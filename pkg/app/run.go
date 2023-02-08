@@ -8,10 +8,6 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
-
-
-
-
 const (
 	shutdownTimeout = time.Second * 5
 )
@@ -34,5 +30,3 @@ func Logger(level string) *zap.Logger {
 
 	return lg
 }
-
-

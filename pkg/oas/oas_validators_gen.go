@@ -946,6 +946,49 @@ func (s TonTransferAction) Validate() error {
 	}
 	return nil
 }
+func (s Trace) Validate() error {
+	var failures []validate.FieldError
+	if err := func() error {
+		if err := s.Transaction.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "transaction",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		var failures []validate.FieldError
+		for i, elem := range s.Children {
+			if err := func() error {
+				if err := elem.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				failures = append(failures, validate.FieldError{
+					Name:  fmt.Sprintf("[%d]", i),
+					Error: err,
+				})
+			}
+		}
+		if len(failures) > 0 {
+			return &validate.Error{Fields: failures}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "children",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
 func (s TraceIds) Validate() error {
 	var failures []validate.FieldError
 	if err := func() error {
@@ -996,6 +1039,17 @@ func (s Transaction) Validate() error {
 	}(); err != nil {
 		failures = append(failures, validate.FieldError{
 			Name:  "transaction_type",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if s.OutMsgs == nil {
+			return errors.New("nil is invalid value")
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "out_msgs",
 			Error: err,
 		})
 	}

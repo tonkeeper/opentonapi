@@ -1029,12 +1029,6 @@ components:
       required:
         - library
       properties:
-        tick:
-          type: boolean
-          example: true
-        tock:
-          type: boolean
-          example: true
         code:
           type: string
           example: te6ccgEBBgEARAABFP8A9KQT9LzyyAsBAgEgAgMCAUgEBQAE8jAAONBsIdMfMO1E0NM/MAHAAZekyMs/ye1UkzDyBuIAEaE0MdqJoaZ+YQ==
@@ -1095,28 +1089,20 @@ components:
           example: 5681002
         created_at:
           type: integer
-          format: int32
-          example: 5681002
-        op_code:
-          type: integer
           format: int64
           example: 5681002
+        op_code:
+          type: string
+          example: "0xdeadbeaf"
         init:
           $ref: '#/components/schemas/StateInit'
+        decoded_op_name:
+          type: string
+          example: "nft_transfer"
         decoded_body:
           type: object
           additionalProperties: true
           example: {}
-
-    Messages:
-      type: object
-      required:
-        - messages
-      properties:
-        transactions:
-          type: array
-          items:
-            $ref: '#/components/schemas/Message'
 
     TransactionType:
       type: string
@@ -1298,7 +1284,9 @@ components:
         in_msg:
           $ref: '#/components/schemas/Message'
         out_msgs:
-          $ref: '#/components/schemas/Messages'
+          type: array
+          items:
+            $ref: '#/components/schemas/Message'
         block:
           type: string
           example: (-1,4234234,8000000000000000)
@@ -2180,11 +2168,14 @@ components:
     Trace:
       type: object
       required:
-        - hash
+        - transaction
       properties:
-        hash:
-          type: string
-          example: "55e8809519cd3c49098c9ee45afdafcea7a894a74d0f628d94a115a50e045122"
+        transaction:
+          $ref: '#/components/schemas/Transaction'
+        children:
+          type: array
+          items:
+            $ref: '#/components/schemas/Trace'
 
     Event:
       type: object

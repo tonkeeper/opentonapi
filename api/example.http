@@ -1,1 +1,12 @@
-GET {{url}}/v2/blockchain/blocks/(-1,4234234,-23423523535345353454)
+GET {{host}}/v2/blockchain/blocks/(-1,8000000000000000,26993860)
+
+
+###
+GET {{host}}/v2/blockchain/transactions/63a86c347c5f5352b3b3f919980704168db19359542be7f1f04070affb278911
+
+
+###
+GET {{host}}/v2/traces/195bc823068b8f01a9a3017ec191f4e7473d6a6429aac93c8727ff53a895cf2c
+
+###
+GET {{metrics}}/metrics

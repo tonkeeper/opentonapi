@@ -2116,20 +2116,21 @@ func (*JettonsBalances) getJettonsBalancesRes() {}
 
 // Ref: #/components/schemas/Message
 type Message struct {
-	CreatedLt   int64              `json:"created_lt"`
-	IhrDisabled bool               `json:"ihr_disabled"`
-	Bounce      bool               `json:"bounce"`
-	Bounced     bool               `json:"bounced"`
-	Value       int64              `json:"value"`
-	FwdFee      int64              `json:"fwd_fee"`
-	IhrFee      int64              `json:"ihr_fee"`
-	Destination OptAccountAddress  `json:"destination"`
-	Source      OptAccountAddress  `json:"source"`
-	ImportFee   int64              `json:"import_fee"`
-	CreatedAt   int32              `json:"created_at"`
-	OpCode      OptInt64           `json:"op_code"`
-	Init        OptStateInit       `json:"init"`
-	DecodedBody MessageDecodedBody `json:"decoded_body"`
+	CreatedLt     int64              `json:"created_lt"`
+	IhrDisabled   bool               `json:"ihr_disabled"`
+	Bounce        bool               `json:"bounce"`
+	Bounced       bool               `json:"bounced"`
+	Value         int64              `json:"value"`
+	FwdFee        int64              `json:"fwd_fee"`
+	IhrFee        int64              `json:"ihr_fee"`
+	Destination   OptAccountAddress  `json:"destination"`
+	Source        OptAccountAddress  `json:"source"`
+	ImportFee     int64              `json:"import_fee"`
+	CreatedAt     int64              `json:"created_at"`
+	OpCode        OptString          `json:"op_code"`
+	Init          OptStateInit       `json:"init"`
+	DecodedOpName OptString          `json:"decoded_op_name"`
+	DecodedBody   MessageDecodedBody `json:"decoded_body"`
 }
 
 // GetCreatedLt returns the value of CreatedLt.
@@ -2183,18 +2184,23 @@ func (s Message) GetImportFee() int64 {
 }
 
 // GetCreatedAt returns the value of CreatedAt.
-func (s Message) GetCreatedAt() int32 {
+func (s Message) GetCreatedAt() int64 {
 	return s.CreatedAt
 }
 
 // GetOpCode returns the value of OpCode.
-func (s Message) GetOpCode() OptInt64 {
+func (s Message) GetOpCode() OptString {
 	return s.OpCode
 }
 
 // GetInit returns the value of Init.
 func (s Message) GetInit() OptStateInit {
 	return s.Init
+}
+
+// GetDecodedOpName returns the value of DecodedOpName.
+func (s Message) GetDecodedOpName() OptString {
+	return s.DecodedOpName
 }
 
 // GetDecodedBody returns the value of DecodedBody.
@@ -2253,18 +2259,23 @@ func (s *Message) SetImportFee(val int64) {
 }
 
 // SetCreatedAt sets the value of CreatedAt.
-func (s *Message) SetCreatedAt(val int32) {
+func (s *Message) SetCreatedAt(val int64) {
 	s.CreatedAt = val
 }
 
 // SetOpCode sets the value of OpCode.
-func (s *Message) SetOpCode(val OptInt64) {
+func (s *Message) SetOpCode(val OptString) {
 	s.OpCode = val
 }
 
 // SetInit sets the value of Init.
 func (s *Message) SetInit(val OptStateInit) {
 	s.Init = val
+}
+
+// SetDecodedOpName sets the value of DecodedOpName.
+func (s *Message) SetDecodedOpName(val OptString) {
+	s.DecodedOpName = val
 }
 
 // SetDecodedBody sets the value of DecodedBody.
@@ -2281,21 +2292,6 @@ func (s *MessageDecodedBody) init() MessageDecodedBody {
 		*s = m
 	}
 	return m
-}
-
-// Ref: #/components/schemas/Messages
-type Messages struct {
-	Transactions []Message `json:"transactions"`
-}
-
-// GetTransactions returns the value of Transactions.
-func (s Messages) GetTransactions() []Message {
-	return s.Transactions
-}
-
-// SetTransactions sets the value of Transactions.
-func (s *Messages) SetTransactions(val []Message) {
-	s.Transactions = val
 }
 
 // Ref: #/components/schemas/MethodExecutionResult
@@ -4350,21 +4346,9 @@ func (s *SendMessageReq) SetBoc(val string) {
 
 // Ref: #/components/schemas/StateInit
 type StateInit struct {
-	Tick    OptBool          `json:"tick"`
-	Tock    OptBool          `json:"tock"`
 	Code    OptString        `json:"code"`
 	Data    OptString        `json:"data"`
 	Library StateInitLibrary `json:"library"`
-}
-
-// GetTick returns the value of Tick.
-func (s StateInit) GetTick() OptBool {
-	return s.Tick
-}
-
-// GetTock returns the value of Tock.
-func (s StateInit) GetTock() OptBool {
-	return s.Tock
 }
 
 // GetCode returns the value of Code.
@@ -4380,16 +4364,6 @@ func (s StateInit) GetData() OptString {
 // GetLibrary returns the value of Library.
 func (s StateInit) GetLibrary() StateInitLibrary {
 	return s.Library
-}
-
-// SetTick sets the value of Tick.
-func (s *StateInit) SetTick(val OptBool) {
-	s.Tick = val
-}
-
-// SetTock sets the value of Tock.
-func (s *StateInit) SetTock(val OptBool) {
-	s.Tock = val
 }
 
 // SetCode sets the value of Code.
@@ -4730,17 +4704,28 @@ func (s *TonTransferAction) SetRefund(val OptRefund) {
 
 // Ref: #/components/schemas/Trace
 type Trace struct {
-	Hash string `json:"hash"`
+	Transaction Transaction `json:"transaction"`
+	Children    []Trace     `json:"children"`
 }
 
-// GetHash returns the value of Hash.
-func (s Trace) GetHash() string {
-	return s.Hash
+// GetTransaction returns the value of Transaction.
+func (s Trace) GetTransaction() Transaction {
+	return s.Transaction
 }
 
-// SetHash sets the value of Hash.
-func (s *Trace) SetHash(val string) {
-	s.Hash = val
+// GetChildren returns the value of Children.
+func (s Trace) GetChildren() []Trace {
+	return s.Children
+}
+
+// SetTransaction sets the value of Transaction.
+func (s *Trace) SetTransaction(val Transaction) {
+	s.Transaction = val
+}
+
+// SetChildren sets the value of Children.
+func (s *Trace) SetChildren(val []Trace) {
+	s.Children = val
 }
 
 func (*Trace) getTraceRes() {}
@@ -4802,7 +4787,7 @@ type Transaction struct {
 	StateUpdateOld  string             `json:"state_update_old"`
 	StateUpdateNew  string             `json:"state_update_new"`
 	InMsg           OptMessage         `json:"in_msg"`
-	OutMsgs         Messages           `json:"out_msgs"`
+	OutMsgs         []Message          `json:"out_msgs"`
 	Block           string             `json:"block"`
 	PrevTransHash   OptString          `json:"prev_trans_hash"`
 	PrevTransLt     OptInt64           `json:"prev_trans_lt"`
@@ -4876,7 +4861,7 @@ func (s Transaction) GetInMsg() OptMessage {
 }
 
 // GetOutMsgs returns the value of OutMsgs.
-func (s Transaction) GetOutMsgs() Messages {
+func (s Transaction) GetOutMsgs() []Message {
 	return s.OutMsgs
 }
 
@@ -4991,7 +4976,7 @@ func (s *Transaction) SetInMsg(val OptMessage) {
 }
 
 // SetOutMsgs sets the value of OutMsgs.
-func (s *Transaction) SetOutMsgs(val Messages) {
+func (s *Transaction) SetOutMsgs(val []Message) {
 	s.OutMsgs = val
 }
 

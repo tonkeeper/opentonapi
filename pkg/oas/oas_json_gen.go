@@ -7918,7 +7918,7 @@ func (s Message) encodeFields(e *jx.Encoder) {
 	{
 
 		e.FieldStart("created_at")
-		e.Int32(s.CreatedAt)
+		e.Int64(s.CreatedAt)
 	}
 	{
 		if s.OpCode.Set {
@@ -7933,13 +7933,19 @@ func (s Message) encodeFields(e *jx.Encoder) {
 		}
 	}
 	{
+		if s.DecodedOpName.Set {
+			e.FieldStart("decoded_op_name")
+			s.DecodedOpName.Encode(e)
+		}
+	}
+	{
 
 		e.FieldStart("decoded_body")
 		s.DecodedBody.Encode(e)
 	}
 }
 
-var jsonFieldsNameOfMessage = [14]string{
+var jsonFieldsNameOfMessage = [15]string{
 	0:  "created_lt",
 	1:  "ihr_disabled",
 	2:  "bounce",
@@ -7953,7 +7959,8 @@ var jsonFieldsNameOfMessage = [14]string{
 	10: "created_at",
 	11: "op_code",
 	12: "init",
-	13: "decoded_body",
+	13: "decoded_op_name",
+	14: "decoded_body",
 }
 
 // Decode decodes Message from json.
@@ -8084,8 +8091,8 @@ func (s *Message) Decode(d *jx.Decoder) error {
 		case "created_at":
 			requiredBitSet[1] |= 1 << 2
 			if err := func() error {
-				v, err := d.Int32()
-				s.CreatedAt = int32(v)
+				v, err := d.Int64()
+				s.CreatedAt = int64(v)
 				if err != nil {
 					return err
 				}
@@ -8113,8 +8120,18 @@ func (s *Message) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"init\"")
 			}
+		case "decoded_op_name":
+			if err := func() error {
+				s.DecodedOpName.Reset()
+				if err := s.DecodedOpName.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"decoded_op_name\"")
+			}
 		case "decoded_body":
-			requiredBitSet[1] |= 1 << 5
+			requiredBitSet[1] |= 1 << 6
 			if err := func() error {
 				if err := s.DecodedBody.Decode(d); err != nil {
 					return err
@@ -8134,7 +8151,7 @@ func (s *Message) Decode(d *jx.Decoder) error {
 	var failures []validate.FieldError
 	for i, mask := range [2]uint8{
 		0b01111111,
-		0b00100110,
+		0b01000110,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -8234,80 +8251,6 @@ func (s MessageDecodedBody) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *MessageDecodedBody) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
-// Encode implements json.Marshaler.
-func (s Messages) Encode(e *jx.Encoder) {
-	e.ObjStart()
-	s.encodeFields(e)
-	e.ObjEnd()
-}
-
-// encodeFields encodes fields.
-func (s Messages) encodeFields(e *jx.Encoder) {
-	{
-		if s.Transactions != nil {
-			e.FieldStart("transactions")
-			e.ArrStart()
-			for _, elem := range s.Transactions {
-				elem.Encode(e)
-			}
-			e.ArrEnd()
-		}
-	}
-}
-
-var jsonFieldsNameOfMessages = [1]string{
-	0: "transactions",
-}
-
-// Decode decodes Messages from json.
-func (s *Messages) Decode(d *jx.Decoder) error {
-	if s == nil {
-		return errors.New("invalid: unable to decode Messages to nil")
-	}
-
-	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
-		switch string(k) {
-		case "transactions":
-			if err := func() error {
-				s.Transactions = make([]Message, 0)
-				if err := d.Arr(func(d *jx.Decoder) error {
-					var elem Message
-					if err := elem.Decode(d); err != nil {
-						return err
-					}
-					s.Transactions = append(s.Transactions, elem)
-					return nil
-				}); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"transactions\"")
-			}
-		default:
-			return d.Skip()
-		}
-		return nil
-	}); err != nil {
-		return errors.Wrap(err, "decode Messages")
-	}
-
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s Messages) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *Messages) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -11457,18 +11400,6 @@ func (s StateInit) Encode(e *jx.Encoder) {
 // encodeFields encodes fields.
 func (s StateInit) encodeFields(e *jx.Encoder) {
 	{
-		if s.Tick.Set {
-			e.FieldStart("tick")
-			s.Tick.Encode(e)
-		}
-	}
-	{
-		if s.Tock.Set {
-			e.FieldStart("tock")
-			s.Tock.Encode(e)
-		}
-	}
-	{
 		if s.Code.Set {
 			e.FieldStart("code")
 			s.Code.Encode(e)
@@ -11487,12 +11418,10 @@ func (s StateInit) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfStateInit = [5]string{
-	0: "tick",
-	1: "tock",
-	2: "code",
-	3: "data",
-	4: "library",
+var jsonFieldsNameOfStateInit = [3]string{
+	0: "code",
+	1: "data",
+	2: "library",
 }
 
 // Decode decodes StateInit from json.
@@ -11504,26 +11433,6 @@ func (s *StateInit) Decode(d *jx.Decoder) error {
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
-		case "tick":
-			if err := func() error {
-				s.Tick.Reset()
-				if err := s.Tick.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"tick\"")
-			}
-		case "tock":
-			if err := func() error {
-				s.Tock.Reset()
-				if err := s.Tock.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"tock\"")
-			}
 		case "code":
 			if err := func() error {
 				s.Code.Reset()
@@ -11545,7 +11454,7 @@ func (s *StateInit) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"data\"")
 			}
 		case "library":
-			requiredBitSet[0] |= 1 << 4
+			requiredBitSet[0] |= 1 << 2
 			if err := func() error {
 				if err := s.Library.Decode(d); err != nil {
 					return err
@@ -11564,7 +11473,7 @@ func (s *StateInit) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b00010000,
+		0b00000100,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -12537,13 +12446,24 @@ func (s Trace) Encode(e *jx.Encoder) {
 func (s Trace) encodeFields(e *jx.Encoder) {
 	{
 
-		e.FieldStart("hash")
-		e.Str(s.Hash)
+		e.FieldStart("transaction")
+		s.Transaction.Encode(e)
+	}
+	{
+		if s.Children != nil {
+			e.FieldStart("children")
+			e.ArrStart()
+			for _, elem := range s.Children {
+				elem.Encode(e)
+			}
+			e.ArrEnd()
+		}
 	}
 }
 
-var jsonFieldsNameOfTrace = [1]string{
-	0: "hash",
+var jsonFieldsNameOfTrace = [2]string{
+	0: "transaction",
+	1: "children",
 }
 
 // Decode decodes Trace from json.
@@ -12555,17 +12475,32 @@ func (s *Trace) Decode(d *jx.Decoder) error {
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
-		case "hash":
+		case "transaction":
 			requiredBitSet[0] |= 1 << 0
 			if err := func() error {
-				v, err := d.Str()
-				s.Hash = string(v)
-				if err != nil {
+				if err := s.Transaction.Decode(d); err != nil {
 					return err
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"hash\"")
+				return errors.Wrap(err, "decode field \"transaction\"")
+			}
+		case "children":
+			if err := func() error {
+				s.Children = make([]Trace, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem Trace
+					if err := elem.Decode(d); err != nil {
+						return err
+					}
+					s.Children = append(s.Children, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"children\"")
 			}
 		default:
 			return d.Skip()
@@ -12918,7 +12853,11 @@ func (s Transaction) encodeFields(e *jx.Encoder) {
 	{
 
 		e.FieldStart("out_msgs")
-		s.OutMsgs.Encode(e)
+		e.ArrStart()
+		for _, elem := range s.OutMsgs {
+			elem.Encode(e)
+		}
+		e.ArrEnd()
 	}
 	{
 
@@ -13151,7 +13090,15 @@ func (s *Transaction) Decode(d *jx.Decoder) error {
 		case "out_msgs":
 			requiredBitSet[1] |= 1 << 4
 			if err := func() error {
-				if err := s.OutMsgs.Decode(d); err != nil {
+				s.OutMsgs = make([]Message, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem Message
+					if err := elem.Decode(d); err != nil {
+						return err
+					}
+					s.OutMsgs = append(s.OutMsgs, elem)
+					return nil
+				}); err != nil {
 					return err
 				}
 				return nil
