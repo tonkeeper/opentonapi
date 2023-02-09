@@ -3,10 +3,10 @@ package main
 import (
 	"fmt"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"opentonapi/pkg/config"
 
 	"go.uber.org/zap"
 	"net/http"
-	"opentonapi/internal/config"
 	"opentonapi/pkg/api"
 	"opentonapi/pkg/app"
 	"opentonapi/pkg/litestorage"
