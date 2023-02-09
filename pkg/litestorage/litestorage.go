@@ -3,11 +3,11 @@ package litestorage
 import (
 	"context"
 	"fmt"
+	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/liteapi"
 	"github.com/tonkeeper/tongo/tlb"
 	"go.uber.org/zap"
-	"opentonapi/pkg/core"
 )
 
 type LiteStorage struct {

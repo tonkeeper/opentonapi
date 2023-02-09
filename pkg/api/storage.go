@@ -2,8 +2,8 @@ package api
 
 import (
 	"context"
+	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/tongo"
-	"opentonapi/pkg/core"
 )
 
 type storage interface {

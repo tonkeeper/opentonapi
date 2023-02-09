@@ -6,9 +6,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/go-faster/jx"
+	"github.com/tonkeeper/opentonapi/pkg/core"
+	"github.com/tonkeeper/opentonapi/pkg/oas"
 	"github.com/tonkeeper/tongo"
-	"opentonapi/pkg/core"
-	"opentonapi/pkg/oas"
 	"reflect"
 )
 

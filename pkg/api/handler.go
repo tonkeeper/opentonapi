@@ -2,8 +2,8 @@ package api
 
 import (
 	"context"
+	"github.com/tonkeeper/opentonapi/pkg/oas"
 	"github.com/tonkeeper/tongo"
-	"opentonapi/pkg/oas"
 )
 
 // Compile-time check for Handler.

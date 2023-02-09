@@ -3,14 +3,14 @@ package main
 import (
 	"fmt"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"opentonapi/pkg/config"
+	"github.com/tonkeeper/opentonapi/pkg/config"
 
+	"github.com/tonkeeper/opentonapi/pkg/api"
+	"github.com/tonkeeper/opentonapi/pkg/app"
+	"github.com/tonkeeper/opentonapi/pkg/litestorage"
+	"github.com/tonkeeper/opentonapi/pkg/oas"
 	"go.uber.org/zap"
 	"net/http"
-	"opentonapi/pkg/api"
-	"opentonapi/pkg/app"
-	"opentonapi/pkg/litestorage"
-	"opentonapi/pkg/oas"
 )
 
 func main() {
