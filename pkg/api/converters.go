@@ -135,13 +135,19 @@ func convertMessage(m core.Message) oas.Message {
 func convertTrace(t core.Trace) oas.Trace {
 	trace := oas.Trace{Transaction: convertTransaction(t.Transaction)}
 	for _, c := range t.Children {
-		trace.Children = append(trace.Children, convertTrace(c))
+		trace.Children = append(trace.Children, convertTrace(*c))
 	}
 	return trace
 }
 
 func anyToJSONRawMap(a any) map[string]jx.Raw { //todo: переписать этот ужас
 	var m = map[string]jx.Raw{}
+	if am, ok := a.(map[string]any); ok {
+		for k, v := range am {
+			m[k], _ = json.Marshal(v)
+		}
+		return m
+	}
 	t := reflect.ValueOf(a)
 	switch t.Kind() {
 	case reflect.Struct:

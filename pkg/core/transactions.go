@@ -1,7 +1,6 @@
 package core
 
 import (
-	"github.com/google/uuid"
 	"github.com/tonkeeper/tongo/tlb"
 	"math/big"
 
@@ -103,14 +102,6 @@ type Transaction struct {
 
 	Aborted   bool
 	Destroyed bool
-}
-
-func (tx TransactionID) UUID() uuid.UUID {
-	var u uuid.UUID
-	// be careful when changing this function,
-	// there is at least one place that depends on UUID() using tx.Hash field only.
-	copy(u[:], tx.Hash[:16])
-	return u
 }
 
 type MessageID struct {

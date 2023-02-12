@@ -105,7 +105,7 @@ func (s *LiteStorage) recursiveGetChildren(ctx context.Context, tx core.Transact
 		if err != nil {
 			return core.Trace{}, err
 		}
-		trace.Children = append(trace.Children, child)
+		trace.Children = append(trace.Children, &child)
 	}
 	return trace, nil
 }
