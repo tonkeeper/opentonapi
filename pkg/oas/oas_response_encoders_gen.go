@@ -25,7 +25,7 @@ func encodeDnsBackResolveResponse(response DnsBackResolveRes, w http.ResponseWri
 		}
 		return nil
 
-	case *DnsBackResolveApplicationJSONBadRequest:
+	case *BadRequest:
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(400)
 		span.SetStatus(codes.Error, http.StatusText(400))
@@ -38,12 +38,18 @@ func encodeDnsBackResolveResponse(response DnsBackResolveRes, w http.ResponseWri
 		return nil
 
 	case *UnauthorizedError:
+		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(401)
 		span.SetStatus(codes.Error, http.StatusText(401))
 
+		e := jx.GetEncoder()
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
 		return nil
 
-	case *DnsBackResolveApplicationJSONNotFound:
+	case *NotFound:
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(404)
 		span.SetStatus(codes.Error, http.StatusText(404))
@@ -55,7 +61,7 @@ func encodeDnsBackResolveResponse(response DnsBackResolveRes, w http.ResponseWri
 		}
 		return nil
 
-	case *DnsBackResolveApplicationJSONInternalServerError:
+	case *InternalError:
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(500)
 		span.SetStatus(codes.Error, http.StatusText(500))
@@ -86,7 +92,7 @@ func encodeDnsResolveResponse(response DnsResolveRes, w http.ResponseWriter, spa
 		}
 		return nil
 
-	case *DnsResolveApplicationJSONBadRequest:
+	case *BadRequest:
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(400)
 		span.SetStatus(codes.Error, http.StatusText(400))
@@ -99,12 +105,18 @@ func encodeDnsResolveResponse(response DnsResolveRes, w http.ResponseWriter, spa
 		return nil
 
 	case *UnauthorizedError:
+		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(401)
 		span.SetStatus(codes.Error, http.StatusText(401))
 
+		e := jx.GetEncoder()
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
 		return nil
 
-	case *DnsResolveApplicationJSONNotFound:
+	case *NotFound:
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(404)
 		span.SetStatus(codes.Error, http.StatusText(404))
@@ -116,7 +128,7 @@ func encodeDnsResolveResponse(response DnsResolveRes, w http.ResponseWriter, spa
 		}
 		return nil
 
-	case *DnsResolveApplicationJSONInternalServerError:
+	case *InternalError:
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(500)
 		span.SetStatus(codes.Error, http.StatusText(500))
@@ -147,7 +159,7 @@ func encodeEmulateMessageResponse(response EmulateMessageRes, w http.ResponseWri
 		}
 		return nil
 
-	case *EmulateMessageApplicationJSONBadRequest:
+	case *BadRequest:
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(400)
 		span.SetStatus(codes.Error, http.StatusText(400))
@@ -160,12 +172,18 @@ func encodeEmulateMessageResponse(response EmulateMessageRes, w http.ResponseWri
 		return nil
 
 	case *UnauthorizedError:
+		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(401)
 		span.SetStatus(codes.Error, http.StatusText(401))
 
+		e := jx.GetEncoder()
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
 		return nil
 
-	case *EmulateMessageApplicationJSONInternalServerError:
+	case *InternalError:
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(500)
 		span.SetStatus(codes.Error, http.StatusText(500))
@@ -196,7 +214,7 @@ func encodeExecGetMethodResponse(response ExecGetMethodRes, w http.ResponseWrite
 		}
 		return nil
 
-	case *ExecGetMethodApplicationJSONBadRequest:
+	case *BadRequest:
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(400)
 		span.SetStatus(codes.Error, http.StatusText(400))
@@ -209,12 +227,18 @@ func encodeExecGetMethodResponse(response ExecGetMethodRes, w http.ResponseWrite
 		return nil
 
 	case *UnauthorizedError:
+		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(401)
 		span.SetStatus(codes.Error, http.StatusText(401))
 
+		e := jx.GetEncoder()
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
 		return nil
 
-	case *ExecGetMethodApplicationJSONInternalServerError:
+	case *InternalError:
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(500)
 		span.SetStatus(codes.Error, http.StatusText(500))
@@ -245,7 +269,7 @@ func encodeGetAccountResponse(response GetAccountRes, w http.ResponseWriter, spa
 		}
 		return nil
 
-	case *GetAccountApplicationJSONBadRequest:
+	case *BadRequest:
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(400)
 		span.SetStatus(codes.Error, http.StatusText(400))
@@ -258,12 +282,18 @@ func encodeGetAccountResponse(response GetAccountRes, w http.ResponseWriter, spa
 		return nil
 
 	case *UnauthorizedError:
+		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(401)
 		span.SetStatus(codes.Error, http.StatusText(401))
 
+		e := jx.GetEncoder()
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
 		return nil
 
-	case *GetAccountApplicationJSONNotFound:
+	case *NotFound:
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(404)
 		span.SetStatus(codes.Error, http.StatusText(404))
@@ -275,7 +305,7 @@ func encodeGetAccountResponse(response GetAccountRes, w http.ResponseWriter, spa
 		}
 		return nil
 
-	case *GetAccountApplicationJSONInternalServerError:
+	case *InternalError:
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(500)
 		span.SetStatus(codes.Error, http.StatusText(500))
@@ -306,7 +336,7 @@ func encodeGetAccountTransactionsResponse(response GetAccountTransactionsRes, w 
 		}
 		return nil
 
-	case *GetAccountTransactionsApplicationJSONBadRequest:
+	case *BadRequest:
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(400)
 		span.SetStatus(codes.Error, http.StatusText(400))
@@ -319,12 +349,18 @@ func encodeGetAccountTransactionsResponse(response GetAccountTransactionsRes, w 
 		return nil
 
 	case *UnauthorizedError:
+		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(401)
 		span.SetStatus(codes.Error, http.StatusText(401))
 
+		e := jx.GetEncoder()
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
 		return nil
 
-	case *GetAccountTransactionsApplicationJSONNotFound:
+	case *NotFound:
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(404)
 		span.SetStatus(codes.Error, http.StatusText(404))
@@ -336,7 +372,7 @@ func encodeGetAccountTransactionsResponse(response GetAccountTransactionsRes, w 
 		}
 		return nil
 
-	case *GetAccountTransactionsApplicationJSONInternalServerError:
+	case *InternalError:
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(500)
 		span.SetStatus(codes.Error, http.StatusText(500))
@@ -368,12 +404,18 @@ func encodeGetAllAuctionsResponse(response GetAllAuctionsRes, w http.ResponseWri
 		return nil
 
 	case *UnauthorizedError:
+		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(401)
 		span.SetStatus(codes.Error, http.StatusText(401))
 
+		e := jx.GetEncoder()
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
 		return nil
 
-	case *Error:
+	case *InternalError:
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(500)
 		span.SetStatus(codes.Error, http.StatusText(500))
@@ -404,7 +446,7 @@ func encodeGetBlockResponse(response GetBlockRes, w http.ResponseWriter, span tr
 		}
 		return nil
 
-	case *GetBlockApplicationJSONBadRequest:
+	case *BadRequest:
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(400)
 		span.SetStatus(codes.Error, http.StatusText(400))
@@ -417,12 +459,18 @@ func encodeGetBlockResponse(response GetBlockRes, w http.ResponseWriter, span tr
 		return nil
 
 	case *UnauthorizedError:
+		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(401)
 		span.SetStatus(codes.Error, http.StatusText(401))
 
+		e := jx.GetEncoder()
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
 		return nil
 
-	case *GetBlockApplicationJSONNotFound:
+	case *NotFound:
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(404)
 		span.SetStatus(codes.Error, http.StatusText(404))
@@ -434,7 +482,7 @@ func encodeGetBlockResponse(response GetBlockRes, w http.ResponseWriter, span tr
 		}
 		return nil
 
-	case *GetBlockApplicationJSONInternalServerError:
+	case *InternalError:
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(500)
 		span.SetStatus(codes.Error, http.StatusText(500))
@@ -466,12 +514,18 @@ func encodeGetConfigResponse(response GetConfigRes, w http.ResponseWriter, span 
 		return nil
 
 	case *UnauthorizedError:
+		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(401)
 		span.SetStatus(codes.Error, http.StatusText(401))
 
+		e := jx.GetEncoder()
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
 		return nil
 
-	case *Error:
+	case *InternalError:
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(500)
 		span.SetStatus(codes.Error, http.StatusText(500))
@@ -502,7 +556,7 @@ func encodeGetDomainBidsResponse(response GetDomainBidsRes, w http.ResponseWrite
 		}
 		return nil
 
-	case *GetDomainBidsApplicationJSONBadRequest:
+	case *BadRequest:
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(400)
 		span.SetStatus(codes.Error, http.StatusText(400))
@@ -515,12 +569,18 @@ func encodeGetDomainBidsResponse(response GetDomainBidsRes, w http.ResponseWrite
 		return nil
 
 	case *UnauthorizedError:
+		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(401)
 		span.SetStatus(codes.Error, http.StatusText(401))
 
+		e := jx.GetEncoder()
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
 		return nil
 
-	case *GetDomainBidsApplicationJSONNotFound:
+	case *NotFound:
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(404)
 		span.SetStatus(codes.Error, http.StatusText(404))
@@ -532,7 +592,7 @@ func encodeGetDomainBidsResponse(response GetDomainBidsRes, w http.ResponseWrite
 		}
 		return nil
 
-	case *GetDomainBidsApplicationJSONInternalServerError:
+	case *InternalError:
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(500)
 		span.SetStatus(codes.Error, http.StatusText(500))
@@ -563,7 +623,7 @@ func encodeGetEventResponse(response GetEventRes, w http.ResponseWriter, span tr
 		}
 		return nil
 
-	case *GetEventApplicationJSONBadRequest:
+	case *BadRequest:
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(400)
 		span.SetStatus(codes.Error, http.StatusText(400))
@@ -576,12 +636,18 @@ func encodeGetEventResponse(response GetEventRes, w http.ResponseWriter, span tr
 		return nil
 
 	case *UnauthorizedError:
+		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(401)
 		span.SetStatus(codes.Error, http.StatusText(401))
 
+		e := jx.GetEncoder()
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
 		return nil
 
-	case *GetEventApplicationJSONNotFound:
+	case *NotFound:
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(404)
 		span.SetStatus(codes.Error, http.StatusText(404))
@@ -593,7 +659,7 @@ func encodeGetEventResponse(response GetEventRes, w http.ResponseWriter, span tr
 		}
 		return nil
 
-	case *GetEventApplicationJSONInternalServerError:
+	case *InternalError:
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(500)
 		span.SetStatus(codes.Error, http.StatusText(500))
@@ -624,7 +690,7 @@ func encodeGetEventsByAccountResponse(response GetEventsByAccountRes, w http.Res
 		}
 		return nil
 
-	case *GetEventsByAccountApplicationJSONBadRequest:
+	case *BadRequest:
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(400)
 		span.SetStatus(codes.Error, http.StatusText(400))
@@ -637,12 +703,18 @@ func encodeGetEventsByAccountResponse(response GetEventsByAccountRes, w http.Res
 		return nil
 
 	case *UnauthorizedError:
+		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(401)
 		span.SetStatus(codes.Error, http.StatusText(401))
 
+		e := jx.GetEncoder()
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
 		return nil
 
-	case *GetEventsByAccountApplicationJSONNotFound:
+	case *NotFound:
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(404)
 		span.SetStatus(codes.Error, http.StatusText(404))
@@ -654,7 +726,7 @@ func encodeGetEventsByAccountResponse(response GetEventsByAccountRes, w http.Res
 		}
 		return nil
 
-	case *GetEventsByAccountApplicationJSONInternalServerError:
+	case *InternalError:
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(500)
 		span.SetStatus(codes.Error, http.StatusText(500))
@@ -685,7 +757,7 @@ func encodeGetJettonInfoResponse(response GetJettonInfoRes, w http.ResponseWrite
 		}
 		return nil
 
-	case *GetJettonInfoApplicationJSONBadRequest:
+	case *BadRequest:
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(400)
 		span.SetStatus(codes.Error, http.StatusText(400))
@@ -698,12 +770,18 @@ func encodeGetJettonInfoResponse(response GetJettonInfoRes, w http.ResponseWrite
 		return nil
 
 	case *UnauthorizedError:
+		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(401)
 		span.SetStatus(codes.Error, http.StatusText(401))
 
+		e := jx.GetEncoder()
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
 		return nil
 
-	case *GetJettonInfoApplicationJSONNotFound:
+	case *NotFound:
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(404)
 		span.SetStatus(codes.Error, http.StatusText(404))
@@ -715,7 +793,7 @@ func encodeGetJettonInfoResponse(response GetJettonInfoRes, w http.ResponseWrite
 		}
 		return nil
 
-	case *GetJettonInfoApplicationJSONInternalServerError:
+	case *InternalError:
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(500)
 		span.SetStatus(codes.Error, http.StatusText(500))
@@ -746,7 +824,7 @@ func encodeGetJettonsBalancesResponse(response GetJettonsBalancesRes, w http.Res
 		}
 		return nil
 
-	case *GetJettonsBalancesApplicationJSONBadRequest:
+	case *BadRequest:
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(400)
 		span.SetStatus(codes.Error, http.StatusText(400))
@@ -759,12 +837,18 @@ func encodeGetJettonsBalancesResponse(response GetJettonsBalancesRes, w http.Res
 		return nil
 
 	case *UnauthorizedError:
+		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(401)
 		span.SetStatus(codes.Error, http.StatusText(401))
 
+		e := jx.GetEncoder()
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
 		return nil
 
-	case *GetJettonsBalancesApplicationJSONNotFound:
+	case *NotFound:
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(404)
 		span.SetStatus(codes.Error, http.StatusText(404))
@@ -776,7 +860,7 @@ func encodeGetJettonsBalancesResponse(response GetJettonsBalancesRes, w http.Res
 		}
 		return nil
 
-	case *GetJettonsBalancesApplicationJSONInternalServerError:
+	case *InternalError:
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(500)
 		span.SetStatus(codes.Error, http.StatusText(500))
@@ -808,12 +892,18 @@ func encodeGetMasterchainHeadResponse(response GetMasterchainHeadRes, w http.Res
 		return nil
 
 	case *UnauthorizedError:
+		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(401)
 		span.SetStatus(codes.Error, http.StatusText(401))
 
+		e := jx.GetEncoder()
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
 		return nil
 
-	case *Error:
+	case *InternalError:
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(500)
 		span.SetStatus(codes.Error, http.StatusText(500))
@@ -844,7 +934,7 @@ func encodeGetNftCollectionResponse(response GetNftCollectionRes, w http.Respons
 		}
 		return nil
 
-	case *GetNftCollectionApplicationJSONBadRequest:
+	case *BadRequest:
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(400)
 		span.SetStatus(codes.Error, http.StatusText(400))
@@ -857,12 +947,18 @@ func encodeGetNftCollectionResponse(response GetNftCollectionRes, w http.Respons
 		return nil
 
 	case *UnauthorizedError:
+		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(401)
 		span.SetStatus(codes.Error, http.StatusText(401))
 
+		e := jx.GetEncoder()
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
 		return nil
 
-	case *GetNftCollectionApplicationJSONNotFound:
+	case *NotFound:
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(404)
 		span.SetStatus(codes.Error, http.StatusText(404))
@@ -874,7 +970,7 @@ func encodeGetNftCollectionResponse(response GetNftCollectionRes, w http.Respons
 		}
 		return nil
 
-	case *GetNftCollectionApplicationJSONInternalServerError:
+	case *InternalError:
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(500)
 		span.SetStatus(codes.Error, http.StatusText(500))
@@ -906,12 +1002,18 @@ func encodeGetNftCollectionsResponse(response GetNftCollectionsRes, w http.Respo
 		return nil
 
 	case *UnauthorizedError:
+		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(401)
 		span.SetStatus(codes.Error, http.StatusText(401))
 
+		e := jx.GetEncoder()
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
 		return nil
 
-	case *Error:
+	case *InternalError:
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(500)
 		span.SetStatus(codes.Error, http.StatusText(500))
@@ -942,7 +1044,7 @@ func encodeGetNftItemByAddressResponse(response GetNftItemByAddressRes, w http.R
 		}
 		return nil
 
-	case *GetNftItemByAddressApplicationJSONBadRequest:
+	case *BadRequest:
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(400)
 		span.SetStatus(codes.Error, http.StatusText(400))
@@ -955,12 +1057,18 @@ func encodeGetNftItemByAddressResponse(response GetNftItemByAddressRes, w http.R
 		return nil
 
 	case *UnauthorizedError:
+		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(401)
 		span.SetStatus(codes.Error, http.StatusText(401))
 
+		e := jx.GetEncoder()
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
 		return nil
 
-	case *GetNftItemByAddressApplicationJSONNotFound:
+	case *NotFound:
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(404)
 		span.SetStatus(codes.Error, http.StatusText(404))
@@ -972,7 +1080,7 @@ func encodeGetNftItemByAddressResponse(response GetNftItemByAddressRes, w http.R
 		}
 		return nil
 
-	case *GetNftItemByAddressApplicationJSONInternalServerError:
+	case *InternalError:
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(500)
 		span.SetStatus(codes.Error, http.StatusText(500))
@@ -1003,7 +1111,7 @@ func encodeGetNftItemsByOwnerResponse(response GetNftItemsByOwnerRes, w http.Res
 		}
 		return nil
 
-	case *GetNftItemsByOwnerApplicationJSONBadRequest:
+	case *BadRequest:
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(400)
 		span.SetStatus(codes.Error, http.StatusText(400))
@@ -1016,12 +1124,18 @@ func encodeGetNftItemsByOwnerResponse(response GetNftItemsByOwnerRes, w http.Res
 		return nil
 
 	case *UnauthorizedError:
+		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(401)
 		span.SetStatus(codes.Error, http.StatusText(401))
 
+		e := jx.GetEncoder()
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
 		return nil
 
-	case *GetNftItemsByOwnerApplicationJSONNotFound:
+	case *NotFound:
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(404)
 		span.SetStatus(codes.Error, http.StatusText(404))
@@ -1033,7 +1147,7 @@ func encodeGetNftItemsByOwnerResponse(response GetNftItemsByOwnerRes, w http.Res
 		}
 		return nil
 
-	case *GetNftItemsByOwnerApplicationJSONInternalServerError:
+	case *InternalError:
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(500)
 		span.SetStatus(codes.Error, http.StatusText(500))
@@ -1064,7 +1178,7 @@ func encodeGetRawAccountResponse(response GetRawAccountRes, w http.ResponseWrite
 		}
 		return nil
 
-	case *GetRawAccountApplicationJSONBadRequest:
+	case *BadRequest:
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(400)
 		span.SetStatus(codes.Error, http.StatusText(400))
@@ -1077,12 +1191,18 @@ func encodeGetRawAccountResponse(response GetRawAccountRes, w http.ResponseWrite
 		return nil
 
 	case *UnauthorizedError:
+		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(401)
 		span.SetStatus(codes.Error, http.StatusText(401))
 
+		e := jx.GetEncoder()
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
 		return nil
 
-	case *GetRawAccountApplicationJSONNotFound:
+	case *NotFound:
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(404)
 		span.SetStatus(codes.Error, http.StatusText(404))
@@ -1094,7 +1214,7 @@ func encodeGetRawAccountResponse(response GetRawAccountRes, w http.ResponseWrite
 		}
 		return nil
 
-	case *GetRawAccountApplicationJSONInternalServerError:
+	case *InternalError:
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(500)
 		span.SetStatus(codes.Error, http.StatusText(500))
@@ -1125,7 +1245,7 @@ func encodeGetSubscriptionsByAccountResponse(response GetSubscriptionsByAccountR
 		}
 		return nil
 
-	case *GetSubscriptionsByAccountApplicationJSONBadRequest:
+	case *BadRequest:
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(400)
 		span.SetStatus(codes.Error, http.StatusText(400))
@@ -1138,12 +1258,18 @@ func encodeGetSubscriptionsByAccountResponse(response GetSubscriptionsByAccountR
 		return nil
 
 	case *UnauthorizedError:
+		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(401)
 		span.SetStatus(codes.Error, http.StatusText(401))
 
+		e := jx.GetEncoder()
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
 		return nil
 
-	case *GetSubscriptionsByAccountApplicationJSONNotFound:
+	case *NotFound:
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(404)
 		span.SetStatus(codes.Error, http.StatusText(404))
@@ -1155,7 +1281,7 @@ func encodeGetSubscriptionsByAccountResponse(response GetSubscriptionsByAccountR
 		}
 		return nil
 
-	case *GetSubscriptionsByAccountApplicationJSONInternalServerError:
+	case *InternalError:
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(500)
 		span.SetStatus(codes.Error, http.StatusText(500))
@@ -1186,7 +1312,7 @@ func encodeGetTraceResponse(response GetTraceRes, w http.ResponseWriter, span tr
 		}
 		return nil
 
-	case *GetTraceApplicationJSONBadRequest:
+	case *BadRequest:
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(400)
 		span.SetStatus(codes.Error, http.StatusText(400))
@@ -1199,12 +1325,18 @@ func encodeGetTraceResponse(response GetTraceRes, w http.ResponseWriter, span tr
 		return nil
 
 	case *UnauthorizedError:
+		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(401)
 		span.SetStatus(codes.Error, http.StatusText(401))
 
+		e := jx.GetEncoder()
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
 		return nil
 
-	case *GetTraceApplicationJSONNotFound:
+	case *NotFound:
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(404)
 		span.SetStatus(codes.Error, http.StatusText(404))
@@ -1216,7 +1348,7 @@ func encodeGetTraceResponse(response GetTraceRes, w http.ResponseWriter, span tr
 		}
 		return nil
 
-	case *GetTraceApplicationJSONInternalServerError:
+	case *InternalError:
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(500)
 		span.SetStatus(codes.Error, http.StatusText(500))
@@ -1247,7 +1379,7 @@ func encodeGetTracesByAccountResponse(response GetTracesByAccountRes, w http.Res
 		}
 		return nil
 
-	case *GetTracesByAccountApplicationJSONBadRequest:
+	case *BadRequest:
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(400)
 		span.SetStatus(codes.Error, http.StatusText(400))
@@ -1260,12 +1392,18 @@ func encodeGetTracesByAccountResponse(response GetTracesByAccountRes, w http.Res
 		return nil
 
 	case *UnauthorizedError:
+		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(401)
 		span.SetStatus(codes.Error, http.StatusText(401))
 
+		e := jx.GetEncoder()
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
 		return nil
 
-	case *GetTracesByAccountApplicationJSONNotFound:
+	case *NotFound:
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(404)
 		span.SetStatus(codes.Error, http.StatusText(404))
@@ -1277,7 +1415,7 @@ func encodeGetTracesByAccountResponse(response GetTracesByAccountRes, w http.Res
 		}
 		return nil
 
-	case *GetTracesByAccountApplicationJSONInternalServerError:
+	case *InternalError:
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(500)
 		span.SetStatus(codes.Error, http.StatusText(500))
@@ -1308,7 +1446,7 @@ func encodeGetTransactionResponse(response GetTransactionRes, w http.ResponseWri
 		}
 		return nil
 
-	case *GetTransactionApplicationJSONBadRequest:
+	case *BadRequest:
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(400)
 		span.SetStatus(codes.Error, http.StatusText(400))
@@ -1321,12 +1459,18 @@ func encodeGetTransactionResponse(response GetTransactionRes, w http.ResponseWri
 		return nil
 
 	case *UnauthorizedError:
+		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(401)
 		span.SetStatus(codes.Error, http.StatusText(401))
 
+		e := jx.GetEncoder()
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
 		return nil
 
-	case *GetTransactionApplicationJSONNotFound:
+	case *NotFound:
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(404)
 		span.SetStatus(codes.Error, http.StatusText(404))
@@ -1338,7 +1482,7 @@ func encodeGetTransactionResponse(response GetTransactionRes, w http.ResponseWri
 		}
 		return nil
 
-	case *GetTransactionApplicationJSONInternalServerError:
+	case *InternalError:
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(500)
 		span.SetStatus(codes.Error, http.StatusText(500))
@@ -1369,7 +1513,7 @@ func encodeGetTransactionsResponse(response GetTransactionsRes, w http.ResponseW
 		}
 		return nil
 
-	case *GetTransactionsApplicationJSONBadRequest:
+	case *BadRequest:
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(400)
 		span.SetStatus(codes.Error, http.StatusText(400))
@@ -1382,12 +1526,18 @@ func encodeGetTransactionsResponse(response GetTransactionsRes, w http.ResponseW
 		return nil
 
 	case *UnauthorizedError:
+		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(401)
 		span.SetStatus(codes.Error, http.StatusText(401))
 
+		e := jx.GetEncoder()
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
 		return nil
 
-	case *GetTransactionsApplicationJSONNotFound:
+	case *NotFound:
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(404)
 		span.SetStatus(codes.Error, http.StatusText(404))
@@ -1399,7 +1549,7 @@ func encodeGetTransactionsResponse(response GetTransactionsRes, w http.ResponseW
 		}
 		return nil
 
-	case *GetTransactionsApplicationJSONInternalServerError:
+	case *InternalError:
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(500)
 		span.SetStatus(codes.Error, http.StatusText(500))
@@ -1431,12 +1581,85 @@ func encodeGetValidatorsResponse(response GetValidatorsRes, w http.ResponseWrite
 		return nil
 
 	case *UnauthorizedError:
+		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(401)
 		span.SetStatus(codes.Error, http.StatusText(401))
 
+		e := jx.GetEncoder()
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
 		return nil
 
-	case *Error:
+	case *InternalError:
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(500)
+		span.SetStatus(codes.Error, http.StatusText(500))
+
+		e := jx.GetEncoder()
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+		return nil
+
+	default:
+		return errors.Errorf("unexpected response type: %T", response)
+	}
+}
+
+func encodePoolsByNominatorsResponse(response PoolsByNominatorsRes, w http.ResponseWriter, span trace.Span) error {
+	switch response := response.(type) {
+	case *AccountStacking:
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(200)
+		span.SetStatus(codes.Ok, http.StatusText(200))
+
+		e := jx.GetEncoder()
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+		return nil
+
+	case *BadRequest:
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(400)
+		span.SetStatus(codes.Error, http.StatusText(400))
+
+		e := jx.GetEncoder()
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+		return nil
+
+	case *UnauthorizedError:
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(401)
+		span.SetStatus(codes.Error, http.StatusText(401))
+
+		e := jx.GetEncoder()
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+		return nil
+
+	case *NotFound:
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(404)
+		span.SetStatus(codes.Error, http.StatusText(404))
+
+		e := jx.GetEncoder()
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+		return nil
+
+	case *InternalError:
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(500)
 		span.SetStatus(codes.Error, http.StatusText(500))
@@ -1461,7 +1684,7 @@ func encodeSendMessageResponse(response SendMessageRes, w http.ResponseWriter, s
 
 		return nil
 
-	case *SendMessageApplicationJSONBadRequest:
+	case *BadRequest:
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(400)
 		span.SetStatus(codes.Error, http.StatusText(400))
@@ -1474,12 +1697,85 @@ func encodeSendMessageResponse(response SendMessageRes, w http.ResponseWriter, s
 		return nil
 
 	case *UnauthorizedError:
+		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(401)
 		span.SetStatus(codes.Error, http.StatusText(401))
 
+		e := jx.GetEncoder()
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
 		return nil
 
-	case *SendMessageApplicationJSONInternalServerError:
+	case *InternalError:
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(500)
+		span.SetStatus(codes.Error, http.StatusText(500))
+
+		e := jx.GetEncoder()
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+		return nil
+
+	default:
+		return errors.Errorf("unexpected response type: %T", response)
+	}
+}
+
+func encodeStackingPoolInfoResponse(response StackingPoolInfoRes, w http.ResponseWriter, span trace.Span) error {
+	switch response := response.(type) {
+	case *PoolInfo:
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(200)
+		span.SetStatus(codes.Ok, http.StatusText(200))
+
+		e := jx.GetEncoder()
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+		return nil
+
+	case *BadRequest:
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(400)
+		span.SetStatus(codes.Error, http.StatusText(400))
+
+		e := jx.GetEncoder()
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+		return nil
+
+	case *UnauthorizedError:
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(401)
+		span.SetStatus(codes.Error, http.StatusText(401))
+
+		e := jx.GetEncoder()
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+		return nil
+
+	case *NotFound:
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(404)
+		span.SetStatus(codes.Error, http.StatusText(404))
+
+		e := jx.GetEncoder()
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+		return nil
+
+	case *InternalError:
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(500)
 		span.SetStatus(codes.Error, http.StatusText(500))

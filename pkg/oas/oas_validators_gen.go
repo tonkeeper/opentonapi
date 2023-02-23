@@ -92,6 +92,35 @@ func (s AccountEvents) Validate() error {
 	}
 	return nil
 }
+func (s AccountStacking) Validate() error {
+	var failures []validate.FieldError
+	if err := func() error {
+		if s.Whales == nil {
+			return errors.New("nil is invalid value")
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "whales",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if s.Tf == nil {
+			return errors.New("nil is invalid value")
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "tf",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
 func (s AccountStatus) Validate() error {
 	switch s {
 	case "nonexist":
@@ -855,6 +884,45 @@ func (s NftPurchaseActionPurchaseType) Validate() error {
 	}
 }
 
+func (s PoolInfo) Validate() error {
+	var failures []validate.FieldError
+	if err := func() error {
+		if err := s.Implementation.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "implementation",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if err := (validate.Float{}).Validate(float64(s.Apy)); err != nil {
+			return errors.Wrap(err, "float")
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "apy",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+func (s PoolInfoImplementation) Validate() error {
+	switch s {
+	case "whales":
+		return nil
+	case "tf":
+		return nil
+	default:
+		return errors.Errorf("invalid value: %v", s)
+	}
+}
 func (s Refund) Validate() error {
 	var failures []validate.FieldError
 	if err := func() error {

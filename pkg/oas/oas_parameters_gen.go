@@ -1711,3 +1711,107 @@ func decodeGetTransactionsParams(args [1]string, r *http.Request) (params GetTra
 	}
 	return params, nil
 }
+
+// PoolsByNominatorsParams is parameters of poolsByNominators operation.
+type PoolsByNominatorsParams struct {
+	// Account ID.
+	AccountID string
+}
+
+func unpackPoolsByNominatorsParams(packed middleware.Parameters) (params PoolsByNominatorsParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "account_id",
+			In:   "path",
+		}
+		params.AccountID = packed[key].(string)
+	}
+	return params
+}
+
+func decodePoolsByNominatorsParams(args [1]string, r *http.Request) (params PoolsByNominatorsParams, _ error) {
+	// Decode path: account_id.
+	{
+		param := args[0]
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "account_id",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.AccountID = c
+				return nil
+			}(); err != nil {
+				return params, errors.Wrap(err, "path: account_id: parse")
+			}
+		} else {
+			return params, errors.New("path: account_id: not specified")
+		}
+	}
+	return params, nil
+}
+
+// StackingPoolInfoParams is parameters of stackingPoolInfo operation.
+type StackingPoolInfoParams struct {
+	// Account ID.
+	AccountID string
+}
+
+func unpackStackingPoolInfoParams(packed middleware.Parameters) (params StackingPoolInfoParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "account_id",
+			In:   "path",
+		}
+		params.AccountID = packed[key].(string)
+	}
+	return params
+}
+
+func decodeStackingPoolInfoParams(args [1]string, r *http.Request) (params StackingPoolInfoParams, _ error) {
+	// Decode path: account_id.
+	{
+		param := args[0]
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "account_id",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.AccountID = c
+				return nil
+			}(); err != nil {
+				return params, errors.Wrap(err, "path: account_id: parse")
+			}
+		} else {
+			return params, errors.New("path: account_id: not specified")
+		}
+	}
+	return params, nil
+}

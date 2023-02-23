@@ -247,11 +247,29 @@ func (UnimplementedHandler) GetValidators(ctx context.Context) (r GetValidatorsR
 	return r, ht.ErrNotImplemented
 }
 
+// PoolsByNominators implements poolsByNominators operation.
+//
+// All pools where account participates.
+//
+// GET /v2/stacking/nominator/{account_id}/pools
+func (UnimplementedHandler) PoolsByNominators(ctx context.Context, params PoolsByNominatorsParams) (r PoolsByNominatorsRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // SendMessage implements sendMessage operation.
 //
 // Send message to blockchain.
 //
 // POST /v2/blockchain/message
 func (UnimplementedHandler) SendMessage(ctx context.Context, req OptSendMessageReq) (r SendMessageRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// StackingPoolInfo implements stackingPoolInfo operation.
+//
+// Pool info.
+//
+// GET /v2/stacking/pool/{account_id}
+func (UnimplementedHandler) StackingPoolInfo(ctx context.Context, params StackingPoolInfoParams) (r StackingPoolInfoRes, _ error) {
 	return r, ht.ErrNotImplemented
 }

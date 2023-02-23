@@ -24,7 +24,7 @@ func main() {
 
 	h := api.NewHandler(storage)
 
-	oasServer, err := oas.NewServer(h, oas.WithMiddleware(api.Logging(log), api.Metrics))
+	oasServer, err := oas.NewServer(h, oas.WithMiddleware(api.Logging(log), api.Metrics), oas.WithErrorHandler(api.ErrorsHandler))
 	if err != nil {
 		log.Fatal("server init", zap.Error(err))
 	}

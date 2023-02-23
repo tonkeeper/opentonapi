@@ -59,7 +59,7 @@ func decodeDnsBackResolveResponse(resp *http.Response) (res DnsBackResolveRes, e
 			}
 
 			d := jx.DecodeBytes(b)
-			var response DnsBackResolveApplicationJSONBadRequest
+			var response BadRequest
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err
@@ -77,7 +77,34 @@ func decodeDnsBackResolveResponse(resp *http.Response) (res DnsBackResolveRes, e
 		}
 	case 401:
 		// Code 401.
-		return &UnauthorizedError{}, nil
+		ct, _, err := mime.ParseMediaType(resp.Header.Get("Content-Type"))
+		if err != nil {
+			return res, errors.Wrap(err, "parse media type")
+		}
+		switch {
+		case ct == "application/json":
+			b, err := io.ReadAll(resp.Body)
+			if err != nil {
+				return res, err
+			}
+
+			d := jx.DecodeBytes(b)
+			var response UnauthorizedError
+			if err := func() error {
+				if err := response.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return res, errors.Wrap(err, "decode \"application/json\"")
+			}
+			if err := d.Skip(); err != io.EOF {
+				return res, errors.New("unexpected trailing data")
+			}
+			return &response, nil
+		default:
+			return res, validate.InvalidContentType(ct)
+		}
 	case 404:
 		// Code 404.
 		ct, _, err := mime.ParseMediaType(resp.Header.Get("Content-Type"))
@@ -92,7 +119,7 @@ func decodeDnsBackResolveResponse(resp *http.Response) (res DnsBackResolveRes, e
 			}
 
 			d := jx.DecodeBytes(b)
-			var response DnsBackResolveApplicationJSONNotFound
+			var response NotFound
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err
@@ -122,7 +149,7 @@ func decodeDnsBackResolveResponse(resp *http.Response) (res DnsBackResolveRes, e
 			}
 
 			d := jx.DecodeBytes(b)
-			var response DnsBackResolveApplicationJSONInternalServerError
+			var response InternalError
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err
@@ -188,7 +215,7 @@ func decodeDnsResolveResponse(resp *http.Response) (res DnsResolveRes, err error
 			}
 
 			d := jx.DecodeBytes(b)
-			var response DnsResolveApplicationJSONBadRequest
+			var response BadRequest
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err
@@ -206,7 +233,34 @@ func decodeDnsResolveResponse(resp *http.Response) (res DnsResolveRes, err error
 		}
 	case 401:
 		// Code 401.
-		return &UnauthorizedError{}, nil
+		ct, _, err := mime.ParseMediaType(resp.Header.Get("Content-Type"))
+		if err != nil {
+			return res, errors.Wrap(err, "parse media type")
+		}
+		switch {
+		case ct == "application/json":
+			b, err := io.ReadAll(resp.Body)
+			if err != nil {
+				return res, err
+			}
+
+			d := jx.DecodeBytes(b)
+			var response UnauthorizedError
+			if err := func() error {
+				if err := response.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return res, errors.Wrap(err, "decode \"application/json\"")
+			}
+			if err := d.Skip(); err != io.EOF {
+				return res, errors.New("unexpected trailing data")
+			}
+			return &response, nil
+		default:
+			return res, validate.InvalidContentType(ct)
+		}
 	case 404:
 		// Code 404.
 		ct, _, err := mime.ParseMediaType(resp.Header.Get("Content-Type"))
@@ -221,7 +275,7 @@ func decodeDnsResolveResponse(resp *http.Response) (res DnsResolveRes, err error
 			}
 
 			d := jx.DecodeBytes(b)
-			var response DnsResolveApplicationJSONNotFound
+			var response NotFound
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err
@@ -251,7 +305,7 @@ func decodeDnsResolveResponse(resp *http.Response) (res DnsResolveRes, err error
 			}
 
 			d := jx.DecodeBytes(b)
-			var response DnsResolveApplicationJSONInternalServerError
+			var response InternalError
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err
@@ -317,7 +371,7 @@ func decodeEmulateMessageResponse(resp *http.Response) (res EmulateMessageRes, e
 			}
 
 			d := jx.DecodeBytes(b)
-			var response EmulateMessageApplicationJSONBadRequest
+			var response BadRequest
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err
@@ -335,7 +389,34 @@ func decodeEmulateMessageResponse(resp *http.Response) (res EmulateMessageRes, e
 		}
 	case 401:
 		// Code 401.
-		return &UnauthorizedError{}, nil
+		ct, _, err := mime.ParseMediaType(resp.Header.Get("Content-Type"))
+		if err != nil {
+			return res, errors.Wrap(err, "parse media type")
+		}
+		switch {
+		case ct == "application/json":
+			b, err := io.ReadAll(resp.Body)
+			if err != nil {
+				return res, err
+			}
+
+			d := jx.DecodeBytes(b)
+			var response UnauthorizedError
+			if err := func() error {
+				if err := response.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return res, errors.Wrap(err, "decode \"application/json\"")
+			}
+			if err := d.Skip(); err != io.EOF {
+				return res, errors.New("unexpected trailing data")
+			}
+			return &response, nil
+		default:
+			return res, validate.InvalidContentType(ct)
+		}
 	case 500:
 		// Code 500.
 		ct, _, err := mime.ParseMediaType(resp.Header.Get("Content-Type"))
@@ -350,7 +431,7 @@ func decodeEmulateMessageResponse(resp *http.Response) (res EmulateMessageRes, e
 			}
 
 			d := jx.DecodeBytes(b)
-			var response EmulateMessageApplicationJSONInternalServerError
+			var response InternalError
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err
@@ -416,7 +497,7 @@ func decodeExecGetMethodResponse(resp *http.Response) (res ExecGetMethodRes, err
 			}
 
 			d := jx.DecodeBytes(b)
-			var response ExecGetMethodApplicationJSONBadRequest
+			var response BadRequest
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err
@@ -434,7 +515,34 @@ func decodeExecGetMethodResponse(resp *http.Response) (res ExecGetMethodRes, err
 		}
 	case 401:
 		// Code 401.
-		return &UnauthorizedError{}, nil
+		ct, _, err := mime.ParseMediaType(resp.Header.Get("Content-Type"))
+		if err != nil {
+			return res, errors.Wrap(err, "parse media type")
+		}
+		switch {
+		case ct == "application/json":
+			b, err := io.ReadAll(resp.Body)
+			if err != nil {
+				return res, err
+			}
+
+			d := jx.DecodeBytes(b)
+			var response UnauthorizedError
+			if err := func() error {
+				if err := response.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return res, errors.Wrap(err, "decode \"application/json\"")
+			}
+			if err := d.Skip(); err != io.EOF {
+				return res, errors.New("unexpected trailing data")
+			}
+			return &response, nil
+		default:
+			return res, validate.InvalidContentType(ct)
+		}
 	case 500:
 		// Code 500.
 		ct, _, err := mime.ParseMediaType(resp.Header.Get("Content-Type"))
@@ -449,7 +557,7 @@ func decodeExecGetMethodResponse(resp *http.Response) (res ExecGetMethodRes, err
 			}
 
 			d := jx.DecodeBytes(b)
-			var response ExecGetMethodApplicationJSONInternalServerError
+			var response InternalError
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err
@@ -515,7 +623,7 @@ func decodeGetAccountResponse(resp *http.Response) (res GetAccountRes, err error
 			}
 
 			d := jx.DecodeBytes(b)
-			var response GetAccountApplicationJSONBadRequest
+			var response BadRequest
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err
@@ -533,7 +641,34 @@ func decodeGetAccountResponse(resp *http.Response) (res GetAccountRes, err error
 		}
 	case 401:
 		// Code 401.
-		return &UnauthorizedError{}, nil
+		ct, _, err := mime.ParseMediaType(resp.Header.Get("Content-Type"))
+		if err != nil {
+			return res, errors.Wrap(err, "parse media type")
+		}
+		switch {
+		case ct == "application/json":
+			b, err := io.ReadAll(resp.Body)
+			if err != nil {
+				return res, err
+			}
+
+			d := jx.DecodeBytes(b)
+			var response UnauthorizedError
+			if err := func() error {
+				if err := response.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return res, errors.Wrap(err, "decode \"application/json\"")
+			}
+			if err := d.Skip(); err != io.EOF {
+				return res, errors.New("unexpected trailing data")
+			}
+			return &response, nil
+		default:
+			return res, validate.InvalidContentType(ct)
+		}
 	case 404:
 		// Code 404.
 		ct, _, err := mime.ParseMediaType(resp.Header.Get("Content-Type"))
@@ -548,7 +683,7 @@ func decodeGetAccountResponse(resp *http.Response) (res GetAccountRes, err error
 			}
 
 			d := jx.DecodeBytes(b)
-			var response GetAccountApplicationJSONNotFound
+			var response NotFound
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err
@@ -578,7 +713,7 @@ func decodeGetAccountResponse(resp *http.Response) (res GetAccountRes, err error
 			}
 
 			d := jx.DecodeBytes(b)
-			var response GetAccountApplicationJSONInternalServerError
+			var response InternalError
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err
@@ -644,7 +779,7 @@ func decodeGetAccountTransactionsResponse(resp *http.Response) (res GetAccountTr
 			}
 
 			d := jx.DecodeBytes(b)
-			var response GetAccountTransactionsApplicationJSONBadRequest
+			var response BadRequest
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err
@@ -662,7 +797,34 @@ func decodeGetAccountTransactionsResponse(resp *http.Response) (res GetAccountTr
 		}
 	case 401:
 		// Code 401.
-		return &UnauthorizedError{}, nil
+		ct, _, err := mime.ParseMediaType(resp.Header.Get("Content-Type"))
+		if err != nil {
+			return res, errors.Wrap(err, "parse media type")
+		}
+		switch {
+		case ct == "application/json":
+			b, err := io.ReadAll(resp.Body)
+			if err != nil {
+				return res, err
+			}
+
+			d := jx.DecodeBytes(b)
+			var response UnauthorizedError
+			if err := func() error {
+				if err := response.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return res, errors.Wrap(err, "decode \"application/json\"")
+			}
+			if err := d.Skip(); err != io.EOF {
+				return res, errors.New("unexpected trailing data")
+			}
+			return &response, nil
+		default:
+			return res, validate.InvalidContentType(ct)
+		}
 	case 404:
 		// Code 404.
 		ct, _, err := mime.ParseMediaType(resp.Header.Get("Content-Type"))
@@ -677,7 +839,7 @@ func decodeGetAccountTransactionsResponse(resp *http.Response) (res GetAccountTr
 			}
 
 			d := jx.DecodeBytes(b)
-			var response GetAccountTransactionsApplicationJSONNotFound
+			var response NotFound
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err
@@ -707,7 +869,7 @@ func decodeGetAccountTransactionsResponse(resp *http.Response) (res GetAccountTr
 			}
 
 			d := jx.DecodeBytes(b)
-			var response GetAccountTransactionsApplicationJSONInternalServerError
+			var response InternalError
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err
@@ -761,7 +923,34 @@ func decodeGetAllAuctionsResponse(resp *http.Response) (res GetAllAuctionsRes, e
 		}
 	case 401:
 		// Code 401.
-		return &UnauthorizedError{}, nil
+		ct, _, err := mime.ParseMediaType(resp.Header.Get("Content-Type"))
+		if err != nil {
+			return res, errors.Wrap(err, "parse media type")
+		}
+		switch {
+		case ct == "application/json":
+			b, err := io.ReadAll(resp.Body)
+			if err != nil {
+				return res, err
+			}
+
+			d := jx.DecodeBytes(b)
+			var response UnauthorizedError
+			if err := func() error {
+				if err := response.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return res, errors.Wrap(err, "decode \"application/json\"")
+			}
+			if err := d.Skip(); err != io.EOF {
+				return res, errors.New("unexpected trailing data")
+			}
+			return &response, nil
+		default:
+			return res, validate.InvalidContentType(ct)
+		}
 	case 500:
 		// Code 500.
 		ct, _, err := mime.ParseMediaType(resp.Header.Get("Content-Type"))
@@ -776,7 +965,7 @@ func decodeGetAllAuctionsResponse(resp *http.Response) (res GetAllAuctionsRes, e
 			}
 
 			d := jx.DecodeBytes(b)
-			var response Error
+			var response InternalError
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err
@@ -842,7 +1031,7 @@ func decodeGetBlockResponse(resp *http.Response) (res GetBlockRes, err error) {
 			}
 
 			d := jx.DecodeBytes(b)
-			var response GetBlockApplicationJSONBadRequest
+			var response BadRequest
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err
@@ -860,7 +1049,34 @@ func decodeGetBlockResponse(resp *http.Response) (res GetBlockRes, err error) {
 		}
 	case 401:
 		// Code 401.
-		return &UnauthorizedError{}, nil
+		ct, _, err := mime.ParseMediaType(resp.Header.Get("Content-Type"))
+		if err != nil {
+			return res, errors.Wrap(err, "parse media type")
+		}
+		switch {
+		case ct == "application/json":
+			b, err := io.ReadAll(resp.Body)
+			if err != nil {
+				return res, err
+			}
+
+			d := jx.DecodeBytes(b)
+			var response UnauthorizedError
+			if err := func() error {
+				if err := response.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return res, errors.Wrap(err, "decode \"application/json\"")
+			}
+			if err := d.Skip(); err != io.EOF {
+				return res, errors.New("unexpected trailing data")
+			}
+			return &response, nil
+		default:
+			return res, validate.InvalidContentType(ct)
+		}
 	case 404:
 		// Code 404.
 		ct, _, err := mime.ParseMediaType(resp.Header.Get("Content-Type"))
@@ -875,7 +1091,7 @@ func decodeGetBlockResponse(resp *http.Response) (res GetBlockRes, err error) {
 			}
 
 			d := jx.DecodeBytes(b)
-			var response GetBlockApplicationJSONNotFound
+			var response NotFound
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err
@@ -905,7 +1121,7 @@ func decodeGetBlockResponse(resp *http.Response) (res GetBlockRes, err error) {
 			}
 
 			d := jx.DecodeBytes(b)
-			var response GetBlockApplicationJSONInternalServerError
+			var response InternalError
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err
@@ -959,7 +1175,34 @@ func decodeGetConfigResponse(resp *http.Response) (res GetConfigRes, err error) 
 		}
 	case 401:
 		// Code 401.
-		return &UnauthorizedError{}, nil
+		ct, _, err := mime.ParseMediaType(resp.Header.Get("Content-Type"))
+		if err != nil {
+			return res, errors.Wrap(err, "parse media type")
+		}
+		switch {
+		case ct == "application/json":
+			b, err := io.ReadAll(resp.Body)
+			if err != nil {
+				return res, err
+			}
+
+			d := jx.DecodeBytes(b)
+			var response UnauthorizedError
+			if err := func() error {
+				if err := response.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return res, errors.Wrap(err, "decode \"application/json\"")
+			}
+			if err := d.Skip(); err != io.EOF {
+				return res, errors.New("unexpected trailing data")
+			}
+			return &response, nil
+		default:
+			return res, validate.InvalidContentType(ct)
+		}
 	case 500:
 		// Code 500.
 		ct, _, err := mime.ParseMediaType(resp.Header.Get("Content-Type"))
@@ -974,7 +1217,7 @@ func decodeGetConfigResponse(resp *http.Response) (res GetConfigRes, err error) 
 			}
 
 			d := jx.DecodeBytes(b)
-			var response Error
+			var response InternalError
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err
@@ -1040,7 +1283,7 @@ func decodeGetDomainBidsResponse(resp *http.Response) (res GetDomainBidsRes, err
 			}
 
 			d := jx.DecodeBytes(b)
-			var response GetDomainBidsApplicationJSONBadRequest
+			var response BadRequest
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err
@@ -1058,7 +1301,34 @@ func decodeGetDomainBidsResponse(resp *http.Response) (res GetDomainBidsRes, err
 		}
 	case 401:
 		// Code 401.
-		return &UnauthorizedError{}, nil
+		ct, _, err := mime.ParseMediaType(resp.Header.Get("Content-Type"))
+		if err != nil {
+			return res, errors.Wrap(err, "parse media type")
+		}
+		switch {
+		case ct == "application/json":
+			b, err := io.ReadAll(resp.Body)
+			if err != nil {
+				return res, err
+			}
+
+			d := jx.DecodeBytes(b)
+			var response UnauthorizedError
+			if err := func() error {
+				if err := response.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return res, errors.Wrap(err, "decode \"application/json\"")
+			}
+			if err := d.Skip(); err != io.EOF {
+				return res, errors.New("unexpected trailing data")
+			}
+			return &response, nil
+		default:
+			return res, validate.InvalidContentType(ct)
+		}
 	case 404:
 		// Code 404.
 		ct, _, err := mime.ParseMediaType(resp.Header.Get("Content-Type"))
@@ -1073,7 +1343,7 @@ func decodeGetDomainBidsResponse(resp *http.Response) (res GetDomainBidsRes, err
 			}
 
 			d := jx.DecodeBytes(b)
-			var response GetDomainBidsApplicationJSONNotFound
+			var response NotFound
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err
@@ -1103,7 +1373,7 @@ func decodeGetDomainBidsResponse(resp *http.Response) (res GetDomainBidsRes, err
 			}
 
 			d := jx.DecodeBytes(b)
-			var response GetDomainBidsApplicationJSONInternalServerError
+			var response InternalError
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err
@@ -1169,7 +1439,7 @@ func decodeGetEventResponse(resp *http.Response) (res GetEventRes, err error) {
 			}
 
 			d := jx.DecodeBytes(b)
-			var response GetEventApplicationJSONBadRequest
+			var response BadRequest
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err
@@ -1187,7 +1457,34 @@ func decodeGetEventResponse(resp *http.Response) (res GetEventRes, err error) {
 		}
 	case 401:
 		// Code 401.
-		return &UnauthorizedError{}, nil
+		ct, _, err := mime.ParseMediaType(resp.Header.Get("Content-Type"))
+		if err != nil {
+			return res, errors.Wrap(err, "parse media type")
+		}
+		switch {
+		case ct == "application/json":
+			b, err := io.ReadAll(resp.Body)
+			if err != nil {
+				return res, err
+			}
+
+			d := jx.DecodeBytes(b)
+			var response UnauthorizedError
+			if err := func() error {
+				if err := response.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return res, errors.Wrap(err, "decode \"application/json\"")
+			}
+			if err := d.Skip(); err != io.EOF {
+				return res, errors.New("unexpected trailing data")
+			}
+			return &response, nil
+		default:
+			return res, validate.InvalidContentType(ct)
+		}
 	case 404:
 		// Code 404.
 		ct, _, err := mime.ParseMediaType(resp.Header.Get("Content-Type"))
@@ -1202,7 +1499,7 @@ func decodeGetEventResponse(resp *http.Response) (res GetEventRes, err error) {
 			}
 
 			d := jx.DecodeBytes(b)
-			var response GetEventApplicationJSONNotFound
+			var response NotFound
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err
@@ -1232,7 +1529,7 @@ func decodeGetEventResponse(resp *http.Response) (res GetEventRes, err error) {
 			}
 
 			d := jx.DecodeBytes(b)
-			var response GetEventApplicationJSONInternalServerError
+			var response InternalError
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err
@@ -1298,7 +1595,7 @@ func decodeGetEventsByAccountResponse(resp *http.Response) (res GetEventsByAccou
 			}
 
 			d := jx.DecodeBytes(b)
-			var response GetEventsByAccountApplicationJSONBadRequest
+			var response BadRequest
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err
@@ -1316,7 +1613,34 @@ func decodeGetEventsByAccountResponse(resp *http.Response) (res GetEventsByAccou
 		}
 	case 401:
 		// Code 401.
-		return &UnauthorizedError{}, nil
+		ct, _, err := mime.ParseMediaType(resp.Header.Get("Content-Type"))
+		if err != nil {
+			return res, errors.Wrap(err, "parse media type")
+		}
+		switch {
+		case ct == "application/json":
+			b, err := io.ReadAll(resp.Body)
+			if err != nil {
+				return res, err
+			}
+
+			d := jx.DecodeBytes(b)
+			var response UnauthorizedError
+			if err := func() error {
+				if err := response.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return res, errors.Wrap(err, "decode \"application/json\"")
+			}
+			if err := d.Skip(); err != io.EOF {
+				return res, errors.New("unexpected trailing data")
+			}
+			return &response, nil
+		default:
+			return res, validate.InvalidContentType(ct)
+		}
 	case 404:
 		// Code 404.
 		ct, _, err := mime.ParseMediaType(resp.Header.Get("Content-Type"))
@@ -1331,7 +1655,7 @@ func decodeGetEventsByAccountResponse(resp *http.Response) (res GetEventsByAccou
 			}
 
 			d := jx.DecodeBytes(b)
-			var response GetEventsByAccountApplicationJSONNotFound
+			var response NotFound
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err
@@ -1361,7 +1685,7 @@ func decodeGetEventsByAccountResponse(resp *http.Response) (res GetEventsByAccou
 			}
 
 			d := jx.DecodeBytes(b)
-			var response GetEventsByAccountApplicationJSONInternalServerError
+			var response InternalError
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err
@@ -1427,7 +1751,7 @@ func decodeGetJettonInfoResponse(resp *http.Response) (res GetJettonInfoRes, err
 			}
 
 			d := jx.DecodeBytes(b)
-			var response GetJettonInfoApplicationJSONBadRequest
+			var response BadRequest
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err
@@ -1445,7 +1769,34 @@ func decodeGetJettonInfoResponse(resp *http.Response) (res GetJettonInfoRes, err
 		}
 	case 401:
 		// Code 401.
-		return &UnauthorizedError{}, nil
+		ct, _, err := mime.ParseMediaType(resp.Header.Get("Content-Type"))
+		if err != nil {
+			return res, errors.Wrap(err, "parse media type")
+		}
+		switch {
+		case ct == "application/json":
+			b, err := io.ReadAll(resp.Body)
+			if err != nil {
+				return res, err
+			}
+
+			d := jx.DecodeBytes(b)
+			var response UnauthorizedError
+			if err := func() error {
+				if err := response.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return res, errors.Wrap(err, "decode \"application/json\"")
+			}
+			if err := d.Skip(); err != io.EOF {
+				return res, errors.New("unexpected trailing data")
+			}
+			return &response, nil
+		default:
+			return res, validate.InvalidContentType(ct)
+		}
 	case 404:
 		// Code 404.
 		ct, _, err := mime.ParseMediaType(resp.Header.Get("Content-Type"))
@@ -1460,7 +1811,7 @@ func decodeGetJettonInfoResponse(resp *http.Response) (res GetJettonInfoRes, err
 			}
 
 			d := jx.DecodeBytes(b)
-			var response GetJettonInfoApplicationJSONNotFound
+			var response NotFound
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err
@@ -1490,7 +1841,7 @@ func decodeGetJettonInfoResponse(resp *http.Response) (res GetJettonInfoRes, err
 			}
 
 			d := jx.DecodeBytes(b)
-			var response GetJettonInfoApplicationJSONInternalServerError
+			var response InternalError
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err
@@ -1556,7 +1907,7 @@ func decodeGetJettonsBalancesResponse(resp *http.Response) (res GetJettonsBalanc
 			}
 
 			d := jx.DecodeBytes(b)
-			var response GetJettonsBalancesApplicationJSONBadRequest
+			var response BadRequest
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err
@@ -1574,7 +1925,34 @@ func decodeGetJettonsBalancesResponse(resp *http.Response) (res GetJettonsBalanc
 		}
 	case 401:
 		// Code 401.
-		return &UnauthorizedError{}, nil
+		ct, _, err := mime.ParseMediaType(resp.Header.Get("Content-Type"))
+		if err != nil {
+			return res, errors.Wrap(err, "parse media type")
+		}
+		switch {
+		case ct == "application/json":
+			b, err := io.ReadAll(resp.Body)
+			if err != nil {
+				return res, err
+			}
+
+			d := jx.DecodeBytes(b)
+			var response UnauthorizedError
+			if err := func() error {
+				if err := response.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return res, errors.Wrap(err, "decode \"application/json\"")
+			}
+			if err := d.Skip(); err != io.EOF {
+				return res, errors.New("unexpected trailing data")
+			}
+			return &response, nil
+		default:
+			return res, validate.InvalidContentType(ct)
+		}
 	case 404:
 		// Code 404.
 		ct, _, err := mime.ParseMediaType(resp.Header.Get("Content-Type"))
@@ -1589,7 +1967,7 @@ func decodeGetJettonsBalancesResponse(resp *http.Response) (res GetJettonsBalanc
 			}
 
 			d := jx.DecodeBytes(b)
-			var response GetJettonsBalancesApplicationJSONNotFound
+			var response NotFound
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err
@@ -1619,7 +1997,7 @@ func decodeGetJettonsBalancesResponse(resp *http.Response) (res GetJettonsBalanc
 			}
 
 			d := jx.DecodeBytes(b)
-			var response GetJettonsBalancesApplicationJSONInternalServerError
+			var response InternalError
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err
@@ -1673,7 +2051,34 @@ func decodeGetMasterchainHeadResponse(resp *http.Response) (res GetMasterchainHe
 		}
 	case 401:
 		// Code 401.
-		return &UnauthorizedError{}, nil
+		ct, _, err := mime.ParseMediaType(resp.Header.Get("Content-Type"))
+		if err != nil {
+			return res, errors.Wrap(err, "parse media type")
+		}
+		switch {
+		case ct == "application/json":
+			b, err := io.ReadAll(resp.Body)
+			if err != nil {
+				return res, err
+			}
+
+			d := jx.DecodeBytes(b)
+			var response UnauthorizedError
+			if err := func() error {
+				if err := response.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return res, errors.Wrap(err, "decode \"application/json\"")
+			}
+			if err := d.Skip(); err != io.EOF {
+				return res, errors.New("unexpected trailing data")
+			}
+			return &response, nil
+		default:
+			return res, validate.InvalidContentType(ct)
+		}
 	case 500:
 		// Code 500.
 		ct, _, err := mime.ParseMediaType(resp.Header.Get("Content-Type"))
@@ -1688,7 +2093,7 @@ func decodeGetMasterchainHeadResponse(resp *http.Response) (res GetMasterchainHe
 			}
 
 			d := jx.DecodeBytes(b)
-			var response Error
+			var response InternalError
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err
@@ -1754,7 +2159,7 @@ func decodeGetNftCollectionResponse(resp *http.Response) (res GetNftCollectionRe
 			}
 
 			d := jx.DecodeBytes(b)
-			var response GetNftCollectionApplicationJSONBadRequest
+			var response BadRequest
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err
@@ -1772,7 +2177,34 @@ func decodeGetNftCollectionResponse(resp *http.Response) (res GetNftCollectionRe
 		}
 	case 401:
 		// Code 401.
-		return &UnauthorizedError{}, nil
+		ct, _, err := mime.ParseMediaType(resp.Header.Get("Content-Type"))
+		if err != nil {
+			return res, errors.Wrap(err, "parse media type")
+		}
+		switch {
+		case ct == "application/json":
+			b, err := io.ReadAll(resp.Body)
+			if err != nil {
+				return res, err
+			}
+
+			d := jx.DecodeBytes(b)
+			var response UnauthorizedError
+			if err := func() error {
+				if err := response.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return res, errors.Wrap(err, "decode \"application/json\"")
+			}
+			if err := d.Skip(); err != io.EOF {
+				return res, errors.New("unexpected trailing data")
+			}
+			return &response, nil
+		default:
+			return res, validate.InvalidContentType(ct)
+		}
 	case 404:
 		// Code 404.
 		ct, _, err := mime.ParseMediaType(resp.Header.Get("Content-Type"))
@@ -1787,7 +2219,7 @@ func decodeGetNftCollectionResponse(resp *http.Response) (res GetNftCollectionRe
 			}
 
 			d := jx.DecodeBytes(b)
-			var response GetNftCollectionApplicationJSONNotFound
+			var response NotFound
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err
@@ -1817,7 +2249,7 @@ func decodeGetNftCollectionResponse(resp *http.Response) (res GetNftCollectionRe
 			}
 
 			d := jx.DecodeBytes(b)
-			var response GetNftCollectionApplicationJSONInternalServerError
+			var response InternalError
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err
@@ -1871,7 +2303,34 @@ func decodeGetNftCollectionsResponse(resp *http.Response) (res GetNftCollections
 		}
 	case 401:
 		// Code 401.
-		return &UnauthorizedError{}, nil
+		ct, _, err := mime.ParseMediaType(resp.Header.Get("Content-Type"))
+		if err != nil {
+			return res, errors.Wrap(err, "parse media type")
+		}
+		switch {
+		case ct == "application/json":
+			b, err := io.ReadAll(resp.Body)
+			if err != nil {
+				return res, err
+			}
+
+			d := jx.DecodeBytes(b)
+			var response UnauthorizedError
+			if err := func() error {
+				if err := response.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return res, errors.Wrap(err, "decode \"application/json\"")
+			}
+			if err := d.Skip(); err != io.EOF {
+				return res, errors.New("unexpected trailing data")
+			}
+			return &response, nil
+		default:
+			return res, validate.InvalidContentType(ct)
+		}
 	case 500:
 		// Code 500.
 		ct, _, err := mime.ParseMediaType(resp.Header.Get("Content-Type"))
@@ -1886,7 +2345,7 @@ func decodeGetNftCollectionsResponse(resp *http.Response) (res GetNftCollections
 			}
 
 			d := jx.DecodeBytes(b)
-			var response Error
+			var response InternalError
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err
@@ -1952,7 +2411,7 @@ func decodeGetNftItemByAddressResponse(resp *http.Response) (res GetNftItemByAdd
 			}
 
 			d := jx.DecodeBytes(b)
-			var response GetNftItemByAddressApplicationJSONBadRequest
+			var response BadRequest
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err
@@ -1970,7 +2429,34 @@ func decodeGetNftItemByAddressResponse(resp *http.Response) (res GetNftItemByAdd
 		}
 	case 401:
 		// Code 401.
-		return &UnauthorizedError{}, nil
+		ct, _, err := mime.ParseMediaType(resp.Header.Get("Content-Type"))
+		if err != nil {
+			return res, errors.Wrap(err, "parse media type")
+		}
+		switch {
+		case ct == "application/json":
+			b, err := io.ReadAll(resp.Body)
+			if err != nil {
+				return res, err
+			}
+
+			d := jx.DecodeBytes(b)
+			var response UnauthorizedError
+			if err := func() error {
+				if err := response.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return res, errors.Wrap(err, "decode \"application/json\"")
+			}
+			if err := d.Skip(); err != io.EOF {
+				return res, errors.New("unexpected trailing data")
+			}
+			return &response, nil
+		default:
+			return res, validate.InvalidContentType(ct)
+		}
 	case 404:
 		// Code 404.
 		ct, _, err := mime.ParseMediaType(resp.Header.Get("Content-Type"))
@@ -1985,7 +2471,7 @@ func decodeGetNftItemByAddressResponse(resp *http.Response) (res GetNftItemByAdd
 			}
 
 			d := jx.DecodeBytes(b)
-			var response GetNftItemByAddressApplicationJSONNotFound
+			var response NotFound
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err
@@ -2015,7 +2501,7 @@ func decodeGetNftItemByAddressResponse(resp *http.Response) (res GetNftItemByAdd
 			}
 
 			d := jx.DecodeBytes(b)
-			var response GetNftItemByAddressApplicationJSONInternalServerError
+			var response InternalError
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err
@@ -2081,7 +2567,7 @@ func decodeGetNftItemsByOwnerResponse(resp *http.Response) (res GetNftItemsByOwn
 			}
 
 			d := jx.DecodeBytes(b)
-			var response GetNftItemsByOwnerApplicationJSONBadRequest
+			var response BadRequest
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err
@@ -2099,7 +2585,34 @@ func decodeGetNftItemsByOwnerResponse(resp *http.Response) (res GetNftItemsByOwn
 		}
 	case 401:
 		// Code 401.
-		return &UnauthorizedError{}, nil
+		ct, _, err := mime.ParseMediaType(resp.Header.Get("Content-Type"))
+		if err != nil {
+			return res, errors.Wrap(err, "parse media type")
+		}
+		switch {
+		case ct == "application/json":
+			b, err := io.ReadAll(resp.Body)
+			if err != nil {
+				return res, err
+			}
+
+			d := jx.DecodeBytes(b)
+			var response UnauthorizedError
+			if err := func() error {
+				if err := response.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return res, errors.Wrap(err, "decode \"application/json\"")
+			}
+			if err := d.Skip(); err != io.EOF {
+				return res, errors.New("unexpected trailing data")
+			}
+			return &response, nil
+		default:
+			return res, validate.InvalidContentType(ct)
+		}
 	case 404:
 		// Code 404.
 		ct, _, err := mime.ParseMediaType(resp.Header.Get("Content-Type"))
@@ -2114,7 +2627,7 @@ func decodeGetNftItemsByOwnerResponse(resp *http.Response) (res GetNftItemsByOwn
 			}
 
 			d := jx.DecodeBytes(b)
-			var response GetNftItemsByOwnerApplicationJSONNotFound
+			var response NotFound
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err
@@ -2144,7 +2657,7 @@ func decodeGetNftItemsByOwnerResponse(resp *http.Response) (res GetNftItemsByOwn
 			}
 
 			d := jx.DecodeBytes(b)
-			var response GetNftItemsByOwnerApplicationJSONInternalServerError
+			var response InternalError
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err
@@ -2210,7 +2723,7 @@ func decodeGetRawAccountResponse(resp *http.Response) (res GetRawAccountRes, err
 			}
 
 			d := jx.DecodeBytes(b)
-			var response GetRawAccountApplicationJSONBadRequest
+			var response BadRequest
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err
@@ -2228,7 +2741,34 @@ func decodeGetRawAccountResponse(resp *http.Response) (res GetRawAccountRes, err
 		}
 	case 401:
 		// Code 401.
-		return &UnauthorizedError{}, nil
+		ct, _, err := mime.ParseMediaType(resp.Header.Get("Content-Type"))
+		if err != nil {
+			return res, errors.Wrap(err, "parse media type")
+		}
+		switch {
+		case ct == "application/json":
+			b, err := io.ReadAll(resp.Body)
+			if err != nil {
+				return res, err
+			}
+
+			d := jx.DecodeBytes(b)
+			var response UnauthorizedError
+			if err := func() error {
+				if err := response.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return res, errors.Wrap(err, "decode \"application/json\"")
+			}
+			if err := d.Skip(); err != io.EOF {
+				return res, errors.New("unexpected trailing data")
+			}
+			return &response, nil
+		default:
+			return res, validate.InvalidContentType(ct)
+		}
 	case 404:
 		// Code 404.
 		ct, _, err := mime.ParseMediaType(resp.Header.Get("Content-Type"))
@@ -2243,7 +2783,7 @@ func decodeGetRawAccountResponse(resp *http.Response) (res GetRawAccountRes, err
 			}
 
 			d := jx.DecodeBytes(b)
-			var response GetRawAccountApplicationJSONNotFound
+			var response NotFound
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err
@@ -2273,7 +2813,7 @@ func decodeGetRawAccountResponse(resp *http.Response) (res GetRawAccountRes, err
 			}
 
 			d := jx.DecodeBytes(b)
-			var response GetRawAccountApplicationJSONInternalServerError
+			var response InternalError
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err
@@ -2339,7 +2879,7 @@ func decodeGetSubscriptionsByAccountResponse(resp *http.Response) (res GetSubscr
 			}
 
 			d := jx.DecodeBytes(b)
-			var response GetSubscriptionsByAccountApplicationJSONBadRequest
+			var response BadRequest
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err
@@ -2357,7 +2897,34 @@ func decodeGetSubscriptionsByAccountResponse(resp *http.Response) (res GetSubscr
 		}
 	case 401:
 		// Code 401.
-		return &UnauthorizedError{}, nil
+		ct, _, err := mime.ParseMediaType(resp.Header.Get("Content-Type"))
+		if err != nil {
+			return res, errors.Wrap(err, "parse media type")
+		}
+		switch {
+		case ct == "application/json":
+			b, err := io.ReadAll(resp.Body)
+			if err != nil {
+				return res, err
+			}
+
+			d := jx.DecodeBytes(b)
+			var response UnauthorizedError
+			if err := func() error {
+				if err := response.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return res, errors.Wrap(err, "decode \"application/json\"")
+			}
+			if err := d.Skip(); err != io.EOF {
+				return res, errors.New("unexpected trailing data")
+			}
+			return &response, nil
+		default:
+			return res, validate.InvalidContentType(ct)
+		}
 	case 404:
 		// Code 404.
 		ct, _, err := mime.ParseMediaType(resp.Header.Get("Content-Type"))
@@ -2372,7 +2939,7 @@ func decodeGetSubscriptionsByAccountResponse(resp *http.Response) (res GetSubscr
 			}
 
 			d := jx.DecodeBytes(b)
-			var response GetSubscriptionsByAccountApplicationJSONNotFound
+			var response NotFound
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err
@@ -2402,7 +2969,7 @@ func decodeGetSubscriptionsByAccountResponse(resp *http.Response) (res GetSubscr
 			}
 
 			d := jx.DecodeBytes(b)
-			var response GetSubscriptionsByAccountApplicationJSONInternalServerError
+			var response InternalError
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err
@@ -2468,7 +3035,7 @@ func decodeGetTraceResponse(resp *http.Response) (res GetTraceRes, err error) {
 			}
 
 			d := jx.DecodeBytes(b)
-			var response GetTraceApplicationJSONBadRequest
+			var response BadRequest
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err
@@ -2486,7 +3053,34 @@ func decodeGetTraceResponse(resp *http.Response) (res GetTraceRes, err error) {
 		}
 	case 401:
 		// Code 401.
-		return &UnauthorizedError{}, nil
+		ct, _, err := mime.ParseMediaType(resp.Header.Get("Content-Type"))
+		if err != nil {
+			return res, errors.Wrap(err, "parse media type")
+		}
+		switch {
+		case ct == "application/json":
+			b, err := io.ReadAll(resp.Body)
+			if err != nil {
+				return res, err
+			}
+
+			d := jx.DecodeBytes(b)
+			var response UnauthorizedError
+			if err := func() error {
+				if err := response.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return res, errors.Wrap(err, "decode \"application/json\"")
+			}
+			if err := d.Skip(); err != io.EOF {
+				return res, errors.New("unexpected trailing data")
+			}
+			return &response, nil
+		default:
+			return res, validate.InvalidContentType(ct)
+		}
 	case 404:
 		// Code 404.
 		ct, _, err := mime.ParseMediaType(resp.Header.Get("Content-Type"))
@@ -2501,7 +3095,7 @@ func decodeGetTraceResponse(resp *http.Response) (res GetTraceRes, err error) {
 			}
 
 			d := jx.DecodeBytes(b)
-			var response GetTraceApplicationJSONNotFound
+			var response NotFound
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err
@@ -2531,7 +3125,7 @@ func decodeGetTraceResponse(resp *http.Response) (res GetTraceRes, err error) {
 			}
 
 			d := jx.DecodeBytes(b)
-			var response GetTraceApplicationJSONInternalServerError
+			var response InternalError
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err
@@ -2597,7 +3191,7 @@ func decodeGetTracesByAccountResponse(resp *http.Response) (res GetTracesByAccou
 			}
 
 			d := jx.DecodeBytes(b)
-			var response GetTracesByAccountApplicationJSONBadRequest
+			var response BadRequest
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err
@@ -2615,7 +3209,34 @@ func decodeGetTracesByAccountResponse(resp *http.Response) (res GetTracesByAccou
 		}
 	case 401:
 		// Code 401.
-		return &UnauthorizedError{}, nil
+		ct, _, err := mime.ParseMediaType(resp.Header.Get("Content-Type"))
+		if err != nil {
+			return res, errors.Wrap(err, "parse media type")
+		}
+		switch {
+		case ct == "application/json":
+			b, err := io.ReadAll(resp.Body)
+			if err != nil {
+				return res, err
+			}
+
+			d := jx.DecodeBytes(b)
+			var response UnauthorizedError
+			if err := func() error {
+				if err := response.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return res, errors.Wrap(err, "decode \"application/json\"")
+			}
+			if err := d.Skip(); err != io.EOF {
+				return res, errors.New("unexpected trailing data")
+			}
+			return &response, nil
+		default:
+			return res, validate.InvalidContentType(ct)
+		}
 	case 404:
 		// Code 404.
 		ct, _, err := mime.ParseMediaType(resp.Header.Get("Content-Type"))
@@ -2630,7 +3251,7 @@ func decodeGetTracesByAccountResponse(resp *http.Response) (res GetTracesByAccou
 			}
 
 			d := jx.DecodeBytes(b)
-			var response GetTracesByAccountApplicationJSONNotFound
+			var response NotFound
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err
@@ -2660,7 +3281,7 @@ func decodeGetTracesByAccountResponse(resp *http.Response) (res GetTracesByAccou
 			}
 
 			d := jx.DecodeBytes(b)
-			var response GetTracesByAccountApplicationJSONInternalServerError
+			var response InternalError
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err
@@ -2726,7 +3347,7 @@ func decodeGetTransactionResponse(resp *http.Response) (res GetTransactionRes, e
 			}
 
 			d := jx.DecodeBytes(b)
-			var response GetTransactionApplicationJSONBadRequest
+			var response BadRequest
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err
@@ -2744,7 +3365,34 @@ func decodeGetTransactionResponse(resp *http.Response) (res GetTransactionRes, e
 		}
 	case 401:
 		// Code 401.
-		return &UnauthorizedError{}, nil
+		ct, _, err := mime.ParseMediaType(resp.Header.Get("Content-Type"))
+		if err != nil {
+			return res, errors.Wrap(err, "parse media type")
+		}
+		switch {
+		case ct == "application/json":
+			b, err := io.ReadAll(resp.Body)
+			if err != nil {
+				return res, err
+			}
+
+			d := jx.DecodeBytes(b)
+			var response UnauthorizedError
+			if err := func() error {
+				if err := response.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return res, errors.Wrap(err, "decode \"application/json\"")
+			}
+			if err := d.Skip(); err != io.EOF {
+				return res, errors.New("unexpected trailing data")
+			}
+			return &response, nil
+		default:
+			return res, validate.InvalidContentType(ct)
+		}
 	case 404:
 		// Code 404.
 		ct, _, err := mime.ParseMediaType(resp.Header.Get("Content-Type"))
@@ -2759,7 +3407,7 @@ func decodeGetTransactionResponse(resp *http.Response) (res GetTransactionRes, e
 			}
 
 			d := jx.DecodeBytes(b)
-			var response GetTransactionApplicationJSONNotFound
+			var response NotFound
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err
@@ -2789,7 +3437,7 @@ func decodeGetTransactionResponse(resp *http.Response) (res GetTransactionRes, e
 			}
 
 			d := jx.DecodeBytes(b)
-			var response GetTransactionApplicationJSONInternalServerError
+			var response InternalError
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err
@@ -2855,7 +3503,7 @@ func decodeGetTransactionsResponse(resp *http.Response) (res GetTransactionsRes,
 			}
 
 			d := jx.DecodeBytes(b)
-			var response GetTransactionsApplicationJSONBadRequest
+			var response BadRequest
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err
@@ -2873,7 +3521,34 @@ func decodeGetTransactionsResponse(resp *http.Response) (res GetTransactionsRes,
 		}
 	case 401:
 		// Code 401.
-		return &UnauthorizedError{}, nil
+		ct, _, err := mime.ParseMediaType(resp.Header.Get("Content-Type"))
+		if err != nil {
+			return res, errors.Wrap(err, "parse media type")
+		}
+		switch {
+		case ct == "application/json":
+			b, err := io.ReadAll(resp.Body)
+			if err != nil {
+				return res, err
+			}
+
+			d := jx.DecodeBytes(b)
+			var response UnauthorizedError
+			if err := func() error {
+				if err := response.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return res, errors.Wrap(err, "decode \"application/json\"")
+			}
+			if err := d.Skip(); err != io.EOF {
+				return res, errors.New("unexpected trailing data")
+			}
+			return &response, nil
+		default:
+			return res, validate.InvalidContentType(ct)
+		}
 	case 404:
 		// Code 404.
 		ct, _, err := mime.ParseMediaType(resp.Header.Get("Content-Type"))
@@ -2888,7 +3563,7 @@ func decodeGetTransactionsResponse(resp *http.Response) (res GetTransactionsRes,
 			}
 
 			d := jx.DecodeBytes(b)
-			var response GetTransactionsApplicationJSONNotFound
+			var response NotFound
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err
@@ -2918,7 +3593,7 @@ func decodeGetTransactionsResponse(resp *http.Response) (res GetTransactionsRes,
 			}
 
 			d := jx.DecodeBytes(b)
-			var response GetTransactionsApplicationJSONInternalServerError
+			var response InternalError
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err
@@ -2972,7 +3647,34 @@ func decodeGetValidatorsResponse(resp *http.Response) (res GetValidatorsRes, err
 		}
 	case 401:
 		// Code 401.
-		return &UnauthorizedError{}, nil
+		ct, _, err := mime.ParseMediaType(resp.Header.Get("Content-Type"))
+		if err != nil {
+			return res, errors.Wrap(err, "parse media type")
+		}
+		switch {
+		case ct == "application/json":
+			b, err := io.ReadAll(resp.Body)
+			if err != nil {
+				return res, err
+			}
+
+			d := jx.DecodeBytes(b)
+			var response UnauthorizedError
+			if err := func() error {
+				if err := response.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return res, errors.Wrap(err, "decode \"application/json\"")
+			}
+			if err := d.Skip(); err != io.EOF {
+				return res, errors.New("unexpected trailing data")
+			}
+			return &response, nil
+		default:
+			return res, validate.InvalidContentType(ct)
+		}
 	case 500:
 		// Code 500.
 		ct, _, err := mime.ParseMediaType(resp.Header.Get("Content-Type"))
@@ -2987,7 +3689,163 @@ func decodeGetValidatorsResponse(resp *http.Response) (res GetValidatorsRes, err
 			}
 
 			d := jx.DecodeBytes(b)
-			var response Error
+			var response InternalError
+			if err := func() error {
+				if err := response.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return res, errors.Wrap(err, "decode \"application/json\"")
+			}
+			if err := d.Skip(); err != io.EOF {
+				return res, errors.New("unexpected trailing data")
+			}
+			return &response, nil
+		default:
+			return res, validate.InvalidContentType(ct)
+		}
+	}
+	return res, validate.UnexpectedStatusCode(resp.StatusCode)
+}
+
+func decodePoolsByNominatorsResponse(resp *http.Response) (res PoolsByNominatorsRes, err error) {
+	switch resp.StatusCode {
+	case 200:
+		// Code 200.
+		ct, _, err := mime.ParseMediaType(resp.Header.Get("Content-Type"))
+		if err != nil {
+			return res, errors.Wrap(err, "parse media type")
+		}
+		switch {
+		case ct == "application/json":
+			b, err := io.ReadAll(resp.Body)
+			if err != nil {
+				return res, err
+			}
+
+			d := jx.DecodeBytes(b)
+			var response AccountStacking
+			if err := func() error {
+				if err := response.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return res, errors.Wrap(err, "decode \"application/json\"")
+			}
+			if err := d.Skip(); err != io.EOF {
+				return res, errors.New("unexpected trailing data")
+			}
+			return &response, nil
+		default:
+			return res, validate.InvalidContentType(ct)
+		}
+	case 400:
+		// Code 400.
+		ct, _, err := mime.ParseMediaType(resp.Header.Get("Content-Type"))
+		if err != nil {
+			return res, errors.Wrap(err, "parse media type")
+		}
+		switch {
+		case ct == "application/json":
+			b, err := io.ReadAll(resp.Body)
+			if err != nil {
+				return res, err
+			}
+
+			d := jx.DecodeBytes(b)
+			var response BadRequest
+			if err := func() error {
+				if err := response.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return res, errors.Wrap(err, "decode \"application/json\"")
+			}
+			if err := d.Skip(); err != io.EOF {
+				return res, errors.New("unexpected trailing data")
+			}
+			return &response, nil
+		default:
+			return res, validate.InvalidContentType(ct)
+		}
+	case 401:
+		// Code 401.
+		ct, _, err := mime.ParseMediaType(resp.Header.Get("Content-Type"))
+		if err != nil {
+			return res, errors.Wrap(err, "parse media type")
+		}
+		switch {
+		case ct == "application/json":
+			b, err := io.ReadAll(resp.Body)
+			if err != nil {
+				return res, err
+			}
+
+			d := jx.DecodeBytes(b)
+			var response UnauthorizedError
+			if err := func() error {
+				if err := response.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return res, errors.Wrap(err, "decode \"application/json\"")
+			}
+			if err := d.Skip(); err != io.EOF {
+				return res, errors.New("unexpected trailing data")
+			}
+			return &response, nil
+		default:
+			return res, validate.InvalidContentType(ct)
+		}
+	case 404:
+		// Code 404.
+		ct, _, err := mime.ParseMediaType(resp.Header.Get("Content-Type"))
+		if err != nil {
+			return res, errors.Wrap(err, "parse media type")
+		}
+		switch {
+		case ct == "application/json":
+			b, err := io.ReadAll(resp.Body)
+			if err != nil {
+				return res, err
+			}
+
+			d := jx.DecodeBytes(b)
+			var response NotFound
+			if err := func() error {
+				if err := response.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return res, errors.Wrap(err, "decode \"application/json\"")
+			}
+			if err := d.Skip(); err != io.EOF {
+				return res, errors.New("unexpected trailing data")
+			}
+			return &response, nil
+		default:
+			return res, validate.InvalidContentType(ct)
+		}
+	case 500:
+		// Code 500.
+		ct, _, err := mime.ParseMediaType(resp.Header.Get("Content-Type"))
+		if err != nil {
+			return res, errors.Wrap(err, "parse media type")
+		}
+		switch {
+		case ct == "application/json":
+			b, err := io.ReadAll(resp.Body)
+			if err != nil {
+				return res, err
+			}
+
+			d := jx.DecodeBytes(b)
+			var response InternalError
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err
@@ -3026,7 +3884,7 @@ func decodeSendMessageResponse(resp *http.Response) (res SendMessageRes, err err
 			}
 
 			d := jx.DecodeBytes(b)
-			var response SendMessageApplicationJSONBadRequest
+			var response BadRequest
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err
@@ -3044,7 +3902,34 @@ func decodeSendMessageResponse(resp *http.Response) (res SendMessageRes, err err
 		}
 	case 401:
 		// Code 401.
-		return &UnauthorizedError{}, nil
+		ct, _, err := mime.ParseMediaType(resp.Header.Get("Content-Type"))
+		if err != nil {
+			return res, errors.Wrap(err, "parse media type")
+		}
+		switch {
+		case ct == "application/json":
+			b, err := io.ReadAll(resp.Body)
+			if err != nil {
+				return res, err
+			}
+
+			d := jx.DecodeBytes(b)
+			var response UnauthorizedError
+			if err := func() error {
+				if err := response.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return res, errors.Wrap(err, "decode \"application/json\"")
+			}
+			if err := d.Skip(); err != io.EOF {
+				return res, errors.New("unexpected trailing data")
+			}
+			return &response, nil
+		default:
+			return res, validate.InvalidContentType(ct)
+		}
 	case 500:
 		// Code 500.
 		ct, _, err := mime.ParseMediaType(resp.Header.Get("Content-Type"))
@@ -3059,7 +3944,163 @@ func decodeSendMessageResponse(resp *http.Response) (res SendMessageRes, err err
 			}
 
 			d := jx.DecodeBytes(b)
-			var response SendMessageApplicationJSONInternalServerError
+			var response InternalError
+			if err := func() error {
+				if err := response.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return res, errors.Wrap(err, "decode \"application/json\"")
+			}
+			if err := d.Skip(); err != io.EOF {
+				return res, errors.New("unexpected trailing data")
+			}
+			return &response, nil
+		default:
+			return res, validate.InvalidContentType(ct)
+		}
+	}
+	return res, validate.UnexpectedStatusCode(resp.StatusCode)
+}
+
+func decodeStackingPoolInfoResponse(resp *http.Response) (res StackingPoolInfoRes, err error) {
+	switch resp.StatusCode {
+	case 200:
+		// Code 200.
+		ct, _, err := mime.ParseMediaType(resp.Header.Get("Content-Type"))
+		if err != nil {
+			return res, errors.Wrap(err, "parse media type")
+		}
+		switch {
+		case ct == "application/json":
+			b, err := io.ReadAll(resp.Body)
+			if err != nil {
+				return res, err
+			}
+
+			d := jx.DecodeBytes(b)
+			var response PoolInfo
+			if err := func() error {
+				if err := response.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return res, errors.Wrap(err, "decode \"application/json\"")
+			}
+			if err := d.Skip(); err != io.EOF {
+				return res, errors.New("unexpected trailing data")
+			}
+			return &response, nil
+		default:
+			return res, validate.InvalidContentType(ct)
+		}
+	case 400:
+		// Code 400.
+		ct, _, err := mime.ParseMediaType(resp.Header.Get("Content-Type"))
+		if err != nil {
+			return res, errors.Wrap(err, "parse media type")
+		}
+		switch {
+		case ct == "application/json":
+			b, err := io.ReadAll(resp.Body)
+			if err != nil {
+				return res, err
+			}
+
+			d := jx.DecodeBytes(b)
+			var response BadRequest
+			if err := func() error {
+				if err := response.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return res, errors.Wrap(err, "decode \"application/json\"")
+			}
+			if err := d.Skip(); err != io.EOF {
+				return res, errors.New("unexpected trailing data")
+			}
+			return &response, nil
+		default:
+			return res, validate.InvalidContentType(ct)
+		}
+	case 401:
+		// Code 401.
+		ct, _, err := mime.ParseMediaType(resp.Header.Get("Content-Type"))
+		if err != nil {
+			return res, errors.Wrap(err, "parse media type")
+		}
+		switch {
+		case ct == "application/json":
+			b, err := io.ReadAll(resp.Body)
+			if err != nil {
+				return res, err
+			}
+
+			d := jx.DecodeBytes(b)
+			var response UnauthorizedError
+			if err := func() error {
+				if err := response.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return res, errors.Wrap(err, "decode \"application/json\"")
+			}
+			if err := d.Skip(); err != io.EOF {
+				return res, errors.New("unexpected trailing data")
+			}
+			return &response, nil
+		default:
+			return res, validate.InvalidContentType(ct)
+		}
+	case 404:
+		// Code 404.
+		ct, _, err := mime.ParseMediaType(resp.Header.Get("Content-Type"))
+		if err != nil {
+			return res, errors.Wrap(err, "parse media type")
+		}
+		switch {
+		case ct == "application/json":
+			b, err := io.ReadAll(resp.Body)
+			if err != nil {
+				return res, err
+			}
+
+			d := jx.DecodeBytes(b)
+			var response NotFound
+			if err := func() error {
+				if err := response.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return res, errors.Wrap(err, "decode \"application/json\"")
+			}
+			if err := d.Skip(); err != io.EOF {
+				return res, errors.New("unexpected trailing data")
+			}
+			return &response, nil
+		default:
+			return res, validate.InvalidContentType(ct)
+		}
+	case 500:
+		// Code 500.
+		ct, _, err := mime.ParseMediaType(resp.Header.Get("Content-Type"))
+		if err != nil {
+			return res, errors.Wrap(err, "parse media type")
+		}
+		switch {
+		case ct == "application/json":
+			b, err := io.ReadAll(resp.Body)
+			if err != nil {
+				return res, err
+			}
+
+			d := jx.DecodeBytes(b)
+			var response InternalError
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err

@@ -1,12 +1,18 @@
-GET {{host}}/v2/blockchain/blocks/(-1,8000000000000000,26993860)
+GET {{host}}/v2/blockchain/blocks/(-1,8000000000000000,27578880)
 
 
 ###
-GET {{host}}/v2/blockchain/transactions/63a86c347c5f5352b3b3f919980704168db19359542be7f1f04070affb278911
+GET {{host}}/v2/blockchain/transactions/2B7E6A0661AB41822E3F515F3A3D2E89643999CDC9CD7ADE9577957A71D73F04
 
 
 ###
-GET {{host}}/v2/traces/195bc823068b8f01a9a3017ec191f4e7473d6a6429aac93c8727ff53a895cf2c
+GET {{host}}/v2/traces/2B7E6A0661AB41822E3F515F3A3D2E89643999CDC9CD7ADE9577957A71D73F04
+
+###
+GET {{host}}/v2/stacking/nominator/0:ECA213199F51FF1C14EEA20E572E18416FAE5FAE5C4F024838A919A47A5B0D78/pools
+
+###
+GET {{host}}/v2/stacking/pool/{{account_id}}
 
 ###
 GET {{metrics}}/metrics

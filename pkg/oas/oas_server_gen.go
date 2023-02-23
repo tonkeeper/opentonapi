@@ -164,12 +164,24 @@ type Handler interface {
 	//
 	// GET /v2/blockchain/validators
 	GetValidators(ctx context.Context) (GetValidatorsRes, error)
+	// PoolsByNominators implements poolsByNominators operation.
+	//
+	// All pools where account participates.
+	//
+	// GET /v2/stacking/nominator/{account_id}/pools
+	PoolsByNominators(ctx context.Context, params PoolsByNominatorsParams) (PoolsByNominatorsRes, error)
 	// SendMessage implements sendMessage operation.
 	//
 	// Send message to blockchain.
 	//
 	// POST /v2/blockchain/message
 	SendMessage(ctx context.Context, req OptSendMessageReq) (SendMessageRes, error)
+	// StackingPoolInfo implements stackingPoolInfo operation.
+	//
+	// Pool info.
+	//
+	// GET /v2/stacking/pool/{account_id}
+	StackingPoolInfo(ctx context.Context, params StackingPoolInfoParams) (StackingPoolInfoRes, error)
 }
 
 // Server implements http server based on OpenAPI v3 specification and

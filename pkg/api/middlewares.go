@@ -1,10 +1,14 @@
 package api
 
 import (
+	"context"
+	"encoding/json"
+	"errors"
 	"github.com/ogen-go/ogen/middleware"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	"go.uber.org/zap"
+	"net/http"
 )
 
 func Logging(logger *zap.Logger) middleware.Middleware {
@@ -47,4 +51,19 @@ func Metrics(req middleware.Request,
 	t := prometheus.NewTimer(httpResponseTimeMetric.WithLabelValues(req.OperationName))
 	defer t.ObserveDuration()
 	return next(req)
+}
+
+var ErrRateLimit = errors.New("rate limit")
+
+func ErrorsHandler(ctx context.Context, w http.ResponseWriter, r *http.Request, err error) {
+	w.Header().Set("content-type", "application/json")
+	text := err.Error()
+	if errors.Is(err, ErrRateLimit) {
+		w.WriteHeader(http.StatusTooManyRequests)
+	} else {
+		w.WriteHeader(http.StatusInternalServerError)
+	}
+	json.NewEncoder(w).Encode(struct {
+		Error string `json:"error"`
+	}{Error: text})
 }

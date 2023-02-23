@@ -204,6 +204,71 @@ func (s *AccountEvents) SetNextFrom(val OptInt64) {
 
 func (*AccountEvents) getEventsByAccountRes() {}
 
+// Ref: #/components/schemas/AccountStacking
+type AccountStacking struct {
+	Whales []AccountStakingInfo `json:"whales"`
+	Tf     []AccountStakingInfo `json:"tf"`
+}
+
+// GetWhales returns the value of Whales.
+func (s AccountStacking) GetWhales() []AccountStakingInfo {
+	return s.Whales
+}
+
+// GetTf returns the value of Tf.
+func (s AccountStacking) GetTf() []AccountStakingInfo {
+	return s.Tf
+}
+
+// SetWhales sets the value of Whales.
+func (s *AccountStacking) SetWhales(val []AccountStakingInfo) {
+	s.Whales = val
+}
+
+// SetTf sets the value of Tf.
+func (s *AccountStacking) SetTf(val []AccountStakingInfo) {
+	s.Tf = val
+}
+
+func (*AccountStacking) poolsByNominatorsRes() {}
+
+// Ref: #/components/schemas/AccountStakingInfo
+type AccountStakingInfo struct {
+	Pool    string   `json:"pool"`
+	Amount  int64    `json:"amount"`
+	Pending OptInt64 `json:"pending"`
+}
+
+// GetPool returns the value of Pool.
+func (s AccountStakingInfo) GetPool() string {
+	return s.Pool
+}
+
+// GetAmount returns the value of Amount.
+func (s AccountStakingInfo) GetAmount() int64 {
+	return s.Amount
+}
+
+// GetPending returns the value of Pending.
+func (s AccountStakingInfo) GetPending() OptInt64 {
+	return s.Pending
+}
+
+// SetPool sets the value of Pool.
+func (s *AccountStakingInfo) SetPool(val string) {
+	s.Pool = val
+}
+
+// SetAmount sets the value of Amount.
+func (s *AccountStakingInfo) SetAmount(val int64) {
+	s.Amount = val
+}
+
+// SetPending sets the value of Pending.
+func (s *AccountStakingInfo) SetPending(val OptInt64) {
+	s.Pending = val
+}
+
 // Ref: #/components/schemas/AccountStatus
 type AccountStatus string
 
@@ -622,6 +687,45 @@ func (s *Auctions) SetTotal(val int64) {
 }
 
 func (*Auctions) getAllAuctionsRes() {}
+
+type BadRequest struct {
+	Error string `json:"error"`
+}
+
+// GetError returns the value of Error.
+func (s BadRequest) GetError() string {
+	return s.Error
+}
+
+// SetError sets the value of Error.
+func (s *BadRequest) SetError(val string) {
+	s.Error = val
+}
+
+func (*BadRequest) dnsBackResolveRes()            {}
+func (*BadRequest) dnsResolveRes()                {}
+func (*BadRequest) emulateMessageRes()            {}
+func (*BadRequest) execGetMethodRes()             {}
+func (*BadRequest) getAccountRes()                {}
+func (*BadRequest) getAccountTransactionsRes()    {}
+func (*BadRequest) getBlockRes()                  {}
+func (*BadRequest) getDomainBidsRes()             {}
+func (*BadRequest) getEventRes()                  {}
+func (*BadRequest) getEventsByAccountRes()        {}
+func (*BadRequest) getJettonInfoRes()             {}
+func (*BadRequest) getJettonsBalancesRes()        {}
+func (*BadRequest) getNftCollectionRes()          {}
+func (*BadRequest) getNftItemByAddressRes()       {}
+func (*BadRequest) getNftItemsByOwnerRes()        {}
+func (*BadRequest) getRawAccountRes()             {}
+func (*BadRequest) getSubscriptionsByAccountRes() {}
+func (*BadRequest) getTraceRes()                  {}
+func (*BadRequest) getTracesByAccountRes()        {}
+func (*BadRequest) getTransactionRes()            {}
+func (*BadRequest) getTransactionsRes()           {}
+func (*BadRequest) poolsByNominatorsRes()         {}
+func (*BadRequest) sendMessageRes()               {}
+func (*BadRequest) stackingPoolInfoRes()          {}
 
 // Ref: #/components/schemas/Block
 type Block struct {
@@ -1118,18 +1222,6 @@ func (s *CreditPhase) SetCredit(val int64) {
 	s.Credit = val
 }
 
-type DnsBackResolveApplicationJSONBadRequest Error
-
-func (*DnsBackResolveApplicationJSONBadRequest) dnsBackResolveRes() {}
-
-type DnsBackResolveApplicationJSONInternalServerError Error
-
-func (*DnsBackResolveApplicationJSONInternalServerError) dnsBackResolveRes() {}
-
-type DnsBackResolveApplicationJSONNotFound Error
-
-func (*DnsBackResolveApplicationJSONNotFound) dnsBackResolveRes() {}
-
 // Ref: #/components/schemas/DnsRecord
 type DnsRecord struct {
 	Wallet       OptWalletDNS `json:"wallet"`
@@ -1168,18 +1260,6 @@ func (s *DnsRecord) SetSite(val []string) {
 }
 
 func (*DnsRecord) dnsResolveRes() {}
-
-type DnsResolveApplicationJSONBadRequest Error
-
-func (*DnsResolveApplicationJSONBadRequest) dnsResolveRes() {}
-
-type DnsResolveApplicationJSONInternalServerError Error
-
-func (*DnsResolveApplicationJSONInternalServerError) dnsResolveRes() {}
-
-type DnsResolveApplicationJSONNotFound Error
-
-func (*DnsResolveApplicationJSONNotFound) dnsResolveRes() {}
 
 // Ref: #/components/schemas/DomainBid
 type DomainBid struct {
@@ -1274,14 +1354,6 @@ func (s *DomainNames) SetDomains(val []string) {
 
 func (*DomainNames) dnsBackResolveRes() {}
 
-type EmulateMessageApplicationJSONBadRequest Error
-
-func (*EmulateMessageApplicationJSONBadRequest) emulateMessageRes() {}
-
-type EmulateMessageApplicationJSONInternalServerError Error
-
-func (*EmulateMessageApplicationJSONInternalServerError) emulateMessageRes() {}
-
 type EmulateMessageReq struct {
 	Boc string `json:"boc"`
 }
@@ -1295,27 +1367,6 @@ func (s EmulateMessageReq) GetBoc() string {
 func (s *EmulateMessageReq) SetBoc(val string) {
 	s.Boc = val
 }
-
-// Ref: #/components/schemas/Error
-type Error struct {
-	Error string `json:"error"`
-}
-
-// GetError returns the value of Error.
-func (s Error) GetError() string {
-	return s.Error
-}
-
-// SetError sets the value of Error.
-func (s *Error) SetError(val string) {
-	s.Error = val
-}
-
-func (*Error) getAllAuctionsRes()     {}
-func (*Error) getConfigRes()          {}
-func (*Error) getMasterchainHeadRes() {}
-func (*Error) getNftCollectionsRes()  {}
-func (*Error) getValidatorsRes()      {}
 
 // Ref: #/components/schemas/Event
 type Event struct {
@@ -1402,14 +1453,6 @@ func (s *Event) SetInProgress(val bool) {
 
 func (*Event) getEventRes() {}
 
-type ExecGetMethodApplicationJSONBadRequest Error
-
-func (*ExecGetMethodApplicationJSONBadRequest) execGetMethodRes() {}
-
-type ExecGetMethodApplicationJSONInternalServerError Error
-
-func (*ExecGetMethodApplicationJSONInternalServerError) execGetMethodRes() {}
-
 type ExecGetMethodReq struct{}
 
 // Ref: #/components/schemas/Fee
@@ -1483,210 +1526,6 @@ func (s *Fee) SetRefund(val int64) {
 	s.Refund = val
 }
 
-type GetAccountApplicationJSONBadRequest Error
-
-func (*GetAccountApplicationJSONBadRequest) getAccountRes() {}
-
-type GetAccountApplicationJSONInternalServerError Error
-
-func (*GetAccountApplicationJSONInternalServerError) getAccountRes() {}
-
-type GetAccountApplicationJSONNotFound Error
-
-func (*GetAccountApplicationJSONNotFound) getAccountRes() {}
-
-type GetAccountTransactionsApplicationJSONBadRequest Error
-
-func (*GetAccountTransactionsApplicationJSONBadRequest) getAccountTransactionsRes() {}
-
-type GetAccountTransactionsApplicationJSONInternalServerError Error
-
-func (*GetAccountTransactionsApplicationJSONInternalServerError) getAccountTransactionsRes() {}
-
-type GetAccountTransactionsApplicationJSONNotFound Error
-
-func (*GetAccountTransactionsApplicationJSONNotFound) getAccountTransactionsRes() {}
-
-type GetBlockApplicationJSONBadRequest Error
-
-func (*GetBlockApplicationJSONBadRequest) getBlockRes() {}
-
-type GetBlockApplicationJSONInternalServerError Error
-
-func (*GetBlockApplicationJSONInternalServerError) getBlockRes() {}
-
-type GetBlockApplicationJSONNotFound Error
-
-func (*GetBlockApplicationJSONNotFound) getBlockRes() {}
-
-type GetDomainBidsApplicationJSONBadRequest Error
-
-func (*GetDomainBidsApplicationJSONBadRequest) getDomainBidsRes() {}
-
-type GetDomainBidsApplicationJSONInternalServerError Error
-
-func (*GetDomainBidsApplicationJSONInternalServerError) getDomainBidsRes() {}
-
-type GetDomainBidsApplicationJSONNotFound Error
-
-func (*GetDomainBidsApplicationJSONNotFound) getDomainBidsRes() {}
-
-type GetEventApplicationJSONBadRequest Error
-
-func (*GetEventApplicationJSONBadRequest) getEventRes() {}
-
-type GetEventApplicationJSONInternalServerError Error
-
-func (*GetEventApplicationJSONInternalServerError) getEventRes() {}
-
-type GetEventApplicationJSONNotFound Error
-
-func (*GetEventApplicationJSONNotFound) getEventRes() {}
-
-type GetEventsByAccountApplicationJSONBadRequest Error
-
-func (*GetEventsByAccountApplicationJSONBadRequest) getEventsByAccountRes() {}
-
-type GetEventsByAccountApplicationJSONInternalServerError Error
-
-func (*GetEventsByAccountApplicationJSONInternalServerError) getEventsByAccountRes() {}
-
-type GetEventsByAccountApplicationJSONNotFound Error
-
-func (*GetEventsByAccountApplicationJSONNotFound) getEventsByAccountRes() {}
-
-type GetJettonInfoApplicationJSONBadRequest Error
-
-func (*GetJettonInfoApplicationJSONBadRequest) getJettonInfoRes() {}
-
-type GetJettonInfoApplicationJSONInternalServerError Error
-
-func (*GetJettonInfoApplicationJSONInternalServerError) getJettonInfoRes() {}
-
-type GetJettonInfoApplicationJSONNotFound Error
-
-func (*GetJettonInfoApplicationJSONNotFound) getJettonInfoRes() {}
-
-type GetJettonsBalancesApplicationJSONBadRequest Error
-
-func (*GetJettonsBalancesApplicationJSONBadRequest) getJettonsBalancesRes() {}
-
-type GetJettonsBalancesApplicationJSONInternalServerError Error
-
-func (*GetJettonsBalancesApplicationJSONInternalServerError) getJettonsBalancesRes() {}
-
-type GetJettonsBalancesApplicationJSONNotFound Error
-
-func (*GetJettonsBalancesApplicationJSONNotFound) getJettonsBalancesRes() {}
-
-type GetNftCollectionApplicationJSONBadRequest Error
-
-func (*GetNftCollectionApplicationJSONBadRequest) getNftCollectionRes() {}
-
-type GetNftCollectionApplicationJSONInternalServerError Error
-
-func (*GetNftCollectionApplicationJSONInternalServerError) getNftCollectionRes() {}
-
-type GetNftCollectionApplicationJSONNotFound Error
-
-func (*GetNftCollectionApplicationJSONNotFound) getNftCollectionRes() {}
-
-type GetNftItemByAddressApplicationJSONBadRequest Error
-
-func (*GetNftItemByAddressApplicationJSONBadRequest) getNftItemByAddressRes() {}
-
-type GetNftItemByAddressApplicationJSONInternalServerError Error
-
-func (*GetNftItemByAddressApplicationJSONInternalServerError) getNftItemByAddressRes() {}
-
-type GetNftItemByAddressApplicationJSONNotFound Error
-
-func (*GetNftItemByAddressApplicationJSONNotFound) getNftItemByAddressRes() {}
-
-type GetNftItemsByOwnerApplicationJSONBadRequest Error
-
-func (*GetNftItemsByOwnerApplicationJSONBadRequest) getNftItemsByOwnerRes() {}
-
-type GetNftItemsByOwnerApplicationJSONInternalServerError Error
-
-func (*GetNftItemsByOwnerApplicationJSONInternalServerError) getNftItemsByOwnerRes() {}
-
-type GetNftItemsByOwnerApplicationJSONNotFound Error
-
-func (*GetNftItemsByOwnerApplicationJSONNotFound) getNftItemsByOwnerRes() {}
-
-type GetRawAccountApplicationJSONBadRequest Error
-
-func (*GetRawAccountApplicationJSONBadRequest) getRawAccountRes() {}
-
-type GetRawAccountApplicationJSONInternalServerError Error
-
-func (*GetRawAccountApplicationJSONInternalServerError) getRawAccountRes() {}
-
-type GetRawAccountApplicationJSONNotFound Error
-
-func (*GetRawAccountApplicationJSONNotFound) getRawAccountRes() {}
-
-type GetSubscriptionsByAccountApplicationJSONBadRequest Error
-
-func (*GetSubscriptionsByAccountApplicationJSONBadRequest) getSubscriptionsByAccountRes() {}
-
-type GetSubscriptionsByAccountApplicationJSONInternalServerError Error
-
-func (*GetSubscriptionsByAccountApplicationJSONInternalServerError) getSubscriptionsByAccountRes() {}
-
-type GetSubscriptionsByAccountApplicationJSONNotFound Error
-
-func (*GetSubscriptionsByAccountApplicationJSONNotFound) getSubscriptionsByAccountRes() {}
-
-type GetTraceApplicationJSONBadRequest Error
-
-func (*GetTraceApplicationJSONBadRequest) getTraceRes() {}
-
-type GetTraceApplicationJSONInternalServerError Error
-
-func (*GetTraceApplicationJSONInternalServerError) getTraceRes() {}
-
-type GetTraceApplicationJSONNotFound Error
-
-func (*GetTraceApplicationJSONNotFound) getTraceRes() {}
-
-type GetTracesByAccountApplicationJSONBadRequest Error
-
-func (*GetTracesByAccountApplicationJSONBadRequest) getTracesByAccountRes() {}
-
-type GetTracesByAccountApplicationJSONInternalServerError Error
-
-func (*GetTracesByAccountApplicationJSONInternalServerError) getTracesByAccountRes() {}
-
-type GetTracesByAccountApplicationJSONNotFound Error
-
-func (*GetTracesByAccountApplicationJSONNotFound) getTracesByAccountRes() {}
-
-type GetTransactionApplicationJSONBadRequest Error
-
-func (*GetTransactionApplicationJSONBadRequest) getTransactionRes() {}
-
-type GetTransactionApplicationJSONInternalServerError Error
-
-func (*GetTransactionApplicationJSONInternalServerError) getTransactionRes() {}
-
-type GetTransactionApplicationJSONNotFound Error
-
-func (*GetTransactionApplicationJSONNotFound) getTransactionRes() {}
-
-type GetTransactionsApplicationJSONBadRequest Error
-
-func (*GetTransactionsApplicationJSONBadRequest) getTransactionsRes() {}
-
-type GetTransactionsApplicationJSONInternalServerError Error
-
-func (*GetTransactionsApplicationJSONInternalServerError) getTransactionsRes() {}
-
-type GetTransactionsApplicationJSONNotFound Error
-
-func (*GetTransactionsApplicationJSONNotFound) getTransactionsRes() {}
-
 // Ref: #/components/schemas/ImagePreview
 type ImagePreview struct {
 	Resolution string `json:"resolution"`
@@ -1712,6 +1551,50 @@ func (s *ImagePreview) SetResolution(val string) {
 func (s *ImagePreview) SetURL(val string) {
 	s.URL = val
 }
+
+type InternalError struct {
+	Error string `json:"error"`
+}
+
+// GetError returns the value of Error.
+func (s InternalError) GetError() string {
+	return s.Error
+}
+
+// SetError sets the value of Error.
+func (s *InternalError) SetError(val string) {
+	s.Error = val
+}
+
+func (*InternalError) dnsBackResolveRes()            {}
+func (*InternalError) dnsResolveRes()                {}
+func (*InternalError) emulateMessageRes()            {}
+func (*InternalError) execGetMethodRes()             {}
+func (*InternalError) getAccountRes()                {}
+func (*InternalError) getAccountTransactionsRes()    {}
+func (*InternalError) getAllAuctionsRes()            {}
+func (*InternalError) getBlockRes()                  {}
+func (*InternalError) getConfigRes()                 {}
+func (*InternalError) getDomainBidsRes()             {}
+func (*InternalError) getEventRes()                  {}
+func (*InternalError) getEventsByAccountRes()        {}
+func (*InternalError) getJettonInfoRes()             {}
+func (*InternalError) getJettonsBalancesRes()        {}
+func (*InternalError) getMasterchainHeadRes()        {}
+func (*InternalError) getNftCollectionRes()          {}
+func (*InternalError) getNftCollectionsRes()         {}
+func (*InternalError) getNftItemByAddressRes()       {}
+func (*InternalError) getNftItemsByOwnerRes()        {}
+func (*InternalError) getRawAccountRes()             {}
+func (*InternalError) getSubscriptionsByAccountRes() {}
+func (*InternalError) getTraceRes()                  {}
+func (*InternalError) getTracesByAccountRes()        {}
+func (*InternalError) getTransactionRes()            {}
+func (*InternalError) getTransactionsRes()           {}
+func (*InternalError) getValidatorsRes()             {}
+func (*InternalError) poolsByNominatorsRes()         {}
+func (*InternalError) sendMessageRes()               {}
+func (*InternalError) stackingPoolInfoRes()          {}
 
 // Ref: #/components/schemas/Jetton
 type Jetton struct {
@@ -2719,6 +2602,42 @@ const (
 	NftPurchaseActionPurchaseTypeDNSTg   NftPurchaseActionPurchaseType = "DNS.tg"
 	NftPurchaseActionPurchaseTypeGetgems NftPurchaseActionPurchaseType = "getgems"
 )
+
+type NotFound struct {
+	Error string `json:"error"`
+}
+
+// GetError returns the value of Error.
+func (s NotFound) GetError() string {
+	return s.Error
+}
+
+// SetError sets the value of Error.
+func (s *NotFound) SetError(val string) {
+	s.Error = val
+}
+
+func (*NotFound) dnsBackResolveRes()            {}
+func (*NotFound) dnsResolveRes()                {}
+func (*NotFound) getAccountRes()                {}
+func (*NotFound) getAccountTransactionsRes()    {}
+func (*NotFound) getBlockRes()                  {}
+func (*NotFound) getDomainBidsRes()             {}
+func (*NotFound) getEventRes()                  {}
+func (*NotFound) getEventsByAccountRes()        {}
+func (*NotFound) getJettonInfoRes()             {}
+func (*NotFound) getJettonsBalancesRes()        {}
+func (*NotFound) getNftCollectionRes()          {}
+func (*NotFound) getNftItemByAddressRes()       {}
+func (*NotFound) getNftItemsByOwnerRes()        {}
+func (*NotFound) getRawAccountRes()             {}
+func (*NotFound) getSubscriptionsByAccountRes() {}
+func (*NotFound) getTraceRes()                  {}
+func (*NotFound) getTracesByAccountRes()        {}
+func (*NotFound) getTransactionRes()            {}
+func (*NotFound) getTransactionsRes()           {}
+func (*NotFound) poolsByNominatorsRes()         {}
+func (*NotFound) stackingPoolInfoRes()          {}
 
 // NewOptAccountAddress returns new OptAccountAddress with value set to v.
 func NewOptAccountAddress(v AccountAddress) OptAccountAddress {
@@ -4192,6 +4111,53 @@ func (o OptWalletDNS) Or(d WalletDNS) WalletDNS {
 	return d
 }
 
+// Ref: #/components/schemas/PoolInfo
+type PoolInfo struct {
+	TotalAmount    int64                  `json:"totalAmount"`
+	Implementation PoolInfoImplementation `json:"implementation"`
+	// APY in percent.
+	Apy float64 `json:"apy"`
+}
+
+// GetTotalAmount returns the value of TotalAmount.
+func (s PoolInfo) GetTotalAmount() int64 {
+	return s.TotalAmount
+}
+
+// GetImplementation returns the value of Implementation.
+func (s PoolInfo) GetImplementation() PoolInfoImplementation {
+	return s.Implementation
+}
+
+// GetApy returns the value of Apy.
+func (s PoolInfo) GetApy() float64 {
+	return s.Apy
+}
+
+// SetTotalAmount sets the value of TotalAmount.
+func (s *PoolInfo) SetTotalAmount(val int64) {
+	s.TotalAmount = val
+}
+
+// SetImplementation sets the value of Implementation.
+func (s *PoolInfo) SetImplementation(val PoolInfoImplementation) {
+	s.Implementation = val
+}
+
+// SetApy sets the value of Apy.
+func (s *PoolInfo) SetApy(val float64) {
+	s.Apy = val
+}
+
+func (*PoolInfo) stackingPoolInfoRes() {}
+
+type PoolInfoImplementation string
+
+const (
+	PoolInfoImplementationWhales PoolInfoImplementation = "whales"
+	PoolInfoImplementationTf     PoolInfoImplementation = "tf"
+)
+
 // Ref: #/components/schemas/Price
 type Price struct {
 	Value     string `json:"value"`
@@ -4316,14 +4282,6 @@ func (s *Sale) SetOwner(val OptAccountAddress) {
 func (s *Sale) SetPrice(val Price) {
 	s.Price = val
 }
-
-type SendMessageApplicationJSONBadRequest Error
-
-func (*SendMessageApplicationJSONBadRequest) sendMessageRes() {}
-
-type SendMessageApplicationJSONInternalServerError Error
-
-func (*SendMessageApplicationJSONInternalServerError) sendMessageRes() {}
 
 // SendMessageOK is response for SendMessage operation.
 type SendMessageOK struct{}
@@ -5100,8 +5058,19 @@ func (s *UnSubscriptionAction) SetBeneficiary(val AccountAddress) {
 	s.Beneficiary = val
 }
 
-// Ref: #/components/responses/UnauthorizedError
-type UnauthorizedError struct{}
+type UnauthorizedError struct {
+	Error string `json:"error"`
+}
+
+// GetError returns the value of Error.
+func (s UnauthorizedError) GetError() string {
+	return s.Error
+}
+
+// SetError sets the value of Error.
+func (s *UnauthorizedError) SetError(val string) {
+	s.Error = val
+}
 
 func (*UnauthorizedError) dnsBackResolveRes()            {}
 func (*UnauthorizedError) dnsResolveRes()                {}
@@ -5129,7 +5098,9 @@ func (*UnauthorizedError) getTracesByAccountRes()        {}
 func (*UnauthorizedError) getTransactionRes()            {}
 func (*UnauthorizedError) getTransactionsRes()           {}
 func (*UnauthorizedError) getValidatorsRes()             {}
+func (*UnauthorizedError) poolsByNominatorsRes()         {}
 func (*UnauthorizedError) sendMessageRes()               {}
+func (*UnauthorizedError) stackingPoolInfoRes()          {}
 
 // Ref: #/components/schemas/Validator
 type Validator struct {

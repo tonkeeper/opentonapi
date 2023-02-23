@@ -105,6 +105,14 @@ type GetValidatorsRes interface {
 	getValidatorsRes()
 }
 
+type PoolsByNominatorsRes interface {
+	poolsByNominatorsRes()
+}
+
 type SendMessageRes interface {
 	sendMessageRes()
+}
+
+type StackingPoolInfoRes interface {
+	stackingPoolInfoRes()
 }

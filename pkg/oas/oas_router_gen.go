@@ -705,6 +705,84 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 					return
 				}
+			case 's': // Prefix: "stacking/"
+				if l := len("stacking/"); len(elem) >= l && elem[0:l] == "stacking/" {
+					elem = elem[l:]
+				} else {
+					break
+				}
+
+				if len(elem) == 0 {
+					break
+				}
+				switch elem[0] {
+				case 'n': // Prefix: "nominator/"
+					if l := len("nominator/"); len(elem) >= l && elem[0:l] == "nominator/" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					// Param: "account_id"
+					// Match until "/"
+					idx := strings.IndexByte(elem, '/')
+					if idx < 0 {
+						idx = len(elem)
+					}
+					args[0] = elem[:idx]
+					elem = elem[idx:]
+
+					if len(elem) == 0 {
+						break
+					}
+					switch elem[0] {
+					case '/': // Prefix: "/pools"
+						if l := len("/pools"); len(elem) >= l && elem[0:l] == "/pools" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						if len(elem) == 0 {
+							// Leaf node.
+							switch r.Method {
+							case "GET":
+								s.handlePoolsByNominatorsRequest([1]string{
+									args[0],
+								}, w, r)
+							default:
+								s.notAllowed(w, r, "GET")
+							}
+
+							return
+						}
+					}
+				case 'p': // Prefix: "pool/"
+					if l := len("pool/"); len(elem) >= l && elem[0:l] == "pool/" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					// Param: "account_id"
+					// Leaf parameter
+					args[0] = elem
+					elem = ""
+
+					if len(elem) == 0 {
+						// Leaf node.
+						switch r.Method {
+						case "GET":
+							s.handleStackingPoolInfoRequest([1]string{
+								args[0],
+							}, w, r)
+						default:
+							s.notAllowed(w, r, "GET")
+						}
+
+						return
+					}
+				}
 			case 't': // Prefix: "traces/"
 				if l := len("traces/"); len(elem) >= l && elem[0:l] == "traces/" {
 					elem = elem[l:]
@@ -1461,6 +1539,84 @@ func (s *Server) FindRoute(method, path string) (r Route, _ bool) {
 						return r, true
 					default:
 						return
+					}
+				}
+			case 's': // Prefix: "stacking/"
+				if l := len("stacking/"); len(elem) >= l && elem[0:l] == "stacking/" {
+					elem = elem[l:]
+				} else {
+					break
+				}
+
+				if len(elem) == 0 {
+					break
+				}
+				switch elem[0] {
+				case 'n': // Prefix: "nominator/"
+					if l := len("nominator/"); len(elem) >= l && elem[0:l] == "nominator/" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					// Param: "account_id"
+					// Match until "/"
+					idx := strings.IndexByte(elem, '/')
+					if idx < 0 {
+						idx = len(elem)
+					}
+					args[0] = elem[:idx]
+					elem = elem[idx:]
+
+					if len(elem) == 0 {
+						break
+					}
+					switch elem[0] {
+					case '/': // Prefix: "/pools"
+						if l := len("/pools"); len(elem) >= l && elem[0:l] == "/pools" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						if len(elem) == 0 {
+							switch method {
+							case "GET":
+								// Leaf: PoolsByNominators
+								r.name = "PoolsByNominators"
+								r.operationID = "poolsByNominators"
+								r.args = args
+								r.count = 1
+								return r, true
+							default:
+								return
+							}
+						}
+					}
+				case 'p': // Prefix: "pool/"
+					if l := len("pool/"); len(elem) >= l && elem[0:l] == "pool/" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					// Param: "account_id"
+					// Leaf parameter
+					args[0] = elem
+					elem = ""
+
+					if len(elem) == 0 {
+						switch method {
+						case "GET":
+							// Leaf: StackingPoolInfo
+							r.name = "StackingPoolInfo"
+							r.operationID = "stackingPoolInfo"
+							r.args = args
+							r.count = 1
+							return r, true
+						default:
+							return
+						}
 					}
 				}
 			case 't': // Prefix: "traces/"
