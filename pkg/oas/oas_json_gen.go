@@ -808,17 +808,22 @@ func (s AccountStakingInfo) encodeFields(e *jx.Encoder) {
 		e.Int64(s.Amount)
 	}
 	{
-		if s.Pending.Set {
-			e.FieldStart("pending")
-			s.Pending.Encode(e)
-		}
+
+		e.FieldStart("pending_deposit")
+		e.Int64(s.PendingDeposit)
+	}
+	{
+
+		e.FieldStart("pending_withdraw")
+		e.Int64(s.PendingWithdraw)
 	}
 }
 
-var jsonFieldsNameOfAccountStakingInfo = [3]string{
+var jsonFieldsNameOfAccountStakingInfo = [4]string{
 	0: "pool",
 	1: "amount",
-	2: "pending",
+	2: "pending_deposit",
+	3: "pending_withdraw",
 }
 
 // Decode decodes AccountStakingInfo from json.
@@ -854,15 +859,29 @@ func (s *AccountStakingInfo) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"amount\"")
 			}
-		case "pending":
+		case "pending_deposit":
+			requiredBitSet[0] |= 1 << 2
 			if err := func() error {
-				s.Pending.Reset()
-				if err := s.Pending.Decode(d); err != nil {
+				v, err := d.Int64()
+				s.PendingDeposit = int64(v)
+				if err != nil {
 					return err
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"pending\"")
+				return errors.Wrap(err, "decode field \"pending_deposit\"")
+			}
+		case "pending_withdraw":
+			requiredBitSet[0] |= 1 << 3
+			if err := func() error {
+				v, err := d.Int64()
+				s.PendingWithdraw = int64(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"pending_withdraw\"")
 			}
 		default:
 			return d.Skip()
@@ -874,7 +893,7 @@ func (s *AccountStakingInfo) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b00000011,
+		0b00001111,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -8858,6 +8877,11 @@ func (s PoolInfo) Encode(e *jx.Encoder) {
 func (s PoolInfo) encodeFields(e *jx.Encoder) {
 	{
 
+		e.FieldStart("name")
+		e.Str(s.Name)
+	}
+	{
+
 		e.FieldStart("totalAmount")
 		e.Int64(s.TotalAmount)
 	}
@@ -8873,10 +8897,11 @@ func (s PoolInfo) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfPoolInfo = [3]string{
-	0: "totalAmount",
-	1: "implementation",
-	2: "apy",
+var jsonFieldsNameOfPoolInfo = [4]string{
+	0: "name",
+	1: "totalAmount",
+	2: "implementation",
+	3: "apy",
 }
 
 // Decode decodes PoolInfo from json.
@@ -8888,8 +8913,20 @@ func (s *PoolInfo) Decode(d *jx.Decoder) error {
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
-		case "totalAmount":
+		case "name":
 			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				v, err := d.Str()
+				s.Name = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"name\"")
+			}
+		case "totalAmount":
+			requiredBitSet[0] |= 1 << 1
 			if err := func() error {
 				v, err := d.Int64()
 				s.TotalAmount = int64(v)
@@ -8901,7 +8938,7 @@ func (s *PoolInfo) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"totalAmount\"")
 			}
 		case "implementation":
-			requiredBitSet[0] |= 1 << 1
+			requiredBitSet[0] |= 1 << 2
 			if err := func() error {
 				if err := s.Implementation.Decode(d); err != nil {
 					return err
@@ -8911,7 +8948,7 @@ func (s *PoolInfo) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"implementation\"")
 			}
 		case "apy":
-			requiredBitSet[0] |= 1 << 2
+			requiredBitSet[0] |= 1 << 3
 			if err := func() error {
 				v, err := d.Float64()
 				s.Apy = float64(v)
@@ -8932,7 +8969,7 @@ func (s *PoolInfo) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b00000111,
+		0b00001111,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.

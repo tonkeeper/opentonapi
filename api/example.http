@@ -9,10 +9,10 @@ GET {{host}}/v2/blockchain/transactions/2B7E6A0661AB41822E3F515F3A3D2E89643999CD
 GET {{host}}/v2/traces/2B7E6A0661AB41822E3F515F3A3D2E89643999CDC9CD7ADE9577957A71D73F04
 
 ###
-GET {{host}}/v2/stacking/nominator/0:ECA213199F51FF1C14EEA20E572E18416FAE5FAE5C4F024838A919A47A5B0D78/pools
+GET {{host}}/v2/stacking/nominator/EQCMVd9ya3yvhyhOWckBUmrHsle3eLqb_em8npZEmbbR-NOe/pools
 
 ###
-GET {{host}}/v2/stacking/pool/{{account_id}}
+GET {{host}}/v2/stacking/pool/0:48fb0195a7fc7454512377b9bd704503ded27f6e7c4c4a9d136fdab3ef9ec04c
 
 ###
 GET {{metrics}}/metrics

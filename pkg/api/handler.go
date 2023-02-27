@@ -5,6 +5,7 @@ import (
 	"github.com/go-faster/errors"
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/opentonapi/pkg/oas"
+	"github.com/tonkeeper/opentonapi/pkg/references"
 	"github.com/tonkeeper/tongo"
 )
 
@@ -72,10 +73,37 @@ func (h Handler) PoolsByNominators(ctx context.Context, params oas.PoolsByNomina
 	if err != nil {
 		return &oas.BadRequest{Error: err.Error()}, nil
 	}
-	h.storage.GetParticipatingInWhalesPools(ctx, accountID)
-	return nil, err
+	whalesPools, err := h.storage.GetParticipatingInWhalesPools(ctx, accountID)
+	if err != nil {
+		return &oas.InternalError{Error: err.Error()}, nil
+	}
+	var result oas.AccountStacking
+	for _, w := range whalesPools {
+		if _, ok := references.WhalesPools[w.Pool]; !ok {
+			continue //skip unknown pools
+		}
+		result.Whales = append(result.Whales, oas.AccountStakingInfo{
+			Pool:            w.Pool.ToRaw(),
+			Amount:          w.MemberBalance,
+			PendingDeposit:  w.MemberPendingDeposit,
+			PendingWithdraw: w.MemberPendingWithdraw,
+		})
+	}
+	return &result, nil
 }
 
 func (h Handler) StackingPoolInfo(ctx context.Context, params oas.StackingPoolInfoParams) (oas.StackingPoolInfoRes, error) {
-	return nil, nil
+	poolID, err := tongo.ParseAccountID(params.AccountID)
+	if err != nil {
+		return &oas.BadRequest{Error: err.Error()}, nil
+	}
+	var result oas.PoolInfo
+	if w, prs := references.WhalesPools[poolID]; prs {
+		result.SetImplementation(oas.PoolInfoImplementationWhales)
+		result.SetApy(5.6)
+		result.SetName(w.Name + " " + w.Queue)
+		return &result, nil
+	}
+
+	return &oas.NotFound{Error: "pool not found"}, nil
 }

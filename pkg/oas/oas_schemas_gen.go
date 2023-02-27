@@ -234,9 +234,10 @@ func (*AccountStacking) poolsByNominatorsRes() {}
 
 // Ref: #/components/schemas/AccountStakingInfo
 type AccountStakingInfo struct {
-	Pool    string   `json:"pool"`
-	Amount  int64    `json:"amount"`
-	Pending OptInt64 `json:"pending"`
+	Pool            string `json:"pool"`
+	Amount          int64  `json:"amount"`
+	PendingDeposit  int64  `json:"pending_deposit"`
+	PendingWithdraw int64  `json:"pending_withdraw"`
 }
 
 // GetPool returns the value of Pool.
@@ -249,9 +250,14 @@ func (s AccountStakingInfo) GetAmount() int64 {
 	return s.Amount
 }
 
-// GetPending returns the value of Pending.
-func (s AccountStakingInfo) GetPending() OptInt64 {
-	return s.Pending
+// GetPendingDeposit returns the value of PendingDeposit.
+func (s AccountStakingInfo) GetPendingDeposit() int64 {
+	return s.PendingDeposit
+}
+
+// GetPendingWithdraw returns the value of PendingWithdraw.
+func (s AccountStakingInfo) GetPendingWithdraw() int64 {
+	return s.PendingWithdraw
 }
 
 // SetPool sets the value of Pool.
@@ -264,9 +270,14 @@ func (s *AccountStakingInfo) SetAmount(val int64) {
 	s.Amount = val
 }
 
-// SetPending sets the value of Pending.
-func (s *AccountStakingInfo) SetPending(val OptInt64) {
-	s.Pending = val
+// SetPendingDeposit sets the value of PendingDeposit.
+func (s *AccountStakingInfo) SetPendingDeposit(val int64) {
+	s.PendingDeposit = val
+}
+
+// SetPendingWithdraw sets the value of PendingWithdraw.
+func (s *AccountStakingInfo) SetPendingWithdraw(val int64) {
+	s.PendingWithdraw = val
 }
 
 // Ref: #/components/schemas/AccountStatus
@@ -4113,10 +4124,16 @@ func (o OptWalletDNS) Or(d WalletDNS) WalletDNS {
 
 // Ref: #/components/schemas/PoolInfo
 type PoolInfo struct {
+	Name           string                 `json:"name"`
 	TotalAmount    int64                  `json:"totalAmount"`
 	Implementation PoolInfoImplementation `json:"implementation"`
 	// APY in percent.
 	Apy float64 `json:"apy"`
+}
+
+// GetName returns the value of Name.
+func (s PoolInfo) GetName() string {
+	return s.Name
 }
 
 // GetTotalAmount returns the value of TotalAmount.
@@ -4132,6 +4149,11 @@ func (s PoolInfo) GetImplementation() PoolInfoImplementation {
 // GetApy returns the value of Apy.
 func (s PoolInfo) GetApy() float64 {
 	return s.Apy
+}
+
+// SetName sets the value of Name.
+func (s *PoolInfo) SetName(val string) {
+	s.Name = val
 }
 
 // SetTotalAmount sets the value of TotalAmount.

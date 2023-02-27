@@ -2288,6 +2288,8 @@ components:
       required:
         - pool
         - amount
+        - pending_deposit
+        - pending_withdraw
       properties:
         pool:
           type: string
@@ -2296,7 +2298,11 @@ components:
           type: integer
           format: int64
           example: 10050000000000
-        pending:
+        pending_deposit:
+          type: integer
+          format: int64
+          example: 500000000000
+        pending_withdraw:
           type: integer
           format: int64
           example: 500000000000
@@ -2306,7 +2312,11 @@ components:
         - totalAmount
         - implementation
         - apy
+        - name
       properties:
+        name:
+          type: string
+          example: "Tonkeeper pool"
         totalAmount:
           type: integer
           format: int64
