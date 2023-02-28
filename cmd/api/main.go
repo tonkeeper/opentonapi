@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"github.com/tonkeeper/opentonapi/pkg/chainstate"
 	"github.com/tonkeeper/opentonapi/pkg/config"
 
 	"github.com/tonkeeper/opentonapi/pkg/api"
@@ -22,7 +23,7 @@ func main() {
 		log.Fatal("storage init", zap.Error(err))
 	}
 
-	h := api.NewHandler(storage)
+	h := api.NewHandler(storage, chainstate.NewChainState())
 
 	oasServer, err := oas.NewServer(h, oas.WithMiddleware(api.Logging(log), api.Metrics), oas.WithErrorHandler(api.ErrorsHandler))
 	if err != nil {

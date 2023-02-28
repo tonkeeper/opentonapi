@@ -22,8 +22,10 @@ func (s *LiteStorage) GetTrace(ctx context.Context, hash tongo.Bits256) (*core.T
 
 func (s *LiteStorage) recursiveGetChildren(ctx context.Context, tx core.Transaction) (core.Trace, error) {
 	trace := core.Trace{Transaction: tx}
+	externalMessages := make([]core.Message, 0, len(tx.OutMsgs))
 	for _, m := range tx.OutMsgs {
 		if m.Destination == nil {
+			externalMessages = append(externalMessages, m)
 			continue
 		}
 		tx, err := s.searchTransactionNearBlock(ctx, *m.Destination, m.CreatedLt, tx.BlockID, false)
@@ -36,6 +38,7 @@ func (s *LiteStorage) recursiveGetChildren(ctx context.Context, tx core.Transact
 		}
 		trace.Children = append(trace.Children, &child)
 	}
+	tx.OutMsgs = externalMessages
 	return trace, nil
 }
 

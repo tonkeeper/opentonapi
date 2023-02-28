@@ -15,11 +15,13 @@ var _ oas.Handler = (*Handler)(nil)
 type Handler struct {
 	oas.UnimplementedHandler // automatically implement all methods
 	storage                  storage
+	state                    chainState
 }
 
-func NewHandler(s storage) Handler {
+func NewHandler(s storage, state chainState) Handler {
 	return Handler{
 		storage: s,
+		state:   state,
 	}
 }
 
@@ -101,7 +103,7 @@ func (h Handler) StackingPoolInfo(ctx context.Context, params oas.StackingPoolIn
 	if w, prs := references.WhalesPools[poolID]; prs {
 		result.SetAddress(poolID.ToRaw())
 		result.SetImplementation(oas.PoolInfoImplementationWhales)
-		result.SetApy(5.6)
+		result.SetApy(h.state.GetAPY())
 		result.SetName(w.Name + " " + w.Queue)
 		return &result, nil
 	}
@@ -117,7 +119,7 @@ func (h Handler) StackingPools(ctx context.Context, params oas.StackingPoolsPara
 			Name:           w.Name + " " + w.Queue,
 			TotalAmount:    0,
 			Implementation: oas.PoolInfoImplementationWhales,
-			Apy:            5.6,
+			Apy:            h.state.GetAPY(),
 		})
 	}
 	return &result, nil

@@ -12,3 +12,7 @@ type storage interface {
 	GetTrace(ctx context.Context, hash tongo.Bits256) (*core.Trace, error)
 	GetParticipatingInWhalesPools(ctx context.Context, id tongo.AccountID) ([]core.WhalesNominator, error)
 }
+
+type chainState interface {
+	GetAPY() float64
+}
