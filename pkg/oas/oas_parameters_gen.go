@@ -1815,3 +1815,106 @@ func decodeStackingPoolInfoParams(args [1]string, r *http.Request) (params Stack
 	}
 	return params, nil
 }
+
+// StackingPoolsParams is parameters of stackingPools operation.
+type StackingPoolsParams struct {
+	// Account ID.
+	AvailableFor OptString
+	// Return also pools not from white list - just compatible by interfaces (maybe dangerous!).
+	IncludeUnverified OptBool
+}
+
+func unpackStackingPoolsParams(packed middleware.Parameters) (params StackingPoolsParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "available_for",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.AvailableFor = v.(OptString)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "include_unverified",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.IncludeUnverified = v.(OptBool)
+		}
+	}
+	return params
+}
+
+func decodeStackingPoolsParams(args [0]string, r *http.Request) (params StackingPoolsParams, _ error) {
+	q := uri.NewQueryDecoder(r.URL.Query())
+	// Decode query: available_for.
+	{
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "available_for",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotAvailableForVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotAvailableForVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.AvailableFor.SetTo(paramsDotAvailableForVal)
+				return nil
+			}); err != nil {
+				return params, errors.Wrap(err, "query: available_for: parse")
+			}
+		}
+	}
+	// Decode query: include_unverified.
+	{
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "include_unverified",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotIncludeUnverifiedVal bool
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToBool(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotIncludeUnverifiedVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.IncludeUnverified.SetTo(paramsDotIncludeUnverifiedVal)
+				return nil
+			}); err != nil {
+				return params, errors.Wrap(err, "query: include_unverified: parse")
+			}
+		}
+	}
+	return params, nil
+}

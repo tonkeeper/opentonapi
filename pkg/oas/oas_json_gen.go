@@ -8877,6 +8877,11 @@ func (s PoolInfo) Encode(e *jx.Encoder) {
 func (s PoolInfo) encodeFields(e *jx.Encoder) {
 	{
 
+		e.FieldStart("address")
+		e.Str(s.Address)
+	}
+	{
+
 		e.FieldStart("name")
 		e.Str(s.Name)
 	}
@@ -8897,11 +8902,12 @@ func (s PoolInfo) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfPoolInfo = [4]string{
-	0: "name",
-	1: "totalAmount",
-	2: "implementation",
-	3: "apy",
+var jsonFieldsNameOfPoolInfo = [5]string{
+	0: "address",
+	1: "name",
+	2: "totalAmount",
+	3: "implementation",
+	4: "apy",
 }
 
 // Decode decodes PoolInfo from json.
@@ -8913,8 +8919,20 @@ func (s *PoolInfo) Decode(d *jx.Decoder) error {
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
-		case "name":
+		case "address":
 			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				v, err := d.Str()
+				s.Address = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"address\"")
+			}
+		case "name":
+			requiredBitSet[0] |= 1 << 1
 			if err := func() error {
 				v, err := d.Str()
 				s.Name = string(v)
@@ -8926,7 +8944,7 @@ func (s *PoolInfo) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"name\"")
 			}
 		case "totalAmount":
-			requiredBitSet[0] |= 1 << 1
+			requiredBitSet[0] |= 1 << 2
 			if err := func() error {
 				v, err := d.Int64()
 				s.TotalAmount = int64(v)
@@ -8938,7 +8956,7 @@ func (s *PoolInfo) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"totalAmount\"")
 			}
 		case "implementation":
-			requiredBitSet[0] |= 1 << 2
+			requiredBitSet[0] |= 1 << 3
 			if err := func() error {
 				if err := s.Implementation.Decode(d); err != nil {
 					return err
@@ -8948,7 +8966,7 @@ func (s *PoolInfo) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"implementation\"")
 			}
 		case "apy":
-			requiredBitSet[0] |= 1 << 3
+			requiredBitSet[0] |= 1 << 4
 			if err := func() error {
 				v, err := d.Float64()
 				s.Apy = float64(v)
@@ -8969,7 +8987,7 @@ func (s *PoolInfo) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b00001111,
+		0b00011111,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -9661,6 +9679,113 @@ func (s SendMessageReq) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *SendMessageReq) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s StackingPoolsOK) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s StackingPoolsOK) encodeFields(e *jx.Encoder) {
+	{
+
+		e.FieldStart("pools")
+		e.ArrStart()
+		for _, elem := range s.Pools {
+			elem.Encode(e)
+		}
+		e.ArrEnd()
+	}
+}
+
+var jsonFieldsNameOfStackingPoolsOK = [1]string{
+	0: "pools",
+}
+
+// Decode decodes StackingPoolsOK from json.
+func (s *StackingPoolsOK) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode StackingPoolsOK to nil")
+	}
+	var requiredBitSet [1]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "pools":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				s.Pools = make([]PoolInfo, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem PoolInfo
+					if err := elem.Decode(d); err != nil {
+						return err
+					}
+					s.Pools = append(s.Pools, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"pools\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode StackingPoolsOK")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00000001,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfStackingPoolsOK) {
+					name = jsonFieldsNameOfStackingPoolsOK[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s StackingPoolsOK) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *StackingPoolsOK) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }

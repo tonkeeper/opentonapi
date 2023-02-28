@@ -953,6 +953,41 @@ func (s RefundType) Validate() error {
 		return errors.Errorf("invalid value: %v", s)
 	}
 }
+func (s StackingPoolsOK) Validate() error {
+	var failures []validate.FieldError
+	if err := func() error {
+		if s.Pools == nil {
+			return errors.New("nil is invalid value")
+		}
+		var failures []validate.FieldError
+		for i, elem := range s.Pools {
+			if err := func() error {
+				if err := elem.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				failures = append(failures, validate.FieldError{
+					Name:  fmt.Sprintf("[%d]", i),
+					Error: err,
+				})
+			}
+		}
+		if len(failures) > 0 {
+			return &validate.Error{Fields: failures}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "pools",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
 func (s StoragePhase) Validate() error {
 	var failures []validate.FieldError
 	if err := func() error {

@@ -746,6 +746,49 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/InternalError'
+  /v2/stacking/pools:
+    get:
+      description: All pools available in network
+      operationId: stackingPools
+      tags:
+        - Stacking
+      parameters:
+        - in: query
+          name: available_for
+          required: false
+          description: account ID
+          schema:
+            type: string
+            example: 0:97264395BD65A255A429B11326C84128B7D70FFED7949ABAE3036D506BA38621
+        - in: query
+          name: include_unverified
+          required: false
+          description: "return also pools not from white list - just compatible by interfaces (maybe dangerous!)"
+          schema:
+            type: boolean
+            example: false
+      responses:
+        '200':
+          description: "list of pools"
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - pools
+                properties:
+                  pools:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/PoolInfo'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
 
 components:
 
@@ -2309,11 +2352,15 @@ components:
     PoolInfo:
       type: object
       required:
+        - address
         - totalAmount
         - implementation
         - apy
         - name
       properties:
+        address:
+          type: string
+          example: "0:48fb0195a7fc7454512377b9bd704503ded27f6e7c4c4a9d136fdab3ef9ec04c"
         name:
           type: string
           example: "Tonkeeper pool"

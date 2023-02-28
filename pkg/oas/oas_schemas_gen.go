@@ -737,6 +737,7 @@ func (*BadRequest) getTransactionsRes()           {}
 func (*BadRequest) poolsByNominatorsRes()         {}
 func (*BadRequest) sendMessageRes()               {}
 func (*BadRequest) stackingPoolInfoRes()          {}
+func (*BadRequest) stackingPoolsRes()             {}
 
 // Ref: #/components/schemas/Block
 type Block struct {
@@ -1606,6 +1607,7 @@ func (*InternalError) getValidatorsRes()             {}
 func (*InternalError) poolsByNominatorsRes()         {}
 func (*InternalError) sendMessageRes()               {}
 func (*InternalError) stackingPoolInfoRes()          {}
+func (*InternalError) stackingPoolsRes()             {}
 
 // Ref: #/components/schemas/Jetton
 type Jetton struct {
@@ -2649,6 +2651,7 @@ func (*NotFound) getTransactionRes()            {}
 func (*NotFound) getTransactionsRes()           {}
 func (*NotFound) poolsByNominatorsRes()         {}
 func (*NotFound) stackingPoolInfoRes()          {}
+func (*NotFound) stackingPoolsRes()             {}
 
 // NewOptAccountAddress returns new OptAccountAddress with value set to v.
 func NewOptAccountAddress(v AccountAddress) OptAccountAddress {
@@ -4124,11 +4127,17 @@ func (o OptWalletDNS) Or(d WalletDNS) WalletDNS {
 
 // Ref: #/components/schemas/PoolInfo
 type PoolInfo struct {
+	Address        string                 `json:"address"`
 	Name           string                 `json:"name"`
 	TotalAmount    int64                  `json:"totalAmount"`
 	Implementation PoolInfoImplementation `json:"implementation"`
 	// APY in percent.
 	Apy float64 `json:"apy"`
+}
+
+// GetAddress returns the value of Address.
+func (s PoolInfo) GetAddress() string {
+	return s.Address
 }
 
 // GetName returns the value of Name.
@@ -4149,6 +4158,11 @@ func (s PoolInfo) GetImplementation() PoolInfoImplementation {
 // GetApy returns the value of Apy.
 func (s PoolInfo) GetApy() float64 {
 	return s.Apy
+}
+
+// SetAddress sets the value of Address.
+func (s *PoolInfo) SetAddress(val string) {
+	s.Address = val
 }
 
 // SetName sets the value of Name.
@@ -4323,6 +4337,22 @@ func (s SendMessageReq) GetBoc() string {
 func (s *SendMessageReq) SetBoc(val string) {
 	s.Boc = val
 }
+
+type StackingPoolsOK struct {
+	Pools []PoolInfo `json:"pools"`
+}
+
+// GetPools returns the value of Pools.
+func (s StackingPoolsOK) GetPools() []PoolInfo {
+	return s.Pools
+}
+
+// SetPools sets the value of Pools.
+func (s *StackingPoolsOK) SetPools(val []PoolInfo) {
+	s.Pools = val
+}
+
+func (*StackingPoolsOK) stackingPoolsRes() {}
 
 // Ref: #/components/schemas/StateInit
 type StateInit struct {
@@ -5123,6 +5153,7 @@ func (*UnauthorizedError) getValidatorsRes()             {}
 func (*UnauthorizedError) poolsByNominatorsRes()         {}
 func (*UnauthorizedError) sendMessageRes()               {}
 func (*UnauthorizedError) stackingPoolInfoRes()          {}
+func (*UnauthorizedError) stackingPoolsRes()             {}
 
 // Ref: #/components/schemas/Validator
 type Validator struct {

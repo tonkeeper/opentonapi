@@ -273,3 +273,12 @@ func (UnimplementedHandler) SendMessage(ctx context.Context, req OptSendMessageR
 func (UnimplementedHandler) StackingPoolInfo(ctx context.Context, params StackingPoolInfoParams) (r StackingPoolInfoRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
+
+// StackingPools implements stackingPools operation.
+//
+// All pools available in network.
+//
+// GET /v2/stacking/pools
+func (UnimplementedHandler) StackingPools(ctx context.Context, params StackingPoolsParams) (r StackingPoolsRes, _ error) {
+	return r, ht.ErrNotImplemented
+}

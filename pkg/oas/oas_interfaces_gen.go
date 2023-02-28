@@ -116,3 +116,7 @@ type SendMessageRes interface {
 type StackingPoolInfoRes interface {
 	stackingPoolInfoRes()
 }
+
+type StackingPoolsRes interface {
+	stackingPoolsRes()
+}

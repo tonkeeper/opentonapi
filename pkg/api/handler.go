@@ -99,6 +99,7 @@ func (h Handler) StackingPoolInfo(ctx context.Context, params oas.StackingPoolIn
 	}
 	var result oas.PoolInfo
 	if w, prs := references.WhalesPools[poolID]; prs {
+		result.SetAddress(poolID.ToRaw())
 		result.SetImplementation(oas.PoolInfoImplementationWhales)
 		result.SetApy(5.6)
 		result.SetName(w.Name + " " + w.Queue)
@@ -106,4 +107,18 @@ func (h Handler) StackingPoolInfo(ctx context.Context, params oas.StackingPoolIn
 	}
 
 	return &oas.NotFound{Error: "pool not found"}, nil
+}
+
+func (h Handler) StackingPools(ctx context.Context, params oas.StackingPoolsParams) (r oas.StackingPoolsRes, _ error) {
+	var result oas.StackingPoolsOK
+	for k, w := range references.WhalesPools {
+		result.Pools = append(result.Pools, oas.PoolInfo{
+			Address:        k.ToRaw(),
+			Name:           w.Name + " " + w.Queue,
+			TotalAmount:    0,
+			Implementation: oas.PoolInfoImplementationWhales,
+			Apy:            5.6,
+		})
+	}
+	return &result, nil
 }

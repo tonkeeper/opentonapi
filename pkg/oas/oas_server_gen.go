@@ -182,6 +182,12 @@ type Handler interface {
 	//
 	// GET /v2/stacking/pool/{account_id}
 	StackingPoolInfo(ctx context.Context, params StackingPoolInfoParams) (StackingPoolInfoRes, error)
+	// StackingPools implements stackingPools operation.
+	//
+	// All pools available in network.
+	//
+	// GET /v2/stacking/pools
+	StackingPools(ctx context.Context, params StackingPoolsParams) (StackingPoolsRes, error)
 }
 
 // Server implements http server based on OpenAPI v3 specification and

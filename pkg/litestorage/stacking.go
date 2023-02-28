@@ -11,7 +11,7 @@ import (
 func (s *LiteStorage) GetParticipatingInWhalesPools(ctx context.Context, member tongo.AccountID) ([]core.WhalesNominator, error) {
 	var result []core.WhalesNominator
 	for k := range references.WhalesPools {
-		_, value, err := abi.GetMembers(ctx, s.client, k)
+		_, value, err := abi.GetMembers(ctx, s.client, k) //todo: add get_member to tongo and rewrite to usage it
 		if err != nil {
 			continue
 		}
