@@ -4132,7 +4132,8 @@ type PoolInfo struct {
 	TotalAmount    int64                  `json:"totalAmount"`
 	Implementation PoolInfoImplementation `json:"implementation"`
 	// APY in percent.
-	Apy float64 `json:"apy"`
+	Apy      float64 `json:"apy"`
+	MinStake int64   `json:"min_stake"`
 }
 
 // GetAddress returns the value of Address.
@@ -4160,6 +4161,11 @@ func (s PoolInfo) GetApy() float64 {
 	return s.Apy
 }
 
+// GetMinStake returns the value of MinStake.
+func (s PoolInfo) GetMinStake() int64 {
+	return s.MinStake
+}
+
 // SetAddress sets the value of Address.
 func (s *PoolInfo) SetAddress(val string) {
 	s.Address = val
@@ -4183,6 +4189,11 @@ func (s *PoolInfo) SetImplementation(val PoolInfoImplementation) {
 // SetApy sets the value of Apy.
 func (s *PoolInfo) SetApy(val float64) {
 	s.Apy = val
+}
+
+// SetMinStake sets the value of MinStake.
+func (s *PoolInfo) SetMinStake(val int64) {
+	s.MinStake = val
 }
 
 func (*PoolInfo) stackingPoolInfoRes() {}

@@ -114,12 +114,17 @@ func (h Handler) StackingPoolInfo(ctx context.Context, params oas.StackingPoolIn
 func (h Handler) StackingPools(ctx context.Context, params oas.StackingPoolsParams) (r oas.StackingPoolsRes, _ error) {
 	var result oas.StackingPoolsOK
 	for k, w := range references.WhalesPools {
+		poolConfig, poolStatus, err := h.storage.GetWhalesPoolInfo(ctx, k)
+		if err != nil {
+			return &oas.InternalError{Error: err.Error()}, nil
+		}
 		result.Pools = append(result.Pools, oas.PoolInfo{
 			Address:        k.ToRaw(),
 			Name:           w.Name + " " + w.Queue,
-			TotalAmount:    0,
+			TotalAmount:    int64(poolStatus.StakeSent),
 			Implementation: oas.PoolInfoImplementationWhales,
-			Apy:            h.state.GetAPY(),
+			Apy:            h.state.GetAPY() * float64(10000-poolConfig.PoolFee) / 10000,
+			MinStake:       poolConfig.MinStake,
 		})
 	}
 	return &result, nil

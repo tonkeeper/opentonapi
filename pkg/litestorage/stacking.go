@@ -2,6 +2,7 @@ package litestorage
 
 import (
 	"context"
+	"fmt"
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/opentonapi/pkg/references"
 	"github.com/tonkeeper/tongo"
@@ -35,4 +36,27 @@ func (s *LiteStorage) GetParticipatingInWhalesPools(ctx context.Context, member 
 		}
 	}
 	return result, nil
+}
+
+func (s *LiteStorage) GetWhalesPoolInfo(ctx context.Context, id tongo.AccountID) (abi.GetParams_WhalesNominatorResult, abi.GetStakingStatusResult, error) {
+	var params abi.GetParams_WhalesNominatorResult
+	var status abi.GetStakingStatusResult
+	var ok bool
+	method, value, err := abi.GetParams(ctx, s.client, id)
+	if err != nil {
+		return params, status, err
+	}
+	params, ok = value.(abi.GetParams_WhalesNominatorResult)
+	if !ok {
+		return params, status, fmt.Errorf("get_params returns type %v", method)
+	}
+	method, value, err = abi.GetStakingStatus(ctx, s.client, id)
+	if err != nil {
+		return params, status, err
+	}
+	status, ok = value.(abi.GetStakingStatusResult)
+	if !ok {
+		return params, status, fmt.Errorf("get_stacking returns type %v", method)
+	}
+	return params, status, nil
 }

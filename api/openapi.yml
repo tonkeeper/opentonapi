@@ -791,9 +791,7 @@ paths:
           $ref: '#/components/responses/InternalError'
 
 components:
-
   parameters:
-
     blockIdParameter:
       in: path
       name: block_id
@@ -2293,7 +2291,6 @@ components:
           items:
             type: string
             example: [ "https://coinmarketcap.com/currencies/drv/", "https://www.coingecko.com/en/coins/durov" ]
-
     JettonInfo:
       type: object
       required:
@@ -2357,6 +2354,7 @@ components:
         - implementation
         - apy
         - name
+        - min_stake
       properties:
         address:
           type: string
@@ -2376,7 +2374,10 @@ components:
           type: number
           description: APY in percent
           example: 5.31
-
+        min_stake:
+          type: integer
+          format: int64
+          example: 5000000000
   responses:
     NotFound:
       description: The specified resource was not found

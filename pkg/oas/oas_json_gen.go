@@ -8900,14 +8900,20 @@ func (s PoolInfo) encodeFields(e *jx.Encoder) {
 		e.FieldStart("apy")
 		e.Float64(s.Apy)
 	}
+	{
+
+		e.FieldStart("min_stake")
+		e.Int64(s.MinStake)
+	}
 }
 
-var jsonFieldsNameOfPoolInfo = [5]string{
+var jsonFieldsNameOfPoolInfo = [6]string{
 	0: "address",
 	1: "name",
 	2: "totalAmount",
 	3: "implementation",
 	4: "apy",
+	5: "min_stake",
 }
 
 // Decode decodes PoolInfo from json.
@@ -8977,6 +8983,18 @@ func (s *PoolInfo) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"apy\"")
 			}
+		case "min_stake":
+			requiredBitSet[0] |= 1 << 5
+			if err := func() error {
+				v, err := d.Int64()
+				s.MinStake = int64(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"min_stake\"")
+			}
 		default:
 			return d.Skip()
 		}
@@ -8987,7 +9005,7 @@ func (s *PoolInfo) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b00011111,
+		0b00111111,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.

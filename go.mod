@@ -9,7 +9,7 @@ require (
 	github.com/google/uuid v1.3.0
 	github.com/ogen-go/ogen v0.55.0
 	github.com/prometheus/client_golang v1.14.0
-	github.com/tonkeeper/tongo v1.0.0-rc2
+	github.com/tonkeeper/tongo v1.0.0-rc2.0.20230301145717-72dc9272c356
 	go.opentelemetry.io/otel v1.11.1
 	go.opentelemetry.io/otel/metric v0.33.0
 	go.opentelemetry.io/otel/trace v1.11.1
