@@ -1491,14 +1491,14 @@ func (c *Client) GetNftCollections(ctx context.Context, params GetNftCollections
 	return result, nil
 }
 
-// GetNftItemByAddress invokes getNftItemByAddress operation.
+// GetNftItemsByAddresses invokes getNftItemsByAddresses operation.
 //
-// Get NFT item by its address.
+// Get NFT items by its address.
 //
-// GET /v2/nfts/{account_id}
-func (c *Client) GetNftItemByAddress(ctx context.Context, params GetNftItemByAddressParams) (res GetNftItemByAddressRes, err error) {
+// GET /v2/nfts/{account_ids}
+func (c *Client) GetNftItemsByAddresses(ctx context.Context, params GetNftItemsByAddressesParams) (res GetNftItemsByAddressesRes, err error) {
 	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("getNftItemByAddress"),
+		otelogen.OperationID("getNftItemsByAddresses"),
 	}
 
 	// Run stopwatch.
@@ -1512,7 +1512,7 @@ func (c *Client) GetNftItemByAddress(ctx context.Context, params GetNftItemByAdd
 	c.requests.Add(ctx, 1, otelAttrs...)
 
 	// Start a span for this request.
-	ctx, span := c.cfg.Tracer.Start(ctx, "GetNftItemByAddress",
+	ctx, span := c.cfg.Tracer.Start(ctx, "GetNftItemsByAddresses",
 		trace.WithAttributes(otelAttrs...),
 		clientSpanKind,
 	)
@@ -1531,14 +1531,23 @@ func (c *Client) GetNftItemByAddress(ctx context.Context, params GetNftItemByAdd
 	u := uri.Clone(c.requestURL(ctx))
 	u.Path += "/v2/nfts/"
 	{
-		// Encode "account_id" parameter.
+		// Encode "account_ids" parameter.
 		e := uri.NewPathEncoder(uri.PathEncoderConfig{
-			Param:   "account_id",
+			Param:   "account_ids",
 			Style:   uri.PathStyleSimple,
 			Explode: false,
 		})
 		if err := func() error {
-			return e.EncodeValue(conv.StringToString(params.AccountID))
+			return e.EncodeArray(func(e uri.Encoder) error {
+				for i, item := range params.AccountIds {
+					if err := func() error {
+						return e.EncodeValue(conv.StringToString(item))
+					}(); err != nil {
+						return errors.Wrapf(err, "[%d]", i)
+					}
+				}
+				return nil
+			})
 		}(); err != nil {
 			return res, errors.Wrap(err, "encode path")
 		}
@@ -1559,7 +1568,7 @@ func (c *Client) GetNftItemByAddress(ctx context.Context, params GetNftItemByAdd
 	defer resp.Body.Close()
 
 	stage = "DecodeResponse"
-	result, err := decodeGetNftItemByAddressResponse(resp)
+	result, err := decodeGetNftItemsByAddressesResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}

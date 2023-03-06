@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"github.com/go-faster/errors"
+	"github.com/tonkeeper/opentonapi/internal/g"
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/opentonapi/pkg/oas"
 	"github.com/tonkeeper/opentonapi/pkg/references"
@@ -99,13 +100,12 @@ func (h Handler) StackingPoolInfo(ctx context.Context, params oas.StackingPoolIn
 	if err != nil {
 		return &oas.BadRequest{Error: err.Error()}, nil
 	}
-	var result oas.PoolInfo
 	if w, prs := references.WhalesPools[poolID]; prs {
-		result.SetAddress(poolID.ToRaw())
-		result.SetImplementation(oas.PoolInfoImplementationWhales)
-		result.SetApy(h.state.GetAPY())
-		result.SetName(w.Name + " " + w.Queue)
-		return &result, nil
+		poolConfig, poolStatus, err := h.storage.GetWhalesPoolInfo(ctx, poolID)
+		if err != nil {
+			return &oas.InternalError{Error: err.Error()}, nil
+		}
+		return g.Pointer(convertStackingWhalesPool(poolID, w, poolStatus, poolConfig, h.state.GetAPY())), nil
 	}
 
 	return &oas.NotFound{Error: "pool not found"}, nil
@@ -118,14 +118,27 @@ func (h Handler) StackingPools(ctx context.Context, params oas.StackingPoolsPara
 		if err != nil {
 			return &oas.InternalError{Error: err.Error()}, nil
 		}
-		result.Pools = append(result.Pools, oas.PoolInfo{
-			Address:        k.ToRaw(),
-			Name:           w.Name + " " + w.Queue,
-			TotalAmount:    int64(poolStatus.StakeSent),
-			Implementation: oas.PoolInfoImplementationWhales,
-			Apy:            h.state.GetAPY() * float64(10000-poolConfig.PoolFee) / 10000,
-			MinStake:       poolConfig.MinStake,
-		})
+		result.Pools = append(result.Pools, convertStackingWhalesPool(k, w, poolStatus, poolConfig, h.state.GetAPY()))
+	}
+	return &result, nil
+}
+
+func (h Handler) GetNftItemsByAddresses(ctx context.Context, params oas.GetNftItemsByAddressesParams) (oas.GetNftItemsByAddressesRes, error) {
+	accounts := make([]tongo.AccountID, len(params.AccountIds))
+	var err error
+	for i := range params.AccountIds {
+		accounts[i], err = tongo.ParseAccountID(params.AccountIds[i])
+		if err != nil {
+			return &oas.BadRequest{Error: err.Error()}, nil
+		}
+	}
+	items, err := h.storage.GetNFTs(ctx, accounts)
+	if err != nil {
+		return &oas.InternalError{Error: err.Error()}, nil
+	}
+	var result oas.NftItems
+	for _, i := range items {
+		result.NftItems = append(result.NftItems, convertNFT(i))
 	}
 	return &result, nil
 }

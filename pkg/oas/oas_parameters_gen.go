@@ -1222,53 +1222,70 @@ func decodeGetNftCollectionsParams(args [0]string, r *http.Request) (params GetN
 	return params, nil
 }
 
-// GetNftItemByAddressParams is parameters of getNftItemByAddress operation.
-type GetNftItemByAddressParams struct {
+// GetNftItemsByAddressesParams is parameters of getNftItemsByAddresses operation.
+type GetNftItemsByAddressesParams struct {
 	// Account ID.
-	AccountID string
+	AccountIds []string
 }
 
-func unpackGetNftItemByAddressParams(packed middleware.Parameters) (params GetNftItemByAddressParams) {
+func unpackGetNftItemsByAddressesParams(packed middleware.Parameters) (params GetNftItemsByAddressesParams) {
 	{
 		key := middleware.ParameterKey{
-			Name: "account_id",
+			Name: "account_ids",
 			In:   "path",
 		}
-		params.AccountID = packed[key].(string)
+		params.AccountIds = packed[key].([]string)
 	}
 	return params
 }
 
-func decodeGetNftItemByAddressParams(args [1]string, r *http.Request) (params GetNftItemByAddressParams, _ error) {
-	// Decode path: account_id.
+func decodeGetNftItemsByAddressesParams(args [1]string, r *http.Request) (params GetNftItemsByAddressesParams, _ error) {
+	// Decode path: account_ids.
 	{
 		param := args[0]
 		if len(param) > 0 {
 			d := uri.NewPathDecoder(uri.PathDecoderConfig{
-				Param:   "account_id",
+				Param:   "account_ids",
 				Value:   param,
 				Style:   uri.PathStyleSimple,
 				Explode: false,
 			})
 
 			if err := func() error {
-				val, err := d.DecodeValue()
-				if err != nil {
-					return err
-				}
+				return d.DecodeArray(func(d uri.Decoder) error {
+					var paramsDotAccountIdsVal string
+					if err := func() error {
+						val, err := d.DecodeValue()
+						if err != nil {
+							return err
+						}
 
-				c, err := conv.ToString(val)
-				if err != nil {
-					return err
-				}
+						c, err := conv.ToString(val)
+						if err != nil {
+							return err
+						}
 
-				params.AccountID = c
+						paramsDotAccountIdsVal = c
+						return nil
+					}(); err != nil {
+						return err
+					}
+					params.AccountIds = append(params.AccountIds, paramsDotAccountIdsVal)
+					return nil
+				})
+			}(); err != nil {
+				return params, errors.Wrap(err, "path: account_ids: parse")
+			}
+			if err := func() error {
+				if params.AccountIds == nil {
+					return errors.New("nil is invalid value")
+				}
 				return nil
 			}(); err != nil {
-				return params, errors.Wrap(err, "path: account_id: parse")
+				return params, errors.Wrap(err, "path: account_ids: invalid")
 			}
 		} else {
-			return params, errors.New("path: account_id: not specified")
+			return params, errors.New("path: account_ids: not specified")
 		}
 	}
 	return params, nil

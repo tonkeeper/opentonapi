@@ -110,12 +110,12 @@ type Handler interface {
 	//
 	// GET /v2/nfts/collections
 	GetNftCollections(ctx context.Context, params GetNftCollectionsParams) (GetNftCollectionsRes, error)
-	// GetNftItemByAddress implements getNftItemByAddress operation.
+	// GetNftItemsByAddresses implements getNftItemsByAddresses operation.
 	//
-	// Get NFT item by its address.
+	// Get NFT items by its address.
 	//
-	// GET /v2/nfts/{account_id}
-	GetNftItemByAddress(ctx context.Context, params GetNftItemByAddressParams) (GetNftItemByAddressRes, error)
+	// GET /v2/nfts/{account_ids}
+	GetNftItemsByAddresses(ctx context.Context, params GetNftItemsByAddressesParams) (GetNftItemsByAddressesRes, error)
 	// GetNftItemsByOwner implements getNftItemsByOwner operation.
 	//
 	// Get all NFT items by owner address.
