@@ -5,13 +5,14 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"reflect"
+
 	"github.com/go-faster/jx"
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/opentonapi/pkg/oas"
 	"github.com/tonkeeper/opentonapi/pkg/references"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
-	"reflect"
 )
 
 func blockIdFromString(s string) (tongo.BlockID, error) {
@@ -197,16 +198,41 @@ func anyToJSONRawMap(a any) map[string]jx.Raw { //todo: переписать э�
 func convertAccountAddress(id tongo.AccountID) oas.AccountAddress {
 	return oas.AccountAddress{Address: id.ToRaw()}
 }
+
 func convertOptAccountAddress(id *tongo.AccountID) oas.OptAccountAddress {
 	if id != nil {
 		return oas.OptAccountAddress{Value: convertAccountAddress(*id), Set: true}
 	}
 	return oas.OptAccountAddress{}
 }
+
 func pointerToOptString(s *string) oas.OptString {
 	var o oas.OptString
 	if s != nil {
 		o.SetTo(*s)
 	}
 	return o
+}
+
+func convertAccount(account *core.Account) oas.RawAccount {
+	rawAccount := oas.RawAccount{
+		Address:           account.AccountAddress.ToRaw(),
+		Balance:           account.TonBalance,
+		LastTransactionLt: account.LastTransactionLt,
+		Status:            account.Status,
+		Storage: oas.AccountStorageInfo{
+			UsedCells:       account.Storage.UsedCells.Uint64(),
+			UsedBits:        account.Storage.UsedBits.Uint64(),
+			UsedPublicCells: account.Storage.UsedPublicCells.Uint64(),
+			LastPaid:        int64(account.Storage.LastPaid),
+			DuePayment:      account.Storage.DuePayment,
+		},
+	}
+	if account.Code != nil && len(account.Code) != 0 {
+		rawAccount.Code = oas.NewOptString(fmt.Sprintf("%x", account.Code[:]))
+	}
+	if account.Data != nil {
+		rawAccount.Data = oas.NewOptString(fmt.Sprintf("%x", account.Data[:]))
+	}
+	return rawAccount
 }

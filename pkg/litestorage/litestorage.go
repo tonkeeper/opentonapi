@@ -3,11 +3,16 @@ package litestorage
 import (
 	"context"
 	"fmt"
-	"github.com/tonkeeper/opentonapi/pkg/core"
+	"time"
+
+	retry "github.com/avast/retry-go"
+	"go.uber.org/zap"
+
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/liteapi"
 	"github.com/tonkeeper/tongo/tlb"
-	"go.uber.org/zap"
+
+	"github.com/tonkeeper/opentonapi/pkg/core"
 )
 
 type LiteStorage struct {
@@ -15,6 +20,23 @@ type LiteStorage struct {
 	transactionsIndex       map[tongo.AccountID][]*core.Transaction
 	transactionsIndexByHash map[tongo.Bits256]*core.Transaction
 	blockCache              map[tongo.BlockIDExt]*tlb.Block
+}
+
+func (s *LiteStorage) GetAccount(ctx context.Context, address tongo.AccountID) (*core.Account, error) {
+	var account tlb.Account
+	err := retry.Do(func() error {
+		state, err := s.client.GetAccountState(ctx, address)
+		if err != nil {
+			return err
+		}
+		account = state.Account
+		return nil
+	}, retry.Attempts(10), retry.Delay(10*time.Millisecond))
+
+	if err != nil {
+		return nil, err
+	}
+	return core.ConvertToAccount(address, account)
 }
 
 func NewLiteStorage(preloadAccounts []tongo.AccountID, log *zap.Logger) (*LiteStorage, error) {

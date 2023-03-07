@@ -2,8 +2,10 @@ package api
 
 import (
 	"context"
+
 	"github.com/go-faster/errors"
 	"github.com/tonkeeper/opentonapi/internal/g"
+
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/opentonapi/pkg/oas"
 	"github.com/tonkeeper/opentonapi/pkg/references"
@@ -24,6 +26,19 @@ func NewHandler(s storage, state chainState) Handler {
 		storage: s,
 		state:   state,
 	}
+}
+
+func (h Handler) GetRawAccount(ctx context.Context, params oas.GetRawAccountParams) (r oas.GetRawAccountRes, _ error) {
+	accountID, err := tongo.ParseAccountID(params.AccountID)
+	if err != nil {
+		return &oas.BadRequest{Error: err.Error()}, nil
+	}
+	rawAccount, err := h.storage.GetAccount(ctx, accountID)
+	if err != nil {
+		return &oas.BadRequest{Error: err.Error()}, nil
+	}
+	res := convertAccount(rawAccount)
+	return &res, nil
 }
 
 func (h Handler) GetBlock(ctx context.Context, params oas.GetBlockParams) (r oas.GetBlockRes, _ error) {
