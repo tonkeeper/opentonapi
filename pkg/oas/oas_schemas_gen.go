@@ -206,28 +206,17 @@ func (*AccountEvents) getEventsByAccountRes() {}
 
 // Ref: #/components/schemas/AccountStacking
 type AccountStacking struct {
-	Whales []AccountStakingInfo `json:"whales"`
-	Tf     []AccountStakingInfo `json:"tf"`
+	Pools []AccountStakingInfo `json:"pools"`
 }
 
-// GetWhales returns the value of Whales.
-func (s AccountStacking) GetWhales() []AccountStakingInfo {
-	return s.Whales
+// GetPools returns the value of Pools.
+func (s AccountStacking) GetPools() []AccountStakingInfo {
+	return s.Pools
 }
 
-// GetTf returns the value of Tf.
-func (s AccountStacking) GetTf() []AccountStakingInfo {
-	return s.Tf
-}
-
-// SetWhales sets the value of Whales.
-func (s *AccountStacking) SetWhales(val []AccountStakingInfo) {
-	s.Whales = val
-}
-
-// SetTf sets the value of Tf.
-func (s *AccountStacking) SetTf(val []AccountStakingInfo) {
-	s.Tf = val
+// SetPools sets the value of Pools.
+func (s *AccountStacking) SetPools(val []AccountStakingInfo) {
+	s.Pools = val
 }
 
 func (*AccountStacking) poolsByNominatorsRes() {}
@@ -4119,6 +4108,10 @@ type PoolInfo struct {
 	// APY in percent.
 	Apy      float64 `json:"apy"`
 	MinStake int64   `json:"min_stake"`
+	// Current nomination cycle beginning timestamp.
+	CycleStart int64 `json:"cycle_start"`
+	// Current nomination cycle ending timestamp.
+	CycleEnd int64 `json:"cycle_end"`
 }
 
 // GetAddress returns the value of Address.
@@ -4151,6 +4144,16 @@ func (s PoolInfo) GetMinStake() int64 {
 	return s.MinStake
 }
 
+// GetCycleStart returns the value of CycleStart.
+func (s PoolInfo) GetCycleStart() int64 {
+	return s.CycleStart
+}
+
+// GetCycleEnd returns the value of CycleEnd.
+func (s PoolInfo) GetCycleEnd() int64 {
+	return s.CycleEnd
+}
+
 // SetAddress sets the value of Address.
 func (s *PoolInfo) SetAddress(val string) {
 	s.Address = val
@@ -4179,6 +4182,16 @@ func (s *PoolInfo) SetApy(val float64) {
 // SetMinStake sets the value of MinStake.
 func (s *PoolInfo) SetMinStake(val int64) {
 	s.MinStake = val
+}
+
+// SetCycleStart sets the value of CycleStart.
+func (s *PoolInfo) SetCycleStart(val int64) {
+	s.CycleStart = val
+}
+
+// SetCycleEnd sets the value of CycleEnd.
+func (s *PoolInfo) SetCycleEnd(val int64) {
+	s.CycleEnd = val
 }
 
 func (*PoolInfo) stackingPoolInfoRes() {}

@@ -664,27 +664,17 @@ func (s AccountStacking) Encode(e *jx.Encoder) {
 func (s AccountStacking) encodeFields(e *jx.Encoder) {
 	{
 
-		e.FieldStart("whales")
+		e.FieldStart("pools")
 		e.ArrStart()
-		for _, elem := range s.Whales {
-			elem.Encode(e)
-		}
-		e.ArrEnd()
-	}
-	{
-
-		e.FieldStart("tf")
-		e.ArrStart()
-		for _, elem := range s.Tf {
+		for _, elem := range s.Pools {
 			elem.Encode(e)
 		}
 		e.ArrEnd()
 	}
 }
 
-var jsonFieldsNameOfAccountStacking = [2]string{
-	0: "whales",
-	1: "tf",
+var jsonFieldsNameOfAccountStacking = [1]string{
+	0: "pools",
 }
 
 // Decode decodes AccountStacking from json.
@@ -696,41 +686,23 @@ func (s *AccountStacking) Decode(d *jx.Decoder) error {
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
-		case "whales":
+		case "pools":
 			requiredBitSet[0] |= 1 << 0
 			if err := func() error {
-				s.Whales = make([]AccountStakingInfo, 0)
+				s.Pools = make([]AccountStakingInfo, 0)
 				if err := d.Arr(func(d *jx.Decoder) error {
 					var elem AccountStakingInfo
 					if err := elem.Decode(d); err != nil {
 						return err
 					}
-					s.Whales = append(s.Whales, elem)
+					s.Pools = append(s.Pools, elem)
 					return nil
 				}); err != nil {
 					return err
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"whales\"")
-			}
-		case "tf":
-			requiredBitSet[0] |= 1 << 1
-			if err := func() error {
-				s.Tf = make([]AccountStakingInfo, 0)
-				if err := d.Arr(func(d *jx.Decoder) error {
-					var elem AccountStakingInfo
-					if err := elem.Decode(d); err != nil {
-						return err
-					}
-					s.Tf = append(s.Tf, elem)
-					return nil
-				}); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"tf\"")
+				return errors.Wrap(err, "decode field \"pools\"")
 			}
 		default:
 			return d.Skip()
@@ -742,7 +714,7 @@ func (s *AccountStacking) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b00000011,
+		0b00000001,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -8888,15 +8860,27 @@ func (s PoolInfo) encodeFields(e *jx.Encoder) {
 		e.FieldStart("min_stake")
 		e.Int64(s.MinStake)
 	}
+	{
+
+		e.FieldStart("cycle_start")
+		e.Int64(s.CycleStart)
+	}
+	{
+
+		e.FieldStart("cycle_end")
+		e.Int64(s.CycleEnd)
+	}
 }
 
-var jsonFieldsNameOfPoolInfo = [6]string{
+var jsonFieldsNameOfPoolInfo = [8]string{
 	0: "address",
 	1: "name",
 	2: "totalAmount",
 	3: "implementation",
 	4: "apy",
 	5: "min_stake",
+	6: "cycle_start",
+	7: "cycle_end",
 }
 
 // Decode decodes PoolInfo from json.
@@ -8978,6 +8962,30 @@ func (s *PoolInfo) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"min_stake\"")
 			}
+		case "cycle_start":
+			requiredBitSet[0] |= 1 << 6
+			if err := func() error {
+				v, err := d.Int64()
+				s.CycleStart = int64(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"cycle_start\"")
+			}
+		case "cycle_end":
+			requiredBitSet[0] |= 1 << 7
+			if err := func() error {
+				v, err := d.Int64()
+				s.CycleEnd = int64(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"cycle_end\"")
+			}
 		default:
 			return d.Skip()
 		}
@@ -8988,7 +8996,7 @@ func (s *PoolInfo) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b00111111,
+		0b11111111,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.

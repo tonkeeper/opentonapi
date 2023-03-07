@@ -85,7 +85,7 @@ func (h Handler) PoolsByNominators(ctx context.Context, params oas.PoolsByNomina
 		if _, ok := references.WhalesPools[w.Pool]; !ok {
 			continue //skip unknown pools
 		}
-		result.Whales = append(result.Whales, oas.AccountStakingInfo{
+		result.Pools = append(result.Pools, oas.AccountStakingInfo{
 			Pool:            w.Pool.ToRaw(),
 			Amount:          w.MemberBalance,
 			PendingDeposit:  w.MemberPendingDeposit,

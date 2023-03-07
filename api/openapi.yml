@@ -2320,14 +2320,9 @@ components:
     AccountStacking:
       type: object
       required:
-        - whales
-        - tf
+        - pools
       properties:
-        whales:
-          type: array
-          items:
-            $ref: '#/components/schemas/AccountStakingInfo'
-        tf:
+        pools:
           type: array
           items:
             $ref: '#/components/schemas/AccountStakingInfo'
@@ -2363,6 +2358,8 @@ components:
         - apy
         - name
         - min_stake
+        - cycle_start
+        - cycle_end
       properties:
         address:
           type: string
@@ -2386,6 +2383,16 @@ components:
           type: integer
           format: int64
           example: 5000000000
+        cycle_start:
+          type: integer
+          description: current nomination cycle beginning timestamp
+          format: int64
+          example: 1678223064
+        cycle_end:
+          type: integer
+          description: current nomination cycle ending timestamp
+          format: int64
+          example: 1678223064
   responses:
     NotFound:
       description: The specified resource was not found

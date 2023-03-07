@@ -95,24 +95,13 @@ func (s AccountEvents) Validate() error {
 func (s AccountStacking) Validate() error {
 	var failures []validate.FieldError
 	if err := func() error {
-		if s.Whales == nil {
+		if s.Pools == nil {
 			return errors.New("nil is invalid value")
 		}
 		return nil
 	}(); err != nil {
 		failures = append(failures, validate.FieldError{
-			Name:  "whales",
-			Error: err,
-		})
-	}
-	if err := func() error {
-		if s.Tf == nil {
-			return errors.New("nil is invalid value")
-		}
-		return nil
-	}(); err != nil {
-		failures = append(failures, validate.FieldError{
-			Name:  "tf",
+			Name:  "pools",
 			Error: err,
 		})
 	}
