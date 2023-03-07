@@ -8,7 +8,9 @@ import (
 	"github.com/go-faster/jx"
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/opentonapi/pkg/oas"
+	"github.com/tonkeeper/opentonapi/pkg/references"
 	"github.com/tonkeeper/tongo"
+	"github.com/tonkeeper/tongo/abi"
 	"reflect"
 )
 
@@ -140,6 +142,32 @@ func convertTrace(t core.Trace) oas.Trace {
 	return trace
 }
 
+func convertStackingWhalesPool(address tongo.AccountID, w references.WhalesPoolInfo, poolStatus abi.GetStakingStatusResult, poolConfig abi.GetParams_WhalesNominatorResult, apy float64) oas.PoolInfo {
+	return oas.PoolInfo{
+		Address:        address.ToRaw(),
+		Name:           w.Name + " " + w.Queue,
+		TotalAmount:    int64(poolStatus.StakeSent),
+		Implementation: oas.PoolInfoImplementationWhales,
+		Apy:            apy * float64(10000-poolConfig.PoolFee) / 10000,
+		MinStake:       poolConfig.MinStake,
+	}
+}
+
+func convertNFT(item core.NftItem) oas.NftItem {
+	return oas.NftItem{
+		Address:    item.Address.ToRaw(),
+		Index:      item.Index.BigInt().Int64(),
+		Owner:      convertOptAccountAddress(item.OwnerAddress),
+		Collection: oas.OptNftItemCollection{}, //todo: add
+		Verified:   item.Verified,
+		Metadata:   anyToJSONRawMap(item.Metadata),
+		Sale:       oas.OptSale{}, //todo: add
+		Previews:   nil,           //todo: add
+		DNS:        pointerToOptString(item.DNS),
+		ApprovedBy: nil, //todo: add
+	}
+}
+
 func anyToJSONRawMap(a any) map[string]jx.Raw { //todo: переписать этот ужас
 	var m = map[string]jx.Raw{}
 	if am, ok := a.(map[string]any); ok {
@@ -172,4 +200,11 @@ func convertOptAccountAddress(id *tongo.AccountID) oas.OptAccountAddress {
 		return oas.OptAccountAddress{Value: convertAccountAddress(*id), Set: true}
 	}
 	return oas.OptAccountAddress{}
+}
+func pointerToOptString(s *string) oas.OptString {
+	var o oas.OptString
+	if s != nil {
+		o.SetTo(*s)
+	}
+	return o
 }

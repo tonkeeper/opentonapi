@@ -166,12 +166,12 @@ func (UnimplementedHandler) GetNftCollections(ctx context.Context, params GetNft
 	return r, ht.ErrNotImplemented
 }
 
-// GetNftItemByAddress implements getNftItemByAddress operation.
+// GetNftItemsByAddresses implements getNftItemsByAddresses operation.
 //
-// Get NFT item by its address.
+// Get NFT items by its address.
 //
-// GET /v2/nfts/{account_id}
-func (UnimplementedHandler) GetNftItemByAddress(ctx context.Context, params GetNftItemByAddressParams) (r GetNftItemByAddressRes, _ error) {
+// GET /v2/nfts/{account_ids}
+func (UnimplementedHandler) GetNftItemsByAddresses(ctx context.Context, params GetNftItemsByAddressesParams) (r GetNftItemsByAddressesRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 

@@ -69,8 +69,8 @@ type GetNftCollectionsRes interface {
 	getNftCollectionsRes()
 }
 
-type GetNftItemByAddressRes interface {
-	getNftItemByAddressRes()
+type GetNftItemsByAddressesRes interface {
+	getNftItemsByAddressesRes()
 }
 
 type GetNftItemsByOwnerRes interface {

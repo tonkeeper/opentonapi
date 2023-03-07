@@ -726,7 +726,7 @@ func (*BadRequest) getEventsByAccountRes()        {}
 func (*BadRequest) getJettonInfoRes()             {}
 func (*BadRequest) getJettonsBalancesRes()        {}
 func (*BadRequest) getNftCollectionRes()          {}
-func (*BadRequest) getNftItemByAddressRes()       {}
+func (*BadRequest) getNftItemsByAddressesRes()    {}
 func (*BadRequest) getNftItemsByOwnerRes()        {}
 func (*BadRequest) getRawAccountRes()             {}
 func (*BadRequest) getSubscriptionsByAccountRes() {}
@@ -1595,7 +1595,7 @@ func (*InternalError) getJettonsBalancesRes()        {}
 func (*InternalError) getMasterchainHeadRes()        {}
 func (*InternalError) getNftCollectionRes()          {}
 func (*InternalError) getNftCollectionsRes()         {}
-func (*InternalError) getNftItemByAddressRes()       {}
+func (*InternalError) getNftItemsByAddressesRes()    {}
 func (*InternalError) getNftItemsByOwnerRes()        {}
 func (*InternalError) getRawAccountRes()             {}
 func (*InternalError) getSubscriptionsByAccountRes() {}
@@ -2298,20 +2298,16 @@ func (*NftCollections) getNftCollectionsRes() {}
 
 // Ref: #/components/schemas/NftItem
 type NftItem struct {
-	Address string            `json:"address"`
-	Index   int64             `json:"index"`
-	Owner   OptAccountAddress `json:"owner"`
-	// Deprecated.
-	//
-	// Deprecated: schema marks this property as deprecated.
-	CollectionAddress OptString            `json:"collection_address"`
-	Collection        OptNftItemCollection `json:"collection"`
-	Verified          bool                 `json:"verified"`
-	Metadata          NftItemMetadata      `json:"metadata"`
-	Sale              OptSale              `json:"sale"`
-	Previews          []ImagePreview       `json:"previews"`
-	DNS               OptString            `json:"dns"`
-	ApprovedBy        []string             `json:"approved_by"`
+	Address    string               `json:"address"`
+	Index      int64                `json:"index"`
+	Owner      OptAccountAddress    `json:"owner"`
+	Collection OptNftItemCollection `json:"collection"`
+	Verified   bool                 `json:"verified"`
+	Metadata   NftItemMetadata      `json:"metadata"`
+	Sale       OptSale              `json:"sale"`
+	Previews   []ImagePreview       `json:"previews"`
+	DNS        OptString            `json:"dns"`
+	ApprovedBy []string             `json:"approved_by"`
 }
 
 // GetAddress returns the value of Address.
@@ -2327,11 +2323,6 @@ func (s NftItem) GetIndex() int64 {
 // GetOwner returns the value of Owner.
 func (s NftItem) GetOwner() OptAccountAddress {
 	return s.Owner
-}
-
-// GetCollectionAddress returns the value of CollectionAddress.
-func (s NftItem) GetCollectionAddress() OptString {
-	return s.CollectionAddress
 }
 
 // GetCollection returns the value of Collection.
@@ -2384,11 +2375,6 @@ func (s *NftItem) SetOwner(val OptAccountAddress) {
 	s.Owner = val
 }
 
-// SetCollectionAddress sets the value of CollectionAddress.
-func (s *NftItem) SetCollectionAddress(val OptString) {
-	s.CollectionAddress = val
-}
-
 // SetCollection sets the value of Collection.
 func (s *NftItem) SetCollection(val OptNftItemCollection) {
 	s.Collection = val
@@ -2423,8 +2409,6 @@ func (s *NftItem) SetDNS(val OptString) {
 func (s *NftItem) SetApprovedBy(val []string) {
 	s.ApprovedBy = val
 }
-
-func (*NftItem) getNftItemByAddressRes() {}
 
 type NftItemCollection struct {
 	Address string `json:"address"`
@@ -2548,7 +2532,8 @@ func (s *NftItems) SetNftItems(val []NftItem) {
 	s.NftItems = val
 }
 
-func (*NftItems) getNftItemsByOwnerRes() {}
+func (*NftItems) getNftItemsByAddressesRes() {}
+func (*NftItems) getNftItemsByOwnerRes()     {}
 
 // Ref: #/components/schemas/NftPurchaseAction
 type NftPurchaseAction struct {
@@ -2641,7 +2626,7 @@ func (*NotFound) getEventsByAccountRes()        {}
 func (*NotFound) getJettonInfoRes()             {}
 func (*NotFound) getJettonsBalancesRes()        {}
 func (*NotFound) getNftCollectionRes()          {}
-func (*NotFound) getNftItemByAddressRes()       {}
+func (*NotFound) getNftItemsByAddressesRes()    {}
 func (*NotFound) getNftItemsByOwnerRes()        {}
 func (*NotFound) getRawAccountRes()             {}
 func (*NotFound) getSubscriptionsByAccountRes() {}
@@ -5152,7 +5137,7 @@ func (*UnauthorizedError) getJettonsBalancesRes()        {}
 func (*UnauthorizedError) getMasterchainHeadRes()        {}
 func (*UnauthorizedError) getNftCollectionRes()          {}
 func (*UnauthorizedError) getNftCollectionsRes()         {}
-func (*UnauthorizedError) getNftItemByAddressRes()       {}
+func (*UnauthorizedError) getNftItemsByAddressesRes()    {}
 func (*UnauthorizedError) getNftItemsByOwnerRes()        {}
 func (*UnauthorizedError) getRawAccountRes()             {}
 func (*UnauthorizedError) getSubscriptionsByAccountRes() {}

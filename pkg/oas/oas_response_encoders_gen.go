@@ -1030,9 +1030,9 @@ func encodeGetNftCollectionsResponse(response GetNftCollectionsRes, w http.Respo
 	}
 }
 
-func encodeGetNftItemByAddressResponse(response GetNftItemByAddressRes, w http.ResponseWriter, span trace.Span) error {
+func encodeGetNftItemsByAddressesResponse(response GetNftItemsByAddressesRes, w http.ResponseWriter, span trace.Span) error {
 	switch response := response.(type) {
-	case *NftItem:
+	case *NftItems:
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(200)
 		span.SetStatus(codes.Ok, http.StatusText(200))

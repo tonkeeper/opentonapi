@@ -18,4 +18,7 @@ GET {{host}}/v2/stacking/pool/0:48fb0195a7fc7454512377b9bd704503ded27f6e7c4c4a9d
 GET {{host}}/v2/stacking/pools?availabe_for=0:48fb0195a7fc7454512377b9bd704503ded27f6e7c4c4a9d136fdab3ef9ec04c
 
 ###
+GET {{host}}/v2/nfts/EQDw41DE6TProVIyDIeMWpx4SJutvd8hYUHRQjtR2tSfxz8q
+
+###
 GET {{metrics}}/metrics

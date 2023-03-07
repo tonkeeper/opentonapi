@@ -1712,18 +1712,18 @@ func (s *Server) handleGetNftCollectionsRequest(args [0]string, w http.ResponseW
 	}
 }
 
-// handleGetNftItemByAddressRequest handles getNftItemByAddress operation.
+// handleGetNftItemsByAddressesRequest handles getNftItemsByAddresses operation.
 //
-// Get NFT item by its address.
+// Get NFT items by its address.
 //
-// GET /v2/nfts/{account_id}
-func (s *Server) handleGetNftItemByAddressRequest(args [1]string, w http.ResponseWriter, r *http.Request) {
+// GET /v2/nfts/{account_ids}
+func (s *Server) handleGetNftItemsByAddressesRequest(args [1]string, w http.ResponseWriter, r *http.Request) {
 	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("getNftItemByAddress"),
+		otelogen.OperationID("getNftItemsByAddresses"),
 	}
 
 	// Start a span for this request.
-	ctx, span := s.cfg.Tracer.Start(r.Context(), "GetNftItemByAddress",
+	ctx, span := s.cfg.Tracer.Start(r.Context(), "GetNftItemsByAddresses",
 		trace.WithAttributes(otelAttrs...),
 		serverSpanKind,
 	)
@@ -1747,11 +1747,11 @@ func (s *Server) handleGetNftItemByAddressRequest(args [1]string, w http.Respons
 		}
 		err          error
 		opErrContext = ogenerrors.OperationContext{
-			Name: "GetNftItemByAddress",
-			ID:   "getNftItemByAddress",
+			Name: "GetNftItemsByAddresses",
+			ID:   "getNftItemsByAddresses",
 		}
 	)
-	params, err := decodeGetNftItemByAddressParams(args, r)
+	params, err := decodeGetNftItemsByAddressesParams(args, r)
 	if err != nil {
 		err = &ogenerrors.DecodeParamsError{
 			OperationContext: opErrContext,
@@ -1762,26 +1762,26 @@ func (s *Server) handleGetNftItemByAddressRequest(args [1]string, w http.Respons
 		return
 	}
 
-	var response GetNftItemByAddressRes
+	var response GetNftItemsByAddressesRes
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:       ctx,
-			OperationName: "GetNftItemByAddress",
-			OperationID:   "getNftItemByAddress",
+			OperationName: "GetNftItemsByAddresses",
+			OperationID:   "getNftItemsByAddresses",
 			Body:          nil,
 			Params: middleware.Parameters{
 				{
-					Name: "account_id",
+					Name: "account_ids",
 					In:   "path",
-				}: params.AccountID,
+				}: params.AccountIds,
 			},
 			Raw: r,
 		}
 
 		type (
 			Request  = struct{}
-			Params   = GetNftItemByAddressParams
-			Response = GetNftItemByAddressRes
+			Params   = GetNftItemsByAddressesParams
+			Response = GetNftItemsByAddressesRes
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -1790,13 +1790,13 @@ func (s *Server) handleGetNftItemByAddressRequest(args [1]string, w http.Respons
 		](
 			m,
 			mreq,
-			unpackGetNftItemByAddressParams,
+			unpackGetNftItemsByAddressesParams,
 			func(ctx context.Context, request Request, params Params) (Response, error) {
-				return s.h.GetNftItemByAddress(ctx, params)
+				return s.h.GetNftItemsByAddresses(ctx, params)
 			},
 		)
 	} else {
-		response, err = s.h.GetNftItemByAddress(ctx, params)
+		response, err = s.h.GetNftItemsByAddresses(ctx, params)
 	}
 	if err != nil {
 		recordError("Internal", err)
@@ -1804,7 +1804,7 @@ func (s *Server) handleGetNftItemByAddressRequest(args [1]string, w http.Respons
 		return
 	}
 
-	if err := encodeGetNftItemByAddressResponse(response, w, span); err != nil {
+	if err := encodeGetNftItemsByAddressesResponse(response, w, span); err != nil {
 		recordError("EncodeResponse", err)
 		s.cfg.ErrorHandler(ctx, w, r, err)
 		return

@@ -687,7 +687,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 						}
 					}
 				}
-				// Param: "account_id"
+				// Param: "account_ids"
 				// Leaf parameter
 				args[0] = elem
 				elem = ""
@@ -696,7 +696,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 					// Leaf node.
 					switch r.Method {
 					case "GET":
-						s.handleGetNftItemByAddressRequest([1]string{
+						s.handleGetNftItemsByAddressesRequest([1]string{
 							args[0],
 						}, w, r)
 					default:
@@ -1553,7 +1553,7 @@ func (s *Server) FindRoute(method, path string) (r Route, _ bool) {
 						}
 					}
 				}
-				// Param: "account_id"
+				// Param: "account_ids"
 				// Leaf parameter
 				args[0] = elem
 				elem = ""
@@ -1561,9 +1561,9 @@ func (s *Server) FindRoute(method, path string) (r Route, _ bool) {
 				if len(elem) == 0 {
 					switch method {
 					case "GET":
-						// Leaf: GetNftItemByAddress
-						r.name = "GetNftItemByAddress"
-						r.operationID = "getNftItemByAddress"
+						// Leaf: GetNftItemsByAddresses
+						r.name = "GetNftItemsByAddresses"
+						r.operationID = "getNftItemsByAddresses"
 						r.args = args
 						r.count = 1
 						return r, true

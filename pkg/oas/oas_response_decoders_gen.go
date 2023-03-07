@@ -2365,7 +2365,7 @@ func decodeGetNftCollectionsResponse(resp *http.Response) (res GetNftCollections
 	return res, validate.UnexpectedStatusCode(resp.StatusCode)
 }
 
-func decodeGetNftItemByAddressResponse(resp *http.Response) (res GetNftItemByAddressRes, err error) {
+func decodeGetNftItemsByAddressesResponse(resp *http.Response) (res GetNftItemsByAddressesRes, err error) {
 	switch resp.StatusCode {
 	case 200:
 		// Code 200.
@@ -2381,7 +2381,7 @@ func decodeGetNftItemByAddressResponse(resp *http.Response) (res GetNftItemByAdd
 			}
 
 			d := jx.DecodeBytes(b)
-			var response NftItem
+			var response NftItems
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err

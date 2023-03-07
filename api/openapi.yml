@@ -604,21 +604,21 @@ paths:
         '500':
           $ref: '#/components/responses/InternalError'
 
-  /v2/nfts/{account_id}:
+  /v2/nfts/{account_ids}:
     get:
-      description: Get NFT item by its address
-      operationId: getNftItemByAddress
+      description: Get NFT items by its address
+      operationId: getNftItemsByAddresses
       tags:
         - NFT
       parameters:
-        - $ref: '#/components/parameters/accountIdParameter'
+        - $ref: '#/components/parameters/accountIdParameters'
       responses:
         '200':
           description: "nft item"
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/NftItem'
+                $ref: '#/components/schemas/NftItems'
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -818,6 +818,18 @@ components:
       schema:
         type: string
         example: 0:97264395BD65A255A429B11326C84128B7D70FFED7949ABAE3036D506BA38621
+
+    accountIdParameters:
+      in: path
+      name: account_ids
+      required: true
+      description: account ID
+      explode: false
+      schema:
+        type: array
+        items:
+          type: string
+          example: 0:97264395BD65A255A429B11326C84128B7D70FFED7949ABAE3036D506BA38621
 
     methodNameParameter:
       in: path
@@ -1587,10 +1599,6 @@ components:
           example: 58
         owner:
           $ref: '#/components/schemas/AccountAddress'
-        collection_address:
-          deprecated: true
-          type: string
-          description: deprecated
         collection:
           type: object
           required:

@@ -6775,12 +6775,6 @@ func (s NftItem) encodeFields(e *jx.Encoder) {
 		}
 	}
 	{
-		if s.CollectionAddress.Set {
-			e.FieldStart("collection_address")
-			s.CollectionAddress.Encode(e)
-		}
-	}
-	{
 		if s.Collection.Set {
 			e.FieldStart("collection")
 			s.Collection.Encode(e)
@@ -6829,18 +6823,17 @@ func (s NftItem) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfNftItem = [11]string{
-	0:  "address",
-	1:  "index",
-	2:  "owner",
-	3:  "collection_address",
-	4:  "collection",
-	5:  "verified",
-	6:  "metadata",
-	7:  "sale",
-	8:  "previews",
-	9:  "dns",
-	10: "approved_by",
+var jsonFieldsNameOfNftItem = [10]string{
+	0: "address",
+	1: "index",
+	2: "owner",
+	3: "collection",
+	4: "verified",
+	5: "metadata",
+	6: "sale",
+	7: "previews",
+	8: "dns",
+	9: "approved_by",
 }
 
 // Decode decodes NftItem from json.
@@ -6886,16 +6879,6 @@ func (s *NftItem) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"owner\"")
 			}
-		case "collection_address":
-			if err := func() error {
-				s.CollectionAddress.Reset()
-				if err := s.CollectionAddress.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"collection_address\"")
-			}
 		case "collection":
 			if err := func() error {
 				s.Collection.Reset()
@@ -6907,7 +6890,7 @@ func (s *NftItem) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"collection\"")
 			}
 		case "verified":
-			requiredBitSet[0] |= 1 << 5
+			requiredBitSet[0] |= 1 << 4
 			if err := func() error {
 				v, err := d.Bool()
 				s.Verified = bool(v)
@@ -6919,7 +6902,7 @@ func (s *NftItem) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"verified\"")
 			}
 		case "metadata":
-			requiredBitSet[0] |= 1 << 6
+			requiredBitSet[0] |= 1 << 5
 			if err := func() error {
 				if err := s.Metadata.Decode(d); err != nil {
 					return err
@@ -6966,7 +6949,7 @@ func (s *NftItem) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"dns\"")
 			}
 		case "approved_by":
-			requiredBitSet[1] |= 1 << 2
+			requiredBitSet[1] |= 1 << 1
 			if err := func() error {
 				s.ApprovedBy = make([]string, 0)
 				if err := d.Arr(func(d *jx.Decoder) error {
@@ -6995,8 +6978,8 @@ func (s *NftItem) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [2]uint8{
-		0b01100011,
-		0b00000100,
+		0b00110011,
+		0b00000010,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
