@@ -4,11 +4,12 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/tonkeeper/opentonapi/internal/g"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
 	"github.com/tonkeeper/tongo/boc"
 	"github.com/tonkeeper/tongo/tlb"
+
+	"github.com/tonkeeper/opentonapi/internal/g"
 )
 
 func ConvertToBlockHeader(id tongo.BlockIDExt, block *tlb.Block) (*BlockHeader, error) {
@@ -354,4 +355,60 @@ func convertBodyCell(a tlb.Any) ([]byte, error) {
 		}
 	}
 	return c.ToBoc()
+}
+
+func ConvertToAccount(accountId tongo.AccountID, acc tlb.Account) (*Account, error) {
+	res := &Account{
+		AccountAddress: accountId,
+		Code:           []byte{},
+	}
+	if acc.SumType == "AccountNone" {
+		res.Status = string(tlb.AccountNone)
+		return res, nil
+	}
+	balance := acc.Account.Storage.Balance
+	res.TonBalance = int64(balance.Grams)
+	items := balance.Other.Dict.Items()
+	if len(items) > 0 {
+		otherBalances := make(map[uint32]big.Int, len(items))
+		for _, item := range items {
+			otherBalances[uint32(item.Key)] = big.Int(item.Value)
+		}
+		res.ExtraBalances = otherBalances
+	}
+	res.LastTransactionLt = acc.Account.Storage.LastTransLt
+	if acc.Account.Storage.State.SumType == "AccountUninit" {
+		res.Status = string(tlb.AccountUninit)
+		return res, nil
+	}
+	if acc.Account.Storage.State.SumType == "AccountFrozen" {
+		res.FrozenHash = g.Pointer(tongo.Bits256(acc.Account.Storage.State.AccountFrozen.StateHash))
+		res.Status = string(tlb.AccountFrozen)
+		return res, nil
+	}
+	res.Status = string(tlb.AccountActive)
+	if acc.Account.Storage.State.AccountActive.StateInit.Data.Exists {
+		data, err := acc.Account.Storage.State.AccountActive.StateInit.Data.Value.Value.ToBoc()
+		if err != nil {
+			return nil, err
+		}
+		res.Data = data
+	}
+	if acc.Account.Storage.State.AccountActive.StateInit.Code.Exists {
+		code, err := acc.Account.Storage.State.AccountActive.StateInit.Code.Value.Value.ToBoc()
+		if err != nil {
+			return nil, err
+		}
+		res.Code = code
+	}
+	res.Storage = StorageInfo{
+		LastPaid:        acc.Account.StorageStat.LastPaid,
+		UsedCells:       big.Int(acc.Account.StorageStat.Used.Cells),
+		UsedBits:        big.Int(acc.Account.StorageStat.Used.Bits),
+		UsedPublicCells: big.Int(acc.Account.StorageStat.Used.PublicCells),
+	}
+	if acc.Account.StorageStat.DuePayment.Exists {
+		res.Storage.DuePayment = int64(acc.Account.StorageStat.DuePayment.Value)
+	}
+	return res, nil
 }

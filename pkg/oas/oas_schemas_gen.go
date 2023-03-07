@@ -279,6 +279,65 @@ const (
 	AccountStatusFrozen   AccountStatus = "frozen"
 )
 
+// Ref: #/components/schemas/AccountStorageInfo
+type AccountStorageInfo struct {
+	UsedCells       uint64 `json:"used_cells"`
+	UsedBits        uint64 `json:"used_bits"`
+	UsedPublicCells uint64 `json:"used_public_cells"`
+	LastPaid        int64  `json:"last_paid"`
+	DuePayment      int64  `json:"due_payment"`
+}
+
+// GetUsedCells returns the value of UsedCells.
+func (s AccountStorageInfo) GetUsedCells() uint64 {
+	return s.UsedCells
+}
+
+// GetUsedBits returns the value of UsedBits.
+func (s AccountStorageInfo) GetUsedBits() uint64 {
+	return s.UsedBits
+}
+
+// GetUsedPublicCells returns the value of UsedPublicCells.
+func (s AccountStorageInfo) GetUsedPublicCells() uint64 {
+	return s.UsedPublicCells
+}
+
+// GetLastPaid returns the value of LastPaid.
+func (s AccountStorageInfo) GetLastPaid() int64 {
+	return s.LastPaid
+}
+
+// GetDuePayment returns the value of DuePayment.
+func (s AccountStorageInfo) GetDuePayment() int64 {
+	return s.DuePayment
+}
+
+// SetUsedCells sets the value of UsedCells.
+func (s *AccountStorageInfo) SetUsedCells(val uint64) {
+	s.UsedCells = val
+}
+
+// SetUsedBits sets the value of UsedBits.
+func (s *AccountStorageInfo) SetUsedBits(val uint64) {
+	s.UsedBits = val
+}
+
+// SetUsedPublicCells sets the value of UsedPublicCells.
+func (s *AccountStorageInfo) SetUsedPublicCells(val uint64) {
+	s.UsedPublicCells = val
+}
+
+// SetLastPaid sets the value of LastPaid.
+func (s *AccountStorageInfo) SetLastPaid(val int64) {
+	s.LastPaid = val
+}
+
+// SetDuePayment sets the value of DuePayment.
+func (s *AccountStorageInfo) SetDuePayment(val int64) {
+	s.DuePayment = val
+}
+
 // Ref: #/components/schemas/Action
 type Action struct {
 	Type            ActionType               `json:"type"`
@@ -4231,7 +4290,13 @@ func (s *Price) SetTokenName(val string) {
 
 // Ref: #/components/schemas/RawAccount
 type RawAccount struct {
-	Address string `json:"address"`
+	Address           string             `json:"address"`
+	Balance           int64              `json:"balance"`
+	Code              OptString          `json:"code"`
+	Data              OptString          `json:"data"`
+	LastTransactionLt uint64             `json:"last_transaction_lt"`
+	Status            string             `json:"status"`
+	Storage           AccountStorageInfo `json:"storage"`
 }
 
 // GetAddress returns the value of Address.
@@ -4239,9 +4304,69 @@ func (s RawAccount) GetAddress() string {
 	return s.Address
 }
 
+// GetBalance returns the value of Balance.
+func (s RawAccount) GetBalance() int64 {
+	return s.Balance
+}
+
+// GetCode returns the value of Code.
+func (s RawAccount) GetCode() OptString {
+	return s.Code
+}
+
+// GetData returns the value of Data.
+func (s RawAccount) GetData() OptString {
+	return s.Data
+}
+
+// GetLastTransactionLt returns the value of LastTransactionLt.
+func (s RawAccount) GetLastTransactionLt() uint64 {
+	return s.LastTransactionLt
+}
+
+// GetStatus returns the value of Status.
+func (s RawAccount) GetStatus() string {
+	return s.Status
+}
+
+// GetStorage returns the value of Storage.
+func (s RawAccount) GetStorage() AccountStorageInfo {
+	return s.Storage
+}
+
 // SetAddress sets the value of Address.
 func (s *RawAccount) SetAddress(val string) {
 	s.Address = val
+}
+
+// SetBalance sets the value of Balance.
+func (s *RawAccount) SetBalance(val int64) {
+	s.Balance = val
+}
+
+// SetCode sets the value of Code.
+func (s *RawAccount) SetCode(val OptString) {
+	s.Code = val
+}
+
+// SetData sets the value of Data.
+func (s *RawAccount) SetData(val OptString) {
+	s.Data = val
+}
+
+// SetLastTransactionLt sets the value of LastTransactionLt.
+func (s *RawAccount) SetLastTransactionLt(val uint64) {
+	s.LastTransactionLt = val
+}
+
+// SetStatus sets the value of Status.
+func (s *RawAccount) SetStatus(val string) {
+	s.Status = val
+}
+
+// SetStorage sets the value of Storage.
+func (s *RawAccount) SetStorage(val AccountStorageInfo) {
+	s.Storage = val
 }
 
 func (*RawAccount) getRawAccountRes() {}
