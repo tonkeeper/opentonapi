@@ -3,13 +3,17 @@ package api
 import (
 	"context"
 
-	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
+
+	"github.com/tonkeeper/opentonapi/pkg/core"
 )
 
 type storage interface {
-	GetAccount(ctx context.Context, id tongo.AccountID) (*core.Account, error)
+	// GetAccountInfo returns human-friendly information about an account without low-level details.
+	GetAccountInfo(ctx context.Context, id tongo.AccountID) (*core.AccountInfo, error)
+	// GetRawAccount returns low-level information about an account taken directly from the blockchain.
+	GetRawAccount(ctx context.Context, id tongo.AccountID) (*core.Account, error)
 	GetBlockHeader(ctx context.Context, id tongo.BlockID) (*core.BlockHeader, error)
 	GetTransaction(ctx context.Context, hash tongo.Bits256) (*core.Transaction, error)
 	GetTrace(ctx context.Context, hash tongo.Bits256) (*core.Trace, error)

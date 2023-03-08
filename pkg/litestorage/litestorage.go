@@ -22,7 +22,20 @@ type LiteStorage struct {
 	blockCache              map[tongo.BlockIDExt]*tlb.Block
 }
 
-func (s *LiteStorage) GetAccount(ctx context.Context, address tongo.AccountID) (*core.Account, error) {
+// GetAccountInfo returns human-friendly information about an account without low-level details.
+func (s *LiteStorage) GetAccountInfo(ctx context.Context, id tongo.AccountID) (*core.AccountInfo, error) {
+	account, err := s.GetRawAccount(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	return &core.AccountInfo{
+		Account: *account,
+		// TODO: populate all fields
+	}, nil
+}
+
+// GetRawAccount returns low-level information about an account taken directly from the blockchain.
+func (s *LiteStorage) GetRawAccount(ctx context.Context, address tongo.AccountID) (*core.Account, error) {
 	var account tlb.Account
 	err := retry.Do(func() error {
 		state, err := s.client.GetAccountState(ctx, address)

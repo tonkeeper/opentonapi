@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math/big"
 
+	"github.com/shopspring/decimal"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
 	"github.com/tonkeeper/tongo/boc"
@@ -370,9 +371,10 @@ func ConvertToAccount(accountId tongo.AccountID, acc tlb.Account) (*Account, err
 	res.TonBalance = int64(balance.Grams)
 	items := balance.Other.Dict.Items()
 	if len(items) > 0 {
-		otherBalances := make(map[uint32]big.Int, len(items))
+		otherBalances := make(map[uint32]decimal.Decimal, len(items))
 		for _, item := range items {
-			otherBalances[uint32(item.Key)] = big.Int(item.Value)
+			value := big.Int(item.Value)
+			otherBalances[uint32(item.Key)] = decimal.NewFromBigInt(&value, 0)
 		}
 		res.ExtraBalances = otherBalances
 	}

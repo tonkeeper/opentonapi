@@ -68,10 +68,67 @@ func (s Account) encodeFields(e *jx.Encoder) {
 		e.FieldStart("address")
 		e.Str(s.Address)
 	}
+	{
+
+		e.FieldStart("balance")
+		e.Int64(s.Balance)
+	}
+	{
+
+		e.FieldStart("last_transaction_lt")
+		e.UInt64(s.LastTransactionLt)
+	}
+	{
+
+		e.FieldStart("status")
+		e.Str(s.Status)
+	}
+	{
+		if s.Interfaces != nil {
+			e.FieldStart("interfaces")
+			e.ArrStart()
+			for _, elem := range s.Interfaces {
+				e.Str(elem)
+			}
+			e.ArrEnd()
+		}
+	}
+	{
+		if s.Name.Set {
+			e.FieldStart("name")
+			s.Name.Encode(e)
+		}
+	}
+	{
+		if s.IsScam.Set {
+			e.FieldStart("is_scam")
+			s.IsScam.Encode(e)
+		}
+	}
+	{
+		if s.Icon.Set {
+			e.FieldStart("icon")
+			s.Icon.Encode(e)
+		}
+	}
+	{
+		if s.MemoRequired.Set {
+			e.FieldStart("memo_required")
+			s.MemoRequired.Encode(e)
+		}
+	}
 }
 
-var jsonFieldsNameOfAccount = [1]string{
+var jsonFieldsNameOfAccount = [9]string{
 	0: "address",
+	1: "balance",
+	2: "last_transaction_lt",
+	3: "status",
+	4: "interfaces",
+	5: "name",
+	6: "is_scam",
+	7: "icon",
+	8: "memo_required",
 }
 
 // Decode decodes Account from json.
@@ -79,7 +136,7 @@ func (s *Account) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode Account to nil")
 	}
-	var requiredBitSet [1]uint8
+	var requiredBitSet [2]uint8
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
@@ -95,6 +152,101 @@ func (s *Account) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"address\"")
 			}
+		case "balance":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				v, err := d.Int64()
+				s.Balance = int64(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"balance\"")
+			}
+		case "last_transaction_lt":
+			requiredBitSet[0] |= 1 << 2
+			if err := func() error {
+				v, err := d.UInt64()
+				s.LastTransactionLt = uint64(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"last_transaction_lt\"")
+			}
+		case "status":
+			requiredBitSet[0] |= 1 << 3
+			if err := func() error {
+				v, err := d.Str()
+				s.Status = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"status\"")
+			}
+		case "interfaces":
+			if err := func() error {
+				s.Interfaces = make([]string, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem string
+					v, err := d.Str()
+					elem = string(v)
+					if err != nil {
+						return err
+					}
+					s.Interfaces = append(s.Interfaces, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"interfaces\"")
+			}
+		case "name":
+			if err := func() error {
+				s.Name.Reset()
+				if err := s.Name.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"name\"")
+			}
+		case "is_scam":
+			if err := func() error {
+				s.IsScam.Reset()
+				if err := s.IsScam.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"is_scam\"")
+			}
+		case "icon":
+			if err := func() error {
+				s.Icon.Reset()
+				if err := s.Icon.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"icon\"")
+			}
+		case "memo_required":
+			if err := func() error {
+				s.MemoRequired.Reset()
+				if err := s.MemoRequired.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"memo_required\"")
+			}
 		default:
 			return d.Skip()
 		}
@@ -104,8 +256,9 @@ func (s *Account) Decode(d *jx.Decoder) error {
 	}
 	// Validate required fields.
 	var failures []validate.FieldError
-	for i, mask := range [1]uint8{
-		0b00000001,
+	for i, mask := range [2]uint8{
+		0b00001111,
+		0b00000000,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -8658,6 +8811,40 @@ func (s *OptNftPurchaseActionPurchaseType) UnmarshalJSON(data []byte) error {
 	return s.Decode(d)
 }
 
+// Encode encodes RawAccountExtraBalance as json.
+func (o OptRawAccountExtraBalance) Encode(e *jx.Encoder) {
+	if !o.Set {
+		return
+	}
+	o.Value.Encode(e)
+}
+
+// Decode decodes RawAccountExtraBalance from json.
+func (o *OptRawAccountExtraBalance) Decode(d *jx.Decoder) error {
+	if o == nil {
+		return errors.New("invalid: unable to decode OptRawAccountExtraBalance to nil")
+	}
+	o.Set = true
+	o.Value = make(RawAccountExtraBalance)
+	if err := o.Value.Decode(d); err != nil {
+		return err
+	}
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s OptRawAccountExtraBalance) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *OptRawAccountExtraBalance) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
 // Encode encodes Refund as json.
 func (o OptRefund) Encode(e *jx.Encoder) {
 	if !o.Set {
@@ -9386,6 +9573,12 @@ func (s RawAccount) encodeFields(e *jx.Encoder) {
 		e.Int64(s.Balance)
 	}
 	{
+		if s.ExtraBalance.Set {
+			e.FieldStart("extra_balance")
+			s.ExtraBalance.Encode(e)
+		}
+	}
+	{
 		if s.Code.Set {
 			e.FieldStart("code")
 			s.Code.Encode(e)
@@ -9414,14 +9607,15 @@ func (s RawAccount) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfRawAccount = [7]string{
+var jsonFieldsNameOfRawAccount = [8]string{
 	0: "address",
 	1: "balance",
-	2: "code",
-	3: "data",
-	4: "last_transaction_lt",
-	5: "status",
-	6: "storage",
+	2: "extra_balance",
+	3: "code",
+	4: "data",
+	5: "last_transaction_lt",
+	6: "status",
+	7: "storage",
 }
 
 // Decode decodes RawAccount from json.
@@ -9457,6 +9651,16 @@ func (s *RawAccount) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"balance\"")
 			}
+		case "extra_balance":
+			if err := func() error {
+				s.ExtraBalance.Reset()
+				if err := s.ExtraBalance.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"extra_balance\"")
+			}
 		case "code":
 			if err := func() error {
 				s.Code.Reset()
@@ -9478,7 +9682,7 @@ func (s *RawAccount) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"data\"")
 			}
 		case "last_transaction_lt":
-			requiredBitSet[0] |= 1 << 4
+			requiredBitSet[0] |= 1 << 5
 			if err := func() error {
 				v, err := d.UInt64()
 				s.LastTransactionLt = uint64(v)
@@ -9490,7 +9694,7 @@ func (s *RawAccount) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"last_transaction_lt\"")
 			}
 		case "status":
-			requiredBitSet[0] |= 1 << 5
+			requiredBitSet[0] |= 1 << 6
 			if err := func() error {
 				v, err := d.Str()
 				s.Status = string(v)
@@ -9502,7 +9706,7 @@ func (s *RawAccount) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"status\"")
 			}
 		case "storage":
-			requiredBitSet[0] |= 1 << 6
+			requiredBitSet[0] |= 1 << 7
 			if err := func() error {
 				if err := s.Storage.Decode(d); err != nil {
 					return err
@@ -9521,7 +9725,7 @@ func (s *RawAccount) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b01110011,
+		0b11100011,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -9563,6 +9767,62 @@ func (s RawAccount) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *RawAccount) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s RawAccountExtraBalance) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields implements json.Marshaler.
+func (s RawAccountExtraBalance) encodeFields(e *jx.Encoder) {
+	for k, elem := range s {
+		e.FieldStart(k)
+
+		e.Str(elem)
+	}
+}
+
+// Decode decodes RawAccountExtraBalance from json.
+func (s *RawAccountExtraBalance) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode RawAccountExtraBalance to nil")
+	}
+	m := s.init()
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		var elem string
+		if err := func() error {
+			v, err := d.Str()
+			elem = string(v)
+			if err != nil {
+				return err
+			}
+			return nil
+		}(); err != nil {
+			return errors.Wrapf(err, "decode field %q", k)
+		}
+		m[string(k)] = elem
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode RawAccountExtraBalance")
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s RawAccountExtraBalance) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *RawAccountExtraBalance) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }

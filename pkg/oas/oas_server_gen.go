@@ -34,7 +34,7 @@ type Handler interface {
 	ExecGetMethod(ctx context.Context, req *ExecGetMethodReq, params ExecGetMethodParams) (ExecGetMethodRes, error)
 	// GetAccount implements getAccount operation.
 	//
-	// Get account info.
+	// Get human-friendly information about an account without low-level details.
 	//
 	// GET /v2/accounts/{account_id}
 	GetAccount(ctx context.Context, params GetAccountParams) (GetAccountRes, error)
@@ -124,7 +124,7 @@ type Handler interface {
 	GetNftItemsByOwner(ctx context.Context, params GetNftItemsByOwnerParams) (GetNftItemsByOwnerRes, error)
 	// GetRawAccount implements getRawAccount operation.
 	//
-	// Get raw account data.
+	// Get low-level information about an account taken directly from the blockchain.
 	//
 	// GET /v2/blockchain/accounts/{account_id}
 	GetRawAccount(ctx context.Context, params GetRawAccountParams) (GetRawAccountRes, error)
