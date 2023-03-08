@@ -731,6 +731,7 @@ paths:
         - Stacking
       parameters:
         - $ref: '#/components/parameters/accountIdParameter'
+        - $ref: '#/components/parameters/i18n'
       responses:
         '200':
           description: "user pools"
@@ -767,6 +768,7 @@ paths:
           schema:
             type: boolean
             example: false
+        - $ref: '#/components/parameters/i18n'
       responses:
         '200':
           description: "list of pools"
@@ -776,11 +778,26 @@ paths:
                 type: object
                 required:
                   - pools
+                  - implementations
                 properties:
                   pools:
                     type: array
                     items:
                       $ref: '#/components/schemas/PoolInfo'
+                  implementations:
+                    type: object
+                    additionalProperties:
+                      type: object
+                      required:
+                        - name
+                        - description
+                      properties:
+                        name:
+                          type: string
+                          example: TON Whales
+                        description:
+                          type: string
+                          example: "Oldest pool with minimal stacking amount 50 TON"
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -875,7 +892,14 @@ components:
       schema:
         type: string
         example: 97264395BD65A255A429B11326C84128B7D70FFED7949ABAE3036D506BA38621
-
+    i18n:
+      in: header
+      name: Accept-Language
+      required: false
+      schema:
+        type: string
+        example: "ru-RU,ru;q=0.5"
+        default: "en"
   requestBodies:
 
     MethodParameters:

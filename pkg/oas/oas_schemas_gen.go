@@ -4473,7 +4473,8 @@ func (s *SendMessageReq) SetBoc(val string) {
 }
 
 type StackingPoolsOK struct {
-	Pools []PoolInfo `json:"pools"`
+	Pools           []PoolInfo                     `json:"pools"`
+	Implementations StackingPoolsOKImplementations `json:"implementations"`
 }
 
 // GetPools returns the value of Pools.
@@ -4481,12 +4482,58 @@ func (s StackingPoolsOK) GetPools() []PoolInfo {
 	return s.Pools
 }
 
+// GetImplementations returns the value of Implementations.
+func (s StackingPoolsOK) GetImplementations() StackingPoolsOKImplementations {
+	return s.Implementations
+}
+
 // SetPools sets the value of Pools.
 func (s *StackingPoolsOK) SetPools(val []PoolInfo) {
 	s.Pools = val
 }
 
+// SetImplementations sets the value of Implementations.
+func (s *StackingPoolsOK) SetImplementations(val StackingPoolsOKImplementations) {
+	s.Implementations = val
+}
+
 func (*StackingPoolsOK) stackingPoolsRes() {}
+
+type StackingPoolsOKImplementations map[string]StackingPoolsOKImplementationsItem
+
+func (s *StackingPoolsOKImplementations) init() StackingPoolsOKImplementations {
+	m := *s
+	if m == nil {
+		m = map[string]StackingPoolsOKImplementationsItem{}
+		*s = m
+	}
+	return m
+}
+
+type StackingPoolsOKImplementationsItem struct {
+	Name        string `json:"name"`
+	Description string `json:"description"`
+}
+
+// GetName returns the value of Name.
+func (s StackingPoolsOKImplementationsItem) GetName() string {
+	return s.Name
+}
+
+// GetDescription returns the value of Description.
+func (s StackingPoolsOKImplementationsItem) GetDescription() string {
+	return s.Description
+}
+
+// SetName sets the value of Name.
+func (s *StackingPoolsOKImplementationsItem) SetName(val string) {
+	s.Name = val
+}
+
+// SetDescription sets the value of Description.
+func (s *StackingPoolsOKImplementationsItem) SetDescription(val string) {
+	s.Description = val
+}
 
 // Ref: #/components/schemas/StateInit
 type StateInit struct {

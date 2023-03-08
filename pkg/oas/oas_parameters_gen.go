@@ -1784,7 +1784,8 @@ func decodePoolsByNominatorsParams(args [1]string, r *http.Request) (params Pool
 // StackingPoolInfoParams is parameters of stackingPoolInfo operation.
 type StackingPoolInfoParams struct {
 	// Account ID.
-	AccountID string
+	AccountID      string
+	AcceptLanguage OptString
 }
 
 func unpackStackingPoolInfoParams(packed middleware.Parameters) (params StackingPoolInfoParams) {
@@ -1795,10 +1796,20 @@ func unpackStackingPoolInfoParams(packed middleware.Parameters) (params Stacking
 		}
 		params.AccountID = packed[key].(string)
 	}
+	{
+		key := middleware.ParameterKey{
+			Name: "Accept-Language",
+			In:   "header",
+		}
+		if v, ok := packed[key]; ok {
+			params.AcceptLanguage = v.(OptString)
+		}
+	}
 	return params
 }
 
 func decodeStackingPoolInfoParams(args [1]string, r *http.Request) (params StackingPoolInfoParams, _ error) {
+	h := uri.NewHeaderDecoder(r.Header)
 	// Decode path: account_id.
 	{
 		param := args[0]
@@ -1830,6 +1841,43 @@ func decodeStackingPoolInfoParams(args [1]string, r *http.Request) (params Stack
 			return params, errors.New("path: account_id: not specified")
 		}
 	}
+	// Set default value for header: Accept-Language.
+	{
+		val := string("en")
+		params.AcceptLanguage.SetTo(val)
+	}
+	// Decode header: Accept-Language.
+	{
+		cfg := uri.HeaderParameterDecodingConfig{
+			Name:    "Accept-Language",
+			Explode: false,
+		}
+		if err := h.HasParam(cfg); err == nil {
+			if err := h.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotAcceptLanguageVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotAcceptLanguageVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.AcceptLanguage.SetTo(paramsDotAcceptLanguageVal)
+				return nil
+			}); err != nil {
+				return params, errors.Wrap(err, "header: Accept-Language: parse")
+			}
+		}
+	}
 	return params, nil
 }
 
@@ -1839,6 +1887,7 @@ type StackingPoolsParams struct {
 	AvailableFor OptString
 	// Return also pools not from white list - just compatible by interfaces (maybe dangerous!).
 	IncludeUnverified OptBool
+	AcceptLanguage    OptString
 }
 
 func unpackStackingPoolsParams(packed middleware.Parameters) (params StackingPoolsParams) {
@@ -1860,11 +1909,21 @@ func unpackStackingPoolsParams(packed middleware.Parameters) (params StackingPoo
 			params.IncludeUnverified = v.(OptBool)
 		}
 	}
+	{
+		key := middleware.ParameterKey{
+			Name: "Accept-Language",
+			In:   "header",
+		}
+		if v, ok := packed[key]; ok {
+			params.AcceptLanguage = v.(OptString)
+		}
+	}
 	return params
 }
 
 func decodeStackingPoolsParams(args [0]string, r *http.Request) (params StackingPoolsParams, _ error) {
 	q := uri.NewQueryDecoder(r.URL.Query())
+	h := uri.NewHeaderDecoder(r.Header)
 	// Decode query: available_for.
 	{
 		cfg := uri.QueryParameterDecodingConfig{
@@ -1930,6 +1989,43 @@ func decodeStackingPoolsParams(args [0]string, r *http.Request) (params Stacking
 				return nil
 			}); err != nil {
 				return params, errors.Wrap(err, "query: include_unverified: parse")
+			}
+		}
+	}
+	// Set default value for header: Accept-Language.
+	{
+		val := string("en")
+		params.AcceptLanguage.SetTo(val)
+	}
+	// Decode header: Accept-Language.
+	{
+		cfg := uri.HeaderParameterDecodingConfig{
+			Name:    "Accept-Language",
+			Explode: false,
+		}
+		if err := h.HasParam(cfg); err == nil {
+			if err := h.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotAcceptLanguageVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotAcceptLanguageVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.AcceptLanguage.SetTo(paramsDotAcceptLanguageVal)
+				return nil
+			}); err != nil {
+				return params, errors.Wrap(err, "header: Accept-Language: parse")
 			}
 		}
 	}
