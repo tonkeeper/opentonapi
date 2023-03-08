@@ -8,11 +8,12 @@ import (
 	"reflect"
 
 	"github.com/go-faster/jx"
+	"github.com/tonkeeper/tongo"
+	"github.com/tonkeeper/tongo/abi"
+
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/opentonapi/pkg/oas"
 	"github.com/tonkeeper/opentonapi/pkg/references"
-	"github.com/tonkeeper/tongo"
-	"github.com/tonkeeper/tongo/abi"
 )
 
 func blockIdFromString(s string) (tongo.BlockID, error) {
@@ -214,7 +215,7 @@ func pointerToOptString(s *string) oas.OptString {
 	return o
 }
 
-func convertAccount(account *core.Account) oas.RawAccount {
+func convertToRawAccount(account *core.Account) oas.RawAccount {
 	rawAccount := oas.RawAccount{
 		Address:           account.AccountAddress.ToRaw(),
 		Balance:           account.TonBalance,
@@ -228,6 +229,13 @@ func convertAccount(account *core.Account) oas.RawAccount {
 			DuePayment:      account.Storage.DuePayment,
 		},
 	}
+	if account.ExtraBalances != nil {
+		balances := make(map[string]string, len(account.ExtraBalances))
+		for key, value := range account.ExtraBalances {
+			balances[fmt.Sprintf("%v", key)] = fmt.Sprintf("%v", value)
+		}
+		rawAccount.ExtraBalance = oas.NewOptRawAccountExtraBalance(balances)
+	}
 	if account.Code != nil && len(account.Code) != 0 {
 		rawAccount.Code = oas.NewOptString(fmt.Sprintf("%x", account.Code[:]))
 	}
@@ -235,4 +243,14 @@ func convertAccount(account *core.Account) oas.RawAccount {
 		rawAccount.Data = oas.NewOptString(fmt.Sprintf("%x", account.Data[:]))
 	}
 	return rawAccount
+}
+
+func convertToAccount(info *core.AccountInfo) oas.Account {
+	acc := oas.Account{
+		Address:           info.Account.AccountAddress.ToRaw(),
+		Balance:           info.Account.TonBalance,
+		LastTransactionLt: info.Account.LastTransactionLt,
+		Status:            info.Account.Status,
+	}
+	return acc
 }

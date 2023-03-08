@@ -122,7 +122,7 @@ paths:
 
   /v2/blockchain/accounts/{account_id}:
     get:
-      description: Get raw account data
+      description: Get low-level information about an account taken directly from the blockchain.
       operationId: getRawAccount
       tags:
         - Blockchain
@@ -275,7 +275,7 @@ paths:
 
   /v2/accounts/{account_id}:
     get:
-      description: Get account info
+      description: Get human-friendly information about an account without low-level details.
       operationId: getAccount
       tags:
         - Accounts
@@ -1434,6 +1434,10 @@ components:
           type: integer
           format: int64
           example: 123456789
+        extra_balance:
+          type: object
+          additionalProperties:
+            type: string
         code:
           type: string
           example: b5ee9c72410104010087000114ff00f4a413f4a0f2c80b0102012002030002d200dfa5ffff76a268698fe9ffe8e42c5267858f90e785ffe4f6aa6467c444ffb365ffc10802faf0807d014035e7a064b87d804077e7857fc10803dfd2407d014035e7a064b86467cd8903a32b9ba4410803ade68afd014035e7a045ea432b6363796103bb7b9363210c678b64b87d807d8040c249b3e4
@@ -1454,10 +1458,41 @@ components:
       type: object
       required:
         - address
+        - balance
+        - status
+        - last_transaction_lt
       properties:
         address:
           type: string
           example: 0:da6b1b6663a0e4d18cc8574ccd9db5296e367dd9324706f3bbd9eb1cd2caf0bf
+        balance:
+          type: integer
+          format: int64
+          example: 123456789
+        last_transaction_lt:
+          type: integer
+          format: uint64
+          example: 123456789
+        status:
+          type: string
+          example: active
+        interfaces:
+          type: array
+          items:
+            type: string
+            example: nft_sale
+        name:
+          type: string
+          example: "Ton foundation"
+        is_scam:
+          type: boolean
+          example: true
+        icon:
+          type: string
+          example: "https://ton.org/logo.png"
+        memo_required:
+          type: boolean
+          example: true
 
     MethodExecutionResult:
       type: object

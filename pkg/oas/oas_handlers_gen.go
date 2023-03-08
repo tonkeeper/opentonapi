@@ -433,7 +433,7 @@ func (s *Server) handleExecGetMethodRequest(args [2]string, w http.ResponseWrite
 
 // handleGetAccountRequest handles getAccount operation.
 //
-// Get account info.
+// Get human-friendly information about an account without low-level details.
 //
 // GET /v2/accounts/{account_id}
 func (s *Server) handleGetAccountRequest(args [1]string, w http.ResponseWriter, r *http.Request) {
@@ -1912,7 +1912,7 @@ func (s *Server) handleGetNftItemsByOwnerRequest(args [1]string, w http.Response
 
 // handleGetRawAccountRequest handles getRawAccount operation.
 //
-// Get raw account data.
+// Get low-level information about an account taken directly from the blockchain.
 //
 // GET /v2/blockchain/accounts/{account_id}
 func (s *Server) handleGetRawAccountRequest(args [1]string, w http.ResponseWriter, r *http.Request) {

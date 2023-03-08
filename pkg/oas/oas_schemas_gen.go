@@ -17,7 +17,15 @@ const (
 
 // Ref: #/components/schemas/Account
 type Account struct {
-	Address string `json:"address"`
+	Address           string    `json:"address"`
+	Balance           int64     `json:"balance"`
+	LastTransactionLt uint64    `json:"last_transaction_lt"`
+	Status            string    `json:"status"`
+	Interfaces        []string  `json:"interfaces"`
+	Name              OptString `json:"name"`
+	IsScam            OptBool   `json:"is_scam"`
+	Icon              OptString `json:"icon"`
+	MemoRequired      OptBool   `json:"memo_required"`
 }
 
 // GetAddress returns the value of Address.
@@ -25,9 +33,89 @@ func (s Account) GetAddress() string {
 	return s.Address
 }
 
+// GetBalance returns the value of Balance.
+func (s Account) GetBalance() int64 {
+	return s.Balance
+}
+
+// GetLastTransactionLt returns the value of LastTransactionLt.
+func (s Account) GetLastTransactionLt() uint64 {
+	return s.LastTransactionLt
+}
+
+// GetStatus returns the value of Status.
+func (s Account) GetStatus() string {
+	return s.Status
+}
+
+// GetInterfaces returns the value of Interfaces.
+func (s Account) GetInterfaces() []string {
+	return s.Interfaces
+}
+
+// GetName returns the value of Name.
+func (s Account) GetName() OptString {
+	return s.Name
+}
+
+// GetIsScam returns the value of IsScam.
+func (s Account) GetIsScam() OptBool {
+	return s.IsScam
+}
+
+// GetIcon returns the value of Icon.
+func (s Account) GetIcon() OptString {
+	return s.Icon
+}
+
+// GetMemoRequired returns the value of MemoRequired.
+func (s Account) GetMemoRequired() OptBool {
+	return s.MemoRequired
+}
+
 // SetAddress sets the value of Address.
 func (s *Account) SetAddress(val string) {
 	s.Address = val
+}
+
+// SetBalance sets the value of Balance.
+func (s *Account) SetBalance(val int64) {
+	s.Balance = val
+}
+
+// SetLastTransactionLt sets the value of LastTransactionLt.
+func (s *Account) SetLastTransactionLt(val uint64) {
+	s.LastTransactionLt = val
+}
+
+// SetStatus sets the value of Status.
+func (s *Account) SetStatus(val string) {
+	s.Status = val
+}
+
+// SetInterfaces sets the value of Interfaces.
+func (s *Account) SetInterfaces(val []string) {
+	s.Interfaces = val
+}
+
+// SetName sets the value of Name.
+func (s *Account) SetName(val OptString) {
+	s.Name = val
+}
+
+// SetIsScam sets the value of IsScam.
+func (s *Account) SetIsScam(val OptBool) {
+	s.IsScam = val
+}
+
+// SetIcon sets the value of Icon.
+func (s *Account) SetIcon(val OptString) {
+	s.Icon = val
+}
+
+// SetMemoRequired sets the value of MemoRequired.
+func (s *Account) SetMemoRequired(val OptBool) {
+	s.MemoRequired = val
 }
 
 func (*Account) getAccountRes() {}
@@ -3698,6 +3786,52 @@ func (o OptNftPurchaseActionPurchaseType) Or(d NftPurchaseActionPurchaseType) Nf
 	return d
 }
 
+// NewOptRawAccountExtraBalance returns new OptRawAccountExtraBalance with value set to v.
+func NewOptRawAccountExtraBalance(v RawAccountExtraBalance) OptRawAccountExtraBalance {
+	return OptRawAccountExtraBalance{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptRawAccountExtraBalance is optional RawAccountExtraBalance.
+type OptRawAccountExtraBalance struct {
+	Value RawAccountExtraBalance
+	Set   bool
+}
+
+// IsSet returns true if OptRawAccountExtraBalance was set.
+func (o OptRawAccountExtraBalance) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptRawAccountExtraBalance) Reset() {
+	var v RawAccountExtraBalance
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptRawAccountExtraBalance) SetTo(v RawAccountExtraBalance) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptRawAccountExtraBalance) Get() (v RawAccountExtraBalance, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptRawAccountExtraBalance) Or(d RawAccountExtraBalance) RawAccountExtraBalance {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptRefund returns new OptRefund with value set to v.
 func NewOptRefund(v Refund) OptRefund {
 	return OptRefund{
@@ -4290,13 +4424,14 @@ func (s *Price) SetTokenName(val string) {
 
 // Ref: #/components/schemas/RawAccount
 type RawAccount struct {
-	Address           string             `json:"address"`
-	Balance           int64              `json:"balance"`
-	Code              OptString          `json:"code"`
-	Data              OptString          `json:"data"`
-	LastTransactionLt uint64             `json:"last_transaction_lt"`
-	Status            string             `json:"status"`
-	Storage           AccountStorageInfo `json:"storage"`
+	Address           string                    `json:"address"`
+	Balance           int64                     `json:"balance"`
+	ExtraBalance      OptRawAccountExtraBalance `json:"extra_balance"`
+	Code              OptString                 `json:"code"`
+	Data              OptString                 `json:"data"`
+	LastTransactionLt uint64                    `json:"last_transaction_lt"`
+	Status            string                    `json:"status"`
+	Storage           AccountStorageInfo        `json:"storage"`
 }
 
 // GetAddress returns the value of Address.
@@ -4307,6 +4442,11 @@ func (s RawAccount) GetAddress() string {
 // GetBalance returns the value of Balance.
 func (s RawAccount) GetBalance() int64 {
 	return s.Balance
+}
+
+// GetExtraBalance returns the value of ExtraBalance.
+func (s RawAccount) GetExtraBalance() OptRawAccountExtraBalance {
+	return s.ExtraBalance
 }
 
 // GetCode returns the value of Code.
@@ -4344,6 +4484,11 @@ func (s *RawAccount) SetBalance(val int64) {
 	s.Balance = val
 }
 
+// SetExtraBalance sets the value of ExtraBalance.
+func (s *RawAccount) SetExtraBalance(val OptRawAccountExtraBalance) {
+	s.ExtraBalance = val
+}
+
 // SetCode sets the value of Code.
 func (s *RawAccount) SetCode(val OptString) {
 	s.Code = val
@@ -4370,6 +4515,17 @@ func (s *RawAccount) SetStorage(val AccountStorageInfo) {
 }
 
 func (*RawAccount) getRawAccountRes() {}
+
+type RawAccountExtraBalance map[string]string
+
+func (s *RawAccountExtraBalance) init() RawAccountExtraBalance {
+	m := *s
+	if m == nil {
+		m = map[string]string{}
+		*s = m
+	}
+	return m
+}
 
 // Ref: #/components/schemas/Refund
 type Refund struct {

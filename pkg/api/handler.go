@@ -4,12 +4,14 @@ import (
 	"context"
 
 	"github.com/go-faster/errors"
+
 	"github.com/tonkeeper/opentonapi/internal/g"
+
+	"github.com/tonkeeper/tongo"
 
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/opentonapi/pkg/oas"
 	"github.com/tonkeeper/opentonapi/pkg/references"
-	"github.com/tonkeeper/tongo"
 )
 
 // Compile-time check for Handler.
@@ -28,16 +30,29 @@ func NewHandler(s storage, state chainState) Handler {
 	}
 }
 
+func (h Handler) GetAccount(ctx context.Context, params oas.GetAccountParams) (oas.GetAccountRes, error) {
+	accountID, err := tongo.ParseAccountID(params.AccountID)
+	if err != nil {
+		return &oas.BadRequest{Error: err.Error()}, nil
+	}
+	info, err := h.storage.GetAccountInfo(ctx, accountID)
+	if err != nil {
+		return &oas.BadRequest{Error: err.Error()}, nil
+	}
+	res := convertToAccount(info)
+	return &res, nil
+}
+
 func (h Handler) GetRawAccount(ctx context.Context, params oas.GetRawAccountParams) (r oas.GetRawAccountRes, _ error) {
 	accountID, err := tongo.ParseAccountID(params.AccountID)
 	if err != nil {
 		return &oas.BadRequest{Error: err.Error()}, nil
 	}
-	rawAccount, err := h.storage.GetAccount(ctx, accountID)
+	rawAccount, err := h.storage.GetRawAccount(ctx, accountID)
 	if err != nil {
 		return &oas.BadRequest{Error: err.Error()}, nil
 	}
-	res := convertAccount(rawAccount)
+	res := convertToRawAccount(rawAccount)
 	return &res, nil
 }
 

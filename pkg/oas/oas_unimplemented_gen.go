@@ -51,7 +51,7 @@ func (UnimplementedHandler) ExecGetMethod(ctx context.Context, req *ExecGetMetho
 
 // GetAccount implements getAccount operation.
 //
-// Get account info.
+// Get human-friendly information about an account without low-level details.
 //
 // GET /v2/accounts/{account_id}
 func (UnimplementedHandler) GetAccount(ctx context.Context, params GetAccountParams) (r GetAccountRes, _ error) {
@@ -186,7 +186,7 @@ func (UnimplementedHandler) GetNftItemsByOwner(ctx context.Context, params GetNf
 
 // GetRawAccount implements getRawAccount operation.
 //
-// Get raw account data.
+// Get low-level information about an account taken directly from the blockchain.
 //
 // GET /v2/blockchain/accounts/{account_id}
 func (UnimplementedHandler) GetRawAccount(ctx context.Context, params GetRawAccountParams) (r GetRawAccountRes, _ error) {
