@@ -44,8 +44,17 @@ func (UnimplementedHandler) EmulateMessage(ctx context.Context, req OptEmulateMe
 //
 // Execute get method for account.
 //
+// GET /v2/blockchain/accounts/{account_id}/methods/{method_name}
+func (UnimplementedHandler) ExecGetMethod(ctx context.Context, params ExecGetMethodParams) (r ExecGetMethodRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// ExecGetMethodPost implements execGetMethodPost operation.
+//
+// Execute get method for account.
+//
 // POST /v2/blockchain/accounts/{account_id}/methods/{method_name}
-func (UnimplementedHandler) ExecGetMethod(ctx context.Context, req *ExecGetMethodReq, params ExecGetMethodParams) (r ExecGetMethodRes, _ error) {
+func (UnimplementedHandler) ExecGetMethodPost(ctx context.Context, req *ExecGetMethodPostReq, params ExecGetMethodPostParams) (r ExecGetMethodPostRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 

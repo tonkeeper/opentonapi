@@ -193,7 +193,7 @@ paths:
   /v2/blockchain/accounts/{account_id}/methods/{method_name}:
     post:
       description: Execute get method for account
-      operationId: execGetMethod
+      operationId: execGetMethodPost
       tags:
         - Blockchain
       parameters:
@@ -201,6 +201,34 @@ paths:
         - $ref: '#/components/parameters/methodNameParameter'
       requestBody:
         $ref: "#/components/requestBodies/MethodParameters"
+      responses:
+        '200':
+          description: "result"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MethodExecutionResult'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+    get:
+      description: Execute get method for account
+      operationId: execGetMethod
+      tags:
+        - Blockchain
+      parameters:
+        - $ref: '#/components/parameters/accountIdParameter'
+        - $ref: '#/components/parameters/methodNameParameter'
+        - name: args
+          in: query
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
       responses:
         '200':
           description: "result"
@@ -1522,11 +1550,51 @@ components:
       type: object
       required:
         - success
+        - exit_code
+        - stack
       properties:
         success:
           type: boolean
           example: true
-
+        exit_code:
+          type: integer
+          example: 0
+          description: tvm exit code
+        stack:
+          type: array
+          items:
+            $ref: "#/components/schemas/TvmStackRecord"
+        decoded:
+          type: object
+          additionalProperties: true
+          example: {"wallet": "EQCJ7yjjxkt_EuuzvUbpdJGebYCvTUzC5rLzJWzUTiDoX_US"}
+    TvmStackRecord:
+      type: object
+      required:
+        - type
+      properties:
+        type:
+          type: string
+          example: "cell"
+          enum:
+            - cell
+            - int
+            - nan
+            - "null"
+            - tuple
+        cell:
+          type: string
+          example: "te6cckEBAQEAJAAAQ4ARPeUceMlv4l12d6jdLpIzzbAV6amYXNZeZK2aicQdC/Apj8aJ"
+        slice:
+          type: string
+          example: ""
+        int:
+          type: integer
+        tuple:
+          type: array
+          example: []
+          items:
+            $ref: '#/components/schemas/TvmStackRecord'
     Config:
       type: object
       required:

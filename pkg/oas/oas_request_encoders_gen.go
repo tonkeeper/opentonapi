@@ -31,8 +31,8 @@ func encodeEmulateMessageRequest(
 	return nil
 }
 
-func encodeExecGetMethodRequest(
-	req *ExecGetMethodReq,
+func encodeExecGetMethodPostRequest(
+	req *ExecGetMethodPostReq,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"

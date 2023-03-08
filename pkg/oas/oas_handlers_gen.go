@@ -317,7 +317,7 @@ func (s *Server) handleEmulateMessageRequest(args [0]string, w http.ResponseWrit
 //
 // Execute get method for account.
 //
-// POST /v2/blockchain/accounts/{account_id}/methods/{method_name}
+// GET /v2/blockchain/accounts/{account_id}/methods/{method_name}
 func (s *Server) handleExecGetMethodRequest(args [2]string, w http.ResponseWriter, r *http.Request) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("execGetMethod"),
@@ -362,7 +362,114 @@ func (s *Server) handleExecGetMethodRequest(args [2]string, w http.ResponseWrite
 		s.cfg.ErrorHandler(ctx, w, r, err)
 		return
 	}
-	request, close, err := s.decodeExecGetMethodRequest(r)
+
+	var response ExecGetMethodRes
+	if m := s.cfg.Middleware; m != nil {
+		mreq := middleware.Request{
+			Context:       ctx,
+			OperationName: "ExecGetMethod",
+			OperationID:   "execGetMethod",
+			Body:          nil,
+			Params: middleware.Parameters{
+				{
+					Name: "account_id",
+					In:   "path",
+				}: params.AccountID,
+				{
+					Name: "method_name",
+					In:   "path",
+				}: params.MethodName,
+				{
+					Name: "args",
+					In:   "query",
+				}: params.Args,
+			},
+			Raw: r,
+		}
+
+		type (
+			Request  = struct{}
+			Params   = ExecGetMethodParams
+			Response = ExecGetMethodRes
+		)
+		response, err = middleware.HookMiddleware[
+			Request,
+			Params,
+			Response,
+		](
+			m,
+			mreq,
+			unpackExecGetMethodParams,
+			func(ctx context.Context, request Request, params Params) (Response, error) {
+				return s.h.ExecGetMethod(ctx, params)
+			},
+		)
+	} else {
+		response, err = s.h.ExecGetMethod(ctx, params)
+	}
+	if err != nil {
+		recordError("Internal", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+
+	if err := encodeExecGetMethodResponse(response, w, span); err != nil {
+		recordError("EncodeResponse", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+}
+
+// handleExecGetMethodPostRequest handles execGetMethodPost operation.
+//
+// Execute get method for account.
+//
+// POST /v2/blockchain/accounts/{account_id}/methods/{method_name}
+func (s *Server) handleExecGetMethodPostRequest(args [2]string, w http.ResponseWriter, r *http.Request) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("execGetMethodPost"),
+	}
+
+	// Start a span for this request.
+	ctx, span := s.cfg.Tracer.Start(r.Context(), "ExecGetMethodPost",
+		trace.WithAttributes(otelAttrs...),
+		serverSpanKind,
+	)
+	defer span.End()
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		elapsedDuration := time.Since(startTime)
+		s.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+	}()
+
+	// Increment request counter.
+	s.requests.Add(ctx, 1, otelAttrs...)
+
+	var (
+		recordError = func(stage string, err error) {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			s.errors.Add(ctx, 1, otelAttrs...)
+		}
+		err          error
+		opErrContext = ogenerrors.OperationContext{
+			Name: "ExecGetMethodPost",
+			ID:   "execGetMethodPost",
+		}
+	)
+	params, err := decodeExecGetMethodPostParams(args, r)
+	if err != nil {
+		err = &ogenerrors.DecodeParamsError{
+			OperationContext: opErrContext,
+			Err:              err,
+		}
+		recordError("DecodeParams", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+	request, close, err := s.decodeExecGetMethodPostRequest(r)
 	if err != nil {
 		err = &ogenerrors.DecodeRequestError{
 			OperationContext: opErrContext,
@@ -378,12 +485,12 @@ func (s *Server) handleExecGetMethodRequest(args [2]string, w http.ResponseWrite
 		}
 	}()
 
-	var response ExecGetMethodRes
+	var response ExecGetMethodPostRes
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:       ctx,
-			OperationName: "ExecGetMethod",
-			OperationID:   "execGetMethod",
+			OperationName: "ExecGetMethodPost",
+			OperationID:   "execGetMethodPost",
 			Body:          request,
 			Params: middleware.Parameters{
 				{
@@ -399,9 +506,9 @@ func (s *Server) handleExecGetMethodRequest(args [2]string, w http.ResponseWrite
 		}
 
 		type (
-			Request  = *ExecGetMethodReq
-			Params   = ExecGetMethodParams
-			Response = ExecGetMethodRes
+			Request  = *ExecGetMethodPostReq
+			Params   = ExecGetMethodPostParams
+			Response = ExecGetMethodPostRes
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -410,13 +517,13 @@ func (s *Server) handleExecGetMethodRequest(args [2]string, w http.ResponseWrite
 		](
 			m,
 			mreq,
-			unpackExecGetMethodParams,
+			unpackExecGetMethodPostParams,
 			func(ctx context.Context, request Request, params Params) (Response, error) {
-				return s.h.ExecGetMethod(ctx, request, params)
+				return s.h.ExecGetMethodPost(ctx, request, params)
 			},
 		)
 	} else {
-		response, err = s.h.ExecGetMethod(ctx, request, params)
+		response, err = s.h.ExecGetMethodPost(ctx, request, params)
 	}
 	if err != nil {
 		recordError("Internal", err)
@@ -424,7 +531,7 @@ func (s *Server) handleExecGetMethodRequest(args [2]string, w http.ResponseWrite
 		return
 	}
 
-	if err := encodeExecGetMethodResponse(response, w, span); err != nil {
+	if err := encodeExecGetMethodPostResponse(response, w, span); err != nil {
 		recordError("EncodeResponse", err)
 		s.cfg.ErrorHandler(ctx, w, r, err)
 		return

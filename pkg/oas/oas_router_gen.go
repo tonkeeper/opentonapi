@@ -273,13 +273,18 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 							if len(elem) == 0 {
 								// Leaf node.
 								switch r.Method {
-								case "POST":
+								case "GET":
 									s.handleExecGetMethodRequest([2]string{
 										args[0],
 										args[1],
 									}, w, r)
+								case "POST":
+									s.handleExecGetMethodPostRequest([2]string{
+										args[0],
+										args[1],
+									}, w, r)
 								default:
-									s.notAllowed(w, r, "POST")
+									s.notAllowed(w, r, "GET,POST")
 								}
 
 								return
@@ -1125,10 +1130,17 @@ func (s *Server) FindRoute(method, path string) (r Route, _ bool) {
 
 							if len(elem) == 0 {
 								switch method {
-								case "POST":
+								case "GET":
 									// Leaf: ExecGetMethod
 									r.name = "ExecGetMethod"
 									r.operationID = "execGetMethod"
+									r.args = args
+									r.count = 2
+									return r, true
+								case "POST":
+									// Leaf: ExecGetMethodPost
+									r.name = "ExecGetMethodPost"
+									r.operationID = "execGetMethodPost"
 									r.args = args
 									r.count = 2
 									return r, true

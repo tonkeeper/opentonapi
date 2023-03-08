@@ -76,8 +76,8 @@ func (s *Server) decodeEmulateMessageRequest(r *http.Request) (
 	}
 }
 
-func (s *Server) decodeExecGetMethodRequest(r *http.Request) (
-	req *ExecGetMethodReq,
+func (s *Server) decodeExecGetMethodPostRequest(r *http.Request) (
+	req *ExecGetMethodPostReq,
 	close func() error,
 	rerr error,
 ) {
@@ -109,7 +109,7 @@ func (s *Server) decodeExecGetMethodRequest(r *http.Request) (
 			return req, close, nil
 		}
 
-		var request *ExecGetMethodReq
+		var request *ExecGetMethodPostReq
 		buf, err := io.ReadAll(r.Body)
 		if err != nil {
 			return req, close, err
@@ -122,7 +122,7 @@ func (s *Server) decodeExecGetMethodRequest(r *http.Request) (
 		d := jx.DecodeBytes(buf)
 		if err := func() error {
 			request = nil
-			var elem ExecGetMethodReq
+			var elem ExecGetMethodPostReq
 			if err := elem.Decode(d); err != nil {
 				return err
 			}
