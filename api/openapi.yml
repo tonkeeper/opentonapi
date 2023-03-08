@@ -731,7 +731,7 @@ paths:
         - Stacking
       parameters:
         - $ref: '#/components/parameters/accountIdParameter'
-        - $ref: '#/components/parameters/internalization'
+        - $ref: '#/components/parameters/i18n'
       responses:
         '200':
           description: "user pools"
@@ -768,7 +768,7 @@ paths:
           schema:
             type: boolean
             example: false
-        - $ref: '#/components/parameters/internalization'
+        - $ref: '#/components/parameters/i18n'
       responses:
         '200':
           description: "list of pools"
@@ -892,7 +892,7 @@ components:
       schema:
         type: string
         example: 97264395BD65A255A429B11326C84128B7D70FFED7949ABAE3036D506BA38621
-    internalization:
+    i18n:
       in: header
       name: Accept-Language
       required: false

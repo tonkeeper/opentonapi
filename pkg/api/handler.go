@@ -127,7 +127,7 @@ func (h Handler) StackingPools(ctx context.Context, params oas.StackingPoolsPara
 		},
 		string(oas.PoolInfoImplementationTf): {
 			Name:        "TON Foundation",
-			Description: "Minimum deposit 10000TON",
+			Description: "Minimum deposit 10000 TON",
 		},
 	})
 	switch normalizeLanguage(params.AcceptLanguage.Value) {
@@ -139,7 +139,7 @@ func (h Handler) StackingPools(ctx context.Context, params oas.StackingPoolsPara
 			},
 			string(oas.PoolInfoImplementationTf): {
 				Name:        "TON Foundation",
-				Description: "Minimum deposit 10000TON",
+				Description: "Минимальный депозит от 10000 ТОН",
 			},
 		})
 	}
