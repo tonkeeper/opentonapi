@@ -2848,6 +2848,10 @@ func (s *Server) handleStackingPoolInfoRequest(args [1]string, w http.ResponseWr
 					Name: "account_id",
 					In:   "path",
 				}: params.AccountID,
+				{
+					Name: "Accept-Language",
+					In:   "header",
+				}: params.AcceptLanguage,
 			},
 			Raw: r,
 		}
@@ -2951,6 +2955,10 @@ func (s *Server) handleStackingPoolsRequest(args [0]string, w http.ResponseWrite
 					Name: "include_unverified",
 					In:   "query",
 				}: params.IncludeUnverified,
+				{
+					Name: "Accept-Language",
+					In:   "header",
+				}: params.AcceptLanguage,
 			},
 			Raw: r,
 		}

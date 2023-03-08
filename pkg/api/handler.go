@@ -120,6 +120,30 @@ func (h Handler) StackingPools(ctx context.Context, params oas.StackingPoolsPara
 		}
 		result.Pools = append(result.Pools, convertStackingWhalesPool(k, w, poolStatus, poolConfig, h.state.GetAPY()))
 	}
+	result.SetImplementations(map[string]oas.StackingPoolsOKImplementationsItem{
+		string(oas.PoolInfoImplementationWhales): {
+			Name:        "TON Whales",
+			Description: "Minimum deposit from 50 TON",
+		},
+		string(oas.PoolInfoImplementationTf): {
+			Name:        "TON Foundation",
+			Description: "Minimum deposit 10000TON",
+		},
+	})
+	switch normalizeLanguage(params.AcceptLanguage.Value) {
+	case "ru":
+		result.SetImplementations(map[string]oas.StackingPoolsOKImplementationsItem{
+			string(oas.PoolInfoImplementationWhales): {
+				Name:        "TON Whales",
+				Description: "Минимальный депозит от 50 ТОН",
+			},
+			string(oas.PoolInfoImplementationTf): {
+				Name:        "TON Foundation",
+				Description: "Minimum deposit 10000TON",
+			},
+		})
+	}
+
 	return &result, nil
 }
 
