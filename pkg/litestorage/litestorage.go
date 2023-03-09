@@ -48,7 +48,6 @@ func (s *LiteStorage) GetAccountInfo(ctx context.Context, id tongo.AccountID) (*
 	}
 	return &core.AccountInfo{
 		Account: *account,
-		// TODO: populate all fields
 	}, nil
 }
 

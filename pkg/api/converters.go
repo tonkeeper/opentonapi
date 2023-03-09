@@ -291,6 +291,19 @@ func convertToAccount(info *core.AccountInfo) oas.Account {
 		Balance:           info.Account.TonBalance,
 		LastTransactionLt: int64(info.Account.LastTransactionLt),
 		Status:            info.Account.Status,
+		Interfaces:        info.Account.Interfaces,
+	}
+	if info.Name != nil {
+		acc.Name = oas.NewOptString(*info.Name)
+	}
+	if info.Icon != nil {
+		acc.Icon = oas.NewOptString(*info.Icon)
+	}
+	if info.IsScam != nil {
+		acc.IsScam = oas.NewOptBool(*info.IsScam)
+	}
+	if info.MemoRequired != nil {
+		acc.MemoRequired = oas.NewOptBool(*info.MemoRequired)
 	}
 	return acc
 }
