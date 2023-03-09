@@ -852,6 +852,7 @@ func (s *BadRequest) SetError(val string) {
 func (*BadRequest) dnsBackResolveRes()            {}
 func (*BadRequest) dnsResolveRes()                {}
 func (*BadRequest) emulateMessageRes()            {}
+func (*BadRequest) execGetMethodPostRes()         {}
 func (*BadRequest) execGetMethodRes()             {}
 func (*BadRequest) getAccountRes()                {}
 func (*BadRequest) getAccountTransactionsRes()    {}
@@ -1601,7 +1602,7 @@ func (s *Event) SetInProgress(val bool) {
 
 func (*Event) getEventRes() {}
 
-type ExecGetMethodReq struct{}
+type ExecGetMethodPostReq struct{}
 
 // Ref: #/components/schemas/Fee
 type Fee struct {
@@ -1717,6 +1718,7 @@ func (s *InternalError) SetError(val string) {
 func (*InternalError) dnsBackResolveRes()            {}
 func (*InternalError) dnsResolveRes()                {}
 func (*InternalError) emulateMessageRes()            {}
+func (*InternalError) execGetMethodPostRes()         {}
 func (*InternalError) execGetMethodRes()             {}
 func (*InternalError) getAccountRes()                {}
 func (*InternalError) getAccountTransactionsRes()    {}
@@ -2329,6 +2331,10 @@ func (s *MessageDecodedBody) init() MessageDecodedBody {
 // Ref: #/components/schemas/MethodExecutionResult
 type MethodExecutionResult struct {
 	Success bool `json:"success"`
+	// Tvm exit code.
+	ExitCode int                             `json:"exit_code"`
+	Stack    []TvmStackRecord                `json:"stack"`
+	Decoded  OptMethodExecutionResultDecoded `json:"decoded"`
 }
 
 // GetSuccess returns the value of Success.
@@ -2336,12 +2342,54 @@ func (s MethodExecutionResult) GetSuccess() bool {
 	return s.Success
 }
 
+// GetExitCode returns the value of ExitCode.
+func (s MethodExecutionResult) GetExitCode() int {
+	return s.ExitCode
+}
+
+// GetStack returns the value of Stack.
+func (s MethodExecutionResult) GetStack() []TvmStackRecord {
+	return s.Stack
+}
+
+// GetDecoded returns the value of Decoded.
+func (s MethodExecutionResult) GetDecoded() OptMethodExecutionResultDecoded {
+	return s.Decoded
+}
+
 // SetSuccess sets the value of Success.
 func (s *MethodExecutionResult) SetSuccess(val bool) {
 	s.Success = val
 }
 
-func (*MethodExecutionResult) execGetMethodRes() {}
+// SetExitCode sets the value of ExitCode.
+func (s *MethodExecutionResult) SetExitCode(val int) {
+	s.ExitCode = val
+}
+
+// SetStack sets the value of Stack.
+func (s *MethodExecutionResult) SetStack(val []TvmStackRecord) {
+	s.Stack = val
+}
+
+// SetDecoded sets the value of Decoded.
+func (s *MethodExecutionResult) SetDecoded(val OptMethodExecutionResultDecoded) {
+	s.Decoded = val
+}
+
+func (*MethodExecutionResult) execGetMethodPostRes() {}
+func (*MethodExecutionResult) execGetMethodRes()     {}
+
+type MethodExecutionResultDecoded map[string]jx.Raw
+
+func (s *MethodExecutionResultDecoded) init() MethodExecutionResultDecoded {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
 
 // Ref: #/components/schemas/NftCollection
 type NftCollection struct {
@@ -3234,6 +3282,52 @@ func (o OptEmulateMessageReq) Or(d EmulateMessageReq) EmulateMessageReq {
 	return d
 }
 
+// NewOptInt returns new OptInt with value set to v.
+func NewOptInt(v int) OptInt {
+	return OptInt{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptInt is optional int.
+type OptInt struct {
+	Value int
+	Set   bool
+}
+
+// IsSet returns true if OptInt was set.
+func (o OptInt) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptInt) Reset() {
+	var v int
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptInt) SetTo(v int) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptInt) Get() (v int, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptInt) Or(d int) int {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptInt32 returns new OptInt32 with value set to v.
 func NewOptInt32(v int32) OptInt32 {
 	return OptInt32{
@@ -3504,6 +3598,52 @@ func (o OptMessage) Get() (v Message, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptMessage) Or(d Message) Message {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptMethodExecutionResultDecoded returns new OptMethodExecutionResultDecoded with value set to v.
+func NewOptMethodExecutionResultDecoded(v MethodExecutionResultDecoded) OptMethodExecutionResultDecoded {
+	return OptMethodExecutionResultDecoded{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptMethodExecutionResultDecoded is optional MethodExecutionResultDecoded.
+type OptMethodExecutionResultDecoded struct {
+	Value MethodExecutionResultDecoded
+	Set   bool
+}
+
+// IsSet returns true if OptMethodExecutionResultDecoded was set.
+func (o OptMethodExecutionResultDecoded) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptMethodExecutionResultDecoded) Reset() {
+	var v MethodExecutionResultDecoded
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptMethodExecutionResultDecoded) SetTo(v MethodExecutionResultDecoded) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptMethodExecutionResultDecoded) Get() (v MethodExecutionResultDecoded, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptMethodExecutionResultDecoded) Or(d MethodExecutionResultDecoded) MethodExecutionResultDecoded {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -5456,6 +5596,75 @@ func (s *Transactions) SetTransactions(val []Transaction) {
 func (*Transactions) getAccountTransactionsRes() {}
 func (*Transactions) getBlockTransactionsRes()   {}
 
+// Ref: #/components/schemas/TvmStackRecord
+type TvmStackRecord struct {
+	Type  TvmStackRecordType `json:"type"`
+	Cell  OptString          `json:"cell"`
+	Slice OptString          `json:"slice"`
+	Int   OptInt             `json:"int"`
+	Tuple []TvmStackRecord   `json:"tuple"`
+}
+
+// GetType returns the value of Type.
+func (s TvmStackRecord) GetType() TvmStackRecordType {
+	return s.Type
+}
+
+// GetCell returns the value of Cell.
+func (s TvmStackRecord) GetCell() OptString {
+	return s.Cell
+}
+
+// GetSlice returns the value of Slice.
+func (s TvmStackRecord) GetSlice() OptString {
+	return s.Slice
+}
+
+// GetInt returns the value of Int.
+func (s TvmStackRecord) GetInt() OptInt {
+	return s.Int
+}
+
+// GetTuple returns the value of Tuple.
+func (s TvmStackRecord) GetTuple() []TvmStackRecord {
+	return s.Tuple
+}
+
+// SetType sets the value of Type.
+func (s *TvmStackRecord) SetType(val TvmStackRecordType) {
+	s.Type = val
+}
+
+// SetCell sets the value of Cell.
+func (s *TvmStackRecord) SetCell(val OptString) {
+	s.Cell = val
+}
+
+// SetSlice sets the value of Slice.
+func (s *TvmStackRecord) SetSlice(val OptString) {
+	s.Slice = val
+}
+
+// SetInt sets the value of Int.
+func (s *TvmStackRecord) SetInt(val OptInt) {
+	s.Int = val
+}
+
+// SetTuple sets the value of Tuple.
+func (s *TvmStackRecord) SetTuple(val []TvmStackRecord) {
+	s.Tuple = val
+}
+
+type TvmStackRecordType string
+
+const (
+	TvmStackRecordTypeCell  TvmStackRecordType = "cell"
+	TvmStackRecordTypeInt   TvmStackRecordType = "int"
+	TvmStackRecordTypeNan   TvmStackRecordType = "nan"
+	TvmStackRecordTypeNull  TvmStackRecordType = "null"
+	TvmStackRecordTypeTuple TvmStackRecordType = "tuple"
+)
+
 // Ref: #/components/schemas/UnSubscriptionAction
 type UnSubscriptionAction struct {
 	Subscriber   AccountAddress `json:"subscriber"`
@@ -5510,6 +5719,7 @@ func (s *UnauthorizedError) SetError(val string) {
 func (*UnauthorizedError) dnsBackResolveRes()            {}
 func (*UnauthorizedError) dnsResolveRes()                {}
 func (*UnauthorizedError) emulateMessageRes()            {}
+func (*UnauthorizedError) execGetMethodPostRes()         {}
 func (*UnauthorizedError) execGetMethodRes()             {}
 func (*UnauthorizedError) getAccountRes()                {}
 func (*UnauthorizedError) getAccountTransactionsRes()    {}

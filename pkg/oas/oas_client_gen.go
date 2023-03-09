@@ -282,8 +282,8 @@ func (c *Client) EmulateMessage(ctx context.Context, request OptEmulateMessageRe
 //
 // Execute get method for account.
 //
-// POST /v2/blockchain/accounts/{account_id}/methods/{method_name}
-func (c *Client) ExecGetMethod(ctx context.Context, request *ExecGetMethodReq, params ExecGetMethodParams) (res ExecGetMethodRes, err error) {
+// GET /v2/blockchain/accounts/{account_id}/methods/{method_name}
+func (c *Client) ExecGetMethod(ctx context.Context, params ExecGetMethodParams) (res ExecGetMethodRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("execGetMethod"),
 	}
@@ -347,13 +347,37 @@ func (c *Client) ExecGetMethod(ctx context.Context, request *ExecGetMethodReq, p
 		u.Path += e.Result()
 	}
 
+	stage = "EncodeQueryParams"
+	q := uri.NewQueryEncoder()
+	{
+		// Encode "args" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "args",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			return e.EncodeArray(func(e uri.Encoder) error {
+				for i, item := range params.Args {
+					if err := func() error {
+						return e.EncodeValue(conv.StringToString(item))
+					}(); err != nil {
+						return errors.Wrapf(err, "[%d]", i)
+					}
+				}
+				return nil
+			})
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	u.RawQuery = q.Values().Encode()
+
 	stage = "EncodeRequest"
-	r, err := ht.NewRequest(ctx, "POST", u, nil)
+	r, err := ht.NewRequest(ctx, "GET", u, nil)
 	if err != nil {
 		return res, errors.Wrap(err, "create request")
-	}
-	if err := encodeExecGetMethodRequest(request, r); err != nil {
-		return res, errors.Wrap(err, "encode request")
 	}
 
 	stage = "SendRequest"
@@ -365,6 +389,100 @@ func (c *Client) ExecGetMethod(ctx context.Context, request *ExecGetMethodReq, p
 
 	stage = "DecodeResponse"
 	result, err := decodeExecGetMethodResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// ExecGetMethodPost invokes execGetMethodPost operation.
+//
+// Execute get method for account.
+//
+// POST /v2/blockchain/accounts/{account_id}/methods/{method_name}
+func (c *Client) ExecGetMethodPost(ctx context.Context, request *ExecGetMethodPostReq, params ExecGetMethodPostParams) (res ExecGetMethodPostRes, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("execGetMethodPost"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, otelAttrs...)
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, "ExecGetMethodPost",
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, otelAttrs...)
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	u.Path += "/v2/blockchain/accounts/"
+	{
+		// Encode "account_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "account_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.AccountID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		u.Path += e.Result()
+	}
+	u.Path += "/methods/"
+	{
+		// Encode "method_name" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "method_name",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.MethodName))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		u.Path += e.Result()
+	}
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "POST", u, nil)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeExecGetMethodPostRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeExecGetMethodPostResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}

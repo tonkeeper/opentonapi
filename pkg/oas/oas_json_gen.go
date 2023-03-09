@@ -4634,22 +4634,22 @@ func (s *Event) UnmarshalJSON(data []byte) error {
 }
 
 // Encode implements json.Marshaler.
-func (s ExecGetMethodReq) Encode(e *jx.Encoder) {
+func (s ExecGetMethodPostReq) Encode(e *jx.Encoder) {
 	e.ObjStart()
 	s.encodeFields(e)
 	e.ObjEnd()
 }
 
 // encodeFields encodes fields.
-func (s ExecGetMethodReq) encodeFields(e *jx.Encoder) {
+func (s ExecGetMethodPostReq) encodeFields(e *jx.Encoder) {
 }
 
-var jsonFieldsNameOfExecGetMethodReq = [0]string{}
+var jsonFieldsNameOfExecGetMethodPostReq = [0]string{}
 
-// Decode decodes ExecGetMethodReq from json.
-func (s *ExecGetMethodReq) Decode(d *jx.Decoder) error {
+// Decode decodes ExecGetMethodPostReq from json.
+func (s *ExecGetMethodPostReq) Decode(d *jx.Decoder) error {
 	if s == nil {
-		return errors.New("invalid: unable to decode ExecGetMethodReq to nil")
+		return errors.New("invalid: unable to decode ExecGetMethodPostReq to nil")
 	}
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
@@ -4659,21 +4659,21 @@ func (s *ExecGetMethodReq) Decode(d *jx.Decoder) error {
 		}
 		return nil
 	}); err != nil {
-		return errors.Wrap(err, "decode ExecGetMethodReq")
+		return errors.Wrap(err, "decode ExecGetMethodPostReq")
 	}
 
 	return nil
 }
 
 // MarshalJSON implements stdjson.Marshaler.
-func (s ExecGetMethodReq) MarshalJSON() ([]byte, error) {
+func (s ExecGetMethodPostReq) MarshalJSON() ([]byte, error) {
 	e := jx.Encoder{}
 	s.Encode(&e)
 	return e.Bytes(), nil
 }
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *ExecGetMethodReq) UnmarshalJSON(data []byte) error {
+func (s *ExecGetMethodPostReq) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -6628,10 +6628,33 @@ func (s MethodExecutionResult) encodeFields(e *jx.Encoder) {
 		e.FieldStart("success")
 		e.Bool(s.Success)
 	}
+	{
+
+		e.FieldStart("exit_code")
+		e.Int(s.ExitCode)
+	}
+	{
+
+		e.FieldStart("stack")
+		e.ArrStart()
+		for _, elem := range s.Stack {
+			elem.Encode(e)
+		}
+		e.ArrEnd()
+	}
+	{
+		if s.Decoded.Set {
+			e.FieldStart("decoded")
+			s.Decoded.Encode(e)
+		}
+	}
 }
 
-var jsonFieldsNameOfMethodExecutionResult = [1]string{
+var jsonFieldsNameOfMethodExecutionResult = [4]string{
 	0: "success",
+	1: "exit_code",
+	2: "stack",
+	3: "decoded",
 }
 
 // Decode decodes MethodExecutionResult from json.
@@ -6655,6 +6678,46 @@ func (s *MethodExecutionResult) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"success\"")
 			}
+		case "exit_code":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				v, err := d.Int()
+				s.ExitCode = int(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"exit_code\"")
+			}
+		case "stack":
+			requiredBitSet[0] |= 1 << 2
+			if err := func() error {
+				s.Stack = make([]TvmStackRecord, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem TvmStackRecord
+					if err := elem.Decode(d); err != nil {
+						return err
+					}
+					s.Stack = append(s.Stack, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"stack\"")
+			}
+		case "decoded":
+			if err := func() error {
+				s.Decoded.Reset()
+				if err := s.Decoded.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"decoded\"")
+			}
 		default:
 			return d.Skip()
 		}
@@ -6665,7 +6728,7 @@ func (s *MethodExecutionResult) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b00000001,
+		0b00000111,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -6707,6 +6770,64 @@ func (s MethodExecutionResult) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *MethodExecutionResult) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s MethodExecutionResultDecoded) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields implements json.Marshaler.
+func (s MethodExecutionResultDecoded) encodeFields(e *jx.Encoder) {
+	for k, elem := range s {
+		e.FieldStart(k)
+
+		if len(elem) != 0 {
+			e.Raw(elem)
+		}
+	}
+}
+
+// Decode decodes MethodExecutionResultDecoded from json.
+func (s *MethodExecutionResultDecoded) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode MethodExecutionResultDecoded to nil")
+	}
+	m := s.init()
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		var elem jx.Raw
+		if err := func() error {
+			v, err := d.RawAppend(nil)
+			elem = jx.Raw(v)
+			if err != nil {
+				return err
+			}
+			return nil
+		}(); err != nil {
+			return errors.Wrapf(err, "decode field %q", k)
+		}
+		m[string(k)] = elem
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode MethodExecutionResultDecoded")
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s MethodExecutionResultDecoded) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *MethodExecutionResultDecoded) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -8410,6 +8531,41 @@ func (s *OptEmulateMessageReq) UnmarshalJSON(data []byte) error {
 	return s.Decode(d)
 }
 
+// Encode encodes int as json.
+func (o OptInt) Encode(e *jx.Encoder) {
+	if !o.Set {
+		return
+	}
+	e.Int(int(o.Value))
+}
+
+// Decode decodes int from json.
+func (o *OptInt) Decode(d *jx.Decoder) error {
+	if o == nil {
+		return errors.New("invalid: unable to decode OptInt to nil")
+	}
+	o.Set = true
+	v, err := d.Int()
+	if err != nil {
+		return err
+	}
+	o.Value = int(v)
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s OptInt) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *OptInt) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
 // Encode encodes int32 as json.
 func (o OptInt32) Encode(e *jx.Encoder) {
 	if !o.Set {
@@ -8608,6 +8764,40 @@ func (s OptMessage) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *OptMessage) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes MethodExecutionResultDecoded as json.
+func (o OptMethodExecutionResultDecoded) Encode(e *jx.Encoder) {
+	if !o.Set {
+		return
+	}
+	o.Value.Encode(e)
+}
+
+// Decode decodes MethodExecutionResultDecoded from json.
+func (o *OptMethodExecutionResultDecoded) Decode(d *jx.Decoder) error {
+	if o == nil {
+		return errors.New("invalid: unable to decode OptMethodExecutionResultDecoded to nil")
+	}
+	o.Set = true
+	o.Value = make(MethodExecutionResultDecoded)
+	if err := o.Value.Decode(d); err != nil {
+		return err
+	}
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s OptMethodExecutionResultDecoded) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *OptMethodExecutionResultDecoded) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -12584,6 +12774,226 @@ func (s Transactions) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *Transactions) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s TvmStackRecord) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s TvmStackRecord) encodeFields(e *jx.Encoder) {
+	{
+
+		e.FieldStart("type")
+		s.Type.Encode(e)
+	}
+	{
+		if s.Cell.Set {
+			e.FieldStart("cell")
+			s.Cell.Encode(e)
+		}
+	}
+	{
+		if s.Slice.Set {
+			e.FieldStart("slice")
+			s.Slice.Encode(e)
+		}
+	}
+	{
+		if s.Int.Set {
+			e.FieldStart("int")
+			s.Int.Encode(e)
+		}
+	}
+	{
+		if s.Tuple != nil {
+			e.FieldStart("tuple")
+			e.ArrStart()
+			for _, elem := range s.Tuple {
+				elem.Encode(e)
+			}
+			e.ArrEnd()
+		}
+	}
+}
+
+var jsonFieldsNameOfTvmStackRecord = [5]string{
+	0: "type",
+	1: "cell",
+	2: "slice",
+	3: "int",
+	4: "tuple",
+}
+
+// Decode decodes TvmStackRecord from json.
+func (s *TvmStackRecord) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode TvmStackRecord to nil")
+	}
+	var requiredBitSet [1]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "type":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				if err := s.Type.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"type\"")
+			}
+		case "cell":
+			if err := func() error {
+				s.Cell.Reset()
+				if err := s.Cell.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"cell\"")
+			}
+		case "slice":
+			if err := func() error {
+				s.Slice.Reset()
+				if err := s.Slice.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"slice\"")
+			}
+		case "int":
+			if err := func() error {
+				s.Int.Reset()
+				if err := s.Int.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"int\"")
+			}
+		case "tuple":
+			if err := func() error {
+				s.Tuple = make([]TvmStackRecord, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem TvmStackRecord
+					if err := elem.Decode(d); err != nil {
+						return err
+					}
+					s.Tuple = append(s.Tuple, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"tuple\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode TvmStackRecord")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00000001,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfTvmStackRecord) {
+					name = jsonFieldsNameOfTvmStackRecord[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s TvmStackRecord) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *TvmStackRecord) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes TvmStackRecordType as json.
+func (s TvmStackRecordType) Encode(e *jx.Encoder) {
+	e.Str(string(s))
+}
+
+// Decode decodes TvmStackRecordType from json.
+func (s *TvmStackRecordType) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode TvmStackRecordType to nil")
+	}
+	v, err := d.StrBytes()
+	if err != nil {
+		return err
+	}
+	// Try to use constant string.
+	switch TvmStackRecordType(v) {
+	case TvmStackRecordTypeCell:
+		*s = TvmStackRecordTypeCell
+	case TvmStackRecordTypeInt:
+		*s = TvmStackRecordTypeInt
+	case TvmStackRecordTypeNan:
+		*s = TvmStackRecordTypeNan
+	case TvmStackRecordTypeNull:
+		*s = TvmStackRecordTypeNull
+	case TvmStackRecordTypeTuple:
+		*s = TvmStackRecordTypeTuple
+	default:
+		*s = TvmStackRecordType(v)
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s TvmStackRecordType) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *TvmStackRecordType) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }

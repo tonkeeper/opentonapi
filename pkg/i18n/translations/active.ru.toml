@@ -1,0 +1,3 @@
+[poolImplementationDescription]
+hash = "sha1-6865607e146fc7e6ec44550c3888b35b97ac0638"
+other = "Минимальный депозит {{.Deposit}} ТОН"

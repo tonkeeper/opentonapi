@@ -123,6 +123,7 @@ type ExecGetMethodParams struct {
 	AccountID string
 	// Contract get method name.
 	MethodName string
+	Args       []string
 }
 
 func unpackExecGetMethodParams(packed middleware.Parameters) (params ExecGetMethodParams) {
@@ -140,10 +141,148 @@ func unpackExecGetMethodParams(packed middleware.Parameters) (params ExecGetMeth
 		}
 		params.MethodName = packed[key].(string)
 	}
+	{
+		key := middleware.ParameterKey{
+			Name: "args",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.Args = v.([]string)
+		}
+	}
 	return params
 }
 
 func decodeExecGetMethodParams(args [2]string, r *http.Request) (params ExecGetMethodParams, _ error) {
+	q := uri.NewQueryDecoder(r.URL.Query())
+	// Decode path: account_id.
+	{
+		param := args[0]
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "account_id",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.AccountID = c
+				return nil
+			}(); err != nil {
+				return params, errors.Wrap(err, "path: account_id: parse")
+			}
+		} else {
+			return params, errors.New("path: account_id: not specified")
+		}
+	}
+	// Decode path: method_name.
+	{
+		param := args[1]
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "method_name",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.MethodName = c
+				return nil
+			}(); err != nil {
+				return params, errors.Wrap(err, "path: method_name: parse")
+			}
+		} else {
+			return params, errors.New("path: method_name: not specified")
+		}
+	}
+	// Decode query: args.
+	{
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "args",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				return d.DecodeArray(func(d uri.Decoder) error {
+					var paramsDotArgsVal string
+					if err := func() error {
+						val, err := d.DecodeValue()
+						if err != nil {
+							return err
+						}
+
+						c, err := conv.ToString(val)
+						if err != nil {
+							return err
+						}
+
+						paramsDotArgsVal = c
+						return nil
+					}(); err != nil {
+						return err
+					}
+					params.Args = append(params.Args, paramsDotArgsVal)
+					return nil
+				})
+			}); err != nil {
+				return params, errors.Wrap(err, "query: args: parse")
+			}
+		}
+	}
+	return params, nil
+}
+
+// ExecGetMethodPostParams is parameters of execGetMethodPost operation.
+type ExecGetMethodPostParams struct {
+	// Account ID.
+	AccountID string
+	// Contract get method name.
+	MethodName string
+}
+
+func unpackExecGetMethodPostParams(packed middleware.Parameters) (params ExecGetMethodPostParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "account_id",
+			In:   "path",
+		}
+		params.AccountID = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "method_name",
+			In:   "path",
+		}
+		params.MethodName = packed[key].(string)
+	}
+	return params
+}
+
+func decodeExecGetMethodPostParams(args [2]string, r *http.Request) (params ExecGetMethodPostParams, _ error) {
 	// Decode path: account_id.
 	{
 		param := args[0]
