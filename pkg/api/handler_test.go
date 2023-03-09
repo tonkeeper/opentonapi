@@ -8,6 +8,8 @@ import (
 	"github.com/tonkeeper/tongo"
 	"go.uber.org/zap"
 
+	"github.com/tonkeeper/opentonapi/pkg/addressbook"
+	"github.com/tonkeeper/opentonapi/pkg/config"
 	"github.com/tonkeeper/opentonapi/pkg/litestorage"
 	"github.com/tonkeeper/opentonapi/pkg/oas"
 )
@@ -62,7 +64,8 @@ func TestHandler_GetAccount(t *testing.T) {
 			liteStorage, err := litestorage.NewLiteStorage([]tongo.AccountID{}, logger)
 			require.Nil(t, err)
 			h := Handler{
-				storage: liteStorage,
+				addressBook: addressbook.NewAddressBook(logger, config.AddressPath, config.JettonPath, config.CollectionPath),
+				storage:     liteStorage,
 			}
 			accountRes, err := h.GetAccount(context.Background(), tt.params)
 			require.Nil(t, err)
