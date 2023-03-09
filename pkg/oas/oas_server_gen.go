@@ -56,6 +56,12 @@ type Handler interface {
 	//
 	// GET /v2/blockchain/blocks/{block_id}
 	GetBlock(ctx context.Context, params GetBlockParams) (GetBlockRes, error)
+	// GetBlockTransactions implements getBlockTransactions operation.
+	//
+	// Get transactions from block.
+	//
+	// GET /v2/blockchain/blocks/{block_id}/transactions
+	GetBlockTransactions(ctx context.Context, params GetBlockTransactionsParams) (GetBlockTransactionsRes, error)
 	// GetConfig implements getConfig operation.
 	//
 	// Get blockchain config.
@@ -152,12 +158,6 @@ type Handler interface {
 	//
 	// GET /v2/blockchain/transactions/{transaction_id}
 	GetTransaction(ctx context.Context, params GetTransactionParams) (GetTransactionRes, error)
-	// GetTransactions implements getTransactions operation.
-	//
-	// Get transactions from block.
-	//
-	// GET /v2/blockchain/blocks/{block_id}/transactions
-	GetTransactions(ctx context.Context, params GetTransactionsParams) (GetTransactionsRes, error)
 	// GetValidators implements getValidators operation.
 	//
 	// Get validators.

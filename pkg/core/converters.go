@@ -414,3 +414,16 @@ func ConvertToAccount(accountId tongo.AccountID, acc tlb.Account) (*Account, err
 	}
 	return res, nil
 }
+
+func ExtractTransactions(id tongo.BlockIDExt, block *tlb.Block) ([]*Transaction, error) {
+	rawTransactions := block.AllTransactions()
+	transactions := make([]*Transaction, 0, len(rawTransactions))
+	for _, rawTx := range rawTransactions {
+		tx, err := ConvertTransaction(id.Workchain, tongo.Transaction{Transaction: rawTx, BlockID: id})
+		if err != nil {
+			return nil, err
+		}
+		transactions = append(transactions, tx)
+	}
+	return transactions, nil
+}

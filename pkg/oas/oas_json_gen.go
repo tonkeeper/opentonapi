@@ -76,7 +76,7 @@ func (s Account) encodeFields(e *jx.Encoder) {
 	{
 
 		e.FieldStart("last_transaction_lt")
-		e.UInt64(s.LastTransactionLt)
+		e.Int64(s.LastTransactionLt)
 	}
 	{
 
@@ -167,8 +167,8 @@ func (s *Account) Decode(d *jx.Decoder) error {
 		case "last_transaction_lt":
 			requiredBitSet[0] |= 1 << 2
 			if err := func() error {
-				v, err := d.UInt64()
-				s.LastTransactionLt = uint64(v)
+				v, err := d.Int64()
+				s.LastTransactionLt = int64(v)
 				if err != nil {
 					return err
 				}
@@ -1120,17 +1120,17 @@ func (s AccountStorageInfo) encodeFields(e *jx.Encoder) {
 	{
 
 		e.FieldStart("used_cells")
-		e.UInt64(s.UsedCells)
+		e.Int64(s.UsedCells)
 	}
 	{
 
 		e.FieldStart("used_bits")
-		e.UInt64(s.UsedBits)
+		e.Int64(s.UsedBits)
 	}
 	{
 
 		e.FieldStart("used_public_cells")
-		e.UInt64(s.UsedPublicCells)
+		e.Int64(s.UsedPublicCells)
 	}
 	{
 
@@ -1164,8 +1164,8 @@ func (s *AccountStorageInfo) Decode(d *jx.Decoder) error {
 		case "used_cells":
 			requiredBitSet[0] |= 1 << 0
 			if err := func() error {
-				v, err := d.UInt64()
-				s.UsedCells = uint64(v)
+				v, err := d.Int64()
+				s.UsedCells = int64(v)
 				if err != nil {
 					return err
 				}
@@ -1176,8 +1176,8 @@ func (s *AccountStorageInfo) Decode(d *jx.Decoder) error {
 		case "used_bits":
 			requiredBitSet[0] |= 1 << 1
 			if err := func() error {
-				v, err := d.UInt64()
-				s.UsedBits = uint64(v)
+				v, err := d.Int64()
+				s.UsedBits = int64(v)
 				if err != nil {
 					return err
 				}
@@ -1188,8 +1188,8 @@ func (s *AccountStorageInfo) Decode(d *jx.Decoder) error {
 		case "used_public_cells":
 			requiredBitSet[0] |= 1 << 2
 			if err := func() error {
-				v, err := d.UInt64()
-				s.UsedPublicCells = uint64(v)
+				v, err := d.Int64()
+				s.UsedPublicCells = int64(v)
 				if err != nil {
 					return err
 				}
@@ -3944,7 +3944,7 @@ func (s DomainBid) encodeFields(e *jx.Encoder) {
 	{
 
 		e.FieldStart("value")
-		e.UInt64(s.Value)
+		e.Int64(s.Value)
 	}
 	{
 
@@ -3996,8 +3996,8 @@ func (s *DomainBid) Decode(d *jx.Decoder) error {
 		case "value":
 			requiredBitSet[0] |= 1 << 1
 			if err := func() error {
-				v, err := d.UInt64()
-				s.Value = uint64(v)
+				v, err := d.Int64()
+				s.Value = int64(v)
 				if err != nil {
 					return err
 				}
@@ -9111,6 +9111,41 @@ func (s *OptTonTransferAction) UnmarshalJSON(data []byte) error {
 	return s.Decode(d)
 }
 
+// Encode encodes uint32 as json.
+func (o OptUint32) Encode(e *jx.Encoder) {
+	if !o.Set {
+		return
+	}
+	e.UInt32(uint32(o.Value))
+}
+
+// Decode decodes uint32 from json.
+func (o *OptUint32) Decode(d *jx.Decoder) error {
+	if o == nil {
+		return errors.New("invalid: unable to decode OptUint32 to nil")
+	}
+	o.Set = true
+	v, err := d.UInt32()
+	if err != nil {
+		return err
+	}
+	o.Value = uint32(v)
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s OptUint32) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *OptUint32) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
 // Encode encodes UnSubscriptionAction as json.
 func (o OptUnSubscriptionAction) Encode(e *jx.Encoder) {
 	if !o.Set {
@@ -9593,7 +9628,7 @@ func (s RawAccount) encodeFields(e *jx.Encoder) {
 	{
 
 		e.FieldStart("last_transaction_lt")
-		e.UInt64(s.LastTransactionLt)
+		e.Int64(s.LastTransactionLt)
 	}
 	{
 
@@ -9684,8 +9719,8 @@ func (s *RawAccount) Decode(d *jx.Decoder) error {
 		case "last_transaction_lt":
 			requiredBitSet[0] |= 1 << 5
 			if err := func() error {
-				v, err := d.UInt64()
-				s.LastTransactionLt = uint64(v)
+				v, err := d.Int64()
+				s.LastTransactionLt = int64(v)
 				if err != nil {
 					return err
 				}

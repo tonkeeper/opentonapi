@@ -85,6 +85,15 @@ func (UnimplementedHandler) GetBlock(ctx context.Context, params GetBlockParams)
 	return r, ht.ErrNotImplemented
 }
 
+// GetBlockTransactions implements getBlockTransactions operation.
+//
+// Get transactions from block.
+//
+// GET /v2/blockchain/blocks/{block_id}/transactions
+func (UnimplementedHandler) GetBlockTransactions(ctx context.Context, params GetBlockTransactionsParams) (r GetBlockTransactionsRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // GetConfig implements getConfig operation.
 //
 // Get blockchain config.
@@ -226,15 +235,6 @@ func (UnimplementedHandler) GetTracesByAccount(ctx context.Context, params GetTr
 //
 // GET /v2/blockchain/transactions/{transaction_id}
 func (UnimplementedHandler) GetTransaction(ctx context.Context, params GetTransactionParams) (r GetTransactionRes, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
-// GetTransactions implements getTransactions operation.
-//
-// Get transactions from block.
-//
-// GET /v2/blockchain/blocks/{block_id}/transactions
-func (UnimplementedHandler) GetTransactions(ctx context.Context, params GetTransactionsParams) (r GetTransactionsRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 

@@ -16,6 +16,8 @@ type storage interface {
 	GetRawAccount(ctx context.Context, id tongo.AccountID) (*core.Account, error)
 	GetBlockHeader(ctx context.Context, id tongo.BlockID) (*core.BlockHeader, error)
 	GetTransaction(ctx context.Context, hash tongo.Bits256) (*core.Transaction, error)
+	// GetBlockTransactions returns low-level information about transactions in a particular block.
+	GetBlockTransactions(ctx context.Context, id tongo.BlockID) ([]*core.Transaction, error)
 	GetTrace(ctx context.Context, hash tongo.Bits256) (*core.Trace, error)
 
 	GetParticipatingInWhalesPools(ctx context.Context, id tongo.AccountID) ([]core.WhalesNominator, error)

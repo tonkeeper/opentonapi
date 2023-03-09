@@ -79,13 +79,8 @@ func convertTransaction(t core.Transaction) oas.Transaction {
 		StateUpdateOld:  t.StateHashUpdate.OldHash.Hex(),
 		StateUpdateNew:  t.StateHashUpdate.NewHash.Hex(),
 		Block:           t.BlockID.String(),
-		//ComputePhase:    oas.OptComputePhase{}, //TODO: write
-		//StoragePhase:    oas.OptStoragePhase{},
-		//CreditPhase:     oas.OptCreditPhase{},
-		//ActionPhase:     oas.OptActionPhase{},
-		//BouncePhase:     oas.OptBouncePhaseType{},
-		Aborted:   t.Aborted,
-		Destroyed: t.Destroyed,
+		Aborted:         t.Aborted,
+		Destroyed:       t.Destroyed,
 	}
 	if t.PrevTransLt != 0 {
 		tx.PrevTransLt.Value = int64(t.PrevTransLt)
@@ -98,6 +93,51 @@ func convertTransaction(t core.Transaction) oas.Transaction {
 	}
 	for _, m := range t.OutMsgs {
 		tx.OutMsgs = append(tx.OutMsgs, convertMessage(m))
+	}
+	if t.ActionPhase != nil {
+		phase := oas.ActionPhase{
+			Success:        t.ActionPhase.Success,
+			TotalActions:   int32(t.ActionPhase.TotalActions),
+			SkippedActions: int32(t.ActionPhase.SkippedActions),
+			FwdFees:        int64(t.ActionPhase.FwdFees),
+			TotalFees:      int64(t.ActionPhase.TotalFees),
+		}
+		tx.ActionPhase = oas.NewOptActionPhase(phase)
+	}
+	if t.StoragePhase != nil {
+		phase := oas.StoragePhase{
+			FeesCollected: int64(t.StoragePhase.StorageFeesCollected),
+			StatusChange:  oas.AccStatusChange(t.StoragePhase.StatusChange),
+		}
+		if t.StoragePhase.StorageFeesDue != nil {
+			phase.FeesDue = oas.NewOptInt64(int64(*t.StoragePhase.StorageFeesDue))
+		}
+		tx.StoragePhase = oas.NewOptStoragePhase(phase)
+	}
+	if t.ComputePhase != nil {
+		phase := oas.ComputePhase{
+			Skipped: t.ComputePhase.Skipped,
+		}
+		if t.ComputePhase.Skipped {
+			phase.SkipReason = oas.NewOptComputeSkipReason(oas.ComputeSkipReason(t.ComputePhase.SkipReason))
+		} else {
+			phase.Success = oas.NewOptBool(t.ComputePhase.Success)
+			phase.GasFees = oas.NewOptInt64(int64(t.ComputePhase.GasFees))
+			phase.GasUsed = oas.NewOptInt64(t.ComputePhase.GasUsed.Int64())
+			phase.VMSteps = oas.NewOptUint32(t.ComputePhase.VmSteps)
+			phase.ExitCode = oas.NewOptInt32(t.ComputePhase.ExitCode)
+		}
+		tx.ComputePhase = oas.NewOptComputePhase(phase)
+	}
+	if t.CreditPhase != nil {
+		phase := oas.CreditPhase{
+			FeesCollected: int64(t.CreditPhase.DueFeesCollected),
+			Credit:        int64(t.CreditPhase.CreditGrams),
+		}
+		tx.CreditPhase = oas.NewOptCreditPhase(phase)
+	}
+	if t.BouncePhase != nil {
+		tx.BouncePhase = oas.NewOptBouncePhaseType(oas.BouncePhaseType(t.BouncePhase.Type))
 	}
 	return tx
 }
@@ -219,12 +259,12 @@ func convertToRawAccount(account *core.Account) oas.RawAccount {
 	rawAccount := oas.RawAccount{
 		Address:           account.AccountAddress.ToRaw(),
 		Balance:           account.TonBalance,
-		LastTransactionLt: account.LastTransactionLt,
+		LastTransactionLt: int64(account.LastTransactionLt),
 		Status:            account.Status,
 		Storage: oas.AccountStorageInfo{
-			UsedCells:       account.Storage.UsedCells.Uint64(),
-			UsedBits:        account.Storage.UsedBits.Uint64(),
-			UsedPublicCells: account.Storage.UsedPublicCells.Uint64(),
+			UsedCells:       account.Storage.UsedCells.Int64(),
+			UsedBits:        account.Storage.UsedBits.Int64(),
+			UsedPublicCells: account.Storage.UsedPublicCells.Int64(),
 			LastPaid:        int64(account.Storage.LastPaid),
 			DuePayment:      account.Storage.DuePayment,
 		},
@@ -249,7 +289,7 @@ func convertToAccount(info *core.AccountInfo) oas.Account {
 	acc := oas.Account{
 		Address:           info.Account.AccountAddress.ToRaw(),
 		Balance:           info.Account.TonBalance,
-		LastTransactionLt: info.Account.LastTransactionLt,
+		LastTransactionLt: int64(info.Account.LastTransactionLt),
 		Status:            info.Account.Status,
 	}
 	return acc

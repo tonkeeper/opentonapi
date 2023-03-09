@@ -33,6 +33,10 @@ type GetBlockRes interface {
 	getBlockRes()
 }
 
+type GetBlockTransactionsRes interface {
+	getBlockTransactionsRes()
+}
+
 type GetConfigRes interface {
 	getConfigRes()
 }
@@ -95,10 +99,6 @@ type GetTracesByAccountRes interface {
 
 type GetTransactionRes interface {
 	getTransactionRes()
-}
-
-type GetTransactionsRes interface {
-	getTransactionsRes()
 }
 
 type GetValidatorsRes interface {

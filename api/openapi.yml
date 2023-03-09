@@ -39,7 +39,7 @@ paths:
   /v2/blockchain/blocks/{block_id}/transactions:
     get:
       description: Get transactions from block
-      operationId: getTransactions
+      operationId: getBlockTransactions
       tags:
         - Blockchain
       parameters:
@@ -1228,11 +1228,12 @@ components:
           format: int64
           example: 1000
         gas_used:
-          type: string
+          type: integer
+          format: int64
           example: 10000
         vm_steps:
           type: integer
-          format: int32
+          format: uint32
           example: 5
         exit_code:
           type: integer
@@ -1424,15 +1425,15 @@ components:
       properties:
         used_cells:
           type: integer
-          format: uint64
+          format: int64
           example: 567
         used_bits:
           type: integer
-          format: uint64
+          format: int64
           example: 567
         used_public_cells:
           type: integer
-          format: uint64
+          format: int64
           example: 567
         last_paid:
           type: integer
@@ -1470,7 +1471,7 @@ components:
           example: b5ee9c7241010101002600004811fd096c0000000000000000000000000000000000000000000000000000000000000000cb78264d
         last_transaction_lt:
           type: integer
-          format: uint64
+          format: int64
           example: 123456789
         status:
           type: string
@@ -1495,7 +1496,7 @@ components:
           example: 123456789
         last_transaction_lt:
           type: integer
-          format: uint64
+          format: int64
           example: 123456789
         status:
           type: string
@@ -1563,7 +1564,7 @@ components:
           default: false
         value:
           type: integer
-          format: uint64
+          format: int64
           example: 1660050553
         txTime:
           type: integer
