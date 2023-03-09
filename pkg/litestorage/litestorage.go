@@ -22,6 +22,24 @@ type LiteStorage struct {
 	blockCache              map[tongo.BlockIDExt]*tlb.Block
 }
 
+func NewLiteStorage(preloadAccounts []tongo.AccountID, log *zap.Logger) (*LiteStorage, error) {
+	client, err := liteapi.NewClientWithDefaultMainnet()
+	if err != nil {
+		return nil, err
+	}
+
+	l := &LiteStorage{
+		client:                  client,
+		transactionsIndex:       make(map[tongo.AccountID][]*core.Transaction),
+		transactionsIndexByHash: make(map[tongo.Bits256]*core.Transaction),
+		blockCache:              make(map[tongo.BlockIDExt]*tlb.Block),
+	}
+	for _, a := range preloadAccounts {
+		l.preloadAccount(a, log)
+	}
+	return l, nil
+}
+
 // GetAccountInfo returns human-friendly information about an account without low-level details.
 func (s *LiteStorage) GetAccountInfo(ctx context.Context, id tongo.AccountID) (*core.AccountInfo, error) {
 	account, err := s.GetRawAccount(ctx, id)
@@ -52,24 +70,6 @@ func (s *LiteStorage) GetRawAccount(ctx context.Context, address tongo.AccountID
 	return core.ConvertToAccount(address, account)
 }
 
-func NewLiteStorage(preloadAccounts []tongo.AccountID, log *zap.Logger) (*LiteStorage, error) {
-	client, err := liteapi.NewClientWithDefaultMainnet()
-	if err != nil {
-		return nil, err
-	}
-
-	l := &LiteStorage{
-		client:                  client,
-		transactionsIndex:       make(map[tongo.AccountID][]*core.Transaction),
-		transactionsIndexByHash: make(map[tongo.Bits256]*core.Transaction),
-		blockCache:              make(map[tongo.BlockIDExt]*tlb.Block),
-	}
-	for _, a := range preloadAccounts {
-		l.preloadAccount(a, log)
-	}
-	return l, nil
-}
-
 func (s *LiteStorage) preloadAccount(a tongo.AccountID, log *zap.Logger) error {
 	ctx := context.Background()
 	accountTxs, err := s.client.GetLastTransactions(ctx, a, 1000)
@@ -89,7 +89,6 @@ func (s *LiteStorage) preloadAccount(a tongo.AccountID, log *zap.Logger) error {
 }
 
 func (s *LiteStorage) GetBlockHeader(ctx context.Context, id tongo.BlockID) (*core.BlockHeader, error) {
-	return nil, fmt.Errorf("fuck you")
 	blockID, _, err := s.client.LookupBlock(ctx, id, 1, nil, nil)
 	if err != nil {
 		return nil, err
@@ -98,6 +97,7 @@ func (s *LiteStorage) GetBlockHeader(ctx context.Context, id tongo.BlockID) (*co
 	if err != nil {
 		return nil, err
 	}
+
 	s.blockCache[blockID] = &block
 	header, err := core.ConvertToBlockHeader(blockID, &block)
 	if err != nil {
@@ -112,6 +112,18 @@ func (s *LiteStorage) GetTransaction(ctx context.Context, hash tongo.Bits256) (*
 		return tx, nil
 	}
 	return nil, fmt.Errorf("not found tx %x", hash)
+}
+
+func (s *LiteStorage) GetBlockTransactions(ctx context.Context, id tongo.BlockID) ([]*core.Transaction, error) {
+	blockID, _, err := s.client.LookupBlock(ctx, id, 1, nil, nil)
+	if err != nil {
+		return nil, err
+	}
+	block, err := s.client.GetBlock(ctx, blockID)
+	if err != nil {
+		return nil, err
+	}
+	return core.ExtractTransactions(blockID, &block)
 }
 
 func (s *LiteStorage) searchTxInCache(a tongo.AccountID, lt uint64) *core.Transaction {

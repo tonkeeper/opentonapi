@@ -19,7 +19,7 @@ const (
 type Account struct {
 	Address           string    `json:"address"`
 	Balance           int64     `json:"balance"`
-	LastTransactionLt uint64    `json:"last_transaction_lt"`
+	LastTransactionLt int64     `json:"last_transaction_lt"`
 	Status            string    `json:"status"`
 	Interfaces        []string  `json:"interfaces"`
 	Name              OptString `json:"name"`
@@ -39,7 +39,7 @@ func (s Account) GetBalance() int64 {
 }
 
 // GetLastTransactionLt returns the value of LastTransactionLt.
-func (s Account) GetLastTransactionLt() uint64 {
+func (s Account) GetLastTransactionLt() int64 {
 	return s.LastTransactionLt
 }
 
@@ -84,7 +84,7 @@ func (s *Account) SetBalance(val int64) {
 }
 
 // SetLastTransactionLt sets the value of LastTransactionLt.
-func (s *Account) SetLastTransactionLt(val uint64) {
+func (s *Account) SetLastTransactionLt(val int64) {
 	s.LastTransactionLt = val
 }
 
@@ -369,25 +369,25 @@ const (
 
 // Ref: #/components/schemas/AccountStorageInfo
 type AccountStorageInfo struct {
-	UsedCells       uint64 `json:"used_cells"`
-	UsedBits        uint64 `json:"used_bits"`
-	UsedPublicCells uint64 `json:"used_public_cells"`
-	LastPaid        int64  `json:"last_paid"`
-	DuePayment      int64  `json:"due_payment"`
+	UsedCells       int64 `json:"used_cells"`
+	UsedBits        int64 `json:"used_bits"`
+	UsedPublicCells int64 `json:"used_public_cells"`
+	LastPaid        int64 `json:"last_paid"`
+	DuePayment      int64 `json:"due_payment"`
 }
 
 // GetUsedCells returns the value of UsedCells.
-func (s AccountStorageInfo) GetUsedCells() uint64 {
+func (s AccountStorageInfo) GetUsedCells() int64 {
 	return s.UsedCells
 }
 
 // GetUsedBits returns the value of UsedBits.
-func (s AccountStorageInfo) GetUsedBits() uint64 {
+func (s AccountStorageInfo) GetUsedBits() int64 {
 	return s.UsedBits
 }
 
 // GetUsedPublicCells returns the value of UsedPublicCells.
-func (s AccountStorageInfo) GetUsedPublicCells() uint64 {
+func (s AccountStorageInfo) GetUsedPublicCells() int64 {
 	return s.UsedPublicCells
 }
 
@@ -402,17 +402,17 @@ func (s AccountStorageInfo) GetDuePayment() int64 {
 }
 
 // SetUsedCells sets the value of UsedCells.
-func (s *AccountStorageInfo) SetUsedCells(val uint64) {
+func (s *AccountStorageInfo) SetUsedCells(val int64) {
 	s.UsedCells = val
 }
 
 // SetUsedBits sets the value of UsedBits.
-func (s *AccountStorageInfo) SetUsedBits(val uint64) {
+func (s *AccountStorageInfo) SetUsedBits(val int64) {
 	s.UsedBits = val
 }
 
 // SetUsedPublicCells sets the value of UsedPublicCells.
-func (s *AccountStorageInfo) SetUsedPublicCells(val uint64) {
+func (s *AccountStorageInfo) SetUsedPublicCells(val int64) {
 	s.UsedPublicCells = val
 }
 
@@ -856,6 +856,7 @@ func (*BadRequest) execGetMethodRes()             {}
 func (*BadRequest) getAccountRes()                {}
 func (*BadRequest) getAccountTransactionsRes()    {}
 func (*BadRequest) getBlockRes()                  {}
+func (*BadRequest) getBlockTransactionsRes()      {}
 func (*BadRequest) getDomainBidsRes()             {}
 func (*BadRequest) getEventRes()                  {}
 func (*BadRequest) getEventsByAccountRes()        {}
@@ -869,7 +870,6 @@ func (*BadRequest) getSubscriptionsByAccountRes() {}
 func (*BadRequest) getTraceRes()                  {}
 func (*BadRequest) getTracesByAccountRes()        {}
 func (*BadRequest) getTransactionRes()            {}
-func (*BadRequest) getTransactionsRes()           {}
 func (*BadRequest) poolsByNominatorsRes()         {}
 func (*BadRequest) sendMessageRes()               {}
 func (*BadRequest) stackingPoolInfoRes()          {}
@@ -1205,8 +1205,8 @@ type ComputePhase struct {
 	SkipReason OptComputeSkipReason `json:"skip_reason"`
 	Success    OptBool              `json:"success"`
 	GasFees    OptInt64             `json:"gas_fees"`
-	GasUsed    OptString            `json:"gas_used"`
-	VMSteps    OptInt32             `json:"vm_steps"`
+	GasUsed    OptInt64             `json:"gas_used"`
+	VMSteps    OptUint32            `json:"vm_steps"`
 	ExitCode   OptInt32             `json:"exit_code"`
 }
 
@@ -1231,12 +1231,12 @@ func (s ComputePhase) GetGasFees() OptInt64 {
 }
 
 // GetGasUsed returns the value of GasUsed.
-func (s ComputePhase) GetGasUsed() OptString {
+func (s ComputePhase) GetGasUsed() OptInt64 {
 	return s.GasUsed
 }
 
 // GetVMSteps returns the value of VMSteps.
-func (s ComputePhase) GetVMSteps() OptInt32 {
+func (s ComputePhase) GetVMSteps() OptUint32 {
 	return s.VMSteps
 }
 
@@ -1266,12 +1266,12 @@ func (s *ComputePhase) SetGasFees(val OptInt64) {
 }
 
 // SetGasUsed sets the value of GasUsed.
-func (s *ComputePhase) SetGasUsed(val OptString) {
+func (s *ComputePhase) SetGasUsed(val OptInt64) {
 	s.GasUsed = val
 }
 
 // SetVMSteps sets the value of VMSteps.
-func (s *ComputePhase) SetVMSteps(val OptInt32) {
+func (s *ComputePhase) SetVMSteps(val OptUint32) {
 	s.VMSteps = val
 }
 
@@ -1412,7 +1412,7 @@ func (*DnsRecord) dnsResolveRes() {}
 // Ref: #/components/schemas/DomainBid
 type DomainBid struct {
 	Success bool           `json:"success"`
-	Value   uint64         `json:"value"`
+	Value   int64          `json:"value"`
 	TxTime  int64          `json:"txTime"`
 	TxHash  string         `json:"txHash"`
 	Bidder  AccountAddress `json:"bidder"`
@@ -1424,7 +1424,7 @@ func (s DomainBid) GetSuccess() bool {
 }
 
 // GetValue returns the value of Value.
-func (s DomainBid) GetValue() uint64 {
+func (s DomainBid) GetValue() int64 {
 	return s.Value
 }
 
@@ -1449,7 +1449,7 @@ func (s *DomainBid) SetSuccess(val bool) {
 }
 
 // SetValue sets the value of Value.
-func (s *DomainBid) SetValue(val uint64) {
+func (s *DomainBid) SetValue(val int64) {
 	s.Value = val
 }
 
@@ -1722,6 +1722,7 @@ func (*InternalError) getAccountRes()                {}
 func (*InternalError) getAccountTransactionsRes()    {}
 func (*InternalError) getAllAuctionsRes()            {}
 func (*InternalError) getBlockRes()                  {}
+func (*InternalError) getBlockTransactionsRes()      {}
 func (*InternalError) getConfigRes()                 {}
 func (*InternalError) getDomainBidsRes()             {}
 func (*InternalError) getEventRes()                  {}
@@ -1738,7 +1739,6 @@ func (*InternalError) getSubscriptionsByAccountRes() {}
 func (*InternalError) getTraceRes()                  {}
 func (*InternalError) getTracesByAccountRes()        {}
 func (*InternalError) getTransactionRes()            {}
-func (*InternalError) getTransactionsRes()           {}
 func (*InternalError) getValidatorsRes()             {}
 func (*InternalError) poolsByNominatorsRes()         {}
 func (*InternalError) sendMessageRes()               {}
@@ -2756,6 +2756,7 @@ func (*NotFound) dnsResolveRes()                {}
 func (*NotFound) getAccountRes()                {}
 func (*NotFound) getAccountTransactionsRes()    {}
 func (*NotFound) getBlockRes()                  {}
+func (*NotFound) getBlockTransactionsRes()      {}
 func (*NotFound) getDomainBidsRes()             {}
 func (*NotFound) getEventRes()                  {}
 func (*NotFound) getEventsByAccountRes()        {}
@@ -2769,7 +2770,6 @@ func (*NotFound) getSubscriptionsByAccountRes() {}
 func (*NotFound) getTraceRes()                  {}
 func (*NotFound) getTracesByAccountRes()        {}
 func (*NotFound) getTransactionRes()            {}
-func (*NotFound) getTransactionsRes()           {}
 func (*NotFound) poolsByNominatorsRes()         {}
 func (*NotFound) stackingPoolInfoRes()          {}
 func (*NotFound) stackingPoolsRes()             {}
@@ -4200,6 +4200,52 @@ func (o OptTonTransferAction) Or(d TonTransferAction) TonTransferAction {
 	return d
 }
 
+// NewOptUint32 returns new OptUint32 with value set to v.
+func NewOptUint32(v uint32) OptUint32 {
+	return OptUint32{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptUint32 is optional uint32.
+type OptUint32 struct {
+	Value uint32
+	Set   bool
+}
+
+// IsSet returns true if OptUint32 was set.
+func (o OptUint32) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptUint32) Reset() {
+	var v uint32
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptUint32) SetTo(v uint32) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptUint32) Get() (v uint32, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptUint32) Or(d uint32) uint32 {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptUnSubscriptionAction returns new OptUnSubscriptionAction with value set to v.
 func NewOptUnSubscriptionAction(v UnSubscriptionAction) OptUnSubscriptionAction {
 	return OptUnSubscriptionAction{
@@ -4429,7 +4475,7 @@ type RawAccount struct {
 	ExtraBalance      OptRawAccountExtraBalance `json:"extra_balance"`
 	Code              OptString                 `json:"code"`
 	Data              OptString                 `json:"data"`
-	LastTransactionLt uint64                    `json:"last_transaction_lt"`
+	LastTransactionLt int64                     `json:"last_transaction_lt"`
 	Status            string                    `json:"status"`
 	Storage           AccountStorageInfo        `json:"storage"`
 }
@@ -4460,7 +4506,7 @@ func (s RawAccount) GetData() OptString {
 }
 
 // GetLastTransactionLt returns the value of LastTransactionLt.
-func (s RawAccount) GetLastTransactionLt() uint64 {
+func (s RawAccount) GetLastTransactionLt() int64 {
 	return s.LastTransactionLt
 }
 
@@ -4500,7 +4546,7 @@ func (s *RawAccount) SetData(val OptString) {
 }
 
 // SetLastTransactionLt sets the value of LastTransactionLt.
-func (s *RawAccount) SetLastTransactionLt(val uint64) {
+func (s *RawAccount) SetLastTransactionLt(val int64) {
 	s.LastTransactionLt = val
 }
 
@@ -5408,7 +5454,7 @@ func (s *Transactions) SetTransactions(val []Transaction) {
 }
 
 func (*Transactions) getAccountTransactionsRes() {}
-func (*Transactions) getTransactionsRes()        {}
+func (*Transactions) getBlockTransactionsRes()   {}
 
 // Ref: #/components/schemas/UnSubscriptionAction
 type UnSubscriptionAction struct {
@@ -5469,6 +5515,7 @@ func (*UnauthorizedError) getAccountRes()                {}
 func (*UnauthorizedError) getAccountTransactionsRes()    {}
 func (*UnauthorizedError) getAllAuctionsRes()            {}
 func (*UnauthorizedError) getBlockRes()                  {}
+func (*UnauthorizedError) getBlockTransactionsRes()      {}
 func (*UnauthorizedError) getConfigRes()                 {}
 func (*UnauthorizedError) getDomainBidsRes()             {}
 func (*UnauthorizedError) getEventRes()                  {}
@@ -5485,7 +5532,6 @@ func (*UnauthorizedError) getSubscriptionsByAccountRes() {}
 func (*UnauthorizedError) getTraceRes()                  {}
 func (*UnauthorizedError) getTracesByAccountRes()        {}
 func (*UnauthorizedError) getTransactionRes()            {}
-func (*UnauthorizedError) getTransactionsRes()           {}
 func (*UnauthorizedError) getValidatorsRes()             {}
 func (*UnauthorizedError) poolsByNominatorsRes()         {}
 func (*UnauthorizedError) sendMessageRes()               {}

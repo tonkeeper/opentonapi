@@ -4,11 +4,9 @@ import (
 	"context"
 
 	"github.com/go-faster/errors"
-
-	"github.com/tonkeeper/opentonapi/internal/g"
-
 	"github.com/tonkeeper/tongo"
 
+	"github.com/tonkeeper/opentonapi/internal/g"
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/opentonapi/pkg/oas"
 	"github.com/tonkeeper/opentonapi/pkg/references"
@@ -86,6 +84,24 @@ func (h Handler) GetTransaction(ctx context.Context, params oas.GetTransactionPa
 	}
 	transaction := convertTransaction(*txs)
 	return &transaction, nil
+}
+
+func (h Handler) GetBlockTransactions(ctx context.Context, params oas.GetBlockTransactionsParams) (oas.GetBlockTransactionsRes, error) {
+	id, err := blockIdFromString(params.BlockID)
+	if err != nil {
+		return &oas.BadRequest{Error: err.Error()}, nil
+	}
+	transactions, err := h.storage.GetBlockTransactions(ctx, id)
+	if err != nil {
+		return &oas.BadRequest{Error: err.Error()}, nil
+	}
+	res := oas.Transactions{
+		Transactions: make([]oas.Transaction, 0, len(transactions)),
+	}
+	for _, tx := range transactions {
+		res.Transactions = append(res.Transactions, convertTransaction(*tx))
+	}
+	return &res, nil
 }
 
 func (h Handler) GetTrace(ctx context.Context, params oas.GetTraceParams) (r oas.GetTraceRes, _ error) {

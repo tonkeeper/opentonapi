@@ -346,7 +346,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 							// Leaf node.
 							switch r.Method {
 							case "GET":
-								s.handleGetTransactionsRequest([1]string{
+								s.handleGetBlockTransactionsRequest([1]string{
 									args[0],
 								}, w, r)
 							default:
@@ -1197,9 +1197,9 @@ func (s *Server) FindRoute(method, path string) (r Route, _ bool) {
 						if len(elem) == 0 {
 							switch method {
 							case "GET":
-								// Leaf: GetTransactions
-								r.name = "GetTransactions"
-								r.operationID = "getTransactions"
+								// Leaf: GetBlockTransactions
+								r.name = "GetBlockTransactions"
+								r.operationID = "getBlockTransactions"
 								r.args = args
 								r.count = 1
 								return r, true

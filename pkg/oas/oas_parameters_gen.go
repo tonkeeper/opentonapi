@@ -587,6 +587,58 @@ func decodeGetBlockParams(args [1]string, r *http.Request) (params GetBlockParam
 	return params, nil
 }
 
+// GetBlockTransactionsParams is parameters of getBlockTransactions operation.
+type GetBlockTransactionsParams struct {
+	// Block ID.
+	BlockID string
+}
+
+func unpackGetBlockTransactionsParams(packed middleware.Parameters) (params GetBlockTransactionsParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "block_id",
+			In:   "path",
+		}
+		params.BlockID = packed[key].(string)
+	}
+	return params
+}
+
+func decodeGetBlockTransactionsParams(args [1]string, r *http.Request) (params GetBlockTransactionsParams, _ error) {
+	// Decode path: block_id.
+	{
+		param := args[0]
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "block_id",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.BlockID = c
+				return nil
+			}(); err != nil {
+				return params, errors.Wrap(err, "path: block_id: parse")
+			}
+		} else {
+			return params, errors.New("path: block_id: not specified")
+		}
+	}
+	return params, nil
+}
+
 // GetDomainBidsParams is parameters of getDomainBids operation.
 type GetDomainBidsParams struct {
 	// Domain name with .ton or .t.me.
@@ -1672,58 +1724,6 @@ func decodeGetTransactionParams(args [1]string, r *http.Request) (params GetTran
 			}
 		} else {
 			return params, errors.New("path: transaction_id: not specified")
-		}
-	}
-	return params, nil
-}
-
-// GetTransactionsParams is parameters of getTransactions operation.
-type GetTransactionsParams struct {
-	// Block ID.
-	BlockID string
-}
-
-func unpackGetTransactionsParams(packed middleware.Parameters) (params GetTransactionsParams) {
-	{
-		key := middleware.ParameterKey{
-			Name: "block_id",
-			In:   "path",
-		}
-		params.BlockID = packed[key].(string)
-	}
-	return params
-}
-
-func decodeGetTransactionsParams(args [1]string, r *http.Request) (params GetTransactionsParams, _ error) {
-	// Decode path: block_id.
-	{
-		param := args[0]
-		if len(param) > 0 {
-			d := uri.NewPathDecoder(uri.PathDecoderConfig{
-				Param:   "block_id",
-				Value:   param,
-				Style:   uri.PathStyleSimple,
-				Explode: false,
-			})
-
-			if err := func() error {
-				val, err := d.DecodeValue()
-				if err != nil {
-					return err
-				}
-
-				c, err := conv.ToString(val)
-				if err != nil {
-					return err
-				}
-
-				params.BlockID = c
-				return nil
-			}(); err != nil {
-				return params, errors.Wrap(err, "path: block_id: parse")
-			}
-		} else {
-			return params, errors.New("path: block_id: not specified")
 		}
 	}
 	return params, nil

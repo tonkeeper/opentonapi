@@ -839,6 +839,105 @@ func (s *Server) handleGetBlockRequest(args [1]string, w http.ResponseWriter, r 
 	}
 }
 
+// handleGetBlockTransactionsRequest handles getBlockTransactions operation.
+//
+// Get transactions from block.
+//
+// GET /v2/blockchain/blocks/{block_id}/transactions
+func (s *Server) handleGetBlockTransactionsRequest(args [1]string, w http.ResponseWriter, r *http.Request) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("getBlockTransactions"),
+	}
+
+	// Start a span for this request.
+	ctx, span := s.cfg.Tracer.Start(r.Context(), "GetBlockTransactions",
+		trace.WithAttributes(otelAttrs...),
+		serverSpanKind,
+	)
+	defer span.End()
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		elapsedDuration := time.Since(startTime)
+		s.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+	}()
+
+	// Increment request counter.
+	s.requests.Add(ctx, 1, otelAttrs...)
+
+	var (
+		recordError = func(stage string, err error) {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			s.errors.Add(ctx, 1, otelAttrs...)
+		}
+		err          error
+		opErrContext = ogenerrors.OperationContext{
+			Name: "GetBlockTransactions",
+			ID:   "getBlockTransactions",
+		}
+	)
+	params, err := decodeGetBlockTransactionsParams(args, r)
+	if err != nil {
+		err = &ogenerrors.DecodeParamsError{
+			OperationContext: opErrContext,
+			Err:              err,
+		}
+		recordError("DecodeParams", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+
+	var response GetBlockTransactionsRes
+	if m := s.cfg.Middleware; m != nil {
+		mreq := middleware.Request{
+			Context:       ctx,
+			OperationName: "GetBlockTransactions",
+			OperationID:   "getBlockTransactions",
+			Body:          nil,
+			Params: middleware.Parameters{
+				{
+					Name: "block_id",
+					In:   "path",
+				}: params.BlockID,
+			},
+			Raw: r,
+		}
+
+		type (
+			Request  = struct{}
+			Params   = GetBlockTransactionsParams
+			Response = GetBlockTransactionsRes
+		)
+		response, err = middleware.HookMiddleware[
+			Request,
+			Params,
+			Response,
+		](
+			m,
+			mreq,
+			unpackGetBlockTransactionsParams,
+			func(ctx context.Context, request Request, params Params) (Response, error) {
+				return s.h.GetBlockTransactions(ctx, params)
+			},
+		)
+	} else {
+		response, err = s.h.GetBlockTransactions(ctx, params)
+	}
+	if err != nil {
+		recordError("Internal", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+
+	if err := encodeGetBlockTransactionsResponse(response, w, span); err != nil {
+		recordError("EncodeResponse", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+}
+
 // handleGetConfigRequest handles getConfig operation.
 //
 // Get blockchain config.
@@ -2403,105 +2502,6 @@ func (s *Server) handleGetTransactionRequest(args [1]string, w http.ResponseWrit
 	}
 
 	if err := encodeGetTransactionResponse(response, w, span); err != nil {
-		recordError("EncodeResponse", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
-		return
-	}
-}
-
-// handleGetTransactionsRequest handles getTransactions operation.
-//
-// Get transactions from block.
-//
-// GET /v2/blockchain/blocks/{block_id}/transactions
-func (s *Server) handleGetTransactionsRequest(args [1]string, w http.ResponseWriter, r *http.Request) {
-	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("getTransactions"),
-	}
-
-	// Start a span for this request.
-	ctx, span := s.cfg.Tracer.Start(r.Context(), "GetTransactions",
-		trace.WithAttributes(otelAttrs...),
-		serverSpanKind,
-	)
-	defer span.End()
-
-	// Run stopwatch.
-	startTime := time.Now()
-	defer func() {
-		elapsedDuration := time.Since(startTime)
-		s.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
-	}()
-
-	// Increment request counter.
-	s.requests.Add(ctx, 1, otelAttrs...)
-
-	var (
-		recordError = func(stage string, err error) {
-			span.RecordError(err)
-			span.SetStatus(codes.Error, stage)
-			s.errors.Add(ctx, 1, otelAttrs...)
-		}
-		err          error
-		opErrContext = ogenerrors.OperationContext{
-			Name: "GetTransactions",
-			ID:   "getTransactions",
-		}
-	)
-	params, err := decodeGetTransactionsParams(args, r)
-	if err != nil {
-		err = &ogenerrors.DecodeParamsError{
-			OperationContext: opErrContext,
-			Err:              err,
-		}
-		recordError("DecodeParams", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
-		return
-	}
-
-	var response GetTransactionsRes
-	if m := s.cfg.Middleware; m != nil {
-		mreq := middleware.Request{
-			Context:       ctx,
-			OperationName: "GetTransactions",
-			OperationID:   "getTransactions",
-			Body:          nil,
-			Params: middleware.Parameters{
-				{
-					Name: "block_id",
-					In:   "path",
-				}: params.BlockID,
-			},
-			Raw: r,
-		}
-
-		type (
-			Request  = struct{}
-			Params   = GetTransactionsParams
-			Response = GetTransactionsRes
-		)
-		response, err = middleware.HookMiddleware[
-			Request,
-			Params,
-			Response,
-		](
-			m,
-			mreq,
-			unpackGetTransactionsParams,
-			func(ctx context.Context, request Request, params Params) (Response, error) {
-				return s.h.GetTransactions(ctx, params)
-			},
-		)
-	} else {
-		response, err = s.h.GetTransactions(ctx, params)
-	}
-	if err != nil {
-		recordError("Internal", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
-		return
-	}
-
-	if err := encodeGetTransactionsResponse(response, w, span); err != nil {
 		recordError("EncodeResponse", err)
 		s.cfg.ErrorHandler(ctx, w, r, err)
 		return
