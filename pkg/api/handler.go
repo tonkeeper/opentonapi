@@ -2,7 +2,6 @@ package api
 
 import (
 	"context"
-	"fmt"
 	"github.com/tonkeeper/opentonapi/pkg/i18n"
 
 	"github.com/go-faster/errors"
@@ -168,7 +167,6 @@ func (h Handler) StackingPools(ctx context.Context, params oas.StackingPoolsPara
 		}
 		result.Pools = append(result.Pools, convertStackingWhalesPool(k, w, poolStatus, poolConfig, h.state.GetAPY()))
 	}
-	fmt.Println(params.AcceptLanguage.Value)
 	result.SetImplementations(map[string]oas.StackingPoolsOKImplementationsItem{
 		string(oas.PoolInfoImplementationWhales): {
 			Name: "TON Whales",
