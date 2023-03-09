@@ -2,7 +2,6 @@ package i18n
 
 import (
 	"embed"
-	"fmt"
 	"github.com/BurntSushi/toml"
 	"github.com/nicksnyder/go-i18n/v2/i18n"
 	"golang.org/x/text/language"
@@ -23,7 +22,6 @@ type C = i18n.LocalizeConfig
 type M = i18n.Message
 
 func T(lang string, c C) string {
-	s, err := i18n.NewLocalizer(bundle, lang).Localize(&c)
-	fmt.Println(err)
+	s, _ := i18n.NewLocalizer(bundle, lang).Localize(&c)
 	return s
 }
