@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+
 	"github.com/tonkeeper/opentonapi/pkg/i18n"
 
 	"github.com/go-faster/errors"
@@ -18,14 +19,17 @@ var _ oas.Handler = (*Handler)(nil)
 
 type Handler struct {
 	oas.UnimplementedHandler // automatically implement all methods
-	storage                  storage
-	state                    chainState
+
+	addressBook addressBook
+	storage     storage
+	state       chainState
 }
 
-func NewHandler(s storage, state chainState) Handler {
+func NewHandler(s storage, state chainState, book addressBook) Handler {
 	return Handler{
-		storage: s,
-		state:   state,
+		storage:     s,
+		state:       state,
+		addressBook: book,
 	}
 }
 
@@ -37,6 +41,17 @@ func (h Handler) GetAccount(ctx context.Context, params oas.GetAccountParams) (o
 	info, err := h.storage.GetAccountInfo(ctx, accountID)
 	if err != nil {
 		return &oas.BadRequest{Error: err.Error()}, nil
+	}
+	ab, found := h.addressBook.GetAddressInfoByAddress(accountID.ToRaw())
+	if found {
+		info.IsScam = &ab.IsScam
+		if len(ab.Name) > 0 {
+			info.Name = &ab.Name
+		}
+		if len(ab.Image) > 0 {
+			info.Icon = &ab.Image
+		}
+		info.MemoRequired = &ab.RequireMemo
 	}
 	res := convertToAccount(info)
 	return &res, nil

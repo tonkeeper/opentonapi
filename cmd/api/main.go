@@ -2,16 +2,21 @@ package main
 
 import (
 	"fmt"
+
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+
 	"github.com/tonkeeper/opentonapi/pkg/chainstate"
 	"github.com/tonkeeper/opentonapi/pkg/config"
 
+	"net/http"
+
+	"go.uber.org/zap"
+
+	"github.com/tonkeeper/opentonapi/pkg/addressbook"
 	"github.com/tonkeeper/opentonapi/pkg/api"
 	"github.com/tonkeeper/opentonapi/pkg/app"
 	"github.com/tonkeeper/opentonapi/pkg/litestorage"
 	"github.com/tonkeeper/opentonapi/pkg/oas"
-	"go.uber.org/zap"
-	"net/http"
 )
 
 func main() {
@@ -23,7 +28,8 @@ func main() {
 		log.Fatal("storage init", zap.Error(err))
 	}
 
-	h := api.NewHandler(storage, chainstate.NewChainState())
+	book := addressbook.NewAddressBook(log, config.AddressPath, config.JettonPath, config.CollectionPath)
+	h := api.NewHandler(storage, chainstate.NewChainState(), book)
 
 	oasServer, err := oas.NewServer(h, oas.WithMiddleware(api.Logging(log), api.Metrics), oas.WithErrorHandler(api.ErrorsHandler))
 	if err != nil {
