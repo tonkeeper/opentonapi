@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"github.com/tonkeeper/tongo/liteapi"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -28,8 +29,9 @@ func TestHandler_GetRawAccount(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			logger, _ := zap.NewDevelopment()
-			liteStorage, err := litestorage.NewLiteStorage([]tongo.AccountID{}, logger)
+			client, err := liteapi.NewClientWithDefaultMainnet()
 			require.Nil(t, err)
+			liteStorage := litestorage.NewLiteStorage(client, []tongo.AccountID{}, logger)
 			h := Handler{
 				storage: liteStorage,
 			}
@@ -59,8 +61,9 @@ func TestHandler_GetAccount(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			logger, _ := zap.NewDevelopment()
-			liteStorage, err := litestorage.NewLiteStorage([]tongo.AccountID{}, logger)
+			client, err := liteapi.NewClientWithDefaultMainnet()
 			require.Nil(t, err)
+			liteStorage := litestorage.NewLiteStorage(client, []tongo.AccountID{}, logger)
 			h := Handler{
 				storage: liteStorage,
 			}

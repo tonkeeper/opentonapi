@@ -5,6 +5,8 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"github.com/tonkeeper/tongo/tlb"
+	"math/big"
 	"reflect"
 
 	"github.com/go-faster/jx"
@@ -253,4 +255,35 @@ func convertToAccount(info *core.AccountInfo) oas.Account {
 		Status:            info.Account.Status,
 	}
 	return acc
+}
+
+func convertTvmStackValue(v tlb.VmStackValue) (oas.TvmStackRecord, error) {
+	//	VmStkSlice   VmCellSlice   `tlbSumType:"vm_stk_slice#04"`
+	//	VmStkTuple   VmStkTuple    `tlbSumType:"vm_stk_tuple#07"`
+	switch v.SumType {
+	case "VmStkNull":
+		return oas.TvmStackRecord{Type: oas.TvmStackRecordTypeNull}, nil
+	case "VmStkNan":
+		return oas.TvmStackRecord{Type: oas.TvmStackRecordTypeNan}, nil
+	case "VmStkTinyInt":
+		return oas.TvmStackRecord{Type: oas.TvmStackRecordTypeNum, Num: oas.NewOptString(fmt.Sprintf("0x%x", v.VmStkTinyInt))}, nil //todo: fix negative
+	case "VmStkInt":
+		b := big.Int(v.VmStkInt)
+		return oas.TvmStackRecord{Type: oas.TvmStackRecordTypeNum, Num: oas.NewOptString(fmt.Sprintf("0x%x", b.Bytes()))}, nil //todo: fix negative
+	case "VmStkCell":
+		boc, err := v.VmStkCell.Value.ToBocBase64()
+		if err != nil {
+			return oas.TvmStackRecord{}, err
+		}
+		return oas.TvmStackRecord{Type: oas.TvmStackRecordTypeCell, Cell: oas.NewOptString(boc)}, nil
+	case "VmStkSlice":
+		boc, err := v.VmStkSlice.Cell().ToBocBase64()
+		if err != nil {
+			return oas.TvmStackRecord{}, err
+		}
+		return oas.TvmStackRecord{Type: oas.TvmStackRecordTypeCell, Cell: oas.NewOptString(boc)}, nil
+	default:
+		return oas.TvmStackRecord{}, fmt.Errorf("can't conver %v stack to rest json", v.SumType)
+	}
+
 }

@@ -5,6 +5,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/tonkeeper/opentonapi/pkg/chainstate"
 	"github.com/tonkeeper/opentonapi/pkg/config"
+	"github.com/tonkeeper/tongo/liteapi"
 
 	"github.com/tonkeeper/opentonapi/pkg/api"
 	"github.com/tonkeeper/opentonapi/pkg/app"
@@ -18,12 +19,14 @@ func main() {
 	cfg := config.Load()
 	log := app.Logger(cfg.App.LogLevel)
 
-	storage, err := litestorage.NewLiteStorage(cfg.App.Accounts, log)
+	client, err := liteapi.NewClientWithDefaultMainnet()
 	if err != nil {
 		log.Fatal("storage init", zap.Error(err))
 	}
 
-	h := api.NewHandler(storage, chainstate.NewChainState())
+	storage := litestorage.NewLiteStorage(client, cfg.App.Accounts, log)
+
+	h := api.NewHandler(storage, chainstate.NewChainState(), client)
 
 	oasServer, err := oas.NewServer(h, oas.WithMiddleware(api.Logging(log), api.Metrics), oas.WithErrorHandler(api.ErrorsHandler))
 	if err != nil {

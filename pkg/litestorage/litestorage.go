@@ -52,12 +52,7 @@ func (s *LiteStorage) GetRawAccount(ctx context.Context, address tongo.AccountID
 	return core.ConvertToAccount(address, account)
 }
 
-func NewLiteStorage(preloadAccounts []tongo.AccountID, log *zap.Logger) (*LiteStorage, error) {
-	client, err := liteapi.NewClientWithDefaultMainnet()
-	if err != nil {
-		return nil, err
-	}
-
+func NewLiteStorage(client *liteapi.Client, preloadAccounts []tongo.AccountID, log *zap.Logger) *LiteStorage {
 	l := &LiteStorage{
 		client:                  client,
 		transactionsIndex:       make(map[tongo.AccountID][]*core.Transaction),
@@ -67,7 +62,7 @@ func NewLiteStorage(preloadAccounts []tongo.AccountID, log *zap.Logger) (*LiteSt
 	for _, a := range preloadAccounts {
 		l.preloadAccount(a, log)
 	}
-	return l, nil
+	return l
 }
 
 func (s *LiteStorage) preloadAccount(a tongo.AccountID, log *zap.Logger) error {

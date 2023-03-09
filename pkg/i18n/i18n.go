@@ -7,7 +7,7 @@ import (
 	"golang.org/x/text/language"
 )
 
-//go:embed locale.*.toml
+//go:embed translations/active.*.toml
 var localeFS embed.FS
 var bundle *i18n.Bundle
 

@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"github.com/tonkeeper/tongo/tlb"
 
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
@@ -29,6 +30,11 @@ type storage interface {
 		onlyVerified bool,
 		limit, offset int,
 	) ([]tongo.AccountID, error)
+}
+
+type executor interface {
+	RunSmcMethod(ctx context.Context, accountID tongo.AccountID, methodName string, params tlb.VmStack) (uint32, tlb.VmStack, error)
+	RunSmcMethodByID(ctx context.Context, accountID tongo.AccountID, methodName int, params tlb.VmStack) (uint32, tlb.VmStack, error)
 }
 
 type chainState interface {

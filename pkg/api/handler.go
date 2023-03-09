@@ -2,10 +2,9 @@ package api
 
 import (
 	"context"
-
 	"github.com/go-faster/errors"
-
 	"github.com/tonkeeper/opentonapi/internal/g"
+	"github.com/tonkeeper/tongo/abi"
 
 	"github.com/tonkeeper/tongo"
 
@@ -21,12 +20,14 @@ type Handler struct {
 	oas.UnimplementedHandler // automatically implement all methods
 	storage                  storage
 	state                    chainState
+	executor                 executor
 }
 
-func NewHandler(s storage, state chainState) Handler {
+func NewHandler(s storage, state chainState, e executor) Handler {
 	return Handler{
-		storage: s,
-		state:   state,
+		storage:  s,
+		state:    state,
+		executor: e,
 	}
 }
 
@@ -193,6 +194,49 @@ func (h Handler) GetNftItemsByAddresses(ctx context.Context, params oas.GetNftIt
 	var result oas.NftItems
 	for _, i := range items {
 		result.NftItems = append(result.NftItems, convertNFT(i))
+	}
+	return &result, nil
+}
+
+func (h Handler) ExecGetMethod(ctx context.Context, params oas.ExecGetMethodParams) (oas.ExecGetMethodRes, error) {
+	id, err := tongo.ParseAccountID(params.AccountID)
+	if err != nil {
+		return &oas.BadRequest{Error: err.Error()}, nil
+	}
+	exitCode, stack, err := h.executor.RunSmcMethod(ctx, id, params.MethodName, nil)
+	if err != nil {
+		return &oas.InternalError{Error: err.Error()}, nil
+	}
+	result := oas.MethodExecutionResult{
+		Success:  exitCode == 0 || exitCode == 1,
+		ExitCode: int(exitCode),
+		Stack:    make([]oas.TvmStackRecord, 0, len(stack)),
+	}
+	_, v, err := abi.GetNftData(ctx, h.executor, id)
+	for i := range stack {
+		value, err := convertTvmStackValue(stack[i])
+		if err != nil {
+			return &oas.InternalError{Error: err.Error()}, nil
+		}
+		result.Stack = append(result.Stack, value)
+	}
+	result.SetDecoded(oas.NewOptMethodExecutionResultDecoded(anyToJSONRawMap(v)))
+	return &result, nil
+}
+
+func (h Handler) ExecGetMethodPost(ctx context.Context, req *oas.ExecGetMethodPostReq, params oas.ExecGetMethodPostParams) (oas.ExecGetMethodPostRes, error) {
+	id, err := tongo.ParseAccountID(params.AccountID)
+	if err != nil {
+		return &oas.BadRequest{Error: err.Error()}, nil
+	}
+	exitCode, stack, err := h.executor.RunSmcMethod(ctx, id, params.MethodName, nil)
+	if err != nil {
+		return &oas.InternalError{Error: err.Error()}, nil
+	}
+	result := oas.MethodExecutionResult{
+		Success:  exitCode == 0 || exitCode == 1,
+		ExitCode: int(exitCode),
+		Stack:    make([]oas.TvmStackRecord, 0, len(stack)),
 	}
 	return &result, nil
 }
