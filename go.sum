@@ -190,7 +190,6 @@ github.com/nicksnyder/go-i18n/v2 v2.2.1 h1:aOzRCdwsJuoExfZhoiXHy4bjruwCMdt5otbYo
 github.com/nicksnyder/go-i18n/v2 v2.2.1/go.mod h1:fF2++lPHlo+/kPaj3nB0uxtPwzlPm+BlgwGX7MkeGj0=
 github.com/oasisprotocol/curve25519-voi v0.0.0-20220328075252-7dd334e3daae h1:7smdlrfdcZic4VfsGKD2ulWL804a4GVphr4s7WZxGiY=
 github.com/oasisprotocol/curve25519-voi v0.0.0-20220328075252-7dd334e3daae/go.mod h1:hVoHR2EVESiICEMbg137etN/Lx+lSrHPTD39Z/uE+2s=
-github.com/ogen-go/ogen v0.52.1/go.mod h1:AoztSDXt+uAuHwB05eFr3QDulu3UGKEfK8NDgkqhOpM=
 github.com/ogen-go/ogen v0.55.0 h1:CJsHP6PM4gQdtOUZgWwC+gELzwEsWT01NXfnuiPYlpg=
 github.com/ogen-go/ogen v0.55.0/go.mod h1:HTLN2SR0RAFQQXhFrK/fUlEXG9gtULojtZpGKPOLI+Y=
 github.com/pkg/errors v0.8.0/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
@@ -247,7 +246,6 @@ github.com/stretchr/testify v1.7.1/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/
 github.com/stretchr/testify v1.8.0/go.mod h1:yNjHg4UonilssWZ8iaSj1OCr/vHnekPRkoO+kdMU+MU=
 github.com/stretchr/testify v1.8.1 h1:w7B6lhMri9wdJUVmEZPGGhZzrYTPvgJArz7wNPgYKsk=
 github.com/stretchr/testify v1.8.1/go.mod h1:w2LPCIKwWwSfY2zedu0+kehJoqGctiVI29o6fzry7u4=
-github.com/tonkeeper/tongo v0.11.6/go.mod h1:kxSZBulNxKKoa0zjSq4Us+5vZ4WeRNBwU9OpY6G9Pu0=
 github.com/tonkeeper/tongo v1.0.3 h1:8NqSb5nUPh2Prp8UDXH5BQk035y6vxR46PE0aZAcsCs=
 github.com/tonkeeper/tongo v1.0.3/go.mod h1:Nn/5t5MGQHBUuEm56O135FIYwk9WpPgDITjWPk+fPGc=
 github.com/yuin/goldmark v1.1.25/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=

@@ -2,6 +2,8 @@ package api
 
 import (
 	"context"
+	"fmt"
+	"github.com/tonkeeper/opentonapi/pkg/i18n"
 
 	"github.com/go-faster/errors"
 
@@ -146,33 +148,24 @@ func (h Handler) StackingPools(ctx context.Context, params oas.StackingPoolsPara
 	for k, w := range references.WhalesPools {
 		poolConfig, poolStatus, err := h.storage.GetWhalesPoolInfo(ctx, k)
 		if err != nil {
-			return &oas.InternalError{Error: err.Error()}, nil
+			continue
 		}
 		result.Pools = append(result.Pools, convertStackingWhalesPool(k, w, poolStatus, poolConfig, h.state.GetAPY()))
 	}
+	fmt.Println(params.AcceptLanguage.Value)
 	result.SetImplementations(map[string]oas.StackingPoolsOKImplementationsItem{
 		string(oas.PoolInfoImplementationWhales): {
-			Name:        "TON Whales",
-			Description: "Minimum deposit from 50 TON",
+			Name: "TON Whales",
+			Description: i18n.T(params.AcceptLanguage.Value, i18n.C{DefaultMessage: &i18n.M{
+				ID:    "poolImplementationDescription",
+				Other: "Minimum deposit {{.Deposit}} TON",
+			}, TemplateData: map[string]interface{}{"Deposit": 50}}),
 		},
 		string(oas.PoolInfoImplementationTf): {
 			Name:        "TON Foundation",
-			Description: "Minimum deposit 10000 TON",
+			Description: i18n.T(params.AcceptLanguage.Value, i18n.C{MessageID: "poolImplementationDescription", TemplateData: map[string]interface{}{"Deposit": 10000}}),
 		},
 	})
-	switch normalizeLanguage(params.AcceptLanguage.Value) {
-	case "ru":
-		result.SetImplementations(map[string]oas.StackingPoolsOKImplementationsItem{
-			string(oas.PoolInfoImplementationWhales): {
-				Name:        "TON Whales",
-				Description: "Минимальный депозит от 50 ТОН",
-			},
-			string(oas.PoolInfoImplementationTf): {
-				Name:        "TON Foundation",
-				Description: "Минимальный депозит от 10000 ТОН",
-			},
-		})
-	}
 
 	return &result, nil
 }
