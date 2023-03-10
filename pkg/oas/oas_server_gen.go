@@ -174,7 +174,7 @@ type Handler interface {
 	//
 	// All pools where account participates.
 	//
-	// GET /v2/stacking/nominator/{account_id}/pools
+	// GET /v2/staking/nominator/{account_id}/pools
 	PoolsByNominators(ctx context.Context, params PoolsByNominatorsParams) (PoolsByNominatorsRes, error)
 	// SendMessage implements sendMessage operation.
 	//
@@ -182,18 +182,18 @@ type Handler interface {
 	//
 	// POST /v2/blockchain/message
 	SendMessage(ctx context.Context, req OptSendMessageReq) (SendMessageRes, error)
-	// StackingPoolInfo implements stackingPoolInfo operation.
+	// StakingPoolInfo implements stakingPoolInfo operation.
 	//
 	// Pool info.
 	//
-	// GET /v2/stacking/pool/{account_id}
-	StackingPoolInfo(ctx context.Context, params StackingPoolInfoParams) (StackingPoolInfoRes, error)
-	// StackingPools implements stackingPools operation.
+	// GET /v2/staking/pool/{account_id}
+	StakingPoolInfo(ctx context.Context, params StakingPoolInfoParams) (StakingPoolInfoRes, error)
+	// StakingPools implements stakingPools operation.
 	//
 	// All pools available in network.
 	//
-	// GET /v2/stacking/pools
-	StackingPools(ctx context.Context, params StackingPoolsParams) (StackingPoolsRes, error)
+	// GET /v2/staking/pools
+	StakingPools(ctx context.Context, params StakingPoolsParams) (StakingPoolsRes, error)
 }
 
 // Server implements http server based on OpenAPI v3 specification and

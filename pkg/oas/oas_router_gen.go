@@ -710,8 +710,8 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 					return
 				}
-			case 's': // Prefix: "stacking/"
-				if l := len("stacking/"); len(elem) >= l && elem[0:l] == "stacking/" {
+			case 's': // Prefix: "staking/"
+				if l := len("staking/"); len(elem) >= l && elem[0:l] == "staking/" {
 					elem = elem[l:]
 				} else {
 					break
@@ -789,7 +789,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 							// Leaf node.
 							switch r.Method {
 							case "GET":
-								s.handleStackingPoolInfoRequest([1]string{
+								s.handleStakingPoolInfoRequest([1]string{
 									args[0],
 								}, w, r)
 							default:
@@ -809,7 +809,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 							// Leaf node.
 							switch r.Method {
 							case "GET":
-								s.handleStackingPoolsRequest([0]string{}, w, r)
+								s.handleStakingPoolsRequest([0]string{}, w, r)
 							default:
 								s.notAllowed(w, r, "GET")
 							}
@@ -1583,8 +1583,8 @@ func (s *Server) FindRoute(method, path string) (r Route, _ bool) {
 						return
 					}
 				}
-			case 's': // Prefix: "stacking/"
-				if l := len("stacking/"); len(elem) >= l && elem[0:l] == "stacking/" {
+			case 's': // Prefix: "staking/"
+				if l := len("staking/"); len(elem) >= l && elem[0:l] == "staking/" {
 					elem = elem[l:]
 				} else {
 					break
@@ -1661,9 +1661,9 @@ func (s *Server) FindRoute(method, path string) (r Route, _ bool) {
 						if len(elem) == 0 {
 							switch method {
 							case "GET":
-								// Leaf: StackingPoolInfo
-								r.name = "StackingPoolInfo"
-								r.operationID = "stackingPoolInfo"
+								// Leaf: StakingPoolInfo
+								r.name = "StakingPoolInfo"
+								r.operationID = "stakingPoolInfo"
 								r.args = args
 								r.count = 1
 								return r, true
@@ -1681,9 +1681,9 @@ func (s *Server) FindRoute(method, path string) (r Route, _ bool) {
 						if len(elem) == 0 {
 							switch method {
 							case "GET":
-								// Leaf: StackingPools
-								r.name = "StackingPools"
-								r.operationID = "stackingPools"
+								// Leaf: StakingPools
+								r.name = "StakingPools"
+								r.operationID = "stakingPools"
 								r.args = args
 								r.count = 0
 								return r, true

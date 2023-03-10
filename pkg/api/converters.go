@@ -184,7 +184,7 @@ func convertTrace(t core.Trace) oas.Trace {
 	return trace
 }
 
-func convertStackingWhalesPool(address tongo.AccountID, w references.WhalesPoolInfo, poolStatus abi.GetStakingStatusResult, poolConfig abi.GetParams_WhalesNominatorResult, apy float64) oas.PoolInfo {
+func convertStakingWhalesPool(address tongo.AccountID, w references.WhalesPoolInfo, poolStatus abi.GetStakingStatusResult, poolConfig abi.GetParams_WhalesNominatorResult, apy float64) oas.PoolInfo {
 	return oas.PoolInfo{
 		Address:        address.ToRaw(),
 		Name:           w.Name + " " + w.Queue,

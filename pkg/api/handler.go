@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"github.com/tonkeeper/opentonapi/pkg/i18n"
+	"golang.org/x/exp/slices"
 
 	"github.com/go-faster/errors"
 	"github.com/tonkeeper/tongo"
@@ -127,7 +128,7 @@ func (h Handler) PoolsByNominators(ctx context.Context, params oas.PoolsByNomina
 	if err != nil {
 		return &oas.InternalError{Error: err.Error()}, nil
 	}
-	var result oas.AccountStacking
+	var result oas.AccountStaking
 	for _, w := range whalesPools {
 		if _, ok := references.WhalesPools[w.Pool]; !ok {
 			continue //skip unknown pools
@@ -142,7 +143,7 @@ func (h Handler) PoolsByNominators(ctx context.Context, params oas.PoolsByNomina
 	return &result, nil
 }
 
-func (h Handler) StackingPoolInfo(ctx context.Context, params oas.StackingPoolInfoParams) (oas.StackingPoolInfoRes, error) {
+func (h Handler) StakingPoolInfo(ctx context.Context, params oas.StakingPoolInfoParams) (oas.StakingPoolInfoRes, error) {
 	poolID, err := tongo.ParseAccountID(params.AccountID)
 	if err != nil {
 		return &oas.BadRequest{Error: err.Error()}, nil
@@ -152,22 +153,25 @@ func (h Handler) StackingPoolInfo(ctx context.Context, params oas.StackingPoolIn
 		if err != nil {
 			return &oas.InternalError{Error: err.Error()}, nil
 		}
-		return g.Pointer(convertStackingWhalesPool(poolID, w, poolStatus, poolConfig, h.state.GetAPY())), nil
+		return g.Pointer(convertStakingWhalesPool(poolID, w, poolStatus, poolConfig, h.state.GetAPY())), nil
 	}
 
 	return &oas.NotFound{Error: "pool not found"}, nil
 }
 
-func (h Handler) StackingPools(ctx context.Context, params oas.StackingPoolsParams) (r oas.StackingPoolsRes, _ error) {
-	var result oas.StackingPoolsOK
+func (h Handler) StakingPools(ctx context.Context, params oas.StakingPoolsParams) (r oas.StakingPoolsRes, _ error) {
+	var result oas.StakingPoolsOK
 	for k, w := range references.WhalesPools {
 		poolConfig, poolStatus, err := h.storage.GetWhalesPoolInfo(ctx, k)
 		if err != nil {
 			continue
 		}
-		result.Pools = append(result.Pools, convertStackingWhalesPool(k, w, poolStatus, poolConfig, h.state.GetAPY()))
+		result.Pools = append(result.Pools, convertStakingWhalesPool(k, w, poolStatus, poolConfig, h.state.GetAPY()))
 	}
-	result.SetImplementations(map[string]oas.StackingPoolsOKImplementationsItem{
+	slices.SortFunc(result.Pools, func(a, b oas.PoolInfo) bool {
+		return a.Apy > b.Apy
+	})
+	result.SetImplementations(map[string]oas.StakingPoolsOKImplementationsItem{
 		string(oas.PoolInfoImplementationWhales): {
 			Name: "TON Whales",
 			Description: i18n.T(params.AcceptLanguage.Value, i18n.C{DefaultMessage: &i18n.M{

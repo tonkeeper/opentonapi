@@ -3851,7 +3851,7 @@ func decodePoolsByNominatorsResponse(resp *http.Response) (res PoolsByNominators
 			}
 
 			d := jx.DecodeBytes(b)
-			var response AccountStacking
+			var response AccountStaking
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err
@@ -4090,7 +4090,7 @@ func decodeSendMessageResponse(resp *http.Response) (res SendMessageRes, err err
 	return res, validate.UnexpectedStatusCode(resp.StatusCode)
 }
 
-func decodeStackingPoolInfoResponse(resp *http.Response) (res StackingPoolInfoRes, err error) {
+func decodeStakingPoolInfoResponse(resp *http.Response) (res StakingPoolInfoRes, err error) {
 	switch resp.StatusCode {
 	case 200:
 		// Code 200.
@@ -4246,7 +4246,7 @@ func decodeStackingPoolInfoResponse(resp *http.Response) (res StackingPoolInfoRe
 	return res, validate.UnexpectedStatusCode(resp.StatusCode)
 }
 
-func decodeStackingPoolsResponse(resp *http.Response) (res StackingPoolsRes, err error) {
+func decodeStakingPoolsResponse(resp *http.Response) (res StakingPoolsRes, err error) {
 	switch resp.StatusCode {
 	case 200:
 		// Code 200.
@@ -4262,7 +4262,7 @@ func decodeStackingPoolsResponse(resp *http.Response) (res StackingPoolsRes, err
 			}
 
 			d := jx.DecodeBytes(b)
-			var response StackingPoolsOK
+			var response StakingPoolsOK
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err

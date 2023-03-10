@@ -260,7 +260,7 @@ func (UnimplementedHandler) GetValidators(ctx context.Context) (r GetValidatorsR
 //
 // All pools where account participates.
 //
-// GET /v2/stacking/nominator/{account_id}/pools
+// GET /v2/staking/nominator/{account_id}/pools
 func (UnimplementedHandler) PoolsByNominators(ctx context.Context, params PoolsByNominatorsParams) (r PoolsByNominatorsRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
@@ -274,20 +274,20 @@ func (UnimplementedHandler) SendMessage(ctx context.Context, req OptSendMessageR
 	return r, ht.ErrNotImplemented
 }
 
-// StackingPoolInfo implements stackingPoolInfo operation.
+// StakingPoolInfo implements stakingPoolInfo operation.
 //
 // Pool info.
 //
-// GET /v2/stacking/pool/{account_id}
-func (UnimplementedHandler) StackingPoolInfo(ctx context.Context, params StackingPoolInfoParams) (r StackingPoolInfoRes, _ error) {
+// GET /v2/staking/pool/{account_id}
+func (UnimplementedHandler) StakingPoolInfo(ctx context.Context, params StakingPoolInfoParams) (r StakingPoolInfoRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
-// StackingPools implements stackingPools operation.
+// StakingPools implements stakingPools operation.
 //
 // All pools available in network.
 //
-// GET /v2/stacking/pools
-func (UnimplementedHandler) StackingPools(ctx context.Context, params StackingPoolsParams) (r StackingPoolsRes, _ error) {
+// GET /v2/staking/pools
+func (UnimplementedHandler) StakingPools(ctx context.Context, params StakingPoolsParams) (r StakingPoolsRes, _ error) {
 	return r, ht.ErrNotImplemented
 }

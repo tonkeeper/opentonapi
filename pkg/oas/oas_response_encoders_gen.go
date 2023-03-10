@@ -1666,7 +1666,7 @@ func encodeGetValidatorsResponse(response GetValidatorsRes, w http.ResponseWrite
 
 func encodePoolsByNominatorsResponse(response PoolsByNominatorsRes, w http.ResponseWriter, span trace.Span) error {
 	switch response := response.(type) {
-	case *AccountStacking:
+	case *AccountStaking:
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(200)
 		span.SetStatus(codes.Ok, http.StatusText(200))
@@ -1780,7 +1780,7 @@ func encodeSendMessageResponse(response SendMessageRes, w http.ResponseWriter, s
 	}
 }
 
-func encodeStackingPoolInfoResponse(response StackingPoolInfoRes, w http.ResponseWriter, span trace.Span) error {
+func encodeStakingPoolInfoResponse(response StakingPoolInfoRes, w http.ResponseWriter, span trace.Span) error {
 	switch response := response.(type) {
 	case *PoolInfo:
 		w.Header().Set("Content-Type", "application/json")
@@ -1847,9 +1847,9 @@ func encodeStackingPoolInfoResponse(response StackingPoolInfoRes, w http.Respons
 	}
 }
 
-func encodeStackingPoolsResponse(response StackingPoolsRes, w http.ResponseWriter, span trace.Span) error {
+func encodeStakingPoolsResponse(response StakingPoolsRes, w http.ResponseWriter, span trace.Span) error {
 	switch response := response.(type) {
-	case *StackingPoolsOK:
+	case *StakingPoolsOK:
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(200)
 		span.SetStatus(codes.Ok, http.StatusText(200))

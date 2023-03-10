@@ -2699,7 +2699,7 @@ func (s *Server) handleGetValidatorsRequest(args [0]string, w http.ResponseWrite
 //
 // All pools where account participates.
 //
-// GET /v2/stacking/nominator/{account_id}/pools
+// GET /v2/staking/nominator/{account_id}/pools
 func (s *Server) handlePoolsByNominatorsRequest(args [1]string, w http.ResponseWriter, r *http.Request) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("poolsByNominators"),
@@ -2893,18 +2893,18 @@ func (s *Server) handleSendMessageRequest(args [0]string, w http.ResponseWriter,
 	}
 }
 
-// handleStackingPoolInfoRequest handles stackingPoolInfo operation.
+// handleStakingPoolInfoRequest handles stakingPoolInfo operation.
 //
 // Pool info.
 //
-// GET /v2/stacking/pool/{account_id}
-func (s *Server) handleStackingPoolInfoRequest(args [1]string, w http.ResponseWriter, r *http.Request) {
+// GET /v2/staking/pool/{account_id}
+func (s *Server) handleStakingPoolInfoRequest(args [1]string, w http.ResponseWriter, r *http.Request) {
 	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("stackingPoolInfo"),
+		otelogen.OperationID("stakingPoolInfo"),
 	}
 
 	// Start a span for this request.
-	ctx, span := s.cfg.Tracer.Start(r.Context(), "StackingPoolInfo",
+	ctx, span := s.cfg.Tracer.Start(r.Context(), "StakingPoolInfo",
 		trace.WithAttributes(otelAttrs...),
 		serverSpanKind,
 	)
@@ -2928,11 +2928,11 @@ func (s *Server) handleStackingPoolInfoRequest(args [1]string, w http.ResponseWr
 		}
 		err          error
 		opErrContext = ogenerrors.OperationContext{
-			Name: "StackingPoolInfo",
-			ID:   "stackingPoolInfo",
+			Name: "StakingPoolInfo",
+			ID:   "stakingPoolInfo",
 		}
 	)
-	params, err := decodeStackingPoolInfoParams(args, r)
+	params, err := decodeStakingPoolInfoParams(args, r)
 	if err != nil {
 		err = &ogenerrors.DecodeParamsError{
 			OperationContext: opErrContext,
@@ -2943,12 +2943,12 @@ func (s *Server) handleStackingPoolInfoRequest(args [1]string, w http.ResponseWr
 		return
 	}
 
-	var response StackingPoolInfoRes
+	var response StakingPoolInfoRes
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:       ctx,
-			OperationName: "StackingPoolInfo",
-			OperationID:   "stackingPoolInfo",
+			OperationName: "StakingPoolInfo",
+			OperationID:   "stakingPoolInfo",
 			Body:          nil,
 			Params: middleware.Parameters{
 				{
@@ -2965,8 +2965,8 @@ func (s *Server) handleStackingPoolInfoRequest(args [1]string, w http.ResponseWr
 
 		type (
 			Request  = struct{}
-			Params   = StackingPoolInfoParams
-			Response = StackingPoolInfoRes
+			Params   = StakingPoolInfoParams
+			Response = StakingPoolInfoRes
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -2975,13 +2975,13 @@ func (s *Server) handleStackingPoolInfoRequest(args [1]string, w http.ResponseWr
 		](
 			m,
 			mreq,
-			unpackStackingPoolInfoParams,
+			unpackStakingPoolInfoParams,
 			func(ctx context.Context, request Request, params Params) (Response, error) {
-				return s.h.StackingPoolInfo(ctx, params)
+				return s.h.StakingPoolInfo(ctx, params)
 			},
 		)
 	} else {
-		response, err = s.h.StackingPoolInfo(ctx, params)
+		response, err = s.h.StakingPoolInfo(ctx, params)
 	}
 	if err != nil {
 		recordError("Internal", err)
@@ -2989,25 +2989,25 @@ func (s *Server) handleStackingPoolInfoRequest(args [1]string, w http.ResponseWr
 		return
 	}
 
-	if err := encodeStackingPoolInfoResponse(response, w, span); err != nil {
+	if err := encodeStakingPoolInfoResponse(response, w, span); err != nil {
 		recordError("EncodeResponse", err)
 		s.cfg.ErrorHandler(ctx, w, r, err)
 		return
 	}
 }
 
-// handleStackingPoolsRequest handles stackingPools operation.
+// handleStakingPoolsRequest handles stakingPools operation.
 //
 // All pools available in network.
 //
-// GET /v2/stacking/pools
-func (s *Server) handleStackingPoolsRequest(args [0]string, w http.ResponseWriter, r *http.Request) {
+// GET /v2/staking/pools
+func (s *Server) handleStakingPoolsRequest(args [0]string, w http.ResponseWriter, r *http.Request) {
 	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("stackingPools"),
+		otelogen.OperationID("stakingPools"),
 	}
 
 	// Start a span for this request.
-	ctx, span := s.cfg.Tracer.Start(r.Context(), "StackingPools",
+	ctx, span := s.cfg.Tracer.Start(r.Context(), "StakingPools",
 		trace.WithAttributes(otelAttrs...),
 		serverSpanKind,
 	)
@@ -3031,11 +3031,11 @@ func (s *Server) handleStackingPoolsRequest(args [0]string, w http.ResponseWrite
 		}
 		err          error
 		opErrContext = ogenerrors.OperationContext{
-			Name: "StackingPools",
-			ID:   "stackingPools",
+			Name: "StakingPools",
+			ID:   "stakingPools",
 		}
 	)
-	params, err := decodeStackingPoolsParams(args, r)
+	params, err := decodeStakingPoolsParams(args, r)
 	if err != nil {
 		err = &ogenerrors.DecodeParamsError{
 			OperationContext: opErrContext,
@@ -3046,12 +3046,12 @@ func (s *Server) handleStackingPoolsRequest(args [0]string, w http.ResponseWrite
 		return
 	}
 
-	var response StackingPoolsRes
+	var response StakingPoolsRes
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:       ctx,
-			OperationName: "StackingPools",
-			OperationID:   "stackingPools",
+			OperationName: "StakingPools",
+			OperationID:   "stakingPools",
 			Body:          nil,
 			Params: middleware.Parameters{
 				{
@@ -3072,8 +3072,8 @@ func (s *Server) handleStackingPoolsRequest(args [0]string, w http.ResponseWrite
 
 		type (
 			Request  = struct{}
-			Params   = StackingPoolsParams
-			Response = StackingPoolsRes
+			Params   = StakingPoolsParams
+			Response = StakingPoolsRes
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -3082,13 +3082,13 @@ func (s *Server) handleStackingPoolsRequest(args [0]string, w http.ResponseWrite
 		](
 			m,
 			mreq,
-			unpackStackingPoolsParams,
+			unpackStakingPoolsParams,
 			func(ctx context.Context, request Request, params Params) (Response, error) {
-				return s.h.StackingPools(ctx, params)
+				return s.h.StakingPools(ctx, params)
 			},
 		)
 	} else {
-		response, err = s.h.StackingPools(ctx, params)
+		response, err = s.h.StakingPools(ctx, params)
 	}
 	if err != nil {
 		recordError("Internal", err)
@@ -3096,7 +3096,7 @@ func (s *Server) handleStackingPoolsRequest(args [0]string, w http.ResponseWrite
 		return
 	}
 
-	if err := encodeStackingPoolsResponse(response, w, span); err != nil {
+	if err := encodeStakingPoolsResponse(response, w, span); err != nil {
 		recordError("EncodeResponse", err)
 		s.cfg.ErrorHandler(ctx, w, r, err)
 		return

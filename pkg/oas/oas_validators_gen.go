@@ -92,7 +92,7 @@ func (s AccountEvents) Validate() error {
 	}
 	return nil
 }
-func (s AccountStacking) Validate() error {
+func (s AccountStaking) Validate() error {
 	var failures []validate.FieldError
 	if err := func() error {
 		if s.Pools == nil {
@@ -977,7 +977,7 @@ func (s RefundType) Validate() error {
 		return errors.Errorf("invalid value: %v", s)
 	}
 }
-func (s StackingPoolsOK) Validate() error {
+func (s StakingPoolsOK) Validate() error {
 	var failures []validate.FieldError
 	if err := func() error {
 		if s.Pools == nil {

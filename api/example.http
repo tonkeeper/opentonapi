@@ -9,13 +9,13 @@ GET {{host}}/v2/blockchain/transactions/2B7E6A0661AB41822E3F515F3A3D2E89643999CD
 GET {{host}}/v2/traces/1841e57595edb38590bc519fc6e385f77a9f0a34475e55cba621cc31438741a5
 
 ###
-GET {{host}}/v2/stacking/nominator/EQCMVd9ya3yvhyhOWckBUmrHsle3eLqb_em8npZEmbbR-NOe/pools
+GET {{host}}/v2/staking/nominator/EQCMVd9ya3yvhyhOWckBUmrHsle3eLqb_em8npZEmbbR-NOe/pools
 
 ###
-GET {{host}}/v2/stacking/pool/0:48fb0195a7fc7454512377b9bd704503ded27f6e7c4c4a9d136fdab3ef9ec04c
+GET {{host}}/v2/staking/pool/0:48fb0195a7fc7454512377b9bd704503ded27f6e7c4c4a9d136fdab3ef9ec04c
 
 ###
-GET {{host}}/v2/stacking/pools?availabe_for=0:48fb0195a7fc7454512377b9bd704503ded27f6e7c4c4a9d136fdab3ef9ec04c
+GET {{host}}/v2/staking/pools?availabe_for=0:48fb0195a7fc7454512377b9bd704503ded27f6e7c4c4a9d136fdab3ef9ec04c
 Accept-Language: ru
 
 ###
