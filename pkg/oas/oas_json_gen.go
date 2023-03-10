@@ -807,14 +807,14 @@ func (s *AccountEvents) UnmarshalJSON(data []byte) error {
 }
 
 // Encode implements json.Marshaler.
-func (s AccountStacking) Encode(e *jx.Encoder) {
+func (s AccountStaking) Encode(e *jx.Encoder) {
 	e.ObjStart()
 	s.encodeFields(e)
 	e.ObjEnd()
 }
 
 // encodeFields encodes fields.
-func (s AccountStacking) encodeFields(e *jx.Encoder) {
+func (s AccountStaking) encodeFields(e *jx.Encoder) {
 	{
 
 		e.FieldStart("pools")
@@ -826,14 +826,14 @@ func (s AccountStacking) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfAccountStacking = [1]string{
+var jsonFieldsNameOfAccountStaking = [1]string{
 	0: "pools",
 }
 
-// Decode decodes AccountStacking from json.
-func (s *AccountStacking) Decode(d *jx.Decoder) error {
+// Decode decodes AccountStaking from json.
+func (s *AccountStaking) Decode(d *jx.Decoder) error {
 	if s == nil {
-		return errors.New("invalid: unable to decode AccountStacking to nil")
+		return errors.New("invalid: unable to decode AccountStaking to nil")
 	}
 	var requiredBitSet [1]uint8
 
@@ -862,7 +862,7 @@ func (s *AccountStacking) Decode(d *jx.Decoder) error {
 		}
 		return nil
 	}); err != nil {
-		return errors.Wrap(err, "decode AccountStacking")
+		return errors.Wrap(err, "decode AccountStaking")
 	}
 	// Validate required fields.
 	var failures []validate.FieldError
@@ -879,8 +879,8 @@ func (s *AccountStacking) Decode(d *jx.Decoder) error {
 				bitIdx := bits.TrailingZeros8(result)
 				fieldIdx := i*8 + bitIdx
 				var name string
-				if fieldIdx < len(jsonFieldsNameOfAccountStacking) {
-					name = jsonFieldsNameOfAccountStacking[fieldIdx]
+				if fieldIdx < len(jsonFieldsNameOfAccountStaking) {
+					name = jsonFieldsNameOfAccountStaking[fieldIdx]
 				} else {
 					name = strconv.Itoa(fieldIdx)
 				}
@@ -901,14 +901,14 @@ func (s *AccountStacking) Decode(d *jx.Decoder) error {
 }
 
 // MarshalJSON implements stdjson.Marshaler.
-func (s AccountStacking) MarshalJSON() ([]byte, error) {
+func (s AccountStaking) MarshalJSON() ([]byte, error) {
 	e := jx.Encoder{}
 	s.Encode(&e)
 	return e.Bytes(), nil
 }
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *AccountStacking) UnmarshalJSON(data []byte) error {
+func (s *AccountStaking) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -10451,14 +10451,14 @@ func (s *SendMessageReq) UnmarshalJSON(data []byte) error {
 }
 
 // Encode implements json.Marshaler.
-func (s StackingPoolsOK) Encode(e *jx.Encoder) {
+func (s StakingPoolsOK) Encode(e *jx.Encoder) {
 	e.ObjStart()
 	s.encodeFields(e)
 	e.ObjEnd()
 }
 
 // encodeFields encodes fields.
-func (s StackingPoolsOK) encodeFields(e *jx.Encoder) {
+func (s StakingPoolsOK) encodeFields(e *jx.Encoder) {
 	{
 
 		e.FieldStart("pools")
@@ -10475,15 +10475,15 @@ func (s StackingPoolsOK) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfStackingPoolsOK = [2]string{
+var jsonFieldsNameOfStakingPoolsOK = [2]string{
 	0: "pools",
 	1: "implementations",
 }
 
-// Decode decodes StackingPoolsOK from json.
-func (s *StackingPoolsOK) Decode(d *jx.Decoder) error {
+// Decode decodes StakingPoolsOK from json.
+func (s *StakingPoolsOK) Decode(d *jx.Decoder) error {
 	if s == nil {
-		return errors.New("invalid: unable to decode StackingPoolsOK to nil")
+		return errors.New("invalid: unable to decode StakingPoolsOK to nil")
 	}
 	var requiredBitSet [1]uint8
 
@@ -10522,7 +10522,7 @@ func (s *StackingPoolsOK) Decode(d *jx.Decoder) error {
 		}
 		return nil
 	}); err != nil {
-		return errors.Wrap(err, "decode StackingPoolsOK")
+		return errors.Wrap(err, "decode StakingPoolsOK")
 	}
 	// Validate required fields.
 	var failures []validate.FieldError
@@ -10539,8 +10539,8 @@ func (s *StackingPoolsOK) Decode(d *jx.Decoder) error {
 				bitIdx := bits.TrailingZeros8(result)
 				fieldIdx := i*8 + bitIdx
 				var name string
-				if fieldIdx < len(jsonFieldsNameOfStackingPoolsOK) {
-					name = jsonFieldsNameOfStackingPoolsOK[fieldIdx]
+				if fieldIdx < len(jsonFieldsNameOfStakingPoolsOK) {
+					name = jsonFieldsNameOfStakingPoolsOK[fieldIdx]
 				} else {
 					name = strconv.Itoa(fieldIdx)
 				}
@@ -10561,27 +10561,27 @@ func (s *StackingPoolsOK) Decode(d *jx.Decoder) error {
 }
 
 // MarshalJSON implements stdjson.Marshaler.
-func (s StackingPoolsOK) MarshalJSON() ([]byte, error) {
+func (s StakingPoolsOK) MarshalJSON() ([]byte, error) {
 	e := jx.Encoder{}
 	s.Encode(&e)
 	return e.Bytes(), nil
 }
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *StackingPoolsOK) UnmarshalJSON(data []byte) error {
+func (s *StakingPoolsOK) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
 
 // Encode implements json.Marshaler.
-func (s StackingPoolsOKImplementations) Encode(e *jx.Encoder) {
+func (s StakingPoolsOKImplementations) Encode(e *jx.Encoder) {
 	e.ObjStart()
 	s.encodeFields(e)
 	e.ObjEnd()
 }
 
 // encodeFields implements json.Marshaler.
-func (s StackingPoolsOKImplementations) encodeFields(e *jx.Encoder) {
+func (s StakingPoolsOKImplementations) encodeFields(e *jx.Encoder) {
 	for k, elem := range s {
 		e.FieldStart(k)
 
@@ -10589,14 +10589,14 @@ func (s StackingPoolsOKImplementations) encodeFields(e *jx.Encoder) {
 	}
 }
 
-// Decode decodes StackingPoolsOKImplementations from json.
-func (s *StackingPoolsOKImplementations) Decode(d *jx.Decoder) error {
+// Decode decodes StakingPoolsOKImplementations from json.
+func (s *StakingPoolsOKImplementations) Decode(d *jx.Decoder) error {
 	if s == nil {
-		return errors.New("invalid: unable to decode StackingPoolsOKImplementations to nil")
+		return errors.New("invalid: unable to decode StakingPoolsOKImplementations to nil")
 	}
 	m := s.init()
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
-		var elem StackingPoolsOKImplementationsItem
+		var elem StakingPoolsOKImplementationsItem
 		if err := func() error {
 			if err := elem.Decode(d); err != nil {
 				return err
@@ -10608,34 +10608,34 @@ func (s *StackingPoolsOKImplementations) Decode(d *jx.Decoder) error {
 		m[string(k)] = elem
 		return nil
 	}); err != nil {
-		return errors.Wrap(err, "decode StackingPoolsOKImplementations")
+		return errors.Wrap(err, "decode StakingPoolsOKImplementations")
 	}
 
 	return nil
 }
 
 // MarshalJSON implements stdjson.Marshaler.
-func (s StackingPoolsOKImplementations) MarshalJSON() ([]byte, error) {
+func (s StakingPoolsOKImplementations) MarshalJSON() ([]byte, error) {
 	e := jx.Encoder{}
 	s.Encode(&e)
 	return e.Bytes(), nil
 }
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *StackingPoolsOKImplementations) UnmarshalJSON(data []byte) error {
+func (s *StakingPoolsOKImplementations) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
 
 // Encode implements json.Marshaler.
-func (s StackingPoolsOKImplementationsItem) Encode(e *jx.Encoder) {
+func (s StakingPoolsOKImplementationsItem) Encode(e *jx.Encoder) {
 	e.ObjStart()
 	s.encodeFields(e)
 	e.ObjEnd()
 }
 
 // encodeFields encodes fields.
-func (s StackingPoolsOKImplementationsItem) encodeFields(e *jx.Encoder) {
+func (s StakingPoolsOKImplementationsItem) encodeFields(e *jx.Encoder) {
 	{
 
 		e.FieldStart("name")
@@ -10648,15 +10648,15 @@ func (s StackingPoolsOKImplementationsItem) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfStackingPoolsOKImplementationsItem = [2]string{
+var jsonFieldsNameOfStakingPoolsOKImplementationsItem = [2]string{
 	0: "name",
 	1: "description",
 }
 
-// Decode decodes StackingPoolsOKImplementationsItem from json.
-func (s *StackingPoolsOKImplementationsItem) Decode(d *jx.Decoder) error {
+// Decode decodes StakingPoolsOKImplementationsItem from json.
+func (s *StakingPoolsOKImplementationsItem) Decode(d *jx.Decoder) error {
 	if s == nil {
-		return errors.New("invalid: unable to decode StackingPoolsOKImplementationsItem to nil")
+		return errors.New("invalid: unable to decode StakingPoolsOKImplementationsItem to nil")
 	}
 	var requiredBitSet [1]uint8
 
@@ -10691,7 +10691,7 @@ func (s *StackingPoolsOKImplementationsItem) Decode(d *jx.Decoder) error {
 		}
 		return nil
 	}); err != nil {
-		return errors.Wrap(err, "decode StackingPoolsOKImplementationsItem")
+		return errors.Wrap(err, "decode StakingPoolsOKImplementationsItem")
 	}
 	// Validate required fields.
 	var failures []validate.FieldError
@@ -10708,8 +10708,8 @@ func (s *StackingPoolsOKImplementationsItem) Decode(d *jx.Decoder) error {
 				bitIdx := bits.TrailingZeros8(result)
 				fieldIdx := i*8 + bitIdx
 				var name string
-				if fieldIdx < len(jsonFieldsNameOfStackingPoolsOKImplementationsItem) {
-					name = jsonFieldsNameOfStackingPoolsOKImplementationsItem[fieldIdx]
+				if fieldIdx < len(jsonFieldsNameOfStakingPoolsOKImplementationsItem) {
+					name = jsonFieldsNameOfStakingPoolsOKImplementationsItem[fieldIdx]
 				} else {
 					name = strconv.Itoa(fieldIdx)
 				}
@@ -10730,14 +10730,14 @@ func (s *StackingPoolsOKImplementationsItem) Decode(d *jx.Decoder) error {
 }
 
 // MarshalJSON implements stdjson.Marshaler.
-func (s StackingPoolsOKImplementationsItem) MarshalJSON() ([]byte, error) {
+func (s StakingPoolsOKImplementationsItem) MarshalJSON() ([]byte, error) {
 	e := jx.Encoder{}
 	s.Encode(&e)
 	return e.Bytes(), nil
 }
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *StackingPoolsOKImplementationsItem) UnmarshalJSON(data []byte) error {
+func (s *StakingPoolsOKImplementationsItem) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }

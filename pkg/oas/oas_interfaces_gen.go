@@ -117,10 +117,10 @@ type SendMessageRes interface {
 	sendMessageRes()
 }
 
-type StackingPoolInfoRes interface {
-	stackingPoolInfoRes()
+type StakingPoolInfoRes interface {
+	stakingPoolInfoRes()
 }
 
-type StackingPoolsRes interface {
-	stackingPoolsRes()
+type StakingPoolsRes interface {
+	stakingPoolsRes()
 }

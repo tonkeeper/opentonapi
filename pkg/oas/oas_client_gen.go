@@ -2317,7 +2317,7 @@ func (c *Client) GetValidators(ctx context.Context) (res GetValidatorsRes, err e
 //
 // All pools where account participates.
 //
-// GET /v2/stacking/nominator/{account_id}/pools
+// GET /v2/staking/nominator/{account_id}/pools
 func (c *Client) PoolsByNominators(ctx context.Context, params PoolsByNominatorsParams) (res PoolsByNominatorsRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("poolsByNominators"),
@@ -2351,7 +2351,7 @@ func (c *Client) PoolsByNominators(ctx context.Context, params PoolsByNominators
 
 	stage = "BuildURL"
 	u := uri.Clone(c.requestURL(ctx))
-	u.Path += "/v2/stacking/nominator/"
+	u.Path += "/v2/staking/nominator/"
 	{
 		// Encode "account_id" parameter.
 		e := uri.NewPathEncoder(uri.PathEncoderConfig{
@@ -2455,14 +2455,14 @@ func (c *Client) SendMessage(ctx context.Context, request OptSendMessageReq) (re
 	return result, nil
 }
 
-// StackingPoolInfo invokes stackingPoolInfo operation.
+// StakingPoolInfo invokes stakingPoolInfo operation.
 //
 // Pool info.
 //
-// GET /v2/stacking/pool/{account_id}
-func (c *Client) StackingPoolInfo(ctx context.Context, params StackingPoolInfoParams) (res StackingPoolInfoRes, err error) {
+// GET /v2/staking/pool/{account_id}
+func (c *Client) StakingPoolInfo(ctx context.Context, params StakingPoolInfoParams) (res StakingPoolInfoRes, err error) {
 	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("stackingPoolInfo"),
+		otelogen.OperationID("stakingPoolInfo"),
 	}
 
 	// Run stopwatch.
@@ -2476,7 +2476,7 @@ func (c *Client) StackingPoolInfo(ctx context.Context, params StackingPoolInfoPa
 	c.requests.Add(ctx, 1, otelAttrs...)
 
 	// Start a span for this request.
-	ctx, span := c.cfg.Tracer.Start(ctx, "StackingPoolInfo",
+	ctx, span := c.cfg.Tracer.Start(ctx, "StakingPoolInfo",
 		trace.WithAttributes(otelAttrs...),
 		clientSpanKind,
 	)
@@ -2493,7 +2493,7 @@ func (c *Client) StackingPoolInfo(ctx context.Context, params StackingPoolInfoPa
 
 	stage = "BuildURL"
 	u := uri.Clone(c.requestURL(ctx))
-	u.Path += "/v2/stacking/pool/"
+	u.Path += "/v2/staking/pool/"
 	{
 		// Encode "account_id" parameter.
 		e := uri.NewPathEncoder(uri.PathEncoderConfig{
@@ -2540,7 +2540,7 @@ func (c *Client) StackingPoolInfo(ctx context.Context, params StackingPoolInfoPa
 	defer resp.Body.Close()
 
 	stage = "DecodeResponse"
-	result, err := decodeStackingPoolInfoResponse(resp)
+	result, err := decodeStakingPoolInfoResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -2548,14 +2548,14 @@ func (c *Client) StackingPoolInfo(ctx context.Context, params StackingPoolInfoPa
 	return result, nil
 }
 
-// StackingPools invokes stackingPools operation.
+// StakingPools invokes stakingPools operation.
 //
 // All pools available in network.
 //
-// GET /v2/stacking/pools
-func (c *Client) StackingPools(ctx context.Context, params StackingPoolsParams) (res StackingPoolsRes, err error) {
+// GET /v2/staking/pools
+func (c *Client) StakingPools(ctx context.Context, params StakingPoolsParams) (res StakingPoolsRes, err error) {
 	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("stackingPools"),
+		otelogen.OperationID("stakingPools"),
 	}
 
 	// Run stopwatch.
@@ -2569,7 +2569,7 @@ func (c *Client) StackingPools(ctx context.Context, params StackingPoolsParams) 
 	c.requests.Add(ctx, 1, otelAttrs...)
 
 	// Start a span for this request.
-	ctx, span := c.cfg.Tracer.Start(ctx, "StackingPools",
+	ctx, span := c.cfg.Tracer.Start(ctx, "StakingPools",
 		trace.WithAttributes(otelAttrs...),
 		clientSpanKind,
 	)
@@ -2586,7 +2586,7 @@ func (c *Client) StackingPools(ctx context.Context, params StackingPoolsParams) 
 
 	stage = "BuildURL"
 	u := uri.Clone(c.requestURL(ctx))
-	u.Path += "/v2/stacking/pools"
+	u.Path += "/v2/staking/pools"
 
 	stage = "EncodeQueryParams"
 	q := uri.NewQueryEncoder()
@@ -2657,7 +2657,7 @@ func (c *Client) StackingPools(ctx context.Context, params StackingPoolsParams) 
 	defer resp.Body.Close()
 
 	stage = "DecodeResponse"
-	result, err := decodeStackingPoolsResponse(resp)
+	result, err := decodeStakingPoolsResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}

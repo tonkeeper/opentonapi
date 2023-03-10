@@ -292,22 +292,22 @@ func (s *AccountEvents) SetNextFrom(val OptInt64) {
 
 func (*AccountEvents) getEventsByAccountRes() {}
 
-// Ref: #/components/schemas/AccountStacking
-type AccountStacking struct {
+// Ref: #/components/schemas/AccountStaking
+type AccountStaking struct {
 	Pools []AccountStakingInfo `json:"pools"`
 }
 
 // GetPools returns the value of Pools.
-func (s AccountStacking) GetPools() []AccountStakingInfo {
+func (s AccountStaking) GetPools() []AccountStakingInfo {
 	return s.Pools
 }
 
 // SetPools sets the value of Pools.
-func (s *AccountStacking) SetPools(val []AccountStakingInfo) {
+func (s *AccountStaking) SetPools(val []AccountStakingInfo) {
 	s.Pools = val
 }
 
-func (*AccountStacking) poolsByNominatorsRes() {}
+func (*AccountStaking) poolsByNominatorsRes() {}
 
 // Ref: #/components/schemas/AccountStakingInfo
 type AccountStakingInfo struct {
@@ -873,8 +873,8 @@ func (*BadRequest) getTracesByAccountRes()        {}
 func (*BadRequest) getTransactionRes()            {}
 func (*BadRequest) poolsByNominatorsRes()         {}
 func (*BadRequest) sendMessageRes()               {}
-func (*BadRequest) stackingPoolInfoRes()          {}
-func (*BadRequest) stackingPoolsRes()             {}
+func (*BadRequest) stakingPoolInfoRes()           {}
+func (*BadRequest) stakingPoolsRes()              {}
 
 // Ref: #/components/schemas/Block
 type Block struct {
@@ -1744,8 +1744,8 @@ func (*InternalError) getTransactionRes()            {}
 func (*InternalError) getValidatorsRes()             {}
 func (*InternalError) poolsByNominatorsRes()         {}
 func (*InternalError) sendMessageRes()               {}
-func (*InternalError) stackingPoolInfoRes()          {}
-func (*InternalError) stackingPoolsRes()             {}
+func (*InternalError) stakingPoolInfoRes()           {}
+func (*InternalError) stakingPoolsRes()              {}
 
 // Ref: #/components/schemas/Jetton
 type Jetton struct {
@@ -2819,8 +2819,8 @@ func (*NotFound) getTraceRes()                  {}
 func (*NotFound) getTracesByAccountRes()        {}
 func (*NotFound) getTransactionRes()            {}
 func (*NotFound) poolsByNominatorsRes()         {}
-func (*NotFound) stackingPoolInfoRes()          {}
-func (*NotFound) stackingPoolsRes()             {}
+func (*NotFound) stakingPoolInfoRes()           {}
+func (*NotFound) stakingPoolsRes()              {}
 
 // NewOptAccountAddress returns new OptAccountAddress with value set to v.
 func NewOptAccountAddress(v AccountAddress) OptAccountAddress {
@@ -4573,7 +4573,7 @@ func (s *PoolInfo) SetCycleEnd(val int64) {
 	s.CycleEnd = val
 }
 
-func (*PoolInfo) stackingPoolInfoRes() {}
+func (*PoolInfo) stakingPoolInfoRes() {}
 
 type PoolInfoImplementation string
 
@@ -4814,66 +4814,66 @@ func (s *SendMessageReq) SetBoc(val string) {
 	s.Boc = val
 }
 
-type StackingPoolsOK struct {
-	Pools           []PoolInfo                     `json:"pools"`
-	Implementations StackingPoolsOKImplementations `json:"implementations"`
+type StakingPoolsOK struct {
+	Pools           []PoolInfo                    `json:"pools"`
+	Implementations StakingPoolsOKImplementations `json:"implementations"`
 }
 
 // GetPools returns the value of Pools.
-func (s StackingPoolsOK) GetPools() []PoolInfo {
+func (s StakingPoolsOK) GetPools() []PoolInfo {
 	return s.Pools
 }
 
 // GetImplementations returns the value of Implementations.
-func (s StackingPoolsOK) GetImplementations() StackingPoolsOKImplementations {
+func (s StakingPoolsOK) GetImplementations() StakingPoolsOKImplementations {
 	return s.Implementations
 }
 
 // SetPools sets the value of Pools.
-func (s *StackingPoolsOK) SetPools(val []PoolInfo) {
+func (s *StakingPoolsOK) SetPools(val []PoolInfo) {
 	s.Pools = val
 }
 
 // SetImplementations sets the value of Implementations.
-func (s *StackingPoolsOK) SetImplementations(val StackingPoolsOKImplementations) {
+func (s *StakingPoolsOK) SetImplementations(val StakingPoolsOKImplementations) {
 	s.Implementations = val
 }
 
-func (*StackingPoolsOK) stackingPoolsRes() {}
+func (*StakingPoolsOK) stakingPoolsRes() {}
 
-type StackingPoolsOKImplementations map[string]StackingPoolsOKImplementationsItem
+type StakingPoolsOKImplementations map[string]StakingPoolsOKImplementationsItem
 
-func (s *StackingPoolsOKImplementations) init() StackingPoolsOKImplementations {
+func (s *StakingPoolsOKImplementations) init() StakingPoolsOKImplementations {
 	m := *s
 	if m == nil {
-		m = map[string]StackingPoolsOKImplementationsItem{}
+		m = map[string]StakingPoolsOKImplementationsItem{}
 		*s = m
 	}
 	return m
 }
 
-type StackingPoolsOKImplementationsItem struct {
+type StakingPoolsOKImplementationsItem struct {
 	Name        string `json:"name"`
 	Description string `json:"description"`
 }
 
 // GetName returns the value of Name.
-func (s StackingPoolsOKImplementationsItem) GetName() string {
+func (s StakingPoolsOKImplementationsItem) GetName() string {
 	return s.Name
 }
 
 // GetDescription returns the value of Description.
-func (s StackingPoolsOKImplementationsItem) GetDescription() string {
+func (s StakingPoolsOKImplementationsItem) GetDescription() string {
 	return s.Description
 }
 
 // SetName sets the value of Name.
-func (s *StackingPoolsOKImplementationsItem) SetName(val string) {
+func (s *StakingPoolsOKImplementationsItem) SetName(val string) {
 	s.Name = val
 }
 
 // SetDescription sets the value of Description.
-func (s *StackingPoolsOKImplementationsItem) SetDescription(val string) {
+func (s *StakingPoolsOKImplementationsItem) SetDescription(val string) {
 	s.Description = val
 }
 
@@ -5745,8 +5745,8 @@ func (*UnauthorizedError) getTransactionRes()            {}
 func (*UnauthorizedError) getValidatorsRes()             {}
 func (*UnauthorizedError) poolsByNominatorsRes()         {}
 func (*UnauthorizedError) sendMessageRes()               {}
-func (*UnauthorizedError) stackingPoolInfoRes()          {}
-func (*UnauthorizedError) stackingPoolsRes()             {}
+func (*UnauthorizedError) stakingPoolInfoRes()           {}
+func (*UnauthorizedError) stakingPoolsRes()              {}
 
 // Ref: #/components/schemas/Validator
 type Validator struct {

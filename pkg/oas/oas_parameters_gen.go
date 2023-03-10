@@ -1920,14 +1920,14 @@ func decodePoolsByNominatorsParams(args [1]string, r *http.Request) (params Pool
 	return params, nil
 }
 
-// StackingPoolInfoParams is parameters of stackingPoolInfo operation.
-type StackingPoolInfoParams struct {
+// StakingPoolInfoParams is parameters of stakingPoolInfo operation.
+type StakingPoolInfoParams struct {
 	// Account ID.
 	AccountID      string
 	AcceptLanguage OptString
 }
 
-func unpackStackingPoolInfoParams(packed middleware.Parameters) (params StackingPoolInfoParams) {
+func unpackStakingPoolInfoParams(packed middleware.Parameters) (params StakingPoolInfoParams) {
 	{
 		key := middleware.ParameterKey{
 			Name: "account_id",
@@ -1947,7 +1947,7 @@ func unpackStackingPoolInfoParams(packed middleware.Parameters) (params Stacking
 	return params
 }
 
-func decodeStackingPoolInfoParams(args [1]string, r *http.Request) (params StackingPoolInfoParams, _ error) {
+func decodeStakingPoolInfoParams(args [1]string, r *http.Request) (params StakingPoolInfoParams, _ error) {
 	h := uri.NewHeaderDecoder(r.Header)
 	// Decode path: account_id.
 	{
@@ -2020,8 +2020,8 @@ func decodeStackingPoolInfoParams(args [1]string, r *http.Request) (params Stack
 	return params, nil
 }
 
-// StackingPoolsParams is parameters of stackingPools operation.
-type StackingPoolsParams struct {
+// StakingPoolsParams is parameters of stakingPools operation.
+type StakingPoolsParams struct {
 	// Account ID.
 	AvailableFor OptString
 	// Return also pools not from white list - just compatible by interfaces (maybe dangerous!).
@@ -2029,7 +2029,7 @@ type StackingPoolsParams struct {
 	AcceptLanguage    OptString
 }
 
-func unpackStackingPoolsParams(packed middleware.Parameters) (params StackingPoolsParams) {
+func unpackStakingPoolsParams(packed middleware.Parameters) (params StakingPoolsParams) {
 	{
 		key := middleware.ParameterKey{
 			Name: "available_for",
@@ -2060,7 +2060,7 @@ func unpackStackingPoolsParams(packed middleware.Parameters) (params StackingPoo
 	return params
 }
 
-func decodeStackingPoolsParams(args [0]string, r *http.Request) (params StackingPoolsParams, _ error) {
+func decodeStakingPoolsParams(args [0]string, r *http.Request) (params StakingPoolsParams, _ error) {
 	q := uri.NewQueryDecoder(r.URL.Query())
 	h := uri.NewHeaderDecoder(r.Header)
 	// Decode query: available_for.

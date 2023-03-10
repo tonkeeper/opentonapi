@@ -56,7 +56,7 @@ func (s *LiteStorage) GetWhalesPoolInfo(ctx context.Context, id tongo.AccountID)
 	}
 	status, ok = value.(abi.GetStakingStatusResult)
 	if !ok {
-		return params, status, fmt.Errorf("get_stacking returns type %v", method)
+		return params, status, fmt.Errorf("get_staking returns type %v", method)
 	}
 	return params, status, nil
 }

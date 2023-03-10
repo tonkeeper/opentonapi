@@ -728,12 +728,12 @@ paths:
         '500':
           $ref: '#/components/responses/InternalError'
 
-  /v2/stacking/nominator/{account_id}/pools:
+  /v2/staking/nominator/{account_id}/pools:
     get:
       description: All pools where account participates
       operationId: "poolsByNominators"
       tags:
-        - Stacking
+        - Staking
       parameters:
         - $ref: '#/components/parameters/accountIdParameter'
       responses:
@@ -742,7 +742,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AccountStacking'
+                $ref: '#/components/schemas/AccountStaking'
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -751,12 +751,12 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/InternalError'
-  /v2/stacking/pool/{account_id}:
+  /v2/staking/pool/{account_id}:
     get:
       description: Pool info
-      operationId: stackingPoolInfo
+      operationId: stakingPoolInfo
       tags:
-        - Stacking
+        - Staking
       parameters:
         - $ref: '#/components/parameters/accountIdParameter'
         - $ref: '#/components/parameters/i18n'
@@ -775,12 +775,12 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/InternalError'
-  /v2/stacking/pools:
+  /v2/staking/pools:
     get:
       description: All pools available in network
-      operationId: stackingPools
+      operationId: stakingPools
       tags:
-        - Stacking
+        - Staking
       parameters:
         - in: query
           name: available_for
@@ -825,7 +825,7 @@ paths:
                           example: TON Whales
                         description:
                           type: string
-                          example: "Oldest pool with minimal stacking amount 50 TON"
+                          example: "Oldest pool with minimal staking amount 50 TON"
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -2497,7 +2497,7 @@ components:
           $ref: '#/components/schemas/JettonMetadata'
         verification:
           $ref: '#/components/schemas/JettonVerificationType'
-    AccountStacking:
+    AccountStaking:
       type: object
       required:
         - pools
