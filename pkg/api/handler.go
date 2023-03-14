@@ -178,10 +178,12 @@ func (h Handler) StakingPools(ctx context.Context, params oas.StakingPoolsParams
 				ID:    "poolImplementationDescription",
 				Other: "Minimum deposit {{.Deposit}} TON",
 			}, TemplateData: map[string]interface{}{"Deposit": 50}}),
+			URL: "https://tonwhales.com/staking",
 		},
 		string(oas.PoolInfoImplementationTf): {
 			Name:        "TON Foundation",
 			Description: i18n.T(params.AcceptLanguage.Value, i18n.C{MessageID: "poolImplementationDescription", TemplateData: map[string]interface{}{"Deposit": 10000}}),
+			URL:         "https://tonvalidators.org/",
 		},
 	})
 

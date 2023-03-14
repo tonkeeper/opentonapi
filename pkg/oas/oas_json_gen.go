@@ -10646,11 +10646,17 @@ func (s StakingPoolsOKImplementationsItem) encodeFields(e *jx.Encoder) {
 		e.FieldStart("description")
 		e.Str(s.Description)
 	}
+	{
+
+		e.FieldStart("url")
+		e.Str(s.URL)
+	}
 }
 
-var jsonFieldsNameOfStakingPoolsOKImplementationsItem = [2]string{
+var jsonFieldsNameOfStakingPoolsOKImplementationsItem = [3]string{
 	0: "name",
 	1: "description",
+	2: "url",
 }
 
 // Decode decodes StakingPoolsOKImplementationsItem from json.
@@ -10686,6 +10692,18 @@ func (s *StakingPoolsOKImplementationsItem) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"description\"")
 			}
+		case "url":
+			requiredBitSet[0] |= 1 << 2
+			if err := func() error {
+				v, err := d.Str()
+				s.URL = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"url\"")
+			}
 		default:
 			return d.Skip()
 		}
@@ -10696,7 +10714,7 @@ func (s *StakingPoolsOKImplementationsItem) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b00000011,
+		0b00000111,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.

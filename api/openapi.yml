@@ -819,6 +819,7 @@ paths:
                       required:
                         - name
                         - description
+                        - url
                       properties:
                         name:
                           type: string
@@ -826,6 +827,9 @@ paths:
                         description:
                           type: string
                           example: "Oldest pool with minimal staking amount 50 TON"
+                        url:
+                          type: string
+                          example: "https://tonvalidators.org/"
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':

@@ -4855,6 +4855,7 @@ func (s *StakingPoolsOKImplementations) init() StakingPoolsOKImplementations {
 type StakingPoolsOKImplementationsItem struct {
 	Name        string `json:"name"`
 	Description string `json:"description"`
+	URL         string `json:"url"`
 }
 
 // GetName returns the value of Name.
@@ -4867,6 +4868,11 @@ func (s StakingPoolsOKImplementationsItem) GetDescription() string {
 	return s.Description
 }
 
+// GetURL returns the value of URL.
+func (s StakingPoolsOKImplementationsItem) GetURL() string {
+	return s.URL
+}
+
 // SetName sets the value of Name.
 func (s *StakingPoolsOKImplementationsItem) SetName(val string) {
 	s.Name = val
@@ -4875,6 +4881,11 @@ func (s *StakingPoolsOKImplementationsItem) SetName(val string) {
 // SetDescription sets the value of Description.
 func (s *StakingPoolsOKImplementationsItem) SetDescription(val string) {
 	s.Description = val
+}
+
+// SetURL sets the value of URL.
+func (s *StakingPoolsOKImplementationsItem) SetURL(val string) {
+	s.URL = val
 }
 
 // Ref: #/components/schemas/StateInit
