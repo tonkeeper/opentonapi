@@ -2,12 +2,19 @@ package api
 
 import (
 	"context"
+	"encoding/base64"
 
-	"github.com/tonkeeper/opentonapi/pkg/i18n"
+	"go.uber.org/zap"
 	"golang.org/x/exp/slices"
 
 	"github.com/go-faster/errors"
 	"github.com/tonkeeper/tongo"
+
+	"github.com/tonkeeper/opentonapi/pkg/addressbook"
+	"github.com/tonkeeper/opentonapi/pkg/blockchain"
+	"github.com/tonkeeper/opentonapi/pkg/chainstate"
+	"github.com/tonkeeper/opentonapi/pkg/config"
+	"github.com/tonkeeper/opentonapi/pkg/i18n"
 
 	"github.com/tonkeeper/opentonapi/internal/g"
 	"github.com/tonkeeper/opentonapi/pkg/core"
@@ -24,14 +31,69 @@ type Handler struct {
 	addressBook addressBook
 	storage     storage
 	state       chainState
+	msgSender   messageSender
 }
 
-func NewHandler(s storage, state chainState, book addressBook) Handler {
-	return Handler{
-		storage:     s,
-		state:       state,
-		addressBook: book,
+// Options configures behavior of a Handler instance.
+type Options struct {
+	storage     storage
+	chainState  chainState
+	addressBook addressBook
+	msgSender   messageSender
+}
+
+type Option func(o *Options)
+
+func WithStorage(s storage) Option {
+	return func(o *Options) {
+		o.storage = s
 	}
+}
+func WithChainState(state chainState) Option {
+	return func(o *Options) {
+		o.chainState = state
+	}
+}
+
+func WithAddressBook(book addressBook) Option {
+	return func(o *Options) {
+		o.addressBook = book
+	}
+}
+
+func WithMessageSender(msgSender messageSender) Option {
+	return func(o *Options) {
+		o.msgSender = msgSender
+	}
+}
+
+func NewHandler(logger *zap.Logger, opts ...Option) (*Handler, error) {
+	options := &Options{}
+	for _, o := range opts {
+		o(options)
+	}
+	if options.msgSender == nil {
+		sender, err := blockchain.NewMsgSender(logger)
+		if err != nil {
+			return nil, err
+		}
+		options.msgSender = sender
+	}
+	if options.addressBook == nil {
+		options.addressBook = addressbook.NewAddressBook(logger, config.AddressPath, config.JettonPath, config.CollectionPath)
+	}
+	if options.chainState == nil {
+		options.chainState = chainstate.NewChainState()
+	}
+	if options.storage == nil {
+		return nil, errors.New("storage is not configured")
+	}
+	return &Handler{
+		storage:     options.storage,
+		state:       options.chainState,
+		addressBook: options.addressBook,
+		msgSender:   options.msgSender,
+	}, nil
 }
 
 func (h Handler) GetAccount(ctx context.Context, params oas.GetAccountParams) (oas.GetAccountRes, error) {
@@ -221,4 +283,15 @@ func (h Handler) GetNftItemsByAddresses(ctx context.Context, params oas.GetNftIt
 		result.NftItems = append(result.NftItems, convertNFT(i))
 	}
 	return &result, nil
+}
+
+func (h Handler) SendMessage(ctx context.Context, req oas.OptSendMessageReq) (r oas.SendMessageRes, _ error) {
+	payload, err := base64.StdEncoding.DecodeString(req.Value.Boc)
+	if err != nil {
+		return &oas.BadRequest{Error: err.Error()}, nil
+	}
+	if err := h.msgSender.SendMessage(ctx, payload); err != nil {
+		return &oas.InternalError{Error: err.Error()}, nil
+	}
+	return &oas.SendMessageOK{}, nil
 }
