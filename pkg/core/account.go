@@ -18,6 +18,7 @@ type Account struct {
 	Data              []byte
 	FrozenHash        *tongo.Bits256
 	Storage           StorageInfo
+	Interfaces        []string
 }
 
 // StorageInfo is taken from TLB storage_stat:StorageInfo.
@@ -32,9 +33,8 @@ type StorageInfo struct {
 // AccountInfo extends Account type to hold additional human-friendly information about a particular account.
 type AccountInfo struct {
 	Account      Account
-	Interfaces   []string
-	MemoRequired bool
-	Name         string
-	Icon         string
-	IsScam       bool
+	MemoRequired *bool
+	Name         *string
+	Icon         *string
+	IsScam       *bool
 }

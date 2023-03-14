@@ -1,11 +1,12 @@
 package config
 
 import (
-	"github.com/caarlos0/env/v6"
-	"github.com/tonkeeper/tongo"
 	"log"
 	"reflect"
 	"strings"
+
+	"github.com/caarlos0/env/v6"
+	"github.com/tonkeeper/tongo"
 )
 
 type Config struct {
@@ -20,6 +21,12 @@ type Config struct {
 }
 
 type accountsList []tongo.AccountID
+
+const (
+	AddressPath    = "https://raw.githubusercontent.com/tonkeeper/ton-assets/main/accounts.json"
+	CollectionPath = "https://raw.githubusercontent.com/tonkeeper/ton-assets/main/collections.json"
+	JettonPath     = "https://raw.githubusercontent.com/tonkeeper/ton-assets/main/jettons.json"
+)
 
 func Load() Config {
 	var c Config
