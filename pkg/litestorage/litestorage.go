@@ -3,6 +3,7 @@ package litestorage
 import (
 	"context"
 	"fmt"
+	"github.com/tonkeeper/tongo/config"
 	"time"
 
 	retry "github.com/avast/retry-go"
@@ -22,7 +23,31 @@ type LiteStorage struct {
 	blockCache              map[tongo.BlockIDExt]*tlb.Block
 }
 
-func NewLiteStorage(preloadAccounts []tongo.AccountID, log *zap.Logger) (*LiteStorage, error) {
+type Options struct {
+	preloadAccounts []tongo.AccountID
+	servers         []config.LiteServer
+}
+
+func WithPreloadAccounts(a []tongo.AccountID) Option {
+	return func(o *Options) {
+		o.preloadAccounts = a
+	}
+}
+
+func WithLiteServers(servers []config.LiteServer) Option {
+	return func(o *Options) {
+		o.servers = servers
+	}
+}
+
+type Option func(o *Options)
+
+func NewLiteStorage(log *zap.Logger, opts ...Option) (*LiteStorage, error) {
+	o := &Options{}
+	for i := range opts {
+		opts[i](o)
+	}
+
 	client, err := liteapi.NewClientWithDefaultMainnet()
 	if err != nil {
 		return nil, err
@@ -34,7 +59,7 @@ func NewLiteStorage(preloadAccounts []tongo.AccountID, log *zap.Logger) (*LiteSt
 		transactionsIndexByHash: make(map[tongo.Bits256]*core.Transaction),
 		blockCache:              make(map[tongo.BlockIDExt]*tlb.Block),
 	}
-	for _, a := range preloadAccounts {
+	for _, a := range o.preloadAccounts {
 		l.preloadAccount(a, log)
 	}
 	return l, nil

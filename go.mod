@@ -13,7 +13,7 @@ require (
 	github.com/prometheus/client_golang v1.14.0
 	github.com/shopspring/decimal v1.3.1
 	github.com/stretchr/testify v1.8.1
-	github.com/tonkeeper/tongo v1.0.4
+	github.com/tonkeeper/tongo v1.0.5
 	go.opentelemetry.io/otel v1.11.1
 	go.opentelemetry.io/otel/metric v0.33.0
 	go.opentelemetry.io/otel/trace v1.11.1

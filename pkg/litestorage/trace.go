@@ -99,12 +99,12 @@ func (s *LiteStorage) searchTransactionInBlock(ctx context.Context, a tongo.Acco
 			continue
 		}
 		if !back && tx.Msgs.InMsg.Exists && tx.Msgs.InMsg.Value.Value.Info.IntMsgInfo.CreatedLt == lt {
-			return core.ConvertTransaction(a.Workchain, tongo.Transaction{BlockID: blockIDExt, Transaction: tx})
+			return core.ConvertTransaction(a.Workchain, tongo.Transaction{BlockID: blockIDExt, Transaction: *tx})
 		}
 		if back {
 			for _, m := range tx.Msgs.OutMsgs.Values() {
 				if m.Value.Info.IntMsgInfo.CreatedLt == lt {
-					return core.ConvertTransaction(a.Workchain, tongo.Transaction{BlockID: blockIDExt, Transaction: tx})
+					return core.ConvertTransaction(a.Workchain, tongo.Transaction{BlockID: blockIDExt, Transaction: *tx})
 				}
 			}
 		}
