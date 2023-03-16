@@ -3,20 +3,20 @@ package api
 import (
 	"context"
 	"encoding/base64"
+	"golang.org/x/exp/maps"
 
 	"go.uber.org/zap"
 	"golang.org/x/exp/slices"
 
 	"github.com/go-faster/errors"
+	"github.com/tonkeeper/opentonapi/pkg/i18n"
 	"github.com/tonkeeper/tongo"
 
+	"github.com/tonkeeper/opentonapi/internal/g"
 	"github.com/tonkeeper/opentonapi/pkg/addressbook"
 	"github.com/tonkeeper/opentonapi/pkg/blockchain"
 	"github.com/tonkeeper/opentonapi/pkg/chainstate"
 	"github.com/tonkeeper/opentonapi/pkg/config"
-	"github.com/tonkeeper/opentonapi/pkg/i18n"
-
-	"github.com/tonkeeper/opentonapi/internal/g"
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/opentonapi/pkg/oas"
 	"github.com/tonkeeper/opentonapi/pkg/references"
@@ -296,4 +296,40 @@ func (h Handler) SendMessage(ctx context.Context, req oas.OptSendMessageReq) (r 
 		return &oas.InternalError{Error: err.Error()}, nil
 	}
 	return &oas.SendMessageOK{}, nil
+}
+
+func (h Handler) GetJettonsBalances(ctx context.Context, params oas.GetJettonsBalancesParams) (oas.GetJettonsBalancesRes, error) {
+	aa, err := tongo.ParseAccountID(params.AccountID)
+	if err != nil {
+		return &oas.BadRequest{Error: err.Error()}, nil
+	}
+	wallets, err := h.storage.GetJettonWalletsByOwnerAddress(ctx, aa, maps.Values(h.addressBook.GetKnownJettons()))
+	if err != nil {
+		return &oas.InternalError{Error: err.Error()}, nil
+	}
+	var balances = oas.JettonsBalances{
+		Balances: make([]oas.JettonBalance, 0, len(wallets)),
+	}
+	for _, wallet := range wallets {
+		jettonBalance := oas.JettonBalance{
+			Balance:       wallet.Balance.String(),
+			JettonAddress: wallet.JettonAddress.ToRaw(),
+			WalletAddress: convertAccountAddress(wallet.Address),
+		}
+		meta, err := h.storage.GetJettonMasterMetadata(ctx, wallet.JettonAddress, h.addressBook.AsBook())
+		if err != nil && !errors.Is(err, core.ErrEntityNotFound) {
+			return &oas.InternalError{Error: err.Error()}, nil
+		}
+		if !errors.Is(err, core.ErrEntityNotFound) {
+			m := convertToApiJetton(meta)
+			m.Verification = oas.OptJettonVerificationType{Value: oas.JettonVerificationTypeNone}
+			jettonBalance.Metadata = oas.OptJetton{Value: m}
+			convertVerification, _ := convertJettonVerification(meta.Verification)
+			jettonBalance.Verification = convertVerification
+		}
+
+		balances.Balances = append(balances.Balances, jettonBalance)
+	}
+
+	return &balances, nil
 }

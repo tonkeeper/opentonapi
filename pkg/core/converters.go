@@ -427,3 +427,12 @@ func ExtractTransactions(id tongo.BlockIDExt, block *tlb.Block) ([]*Transaction,
 	}
 	return transactions, nil
 }
+
+func ConvertJettonMeta(metadata tongo.JettonMetadata) JettonMetadata {
+	return JettonMetadata{
+		Name:        metadata.Name,
+		Description: metadata.Description,
+		Image:       metadata.Image,
+		Symbol:      metadata.Symbol,
+	}
+}

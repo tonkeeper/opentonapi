@@ -9,4 +9,6 @@ type addressBook interface {
 	GetAddressInfoByAddress(rawAddr string) (addressbook.KnownAddress, bool)
 	GetCollectionInfoByAddress(rawAddr string) (addressbook.KnownCollection, bool)
 	GetJettonInfoByAddress(rawAddr string) (addressbook.KnownJetton, bool)
+	GetKnownJettons() map[string]addressbook.KnownJetton
+	AsBook() *addressbook.Book
 }

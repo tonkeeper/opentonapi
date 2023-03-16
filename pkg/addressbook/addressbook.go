@@ -88,6 +88,14 @@ func (b *Book) GetJettonInfoByAddress(rawAddr string) (KnownJetton, bool) {
 	return j, ok
 }
 
+func (b *Book) GetKnownJettons() map[string]KnownJetton {
+	return b.jettons
+}
+
+func (b *Book) AsBook() *Book {
+	return b
+}
+
 func NewAddressBook(logger *zap.Logger, addressPath, jettonPath, collectionPath string) *Book {
 	addresses := make(map[string]KnownAddress)
 	collections := make(map[string]KnownCollection)

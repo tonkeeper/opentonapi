@@ -18,6 +18,7 @@ import (
 type LiteStorage struct {
 	client                  *liteapi.Client
 	transactionsIndex       map[tongo.AccountID][]*core.Transaction
+	jettonMetaCache         map[string]core.JettonMetadata
 	transactionsIndexByHash map[tongo.Bits256]*core.Transaction
 	blockCache              map[tongo.BlockIDExt]*tlb.Block
 }
@@ -31,6 +32,7 @@ func NewLiteStorage(preloadAccounts []tongo.AccountID, log *zap.Logger) (*LiteSt
 	l := &LiteStorage{
 		client:                  client,
 		transactionsIndex:       make(map[tongo.AccountID][]*core.Transaction),
+		jettonMetaCache:         make(map[string]core.JettonMetadata),
 		transactionsIndexByHash: make(map[tongo.Bits256]*core.Transaction),
 		blockCache:              make(map[tongo.BlockIDExt]*tlb.Block),
 	}

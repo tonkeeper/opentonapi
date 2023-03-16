@@ -5,7 +5,10 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"github.com/shopspring/decimal"
+	"github.com/tonkeeper/opentonapi/pkg/addressbook"
 	"reflect"
+	"strings"
 
 	"github.com/go-faster/jx"
 	"github.com/tonkeeper/tongo"
@@ -306,4 +309,54 @@ func convertToAccount(info *core.AccountInfo) oas.Account {
 		acc.MemoRequired = oas.NewOptBool(*info.MemoRequired)
 	}
 	return acc
+}
+
+func convertToApiJetton(metadata core.JettonMetadata) oas.Jetton {
+	convertVerification, _ := convertJettonVerification(metadata.Verification)
+	name := metadata.Name
+	if name == "" {
+		name = "Unknown Token"
+	}
+	symbol := metadata.Symbol
+	if symbol == "" {
+		symbol = "UKWN"
+	}
+	normalizedSymbol := strings.TrimSpace(strings.ToUpper(symbol))
+	if normalizedSymbol == "TON" || normalizedSymbol == "TОN" { //eng and russian
+		symbol = "SCAM"
+	}
+	jetton := oas.Jetton{
+		Address:      metadata.Address.ToRaw(),
+		Name:         name,
+		Symbol:       symbol,
+		Verification: oas.OptJettonVerificationType{Value: convertVerification},
+	}
+	jetton.Decimals = convertJettonDecimals(metadata.Decimals)
+	if metadata.Image != "" {
+		preview := core.GenerateImageUrl(metadata.Image, 200, 200)
+		jetton.Image = oas.OptString{Value: preview}
+	}
+	return jetton
+}
+
+func convertJettonDecimals(decimals *decimal.Decimal) int {
+	if decimals == nil {
+		return 9
+	}
+	dec := decimals.IntPart()
+	return int(dec)
+}
+
+func convertJettonVerification(verificationType addressbook.JettonVerificationType) (oas.JettonVerificationType, error) {
+	switch verificationType {
+	case addressbook.Whitelist:
+		return oas.JettonVerificationTypeWhitelist, nil
+	case addressbook.Blacklist:
+		return oas.JettonVerificationTypeBlacklist, nil
+	case addressbook.None:
+		return oas.JettonVerificationTypeNone, nil
+	default:
+		// if we do not find matches, then we throw out an error and set a default api.JettonVerificationTypeNone
+		return oas.JettonVerificationTypeNone, fmt.Errorf("convert jetton verification error: %v", verificationType)
+	}
 }
