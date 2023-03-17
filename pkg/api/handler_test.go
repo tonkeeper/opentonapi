@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"github.com/tonkeeper/tongo"
 	"go.uber.org/zap"
 
 	"github.com/tonkeeper/opentonapi/pkg/addressbook"
@@ -30,7 +29,7 @@ func TestHandler_GetRawAccount(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			logger, _ := zap.NewDevelopment()
-			liteStorage, err := litestorage.NewLiteStorage([]tongo.AccountID{}, logger)
+			liteStorage, err := litestorage.NewLiteStorage(logger)
 			require.Nil(t, err)
 			h := Handler{
 				storage: liteStorage,
@@ -61,7 +60,7 @@ func TestHandler_GetAccount(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			logger, _ := zap.NewDevelopment()
-			liteStorage, err := litestorage.NewLiteStorage([]tongo.AccountID{}, logger)
+			liteStorage, err := litestorage.NewLiteStorage(logger)
 			require.Nil(t, err)
 			h := Handler{
 				addressBook: addressbook.NewAddressBook(logger, config.AddressPath, config.JettonPath, config.CollectionPath),
@@ -99,7 +98,7 @@ func TestHandler_GetTransactions(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			logger, _ := zap.NewDevelopment()
-			liteStorage, err := litestorage.NewLiteStorage([]tongo.AccountID{}, logger)
+			liteStorage, err := litestorage.NewLiteStorage(logger)
 			require.Nil(t, err)
 			h := Handler{
 				storage: liteStorage,
