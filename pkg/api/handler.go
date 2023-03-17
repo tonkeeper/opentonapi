@@ -215,6 +215,7 @@ func (h Handler) PoolsByNominators(ctx context.Context, params oas.PoolsByNomina
 			Amount:          w.MemberBalance,
 			PendingDeposit:  w.MemberPendingDeposit,
 			PendingWithdraw: w.MemberPendingWithdraw,
+			ReadyWithdraw:   w.MemberWithdraw,
 		})
 	}
 	return &result, nil

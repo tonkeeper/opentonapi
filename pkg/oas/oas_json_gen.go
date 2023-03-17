@@ -942,13 +942,19 @@ func (s AccountStakingInfo) encodeFields(e *jx.Encoder) {
 		e.FieldStart("pending_withdraw")
 		e.Int64(s.PendingWithdraw)
 	}
+	{
+
+		e.FieldStart("ready_withdraw")
+		e.Int64(s.ReadyWithdraw)
+	}
 }
 
-var jsonFieldsNameOfAccountStakingInfo = [4]string{
+var jsonFieldsNameOfAccountStakingInfo = [5]string{
 	0: "pool",
 	1: "amount",
 	2: "pending_deposit",
 	3: "pending_withdraw",
+	4: "ready_withdraw",
 }
 
 // Decode decodes AccountStakingInfo from json.
@@ -1008,6 +1014,18 @@ func (s *AccountStakingInfo) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"pending_withdraw\"")
 			}
+		case "ready_withdraw":
+			requiredBitSet[0] |= 1 << 4
+			if err := func() error {
+				v, err := d.Int64()
+				s.ReadyWithdraw = int64(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"ready_withdraw\"")
+			}
 		default:
 			return d.Skip()
 		}
@@ -1018,7 +1036,7 @@ func (s *AccountStakingInfo) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b00001111,
+		0b00011111,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.

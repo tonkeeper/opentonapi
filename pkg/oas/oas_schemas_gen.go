@@ -315,6 +315,7 @@ type AccountStakingInfo struct {
 	Amount          int64  `json:"amount"`
 	PendingDeposit  int64  `json:"pending_deposit"`
 	PendingWithdraw int64  `json:"pending_withdraw"`
+	ReadyWithdraw   int64  `json:"ready_withdraw"`
 }
 
 // GetPool returns the value of Pool.
@@ -337,6 +338,11 @@ func (s AccountStakingInfo) GetPendingWithdraw() int64 {
 	return s.PendingWithdraw
 }
 
+// GetReadyWithdraw returns the value of ReadyWithdraw.
+func (s AccountStakingInfo) GetReadyWithdraw() int64 {
+	return s.ReadyWithdraw
+}
+
 // SetPool sets the value of Pool.
 func (s *AccountStakingInfo) SetPool(val string) {
 	s.Pool = val
@@ -355,6 +361,11 @@ func (s *AccountStakingInfo) SetPendingDeposit(val int64) {
 // SetPendingWithdraw sets the value of PendingWithdraw.
 func (s *AccountStakingInfo) SetPendingWithdraw(val int64) {
 	s.PendingWithdraw = val
+}
+
+// SetReadyWithdraw sets the value of ReadyWithdraw.
+func (s *AccountStakingInfo) SetReadyWithdraw(val int64) {
+	s.ReadyWithdraw = val
 }
 
 // Ref: #/components/schemas/AccountStatus
