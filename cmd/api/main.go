@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/tonkeeper/opentonapi/pkg/addressbook"
 	"net/http"
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -18,7 +19,8 @@ func main() {
 	cfg := config.Load()
 	log := app.Logger(cfg.App.LogLevel)
 
-	storage, err := litestorage.NewLiteStorage(log, litestorage.WithPreloadAccounts(cfg.App.Accounts))
+	addressBook := addressbook.NewAddressBook(log, config.AddressPath, config.JettonPath, config.CollectionPath)
+	storage, err := litestorage.NewLiteStorage(log, litestorage.WithPreloadAccounts(cfg.App.Accounts), litestorage.WithKnownJettons(addressBook))
 	if err != nil {
 		log.Fatal("storage init", zap.Error(err))
 	}

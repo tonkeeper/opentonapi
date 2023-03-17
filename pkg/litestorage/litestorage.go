@@ -3,6 +3,7 @@ package litestorage
 import (
 	"context"
 	"fmt"
+	"github.com/tonkeeper/opentonapi/pkg/addressbook"
 	"github.com/tonkeeper/tongo/config"
 	"time"
 
@@ -18,6 +19,7 @@ import (
 
 type LiteStorage struct {
 	client                  *liteapi.Client
+	AddressBook             *addressbook.Book
 	transactionsIndex       map[tongo.AccountID][]*core.Transaction
 	jettonMetaCache         map[string]core.JettonMetadata
 	transactionsIndexByHash map[tongo.Bits256]*core.Transaction
@@ -26,12 +28,19 @@ type LiteStorage struct {
 
 type Options struct {
 	preloadAccounts []tongo.AccountID
+	addressBook     *addressbook.Book
 	servers         []config.LiteServer
 }
 
 func WithPreloadAccounts(a []tongo.AccountID) Option {
 	return func(o *Options) {
 		o.preloadAccounts = a
+	}
+}
+
+func WithKnownJettons(addressbook *addressbook.Book) Option {
+	return func(o *Options) {
+		o.addressBook = addressbook
 	}
 }
 
@@ -56,6 +65,7 @@ func NewLiteStorage(log *zap.Logger, opts ...Option) (*LiteStorage, error) {
 
 	l := &LiteStorage{
 		client:                  client,
+		AddressBook:             o.addressBook,
 		transactionsIndex:       make(map[tongo.AccountID][]*core.Transaction),
 		jettonMetaCache:         make(map[string]core.JettonMetadata),
 		transactionsIndexByHash: make(map[tongo.Bits256]*core.Transaction),

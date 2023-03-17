@@ -9,12 +9,6 @@ import (
 	"github.com/tonkeeper/tongo"
 )
 
-var ImageProxy struct {
-	CacheWarmupPath string `env:"CACHE_PATH,required"`
-	ImageProxyKey   string `env:"IMAGE_PROXY_KEY,required"`
-	ImageProxySalt  string `env:"IMAGE_PROXY_SALT,required"`
-}
-
 type Config struct {
 	API struct {
 		Port int `env:"PORT" envDefault:"8081"`
@@ -48,10 +42,6 @@ func Load() Config {
 			}
 			return accs, nil
 		}}); err != nil {
-		log.Panicf("[‼️  Config parsing failed] %+v\n", err)
-	}
-
-	if err := env.Parse(&ImageProxy); err != nil {
 		log.Panicf("[‼️  Config parsing failed] %+v\n", err)
 	}
 

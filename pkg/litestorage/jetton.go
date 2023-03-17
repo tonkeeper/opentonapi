@@ -3,15 +3,15 @@ package litestorage
 import (
 	"context"
 	"errors"
-	"github.com/tonkeeper/opentonapi/pkg/addressbook"
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
 )
 
-func (s *LiteStorage) GetJettonWalletsByOwnerAddress(ctx context.Context, address tongo.AccountID, knownJettons []addressbook.KnownJetton) ([]core.JettonWallet, error) {
+func (s *LiteStorage) GetJettonWalletsByOwnerAddress(ctx context.Context, address tongo.AccountID) ([]core.JettonWallet, error) {
 	wallets := []core.JettonWallet{}
 
+	knownJettons := s.AddressBook.GetKnownJettons()
 	for _, jetton := range knownJettons {
 		jettonAddress, _ := tongo.ParseAccountID(jetton.Address)
 		_, result, err := abi.GetWalletAddress(ctx, s.client, jettonAddress, address.ToMsgAddress())
@@ -27,18 +27,23 @@ func (s *LiteStorage) GetJettonWalletsByOwnerAddress(ctx context.Context, addres
 		if err != nil {
 			continue
 		}
-		wallets = append(wallets, result.(core.JettonWallet))
+		jettonWallet := result.(core.JettonWallet)
+		if jettonWallet.Address != jettonAddress {
+			continue
+		}
+
+		wallets = append(wallets, jettonWallet)
 	}
 
 	return wallets, nil
 }
 
-func (s *LiteStorage) GetJettonMasterMetadata(ctx context.Context, master tongo.AccountID, book *addressbook.Book) (core.JettonMetadata, error) {
+func (s *LiteStorage) GetJettonMasterMetadata(ctx context.Context, master tongo.AccountID) (core.JettonMetadata, error) {
 	meta, ok := s.jettonMetaCache[master.ToRaw()]
 	if ok {
 		return meta, nil
 	}
-	info, ok := book.GetJettonInfoByAddress(master.ToRaw())
+	info, ok := s.AddressBook.GetJettonInfoByAddress(master.ToRaw())
 	rawMeta, err := s.client.GetJettonData(ctx, master)
 	if errors.Is(err, core.ErrEntityNotFound) {
 		if !ok {
@@ -58,7 +63,7 @@ func (s *LiteStorage) GetJettonMasterMetadata(ctx context.Context, master tongo.
 	res.Image = rewriteIfNotEmpty(res.Image, info.Image)
 	res.Symbol = rewriteIfNotEmpty(res.Symbol, info.Symbol)
 	res.Verification = info.Verification
-	s.jettonMetaCache[master.ToRaw()] = res // TODO: is it okay, if cache not expire?
+	s.jettonMetaCache[master.ToRaw()] = res
 	return res, nil
 }
 

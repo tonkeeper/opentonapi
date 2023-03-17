@@ -311,7 +311,7 @@ func convertToAccount(info *core.AccountInfo) oas.Account {
 	return acc
 }
 
-func convertToApiJetton(metadata core.JettonMetadata) oas.Jetton {
+func convertToApiJetton(metadata core.JettonMetadata, imgGenerator previewGenerator) oas.Jetton {
 	convertVerification, _ := convertJettonVerification(metadata.Verification)
 	name := metadata.Name
 	if name == "" {
@@ -333,7 +333,7 @@ func convertToApiJetton(metadata core.JettonMetadata) oas.Jetton {
 	}
 	jetton.Decimals = convertJettonDecimals(metadata.Decimals)
 	if metadata.Image != "" {
-		preview := core.GenerateImageUrl(metadata.Image, 200, 200)
+		preview := imgGenerator.GenerateImageUrl(metadata.Image, 200, 200)
 		jetton.Image = oas.OptString{Value: preview}
 	}
 	return jetton
