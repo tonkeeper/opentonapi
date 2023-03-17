@@ -18,7 +18,7 @@ func main() {
 	cfg := config.Load()
 	log := app.Logger(cfg.App.LogLevel)
 
-	storage, err := litestorage.NewLiteStorage(cfg.App.Accounts, log)
+	storage, err := litestorage.NewLiteStorage(log, litestorage.WithPreloadAccounts(cfg.App.Accounts))
 	if err != nil {
 		log.Fatal("storage init", zap.Error(err))
 	}

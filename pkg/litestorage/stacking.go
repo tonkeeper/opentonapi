@@ -12,28 +12,25 @@ import (
 func (s *LiteStorage) GetParticipatingInWhalesPools(ctx context.Context, member tongo.AccountID) ([]core.WhalesNominator, error) {
 	var result []core.WhalesNominator
 	for k := range references.WhalesPools {
-		_, value, err := abi.GetMembers(ctx, s.client, k) //todo: add get_member to tongo and rewrite to usage it
+		_, value, err := abi.GetMember(ctx, s.client, k, member.ToMsgAddress()) //todo: add get_member to tongo and rewrite to usage it
 		if err != nil {
 			continue
 		}
-		if members, ok := value.(abi.GetMembers_WhalesNominatorResult); ok {
-			for _, m := range members.Members {
-				memberID, err := tongo.AccountIDFromTlb(m.Address)
-				if err != nil {
-					continue
-				}
-				if memberID != nil && member == *memberID {
-					result = append(result, core.WhalesNominator{
-						Pool:                  k,
-						Member:                member,
-						MemberBalance:         m.MemberBalance,
-						MemberPendingDeposit:  m.MemberPendingDeposit,
-						MemberPendingWithdraw: m.MemberPendingWithdraw,
-						MemberWithdraw:        m.MemberWithdraw,
-					})
-				}
-			}
+		m, ok := value.(abi.GetMember_WhalesNominatorResult)
+		if !ok {
+			continue
 		}
+		if m.MemberBalance+m.MemberPendingDeposit+m.MemberPendingWithdraw+m.MemberPendingDeposit == 0 {
+			continue
+		}
+		result = append(result, core.WhalesNominator{
+			Pool:                  k,
+			Member:                member,
+			MemberBalance:         m.MemberBalance,
+			MemberPendingDeposit:  m.MemberPendingDeposit,
+			MemberPendingWithdraw: m.MemberPendingWithdraw,
+			MemberWithdraw:        m.MemberWithdraw,
+		})
 	}
 	return result, nil
 }

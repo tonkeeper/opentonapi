@@ -419,7 +419,7 @@ func ExtractTransactions(id tongo.BlockIDExt, block *tlb.Block) ([]*Transaction,
 	rawTransactions := block.AllTransactions()
 	transactions := make([]*Transaction, 0, len(rawTransactions))
 	for _, rawTx := range rawTransactions {
-		tx, err := ConvertTransaction(id.Workchain, tongo.Transaction{Transaction: rawTx, BlockID: id})
+		tx, err := ConvertTransaction(id.Workchain, tongo.Transaction{Transaction: *rawTx, BlockID: id})
 		if err != nil {
 			return nil, err
 		}
