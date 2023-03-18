@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"encoding/base64"
+	"fmt"
 	"go.uber.org/zap"
 	"golang.org/x/exp/slices"
 
@@ -243,9 +244,19 @@ func (h Handler) StakingPools(ctx context.Context, params oas.StakingPoolsParams
 	if err != nil {
 		return nil, err
 	}
+	var minTF, minWhales int64
 	for _, p := range tfPools {
+		fmt.Println(p.Nominators, p.MaxNominators)
+		if params.AvailableFor.IsSet() && p.Nominators >= p.MaxNominators {
+			fmt.Println("skipped")
+			continue
+		}
 		info, _ := h.addressBook.GetTFPoolInfo(p.Address)
-		result.Pools = append(result.Pools, convertStakingTFPool(p, info, h.state.GetAPY()))
+		pool := convertStakingTFPool(p, info, h.state.GetAPY())
+		if minTF == 0 || pool.MinStake < minTF {
+			minTF = pool.MinStake
+		}
+		result.Pools = append(result.Pools, pool)
 	}
 
 	for k, w := range references.WhalesPools {
@@ -253,7 +264,11 @@ func (h Handler) StakingPools(ctx context.Context, params oas.StakingPoolsParams
 		if err != nil {
 			continue
 		}
-		result.Pools = append(result.Pools, convertStakingWhalesPool(k, w, poolStatus, poolConfig, h.state.GetAPY()))
+		pool := convertStakingWhalesPool(k, w, poolStatus, poolConfig, h.state.GetAPY())
+		if minWhales == 0 || pool.MinStake < minWhales {
+			minWhales = pool.MinStake
+		}
+		result.Pools = append(result.Pools, pool)
 	}
 
 	slices.SortFunc(result.Pools, func(a, b oas.PoolInfo) bool {
@@ -265,12 +280,12 @@ func (h Handler) StakingPools(ctx context.Context, params oas.StakingPoolsParams
 			Description: i18n.T(params.AcceptLanguage.Value, i18n.C{DefaultMessage: &i18n.M{
 				ID:    "poolImplementationDescription",
 				Other: "Minimum deposit {{.Deposit}} TON",
-			}, TemplateData: map[string]interface{}{"Deposit": 50}}),
+			}, TemplateData: map[string]interface{}{"Deposit": minWhales / 1_000_000_000}}),
 			URL: "https://tonwhales.com/staking",
 		},
 		string(oas.PoolInfoImplementationTf): {
 			Name:        "TON Foundation",
-			Description: i18n.T(params.AcceptLanguage.Value, i18n.C{MessageID: "poolImplementationDescription", TemplateData: map[string]interface{}{"Deposit": 10000}}),
+			Description: i18n.T(params.AcceptLanguage.Value, i18n.C{MessageID: "poolImplementationDescription", TemplateData: map[string]interface{}{"Deposit": minTF / 1_000_000_000}}),
 			URL:         "https://tonvalidators.org/",
 		},
 	})

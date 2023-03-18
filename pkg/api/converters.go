@@ -192,7 +192,7 @@ func convertStakingWhalesPool(address tongo.AccountID, w references.WhalesPoolIn
 		TotalAmount:    int64(poolStatus.StakeSent),
 		Implementation: oas.PoolInfoImplementationWhales,
 		Apy:            apy * float64(10000-poolConfig.PoolFee) / 10000,
-		MinStake:       poolConfig.MinStake + poolConfig.DepositFee,
+		MinStake:       poolConfig.MinStake + poolConfig.DepositFee + poolConfig.ReceiptPrice,
 		CycleEnd:       int64(poolStatus.StakeUntil),
 		CycleStart:     int64(poolStatus.StakeAt),
 	}

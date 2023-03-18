@@ -49,7 +49,6 @@ func (s *LiteStorage) GetWhalesPoolInfo(ctx context.Context, id tongo.AccountID)
 	}
 	method, value, err = abi.GetStakingStatus(ctx, s.client, id)
 	if err != nil {
-		fmt.Println(id)
 		return params, status, err
 	}
 	status, ok = value.(abi.GetStakingStatusResult)
@@ -76,6 +75,8 @@ func (s *LiteStorage) GetTFPools(ctx context.Context) ([]core.TFPool, error) {
 			MinNominatorStake: poolData.MinNominatorStake,
 			ValidatorShare:    poolData.ValidatorRewardShare,
 			StakeAt:           poolData.StakeAt,
+			Nominators:        int(poolData.NominatorsCount),
+			MaxNominators:     int(poolData.MaxNominatorsCount),
 		})
 	}
 	return result, nil

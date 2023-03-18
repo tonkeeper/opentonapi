@@ -19,4 +19,6 @@ type TFPool struct {
 	MinNominatorStake int64
 	ValidatorShare    uint32
 	StakeAt           uint32
+	Nominators        int
+	MaxNominators     int
 }
