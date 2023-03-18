@@ -49,6 +49,7 @@ func (s *LiteStorage) GetWhalesPoolInfo(ctx context.Context, id tongo.AccountID)
 	}
 	method, value, err = abi.GetStakingStatus(ctx, s.client, id)
 	if err != nil {
+		fmt.Println(id)
 		return params, status, err
 	}
 	status, ok = value.(abi.GetStakingStatusResult)
@@ -56,4 +57,26 @@ func (s *LiteStorage) GetWhalesPoolInfo(ctx context.Context, id tongo.AccountID)
 		return params, status, fmt.Errorf("get_staking returns type %v", method)
 	}
 	return params, status, nil
+}
+
+func (s *LiteStorage) GetTFPools(ctx context.Context) ([]core.TFPool, error) {
+	var result []core.TFPool
+	for _, a := range s.knownAccounts["tf_pools"] {
+		_, v, err := abi.GetPoolData(ctx, s.client, a)
+		if err != nil {
+			continue
+		}
+		poolData, ok := v.(abi.GetPoolData_TfResult)
+		if !ok {
+			continue
+		}
+		result = append(result, core.TFPool{
+			Address:           a,
+			TotalAmount:       poolData.StakeAmountSent,
+			MinNominatorStake: poolData.MinNominatorStake,
+			ValidatorShare:    poolData.ValidatorRewardShare,
+			StakeAt:           poolData.StakeAt,
+		})
+	}
+	return result, nil
 }

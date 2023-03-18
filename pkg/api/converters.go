@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"github.com/tonkeeper/opentonapi/pkg/addressbook"
 	"reflect"
 
 	"github.com/go-faster/jx"
@@ -194,6 +195,19 @@ func convertStakingWhalesPool(address tongo.AccountID, w references.WhalesPoolIn
 		MinStake:       poolConfig.MinStake,
 		CycleEnd:       int64(poolStatus.StakeUntil),
 		CycleStart:     int64(poolStatus.StakeAt),
+	}
+}
+
+func convertStakingTFPool(p core.TFPool, info addressbook.TFPoolInfo, apy float64) oas.PoolInfo {
+	return oas.PoolInfo{
+		Address:        p.Address.ToRaw(),
+		Name:           info.Name,
+		TotalAmount:    p.TotalAmount,
+		Implementation: oas.PoolInfoImplementationTf,
+		Apy:            apy * float64(10000-p.ValidatorShare) / 10000,
+		MinStake:       p.MinNominatorStake,
+		CycleStart:     int64(p.StakeAt),
+		CycleEnd:       int64(p.StakeAt) + 3600*36, //todo: make correct
 	}
 }
 

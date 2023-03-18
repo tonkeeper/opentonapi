@@ -12,3 +12,11 @@ type WhalesNominator struct {
 	MemberPendingWithdraw int64
 	MemberWithdraw        int64
 }
+
+type TFPool struct {
+	Address           tongo.AccountID
+	TotalAmount       int64
+	MinNominatorStake int64
+	ValidatorShare    uint32
+	StakeAt           uint32
+}

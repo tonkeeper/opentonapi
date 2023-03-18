@@ -3,7 +3,6 @@ package api
 import (
 	"context"
 	"encoding/base64"
-
 	"go.uber.org/zap"
 	"golang.org/x/exp/slices"
 
@@ -105,7 +104,7 @@ func (h Handler) GetAccount(ctx context.Context, params oas.GetAccountParams) (o
 	if err != nil {
 		return &oas.BadRequest{Error: err.Error()}, nil
 	}
-	ab, found := h.addressBook.GetAddressInfoByAddress(accountID.ToRaw())
+	ab, found := h.addressBook.GetAddressInfoByAddress(accountID)
 	if found {
 		info.IsScam = &ab.IsScam
 		if len(ab.Name) > 0 {
@@ -239,6 +238,16 @@ func (h Handler) StakingPoolInfo(ctx context.Context, params oas.StakingPoolInfo
 
 func (h Handler) StakingPools(ctx context.Context, params oas.StakingPoolsParams) (r oas.StakingPoolsRes, _ error) {
 	var result oas.StakingPoolsOK
+
+	tfPools, err := h.storage.GetTFPools(ctx)
+	if err != nil {
+		return nil, err
+	}
+	for _, p := range tfPools {
+		info, _ := h.addressBook.GetTFPoolInfo(p.Address)
+		result.Pools = append(result.Pools, convertStakingTFPool(p, info, h.state.GetAPY()))
+	}
+
 	for k, w := range references.WhalesPools {
 		poolConfig, poolStatus, err := h.storage.GetWhalesPoolInfo(ctx, k)
 		if err != nil {
@@ -246,6 +255,7 @@ func (h Handler) StakingPools(ctx context.Context, params oas.StakingPoolsParams
 		}
 		result.Pools = append(result.Pools, convertStakingWhalesPool(k, w, poolStatus, poolConfig, h.state.GetAPY()))
 	}
+
 	slices.SortFunc(result.Pools, func(a, b oas.PoolInfo) bool {
 		return a.Apy > b.Apy
 	})
