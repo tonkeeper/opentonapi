@@ -1782,7 +1782,7 @@ func encodeSendMessageResponse(response SendMessageRes, w http.ResponseWriter, s
 
 func encodeStakingPoolInfoResponse(response StakingPoolInfoRes, w http.ResponseWriter, span trace.Span) error {
 	switch response := response.(type) {
-	case *PoolInfo:
+	case *StakingPoolInfoOK:
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(200)
 		span.SetStatus(codes.Ok, http.StatusText(200))

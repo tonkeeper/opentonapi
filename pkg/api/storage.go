@@ -21,8 +21,10 @@ type storage interface {
 	GetTrace(ctx context.Context, hash tongo.Bits256) (*core.Trace, error)
 
 	GetParticipatingInWhalesPools(ctx context.Context, id tongo.AccountID) ([]core.WhalesNominator, error)
+	GetWhalesPoolMemberInfo(ctx context.Context, pool, member tongo.AccountID) (core.WhalesNominator, error)
 	GetWhalesPoolInfo(ctx context.Context, id tongo.AccountID) (abi.GetParams_WhalesNominatorResult, abi.GetStakingStatusResult, error)
 	GetTFPools(ctx context.Context) ([]core.TFPool, error)
+	GetTFPool(ctx context.Context, pool tongo.AccountID) (core.TFPool, error)
 
 	GetNFTs(ctx context.Context, accounts []tongo.AccountID) ([]core.NftItem, error)
 	SearchNFTs(ctx context.Context,

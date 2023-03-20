@@ -21,4 +21,5 @@ type TFPool struct {
 	StakeAt           uint32
 	Nominators        int
 	MaxNominators     int
+	VerifiedSources   bool
 }
