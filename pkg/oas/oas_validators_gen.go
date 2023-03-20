@@ -977,6 +977,24 @@ func (s RefundType) Validate() error {
 		return errors.Errorf("invalid value: %v", s)
 	}
 }
+func (s StakingPoolInfoOK) Validate() error {
+	var failures []validate.FieldError
+	if err := func() error {
+		if err := s.Pool.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "pool",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
 func (s StakingPoolsOK) Validate() error {
 	var failures []validate.FieldError
 	if err := func() error {

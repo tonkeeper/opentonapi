@@ -766,7 +766,15 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PoolInfo'
+                type: object
+                required:
+                  - implementation
+                  - pool
+                properties:
+                  implementation:
+                    $ref: '#/components/schemas/PoolImplementation'
+                  pool:
+                    $ref: '#/components/schemas/PoolInfo'
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -815,21 +823,7 @@ paths:
                   implementations:
                     type: object
                     additionalProperties:
-                      type: object
-                      required:
-                        - name
-                        - description
-                        - url
-                      properties:
-                        name:
-                          type: string
-                          example: TON Whales
-                        description:
-                          type: string
-                          example: "Oldest pool with minimal staking amount 50 TON"
-                        url:
-                          type: string
-                          example: "https://tonvalidators.org/"
+                      $ref: '#/components/schemas/PoolImplementation'
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -2542,13 +2536,14 @@ components:
       type: object
       required:
         - address
-        - totalAmount
+        - total_amount
         - implementation
         - apy
         - name
         - min_stake
         - cycle_start
         - cycle_end
+        - verified
       properties:
         address:
           type: string
@@ -2556,7 +2551,7 @@ components:
         name:
           type: string
           example: "Tonkeeper pool"
-        totalAmount:
+        total_amount:
           type: integer
           format: int64
         implementation:
@@ -2582,6 +2577,26 @@ components:
           description: current nomination cycle ending timestamp
           format: int64
           example: 1678223064
+        verified:
+          type: boolean
+          example: true
+          description: this pool has verified source code or managed by trusted company
+    PoolImplementation:
+      type: object
+      required:
+        - name
+        - description
+        - url
+      properties:
+        name:
+          type: string
+          example: TON Whales
+        description:
+          type: string
+          example: "Oldest pool with minimal staking amount 50 TON"
+        url:
+          type: string
+          example: "https://tonvalidators.org/"
   responses:
     NotFound:
       description: The specified resource was not found
