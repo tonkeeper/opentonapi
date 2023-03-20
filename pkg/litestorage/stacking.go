@@ -73,7 +73,7 @@ func (s *LiteStorage) GetTFPool(ctx context.Context, pool tongo.AccountID) (core
 	}
 	poolData, ok := v.(abi.GetPoolData_TfResult)
 	if !ok {
-		return core.TFPool{}, fmt.Errorf("invali type %", t)
+		return core.TFPool{}, fmt.Errorf("invali type %v", t)
 	}
 	return core.TFPool{
 		Address:           pool,
