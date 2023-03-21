@@ -89,6 +89,10 @@ type GetRawAccountRes interface {
 	getRawAccountRes()
 }
 
+type GetStorageProvidersRes interface {
+	getStorageProvidersRes()
+}
+
 type GetSubscriptionsByAccountRes interface {
 	getSubscriptionsByAccountRes()
 }
