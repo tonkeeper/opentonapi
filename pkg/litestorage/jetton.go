@@ -38,33 +38,25 @@ func (s *LiteStorage) GetJettonWalletsByOwnerAddress(ctx context.Context, addres
 	return wallets, nil
 }
 
-func (s *LiteStorage) GetJettonMasterMetadata(ctx context.Context, master tongo.AccountID) (core.JettonMetadata, error) {
+func (s *LiteStorage) GetJettonMasterMetadata(ctx context.Context, master tongo.AccountID) (tongo.JettonMetadata, error) {
 	meta, ok := s.jettonMetaCache[master.ToRaw()]
 	if ok {
 		return meta, nil
 	}
-	info, ok := s.AddressBook.GetJettonInfoByAddress(master)
 	rawMeta, err := s.client.GetJettonData(ctx, master)
 	if errors.Is(err, core.ErrEntityNotFound) {
 		if !ok {
-			return core.JettonMetadata{}, err
+			return tongo.JettonMetadata{}, err
 		}
 		rawMeta = tongo.JettonMetadata{
 			Name:  "Unknown",
 			Image: "https://ton.ams3.digitaloceanspaces.com/token-placeholder-288.png",
 		}
 	} else if err != nil {
-		return core.JettonMetadata{}, err
+		return tongo.JettonMetadata{}, err
 	}
-	res := core.ConvertJettonMeta(rawMeta)
-	res.Address = master
-	res.Name = rewriteIfNotEmpty(res.Name, info.Name)
-	res.Description = rewriteIfNotEmpty(res.Description, info.Description)
-	res.Image = rewriteIfNotEmpty(res.Image, info.Image)
-	res.Symbol = rewriteIfNotEmpty(res.Symbol, info.Symbol)
-	res.Verification = info.Verification
-	s.jettonMetaCache[master.ToRaw()] = res
-	return res, nil
+	s.jettonMetaCache[master.ToRaw()] = rawMeta
+	return rawMeta, nil
 }
 
 func rewriteIfNotEmpty(src, dest string) string {

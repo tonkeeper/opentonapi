@@ -8,8 +8,6 @@ import (
 	"github.com/tonkeeper/tongo/config"
 	"time"
 
-	"github.com/tonkeeper/tongo/config"
-
 	retry "github.com/avast/retry-go"
 	"go.uber.org/zap"
 
@@ -24,7 +22,7 @@ type LiteStorage struct {
 	client                  *liteapi.Client
 	AddressBook             *addressbook.Book
 	transactionsIndex       map[tongo.AccountID][]*core.Transaction
-	jettonMetaCache         map[string]core.JettonMetadata
+	jettonMetaCache         map[string]tongo.JettonMetadata
 	transactionsIndexByHash map[tongo.Bits256]*core.Transaction
 	blockCache              map[tongo.BlockIDExt]*tlb.Block
 	knownAccounts           map[string][]tongo.AccountID
@@ -90,7 +88,7 @@ func NewLiteStorage(log *zap.Logger, opts ...Option) (*LiteStorage, error) {
 		client:                  client,
 		AddressBook:             o.addressBook,
 		transactionsIndex:       make(map[tongo.AccountID][]*core.Transaction),
-		jettonMetaCache:         make(map[string]core.JettonMetadata),
+		jettonMetaCache:         make(map[string]tongo.JettonMetadata),
 		transactionsIndexByHash: make(map[tongo.Bits256]*core.Transaction),
 		blockCache:              make(map[tongo.BlockIDExt]*tlb.Block),
 		knownAccounts:           make(map[string][]tongo.AccountID),

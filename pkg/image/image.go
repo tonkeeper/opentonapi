@@ -1,13 +1,11 @@
 package image
 
-import (
-	"github.com/tonkeeper/tongo/liteapi"
-)
-
-type PreviewGenerator struct {
-	client *liteapi.Client
-}
+type PreviewGenerator struct{}
 
 func (g *PreviewGenerator) GenerateImageUrl(url string, height, width int) string {
 	return url
+}
+
+func NewImgGenerator() *PreviewGenerator {
+	return &PreviewGenerator{}
 }

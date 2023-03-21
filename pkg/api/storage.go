@@ -37,7 +37,7 @@ type storage interface {
 	) ([]tongo.AccountID, error)
 
 	GetJettonWalletsByOwnerAddress(ctx context.Context, address tongo.AccountID) ([]core.JettonWallet, error)
-	GetJettonMasterMetadata(ctx context.Context, master tongo.AccountID) (core.JettonMetadata, error)
+	GetJettonMasterMetadata(ctx context.Context, master tongo.AccountID) (tongo.JettonMetadata, error)
 }
 
 type chainState interface {

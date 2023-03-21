@@ -3,7 +3,7 @@ package api
 import (
 	"context"
 	"encoding/base64"
-
+	"github.com/tonkeeper/opentonapi/pkg/image"
 	"go.uber.org/zap"
 	"golang.org/x/exp/slices"
 
@@ -93,6 +93,9 @@ func NewHandler(logger *zap.Logger, opts ...Option) (*Handler, error) {
 	}
 	if options.storage == nil {
 		return nil, errors.New("storage is not configured")
+	}
+	if options.previewGenerator == nil {
+		options.previewGenerator = image.NewImgGenerator()
 	}
 	return &Handler{
 		storage:          options.storage,
@@ -404,13 +407,14 @@ func (h Handler) GetJettonsBalances(ctx context.Context, params oas.GetJettonsBa
 		if err != nil && !errors.Is(err, core.ErrEntityNotFound) {
 			return &oas.InternalError{Error: err.Error()}, nil
 		}
-		if !errors.Is(err, core.ErrEntityNotFound) {
-			m := convertToApiJetton(meta, h.previewGenerator)
-			m.Verification = oas.OptJettonVerificationType{Value: oas.JettonVerificationTypeNone}
-			jettonBalance.Metadata = oas.OptJetton{Value: m}
-			convertVerification, _ := convertJettonVerification(meta.Verification)
-			jettonBalance.Verification = convertVerification
+		m, err := convertToApiJetton(meta, wallet.JettonAddress, h.previewGenerator)
+		if err != nil {
+			return &oas.InternalError{Error: err.Error()}, nil
 		}
+		m.Verification = oas.OptJettonVerificationType{Value: oas.JettonVerificationTypeNone}
+		jettonBalance.Metadata = oas.OptJetton{Value: m}
+		convertVerification, _ := convertJettonVerification(addressbook.None) // TODO: change to real verify
+		jettonBalance.Verification = convertVerification
 
 		balances.Balances = append(balances.Balances, jettonBalance)
 	}

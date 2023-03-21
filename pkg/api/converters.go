@@ -5,9 +5,9 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"github.com/shopspring/decimal"
 	"github.com/tonkeeper/opentonapi/pkg/addressbook"
 	"reflect"
+	"strconv"
 	"strings"
 
 	"github.com/go-faster/jx"
@@ -326,8 +326,8 @@ func convertToAccount(info *core.AccountInfo) oas.Account {
 	return acc
 }
 
-func convertToApiJetton(metadata core.JettonMetadata, imgGenerator previewGenerator) oas.Jetton {
-	convertVerification, _ := convertJettonVerification(metadata.Verification)
+func convertToApiJetton(metadata tongo.JettonMetadata, master tongo.AccountID, imgGenerator previewGenerator) (oas.Jetton, error) {
+	convertVerification, _ := convertJettonVerification(addressbook.None) // TODO: change to real verify
 	name := metadata.Name
 	if name == "" {
 		name = "Unknown Token"
@@ -341,25 +341,32 @@ func convertToApiJetton(metadata core.JettonMetadata, imgGenerator previewGenera
 		symbol = "SCAM"
 	}
 	jetton := oas.Jetton{
-		Address:      metadata.Address.ToRaw(),
+		Address:      master.ToRaw(),
 		Name:         name,
 		Symbol:       symbol,
 		Verification: oas.OptJettonVerificationType{Value: convertVerification},
 	}
-	jetton.Decimals = convertJettonDecimals(metadata.Decimals)
+	dec, err := convertJettonDecimals(metadata.Decimals)
+	if err != nil {
+		return oas.Jetton{}, err
+	}
+	jetton.Decimals = dec
 	if metadata.Image != "" {
 		preview := imgGenerator.GenerateImageUrl(metadata.Image, 200, 200)
 		jetton.Image = oas.OptString{Value: preview}
 	}
-	return jetton
+	return jetton, nil
 }
 
-func convertJettonDecimals(decimals *decimal.Decimal) int {
-	if decimals == nil {
-		return 9
+func convertJettonDecimals(decimals string) (int, error) {
+	if decimals == "" {
+		return 9, nil
 	}
-	dec := decimals.IntPart()
-	return int(dec)
+	dec, err := strconv.Atoi(decimals)
+	if err != nil {
+		return 0, err
+	}
+	return dec, nil
 }
 
 func convertJettonVerification(verificationType addressbook.JettonVerificationType) (oas.JettonVerificationType, error) {
