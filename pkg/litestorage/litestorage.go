@@ -55,8 +55,14 @@ func NewLiteStorage(log *zap.Logger, opts ...Option) (*LiteStorage, error) {
 	for i := range opts {
 		opts[i](o)
 	}
-
-	client, err := liteapi.NewClientWithDefaultMainnet()
+	var err error
+	var client *liteapi.Client
+	if len(o.servers) == 0 {
+		log.Warn("USE PUBLIC CONFIG! BE CAREFUL!")
+		client, err = liteapi.NewClientWithDefaultMainnet()
+	} else {
+		client, err = liteapi.NewClient(liteapi.WithLiteServers(o.servers))
+	}
 	if err != nil {
 		return nil, err
 	}
