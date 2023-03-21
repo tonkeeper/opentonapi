@@ -832,6 +832,32 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/InternalError'
+  /v2/storage/providers:
+    get:
+      description: Get TON storage providers deployed to the blockchain.
+      operationId: getStorageProviders
+      tags:
+        - Storage
+      responses:
+        '200':
+          description: "list of storage providers"
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - providers
+                properties:
+                  providers:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/StorageProvider'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalError'
 
 components:
   parameters:
@@ -2597,6 +2623,38 @@ components:
         url:
           type: string
           example: "https://tonvalidators.org/"
+    StorageProvider:
+      type: object
+      required:
+        - address
+        - accept_new_contracts
+        - rate_per_mb_day
+        - max_span
+        - minimal_file_size
+        - maximal_file_size
+      properties:
+        address:
+          type: string
+          example: 0:FD595F36B4C1535BEC8461490D38EBB9AE3C38DD6ACE17CA63ABE2C6608BE159
+        accept_new_contracts:
+          type: boolean
+          example: true
+        rate_per_mb_day:
+          type: integer
+          format: int64
+          example: 50000000
+        max_span:
+          type: integer
+          format: int64
+          example: 604800
+        minimal_file_size:
+          type: integer
+          format: int64
+          example: 64
+        maximal_file_size:
+          type: integer
+          format: int64
+          example: 10485760
   responses:
     NotFound:
       description: The specified resource was not found

@@ -710,8 +710,8 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 					return
 				}
-			case 's': // Prefix: "staking/"
-				if l := len("staking/"); len(elem) >= l && elem[0:l] == "staking/" {
+			case 's': // Prefix: "st"
+				if l := len("st"); len(elem) >= l && elem[0:l] == "st" {
 					elem = elem[l:]
 				} else {
 					break
@@ -721,49 +721,8 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 					break
 				}
 				switch elem[0] {
-				case 'n': // Prefix: "nominator/"
-					if l := len("nominator/"); len(elem) >= l && elem[0:l] == "nominator/" {
-						elem = elem[l:]
-					} else {
-						break
-					}
-
-					// Param: "account_id"
-					// Match until "/"
-					idx := strings.IndexByte(elem, '/')
-					if idx < 0 {
-						idx = len(elem)
-					}
-					args[0] = elem[:idx]
-					elem = elem[idx:]
-
-					if len(elem) == 0 {
-						break
-					}
-					switch elem[0] {
-					case '/': // Prefix: "/pools"
-						if l := len("/pools"); len(elem) >= l && elem[0:l] == "/pools" {
-							elem = elem[l:]
-						} else {
-							break
-						}
-
-						if len(elem) == 0 {
-							// Leaf node.
-							switch r.Method {
-							case "GET":
-								s.handlePoolsByNominatorsRequest([1]string{
-									args[0],
-								}, w, r)
-							default:
-								s.notAllowed(w, r, "GET")
-							}
-
-							return
-						}
-					}
-				case 'p': // Prefix: "pool"
-					if l := len("pool"); len(elem) >= l && elem[0:l] == "pool" {
+				case 'a': // Prefix: "aking/"
+					if l := len("aking/"); len(elem) >= l && elem[0:l] == "aking/" {
 						elem = elem[l:]
 					} else {
 						break
@@ -773,49 +732,120 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 						break
 					}
 					switch elem[0] {
-					case '/': // Prefix: "/"
-						if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+					case 'n': // Prefix: "nominator/"
+						if l := len("nominator/"); len(elem) >= l && elem[0:l] == "nominator/" {
 							elem = elem[l:]
 						} else {
 							break
 						}
 
 						// Param: "account_id"
-						// Leaf parameter
-						args[0] = elem
-						elem = ""
+						// Match until "/"
+						idx := strings.IndexByte(elem, '/')
+						if idx < 0 {
+							idx = len(elem)
+						}
+						args[0] = elem[:idx]
+						elem = elem[idx:]
 
 						if len(elem) == 0 {
-							// Leaf node.
-							switch r.Method {
-							case "GET":
-								s.handleStakingPoolInfoRequest([1]string{
-									args[0],
-								}, w, r)
-							default:
-								s.notAllowed(w, r, "GET")
+							break
+						}
+						switch elem[0] {
+						case '/': // Prefix: "/pools"
+							if l := len("/pools"); len(elem) >= l && elem[0:l] == "/pools" {
+								elem = elem[l:]
+							} else {
+								break
 							}
 
-							return
+							if len(elem) == 0 {
+								// Leaf node.
+								switch r.Method {
+								case "GET":
+									s.handlePoolsByNominatorsRequest([1]string{
+										args[0],
+									}, w, r)
+								default:
+									s.notAllowed(w, r, "GET")
+								}
+
+								return
+							}
 						}
-					case 's': // Prefix: "s"
-						if l := len("s"); len(elem) >= l && elem[0:l] == "s" {
+					case 'p': // Prefix: "pool"
+						if l := len("pool"); len(elem) >= l && elem[0:l] == "pool" {
 							elem = elem[l:]
 						} else {
 							break
 						}
 
 						if len(elem) == 0 {
-							// Leaf node.
-							switch r.Method {
-							case "GET":
-								s.handleStakingPoolsRequest([0]string{}, w, r)
-							default:
-								s.notAllowed(w, r, "GET")
+							break
+						}
+						switch elem[0] {
+						case '/': // Prefix: "/"
+							if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+								elem = elem[l:]
+							} else {
+								break
 							}
 
-							return
+							// Param: "account_id"
+							// Leaf parameter
+							args[0] = elem
+							elem = ""
+
+							if len(elem) == 0 {
+								// Leaf node.
+								switch r.Method {
+								case "GET":
+									s.handleStakingPoolInfoRequest([1]string{
+										args[0],
+									}, w, r)
+								default:
+									s.notAllowed(w, r, "GET")
+								}
+
+								return
+							}
+						case 's': // Prefix: "s"
+							if l := len("s"); len(elem) >= l && elem[0:l] == "s" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							if len(elem) == 0 {
+								// Leaf node.
+								switch r.Method {
+								case "GET":
+									s.handleStakingPoolsRequest([0]string{}, w, r)
+								default:
+									s.notAllowed(w, r, "GET")
+								}
+
+								return
+							}
 						}
+					}
+				case 'o': // Prefix: "orage/providers"
+					if l := len("orage/providers"); len(elem) >= l && elem[0:l] == "orage/providers" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					if len(elem) == 0 {
+						// Leaf node.
+						switch r.Method {
+						case "GET":
+							s.handleGetStorageProvidersRequest([0]string{}, w, r)
+						default:
+							s.notAllowed(w, r, "GET")
+						}
+
+						return
 					}
 				}
 			case 't': // Prefix: "traces/"
@@ -1583,8 +1613,8 @@ func (s *Server) FindRoute(method, path string) (r Route, _ bool) {
 						return
 					}
 				}
-			case 's': // Prefix: "staking/"
-				if l := len("staking/"); len(elem) >= l && elem[0:l] == "staking/" {
+			case 's': // Prefix: "st"
+				if l := len("st"); len(elem) >= l && elem[0:l] == "st" {
 					elem = elem[l:]
 				} else {
 					break
@@ -1594,49 +1624,8 @@ func (s *Server) FindRoute(method, path string) (r Route, _ bool) {
 					break
 				}
 				switch elem[0] {
-				case 'n': // Prefix: "nominator/"
-					if l := len("nominator/"); len(elem) >= l && elem[0:l] == "nominator/" {
-						elem = elem[l:]
-					} else {
-						break
-					}
-
-					// Param: "account_id"
-					// Match until "/"
-					idx := strings.IndexByte(elem, '/')
-					if idx < 0 {
-						idx = len(elem)
-					}
-					args[0] = elem[:idx]
-					elem = elem[idx:]
-
-					if len(elem) == 0 {
-						break
-					}
-					switch elem[0] {
-					case '/': // Prefix: "/pools"
-						if l := len("/pools"); len(elem) >= l && elem[0:l] == "/pools" {
-							elem = elem[l:]
-						} else {
-							break
-						}
-
-						if len(elem) == 0 {
-							switch method {
-							case "GET":
-								// Leaf: PoolsByNominators
-								r.name = "PoolsByNominators"
-								r.operationID = "poolsByNominators"
-								r.args = args
-								r.count = 1
-								return r, true
-							default:
-								return
-							}
-						}
-					}
-				case 'p': // Prefix: "pool"
-					if l := len("pool"); len(elem) >= l && elem[0:l] == "pool" {
+				case 'a': // Prefix: "aking/"
+					if l := len("aking/"); len(elem) >= l && elem[0:l] == "aking/" {
 						elem = elem[l:]
 					} else {
 						break
@@ -1646,50 +1635,123 @@ func (s *Server) FindRoute(method, path string) (r Route, _ bool) {
 						break
 					}
 					switch elem[0] {
-					case '/': // Prefix: "/"
-						if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+					case 'n': // Prefix: "nominator/"
+						if l := len("nominator/"); len(elem) >= l && elem[0:l] == "nominator/" {
 							elem = elem[l:]
 						} else {
 							break
 						}
 
 						// Param: "account_id"
-						// Leaf parameter
-						args[0] = elem
-						elem = ""
+						// Match until "/"
+						idx := strings.IndexByte(elem, '/')
+						if idx < 0 {
+							idx = len(elem)
+						}
+						args[0] = elem[:idx]
+						elem = elem[idx:]
 
 						if len(elem) == 0 {
-							switch method {
-							case "GET":
-								// Leaf: StakingPoolInfo
-								r.name = "StakingPoolInfo"
-								r.operationID = "stakingPoolInfo"
-								r.args = args
-								r.count = 1
-								return r, true
-							default:
-								return
+							break
+						}
+						switch elem[0] {
+						case '/': // Prefix: "/pools"
+							if l := len("/pools"); len(elem) >= l && elem[0:l] == "/pools" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							if len(elem) == 0 {
+								switch method {
+								case "GET":
+									// Leaf: PoolsByNominators
+									r.name = "PoolsByNominators"
+									r.operationID = "poolsByNominators"
+									r.args = args
+									r.count = 1
+									return r, true
+								default:
+									return
+								}
 							}
 						}
-					case 's': // Prefix: "s"
-						if l := len("s"); len(elem) >= l && elem[0:l] == "s" {
+					case 'p': // Prefix: "pool"
+						if l := len("pool"); len(elem) >= l && elem[0:l] == "pool" {
 							elem = elem[l:]
 						} else {
 							break
 						}
 
 						if len(elem) == 0 {
-							switch method {
-							case "GET":
-								// Leaf: StakingPools
-								r.name = "StakingPools"
-								r.operationID = "stakingPools"
-								r.args = args
-								r.count = 0
-								return r, true
-							default:
-								return
+							break
+						}
+						switch elem[0] {
+						case '/': // Prefix: "/"
+							if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+								elem = elem[l:]
+							} else {
+								break
 							}
+
+							// Param: "account_id"
+							// Leaf parameter
+							args[0] = elem
+							elem = ""
+
+							if len(elem) == 0 {
+								switch method {
+								case "GET":
+									// Leaf: StakingPoolInfo
+									r.name = "StakingPoolInfo"
+									r.operationID = "stakingPoolInfo"
+									r.args = args
+									r.count = 1
+									return r, true
+								default:
+									return
+								}
+							}
+						case 's': // Prefix: "s"
+							if l := len("s"); len(elem) >= l && elem[0:l] == "s" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							if len(elem) == 0 {
+								switch method {
+								case "GET":
+									// Leaf: StakingPools
+									r.name = "StakingPools"
+									r.operationID = "stakingPools"
+									r.args = args
+									r.count = 0
+									return r, true
+								default:
+									return
+								}
+							}
+						}
+					}
+				case 'o': // Prefix: "orage/providers"
+					if l := len("orage/providers"); len(elem) >= l && elem[0:l] == "orage/providers" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					if len(elem) == 0 {
+						switch method {
+						case "GET":
+							// Leaf: GetStorageProviders
+							r.name = "GetStorageProviders"
+							r.operationID = "getStorageProviders"
+							r.args = args
+							r.count = 0
+							return r, true
+						default:
+							return
 						}
 					}
 				}

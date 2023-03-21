@@ -140,6 +140,12 @@ type Handler interface {
 	//
 	// GET /v2/blockchain/accounts/{account_id}
 	GetRawAccount(ctx context.Context, params GetRawAccountParams) (GetRawAccountRes, error)
+	// GetStorageProviders implements getStorageProviders operation.
+	//
+	// Get TON storage providers deployed to the blockchain.
+	//
+	// GET /v2/storage/providers
+	GetStorageProviders(ctx context.Context) (GetStorageProvidersRes, error)
 	// GetSubscriptionsByAccount implements getSubscriptionsByAccount operation.
 	//
 	// Get all subscriptions by wallet address.

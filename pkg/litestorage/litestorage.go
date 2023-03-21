@@ -2,9 +2,11 @@ package litestorage
 
 import (
 	"context"
+	"errors"
 	"fmt"
-	"github.com/tonkeeper/tongo/config"
 	"time"
+
+	"github.com/tonkeeper/tongo/config"
 
 	retry "github.com/avast/retry-go"
 	"go.uber.org/zap"
@@ -168,4 +170,8 @@ func (s *LiteStorage) GetBlockTransactions(ctx context.Context, id tongo.BlockID
 
 func (s *LiteStorage) searchTxInCache(a tongo.AccountID, lt uint64) *core.Transaction {
 	return nil
+}
+
+func (s *LiteStorage) GetStorageProviders(ctx context.Context) ([]core.StorageProvider, error) {
+	return nil, errors.New("not implemented")
 }
