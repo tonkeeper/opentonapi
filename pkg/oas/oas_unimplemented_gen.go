@@ -211,6 +211,15 @@ func (UnimplementedHandler) GetRawAccount(ctx context.Context, params GetRawAcco
 	return r, ht.ErrNotImplemented
 }
 
+// GetStorageProviders implements getStorageProviders operation.
+//
+// Get TON storage providers deployed to the blockchain.
+//
+// GET /v2/storage/providers
+func (UnimplementedHandler) GetStorageProviders(ctx context.Context) (r GetStorageProvidersRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // GetSubscriptionsByAccount implements getSubscriptionsByAccount operation.
 //
 // Get all subscriptions by wallet address.

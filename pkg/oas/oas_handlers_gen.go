@@ -2215,6 +2215,86 @@ func (s *Server) handleGetRawAccountRequest(args [1]string, w http.ResponseWrite
 	}
 }
 
+// handleGetStorageProvidersRequest handles getStorageProviders operation.
+//
+// Get TON storage providers deployed to the blockchain.
+//
+// GET /v2/storage/providers
+func (s *Server) handleGetStorageProvidersRequest(args [0]string, w http.ResponseWriter, r *http.Request) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("getStorageProviders"),
+	}
+
+	// Start a span for this request.
+	ctx, span := s.cfg.Tracer.Start(r.Context(), "GetStorageProviders",
+		trace.WithAttributes(otelAttrs...),
+		serverSpanKind,
+	)
+	defer span.End()
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		elapsedDuration := time.Since(startTime)
+		s.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+	}()
+
+	// Increment request counter.
+	s.requests.Add(ctx, 1, otelAttrs...)
+
+	var (
+		recordError = func(stage string, err error) {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			s.errors.Add(ctx, 1, otelAttrs...)
+		}
+		err error
+	)
+
+	var response GetStorageProvidersRes
+	if m := s.cfg.Middleware; m != nil {
+		mreq := middleware.Request{
+			Context:       ctx,
+			OperationName: "GetStorageProviders",
+			OperationID:   "getStorageProviders",
+			Body:          nil,
+			Params:        middleware.Parameters{},
+			Raw:           r,
+		}
+
+		type (
+			Request  = struct{}
+			Params   = struct{}
+			Response = GetStorageProvidersRes
+		)
+		response, err = middleware.HookMiddleware[
+			Request,
+			Params,
+			Response,
+		](
+			m,
+			mreq,
+			nil,
+			func(ctx context.Context, request Request, params Params) (Response, error) {
+				return s.h.GetStorageProviders(ctx)
+			},
+		)
+	} else {
+		response, err = s.h.GetStorageProviders(ctx)
+	}
+	if err != nil {
+		recordError("Internal", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+
+	if err := encodeGetStorageProvidersResponse(response, w, span); err != nil {
+		recordError("EncodeResponse", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+}
+
 // handleGetSubscriptionsByAccountRequest handles getSubscriptionsByAccount operation.
 //
 // Get all subscriptions by wallet address.
