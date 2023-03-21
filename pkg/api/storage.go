@@ -18,6 +18,8 @@ type storage interface {
 	// GetBlockTransactions returns low-level information about transactions in a particular block.
 	GetBlockTransactions(ctx context.Context, id tongo.BlockID) ([]*core.Transaction, error)
 	GetTrace(ctx context.Context, hash tongo.Bits256) (*core.Trace, error)
+	// GetStorageProviders returns a list of storage contracts deployed to the blockchain.
+	GetStorageProviders(ctx context.Context) ([]core.StorageProvider, error)
 
 	GetParticipatingInWhalesPools(ctx context.Context, id tongo.AccountID) ([]core.WhalesNominator, error)
 	GetWhalesPoolMemberInfo(ctx context.Context, pool, member tongo.AccountID) (core.WhalesNominator, error)

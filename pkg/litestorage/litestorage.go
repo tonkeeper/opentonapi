@@ -2,10 +2,13 @@ package litestorage
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/tonkeeper/opentonapi/pkg/addressbook"
 	"github.com/tonkeeper/tongo/config"
 	"time"
+
+	"github.com/tonkeeper/tongo/config"
 
 	retry "github.com/avast/retry-go"
 	"go.uber.org/zap"
@@ -71,8 +74,14 @@ func NewLiteStorage(log *zap.Logger, opts ...Option) (*LiteStorage, error) {
 	for i := range opts {
 		opts[i](o)
 	}
-
-	client, err := liteapi.NewClientWithDefaultMainnet()
+	var err error
+	var client *liteapi.Client
+	if len(o.servers) == 0 {
+		log.Warn("USE PUBLIC CONFIG! BE CAREFUL!")
+		client, err = liteapi.NewClientWithDefaultMainnet()
+	} else {
+		client, err = liteapi.NewClient(liteapi.WithLiteServers(o.servers))
+	}
 	if err != nil {
 		return nil, err
 	}
@@ -180,4 +189,8 @@ func (s *LiteStorage) GetBlockTransactions(ctx context.Context, id tongo.BlockID
 
 func (s *LiteStorage) searchTxInCache(a tongo.AccountID, lt uint64) *core.Transaction {
 	return nil
+}
+
+func (s *LiteStorage) GetStorageProviders(ctx context.Context) ([]core.StorageProvider, error) {
+	return nil, errors.New("not implemented")
 }

@@ -878,6 +878,7 @@ func (*BadRequest) getNftCollectionRes()          {}
 func (*BadRequest) getNftItemsByAddressesRes()    {}
 func (*BadRequest) getNftItemsByOwnerRes()        {}
 func (*BadRequest) getRawAccountRes()             {}
+func (*BadRequest) getStorageProvidersRes()       {}
 func (*BadRequest) getSubscriptionsByAccountRes() {}
 func (*BadRequest) getTraceRes()                  {}
 func (*BadRequest) getTracesByAccountRes()        {}
@@ -1686,6 +1687,22 @@ func (s *Fee) SetRefund(val int64) {
 	s.Refund = val
 }
 
+type GetStorageProvidersOK struct {
+	Providers []StorageProvider `json:"providers"`
+}
+
+// GetProviders returns the value of Providers.
+func (s GetStorageProvidersOK) GetProviders() []StorageProvider {
+	return s.Providers
+}
+
+// SetProviders sets the value of Providers.
+func (s *GetStorageProvidersOK) SetProviders(val []StorageProvider) {
+	s.Providers = val
+}
+
+func (*GetStorageProvidersOK) getStorageProvidersRes() {}
+
 // Ref: #/components/schemas/ImagePreview
 type ImagePreview struct {
 	Resolution string `json:"resolution"`
@@ -1748,6 +1765,7 @@ func (*InternalError) getNftCollectionsRes()         {}
 func (*InternalError) getNftItemsByAddressesRes()    {}
 func (*InternalError) getNftItemsByOwnerRes()        {}
 func (*InternalError) getRawAccountRes()             {}
+func (*InternalError) getStorageProvidersRes()       {}
 func (*InternalError) getSubscriptionsByAccountRes() {}
 func (*InternalError) getTraceRes()                  {}
 func (*InternalError) getTracesByAccountRes()        {}
@@ -5022,6 +5040,76 @@ func (s *StoragePhase) SetStatusChange(val AccStatusChange) {
 	s.StatusChange = val
 }
 
+// Ref: #/components/schemas/StorageProvider
+type StorageProvider struct {
+	Address            string `json:"address"`
+	AcceptNewContracts bool   `json:"accept_new_contracts"`
+	RatePerMBDay       int64  `json:"rate_per_mb_day"`
+	MaxSpan            int64  `json:"max_span"`
+	MinimalFileSize    int64  `json:"minimal_file_size"`
+	MaximalFileSize    int64  `json:"maximal_file_size"`
+}
+
+// GetAddress returns the value of Address.
+func (s StorageProvider) GetAddress() string {
+	return s.Address
+}
+
+// GetAcceptNewContracts returns the value of AcceptNewContracts.
+func (s StorageProvider) GetAcceptNewContracts() bool {
+	return s.AcceptNewContracts
+}
+
+// GetRatePerMBDay returns the value of RatePerMBDay.
+func (s StorageProvider) GetRatePerMBDay() int64 {
+	return s.RatePerMBDay
+}
+
+// GetMaxSpan returns the value of MaxSpan.
+func (s StorageProvider) GetMaxSpan() int64 {
+	return s.MaxSpan
+}
+
+// GetMinimalFileSize returns the value of MinimalFileSize.
+func (s StorageProvider) GetMinimalFileSize() int64 {
+	return s.MinimalFileSize
+}
+
+// GetMaximalFileSize returns the value of MaximalFileSize.
+func (s StorageProvider) GetMaximalFileSize() int64 {
+	return s.MaximalFileSize
+}
+
+// SetAddress sets the value of Address.
+func (s *StorageProvider) SetAddress(val string) {
+	s.Address = val
+}
+
+// SetAcceptNewContracts sets the value of AcceptNewContracts.
+func (s *StorageProvider) SetAcceptNewContracts(val bool) {
+	s.AcceptNewContracts = val
+}
+
+// SetRatePerMBDay sets the value of RatePerMBDay.
+func (s *StorageProvider) SetRatePerMBDay(val int64) {
+	s.RatePerMBDay = val
+}
+
+// SetMaxSpan sets the value of MaxSpan.
+func (s *StorageProvider) SetMaxSpan(val int64) {
+	s.MaxSpan = val
+}
+
+// SetMinimalFileSize sets the value of MinimalFileSize.
+func (s *StorageProvider) SetMinimalFileSize(val int64) {
+	s.MinimalFileSize = val
+}
+
+// SetMaximalFileSize sets the value of MaximalFileSize.
+func (s *StorageProvider) SetMaximalFileSize(val int64) {
+	s.MaximalFileSize = val
+}
+
 // Ref: #/components/schemas/Subscription
 type Subscription struct {
 	Address            string `json:"address"`
@@ -5798,6 +5886,7 @@ func (*UnauthorizedError) getNftCollectionsRes()         {}
 func (*UnauthorizedError) getNftItemsByAddressesRes()    {}
 func (*UnauthorizedError) getNftItemsByOwnerRes()        {}
 func (*UnauthorizedError) getRawAccountRes()             {}
+func (*UnauthorizedError) getStorageProvidersRes()       {}
 func (*UnauthorizedError) getSubscriptionsByAccountRes() {}
 func (*UnauthorizedError) getTraceRes()                  {}
 func (*UnauthorizedError) getTracesByAccountRes()        {}

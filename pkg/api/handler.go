@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"encoding/base64"
+
 	"go.uber.org/zap"
 	"golang.org/x/exp/slices"
 
@@ -360,6 +361,25 @@ func (h Handler) SendMessage(ctx context.Context, req oas.OptSendMessageReq) (r 
 		return &oas.InternalError{Error: err.Error()}, nil
 	}
 	return &oas.SendMessageOK{}, nil
+}
+
+func (h Handler) GetStorageProviders(ctx context.Context) (r oas.GetStorageProvidersRes, _ error) {
+	providers, err := h.storage.GetStorageProviders(ctx)
+	if err != nil {
+		return nil, err
+	}
+	result := make([]oas.StorageProvider, 0, len(providers))
+	for _, p := range providers {
+		result = append(result, oas.StorageProvider{
+			Address:            p.Address.ToRaw(),
+			AcceptNewContracts: p.AcceptNewContracts,
+			RatePerMBDay:       p.RatePerMbDay,
+			MaxSpan:            p.MaxSpan,
+			MinimalFileSize:    p.MinimalFileSize,
+			MaximalFileSize:    p.MaximalFileSize,
+		})
+	}
+	return &oas.GetStorageProvidersOK{Providers: result}, nil
 }
 
 func (h Handler) GetJettonsBalances(ctx context.Context, params oas.GetJettonsBalancesParams) (oas.GetJettonsBalancesRes, error) {
