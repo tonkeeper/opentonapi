@@ -101,12 +101,8 @@ func (b *Book) GetJettonInfoByAddress(a tongo.AccountID) (KnownJetton, bool) {
 	return j, ok
 }
 
-func (b *Book) GetKnownJettons() map[string]KnownJetton {
+func (b *Book) GetKnownJettons() map[tongo.AccountID]KnownJetton {
 	return b.jettons
-}
-
-func (b *Book) AsBook() *Book {
-	return b
 }
 
 func NewAddressBook(logger *zap.Logger, addressPath, jettonPath, collectionPath string) *Book {

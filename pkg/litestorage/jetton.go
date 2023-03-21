@@ -43,7 +43,7 @@ func (s *LiteStorage) GetJettonMasterMetadata(ctx context.Context, master tongo.
 	if ok {
 		return meta, nil
 	}
-	info, ok := s.AddressBook.GetJettonInfoByAddress(master.ToRaw())
+	info, ok := s.AddressBook.GetJettonInfoByAddress(master)
 	rawMeta, err := s.client.GetJettonData(ctx, master)
 	if errors.Is(err, core.ErrEntityNotFound) {
 		if !ok {

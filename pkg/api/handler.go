@@ -10,13 +10,10 @@ import (
 	"github.com/tonkeeper/opentonapi/pkg/i18n"
 	"github.com/tonkeeper/tongo"
 
-	"github.com/tonkeeper/opentonapi/internal/g"
 	"github.com/tonkeeper/opentonapi/pkg/addressbook"
 	"github.com/tonkeeper/opentonapi/pkg/blockchain"
 	"github.com/tonkeeper/opentonapi/pkg/chainstate"
 	"github.com/tonkeeper/opentonapi/pkg/config"
-	"github.com/tonkeeper/opentonapi/pkg/i18n"
-
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/opentonapi/pkg/oas"
 	"github.com/tonkeeper/opentonapi/pkg/references"
