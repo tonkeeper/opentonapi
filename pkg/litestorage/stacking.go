@@ -19,7 +19,7 @@ func (s *LiteStorage) GetWhalesPoolMemberInfo(ctx context.Context, pool, member 
 	if !ok {
 		return core.WhalesNominator{}, fmt.Errorf("invalid result")
 	}
-	if m.MemberBalance+m.MemberPendingDeposit+m.MemberPendingWithdraw+m.MemberPendingDeposit == 0 {
+	if m.MemberBalance+m.MemberWithdraw+m.MemberPendingWithdraw+m.MemberPendingDeposit == 0 {
 		return core.WhalesNominator{}, fmt.Errorf("not pool member")
 	}
 	return core.WhalesNominator{
