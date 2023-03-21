@@ -58,6 +58,12 @@ func WithTFPools(pools []tongo.AccountID) Option {
 	}
 }
 
+func WithAddressBook(book *addressbook.Book) Option {
+	return func(o *Options) {
+		o.addressBook = book
+	}
+}
+
 type Option func(o *Options)
 
 func NewLiteStorage(log *zap.Logger, opts ...Option) (*LiteStorage, error) {
