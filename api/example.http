@@ -15,7 +15,7 @@ GET {{host}}/v2/staking/nominator/EQCMVd9ya3yvhyhOWckBUmrHsle3eLqb_em8npZEmbbR-N
 GET {{host}}/v2/staking/pool/0:48fb0195a7fc7454512377b9bd704503ded27f6e7c4c4a9d136fdab3ef9ec04c
 
 ###
-GET {{host}}/v2/staking/pools?availabe_for=0:48fb0195a7fc7454512377b9bd704503ded27f6e7c4c4a9d136fdab3ef9ec04c
+GET {{host}}/v2/staking/pools?available_for=0:48fb0195a7fc7454512377b9bd704503ded27f6e7c4c4a9d136fdab3ef9ec04c
 Accept-Language: ru
 
 ###

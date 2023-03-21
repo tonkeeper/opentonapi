@@ -315,6 +315,7 @@ type AccountStakingInfo struct {
 	Amount          int64  `json:"amount"`
 	PendingDeposit  int64  `json:"pending_deposit"`
 	PendingWithdraw int64  `json:"pending_withdraw"`
+	ReadyWithdraw   int64  `json:"ready_withdraw"`
 }
 
 // GetPool returns the value of Pool.
@@ -337,6 +338,11 @@ func (s AccountStakingInfo) GetPendingWithdraw() int64 {
 	return s.PendingWithdraw
 }
 
+// GetReadyWithdraw returns the value of ReadyWithdraw.
+func (s AccountStakingInfo) GetReadyWithdraw() int64 {
+	return s.ReadyWithdraw
+}
+
 // SetPool sets the value of Pool.
 func (s *AccountStakingInfo) SetPool(val string) {
 	s.Pool = val
@@ -355,6 +361,11 @@ func (s *AccountStakingInfo) SetPendingDeposit(val int64) {
 // SetPendingWithdraw sets the value of PendingWithdraw.
 func (s *AccountStakingInfo) SetPendingWithdraw(val int64) {
 	s.PendingWithdraw = val
+}
+
+// SetReadyWithdraw sets the value of ReadyWithdraw.
+func (s *AccountStakingInfo) SetReadyWithdraw(val int64) {
+	s.ReadyWithdraw = val
 }
 
 // Ref: #/components/schemas/AccountStatus
@@ -4478,11 +4489,48 @@ func (o OptWalletDNS) Or(d WalletDNS) WalletDNS {
 	return d
 }
 
+// Ref: #/components/schemas/PoolImplementation
+type PoolImplementation struct {
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	URL         string `json:"url"`
+}
+
+// GetName returns the value of Name.
+func (s PoolImplementation) GetName() string {
+	return s.Name
+}
+
+// GetDescription returns the value of Description.
+func (s PoolImplementation) GetDescription() string {
+	return s.Description
+}
+
+// GetURL returns the value of URL.
+func (s PoolImplementation) GetURL() string {
+	return s.URL
+}
+
+// SetName sets the value of Name.
+func (s *PoolImplementation) SetName(val string) {
+	s.Name = val
+}
+
+// SetDescription sets the value of Description.
+func (s *PoolImplementation) SetDescription(val string) {
+	s.Description = val
+}
+
+// SetURL sets the value of URL.
+func (s *PoolImplementation) SetURL(val string) {
+	s.URL = val
+}
+
 // Ref: #/components/schemas/PoolInfo
 type PoolInfo struct {
 	Address        string                 `json:"address"`
 	Name           string                 `json:"name"`
-	TotalAmount    int64                  `json:"totalAmount"`
+	TotalAmount    int64                  `json:"total_amount"`
 	Implementation PoolInfoImplementation `json:"implementation"`
 	// APY in percent.
 	Apy      float64 `json:"apy"`
@@ -4491,6 +4539,8 @@ type PoolInfo struct {
 	CycleStart int64 `json:"cycle_start"`
 	// Current nomination cycle ending timestamp.
 	CycleEnd int64 `json:"cycle_end"`
+	// This pool has verified source code or managed by trusted company.
+	Verified bool `json:"verified"`
 }
 
 // GetAddress returns the value of Address.
@@ -4533,6 +4583,11 @@ func (s PoolInfo) GetCycleEnd() int64 {
 	return s.CycleEnd
 }
 
+// GetVerified returns the value of Verified.
+func (s PoolInfo) GetVerified() bool {
+	return s.Verified
+}
+
 // SetAddress sets the value of Address.
 func (s *PoolInfo) SetAddress(val string) {
 	s.Address = val
@@ -4573,7 +4628,10 @@ func (s *PoolInfo) SetCycleEnd(val int64) {
 	s.CycleEnd = val
 }
 
-func (*PoolInfo) stakingPoolInfoRes() {}
+// SetVerified sets the value of Verified.
+func (s *PoolInfo) SetVerified(val bool) {
+	s.Verified = val
+}
 
 type PoolInfoImplementation string
 
@@ -4814,6 +4872,33 @@ func (s *SendMessageReq) SetBoc(val string) {
 	s.Boc = val
 }
 
+type StakingPoolInfoOK struct {
+	Implementation PoolImplementation `json:"implementation"`
+	Pool           PoolInfo           `json:"pool"`
+}
+
+// GetImplementation returns the value of Implementation.
+func (s StakingPoolInfoOK) GetImplementation() PoolImplementation {
+	return s.Implementation
+}
+
+// GetPool returns the value of Pool.
+func (s StakingPoolInfoOK) GetPool() PoolInfo {
+	return s.Pool
+}
+
+// SetImplementation sets the value of Implementation.
+func (s *StakingPoolInfoOK) SetImplementation(val PoolImplementation) {
+	s.Implementation = val
+}
+
+// SetPool sets the value of Pool.
+func (s *StakingPoolInfoOK) SetPool(val PoolInfo) {
+	s.Pool = val
+}
+
+func (*StakingPoolInfoOK) stakingPoolInfoRes() {}
+
 type StakingPoolsOK struct {
 	Pools           []PoolInfo                    `json:"pools"`
 	Implementations StakingPoolsOKImplementations `json:"implementations"`
@@ -4841,51 +4926,15 @@ func (s *StakingPoolsOK) SetImplementations(val StakingPoolsOKImplementations) {
 
 func (*StakingPoolsOK) stakingPoolsRes() {}
 
-type StakingPoolsOKImplementations map[string]StakingPoolsOKImplementationsItem
+type StakingPoolsOKImplementations map[string]PoolImplementation
 
 func (s *StakingPoolsOKImplementations) init() StakingPoolsOKImplementations {
 	m := *s
 	if m == nil {
-		m = map[string]StakingPoolsOKImplementationsItem{}
+		m = map[string]PoolImplementation{}
 		*s = m
 	}
 	return m
-}
-
-type StakingPoolsOKImplementationsItem struct {
-	Name        string `json:"name"`
-	Description string `json:"description"`
-	URL         string `json:"url"`
-}
-
-// GetName returns the value of Name.
-func (s StakingPoolsOKImplementationsItem) GetName() string {
-	return s.Name
-}
-
-// GetDescription returns the value of Description.
-func (s StakingPoolsOKImplementationsItem) GetDescription() string {
-	return s.Description
-}
-
-// GetURL returns the value of URL.
-func (s StakingPoolsOKImplementationsItem) GetURL() string {
-	return s.URL
-}
-
-// SetName sets the value of Name.
-func (s *StakingPoolsOKImplementationsItem) SetName(val string) {
-	s.Name = val
-}
-
-// SetDescription sets the value of Description.
-func (s *StakingPoolsOKImplementationsItem) SetDescription(val string) {
-	s.Description = val
-}
-
-// SetURL sets the value of URL.
-func (s *StakingPoolsOKImplementationsItem) SetURL(val string) {
-	s.URL = val
 }
 
 // Ref: #/components/schemas/StateInit

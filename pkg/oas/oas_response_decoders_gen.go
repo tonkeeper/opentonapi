@@ -4106,7 +4106,7 @@ func decodeStakingPoolInfoResponse(resp *http.Response) (res StakingPoolInfoRes,
 			}
 
 			d := jx.DecodeBytes(b)
-			var response PoolInfo
+			var response StakingPoolInfoOK
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err

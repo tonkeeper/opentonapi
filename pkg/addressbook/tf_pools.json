@@ -1,0 +1,272 @@
+[
+ {
+  "name": "Very First Pool #1",
+  "groupName": "Very First Pool",
+  "address": "Ef8gQpp7pKD9GzBrcr3ju9faPjEWHPerhZ4tFpSiDoDUINxn"
+ },
+ {
+  "name": "Very First Pool #2",
+  "groupName": "Very First Pool",
+  "address": "Ef_dodh2I8BjpvxJIrKG5owo5_C1RZlzkZtXC3HGLuNZE0Sa"
+ },
+ {
+  "name": "Global Net AC Pool #1",
+  "groupName": "Global Net AC Pool",
+  "address": "Ef9Qhifu_o6WiS3JzJEailMuDtlDqmy55eCGDJ5cYSTGD4BW"
+ },
+ {
+  "name": "Global Net AC Pool #2",
+  "groupName": "Global Net AC Pool",
+  "address": "Ef-pcGkDL4qjf44vN8iD8-yrjs-wVWOi5LVQudbDKbukHQvb"
+ },
+ {
+  "name": "Fastnet pool A #1",
+  "groupName": "Fastnet pool A",
+  "address": "Ef9IJWfn0qDrh4S8CBJsZUzAPrxQkH3C_JanVrQWjOZ5LndS"
+ },
+ {
+  "name": "Fastnet pool A #2",
+  "groupName": "Fastnet pool A",
+  "address": "Ef__38zm-M_kTn6OgIs5DKVQy2qnjJIF50xZ203regWrI-yh"
+ },
+ {
+  "name": "Fastnet pool B #1",
+  "groupName": "Fastnet pool B",
+  "address": "Ef8_6eSCSeJyCeLM7uCxYjeirtQ4Zo8OEp0W4HJYJY4IC0zK"
+ },
+ {
+  "name": "Fastnet pool B #2",
+  "groupName": "Fastnet pool B",
+  "address": "Ef_nHR5IUKCBf_qHlIjCsUWuo6bbrh174f_aJfN6zIAnBF9n"
+ },
+ {
+  "name": "HB Pool #1",
+  "groupName": "HB Pool",
+  "address": "Ef8RiUWO6kANDF3FsaIu2o3QCbq6VGWyqZxRRXM8B9mRbIQ_"
+ },
+ {
+  "name": "HB Pool #2",
+  "groupName": "HB Pool",
+  "address": "Ef-8i71cS7pz9fuzQCxRNOIx31EzaTPpmsNluGbzJC6cVGHp"
+ },
+ {
+  "name": "Luca's tonpool #1",
+  "groupName": "Luca's tonpool",
+  "address": "Ef9xDVm0sQ0YkCGscPNaU1eTIR686IFSeLnQPy_C_0P84RrU"
+ },
+ {
+  "name": "Luca's tonpool #2",
+  "groupName": "Luca's tonpool",
+  "address": "Ef8Xw7V-bJjf95k6D3uyzrg5bemAehobVHCqRqjlRZjgAgxG"
+ },
+ {
+  "name": "KoreaTON Pool #1",
+  "groupName": "KoreaTON Pool",
+  "address": "Ef9QA9O2zBmzK4r4PR5774n7u3ZuRTyNAS37qGfcuK5_jJg1"
+ },
+ {
+  "name": "KoreaTON Pool #2",
+  "groupName": "KoreaTON Pool",
+  "address": "Ef-WCNS9bSpx6wN9cusNbyaBVpGatjmaUXWcdiVlxw7wz9ot"
+ },
+ {
+  "name": "DG Pool #1",
+  "groupName": "DG Pool",
+  "address": "Ef81FHdh5LtBrx9x20Iit7B_L-glFfnzOWN41bHDJLNA4y3C"
+ },
+ {
+  "name": "DG Pool #2",
+  "groupName": "DG Pool",
+  "address": "Ef_8zkZm4k4fjv3IaddodfBWBwMk-0TgLuWGQEfaEMm0xHLk"
+ },
+ {
+  "name": "Cryptonic TON #1",
+  "groupName": "Cryptonic TON",
+  "address": "Ef8DEasP8aOZ9Wd-E4TI-0Xt9TOJHRoxb0HRmV14vz-Faw4c"
+ },
+ {
+  "name": "Cryptonic TON #2",
+  "groupName": "Cryptonic TON",
+  "address": "Ef9hqGNdqb0W9GndT8Jlpz_MAvLggV4U3oCbE4fItgn9GQ3t"
+ },
+ {
+  "name": "TON syndrome #1",
+  "groupName": "TON syndrome",
+  "address": "Ef8Q01195TNr875qczfyyY7imy_cQs4wEfMQQPFfMdwqbcIF"
+ },
+ {
+  "name": "TON syndrome #2",
+  "groupName": "TON syndrome",
+  "address": "Ef_dE9rdVt3hNzzWU-sH4educQyTuW-xLgAN-0e3YiWWpF9x"
+ },
+ {
+  "name": "Ultra TON blades #1",
+  "groupName": "Ultra TON blades",
+  "address": "Ef8-Gs62B49bv-rYePwF7fx6nPFUeTDWKbVu1Krimpw1xujW"
+ },
+ {
+  "name": "Ultra TON blades #2",
+  "groupName": "Ultra TON blades",
+  "address": "Ef87wEN4OfYzTFbFDbU76-pqm1QOsJdogCrJEzABRfG0bYaU"
+ },
+ {
+  "name": "Rangers pool #1",
+  "groupName": "Rangers pool",
+  "address": "Ef84bmp5O3DtYjXmdWAYMEBzTPsu-cPMcg51i3Z9bfdI78mv"
+ },
+ {
+  "name": "Rangers pool #2",
+  "groupName": "Rangers pool",
+  "address": "Ef_1qwsc5P_pxid2MH8gnaRvRJAa1kmRy86eq0JC6XWXaBg-"
+ },
+ {
+  "name": "CAT #1",
+  "groupName": "CAT",
+  "address": "Ef9wm_whwjPFe7H4jvP-ODhluiZFm0Tb2Gj-67zqS31hCaWC"
+ },
+ {
+  "name": "CAT #2",
+  "groupName": "CAT",
+  "address": "Ef-BHO0nH49EnLUetZIAkLkssgCyDwcXBnbp22--naUWz8VY"
+ },
+ {
+  "name": "CAT Leo #1",
+  "groupName": "CAT Leo",
+  "address": "Ef8iu8EiNOP2MczVvHseFi-CrGO1C4v6MkSSOgVZcESNGfT7"
+ },
+ {
+  "name": "CAT Leo #2",
+  "groupName": "CAT Leo",
+  "address": "Ef8AeKBMQKW-PB8-RDeyJQSsxQQr5oEwbQeBEwE2BKDiFA_U"
+ },
+ {
+  "name": "ODIN #1",
+  "groupName": "ODIN",
+  "address": "Ef_pD_JqXjRuYNE4-xJy-T0Wwace7ErvAfSPq2_GW9Q2QhXi"
+ },
+ {
+  "name": "CAT Gemini #1",
+  "groupName": "CAT Gemini",
+  "address": "Ef-DxWkExr12iOSi0vJfT5TKCUG9W3-eWInm1yT5oEJISJkl"
+ },
+ {
+  "name": "CAT Gemini #2",
+  "groupName": "CAT Gemini",
+  "address": "Ef8z0gek-K888pl61tyErw96TfnthjV9lZ7UDVFXlad9HEGS"
+ },
+ {
+  "name": "CAT Libra #1",
+  "groupName": "CAT Libra",
+  "address": "Ef98be2ASo4xA_t2Q2VIH0cdpYKylDyfhL3nL7Byjz180VaU"
+ },
+ {
+  "name": "CAT Libra #2",
+  "groupName": "CAT Libra",
+  "address": "Ef8h5pd9_ZuWJOlilBH6a_LOACxl_R6DJbWHhut7QLDLWSgf"
+ },
+ {
+  "name": "ALPHA PRO #1",
+  "groupName": "ALPHA PRO",
+  "address": "Ef_ajx5qE0Js8iYKMRuzQquObl9GNrANOakvCcMwdWaSu0Xb"
+ },
+ {
+  "name": "TonApp pool #1",
+  "groupName": "TonApp pool",
+  "address": "Ef8zS4jd_1n4AvA9SNxpEb77sXG7syWfgqTUIFfsCA-0xsm0"
+ },
+ {
+  "name": "TonApp pool #2",
+  "groupName": "TonApp pool",
+  "address": "Ef_IZXekW6BZDx5kaMdr9bYRJm-gdZJHiLu4XJTt_brHLnFu"
+ },
+ {
+  "name": "Web Capital #1",
+  "groupName": "Web Capital",
+  "address": "Ef8eVB4pGAKMGKGWuWHjqQ79ZM_6o_WfO9N0WP31xO9vyWFp"
+ },
+ {
+  "name": "Web Capital #2",
+  "groupName": "Web Capital",
+  "address": "Ef8DAo76lzTKle7-MNTV7iOLRPPdPgQYV6oUZcmwDn3ioHoU"
+ },
+ {
+  "name": "Sol laranja #1",
+  "groupName": "Sol laranja",
+  "address": "Ef9r9nMn8L_mUxvoNUnlf5vmfm3IbYN0IFLpHYIeLjT7tgbL"
+ },
+ {
+  "name": "Sol laranja #2",
+  "groupName": "Sol laranja",
+  "address": "Ef_77UxbnpRFdaQ6QYBA6GEjJNXN9Dt5KaBJgCUBnEYVBRSW"
+ },
+ {
+  "name": "Vice city blues #1",
+  "groupName": "Vice city blues",
+  "address": "Ef-4MnMJuUUSyiaZWH6bGLQjSH4eKcaLAF9lt7GopkfRP1s-"
+ },
+ {
+  "name": "Vice city blues #2",
+  "groupName": "Vice city blues",
+  "address": "Ef-W-k5dQH642Zl7J5NVM6t1PM8qExGTbX-Y50MFml5tuNxW"
+ },
+ {
+  "name": "BlackCastle #1",
+  "groupName": "BlackCastle",
+  "address": "Ef8UV8c2po5g_13T2SnNGRYMEvx0tZGLCCRk3P-09nbvZDbV"
+ },
+ {
+  "name": "Aruai #1",
+  "groupName": "Aruai",
+  "address": "Ef-OPifyoV5nimEj-g9u1_Z5WzkiySKDxiB2SydAf42amhXL"
+ },
+ {
+  "name": "Aruai #2",
+  "groupName": "Aruai",
+  "address": "Ef8iYtiliIeS9JcCOXbpkBYXiYOlF64fPhmnCgwyAKkQHHZt"
+ },
+ {
+  "name": "Pavel #1",
+  "groupName": "Pavel",
+  "address": "Ef_OYrIEu5DMGU4sC9o64ZKfUdFFRoTeA9XwxIj7nGZBB0_k"
+ },
+ {
+  "name": "Pavel #2",
+  "groupName": "Pavel",
+  "address": "Ef9Pp5I6ct3NvQtMAiMsz1b5n25h5tpGGG89f7XqVrhdw2DE"
+ },
+ {
+  "name": "TonUtils Pool #1",
+  "groupName": "TonUtils Pool",
+  "address": "Ef_X4pRKtgXOXYMOXNgXNRdlhkNKJ9bTKMfqvj6HDIiQG98F"
+ },
+ {
+  "name": "TonUtils Pool #2",
+  "groupName": "TonUtils Pool",
+  "address": "Ef84e7qj_bxNbgbCOYGXwD-LUOCeUcPFEC_cd-7NLofjc067"
+ },
+ {
+  "name": "mypool #1",
+  "groupName": "mypool",
+  "address": "Ef-r2YSWiGAQiKXDqypMly-gykFeFAcPqUXB1XbrV5D3kMav"
+ },
+ {
+  "name": "mypool #2",
+  "groupName": "mypool",
+  "address": "Ef9Xa0Dplm4XgAAy_uv97xvrf5y9RzRzeBcC2L0SWCEMdKFH"
+ },
+ {
+  "name": "The Dogs #1",
+  "groupName": "The Dogs",
+  "address": "Ef_VLBZMy6RXS5CA680o48oqD-SG4fxOHUmVPTkpduysUIiP"
+ },
+ {
+  "name": "The Dogs #2",
+  "groupName": "The Dogs",
+  "address": "Ef8KaPsBIY1_qLf8foAKg4dHVTVM4Kc5AWFwJ_HXSjsgtN7f"
+ },
+ {
+  "name": "Amplifier #1",
+  "groupName": "Amplifier",
+  "address": "Ef8wqS4UJfAKLNtvNUpOskq-_2kD94ShUWvgwfV48mfBaw0B"
+ }
+]

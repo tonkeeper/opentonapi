@@ -15,6 +15,8 @@ import (
 	"github.com/tonkeeper/opentonapi/pkg/blockchain"
 	"github.com/tonkeeper/opentonapi/pkg/chainstate"
 	"github.com/tonkeeper/opentonapi/pkg/config"
+	"github.com/tonkeeper/opentonapi/pkg/i18n"
+
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/opentonapi/pkg/oas"
 	"github.com/tonkeeper/opentonapi/pkg/references"
@@ -112,7 +114,7 @@ func (h Handler) GetAccount(ctx context.Context, params oas.GetAccountParams) (o
 	if err != nil {
 		return &oas.BadRequest{Error: err.Error()}, nil
 	}
-	ab, found := h.addressBook.GetAddressInfoByAddress(accountID.ToRaw())
+	ab, found := h.addressBook.GetAddressInfoByAddress(accountID)
 	if found {
 		info.IsScam = &ab.IsScam
 		if len(ab.Name) > 0 {
@@ -222,6 +224,7 @@ func (h Handler) PoolsByNominators(ctx context.Context, params oas.PoolsByNomina
 			Amount:          w.MemberBalance,
 			PendingDeposit:  w.MemberPendingDeposit,
 			PendingWithdraw: w.MemberPendingWithdraw,
+			ReadyWithdraw:   w.MemberWithdraw,
 		})
 	}
 	return &result, nil
@@ -237,37 +240,94 @@ func (h Handler) StakingPoolInfo(ctx context.Context, params oas.StakingPoolInfo
 		if err != nil {
 			return &oas.InternalError{Error: err.Error()}, nil
 		}
-		return g.Pointer(convertStakingWhalesPool(poolID, w, poolStatus, poolConfig, h.state.GetAPY())), nil
+		return &oas.StakingPoolInfoOK{
+			Implementation: oas.PoolImplementation{
+				Name:        references.WhalesPoolImplementationsName,
+				Description: i18n.T(params.AcceptLanguage.Value, i18n.C{MessageID: "poolImplementationDescription", TemplateData: map[string]interface{}{"Deposit": poolConfig.MinStake / 1_000_000_000}}),
+				URL:         references.WhalesPoolImplementationsURL,
+			},
+			Pool: convertStakingWhalesPool(poolID, w, poolStatus, poolConfig, h.state.GetAPY(), true),
+		}, nil
+	}
+	p, err := h.storage.GetTFPool(ctx, poolID)
+	if err != nil {
+		return &oas.NotFound{Error: "pool not found: " + err.Error()}, nil
 	}
 
-	return &oas.NotFound{Error: "pool not found"}, nil
+	info, _ := h.addressBook.GetTFPoolInfo(p.Address)
+
+	return &oas.StakingPoolInfoOK{
+		Implementation: oas.PoolImplementation{
+			Name:        references.TFPoolImplementationsName,
+			Description: i18n.T(params.AcceptLanguage.Value, i18n.C{MessageID: "poolImplementationDescription", TemplateData: map[string]interface{}{"Deposit": p.MinNominatorStake / 1_000_000_000}}),
+			URL:         references.TFPoolImplementationsURL,
+		},
+		Pool: convertStakingTFPool(p, info, h.state.GetAPY()),
+	}, nil
 }
 
 func (h Handler) StakingPools(ctx context.Context, params oas.StakingPoolsParams) (r oas.StakingPoolsRes, _ error) {
 	var result oas.StakingPoolsOK
+
+	tfPools, err := h.storage.GetTFPools(ctx)
+	if err != nil {
+		return nil, err
+	}
+	var minTF, minWhales int64
+	var availableFor *tongo.AccountID
+	if params.AvailableFor.IsSet() {
+		a, err := tongo.ParseAccountID(params.AvailableFor.Value)
+		if err != nil {
+			return &oas.BadRequest{Error: err.Error()}, nil
+		}
+		availableFor = &a
+	}
+	for _, p := range tfPools {
+		if availableFor != nil && p.Nominators >= p.MaxNominators {
+			continue
+		}
+		info, _ := h.addressBook.GetTFPoolInfo(p.Address)
+		pool := convertStakingTFPool(p, info, h.state.GetAPY())
+		if minTF == 0 || pool.MinStake < minTF {
+			minTF = pool.MinStake
+		}
+		result.Pools = append(result.Pools, pool)
+	}
+
 	for k, w := range references.WhalesPools {
+		if availableFor != nil {
+			_, err = h.storage.GetWhalesPoolMemberInfo(ctx, k, *availableFor)
+			if err != nil && !w.AvailableFor(*availableFor) {
+				continue
+			}
+		}
 		poolConfig, poolStatus, err := h.storage.GetWhalesPoolInfo(ctx, k)
 		if err != nil {
 			continue
 		}
-		result.Pools = append(result.Pools, convertStakingWhalesPool(k, w, poolStatus, poolConfig, h.state.GetAPY()))
+		pool := convertStakingWhalesPool(k, w, poolStatus, poolConfig, h.state.GetAPY(), true)
+		if minWhales == 0 || pool.MinStake < minWhales {
+			minWhales = pool.MinStake
+		}
+		result.Pools = append(result.Pools, pool)
 	}
+
 	slices.SortFunc(result.Pools, func(a, b oas.PoolInfo) bool {
 		return a.Apy > b.Apy
 	})
-	result.SetImplementations(map[string]oas.StakingPoolsOKImplementationsItem{
+	result.SetImplementations(map[string]oas.PoolImplementation{
 		string(oas.PoolInfoImplementationWhales): {
-			Name: "TON Whales",
+			Name: references.WhalesPoolImplementationsName,
 			Description: i18n.T(params.AcceptLanguage.Value, i18n.C{DefaultMessage: &i18n.M{
 				ID:    "poolImplementationDescription",
 				Other: "Minimum deposit {{.Deposit}} TON",
-			}, TemplateData: map[string]interface{}{"Deposit": 50}}),
-			URL: "https://tonwhales.com/staking",
+			}, TemplateData: map[string]interface{}{"Deposit": minWhales / 1_000_000_000}}),
+			URL: references.WhalesPoolImplementationsURL,
 		},
 		string(oas.PoolInfoImplementationTf): {
-			Name:        "TON Foundation",
-			Description: i18n.T(params.AcceptLanguage.Value, i18n.C{MessageID: "poolImplementationDescription", TemplateData: map[string]interface{}{"Deposit": 10000}}),
-			URL:         "https://tonvalidators.org/",
+			Name:        references.TFPoolImplementationsName,
+			Description: i18n.T(params.AcceptLanguage.Value, i18n.C{MessageID: "poolImplementationDescription", TemplateData: map[string]interface{}{"Deposit": minTF / 1_000_000_000}}),
+			URL:         references.TFPoolImplementationsURL,
 		},
 	})
 

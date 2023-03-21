@@ -3,6 +3,7 @@ package addressbook
 import (
 	"encoding/json"
 	"fmt"
+	"golang.org/x/exp/maps"
 	"io"
 	"net/http"
 
@@ -56,30 +57,42 @@ type KnownCollection struct {
 
 // Book holds information about known accounts, jettons, NFT collections manually crafted by the tonkeeper team and the community.
 type Book struct {
-	addresses   map[string]KnownAddress
-	collections map[string]KnownCollection
-	jettons     map[string]KnownJetton
-	dnsCache    map[string]string
+	addresses   map[tongo.AccountID]KnownAddress
+	collections map[tongo.AccountID]KnownCollection
+	jettons     map[tongo.AccountID]KnownJetton
+	tfPools     map[tongo.AccountID]TFPoolInfo
+	dnsCache    map[tongo.AccountID]string
 }
 
-func (b *Book) GetAddressInfoByAddress(rawAddr string) (KnownAddress, bool) {
-	a1, ok := b.addresses[rawAddr]
+type TFPoolInfo struct {
+	Name      string `json:"name"`
+	GroupName string `json:"groupName"`
+	Address   string `json:"address"`
+}
+
+func (b *Book) GetAddressInfoByAddress(a tongo.AccountID) (KnownAddress, bool) {
+	a1, ok := b.addresses[a]
 	if ok {
 		return a1, ok
 	}
-	name, ok := b.dnsCache[rawAddr]
+	name, ok := b.dnsCache[a]
 	a1.Name = name
-	a1.Address = rawAddr
+	a1.Address = a.ToRaw()
 	return a1, ok
 }
 
-func (b *Book) GetCollectionInfoByAddress(rawAddr string) (KnownCollection, bool) {
-	c, ok := b.collections[rawAddr]
+func (b *Book) GetTFPoolInfo(a tongo.AccountID) (TFPoolInfo, bool) {
+	info, ok := b.tfPools[a]
+	return info, ok
+}
+
+func (b *Book) GetCollectionInfoByAddress(a tongo.AccountID) (KnownCollection, bool) {
+	c, ok := b.collections[a]
 	return c, ok
 }
 
-func (b *Book) GetJettonInfoByAddress(rawAddr string) (KnownJetton, bool) {
-	j, ok := b.jettons[rawAddr]
+func (b *Book) GetJettonInfoByAddress(a tongo.AccountID) (KnownJetton, bool) {
+	j, ok := b.jettons[a]
 	if ok {
 		j.Verification = Whitelist
 	} else {
@@ -97,20 +110,22 @@ func (b *Book) AsBook() *Book {
 }
 
 func NewAddressBook(logger *zap.Logger, addressPath, jettonPath, collectionPath string) *Book {
-	addresses := make(map[string]KnownAddress)
-	collections := make(map[string]KnownCollection)
-	jettons := make(map[string]KnownJetton)
+	addresses := make(map[tongo.AccountID]KnownAddress)
+	collections := make(map[tongo.AccountID]KnownCollection)
+	jettons := make(map[tongo.AccountID]KnownJetton)
+	tfPools := make(map[tongo.AccountID]TFPoolInfo)
 
 	addrs, err := downloadJson[KnownAddress](addressPath)
 	if err != nil {
 		logger.Info("fail to load accounts.json")
 	} else {
 		for _, i := range addrs {
-			a, err := convertAddressToRaw(i.Address)
+			a, err := tongo.ParseAccountID(i.Address)
 			if err != nil {
 				continue
 			}
-			i.Address = a
+			i.Address = a.ToRaw()
+
 			addresses[a] = i
 		}
 	}
@@ -119,12 +134,12 @@ func NewAddressBook(logger *zap.Logger, addressPath, jettonPath, collectionPath 
 		logger.Info("fail to load jettons.json")
 	} else {
 		for _, i := range jetts {
-			a, err := convertAddressToRaw(i.Address)
+			a, err := tongo.ParseAccountID(i.Address)
 			if err != nil {
 				continue
 			}
-			i.Address = a
-			jettons[i.Address] = i
+			i.Address = a.ToRaw()
+			jettons[a] = i
 		}
 	}
 	colls, err := downloadJson[KnownCollection](collectionPath)
@@ -132,20 +147,35 @@ func NewAddressBook(logger *zap.Logger, addressPath, jettonPath, collectionPath 
 		logger.Info("fail to load collections.json")
 	} else {
 		for _, i := range colls {
-			a, err := convertAddressToRaw(i.Address)
+			a, err := tongo.ParseAccountID(i.Address)
 			if err != nil {
 				continue
 			}
-			i.Address = a
-			collections[i.Address] = i
+			i.Address = a.ToRaw()
+			collections[a] = i
 		}
 	}
+	for _, v := range getPools(logger) {
+		a, err := tongo.ParseAccountID(v.Address)
+		if err != nil {
+			logger.Error("parse account in pools", zap.Error(err))
+			continue
+		}
+		v.Address = a.ToRaw()
+		tfPools[a] = v
+	}
+
 	return &Book{
 		addresses:   addresses,
 		collections: collections,
 		jettons:     jettons,
-		dnsCache:    map[string]string{},
+		dnsCache:    map[tongo.AccountID]string{},
+		tfPools:     tfPools,
 	}
+}
+
+func (b *Book) TFPools() []tongo.AccountID {
+	return maps.Keys(b.tfPools)
 }
 
 func downloadJson[T any](url string) ([]T, error) {
@@ -166,12 +196,4 @@ func downloadJson[T any](url string) ([]T, error) {
 		return nil, err
 	}
 	return data, nil
-}
-
-func convertAddressToRaw(a string) (string, error) {
-	addr, err := tongo.ParseAccountID(a)
-	if err != nil {
-		return "", err
-	}
-	return addr.ToRaw(), nil
 }

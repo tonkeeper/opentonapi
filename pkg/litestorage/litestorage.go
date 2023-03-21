@@ -24,12 +24,14 @@ type LiteStorage struct {
 	jettonMetaCache         map[string]core.JettonMetadata
 	transactionsIndexByHash map[tongo.Bits256]*core.Transaction
 	blockCache              map[tongo.BlockIDExt]*tlb.Block
+	knownAccounts           map[string][]tongo.AccountID
 }
 
 type Options struct {
 	preloadAccounts []tongo.AccountID
 	addressBook     *addressbook.Book
 	servers         []config.LiteServer
+	tfPools         []tongo.AccountID
 }
 
 func WithPreloadAccounts(a []tongo.AccountID) Option {
@@ -47,6 +49,12 @@ func WithKnownJettons(addressbook *addressbook.Book) Option {
 func WithLiteServers(servers []config.LiteServer) Option {
 	return func(o *Options) {
 		o.servers = servers
+	}
+}
+
+func WithTFPools(pools []tongo.AccountID) Option {
+	return func(o *Options) {
+		o.tfPools = pools
 	}
 }
 
@@ -70,7 +78,9 @@ func NewLiteStorage(log *zap.Logger, opts ...Option) (*LiteStorage, error) {
 		jettonMetaCache:         make(map[string]core.JettonMetadata),
 		transactionsIndexByHash: make(map[tongo.Bits256]*core.Transaction),
 		blockCache:              make(map[tongo.BlockIDExt]*tlb.Block),
+		knownAccounts:           make(map[string][]tongo.AccountID),
 	}
+	l.knownAccounts["tf_pools"] = o.tfPools
 	for _, a := range o.preloadAccounts {
 		l.preloadAccount(a, log)
 	}
