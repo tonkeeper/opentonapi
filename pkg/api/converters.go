@@ -382,3 +382,10 @@ func convertJettonVerification(verificationType addressbook.JettonVerificationTy
 		return oas.JettonVerificationTypeNone, fmt.Errorf("convert jetton verification error: %v", verificationType)
 	}
 }
+
+func rewriteIfNotEmpty(src, dest string) string {
+	if dest != "" {
+		return dest
+	}
+	return src
+}

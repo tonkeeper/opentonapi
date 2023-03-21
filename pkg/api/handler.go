@@ -407,6 +407,13 @@ func (h Handler) GetJettonsBalances(ctx context.Context, params oas.GetJettonsBa
 		if err != nil && !errors.Is(err, core.ErrEntityNotFound) {
 			return &oas.InternalError{Error: err.Error()}, nil
 		}
+		info, ok := h.addressBook.GetJettonInfoByAddress(wallet.JettonAddress)
+		if ok {
+			meta.Name = rewriteIfNotEmpty(meta.Name, info.Name)
+			meta.Description = rewriteIfNotEmpty(meta.Description, info.Description)
+			meta.Image = rewriteIfNotEmpty(meta.Image, info.Image)
+			meta.Symbol = rewriteIfNotEmpty(meta.Symbol, info.Symbol)
+		}
 		m, err := convertToApiJetton(meta, wallet.JettonAddress, h.previewGenerator)
 		if err != nil {
 			return &oas.InternalError{Error: err.Error()}, nil

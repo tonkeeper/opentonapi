@@ -58,10 +58,3 @@ func (s *LiteStorage) GetJettonMasterMetadata(ctx context.Context, master tongo.
 	s.jettonMetaCache[master.ToRaw()] = rawMeta
 	return rawMeta, nil
 }
-
-func rewriteIfNotEmpty(src, dest string) string {
-	if dest != "" {
-		return dest
-	}
-	return src
-}
