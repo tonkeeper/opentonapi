@@ -1,6 +1,7 @@
 package litestorage
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"github.com/tonkeeper/opentonapi/pkg/core"
@@ -75,6 +76,15 @@ func (s *LiteStorage) GetTFPool(ctx context.Context, pool tongo.AccountID) (core
 	if !ok {
 		return core.TFPool{}, fmt.Errorf("invali type %v", t)
 	}
+	state, err := s.client.GetAccountState(ctx, pool)
+	if err != nil {
+		return core.TFPool{}, err
+	}
+	code := state.Account.Account.Storage.State.AccountActive.StateInit.Code.Value.Value
+	hash, err := code.Hash()
+	if err != nil {
+		return core.TFPool{}, err
+	}
 	return core.TFPool{
 		Address:           pool,
 		TotalAmount:       poolData.StakeAmountSent,
@@ -83,6 +93,7 @@ func (s *LiteStorage) GetTFPool(ctx context.Context, pool tongo.AccountID) (core
 		StakeAt:           poolData.StakeAt,
 		Nominators:        int(poolData.NominatorsCount),
 		MaxNominators:     int(poolData.MaxNominatorsCount),
+		VerifiedSources:   bytes.Equal(hash, references.TFPoolCodeHash[:]),
 	}, nil
 }
 func (s *LiteStorage) GetTFPools(ctx context.Context) ([]core.TFPool, error) {

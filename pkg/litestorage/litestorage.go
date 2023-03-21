@@ -58,7 +58,7 @@ func NewLiteStorage(log *zap.Logger, opts ...Option) (*LiteStorage, error) {
 	var err error
 	var client *liteapi.Client
 	if len(o.servers) == 0 {
-		log.Warn("USE PUBLIC CONFIG! BE CAREFUL!")
+		log.Warn("USING PUBLIC CONFIG! BE CAREFUL!")
 		client, err = liteapi.NewClientWithDefaultMainnet()
 	} else {
 		client, err = liteapi.NewClient(liteapi.WithLiteServers(o.servers))
