@@ -20,7 +20,7 @@ import (
 
 type LiteStorage struct {
 	client                  *liteapi.Client
-	AddressBook             *addressbook.Book
+	addressBook             *addressbook.Book
 	transactionsIndex       map[tongo.AccountID][]*core.Transaction
 	jettonMetaCache         map[string]tongo.JettonMetadata
 	transactionsIndexByHash map[tongo.Bits256]*core.Transaction
@@ -83,10 +83,12 @@ func NewLiteStorage(log *zap.Logger, opts ...Option) (*LiteStorage, error) {
 	if err != nil {
 		return nil, err
 	}
-
+	if o.addressBook == nil {
+		return nil, errors.New("address book is not configured")
+	}
 	l := &LiteStorage{
 		client:                  client,
-		AddressBook:             o.addressBook,
+		addressBook:             o.addressBook,
 		transactionsIndex:       make(map[tongo.AccountID][]*core.Transaction),
 		jettonMetaCache:         make(map[string]tongo.JettonMetadata),
 		transactionsIndexByHash: make(map[tongo.Bits256]*core.Transaction),

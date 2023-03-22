@@ -407,6 +407,12 @@ func (h Handler) GetJettonsBalances(ctx context.Context, params oas.GetJettonsBa
 		if err != nil && !errors.Is(err, core.ErrEntityNotFound) {
 			return &oas.InternalError{Error: err.Error()}, nil
 		}
+		if errors.Is(err, core.ErrEntityNotFound) {
+			meta = tongo.JettonMetadata{
+				Name:  "Unknown",
+				Image: "https://ton.ams3.digitaloceanspaces.com/token-placeholder-288.png",
+			}
+		}
 		info, ok := h.addressBook.GetJettonInfoByAddress(wallet.JettonAddress)
 		if ok {
 			meta.Name = rewriteIfNotEmpty(meta.Name, info.Name)

@@ -2,7 +2,6 @@ package litestorage
 
 import (
 	"context"
-	"errors"
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
@@ -11,7 +10,7 @@ import (
 func (s *LiteStorage) GetJettonWalletsByOwnerAddress(ctx context.Context, address tongo.AccountID) ([]core.JettonWallet, error) {
 	wallets := []core.JettonWallet{}
 
-	knownJettons := s.AddressBook.GetKnownJettons()
+	knownJettons := s.addressBook.GetKnownJettons()
 	for _, jetton := range knownJettons {
 		jettonAddress, _ := tongo.ParseAccountID(jetton.Address)
 		_, result, err := abi.GetWalletAddress(ctx, s.client, jettonAddress, address.ToMsgAddress())
@@ -44,15 +43,7 @@ func (s *LiteStorage) GetJettonMasterMetadata(ctx context.Context, master tongo.
 		return meta, nil
 	}
 	rawMeta, err := s.client.GetJettonData(ctx, master)
-	if errors.Is(err, core.ErrEntityNotFound) {
-		if !ok {
-			return tongo.JettonMetadata{}, err
-		}
-		rawMeta = tongo.JettonMetadata{
-			Name:  "Unknown",
-			Image: "https://ton.ams3.digitaloceanspaces.com/token-placeholder-288.png",
-		}
-	} else if err != nil {
+	if err != nil {
 		return tongo.JettonMetadata{}, err
 	}
 	s.jettonMetaCache[master.ToRaw()] = rawMeta
