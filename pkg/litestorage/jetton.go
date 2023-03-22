@@ -10,10 +10,8 @@ import (
 func (s *LiteStorage) GetJettonWalletsByOwnerAddress(ctx context.Context, address tongo.AccountID) ([]core.JettonWallet, error) {
 	wallets := []core.JettonWallet{}
 
-	knownJettons := s.addressBook.GetKnownJettons()
-	for _, jetton := range knownJettons {
-		jettonAddress, _ := tongo.ParseAccountID(jetton.Address)
-		_, result, err := abi.GetWalletAddress(ctx, s.client, jettonAddress, address.ToMsgAddress())
+	for _, jetton := range s.knownAccounts["jettons"] {
+		_, result, err := abi.GetWalletAddress(ctx, s.client, jetton, address.ToMsgAddress())
 		if err != nil {
 			continue
 		}
@@ -27,7 +25,7 @@ func (s *LiteStorage) GetJettonWalletsByOwnerAddress(ctx context.Context, addres
 			continue
 		}
 		jettonWallet := result.(core.JettonWallet)
-		if jettonWallet.Address != jettonAddress {
+		if jettonWallet.Address != jetton {
 			continue
 		}
 

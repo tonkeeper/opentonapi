@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/tonkeeper/opentonapi/pkg/addressbook"
 	"github.com/tonkeeper/tongo/config"
 	"time"
 
@@ -20,7 +19,6 @@ import (
 
 type LiteStorage struct {
 	client                  *liteapi.Client
-	addressBook             *addressbook.Book
 	transactionsIndex       map[tongo.AccountID][]*core.Transaction
 	jettonMetaCache         map[string]tongo.JettonMetadata
 	transactionsIndexByHash map[tongo.Bits256]*core.Transaction
@@ -30,9 +28,9 @@ type LiteStorage struct {
 
 type Options struct {
 	preloadAccounts []tongo.AccountID
-	addressBook     *addressbook.Book
 	servers         []config.LiteServer
 	tfPools         []tongo.AccountID
+	jettons         []tongo.AccountID
 }
 
 func WithPreloadAccounts(a []tongo.AccountID) Option {
@@ -41,9 +39,9 @@ func WithPreloadAccounts(a []tongo.AccountID) Option {
 	}
 }
 
-func WithKnownJettons(addressbook *addressbook.Book) Option {
+func WithKnownJettons(a []tongo.AccountID) Option {
 	return func(o *Options) {
-		o.addressBook = addressbook
+		o.jettons = a
 	}
 }
 
@@ -56,12 +54,6 @@ func WithLiteServers(servers []config.LiteServer) Option {
 func WithTFPools(pools []tongo.AccountID) Option {
 	return func(o *Options) {
 		o.tfPools = pools
-	}
-}
-
-func WithAddressBook(book *addressbook.Book) Option {
-	return func(o *Options) {
-		o.addressBook = book
 	}
 }
 
@@ -83,12 +75,9 @@ func NewLiteStorage(log *zap.Logger, opts ...Option) (*LiteStorage, error) {
 	if err != nil {
 		return nil, err
 	}
-	if o.addressBook == nil {
-		return nil, errors.New("address book is not configured")
-	}
+
 	l := &LiteStorage{
 		client:                  client,
-		addressBook:             o.addressBook,
 		transactionsIndex:       make(map[tongo.AccountID][]*core.Transaction),
 		jettonMetaCache:         make(map[string]tongo.JettonMetadata),
 		transactionsIndexByHash: make(map[tongo.Bits256]*core.Transaction),
@@ -96,6 +85,7 @@ func NewLiteStorage(log *zap.Logger, opts ...Option) (*LiteStorage, error) {
 		knownAccounts:           make(map[string][]tongo.AccountID),
 	}
 	l.knownAccounts["tf_pools"] = o.tfPools
+	l.knownAccounts["jettons"] = o.jettons
 	for _, a := range o.preloadAccounts {
 		l.preloadAccount(a, log)
 	}
