@@ -13,4 +13,5 @@ type addressBook interface {
 	GetCollectionInfoByAddress(a tongo.AccountID) (addressbook.KnownCollection, bool)
 	GetJettonInfoByAddress(a tongo.AccountID) (addressbook.KnownJetton, bool)
 	GetTFPoolInfo(a tongo.AccountID) (addressbook.TFPoolInfo, bool)
+	GetKnownJettons() map[tongo.AccountID]addressbook.KnownJetton
 }

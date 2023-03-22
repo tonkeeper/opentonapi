@@ -2,10 +2,10 @@ package main
 
 import (
 	"fmt"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/tonkeeper/opentonapi/pkg/addressbook"
 	"net/http"
 
-	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"go.uber.org/zap"
 
 	"github.com/tonkeeper/opentonapi/pkg/api"
@@ -20,11 +20,10 @@ func main() {
 	log := app.Logger(cfg.App.LogLevel)
 	book := addressbook.NewAddressBook(log, config.AddressPath, config.JettonPath, config.CollectionPath)
 
-	storage, err := litestorage.NewLiteStorage(log, litestorage.WithPreloadAccounts(cfg.App.Accounts), litestorage.WithTFPools(book.TFPools()))
+	storage, err := litestorage.NewLiteStorage(log, litestorage.WithPreloadAccounts(cfg.App.Accounts), litestorage.WithTFPools(book.TFPools()), litestorage.WithAddressBook(book))
 	if err != nil {
 		log.Fatal("storage init", zap.Error(err))
 	}
-
 	h, err := api.NewHandler(log, api.WithStorage(storage), api.WithAddressBook(book))
 	if err != nil {
 		log.Fatal("failed to create api handler", zap.Error(err))

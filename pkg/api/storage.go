@@ -2,7 +2,6 @@ package api
 
 import (
 	"context"
-
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
 
@@ -36,6 +35,9 @@ type storage interface {
 		onlyVerified bool,
 		limit, offset int,
 	) ([]tongo.AccountID, error)
+
+	GetJettonWalletsByOwnerAddress(ctx context.Context, address tongo.AccountID) ([]core.JettonWallet, error)
+	GetJettonMasterMetadata(ctx context.Context, master tongo.AccountID) (tongo.JettonMetadata, error)
 }
 
 type chainState interface {

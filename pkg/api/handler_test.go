@@ -29,7 +29,7 @@ func TestHandler_GetRawAccount(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			logger, _ := zap.NewDevelopment()
-			liteStorage, err := litestorage.NewLiteStorage(logger)
+			liteStorage, err := litestorage.NewLiteStorage(logger, litestorage.WithAddressBook(createEmptyAddressBook()))
 			require.Nil(t, err)
 			h := Handler{
 				storage: liteStorage,
@@ -60,7 +60,8 @@ func TestHandler_GetAccount(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			logger, _ := zap.NewDevelopment()
-			liteStorage, err := litestorage.NewLiteStorage(logger)
+
+			liteStorage, err := litestorage.NewLiteStorage(logger, litestorage.WithAddressBook(createEmptyAddressBook()))
 			require.Nil(t, err)
 			h := Handler{
 				addressBook: addressbook.NewAddressBook(logger, config.AddressPath, config.JettonPath, config.CollectionPath),
@@ -98,7 +99,7 @@ func TestHandler_GetTransactions(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			logger, _ := zap.NewDevelopment()
-			liteStorage, err := litestorage.NewLiteStorage(logger)
+			liteStorage, err := litestorage.NewLiteStorage(logger, litestorage.WithAddressBook(createEmptyAddressBook()))
 			require.Nil(t, err)
 			h := Handler{
 				storage: liteStorage,
@@ -115,4 +116,8 @@ func TestHandler_GetTransactions(t *testing.T) {
 			require.Equal(t, tt.wantTxHashes, txHashes)
 		})
 	}
+}
+
+func createEmptyAddressBook() *addressbook.Book {
+	return &addressbook.Book{} // if need change empty address book to real
 }

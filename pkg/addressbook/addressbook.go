@@ -101,6 +101,10 @@ func (b *Book) GetJettonInfoByAddress(a tongo.AccountID) (KnownJetton, bool) {
 	return j, ok
 }
 
+func (b *Book) GetKnownJettons() map[tongo.AccountID]KnownJetton {
+	return b.jettons
+}
+
 func NewAddressBook(logger *zap.Logger, addressPath, jettonPath, collectionPath string) *Book {
 	addresses := make(map[tongo.AccountID]KnownAddress)
 	collections := make(map[tongo.AccountID]KnownCollection)

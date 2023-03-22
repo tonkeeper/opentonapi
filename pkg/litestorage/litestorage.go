@@ -4,9 +4,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"time"
-
+	"github.com/tonkeeper/opentonapi/pkg/addressbook"
 	"github.com/tonkeeper/tongo/config"
+	"time"
 
 	retry "github.com/avast/retry-go"
 	"go.uber.org/zap"
@@ -20,7 +20,9 @@ import (
 
 type LiteStorage struct {
 	client                  *liteapi.Client
+	addressBook             *addressbook.Book
 	transactionsIndex       map[tongo.AccountID][]*core.Transaction
+	jettonMetaCache         map[string]tongo.JettonMetadata
 	transactionsIndexByHash map[tongo.Bits256]*core.Transaction
 	blockCache              map[tongo.BlockIDExt]*tlb.Block
 	knownAccounts           map[string][]tongo.AccountID
@@ -28,6 +30,7 @@ type LiteStorage struct {
 
 type Options struct {
 	preloadAccounts []tongo.AccountID
+	addressBook     *addressbook.Book
 	servers         []config.LiteServer
 	tfPools         []tongo.AccountID
 }
@@ -35,6 +38,12 @@ type Options struct {
 func WithPreloadAccounts(a []tongo.AccountID) Option {
 	return func(o *Options) {
 		o.preloadAccounts = a
+	}
+}
+
+func WithKnownJettons(addressbook *addressbook.Book) Option {
+	return func(o *Options) {
+		o.addressBook = addressbook
 	}
 }
 
@@ -47,6 +56,12 @@ func WithLiteServers(servers []config.LiteServer) Option {
 func WithTFPools(pools []tongo.AccountID) Option {
 	return func(o *Options) {
 		o.tfPools = pools
+	}
+}
+
+func WithAddressBook(book *addressbook.Book) Option {
+	return func(o *Options) {
+		o.addressBook = book
 	}
 }
 
@@ -68,10 +83,14 @@ func NewLiteStorage(log *zap.Logger, opts ...Option) (*LiteStorage, error) {
 	if err != nil {
 		return nil, err
 	}
-
+	if o.addressBook == nil {
+		return nil, errors.New("address book is not configured")
+	}
 	l := &LiteStorage{
 		client:                  client,
+		addressBook:             o.addressBook,
 		transactionsIndex:       make(map[tongo.AccountID][]*core.Transaction),
+		jettonMetaCache:         make(map[string]tongo.JettonMetadata),
 		transactionsIndexByHash: make(map[tongo.Bits256]*core.Transaction),
 		blockCache:              make(map[tongo.BlockIDExt]*tlb.Block),
 		knownAccounts:           make(map[string][]tongo.AccountID),
