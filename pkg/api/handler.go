@@ -284,7 +284,8 @@ func (h Handler) StakingPools(ctx context.Context, params oas.StakingPoolsParams
 		availableFor = &a
 	}
 	for _, p := range tfPools {
-		if availableFor != nil && p.Nominators >= p.MaxNominators {
+		if availableFor != nil && (p.Nominators >= p.MaxNominators || //hide nominators without slots
+			p.MinNominatorStake < 10_000_000_000_000) { //hide nominators with unsafe minimal stake
 			continue
 		}
 		info, _ := h.addressBook.GetTFPoolInfo(p.Address)
