@@ -4559,6 +4559,10 @@ type PoolInfo struct {
 	CycleEnd int64 `json:"cycle_end"`
 	// This pool has verified source code or managed by trusted company.
 	Verified bool `json:"verified"`
+	// Current number of nominators.
+	CurrentNominators int `json:"current_nominators"`
+	// Maximum number of nominators.
+	MaxNominators int `json:"max_nominators"`
 }
 
 // GetAddress returns the value of Address.
@@ -4606,6 +4610,16 @@ func (s PoolInfo) GetVerified() bool {
 	return s.Verified
 }
 
+// GetCurrentNominators returns the value of CurrentNominators.
+func (s PoolInfo) GetCurrentNominators() int {
+	return s.CurrentNominators
+}
+
+// GetMaxNominators returns the value of MaxNominators.
+func (s PoolInfo) GetMaxNominators() int {
+	return s.MaxNominators
+}
+
 // SetAddress sets the value of Address.
 func (s *PoolInfo) SetAddress(val string) {
 	s.Address = val
@@ -4649,6 +4663,16 @@ func (s *PoolInfo) SetCycleEnd(val int64) {
 // SetVerified sets the value of Verified.
 func (s *PoolInfo) SetVerified(val bool) {
 	s.Verified = val
+}
+
+// SetCurrentNominators sets the value of CurrentNominators.
+func (s *PoolInfo) SetCurrentNominators(val int) {
+	s.CurrentNominators = val
+}
+
+// SetMaxNominators sets the value of MaxNominators.
+func (s *PoolInfo) SetMaxNominators(val int) {
+	s.MaxNominators = val
 }
 
 type PoolInfoImplementation string

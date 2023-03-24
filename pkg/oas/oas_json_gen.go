@@ -9714,18 +9714,30 @@ func (s PoolInfo) encodeFields(e *jx.Encoder) {
 		e.FieldStart("verified")
 		e.Bool(s.Verified)
 	}
+	{
+
+		e.FieldStart("current_nominators")
+		e.Int(s.CurrentNominators)
+	}
+	{
+
+		e.FieldStart("max_nominators")
+		e.Int(s.MaxNominators)
+	}
 }
 
-var jsonFieldsNameOfPoolInfo = [9]string{
-	0: "address",
-	1: "name",
-	2: "total_amount",
-	3: "implementation",
-	4: "apy",
-	5: "min_stake",
-	6: "cycle_start",
-	7: "cycle_end",
-	8: "verified",
+var jsonFieldsNameOfPoolInfo = [11]string{
+	0:  "address",
+	1:  "name",
+	2:  "total_amount",
+	3:  "implementation",
+	4:  "apy",
+	5:  "min_stake",
+	6:  "cycle_start",
+	7:  "cycle_end",
+	8:  "verified",
+	9:  "current_nominators",
+	10: "max_nominators",
 }
 
 // Decode decodes PoolInfo from json.
@@ -9843,6 +9855,30 @@ func (s *PoolInfo) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"verified\"")
 			}
+		case "current_nominators":
+			requiredBitSet[1] |= 1 << 1
+			if err := func() error {
+				v, err := d.Int()
+				s.CurrentNominators = int(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"current_nominators\"")
+			}
+		case "max_nominators":
+			requiredBitSet[1] |= 1 << 2
+			if err := func() error {
+				v, err := d.Int()
+				s.MaxNominators = int(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"max_nominators\"")
+			}
 		default:
 			return d.Skip()
 		}
@@ -9854,7 +9890,7 @@ func (s *PoolInfo) Decode(d *jx.Decoder) error {
 	var failures []validate.FieldError
 	for i, mask := range [2]uint8{
 		0b11111111,
-		0b00000001,
+		0b00000111,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.

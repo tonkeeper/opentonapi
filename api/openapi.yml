@@ -2570,6 +2570,8 @@ components:
         - cycle_start
         - cycle_end
         - verified
+        - current_nominators
+        - max_nominators
       properties:
         address:
           type: string
@@ -2607,6 +2609,14 @@ components:
           type: boolean
           example: true
           description: this pool has verified source code or managed by trusted company
+        current_nominators:
+          type: integer
+          example: 10
+          description: current number of nominators
+        max_nominators:
+          type: integer
+          example: 100
+          description: maximum number of nominators
     PoolImplementation:
       type: object
       required:
