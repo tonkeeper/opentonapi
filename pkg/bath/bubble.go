@@ -59,7 +59,7 @@ func FromTrace(trace *core.Trace) *Bubble {
 	btx := BubbleTx{
 		success:  trace.Success,
 		account:  trace.Account,
-		external: trace.InMsg == nil || trace.InMsg.IsExtenal(),
+		external: trace.InMsg == nil || trace.InMsg.IsExternal(),
 	}
 	if trace.InMsg != nil {
 		btx.bounce = trace.InMsg.Bounce

@@ -184,3 +184,7 @@ func (s *LiteStorage) searchTxInCache(a tongo.AccountID, lt uint64) *core.Transa
 func (s *LiteStorage) GetStorageProviders(ctx context.Context) ([]core.StorageProvider, error) {
 	return nil, errors.New("not implemented")
 }
+
+func (s *LiteStorage) RunSmcMethod(ctx context.Context, id tongo.AccountID, method string, stack tlb.VmStack) (uint32, tlb.VmStack, error) {
+	return s.client.RunSmcMethod(ctx, id, method, stack)
+}

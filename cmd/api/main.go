@@ -30,7 +30,7 @@ func main() {
 	if err != nil {
 		log.Fatal("storage init", zap.Error(err))
 	}
-	h, err := api.NewHandler(log, api.WithStorage(storage), api.WithAddressBook(book))
+	h, err := api.NewHandler(log, api.WithStorage(storage), api.WithAddressBook(book), api.WithExecutor(storage))
 	if err != nil {
 		log.Fatal("failed to create api handler", zap.Error(err))
 	}

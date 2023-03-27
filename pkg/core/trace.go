@@ -6,12 +6,12 @@ type Trace struct {
 }
 
 func (t *Trace) InProgress() bool {
-	return t.countUncomplited() != 0
+	return t.countUncompleted() != 0
 }
-func (t *Trace) countUncomplited() int {
+func (t *Trace) countUncompleted() int {
 	c := len(t.OutMsgs) //todo: not count externals
 	for _, st := range t.Children {
-		c += st.countUncomplited()
+		c += st.countUncompleted()
 	}
 	return c
 }

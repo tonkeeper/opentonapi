@@ -110,7 +110,7 @@ type MessageID struct {
 	Destination *tongo.AccountID
 }
 
-func (m MessageID) IsExtenal() bool {
+func (m MessageID) IsExternal() bool {
 	return m.Source == nil
 }
 

@@ -19,6 +19,9 @@ GET {{host}}/v2/staking/pools?available_for=0:48fb0195a7fc7454512377b9bd704503de
 Accept-Language: ru
 
 ###
+GET {{host}}/v2/blockchain/accounts/EQDw41DE6TProVIyDIeMWpx4SJutvd8hYUHRQjtR2tSfxz8q/methods/get_nft_data
+
+###
 GET {{host}}/v2/nfts/EQDw41DE6TProVIyDIeMWpx4SJutvd8hYUHRQjtR2tSfxz8q
 
 ###

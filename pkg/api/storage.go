@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
+	"github.com/tonkeeper/tongo/tlb"
 
 	"github.com/tonkeeper/opentonapi/pkg/core"
 )
@@ -42,4 +43,8 @@ type storage interface {
 
 type chainState interface {
 	GetAPY() float64
+}
+
+type executor interface {
+	RunSmcMethod(context.Context, tongo.AccountID, string, tlb.VmStack) (uint32, tlb.VmStack, error)
 }

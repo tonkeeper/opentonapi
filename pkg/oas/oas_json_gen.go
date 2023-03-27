@@ -8656,41 +8656,6 @@ func (s *OptEmulateMessageReq) UnmarshalJSON(data []byte) error {
 	return s.Decode(d)
 }
 
-// Encode encodes int as json.
-func (o OptInt) Encode(e *jx.Encoder) {
-	if !o.Set {
-		return
-	}
-	e.Int(int(o.Value))
-}
-
-// Decode decodes int from json.
-func (o *OptInt) Decode(d *jx.Decoder) error {
-	if o == nil {
-		return errors.New("invalid: unable to decode OptInt to nil")
-	}
-	o.Set = true
-	v, err := d.Int()
-	if err != nil {
-		return err
-	}
-	o.Value = int(v)
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s OptInt) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *OptInt) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
 // Encode encodes int32 as json.
 func (o OptInt32) Encode(e *jx.Encoder) {
 	if !o.Set {
@@ -13301,9 +13266,9 @@ func (s TvmStackRecord) encodeFields(e *jx.Encoder) {
 		}
 	}
 	{
-		if s.Int.Set {
-			e.FieldStart("int")
-			s.Int.Encode(e)
+		if s.Num.Set {
+			e.FieldStart("num")
+			s.Num.Encode(e)
 		}
 	}
 	{
@@ -13322,7 +13287,7 @@ var jsonFieldsNameOfTvmStackRecord = [5]string{
 	0: "type",
 	1: "cell",
 	2: "slice",
-	3: "int",
+	3: "num",
 	4: "tuple",
 }
 
@@ -13365,15 +13330,15 @@ func (s *TvmStackRecord) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"slice\"")
 			}
-		case "int":
+		case "num":
 			if err := func() error {
-				s.Int.Reset()
-				if err := s.Int.Decode(d); err != nil {
+				s.Num.Reset()
+				if err := s.Num.Decode(d); err != nil {
 					return err
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"int\"")
+				return errors.Wrap(err, "decode field \"num\"")
 			}
 		case "tuple":
 			if err := func() error {
@@ -13466,8 +13431,8 @@ func (s *TvmStackRecordType) Decode(d *jx.Decoder) error {
 	switch TvmStackRecordType(v) {
 	case TvmStackRecordTypeCell:
 		*s = TvmStackRecordTypeCell
-	case TvmStackRecordTypeInt:
-		*s = TvmStackRecordTypeInt
+	case TvmStackRecordTypeNum:
+		*s = TvmStackRecordTypeNum
 	case TvmStackRecordTypeNan:
 		*s = TvmStackRecordTypeNan
 	case TvmStackRecordTypeNull:

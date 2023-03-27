@@ -1377,7 +1377,7 @@ func (s TvmStackRecordType) Validate() error {
 	switch s {
 	case "cell":
 		return nil
-	case "int":
+	case "num":
 		return nil
 	case "nan":
 		return nil

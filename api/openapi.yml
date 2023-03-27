@@ -1603,7 +1603,7 @@ components:
           example: "cell"
           enum:
             - cell
-            - int
+            - num
             - nan
             - "null"
             - tuple
@@ -1613,8 +1613,9 @@ components:
         slice:
           type: string
           example: ""
-        int:
-          type: integer
+        num:
+          type: string
+          example: ""
         tuple:
           type: array
           example: []

@@ -46,7 +46,7 @@ func (s *LiteStorage) findRoot(ctx context.Context, tx *core.Transaction) (*core
 	if tx == nil {
 		return nil, fmt.Errorf("can't find root of nil transaction")
 	}
-	if tx.InMsg == nil || tx.InMsg.IsExtenal() || tx.InMsg.IsEmission() {
+	if tx.InMsg == nil || tx.InMsg.IsExternal() || tx.InMsg.IsEmission() {
 		return tx, nil
 	}
 	var err error

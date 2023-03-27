@@ -3,8 +3,10 @@ package api
 import (
 	"context"
 	"encoding/base64"
+	"fmt"
 	"github.com/tonkeeper/opentonapi/pkg/bath"
 	"github.com/tonkeeper/opentonapi/pkg/image"
+	"github.com/tonkeeper/tongo/abi"
 	"go.uber.org/zap"
 	"golang.org/x/exp/slices"
 
@@ -32,6 +34,7 @@ type Handler struct {
 	state            chainState
 	msgSender        messageSender
 	previewGenerator previewGenerator
+	executor         executor
 }
 
 // Options configures behavior of a Handler instance.
@@ -41,6 +44,7 @@ type Options struct {
 	addressBook      addressBook
 	msgSender        messageSender
 	previewGenerator previewGenerator
+	executor         executor
 }
 
 type Option func(o *Options)
@@ -74,6 +78,12 @@ func WithPreviewGenerator(previewGenerator previewGenerator) Option {
 	}
 }
 
+func WithExecutor(e executor) Option {
+	return func(o *Options) {
+		o.executor = e
+	}
+}
+
 func NewHandler(logger *zap.Logger, opts ...Option) (*Handler, error) {
 	options := &Options{}
 	for _, o := range opts {
@@ -98,12 +108,16 @@ func NewHandler(logger *zap.Logger, opts ...Option) (*Handler, error) {
 	if options.previewGenerator == nil {
 		options.previewGenerator = image.NewImgGenerator()
 	}
+	if options.executor == nil {
+		return nil, fmt.Errorf("executor is not configured")
+	}
 	return &Handler{
 		storage:          options.storage,
 		state:            options.chainState,
 		addressBook:      options.addressBook,
 		msgSender:        options.msgSender,
 		previewGenerator: options.previewGenerator,
+		executor:         options.executor,
 	}, nil
 }
 
@@ -467,4 +481,36 @@ func (h Handler) GetEvent(ctx context.Context, params oas.GetEventParams) (oas.G
 		event.Fees[i] = convertFees(f)
 	}
 	return &event, nil
+}
+
+func (h Handler) ExecGetMethod(ctx context.Context, params oas.ExecGetMethodParams) (oas.ExecGetMethodRes, error) {
+	id, err := tongo.ParseAccountID(params.AccountID)
+	if err != nil {
+		return &oas.BadRequest{Error: err.Error()}, nil
+	}
+	exitCode, stack, err := h.executor.RunSmcMethod(ctx, id, params.MethodName, nil)
+	if err != nil {
+		return &oas.InternalError{Error: err.Error()}, nil
+	}
+	result := oas.MethodExecutionResult{
+		Success:  exitCode == 0 || exitCode == 1,
+		ExitCode: int(exitCode),
+		Stack:    make([]oas.TvmStackRecord, 0, len(stack)),
+	}
+	for i := range stack {
+		value, err := convertTvmStackValue(stack[i])
+		if err != nil {
+			return &oas.InternalError{Error: err.Error()}, nil
+		}
+		result.Stack = append(result.Stack, value)
+	}
+	for _, decoder := range abi.KnownGetMethodsDecoder[params.MethodName] {
+		_, v, err := decoder(stack)
+		if err == nil {
+			result.SetDecoded(oas.NewOptMethodExecutionResultDecoded(anyToJSONRawMap(v)))
+			break
+		}
+	}
+
+	return &result, nil
 }
