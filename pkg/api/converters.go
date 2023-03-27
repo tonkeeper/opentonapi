@@ -317,6 +317,7 @@ func convertToAccount(info *core.AccountInfo) oas.Account {
 		LastActivity: info.Account.LastActivityTime,
 		Status:       info.Account.Status,
 		Interfaces:   info.Account.Interfaces,
+		GetMethods:   info.Account.GetMethods,
 	}
 	if info.Name != nil {
 		acc.Name = oas.NewOptString(*info.Name)
@@ -476,7 +477,6 @@ func convertFees(fee bath.Fee) oas.Fee {
 }
 
 func convertTvmStackValue(v tlb.VmStackValue) (oas.TvmStackRecord, error) {
-	//	VmStkSlice   VmCellSlice   `tlbSumType:"vm_stk_slice#04"`
 	//	VmStkTuple   VmStkTuple    `tlbSumType:"vm_stk_tuple#07"`
 	switch v.SumType {
 	case "VmStkNull":

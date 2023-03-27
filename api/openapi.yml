@@ -1537,6 +1537,7 @@ components:
         - balance
         - status
         - last_activity
+        - get_methods
       properties:
         address:
           type: string
@@ -1570,6 +1571,12 @@ components:
         memo_required:
           type: boolean
           example: true
+        get_methods:
+          type: array
+          items:
+            type: string
+          example: ['get_item_data']
+
 
     MethodExecutionResult:
       type: object

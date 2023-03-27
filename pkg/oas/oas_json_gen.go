@@ -117,9 +117,18 @@ func (s Account) encodeFields(e *jx.Encoder) {
 			s.MemoRequired.Encode(e)
 		}
 	}
+	{
+
+		e.FieldStart("get_methods")
+		e.ArrStart()
+		for _, elem := range s.GetMethods {
+			e.Str(elem)
+		}
+		e.ArrEnd()
+	}
 }
 
-var jsonFieldsNameOfAccount = [9]string{
+var jsonFieldsNameOfAccount = [10]string{
 	0: "address",
 	1: "balance",
 	2: "last_activity",
@@ -129,6 +138,7 @@ var jsonFieldsNameOfAccount = [9]string{
 	6: "is_scam",
 	7: "icon",
 	8: "memo_required",
+	9: "get_methods",
 }
 
 // Decode decodes Account from json.
@@ -247,6 +257,26 @@ func (s *Account) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"memo_required\"")
 			}
+		case "get_methods":
+			requiredBitSet[1] |= 1 << 1
+			if err := func() error {
+				s.GetMethods = make([]string, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem string
+					v, err := d.Str()
+					elem = string(v)
+					if err != nil {
+						return err
+					}
+					s.GetMethods = append(s.GetMethods, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"get_methods\"")
+			}
 		default:
 			return d.Skip()
 		}
@@ -258,7 +288,7 @@ func (s *Account) Decode(d *jx.Decoder) error {
 	var failures []validate.FieldError
 	for i, mask := range [2]uint8{
 		0b00001111,
-		0b00000000,
+		0b00000010,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.

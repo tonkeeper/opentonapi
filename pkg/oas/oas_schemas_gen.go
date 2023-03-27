@@ -27,6 +27,7 @@ type Account struct {
 	IsScam       OptBool   `json:"is_scam"`
 	Icon         OptString `json:"icon"`
 	MemoRequired OptBool   `json:"memo_required"`
+	GetMethods   []string  `json:"get_methods"`
 }
 
 // GetAddress returns the value of Address.
@@ -74,6 +75,11 @@ func (s Account) GetMemoRequired() OptBool {
 	return s.MemoRequired
 }
 
+// GetGetMethods returns the value of GetMethods.
+func (s Account) GetGetMethods() []string {
+	return s.GetMethods
+}
+
 // SetAddress sets the value of Address.
 func (s *Account) SetAddress(val string) {
 	s.Address = val
@@ -117,6 +123,11 @@ func (s *Account) SetIcon(val OptString) {
 // SetMemoRequired sets the value of MemoRequired.
 func (s *Account) SetMemoRequired(val OptBool) {
 	s.MemoRequired = val
+}
+
+// SetGetMethods sets the value of GetMethods.
+func (s *Account) SetGetMethods(val []string) {
+	s.GetMethods = val
 }
 
 func (*Account) getAccountRes() {}
