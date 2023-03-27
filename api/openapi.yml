@@ -868,8 +868,7 @@ components:
       description: block ID
       schema:
         type: string
-        example: (-1,4234234,8000000000000000)
-
+        example: (-1,8000000000000000,4234234)
     transactionIdParameter:
       in: path
       name: transaction_id
@@ -1537,7 +1536,7 @@ components:
         - address
         - balance
         - status
-        - last_transaction_lt
+        - last_activity
       properties:
         address:
           type: string
@@ -1546,8 +1545,9 @@ components:
           type: integer
           format: int64
           example: 123456789
-        last_transaction_lt:
+        last_activity:
           type: integer
+          description: unix timestamp
           format: int64
           example: 123456789
         status:

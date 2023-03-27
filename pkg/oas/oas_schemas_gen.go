@@ -17,15 +17,16 @@ const (
 
 // Ref: #/components/schemas/Account
 type Account struct {
-	Address           string    `json:"address"`
-	Balance           int64     `json:"balance"`
-	LastTransactionLt int64     `json:"last_transaction_lt"`
-	Status            string    `json:"status"`
-	Interfaces        []string  `json:"interfaces"`
-	Name              OptString `json:"name"`
-	IsScam            OptBool   `json:"is_scam"`
-	Icon              OptString `json:"icon"`
-	MemoRequired      OptBool   `json:"memo_required"`
+	Address string `json:"address"`
+	Balance int64  `json:"balance"`
+	// Unix timestamp.
+	LastActivity int64     `json:"last_activity"`
+	Status       string    `json:"status"`
+	Interfaces   []string  `json:"interfaces"`
+	Name         OptString `json:"name"`
+	IsScam       OptBool   `json:"is_scam"`
+	Icon         OptString `json:"icon"`
+	MemoRequired OptBool   `json:"memo_required"`
 }
 
 // GetAddress returns the value of Address.
@@ -38,9 +39,9 @@ func (s Account) GetBalance() int64 {
 	return s.Balance
 }
 
-// GetLastTransactionLt returns the value of LastTransactionLt.
-func (s Account) GetLastTransactionLt() int64 {
-	return s.LastTransactionLt
+// GetLastActivity returns the value of LastActivity.
+func (s Account) GetLastActivity() int64 {
+	return s.LastActivity
 }
 
 // GetStatus returns the value of Status.
@@ -83,9 +84,9 @@ func (s *Account) SetBalance(val int64) {
 	s.Balance = val
 }
 
-// SetLastTransactionLt sets the value of LastTransactionLt.
-func (s *Account) SetLastTransactionLt(val int64) {
-	s.LastTransactionLt = val
+// SetLastActivity sets the value of LastActivity.
+func (s *Account) SetLastActivity(val int64) {
+	s.LastActivity = val
 }
 
 // SetStatus sets the value of Status.
