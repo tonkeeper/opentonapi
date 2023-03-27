@@ -114,8 +114,8 @@ func (m MessageID) IsExtenal() bool {
 	return m.Source == nil
 }
 
-func (m MessageID) IsEmission() bool {
-	return m.Source != nil && m.Source.IsZero()
+func (m Message) IsEmission() bool {
+	return m.Source != nil && m.Source.IsZero() && m.Source.Workchain == -1 && m.Bounced == false
 }
 
 type Message struct {

@@ -75,8 +75,8 @@ func (s Account) encodeFields(e *jx.Encoder) {
 	}
 	{
 
-		e.FieldStart("last_transaction_lt")
-		e.Int64(s.LastTransactionLt)
+		e.FieldStart("last_activity")
+		e.Int64(s.LastActivity)
 	}
 	{
 
@@ -122,7 +122,7 @@ func (s Account) encodeFields(e *jx.Encoder) {
 var jsonFieldsNameOfAccount = [9]string{
 	0: "address",
 	1: "balance",
-	2: "last_transaction_lt",
+	2: "last_activity",
 	3: "status",
 	4: "interfaces",
 	5: "name",
@@ -164,17 +164,17 @@ func (s *Account) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"balance\"")
 			}
-		case "last_transaction_lt":
+		case "last_activity":
 			requiredBitSet[0] |= 1 << 2
 			if err := func() error {
 				v, err := d.Int64()
-				s.LastTransactionLt = int64(v)
+				s.LastActivity = int64(v)
 				if err != nil {
 					return err
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"last_transaction_lt\"")
+				return errors.Wrap(err, "decode field \"last_activity\"")
 			}
 		case "status":
 			requiredBitSet[0] |= 1 << 3

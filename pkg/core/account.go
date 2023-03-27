@@ -19,6 +19,7 @@ type Account struct {
 	FrozenHash        *tongo.Bits256
 	Storage           StorageInfo
 	Interfaces        []string
+	LastActivityTime  int64
 }
 
 // StorageInfo is taken from TLB storage_stat:StorageInfo.

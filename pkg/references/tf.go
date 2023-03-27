@@ -2,7 +2,7 @@ package references
 
 import "github.com/tonkeeper/tongo"
 
-const TFPoolImplementationsName = "TON Foundation"
+const TFPoolImplementationsName = "TON Nominators"
 const TFPoolImplementationsURL = "https://tonvalidators.org/"
 
 // validated nominators contract code hash
