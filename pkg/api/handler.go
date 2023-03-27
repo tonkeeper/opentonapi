@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"encoding/base64"
+	"github.com/tonkeeper/opentonapi/pkg/bath"
 	"github.com/tonkeeper/opentonapi/pkg/image"
 	"go.uber.org/zap"
 	"golang.org/x/exp/slices"
@@ -434,4 +435,36 @@ func (h Handler) GetJettonsBalances(ctx context.Context, params oas.GetJettonsBa
 	}
 
 	return &balances, nil
+}
+
+func (h Handler) GetEvent(ctx context.Context, params oas.GetEventParams) (oas.GetEventRes, error) {
+	traceID, err := tongo.ParseHash(params.EventID)
+	if err != nil {
+		return &oas.BadRequest{Error: err.Error()}, nil
+	}
+	trace, err := h.storage.GetTrace(ctx, traceID)
+	if errors.Is(err, core.ErrEntityNotFound) {
+		return &oas.NotFound{Error: err.Error()}, nil
+	}
+	if err != nil {
+		return &oas.InternalError{Error: err.Error()}, nil
+	}
+	b := bath.FromTrace(trace)
+	actions, fees := bath.CollectActions(b)
+	event := oas.Event{
+		EventID:    trace.Hash.Hex(),
+		Timestamp:  trace.Utime,
+		Actions:    make([]oas.Action, len(actions)),
+		Fees:       make([]oas.Fee, len(fees)),
+		IsScam:     false,
+		Lt:         int64(trace.Lt),
+		InProgress: trace.InProgress(),
+	}
+	for i, a := range actions {
+		event.Actions[i] = convertAction(a)
+	}
+	for i, f := range fees {
+		event.Fees[i] = convertFees(f)
+	}
+	return &event, nil
 }
