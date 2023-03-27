@@ -23,3 +23,6 @@ GET {{host}}/v2/nfts/EQDw41DE6TProVIyDIeMWpx4SJutvd8hYUHRQjtR2tSfxz8q
 
 ###
 GET {{metrics}}/metrics
+
+###
+GET {{host}}/v2/events/1841e57595edb38590bc519fc6e385f77a9f0a34475e55cba621cc31438741a5
