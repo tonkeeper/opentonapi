@@ -207,9 +207,13 @@ func convertStakingWhalesPool(address tongo.AccountID, w references.WhalesPoolIn
 }
 
 func convertStakingTFPool(p core.TFPool, info addressbook.TFPoolInfo, apy float64) oas.PoolInfo {
+	name := info.Name
+	if name == "" {
+		name = "Unknown name ..." + p.Address.ToHuman(true, false)[43:]
+	}
 	return oas.PoolInfo{
 		Address:           p.Address.ToRaw(),
-		Name:              info.Name,
+		Name:              name,
 		TotalAmount:       p.TotalAmount,
 		Implementation:    oas.PoolInfoImplementationTf,
 		Apy:               apy * float64(10000-p.ValidatorShare) / 10000,
@@ -484,7 +488,11 @@ func convertTvmStackValue(v tlb.VmStackValue) (oas.TvmStackRecord, error) {
 	case "VmStkNan":
 		return oas.TvmStackRecord{Type: oas.TvmStackRecordTypeNan}, nil
 	case "VmStkTinyInt":
-		return oas.TvmStackRecord{Type: oas.TvmStackRecordTypeNum, Num: oas.NewOptString(fmt.Sprintf("0x%x", v.VmStkTinyInt))}, nil //todo: fix negative
+		str := fmt.Sprintf("0x%x", v.VmStkTinyInt)
+		if v.VmStkTinyInt < 0 {
+			str = "-0x" + str[3:]
+		}
+		return oas.TvmStackRecord{Type: oas.TvmStackRecordTypeNum, Num: oas.NewOptString(str)}, nil
 	case "VmStkInt":
 		b := big.Int(v.VmStkInt)
 		return oas.TvmStackRecord{Type: oas.TvmStackRecordTypeNum, Num: oas.NewOptString(fmt.Sprintf("0x%x", b.Bytes()))}, nil //todo: fix negative
