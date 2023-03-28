@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"github.com/tonkeeper/opentonapi/pkg/addressbook"
 	"github.com/tonkeeper/opentonapi/pkg/bath"
+	"github.com/tonkeeper/tongo/tlb"
+	"math/big"
 	"reflect"
 	"strconv"
 	"strings"
@@ -205,9 +207,13 @@ func convertStakingWhalesPool(address tongo.AccountID, w references.WhalesPoolIn
 }
 
 func convertStakingTFPool(p core.TFPool, info addressbook.TFPoolInfo, apy float64) oas.PoolInfo {
+	name := info.Name
+	if name == "" {
+		name = "Unknown name ..." + p.Address.ToHuman(true, false)[43:]
+	}
 	return oas.PoolInfo{
 		Address:           p.Address.ToRaw(),
-		Name:              info.Name,
+		Name:              name,
 		TotalAmount:       p.TotalAmount,
 		Implementation:    oas.PoolInfoImplementationTf,
 		Apy:               apy * float64(10000-p.ValidatorShare) / 10000,
@@ -315,6 +321,7 @@ func convertToAccount(info *core.AccountInfo) oas.Account {
 		LastActivity: info.Account.LastActivityTime,
 		Status:       info.Account.Status,
 		Interfaces:   info.Account.Interfaces,
+		GetMethods:   info.Account.GetMethods,
 	}
 	if info.Name != nil {
 		acc.Name = oas.NewOptString(*info.Name)
@@ -470,5 +477,38 @@ func convertFees(fee bath.Fee) oas.Fee {
 		Rent:    fee.Storage,
 		Deposit: fee.Deposit,
 		Refund:  0,
+	}
+}
+
+func convertTvmStackValue(v tlb.VmStackValue) (oas.TvmStackRecord, error) {
+	//	VmStkTuple   VmStkTuple    `tlbSumType:"vm_stk_tuple#07"`
+	switch v.SumType {
+	case "VmStkNull":
+		return oas.TvmStackRecord{Type: oas.TvmStackRecordTypeNull}, nil
+	case "VmStkNan":
+		return oas.TvmStackRecord{Type: oas.TvmStackRecordTypeNan}, nil
+	case "VmStkTinyInt":
+		str := fmt.Sprintf("0x%x", v.VmStkTinyInt)
+		if v.VmStkTinyInt < 0 {
+			str = "-0x" + str[3:]
+		}
+		return oas.TvmStackRecord{Type: oas.TvmStackRecordTypeNum, Num: oas.NewOptString(str)}, nil
+	case "VmStkInt":
+		b := big.Int(v.VmStkInt)
+		return oas.TvmStackRecord{Type: oas.TvmStackRecordTypeNum, Num: oas.NewOptString(fmt.Sprintf("0x%x", b.Bytes()))}, nil //todo: fix negative
+	case "VmStkCell":
+		boc, err := v.VmStkCell.Value.ToBocString()
+		if err != nil {
+			return oas.TvmStackRecord{}, err
+		}
+		return oas.TvmStackRecord{Type: oas.TvmStackRecordTypeCell, Cell: oas.NewOptString(boc)}, nil
+	case "VmStkSlice":
+		boc, err := v.VmStkSlice.Cell().ToBocString()
+		if err != nil {
+			return oas.TvmStackRecord{}, err
+		}
+		return oas.TvmStackRecord{Type: oas.TvmStackRecordTypeCell, Cell: oas.NewOptString(boc)}, nil
+	default:
+		return oas.TvmStackRecord{}, fmt.Errorf("can't conver %v stack to rest json", v.SumType)
 	}
 }

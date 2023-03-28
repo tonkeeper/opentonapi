@@ -117,9 +117,18 @@ func (s Account) encodeFields(e *jx.Encoder) {
 			s.MemoRequired.Encode(e)
 		}
 	}
+	{
+
+		e.FieldStart("get_methods")
+		e.ArrStart()
+		for _, elem := range s.GetMethods {
+			e.Str(elem)
+		}
+		e.ArrEnd()
+	}
 }
 
-var jsonFieldsNameOfAccount = [9]string{
+var jsonFieldsNameOfAccount = [10]string{
 	0: "address",
 	1: "balance",
 	2: "last_activity",
@@ -129,6 +138,7 @@ var jsonFieldsNameOfAccount = [9]string{
 	6: "is_scam",
 	7: "icon",
 	8: "memo_required",
+	9: "get_methods",
 }
 
 // Decode decodes Account from json.
@@ -247,6 +257,26 @@ func (s *Account) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"memo_required\"")
 			}
+		case "get_methods":
+			requiredBitSet[1] |= 1 << 1
+			if err := func() error {
+				s.GetMethods = make([]string, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem string
+					v, err := d.Str()
+					elem = string(v)
+					if err != nil {
+						return err
+					}
+					s.GetMethods = append(s.GetMethods, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"get_methods\"")
+			}
 		default:
 			return d.Skip()
 		}
@@ -258,7 +288,7 @@ func (s *Account) Decode(d *jx.Decoder) error {
 	var failures []validate.FieldError
 	for i, mask := range [2]uint8{
 		0b00001111,
-		0b00000000,
+		0b00000010,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -8656,41 +8686,6 @@ func (s *OptEmulateMessageReq) UnmarshalJSON(data []byte) error {
 	return s.Decode(d)
 }
 
-// Encode encodes int as json.
-func (o OptInt) Encode(e *jx.Encoder) {
-	if !o.Set {
-		return
-	}
-	e.Int(int(o.Value))
-}
-
-// Decode decodes int from json.
-func (o *OptInt) Decode(d *jx.Decoder) error {
-	if o == nil {
-		return errors.New("invalid: unable to decode OptInt to nil")
-	}
-	o.Set = true
-	v, err := d.Int()
-	if err != nil {
-		return err
-	}
-	o.Value = int(v)
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s OptInt) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *OptInt) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
 // Encode encodes int32 as json.
 func (o OptInt32) Encode(e *jx.Encoder) {
 	if !o.Set {
@@ -13301,9 +13296,9 @@ func (s TvmStackRecord) encodeFields(e *jx.Encoder) {
 		}
 	}
 	{
-		if s.Int.Set {
-			e.FieldStart("int")
-			s.Int.Encode(e)
+		if s.Num.Set {
+			e.FieldStart("num")
+			s.Num.Encode(e)
 		}
 	}
 	{
@@ -13322,7 +13317,7 @@ var jsonFieldsNameOfTvmStackRecord = [5]string{
 	0: "type",
 	1: "cell",
 	2: "slice",
-	3: "int",
+	3: "num",
 	4: "tuple",
 }
 
@@ -13365,15 +13360,15 @@ func (s *TvmStackRecord) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"slice\"")
 			}
-		case "int":
+		case "num":
 			if err := func() error {
-				s.Int.Reset()
-				if err := s.Int.Decode(d); err != nil {
+				s.Num.Reset()
+				if err := s.Num.Decode(d); err != nil {
 					return err
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"int\"")
+				return errors.Wrap(err, "decode field \"num\"")
 			}
 		case "tuple":
 			if err := func() error {
@@ -13466,8 +13461,8 @@ func (s *TvmStackRecordType) Decode(d *jx.Decoder) error {
 	switch TvmStackRecordType(v) {
 	case TvmStackRecordTypeCell:
 		*s = TvmStackRecordTypeCell
-	case TvmStackRecordTypeInt:
-		*s = TvmStackRecordTypeInt
+	case TvmStackRecordTypeNum:
+		*s = TvmStackRecordTypeNum
 	case TvmStackRecordTypeNan:
 		*s = TvmStackRecordTypeNan
 	case TvmStackRecordTypeNull:

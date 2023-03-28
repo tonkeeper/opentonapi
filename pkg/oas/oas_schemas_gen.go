@@ -27,6 +27,7 @@ type Account struct {
 	IsScam       OptBool   `json:"is_scam"`
 	Icon         OptString `json:"icon"`
 	MemoRequired OptBool   `json:"memo_required"`
+	GetMethods   []string  `json:"get_methods"`
 }
 
 // GetAddress returns the value of Address.
@@ -74,6 +75,11 @@ func (s Account) GetMemoRequired() OptBool {
 	return s.MemoRequired
 }
 
+// GetGetMethods returns the value of GetMethods.
+func (s Account) GetGetMethods() []string {
+	return s.GetMethods
+}
+
 // SetAddress sets the value of Address.
 func (s *Account) SetAddress(val string) {
 	s.Address = val
@@ -117,6 +123,11 @@ func (s *Account) SetIcon(val OptString) {
 // SetMemoRequired sets the value of MemoRequired.
 func (s *Account) SetMemoRequired(val OptBool) {
 	s.MemoRequired = val
+}
+
+// SetGetMethods sets the value of GetMethods.
+func (s *Account) SetGetMethods(val []string) {
+	s.GetMethods = val
 }
 
 func (*Account) getAccountRes() {}
@@ -3312,52 +3323,6 @@ func (o OptEmulateMessageReq) Or(d EmulateMessageReq) EmulateMessageReq {
 	return d
 }
 
-// NewOptInt returns new OptInt with value set to v.
-func NewOptInt(v int) OptInt {
-	return OptInt{
-		Value: v,
-		Set:   true,
-	}
-}
-
-// OptInt is optional int.
-type OptInt struct {
-	Value int
-	Set   bool
-}
-
-// IsSet returns true if OptInt was set.
-func (o OptInt) IsSet() bool { return o.Set }
-
-// Reset unsets value.
-func (o *OptInt) Reset() {
-	var v int
-	o.Value = v
-	o.Set = false
-}
-
-// SetTo sets value to v.
-func (o *OptInt) SetTo(v int) {
-	o.Set = true
-	o.Value = v
-}
-
-// Get returns value and boolean that denotes whether value was set.
-func (o OptInt) Get() (v int, ok bool) {
-	if !o.Set {
-		return v, false
-	}
-	return o.Value, true
-}
-
-// Or returns value if set, or given parameter if does not.
-func (o OptInt) Or(d int) int {
-	if v, ok := o.Get(); ok {
-		return v
-	}
-	return d
-}
-
 // NewOptInt32 returns new OptInt32 with value set to v.
 func NewOptInt32(v int32) OptInt32 {
 	return OptInt32{
@@ -5774,7 +5739,7 @@ type TvmStackRecord struct {
 	Type  TvmStackRecordType `json:"type"`
 	Cell  OptString          `json:"cell"`
 	Slice OptString          `json:"slice"`
-	Int   OptInt             `json:"int"`
+	Num   OptString          `json:"num"`
 	Tuple []TvmStackRecord   `json:"tuple"`
 }
 
@@ -5793,9 +5758,9 @@ func (s TvmStackRecord) GetSlice() OptString {
 	return s.Slice
 }
 
-// GetInt returns the value of Int.
-func (s TvmStackRecord) GetInt() OptInt {
-	return s.Int
+// GetNum returns the value of Num.
+func (s TvmStackRecord) GetNum() OptString {
+	return s.Num
 }
 
 // GetTuple returns the value of Tuple.
@@ -5818,9 +5783,9 @@ func (s *TvmStackRecord) SetSlice(val OptString) {
 	s.Slice = val
 }
 
-// SetInt sets the value of Int.
-func (s *TvmStackRecord) SetInt(val OptInt) {
-	s.Int = val
+// SetNum sets the value of Num.
+func (s *TvmStackRecord) SetNum(val OptString) {
+	s.Num = val
 }
 
 // SetTuple sets the value of Tuple.
@@ -5832,7 +5797,7 @@ type TvmStackRecordType string
 
 const (
 	TvmStackRecordTypeCell  TvmStackRecordType = "cell"
-	TvmStackRecordTypeInt   TvmStackRecordType = "int"
+	TvmStackRecordTypeNum   TvmStackRecordType = "num"
 	TvmStackRecordTypeNan   TvmStackRecordType = "nan"
 	TvmStackRecordTypeNull  TvmStackRecordType = "null"
 	TvmStackRecordTypeTuple TvmStackRecordType = "tuple"

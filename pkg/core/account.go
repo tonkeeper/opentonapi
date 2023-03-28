@@ -20,6 +20,7 @@ type Account struct {
 	Storage           StorageInfo
 	Interfaces        []string
 	LastActivityTime  int64
+	GetMethods        []string
 }
 
 // StorageInfo is taken from TLB storage_stat:StorageInfo.
