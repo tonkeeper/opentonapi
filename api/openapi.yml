@@ -191,29 +191,6 @@ paths:
           $ref: '#/components/responses/InternalError'
 
   /v2/blockchain/accounts/{account_id}/methods/{method_name}:
-    post:
-      description: Execute get method for account
-      operationId: execGetMethodPost
-      tags:
-        - Blockchain
-      parameters:
-        - $ref: '#/components/parameters/accountIdParameter'
-        - $ref: '#/components/parameters/methodNameParameter'
-      requestBody:
-        $ref: "#/components/requestBodies/MethodParameters"
-      responses:
-        '200':
-          description: "result"
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/MethodExecutionResult'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '500':
-          $ref: '#/components/responses/InternalError'
     get:
       description: Execute get method for account
       operationId: execGetMethod
@@ -227,8 +204,10 @@ paths:
           required: false
           schema:
             type: array
+            description: "Supported values: NaN, Null, 10-base digits for tiny int, 0x-prefixed hex digits for int257, all forms of addresses for slice, single-root base64-encoded BOC for cell"
             items:
               type: string
+            example: ["0:9a33970f617bcd71acf2cd28357c067aa31859c02820d8f01d74c88063a8f4d8"]
       responses:
         '200':
           description: "result"
@@ -906,7 +885,7 @@ components:
       description: contract get method name
       schema:
         type: string
-        example: get_collection_data
+        example: get_wallet_address
 
     domainNameParameter:
       in: path

@@ -7,6 +7,7 @@ import (
 	"github.com/tonkeeper/opentonapi/pkg/bath"
 	"github.com/tonkeeper/opentonapi/pkg/image"
 	"github.com/tonkeeper/tongo/abi"
+	"github.com/tonkeeper/tongo/tlb"
 	"go.uber.org/zap"
 	"golang.org/x/exp/slices"
 
@@ -488,7 +489,15 @@ func (h Handler) ExecGetMethod(ctx context.Context, params oas.ExecGetMethodPara
 	if err != nil {
 		return &oas.BadRequest{Error: err.Error()}, nil
 	}
-	exitCode, stack, err := h.executor.RunSmcMethod(ctx, id, params.MethodName, nil)
+	var stack tlb.VmStack
+	for _, p := range params.Args {
+		r, err := stringToTVMStackRecord(p)
+		if err != nil {
+			return &oas.BadRequest{Error: fmt.Sprintf("can't parse arg '%v' as any TVMStackValue", p)}, nil
+		}
+		stack = append(stack, r)
+	}
+	exitCode, stack, err := h.executor.RunSmcMethod(ctx, id, params.MethodName, stack)
 	if err != nil {
 		return &oas.InternalError{Error: err.Error()}, nil
 	}

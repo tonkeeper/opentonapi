@@ -49,15 +49,6 @@ func (UnimplementedHandler) ExecGetMethod(ctx context.Context, params ExecGetMet
 	return r, ht.ErrNotImplemented
 }
 
-// ExecGetMethodPost implements execGetMethodPost operation.
-//
-// Execute get method for account.
-//
-// POST /v2/blockchain/accounts/{account_id}/methods/{method_name}
-func (UnimplementedHandler) ExecGetMethodPost(ctx context.Context, req *ExecGetMethodPostReq, params ExecGetMethodPostParams) (r ExecGetMethodPostRes, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
 // GetAccount implements getAccount operation.
 //
 // Get human-friendly information about an account without low-level details.

@@ -13,10 +13,6 @@ type EmulateMessageRes interface {
 	emulateMessageRes()
 }
 
-type ExecGetMethodPostRes interface {
-	execGetMethodPostRes()
-}
-
 type ExecGetMethodRes interface {
 	execGetMethodRes()
 }

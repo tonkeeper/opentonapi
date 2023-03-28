@@ -32,12 +32,6 @@ type Handler interface {
 	//
 	// GET /v2/blockchain/accounts/{account_id}/methods/{method_name}
 	ExecGetMethod(ctx context.Context, params ExecGetMethodParams) (ExecGetMethodRes, error)
-	// ExecGetMethodPost implements execGetMethodPost operation.
-	//
-	// Execute get method for account.
-	//
-	// POST /v2/blockchain/accounts/{account_id}/methods/{method_name}
-	ExecGetMethodPost(ctx context.Context, req *ExecGetMethodPostReq, params ExecGetMethodPostParams) (ExecGetMethodPostRes, error)
 	// GetAccount implements getAccount operation.
 	//
 	// Get human-friendly information about an account without low-level details.

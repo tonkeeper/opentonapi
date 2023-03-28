@@ -875,7 +875,6 @@ func (s *BadRequest) SetError(val string) {
 func (*BadRequest) dnsBackResolveRes()            {}
 func (*BadRequest) dnsResolveRes()                {}
 func (*BadRequest) emulateMessageRes()            {}
-func (*BadRequest) execGetMethodPostRes()         {}
 func (*BadRequest) execGetMethodRes()             {}
 func (*BadRequest) getAccountRes()                {}
 func (*BadRequest) getAccountTransactionsRes()    {}
@@ -1626,8 +1625,6 @@ func (s *Event) SetInProgress(val bool) {
 
 func (*Event) getEventRes() {}
 
-type ExecGetMethodPostReq struct{}
-
 // Ref: #/components/schemas/Fee
 type Fee struct {
 	Account AccountAddress `json:"account"`
@@ -1758,7 +1755,6 @@ func (s *InternalError) SetError(val string) {
 func (*InternalError) dnsBackResolveRes()            {}
 func (*InternalError) dnsResolveRes()                {}
 func (*InternalError) emulateMessageRes()            {}
-func (*InternalError) execGetMethodPostRes()         {}
 func (*InternalError) execGetMethodRes()             {}
 func (*InternalError) getAccountRes()                {}
 func (*InternalError) getAccountTransactionsRes()    {}
@@ -2418,8 +2414,7 @@ func (s *MethodExecutionResult) SetDecoded(val OptMethodExecutionResultDecoded) 
 	s.Decoded = val
 }
 
-func (*MethodExecutionResult) execGetMethodPostRes() {}
-func (*MethodExecutionResult) execGetMethodRes()     {}
+func (*MethodExecutionResult) execGetMethodRes() {}
 
 type MethodExecutionResultDecoded map[string]jx.Raw
 
@@ -5857,7 +5852,6 @@ func (s *UnauthorizedError) SetError(val string) {
 func (*UnauthorizedError) dnsBackResolveRes()            {}
 func (*UnauthorizedError) dnsResolveRes()                {}
 func (*UnauthorizedError) emulateMessageRes()            {}
-func (*UnauthorizedError) execGetMethodPostRes()         {}
 func (*UnauthorizedError) execGetMethodRes()             {}
 func (*UnauthorizedError) getAccountRes()                {}
 func (*UnauthorizedError) getAccountTransactionsRes()    {}

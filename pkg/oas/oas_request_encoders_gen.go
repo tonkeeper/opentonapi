@@ -31,22 +31,6 @@ func encodeEmulateMessageRequest(
 	return nil
 }
 
-func encodeExecGetMethodPostRequest(
-	req *ExecGetMethodPostReq,
-	r *http.Request,
-) error {
-	const contentType = "application/json"
-	e := jx.GetEncoder()
-	{
-		if req != nil {
-			req.Encode(e)
-		}
-	}
-	encoded := e.Bytes()
-	ht.SetBody(r, bytes.NewReader(encoded), contentType)
-	return nil
-}
-
 func encodeSendMessageRequest(
 	req OptSendMessageReq,
 	r *http.Request,

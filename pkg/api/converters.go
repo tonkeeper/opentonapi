@@ -7,11 +7,13 @@ import (
 	"fmt"
 	"github.com/tonkeeper/opentonapi/pkg/addressbook"
 	"github.com/tonkeeper/opentonapi/pkg/bath"
+	"github.com/tonkeeper/tongo/boc"
 	"github.com/tonkeeper/tongo/tlb"
 	"math/big"
 	"reflect"
 	"strconv"
 	"strings"
+	"unicode"
 
 	"github.com/go-faster/jx"
 	"github.com/tonkeeper/tongo"
@@ -511,4 +513,48 @@ func convertTvmStackValue(v tlb.VmStackValue) (oas.TvmStackRecord, error) {
 	default:
 		return oas.TvmStackRecord{}, fmt.Errorf("can't conver %v stack to rest json", v.SumType)
 	}
+}
+
+func stringToTVMStackRecord(s string) (tlb.VmStackValue, error) {
+	if s == "" {
+		return tlb.VmStackValue{}, fmt.Errorf("zero length sting can't be converted to tvm stack")
+	}
+	if s == "NaN" {
+		return tlb.VmStackValue{SumType: "VmStkNan"}, nil
+	}
+	if s == "Null" {
+		return tlb.VmStackValue{SumType: "VmStkNull"}, nil
+	}
+	a, err := tongo.ParseAccountID(s)
+	if err == nil {
+		return tlb.TlbStructToVmCellSlice(a.ToMsgAddress())
+	}
+	if strings.HasPrefix(s, "0x") {
+		b, err := hex.DecodeString(s[2:])
+		if err != nil {
+			return tlb.VmStackValue{}, err
+		}
+		i := big.Int{}
+		i.SetBytes(b)
+		return tlb.VmStackValue{SumType: "VmStkInt", VmStkInt: tlb.Int257(i)}, nil
+	}
+	isDigit := true
+	for _, c := range s {
+		if !unicode.IsDigit(c) {
+			isDigit = false
+			break
+		}
+	}
+	if isDigit {
+		i, err := strconv.ParseInt(s, 10, 64)
+		if err != nil {
+			return tlb.VmStackValue{}, err
+		}
+		return tlb.VmStackValue{SumType: "VmStkTinyInt", VmStkTinyInt: i}, nil
+	}
+	c, err := boc.DeserializeSinglRootBase64(s)
+	if err != nil {
+		return tlb.VmStackValue{}, err
+	}
+	return tlb.VmStackValue{SumType: "VmStkCell", VmStkCell: tlb.Ref[boc.Cell]{Value: *c}}, nil
 }

@@ -29,3 +29,6 @@ GET {{metrics}}/metrics
 
 ###
 GET {{host}}/v2/events/1841e57595edb38590bc519fc6e385f77a9f0a34475e55cba621cc31438741a5
+
+###
+GET {{host}}/v2/blockchain/accounts/EQAvDfWFG0oYX19jwNDNBBL1rKNT9XfaGP9HyTb5nb2Eml6y/methods/get_wallet_address?args=EQCnM2nIemDP3fRihoXiuyo8ETt0LILd1LUqFlZba7nErMv_
