@@ -28,7 +28,7 @@ GET {{host}}/v2/nfts/EQDw41DE6TProVIyDIeMWpx4SJutvd8hYUHRQjtR2tSfxz8q
 GET {{metrics}}/metrics
 
 ###
-GET {{host}}/v2/events/1841e57595edb38590bc519fc6e385f77a9f0a34475e55cba621cc31438741a5
+GET {{host}}/v2/events/492cc2277caf9ef14ebb1d42bcce7a254ecf31261eed54bd55b5f9fd835cb614
 
 ###
 GET {{host}}/v2/blockchain/accounts/EQAvDfWFG0oYX19jwNDNBBL1rKNT9XfaGP9HyTb5nb2Eml6y/methods/get_wallet_address?args=EQCnM2nIemDP3fRihoXiuyo8ETt0LILd1LUqFlZba7nErMv_

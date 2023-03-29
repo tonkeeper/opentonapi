@@ -26,6 +26,7 @@ func main() {
 		litestorage.WithPreloadAccounts(cfg.App.Accounts),
 		litestorage.WithTFPools(book.TFPools()),
 		litestorage.WithKnownJettons(maps.Keys(book.GetKnownJettons())),
+		litestorage.WithLiteServers(cfg.App.LiteServers),
 	)
 	if err != nil {
 		log.Fatal("storage init", zap.Error(err))
