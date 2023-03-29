@@ -1904,6 +1904,7 @@ components:
             - UnSubscribe
             - AuctionBid
             - NftPurchase
+            - SmartContractExec
             - Unknown
         status:
           type: string
@@ -1928,6 +1929,8 @@ components:
           $ref: '#/components/schemas/AuctionBidAction'
         NftPurchase:
           $ref: '#/components/schemas/NftPurchaseAction'
+        SmartContractExec:
+          $ref: '#/components/schemas/SmartContractAction'
         simple_preview:
           $ref: '#/components/schemas/ActionSimplePreview'
 
@@ -1950,10 +1953,31 @@ components:
         comment:
           type: string
           example: "Hi! This is your salary. \nFrom accounting with love."
+        refund:
+          $ref: '#/components/schemas/Refund'
+
+    SmartContractAction:
+      type: object
+      required:
+        - executor
+        - contract
+        - ton_attached
+        - operation
+      properties:
+        executor:
+          $ref: '#/components/schemas/AccountAddress'
+        contract:
+          $ref: '#/components/schemas/AccountAddress'
+        ton_attached:
+          type: integer
+          description: amount in nanotons
+          format: int64
+          example: 123456789
+        operation:
+          type: string
+          example: "NftTransfer or 0x35d95a12"
         payload:
           type: string
-          description: raw hex encoded payload
-          example: '0234de3e21d21b3ee21f3'
         refund:
           $ref: '#/components/schemas/Refund'
 

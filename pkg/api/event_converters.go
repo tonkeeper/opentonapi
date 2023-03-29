@@ -29,7 +29,6 @@ func convertAction(a bath.Action) oas.Action {
 		action.TonTransfer.SetTo(oas.TonTransferAction{
 			Amount:    a.TonTransfer.Amount,
 			Comment:   pointerToOptString(a.TonTransfer.Comment),
-			Payload:   pointerToOptString(a.TonTransfer.Payload),
 			Recipient: convertAccountAddress(a.TonTransfer.Recipient),
 			Sender:    convertAccountAddress(a.TonTransfer.Sender),
 		})
@@ -40,16 +39,15 @@ func convertAction(a bath.Action) oas.Action {
 			})
 
 		}
-
-	case bath.NftTransfer:
+	case bath.NftItemTransfer:
 		action.NftItemTransfer.SetTo(oas.NftItemTransferAction{
-			Nft:       a.NftTransfer.Nft.ToRaw(),
-			Recipient: convertOptAccountAddress(a.NftTransfer.Recipient),
-			Sender:    convertOptAccountAddress(a.NftTransfer.Sender),
+			Nft:       a.NftItemTransfer.Nft.ToRaw(),
+			Recipient: convertOptAccountAddress(a.NftItemTransfer.Recipient),
+			Sender:    convertOptAccountAddress(a.NftItemTransfer.Sender),
 		})
 	case bath.JettonTransfer:
 		action.JettonTransfer.SetTo(oas.JettonTransferAction{
-			Amount:           a.JettonTransfer.Amount.String(),
+			//Amount:           a.JettonTransfer.Amount.String(),
 			Recipient:        convertOptAccountAddress(a.JettonTransfer.Recipient),
 			Sender:           convertOptAccountAddress(a.JettonTransfer.Sender),
 			RecipientsWallet: a.JettonTransfer.RecipientsWallet.ToRaw(),
@@ -76,7 +74,19 @@ func convertAction(a bath.Action) oas.Action {
 			Interfaces: a.ContractDeploy.Interfaces,
 			Deployer:   convertAccountAddress(a.ContractDeploy.Sender),
 		})
-
+	case bath.SmartContractExec:
+		op := "Call"
+		if a.SmartContractExec.Operation != "" {
+			op = a.SmartContractExec.Operation
+		}
+		action.SmartContractExec.SetTo(oas.SmartContractAction{
+			Executor:    convertAccountAddress(a.SmartContractExec.Executor),
+			Contract:    convertAccountAddress(a.SmartContractExec.Contract),
+			TonAttached: a.SmartContractExec.TonAttached,
+			Operation:   op,
+			Payload:     oas.OptString{}, //todo: do
+			Refund:      oas.OptRefund{},
+		})
 	}
 	return action
 }

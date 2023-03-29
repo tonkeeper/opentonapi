@@ -47,6 +47,7 @@ func (h Handler) GetEvent(ctx context.Context, params oas.GetEventParams) (oas.G
 		return &oas.InternalError{Error: err.Error()}, nil
 	}
 	b := bath.FromTrace(trace)
+	bath.MergeAllBubbles(b, bath.DefaultStraws)
 	actions, fees := bath.CollectActions(b)
 	event := oas.Event{
 		EventID:    trace.Hash.Hex(),
