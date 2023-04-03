@@ -2,12 +2,14 @@ package bath
 
 import (
 	"fmt"
-	"github.com/tonkeeper/opentonapi/pkg/core"
+	"strings"
+
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
 	"github.com/tonkeeper/tongo/tlb"
 	"golang.org/x/exp/slices"
-	"strings"
+
+	"github.com/tonkeeper/opentonapi/pkg/core"
 )
 
 type Bubble struct {
@@ -54,16 +56,6 @@ func (b Bubble) String() string {
 		}
 	}
 	return buf.String()
-}
-
-func TakeBubble(bubbles []*Bubble, check func(bubble *Bubble) bool) (sl []*Bubble, b *Bubble) {
-	for i := range bubbles {
-		if check(bubbles[i]) {
-			b, bubbles[i] = bubbles[i], bubbles[len(bubbles)-1]
-			return bubbles[:len(bubbles)-1], b
-		}
-	}
-	return bubbles, nil
 }
 
 type actioner interface {
@@ -140,6 +132,9 @@ func (b BubbleTx) ToAction() *Action {
 	return a
 }
 
+func (b BubbleTx) operation(name string) bool {
+	return b.decodedBody != nil && b.decodedBody.Operation == name
+}
 func FromTrace(trace *core.Trace) *Bubble {
 	return fromTrace(trace, nil)
 }

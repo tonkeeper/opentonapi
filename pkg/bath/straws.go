@@ -1,12 +1,15 @@
 package bath
 
 import (
-	"github.com/tonkeeper/opentonapi/internal/g"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
 	"github.com/tonkeeper/tongo/tlb"
+
+	"github.com/tonkeeper/opentonapi/internal/g"
 )
 
+// Straw extracts information from the given bubble and its children and modifies the bubble if needed.
+// If the bubble is modified this function return true.
 type Straw func(bubble *Bubble) (success bool)
 
 var DefaultStraws = []Straw{
@@ -14,59 +17,84 @@ var DefaultStraws = []Straw{
 	FindJettonTransfer,
 }
 
+func parseAccount(a tlb.MsgAddress) *Account {
+	o, err := tongo.AccountIDFromTlb(a)
+	if err == nil && o != nil {
+		return &Account{Address: *o}
+	}
+	return nil
+}
+
+type Merge struct {
+	children []*Bubble
+}
+
+func ProcessChildren(children []*Bubble, fns ...func(child *Bubble) *Merge) []*Bubble {
+	var newChildren []*Bubble
+	for _, child := range children {
+		merged := false
+		for _, fn := range fns {
+			merge := fn(child)
+			if merge != nil {
+				newChildren = append(newChildren, merge.children...)
+				merged = true
+				break
+			}
+		}
+		if !merged {
+			newChildren = append(newChildren, child)
+		}
+	}
+	return newChildren
+}
+
 func FindNFTTransfer(bubble *Bubble) bool {
 	nftBubble, ok := bubble.Info.(BubbleTx)
 	if !ok {
 		return false
 	}
-	if nftBubble.decodedBody == nil {
+	if !nftBubble.operation("NftTransfer") {
 		return false
 	}
-	transfer, ok := nftBubble.decodedBody.Value.(abi.NftTransferMsgBody)
-	if !ok {
-		return false
-	}
-	var newOwner *Account
-	if o, err := tongo.AccountIDFromTlb(transfer.NewOwner); err == nil && o != nil {
-		newOwner = &Account{
-			Address: *o,
-		}
-	}
+	transfer := nftBubble.decodedBody.Value.(abi.NftTransferMsgBody)
 	newBubble := Bubble{
 		Info: BubbleNftTransfer{
 			success:   nftBubble.success,
 			account:   nftBubble.account,
 			sender:    nftBubble.inputFrom,
-			recipient: newOwner,
+			recipient: parseAccount(transfer.NewOwner),
 		},
 		Accounts: append(bubble.Accounts, nftBubble.account.Address),
-		Children: bubble.Children,
 		Fee:      bubble.Fee,
 	}
 	newBubble.Fee.WhoPay = nftBubble.inputFrom.Address
 	newBubble.Fee.Deposit += nftBubble.inputAmount
-	var excessBubble, notifyBubble *Bubble
-	newBubble.Children, excessBubble = TakeBubble(newBubble.Children, func(b *Bubble) bool {
-		tx, ok := b.Info.(BubbleTx)
-		return ok && tx.decodedBody != nil && tx.decodedBody.Operation == "Excess"
-	})
-	newBubble.Children, notifyBubble = TakeBubble(newBubble.Children, func(b *Bubble) bool {
-		tx, ok := b.Info.(BubbleTx)
-		return ok && tx.decodedBody != nil && tx.decodedBody.Operation == "NftOwnershipAssigned"
-	})
-	if excessBubble != nil {
-		newBubble.Fee.Add(excessBubble.Fee)
-		tx := excessBubble.Info.(BubbleTx)
-		newBubble.Fee.Refund += tx.inputAmount
-		newBubble.Children = append(newBubble.Children, excessBubble.Children...)
-		newBubble.Accounts = append(newBubble.Accounts, tx.account.Address)
-	}
-	if notifyBubble != nil {
-		newBubble.Fee.Add(notifyBubble.Fee)
-		tx := notifyBubble.Info.(BubbleTx)
-		newBubble.Children = append(newBubble.Children, notifyBubble.Children...)
-		newBubble.Accounts = append(newBubble.Accounts, tx.account.Address)
-	}
+	newBubble.Children = ProcessChildren(bubble.Children,
+		func(child *Bubble) *Merge {
+			tx, ok := child.Info.(BubbleTx)
+			if !ok {
+				return nil
+			}
+			if !tx.operation("Excess") {
+				return nil
+			}
+			newBubble.Fee.Add(child.Fee)
+			newBubble.Fee.Refund += tx.inputAmount
+			newBubble.Accounts = append(newBubble.Accounts, tx.account.Address)
+			return &Merge{children: child.Children}
+		},
+		func(child *Bubble) *Merge {
+			tx, ok := child.Info.(BubbleTx)
+			if !ok {
+				return nil
+			}
+			if !tx.operation("NftOwnershipAssigned") {
+				return nil
+			}
+			newBubble.Fee.Add(child.Fee)
+			newBubble.Accounts = append(newBubble.Accounts, tx.account.Address)
+			return &Merge{children: child.Children}
+		})
 	*bubble = newBubble
 	return true
 }
@@ -97,10 +125,7 @@ func FindJettonTransfer(bubble *Bubble) bool {
 	if !ok {
 		return false
 	}
-	if jettonBubble.decodedBody == nil {
-		return false
-	}
-	if jettonBubble.decodedBody.Operation != "JettonTransfer" {
+	if !jettonBubble.operation("JettonTransfer") {
 		return false
 	}
 	intention := jettonBubble.decodedBody.Value.(abi.JettonTransferMsgBody)
@@ -116,45 +141,46 @@ func FindJettonTransfer(bubble *Bubble) bool {
 		Children: bubble.Children,
 		Fee:      bubble.Fee,
 	}
-	var recipient *Account
-	var receiveBubble, excessBubble, notifyBubble *Bubble
 	if jettonBubble.success {
-		newBubble.Children, receiveBubble = TakeBubble(newBubble.Children, func(b *Bubble) bool {
-			tx, ok := b.Info.(BubbleTx)
-			return ok && tx.decodedBody != nil && tx.decodedBody.Operation == "JettonInternalTransfer"
-		})
-		if receiveBubble != nil {
-			tx := receiveBubble.Info.(BubbleTx)
-			transfer.recipientWallet = tx.account.Address
-
-			receiveBubble.Children, excessBubble = TakeBubble(receiveBubble.Children, func(b *Bubble) bool {
-				tx, ok := b.Info.(BubbleTx)
-				return ok && tx.decodedBody != nil && tx.decodedBody.Operation == "Excess"
-			})
-			receiveBubble.Children, notifyBubble = TakeBubble(receiveBubble.Children, func(b *Bubble) bool {
-				tx, ok := b.Info.(BubbleTx)
-				return ok && tx.opCode != nil && *tx.opCode == 0x7362d09c //todo: replace with text
-			})
-			if excessBubble != nil {
-				newBubble.Children = append(newBubble.Children, excessBubble.Children...)
-			}
-			if notifyBubble != nil {
-				newBubble.Children = append(newBubble.Children, notifyBubble.Children...)
-				recipient = g.Pointer(notifyBubble.Info.(BubbleTx).account)
-			} else {
-				a, err := tongo.AccountIDFromTlb(intention.Destination)
-				if a != nil && err == nil {
-					recipient = &Account{
-						Address: *a,
-					}
+		newBubble.Children = ProcessChildren(bubble.Children,
+			func(child *Bubble) *Merge {
+				tx, ok := child.Info.(BubbleTx)
+				if !ok {
+					return nil
 				}
-			}
-			newBubble.Children = append(newBubble.Children, receiveBubble.Children...)
+				if !tx.operation("JettonInternalTransfer") {
+					return nil
+				}
+				children := ProcessChildren(child.Children,
+					func(excess *Bubble) *Merge {
+						tx, ok := child.Info.(BubbleTx)
+						if !ok {
+							return nil
+						}
+						if !tx.operation("Excess") {
+							return nil
+						}
+						return &Merge{children: excess.Children}
+					},
+					func(notify *Bubble) *Merge {
+						tx, ok := child.Info.(BubbleTx)
+						if !ok {
+							return nil
+						}
+						if !tx.operation("JettonNotify") {
+							return nil
+						}
+						transfer.recipient = g.Pointer(tx.account)
+						return &Merge{children: notify.Children}
+					},
+				)
+				return &Merge{children: children}
+			})
+		if transfer.recipient == nil {
+			transfer.recipient = parseAccount(intention.Destination)
 		}
 	}
-	transfer.recipient = recipient
 	newBubble.Info = transfer
-
 	newBubble.Fee.WhoPay = jettonBubble.inputFrom.Address
 	*bubble = newBubble
 	return true
