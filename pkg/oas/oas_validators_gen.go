@@ -274,6 +274,24 @@ func (s Action) Validate() error {
 			Error: err,
 		})
 	}
+	if err := func() error {
+		if s.SmartContractExec.Set {
+			if err := func() error {
+				if err := s.SmartContractExec.Value.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "SmartContractExec",
+			Error: err,
+		})
+	}
 	if len(failures) > 0 {
 		return &validate.Error{Fields: failures}
 	}
@@ -308,6 +326,8 @@ func (s ActionType) Validate() error {
 	case "AuctionBid":
 		return nil
 	case "NftPurchase":
+		return nil
+	case "SmartContractExec":
 		return nil
 	case "Unknown":
 		return nil
@@ -1012,6 +1032,31 @@ func (s RefundType) Validate() error {
 	default:
 		return errors.Errorf("invalid value: %v", s)
 	}
+}
+func (s SmartContractAction) Validate() error {
+	var failures []validate.FieldError
+	if err := func() error {
+		if s.Refund.Set {
+			if err := func() error {
+				if err := s.Refund.Value.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "refund",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
 }
 func (s StakingPoolInfoOK) Validate() error {
 	var failures []validate.FieldError

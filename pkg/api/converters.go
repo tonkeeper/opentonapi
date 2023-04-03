@@ -95,6 +95,8 @@ func convertTvmStackValue(v tlb.VmStackValue) (oas.TvmStackRecord, error) {
 			return oas.TvmStackRecord{}, err
 		}
 		return oas.TvmStackRecord{Type: oas.TvmStackRecordTypeCell, Cell: oas.NewOptString(boc)}, nil
+	case "VmStkTuple":
+		return oas.TvmStackRecord{Type: oas.TvmStackRecordTypeTuple, Tuple: []oas.TvmStackRecord{{Type: oas.TvmStackRecordTypeCell, Cell: oas.NewOptString("Tuple is not implemented")}}}, nil //todo: return values
 	default:
 		return oas.TvmStackRecord{}, fmt.Errorf("can't conver %v stack to rest json", v.SumType)
 	}

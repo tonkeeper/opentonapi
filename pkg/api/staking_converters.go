@@ -28,7 +28,7 @@ func convertStakingWhalesPool(address tongo.AccountID, w references.WhalesPoolIn
 func convertStakingTFPool(p core.TFPool, info addressbook.TFPoolInfo, apy float64) oas.PoolInfo {
 	name := info.Name
 	if name == "" {
-		name = "Unknown name ..." + p.Address.ToHuman(true, false)[43:]
+		name = p.Address.ToHuman(true, false)
 	}
 	return oas.PoolInfo{
 		Address:           p.Address.ToRaw(),

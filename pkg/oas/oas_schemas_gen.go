@@ -451,17 +451,18 @@ func (s *AccountStorageInfo) SetDuePayment(val int64) {
 
 // Ref: #/components/schemas/Action
 type Action struct {
-	Type            ActionType               `json:"type"`
-	Status          ActionStatus             `json:"status"`
-	TonTransfer     OptTonTransferAction     `json:"TonTransfer"`
-	ContractDeploy  OptContractDeployAction  `json:"ContractDeploy"`
-	JettonTransfer  OptJettonTransferAction  `json:"JettonTransfer"`
-	NftItemTransfer OptNftItemTransferAction `json:"NftItemTransfer"`
-	Subscribe       OptSubscriptionAction    `json:"Subscribe"`
-	UnSubscribe     OptUnSubscriptionAction  `json:"UnSubscribe"`
-	AuctionBid      OptAuctionBidAction      `json:"AuctionBid"`
-	NftPurchase     OptNftPurchaseAction     `json:"NftPurchase"`
-	SimplePreview   ActionSimplePreview      `json:"simple_preview"`
+	Type              ActionType               `json:"type"`
+	Status            ActionStatus             `json:"status"`
+	TonTransfer       OptTonTransferAction     `json:"TonTransfer"`
+	ContractDeploy    OptContractDeployAction  `json:"ContractDeploy"`
+	JettonTransfer    OptJettonTransferAction  `json:"JettonTransfer"`
+	NftItemTransfer   OptNftItemTransferAction `json:"NftItemTransfer"`
+	Subscribe         OptSubscriptionAction    `json:"Subscribe"`
+	UnSubscribe       OptUnSubscriptionAction  `json:"UnSubscribe"`
+	AuctionBid        OptAuctionBidAction      `json:"AuctionBid"`
+	NftPurchase       OptNftPurchaseAction     `json:"NftPurchase"`
+	SmartContractExec OptSmartContractAction   `json:"SmartContractExec"`
+	SimplePreview     ActionSimplePreview      `json:"simple_preview"`
 }
 
 // GetType returns the value of Type.
@@ -512,6 +513,11 @@ func (s Action) GetAuctionBid() OptAuctionBidAction {
 // GetNftPurchase returns the value of NftPurchase.
 func (s Action) GetNftPurchase() OptNftPurchaseAction {
 	return s.NftPurchase
+}
+
+// GetSmartContractExec returns the value of SmartContractExec.
+func (s Action) GetSmartContractExec() OptSmartContractAction {
+	return s.SmartContractExec
 }
 
 // GetSimplePreview returns the value of SimplePreview.
@@ -567,6 +573,11 @@ func (s *Action) SetAuctionBid(val OptAuctionBidAction) {
 // SetNftPurchase sets the value of NftPurchase.
 func (s *Action) SetNftPurchase(val OptNftPurchaseAction) {
 	s.NftPurchase = val
+}
+
+// SetSmartContractExec sets the value of SmartContractExec.
+func (s *Action) SetSmartContractExec(val OptSmartContractAction) {
+	s.SmartContractExec = val
 }
 
 // SetSimplePreview sets the value of SimplePreview.
@@ -692,15 +703,16 @@ const (
 type ActionType string
 
 const (
-	ActionTypeTonTransfer     ActionType = "TonTransfer"
-	ActionTypeJettonTransfer  ActionType = "JettonTransfer"
-	ActionTypeNftItemTransfer ActionType = "NftItemTransfer"
-	ActionTypeContractDeploy  ActionType = "ContractDeploy"
-	ActionTypeSubscribe       ActionType = "Subscribe"
-	ActionTypeUnSubscribe     ActionType = "UnSubscribe"
-	ActionTypeAuctionBid      ActionType = "AuctionBid"
-	ActionTypeNftPurchase     ActionType = "NftPurchase"
-	ActionTypeUnknown         ActionType = "Unknown"
+	ActionTypeTonTransfer       ActionType = "TonTransfer"
+	ActionTypeJettonTransfer    ActionType = "JettonTransfer"
+	ActionTypeNftItemTransfer   ActionType = "NftItemTransfer"
+	ActionTypeContractDeploy    ActionType = "ContractDeploy"
+	ActionTypeSubscribe         ActionType = "Subscribe"
+	ActionTypeUnSubscribe       ActionType = "UnSubscribe"
+	ActionTypeAuctionBid        ActionType = "AuctionBid"
+	ActionTypeNftPurchase       ActionType = "NftPurchase"
+	ActionTypeSmartContractExec ActionType = "SmartContractExec"
+	ActionTypeUnknown           ActionType = "Unknown"
 )
 
 // Ref: #/components/schemas/Auction
@@ -4100,6 +4112,52 @@ func (o OptSendMessageReq) Or(d SendMessageReq) SendMessageReq {
 	return d
 }
 
+// NewOptSmartContractAction returns new OptSmartContractAction with value set to v.
+func NewOptSmartContractAction(v SmartContractAction) OptSmartContractAction {
+	return OptSmartContractAction{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptSmartContractAction is optional SmartContractAction.
+type OptSmartContractAction struct {
+	Value SmartContractAction
+	Set   bool
+}
+
+// IsSet returns true if OptSmartContractAction was set.
+func (o OptSmartContractAction) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptSmartContractAction) Reset() {
+	var v SmartContractAction
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptSmartContractAction) SetTo(v SmartContractAction) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptSmartContractAction) Get() (v SmartContractAction, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptSmartContractAction) Or(d SmartContractAction) SmartContractAction {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptStateInit returns new OptStateInit with value set to v.
 func NewOptStateInit(v StateInit) OptStateInit {
 	return OptStateInit{
@@ -4875,6 +4933,77 @@ func (s *SendMessageReq) SetBoc(val string) {
 	s.Boc = val
 }
 
+// Ref: #/components/schemas/SmartContractAction
+type SmartContractAction struct {
+	Executor AccountAddress `json:"executor"`
+	Contract AccountAddress `json:"contract"`
+	// Amount in nanotons.
+	TonAttached int64     `json:"ton_attached"`
+	Operation   string    `json:"operation"`
+	Payload     OptString `json:"payload"`
+	Refund      OptRefund `json:"refund"`
+}
+
+// GetExecutor returns the value of Executor.
+func (s SmartContractAction) GetExecutor() AccountAddress {
+	return s.Executor
+}
+
+// GetContract returns the value of Contract.
+func (s SmartContractAction) GetContract() AccountAddress {
+	return s.Contract
+}
+
+// GetTonAttached returns the value of TonAttached.
+func (s SmartContractAction) GetTonAttached() int64 {
+	return s.TonAttached
+}
+
+// GetOperation returns the value of Operation.
+func (s SmartContractAction) GetOperation() string {
+	return s.Operation
+}
+
+// GetPayload returns the value of Payload.
+func (s SmartContractAction) GetPayload() OptString {
+	return s.Payload
+}
+
+// GetRefund returns the value of Refund.
+func (s SmartContractAction) GetRefund() OptRefund {
+	return s.Refund
+}
+
+// SetExecutor sets the value of Executor.
+func (s *SmartContractAction) SetExecutor(val AccountAddress) {
+	s.Executor = val
+}
+
+// SetContract sets the value of Contract.
+func (s *SmartContractAction) SetContract(val AccountAddress) {
+	s.Contract = val
+}
+
+// SetTonAttached sets the value of TonAttached.
+func (s *SmartContractAction) SetTonAttached(val int64) {
+	s.TonAttached = val
+}
+
+// SetOperation sets the value of Operation.
+func (s *SmartContractAction) SetOperation(val string) {
+	s.Operation = val
+}
+
+// SetPayload sets the value of Payload.
+func (s *SmartContractAction) SetPayload(val OptString) {
+	s.Payload = val
+}
+
+// SetRefund sets the value of Refund.
+func (s *SmartContractAction) SetRefund(val OptRefund) {
+	s.Refund = val
+}
+
 type StakingPoolInfoOK struct {
 	Implementation PoolImplementation `json:"implementation"`
 	Pool           PoolInfo           `json:"pool"`
@@ -5303,8 +5432,6 @@ type TonTransferAction struct {
 	// Amount in nanotons.
 	Amount  int64     `json:"amount"`
 	Comment OptString `json:"comment"`
-	// Raw hex encoded payload.
-	Payload OptString `json:"payload"`
 	Refund  OptRefund `json:"refund"`
 }
 
@@ -5326,11 +5453,6 @@ func (s TonTransferAction) GetAmount() int64 {
 // GetComment returns the value of Comment.
 func (s TonTransferAction) GetComment() OptString {
 	return s.Comment
-}
-
-// GetPayload returns the value of Payload.
-func (s TonTransferAction) GetPayload() OptString {
-	return s.Payload
 }
 
 // GetRefund returns the value of Refund.
@@ -5356,11 +5478,6 @@ func (s *TonTransferAction) SetAmount(val int64) {
 // SetComment sets the value of Comment.
 func (s *TonTransferAction) SetComment(val OptString) {
 	s.Comment = val
-}
-
-// SetPayload sets the value of Payload.
-func (s *TonTransferAction) SetPayload(val OptString) {
-	s.Payload = val
 }
 
 // SetRefund sets the value of Refund.

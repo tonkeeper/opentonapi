@@ -1,8 +1,11 @@
 package core
 
+import "github.com/tonkeeper/tongo/abi"
+
 type Trace struct {
 	Transaction
-	Children []*Trace
+	AccountInterfaces []abi.ContractInterface
+	Children          []*Trace
 }
 
 func (t *Trace) InProgress() bool {
