@@ -2,7 +2,9 @@ package api
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/opentonapi/pkg/oas"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
@@ -15,6 +17,12 @@ func (h Handler) GetAccount(ctx context.Context, params oas.GetAccountParams) (o
 		return &oas.BadRequest{Error: err.Error()}, nil
 	}
 	info, err := h.storage.GetAccountInfo(ctx, accountID)
+	if errors.Is(err, core.ErrEntityNotFound) {
+		return &oas.Account{
+			Address: accountID.ToRaw(),
+			Status:  string(tlb.AccountNone),
+		}, nil
+	}
 	if err != nil {
 		return &oas.BadRequest{Error: err.Error()}, nil
 	}

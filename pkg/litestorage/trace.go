@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/tongo"
+	"github.com/tonkeeper/tongo/abi"
 )
 
 func (s *LiteStorage) GetTrace(ctx context.Context, hash tongo.Bits256) (*core.Trace, error) {
@@ -37,6 +38,11 @@ func (s *LiteStorage) recursiveGetChildren(ctx context.Context, tx core.Transact
 			return core.Trace{}, err
 		}
 		trace.Children = append(trace.Children, &child)
+	}
+	var err error
+	trace.AccountInterfaces, err = s.accountInterfaces(tx.Account)
+	if err != nil {
+		return core.Trace{}, nil
 	}
 	tx.OutMsgs = externalMessages
 	return trace, nil
@@ -110,4 +116,8 @@ func (s *LiteStorage) searchTransactionInBlock(ctx context.Context, a tongo.Acco
 		}
 	}
 	return nil, fmt.Errorf("not found")
+}
+
+func (s *LiteStorage) accountInterfaces(id tongo.AccountID) ([]abi.ContractInterface, error) {
+	return nil, nil
 }

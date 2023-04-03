@@ -5,6 +5,7 @@ import (
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
+	"github.com/tonkeeper/tongo/tlb"
 	"golang.org/x/exp/slices"
 	"strings"
 )
@@ -92,6 +93,8 @@ type BubbleTx struct {
 	opCode      *uint32
 	decodedBody *core.DecodedMessageBody
 	init        []byte
+
+	accountWasActiveAtComputingTime bool
 }
 
 func (a Account) Is(i abi.ContractInterface) bool {
@@ -102,7 +105,7 @@ func (b BubbleTx) ToAction() *Action {
 	if b.external {
 		return nil
 	}
-	if b.opCode != nil && *b.opCode != 0 {
+	if b.opCode != nil && *b.opCode != 0 && b.accountWasActiveAtComputingTime && !b.account.Is(abi.Wallet) {
 		operation := fmt.Sprintf("0x%x", *b.opCode)
 		if b.decodedBody != nil {
 			operation = b.decodedBody.Operation
@@ -143,9 +146,10 @@ func FromTrace(trace *core.Trace) *Bubble {
 
 func fromTrace(trace *core.Trace, source *Account) *Bubble {
 	btx := BubbleTx{
-		success:  trace.Success,
-		account:  Account{Address: trace.Account, Interfaces: trace.AccountInterfaces},
-		external: trace.InMsg == nil || trace.InMsg.IsExternal(),
+		success:                         trace.Success,
+		account:                         Account{Address: trace.Account, Interfaces: trace.AccountInterfaces},
+		external:                        trace.InMsg == nil || trace.InMsg.IsExternal(),
+		accountWasActiveAtComputingTime: trace.Type != core.OrdinaryTx || trace.ComputePhase == nil || trace.ComputePhase.SkipReason != tlb.ComputeSkipReasonNoState,
 	}
 	if trace.InMsg != nil {
 		btx.bounce = trace.InMsg.Bounce
