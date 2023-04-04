@@ -48,7 +48,7 @@ func (h Handler) GetEvent(ctx context.Context, params oas.GetEventParams) (oas.G
 	}
 	b := bath.FromTrace(trace)
 	bath.MergeAllBubbles(b, bath.DefaultStraws)
-	actions, fees := bath.CollectActions(b)
+	actions, fees := bath.CollectActions(b, nil)
 	event := oas.Event{
 		EventID:    trace.Hash.Hex(),
 		Timestamp:  trace.Utime,
@@ -65,4 +65,57 @@ func (h Handler) GetEvent(ctx context.Context, params oas.GetEventParams) (oas.G
 		event.Fees[i] = convertFees(f)
 	}
 	return &event, nil
+}
+
+func (h Handler) GetEventsByAccount(ctx context.Context, params oas.GetEventsByAccountParams) (r oas.GetEventsByAccountRes, _ error) {
+	account, err := tongo.ParseAccountID(params.AccountID)
+	if err != nil {
+		return &oas.BadRequest{Error: err.Error()}, nil
+	}
+	traceIDs, err := h.storage.SearchTraces(ctx, account, params.Limit, optIntToPointer(params.BeforeLt), optIntToPointer(params.StartDate), optIntToPointer(params.EndDate))
+	events := make([]oas.AccountEvent, len(traceIDs))
+	var lastLT uint64
+	for i, traceID := range traceIDs {
+		trace, err := h.storage.GetTrace(ctx, traceID)
+		if err != nil {
+			return &oas.InternalError{Error: err.Error()}, nil
+		}
+		b := bath.FromTrace(trace)
+		bath.MergeAllBubbles(b, bath.DefaultStraws)
+		actions, fees := bath.CollectActions(b, &account)
+		e := oas.AccountEvent{
+			EventID:    trace.Hash.Hex(),
+			Account:    convertAccountAddress(account),
+			Timestamp:  trace.Utime,
+			Fee:        oas.Fee{Account: convertAccountAddress(account)},
+			IsScam:     false,
+			Lt:         int64(trace.Lt),
+			InProgress: trace.InProgress(),
+		}
+		for _, f := range fees {
+			if f.WhoPay == account {
+				e.Fee = convertFees(f)
+				break
+			}
+		}
+		for _, a := range actions {
+			e.Actions = append(e.Actions, convertAction(a))
+		}
+		if len(e.Actions) == 0 {
+			e.Actions = []oas.Action{{
+				Type:   oas.ActionTypeUnknown,
+				Status: oas.ActionStatusOk,
+			}}
+		}
+		events[i] = e
+		lastLT = trace.Lt
+	}
+	return &oas.AccountEvents{Events: events, NextFrom: int64(lastLT)}, nil
+}
+
+func optIntToPointer(o oas.OptInt64) *int64 {
+	if !o.IsSet() {
+		return nil
+	}
+	return &o.Value
 }

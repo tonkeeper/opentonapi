@@ -731,10 +731,9 @@ func (s AccountEvents) encodeFields(e *jx.Encoder) {
 		e.ArrEnd()
 	}
 	{
-		if s.NextFrom.Set {
-			e.FieldStart("next_from")
-			s.NextFrom.Encode(e)
-		}
+
+		e.FieldStart("next_from")
+		e.Int64(s.NextFrom)
 	}
 }
 
@@ -771,9 +770,11 @@ func (s *AccountEvents) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"events\"")
 			}
 		case "next_from":
+			requiredBitSet[0] |= 1 << 1
 			if err := func() error {
-				s.NextFrom.Reset()
-				if err := s.NextFrom.Decode(d); err != nil {
+				v, err := d.Int64()
+				s.NextFrom = int64(v)
+				if err != nil {
 					return err
 				}
 				return nil
@@ -790,7 +791,7 @@ func (s *AccountEvents) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b00000001,
+		0b00000011,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.

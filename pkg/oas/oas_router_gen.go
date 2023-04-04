@@ -145,8 +145,8 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 							return
 						}
-					case 'n': // Prefix: "ntfs"
-						if l := len("ntfs"); len(elem) >= l && elem[0:l] == "ntfs" {
+					case 'n': // Prefix: "nfts"
+						if l := len("nfts"); len(elem) >= l && elem[0:l] == "nfts" {
 							elem = elem[l:]
 						} else {
 							break
@@ -1028,8 +1028,8 @@ func (s *Server) FindRoute(method, path string) (r Route, _ bool) {
 								return
 							}
 						}
-					case 'n': // Prefix: "ntfs"
-						if l := len("ntfs"); len(elem) >= l && elem[0:l] == "ntfs" {
+					case 'n': // Prefix: "nfts"
+						if l := len("nfts"); len(elem) >= l && elem[0:l] == "nfts" {
 							elem = elem[l:]
 						} else {
 							break

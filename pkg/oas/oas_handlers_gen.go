@@ -1903,7 +1903,7 @@ func (s *Server) handleGetNftItemsByAddressesRequest(args [1]string, w http.Resp
 //
 // Get all NFT items by owner address.
 //
-// GET /v2/accounts/{account_id}/ntfs
+// GET /v2/accounts/{account_id}/nfts
 func (s *Server) handleGetNftItemsByOwnerRequest(args [1]string, w http.ResponseWriter, r *http.Request) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getNftItemsByOwner"),
@@ -1961,6 +1961,18 @@ func (s *Server) handleGetNftItemsByOwnerRequest(args [1]string, w http.Response
 					Name: "account_id",
 					In:   "path",
 				}: params.AccountID,
+				{
+					Name: "limit",
+					In:   "query",
+				}: params.Limit,
+				{
+					Name: "offset",
+					In:   "query",
+				}: params.Offset,
+				{
+					Name: "indirect_ownership",
+					In:   "query",
+				}: params.IndirectOwnership,
 			},
 			Raw: r,
 		}

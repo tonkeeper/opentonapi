@@ -7,6 +7,7 @@ import (
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/tlb"
 	"golang.org/x/exp/maps"
+	"golang.org/x/exp/slices"
 	"reflect"
 )
 
@@ -123,20 +124,22 @@ func (f Fee) String() string {
 	return fmt.Sprintf("%v: %v/%v/%v/%v/%v", f.WhoPay, f.Total(), f.Storage, f.Compute, f.Deposit, f.Refund)
 }
 
-func CollectActions(bubble *Bubble) ([]Action, []Fee) {
+func CollectActions(bubble *Bubble, forAccount *tongo.AccountID) ([]Action, []Fee) {
 	fees := make(map[tongo.AccountID]Fee)
-	actions := collectActions(bubble, fees)
+	actions := collectActions(bubble, fees, forAccount)
 	return actions, maps.Values(fees)
 }
 
-func collectActions(bubble *Bubble, fees map[tongo.AccountID]Fee) []Action {
+func collectActions(bubble *Bubble, fees map[tongo.AccountID]Fee, forAccount *tongo.AccountID) []Action {
 	var actions []Action
-	a := bubble.Info.ToAction()
-	if a != nil {
-		actions = append(actions, *a)
+	if forAccount == nil || slices.Contains(bubble.Accounts, *forAccount) {
+		a := bubble.Info.ToAction()
+		if a != nil {
+			actions = append(actions, *a)
+		}
 	}
 	for _, c := range bubble.Children {
-		a := collectActions(c, fees)
+		a := collectActions(c, fees, forAccount)
 		actions = append(actions, a...)
 	}
 	f := fees[bubble.Fee.WhoPay]

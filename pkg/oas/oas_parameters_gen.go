@@ -1394,6 +1394,11 @@ func decodeGetNftItemsByAddressesParams(args [1]string, r *http.Request) (params
 type GetNftItemsByOwnerParams struct {
 	// Account ID.
 	AccountID string
+	Limit     OptInt
+	Offset    OptInt
+	// Selling nft items in ton implemented usually via transfer items to special selling account. This
+	// option enables including items which owned not directly.
+	IndirectOwnership OptBool
 }
 
 func unpackGetNftItemsByOwnerParams(packed middleware.Parameters) (params GetNftItemsByOwnerParams) {
@@ -1404,10 +1409,38 @@ func unpackGetNftItemsByOwnerParams(packed middleware.Parameters) (params GetNft
 		}
 		params.AccountID = packed[key].(string)
 	}
+	{
+		key := middleware.ParameterKey{
+			Name: "limit",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.Limit = v.(OptInt)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "offset",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.Offset = v.(OptInt)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "indirect_ownership",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.IndirectOwnership = v.(OptBool)
+		}
+	}
 	return params
 }
 
 func decodeGetNftItemsByOwnerParams(args [1]string, r *http.Request) (params GetNftItemsByOwnerParams, _ error) {
+	q := uri.NewQueryDecoder(r.URL.Query())
 	// Decode path: account_id.
 	{
 		param := args[0]
@@ -1437,6 +1470,123 @@ func decodeGetNftItemsByOwnerParams(args [1]string, r *http.Request) (params Get
 			}
 		} else {
 			return params, errors.New("path: account_id: not specified")
+		}
+	}
+	// Set default value for query: limit.
+	{
+		val := int(1000)
+		params.Limit.SetTo(val)
+	}
+	// Decode query: limit.
+	{
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "limit",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotLimitVal int
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToInt(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotLimitVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.Limit.SetTo(paramsDotLimitVal)
+				return nil
+			}); err != nil {
+				return params, errors.Wrap(err, "query: limit: parse")
+			}
+		}
+	}
+	// Set default value for query: offset.
+	{
+		val := int(0)
+		params.Offset.SetTo(val)
+	}
+	// Decode query: offset.
+	{
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "offset",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotOffsetVal int
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToInt(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotOffsetVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.Offset.SetTo(paramsDotOffsetVal)
+				return nil
+			}); err != nil {
+				return params, errors.Wrap(err, "query: offset: parse")
+			}
+		}
+	}
+	// Set default value for query: indirect_ownership.
+	{
+		val := bool(false)
+		params.IndirectOwnership.SetTo(val)
+	}
+	// Decode query: indirect_ownership.
+	{
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "indirect_ownership",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotIndirectOwnershipVal bool
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToBool(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotIndirectOwnershipVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.IndirectOwnership.SetTo(paramsDotIndirectOwnershipVal)
+				return nil
+			}); err != nil {
+				return params, errors.Wrap(err, "query: indirect_ownership: parse")
+			}
 		}
 	}
 	return params, nil

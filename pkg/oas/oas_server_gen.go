@@ -126,7 +126,7 @@ type Handler interface {
 	//
 	// Get all NFT items by owner address.
 	//
-	// GET /v2/accounts/{account_id}/ntfs
+	// GET /v2/accounts/{account_id}/nfts
 	GetNftItemsByOwner(ctx context.Context, params GetNftItemsByOwnerParams) (GetNftItemsByOwnerRes, error)
 	// GetRawAccount implements getRawAccount operation.
 	//

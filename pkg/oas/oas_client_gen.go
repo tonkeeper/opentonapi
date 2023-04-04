@@ -1681,7 +1681,7 @@ func (c *Client) GetNftItemsByAddresses(ctx context.Context, params GetNftItemsB
 //
 // Get all NFT items by owner address.
 //
-// GET /v2/accounts/{account_id}/ntfs
+// GET /v2/accounts/{account_id}/nfts
 func (c *Client) GetNftItemsByOwner(ctx context.Context, params GetNftItemsByOwnerParams) (res GetNftItemsByOwnerRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getNftItemsByOwner"),
@@ -1730,7 +1730,62 @@ func (c *Client) GetNftItemsByOwner(ctx context.Context, params GetNftItemsByOwn
 		}
 		u.Path += e.Result()
 	}
-	u.Path += "/ntfs"
+	u.Path += "/nfts"
+
+	stage = "EncodeQueryParams"
+	q := uri.NewQueryEncoder()
+	{
+		// Encode "limit" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "limit",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.Limit.Get(); ok {
+				return e.EncodeValue(conv.IntToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "offset" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "offset",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.Offset.Get(); ok {
+				return e.EncodeValue(conv.IntToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "indirect_ownership" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "indirect_ownership",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.IndirectOwnership.Get(); ok {
+				return e.EncodeValue(conv.BoolToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	u.RawQuery = q.Values().Encode()
 
 	stage = "EncodeRequest"
 	r, err := ht.NewRequest(ctx, "GET", u, nil)
