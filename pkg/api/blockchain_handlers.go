@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"errors"
+	"github.com/tonkeeper/opentonapi/internal/g"
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/opentonapi/pkg/oas"
 	"github.com/tonkeeper/tongo"
@@ -56,4 +57,12 @@ func (h Handler) GetBlockTransactions(ctx context.Context, params oas.GetBlockTr
 		res.Transactions = append(res.Transactions, convertTransaction(*tx))
 	}
 	return &res, nil
+}
+
+func (h Handler) GetMasterchainHead(ctx context.Context) (r oas.GetMasterchainHeadRes, err error) {
+	header, err := h.storage.LastMasterchainBlockHeader(ctx)
+	if err != nil {
+		return &oas.InternalError{Error: err.Error()}, nil
+	}
+	return g.Pointer(convertBlockHeader(*header)), nil
 }

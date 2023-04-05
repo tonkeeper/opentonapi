@@ -313,10 +313,10 @@ type GetAccountTransactionsParams struct {
 	// Account ID.
 	AccountID string
 	// Omit this parameter to get last transactions.
-	MaxLt OptInt64
+	AfterLt OptInt64
 	// Omit this parameter to get last transactions.
-	MinLt OptInt64
-	Limit OptInt32
+	BeforeLt OptInt64
+	Limit    OptInt32
 }
 
 func unpackGetAccountTransactionsParams(packed middleware.Parameters) (params GetAccountTransactionsParams) {
@@ -329,20 +329,20 @@ func unpackGetAccountTransactionsParams(packed middleware.Parameters) (params Ge
 	}
 	{
 		key := middleware.ParameterKey{
-			Name: "max_lt",
+			Name: "after_lt",
 			In:   "query",
 		}
 		if v, ok := packed[key]; ok {
-			params.MaxLt = v.(OptInt64)
+			params.AfterLt = v.(OptInt64)
 		}
 	}
 	{
 		key := middleware.ParameterKey{
-			Name: "min_lt",
+			Name: "before_lt",
 			In:   "query",
 		}
 		if v, ok := packed[key]; ok {
-			params.MinLt = v.(OptInt64)
+			params.BeforeLt = v.(OptInt64)
 		}
 	}
 	{
@@ -390,17 +390,17 @@ func decodeGetAccountTransactionsParams(args [1]string, r *http.Request) (params
 			return params, errors.New("path: account_id: not specified")
 		}
 	}
-	// Decode query: max_lt.
+	// Decode query: after_lt.
 	{
 		cfg := uri.QueryParameterDecodingConfig{
-			Name:    "max_lt",
+			Name:    "after_lt",
 			Style:   uri.QueryStyleForm,
 			Explode: true,
 		}
 
 		if err := q.HasParam(cfg); err == nil {
 			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
-				var paramsDotMaxLtVal int64
+				var paramsDotAfterLtVal int64
 				if err := func() error {
 					val, err := d.DecodeValue()
 					if err != nil {
@@ -412,29 +412,29 @@ func decodeGetAccountTransactionsParams(args [1]string, r *http.Request) (params
 						return err
 					}
 
-					paramsDotMaxLtVal = c
+					paramsDotAfterLtVal = c
 					return nil
 				}(); err != nil {
 					return err
 				}
-				params.MaxLt.SetTo(paramsDotMaxLtVal)
+				params.AfterLt.SetTo(paramsDotAfterLtVal)
 				return nil
 			}); err != nil {
-				return params, errors.Wrap(err, "query: max_lt: parse")
+				return params, errors.Wrap(err, "query: after_lt: parse")
 			}
 		}
 	}
-	// Decode query: min_lt.
+	// Decode query: before_lt.
 	{
 		cfg := uri.QueryParameterDecodingConfig{
-			Name:    "min_lt",
+			Name:    "before_lt",
 			Style:   uri.QueryStyleForm,
 			Explode: true,
 		}
 
 		if err := q.HasParam(cfg); err == nil {
 			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
-				var paramsDotMinLtVal int64
+				var paramsDotBeforeLtVal int64
 				if err := func() error {
 					val, err := d.DecodeValue()
 					if err != nil {
@@ -446,15 +446,15 @@ func decodeGetAccountTransactionsParams(args [1]string, r *http.Request) (params
 						return err
 					}
 
-					paramsDotMinLtVal = c
+					paramsDotBeforeLtVal = c
 					return nil
 				}(); err != nil {
 					return err
 				}
-				params.MinLt.SetTo(paramsDotMinLtVal)
+				params.BeforeLt.SetTo(paramsDotBeforeLtVal)
 				return nil
 			}); err != nil {
-				return params, errors.Wrap(err, "query: min_lt: parse")
+				return params, errors.Wrap(err, "query: before_lt: parse")
 			}
 		}
 	}

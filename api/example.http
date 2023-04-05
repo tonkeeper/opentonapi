@@ -38,3 +38,9 @@ GET {{host}}/v2/accounts/EQAs87W4yJHlF8mt29ocA4agnMrLsOP69jC1HPyBUjJay-7l/nfts
 
 ###
 GET {{host}}/v2/accounts/EQAs87W4yJHlF8mt29ocA4agnMrLsOP69jC1HPyBUjJay-7l/events?limit=2
+
+###
+GET {{host}}/v2/blockchain/masterchain-head
+
+###
+GET {{host}}/v2/blockchain/accounts/EQAs87W4yJHlF8mt29ocA4agnMrLsOP69jC1HPyBUjJay-7l/transactions?limit=5

@@ -152,14 +152,14 @@ paths:
         - Blockchain
       parameters:
         - $ref: '#/components/parameters/accountIdParameter'
-        - name: max_lt
+        - name: after_lt
           in: query
           description: "omit this parameter to get last transactions"
           schema:
             type: integer
             format: int64
-            example: 25758317000002
-        - name: min_lt
+            example: ""
+        - name: before_lt
           in: query
           description: "omit this parameter to get last transactions"
           schema:
