@@ -279,7 +279,7 @@ func (*AccountEvent) emulateMessageRes() {}
 // Ref: #/components/schemas/AccountEvents
 type AccountEvents struct {
 	Events   []AccountEvent `json:"events"`
-	NextFrom OptInt64       `json:"next_from"`
+	NextFrom int64          `json:"next_from"`
 }
 
 // GetEvents returns the value of Events.
@@ -288,7 +288,7 @@ func (s AccountEvents) GetEvents() []AccountEvent {
 }
 
 // GetNextFrom returns the value of NextFrom.
-func (s AccountEvents) GetNextFrom() OptInt64 {
+func (s AccountEvents) GetNextFrom() int64 {
 	return s.NextFrom
 }
 
@@ -298,7 +298,7 @@ func (s *AccountEvents) SetEvents(val []AccountEvent) {
 }
 
 // SetNextFrom sets the value of NextFrom.
-func (s *AccountEvents) SetNextFrom(val OptInt64) {
+func (s *AccountEvents) SetNextFrom(val int64) {
 	s.NextFrom = val
 }
 
@@ -3324,6 +3324,52 @@ func (o OptEmulateMessageReq) Get() (v EmulateMessageReq, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptEmulateMessageReq) Or(d EmulateMessageReq) EmulateMessageReq {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptInt returns new OptInt with value set to v.
+func NewOptInt(v int) OptInt {
+	return OptInt{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptInt is optional int.
+type OptInt struct {
+	Value int
+	Set   bool
+}
+
+// IsSet returns true if OptInt was set.
+func (o OptInt) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptInt) Reset() {
+	var v int
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptInt) SetTo(v int) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptInt) Get() (v int, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptInt) Or(d int) int {
 	if v, ok := o.Get(); ok {
 		return v
 	}

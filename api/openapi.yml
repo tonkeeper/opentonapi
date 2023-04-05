@@ -352,7 +352,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalError'
 
-  /v2/accounts/{account_id}/ntfs:
+  /v2/accounts/{account_id}/nfts:
     get:
       description: Get all NFT items by owner address
       operationId: getNftItemsByOwner
@@ -360,6 +360,15 @@ paths:
         - Accounts
       parameters:
         - $ref: '#/components/parameters/accountIdParameter'
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/offset'
+        - in: query
+          name: indirect_ownership
+          required: false
+          description: "Selling nft items in ton implemented usually via transfer items to special selling account. This option enables including items which owned not directly."
+          schema:
+            type: boolean
+            default: false
       responses:
         '200':
           description: "nft items"
@@ -930,6 +939,21 @@ components:
         type: string
         example: "ru-RU,ru;q=0.5"
         default: "en"
+    limit:
+      in: query
+      name: limit
+      required: false
+      schema:
+        type: integer
+        default: 1000
+    offset:
+      in: query
+      name: offset
+      required: false
+      schema:
+        type: integer
+        default: 0
+
   requestBodies:
 
     MethodParameters:
@@ -2201,6 +2225,7 @@ components:
       type: object
       required:
         - events
+        - next_from
       properties:
         events:
           type: array

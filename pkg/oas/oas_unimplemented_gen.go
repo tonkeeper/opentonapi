@@ -188,7 +188,7 @@ func (UnimplementedHandler) GetNftItemsByAddresses(ctx context.Context, params G
 //
 // Get all NFT items by owner address.
 //
-// GET /v2/accounts/{account_id}/ntfs
+// GET /v2/accounts/{account_id}/nfts
 func (UnimplementedHandler) GetNftItemsByOwner(ctx context.Context, params GetNftItemsByOwnerParams) (r GetNftItemsByOwnerRes, _ error) {
 	return r, ht.ErrNotImplemented
 }

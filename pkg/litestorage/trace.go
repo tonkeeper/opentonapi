@@ -21,6 +21,10 @@ func (s *LiteStorage) GetTrace(ctx context.Context, hash tongo.Bits256) (*core.T
 	return &trace, err
 }
 
+func (s *LiteStorage) SearchTraces(ctx context.Context, a tongo.AccountID, limit int, beforeLT *int64, startTime *int64, endTime *int64) ([]tongo.Bits256, error) {
+	return nil, nil
+}
+
 func (s *LiteStorage) recursiveGetChildren(ctx context.Context, tx core.Transaction) (core.Trace, error) {
 	trace := core.Trace{Transaction: tx}
 	externalMessages := make([]core.Message, 0, len(tx.OutMsgs))

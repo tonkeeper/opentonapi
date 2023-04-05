@@ -146,6 +146,10 @@ func fromTrace(trace *core.Trace, source *Account) *Bubble {
 		external:                        trace.InMsg == nil || trace.InMsg.IsExternal(),
 		accountWasActiveAtComputingTime: trace.Type != core.OrdinaryTx || trace.ComputePhase == nil || trace.ComputePhase.SkipReason != tlb.ComputeSkipReasonNoState,
 	}
+	accounts := []tongo.AccountID{trace.Account}
+	if source != nil {
+		accounts = append(accounts, source.Address)
+	}
 	if trace.InMsg != nil {
 		btx.bounce = trace.InMsg.Bounce
 		btx.bounced = trace.InMsg.Bounced
@@ -158,7 +162,7 @@ func fromTrace(trace *core.Trace, source *Account) *Bubble {
 
 	b := Bubble{
 		Info:     btx,
-		Accounts: []tongo.AccountID{trace.Account},
+		Accounts: accounts,
 		Children: make([]*Bubble, len(trace.Children)),
 		Fee: Fee{
 			WhoPay:  trace.Account,
