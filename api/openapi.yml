@@ -1696,13 +1696,15 @@ components:
         - blacklist
         - none
 
-    Jetton:
+    JettonPreview:
       type: object
       required:
         - address
         - name
         - symbol
         - decimals
+        - verification
+        - image
       properties:
         address:
           type: string
@@ -1728,10 +1730,8 @@ components:
         - balance
         - jetton_address
         - wallet_address
-        - verification
+        - jetton
       properties:
-        verification:
-          $ref: '#/components/schemas/JettonVerificationType'
         balance:
           type: string
           example: 597968399
@@ -1740,8 +1740,8 @@ components:
           example: 0:6553FB4A2128297A978C153F6DDF14C37A2566A36E5D5BFE2F50E97A8C877F04
         wallet_address:
           $ref: '#/components/schemas/AccountAddress'
-        metadata:
-          $ref: '#/components/schemas/Jetton'
+        jetton:
+          $ref: '#/components/schemas/JettonPreview'
 
     JettonsBalances:
       type: object
@@ -2055,7 +2055,7 @@ components:
         refund:
           $ref: '#/components/schemas/Refund'
         jetton:
-          $ref: '#/components/schemas/Jetton'
+          $ref: '#/components/schemas/JettonPreview'
 
     ContractDeployAction:
       type: object
@@ -2516,8 +2516,8 @@ components:
           type: string
           example: WTON
         decimals:
-          type: integer
-          example: 9
+          type: string
+          example: "9"
         image:
           type: string
           example: "https://cache.tonapi.io/images/jetton.jpg"

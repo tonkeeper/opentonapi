@@ -1796,88 +1796,12 @@ func (*InternalError) sendMessageRes()               {}
 func (*InternalError) stakingPoolInfoRes()           {}
 func (*InternalError) stakingPoolsRes()              {}
 
-// Ref: #/components/schemas/Jetton
-type Jetton struct {
-	Address      string                    `json:"address"`
-	Name         string                    `json:"name"`
-	Symbol       string                    `json:"symbol"`
-	Decimals     int                       `json:"decimals"`
-	Image        OptString                 `json:"image"`
-	Verification OptJettonVerificationType `json:"verification"`
-}
-
-// GetAddress returns the value of Address.
-func (s Jetton) GetAddress() string {
-	return s.Address
-}
-
-// GetName returns the value of Name.
-func (s Jetton) GetName() string {
-	return s.Name
-}
-
-// GetSymbol returns the value of Symbol.
-func (s Jetton) GetSymbol() string {
-	return s.Symbol
-}
-
-// GetDecimals returns the value of Decimals.
-func (s Jetton) GetDecimals() int {
-	return s.Decimals
-}
-
-// GetImage returns the value of Image.
-func (s Jetton) GetImage() OptString {
-	return s.Image
-}
-
-// GetVerification returns the value of Verification.
-func (s Jetton) GetVerification() OptJettonVerificationType {
-	return s.Verification
-}
-
-// SetAddress sets the value of Address.
-func (s *Jetton) SetAddress(val string) {
-	s.Address = val
-}
-
-// SetName sets the value of Name.
-func (s *Jetton) SetName(val string) {
-	s.Name = val
-}
-
-// SetSymbol sets the value of Symbol.
-func (s *Jetton) SetSymbol(val string) {
-	s.Symbol = val
-}
-
-// SetDecimals sets the value of Decimals.
-func (s *Jetton) SetDecimals(val int) {
-	s.Decimals = val
-}
-
-// SetImage sets the value of Image.
-func (s *Jetton) SetImage(val OptString) {
-	s.Image = val
-}
-
-// SetVerification sets the value of Verification.
-func (s *Jetton) SetVerification(val OptJettonVerificationType) {
-	s.Verification = val
-}
-
 // Ref: #/components/schemas/JettonBalance
 type JettonBalance struct {
-	Verification  JettonVerificationType `json:"verification"`
-	Balance       string                 `json:"balance"`
-	JettonAddress string                 `json:"jetton_address"`
-	WalletAddress AccountAddress         `json:"wallet_address"`
-	Metadata      OptJetton              `json:"metadata"`
-}
-
-// GetVerification returns the value of Verification.
-func (s JettonBalance) GetVerification() JettonVerificationType {
-	return s.Verification
+	Balance       string         `json:"balance"`
+	JettonAddress string         `json:"jetton_address"`
+	WalletAddress AccountAddress `json:"wallet_address"`
+	Jetton        JettonPreview  `json:"jetton"`
 }
 
 // GetBalance returns the value of Balance.
@@ -1895,14 +1819,9 @@ func (s JettonBalance) GetWalletAddress() AccountAddress {
 	return s.WalletAddress
 }
 
-// GetMetadata returns the value of Metadata.
-func (s JettonBalance) GetMetadata() OptJetton {
-	return s.Metadata
-}
-
-// SetVerification sets the value of Verification.
-func (s *JettonBalance) SetVerification(val JettonVerificationType) {
-	s.Verification = val
+// GetJetton returns the value of Jetton.
+func (s JettonBalance) GetJetton() JettonPreview {
+	return s.Jetton
 }
 
 // SetBalance sets the value of Balance.
@@ -1920,9 +1839,9 @@ func (s *JettonBalance) SetWalletAddress(val AccountAddress) {
 	s.WalletAddress = val
 }
 
-// SetMetadata sets the value of Metadata.
-func (s *JettonBalance) SetMetadata(val OptJetton) {
-	s.Metadata = val
+// SetJetton sets the value of Jetton.
+func (s *JettonBalance) SetJetton(val JettonPreview) {
+	s.Jetton = val
 }
 
 // Ref: #/components/schemas/JettonInfo
@@ -1980,7 +1899,7 @@ type JettonMetadata struct {
 	Address     string    `json:"address"`
 	Name        string    `json:"name"`
 	Symbol      string    `json:"symbol"`
-	Decimals    int       `json:"decimals"`
+	Decimals    string    `json:"decimals"`
 	Image       OptString `json:"image"`
 	Description OptString `json:"description"`
 	Social      []string  `json:"social"`
@@ -2004,7 +1923,7 @@ func (s JettonMetadata) GetSymbol() string {
 }
 
 // GetDecimals returns the value of Decimals.
-func (s JettonMetadata) GetDecimals() int {
+func (s JettonMetadata) GetDecimals() string {
 	return s.Decimals
 }
 
@@ -2049,7 +1968,7 @@ func (s *JettonMetadata) SetSymbol(val string) {
 }
 
 // SetDecimals sets the value of Decimals.
-func (s *JettonMetadata) SetDecimals(val int) {
+func (s *JettonMetadata) SetDecimals(val string) {
 	s.Decimals = val
 }
 
@@ -2078,6 +1997,76 @@ func (s *JettonMetadata) SetCatalogs(val []string) {
 	s.Catalogs = val
 }
 
+// Ref: #/components/schemas/JettonPreview
+type JettonPreview struct {
+	Address      string                 `json:"address"`
+	Name         string                 `json:"name"`
+	Symbol       string                 `json:"symbol"`
+	Decimals     int                    `json:"decimals"`
+	Image        string                 `json:"image"`
+	Verification JettonVerificationType `json:"verification"`
+}
+
+// GetAddress returns the value of Address.
+func (s JettonPreview) GetAddress() string {
+	return s.Address
+}
+
+// GetName returns the value of Name.
+func (s JettonPreview) GetName() string {
+	return s.Name
+}
+
+// GetSymbol returns the value of Symbol.
+func (s JettonPreview) GetSymbol() string {
+	return s.Symbol
+}
+
+// GetDecimals returns the value of Decimals.
+func (s JettonPreview) GetDecimals() int {
+	return s.Decimals
+}
+
+// GetImage returns the value of Image.
+func (s JettonPreview) GetImage() string {
+	return s.Image
+}
+
+// GetVerification returns the value of Verification.
+func (s JettonPreview) GetVerification() JettonVerificationType {
+	return s.Verification
+}
+
+// SetAddress sets the value of Address.
+func (s *JettonPreview) SetAddress(val string) {
+	s.Address = val
+}
+
+// SetName sets the value of Name.
+func (s *JettonPreview) SetName(val string) {
+	s.Name = val
+}
+
+// SetSymbol sets the value of Symbol.
+func (s *JettonPreview) SetSymbol(val string) {
+	s.Symbol = val
+}
+
+// SetDecimals sets the value of Decimals.
+func (s *JettonPreview) SetDecimals(val int) {
+	s.Decimals = val
+}
+
+// SetImage sets the value of Image.
+func (s *JettonPreview) SetImage(val string) {
+	s.Image = val
+}
+
+// SetVerification sets the value of Verification.
+func (s *JettonPreview) SetVerification(val JettonVerificationType) {
+	s.Verification = val
+}
+
 // Ref: #/components/schemas/JettonTransferAction
 type JettonTransferAction struct {
 	Sender           OptAccountAddress `json:"sender"`
@@ -2085,10 +2074,10 @@ type JettonTransferAction struct {
 	SendersWallet    string            `json:"senders_wallet"`
 	RecipientsWallet string            `json:"recipients_wallet"`
 	// Amount in quanta of tokens.
-	Amount  string    `json:"amount"`
-	Comment OptString `json:"comment"`
-	Refund  OptRefund `json:"refund"`
-	Jetton  Jetton    `json:"jetton"`
+	Amount  string        `json:"amount"`
+	Comment OptString     `json:"comment"`
+	Refund  OptRefund     `json:"refund"`
+	Jetton  JettonPreview `json:"jetton"`
 }
 
 // GetSender returns the value of Sender.
@@ -2127,7 +2116,7 @@ func (s JettonTransferAction) GetRefund() OptRefund {
 }
 
 // GetJetton returns the value of Jetton.
-func (s JettonTransferAction) GetJetton() Jetton {
+func (s JettonTransferAction) GetJetton() JettonPreview {
 	return s.Jetton
 }
 
@@ -2167,7 +2156,7 @@ func (s *JettonTransferAction) SetRefund(val OptRefund) {
 }
 
 // SetJetton sets the value of Jetton.
-func (s *JettonTransferAction) SetJetton(val Jetton) {
+func (s *JettonTransferAction) SetJetton(val JettonPreview) {
 	s.Jetton = val
 }
 
@@ -3468,52 +3457,6 @@ func (o OptInt64) Or(d int64) int64 {
 	return d
 }
 
-// NewOptJetton returns new OptJetton with value set to v.
-func NewOptJetton(v Jetton) OptJetton {
-	return OptJetton{
-		Value: v,
-		Set:   true,
-	}
-}
-
-// OptJetton is optional Jetton.
-type OptJetton struct {
-	Value Jetton
-	Set   bool
-}
-
-// IsSet returns true if OptJetton was set.
-func (o OptJetton) IsSet() bool { return o.Set }
-
-// Reset unsets value.
-func (o *OptJetton) Reset() {
-	var v Jetton
-	o.Value = v
-	o.Set = false
-}
-
-// SetTo sets value to v.
-func (o *OptJetton) SetTo(v Jetton) {
-	o.Set = true
-	o.Value = v
-}
-
-// Get returns value and boolean that denotes whether value was set.
-func (o OptJetton) Get() (v Jetton, ok bool) {
-	if !o.Set {
-		return v, false
-	}
-	return o.Value, true
-}
-
-// Or returns value if set, or given parameter if does not.
-func (o OptJetton) Or(d Jetton) Jetton {
-	if v, ok := o.Get(); ok {
-		return v
-	}
-	return d
-}
-
 // NewOptJettonTransferAction returns new OptJettonTransferAction with value set to v.
 func NewOptJettonTransferAction(v JettonTransferAction) OptJettonTransferAction {
 	return OptJettonTransferAction{
@@ -3554,52 +3497,6 @@ func (o OptJettonTransferAction) Get() (v JettonTransferAction, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptJettonTransferAction) Or(d JettonTransferAction) JettonTransferAction {
-	if v, ok := o.Get(); ok {
-		return v
-	}
-	return d
-}
-
-// NewOptJettonVerificationType returns new OptJettonVerificationType with value set to v.
-func NewOptJettonVerificationType(v JettonVerificationType) OptJettonVerificationType {
-	return OptJettonVerificationType{
-		Value: v,
-		Set:   true,
-	}
-}
-
-// OptJettonVerificationType is optional JettonVerificationType.
-type OptJettonVerificationType struct {
-	Value JettonVerificationType
-	Set   bool
-}
-
-// IsSet returns true if OptJettonVerificationType was set.
-func (o OptJettonVerificationType) IsSet() bool { return o.Set }
-
-// Reset unsets value.
-func (o *OptJettonVerificationType) Reset() {
-	var v JettonVerificationType
-	o.Value = v
-	o.Set = false
-}
-
-// SetTo sets value to v.
-func (o *OptJettonVerificationType) SetTo(v JettonVerificationType) {
-	o.Set = true
-	o.Value = v
-}
-
-// Get returns value and boolean that denotes whether value was set.
-func (o OptJettonVerificationType) Get() (v JettonVerificationType, ok bool) {
-	if !o.Set {
-		return v, false
-	}
-	return o.Value, true
-}
-
-// Or returns value if set, or given parameter if does not.
-func (o OptJettonVerificationType) Or(d JettonVerificationType) JettonVerificationType {
 	if v, ok := o.Get(); ok {
 		return v
 	}
