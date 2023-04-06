@@ -19,3 +19,7 @@ func (s *LiteStorage) SearchNFTs(ctx context.Context,
 ) ([]tongo.AccountID, error) {
 	return nil, nil
 }
+
+func (s *LiteStorage) GetNftCollections(ctx context.Context, limit, offset *int32) ([]core.NftCollection, error) {
+	return nil, nil
+}
