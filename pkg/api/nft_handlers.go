@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"encoding/json"
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/opentonapi/pkg/oas"
 	"github.com/tonkeeper/tongo"
@@ -54,4 +55,26 @@ func (h Handler) GetNftItemsByOwner(ctx context.Context, params oas.GetNftItemsB
 		result.NftItems = append(result.NftItems, convertNFT(i))
 	}
 	return &result, nil
+}
+
+func (h Handler) GetNftCollections(ctx context.Context, params oas.GetNftCollectionsParams) (oas.GetNftCollectionsRes, error) {
+	collections, err := h.storage.GetNftCollections(ctx, &params.Limit.Value, &params.Offset.Value)
+	if err != nil {
+		return &oas.InternalError{Error: err.Error()}, nil
+	}
+	var collectionsRes oas.NftCollections
+	for _, collection := range collections {
+		col := convertNftCollection(collection)
+		if collection.Metadata == nil {
+			collectionsRes.NftCollections = append(collectionsRes.NftCollections, col)
+			continue
+		}
+		var metadata oas.OptNftCollectionMetadata
+		err = json.Unmarshal(collection.Metadata, &metadata)
+		if err == nil {
+			col.Metadata = metadata
+		}
+		collectionsRes.NftCollections = append(collectionsRes.NftCollections, col)
+	}
+	return &collectionsRes, nil
 }

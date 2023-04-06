@@ -17,6 +17,15 @@ type NftItem struct {
 	Metadata          map[string]interface{}
 }
 
+type NftCollection struct {
+	Address           tongo.AccountID
+	NextItemIndex     uint64
+	OwnerAddress      *tongo.AccountID
+	ContentLayout     int
+	CollectionContent []byte
+	Metadata          []byte
+}
+
 type NftSaleInfo struct {
 	Contract    tongo.AccountID
 	Marketplace tongo.AccountID

@@ -1,6 +1,7 @@
 package api
 
 import (
+	"fmt"
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/opentonapi/pkg/oas"
 )
@@ -18,4 +19,14 @@ func convertNFT(item core.NftItem) oas.NftItem {
 		DNS:        pointerToOptString(item.DNS),
 		ApprovedBy: nil, //todo: add
 	}
+}
+
+func convertNftCollection(collection core.NftCollection) oas.NftCollection {
+	c := oas.NftCollection{
+		Address:              collection.Address.ToRaw(),
+		NextItemIndex:        int64(collection.NextItemIndex),
+		RawCollectionContent: fmt.Sprintf("%x", collection.CollectionContent[:]),
+		Owner:                convertOptAccountAddress(collection.OwnerAddress),
+	}
+	return c
 }

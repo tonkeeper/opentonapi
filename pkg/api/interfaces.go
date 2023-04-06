@@ -42,6 +42,7 @@ type storage interface {
 		onlyVerified bool,
 		limit, offset int,
 	) ([]tongo.AccountID, error)
+	GetNftCollections(ctx context.Context, limit, offset *int32) ([]core.NftCollection, error)
 
 	GetJettonWalletsByOwnerAddress(ctx context.Context, address tongo.AccountID) ([]core.JettonWallet, error)
 	GetJettonMasterMetadata(ctx context.Context, master tongo.AccountID) (tongo.JettonMetadata, error)
