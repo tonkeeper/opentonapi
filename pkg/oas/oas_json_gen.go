@@ -5206,191 +5206,6 @@ func (s *InternalError) UnmarshalJSON(data []byte) error {
 }
 
 // Encode implements json.Marshaler.
-func (s Jetton) Encode(e *jx.Encoder) {
-	e.ObjStart()
-	s.encodeFields(e)
-	e.ObjEnd()
-}
-
-// encodeFields encodes fields.
-func (s Jetton) encodeFields(e *jx.Encoder) {
-	{
-
-		e.FieldStart("address")
-		e.Str(s.Address)
-	}
-	{
-
-		e.FieldStart("name")
-		e.Str(s.Name)
-	}
-	{
-
-		e.FieldStart("symbol")
-		e.Str(s.Symbol)
-	}
-	{
-
-		e.FieldStart("decimals")
-		e.Int(s.Decimals)
-	}
-	{
-		if s.Image.Set {
-			e.FieldStart("image")
-			s.Image.Encode(e)
-		}
-	}
-	{
-		if s.Verification.Set {
-			e.FieldStart("verification")
-			s.Verification.Encode(e)
-		}
-	}
-}
-
-var jsonFieldsNameOfJetton = [6]string{
-	0: "address",
-	1: "name",
-	2: "symbol",
-	3: "decimals",
-	4: "image",
-	5: "verification",
-}
-
-// Decode decodes Jetton from json.
-func (s *Jetton) Decode(d *jx.Decoder) error {
-	if s == nil {
-		return errors.New("invalid: unable to decode Jetton to nil")
-	}
-	var requiredBitSet [1]uint8
-
-	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
-		switch string(k) {
-		case "address":
-			requiredBitSet[0] |= 1 << 0
-			if err := func() error {
-				v, err := d.Str()
-				s.Address = string(v)
-				if err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"address\"")
-			}
-		case "name":
-			requiredBitSet[0] |= 1 << 1
-			if err := func() error {
-				v, err := d.Str()
-				s.Name = string(v)
-				if err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"name\"")
-			}
-		case "symbol":
-			requiredBitSet[0] |= 1 << 2
-			if err := func() error {
-				v, err := d.Str()
-				s.Symbol = string(v)
-				if err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"symbol\"")
-			}
-		case "decimals":
-			requiredBitSet[0] |= 1 << 3
-			if err := func() error {
-				v, err := d.Int()
-				s.Decimals = int(v)
-				if err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"decimals\"")
-			}
-		case "image":
-			if err := func() error {
-				s.Image.Reset()
-				if err := s.Image.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"image\"")
-			}
-		case "verification":
-			if err := func() error {
-				s.Verification.Reset()
-				if err := s.Verification.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"verification\"")
-			}
-		default:
-			return d.Skip()
-		}
-		return nil
-	}); err != nil {
-		return errors.Wrap(err, "decode Jetton")
-	}
-	// Validate required fields.
-	var failures []validate.FieldError
-	for i, mask := range [1]uint8{
-		0b00001111,
-	} {
-		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
-			// Mask only required fields and check equality to mask using XOR.
-			//
-			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
-			// Bits of fields which would be set are actually bits of missed fields.
-			missed := bits.OnesCount8(result)
-			for bitN := 0; bitN < missed; bitN++ {
-				bitIdx := bits.TrailingZeros8(result)
-				fieldIdx := i*8 + bitIdx
-				var name string
-				if fieldIdx < len(jsonFieldsNameOfJetton) {
-					name = jsonFieldsNameOfJetton[fieldIdx]
-				} else {
-					name = strconv.Itoa(fieldIdx)
-				}
-				failures = append(failures, validate.FieldError{
-					Name:  name,
-					Error: validate.ErrFieldRequired,
-				})
-				// Reset bit.
-				result &^= 1 << bitIdx
-			}
-		}
-	}
-	if len(failures) > 0 {
-		return &validate.Error{Fields: failures}
-	}
-
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s Jetton) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *Jetton) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
-// Encode implements json.Marshaler.
 func (s JettonBalance) Encode(e *jx.Encoder) {
 	e.ObjStart()
 	s.encodeFields(e)
@@ -5399,11 +5214,6 @@ func (s JettonBalance) Encode(e *jx.Encoder) {
 
 // encodeFields encodes fields.
 func (s JettonBalance) encodeFields(e *jx.Encoder) {
-	{
-
-		e.FieldStart("verification")
-		s.Verification.Encode(e)
-	}
 	{
 
 		e.FieldStart("balance")
@@ -5420,19 +5230,17 @@ func (s JettonBalance) encodeFields(e *jx.Encoder) {
 		s.WalletAddress.Encode(e)
 	}
 	{
-		if s.Metadata.Set {
-			e.FieldStart("metadata")
-			s.Metadata.Encode(e)
-		}
+
+		e.FieldStart("jetton")
+		s.Jetton.Encode(e)
 	}
 }
 
-var jsonFieldsNameOfJettonBalance = [5]string{
-	0: "verification",
-	1: "balance",
-	2: "jetton_address",
-	3: "wallet_address",
-	4: "metadata",
+var jsonFieldsNameOfJettonBalance = [4]string{
+	0: "balance",
+	1: "jetton_address",
+	2: "wallet_address",
+	3: "jetton",
 }
 
 // Decode decodes JettonBalance from json.
@@ -5444,18 +5252,8 @@ func (s *JettonBalance) Decode(d *jx.Decoder) error {
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
-		case "verification":
-			requiredBitSet[0] |= 1 << 0
-			if err := func() error {
-				if err := s.Verification.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"verification\"")
-			}
 		case "balance":
-			requiredBitSet[0] |= 1 << 1
+			requiredBitSet[0] |= 1 << 0
 			if err := func() error {
 				v, err := d.Str()
 				s.Balance = string(v)
@@ -5467,7 +5265,7 @@ func (s *JettonBalance) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"balance\"")
 			}
 		case "jetton_address":
-			requiredBitSet[0] |= 1 << 2
+			requiredBitSet[0] |= 1 << 1
 			if err := func() error {
 				v, err := d.Str()
 				s.JettonAddress = string(v)
@@ -5479,7 +5277,7 @@ func (s *JettonBalance) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"jetton_address\"")
 			}
 		case "wallet_address":
-			requiredBitSet[0] |= 1 << 3
+			requiredBitSet[0] |= 1 << 2
 			if err := func() error {
 				if err := s.WalletAddress.Decode(d); err != nil {
 					return err
@@ -5488,15 +5286,15 @@ func (s *JettonBalance) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"wallet_address\"")
 			}
-		case "metadata":
+		case "jetton":
+			requiredBitSet[0] |= 1 << 3
 			if err := func() error {
-				s.Metadata.Reset()
-				if err := s.Metadata.Decode(d); err != nil {
+				if err := s.Jetton.Decode(d); err != nil {
 					return err
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"metadata\"")
+				return errors.Wrap(err, "decode field \"jetton\"")
 			}
 		default:
 			return d.Skip()
@@ -5728,7 +5526,7 @@ func (s JettonMetadata) encodeFields(e *jx.Encoder) {
 	{
 
 		e.FieldStart("decimals")
-		e.Int(s.Decimals)
+		e.Str(s.Decimals)
 	}
 	{
 		if s.Image.Set {
@@ -5834,8 +5632,8 @@ func (s *JettonMetadata) Decode(d *jx.Decoder) error {
 		case "decimals":
 			requiredBitSet[0] |= 1 << 3
 			if err := func() error {
-				v, err := d.Int()
-				s.Decimals = int(v)
+				v, err := d.Str()
+				s.Decimals = string(v)
 				if err != nil {
 					return err
 				}
@@ -5973,6 +5771,191 @@ func (s JettonMetadata) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *JettonMetadata) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s JettonPreview) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s JettonPreview) encodeFields(e *jx.Encoder) {
+	{
+
+		e.FieldStart("address")
+		e.Str(s.Address)
+	}
+	{
+
+		e.FieldStart("name")
+		e.Str(s.Name)
+	}
+	{
+
+		e.FieldStart("symbol")
+		e.Str(s.Symbol)
+	}
+	{
+
+		e.FieldStart("decimals")
+		e.Int(s.Decimals)
+	}
+	{
+
+		e.FieldStart("image")
+		e.Str(s.Image)
+	}
+	{
+
+		e.FieldStart("verification")
+		s.Verification.Encode(e)
+	}
+}
+
+var jsonFieldsNameOfJettonPreview = [6]string{
+	0: "address",
+	1: "name",
+	2: "symbol",
+	3: "decimals",
+	4: "image",
+	5: "verification",
+}
+
+// Decode decodes JettonPreview from json.
+func (s *JettonPreview) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode JettonPreview to nil")
+	}
+	var requiredBitSet [1]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "address":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				v, err := d.Str()
+				s.Address = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"address\"")
+			}
+		case "name":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				v, err := d.Str()
+				s.Name = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"name\"")
+			}
+		case "symbol":
+			requiredBitSet[0] |= 1 << 2
+			if err := func() error {
+				v, err := d.Str()
+				s.Symbol = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"symbol\"")
+			}
+		case "decimals":
+			requiredBitSet[0] |= 1 << 3
+			if err := func() error {
+				v, err := d.Int()
+				s.Decimals = int(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"decimals\"")
+			}
+		case "image":
+			requiredBitSet[0] |= 1 << 4
+			if err := func() error {
+				v, err := d.Str()
+				s.Image = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"image\"")
+			}
+		case "verification":
+			requiredBitSet[0] |= 1 << 5
+			if err := func() error {
+				if err := s.Verification.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"verification\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode JettonPreview")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00111111,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfJettonPreview) {
+					name = jsonFieldsNameOfJettonPreview[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s JettonPreview) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *JettonPreview) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -8731,39 +8714,6 @@ func (s *OptInt64) UnmarshalJSON(data []byte) error {
 	return s.Decode(d)
 }
 
-// Encode encodes Jetton as json.
-func (o OptJetton) Encode(e *jx.Encoder) {
-	if !o.Set {
-		return
-	}
-	o.Value.Encode(e)
-}
-
-// Decode decodes Jetton from json.
-func (o *OptJetton) Decode(d *jx.Decoder) error {
-	if o == nil {
-		return errors.New("invalid: unable to decode OptJetton to nil")
-	}
-	o.Set = true
-	if err := o.Value.Decode(d); err != nil {
-		return err
-	}
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s OptJetton) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *OptJetton) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
 // Encode encodes JettonTransferAction as json.
 func (o OptJettonTransferAction) Encode(e *jx.Encoder) {
 	if !o.Set {
@@ -8793,39 +8743,6 @@ func (s OptJettonTransferAction) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *OptJettonTransferAction) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
-// Encode encodes JettonVerificationType as json.
-func (o OptJettonVerificationType) Encode(e *jx.Encoder) {
-	if !o.Set {
-		return
-	}
-	e.Str(string(o.Value))
-}
-
-// Decode decodes JettonVerificationType from json.
-func (o *OptJettonVerificationType) Decode(d *jx.Decoder) error {
-	if o == nil {
-		return errors.New("invalid: unable to decode OptJettonVerificationType to nil")
-	}
-	o.Set = true
-	if err := o.Value.Decode(d); err != nil {
-		return err
-	}
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s OptJettonVerificationType) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *OptJettonVerificationType) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }

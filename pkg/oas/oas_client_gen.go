@@ -530,15 +530,15 @@ func (c *Client) GetAccountTransactions(ctx context.Context, params GetAccountTr
 	stage = "EncodeQueryParams"
 	q := uri.NewQueryEncoder()
 	{
-		// Encode "max_lt" parameter.
+		// Encode "after_lt" parameter.
 		cfg := uri.QueryParameterEncodingConfig{
-			Name:    "max_lt",
+			Name:    "after_lt",
 			Style:   uri.QueryStyleForm,
 			Explode: true,
 		}
 
 		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
-			if val, ok := params.MaxLt.Get(); ok {
+			if val, ok := params.AfterLt.Get(); ok {
 				return e.EncodeValue(conv.Int64ToString(val))
 			}
 			return nil
@@ -547,15 +547,15 @@ func (c *Client) GetAccountTransactions(ctx context.Context, params GetAccountTr
 		}
 	}
 	{
-		// Encode "min_lt" parameter.
+		// Encode "before_lt" parameter.
 		cfg := uri.QueryParameterEncodingConfig{
-			Name:    "min_lt",
+			Name:    "before_lt",
 			Style:   uri.QueryStyleForm,
 			Explode: true,
 		}
 
 		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
-			if val, ok := params.MinLt.Get(); ok {
+			if val, ok := params.BeforeLt.Get(); ok {
 				return e.EncodeValue(conv.Int64ToString(val))
 			}
 			return nil

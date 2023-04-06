@@ -38,3 +38,15 @@ GET {{host}}/v2/accounts/EQAs87W4yJHlF8mt29ocA4agnMrLsOP69jC1HPyBUjJay-7l/nfts
 
 ###
 GET {{host}}/v2/accounts/EQAs87W4yJHlF8mt29ocA4agnMrLsOP69jC1HPyBUjJay-7l/events?limit=2
+
+###
+GET {{host}}/v2/blockchain/masterchain-head
+
+###
+GET {{host}}/v2/blockchain/accounts/EQAs87W4yJHlF8mt29ocA4agnMrLsOP69jC1HPyBUjJay-7l/transactions?limit=5
+
+###
+GET {{host}}/v2/accounts/EQAs87W4yJHlF8mt29ocA4agnMrLsOP69jC1HPyBUjJay-7l/jettons
+
+###
+GET {{host}}/v2/jettons/0:beb5d4638e860ccf7317296e298fde5b35982f4725b0676dc98b1de987b82ebc

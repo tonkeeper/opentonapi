@@ -582,13 +582,13 @@ func (s *Server) handleGetAccountTransactionsRequest(args [1]string, w http.Resp
 					In:   "path",
 				}: params.AccountID,
 				{
-					Name: "max_lt",
+					Name: "after_lt",
 					In:   "query",
-				}: params.MaxLt,
+				}: params.AfterLt,
 				{
-					Name: "min_lt",
+					Name: "before_lt",
 					In:   "query",
-				}: params.MinLt,
+				}: params.BeforeLt,
 				{
 					Name: "limit",
 					In:   "query",

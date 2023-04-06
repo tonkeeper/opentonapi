@@ -157,6 +157,14 @@ func (s *LiteStorage) GetBlockHeader(ctx context.Context, id tongo.BlockID) (*co
 	return header, nil
 }
 
+func (s *LiteStorage) LastMasterchainBlockHeader(ctx context.Context) (*core.BlockHeader, error) {
+	info, err := s.client.GetMasterchainInfo(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return s.GetBlockHeader(ctx, info.Last.ToBlockIdExt().BlockID)
+}
+
 func (s *LiteStorage) GetTransaction(ctx context.Context, hash tongo.Bits256) (*core.Transaction, error) {
 	tx, prs := s.transactionsIndexByHash[hash]
 	if prs {
@@ -187,4 +195,20 @@ func (s *LiteStorage) GetStorageProviders(ctx context.Context) ([]core.StoragePr
 
 func (s *LiteStorage) RunSmcMethod(ctx context.Context, id tongo.AccountID, method string, stack tlb.VmStack) (uint32, tlb.VmStack, error) {
 	return s.client.RunSmcMethod(ctx, id, method, stack)
+}
+
+func (s *LiteStorage) GetAccountTransactions(ctx context.Context, id tongo.AccountID, limit int, beforeLt, afterLt uint64) ([]*core.Transaction, error) {
+	txs, err := s.client.GetLastTransactions(ctx, id, limit) //todo: custom with beforeLt and afterLt
+	if err != nil {
+		return nil, err
+	}
+	result := make([]*core.Transaction, len(txs))
+	for i := range txs {
+		tx, err := core.ConvertTransaction(id.Workchain, txs[i])
+		if err != nil {
+			return nil, err
+		}
+		result[i] = tx
+	}
+	return result, nil
 }

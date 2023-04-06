@@ -93,3 +93,24 @@ func (h Handler) ExecGetMethod(ctx context.Context, params oas.ExecGetMethodPara
 
 	return &result, nil
 }
+
+func (h Handler) GetAccountTransactions(ctx context.Context, params oas.GetAccountTransactionsParams) (r oas.GetAccountTransactionsRes, err error) {
+	a, err := tongo.ParseAccountID(params.AccountID)
+	if err != nil {
+		return &oas.BadRequest{Error: err.Error()}, nil
+	}
+	if params.BeforeLt.Value == 0 {
+		params.BeforeLt.Value = 1 << 62
+	}
+	txs, err := h.storage.GetAccountTransactions(ctx, a, int(params.Limit.Value), uint64(params.BeforeLt.Value), uint64(params.AfterLt.Value))
+	if err != nil {
+		return &oas.InternalError{Error: err.Error()}, nil
+	}
+	result := oas.Transactions{
+		Transactions: make([]oas.Transaction, len(txs)),
+	}
+	for i, tx := range txs {
+		result.Transactions[i] = convertTransaction(*tx)
+	}
+	return &result, nil
+}

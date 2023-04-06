@@ -624,23 +624,16 @@ func (s GetStorageProvidersOK) Validate() error {
 	}
 	return nil
 }
-func (s Jetton) Validate() error {
+func (s JettonBalance) Validate() error {
 	var failures []validate.FieldError
 	if err := func() error {
-		if s.Verification.Set {
-			if err := func() error {
-				if err := s.Verification.Value.Validate(); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return err
-			}
+		if err := s.Jetton.Validate(); err != nil {
+			return err
 		}
 		return nil
 	}(); err != nil {
 		failures = append(failures, validate.FieldError{
-			Name:  "verification",
+			Name:  "jetton",
 			Error: err,
 		})
 	}
@@ -649,7 +642,7 @@ func (s Jetton) Validate() error {
 	}
 	return nil
 }
-func (s JettonBalance) Validate() error {
+func (s JettonInfo) Validate() error {
 	var failures []validate.FieldError
 	if err := func() error {
 		if err := s.Verification.Validate(); err != nil {
@@ -662,30 +655,12 @@ func (s JettonBalance) Validate() error {
 			Error: err,
 		})
 	}
-	if err := func() error {
-		if s.Metadata.Set {
-			if err := func() error {
-				if err := s.Metadata.Value.Validate(); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return err
-			}
-		}
-		return nil
-	}(); err != nil {
-		failures = append(failures, validate.FieldError{
-			Name:  "metadata",
-			Error: err,
-		})
-	}
 	if len(failures) > 0 {
 		return &validate.Error{Fields: failures}
 	}
 	return nil
 }
-func (s JettonInfo) Validate() error {
+func (s JettonPreview) Validate() error {
 	var failures []validate.FieldError
 	if err := func() error {
 		if err := s.Verification.Validate(); err != nil {

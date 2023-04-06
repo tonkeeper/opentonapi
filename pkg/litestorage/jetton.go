@@ -2,6 +2,7 @@ package litestorage
 
 import (
 	"context"
+	"fmt"
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
@@ -46,4 +47,16 @@ func (s *LiteStorage) GetJettonMasterMetadata(ctx context.Context, master tongo.
 	}
 	s.jettonMetaCache[master.ToRaw()] = rawMeta
 	return rawMeta, nil
+}
+
+func (s *LiteStorage) GetJettonMasterData(ctx context.Context, master tongo.AccountID) (abi.GetJettonDataResult, error) {
+	_, value, err := abi.GetJettonData(ctx, s.client, master)
+	if err != nil {
+		return abi.GetJettonDataResult{}, err
+	}
+	r, ok := value.(abi.GetJettonDataResult)
+	if !ok {
+		return abi.GetJettonDataResult{}, fmt.Errorf("invalid jetton data result")
+	}
+	return r, nil
 }
