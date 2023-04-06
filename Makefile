@@ -1,4 +1,4 @@
-.PHONY: all fmt test gen
+.PHONY: all fmt test gen run
 
 all: gen fmt test
 
@@ -13,3 +13,6 @@ collect_i18n:
 	#go run github.com/nicksnyder/go-i18n/v2/goi18n extract -outdir pkg/i18n/translations todo: switch to this version after https://github.com/nicksnyder/go-i18n/pull/295
 translate:
 	goi18n merge -outdir pkg/i18n/translations/ pkg/i18n/translations/active.en.toml  pkg/i18n/translations/active.ru.toml
+
+run:
+	go run cmd/api/main.go
