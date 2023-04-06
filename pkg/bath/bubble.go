@@ -39,7 +39,7 @@ func (f Fee) Total() int64 {
 }
 
 func (b BubbleTx) String() string {
-	return fmt.Sprintf("buccess: %v bounce: %v, bounced: %v,  account: %v, body: %v", b.success, b.bounce, b.bounced, b.account, b.decodedBody)
+	return fmt.Sprintf("success: %v bounce: %v, bounced: %v,  account: %v, body: %v", b.success, b.bounce, b.bounced, b.account, b.decodedBody)
 }
 
 func (b Bubble) String() string {
