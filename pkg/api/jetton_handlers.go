@@ -24,7 +24,6 @@ func (h Handler) GetJettonsBalances(ctx context.Context, params oas.GetJettonsBa
 	for _, wallet := range wallets {
 		jettonBalance := oas.JettonBalance{
 			Balance:       wallet.Balance.String(),
-			JettonAddress: wallet.JettonAddress.ToRaw(),
 			WalletAddress: convertAccountAddress(wallet.Address),
 		}
 		meta, err := h.storage.GetJettonMasterMetadata(ctx, wallet.JettonAddress)

@@ -1410,7 +1410,9 @@ func (s *CreditPhase) SetCredit(val int64) {
 type DnsRecord struct {
 	Wallet       OptWalletDNS `json:"wallet"`
 	NextResolver OptString    `json:"next_resolver"`
-	Site         []string     `json:"site"`
+	Sites        []string     `json:"sites"`
+	// Tonstorage bag id.
+	Storage OptString `json:"storage"`
 }
 
 // GetWallet returns the value of Wallet.
@@ -1423,9 +1425,14 @@ func (s DnsRecord) GetNextResolver() OptString {
 	return s.NextResolver
 }
 
-// GetSite returns the value of Site.
-func (s DnsRecord) GetSite() []string {
-	return s.Site
+// GetSites returns the value of Sites.
+func (s DnsRecord) GetSites() []string {
+	return s.Sites
+}
+
+// GetStorage returns the value of Storage.
+func (s DnsRecord) GetStorage() OptString {
+	return s.Storage
 }
 
 // SetWallet sets the value of Wallet.
@@ -1438,9 +1445,14 @@ func (s *DnsRecord) SetNextResolver(val OptString) {
 	s.NextResolver = val
 }
 
-// SetSite sets the value of Site.
-func (s *DnsRecord) SetSite(val []string) {
-	s.Site = val
+// SetSites sets the value of Sites.
+func (s *DnsRecord) SetSites(val []string) {
+	s.Sites = val
+}
+
+// SetStorage sets the value of Storage.
+func (s *DnsRecord) SetStorage(val OptString) {
+	s.Storage = val
 }
 
 func (*DnsRecord) dnsResolveRes() {}
@@ -1799,7 +1811,6 @@ func (*InternalError) stakingPoolsRes()              {}
 // Ref: #/components/schemas/JettonBalance
 type JettonBalance struct {
 	Balance       string         `json:"balance"`
-	JettonAddress string         `json:"jetton_address"`
 	WalletAddress AccountAddress `json:"wallet_address"`
 	Jetton        JettonPreview  `json:"jetton"`
 }
@@ -1807,11 +1818,6 @@ type JettonBalance struct {
 // GetBalance returns the value of Balance.
 func (s JettonBalance) GetBalance() string {
 	return s.Balance
-}
-
-// GetJettonAddress returns the value of JettonAddress.
-func (s JettonBalance) GetJettonAddress() string {
-	return s.JettonAddress
 }
 
 // GetWalletAddress returns the value of WalletAddress.
@@ -1827,11 +1833,6 @@ func (s JettonBalance) GetJetton() JettonPreview {
 // SetBalance sets the value of Balance.
 func (s *JettonBalance) SetBalance(val string) {
 	s.Balance = val
-}
-
-// SetJettonAddress sets the value of JettonAddress.
-func (s *JettonBalance) SetJettonAddress(val string) {
-	s.JettonAddress = val
 }
 
 // SetWalletAddress sets the value of WalletAddress.

@@ -1728,16 +1728,12 @@ components:
       type: object
       required:
         - balance
-        - jetton_address
         - wallet_address
         - jetton
       properties:
         balance:
           type: string
           example: 597968399
-        jetton_address:
-          type: string
-          example: 0:6553FB4A2128297A978C153F6DDF14C37A2566A36E5D5BFE2F50E97A8C877F04
         wallet_address:
           $ref: '#/components/schemas/AccountAddress'
         jetton:
@@ -2400,18 +2396,22 @@ components:
     DnsRecord:
       type: object
       required:
-        - site
+        - sites
       properties:
         wallet:
           $ref: '#/components/schemas/WalletDNS'
         next_resolver:
           type: string
           example: "0:da6b1b6663a0e4d18cc8574ccd9db5296e367dd9324706f3bbd9eb1cd2caf0bf"
-        site:
+        sites:
           type: array
           items:
             type: string
             example: "http://12234.ton"
+        storage:
+          type: string
+          description: "tonstorage bag id"
+          example: "da6b1b6663a0e4d18cc8574ccd9db5296e367dd9324706f3bbd9eb1cd2caf0bf"
 
     NftCollection:
       type: object

@@ -509,13 +509,13 @@ func (s DnsRecord) Validate() error {
 		})
 	}
 	if err := func() error {
-		if s.Site == nil {
+		if s.Sites == nil {
 			return errors.New("nil is invalid value")
 		}
 		return nil
 	}(); err != nil {
 		failures = append(failures, validate.FieldError{
-			Name:  "site",
+			Name:  "sites",
 			Error: err,
 		})
 	}
