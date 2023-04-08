@@ -3,11 +3,10 @@ package api
 import (
 	"context"
 	"github.com/tonkeeper/opentonapi/pkg/addressbook"
+	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
 	"github.com/tonkeeper/tongo/tlb"
-
-	"github.com/tonkeeper/opentonapi/pkg/core"
 )
 
 type storage interface {
@@ -44,6 +43,8 @@ type storage interface {
 	) ([]tongo.AccountID, error)
 	GetNftCollections(ctx context.Context, limit, offset *int32) ([]core.NftCollection, error)
 
+	FindAllDomainsResolvedToAddress(ctx context.Context, a tongo.AccountID) ([]string, error)
+
 	GetJettonWalletsByOwnerAddress(ctx context.Context, address tongo.AccountID) ([]core.JettonWallet, error)
 	GetJettonMasterMetadata(ctx context.Context, master tongo.AccountID) (tongo.JettonMetadata, error)
 	GetJettonMasterData(ctx context.Context, master tongo.AccountID) (abi.GetJettonDataResult, error)
@@ -63,6 +64,7 @@ type messageSender interface {
 // executor runs any get methods
 type executor interface {
 	RunSmcMethod(context.Context, tongo.AccountID, string, tlb.VmStack) (uint32, tlb.VmStack, error)
+	RunSmcMethodByID(context.Context, tongo.AccountID, int, tlb.VmStack) (uint32, tlb.VmStack, error)
 }
 
 type previewGenerator interface {

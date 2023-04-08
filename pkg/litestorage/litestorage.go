@@ -197,6 +197,10 @@ func (s *LiteStorage) RunSmcMethod(ctx context.Context, id tongo.AccountID, meth
 	return s.client.RunSmcMethod(ctx, id, method, stack)
 }
 
+func (s *LiteStorage) RunSmcMethodByID(ctx context.Context, id tongo.AccountID, method int, stack tlb.VmStack) (uint32, tlb.VmStack, error) {
+	return s.client.RunSmcMethodByID(ctx, id, method, stack)
+}
+
 func (s *LiteStorage) GetAccountTransactions(ctx context.Context, id tongo.AccountID, limit int, beforeLt, afterLt uint64) ([]*core.Transaction, error) {
 	txs, err := s.client.GetLastTransactions(ctx, id, limit) //todo: custom with beforeLt and afterLt
 	if err != nil {
@@ -211,4 +215,8 @@ func (s *LiteStorage) GetAccountTransactions(ctx context.Context, id tongo.Accou
 		result[i] = tx
 	}
 	return result, nil
+}
+
+func (s *LiteStorage) FindAllDomainsResolvedToAddress(ctx context.Context, a tongo.AccountID) ([]string, error) {
+	return nil, nil
 }

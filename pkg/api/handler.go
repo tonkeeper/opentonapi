@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"github.com/go-faster/errors"
 	"github.com/tonkeeper/opentonapi/pkg/image"
+	"github.com/tonkeeper/tongo"
+	"github.com/tonkeeper/tongo/contract/dns"
 	"go.uber.org/zap"
 
 	"github.com/tonkeeper/opentonapi/pkg/addressbook"
@@ -25,6 +27,7 @@ type Handler struct {
 	msgSender        messageSender
 	previewGenerator previewGenerator
 	executor         executor
+	dns              *dns.DNS
 }
 
 // Options configures behavior of a Handler instance.
@@ -101,6 +104,8 @@ func NewHandler(logger *zap.Logger, opts ...Option) (*Handler, error) {
 	if options.executor == nil {
 		return nil, fmt.Errorf("executor is not configured")
 	}
+	dnsClient := dns.NewDNS(tongo.MustParseAccountID("-1:e56754f83426f69b09267bd876ac97c44821345b7e266bd956a7bfbfb98df35c"), options.executor) //todo: move to chain config
+
 	return &Handler{
 		storage:          options.storage,
 		state:            options.chainState,
@@ -108,5 +113,6 @@ func NewHandler(logger *zap.Logger, opts ...Option) (*Handler, error) {
 		msgSender:        options.msgSender,
 		previewGenerator: options.previewGenerator,
 		executor:         options.executor,
+		dns:              dnsClient,
 	}, nil
 }
