@@ -30,7 +30,7 @@ func (h Handler) GetTrace(ctx context.Context, params oas.GetTraceParams) (r oas
 	if err != nil {
 		return nil, err
 	}
-	trace := convertTrace(*t)
+	trace := convertTrace(*t, h.addressBook)
 	return &trace, nil
 }
 
@@ -59,10 +59,10 @@ func (h Handler) GetEvent(ctx context.Context, params oas.GetEventParams) (oas.G
 		InProgress: trace.InProgress(),
 	}
 	for i, a := range actions {
-		event.Actions[i] = convertAction(a)
+		event.Actions[i] = convertAction(a, h.addressBook)
 	}
 	for i, f := range fees {
-		event.Fees[i] = convertFees(f)
+		event.Fees[i] = convertFees(f, h.addressBook)
 	}
 	return &event, nil
 }
@@ -88,21 +88,21 @@ func (h Handler) GetEventsByAccount(ctx context.Context, params oas.GetEventsByA
 		actions, fees := bath.CollectActions(b, &account)
 		e := oas.AccountEvent{
 			EventID:    trace.Hash.Hex(),
-			Account:    convertAccountAddress(account),
+			Account:    convertAccountAddress(account, h.addressBook),
 			Timestamp:  trace.Utime,
-			Fee:        oas.Fee{Account: convertAccountAddress(account)},
+			Fee:        oas.Fee{Account: convertAccountAddress(account, h.addressBook)},
 			IsScam:     false,
 			Lt:         int64(trace.Lt),
 			InProgress: trace.InProgress(),
 		}
 		for _, f := range fees {
 			if f.WhoPay == account {
-				e.Fee = convertFees(f)
+				e.Fee = convertFees(f, h.addressBook)
 				break
 			}
 		}
 		for _, a := range actions {
-			e.Actions = append(e.Actions, convertAction(a))
+			e.Actions = append(e.Actions, convertAction(a, h.addressBook))
 		}
 		if len(e.Actions) == 0 {
 			e.Actions = []oas.Action{{
