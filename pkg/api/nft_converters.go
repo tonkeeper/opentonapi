@@ -1,6 +1,7 @@
 package api
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/opentonapi/pkg/oas"
@@ -27,6 +28,13 @@ func convertNftCollection(collection core.NftCollection) oas.NftCollection {
 		NextItemIndex:        int64(collection.NextItemIndex),
 		RawCollectionContent: fmt.Sprintf("%x", collection.CollectionContent[:]),
 		Owner:                convertOptAccountAddress(collection.OwnerAddress),
+	}
+	if collection.Metadata != nil {
+		var metadata oas.OptNftCollectionMetadata
+		err := json.Unmarshal(collection.Metadata, &metadata)
+		if err == nil {
+			c.Metadata = metadata
+		}
 	}
 	return c
 }
