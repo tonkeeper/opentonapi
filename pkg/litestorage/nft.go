@@ -23,3 +23,7 @@ func (s *LiteStorage) SearchNFTs(ctx context.Context,
 func (s *LiteStorage) GetNftCollections(ctx context.Context, limit, offset *int32) ([]core.NftCollection, error) {
 	return nil, nil
 }
+
+func (s *LiteStorage) GetNftCollectionByCollectionAddress(ctx context.Context, address tongo.AccountID) (core.NftCollection, error) {
+	return core.NftCollection{}, nil
+}

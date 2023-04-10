@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/opentonapi/pkg/oas"
 	"github.com/tonkeeper/tongo"
@@ -77,4 +78,29 @@ func (h Handler) GetNftCollections(ctx context.Context, params oas.GetNftCollect
 		collectionsRes.NftCollections = append(collectionsRes.NftCollections, col)
 	}
 	return &collectionsRes, nil
+}
+
+func (h Handler) GetNftCollection(ctx context.Context, params oas.GetNftCollectionParams) (oas.GetNftCollectionRes, error) {
+	account, err := tongo.ParseAccountID(params.AccountID)
+	if err != nil {
+		return &oas.BadRequest{Error: err.Error()}, nil
+	}
+
+	collection, err := h.storage.GetNftCollectionByCollectionAddress(ctx, account)
+	if errors.Is(err, core.ErrEntityNotFound) {
+		return &oas.NotFound{Error: err.Error()}, nil
+	}
+	if err != nil {
+		return &oas.InternalError{Error: err.Error()}, nil
+	}
+	col := convertNftCollection(collection)
+	if collection.Metadata != nil {
+		var metadata oas.OptNftCollectionMetadata
+		err = json.Unmarshal(collection.Metadata, &metadata)
+		if err == nil {
+			col.Metadata = metadata
+		}
+	}
+
+	return &col, nil
 }
