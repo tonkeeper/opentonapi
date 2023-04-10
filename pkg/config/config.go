@@ -2,12 +2,11 @@ package config
 
 import (
 	"fmt"
-	"github.com/tonkeeper/tongo/config"
 	"log"
-	"net"
 	"reflect"
-	"strconv"
 	"strings"
+
+	"github.com/tonkeeper/tongo/config"
 
 	"github.com/caarlos0/env/v6"
 	"github.com/tonkeeper/tongo"
@@ -37,31 +36,12 @@ func Load() Config {
 	var c Config
 	if err := env.ParseWithFuncs(&c, map[reflect.Type]env.ParserFunc{
 		reflect.TypeOf([]config.LiteServer{}): func(v string) (interface{}, error) {
-			serverStrings := strings.Split(v, ",")
-			if len(serverStrings) == 0 {
-				return nil, fmt.Errorf("empty liteservers list")
+			servers, err := config.ParseLiteServersEnvVar(v)
+			if err != nil {
+				return nil, err
 			}
-			var servers []config.LiteServer
-			for _, s := range serverStrings {
-				params := strings.Split(s, ":")
-				if len(params) != 3 {
-					return nil, fmt.Errorf("invalid liteserver config string")
-				}
-				ip := net.ParseIP(params[0])
-				if ip == nil {
-					return nil, fmt.Errorf("invalid lite server ip")
-				}
-				if ip.To4() == nil {
-					return nil, fmt.Errorf("IPv6 not supported")
-				}
-				_, err := strconv.ParseInt(params[1], 10, 32)
-				if err != nil {
-					return nil, fmt.Errorf("invalid lite server port: %v", err)
-				}
-				servers = append(servers, config.LiteServer{
-					Host: fmt.Sprintf("%v:%v", params[0], params[1]),
-					Key:  params[2],
-				})
+			if len(servers) == 0 {
+				return nil, fmt.Errorf("empty liteservers list")
 			}
 			return servers, nil
 		},
