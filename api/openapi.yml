@@ -999,9 +999,11 @@ components:
         name:
           type: string
           example: Ton foundation
+          description: Display name. Data collected from different sources like moderation lists, dns, collections names and over.
         is_scam:
           type: boolean
           example: true
+          description: Is this account was marked as part of scammers activity
         icon:
           type: string
           example: https://ton.org/logo.png
@@ -1151,18 +1153,11 @@ components:
     StateInit:
       type: object
       required:
-        - library
+        - boc
       properties:
-        code:
+        boc:
           type: string
           example: te6ccgEBBgEARAABFP8A9KQT9LzyyAsBAgEgAgMCAUgEBQAE8jAAONBsIdMfMO1E0NM/MAHAAZekyMs/ye1UkzDyBuIAEaE0MdqJoaZ+YQ==
-        data:
-          type: string
-          example: te6ccgEBBgEARAABFP8A9KQT9LzyyAsBAgEgAgMCAUgEBQAE8jAAONBsIdMfMO1E0NM/MAHAAZekyMs/ye1UkzDyBuIAEaE0MdqJoaZ+YQ==
-        library:
-          type: object
-          additionalProperties:
-            type: string
 
     Message:
       type: object

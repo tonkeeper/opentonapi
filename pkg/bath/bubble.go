@@ -2,6 +2,7 @@ package bath
 
 import (
 	"fmt"
+	"reflect"
 	"strings"
 
 	"github.com/tonkeeper/tongo"
@@ -99,8 +100,10 @@ func (b BubbleTx) ToAction() *Action {
 	}
 	if b.opCode != nil && *b.opCode != 0 && b.accountWasActiveAtComputingTime && !b.account.Is(abi.Wallet) {
 		operation := fmt.Sprintf("0x%x", *b.opCode)
+		payload := ""
 		if b.decodedBody != nil {
 			operation = b.decodedBody.Operation
+			payload = strings.TrimLeft(dumpCallArgs(b.decodedBody.Value, ""), "\n")
 		}
 		return &Action{
 			SmartContractExec: &SmartContractAction{
@@ -108,7 +111,7 @@ func (b BubbleTx) ToAction() *Action {
 				Executor:    b.inputFrom.Address, //can't be null because we check IsExternal
 				Contract:    b.account.Address,
 				Operation:   operation,
-				Payload:     "", //todo: add payload
+				Payload:     payload,
 			},
 			Success: b.success,
 			Type:    SmartContractExec,
@@ -130,6 +133,21 @@ func (b BubbleTx) ToAction() *Action {
 		a.TonTransfer.Comment = &s
 	}
 	return a
+}
+
+func dumpCallArgs(v any, ident string) string {
+	t := reflect.TypeOf(v)
+	switch t.Kind() {
+	case reflect.Struct:
+		val := reflect.ValueOf(v)
+		s := ""
+		for i := 0; i < val.NumField(); i++ {
+			s += fmt.Sprintf("\n%s%s:%s", ident, t.Field(i).Name, dumpCallArgs(val.Field(i).Interface(), ident+"  "))
+		}
+		return s
+	default:
+		return fmt.Sprintf("%s%+v", ident, v)
+	}
 }
 
 func (b BubbleTx) operation(name string) bool {

@@ -5015,50 +5015,17 @@ func (s *StakingPoolsOKImplementations) init() StakingPoolsOKImplementations {
 
 // Ref: #/components/schemas/StateInit
 type StateInit struct {
-	Code    OptString        `json:"code"`
-	Data    OptString        `json:"data"`
-	Library StateInitLibrary `json:"library"`
+	Boc string `json:"boc"`
 }
 
-// GetCode returns the value of Code.
-func (s StateInit) GetCode() OptString {
-	return s.Code
+// GetBoc returns the value of Boc.
+func (s StateInit) GetBoc() string {
+	return s.Boc
 }
 
-// GetData returns the value of Data.
-func (s StateInit) GetData() OptString {
-	return s.Data
-}
-
-// GetLibrary returns the value of Library.
-func (s StateInit) GetLibrary() StateInitLibrary {
-	return s.Library
-}
-
-// SetCode sets the value of Code.
-func (s *StateInit) SetCode(val OptString) {
-	s.Code = val
-}
-
-// SetData sets the value of Data.
-func (s *StateInit) SetData(val OptString) {
-	s.Data = val
-}
-
-// SetLibrary sets the value of Library.
-func (s *StateInit) SetLibrary(val StateInitLibrary) {
-	s.Library = val
-}
-
-type StateInitLibrary map[string]string
-
-func (s *StateInitLibrary) init() StateInitLibrary {
-	m := *s
-	if m == nil {
-		m = map[string]string{}
-		*s = m
-	}
-	return m
+// SetBoc sets the value of Boc.
+func (s *StateInit) SetBoc(val string) {
+	s.Boc = val
 }
 
 // Ref: #/components/schemas/StoragePhase
