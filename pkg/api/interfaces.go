@@ -48,6 +48,8 @@ type storage interface {
 	GetJettonWalletsByOwnerAddress(ctx context.Context, address tongo.AccountID) ([]core.JettonWallet, error)
 	GetJettonMasterMetadata(ctx context.Context, master tongo.AccountID) (tongo.JettonMetadata, error)
 	GetJettonMasterData(ctx context.Context, master tongo.AccountID) (abi.GetJettonDataResult, error)
+
+	GetAllAuctions(ctx context.Context) ([]core.Auction, error)
 }
 
 // chainState provides current blockchain state which change very rarely or slow like staking APY income
