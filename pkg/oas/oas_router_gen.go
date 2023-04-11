@@ -665,6 +665,24 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 					break
 				}
 				switch elem[0] {
+				case '_': // Prefix: "_bulk"
+					if l := len("_bulk"); len(elem) >= l && elem[0:l] == "_bulk" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					if len(elem) == 0 {
+						// Leaf node.
+						switch r.Method {
+						case "POST":
+							s.handleGetNftItemsByAddressesRequest([0]string{}, w, r)
+						default:
+							s.notAllowed(w, r, "POST")
+						}
+
+						return
+					}
 				case 'c': // Prefix: "collections"
 					if l := len("collections"); len(elem) >= l && elem[0:l] == "collections" {
 						elem = elem[l:]
@@ -709,24 +727,6 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 							return
 						}
 					}
-				}
-				// Param: "account_ids"
-				// Leaf parameter
-				args[0] = elem
-				elem = ""
-
-				if len(elem) == 0 {
-					// Leaf node.
-					switch r.Method {
-					case "GET":
-						s.handleGetNftItemsByAddressesRequest([1]string{
-							args[0],
-						}, w, r)
-					default:
-						s.notAllowed(w, r, "GET")
-					}
-
-					return
 				}
 			case 's': // Prefix: "st"
 				if l := len("st"); len(elem) >= l && elem[0:l] == "st" {
@@ -1584,6 +1584,26 @@ func (s *Server) FindRoute(method, path string) (r Route, _ bool) {
 					break
 				}
 				switch elem[0] {
+				case '_': // Prefix: "_bulk"
+					if l := len("_bulk"); len(elem) >= l && elem[0:l] == "_bulk" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					if len(elem) == 0 {
+						switch method {
+						case "POST":
+							// Leaf: GetNftItemsByAddresses
+							r.name = "GetNftItemsByAddresses"
+							r.operationID = "getNftItemsByAddresses"
+							r.args = args
+							r.count = 0
+							return r, true
+						default:
+							return
+						}
+					}
 				case 'c': // Prefix: "collections"
 					if l := len("collections"); len(elem) >= l && elem[0:l] == "collections" {
 						elem = elem[l:]
@@ -1629,24 +1649,6 @@ func (s *Server) FindRoute(method, path string) (r Route, _ bool) {
 								return
 							}
 						}
-					}
-				}
-				// Param: "account_ids"
-				// Leaf parameter
-				args[0] = elem
-				elem = ""
-
-				if len(elem) == 0 {
-					switch method {
-					case "GET":
-						// Leaf: GetNftItemsByAddresses
-						r.name = "GetNftItemsByAddresses"
-						r.operationID = "getNftItemsByAddresses"
-						r.args = args
-						r.count = 1
-						return r, true
-					default:
-						return
 					}
 				}
 			case 's': // Prefix: "st"

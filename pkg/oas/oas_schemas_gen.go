@@ -134,10 +134,13 @@ func (*Account) getAccountRes() {}
 
 // Ref: #/components/schemas/AccountAddress
 type AccountAddress struct {
-	Address string    `json:"address"`
-	Name    OptString `json:"name"`
-	IsScam  bool      `json:"is_scam"`
-	Icon    OptString `json:"icon"`
+	Address string `json:"address"`
+	// Display name. Data collected from different sources like moderation lists, dns, collections names
+	// and over.
+	Name OptString `json:"name"`
+	// Is this account was marked as part of scammers activity.
+	IsScam bool      `json:"is_scam"`
+	Icon   OptString `json:"icon"`
 }
 
 // GetAddress returns the value of Address.
@@ -1749,6 +1752,20 @@ func (s GetAccountsReq) GetAccountIds() []string {
 
 // SetAccountIds sets the value of AccountIds.
 func (s *GetAccountsReq) SetAccountIds(val []string) {
+	s.AccountIds = val
+}
+
+type GetNftItemsByAddressesReq struct {
+	AccountIds []string `json:"account_ids"`
+}
+
+// GetAccountIds returns the value of AccountIds.
+func (s GetNftItemsByAddressesReq) GetAccountIds() []string {
+	return s.AccountIds
+}
+
+// SetAccountIds sets the value of AccountIds.
+func (s *GetNftItemsByAddressesReq) SetAccountIds(val []string) {
 	s.AccountIds = val
 }
 
@@ -3393,6 +3410,52 @@ func (o OptGetAccountsReq) Get() (v GetAccountsReq, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptGetAccountsReq) Or(d GetAccountsReq) GetAccountsReq {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptGetNftItemsByAddressesReq returns new OptGetNftItemsByAddressesReq with value set to v.
+func NewOptGetNftItemsByAddressesReq(v GetNftItemsByAddressesReq) OptGetNftItemsByAddressesReq {
+	return OptGetNftItemsByAddressesReq{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptGetNftItemsByAddressesReq is optional GetNftItemsByAddressesReq.
+type OptGetNftItemsByAddressesReq struct {
+	Value GetNftItemsByAddressesReq
+	Set   bool
+}
+
+// IsSet returns true if OptGetNftItemsByAddressesReq was set.
+func (o OptGetNftItemsByAddressesReq) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptGetNftItemsByAddressesReq) Reset() {
+	var v GetNftItemsByAddressesReq
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptGetNftItemsByAddressesReq) SetTo(v GetNftItemsByAddressesReq) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptGetNftItemsByAddressesReq) Get() (v GetNftItemsByAddressesReq, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptGetNftItemsByAddressesReq) Or(d GetNftItemsByAddressesReq) GetNftItemsByAddressesReq {
 	if v, ok := o.Get(); ok {
 		return v
 	}

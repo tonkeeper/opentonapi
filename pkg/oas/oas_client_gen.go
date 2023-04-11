@@ -1675,12 +1675,28 @@ func (c *Client) GetNftCollections(ctx context.Context, params GetNftCollections
 
 // GetNftItemsByAddresses invokes getNftItemsByAddresses operation.
 //
-// Get NFT items by its address.
+// Get NFT items by their addresses.
 //
-// GET /v2/nfts/{account_ids}
-func (c *Client) GetNftItemsByAddresses(ctx context.Context, params GetNftItemsByAddressesParams) (res GetNftItemsByAddressesRes, err error) {
+// POST /v2/nfts/_bulk
+func (c *Client) GetNftItemsByAddresses(ctx context.Context, request OptGetNftItemsByAddressesReq) (res GetNftItemsByAddressesRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getNftItemsByAddresses"),
+	}
+	// Validate request before sending.
+	if err := func() error {
+		if request.Set {
+			if err := func() error {
+				if err := request.Value.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return res, errors.Wrap(err, "validate")
 	}
 
 	// Run stopwatch.
@@ -1711,35 +1727,15 @@ func (c *Client) GetNftItemsByAddresses(ctx context.Context, params GetNftItemsB
 
 	stage = "BuildURL"
 	u := uri.Clone(c.requestURL(ctx))
-	u.Path += "/v2/nfts/"
-	{
-		// Encode "account_ids" parameter.
-		e := uri.NewPathEncoder(uri.PathEncoderConfig{
-			Param:   "account_ids",
-			Style:   uri.PathStyleSimple,
-			Explode: false,
-		})
-		if err := func() error {
-			return e.EncodeArray(func(e uri.Encoder) error {
-				for i, item := range params.AccountIds {
-					if err := func() error {
-						return e.EncodeValue(conv.StringToString(item))
-					}(); err != nil {
-						return errors.Wrapf(err, "[%d]", i)
-					}
-				}
-				return nil
-			})
-		}(); err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		u.Path += e.Result()
-	}
+	u.Path += "/v2/nfts/_bulk"
 
 	stage = "EncodeRequest"
-	r, err := ht.NewRequest(ctx, "GET", u, nil)
+	r, err := ht.NewRequest(ctx, "POST", u, nil)
 	if err != nil {
 		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeGetNftItemsByAddressesRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
 	}
 
 	stage = "SendRequest"
