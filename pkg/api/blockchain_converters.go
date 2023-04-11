@@ -4,6 +4,7 @@ import (
 	"encoding/binary"
 	"encoding/hex"
 	"fmt"
+	"github.com/tonkeeper/opentonapi/internal/g"
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/opentonapi/pkg/oas"
 	"github.com/tonkeeper/tongo"
@@ -154,17 +155,13 @@ func convertMessage(m core.Message, book addressBook) oas.Message {
 		msg.OpCode = oas.NewOptString("0x" + hex.EncodeToString(binary.BigEndian.AppendUint32(nil, *m.OpCode)))
 	}
 	if len(m.Init) != 0 {
-		//todo: return init
-		//cells, err := boc.DeserializeBoc(m.Init)
-		//if err == nil && len(cells) == 1 {
-		//	var stateInit tlb.StateInit
-		//	err = tlb.Unmarshal(cells[0], &stateInit)
-		//
-		//}
+		msg.Init.SetTo(oas.StateInit{
+			Boc: hex.EncodeToString(m.Init),
+		})
 	}
 	if m.DecodedBody != nil {
-		msg.DecodedOpName = oas.NewOptString(m.DecodedBody.Operation)
-		msg.DecodedBody = anyToJSONRawMap(m.DecodedBody.Value)
+		msg.DecodedOpName = oas.NewOptString(g.CamelToSnake(m.DecodedBody.Operation))
+		msg.DecodedBody = anyToJSONRawMap(m.DecodedBody.Value, true)
 	}
 	return msg
 }

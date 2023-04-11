@@ -4,6 +4,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"github.com/tonkeeper/opentonapi/internal/g"
 	"github.com/tonkeeper/tongo/boc"
 	"github.com/tonkeeper/tongo/tlb"
 	"math/big"
@@ -17,10 +18,13 @@ import (
 	"github.com/tonkeeper/tongo"
 )
 
-func anyToJSONRawMap(a any) map[string]jx.Raw { //todo: переписать этот ужас
+func anyToJSONRawMap(a any, toSnake bool) map[string]jx.Raw { //todo: переписать этот ужас
 	var m = map[string]jx.Raw{}
 	if am, ok := a.(map[string]any); ok {
 		for k, v := range am {
+			if toSnake {
+				k = g.CamelToSnake(k)
+			}
 			m[k], _ = json.Marshal(v)
 		}
 		return m
@@ -33,7 +37,11 @@ func anyToJSONRawMap(a any) map[string]jx.Raw { //todo: переписать э�
 			if err != nil {
 				panic("some shit")
 			}
-			m[t.Type().Field(i).Name] = b
+			name := t.Type().Field(i).Name
+			if toSnake {
+				name = g.CamelToSnake(name)
+			}
+			m[name] = b
 		}
 	default:
 		panic(fmt.Sprintf("some shit %v", t.Kind()))

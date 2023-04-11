@@ -12,7 +12,7 @@ func convertNFT(item core.NftItem, book addressBook, previewGen previewGenerator
 		Index:    item.Index.BigInt().Int64(),
 		Owner:    convertOptAccountAddress(item.OwnerAddress, book),
 		Verified: item.Verified,
-		Metadata: anyToJSONRawMap(item.Metadata),
+		Metadata: anyToJSONRawMap(item.Metadata, false),
 		DNS:      pointerToOptString(item.DNS),
 	}
 	if item.Sale != nil {
