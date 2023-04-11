@@ -641,14 +641,14 @@ paths:
         '500':
           $ref: '#/components/responses/InternalError'
 
-  /v2/nfts/{account_ids}:
-    get:
-      description: Get NFT items by its address
+  /v2/nfts/_bulk:
+    post:
+      description: Get NFT items by their addresses
       operationId: getNftItemsByAddresses
       tags:
         - NFT
-      parameters:
-        - $ref: '#/components/parameters/accountIdParameters'
+      requestBody:
+        $ref: "#/components/requestBodies/AccountIds"
       responses:
         '200':
           description: "nft item"
@@ -997,7 +997,7 @@ components:
                 type: string
                 example: te6ccgECBQEAARUAAkWIAWTtae+KgtbrX26Bep8JSq8lFLfGOoyGR/xwdjfvpvEaHg
     AccountIds:
-      description: a list of ids
+      description: a list of account ids
       content:
         application/json:
           schema:
