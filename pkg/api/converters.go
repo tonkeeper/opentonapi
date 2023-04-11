@@ -41,13 +41,24 @@ func anyToJSONRawMap(a any) map[string]jx.Raw { //todo: переписать э�
 	return m
 }
 
-func convertAccountAddress(id tongo.AccountID) oas.AccountAddress {
-	return oas.AccountAddress{Address: id.ToRaw()}
+func convertAccountAddress(id tongo.AccountID, book addressBook) oas.AccountAddress {
+	i, prs := book.GetAddressInfoByAddress(id)
+	address := oas.AccountAddress{Address: id.ToRaw()}
+	if prs {
+		if i.Name != "" {
+			address.SetName(oas.NewOptString(i.Name))
+		}
+		if i.Image != "" {
+			address.SetIcon(oas.NewOptString(i.Image))
+		}
+		address.IsScam = i.IsScam
+	}
+	return address
 }
 
-func convertOptAccountAddress(id *tongo.AccountID) oas.OptAccountAddress {
+func convertOptAccountAddress(id *tongo.AccountID, book addressBook) oas.OptAccountAddress {
 	if id != nil {
-		return oas.OptAccountAddress{Value: convertAccountAddress(*id), Set: true}
+		return oas.OptAccountAddress{Value: convertAccountAddress(*id, book), Set: true}
 	}
 	return oas.OptAccountAddress{}
 }

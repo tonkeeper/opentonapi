@@ -14,12 +14,11 @@ import (
 
 // KnownAddress represents additional manually crafted information about a particular account in the blockchain.
 type KnownAddress struct {
-	IsScam      bool `json:"is_scam,omitempty"`
-	RequireMemo bool `json:"require_memo,omitempty"`
-	// Name is a dns name.
-	Name    string `json:"name"`
-	Address string `json:"address"`
-	Image   string `json:"image,omitempty"`
+	IsScam      bool   `json:"is_scam,omitempty"`
+	RequireMemo bool   `json:"require_memo,omitempty"`
+	Name        string `json:"name"`
+	Address     string `json:"address"`
+	Image       string `json:"image,omitempty"`
 }
 
 type JettonVerificationType string
@@ -55,13 +54,28 @@ type KnownCollection struct {
 	Social      []string `json:"social,omitempty"`
 }
 
+type Options struct {
+	addressers []addresser
+}
+type Option func(o *Options)
+
+type addresser interface {
+	GetAddress(a tongo.AccountID) (KnownAddress, bool)
+}
+
+func WithAdditionalAddressesSource(a addresser) Option {
+	return func(o *Options) {
+		o.addressers = append(o.addressers, a)
+	}
+}
+
 // Book holds information about known accounts, jettons, NFT collections manually crafted by the tonkeeper team and the community.
 type Book struct {
 	addresses   map[tongo.AccountID]KnownAddress
 	collections map[tongo.AccountID]KnownCollection
 	jettons     map[tongo.AccountID]KnownJetton
 	tfPools     map[tongo.AccountID]TFPoolInfo
-	dnsCache    map[tongo.AccountID]string
+	addressers  []addresser
 }
 
 type TFPoolInfo struct {
@@ -71,14 +85,15 @@ type TFPoolInfo struct {
 }
 
 func (b *Book) GetAddressInfoByAddress(a tongo.AccountID) (KnownAddress, bool) {
-	a1, ok := b.addresses[a]
-	if ok {
+	if a1, ok := b.addresses[a]; ok {
 		return a1, ok
 	}
-	name, ok := b.dnsCache[a]
-	a1.Name = name
-	a1.Address = a.ToRaw()
-	return a1, ok
+	for i := range b.addressers {
+		if a1, ok := b.addressers[i].GetAddress(a); ok {
+			return a1, ok
+		}
+	}
+	return KnownAddress{}, false
 }
 
 func (b *Book) GetTFPoolInfo(a tongo.AccountID) (TFPoolInfo, bool) {
@@ -105,7 +120,11 @@ func (b *Book) GetKnownJettons() map[tongo.AccountID]KnownJetton {
 	return b.jettons
 }
 
-func NewAddressBook(logger *zap.Logger, addressPath, jettonPath, collectionPath string) *Book {
+func NewAddressBook(logger *zap.Logger, addressPath, jettonPath, collectionPath string, opts ...Option) *Book {
+	var options Options
+	for _, opt := range opts {
+		opt(&options)
+	}
 	addresses := make(map[tongo.AccountID]KnownAddress)
 	collections := make(map[tongo.AccountID]KnownCollection)
 	jettons := make(map[tongo.AccountID]KnownJetton)
@@ -165,8 +184,8 @@ func NewAddressBook(logger *zap.Logger, addressPath, jettonPath, collectionPath 
 		addresses:   addresses,
 		collections: collections,
 		jettons:     jettons,
-		dnsCache:    map[tongo.AccountID]string{},
 		tfPools:     tfPools,
+		addressers:  options.addressers,
 	}
 }
 

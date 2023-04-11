@@ -6,11 +6,11 @@ import (
 	"github.com/tonkeeper/opentonapi/pkg/oas"
 )
 
-func convertNFT(item core.NftItem) oas.NftItem {
+func convertNFT(item core.NftItem, book addressBook) oas.NftItem {
 	return oas.NftItem{
 		Address:    item.Address.ToRaw(),
 		Index:      item.Index.BigInt().Int64(),
-		Owner:      convertOptAccountAddress(item.OwnerAddress),
+		Owner:      convertOptAccountAddress(item.OwnerAddress, book),
 		Collection: oas.OptNftItemCollection{}, //todo: add
 		Verified:   item.Verified,
 		Metadata:   anyToJSONRawMap(item.Metadata),
@@ -21,12 +21,12 @@ func convertNFT(item core.NftItem) oas.NftItem {
 	}
 }
 
-func convertNftCollection(collection core.NftCollection) oas.NftCollection {
+func convertNftCollection(collection core.NftCollection, book addressBook) oas.NftCollection {
 	c := oas.NftCollection{
 		Address:              collection.Address.ToRaw(),
 		NextItemIndex:        int64(collection.NextItemIndex),
 		RawCollectionContent: fmt.Sprintf("%x", collection.CollectionContent[:]),
-		Owner:                convertOptAccountAddress(collection.OwnerAddress),
+		Owner:                convertOptAccountAddress(collection.OwnerAddress, book),
 	}
 	return c
 }
