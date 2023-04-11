@@ -449,6 +449,23 @@ func (s *AccountStorageInfo) SetDuePayment(val int64) {
 	s.DuePayment = val
 }
 
+// Ref: #/components/schemas/Accounts
+type Accounts struct {
+	Accounts []Account `json:"accounts"`
+}
+
+// GetAccounts returns the value of Accounts.
+func (s Accounts) GetAccounts() []Account {
+	return s.Accounts
+}
+
+// SetAccounts sets the value of Accounts.
+func (s *Accounts) SetAccounts(val []Account) {
+	s.Accounts = val
+}
+
+func (*Accounts) getAccountsRes() {}
+
 // Ref: #/components/schemas/Action
 type Action struct {
 	Type              ActionType               `json:"type"`
@@ -890,6 +907,7 @@ func (*BadRequest) emulateMessageRes()            {}
 func (*BadRequest) execGetMethodRes()             {}
 func (*BadRequest) getAccountRes()                {}
 func (*BadRequest) getAccountTransactionsRes()    {}
+func (*BadRequest) getAccountsRes()               {}
 func (*BadRequest) getBlockRes()                  {}
 func (*BadRequest) getBlockTransactionsRes()      {}
 func (*BadRequest) getDomainBidsRes()             {}
@@ -1720,6 +1738,20 @@ func (s *Fee) SetRefund(val int64) {
 	s.Refund = val
 }
 
+type GetAccountsReq struct {
+	AccountIds []string `json:"account_ids"`
+}
+
+// GetAccountIds returns the value of AccountIds.
+func (s GetAccountsReq) GetAccountIds() []string {
+	return s.AccountIds
+}
+
+// SetAccountIds sets the value of AccountIds.
+func (s *GetAccountsReq) SetAccountIds(val []string) {
+	s.AccountIds = val
+}
+
 type GetStorageProvidersOK struct {
 	Providers []StorageProvider `json:"providers"`
 }
@@ -1782,6 +1814,7 @@ func (*InternalError) emulateMessageRes()            {}
 func (*InternalError) execGetMethodRes()             {}
 func (*InternalError) getAccountRes()                {}
 func (*InternalError) getAccountTransactionsRes()    {}
+func (*InternalError) getAccountsRes()               {}
 func (*InternalError) getAllAuctionsRes()            {}
 func (*InternalError) getBlockRes()                  {}
 func (*InternalError) getBlockTransactionsRes()      {}
@@ -3314,6 +3347,52 @@ func (o OptEmulateMessageReq) Get() (v EmulateMessageReq, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptEmulateMessageReq) Or(d EmulateMessageReq) EmulateMessageReq {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptGetAccountsReq returns new OptGetAccountsReq with value set to v.
+func NewOptGetAccountsReq(v GetAccountsReq) OptGetAccountsReq {
+	return OptGetAccountsReq{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptGetAccountsReq is optional GetAccountsReq.
+type OptGetAccountsReq struct {
+	Value GetAccountsReq
+	Set   bool
+}
+
+// IsSet returns true if OptGetAccountsReq was set.
+func (o OptGetAccountsReq) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptGetAccountsReq) Reset() {
+	var v GetAccountsReq
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptGetAccountsReq) SetTo(v GetAccountsReq) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptGetAccountsReq) Get() (v GetAccountsReq, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptGetAccountsReq) Or(d GetAccountsReq) GetAccountsReq {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -5916,6 +5995,7 @@ func (*UnauthorizedError) emulateMessageRes()            {}
 func (*UnauthorizedError) execGetMethodRes()             {}
 func (*UnauthorizedError) getAccountRes()                {}
 func (*UnauthorizedError) getAccountTransactionsRes()    {}
+func (*UnauthorizedError) getAccountsRes()               {}
 func (*UnauthorizedError) getAllAuctionsRes()            {}
 func (*UnauthorizedError) getBlockRes()                  {}
 func (*UnauthorizedError) getBlockTransactionsRes()      {}

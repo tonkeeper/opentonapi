@@ -4,11 +4,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/tonkeeper/opentonapi/pkg/core"
-	"github.com/tonkeeper/opentonapi/pkg/oas"
+
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
 	"github.com/tonkeeper/tongo/tlb"
+
+	"github.com/tonkeeper/opentonapi/pkg/core"
+	"github.com/tonkeeper/opentonapi/pkg/oas"
 )
 
 func (h Handler) GetAccount(ctx context.Context, params oas.GetAccountParams) (oas.GetAccountRes, error) {
@@ -16,7 +18,7 @@ func (h Handler) GetAccount(ctx context.Context, params oas.GetAccountParams) (o
 	if err != nil {
 		return &oas.BadRequest{Error: err.Error()}, nil
 	}
-	info, err := h.storage.GetAccountInfo(ctx, accountID)
+	account, err := h.storage.GetRawAccount(ctx, accountID)
 	if errors.Is(err, core.ErrEntityNotFound) {
 		return &oas.Account{
 			Address: accountID.ToRaw(),
@@ -27,18 +29,43 @@ func (h Handler) GetAccount(ctx context.Context, params oas.GetAccountParams) (o
 		return &oas.BadRequest{Error: err.Error()}, nil
 	}
 	ab, found := h.addressBook.GetAddressInfoByAddress(accountID)
+	var res oas.Account
 	if found {
-		info.IsScam = &ab.IsScam
-		if len(ab.Name) > 0 {
-			info.Name = &ab.Name
-		}
-		if len(ab.Image) > 0 {
-			info.Icon = &ab.Image
-		}
-		info.MemoRequired = &ab.RequireMemo
+		res = convertToAccount(account, &ab)
+	} else {
+		res = convertToAccount(account, nil)
 	}
-	res := convertToAccount(info)
 	return &res, nil
+}
+
+func (h Handler) GetAccounts(ctx context.Context, req oas.OptGetAccountsReq) (r oas.GetAccountsRes, _ error) {
+	if len(req.Value.AccountIds) == 0 {
+		return &oas.BadRequest{Error: "empty list of ids"}, nil
+	}
+	var ids []tongo.AccountID
+	for _, str := range req.Value.AccountIds {
+		accountID, err := tongo.ParseAccountID(str)
+		if err != nil {
+			return &oas.BadRequest{Error: err.Error()}, nil
+		}
+		ids = append(ids, accountID)
+	}
+	accounts, err := h.storage.GetRawAccounts(ctx, ids)
+	if err != nil {
+		return &oas.InternalError{Error: err.Error()}, nil
+	}
+	results := make([]oas.Account, 0, len(accounts))
+	for _, account := range accounts {
+		ab, found := h.addressBook.GetAddressInfoByAddress(account.AccountAddress)
+		var res oas.Account
+		if found {
+			res = convertToAccount(account, &ab)
+		} else {
+			res = convertToAccount(account, nil)
+		}
+		results = append(results, res)
+	}
+	return &oas.Accounts{Accounts: results}, nil
 }
 
 func (h Handler) GetRawAccount(ctx context.Context, params oas.GetRawAccountParams) (r oas.GetRawAccountRes, _ error) {
