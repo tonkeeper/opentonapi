@@ -28,6 +28,6 @@ func (h Handler) GetAllAuctions(ctx context.Context, params oas.GetAllAuctionsPa
 			Price:  a.Price,
 		})
 	}
-	auctionsRes.Total = int64(len(auctions))
+	auctionsRes.Total = int64(len(auctionsRes.Data))
 	return &auctionsRes, nil
 }
