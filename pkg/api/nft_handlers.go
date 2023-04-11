@@ -23,7 +23,7 @@ func (h Handler) GetNftItemsByAddresses(ctx context.Context, params oas.GetNftIt
 	}
 	var result oas.NftItems
 	for _, i := range items {
-		result.NftItems = append(result.NftItems, convertNFT(i, h.addressBook))
+		result.NftItems = append(result.NftItems, convertNFT(i, h.addressBook, h.previewGenerator))
 	}
 	return &result, nil
 }
@@ -52,7 +52,7 @@ func (h Handler) GetNftItemsByOwner(ctx context.Context, params oas.GetNftItemsB
 		return &oas.InternalError{Error: err.Error()}, nil
 	}
 	for _, i := range items {
-		result.NftItems = append(result.NftItems, convertNFT(i, h.addressBook))
+		result.NftItems = append(result.NftItems, convertNFT(i, h.addressBook, h.previewGenerator))
 	}
 	return &result, nil
 }

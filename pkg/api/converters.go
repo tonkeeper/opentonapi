@@ -79,7 +79,6 @@ func rewriteIfNotEmpty(src, dest string) string {
 }
 
 func convertTvmStackValue(v tlb.VmStackValue) (oas.TvmStackRecord, error) {
-	//	VmStkTuple   VmStkTuple    `tlbSumType:"vm_stk_tuple#07"`
 	switch v.SumType {
 	case "VmStkNull":
 		return oas.TvmStackRecord{Type: oas.TvmStackRecordTypeNull}, nil
@@ -93,7 +92,11 @@ func convertTvmStackValue(v tlb.VmStackValue) (oas.TvmStackRecord, error) {
 		return oas.TvmStackRecord{Type: oas.TvmStackRecordTypeNum, Num: oas.NewOptString(str)}, nil
 	case "VmStkInt":
 		b := big.Int(v.VmStkInt)
-		return oas.TvmStackRecord{Type: oas.TvmStackRecordTypeNum, Num: oas.NewOptString(fmt.Sprintf("0x%x", b.Bytes()))}, nil //todo: fix negative
+		str := fmt.Sprintf("0x%x", b.Bytes())
+		if b.Sign() == -1 {
+			str = "-" + str
+		}
+		return oas.TvmStackRecord{Type: oas.TvmStackRecordTypeNum, Num: oas.NewOptString(str)}, nil
 	case "VmStkCell":
 		boc, err := v.VmStkCell.Value.ToBocString()
 		if err != nil {
@@ -107,10 +110,33 @@ func convertTvmStackValue(v tlb.VmStackValue) (oas.TvmStackRecord, error) {
 		}
 		return oas.TvmStackRecord{Type: oas.TvmStackRecordTypeCell, Cell: oas.NewOptString(boc)}, nil
 	case "VmStkTuple":
-		return oas.TvmStackRecord{Type: oas.TvmStackRecordTypeTuple, Tuple: []oas.TvmStackRecord{{Type: oas.TvmStackRecordTypeCell, Cell: oas.NewOptString("Tuple is not implemented")}}}, nil //todo: return values
+		return convertTuple(v.VmStkTuple)
 	default:
 		return oas.TvmStackRecord{}, fmt.Errorf("can't conver %v stack to rest json", v.SumType)
 	}
+}
+
+func convertTuple(v tlb.VmStkTuple) (oas.TvmStackRecord, error) {
+	var records []tlb.VmStackValue
+	var err error
+	r := oas.TvmStackRecord{Type: oas.TvmStackRecordTypeTuple}
+
+	if v.Len == 2 { //todo: find correct
+		records, err = v.RecursiveToSlice()
+	} else {
+		records, err = v.Data.RecursiveToSlice(int(v.Len))
+	}
+	if err != nil {
+		return r, err
+	}
+	for _, v := range records {
+		ov, err := convertTvmStackValue(v)
+		if err != nil {
+			return r, err
+		}
+		r.Tuple = append(r.Tuple, ov)
+	}
+	return r, nil
 }
 
 func stringToTVMStackRecord(s string) (tlb.VmStackValue, error) {

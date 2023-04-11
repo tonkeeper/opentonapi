@@ -11410,28 +11410,14 @@ func (s StateInit) Encode(e *jx.Encoder) {
 // encodeFields encodes fields.
 func (s StateInit) encodeFields(e *jx.Encoder) {
 	{
-		if s.Code.Set {
-			e.FieldStart("code")
-			s.Code.Encode(e)
-		}
-	}
-	{
-		if s.Data.Set {
-			e.FieldStart("data")
-			s.Data.Encode(e)
-		}
-	}
-	{
 
-		e.FieldStart("library")
-		s.Library.Encode(e)
+		e.FieldStart("boc")
+		e.Str(s.Boc)
 	}
 }
 
-var jsonFieldsNameOfStateInit = [3]string{
-	0: "code",
-	1: "data",
-	2: "library",
+var jsonFieldsNameOfStateInit = [1]string{
+	0: "boc",
 }
 
 // Decode decodes StateInit from json.
@@ -11443,35 +11429,17 @@ func (s *StateInit) Decode(d *jx.Decoder) error {
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
-		case "code":
+		case "boc":
+			requiredBitSet[0] |= 1 << 0
 			if err := func() error {
-				s.Code.Reset()
-				if err := s.Code.Decode(d); err != nil {
+				v, err := d.Str()
+				s.Boc = string(v)
+				if err != nil {
 					return err
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"code\"")
-			}
-		case "data":
-			if err := func() error {
-				s.Data.Reset()
-				if err := s.Data.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"data\"")
-			}
-		case "library":
-			requiredBitSet[0] |= 1 << 2
-			if err := func() error {
-				if err := s.Library.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"library\"")
+				return errors.Wrap(err, "decode field \"boc\"")
 			}
 		default:
 			return d.Skip()
@@ -11483,7 +11451,7 @@ func (s *StateInit) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b00000100,
+		0b00000001,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -11525,62 +11493,6 @@ func (s StateInit) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *StateInit) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
-// Encode implements json.Marshaler.
-func (s StateInitLibrary) Encode(e *jx.Encoder) {
-	e.ObjStart()
-	s.encodeFields(e)
-	e.ObjEnd()
-}
-
-// encodeFields implements json.Marshaler.
-func (s StateInitLibrary) encodeFields(e *jx.Encoder) {
-	for k, elem := range s {
-		e.FieldStart(k)
-
-		e.Str(elem)
-	}
-}
-
-// Decode decodes StateInitLibrary from json.
-func (s *StateInitLibrary) Decode(d *jx.Decoder) error {
-	if s == nil {
-		return errors.New("invalid: unable to decode StateInitLibrary to nil")
-	}
-	m := s.init()
-	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
-		var elem string
-		if err := func() error {
-			v, err := d.Str()
-			elem = string(v)
-			if err != nil {
-				return err
-			}
-			return nil
-		}(); err != nil {
-			return errors.Wrapf(err, "decode field %q", k)
-		}
-		m[string(k)] = elem
-		return nil
-	}); err != nil {
-		return errors.Wrap(err, "decode StateInitLibrary")
-	}
-
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s StateInitLibrary) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *StateInitLibrary) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }

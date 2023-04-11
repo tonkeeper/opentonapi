@@ -79,14 +79,17 @@ func convertAction(a bath.Action, book addressBook) oas.Action {
 		if a.SmartContractExec.Operation != "" {
 			op = a.SmartContractExec.Operation
 		}
-		action.SmartContractExec.SetTo(oas.SmartContractAction{
+		contractAction := oas.SmartContractAction{
 			Executor:    convertAccountAddress(a.SmartContractExec.Executor, book),
 			Contract:    convertAccountAddress(a.SmartContractExec.Contract, book),
 			TonAttached: a.SmartContractExec.TonAttached,
 			Operation:   op,
-			Payload:     oas.OptString{}, //todo: do
 			Refund:      oas.OptRefund{},
-		})
+		}
+		if a.SmartContractExec.Payload != "" {
+			contractAction.Payload.SetTo(a.SmartContractExec.Payload)
+		}
+		action.SmartContractExec.SetTo(contractAction)
 	}
 	return action
 }
