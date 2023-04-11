@@ -52,6 +52,29 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 					break
 				}
 
+				if len(elem) == 0 {
+					break
+				}
+				switch elem[0] {
+				case '_': // Prefix: "_bulk"
+					if l := len("_bulk"); len(elem) >= l && elem[0:l] == "_bulk" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					if len(elem) == 0 {
+						// Leaf node.
+						switch r.Method {
+						case "POST":
+							s.handleGetAccountsRequest([0]string{}, w, r)
+						default:
+							s.notAllowed(w, r, "POST")
+						}
+
+						return
+					}
+				}
 				// Param: "account_id"
 				// Match until "/"
 				idx := strings.IndexByte(elem, '/')
@@ -935,6 +958,31 @@ func (s *Server) FindRoute(method, path string) (r Route, _ bool) {
 					break
 				}
 
+				if len(elem) == 0 {
+					break
+				}
+				switch elem[0] {
+				case '_': // Prefix: "_bulk"
+					if l := len("_bulk"); len(elem) >= l && elem[0:l] == "_bulk" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					if len(elem) == 0 {
+						switch method {
+						case "POST":
+							// Leaf: GetAccounts
+							r.name = "GetAccounts"
+							r.operationID = "getAccounts"
+							r.args = args
+							r.count = 0
+							return r, true
+						default:
+							return
+						}
+					}
+				}
 				// Param: "account_id"
 				// Match until "/"
 				idx := strings.IndexByte(elem, '/')

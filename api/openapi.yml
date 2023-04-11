@@ -143,7 +143,6 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/InternalError'
-
   /v2/blockchain/accounts/{account_id}/transactions:
     get:
       description: Get account transactions
@@ -277,6 +276,28 @@ paths:
                 $ref: '#/components/schemas/Config'
         '401':
           $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /v2/accounts/_bulk:
+    post:
+      description: Get human-friendly information about several accounts without low-level details.
+      operationId: getAccounts
+      tags:
+        - Accounts
+      requestBody:
+        $ref: "#/components/requestBodies/AccountIds"
+      responses:
+        '200':
+          description: a list of accounts
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Accounts'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '400':
+          $ref: '#/components/responses/BadRequest'
         '500':
           $ref: '#/components/responses/InternalError'
 
@@ -975,6 +996,20 @@ components:
               boc:
                 type: string
                 example: te6ccgECBQEAARUAAkWIAWTtae+KgtbrX26Bep8JSq8lFLfGOoyGR/xwdjfvpvEaHg
+    AccountIds:
+      description: a list of ids
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - account_ids
+            properties:
+              account_ids:
+                type: array
+                items:
+                  type: string
+                  example: 0:97264395BD65A255A429B11326C84128B7D70FFED7949ABAE3036D506BA38621
 
   schemas:
 
@@ -1580,6 +1615,15 @@ components:
             type: string
           example: ['get_item_data']
 
+    Accounts:
+      type: object
+      required:
+        - accounts
+      properties:
+        accounts:
+          type: array
+          items:
+            $ref: '#/components/schemas/Account'
 
     MethodExecutionResult:
       type: object

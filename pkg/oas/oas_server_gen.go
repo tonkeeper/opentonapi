@@ -44,6 +44,12 @@ type Handler interface {
 	//
 	// GET /v2/blockchain/accounts/{account_id}/transactions
 	GetAccountTransactions(ctx context.Context, params GetAccountTransactionsParams) (GetAccountTransactionsRes, error)
+	// GetAccounts implements getAccounts operation.
+	//
+	// Get human-friendly information about several accounts without low-level details.
+	//
+	// POST /v2/accounts/_bulk
+	GetAccounts(ctx context.Context, req OptGetAccountsReq) (GetAccountsRes, error)
 	// GetAllAuctions implements getAllAuctions operation.
 	//
 	// Get all auctions.

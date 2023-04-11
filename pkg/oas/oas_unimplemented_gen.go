@@ -67,6 +67,15 @@ func (UnimplementedHandler) GetAccountTransactions(ctx context.Context, params G
 	return r, ht.ErrNotImplemented
 }
 
+// GetAccounts implements getAccounts operation.
+//
+// Get human-friendly information about several accounts without low-level details.
+//
+// POST /v2/accounts/_bulk
+func (UnimplementedHandler) GetAccounts(ctx context.Context, req OptGetAccountsReq) (r GetAccountsRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // GetAllAuctions implements getAllAuctions operation.
 //
 // Get all auctions.

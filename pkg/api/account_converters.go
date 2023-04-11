@@ -2,6 +2,8 @@ package api
 
 import (
 	"fmt"
+
+	"github.com/tonkeeper/opentonapi/pkg/addressbook"
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/opentonapi/pkg/oas"
 )
@@ -36,26 +38,25 @@ func convertToRawAccount(account *core.Account) oas.RawAccount {
 	return rawAccount
 }
 
-func convertToAccount(info *core.AccountInfo) oas.Account {
+func convertToAccount(account *core.Account, ab *addressbook.KnownAddress) oas.Account {
 	acc := oas.Account{
-		Address:      info.Account.AccountAddress.ToRaw(),
-		Balance:      info.Account.TonBalance,
-		LastActivity: info.Account.LastActivityTime,
-		Status:       info.Account.Status,
-		Interfaces:   info.Account.Interfaces,
-		GetMethods:   info.Account.GetMethods,
+		Address:      account.AccountAddress.ToRaw(),
+		Balance:      account.TonBalance,
+		LastActivity: account.LastActivityTime,
+		Status:       account.Status,
+		Interfaces:   account.Interfaces,
+		GetMethods:   account.GetMethods,
 	}
-	if info.Name != nil {
-		acc.Name = oas.NewOptString(*info.Name)
+	if ab == nil {
+		return acc
 	}
-	if info.Icon != nil {
-		acc.Icon = oas.NewOptString(*info.Icon)
+	acc.IsScam = oas.NewOptBool(ab.IsScam)
+	if len(ab.Name) > 0 {
+		acc.Name = oas.NewOptString(ab.Name)
 	}
-	if info.IsScam != nil {
-		acc.IsScam = oas.NewOptBool(*info.IsScam)
+	if len(ab.Image) > 0 {
+		acc.Icon = oas.NewOptString(ab.Image)
 	}
-	if info.MemoRequired != nil {
-		acc.MemoRequired = oas.NewOptBool(*info.MemoRequired)
-	}
+	acc.MemoRequired = oas.NewOptBool(ab.RequireMemo)
 	return acc
 }
