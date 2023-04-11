@@ -7,8 +7,6 @@ import (
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
 
-	"github.com/tonkeeper/opentonapi/pkg/addressbook"
-	"github.com/tonkeeper/opentonapi/pkg/config"
 	"github.com/tonkeeper/opentonapi/pkg/litestorage"
 	"github.com/tonkeeper/opentonapi/pkg/oas"
 )
@@ -31,9 +29,8 @@ func TestHandler_GetRawAccount(t *testing.T) {
 			logger, _ := zap.NewDevelopment()
 			liteStorage, err := litestorage.NewLiteStorage(logger)
 			require.Nil(t, err)
-			h := Handler{
-				storage: liteStorage,
-			}
+			h, err := NewHandler(logger, WithStorage(liteStorage))
+			require.Nil(t, err)
 			account, err := h.GetRawAccount(context.Background(), tt.params)
 			require.Nil(t, err)
 			rawAccount, ok := account.(*oas.RawAccount)
@@ -63,10 +60,8 @@ func TestHandler_GetAccount(t *testing.T) {
 
 			liteStorage, err := litestorage.NewLiteStorage(logger)
 			require.Nil(t, err)
-			h := Handler{
-				addressBook: addressbook.NewAddressBook(logger, config.AddressPath, config.JettonPath, config.CollectionPath),
-				storage:     liteStorage,
-			}
+			h, err := NewHandler(logger, WithStorage(liteStorage))
+			require.Nil(t, err)
 			accountRes, err := h.GetAccount(context.Background(), tt.params)
 			require.Nil(t, err)
 			account, ok := accountRes.(*oas.Account)
@@ -101,9 +96,8 @@ func TestHandler_GetTransactions(t *testing.T) {
 			logger, _ := zap.NewDevelopment()
 			liteStorage, err := litestorage.NewLiteStorage(logger)
 			require.Nil(t, err)
-			h := Handler{
-				storage: liteStorage,
-			}
+			h, err := NewHandler(logger, WithStorage(liteStorage))
+			require.Nil(t, err)
 			res, err := h.GetBlockTransactions(context.Background(), tt.params)
 			require.Nil(t, err)
 			transactions, ok := res.(*oas.Transactions)
@@ -116,8 +110,4 @@ func TestHandler_GetTransactions(t *testing.T) {
 			require.Equal(t, tt.wantTxHashes, txHashes)
 		})
 	}
-}
-
-func createEmptyAddressBook() *addressbook.Book {
-	return &addressbook.Book{} // if need change empty address book to real
 }
