@@ -5,6 +5,7 @@ import (
 	"errors"
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/opentonapi/pkg/oas"
+	"github.com/tonkeeper/tongo"
 )
 
 func (h Handler) GetNftItemsByAddresses(ctx context.Context, req oas.OptGetNftItemsByAddressesReq) (oas.GetNftItemsByAddressesRes, error) {
@@ -66,7 +67,7 @@ func (h Handler) GetNftCollections(ctx context.Context, params oas.GetNftCollect
 	}
 	var collectionsRes oas.NftCollections
 	for _, collection := range collections {
-		col := convertNftCollection(collection)
+		col := convertNftCollection(collection, h.addressBook)
 		collectionsRes.NftCollections = append(collectionsRes.NftCollections, col)
 	}
 	return &collectionsRes, nil
@@ -85,6 +86,6 @@ func (h Handler) GetNftCollection(ctx context.Context, params oas.GetNftCollecti
 	if err != nil {
 		return &oas.InternalError{Error: err.Error()}, nil
 	}
-	col := convertNftCollection(collection)
+	col := convertNftCollection(collection, h.addressBook)
 	return &col, nil
 }
