@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/tonkeeper/opentonapi/pkg/addressbook"
+	"github.com/tonkeeper/opentonapi/pkg/spam"
 	"golang.org/x/exp/maps"
 	"net/http"
 
@@ -20,7 +21,7 @@ func main() {
 	cfg := config.Load()
 	log := app.Logger(cfg.App.LogLevel)
 	book := addressbook.NewAddressBook(log, config.AddressPath, config.JettonPath, config.CollectionPath)
-
+	spamWorker := spam.NewSpam()
 	storage, err := litestorage.NewLiteStorage(
 		log,
 		litestorage.WithPreloadAccounts(cfg.App.Accounts),
@@ -31,7 +32,7 @@ func main() {
 	if err != nil {
 		log.Fatal("storage init", zap.Error(err))
 	}
-	h, err := api.NewHandler(log, api.WithStorage(storage), api.WithAddressBook(book), api.WithExecutor(storage))
+	h, err := api.NewHandler(log, api.WithStorage(storage), api.WithAddressBook(book), api.WithExecutor(storage), api.WithSpam(spamWorker))
 	if err != nil {
 		log.Fatal("failed to create api handler", zap.Error(err))
 	}

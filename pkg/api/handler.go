@@ -28,6 +28,7 @@ type Handler struct {
 	previewGenerator previewGenerator
 	executor         executor
 	dns              *dns.DNS
+	spamWorker       spamWorker
 }
 
 // Options configures behavior of a Handler instance.
@@ -38,6 +39,7 @@ type Options struct {
 	msgSender        messageSender
 	previewGenerator previewGenerator
 	executor         executor
+	spamWorker       spamWorker
 }
 
 type Option func(o *Options)
@@ -77,6 +79,12 @@ func WithExecutor(e executor) Option {
 	}
 }
 
+func WithSpam(spamWorker spamWorker) Option {
+	return func(o *Options) {
+		o.spamWorker = spamWorker
+	}
+}
+
 func NewHandler(logger *zap.Logger, opts ...Option) (*Handler, error) {
 	options := &Options{}
 	for _, o := range opts {
@@ -104,6 +112,9 @@ func NewHandler(logger *zap.Logger, opts ...Option) (*Handler, error) {
 	if options.executor == nil {
 		return nil, fmt.Errorf("executor is not configured")
 	}
+	if options.spamWorker == nil {
+		return nil, fmt.Errorf("spam is not configured")
+	}
 	dnsClient := dns.NewDNS(tongo.MustParseAccountID("-1:e56754f83426f69b09267bd876ac97c44821345b7e266bd956a7bfbfb98df35c"), options.executor) //todo: move to chain config
 
 	return &Handler{
@@ -114,5 +125,6 @@ func NewHandler(logger *zap.Logger, opts ...Option) (*Handler, error) {
 		previewGenerator: options.previewGenerator,
 		executor:         options.executor,
 		dns:              dnsClient,
+		spamWorker:       options.spamWorker,
 	}, nil
 }

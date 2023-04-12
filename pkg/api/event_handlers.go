@@ -7,6 +7,7 @@ import (
 	"github.com/tonkeeper/opentonapi/pkg/bath"
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/opentonapi/pkg/oas"
+	"github.com/tonkeeper/opentonapi/pkg/spam"
 	"github.com/tonkeeper/tongo"
 )
 
@@ -110,6 +111,7 @@ func (h Handler) GetEventsByAccount(ctx context.Context, params oas.GetEventsByA
 				Status: oas.ActionStatusOk,
 			}}
 		}
+		e = spam.MarkScamEvent(e, h.spamWorker.GetRules())
 		events[i] = e
 		lastLT = trace.Lt
 	}
