@@ -25,11 +25,6 @@ type Config struct {
 	}
 }
 
-var Loader struct {
-	IpfsGate       string `env:"IPFS_GATE" envDefault:"https://ipfs.io/ipfs/"`
-	TonStorageGate string `env:"TONSTORAGE_GATE" envDefault:"http://storage.ton/gateway/"`
-}
-
 type accountsList []tongo.AccountID
 
 const (
@@ -81,10 +76,6 @@ func Load() Config {
 			}
 			return accs, nil
 		}}); err != nil {
-		log.Panicf("[‼️  Config parsing failed] %+v\n", err)
-	}
-
-	if err := env.Parse(&Loader); err != nil {
 		log.Panicf("[‼️  Config parsing failed] %+v\n", err)
 	}
 

@@ -8,6 +8,7 @@ import (
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
 	"github.com/tonkeeper/tongo/boc"
+	"github.com/tonkeeper/tongo/tep64"
 	"math/big"
 )
 
@@ -39,7 +40,7 @@ func (s *LiteStorage) GetNftCollectionByCollectionAddress(ctx context.Context, a
 		return core.NftCollection{}, fmt.Errorf("invalid collection address")
 	}
 	content := boc.Cell(source.CollectionContent)
-	fullContent, err := core.DecodeFullContent(&content)
+	fullContent, err := tep64.DecodeFullContent(&content)
 	if err != nil {
 		return core.NftCollection{}, err
 	}
@@ -54,7 +55,7 @@ func (s *LiteStorage) GetNftCollectionByCollectionAddress(ctx context.Context, a
 		ContentLayout:     int(fullContent.Layout),
 		NextItemIndex:     g.Pointer(big.Int(source.NextItemIndex)).Uint64(),
 	}
-	if fullContent.Layout == core.OffChain {
+	if fullContent.Layout == tep64.OffChain {
 		meta, err := core.GetNftMetaData(string(fullContent.Data))
 		if err != nil {
 			return core.NftCollection{}, err
