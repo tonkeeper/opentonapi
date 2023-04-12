@@ -37,7 +37,7 @@ func (h Handler) GetTransaction(ctx context.Context, params oas.GetTransactionPa
 	if err != nil {
 		return nil, err
 	}
-	transaction := convertTransaction(*txs)
+	transaction := convertTransaction(*txs, h.addressBook)
 	return &transaction, nil
 }
 
@@ -54,7 +54,7 @@ func (h Handler) GetBlockTransactions(ctx context.Context, params oas.GetBlockTr
 		Transactions: make([]oas.Transaction, 0, len(transactions)),
 	}
 	for _, tx := range transactions {
-		res.Transactions = append(res.Transactions, convertTransaction(*tx))
+		res.Transactions = append(res.Transactions, convertTransaction(*tx, h.addressBook))
 	}
 	return &res, nil
 }

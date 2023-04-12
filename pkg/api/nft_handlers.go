@@ -5,14 +5,16 @@ import (
 	"errors"
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/opentonapi/pkg/oas"
-	"github.com/tonkeeper/tongo"
 )
 
-func (h Handler) GetNftItemsByAddresses(ctx context.Context, params oas.GetNftItemsByAddressesParams) (oas.GetNftItemsByAddressesRes, error) {
-	accounts := make([]tongo.AccountID, len(params.AccountIds))
+func (h Handler) GetNftItemsByAddresses(ctx context.Context, req oas.OptGetNftItemsByAddressesReq) (oas.GetNftItemsByAddressesRes, error) {
+	if len(req.Value.AccountIds) == 0 {
+		return &oas.BadRequest{Error: "empty list of ids"}, nil
+	}
+	accounts := make([]tongo.AccountID, len(req.Value.AccountIds))
 	var err error
-	for i := range params.AccountIds {
-		accounts[i], err = tongo.ParseAccountID(params.AccountIds[i])
+	for i := range req.Value.AccountIds {
+		accounts[i], err = tongo.ParseAccountID(req.Value.AccountIds[i])
 		if err != nil {
 			return &oas.BadRequest{Error: err.Error()}, nil
 		}
@@ -23,7 +25,7 @@ func (h Handler) GetNftItemsByAddresses(ctx context.Context, params oas.GetNftIt
 	}
 	var result oas.NftItems
 	for _, i := range items {
-		result.NftItems = append(result.NftItems, convertNFT(i))
+		result.NftItems = append(result.NftItems, convertNFT(i, h.addressBook, h.previewGenerator))
 	}
 	return &result, nil
 }
@@ -52,7 +54,7 @@ func (h Handler) GetNftItemsByOwner(ctx context.Context, params oas.GetNftItemsB
 		return &oas.InternalError{Error: err.Error()}, nil
 	}
 	for _, i := range items {
-		result.NftItems = append(result.NftItems, convertNFT(i))
+		result.NftItems = append(result.NftItems, convertNFT(i, h.addressBook, h.previewGenerator))
 	}
 	return &result, nil
 }

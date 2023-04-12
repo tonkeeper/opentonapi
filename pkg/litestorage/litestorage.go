@@ -4,8 +4,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/tonkeeper/tongo/config"
 	"time"
+
+	"github.com/tonkeeper/tongo/config"
 
 	retry "github.com/avast/retry-go"
 	"go.uber.org/zap"
@@ -92,17 +93,6 @@ func NewLiteStorage(log *zap.Logger, opts ...Option) (*LiteStorage, error) {
 	return l, nil
 }
 
-// GetAccountInfo returns human-friendly information about an account without low-level details.
-func (s *LiteStorage) GetAccountInfo(ctx context.Context, id tongo.AccountID) (*core.AccountInfo, error) {
-	account, err := s.GetRawAccount(ctx, id)
-	if err != nil {
-		return nil, err
-	}
-	return &core.AccountInfo{
-		Account: *account,
-	}, nil
-}
-
 // GetRawAccount returns low-level information about an account taken directly from the blockchain.
 func (s *LiteStorage) GetRawAccount(ctx context.Context, address tongo.AccountID) (*core.Account, error) {
 	var account tlb.Account
@@ -119,6 +109,31 @@ func (s *LiteStorage) GetRawAccount(ctx context.Context, address tongo.AccountID
 		return nil, err
 	}
 	return core.ConvertToAccount(address, account)
+}
+
+// GetRawAccounts returns low-level information about several accounts taken directly from the blockchain.
+func (s *LiteStorage) GetRawAccounts(ctx context.Context, ids []tongo.AccountID) ([]*core.Account, error) {
+	var accounts []*core.Account
+	for _, address := range ids {
+		var account tlb.Account
+		err := retry.Do(func() error {
+			state, err := s.client.GetAccountState(ctx, address)
+			if err != nil {
+				return err
+			}
+			account = state.Account
+			return nil
+		}, retry.Attempts(10), retry.Delay(10*time.Millisecond))
+		if err != nil {
+			return nil, err
+		}
+		acc, err := core.ConvertToAccount(address, account)
+		if err != nil {
+			return nil, err
+		}
+		accounts = append(accounts, acc)
+	}
+	return accounts, nil
 }
 
 func (s *LiteStorage) preloadAccount(a tongo.AccountID, log *zap.Logger) error {

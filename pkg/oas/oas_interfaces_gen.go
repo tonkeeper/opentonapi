@@ -25,6 +25,10 @@ type GetAccountTransactionsRes interface {
 	getAccountTransactionsRes()
 }
 
+type GetAccountsRes interface {
+	getAccountsRes()
+}
+
 type GetAllAuctionsRes interface {
 	getAllAuctionsRes()
 }

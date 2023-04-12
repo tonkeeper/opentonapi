@@ -630,6 +630,105 @@ func (s *Server) handleGetAccountTransactionsRequest(args [1]string, w http.Resp
 	}
 }
 
+// handleGetAccountsRequest handles getAccounts operation.
+//
+// Get human-friendly information about several accounts without low-level details.
+//
+// POST /v2/accounts/_bulk
+func (s *Server) handleGetAccountsRequest(args [0]string, w http.ResponseWriter, r *http.Request) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("getAccounts"),
+	}
+
+	// Start a span for this request.
+	ctx, span := s.cfg.Tracer.Start(r.Context(), "GetAccounts",
+		trace.WithAttributes(otelAttrs...),
+		serverSpanKind,
+	)
+	defer span.End()
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		elapsedDuration := time.Since(startTime)
+		s.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+	}()
+
+	// Increment request counter.
+	s.requests.Add(ctx, 1, otelAttrs...)
+
+	var (
+		recordError = func(stage string, err error) {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			s.errors.Add(ctx, 1, otelAttrs...)
+		}
+		err          error
+		opErrContext = ogenerrors.OperationContext{
+			Name: "GetAccounts",
+			ID:   "getAccounts",
+		}
+	)
+	request, close, err := s.decodeGetAccountsRequest(r)
+	if err != nil {
+		err = &ogenerrors.DecodeRequestError{
+			OperationContext: opErrContext,
+			Err:              err,
+		}
+		recordError("DecodeRequest", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+	defer func() {
+		if err := close(); err != nil {
+			recordError("CloseRequest", err)
+		}
+	}()
+
+	var response GetAccountsRes
+	if m := s.cfg.Middleware; m != nil {
+		mreq := middleware.Request{
+			Context:       ctx,
+			OperationName: "GetAccounts",
+			OperationID:   "getAccounts",
+			Body:          request,
+			Params:        middleware.Parameters{},
+			Raw:           r,
+		}
+
+		type (
+			Request  = OptGetAccountsReq
+			Params   = struct{}
+			Response = GetAccountsRes
+		)
+		response, err = middleware.HookMiddleware[
+			Request,
+			Params,
+			Response,
+		](
+			m,
+			mreq,
+			nil,
+			func(ctx context.Context, request Request, params Params) (Response, error) {
+				return s.h.GetAccounts(ctx, request)
+			},
+		)
+	} else {
+		response, err = s.h.GetAccounts(ctx, request)
+	}
+	if err != nil {
+		recordError("Internal", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+
+	if err := encodeGetAccountsResponse(response, w, span); err != nil {
+		recordError("EncodeResponse", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+}
+
 // handleGetAllAuctionsRequest handles getAllAuctions operation.
 //
 // Get all auctions.
@@ -1802,10 +1901,10 @@ func (s *Server) handleGetNftCollectionsRequest(args [0]string, w http.ResponseW
 
 // handleGetNftItemsByAddressesRequest handles getNftItemsByAddresses operation.
 //
-// Get NFT items by its address.
+// Get NFT items by their addresses.
 //
-// GET /v2/nfts/{account_ids}
-func (s *Server) handleGetNftItemsByAddressesRequest(args [1]string, w http.ResponseWriter, r *http.Request) {
+// POST /v2/nfts/_bulk
+func (s *Server) handleGetNftItemsByAddressesRequest(args [0]string, w http.ResponseWriter, r *http.Request) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getNftItemsByAddresses"),
 	}
@@ -1839,16 +1938,21 @@ func (s *Server) handleGetNftItemsByAddressesRequest(args [1]string, w http.Resp
 			ID:   "getNftItemsByAddresses",
 		}
 	)
-	params, err := decodeGetNftItemsByAddressesParams(args, r)
+	request, close, err := s.decodeGetNftItemsByAddressesRequest(r)
 	if err != nil {
-		err = &ogenerrors.DecodeParamsError{
+		err = &ogenerrors.DecodeRequestError{
 			OperationContext: opErrContext,
 			Err:              err,
 		}
-		recordError("DecodeParams", err)
+		recordError("DecodeRequest", err)
 		s.cfg.ErrorHandler(ctx, w, r, err)
 		return
 	}
+	defer func() {
+		if err := close(); err != nil {
+			recordError("CloseRequest", err)
+		}
+	}()
 
 	var response GetNftItemsByAddressesRes
 	if m := s.cfg.Middleware; m != nil {
@@ -1856,19 +1960,14 @@ func (s *Server) handleGetNftItemsByAddressesRequest(args [1]string, w http.Resp
 			Context:       ctx,
 			OperationName: "GetNftItemsByAddresses",
 			OperationID:   "getNftItemsByAddresses",
-			Body:          nil,
-			Params: middleware.Parameters{
-				{
-					Name: "account_ids",
-					In:   "path",
-				}: params.AccountIds,
-			},
-			Raw: r,
+			Body:          request,
+			Params:        middleware.Parameters{},
+			Raw:           r,
 		}
 
 		type (
-			Request  = struct{}
-			Params   = GetNftItemsByAddressesParams
+			Request  = OptGetNftItemsByAddressesReq
+			Params   = struct{}
 			Response = GetNftItemsByAddressesRes
 		)
 		response, err = middleware.HookMiddleware[
@@ -1878,13 +1977,13 @@ func (s *Server) handleGetNftItemsByAddressesRequest(args [1]string, w http.Resp
 		](
 			m,
 			mreq,
-			unpackGetNftItemsByAddressesParams,
+			nil,
 			func(ctx context.Context, request Request, params Params) (Response, error) {
-				return s.h.GetNftItemsByAddresses(ctx, params)
+				return s.h.GetNftItemsByAddresses(ctx, request)
 			},
 		)
 	} else {
-		response, err = s.h.GetNftItemsByAddresses(ctx, params)
+		response, err = s.h.GetNftItemsByAddresses(ctx, request)
 	}
 	if err != nil {
 		recordError("Internal", err)

@@ -134,10 +134,13 @@ func (*Account) getAccountRes() {}
 
 // Ref: #/components/schemas/AccountAddress
 type AccountAddress struct {
-	Address string    `json:"address"`
-	Name    OptString `json:"name"`
-	IsScam  bool      `json:"is_scam"`
-	Icon    OptString `json:"icon"`
+	Address string `json:"address"`
+	// Display name. Data collected from different sources like moderation lists, dns, collections names
+	// and over.
+	Name OptString `json:"name"`
+	// Is this account was marked as part of scammers activity.
+	IsScam bool      `json:"is_scam"`
+	Icon   OptString `json:"icon"`
 }
 
 // GetAddress returns the value of Address.
@@ -448,6 +451,23 @@ func (s *AccountStorageInfo) SetLastPaid(val int64) {
 func (s *AccountStorageInfo) SetDuePayment(val int64) {
 	s.DuePayment = val
 }
+
+// Ref: #/components/schemas/Accounts
+type Accounts struct {
+	Accounts []Account `json:"accounts"`
+}
+
+// GetAccounts returns the value of Accounts.
+func (s Accounts) GetAccounts() []Account {
+	return s.Accounts
+}
+
+// SetAccounts sets the value of Accounts.
+func (s *Accounts) SetAccounts(val []Account) {
+	s.Accounts = val
+}
+
+func (*Accounts) getAccountsRes() {}
 
 // Ref: #/components/schemas/Action
 type Action struct {
@@ -890,6 +910,7 @@ func (*BadRequest) emulateMessageRes()            {}
 func (*BadRequest) execGetMethodRes()             {}
 func (*BadRequest) getAccountRes()                {}
 func (*BadRequest) getAccountTransactionsRes()    {}
+func (*BadRequest) getAccountsRes()               {}
 func (*BadRequest) getBlockRes()                  {}
 func (*BadRequest) getBlockTransactionsRes()      {}
 func (*BadRequest) getDomainBidsRes()             {}
@@ -1720,6 +1741,34 @@ func (s *Fee) SetRefund(val int64) {
 	s.Refund = val
 }
 
+type GetAccountsReq struct {
+	AccountIds []string `json:"account_ids"`
+}
+
+// GetAccountIds returns the value of AccountIds.
+func (s GetAccountsReq) GetAccountIds() []string {
+	return s.AccountIds
+}
+
+// SetAccountIds sets the value of AccountIds.
+func (s *GetAccountsReq) SetAccountIds(val []string) {
+	s.AccountIds = val
+}
+
+type GetNftItemsByAddressesReq struct {
+	AccountIds []string `json:"account_ids"`
+}
+
+// GetAccountIds returns the value of AccountIds.
+func (s GetNftItemsByAddressesReq) GetAccountIds() []string {
+	return s.AccountIds
+}
+
+// SetAccountIds sets the value of AccountIds.
+func (s *GetNftItemsByAddressesReq) SetAccountIds(val []string) {
+	s.AccountIds = val
+}
+
 type GetStorageProvidersOK struct {
 	Providers []StorageProvider `json:"providers"`
 }
@@ -1782,6 +1831,7 @@ func (*InternalError) emulateMessageRes()            {}
 func (*InternalError) execGetMethodRes()             {}
 func (*InternalError) getAccountRes()                {}
 func (*InternalError) getAccountTransactionsRes()    {}
+func (*InternalError) getAccountsRes()               {}
 func (*InternalError) getAllAuctionsRes()            {}
 func (*InternalError) getBlockRes()                  {}
 func (*InternalError) getBlockTransactionsRes()      {}
@@ -3314,6 +3364,98 @@ func (o OptEmulateMessageReq) Get() (v EmulateMessageReq, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptEmulateMessageReq) Or(d EmulateMessageReq) EmulateMessageReq {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptGetAccountsReq returns new OptGetAccountsReq with value set to v.
+func NewOptGetAccountsReq(v GetAccountsReq) OptGetAccountsReq {
+	return OptGetAccountsReq{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptGetAccountsReq is optional GetAccountsReq.
+type OptGetAccountsReq struct {
+	Value GetAccountsReq
+	Set   bool
+}
+
+// IsSet returns true if OptGetAccountsReq was set.
+func (o OptGetAccountsReq) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptGetAccountsReq) Reset() {
+	var v GetAccountsReq
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptGetAccountsReq) SetTo(v GetAccountsReq) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptGetAccountsReq) Get() (v GetAccountsReq, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptGetAccountsReq) Or(d GetAccountsReq) GetAccountsReq {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptGetNftItemsByAddressesReq returns new OptGetNftItemsByAddressesReq with value set to v.
+func NewOptGetNftItemsByAddressesReq(v GetNftItemsByAddressesReq) OptGetNftItemsByAddressesReq {
+	return OptGetNftItemsByAddressesReq{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptGetNftItemsByAddressesReq is optional GetNftItemsByAddressesReq.
+type OptGetNftItemsByAddressesReq struct {
+	Value GetNftItemsByAddressesReq
+	Set   bool
+}
+
+// IsSet returns true if OptGetNftItemsByAddressesReq was set.
+func (o OptGetNftItemsByAddressesReq) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptGetNftItemsByAddressesReq) Reset() {
+	var v GetNftItemsByAddressesReq
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptGetNftItemsByAddressesReq) SetTo(v GetNftItemsByAddressesReq) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptGetNftItemsByAddressesReq) Get() (v GetNftItemsByAddressesReq, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptGetNftItemsByAddressesReq) Or(d GetNftItemsByAddressesReq) GetNftItemsByAddressesReq {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -5015,50 +5157,17 @@ func (s *StakingPoolsOKImplementations) init() StakingPoolsOKImplementations {
 
 // Ref: #/components/schemas/StateInit
 type StateInit struct {
-	Code    OptString        `json:"code"`
-	Data    OptString        `json:"data"`
-	Library StateInitLibrary `json:"library"`
+	Boc string `json:"boc"`
 }
 
-// GetCode returns the value of Code.
-func (s StateInit) GetCode() OptString {
-	return s.Code
+// GetBoc returns the value of Boc.
+func (s StateInit) GetBoc() string {
+	return s.Boc
 }
 
-// GetData returns the value of Data.
-func (s StateInit) GetData() OptString {
-	return s.Data
-}
-
-// GetLibrary returns the value of Library.
-func (s StateInit) GetLibrary() StateInitLibrary {
-	return s.Library
-}
-
-// SetCode sets the value of Code.
-func (s *StateInit) SetCode(val OptString) {
-	s.Code = val
-}
-
-// SetData sets the value of Data.
-func (s *StateInit) SetData(val OptString) {
-	s.Data = val
-}
-
-// SetLibrary sets the value of Library.
-func (s *StateInit) SetLibrary(val StateInitLibrary) {
-	s.Library = val
-}
-
-type StateInitLibrary map[string]string
-
-func (s *StateInitLibrary) init() StateInitLibrary {
-	m := *s
-	if m == nil {
-		m = map[string]string{}
-		*s = m
-	}
-	return m
+// SetBoc sets the value of Boc.
+func (s *StateInit) SetBoc(val string) {
+	s.Boc = val
 }
 
 // Ref: #/components/schemas/StoragePhase
@@ -5916,6 +6025,7 @@ func (*UnauthorizedError) emulateMessageRes()            {}
 func (*UnauthorizedError) execGetMethodRes()             {}
 func (*UnauthorizedError) getAccountRes()                {}
 func (*UnauthorizedError) getAccountTransactionsRes()    {}
+func (*UnauthorizedError) getAccountsRes()               {}
 func (*UnauthorizedError) getAllAuctionsRes()            {}
 func (*UnauthorizedError) getBlockRes()                  {}
 func (*UnauthorizedError) getBlockTransactionsRes()      {}

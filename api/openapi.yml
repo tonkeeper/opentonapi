@@ -143,7 +143,6 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/InternalError'
-
   /v2/blockchain/accounts/{account_id}/transactions:
     get:
       description: Get account transactions
@@ -277,6 +276,28 @@ paths:
                 $ref: '#/components/schemas/Config'
         '401':
           $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /v2/accounts/_bulk:
+    post:
+      description: Get human-friendly information about several accounts without low-level details.
+      operationId: getAccounts
+      tags:
+        - Accounts
+      requestBody:
+        $ref: "#/components/requestBodies/AccountIds"
+      responses:
+        '200':
+          description: a list of accounts
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Accounts'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '400':
+          $ref: '#/components/responses/BadRequest'
         '500':
           $ref: '#/components/responses/InternalError'
 
@@ -620,14 +641,14 @@ paths:
         '500':
           $ref: '#/components/responses/InternalError'
 
-  /v2/nfts/{account_ids}:
-    get:
-      description: Get NFT items by its address
+  /v2/nfts/_bulk:
+    post:
+      description: Get NFT items by their addresses
       operationId: getNftItemsByAddresses
       tags:
         - NFT
-      parameters:
-        - $ref: '#/components/parameters/accountIdParameters'
+      requestBody:
+        $ref: "#/components/requestBodies/AccountIds"
       responses:
         '200':
           description: "nft item"
@@ -975,6 +996,20 @@ components:
               boc:
                 type: string
                 example: te6ccgECBQEAARUAAkWIAWTtae+KgtbrX26Bep8JSq8lFLfGOoyGR/xwdjfvpvEaHg
+    AccountIds:
+      description: a list of account ids
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - account_ids
+            properties:
+              account_ids:
+                type: array
+                items:
+                  type: string
+                  example: 0:97264395BD65A255A429B11326C84128B7D70FFED7949ABAE3036D506BA38621
 
   schemas:
 
@@ -999,9 +1034,11 @@ components:
         name:
           type: string
           example: Ton foundation
+          description: Display name. Data collected from different sources like moderation lists, dns, collections names and over.
         is_scam:
           type: boolean
           example: true
+          description: Is this account was marked as part of scammers activity
         icon:
           type: string
           example: https://ton.org/logo.png
@@ -1151,18 +1188,11 @@ components:
     StateInit:
       type: object
       required:
-        - library
+        - boc
       properties:
-        code:
+        boc:
           type: string
           example: te6ccgEBBgEARAABFP8A9KQT9LzyyAsBAgEgAgMCAUgEBQAE8jAAONBsIdMfMO1E0NM/MAHAAZekyMs/ye1UkzDyBuIAEaE0MdqJoaZ+YQ==
-        data:
-          type: string
-          example: te6ccgEBBgEARAABFP8A9KQT9LzyyAsBAgEgAgMCAUgEBQAE8jAAONBsIdMfMO1E0NM/MAHAAZekyMs/ye1UkzDyBuIAEaE0MdqJoaZ+YQ==
-        library:
-          type: object
-          additionalProperties:
-            type: string
 
     Message:
       type: object
@@ -1580,6 +1610,15 @@ components:
             type: string
           example: ['get_item_data']
 
+    Accounts:
+      type: object
+      required:
+        - accounts
+      properties:
+        accounts:
+          type: array
+          items:
+            $ref: '#/components/schemas/Account'
 
     MethodExecutionResult:
       type: object

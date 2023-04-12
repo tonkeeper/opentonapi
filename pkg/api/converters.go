@@ -4,6 +4,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"github.com/tonkeeper/opentonapi/internal/g"
 	"github.com/tonkeeper/tongo/boc"
 	"github.com/tonkeeper/tongo/tlb"
 	"math/big"
@@ -17,10 +18,13 @@ import (
 	"github.com/tonkeeper/tongo"
 )
 
-func anyToJSONRawMap(a any) map[string]jx.Raw { //todo: переписать этот ужас
+func anyToJSONRawMap(a any, toSnake bool) map[string]jx.Raw { //todo: переписать этот ужас
 	var m = map[string]jx.Raw{}
 	if am, ok := a.(map[string]any); ok {
 		for k, v := range am {
+			if toSnake {
+				k = g.CamelToSnake(k)
+			}
 			m[k], _ = json.Marshal(v)
 		}
 		return m
@@ -33,7 +37,11 @@ func anyToJSONRawMap(a any) map[string]jx.Raw { //todo: переписать э�
 			if err != nil {
 				panic("some shit")
 			}
-			m[t.Type().Field(i).Name] = b
+			name := t.Type().Field(i).Name
+			if toSnake {
+				name = g.CamelToSnake(name)
+			}
+			m[name] = b
 		}
 	default:
 		panic(fmt.Sprintf("some shit %v", t.Kind()))
@@ -41,13 +49,24 @@ func anyToJSONRawMap(a any) map[string]jx.Raw { //todo: переписать э�
 	return m
 }
 
-func convertAccountAddress(id tongo.AccountID) oas.AccountAddress {
-	return oas.AccountAddress{Address: id.ToRaw()}
+func convertAccountAddress(id tongo.AccountID, book addressBook) oas.AccountAddress {
+	i, prs := book.GetAddressInfoByAddress(id)
+	address := oas.AccountAddress{Address: id.ToRaw()}
+	if prs {
+		if i.Name != "" {
+			address.SetName(oas.NewOptString(i.Name))
+		}
+		if i.Image != "" {
+			address.SetIcon(oas.NewOptString(i.Image))
+		}
+		address.IsScam = i.IsScam
+	}
+	return address
 }
 
-func convertOptAccountAddress(id *tongo.AccountID) oas.OptAccountAddress {
+func convertOptAccountAddress(id *tongo.AccountID, book addressBook) oas.OptAccountAddress {
 	if id != nil {
-		return oas.OptAccountAddress{Value: convertAccountAddress(*id), Set: true}
+		return oas.OptAccountAddress{Value: convertAccountAddress(*id, book), Set: true}
 	}
 	return oas.OptAccountAddress{}
 }
@@ -68,7 +87,6 @@ func rewriteIfNotEmpty(src, dest string) string {
 }
 
 func convertTvmStackValue(v tlb.VmStackValue) (oas.TvmStackRecord, error) {
-	//	VmStkTuple   VmStkTuple    `tlbSumType:"vm_stk_tuple#07"`
 	switch v.SumType {
 	case "VmStkNull":
 		return oas.TvmStackRecord{Type: oas.TvmStackRecordTypeNull}, nil
@@ -82,7 +100,11 @@ func convertTvmStackValue(v tlb.VmStackValue) (oas.TvmStackRecord, error) {
 		return oas.TvmStackRecord{Type: oas.TvmStackRecordTypeNum, Num: oas.NewOptString(str)}, nil
 	case "VmStkInt":
 		b := big.Int(v.VmStkInt)
-		return oas.TvmStackRecord{Type: oas.TvmStackRecordTypeNum, Num: oas.NewOptString(fmt.Sprintf("0x%x", b.Bytes()))}, nil //todo: fix negative
+		str := fmt.Sprintf("0x%x", b.Bytes())
+		if b.Sign() == -1 {
+			str = "-" + str
+		}
+		return oas.TvmStackRecord{Type: oas.TvmStackRecordTypeNum, Num: oas.NewOptString(str)}, nil
 	case "VmStkCell":
 		boc, err := v.VmStkCell.Value.ToBocString()
 		if err != nil {
@@ -96,10 +118,33 @@ func convertTvmStackValue(v tlb.VmStackValue) (oas.TvmStackRecord, error) {
 		}
 		return oas.TvmStackRecord{Type: oas.TvmStackRecordTypeCell, Cell: oas.NewOptString(boc)}, nil
 	case "VmStkTuple":
-		return oas.TvmStackRecord{Type: oas.TvmStackRecordTypeTuple, Tuple: []oas.TvmStackRecord{{Type: oas.TvmStackRecordTypeCell, Cell: oas.NewOptString("Tuple is not implemented")}}}, nil //todo: return values
+		return convertTuple(v.VmStkTuple)
 	default:
 		return oas.TvmStackRecord{}, fmt.Errorf("can't conver %v stack to rest json", v.SumType)
 	}
+}
+
+func convertTuple(v tlb.VmStkTuple) (oas.TvmStackRecord, error) {
+	var records []tlb.VmStackValue
+	var err error
+	r := oas.TvmStackRecord{Type: oas.TvmStackRecordTypeTuple}
+
+	if v.Len == 2 { //todo: find correct
+		records, err = v.RecursiveToSlice()
+	} else {
+		records, err = v.Data.RecursiveToSlice(int(v.Len))
+	}
+	if err != nil {
+		return r, err
+	}
+	for _, v := range records {
+		ov, err := convertTvmStackValue(v)
+		if err != nil {
+			return r, err
+		}
+		r.Tuple = append(r.Tuple, ov)
+	}
+	return r, nil
 }
 
 func stringToTVMStackRecord(s string) (tlb.VmStackValue, error) {

@@ -2,18 +2,20 @@ package api
 
 import (
 	"context"
-	"github.com/tonkeeper/opentonapi/pkg/addressbook"
-	"github.com/tonkeeper/opentonapi/pkg/core"
+
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
 	"github.com/tonkeeper/tongo/tlb"
+
+	"github.com/tonkeeper/opentonapi/pkg/addressbook"
+	"github.com/tonkeeper/opentonapi/pkg/core"
 )
 
 type storage interface {
-	// GetAccountInfo returns human-friendly information about an account without low-level details.
-	GetAccountInfo(ctx context.Context, id tongo.AccountID) (*core.AccountInfo, error)
 	// GetRawAccount returns low-level information about an account taken directly from the blockchain.
 	GetRawAccount(ctx context.Context, id tongo.AccountID) (*core.Account, error)
+	// GetRawAccounts returns low-level information about several accounts taken directly from the blockchain.
+	GetRawAccounts(ctx context.Context, ids []tongo.AccountID) ([]*core.Account, error)
 	GetBlockHeader(ctx context.Context, id tongo.BlockID) (*core.BlockHeader, error)
 	LastMasterchainBlockHeader(ctx context.Context) (*core.BlockHeader, error)
 	GetTransaction(ctx context.Context, hash tongo.Bits256) (*core.Transaction, error)
@@ -49,6 +51,8 @@ type storage interface {
 	GetJettonWalletsByOwnerAddress(ctx context.Context, address tongo.AccountID) ([]core.JettonWallet, error)
 	GetJettonMasterMetadata(ctx context.Context, master tongo.AccountID) (tongo.JettonMetadata, error)
 	GetJettonMasterData(ctx context.Context, master tongo.AccountID) (abi.GetJettonDataResult, error)
+
+	GetAllAuctions(ctx context.Context) ([]core.Auction, error)
 }
 
 // chainState provides current blockchain state which change very rarely or slow like staking APY income

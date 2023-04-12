@@ -4,6 +4,7 @@ import (
 	"encoding/binary"
 	"encoding/hex"
 	"fmt"
+	"github.com/tonkeeper/opentonapi/internal/g"
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/opentonapi/pkg/oas"
 	"github.com/tonkeeper/tongo"
@@ -58,11 +59,11 @@ func convertBlockHeader(b core.BlockHeader) oas.Block {
 	return res
 }
 
-func convertTransaction(t core.Transaction) oas.Transaction {
+func convertTransaction(t core.Transaction, book addressBook) oas.Transaction {
 	tx := oas.Transaction{
 		Hash:            t.Hash.Hex(),
 		Lt:              int64(t.Lt),
-		Account:         convertAccountAddress(t.Account),
+		Account:         convertAccountAddress(t.Account, book),
 		Success:         t.Success,
 		Utime:           t.Utime,
 		OrigStatus:      oas.AccountStatus(t.OrigStatus),
@@ -82,10 +83,10 @@ func convertTransaction(t core.Transaction) oas.Transaction {
 		tx.PrevTransHash.Set = true
 	}
 	if t.InMsg != nil {
-		tx.InMsg.SetTo(convertMessage(*t.InMsg))
+		tx.InMsg.SetTo(convertMessage(*t.InMsg, book))
 	}
 	for _, m := range t.OutMsgs {
-		tx.OutMsgs = append(tx.OutMsgs, convertMessage(m))
+		tx.OutMsgs = append(tx.OutMsgs, convertMessage(m, book))
 	}
 	if t.ActionPhase != nil {
 		phase := oas.ActionPhase{
@@ -135,7 +136,7 @@ func convertTransaction(t core.Transaction) oas.Transaction {
 	return tx
 }
 
-func convertMessage(m core.Message) oas.Message {
+func convertMessage(m core.Message, book addressBook) oas.Message {
 	msg := oas.Message{
 		CreatedLt:   int64(m.CreatedLt),
 		IhrDisabled: m.IhrDisabled,
@@ -144,8 +145,8 @@ func convertMessage(m core.Message) oas.Message {
 		Value:       m.Value,
 		FwdFee:      m.FwdFee,
 		IhrFee:      m.IhrFee,
-		Destination: convertOptAccountAddress(m.Destination),
-		Source:      convertOptAccountAddress(m.Source),
+		Destination: convertOptAccountAddress(m.Destination, book),
+		Source:      convertOptAccountAddress(m.Source, book),
 		ImportFee:   m.ImportFee,
 		CreatedAt:   int64(m.CreatedAt),
 		DecodedBody: nil,
@@ -154,17 +155,13 @@ func convertMessage(m core.Message) oas.Message {
 		msg.OpCode = oas.NewOptString("0x" + hex.EncodeToString(binary.BigEndian.AppendUint32(nil, *m.OpCode)))
 	}
 	if len(m.Init) != 0 {
-		//todo: return init
-		//cells, err := boc.DeserializeBoc(m.Init)
-		//if err == nil && len(cells) == 1 {
-		//	var stateInit tlb.StateInit
-		//	err = tlb.Unmarshal(cells[0], &stateInit)
-		//
-		//}
+		msg.Init.SetTo(oas.StateInit{
+			Boc: hex.EncodeToString(m.Init),
+		})
 	}
 	if m.DecodedBody != nil {
-		msg.DecodedOpName = oas.NewOptString(m.DecodedBody.Operation)
-		msg.DecodedBody = anyToJSONRawMap(m.DecodedBody.Value)
+		msg.DecodedOpName = oas.NewOptString(g.CamelToSnake(m.DecodedBody.Operation))
+		msg.DecodedBody = anyToJSONRawMap(m.DecodedBody.Value, true)
 	}
 	return msg
 }

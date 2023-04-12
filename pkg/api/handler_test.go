@@ -31,9 +31,8 @@ func TestHandler_GetRawAccount(t *testing.T) {
 			logger, _ := zap.NewDevelopment()
 			liteStorage, err := litestorage.NewLiteStorage(logger)
 			require.Nil(t, err)
-			h := Handler{
-				storage: liteStorage,
-			}
+			h, err := NewHandler(logger, WithStorage(liteStorage), WithExecutor(liteStorage))
+			require.Nil(t, err)
 			account, err := h.GetRawAccount(context.Background(), tt.params)
 			require.Nil(t, err)
 			rawAccount, ok := account.(*oas.RawAccount)
@@ -63,16 +62,73 @@ func TestHandler_GetAccount(t *testing.T) {
 
 			liteStorage, err := litestorage.NewLiteStorage(logger)
 			require.Nil(t, err)
-			h := Handler{
-				addressBook: addressbook.NewAddressBook(logger, config.AddressPath, config.JettonPath, config.CollectionPath),
-				storage:     liteStorage,
-			}
+			h, err := NewHandler(logger, WithStorage(liteStorage), WithExecutor(liteStorage))
+			require.Nil(t, err)
 			accountRes, err := h.GetAccount(context.Background(), tt.params)
 			require.Nil(t, err)
 			account, ok := accountRes.(*oas.Account)
 			require.True(t, ok)
 			require.Equal(t, tt.wantAddress, account.Address)
 			require.Equal(t, tt.wantStatus, account.Status)
+		})
+	}
+}
+
+func TestHandler_GetAccounts(t *testing.T) {
+	tests := []struct {
+		name         string
+		params       oas.OptGetAccountsReq
+		wantStatuses map[string]string
+		wantNames    map[string]string
+	}{
+		{
+			params: oas.OptGetAccountsReq{
+				Value: oas.GetAccountsReq{
+					AccountIds: []string{
+						"-1:3333333333333333333333333333333333333333333333333333333333333333",
+						"-1:5555555555555555555555555555555555555555555555555555555555555555",
+						"0:a3935861f79daf59a13d6d182e1640210c02f98e3df18fda74b8f5ab141abf18",
+						"0:a3935861f79daf59a13d6d182e1640210c02f98e3df18fda74b8f5ab141abf17",
+					},
+				},
+			},
+			wantStatuses: map[string]string{
+				"-1:3333333333333333333333333333333333333333333333333333333333333333": "active",
+				"-1:5555555555555555555555555555555555555555555555555555555555555555": "active",
+				"0:a3935861f79daf59a13d6d182e1640210c02f98e3df18fda74b8f5ab141abf18":  "active",
+				"0:a3935861f79daf59a13d6d182e1640210c02f98e3df18fda74b8f5ab141abf17":  "nonexist",
+			},
+			wantNames: map[string]string{
+				"-1:3333333333333333333333333333333333333333333333333333333333333333": "Elector Contract",
+				"-1:5555555555555555555555555555555555555555555555555555555555555555": "Config Contract",
+				"0:a3935861f79daf59a13d6d182e1640210c02f98e3df18fda74b8f5ab141abf18":  "Getgems Marketplace",
+				"0:a3935861f79daf59a13d6d182e1640210c02f98e3df18fda74b8f5ab141abf17":  "",
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			logger, _ := zap.NewDevelopment()
+
+			liteStorage, err := litestorage.NewLiteStorage(logger)
+			require.Nil(t, err)
+			h := Handler{
+				addressBook: addressbook.NewAddressBook(logger, config.AddressPath, config.JettonPath, config.CollectionPath),
+				storage:     liteStorage,
+			}
+			accountRes, err := h.GetAccounts(context.Background(), tt.params)
+			require.Nil(t, err)
+			accounts, ok := accountRes.(*oas.Accounts)
+			require.True(t, ok)
+			_ = accounts
+			statuses := map[string]string{}
+			names := map[string]string{}
+			for _, account := range accounts.Accounts {
+				statuses[account.Address] = account.Status
+				names[account.Address] = account.Name.Value
+			}
+			require.Equal(t, tt.wantStatuses, statuses)
+			require.Equal(t, tt.wantNames, names)
 		})
 	}
 }
@@ -101,9 +157,8 @@ func TestHandler_GetTransactions(t *testing.T) {
 			logger, _ := zap.NewDevelopment()
 			liteStorage, err := litestorage.NewLiteStorage(logger)
 			require.Nil(t, err)
-			h := Handler{
-				storage: liteStorage,
-			}
+			h, err := NewHandler(logger, WithStorage(liteStorage), WithExecutor(liteStorage))
+			require.Nil(t, err)
 			res, err := h.GetBlockTransactions(context.Background(), tt.params)
 			require.Nil(t, err)
 			transactions, ok := res.(*oas.Transactions)
@@ -116,8 +171,4 @@ func TestHandler_GetTransactions(t *testing.T) {
 			require.Equal(t, tt.wantTxHashes, txHashes)
 		})
 	}
-}
-
-func createEmptyAddressBook() *addressbook.Book {
-	return &addressbook.Book{} // if need change empty address book to real
 }
