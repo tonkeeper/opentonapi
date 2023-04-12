@@ -16,7 +16,7 @@ var bytesOfRules []byte
 
 func NewSpam() *Spam {
 	s := &Spam{
-		Rules: rules.LoadRules(bytesOfRules, false),
+		Rules: rules.LoadRules(bytesOfRules, true),
 	}
 	return s
 }
