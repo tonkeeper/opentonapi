@@ -3,14 +3,20 @@ package api
 import (
 	"context"
 	"errors"
+	"fmt"
+
+	"github.com/tonkeeper/tongo"
+
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/opentonapi/pkg/oas"
-	"github.com/tonkeeper/tongo"
 )
 
 func (h Handler) GetNftItemsByAddresses(ctx context.Context, req oas.OptGetNftItemsByAddressesReq) (oas.GetNftItemsByAddressesRes, error) {
 	if len(req.Value.AccountIds) == 0 {
 		return &oas.BadRequest{Error: "empty list of ids"}, nil
+	}
+	if !h.limits.isBulkQuantityAllowed(len(req.Value.AccountIds)) {
+		return &oas.BadRequest{Error: fmt.Sprintf("the maximum number of addresses to request at once: %v", h.limits.BulkLimits)}, nil
 	}
 	accounts := make([]tongo.AccountID, len(req.Value.AccountIds))
 	var err error

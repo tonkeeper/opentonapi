@@ -42,6 +42,9 @@ func (h Handler) GetAccounts(ctx context.Context, req oas.OptGetAccountsReq) (r 
 	if len(req.Value.AccountIds) == 0 {
 		return &oas.BadRequest{Error: "empty list of ids"}, nil
 	}
+	if !h.limits.isBulkQuantityAllowed(len(req.Value.AccountIds)) {
+		return &oas.BadRequest{Error: fmt.Sprintf("the maximum number of accounts to request at once: %v", h.limits.BulkLimits)}, nil
+	}
 	var ids []tongo.AccountID
 	for _, str := range req.Value.AccountIds {
 		accountID, err := tongo.ParseAccountID(str)
