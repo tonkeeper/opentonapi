@@ -129,8 +129,11 @@ func (b BubbleTx) ToAction() *Action {
 		Type:    TonTransfer,
 	}
 	if b.decodedBody != nil {
-		s := string(b.decodedBody.Value.(abi.TextCommentMsgBody).Text)
-		a.TonTransfer.Comment = &s
+		s, ok := b.decodedBody.Value.(abi.TextCommentMsgBody)
+		if ok {
+			converted := string(s.Text)
+			a.TonTransfer.Comment = &converted
+		}
 	}
 	return a
 }
