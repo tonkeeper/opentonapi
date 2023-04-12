@@ -46,12 +46,14 @@ func (h Handler) GetAccounts(ctx context.Context, req oas.OptGetAccountsReq) (r 
 		return &oas.BadRequest{Error: fmt.Sprintf("the maximum number of accounts to request at once: %v", h.limits.BulkLimits)}, nil
 	}
 	var ids []tongo.AccountID
+	allAccountIDs := make(map[tongo.AccountID]struct{}, len(req.Value.AccountIds))
 	for _, str := range req.Value.AccountIds {
 		accountID, err := tongo.ParseAccountID(str)
 		if err != nil {
 			return &oas.BadRequest{Error: err.Error()}, nil
 		}
 		ids = append(ids, accountID)
+		allAccountIDs[accountID] = struct{}{}
 	}
 	accounts, err := h.storage.GetRawAccounts(ctx, ids)
 	if err != nil {
@@ -59,6 +61,7 @@ func (h Handler) GetAccounts(ctx context.Context, req oas.OptGetAccountsReq) (r 
 	}
 	results := make([]oas.Account, 0, len(accounts))
 	for _, account := range accounts {
+		delete(allAccountIDs, account.AccountAddress)
 		ab, found := h.addressBook.GetAddressInfoByAddress(account.AccountAddress)
 		var res oas.Account
 		if found {
@@ -67,6 +70,14 @@ func (h Handler) GetAccounts(ctx context.Context, req oas.OptGetAccountsReq) (r 
 			res = convertToAccount(account, nil)
 		}
 		results = append(results, res)
+	}
+	// if we don't find an account, we return it with "nonexist" status
+	for accountID := range allAccountIDs {
+		account := oas.Account{
+			Address: accountID.ToRaw(),
+			Status:  string(tlb.AccountNone),
+		}
+		results = append(results, account)
 	}
 	return &oas.Accounts{Accounts: results}, nil
 }
