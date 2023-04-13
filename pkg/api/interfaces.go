@@ -2,7 +2,6 @@ package api
 
 import (
 	"context"
-	rules "github.com/tonkeeper/scam_backoffice_rules"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
 	"github.com/tonkeeper/tongo/tlb"
@@ -74,11 +73,6 @@ type executor interface {
 
 type previewGenerator interface {
 	GenerateImageUrl(url string, height, width int) string
-}
-
-type spamFilter interface {
-	GetRules() rules.Rules
-	CheckAction(comment string) rules.TypeOfAction
 }
 
 // addressBook provides methods to request additional information about accounts, NFT collections and jettons
