@@ -2,17 +2,17 @@ package main
 
 import (
 	"fmt"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"github.com/tonkeeper/opentonapi/pkg/addressbook"
-	"go.uber.org/zap"
-	"golang.org/x/exp/maps"
 	"net/http"
 
+	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"go.uber.org/zap"
+	"golang.org/x/exp/maps"
+
+	"github.com/tonkeeper/opentonapi/pkg/addressbook"
 	"github.com/tonkeeper/opentonapi/pkg/api"
 	"github.com/tonkeeper/opentonapi/pkg/app"
 	"github.com/tonkeeper/opentonapi/pkg/config"
 	"github.com/tonkeeper/opentonapi/pkg/litestorage"
-	"github.com/tonkeeper/opentonapi/pkg/oas"
 )
 
 func main() {
@@ -33,15 +33,11 @@ func main() {
 	if err != nil {
 		log.Fatal("failed to create api handler", zap.Error(err))
 	}
-
-	oasServer, err := oas.NewServer(h, oas.WithMiddleware(api.Logging(log), api.Metrics), oas.WithErrorHandler(api.ErrorsHandler))
+	server, err := api.NewServer(log, h, fmt.Sprintf(":%d", cfg.API.Port), api.WithLiteServers(cfg.App.LiteServers))
 	if err != nil {
-		log.Fatal("server init", zap.Error(err))
+		log.Fatal("failed to create api handler", zap.Error(err))
 	}
-	httpServer := http.Server{
-		Addr:    fmt.Sprintf(":%v", cfg.API.Port),
-		Handler: oasServer,
-	}
+
 	metricServer := http.Server{
 		Addr:    fmt.Sprintf(":%v", cfg.App.MetricsPort),
 		Handler: promhttp.Handler(),
@@ -51,9 +47,7 @@ func main() {
 			log.Fatal("listen and serve", zap.Error(err))
 		}
 	}()
-	log.Info("start server", zap.Int("port", cfg.API.Port))
-	if err := httpServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-		log.Error("listen and serve", zap.Error(err))
-	}
 
+	log.Info("start server", zap.Int("port", cfg.API.Port))
+	server.Run()
 }
