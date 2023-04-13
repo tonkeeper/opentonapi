@@ -44,6 +44,7 @@ type storage interface {
 		limit, offset int,
 	) ([]tongo.AccountID, error)
 	GetNftCollections(ctx context.Context, limit, offset *int32) ([]core.NftCollection, error)
+	GetNftCollectionByCollectionAddress(ctx context.Context, address tongo.AccountID) (core.NftCollection, error)
 
 	FindAllDomainsResolvedToAddress(ctx context.Context, a tongo.AccountID) ([]string, error)
 

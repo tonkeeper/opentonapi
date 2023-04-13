@@ -76,10 +76,11 @@ func TestHandler_GetAccount(t *testing.T) {
 
 func TestHandler_GetAccounts(t *testing.T) {
 	tests := []struct {
-		name         string
-		params       oas.OptGetAccountsReq
-		wantStatuses map[string]string
-		wantNames    map[string]string
+		name                string
+		params              oas.OptGetAccountsReq
+		wantStatuses        map[string]string
+		wantNames           map[string]string
+		wantBadRequestError string
 	}{
 		{
 			params: oas.OptGetAccountsReq{
@@ -105,6 +106,20 @@ func TestHandler_GetAccounts(t *testing.T) {
 				"0:a3935861f79daf59a13d6d182e1640210c02f98e3df18fda74b8f5ab141abf17":  "",
 			},
 		},
+		{
+			params: oas.OptGetAccountsReq{
+				Value: oas.GetAccountsReq{
+					AccountIds: []string{
+						"-1:3333333333333333333333333333333333333333333333333333333333333333",
+						"-1:5555555555555555555555555555555555555555555555555555555555555555",
+						"0:a3935861f79daf59a13d6d182e1640210c02f98e3df18fda74b8f5ab141abf18",
+						"0:a3935861f79daf59a13d6d182e1640210c02f98e3df18fda74b8f5ab141abf17",
+						"0:a3935861f79daf59a13d6d182e1640210c02f98e3df18fda74b8f5ab141abf16",
+					},
+				},
+			},
+			wantBadRequestError: "the maximum number of accounts to request at once: 4",
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -115,9 +130,18 @@ func TestHandler_GetAccounts(t *testing.T) {
 			h := Handler{
 				addressBook: addressbook.NewAddressBook(logger, config.AddressPath, config.JettonPath, config.CollectionPath),
 				storage:     liteStorage,
+				limits: Limits{
+					BulkLimits: 4,
+				},
 			}
 			accountRes, err := h.GetAccounts(context.Background(), tt.params)
 			require.Nil(t, err)
+			if len(tt.wantBadRequestError) > 0 {
+				badRequest, ok := accountRes.(*oas.BadRequest)
+				require.True(t, ok)
+				require.Equal(t, tt.wantBadRequestError, badRequest.Error)
+				return
+			}
 			accounts, ok := accountRes.(*oas.Accounts)
 			require.True(t, ok)
 			_ = accounts

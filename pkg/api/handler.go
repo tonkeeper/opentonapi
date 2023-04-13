@@ -2,7 +2,14 @@ package api
 
 import (
 	"fmt"
+
 	"github.com/go-faster/errors"
+	"github.com/tonkeeper/tongo"
+	"github.com/tonkeeper/tongo/contract/dns"
+	"go.uber.org/zap"
+
+	"github.com/tonkeeper/opentonapi/pkg/image"
+
 	"github.com/tonkeeper/opentonapi/pkg/addressbook"
 	"github.com/tonkeeper/opentonapi/pkg/blockchain"
 	"github.com/tonkeeper/opentonapi/pkg/chainstate"
@@ -28,6 +35,7 @@ type Handler struct {
 	previewGenerator previewGenerator
 	executor         executor
 	dns              *dns.DNS
+	limits           Limits
 	spamRules        func() rules.Rules
 }
 
@@ -39,6 +47,7 @@ type Options struct {
 	msgSender        messageSender
 	previewGenerator previewGenerator
 	executor         executor
+	limits           Limits
 	spamRules        func() rules.Rules
 }
 
@@ -76,6 +85,12 @@ func WithPreviewGenerator(previewGenerator previewGenerator) Option {
 func WithExecutor(e executor) Option {
 	return func(o *Options) {
 		o.executor = e
+	}
+}
+
+func WithLimits(limits Limits) Option {
+	return func(o *Options) {
+		o.limits = limits
 	}
 }
 
@@ -128,6 +143,7 @@ func NewHandler(logger *zap.Logger, opts ...Option) (*Handler, error) {
 		previewGenerator: options.previewGenerator,
 		executor:         options.executor,
 		dns:              dnsClient,
+		limits:           options.limits,
 		spamRules:        options.spamRules,
 	}, nil
 }

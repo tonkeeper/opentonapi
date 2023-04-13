@@ -1,8 +1,13 @@
 package core
 
 import (
+	"fmt"
 	"github.com/shopspring/decimal"
 	"github.com/tonkeeper/tongo"
+	"io"
+	"net/http"
+	"strings"
+	"time"
 )
 
 type NftItem struct {
@@ -38,4 +43,24 @@ type NftSaleInfo struct {
 	MarketplaceFee uint64
 	RoyaltyAddress *tongo.AccountID
 	RoyaltyAmount  uint64
+}
+
+func GetNftMetaData(nftMetaUrl string) ([]byte, error) {
+	if !strings.HasPrefix(nftMetaUrl, "http://") && !strings.HasPrefix(nftMetaUrl, "https://") {
+		return nil, fmt.Errorf("not http/https link")
+	}
+	var client = &http.Client{Timeout: 10 * time.Second}
+	response, err := client.Get(nftMetaUrl)
+	if err != nil {
+		return nil, err
+	}
+	defer response.Body.Close()
+	if response.StatusCode >= 300 {
+		return nil, fmt.Errorf("invalid status code: %v", response.StatusCode)
+	}
+	meta, err := io.ReadAll(response.Body)
+	if err != nil {
+		return nil, err
+	}
+	return meta, nil
 }
