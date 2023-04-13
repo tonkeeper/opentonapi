@@ -14,12 +14,8 @@ import (
 	"github.com/tonkeeper/opentonapi/pkg/blockchain"
 	"github.com/tonkeeper/opentonapi/pkg/chainstate"
 	"github.com/tonkeeper/opentonapi/pkg/config"
-	"github.com/tonkeeper/opentonapi/pkg/image"
 	"github.com/tonkeeper/opentonapi/pkg/oas"
 	rules "github.com/tonkeeper/scam_backoffice_rules"
-	"github.com/tonkeeper/tongo"
-	"github.com/tonkeeper/tongo/contract/dns"
-	"go.uber.org/zap"
 )
 
 // Compile-time check for Handler.
