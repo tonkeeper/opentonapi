@@ -15,7 +15,7 @@ func convertTrace(t core.Trace, book addressBook) oas.Trace {
 	return trace
 }
 
-func convertAction(a bath.Action, book addressBook, spamFilter spamFilter) (oas.Action, bool) {
+func convertAction(a bath.Action, book addressBook, spamRules rules.Rules) (oas.Action, bool) {
 	action := oas.Action{
 		Type: oas.ActionType(a.Type),
 	}
@@ -27,7 +27,7 @@ func convertAction(a bath.Action, book addressBook, spamFilter spamFilter) (oas.
 	}
 	switch a.Type {
 	case bath.TonTransfer:
-		spamAction := spamFilter.CheckAction(*a.TonTransfer.Comment)
+		spamAction := rules.CheckAction(spamRules, *a.TonTransfer.Comment)
 		if spamAction == rules.Drop {
 			*a.TonTransfer.Comment = ""
 			spamDetected = true

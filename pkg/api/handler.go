@@ -3,16 +3,16 @@ package api
 import (
 	"fmt"
 	"github.com/go-faster/errors"
-	"github.com/tonkeeper/opentonapi/pkg/image"
-	"github.com/tonkeeper/tongo"
-	"github.com/tonkeeper/tongo/contract/dns"
-	"go.uber.org/zap"
-
 	"github.com/tonkeeper/opentonapi/pkg/addressbook"
 	"github.com/tonkeeper/opentonapi/pkg/blockchain"
 	"github.com/tonkeeper/opentonapi/pkg/chainstate"
 	"github.com/tonkeeper/opentonapi/pkg/config"
+	"github.com/tonkeeper/opentonapi/pkg/image"
 	"github.com/tonkeeper/opentonapi/pkg/oas"
+	rules "github.com/tonkeeper/scam_backoffice_rules"
+	"github.com/tonkeeper/tongo"
+	"github.com/tonkeeper/tongo/contract/dns"
+	"go.uber.org/zap"
 )
 
 // Compile-time check for Handler.
@@ -28,7 +28,7 @@ type Handler struct {
 	previewGenerator previewGenerator
 	executor         executor
 	dns              *dns.DNS
-	spamFilter       spamFilter
+	spamRules        func() rules.Rules
 }
 
 // Options configures behavior of a Handler instance.
@@ -39,7 +39,7 @@ type Options struct {
 	msgSender        messageSender
 	previewGenerator previewGenerator
 	executor         executor
-	spamFilter       spamFilter
+	spamRules        func() rules.Rules
 }
 
 type Option func(o *Options)
@@ -79,9 +79,9 @@ func WithExecutor(e executor) Option {
 	}
 }
 
-func WithSpam(spamFilter spamFilter) Option {
+func WithSpamRules(spamRules func() rules.Rules) Option {
 	return func(o *Options) {
-		o.spamFilter = spamFilter
+		o.spamRules = spamRules
 	}
 }
 
@@ -109,6 +109,12 @@ func NewHandler(logger *zap.Logger, opts ...Option) (*Handler, error) {
 	if options.previewGenerator == nil {
 		options.previewGenerator = image.NewImgGenerator()
 	}
+	if options.spamRules == nil {
+		options.spamRules = func() rules.Rules {
+			defaultRules := rules.GetDefaultRules()
+			return defaultRules
+		}
+	}
 	if options.executor == nil {
 		return nil, fmt.Errorf("executor is not configured")
 	}
@@ -122,6 +128,6 @@ func NewHandler(logger *zap.Logger, opts ...Option) (*Handler, error) {
 		previewGenerator: options.previewGenerator,
 		executor:         options.executor,
 		dns:              dnsClient,
-		spamFilter:       options.spamFilter,
+		spamRules:        options.spamRules,
 	}, nil
 }

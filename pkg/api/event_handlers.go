@@ -59,7 +59,7 @@ func (h Handler) GetEvent(ctx context.Context, params oas.GetEventParams) (oas.G
 		InProgress: trace.InProgress(),
 	}
 	for i, a := range actions {
-		convertedAction, spamDetected := convertAction(a, h.addressBook, h.spamFilter)
+		convertedAction, spamDetected := convertAction(a, h.addressBook, h.spamRules())
 		if !event.IsScam && spamDetected {
 			event.IsScam = true
 		}
@@ -106,7 +106,7 @@ func (h Handler) GetEventsByAccount(ctx context.Context, params oas.GetEventsByA
 			}
 		}
 		for _, a := range actions {
-			convertedAction, spamDetected := convertAction(a, h.addressBook, h.spamFilter)
+			convertedAction, spamDetected := convertAction(a, h.addressBook, h.spamRules())
 			if !e.IsScam && spamDetected {
 				e.IsScam = true
 			}
