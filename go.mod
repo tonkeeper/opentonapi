@@ -13,7 +13,7 @@ require (
 	github.com/prometheus/client_golang v1.14.0
 	github.com/shopspring/decimal v1.3.1
 	github.com/stretchr/testify v1.8.1
-	github.com/tonkeeper/scam_backoffice_rules v0.0.0-20230413063115-4c74c7fb397f
+	github.com/tonkeeper/scam_backoffice_rules v0.0.0-20230413094040-a66ab71fb269
 	github.com/tonkeeper/tongo v1.0.12
 	go.opentelemetry.io/otel v1.11.1
 	go.opentelemetry.io/otel/metric v0.33.0
