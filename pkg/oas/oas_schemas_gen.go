@@ -919,6 +919,7 @@ func (*BadRequest) getEventsByAccountRes()        {}
 func (*BadRequest) getJettonInfoRes()             {}
 func (*BadRequest) getJettonsBalancesRes()        {}
 func (*BadRequest) getNftCollectionRes()          {}
+func (*BadRequest) getNftItemByAddressRes()       {}
 func (*BadRequest) getNftItemsByAddressesRes()    {}
 func (*BadRequest) getNftItemsByOwnerRes()        {}
 func (*BadRequest) getRawAccountRes()             {}
@@ -1844,6 +1845,7 @@ func (*InternalError) getJettonsBalancesRes()        {}
 func (*InternalError) getMasterchainHeadRes()        {}
 func (*InternalError) getNftCollectionRes()          {}
 func (*InternalError) getNftCollectionsRes()         {}
+func (*InternalError) getNftItemByAddressRes()       {}
 func (*InternalError) getNftItemsByAddressesRes()    {}
 func (*InternalError) getNftItemsByOwnerRes()        {}
 func (*InternalError) getRawAccountRes()             {}
@@ -2682,6 +2684,8 @@ func (s *NftItem) SetApprovedBy(val []string) {
 	s.ApprovedBy = val
 }
 
+func (*NftItem) getNftItemByAddressRes() {}
+
 type NftItemCollection struct {
 	Address string `json:"address"`
 	Name    string `json:"name"`
@@ -2899,6 +2903,7 @@ func (*NotFound) getEventsByAccountRes()        {}
 func (*NotFound) getJettonInfoRes()             {}
 func (*NotFound) getJettonsBalancesRes()        {}
 func (*NotFound) getNftCollectionRes()          {}
+func (*NotFound) getNftItemByAddressRes()       {}
 func (*NotFound) getNftItemsByAddressesRes()    {}
 func (*NotFound) getNftItemsByOwnerRes()        {}
 func (*NotFound) getRawAccountRes()             {}
@@ -6038,6 +6043,7 @@ func (*UnauthorizedError) getJettonsBalancesRes()        {}
 func (*UnauthorizedError) getMasterchainHeadRes()        {}
 func (*UnauthorizedError) getNftCollectionRes()          {}
 func (*UnauthorizedError) getNftCollectionsRes()         {}
+func (*UnauthorizedError) getNftItemByAddressRes()       {}
 func (*UnauthorizedError) getNftItemsByAddressesRes()    {}
 func (*UnauthorizedError) getNftItemsByOwnerRes()        {}
 func (*UnauthorizedError) getRawAccountRes()             {}

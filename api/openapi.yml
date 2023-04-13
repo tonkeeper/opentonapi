@@ -651,11 +651,35 @@ paths:
         $ref: "#/components/requestBodies/AccountIds"
       responses:
         '200':
-          description: "nft item"
+          description: "nft items"
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/NftItems'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /v2/nfts/{account_id}:
+    get:
+      description: Get NFT item by its address
+      operationId: getNftItemByAddress
+      tags:
+        - NFT
+      parameters:
+        - $ref: '#/components/parameters/accountIdParameter'
+      responses:
+        '200':
+          description: "nft item"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NftItem'
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
