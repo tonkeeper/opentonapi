@@ -4,10 +4,9 @@ import (
 	"fmt"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/tonkeeper/opentonapi/pkg/addressbook"
+	"go.uber.org/zap"
 	"golang.org/x/exp/maps"
 	"net/http"
-
-	"go.uber.org/zap"
 
 	"github.com/tonkeeper/opentonapi/pkg/api"
 	"github.com/tonkeeper/opentonapi/pkg/app"
@@ -20,7 +19,6 @@ func main() {
 	cfg := config.Load()
 	log := app.Logger(cfg.App.LogLevel)
 	book := addressbook.NewAddressBook(log, config.AddressPath, config.JettonPath, config.CollectionPath)
-
 	storage, err := litestorage.NewLiteStorage(
 		log,
 		litestorage.WithPreloadAccounts(cfg.App.Accounts),

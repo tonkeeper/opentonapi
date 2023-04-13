@@ -15,6 +15,7 @@ import (
 	"github.com/tonkeeper/opentonapi/pkg/chainstate"
 	"github.com/tonkeeper/opentonapi/pkg/config"
 	"github.com/tonkeeper/opentonapi/pkg/oas"
+	rules "github.com/tonkeeper/scam_backoffice_rules"
 )
 
 // Compile-time check for Handler.
@@ -31,6 +32,7 @@ type Handler struct {
 	executor         executor
 	dns              *dns.DNS
 	limits           Limits
+	spamRules        func() rules.Rules
 }
 
 // Options configures behavior of a Handler instance.
@@ -42,6 +44,7 @@ type Options struct {
 	previewGenerator previewGenerator
 	executor         executor
 	limits           Limits
+	spamRules        func() rules.Rules
 }
 
 type Option func(o *Options)
@@ -87,6 +90,12 @@ func WithLimits(limits Limits) Option {
 	}
 }
 
+func WithSpamRules(spamRules func() rules.Rules) Option {
+	return func(o *Options) {
+		o.spamRules = spamRules
+	}
+}
+
 func NewHandler(logger *zap.Logger, opts ...Option) (*Handler, error) {
 	options := &Options{}
 	for _, o := range opts {
@@ -111,6 +120,12 @@ func NewHandler(logger *zap.Logger, opts ...Option) (*Handler, error) {
 	if options.previewGenerator == nil {
 		options.previewGenerator = image.NewImgGenerator()
 	}
+	if options.spamRules == nil {
+		options.spamRules = func() rules.Rules {
+			defaultRules := rules.GetDefaultRules()
+			return defaultRules
+		}
+	}
 	if options.executor == nil {
 		return nil, fmt.Errorf("executor is not configured")
 	}
@@ -125,5 +140,6 @@ func NewHandler(logger *zap.Logger, opts ...Option) (*Handler, error) {
 		executor:         options.executor,
 		dns:              dnsClient,
 		limits:           options.limits,
+		spamRules:        options.spamRules,
 	}, nil
 }

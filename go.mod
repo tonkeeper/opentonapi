@@ -13,6 +13,7 @@ require (
 	github.com/prometheus/client_golang v1.14.0
 	github.com/shopspring/decimal v1.3.1
 	github.com/stretchr/testify v1.8.1
+	github.com/tonkeeper/scam_backoffice_rules v0.0.0-20230413094040-a66ab71fb269
 	github.com/tonkeeper/tongo v1.0.12
 	go.opentelemetry.io/otel v1.11.1
 	go.opentelemetry.io/otel/metric v0.33.0
@@ -20,7 +21,7 @@ require (
 	go.uber.org/multierr v1.8.0
 	go.uber.org/zap v1.24.0
 	golang.org/x/exp v0.0.0-20230116083435-1de6713980de
-	golang.org/x/text v0.4.0
+	golang.org/x/text v0.9.0
 )
 
 require (
@@ -35,8 +36,9 @@ require (
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/google/uuid v1.3.0 // indirect
-	github.com/mattn/go-colorable v0.1.12 // indirect
-	github.com/mattn/go-isatty v0.0.14 // indirect
+	github.com/labstack/gommon v0.4.0 // indirect
+	github.com/mattn/go-colorable v0.1.13 // indirect
+	github.com/mattn/go-isatty v0.0.18 // indirect
 	github.com/matttproud/golang_protobuf_extensions v1.0.1 // indirect
 	github.com/oasisprotocol/curve25519-voi v0.0.0-20220328075252-7dd334e3daae // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
@@ -45,13 +47,15 @@ require (
 	github.com/prometheus/procfs v0.8.0 // indirect
 	github.com/segmentio/asm v1.2.0 // indirect
 	github.com/snksoft/crc v1.1.0 // indirect
+	github.com/valyala/bytebufferpool v1.0.0 // indirect
+	github.com/valyala/fasttemplate v1.2.2 // indirect
 	go.uber.org/atomic v1.10.0 // indirect
 	golang.org/x/crypto v0.0.0-20220321153916-2c7772ba3064 // indirect
-	golang.org/x/mod v0.7.0 // indirect
-	golang.org/x/net v0.2.0 // indirect
+	golang.org/x/mod v0.8.0 // indirect
+	golang.org/x/net v0.6.0 // indirect
 	golang.org/x/sync v0.1.0 // indirect
-	golang.org/x/sys v0.2.0 // indirect
-	golang.org/x/tools v0.3.0 // indirect
+	golang.org/x/sys v0.7.0 // indirect
+	golang.org/x/tools v0.6.0 // indirect
 	google.golang.org/protobuf v1.28.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
