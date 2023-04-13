@@ -37,6 +37,22 @@ func (h Handler) GetNftItemsByAddresses(ctx context.Context, req oas.OptGetNftIt
 	return &result, nil
 }
 
+func (h Handler) GetNftItemByAddress(ctx context.Context, req oas.GetNftItemByAddressParams) (oas.GetNftItemByAddressRes, error) {
+	account, err := tongo.ParseAccountID(req.AccountID)
+	if err != nil {
+		return &oas.BadRequest{Error: err.Error()}, nil
+	}
+	items, err := h.storage.GetNFTs(ctx, []tongo.AccountID{account})
+	if err != nil {
+		return &oas.InternalError{Error: err.Error()}, nil
+	}
+	if len(items) != 1 {
+		return &oas.NotFound{Error: "item not found"}, nil
+	}
+	result := convertNFT(items[0], h.addressBook, h.previewGenerator)
+	return &result, nil
+}
+
 func (h Handler) GetNftItemsByOwner(ctx context.Context, params oas.GetNftItemsByOwnerParams) (oas.GetNftItemsByOwnerRes, error) {
 	account, err := tongo.ParseAccountID(params.AccountID)
 	if err != nil {

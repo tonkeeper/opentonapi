@@ -728,6 +728,24 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 						}
 					}
 				}
+				// Param: "account_id"
+				// Leaf parameter
+				args[0] = elem
+				elem = ""
+
+				if len(elem) == 0 {
+					// Leaf node.
+					switch r.Method {
+					case "GET":
+						s.handleGetNftItemByAddressRequest([1]string{
+							args[0],
+						}, w, r)
+					default:
+						s.notAllowed(w, r, "GET")
+					}
+
+					return
+				}
 			case 's': // Prefix: "st"
 				if l := len("st"); len(elem) >= l && elem[0:l] == "st" {
 					elem = elem[l:]
@@ -1649,6 +1667,24 @@ func (s *Server) FindRoute(method, path string) (r Route, _ bool) {
 								return
 							}
 						}
+					}
+				}
+				// Param: "account_id"
+				// Leaf parameter
+				args[0] = elem
+				elem = ""
+
+				if len(elem) == 0 {
+					switch method {
+					case "GET":
+						// Leaf: GetNftItemByAddress
+						r.name = "GetNftItemByAddress"
+						r.operationID = "getNftItemByAddress"
+						r.args = args
+						r.count = 1
+						return r, true
+					default:
+						return
 					}
 				}
 			case 's': // Prefix: "st"
