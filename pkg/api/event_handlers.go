@@ -7,7 +7,6 @@ import (
 	"github.com/tonkeeper/opentonapi/pkg/bath"
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/opentonapi/pkg/oas"
-	"github.com/tonkeeper/opentonapi/pkg/spam"
 	"github.com/tonkeeper/tongo"
 )
 
@@ -60,7 +59,11 @@ func (h Handler) GetEvent(ctx context.Context, params oas.GetEventParams) (oas.G
 		InProgress: trace.InProgress(),
 	}
 	for i, a := range actions {
-		event.Actions[i] = convertAction(a, h.addressBook)
+		convertedAction, spamDetected := convertAction(a, h.addressBook, h.spamFilter)
+		if !event.IsScam && spamDetected {
+			event.IsScam = true
+		}
+		event.Actions[i] = convertedAction
 	}
 	for i, f := range fees {
 		event.Fees[i] = convertFees(f, h.addressBook)
@@ -103,7 +106,11 @@ func (h Handler) GetEventsByAccount(ctx context.Context, params oas.GetEventsByA
 			}
 		}
 		for _, a := range actions {
-			e.Actions = append(e.Actions, convertAction(a, h.addressBook))
+			convertedAction, spamDetected := convertAction(a, h.addressBook, h.spamFilter)
+			if !e.IsScam && spamDetected {
+				e.IsScam = true
+			}
+			e.Actions = append(e.Actions, convertedAction)
 		}
 		if len(e.Actions) == 0 {
 			e.Actions = []oas.Action{{
@@ -111,7 +118,6 @@ func (h Handler) GetEventsByAccount(ctx context.Context, params oas.GetEventsByA
 				Status: oas.ActionStatusOk,
 			}}
 		}
-		e = spam.MarkScamEvent(e, h.spamWorker.GetRules())
 		events[i] = e
 		lastLT = trace.Lt
 	}

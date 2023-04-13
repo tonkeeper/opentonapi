@@ -75,8 +75,9 @@ type previewGenerator interface {
 	GenerateImageUrl(url string, height, width int) string
 }
 
-type spamWorker interface {
+type spamFilter interface {
 	GetRules() rules.Rules
+	CheckAction(comment string) rules.TypeOfAction
 }
 
 // addressBook provides methods to request additional information about accounts, NFT collections and jettons

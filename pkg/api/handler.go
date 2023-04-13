@@ -28,7 +28,7 @@ type Handler struct {
 	previewGenerator previewGenerator
 	executor         executor
 	dns              *dns.DNS
-	spamWorker       spamWorker
+	spamFilter       spamFilter
 }
 
 // Options configures behavior of a Handler instance.
@@ -39,7 +39,7 @@ type Options struct {
 	msgSender        messageSender
 	previewGenerator previewGenerator
 	executor         executor
-	spamWorker       spamWorker
+	spamFilter       spamFilter
 }
 
 type Option func(o *Options)
@@ -79,9 +79,9 @@ func WithExecutor(e executor) Option {
 	}
 }
 
-func WithSpam(spamWorker spamWorker) Option {
+func WithSpam(spamFilter spamFilter) Option {
 	return func(o *Options) {
-		o.spamWorker = spamWorker
+		o.spamFilter = spamFilter
 	}
 }
 
@@ -122,6 +122,6 @@ func NewHandler(logger *zap.Logger, opts ...Option) (*Handler, error) {
 		previewGenerator: options.previewGenerator,
 		executor:         options.executor,
 		dns:              dnsClient,
-		spamWorker:       options.spamWorker,
+		spamFilter:       options.spamFilter,
 	}, nil
 }

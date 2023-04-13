@@ -4,6 +4,7 @@ import (
 	"github.com/tonkeeper/opentonapi/pkg/bath"
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/opentonapi/pkg/oas"
+	rules "github.com/tonkeeper/scam_backoffice_rules"
 )
 
 func convertTrace(t core.Trace, book addressBook) oas.Trace {
@@ -14,11 +15,11 @@ func convertTrace(t core.Trace, book addressBook) oas.Trace {
 	return trace
 }
 
-func convertAction(a bath.Action, book addressBook) oas.Action {
-
+func convertAction(a bath.Action, book addressBook, spamFilter spamFilter) (oas.Action, bool) {
 	action := oas.Action{
 		Type: oas.ActionType(a.Type),
 	}
+	var spamDetected bool
 	if a.Success {
 		action.Status = oas.ActionStatusOk
 	} else {
@@ -26,6 +27,11 @@ func convertAction(a bath.Action, book addressBook) oas.Action {
 	}
 	switch a.Type {
 	case bath.TonTransfer:
+		spamAction := spamFilter.CheckAction(*a.TonTransfer.Comment)
+		if spamAction == rules.Drop {
+			*a.TonTransfer.Comment = ""
+			spamDetected = true
+		}
 		action.TonTransfer.SetTo(oas.TonTransferAction{
 			Amount:    a.TonTransfer.Amount,
 			Comment:   pointerToOptString(a.TonTransfer.Comment),
@@ -91,7 +97,7 @@ func convertAction(a bath.Action, book addressBook) oas.Action {
 		}
 		action.SmartContractExec.SetTo(contractAction)
 	}
-	return action
+	return action, spamDetected
 }
 
 func convertFees(fee bath.Fee, book addressBook) oas.Fee {
