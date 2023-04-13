@@ -22,9 +22,6 @@ type Config struct {
 		Accounts    accountsList        `env:"ACCOUNTS"`
 		LiteServers []config.LiteServer `env:"LITE_SERVERS"`
 	}
-	Spam struct {
-		SpamApiURL string `env:"SPAM_API_URL"`
-	}
 }
 
 type accountsList []tongo.AccountID

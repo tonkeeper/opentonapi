@@ -60,9 +60,7 @@ func (h Handler) GetEvent(ctx context.Context, params oas.GetEventParams) (oas.G
 	}
 	for i, a := range actions {
 		convertedAction, spamDetected := convertAction(a, h.addressBook, h.spamRules())
-		if !event.IsScam && spamDetected {
-			event.IsScam = true
-		}
+		event.IsScam = event.IsScam || spamDetected
 		event.Actions[i] = convertedAction
 	}
 	for i, f := range fees {
