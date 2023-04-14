@@ -2,7 +2,7 @@ package bath
 
 import (
 	"fmt"
-	"reflect"
+	"github.com/ghodss/yaml"
 	"strings"
 
 	"github.com/tonkeeper/tongo"
@@ -103,7 +103,7 @@ func (b BubbleTx) ToAction() *Action {
 		payload := ""
 		if b.decodedBody != nil {
 			operation = b.decodedBody.Operation
-			payload = strings.TrimLeft(dumpCallArgs(b.decodedBody.Value, ""), "\n")
+			payload = dumpCallArgs(b.decodedBody.Value)
 		}
 		return &Action{
 			SmartContractExec: &SmartContractAction{
@@ -138,19 +138,12 @@ func (b BubbleTx) ToAction() *Action {
 	return a
 }
 
-func dumpCallArgs(v any, ident string) string {
-	t := reflect.TypeOf(v)
-	switch t.Kind() {
-	case reflect.Struct:
-		val := reflect.ValueOf(v)
-		s := ""
-		for i := 0; i < val.NumField(); i++ {
-			s += fmt.Sprintf("\n%s%s:%s", ident, t.Field(i).Name, dumpCallArgs(val.Field(i).Interface(), ident+"  "))
-		}
-		return s
-	default:
-		return fmt.Sprintf("%s%+v", ident, v)
+func dumpCallArgs(v any) string {
+	bs, err := yaml.Marshal(v)
+	if err != nil {
+		return err.Error()
 	}
+	return string(bs)
 }
 
 func (b BubbleTx) operation(name string) bool {
