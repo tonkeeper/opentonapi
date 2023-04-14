@@ -2,11 +2,15 @@ package api
 
 import (
 	"context"
+	"errors"
+
+	"github.com/tonkeeper/tongo"
+	"golang.org/x/exp/slices"
+
+	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/opentonapi/pkg/i18n"
 	"github.com/tonkeeper/opentonapi/pkg/oas"
 	"github.com/tonkeeper/opentonapi/pkg/references"
-	"github.com/tonkeeper/tongo"
-	"golang.org/x/exp/slices"
 )
 
 func (h Handler) StakingPoolInfo(ctx context.Context, params oas.StakingPoolInfoParams) (oas.StakingPoolInfoRes, error) {
@@ -121,6 +125,9 @@ func (h Handler) PoolsByNominators(ctx context.Context, params oas.PoolsByNomina
 	}
 	whalesPools, err := h.storage.GetParticipatingInWhalesPools(ctx, accountID)
 	if err != nil {
+		if errors.Is(err, core.ErrEntityNotFound) {
+			return &oas.NotFound{Error: err.Error()}, nil
+		}
 		return &oas.InternalError{Error: err.Error()}, nil
 	}
 	var result oas.AccountStaking
