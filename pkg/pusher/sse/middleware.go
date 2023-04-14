@@ -1,7 +1,6 @@
 package sse
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/tonkeeper/opentonapi/pkg/pusher/errors"
@@ -18,12 +17,13 @@ func writeError(writer http.ResponseWriter, err error) {
 	writer.Write([]byte(err.Error()))
 }
 
-func StreamingMiddleware(handler HandlerFunc) http.Handler {
-	return http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+func Stream(handler HandlerFunc) func(writer http.ResponseWriter, request *http.Request) error {
+	return func(writer http.ResponseWriter, request *http.Request) error {
 		_, ok := writer.(http.Flusher)
 		if !ok {
-			writeError(writer, fmt.Errorf("streaming unsupported"))
-			return
+			err := errors.InternalServerError("streaming unsupported")
+			writeError(writer, err)
+			return err
 		}
 
 		writer.Header().Set("Content-Type", "text/event-stream")
@@ -35,11 +35,12 @@ func StreamingMiddleware(handler HandlerFunc) http.Handler {
 		session := newSession()
 		if err := handler(session, request); err != nil {
 			writeError(writer, err)
-			return
+			return err
 		}
 		if err := session.StreamEvents(request.Context(), writer); err != nil {
 			writeError(writer, err)
-			return
+			return err
 		}
-	})
+		return nil
+	}
 }

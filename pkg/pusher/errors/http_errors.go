@@ -18,6 +18,12 @@ func (e HTTPError) Error() string {
 	return e.Message
 }
 
+func InternalServerError(msg string) HTTPError {
+	return HTTPError{
+		Code:    http.StatusInternalServerError,
+		Message: msg,
+	}
+}
 func BadRequest(msg string) HTTPError {
 	return HTTPError{
 		Code:    http.StatusBadRequest,

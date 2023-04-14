@@ -4,18 +4,16 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"net/http"
+
 	"github.com/ogen-go/ogen/middleware"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	"go.uber.org/zap"
-	"net/http"
 )
 
-func Logging(logger *zap.Logger) middleware.Middleware {
-	return func(
-		req middleware.Request,
-		next func(req middleware.Request) (middleware.Response, error),
-	) (middleware.Response, error) {
+func ogenLoggingMiddleware(logger *zap.Logger) middleware.Middleware {
+	return func(req middleware.Request, next middleware.Next) (middleware.Response, error) {
 		logger := logger.With(
 			zap.String("operation", req.OperationName),
 			zap.String("path", req.Raw.URL.Path),
@@ -37,6 +35,28 @@ func Logging(logger *zap.Logger) middleware.Middleware {
 	}
 }
 
+func asyncOperation(req *http.Request) string {
+	return req.URL.Path
+}
+
+func asyncLoggingMiddleware(logger *zap.Logger) func(next AsyncHandler) AsyncHandler {
+	return func(next AsyncHandler) AsyncHandler {
+		return func(w http.ResponseWriter, r *http.Request) error {
+			logger := logger.With(
+				zap.String("operation", asyncOperation(r)),
+				zap.String("path", r.URL.Path),
+			)
+			logger.Info("Handling request")
+			if err := next(w, r); err != nil {
+				logger.Error("Fail", zap.Error(err))
+				return err
+			}
+			logger.Info("Success")
+			return nil
+		}
+	}
+}
+
 var httpResponseTimeMetric = promauto.NewHistogramVec(prometheus.HistogramOpts{
 	Subsystem:   "http",
 	Name:        "request_duration_seconds",
@@ -45,25 +65,32 @@ var httpResponseTimeMetric = promauto.NewHistogramVec(prometheus.HistogramOpts{
 	Buckets:     []float64{0.001, 0.01, 0.05, 0.1, 0.5, 1, 10},
 }, []string{"operation"})
 
-func Metrics(req middleware.Request,
-	next func(req middleware.Request) (middleware.Response, error),
-) (middleware.Response, error) {
+func ogenMetricsMiddleware(req middleware.Request, next middleware.Next) (middleware.Response, error) {
 	t := prometheus.NewTimer(httpResponseTimeMetric.WithLabelValues(req.OperationName))
 	defer t.ObserveDuration()
 	return next(req)
 }
 
+func asyncMetricsMiddleware(next AsyncHandler) AsyncHandler {
+	return func(w http.ResponseWriter, r *http.Request) error {
+		t := prometheus.NewTimer(httpResponseTimeMetric.WithLabelValues(asyncOperation(r)))
+		defer t.ObserveDuration()
+		return next(w, r)
+	}
+}
+
 var ErrRateLimit = errors.New("rate limit")
 
-func ErrorsHandler(ctx context.Context, w http.ResponseWriter, r *http.Request, err error) {
+type errorJSON struct {
+	Error string
+}
+
+func ogenErrorsHandler(ctx context.Context, w http.ResponseWriter, r *http.Request, err error) {
 	w.Header().Set("content-type", "application/json")
-	text := err.Error()
 	if errors.Is(err, ErrRateLimit) {
 		w.WriteHeader(http.StatusTooManyRequests)
 	} else {
 		w.WriteHeader(http.StatusInternalServerError)
 	}
-	json.NewEncoder(w).Encode(struct {
-		Error string `json:"error"`
-	}{Error: text})
+	json.NewEncoder(w).Encode(&errorJSON{Error: err.Error()})
 }
