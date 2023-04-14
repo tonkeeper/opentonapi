@@ -1,6 +1,7 @@
 package api
 
 import (
+	"github.com/tonkeeper/opentonapi/internal/g"
 	"github.com/tonkeeper/opentonapi/pkg/bath"
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/opentonapi/pkg/oas"
@@ -8,7 +9,7 @@ import (
 )
 
 func convertTrace(t core.Trace, book addressBook) oas.Trace {
-	trace := oas.Trace{Transaction: convertTransaction(t.Transaction, book)}
+	trace := oas.Trace{Transaction: convertTransaction(t.Transaction, book), Interfaces: g.ToStrings(t.AccountInterfaces)}
 	for _, c := range t.Children {
 		trace.Children = append(trace.Children, convertTrace(*c, book))
 	}

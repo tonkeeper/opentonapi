@@ -2514,9 +2514,15 @@ components:
       type: object
       required:
         - transaction
+        - interfaces
       properties:
         transaction:
           $ref: '#/components/schemas/Transaction'
+        interfaces:
+          type: array
+          items:
+            type: string
+          example: ["wallet", "tep62_item"]
         children:
           type: array
           items:

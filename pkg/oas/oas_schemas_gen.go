@@ -5546,12 +5546,18 @@ func (s *TonTransferAction) SetRefund(val OptRefund) {
 // Ref: #/components/schemas/Trace
 type Trace struct {
 	Transaction Transaction `json:"transaction"`
+	Interfaces  []string    `json:"interfaces"`
 	Children    []Trace     `json:"children"`
 }
 
 // GetTransaction returns the value of Transaction.
 func (s Trace) GetTransaction() Transaction {
 	return s.Transaction
+}
+
+// GetInterfaces returns the value of Interfaces.
+func (s Trace) GetInterfaces() []string {
+	return s.Interfaces
 }
 
 // GetChildren returns the value of Children.
@@ -5562,6 +5568,11 @@ func (s Trace) GetChildren() []Trace {
 // SetTransaction sets the value of Transaction.
 func (s *Trace) SetTransaction(val Transaction) {
 	s.Transaction = val
+}
+
+// SetInterfaces sets the value of Interfaces.
+func (s *Trace) SetInterfaces(val []string) {
+	s.Interfaces = val
 }
 
 // SetChildren sets the value of Children.

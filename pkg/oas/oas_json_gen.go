@@ -12684,6 +12684,15 @@ func (s Trace) encodeFields(e *jx.Encoder) {
 		s.Transaction.Encode(e)
 	}
 	{
+
+		e.FieldStart("interfaces")
+		e.ArrStart()
+		for _, elem := range s.Interfaces {
+			e.Str(elem)
+		}
+		e.ArrEnd()
+	}
+	{
 		if s.Children != nil {
 			e.FieldStart("children")
 			e.ArrStart()
@@ -12695,9 +12704,10 @@ func (s Trace) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfTrace = [2]string{
+var jsonFieldsNameOfTrace = [3]string{
 	0: "transaction",
-	1: "children",
+	1: "interfaces",
+	2: "children",
 }
 
 // Decode decodes Trace from json.
@@ -12718,6 +12728,26 @@ func (s *Trace) Decode(d *jx.Decoder) error {
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"transaction\"")
+			}
+		case "interfaces":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				s.Interfaces = make([]string, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem string
+					v, err := d.Str()
+					elem = string(v)
+					if err != nil {
+						return err
+					}
+					s.Interfaces = append(s.Interfaces, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"interfaces\"")
 			}
 		case "children":
 			if err := func() error {
@@ -12746,7 +12776,7 @@ func (s *Trace) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b00000001,
+		0b00000011,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
