@@ -27,10 +27,12 @@ func convertAction(a bath.Action, book addressBook, spamRules rules.Rules) (oas.
 	}
 	switch a.Type {
 	case bath.TonTransfer:
-		spamAction := rules.CheckAction(spamRules, *a.TonTransfer.Comment)
-		if spamAction == rules.Drop {
-			*a.TonTransfer.Comment = ""
-			spamDetected = true
+		if a.TonTransfer.Comment != nil {
+			spamAction := rules.CheckAction(spamRules, *a.TonTransfer.Comment)
+			if spamAction == rules.Drop {
+				*a.TonTransfer.Comment = ""
+				spamDetected = true
+			}
 		}
 		action.TonTransfer.SetTo(oas.TonTransferAction{
 			Amount:    a.TonTransfer.Amount,
