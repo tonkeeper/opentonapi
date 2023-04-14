@@ -3,10 +3,12 @@ package api
 import (
 	"context"
 	"errors"
+	"math/big"
+
+	"github.com/tonkeeper/tongo"
+
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/opentonapi/pkg/oas"
-	"github.com/tonkeeper/tongo"
-	"math/big"
 )
 
 func (h Handler) GetJettonsBalances(ctx context.Context, params oas.GetJettonsBalancesParams) (oas.GetJettonsBalancesRes, error) {
@@ -16,6 +18,9 @@ func (h Handler) GetJettonsBalances(ctx context.Context, params oas.GetJettonsBa
 	}
 	wallets, err := h.storage.GetJettonWalletsByOwnerAddress(ctx, accountID)
 	if err != nil {
+		if errors.Is(err, core.ErrEntityNotFound) {
+			return &oas.NotFound{Error: err.Error()}, nil
+		}
 		return &oas.InternalError{Error: err.Error()}, nil
 	}
 	var balances = oas.JettonsBalances{
