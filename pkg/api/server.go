@@ -11,6 +11,7 @@ import (
 	"github.com/tonkeeper/opentonapi/pkg/oas"
 	"github.com/tonkeeper/opentonapi/pkg/pusher/sources"
 	"github.com/tonkeeper/opentonapi/pkg/pusher/sse"
+	"github.com/tonkeeper/opentonapi/pkg/pusher/websocket"
 )
 
 // Server opens a port and exposes REST-ish API.
@@ -94,6 +95,7 @@ func NewServer(log *zap.Logger, handler *Handler, address string, opts ...Server
 
 	sseHandler := sse.NewHandler(options.txSource)
 	mux.Handle("/v2/sse/accounts/transactions", wrapAsync(chainMiddlewares(sse.Stream(sseHandler.SubscribeToTransactions), asyncMiddlewares...)))
+	mux.Handle("/v2/websocket", wrapAsync(chainMiddlewares(websocket.Handler(log, options.txSource), asyncMiddlewares...)))
 	mux.Handle("/", ogenServer)
 
 	serv := Server{

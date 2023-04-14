@@ -17,7 +17,7 @@ func writeError(writer http.ResponseWriter, err error) {
 	writer.Write([]byte(err.Error()))
 }
 
-func Stream(handler HandlerFunc) func(writer http.ResponseWriter, request *http.Request) error {
+func Stream(handler handlerFunc) func(writer http.ResponseWriter, request *http.Request) error {
 	return func(writer http.ResponseWriter, request *http.Request) error {
 		_, ok := writer.(http.Flusher)
 		if !ok {

@@ -18,7 +18,7 @@ type Handler struct {
 	currentEventID int64
 }
 
-type HandlerFunc func(session *Session, request *http.Request) error
+type handlerFunc func(session *session, request *http.Request) error
 
 func NewHandler(txSource sources.TransactionSource) *Handler {
 	h := Handler{
@@ -44,7 +44,7 @@ func parseAccounts(str string) (*sources.SubscribeToTransactionsOptions, error) 
 	return &sources.SubscribeToTransactionsOptions{Accounts: accounts}, nil
 }
 
-func (h *Handler) SubscribeToTransactions(session *Session, request *http.Request) error {
+func (h *Handler) SubscribeToTransactions(session *session, request *http.Request) error {
 	accounts := request.URL.Query().Get("accounts")
 	options, err := parseAccounts(accounts)
 	if err != nil {

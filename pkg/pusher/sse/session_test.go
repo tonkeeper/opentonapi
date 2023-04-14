@@ -13,14 +13,14 @@ import (
 func Test_session_Stream(t *testing.T) {
 	// to make "go test -race" happy
 	cancelIsCalled := atomic.Bool{}
-	s := &Session{
+	s := &session{
 		eventCh: make(chan Event, 10),
 		cancel: func() {
 			cancelIsCalled.Store(true)
 		},
 		pingInterval: time.Second * 1,
 	}
-	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 1500*time.Millisecond)
 	defer cancel()
 
 	rec := httptest.NewRecorder()

@@ -9,31 +9,31 @@ import (
 	"github.com/tonkeeper/opentonapi/pkg/pusher/sources"
 )
 
-// Session represents an HTTP connection from a client and
+// session represents an HTTP connection from a client and
 // implements a loop to stream events from a channel to http.ResponseWriter.
-type Session struct {
+type session struct {
 	eventCh      chan Event
 	cancel       sources.CancelFn
 	pingInterval time.Duration
 }
 
-func newSession() *Session {
-	return &Session{
+func newSession() *session {
+	return &session{
 		// TODO: use elastic channel to be sure transactionDispatcher doesn't hang
 		eventCh:      make(chan Event, 100),
 		pingInterval: 5 * time.Second,
 	}
 }
 
-func (s *Session) SendEvent(event Event) {
+func (s *session) SendEvent(event Event) {
 	s.eventCh <- event
 }
 
-func (s *Session) SetCancelFn(cancel sources.CancelFn) {
+func (s *session) SetCancelFn(cancel sources.CancelFn) {
 	s.cancel = cancel
 }
 
-func (s *Session) StreamEvents(ctx context.Context, writer http.ResponseWriter) error {
+func (s *session) StreamEvents(ctx context.Context, writer http.ResponseWriter) error {
 	defer s.cancel()
 
 	flusher := writer.(http.Flusher)
