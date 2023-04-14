@@ -34,7 +34,7 @@ func (h Handler) StakingPoolInfo(ctx context.Context, params oas.StakingPoolInfo
 	}
 	p, err := h.storage.GetTFPool(ctx, poolID)
 	if err != nil {
-		return &oas.NotFound{Error: "pool not found: " + err.Error()}, nil
+		return &oas.InternalError{Error: "pool not found: " + err.Error()}, nil
 	}
 
 	info, _ := h.addressBook.GetTFPoolInfo(p.Address)
