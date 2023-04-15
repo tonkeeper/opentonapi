@@ -709,12 +709,15 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 						}
 
 						// Param: "account_id"
-						// Leaf parameter
-						args[0] = elem
-						elem = ""
+						// Match until "/"
+						idx := strings.IndexByte(elem, '/')
+						if idx < 0 {
+							idx = len(elem)
+						}
+						args[0] = elem[:idx]
+						elem = elem[idx:]
 
 						if len(elem) == 0 {
-							// Leaf node.
 							switch r.Method {
 							case "GET":
 								s.handleGetNftCollectionRequest([1]string{
@@ -725,6 +728,28 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 							}
 
 							return
+						}
+						switch elem[0] {
+						case '/': // Prefix: "/items"
+							if l := len("/items"); len(elem) >= l && elem[0:l] == "/items" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							if len(elem) == 0 {
+								// Leaf node.
+								switch r.Method {
+								case "GET":
+									s.handleGetItemsFromCollectionRequest([1]string{
+										args[0],
+									}, w, r)
+								default:
+									s.notAllowed(w, r, "GET")
+								}
+
+								return
+							}
 						}
 					}
 				}
@@ -1650,14 +1675,17 @@ func (s *Server) FindRoute(method, path string) (r Route, _ bool) {
 						}
 
 						// Param: "account_id"
-						// Leaf parameter
-						args[0] = elem
-						elem = ""
+						// Match until "/"
+						idx := strings.IndexByte(elem, '/')
+						if idx < 0 {
+							idx = len(elem)
+						}
+						args[0] = elem[:idx]
+						elem = elem[idx:]
 
 						if len(elem) == 0 {
 							switch method {
 							case "GET":
-								// Leaf: GetNftCollection
 								r.name = "GetNftCollection"
 								r.operationID = "getNftCollection"
 								r.args = args
@@ -1665,6 +1693,28 @@ func (s *Server) FindRoute(method, path string) (r Route, _ bool) {
 								return r, true
 							default:
 								return
+							}
+						}
+						switch elem[0] {
+						case '/': // Prefix: "/items"
+							if l := len("/items"); len(elem) >= l && elem[0:l] == "/items" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							if len(elem) == 0 {
+								switch method {
+								case "GET":
+									// Leaf: GetItemsFromCollection
+									r.name = "GetItemsFromCollection"
+									r.operationID = "getItemsFromCollection"
+									r.args = args
+									r.count = 1
+									return r, true
+								default:
+									return
+								}
 							}
 						}
 					}

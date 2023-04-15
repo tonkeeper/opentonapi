@@ -916,6 +916,7 @@ func (*BadRequest) getBlockTransactionsRes()      {}
 func (*BadRequest) getDomainBidsRes()             {}
 func (*BadRequest) getEventRes()                  {}
 func (*BadRequest) getEventsByAccountRes()        {}
+func (*BadRequest) getItemsFromCollectionRes()    {}
 func (*BadRequest) getJettonInfoRes()             {}
 func (*BadRequest) getJettonsBalancesRes()        {}
 func (*BadRequest) getNftCollectionRes()          {}
@@ -1840,6 +1841,7 @@ func (*InternalError) getConfigRes()                 {}
 func (*InternalError) getDomainBidsRes()             {}
 func (*InternalError) getEventRes()                  {}
 func (*InternalError) getEventsByAccountRes()        {}
+func (*InternalError) getItemsFromCollectionRes()    {}
 func (*InternalError) getJettonInfoRes()             {}
 func (*InternalError) getJettonsBalancesRes()        {}
 func (*InternalError) getMasterchainHeadRes()        {}
@@ -2808,6 +2810,7 @@ func (s *NftItems) SetNftItems(val []NftItem) {
 	s.NftItems = val
 }
 
+func (*NftItems) getItemsFromCollectionRes() {}
 func (*NftItems) getNftItemsByAddressesRes() {}
 func (*NftItems) getNftItemsByOwnerRes()     {}
 
@@ -2900,6 +2903,7 @@ func (*NotFound) getBlockTransactionsRes()      {}
 func (*NotFound) getDomainBidsRes()             {}
 func (*NotFound) getEventRes()                  {}
 func (*NotFound) getEventsByAccountRes()        {}
+func (*NotFound) getItemsFromCollectionRes()    {}
 func (*NotFound) getJettonInfoRes()             {}
 func (*NotFound) getJettonsBalancesRes()        {}
 func (*NotFound) getNftCollectionRes()          {}
@@ -6049,6 +6053,7 @@ func (*UnauthorizedError) getConfigRes()                 {}
 func (*UnauthorizedError) getDomainBidsRes()             {}
 func (*UnauthorizedError) getEventRes()                  {}
 func (*UnauthorizedError) getEventsByAccountRes()        {}
+func (*UnauthorizedError) getItemsFromCollectionRes()    {}
 func (*UnauthorizedError) getJettonInfoRes()             {}
 func (*UnauthorizedError) getJettonsBalancesRes()        {}
 func (*UnauthorizedError) getMasterchainHeadRes()        {}

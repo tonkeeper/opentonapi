@@ -641,6 +641,32 @@ paths:
         '500':
           $ref: '#/components/responses/InternalError'
 
+  /v2/nfts/collections/{account_id}/items:
+    get:
+      description: Get NFT items from collection by collection address
+      operationId: getItemsFromCollection
+      tags:
+        - NFT
+      parameters:
+        - $ref: '#/components/parameters/accountIdParameter'
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/offset'
+      responses:
+        '200':
+          description: "nft collection"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NftItems'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
   /v2/nfts/_bulk:
     post:
       description: Get NFT items by their addresses
@@ -991,6 +1017,7 @@ components:
       schema:
         type: integer
         default: 1000
+        maximum: 1000
     offset:
       in: query
       name: offset

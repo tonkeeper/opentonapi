@@ -1419,6 +1419,113 @@ func (s *Server) handleGetEventsByAccountRequest(args [1]string, w http.Response
 	}
 }
 
+// handleGetItemsFromCollectionRequest handles getItemsFromCollection operation.
+//
+// Get NFT items from collection by collection address.
+//
+// GET /v2/nfts/collections/{account_id}/items
+func (s *Server) handleGetItemsFromCollectionRequest(args [1]string, w http.ResponseWriter, r *http.Request) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("getItemsFromCollection"),
+	}
+
+	// Start a span for this request.
+	ctx, span := s.cfg.Tracer.Start(r.Context(), "GetItemsFromCollection",
+		trace.WithAttributes(otelAttrs...),
+		serverSpanKind,
+	)
+	defer span.End()
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		elapsedDuration := time.Since(startTime)
+		s.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+	}()
+
+	// Increment request counter.
+	s.requests.Add(ctx, 1, otelAttrs...)
+
+	var (
+		recordError = func(stage string, err error) {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			s.errors.Add(ctx, 1, otelAttrs...)
+		}
+		err          error
+		opErrContext = ogenerrors.OperationContext{
+			Name: "GetItemsFromCollection",
+			ID:   "getItemsFromCollection",
+		}
+	)
+	params, err := decodeGetItemsFromCollectionParams(args, r)
+	if err != nil {
+		err = &ogenerrors.DecodeParamsError{
+			OperationContext: opErrContext,
+			Err:              err,
+		}
+		recordError("DecodeParams", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+
+	var response GetItemsFromCollectionRes
+	if m := s.cfg.Middleware; m != nil {
+		mreq := middleware.Request{
+			Context:       ctx,
+			OperationName: "GetItemsFromCollection",
+			OperationID:   "getItemsFromCollection",
+			Body:          nil,
+			Params: middleware.Parameters{
+				{
+					Name: "account_id",
+					In:   "path",
+				}: params.AccountID,
+				{
+					Name: "limit",
+					In:   "query",
+				}: params.Limit,
+				{
+					Name: "offset",
+					In:   "query",
+				}: params.Offset,
+			},
+			Raw: r,
+		}
+
+		type (
+			Request  = struct{}
+			Params   = GetItemsFromCollectionParams
+			Response = GetItemsFromCollectionRes
+		)
+		response, err = middleware.HookMiddleware[
+			Request,
+			Params,
+			Response,
+		](
+			m,
+			mreq,
+			unpackGetItemsFromCollectionParams,
+			func(ctx context.Context, request Request, params Params) (Response, error) {
+				return s.h.GetItemsFromCollection(ctx, params)
+			},
+		)
+	} else {
+		response, err = s.h.GetItemsFromCollection(ctx, params)
+	}
+	if err != nil {
+		recordError("Internal", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+
+	if err := encodeGetItemsFromCollectionResponse(response, w, span); err != nil {
+		recordError("EncodeResponse", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+}
+
 // handleGetJettonInfoRequest handles getJettonInfo operation.
 //
 // Get jetton metadata by jetton master address.

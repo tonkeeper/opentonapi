@@ -111,3 +111,25 @@ func (h Handler) GetNftCollection(ctx context.Context, params oas.GetNftCollecti
 	col := convertNftCollection(collection, h.addressBook)
 	return &col, nil
 }
+
+func (h Handler) GetItemsFromCollection(ctx context.Context, params oas.GetItemsFromCollectionParams) (oas.GetItemsFromCollectionRes, error) {
+	account, err := tongo.ParseAccountID(params.AccountID)
+	if err != nil {
+		return &oas.BadRequest{Error: err.Error()}, nil
+	}
+	ids, err := h.storage.SearchNFTs(ctx, &core.Filter[tongo.AccountID]{Value: account}, nil, false,
+		false, //todo: remove after fix
+		params.Limit.Value, params.Offset.Value)
+	var result oas.NftItems
+	if len(ids) == 0 {
+		return &result, nil
+	}
+	items, err := h.storage.GetNFTs(ctx, ids)
+	if err != nil {
+		return &oas.InternalError{Error: err.Error()}, nil
+	}
+	for _, i := range items {
+		result.NftItems = append(result.NftItems, convertNFT(i, h.addressBook, h.previewGenerator))
+	}
+	return &result, nil
+}
