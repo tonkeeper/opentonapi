@@ -57,6 +57,10 @@ type GetEventsByAccountRes interface {
 	getEventsByAccountRes()
 }
 
+type GetItemsFromCollectionRes interface {
+	getItemsFromCollectionRes()
+}
+
 type GetJettonInfoRes interface {
 	getJettonInfoRes()
 }

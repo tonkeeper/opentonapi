@@ -12,7 +12,7 @@ GET {{host}}/v2/traces/1841e57595edb38590bc519fc6e385f77a9f0a34475e55cba621cc314
 GET {{host}}/v2/staking/nominator/EQCMVd9ya3yvhyhOWckBUmrHsle3eLqb_em8npZEmbbR-NOe/pools
 
 ###
-GET {{host}}/v2/staking/pool/0:48fb0195a7fc7454512377b9bd704503ded27f6e7c4c4a9d136fdab3ef9ec04c
+GET {{host}}/v2/staking/pool/EQCY4M6TZYnOMnGBQlqi_nyeaIB1LeBFfGgP4uXQ1VWhales
 
 ###
 GET {{host}}/v2/staking/pools?available_for=0:48fb0195a7fc7454512377b9bd704503ded27f6e7c4c4a9d136fdab3ef9ec04c
@@ -28,7 +28,7 @@ GET {{host}}/v2/nfts/EQDw41DE6TProVIyDIeMWpx4SJutvd8hYUHRQjtR2tSfxz8q
 GET {{metrics}}/metrics
 
 ###
-GET {{host}}/v2/events/492cc2277caf9ef14ebb1d42bcce7a254ecf31261eed54bd55b5f9fd835cb614
+GET {{host}}/v2/events/44dc48dcdb9f0ff5250543025182e94b39bfb8cdc939c28d98c46e6020d95b7b
 
 ###
 GET {{host}}/v2/blockchain/accounts/EQAvDfWFG0oYX19jwNDNBBL1rKNT9XfaGP9HyTb5nb2Eml6y/methods/get_wallet_address?args=EQCnM2nIemDP3fRihoXiuyo8ETt0LILd1LUqFlZba7nErMv_
@@ -53,3 +53,6 @@ GET {{host}}/v2/jettons/0:beb5d4638e860ccf7317296e298fde5b35982f4725b0676dc98b1d
 
 ###
 GET {{host}}/v2/dns/subbotin.ton/resolve
+
+###
+GET {{host}}/v2/nfts/collections/EQDaaxtmY6Dk0YzIV0zNnbUpbjZ92TJHBvO72esc0srwv8K2/items

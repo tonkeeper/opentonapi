@@ -139,6 +139,15 @@ func (UnimplementedHandler) GetEventsByAccount(ctx context.Context, params GetEv
 	return r, ht.ErrNotImplemented
 }
 
+// GetItemsFromCollection implements getItemsFromCollection operation.
+//
+// Get NFT items from collection by collection address.
+//
+// GET /v2/nfts/collections/{account_id}/items
+func (UnimplementedHandler) GetItemsFromCollection(ctx context.Context, params GetItemsFromCollectionParams) (r GetItemsFromCollectionRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // GetJettonInfo implements getJettonInfo operation.
 //
 // Get jetton metadata by jetton master address.

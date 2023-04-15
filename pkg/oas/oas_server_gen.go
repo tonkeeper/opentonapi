@@ -92,6 +92,12 @@ type Handler interface {
 	//
 	// GET /v2/accounts/{account_id}/events
 	GetEventsByAccount(ctx context.Context, params GetEventsByAccountParams) (GetEventsByAccountRes, error)
+	// GetItemsFromCollection implements getItemsFromCollection operation.
+	//
+	// Get NFT items from collection by collection address.
+	//
+	// GET /v2/nfts/collections/{account_id}/items
+	GetItemsFromCollection(ctx context.Context, params GetItemsFromCollectionParams) (GetItemsFromCollectionRes, error)
 	// GetJettonInfo implements getJettonInfo operation.
 	//
 	// Get jetton metadata by jetton master address.
