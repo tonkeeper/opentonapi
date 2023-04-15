@@ -34,7 +34,10 @@ func convertNFT(item core.NftItem, book addressBook, previewGen previewGenerator
 		if _, prs := book.GetCollectionInfoByAddress(*item.CollectionAddress); prs {
 			i.ApprovedBy = []string{"tonkeeper"} //todo: make enum
 		}
-		//todo: add coolection info
+		i.Collection.SetTo(oas.NftItemCollection{
+			Address: item.CollectionAddress.ToRaw(),
+			Name:    "", //todo: use cache
+		})
 	}
 	if item.Metadata != nil {
 		if imageI, prs := item.Metadata["image"]; prs {
