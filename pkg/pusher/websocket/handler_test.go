@@ -39,7 +39,7 @@ func TestHandler(t *testing.T) {
 	logger, _ := zap.NewDevelopment()
 	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
 		handler := Handler(logger, source)
-		err := handler(writer, request)
+		err := handler(writer, request, 0)
 		require.Nil(t, err)
 	}))
 	defer server.Close()

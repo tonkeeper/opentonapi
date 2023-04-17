@@ -30,8 +30,8 @@ type JsonRPCResponse struct {
 	Params  json.RawMessage `json:"params,omitempty"`
 }
 
-func Handler(logger *zap.Logger, txSource sources.TransactionSource) func(writer http.ResponseWriter, request *http.Request) error {
-	return func(w http.ResponseWriter, r *http.Request) error {
+func Handler(logger *zap.Logger, txSource sources.TransactionSource) func(http.ResponseWriter, *http.Request, int) error {
+	return func(w http.ResponseWriter, r *http.Request, connectionType int) error {
 		conn, err := upgrader.Upgrade(w, r, nil)
 		if err != nil {
 			logger.Error("failed to upgrade HTTP connection to websocket protocol",

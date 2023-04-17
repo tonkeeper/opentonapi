@@ -30,7 +30,13 @@ type Server struct {
 	asyncMiddlewares []AsyncMiddleware
 }
 
-type AsyncHandler func(http.ResponseWriter, *http.Request) error
+// For authentication purposes we need to distinguish between regular and long-lived connections.
+const (
+	LongLivedConnection = 0
+	RegularConnection   = 1
+)
+
+type AsyncHandler func(http.ResponseWriter, *http.Request, int) error
 type AsyncMiddleware func(AsyncHandler) AsyncHandler
 
 type ServerOptions struct {
@@ -94,8 +100,8 @@ func NewServer(log *zap.Logger, handler *Handler, address string, opts ...Server
 	asyncMiddlewares = append(asyncMiddlewares, options.asyncMiddlewares...)
 
 	sseHandler := sse.NewHandler(options.txSource)
-	mux.Handle("/v2/sse/accounts/transactions", wrapAsync(chainMiddlewares(sse.Stream(sseHandler.SubscribeToTransactions), asyncMiddlewares...)))
-	mux.Handle("/v2/websocket", wrapAsync(chainMiddlewares(websocket.Handler(log, options.txSource), asyncMiddlewares...)))
+	mux.Handle("/v2/sse/accounts/transactions", wrapAsync(LongLivedConnection, chainMiddlewares(sse.Stream(sseHandler.SubscribeToTransactions), asyncMiddlewares...)))
+	mux.Handle("/v2/websocket", wrapAsync(LongLivedConnection, chainMiddlewares(websocket.Handler(log, options.txSource), asyncMiddlewares...)))
 	mux.Handle("/", ogenServer)
 
 	serv := Server{
@@ -110,9 +116,9 @@ func NewServer(log *zap.Logger, handler *Handler, address string, opts ...Server
 	return &serv, nil
 }
 
-func wrapAsync(handler AsyncHandler) http.Handler {
+func wrapAsync(connectionType int, handler AsyncHandler) http.Handler {
 	return http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
-		_ = handler(writer, request)
+		_ = handler(writer, request, connectionType)
 	})
 }
 
@@ -123,8 +129,8 @@ func chainMiddlewares(handler AsyncHandler, middleware ...AsyncMiddleware) Async
 	return handler
 }
 
-func (s *Server) RegisterAsyncHandler(pattern string, handler AsyncHandler) {
-	s.mux.Handle(pattern, wrapAsync(chainMiddlewares(handler, s.asyncMiddlewares...)))
+func (s *Server) RegisterAsyncHandler(pattern string, handler AsyncHandler, connectionType int) {
+	s.mux.Handle(pattern, wrapAsync(connectionType, chainMiddlewares(handler, s.asyncMiddlewares...)))
 }
 
 func (s *Server) Run() {
