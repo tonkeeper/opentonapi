@@ -3,10 +3,13 @@ package chainstate
 import (
 	"encoding/json"
 	"net/http"
+	"sync"
+	"time"
 )
 
 type ChainState struct {
 	apy float64
+	mu  sync.RWMutex
 }
 
 func (s *ChainState) GetAPY() float64 {
@@ -14,7 +17,22 @@ func (s *ChainState) GetAPY() float64 {
 }
 
 func NewChainState() *ChainState {
-	return &ChainState{apy: apyFromWhales()} //todo: replace with local calculations
+	chain := &ChainState{apy: apyFromWhales()} //todo: replace with local calculations
+
+	go func() {
+		for {
+			chain.refresh()
+			time.Sleep(time.Minute * 30)
+		}
+	}()
+
+	return chain
+}
+
+func (s *ChainState) refresh() {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.apy = apyFromWhales()
 }
 
 func apyFromWhales() float64 {
