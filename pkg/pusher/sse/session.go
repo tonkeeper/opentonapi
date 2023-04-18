@@ -46,9 +46,9 @@ func (s *session) StreamEvents(ctx context.Context, writer http.ResponseWriter) 
 			if !open {
 				return nil
 			}
-			_, err = fmt.Fprintf(writer, "id: %v\ndata: %v\n\n", msg.EventID, string(msg.Data))
+			_, err = fmt.Fprintf(writer, "event: message\nid: %v\ndata: %v\n\n", msg.EventID, string(msg.Data))
 		case <-time.After(s.pingInterval):
-			_, err = fmt.Fprintf(writer, "body: heartbeat\n\n")
+			_, err = fmt.Fprintf(writer, "event: heartbeat\n\n")
 		}
 		if err != nil {
 			// closing a connection
