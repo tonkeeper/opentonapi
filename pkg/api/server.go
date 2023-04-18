@@ -1,8 +1,8 @@
 package api
 
 import (
-	"context"
 	"errors"
+	"fmt"
 	"net/http"
 
 	"github.com/tonkeeper/tongo/config"
@@ -66,25 +66,13 @@ func WithTransactionSource(txSource sources.TransactionSource) ServerOption {
 	}
 }
 
-func WithLiteServers(servers []config.LiteServer) ServerOption {
-	return func(options *ServerOptions) {
-		options.liteServers = servers
-	}
-}
-
 func NewServer(log *zap.Logger, handler *Handler, address string, opts ...ServerOption) (*Server, error) {
 	options := &ServerOptions{}
 	for _, o := range opts {
 		o(options)
 	}
 	if options.txSource == nil {
-		s, err := sources.NewBlockchainSource(log, options.liteServers)
-		if err != nil {
-			return nil, err
-		}
-		go s.Run(context.TODO())
-
-		options.txSource = s
+		return nil, fmt.Errorf("transaction source is not set")
 	}
 	ogenMiddlewares := []oas.Middleware{ogenLoggingMiddleware(log), ogenMetricsMiddleware}
 	ogenMiddlewares = append(ogenMiddlewares, options.ogenMiddlewares...)

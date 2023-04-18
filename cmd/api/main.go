@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 
@@ -13,6 +14,7 @@ import (
 	"github.com/tonkeeper/opentonapi/pkg/app"
 	"github.com/tonkeeper/opentonapi/pkg/config"
 	"github.com/tonkeeper/opentonapi/pkg/litestorage"
+	"github.com/tonkeeper/opentonapi/pkg/pusher/sources"
 )
 
 func main() {
@@ -33,7 +35,13 @@ func main() {
 	if err != nil {
 		log.Fatal("failed to create api handler", zap.Error(err))
 	}
-	server, err := api.NewServer(log, h, fmt.Sprintf(":%d", cfg.API.Port), api.WithLiteServers(cfg.App.LiteServers))
+	source, err := sources.NewBlockchainSource(log, cfg.App.LiteServers)
+	if err != nil {
+		log.Fatal("failed to create blockchain source", zap.Error(err))
+	}
+	go source.Run(context.TODO())
+
+	server, err := api.NewServer(log, h, fmt.Sprintf(":%d", cfg.API.Port), api.WithTransactionSource(source))
 	if err != nil {
 		log.Fatal("failed to create api handler", zap.Error(err))
 	}
