@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -166,14 +167,12 @@ func TestHandler_GetTransactions(t *testing.T) {
 		wantTxHashes map[string]struct{}
 	}{
 		{
-			params:      oas.GetBlockTransactionsParams{BlockID: "(-1,8000000000000000,27906616)"},
-			wantTxCount: 5,
+			params:      oas.GetBlockTransactionsParams{BlockID: "(-1,8000000000000000,28741341)"},
+			wantTxCount: 3,
 			wantTxHashes: map[string]struct{}{
-				"9bbc8b4671e944047cae265f962093c65e6d278ac3439242b34ee4d8e063014d": {},
-				"739147d0f90ce636ea4ab96797f20193a91a246f4c7203e8ae797f3544311ad1": {},
-				"3facfbc5a51c15a183ecdf926f6f96aa90d4d38993b8c0a027a8b076517748f1": {},
-				"86676c79ab3b86f5a45bc27e177b1457e40f5d41159e86d0db04ba429d123ac4": {},
-				"d5e293051bbe005bd2394bef04596c42f636864c628ff77a71d52baf938d1bbe": {},
+				"fec4f77e8b72eec62d14944d9cf99171a32c03783c8e6e30590aabbe35236f9b": {},
+				"ed07582702c23aeaa6f1b7ce28def3a810399467a8e062ed1c67eed8c1abd2ad": {},
+				"6f268d1fcd0bd36021237bb2b1810a7a78cd1d3b5e96d826ffddbcc96b848523": {},
 			},
 		},
 	}
@@ -186,6 +185,7 @@ func TestHandler_GetTransactions(t *testing.T) {
 			require.Nil(t, err)
 			res, err := h.GetBlockTransactions(context.Background(), tt.params)
 			require.Nil(t, err)
+			fmt.Printf("%v\n", res)
 			transactions, ok := res.(*oas.Transactions)
 			require.True(t, ok)
 			require.Equal(t, tt.wantTxCount, len(transactions.Transactions))

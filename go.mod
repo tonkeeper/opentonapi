@@ -9,17 +9,19 @@ require (
 	github.com/ghodss/yaml v1.0.0
 	github.com/go-faster/errors v0.6.1
 	github.com/go-faster/jx v0.40.0
+	github.com/gorilla/websocket v1.5.0
 	github.com/nicksnyder/go-i18n/v2 v2.2.1
 	github.com/ogen-go/ogen v0.55.0
 	github.com/prometheus/client_golang v1.14.0
 	github.com/shopspring/decimal v1.3.1
+	github.com/sourcegraph/conc v0.3.0
 	github.com/stretchr/testify v1.8.1
 	github.com/tonkeeper/scam_backoffice_rules v0.0.0-20230413094040-a66ab71fb269
 	github.com/tonkeeper/tongo v1.0.13
 	go.opentelemetry.io/otel v1.11.1
 	go.opentelemetry.io/otel/metric v0.33.0
 	go.opentelemetry.io/otel/trace v1.11.1
-	go.uber.org/multierr v1.8.0
+	go.uber.org/multierr v1.9.0
 	go.uber.org/zap v1.24.0
 	golang.org/x/exp v0.0.0-20230116083435-1de6713980de
 	golang.org/x/text v0.9.0
