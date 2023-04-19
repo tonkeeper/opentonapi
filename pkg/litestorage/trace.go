@@ -3,9 +3,11 @@ package litestorage
 import (
 	"context"
 	"fmt"
-	"github.com/tonkeeper/opentonapi/pkg/core"
+
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
+
+	"github.com/tonkeeper/opentonapi/pkg/core"
 )
 
 func (s *LiteStorage) GetTrace(ctx context.Context, hash tongo.Bits256) (*core.Trace, error) {
@@ -108,12 +110,13 @@ func (s *LiteStorage) searchTransactionInBlock(ctx context.Context, a tongo.Acco
 		if tx.AccountAddr != a.Address {
 			continue
 		}
-		if !back && tx.Msgs.InMsg.Exists && tx.Msgs.InMsg.Value.Value.Info.IntMsgInfo.CreatedLt == lt {
+		inMsg := tx.Msgs.InMsg
+		if !back && inMsg.Exists && inMsg.Value.Value.Info.IntMsgInfo != nil && inMsg.Value.Value.Info.IntMsgInfo.CreatedLt == lt {
 			return core.ConvertTransaction(a.Workchain, tongo.Transaction{BlockID: blockIDExt, Transaction: *tx})
 		}
 		if back {
 			for _, m := range tx.Msgs.OutMsgs.Values() {
-				if m.Value.Info.IntMsgInfo.CreatedLt == lt {
+				if m.Value.Info.IntMsgInfo != nil && m.Value.Info.IntMsgInfo.CreatedLt == lt {
 					return core.ConvertTransaction(a.Workchain, tongo.Transaction{BlockID: blockIDExt, Transaction: *tx})
 				}
 			}
