@@ -19,7 +19,6 @@ import (
 
 type LiteStorage struct {
 	client                  *liteapi.Client
-	transactionsIndex       map[tongo.AccountID][]*core.Transaction
 	jettonMetaCache         map[string]tongo.JettonMetadata
 	transactionsIndexByHash map[tongo.Bits256]*core.Transaction
 	blockCache              *xsync.MapOf[tongo.BlockIDExt, *tlb.Block]
@@ -78,7 +77,6 @@ func NewLiteStorage(log *zap.Logger, opts ...Option) (*LiteStorage, error) {
 
 	l := &LiteStorage{
 		client:                  client,
-		transactionsIndex:       make(map[tongo.AccountID][]*core.Transaction),
 		jettonMetaCache:         make(map[string]tongo.JettonMetadata),
 		transactionsIndexByHash: make(map[tongo.Bits256]*core.Transaction),
 		blockCache:              xsync.NewTypedMapOf[tongo.BlockIDExt, *tlb.Block](hashBlockIDExt),
@@ -147,7 +145,6 @@ func (s *LiteStorage) preloadAccount(a tongo.AccountID, log *zap.Logger) error {
 			return err
 		}
 		s.transactionsIndexByHash[tongo.Bits256(tx.Hash())] = t
-		s.transactionsIndex[a] = append(s.transactionsIndex[a], t)
 	}
 
 	return nil
