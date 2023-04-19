@@ -28,7 +28,7 @@ type NftCollection struct {
 	OwnerAddress      *tongo.AccountID
 	ContentLayout     int
 	CollectionContent []byte
-	Metadata          []byte
+	Metadata          map[string]interface{}
 }
 
 type NftSaleInfo struct {

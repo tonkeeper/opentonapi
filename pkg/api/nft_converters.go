@@ -1,13 +1,14 @@
 package api
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/opentonapi/pkg/oas"
 )
 
-func convertNFT(item core.NftItem, book addressBook, previewGen previewGenerator) oas.NftItem {
+func convertNFT(ctx context.Context, item core.NftItem, book addressBook, previewGen previewGenerator, metaCache metadataCache) oas.NftItem {
 	i := oas.NftItem{
 		Address:  item.Address.ToRaw(),
 		Index:    item.Index.BigInt().Int64(),
@@ -17,6 +18,14 @@ func convertNFT(item core.NftItem, book addressBook, previewGen previewGenerator
 		DNS:      pointerToOptString(item.DNS),
 	}
 	if item.Sale != nil {
+		tokenName := "TON"
+		if item.Sale.Price.Token != nil {
+			m, _ := metaCache.getJettonMeta(ctx, *item.Sale.Price.Token)
+			tokenName = m.Name
+			if tokenName == "" {
+				tokenName = "UKWN"
+			}
+		}
 		i.SetSale(oas.OptSale{
 			Value: oas.Sale{
 				Address: item.Sale.Contract.ToRaw(),
@@ -24,7 +33,7 @@ func convertNFT(item core.NftItem, book addressBook, previewGen previewGenerator
 				Owner:   convertOptAccountAddress(item.Sale.Seller, book),
 				Price: oas.Price{
 					Value:     fmt.Sprintf("%v", item.Sale.Price.Amount),
-					TokenName: "TON", //todo: support over token
+					TokenName: tokenName,
 				},
 			},
 			Set: true,
@@ -62,11 +71,14 @@ func convertNftCollection(collection core.NftCollection, book addressBook) oas.N
 		RawCollectionContent: fmt.Sprintf("%x", collection.CollectionContent[:]),
 		Owner:                convertOptAccountAddress(collection.OwnerAddress, book),
 	}
-	if collection.Metadata != nil {
-		var metadata oas.OptNftCollectionMetadata
-		err := json.Unmarshal(collection.Metadata, &metadata)
-		if err == nil {
-			c.Metadata = metadata
+	if len(collection.Metadata) != 0 {
+		metadata := oas.OptNftCollectionMetadata{Set: true}
+		for k, v := range collection.Metadata {
+			var err error
+			metadata.Value[k], err = json.Marshal(v)
+			if err != nil {
+				continue
+			}
 		}
 	}
 	return c

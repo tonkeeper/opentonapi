@@ -2,12 +2,14 @@ package api
 
 import (
 	"fmt"
+	"github.com/tonkeeper/tongo/tep64"
 
 	"github.com/go-faster/errors"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/contract/dns"
 	"go.uber.org/zap"
 
+	"github.com/tonkeeper/opentonapi/pkg/cache"
 	"github.com/tonkeeper/opentonapi/pkg/image"
 
 	"github.com/tonkeeper/opentonapi/pkg/addressbook"
@@ -33,6 +35,7 @@ type Handler struct {
 	dns              *dns.DNS
 	limits           Limits
 	spamRules        func() rules.Rules
+	metaCache        metadataCache
 }
 
 // Options configures behavior of a Handler instance.
@@ -141,5 +144,10 @@ func NewHandler(logger *zap.Logger, opts ...Option) (*Handler, error) {
 		dns:              dnsClient,
 		limits:           options.limits,
 		spamRules:        options.spamRules,
+		metaCache: metadataCache{
+			collectionsCache: cache.NewLRUCache[tongo.AccountID, tep64.Metadata](10000, "nft_metadata_cache"),
+			jettonsCache:     cache.NewLRUCache[tongo.AccountID, tep64.Metadata](10000, "jetton_metadata_cache"),
+			storage:          options.storage,
+		},
 	}, nil
 }
