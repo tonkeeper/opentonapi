@@ -2,6 +2,7 @@ package litestorage
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"github.com/tonkeeper/opentonapi/internal/g"
 	"github.com/tonkeeper/opentonapi/pkg/core"
@@ -40,6 +41,10 @@ func (s *LiteStorage) GetNftCollectionByCollectionAddress(ctx context.Context, a
 		return core.NftCollection{}, fmt.Errorf("invalid collection address")
 	}
 	content := boc.Cell(source.CollectionContent)
+	rawContent, err := content.ToBoc()
+	if err != nil {
+		return core.NftCollection{}, err
+	}
 	fullContent, err := tep64.DecodeFullContent(&content)
 	if err != nil {
 		return core.NftCollection{}, err
@@ -51,7 +56,7 @@ func (s *LiteStorage) GetNftCollectionByCollectionAddress(ctx context.Context, a
 	collection := core.NftCollection{
 		Address:           address,
 		OwnerAddress:      accountID,
-		CollectionContent: fullContent.Data,
+		CollectionContent: rawContent,
 		ContentLayout:     int(fullContent.Layout),
 		NextItemIndex:     g.Pointer(big.Int(source.NextItemIndex)).Uint64(),
 	}
@@ -60,9 +65,13 @@ func (s *LiteStorage) GetNftCollectionByCollectionAddress(ctx context.Context, a
 		if err != nil {
 			return core.NftCollection{}, err
 		}
-		collection.Metadata = meta
+		var m map[string]interface{}
+		json.Unmarshal(meta, &m)
+		collection.Metadata = m
 	} else {
-		collection.Metadata = fullContent.Data
+		var m map[string]interface{}
+		json.Unmarshal(fullContent.Data, &m)
+		collection.Metadata = m
 	}
 	return collection, nil
 }
