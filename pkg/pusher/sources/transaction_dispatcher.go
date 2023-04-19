@@ -6,15 +6,16 @@ import (
 	"sync"
 
 	"github.com/tonkeeper/tongo"
-	"github.com/tonkeeper/tongo/tlb"
 	"go.uber.org/zap"
 )
 
 type subscriberID int64
 
+// TransactionEvent is a notification event about a new transaction between a TransactionSource instance and a dispatcher.
 type TransactionEvent struct {
-	accountID tongo.AccountID
-	tx        *tlb.Transaction
+	AccountID tongo.AccountID
+	Lt        uint64
+	TxHash    string
 }
 
 // TransactionDispatcher implements the fan-out pattern reading a TransactionEvent from a single channel
@@ -39,10 +40,12 @@ func NewTransactionDispatcher(logger *zap.Logger) *TransactionDispatcher {
 	}
 }
 
+// TransactionEventData represents a JSON object we send to subscribers.
+// This is part of our API contract with subscribers.
 type TransactionEventData struct {
-	AccountID tongo.AccountID
-	Lt        uint64
-	TxHash    string
+	AccountID tongo.AccountID `json:"account_id"`
+	Lt        uint64          `json:"lt"`
+	TxHash    string          `json:"tx_hash"`
 }
 
 // Run runs a dispatching loop in a dedicated goroutine and returns a channel to be used to communicate with this dispatcher.
@@ -53,14 +56,14 @@ func (disp *TransactionDispatcher) Run(ctx context.Context) chan TransactionEven
 			select {
 			case <-ctx.Done():
 				return
-			case n := <-ch:
+			case event := <-ch:
 				disp.logger.Debug("handling transaction",
-					zap.String("account", n.accountID.ToRaw()),
-					zap.Uint64("lt", n.tx.Lt))
+					zap.String("account", event.AccountID.ToRaw()),
+					zap.Uint64("lt", event.Lt))
 				tx := TransactionEventData{
-					AccountID: n.accountID,
-					Lt:        n.tx.Lt,
-					TxHash:    n.tx.Hash().Hex(),
+					AccountID: event.AccountID,
+					Lt:        event.Lt,
+					TxHash:    event.TxHash,
 				}
 				disp.dispatch(&tx)
 			}

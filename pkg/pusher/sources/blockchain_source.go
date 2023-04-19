@@ -79,8 +79,9 @@ func (b *BlockchainSource) Run(ctx context.Context) {
 			transactions := block.Block.AllTransactions()
 			for _, tx := range transactions {
 				ch <- TransactionEvent{
-					accountID: *tongo.NewAccountId(block.ID.Workchain, tx.AccountAddr),
-					tx:        tx,
+					AccountID: *tongo.NewAccountId(block.ID.Workchain, tx.AccountAddr),
+					Lt:        tx.Lt,
+					TxHash:    tx.Hash().Hex(),
 				}
 			}
 		}
