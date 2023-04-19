@@ -13,6 +13,7 @@ require (
 	github.com/nicksnyder/go-i18n/v2 v2.2.1
 	github.com/ogen-go/ogen v0.55.0
 	github.com/prometheus/client_golang v1.14.0
+	github.com/puzpuzpuz/xsync/v2 v2.4.0
 	github.com/shopspring/decimal v1.3.1
 	github.com/sourcegraph/conc v0.3.0
 	github.com/stretchr/testify v1.8.1
