@@ -97,13 +97,13 @@ func (s *LiteStorage) searchTransactionInBlock(ctx context.Context, a tongo.Acco
 	if err != nil {
 		return nil, err
 	}
-	block, prs := s.blockCache[blockIDExt]
+	block, prs := s.blockCache.Load(blockIDExt)
 	if !prs {
 		b, err := s.client.GetBlock(ctx, blockIDExt)
 		if err != nil {
 			return nil, err
 		}
-		s.blockCache[blockIDExt] = &b
+		s.blockCache.Store(blockIDExt, &b)
 		block = &b
 	}
 	for _, tx := range block.AllTransactions() {
