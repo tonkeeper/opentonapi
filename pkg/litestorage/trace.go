@@ -88,7 +88,6 @@ func (s *LiteStorage) searchTransactionNearBlock(ctx context.Context, a tongo.Ac
 		}
 
 	}
-	s.transactionsIndex[a] = append(s.transactionsIndex[a], tx)
 	return tx, nil
 }
 
