@@ -85,3 +85,7 @@ type addressBook interface {
 	GetTFPoolInfo(a tongo.AccountID) (addressbook.TFPoolInfo, bool)
 	GetKnownJettons() map[tongo.AccountID]addressbook.KnownJetton
 }
+
+type tonRates interface {
+	GetRates() map[string]string
+}

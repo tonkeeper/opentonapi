@@ -1193,6 +1193,24 @@ func (s Subscriptions) Validate() error {
 	}
 	return nil
 }
+func (s TonRate) Validate() error {
+	var failures []validate.FieldError
+	if err := func() error {
+		if err := (validate.Float{}).Validate(float64(s.Price)); err != nil {
+			return errors.Wrap(err, "float")
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "price",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
 func (s TonTransferAction) Validate() error {
 	var failures []validate.FieldError
 	if err := func() error {

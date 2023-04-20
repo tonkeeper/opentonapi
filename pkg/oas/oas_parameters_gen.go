@@ -1878,6 +1878,56 @@ func decodeGetSubscriptionsByAccountParams(args [1]string, r *http.Request) (par
 	return params, nil
 }
 
+// GetTonRateParams is parameters of getTonRate operation.
+type GetTonRateParams struct {
+	Currency string
+}
+
+func unpackGetTonRateParams(packed middleware.Parameters) (params GetTonRateParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "currency",
+			In:   "query",
+		}
+		params.Currency = packed[key].(string)
+	}
+	return params
+}
+
+func decodeGetTonRateParams(args [0]string, r *http.Request) (params GetTonRateParams, _ error) {
+	q := uri.NewQueryDecoder(r.URL.Query())
+	// Decode query: currency.
+	{
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "currency",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.Currency = c
+				return nil
+			}); err != nil {
+				return params, errors.Wrap(err, "query: currency: parse")
+			}
+		} else {
+			return params, errors.Wrap(err, "query")
+		}
+	}
+	return params, nil
+}
+
 // GetTraceParams is parameters of getTrace operation.
 type GetTraceParams struct {
 	// Trace ID or transaction hash in hex (without 0x) or base64url format.

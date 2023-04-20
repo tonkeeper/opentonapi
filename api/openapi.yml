@@ -206,7 +206,7 @@ paths:
             description: "Supported values: NaN, Null, 10-base digits for tiny int, 0x-prefixed hex digits for int257, all forms of addresses for slice, single-root base64-encoded BOC for cell"
             items:
               type: string
-            example: ["0:9a33970f617bcd71acf2cd28357c067aa31859c02820d8f01d74c88063a8f4d8"]
+            example: [ "0:9a33970f617bcd71acf2cd28357c067aa31859c02820d8f01d74c88063a8f4d8" ]
       responses:
         '200':
           description: "result"
@@ -918,6 +918,33 @@ paths:
         '500':
           $ref: '#/components/responses/InternalError'
 
+  /v2/ton-rate:
+    get:
+      description: Get TON ton_rate depending on the currency
+      operationId: getTonRate
+      tags:
+        - TonRate
+      parameters:
+        - in: query
+          name: currency
+          required: true
+          schema:
+            type: string
+            example: USD
+      responses:
+        '200':
+          description: "ton ton_rate"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TonRate'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
 components:
   parameters:
     blockIdParameter:
@@ -1211,7 +1238,7 @@ components:
           type: array
           items:
             type: string
-            example: [(-1,4234235,8000000000000000)]
+            example: [ (-1,4234235,8000000000000000) ]
         in_msg_descr_length:
           type: integer
           format: int64
@@ -1307,7 +1334,7 @@ components:
         decoded_body:
           type: object
           additionalProperties: true
-          example: {}
+          example: { }
 
     TransactionType:
       type: string
@@ -1659,7 +1686,7 @@ components:
           type: array
           items:
             type: string
-          example: ['get_item_data']
+          example: [ 'get_item_data' ]
 
     Accounts:
       type: object
@@ -1692,7 +1719,7 @@ components:
         decoded:
           type: object
           additionalProperties: true
-          example: {"wallet": "EQCJ7yjjxkt_EuuzvUbpdJGebYCvTUzC5rLzJWzUTiDoX_US"}
+          example: { "wallet": "EQCJ7yjjxkt_EuuzvUbpdJGebYCvTUzC5rLzJWzUTiDoX_US" }
     TvmStackRecord:
       type: object
       required:
@@ -1718,7 +1745,7 @@ components:
           example: ""
         tuple:
           type: array
-          example: []
+          example: [ ]
           items:
             $ref: '#/components/schemas/TvmStackRecord'
     Config:
@@ -1918,7 +1945,7 @@ components:
         metadata:
           type: object
           additionalProperties: true
-          example: {}
+          example: { }
         sale:
           $ref: '#/components/schemas/Sale'
         previews:
@@ -2525,7 +2552,7 @@ components:
         metadata:
           type: object
           additionalProperties: true
-          example: {}
+          example: { }
 
     NftCollections:
       type: object
@@ -2549,7 +2576,7 @@ components:
           type: array
           items:
             type: string
-          example: ["wallet", "tep62_item"]
+          example: [ "wallet", "tep62_item" ]
         children:
           type: array
           items:
@@ -2797,6 +2824,18 @@ components:
           type: integer
           format: int64
           example: 10485760
+    TonRate:
+      type: object
+      required:
+        - price
+        - currency
+      properties:
+        price:
+          type: number
+          example: 2.25
+        currency:
+          type: string
+          example: "USD"
   responses:
     NotFound:
       description: The specified resource was not found

@@ -2593,6 +2593,105 @@ func (s *Server) handleGetSubscriptionsByAccountRequest(args [1]string, w http.R
 	}
 }
 
+// handleGetTonRateRequest handles getTonRate operation.
+//
+// Get TON ton_rate depending on the currency.
+//
+// GET /v2/ton-rate
+func (s *Server) handleGetTonRateRequest(args [0]string, w http.ResponseWriter, r *http.Request) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("getTonRate"),
+	}
+
+	// Start a span for this request.
+	ctx, span := s.cfg.Tracer.Start(r.Context(), "GetTonRate",
+		trace.WithAttributes(otelAttrs...),
+		serverSpanKind,
+	)
+	defer span.End()
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		elapsedDuration := time.Since(startTime)
+		s.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+	}()
+
+	// Increment request counter.
+	s.requests.Add(ctx, 1, otelAttrs...)
+
+	var (
+		recordError = func(stage string, err error) {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			s.errors.Add(ctx, 1, otelAttrs...)
+		}
+		err          error
+		opErrContext = ogenerrors.OperationContext{
+			Name: "GetTonRate",
+			ID:   "getTonRate",
+		}
+	)
+	params, err := decodeGetTonRateParams(args, r)
+	if err != nil {
+		err = &ogenerrors.DecodeParamsError{
+			OperationContext: opErrContext,
+			Err:              err,
+		}
+		recordError("DecodeParams", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+
+	var response GetTonRateRes
+	if m := s.cfg.Middleware; m != nil {
+		mreq := middleware.Request{
+			Context:       ctx,
+			OperationName: "GetTonRate",
+			OperationID:   "getTonRate",
+			Body:          nil,
+			Params: middleware.Parameters{
+				{
+					Name: "currency",
+					In:   "query",
+				}: params.Currency,
+			},
+			Raw: r,
+		}
+
+		type (
+			Request  = struct{}
+			Params   = GetTonRateParams
+			Response = GetTonRateRes
+		)
+		response, err = middleware.HookMiddleware[
+			Request,
+			Params,
+			Response,
+		](
+			m,
+			mreq,
+			unpackGetTonRateParams,
+			func(ctx context.Context, request Request, params Params) (Response, error) {
+				return s.h.GetTonRate(ctx, params)
+			},
+		)
+	} else {
+		response, err = s.h.GetTonRate(ctx, params)
+	}
+	if err != nil {
+		recordError("Internal", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+
+	if err := encodeGetTonRateResponse(response, w, span); err != nil {
+		recordError("EncodeResponse", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+}
+
 // handleGetTraceRequest handles getTrace operation.
 //
 // Get the trace by trace ID or hash of any transaction in trace.

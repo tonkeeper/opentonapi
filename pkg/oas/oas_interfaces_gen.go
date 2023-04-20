@@ -105,6 +105,10 @@ type GetSubscriptionsByAccountRes interface {
 	getSubscriptionsByAccountRes()
 }
 
+type GetTonRateRes interface {
+	getTonRateRes()
+}
+
 type GetTraceRes interface {
 	getTraceRes()
 }

@@ -247,6 +247,15 @@ func (UnimplementedHandler) GetSubscriptionsByAccount(ctx context.Context, param
 	return r, ht.ErrNotImplemented
 }
 
+// GetTonRate implements getTonRate operation.
+//
+// Get TON ton_rate depending on the currency.
+//
+// GET /v2/ton-rate
+func (UnimplementedHandler) GetTonRate(ctx context.Context, params GetTonRateParams) (r GetTonRateRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // GetTrace implements getTrace operation.
 //
 // Get the trace by trace ID or hash of any transaction in trace.

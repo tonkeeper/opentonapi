@@ -2,6 +2,7 @@ package api
 
 import (
 	"fmt"
+	"github.com/tonkeeper/opentonapi/pkg/ton_rate"
 
 	"github.com/go-faster/errors"
 	"github.com/tonkeeper/tongo"
@@ -33,6 +34,7 @@ type Handler struct {
 	dns              *dns.DNS
 	limits           Limits
 	spamRules        func() rules.Rules
+	tonRates         tonRates
 }
 
 // Options configures behavior of a Handler instance.
@@ -45,6 +47,7 @@ type Options struct {
 	executor         executor
 	limits           Limits
 	spamRules        func() rules.Rules
+	tonRates         tonRates
 }
 
 type Option func(o *Options)
@@ -126,6 +129,9 @@ func NewHandler(logger *zap.Logger, opts ...Option) (*Handler, error) {
 			return defaultRules
 		}
 	}
+	if options.tonRates == nil {
+		options.tonRates = ton_rate.InitTonRates(logger)
+	}
 	if options.executor == nil {
 		return nil, fmt.Errorf("executor is not configured")
 	}
@@ -141,5 +147,6 @@ func NewHandler(logger *zap.Logger, opts ...Option) (*Handler, error) {
 		dns:              dnsClient,
 		limits:           options.limits,
 		spamRules:        options.spamRules,
+		tonRates:         options.tonRates,
 	}, nil
 }
