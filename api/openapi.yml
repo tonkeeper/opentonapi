@@ -918,9 +918,9 @@ paths:
         '500':
           $ref: '#/components/responses/InternalError'
 
-  /v2/ton-rate:
+  /v2/rates/ton:
     get:
-      description: Get TON ton_rate depending on the currency
+      description: Get TON price depending on the currency
       operationId: getTonRate
       tags:
         - TonRate
@@ -933,7 +933,7 @@ paths:
             example: USD
       responses:
         '200':
-          description: "ton ton_rate"
+          description: "ton price"
           content:
             application/json:
               schema:
