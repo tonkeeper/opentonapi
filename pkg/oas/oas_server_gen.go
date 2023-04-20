@@ -146,6 +146,12 @@ type Handler interface {
 	//
 	// GET /v2/accounts/{account_id}/nfts
 	GetNftItemsByOwner(ctx context.Context, params GetNftItemsByOwnerParams) (GetNftItemsByOwnerRes, error)
+	// GetRates implements getRates operation.
+	//
+	// Э.
+	//
+	// GET /v2/rates
+	GetRates(ctx context.Context, params GetRatesParams) (GetRatesRes, error)
 	// GetRawAccount implements getRawAccount operation.
 	//
 	// Get low-level information about an account taken directly from the blockchain.

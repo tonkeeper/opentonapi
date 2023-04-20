@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
 	"github.com/tonkeeper/tongo/tep64"
@@ -86,6 +87,10 @@ type addressBook interface {
 	GetJettonInfoByAddress(a tongo.AccountID) (addressbook.KnownJetton, bool)
 	GetTFPoolInfo(a tongo.AccountID) (addressbook.TFPoolInfo, bool)
 	GetKnownJettons() map[tongo.AccountID]addressbook.KnownJetton
+}
+
+type tonRates interface {
+	GetRates() map[string]string
 }
 
 type metadataCache struct {

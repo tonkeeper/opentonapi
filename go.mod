@@ -10,10 +10,12 @@ require (
 	github.com/ghodss/yaml v1.0.0
 	github.com/go-faster/errors v0.6.1
 	github.com/go-faster/jx v0.40.0
+	github.com/google/martian v2.1.0+incompatible
 	github.com/gorilla/websocket v1.5.0
 	github.com/nicksnyder/go-i18n/v2 v2.2.1
 	github.com/ogen-go/ogen v0.55.0
 	github.com/prometheus/client_golang v1.14.0
+	github.com/puzpuzpuz/xsync/v2 v2.4.0
 	github.com/shopspring/decimal v1.3.1
 	github.com/sourcegraph/conc v0.3.0
 	github.com/stretchr/testify v1.8.1

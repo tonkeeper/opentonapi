@@ -771,6 +771,24 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 					return
 				}
+			case 'r': // Prefix: "rates"
+				if l := len("rates"); len(elem) >= l && elem[0:l] == "rates" {
+					elem = elem[l:]
+				} else {
+					break
+				}
+
+				if len(elem) == 0 {
+					// Leaf node.
+					switch r.Method {
+					case "GET":
+						s.handleGetRatesRequest([0]string{}, w, r)
+					default:
+						s.notAllowed(w, r, "GET")
+					}
+
+					return
+				}
 			case 's': // Prefix: "st"
 				if l := len("st"); len(elem) >= l && elem[0:l] == "st" {
 					elem = elem[l:]
@@ -1732,6 +1750,26 @@ func (s *Server) FindRoute(method, path string) (r Route, _ bool) {
 						r.operationID = "getNftItemByAddress"
 						r.args = args
 						r.count = 1
+						return r, true
+					default:
+						return
+					}
+				}
+			case 'r': // Prefix: "rates"
+				if l := len("rates"); len(elem) >= l && elem[0:l] == "rates" {
+					elem = elem[l:]
+				} else {
+					break
+				}
+
+				if len(elem) == 0 {
+					switch method {
+					case "GET":
+						// Leaf: GetRates
+						r.name = "GetRates"
+						r.operationID = "getRates"
+						r.args = args
+						r.count = 0
 						return r, true
 					default:
 						return

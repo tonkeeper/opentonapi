@@ -6,24 +6,22 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/tonkeeper/tongo/config"
-
-	retry "github.com/avast/retry-go"
-	"go.uber.org/zap"
-
+	"github.com/avast/retry-go"
+	"github.com/puzpuzpuz/xsync/v2"
 	"github.com/tonkeeper/tongo"
+	"github.com/tonkeeper/tongo/config"
 	"github.com/tonkeeper/tongo/liteapi"
 	"github.com/tonkeeper/tongo/tlb"
+	"go.uber.org/zap"
 
 	"github.com/tonkeeper/opentonapi/pkg/core"
 )
 
 type LiteStorage struct {
 	client                  *liteapi.Client
-	transactionsIndex       map[tongo.AccountID][]*core.Transaction
 	jettonMetaCache         map[string]tongo.JettonMetadata
 	transactionsIndexByHash map[tongo.Bits256]*core.Transaction
-	blockCache              map[tongo.BlockIDExt]*tlb.Block
+	blockCache              *xsync.MapOf[tongo.BlockIDExt, *tlb.Block]
 	knownAccounts           map[string][]tongo.AccountID
 }
 
@@ -79,10 +77,9 @@ func NewLiteStorage(log *zap.Logger, opts ...Option) (*LiteStorage, error) {
 
 	l := &LiteStorage{
 		client:                  client,
-		transactionsIndex:       make(map[tongo.AccountID][]*core.Transaction),
 		jettonMetaCache:         make(map[string]tongo.JettonMetadata),
 		transactionsIndexByHash: make(map[tongo.Bits256]*core.Transaction),
-		blockCache:              make(map[tongo.BlockIDExt]*tlb.Block),
+		blockCache:              xsync.NewTypedMapOf[tongo.BlockIDExt, *tlb.Block](hashBlockIDExt),
 		knownAccounts:           make(map[string][]tongo.AccountID),
 	}
 	l.knownAccounts["tf_pools"] = o.tfPools
@@ -148,7 +145,6 @@ func (s *LiteStorage) preloadAccount(a tongo.AccountID, log *zap.Logger) error {
 			return err
 		}
 		s.transactionsIndexByHash[tongo.Bits256(tx.Hash())] = t
-		s.transactionsIndex[a] = append(s.transactionsIndex[a], t)
 	}
 
 	return nil
@@ -164,7 +160,7 @@ func (s *LiteStorage) GetBlockHeader(ctx context.Context, id tongo.BlockID) (*co
 		return nil, err
 	}
 
-	s.blockCache[blockID] = &block
+	s.blockCache.Store(blockID, &block)
 	header, err := core.ConvertToBlockHeader(blockID, &block)
 	if err != nil {
 		return nil, err
