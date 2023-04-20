@@ -595,8 +595,8 @@ paths:
           schema:
             type: integer
             format: int32
-            maximum: 25
-            default: 15
+            maximum: 1000
+            default: 100
             example: 15
         - name: offset
           in: query

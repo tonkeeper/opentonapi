@@ -1393,7 +1393,7 @@ func decodeGetNftCollectionsParams(args [0]string, r *http.Request) (params GetN
 	q := uri.NewQueryDecoder(r.URL.Query())
 	// Set default value for query: limit.
 	{
-		val := int32(15)
+		val := int32(100)
 		params.Limit.SetTo(val)
 	}
 	// Decode query: limit.
@@ -1435,7 +1435,7 @@ func decodeGetNftCollectionsParams(args [0]string, r *http.Request) (params GetN
 							MinSet:        false,
 							Min:           0,
 							MaxSet:        true,
-							Max:           25,
+							Max:           1000,
 							MinExclusive:  false,
 							MaxExclusive:  false,
 							MultipleOfSet: false,

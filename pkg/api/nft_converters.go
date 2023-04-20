@@ -4,6 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+
+	"github.com/go-faster/jx"
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/opentonapi/pkg/oas"
 )
@@ -72,14 +74,15 @@ func convertNftCollection(collection core.NftCollection, book addressBook) oas.N
 		Owner:                convertOptAccountAddress(collection.OwnerAddress, book),
 	}
 	if len(collection.Metadata) != 0 {
-		metadata := oas.OptNftCollectionMetadata{Set: true}
+		metadata := map[string]jx.Raw{}
 		for k, v := range collection.Metadata {
 			var err error
-			metadata.Value[k], err = json.Marshal(v)
+			metadata[k], err = json.Marshal(v)
 			if err != nil {
 				continue
 			}
 		}
+		c.Metadata.SetTo(metadata)
 	}
 	return c
 }
