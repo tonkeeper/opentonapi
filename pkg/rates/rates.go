@@ -69,7 +69,7 @@ func getRates() (map[string]float64, error) {
 
 	meanTonPriceToUSD := (huobi + okx) / 2
 
-	fiatPricesToUSD, err := getFiatPricesByUSD()
+	fiatPricesToUSD, err := getFiatPricesToUSD()
 	if err != nil {
 		return nil, err
 	}
@@ -221,7 +221,7 @@ func getOKXPrice() (float64, error) {
 	return price, nil
 }
 
-func getFiatPricesByUSD() ([]fiatPriceToUSD, error) {
+func getFiatPricesToUSD() ([]fiatPriceToUSD, error) {
 	resp, err := http.Get("https://api.coinbase.com/v2/exchange-rates?currency=USD")
 	if err != nil {
 		return nil, err
