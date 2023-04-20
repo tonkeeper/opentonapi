@@ -93,6 +93,10 @@ type GetNftItemsByOwnerRes interface {
 	getNftItemsByOwnerRes()
 }
 
+type GetRatesRes interface {
+	getRatesRes()
+}
+
 type GetRawAccountRes interface {
 	getRawAccountRes()
 }

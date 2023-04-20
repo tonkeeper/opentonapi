@@ -220,6 +220,15 @@ func (UnimplementedHandler) GetNftItemsByOwner(ctx context.Context, params GetNf
 	return r, ht.ErrNotImplemented
 }
 
+// GetRates implements getRates operation.
+//
+// Э.
+//
+// GET /v2/rates
+func (UnimplementedHandler) GetRates(ctx context.Context, params GetRatesParams) (r GetRatesRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // GetRawAccount implements getRawAccount operation.
 //
 // Get low-level information about an account taken directly from the blockchain.

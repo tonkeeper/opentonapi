@@ -923,6 +923,7 @@ func (*BadRequest) getNftCollectionRes()          {}
 func (*BadRequest) getNftItemByAddressRes()       {}
 func (*BadRequest) getNftItemsByAddressesRes()    {}
 func (*BadRequest) getNftItemsByOwnerRes()        {}
+func (*BadRequest) getRatesRes()                  {}
 func (*BadRequest) getRawAccountRes()             {}
 func (*BadRequest) getStorageProvidersRes()       {}
 func (*BadRequest) getSubscriptionsByAccountRes() {}
@@ -1771,6 +1772,22 @@ func (s *GetNftItemsByAddressesReq) SetAccountIds(val []string) {
 	s.AccountIds = val
 }
 
+type GetRatesOK struct {
+	Rates jx.Raw `json:"rates"`
+}
+
+// GetRates returns the value of Rates.
+func (s GetRatesOK) GetRates() jx.Raw {
+	return s.Rates
+}
+
+// SetRates sets the value of Rates.
+func (s *GetRatesOK) SetRates(val jx.Raw) {
+	s.Rates = val
+}
+
+func (*GetRatesOK) getRatesRes() {}
+
 type GetStorageProvidersOK struct {
 	Providers []StorageProvider `json:"providers"`
 }
@@ -1850,6 +1867,7 @@ func (*InternalError) getNftCollectionsRes()         {}
 func (*InternalError) getNftItemByAddressRes()       {}
 func (*InternalError) getNftItemsByAddressesRes()    {}
 func (*InternalError) getNftItemsByOwnerRes()        {}
+func (*InternalError) getRatesRes()                  {}
 func (*InternalError) getRawAccountRes()             {}
 func (*InternalError) getStorageProvidersRes()       {}
 func (*InternalError) getSubscriptionsByAccountRes() {}
@@ -6062,6 +6080,7 @@ func (*UnauthorizedError) getNftCollectionsRes()         {}
 func (*UnauthorizedError) getNftItemByAddressRes()       {}
 func (*UnauthorizedError) getNftItemsByAddressesRes()    {}
 func (*UnauthorizedError) getNftItemsByOwnerRes()        {}
+func (*UnauthorizedError) getRatesRes()                  {}
 func (*UnauthorizedError) getRawAccountRes()             {}
 func (*UnauthorizedError) getStorageProvidersRes()       {}
 func (*UnauthorizedError) getSubscriptionsByAccountRes() {}
