@@ -4,6 +4,7 @@ go 1.19
 
 require (
 	github.com/BurntSushi/toml v1.0.0
+	github.com/Code-Hex/go-generics-cache v1.3.0
 	github.com/avast/retry-go v3.0.0+incompatible
 	github.com/caarlos0/env/v6 v6.10.1
 	github.com/ghodss/yaml v1.0.0

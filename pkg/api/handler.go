@@ -2,21 +2,22 @@ package api
 
 import (
 	"fmt"
-	"github.com/tonkeeper/opentonapi/pkg/rates"
 
 	"github.com/go-faster/errors"
+	rules "github.com/tonkeeper/scam_backoffice_rules"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/contract/dns"
+	"github.com/tonkeeper/tongo/tep64"
 	"go.uber.org/zap"
-
-	"github.com/tonkeeper/opentonapi/pkg/image"
 
 	"github.com/tonkeeper/opentonapi/pkg/addressbook"
 	"github.com/tonkeeper/opentonapi/pkg/blockchain"
+	"github.com/tonkeeper/opentonapi/pkg/cache"
 	"github.com/tonkeeper/opentonapi/pkg/chainstate"
 	"github.com/tonkeeper/opentonapi/pkg/config"
+	"github.com/tonkeeper/opentonapi/pkg/image"
 	"github.com/tonkeeper/opentonapi/pkg/oas"
-	rules "github.com/tonkeeper/scam_backoffice_rules"
+	"github.com/tonkeeper/opentonapi/pkg/rates"
 )
 
 // Compile-time check for Handler.
@@ -35,6 +36,7 @@ type Handler struct {
 	limits           Limits
 	spamRules        func() rules.Rules
 	tonRates         tonRates
+	metaCache        metadataCache
 }
 
 // Options configures behavior of a Handler instance.
@@ -148,5 +150,10 @@ func NewHandler(logger *zap.Logger, opts ...Option) (*Handler, error) {
 		limits:           options.limits,
 		spamRules:        options.spamRules,
 		tonRates:         options.tonRates,
+		metaCache: metadataCache{
+			collectionsCache: cache.NewLRUCache[tongo.AccountID, tep64.Metadata](10000, "nft_metadata_cache"),
+			jettonsCache:     cache.NewLRUCache[tongo.AccountID, tep64.Metadata](10000, "jetton_metadata_cache"),
+			storage:          options.storage,
+		},
 	}, nil
 }

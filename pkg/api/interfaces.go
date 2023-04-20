@@ -2,11 +2,14 @@ package api
 
 import (
 	"context"
+
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
+	"github.com/tonkeeper/tongo/tep64"
 	"github.com/tonkeeper/tongo/tlb"
 
 	"github.com/tonkeeper/opentonapi/pkg/addressbook"
+	"github.com/tonkeeper/opentonapi/pkg/cache"
 	"github.com/tonkeeper/opentonapi/pkg/core"
 )
 
@@ -88,4 +91,13 @@ type addressBook interface {
 
 type tonRates interface {
 	GetRates() map[string]string
+}
+
+type metadataCache struct {
+	collectionsCache cache.Cache[tongo.AccountID, tep64.Metadata]
+	jettonsCache     cache.Cache[tongo.AccountID, tep64.Metadata]
+	storage          interface {
+		GetJettonMasterMetadata(ctx context.Context, master tongo.AccountID) (tep64.Metadata, error)
+		GetNftCollectionByCollectionAddress(ctx context.Context, address tongo.AccountID) (core.NftCollection, error)
+	}
 }
