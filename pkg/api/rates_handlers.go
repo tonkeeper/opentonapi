@@ -3,61 +3,64 @@ package api
 import (
 	"context"
 	"encoding/json"
-	"github.com/shopspring/decimal"
-	"github.com/tonkeeper/opentonapi/pkg/oas"
-	"strconv"
 	"strings"
+
+	"github.com/tonkeeper/opentonapi/pkg/oas"
 )
 
 func (h *Handler) GetRates(ctx context.Context, params oas.GetRatesParams) (res oas.GetRatesRes, err error) {
-	params.Currencies = strings.TrimSpace(params.Currencies)
+	params.Tokens = strings.TrimSpace(params.Tokens)
+	tokens := strings.Split(params.Tokens, ",")
+	if len(tokens) == 0 {
+		return &oas.BadRequest{"tokens is required param"}, nil
+	}
+
+	params.Currencies = strings.TrimSpace(strings.ToUpper(params.Currencies))
 	currencies := strings.Split(params.Currencies, ",")
 	if len(currencies) == 0 {
 		return &oas.BadRequest{"currencies is required param"}, nil
 	}
 
-	params.In = strings.TrimSpace(params.In)
-	in := strings.Split(params.In, ",")
-	if len(in) == 0 {
-		return &oas.BadRequest{"in is required param"}, nil
+	if len(tokens) > 50 || len(currencies) > 50 {
+		return &oas.BadRequest{"max params limit is 50 items"}, nil
 	}
 
 	rates := h.tonRates.GetRates()
-	btcPrice := rates["TON"]
-	btcPriceConverted, err := strconv.ParseFloat(btcPrice, 64)
-	if err != nil {
-		return &oas.InternalError{Error: err.Error()}, nil
-	}
-	decimalBTCPrice := decimal.NewFromFloat(btcPriceConverted)
+	basicTonPrice := rates["TON"]
 
 	ratesRes := make(map[string]map[string]map[string]interface{})
-	for _, currency := range currencies {
-		switch currency {
-		case "ton":
-			for _, needConverted := range in {
-				if needConverted == "ton" {
-					continue
-				}
-				btcInFiat, ok := rates[strings.ToUpper(needConverted)]
-				if !ok {
-					return &oas.BadRequest{Error: "invalid currency: " + needConverted}, nil
-				}
-				btcInFiatConverted, err := strconv.ParseFloat(btcInFiat, 64)
-				if err != nil {
-					return &oas.InternalError{Error: err.Error()}, nil
-				}
-				decimalBTCInFiat := decimal.NewFromFloat(btcInFiatConverted)
-				tonPrice, _ := decimalBTCInFiat.Div(decimalBTCPrice).Round(5).Float64()
-				ton, ok := ratesRes["ton"]
-				if !ok {
-					ratesRes["ton"] = map[string]map[string]interface{}{"prices": {needConverted: tonPrice}}
-					continue
-				}
-				prices, _ := ton["prices"]
-				prices[needConverted] = tonPrice
-				ton["prices"] = prices
-				ratesRes["ton"] = ton
+	for _, token := range tokens {
+		for _, currency := range currencies {
+			tonPriceToCurrency, ok := rates[currency]
+			if !ok {
+				return &oas.BadRequest{Error: "invalid currency: " + currency}, nil
 			}
+
+			if token == "ton" {
+				token = "TON"
+			}
+
+			tokenPrice, ok := rates[token]
+			if !ok {
+				return &oas.BadRequest{Error: "invalid token: " + token}, nil
+			}
+
+			var price float64
+			if currency != "TON" {
+				tokenPrice = tokenPrice / basicTonPrice
+				price = tokenPrice * tonPriceToCurrency
+			} else {
+				price = tokenPrice / tonPriceToCurrency
+			}
+
+			rate, ok := ratesRes[token]
+			if !ok {
+				ratesRes[token] = map[string]map[string]interface{}{"prices": {currency: price}}
+				continue
+			}
+
+			rate["prices"][currency] = price
+			ratesRes[token] = rate
 		}
 	}
 

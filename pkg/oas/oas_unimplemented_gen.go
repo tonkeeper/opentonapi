@@ -222,7 +222,7 @@ func (UnimplementedHandler) GetNftItemsByOwner(ctx context.Context, params GetNf
 
 // GetRates implements getRates operation.
 //
-// Э.
+// Get the token price to the currency.
 //
 // GET /v2/rates
 func (UnimplementedHandler) GetRates(ctx context.Context, params GetRatesParams) (r GetRatesRes, _ error) {

@@ -2079,7 +2079,7 @@ func (c *Client) GetNftItemsByOwner(ctx context.Context, params GetNftItemsByOwn
 
 // GetRates invokes getRates operation.
 //
-// Э.
+// Get the token price to the currency.
 //
 // GET /v2/rates
 func (c *Client) GetRates(ctx context.Context, params GetRatesParams) (res GetRatesRes, err error) {
@@ -2120,6 +2120,20 @@ func (c *Client) GetRates(ctx context.Context, params GetRatesParams) (res GetRa
 	stage = "EncodeQueryParams"
 	q := uri.NewQueryEncoder()
 	{
+		// Encode "tokens" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "tokens",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			return e.EncodeValue(conv.StringToString(params.Tokens))
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
 		// Encode "currencies" parameter.
 		cfg := uri.QueryParameterEncodingConfig{
 			Name:    "currencies",
@@ -2129,20 +2143,6 @@ func (c *Client) GetRates(ctx context.Context, params GetRatesParams) (res GetRa
 
 		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
 			return e.EncodeValue(conv.StringToString(params.Currencies))
-		}); err != nil {
-			return res, errors.Wrap(err, "encode query")
-		}
-	}
-	{
-		// Encode "in" parameter.
-		cfg := uri.QueryParameterEncodingConfig{
-			Name:    "in",
-			Style:   uri.QueryStyleForm,
-			Explode: true,
-		}
-
-		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
-			return e.EncodeValue(conv.StringToString(params.In))
 		}); err != nil {
 			return res, errors.Wrap(err, "encode query")
 		}

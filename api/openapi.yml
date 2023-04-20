@@ -920,19 +920,21 @@ paths:
 
   /v2/rates:
     get:
-      description: Э
+      description: Get the token price to the currency
       operationId: getRates
       tags:
         - Rates
       parameters:
         - in: query
-          name: currencies
+          name: tokens
+          description: accept ton and jetton master addresses, separated by commas
           required: true
           schema:
             type: string
             example: ton
         - in: query
-          name: in
+          name: currencies
+          description: accept ton and all possible fiat currencies, separated by commas
           required: true
           schema:
             type: string

@@ -1776,11 +1776,18 @@ func decodeGetNftItemsByOwnerParams(args [1]string, r *http.Request) (params Get
 
 // GetRatesParams is parameters of getRates operation.
 type GetRatesParams struct {
+	Tokens     string
 	Currencies string
-	In         string
 }
 
 func unpackGetRatesParams(packed middleware.Parameters) (params GetRatesParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "tokens",
+			In:   "query",
+		}
+		params.Tokens = packed[key].(string)
+	}
 	{
 		key := middleware.ParameterKey{
 			Name: "currencies",
@@ -1788,18 +1795,40 @@ func unpackGetRatesParams(packed middleware.Parameters) (params GetRatesParams) 
 		}
 		params.Currencies = packed[key].(string)
 	}
-	{
-		key := middleware.ParameterKey{
-			Name: "in",
-			In:   "query",
-		}
-		params.In = packed[key].(string)
-	}
 	return params
 }
 
 func decodeGetRatesParams(args [0]string, r *http.Request) (params GetRatesParams, _ error) {
 	q := uri.NewQueryDecoder(r.URL.Query())
+	// Decode query: tokens.
+	{
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "tokens",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.Tokens = c
+				return nil
+			}); err != nil {
+				return params, errors.Wrap(err, "query: tokens: parse")
+			}
+		} else {
+			return params, errors.Wrap(err, "query")
+		}
+	}
 	// Decode query: currencies.
 	{
 		cfg := uri.QueryParameterDecodingConfig{
@@ -1824,35 +1853,6 @@ func decodeGetRatesParams(args [0]string, r *http.Request) (params GetRatesParam
 				return nil
 			}); err != nil {
 				return params, errors.Wrap(err, "query: currencies: parse")
-			}
-		} else {
-			return params, errors.Wrap(err, "query")
-		}
-	}
-	// Decode query: in.
-	{
-		cfg := uri.QueryParameterDecodingConfig{
-			Name:    "in",
-			Style:   uri.QueryStyleForm,
-			Explode: true,
-		}
-
-		if err := q.HasParam(cfg); err == nil {
-			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
-				val, err := d.DecodeValue()
-				if err != nil {
-					return err
-				}
-
-				c, err := conv.ToString(val)
-				if err != nil {
-					return err
-				}
-
-				params.In = c
-				return nil
-			}); err != nil {
-				return params, errors.Wrap(err, "query: in: parse")
 			}
 		} else {
 			return params, errors.Wrap(err, "query")
