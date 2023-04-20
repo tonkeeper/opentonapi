@@ -90,7 +90,7 @@ type addressBook interface {
 }
 
 type tonRates interface {
-	GetRates() map[string]string
+	GetRates() map[string]float64
 }
 
 type metadataCache struct {

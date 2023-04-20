@@ -148,7 +148,7 @@ type Handler interface {
 	GetNftItemsByOwner(ctx context.Context, params GetNftItemsByOwnerParams) (GetNftItemsByOwnerRes, error)
 	// GetRates implements getRates operation.
 	//
-	// Э.
+	// Get the token price to the currency.
 	//
 	// GET /v2/rates
 	GetRates(ctx context.Context, params GetRatesParams) (GetRatesRes, error)

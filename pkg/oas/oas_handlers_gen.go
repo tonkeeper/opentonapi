@@ -2317,7 +2317,7 @@ func (s *Server) handleGetNftItemsByOwnerRequest(args [1]string, w http.Response
 
 // handleGetRatesRequest handles getRates operation.
 //
-// Э.
+// Get the token price to the currency.
 //
 // GET /v2/rates
 func (s *Server) handleGetRatesRequest(args [0]string, w http.ResponseWriter, r *http.Request) {
@@ -2374,13 +2374,13 @@ func (s *Server) handleGetRatesRequest(args [0]string, w http.ResponseWriter, r 
 			Body:          nil,
 			Params: middleware.Parameters{
 				{
+					Name: "tokens",
+					In:   "query",
+				}: params.Tokens,
+				{
 					Name: "currencies",
 					In:   "query",
 				}: params.Currencies,
-				{
-					Name: "in",
-					In:   "query",
-				}: params.In,
 			},
 			Raw: r,
 		}
