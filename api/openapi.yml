@@ -920,19 +920,19 @@ paths:
 
   /v2/rates:
     get:
-      description: Э
+      description: Get the token price to the currency
       operationId: getRates
       tags:
         - Rates
       parameters:
         - in: query
-          name: currencies
+          name: tokens
           required: true
           schema:
             type: string
             example: ton
         - in: query
-          name: in
+          name: currencies
           required: true
           schema:
             type: string
