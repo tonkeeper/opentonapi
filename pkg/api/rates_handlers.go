@@ -21,17 +21,14 @@ func (h *Handler) GetRates(ctx context.Context, params oas.GetRatesParams) (res 
 		return &oas.BadRequest{"currencies is required param"}, nil
 	}
 
-	if len(params.Tokens) > 50 || len(params.Currencies) > 50 {
+	if len(tokens) > 50 || len(currencies) > 50 {
 		return &oas.BadRequest{"max params limit is 50 items"}, nil
 	}
 
 	rates := h.tonRates.GetRates()
-	pools := h.tonRates.GetPools()
-
 	basicTonPrice := rates["TON"]
 
 	ratesRes := make(map[string]map[string]map[string]interface{})
-
 	for _, token := range tokens {
 		for _, currency := range currencies {
 			tonPriceToCurrency, ok := rates[currency]
@@ -39,19 +36,23 @@ func (h *Handler) GetRates(ctx context.Context, params oas.GetRatesParams) (res 
 				return &oas.BadRequest{Error: "invalid currency: " + currency}, nil
 			}
 
-			price := tonPriceToCurrency
-			if token != "ton" {
-				tokenPrice, ok := pools[token]
-				if !ok {
-					return &oas.BadRequest{Error: "invalid token: " + token}, nil
-				}
-				if currency != "TON" {
-					tokenPrice = tokenPrice / basicTonPrice
-					price = tokenPrice * tonPriceToCurrency
-				} else {
-					price = tokenPrice / tonPriceToCurrency
-				}
+			if token == "ton" {
+				token = "TON"
 			}
+
+			tokenPrice, ok := rates[token]
+			if !ok {
+				return &oas.BadRequest{Error: "invalid token: " + token}, nil
+			}
+
+			var price float64
+			if currency != "TON" {
+				tokenPrice = tokenPrice / basicTonPrice
+				price = tokenPrice * tonPriceToCurrency
+			} else {
+				price = tokenPrice / tonPriceToCurrency
+			}
+
 			rate, ok := ratesRes[token]
 			if !ok {
 				ratesRes[token] = map[string]map[string]interface{}{"prices": {currency: price}}

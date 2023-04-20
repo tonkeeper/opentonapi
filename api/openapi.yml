@@ -927,12 +927,14 @@ paths:
       parameters:
         - in: query
           name: tokens
+          description: accept ton and jetton master addresses, separated by commas
           required: true
           schema:
             type: string
             example: ton
         - in: query
           name: currencies
+          description: accept ton and all possible fiat currencies, separated by commas
           required: true
           schema:
             type: string

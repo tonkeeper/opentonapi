@@ -14,20 +14,15 @@ import (
 
 type TonRates struct { // the values are equated to the TON
 	mu    sync.RWMutex
-	Rates map[string]float64 // {"USD": 2.25}
-	Pools map[string]float64 // {"EQDo_ZJyQ_YqBzBwbVpMmhbhIddKtRP99HugZJ14aFscxi7B": 1.0}
+	Rates map[string]float64
 }
 
 func (r *TonRates) GetRates() map[string]float64 {
 	return r.Rates
 }
 
-func (r *TonRates) GetPools() map[string]float64 {
-	return r.Pools
-}
-
 func InitTonRates() *TonRates {
-	rates := &TonRates{Rates: map[string]float64{}, Pools: map[string]float64{}}
+	rates := &TonRates{Rates: map[string]float64{}}
 
 	go func() {
 		for {
@@ -46,53 +41,47 @@ func (r *TonRates) refresh() {
 	if err != nil {
 		return
 	}
-	pools, err := getPools()
-	if err != nil {
-		return
-	}
 	r.Rates = rates
-	r.Pools = pools
 }
 
 func getRates() (map[string]float64, error) {
-	okx, err := getOKXPrice()
-	if err != nil {
-		log.Errorf("failed to get okx price: %v", err)
-		return nil, err
-	}
+	okx := getOKXPrice()
+	huobi := getHuobiPrice()
 
-	huobi, err := getHuobiPrice()
-	if err != nil {
-		log.Errorf("failed to get huobi price: %v", err)
-		return nil, err
+	if okx == 0 && huobi == 0 {
+		return nil, fmt.Errorf("failed to get ton price")
 	}
 
 	meanTonPriceToUSD := (huobi + okx) / 2
 
-	fiatPricesToUSD, err := getFiatPricesToUSD()
-	if err != nil {
-		return nil, err
-	}
+	fiatPrices := getFiatPrices()
+	pools := getPools()
 
 	rates := make(map[string]float64)
-	for _, price := range fiatPricesToUSD {
-		rates[price.Currency] = meanTonPriceToUSD * price.Price
+	for currency, price := range fiatPrices {
+		rates[currency] = meanTonPriceToUSD * price
 	}
+	for token, coinsCount := range pools {
+		rates[token] = meanTonPriceToUSD * coinsCount
+	}
+
 	rates["TON"] = meanTonPriceToUSD
 
 	return rates, nil
 }
 
-func getPools() (map[string]float64, error) {
+func getPools() map[string]float64 {
 	resp, err := http.Get("https://api.dedust.io/v2/pools")
 	if err != nil {
-		return nil, fmt.Errorf("failed to fetch rates: %v", err)
+		log.Errorf("failed to fetch rates: %v", err)
+		return nil
 	}
 	defer resp.Body.Close()
 
 	var respBody []Pool
 	if err = json.NewDecoder(resp.Body).Decode(&respBody); err != nil {
-		return nil, fmt.Errorf("failed to decode response: %v", err)
+		log.Errorf("failed to decode response: %v", err)
+		return nil
 	}
 
 	mapOfPool := make(map[string]float64)
@@ -131,7 +120,7 @@ func getPools() (map[string]float64, error) {
 		mapOfPool[secondAsset.Address] = price
 	}
 
-	return mapOfPool, nil
+	return mapOfPool
 }
 
 type Pool struct {
@@ -165,66 +154,71 @@ type okxPrice struct {
 	} `json:"data"`
 }
 
-type fiatPriceToUSD struct {
-	Currency string  `json:"currency"`
-	Price    float64 `json:"price"`
-}
-
-func getHuobiPrice() (float64, error) {
+func getHuobiPrice() float64 {
 	resp, err := http.Get("https://api.huobi.pro/market/trade?symbol=tonusdt")
 	if err != nil {
-		return 0, fmt.Errorf("can't load huobi price")
+		log.Errorf("can't load huobi price")
+		return 0
 	}
 	defer resp.Body.Close()
 
 	var respBody huobiPrice
 	if err = json.NewDecoder(resp.Body).Decode(&respBody); err != nil {
-		return 0, fmt.Errorf("failed to decode response: %v", err)
+		log.Errorf("failed to decode response: %v", err)
+		return 0
 	}
 
 	if respBody.Status != "ok" {
-		return 0, fmt.Errorf("failed to get huobi price: %v", err)
+		log.Errorf("failed to get huobi price: %v", err)
+		return 0
 	}
 
 	if len(respBody.Tick.Data) == 0 {
-		return 0, fmt.Errorf("invalid price")
+		log.Errorf("invalid price")
+		return 0
 	}
 
-	return respBody.Tick.Data[0].Price, nil
+	return respBody.Tick.Data[0].Price
 }
 
-func getOKXPrice() (float64, error) {
+func getOKXPrice() float64 {
 	resp, err := http.Get("https://www.okx.com/api/v5/market/ticker?instId=TON-USDT")
 	if err != nil {
-		return 0, fmt.Errorf("can't load okx price")
+		log.Errorf("can't load okx price")
+		return 0
 	}
 	defer resp.Body.Close()
 
 	var respBody okxPrice
 	if err = json.NewDecoder(resp.Body).Decode(&respBody); err != nil {
-		return 0, fmt.Errorf("failed to decode response: %v", err)
+		log.Errorf("failed to decode response: %v", err)
+		return 0
 	}
 
 	if respBody.Code != "0" {
-		return 0, fmt.Errorf("failed to get okx price: %v", err)
+		log.Errorf("failed to get okx price: %v", err)
+		return 0
 	}
 
 	if len(respBody.Data) == 0 {
-		return 0, fmt.Errorf("invalid price")
+		log.Errorf("invalid price")
+		return 0
 	}
 
 	price, err := strconv.ParseFloat(respBody.Data[0].Last, 64)
 	if err != nil {
-		return 0, fmt.Errorf("invalid price")
+		log.Errorf("invalid price")
+		return 0
 	}
 
-	return price, nil
+	return price
 }
 
-func getFiatPricesToUSD() ([]fiatPriceToUSD, error) {
+func getFiatPrices() map[string]float64 {
 	resp, err := http.Get("https://api.coinbase.com/v2/exchange-rates?currency=USD")
 	if err != nil {
-		return nil, err
+		log.Errorf("can't load coinbase prices")
+		return nil
 	}
 	defer resp.Body.Close()
 
@@ -234,22 +228,19 @@ func getFiatPricesToUSD() ([]fiatPriceToUSD, error) {
 		} `json:"data"`
 	}
 	if err = json.NewDecoder(resp.Body).Decode(&respBody); err != nil {
-		return nil, fmt.Errorf("failed to decode response: %v", err)
+		log.Errorf("failed to decode response: %v", err)
+		return nil
 	}
 
-	var prices []fiatPriceToUSD
+	mapOfPrices := make(map[string]float64)
 	for currency, rate := range respBody.Data.Rates {
 		rateConverted, err := strconv.ParseFloat(rate, 64)
 		if err != nil {
-			fmt.Printf("failed to convert str to float64 %v, err: %v", rate, err)
+			log.Errorf("failed to convert str to float64 %v, err: %v", rate, err)
 			continue
 		}
-		price := fiatPriceToUSD{
-			Currency: currency,
-			Price:    rateConverted,
-		}
-		prices = append(prices, price)
+		mapOfPrices[currency] = rateConverted
 	}
 
-	return prices, nil
+	return mapOfPrices
 }
