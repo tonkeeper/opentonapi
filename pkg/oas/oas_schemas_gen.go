@@ -923,10 +923,10 @@ func (*BadRequest) getNftCollectionRes()          {}
 func (*BadRequest) getNftItemByAddressRes()       {}
 func (*BadRequest) getNftItemsByAddressesRes()    {}
 func (*BadRequest) getNftItemsByOwnerRes()        {}
+func (*BadRequest) getRatesRes()                  {}
 func (*BadRequest) getRawAccountRes()             {}
 func (*BadRequest) getStorageProvidersRes()       {}
 func (*BadRequest) getSubscriptionsByAccountRes() {}
-func (*BadRequest) getTonRateRes()                {}
 func (*BadRequest) getTraceRes()                  {}
 func (*BadRequest) getTracesByAccountRes()        {}
 func (*BadRequest) getTransactionRes()            {}
@@ -1772,6 +1772,22 @@ func (s *GetNftItemsByAddressesReq) SetAccountIds(val []string) {
 	s.AccountIds = val
 }
 
+type GetRatesOK struct {
+	Rates jx.Raw `json:"rates"`
+}
+
+// GetRates returns the value of Rates.
+func (s GetRatesOK) GetRates() jx.Raw {
+	return s.Rates
+}
+
+// SetRates sets the value of Rates.
+func (s *GetRatesOK) SetRates(val jx.Raw) {
+	s.Rates = val
+}
+
+func (*GetRatesOK) getRatesRes() {}
+
 type GetStorageProvidersOK struct {
 	Providers []StorageProvider `json:"providers"`
 }
@@ -1851,10 +1867,10 @@ func (*InternalError) getNftCollectionsRes()         {}
 func (*InternalError) getNftItemByAddressRes()       {}
 func (*InternalError) getNftItemsByAddressesRes()    {}
 func (*InternalError) getNftItemsByOwnerRes()        {}
+func (*InternalError) getRatesRes()                  {}
 func (*InternalError) getRawAccountRes()             {}
 func (*InternalError) getStorageProvidersRes()       {}
 func (*InternalError) getSubscriptionsByAccountRes() {}
-func (*InternalError) getTonRateRes()                {}
 func (*InternalError) getTraceRes()                  {}
 func (*InternalError) getTracesByAccountRes()        {}
 func (*InternalError) getTransactionRes()            {}
@@ -5489,34 +5505,6 @@ func (s *Subscriptions) SetSubscriptions(val []Subscription) {
 
 func (*Subscriptions) getSubscriptionsByAccountRes() {}
 
-// Ref: #/components/schemas/TonRate
-type TonRate struct {
-	Price    float64 `json:"price"`
-	Currency string  `json:"currency"`
-}
-
-// GetPrice returns the value of Price.
-func (s TonRate) GetPrice() float64 {
-	return s.Price
-}
-
-// GetCurrency returns the value of Currency.
-func (s TonRate) GetCurrency() string {
-	return s.Currency
-}
-
-// SetPrice sets the value of Price.
-func (s *TonRate) SetPrice(val float64) {
-	s.Price = val
-}
-
-// SetCurrency sets the value of Currency.
-func (s *TonRate) SetCurrency(val string) {
-	s.Currency = val
-}
-
-func (*TonRate) getTonRateRes() {}
-
 // Ref: #/components/schemas/TonTransferAction
 type TonTransferAction struct {
 	Sender    AccountAddress `json:"sender"`
@@ -6092,10 +6080,10 @@ func (*UnauthorizedError) getNftCollectionsRes()         {}
 func (*UnauthorizedError) getNftItemByAddressRes()       {}
 func (*UnauthorizedError) getNftItemsByAddressesRes()    {}
 func (*UnauthorizedError) getNftItemsByOwnerRes()        {}
+func (*UnauthorizedError) getRatesRes()                  {}
 func (*UnauthorizedError) getRawAccountRes()             {}
 func (*UnauthorizedError) getStorageProvidersRes()       {}
 func (*UnauthorizedError) getSubscriptionsByAccountRes() {}
-func (*UnauthorizedError) getTonRateRes()                {}
 func (*UnauthorizedError) getTraceRes()                  {}
 func (*UnauthorizedError) getTracesByAccountRes()        {}
 func (*UnauthorizedError) getTransactionRes()            {}

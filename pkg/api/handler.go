@@ -2,7 +2,7 @@ package api
 
 import (
 	"fmt"
-	"github.com/tonkeeper/opentonapi/pkg/ton_rate"
+	"github.com/tonkeeper/opentonapi/pkg/rates"
 
 	"github.com/go-faster/errors"
 	"github.com/tonkeeper/tongo"
@@ -130,7 +130,7 @@ func NewHandler(logger *zap.Logger, opts ...Option) (*Handler, error) {
 		}
 	}
 	if options.tonRates == nil {
-		options.tonRates = ton_rate.InitTonRates(logger)
+		options.tonRates = rates.InitTonRates(logger)
 	}
 	if options.executor == nil {
 		return nil, fmt.Errorf("executor is not configured")

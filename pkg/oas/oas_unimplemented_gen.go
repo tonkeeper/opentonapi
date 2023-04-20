@@ -220,6 +220,15 @@ func (UnimplementedHandler) GetNftItemsByOwner(ctx context.Context, params GetNf
 	return r, ht.ErrNotImplemented
 }
 
+// GetRates implements getRates operation.
+//
+// Э.
+//
+// GET /v2/rates
+func (UnimplementedHandler) GetRates(ctx context.Context, params GetRatesParams) (r GetRatesRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // GetRawAccount implements getRawAccount operation.
 //
 // Get low-level information about an account taken directly from the blockchain.
@@ -244,15 +253,6 @@ func (UnimplementedHandler) GetStorageProviders(ctx context.Context) (r GetStora
 //
 // GET /v2/accounts/{account_id}/subscriptions
 func (UnimplementedHandler) GetSubscriptionsByAccount(ctx context.Context, params GetSubscriptionsByAccountParams) (r GetSubscriptionsByAccountRes, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
-// GetTonRate implements getTonRate operation.
-//
-// Get TON ton_rate depending on the currency.
-//
-// GET /v2/ton-rate
-func (UnimplementedHandler) GetTonRate(ctx context.Context, params GetTonRateParams) (r GetTonRateRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 

@@ -918,26 +918,38 @@ paths:
         '500':
           $ref: '#/components/responses/InternalError'
 
-  /v2/rates/ton:
+  /v2/rates:
     get:
-      description: Get TON price depending on the currency
-      operationId: getTonRate
+      description: Э
+      operationId: getRates
       tags:
-        - TonRate
+        - Rates
       parameters:
         - in: query
-          name: currency
+          name: currencies
           required: true
           schema:
             type: string
-            example: USD
+            example: ton
+        - in: query
+          name: in
+          required: true
+          schema:
+            type: string
+            example: ton,usd,rub
       responses:
         '200':
           description: "ton price"
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/TonRate'
+                type: object
+                required:
+                  - rates
+                properties:
+                  rates:
+                    additionalProperties: true
+                    example: { }
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -2824,18 +2836,6 @@ components:
           type: integer
           format: int64
           example: 10485760
-    TonRate:
-      type: object
-      required:
-        - price
-        - currency
-      properties:
-        price:
-          type: number
-          example: 2.25
-        currency:
-          type: string
-          example: "USD"
   responses:
     NotFound:
       description: The specified resource was not found

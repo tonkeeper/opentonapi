@@ -1,4 +1,4 @@
-package ton_rate
+package rates
 
 import (
 	"encoding/json"
@@ -95,7 +95,7 @@ type huobiPrice struct {
 			Ts        int64   `json:"ts"`
 			TradeID   int64   `json:"trade-id"`
 			Amount    float64 `json:"amount"`
-			Price     float64 `json:"ton_rate"`
+			Price     float64 `json:"price"`
 			Direction string  `json:"direction"`
 		} `json:"data"`
 	} `json:"tick"`
@@ -126,7 +126,7 @@ type okxPrice struct {
 
 type pairPrice struct {
 	Pair  string `json:"pair"`
-	Price string `json:"ton_rate"`
+	Price string `json:"price"`
 }
 
 func getBTCrates() (*btcRates, error) {
@@ -147,7 +147,7 @@ func getBTCrates() (*btcRates, error) {
 func getHuobiPrice() (*pairPrice, error) {
 	resp, err := http.Get("https://api.huobi.pro/market/trade?symbol=tonusdt")
 	if err != nil {
-		return nil, fmt.Errorf("can't load huobi ton_rate")
+		return nil, fmt.Errorf("can't load huobi price")
 	}
 	defer resp.Body.Close()
 
@@ -157,11 +157,11 @@ func getHuobiPrice() (*pairPrice, error) {
 	}
 
 	if respBody.Status != "ok" {
-		return nil, fmt.Errorf("failed to get huobi ton_rate: %v", err)
+		return nil, fmt.Errorf("failed to get huobi price: %v", err)
 	}
 
 	if len(respBody.Tick.Data) == 0 {
-		return nil, fmt.Errorf("invalid ton_rate")
+		return nil, fmt.Errorf("invalid price")
 	}
 
 	pair := pairPrice{
@@ -175,7 +175,7 @@ func getHuobiPrice() (*pairPrice, error) {
 func getOKXPrice() (*pairPrice, error) {
 	resp, err := http.Get("https://www.okx.com/api/v5/market/ticker?instId=TON-USDT")
 	if err != nil {
-		return nil, fmt.Errorf("can't load okx ton_rate")
+		return nil, fmt.Errorf("can't load okx price")
 	}
 	defer resp.Body.Close()
 
@@ -185,16 +185,16 @@ func getOKXPrice() (*pairPrice, error) {
 	}
 
 	if respBody.Code != "0" {
-		return nil, fmt.Errorf("failed to get okx ton_rate: %v", err)
+		return nil, fmt.Errorf("failed to get okx price: %v", err)
 	}
 
 	if len(respBody.Data) == 0 {
-		return nil, fmt.Errorf("invalid ton_rate")
+		return nil, fmt.Errorf("invalid price")
 	}
 
 	price, err := strconv.ParseFloat(respBody.Data[0].Last, 64)
 	if err != nil {
-		return nil, fmt.Errorf("invalid ton_rate")
+		return nil, fmt.Errorf("invalid price")
 	}
 
 	pair := pairPrice{

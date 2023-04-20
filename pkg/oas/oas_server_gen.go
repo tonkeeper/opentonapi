@@ -146,6 +146,12 @@ type Handler interface {
 	//
 	// GET /v2/accounts/{account_id}/nfts
 	GetNftItemsByOwner(ctx context.Context, params GetNftItemsByOwnerParams) (GetNftItemsByOwnerRes, error)
+	// GetRates implements getRates operation.
+	//
+	// Э.
+	//
+	// GET /v2/rates
+	GetRates(ctx context.Context, params GetRatesParams) (GetRatesRes, error)
 	// GetRawAccount implements getRawAccount operation.
 	//
 	// Get low-level information about an account taken directly from the blockchain.
@@ -164,12 +170,6 @@ type Handler interface {
 	//
 	// GET /v2/accounts/{account_id}/subscriptions
 	GetSubscriptionsByAccount(ctx context.Context, params GetSubscriptionsByAccountParams) (GetSubscriptionsByAccountRes, error)
-	// GetTonRate implements getTonRate operation.
-	//
-	// Get TON ton_rate depending on the currency.
-	//
-	// GET /v2/ton-rate
-	GetTonRate(ctx context.Context, params GetTonRateParams) (GetTonRateRes, error)
 	// GetTrace implements getTrace operation.
 	//
 	// Get the trace by trace ID or hash of any transaction in trace.
