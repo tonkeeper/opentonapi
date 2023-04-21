@@ -16,29 +16,48 @@ import (
 )
 
 type mockTxSource struct {
-	OnSubscribeToTransactions func(deliveryFn sources.DeliveryTxFn, opts sources.SubscribeToTransactionsOptions) sources.CancelFn
+	OnSubscribeToTransactions func(deliveryFn sources.DeliveryFn, opts sources.SubscribeToTransactionsOptions) sources.CancelFn
 }
 
-func (m *mockTxSource) SubscribeToTransactions(deliveryFn sources.DeliveryTxFn, opts sources.SubscribeToTransactionsOptions) sources.CancelFn {
+func (m *mockTxSource) SubscribeToTransactions(deliveryFn sources.DeliveryFn, opts sources.SubscribeToTransactionsOptions) sources.CancelFn {
 	return m.OnSubscribeToTransactions(deliveryFn, opts)
 }
 
+type mockMemPool struct {
+	OnSubscribeToMessages func(deliveryFn sources.DeliveryFn) sources.CancelFn
+}
+
+func (m *mockMemPool) SubscribeToMessages(deliveryFn sources.DeliveryFn) sources.CancelFn {
+	return m.OnSubscribeToMessages(deliveryFn)
+}
+
 var _ sources.TransactionSource = &mockTxSource{}
+var _ sources.MemPoolSource = &mockMemPool{}
 
 func TestHandler(t *testing.T) {
-	var subscribed atomic.Bool   // to make "go test -race" happy
-	var unsubscribed atomic.Bool // to make "go test -race" happy
+	var txSubscribed atomic.Bool   // to make "go test -race" happy
+	var txUnsubscribed atomic.Bool // to make "go test -race" happy
 	source := &mockTxSource{
-		OnSubscribeToTransactions: func(deliveryFn sources.DeliveryTxFn, opts sources.SubscribeToTransactionsOptions) sources.CancelFn {
-			subscribed.Store(true)
+		OnSubscribeToTransactions: func(deliveryFn sources.DeliveryFn, opts sources.SubscribeToTransactionsOptions) sources.CancelFn {
+			txSubscribed.Store(true)
 			return func() {
-				unsubscribed.Store(true)
+				txUnsubscribed.Store(true)
+			}
+		},
+	}
+	var memPoolSubscribed atomic.Bool   // to make "go test -race" happy
+	var memPoolUnsubscribed atomic.Bool // to make "go test -race" happy
+	mempool := &mockMemPool{
+		OnSubscribeToMessages: func(deliveryFn sources.DeliveryFn) sources.CancelFn {
+			memPoolSubscribed.Store(true)
+			return func() {
+				memPoolUnsubscribed.Store(true)
 			}
 		},
 	}
 	logger, _ := zap.NewDevelopment()
 	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
-		handler := Handler(logger, source)
+		handler := Handler(logger, source, mempool)
 		err := handler(writer, request, 0)
 		require.Nil(t, err)
 	}))
@@ -48,29 +67,48 @@ func TestHandler(t *testing.T) {
 	conn, _, err := websocket.DefaultDialer.Dial(url, nil)
 	require.Nil(t, err)
 
-	request := JsonRPCRequest{
-		ID:      1,
-		JSONRPC: "2.0",
-		Method:  "subscribe_account",
-		Params: []string{
-			"-1:5555555555555555555555555555555555555555555555555555555555555555",
-			"0:5555555555555555555555555555555555555555555555555555555555555555",
+	requests := []JsonRPCRequest{
+		{
+			ID:      1,
+			JSONRPC: "2.0",
+			Method:  "subscribe_account",
+			Params: []string{
+				"-1:5555555555555555555555555555555555555555555555555555555555555555",
+				"0:5555555555555555555555555555555555555555555555555555555555555555",
+			},
+		},
+		{
+			ID:      2,
+			JSONRPC: "2.0",
+			Method:  "subscribe_mempool",
 		},
 	}
-	err = conn.WriteJSON(request)
-	require.Nil(t, err)
+	expectedResponses := [][]byte{
+		[]byte(`{"id":1,"jsonrpc":"2.0","method":"subscribe_account","result":"success! 2 new subscriptions created"}` + "\n"),
+		[]byte(`{"id":2,"jsonrpc":"2.0","method":"subscribe_mempool","result":"success! you have subscribed to mempool"}` + "\n"),
+	}
 
-	time.Sleep(1 * time.Second)
+	for i, request := range requests {
+		expectedResponse := expectedResponses[i]
+		err = conn.WriteJSON(request)
+		require.Nil(t, err)
 
-	msgType, msg, err := conn.ReadMessage()
-	require.Nil(t, err)
-	require.Equal(t, websocket.TextMessage, msgType)
-	expectedResponse := []byte(`{"id":1,"jsonrpc":"2.0","method":"subscribe_account","result":"success! 2 new subscriptions created"}` + "\n")
-	require.Equal(t, expectedResponse, msg)
-	require.True(t, subscribed.Load())
-	require.False(t, unsubscribed.Load())
+		time.Sleep(1 * time.Second)
+
+		msgType, msg, err := conn.ReadMessage()
+		require.Nil(t, err)
+		require.Equal(t, websocket.TextMessage, msgType)
+
+		require.Equal(t, expectedResponse, msg)
+	}
+	require.True(t, txSubscribed.Load())
+	require.False(t, txUnsubscribed.Load())
+
+	require.True(t, memPoolSubscribed.Load())
+	require.False(t, memPoolUnsubscribed.Load())
+
 	conn.Close()
 	time.Sleep(1 * time.Second)
-	require.True(t, unsubscribed.Load())
-
+	require.True(t, txUnsubscribed.Load())
+	require.True(t, memPoolUnsubscribed.Load())
 }

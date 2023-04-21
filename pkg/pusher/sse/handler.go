@@ -15,14 +15,16 @@ import (
 // Handler handles http methods for sse.
 type Handler struct {
 	txSource       sources.TransactionSource
+	memPool        sources.MemPoolSource
 	currentEventID int64
 }
 
 type handlerFunc func(session *session, request *http.Request) error
 
-func NewHandler(txSource sources.TransactionSource) *Handler {
+func NewHandler(txSource sources.TransactionSource, memPool sources.MemPoolSource) *Handler {
 	h := Handler{
 		txSource:       txSource,
+		memPool:        memPool,
 		currentEventID: time.Now().UnixNano(),
 	}
 	return &h
@@ -57,6 +59,18 @@ func (h *Handler) SubscribeToTransactions(session *session, request *http.Reques
 		}
 		session.SendEvent(event)
 	}, *options)
+	session.SetCancelFn(cancelFn)
+	return nil
+}
+
+func (h *Handler) SubscribeToMessages(session *session, _ *http.Request) error {
+	cancelFn := h.memPool.SubscribeToMessages(func(data []byte) {
+		event := Event{
+			EventID: h.nextID(),
+			Data:    data,
+		}
+		session.SendEvent(event)
+	})
 	session.SetCancelFn(cancelFn)
 	return nil
 }

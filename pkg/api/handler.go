@@ -11,7 +11,6 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/tonkeeper/opentonapi/pkg/addressbook"
-	"github.com/tonkeeper/opentonapi/pkg/blockchain"
 	"github.com/tonkeeper/opentonapi/pkg/cache"
 	"github.com/tonkeeper/opentonapi/pkg/chainstate"
 	"github.com/tonkeeper/opentonapi/pkg/config"
@@ -101,17 +100,19 @@ func WithSpamRules(spamRules func() rules.Rules) Option {
 	}
 }
 
+func WithTonRates(rates tonRates) Option {
+	return func(o *Options) {
+		o.tonRates = rates
+	}
+}
+
 func NewHandler(logger *zap.Logger, opts ...Option) (*Handler, error) {
 	options := &Options{}
 	for _, o := range opts {
 		o(options)
 	}
 	if options.msgSender == nil {
-		sender, err := blockchain.NewMsgSender(logger)
-		if err != nil {
-			return nil, err
-		}
-		options.msgSender = sender
+		logger.Warn("message sender is not configured, you can't send messages to the blockchain")
 	}
 	if options.addressBook == nil {
 		options.addressBook = addressbook.NewAddressBook(logger, config.AddressPath, config.JettonPath, config.CollectionPath)

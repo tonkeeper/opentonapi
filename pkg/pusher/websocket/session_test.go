@@ -50,11 +50,11 @@ func Test_session_subscribeToTransactions(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			s := &session{
-				eventCh:           make(chan []byte, 10),
+				eventCh:           make(chan event, 10),
 				subscriptions:     map[tongo.AccountID]sources.CancelFn{},
 				subscriptionLimit: tt.subscriptionLimit,
 				txSource: &mockTxSource{
-					OnSubscribeToTransactions: func(deliveryFn sources.DeliveryTxFn, opts sources.SubscribeToTransactionsOptions) sources.CancelFn {
+					OnSubscribeToTransactions: func(deliveryFn sources.DeliveryFn, opts sources.SubscribeToTransactionsOptions) sources.CancelFn {
 						deliveryFn([]byte("msg"))
 						return func() {}
 					},

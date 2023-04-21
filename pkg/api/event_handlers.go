@@ -4,6 +4,8 @@ import (
 	"context"
 	"encoding/base64"
 	"errors"
+	"fmt"
+
 	"github.com/tonkeeper/opentonapi/pkg/bath"
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/opentonapi/pkg/oas"
@@ -11,6 +13,9 @@ import (
 )
 
 func (h Handler) SendMessage(ctx context.Context, req oas.OptSendMessageReq) (r oas.SendMessageRes, _ error) {
+	if h.msgSender == nil {
+		return nil, fmt.Errorf("msg sender is not configured")
+	}
 	payload, err := base64.StdEncoding.DecodeString(req.Value.Boc)
 	if err != nil {
 		return &oas.BadRequest{Error: err.Error()}, nil

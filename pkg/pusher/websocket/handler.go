@@ -30,7 +30,7 @@ type JsonRPCResponse struct {
 	Params  json.RawMessage `json:"params,omitempty"`
 }
 
-func Handler(logger *zap.Logger, txSource sources.TransactionSource) func(http.ResponseWriter, *http.Request, int) error {
+func Handler(logger *zap.Logger, txSource sources.TransactionSource, mempool sources.MemPoolSource) func(http.ResponseWriter, *http.Request, int) error {
 	return func(w http.ResponseWriter, r *http.Request, connectionType int) error {
 		conn, err := upgrader.Upgrade(w, r, nil)
 		if err != nil {
@@ -41,7 +41,7 @@ func Handler(logger *zap.Logger, txSource sources.TransactionSource) func(http.R
 		}
 		ctx, cancel := context.WithCancel(r.Context())
 		defer cancel()
-		session := newSession(logger, txSource, conn)
+		session := newSession(logger, txSource, mempool, conn)
 		requestCh := session.Run(ctx)
 		for {
 			_, msg, err := conn.ReadMessage()

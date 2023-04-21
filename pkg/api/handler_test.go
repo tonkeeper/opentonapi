@@ -14,6 +14,15 @@ import (
 	"github.com/tonkeeper/opentonapi/pkg/oas"
 )
 
+type mockTonRates struct {
+}
+
+func (m *mockTonRates) GetRates() map[string]float64 {
+	return map[string]float64{}
+}
+
+var _ tonRates = &mockTonRates{}
+
 func TestHandler_GetRawAccount(t *testing.T) {
 	tests := []struct {
 		name        string
@@ -32,7 +41,7 @@ func TestHandler_GetRawAccount(t *testing.T) {
 			logger, _ := zap.NewDevelopment()
 			liteStorage, err := litestorage.NewLiteStorage(logger)
 			require.Nil(t, err)
-			h, err := NewHandler(logger, WithStorage(liteStorage), WithExecutor(liteStorage))
+			h, err := NewHandler(logger, WithStorage(liteStorage), WithExecutor(liteStorage), WithTonRates(&mockTonRates{}))
 			require.Nil(t, err)
 			account, err := h.GetRawAccount(context.Background(), tt.params)
 			require.Nil(t, err)
@@ -63,7 +72,7 @@ func TestHandler_GetAccount(t *testing.T) {
 
 			liteStorage, err := litestorage.NewLiteStorage(logger)
 			require.Nil(t, err)
-			h, err := NewHandler(logger, WithStorage(liteStorage), WithExecutor(liteStorage))
+			h, err := NewHandler(logger, WithStorage(liteStorage), WithExecutor(liteStorage), WithTonRates(&mockTonRates{}))
 			require.Nil(t, err)
 			accountRes, err := h.GetAccount(context.Background(), tt.params)
 			require.Nil(t, err)
