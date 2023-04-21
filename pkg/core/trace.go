@@ -6,6 +6,7 @@ type Trace struct {
 	Transaction
 	AccountInterfaces []abi.ContractInterface
 	Children          []*Trace
+	AdditionalInfo    map[string]interface{}
 }
 
 func (t *Trace) InProgress() bool {

@@ -2,8 +2,9 @@ package bath
 
 import (
 	"fmt"
-	"github.com/ghodss/yaml"
 	"strings"
+
+	"github.com/ghodss/yaml"
 
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
@@ -87,6 +88,7 @@ type BubbleTx struct {
 	decodedBody *core.DecodedMessageBody
 	init        []byte
 
+	additionalInfo                  map[string]interface{} //place for storing different data from trace which can be useful later
 	accountWasActiveAtComputingTime bool
 }
 
@@ -159,6 +161,7 @@ func fromTrace(trace *core.Trace, source *Account) *Bubble {
 		account:                         Account{Address: trace.Account, Interfaces: trace.AccountInterfaces},
 		external:                        trace.InMsg == nil || trace.InMsg.IsExternal(),
 		accountWasActiveAtComputingTime: trace.Type != core.OrdinaryTx || trace.ComputePhase == nil || trace.ComputePhase.SkipReason != tlb.ComputeSkipReasonNoState,
+		additionalInfo:                  trace.AdditionalInfo,
 	}
 	accounts := []tongo.AccountID{trace.Account}
 	if source != nil {

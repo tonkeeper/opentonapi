@@ -4,8 +4,6 @@ import (
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
 	"github.com/tonkeeper/tongo/tlb"
-
-	"github.com/tonkeeper/opentonapi/internal/g"
 )
 
 // Straw extracts information from the given bubble and its children and modifies the bubble if needed.
@@ -129,12 +127,23 @@ func FindJettonTransfer(bubble *Bubble) bool {
 		return false
 	}
 	intention := jettonBubble.decodedBody.Value.(abi.JettonTransferMsgBody)
+	recipient, err := tongo.AccountIDFromTlb(intention.Destination)
+	if err != nil || recipient == nil {
+		return false
+	}
+
 	transfer := BubbleJettonTransfer{
 		sender:       jettonBubble.inputFrom,
 		senderWallet: jettonBubble.account.Address,
 		master:       tongo.AccountID{},
 		amount:       intention.Amount,
-		payload:      nil, //todo: do
+		recipient: &Account{
+			Address: *recipient,
+		},
+		payload: nil, //todo: do
+	}
+	if master, ok := jettonBubble.additionalInfo["jetton_master"]; ok {
+		transfer.master, _ = master.(tongo.AccountID)
 	}
 	newBubble := Bubble{
 		Accounts: append(bubble.Accounts, jettonBubble.account.Address),
@@ -151,6 +160,10 @@ func FindJettonTransfer(bubble *Bubble) bool {
 				if !tx.operation("JettonInternalTransfer") {
 					return nil
 				}
+				if tx.success {
+					transfer.success = true
+				}
+				transfer.recipientWallet = tx.account.Address
 				children := ProcessChildren(child.Children,
 					func(excess *Bubble) *Merge {
 						tx, ok := child.Info.(BubbleTx)
@@ -170,7 +183,11 @@ func FindJettonTransfer(bubble *Bubble) bool {
 						if !tx.operation("JettonNotify") {
 							return nil
 						}
-						transfer.recipient = g.Pointer(tx.account)
+						transfer.success = true
+						if transfer.recipient.Address != tx.account.Address {
+							transfer.success = false
+						}
+						transfer.recipient.Interfaces = tx.account.Interfaces
 						return &Merge{children: notify.Children}
 					},
 				)
