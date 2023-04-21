@@ -26,7 +26,6 @@ func (h *Handler) GetRates(ctx context.Context, params oas.GetRatesParams) (res 
 	}
 
 	rates := h.tonRates.GetRates()
-	basicTonPrice := rates["TON"]
 
 	ratesRes := make(map[string]map[string]map[string]interface{})
 	for _, token := range tokens {
@@ -45,21 +44,15 @@ func (h *Handler) GetRates(ctx context.Context, params oas.GetRatesParams) (res 
 				return &oas.BadRequest{Error: "invalid token: " + token}, nil
 			}
 
-			var price float64
-			if currency != "TON" {
-				tokenPrice = tokenPrice / basicTonPrice
-				price = tokenPrice * tonPriceToCurrency
-			} else {
-				price = tokenPrice / tonPriceToCurrency
-			}
+			tokenPrice = (1 / tokenPrice) * tonPriceToCurrency
 
 			rate, ok := ratesRes[token]
 			if !ok {
-				ratesRes[token] = map[string]map[string]interface{}{"prices": {currency: price}}
+				ratesRes[token] = map[string]map[string]interface{}{"prices": {currency: tokenPrice}}
 				continue
 			}
 
-			rate["prices"][currency] = price
+			rate["prices"][currency] = tokenPrice
 			ratesRes[token] = rate
 		}
 	}

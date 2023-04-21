@@ -3,13 +3,13 @@ package rates
 import (
 	"encoding/json"
 	"fmt"
+	"math"
 	"net/http"
 	"strconv"
 	"sync"
 	"time"
 
 	"github.com/google/martian/log"
-	"github.com/shopspring/decimal"
 )
 
 type TonRates struct { // the values are equated to the TON
@@ -62,10 +62,10 @@ func getRates() (map[string]float64, error) {
 		rates[currency] = meanTonPriceToUSD * price
 	}
 	for token, coinsCount := range pools {
-		rates[token] = meanTonPriceToUSD * coinsCount
+		rates[token] = coinsCount
 	}
 
-	rates["TON"] = meanTonPriceToUSD
+	rates["TON"] = 1
 
 	return rates, nil
 }
@@ -104,18 +104,15 @@ func getPools() map[string]float64 {
 			continue
 		}
 
-		decimals := int32(9)
+		secondReserveDecimals := float64(9)
 		if secondAsset.Metadata != nil && secondAsset.Metadata.Decimals != 0 {
-			decimals = secondAsset.Metadata.Decimals
+			secondReserveDecimals = secondAsset.Metadata.Decimals
 		}
 
 		firstReserveConverted, _ := strconv.ParseFloat(firstReserve, 64)
 		secondReserveConverted, _ := strconv.ParseFloat(secondReserve, 64)
 
-		decimalFirstReserve := decimal.NewFromFloat(firstReserveConverted)
-		decimalSecondReserve := decimal.NewFromFloat(secondReserveConverted)
-
-		price, _ := decimalSecondReserve.Div(decimalFirstReserve).Round(decimals).Float64()
+		price := (secondReserveConverted / math.Pow(10, secondReserveDecimals)) / (firstReserveConverted / math.Pow(10, 9))
 
 		mapOfPool[secondAsset.Address] = price
 	}
@@ -128,9 +125,9 @@ type Pool struct {
 		Type     string `json:"type"`
 		Address  string `json:"address"`
 		Metadata *struct {
-			Name     string `json:"name"`
-			Symbol   string `json:"symbol"`
-			Decimals int32  `json:"decimals"`
+			Name     string  `json:"name"`
+			Symbol   string  `json:"symbol"`
+			Decimals float64 `json:"decimals"`
 		} `json:"metadata"`
 	} `json:"assets"`
 	Reserves []string `json:"reserves"`
