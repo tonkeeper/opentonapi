@@ -17,21 +17,29 @@ const subscriptionLimit = 10000 // limitation of subscription by connection
 
 // session is a light-weight implementation of JSON-RPC protocol over an HTTP connection from a client.
 type session struct {
-	logger            *zap.Logger
-	conn              *websocket.Conn
-	txSource          sources.TransactionSource
-	eventCh           chan []byte
-	subscriptions     map[tongo.AccountID]sources.CancelFn
-	pingInterval      time.Duration
-	subscriptionLimit int
+	logger              *zap.Logger
+	conn                *websocket.Conn
+	mempool             sources.MemPoolSource
+	txSource            sources.TransactionSource
+	eventCh             chan event
+	subscriptions       map[tongo.AccountID]sources.CancelFn
+	mempoolSubscription sources.CancelFn
+	pingInterval        time.Duration
+	subscriptionLimit   int
 }
 
-func newSession(logger *zap.Logger, txSource sources.TransactionSource, conn *websocket.Conn) *session {
+type event struct {
+	Method string
+	Params []byte
+}
+
+func newSession(logger *zap.Logger, txSource sources.TransactionSource, mempool sources.MemPoolSource, conn *websocket.Conn) *session {
 	return &session{
 		logger: logger,
 		// TODO: use elastic channel to be sure transactionDispatcher doesn't hang
-		eventCh:           make(chan []byte, 100),
+		eventCh:           make(chan event, 100),
 		conn:              conn,
+		mempool:           mempool,
 		txSource:          txSource,
 		subscriptions:     map[tongo.AccountID]sources.CancelFn{},
 		pingInterval:      5 * time.Second,
@@ -42,6 +50,9 @@ func newSession(logger *zap.Logger, txSource sources.TransactionSource, conn *we
 func (s *session) cancel() {
 	for _, cancelFn := range s.subscriptions {
 		cancelFn()
+	}
+	if s.mempoolSubscription != nil {
+		s.mempoolSubscription()
 	}
 }
 
@@ -55,11 +66,11 @@ func (s *session) Run(ctx context.Context) chan JsonRPCRequest {
 			select {
 			case <-ctx.Done():
 				return
-			case event := <-s.eventCh:
+			case e := <-s.eventCh:
 				response := JsonRPCResponse{
 					JSONRPC: "2.0",
-					Method:  "account_transaction",
-					Params:  event,
+					Method:  e.Method,
+					Params:  e.Params,
 				}
 				err = s.conn.WriteJSON(response)
 			case request := <-requestCh:
@@ -67,6 +78,8 @@ func (s *session) Run(ctx context.Context) chan JsonRPCRequest {
 				switch request.Method {
 				case "subscribe_account":
 					response = s.subscribeToTransactions(request.Params)
+				case "subscribe_mempool":
+					response = s.subscribeToMempool()
 				case "unsubscribe_account":
 					response = s.unsubscribe(request.Params)
 				}
@@ -104,7 +117,10 @@ func (s *session) subscribeToTransactions(params []string) string {
 			Accounts: []tongo.AccountID{account},
 		}
 		cancel := s.txSource.SubscribeToTransactions(func(eventData []byte) {
-			s.eventCh <- eventData
+			s.eventCh <- event{
+				Method: "account_transaction",
+				Params: eventData,
+			}
 		}, options)
 		s.subscriptions[account] = cancel
 		counter += 1
@@ -114,6 +130,16 @@ func (s *session) subscribeToTransactions(params []string) string {
 
 func (s *session) unsubscribe(params []string) string {
 	return "not supported yet"
+}
+
+func (s *session) subscribeToMempool() string {
+	if s.mempoolSubscription != nil {
+		return fmt.Sprintf("you are already subscribed to mempool")
+	}
+	s.mempoolSubscription = s.mempool.SubscribeToMessages(func(eventData []byte) {
+		s.eventCh <- event{Method: "mempool_message", Params: eventData}
+	})
+	return fmt.Sprintf("success! you have subscribed to mempool")
 }
 
 func jsonRPCResponseMessage(message string, id uint64, jsonrpc, method string) (JsonRPCResponse, error) {

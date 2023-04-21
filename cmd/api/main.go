@@ -12,6 +12,7 @@ import (
 	"github.com/tonkeeper/opentonapi/pkg/addressbook"
 	"github.com/tonkeeper/opentonapi/pkg/api"
 	"github.com/tonkeeper/opentonapi/pkg/app"
+	"github.com/tonkeeper/opentonapi/pkg/blockchain"
 	"github.com/tonkeeper/opentonapi/pkg/config"
 	"github.com/tonkeeper/opentonapi/pkg/litestorage"
 	"github.com/tonkeeper/opentonapi/pkg/pusher/sources"
@@ -31,7 +32,20 @@ func main() {
 	if err != nil {
 		log.Fatal("storage init", zap.Error(err))
 	}
-	h, err := api.NewHandler(log, api.WithStorage(storage), api.WithAddressBook(book), api.WithExecutor(storage))
+	mempool := sources.NewMemPool(log)
+	// mempoolChannel receives a copy of any payload that goes through our API method /v2/blockchain/message
+	mempoolChannel := mempool.Run(context.TODO())
+
+	msgSender, err := blockchain.NewMsgSender(cfg.App.LiteServers, []chan []byte{mempoolChannel})
+	if err != nil {
+		log.Fatal("failed to create msg sender", zap.Error(err))
+	}
+	h, err := api.NewHandler(log,
+		api.WithStorage(storage),
+		api.WithAddressBook(book),
+		api.WithExecutor(storage),
+		api.WithMessageSender(msgSender),
+	)
 	if err != nil {
 		log.Fatal("failed to create api handler", zap.Error(err))
 	}
@@ -41,7 +55,9 @@ func main() {
 	}
 	go source.Run(context.TODO())
 
-	server, err := api.NewServer(log, h, fmt.Sprintf(":%d", cfg.API.Port), api.WithTransactionSource(source))
+	server, err := api.NewServer(log, h, fmt.Sprintf(":%d", cfg.API.Port),
+		api.WithTransactionSource(source),
+		api.WithMemPool(mempool))
 	if err != nil {
 		log.Fatal("failed to create api handler", zap.Error(err))
 	}

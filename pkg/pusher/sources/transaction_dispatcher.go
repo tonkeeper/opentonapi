@@ -24,8 +24,8 @@ type TransactionDispatcher struct {
 	logger *zap.Logger
 
 	mu          sync.RWMutex
-	accounts    map[tongo.AccountID]map[subscriberID]DeliveryTxFn
-	allAccounts map[subscriberID]DeliveryTxFn
+	accounts    map[tongo.AccountID]map[subscriberID]DeliveryFn
+	allAccounts map[subscriberID]DeliveryFn
 	options     map[subscriberID]SubscribeToTransactionsOptions
 	currentID   subscriberID
 }
@@ -33,19 +33,11 @@ type TransactionDispatcher struct {
 func NewTransactionDispatcher(logger *zap.Logger) *TransactionDispatcher {
 	return &TransactionDispatcher{
 		logger:      logger,
-		accounts:    map[tongo.AccountID]map[subscriberID]DeliveryTxFn{},
-		allAccounts: map[subscriberID]DeliveryTxFn{},
+		accounts:    map[tongo.AccountID]map[subscriberID]DeliveryFn{},
+		allAccounts: map[subscriberID]DeliveryFn{},
 		options:     map[subscriberID]SubscribeToTransactionsOptions{},
 		currentID:   1,
 	}
-}
-
-// TransactionEventData represents a JSON object we send to subscribers.
-// This is part of our API contract with subscribers.
-type TransactionEventData struct {
-	AccountID tongo.AccountID `json:"account_id"`
-	Lt        uint64          `json:"lt"`
-	TxHash    string          `json:"tx_hash"`
 }
 
 // Run runs a dispatching loop in a dedicated goroutine and returns a channel to be used to communicate with this dispatcher.
@@ -90,7 +82,7 @@ func (disp *TransactionDispatcher) dispatch(tx *TransactionEventData) {
 	}
 }
 
-func (disp *TransactionDispatcher) RegisterSubscriber(fn DeliveryTxFn, options SubscribeToTransactionsOptions) CancelFn {
+func (disp *TransactionDispatcher) RegisterSubscriber(fn DeliveryFn, options SubscribeToTransactionsOptions) CancelFn {
 	disp.mu.Lock()
 	defer disp.mu.Unlock()
 
@@ -106,7 +98,7 @@ func (disp *TransactionDispatcher) RegisterSubscriber(fn DeliveryTxFn, options S
 	for _, account := range options.Accounts {
 		subscribers, ok := disp.accounts[account]
 		if !ok {
-			subscribers = map[subscriberID]DeliveryTxFn{id: fn}
+			subscribers = map[subscriberID]DeliveryFn{id: fn}
 			disp.accounts[account] = subscribers
 		}
 		subscribers[id] = fn
