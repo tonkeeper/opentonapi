@@ -166,7 +166,7 @@ func FindJettonTransfer(bubble *Bubble) bool {
 				transfer.recipientWallet = tx.account.Address
 				children := ProcessChildren(child.Children,
 					func(excess *Bubble) *Merge {
-						tx, ok := child.Info.(BubbleTx)
+						tx, ok := excess.Info.(BubbleTx)
 						if !ok {
 							return nil
 						}
@@ -176,7 +176,7 @@ func FindJettonTransfer(bubble *Bubble) bool {
 						return &Merge{children: excess.Children}
 					},
 					func(notify *Bubble) *Merge {
-						tx, ok := child.Info.(BubbleTx)
+						tx, ok := notify.Info.(BubbleTx)
 						if !ok {
 							return nil
 						}
