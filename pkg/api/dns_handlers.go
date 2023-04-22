@@ -3,7 +3,9 @@ package api
 import (
 	"context"
 	"fmt"
+
 	"github.com/tonkeeper/opentonapi/pkg/oas"
+	"github.com/tonkeeper/opentonapi/pkg/references"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/tlb"
 )
@@ -13,7 +15,7 @@ func (h Handler) DnsBackResolve(ctx context.Context, params oas.DnsBackResolvePa
 	if err != nil {
 		return &oas.BadRequest{Error: err.Error()}, nil
 	}
-	domains, err := h.storage.FindAllDomainsResolvedToAddress(ctx, a)
+	domains, err := h.storage.FindAllDomainsResolvedToAddress(ctx, a, references.DomainPrefixes)
 	if err != nil {
 		return &oas.InternalError{Error: err.Error()}, nil
 	}

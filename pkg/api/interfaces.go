@@ -48,7 +48,7 @@ type storage interface {
 	GetNftCollections(ctx context.Context, limit, offset *int32) ([]core.NftCollection, error)
 	GetNftCollectionByCollectionAddress(ctx context.Context, address tongo.AccountID) (core.NftCollection, error)
 
-	FindAllDomainsResolvedToAddress(ctx context.Context, a tongo.AccountID) ([]string, error)
+	FindAllDomainsResolvedToAddress(ctx context.Context, a tongo.AccountID, collections map[tongo.AccountID]string) ([]string, error)
 
 	GetJettonWalletsByOwnerAddress(ctx context.Context, address tongo.AccountID) ([]core.JettonWallet, error)
 	GetJettonMasterMetadata(ctx context.Context, master tongo.AccountID) (tongo.JettonMetadata, error)

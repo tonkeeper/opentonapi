@@ -228,6 +228,6 @@ func (s *LiteStorage) GetAccountTransactions(ctx context.Context, id tongo.Accou
 	return result, nil
 }
 
-func (s *LiteStorage) FindAllDomainsResolvedToAddress(ctx context.Context, a tongo.AccountID) ([]string, error) {
+func (s *LiteStorage) FindAllDomainsResolvedToAddress(ctx context.Context, a tongo.AccountID, collections map[tongo.AccountID]string) ([]string, error) {
 	return nil, nil
 }
