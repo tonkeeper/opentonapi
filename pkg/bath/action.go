@@ -3,12 +3,13 @@ package bath
 import (
 	"encoding/json"
 	"fmt"
+	"reflect"
+
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/tlb"
 	"golang.org/x/exp/maps"
 	"golang.org/x/exp/slices"
-	"reflect"
 )
 
 const (
@@ -18,7 +19,7 @@ const (
 	NftItemTransfer   ActionType = "NftItemTransfer"
 	JettonTransfer    ActionType = "JettonTransfer"
 	ContractDeploy    ActionType = "ContractDeploy"
-	Subscription      ActionType = "Subscribe"
+	Subscription      ActionType = "Subscription"
 	UnSubscription    ActionType = "UnSubscribe"
 	AuctionBid        ActionType = "AuctionBid"
 	AuctionTgInitBid  ActionType = "AuctionTgInitBid"

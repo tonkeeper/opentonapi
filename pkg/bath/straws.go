@@ -13,6 +13,8 @@ type Straw func(bubble *Bubble) (success bool)
 var DefaultStraws = []Straw{
 	FindNFTTransfer,
 	FindJettonTransfer,
+	FindInitialSubscription,
+	FindExtendedSubscription,
 }
 
 func parseAccount(a tlb.MsgAddress) *Account {
