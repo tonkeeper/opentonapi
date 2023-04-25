@@ -30,6 +30,9 @@ func NewMsgSender(servers []config.LiteServer, channels []chan []byte) (*MsgSend
 
 // SendMessage sends the given payload(a message) to the blockchain.
 func (ms *MsgSender) SendMessage(ctx context.Context, payload []byte) error {
+	if err := liteapi.VerifySendMessagePayload(payload); err != nil {
+		return err
+	}
 	for _, ch := range ms.channels {
 		ch <- payload
 	}
