@@ -1,6 +1,7 @@
 package websocket
 
 import (
+	"context"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -16,19 +17,19 @@ import (
 )
 
 type mockTxSource struct {
-	OnSubscribeToTransactions func(deliveryFn sources.DeliveryFn, opts sources.SubscribeToTransactionsOptions) sources.CancelFn
+	OnSubscribeToTransactions func(ctx context.Context, deliveryFn sources.DeliveryFn, opts sources.SubscribeToTransactionsOptions) sources.CancelFn
 }
 
-func (m *mockTxSource) SubscribeToTransactions(deliveryFn sources.DeliveryFn, opts sources.SubscribeToTransactionsOptions) sources.CancelFn {
-	return m.OnSubscribeToTransactions(deliveryFn, opts)
+func (m *mockTxSource) SubscribeToTransactions(ctx context.Context, deliveryFn sources.DeliveryFn, opts sources.SubscribeToTransactionsOptions) sources.CancelFn {
+	return m.OnSubscribeToTransactions(ctx, deliveryFn, opts)
 }
 
 type mockMemPool struct {
-	OnSubscribeToMessages func(deliveryFn sources.DeliveryFn) sources.CancelFn
+	OnSubscribeToMessages func(ctx context.Context, deliveryFn sources.DeliveryFn) (sources.CancelFn, error)
 }
 
-func (m *mockMemPool) SubscribeToMessages(deliveryFn sources.DeliveryFn) sources.CancelFn {
-	return m.OnSubscribeToMessages(deliveryFn)
+func (m *mockMemPool) SubscribeToMessages(ctx context.Context, deliveryFn sources.DeliveryFn) (sources.CancelFn, error) {
+	return m.OnSubscribeToMessages(ctx, deliveryFn)
 }
 
 var _ sources.TransactionSource = &mockTxSource{}
@@ -38,7 +39,7 @@ func TestHandler(t *testing.T) {
 	var txSubscribed atomic.Bool   // to make "go test -race" happy
 	var txUnsubscribed atomic.Bool // to make "go test -race" happy
 	source := &mockTxSource{
-		OnSubscribeToTransactions: func(deliveryFn sources.DeliveryFn, opts sources.SubscribeToTransactionsOptions) sources.CancelFn {
+		OnSubscribeToTransactions: func(ctx context.Context, deliveryFn sources.DeliveryFn, opts sources.SubscribeToTransactionsOptions) sources.CancelFn {
 			txSubscribed.Store(true)
 			return func() {
 				txUnsubscribed.Store(true)
@@ -48,11 +49,11 @@ func TestHandler(t *testing.T) {
 	var memPoolSubscribed atomic.Bool   // to make "go test -race" happy
 	var memPoolUnsubscribed atomic.Bool // to make "go test -race" happy
 	mempool := &mockMemPool{
-		OnSubscribeToMessages: func(deliveryFn sources.DeliveryFn) sources.CancelFn {
+		OnSubscribeToMessages: func(ctx context.Context, deliveryFn sources.DeliveryFn) (sources.CancelFn, error) {
 			memPoolSubscribed.Store(true)
 			return func() {
 				memPoolUnsubscribed.Store(true)
-			}
+			}, nil
 		},
 	}
 	logger, _ := zap.NewDevelopment()

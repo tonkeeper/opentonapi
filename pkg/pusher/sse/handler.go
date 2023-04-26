@@ -52,7 +52,7 @@ func (h *Handler) SubscribeToTransactions(session *session, request *http.Reques
 	if err != nil {
 		return errors.BadRequest("failed to parse 'accounts' parameter in query")
 	}
-	cancelFn := h.txSource.SubscribeToTransactions(func(data []byte) {
+	cancelFn := h.txSource.SubscribeToTransactions(request.Context(), func(data []byte) {
 		event := Event{
 			EventID: h.nextID(),
 			Data:    data,
@@ -63,14 +63,17 @@ func (h *Handler) SubscribeToTransactions(session *session, request *http.Reques
 	return nil
 }
 
-func (h *Handler) SubscribeToMessages(session *session, _ *http.Request) error {
-	cancelFn := h.memPool.SubscribeToMessages(func(data []byte) {
+func (h *Handler) SubscribeToMessages(session *session, request *http.Request) error {
+	cancelFn, err := h.memPool.SubscribeToMessages(request.Context(), func(data []byte) {
 		event := Event{
 			EventID: h.nextID(),
 			Data:    data,
 		}
 		session.SendEvent(event)
 	})
+	if err != nil {
+		return err
+	}
 	session.SetCancelFn(cancelFn)
 	return nil
 }

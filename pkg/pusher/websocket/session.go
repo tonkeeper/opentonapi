@@ -77,9 +77,9 @@ func (s *session) Run(ctx context.Context) chan JsonRPCRequest {
 				var response string
 				switch request.Method {
 				case "subscribe_account":
-					response = s.subscribeToTransactions(request.Params)
+					response = s.subscribeToTransactions(ctx, request.Params)
 				case "subscribe_mempool":
-					response = s.subscribeToMempool()
+					response = s.subscribeToMempool(ctx)
 				case "unsubscribe_account":
 					response = s.unsubscribe(request.Params)
 				}
@@ -96,7 +96,7 @@ func (s *session) Run(ctx context.Context) chan JsonRPCRequest {
 	return requestCh
 }
 
-func (s *session) subscribeToTransactions(params []string) string {
+func (s *session) subscribeToTransactions(ctx context.Context, params []string) string {
 	accounts := make([]tongo.AccountID, 0, len(params))
 	for _, a := range params {
 		accountID, err := tongo.ParseAccountID(a)
@@ -116,7 +116,7 @@ func (s *session) subscribeToTransactions(params []string) string {
 		options := sources.SubscribeToTransactionsOptions{
 			Accounts: []tongo.AccountID{account},
 		}
-		cancel := s.txSource.SubscribeToTransactions(func(eventData []byte) {
+		cancel := s.txSource.SubscribeToTransactions(ctx, func(eventData []byte) {
 			s.eventCh <- event{
 				Method: "account_transaction",
 				Params: eventData,
@@ -132,13 +132,17 @@ func (s *session) unsubscribe(params []string) string {
 	return "not supported yet"
 }
 
-func (s *session) subscribeToMempool() string {
+func (s *session) subscribeToMempool(ctx context.Context) string {
 	if s.mempoolSubscription != nil {
 		return fmt.Sprintf("you are already subscribed to mempool")
 	}
-	s.mempoolSubscription = s.mempool.SubscribeToMessages(func(eventData []byte) {
+	cancelFn, err := s.mempool.SubscribeToMessages(ctx, func(eventData []byte) {
 		s.eventCh <- event{Method: "mempool_message", Params: eventData}
 	})
+	if err != nil {
+		return err.Error()
+	}
+	s.mempoolSubscription = cancelFn
 	return fmt.Sprintf("success! you have subscribed to mempool")
 }
 

@@ -1,6 +1,10 @@
 package sources
 
-import "github.com/tonkeeper/tongo"
+import (
+	"context"
+
+	"github.com/tonkeeper/tongo"
+)
 
 type SubscribeToTransactionsOptions struct {
 	AllAccounts bool
@@ -23,7 +27,7 @@ type TransactionEventData struct {
 
 // TransactionSource provides a method to subscribe to notifications about new transactions from the blockchain.
 type TransactionSource interface {
-	SubscribeToTransactions(deliveryFn DeliveryFn, opts SubscribeToTransactionsOptions) CancelFn
+	SubscribeToTransactions(ctx context.Context, deliveryFn DeliveryFn, opts SubscribeToTransactionsOptions) CancelFn
 }
 
 // MessageEventData represents a notification about a new pending inbound message.
@@ -34,5 +38,5 @@ type MessageEventData struct {
 
 // MemPoolSource provides a method to subscribe to notifications about pending inbound messages.
 type MemPoolSource interface {
-	SubscribeToMessages(deliveryFn DeliveryFn) CancelFn
+	SubscribeToMessages(ctx context.Context, deliveryFn DeliveryFn) (CancelFn, error)
 }

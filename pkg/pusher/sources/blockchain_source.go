@@ -37,7 +37,7 @@ func NewBlockchainSource(logger *zap.Logger, servers []config.LiteServer) (*Bloc
 
 var _ TransactionSource = (*BlockchainSource)(nil)
 
-func (b *BlockchainSource) SubscribeToTransactions(deliverFn DeliveryFn, opts SubscribeToTransactionsOptions) CancelFn {
+func (b *BlockchainSource) SubscribeToTransactions(ctx context.Context, deliverFn DeliveryFn, opts SubscribeToTransactionsOptions) CancelFn {
 	b.logger.Debug("subscribe to transactions",
 		zap.Bool("all-accounts", opts.AllAccounts),
 		zap.Stringers("accounts", opts.Accounts))
