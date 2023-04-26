@@ -9,7 +9,7 @@ import (
 	"github.com/tonkeeper/tongo/abi"
 )
 
-func convertStakingWhalesPool(address tongo.AccountID, w references.WhalesPoolInfo, poolStatus abi.GetStakingStatusResult, poolConfig abi.GetParams_WhalesNominatorResult, apy float64, verified bool) oas.PoolInfo {
+func convertStakingWhalesPool(address tongo.AccountID, w references.WhalesPoolInfo, poolStatus abi.GetStakingStatusResult, poolConfig abi.GetParams_WhalesNominatorResult, apy float64, verified bool, nominators int) oas.PoolInfo {
 	return oas.PoolInfo{
 		Address:           address.ToRaw(),
 		Name:              w.Name + " " + w.Queue,
@@ -20,8 +20,8 @@ func convertStakingWhalesPool(address tongo.AccountID, w references.WhalesPoolIn
 		CycleEnd:          int64(poolStatus.StakeUntil),
 		CycleStart:        int64(poolStatus.StakeAt),
 		Verified:          verified,
-		CurrentNominators: 0, //todo: add actual values
-		MaxNominators:     40000,
+		CurrentNominators: nominators,
+		MaxNominators:     30000,
 	}
 }
 

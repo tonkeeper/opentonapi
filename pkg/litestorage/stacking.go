@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/opentonapi/pkg/references"
 	"github.com/tonkeeper/tongo"
@@ -44,27 +45,32 @@ func (s *LiteStorage) GetParticipatingInWhalesPools(ctx context.Context, member 
 	return result, nil
 }
 
-func (s *LiteStorage) GetWhalesPoolInfo(ctx context.Context, id tongo.AccountID) (abi.GetParams_WhalesNominatorResult, abi.GetStakingStatusResult, error) {
+func (s *LiteStorage) GetWhalesPoolInfo(ctx context.Context, id tongo.AccountID) (abi.GetParams_WhalesNominatorResult, abi.GetStakingStatusResult, int, error) {
 	var params abi.GetParams_WhalesNominatorResult
 	var status abi.GetStakingStatusResult
 	var ok bool
 	method, value, err := abi.GetParams(ctx, s.client, id)
 	if err != nil {
-		return params, status, err
+		return params, status, 0, err
 	}
 	params, ok = value.(abi.GetParams_WhalesNominatorResult)
 	if !ok {
-		return params, status, fmt.Errorf("get_params returns type %v", method)
+		return params, status, 0, fmt.Errorf("get_params returns type %v", method)
 	}
 	method, value, err = abi.GetStakingStatus(ctx, s.client, id)
 	if err != nil {
-		return params, status, err
+		return params, status, 0, err
 	}
 	status, ok = value.(abi.GetStakingStatusResult)
 	if !ok {
-		return params, status, fmt.Errorf("get_staking returns type %v", method)
+		return params, status, 0, fmt.Errorf("get_staking returns type %v", method)
 	}
-	return params, status, nil
+	method, value, err = abi.GetMembersRaw(ctx, s.client, id)
+	nominators, ok := value.(abi.GetMembersRaw_WhalesNominatorResult)
+	if !ok {
+		return params, status, 0, fmt.Errorf("get_members returns type %v", method)
+	}
+	return params, status, len(nominators.Members.List.Keys()), nil
 }
 
 func (s *LiteStorage) GetTFPool(ctx context.Context, pool tongo.AccountID) (core.TFPool, error) {

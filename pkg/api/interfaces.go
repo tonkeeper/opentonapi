@@ -33,7 +33,7 @@ type storage interface {
 
 	GetParticipatingInWhalesPools(ctx context.Context, id tongo.AccountID) ([]core.WhalesNominator, error)
 	GetWhalesPoolMemberInfo(ctx context.Context, pool, member tongo.AccountID) (core.WhalesNominator, error)
-	GetWhalesPoolInfo(ctx context.Context, id tongo.AccountID) (abi.GetParams_WhalesNominatorResult, abi.GetStakingStatusResult, error)
+	GetWhalesPoolInfo(ctx context.Context, id tongo.AccountID) (abi.GetParams_WhalesNominatorResult, abi.GetStakingStatusResult, int, error)
 	GetTFPools(ctx context.Context) ([]core.TFPool, error)
 	GetTFPool(ctx context.Context, pool tongo.AccountID) (core.TFPool, error)
 

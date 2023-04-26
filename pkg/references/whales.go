@@ -21,13 +21,13 @@ const WhalesPoolImplementationsURL = "https://tonwhales.com/staking"
 
 var WhalesPools = map[tongo.AccountID]WhalesPoolInfo{
 	tongo.MustParseAccountID("EQBYtJtQzU3M-AI23gFM91tW6kYlblVtjej59gS8P3uJ_ePN"): {
-		Name:         "EPn",
+		Name:         "ePN",
 		Queue:        "Queue #1",
 		AvailableFor: closed,
 	},
-	tongo.MustParseAccountID("EQBYtJtQzU3M-AI23gFM91tW6kYlblVtjej59gS8P3uJ_ePN"): {
-		Name:         "EPn",
-		Queue:        "Queue #2",
+	tongo.MustParseAccountID("EQCpCjQigwF27KQ588VhQv9jm_DUuL_ZLY3HCf_9yZW5_ePN"): {
+		Name:         "ePN",
+		Queue:        "Queue #1",
 		AvailableFor: closed,
 	},
 	tongo.MustParseAccountID("EQDFvnxuyA2ogNPOoEj1lu968U4PP8_FzJfrOWUsi_o1CLUB"): {
@@ -67,6 +67,16 @@ var WhalesPools = map[tongo.AccountID]WhalesPoolInfo{
 	},
 	tongo.MustParseAccountID("EQDvvBmP3wUcjoXPY1jHfT4-fgb294imVYH5EHdLnAKeeper"): {
 		Name:         "Tonkeeper",
+		Queue:        "Queue #2",
+		AvailableFor: open,
+	},
+	tongo.MustParseAccountID("EQDhGXtbR6ejNQucRcoyzwiaF2Ke-5T8reptsiuZ_mLockup"): {
+		Name:         "Lockup",
+		Queue:        "Queue #1",
+		AvailableFor: open,
+	},
+	tongo.MustParseAccountID("EQDg5ThqQ1t9eriIv2HkH6XUiUs_Wd4YmXZeGpnPzwLockup"): {
+		Name:         "Lockup",
 		Queue:        "Queue #2",
 		AvailableFor: open,
 	},
