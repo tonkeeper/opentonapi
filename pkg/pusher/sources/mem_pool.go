@@ -28,7 +28,7 @@ func NewMemPool(logger *zap.Logger) *MemPool {
 
 var _ MemPoolSource = (*MemPool)(nil)
 
-func (m *MemPool) SubscribeToMessages(deliveryFn DeliveryFn) CancelFn {
+func (m *MemPool) SubscribeToMessages(ctx context.Context, deliveryFn DeliveryFn) (CancelFn, error) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
@@ -39,7 +39,7 @@ func (m *MemPool) SubscribeToMessages(deliveryFn DeliveryFn) CancelFn {
 		m.mu.Lock()
 		defer m.mu.Unlock()
 		delete(m.subscribers, subID)
-	}
+	}, nil
 }
 
 // Run runs a goroutine with a fan-out event-loop that resends an incoming payload to all subscribers.

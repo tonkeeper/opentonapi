@@ -1,6 +1,7 @@
 package websocket
 
 import (
+	"context"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -54,13 +55,13 @@ func Test_session_subscribeToTransactions(t *testing.T) {
 				subscriptions:     map[tongo.AccountID]sources.CancelFn{},
 				subscriptionLimit: tt.subscriptionLimit,
 				txSource: &mockTxSource{
-					OnSubscribeToTransactions: func(deliveryFn sources.DeliveryFn, opts sources.SubscribeToTransactionsOptions) sources.CancelFn {
+					OnSubscribeToTransactions: func(ctx context.Context, deliveryFn sources.DeliveryFn, opts sources.SubscribeToTransactionsOptions) sources.CancelFn {
 						deliveryFn([]byte("msg"))
 						return func() {}
 					},
 				},
 			}
-			msg := s.subscribeToTransactions(tt.params)
+			msg := s.subscribeToTransactions(context.Background(), tt.params)
 			require.Equal(t, tt.want, msg)
 			subs := make(map[tongo.AccountID]struct{})
 			for sub := range s.subscriptions {

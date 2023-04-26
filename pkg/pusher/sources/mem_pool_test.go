@@ -25,10 +25,12 @@ func TestMemPool_Run(t *testing.T) {
 	wg.Add(eventsNumber)
 
 	eventDataCh := make(chan []byte, eventsNumber)
-	mempool.SubscribeToMessages(func(eventData []byte) {
+	cancelFn, err := mempool.SubscribeToMessages(context.Background(), func(eventData []byte) {
 		eventDataCh <- eventData
 		wg.Done()
 	})
+	require.Nil(t, err)
+	defer cancelFn()
 
 	var expected [][]byte
 	for i := 0; i < eventsNumber; i++ {
@@ -62,7 +64,8 @@ func TestMemPool_SubscribeToMessages(t *testing.T) {
 	cancelFns := map[subscriberID]CancelFn{}
 	for i := 0; i < 5; i++ {
 		subID := mempool.currentID
-		cancel := mempool.SubscribeToMessages(func(eventData []byte) {})
+		cancel, err := mempool.SubscribeToMessages(context.Background(), func(eventData []byte) {})
+		require.Nil(t, err)
 		cancelFns[subID] = cancel
 	}
 	compareSubscribers(t, []subscriberID{1, 2, 3, 4, 5}, mempool.subscribers)
