@@ -514,6 +514,34 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/InternalError'
+  
+  /v2/accounts/search:
+    get:
+      description: ""
+      operationId: getSearchAccounts
+      tags:
+        - Accounts
+      parameters:
+        - name: name
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: "searched accounts"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SearchedAccounts'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
 
   /v2/dns/{domain_name}/resolve:
     get:
@@ -2838,6 +2866,20 @@ components:
           type: integer
           format: int64
           example: 10485760
+    
+    SearchedAccounts:
+      type: array
+      items:
+        type: object
+        required:
+          - address
+          - name
+        properties:
+          address:
+            type: string
+          name:
+            type: string
+  
   responses:
     NotFound:
       description: The specified resource was not found

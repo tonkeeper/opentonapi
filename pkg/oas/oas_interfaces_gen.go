@@ -101,6 +101,10 @@ type GetRawAccountRes interface {
 	getRawAccountRes()
 }
 
+type GetSearchAccountsRes interface {
+	getSearchAccountsRes()
+}
+
 type GetStorageProvidersRes interface {
 	getStorageProvidersRes()
 }

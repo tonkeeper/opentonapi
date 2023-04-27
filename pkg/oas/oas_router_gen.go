@@ -74,6 +74,24 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 						return
 					}
+				case 's': // Prefix: "search"
+					if l := len("search"); len(elem) >= l && elem[0:l] == "search" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					if len(elem) == 0 {
+						// Leaf node.
+						switch r.Method {
+						case "GET":
+							s.handleGetSearchAccountsRequest([0]string{}, w, r)
+						default:
+							s.notAllowed(w, r, "GET")
+						}
+
+						return
+					}
 				}
 				// Param: "account_id"
 				// Match until "/"
@@ -1036,6 +1054,26 @@ func (s *Server) FindRoute(method, path string) (r Route, _ bool) {
 							// Leaf: GetAccounts
 							r.name = "GetAccounts"
 							r.operationID = "getAccounts"
+							r.args = args
+							r.count = 0
+							return r, true
+						default:
+							return
+						}
+					}
+				case 's': // Prefix: "search"
+					if l := len("search"); len(elem) >= l && elem[0:l] == "search" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					if len(elem) == 0 {
+						switch method {
+						case "GET":
+							// Leaf: GetSearchAccounts
+							r.name = "GetSearchAccounts"
+							r.operationID = "getSearchAccounts"
 							r.args = args
 							r.count = 0
 							return r, true

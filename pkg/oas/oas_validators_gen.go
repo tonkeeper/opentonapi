@@ -1079,6 +1079,12 @@ func (s RefundType) Validate() error {
 		return errors.Errorf("invalid value: %v", s)
 	}
 }
+func (s SearchedAccounts) Validate() error {
+	if s == nil {
+		return errors.New("nil is invalid value")
+	}
+	return nil
+}
 func (s SmartContractAction) Validate() error {
 	var failures []validate.FieldError
 	if err := func() error {

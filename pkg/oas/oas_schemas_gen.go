@@ -925,6 +925,7 @@ func (*BadRequest) getNftItemsByAddressesRes()    {}
 func (*BadRequest) getNftItemsByOwnerRes()        {}
 func (*BadRequest) getRatesRes()                  {}
 func (*BadRequest) getRawAccountRes()             {}
+func (*BadRequest) getSearchAccountsRes()         {}
 func (*BadRequest) getStorageProvidersRes()       {}
 func (*BadRequest) getSubscriptionsByAccountRes() {}
 func (*BadRequest) getTraceRes()                  {}
@@ -1869,6 +1870,7 @@ func (*InternalError) getNftItemsByAddressesRes()    {}
 func (*InternalError) getNftItemsByOwnerRes()        {}
 func (*InternalError) getRatesRes()                  {}
 func (*InternalError) getRawAccountRes()             {}
+func (*InternalError) getSearchAccountsRes()         {}
 func (*InternalError) getStorageProvidersRes()       {}
 func (*InternalError) getSubscriptionsByAccountRes() {}
 func (*InternalError) getTraceRes()                  {}
@@ -2929,6 +2931,7 @@ func (*NotFound) getNftItemByAddressRes()       {}
 func (*NotFound) getNftItemsByAddressesRes()    {}
 func (*NotFound) getNftItemsByOwnerRes()        {}
 func (*NotFound) getRawAccountRes()             {}
+func (*NotFound) getSearchAccountsRes()         {}
 func (*NotFound) getSubscriptionsByAccountRes() {}
 func (*NotFound) getTraceRes()                  {}
 func (*NotFound) getTracesByAccountRes()        {}
@@ -5027,6 +5030,35 @@ func (s *Sale) SetPrice(val Price) {
 	s.Price = val
 }
 
+type SearchedAccounts []SearchedAccountsItem
+
+func (SearchedAccounts) getSearchAccountsRes() {}
+
+type SearchedAccountsItem struct {
+	Address string `json:"address"`
+	Name    string `json:"name"`
+}
+
+// GetAddress returns the value of Address.
+func (s SearchedAccountsItem) GetAddress() string {
+	return s.Address
+}
+
+// GetName returns the value of Name.
+func (s SearchedAccountsItem) GetName() string {
+	return s.Name
+}
+
+// SetAddress sets the value of Address.
+func (s *SearchedAccountsItem) SetAddress(val string) {
+	s.Address = val
+}
+
+// SetName sets the value of Name.
+func (s *SearchedAccountsItem) SetName(val string) {
+	s.Name = val
+}
+
 // SendMessageOK is response for SendMessage operation.
 type SendMessageOK struct{}
 
@@ -6082,6 +6114,7 @@ func (*UnauthorizedError) getNftItemsByAddressesRes()    {}
 func (*UnauthorizedError) getNftItemsByOwnerRes()        {}
 func (*UnauthorizedError) getRatesRes()                  {}
 func (*UnauthorizedError) getRawAccountRes()             {}
+func (*UnauthorizedError) getSearchAccountsRes()         {}
 func (*UnauthorizedError) getStorageProvidersRes()       {}
 func (*UnauthorizedError) getSubscriptionsByAccountRes() {}
 func (*UnauthorizedError) getTraceRes()                  {}

@@ -1776,7 +1776,9 @@ func decodeGetNftItemsByOwnerParams(args [1]string, r *http.Request) (params Get
 
 // GetRatesParams is parameters of getRates operation.
 type GetRatesParams struct {
-	Tokens     string
+	// Accept ton and jetton master addresses, separated by commas.
+	Tokens string
+	// Accept ton and all possible fiat currencies, separated by commas.
 	Currencies string
 }
 
@@ -1908,6 +1910,56 @@ func decodeGetRawAccountParams(args [1]string, r *http.Request) (params GetRawAc
 			}
 		} else {
 			return params, errors.New("path: account_id: not specified")
+		}
+	}
+	return params, nil
+}
+
+// GetSearchAccountsParams is parameters of getSearchAccounts operation.
+type GetSearchAccountsParams struct {
+	Name string
+}
+
+func unpackGetSearchAccountsParams(packed middleware.Parameters) (params GetSearchAccountsParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "name",
+			In:   "query",
+		}
+		params.Name = packed[key].(string)
+	}
+	return params
+}
+
+func decodeGetSearchAccountsParams(args [0]string, r *http.Request) (params GetSearchAccountsParams, _ error) {
+	q := uri.NewQueryDecoder(r.URL.Query())
+	// Decode query: name.
+	{
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "name",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.Name = c
+				return nil
+			}); err != nil {
+				return params, errors.Wrap(err, "query: name: parse")
+			}
+		} else {
+			return params, errors.Wrap(err, "query")
 		}
 	}
 	return params, nil

@@ -155,3 +155,23 @@ func (h Handler) GetAccountTransactions(ctx context.Context, params oas.GetAccou
 	}
 	return &result, nil
 }
+
+func (h Handler) GetSearchAccounts(ctx context.Context, params oas.GetSearchAccountsParams) (res oas.GetSearchAccountsRes, err error) {
+	if len(params.Name) < 3 {
+		return &oas.BadRequest{Error: "min name length is 3 characters"}, nil
+	}
+	if len(params.Name) > 15 {
+		return &oas.BadRequest{Error: "max name length is 15 characters"}, nil
+	}
+
+	accounts := h.addressBook.SearchAttachedAccountsByPrefix(params.Name)
+	var response oas.SearchedAccounts
+	for _, account := range accounts {
+		response = append(response, oas.SearchedAccountsItem{
+			Address: account.Wallet,
+			Name:    account.Name,
+		})
+	}
+
+	return &response, nil
+}

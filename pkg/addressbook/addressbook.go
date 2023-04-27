@@ -3,9 +3,10 @@ package addressbook
 import (
 	"encoding/json"
 	"fmt"
-	"golang.org/x/exp/maps"
 	"io"
 	"net/http"
+
+	"golang.org/x/exp/maps"
 
 	"github.com/shopspring/decimal"
 	"github.com/tonkeeper/tongo"
@@ -19,6 +20,13 @@ type KnownAddress struct {
 	Name        string `json:"name"`
 	Address     string `json:"address"`
 	Image       string `json:"image,omitempty"`
+}
+
+// AttachedAccounts represents domains, nft collections for quick search by name are presented
+type AttachedAccount struct {
+	Name       string `json:"name"`
+	Wallet     string `json:"wallet"`
+	Normalized string
 }
 
 type JettonVerificationType string
@@ -55,12 +63,17 @@ type KnownCollection struct {
 }
 
 type Options struct {
-	addressers []addresser
+	addressers       []addresser
+	attachedAccounts attachedAccounts
 }
 type Option func(o *Options)
 
 type addresser interface {
 	GetAddress(a tongo.AccountID) (KnownAddress, bool)
+}
+
+type attachedAccounts interface {
+	SearchAttachedAccounts(prefix string) []AttachedAccount
 }
 
 func WithAdditionalAddressesSource(a addresser) Option {
@@ -69,13 +82,20 @@ func WithAdditionalAddressesSource(a addresser) Option {
 	}
 }
 
+func WithAttachedAccounts(accounts attachedAccounts) Option {
+	return func(o *Options) {
+		o.attachedAccounts = accounts
+	}
+}
+
 // Book holds information about known accounts, jettons, NFT collections manually crafted by the tonkeeper team and the community.
 type Book struct {
-	addresses   map[tongo.AccountID]KnownAddress
-	collections map[tongo.AccountID]KnownCollection
-	jettons     map[tongo.AccountID]KnownJetton
-	tfPools     map[tongo.AccountID]TFPoolInfo
-	addressers  []addresser
+	addresses        map[tongo.AccountID]KnownAddress
+	collections      map[tongo.AccountID]KnownCollection
+	jettons          map[tongo.AccountID]KnownJetton
+	tfPools          map[tongo.AccountID]TFPoolInfo
+	addressers       []addresser
+	attachedAccounts attachedAccounts
 }
 
 type TFPoolInfo struct {
@@ -94,6 +114,10 @@ func (b *Book) GetAddressInfoByAddress(a tongo.AccountID) (KnownAddress, bool) {
 		}
 	}
 	return KnownAddress{}, false
+}
+
+func (b *Book) SearchAttachedAccountsByPrefix(prefix string) []AttachedAccount {
+	return b.attachedAccounts.SearchAttachedAccounts(prefix)
 }
 
 func (b *Book) GetTFPoolInfo(a tongo.AccountID) (TFPoolInfo, bool) {
@@ -181,11 +205,12 @@ func NewAddressBook(logger *zap.Logger, addressPath, jettonPath, collectionPath 
 	}
 
 	return &Book{
-		addresses:   addresses,
-		collections: collections,
-		jettons:     jettons,
-		tfPools:     tfPools,
-		addressers:  options.addressers,
+		addresses:        addresses,
+		collections:      collections,
+		jettons:          jettons,
+		tfPools:          tfPools,
+		addressers:       options.addressers,
+		attachedAccounts: options.attachedAccounts,
 	}
 }
 
