@@ -1745,6 +1745,48 @@ func (s *Fee) SetRefund(val int64) {
 	s.Refund = val
 }
 
+// Ref: #/components/schemas/FoundAccounts
+type FoundAccounts struct {
+	Addresses []FoundAccountsAddressesItem `json:"addresses"`
+}
+
+// GetAddresses returns the value of Addresses.
+func (s FoundAccounts) GetAddresses() []FoundAccountsAddressesItem {
+	return s.Addresses
+}
+
+// SetAddresses sets the value of Addresses.
+func (s *FoundAccounts) SetAddresses(val []FoundAccountsAddressesItem) {
+	s.Addresses = val
+}
+
+func (*FoundAccounts) getSearchAccountsRes() {}
+
+type FoundAccountsAddressesItem struct {
+	Address string `json:"address"`
+	Name    string `json:"name"`
+}
+
+// GetAddress returns the value of Address.
+func (s FoundAccountsAddressesItem) GetAddress() string {
+	return s.Address
+}
+
+// GetName returns the value of Name.
+func (s FoundAccountsAddressesItem) GetName() string {
+	return s.Name
+}
+
+// SetAddress sets the value of Address.
+func (s *FoundAccountsAddressesItem) SetAddress(val string) {
+	s.Address = val
+}
+
+// SetName sets the value of Name.
+func (s *FoundAccountsAddressesItem) SetName(val string) {
+	s.Name = val
+}
+
 type GetAccountsReq struct {
 	AccountIds []string `json:"account_ids"`
 }
@@ -5028,35 +5070,6 @@ func (s *Sale) SetOwner(val OptAccountAddress) {
 // SetPrice sets the value of Price.
 func (s *Sale) SetPrice(val Price) {
 	s.Price = val
-}
-
-type SearchedAccounts []SearchedAccountsItem
-
-func (SearchedAccounts) getSearchAccountsRes() {}
-
-type SearchedAccountsItem struct {
-	Address string `json:"address"`
-	Name    string `json:"name"`
-}
-
-// GetAddress returns the value of Address.
-func (s SearchedAccountsItem) GetAddress() string {
-	return s.Address
-}
-
-// GetName returns the value of Name.
-func (s SearchedAccountsItem) GetName() string {
-	return s.Name
-}
-
-// SetAddress sets the value of Address.
-func (s *SearchedAccountsItem) SetAddress(val string) {
-	s.Address = val
-}
-
-// SetName sets the value of Name.
-func (s *SearchedAccountsItem) SetName(val string) {
-	s.Name = val
 }
 
 // SendMessageOK is response for SendMessage operation.

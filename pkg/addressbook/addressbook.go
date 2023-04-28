@@ -63,16 +63,12 @@ type KnownCollection struct {
 }
 
 type Options struct {
-	addressers       []addresser
-	attachedAccounts attachedAccounts
+	addressers []addresser
 }
 type Option func(o *Options)
 
 type addresser interface {
 	GetAddress(a tongo.AccountID) (KnownAddress, bool)
-}
-
-type attachedAccounts interface {
 	SearchAttachedAccounts(prefix string) []AttachedAccount
 }
 
@@ -82,20 +78,13 @@ func WithAdditionalAddressesSource(a addresser) Option {
 	}
 }
 
-func WithAttachedAccounts(accounts attachedAccounts) Option {
-	return func(o *Options) {
-		o.attachedAccounts = accounts
-	}
-}
-
 // Book holds information about known accounts, jettons, NFT collections manually crafted by the tonkeeper team and the community.
 type Book struct {
-	addresses        map[tongo.AccountID]KnownAddress
-	collections      map[tongo.AccountID]KnownCollection
-	jettons          map[tongo.AccountID]KnownJetton
-	tfPools          map[tongo.AccountID]TFPoolInfo
-	addressers       []addresser
-	attachedAccounts attachedAccounts
+	addresses   map[tongo.AccountID]KnownAddress
+	collections map[tongo.AccountID]KnownCollection
+	jettons     map[tongo.AccountID]KnownJetton
+	tfPools     map[tongo.AccountID]TFPoolInfo
+	addressers  []addresser
 }
 
 type TFPoolInfo struct {
@@ -117,7 +106,13 @@ func (b *Book) GetAddressInfoByAddress(a tongo.AccountID) (KnownAddress, bool) {
 }
 
 func (b *Book) SearchAttachedAccountsByPrefix(prefix string) []AttachedAccount {
-	return b.attachedAccounts.SearchAttachedAccounts(prefix)
+	for i := range b.addressers {
+		foundAccounts := b.addressers[i].SearchAttachedAccounts(prefix)
+		if len(foundAccounts) > 0 {
+			return foundAccounts
+		}
+	}
+	return []AttachedAccount{}
 }
 
 func (b *Book) GetTFPoolInfo(a tongo.AccountID) (TFPoolInfo, bool) {
@@ -205,12 +200,11 @@ func NewAddressBook(logger *zap.Logger, addressPath, jettonPath, collectionPath 
 	}
 
 	return &Book{
-		addresses:        addresses,
-		collections:      collections,
-		jettons:          jettons,
-		tfPools:          tfPools,
-		addressers:       options.addressers,
-		attachedAccounts: options.attachedAccounts,
+		addresses:   addresses,
+		collections: collections,
+		jettons:     jettons,
+		tfPools:     tfPools,
+		addressers:  options.addressers,
 	}
 }
 

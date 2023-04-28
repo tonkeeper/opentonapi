@@ -1544,7 +1544,7 @@ func encodeGetRawAccountResponse(response GetRawAccountRes, w http.ResponseWrite
 
 func encodeGetSearchAccountsResponse(response GetSearchAccountsRes, w http.ResponseWriter, span trace.Span) error {
 	switch response := response.(type) {
-	case *SearchedAccounts:
+	case *FoundAccounts:
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(200)
 		span.SetStatus(codes.Ok, http.StatusText(200))

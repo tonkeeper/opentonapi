@@ -3569,7 +3569,7 @@ func decodeGetSearchAccountsResponse(resp *http.Response) (res GetSearchAccounts
 			}
 
 			d := jx.DecodeBytes(b)
-			var response SearchedAccounts
+			var response FoundAccounts
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err

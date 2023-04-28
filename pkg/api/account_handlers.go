@@ -165,9 +165,9 @@ func (h Handler) GetSearchAccounts(ctx context.Context, params oas.GetSearchAcco
 	}
 
 	accounts := h.addressBook.SearchAttachedAccountsByPrefix(params.Name)
-	var response oas.SearchedAccounts
+	var response oas.FoundAccounts
 	for _, account := range accounts {
-		response = append(response, oas.SearchedAccountsItem{
+		response.Addresses = append(response.Addresses, oas.FoundAccountsAddressesItem{
 			Address: account.Wallet,
 			Name:    account.Name,
 		})
