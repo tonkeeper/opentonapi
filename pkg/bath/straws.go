@@ -1,9 +1,13 @@
 package bath
 
 import (
+	"fmt"
+
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
+	"github.com/tonkeeper/tongo/boc"
 	"github.com/tonkeeper/tongo/tlb"
+	"github.com/tonkeeper/tongo/wallet"
 )
 
 // Straw extracts information from the given bubble and its children and modifies the bubble if needed.
@@ -63,6 +67,7 @@ func FindNFTTransfer(bubble *Bubble) bool {
 			account:   nftBubble.account,
 			sender:    nftBubble.inputFrom,
 			recipient: parseAccount(transfer.NewOwner),
+			payload:   cellToTextComment(boc.Cell(transfer.ForwardPayload.Value)),
 		},
 		Accounts: append(bubble.Accounts, nftBubble.account.Address),
 		Fee:      bubble.Fee,
@@ -108,7 +113,7 @@ type BubbleNftTransfer struct {
 }
 
 func (b BubbleNftTransfer) ToAction() (action *Action) {
-	return &Action{
+	a := Action{
 		NftItemTransfer: &NftTransferAction{
 			Comment:   nil, //todo: add
 			Recipient: b.account.Addr(),
@@ -118,6 +123,23 @@ func (b BubbleNftTransfer) ToAction() (action *Action) {
 		Success: b.success,
 		Type:    NftItemTransfer,
 	}
+	if c, ok := b.payload.(string); ok {
+		a.NftItemTransfer.Comment = &c
+	}
+	return &a
+}
+
+func cellToTextComment(payloadCell boc.Cell) any {
+	var payload wallet.TextComment
+	if err := tlb.Unmarshal(&payloadCell, &payload); err == nil {
+		return string(payload)
+	}
+	payloadCell.ResetCounters()
+	op, err := payloadCell.ReadUint(32)
+	if err == nil {
+		return fmt.Sprintf("Call: 0x%x", op)
+	}
+	return nil
 }
 
 func FindJettonTransfer(bubble *Bubble) bool {
@@ -142,7 +164,7 @@ func FindJettonTransfer(bubble *Bubble) bool {
 		recipient: &Account{
 			Address: *recipient,
 		},
-		payload: nil, //todo: do
+		payload: cellToTextComment(boc.Cell(intention.ForwardPayload.Value)),
 	}
 	if master, ok := jettonBubble.additionalInfo["jetton_master"]; ok {
 		transfer.master, _ = master.(tongo.AccountID)
@@ -211,13 +233,12 @@ type BubbleJettonTransfer struct {
 	master                        tongo.AccountID
 	amount                        tlb.VarUInteger16
 	success                       bool
-	payload                       any //todo: do something
+	payload                       any
 }
 
 func (b BubbleJettonTransfer) ToAction() (action *Action) {
-	return &Action{
+	a := Action{
 		JettonTransfer: &JettonTransferAction{
-			Comment:          nil,
 			Jetton:           b.master,
 			Recipient:        b.recipient.Addr(),
 			Sender:           b.sender.Addr(),
@@ -228,4 +249,8 @@ func (b BubbleJettonTransfer) ToAction() (action *Action) {
 		Success: b.success,
 		Type:    JettonTransfer,
 	}
+	if c, ok := b.payload.(string); ok {
+		a.JettonTransfer.Comment = &c
+	}
+	return &a
 }

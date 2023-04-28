@@ -73,11 +73,11 @@ var WhalesPools = map[tongo.AccountID]WhalesPoolInfo{
 	tongo.MustParseAccountID("EQDhGXtbR6ejNQucRcoyzwiaF2Ke-5T8reptsiuZ_mLockup"): {
 		Name:         "Lockup",
 		Queue:        "Queue #1",
-		AvailableFor: open,
+		AvailableFor: closed,
 	},
 	tongo.MustParseAccountID("EQDg5ThqQ1t9eriIv2HkH6XUiUs_Wd4YmXZeGpnPzwLockup"): {
 		Name:         "Lockup",
 		Queue:        "Queue #2",
-		AvailableFor: open,
+		AvailableFor: closed,
 	},
 }
