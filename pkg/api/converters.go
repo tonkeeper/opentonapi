@@ -4,14 +4,15 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"github.com/tonkeeper/opentonapi/internal/g"
-	"github.com/tonkeeper/tongo/boc"
-	"github.com/tonkeeper/tongo/tlb"
 	"math/big"
 	"reflect"
 	"strconv"
 	"strings"
 	"unicode"
+
+	"github.com/tonkeeper/opentonapi/internal/g"
+	"github.com/tonkeeper/tongo/boc"
+	"github.com/tonkeeper/tongo/tlb"
 
 	"github.com/go-faster/jx"
 	"github.com/tonkeeper/opentonapi/pkg/oas"
@@ -33,7 +34,20 @@ func anyToJSONRawMap(a any, toSnake bool) map[string]jx.Raw { //todo: переп
 	switch t.Kind() {
 	case reflect.Struct:
 		for i := 0; i < t.NumField(); i++ {
-			b, err := json.Marshal(t.Field(i).Interface())
+			var b []byte
+			var err error
+			if aj, ok := t.Field(i).Interface().(json.Marshaler); ok {
+				b, err = aj.MarshalJSON()
+			} else if t.Field(i).Kind() == reflect.Struct {
+				m := anyToJSONRawMap(t.Field(i).Interface(), toSnake)
+				m2 := make(map[string]json.RawMessage)
+				for k, v := range m {
+					m2[k] = json.RawMessage(v)
+				}
+				b, err = json.Marshal(m2)
+			} else {
+				b, err = json.Marshal(t.Field(i).Interface())
+			}
 			if err != nil {
 				panic("some shit")
 			}
