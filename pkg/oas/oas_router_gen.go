@@ -156,7 +156,6 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 						}
 
 						if len(elem) == 0 {
-							// Leaf node.
 							switch r.Method {
 							case "GET":
 								s.handleGetJettonsBalancesRequest([1]string{
@@ -167,6 +166,28 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 							}
 
 							return
+						}
+						switch elem[0] {
+						case '/': // Prefix: "/history"
+							if l := len("/history"); len(elem) >= l && elem[0:l] == "/history" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							if len(elem) == 0 {
+								// Leaf node.
+								switch r.Method {
+								case "GET":
+									s.handleGetJettonsHistoryRequest([1]string{
+										args[0],
+									}, w, r)
+								default:
+									s.notAllowed(w, r, "GET")
+								}
+
+								return
+							}
 						}
 					case 'n': // Prefix: "nfts"
 						if l := len("nfts"); len(elem) >= l && elem[0:l] == "nfts" {
@@ -1127,7 +1148,6 @@ func (s *Server) FindRoute(method, path string) (r Route, _ bool) {
 						if len(elem) == 0 {
 							switch method {
 							case "GET":
-								// Leaf: GetJettonsBalances
 								r.name = "GetJettonsBalances"
 								r.operationID = "getJettonsBalances"
 								r.args = args
@@ -1135,6 +1155,28 @@ func (s *Server) FindRoute(method, path string) (r Route, _ bool) {
 								return r, true
 							default:
 								return
+							}
+						}
+						switch elem[0] {
+						case '/': // Prefix: "/history"
+							if l := len("/history"); len(elem) >= l && elem[0:l] == "/history" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							if len(elem) == 0 {
+								switch method {
+								case "GET":
+									// Leaf: GetJettonsHistory
+									r.name = "GetJettonsHistory"
+									r.operationID = "getJettonsHistory"
+									r.args = args
+									r.count = 1
+									return r, true
+								default:
+									return
+								}
 							}
 						}
 					case 'n': // Prefix: "nfts"

@@ -5,6 +5,7 @@ import (
 	"errors"
 	"math/big"
 
+	"github.com/tonkeeper/opentonapi/pkg/bath"
 	"github.com/tonkeeper/tongo"
 
 	"github.com/tonkeeper/opentonapi/pkg/core"
@@ -81,4 +82,57 @@ func (h Handler) GetJettonInfo(ctx context.Context, params oas.GetJettonInfoPara
 		Metadata:     metadata,
 		Verification: verification,
 	}, nil
+}
+
+func (h Handler) GetJettonsHistory(ctx context.Context, params oas.GetJettonsHistoryParams) (res oas.GetJettonsHistoryRes, err error) {
+	account, err := tongo.ParseAccountID(params.AccountID)
+	if err != nil {
+		return &oas.BadRequest{Error: err.Error()}, nil
+	}
+	traceIDs, err := h.storage.GetAccountJettonsHistory(ctx, account, params.Limit, optIntToPointer(params.BeforeLt), optIntToPointer(params.StartDate), optIntToPointer(params.EndDate))
+	if err != nil {
+		return &oas.InternalError{Error: err.Error()}, nil
+	}
+	events := make([]oas.AccountEvent, len(traceIDs))
+	var lastLT uint64
+	for idx, traceID := range traceIDs {
+		trace, err := h.storage.GetTrace(ctx, traceID)
+		if err != nil {
+			return &oas.InternalError{Error: err.Error()}, nil
+		}
+		bubble := bath.FromTrace(trace)
+		actions, fees := bath.CollectActions(bubble, &account)
+		event := oas.AccountEvent{
+			EventID:    trace.Hash.Hex(),
+			Account:    convertAccountAddress(account, h.addressBook),
+			Timestamp:  trace.Utime,
+			Fee:        oas.Fee{Account: convertAccountAddress(account, h.addressBook)},
+			IsScam:     false,
+			Lt:         int64(trace.Lt),
+			InProgress: trace.InProgress(),
+		}
+		for _, fee := range fees {
+			if fee.WhoPay == account {
+				event.Fee = convertFees(fee, h.addressBook)
+				break
+			}
+		}
+		for _, action := range actions {
+			convertedAction, spamDetected := h.convertAction(ctx, action)
+			if !event.IsScam && spamDetected {
+				event.IsScam = true
+			}
+			event.Actions = append(event.Actions, convertedAction)
+		}
+		if len(event.Actions) == 0 {
+			event.Actions = []oas.Action{{
+				Type:   oas.ActionTypeUnknown,
+				Status: oas.ActionStatusOk,
+			}}
+		}
+		events[idx] = event
+		lastLT = trace.Lt
+	}
+
+	return &oas.AccountEvents{Events: events, NextFrom: int64(lastLT)}, nil
 }

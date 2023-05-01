@@ -166,6 +166,13 @@ func (UnimplementedHandler) GetJettonsBalances(ctx context.Context, params GetJe
 	return r, ht.ErrNotImplemented
 }
 
+// GetJettonsHistory implements getJettonsHistory operation.
+//
+// GET /v2/accounts/{account_id}/jettons/history
+func (UnimplementedHandler) GetJettonsHistory(ctx context.Context, params GetJettonsHistoryParams) (r GetJettonsHistoryRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // GetMasterchainHead implements getMasterchainHead operation.
 //
 // Get last known masterchain block.

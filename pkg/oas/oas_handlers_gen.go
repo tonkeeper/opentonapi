@@ -1724,6 +1724,119 @@ func (s *Server) handleGetJettonsBalancesRequest(args [1]string, w http.Response
 	}
 }
 
+// handleGetJettonsHistoryRequest handles getJettonsHistory operation.
+//
+// GET /v2/accounts/{account_id}/jettons/history
+func (s *Server) handleGetJettonsHistoryRequest(args [1]string, w http.ResponseWriter, r *http.Request) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("getJettonsHistory"),
+	}
+
+	// Start a span for this request.
+	ctx, span := s.cfg.Tracer.Start(r.Context(), "GetJettonsHistory",
+		trace.WithAttributes(otelAttrs...),
+		serverSpanKind,
+	)
+	defer span.End()
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		elapsedDuration := time.Since(startTime)
+		s.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+	}()
+
+	// Increment request counter.
+	s.requests.Add(ctx, 1, otelAttrs...)
+
+	var (
+		recordError = func(stage string, err error) {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			s.errors.Add(ctx, 1, otelAttrs...)
+		}
+		err          error
+		opErrContext = ogenerrors.OperationContext{
+			Name: "GetJettonsHistory",
+			ID:   "getJettonsHistory",
+		}
+	)
+	params, err := decodeGetJettonsHistoryParams(args, r)
+	if err != nil {
+		err = &ogenerrors.DecodeParamsError{
+			OperationContext: opErrContext,
+			Err:              err,
+		}
+		recordError("DecodeParams", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+
+	var response GetJettonsHistoryRes
+	if m := s.cfg.Middleware; m != nil {
+		mreq := middleware.Request{
+			Context:       ctx,
+			OperationName: "GetJettonsHistory",
+			OperationID:   "getJettonsHistory",
+			Body:          nil,
+			Params: middleware.Parameters{
+				{
+					Name: "account_id",
+					In:   "path",
+				}: params.AccountID,
+				{
+					Name: "before_lt",
+					In:   "query",
+				}: params.BeforeLt,
+				{
+					Name: "limit",
+					In:   "query",
+				}: params.Limit,
+				{
+					Name: "start_date",
+					In:   "query",
+				}: params.StartDate,
+				{
+					Name: "end_date",
+					In:   "query",
+				}: params.EndDate,
+			},
+			Raw: r,
+		}
+
+		type (
+			Request  = struct{}
+			Params   = GetJettonsHistoryParams
+			Response = GetJettonsHistoryRes
+		)
+		response, err = middleware.HookMiddleware[
+			Request,
+			Params,
+			Response,
+		](
+			m,
+			mreq,
+			unpackGetJettonsHistoryParams,
+			func(ctx context.Context, request Request, params Params) (Response, error) {
+				return s.h.GetJettonsHistory(ctx, params)
+			},
+		)
+	} else {
+		response, err = s.h.GetJettonsHistory(ctx, params)
+	}
+	if err != nil {
+		recordError("Internal", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+
+	if err := encodeGetJettonsHistoryResponse(response, w, span); err != nil {
+		recordError("EncodeResponse", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+}
+
 // handleGetMasterchainHeadRequest handles getMasterchainHead operation.
 //
 // Get last known masterchain block.

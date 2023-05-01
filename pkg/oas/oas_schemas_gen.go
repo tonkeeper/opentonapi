@@ -306,6 +306,7 @@ func (s *AccountEvents) SetNextFrom(val int64) {
 }
 
 func (*AccountEvents) getEventsByAccountRes() {}
+func (*AccountEvents) getJettonsHistoryRes()  {}
 
 // Ref: #/components/schemas/AccountStaking
 type AccountStaking struct {
@@ -919,6 +920,7 @@ func (*BadRequest) getEventsByAccountRes()        {}
 func (*BadRequest) getItemsFromCollectionRes()    {}
 func (*BadRequest) getJettonInfoRes()             {}
 func (*BadRequest) getJettonsBalancesRes()        {}
+func (*BadRequest) getJettonsHistoryRes()         {}
 func (*BadRequest) getNftCollectionRes()          {}
 func (*BadRequest) getNftItemByAddressRes()       {}
 func (*BadRequest) getNftItemsByAddressesRes()    {}
@@ -1861,6 +1863,7 @@ func (*InternalError) getEventsByAccountRes()        {}
 func (*InternalError) getItemsFromCollectionRes()    {}
 func (*InternalError) getJettonInfoRes()             {}
 func (*InternalError) getJettonsBalancesRes()        {}
+func (*InternalError) getJettonsHistoryRes()         {}
 func (*InternalError) getMasterchainHeadRes()        {}
 func (*InternalError) getNftCollectionRes()          {}
 func (*InternalError) getNftCollectionsRes()         {}
@@ -2924,6 +2927,7 @@ func (*NotFound) getEventsByAccountRes()        {}
 func (*NotFound) getItemsFromCollectionRes()    {}
 func (*NotFound) getJettonInfoRes()             {}
 func (*NotFound) getJettonsBalancesRes()        {}
+func (*NotFound) getJettonsHistoryRes()         {}
 func (*NotFound) getNftCollectionRes()          {}
 func (*NotFound) getNftItemByAddressRes()       {}
 func (*NotFound) getNftItemsByAddressesRes()    {}
@@ -6074,6 +6078,7 @@ func (*UnauthorizedError) getEventsByAccountRes()        {}
 func (*UnauthorizedError) getItemsFromCollectionRes()    {}
 func (*UnauthorizedError) getJettonInfoRes()             {}
 func (*UnauthorizedError) getJettonsBalancesRes()        {}
+func (*UnauthorizedError) getJettonsHistoryRes()         {}
 func (*UnauthorizedError) getMasterchainHeadRes()        {}
 func (*UnauthorizedError) getNftCollectionRes()          {}
 func (*UnauthorizedError) getNftCollectionsRes()         {}

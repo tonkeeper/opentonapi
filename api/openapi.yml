@@ -372,6 +372,59 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/InternalError'
+  
+  /v2/accounts/{account_id}/jettons/history:
+    get:
+      description: "Get history of jettons by account id"
+      operationId: getJettonsHistory
+      tags:
+        - Accounts
+      parameters:
+        - $ref: '#/components/parameters/accountIdParameter'
+        - name: before_lt
+          in: query
+          description: "omit this parameter to get last events"
+          required: false
+          schema:
+            type: integer
+            format: int64
+            example: 25758317000002
+        - name: limit
+          in: query
+          required: true
+          schema:
+            type: integer
+            example: 1000
+            maximum: 1000
+        - name: start_date
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+            example: 1668436763
+        - name: end_date
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+            example: 1668436763
+      responses:
+        '200':
+          description: jetton history
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountEvents'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
 
   /v2/accounts/{account_id}/nfts:
     get:
