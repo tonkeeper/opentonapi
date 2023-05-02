@@ -5,7 +5,6 @@ import (
 	"errors"
 	"math/big"
 
-	"github.com/tonkeeper/opentonapi/pkg/bath"
 	"github.com/tonkeeper/tongo"
 
 	"github.com/tonkeeper/opentonapi/pkg/core"
@@ -93,47 +92,23 @@ func (h Handler) GetJettonsHistory(ctx context.Context, params oas.GetJettonsHis
 	if err != nil {
 		return &oas.InternalError{Error: err.Error()}, nil
 	}
-	events := []oas.AccountEvent{}
-	var lastLT uint64
-	for _, traceID := range traceIDs {
-		trace, err := h.storage.GetTrace(ctx, traceID)
-		if err != nil {
-			return &oas.InternalError{Error: err.Error()}, nil
-		}
-		bubble := bath.FromTrace(trace)
-		bath.MergeAllBubbles(bubble, []bath.Straw{bath.FindJettonTransfer})
-		actions, fees := bath.CollectActions(bubble, &account)
-		event := oas.AccountEvent{
-			EventID:    trace.Hash.Hex(),
-			Account:    convertAccountAddress(account, h.addressBook),
-			Timestamp:  trace.Utime,
-			Fee:        oas.Fee{Account: convertAccountAddress(account, h.addressBook)},
-			IsScam:     false,
-			Lt:         int64(trace.Lt),
-			InProgress: trace.InProgress(),
-		}
-		for _, fee := range fees {
-			if fee.WhoPay == account {
-				event.Fee = convertFees(fee, h.addressBook)
-				break
-			}
-		}
-		for _, action := range actions {
-			convertedAction, spamDetected := h.convertAction(ctx, action)
-			if !event.IsScam && spamDetected {
-				event.IsScam = true
-			}
-			if convertedAction.Type != oas.ActionTypeJettonTransfer {
-				continue
-			}
-			event.Actions = append(event.Actions, convertedAction)
-		}
-		if len(event.Actions) == 0 {
-			continue
-		}
-		events = append(events, event)
-		lastLT = trace.Lt
-	}
+	events, lastLT, err := h.convertJettonHistory(ctx, account, traceIDs)
+	return &oas.AccountEvents{Events: events, NextFrom: lastLT}, nil
+}
 
-	return &oas.AccountEvents{Events: events, NextFrom: int64(lastLT)}, nil
+func (h Handler) GetJettonsHistoryByID(ctx context.Context, params oas.GetJettonsHistoryByIDParams) (res oas.GetJettonsHistoryByIDRes, err error) {
+	account, err := tongo.ParseAccountID(params.AccountID)
+	if err != nil {
+		return &oas.BadRequest{Error: err.Error()}, nil
+	}
+	jettonMasterAccount, err := tongo.ParseAccountID(params.JettonID)
+	if err != nil {
+		return &oas.BadRequest{Error: err.Error()}, nil
+	}
+	traceIDs, err := h.storage.GetAccountJettonHistoryByID(ctx, account, jettonMasterAccount, params.Limit, optIntToPointer(params.BeforeLt), optIntToPointer(params.StartDate), optIntToPointer(params.EndDate))
+	if err != nil {
+		return &oas.InternalError{Error: err.Error()}, nil
+	}
+	events, lastLT, err := h.convertJettonHistory(ctx, account, traceIDs)
+	return &oas.AccountEvents{Events: events, NextFrom: lastLT}, nil
 }

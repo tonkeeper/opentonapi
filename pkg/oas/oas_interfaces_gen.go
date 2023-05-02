@@ -69,6 +69,10 @@ type GetJettonsBalancesRes interface {
 	getJettonsBalancesRes()
 }
 
+type GetJettonsHistoryByIDRes interface {
+	getJettonsHistoryByIDRes()
+}
+
 type GetJettonsHistoryRes interface {
 	getJettonsHistoryRes()
 }

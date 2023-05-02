@@ -168,8 +168,19 @@ func (UnimplementedHandler) GetJettonsBalances(ctx context.Context, params GetJe
 
 // GetJettonsHistory implements getJettonsHistory operation.
 //
+// Get the transfer jettons history for account_id.
+//
 // GET /v2/accounts/{account_id}/jettons/history
 func (UnimplementedHandler) GetJettonsHistory(ctx context.Context, params GetJettonsHistoryParams) (r GetJettonsHistoryRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// GetJettonsHistoryByID implements getJettonsHistoryByID operation.
+//
+// Get the transfer jetton history for account_id and jetton_id.
+//
+// GET /v2/accounts/{account_id}/jettons/{jetton_id}/history
+func (UnimplementedHandler) GetJettonsHistoryByID(ctx context.Context, params GetJettonsHistoryByIDParams) (r GetJettonsHistoryByIDRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
