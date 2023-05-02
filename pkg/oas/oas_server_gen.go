@@ -160,6 +160,8 @@ type Handler interface {
 	GetRawAccount(ctx context.Context, params GetRawAccountParams) (GetRawAccountRes, error)
 	// GetSearchAccounts implements getSearchAccounts operation.
 	//
+	// Search for accounts by name. You can find the account by the first characters of the domain.
+	//
 	// GET /v2/accounts/search
 	GetSearchAccounts(ctx context.Context, params GetSearchAccountsParams) (GetSearchAccountsRes, error)
 	// GetStorageProviders implements getStorageProviders operation.

@@ -523,11 +523,12 @@ paths:
         - Accounts
       parameters:
         - name: name
-          description: "min length name is 3 and max length name is 15"
           in: query
           required: true
           schema:
             type: string
+            minLength: 3
+            maxLength: 15
       responses:
         '200':
           description: "found accounts"

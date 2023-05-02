@@ -2519,6 +2519,8 @@ func (s *Server) handleGetRawAccountRequest(args [1]string, w http.ResponseWrite
 
 // handleGetSearchAccountsRequest handles getSearchAccounts operation.
 //
+// Search for accounts by name. You can find the account by the first characters of the domain.
+//
 // GET /v2/accounts/search
 func (s *Server) handleGetSearchAccountsRequest(args [0]string, w http.ResponseWriter, r *http.Request) {
 	otelAttrs := []attribute.KeyValue{

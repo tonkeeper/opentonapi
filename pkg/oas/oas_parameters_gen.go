@@ -1958,6 +1958,22 @@ func decodeGetSearchAccountsParams(args [0]string, r *http.Request) (params GetS
 			}); err != nil {
 				return params, errors.Wrap(err, "query: name: parse")
 			}
+			if err := func() error {
+				if err := (validate.String{
+					MinLength:    3,
+					MinLengthSet: true,
+					MaxLength:    15,
+					MaxLengthSet: true,
+					Email:        false,
+					Hostname:     false,
+					Regex:        nil,
+				}).Validate(string(params.Name)); err != nil {
+					return errors.Wrap(err, "string")
+				}
+				return nil
+			}(); err != nil {
+				return params, errors.Wrap(err, "query: name: invalid")
+			}
 		} else {
 			return params, errors.Wrap(err, "query")
 		}

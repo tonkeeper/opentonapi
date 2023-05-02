@@ -2249,6 +2249,8 @@ func (c *Client) GetRawAccount(ctx context.Context, params GetRawAccountParams) 
 
 // GetSearchAccounts invokes getSearchAccounts operation.
 //
+// Search for accounts by name. You can find the account by the first characters of the domain.
+//
 // GET /v2/accounts/search
 func (c *Client) GetSearchAccounts(ctx context.Context, params GetSearchAccountsParams) (res GetSearchAccountsRes, err error) {
 	otelAttrs := []attribute.KeyValue{

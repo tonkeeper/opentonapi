@@ -240,6 +240,8 @@ func (UnimplementedHandler) GetRawAccount(ctx context.Context, params GetRawAcco
 
 // GetSearchAccounts implements getSearchAccounts operation.
 //
+// Search for accounts by name. You can find the account by the first characters of the domain.
+//
 // GET /v2/accounts/search
 func (UnimplementedHandler) GetSearchAccounts(ctx context.Context, params GetSearchAccountsParams) (r GetSearchAccountsRes, _ error) {
 	return r, ht.ErrNotImplemented
