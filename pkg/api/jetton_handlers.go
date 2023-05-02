@@ -93,14 +93,15 @@ func (h Handler) GetJettonsHistory(ctx context.Context, params oas.GetJettonsHis
 	if err != nil {
 		return &oas.InternalError{Error: err.Error()}, nil
 	}
-	events := make([]oas.AccountEvent, len(traceIDs))
+	events := []oas.AccountEvent{}
 	var lastLT uint64
-	for idx, traceID := range traceIDs {
+	for _, traceID := range traceIDs {
 		trace, err := h.storage.GetTrace(ctx, traceID)
 		if err != nil {
 			return &oas.InternalError{Error: err.Error()}, nil
 		}
 		bubble := bath.FromTrace(trace)
+		bath.MergeAllBubbles(bubble, []bath.Straw{bath.FindJettonTransfer})
 		actions, fees := bath.CollectActions(bubble, &account)
 		event := oas.AccountEvent{
 			EventID:    trace.Hash.Hex(),
@@ -122,15 +123,15 @@ func (h Handler) GetJettonsHistory(ctx context.Context, params oas.GetJettonsHis
 			if !event.IsScam && spamDetected {
 				event.IsScam = true
 			}
+			if convertedAction.Type != oas.ActionTypeJettonTransfer {
+				continue
+			}
 			event.Actions = append(event.Actions, convertedAction)
 		}
 		if len(event.Actions) == 0 {
-			event.Actions = []oas.Action{{
-				Type:   oas.ActionTypeUnknown,
-				Status: oas.ActionStatusOk,
-			}}
+			continue
 		}
-		events[idx] = event
+		events = append(events, event)
 		lastLT = trace.Lt
 	}
 
