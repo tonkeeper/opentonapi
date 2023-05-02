@@ -82,3 +82,33 @@ func (h Handler) GetJettonInfo(ctx context.Context, params oas.GetJettonInfoPara
 		Verification: verification,
 	}, nil
 }
+
+func (h Handler) GetJettonsHistory(ctx context.Context, params oas.GetJettonsHistoryParams) (res oas.GetJettonsHistoryRes, err error) {
+	account, err := tongo.ParseAccountID(params.AccountID)
+	if err != nil {
+		return &oas.BadRequest{Error: err.Error()}, nil
+	}
+	traceIDs, err := h.storage.GetAccountJettonsHistory(ctx, account, params.Limit, optIntToPointer(params.BeforeLt), optIntToPointer(params.StartDate), optIntToPointer(params.EndDate))
+	if err != nil {
+		return &oas.InternalError{Error: err.Error()}, nil
+	}
+	events, lastLT, err := h.convertJettonHistory(ctx, account, traceIDs)
+	return &oas.AccountEvents{Events: events, NextFrom: lastLT}, nil
+}
+
+func (h Handler) GetJettonsHistoryByID(ctx context.Context, params oas.GetJettonsHistoryByIDParams) (res oas.GetJettonsHistoryByIDRes, err error) {
+	account, err := tongo.ParseAccountID(params.AccountID)
+	if err != nil {
+		return &oas.BadRequest{Error: err.Error()}, nil
+	}
+	jettonMasterAccount, err := tongo.ParseAccountID(params.JettonID)
+	if err != nil {
+		return &oas.BadRequest{Error: err.Error()}, nil
+	}
+	traceIDs, err := h.storage.GetAccountJettonHistoryByID(ctx, account, jettonMasterAccount, params.Limit, optIntToPointer(params.BeforeLt), optIntToPointer(params.StartDate), optIntToPointer(params.EndDate))
+	if err != nil {
+		return &oas.InternalError{Error: err.Error()}, nil
+	}
+	events, lastLT, err := h.convertJettonHistory(ctx, account, traceIDs)
+	return &oas.AccountEvents{Events: events, NextFrom: lastLT}, nil
+}

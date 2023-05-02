@@ -1,10 +1,13 @@
 package api
 
 import (
-	"github.com/tonkeeper/opentonapi/pkg/oas"
-	"github.com/tonkeeper/tongo"
+	"context"
 	"strconv"
 	"strings"
+
+	"github.com/tonkeeper/opentonapi/pkg/bath"
+	"github.com/tonkeeper/opentonapi/pkg/oas"
+	"github.com/tonkeeper/tongo"
 )
 
 func convertJettonDecimals(decimals string) int {
@@ -52,4 +55,50 @@ func jettonPreview(addressBook addressBook, master tongo.AccountID, meta tongo.J
 		Image:        imgGenerator.GenerateImageUrl(meta.Image, 200, 200),
 	}
 	return jetton
+}
+
+func (h Handler) convertJettonHistory(ctx context.Context, account tongo.AccountID, traceIDs []tongo.Bits256) ([]oas.AccountEvent, int64, error) {
+	var lastLT uint64
+	events := []oas.AccountEvent{}
+	for _, traceID := range traceIDs {
+		trace, err := h.storage.GetTrace(ctx, traceID)
+		if err != nil {
+			return nil, 0, err
+		}
+		bubble := bath.FromTrace(trace)
+		bath.MergeAllBubbles(bubble, []bath.Straw{bath.FindJettonTransfer})
+		actions, fees := bath.CollectActions(bubble, &account)
+		event := oas.AccountEvent{
+			EventID:    trace.Hash.Hex(),
+			Account:    convertAccountAddress(account, h.addressBook),
+			Timestamp:  trace.Utime,
+			Fee:        oas.Fee{Account: convertAccountAddress(account, h.addressBook)},
+			IsScam:     false,
+			Lt:         int64(trace.Lt),
+			InProgress: trace.InProgress(),
+		}
+		for _, fee := range fees {
+			if fee.WhoPay == account {
+				event.Fee = convertFees(fee, h.addressBook)
+				break
+			}
+		}
+		for _, action := range actions {
+			convertedAction, spamDetected := h.convertAction(ctx, action)
+			if !event.IsScam && spamDetected {
+				event.IsScam = true
+			}
+			if convertedAction.Type != oas.ActionTypeJettonTransfer {
+				continue
+			}
+			event.Actions = append(event.Actions, convertedAction)
+		}
+		if len(event.Actions) == 0 {
+			continue
+		}
+		events = append(events, event)
+		lastLT = trace.Lt
+	}
+
+	return events, int64(lastLT), nil
 }

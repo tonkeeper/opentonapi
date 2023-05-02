@@ -110,6 +110,18 @@ type Handler interface {
 	//
 	// GET /v2/accounts/{account_id}/jettons
 	GetJettonsBalances(ctx context.Context, params GetJettonsBalancesParams) (GetJettonsBalancesRes, error)
+	// GetJettonsHistory implements getJettonsHistory operation.
+	//
+	// Get the transfer jettons history for account_id.
+	//
+	// GET /v2/accounts/{account_id}/jettons/history
+	GetJettonsHistory(ctx context.Context, params GetJettonsHistoryParams) (GetJettonsHistoryRes, error)
+	// GetJettonsHistoryByID implements getJettonsHistoryByID operation.
+	//
+	// Get the transfer jetton history for account_id and jetton_id.
+	//
+	// GET /v2/accounts/{account_id}/jettons/{jetton_id}/history
+	GetJettonsHistoryByID(ctx context.Context, params GetJettonsHistoryByIDParams) (GetJettonsHistoryByIDRes, error)
 	// GetMasterchainHead implements getMasterchainHead operation.
 	//
 	// Get last known masterchain block.
