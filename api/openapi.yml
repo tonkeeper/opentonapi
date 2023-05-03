@@ -1922,7 +1922,7 @@ components:
           type: array
           items:
             type: string
-            example: http://12234.ton
+            example: vasya.ton
 
     DomainBid:
       type: object

@@ -42,6 +42,7 @@ func convertNFT(ctx context.Context, item core.NftItem, book addressBook, previe
 			Set: true,
 		})
 	}
+	var image string
 	if item.CollectionAddress != nil {
 		if _, prs := book.GetCollectionInfoByAddress(*item.CollectionAddress); prs {
 			i.ApprovedBy = []string{"tonkeeper"} //todo: make enum
@@ -51,8 +52,12 @@ func convertNFT(ctx context.Context, item core.NftItem, book addressBook, previe
 			Address: item.CollectionAddress.ToRaw(),
 			Name:    cInfo.Name,
 		})
+		if *item.CollectionAddress == references.RootDotTon && item.DNS != nil && item.Verified {
+			image = "https://cache.tonapi.io/dns/preview/" + *item.DNS + ".png"
+			i.Metadata["name"] = []byte(fmt.Sprintf(`"%v"`, *item.DNS))
+		}
 	}
-	var image string
+
 	if item.Metadata != nil {
 		if imageI, prs := item.Metadata["image"]; prs {
 			image, _ = imageI.(string)

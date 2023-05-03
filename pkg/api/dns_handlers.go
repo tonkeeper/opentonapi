@@ -15,7 +15,7 @@ func (h Handler) DnsBackResolve(ctx context.Context, params oas.DnsBackResolvePa
 	if err != nil {
 		return &oas.BadRequest{Error: err.Error()}, nil
 	}
-	domains, err := h.storage.FindAllDomainsResolvedToAddress(ctx, a, references.DomainPrefixes)
+	domains, err := h.storage.FindAllDomainsResolvedToAddress(ctx, a, references.DomainSuffixes)
 	if err != nil {
 		return &oas.InternalError{Error: err.Error()}, nil
 	}
