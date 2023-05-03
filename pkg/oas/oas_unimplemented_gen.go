@@ -256,6 +256,15 @@ func (UnimplementedHandler) GetRawAccount(ctx context.Context, params GetRawAcco
 	return r, ht.ErrNotImplemented
 }
 
+// GetSearchAccounts implements getSearchAccounts operation.
+//
+// Search for accounts by name. You can find the account by the first characters of the domain.
+//
+// GET /v2/accounts/search
+func (UnimplementedHandler) GetSearchAccounts(ctx context.Context, params GetSearchAccountsParams) (r GetSearchAccountsRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // GetStorageProviders implements getStorageProviders operation.
 //
 // Get TON storage providers deployed to the blockchain.

@@ -155,3 +155,16 @@ func (h Handler) GetAccountTransactions(ctx context.Context, params oas.GetAccou
 	}
 	return &result, nil
 }
+
+func (h Handler) GetSearchAccounts(ctx context.Context, params oas.GetSearchAccountsParams) (res oas.GetSearchAccountsRes, err error) {
+	accounts := h.addressBook.SearchAttachedAccountsByPrefix(params.Name)
+	var response oas.FoundAccounts
+	for _, account := range accounts {
+		response.Addresses = append(response.Addresses, oas.FoundAccountsAddressesItem{
+			Address: account.Wallet,
+			Name:    account.Name,
+		})
+	}
+
+	return &response, nil
+}

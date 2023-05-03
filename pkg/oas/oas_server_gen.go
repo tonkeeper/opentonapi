@@ -170,6 +170,12 @@ type Handler interface {
 	//
 	// GET /v2/blockchain/accounts/{account_id}
 	GetRawAccount(ctx context.Context, params GetRawAccountParams) (GetRawAccountRes, error)
+	// GetSearchAccounts implements getSearchAccounts operation.
+	//
+	// Search for accounts by name. You can find the account by the first characters of the domain.
+	//
+	// GET /v2/accounts/search
+	GetSearchAccounts(ctx context.Context, params GetSearchAccountsParams) (GetSearchAccountsRes, error)
 	// GetStorageProviders implements getStorageProviders operation.
 	//
 	// Get TON storage providers deployed to the blockchain.

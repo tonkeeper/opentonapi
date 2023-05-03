@@ -2435,6 +2435,72 @@ func decodeGetRawAccountParams(args [1]string, r *http.Request) (params GetRawAc
 	return params, nil
 }
 
+// GetSearchAccountsParams is parameters of getSearchAccounts operation.
+type GetSearchAccountsParams struct {
+	Name string
+}
+
+func unpackGetSearchAccountsParams(packed middleware.Parameters) (params GetSearchAccountsParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "name",
+			In:   "query",
+		}
+		params.Name = packed[key].(string)
+	}
+	return params
+}
+
+func decodeGetSearchAccountsParams(args [0]string, r *http.Request) (params GetSearchAccountsParams, _ error) {
+	q := uri.NewQueryDecoder(r.URL.Query())
+	// Decode query: name.
+	{
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "name",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.Name = c
+				return nil
+			}); err != nil {
+				return params, errors.Wrap(err, "query: name: parse")
+			}
+			if err := func() error {
+				if err := (validate.String{
+					MinLength:    3,
+					MinLengthSet: true,
+					MaxLength:    15,
+					MaxLengthSet: true,
+					Email:        false,
+					Hostname:     false,
+					Regex:        nil,
+				}).Validate(string(params.Name)); err != nil {
+					return errors.Wrap(err, "string")
+				}
+				return nil
+			}(); err != nil {
+				return params, errors.Wrap(err, "query: name: invalid")
+			}
+		} else {
+			return params, errors.Wrap(err, "query")
+		}
+	}
+	return params, nil
+}
+
 // GetSubscriptionsByAccountParams is parameters of getSubscriptionsByAccount operation.
 type GetSubscriptionsByAccountParams struct {
 	// Account ID.

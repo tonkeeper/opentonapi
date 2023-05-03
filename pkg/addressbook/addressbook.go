@@ -3,9 +3,10 @@ package addressbook
 import (
 	"encoding/json"
 	"fmt"
-	"golang.org/x/exp/maps"
 	"io"
 	"net/http"
+
+	"golang.org/x/exp/maps"
 
 	"github.com/shopspring/decimal"
 	"github.com/tonkeeper/tongo"
@@ -19,6 +20,13 @@ type KnownAddress struct {
 	Name        string `json:"name"`
 	Address     string `json:"address"`
 	Image       string `json:"image,omitempty"`
+}
+
+// AttachedAccounts represents domains, nft collections for quick search by name are presented
+type AttachedAccount struct {
+	Name       string `json:"name"`
+	Wallet     string `json:"wallet"`
+	Normalized string
 }
 
 type JettonVerificationType string
@@ -61,6 +69,7 @@ type Option func(o *Options)
 
 type addresser interface {
 	GetAddress(a tongo.AccountID) (KnownAddress, bool)
+	SearchAttachedAccounts(prefix string) []AttachedAccount
 }
 
 func WithAdditionalAddressesSource(a addresser) Option {
@@ -94,6 +103,16 @@ func (b *Book) GetAddressInfoByAddress(a tongo.AccountID) (KnownAddress, bool) {
 		}
 	}
 	return KnownAddress{}, false
+}
+
+func (b *Book) SearchAttachedAccountsByPrefix(prefix string) []AttachedAccount {
+	for i := range b.addressers {
+		foundAccounts := b.addressers[i].SearchAttachedAccounts(prefix)
+		if len(foundAccounts) > 0 {
+			return foundAccounts
+		}
+	}
+	return []AttachedAccount{}
 }
 
 func (b *Book) GetTFPoolInfo(a tongo.AccountID) (TFPoolInfo, bool) {
