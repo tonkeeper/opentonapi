@@ -7,6 +7,7 @@ import (
 
 	"github.com/tonkeeper/opentonapi/pkg/bath"
 	"github.com/tonkeeper/opentonapi/pkg/oas"
+	"github.com/tonkeeper/opentonapi/pkg/references"
 	"github.com/tonkeeper/tongo"
 )
 
@@ -35,7 +36,7 @@ func jettonPreview(addressBook addressBook, master tongo.AccountID, meta tongo.J
 	}
 
 	if meta.Image == "" {
-		meta.Image = "https://ton.ams3.digitaloceanspaces.com/token-placeholder-288.png"
+		meta.Image = references.Placeholder
 	}
 	info, ok := addressBook.GetJettonInfoByAddress(master)
 	if ok {

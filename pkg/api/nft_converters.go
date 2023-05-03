@@ -8,6 +8,7 @@ import (
 	"github.com/go-faster/jx"
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/opentonapi/pkg/oas"
+	"github.com/tonkeeper/opentonapi/pkg/references"
 )
 
 func convertNFT(ctx context.Context, item core.NftItem, book addressBook, previewGen previewGenerator, metaCache metadataCache) oas.NftItem {
@@ -45,23 +46,27 @@ func convertNFT(ctx context.Context, item core.NftItem, book addressBook, previe
 		if _, prs := book.GetCollectionInfoByAddress(*item.CollectionAddress); prs {
 			i.ApprovedBy = []string{"tonkeeper"} //todo: make enum
 		}
+		cInfo, _ := metaCache.getCollectionMeta(ctx, *item.CollectionAddress)
 		i.Collection.SetTo(oas.NftItemCollection{
 			Address: item.CollectionAddress.ToRaw(),
-			Name:    "", //todo: use cache
+			Name:    cInfo.Name,
 		})
 	}
+	var image string
 	if item.Metadata != nil {
 		if imageI, prs := item.Metadata["image"]; prs {
-			if image, ok := imageI.(string); ok {
-				for _, size := range []int{100, 500, 1500} {
-					url := previewGen.GenerateImageUrl(image, size, size)
-					i.Previews = append(i.Previews, oas.ImagePreview{
-						Resolution: fmt.Sprintf("%vx%v", size, size),
-						URL:        url,
-					})
-				}
-			}
+			image, _ = imageI.(string)
 		}
+	}
+	if image == "" {
+		image = references.Placeholder
+	}
+	for _, size := range []int{100, 500, 1500} {
+		url := previewGen.GenerateImageUrl(image, size, size)
+		i.Previews = append(i.Previews, oas.ImagePreview{
+			Resolution: fmt.Sprintf("%vx%v", size, size),
+			URL:        url,
+		})
 	}
 	return i
 }
