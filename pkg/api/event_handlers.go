@@ -80,7 +80,7 @@ func (h Handler) GetEventsByAccount(ctx context.Context, params oas.GetEventsByA
 		return &oas.BadRequest{Error: err.Error()}, nil
 	}
 	traceIDs, err := h.storage.SearchTraces(ctx, account, params.Limit, optIntToPointer(params.BeforeLt), optIntToPointer(params.StartDate), optIntToPointer(params.EndDate))
-	if err != nil {
+	if err != nil && !errors.Is(err, core.ErrEntityNotFound) {
 		return &oas.InternalError{Error: err.Error()}, nil
 	}
 	events := make([]oas.AccountEvent, len(traceIDs))
