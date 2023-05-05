@@ -1,8 +1,9 @@
 package core
 
 import (
-	"github.com/tonkeeper/tongo/tlb"
 	"math/big"
+
+	"github.com/tonkeeper/tongo/tlb"
 
 	"github.com/tonkeeper/tongo"
 )
@@ -79,13 +80,9 @@ type Transaction struct {
 	TransactionID
 	Type       TransactionType
 	Success    bool
-	Fee        int64
-	OtherFee   int64
-	StorageFee int64
 	Utime      int64
 	InMsg      *Message
 	OutMsgs    []Message
-	Data       []byte
 	BlockID    tongo.BlockID
 	OrigStatus tlb.AccountStatus
 	EndStatus  tlb.AccountStatus
@@ -102,6 +99,15 @@ type Transaction struct {
 
 	Aborted   bool
 	Destroyed bool
+
+	// StorageFee collected during the Storage Phase.
+	StorageFee int64
+	// OtherFee includes fwd fees of all outbound messages and this transaction's total fees for all phases except Storage.
+	OtherFee int64
+	// Fee includes this transaction's total fees for all phases and fwd fees of all outbound messages.
+	// The following formula works:
+	// StartingBalance - Fee + IN msg's Value - OUT msgs' Value = remaining balance at the account
+	Fee int64
 }
 
 type MessageID struct {
