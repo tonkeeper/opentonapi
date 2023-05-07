@@ -138,8 +138,8 @@ func maybeRefInvoke[Result any, T any](fn func(t T) *Result, maybe tlb.Maybe[tlb
 
 func ConvertTransaction(workchain int32, tx tongo.Transaction) (*Transaction, error) {
 	var (
-		totalFee int64
-		inMsg    *Message
+		totalFee, storageFee int64
+		inMsg                *Message
 	)
 	if tx.Msgs.InMsg.Exists {
 		msg, err := ConvertMessage(tx.Msgs.InMsg.Value.Value, tx.Lt)
@@ -147,9 +147,6 @@ func ConvertTransaction(workchain int32, tx tongo.Transaction) (*Transaction, er
 			return nil, err
 		}
 		inMsg = &msg
-		if msg.Source == nil {
-			totalFee += msg.FwdFee
-		}
 	}
 	var outMessage []Message
 	for _, msg := range tx.Msgs.OutMsgs.Values() {
@@ -210,6 +207,9 @@ func ConvertTransaction(workchain int32, tx tongo.Transaction) (*Transaction, er
 		actionPhase = maybeRefInvoke(convertActionPhase, tx.Action)
 	}
 	totalFee += int64(tx.TotalFees.Grams)
+	if storagePhase != nil {
+		storageFee = int64(storagePhase.StorageFeesCollected)
+	}
 
 	return &Transaction{
 		TransactionID: TransactionID{
@@ -219,25 +219,25 @@ func ConvertTransaction(workchain int32, tx tongo.Transaction) (*Transaction, er
 		},
 		StateHashUpdate: tx.StateUpdate,
 		Type:            TransactionType(desc.SumType),
-		Data:            []byte{},
 		Fee:             totalFee,
 		BlockID:         tx.BlockID.BlockID,
-		//StorageFee:    storageFee,
-		Utime:         int64(tx.Now),
-		InMsg:         inMsg,
-		OutMsgs:       outMessage,
-		PrevTransHash: tongo.Bits256(tx.PrevTransHash),
-		PrevTransLt:   tx.PrevTransLt,
-		Success:       tx.IsSuccess(),
-		OrigStatus:    tx.OrigStatus,
-		EndStatus:     tx.EndStatus,
-		Aborted:       aborted,
-		Destroyed:     destroyed,
-		ComputePhase:  computePhase,
-		StoragePhase:  storagePhase,
-		CreditPhase:   creditPhase,
-		ActionPhase:   actionPhase,
-		BouncePhase:   bouncePhase,
+		StorageFee:      storageFee,
+		OtherFee:        totalFee - storageFee,
+		Utime:           int64(tx.Now),
+		InMsg:           inMsg,
+		OutMsgs:         outMessage,
+		PrevTransHash:   tongo.Bits256(tx.PrevTransHash),
+		PrevTransLt:     tx.PrevTransLt,
+		Success:         tx.IsSuccess(),
+		OrigStatus:      tx.OrigStatus,
+		EndStatus:       tx.EndStatus,
+		Aborted:         aborted,
+		Destroyed:       destroyed,
+		ComputePhase:    computePhase,
+		StoragePhase:    storagePhase,
+		CreditPhase:     creditPhase,
+		ActionPhase:     actionPhase,
+		BouncePhase:     bouncePhase,
 	}, nil
 }
 
