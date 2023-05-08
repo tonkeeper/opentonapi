@@ -57,7 +57,7 @@ func FindNFTTransfer(bubble *Bubble) bool {
 	if !ok {
 		return false
 	}
-	if !nftBubble.operation("NftTransfer") {
+	if !nftBubble.operation(abi.NftTransferMsgOp) {
 		return false
 	}
 	transfer := nftBubble.decodedBody.Value.(abi.NftTransferMsgBody)
@@ -80,7 +80,7 @@ func FindNFTTransfer(bubble *Bubble) bool {
 			if !ok {
 				return nil
 			}
-			if !tx.operation("Excess") {
+			if !tx.operation(abi.ExcessMsgOp) {
 				return nil
 			}
 			newBubble.Fee.Add(child.Fee)
@@ -93,7 +93,7 @@ func FindNFTTransfer(bubble *Bubble) bool {
 			if !ok {
 				return nil
 			}
-			if !tx.operation("NftOwnershipAssigned") {
+			if !tx.operation(abi.NftOwnershipAssignedMsgOp) {
 				return nil
 			}
 			newBubble.Fee.Add(child.Fee)
@@ -147,7 +147,7 @@ func FindJettonTransfer(bubble *Bubble) bool {
 	if !ok {
 		return false
 	}
-	if !jettonBubble.operation("JettonTransfer") {
+	if !jettonBubble.operation(abi.JettonTransferMsgOp) {
 		return false
 	}
 	intention := jettonBubble.decodedBody.Value.(abi.JettonTransferMsgBody)
@@ -181,7 +181,7 @@ func FindJettonTransfer(bubble *Bubble) bool {
 				if !ok {
 					return nil
 				}
-				if !tx.operation("JettonInternalTransfer") {
+				if !tx.operation(abi.JettonInternalTransferMsgOp) {
 					return nil
 				}
 				if tx.success {
@@ -194,7 +194,7 @@ func FindJettonTransfer(bubble *Bubble) bool {
 						if !ok {
 							return nil
 						}
-						if !tx.operation("Excess") {
+						if !tx.operation(abi.ExcessMsgOp) {
 							return nil
 						}
 						return &Merge{children: excess.Children}
@@ -204,7 +204,7 @@ func FindJettonTransfer(bubble *Bubble) bool {
 						if !ok {
 							return nil
 						}
-						if !tx.operation("JettonNotify") {
+						if !tx.operation(abi.JettonNotifyMsgOp) {
 							return nil
 						}
 						transfer.success = true
