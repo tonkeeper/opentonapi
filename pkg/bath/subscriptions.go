@@ -16,10 +16,9 @@ func FindInitialSubscription(bubble *Bubble) bool {
 	if !ok {
 		return false
 	}
-	if txBubble.opCode == nil || *txBubble.opCode != 0xf06c7567 { //todo: use decoded after tongo update
+	if !txBubble.operation(abi.PaymentRequestResponseMsgOp) {
 		return false
 	}
-
 	newBubble := Bubble{
 		Accounts: append(bubble.Accounts, txBubble.account.Address),
 		Fee:      bubble.Fee,
@@ -36,7 +35,7 @@ func FindInitialSubscription(bubble *Bubble) bool {
 			if !ok {
 				return nil
 			}
-			if tx.opCode == nil || *tx.opCode != 0x73756273 { //todo: use decoded after tongo update
+			if !tx.operation(abi.SubscriptionPaymentMsgOp) {
 				return nil
 			}
 			success = true
@@ -76,7 +75,7 @@ func FindExtendedSubscription(bubble *Bubble) bool {
 	if !ok {
 		return false
 	}
-	if !command.operation("PaymentRequest") { //todo: use constant
+	if !command.operation(abi.PaymentRequestMsgOp) {
 		return false
 	}
 	request := command.decodedBody.Value.(abi.PaymentRequestMsgBody)
