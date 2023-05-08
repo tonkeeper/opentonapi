@@ -56,3 +56,6 @@ GET {{host}}/v2/dns/subbotin.ton/resolve
 
 ###
 GET {{host}}/v2/nfts/collections/EQDaaxtmY6Dk0YzIV0zNnbUpbjZ92TJHBvO72esc0srwv8K2/items
+
+###
+GET {{host}}/v2/dns/auctions
