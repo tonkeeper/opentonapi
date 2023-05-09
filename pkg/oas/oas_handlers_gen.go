@@ -3031,7 +3031,9 @@ func (s *Server) handleGetSubscriptionsByAccountRequest(args [1]string, w http.R
 
 // handleGetTonConnectPayloadRequest handles getTonConnectPayload operation.
 //
-// POST /v2/tonconnect/generate/payload
+// Get a payload for further token receipt.
+//
+// GET /v2/tonconnect/payload
 func (s *Server) handleGetTonConnectPayloadRequest(args [0]string, w http.ResponseWriter, r *http.Request) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getTonConnectPayload"),
@@ -3897,6 +3899,8 @@ func (s *Server) handleStakingPoolsRequest(args [0]string, w http.ResponseWriter
 }
 
 // handleTonConnectProofRequest handles tonConnectProof operation.
+//
+// Account verification and token issuance.
 //
 // POST /v2/tonconnect/proof
 func (s *Server) handleTonConnectProofRequest(args [0]string, w http.ResponseWriter, r *http.Request) {

@@ -1,7 +1,6 @@
 package tonconnect
 
 import (
-	"context"
 	"crypto/ed25519"
 	"crypto/hmac"
 	"crypto/rand"
@@ -10,25 +9,20 @@ import (
 	"encoding/binary"
 	"encoding/hex"
 	"fmt"
-	"math/big"
 	"strconv"
 	"strings"
 
-	"github.com/tonkeeper/tongo"
-	"github.com/tonkeeper/tongo/abi"
 	"github.com/tonkeeper/tongo/boc"
-	"github.com/tonkeeper/tongo/liteapi"
 	"github.com/tonkeeper/tongo/tlb"
 	"github.com/tonkeeper/tongo/wallet"
 )
 
 type TonConnect struct {
-	ProofSecret  string
-	SignedSecret string
+	Secret string
 }
 
-func NewTonConnect(proofSecret, signedSecret string) *TonConnect {
-	return &TonConnect{ProofSecret: proofSecret, SignedSecret: signedSecret}
+func NewTonConnect(secret string) *TonConnect {
+	return &TonConnect{Secret: secret}
 }
 
 const (
@@ -73,8 +67,8 @@ type ParsedMessage struct {
 	StateInit string
 }
 
-func (c *TonConnect) GetSignedSecret() string {
-	return c.SignedSecret
+func (c *TonConnect) GetSecret() string {
+	return c.Secret
 }
 
 func (c *TonConnect) GeneratePayload() (string, error) {
@@ -84,7 +78,7 @@ func (c *TonConnect) GeneratePayload() (string, error) {
 		return "", err
 	}
 
-	hmacHash := hmac.New(sha256.New, []byte(c.ProofSecret))
+	hmacHash := hmac.New(sha256.New, []byte(c.Secret))
 	hmacHash.Write(randomBytes)
 	signature := hmacHash.Sum(nil)
 
@@ -103,7 +97,7 @@ func (c *TonConnect) CheckPayload(data string) bool {
 	randomBytes := decodedData[:8]
 	signature := decodedData[8:]
 
-	hmacHash := hmac.New(sha256.New, []byte(c.ProofSecret))
+	hmacHash := hmac.New(sha256.New, []byte(c.Secret))
 	hmacHash.Write(randomBytes)
 	computedSignature := hmacHash.Sum(nil)
 	if !hmac.Equal(signature, computedSignature) {
@@ -182,22 +176,6 @@ func CreateMessage(message *ParsedMessage) ([]byte, error) {
 
 func SignatureVerify(pubKey ed25519.PublicKey, message, signature []byte) bool {
 	return ed25519.Verify(pubKey, message, signature)
-}
-
-func GetWalletPubKey(address tongo.AccountID, net *liteapi.Client) (ed25519.PublicKey, error) {
-	_, result, err := abi.GetPublicKey(context.Background(), net, address)
-	if err != nil {
-		return nil, err
-	}
-	if r, ok := result.(abi.GetPublicKeyResult); ok {
-		i := big.Int(r.PublicKey)
-		b := i.Bytes()
-		if len(b) < 24 || len(b) > 32 {
-			return nil, fmt.Errorf("invalid publock key")
-		}
-		return append(make([]byte, 32-len(b)), b...), nil
-	}
-	return nil, fmt.Errorf("can't get publick key")
 }
 
 func ParseStateInit(stateInit string) ([]byte, error) {

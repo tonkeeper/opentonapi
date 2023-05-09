@@ -41,7 +41,7 @@ func TestHandler_GetRawAccount(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			logger, _ := zap.NewDevelopment()
 			liteStorage, err := litestorage.NewLiteStorage(logger)
-			tonConnect := tonconnect.NewTonConnect("proof_secret", "signed_secret")
+			tonConnect := tonconnect.NewTonConnect("secret")
 			require.Nil(t, err)
 			h, err := NewHandler(logger, WithStorage(liteStorage), WithExecutor(liteStorage), WithTonRates(&mockTonRates{}), WithTonConnect(tonConnect))
 			require.Nil(t, err)
@@ -73,7 +73,7 @@ func TestHandler_GetAccount(t *testing.T) {
 			logger, _ := zap.NewDevelopment()
 
 			liteStorage, err := litestorage.NewLiteStorage(logger)
-			tonConnect := tonconnect.NewTonConnect("proof_secret", "signed_secret")
+			tonConnect := tonconnect.NewTonConnect("secret")
 			require.Nil(t, err)
 			h, err := NewHandler(logger, WithStorage(liteStorage), WithExecutor(liteStorage), WithTonRates(&mockTonRates{}), WithTonConnect(tonConnect))
 			require.Nil(t, err)
@@ -192,7 +192,7 @@ func TestHandler_GetTransactions(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			logger, _ := zap.NewDevelopment()
 			liteStorage, err := litestorage.NewLiteStorage(logger)
-			tonConnect := tonconnect.NewTonConnect("proof_secret", "signed_secret")
+			tonConnect := tonconnect.NewTonConnect("secret")
 			require.Nil(t, err)
 			h, err := NewHandler(logger, WithStorage(liteStorage), WithExecutor(liteStorage), WithTonConnect(tonConnect))
 			require.Nil(t, err)

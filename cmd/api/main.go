@@ -41,7 +41,7 @@ func main() {
 	if err != nil {
 		log.Fatal("failed to create msg sender", zap.Error(err))
 	}
-	tonConnect := tonconnect.NewTonConnect(cfg.App.ProofTonConnectSecret, cfg.App.SignedTonConnectSecret)
+	tonConnect := tonconnect.NewTonConnect(cfg.App.TonConnectSecret)
 	h, err := api.NewHandler(log,
 		api.WithStorage(storage),
 		api.WithAddressBook(book),

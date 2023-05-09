@@ -1024,8 +1024,8 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 					break
 				}
 				switch elem[0] {
-				case 'o': // Prefix: "onconnect/"
-					if l := len("onconnect/"); len(elem) >= l && elem[0:l] == "onconnect/" {
+				case 'o': // Prefix: "onconnect/p"
+					if l := len("onconnect/p"); len(elem) >= l && elem[0:l] == "onconnect/p" {
 						elem = elem[l:]
 					} else {
 						break
@@ -1035,8 +1035,8 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 						break
 					}
 					switch elem[0] {
-					case 'g': // Prefix: "generate/payload"
-						if l := len("generate/payload"); len(elem) >= l && elem[0:l] == "generate/payload" {
+					case 'a': // Prefix: "ayload"
+						if l := len("ayload"); len(elem) >= l && elem[0:l] == "ayload" {
 							elem = elem[l:]
 						} else {
 							break
@@ -1045,16 +1045,16 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 						if len(elem) == 0 {
 							// Leaf node.
 							switch r.Method {
-							case "POST":
+							case "GET":
 								s.handleGetTonConnectPayloadRequest([0]string{}, w, r)
 							default:
-								s.notAllowed(w, r, "POST")
+								s.notAllowed(w, r, "GET")
 							}
 
 							return
 						}
-					case 'p': // Prefix: "proof"
-						if l := len("proof"); len(elem) >= l && elem[0:l] == "proof" {
+					case 'r': // Prefix: "roof"
+						if l := len("roof"); len(elem) >= l && elem[0:l] == "roof" {
 							elem = elem[l:]
 						} else {
 							break
@@ -2161,8 +2161,8 @@ func (s *Server) FindRoute(method, path string) (r Route, _ bool) {
 					break
 				}
 				switch elem[0] {
-				case 'o': // Prefix: "onconnect/"
-					if l := len("onconnect/"); len(elem) >= l && elem[0:l] == "onconnect/" {
+				case 'o': // Prefix: "onconnect/p"
+					if l := len("onconnect/p"); len(elem) >= l && elem[0:l] == "onconnect/p" {
 						elem = elem[l:]
 					} else {
 						break
@@ -2172,8 +2172,8 @@ func (s *Server) FindRoute(method, path string) (r Route, _ bool) {
 						break
 					}
 					switch elem[0] {
-					case 'g': // Prefix: "generate/payload"
-						if l := len("generate/payload"); len(elem) >= l && elem[0:l] == "generate/payload" {
+					case 'a': // Prefix: "ayload"
+						if l := len("ayload"); len(elem) >= l && elem[0:l] == "ayload" {
 							elem = elem[l:]
 						} else {
 							break
@@ -2181,7 +2181,7 @@ func (s *Server) FindRoute(method, path string) (r Route, _ bool) {
 
 						if len(elem) == 0 {
 							switch method {
-							case "POST":
+							case "GET":
 								// Leaf: GetTonConnectPayload
 								r.name = "GetTonConnectPayload"
 								r.operationID = "getTonConnectPayload"
@@ -2192,8 +2192,8 @@ func (s *Server) FindRoute(method, path string) (r Route, _ bool) {
 								return
 							}
 						}
-					case 'p': // Prefix: "proof"
-						if l := len("proof"); len(elem) >= l && elem[0:l] == "proof" {
+					case 'r': // Prefix: "roof"
+						if l := len("roof"); len(elem) >= l && elem[0:l] == "roof" {
 							elem = elem[l:]
 						} else {
 							break

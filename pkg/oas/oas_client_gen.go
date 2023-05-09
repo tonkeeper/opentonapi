@@ -2775,7 +2775,9 @@ func (c *Client) GetSubscriptionsByAccount(ctx context.Context, params GetSubscr
 
 // GetTonConnectPayload invokes getTonConnectPayload operation.
 //
-// POST /v2/tonconnect/generate/payload
+// Get a payload for further token receipt.
+//
+// GET /v2/tonconnect/payload
 func (c *Client) GetTonConnectPayload(ctx context.Context) (res GetTonConnectPayloadRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getTonConnectPayload"),
@@ -2809,10 +2811,10 @@ func (c *Client) GetTonConnectPayload(ctx context.Context) (res GetTonConnectPay
 
 	stage = "BuildURL"
 	u := uri.Clone(c.requestURL(ctx))
-	u.Path += "/v2/tonconnect/generate/payload"
+	u.Path += "/v2/tonconnect/payload"
 
 	stage = "EncodeRequest"
-	r, err := ht.NewRequest(ctx, "POST", u, nil)
+	r, err := ht.NewRequest(ctx, "GET", u, nil)
 	if err != nil {
 		return res, errors.Wrap(err, "create request")
 	}
@@ -3498,6 +3500,8 @@ func (c *Client) StakingPools(ctx context.Context, params StakingPoolsParams) (r
 }
 
 // TonConnectProof invokes tonConnectProof operation.
+//
+// Account verification and token issuance.
 //
 // POST /v2/tonconnect/proof
 func (c *Client) TonConnectProof(ctx context.Context, request OptTonConnectProofReq) (res TonConnectProofRes, err error) {

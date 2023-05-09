@@ -190,7 +190,9 @@ type Handler interface {
 	GetSubscriptionsByAccount(ctx context.Context, params GetSubscriptionsByAccountParams) (GetSubscriptionsByAccountRes, error)
 	// GetTonConnectPayload implements getTonConnectPayload operation.
 	//
-	// POST /v2/tonconnect/generate/payload
+	// Get a payload for further token receipt.
+	//
+	// GET /v2/tonconnect/payload
 	GetTonConnectPayload(ctx context.Context) (GetTonConnectPayloadRes, error)
 	// GetTrace implements getTrace operation.
 	//
@@ -241,6 +243,8 @@ type Handler interface {
 	// GET /v2/staking/pools
 	StakingPools(ctx context.Context, params StakingPoolsParams) (StakingPoolsRes, error)
 	// TonConnectProof implements tonConnectProof operation.
+	//
+	// Account verification and token issuance.
 	//
 	// POST /v2/tonconnect/proof
 	TonConnectProof(ctx context.Context, req OptTonConnectProofReq) (TonConnectProofRes, error)

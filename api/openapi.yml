@@ -1095,9 +1095,9 @@ paths:
         '500':
           $ref: '#/components/responses/InternalError'
   
-  /v2/tonconnect/generate/payload:
-    post:
-      description: Creating a payload for further token receipt
+  /v2/tonconnect/payload:
+    get:
+      description: Get a payload for further token receipt
       operationId: getTonConnectPayload
       tags:
         - Connect

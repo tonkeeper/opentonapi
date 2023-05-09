@@ -76,7 +76,7 @@ func (h Handler) TonConnectProof(ctx context.Context, request oas.OptTonConnectP
 
 	claims := &jwtCustomClaims{Address: request.Value.GetAddress()}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	signedToken, err := token.SignedString([]byte(h.tonConnect.GetSignedSecret()))
+	signedToken, err := token.SignedString([]byte(h.tonConnect.GetSecret()))
 	if err != nil {
 		return &oas.InternalError{Error: err.Error()}, nil
 	}

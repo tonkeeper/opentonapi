@@ -285,7 +285,9 @@ func (UnimplementedHandler) GetSubscriptionsByAccount(ctx context.Context, param
 
 // GetTonConnectPayload implements getTonConnectPayload operation.
 //
-// POST /v2/tonconnect/generate/payload
+// Get a payload for further token receipt.
+//
+// GET /v2/tonconnect/payload
 func (UnimplementedHandler) GetTonConnectPayload(ctx context.Context) (r GetTonConnectPayloadRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
@@ -363,6 +365,8 @@ func (UnimplementedHandler) StakingPools(ctx context.Context, params StakingPool
 }
 
 // TonConnectProof implements tonConnectProof operation.
+//
+// Account verification and token issuance.
 //
 // POST /v2/tonconnect/proof
 func (UnimplementedHandler) TonConnectProof(ctx context.Context, req OptTonConnectProofReq) (r TonConnectProofRes, _ error) {
