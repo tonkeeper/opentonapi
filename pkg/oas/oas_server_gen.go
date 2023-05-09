@@ -188,6 +188,10 @@ type Handler interface {
 	//
 	// GET /v2/accounts/{account_id}/subscriptions
 	GetSubscriptionsByAccount(ctx context.Context, params GetSubscriptionsByAccountParams) (GetSubscriptionsByAccountRes, error)
+	// GetTonConnectPayload implements getTonConnectPayload operation.
+	//
+	// POST /v2/tonconnect/generate/payload
+	GetTonConnectPayload(ctx context.Context) (GetTonConnectPayloadRes, error)
 	// GetTrace implements getTrace operation.
 	//
 	// Get the trace by trace ID or hash of any transaction in trace.
@@ -236,6 +240,10 @@ type Handler interface {
 	//
 	// GET /v2/staking/pools
 	StakingPools(ctx context.Context, params StakingPoolsParams) (StakingPoolsRes, error)
+	// TonConnectProof implements tonConnectProof operation.
+	//
+	// POST /v2/tonconnect/proof
+	TonConnectProof(ctx context.Context, req OptTonConnectProofReq) (TonConnectProofRes, error)
 }
 
 // Server implements http server based on OpenAPI v3 specification and

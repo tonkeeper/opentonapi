@@ -283,6 +283,13 @@ func (UnimplementedHandler) GetSubscriptionsByAccount(ctx context.Context, param
 	return r, ht.ErrNotImplemented
 }
 
+// GetTonConnectPayload implements getTonConnectPayload operation.
+//
+// POST /v2/tonconnect/generate/payload
+func (UnimplementedHandler) GetTonConnectPayload(ctx context.Context) (r GetTonConnectPayloadRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // GetTrace implements getTrace operation.
 //
 // Get the trace by trace ID or hash of any transaction in trace.
@@ -352,5 +359,12 @@ func (UnimplementedHandler) StakingPoolInfo(ctx context.Context, params StakingP
 //
 // GET /v2/staking/pools
 func (UnimplementedHandler) StakingPools(ctx context.Context, params StakingPoolsParams) (r StakingPoolsRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// TonConnectProof implements tonConnectProof operation.
+//
+// POST /v2/tonconnect/proof
+func (UnimplementedHandler) TonConnectProof(ctx context.Context, req OptTonConnectProofReq) (r TonConnectProofRes, _ error) {
 	return r, ht.ErrNotImplemented
 }

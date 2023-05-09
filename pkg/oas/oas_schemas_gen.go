@@ -932,6 +932,7 @@ func (*BadRequest) getRawAccountRes()             {}
 func (*BadRequest) getSearchAccountsRes()         {}
 func (*BadRequest) getStorageProvidersRes()       {}
 func (*BadRequest) getSubscriptionsByAccountRes() {}
+func (*BadRequest) getTonConnectPayloadRes()      {}
 func (*BadRequest) getTraceRes()                  {}
 func (*BadRequest) getTracesByAccountRes()        {}
 func (*BadRequest) getTransactionRes()            {}
@@ -939,6 +940,7 @@ func (*BadRequest) poolsByNominatorsRes()         {}
 func (*BadRequest) sendMessageRes()               {}
 func (*BadRequest) stakingPoolInfoRes()           {}
 func (*BadRequest) stakingPoolsRes()              {}
+func (*BadRequest) tonConnectProofRes()           {}
 
 // Ref: #/components/schemas/Block
 type Block struct {
@@ -1851,6 +1853,22 @@ func (s *GetStorageProvidersOK) SetProviders(val []StorageProvider) {
 
 func (*GetStorageProvidersOK) getStorageProvidersRes() {}
 
+type GetTonConnectPayloadOK struct {
+	Payload string `json:"payload"`
+}
+
+// GetPayload returns the value of Payload.
+func (s GetTonConnectPayloadOK) GetPayload() string {
+	return s.Payload
+}
+
+// SetPayload sets the value of Payload.
+func (s *GetTonConnectPayloadOK) SetPayload(val string) {
+	s.Payload = val
+}
+
+func (*GetTonConnectPayloadOK) getTonConnectPayloadRes() {}
+
 // Ref: #/components/schemas/ImagePreview
 type ImagePreview struct {
 	Resolution string `json:"resolution"`
@@ -1921,6 +1939,7 @@ func (*InternalError) getRawAccountRes()             {}
 func (*InternalError) getSearchAccountsRes()         {}
 func (*InternalError) getStorageProvidersRes()       {}
 func (*InternalError) getSubscriptionsByAccountRes() {}
+func (*InternalError) getTonConnectPayloadRes()      {}
 func (*InternalError) getTraceRes()                  {}
 func (*InternalError) getTracesByAccountRes()        {}
 func (*InternalError) getTransactionRes()            {}
@@ -1929,6 +1948,7 @@ func (*InternalError) poolsByNominatorsRes()         {}
 func (*InternalError) sendMessageRes()               {}
 func (*InternalError) stakingPoolInfoRes()           {}
 func (*InternalError) stakingPoolsRes()              {}
+func (*InternalError) tonConnectProofRes()           {}
 
 // Ref: #/components/schemas/JettonBalance
 type JettonBalance struct {
@@ -4508,6 +4528,98 @@ func (o OptSubscriptionAction) Or(d SubscriptionAction) SubscriptionAction {
 	return d
 }
 
+// NewOptTonConnectProofReq returns new OptTonConnectProofReq with value set to v.
+func NewOptTonConnectProofReq(v TonConnectProofReq) OptTonConnectProofReq {
+	return OptTonConnectProofReq{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptTonConnectProofReq is optional TonConnectProofReq.
+type OptTonConnectProofReq struct {
+	Value TonConnectProofReq
+	Set   bool
+}
+
+// IsSet returns true if OptTonConnectProofReq was set.
+func (o OptTonConnectProofReq) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptTonConnectProofReq) Reset() {
+	var v TonConnectProofReq
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptTonConnectProofReq) SetTo(v TonConnectProofReq) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptTonConnectProofReq) Get() (v TonConnectProofReq, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptTonConnectProofReq) Or(d TonConnectProofReq) TonConnectProofReq {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptTonConnectProofReqProofDomain returns new OptTonConnectProofReqProofDomain with value set to v.
+func NewOptTonConnectProofReqProofDomain(v TonConnectProofReqProofDomain) OptTonConnectProofReqProofDomain {
+	return OptTonConnectProofReqProofDomain{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptTonConnectProofReqProofDomain is optional TonConnectProofReqProofDomain.
+type OptTonConnectProofReqProofDomain struct {
+	Value TonConnectProofReqProofDomain
+	Set   bool
+}
+
+// IsSet returns true if OptTonConnectProofReqProofDomain was set.
+func (o OptTonConnectProofReqProofDomain) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptTonConnectProofReqProofDomain) Reset() {
+	var v TonConnectProofReqProofDomain
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptTonConnectProofReqProofDomain) SetTo(v TonConnectProofReqProofDomain) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptTonConnectProofReqProofDomain) Get() (v TonConnectProofReqProofDomain, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptTonConnectProofReqProofDomain) Or(d TonConnectProofReqProofDomain) TonConnectProofReqProofDomain {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptTonTransferAction returns new OptTonTransferAction with value set to v.
 func NewOptTonTransferAction(v TonTransferAction) OptTonTransferAction {
 	return OptTonTransferAction{
@@ -5558,6 +5670,130 @@ func (s *Subscriptions) SetSubscriptions(val []Subscription) {
 
 func (*Subscriptions) getSubscriptionsByAccountRes() {}
 
+type TonConnectProofOK struct {
+	Token string `json:"token"`
+}
+
+// GetToken returns the value of Token.
+func (s TonConnectProofOK) GetToken() string {
+	return s.Token
+}
+
+// SetToken sets the value of Token.
+func (s *TonConnectProofOK) SetToken(val string) {
+	s.Token = val
+}
+
+func (*TonConnectProofOK) tonConnectProofRes() {}
+
+type TonConnectProofReq struct {
+	Address string                  `json:"address"`
+	Proof   TonConnectProofReqProof `json:"proof"`
+}
+
+// GetAddress returns the value of Address.
+func (s TonConnectProofReq) GetAddress() string {
+	return s.Address
+}
+
+// GetProof returns the value of Proof.
+func (s TonConnectProofReq) GetProof() TonConnectProofReqProof {
+	return s.Proof
+}
+
+// SetAddress sets the value of Address.
+func (s *TonConnectProofReq) SetAddress(val string) {
+	s.Address = val
+}
+
+// SetProof sets the value of Proof.
+func (s *TonConnectProofReq) SetProof(val TonConnectProofReqProof) {
+	s.Proof = val
+}
+
+type TonConnectProofReqProof struct {
+	Timestamp OptInt64                         `json:"timestamp"`
+	Domain    OptTonConnectProofReqProofDomain `json:"domain"`
+	Signature OptString                        `json:"signature"`
+	Payload   OptString                        `json:"payload"`
+	StateInit OptString                        `json:"state_init"`
+}
+
+// GetTimestamp returns the value of Timestamp.
+func (s TonConnectProofReqProof) GetTimestamp() OptInt64 {
+	return s.Timestamp
+}
+
+// GetDomain returns the value of Domain.
+func (s TonConnectProofReqProof) GetDomain() OptTonConnectProofReqProofDomain {
+	return s.Domain
+}
+
+// GetSignature returns the value of Signature.
+func (s TonConnectProofReqProof) GetSignature() OptString {
+	return s.Signature
+}
+
+// GetPayload returns the value of Payload.
+func (s TonConnectProofReqProof) GetPayload() OptString {
+	return s.Payload
+}
+
+// GetStateInit returns the value of StateInit.
+func (s TonConnectProofReqProof) GetStateInit() OptString {
+	return s.StateInit
+}
+
+// SetTimestamp sets the value of Timestamp.
+func (s *TonConnectProofReqProof) SetTimestamp(val OptInt64) {
+	s.Timestamp = val
+}
+
+// SetDomain sets the value of Domain.
+func (s *TonConnectProofReqProof) SetDomain(val OptTonConnectProofReqProofDomain) {
+	s.Domain = val
+}
+
+// SetSignature sets the value of Signature.
+func (s *TonConnectProofReqProof) SetSignature(val OptString) {
+	s.Signature = val
+}
+
+// SetPayload sets the value of Payload.
+func (s *TonConnectProofReqProof) SetPayload(val OptString) {
+	s.Payload = val
+}
+
+// SetStateInit sets the value of StateInit.
+func (s *TonConnectProofReqProof) SetStateInit(val OptString) {
+	s.StateInit = val
+}
+
+type TonConnectProofReqProofDomain struct {
+	LengthBytes OptUint32 `json:"length_bytes"`
+	Value       OptString `json:"value"`
+}
+
+// GetLengthBytes returns the value of LengthBytes.
+func (s TonConnectProofReqProofDomain) GetLengthBytes() OptUint32 {
+	return s.LengthBytes
+}
+
+// GetValue returns the value of Value.
+func (s TonConnectProofReqProofDomain) GetValue() OptString {
+	return s.Value
+}
+
+// SetLengthBytes sets the value of LengthBytes.
+func (s *TonConnectProofReqProofDomain) SetLengthBytes(val OptUint32) {
+	s.LengthBytes = val
+}
+
+// SetValue sets the value of Value.
+func (s *TonConnectProofReqProofDomain) SetValue(val OptString) {
+	s.Value = val
+}
+
 // Ref: #/components/schemas/TonTransferAction
 type TonTransferAction struct {
 	Sender    AccountAddress `json:"sender"`
@@ -6140,6 +6376,7 @@ func (*UnauthorizedError) getRawAccountRes()             {}
 func (*UnauthorizedError) getSearchAccountsRes()         {}
 func (*UnauthorizedError) getStorageProvidersRes()       {}
 func (*UnauthorizedError) getSubscriptionsByAccountRes() {}
+func (*UnauthorizedError) getTonConnectPayloadRes()      {}
 func (*UnauthorizedError) getTraceRes()                  {}
 func (*UnauthorizedError) getTracesByAccountRes()        {}
 func (*UnauthorizedError) getTransactionRes()            {}
@@ -6148,6 +6385,7 @@ func (*UnauthorizedError) poolsByNominatorsRes()         {}
 func (*UnauthorizedError) sendMessageRes()               {}
 func (*UnauthorizedError) stakingPoolInfoRes()           {}
 func (*UnauthorizedError) stakingPoolsRes()              {}
+func (*UnauthorizedError) tonConnectProofRes()           {}
 
 // Ref: #/components/schemas/Validator
 type Validator struct {

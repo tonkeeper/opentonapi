@@ -121,6 +121,10 @@ type GetSubscriptionsByAccountRes interface {
 	getSubscriptionsByAccountRes()
 }
 
+type GetTonConnectPayloadRes interface {
+	getTonConnectPayloadRes()
+}
+
 type GetTraceRes interface {
 	getTraceRes()
 }
@@ -151,4 +155,8 @@ type StakingPoolInfoRes interface {
 
 type StakingPoolsRes interface {
 	stakingPoolsRes()
+}
+
+type TonConnectProofRes interface {
+	tonConnectProofRes()
 }

@@ -2,7 +2,9 @@ package api
 
 import (
 	"context"
+	"crypto/ed25519"
 
+	"github.com/tonkeeper/opentonapi/pkg/tonconnect"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
 	"github.com/tonkeeper/tongo/tep64"
@@ -57,6 +59,8 @@ type storage interface {
 	GetAccountJettonHistoryByID(ctx context.Context, address, jettonMaster tongo.AccountID, limit int, beforeLT *int64, startTime *int64, endTime *int64) ([]tongo.Bits256, error)
 
 	GetAllAuctions(ctx context.Context) ([]core.Auction, error)
+
+	GetWalletPubKey(address tongo.AccountID) (ed25519.PublicKey, error)
 }
 
 // chainState provides current blockchain state which change very rarely or slow like staking APY income
@@ -94,6 +98,14 @@ type addressBook interface {
 
 type tonRates interface {
 	GetRates() map[string]float64
+}
+
+type tonConnect interface {
+	GeneratePayload() (string, error)
+	CheckPayload(payload string) bool
+	ConvertTonProofMessage(tp *tonconnect.TonProof) (*tonconnect.ParsedMessage, error)
+	CheckProof(tonProofReq *tonconnect.ParsedMessage, pubKey ed25519.PublicKey) (bool, error)
+	GetSignedSecret() string
 }
 
 type metadataCache struct {

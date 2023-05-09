@@ -2,13 +2,16 @@ package litestorage
 
 import (
 	"context"
+	"crypto/ed25519"
 	"errors"
 	"fmt"
+	"math/big"
 	"time"
 
 	"github.com/avast/retry-go"
 	"github.com/puzpuzpuz/xsync/v2"
 	"github.com/tonkeeper/tongo"
+	"github.com/tonkeeper/tongo/abi"
 	"github.com/tonkeeper/tongo/config"
 	"github.com/tonkeeper/tongo/liteapi"
 	"github.com/tonkeeper/tongo/tlb"
@@ -230,4 +233,20 @@ func (s *LiteStorage) GetAccountTransactions(ctx context.Context, id tongo.Accou
 
 func (s *LiteStorage) FindAllDomainsResolvedToAddress(ctx context.Context, a tongo.AccountID, collections map[tongo.AccountID]string) ([]string, error) {
 	return nil, nil
+}
+
+func (s *LiteStorage) GetWalletPubKey(address tongo.AccountID) (ed25519.PublicKey, error) {
+	_, result, err := abi.GetPublicKey(context.Background(), s.client, address)
+	if err != nil {
+		return nil, err
+	}
+	if r, ok := result.(abi.GetPublicKeyResult); ok {
+		i := big.Int(r.PublicKey)
+		b := i.Bytes()
+		if len(b) < 24 || len(b) > 32 {
+			return nil, fmt.Errorf("invalid publock key")
+		}
+		return append(make([]byte, 32-len(b)), b...), nil
+	}
+	return nil, fmt.Errorf("can't get publick key")
 }
