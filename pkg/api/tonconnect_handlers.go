@@ -2,6 +2,9 @@ package api
 
 import (
 	"context"
+	"crypto/hmac"
+	"crypto/sha256"
+	"encoding/base64"
 
 	"github.com/golang-jwt/jwt"
 	"github.com/tonkeeper/opentonapi/pkg/oas"
@@ -24,8 +27,7 @@ func (h Handler) GetTonConnectPayload(ctx context.Context) (res oas.GetTonConnec
 }
 
 func (h Handler) TonConnectProof(ctx context.Context, request oas.OptTonConnectProofReq) (res oas.TonConnectProofRes, err error) {
-	payload := request.Value.Proof.Payload.Value
-	verified := h.tonConnect.CheckPayload(payload)
+	verified := h.tonConnect.CheckPayload(request.Value.Proof.GetPayload().Value)
 	if !verified {
 		return &oas.BadRequest{Error: "failed verify payload"}, nil
 	}
@@ -74,12 +76,11 @@ func (h Handler) TonConnectProof(ctx context.Context, request oas.OptTonConnectP
 		return &oas.BadRequest{Error: "failed proof"}, nil
 	}
 
-	claims := &jwtCustomClaims{Address: request.Value.GetAddress()}
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	signedToken, err := token.SignedString([]byte(h.tonConnect.GetSecret()))
-	if err != nil {
-		return &oas.InternalError{Error: err.Error()}, nil
-	}
+	hmacHash := hmac.New(sha256.New, []byte(h.tonConnect.GetSecret()))
+	hmacHash.Write(pubKey)
+	signature := hmacHash.Sum(nil)
+	data := append(pubKey, signature...)
+	signedToken := base64.URLEncoding.EncodeToString(data)
 
 	return &oas.TonConnectProofOK{Token: signedToken}, nil
 }

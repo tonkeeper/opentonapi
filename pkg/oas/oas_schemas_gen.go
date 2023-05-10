@@ -936,8 +936,10 @@ func (*BadRequest) getTonConnectPayloadRes()      {}
 func (*BadRequest) getTraceRes()                  {}
 func (*BadRequest) getTracesByAccountRes()        {}
 func (*BadRequest) getTransactionRes()            {}
+func (*BadRequest) getWalletBackupRes()           {}
 func (*BadRequest) poolsByNominatorsRes()         {}
 func (*BadRequest) sendMessageRes()               {}
+func (*BadRequest) setWalletBackupRes()           {}
 func (*BadRequest) stakingPoolInfoRes()           {}
 func (*BadRequest) stakingPoolsRes()              {}
 func (*BadRequest) tonConnectProofRes()           {}
@@ -1869,6 +1871,22 @@ func (s *GetTonConnectPayloadOK) SetPayload(val string) {
 
 func (*GetTonConnectPayloadOK) getTonConnectPayloadRes() {}
 
+type GetWalletBackupOK struct {
+	Dump string `json:"dump"`
+}
+
+// GetDump returns the value of Dump.
+func (s GetWalletBackupOK) GetDump() string {
+	return s.Dump
+}
+
+// SetDump sets the value of Dump.
+func (s *GetWalletBackupOK) SetDump(val string) {
+	s.Dump = val
+}
+
+func (*GetWalletBackupOK) getWalletBackupRes() {}
+
 // Ref: #/components/schemas/ImagePreview
 type ImagePreview struct {
 	Resolution string `json:"resolution"`
@@ -1944,8 +1962,10 @@ func (*InternalError) getTraceRes()                  {}
 func (*InternalError) getTracesByAccountRes()        {}
 func (*InternalError) getTransactionRes()            {}
 func (*InternalError) getValidatorsRes()             {}
+func (*InternalError) getWalletBackupRes()           {}
 func (*InternalError) poolsByNominatorsRes()         {}
 func (*InternalError) sendMessageRes()               {}
+func (*InternalError) setWalletBackupRes()           {}
 func (*InternalError) stakingPoolInfoRes()           {}
 func (*InternalError) stakingPoolsRes()              {}
 func (*InternalError) tonConnectProofRes()           {}
@@ -4298,6 +4318,52 @@ func (o OptSendMessageReq) Or(d SendMessageReq) SendMessageReq {
 	return d
 }
 
+// NewOptSetWalletBackupReq returns new OptSetWalletBackupReq with value set to v.
+func NewOptSetWalletBackupReq(v SetWalletBackupReq) OptSetWalletBackupReq {
+	return OptSetWalletBackupReq{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptSetWalletBackupReq is optional SetWalletBackupReq.
+type OptSetWalletBackupReq struct {
+	Value SetWalletBackupReq
+	Set   bool
+}
+
+// IsSet returns true if OptSetWalletBackupReq was set.
+func (o OptSetWalletBackupReq) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptSetWalletBackupReq) Reset() {
+	var v SetWalletBackupReq
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptSetWalletBackupReq) SetTo(v SetWalletBackupReq) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptSetWalletBackupReq) Get() (v SetWalletBackupReq, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptSetWalletBackupReq) Or(d SetWalletBackupReq) SetWalletBackupReq {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptSmartContractAction returns new OptSmartContractAction with value set to v.
 func NewOptSmartContractAction(v SmartContractAction) OptSmartContractAction {
 	return OptSmartContractAction{
@@ -5209,6 +5275,25 @@ func (s SendMessageReq) GetBoc() string {
 // SetBoc sets the value of Boc.
 func (s *SendMessageReq) SetBoc(val string) {
 	s.Boc = val
+}
+
+// SetWalletBackupOK is response for SetWalletBackup operation.
+type SetWalletBackupOK struct{}
+
+func (*SetWalletBackupOK) setWalletBackupRes() {}
+
+type SetWalletBackupReq struct {
+	Dump string `json:"dump"`
+}
+
+// GetDump returns the value of Dump.
+func (s SetWalletBackupReq) GetDump() string {
+	return s.Dump
+}
+
+// SetDump sets the value of Dump.
+func (s *SetWalletBackupReq) SetDump(val string) {
+	s.Dump = val
 }
 
 // Ref: #/components/schemas/SmartContractAction
@@ -6381,8 +6466,10 @@ func (*UnauthorizedError) getTraceRes()                  {}
 func (*UnauthorizedError) getTracesByAccountRes()        {}
 func (*UnauthorizedError) getTransactionRes()            {}
 func (*UnauthorizedError) getValidatorsRes()             {}
+func (*UnauthorizedError) getWalletBackupRes()           {}
 func (*UnauthorizedError) poolsByNominatorsRes()         {}
 func (*UnauthorizedError) sendMessageRes()               {}
+func (*UnauthorizedError) setWalletBackupRes()           {}
 func (*UnauthorizedError) stakingPoolInfoRes()           {}
 func (*UnauthorizedError) stakingPoolsRes()              {}
 func (*UnauthorizedError) tonConnectProofRes()           {}

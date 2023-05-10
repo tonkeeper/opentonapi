@@ -3490,6 +3490,105 @@ func (s *Server) handleGetValidatorsRequest(args [0]string, w http.ResponseWrite
 	}
 }
 
+// handleGetWalletBackupRequest handles getWalletBackup operation.
+//
+// Get backup info.
+//
+// GET /v2/wallet/backup
+func (s *Server) handleGetWalletBackupRequest(args [0]string, w http.ResponseWriter, r *http.Request) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("getWalletBackup"),
+	}
+
+	// Start a span for this request.
+	ctx, span := s.cfg.Tracer.Start(r.Context(), "GetWalletBackup",
+		trace.WithAttributes(otelAttrs...),
+		serverSpanKind,
+	)
+	defer span.End()
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		elapsedDuration := time.Since(startTime)
+		s.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+	}()
+
+	// Increment request counter.
+	s.requests.Add(ctx, 1, otelAttrs...)
+
+	var (
+		recordError = func(stage string, err error) {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			s.errors.Add(ctx, 1, otelAttrs...)
+		}
+		err          error
+		opErrContext = ogenerrors.OperationContext{
+			Name: "GetWalletBackup",
+			ID:   "getWalletBackup",
+		}
+	)
+	params, err := decodeGetWalletBackupParams(args, r)
+	if err != nil {
+		err = &ogenerrors.DecodeParamsError{
+			OperationContext: opErrContext,
+			Err:              err,
+		}
+		recordError("DecodeParams", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+
+	var response GetWalletBackupRes
+	if m := s.cfg.Middleware; m != nil {
+		mreq := middleware.Request{
+			Context:       ctx,
+			OperationName: "GetWalletBackup",
+			OperationID:   "getWalletBackup",
+			Body:          nil,
+			Params: middleware.Parameters{
+				{
+					Name: "X-TonConnect-Auth",
+					In:   "header",
+				}: params.XTonConnectAuth,
+			},
+			Raw: r,
+		}
+
+		type (
+			Request  = struct{}
+			Params   = GetWalletBackupParams
+			Response = GetWalletBackupRes
+		)
+		response, err = middleware.HookMiddleware[
+			Request,
+			Params,
+			Response,
+		](
+			m,
+			mreq,
+			unpackGetWalletBackupParams,
+			func(ctx context.Context, request Request, params Params) (Response, error) {
+				return s.h.GetWalletBackup(ctx, params)
+			},
+		)
+	} else {
+		response, err = s.h.GetWalletBackup(ctx, params)
+	}
+	if err != nil {
+		recordError("Internal", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+
+	if err := encodeGetWalletBackupResponse(response, w, span); err != nil {
+		recordError("EncodeResponse", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+}
+
 // handlePoolsByNominatorsRequest handles poolsByNominators operation.
 //
 // All pools where account participates.
@@ -3682,6 +3781,120 @@ func (s *Server) handleSendMessageRequest(args [0]string, w http.ResponseWriter,
 	}
 
 	if err := encodeSendMessageResponse(response, w, span); err != nil {
+		recordError("EncodeResponse", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+}
+
+// handleSetWalletBackupRequest handles setWalletBackup operation.
+//
+// Set backup info.
+//
+// PUT /v2/wallet/backup
+func (s *Server) handleSetWalletBackupRequest(args [0]string, w http.ResponseWriter, r *http.Request) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("setWalletBackup"),
+	}
+
+	// Start a span for this request.
+	ctx, span := s.cfg.Tracer.Start(r.Context(), "SetWalletBackup",
+		trace.WithAttributes(otelAttrs...),
+		serverSpanKind,
+	)
+	defer span.End()
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		elapsedDuration := time.Since(startTime)
+		s.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+	}()
+
+	// Increment request counter.
+	s.requests.Add(ctx, 1, otelAttrs...)
+
+	var (
+		recordError = func(stage string, err error) {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			s.errors.Add(ctx, 1, otelAttrs...)
+		}
+		err          error
+		opErrContext = ogenerrors.OperationContext{
+			Name: "SetWalletBackup",
+			ID:   "setWalletBackup",
+		}
+	)
+	params, err := decodeSetWalletBackupParams(args, r)
+	if err != nil {
+		err = &ogenerrors.DecodeParamsError{
+			OperationContext: opErrContext,
+			Err:              err,
+		}
+		recordError("DecodeParams", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+	request, close, err := s.decodeSetWalletBackupRequest(r)
+	if err != nil {
+		err = &ogenerrors.DecodeRequestError{
+			OperationContext: opErrContext,
+			Err:              err,
+		}
+		recordError("DecodeRequest", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+	defer func() {
+		if err := close(); err != nil {
+			recordError("CloseRequest", err)
+		}
+	}()
+
+	var response SetWalletBackupRes
+	if m := s.cfg.Middleware; m != nil {
+		mreq := middleware.Request{
+			Context:       ctx,
+			OperationName: "SetWalletBackup",
+			OperationID:   "setWalletBackup",
+			Body:          request,
+			Params: middleware.Parameters{
+				{
+					Name: "X-TonConnect-Auth",
+					In:   "header",
+				}: params.XTonConnectAuth,
+			},
+			Raw: r,
+		}
+
+		type (
+			Request  = OptSetWalletBackupReq
+			Params   = SetWalletBackupParams
+			Response = SetWalletBackupRes
+		)
+		response, err = middleware.HookMiddleware[
+			Request,
+			Params,
+			Response,
+		](
+			m,
+			mreq,
+			unpackSetWalletBackupParams,
+			func(ctx context.Context, request Request, params Params) (Response, error) {
+				return s.h.SetWalletBackup(ctx, request, params)
+			},
+		)
+	} else {
+		response, err = s.h.SetWalletBackup(ctx, request, params)
+	}
+	if err != nil {
+		recordError("Internal", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+
+	if err := encodeSetWalletBackupResponse(response, w, span); err != nil {
 		recordError("EncodeResponse", err)
 		s.cfg.ErrorHandler(ctx, w, r, err)
 		return

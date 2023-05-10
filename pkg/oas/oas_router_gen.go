@@ -1098,6 +1098,26 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 						return
 					}
 				}
+			case 'w': // Prefix: "wallet/backup"
+				if l := len("wallet/backup"); len(elem) >= l && elem[0:l] == "wallet/backup" {
+					elem = elem[l:]
+				} else {
+					break
+				}
+
+				if len(elem) == 0 {
+					// Leaf node.
+					switch r.Method {
+					case "GET":
+						s.handleGetWalletBackupRequest([0]string{}, w, r)
+					case "PUT":
+						s.handleSetWalletBackupRequest([0]string{}, w, r)
+					default:
+						s.notAllowed(w, r, "GET,PUT")
+					}
+
+					return
+				}
 			}
 		}
 	}
@@ -2237,6 +2257,33 @@ func (s *Server) FindRoute(method, path string) (r Route, _ bool) {
 						default:
 							return
 						}
+					}
+				}
+			case 'w': // Prefix: "wallet/backup"
+				if l := len("wallet/backup"); len(elem) >= l && elem[0:l] == "wallet/backup" {
+					elem = elem[l:]
+				} else {
+					break
+				}
+
+				if len(elem) == 0 {
+					switch method {
+					case "GET":
+						// Leaf: GetWalletBackup
+						r.name = "GetWalletBackup"
+						r.operationID = "getWalletBackup"
+						r.args = args
+						r.count = 0
+						return r, true
+					case "PUT":
+						// Leaf: SetWalletBackup
+						r.name = "SetWalletBackup"
+						r.operationID = "setWalletBackup"
+						r.args = args
+						r.count = 0
+						return r, true
+					default:
+						return
 					}
 				}
 			}

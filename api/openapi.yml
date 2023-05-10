@@ -1147,6 +1147,59 @@ paths:
           $ref: '#/components/responses/UnauthorizedError'
         '500':
           $ref: '#/components/responses/InternalError'
+  
+  /v2/wallet/backup:
+    get:
+      description: Get backup info
+      operationId: getWalletBackup
+      tags:
+        - Wallet
+      parameters:
+        - in: header
+          name: X-TonConnect-Auth
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: "backup"
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - dump
+                properties:
+                  dump:
+                    type: string
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+    put:
+      description: Set backup info
+      operationId: setWalletBackup
+      tags:
+        - Wallet
+      parameters:
+        - in: header
+          name: X-TonConnect-Auth
+          schema:
+            type: string
+          required: true
+      requestBody:
+        $ref: "#/components/requestBodies/Backup"
+      responses:
+        '200':
+          description: "success"
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalError'
 
 components:
   parameters:
@@ -1331,6 +1384,18 @@ components:
                     example: "84jHVNLQmZsAAAAAZB0Zryi2wqVJI-KaKNXOvCijEi46YyYzkaSHyJrMPBMOkVZa"
                   state_init:
                     type: string
+    Backup:
+      description: "Information for saving backup"
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - dump
+            properties:
+              dump:
+                type: string
+                format: binary
 
   schemas:
     Error:

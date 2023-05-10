@@ -218,6 +218,12 @@ type Handler interface {
 	//
 	// GET /v2/blockchain/validators
 	GetValidators(ctx context.Context) (GetValidatorsRes, error)
+	// GetWalletBackup implements getWalletBackup operation.
+	//
+	// Get backup info.
+	//
+	// GET /v2/wallet/backup
+	GetWalletBackup(ctx context.Context, params GetWalletBackupParams) (GetWalletBackupRes, error)
 	// PoolsByNominators implements poolsByNominators operation.
 	//
 	// All pools where account participates.
@@ -230,6 +236,12 @@ type Handler interface {
 	//
 	// POST /v2/blockchain/message
 	SendMessage(ctx context.Context, req OptSendMessageReq) (SendMessageRes, error)
+	// SetWalletBackup implements setWalletBackup operation.
+	//
+	// Set backup info.
+	//
+	// PUT /v2/wallet/backup
+	SetWalletBackup(ctx context.Context, req OptSetWalletBackupReq, params SetWalletBackupParams) (SetWalletBackupRes, error)
 	// StakingPoolInfo implements stakingPoolInfo operation.
 	//
 	// Pool info.

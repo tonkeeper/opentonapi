@@ -328,6 +328,15 @@ func (UnimplementedHandler) GetValidators(ctx context.Context) (r GetValidatorsR
 	return r, ht.ErrNotImplemented
 }
 
+// GetWalletBackup implements getWalletBackup operation.
+//
+// Get backup info.
+//
+// GET /v2/wallet/backup
+func (UnimplementedHandler) GetWalletBackup(ctx context.Context, params GetWalletBackupParams) (r GetWalletBackupRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // PoolsByNominators implements poolsByNominators operation.
 //
 // All pools where account participates.
@@ -343,6 +352,15 @@ func (UnimplementedHandler) PoolsByNominators(ctx context.Context, params PoolsB
 //
 // POST /v2/blockchain/message
 func (UnimplementedHandler) SendMessage(ctx context.Context, req OptSendMessageReq) (r SendMessageRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// SetWalletBackup implements setWalletBackup operation.
+//
+// Set backup info.
+//
+// PUT /v2/wallet/backup
+func (UnimplementedHandler) SetWalletBackup(ctx context.Context, req OptSetWalletBackupReq, params SetWalletBackupParams) (r SetWalletBackupRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 

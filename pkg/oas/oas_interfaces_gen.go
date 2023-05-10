@@ -141,12 +141,20 @@ type GetValidatorsRes interface {
 	getValidatorsRes()
 }
 
+type GetWalletBackupRes interface {
+	getWalletBackupRes()
+}
+
 type PoolsByNominatorsRes interface {
 	poolsByNominatorsRes()
 }
 
 type SendMessageRes interface {
 	sendMessageRes()
+}
+
+type SetWalletBackupRes interface {
+	setWalletBackupRes()
 }
 
 type StakingPoolInfoRes interface {
