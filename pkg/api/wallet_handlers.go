@@ -6,18 +6,13 @@ import (
 	"crypto/sha256"
 	"encoding/base64"
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"os"
-	"path/filepath"
 
 	"github.com/tonkeeper/opentonapi/pkg/oas"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/wallet"
-)
-
-const (
-	dirPath = "/opt/wallets_backup" // TODO: change to s3
 )
 
 func (h Handler) SetWalletBackup(ctx context.Context, request oas.OptSetWalletBackupReq, params oas.SetWalletBackupParams) (res oas.SetWalletBackupRes, err error) {
@@ -29,8 +24,6 @@ func (h Handler) SetWalletBackup(ctx context.Context, request oas.OptSetWalletBa
 		return &oas.BadRequest{Error: "failed verify"}, nil
 	}
 
-	fileName := hex.EncodeToString(pubKey)
-
 	walletBalance, err := getTotalBalances(ctx, h.storage, pubKey)
 	if err != nil {
 		return &oas.BadRequest{Error: err.Error()}, nil
@@ -39,20 +32,17 @@ func (h Handler) SetWalletBackup(ctx context.Context, request oas.OptSetWalletBa
 		return &oas.BadRequest{Error: "wallet must have more than 1 TON"}, nil
 	}
 
-	if _, err = os.Stat(dirPath); os.IsNotExist(err) {
-		err = os.MkdirAll(dirPath, 0755)
-		if err != nil {
-			return &oas.InternalError{Error: err.Error()}, nil
-		}
+	file, err := os.Create(fmt.Sprintf("%v.dump", hex.EncodeToString(pubKey)))
+	if err != nil {
+		return &oas.InternalError{Error: err.Error()}, nil
 	}
+	defer file.Close()
 
-	bytesData, err := request.Value.MarshalJSON()
+	bytesData, err := json.Marshal(request.Value.Dump)
 	if err != nil {
 		return &oas.BadRequest{Error: err.Error()}, nil
 	}
-
-	filePath := fmt.Sprintf("%v/%v.dump", dirPath, fileName)
-	err = ioutil.WriteFile(filePath, bytesData, 0644)
+	_, err = file.Write(bytesData)
 	if err != nil {
 		return &oas.InternalError{Error: err.Error()}, nil
 	}
@@ -69,33 +59,12 @@ func (h Handler) GetWalletBackup(ctx context.Context, params oas.GetWalletBackup
 		return &oas.BadRequest{Error: "failed verify"}, nil
 	}
 
-	fileName := hex.EncodeToString(pubKey)
-
-	if _, err = os.Stat(dirPath); os.IsNotExist(err) {
-		err = os.MkdirAll(dirPath, 0755)
-		if err != nil {
-			return &oas.InternalError{Error: err.Error()}, nil
-		}
-	}
-
-	files, err := ioutil.ReadDir(dirPath)
+	dump, err := os.ReadFile(fmt.Sprintf("%v.dump", hex.EncodeToString(pubKey)))
 	if err != nil {
-		return &oas.InternalError{Error: err.Error()}, nil
+		return &oas.BadRequest{Error: err.Error()}, nil
 	}
 
-	var dump string
-	for _, file := range files {
-		if file.Name() == fileName {
-			filePath := filepath.Join(dirPath, fmt.Sprintf("%v.dump", fileName))
-			data, err := ioutil.ReadFile(filePath)
-			if err != nil {
-				return &oas.InternalError{Error: err.Error()}, nil
-			}
-			dump = string(data)
-		}
-	}
-
-	return &oas.GetWalletBackupOK{Dump: dump}, nil
+	return &oas.GetWalletBackupOK{Dump: string(dump)}, nil
 }
 
 func checkTonConnectToken(authToken, secret string) ([]byte, bool, error) {
