@@ -66,9 +66,10 @@ func (h Handler) convertJettonHistory(ctx context.Context, account tongo.Account
 		if err != nil {
 			return nil, 0, err
 		}
-		bubble := bath.FromTrace(trace)
-		bath.MergeAllBubbles(bubble, []bath.Straw{bath.FindJettonTransfer})
-		actions, fees := bath.CollectActions(bubble, &account)
+		result, err := bath.FindActions(trace, bath.WithStraws([]bath.Straw{bath.FindJettonTransfer}))
+		if err != nil {
+			return nil, 0, err
+		}
 		event := oas.AccountEvent{
 			EventID:    trace.Hash.Hex(),
 			Account:    convertAccountAddress(account, h.addressBook),
@@ -78,13 +79,10 @@ func (h Handler) convertJettonHistory(ctx context.Context, account tongo.Account
 			Lt:         int64(trace.Lt),
 			InProgress: trace.InProgress(),
 		}
-		for _, fee := range fees {
-			if fee.WhoPay == account {
-				event.Fee = convertFees(fee, h.addressBook)
-				break
-			}
+		if flow, ok := result.ValueFlow.Accounts[account]; ok {
+			event.ValueFlow = convertAccountValueFlow(account, flow, h.addressBook)
 		}
-		for _, action := range actions {
+		for _, action := range result.Actions {
 			convertedAction, spamDetected := h.convertAction(ctx, action)
 			if !event.IsScam && spamDetected {
 				event.IsScam = true

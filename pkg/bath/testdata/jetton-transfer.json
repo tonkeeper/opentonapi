@@ -1,0 +1,45 @@
+{
+   "Actions": [
+     {
+       "TonTransfer": null,
+       "SmartContractExec": null,
+       "NftItemTransfer": null,
+       "JettonTransfer": {
+         "Comment": "",
+         "Jetton": "0:0000000000000000000000000000000000000000000000000000000000000000",
+         "Recipient": "0:2cf3b5b8c891e517c9addbda1c0386a09ccacbb0e3faf630b51cfc8152325acb",
+         "Sender": "0:2cf3b5b8c891e517c9addbda1c0386a09ccacbb0e3faf630b51cfc8152325acb",
+         "RecipientsWallet": "0:54d72ac7254c6e4b4a5a3066d41fc7f3f1f604fdf40d6784d6778f3b874e09da",
+         "SendersWallet": "0:54d72ac7254c6e4b4a5a3066d41fc7f3f1f604fdf40d6784d6778f3b874e09da",
+         "Amount": "1000000"
+       },
+       "ContractDeploy": null,
+       "Subscription": null,
+       "UnSubscription": null,
+       "AuctionBid": null,
+       "Success": true,
+       "Type": "JettonTransfer"
+     }
+   ],
+   "Accounts": [
+     {
+       "Account": "0:2cf3b5b8c891e517c9addbda1c0386a09ccacbb0e3faf630b51cfc8152325acb",
+       "Ton": -36830386,
+       "Fee": 8423384,
+       "Nfts": null,
+       "Jettons": [
+         {
+           "Address": "0:0000000000000000000000000000000000000000000000000000000000000000",
+           "Quantity": 1000000
+         }
+       ]
+     },
+     {
+       "Account": "0:54d72ac7254c6e4b4a5a3066d41fc7f3f1f604fdf40d6784d6778f3b874e09da",
+       "Ton": 18945000,
+       "Fee": 23948878,
+       "Nfts": null,
+       "Jettons": null
+     }
+   ]
+ }

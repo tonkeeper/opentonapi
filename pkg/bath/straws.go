@@ -2,6 +2,7 @@ package bath
 
 import (
 	"fmt"
+	"math/big"
 
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
@@ -69,11 +70,14 @@ func FindNFTTransfer(bubble *Bubble) bool {
 			recipient: parseAccount(transfer.NewOwner),
 			payload:   cellToTextComment(boc.Cell(transfer.ForwardPayload.Value)),
 		},
-		Accounts: append(bubble.Accounts, nftBubble.account.Address),
-		Fee:      bubble.Fee,
+		Accounts:  append(bubble.Accounts, nftBubble.account.Address),
+		ValueFlow: bubble.ValueFlow,
 	}
-	newBubble.Fee.WhoPay = nftBubble.inputFrom.Address
-	newBubble.Fee.Deposit += nftBubble.inputAmount
+	newOwner, err := tongo.AccountIDFromTlb(transfer.NewOwner)
+	if err != nil {
+		return false
+	}
+	newBubble.ValueFlow.AddNFT(*newOwner, nftBubble.account.Address, 1)
 	newBubble.Children = ProcessChildren(bubble.Children,
 		func(child *Bubble) *Merge {
 			tx, ok := child.Info.(BubbleTx)
@@ -83,8 +87,7 @@ func FindNFTTransfer(bubble *Bubble) bool {
 			if !tx.operation(abi.ExcessMsgOp) {
 				return nil
 			}
-			newBubble.Fee.Add(child.Fee)
-			newBubble.Fee.Refund += tx.inputAmount
+			newBubble.ValueFlow.Merge(child.ValueFlow)
 			newBubble.Accounts = append(newBubble.Accounts, tx.account.Address)
 			return &Merge{children: child.Children}
 		},
@@ -96,8 +99,8 @@ func FindNFTTransfer(bubble *Bubble) bool {
 			if !tx.operation(abi.NftOwnershipAssignedMsgOp) {
 				return nil
 			}
-			newBubble.Fee.Add(child.Fee)
 			newBubble.Accounts = append(newBubble.Accounts, tx.account.Address)
+			newBubble.ValueFlow.Merge(child.ValueFlow)
 			return &Merge{children: child.Children}
 		})
 	*bubble = newBubble
@@ -116,7 +119,7 @@ func (b BubbleNftTransfer) ToAction() (action *Action) {
 	a := Action{
 		NftItemTransfer: &NftTransferAction{
 			Comment:   nil, //todo: add
-			Recipient: b.account.Addr(),
+			Recipient: b.recipient.Addr(),
 			Sender:    b.sender.Addr(),
 			Nft:       b.account.Address,
 		},
@@ -170,10 +173,11 @@ func FindJettonTransfer(bubble *Bubble) bool {
 		transfer.master, _ = master.(tongo.AccountID)
 	}
 	newBubble := Bubble{
-		Accounts: append(bubble.Accounts, jettonBubble.account.Address),
-		Children: bubble.Children,
-		Fee:      bubble.Fee,
+		Accounts:  append(bubble.Accounts, jettonBubble.account.Address),
+		Children:  bubble.Children,
+		ValueFlow: bubble.ValueFlow,
 	}
+	newBubble.ValueFlow.AddJettons(*recipient, transfer.master, big.Int(intention.Amount))
 	if jettonBubble.success {
 		newBubble.Children = ProcessChildren(bubble.Children,
 			func(child *Bubble) *Merge {
@@ -197,6 +201,7 @@ func FindJettonTransfer(bubble *Bubble) bool {
 						if !tx.operation(abi.ExcessMsgOp) {
 							return nil
 						}
+						newBubble.ValueFlow.Merge(excess.ValueFlow)
 						return &Merge{children: excess.Children}
 					},
 					func(notify *Bubble) *Merge {
@@ -212,6 +217,7 @@ func FindJettonTransfer(bubble *Bubble) bool {
 							transfer.success = false
 						}
 						transfer.recipient.Interfaces = tx.account.Interfaces
+						newBubble.ValueFlow.Merge(notify.ValueFlow)
 						return &Merge{children: notify.Children}
 					},
 				)
@@ -222,7 +228,6 @@ func FindJettonTransfer(bubble *Bubble) bool {
 		}
 	}
 	newBubble.Info = transfer
-	newBubble.Fee.WhoPay = jettonBubble.inputFrom.Address
 	*bubble = newBubble
 	return true
 }
