@@ -92,39 +92,23 @@ func encodeSendMessageRequest(
 }
 
 func encodeSetWalletBackupRequest(
-	req OptSetWalletBackupReq,
+	req SetWalletBackupReq,
 	r *http.Request,
 ) error {
-	const contentType = "application/json"
-	if !req.Set {
-		// Keep request with empty body if value is not set.
-		return nil
-	}
-	e := jx.GetEncoder()
-	{
-		if req.Set {
-			req.Encode(e)
-		}
-	}
-	encoded := e.Bytes()
-	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	const contentType = "application/octet-stream"
+	body := req
+	ht.SetBody(r, body, contentType)
 	return nil
 }
 
 func encodeTonConnectProofRequest(
-	req OptTonConnectProofReq,
+	req TonConnectProofReq,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"
-	if !req.Set {
-		// Keep request with empty body if value is not set.
-		return nil
-	}
 	e := jx.GetEncoder()
 	{
-		if req.Set {
-			req.Encode(e)
-		}
+		req.Encode(e)
 	}
 	encoded := e.Bytes()
 	ht.SetBody(r, bytes.NewReader(encoded), contentType)

@@ -9,3 +9,6 @@ var DomainSuffixes = map[tongo.AccountID]string{
 	RootTelegram: "", //telegram use full domain
 	tongo.MustParseAccountID("0:d9255340783403c635169d00aaaaaf2ab85fbb5d32c707b39a42157b7c347440"): ".dolboeb.t.me",
 }
+
+// use for checking ton-connect proofs
+const AppDomain string = "tonapi.ton"

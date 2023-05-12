@@ -6,16 +6,17 @@ import (
 	"crypto/sha256"
 	"encoding/base64"
 	"encoding/hex"
-	"encoding/json"
 	"fmt"
+	"io"
 	"os"
+	"time"
 
 	"github.com/tonkeeper/opentonapi/pkg/oas"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/wallet"
 )
 
-func (h Handler) SetWalletBackup(ctx context.Context, request oas.OptSetWalletBackupReq, params oas.SetWalletBackupParams) (res oas.SetWalletBackupRes, err error) {
+func (h Handler) SetWalletBackup(ctx context.Context, request oas.SetWalletBackupReq, params oas.SetWalletBackupParams) (res oas.SetWalletBackupRes, err error) {
 	pubKey, verify, err := checkTonConnectToken(params.XTonConnectAuth, h.tonConnect.GetSecret())
 	if err != nil {
 		return &oas.BadRequest{Error: err.Error()}, nil
@@ -32,21 +33,22 @@ func (h Handler) SetWalletBackup(ctx context.Context, request oas.OptSetWalletBa
 		return &oas.BadRequest{Error: "wallet must have more than 1 TON"}, nil
 	}
 
-	file, err := os.Create(fmt.Sprintf("%v.dump", hex.EncodeToString(pubKey)))
+	fileName := fmt.Sprintf("%x.dump", pubKey)
+	tempFileName := fileName + fmt.Sprintf(".temp%v", time.Now().Nanosecond()+time.Now().Second())
+	file, err := os.Create(tempFileName)
 	if err != nil {
 		return &oas.InternalError{Error: err.Error()}, nil
 	}
 	defer file.Close()
-
-	bytesData, err := json.Marshal(request.Value.Dump)
-	if err != nil {
-		return &oas.BadRequest{Error: err.Error()}, nil
-	}
-	_, err = file.Write(bytesData)
+	_, err = io.Copy(file, io.LimitReader(request.Data, 640*1024)) //640K ought to be enough for anybody
 	if err != nil {
 		return &oas.InternalError{Error: err.Error()}, nil
 	}
-
+	file.Close()
+	err = os.Rename(tempFileName, fileName)
+	if err != nil {
+		return &oas.InternalError{Error: err.Error()}, nil
+	}
 	return &oas.SetWalletBackupOK{}, nil
 }
 

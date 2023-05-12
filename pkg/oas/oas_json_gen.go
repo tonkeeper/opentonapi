@@ -10051,39 +10051,6 @@ func (s *OptSendMessageReq) UnmarshalJSON(data []byte) error {
 	return s.Decode(d)
 }
 
-// Encode encodes SetWalletBackupReq as json.
-func (o OptSetWalletBackupReq) Encode(e *jx.Encoder) {
-	if !o.Set {
-		return
-	}
-	o.Value.Encode(e)
-}
-
-// Decode decodes SetWalletBackupReq from json.
-func (o *OptSetWalletBackupReq) Decode(d *jx.Decoder) error {
-	if o == nil {
-		return errors.New("invalid: unable to decode OptSetWalletBackupReq to nil")
-	}
-	o.Set = true
-	if err := o.Value.Decode(d); err != nil {
-		return err
-	}
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s OptSetWalletBackupReq) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *OptSetWalletBackupReq) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
 // Encode encodes SmartContractAction as json.
 func (o OptSmartContractAction) Encode(e *jx.Encoder) {
 	if !o.Set {
@@ -10247,72 +10214,6 @@ func (s OptSubscriptionAction) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *OptSubscriptionAction) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
-// Encode encodes TonConnectProofReq as json.
-func (o OptTonConnectProofReq) Encode(e *jx.Encoder) {
-	if !o.Set {
-		return
-	}
-	o.Value.Encode(e)
-}
-
-// Decode decodes TonConnectProofReq from json.
-func (o *OptTonConnectProofReq) Decode(d *jx.Decoder) error {
-	if o == nil {
-		return errors.New("invalid: unable to decode OptTonConnectProofReq to nil")
-	}
-	o.Set = true
-	if err := o.Value.Decode(d); err != nil {
-		return err
-	}
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s OptTonConnectProofReq) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *OptTonConnectProofReq) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
-// Encode encodes TonConnectProofReqProofDomain as json.
-func (o OptTonConnectProofReqProofDomain) Encode(e *jx.Encoder) {
-	if !o.Set {
-		return
-	}
-	o.Value.Encode(e)
-}
-
-// Decode decodes TonConnectProofReqProofDomain from json.
-func (o *OptTonConnectProofReqProofDomain) Decode(d *jx.Decoder) error {
-	if o == nil {
-		return errors.New("invalid: unable to decode OptTonConnectProofReqProofDomain to nil")
-	}
-	o.Set = true
-	if err := o.Value.Decode(d); err != nil {
-		return err
-	}
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s OptTonConnectProofReqProofDomain) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *OptTonConnectProofReqProofDomain) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -11683,103 +11584,6 @@ func (s SendMessageReq) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *SendMessageReq) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
-// Encode implements json.Marshaler.
-func (s SetWalletBackupReq) Encode(e *jx.Encoder) {
-	e.ObjStart()
-	s.encodeFields(e)
-	e.ObjEnd()
-}
-
-// encodeFields encodes fields.
-func (s SetWalletBackupReq) encodeFields(e *jx.Encoder) {
-	{
-
-		e.FieldStart("dump")
-		e.Str(s.Dump)
-	}
-}
-
-var jsonFieldsNameOfSetWalletBackupReq = [1]string{
-	0: "dump",
-}
-
-// Decode decodes SetWalletBackupReq from json.
-func (s *SetWalletBackupReq) Decode(d *jx.Decoder) error {
-	if s == nil {
-		return errors.New("invalid: unable to decode SetWalletBackupReq to nil")
-	}
-	var requiredBitSet [1]uint8
-
-	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
-		switch string(k) {
-		case "dump":
-			requiredBitSet[0] |= 1 << 0
-			if err := func() error {
-				v, err := d.Str()
-				s.Dump = string(v)
-				if err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"dump\"")
-			}
-		default:
-			return d.Skip()
-		}
-		return nil
-	}); err != nil {
-		return errors.Wrap(err, "decode SetWalletBackupReq")
-	}
-	// Validate required fields.
-	var failures []validate.FieldError
-	for i, mask := range [1]uint8{
-		0b00000001,
-	} {
-		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
-			// Mask only required fields and check equality to mask using XOR.
-			//
-			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
-			// Bits of fields which would be set are actually bits of missed fields.
-			missed := bits.OnesCount8(result)
-			for bitN := 0; bitN < missed; bitN++ {
-				bitIdx := bits.TrailingZeros8(result)
-				fieldIdx := i*8 + bitIdx
-				var name string
-				if fieldIdx < len(jsonFieldsNameOfSetWalletBackupReq) {
-					name = jsonFieldsNameOfSetWalletBackupReq[fieldIdx]
-				} else {
-					name = strconv.Itoa(fieldIdx)
-				}
-				failures = append(failures, validate.FieldError{
-					Name:  name,
-					Error: validate.ErrFieldRequired,
-				})
-				// Reset bit.
-				result &^= 1 << bitIdx
-			}
-		}
-	}
-	if len(failures) > 0 {
-		return &validate.Error{Fields: failures}
-	}
-
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s SetWalletBackupReq) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *SetWalletBackupReq) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -13437,28 +13241,24 @@ func (s TonConnectProofReqProof) Encode(e *jx.Encoder) {
 // encodeFields encodes fields.
 func (s TonConnectProofReqProof) encodeFields(e *jx.Encoder) {
 	{
-		if s.Timestamp.Set {
-			e.FieldStart("timestamp")
-			s.Timestamp.Encode(e)
-		}
+
+		e.FieldStart("timestamp")
+		e.Int64(s.Timestamp)
 	}
 	{
-		if s.Domain.Set {
-			e.FieldStart("domain")
-			s.Domain.Encode(e)
-		}
+
+		e.FieldStart("domain")
+		s.Domain.Encode(e)
 	}
 	{
-		if s.Signature.Set {
-			e.FieldStart("signature")
-			s.Signature.Encode(e)
-		}
+
+		e.FieldStart("signature")
+		e.Str(s.Signature)
 	}
 	{
-		if s.Payload.Set {
-			e.FieldStart("payload")
-			s.Payload.Encode(e)
-		}
+
+		e.FieldStart("payload")
+		e.Str(s.Payload)
 	}
 	{
 		if s.StateInit.Set {
@@ -13481,13 +13281,16 @@ func (s *TonConnectProofReqProof) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode TonConnectProofReqProof to nil")
 	}
+	var requiredBitSet [1]uint8
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
 		case "timestamp":
+			requiredBitSet[0] |= 1 << 0
 			if err := func() error {
-				s.Timestamp.Reset()
-				if err := s.Timestamp.Decode(d); err != nil {
+				v, err := d.Int64()
+				s.Timestamp = int64(v)
+				if err != nil {
 					return err
 				}
 				return nil
@@ -13495,8 +13298,8 @@ func (s *TonConnectProofReqProof) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"timestamp\"")
 			}
 		case "domain":
+			requiredBitSet[0] |= 1 << 1
 			if err := func() error {
-				s.Domain.Reset()
 				if err := s.Domain.Decode(d); err != nil {
 					return err
 				}
@@ -13505,9 +13308,11 @@ func (s *TonConnectProofReqProof) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"domain\"")
 			}
 		case "signature":
+			requiredBitSet[0] |= 1 << 2
 			if err := func() error {
-				s.Signature.Reset()
-				if err := s.Signature.Decode(d); err != nil {
+				v, err := d.Str()
+				s.Signature = string(v)
+				if err != nil {
 					return err
 				}
 				return nil
@@ -13515,9 +13320,11 @@ func (s *TonConnectProofReqProof) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"signature\"")
 			}
 		case "payload":
+			requiredBitSet[0] |= 1 << 3
 			if err := func() error {
-				s.Payload.Reset()
-				if err := s.Payload.Decode(d); err != nil {
+				v, err := d.Str()
+				s.Payload = string(v)
+				if err != nil {
 					return err
 				}
 				return nil
@@ -13540,6 +13347,38 @@ func (s *TonConnectProofReqProof) Decode(d *jx.Decoder) error {
 		return nil
 	}); err != nil {
 		return errors.Wrap(err, "decode TonConnectProofReqProof")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00001111,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfTonConnectProofReqProof) {
+					name = jsonFieldsNameOfTonConnectProofReqProof[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
 	}
 
 	return nil
@@ -13574,10 +13413,9 @@ func (s TonConnectProofReqProofDomain) encodeFields(e *jx.Encoder) {
 		}
 	}
 	{
-		if s.Value.Set {
-			e.FieldStart("value")
-			s.Value.Encode(e)
-		}
+
+		e.FieldStart("value")
+		e.Str(s.Value)
 	}
 }
 
@@ -13591,6 +13429,7 @@ func (s *TonConnectProofReqProofDomain) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode TonConnectProofReqProofDomain to nil")
 	}
+	var requiredBitSet [1]uint8
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
@@ -13605,9 +13444,11 @@ func (s *TonConnectProofReqProofDomain) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"length_bytes\"")
 			}
 		case "value":
+			requiredBitSet[0] |= 1 << 1
 			if err := func() error {
-				s.Value.Reset()
-				if err := s.Value.Decode(d); err != nil {
+				v, err := d.Str()
+				s.Value = string(v)
+				if err != nil {
 					return err
 				}
 				return nil
@@ -13620,6 +13461,38 @@ func (s *TonConnectProofReqProofDomain) Decode(d *jx.Decoder) error {
 		return nil
 	}); err != nil {
 		return errors.Wrap(err, "decode TonConnectProofReqProofDomain")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00000010,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfTonConnectProofReqProofDomain) {
+					name = jsonFieldsNameOfTonConnectProofReqProofDomain[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
 	}
 
 	return nil

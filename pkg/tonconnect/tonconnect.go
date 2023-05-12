@@ -41,7 +41,7 @@ func init() {
 
 type MessageInfo struct {
 	Timestamp int64  `json:"timestamp"`
-	Domain    Domain `json:"domain"`
+	Domain    string `json:"domain"`
 	Signature string `json:"signature"`
 	Payload   string `json:"payload"`
 	StateInit string `json:"state_init"`
@@ -61,7 +61,7 @@ type ParsedMessage struct {
 	WorkChain int32
 	Address   []byte
 	TS        int64
-	Domain    Domain
+	Domain    string
 	Signature []byte
 	Payload   string
 	StateInit string
@@ -155,13 +155,13 @@ func CreateMessage(message *ParsedMessage) ([]byte, error) {
 	binary.LittleEndian.PutUint64(ts, uint64(message.TS))
 
 	dl := make([]byte, 4)
-	binary.LittleEndian.PutUint32(dl, message.Domain.LengthBytes)
+	binary.LittleEndian.PutUint32(dl, uint32(len(message.Domain)))
 
 	m := []byte(tonProofPrefix)
 	m = append(m, wc...)
 	m = append(m, message.Address...)
 	m = append(m, dl...)
-	m = append(m, []byte(message.Domain.Value)...)
+	m = append(m, []byte(message.Domain)...)
 	m = append(m, ts...)
 	m = append(m, []byte(message.Payload)...)
 

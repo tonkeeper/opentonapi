@@ -360,7 +360,7 @@ func (UnimplementedHandler) SendMessage(ctx context.Context, req OptSendMessageR
 // Set backup info.
 //
 // PUT /v2/wallet/backup
-func (UnimplementedHandler) SetWalletBackup(ctx context.Context, req OptSetWalletBackupReq, params SetWalletBackupParams) (r SetWalletBackupRes, _ error) {
+func (UnimplementedHandler) SetWalletBackup(ctx context.Context, req SetWalletBackupReq, params SetWalletBackupParams) (r SetWalletBackupRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -387,6 +387,6 @@ func (UnimplementedHandler) StakingPools(ctx context.Context, params StakingPool
 // Account verification and token issuance.
 //
 // POST /v2/tonconnect/proof
-func (UnimplementedHandler) TonConnectProof(ctx context.Context, req OptTonConnectProofReq) (r TonConnectProofRes, _ error) {
+func (UnimplementedHandler) TonConnectProof(ctx context.Context, req TonConnectProofReq) (r TonConnectProofRes, _ error) {
 	return r, ht.ErrNotImplemented
 }

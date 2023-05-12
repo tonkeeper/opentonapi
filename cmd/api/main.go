@@ -6,7 +6,6 @@ import (
 	"net/http"
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"github.com/tonkeeper/opentonapi/pkg/tonconnect"
 	"go.uber.org/zap"
 	"golang.org/x/exp/maps"
 
@@ -41,13 +40,13 @@ func main() {
 	if err != nil {
 		log.Fatal("failed to create msg sender", zap.Error(err))
 	}
-	tonConnect := tonconnect.NewTonConnect(cfg.App.TonConnectSecret)
+
 	h, err := api.NewHandler(log,
 		api.WithStorage(storage),
 		api.WithAddressBook(book),
 		api.WithExecutor(storage),
 		api.WithMessageSender(msgSender),
-		api.WithTonConnect(tonConnect),
+		api.WithTonConnectSecret(cfg.App.TonConnectSecret),
 	)
 	if err != nil {
 		log.Fatal("failed to create api handler", zap.Error(err))

@@ -1351,6 +1351,7 @@ components:
                   example: 0:97264395BD65A255A429B11326C84128B7D70FFED7949ABAE3036D506BA38621
     TonConnectProof:
       description: "Data that is expected from TON Connect"
+      required: true
       content:
         application/json:
           schema:
@@ -1364,6 +1365,11 @@ components:
                 example: "0:97146a46acc2654y27947f14c4a4b14273e954f78bc017790b41208b0043200b"
               proof:
                 type: object
+                required:
+                  - timestamp
+                  - domain
+                  - signature
+                  - payload
                 properties:
                   timestamp:
                     type: integer
@@ -1371,6 +1377,8 @@ components:
                     example: "1678275313"
                   domain:
                     type: object
+                    required:
+                      - value
                     properties:
                       length_bytes:
                         type: integer
@@ -1386,16 +1394,12 @@ components:
                     type: string
     Backup:
       description: "Information for saving backup"
+      required: true
       content:
-        application/json:
+        application/octet-stream:
           schema:
-            type: object
-            required:
-              - dump
-            properties:
-              dump:
-                type: string
-                format: binary
+            type: string
+            format: binary
 
   schemas:
     Error:

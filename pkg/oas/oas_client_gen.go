@@ -3370,7 +3370,7 @@ func (c *Client) SendMessage(ctx context.Context, request OptSendMessageReq) (re
 // Set backup info.
 //
 // PUT /v2/wallet/backup
-func (c *Client) SetWalletBackup(ctx context.Context, request OptSetWalletBackupReq, params SetWalletBackupParams) (res SetWalletBackupRes, err error) {
+func (c *Client) SetWalletBackup(ctx context.Context, request SetWalletBackupReq, params SetWalletBackupParams) (res SetWalletBackupRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("setWalletBackup"),
 	}
@@ -3659,7 +3659,7 @@ func (c *Client) StakingPools(ctx context.Context, params StakingPoolsParams) (r
 // Account verification and token issuance.
 //
 // POST /v2/tonconnect/proof
-func (c *Client) TonConnectProof(ctx context.Context, request OptTonConnectProofReq) (res TonConnectProofRes, err error) {
+func (c *Client) TonConnectProof(ctx context.Context, request TonConnectProofReq) (res TonConnectProofRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("tonConnectProof"),
 	}

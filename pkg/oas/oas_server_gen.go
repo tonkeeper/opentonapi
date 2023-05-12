@@ -241,7 +241,7 @@ type Handler interface {
 	// Set backup info.
 	//
 	// PUT /v2/wallet/backup
-	SetWalletBackup(ctx context.Context, req OptSetWalletBackupReq, params SetWalletBackupParams) (SetWalletBackupRes, error)
+	SetWalletBackup(ctx context.Context, req SetWalletBackupReq, params SetWalletBackupParams) (SetWalletBackupRes, error)
 	// StakingPoolInfo implements stakingPoolInfo operation.
 	//
 	// Pool info.
@@ -259,7 +259,7 @@ type Handler interface {
 	// Account verification and token issuance.
 	//
 	// POST /v2/tonconnect/proof
-	TonConnectProof(ctx context.Context, req OptTonConnectProofReq) (TonConnectProofRes, error)
+	TonConnectProof(ctx context.Context, req TonConnectProofReq) (TonConnectProofRes, error)
 }
 
 // Server implements http server based on OpenAPI v3 specification and

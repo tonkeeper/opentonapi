@@ -5,17 +5,12 @@ import (
 	"crypto/hmac"
 	"crypto/sha256"
 	"encoding/base64"
+	"github.com/tonkeeper/opentonapi/pkg/references"
 
-	"github.com/golang-jwt/jwt"
 	"github.com/tonkeeper/opentonapi/pkg/oas"
 	"github.com/tonkeeper/opentonapi/pkg/tonconnect"
 	"github.com/tonkeeper/tongo"
 )
-
-type jwtCustomClaims struct {
-	Address string `json:"address"`
-	jwt.StandardClaims
-}
 
 func (h Handler) GetTonConnectPayload(ctx context.Context) (res oas.GetTonConnectPayloadRes, err error) {
 	payload, err := h.tonConnect.GeneratePayload()
@@ -26,24 +21,24 @@ func (h Handler) GetTonConnectPayload(ctx context.Context) (res oas.GetTonConnec
 	return &oas.GetTonConnectPayloadOK{Payload: payload}, nil
 }
 
-func (h Handler) TonConnectProof(ctx context.Context, request oas.OptTonConnectProofReq) (res oas.TonConnectProofRes, err error) {
-	verified := h.tonConnect.CheckPayload(request.Value.Proof.GetPayload().Value)
+func (h Handler) TonConnectProof(ctx context.Context, request oas.TonConnectProofReq) (res oas.TonConnectProofRes, err error) {
+	verified := h.tonConnect.CheckPayload(request.Proof.Payload)
 	if !verified {
 		return &oas.BadRequest{Error: "failed verify payload"}, nil
 	}
+	requestProof := request.Proof
 
-	requestProof := request.Value.GetProof()
+	if requestProof.Domain.Value != references.AppDomain {
+		return &oas.BadRequest{Error: "invalid domain for proof"}, nil
+	}
 	stateInit := requestProof.StateInit.Value
 	proof := tonconnect.TonProof{
-		Address: request.Value.GetAddress(),
+		Address: request.Address,
 		Proof: tonconnect.MessageInfo{
-			Timestamp: requestProof.Timestamp.Value,
-			Domain: tonconnect.Domain{
-				LengthBytes: requestProof.Domain.Value.GetLengthBytes().Value,
-				Value:       requestProof.Domain.Value.GetValue().Value,
-			},
-			Signature: requestProof.Signature.Value,
-			Payload:   requestProof.Payload.Value,
+			Timestamp: requestProof.Timestamp,
+			Domain:    requestProof.Domain.Value,
+			Signature: requestProof.Signature,
+			Payload:   requestProof.Payload,
 			StateInit: stateInit,
 		},
 	}
@@ -52,7 +47,7 @@ func (h Handler) TonConnectProof(ctx context.Context, request oas.OptTonConnectP
 		return &oas.BadRequest{Error: err.Error()}, nil
 	}
 
-	accountID, err := tongo.ParseAccountID(request.Value.GetAddress())
+	accountID, err := tongo.ParseAccountID(request.Address)
 	if err != nil {
 		return &oas.BadRequest{Error: err.Error()}, nil
 	}

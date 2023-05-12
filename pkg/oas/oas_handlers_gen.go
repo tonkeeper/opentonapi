@@ -3869,7 +3869,7 @@ func (s *Server) handleSetWalletBackupRequest(args [0]string, w http.ResponseWri
 		}
 
 		type (
-			Request  = OptSetWalletBackupReq
+			Request  = SetWalletBackupReq
 			Params   = SetWalletBackupParams
 			Response = SetWalletBackupRes
 		)
@@ -4178,7 +4178,7 @@ func (s *Server) handleTonConnectProofRequest(args [0]string, w http.ResponseWri
 		}
 
 		type (
-			Request  = OptTonConnectProofReq
+			Request  = TonConnectProofReq
 			Params   = struct{}
 			Response = TonConnectProofRes
 		)

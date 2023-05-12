@@ -3,6 +3,8 @@
 package oas
 
 import (
+	"io"
+
 	"github.com/go-faster/jx"
 )
 
@@ -4318,52 +4320,6 @@ func (o OptSendMessageReq) Or(d SendMessageReq) SendMessageReq {
 	return d
 }
 
-// NewOptSetWalletBackupReq returns new OptSetWalletBackupReq with value set to v.
-func NewOptSetWalletBackupReq(v SetWalletBackupReq) OptSetWalletBackupReq {
-	return OptSetWalletBackupReq{
-		Value: v,
-		Set:   true,
-	}
-}
-
-// OptSetWalletBackupReq is optional SetWalletBackupReq.
-type OptSetWalletBackupReq struct {
-	Value SetWalletBackupReq
-	Set   bool
-}
-
-// IsSet returns true if OptSetWalletBackupReq was set.
-func (o OptSetWalletBackupReq) IsSet() bool { return o.Set }
-
-// Reset unsets value.
-func (o *OptSetWalletBackupReq) Reset() {
-	var v SetWalletBackupReq
-	o.Value = v
-	o.Set = false
-}
-
-// SetTo sets value to v.
-func (o *OptSetWalletBackupReq) SetTo(v SetWalletBackupReq) {
-	o.Set = true
-	o.Value = v
-}
-
-// Get returns value and boolean that denotes whether value was set.
-func (o OptSetWalletBackupReq) Get() (v SetWalletBackupReq, ok bool) {
-	if !o.Set {
-		return v, false
-	}
-	return o.Value, true
-}
-
-// Or returns value if set, or given parameter if does not.
-func (o OptSetWalletBackupReq) Or(d SetWalletBackupReq) SetWalletBackupReq {
-	if v, ok := o.Get(); ok {
-		return v
-	}
-	return d
-}
-
 // NewOptSmartContractAction returns new OptSmartContractAction with value set to v.
 func NewOptSmartContractAction(v SmartContractAction) OptSmartContractAction {
 	return OptSmartContractAction{
@@ -4588,98 +4544,6 @@ func (o OptSubscriptionAction) Get() (v SubscriptionAction, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptSubscriptionAction) Or(d SubscriptionAction) SubscriptionAction {
-	if v, ok := o.Get(); ok {
-		return v
-	}
-	return d
-}
-
-// NewOptTonConnectProofReq returns new OptTonConnectProofReq with value set to v.
-func NewOptTonConnectProofReq(v TonConnectProofReq) OptTonConnectProofReq {
-	return OptTonConnectProofReq{
-		Value: v,
-		Set:   true,
-	}
-}
-
-// OptTonConnectProofReq is optional TonConnectProofReq.
-type OptTonConnectProofReq struct {
-	Value TonConnectProofReq
-	Set   bool
-}
-
-// IsSet returns true if OptTonConnectProofReq was set.
-func (o OptTonConnectProofReq) IsSet() bool { return o.Set }
-
-// Reset unsets value.
-func (o *OptTonConnectProofReq) Reset() {
-	var v TonConnectProofReq
-	o.Value = v
-	o.Set = false
-}
-
-// SetTo sets value to v.
-func (o *OptTonConnectProofReq) SetTo(v TonConnectProofReq) {
-	o.Set = true
-	o.Value = v
-}
-
-// Get returns value and boolean that denotes whether value was set.
-func (o OptTonConnectProofReq) Get() (v TonConnectProofReq, ok bool) {
-	if !o.Set {
-		return v, false
-	}
-	return o.Value, true
-}
-
-// Or returns value if set, or given parameter if does not.
-func (o OptTonConnectProofReq) Or(d TonConnectProofReq) TonConnectProofReq {
-	if v, ok := o.Get(); ok {
-		return v
-	}
-	return d
-}
-
-// NewOptTonConnectProofReqProofDomain returns new OptTonConnectProofReqProofDomain with value set to v.
-func NewOptTonConnectProofReqProofDomain(v TonConnectProofReqProofDomain) OptTonConnectProofReqProofDomain {
-	return OptTonConnectProofReqProofDomain{
-		Value: v,
-		Set:   true,
-	}
-}
-
-// OptTonConnectProofReqProofDomain is optional TonConnectProofReqProofDomain.
-type OptTonConnectProofReqProofDomain struct {
-	Value TonConnectProofReqProofDomain
-	Set   bool
-}
-
-// IsSet returns true if OptTonConnectProofReqProofDomain was set.
-func (o OptTonConnectProofReqProofDomain) IsSet() bool { return o.Set }
-
-// Reset unsets value.
-func (o *OptTonConnectProofReqProofDomain) Reset() {
-	var v TonConnectProofReqProofDomain
-	o.Value = v
-	o.Set = false
-}
-
-// SetTo sets value to v.
-func (o *OptTonConnectProofReqProofDomain) SetTo(v TonConnectProofReqProofDomain) {
-	o.Set = true
-	o.Value = v
-}
-
-// Get returns value and boolean that denotes whether value was set.
-func (o OptTonConnectProofReqProofDomain) Get() (v TonConnectProofReqProofDomain, ok bool) {
-	if !o.Set {
-		return v, false
-	}
-	return o.Value, true
-}
-
-// Or returns value if set, or given parameter if does not.
-func (o OptTonConnectProofReqProofDomain) Or(d TonConnectProofReqProofDomain) TonConnectProofReqProofDomain {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -5283,17 +5147,14 @@ type SetWalletBackupOK struct{}
 func (*SetWalletBackupOK) setWalletBackupRes() {}
 
 type SetWalletBackupReq struct {
-	Dump string `json:"dump"`
+	Data io.Reader
 }
 
-// GetDump returns the value of Dump.
-func (s SetWalletBackupReq) GetDump() string {
-	return s.Dump
-}
-
-// SetDump sets the value of Dump.
-func (s *SetWalletBackupReq) SetDump(val string) {
-	s.Dump = val
+// Read reads data from the Data reader.
+//
+// Kept to satisfy the io.Reader interface.
+func (s SetWalletBackupReq) Read(p []byte) (n int, err error) {
+	return s.Data.Read(p)
 }
 
 // Ref: #/components/schemas/SmartContractAction
@@ -5797,30 +5658,30 @@ func (s *TonConnectProofReq) SetProof(val TonConnectProofReqProof) {
 }
 
 type TonConnectProofReqProof struct {
-	Timestamp OptInt64                         `json:"timestamp"`
-	Domain    OptTonConnectProofReqProofDomain `json:"domain"`
-	Signature OptString                        `json:"signature"`
-	Payload   OptString                        `json:"payload"`
-	StateInit OptString                        `json:"state_init"`
+	Timestamp int64                         `json:"timestamp"`
+	Domain    TonConnectProofReqProofDomain `json:"domain"`
+	Signature string                        `json:"signature"`
+	Payload   string                        `json:"payload"`
+	StateInit OptString                     `json:"state_init"`
 }
 
 // GetTimestamp returns the value of Timestamp.
-func (s TonConnectProofReqProof) GetTimestamp() OptInt64 {
+func (s TonConnectProofReqProof) GetTimestamp() int64 {
 	return s.Timestamp
 }
 
 // GetDomain returns the value of Domain.
-func (s TonConnectProofReqProof) GetDomain() OptTonConnectProofReqProofDomain {
+func (s TonConnectProofReqProof) GetDomain() TonConnectProofReqProofDomain {
 	return s.Domain
 }
 
 // GetSignature returns the value of Signature.
-func (s TonConnectProofReqProof) GetSignature() OptString {
+func (s TonConnectProofReqProof) GetSignature() string {
 	return s.Signature
 }
 
 // GetPayload returns the value of Payload.
-func (s TonConnectProofReqProof) GetPayload() OptString {
+func (s TonConnectProofReqProof) GetPayload() string {
 	return s.Payload
 }
 
@@ -5830,22 +5691,22 @@ func (s TonConnectProofReqProof) GetStateInit() OptString {
 }
 
 // SetTimestamp sets the value of Timestamp.
-func (s *TonConnectProofReqProof) SetTimestamp(val OptInt64) {
+func (s *TonConnectProofReqProof) SetTimestamp(val int64) {
 	s.Timestamp = val
 }
 
 // SetDomain sets the value of Domain.
-func (s *TonConnectProofReqProof) SetDomain(val OptTonConnectProofReqProofDomain) {
+func (s *TonConnectProofReqProof) SetDomain(val TonConnectProofReqProofDomain) {
 	s.Domain = val
 }
 
 // SetSignature sets the value of Signature.
-func (s *TonConnectProofReqProof) SetSignature(val OptString) {
+func (s *TonConnectProofReqProof) SetSignature(val string) {
 	s.Signature = val
 }
 
 // SetPayload sets the value of Payload.
-func (s *TonConnectProofReqProof) SetPayload(val OptString) {
+func (s *TonConnectProofReqProof) SetPayload(val string) {
 	s.Payload = val
 }
 
@@ -5856,7 +5717,7 @@ func (s *TonConnectProofReqProof) SetStateInit(val OptString) {
 
 type TonConnectProofReqProofDomain struct {
 	LengthBytes OptUint32 `json:"length_bytes"`
-	Value       OptString `json:"value"`
+	Value       string    `json:"value"`
 }
 
 // GetLengthBytes returns the value of LengthBytes.
@@ -5865,7 +5726,7 @@ func (s TonConnectProofReqProofDomain) GetLengthBytes() OptUint32 {
 }
 
 // GetValue returns the value of Value.
-func (s TonConnectProofReqProofDomain) GetValue() OptString {
+func (s TonConnectProofReqProofDomain) GetValue() string {
 	return s.Value
 }
 
@@ -5875,7 +5736,7 @@ func (s *TonConnectProofReqProofDomain) SetLengthBytes(val OptUint32) {
 }
 
 // SetValue sets the value of Value.
-func (s *TonConnectProofReqProofDomain) SetValue(val OptString) {
+func (s *TonConnectProofReqProofDomain) SetValue(val string) {
 	s.Value = val
 }
 

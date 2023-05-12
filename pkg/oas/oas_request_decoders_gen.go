@@ -293,7 +293,7 @@ func (s *Server) decodeSendMessageRequest(r *http.Request) (
 }
 
 func (s *Server) decodeSetWalletBackupRequest(r *http.Request) (
-	req OptSetWalletBackupReq,
+	req SetWalletBackupReq,
 	close func() error,
 	rerr error,
 ) {
@@ -312,42 +312,14 @@ func (s *Server) decodeSetWalletBackupRequest(r *http.Request) (
 			rerr = multierr.Append(rerr, close())
 		}
 	}()
-	if _, ok := r.Header["Content-Type"]; !ok && r.ContentLength == 0 {
-		return req, close, nil
-	}
 	ct, _, err := mime.ParseMediaType(r.Header.Get("Content-Type"))
 	if err != nil {
 		return req, close, errors.Wrap(err, "parse media type")
 	}
 	switch {
-	case ct == "application/json":
-		if r.ContentLength == 0 {
-			return req, close, nil
-		}
-
-		var request OptSetWalletBackupReq
-		buf, err := io.ReadAll(r.Body)
-		if err != nil {
-			return req, close, err
-		}
-
-		if len(buf) == 0 {
-			return req, close, nil
-		}
-
-		d := jx.DecodeBytes(buf)
-		if err := func() error {
-			request.Reset()
-			if err := request.Decode(d); err != nil {
-				return err
-			}
-			return nil
-		}(); err != nil {
-			return req, close, errors.Wrap(err, "decode \"application/json\"")
-		}
-		if err := d.Skip(); err != io.EOF {
-			return req, close, errors.New("unexpected trailing data")
-		}
+	case ct == "application/octet-stream":
+		reader := r.Body
+		request := SetWalletBackupReq{Data: reader}
 		return request, close, nil
 	default:
 		return req, close, validate.InvalidContentType(ct)
@@ -355,7 +327,7 @@ func (s *Server) decodeSetWalletBackupRequest(r *http.Request) (
 }
 
 func (s *Server) decodeTonConnectProofRequest(r *http.Request) (
-	req OptTonConnectProofReq,
+	req TonConnectProofReq,
 	close func() error,
 	rerr error,
 ) {
@@ -374,9 +346,6 @@ func (s *Server) decodeTonConnectProofRequest(r *http.Request) (
 			rerr = multierr.Append(rerr, close())
 		}
 	}()
-	if _, ok := r.Header["Content-Type"]; !ok && r.ContentLength == 0 {
-		return req, close, nil
-	}
 	ct, _, err := mime.ParseMediaType(r.Header.Get("Content-Type"))
 	if err != nil {
 		return req, close, errors.Wrap(err, "parse media type")
@@ -384,22 +353,21 @@ func (s *Server) decodeTonConnectProofRequest(r *http.Request) (
 	switch {
 	case ct == "application/json":
 		if r.ContentLength == 0 {
-			return req, close, nil
+			return req, close, validate.ErrBodyRequired
 		}
 
-		var request OptTonConnectProofReq
+		var request TonConnectProofReq
 		buf, err := io.ReadAll(r.Body)
 		if err != nil {
 			return req, close, err
 		}
 
 		if len(buf) == 0 {
-			return req, close, nil
+			return req, close, validate.ErrBodyRequired
 		}
 
 		d := jx.DecodeBytes(buf)
 		if err := func() error {
-			request.Reset()
 			if err := request.Decode(d); err != nil {
 				return err
 			}

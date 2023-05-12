@@ -2,6 +2,7 @@ package api
 
 import (
 	"fmt"
+	"github.com/tonkeeper/opentonapi/pkg/tonconnect"
 
 	"github.com/go-faster/errors"
 	rules "github.com/tonkeeper/scam_backoffice_rules"
@@ -50,7 +51,7 @@ type Options struct {
 	limits           Limits
 	spamRules        func() rules.Rules
 	tonRates         tonRates
-	tonConnect       tonConnect
+	tonConnectSecret string
 }
 
 type Option func(o *Options)
@@ -107,9 +108,10 @@ func WithTonRates(rates tonRates) Option {
 		o.tonRates = rates
 	}
 }
-func WithTonConnect(tonConnect tonConnect) Option {
+
+func WithTonConnectSecret(tonConnect string) Option {
 	return func(o *Options) {
-		o.tonConnect = tonConnect
+		o.tonConnectSecret = tonConnect
 	}
 }
 
@@ -145,9 +147,8 @@ func NewHandler(logger *zap.Logger, opts ...Option) (*Handler, error) {
 	if options.executor == nil {
 		return nil, fmt.Errorf("executor is not configured")
 	}
-	if options.tonConnect == nil {
-		return nil, fmt.Errorf("tonconnect is not configured")
-	}
+	tonConnect := tonconnect.NewTonConnect(options.tonConnectSecret)
+
 	dnsClient := dns.NewDNS(tongo.MustParseAccountID("-1:e56754f83426f69b09267bd876ac97c44821345b7e266bd956a7bfbfb98df35c"), options.executor) //todo: move to chain config
 
 	return &Handler{
@@ -166,6 +167,6 @@ func NewHandler(logger *zap.Logger, opts ...Option) (*Handler, error) {
 			jettonsCache:     cache.NewLRUCache[tongo.AccountID, tep64.Metadata](10000, "jetton_metadata_cache"),
 			storage:          options.storage,
 		},
-		tonConnect: options.tonConnect,
+		tonConnect: tonConnect,
 	}, nil
 }
