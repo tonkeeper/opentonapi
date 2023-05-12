@@ -2176,6 +2176,51 @@ components:
         origin:
           type: string
           example: "0:da6b1b6663a0e4d18cc8574ccd9db5296e367dd9324706f3bbd9eb1cd2caf0bf"
+    ValueFlow:
+      type: object
+      required:
+        - account
+        - ton
+        - fees
+      properties:
+        account:
+          $ref: '#/components/schemas/AccountAddress'
+        ton:
+          type: integer
+          format: int64
+          example: 80
+        fees:
+          type: integer
+          format: int64
+          example: 10
+        nfts:
+          type: array
+          items:
+            type: object
+            required:
+              - account
+              - quantity
+            properties:
+              account:
+                $ref: '#/components/schemas/AccountAddress'
+              quantity:
+                type: integer
+                format: int64
+                example: 10
+        jettons:
+          type: array
+          items:
+            type: object
+            required:
+              - account
+              - quantity
+            properties:
+              account:
+                $ref: '#/components/schemas/AccountAddress'
+              quantity:
+                type: integer
+                format: int64
+                example: 10
 
     Action:
       type: object
@@ -2456,6 +2501,7 @@ components:
         - timestamp
         - actions
         - fee
+        - value_flow
         - account
         - is_scam
         - lt
@@ -2476,6 +2522,9 @@ components:
             $ref: '#/components/schemas/Action'
         fee:
           $ref: '#/components/schemas/Fee'
+          deprecated: true
+        value_flow:
+          $ref: '#/components/schemas/ValueFlow'
         is_scam:
           type: boolean
           description: scam
@@ -2744,6 +2793,7 @@ components:
         - timestamp
         - actions
         - fees
+        - value_flow
         - is_scam
         - lt
         - in_progress
@@ -2763,6 +2813,10 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Fee'
+        value_flow:
+          type: array
+          items:
+            $ref: '#/components/schemas/ValueFlow'
         is_scam:
           type: boolean
           description: scam

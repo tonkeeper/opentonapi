@@ -51,25 +51,26 @@ func (h Handler) GetEvent(ctx context.Context, params oas.GetEventParams) (oas.G
 	if err != nil {
 		return &oas.InternalError{Error: err.Error()}, nil
 	}
-	b := bath.FromTrace(trace)
-	bath.MergeAllBubbles(b, bath.DefaultStraws)
-	actions, fees := bath.CollectActions(b, nil)
+	result, err := bath.FindActions(trace)
+	if err != nil {
+		return nil, err
+	}
 	event := oas.Event{
 		EventID:    trace.Hash.Hex(),
 		Timestamp:  trace.Utime,
-		Actions:    make([]oas.Action, len(actions)),
-		Fees:       make([]oas.Fee, len(fees)),
+		Actions:    make([]oas.Action, len(result.Actions)),
+		ValueFlow:  make([]oas.ValueFlow, 0, len(result.ValueFlow.Accounts)),
 		IsScam:     false,
 		Lt:         int64(trace.Lt),
 		InProgress: trace.InProgress(),
 	}
-	for i, a := range actions {
+	for i, a := range result.Actions {
 		convertedAction, spamDetected := h.convertAction(ctx, a)
 		event.IsScam = event.IsScam || spamDetected
 		event.Actions[i] = convertedAction
 	}
-	for i, f := range fees {
-		event.Fees[i] = convertFees(f, h.addressBook)
+	for accountID, flow := range result.ValueFlow.Accounts {
+		event.ValueFlow = append(event.ValueFlow, convertAccountValueFlow(accountID, flow, h.addressBook))
 	}
 	return &event, nil
 }
@@ -90,9 +91,10 @@ func (h Handler) GetEventsByAccount(ctx context.Context, params oas.GetEventsByA
 		if err != nil {
 			return &oas.InternalError{Error: err.Error()}, nil
 		}
-		b := bath.FromTrace(trace)
-		bath.MergeAllBubbles(b, bath.DefaultStraws)
-		actions, fees := bath.CollectActions(b, &account)
+		result, err := bath.FindActions(trace)
+		if err != nil {
+			return &oas.InternalError{Error: err.Error()}, nil
+		}
 		e := oas.AccountEvent{
 			EventID:    trace.Hash.Hex(),
 			Account:    convertAccountAddress(account, h.addressBook),
@@ -102,13 +104,10 @@ func (h Handler) GetEventsByAccount(ctx context.Context, params oas.GetEventsByA
 			Lt:         int64(trace.Lt),
 			InProgress: trace.InProgress(),
 		}
-		for _, f := range fees {
-			if f.WhoPay == account {
-				e.Fee = convertFees(f, h.addressBook)
-				break
-			}
+		if flow, ok := result.ValueFlow.Accounts[account]; ok {
+			e.ValueFlow = convertAccountValueFlow(account, flow, h.addressBook)
 		}
-		for _, a := range actions {
+		for _, a := range result.Actions {
 			convertedAction, spamDetected := h.convertAction(ctx, a)
 			if !e.IsScam && spamDetected {
 				e.IsScam = true

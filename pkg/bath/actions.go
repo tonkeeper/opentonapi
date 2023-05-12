@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/tlb"
-	"golang.org/x/exp/maps"
 	"golang.org/x/exp/slices"
+
+	"github.com/tonkeeper/opentonapi/pkg/core"
 )
 
 const (
@@ -38,7 +38,6 @@ type (
 		Type   RefundType
 		Origin string
 	}
-
 	Action struct {
 		TonTransfer       *TonTransferAction
 		SmartContractExec *SmartContractAction
@@ -121,18 +120,9 @@ func (a Action) String() string {
 	return fmt.Sprintf("%v: %+v", a.Type, string(b))
 }
 
-func (f Fee) String() string {
-	return fmt.Sprintf("%v: %v/%v/%v/%v/%v", f.WhoPay, f.Total(), f.Storage, f.Compute, f.Deposit, f.Refund)
-}
-
-func CollectActions(bubble *Bubble, forAccount *tongo.AccountID) ([]Action, []Fee) {
-	fees := make(map[tongo.AccountID]Fee)
-	actions := collectActions(bubble, fees, forAccount)
-	return actions, maps.Values(fees)
-}
-
-func collectActions(bubble *Bubble, fees map[tongo.AccountID]Fee, forAccount *tongo.AccountID) []Action {
+func CollectActionsAndValueFlow(bubble *Bubble, forAccount *tongo.AccountID) ([]Action, *ValueFlow) {
 	var actions []Action
+	valueFlow := newValueFlow()
 	if forAccount == nil || slices.Contains(bubble.Accounts, *forAccount) {
 		a := bubble.Info.ToAction()
 		if a != nil {
@@ -140,11 +130,10 @@ func collectActions(bubble *Bubble, fees map[tongo.AccountID]Fee, forAccount *to
 		}
 	}
 	for _, c := range bubble.Children {
-		a := collectActions(c, fees, forAccount)
-		actions = append(actions, a...)
+		childActions, childValueFlow := CollectActionsAndValueFlow(c, forAccount)
+		actions = append(actions, childActions...)
+		valueFlow.Merge(childValueFlow)
 	}
-	f := fees[bubble.Fee.WhoPay]
-	bubble.Fee.Add(f)
-	fees[bubble.Fee.WhoPay] = bubble.Fee
-	return actions
+	valueFlow.Merge(bubble.ValueFlow)
+	return actions, valueFlow
 }

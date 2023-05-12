@@ -9,6 +9,7 @@ import (
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/opentonapi/pkg/oas"
 	rules "github.com/tonkeeper/scam_backoffice_rules"
+	"github.com/tonkeeper/tongo"
 )
 
 func convertTrace(t core.Trace, book addressBook) oas.Trace {
@@ -49,7 +50,6 @@ func (h Handler) convertAction(ctx context.Context, a bath.Action) (oas.Action, 
 				Type:   oas.RefundType(a.TonTransfer.Refund.Type),
 				Origin: a.TonTransfer.Refund.Origin,
 			})
-
 		}
 	case bath.NftItemTransfer:
 		action.NftItemTransfer.SetTo(oas.NftItemTransferAction{
@@ -108,13 +108,23 @@ func (h Handler) convertAction(ctx context.Context, a bath.Action) (oas.Action, 
 	return action, spamDetected
 }
 
-func convertFees(fee bath.Fee, book addressBook) oas.Fee {
-	return oas.Fee{
-		Account: convertAccountAddress(fee.WhoPay, book),
-		Total:   0,
-		Gas:     fee.Compute,
-		Rent:    fee.Storage,
-		Deposit: fee.Deposit,
-		Refund:  0,
+func convertAccountValueFlow(accountID tongo.AccountID, flow *bath.AccountValueFlow, book addressBook) oas.ValueFlow {
+	valueFlow := oas.ValueFlow{
+		Account: convertAccountAddress(accountID, book),
+		Ton:     flow.Ton,
+		Fees:    flow.Fees,
 	}
+	for nftItem, quantity := range flow.Nfts {
+		valueFlow.Nfts = append(valueFlow.Nfts, oas.ValueFlowNftsItem{
+			Account:  convertAccountAddress(nftItem, book),
+			Quantity: quantity,
+		})
+	}
+	for jettonItem, quantity := range flow.Jettons {
+		valueFlow.Jettons = append(valueFlow.Jettons, oas.ValueFlowJettonsItem{
+			Account:  convertAccountAddress(jettonItem, book),
+			Quantity: quantity.Int64(),
+		})
+	}
+	return valueFlow
 }

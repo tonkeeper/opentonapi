@@ -20,14 +20,13 @@ func FindInitialSubscription(bubble *Bubble) bool {
 		return false
 	}
 	newBubble := Bubble{
-		Accounts: append(bubble.Accounts, txBubble.account.Address),
-		Fee:      bubble.Fee,
+		Accounts:  append(bubble.Accounts, txBubble.account.Address),
+		ValueFlow: bubble.ValueFlow,
 	}
 	var beneficiary, subscriber Account
 	if txBubble.inputFrom != nil {
 		subscriber = *txBubble.inputFrom
 	}
-	newBubble.Fee.WhoPay = txBubble.inputFrom.Address
 	var success bool
 	newBubble.Children = ProcessChildren(bubble.Children,
 		func(child *Bubble) *Merge {
@@ -40,8 +39,7 @@ func FindInitialSubscription(bubble *Bubble) bool {
 			}
 			success = true
 			beneficiary = tx.account
-			newBubble.Fee.Add(child.Fee)
-			newBubble.Fee.WhoPay = tx.account.Address
+			newBubble.ValueFlow.Merge(child.ValueFlow)
 			newBubble.Accounts = append(newBubble.Accounts, tx.account.Address)
 			return &Merge{children: child.Children}
 		})
@@ -81,8 +79,8 @@ func FindExtendedSubscription(bubble *Bubble) bool {
 	request := command.decodedBody.Value.(abi.PaymentRequestMsgBody)
 	subscription.Amount = int64(request.Amount.Grams)
 	subscription.First = false
-	subscriptionBubble.Fee.Add(bubble.Fee)
-	subscriptionBubble.Fee.Add(commandBubble.Fee)
+	subscriptionBubble.ValueFlow.Merge(bubble.ValueFlow)
+	subscriptionBubble.ValueFlow.Merge(commandBubble.ValueFlow)
 	subscriptionBubble.Info = subscription
 	*bubble = *subscriptionBubble
 	return false

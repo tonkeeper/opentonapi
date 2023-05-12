@@ -190,6 +190,7 @@ type AccountEvent struct {
 	Timestamp int64          `json:"timestamp"`
 	Actions   []Action       `json:"actions"`
 	Fee       Fee            `json:"fee"`
+	ValueFlow ValueFlow      `json:"value_flow"`
 	// Scam.
 	IsScam bool  `json:"is_scam"`
 	Lt     int64 `json:"lt"`
@@ -220,6 +221,11 @@ func (s AccountEvent) GetActions() []Action {
 // GetFee returns the value of Fee.
 func (s AccountEvent) GetFee() Fee {
 	return s.Fee
+}
+
+// GetValueFlow returns the value of ValueFlow.
+func (s AccountEvent) GetValueFlow() ValueFlow {
+	return s.ValueFlow
 }
 
 // GetIsScam returns the value of IsScam.
@@ -260,6 +266,11 @@ func (s *AccountEvent) SetActions(val []Action) {
 // SetFee sets the value of Fee.
 func (s *AccountEvent) SetFee(val Fee) {
 	s.Fee = val
+}
+
+// SetValueFlow sets the value of ValueFlow.
+func (s *AccountEvent) SetValueFlow(val ValueFlow) {
+	s.ValueFlow = val
 }
 
 // SetIsScam sets the value of IsScam.
@@ -1595,10 +1606,11 @@ func (s *EmulateMessageReq) SetBoc(val string) {
 
 // Ref: #/components/schemas/Event
 type Event struct {
-	EventID   string   `json:"event_id"`
-	Timestamp int64    `json:"timestamp"`
-	Actions   []Action `json:"actions"`
-	Fees      []Fee    `json:"fees"`
+	EventID   string      `json:"event_id"`
+	Timestamp int64       `json:"timestamp"`
+	Actions   []Action    `json:"actions"`
+	Fees      []Fee       `json:"fees"`
+	ValueFlow []ValueFlow `json:"value_flow"`
 	// Scam.
 	IsScam bool  `json:"is_scam"`
 	Lt     int64 `json:"lt"`
@@ -1624,6 +1636,11 @@ func (s Event) GetActions() []Action {
 // GetFees returns the value of Fees.
 func (s Event) GetFees() []Fee {
 	return s.Fees
+}
+
+// GetValueFlow returns the value of ValueFlow.
+func (s Event) GetValueFlow() []ValueFlow {
+	return s.ValueFlow
 }
 
 // GetIsScam returns the value of IsScam.
@@ -1659,6 +1676,11 @@ func (s *Event) SetActions(val []Action) {
 // SetFees sets the value of Fees.
 func (s *Event) SetFees(val []Fee) {
 	s.Fees = val
+}
+
+// SetValueFlow sets the value of ValueFlow.
+func (s *Event) SetValueFlow(val []ValueFlow) {
+	s.ValueFlow = val
 }
 
 // SetIsScam sets the value of IsScam.
@@ -6180,6 +6202,115 @@ func (s *Validators) SetTransactions(val []Validator) {
 }
 
 func (*Validators) getValidatorsRes() {}
+
+// Ref: #/components/schemas/ValueFlow
+type ValueFlow struct {
+	Account AccountAddress         `json:"account"`
+	Ton     int64                  `json:"ton"`
+	Fees    int64                  `json:"fees"`
+	Nfts    []ValueFlowNftsItem    `json:"nfts"`
+	Jettons []ValueFlowJettonsItem `json:"jettons"`
+}
+
+// GetAccount returns the value of Account.
+func (s ValueFlow) GetAccount() AccountAddress {
+	return s.Account
+}
+
+// GetTon returns the value of Ton.
+func (s ValueFlow) GetTon() int64 {
+	return s.Ton
+}
+
+// GetFees returns the value of Fees.
+func (s ValueFlow) GetFees() int64 {
+	return s.Fees
+}
+
+// GetNfts returns the value of Nfts.
+func (s ValueFlow) GetNfts() []ValueFlowNftsItem {
+	return s.Nfts
+}
+
+// GetJettons returns the value of Jettons.
+func (s ValueFlow) GetJettons() []ValueFlowJettonsItem {
+	return s.Jettons
+}
+
+// SetAccount sets the value of Account.
+func (s *ValueFlow) SetAccount(val AccountAddress) {
+	s.Account = val
+}
+
+// SetTon sets the value of Ton.
+func (s *ValueFlow) SetTon(val int64) {
+	s.Ton = val
+}
+
+// SetFees sets the value of Fees.
+func (s *ValueFlow) SetFees(val int64) {
+	s.Fees = val
+}
+
+// SetNfts sets the value of Nfts.
+func (s *ValueFlow) SetNfts(val []ValueFlowNftsItem) {
+	s.Nfts = val
+}
+
+// SetJettons sets the value of Jettons.
+func (s *ValueFlow) SetJettons(val []ValueFlowJettonsItem) {
+	s.Jettons = val
+}
+
+type ValueFlowJettonsItem struct {
+	Account  AccountAddress `json:"account"`
+	Quantity int64          `json:"quantity"`
+}
+
+// GetAccount returns the value of Account.
+func (s ValueFlowJettonsItem) GetAccount() AccountAddress {
+	return s.Account
+}
+
+// GetQuantity returns the value of Quantity.
+func (s ValueFlowJettonsItem) GetQuantity() int64 {
+	return s.Quantity
+}
+
+// SetAccount sets the value of Account.
+func (s *ValueFlowJettonsItem) SetAccount(val AccountAddress) {
+	s.Account = val
+}
+
+// SetQuantity sets the value of Quantity.
+func (s *ValueFlowJettonsItem) SetQuantity(val int64) {
+	s.Quantity = val
+}
+
+type ValueFlowNftsItem struct {
+	Account  AccountAddress `json:"account"`
+	Quantity int64          `json:"quantity"`
+}
+
+// GetAccount returns the value of Account.
+func (s ValueFlowNftsItem) GetAccount() AccountAddress {
+	return s.Account
+}
+
+// GetQuantity returns the value of Quantity.
+func (s ValueFlowNftsItem) GetQuantity() int64 {
+	return s.Quantity
+}
+
+// SetAccount sets the value of Account.
+func (s *ValueFlowNftsItem) SetAccount(val AccountAddress) {
+	s.Account = val
+}
+
+// SetQuantity sets the value of Quantity.
+func (s *ValueFlowNftsItem) SetQuantity(val int64) {
+	s.Quantity = val
+}
 
 // Ref: #/components/schemas/WalletDNS
 type WalletDNS struct {
