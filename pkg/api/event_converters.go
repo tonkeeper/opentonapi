@@ -45,6 +45,12 @@ func (h Handler) convertAction(ctx context.Context, a bath.Action) (oas.Action, 
 			Recipient: convertAccountAddress(a.TonTransfer.Recipient, h.addressBook),
 			Sender:    convertAccountAddress(a.TonTransfer.Sender, h.addressBook),
 		})
+		if a.TonTransfer.Refund != nil {
+			action.TonTransfer.Value.Refund.SetTo(oas.Refund{
+				Type:   oas.RefundType(a.TonTransfer.Refund.Type),
+				Origin: a.TonTransfer.Refund.Origin,
+			})
+		}
 	case bath.NftItemTransfer:
 		action.NftItemTransfer.SetTo(oas.NftItemTransferAction{
 			Nft:       a.NftItemTransfer.Nft.ToRaw(),

@@ -23,11 +23,21 @@ const (
 	UnSubscription    ActionType = "UnSubscribe"
 	AuctionBid        ActionType = "AuctionBid"
 	AuctionTgInitBid  ActionType = "AuctionTgInitBid"
+
+	RefundDnsTg   RefundType = "DNS.tg"
+	RefundDnsTon  RefundType = "DNS.ton"
+	RefundGetGems RefundType = "GetGems"
+	RefundUnknown RefundType = "unknown"
 )
 
 type ActionType string
+type RefundType string
 
 type (
+	Refund struct {
+		Type   RefundType
+		Origin string
+	}
 	Action struct {
 		TonTransfer       *TonTransferAction
 		SmartContractExec *SmartContractAction
@@ -45,6 +55,7 @@ type (
 		Comment   *string
 		Recipient tongo.AccountID
 		Sender    tongo.AccountID
+		Refund    *Refund
 	}
 	SmartContractAction struct {
 		TonAttached int64
@@ -59,6 +70,7 @@ type (
 		Recipient *tongo.AccountID
 		Sender    *tongo.AccountID
 		Nft       tongo.AccountID
+		Refund    *Refund
 	}
 
 	JettonTransferAction struct {
@@ -69,6 +81,7 @@ type (
 		RecipientsWallet tongo.AccountID
 		SendersWallet    tongo.AccountID
 		Amount           tlb.VarUInteger16
+		Refund           *Refund
 	}
 
 	ContractDeployAction struct {
@@ -107,7 +120,7 @@ func (a Action) String() string {
 	return fmt.Sprintf("%v: %+v", a.Type, string(b))
 }
 
-func collectActionsAndValueFlow(bubble *Bubble, forAccount *tongo.AccountID) ([]Action, *ValueFlow) {
+func CollectActionsAndValueFlow(bubble *Bubble, forAccount *tongo.AccountID) ([]Action, *ValueFlow) {
 	var actions []Action
 	valueFlow := newValueFlow()
 	if forAccount == nil || slices.Contains(bubble.Accounts, *forAccount) {
@@ -117,7 +130,7 @@ func collectActionsAndValueFlow(bubble *Bubble, forAccount *tongo.AccountID) ([]
 		}
 	}
 	for _, c := range bubble.Children {
-		childActions, childValueFlow := collectActionsAndValueFlow(c, forAccount)
+		childActions, childValueFlow := CollectActionsAndValueFlow(c, forAccount)
 		actions = append(actions, childActions...)
 		valueFlow.Merge(childValueFlow)
 	}

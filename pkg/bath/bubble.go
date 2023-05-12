@@ -58,6 +58,10 @@ func (a Account) Is(i abi.ContractInterface) bool {
 	return slices.Contains(a.Interfaces, i)
 }
 
+func FromTrace(trace *core.Trace) *Bubble {
+	return fromTrace(trace, nil)
+}
+
 func fromTrace(trace *core.Trace, source *Account) *Bubble {
 	btx := BubbleTx{
 		success:                         trace.Success,

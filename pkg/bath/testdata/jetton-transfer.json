@@ -11,7 +11,8 @@
          "Sender": "0:2cf3b5b8c891e517c9addbda1c0386a09ccacbb0e3faf630b51cfc8152325acb",
          "RecipientsWallet": "0:54d72ac7254c6e4b4a5a3066d41fc7f3f1f604fdf40d6784d6778f3b874e09da",
          "SendersWallet": "0:54d72ac7254c6e4b4a5a3066d41fc7f3f1f604fdf40d6784d6778f3b874e09da",
-         "Amount": "1000000"
+         "Amount": "1000000",
+         "Refund": null
        },
        "ContractDeploy": null,
        "Subscription": null,

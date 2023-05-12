@@ -32,15 +32,15 @@ func FindActions(trace *core.Trace, opts ...Option) (*ActionsList, error) {
 		o(&options)
 	}
 	bubble := fromTrace(trace, nil)
-	mergeAllBubbles(bubble, options.Straws)
-	actions, flow := collectActionsAndValueFlow(bubble, nil)
+	MergeAllBubbles(bubble, options.Straws)
+	actions, flow := CollectActionsAndValueFlow(bubble, nil)
 	return &ActionsList{
 		Actions:   actions,
 		ValueFlow: flow,
 	}, nil
 }
 
-func mergeAllBubbles(bubble *Bubble, straws []Straw) {
+func MergeAllBubbles(bubble *Bubble, straws []Straw) {
 	for _, s := range straws {
 		for {
 			success := recursiveMerge(bubble, s)

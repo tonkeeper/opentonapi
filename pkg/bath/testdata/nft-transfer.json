@@ -7,7 +7,8 @@
          "Comment": null,
          "Recipient": "0:2cf3b5b8c891e517c9addbda1c0386a09ccacbb0e3faf630b51cfc8152325acb",
          "Sender": "0:49a43c76745b520241ebf00301e1bcb729e38dff9180d1f0bfac16245a58c52e",
-         "Nft": "0:513828e5a7a6523625195da4490ef08ee0e0327a4c328fac06935ebcc48294fd"
+         "Nft": "0:513828e5a7a6523625195da4490ef08ee0e0327a4c328fac06935ebcc48294fd",
+         "Refund": null
        },
        "JettonTransfer": null,
        "ContractDeploy": null,
