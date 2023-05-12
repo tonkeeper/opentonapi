@@ -121,6 +121,10 @@ type GetSubscriptionsByAccountRes interface {
 	getSubscriptionsByAccountRes()
 }
 
+type GetTonConnectPayloadRes interface {
+	getTonConnectPayloadRes()
+}
+
 type GetTraceRes interface {
 	getTraceRes()
 }
@@ -137,6 +141,10 @@ type GetValidatorsRes interface {
 	getValidatorsRes()
 }
 
+type GetWalletBackupRes interface {
+	getWalletBackupRes()
+}
+
 type PoolsByNominatorsRes interface {
 	poolsByNominatorsRes()
 }
@@ -145,10 +153,18 @@ type SendMessageRes interface {
 	sendMessageRes()
 }
 
+type SetWalletBackupRes interface {
+	setWalletBackupRes()
+}
+
 type StakingPoolInfoRes interface {
 	stakingPoolInfoRes()
 }
 
 type StakingPoolsRes interface {
 	stakingPoolsRes()
+}
+
+type TonConnectProofRes interface {
+	tonConnectProofRes()
 }

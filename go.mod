@@ -10,6 +10,7 @@ require (
 	github.com/ghodss/yaml v1.0.0
 	github.com/go-faster/errors v0.6.1
 	github.com/go-faster/jx v0.40.0
+	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/google/martian v2.1.0+incompatible
 	github.com/gorilla/websocket v1.5.0
 	github.com/nicksnyder/go-i18n/v2 v2.2.1

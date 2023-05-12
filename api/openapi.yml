@@ -1094,6 +1094,112 @@ paths:
           $ref: '#/components/responses/UnauthorizedError'
         '500':
           $ref: '#/components/responses/InternalError'
+  
+  /v2/tonconnect/payload:
+    get:
+      description: Get a payload for further token receipt
+      operationId: getTonConnectPayload
+      tags:
+        - Connect
+      responses:
+        '200':
+          description: "payload"
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - payload
+                properties:
+                  payload:
+                    type: string
+                    example: "84jHVNLQmZsAAAAAZB0Zryi2wqVJI-KaKNXOvCijEi46YyYzkaSHyJrMPBMOkVZa"
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /v2/tonconnect/proof:
+    post:
+      description: Account verification and token issuance
+      operationId: tonConnectProof
+      tags:
+        - Connect
+      requestBody:
+        $ref: "#/components/requestBodies/TonConnectProof"
+      responses:
+        '200':
+          description: "token"
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - token
+                properties:
+                  token:
+                    type: string
+                    example: "NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2ODQ3..."
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  
+  /v2/wallet/backup:
+    get:
+      description: Get backup info
+      operationId: getWalletBackup
+      tags:
+        - Wallet
+      parameters:
+        - in: header
+          name: X-TonConnect-Auth
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: "backup"
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - dump
+                properties:
+                  dump:
+                    type: string
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+    put:
+      description: Set backup info
+      operationId: setWalletBackup
+      tags:
+        - Wallet
+      parameters:
+        - in: header
+          name: X-TonConnect-Auth
+          schema:
+            type: string
+          required: true
+      requestBody:
+        $ref: "#/components/requestBodies/Backup"
+      responses:
+        '200':
+          description: "success"
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalError'
 
 components:
   parameters:
@@ -1243,9 +1349,59 @@ components:
                 items:
                   type: string
                   example: 0:97264395BD65A255A429B11326C84128B7D70FFED7949ABAE3036D506BA38621
+    TonConnectProof:
+      description: "Data that is expected from TON Connect"
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - address
+              - proof
+            properties:
+              address:
+                type: string
+                example: "0:97146a46acc2654y27947f14c4a4b14273e954f78bc017790b41208b0043200b"
+              proof:
+                type: object
+                required:
+                  - timestamp
+                  - domain
+                  - signature
+                  - payload
+                properties:
+                  timestamp:
+                    type: integer
+                    format: int64
+                    example: "1678275313"
+                  domain:
+                    type: object
+                    required:
+                      - value
+                    properties:
+                      length_bytes:
+                        type: integer
+                        format: uint32
+                      value:
+                        type: string
+                  signature:
+                    type: string
+                  payload:
+                    type: string
+                    example: "84jHVNLQmZsAAAAAZB0Zryi2wqVJI-KaKNXOvCijEi46YyYzkaSHyJrMPBMOkVZa"
+                  state_init:
+                    type: string
+    Backup:
+      description: "Information for saving backup"
+      required: true
+      content:
+        application/octet-stream:
+          schema:
+            type: string
+            format: binary
 
   schemas:
-
     Error:
       type: object
       required:

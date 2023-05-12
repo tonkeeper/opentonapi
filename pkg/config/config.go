@@ -17,10 +17,11 @@ type Config struct {
 		Port int `env:"PORT" envDefault:"8081"`
 	}
 	App struct {
-		LogLevel    string              `env:"LOG_LEVEL" envDefault:"INFO"`
-		MetricsPort int                 `env:"METRICS_PORT" envDefault:"9010"`
-		Accounts    accountsList        `env:"ACCOUNTS"`
-		LiteServers []config.LiteServer `env:"LITE_SERVERS"`
+		LogLevel         string              `env:"LOG_LEVEL" envDefault:"INFO"`
+		MetricsPort      int                 `env:"METRICS_PORT" envDefault:"9010"`
+		Accounts         accountsList        `env:"ACCOUNTS"`
+		LiteServers      []config.LiteServer `env:"LITE_SERVERS"`
+		TonConnectSecret string              `env:"TON_CONNECT_SECRET"`
 	}
 }
 

@@ -2783,6 +2783,54 @@ func decodeGetTransactionParams(args [1]string, r *http.Request) (params GetTran
 	return params, nil
 }
 
+// GetWalletBackupParams is parameters of getWalletBackup operation.
+type GetWalletBackupParams struct {
+	XTonConnectAuth string
+}
+
+func unpackGetWalletBackupParams(packed middleware.Parameters) (params GetWalletBackupParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "X-TonConnect-Auth",
+			In:   "header",
+		}
+		params.XTonConnectAuth = packed[key].(string)
+	}
+	return params
+}
+
+func decodeGetWalletBackupParams(args [0]string, r *http.Request) (params GetWalletBackupParams, _ error) {
+	h := uri.NewHeaderDecoder(r.Header)
+	// Decode header: X-TonConnect-Auth.
+	{
+		cfg := uri.HeaderParameterDecodingConfig{
+			Name:    "X-TonConnect-Auth",
+			Explode: false,
+		}
+		if err := h.HasParam(cfg); err == nil {
+			if err := h.DecodeParam(cfg, func(d uri.Decoder) error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.XTonConnectAuth = c
+				return nil
+			}); err != nil {
+				return params, errors.Wrap(err, "header: X-TonConnect-Auth: parse")
+			}
+		} else {
+			return params, errors.New("header: X-TonConnect-Auth: not specified")
+		}
+	}
+	return params, nil
+}
+
 // PoolsByNominatorsParams is parameters of poolsByNominators operation.
 type PoolsByNominatorsParams struct {
 	// Account ID.
@@ -2830,6 +2878,54 @@ func decodePoolsByNominatorsParams(args [1]string, r *http.Request) (params Pool
 			}
 		} else {
 			return params, errors.New("path: account_id: not specified")
+		}
+	}
+	return params, nil
+}
+
+// SetWalletBackupParams is parameters of setWalletBackup operation.
+type SetWalletBackupParams struct {
+	XTonConnectAuth string
+}
+
+func unpackSetWalletBackupParams(packed middleware.Parameters) (params SetWalletBackupParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "X-TonConnect-Auth",
+			In:   "header",
+		}
+		params.XTonConnectAuth = packed[key].(string)
+	}
+	return params
+}
+
+func decodeSetWalletBackupParams(args [0]string, r *http.Request) (params SetWalletBackupParams, _ error) {
+	h := uri.NewHeaderDecoder(r.Header)
+	// Decode header: X-TonConnect-Auth.
+	{
+		cfg := uri.HeaderParameterDecodingConfig{
+			Name:    "X-TonConnect-Auth",
+			Explode: false,
+		}
+		if err := h.HasParam(cfg); err == nil {
+			if err := h.DecodeParam(cfg, func(d uri.Decoder) error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.XTonConnectAuth = c
+				return nil
+			}); err != nil {
+				return params, errors.Wrap(err, "header: X-TonConnect-Auth: parse")
+			}
+		} else {
+			return params, errors.New("header: X-TonConnect-Auth: not specified")
 		}
 	}
 	return params, nil

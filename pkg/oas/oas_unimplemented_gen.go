@@ -283,6 +283,15 @@ func (UnimplementedHandler) GetSubscriptionsByAccount(ctx context.Context, param
 	return r, ht.ErrNotImplemented
 }
 
+// GetTonConnectPayload implements getTonConnectPayload operation.
+//
+// Get a payload for further token receipt.
+//
+// GET /v2/tonconnect/payload
+func (UnimplementedHandler) GetTonConnectPayload(ctx context.Context) (r GetTonConnectPayloadRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // GetTrace implements getTrace operation.
 //
 // Get the trace by trace ID or hash of any transaction in trace.
@@ -319,6 +328,15 @@ func (UnimplementedHandler) GetValidators(ctx context.Context) (r GetValidatorsR
 	return r, ht.ErrNotImplemented
 }
 
+// GetWalletBackup implements getWalletBackup operation.
+//
+// Get backup info.
+//
+// GET /v2/wallet/backup
+func (UnimplementedHandler) GetWalletBackup(ctx context.Context, params GetWalletBackupParams) (r GetWalletBackupRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // PoolsByNominators implements poolsByNominators operation.
 //
 // All pools where account participates.
@@ -337,6 +355,15 @@ func (UnimplementedHandler) SendMessage(ctx context.Context, req OptSendMessageR
 	return r, ht.ErrNotImplemented
 }
 
+// SetWalletBackup implements setWalletBackup operation.
+//
+// Set backup info.
+//
+// PUT /v2/wallet/backup
+func (UnimplementedHandler) SetWalletBackup(ctx context.Context, req SetWalletBackupReq, params SetWalletBackupParams) (r SetWalletBackupRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // StakingPoolInfo implements stakingPoolInfo operation.
 //
 // Pool info.
@@ -352,5 +379,14 @@ func (UnimplementedHandler) StakingPoolInfo(ctx context.Context, params StakingP
 //
 // GET /v2/staking/pools
 func (UnimplementedHandler) StakingPools(ctx context.Context, params StakingPoolsParams) (r StakingPoolsRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// TonConnectProof implements tonConnectProof operation.
+//
+// Account verification and token issuance.
+//
+// POST /v2/tonconnect/proof
+func (UnimplementedHandler) TonConnectProof(ctx context.Context, req TonConnectProofReq) (r TonConnectProofRes, _ error) {
 	return r, ht.ErrNotImplemented
 }

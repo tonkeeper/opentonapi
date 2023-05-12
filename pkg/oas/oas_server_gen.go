@@ -188,6 +188,12 @@ type Handler interface {
 	//
 	// GET /v2/accounts/{account_id}/subscriptions
 	GetSubscriptionsByAccount(ctx context.Context, params GetSubscriptionsByAccountParams) (GetSubscriptionsByAccountRes, error)
+	// GetTonConnectPayload implements getTonConnectPayload operation.
+	//
+	// Get a payload for further token receipt.
+	//
+	// GET /v2/tonconnect/payload
+	GetTonConnectPayload(ctx context.Context) (GetTonConnectPayloadRes, error)
 	// GetTrace implements getTrace operation.
 	//
 	// Get the trace by trace ID or hash of any transaction in trace.
@@ -212,6 +218,12 @@ type Handler interface {
 	//
 	// GET /v2/blockchain/validators
 	GetValidators(ctx context.Context) (GetValidatorsRes, error)
+	// GetWalletBackup implements getWalletBackup operation.
+	//
+	// Get backup info.
+	//
+	// GET /v2/wallet/backup
+	GetWalletBackup(ctx context.Context, params GetWalletBackupParams) (GetWalletBackupRes, error)
 	// PoolsByNominators implements poolsByNominators operation.
 	//
 	// All pools where account participates.
@@ -224,6 +236,12 @@ type Handler interface {
 	//
 	// POST /v2/blockchain/message
 	SendMessage(ctx context.Context, req OptSendMessageReq) (SendMessageRes, error)
+	// SetWalletBackup implements setWalletBackup operation.
+	//
+	// Set backup info.
+	//
+	// PUT /v2/wallet/backup
+	SetWalletBackup(ctx context.Context, req SetWalletBackupReq, params SetWalletBackupParams) (SetWalletBackupRes, error)
 	// StakingPoolInfo implements stakingPoolInfo operation.
 	//
 	// Pool info.
@@ -236,6 +254,12 @@ type Handler interface {
 	//
 	// GET /v2/staking/pools
 	StakingPools(ctx context.Context, params StakingPoolsParams) (StakingPoolsRes, error)
+	// TonConnectProof implements tonConnectProof operation.
+	//
+	// Account verification and token issuance.
+	//
+	// POST /v2/tonconnect/proof
+	TonConnectProof(ctx context.Context, req TonConnectProofReq) (TonConnectProofRes, error)
 }
 
 // Server implements http server based on OpenAPI v3 specification and

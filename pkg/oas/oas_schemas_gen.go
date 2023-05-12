@@ -3,6 +3,8 @@
 package oas
 
 import (
+	"io"
+
 	"github.com/go-faster/jx"
 )
 
@@ -943,13 +945,17 @@ func (*BadRequest) getRawAccountRes()             {}
 func (*BadRequest) getSearchAccountsRes()         {}
 func (*BadRequest) getStorageProvidersRes()       {}
 func (*BadRequest) getSubscriptionsByAccountRes() {}
+func (*BadRequest) getTonConnectPayloadRes()      {}
 func (*BadRequest) getTraceRes()                  {}
 func (*BadRequest) getTracesByAccountRes()        {}
 func (*BadRequest) getTransactionRes()            {}
+func (*BadRequest) getWalletBackupRes()           {}
 func (*BadRequest) poolsByNominatorsRes()         {}
 func (*BadRequest) sendMessageRes()               {}
+func (*BadRequest) setWalletBackupRes()           {}
 func (*BadRequest) stakingPoolInfoRes()           {}
 func (*BadRequest) stakingPoolsRes()              {}
+func (*BadRequest) tonConnectProofRes()           {}
 
 // Ref: #/components/schemas/Block
 type Block struct {
@@ -1873,6 +1879,38 @@ func (s *GetStorageProvidersOK) SetProviders(val []StorageProvider) {
 
 func (*GetStorageProvidersOK) getStorageProvidersRes() {}
 
+type GetTonConnectPayloadOK struct {
+	Payload string `json:"payload"`
+}
+
+// GetPayload returns the value of Payload.
+func (s GetTonConnectPayloadOK) GetPayload() string {
+	return s.Payload
+}
+
+// SetPayload sets the value of Payload.
+func (s *GetTonConnectPayloadOK) SetPayload(val string) {
+	s.Payload = val
+}
+
+func (*GetTonConnectPayloadOK) getTonConnectPayloadRes() {}
+
+type GetWalletBackupOK struct {
+	Dump string `json:"dump"`
+}
+
+// GetDump returns the value of Dump.
+func (s GetWalletBackupOK) GetDump() string {
+	return s.Dump
+}
+
+// SetDump sets the value of Dump.
+func (s *GetWalletBackupOK) SetDump(val string) {
+	s.Dump = val
+}
+
+func (*GetWalletBackupOK) getWalletBackupRes() {}
+
 // Ref: #/components/schemas/ImagePreview
 type ImagePreview struct {
 	Resolution string `json:"resolution"`
@@ -1943,14 +1981,18 @@ func (*InternalError) getRawAccountRes()             {}
 func (*InternalError) getSearchAccountsRes()         {}
 func (*InternalError) getStorageProvidersRes()       {}
 func (*InternalError) getSubscriptionsByAccountRes() {}
+func (*InternalError) getTonConnectPayloadRes()      {}
 func (*InternalError) getTraceRes()                  {}
 func (*InternalError) getTracesByAccountRes()        {}
 func (*InternalError) getTransactionRes()            {}
 func (*InternalError) getValidatorsRes()             {}
+func (*InternalError) getWalletBackupRes()           {}
 func (*InternalError) poolsByNominatorsRes()         {}
 func (*InternalError) sendMessageRes()               {}
+func (*InternalError) setWalletBackupRes()           {}
 func (*InternalError) stakingPoolInfoRes()           {}
 func (*InternalError) stakingPoolsRes()              {}
+func (*InternalError) tonConnectProofRes()           {}
 
 // Ref: #/components/schemas/JettonBalance
 type JettonBalance struct {
@@ -5121,6 +5163,22 @@ func (s *SendMessageReq) SetBoc(val string) {
 	s.Boc = val
 }
 
+// SetWalletBackupOK is response for SetWalletBackup operation.
+type SetWalletBackupOK struct{}
+
+func (*SetWalletBackupOK) setWalletBackupRes() {}
+
+type SetWalletBackupReq struct {
+	Data io.Reader
+}
+
+// Read reads data from the Data reader.
+//
+// Kept to satisfy the io.Reader interface.
+func (s SetWalletBackupReq) Read(p []byte) (n int, err error) {
+	return s.Data.Read(p)
+}
+
 // Ref: #/components/schemas/SmartContractAction
 type SmartContractAction struct {
 	Executor AccountAddress `json:"executor"`
@@ -5579,6 +5637,130 @@ func (s *Subscriptions) SetSubscriptions(val []Subscription) {
 }
 
 func (*Subscriptions) getSubscriptionsByAccountRes() {}
+
+type TonConnectProofOK struct {
+	Token string `json:"token"`
+}
+
+// GetToken returns the value of Token.
+func (s TonConnectProofOK) GetToken() string {
+	return s.Token
+}
+
+// SetToken sets the value of Token.
+func (s *TonConnectProofOK) SetToken(val string) {
+	s.Token = val
+}
+
+func (*TonConnectProofOK) tonConnectProofRes() {}
+
+type TonConnectProofReq struct {
+	Address string                  `json:"address"`
+	Proof   TonConnectProofReqProof `json:"proof"`
+}
+
+// GetAddress returns the value of Address.
+func (s TonConnectProofReq) GetAddress() string {
+	return s.Address
+}
+
+// GetProof returns the value of Proof.
+func (s TonConnectProofReq) GetProof() TonConnectProofReqProof {
+	return s.Proof
+}
+
+// SetAddress sets the value of Address.
+func (s *TonConnectProofReq) SetAddress(val string) {
+	s.Address = val
+}
+
+// SetProof sets the value of Proof.
+func (s *TonConnectProofReq) SetProof(val TonConnectProofReqProof) {
+	s.Proof = val
+}
+
+type TonConnectProofReqProof struct {
+	Timestamp int64                         `json:"timestamp"`
+	Domain    TonConnectProofReqProofDomain `json:"domain"`
+	Signature string                        `json:"signature"`
+	Payload   string                        `json:"payload"`
+	StateInit OptString                     `json:"state_init"`
+}
+
+// GetTimestamp returns the value of Timestamp.
+func (s TonConnectProofReqProof) GetTimestamp() int64 {
+	return s.Timestamp
+}
+
+// GetDomain returns the value of Domain.
+func (s TonConnectProofReqProof) GetDomain() TonConnectProofReqProofDomain {
+	return s.Domain
+}
+
+// GetSignature returns the value of Signature.
+func (s TonConnectProofReqProof) GetSignature() string {
+	return s.Signature
+}
+
+// GetPayload returns the value of Payload.
+func (s TonConnectProofReqProof) GetPayload() string {
+	return s.Payload
+}
+
+// GetStateInit returns the value of StateInit.
+func (s TonConnectProofReqProof) GetStateInit() OptString {
+	return s.StateInit
+}
+
+// SetTimestamp sets the value of Timestamp.
+func (s *TonConnectProofReqProof) SetTimestamp(val int64) {
+	s.Timestamp = val
+}
+
+// SetDomain sets the value of Domain.
+func (s *TonConnectProofReqProof) SetDomain(val TonConnectProofReqProofDomain) {
+	s.Domain = val
+}
+
+// SetSignature sets the value of Signature.
+func (s *TonConnectProofReqProof) SetSignature(val string) {
+	s.Signature = val
+}
+
+// SetPayload sets the value of Payload.
+func (s *TonConnectProofReqProof) SetPayload(val string) {
+	s.Payload = val
+}
+
+// SetStateInit sets the value of StateInit.
+func (s *TonConnectProofReqProof) SetStateInit(val OptString) {
+	s.StateInit = val
+}
+
+type TonConnectProofReqProofDomain struct {
+	LengthBytes OptUint32 `json:"length_bytes"`
+	Value       string    `json:"value"`
+}
+
+// GetLengthBytes returns the value of LengthBytes.
+func (s TonConnectProofReqProofDomain) GetLengthBytes() OptUint32 {
+	return s.LengthBytes
+}
+
+// GetValue returns the value of Value.
+func (s TonConnectProofReqProofDomain) GetValue() string {
+	return s.Value
+}
+
+// SetLengthBytes sets the value of LengthBytes.
+func (s *TonConnectProofReqProofDomain) SetLengthBytes(val OptUint32) {
+	s.LengthBytes = val
+}
+
+// SetValue sets the value of Value.
+func (s *TonConnectProofReqProofDomain) SetValue(val string) {
+	s.Value = val
+}
 
 // Ref: #/components/schemas/TonTransferAction
 type TonTransferAction struct {
@@ -6162,14 +6344,18 @@ func (*UnauthorizedError) getRawAccountRes()             {}
 func (*UnauthorizedError) getSearchAccountsRes()         {}
 func (*UnauthorizedError) getStorageProvidersRes()       {}
 func (*UnauthorizedError) getSubscriptionsByAccountRes() {}
+func (*UnauthorizedError) getTonConnectPayloadRes()      {}
 func (*UnauthorizedError) getTraceRes()                  {}
 func (*UnauthorizedError) getTracesByAccountRes()        {}
 func (*UnauthorizedError) getTransactionRes()            {}
 func (*UnauthorizedError) getValidatorsRes()             {}
+func (*UnauthorizedError) getWalletBackupRes()           {}
 func (*UnauthorizedError) poolsByNominatorsRes()         {}
 func (*UnauthorizedError) sendMessageRes()               {}
+func (*UnauthorizedError) setWalletBackupRes()           {}
 func (*UnauthorizedError) stakingPoolInfoRes()           {}
 func (*UnauthorizedError) stakingPoolsRes()              {}
+func (*UnauthorizedError) tonConnectProofRes()           {}
 
 // Ref: #/components/schemas/Validator
 type Validator struct {

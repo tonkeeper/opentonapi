@@ -1013,27 +1013,107 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 						return
 					}
 				}
-			case 't': // Prefix: "traces/"
-				if l := len("traces/"); len(elem) >= l && elem[0:l] == "traces/" {
+			case 't': // Prefix: "t"
+				if l := len("t"); len(elem) >= l && elem[0:l] == "t" {
 					elem = elem[l:]
 				} else {
 					break
 				}
 
-				// Param: "trace_id"
-				// Leaf parameter
-				args[0] = elem
-				elem = ""
+				if len(elem) == 0 {
+					break
+				}
+				switch elem[0] {
+				case 'o': // Prefix: "onconnect/p"
+					if l := len("onconnect/p"); len(elem) >= l && elem[0:l] == "onconnect/p" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					if len(elem) == 0 {
+						break
+					}
+					switch elem[0] {
+					case 'a': // Prefix: "ayload"
+						if l := len("ayload"); len(elem) >= l && elem[0:l] == "ayload" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						if len(elem) == 0 {
+							// Leaf node.
+							switch r.Method {
+							case "GET":
+								s.handleGetTonConnectPayloadRequest([0]string{}, w, r)
+							default:
+								s.notAllowed(w, r, "GET")
+							}
+
+							return
+						}
+					case 'r': // Prefix: "roof"
+						if l := len("roof"); len(elem) >= l && elem[0:l] == "roof" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						if len(elem) == 0 {
+							// Leaf node.
+							switch r.Method {
+							case "POST":
+								s.handleTonConnectProofRequest([0]string{}, w, r)
+							default:
+								s.notAllowed(w, r, "POST")
+							}
+
+							return
+						}
+					}
+				case 'r': // Prefix: "races/"
+					if l := len("races/"); len(elem) >= l && elem[0:l] == "races/" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					// Param: "trace_id"
+					// Leaf parameter
+					args[0] = elem
+					elem = ""
+
+					if len(elem) == 0 {
+						// Leaf node.
+						switch r.Method {
+						case "GET":
+							s.handleGetTraceRequest([1]string{
+								args[0],
+							}, w, r)
+						default:
+							s.notAllowed(w, r, "GET")
+						}
+
+						return
+					}
+				}
+			case 'w': // Prefix: "wallet/backup"
+				if l := len("wallet/backup"); len(elem) >= l && elem[0:l] == "wallet/backup" {
+					elem = elem[l:]
+				} else {
+					break
+				}
 
 				if len(elem) == 0 {
 					// Leaf node.
 					switch r.Method {
 					case "GET":
-						s.handleGetTraceRequest([1]string{
-							args[0],
-						}, w, r)
+						s.handleGetWalletBackupRequest([0]string{}, w, r)
+					case "PUT":
+						s.handleSetWalletBackupRequest([0]string{}, w, r)
 					default:
-						s.notAllowed(w, r, "GET")
+						s.notAllowed(w, r, "GET,PUT")
 					}
 
 					return
@@ -2090,26 +2170,117 @@ func (s *Server) FindRoute(method, path string) (r Route, _ bool) {
 						}
 					}
 				}
-			case 't': // Prefix: "traces/"
-				if l := len("traces/"); len(elem) >= l && elem[0:l] == "traces/" {
+			case 't': // Prefix: "t"
+				if l := len("t"); len(elem) >= l && elem[0:l] == "t" {
 					elem = elem[l:]
 				} else {
 					break
 				}
 
-				// Param: "trace_id"
-				// Leaf parameter
-				args[0] = elem
-				elem = ""
+				if len(elem) == 0 {
+					break
+				}
+				switch elem[0] {
+				case 'o': // Prefix: "onconnect/p"
+					if l := len("onconnect/p"); len(elem) >= l && elem[0:l] == "onconnect/p" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					if len(elem) == 0 {
+						break
+					}
+					switch elem[0] {
+					case 'a': // Prefix: "ayload"
+						if l := len("ayload"); len(elem) >= l && elem[0:l] == "ayload" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						if len(elem) == 0 {
+							switch method {
+							case "GET":
+								// Leaf: GetTonConnectPayload
+								r.name = "GetTonConnectPayload"
+								r.operationID = "getTonConnectPayload"
+								r.args = args
+								r.count = 0
+								return r, true
+							default:
+								return
+							}
+						}
+					case 'r': // Prefix: "roof"
+						if l := len("roof"); len(elem) >= l && elem[0:l] == "roof" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						if len(elem) == 0 {
+							switch method {
+							case "POST":
+								// Leaf: TonConnectProof
+								r.name = "TonConnectProof"
+								r.operationID = "tonConnectProof"
+								r.args = args
+								r.count = 0
+								return r, true
+							default:
+								return
+							}
+						}
+					}
+				case 'r': // Prefix: "races/"
+					if l := len("races/"); len(elem) >= l && elem[0:l] == "races/" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					// Param: "trace_id"
+					// Leaf parameter
+					args[0] = elem
+					elem = ""
+
+					if len(elem) == 0 {
+						switch method {
+						case "GET":
+							// Leaf: GetTrace
+							r.name = "GetTrace"
+							r.operationID = "getTrace"
+							r.args = args
+							r.count = 1
+							return r, true
+						default:
+							return
+						}
+					}
+				}
+			case 'w': // Prefix: "wallet/backup"
+				if l := len("wallet/backup"); len(elem) >= l && elem[0:l] == "wallet/backup" {
+					elem = elem[l:]
+				} else {
+					break
+				}
 
 				if len(elem) == 0 {
 					switch method {
 					case "GET":
-						// Leaf: GetTrace
-						r.name = "GetTrace"
-						r.operationID = "getTrace"
+						// Leaf: GetWalletBackup
+						r.name = "GetWalletBackup"
+						r.operationID = "getWalletBackup"
 						r.args = args
-						r.count = 1
+						r.count = 0
+						return r, true
+					case "PUT":
+						// Leaf: SetWalletBackup
+						r.name = "SetWalletBackup"
+						r.operationID = "setWalletBackup"
+						r.args = args
+						r.count = 0
 						return r, true
 					default:
 						return
