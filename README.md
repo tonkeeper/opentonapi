@@ -21,4 +21,3 @@ Advanced features like traces, NFTs, Jettons, etc require you to configure a set
 ```shell
 ACCOUNTS="comma-separated-list-of-raw-account-addresses" make run 
 ```
-
