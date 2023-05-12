@@ -10,16 +10,17 @@ import (
 )
 
 type BubbleTx struct {
-	success     bool
-	inputAmount int64
-	inputFrom   *Account
-	bounce      bool
-	bounced     bool
-	external    bool
-	account     Account
-	opCode      *uint32
-	decodedBody *core.DecodedMessageBody
-	init        []byte
+	success         bool
+	transactionType core.TransactionType
+	inputAmount     int64
+	inputFrom       *Account
+	bounce          bool
+	bounced         bool
+	external        bool
+	account         Account
+	opCode          *uint32
+	decodedBody     *core.DecodedMessageBody
+	init            []byte
 
 	additionalInfo                  map[string]interface{} //place for storing different data from trace which can be useful later
 	accountWasActiveAtComputingTime bool
@@ -38,6 +39,18 @@ func dumpCallArgs(v any) string {
 }
 func (b BubbleTx) ToAction() *Action {
 	if b.external {
+		if b.transactionType == core.TickTockTx {
+			return &Action{
+				SmartContractExec: &SmartContractAction{
+					TonAttached: b.inputAmount,
+					Executor:    b.account.Address,
+					Contract:    b.account.Address,
+					Operation:   "Tick-tock",
+				},
+				Success: b.success,
+				Type:    SmartContractExec,
+			}
+		}
 		return nil
 	}
 	if b.opCode != nil && *b.opCode != 0 && b.accountWasActiveAtComputingTime && !b.account.Is(abi.Wallet) {

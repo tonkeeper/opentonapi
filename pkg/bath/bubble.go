@@ -65,6 +65,7 @@ func FromTrace(trace *core.Trace) *Bubble {
 func fromTrace(trace *core.Trace, source *Account) *Bubble {
 	btx := BubbleTx{
 		success:                         trace.Success,
+		transactionType:                 trace.Transaction.Type,
 		account:                         Account{Address: trace.Account, Interfaces: trace.AccountInterfaces},
 		external:                        trace.InMsg == nil || trace.InMsg.IsExternal(),
 		accountWasActiveAtComputingTime: trace.Type != core.OrdinaryTx || trace.ComputePhase == nil || trace.ComputePhase.SkipReason != tlb.ComputeSkipReasonNoState,
