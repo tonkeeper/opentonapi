@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"github.com/tonkeeper/opentonapi/pkg/tonconnect"
 	"go.uber.org/zap"
 
 	"github.com/tonkeeper/opentonapi/pkg/addressbook"
@@ -41,7 +42,8 @@ func TestHandler_GetRawAccount(t *testing.T) {
 			logger, _ := zap.NewDevelopment()
 			liteStorage, err := litestorage.NewLiteStorage(logger)
 			require.Nil(t, err)
-			h, err := NewHandler(logger, WithStorage(liteStorage), WithExecutor(liteStorage), WithTonRates(&mockTonRates{}))
+			tonConnect := tonconnect.NewTonConnect("secret", 300)
+			h, err := NewHandler(logger, WithStorage(liteStorage), WithExecutor(liteStorage), WithTonRates(&mockTonRates{}), WithTonConnect(tonConnect))
 			require.Nil(t, err)
 			account, err := h.GetRawAccount(context.Background(), tt.params)
 			require.Nil(t, err)
@@ -72,7 +74,8 @@ func TestHandler_GetAccount(t *testing.T) {
 
 			liteStorage, err := litestorage.NewLiteStorage(logger)
 			require.Nil(t, err)
-			h, err := NewHandler(logger, WithStorage(liteStorage), WithExecutor(liteStorage), WithTonRates(&mockTonRates{}))
+			tonConnect := tonconnect.NewTonConnect("secret", 300)
+			h, err := NewHandler(logger, WithStorage(liteStorage), WithExecutor(liteStorage), WithTonRates(&mockTonRates{}), WithTonConnect(tonConnect))
 			require.Nil(t, err)
 			accountRes, err := h.GetAccount(context.Background(), tt.params)
 			require.Nil(t, err)
@@ -190,7 +193,8 @@ func TestHandler_GetTransactions(t *testing.T) {
 			logger, _ := zap.NewDevelopment()
 			liteStorage, err := litestorage.NewLiteStorage(logger)
 			require.Nil(t, err)
-			h, err := NewHandler(logger, WithStorage(liteStorage), WithExecutor(liteStorage))
+			tonConnect := tonconnect.NewTonConnect("secret", 300)
+			h, err := NewHandler(logger, WithStorage(liteStorage), WithExecutor(liteStorage), WithTonConnect(tonConnect))
 			require.Nil(t, err)
 			res, err := h.GetBlockTransactions(context.Background(), tt.params)
 			require.Nil(t, err)

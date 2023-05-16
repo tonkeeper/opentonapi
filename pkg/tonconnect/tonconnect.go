@@ -20,11 +20,12 @@ import (
 )
 
 type TonConnect struct {
-	Secret string
+	Secret   string
+	LifeTime int64
 }
 
-func NewTonConnect(secret string) *TonConnect {
-	return &TonConnect{Secret: secret}
+func NewTonConnect(secret string, lifeTimeProof int64) *TonConnect {
+	return &TonConnect{Secret: secret, LifeTime: lifeTimeProof}
 }
 
 const (
@@ -71,6 +72,10 @@ type ParsedMessage struct {
 
 func (c *TonConnect) GetSecret() string {
 	return c.Secret
+}
+
+func (c *TonConnect) GetLifeTimeProof() int64 {
+	return c.LifeTime
 }
 
 func (c *TonConnect) GeneratePayload() (string, error) {

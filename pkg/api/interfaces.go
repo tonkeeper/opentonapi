@@ -106,6 +106,7 @@ type tonConnect interface {
 	ConvertTonProofMessage(tp *tonconnect.TonProof) (*tonconnect.ParsedMessage, error)
 	CheckProof(tonProofReq *tonconnect.ParsedMessage, pubKey ed25519.PublicKey) (bool, error)
 	GetSecret() string
+	GetLifeTimeProof() int64
 }
 
 type metadataCache struct {
