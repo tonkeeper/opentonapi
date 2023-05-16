@@ -62,11 +62,12 @@ func TestFindActions(t *testing.T) {
 		t.Fatal(err)
 	}
 	type Case struct {
-		name           string
-		account        string
-		hash           string
-		filenamePrefix string
-		valueFlow      ValueFlow
+		name             string
+		account          string
+		hash             string
+		filenamePrefix   string
+		valueFlow        ValueFlow
+		additionalStraws []Straw
 	}
 	for _, c := range []Case{
 		{
@@ -83,6 +84,12 @@ func TestFindActions(t *testing.T) {
 			name:           "nft purchase",
 			hash:           "8feb00edd889f8a36fb8af5b4d5370190fcbe872088cd1247c445e3c3b39a795",
 			filenamePrefix: "getgems-nft-purchase",
+		},
+		{
+			name:             "get gems nft purchase",
+			hash:             "8feb00edd889f8a36fb8af5b4d5370190fcbe872088cd1247c445e3c3b39a795",
+			filenamePrefix:   "getgems-nft-purchase-with-straw",
+			additionalStraws: []Straw{FindGetGemsNftPurchase},
 		},
 		{
 			name:           "subscription initialization",
@@ -103,7 +110,7 @@ func TestFindActions(t *testing.T) {
 		t.Run(c.name, func(t *testing.T) {
 			trace, err := storage.GetTrace(context.Background(), tongo.MustParseHash(c.hash))
 			require.Nil(t, err)
-			actionsList, err := FindActions(trace)
+			actionsList, err := FindActions(trace, WithStraws(append(c.additionalStraws, DefaultStraws...)))
 			require.Nil(t, err)
 			results := result{
 				Actions: actionsList.Actions,

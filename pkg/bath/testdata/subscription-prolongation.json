@@ -4,6 +4,7 @@
        "TonTransfer": null,
        "SmartContractExec": null,
        "NftItemTransfer": null,
+       "GetGemsNftPurchase": null,
        "JettonTransfer": null,
        "ContractDeploy": null,
        "Subscription": {

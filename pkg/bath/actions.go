@@ -13,16 +13,17 @@ import (
 )
 
 const (
-	Empty             ActionType = "Empty"
-	TonTransfer       ActionType = "TonTransfer"
-	SmartContractExec ActionType = "SmartContractExec"
-	NftItemTransfer   ActionType = "NftItemTransfer"
-	JettonTransfer    ActionType = "JettonTransfer"
-	ContractDeploy    ActionType = "ContractDeploy"
-	Subscription      ActionType = "Subscription"
-	UnSubscription    ActionType = "UnSubscribe"
-	AuctionBid        ActionType = "AuctionBid"
-	AuctionTgInitBid  ActionType = "AuctionTgInitBid"
+	Empty              ActionType = "Empty"
+	TonTransfer        ActionType = "TonTransfer"
+	SmartContractExec  ActionType = "SmartContractExec"
+	NftItemTransfer    ActionType = "NftItemTransfer"
+	GetGemsNftPurchase ActionType = "GetGemsNftPurchase"
+	JettonTransfer     ActionType = "JettonTransfer"
+	ContractDeploy     ActionType = "ContractDeploy"
+	Subscription       ActionType = "Subscription"
+	UnSubscription     ActionType = "UnSubscribe"
+	AuctionBid         ActionType = "AuctionBid"
+	AuctionTgInitBid   ActionType = "AuctionTgInitBid"
 
 	RefundDnsTg   RefundType = "DNS.tg"
 	RefundDnsTon  RefundType = "DNS.ton"
@@ -39,16 +40,17 @@ type (
 		Origin string
 	}
 	Action struct {
-		TonTransfer       *TonTransferAction
-		SmartContractExec *SmartContractAction
-		NftItemTransfer   *NftTransferAction
-		JettonTransfer    *JettonTransferAction
-		ContractDeploy    *ContractDeployAction
-		Subscription      *SubscriptionAction
-		UnSubscription    *UnSubscriptionAction
-		AuctionBid        *AuctionBidAction
-		Success           bool
-		Type              ActionType
+		TonTransfer        *TonTransferAction
+		SmartContractExec  *SmartContractAction
+		NftItemTransfer    *NftTransferAction
+		GetGemsNftPurchase *GetGemsNftPurchaseAction
+		JettonTransfer     *JettonTransferAction
+		ContractDeploy     *ContractDeployAction
+		Subscription       *SubscriptionAction
+		UnSubscription     *UnSubscriptionAction
+		AuctionBid         *AuctionBidAction
+		Success            bool
+		Type               ActionType
 	}
 	TonTransferAction struct {
 		Amount    int64
@@ -71,6 +73,11 @@ type (
 		Sender    *tongo.AccountID
 		Nft       tongo.AccountID
 		Refund    *Refund
+	}
+
+	GetGemsNftPurchaseAction struct {
+		Nft      tongo.AccountID
+		NewOwner tongo.AccountID
 	}
 
 	JettonTransferAction struct {
