@@ -19,12 +19,14 @@ import (
 	"github.com/tonkeeper/tongo/wallet"
 )
 
+const lifeTimeProof = 300
+
 type TonConnect struct {
 	Secret   string
 	LifeTime int64
 }
 
-func NewTonConnect(secret string, lifeTimeProof int64) *TonConnect {
+func NewTonConnect(secret string) *TonConnect {
 	return &TonConnect{Secret: secret, LifeTime: lifeTimeProof}
 }
 

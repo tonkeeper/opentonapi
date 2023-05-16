@@ -49,7 +49,7 @@ func (h Handler) TonConnectProof(ctx context.Context, request oas.TonConnectProo
 		return &oas.BadRequest{Error: err.Error()}, nil
 	}
 
-	if time.Now().After(time.Unix(parsed.TS, 0).Add(time.Duration(h.tonConnect.GetLifeTimeProof()) * time.Second)) {
+	if time.Since(time.Unix(parsed.TS, 0)) > time.Duration(h.tonConnect.GetLifeTimeProof())*time.Second {
 		return &oas.BadRequest{Error: "proof has been expired"}, nil
 	}
 

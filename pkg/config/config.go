@@ -22,8 +22,7 @@ type Config struct {
 		LiteServers []config.LiteServer `env:"LITE_SERVERS"`
 	}
 	TonConnect struct {
-		Secret        string `env:"TON_CONNECT_SECRET"`
-		LifeTimeProof int64  `env:"TON_CONNECT_LIFE_TIME_PROOF" envDefault:"300"`
+		Secret string `env:"TON_CONNECT_SECRET"`
 	}
 }
 
