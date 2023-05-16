@@ -2,24 +2,6 @@
    "Actions": [
      {
        "TonTransfer": null,
-       "SmartContractExec": {
-         "TonAttached": 16000000,
-         "Executor": "0:84796c47a337716be8919014070016bd16498021b27325778394ea1893544ba6",
-         "Contract": "0:f3b542fa6d15e4bba8c9aac63aa1b8a97d787ab7dcb34730e1e5a4e78e104b80",
-         "Operation": "PaymentRequest",
-         "Payload": "Amount:\n  Grams: \"1000000000\"\n  Other: {}\nQueryId: 26184672000001\n"
-       },
-       "NftItemTransfer": null,
-       "JettonTransfer": null,
-       "ContractDeploy": null,
-       "Subscription": null,
-       "UnSubscription": null,
-       "AuctionBid": null,
-       "Success": true,
-       "Type": "SmartContractExec"
-     },
-     {
-       "TonTransfer": null,
        "SmartContractExec": null,
        "NftItemTransfer": null,
        "JettonTransfer": null,
@@ -28,7 +10,7 @@
          "Subscription": "0:84796c47a337716be8919014070016bd16498021b27325778394ea1893544ba6",
          "Subscriber": "0:f3b542fa6d15e4bba8c9aac63aa1b8a97d787ab7dcb34730e1e5a4e78e104b80",
          "Beneficiary": "0:e01675b731ed41f3a186a29d4a203068f744f68162cc370b0cde92f24ff97de5",
-         "Amount": 1010380000,
+         "Amount": 1000000000,
          "First": false
        },
        "UnSubscription": null,
