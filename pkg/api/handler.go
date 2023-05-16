@@ -2,9 +2,9 @@ package api
 
 import (
 	"fmt"
-	"github.com/tonkeeper/opentonapi/pkg/tonconnect"
 
 	"github.com/go-faster/errors"
+	"github.com/tonkeeper/opentonapi/pkg/tonconnect"
 	rules "github.com/tonkeeper/scam_backoffice_rules"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/contract/dns"
@@ -109,9 +109,9 @@ func WithTonRates(rates tonRates) Option {
 	}
 }
 
-func WithTonConnectSecret(tonConnect string) Option {
+func WithTonConnectSecret(tonConnectSecret string) Option {
 	return func(o *Options) {
-		o.tonConnectSecret = tonConnect
+		o.tonConnectSecret = tonConnectSecret
 	}
 }
 
@@ -148,7 +148,6 @@ func NewHandler(logger *zap.Logger, opts ...Option) (*Handler, error) {
 		return nil, fmt.Errorf("executor is not configured")
 	}
 	tonConnect := tonconnect.NewTonConnect(options.tonConnectSecret)
-
 	dnsClient := dns.NewDNS(tongo.MustParseAccountID("-1:e56754f83426f69b09267bd876ac97c44821345b7e266bd956a7bfbfb98df35c"), options.executor) //todo: move to chain config
 
 	return &Handler{

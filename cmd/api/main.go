@@ -40,13 +40,12 @@ func main() {
 	if err != nil {
 		log.Fatal("failed to create msg sender", zap.Error(err))
 	}
-
 	h, err := api.NewHandler(log,
 		api.WithStorage(storage),
 		api.WithAddressBook(book),
 		api.WithExecutor(storage),
 		api.WithMessageSender(msgSender),
-		api.WithTonConnectSecret(cfg.App.TonConnectSecret),
+		api.WithTonConnectSecret(cfg.TonConnect.Secret),
 	)
 	if err != nil {
 		log.Fatal("failed to create api handler", zap.Error(err))

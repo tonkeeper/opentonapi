@@ -5,6 +5,8 @@ import (
 	"crypto/hmac"
 	"crypto/sha256"
 	"encoding/base64"
+	"time"
+
 	"github.com/tonkeeper/opentonapi/pkg/references"
 
 	"github.com/tonkeeper/opentonapi/pkg/oas"
@@ -47,6 +49,10 @@ func (h Handler) TonConnectProof(ctx context.Context, request oas.TonConnectProo
 		return &oas.BadRequest{Error: err.Error()}, nil
 	}
 
+	if time.Since(time.Unix(parsed.TS, 0)) > time.Duration(h.tonConnect.GetLifeTimeProof())*time.Second {
+		return &oas.BadRequest{Error: "proof has been expired"}, nil
+	}
+
 	accountID, err := tongo.ParseAccountID(request.Address)
 	if err != nil {
 		return &oas.BadRequest{Error: err.Error()}, nil
@@ -56,6 +62,9 @@ func (h Handler) TonConnectProof(ctx context.Context, request oas.TonConnectProo
 	if err != nil {
 		if stateInit == "" {
 			return &oas.BadRequest{Error: "failed get public key"}, nil
+		}
+		if ok, err := tonconnect.CompareStateInitWithAddress(accountID, stateInit); err != nil || !ok {
+			return &oas.BadRequest{Error: "failed compare state init with address"}, nil
 		}
 		pubKey, err = tonconnect.ParseStateInit(stateInit)
 		if err != nil {

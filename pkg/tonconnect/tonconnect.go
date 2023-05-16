@@ -1,6 +1,7 @@
 package tonconnect
 
 import (
+	"bytes"
 	"crypto/ed25519"
 	"crypto/hmac"
 	"crypto/rand"
@@ -12,17 +13,21 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/boc"
 	"github.com/tonkeeper/tongo/tlb"
 	"github.com/tonkeeper/tongo/wallet"
 )
 
+const lifeTimeProof = 300
+
 type TonConnect struct {
-	Secret string
+	Secret   string
+	LifeTime int64
 }
 
 func NewTonConnect(secret string) *TonConnect {
-	return &TonConnect{Secret: secret}
+	return &TonConnect{Secret: secret, LifeTime: lifeTimeProof}
 }
 
 const (
@@ -69,6 +74,10 @@ type ParsedMessage struct {
 
 func (c *TonConnect) GetSecret() string {
 	return c.Secret
+}
+
+func (c *TonConnect) GetLifeTimeProof() int64 {
+	return c.LifeTime
 }
 
 func (c *TonConnect) GeneratePayload() (string, error) {
@@ -201,7 +210,7 @@ func ParseStateInit(stateInit string) ([]byte, error) {
 
 	version, prs := knownHashes[hash]
 	if !prs {
-		return nil, err
+		return nil, fmt.Errorf("unknown hash")
 	}
 
 	var pubKey tlb.Bits256
@@ -224,4 +233,16 @@ func ParseStateInit(stateInit string) ([]byte, error) {
 	}
 
 	return pubKey[:], nil
+}
+
+func CompareStateInitWithAddress(a tongo.AccountID, stateInit string) (bool, error) {
+	cells, err := boc.DeserializeBocBase64(stateInit)
+	if err != nil || len(cells) != 1 {
+		return false, err
+	}
+	h, err := cells[0].Hash()
+	if err != nil {
+		return false, err
+	}
+	return bytes.Equal(h, a.Address[:]), nil
 }
