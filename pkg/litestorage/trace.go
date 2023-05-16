@@ -46,7 +46,7 @@ func (s *LiteStorage) recursiveGetChildren(ctx context.Context, tx core.Transact
 		trace.Children = append(trace.Children, &child)
 	}
 	var err error
-	trace.AccountInterfaces, err = s.accountInterfaces(tx.Account)
+	trace.AccountInterfaces, err = s.getAccountInterfaces(ctx, tx.Account)
 	if err != nil {
 		return core.Trace{}, nil
 	}
@@ -124,6 +124,21 @@ func (s *LiteStorage) searchTransactionInBlock(ctx context.Context, a tongo.Acco
 	return nil, fmt.Errorf("not found")
 }
 
-func (s *LiteStorage) accountInterfaces(id tongo.AccountID) ([]abi.ContractInterface, error) {
-	return nil, nil
+func (s *LiteStorage) getAccountInterfaces(ctx context.Context, id tongo.AccountID) ([]abi.ContractInterface, error) {
+	interfaces, ok := s.accountInterfacesCache.Load(id)
+	if ok {
+		return interfaces, nil
+	}
+	account, err := s.GetRawAccount(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	inspector := abi.NewContractInspector()
+	cd, err := inspector.InspectContract(ctx, account.Code, s.client, id)
+	if err != nil {
+		return nil, err
+	}
+	interfaces = cd.ImplementedInterfaces()
+	s.accountInterfacesCache.Store(id, interfaces)
+	return interfaces, nil
 }

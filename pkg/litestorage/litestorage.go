@@ -25,6 +25,7 @@ type LiteStorage struct {
 	jettonMetaCache         map[string]tongo.JettonMetadata
 	transactionsIndexByHash map[tongo.Bits256]*core.Transaction
 	blockCache              *xsync.MapOf[tongo.BlockIDExt, *tlb.Block]
+	accountInterfacesCache  *xsync.MapOf[tongo.AccountID, []abi.ContractInterface]
 	knownAccounts           map[string][]tongo.AccountID
 }
 
@@ -83,6 +84,7 @@ func NewLiteStorage(log *zap.Logger, opts ...Option) (*LiteStorage, error) {
 		jettonMetaCache:         make(map[string]tongo.JettonMetadata),
 		transactionsIndexByHash: make(map[tongo.Bits256]*core.Transaction),
 		blockCache:              xsync.NewTypedMapOf[tongo.BlockIDExt, *tlb.Block](hashBlockIDExt),
+		accountInterfacesCache:  xsync.NewTypedMapOf[tongo.AccountID, []abi.ContractInterface](hashAccountID),
 		knownAccounts:           make(map[string][]tongo.AccountID),
 	}
 	l.knownAccounts["tf_pools"] = o.tfPools
