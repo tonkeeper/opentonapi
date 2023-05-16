@@ -5,6 +5,7 @@ import (
 	"crypto/hmac"
 	"crypto/sha256"
 	"encoding/base64"
+
 	"github.com/tonkeeper/opentonapi/pkg/references"
 
 	"github.com/tonkeeper/opentonapi/pkg/oas"
@@ -56,6 +57,9 @@ func (h Handler) TonConnectProof(ctx context.Context, request oas.TonConnectProo
 	if err != nil {
 		if stateInit == "" {
 			return &oas.BadRequest{Error: "failed get public key"}, nil
+		}
+		if ok, err := tonconnect.CompareStateInitWithAddress(accountID, stateInit); err != nil || !ok {
+			return &oas.BadRequest{Error: "failed compare state init with address"}, nil
 		}
 		pubKey, err = tonconnect.ParseStateInit(stateInit)
 		if err != nil {
