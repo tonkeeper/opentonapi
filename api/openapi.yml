@@ -381,6 +381,7 @@ paths:
         - Accounts
       parameters:
         - $ref: '#/components/parameters/accountIdParameter'
+        - $ref: '#/components/parameters/i18n'
         - name: before_lt
           in: query
           description: "omit this parameter to get last events"
@@ -434,6 +435,7 @@ paths:
       parameters:
         - $ref: '#/components/parameters/accountIdParameter'
         - $ref: '#/components/parameters/jettonIdParameter'
+        - $ref: '#/components/parameters/i18n'
         - name: before_lt
           in: query
           description: "omit this parameter to get last events"
@@ -520,6 +522,7 @@ paths:
         - Accounts
       parameters:
         - $ref: '#/components/parameters/accountIdParameter'
+        - $ref: '#/components/parameters/i18n'
         - name: before_lt
           in: query
           description: "omit this parameter to get last events"
@@ -883,6 +886,7 @@ paths:
         - Events
       parameters:
         - $ref: '#/components/parameters/eventIdParameter'
+        - $ref: '#/components/parameters/i18n'
       responses:
         '200':
           description: "event"
@@ -2633,22 +2637,20 @@ components:
     ActionSimplePreview:
       type: object
       required:
-        - name
-        - short_description
-        - full_description
+        - description
+        - accounts
       properties:
-        name:
+        description:
           type: string
-          example: "contract deploy"
-        short_description:
-          type: string
-          example: ""
-        full_description:
-          type: string
-          example: ""
-        image:
-          type: string
-          example: "https://site.com/pic1.jpg"
+          example: "Transferring 5 TON"
+        value:
+          type: integer
+          format: int64
+          example: 1000
+        accounts:
+          type: array
+          items:
+            $ref: '#/components/schemas/AccountAddress'
 
     AccountEvent:
       type: object

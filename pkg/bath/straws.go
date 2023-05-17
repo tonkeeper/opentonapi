@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"math/big"
 
+	"github.com/tonkeeper/opentonapi/internal/g"
+	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
 	"github.com/tonkeeper/tongo/boc"
@@ -84,7 +86,7 @@ type BubbleNftTransfer struct {
 	payload   any //todo: replace any
 }
 
-func (b BubbleNftTransfer) ToAction() (action *Action) {
+func (b BubbleNftTransfer) ToAction(book addressBook) (action *Action) {
 	a := Action{
 		NftItemTransfer: &NftTransferAction{
 			Comment:   nil, //todo: add
@@ -94,6 +96,11 @@ func (b BubbleNftTransfer) ToAction() (action *Action) {
 		},
 		Success: b.success,
 		Type:    NftItemTransfer,
+		SimplePreview: SimplePreview{
+			MessageID: nftTransferMessageID,
+			Accounts:  distinctAccounts(b.account.Address, b.sender.Address, b.recipient.Address),
+			Value:     g.Pointer[int64](1),
+		},
 	}
 	if c, ok := b.payload.(string); ok {
 		a.NftItemTransfer.Comment = &c
@@ -210,7 +217,14 @@ type BubbleJettonTransfer struct {
 	payload                       any
 }
 
-func (b BubbleJettonTransfer) ToAction() (action *Action) {
+func (b BubbleJettonTransfer) ToAction(book addressBook) (action *Action) {
+	jettonName := core.UnknownJettonName
+	if book != nil {
+		if jetton, ok := book.GetJettonInfoByAddress(b.master); ok {
+			jettonName = jetton.Name
+		}
+	}
+	amount := big.Int(b.amount)
 	a := Action{
 		JettonTransfer: &JettonTransferAction{
 			Jetton:           b.master,
@@ -222,6 +236,15 @@ func (b BubbleJettonTransfer) ToAction() (action *Action) {
 		},
 		Success: b.success,
 		Type:    JettonTransfer,
+		SimplePreview: SimplePreview{
+			MessageID: jettonTransferMessageID,
+			TemplateData: map[string]interface{}{
+				"Value":      b.amount,
+				"JettonName": jettonName,
+			},
+			Accounts: distinctAccounts(b.recipient.Address, b.sender.Address, b.master),
+			Value:    g.Pointer(amount.Int64()),
+		},
 	}
 	if c, ok := b.payload.(string); ok {
 		a.JettonTransfer.Comment = &c

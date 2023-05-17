@@ -1,7 +1,9 @@
 package bath
 
 import (
+	"github.com/tonkeeper/opentonapi/pkg/addressbook"
 	"github.com/tonkeeper/opentonapi/pkg/core"
+	"github.com/tonkeeper/tongo"
 )
 
 type ActionsList struct {
@@ -9,8 +11,13 @@ type ActionsList struct {
 	ValueFlow *ValueFlow
 }
 
+type addressBook interface {
+	GetJettonInfoByAddress(a tongo.AccountID) (addressbook.KnownJetton, bool)
+}
+
 type Options struct {
-	Straws []Straw
+	Straws      []Straw
+	AddressBook addressBook
 }
 
 type Option func(*Options)
@@ -19,6 +26,12 @@ type Option func(*Options)
 func WithStraws(straws []Straw) Option {
 	return func(options *Options) {
 		options.Straws = straws
+	}
+}
+
+func WithAddressbook(book addressBook) Option {
+	return func(options *Options) {
+		options.AddressBook = book
 	}
 }
 
@@ -33,7 +46,7 @@ func FindActions(trace *core.Trace, opts ...Option) (*ActionsList, error) {
 	}
 	bubble := fromTrace(trace, nil)
 	MergeAllBubbles(bubble, options.Straws)
-	actions, flow := CollectActionsAndValueFlow(bubble, nil)
+	actions, flow := CollectActionsAndValueFlow(bubble, nil, options.AddressBook)
 	return &ActionsList{
 		Actions:   actions,
 		ValueFlow: flow,

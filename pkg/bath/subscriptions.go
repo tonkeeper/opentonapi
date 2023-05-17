@@ -1,7 +1,9 @@
 package bath
 
 import (
+	"github.com/tonkeeper/opentonapi/internal/g"
 	"github.com/tonkeeper/tongo/abi"
+	"github.com/tonkeeper/tongo/utils"
 )
 
 type BubbleSubscription struct {
@@ -86,7 +88,7 @@ func FindExtendedSubscription(bubble *Bubble) bool {
 	return false
 }
 
-func (b BubbleSubscription) ToAction() (action *Action) {
+func (b BubbleSubscription) ToAction(book addressBook) (action *Action) {
 	return &Action{
 		Subscription: &SubscriptionAction{
 			Subscription: b.Subscription.Address,
@@ -97,5 +99,13 @@ func (b BubbleSubscription) ToAction() (action *Action) {
 		},
 		Success: true,
 		Type:    Subscription,
+		SimplePreview: SimplePreview{
+			MessageID: subscriptionMessageID,
+			TemplateData: map[string]interface{}{
+				"Value": utils.HumanFriendlyCoinsRepr(b.Amount),
+			},
+			Accounts: distinctAccounts(b.Beneficiary.Address, b.Subscriber.Address),
+			Value:    g.Pointer(b.Amount),
+		},
 	}
 }

@@ -1,3 +1,18 @@
 [poolImplementationDescription]
 hash = "sha1-6865607e146fc7e6ec44550c3888b35b97ac0638"
 other = "Минимальный депозит {{.Deposit}} ТОН"
+
+[smartContractExecAction]
+other = "Выполнение смарт-контракта"
+
+[subscriptionAction]
+other = "Оплата подписки {{.Value}}"
+
+[jettonTransferAction]
+other = "Перевод {{.Value}} {{.JettonName}}"
+
+[nftTransferAction]
+other = "Перевод NFT"
+
+[nftPurchaseAction]
+other = "Покупка NFT"

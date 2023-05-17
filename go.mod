@@ -10,7 +10,6 @@ require (
 	github.com/ghodss/yaml v1.0.0
 	github.com/go-faster/errors v0.6.1
 	github.com/go-faster/jx v0.40.0
-	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/google/martian v2.1.0+incompatible
 	github.com/gorilla/websocket v1.5.0
 	github.com/nicksnyder/go-i18n/v2 v2.2.1
@@ -21,7 +20,7 @@ require (
 	github.com/sourcegraph/conc v0.3.0
 	github.com/stretchr/testify v1.8.1
 	github.com/tonkeeper/scam_backoffice_rules v0.0.0-20230413094040-a66ab71fb269
-	github.com/tonkeeper/tongo v1.0.15-0.20230508095306-c4c3b7a0ae50
+	github.com/tonkeeper/tongo v1.0.15-0.20230516101610-c96304f91108
 	go.opentelemetry.io/otel v1.11.1
 	go.opentelemetry.io/otel/metric v0.33.0
 	go.opentelemetry.io/otel/trace v1.11.1

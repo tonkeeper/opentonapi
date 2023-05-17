@@ -1,9 +1,12 @@
 package bath
 
 import (
+	"sort"
+
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
 	"github.com/tonkeeper/tongo/tlb"
+	"golang.org/x/exp/slices"
 )
 
 func parseAccount(a tlb.MsgAddress) *Account {
@@ -51,4 +54,11 @@ func operation(bubble *Bubble, opName abi.MsgOpName) bool {
 		return false
 	}
 	return txBubble.operation(opName)
+}
+
+func distinctAccounts(accounts ...tongo.AccountID) []tongo.AccountID {
+	sort.Slice(accounts, func(i, j int) bool {
+		return accounts[i].String() < accounts[j].String()
+	})
+	return slices.Compact(accounts)
 }

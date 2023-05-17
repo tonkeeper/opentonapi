@@ -1267,6 +1267,10 @@ func (s *Server) handleGetEventRequest(args [1]string, w http.ResponseWriter, r 
 					Name: "event_id",
 					In:   "path",
 				}: params.EventID,
+				{
+					Name: "Accept-Language",
+					In:   "header",
+				}: params.AcceptLanguage,
 			},
 			Raw: r,
 		}
@@ -1366,6 +1370,10 @@ func (s *Server) handleGetEventsByAccountRequest(args [1]string, w http.Response
 					Name: "account_id",
 					In:   "path",
 				}: params.AccountID,
+				{
+					Name: "Accept-Language",
+					In:   "header",
+				}: params.AcceptLanguage,
 				{
 					Name: "before_lt",
 					In:   "query",
@@ -1787,6 +1795,10 @@ func (s *Server) handleGetJettonsHistoryRequest(args [1]string, w http.ResponseW
 					In:   "path",
 				}: params.AccountID,
 				{
+					Name: "Accept-Language",
+					In:   "header",
+				}: params.AcceptLanguage,
+				{
 					Name: "before_lt",
 					In:   "query",
 				}: params.BeforeLt,
@@ -1905,6 +1917,10 @@ func (s *Server) handleGetJettonsHistoryByIDRequest(args [2]string, w http.Respo
 					Name: "jetton_id",
 					In:   "path",
 				}: params.JettonID,
+				{
+					Name: "Accept-Language",
+					In:   "header",
+				}: params.AcceptLanguage,
 				{
 					Name: "before_lt",
 					In:   "query",

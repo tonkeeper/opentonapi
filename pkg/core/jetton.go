@@ -12,3 +12,5 @@ type JettonWallet struct {
 	JettonAddress tongo.AccountID
 	Code          []byte
 }
+
+const UnknownJettonName = "UKWN"

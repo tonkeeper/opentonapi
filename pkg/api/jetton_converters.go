@@ -58,7 +58,7 @@ func jettonPreview(addressBook addressBook, master tongo.AccountID, meta tongo.J
 	return jetton
 }
 
-func (h Handler) convertJettonHistory(ctx context.Context, account tongo.AccountID, traceIDs []tongo.Bits256) ([]oas.AccountEvent, int64, error) {
+func (h Handler) convertJettonHistory(ctx context.Context, account tongo.AccountID, traceIDs []tongo.Bits256, acceptLanguage oas.OptString) ([]oas.AccountEvent, int64, error) {
 	var lastLT uint64
 	events := []oas.AccountEvent{}
 	for _, traceID := range traceIDs {
@@ -66,7 +66,9 @@ func (h Handler) convertJettonHistory(ctx context.Context, account tongo.Account
 		if err != nil {
 			return nil, 0, err
 		}
-		result, err := bath.FindActions(trace, bath.WithStraws([]bath.Straw{bath.FindJettonTransfer}))
+		result, err := bath.FindActions(trace,
+			bath.WithStraws([]bath.Straw{bath.FindJettonTransfer}),
+			bath.WithAddressbook(h.addressBook))
 		if err != nil {
 			return nil, 0, err
 		}
@@ -83,7 +85,7 @@ func (h Handler) convertJettonHistory(ctx context.Context, account tongo.Account
 			event.ValueFlow = convertAccountValueFlow(account, flow, h.addressBook)
 		}
 		for _, action := range result.Actions {
-			convertedAction, spamDetected := h.convertAction(ctx, action)
+			convertedAction, spamDetected := h.convertAction(ctx, action, acceptLanguage)
 			if !event.IsScam && spamDetected {
 				event.IsScam = true
 			}

@@ -39,6 +39,14 @@ type (
 		Type   RefundType
 		Origin string
 	}
+	// SimplePreview shortly describes what an action is about.
+	SimplePreview struct {
+		Value    *int64
+		Accounts []tongo.AccountID
+		// MessageID specifies a message's ID from pkg/i18n/translation/*.toml
+		MessageID    string
+		TemplateData map[string]interface{}
+	}
 	Action struct {
 		TonTransfer        *TonTransferAction
 		SmartContractExec  *SmartContractAction
@@ -51,6 +59,7 @@ type (
 		AuctionBid         *AuctionBidAction
 		Success            bool
 		Type               ActionType
+		SimplePreview      SimplePreview
 	}
 	TonTransferAction struct {
 		Amount    int64
@@ -127,17 +136,17 @@ func (a Action) String() string {
 	return fmt.Sprintf("%v: %+v", a.Type, string(b))
 }
 
-func CollectActionsAndValueFlow(bubble *Bubble, forAccount *tongo.AccountID) ([]Action, *ValueFlow) {
+func CollectActionsAndValueFlow(bubble *Bubble, forAccount *tongo.AccountID, book addressBook) ([]Action, *ValueFlow) {
 	var actions []Action
 	valueFlow := newValueFlow()
 	if forAccount == nil || slices.Contains(bubble.Accounts, *forAccount) {
-		a := bubble.Info.ToAction()
+		a := bubble.Info.ToAction(book)
 		if a != nil {
 			actions = append(actions, *a)
 		}
 	}
 	for _, c := range bubble.Children {
-		childActions, childValueFlow := CollectActionsAndValueFlow(c, forAccount)
+		childActions, childValueFlow := CollectActionsAndValueFlow(c, forAccount, book)
 		actions = append(actions, childActions...)
 		valueFlow.Merge(childValueFlow)
 	}

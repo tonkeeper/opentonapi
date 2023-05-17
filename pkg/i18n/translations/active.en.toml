@@ -1,1 +1,7 @@
 poolImplementationDescription = "Minimum deposit {{.Deposit}} TON"
+tonTransferAction = "Transferring {{.Value}}"
+smartContractExecAction = "Execution of smart contract"
+subscriptionAction = "Paying {{.Value}} for subscription"
+jettonTransferAction = "Transferring {{.Value}} {{.JettonName}}"
+nftTransferAction = "NFT Transfer"
+nftPurchaseAction = "NFT Purchase"

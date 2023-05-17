@@ -327,6 +327,35 @@ func (s Action) Validate() error {
 			Error: err,
 		})
 	}
+	if err := func() error {
+		if err := s.SimplePreview.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "simple_preview",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+func (s ActionSimplePreview) Validate() error {
+	var failures []validate.FieldError
+	if err := func() error {
+		if s.Accounts == nil {
+			return errors.New("nil is invalid value")
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "accounts",
+			Error: err,
+		})
+	}
 	if len(failures) > 0 {
 		return &validate.Error{Fields: failures}
 	}
