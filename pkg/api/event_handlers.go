@@ -51,7 +51,7 @@ func (h Handler) GetEvent(ctx context.Context, params oas.GetEventParams) (oas.G
 	if err != nil {
 		return &oas.InternalError{Error: err.Error()}, nil
 	}
-	result, err := bath.FindActions(trace)
+	result, err := bath.FindActions(trace, bath.WithAddressbook(h.addressBook))
 	if err != nil {
 		return nil, err
 	}
@@ -65,7 +65,7 @@ func (h Handler) GetEvent(ctx context.Context, params oas.GetEventParams) (oas.G
 		InProgress: trace.InProgress(),
 	}
 	for i, a := range result.Actions {
-		convertedAction, spamDetected := h.convertAction(ctx, a)
+		convertedAction, spamDetected := h.convertAction(ctx, a, params.AcceptLanguage)
 		event.IsScam = event.IsScam || spamDetected
 		event.Actions[i] = convertedAction
 	}
@@ -91,7 +91,7 @@ func (h Handler) GetEventsByAccount(ctx context.Context, params oas.GetEventsByA
 		if err != nil {
 			return &oas.InternalError{Error: err.Error()}, nil
 		}
-		result, err := bath.FindActions(trace)
+		result, err := bath.FindActions(trace, bath.WithAddressbook(h.addressBook))
 		if err != nil {
 			return &oas.InternalError{Error: err.Error()}, nil
 		}
@@ -108,7 +108,7 @@ func (h Handler) GetEventsByAccount(ctx context.Context, params oas.GetEventsByA
 			e.ValueFlow = convertAccountValueFlow(account, flow, h.addressBook)
 		}
 		for _, a := range result.Actions {
-			convertedAction, spamDetected := h.convertAction(ctx, a)
+			convertedAction, spamDetected := h.convertAction(ctx, a, params.AcceptLanguage)
 			if !e.IsScam && spamDetected {
 				e.IsScam = true
 			}

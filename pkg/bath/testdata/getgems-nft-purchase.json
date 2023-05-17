@@ -17,7 +17,18 @@
        "UnSubscription": null,
        "AuctionBid": null,
        "Success": true,
-       "Type": "TonTransfer"
+       "Type": "TonTransfer",
+       "SimplePreview": {
+         "Value": 1800000000,
+         "Accounts": [
+           "0:4495a1921ab497b0eacee0d78838f8aeaba12481c29ec592c7fd5cbdd5b5ad0e",
+           "0:533f30de5722157b8471f5503b9fc5800c8d8397e79743f796b11e609adae69f"
+         ],
+         "MessageID": "tonTransferAction",
+         "TemplateData": {
+           "Value": "1.8 Ton"
+         }
+       }
      },
      {
        "TonTransfer": {
@@ -36,7 +47,18 @@
        "UnSubscription": null,
        "AuctionBid": null,
        "Success": true,
-       "Type": "TonTransfer"
+       "Type": "TonTransfer",
+       "SimplePreview": {
+         "Value": 687432978,
+         "Accounts": [
+           "0:353d4cb749da429dbee9387ff7f65c0d99a922396a3d239eff8be465422771a0",
+           "0:4495a1921ab497b0eacee0d78838f8aeaba12481c29ec592c7fd5cbdd5b5ad0e"
+         ],
+         "MessageID": "tonTransferAction",
+         "TemplateData": {
+           "Value": "687.432978 milliTon"
+         }
+       }
      },
      {
        "TonTransfer": {
@@ -55,7 +77,18 @@
        "UnSubscription": null,
        "AuctionBid": null,
        "Success": true,
-       "Type": "TonTransfer"
+       "Type": "TonTransfer",
+       "SimplePreview": {
+         "Value": 80000000,
+         "Accounts": [
+           "0:353d4cb749da429dbee9387ff7f65c0d99a922396a3d239eff8be465422771a0",
+           "0:4495a1921ab497b0eacee0d78838f8aeaba12481c29ec592c7fd5cbdd5b5ad0e"
+         ],
+         "MessageID": "tonTransferAction",
+         "TemplateData": {
+           "Value": "80 milliTon"
+         }
+       }
      },
      {
        "TonTransfer": {
@@ -74,7 +107,18 @@
        "UnSubscription": null,
        "AuctionBid": null,
        "Success": true,
-       "Type": "TonTransfer"
+       "Type": "TonTransfer",
+       "SimplePreview": {
+         "Value": 40000000,
+         "Accounts": [
+           "0:4495a1921ab497b0eacee0d78838f8aeaba12481c29ec592c7fd5cbdd5b5ad0e",
+           "0:a3935861f79daf59a13d6d182e1640210c02f98e3df18fda74b8f5ab141abf18"
+         ],
+         "MessageID": "tonTransferAction",
+         "TemplateData": {
+           "Value": "40 milliTon"
+         }
+       }
      },
      {
        "TonTransfer": null,
@@ -93,7 +137,17 @@
        "UnSubscription": null,
        "AuctionBid": null,
        "Success": true,
-       "Type": "NftItemTransfer"
+       "Type": "NftItemTransfer",
+       "SimplePreview": {
+         "Value": 1,
+         "Accounts": [
+           "0:4495a1921ab497b0eacee0d78838f8aeaba12481c29ec592c7fd5cbdd5b5ad0e",
+           "0:533f30de5722157b8471f5503b9fc5800c8d8397e79743f796b11e609adae69f",
+           "0:63864e10646c9a2214651aec6dddf3379da9273a99c83fcce23c77da188b1348"
+         ],
+         "MessageID": "nftTransferAction",
+         "TemplateData": null
+       }
      }
    ],
    "Accounts": [

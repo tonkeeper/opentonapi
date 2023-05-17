@@ -741,7 +741,8 @@ func decodeGetDomainBidsParams(args [1]string, r *http.Request) (params GetDomai
 // GetEventParams is parameters of getEvent operation.
 type GetEventParams struct {
 	// Event ID or transaction hash in hex (without 0x) or base64url format.
-	EventID string
+	EventID        string
+	AcceptLanguage OptString
 }
 
 func unpackGetEventParams(packed middleware.Parameters) (params GetEventParams) {
@@ -752,10 +753,20 @@ func unpackGetEventParams(packed middleware.Parameters) (params GetEventParams) 
 		}
 		params.EventID = packed[key].(string)
 	}
+	{
+		key := middleware.ParameterKey{
+			Name: "Accept-Language",
+			In:   "header",
+		}
+		if v, ok := packed[key]; ok {
+			params.AcceptLanguage = v.(OptString)
+		}
+	}
 	return params
 }
 
 func decodeGetEventParams(args [1]string, r *http.Request) (params GetEventParams, _ error) {
+	h := uri.NewHeaderDecoder(r.Header)
 	// Decode path: event_id.
 	{
 		param := args[0]
@@ -787,13 +798,51 @@ func decodeGetEventParams(args [1]string, r *http.Request) (params GetEventParam
 			return params, errors.New("path: event_id: not specified")
 		}
 	}
+	// Set default value for header: Accept-Language.
+	{
+		val := string("en")
+		params.AcceptLanguage.SetTo(val)
+	}
+	// Decode header: Accept-Language.
+	{
+		cfg := uri.HeaderParameterDecodingConfig{
+			Name:    "Accept-Language",
+			Explode: false,
+		}
+		if err := h.HasParam(cfg); err == nil {
+			if err := h.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotAcceptLanguageVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotAcceptLanguageVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.AcceptLanguage.SetTo(paramsDotAcceptLanguageVal)
+				return nil
+			}); err != nil {
+				return params, errors.Wrap(err, "header: Accept-Language: parse")
+			}
+		}
+	}
 	return params, nil
 }
 
 // GetEventsByAccountParams is parameters of getEventsByAccount operation.
 type GetEventsByAccountParams struct {
 	// Account ID.
-	AccountID string
+	AccountID      string
+	AcceptLanguage OptString
 	// Omit this parameter to get last events.
 	BeforeLt  OptInt64
 	Limit     int
@@ -808,6 +857,15 @@ func unpackGetEventsByAccountParams(packed middleware.Parameters) (params GetEve
 			In:   "path",
 		}
 		params.AccountID = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "Accept-Language",
+			In:   "header",
+		}
+		if v, ok := packed[key]; ok {
+			params.AcceptLanguage = v.(OptString)
+		}
 	}
 	{
 		key := middleware.ParameterKey{
@@ -848,6 +906,7 @@ func unpackGetEventsByAccountParams(packed middleware.Parameters) (params GetEve
 
 func decodeGetEventsByAccountParams(args [1]string, r *http.Request) (params GetEventsByAccountParams, _ error) {
 	q := uri.NewQueryDecoder(r.URL.Query())
+	h := uri.NewHeaderDecoder(r.Header)
 	// Decode path: account_id.
 	{
 		param := args[0]
@@ -877,6 +936,43 @@ func decodeGetEventsByAccountParams(args [1]string, r *http.Request) (params Get
 			}
 		} else {
 			return params, errors.New("path: account_id: not specified")
+		}
+	}
+	// Set default value for header: Accept-Language.
+	{
+		val := string("en")
+		params.AcceptLanguage.SetTo(val)
+	}
+	// Decode header: Accept-Language.
+	{
+		cfg := uri.HeaderParameterDecodingConfig{
+			Name:    "Accept-Language",
+			Explode: false,
+		}
+		if err := h.HasParam(cfg); err == nil {
+			if err := h.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotAcceptLanguageVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotAcceptLanguageVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.AcceptLanguage.SetTo(paramsDotAcceptLanguageVal)
+				return nil
+			}); err != nil {
+				return params, errors.Wrap(err, "header: Accept-Language: parse")
+			}
 		}
 	}
 	// Decode query: before_lt.
@@ -1312,7 +1408,8 @@ func decodeGetJettonsBalancesParams(args [1]string, r *http.Request) (params Get
 // GetJettonsHistoryParams is parameters of getJettonsHistory operation.
 type GetJettonsHistoryParams struct {
 	// Account ID.
-	AccountID string
+	AccountID      string
+	AcceptLanguage OptString
 	// Omit this parameter to get last events.
 	BeforeLt  OptInt64
 	Limit     int
@@ -1327,6 +1424,15 @@ func unpackGetJettonsHistoryParams(packed middleware.Parameters) (params GetJett
 			In:   "path",
 		}
 		params.AccountID = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "Accept-Language",
+			In:   "header",
+		}
+		if v, ok := packed[key]; ok {
+			params.AcceptLanguage = v.(OptString)
+		}
 	}
 	{
 		key := middleware.ParameterKey{
@@ -1367,6 +1473,7 @@ func unpackGetJettonsHistoryParams(packed middleware.Parameters) (params GetJett
 
 func decodeGetJettonsHistoryParams(args [1]string, r *http.Request) (params GetJettonsHistoryParams, _ error) {
 	q := uri.NewQueryDecoder(r.URL.Query())
+	h := uri.NewHeaderDecoder(r.Header)
 	// Decode path: account_id.
 	{
 		param := args[0]
@@ -1396,6 +1503,43 @@ func decodeGetJettonsHistoryParams(args [1]string, r *http.Request) (params GetJ
 			}
 		} else {
 			return params, errors.New("path: account_id: not specified")
+		}
+	}
+	// Set default value for header: Accept-Language.
+	{
+		val := string("en")
+		params.AcceptLanguage.SetTo(val)
+	}
+	// Decode header: Accept-Language.
+	{
+		cfg := uri.HeaderParameterDecodingConfig{
+			Name:    "Accept-Language",
+			Explode: false,
+		}
+		if err := h.HasParam(cfg); err == nil {
+			if err := h.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotAcceptLanguageVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotAcceptLanguageVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.AcceptLanguage.SetTo(paramsDotAcceptLanguageVal)
+				return nil
+			}); err != nil {
+				return params, errors.Wrap(err, "header: Accept-Language: parse")
+			}
 		}
 	}
 	// Decode query: before_lt.
@@ -1554,7 +1698,8 @@ type GetJettonsHistoryByIDParams struct {
 	// Account ID.
 	AccountID string
 	// Jetton ID.
-	JettonID string
+	JettonID       string
+	AcceptLanguage OptString
 	// Omit this parameter to get last events.
 	BeforeLt  OptInt64
 	Limit     int
@@ -1576,6 +1721,15 @@ func unpackGetJettonsHistoryByIDParams(packed middleware.Parameters) (params Get
 			In:   "path",
 		}
 		params.JettonID = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "Accept-Language",
+			In:   "header",
+		}
+		if v, ok := packed[key]; ok {
+			params.AcceptLanguage = v.(OptString)
+		}
 	}
 	{
 		key := middleware.ParameterKey{
@@ -1616,6 +1770,7 @@ func unpackGetJettonsHistoryByIDParams(packed middleware.Parameters) (params Get
 
 func decodeGetJettonsHistoryByIDParams(args [2]string, r *http.Request) (params GetJettonsHistoryByIDParams, _ error) {
 	q := uri.NewQueryDecoder(r.URL.Query())
+	h := uri.NewHeaderDecoder(r.Header)
 	// Decode path: account_id.
 	{
 		param := args[0]
@@ -1676,6 +1831,43 @@ func decodeGetJettonsHistoryByIDParams(args [2]string, r *http.Request) (params 
 			}
 		} else {
 			return params, errors.New("path: jetton_id: not specified")
+		}
+	}
+	// Set default value for header: Accept-Language.
+	{
+		val := string("en")
+		params.AcceptLanguage.SetTo(val)
+	}
+	// Decode header: Accept-Language.
+	{
+		cfg := uri.HeaderParameterDecodingConfig{
+			Name:    "Accept-Language",
+			Explode: false,
+		}
+		if err := h.HasParam(cfg); err == nil {
+			if err := h.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotAcceptLanguageVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotAcceptLanguageVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.AcceptLanguage.SetTo(paramsDotAcceptLanguageVal)
+				return nil
+			}); err != nil {
+				return params, errors.Wrap(err, "header: Accept-Language: parse")
+			}
 		}
 	}
 	// Decode query: before_lt.

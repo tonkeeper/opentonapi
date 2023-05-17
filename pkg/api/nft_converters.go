@@ -26,7 +26,7 @@ func convertNFT(ctx context.Context, item core.NftItem, book addressBook, previe
 			m, _ := metaCache.getJettonMeta(ctx, *item.Sale.Price.Token)
 			tokenName = m.Name
 			if tokenName == "" {
-				tokenName = "UKWN"
+				tokenName = core.UnknownJettonName
 			}
 		}
 		i.SetSale(oas.OptSale{

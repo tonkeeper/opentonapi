@@ -4,7 +4,10 @@ import (
 	"fmt"
 
 	"github.com/ghodss/yaml"
+	"github.com/tonkeeper/opentonapi/internal/g"
+	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
+	"github.com/tonkeeper/tongo/utils"
 
 	"github.com/tonkeeper/opentonapi/pkg/core"
 )
@@ -37,7 +40,7 @@ func dumpCallArgs(v any) string {
 	}
 	return string(bs)
 }
-func (b BubbleTx) ToAction() *Action {
+func (b BubbleTx) ToAction(book addressBook) *Action {
 	if b.external {
 		if b.transactionType == core.TickTockTx {
 			return &Action{
@@ -49,6 +52,10 @@ func (b BubbleTx) ToAction() *Action {
 				},
 				Success: b.success,
 				Type:    SmartContractExec,
+				SimplePreview: SimplePreview{
+					MessageID: smartContractMessageID,
+					Accounts:  []tongo.AccountID{b.account.Address},
+				},
 			}
 		}
 		return nil
@@ -70,6 +77,10 @@ func (b BubbleTx) ToAction() *Action {
 			},
 			Success: b.success,
 			Type:    SmartContractExec,
+			SimplePreview: SimplePreview{
+				MessageID: smartContractMessageID,
+				Accounts:  distinctAccounts(b.account.Address, b.inputFrom.Address),
+			},
 		}
 	}
 	a := &Action{
@@ -78,9 +89,16 @@ func (b BubbleTx) ToAction() *Action {
 			Recipient: b.account.Address,
 			Sender:    b.inputFrom.Address, //can't be null because we check IsExternal
 		},
-
 		Success: true,
 		Type:    TonTransfer,
+		SimplePreview: SimplePreview{
+			MessageID: tonTransferMessageID,
+			TemplateData: map[string]interface{}{
+				"Value": utils.HumanFriendlyCoinsRepr(b.inputAmount),
+			},
+			Accounts: distinctAccounts(b.account.Address, b.inputFrom.Address),
+			Value:    g.Pointer(b.inputAmount),
+		},
 	}
 	if b.decodedBody != nil {
 		s, ok := b.decodedBody.Value.(abi.TextCommentMsgBody)

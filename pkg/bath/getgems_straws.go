@@ -1,6 +1,7 @@
 package bath
 
 import (
+	"github.com/tonkeeper/opentonapi/internal/g"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
 )
@@ -11,7 +12,7 @@ type BubbleGetGemsNftPurchase struct {
 	Nft      tongo.AccountID
 }
 
-func (b BubbleGetGemsNftPurchase) ToAction() *Action {
+func (b BubbleGetGemsNftPurchase) ToAction(book addressBook) *Action {
 	return &Action{
 		GetGemsNftPurchase: &GetGemsNftPurchaseAction{
 			Nft:      b.Nft,
@@ -19,6 +20,13 @@ func (b BubbleGetGemsNftPurchase) ToAction() *Action {
 		},
 		Success: b.Success,
 		Type:    GetGemsNftPurchase,
+		SimplePreview: SimplePreview{
+			Value: g.Pointer[int64](1),
+			Accounts: []tongo.AccountID{
+				b.NewOwner, b.Nft,
+			},
+			MessageID: nftPurchaseMessageID,
+		},
 	}
 }
 

@@ -39,7 +39,7 @@ func (b Bubble) String() string {
 }
 
 type actioner interface {
-	ToAction() *Action
+	ToAction(book addressBook) *Action
 }
 
 type Account struct {

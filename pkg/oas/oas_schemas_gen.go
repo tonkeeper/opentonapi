@@ -681,50 +681,39 @@ func (s *ActionPhase) SetTotalFees(val int64) {
 
 // Ref: #/components/schemas/ActionSimplePreview
 type ActionSimplePreview struct {
-	Name             string    `json:"name"`
-	ShortDescription string    `json:"short_description"`
-	FullDescription  string    `json:"full_description"`
-	Image            OptString `json:"image"`
+	Description string           `json:"description"`
+	Value       OptInt64         `json:"value"`
+	Accounts    []AccountAddress `json:"accounts"`
 }
 
-// GetName returns the value of Name.
-func (s ActionSimplePreview) GetName() string {
-	return s.Name
+// GetDescription returns the value of Description.
+func (s ActionSimplePreview) GetDescription() string {
+	return s.Description
 }
 
-// GetShortDescription returns the value of ShortDescription.
-func (s ActionSimplePreview) GetShortDescription() string {
-	return s.ShortDescription
+// GetValue returns the value of Value.
+func (s ActionSimplePreview) GetValue() OptInt64 {
+	return s.Value
 }
 
-// GetFullDescription returns the value of FullDescription.
-func (s ActionSimplePreview) GetFullDescription() string {
-	return s.FullDescription
+// GetAccounts returns the value of Accounts.
+func (s ActionSimplePreview) GetAccounts() []AccountAddress {
+	return s.Accounts
 }
 
-// GetImage returns the value of Image.
-func (s ActionSimplePreview) GetImage() OptString {
-	return s.Image
+// SetDescription sets the value of Description.
+func (s *ActionSimplePreview) SetDescription(val string) {
+	s.Description = val
 }
 
-// SetName sets the value of Name.
-func (s *ActionSimplePreview) SetName(val string) {
-	s.Name = val
+// SetValue sets the value of Value.
+func (s *ActionSimplePreview) SetValue(val OptInt64) {
+	s.Value = val
 }
 
-// SetShortDescription sets the value of ShortDescription.
-func (s *ActionSimplePreview) SetShortDescription(val string) {
-	s.ShortDescription = val
-}
-
-// SetFullDescription sets the value of FullDescription.
-func (s *ActionSimplePreview) SetFullDescription(val string) {
-	s.FullDescription = val
-}
-
-// SetImage sets the value of Image.
-func (s *ActionSimplePreview) SetImage(val OptString) {
-	s.Image = val
+// SetAccounts sets the value of Accounts.
+func (s *ActionSimplePreview) SetAccounts(val []AccountAddress) {
+	s.Accounts = val
 }
 
 type ActionStatus string

@@ -7,6 +7,7 @@ import (
 	"github.com/tonkeeper/opentonapi/internal/g"
 	"github.com/tonkeeper/opentonapi/pkg/bath"
 	"github.com/tonkeeper/opentonapi/pkg/core"
+	"github.com/tonkeeper/opentonapi/pkg/i18n"
 	"github.com/tonkeeper/opentonapi/pkg/oas"
 	rules "github.com/tonkeeper/scam_backoffice_rules"
 	"github.com/tonkeeper/tongo"
@@ -20,7 +21,7 @@ func convertTrace(t core.Trace, book addressBook) oas.Trace {
 	return trace
 }
 
-func (h Handler) convertAction(ctx context.Context, a bath.Action) (oas.Action, bool) {
+func (h Handler) convertAction(ctx context.Context, a bath.Action, acceptLanguage oas.OptString) (oas.Action, bool) {
 	action := oas.Action{
 		Type: oas.ActionType(a.Type),
 	}
@@ -30,6 +31,7 @@ func (h Handler) convertAction(ctx context.Context, a bath.Action) (oas.Action, 
 	} else {
 		action.Status = oas.ActionStatusFailed
 	}
+
 	switch a.Type {
 	case bath.TonTransfer:
 		if a.TonTransfer.Comment != nil {
@@ -104,6 +106,24 @@ func (h Handler) convertAction(ctx context.Context, a bath.Action) (oas.Action, 
 			contractAction.Payload.SetTo(a.SmartContractExec.Payload)
 		}
 		action.SmartContractExec.SetTo(contractAction)
+	}
+	action.SimplePreview = oas.ActionSimplePreview{
+		Description: string(a.Type),
+	}
+	if len(a.SimplePreview.MessageID) > 0 {
+		action.SimplePreview.Description = i18n.T(acceptLanguage.Value,
+			i18n.C{
+				MessageID:    a.SimplePreview.MessageID,
+				TemplateData: a.SimplePreview.TemplateData,
+			})
+	}
+	accounts := make([]oas.AccountAddress, 0, len(a.SimplePreview.Accounts))
+	for _, account := range a.SimplePreview.Accounts {
+		accounts = append(accounts, convertAccountAddress(account, h.addressBook))
+	}
+	action.SimplePreview.SetAccounts(accounts)
+	if a.SimplePreview.Value != nil {
+		action.SimplePreview.Value = oas.NewOptInt64(*a.SimplePreview.Value)
 	}
 	return action, spamDetected
 }
