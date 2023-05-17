@@ -9,6 +9,7 @@ import (
 	"github.com/tonkeeper/opentonapi/pkg/pusher/events"
 	"github.com/tonkeeper/opentonapi/pkg/pusher/metrics"
 	"github.com/tonkeeper/opentonapi/pkg/pusher/sources"
+	"github.com/tonkeeper/opentonapi/pkg/pusher/utils"
 )
 
 // session represents an HTTP connection from a client and
@@ -49,9 +50,9 @@ func (s *session) StreamEvents(ctx context.Context, writer http.ResponseWriter) 
 				return nil
 			}
 			_, err = fmt.Fprintf(writer, "event: message\nid: %v\ndata: %v\n\n", msg.EventID, string(msg.Data))
-			metrics.SseEventSent(msg.Name)
+			metrics.SseEventSent(msg.Name, utils.TokenNameFromContext(ctx))
 		case <-time.After(s.pingInterval):
-			metrics.SseEventSent(events.PingEvent)
+			metrics.SseEventSent(events.PingEvent, utils.TokenNameFromContext(ctx))
 			_, err = fmt.Fprintf(writer, "event: heartbeat\n\n")
 		}
 		if err != nil {

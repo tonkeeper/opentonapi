@@ -13,13 +13,14 @@ var eventsQuantity = promauto.NewGaugeVec(
 	[]string{
 		"type",
 		"event",
+		"token_name",
 	},
 )
 
-func SseEventSent(event events.Name) {
-	eventsQuantity.With(map[string]string{"type": "sse", "event": event.String()}).Inc()
+func SseEventSent(event events.Name, token string) {
+	eventsQuantity.With(map[string]string{"type": "sse", "event": event.String(), "token_name": token}).Inc()
 }
 
-func WebsocketEventSent(event events.Name) {
-	eventsQuantity.With(map[string]string{"type": "websocket", "event": event.String()}).Inc()
+func WebsocketEventSent(event events.Name, token string) {
+	eventsQuantity.With(map[string]string{"type": "websocket", "event": event.String(), "token_name": token}).Inc()
 }

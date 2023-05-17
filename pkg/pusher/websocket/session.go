@@ -9,6 +9,7 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/tonkeeper/opentonapi/pkg/pusher/events"
 	"github.com/tonkeeper/opentonapi/pkg/pusher/metrics"
+	"github.com/tonkeeper/opentonapi/pkg/pusher/utils"
 	"github.com/tonkeeper/tongo"
 	"go.uber.org/zap"
 
@@ -75,7 +76,7 @@ func (s *session) Run(ctx context.Context) chan JsonRPCRequest {
 					Method:  e.Method,
 					Params:  e.Params,
 				}
-				metrics.WebsocketEventSent(e.Name)
+				metrics.WebsocketEventSent(e.Name, utils.TokenNameFromContext(ctx))
 				err = s.conn.WriteJSON(response)
 			case request := <-requestCh:
 				var response string
@@ -89,7 +90,7 @@ func (s *session) Run(ctx context.Context) chan JsonRPCRequest {
 				}
 				err = s.writeResponse(response, request)
 			case <-time.After(s.pingInterval):
-				metrics.WebsocketEventSent(events.PingEvent)
+				metrics.WebsocketEventSent(events.PingEvent, utils.TokenNameFromContext(ctx))
 				err = s.conn.WriteMessage(websocket.PingMessage, []byte{})
 			}
 			if err != nil {
