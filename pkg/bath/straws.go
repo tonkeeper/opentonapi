@@ -149,9 +149,9 @@ func FindJettonTransfer(bubble *Bubble) bool {
 		transfer.master, _ = master.(tongo.AccountID)
 	}
 	newBubble := Bubble{
-		Accounts:  append(bubble.Accounts, jettonBubble.account.Address),
 		Children:  bubble.Children,
 		ValueFlow: bubble.ValueFlow,
+		Accounts:  append(bubble.Accounts, jettonBubble.account.Address),
 	}
 	newBubble.ValueFlow.AddJettons(*recipient, transfer.master, big.Int(intention.Amount))
 	if jettonBubble.success {
@@ -168,6 +168,7 @@ func FindJettonTransfer(bubble *Bubble) bool {
 					transfer.success = true
 				}
 				transfer.recipientWallet = tx.account.Address
+				newBubble.Accounts = append(newBubble.Accounts, tx.account.Address)
 				children := ProcessChildren(child.Children,
 					func(excess *Bubble) *Merge {
 						tx, ok := excess.Info.(BubbleTx)
