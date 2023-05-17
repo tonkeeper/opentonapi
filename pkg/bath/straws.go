@@ -151,6 +151,7 @@ func FindJettonTransfer(bubble *Bubble) bool {
 	newBubble := Bubble{
 		Children:  bubble.Children,
 		ValueFlow: bubble.ValueFlow,
+		Accounts:  bubble.Accounts,
 	}
 	newBubble.ValueFlow.AddJettons(*recipient, transfer.master, big.Int(intention.Amount))
 	if transferBubbleInfo.success {
