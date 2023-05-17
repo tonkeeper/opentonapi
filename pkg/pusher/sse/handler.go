@@ -6,6 +6,7 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/tonkeeper/opentonapi/pkg/pusher/events"
 	"github.com/tonkeeper/tongo"
 
 	"github.com/tonkeeper/opentonapi/pkg/pusher/errors"
@@ -54,6 +55,7 @@ func (h *Handler) SubscribeToTransactions(session *session, request *http.Reques
 	}
 	cancelFn := h.txSource.SubscribeToTransactions(request.Context(), func(data []byte) {
 		event := Event{
+			Name:    events.AccountTxEvent,
 			EventID: h.nextID(),
 			Data:    data,
 		}
@@ -66,6 +68,7 @@ func (h *Handler) SubscribeToTransactions(session *session, request *http.Reques
 func (h *Handler) SubscribeToMessages(session *session, request *http.Request) error {
 	cancelFn, err := h.memPool.SubscribeToMessages(request.Context(), func(data []byte) {
 		event := Event{
+			Name:    events.MempoolEvent,
 			EventID: h.nextID(),
 			Data:    data,
 		}

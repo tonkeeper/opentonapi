@@ -7,6 +7,8 @@ import (
 	"time"
 
 	"github.com/gorilla/websocket"
+	"github.com/tonkeeper/opentonapi/pkg/pusher/events"
+	"github.com/tonkeeper/opentonapi/pkg/pusher/metrics"
 	"github.com/tonkeeper/tongo"
 	"go.uber.org/zap"
 
@@ -29,6 +31,7 @@ type session struct {
 }
 
 type event struct {
+	Name   events.Name
 	Method string
 	Params []byte
 }
@@ -72,6 +75,7 @@ func (s *session) Run(ctx context.Context) chan JsonRPCRequest {
 					Method:  e.Method,
 					Params:  e.Params,
 				}
+				metrics.WebsocketEventSent(e.Name)
 				err = s.conn.WriteJSON(response)
 			case request := <-requestCh:
 				var response string
@@ -85,6 +89,7 @@ func (s *session) Run(ctx context.Context) chan JsonRPCRequest {
 				}
 				err = s.writeResponse(response, request)
 			case <-time.After(s.pingInterval):
+				metrics.WebsocketEventSent(events.PingEvent)
 				err = s.conn.WriteMessage(websocket.PingMessage, []byte{})
 			}
 			if err != nil {
@@ -118,6 +123,7 @@ func (s *session) subscribeToTransactions(ctx context.Context, params []string) 
 		}
 		cancel := s.txSource.SubscribeToTransactions(ctx, func(eventData []byte) {
 			s.eventCh <- event{
+				Name:   events.AccountTxEvent,
 				Method: "account_transaction",
 				Params: eventData,
 			}
@@ -137,7 +143,7 @@ func (s *session) subscribeToMempool(ctx context.Context) string {
 		return fmt.Sprintf("you are already subscribed to mempool")
 	}
 	cancelFn, err := s.mempool.SubscribeToMessages(ctx, func(eventData []byte) {
-		s.eventCh <- event{Method: "mempool_message", Params: eventData}
+		s.eventCh <- event{Method: "mempool_message", Params: eventData, Name: events.MempoolEvent}
 	})
 	if err != nil {
 		return err.Error()

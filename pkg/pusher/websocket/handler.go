@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/gorilla/websocket"
+	"github.com/tonkeeper/opentonapi/pkg/pusher/metrics"
 	"go.uber.org/zap"
 
 	"github.com/tonkeeper/opentonapi/pkg/pusher/sources"
@@ -41,6 +42,10 @@ func Handler(logger *zap.Logger, txSource sources.TransactionSource, mempool sou
 		}
 		ctx, cancel := context.WithCancel(r.Context())
 		defer cancel()
+
+		metrics.OpenWebsocketConnection()
+		defer metrics.CloseWebsocketConnection()
+
 		session := newSession(logger, txSource, mempool, conn)
 		requestCh := session.Run(ctx)
 		for {
