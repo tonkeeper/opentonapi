@@ -11,21 +11,22 @@ var openConnections = promauto.NewGaugeVec(
 	},
 	[]string{
 		"type",
+		"token_name",
 	},
 )
 
-func OpenWebsocketConnection() {
-	openConnections.With(map[string]string{"type": "websocket"}).Inc()
+func OpenWebsocketConnection(token string) {
+	openConnections.With(map[string]string{"type": "websocket", "token_name": token}).Inc()
 }
 
-func CloseWebsocketConnection() {
-	openConnections.With(map[string]string{"type": "websocket"}).Dec()
+func CloseWebsocketConnection(token string) {
+	openConnections.With(map[string]string{"type": "websocket", "token_name": token}).Dec()
 }
 
-func OpenSseConnection() {
-	openConnections.With(map[string]string{"type": "sse"}).Inc()
+func OpenSseConnection(token string) {
+	openConnections.With(map[string]string{"type": "sse", "token_name": token}).Inc()
 }
 
-func CloseSseConnection() {
-	openConnections.With(map[string]string{"type": "sse"}).Dec()
+func CloseSseConnection(token string) {
+	openConnections.With(map[string]string{"type": "sse", "token_name": token}).Dec()
 }

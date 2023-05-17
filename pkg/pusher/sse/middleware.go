@@ -5,6 +5,7 @@ import (
 
 	"github.com/tonkeeper/opentonapi/pkg/pusher/errors"
 	"github.com/tonkeeper/opentonapi/pkg/pusher/metrics"
+	"github.com/tonkeeper/opentonapi/pkg/pusher/utils"
 )
 
 func writeError(writer http.ResponseWriter, err error) {
@@ -32,8 +33,8 @@ func Stream(handler handlerFunc) func(writer http.ResponseWriter, request *http.
 		writer.Header().Set("Connection", "keep-alive")
 		writer.Header().Set("Transfer-Encoding", "chunked")
 
-		metrics.OpenSseConnection()
-		defer metrics.CloseSseConnection()
+		metrics.OpenSseConnection(utils.TokenNameFromContext(request.Context()))
+		defer metrics.CloseSseConnection(utils.TokenNameFromContext(request.Context()))
 
 		// TODO: last-event-id
 		session := newSession()
