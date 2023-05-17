@@ -91,7 +91,7 @@ func (h Handler) GetEventsByAccount(ctx context.Context, params oas.GetEventsByA
 		if err != nil {
 			return &oas.InternalError{Error: err.Error()}, nil
 		}
-		result, err := bath.FindActions(trace, bath.WithAddressbook(h.addressBook))
+		result, err := bath.FindActions(trace, bath.ForAccount(account), bath.WithAddressbook(h.addressBook))
 		if err != nil {
 			return &oas.InternalError{Error: err.Error()}, nil
 		}

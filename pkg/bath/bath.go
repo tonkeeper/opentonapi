@@ -16,8 +16,9 @@ type addressBook interface {
 }
 
 type Options struct {
-	Straws      []Straw
-	AddressBook addressBook
+	straws      []Straw
+	account     *tongo.AccountID
+	addressBook addressBook
 }
 
 type Option func(*Options)
@@ -25,13 +26,19 @@ type Option func(*Options)
 // WithStraws provides functions to find actions in a trace.
 func WithStraws(straws []Straw) Option {
 	return func(options *Options) {
-		options.Straws = straws
+		options.straws = straws
+	}
+}
+
+func ForAccount(a tongo.AccountID) Option {
+	return func(options *Options) {
+		options.account = &a
 	}
 }
 
 func WithAddressbook(book addressBook) Option {
 	return func(options *Options) {
-		options.AddressBook = book
+		options.addressBook = book
 	}
 }
 
@@ -39,14 +46,14 @@ func WithAddressbook(book addressBook) Option {
 // returns a list of actions.
 func FindActions(trace *core.Trace, opts ...Option) (*ActionsList, error) {
 	options := Options{
-		Straws: DefaultStraws,
+		straws: DefaultStraws,
 	}
 	for _, o := range opts {
 		o(&options)
 	}
 	bubble := fromTrace(trace, nil)
-	MergeAllBubbles(bubble, options.Straws)
-	actions, flow := CollectActionsAndValueFlow(bubble, nil, options.AddressBook)
+	MergeAllBubbles(bubble, options.straws)
+	actions, flow := CollectActionsAndValueFlow(bubble, options.account, options.addressBook)
 	return &ActionsList{
 		Actions:   actions,
 		ValueFlow: flow,
