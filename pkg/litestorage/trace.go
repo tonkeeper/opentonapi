@@ -50,7 +50,7 @@ func (s *LiteStorage) recursiveGetChildren(ctx context.Context, tx core.Transact
 	if err != nil {
 		return core.Trace{}, nil
 	}
-	tx.OutMsgs = externalMessages
+	trace.OutMsgs = externalMessages
 	return trace, nil
 }
 

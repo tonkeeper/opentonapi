@@ -103,6 +103,12 @@ func fromTrace(trace *core.Trace, source *Account) *Bubble {
 		b.ValueFlow.AddTons(trace.Account, -outMsg.Value)
 	}
 	for i, c := range trace.Children {
+		if c.InMsg != nil {
+			// If an outbound message has a corresponding InMsg,
+			// we have removed it from OutMsgs to avoid duplicates.
+			// That's why we add tons here
+			b.ValueFlow.AddTons(trace.Account, -c.InMsg.Value)
+		}
 		b.Children[i] = fromTrace(c, &btx.account)
 	}
 	return &b

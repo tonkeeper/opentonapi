@@ -3,6 +3,8 @@ package core
 import "github.com/tonkeeper/tongo/abi"
 
 type Trace struct {
+	// Transaction is slightly modified.
+	// For example, we have kept only external outbound messages in OutMsgs.
 	Transaction
 	AccountInterfaces []abi.ContractInterface
 	Children          []*Trace
