@@ -2,43 +2,78 @@ package litestorage
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"math/big"
 
+	"github.com/shopspring/decimal"
+	"github.com/sourcegraph/conc/iter"
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
+	"github.com/tonkeeper/tongo/liteapi"
 )
 
 func (s *LiteStorage) GetJettonWalletsByOwnerAddress(ctx context.Context, address tongo.AccountID) ([]core.JettonWallet, error) {
-	wallets := []core.JettonWallet{}
-
-	for _, jetton := range s.knownAccounts["jettons"] {
-		_, result, err := abi.GetWalletAddress(ctx, s.client, jetton, address.ToMsgAddress())
-		if err != nil {
-			continue
-		}
-		walletAddress := result.(abi.GetWalletAddressResult)
-		jettonAccountID, err := tongo.AccountIDFromTlb(walletAddress.JettonWalletAddress)
-		if err != nil {
-			continue
-		}
-		_, result, err = abi.GetWalletData(ctx, s.client, *jettonAccountID)
-		if err != nil {
-			continue
-		}
-		jettonWallet := result.(core.JettonWallet)
-		if jettonWallet.Address != jetton {
-			continue
-		}
-
-		wallets = append(wallets, jettonWallet)
+	jettons := s.knownAccounts["jettons"]
+	mapper := iter.Mapper[tongo.AccountID, *core.JettonWallet]{
+		MaxGoroutines: s.maxGoroutines,
 	}
-
-	return wallets, nil
+	wallets, err := mapper.MapErr(jettons, func(jettonMaster *tongo.AccountID) (*core.JettonWallet, error) {
+		_, result, err := abi.GetWalletAddress(ctx, s.client, *jettonMaster, address.ToMsgAddress())
+		if err != nil {
+			return nil, err
+		}
+		addressResult := result.(abi.GetWalletAddressResult)
+		walletAddress, err := tongo.AccountIDFromTlb(addressResult.JettonWalletAddress)
+		if err != nil {
+			return nil, err
+		}
+		if walletAddress == nil {
+			return nil, nil
+		}
+		_, result, err = abi.GetWalletData(ctx, s.client, *walletAddress)
+		if err != nil && errors.Is(err, liteapi.ErrAccountNotFound) {
+			// our account doesn't have a corresponding wallet account, ignore this error.
+			return nil, nil
+		}
+		if err != nil {
+			return nil, err
+		}
+		jettonWallet := result.(abi.GetWalletDataResult)
+		jettonAddress, err := tongo.AccountIDFromTlb(addressResult.JettonWalletAddress)
+		if err != nil {
+			return nil, err
+		}
+		if jettonAddress == nil {
+			return nil, nil
+		}
+		if jettonAddress == nil || *jettonAddress != *walletAddress {
+			return nil, nil
+		}
+		balance := big.Int(jettonWallet.Balance)
+		wallet := core.JettonWallet{
+			Address:       *walletAddress,
+			Balance:       decimal.NewFromBigInt(&balance, 0),
+			OwnerAddress:  &address,
+			JettonAddress: *jettonMaster,
+		}
+		return &wallet, nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	var results []core.JettonWallet
+	for _, wallet := range wallets {
+		if wallet != nil {
+			results = append(results, *wallet)
+		}
+	}
+	return results, nil
 }
 
 func (s *LiteStorage) GetJettonMasterMetadata(ctx context.Context, master tongo.AccountID) (tongo.JettonMetadata, error) {
-	meta, ok := s.jettonMetaCache[master.ToRaw()]
+	meta, ok := s.jettonMetaCache.Load(master.ToRaw())
 	if ok {
 		return meta, nil
 	}
@@ -46,7 +81,7 @@ func (s *LiteStorage) GetJettonMasterMetadata(ctx context.Context, master tongo.
 	if err != nil {
 		return tongo.JettonMetadata{}, err
 	}
-	s.jettonMetaCache[master.ToRaw()] = rawMeta
+	s.jettonMetaCache.Store(master.ToRaw(), rawMeta)
 	return rawMeta, nil
 }
 

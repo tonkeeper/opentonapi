@@ -14,6 +14,7 @@ import (
 	"github.com/tonkeeper/tongo/abi"
 	"github.com/tonkeeper/tongo/config"
 	"github.com/tonkeeper/tongo/liteapi"
+	"github.com/tonkeeper/tongo/tep64"
 	"github.com/tonkeeper/tongo/tlb"
 	"go.uber.org/zap"
 
@@ -21,12 +22,15 @@ import (
 )
 
 type LiteStorage struct {
+	logger                  *zap.Logger
 	client                  *liteapi.Client
-	jettonMetaCache         map[string]tongo.JettonMetadata
+	jettonMetaCache         *xsync.MapOf[string, tep64.Metadata]
 	transactionsIndexByHash map[tongo.Bits256]*core.Transaction
 	blockCache              *xsync.MapOf[tongo.BlockIDExt, *tlb.Block]
 	accountInterfacesCache  *xsync.MapOf[tongo.AccountID, []abi.ContractInterface]
 	knownAccounts           map[string][]tongo.AccountID
+	// maxGoroutines specifies a number of goroutines used to perform some time-consuming operations.
+	maxGoroutines int
 }
 
 type Options struct {
@@ -80,8 +84,11 @@ func NewLiteStorage(log *zap.Logger, opts ...Option) (*LiteStorage, error) {
 	}
 
 	l := &LiteStorage{
+		logger: log,
+		// TODO: introduce an env variable to configure this number
+		maxGoroutines:           5,
 		client:                  client,
-		jettonMetaCache:         make(map[string]tongo.JettonMetadata),
+		jettonMetaCache:         xsync.NewMapOf[tep64.Metadata](),
 		transactionsIndexByHash: make(map[tongo.Bits256]*core.Transaction),
 		blockCache:              xsync.NewTypedMapOf[tongo.BlockIDExt, *tlb.Block](hashBlockIDExt),
 		accountInterfacesCache:  xsync.NewTypedMapOf[tongo.AccountID, []abi.ContractInterface](hashAccountID),
@@ -90,7 +97,7 @@ func NewLiteStorage(log *zap.Logger, opts ...Option) (*LiteStorage, error) {
 	l.knownAccounts["tf_pools"] = o.tfPools
 	l.knownAccounts["jettons"] = o.jettons
 	for _, a := range o.preloadAccounts {
-		l.preloadAccount(a, log)
+		l.preloadAccount(a)
 	}
 	return l, nil
 }
@@ -138,7 +145,7 @@ func (s *LiteStorage) GetRawAccounts(ctx context.Context, ids []tongo.AccountID)
 	return accounts, nil
 }
 
-func (s *LiteStorage) preloadAccount(a tongo.AccountID, log *zap.Logger) error {
+func (s *LiteStorage) preloadAccount(a tongo.AccountID) error {
 	ctx := context.Background()
 	accountTxs, err := s.client.GetLastTransactions(ctx, a, 1000)
 	if err != nil {
