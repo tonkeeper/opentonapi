@@ -59,10 +59,10 @@ func (a Account) Is(i abi.ContractInterface) bool {
 }
 
 func FromTrace(trace *core.Trace) *Bubble {
-	return fromTrace(trace, nil)
+	return fromTrace(trace)
 }
 
-func fromTrace(trace *core.Trace, source *Account) *Bubble {
+func fromTrace(trace *core.Trace) *Bubble {
 	btx := BubbleTx{
 		success:                         trace.Success,
 		transactionType:                 trace.Transaction.Type,
@@ -72,7 +72,11 @@ func fromTrace(trace *core.Trace, source *Account) *Bubble {
 		additionalInfo:                  trace.AdditionalInfo,
 	}
 	accounts := []tongo.AccountID{trace.Account}
-	if source != nil {
+	var source *Account
+	if trace.InMsg != nil && trace.InMsg.Source != nil {
+		source = &Account{
+			Address: *trace.InMsg.Source,
+		}
 		accounts = append(accounts, source.Address)
 	}
 	var inputAmount int64
@@ -109,7 +113,7 @@ func fromTrace(trace *core.Trace, source *Account) *Bubble {
 			// That's why we add tons here
 			b.ValueFlow.AddTons(trace.Account, -c.InMsg.Value)
 		}
-		b.Children[i] = fromTrace(c, &btx.account)
+		b.Children[i] = fromTrace(c)
 	}
 	return &b
 }

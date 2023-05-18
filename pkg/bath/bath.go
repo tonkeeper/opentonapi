@@ -51,7 +51,7 @@ func FindActions(trace *core.Trace, opts ...Option) (*ActionsList, error) {
 	for _, o := range opts {
 		o(&options)
 	}
-	bubble := fromTrace(trace, nil)
+	bubble := fromTrace(trace)
 	MergeAllBubbles(bubble, options.straws)
 	actions, flow := CollectActionsAndValueFlow(bubble, options.account, options.addressBook)
 	return &ActionsList{
