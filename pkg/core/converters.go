@@ -16,8 +16,7 @@ import (
 func ConvertToBlockHeader(id tongo.BlockIDExt, block *tlb.Block) (*BlockHeader, error) {
 	info := block.Info
 	header := &BlockHeader{
-		BlockIDExt: id,
-		// todo: why do we have all these type conversions?
+		BlockIDExt:             id,
 		StartLt:                int64(info.StartLt),
 		EndLt:                  int64(info.EndLt),
 		GlobalId:               block.GlobalId,

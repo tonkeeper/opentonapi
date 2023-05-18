@@ -61,7 +61,7 @@ func (b BubbleTx) ToAction(book addressBook) *Action {
 		return nil
 	}
 	if b.opCode != nil && *b.opCode != 0 && b.accountWasActiveAtComputingTime && !b.account.Is(abi.Wallet) {
-		operation := fmt.Sprintf("0x%x", *b.opCode)
+		operation := fmt.Sprintf("0x%08x", *b.opCode)
 		payload := ""
 		if b.decodedBody != nil {
 			operation = b.decodedBody.Operation

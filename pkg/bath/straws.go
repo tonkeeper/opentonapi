@@ -89,7 +89,6 @@ type BubbleNftTransfer struct {
 func (b BubbleNftTransfer) ToAction(book addressBook) (action *Action) {
 	a := Action{
 		NftItemTransfer: &NftTransferAction{
-			Comment:   nil, //todo: add
 			Recipient: b.recipient.Addr(),
 			Sender:    b.sender.Addr(),
 			Nft:       b.account.Address,
