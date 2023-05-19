@@ -123,7 +123,12 @@ func (UnimplementedHandler) GetDomainBids(ctx context.Context, params GetDomainB
 
 // GetEvent implements getEvent operation.
 //
-// Get the event by event ID or hash of any transaction in trace.
+// Get an event either by event ID or a hash of any transaction in a trace. An event is built on top
+// of a trace which is a series of transactions caused by one inbound message. TonAPI looks for known
+// patterns inside the trace and splits the trace into actions, where a single action represents a
+// meaningful high-level operation like a Jetton Transfer or an NFT Purchase. Actions are expected to
+// be shown to users. It is advised not to build any logic on top of actions because actions can be
+// changed at any time.
 //
 // GET /v2/events/{event_id}
 func (UnimplementedHandler) GetEvent(ctx context.Context, params GetEventParams) (r GetEventRes, _ error) {
@@ -132,7 +137,11 @@ func (UnimplementedHandler) GetEvent(ctx context.Context, params GetEventParams)
 
 // GetEventsByAccount implements getEventsByAccount operation.
 //
-// Get events for account.
+// Get events for an account. Each event is built on top of a trace which is a series of transactions
+// caused by one inbound message. TonAPI looks for known patterns inside the trace and splits the
+// trace into actions, where a single action represents a meaningful high-level operation like a
+// Jetton Transfer or an NFT Purchase. Actions are expected to be shown to users. It is advised not
+// to build any logic on top of actions because actions can be changed at any time.
 //
 // GET /v2/accounts/{account_id}/events
 func (UnimplementedHandler) GetEventsByAccount(ctx context.Context, params GetEventsByAccountParams) (r GetEventsByAccountRes, _ error) {

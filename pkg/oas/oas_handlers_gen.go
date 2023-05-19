@@ -1207,7 +1207,12 @@ func (s *Server) handleGetDomainBidsRequest(args [1]string, w http.ResponseWrite
 
 // handleGetEventRequest handles getEvent operation.
 //
-// Get the event by event ID or hash of any transaction in trace.
+// Get an event either by event ID or a hash of any transaction in a trace. An event is built on top
+// of a trace which is a series of transactions caused by one inbound message. TonAPI looks for known
+// patterns inside the trace and splits the trace into actions, where a single action represents a
+// meaningful high-level operation like a Jetton Transfer or an NFT Purchase. Actions are expected to
+// be shown to users. It is advised not to build any logic on top of actions because actions can be
+// changed at any time.
 //
 // GET /v2/events/{event_id}
 func (s *Server) handleGetEventRequest(args [1]string, w http.ResponseWriter, r *http.Request) {
@@ -1310,7 +1315,11 @@ func (s *Server) handleGetEventRequest(args [1]string, w http.ResponseWriter, r 
 
 // handleGetEventsByAccountRequest handles getEventsByAccount operation.
 //
-// Get events for account.
+// Get events for an account. Each event is built on top of a trace which is a series of transactions
+// caused by one inbound message. TonAPI looks for known patterns inside the trace and splits the
+// trace into actions, where a single action represents a meaningful high-level operation like a
+// Jetton Transfer or an NFT Purchase. Actions are expected to be shown to users. It is advised not
+// to build any logic on top of actions because actions can be changed at any time.
 //
 // GET /v2/accounts/{account_id}/events
 func (s *Server) handleGetEventsByAccountRequest(args [1]string, w http.ResponseWriter, r *http.Request) {
