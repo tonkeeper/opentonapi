@@ -6,6 +6,7 @@ import (
 	"math/big"
 
 	"github.com/tonkeeper/tongo"
+	"github.com/tonkeeper/tongo/liteapi"
 
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/opentonapi/pkg/oas"
@@ -32,6 +33,14 @@ func (h Handler) GetJettonsBalances(ctx context.Context, params oas.GetJettonsBa
 			WalletAddress: convertAccountAddress(wallet.Address, h.addressBook),
 		}
 		meta, err := h.storage.GetJettonMasterMetadata(ctx, wallet.JettonAddress)
+		if err != nil && err.Error() == "not enough refs" {
+			// happens when metadata is broken, for example.
+			continue
+		}
+		if err != nil && errors.Is(err, liteapi.ErrOnchainContentOnly) {
+			// we don't support such jettons
+			continue
+		}
 		if err != nil && !errors.Is(err, core.ErrEntityNotFound) {
 			return &oas.InternalError{Error: err.Error()}, nil
 		}
