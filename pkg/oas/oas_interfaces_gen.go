@@ -149,6 +149,10 @@ type PoolsByNominatorsRes interface {
 	poolsByNominatorsRes()
 }
 
+type ReindexAccountRes interface {
+	reindexAccountRes()
+}
+
 type SendMessageRes interface {
 	sendMessageRes()
 }

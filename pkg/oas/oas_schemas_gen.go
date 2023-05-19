@@ -945,6 +945,7 @@ func (*BadRequest) getTracesByAccountRes()        {}
 func (*BadRequest) getTransactionRes()            {}
 func (*BadRequest) getWalletBackupRes()           {}
 func (*BadRequest) poolsByNominatorsRes()         {}
+func (*BadRequest) reindexAccountRes()            {}
 func (*BadRequest) sendMessageRes()               {}
 func (*BadRequest) setWalletBackupRes()           {}
 func (*BadRequest) stakingPoolInfoRes()           {}
@@ -1982,6 +1983,7 @@ func (*InternalError) getTransactionRes()            {}
 func (*InternalError) getValidatorsRes()             {}
 func (*InternalError) getWalletBackupRes()           {}
 func (*InternalError) poolsByNominatorsRes()         {}
+func (*InternalError) reindexAccountRes()            {}
 func (*InternalError) sendMessageRes()               {}
 func (*InternalError) setWalletBackupRes()           {}
 func (*InternalError) stakingPoolInfoRes()           {}
@@ -5090,6 +5092,11 @@ const (
 	RefundTypeGetGems RefundType = "GetGems"
 )
 
+// ReindexAccountOK is response for ReindexAccount operation.
+type ReindexAccountOK struct{}
+
+func (*ReindexAccountOK) reindexAccountRes() {}
+
 // Ref: #/components/schemas/Sale
 type Sale struct {
 	Address string            `json:"address"`
@@ -6345,6 +6352,7 @@ func (*UnauthorizedError) getTransactionRes()            {}
 func (*UnauthorizedError) getValidatorsRes()             {}
 func (*UnauthorizedError) getWalletBackupRes()           {}
 func (*UnauthorizedError) poolsByNominatorsRes()         {}
+func (*UnauthorizedError) reindexAccountRes()            {}
 func (*UnauthorizedError) sendMessageRes()               {}
 func (*UnauthorizedError) setWalletBackupRes()           {}
 func (*UnauthorizedError) stakingPoolInfoRes()           {}

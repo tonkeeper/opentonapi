@@ -239,6 +239,12 @@ type Handler interface {
 	//
 	// GET /v2/staking/nominator/{account_id}/pools
 	PoolsByNominators(ctx context.Context, params PoolsByNominatorsParams) (PoolsByNominatorsRes, error)
+	// ReindexAccount implements reindexAccount operation.
+	//
+	// Update internal cache for a particular account.
+	//
+	// POST /v2/accounts/{account_id}/reindex
+	ReindexAccount(ctx context.Context, params ReindexAccountParams) (ReindexAccountRes, error)
 	// SendMessage implements sendMessage operation.
 	//
 	// Send message to blockchain.
