@@ -252,3 +252,7 @@ func (s *LiteStorage) GetWalletPubKey(address tongo.AccountID) (ed25519.PublicKe
 	}
 	return nil, fmt.Errorf("can't get publick key")
 }
+
+func (s *LiteStorage) ReindexAccount(ctx context.Context, accountID tongo.AccountID) error {
+	return nil
+}

@@ -355,6 +355,15 @@ func (UnimplementedHandler) PoolsByNominators(ctx context.Context, params PoolsB
 	return r, ht.ErrNotImplemented
 }
 
+// ReindexAccount implements reindexAccount operation.
+//
+// Update internal cache for a particular account.
+//
+// POST /v2/accounts/{account_id}/reindex
+func (UnimplementedHandler) ReindexAccount(ctx context.Context, params ReindexAccountParams) (r ReindexAccountRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // SendMessage implements sendMessage operation.
 //
 // Send message to blockchain.

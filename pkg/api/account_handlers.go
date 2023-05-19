@@ -168,3 +168,15 @@ func (h Handler) GetSearchAccounts(ctx context.Context, params oas.GetSearchAcco
 
 	return &response, nil
 }
+
+// ReindexAccount updates internal cache for a particular account.
+func (h Handler) ReindexAccount(ctx context.Context, params oas.ReindexAccountParams) (r oas.ReindexAccountRes, err error) {
+	accountID, err := tongo.ParseAccountID(params.AccountID)
+	if err != nil {
+		return &oas.BadRequest{Error: err.Error()}, nil
+	}
+	if err = h.storage.ReindexAccount(ctx, accountID); err != nil {
+		return &oas.InternalError{Error: err.Error()}, nil
+	}
+	return &oas.ReindexAccountOK{}, nil
+}

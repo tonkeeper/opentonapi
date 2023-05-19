@@ -274,6 +274,26 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 							return
 						}
+					case 'r': // Prefix: "reindex"
+						if l := len("reindex"); len(elem) >= l && elem[0:l] == "reindex" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						if len(elem) == 0 {
+							// Leaf node.
+							switch r.Method {
+							case "POST":
+								s.handleReindexAccountRequest([1]string{
+									args[0],
+								}, w, r)
+							default:
+								s.notAllowed(w, r, "POST")
+							}
+
+							return
+						}
 					case 's': // Prefix: "subscriptions"
 						if l := len("subscriptions"); len(elem) >= l && elem[0:l] == "subscriptions" {
 							elem = elem[l:]
@@ -1403,6 +1423,26 @@ func (s *Server) FindRoute(method, path string) (r Route, _ bool) {
 								// Leaf: GetNftItemsByOwner
 								r.name = "GetNftItemsByOwner"
 								r.operationID = "getNftItemsByOwner"
+								r.args = args
+								r.count = 1
+								return r, true
+							default:
+								return
+							}
+						}
+					case 'r': // Prefix: "reindex"
+						if l := len("reindex"); len(elem) >= l && elem[0:l] == "reindex" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						if len(elem) == 0 {
+							switch method {
+							case "POST":
+								// Leaf: ReindexAccount
+								r.name = "ReindexAccount"
+								r.operationID = "reindexAccount"
 								r.args = args
 								r.count = 1
 								return r, true

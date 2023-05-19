@@ -3075,6 +3075,58 @@ func decodePoolsByNominatorsParams(args [1]string, r *http.Request) (params Pool
 	return params, nil
 }
 
+// ReindexAccountParams is parameters of reindexAccount operation.
+type ReindexAccountParams struct {
+	// Account ID.
+	AccountID string
+}
+
+func unpackReindexAccountParams(packed middleware.Parameters) (params ReindexAccountParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "account_id",
+			In:   "path",
+		}
+		params.AccountID = packed[key].(string)
+	}
+	return params
+}
+
+func decodeReindexAccountParams(args [1]string, r *http.Request) (params ReindexAccountParams, _ error) {
+	// Decode path: account_id.
+	{
+		param := args[0]
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "account_id",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.AccountID = c
+				return nil
+			}(); err != nil {
+				return params, errors.Wrap(err, "path: account_id: parse")
+			}
+		} else {
+			return params, errors.New("path: account_id: not specified")
+		}
+	}
+	return params, nil
+}
+
 // SetWalletBackupParams is parameters of setWalletBackup operation.
 type SetWalletBackupParams struct {
 	XTonConnectAuth string
