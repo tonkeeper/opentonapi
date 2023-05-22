@@ -1,6 +1,7 @@
 package rates
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"math"
@@ -10,19 +11,30 @@ import (
 	"time"
 
 	"github.com/google/martian/log"
+	"github.com/tonkeeper/tongo"
+	"github.com/tonkeeper/tongo/liteapi"
+	"go.uber.org/zap"
 )
 
 type TonRates struct { // the values are equated to the TON
-	mu    sync.RWMutex
-	Rates map[string]float64
+	mu       sync.RWMutex
+	executor *liteapi.Client
+	Rates    map[string]float64
 }
 
 func (r *TonRates) GetRates() map[string]float64 {
 	return r.Rates
 }
 
-func InitTonRates() *TonRates {
-	rates := &TonRates{Rates: map[string]float64{}}
+func InitTonRates(logger *zap.Logger) *TonRates {
+	executor, err := liteapi.NewClientWithDefaultMainnet()
+	if err != nil {
+		logger.Fatal("failed init ton rates", zap.Error(err))
+	}
+	rates := &TonRates{
+		Rates:    map[string]float64{},
+		executor: executor,
+	}
 
 	go func() {
 		for {
@@ -37,14 +49,14 @@ func InitTonRates() *TonRates {
 func (r *TonRates) refresh() {
 	r.mu.Lock()
 	defer r.mu.Unlock()
-	rates, err := getRates()
+	rates, err := r.getRates()
 	if err != nil {
 		return
 	}
 	r.Rates = rates
 }
 
-func getRates() (map[string]float64, error) {
+func (r *TonRates) getRates() (map[string]float64, error) {
 	okx := getOKXPrice()
 	huobi := getHuobiPrice()
 
@@ -55,7 +67,7 @@ func getRates() (map[string]float64, error) {
 	meanTonPriceToUSD := (huobi + okx) / 2
 
 	fiatPrices := getFiatPrices()
-	pools := getPools()
+	pools := r.getPools()
 
 	rates := make(map[string]float64)
 	for currency, price := range fiatPrices {
@@ -70,7 +82,7 @@ func getRates() (map[string]float64, error) {
 	return rates, nil
 }
 
-func getPools() map[string]float64 {
+func (r *TonRates) getPools() map[string]float64 {
 	resp, err := http.Get("https://api.dedust.io/v2/pools")
 	if err != nil {
 		log.Errorf("failed to fetch rates: %v", err)
@@ -84,37 +96,62 @@ func getPools() map[string]float64 {
 		return nil
 	}
 
-	mapOfPool := make(map[string]float64)
+	var wg sync.WaitGroup
+	chanMapOfPool := make(chan map[string]float64)
 	for _, pool := range respBody {
-		if len(pool.Assets) != 2 {
-			log.Errorf("count of assets not 2")
-			continue
+		wg.Add(1)
+
+		go func(pool Pool) {
+			defer wg.Done()
+
+			if len(pool.Assets) != 2 {
+				log.Errorf("count of assets not 2")
+				return
+			}
+			firstAsset := pool.Assets[0]
+			secondAsset := pool.Assets[1]
+
+			if firstAsset.Metadata == nil || firstAsset.Metadata.Symbol != "TON" {
+				return
+			}
+
+			firstReserve := pool.Reserves[0]
+			secondReserve := pool.Reserves[1]
+
+			if firstReserve == "0" || secondReserve == "0" {
+				return
+			}
+
+			secondReserveDecimals := float64(9)
+			if secondAsset.Metadata == nil || secondAsset.Metadata.Decimals != 0 {
+				accountID, _ := tongo.ParseAccountID(secondAsset.Address)
+				meta, err := r.executor.GetJettonData(context.Background(), accountID)
+				if err == nil && meta.Decimals != "" {
+					decimals, err := strconv.Atoi(meta.Decimals)
+					if err == nil {
+						secondReserveDecimals = float64(decimals)
+					}
+				}
+			}
+
+			firstReserveConverted, _ := strconv.ParseFloat(firstReserve, 64)
+			secondReserveConverted, _ := strconv.ParseFloat(secondReserve, 64)
+
+			price := (secondReserveConverted / math.Pow(10, secondReserveDecimals)) / (firstReserveConverted / math.Pow(10, 9))
+			chanMapOfPool <- map[string]float64{secondAsset.Address: price}
+		}(pool)
+	}
+
+	go func() {
+		wg.Wait()
+		close(chanMapOfPool)
+	}()
+
+	mapOfPool := make(map[string]float64)
+	for pools := range chanMapOfPool {
+		for address, price := range pools {
+			mapOfPool[address] = price
 		}
-		firstAsset := pool.Assets[0]
-		secondAsset := pool.Assets[1]
-
-		if firstAsset.Metadata == nil || firstAsset.Metadata.Symbol != "TON" {
-			continue
-		}
-
-		firstReserve := pool.Reserves[0]
-		secondReserve := pool.Reserves[1]
-
-		if firstReserve == "0" || secondReserve == "0" {
-			continue
-		}
-
-		secondReserveDecimals := float64(9)
-		if secondAsset.Metadata != nil && secondAsset.Metadata.Decimals != 0 {
-			secondReserveDecimals = secondAsset.Metadata.Decimals
-		}
-
-		firstReserveConverted, _ := strconv.ParseFloat(firstReserve, 64)
-		secondReserveConverted, _ := strconv.ParseFloat(secondReserve, 64)
-
-		price := (secondReserveConverted / math.Pow(10, secondReserveDecimals)) / (firstReserveConverted / math.Pow(10, 9))
-
-		mapOfPool[secondAsset.Address] = price
 	}
 
 	return mapOfPool
