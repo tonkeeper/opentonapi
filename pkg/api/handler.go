@@ -142,7 +142,7 @@ func NewHandler(logger *zap.Logger, opts ...Option) (*Handler, error) {
 		}
 	}
 	if options.tonRates == nil {
-		options.tonRates = rates.InitTonRates()
+		options.tonRates = rates.InitTonRates(logger)
 	}
 	if options.executor == nil {
 		return nil, fmt.Errorf("executor is not configured")
