@@ -4,7 +4,6 @@ import (
 	"context"
 	"crypto/ed25519"
 
-	"github.com/tonkeeper/opentonapi/pkg/tonconnect"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
 	"github.com/tonkeeper/tongo/tep64"
@@ -100,15 +99,6 @@ type addressBook interface {
 
 type tonRates interface {
 	GetRates() map[string]float64
-}
-
-type tonConnect interface {
-	GeneratePayload() (string, error)
-	CheckPayload(payload string) bool
-	ConvertTonProofMessage(tp *tonconnect.TonProof) (*tonconnect.ParsedMessage, error)
-	CheckProof(tonProofReq *tonconnect.ParsedMessage, pubKey ed25519.PublicKey) (bool, error)
-	GetSecret() string
-	GetLifeTimeProof() int64
 }
 
 type metadataCache struct {
