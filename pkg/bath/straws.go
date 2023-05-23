@@ -241,7 +241,7 @@ func (b BubbleJettonTransfer) ToAction(book addressBook) (action *Action) {
 		SimplePreview: SimplePreview{
 			MessageID: jettonTransferMessageID,
 			TemplateData: map[string]interface{}{
-				"Value":      b.amount,
+				"Value":      amount.Int64(),
 				"JettonName": jettonName,
 			},
 			Accounts: distinctAccounts(b.recipient.Address, b.sender.Address, b.master),

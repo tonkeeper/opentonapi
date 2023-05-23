@@ -30,7 +30,7 @@
          "MessageID": "jettonTransferAction",
          "TemplateData": {
            "JettonName": "UKWN",
-           "Value": "1000000"
+           "Value": 1000000
          }
        }
      }
