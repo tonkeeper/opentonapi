@@ -2655,16 +2655,25 @@ components:
     ActionSimplePreview:
       type: object
       required:
+        - name
         - description
         - accounts
       properties:
+        name:
+          type: string
+          example: "Ton Transfer"
         description:
           type: string
-          example: "Transferring 5 TON"
+          example: "Transferring 5 Ton"
+        action_image:
+          type: string
+          description: a link to an image for this particular action.
         value:
-          type: integer
-          format: int64
-          example: 1000
+          type: string
+          example: "5 Ton"
+        value_image:
+          type: string
+          description: a link to an image that depicts this action's asset.
         accounts:
           type: array
           items:

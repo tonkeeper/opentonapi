@@ -686,9 +686,19 @@ func (s *ActionPhase) SetTotalFees(val int64) {
 
 // Ref: #/components/schemas/ActionSimplePreview
 type ActionSimplePreview struct {
-	Description string           `json:"description"`
-	Value       OptInt64         `json:"value"`
-	Accounts    []AccountAddress `json:"accounts"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	// A link to an image for this particular action.
+	ActionImage OptString `json:"action_image"`
+	Value       OptString `json:"value"`
+	// A link to an image that depicts this action's asset.
+	ValueImage OptString        `json:"value_image"`
+	Accounts   []AccountAddress `json:"accounts"`
+}
+
+// GetName returns the value of Name.
+func (s ActionSimplePreview) GetName() string {
+	return s.Name
 }
 
 // GetDescription returns the value of Description.
@@ -696,9 +706,19 @@ func (s ActionSimplePreview) GetDescription() string {
 	return s.Description
 }
 
+// GetActionImage returns the value of ActionImage.
+func (s ActionSimplePreview) GetActionImage() OptString {
+	return s.ActionImage
+}
+
 // GetValue returns the value of Value.
-func (s ActionSimplePreview) GetValue() OptInt64 {
+func (s ActionSimplePreview) GetValue() OptString {
 	return s.Value
+}
+
+// GetValueImage returns the value of ValueImage.
+func (s ActionSimplePreview) GetValueImage() OptString {
+	return s.ValueImage
 }
 
 // GetAccounts returns the value of Accounts.
@@ -706,14 +726,29 @@ func (s ActionSimplePreview) GetAccounts() []AccountAddress {
 	return s.Accounts
 }
 
+// SetName sets the value of Name.
+func (s *ActionSimplePreview) SetName(val string) {
+	s.Name = val
+}
+
 // SetDescription sets the value of Description.
 func (s *ActionSimplePreview) SetDescription(val string) {
 	s.Description = val
 }
 
+// SetActionImage sets the value of ActionImage.
+func (s *ActionSimplePreview) SetActionImage(val OptString) {
+	s.ActionImage = val
+}
+
 // SetValue sets the value of Value.
-func (s *ActionSimplePreview) SetValue(val OptInt64) {
+func (s *ActionSimplePreview) SetValue(val OptString) {
 	s.Value = val
+}
+
+// SetValueImage sets the value of ValueImage.
+func (s *ActionSimplePreview) SetValueImage(val OptString) {
+	s.ValueImage = val
 }
 
 // SetAccounts sets the value of Accounts.

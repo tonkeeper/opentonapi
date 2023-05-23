@@ -32,6 +32,10 @@ func (h Handler) convertAction(ctx context.Context, a bath.Action, acceptLanguag
 		action.Status = oas.ActionStatusFailed
 	}
 
+	action.SimplePreview = oas.ActionSimplePreview{
+		Name:        a.SimplePreview.Name,
+		Description: string(a.Type),
+	}
 	switch a.Type {
 	case bath.TonTransfer:
 		if a.TonTransfer.Comment != nil {
@@ -61,15 +65,19 @@ func (h Handler) convertAction(ctx context.Context, a bath.Action, acceptLanguag
 		})
 	case bath.JettonTransfer:
 		meta, _ := h.metaCache.getJettonMeta(ctx, a.JettonTransfer.Jetton)
+		preview := jettonPreview(h.addressBook, a.JettonTransfer.Jetton, meta, h.previewGenerator)
 		action.JettonTransfer.SetTo(oas.JettonTransferAction{
 			Amount:           g.Pointer(big.Int(a.JettonTransfer.Amount)).String(),
 			Recipient:        convertOptAccountAddress(a.JettonTransfer.Recipient, h.addressBook),
 			Sender:           convertOptAccountAddress(a.JettonTransfer.Sender, h.addressBook),
-			Jetton:           jettonPreview(h.addressBook, a.JettonTransfer.Jetton, meta, h.previewGenerator),
+			Jetton:           preview,
 			RecipientsWallet: a.JettonTransfer.RecipientsWallet.ToRaw(),
 			SendersWallet:    a.JettonTransfer.SendersWallet.ToRaw(),
 			Comment:          pointerToOptString(a.JettonTransfer.Comment),
 		})
+		if len(preview.Image) > 0 {
+			action.SimplePreview.ValueImage = oas.NewOptString(preview.Image)
+		}
 	case bath.Subscription:
 		action.Subscribe.SetTo(oas.SubscriptionAction{
 			Amount:       a.Subscription.Amount,
@@ -107,9 +115,6 @@ func (h Handler) convertAction(ctx context.Context, a bath.Action, acceptLanguag
 		}
 		action.SmartContractExec.SetTo(contractAction)
 	}
-	action.SimplePreview = oas.ActionSimplePreview{
-		Description: string(a.Type),
-	}
 	if len(a.SimplePreview.MessageID) > 0 {
 		action.SimplePreview.Description = i18n.T(acceptLanguage.Value,
 			i18n.C{
@@ -122,8 +127,8 @@ func (h Handler) convertAction(ctx context.Context, a bath.Action, acceptLanguag
 		accounts = append(accounts, convertAccountAddress(account, h.addressBook))
 	}
 	action.SimplePreview.SetAccounts(accounts)
-	if a.SimplePreview.Value != nil {
-		action.SimplePreview.Value = oas.NewOptInt64(*a.SimplePreview.Value)
+	if len(a.SimplePreview.Value) > 0 {
+		action.SimplePreview.Value = oas.NewOptString(a.SimplePreview.Value)
 	}
 	return action, spamDetected
 }

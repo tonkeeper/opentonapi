@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/ghodss/yaml"
-	"github.com/tonkeeper/opentonapi/internal/g"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
 	"github.com/tonkeeper/tongo/utils"
@@ -53,6 +52,7 @@ func (b BubbleTx) ToAction(book addressBook) *Action {
 				Success: b.success,
 				Type:    SmartContractExec,
 				SimplePreview: SimplePreview{
+					Name:      "Smart Contract Execution",
 					MessageID: smartContractMessageID,
 					Accounts:  []tongo.AccountID{b.account.Address},
 				},
@@ -78,11 +78,13 @@ func (b BubbleTx) ToAction(book addressBook) *Action {
 			Success: b.success,
 			Type:    SmartContractExec,
 			SimplePreview: SimplePreview{
+				Name:      "Smart Contract Execution",
 				MessageID: smartContractMessageID,
 				Accounts:  distinctAccounts(b.account.Address, b.inputFrom.Address),
 			},
 		}
 	}
+	value := utils.HumanFriendlyCoinsRepr(b.inputAmount)
 	a := &Action{
 		TonTransfer: &TonTransferAction{
 			Amount:    b.inputAmount,
@@ -92,12 +94,13 @@ func (b BubbleTx) ToAction(book addressBook) *Action {
 		Success: true,
 		Type:    TonTransfer,
 		SimplePreview: SimplePreview{
+			Name:      "Ton Transfer",
 			MessageID: tonTransferMessageID,
 			TemplateData: map[string]interface{}{
-				"Value": utils.HumanFriendlyCoinsRepr(b.inputAmount),
+				"Value": value,
 			},
 			Accounts: distinctAccounts(b.account.Address, b.inputFrom.Address),
-			Value:    g.Pointer(b.inputAmount),
+			Value:    value,
 		},
 	}
 	if b.decodedBody != nil {

@@ -1911,13 +1911,30 @@ func (s ActionSimplePreview) Encode(e *jx.Encoder) {
 func (s ActionSimplePreview) encodeFields(e *jx.Encoder) {
 	{
 
+		e.FieldStart("name")
+		e.Str(s.Name)
+	}
+	{
+
 		e.FieldStart("description")
 		e.Str(s.Description)
+	}
+	{
+		if s.ActionImage.Set {
+			e.FieldStart("action_image")
+			s.ActionImage.Encode(e)
+		}
 	}
 	{
 		if s.Value.Set {
 			e.FieldStart("value")
 			s.Value.Encode(e)
+		}
+	}
+	{
+		if s.ValueImage.Set {
+			e.FieldStart("value_image")
+			s.ValueImage.Encode(e)
 		}
 	}
 	{
@@ -1931,10 +1948,13 @@ func (s ActionSimplePreview) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfActionSimplePreview = [3]string{
-	0: "description",
-	1: "value",
-	2: "accounts",
+var jsonFieldsNameOfActionSimplePreview = [6]string{
+	0: "name",
+	1: "description",
+	2: "action_image",
+	3: "value",
+	4: "value_image",
+	5: "accounts",
 }
 
 // Decode decodes ActionSimplePreview from json.
@@ -1946,8 +1966,20 @@ func (s *ActionSimplePreview) Decode(d *jx.Decoder) error {
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
-		case "description":
+		case "name":
 			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				v, err := d.Str()
+				s.Name = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"name\"")
+			}
+		case "description":
+			requiredBitSet[0] |= 1 << 1
 			if err := func() error {
 				v, err := d.Str()
 				s.Description = string(v)
@@ -1957,6 +1989,16 @@ func (s *ActionSimplePreview) Decode(d *jx.Decoder) error {
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"description\"")
+			}
+		case "action_image":
+			if err := func() error {
+				s.ActionImage.Reset()
+				if err := s.ActionImage.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"action_image\"")
 			}
 		case "value":
 			if err := func() error {
@@ -1968,8 +2010,18 @@ func (s *ActionSimplePreview) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"value\"")
 			}
+		case "value_image":
+			if err := func() error {
+				s.ValueImage.Reset()
+				if err := s.ValueImage.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"value_image\"")
+			}
 		case "accounts":
-			requiredBitSet[0] |= 1 << 2
+			requiredBitSet[0] |= 1 << 5
 			if err := func() error {
 				s.Accounts = make([]AccountAddress, 0)
 				if err := d.Arr(func(d *jx.Decoder) error {
@@ -1996,7 +2048,7 @@ func (s *ActionSimplePreview) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b00000101,
+		0b00100011,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.

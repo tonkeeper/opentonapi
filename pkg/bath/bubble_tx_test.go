@@ -34,6 +34,7 @@ func TestBubbleTx_ToAction(t *testing.T) {
 				Success: true,
 				Type:    SmartContractExec,
 				SimplePreview: SimplePreview{
+					Name: "Smart Contract Execution",
 					Accounts: []tongo.AccountID{
 						tongo.MustParseAccountID("-1:5555555555555555555555555555555555555555555555555555555555555555"),
 					},

@@ -19,7 +19,8 @@
        "Success": true,
        "Type": "NftItemTransfer",
        "SimplePreview": {
-         "Value": 1,
+         "Name": "NFT Transfer",
+         "Value": "1 NFT",
          "Accounts": [
            "0:2cf3b5b8c891e517c9addbda1c0386a09ccacbb0e3faf630b51cfc8152325acb",
            "0:49a43c76745b520241ebf00301e1bcb729e38dff9180d1f0bfac16245a58c52e",

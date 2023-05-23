@@ -1,7 +1,6 @@
 package bath
 
 import (
-	"github.com/tonkeeper/opentonapi/internal/g"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
 )
@@ -21,7 +20,8 @@ func (b BubbleGetGemsNftPurchase) ToAction(book addressBook) *Action {
 		Success: b.Success,
 		Type:    GetGemsNftPurchase,
 		SimplePreview: SimplePreview{
-			Value: g.Pointer[int64](1),
+			Name:  "NFT Purchase",
+			Value: "1 NFT",
 			Accounts: []tongo.AccountID{
 				b.NewOwner, b.Nft,
 			},

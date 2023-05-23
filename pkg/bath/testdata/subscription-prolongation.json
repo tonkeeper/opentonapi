@@ -19,7 +19,8 @@
        "Success": true,
        "Type": "Subscription",
        "SimplePreview": {
-         "Value": 1000000000,
+         "Name": "Subscription",
+         "Value": "1 Ton",
          "Accounts": [
            "0:e01675b731ed41f3a186a29d4a203068f744f68162cc370b0cde92f24ff97de5",
            "0:f3b542fa6d15e4bba8c9aac63aa1b8a97d787ab7dcb34730e1e5a4e78e104b80"
