@@ -10,6 +10,8 @@ import (
 
 	"github.com/avast/retry-go"
 	"github.com/puzpuzpuz/xsync/v2"
+	"github.com/sourcegraph/conc/iter"
+	"github.com/tonkeeper/opentonapi/pkg/blockchain/indexer"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
 	"github.com/tonkeeper/tongo/config"
@@ -25,12 +27,14 @@ type LiteStorage struct {
 	logger                  *zap.Logger
 	client                  *liteapi.Client
 	jettonMetaCache         *xsync.MapOf[string, tep64.Metadata]
-	transactionsIndexByHash map[tongo.Bits256]*core.Transaction
+	transactionsIndexByHash *xsync.MapOf[tongo.Bits256, *core.Transaction]
 	blockCache              *xsync.MapOf[tongo.BlockIDExt, *tlb.Block]
 	accountInterfacesCache  *xsync.MapOf[tongo.AccountID, []abi.ContractInterface]
 	knownAccounts           map[string][]tongo.AccountID
 	// maxGoroutines specifies a number of goroutines used to perform some time-consuming operations.
 	maxGoroutines int
+	// trackingAccounts is a list of accounts we track. Defined with ACCOUNTS env variable.
+	trackingAccounts map[tongo.AccountID]struct{}
 }
 
 type Options struct {
@@ -38,6 +42,8 @@ type Options struct {
 	servers         []config.LiteServer
 	tfPools         []tongo.AccountID
 	jettons         []tongo.AccountID
+	// blockCh is used to receive new blocks in the blockchain, if set.
+	blockCh <-chan indexer.IDandBlock
 }
 
 func WithPreloadAccounts(a []tongo.AccountID) Option {
@@ -64,6 +70,13 @@ func WithTFPools(pools []tongo.AccountID) Option {
 	}
 }
 
+// WithBlockChannel configures a channel to receive notifications about new blocks in the blockchain.
+func WithBlockChannel(ch <-chan indexer.IDandBlock) Option {
+	return func(o *Options) {
+		o.blockCh = ch
+	}
+}
+
 type Option func(o *Options)
 
 func NewLiteStorage(log *zap.Logger, opts ...Option) (*LiteStorage, error) {
@@ -83,23 +96,59 @@ func NewLiteStorage(log *zap.Logger, opts ...Option) (*LiteStorage, error) {
 		return nil, err
 	}
 
-	l := &LiteStorage{
+	storage := &LiteStorage{
 		logger: log,
 		// TODO: introduce an env variable to configure this number
-		maxGoroutines:           5,
-		client:                  client,
+		maxGoroutines: 5,
+		client:        client,
+		// read-only data
+		knownAccounts:    make(map[string][]tongo.AccountID),
+		trackingAccounts: map[tongo.AccountID]struct{}{},
+		// data for concurrent access
+		// TODO: implement expiration logic for the caches below.
 		jettonMetaCache:         xsync.NewMapOf[tep64.Metadata](),
-		transactionsIndexByHash: make(map[tongo.Bits256]*core.Transaction),
+		transactionsIndexByHash: xsync.NewTypedMapOf[tongo.Bits256, *core.Transaction](hashBits256),
 		blockCache:              xsync.NewTypedMapOf[tongo.BlockIDExt, *tlb.Block](hashBlockIDExt),
 		accountInterfacesCache:  xsync.NewTypedMapOf[tongo.AccountID, []abi.ContractInterface](hashAccountID),
-		knownAccounts:           make(map[string][]tongo.AccountID),
 	}
-	l.knownAccounts["tf_pools"] = o.tfPools
-	l.knownAccounts["jettons"] = o.jettons
+	storage.knownAccounts["tf_pools"] = o.tfPools
+	storage.knownAccounts["jettons"] = o.jettons
+
+	iterator := iter.Iterator[tongo.AccountID]{MaxGoroutines: storage.maxGoroutines}
+	iterator.ForEach(o.preloadAccounts, func(accountID *tongo.AccountID) {
+		if err := storage.preloadAccount(*accountID); err != nil {
+			log.Error("failed to preload account",
+				zap.String("accountID", accountID.String()),
+				zap.Error(err))
+		}
+	})
 	for _, a := range o.preloadAccounts {
-		l.preloadAccount(a)
+		storage.trackingAccounts[a] = struct{}{}
 	}
-	return l, nil
+	go storage.run(o.blockCh)
+	return storage, nil
+}
+
+func (s *LiteStorage) run(ch <-chan indexer.IDandBlock) {
+	if ch == nil {
+		return
+	}
+	for block := range ch {
+		for _, tx := range block.Block.AllTransactions() {
+			accountID := *tongo.NewAccountId(block.ID.Workchain, tx.AccountAddr)
+			if _, ok := s.trackingAccounts[accountID]; ok {
+				hash := tongo.Bits256(tx.Hash())
+				transaction, err := core.ConvertTransaction(accountID.Workchain, tongo.Transaction{Transaction: *tx, BlockID: block.ID})
+				if err != nil {
+					s.logger.Error("failed to process tx",
+						zap.String("tx-hash", hash.Hex()),
+						zap.Error(err))
+					continue
+				}
+				s.transactionsIndexByHash.Store(hash, transaction)
+			}
+		}
+	}
 }
 
 // GetRawAccount returns low-level information about an account taken directly from the blockchain.
@@ -156,7 +205,7 @@ func (s *LiteStorage) preloadAccount(a tongo.AccountID) error {
 		if err != nil {
 			return err
 		}
-		s.transactionsIndexByHash[tongo.Bits256(tx.Hash())] = t
+		s.transactionsIndexByHash.Store(tongo.Bits256(tx.Hash()), t)
 	}
 
 	return nil
@@ -189,7 +238,7 @@ func (s *LiteStorage) LastMasterchainBlockHeader(ctx context.Context) (*core.Blo
 }
 
 func (s *LiteStorage) GetTransaction(ctx context.Context, hash tongo.Bits256) (*core.Transaction, error) {
-	tx, prs := s.transactionsIndexByHash[hash]
+	tx, prs := s.transactionsIndexByHash.Load(hash)
 	if prs {
 		return tx, nil
 	}

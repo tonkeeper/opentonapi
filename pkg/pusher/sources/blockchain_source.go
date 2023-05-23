@@ -2,8 +2,8 @@ package sources
 
 import (
 	"context"
-	"time"
 
+	"github.com/tonkeeper/opentonapi/pkg/blockchain/indexer"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/config"
 	"github.com/tonkeeper/tongo/liteapi"
@@ -45,46 +45,25 @@ func (b *BlockchainSource) SubscribeToTransactions(ctx context.Context, deliverF
 	return b.dispatcher.RegisterSubscriber(deliverFn, opts)
 }
 
-func (b *BlockchainSource) Run(ctx context.Context) {
-	var chunk *chunk
-	idx := indexer{cli: b.client}
-	for {
-		time.Sleep(200 * time.Millisecond)
-		info, err := b.client.GetMasterchainInfo(ctx)
-		if err != nil {
-			b.logger.Error("failed to get masterchain info", zap.Error(err))
-			continue
-		}
-		chunk, err = idx.initChunk(info.Last.Seqno)
-		if err != nil {
-			b.logger.Error("failed to get init chunk", zap.Error(err))
-			continue
-		}
-		break
-	}
-
-	ch := b.dispatcher.Run(ctx)
-
-	for {
-		time.Sleep(500 * time.Millisecond)
-		next, err := idx.next(chunk)
-		if err != nil {
-			if isBlockNotReadyError(err) {
-				continue
-			}
-			b.logger.Error("failed to get next chunk", zap.Error(err))
-			continue
-		}
-		for _, block := range next.blocks {
-			transactions := block.Block.AllTransactions()
-			for _, tx := range transactions {
-				ch <- TransactionEvent{
-					AccountID: *tongo.NewAccountId(block.ID.Workchain, tx.AccountAddr),
-					Lt:        tx.Lt,
-					TxHash:    tx.Hash().Hex(),
+func (b *BlockchainSource) Run(ctx context.Context) chan indexer.IDandBlock {
+	blockCh := make(chan indexer.IDandBlock)
+	go func() {
+		ch := b.dispatcher.Run(ctx)
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case block := <-blockCh:
+				transactions := block.Block.AllTransactions()
+				for _, tx := range transactions {
+					ch <- TransactionEvent{
+						AccountID: *tongo.NewAccountId(block.ID.Workchain, tx.AccountAddr),
+						Lt:        tx.Lt,
+						TxHash:    tx.Hash().Hex(),
+					}
 				}
 			}
 		}
-		chunk = next
-	}
+	}()
+	return blockCh
 }

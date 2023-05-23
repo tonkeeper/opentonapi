@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"github.com/tonkeeper/opentonapi/pkg/blockchain/indexer"
 	"go.uber.org/zap"
 	"golang.org/x/exp/maps"
 
@@ -22,12 +23,15 @@ func main() {
 	cfg := config.Load()
 	log := app.Logger(cfg.App.LogLevel)
 	book := addressbook.NewAddressBook(log, config.AddressPath, config.JettonPath, config.CollectionPath)
+
+	storageBlockCh := make(chan indexer.IDandBlock)
 	storage, err := litestorage.NewLiteStorage(
 		log,
 		litestorage.WithPreloadAccounts(cfg.App.Accounts),
 		litestorage.WithTFPools(book.TFPools()),
 		litestorage.WithKnownJettons(maps.Keys(book.GetKnownJettons())),
 		litestorage.WithLiteServers(cfg.App.LiteServers),
+		litestorage.WithBlockChannel(storageBlockCh),
 	)
 	if err != nil {
 		log.Fatal("storage init", zap.Error(err))
@@ -54,7 +58,16 @@ func main() {
 	if err != nil {
 		log.Fatal("failed to create blockchain source", zap.Error(err))
 	}
-	go source.Run(context.TODO())
+	pusherBlockCh := source.Run(context.TODO())
+
+	idx, err := indexer.New(log, cfg.App.LiteServers)
+	if err != nil {
+		log.Fatal("failed to create blockchain indexer", zap.Error(err))
+	}
+	go idx.Run(context.TODO(), []chan indexer.IDandBlock{
+		pusherBlockCh,
+		storageBlockCh,
+	})
 
 	server, err := api.NewServer(log, h, fmt.Sprintf(":%d", cfg.API.Port),
 		api.WithTransactionSource(source),
