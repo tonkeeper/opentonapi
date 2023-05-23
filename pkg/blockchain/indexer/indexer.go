@@ -1,14 +1,17 @@
-package sources
+package indexer
 
 import (
 	"context"
 	"sort"
 	"strings"
+	"time"
 
 	"github.com/sourcegraph/conc/iter"
 	"github.com/tonkeeper/tongo"
+	"github.com/tonkeeper/tongo/config"
 	"github.com/tonkeeper/tongo/liteapi"
 	"github.com/tonkeeper/tongo/tlb"
+	"go.uber.org/zap"
 )
 
 type chunk struct {
@@ -17,8 +20,27 @@ type chunk struct {
 	blocks   []IDandBlock
 }
 
-type indexer struct {
-	cli *liteapi.Client
+// Indexer tracks the blockchain and notifies subscribers about new blocks.
+type Indexer struct {
+	logger *zap.Logger
+	cli    *liteapi.Client
+}
+
+func New(logger *zap.Logger, servers []config.LiteServer) (*Indexer, error) {
+	var err error
+	var client *liteapi.Client
+	if len(servers) == 0 {
+		client, err = liteapi.NewClientWithDefaultMainnet()
+	} else {
+		client, err = liteapi.NewClient(liteapi.WithLiteServers(servers))
+	}
+	if err != nil {
+		return nil, err
+	}
+	return &Indexer{
+		cli:    client,
+		logger: logger,
+	}, nil
 }
 
 type IDandBlock struct {
@@ -26,7 +48,44 @@ type IDandBlock struct {
 	Block *tlb.Block
 }
 
-func (idx *indexer) next(prevChunk *chunk) (*chunk, error) {
+func (idx *Indexer) Run(ctx context.Context, channels []chan IDandBlock) {
+	var chunk *chunk
+	for {
+		time.Sleep(200 * time.Millisecond)
+		info, err := idx.cli.GetMasterchainInfo(ctx)
+		if err != nil {
+			idx.logger.Error("failed to get masterchain info", zap.Error(err))
+			continue
+		}
+		chunk, err = idx.initChunk(info.Last.Seqno)
+		if err != nil {
+			idx.logger.Error("failed to get init chunk", zap.Error(err))
+			continue
+		}
+		break
+	}
+
+	for {
+		time.Sleep(500 * time.Millisecond)
+		next, err := idx.next(chunk)
+		if err != nil {
+			if isBlockNotReadyError(err) {
+				continue
+			}
+			idx.logger.Error("failed to get next chunk", zap.Error(err))
+			continue
+		}
+		for _, block := range next.blocks {
+			for _, ch := range channels {
+				ch <- block
+			}
+		}
+		chunk = next
+	}
+
+}
+
+func (idx *Indexer) next(prevChunk *chunk) (*chunk, error) {
 	nextMasterID := prevChunk.masterID
 	nextMasterID.Seqno += 1
 	masterBlockID, _, err := idx.cli.LookupBlock(context.Background(), nextMasterID, 1, nil, nil)
@@ -105,7 +164,7 @@ func (idx *indexer) next(prevChunk *chunk) (*chunk, error) {
 	return &currentChunk, nil
 }
 
-func (idx *indexer) initChunk(seqno uint32) (*chunk, error) {
+func (idx *Indexer) initChunk(seqno uint32) (*chunk, error) {
 	init := tongo.BlockID{
 		Workchain: -1,
 		Shard:     9223372036854775808,
