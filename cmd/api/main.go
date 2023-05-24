@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
+	jsoniterExtra "github.com/json-iterator/go/extra"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/tonkeeper/opentonapi/pkg/blockchain/indexer"
 	"go.uber.org/zap"
@@ -20,6 +21,9 @@ import (
 )
 
 func main() {
+
+	jsoniterExtra.SetNamingStrategy(jsoniterExtra.LowerCaseWithUnderscores)
+
 	cfg := config.Load()
 	log := app.Logger(cfg.App.LogLevel)
 	book := addressbook.NewAddressBook(log, config.AddressPath, config.JettonPath, config.CollectionPath)

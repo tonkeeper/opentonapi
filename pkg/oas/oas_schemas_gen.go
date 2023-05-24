@@ -2406,21 +2406,21 @@ func (*JettonsBalances) getJettonsBalancesRes() {}
 
 // Ref: #/components/schemas/Message
 type Message struct {
-	CreatedLt     int64              `json:"created_lt"`
-	IhrDisabled   bool               `json:"ihr_disabled"`
-	Bounce        bool               `json:"bounce"`
-	Bounced       bool               `json:"bounced"`
-	Value         int64              `json:"value"`
-	FwdFee        int64              `json:"fwd_fee"`
-	IhrFee        int64              `json:"ihr_fee"`
-	Destination   OptAccountAddress  `json:"destination"`
-	Source        OptAccountAddress  `json:"source"`
-	ImportFee     int64              `json:"import_fee"`
-	CreatedAt     int64              `json:"created_at"`
-	OpCode        OptString          `json:"op_code"`
-	Init          OptStateInit       `json:"init"`
-	DecodedOpName OptString          `json:"decoded_op_name"`
-	DecodedBody   MessageDecodedBody `json:"decoded_body"`
+	CreatedLt     int64             `json:"created_lt"`
+	IhrDisabled   bool              `json:"ihr_disabled"`
+	Bounce        bool              `json:"bounce"`
+	Bounced       bool              `json:"bounced"`
+	Value         int64             `json:"value"`
+	FwdFee        int64             `json:"fwd_fee"`
+	IhrFee        int64             `json:"ihr_fee"`
+	Destination   OptAccountAddress `json:"destination"`
+	Source        OptAccountAddress `json:"source"`
+	ImportFee     int64             `json:"import_fee"`
+	CreatedAt     int64             `json:"created_at"`
+	OpCode        OptString         `json:"op_code"`
+	Init          OptStateInit      `json:"init"`
+	DecodedOpName OptString         `json:"decoded_op_name"`
+	DecodedBody   jx.Raw            `json:"decoded_body"`
 }
 
 // GetCreatedLt returns the value of CreatedLt.
@@ -2494,7 +2494,7 @@ func (s Message) GetDecodedOpName() OptString {
 }
 
 // GetDecodedBody returns the value of DecodedBody.
-func (s Message) GetDecodedBody() MessageDecodedBody {
+func (s Message) GetDecodedBody() jx.Raw {
 	return s.DecodedBody
 }
 
@@ -2569,28 +2569,17 @@ func (s *Message) SetDecodedOpName(val OptString) {
 }
 
 // SetDecodedBody sets the value of DecodedBody.
-func (s *Message) SetDecodedBody(val MessageDecodedBody) {
+func (s *Message) SetDecodedBody(val jx.Raw) {
 	s.DecodedBody = val
-}
-
-type MessageDecodedBody map[string]jx.Raw
-
-func (s *MessageDecodedBody) init() MessageDecodedBody {
-	m := *s
-	if m == nil {
-		m = map[string]jx.Raw{}
-		*s = m
-	}
-	return m
 }
 
 // Ref: #/components/schemas/MethodExecutionResult
 type MethodExecutionResult struct {
 	Success bool `json:"success"`
 	// Tvm exit code.
-	ExitCode int                             `json:"exit_code"`
-	Stack    []TvmStackRecord                `json:"stack"`
-	Decoded  OptMethodExecutionResultDecoded `json:"decoded"`
+	ExitCode int              `json:"exit_code"`
+	Stack    []TvmStackRecord `json:"stack"`
+	Decoded  jx.Raw           `json:"decoded"`
 }
 
 // GetSuccess returns the value of Success.
@@ -2609,7 +2598,7 @@ func (s MethodExecutionResult) GetStack() []TvmStackRecord {
 }
 
 // GetDecoded returns the value of Decoded.
-func (s MethodExecutionResult) GetDecoded() OptMethodExecutionResultDecoded {
+func (s MethodExecutionResult) GetDecoded() jx.Raw {
 	return s.Decoded
 }
 
@@ -2629,22 +2618,11 @@ func (s *MethodExecutionResult) SetStack(val []TvmStackRecord) {
 }
 
 // SetDecoded sets the value of Decoded.
-func (s *MethodExecutionResult) SetDecoded(val OptMethodExecutionResultDecoded) {
+func (s *MethodExecutionResult) SetDecoded(val jx.Raw) {
 	s.Decoded = val
 }
 
 func (*MethodExecutionResult) execGetMethodRes() {}
-
-type MethodExecutionResultDecoded map[string]jx.Raw
-
-func (s *MethodExecutionResultDecoded) init() MethodExecutionResultDecoded {
-	m := *s
-	if m == nil {
-		m = map[string]jx.Raw{}
-		*s = m
-	}
-	return m
-}
 
 // Ref: #/components/schemas/NftCollection
 type NftCollection struct {
@@ -3861,52 +3839,6 @@ func (o OptMessage) Get() (v Message, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptMessage) Or(d Message) Message {
-	if v, ok := o.Get(); ok {
-		return v
-	}
-	return d
-}
-
-// NewOptMethodExecutionResultDecoded returns new OptMethodExecutionResultDecoded with value set to v.
-func NewOptMethodExecutionResultDecoded(v MethodExecutionResultDecoded) OptMethodExecutionResultDecoded {
-	return OptMethodExecutionResultDecoded{
-		Value: v,
-		Set:   true,
-	}
-}
-
-// OptMethodExecutionResultDecoded is optional MethodExecutionResultDecoded.
-type OptMethodExecutionResultDecoded struct {
-	Value MethodExecutionResultDecoded
-	Set   bool
-}
-
-// IsSet returns true if OptMethodExecutionResultDecoded was set.
-func (o OptMethodExecutionResultDecoded) IsSet() bool { return o.Set }
-
-// Reset unsets value.
-func (o *OptMethodExecutionResultDecoded) Reset() {
-	var v MethodExecutionResultDecoded
-	o.Value = v
-	o.Set = false
-}
-
-// SetTo sets value to v.
-func (o *OptMethodExecutionResultDecoded) SetTo(v MethodExecutionResultDecoded) {
-	o.Set = true
-	o.Value = v
-}
-
-// Get returns value and boolean that denotes whether value was set.
-func (o OptMethodExecutionResultDecoded) Get() (v MethodExecutionResultDecoded, ok bool) {
-	if !o.Set {
-		return v, false
-	}
-	return o.Value, true
-}
-
-// Or returns value if set, or given parameter if does not.
-func (o OptMethodExecutionResultDecoded) Or(d MethodExecutionResultDecoded) MethodExecutionResultDecoded {
 	if v, ok := o.Get(); ok {
 		return v
 	}

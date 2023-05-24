@@ -12,6 +12,7 @@ require (
 	github.com/go-faster/jx v0.40.0
 	github.com/google/martian v2.1.0+incompatible
 	github.com/gorilla/websocket v1.5.0
+	github.com/json-iterator/go v1.1.12
 	github.com/nicksnyder/go-i18n/v2 v2.2.1
 	github.com/ogen-go/ogen v0.55.0
 	github.com/prometheus/client_golang v1.14.0
@@ -45,6 +46,8 @@ require (
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.18 // indirect
 	github.com/matttproud/golang_protobuf_extensions v1.0.1 // indirect
+	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
+	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/oasisprotocol/curve25519-voi v0.0.0-20220328075252-7dd334e3daae // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/prometheus/client_model v0.3.0 // indirect

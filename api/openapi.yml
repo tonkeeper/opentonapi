@@ -1664,10 +1664,7 @@ components:
         decoded_op_name:
           type: string
           example: "nft_transfer"
-        decoded_body:
-          type: object
-          additionalProperties: true
-          example: { }
+        decoded_body: {} # Free-form JSON value
 
     TransactionType:
       type: string
@@ -2049,10 +2046,7 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/TvmStackRecord"
-        decoded:
-          type: object
-          additionalProperties: true
-          example: { "wallet": "EQCJ7yjjxkt_EuuzvUbpdJGebYCvTUzC5rLzJWzUTiDoX_US" }
+        decoded: {} # Free-form JSON value
     TvmStackRecord:
       type: object
       required:

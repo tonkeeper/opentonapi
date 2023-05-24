@@ -4,6 +4,8 @@ import (
 	"encoding/binary"
 	"encoding/hex"
 	"fmt"
+
+	jsoniter "github.com/json-iterator/go"
 	"github.com/tonkeeper/opentonapi/internal/g"
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/opentonapi/pkg/oas"
@@ -149,7 +151,6 @@ func convertMessage(m core.Message, book addressBook) oas.Message {
 		Source:      convertOptAccountAddress(m.Source, book),
 		ImportFee:   m.ImportFee,
 		CreatedAt:   int64(m.CreatedAt),
-		DecodedBody: nil,
 	}
 	if m.OpCode != nil {
 		msg.OpCode = oas.NewOptString("0x" + hex.EncodeToString(binary.BigEndian.AppendUint32(nil, *m.OpCode)))
@@ -161,7 +162,9 @@ func convertMessage(m core.Message, book addressBook) oas.Message {
 	}
 	if m.DecodedBody != nil {
 		msg.DecodedOpName = oas.NewOptString(g.CamelToSnake(m.DecodedBody.Operation))
-		msg.DecodedBody = anyToJSONRawMap(m.DecodedBody.Value, true)
+		// DecodedBody.Value is a simple struct, there shouldn't be any issue with it.
+		value, _ := jsoniter.Marshal(m.DecodedBody.Value)
+		msg.DecodedBody = value
 	}
 	return msg
 }
