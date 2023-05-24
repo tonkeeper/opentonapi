@@ -20,13 +20,13 @@ require (
 	github.com/sourcegraph/conc v0.3.0
 	github.com/stretchr/testify v1.8.1
 	github.com/tonkeeper/scam_backoffice_rules v0.0.0-20230413094040-a66ab71fb269
-	github.com/tonkeeper/tongo v1.0.16-0.20230518155408-73ccdd3405e9
+	github.com/tonkeeper/tongo v1.0.16-0.20230523142154-0e273aa6fa60
 	go.opentelemetry.io/otel v1.11.1
 	go.opentelemetry.io/otel/metric v0.33.0
 	go.opentelemetry.io/otel/trace v1.11.1
 	go.uber.org/multierr v1.9.0
 	go.uber.org/zap v1.24.0
-	golang.org/x/exp v0.0.0-20230116083435-1de6713980de
+	golang.org/x/exp v0.0.0-20230522175609-2e198f4a06a1
 	golang.org/x/text v0.9.0
 )
 

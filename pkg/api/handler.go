@@ -4,11 +4,11 @@ import (
 	"fmt"
 
 	"github.com/go-faster/errors"
-	"github.com/tonkeeper/opentonapi/pkg/tonconnect"
 	rules "github.com/tonkeeper/scam_backoffice_rules"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/contract/dns"
 	"github.com/tonkeeper/tongo/tep64"
+	"github.com/tonkeeper/tongo/tonconnect"
 	"go.uber.org/zap"
 
 	"github.com/tonkeeper/opentonapi/pkg/addressbook"
@@ -37,7 +37,7 @@ type Handler struct {
 	spamRules        func() rules.Rules
 	tonRates         tonRates
 	metaCache        metadataCache
-	tonConnect       tonConnect
+	tonConnect       *tonconnect.Server
 }
 
 // Options configures behavior of a Handler instance.
@@ -147,7 +147,10 @@ func NewHandler(logger *zap.Logger, opts ...Option) (*Handler, error) {
 	if options.executor == nil {
 		return nil, fmt.Errorf("executor is not configured")
 	}
-	tonConnect := tonconnect.NewTonConnect(options.tonConnectSecret)
+	tonConnect, err := tonconnect.NewTonConnect(options.executor, options.tonConnectSecret)
+	if err != nil {
+		return nil, fmt.Errorf("failed to init tonconnect")
+	}
 	dnsClient := dns.NewDNS(tongo.MustParseAccountID("-1:e56754f83426f69b09267bd876ac97c44821345b7e266bd956a7bfbfb98df35c"), options.executor) //todo: move to chain config
 
 	return &Handler{
