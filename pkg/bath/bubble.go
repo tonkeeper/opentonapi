@@ -98,7 +98,7 @@ func fromTrace(trace *core.Trace) *Bubble {
 			Accounts: map[tongo.AccountID]*AccountValueFlow{
 				trace.Account: {
 					Ton:  inputAmount,
-					Fees: trace.OtherFee + trace.StorageFee,
+					Fees: trace.AggregatedFee,
 				},
 			},
 		},

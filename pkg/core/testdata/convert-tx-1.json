@@ -94,5 +94,6 @@
    "Destroyed": false,
    "StorageFee": 126,
    "OtherFee": 16534000,
-   "Fee": 16534126
+   "AggregatedFee": 16534126,
+   "TotalFee": 9778074
  }
