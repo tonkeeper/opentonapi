@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 
+	jsoniter "github.com/json-iterator/go"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
 	"github.com/tonkeeper/tongo/tlb"
@@ -127,7 +128,11 @@ func (h Handler) ExecGetMethod(ctx context.Context, params oas.ExecGetMethodPara
 	for _, decoder := range abi.KnownGetMethodsDecoder[params.MethodName] {
 		_, v, err := decoder(stack)
 		if err == nil {
-			result.SetDecoded(oas.NewOptMethodExecutionResultDecoded(anyToJSONRawMap(v, true)))
+			value, err := jsoniter.Marshal(v)
+			if err != nil {
+				return nil, err
+			}
+			result.SetDecoded(value)
 			break
 		}
 	}

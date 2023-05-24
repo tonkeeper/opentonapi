@@ -7630,9 +7630,10 @@ func (s MethodExecutionResult) encodeFields(e *jx.Encoder) {
 		e.ArrEnd()
 	}
 	{
-		if s.Decoded.Set {
+
+		if len(s.Decoded) != 0 {
 			e.FieldStart("decoded")
-			s.Decoded.Encode(e)
+			e.Raw(s.Decoded)
 		}
 	}
 }
@@ -7697,8 +7698,9 @@ func (s *MethodExecutionResult) Decode(d *jx.Decoder) error {
 			}
 		case "decoded":
 			if err := func() error {
-				s.Decoded.Reset()
-				if err := s.Decoded.Decode(d); err != nil {
+				v, err := d.RawAppend(nil)
+				s.Decoded = jx.Raw(v)
+				if err != nil {
 					return err
 				}
 				return nil
@@ -7757,64 +7759,6 @@ func (s MethodExecutionResult) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *MethodExecutionResult) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
-// Encode implements json.Marshaler.
-func (s MethodExecutionResultDecoded) Encode(e *jx.Encoder) {
-	e.ObjStart()
-	s.encodeFields(e)
-	e.ObjEnd()
-}
-
-// encodeFields implements json.Marshaler.
-func (s MethodExecutionResultDecoded) encodeFields(e *jx.Encoder) {
-	for k, elem := range s {
-		e.FieldStart(k)
-
-		if len(elem) != 0 {
-			e.Raw(elem)
-		}
-	}
-}
-
-// Decode decodes MethodExecutionResultDecoded from json.
-func (s *MethodExecutionResultDecoded) Decode(d *jx.Decoder) error {
-	if s == nil {
-		return errors.New("invalid: unable to decode MethodExecutionResultDecoded to nil")
-	}
-	m := s.init()
-	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
-		var elem jx.Raw
-		if err := func() error {
-			v, err := d.RawAppend(nil)
-			elem = jx.Raw(v)
-			if err != nil {
-				return err
-			}
-			return nil
-		}(); err != nil {
-			return errors.Wrapf(err, "decode field %q", k)
-		}
-		m[string(k)] = elem
-		return nil
-	}); err != nil {
-		return errors.Wrap(err, "decode MethodExecutionResultDecoded")
-	}
-
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s MethodExecutionResultDecoded) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *MethodExecutionResultDecoded) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -9716,40 +9660,6 @@ func (s OptMessage) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *OptMessage) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
-// Encode encodes MethodExecutionResultDecoded as json.
-func (o OptMethodExecutionResultDecoded) Encode(e *jx.Encoder) {
-	if !o.Set {
-		return
-	}
-	o.Value.Encode(e)
-}
-
-// Decode decodes MethodExecutionResultDecoded from json.
-func (o *OptMethodExecutionResultDecoded) Decode(d *jx.Decoder) error {
-	if o == nil {
-		return errors.New("invalid: unable to decode OptMethodExecutionResultDecoded to nil")
-	}
-	o.Set = true
-	o.Value = make(MethodExecutionResultDecoded)
-	if err := o.Value.Decode(d); err != nil {
-		return err
-	}
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s OptMethodExecutionResultDecoded) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *OptMethodExecutionResultDecoded) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
