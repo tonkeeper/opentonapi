@@ -22,7 +22,8 @@
        "Success": true,
        "Type": "JettonTransfer",
        "SimplePreview": {
-         "Value": 1000000,
+         "Name": "Jetton Transfer",
+         "Value": "1000000 UKWN",
          "Accounts": [
            "0:0000000000000000000000000000000000000000000000000000000000000000",
            "0:2cf3b5b8c891e517c9addbda1c0386a09ccacbb0e3faf630b51cfc8152325acb"

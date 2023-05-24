@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/tonkeeper/opentonapi/internal/g"
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
@@ -96,9 +95,10 @@ func (b BubbleNftTransfer) ToAction(book addressBook) (action *Action) {
 		Success: b.success,
 		Type:    NftItemTransfer,
 		SimplePreview: SimplePreview{
+			Name:      "NFT Transfer",
 			MessageID: nftTransferMessageID,
 			Accounts:  distinctAccounts(b.account.Address, b.sender.Address, b.recipient.Address),
-			Value:     g.Pointer[int64](1),
+			Value:     "1 NFT",
 		},
 	}
 	if c, ok := b.payload.(string); ok {
@@ -239,13 +239,14 @@ func (b BubbleJettonTransfer) ToAction(book addressBook) (action *Action) {
 		Success: b.success,
 		Type:    JettonTransfer,
 		SimplePreview: SimplePreview{
+			Name:      "Jetton Transfer",
 			MessageID: jettonTransferMessageID,
 			TemplateData: map[string]interface{}{
 				"Value":      amount.Int64(),
 				"JettonName": jettonName,
 			},
 			Accounts: distinctAccounts(b.recipient.Address, b.sender.Address, b.master),
-			Value:    g.Pointer(amount.Int64()),
+			Value:    fmt.Sprintf("%v %v", amount.String(), jettonName),
 		},
 	}
 	if c, ok := b.payload.(string); ok {

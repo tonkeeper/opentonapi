@@ -19,7 +19,8 @@
        "Success": true,
        "Type": "TonTransfer",
        "SimplePreview": {
-         "Value": 1800000000,
+         "Name": "Ton Transfer",
+         "Value": "1.8 Ton",
          "Accounts": [
            "0:4495a1921ab497b0eacee0d78838f8aeaba12481c29ec592c7fd5cbdd5b5ad0e",
            "0:533f30de5722157b8471f5503b9fc5800c8d8397e79743f796b11e609adae69f"
@@ -49,7 +50,8 @@
        "Success": true,
        "Type": "TonTransfer",
        "SimplePreview": {
-         "Value": 687432978,
+         "Name": "Ton Transfer",
+         "Value": "687.432978 milliTon",
          "Accounts": [
            "0:353d4cb749da429dbee9387ff7f65c0d99a922396a3d239eff8be465422771a0",
            "0:4495a1921ab497b0eacee0d78838f8aeaba12481c29ec592c7fd5cbdd5b5ad0e"
@@ -79,7 +81,8 @@
        "Success": true,
        "Type": "TonTransfer",
        "SimplePreview": {
-         "Value": 80000000,
+         "Name": "Ton Transfer",
+         "Value": "80 milliTon",
          "Accounts": [
            "0:353d4cb749da429dbee9387ff7f65c0d99a922396a3d239eff8be465422771a0",
            "0:4495a1921ab497b0eacee0d78838f8aeaba12481c29ec592c7fd5cbdd5b5ad0e"
@@ -109,7 +112,8 @@
        "Success": true,
        "Type": "TonTransfer",
        "SimplePreview": {
-         "Value": 40000000,
+         "Name": "Ton Transfer",
+         "Value": "40 milliTon",
          "Accounts": [
            "0:4495a1921ab497b0eacee0d78838f8aeaba12481c29ec592c7fd5cbdd5b5ad0e",
            "0:a3935861f79daf59a13d6d182e1640210c02f98e3df18fda74b8f5ab141abf18"
@@ -139,7 +143,8 @@
        "Success": true,
        "Type": "NftItemTransfer",
        "SimplePreview": {
-         "Value": 1,
+         "Name": "NFT Transfer",
+         "Value": "1 NFT",
          "Accounts": [
            "0:4495a1921ab497b0eacee0d78838f8aeaba12481c29ec592c7fd5cbdd5b5ad0e",
            "0:533f30de5722157b8471f5503b9fc5800c8d8397e79743f796b11e609adae69f",

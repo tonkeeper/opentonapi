@@ -16,7 +16,8 @@
        "Success": true,
        "Type": "GetGemsNftPurchase",
        "SimplePreview": {
-         "Value": 1,
+         "Name": "NFT Purchase",
+         "Value": "1 NFT",
          "Accounts": [
            "0:533f30de5722157b8471f5503b9fc5800c8d8397e79743f796b11e609adae69f",
            "0:63864e10646c9a2214651aec6dddf3379da9273a99c83fcce23c77da188b1348"

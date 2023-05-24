@@ -41,7 +41,8 @@ type (
 	}
 	// SimplePreview shortly describes what an action is about.
 	SimplePreview struct {
-		Value    *int64
+		Name     string
+		Value    string
 		Accounts []tongo.AccountID
 		// MessageID specifies a message's ID from pkg/i18n/translation/*.toml
 		MessageID    string
