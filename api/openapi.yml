@@ -1664,10 +1664,7 @@ components:
         decoded_op_name:
           type: string
           example: "nft_transfer"
-        decoded_body:
-          type: object
-          additionalProperties: true
-          example: { }
+        decoded_body: {} # Free-form JSON value
 
     TransactionType:
       type: string

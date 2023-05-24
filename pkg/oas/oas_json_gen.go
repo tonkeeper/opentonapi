@@ -7340,8 +7340,10 @@ func (s Message) encodeFields(e *jx.Encoder) {
 	}
 	{
 
-		e.FieldStart("decoded_body")
-		s.DecodedBody.Encode(e)
+		if len(s.DecodedBody) != 0 {
+			e.FieldStart("decoded_body")
+			e.Raw(s.DecodedBody)
+		}
 	}
 }
 
@@ -7533,7 +7535,9 @@ func (s *Message) Decode(d *jx.Decoder) error {
 		case "decoded_body":
 			requiredBitSet[1] |= 1 << 6
 			if err := func() error {
-				if err := s.DecodedBody.Decode(d); err != nil {
+				v, err := d.RawAppend(nil)
+				s.DecodedBody = jx.Raw(v)
+				if err != nil {
 					return err
 				}
 				return nil
@@ -7593,64 +7597,6 @@ func (s Message) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *Message) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
-// Encode implements json.Marshaler.
-func (s MessageDecodedBody) Encode(e *jx.Encoder) {
-	e.ObjStart()
-	s.encodeFields(e)
-	e.ObjEnd()
-}
-
-// encodeFields implements json.Marshaler.
-func (s MessageDecodedBody) encodeFields(e *jx.Encoder) {
-	for k, elem := range s {
-		e.FieldStart(k)
-
-		if len(elem) != 0 {
-			e.Raw(elem)
-		}
-	}
-}
-
-// Decode decodes MessageDecodedBody from json.
-func (s *MessageDecodedBody) Decode(d *jx.Decoder) error {
-	if s == nil {
-		return errors.New("invalid: unable to decode MessageDecodedBody to nil")
-	}
-	m := s.init()
-	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
-		var elem jx.Raw
-		if err := func() error {
-			v, err := d.RawAppend(nil)
-			elem = jx.Raw(v)
-			if err != nil {
-				return err
-			}
-			return nil
-		}(); err != nil {
-			return errors.Wrapf(err, "decode field %q", k)
-		}
-		m[string(k)] = elem
-		return nil
-	}); err != nil {
-		return errors.Wrap(err, "decode MessageDecodedBody")
-	}
-
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s MessageDecodedBody) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *MessageDecodedBody) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }

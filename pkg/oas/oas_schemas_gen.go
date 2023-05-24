@@ -2406,21 +2406,21 @@ func (*JettonsBalances) getJettonsBalancesRes() {}
 
 // Ref: #/components/schemas/Message
 type Message struct {
-	CreatedLt     int64              `json:"created_lt"`
-	IhrDisabled   bool               `json:"ihr_disabled"`
-	Bounce        bool               `json:"bounce"`
-	Bounced       bool               `json:"bounced"`
-	Value         int64              `json:"value"`
-	FwdFee        int64              `json:"fwd_fee"`
-	IhrFee        int64              `json:"ihr_fee"`
-	Destination   OptAccountAddress  `json:"destination"`
-	Source        OptAccountAddress  `json:"source"`
-	ImportFee     int64              `json:"import_fee"`
-	CreatedAt     int64              `json:"created_at"`
-	OpCode        OptString          `json:"op_code"`
-	Init          OptStateInit       `json:"init"`
-	DecodedOpName OptString          `json:"decoded_op_name"`
-	DecodedBody   MessageDecodedBody `json:"decoded_body"`
+	CreatedLt     int64             `json:"created_lt"`
+	IhrDisabled   bool              `json:"ihr_disabled"`
+	Bounce        bool              `json:"bounce"`
+	Bounced       bool              `json:"bounced"`
+	Value         int64             `json:"value"`
+	FwdFee        int64             `json:"fwd_fee"`
+	IhrFee        int64             `json:"ihr_fee"`
+	Destination   OptAccountAddress `json:"destination"`
+	Source        OptAccountAddress `json:"source"`
+	ImportFee     int64             `json:"import_fee"`
+	CreatedAt     int64             `json:"created_at"`
+	OpCode        OptString         `json:"op_code"`
+	Init          OptStateInit      `json:"init"`
+	DecodedOpName OptString         `json:"decoded_op_name"`
+	DecodedBody   jx.Raw            `json:"decoded_body"`
 }
 
 // GetCreatedLt returns the value of CreatedLt.
@@ -2494,7 +2494,7 @@ func (s Message) GetDecodedOpName() OptString {
 }
 
 // GetDecodedBody returns the value of DecodedBody.
-func (s Message) GetDecodedBody() MessageDecodedBody {
+func (s Message) GetDecodedBody() jx.Raw {
 	return s.DecodedBody
 }
 
@@ -2569,19 +2569,8 @@ func (s *Message) SetDecodedOpName(val OptString) {
 }
 
 // SetDecodedBody sets the value of DecodedBody.
-func (s *Message) SetDecodedBody(val MessageDecodedBody) {
+func (s *Message) SetDecodedBody(val jx.Raw) {
 	s.DecodedBody = val
-}
-
-type MessageDecodedBody map[string]jx.Raw
-
-func (s *MessageDecodedBody) init() MessageDecodedBody {
-	m := *s
-	if m == nil {
-		m = map[string]jx.Raw{}
-		*s = m
-	}
-	return m
 }
 
 // Ref: #/components/schemas/MethodExecutionResult
