@@ -90,6 +90,7 @@ func fromTrace(trace *core.Trace) *Bubble {
 		btx.inputFrom = source
 		btx.init = msg.Init
 	}
+	aggregatedFee := trace.TotalFee
 	b := Bubble{
 		Info:     btx,
 		Accounts: accounts,
@@ -97,14 +98,14 @@ func fromTrace(trace *core.Trace) *Bubble {
 		ValueFlow: &ValueFlow{
 			Accounts: map[tongo.AccountID]*AccountValueFlow{
 				trace.Account: {
-					Ton:  inputAmount,
-					Fees: trace.AggregatedFee,
+					Ton: inputAmount,
 				},
 			},
 		},
 	}
 	for _, outMsg := range trace.OutMsgs {
 		b.ValueFlow.AddTons(trace.Account, -outMsg.Value)
+		aggregatedFee += outMsg.FwdFee
 	}
 	for i, c := range trace.Children {
 		if c.InMsg != nil {
@@ -112,8 +113,10 @@ func fromTrace(trace *core.Trace) *Bubble {
 			// we have removed it from OutMsgs to avoid duplicates.
 			// That's why we add tons here
 			b.ValueFlow.AddTons(trace.Account, -c.InMsg.Value)
+			aggregatedFee += c.InMsg.FwdFee
 		}
 		b.Children[i] = fromTrace(c)
 	}
+	b.ValueFlow.Accounts[trace.Account].Fees = aggregatedFee
 	return &b
 }
