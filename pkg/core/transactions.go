@@ -104,10 +104,12 @@ type Transaction struct {
 	StorageFee int64
 	// OtherFee includes fwd fees of all outbound messages and this transaction's total fees for all phases except Storage.
 	OtherFee int64
-	// Fee includes this transaction's total fees for all phases and fwd fees of all outbound messages.
+	// AggregatedFee includes this transaction's total fees for all phases and fwd fees of all outbound messages.
 	// The following formula works:
-	// StartingBalance - Fee + IN msg's Value - OUT msgs' Value = remaining balance at the account
-	Fee int64
+	// StartingBalance - AggregatedFee + IN msg's Value - OUT msgs' Value = remaining balance at the account
+	AggregatedFee int64
+	// TotalFee is the original total_fee of a transaction directly from the blockchain.
+	TotalFee int64
 }
 
 type MessageID struct {

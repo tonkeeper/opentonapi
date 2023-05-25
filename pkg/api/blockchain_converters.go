@@ -70,7 +70,7 @@ func convertTransaction(t core.Transaction, book addressBook) oas.Transaction {
 		Utime:           t.Utime,
 		OrigStatus:      oas.AccountStatus(t.OrigStatus),
 		EndStatus:       oas.AccountStatus(t.EndStatus),
-		TotalFees:       t.Fee,
+		TotalFees:       t.TotalFee,
 		TransactionType: oas.TransactionType(t.Type),
 		StateUpdateOld:  t.StateHashUpdate.OldHash.Hex(),
 		StateUpdateNew:  t.StateHashUpdate.NewHash.Hex(),
