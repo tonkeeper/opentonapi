@@ -4803,14 +4803,14 @@ func (s *DomainNames) UnmarshalJSON(data []byte) error {
 }
 
 // Encode implements json.Marshaler.
-func (s EmulateMessageReq) Encode(e *jx.Encoder) {
+func (s EmulateMessageToAccountEventReq) Encode(e *jx.Encoder) {
 	e.ObjStart()
 	s.encodeFields(e)
 	e.ObjEnd()
 }
 
 // encodeFields encodes fields.
-func (s EmulateMessageReq) encodeFields(e *jx.Encoder) {
+func (s EmulateMessageToAccountEventReq) encodeFields(e *jx.Encoder) {
 	{
 
 		e.FieldStart("boc")
@@ -4818,14 +4818,14 @@ func (s EmulateMessageReq) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfEmulateMessageReq = [1]string{
+var jsonFieldsNameOfEmulateMessageToAccountEventReq = [1]string{
 	0: "boc",
 }
 
-// Decode decodes EmulateMessageReq from json.
-func (s *EmulateMessageReq) Decode(d *jx.Decoder) error {
+// Decode decodes EmulateMessageToAccountEventReq from json.
+func (s *EmulateMessageToAccountEventReq) Decode(d *jx.Decoder) error {
 	if s == nil {
-		return errors.New("invalid: unable to decode EmulateMessageReq to nil")
+		return errors.New("invalid: unable to decode EmulateMessageToAccountEventReq to nil")
 	}
 	var requiredBitSet [1]uint8
 
@@ -4848,7 +4848,7 @@ func (s *EmulateMessageReq) Decode(d *jx.Decoder) error {
 		}
 		return nil
 	}); err != nil {
-		return errors.Wrap(err, "decode EmulateMessageReq")
+		return errors.Wrap(err, "decode EmulateMessageToAccountEventReq")
 	}
 	// Validate required fields.
 	var failures []validate.FieldError
@@ -4865,8 +4865,8 @@ func (s *EmulateMessageReq) Decode(d *jx.Decoder) error {
 				bitIdx := bits.TrailingZeros8(result)
 				fieldIdx := i*8 + bitIdx
 				var name string
-				if fieldIdx < len(jsonFieldsNameOfEmulateMessageReq) {
-					name = jsonFieldsNameOfEmulateMessageReq[fieldIdx]
+				if fieldIdx < len(jsonFieldsNameOfEmulateMessageToAccountEventReq) {
+					name = jsonFieldsNameOfEmulateMessageToAccountEventReq[fieldIdx]
 				} else {
 					name = strconv.Itoa(fieldIdx)
 				}
@@ -4887,14 +4887,208 @@ func (s *EmulateMessageReq) Decode(d *jx.Decoder) error {
 }
 
 // MarshalJSON implements stdjson.Marshaler.
-func (s EmulateMessageReq) MarshalJSON() ([]byte, error) {
+func (s EmulateMessageToAccountEventReq) MarshalJSON() ([]byte, error) {
 	e := jx.Encoder{}
 	s.Encode(&e)
 	return e.Bytes(), nil
 }
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *EmulateMessageReq) UnmarshalJSON(data []byte) error {
+func (s *EmulateMessageToAccountEventReq) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s EmulateMessageToEventReq) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s EmulateMessageToEventReq) encodeFields(e *jx.Encoder) {
+	{
+
+		e.FieldStart("boc")
+		e.Str(s.Boc)
+	}
+}
+
+var jsonFieldsNameOfEmulateMessageToEventReq = [1]string{
+	0: "boc",
+}
+
+// Decode decodes EmulateMessageToEventReq from json.
+func (s *EmulateMessageToEventReq) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode EmulateMessageToEventReq to nil")
+	}
+	var requiredBitSet [1]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "boc":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				v, err := d.Str()
+				s.Boc = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"boc\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode EmulateMessageToEventReq")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00000001,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfEmulateMessageToEventReq) {
+					name = jsonFieldsNameOfEmulateMessageToEventReq[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s EmulateMessageToEventReq) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *EmulateMessageToEventReq) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s EmulateMessageToTraceReq) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s EmulateMessageToTraceReq) encodeFields(e *jx.Encoder) {
+	{
+
+		e.FieldStart("boc")
+		e.Str(s.Boc)
+	}
+}
+
+var jsonFieldsNameOfEmulateMessageToTraceReq = [1]string{
+	0: "boc",
+}
+
+// Decode decodes EmulateMessageToTraceReq from json.
+func (s *EmulateMessageToTraceReq) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode EmulateMessageToTraceReq to nil")
+	}
+	var requiredBitSet [1]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "boc":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				v, err := d.Str()
+				s.Boc = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"boc\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode EmulateMessageToTraceReq")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00000001,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfEmulateMessageToTraceReq) {
+					name = jsonFieldsNameOfEmulateMessageToTraceReq[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s EmulateMessageToTraceReq) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *EmulateMessageToTraceReq) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -9667,39 +9861,6 @@ func (s *OptCreditPhase) UnmarshalJSON(data []byte) error {
 	return s.Decode(d)
 }
 
-// Encode encodes EmulateMessageReq as json.
-func (o OptEmulateMessageReq) Encode(e *jx.Encoder) {
-	if !o.Set {
-		return
-	}
-	o.Value.Encode(e)
-}
-
-// Decode decodes EmulateMessageReq from json.
-func (o *OptEmulateMessageReq) Decode(d *jx.Decoder) error {
-	if o == nil {
-		return errors.New("invalid: unable to decode OptEmulateMessageReq to nil")
-	}
-	o.Set = true
-	if err := o.Value.Decode(d); err != nil {
-		return err
-	}
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s OptEmulateMessageReq) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *OptEmulateMessageReq) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
 // Encode encodes GetAccountsReq as json.
 func (o OptGetAccountsReq) Encode(e *jx.Encoder) {
 	if !o.Set {
@@ -10197,39 +10358,6 @@ func (s OptSale) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *OptSale) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
-// Encode encodes SendMessageReq as json.
-func (o OptSendMessageReq) Encode(e *jx.Encoder) {
-	if !o.Set {
-		return
-	}
-	o.Value.Encode(e)
-}
-
-// Decode decodes SendMessageReq from json.
-func (o *OptSendMessageReq) Decode(d *jx.Decoder) error {
-	if o == nil {
-		return errors.New("invalid: unable to decode OptSendMessageReq to nil")
-	}
-	o.Set = true
-	if err := o.Value.Decode(d); err != nil {
-		return err
-	}
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s OptSendMessageReq) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *OptSendMessageReq) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }

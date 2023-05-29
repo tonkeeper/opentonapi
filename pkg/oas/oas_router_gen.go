@@ -186,7 +186,6 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 						}
 
 						if len(elem) == 0 {
-							// Leaf node.
 							switch r.Method {
 							case "GET":
 								s.handleGetEventsByAccountRequest([1]string{
@@ -197,6 +196,28 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 							}
 
 							return
+						}
+						switch elem[0] {
+						case '/': // Prefix: "/emulate"
+							if l := len("/emulate"); len(elem) >= l && elem[0:l] == "/emulate" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							if len(elem) == 0 {
+								// Leaf node.
+								switch r.Method {
+								case "POST":
+									s.handleEmulateMessageToAccountEventRequest([1]string{
+										args[0],
+									}, w, r)
+								default:
+									s.notAllowed(w, r, "POST")
+								}
+
+								return
+							}
 						}
 					case 'j': // Prefix: "jettons"
 						if l := len("jettons"); len(elem) >= l && elem[0:l] == "jettons" {
@@ -572,6 +593,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 						}
 
 						if len(elem) == 0 {
+							// Leaf node.
 							switch r.Method {
 							case "POST":
 								s.handleSendMessageRequest([0]string{}, w, r)
@@ -580,26 +602,6 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 							}
 
 							return
-						}
-						switch elem[0] {
-						case '/': // Prefix: "/emulate"
-							if l := len("/emulate"); len(elem) >= l && elem[0:l] == "/emulate" {
-								elem = elem[l:]
-							} else {
-								break
-							}
-
-							if len(elem) == 0 {
-								// Leaf node.
-								switch r.Method {
-								case "POST":
-									s.handleEmulateMessageRequest([0]string{}, w, r)
-								default:
-									s.notAllowed(w, r, "POST")
-								}
-
-								return
-							}
 						}
 					}
 				case 't': // Prefix: "transactions/"
@@ -749,6 +751,29 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 					break
 				}
 
+				if len(elem) == 0 {
+					break
+				}
+				switch elem[0] {
+				case 'e': // Prefix: "emulate"
+					if l := len("emulate"); len(elem) >= l && elem[0:l] == "emulate" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					if len(elem) == 0 {
+						// Leaf node.
+						switch r.Method {
+						case "POST":
+							s.handleEmulateMessageToEventRequest([0]string{}, w, r)
+						default:
+							s.notAllowed(w, r, "POST")
+						}
+
+						return
+					}
+				}
 				// Param: "event_id"
 				// Leaf parameter
 				args[0] = elem
@@ -1131,6 +1156,29 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 						break
 					}
 
+					if len(elem) == 0 {
+						break
+					}
+					switch elem[0] {
+					case 'e': // Prefix: "emulate"
+						if l := len("emulate"); len(elem) >= l && elem[0:l] == "emulate" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						if len(elem) == 0 {
+							// Leaf node.
+							switch r.Method {
+							case "POST":
+								s.handleEmulateMessageToTraceRequest([0]string{}, w, r)
+							default:
+								s.notAllowed(w, r, "POST")
+							}
+
+							return
+						}
+					}
 					// Param: "trace_id"
 					// Leaf parameter
 					args[0] = elem
@@ -1377,7 +1425,6 @@ func (s *Server) FindRoute(method, path string) (r Route, _ bool) {
 						if len(elem) == 0 {
 							switch method {
 							case "GET":
-								// Leaf: GetEventsByAccount
 								r.name = "GetEventsByAccount"
 								r.operationID = "getEventsByAccount"
 								r.args = args
@@ -1385,6 +1432,28 @@ func (s *Server) FindRoute(method, path string) (r Route, _ bool) {
 								return r, true
 							default:
 								return
+							}
+						}
+						switch elem[0] {
+						case '/': // Prefix: "/emulate"
+							if l := len("/emulate"); len(elem) >= l && elem[0:l] == "/emulate" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							if len(elem) == 0 {
+								switch method {
+								case "POST":
+									// Leaf: EmulateMessageToAccountEvent
+									r.name = "EmulateMessageToAccountEvent"
+									r.operationID = "emulateMessageToAccountEvent"
+									r.args = args
+									r.count = 1
+									return r, true
+								default:
+									return
+								}
 							}
 						}
 					case 'j': // Prefix: "jettons"
@@ -1765,6 +1834,7 @@ func (s *Server) FindRoute(method, path string) (r Route, _ bool) {
 						if len(elem) == 0 {
 							switch method {
 							case "POST":
+								// Leaf: SendMessage
 								r.name = "SendMessage"
 								r.operationID = "sendMessage"
 								r.args = args
@@ -1772,28 +1842,6 @@ func (s *Server) FindRoute(method, path string) (r Route, _ bool) {
 								return r, true
 							default:
 								return
-							}
-						}
-						switch elem[0] {
-						case '/': // Prefix: "/emulate"
-							if l := len("/emulate"); len(elem) >= l && elem[0:l] == "/emulate" {
-								elem = elem[l:]
-							} else {
-								break
-							}
-
-							if len(elem) == 0 {
-								switch method {
-								case "POST":
-									// Leaf: EmulateMessage
-									r.name = "EmulateMessage"
-									r.operationID = "emulateMessage"
-									r.args = args
-									r.count = 0
-									return r, true
-								default:
-									return
-								}
 							}
 						}
 					}
@@ -1948,6 +1996,31 @@ func (s *Server) FindRoute(method, path string) (r Route, _ bool) {
 					break
 				}
 
+				if len(elem) == 0 {
+					break
+				}
+				switch elem[0] {
+				case 'e': // Prefix: "emulate"
+					if l := len("emulate"); len(elem) >= l && elem[0:l] == "emulate" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					if len(elem) == 0 {
+						switch method {
+						case "POST":
+							// Leaf: EmulateMessageToEvent
+							r.name = "EmulateMessageToEvent"
+							r.operationID = "emulateMessageToEvent"
+							r.args = args
+							r.count = 0
+							return r, true
+						default:
+							return
+						}
+					}
+				}
 				// Param: "event_id"
 				// Leaf parameter
 				args[0] = elem
@@ -2344,6 +2417,31 @@ func (s *Server) FindRoute(method, path string) (r Route, _ bool) {
 						break
 					}
 
+					if len(elem) == 0 {
+						break
+					}
+					switch elem[0] {
+					case 'e': // Prefix: "emulate"
+						if l := len("emulate"); len(elem) >= l && elem[0:l] == "emulate" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						if len(elem) == 0 {
+							switch method {
+							case "POST":
+								// Leaf: EmulateMessageToTrace
+								r.name = "EmulateMessageToTrace"
+								r.operationID = "emulateMessageToTrace"
+								r.args = args
+								r.count = 0
+								return r, true
+							default:
+								return
+							}
+						}
+					}
 					// Param: "trace_id"
 					// Leaf parameter
 					args[0] = elem

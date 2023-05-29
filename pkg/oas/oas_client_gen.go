@@ -213,14 +213,14 @@ func (c *Client) DnsResolve(ctx context.Context, params DnsResolveParams) (res D
 	return result, nil
 }
 
-// EmulateMessage invokes emulateMessage operation.
+// EmulateMessageToAccountEvent invokes emulateMessageToAccountEvent operation.
 //
 // Emulate sending message to blockchain.
 //
-// POST /v2/blockchain/message/emulate
-func (c *Client) EmulateMessage(ctx context.Context, request OptEmulateMessageReq) (res EmulateMessageRes, err error) {
+// POST /v2/accounts/{account_id}/events/emulate
+func (c *Client) EmulateMessageToAccountEvent(ctx context.Context, request EmulateMessageToAccountEventReq, params EmulateMessageToAccountEventParams) (res EmulateMessageToAccountEventRes, err error) {
 	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("emulateMessage"),
+		otelogen.OperationID("emulateMessageToAccountEvent"),
 	}
 
 	// Run stopwatch.
@@ -234,7 +234,7 @@ func (c *Client) EmulateMessage(ctx context.Context, request OptEmulateMessageRe
 	c.requests.Add(ctx, 1, otelAttrs...)
 
 	// Start a span for this request.
-	ctx, span := c.cfg.Tracer.Start(ctx, "EmulateMessage",
+	ctx, span := c.cfg.Tracer.Start(ctx, "EmulateMessageToAccountEvent",
 		trace.WithAttributes(otelAttrs...),
 		clientSpanKind,
 	)
@@ -251,14 +251,193 @@ func (c *Client) EmulateMessage(ctx context.Context, request OptEmulateMessageRe
 
 	stage = "BuildURL"
 	u := uri.Clone(c.requestURL(ctx))
-	u.Path += "/v2/blockchain/message/emulate"
+	u.Path += "/v2/accounts/"
+	{
+		// Encode "account_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "account_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.AccountID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		u.Path += e.Result()
+	}
+	u.Path += "/events/emulate"
 
 	stage = "EncodeRequest"
 	r, err := ht.NewRequest(ctx, "POST", u, nil)
 	if err != nil {
 		return res, errors.Wrap(err, "create request")
 	}
-	if err := encodeEmulateMessageRequest(request, r); err != nil {
+	if err := encodeEmulateMessageToAccountEventRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	stage = "EncodeHeaderParams"
+	h := uri.NewHeaderEncoder(r.Header)
+	{
+		cfg := uri.HeaderParameterEncodingConfig{
+			Name:    "Accept-Language",
+			Explode: false,
+		}
+		if err := h.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.AcceptLanguage.Get(); ok {
+				return e.EncodeValue(conv.StringToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode header param Accept-Language")
+		}
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeEmulateMessageToAccountEventResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// EmulateMessageToEvent invokes emulateMessageToEvent operation.
+//
+// Emulate sending message to blockchain.
+//
+// POST /v2/events/emulate
+func (c *Client) EmulateMessageToEvent(ctx context.Context, request EmulateMessageToEventReq, params EmulateMessageToEventParams) (res EmulateMessageToEventRes, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("emulateMessageToEvent"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, otelAttrs...)
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, "EmulateMessageToEvent",
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, otelAttrs...)
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	u.Path += "/v2/events/emulate"
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "POST", u, nil)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeEmulateMessageToEventRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	stage = "EncodeHeaderParams"
+	h := uri.NewHeaderEncoder(r.Header)
+	{
+		cfg := uri.HeaderParameterEncodingConfig{
+			Name:    "Accept-Language",
+			Explode: false,
+		}
+		if err := h.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.AcceptLanguage.Get(); ok {
+				return e.EncodeValue(conv.StringToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode header param Accept-Language")
+		}
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeEmulateMessageToEventResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// EmulateMessageToTrace invokes emulateMessageToTrace operation.
+//
+// Emulate sending message to blockchain.
+//
+// POST /v2/traces/emulate
+func (c *Client) EmulateMessageToTrace(ctx context.Context, request EmulateMessageToTraceReq) (res EmulateMessageToTraceRes, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("emulateMessageToTrace"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, otelAttrs...)
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, "EmulateMessageToTrace",
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, otelAttrs...)
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	u.Path += "/v2/traces/emulate"
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "POST", u, nil)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeEmulateMessageToTraceRequest(request, r); err != nil {
 		return res, errors.Wrap(err, "encode request")
 	}
 
@@ -270,7 +449,7 @@ func (c *Client) EmulateMessage(ctx context.Context, request OptEmulateMessageRe
 	defer resp.Body.Close()
 
 	stage = "DecodeResponse"
-	result, err := decodeEmulateMessageResponse(resp)
+	result, err := decodeEmulateMessageToTraceResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -3557,7 +3736,7 @@ func (c *Client) ReindexAccount(ctx context.Context, params ReindexAccountParams
 // Send message to blockchain.
 //
 // POST /v2/blockchain/message
-func (c *Client) SendMessage(ctx context.Context, request OptSendMessageReq) (res SendMessageRes, err error) {
+func (c *Client) SendMessage(ctx context.Context, request SendMessageReq) (res SendMessageRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("sendMessage"),
 	}

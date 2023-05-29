@@ -9,8 +9,16 @@ type DnsResolveRes interface {
 	dnsResolveRes()
 }
 
-type EmulateMessageRes interface {
-	emulateMessageRes()
+type EmulateMessageToAccountEventRes interface {
+	emulateMessageToAccountEventRes()
+}
+
+type EmulateMessageToEventRes interface {
+	emulateMessageToEventRes()
+}
+
+type EmulateMessageToTraceRes interface {
+	emulateMessageToTraceRes()
 }
 
 type ExecGetMethodRes interface {

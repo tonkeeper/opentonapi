@@ -5,6 +5,9 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
+	"github.com/tonkeeper/tongo/boc"
+	"github.com/tonkeeper/tongo/tlb"
+	"github.com/tonkeeper/tongo/txemulator"
 
 	"github.com/tonkeeper/opentonapi/pkg/bath"
 	"github.com/tonkeeper/opentonapi/pkg/core"
@@ -12,11 +15,11 @@ import (
 	"github.com/tonkeeper/tongo"
 )
 
-func (h Handler) SendMessage(ctx context.Context, req oas.OptSendMessageReq) (r oas.SendMessageRes, _ error) {
+func (h Handler) SendMessage(ctx context.Context, req oas.SendMessageReq) (r oas.SendMessageRes, _ error) {
 	if h.msgSender == nil {
 		return nil, fmt.Errorf("msg sender is not configured")
 	}
-	payload, err := base64.StdEncoding.DecodeString(req.Value.Boc)
+	payload, err := base64.StdEncoding.DecodeString(req.Boc)
 	if err != nil {
 		return &oas.BadRequest{Error: err.Error()}, nil
 	}
@@ -55,23 +58,7 @@ func (h Handler) GetEvent(ctx context.Context, params oas.GetEventParams) (oas.G
 	if err != nil {
 		return nil, err
 	}
-	event := oas.Event{
-		EventID:    trace.Hash.Hex(),
-		Timestamp:  trace.Utime,
-		Actions:    make([]oas.Action, len(result.Actions)),
-		ValueFlow:  make([]oas.ValueFlow, 0, len(result.ValueFlow.Accounts)),
-		IsScam:     false,
-		Lt:         int64(trace.Lt),
-		InProgress: trace.InProgress(),
-	}
-	for i, a := range result.Actions {
-		convertedAction, spamDetected := h.convertAction(ctx, a, params.AcceptLanguage)
-		event.IsScam = event.IsScam || spamDetected
-		event.Actions[i] = convertedAction
-	}
-	for accountID, flow := range result.ValueFlow.Accounts {
-		event.ValueFlow = append(event.ValueFlow, convertAccountValueFlow(accountID, flow, h.addressBook))
-	}
+	event := h.toEvent(ctx, trace, result, params.AcceptLanguage)
 	return &event, nil
 }
 
@@ -95,32 +82,7 @@ func (h Handler) GetEventsByAccount(ctx context.Context, params oas.GetEventsByA
 		if err != nil {
 			return &oas.InternalError{Error: err.Error()}, nil
 		}
-		e := oas.AccountEvent{
-			EventID:    trace.Hash.Hex(),
-			Account:    convertAccountAddress(account, h.addressBook),
-			Timestamp:  trace.Utime,
-			Fee:        oas.Fee{Account: convertAccountAddress(account, h.addressBook)},
-			IsScam:     false,
-			Lt:         int64(trace.Lt),
-			InProgress: trace.InProgress(),
-		}
-		if flow, ok := result.ValueFlow.Accounts[account]; ok {
-			e.ValueFlow = convertAccountValueFlow(account, flow, h.addressBook)
-		}
-		for _, a := range result.Actions {
-			convertedAction, spamDetected := h.convertAction(ctx, a, params.AcceptLanguage)
-			if !e.IsScam && spamDetected {
-				e.IsScam = true
-			}
-			e.Actions = append(e.Actions, convertedAction)
-		}
-		if len(e.Actions) == 0 {
-			e.Actions = []oas.Action{{
-				Type:   oas.ActionTypeUnknown,
-				Status: oas.ActionStatusOk,
-			}}
-		}
-		events[i] = e
+		events[i] = h.toAccountEvent(ctx, account, trace, result, params.AcceptLanguage)
 		lastLT = trace.Lt
 	}
 	return &oas.AccountEvents{Events: events, NextFrom: int64(lastLT)}, nil
@@ -131,4 +93,131 @@ func optIntToPointer(o oas.OptInt64) *int64 {
 		return nil
 	}
 	return &o.Value
+}
+
+func (h Handler) EmulateMessageToAccountEvent(ctx context.Context, req oas.EmulateMessageToAccountEventReq, params oas.EmulateMessageToAccountEventParams) (r oas.EmulateMessageToAccountEventRes, _ error) {
+	c, err := boc.DeserializeSinglRootBase64(req.Boc)
+	if err != nil {
+		return &oas.BadRequest{Error: err.Error()}, nil
+	}
+	var m tlb.Message
+	err = tlb.Unmarshal(c, &m)
+	if err != nil {
+		return &oas.BadRequest{Error: err.Error()}, nil
+	}
+	account, err := tongo.ParseAccountID(params.AccountID)
+	if err != nil {
+		return &oas.BadRequest{err.Error()}, nil
+	}
+	emulator, err := txemulator.NewTraceBuilder()
+	if err != nil {
+		return &oas.InternalError{Error: err.Error()}, err
+	}
+	tree, err := emulator.Run(ctx, m)
+	if err != nil {
+		return &oas.InternalError{Error: err.Error()}, nil
+	}
+	trace, err := emulatedTreeToTrace(tree, emulator.FinalStates())
+	if err != nil {
+		return &oas.InternalError{Error: err.Error()}, nil
+	}
+	result, err := bath.FindActions(trace)
+	if err != nil {
+		return &oas.InternalError{Error: err.Error()}, nil
+	}
+
+	event := h.toAccountEvent(ctx, account, trace, result, params.AcceptLanguage)
+	return &event, nil
+}
+
+func (h Handler) EmulateMessageToEvent(ctx context.Context, req oas.EmulateMessageToEventReq, params oas.EmulateMessageToEventParams) (r oas.EmulateMessageToEventRes, _ error) {
+	c, err := boc.DeserializeSinglRootBase64(req.Boc)
+	if err != nil {
+		return &oas.BadRequest{Error: err.Error()}, nil
+	}
+	var m tlb.Message
+	err = tlb.Unmarshal(c, &m)
+	if err != nil {
+		return &oas.BadRequest{Error: err.Error()}, nil
+	}
+	emulator, err := txemulator.NewTraceBuilder()
+	if err != nil {
+		return &oas.InternalError{Error: err.Error()}, err
+	}
+	tree, err := emulator.Run(ctx, m)
+	if err != nil {
+		return &oas.InternalError{Error: err.Error()}, nil
+	}
+	trace, err := emulatedTreeToTrace(tree, emulator.FinalStates())
+	if err != nil {
+		return &oas.InternalError{Error: err.Error()}, nil
+	}
+	result, err := bath.FindActions(trace)
+	if err != nil {
+		return &oas.InternalError{Error: err.Error()}, nil
+	}
+	event := h.toEvent(ctx, trace, result, params.AcceptLanguage)
+	return &event, nil
+}
+
+func (h Handler) EmulateMessageToTrace(ctx context.Context, req oas.EmulateMessageToTraceReq) (r oas.EmulateMessageToTraceRes, _ error) {
+	c, err := boc.DeserializeSinglRootBase64(req.Boc)
+	if err != nil {
+		return &oas.BadRequest{Error: err.Error()}, nil
+	}
+	var m tlb.Message
+	err = tlb.Unmarshal(c, &m)
+	if err != nil {
+		return &oas.BadRequest{Error: err.Error()}, nil
+	}
+	emulator, err := txemulator.NewTraceBuilder()
+	if err != nil {
+		return &oas.InternalError{Error: err.Error()}, err
+	}
+	tree, err := emulator.Run(ctx, m)
+	if err != nil {
+		return &oas.InternalError{Error: err.Error()}, nil
+	}
+	trace, err := emulatedTreeToTrace(tree, emulator.FinalStates())
+	if err != nil {
+		return &oas.InternalError{Error: err.Error()}, nil
+	}
+	t := convertTrace(*trace, h.addressBook)
+	return &t, nil
+}
+
+func emulatedTreeToTrace(tree *txemulator.TxTree, accounts map[tongo.AccountID]tlb.ShardAccount) (*core.Trace, error) {
+	if !tree.TX.Msgs.InMsg.Exists {
+		return nil, errors.New("there is no incoming message in emulation result")
+	}
+	m := tree.TX.Msgs.InMsg.Value.Value
+	var a tlb.MsgAddress
+	switch m.Info.SumType {
+	case "IntMsgInfo":
+		a = m.Info.IntMsgInfo.Dest
+	case "ExtInMsgInfo":
+		a = m.Info.ExtInMsgInfo.Dest
+	default:
+		return nil, errors.New("unknown message type in emulation result")
+	}
+	transaction, err := core.ConvertTransaction(int32(a.AddrStd.WorkchainId), tongo.Transaction{
+		Transaction: tree.TX,
+		BlockID:     tongo.BlockIDExt{BlockID: tongo.BlockID{Workchain: int32(a.AddrStd.WorkchainId)}},
+	})
+	if err != nil {
+		return nil, err
+	}
+	t := &core.Trace{
+		Transaction:       *transaction,
+		AccountInterfaces: nil, //todo: do
+		AdditionalInfo:    nil, //todo: do
+	}
+	for i := range tree.Children {
+		child, err := emulatedTreeToTrace(tree.Children[i], accounts)
+		if err != nil {
+			return nil, err
+		}
+		t.Children = append(t.Children, child)
+	}
+	return t, nil
 }

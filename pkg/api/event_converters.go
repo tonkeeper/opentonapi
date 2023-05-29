@@ -153,3 +153,53 @@ func convertAccountValueFlow(accountID tongo.AccountID, flow *bath.AccountValueF
 	}
 	return valueFlow
 }
+
+func (h Handler) toEvent(ctx context.Context, trace *core.Trace, result *bath.ActionsList, lang oas.OptString) oas.Event {
+	event := oas.Event{
+		EventID:    trace.Hash.Hex(),
+		Timestamp:  trace.Utime,
+		Actions:    make([]oas.Action, len(result.Actions)),
+		ValueFlow:  make([]oas.ValueFlow, 0, len(result.ValueFlow.Accounts)),
+		IsScam:     false,
+		Lt:         int64(trace.Lt),
+		InProgress: trace.InProgress(),
+	}
+	for i, a := range result.Actions {
+		convertedAction, spamDetected := h.convertAction(ctx, a, lang)
+		event.IsScam = event.IsScam || spamDetected
+		event.Actions[i] = convertedAction
+	}
+	for accountID, flow := range result.ValueFlow.Accounts {
+		event.ValueFlow = append(event.ValueFlow, convertAccountValueFlow(accountID, flow, h.addressBook))
+	}
+	return event
+}
+
+func (h Handler) toAccountEvent(ctx context.Context, account tongo.AccountID, trace *core.Trace, result *bath.ActionsList, lang oas.OptString) oas.AccountEvent {
+	e := oas.AccountEvent{
+		EventID:    trace.Hash.Hex(),
+		Account:    convertAccountAddress(account, h.addressBook),
+		Timestamp:  trace.Utime,
+		Fee:        oas.Fee{Account: convertAccountAddress(account, h.addressBook)},
+		IsScam:     false,
+		Lt:         int64(trace.Lt),
+		InProgress: trace.InProgress(),
+	}
+	if flow, ok := result.ValueFlow.Accounts[account]; ok {
+		e.ValueFlow = convertAccountValueFlow(account, flow, h.addressBook)
+	}
+	for _, a := range result.Actions {
+		convertedAction, spamDetected := h.convertAction(ctx, a, lang)
+		if !e.IsScam && spamDetected {
+			e.IsScam = true
+		}
+		e.Actions = append(e.Actions, convertedAction)
+	}
+	if len(e.Actions) == 0 {
+		e.Actions = []oas.Action{{
+			Type:   oas.ActionTypeUnknown,
+			Status: oas.ActionStatusOk,
+		}}
+	}
+	return e
+}

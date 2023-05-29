@@ -239,12 +239,61 @@ paths:
         '500':
           $ref: '#/components/responses/InternalError'
 
-  /v2/blockchain/message/emulate:
+  /v2/events/emulate:
     post:
       description: Emulate sending message to blockchain
-      operationId: emulateMessage
+      operationId: emulateMessageToEvent
       tags:
-        - Blockchain
+        - Emulation
+      parameters:
+        - $ref: '#/components/parameters/i18n'
+      requestBody:
+        $ref: "#/components/requestBodies/Boc"
+      responses:
+        '200':
+          description: "event"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Event'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /v2/traces/emulate:
+    post:
+      description: Emulate sending message to blockchain
+      operationId: emulateMessageToTrace
+      tags:
+        - Emulation
+      requestBody:
+        $ref: "#/components/requestBodies/Boc"
+      responses:
+        '200':
+          description: "event"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Trace'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /v2/accounts/{account_id}/events/emulate:
+    post:
+      description: Emulate sending message to blockchain
+      operationId: emulateMessageToAccountEvent
+      tags:
+        - Emulation
+      parameters:
+        - $ref: '#/components/parameters/i18n'
+        - $ref: '#/components/parameters/accountIdParameter'
       requestBody:
         $ref: "#/components/requestBodies/Boc"
       responses:
@@ -1381,6 +1430,7 @@ components:
 
     Boc:
       description: bag-of-cells serialized to base64
+      required: true
       content:
         application/json:
           schema:
