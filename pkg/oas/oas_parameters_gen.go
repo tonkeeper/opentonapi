@@ -686,6 +686,132 @@ func decodeGetBlockTransactionsParams(args [1]string, r *http.Request) (params G
 	return params, nil
 }
 
+// GetDnsExpiringParams is parameters of getDnsExpiring operation.
+type GetDnsExpiringParams struct {
+	// Account ID.
+	AccountID string
+	Period    OptInt
+}
+
+func unpackGetDnsExpiringParams(packed middleware.Parameters) (params GetDnsExpiringParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "account_id",
+			In:   "path",
+		}
+		params.AccountID = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "period",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.Period = v.(OptInt)
+		}
+	}
+	return params
+}
+
+func decodeGetDnsExpiringParams(args [1]string, r *http.Request) (params GetDnsExpiringParams, _ error) {
+	q := uri.NewQueryDecoder(r.URL.Query())
+	// Decode path: account_id.
+	{
+		param := args[0]
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "account_id",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.AccountID = c
+				return nil
+			}(); err != nil {
+				return params, errors.Wrap(err, "path: account_id: parse")
+			}
+		} else {
+			return params, errors.New("path: account_id: not specified")
+		}
+	}
+	// Set default value for query: period.
+	{
+		val := int(30)
+		params.Period.SetTo(val)
+	}
+	// Decode query: period.
+	{
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "period",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotPeriodVal int
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToInt(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotPeriodVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.Period.SetTo(paramsDotPeriodVal)
+				return nil
+			}); err != nil {
+				return params, errors.Wrap(err, "query: period: parse")
+			}
+			if err := func() error {
+				if params.Period.Set {
+					if err := func() error {
+						if err := (validate.Int{
+							MinSet:        true,
+							Min:           1,
+							MaxSet:        true,
+							Max:           90,
+							MinExclusive:  false,
+							MaxExclusive:  false,
+							MultipleOfSet: false,
+							MultipleOf:    0,
+						}).Validate(int64(params.Period.Value)); err != nil {
+							return errors.Wrap(err, "int")
+						}
+						return nil
+					}(); err != nil {
+						return err
+					}
+				}
+				return nil
+			}(); err != nil {
+				return params, errors.Wrap(err, "query: period: invalid")
+			}
+		}
+	}
+	return params, nil
+}
+
 // GetDomainBidsParams is parameters of getDomainBids operation.
 type GetDomainBidsParams struct {
 	// Domain name with .ton or .t.me.

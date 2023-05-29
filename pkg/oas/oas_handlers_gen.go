@@ -1106,6 +1106,109 @@ func (s *Server) handleGetConfigRequest(args [0]string, w http.ResponseWriter, r
 	}
 }
 
+// handleGetDnsExpiringRequest handles getDnsExpiring operation.
+//
+// Get expiring .ton dns.
+//
+// GET /v2/accounts/{account_id}/dns/expiring
+func (s *Server) handleGetDnsExpiringRequest(args [1]string, w http.ResponseWriter, r *http.Request) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("getDnsExpiring"),
+	}
+
+	// Start a span for this request.
+	ctx, span := s.cfg.Tracer.Start(r.Context(), "GetDnsExpiring",
+		trace.WithAttributes(otelAttrs...),
+		serverSpanKind,
+	)
+	defer span.End()
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		elapsedDuration := time.Since(startTime)
+		s.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+	}()
+
+	// Increment request counter.
+	s.requests.Add(ctx, 1, otelAttrs...)
+
+	var (
+		recordError = func(stage string, err error) {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			s.errors.Add(ctx, 1, otelAttrs...)
+		}
+		err          error
+		opErrContext = ogenerrors.OperationContext{
+			Name: "GetDnsExpiring",
+			ID:   "getDnsExpiring",
+		}
+	)
+	params, err := decodeGetDnsExpiringParams(args, r)
+	if err != nil {
+		err = &ogenerrors.DecodeParamsError{
+			OperationContext: opErrContext,
+			Err:              err,
+		}
+		recordError("DecodeParams", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+
+	var response GetDnsExpiringRes
+	if m := s.cfg.Middleware; m != nil {
+		mreq := middleware.Request{
+			Context:       ctx,
+			OperationName: "GetDnsExpiring",
+			OperationID:   "getDnsExpiring",
+			Body:          nil,
+			Params: middleware.Parameters{
+				{
+					Name: "account_id",
+					In:   "path",
+				}: params.AccountID,
+				{
+					Name: "period",
+					In:   "query",
+				}: params.Period,
+			},
+			Raw: r,
+		}
+
+		type (
+			Request  = struct{}
+			Params   = GetDnsExpiringParams
+			Response = GetDnsExpiringRes
+		)
+		response, err = middleware.HookMiddleware[
+			Request,
+			Params,
+			Response,
+		](
+			m,
+			mreq,
+			unpackGetDnsExpiringParams,
+			func(ctx context.Context, request Request, params Params) (Response, error) {
+				return s.h.GetDnsExpiring(ctx, params)
+			},
+		)
+	} else {
+		response, err = s.h.GetDnsExpiring(ctx, params)
+	}
+	if err != nil {
+		recordError("Internal", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+
+	if err := encodeGetDnsExpiringResponse(response, w, span); err != nil {
+		recordError("EncodeResponse", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+}
+
 // handleGetDomainBidsRequest handles getDomainBids operation.
 //
 // Get domain bids.

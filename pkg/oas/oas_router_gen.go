@@ -126,25 +126,57 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 						break
 					}
 					switch elem[0] {
-					case 'd': // Prefix: "dns/backresolve"
-						if l := len("dns/backresolve"); len(elem) >= l && elem[0:l] == "dns/backresolve" {
+					case 'd': // Prefix: "dns/"
+						if l := len("dns/"); len(elem) >= l && elem[0:l] == "dns/" {
 							elem = elem[l:]
 						} else {
 							break
 						}
 
 						if len(elem) == 0 {
-							// Leaf node.
-							switch r.Method {
-							case "GET":
-								s.handleDnsBackResolveRequest([1]string{
-									args[0],
-								}, w, r)
-							default:
-								s.notAllowed(w, r, "GET")
+							break
+						}
+						switch elem[0] {
+						case 'b': // Prefix: "backresolve"
+							if l := len("backresolve"); len(elem) >= l && elem[0:l] == "backresolve" {
+								elem = elem[l:]
+							} else {
+								break
 							}
 
-							return
+							if len(elem) == 0 {
+								// Leaf node.
+								switch r.Method {
+								case "GET":
+									s.handleDnsBackResolveRequest([1]string{
+										args[0],
+									}, w, r)
+								default:
+									s.notAllowed(w, r, "GET")
+								}
+
+								return
+							}
+						case 'e': // Prefix: "expiring"
+							if l := len("expiring"); len(elem) >= l && elem[0:l] == "expiring" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							if len(elem) == 0 {
+								// Leaf node.
+								switch r.Method {
+								case "GET":
+									s.handleGetDnsExpiringRequest([1]string{
+										args[0],
+									}, w, r)
+								default:
+									s.notAllowed(w, r, "GET")
+								}
+
+								return
+							}
 						}
 					case 'e': // Prefix: "events"
 						if l := len("events"); len(elem) >= l && elem[0:l] == "events" {
@@ -1283,24 +1315,56 @@ func (s *Server) FindRoute(method, path string) (r Route, _ bool) {
 						break
 					}
 					switch elem[0] {
-					case 'd': // Prefix: "dns/backresolve"
-						if l := len("dns/backresolve"); len(elem) >= l && elem[0:l] == "dns/backresolve" {
+					case 'd': // Prefix: "dns/"
+						if l := len("dns/"); len(elem) >= l && elem[0:l] == "dns/" {
 							elem = elem[l:]
 						} else {
 							break
 						}
 
 						if len(elem) == 0 {
-							switch method {
-							case "GET":
-								// Leaf: DnsBackResolve
-								r.name = "DnsBackResolve"
-								r.operationID = "dnsBackResolve"
-								r.args = args
-								r.count = 1
-								return r, true
-							default:
-								return
+							break
+						}
+						switch elem[0] {
+						case 'b': // Prefix: "backresolve"
+							if l := len("backresolve"); len(elem) >= l && elem[0:l] == "backresolve" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							if len(elem) == 0 {
+								switch method {
+								case "GET":
+									// Leaf: DnsBackResolve
+									r.name = "DnsBackResolve"
+									r.operationID = "dnsBackResolve"
+									r.args = args
+									r.count = 1
+									return r, true
+								default:
+									return
+								}
+							}
+						case 'e': // Prefix: "expiring"
+							if l := len("expiring"); len(elem) >= l && elem[0:l] == "expiring" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							if len(elem) == 0 {
+								switch method {
+								case "GET":
+									// Leaf: GetDnsExpiring
+									r.name = "GetDnsExpiring"
+									r.operationID = "getDnsExpiring"
+									r.args = args
+									r.count = 1
+									return r, true
+								default:
+									return
+								}
 							}
 						}
 					case 'e': // Prefix: "events"

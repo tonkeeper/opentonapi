@@ -312,3 +312,7 @@ func (s *LiteStorage) GetWalletPubKey(address tongo.AccountID) (ed25519.PublicKe
 func (s *LiteStorage) ReindexAccount(ctx context.Context, accountID tongo.AccountID) error {
 	return nil
 }
+
+func (s *LiteStorage) GetDnsExpiring(ctx context.Context, id tongo.AccountID, period int) ([]core.DnsExpiring, error) {
+	return nil, nil
+}

@@ -4,14 +4,14 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"sort"
 
 	jsoniter "github.com/json-iterator/go"
+	"github.com/tonkeeper/opentonapi/pkg/core"
+	"github.com/tonkeeper/opentonapi/pkg/oas"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
 	"github.com/tonkeeper/tongo/tlb"
-
-	"github.com/tonkeeper/opentonapi/pkg/core"
-	"github.com/tonkeeper/opentonapi/pkg/oas"
 )
 
 func (h Handler) GetAccount(ctx context.Context, params oas.GetAccountParams) (oas.GetAccountRes, error) {
@@ -184,4 +184,37 @@ func (h Handler) ReindexAccount(ctx context.Context, params oas.ReindexAccountPa
 		return &oas.InternalError{Error: err.Error()}, nil
 	}
 	return &oas.ReindexAccountOK{}, nil
+}
+
+func (h Handler) GetDnsExpiring(ctx context.Context, params oas.GetDnsExpiringParams) (r oas.GetDnsExpiringRes, _ error) {
+	accountID, err := tongo.ParseAccountID(params.AccountID)
+	if err != nil {
+		return &oas.BadRequest{Error: err.Error()}, nil
+	}
+	dnsExpiring, err := h.storage.GetDnsExpiring(ctx, accountID, params.Period.Value)
+	if err != nil {
+		return &oas.InternalError{Error: err.Error()}, nil
+	}
+	var response oas.DnsExpiring
+	for _, dns := range dnsExpiring {
+		dnsExpireItem := oas.DnsExpiringItemsItem{
+			ExpiringAt: dns.ExpiringAt,
+			Name:       dns.Name,
+		}
+		if dns.DnsItem != nil {
+			items, err := h.storage.GetNFTs(ctx, []tongo.AccountID{dns.DnsItem.Address})
+			if err != nil {
+				return &oas.InternalError{Error: err.Error()}, nil
+			}
+			if len(items) > 0 {
+				dnsExpireItem.DNSItem = convertNFT(ctx, items[0], h.addressBook, h.previewGenerator, h.metaCache)
+			}
+		}
+		response.Items = append(response.Items, dnsExpireItem)
+	}
+	sort.Slice(response.Items, func(i, j int) bool {
+		return response.Items[i].ExpiringAt > response.Items[j].ExpiringAt
+	})
+
+	return &response, nil
 }
