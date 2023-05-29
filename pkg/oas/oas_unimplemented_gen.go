@@ -112,6 +112,15 @@ func (UnimplementedHandler) GetConfig(ctx context.Context) (r GetConfigRes, _ er
 	return r, ht.ErrNotImplemented
 }
 
+// GetDnsExpiring implements getDnsExpiring operation.
+//
+// Get expiring .ton dns.
+//
+// GET /v2/accounts/{account_id}/dns/expiring
+func (UnimplementedHandler) GetDnsExpiring(ctx context.Context, params GetDnsExpiringParams) (r GetDnsExpiringRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // GetDomainBids implements getDomainBids operation.
 //
 // Get domain bids.

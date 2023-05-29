@@ -45,6 +45,10 @@ type GetConfigRes interface {
 	getConfigRes()
 }
 
+type GetDnsExpiringRes interface {
+	getDnsExpiringRes()
+}
+
 type GetDomainBidsRes interface {
 	getDomainBidsRes()
 }

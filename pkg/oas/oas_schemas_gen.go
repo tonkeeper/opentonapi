@@ -957,6 +957,7 @@ func (*BadRequest) getAccountTransactionsRes()    {}
 func (*BadRequest) getAccountsRes()               {}
 func (*BadRequest) getBlockRes()                  {}
 func (*BadRequest) getBlockTransactionsRes()      {}
+func (*BadRequest) getDnsExpiringRes()            {}
 func (*BadRequest) getDomainBidsRes()             {}
 func (*BadRequest) getEventRes()                  {}
 func (*BadRequest) getEventsByAccountRes()        {}
@@ -1482,6 +1483,59 @@ func (s *CreditPhase) SetCredit(val int64) {
 	s.Credit = val
 }
 
+// Ref: #/components/schemas/DnsExpiring
+type DnsExpiring struct {
+	Items []DnsExpiringItemsItem `json:"items"`
+}
+
+// GetItems returns the value of Items.
+func (s DnsExpiring) GetItems() []DnsExpiringItemsItem {
+	return s.Items
+}
+
+// SetItems sets the value of Items.
+func (s *DnsExpiring) SetItems(val []DnsExpiringItemsItem) {
+	s.Items = val
+}
+
+func (*DnsExpiring) getDnsExpiringRes() {}
+
+type DnsExpiringItemsItem struct {
+	ExpiringAt int64   `json:"expiring_at"`
+	Name       string  `json:"name"`
+	DNSItem    NftItem `json:"dns_item"`
+}
+
+// GetExpiringAt returns the value of ExpiringAt.
+func (s DnsExpiringItemsItem) GetExpiringAt() int64 {
+	return s.ExpiringAt
+}
+
+// GetName returns the value of Name.
+func (s DnsExpiringItemsItem) GetName() string {
+	return s.Name
+}
+
+// GetDNSItem returns the value of DNSItem.
+func (s DnsExpiringItemsItem) GetDNSItem() NftItem {
+	return s.DNSItem
+}
+
+// SetExpiringAt sets the value of ExpiringAt.
+func (s *DnsExpiringItemsItem) SetExpiringAt(val int64) {
+	s.ExpiringAt = val
+}
+
+// SetName sets the value of Name.
+func (s *DnsExpiringItemsItem) SetName(val string) {
+	s.Name = val
+}
+
+// SetDNSItem sets the value of DNSItem.
+func (s *DnsExpiringItemsItem) SetDNSItem(val NftItem) {
+	s.DNSItem = val
+}
+
 // Ref: #/components/schemas/DnsRecord
 type DnsRecord struct {
 	Wallet       OptWalletDNS `json:"wallet"`
@@ -1992,6 +2046,7 @@ func (*InternalError) getAllAuctionsRes()            {}
 func (*InternalError) getBlockRes()                  {}
 func (*InternalError) getBlockTransactionsRes()      {}
 func (*InternalError) getConfigRes()                 {}
+func (*InternalError) getDnsExpiringRes()            {}
 func (*InternalError) getDomainBidsRes()             {}
 func (*InternalError) getEventRes()                  {}
 func (*InternalError) getEventsByAccountRes()        {}
@@ -3041,6 +3096,7 @@ func (*NotFound) getAccountRes()                {}
 func (*NotFound) getAccountTransactionsRes()    {}
 func (*NotFound) getBlockRes()                  {}
 func (*NotFound) getBlockTransactionsRes()      {}
+func (*NotFound) getDnsExpiringRes()            {}
 func (*NotFound) getDomainBidsRes()             {}
 func (*NotFound) getEventRes()                  {}
 func (*NotFound) getEventsByAccountRes()        {}
@@ -6293,6 +6349,7 @@ func (*UnauthorizedError) getAllAuctionsRes()            {}
 func (*UnauthorizedError) getBlockRes()                  {}
 func (*UnauthorizedError) getBlockTransactionsRes()      {}
 func (*UnauthorizedError) getConfigRes()                 {}
+func (*UnauthorizedError) getDnsExpiringRes()            {}
 func (*UnauthorizedError) getDomainBidsRes()             {}
 func (*UnauthorizedError) getEventRes()                  {}
 func (*UnauthorizedError) getEventsByAccountRes()        {}

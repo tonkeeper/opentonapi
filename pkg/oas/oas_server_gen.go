@@ -74,6 +74,12 @@ type Handler interface {
 	//
 	// GET /v2/blockchain/config
 	GetConfig(ctx context.Context) (GetConfigRes, error)
+	// GetDnsExpiring implements getDnsExpiring operation.
+	//
+	// Get expiring .ton dns.
+	//
+	// GET /v2/accounts/{account_id}/dns/expiring
+	GetDnsExpiring(ctx context.Context, params GetDnsExpiringParams) (GetDnsExpiringRes, error)
 	// GetDomainBids implements getDomainBids operation.
 	//
 	// Get domain bids.

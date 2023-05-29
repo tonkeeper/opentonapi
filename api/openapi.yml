@@ -671,6 +671,31 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/InternalError'
+  
+  /v2/accounts/{account_id}/dns/expiring:
+    get:
+      description: "Get expiring .ton dns"
+      operationId: getDnsExpiring
+      tags:
+        - Accounts
+      parameters:
+        - $ref: '#/components/parameters/accountIdParameter'
+        - $ref: '#/components/parameters/periodQuery'
+      responses:
+        '200':
+          description: "expiring .ton dns"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DnsExpiring'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
 
   /v2/dns/{domain_name}/resolve:
     get:
@@ -1335,9 +1360,18 @@ components:
       schema:
         type: integer
         default: 0
+    periodQuery:
+      in: query
+      name: period
+      required: false
+      schema:
+        description: "number of days before expiration"
+        type: integer
+        default: 30
+        minimum: 1
+        maximum: 90
 
   requestBodies:
-
     MethodParameters:
       description: input parameters for contract get method
       content:
@@ -1664,7 +1698,7 @@ components:
         decoded_op_name:
           type: string
           example: "nft_transfer"
-        decoded_body: {} # Free-form JSON value
+        decoded_body: { } # Free-form JSON value
 
     TransactionType:
       type: string
@@ -2046,7 +2080,7 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/TvmStackRecord"
-        decoded: {} # Free-form JSON value
+        decoded: { } # Free-form JSON value
     TvmStackRecord:
       type: object
       required:
@@ -3233,6 +3267,30 @@ components:
               name:
                 type: string
                 example: "blah_blah.ton"
+    
+    DnsExpiring:
+      type: object
+      required:
+        - items
+      properties:
+        items:
+          type: array
+          items:
+            type: object
+            required:
+              - expiring_at
+              - name
+              - dns_item
+            properties:
+              expiring_at:
+                type: integer
+                format: int64
+                example: "1678275313"
+              name:
+                type: string
+                example: "blah_blah.ton"
+              dns_item:
+                $ref: '#/components/schemas/NftItem'
   
   responses:
     NotFound:
