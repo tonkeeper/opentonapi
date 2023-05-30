@@ -10,7 +10,6 @@ import (
 type AccountValueFlow struct {
 	Ton     int64
 	Fees    int64
-	Nfts    map[tongo.AccountID]int64
 	Jettons map[tongo.AccountID]big.Int
 }
 
@@ -41,18 +40,6 @@ func (flow *ValueFlow) AddFee(accountID tongo.AccountID, amount int64) {
 	flow.Accounts[accountID] = &AccountValueFlow{Fees: amount}
 }
 
-func (flow *ValueFlow) AddNFT(accountID tongo.AccountID, nft tongo.AccountID, value int64) {
-	accountFlow, ok := flow.Accounts[accountID]
-	if !ok {
-		accountFlow = &AccountValueFlow{}
-		flow.Accounts[accountID] = accountFlow
-	}
-	if accountFlow.Nfts == nil {
-		accountFlow.Nfts = make(map[tongo.AccountID]int64, 1)
-	}
-	accountFlow.Nfts[nft] += value
-}
-
 func (flow *ValueFlow) AddJettons(accountID tongo.AccountID, jetton tongo.AccountID, value big.Int) {
 	accountFlow, ok := flow.Accounts[accountID]
 	if !ok {
@@ -72,9 +59,6 @@ func (flow *ValueFlow) Merge(other *ValueFlow) {
 	for accountID, af := range other.Accounts {
 		flow.AddTons(accountID, af.Ton)
 		flow.AddFee(accountID, af.Fees)
-		for nft, value := range af.Nfts {
-			flow.AddNFT(accountID, nft, value)
-		}
 		for jetton, value := range af.Jettons {
 			flow.AddJettons(accountID, jetton, value)
 		}

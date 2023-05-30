@@ -2399,20 +2399,6 @@ components:
           type: integer
           format: int64
           example: 10
-        nfts:
-          type: array
-          items:
-            type: object
-            required:
-              - account
-              - quantity
-            properties:
-              account:
-                $ref: '#/components/schemas/AccountAddress'
-              quantity:
-                type: integer
-                format: int64
-                example: 10
         jettons:
           type: array
           items:

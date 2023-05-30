@@ -139,12 +139,6 @@ func convertAccountValueFlow(accountID tongo.AccountID, flow *bath.AccountValueF
 		Ton:     flow.Ton,
 		Fees:    flow.Fees,
 	}
-	for nftItem, quantity := range flow.Nfts {
-		valueFlow.Nfts = append(valueFlow.Nfts, oas.ValueFlowNftsItem{
-			Account:  convertAccountAddress(nftItem, book),
-			Quantity: quantity,
-		})
-	}
 	for jettonItem, quantity := range flow.Jettons {
 		valueFlow.Jettons = append(valueFlow.Jettons, oas.ValueFlowJettonsItem{
 			Account:  convertAccountAddress(jettonItem, book),

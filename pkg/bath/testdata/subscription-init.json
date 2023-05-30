@@ -37,21 +37,18 @@
        "Account": "0:47580dd4cab600a751875071ef7482d99ce5cfada7293e9ebc7c3e07125846f6",
        "Ton": 75213864,
        "Fee": 8105000,
-       "Nfts": null,
        "Jettons": null
      },
      {
        "Account": "0:54887d7c01ead183691a703afff08adc7b653fba2022df3a4963dae5171aa2ca",
        "Ton": -5000000000,
        "Fee": 28038533,
-       "Nfts": null,
        "Jettons": null
      },
      {
        "Account": "0:8c6170617fe0432475039842669ba87a8e46c5064f5d47460c737d31e53ca416",
        "Ton": 4924786136,
        "Fee": 991428,
-       "Nfts": null,
        "Jettons": null
      }
    ]

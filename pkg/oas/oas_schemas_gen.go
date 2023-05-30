@@ -6420,7 +6420,6 @@ type ValueFlow struct {
 	Account AccountAddress         `json:"account"`
 	Ton     int64                  `json:"ton"`
 	Fees    int64                  `json:"fees"`
-	Nfts    []ValueFlowNftsItem    `json:"nfts"`
 	Jettons []ValueFlowJettonsItem `json:"jettons"`
 }
 
@@ -6437,11 +6436,6 @@ func (s ValueFlow) GetTon() int64 {
 // GetFees returns the value of Fees.
 func (s ValueFlow) GetFees() int64 {
 	return s.Fees
-}
-
-// GetNfts returns the value of Nfts.
-func (s ValueFlow) GetNfts() []ValueFlowNftsItem {
-	return s.Nfts
 }
 
 // GetJettons returns the value of Jettons.
@@ -6462,11 +6456,6 @@ func (s *ValueFlow) SetTon(val int64) {
 // SetFees sets the value of Fees.
 func (s *ValueFlow) SetFees(val int64) {
 	s.Fees = val
-}
-
-// SetNfts sets the value of Nfts.
-func (s *ValueFlow) SetNfts(val []ValueFlowNftsItem) {
-	s.Nfts = val
 }
 
 // SetJettons sets the value of Jettons.
@@ -6496,31 +6485,6 @@ func (s *ValueFlowJettonsItem) SetAccount(val AccountAddress) {
 
 // SetQuantity sets the value of Quantity.
 func (s *ValueFlowJettonsItem) SetQuantity(val int64) {
-	s.Quantity = val
-}
-
-type ValueFlowNftsItem struct {
-	Account  AccountAddress `json:"account"`
-	Quantity int64          `json:"quantity"`
-}
-
-// GetAccount returns the value of Account.
-func (s ValueFlowNftsItem) GetAccount() AccountAddress {
-	return s.Account
-}
-
-// GetQuantity returns the value of Quantity.
-func (s ValueFlowNftsItem) GetQuantity() int64 {
-	return s.Quantity
-}
-
-// SetAccount sets the value of Account.
-func (s *ValueFlowNftsItem) SetAccount(val AccountAddress) {
-	s.Account = val
-}
-
-// SetQuantity sets the value of Quantity.
-func (s *ValueFlowNftsItem) SetQuantity(val int64) {
 	s.Quantity = val
 }
 

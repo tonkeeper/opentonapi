@@ -41,7 +41,6 @@
        "Account": "0:2cf3b5b8c891e517c9addbda1c0386a09ccacbb0e3faf630b51cfc8152325acb",
        "Ton": -36830386,
        "Fee": 8423384,
-       "Nfts": null,
        "Jettons": [
          {
            "Address": "0:0000000000000000000000000000000000000000000000000000000000000000",
@@ -53,7 +52,6 @@
        "Account": "0:54d72ac7254c6e4b4a5a3066d41fc7f3f1f604fdf40d6784d6778f3b874e09da",
        "Ton": 18945000,
        "Fee": 23948878,
-       "Nfts": null,
        "Jettons": null
      }
    ]
