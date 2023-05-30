@@ -1364,8 +1364,8 @@ components:
       in: query
       name: period
       required: false
+      description: "number of days before expiration"
       schema:
-        description: "number of days before expiration"
         type: integer
         default: 30
         minimum: 1
