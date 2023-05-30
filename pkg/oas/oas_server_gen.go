@@ -20,12 +20,24 @@ type Handler interface {
 	//
 	// GET /v2/dns/{domain_name}/resolve
 	DnsResolve(ctx context.Context, params DnsResolveParams) (DnsResolveRes, error)
-	// EmulateMessage implements emulateMessage operation.
+	// EmulateMessageToAccountEvent implements emulateMessageToAccountEvent operation.
 	//
 	// Emulate sending message to blockchain.
 	//
-	// POST /v2/blockchain/message/emulate
-	EmulateMessage(ctx context.Context, req OptEmulateMessageReq) (EmulateMessageRes, error)
+	// POST /v2/accounts/{account_id}/events/emulate
+	EmulateMessageToAccountEvent(ctx context.Context, req EmulateMessageToAccountEventReq, params EmulateMessageToAccountEventParams) (EmulateMessageToAccountEventRes, error)
+	// EmulateMessageToEvent implements emulateMessageToEvent operation.
+	//
+	// Emulate sending message to blockchain.
+	//
+	// POST /v2/events/emulate
+	EmulateMessageToEvent(ctx context.Context, req EmulateMessageToEventReq, params EmulateMessageToEventParams) (EmulateMessageToEventRes, error)
+	// EmulateMessageToTrace implements emulateMessageToTrace operation.
+	//
+	// Emulate sending message to blockchain.
+	//
+	// POST /v2/traces/emulate
+	EmulateMessageToTrace(ctx context.Context, req EmulateMessageToTraceReq) (EmulateMessageToTraceRes, error)
 	// ExecGetMethod implements execGetMethod operation.
 	//
 	// Execute get method for account.
@@ -256,7 +268,7 @@ type Handler interface {
 	// Send message to blockchain.
 	//
 	// POST /v2/blockchain/message
-	SendMessage(ctx context.Context, req OptSendMessageReq) (SendMessageRes, error)
+	SendMessage(ctx context.Context, req SendMessageReq) (SendMessageRes, error)
 	// SetWalletBackup implements setWalletBackup operation.
 	//
 	// Set backup info.

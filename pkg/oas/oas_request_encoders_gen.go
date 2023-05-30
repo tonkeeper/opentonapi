@@ -11,20 +11,42 @@ import (
 	ht "github.com/ogen-go/ogen/http"
 )
 
-func encodeEmulateMessageRequest(
-	req OptEmulateMessageReq,
+func encodeEmulateMessageToAccountEventRequest(
+	req EmulateMessageToAccountEventReq,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"
-	if !req.Set {
-		// Keep request with empty body if value is not set.
-		return nil
-	}
 	e := jx.GetEncoder()
 	{
-		if req.Set {
-			req.Encode(e)
-		}
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
+func encodeEmulateMessageToEventRequest(
+	req EmulateMessageToEventReq,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := jx.GetEncoder()
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
+func encodeEmulateMessageToTraceRequest(
+	req EmulateMessageToTraceReq,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := jx.GetEncoder()
+	{
+		req.Encode(e)
 	}
 	encoded := e.Bytes()
 	ht.SetBody(r, bytes.NewReader(encoded), contentType)
@@ -72,19 +94,13 @@ func encodeGetNftItemsByAddressesRequest(
 }
 
 func encodeSendMessageRequest(
-	req OptSendMessageReq,
+	req SendMessageReq,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"
-	if !req.Set {
-		// Keep request with empty body if value is not set.
-		return nil
-	}
 	e := jx.GetEncoder()
 	{
-		if req.Set {
-			req.Encode(e)
-		}
+		req.Encode(e)
 	}
 	encoded := e.Bytes()
 	ht.SetBody(r, bytes.NewReader(encoded), contentType)

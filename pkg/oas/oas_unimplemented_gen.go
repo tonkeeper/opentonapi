@@ -31,12 +31,30 @@ func (UnimplementedHandler) DnsResolve(ctx context.Context, params DnsResolvePar
 	return r, ht.ErrNotImplemented
 }
 
-// EmulateMessage implements emulateMessage operation.
+// EmulateMessageToAccountEvent implements emulateMessageToAccountEvent operation.
 //
 // Emulate sending message to blockchain.
 //
-// POST /v2/blockchain/message/emulate
-func (UnimplementedHandler) EmulateMessage(ctx context.Context, req OptEmulateMessageReq) (r EmulateMessageRes, _ error) {
+// POST /v2/accounts/{account_id}/events/emulate
+func (UnimplementedHandler) EmulateMessageToAccountEvent(ctx context.Context, req EmulateMessageToAccountEventReq, params EmulateMessageToAccountEventParams) (r EmulateMessageToAccountEventRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// EmulateMessageToEvent implements emulateMessageToEvent operation.
+//
+// Emulate sending message to blockchain.
+//
+// POST /v2/events/emulate
+func (UnimplementedHandler) EmulateMessageToEvent(ctx context.Context, req EmulateMessageToEventReq, params EmulateMessageToEventParams) (r EmulateMessageToEventRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// EmulateMessageToTrace implements emulateMessageToTrace operation.
+//
+// Emulate sending message to blockchain.
+//
+// POST /v2/traces/emulate
+func (UnimplementedHandler) EmulateMessageToTrace(ctx context.Context, req EmulateMessageToTraceReq) (r EmulateMessageToTraceRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -378,7 +396,7 @@ func (UnimplementedHandler) ReindexAccount(ctx context.Context, params ReindexAc
 // Send message to blockchain.
 //
 // POST /v2/blockchain/message
-func (UnimplementedHandler) SendMessage(ctx context.Context, req OptSendMessageReq) (r SendMessageRes, _ error) {
+func (UnimplementedHandler) SendMessage(ctx context.Context, req SendMessageReq) (r SendMessageRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 

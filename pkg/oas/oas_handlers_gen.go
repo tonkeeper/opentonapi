@@ -214,18 +214,18 @@ func (s *Server) handleDnsResolveRequest(args [1]string, w http.ResponseWriter, 
 	}
 }
 
-// handleEmulateMessageRequest handles emulateMessage operation.
+// handleEmulateMessageToAccountEventRequest handles emulateMessageToAccountEvent operation.
 //
 // Emulate sending message to blockchain.
 //
-// POST /v2/blockchain/message/emulate
-func (s *Server) handleEmulateMessageRequest(args [0]string, w http.ResponseWriter, r *http.Request) {
+// POST /v2/accounts/{account_id}/events/emulate
+func (s *Server) handleEmulateMessageToAccountEventRequest(args [1]string, w http.ResponseWriter, r *http.Request) {
 	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("emulateMessage"),
+		otelogen.OperationID("emulateMessageToAccountEvent"),
 	}
 
 	// Start a span for this request.
-	ctx, span := s.cfg.Tracer.Start(r.Context(), "EmulateMessage",
+	ctx, span := s.cfg.Tracer.Start(r.Context(), "EmulateMessageToAccountEvent",
 		trace.WithAttributes(otelAttrs...),
 		serverSpanKind,
 	)
@@ -249,11 +249,21 @@ func (s *Server) handleEmulateMessageRequest(args [0]string, w http.ResponseWrit
 		}
 		err          error
 		opErrContext = ogenerrors.OperationContext{
-			Name: "EmulateMessage",
-			ID:   "emulateMessage",
+			Name: "EmulateMessageToAccountEvent",
+			ID:   "emulateMessageToAccountEvent",
 		}
 	)
-	request, close, err := s.decodeEmulateMessageRequest(r)
+	params, err := decodeEmulateMessageToAccountEventParams(args, r)
+	if err != nil {
+		err = &ogenerrors.DecodeParamsError{
+			OperationContext: opErrContext,
+			Err:              err,
+		}
+		recordError("DecodeParams", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+	request, close, err := s.decodeEmulateMessageToAccountEventRequest(r)
 	if err != nil {
 		err = &ogenerrors.DecodeRequestError{
 			OperationContext: opErrContext,
@@ -269,21 +279,243 @@ func (s *Server) handleEmulateMessageRequest(args [0]string, w http.ResponseWrit
 		}
 	}()
 
-	var response EmulateMessageRes
+	var response EmulateMessageToAccountEventRes
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:       ctx,
-			OperationName: "EmulateMessage",
-			OperationID:   "emulateMessage",
+			OperationName: "EmulateMessageToAccountEvent",
+			OperationID:   "emulateMessageToAccountEvent",
+			Body:          request,
+			Params: middleware.Parameters{
+				{
+					Name: "Accept-Language",
+					In:   "header",
+				}: params.AcceptLanguage,
+				{
+					Name: "account_id",
+					In:   "path",
+				}: params.AccountID,
+			},
+			Raw: r,
+		}
+
+		type (
+			Request  = EmulateMessageToAccountEventReq
+			Params   = EmulateMessageToAccountEventParams
+			Response = EmulateMessageToAccountEventRes
+		)
+		response, err = middleware.HookMiddleware[
+			Request,
+			Params,
+			Response,
+		](
+			m,
+			mreq,
+			unpackEmulateMessageToAccountEventParams,
+			func(ctx context.Context, request Request, params Params) (Response, error) {
+				return s.h.EmulateMessageToAccountEvent(ctx, request, params)
+			},
+		)
+	} else {
+		response, err = s.h.EmulateMessageToAccountEvent(ctx, request, params)
+	}
+	if err != nil {
+		recordError("Internal", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+
+	if err := encodeEmulateMessageToAccountEventResponse(response, w, span); err != nil {
+		recordError("EncodeResponse", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+}
+
+// handleEmulateMessageToEventRequest handles emulateMessageToEvent operation.
+//
+// Emulate sending message to blockchain.
+//
+// POST /v2/events/emulate
+func (s *Server) handleEmulateMessageToEventRequest(args [0]string, w http.ResponseWriter, r *http.Request) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("emulateMessageToEvent"),
+	}
+
+	// Start a span for this request.
+	ctx, span := s.cfg.Tracer.Start(r.Context(), "EmulateMessageToEvent",
+		trace.WithAttributes(otelAttrs...),
+		serverSpanKind,
+	)
+	defer span.End()
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		elapsedDuration := time.Since(startTime)
+		s.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+	}()
+
+	// Increment request counter.
+	s.requests.Add(ctx, 1, otelAttrs...)
+
+	var (
+		recordError = func(stage string, err error) {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			s.errors.Add(ctx, 1, otelAttrs...)
+		}
+		err          error
+		opErrContext = ogenerrors.OperationContext{
+			Name: "EmulateMessageToEvent",
+			ID:   "emulateMessageToEvent",
+		}
+	)
+	params, err := decodeEmulateMessageToEventParams(args, r)
+	if err != nil {
+		err = &ogenerrors.DecodeParamsError{
+			OperationContext: opErrContext,
+			Err:              err,
+		}
+		recordError("DecodeParams", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+	request, close, err := s.decodeEmulateMessageToEventRequest(r)
+	if err != nil {
+		err = &ogenerrors.DecodeRequestError{
+			OperationContext: opErrContext,
+			Err:              err,
+		}
+		recordError("DecodeRequest", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+	defer func() {
+		if err := close(); err != nil {
+			recordError("CloseRequest", err)
+		}
+	}()
+
+	var response EmulateMessageToEventRes
+	if m := s.cfg.Middleware; m != nil {
+		mreq := middleware.Request{
+			Context:       ctx,
+			OperationName: "EmulateMessageToEvent",
+			OperationID:   "emulateMessageToEvent",
+			Body:          request,
+			Params: middleware.Parameters{
+				{
+					Name: "Accept-Language",
+					In:   "header",
+				}: params.AcceptLanguage,
+			},
+			Raw: r,
+		}
+
+		type (
+			Request  = EmulateMessageToEventReq
+			Params   = EmulateMessageToEventParams
+			Response = EmulateMessageToEventRes
+		)
+		response, err = middleware.HookMiddleware[
+			Request,
+			Params,
+			Response,
+		](
+			m,
+			mreq,
+			unpackEmulateMessageToEventParams,
+			func(ctx context.Context, request Request, params Params) (Response, error) {
+				return s.h.EmulateMessageToEvent(ctx, request, params)
+			},
+		)
+	} else {
+		response, err = s.h.EmulateMessageToEvent(ctx, request, params)
+	}
+	if err != nil {
+		recordError("Internal", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+
+	if err := encodeEmulateMessageToEventResponse(response, w, span); err != nil {
+		recordError("EncodeResponse", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+}
+
+// handleEmulateMessageToTraceRequest handles emulateMessageToTrace operation.
+//
+// Emulate sending message to blockchain.
+//
+// POST /v2/traces/emulate
+func (s *Server) handleEmulateMessageToTraceRequest(args [0]string, w http.ResponseWriter, r *http.Request) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("emulateMessageToTrace"),
+	}
+
+	// Start a span for this request.
+	ctx, span := s.cfg.Tracer.Start(r.Context(), "EmulateMessageToTrace",
+		trace.WithAttributes(otelAttrs...),
+		serverSpanKind,
+	)
+	defer span.End()
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		elapsedDuration := time.Since(startTime)
+		s.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+	}()
+
+	// Increment request counter.
+	s.requests.Add(ctx, 1, otelAttrs...)
+
+	var (
+		recordError = func(stage string, err error) {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			s.errors.Add(ctx, 1, otelAttrs...)
+		}
+		err          error
+		opErrContext = ogenerrors.OperationContext{
+			Name: "EmulateMessageToTrace",
+			ID:   "emulateMessageToTrace",
+		}
+	)
+	request, close, err := s.decodeEmulateMessageToTraceRequest(r)
+	if err != nil {
+		err = &ogenerrors.DecodeRequestError{
+			OperationContext: opErrContext,
+			Err:              err,
+		}
+		recordError("DecodeRequest", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+	defer func() {
+		if err := close(); err != nil {
+			recordError("CloseRequest", err)
+		}
+	}()
+
+	var response EmulateMessageToTraceRes
+	if m := s.cfg.Middleware; m != nil {
+		mreq := middleware.Request{
+			Context:       ctx,
+			OperationName: "EmulateMessageToTrace",
+			OperationID:   "emulateMessageToTrace",
 			Body:          request,
 			Params:        middleware.Parameters{},
 			Raw:           r,
 		}
 
 		type (
-			Request  = OptEmulateMessageReq
+			Request  = EmulateMessageToTraceReq
 			Params   = struct{}
-			Response = EmulateMessageRes
+			Response = EmulateMessageToTraceRes
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -294,11 +526,11 @@ func (s *Server) handleEmulateMessageRequest(args [0]string, w http.ResponseWrit
 			mreq,
 			nil,
 			func(ctx context.Context, request Request, params Params) (Response, error) {
-				return s.h.EmulateMessage(ctx, request)
+				return s.h.EmulateMessageToTrace(ctx, request)
 			},
 		)
 	} else {
-		response, err = s.h.EmulateMessage(ctx, request)
+		response, err = s.h.EmulateMessageToTrace(ctx, request)
 	}
 	if err != nil {
 		recordError("Internal", err)
@@ -306,7 +538,7 @@ func (s *Server) handleEmulateMessageRequest(args [0]string, w http.ResponseWrit
 		return
 	}
 
-	if err := encodeEmulateMessageResponse(response, w, span); err != nil {
+	if err := encodeEmulateMessageToTraceResponse(response, w, span); err != nil {
 		recordError("EncodeResponse", err)
 		s.cfg.ErrorHandler(ctx, w, r, err)
 		return
@@ -3982,7 +4214,7 @@ func (s *Server) handleSendMessageRequest(args [0]string, w http.ResponseWriter,
 		}
 
 		type (
-			Request  = OptSendMessageReq
+			Request  = SendMessageReq
 			Params   = struct{}
 			Response = SendMessageRes
 		)

@@ -117,6 +117,166 @@ func decodeDnsResolveParams(args [1]string, r *http.Request) (params DnsResolveP
 	return params, nil
 }
 
+// EmulateMessageToAccountEventParams is parameters of emulateMessageToAccountEvent operation.
+type EmulateMessageToAccountEventParams struct {
+	AcceptLanguage OptString
+	// Account ID.
+	AccountID string
+}
+
+func unpackEmulateMessageToAccountEventParams(packed middleware.Parameters) (params EmulateMessageToAccountEventParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "Accept-Language",
+			In:   "header",
+		}
+		if v, ok := packed[key]; ok {
+			params.AcceptLanguage = v.(OptString)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "account_id",
+			In:   "path",
+		}
+		params.AccountID = packed[key].(string)
+	}
+	return params
+}
+
+func decodeEmulateMessageToAccountEventParams(args [1]string, r *http.Request) (params EmulateMessageToAccountEventParams, _ error) {
+	h := uri.NewHeaderDecoder(r.Header)
+	// Set default value for header: Accept-Language.
+	{
+		val := string("en")
+		params.AcceptLanguage.SetTo(val)
+	}
+	// Decode header: Accept-Language.
+	{
+		cfg := uri.HeaderParameterDecodingConfig{
+			Name:    "Accept-Language",
+			Explode: false,
+		}
+		if err := h.HasParam(cfg); err == nil {
+			if err := h.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotAcceptLanguageVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotAcceptLanguageVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.AcceptLanguage.SetTo(paramsDotAcceptLanguageVal)
+				return nil
+			}); err != nil {
+				return params, errors.Wrap(err, "header: Accept-Language: parse")
+			}
+		}
+	}
+	// Decode path: account_id.
+	{
+		param := args[0]
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "account_id",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.AccountID = c
+				return nil
+			}(); err != nil {
+				return params, errors.Wrap(err, "path: account_id: parse")
+			}
+		} else {
+			return params, errors.New("path: account_id: not specified")
+		}
+	}
+	return params, nil
+}
+
+// EmulateMessageToEventParams is parameters of emulateMessageToEvent operation.
+type EmulateMessageToEventParams struct {
+	AcceptLanguage OptString
+}
+
+func unpackEmulateMessageToEventParams(packed middleware.Parameters) (params EmulateMessageToEventParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "Accept-Language",
+			In:   "header",
+		}
+		if v, ok := packed[key]; ok {
+			params.AcceptLanguage = v.(OptString)
+		}
+	}
+	return params
+}
+
+func decodeEmulateMessageToEventParams(args [0]string, r *http.Request) (params EmulateMessageToEventParams, _ error) {
+	h := uri.NewHeaderDecoder(r.Header)
+	// Set default value for header: Accept-Language.
+	{
+		val := string("en")
+		params.AcceptLanguage.SetTo(val)
+	}
+	// Decode header: Accept-Language.
+	{
+		cfg := uri.HeaderParameterDecodingConfig{
+			Name:    "Accept-Language",
+			Explode: false,
+		}
+		if err := h.HasParam(cfg); err == nil {
+			if err := h.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotAcceptLanguageVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotAcceptLanguageVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.AcceptLanguage.SetTo(paramsDotAcceptLanguageVal)
+				return nil
+			}); err != nil {
+				return params, errors.Wrap(err, "header: Accept-Language: parse")
+			}
+		}
+	}
+	return params, nil
+}
+
 // ExecGetMethodParams is parameters of execGetMethod operation.
 type ExecGetMethodParams struct {
 	// Account ID.
