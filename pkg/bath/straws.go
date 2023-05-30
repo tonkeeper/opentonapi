@@ -43,11 +43,6 @@ func FindNFTTransfer(bubble *Bubble) bool {
 		Accounts:  append(bubble.Accounts, nftBubble.account.Address),
 		ValueFlow: bubble.ValueFlow,
 	}
-	newOwner, err := tongo.AccountIDFromTlb(transfer.NewOwner)
-	if err != nil {
-		return false
-	}
-	newBubble.ValueFlow.AddNFT(*newOwner, nftBubble.account.Address, 1)
 	newBubble.Children = ProcessChildren(bubble.Children,
 		func(child *Bubble) *Merge {
 			tx, ok := child.Info.(BubbleTx)

@@ -101,7 +101,6 @@ func FindGetGemsNftPurchase(bubble *Bubble) bool {
 						return nil
 					}
 					newOwner = tx.account.Address
-					newBubble.ValueFlow.AddNFT(newOwner, nft, 1)
 					newBubble.ValueFlow.Merge(child.ValueFlow)
 					newBubble.Accounts = append(newBubble.Accounts, tx.account.Address)
 					return &Merge{children: child.Children}

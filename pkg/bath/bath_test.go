@@ -31,7 +31,6 @@ type accountValueFlow struct {
 	Account string
 	Ton     int64
 	Fee     int64
-	Nfts    []nft
 	Jettons []jetton
 }
 
@@ -116,22 +115,14 @@ func TestFindActions(t *testing.T) {
 				Actions: actionsList.Actions,
 			}
 			for accountID, flow := range actionsList.ValueFlow.Accounts {
-				var nfts []nft
-				for address, quantity := range flow.Nfts {
-					nfts = append(nfts, nft{Address: address.String(), Quantity: quantity})
-				}
 				var jettons []jetton
 				for address, quantity := range flow.Jettons {
 					jettons = append(jettons, jetton{Address: address.String(), Quantity: quantity.Int64()})
 				}
-				sort.Slice(nfts, func(i, j int) bool {
-					return nfts[i].Address < nfts[j].Address
-				})
 				accountFlow := accountValueFlow{
 					Account: accountID.String(),
 					Ton:     flow.Ton,
 					Fee:     flow.Fees,
-					Nfts:    nfts,
 					Jettons: jettons,
 				}
 				results.Accounts = append(results.Accounts, accountFlow)

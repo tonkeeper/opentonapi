@@ -15520,16 +15520,6 @@ func (s ValueFlow) encodeFields(e *jx.Encoder) {
 		e.Int64(s.Fees)
 	}
 	{
-		if s.Nfts != nil {
-			e.FieldStart("nfts")
-			e.ArrStart()
-			for _, elem := range s.Nfts {
-				elem.Encode(e)
-			}
-			e.ArrEnd()
-		}
-	}
-	{
 		if s.Jettons != nil {
 			e.FieldStart("jettons")
 			e.ArrStart()
@@ -15541,12 +15531,11 @@ func (s ValueFlow) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfValueFlow = [5]string{
+var jsonFieldsNameOfValueFlow = [4]string{
 	0: "account",
 	1: "ton",
 	2: "fees",
-	3: "nfts",
-	4: "jettons",
+	3: "jettons",
 }
 
 // Decode decodes ValueFlow from json.
@@ -15591,23 +15580,6 @@ func (s *ValueFlow) Decode(d *jx.Decoder) error {
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"fees\"")
-			}
-		case "nfts":
-			if err := func() error {
-				s.Nfts = make([]ValueFlowNftsItem, 0)
-				if err := d.Arr(func(d *jx.Decoder) error {
-					var elem ValueFlowNftsItem
-					if err := elem.Decode(d); err != nil {
-						return err
-					}
-					s.Nfts = append(s.Nfts, elem)
-					return nil
-				}); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"nfts\"")
 			}
 		case "jettons":
 			if err := func() error {
@@ -15791,119 +15763,6 @@ func (s ValueFlowJettonsItem) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *ValueFlowJettonsItem) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
-// Encode implements json.Marshaler.
-func (s ValueFlowNftsItem) Encode(e *jx.Encoder) {
-	e.ObjStart()
-	s.encodeFields(e)
-	e.ObjEnd()
-}
-
-// encodeFields encodes fields.
-func (s ValueFlowNftsItem) encodeFields(e *jx.Encoder) {
-	{
-
-		e.FieldStart("account")
-		s.Account.Encode(e)
-	}
-	{
-
-		e.FieldStart("quantity")
-		e.Int64(s.Quantity)
-	}
-}
-
-var jsonFieldsNameOfValueFlowNftsItem = [2]string{
-	0: "account",
-	1: "quantity",
-}
-
-// Decode decodes ValueFlowNftsItem from json.
-func (s *ValueFlowNftsItem) Decode(d *jx.Decoder) error {
-	if s == nil {
-		return errors.New("invalid: unable to decode ValueFlowNftsItem to nil")
-	}
-	var requiredBitSet [1]uint8
-
-	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
-		switch string(k) {
-		case "account":
-			requiredBitSet[0] |= 1 << 0
-			if err := func() error {
-				if err := s.Account.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"account\"")
-			}
-		case "quantity":
-			requiredBitSet[0] |= 1 << 1
-			if err := func() error {
-				v, err := d.Int64()
-				s.Quantity = int64(v)
-				if err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"quantity\"")
-			}
-		default:
-			return d.Skip()
-		}
-		return nil
-	}); err != nil {
-		return errors.Wrap(err, "decode ValueFlowNftsItem")
-	}
-	// Validate required fields.
-	var failures []validate.FieldError
-	for i, mask := range [1]uint8{
-		0b00000011,
-	} {
-		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
-			// Mask only required fields and check equality to mask using XOR.
-			//
-			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
-			// Bits of fields which would be set are actually bits of missed fields.
-			missed := bits.OnesCount8(result)
-			for bitN := 0; bitN < missed; bitN++ {
-				bitIdx := bits.TrailingZeros8(result)
-				fieldIdx := i*8 + bitIdx
-				var name string
-				if fieldIdx < len(jsonFieldsNameOfValueFlowNftsItem) {
-					name = jsonFieldsNameOfValueFlowNftsItem[fieldIdx]
-				} else {
-					name = strconv.Itoa(fieldIdx)
-				}
-				failures = append(failures, validate.FieldError{
-					Name:  name,
-					Error: validate.ErrFieldRequired,
-				})
-				// Reset bit.
-				result &^= 1 << bitIdx
-			}
-		}
-	}
-	if len(failures) > 0 {
-		return &validate.Error{Fields: failures}
-	}
-
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s ValueFlowNftsItem) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *ValueFlowNftsItem) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
