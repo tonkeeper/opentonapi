@@ -115,12 +115,12 @@
     }
    },
    "periodQuery": {
+    "description": "number of days before expiration",
     "in": "query",
     "name": "period",
     "required": false,
     "schema": {
      "default": 30,
-     "description": "number of days before expiration",
      "maximum": 90,
      "minimum": 1,
      "type": "integer"
@@ -1103,9 +1103,6 @@
       "example": "0:da6b1b6663a0e4d18cc8574ccd9db5296e367dd9324706f3bbd9eb1cd2caf0bf",
       "type": "string"
      },
-     "deployer": {
-      "$ref": "#/components/schemas/AccountAddress"
-     },
      "interfaces": {
       "example": [
        "nft_item",
@@ -1119,7 +1116,6 @@
     },
     "required": [
      "address",
-     "deployer",
      "interfaces"
     ],
     "type": "object"
@@ -2672,26 +2668,6 @@
       "type": "integer"
      },
      "jettons": {
-      "items": {
-       "properties": {
-        "account": {
-         "$ref": "#/components/schemas/AccountAddress"
-        },
-        "quantity": {
-         "example": 10,
-         "format": "int64",
-         "type": "integer"
-        }
-       },
-       "required": [
-        "account",
-        "quantity"
-       ],
-       "type": "object"
-      },
-      "type": "array"
-     },
-     "nfts": {
       "items": {
        "properties": {
         "account": {

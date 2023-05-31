@@ -1424,19 +1424,13 @@ func (*Config) getConfigRes() {}
 
 // Ref: #/components/schemas/ContractDeployAction
 type ContractDeployAction struct {
-	Address    string         `json:"address"`
-	Deployer   AccountAddress `json:"deployer"`
-	Interfaces []string       `json:"interfaces"`
+	Address    string   `json:"address"`
+	Interfaces []string `json:"interfaces"`
 }
 
 // GetAddress returns the value of Address.
 func (s ContractDeployAction) GetAddress() string {
 	return s.Address
-}
-
-// GetDeployer returns the value of Deployer.
-func (s ContractDeployAction) GetDeployer() AccountAddress {
-	return s.Deployer
 }
 
 // GetInterfaces returns the value of Interfaces.
@@ -1447,11 +1441,6 @@ func (s ContractDeployAction) GetInterfaces() []string {
 // SetAddress sets the value of Address.
 func (s *ContractDeployAction) SetAddress(val string) {
 	s.Address = val
-}
-
-// SetDeployer sets the value of Deployer.
-func (s *ContractDeployAction) SetDeployer(val AccountAddress) {
-	s.Deployer = val
 }
 
 // SetInterfaces sets the value of Interfaces.

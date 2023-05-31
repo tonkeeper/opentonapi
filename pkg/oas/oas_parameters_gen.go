@@ -850,7 +850,8 @@ func decodeGetBlockTransactionsParams(args [1]string, r *http.Request) (params G
 type GetDnsExpiringParams struct {
 	// Account ID.
 	AccountID string
-	Period    OptInt
+	// Number of days before expiration.
+	Period OptInt
 }
 
 func unpackGetDnsExpiringParams(packed middleware.Parameters) (params GetDnsExpiringParams) {
