@@ -96,7 +96,6 @@ func (h Handler) convertAction(ctx context.Context, a bath.Action, acceptLanguag
 		action.ContractDeploy.SetTo(oas.ContractDeployAction{
 			Address:    a.ContractDeploy.Address.ToRaw(),
 			Interfaces: a.ContractDeploy.Interfaces,
-			Deployer:   convertAccountAddress(a.ContractDeploy.Sender, h.addressBook),
 		})
 	case bath.SmartContractExec:
 		op := "Call"

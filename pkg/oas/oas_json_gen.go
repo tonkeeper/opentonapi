@@ -3778,11 +3778,6 @@ func (s ContractDeployAction) encodeFields(e *jx.Encoder) {
 	}
 	{
 
-		e.FieldStart("deployer")
-		s.Deployer.Encode(e)
-	}
-	{
-
 		e.FieldStart("interfaces")
 		e.ArrStart()
 		for _, elem := range s.Interfaces {
@@ -3792,10 +3787,9 @@ func (s ContractDeployAction) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfContractDeployAction = [3]string{
+var jsonFieldsNameOfContractDeployAction = [2]string{
 	0: "address",
-	1: "deployer",
-	2: "interfaces",
+	1: "interfaces",
 }
 
 // Decode decodes ContractDeployAction from json.
@@ -3819,18 +3813,8 @@ func (s *ContractDeployAction) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"address\"")
 			}
-		case "deployer":
-			requiredBitSet[0] |= 1 << 1
-			if err := func() error {
-				if err := s.Deployer.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"deployer\"")
-			}
 		case "interfaces":
-			requiredBitSet[0] |= 1 << 2
+			requiredBitSet[0] |= 1 << 1
 			if err := func() error {
 				s.Interfaces = make([]string, 0)
 				if err := d.Arr(func(d *jx.Decoder) error {
@@ -3859,7 +3843,7 @@ func (s *ContractDeployAction) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b00000111,
+		0b00000011,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.

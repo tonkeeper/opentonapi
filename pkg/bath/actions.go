@@ -103,7 +103,6 @@ type (
 
 	ContractDeployAction struct {
 		Address    tongo.AccountID
-		Sender     tongo.AccountID
 		Interfaces []string
 	}
 
