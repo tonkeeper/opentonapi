@@ -20,7 +20,9 @@ jobs:
           go-version: '1.20'
       - name: test
         env:
-          LD_LIBRARY_PATH: /home/runner/go/pkg/mod/github.com/tonkeeper/tongo@v1.0.16-0.20230528101916-42f3dc2194c8/lib/linux
+          LD_LIBRARY_PATH: ${{ github.workspace }}/libs
           LITE_SERVERS: ${{ secrets.LITE_SERVERS }}
         run: |
+          mkdir -p ${{ env.LD_LIBRARY_PATH}}
+          wget https://github.com/tonkeeper/tongo/raw/master/lib/linux/libemulator.so -O ${{ env.LD_LIBRARY_PATH}}/libemulator.so
           make test
