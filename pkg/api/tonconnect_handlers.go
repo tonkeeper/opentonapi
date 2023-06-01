@@ -5,6 +5,7 @@ import (
 	"crypto/hmac"
 	"crypto/sha256"
 	"encoding/base64"
+	"encoding/hex"
 
 	"github.com/tonkeeper/tongo/tonconnect"
 
@@ -43,4 +44,13 @@ func (h Handler) TonConnectProof(ctx context.Context, request oas.TonConnectProo
 	signedToken := base64.URLEncoding.EncodeToString(data)
 
 	return &oas.TonConnectProofOK{Token: signedToken}, nil
+}
+
+func (h Handler) GetPubKeyByStateInit(ctx context.Context, request oas.GetPubKeyByStateInitReq) (res oas.GetPubKeyByStateInitRes, err error) {
+	pubKey, err := tonconnect.ParseStateInit(request.StateInit)
+	if err != nil {
+		return &oas.BadRequest{Error: err.Error()}, nil
+	}
+
+	return &oas.GetPubKeyByStateInitOK{PublicKey: hex.EncodeToString(pubKey)}, nil
 }

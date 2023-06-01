@@ -972,6 +972,7 @@ func (*BadRequest) getNftCollectionRes()             {}
 func (*BadRequest) getNftItemByAddressRes()          {}
 func (*BadRequest) getNftItemsByAddressesRes()       {}
 func (*BadRequest) getNftItemsByOwnerRes()           {}
+func (*BadRequest) getPubKeyByStateInitRes()         {}
 func (*BadRequest) getRatesRes()                     {}
 func (*BadRequest) getRawAccountRes()                {}
 func (*BadRequest) getSearchAccountsRes()            {}
@@ -1951,6 +1952,36 @@ func (s *GetNftItemsByAddressesReq) SetAccountIds(val []string) {
 	s.AccountIds = val
 }
 
+type GetPubKeyByStateInitOK struct {
+	PublicKey string `json:"public_key"`
+}
+
+// GetPublicKey returns the value of PublicKey.
+func (s GetPubKeyByStateInitOK) GetPublicKey() string {
+	return s.PublicKey
+}
+
+// SetPublicKey sets the value of PublicKey.
+func (s *GetPubKeyByStateInitOK) SetPublicKey(val string) {
+	s.PublicKey = val
+}
+
+func (*GetPubKeyByStateInitOK) getPubKeyByStateInitRes() {}
+
+type GetPubKeyByStateInitReq struct {
+	StateInit string `json:"state_init"`
+}
+
+// GetStateInit returns the value of StateInit.
+func (s GetPubKeyByStateInitReq) GetStateInit() string {
+	return s.StateInit
+}
+
+// SetStateInit sets the value of StateInit.
+func (s *GetPubKeyByStateInitReq) SetStateInit(val string) {
+	s.StateInit = val
+}
+
 type GetRatesOK struct {
 	Rates jx.Raw `json:"rates"`
 }
@@ -2083,6 +2114,7 @@ func (*InternalError) getNftCollectionsRes()            {}
 func (*InternalError) getNftItemByAddressRes()          {}
 func (*InternalError) getNftItemsByAddressesRes()       {}
 func (*InternalError) getNftItemsByOwnerRes()           {}
+func (*InternalError) getPubKeyByStateInitRes()         {}
 func (*InternalError) getRatesRes()                     {}
 func (*InternalError) getRawAccountRes()                {}
 func (*InternalError) getSearchAccountsRes()            {}
@@ -6297,6 +6329,7 @@ func (*UnauthorizedError) getNftCollectionsRes()            {}
 func (*UnauthorizedError) getNftItemByAddressRes()          {}
 func (*UnauthorizedError) getNftItemsByAddressesRes()       {}
 func (*UnauthorizedError) getNftItemsByOwnerRes()           {}
+func (*UnauthorizedError) getPubKeyByStateInitRes()         {}
 func (*UnauthorizedError) getRatesRes()                     {}
 func (*UnauthorizedError) getRawAccountRes()                {}
 func (*UnauthorizedError) getSearchAccountsRes()            {}

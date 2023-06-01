@@ -4,13 +4,14 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"math/big"
+
 	"github.com/tonkeeper/opentonapi/internal/g"
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
 	"github.com/tonkeeper/tongo/boc"
 	"github.com/tonkeeper/tongo/tep64"
-	"math/big"
 )
 
 func (s *LiteStorage) GetNFTs(ctx context.Context, accounts []tongo.AccountID) ([]core.NftItem, error) {
@@ -45,7 +46,7 @@ func (s *LiteStorage) GetNftCollectionByCollectionAddress(ctx context.Context, a
 	if err != nil {
 		return core.NftCollection{}, err
 	}
-	fullContent, err := tep64.DecodeFullContent(&content)
+	fullContent, err := tep64.DecodeFullContentFromCell(&content)
 	if err != nil {
 		return core.NftCollection{}, err
 	}

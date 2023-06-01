@@ -1243,6 +1243,33 @@ paths:
           $ref: '#/components/responses/UnauthorizedError'
         '500':
           $ref: '#/components/responses/InternalError'
+  /v2/tonconnect/stateinit:
+    post:
+      description: ""
+      operationId: getPubKeyByStateInit
+      tags:
+        - Connect
+      requestBody:
+        $ref: "#/components/requestBodies/TonConnectStateInit"
+      responses:
+        '200':
+          description: "public key"
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - public_key
+                properties:
+                  public_key:
+                    type: string
+                    example: "NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2ODQ3..."
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalError'
   
   /v2/wallet/backup:
     get:
@@ -1506,6 +1533,18 @@ components:
           schema:
             type: string
             format: binary
+    TonConnectStateInit:
+      description: "Data that is expected"
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - state_init
+            properties:
+              state_init:
+                type: string
 
   schemas:
     Error:

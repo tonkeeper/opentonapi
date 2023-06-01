@@ -113,6 +113,10 @@ type GetNftItemsByOwnerRes interface {
 	getNftItemsByOwnerRes()
 }
 
+type GetPubKeyByStateInitRes interface {
+	getPubKeyByStateInitRes()
+}
+
 type GetRatesRes interface {
 	getRatesRes()
 }
