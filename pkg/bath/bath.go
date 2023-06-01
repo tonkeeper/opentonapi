@@ -83,3 +83,14 @@ func recursiveMerge(bubble *Bubble, s Straw) bool {
 	}
 	return false
 }
+
+func (l *ActionsList) Extra(account tongo.AccountID) int64 {
+	var extra int64
+	if flow, ok := l.ValueFlow.Accounts[account]; ok {
+		extra = -flow.Fees
+	}
+	for _, action := range l.Actions {
+		extra = action.ContributeToExtra(account, extra)
+	}
+	return extra
+}

@@ -116,3 +116,15 @@ func (b BubbleTx) ToAction(book addressBook) *Action {
 func (b BubbleTx) operation(name string) bool {
 	return b.decodedBody != nil && b.decodedBody.Operation == name
 }
+
+func (b BubbleTx) tonAttached() HiddenTonValue {
+	var senderAddr tongo.AccountID
+	if b.inputFrom != nil {
+		senderAddr = b.inputFrom.Address
+	}
+	return HiddenTonValue{
+		Amount:   b.inputAmount,
+		Sender:   senderAddr,
+		Receiver: b.account.Address,
+	}
+}

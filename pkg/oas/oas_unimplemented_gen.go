@@ -58,6 +58,15 @@ func (UnimplementedHandler) EmulateMessageToTrace(ctx context.Context, req Emula
 	return r, ht.ErrNotImplemented
 }
 
+// EmulateWalletMessage implements emulateWalletMessage operation.
+//
+// Emulate sending message to blockchain.
+//
+// POST /v2/wallet/emulate
+func (UnimplementedHandler) EmulateWalletMessage(ctx context.Context, req EmulateWalletMessageReq, params EmulateWalletMessageParams) (r EmulateWalletMessageRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // ExecGetMethod implements execGetMethod operation.
 //
 // Execute get method for account.

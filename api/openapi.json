@@ -484,6 +484,12 @@
       "example": "e8b0e3fee4a26bd2317ac1f9952fcdc87dc08fdb617656b5202416323337372e",
       "type": "string"
      },
+     "extra": {
+      "description": "TODO",
+      "example": 3,
+      "format": "int64",
+      "type": "integer"
+     },
      "fee": {
       "$ref": "#/components/schemas/Fee",
       "deprecated": true
@@ -507,9 +513,6 @@
       "example": 1234567890,
       "format": "int64",
       "type": "integer"
-     },
-     "value_flow": {
-      "$ref": "#/components/schemas/ValueFlow"
      }
     },
     "required": [
@@ -517,11 +520,11 @@
      "timestamp",
      "actions",
      "fee",
-     "value_flow",
      "account",
      "is_scam",
      "lt",
-     "in_progress"
+     "in_progress",
+     "extra"
     ],
     "type": "object"
    },
@@ -1583,6 +1586,26 @@
     ],
     "type": "object"
    },
+   "JettonQuantity": {
+    "properties": {
+     "jetton": {
+      "$ref": "#/components/schemas/JettonPreview"
+     },
+     "quantity": {
+      "example": 597968399,
+      "type": "string"
+     },
+     "wallet_address": {
+      "$ref": "#/components/schemas/AccountAddress"
+     }
+    },
+    "required": [
+     "quantity",
+     "wallet_address",
+     "jetton"
+    ],
+    "type": "object"
+   },
    "JettonTransferAction": {
     "properties": {
      "amount": {
@@ -1719,6 +1742,25 @@
      "import_fee",
      "created_at",
      "decoded_body"
+    ],
+    "type": "object"
+   },
+   "MessageConsequences": {
+    "properties": {
+     "event": {
+      "$ref": "#/components/schemas/AccountEvent"
+     },
+     "risk": {
+      "$ref": "#/components/schemas/Risk"
+     },
+     "trace": {
+      "$ref": "#/components/schemas/Trace"
+     }
+    },
+    "required": [
+     "trace",
+     "risk",
+     "event"
     ],
     "type": "object"
    },
@@ -2117,6 +2159,34 @@
     "required": [
      "type",
      "origin"
+    ],
+    "type": "object"
+   },
+   "Risk": {
+    "description": "Risk specifies assets that could be lost if a message would be sent to a malicious smart contract. It makes sense to understand the risk BEFORE sending a message to the blockchain.",
+    "properties": {
+     "jettons": {
+      "items": {
+       "$ref": "#/components/schemas/JettonQuantity"
+      },
+      "type": "array"
+     },
+     "nfts": {
+      "items": {
+       "$ref": "#/components/schemas/NftItem"
+      },
+      "type": "array"
+     },
+     "ton": {
+      "example": 500,
+      "format": "int64",
+      "type": "integer"
+     }
+    },
+    "required": [
+     "ton",
+     "jettons",
+     "nfts"
     ],
     "type": "object"
    },
@@ -4813,6 +4883,44 @@
     },
     "tags": [
      "Wallet"
+    ]
+   }
+  },
+  "/v2/wallet/emulate": {
+   "post": {
+    "description": "Emulate sending message to blockchain",
+    "operationId": "emulateWalletMessage",
+    "parameters": [
+     {
+      "$ref": "#/components/parameters/i18n"
+     }
+    ],
+    "requestBody": {
+     "$ref": "#/components/requestBodies/Boc"
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/MessageConsequences"
+        }
+       }
+      },
+      "description": "event"
+     },
+     "400": {
+      "$ref": "#/components/responses/BadRequest"
+     },
+     "401": {
+      "$ref": "#/components/responses/UnauthorizedError"
+     },
+     "500": {
+      "$ref": "#/components/responses/InternalError"
+     }
+    },
+    "tags": [
+     "Emulation"
     ]
    }
   }
