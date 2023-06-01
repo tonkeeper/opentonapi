@@ -132,24 +132,7 @@
          "Recipient": "0:533f30de5722157b8471f5503b9fc5800c8d8397e79743f796b11e609adae69f",
          "Sender": "0:4495a1921ab497b0eacee0d78838f8aeaba12481c29ec592c7fd5cbdd5b5ad0e",
          "Nft": "0:63864e10646c9a2214651aec6dddf3379da9273a99c83fcce23c77da188b1348",
-         "Refund": null,
-         "TonAttached": [
-           {
-             "Amount": 984999000,
-             "Sender": "0:4495a1921ab497b0eacee0d78838f8aeaba12481c29ec592c7fd5cbdd5b5ad0e",
-             "Receiver": "0:63864e10646c9a2214651aec6dddf3379da9273a99c83fcce23c77da188b1348"
-           },
-           {
-             "Amount": 30000000,
-             "Sender": "0:63864e10646c9a2214651aec6dddf3379da9273a99c83fcce23c77da188b1348",
-             "Receiver": "0:533f30de5722157b8471f5503b9fc5800c8d8397e79743f796b11e609adae69f"
-           },
-           {
-             "Amount": 943852956,
-             "Sender": "0:63864e10646c9a2214651aec6dddf3379da9273a99c83fcce23c77da188b1348",
-             "Receiver": "0:533f30de5722157b8471f5503b9fc5800c8d8397e79743f796b11e609adae69f"
-           }
-         ]
+         "Refund": null
        },
        "GetGemsNftPurchase": null,
        "JettonTransfer": null,

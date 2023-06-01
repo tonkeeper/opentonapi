@@ -236,7 +236,7 @@ func (h Handler) EmulateWalletMessage(ctx context.Context, req oas.EmulateWallet
 		return &oas.InternalError{Error: err.Error()}, nil
 	}
 	t := convertTrace(*trace, h.addressBook)
-	result, err := bath.FindActions(trace)
+	result, err := bath.FindActions(trace, bath.ForAccount(*walletAddress))
 	if err != nil {
 		return &oas.InternalError{Error: err.Error()}, nil
 	}

@@ -78,18 +78,16 @@ type (
 	}
 
 	NftTransferAction struct {
-		Comment     *string
-		Recipient   *tongo.AccountID
-		Sender      *tongo.AccountID
-		Nft         tongo.AccountID
-		Refund      *Refund
-		TonAttached []HiddenTonValue
+		Comment   *string
+		Recipient *tongo.AccountID
+		Sender    *tongo.AccountID
+		Nft       tongo.AccountID
+		Refund    *Refund
 	}
 
 	GetGemsNftPurchaseAction struct {
-		Nft         tongo.AccountID
-		NewOwner    tongo.AccountID
-		TonAttached []HiddenTonValue
+		Nft      tongo.AccountID
+		NewOwner tongo.AccountID
 	}
 
 	JettonTransferAction struct {
@@ -101,7 +99,6 @@ type (
 		SendersWallet    tongo.AccountID
 		Amount           tlb.VarUInteger16
 		Refund           *Refund
-		TonAttached      []HiddenTonValue
 	}
 
 	ContractDeployAction struct {
@@ -157,59 +154,32 @@ func CollectActionsAndValueFlow(bubble *Bubble, forAccount *tongo.AccountID, boo
 	return actions, valueFlow
 }
 
-func (a *Action) actions() []extraContributor {
-	// TODO: does it make sense to use reflection to go over the fields of this action?
-	all := []extraContributor{
-		a.TonTransfer,
-		a.SmartContractExec,
-		a.NftItemTransfer,
-		a.GetGemsNftPurchase,
-		a.JettonTransfer,
-		a.Subscription,
+func (a Action) ContributeToExtra(account tongo.AccountID, extra int64) int64 {
+	if a.TonTransfer != nil {
+		return a.TonTransfer.ContributeToExtra(account, extra)
 	}
-	var result []extraContributor
-	for _, action := range all {
-		if action == nil {
-			continue
-		}
-		result = append(result, action)
-	}
-	return result
-}
-
-func (a *Action) ContributeToExtra(account tongo.AccountID, extra int64) int64 {
-	for _, action := range a.actions() {
-		extra = action.ContributeToExtra(account, extra)
+	if a.SmartContractExec != nil {
+		return a.SmartContractExec.ContributeToExtra(account, extra)
 	}
 	return extra
 }
 
-// extraContributor defines a method that must be implemented by an action.
-// The method below are used to measure extra BEFORE sending a message to the blockchain.
-type extraContributor interface {
-	ContributeToExtra(account tongo.AccountID, extra int64) int64
-}
-
 func (a *TonTransferAction) ContributeToExtra(account tongo.AccountID, extra int64) int64 {
+	if a.Sender == account {
+		return extra - a.Amount
+	}
+	if a.Recipient == account {
+		return extra + a.Amount
+	}
 	return extra
 }
 
 func (a *SmartContractAction) ContributeToExtra(account tongo.AccountID, extra int64) int64 {
-	return extra
-}
-
-func (a *NftTransferAction) ContributeToExtra(account tongo.AccountID, extra int64) int64 {
-	return extra + getTotalHiddenAmount(account, a.TonAttached)
-}
-
-func (a *GetGemsNftPurchaseAction) ContributeToExtra(account tongo.AccountID, extra int64) int64 {
-	return extra
-}
-
-func (a *JettonTransferAction) ContributeToExtra(account tongo.AccountID, extra int64) int64 {
-	return extra + getTotalHiddenAmount(account, a.TonAttached)
-}
-
-func (a *SubscriptionAction) ContributeToExtra(account tongo.AccountID, extra int64) int64 {
+	if a.Executor == account {
+		return extra - a.TonAttached
+	}
+	if a.Contract == account {
+		return extra + a.TonAttached
+	}
 	return extra
 }

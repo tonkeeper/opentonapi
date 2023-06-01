@@ -13,29 +13,7 @@
          "RecipientsWallet": "0:54d72ac7254c6e4b4a5a3066d41fc7f3f1f604fdf40d6784d6778f3b874e09da",
          "SendersWallet": "0:54d72ac7254c6e4b4a5a3066d41fc7f3f1f604fdf40d6784d6778f3b874e09da",
          "Amount": "1000000",
-         "Refund": null,
-         "TonAttached": [
-           {
-             "Amount": 640000000,
-             "Sender": "0:2cf3b5b8c891e517c9addbda1c0386a09ccacbb0e3faf630b51cfc8152325acb",
-             "Receiver": "0:54d72ac7254c6e4b4a5a3066d41fc7f3f1f604fdf40d6784d6778f3b874e09da"
-           },
-           {
-             "Amount": 621055000,
-             "Sender": "0:54d72ac7254c6e4b4a5a3066d41fc7f3f1f604fdf40d6784d6778f3b874e09da",
-             "Receiver": "0:54d72ac7254c6e4b4a5a3066d41fc7f3f1f604fdf40d6784d6778f3b874e09da"
-           },
-           {
-             "Amount": 1,
-             "Sender": "0:54d72ac7254c6e4b4a5a3066d41fc7f3f1f604fdf40d6784d6778f3b874e09da",
-             "Receiver": "0:2cf3b5b8c891e517c9addbda1c0386a09ccacbb0e3faf630b51cfc8152325acb"
-           },
-           {
-             "Amount": 603169613,
-             "Sender": "0:54d72ac7254c6e4b4a5a3066d41fc7f3f1f604fdf40d6784d6778f3b874e09da",
-             "Receiver": "0:2cf3b5b8c891e517c9addbda1c0386a09ccacbb0e3faf630b51cfc8152325acb"
-           }
-         ]
+         "Refund": null
        },
        "ContractDeploy": null,
        "Subscription": null,

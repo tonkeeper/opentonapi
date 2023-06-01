@@ -32,19 +32,16 @@ func FindNFTTransfer(bubble *Bubble) bool {
 		return false
 	}
 	transfer := nftBubble.decodedBody.Value.(abi.NftTransferMsgBody)
-	nftTransfer := BubbleNftTransfer{
-		success:   nftBubble.success,
-		account:   nftBubble.account,
-		sender:    nftBubble.inputFrom,
-		recipient: parseAccount(transfer.NewOwner),
-		payload:   cellToTextComment(boc.Cell(transfer.ForwardPayload.Value)),
-	}
 	newBubble := Bubble{
+		Info: BubbleNftTransfer{
+			success:   nftBubble.success,
+			account:   nftBubble.account,
+			sender:    nftBubble.inputFrom,
+			recipient: parseAccount(transfer.NewOwner),
+			payload:   cellToTextComment(boc.Cell(transfer.ForwardPayload.Value)),
+		},
 		Accounts:  append(bubble.Accounts, nftBubble.account.Address),
 		ValueFlow: bubble.ValueFlow,
-	}
-	hiddenAttachments := []HiddenTonValue{
-		nftBubble.tonAttached(),
 	}
 	newBubble.Children = ProcessChildren(bubble.Children,
 		func(child *Bubble) *Merge {
@@ -55,7 +52,6 @@ func FindNFTTransfer(bubble *Bubble) bool {
 			if !tx.operation(abi.ExcessMsgOp) {
 				return nil
 			}
-			hiddenAttachments = append(hiddenAttachments, tx.tonAttached())
 			newBubble.ValueFlow.Merge(child.ValueFlow)
 			newBubble.Accounts = append(newBubble.Accounts, child.Accounts...)
 			return &Merge{children: child.Children}
@@ -68,33 +64,28 @@ func FindNFTTransfer(bubble *Bubble) bool {
 			if !tx.operation(abi.NftOwnershipAssignedMsgOp) {
 				return nil
 			}
-			hiddenAttachments = append(hiddenAttachments, tx.tonAttached())
 			newBubble.Accounts = append(newBubble.Accounts, child.Accounts...)
 			newBubble.ValueFlow.Merge(child.ValueFlow)
 			return &Merge{children: child.Children}
 		})
-	nftTransfer.hiddenTons = hiddenAttachments
-	newBubble.Info = nftTransfer
 	*bubble = newBubble
 	return true
 }
 
 type BubbleNftTransfer struct {
-	success    bool
-	account    Account
-	sender     *Account
-	recipient  *Account
-	payload    any //todo: replace any
-	hiddenTons []HiddenTonValue
+	success   bool
+	account   Account
+	sender    *Account
+	recipient *Account
+	payload   any //todo: replace any
 }
 
 func (b BubbleNftTransfer) ToAction(book addressBook) (action *Action) {
 	a := Action{
 		NftItemTransfer: &NftTransferAction{
-			Recipient:   b.recipient.Addr(),
-			Sender:      b.sender.Addr(),
-			Nft:         b.account.Address,
-			TonAttached: b.hiddenTons,
+			Recipient: b.recipient.Addr(),
+			Sender:    b.sender.Addr(),
+			Nft:       b.account.Address,
 		},
 		Success: b.success,
 		Type:    NftItemTransfer,
@@ -147,9 +138,6 @@ func FindJettonTransfer(bubble *Bubble) bool {
 			Address: *recipient,
 		},
 		payload: cellToTextComment(boc.Cell(intention.ForwardPayload.Value)),
-		hiddenTons: []HiddenTonValue{
-			transferBubbleInfo.tonAttached(),
-		},
 	}
 	if master, ok := transferBubbleInfo.additionalInfo["jetton_master"]; ok {
 		transfer.master, _ = master.(tongo.AccountID)
@@ -173,7 +161,6 @@ func FindJettonTransfer(bubble *Bubble) bool {
 				if receiveBubbleInfo.success {
 					transfer.success = true
 				}
-				transfer.hiddenTons = append(transfer.hiddenTons, receiveBubbleInfo.tonAttached())
 				transfer.recipientWallet = receiveBubbleInfo.account.Address
 				newBubble.Accounts = append(newBubble.Accounts, child.Accounts...)
 				children := ProcessChildren(child.Children,
@@ -185,7 +172,6 @@ func FindJettonTransfer(bubble *Bubble) bool {
 						if !tx.operation(abi.ExcessMsgOp) {
 							return nil
 						}
-						transfer.hiddenTons = append(transfer.hiddenTons, tx.tonAttached())
 						newBubble.ValueFlow.Merge(excess.ValueFlow)
 						newBubble.Accounts = append(newBubble.Accounts, excess.Accounts...)
 						return &Merge{children: excess.Children}
@@ -202,7 +188,6 @@ func FindJettonTransfer(bubble *Bubble) bool {
 						if transfer.recipient.Address != tx.account.Address {
 							transfer.success = false
 						}
-						transfer.hiddenTons = append(transfer.hiddenTons, tx.tonAttached())
 						transfer.recipient.Interfaces = tx.account.Interfaces
 						newBubble.ValueFlow.Merge(notify.ValueFlow)
 						newBubble.Accounts = append(newBubble.Accounts, notify.Accounts...)
@@ -227,7 +212,6 @@ type BubbleJettonTransfer struct {
 	amount                        tlb.VarUInteger16
 	success                       bool
 	payload                       any
-	hiddenTons                    []HiddenTonValue
 }
 
 func (b BubbleJettonTransfer) ToAction(book addressBook) (action *Action) {
@@ -246,7 +230,6 @@ func (b BubbleJettonTransfer) ToAction(book addressBook) (action *Action) {
 			RecipientsWallet: b.recipientWallet,
 			SendersWallet:    b.senderWallet,
 			Amount:           b.amount,
-			TonAttached:      b.hiddenTons,
 		},
 		Success: b.success,
 		Type:    JettonTransfer,

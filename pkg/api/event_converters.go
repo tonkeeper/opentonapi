@@ -177,7 +177,7 @@ func (h Handler) toAccountEvent(ctx context.Context, account tongo.AccountID, tr
 		IsScam:     false,
 		Lt:         int64(trace.Lt),
 		InProgress: trace.InProgress(),
-		Extra:      result.Extra(account),
+		Extra:      result.Extra(account, trace),
 	}
 	for _, a := range result.Actions {
 		convertedAction, spamDetected := h.convertAction(ctx, a, lang)
