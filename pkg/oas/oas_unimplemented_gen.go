@@ -274,6 +274,13 @@ func (UnimplementedHandler) GetNftItemsByOwner(ctx context.Context, params GetNf
 	return r, ht.ErrNotImplemented
 }
 
+// GetPubKeyByStateInit implements getPubKeyByStateInit operation.
+//
+// POST /v2/tonconnect/stateinit
+func (UnimplementedHandler) GetPubKeyByStateInit(ctx context.Context, req GetPubKeyByStateInitReq) (r GetPubKeyByStateInitRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // GetRates implements getRates operation.
 //
 // Get the token price to the currency.

@@ -1101,8 +1101,8 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 					break
 				}
 				switch elem[0] {
-				case 'o': // Prefix: "onconnect/p"
-					if l := len("onconnect/p"); len(elem) >= l && elem[0:l] == "onconnect/p" {
+				case 'o': // Prefix: "onconnect/"
+					if l := len("onconnect/"); len(elem) >= l && elem[0:l] == "onconnect/" {
 						elem = elem[l:]
 					} else {
 						break
@@ -1112,26 +1112,56 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 						break
 					}
 					switch elem[0] {
-					case 'a': // Prefix: "ayload"
-						if l := len("ayload"); len(elem) >= l && elem[0:l] == "ayload" {
+					case 'p': // Prefix: "p"
+						if l := len("p"); len(elem) >= l && elem[0:l] == "p" {
 							elem = elem[l:]
 						} else {
 							break
 						}
 
 						if len(elem) == 0 {
-							// Leaf node.
-							switch r.Method {
-							case "GET":
-								s.handleGetTonConnectPayloadRequest([0]string{}, w, r)
-							default:
-								s.notAllowed(w, r, "GET")
+							break
+						}
+						switch elem[0] {
+						case 'a': // Prefix: "ayload"
+							if l := len("ayload"); len(elem) >= l && elem[0:l] == "ayload" {
+								elem = elem[l:]
+							} else {
+								break
 							}
 
-							return
+							if len(elem) == 0 {
+								// Leaf node.
+								switch r.Method {
+								case "GET":
+									s.handleGetTonConnectPayloadRequest([0]string{}, w, r)
+								default:
+									s.notAllowed(w, r, "GET")
+								}
+
+								return
+							}
+						case 'r': // Prefix: "roof"
+							if l := len("roof"); len(elem) >= l && elem[0:l] == "roof" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							if len(elem) == 0 {
+								// Leaf node.
+								switch r.Method {
+								case "POST":
+									s.handleTonConnectProofRequest([0]string{}, w, r)
+								default:
+									s.notAllowed(w, r, "POST")
+								}
+
+								return
+							}
 						}
-					case 'r': // Prefix: "roof"
-						if l := len("roof"); len(elem) >= l && elem[0:l] == "roof" {
+					case 's': // Prefix: "stateinit"
+						if l := len("stateinit"); len(elem) >= l && elem[0:l] == "stateinit" {
 							elem = elem[l:]
 						} else {
 							break
@@ -1141,7 +1171,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 							// Leaf node.
 							switch r.Method {
 							case "POST":
-								s.handleTonConnectProofRequest([0]string{}, w, r)
+								s.handleGetPubKeyByStateInitRequest([0]string{}, w, r)
 							default:
 								s.notAllowed(w, r, "POST")
 							}
@@ -2358,8 +2388,8 @@ func (s *Server) FindRoute(method, path string) (r Route, _ bool) {
 					break
 				}
 				switch elem[0] {
-				case 'o': // Prefix: "onconnect/p"
-					if l := len("onconnect/p"); len(elem) >= l && elem[0:l] == "onconnect/p" {
+				case 'o': // Prefix: "onconnect/"
+					if l := len("onconnect/"); len(elem) >= l && elem[0:l] == "onconnect/" {
 						elem = elem[l:]
 					} else {
 						break
@@ -2369,28 +2399,60 @@ func (s *Server) FindRoute(method, path string) (r Route, _ bool) {
 						break
 					}
 					switch elem[0] {
-					case 'a': // Prefix: "ayload"
-						if l := len("ayload"); len(elem) >= l && elem[0:l] == "ayload" {
+					case 'p': // Prefix: "p"
+						if l := len("p"); len(elem) >= l && elem[0:l] == "p" {
 							elem = elem[l:]
 						} else {
 							break
 						}
 
 						if len(elem) == 0 {
-							switch method {
-							case "GET":
-								// Leaf: GetTonConnectPayload
-								r.name = "GetTonConnectPayload"
-								r.operationID = "getTonConnectPayload"
-								r.args = args
-								r.count = 0
-								return r, true
-							default:
-								return
+							break
+						}
+						switch elem[0] {
+						case 'a': // Prefix: "ayload"
+							if l := len("ayload"); len(elem) >= l && elem[0:l] == "ayload" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							if len(elem) == 0 {
+								switch method {
+								case "GET":
+									// Leaf: GetTonConnectPayload
+									r.name = "GetTonConnectPayload"
+									r.operationID = "getTonConnectPayload"
+									r.args = args
+									r.count = 0
+									return r, true
+								default:
+									return
+								}
+							}
+						case 'r': // Prefix: "roof"
+							if l := len("roof"); len(elem) >= l && elem[0:l] == "roof" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							if len(elem) == 0 {
+								switch method {
+								case "POST":
+									// Leaf: TonConnectProof
+									r.name = "TonConnectProof"
+									r.operationID = "tonConnectProof"
+									r.args = args
+									r.count = 0
+									return r, true
+								default:
+									return
+								}
 							}
 						}
-					case 'r': // Prefix: "roof"
-						if l := len("roof"); len(elem) >= l && elem[0:l] == "roof" {
+					case 's': // Prefix: "stateinit"
+						if l := len("stateinit"); len(elem) >= l && elem[0:l] == "stateinit" {
 							elem = elem[l:]
 						} else {
 							break
@@ -2399,9 +2461,9 @@ func (s *Server) FindRoute(method, path string) (r Route, _ bool) {
 						if len(elem) == 0 {
 							switch method {
 							case "POST":
-								// Leaf: TonConnectProof
-								r.name = "TonConnectProof"
-								r.operationID = "tonConnectProof"
+								// Leaf: GetPubKeyByStateInit
+								r.name = "GetPubKeyByStateInit"
+								r.operationID = "getPubKeyByStateInit"
 								r.args = args
 								r.count = 0
 								return r, true

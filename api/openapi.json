@@ -273,6 +273,25 @@
     },
     "description": "Data that is expected from TON Connect",
     "required": true
+   },
+   "TonConnectStateInit": {
+    "content": {
+     "application/json": {
+      "schema": {
+       "properties": {
+        "state_init": {
+         "type": "string"
+        }
+       },
+       "required": [
+        "state_init"
+       ],
+       "type": "object"
+      }
+     }
+    },
+    "description": "Data that is expected",
+    "required": true
    }
   },
   "responses": {
@@ -4586,6 +4605,48 @@
        }
       },
       "description": "token"
+     },
+     "400": {
+      "$ref": "#/components/responses/BadRequest"
+     },
+     "401": {
+      "$ref": "#/components/responses/UnauthorizedError"
+     },
+     "500": {
+      "$ref": "#/components/responses/InternalError"
+     }
+    },
+    "tags": [
+     "Connect"
+    ]
+   }
+  },
+  "/v2/tonconnect/stateinit": {
+   "post": {
+    "description": "",
+    "operationId": "getPubKeyByStateInit",
+    "requestBody": {
+     "$ref": "#/components/requestBodies/TonConnectStateInit"
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "public_key": {
+           "example": "NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2ODQ3...",
+           "type": "string"
+          }
+         },
+         "required": [
+          "public_key"
+         ],
+         "type": "object"
+        }
+       }
+      },
+      "description": "public key"
      },
      "400": {
       "$ref": "#/components/responses/BadRequest"
