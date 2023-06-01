@@ -1,6 +1,8 @@
 package core
 
-import "github.com/tonkeeper/tongo/abi"
+import (
+	"github.com/tonkeeper/tongo/abi"
+)
 
 type Trace struct {
 	// Transaction is slightly modified.

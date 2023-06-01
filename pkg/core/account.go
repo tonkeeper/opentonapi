@@ -5,6 +5,7 @@ import (
 
 	"github.com/shopspring/decimal"
 	"github.com/tonkeeper/tongo"
+	"github.com/tonkeeper/tongo/abi"
 )
 
 // Account holds low-level details about a particular account taken directly from the blockchain.
@@ -39,4 +40,16 @@ type AccountInfo struct {
 	Name         *string
 	Icon         *string
 	IsScam       *bool
+}
+
+// HasAnyIntefaceImplemented returns true if this account implements at least one of the given interfaces.
+func (acc *Account) HasAnyIntefaceImplemented(interfaces ...abi.ContractInterface) bool {
+	for _, implemented := range acc.Interfaces {
+		for _, iface := range interfaces {
+			if implemented == string(iface) {
+				return true
+			}
+		}
+	}
+	return false
 }

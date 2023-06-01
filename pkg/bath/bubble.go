@@ -4,12 +4,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/tonkeeper/tongo"
-	"github.com/tonkeeper/tongo/abi"
-	"github.com/tonkeeper/tongo/tlb"
-	"golang.org/x/exp/slices"
-
 	"github.com/tonkeeper/opentonapi/pkg/core"
+	"github.com/tonkeeper/tongo"
+	"github.com/tonkeeper/tongo/tlb"
 )
 
 // Bubble represents a transaction in the beginning.
@@ -40,22 +37,6 @@ func (b Bubble) String() string {
 
 type actioner interface {
 	ToAction(book addressBook) *Action
-}
-
-type Account struct {
-	Address    tongo.AccountID
-	Interfaces []abi.ContractInterface
-}
-
-func (a *Account) Addr() *tongo.AccountID {
-	if a == nil {
-		return nil
-	}
-	return &a.Address
-}
-
-func (a Account) Is(i abi.ContractInterface) bool {
-	return slices.Contains(a.Interfaces, i)
 }
 
 func FromTrace(trace *core.Trace) *Bubble {
