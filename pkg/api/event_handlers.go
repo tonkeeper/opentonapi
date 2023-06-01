@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/tonkeeper/tongo/abi"
 	"github.com/tonkeeper/tongo/boc"
 	"github.com/tonkeeper/tongo/tlb"
 	"github.com/tonkeeper/tongo/txemulator"
@@ -211,9 +212,16 @@ func (h Handler) EmulateWalletMessage(ctx context.Context, req oas.EmulateWallet
 	if err != nil {
 		return &oas.BadRequest{Error: err.Error()}, nil
 	}
-	account, err := extractDestinationWallet(m)
+	walletAddress, err := extractDestinationWallet(m)
 	if err != nil {
 		return &oas.BadRequest{err.Error()}, nil
+	}
+	account, err := h.storage.GetRawAccount(ctx, *walletAddress)
+	if err != nil {
+		return &oas.InternalError{Error: err.Error()}, err
+	}
+	if !account.HasAnyIntefaceImplemented(abi.WalletV3R1, abi.WalletV3R2, abi.WalletV4R1, abi.WalletV4R2) {
+		return &oas.InternalError{Error: "can't emulate message for non-wallet contract"}, nil
 	}
 	emulator, err := txemulator.NewTraceBuilder()
 	if err != nil {
@@ -232,7 +240,7 @@ func (h Handler) EmulateWalletMessage(ctx context.Context, req oas.EmulateWallet
 	if err != nil {
 		return &oas.InternalError{Error: err.Error()}, nil
 	}
-	event := h.toAccountEvent(ctx, *account, trace, result, params.AcceptLanguage)
+	event := h.toAccountEvent(ctx, *walletAddress, trace, result, params.AcceptLanguage)
 	consequences := oas.MessageConsequences{
 		Trace: t,
 		Event: event,
