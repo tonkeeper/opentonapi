@@ -3,6 +3,7 @@ package litestorage
 import (
 	"context"
 	"fmt"
+	"github.com/prometheus/client_golang/prometheus"
 
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
@@ -11,6 +12,10 @@ import (
 )
 
 func (s *LiteStorage) GetTrace(ctx context.Context, hash tongo.Bits256) (*core.Trace, error) {
+	timer := prometheus.NewTimer(prometheus.ObserverFunc(func(v float64) {
+		storageTimeHistogramVec.WithLabelValues("get_trace").Observe(v)
+	}))
+	defer timer.ObserveDuration()
 	tx, err := s.GetTransaction(ctx, hash)
 	if err != nil {
 		return nil, err

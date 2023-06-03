@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"github.com/prometheus/client_golang/prometheus"
 
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/opentonapi/pkg/references"
@@ -12,6 +13,10 @@ import (
 )
 
 func (s *LiteStorage) GetWhalesPoolMemberInfo(ctx context.Context, pool, member tongo.AccountID) (core.WhalesNominator, error) {
+	timer := prometheus.NewTimer(prometheus.ObserverFunc(func(v float64) {
+		storageTimeHistogramVec.WithLabelValues("get_whales_pool_member_info").Observe(v)
+	}))
+	defer timer.ObserveDuration()
 	_, value, err := abi.GetMember(ctx, s.client, pool, member.ToMsgAddress())
 	if err != nil {
 		return core.WhalesNominator{}, err
@@ -34,6 +39,10 @@ func (s *LiteStorage) GetWhalesPoolMemberInfo(ctx context.Context, pool, member 
 }
 
 func (s *LiteStorage) GetParticipatingInWhalesPools(ctx context.Context, member tongo.AccountID) ([]core.WhalesNominator, error) {
+	timer := prometheus.NewTimer(prometheus.ObserverFunc(func(v float64) {
+		storageTimeHistogramVec.WithLabelValues("get_participating_in_whales_pool").Observe(v)
+	}))
+	defer timer.ObserveDuration()
 	var result []core.WhalesNominator
 	for k := range references.WhalesPools {
 		info, err := s.GetWhalesPoolMemberInfo(ctx, k, member)
@@ -46,6 +55,10 @@ func (s *LiteStorage) GetParticipatingInWhalesPools(ctx context.Context, member 
 }
 
 func (s *LiteStorage) GetWhalesPoolInfo(ctx context.Context, id tongo.AccountID) (abi.GetParams_WhalesNominatorResult, abi.GetStakingStatusResult, int, error) {
+	timer := prometheus.NewTimer(prometheus.ObserverFunc(func(v float64) {
+		storageTimeHistogramVec.WithLabelValues("get_whales_pool_info").Observe(v)
+	}))
+	defer timer.ObserveDuration()
 	var params abi.GetParams_WhalesNominatorResult
 	var status abi.GetStakingStatusResult
 	var ok bool
@@ -74,6 +87,10 @@ func (s *LiteStorage) GetWhalesPoolInfo(ctx context.Context, id tongo.AccountID)
 }
 
 func (s *LiteStorage) GetTFPool(ctx context.Context, pool tongo.AccountID) (core.TFPool, error) {
+	timer := prometheus.NewTimer(prometheus.ObserverFunc(func(v float64) {
+		storageTimeHistogramVec.WithLabelValues("get_tf_pool").Observe(v)
+	}))
+	defer timer.ObserveDuration()
 	t, v, err := abi.GetPoolData(ctx, s.client, pool)
 	if err != nil {
 		return core.TFPool{}, err

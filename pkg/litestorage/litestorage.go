@@ -5,6 +5,8 @@ import (
 	"crypto/ed25519"
 	"errors"
 	"fmt"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promauto"
 	"math/big"
 	"time"
 
@@ -21,6 +23,15 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/tonkeeper/opentonapi/pkg/core"
+)
+
+var storageTimeHistogramVec = promauto.NewHistogramVec(
+	prometheus.HistogramOpts{
+		Name:    "litestorage_functions_time",
+		Help:    "LiteStorage functions execution duration distribution in seconds",
+		Buckets: []float64{0.001, 0.01, 0.05, 0.1, 1, 5, 10},
+	},
+	[]string{"method"},
 )
 
 type LiteStorage struct {
@@ -153,6 +164,10 @@ func (s *LiteStorage) run(ch <-chan indexer.IDandBlock) {
 
 // GetRawAccount returns low-level information about an account taken directly from the blockchain.
 func (s *LiteStorage) GetRawAccount(ctx context.Context, address tongo.AccountID) (*core.Account, error) {
+	timer := prometheus.NewTimer(prometheus.ObserverFunc(func(v float64) {
+		storageTimeHistogramVec.WithLabelValues("get_raw_account").Observe(v)
+	}))
+	defer timer.ObserveDuration()
 	var account tlb.Account
 	err := retry.Do(func() error {
 		state, err := s.client.GetAccountState(ctx, address)
@@ -171,6 +186,10 @@ func (s *LiteStorage) GetRawAccount(ctx context.Context, address tongo.AccountID
 
 // GetRawAccounts returns low-level information about several accounts taken directly from the blockchain.
 func (s *LiteStorage) GetRawAccounts(ctx context.Context, ids []tongo.AccountID) ([]*core.Account, error) {
+	timer := prometheus.NewTimer(prometheus.ObserverFunc(func(v float64) {
+		storageTimeHistogramVec.WithLabelValues("get_raw_accounts").Observe(v)
+	}))
+	defer timer.ObserveDuration()
 	var accounts []*core.Account
 	for _, address := range ids {
 		var account tlb.Account
@@ -212,6 +231,10 @@ func (s *LiteStorage) preloadAccount(a tongo.AccountID) error {
 }
 
 func (s *LiteStorage) GetBlockHeader(ctx context.Context, id tongo.BlockID) (*core.BlockHeader, error) {
+	timer := prometheus.NewTimer(prometheus.ObserverFunc(func(v float64) {
+		storageTimeHistogramVec.WithLabelValues("get_block_header").Observe(v)
+	}))
+	defer timer.ObserveDuration()
 	blockID, _, err := s.client.LookupBlock(ctx, id, 1, nil, nil)
 	if err != nil {
 		return nil, err
@@ -230,6 +253,10 @@ func (s *LiteStorage) GetBlockHeader(ctx context.Context, id tongo.BlockID) (*co
 }
 
 func (s *LiteStorage) LastMasterchainBlockHeader(ctx context.Context) (*core.BlockHeader, error) {
+	timer := prometheus.NewTimer(prometheus.ObserverFunc(func(v float64) {
+		storageTimeHistogramVec.WithLabelValues("get_masterchain").Observe(v)
+	}))
+	defer timer.ObserveDuration()
 	info, err := s.client.GetMasterchainInfo(ctx)
 	if err != nil {
 		return nil, err
@@ -238,6 +265,10 @@ func (s *LiteStorage) LastMasterchainBlockHeader(ctx context.Context) (*core.Blo
 }
 
 func (s *LiteStorage) GetTransaction(ctx context.Context, hash tongo.Bits256) (*core.Transaction, error) {
+	timer := prometheus.NewTimer(prometheus.ObserverFunc(func(v float64) {
+		storageTimeHistogramVec.WithLabelValues("get_transaction").Observe(v)
+	}))
+	defer timer.ObserveDuration()
 	tx, prs := s.transactionsIndexByHash.Load(hash)
 	if prs {
 		return tx, nil
@@ -246,6 +277,10 @@ func (s *LiteStorage) GetTransaction(ctx context.Context, hash tongo.Bits256) (*
 }
 
 func (s *LiteStorage) GetBlockTransactions(ctx context.Context, id tongo.BlockID) ([]*core.Transaction, error) {
+	timer := prometheus.NewTimer(prometheus.ObserverFunc(func(v float64) {
+		storageTimeHistogramVec.WithLabelValues("get_block_transactions").Observe(v)
+	}))
+	defer timer.ObserveDuration()
 	blockID, _, err := s.client.LookupBlock(ctx, id, 1, nil, nil)
 	if err != nil {
 		return nil, err
@@ -262,18 +297,35 @@ func (s *LiteStorage) searchTxInCache(a tongo.AccountID, lt uint64) *core.Transa
 }
 
 func (s *LiteStorage) GetStorageProviders(ctx context.Context) ([]core.StorageProvider, error) {
+	timer := prometheus.NewTimer(prometheus.ObserverFunc(func(v float64) {
+		storageTimeHistogramVec.WithLabelValues("get_storage_providers").Observe(v)
+	}))
+	defer timer.ObserveDuration()
+
 	return nil, errors.New("not implemented")
 }
 
 func (s *LiteStorage) RunSmcMethod(ctx context.Context, id tongo.AccountID, method string, stack tlb.VmStack) (uint32, tlb.VmStack, error) {
+	timer := prometheus.NewTimer(prometheus.ObserverFunc(func(v float64) {
+		storageTimeHistogramVec.WithLabelValues("run_smc_method").Observe(v)
+	}))
+	defer timer.ObserveDuration()
 	return s.client.RunSmcMethod(ctx, id, method, stack)
 }
 
 func (s *LiteStorage) RunSmcMethodByID(ctx context.Context, id tongo.AccountID, method int, stack tlb.VmStack) (uint32, tlb.VmStack, error) {
+	timer := prometheus.NewTimer(prometheus.ObserverFunc(func(v float64) {
+		storageTimeHistogramVec.WithLabelValues("run_smc_method_by_id").Observe(v)
+	}))
+	defer timer.ObserveDuration()
 	return s.client.RunSmcMethodByID(ctx, id, method, stack)
 }
 
 func (s *LiteStorage) GetAccountTransactions(ctx context.Context, id tongo.AccountID, limit int, beforeLt, afterLt uint64) ([]*core.Transaction, error) {
+	timer := prometheus.NewTimer(prometheus.ObserverFunc(func(v float64) {
+		storageTimeHistogramVec.WithLabelValues("get_account_transactions").Observe(v)
+	}))
+	defer timer.ObserveDuration()
 	txs, err := s.client.GetLastTransactions(ctx, id, limit) //todo: custom with beforeLt and afterLt
 	if err != nil {
 		return nil, err
@@ -290,10 +342,18 @@ func (s *LiteStorage) GetAccountTransactions(ctx context.Context, id tongo.Accou
 }
 
 func (s *LiteStorage) FindAllDomainsResolvedToAddress(ctx context.Context, a tongo.AccountID, collections map[tongo.AccountID]string) ([]string, error) {
+	timer := prometheus.NewTimer(prometheus.ObserverFunc(func(v float64) {
+		storageTimeHistogramVec.WithLabelValues("find_all_domains_resolved_to_address").Observe(v)
+	}))
+	defer timer.ObserveDuration()
 	return nil, nil
 }
 
 func (s *LiteStorage) GetWalletPubKey(address tongo.AccountID) (ed25519.PublicKey, error) {
+	timer := prometheus.NewTimer(prometheus.ObserverFunc(func(v float64) {
+		storageTimeHistogramVec.WithLabelValues("get_wallet_by_pubkey").Observe(v)
+	}))
+	defer timer.ObserveDuration()
 	_, result, err := abi.GetPublicKey(context.Background(), s.client, address)
 	if err != nil {
 		return nil, err
@@ -310,9 +370,17 @@ func (s *LiteStorage) GetWalletPubKey(address tongo.AccountID) (ed25519.PublicKe
 }
 
 func (s *LiteStorage) ReindexAccount(ctx context.Context, accountID tongo.AccountID) error {
+	timer := prometheus.NewTimer(prometheus.ObserverFunc(func(v float64) {
+		storageTimeHistogramVec.WithLabelValues("reindex_account").Observe(v)
+	}))
+	defer timer.ObserveDuration()
 	return nil
 }
 
 func (s *LiteStorage) GetDnsExpiring(ctx context.Context, id tongo.AccountID, period int) ([]core.DnsExpiring, error) {
+	timer := prometheus.NewTimer(prometheus.ObserverFunc(func(v float64) {
+		storageTimeHistogramVec.WithLabelValues("get_dns_expiring").Observe(v)
+	}))
+	defer timer.ObserveDuration()
 	return nil, nil
 }

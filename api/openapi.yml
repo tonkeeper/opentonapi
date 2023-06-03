@@ -1,17 +1,16 @@
 openapi: 3.0.2
 info:
   title: REST api to TON blockchain explorer
-  version: 0.0.1
+  version: 2.0.0
   description: Provide access to indexed TON blockchain
   contact:
     name: Support
-    email: contact@fslabs.org
+    email: support@tonkeeper.com
 servers:
   - url: "https://tonapi.io"
   - url: "https://testnet.tonapi.io"
   - url: "http://localhost:8081"
 paths:
-
   /v2/blockchain/blocks/{block_id}:
     get:
       description: Get block data

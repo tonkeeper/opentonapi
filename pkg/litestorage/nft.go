@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"math/big"
 
+	"github.com/prometheus/client_golang/prometheus"
 	"github.com/tonkeeper/opentonapi/internal/g"
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/tongo"
@@ -33,6 +34,10 @@ func (s *LiteStorage) GetNftCollections(ctx context.Context, limit, offset *int3
 }
 
 func (s *LiteStorage) GetNftCollectionByCollectionAddress(ctx context.Context, address tongo.AccountID) (core.NftCollection, error) {
+	timer := prometheus.NewTimer(prometheus.ObserverFunc(func(v float64) {
+		storageTimeHistogramVec.WithLabelValues("get_nft_collection").Observe(v)
+	}))
+	defer timer.ObserveDuration()
 	_, value, err := abi.GetCollectionData(ctx, s.client, address)
 	if err != nil {
 		return core.NftCollection{}, nil

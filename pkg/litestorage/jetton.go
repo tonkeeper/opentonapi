@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/prometheus/client_golang/prometheus"
 	"math/big"
 
 	"github.com/shopspring/decimal"
@@ -15,6 +16,10 @@ import (
 )
 
 func (s *LiteStorage) GetJettonWalletsByOwnerAddress(ctx context.Context, address tongo.AccountID) ([]core.JettonWallet, error) {
+	timer := prometheus.NewTimer(prometheus.ObserverFunc(func(v float64) {
+		storageTimeHistogramVec.WithLabelValues("get_jetton_wallets_by_owner").Observe(v)
+	}))
+	defer timer.ObserveDuration()
 	jettons := s.knownAccounts["jettons"]
 	mapper := iter.Mapper[tongo.AccountID, *core.JettonWallet]{
 		MaxGoroutines: s.maxGoroutines,
@@ -73,6 +78,10 @@ func (s *LiteStorage) GetJettonWalletsByOwnerAddress(ctx context.Context, addres
 }
 
 func (s *LiteStorage) GetJettonMasterMetadata(ctx context.Context, master tongo.AccountID) (tongo.JettonMetadata, error) {
+	timer := prometheus.NewTimer(prometheus.ObserverFunc(func(v float64) {
+		storageTimeHistogramVec.WithLabelValues("get_jetton_master_metadata").Observe(v)
+	}))
+	defer timer.ObserveDuration()
 	meta, ok := s.jettonMetaCache.Load(master.ToRaw())
 	if ok {
 		return meta, nil
@@ -86,6 +95,10 @@ func (s *LiteStorage) GetJettonMasterMetadata(ctx context.Context, master tongo.
 }
 
 func (s *LiteStorage) GetJettonMasterData(ctx context.Context, master tongo.AccountID) (abi.GetJettonDataResult, error) {
+	timer := prometheus.NewTimer(prometheus.ObserverFunc(func(v float64) {
+		storageTimeHistogramVec.WithLabelValues("get_jetton_master_data").Observe(v)
+	}))
+	defer timer.ObserveDuration()
 	_, value, err := abi.GetJettonData(ctx, s.client, master)
 	if err != nil {
 		return abi.GetJettonDataResult{}, err
