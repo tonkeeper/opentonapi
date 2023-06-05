@@ -5190,9 +5190,16 @@ func (*ReindexAccountOK) reindexAccountRes() {}
 // It makes sense to understand the risk BEFORE sending a message to the blockchain.
 // Ref: #/components/schemas/Risk
 type Risk struct {
-	Ton     int64            `json:"ton"`
-	Jettons []JettonQuantity `json:"jettons"`
-	Nfts    []NftItem        `json:"nfts"`
+	// Transfer all the remaining balance of the wallet.
+	TransferAllRemainingBalance bool             `json:"transfer_all_remaining_balance"`
+	Ton                         int64            `json:"ton"`
+	Jettons                     []JettonQuantity `json:"jettons"`
+	Nfts                        []NftItem        `json:"nfts"`
+}
+
+// GetTransferAllRemainingBalance returns the value of TransferAllRemainingBalance.
+func (s Risk) GetTransferAllRemainingBalance() bool {
+	return s.TransferAllRemainingBalance
 }
 
 // GetTon returns the value of Ton.
@@ -5208,6 +5215,11 @@ func (s Risk) GetJettons() []JettonQuantity {
 // GetNfts returns the value of Nfts.
 func (s Risk) GetNfts() []NftItem {
 	return s.Nfts
+}
+
+// SetTransferAllRemainingBalance sets the value of TransferAllRemainingBalance.
+func (s *Risk) SetTransferAllRemainingBalance(val bool) {
+	s.TransferAllRemainingBalance = val
 }
 
 // SetTon sets the value of Ton.

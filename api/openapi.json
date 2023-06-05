@@ -2181,9 +2181,15 @@
       "example": 500,
       "format": "int64",
       "type": "integer"
+     },
+     "transfer_all_remaining_balance": {
+      "description": "transfer all the remaining balance of the wallet.",
+      "example": true,
+      "type": "boolean"
      }
     },
     "required": [
+     "transfer_all_remaining_balance",
      "ton",
      "jettons",
      "nfts"
@@ -2828,12 +2834,12 @@
  },
  "info": {
   "contact": {
-   "email": "contact@fslabs.org",
+   "email": "support@tonkeeper.com",
    "name": "Support"
   },
   "description": "Provide access to indexed TON blockchain",
   "title": "REST api to TON blockchain explorer",
-  "version": "0.0.1"
+  "version": "2.0.0"
  },
  "openapi": "3.0.2",
  "paths": {

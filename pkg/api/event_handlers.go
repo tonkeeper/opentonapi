@@ -6,15 +6,14 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/tonkeeper/tongo/abi"
-	"github.com/tonkeeper/tongo/boc"
-	"github.com/tonkeeper/tongo/tlb"
-	"github.com/tonkeeper/tongo/txemulator"
-
 	"github.com/tonkeeper/opentonapi/pkg/bath"
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/opentonapi/pkg/oas"
+	"github.com/tonkeeper/opentonapi/pkg/wallet"
 	"github.com/tonkeeper/tongo"
+	"github.com/tonkeeper/tongo/boc"
+	"github.com/tonkeeper/tongo/tlb"
+	"github.com/tonkeeper/tongo/txemulator"
 )
 
 func (h Handler) SendMessage(ctx context.Context, req oas.SendMessageReq) (r oas.SendMessageRes, _ error) {
@@ -203,12 +202,12 @@ func extractDestinationWallet(message tlb.Message) (*tongo.AccountID, error) {
 }
 
 func (h Handler) EmulateWalletMessage(ctx context.Context, req oas.EmulateWalletMessageReq, params oas.EmulateWalletMessageParams) (oas.EmulateWalletMessageRes, error) {
-	c, err := boc.DeserializeSinglRootBase64(req.Boc)
+	msgCell, err := boc.DeserializeSinglRootBase64(req.Boc)
 	if err != nil {
 		return &oas.BadRequest{Error: err.Error()}, nil
 	}
 	var m tlb.Message
-	err = tlb.Unmarshal(c, &m)
+	err = tlb.Unmarshal(msgCell, &m)
 	if err != nil {
 		return &oas.BadRequest{Error: err.Error()}, nil
 	}
@@ -218,14 +217,20 @@ func (h Handler) EmulateWalletMessage(ctx context.Context, req oas.EmulateWallet
 	}
 	account, err := h.storage.GetRawAccount(ctx, *walletAddress)
 	if err != nil {
-		return &oas.InternalError{Error: err.Error()}, err
+		// TODO: if not found, take code from stateInit
+		return &oas.InternalError{Error: err.Error()}, nil
 	}
-	if !account.HasAnyIntefaceImplemented(abi.WalletV3R1, abi.WalletV3R2, abi.WalletV4R1, abi.WalletV4R2) {
-		return &oas.InternalError{Error: "can't emulate message for non-wallet contract"}, nil
+	walletVersion, err := wallet.GetVersionByCode(account.Code)
+	if err != nil {
+		return &oas.InternalError{Error: err.Error()}, nil
+	}
+	risk, err := wallet.ExtractRisk(walletVersion, msgCell)
+	if err != nil {
+		return nil, err
 	}
 	emulator, err := txemulator.NewTraceBuilder()
 	if err != nil {
-		return &oas.InternalError{Error: err.Error()}, err
+		return &oas.InternalError{Error: err.Error()}, nil
 	}
 	tree, err := emulator.Run(ctx, m)
 	if err != nil {
@@ -241,10 +246,14 @@ func (h Handler) EmulateWalletMessage(ctx context.Context, req oas.EmulateWallet
 		return &oas.InternalError{Error: err.Error()}, nil
 	}
 	event := h.toAccountEvent(ctx, *walletAddress, trace, result, params.AcceptLanguage)
+	oasRisk, err := h.convertRisk(ctx, *risk, *walletAddress)
+	if err != nil {
+		return &oas.InternalError{Error: err.Error()}, nil
+	}
 	consequences := oas.MessageConsequences{
 		Trace: t,
 		Event: event,
-		Risk:  oas.Risk{},
+		Risk:  oasRisk,
 	}
 	return &consequences, nil
 }

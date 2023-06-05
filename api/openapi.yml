@@ -3120,10 +3120,15 @@ components:
       type: object
       description: Risk specifies assets that could be lost if a message would be sent to a malicious smart contract. It makes sense to understand the risk BEFORE sending a message to the blockchain.
       required:
+        - transfer_all_remaining_balance
         - ton
         - jettons
         - nfts
       properties:
+        transfer_all_remaining_balance:
+          type: boolean
+          description: transfer all the remaining balance of the wallet.
+          example: true
         ton:
           type: integer
           format: int64

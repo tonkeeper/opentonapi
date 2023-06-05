@@ -53,8 +53,8 @@ func encodeEmulateMessageToTraceRequest(
 	return nil
 }
 
-func encodeGetAccountInfoByStateInitRequest(
-	req GetAccountInfoByStateInitReq,
+func encodeEmulateWalletMessageRequest(
+	req EmulateWalletMessageReq,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"
@@ -67,8 +67,8 @@ func encodeGetAccountInfoByStateInitRequest(
 	return nil
 }
 
-func encodeEmulateWalletMessageRequest(
-	req EmulateWalletMessageReq,
+func encodeGetAccountInfoByStateInitRequest(
+	req GetAccountInfoByStateInitReq,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"
