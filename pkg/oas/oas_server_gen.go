@@ -56,6 +56,10 @@ type Handler interface {
 	//
 	// GET /v2/accounts/{account_id}
 	GetAccount(ctx context.Context, params GetAccountParams) (GetAccountRes, error)
+	// GetAccountInfoByStateInit implements getAccountInfoByStateInit operation.
+	//
+	// POST /v2/tonconnect/stateinit
+	GetAccountInfoByStateInit(ctx context.Context, req GetAccountInfoByStateInitReq) (GetAccountInfoByStateInitRes, error)
 	// GetAccountTransactions implements getAccountTransactions operation.
 	//
 	// Get account transactions.
@@ -191,10 +195,6 @@ type Handler interface {
 	//
 	// GET /v2/accounts/{account_id}/nfts
 	GetNftItemsByOwner(ctx context.Context, params GetNftItemsByOwnerParams) (GetNftItemsByOwnerRes, error)
-	// GetPubKeyByStateInit implements getPubKeyByStateInit operation.
-	//
-	// POST /v2/tonconnect/stateinit
-	GetPubKeyByStateInit(ctx context.Context, req GetPubKeyByStateInitReq) (GetPubKeyByStateInitRes, error)
 	// GetRates implements getRates operation.
 	//
 	// Get the token price to the currency.

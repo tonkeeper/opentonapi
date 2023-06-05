@@ -29,6 +29,10 @@ type ExecGetMethodRes interface {
 	execGetMethodRes()
 }
 
+type GetAccountInfoByStateInitRes interface {
+	getAccountInfoByStateInitRes()
+}
+
 type GetAccountRes interface {
 	getAccountRes()
 }
@@ -115,10 +119,6 @@ type GetNftItemsByAddressesRes interface {
 
 type GetNftItemsByOwnerRes interface {
 	getNftItemsByOwnerRes()
-}
-
-type GetPubKeyByStateInitRes interface {
-	getPubKeyByStateInitRes()
 }
 
 type GetRatesRes interface {

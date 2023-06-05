@@ -956,6 +956,7 @@ func (*BadRequest) emulateMessageToEventRes()        {}
 func (*BadRequest) emulateMessageToTraceRes()        {}
 func (*BadRequest) emulateWalletMessageRes()         {}
 func (*BadRequest) execGetMethodRes()                {}
+func (*BadRequest) getAccountInfoByStateInitRes()    {}
 func (*BadRequest) getAccountRes()                   {}
 func (*BadRequest) getAccountTransactionsRes()       {}
 func (*BadRequest) getAccountsRes()                  {}
@@ -974,7 +975,6 @@ func (*BadRequest) getNftCollectionRes()             {}
 func (*BadRequest) getNftItemByAddressRes()          {}
 func (*BadRequest) getNftItemsByAddressesRes()       {}
 func (*BadRequest) getNftItemsByOwnerRes()           {}
-func (*BadRequest) getPubKeyByStateInitRes()         {}
 func (*BadRequest) getRatesRes()                     {}
 func (*BadRequest) getRawAccountRes()                {}
 func (*BadRequest) getSearchAccountsRes()            {}
@@ -1940,6 +1940,47 @@ func (s *FoundAccountsAddressesItem) SetName(val string) {
 	s.Name = val
 }
 
+type GetAccountInfoByStateInitOK struct {
+	PublicKey string `json:"public_key"`
+	Address   string `json:"address"`
+}
+
+// GetPublicKey returns the value of PublicKey.
+func (s GetAccountInfoByStateInitOK) GetPublicKey() string {
+	return s.PublicKey
+}
+
+// GetAddress returns the value of Address.
+func (s GetAccountInfoByStateInitOK) GetAddress() string {
+	return s.Address
+}
+
+// SetPublicKey sets the value of PublicKey.
+func (s *GetAccountInfoByStateInitOK) SetPublicKey(val string) {
+	s.PublicKey = val
+}
+
+// SetAddress sets the value of Address.
+func (s *GetAccountInfoByStateInitOK) SetAddress(val string) {
+	s.Address = val
+}
+
+func (*GetAccountInfoByStateInitOK) getAccountInfoByStateInitRes() {}
+
+type GetAccountInfoByStateInitReq struct {
+	StateInit string `json:"state_init"`
+}
+
+// GetStateInit returns the value of StateInit.
+func (s GetAccountInfoByStateInitReq) GetStateInit() string {
+	return s.StateInit
+}
+
+// SetStateInit sets the value of StateInit.
+func (s *GetAccountInfoByStateInitReq) SetStateInit(val string) {
+	s.StateInit = val
+}
+
 type GetAccountsReq struct {
 	AccountIds []string `json:"account_ids"`
 }
@@ -1966,36 +2007,6 @@ func (s GetNftItemsByAddressesReq) GetAccountIds() []string {
 // SetAccountIds sets the value of AccountIds.
 func (s *GetNftItemsByAddressesReq) SetAccountIds(val []string) {
 	s.AccountIds = val
-}
-
-type GetPubKeyByStateInitOK struct {
-	PublicKey string `json:"public_key"`
-}
-
-// GetPublicKey returns the value of PublicKey.
-func (s GetPubKeyByStateInitOK) GetPublicKey() string {
-	return s.PublicKey
-}
-
-// SetPublicKey sets the value of PublicKey.
-func (s *GetPubKeyByStateInitOK) SetPublicKey(val string) {
-	s.PublicKey = val
-}
-
-func (*GetPubKeyByStateInitOK) getPubKeyByStateInitRes() {}
-
-type GetPubKeyByStateInitReq struct {
-	StateInit string `json:"state_init"`
-}
-
-// GetStateInit returns the value of StateInit.
-func (s GetPubKeyByStateInitReq) GetStateInit() string {
-	return s.StateInit
-}
-
-// SetStateInit sets the value of StateInit.
-func (s *GetPubKeyByStateInitReq) SetStateInit(val string) {
-	s.StateInit = val
 }
 
 type GetRatesOK struct {
@@ -2109,6 +2120,7 @@ func (*InternalError) emulateMessageToEventRes()        {}
 func (*InternalError) emulateMessageToTraceRes()        {}
 func (*InternalError) emulateWalletMessageRes()         {}
 func (*InternalError) execGetMethodRes()                {}
+func (*InternalError) getAccountInfoByStateInitRes()    {}
 func (*InternalError) getAccountRes()                   {}
 func (*InternalError) getAccountTransactionsRes()       {}
 func (*InternalError) getAccountsRes()                  {}
@@ -2131,7 +2143,6 @@ func (*InternalError) getNftCollectionsRes()            {}
 func (*InternalError) getNftItemByAddressRes()          {}
 func (*InternalError) getNftItemsByAddressesRes()       {}
 func (*InternalError) getNftItemsByOwnerRes()           {}
-func (*InternalError) getPubKeyByStateInitRes()         {}
 func (*InternalError) getRatesRes()                     {}
 func (*InternalError) getRawAccountRes()                {}
 func (*InternalError) getSearchAccountsRes()            {}
@@ -6440,6 +6451,7 @@ func (*UnauthorizedError) emulateMessageToEventRes()        {}
 func (*UnauthorizedError) emulateMessageToTraceRes()        {}
 func (*UnauthorizedError) emulateWalletMessageRes()         {}
 func (*UnauthorizedError) execGetMethodRes()                {}
+func (*UnauthorizedError) getAccountInfoByStateInitRes()    {}
 func (*UnauthorizedError) getAccountRes()                   {}
 func (*UnauthorizedError) getAccountTransactionsRes()       {}
 func (*UnauthorizedError) getAccountsRes()                  {}
@@ -6462,7 +6474,6 @@ func (*UnauthorizedError) getNftCollectionsRes()            {}
 func (*UnauthorizedError) getNftItemByAddressRes()          {}
 func (*UnauthorizedError) getNftItemsByAddressesRes()       {}
 func (*UnauthorizedError) getNftItemsByOwnerRes()           {}
-func (*UnauthorizedError) getPubKeyByStateInitRes()         {}
 func (*UnauthorizedError) getRatesRes()                     {}
 func (*UnauthorizedError) getRawAccountRes()                {}
 func (*UnauthorizedError) getSearchAccountsRes()            {}
