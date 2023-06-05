@@ -17,11 +17,11 @@ import (
 type Straw func(bubble *Bubble) (success bool)
 
 var DefaultStraws = []Straw{
+	FindGetGemsNftPurchase,
 	FindNFTTransfer,
 	FindJettonTransfer,
 	FindInitialSubscription,
 	FindExtendedSubscription,
-	FindGetGemsNftPurchase,
 }
 
 func FindNFTTransfer(bubble *Bubble) bool {
