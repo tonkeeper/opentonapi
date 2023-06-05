@@ -1228,25 +1228,55 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 						return
 					}
 				}
-			case 'w': // Prefix: "wallet/backup"
-				if l := len("wallet/backup"); len(elem) >= l && elem[0:l] == "wallet/backup" {
+			case 'w': // Prefix: "wallet/"
+				if l := len("wallet/"); len(elem) >= l && elem[0:l] == "wallet/" {
 					elem = elem[l:]
 				} else {
 					break
 				}
 
 				if len(elem) == 0 {
-					// Leaf node.
-					switch r.Method {
-					case "GET":
-						s.handleGetWalletBackupRequest([0]string{}, w, r)
-					case "PUT":
-						s.handleSetWalletBackupRequest([0]string{}, w, r)
-					default:
-						s.notAllowed(w, r, "GET,PUT")
+					break
+				}
+				switch elem[0] {
+				case 'b': // Prefix: "backup"
+					if l := len("backup"); len(elem) >= l && elem[0:l] == "backup" {
+						elem = elem[l:]
+					} else {
+						break
 					}
 
-					return
+					if len(elem) == 0 {
+						// Leaf node.
+						switch r.Method {
+						case "GET":
+							s.handleGetWalletBackupRequest([0]string{}, w, r)
+						case "PUT":
+							s.handleSetWalletBackupRequest([0]string{}, w, r)
+						default:
+							s.notAllowed(w, r, "GET,PUT")
+						}
+
+						return
+					}
+				case 'e': // Prefix: "emulate"
+					if l := len("emulate"); len(elem) >= l && elem[0:l] == "emulate" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					if len(elem) == 0 {
+						// Leaf node.
+						switch r.Method {
+						case "POST":
+							s.handleEmulateWalletMessageRequest([0]string{}, w, r)
+						default:
+							s.notAllowed(w, r, "POST")
+						}
+
+						return
+					}
 				}
 			}
 		}
@@ -2523,31 +2553,63 @@ func (s *Server) FindRoute(method, path string) (r Route, _ bool) {
 						}
 					}
 				}
-			case 'w': // Prefix: "wallet/backup"
-				if l := len("wallet/backup"); len(elem) >= l && elem[0:l] == "wallet/backup" {
+			case 'w': // Prefix: "wallet/"
+				if l := len("wallet/"); len(elem) >= l && elem[0:l] == "wallet/" {
 					elem = elem[l:]
 				} else {
 					break
 				}
 
 				if len(elem) == 0 {
-					switch method {
-					case "GET":
-						// Leaf: GetWalletBackup
-						r.name = "GetWalletBackup"
-						r.operationID = "getWalletBackup"
-						r.args = args
-						r.count = 0
-						return r, true
-					case "PUT":
-						// Leaf: SetWalletBackup
-						r.name = "SetWalletBackup"
-						r.operationID = "setWalletBackup"
-						r.args = args
-						r.count = 0
-						return r, true
-					default:
-						return
+					break
+				}
+				switch elem[0] {
+				case 'b': // Prefix: "backup"
+					if l := len("backup"); len(elem) >= l && elem[0:l] == "backup" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					if len(elem) == 0 {
+						switch method {
+						case "GET":
+							// Leaf: GetWalletBackup
+							r.name = "GetWalletBackup"
+							r.operationID = "getWalletBackup"
+							r.args = args
+							r.count = 0
+							return r, true
+						case "PUT":
+							// Leaf: SetWalletBackup
+							r.name = "SetWalletBackup"
+							r.operationID = "setWalletBackup"
+							r.args = args
+							r.count = 0
+							return r, true
+						default:
+							return
+						}
+					}
+				case 'e': // Prefix: "emulate"
+					if l := len("emulate"); len(elem) >= l && elem[0:l] == "emulate" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					if len(elem) == 0 {
+						switch method {
+						case "POST":
+							// Leaf: EmulateWalletMessage
+							r.name = "EmulateWalletMessage"
+							r.operationID = "emulateWalletMessage"
+							r.args = args
+							r.count = 0
+							return r, true
+						default:
+							return
+						}
 					}
 				}
 			}

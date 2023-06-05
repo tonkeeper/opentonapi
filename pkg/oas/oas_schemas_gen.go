@@ -197,12 +197,13 @@ type AccountEvent struct {
 	Timestamp int64          `json:"timestamp"`
 	Actions   []Action       `json:"actions"`
 	Fee       Fee            `json:"fee"`
-	ValueFlow ValueFlow      `json:"value_flow"`
 	// Scam.
 	IsScam bool  `json:"is_scam"`
 	Lt     int64 `json:"lt"`
 	// Event is not finished yet. Transactions still happening.
 	InProgress bool `json:"in_progress"`
+	// TODO.
+	Extra int64 `json:"extra"`
 }
 
 // GetEventID returns the value of EventID.
@@ -230,11 +231,6 @@ func (s AccountEvent) GetFee() Fee {
 	return s.Fee
 }
 
-// GetValueFlow returns the value of ValueFlow.
-func (s AccountEvent) GetValueFlow() ValueFlow {
-	return s.ValueFlow
-}
-
 // GetIsScam returns the value of IsScam.
 func (s AccountEvent) GetIsScam() bool {
 	return s.IsScam
@@ -248,6 +244,11 @@ func (s AccountEvent) GetLt() int64 {
 // GetInProgress returns the value of InProgress.
 func (s AccountEvent) GetInProgress() bool {
 	return s.InProgress
+}
+
+// GetExtra returns the value of Extra.
+func (s AccountEvent) GetExtra() int64 {
+	return s.Extra
 }
 
 // SetEventID sets the value of EventID.
@@ -275,11 +276,6 @@ func (s *AccountEvent) SetFee(val Fee) {
 	s.Fee = val
 }
 
-// SetValueFlow sets the value of ValueFlow.
-func (s *AccountEvent) SetValueFlow(val ValueFlow) {
-	s.ValueFlow = val
-}
-
 // SetIsScam sets the value of IsScam.
 func (s *AccountEvent) SetIsScam(val bool) {
 	s.IsScam = val
@@ -293,6 +289,11 @@ func (s *AccountEvent) SetLt(val int64) {
 // SetInProgress sets the value of InProgress.
 func (s *AccountEvent) SetInProgress(val bool) {
 	s.InProgress = val
+}
+
+// SetExtra sets the value of Extra.
+func (s *AccountEvent) SetExtra(val int64) {
+	s.Extra = val
 }
 
 func (*AccountEvent) emulateMessageToAccountEventRes() {}
@@ -953,6 +954,7 @@ func (*BadRequest) dnsResolveRes()                   {}
 func (*BadRequest) emulateMessageToAccountEventRes() {}
 func (*BadRequest) emulateMessageToEventRes()        {}
 func (*BadRequest) emulateMessageToTraceRes()        {}
+func (*BadRequest) emulateWalletMessageRes()         {}
 func (*BadRequest) execGetMethodRes()                {}
 func (*BadRequest) getAccountInfoByStateInitRes()    {}
 func (*BadRequest) getAccountRes()                   {}
@@ -1714,6 +1716,20 @@ func (s *EmulateMessageToTraceReq) SetBoc(val string) {
 	s.Boc = val
 }
 
+type EmulateWalletMessageReq struct {
+	Boc string `json:"boc"`
+}
+
+// GetBoc returns the value of Boc.
+func (s EmulateWalletMessageReq) GetBoc() string {
+	return s.Boc
+}
+
+// SetBoc sets the value of Boc.
+func (s *EmulateWalletMessageReq) SetBoc(val string) {
+	s.Boc = val
+}
+
 // Ref: #/components/schemas/Event
 type Event struct {
 	EventID   string      `json:"event_id"`
@@ -2102,6 +2118,7 @@ func (*InternalError) dnsResolveRes()                   {}
 func (*InternalError) emulateMessageToAccountEventRes() {}
 func (*InternalError) emulateMessageToEventRes()        {}
 func (*InternalError) emulateMessageToTraceRes()        {}
+func (*InternalError) emulateWalletMessageRes()         {}
 func (*InternalError) execGetMethodRes()                {}
 func (*InternalError) getAccountInfoByStateInitRes()    {}
 func (*InternalError) getAccountRes()                   {}
@@ -2405,6 +2422,43 @@ func (s *JettonPreview) SetVerification(val JettonVerificationType) {
 	s.Verification = val
 }
 
+// Ref: #/components/schemas/JettonQuantity
+type JettonQuantity struct {
+	Quantity      string         `json:"quantity"`
+	WalletAddress AccountAddress `json:"wallet_address"`
+	Jetton        JettonPreview  `json:"jetton"`
+}
+
+// GetQuantity returns the value of Quantity.
+func (s JettonQuantity) GetQuantity() string {
+	return s.Quantity
+}
+
+// GetWalletAddress returns the value of WalletAddress.
+func (s JettonQuantity) GetWalletAddress() AccountAddress {
+	return s.WalletAddress
+}
+
+// GetJetton returns the value of Jetton.
+func (s JettonQuantity) GetJetton() JettonPreview {
+	return s.Jetton
+}
+
+// SetQuantity sets the value of Quantity.
+func (s *JettonQuantity) SetQuantity(val string) {
+	s.Quantity = val
+}
+
+// SetWalletAddress sets the value of WalletAddress.
+func (s *JettonQuantity) SetWalletAddress(val AccountAddress) {
+	s.WalletAddress = val
+}
+
+// SetJetton sets the value of Jetton.
+func (s *JettonQuantity) SetJetton(val JettonPreview) {
+	s.Jetton = val
+}
+
 // Ref: #/components/schemas/JettonTransferAction
 type JettonTransferAction struct {
 	Sender           OptAccountAddress `json:"sender"`
@@ -2692,6 +2746,45 @@ func (s *Message) SetDecodedOpName(val OptString) {
 func (s *Message) SetDecodedBody(val jx.Raw) {
 	s.DecodedBody = val
 }
+
+// Ref: #/components/schemas/MessageConsequences
+type MessageConsequences struct {
+	Trace Trace        `json:"trace"`
+	Risk  Risk         `json:"risk"`
+	Event AccountEvent `json:"event"`
+}
+
+// GetTrace returns the value of Trace.
+func (s MessageConsequences) GetTrace() Trace {
+	return s.Trace
+}
+
+// GetRisk returns the value of Risk.
+func (s MessageConsequences) GetRisk() Risk {
+	return s.Risk
+}
+
+// GetEvent returns the value of Event.
+func (s MessageConsequences) GetEvent() AccountEvent {
+	return s.Event
+}
+
+// SetTrace sets the value of Trace.
+func (s *MessageConsequences) SetTrace(val Trace) {
+	s.Trace = val
+}
+
+// SetRisk sets the value of Risk.
+func (s *MessageConsequences) SetRisk(val Risk) {
+	s.Risk = val
+}
+
+// SetEvent sets the value of Event.
+func (s *MessageConsequences) SetEvent(val AccountEvent) {
+	s.Event = val
+}
+
+func (*MessageConsequences) emulateWalletMessageRes() {}
 
 // Ref: #/components/schemas/MethodExecutionResult
 type MethodExecutionResult struct {
@@ -5093,6 +5186,45 @@ type ReindexAccountOK struct{}
 
 func (*ReindexAccountOK) reindexAccountRes() {}
 
+// Risk specifies assets that could be lost if a message would be sent to a malicious smart contract.
+// It makes sense to understand the risk BEFORE sending a message to the blockchain.
+// Ref: #/components/schemas/Risk
+type Risk struct {
+	Ton     int64            `json:"ton"`
+	Jettons []JettonQuantity `json:"jettons"`
+	Nfts    []NftItem        `json:"nfts"`
+}
+
+// GetTon returns the value of Ton.
+func (s Risk) GetTon() int64 {
+	return s.Ton
+}
+
+// GetJettons returns the value of Jettons.
+func (s Risk) GetJettons() []JettonQuantity {
+	return s.Jettons
+}
+
+// GetNfts returns the value of Nfts.
+func (s Risk) GetNfts() []NftItem {
+	return s.Nfts
+}
+
+// SetTon sets the value of Ton.
+func (s *Risk) SetTon(val int64) {
+	s.Ton = val
+}
+
+// SetJettons sets the value of Jettons.
+func (s *Risk) SetJettons(val []JettonQuantity) {
+	s.Jettons = val
+}
+
+// SetNfts sets the value of Nfts.
+func (s *Risk) SetNfts(val []NftItem) {
+	s.Nfts = val
+}
+
 // Ref: #/components/schemas/Sale
 type Sale struct {
 	Address string            `json:"address"`
@@ -6317,6 +6449,7 @@ func (*UnauthorizedError) dnsResolveRes()                   {}
 func (*UnauthorizedError) emulateMessageToAccountEventRes() {}
 func (*UnauthorizedError) emulateMessageToEventRes()        {}
 func (*UnauthorizedError) emulateMessageToTraceRes()        {}
+func (*UnauthorizedError) emulateWalletMessageRes()         {}
 func (*UnauthorizedError) execGetMethodRes()                {}
 func (*UnauthorizedError) getAccountInfoByStateInitRes()    {}
 func (*UnauthorizedError) getAccountRes()                   {}

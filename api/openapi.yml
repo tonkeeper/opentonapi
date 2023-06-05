@@ -285,6 +285,30 @@ paths:
         '500':
           $ref: '#/components/responses/InternalError'
 
+  /v2/wallet/emulate:
+    post:
+      description: Emulate sending message to blockchain
+      operationId: emulateWalletMessage
+      tags:
+        - Emulation
+      parameters:
+        - $ref: '#/components/parameters/i18n'
+      requestBody:
+        $ref: "#/components/requestBodies/Boc"
+      responses:
+        '200':
+          description: "event"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageConsequences'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
   /v2/accounts/{account_id}/events/emulate:
     post:
       description: Emulate sending message to blockchain
@@ -2791,11 +2815,11 @@ components:
         - timestamp
         - actions
         - fee
-        - value_flow
         - account
         - is_scam
         - lt
         - in_progress
+        - extra
       properties:
         event_id:
           type: string
@@ -2813,8 +2837,6 @@ components:
         fee:
           $ref: '#/components/schemas/Fee'
           deprecated: true
-        value_flow:
-          $ref: '#/components/schemas/ValueFlow'
         is_scam:
           type: boolean
           description: scam
@@ -2827,6 +2849,11 @@ components:
           type: boolean
           example: false
           description: Event is not finished yet. Transactions still happening
+        extra:
+          description: TODO
+          type: integer
+          format: int64
+          example: 3
 
     AccountEvents:
       type: object
@@ -3075,6 +3102,56 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Trace'
+
+    MessageConsequences:
+      type: object
+      required:
+        - trace
+        - risk
+        - event
+      properties:
+        trace:
+          $ref: '#/components/schemas/Trace'
+        risk:
+          $ref: '#/components/schemas/Risk'
+        event:
+          $ref: '#/components/schemas/AccountEvent'
+
+    Risk:
+      type: object
+      description: Risk specifies assets that could be lost if a message would be sent to a malicious smart contract. It makes sense to understand the risk BEFORE sending a message to the blockchain.
+      required:
+        - ton
+        - jettons
+        - nfts
+      properties:
+        ton:
+          type: integer
+          format: int64
+          example: 500
+        jettons:
+          type: array
+          items:
+            $ref: '#/components/schemas/JettonQuantity'
+        nfts:
+          type: array
+          items:
+            $ref: '#/components/schemas/NftItem'
+
+    JettonQuantity:
+      type: object
+      required:
+        - quantity
+        - wallet_address
+        - jetton
+      properties:
+        quantity:
+          type: string
+          example: 597968399
+        wallet_address:
+          $ref: '#/components/schemas/AccountAddress'
+        jetton:
+          $ref: '#/components/schemas/JettonPreview'
 
     Event:
       type: object

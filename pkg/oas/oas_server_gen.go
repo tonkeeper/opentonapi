@@ -38,6 +38,12 @@ type Handler interface {
 	//
 	// POST /v2/traces/emulate
 	EmulateMessageToTrace(ctx context.Context, req EmulateMessageToTraceReq) (EmulateMessageToTraceRes, error)
+	// EmulateWalletMessage implements emulateWalletMessage operation.
+	//
+	// Emulate sending message to blockchain.
+	//
+	// POST /v2/wallet/emulate
+	EmulateWalletMessage(ctx context.Context, req EmulateWalletMessageReq, params EmulateWalletMessageParams) (EmulateWalletMessageRes, error)
 	// ExecGetMethod implements execGetMethod operation.
 	//
 	// Execute get method for account.

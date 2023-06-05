@@ -153,3 +153,33 @@ func CollectActionsAndValueFlow(bubble *Bubble, forAccount *tongo.AccountID, boo
 	valueFlow.Merge(bubble.ValueFlow)
 	return actions, valueFlow
 }
+
+func (a Action) ContributeToExtra(account tongo.AccountID, extra int64) int64 {
+	if a.TonTransfer != nil {
+		return a.TonTransfer.ContributeToExtra(account, extra)
+	}
+	if a.SmartContractExec != nil {
+		return a.SmartContractExec.ContributeToExtra(account, extra)
+	}
+	return extra
+}
+
+func (a *TonTransferAction) ContributeToExtra(account tongo.AccountID, extra int64) int64 {
+	if a.Sender == account {
+		return extra - a.Amount
+	}
+	if a.Recipient == account {
+		return extra + a.Amount
+	}
+	return extra
+}
+
+func (a *SmartContractAction) ContributeToExtra(account tongo.AccountID, extra int64) int64 {
+	if a.Executor == account {
+		return extra - a.TonAttached
+	}
+	if a.Contract == account {
+		return extra + a.TonAttached
+	}
+	return extra
+}

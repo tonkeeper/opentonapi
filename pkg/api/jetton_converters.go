@@ -81,9 +81,6 @@ func (h Handler) convertJettonHistory(ctx context.Context, account tongo.Account
 			Lt:         int64(trace.Lt),
 			InProgress: trace.InProgress(),
 		}
-		if flow, ok := result.ValueFlow.Accounts[account]; ok {
-			event.ValueFlow = convertAccountValueFlow(account, flow, h.addressBook)
-		}
 		for _, action := range result.Actions {
 			convertedAction, spamDetected := h.convertAction(ctx, action, acceptLanguage)
 			if !event.IsScam && spamDetected {

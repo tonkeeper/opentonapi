@@ -21,6 +21,10 @@ type EmulateMessageToTraceRes interface {
 	emulateMessageToTraceRes()
 }
 
+type EmulateWalletMessageRes interface {
+	emulateWalletMessageRes()
+}
+
 type ExecGetMethodRes interface {
 	execGetMethodRes()
 }

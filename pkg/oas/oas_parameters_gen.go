@@ -277,6 +277,66 @@ func decodeEmulateMessageToEventParams(args [0]string, r *http.Request) (params 
 	return params, nil
 }
 
+// EmulateWalletMessageParams is parameters of emulateWalletMessage operation.
+type EmulateWalletMessageParams struct {
+	AcceptLanguage OptString
+}
+
+func unpackEmulateWalletMessageParams(packed middleware.Parameters) (params EmulateWalletMessageParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "Accept-Language",
+			In:   "header",
+		}
+		if v, ok := packed[key]; ok {
+			params.AcceptLanguage = v.(OptString)
+		}
+	}
+	return params
+}
+
+func decodeEmulateWalletMessageParams(args [0]string, r *http.Request) (params EmulateWalletMessageParams, _ error) {
+	h := uri.NewHeaderDecoder(r.Header)
+	// Set default value for header: Accept-Language.
+	{
+		val := string("en")
+		params.AcceptLanguage.SetTo(val)
+	}
+	// Decode header: Accept-Language.
+	{
+		cfg := uri.HeaderParameterDecodingConfig{
+			Name:    "Accept-Language",
+			Explode: false,
+		}
+		if err := h.HasParam(cfg); err == nil {
+			if err := h.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotAcceptLanguageVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotAcceptLanguageVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.AcceptLanguage.SetTo(paramsDotAcceptLanguageVal)
+				return nil
+			}); err != nil {
+				return params, errors.Wrap(err, "header: Accept-Language: parse")
+			}
+		}
+	}
+	return params, nil
+}
+
 // ExecGetMethodParams is parameters of execGetMethod operation.
 type ExecGetMethodParams struct {
 	// Account ID.

@@ -5,6 +5,8 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
+
+	"github.com/tonkeeper/tongo/abi"
 	"github.com/tonkeeper/tongo/boc"
 	"github.com/tonkeeper/tongo/tlb"
 	"github.com/tonkeeper/tongo/txemulator"
@@ -184,6 +186,67 @@ func (h Handler) EmulateMessageToTrace(ctx context.Context, req oas.EmulateMessa
 	}
 	t := convertTrace(*trace, h.addressBook)
 	return &t, nil
+}
+
+func extractDestinationWallet(message tlb.Message) (*tongo.AccountID, error) {
+	if message.Info.SumType != "ExtInMsgInfo" {
+		return nil, fmt.Errorf("unsupported message type: %v", message.Info.SumType)
+	}
+	accountID, err := tongo.AccountIDFromTlb(message.Info.ExtInMsgInfo.Dest)
+	if err != nil {
+		return nil, err
+	}
+	if accountID == nil {
+		return nil, fmt.Errorf("failed to extract the destination wallet")
+	}
+	return accountID, nil
+}
+
+func (h Handler) EmulateWalletMessage(ctx context.Context, req oas.EmulateWalletMessageReq, params oas.EmulateWalletMessageParams) (oas.EmulateWalletMessageRes, error) {
+	c, err := boc.DeserializeSinglRootBase64(req.Boc)
+	if err != nil {
+		return &oas.BadRequest{Error: err.Error()}, nil
+	}
+	var m tlb.Message
+	err = tlb.Unmarshal(c, &m)
+	if err != nil {
+		return &oas.BadRequest{Error: err.Error()}, nil
+	}
+	walletAddress, err := extractDestinationWallet(m)
+	if err != nil {
+		return &oas.BadRequest{err.Error()}, nil
+	}
+	account, err := h.storage.GetRawAccount(ctx, *walletAddress)
+	if err != nil {
+		return &oas.InternalError{Error: err.Error()}, err
+	}
+	if !account.HasAnyIntefaceImplemented(abi.WalletV3R1, abi.WalletV3R2, abi.WalletV4R1, abi.WalletV4R2) {
+		return &oas.InternalError{Error: "can't emulate message for non-wallet contract"}, nil
+	}
+	emulator, err := txemulator.NewTraceBuilder()
+	if err != nil {
+		return &oas.InternalError{Error: err.Error()}, err
+	}
+	tree, err := emulator.Run(ctx, m)
+	if err != nil {
+		return &oas.InternalError{Error: err.Error()}, nil
+	}
+	trace, err := emulatedTreeToTrace(tree, emulator.FinalStates())
+	if err != nil {
+		return &oas.InternalError{Error: err.Error()}, nil
+	}
+	t := convertTrace(*trace, h.addressBook)
+	result, err := bath.FindActions(trace, bath.ForAccount(*walletAddress))
+	if err != nil {
+		return &oas.InternalError{Error: err.Error()}, nil
+	}
+	event := h.toAccountEvent(ctx, *walletAddress, trace, result, params.AcceptLanguage)
+	consequences := oas.MessageConsequences{
+		Trace: t,
+		Event: event,
+		Risk:  oas.Risk{},
+	}
+	return &consequences, nil
 }
 
 func emulatedTreeToTrace(tree *txemulator.TxTree, accounts map[tongo.AccountID]tlb.ShardAccount) (*core.Trace, error) {
