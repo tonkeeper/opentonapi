@@ -53,20 +53,12 @@ func (h Handler) GetAccountInfoByStateInit(ctx context.Context, request oas.GetA
 	if err != nil {
 		return &oas.BadRequest{Error: err.Error()}, nil
 	}
-	cells, err := boc.DeserializeBocBase64(request.StateInit)
-	if err != nil || len(cells) != 1 {
-		return &oas.BadRequest{Error: err.Error()}, nil
-	}
+	cells, _ := boc.DeserializeBocBase64(request.StateInit)
 	cellHash, err := cells[0].Hash()
 	if err != nil {
 		return &oas.BadRequest{Error: err.Error()}, nil
 	}
-	var hash tlb.Bits256
-	copy(hash[:], cellHash[:])
-	if err != nil {
-		return &oas.BadRequest{Error: err.Error()}, nil
-	}
-	accountID := tongo.AccountID{Workchain: int32(0), Address: hash}
+	accountID := tongo.AccountID{Workchain: int32(0), Address: tlb.Bits256(cellHash[:])}
 
 	return &oas.GetAccountInfoByStateInitOK{PublicKey: hex.EncodeToString(pubKey), Address: accountID.ToRaw()}, nil
 }
