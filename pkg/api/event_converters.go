@@ -9,6 +9,7 @@ import (
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/opentonapi/pkg/i18n"
 	"github.com/tonkeeper/opentonapi/pkg/oas"
+	"github.com/tonkeeper/opentonapi/pkg/wallet"
 	rules "github.com/tonkeeper/scam_backoffice_rules"
 	"github.com/tonkeeper/tongo"
 )
@@ -19,6 +20,47 @@ func convertTrace(t core.Trace, book addressBook) oas.Trace {
 		trace.Children = append(trace.Children, convertTrace(*c, book))
 	}
 	return trace
+}
+
+func (h Handler) convertRisk(ctx context.Context, risk wallet.Risk, walletAddress tongo.AccountID) (oas.Risk, error) {
+	oasRisk := oas.Risk{
+		TransferAllRemainingBalance: risk.TransferAllRemainingBalance,
+		// TODO: verify there is no overflow
+		Ton:     int64(risk.Ton),
+		Jettons: nil,
+		Nfts:    nil,
+	}
+	if len(risk.Jettons) > 0 {
+		wallets, err := h.storage.GetJettonWalletsByOwnerAddress(ctx, walletAddress)
+		if err != nil {
+			return oas.Risk{}, err
+		}
+		for _, jettonWallet := range wallets {
+			quantity, ok := risk.Jettons[jettonWallet.Address]
+			if !ok {
+				continue
+			}
+			meta, _ := h.metaCache.getJettonMeta(ctx, jettonWallet.JettonAddress)
+			preview := jettonPreview(h.addressBook, jettonWallet.JettonAddress, meta, h.previewGenerator)
+			jettonQuantity := oas.JettonQuantity{
+				Quantity:      quantity.String(),
+				WalletAddress: convertAccountAddress(jettonWallet.Address, h.addressBook),
+				Jetton:        preview,
+			}
+			oasRisk.Jettons = append(oasRisk.Jettons, jettonQuantity)
+		}
+	}
+	if len(risk.Nfts) > 0 {
+		items, err := h.storage.GetNFTs(ctx, risk.Nfts)
+		if err != nil {
+			return oas.Risk{}, err
+		}
+		for _, item := range items {
+			nft := convertNFT(ctx, item, h.addressBook, h.previewGenerator, h.metaCache)
+			oasRisk.Nfts = append(oasRisk.Nfts, nft)
+		}
+	}
+	return oasRisk, nil
 }
 
 func (h Handler) convertAction(ctx context.Context, a bath.Action, acceptLanguage oas.OptString) (oas.Action, bool) {
@@ -193,33 +235,4 @@ func (h Handler) toAccountEvent(ctx context.Context, account tongo.AccountID, tr
 		}}
 	}
 	return e
-}
-
-func (h Handler) toRisk(ctx context.Context, risk bath.Risk) (*oas.Risk, error) {
-	oasRisk := oas.Risk{
-		Ton:     risk.Ton,
-		Jettons: make([]oas.JettonQuantity, 0, len(risk.Jettons)),
-		Nfts:    make([]oas.NftItem, 0, len(risk.Nfts)),
-	}
-	for master, jq := range risk.Jettons {
-		meta, _ := h.metaCache.getJettonMeta(ctx, master)
-		preview := jettonPreview(h.addressBook, master, meta, h.previewGenerator)
-		quantity := oas.JettonQuantity{
-			Quantity:      jq.Quantity.String(),
-			WalletAddress: convertAccountAddress(jq.WalletAddress, h.addressBook),
-			Jetton:        preview,
-		}
-		oasRisk.Jettons = append(oasRisk.Jettons, quantity)
-	}
-	if len(risk.Nfts) > 0 {
-		items, err := h.storage.GetNFTs(ctx, risk.Nfts)
-		if err != nil {
-			return nil, err
-		}
-		for _, item := range items {
-			nft := convertNFT(ctx, item, h.addressBook, h.previewGenerator, h.metaCache)
-			oasRisk.Nfts = append(oasRisk.Nfts, nft)
-		}
-	}
-	return &oasRisk, nil
 }

@@ -1,0 +1,75 @@
+package wallet
+
+import (
+	"math/big"
+
+	"github.com/tonkeeper/tongo"
+	"github.com/tonkeeper/tongo/abi"
+	"github.com/tonkeeper/tongo/boc"
+	"github.com/tonkeeper/tongo/tlb"
+	walletTongo "github.com/tonkeeper/tongo/wallet"
+)
+
+// Risk specifies assets that could be lost
+// if a message would be sent to a malicious smart contract.
+// It makes sense to understand the risk BEFORE sending a message to the blockchain.
+type Risk struct {
+	// According to https://docs.ton.org/develop/smart-contracts/messages#message-modes
+	TransferAllRemainingBalance bool
+	Ton                         uint64
+	Jettons                     map[tongo.AccountID]big.Int
+	Nfts                        []tongo.AccountID
+}
+
+func ExtractRisk(version walletTongo.Version, msg *boc.Cell) (*Risk, error) {
+	rawMessages, err := walletTongo.ExtractRawMessages(version, msg)
+	if err != nil {
+		return nil, err
+	}
+	risk := Risk{
+		TransferAllRemainingBalance: false,
+		Jettons:                     map[tongo.AccountID]big.Int{},
+	}
+	for _, rawMsg := range rawMessages {
+		if walletTongo.IsMessageModeSet(int(rawMsg.Mode), walletTongo.AttachAllRemainingBalance) {
+			risk.TransferAllRemainingBalance = true
+		}
+		var m tlb.Message
+		if err := tlb.Unmarshal(rawMsg.Message, &m); err != nil {
+			return nil, err
+		}
+		var tonValue uint64
+		var destination *tongo.AccountID
+		if m.Info.IntMsgInfo != nil {
+			tonValue = uint64(m.Info.IntMsgInfo.Value.Grams)
+			destination, err = tongo.AccountIDFromTlb(m.Info.IntMsgInfo.Dest)
+			if err != nil {
+				return nil, err
+			}
+		}
+		risk.Ton += tonValue
+		body := boc.Cell(m.Body.Value)
+		_, msgBody, err := abi.MessageDecoder(&body)
+		if err != nil {
+			continue
+		}
+		switch x := msgBody.(type) {
+		case abi.NftTransferMsgBody:
+			if destination == nil {
+				continue
+			}
+			// here, destination is an NFT
+			risk.Nfts = append(risk.Nfts, *destination)
+		case abi.JettonTransferMsgBody:
+			if destination == nil {
+				continue
+			}
+			// here, destination is a jetton wallet
+			amount := big.Int(x.Amount)
+			currentJettons := risk.Jettons[*destination]
+			var total big.Int
+			risk.Jettons[*destination] = *total.Add(&currentJettons, &amount)
+		}
+	}
+	return &risk, nil
+}
