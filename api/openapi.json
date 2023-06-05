@@ -4624,7 +4624,7 @@
   "/v2/tonconnect/stateinit": {
    "post": {
     "description": "",
-    "operationId": "getPubKeyByStateInit",
+    "operationId": "getAccountInfoByStateInit",
     "requestBody": {
      "$ref": "#/components/requestBodies/TonConnectStateInit"
     },
@@ -4634,19 +4634,24 @@
        "application/json": {
         "schema": {
          "properties": {
+          "address": {
+           "example": "0:97146a46acc2654y27947f14c4a4b14273e954f78bc017790b41208b0043200b",
+           "type": "string"
+          },
           "public_key": {
            "example": "NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2ODQ3...",
            "type": "string"
           }
          },
          "required": [
-          "public_key"
+          "public_key",
+          "address"
          ],
          "type": "object"
         }
        }
       },
-      "description": "public key"
+      "description": "account info"
      },
      "400": {
       "$ref": "#/components/responses/BadRequest"

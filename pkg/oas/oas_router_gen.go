@@ -1171,7 +1171,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 							// Leaf node.
 							switch r.Method {
 							case "POST":
-								s.handleGetPubKeyByStateInitRequest([0]string{}, w, r)
+								s.handleGetAccountInfoByStateInitRequest([0]string{}, w, r)
 							default:
 								s.notAllowed(w, r, "POST")
 							}
@@ -2461,9 +2461,9 @@ func (s *Server) FindRoute(method, path string) (r Route, _ bool) {
 						if len(elem) == 0 {
 							switch method {
 							case "POST":
-								// Leaf: GetPubKeyByStateInit
-								r.name = "GetPubKeyByStateInit"
-								r.operationID = "getPubKeyByStateInit"
+								// Leaf: GetAccountInfoByStateInit
+								r.name = "GetAccountInfoByStateInit"
+								r.operationID = "getAccountInfoByStateInit"
 								r.args = args
 								r.count = 0
 								return r, true

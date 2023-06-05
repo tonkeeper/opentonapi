@@ -651,6 +651,69 @@ func (c *Client) GetAccount(ctx context.Context, params GetAccountParams) (res G
 	return result, nil
 }
 
+// GetAccountInfoByStateInit invokes getAccountInfoByStateInit operation.
+//
+// POST /v2/tonconnect/stateinit
+func (c *Client) GetAccountInfoByStateInit(ctx context.Context, request GetAccountInfoByStateInitReq) (res GetAccountInfoByStateInitRes, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("getAccountInfoByStateInit"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, otelAttrs...)
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, "GetAccountInfoByStateInit",
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, otelAttrs...)
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	u.Path += "/v2/tonconnect/stateinit"
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "POST", u, nil)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeGetAccountInfoByStateInitRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeGetAccountInfoByStateInitResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
 // GetAccountTransactions invokes getAccountTransactions operation.
 //
 // Get account transactions.
@@ -2731,69 +2794,6 @@ func (c *Client) GetNftItemsByOwner(ctx context.Context, params GetNftItemsByOwn
 
 	stage = "DecodeResponse"
 	result, err := decodeGetNftItemsByOwnerResponse(resp)
-	if err != nil {
-		return res, errors.Wrap(err, "decode response")
-	}
-
-	return result, nil
-}
-
-// GetPubKeyByStateInit invokes getPubKeyByStateInit operation.
-//
-// POST /v2/tonconnect/stateinit
-func (c *Client) GetPubKeyByStateInit(ctx context.Context, request GetPubKeyByStateInitReq) (res GetPubKeyByStateInitRes, err error) {
-	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("getPubKeyByStateInit"),
-	}
-
-	// Run stopwatch.
-	startTime := time.Now()
-	defer func() {
-		elapsedDuration := time.Since(startTime)
-		c.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
-	}()
-
-	// Increment request counter.
-	c.requests.Add(ctx, 1, otelAttrs...)
-
-	// Start a span for this request.
-	ctx, span := c.cfg.Tracer.Start(ctx, "GetPubKeyByStateInit",
-		trace.WithAttributes(otelAttrs...),
-		clientSpanKind,
-	)
-	// Track stage for error reporting.
-	var stage string
-	defer func() {
-		if err != nil {
-			span.RecordError(err)
-			span.SetStatus(codes.Error, stage)
-			c.errors.Add(ctx, 1, otelAttrs...)
-		}
-		span.End()
-	}()
-
-	stage = "BuildURL"
-	u := uri.Clone(c.requestURL(ctx))
-	u.Path += "/v2/tonconnect/stateinit"
-
-	stage = "EncodeRequest"
-	r, err := ht.NewRequest(ctx, "POST", u, nil)
-	if err != nil {
-		return res, errors.Wrap(err, "create request")
-	}
-	if err := encodeGetPubKeyByStateInitRequest(request, r); err != nil {
-		return res, errors.Wrap(err, "encode request")
-	}
-
-	stage = "SendRequest"
-	resp, err := c.cfg.Client.Do(r)
-	if err != nil {
-		return res, errors.Wrap(err, "do request")
-	}
-	defer resp.Body.Close()
-
-	stage = "DecodeResponse"
-	result, err := decodeGetPubKeyByStateInitResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}

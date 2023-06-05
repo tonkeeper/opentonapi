@@ -7,9 +7,11 @@ import (
 	"encoding/base64"
 	"encoding/hex"
 
-	"github.com/tonkeeper/tongo/tonconnect"
-
 	"github.com/tonkeeper/opentonapi/pkg/oas"
+	"github.com/tonkeeper/tongo"
+	"github.com/tonkeeper/tongo/boc"
+	"github.com/tonkeeper/tongo/tlb"
+	"github.com/tonkeeper/tongo/tonconnect"
 )
 
 func (h Handler) GetTonConnectPayload(ctx context.Context) (res oas.GetTonConnectPayloadRes, err error) {
@@ -46,11 +48,25 @@ func (h Handler) TonConnectProof(ctx context.Context, request oas.TonConnectProo
 	return &oas.TonConnectProofOK{Token: signedToken}, nil
 }
 
-func (h Handler) GetPubKeyByStateInit(ctx context.Context, request oas.GetPubKeyByStateInitReq) (res oas.GetPubKeyByStateInitRes, err error) {
+func (h Handler) GetAccountInfoByStateInit(ctx context.Context, request oas.GetAccountInfoByStateInitReq) (res oas.GetAccountInfoByStateInitRes, err error) {
 	pubKey, err := tonconnect.ParseStateInit(request.StateInit)
 	if err != nil {
 		return &oas.BadRequest{Error: err.Error()}, nil
 	}
+	cells, err := boc.DeserializeBocBase64(request.StateInit)
+	if err != nil || len(cells) != 1 {
+		return &oas.BadRequest{Error: err.Error()}, nil
+	}
+	cellHash, err := cells[0].Hash()
+	if err != nil {
+		return &oas.BadRequest{Error: err.Error()}, nil
+	}
+	var hash tlb.Bits256
+	copy(hash[:], cellHash[:])
+	if err != nil {
+		return &oas.BadRequest{Error: err.Error()}, nil
+	}
+	accountID := tongo.AccountID{Workchain: int32(0), Address: hash}
 
-	return &oas.GetPubKeyByStateInitOK{PublicKey: hex.EncodeToString(pubKey)}, nil
+	return &oas.GetAccountInfoByStateInitOK{PublicKey: hex.EncodeToString(pubKey), Address: accountID.ToRaw()}, nil
 }
