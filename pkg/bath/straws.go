@@ -21,6 +21,7 @@ var DefaultStraws = []Straw{
 	FindJettonTransfer,
 	FindInitialSubscription,
 	FindExtendedSubscription,
+	FindGetGemsNftPurchase,
 }
 
 func FindNFTTransfer(bubble *Bubble) bool {
