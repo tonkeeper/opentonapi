@@ -38,7 +38,7 @@ func FindGetGemsNftPurchase(bubble *Bubble) bool {
 	if !txBubble.account.Is(abi.NftSaleGetgems) {
 		return false
 	}
-	if len(bubble.Children) != 4 && len(bubble.Children[3].Children) != 2 {
+	if len(bubble.Children) != 4 || len(bubble.Children[3].Children) != 2 {
 		return false
 	}
 	if !noOpCode(bubble.Children[0]) {
