@@ -548,6 +548,23 @@
     ],
     "type": "object"
    },
+   "AccountInfoByStateInit": {
+    "properties": {
+     "address": {
+      "example": "0:97146a46acc2654y27947f14c4a4b14273e954f78bc017790b41208b0043200b",
+      "type": "string"
+     },
+     "public_key": {
+      "example": "NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2ODQ3...",
+      "type": "string"
+     }
+    },
+    "required": [
+     "public_key",
+     "address"
+    ],
+    "type": "object"
+   },
    "AccountStaking": {
     "properties": {
      "pools": {
@@ -2828,12 +2845,12 @@
  },
  "info": {
   "contact": {
-   "email": "contact@fslabs.org",
+   "email": "support@tonkeeper.com",
    "name": "Support"
   },
   "description": "Provide access to indexed TON blockchain",
   "title": "REST api to TON blockchain explorer",
-  "version": "0.0.1"
+  "version": "2.0.0"
  },
  "openapi": "3.0.2",
  "paths": {
@@ -3404,6 +3421,50 @@
      },
      "404": {
       "$ref": "#/components/responses/NotFound"
+     },
+     "500": {
+      "$ref": "#/components/responses/InternalError"
+     }
+    },
+    "tags": [
+     "Accounts"
+    ]
+   }
+  },
+  "/v2/accounts/{account_id}/publickey": {
+   "get": {
+    "description": "Get public key by account id",
+    "operationId": "getPublicKeyByAccountID",
+    "parameters": [
+     {
+      "$ref": "#/components/parameters/accountIdParameter"
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "public_key": {
+           "example": "NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2ODQ3...",
+           "type": "string"
+          }
+         },
+         "required": [
+          "public_key"
+         ],
+         "type": "object"
+        }
+       }
+      },
+      "description": "public key"
+     },
+     "400": {
+      "$ref": "#/components/responses/BadRequest"
+     },
+     "401": {
+      "$ref": "#/components/responses/UnauthorizedError"
      },
      "500": {
       "$ref": "#/components/responses/InternalError"
@@ -4693,7 +4754,7 @@
   },
   "/v2/tonconnect/stateinit": {
    "post": {
-    "description": "",
+    "description": "Get account info by state init",
     "operationId": "getAccountInfoByStateInit",
     "requestBody": {
      "$ref": "#/components/requestBodies/TonConnectStateInit"
@@ -4703,21 +4764,7 @@
       "content": {
        "application/json": {
         "schema": {
-         "properties": {
-          "address": {
-           "example": "0:97146a46acc2654y27947f14c4a4b14273e954f78bc017790b41208b0043200b",
-           "type": "string"
-          },
-          "public_key": {
-           "example": "NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2ODQ3...",
-           "type": "string"
-          }
-         },
-         "required": [
-          "public_key",
-          "address"
-         ],
-         "type": "object"
+         "$ref": "#/components/schemas/AccountInfoByStateInit"
         }
        }
       },

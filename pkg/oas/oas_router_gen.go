@@ -327,6 +327,26 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 							return
 						}
+					case 'p': // Prefix: "publickey"
+						if l := len("publickey"); len(elem) >= l && elem[0:l] == "publickey" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						if len(elem) == 0 {
+							// Leaf node.
+							switch r.Method {
+							case "GET":
+								s.handleGetPublicKeyByAccountIDRequest([1]string{
+									args[0],
+								}, w, r)
+							default:
+								s.notAllowed(w, r, "GET")
+							}
+
+							return
+						}
 					case 'r': // Prefix: "reindex"
 						if l := len("reindex"); len(elem) >= l && elem[0:l] == "reindex" {
 							elem = elem[l:]
@@ -1616,6 +1636,26 @@ func (s *Server) FindRoute(method, path string) (r Route, _ bool) {
 								// Leaf: GetNftItemsByOwner
 								r.name = "GetNftItemsByOwner"
 								r.operationID = "getNftItemsByOwner"
+								r.args = args
+								r.count = 1
+								return r, true
+							default:
+								return
+							}
+						}
+					case 'p': // Prefix: "publickey"
+						if l := len("publickey"); len(elem) >= l && elem[0:l] == "publickey" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						if len(elem) == 0 {
+							switch method {
+							case "GET":
+								// Leaf: GetPublicKeyByAccountID
+								r.name = "GetPublicKeyByAccountID"
+								r.operationID = "getPublicKeyByAccountID"
 								r.args = args
 								r.count = 1
 								return r, true
