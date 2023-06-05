@@ -1269,24 +1269,28 @@ paths:
   /v2/tonconnect/stateinit:
     post:
       description: ""
-      operationId: getPubKeyByStateInit
+      operationId: getAccountInfoByStateInit
       tags:
         - Connect
       requestBody:
         $ref: "#/components/requestBodies/TonConnectStateInit"
       responses:
         '200':
-          description: "public key"
+          description: "account info"
           content:
             application/json:
               schema:
                 type: object
                 required:
                   - public_key
+                  - address
                 properties:
                   public_key:
                     type: string
                     example: "NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2ODQ3..."
+                  address:
+                    type: string
+                    example: "0:97146a46acc2654y27947f14c4a4b14273e954f78bc017790b41208b0043200b"
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':

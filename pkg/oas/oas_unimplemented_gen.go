@@ -85,6 +85,13 @@ func (UnimplementedHandler) GetAccount(ctx context.Context, params GetAccountPar
 	return r, ht.ErrNotImplemented
 }
 
+// GetAccountInfoByStateInit implements getAccountInfoByStateInit operation.
+//
+// POST /v2/tonconnect/stateinit
+func (UnimplementedHandler) GetAccountInfoByStateInit(ctx context.Context, req GetAccountInfoByStateInitReq) (r GetAccountInfoByStateInitRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // GetAccountTransactions implements getAccountTransactions operation.
 //
 // Get account transactions.
@@ -280,13 +287,6 @@ func (UnimplementedHandler) GetNftItemsByAddresses(ctx context.Context, req OptG
 //
 // GET /v2/accounts/{account_id}/nfts
 func (UnimplementedHandler) GetNftItemsByOwner(ctx context.Context, params GetNftItemsByOwnerParams) (r GetNftItemsByOwnerRes, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
-// GetPubKeyByStateInit implements getPubKeyByStateInit operation.
-//
-// POST /v2/tonconnect/stateinit
-func (UnimplementedHandler) GetPubKeyByStateInit(ctx context.Context, req GetPubKeyByStateInitReq) (r GetPubKeyByStateInitRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
