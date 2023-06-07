@@ -60,5 +60,5 @@ func (h Handler) GetAccountInfoByStateInit(ctx context.Context, request oas.GetA
 	}
 	accountID := tongo.AccountID{Workchain: int32(0), Address: tlb.Bits256(cellHash[:])}
 
-	return &oas.GetAccountInfoByStateInitOK{PublicKey: hex.EncodeToString(pubKey), Address: accountID.ToRaw()}, nil
+	return &oas.AccountInfoByStateInit{PublicKey: hex.EncodeToString(pubKey), Address: accountID.ToRaw()}, nil
 }

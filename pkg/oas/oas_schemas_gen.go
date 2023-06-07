@@ -328,6 +328,34 @@ func (*AccountEvents) getEventsByAccountRes()    {}
 func (*AccountEvents) getJettonsHistoryByIDRes() {}
 func (*AccountEvents) getJettonsHistoryRes()     {}
 
+// Ref: #/components/schemas/AccountInfoByStateInit
+type AccountInfoByStateInit struct {
+	PublicKey string `json:"public_key"`
+	Address   string `json:"address"`
+}
+
+// GetPublicKey returns the value of PublicKey.
+func (s AccountInfoByStateInit) GetPublicKey() string {
+	return s.PublicKey
+}
+
+// GetAddress returns the value of Address.
+func (s AccountInfoByStateInit) GetAddress() string {
+	return s.Address
+}
+
+// SetPublicKey sets the value of PublicKey.
+func (s *AccountInfoByStateInit) SetPublicKey(val string) {
+	s.PublicKey = val
+}
+
+// SetAddress sets the value of Address.
+func (s *AccountInfoByStateInit) SetAddress(val string) {
+	s.Address = val
+}
+
+func (*AccountInfoByStateInit) getAccountInfoByStateInitRes() {}
+
 // Ref: #/components/schemas/AccountStaking
 type AccountStaking struct {
 	Pools []AccountStakingInfo `json:"pools"`
@@ -975,6 +1003,7 @@ func (*BadRequest) getNftCollectionRes()             {}
 func (*BadRequest) getNftItemByAddressRes()          {}
 func (*BadRequest) getNftItemsByAddressesRes()       {}
 func (*BadRequest) getNftItemsByOwnerRes()           {}
+func (*BadRequest) getPublicKeyByAccountIDRes()      {}
 func (*BadRequest) getRatesRes()                     {}
 func (*BadRequest) getRawAccountRes()                {}
 func (*BadRequest) getSearchAccountsRes()            {}
@@ -1940,33 +1969,6 @@ func (s *FoundAccountsAddressesItem) SetName(val string) {
 	s.Name = val
 }
 
-type GetAccountInfoByStateInitOK struct {
-	PublicKey string `json:"public_key"`
-	Address   string `json:"address"`
-}
-
-// GetPublicKey returns the value of PublicKey.
-func (s GetAccountInfoByStateInitOK) GetPublicKey() string {
-	return s.PublicKey
-}
-
-// GetAddress returns the value of Address.
-func (s GetAccountInfoByStateInitOK) GetAddress() string {
-	return s.Address
-}
-
-// SetPublicKey sets the value of PublicKey.
-func (s *GetAccountInfoByStateInitOK) SetPublicKey(val string) {
-	s.PublicKey = val
-}
-
-// SetAddress sets the value of Address.
-func (s *GetAccountInfoByStateInitOK) SetAddress(val string) {
-	s.Address = val
-}
-
-func (*GetAccountInfoByStateInitOK) getAccountInfoByStateInitRes() {}
-
 type GetAccountInfoByStateInitReq struct {
 	StateInit string `json:"state_init"`
 }
@@ -2008,6 +2010,22 @@ func (s GetNftItemsByAddressesReq) GetAccountIds() []string {
 func (s *GetNftItemsByAddressesReq) SetAccountIds(val []string) {
 	s.AccountIds = val
 }
+
+type GetPublicKeyByAccountIDOK struct {
+	PublicKey string `json:"public_key"`
+}
+
+// GetPublicKey returns the value of PublicKey.
+func (s GetPublicKeyByAccountIDOK) GetPublicKey() string {
+	return s.PublicKey
+}
+
+// SetPublicKey sets the value of PublicKey.
+func (s *GetPublicKeyByAccountIDOK) SetPublicKey(val string) {
+	s.PublicKey = val
+}
+
+func (*GetPublicKeyByAccountIDOK) getPublicKeyByAccountIDRes() {}
 
 type GetRatesOK struct {
 	Rates jx.Raw `json:"rates"`
@@ -2143,6 +2161,7 @@ func (*InternalError) getNftCollectionsRes()            {}
 func (*InternalError) getNftItemByAddressRes()          {}
 func (*InternalError) getNftItemsByAddressesRes()       {}
 func (*InternalError) getNftItemsByOwnerRes()           {}
+func (*InternalError) getPublicKeyByAccountIDRes()      {}
 func (*InternalError) getRatesRes()                     {}
 func (*InternalError) getRawAccountRes()                {}
 func (*InternalError) getSearchAccountsRes()            {}
@@ -6486,6 +6505,7 @@ func (*UnauthorizedError) getNftCollectionsRes()            {}
 func (*UnauthorizedError) getNftItemByAddressRes()          {}
 func (*UnauthorizedError) getNftItemsByAddressesRes()       {}
 func (*UnauthorizedError) getNftItemsByOwnerRes()           {}
+func (*UnauthorizedError) getPublicKeyByAccountIDRes()      {}
 func (*UnauthorizedError) getRatesRes()                     {}
 func (*UnauthorizedError) getRawAccountRes()                {}
 func (*UnauthorizedError) getSearchAccountsRes()            {}

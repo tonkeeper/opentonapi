@@ -768,6 +768,34 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/InternalError'
+  
+  /v2/accounts/{account_id}/publickey:
+    get:
+      description: "Get public key by account id"
+      operationId: getPublicKeyByAccountID
+      tags:
+        - Accounts
+      parameters:
+        - $ref: '#/components/parameters/accountIdParameter'
+      responses:
+        '200':
+          description: "public key"
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - public_key
+                properties:
+                  public_key:
+                    type: string
+                    example: "NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2ODQ3..."
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalError'
 
   /v2/dns/{domain_name}/resolve:
     get:
@@ -1268,7 +1296,7 @@ paths:
           $ref: '#/components/responses/InternalError'
   /v2/tonconnect/stateinit:
     post:
-      description: ""
+      description: "Get account info by state init"
       operationId: getAccountInfoByStateInit
       tags:
         - Connect
@@ -1280,17 +1308,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                required:
-                  - public_key
-                  - address
-                properties:
-                  public_key:
-                    type: string
-                    example: "NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2ODQ3..."
-                  address:
-                    type: string
-                    example: "0:97146a46acc2654y27947f14c4a4b14273e954f78bc017790b41208b0043200b"
+                $ref: '#/components/schemas/AccountInfoByStateInit'
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -3448,6 +3466,18 @@ components:
                 example: "blah_blah.ton"
               dns_item:
                 $ref: '#/components/schemas/NftItem'
+    AccountInfoByStateInit:
+      type: object
+      required:
+        - public_key
+        - address
+      properties:
+        public_key:
+          type: string
+          example: "NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2ODQ3..."
+        address:
+          type: string
+          example: "0:97146a46acc2654y27947f14c4a4b14273e954f78bc017790b41208b0043200b"
   
   responses:
     NotFound:

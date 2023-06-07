@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"sort"
@@ -217,4 +218,16 @@ func (h Handler) GetDnsExpiring(ctx context.Context, params oas.GetDnsExpiringPa
 	})
 
 	return &response, nil
+}
+
+func (h Handler) GetPublicKeyByAccountID(ctx context.Context, params oas.GetPublicKeyByAccountIDParams) (r oas.GetPublicKeyByAccountIDRes, _ error) {
+	accountID, err := tongo.ParseAccountID(params.AccountID)
+	if err != nil {
+		return &oas.BadRequest{Error: err.Error()}, nil
+	}
+	pubKey, err := h.storage.GetWalletPubKey(accountID)
+	if err != nil {
+		return &oas.InternalError{Error: err.Error()}, nil
+	}
+	return &oas.GetPublicKeyByAccountIDOK{PublicKey: hex.EncodeToString(pubKey)}, nil
 }
