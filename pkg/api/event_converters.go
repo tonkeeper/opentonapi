@@ -232,6 +232,11 @@ func (h Handler) toAccountEvent(ctx context.Context, account tongo.AccountID, tr
 		e.Actions = []oas.Action{{
 			Type:   oas.ActionTypeUnknown,
 			Status: oas.ActionStatusOk,
+			SimplePreview: oas.ActionSimplePreview{
+				Name:        "Unknown",
+				Description: "Something happened but we don't understand what.",
+				Accounts:    []oas.AccountAddress{convertAccountAddress(account, h.addressBook)},
+			},
 		}}
 	}
 	return e
