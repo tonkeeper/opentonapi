@@ -3344,6 +3344,7 @@ components:
           enum:
             - whales
             - tf
+            - liquidTF
         apy:
           type: number
           description: APY in percent

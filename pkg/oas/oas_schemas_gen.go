@@ -5031,8 +5031,9 @@ func (s *PoolInfo) SetMaxNominators(val int) {
 type PoolInfoImplementation string
 
 const (
-	PoolInfoImplementationWhales PoolInfoImplementation = "whales"
-	PoolInfoImplementationTf     PoolInfoImplementation = "tf"
+	PoolInfoImplementationWhales   PoolInfoImplementation = "whales"
+	PoolInfoImplementationTf       PoolInfoImplementation = "tf"
+	PoolInfoImplementationLiquidTF PoolInfoImplementation = "liquidTF"
 )
 
 // Ref: #/components/schemas/Price

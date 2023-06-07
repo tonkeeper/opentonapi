@@ -32,6 +32,17 @@ func (h Handler) StakingPoolInfo(ctx context.Context, params oas.StakingPoolInfo
 			Pool: convertStakingWhalesPool(poolID, w, poolStatus, poolConfig, h.state.GetAPY(), true, nominatorsCount),
 		}, nil
 	}
+	lPool, err := h.storage.GetLiquidPool(ctx, poolID)
+	if err == nil {
+		return &oas.StakingPoolInfoOK{
+			Implementation: oas.PoolImplementation{
+				Name:        references.LiquidImplementationsName,
+				Description: i18n.T(params.AcceptLanguage.Value, i18n.C{MessageID: "poolImplementationDescription", TemplateData: map[string]interface{}{"Deposit": 100}}),
+				URL:         references.LiquidImplementationsUrl,
+			},
+			Pool: convertLiquidStaking(lPool, h.state.GetAPY()),
+		}, nil
+	}
 	p, err := h.storage.GetTFPool(ctx, poolID)
 	if err != nil {
 		return &oas.InternalError{Error: "pool not found: " + err.Error()}, nil

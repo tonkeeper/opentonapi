@@ -44,3 +44,20 @@ func convertStakingTFPool(p core.TFPool, info addressbook.TFPoolInfo, apy float6
 		MaxNominators:     p.MaxNominators,
 	}
 }
+
+func convertLiquidStaking(p core.LiquidPool, apy float64) oas.PoolInfo {
+
+	name := p.Address.ToHuman(true, false)
+
+	return oas.PoolInfo{
+		Address:           p.Address.ToRaw(),
+		Name:              name,
+		TotalAmount:       p.TotalAmount,
+		Implementation:    oas.PoolInfoImplementationLiquidTF,
+		Apy:               apy * 0.6,
+		MinStake:          10,
+		Verified:          p.VerifiedSources,
+		CurrentNominators: 0,
+		MaxNominators:     0,
+	}
+}

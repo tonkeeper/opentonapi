@@ -1214,6 +1214,8 @@ func (s PoolInfoImplementation) Validate() error {
 		return nil
 	case "tf":
 		return nil
+	case "liquidTF":
+		return nil
 	default:
 		return errors.Errorf("invalid value: %v", s)
 	}

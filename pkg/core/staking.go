@@ -23,3 +23,9 @@ type TFPool struct {
 	MaxNominators     int
 	VerifiedSources   bool
 }
+
+type LiquidPool struct {
+	Address         tongo.AccountID
+	TotalAmount     int64
+	VerifiedSources bool
+}

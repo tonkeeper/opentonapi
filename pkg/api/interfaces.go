@@ -40,6 +40,7 @@ type storage interface {
 	GetWhalesPoolInfo(ctx context.Context, id tongo.AccountID) (abi.GetParams_WhalesNominatorResult, abi.GetStakingStatusResult, int, error)
 	GetTFPools(ctx context.Context) ([]core.TFPool, error)
 	GetTFPool(ctx context.Context, pool tongo.AccountID) (core.TFPool, error)
+	GetLiquidPool(ctx context.Context, pool tongo.AccountID) (core.LiquidPool, error)
 
 	GetNFTs(ctx context.Context, accounts []tongo.AccountID) ([]core.NftItem, error)
 	SearchNFTs(ctx context.Context,

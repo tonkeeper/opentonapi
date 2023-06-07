@@ -11740,6 +11740,8 @@ func (s *PoolInfoImplementation) Decode(d *jx.Decoder) error {
 		*s = PoolInfoImplementationWhales
 	case PoolInfoImplementationTf:
 		*s = PoolInfoImplementationTf
+	case PoolInfoImplementationLiquidTF:
+		*s = PoolInfoImplementationLiquidTF
 	default:
 		*s = PoolInfoImplementation(v)
 	}

@@ -2050,7 +2050,8 @@
      "implementation": {
       "enum": [
        "whales",
-       "tf"
+       "tf",
+       "liquidTF"
       ],
       "type": "string"
      },
