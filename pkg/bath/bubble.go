@@ -36,7 +36,7 @@ func (b Bubble) String() string {
 }
 
 type actioner interface {
-	ToAction(metaResolver) *Action
+	ToAction() *Action
 }
 
 func FromTrace(trace *core.Trace) *Bubble {

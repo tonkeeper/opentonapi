@@ -1,10 +1,7 @@
 package bath
 
 import (
-	"context"
-
 	"github.com/tonkeeper/opentonapi/pkg/core"
-	"github.com/tonkeeper/opentonapi/pkg/core/jetton"
 	"github.com/tonkeeper/tongo"
 )
 
@@ -13,14 +10,9 @@ type ActionsList struct {
 	ValueFlow *ValueFlow
 }
 
-type metaResolver interface {
-	GetJettonNormalizedMetadata(ctx context.Context, master tongo.AccountID) jetton.NormalizedMetadata
-}
-
 type Options struct {
-	straws   []Straw
-	account  *tongo.AccountID
-	resolver metaResolver
+	straws  []Straw
+	account *tongo.AccountID
 }
 
 type Option func(*Options)
@@ -38,12 +30,6 @@ func ForAccount(a tongo.AccountID) Option {
 	}
 }
 
-func WithMetaResolver(resolver metaResolver) Option {
-	return func(options *Options) {
-		options.resolver = resolver
-	}
-}
-
 // FindActions finds known action patterns in the given trace and
 // returns a list of actions.
 func FindActions(trace *core.Trace, opts ...Option) (*ActionsList, error) {
@@ -55,7 +41,7 @@ func FindActions(trace *core.Trace, opts ...Option) (*ActionsList, error) {
 	}
 	bubble := fromTrace(trace)
 	MergeAllBubbles(bubble, options.straws)
-	actions, flow := CollectActionsAndValueFlow(bubble, options.account, options.resolver)
+	actions, flow := CollectActionsAndValueFlow(bubble, options.account)
 	return &ActionsList{
 		Actions:   actions,
 		ValueFlow: flow,

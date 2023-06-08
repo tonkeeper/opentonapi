@@ -713,6 +713,7 @@ func (s *ActionPhase) SetTotalFees(val int64) {
 	s.TotalFees = val
 }
 
+// Shortly describes what this action is about.
 // Ref: #/components/schemas/ActionSimplePreview
 type ActionSimplePreview struct {
 	Name        string `json:"name"`

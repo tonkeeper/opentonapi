@@ -5,12 +5,11 @@ import (
 	"fmt"
 
 	"github.com/tonkeeper/opentonapi/pkg/bath"
-	"github.com/tonkeeper/opentonapi/pkg/core/jetton"
 	"github.com/tonkeeper/opentonapi/pkg/oas"
 	"github.com/tonkeeper/tongo"
 )
 
-func jettonPreview(master tongo.AccountID, meta jetton.NormalizedMetadata, imgGenerator previewGenerator) oas.JettonPreview {
+func jettonPreview(master tongo.AccountID, meta NormalizedMetadata, imgGenerator previewGenerator) oas.JettonPreview {
 	preview := oas.JettonPreview{
 		Address:      master.ToRaw(),
 		Name:         meta.Name,
@@ -22,7 +21,7 @@ func jettonPreview(master tongo.AccountID, meta jetton.NormalizedMetadata, imgGe
 	return preview
 }
 
-func jettonMetadata(account tongo.AccountID, meta jetton.NormalizedMetadata) oas.JettonMetadata {
+func jettonMetadata(account tongo.AccountID, meta NormalizedMetadata) oas.JettonMetadata {
 	metadata := oas.JettonMetadata{
 		Address:  account.ToRaw(),
 		Name:     meta.Name,
@@ -49,8 +48,7 @@ func (h Handler) convertJettonHistory(ctx context.Context, account tongo.Account
 			return nil, 0, err
 		}
 		result, err := bath.FindActions(trace,
-			bath.WithStraws([]bath.Straw{bath.FindJettonTransfer}),
-			bath.WithMetaResolver(h))
+			bath.WithStraws([]bath.Straw{bath.FindJettonTransfer}))
 		if err != nil {
 			return nil, 0, err
 		}

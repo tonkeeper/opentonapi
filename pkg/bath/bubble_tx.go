@@ -4,11 +4,8 @@ import (
 	"fmt"
 
 	"github.com/ghodss/yaml"
-	"github.com/tonkeeper/tongo"
-	"github.com/tonkeeper/tongo/abi"
-	"github.com/tonkeeper/tongo/utils"
-
 	"github.com/tonkeeper/opentonapi/pkg/core"
+	"github.com/tonkeeper/tongo/abi"
 )
 
 type BubbleTx struct {
@@ -39,7 +36,7 @@ func dumpCallArgs(v any) string {
 	}
 	return string(bs)
 }
-func (b BubbleTx) ToAction(metaResolver) *Action {
+func (b BubbleTx) ToAction() *Action {
 	if b.external {
 		if b.transactionType == core.TickTockTx {
 			return &Action{
@@ -51,11 +48,6 @@ func (b BubbleTx) ToAction(metaResolver) *Action {
 				},
 				Success: b.success,
 				Type:    SmartContractExec,
-				SimplePreview: SimplePreview{
-					Name:      "Smart Contract Execution",
-					MessageID: smartContractMessageID,
-					Accounts:  []tongo.AccountID{b.account.Address},
-				},
 			}
 		}
 		return nil
@@ -77,14 +69,8 @@ func (b BubbleTx) ToAction(metaResolver) *Action {
 			},
 			Success: b.success,
 			Type:    SmartContractExec,
-			SimplePreview: SimplePreview{
-				Name:      "Smart Contract Execution",
-				MessageID: smartContractMessageID,
-				Accounts:  distinctAccounts(b.account.Address, b.inputFrom.Address),
-			},
 		}
 	}
-	value := utils.HumanFriendlyCoinsRepr(b.inputAmount)
 	a := &Action{
 		TonTransfer: &TonTransferAction{
 			Amount:    b.inputAmount,
@@ -93,15 +79,6 @@ func (b BubbleTx) ToAction(metaResolver) *Action {
 		},
 		Success: true,
 		Type:    TonTransfer,
-		SimplePreview: SimplePreview{
-			Name:      "Ton Transfer",
-			MessageID: tonTransferMessageID,
-			TemplateData: map[string]interface{}{
-				"Value": value,
-			},
-			Accounts: distinctAccounts(b.account.Address, b.inputFrom.Address),
-			Value:    value,
-		},
 	}
 	if b.decodedBody != nil {
 		s, ok := b.decodedBody.Value.(abi.TextCommentMsgBody)

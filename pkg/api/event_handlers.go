@@ -55,7 +55,7 @@ func (h Handler) GetEvent(ctx context.Context, params oas.GetEventParams) (oas.G
 	if err != nil {
 		return &oas.InternalError{Error: err.Error()}, nil
 	}
-	result, err := bath.FindActions(trace, bath.WithMetaResolver(h))
+	result, err := bath.FindActions(trace)
 	if err != nil {
 		return nil, err
 	}
@@ -79,7 +79,7 @@ func (h Handler) GetEventsByAccount(ctx context.Context, params oas.GetEventsByA
 		if err != nil {
 			return &oas.InternalError{Error: err.Error()}, nil
 		}
-		result, err := bath.FindActions(trace, bath.ForAccount(account), bath.WithMetaResolver(h))
+		result, err := bath.FindActions(trace, bath.ForAccount(account))
 		if err != nil {
 			return &oas.InternalError{Error: err.Error()}, nil
 		}

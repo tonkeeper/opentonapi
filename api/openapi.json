@@ -778,6 +778,7 @@
     "type": "object"
    },
    "ActionSimplePreview": {
+    "description": "shortly describes what this action is about.",
     "properties": {
      "accounts": {
       "items": {

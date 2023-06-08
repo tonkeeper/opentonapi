@@ -11,7 +11,7 @@ type BubbleGetGemsNftPurchase struct {
 	Nft      tongo.AccountID
 }
 
-func (b BubbleGetGemsNftPurchase) ToAction(metaResolver) *Action {
+func (b BubbleGetGemsNftPurchase) ToAction() *Action {
 	return &Action{
 		GetGemsNftPurchase: &GetGemsNftPurchaseAction{
 			Nft:      b.Nft,
@@ -19,14 +19,6 @@ func (b BubbleGetGemsNftPurchase) ToAction(metaResolver) *Action {
 		},
 		Success: b.Success,
 		Type:    GetGemsNftPurchase,
-		SimplePreview: SimplePreview{
-			Name:  "NFT Purchase",
-			Value: "1 NFT",
-			Accounts: []tongo.AccountID{
-				b.NewOwner, b.Nft,
-			},
-			MessageID: nftPurchaseMessageID,
-		},
 	}
 }
 

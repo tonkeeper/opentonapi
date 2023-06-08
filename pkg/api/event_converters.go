@@ -2,7 +2,14 @@ package api
 
 import (
 	"context"
+	"fmt"
 	"math/big"
+	"sort"
+
+	rules "github.com/tonkeeper/scam_backoffice_rules"
+	"github.com/tonkeeper/tongo"
+	"github.com/tonkeeper/tongo/utils"
+	"golang.org/x/exp/slices"
 
 	"github.com/tonkeeper/opentonapi/internal/g"
 	"github.com/tonkeeper/opentonapi/pkg/bath"
@@ -10,9 +17,36 @@ import (
 	"github.com/tonkeeper/opentonapi/pkg/i18n"
 	"github.com/tonkeeper/opentonapi/pkg/oas"
 	"github.com/tonkeeper/opentonapi/pkg/wallet"
-	rules "github.com/tonkeeper/scam_backoffice_rules"
-	"github.com/tonkeeper/tongo"
 )
+
+// IDs of messages in pkg/i18n/translations/*.toml
+const (
+	tonTransferMessageID    = "tonTransferAction"
+	nftTransferMessageID    = "nftTransferAction"
+	nftPurchaseMessageID    = "nftPurchaseAction"
+	jettonTransferMessageID = "jettonTransferAction"
+	smartContractMessageID  = "smartContractExecAction"
+	subscriptionMessageID   = "subscriptionAction"
+)
+
+func distinctAccounts(book addressBook, accounts ...*tongo.AccountID) []oas.AccountAddress {
+	var okAccounts []*tongo.AccountID
+	for _, account := range accounts {
+		if account == nil {
+			continue
+		}
+		okAccounts = append(okAccounts, account)
+	}
+	sort.Slice(accounts, func(i, j int) bool {
+		return accounts[i].String() < accounts[j].String()
+	})
+	sortedAccounts := slices.Compact(accounts)
+	result := make([]oas.AccountAddress, 0, len(sortedAccounts))
+	for _, account := range sortedAccounts {
+		result = append(result, convertAccountAddress(*account, book))
+	}
+	return result
+}
 
 func convertTrace(t core.Trace, book addressBook) oas.Trace {
 	trace := oas.Trace{Transaction: convertTransaction(t.Transaction, book), Interfaces: g.ToStrings(t.AccountInterfaces)}
@@ -75,7 +109,7 @@ func (h Handler) convertAction(ctx context.Context, a bath.Action, acceptLanguag
 	}
 
 	action.SimplePreview = oas.ActionSimplePreview{
-		Name:        a.SimplePreview.Name,
+		Name:        string(a.Type),
 		Description: string(a.Type),
 	}
 	switch a.Type {
@@ -99,12 +133,32 @@ func (h Handler) convertAction(ctx context.Context, a bath.Action, acceptLanguag
 				Origin: a.TonTransfer.Refund.Origin,
 			})
 		}
+		value := utils.HumanFriendlyCoinsRepr(a.TonTransfer.Amount)
+		action.SimplePreview = oas.ActionSimplePreview{
+			Name: "Ton Transfer",
+			Description: i18n.T(acceptLanguage.Value, i18n.C{
+				MessageID: tonTransferMessageID,
+				TemplateData: map[string]interface{}{
+					"Value": value,
+				},
+			}),
+			Accounts: distinctAccounts(h.addressBook, &a.TonTransfer.Sender, &a.TonTransfer.Recipient),
+			Value:    oas.NewOptString(value),
+		}
 	case bath.NftItemTransfer:
 		action.NftItemTransfer.SetTo(oas.NftItemTransferAction{
 			Nft:       a.NftItemTransfer.Nft.ToRaw(),
 			Recipient: convertOptAccountAddress(a.NftItemTransfer.Recipient, h.addressBook),
 			Sender:    convertOptAccountAddress(a.NftItemTransfer.Sender, h.addressBook),
 		})
+		action.SimplePreview = oas.ActionSimplePreview{
+			Name: "NFT Transfer",
+			Description: i18n.T(acceptLanguage.Value, i18n.C{
+				MessageID: nftTransferMessageID,
+			}),
+			Accounts: distinctAccounts(h.addressBook, a.NftItemTransfer.Recipient, a.NftItemTransfer.Sender, &a.NftItemTransfer.Nft),
+			Value:    oas.NewOptString(fmt.Sprintf("1 NFT")),
+		}
 	case bath.JettonTransfer:
 		meta := h.GetJettonNormalizedMetadata(ctx, a.JettonTransfer.Jetton)
 		preview := jettonPreview(a.JettonTransfer.Jetton, meta, h.previewGenerator)
@@ -120,6 +174,20 @@ func (h Handler) convertAction(ctx context.Context, a bath.Action, acceptLanguag
 		if len(preview.Image) > 0 {
 			action.SimplePreview.ValueImage = oas.NewOptString(preview.Image)
 		}
+		amount := Scale(a.JettonTransfer.Amount, meta.Decimals).String()
+		action.SimplePreview = oas.ActionSimplePreview{
+			Name: "Jetton Transfer",
+			Description: i18n.T(acceptLanguage.Value, i18n.C{
+				MessageID: jettonTransferMessageID,
+				TemplateData: map[string]interface{}{
+					"Value":      amount,
+					"JettonName": meta.Name,
+				},
+			}),
+			Accounts: distinctAccounts(h.addressBook, a.JettonTransfer.Recipient, a.JettonTransfer.Sender, &a.JettonTransfer.Jetton),
+			Value:    oas.NewOptString(fmt.Sprintf("%v %v", amount, meta.Name)),
+		}
+
 	case bath.Subscription:
 		action.Subscribe.SetTo(oas.SubscriptionAction{
 			Amount:       a.Subscription.Amount,
@@ -128,6 +196,18 @@ func (h Handler) convertAction(ctx context.Context, a bath.Action, acceptLanguag
 			Subscription: a.Subscription.Subscription.ToRaw(),
 			Initial:      a.Subscription.First,
 		})
+		value := utils.HumanFriendlyCoinsRepr(a.Subscription.Amount)
+		action.SimplePreview = oas.ActionSimplePreview{
+			Name: "Subscription",
+			Description: i18n.T(acceptLanguage.Value, i18n.C{
+				MessageID: subscriptionMessageID,
+				TemplateData: map[string]interface{}{
+					"Value": value,
+				},
+			}),
+			Accounts: distinctAccounts(h.addressBook, &a.Subscription.Beneficiary, &a.Subscription.Subscriber),
+			Value:    oas.NewOptString(value),
+		}
 	case bath.UnSubscription:
 		action.UnSubscribe.SetTo(oas.UnSubscriptionAction{
 			Beneficiary:  convertAccountAddress(a.UnSubscription.Beneficiary, h.addressBook),
@@ -139,6 +219,16 @@ func (h Handler) convertAction(ctx context.Context, a bath.Action, acceptLanguag
 			Address:    a.ContractDeploy.Address.ToRaw(),
 			Interfaces: a.ContractDeploy.Interfaces,
 		})
+	case bath.GetGemsNftPurchase:
+		action.SimplePreview = oas.ActionSimplePreview{
+			Name: "NFT Purchase",
+			Description: i18n.T(acceptLanguage.Value, i18n.C{
+				MessageID:    nftPurchaseMessageID,
+				TemplateData: map[string]interface{}{},
+			}),
+			Accounts: distinctAccounts(h.addressBook, &a.GetGemsNftPurchase.Nft, &a.GetGemsNftPurchase.NewOwner),
+			Value:    oas.NewOptString(fmt.Sprintf("1 NFT")),
+		}
 	case bath.SmartContractExec:
 		op := "Call"
 		if a.SmartContractExec.Operation != "" {
@@ -151,25 +241,17 @@ func (h Handler) convertAction(ctx context.Context, a bath.Action, acceptLanguag
 			Operation:   op,
 			Refund:      oas.OptRefund{},
 		}
+		action.SimplePreview = oas.ActionSimplePreview{
+			Name: "Smart Contract Execution",
+			Description: i18n.T(acceptLanguage.Value, i18n.C{
+				MessageID: smartContractMessageID,
+			}),
+			Accounts: distinctAccounts(h.addressBook, &a.SmartContractExec.Executor, &a.SmartContractExec.Contract),
+		}
 		if a.SmartContractExec.Payload != "" {
 			contractAction.Payload.SetTo(a.SmartContractExec.Payload)
 		}
 		action.SmartContractExec.SetTo(contractAction)
-	}
-	if len(a.SimplePreview.MessageID) > 0 {
-		action.SimplePreview.Description = i18n.T(acceptLanguage.Value,
-			i18n.C{
-				MessageID:    a.SimplePreview.MessageID,
-				TemplateData: a.SimplePreview.TemplateData,
-			})
-	}
-	accounts := make([]oas.AccountAddress, 0, len(a.SimplePreview.Accounts))
-	for _, account := range a.SimplePreview.Accounts {
-		accounts = append(accounts, convertAccountAddress(account, h.addressBook))
-	}
-	action.SimplePreview.SetAccounts(accounts)
-	if len(a.SimplePreview.Value) > 0 {
-		action.SimplePreview.Value = oas.NewOptString(a.SimplePreview.Value)
 	}
 	return action, spamDetected
 }
