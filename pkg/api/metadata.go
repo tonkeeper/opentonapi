@@ -3,10 +3,11 @@ package api
 import (
 	"context"
 	"encoding/json"
+	"time"
+
 	"github.com/tonkeeper/opentonapi/pkg/cache"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/tep64"
-	"time"
 )
 
 func (mc *metadataCache) getCollectionMeta(ctx context.Context, a tongo.AccountID) (tep64.Metadata, bool) {

@@ -87,7 +87,7 @@ func FindExtendedSubscription(bubble *Bubble) bool {
 	return false
 }
 
-func (b BubbleSubscription) ToAction(book addressBook) (action *Action) {
+func (b BubbleSubscription) ToAction(metaResolver) (action *Action) {
 	value := utils.HumanFriendlyCoinsRepr(b.Amount)
 	return &Action{
 		Subscription: &SubscriptionAction{

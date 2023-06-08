@@ -1,9 +1,11 @@
 package api
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/go-faster/errors"
+	"github.com/tonkeeper/opentonapi/pkg/core/jetton"
 	rules "github.com/tonkeeper/scam_backoffice_rules"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/contract/dns"
@@ -171,4 +173,14 @@ func NewHandler(logger *zap.Logger, opts ...Option) (*Handler, error) {
 		},
 		tonConnect: tonConnect,
 	}, nil
+}
+
+func (h Handler) GetJettonNormalizedMetadata(ctx context.Context, master tongo.AccountID) jetton.NormalizedMetadata {
+	meta, _ := h.metaCache.getJettonMeta(ctx, master)
+	// TODO: should we ignore the second returned value?
+	info, ok := h.addressBook.GetJettonInfoByAddress(master)
+	if ok {
+		return jetton.NormalizeMetadata(meta, &info)
+	}
+	return jetton.NormalizeMetadata(meta, nil)
 }

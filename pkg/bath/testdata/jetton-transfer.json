@@ -23,15 +23,15 @@
        "Type": "JettonTransfer",
        "SimplePreview": {
          "Name": "Jetton Transfer",
-         "Value": "1000000 UKWN",
+         "Value": "0.01 jUSDT",
          "Accounts": [
            "0:0000000000000000000000000000000000000000000000000000000000000000",
            "0:2cf3b5b8c891e517c9addbda1c0386a09ccacbb0e3faf630b51cfc8152325acb"
          ],
          "MessageID": "jettonTransferAction",
          "TemplateData": {
-           "JettonName": "UKWN",
-           "Value": 1000000
+           "JettonName": "jUSDT",
+           "Value": "0.01"
          }
        }
      }

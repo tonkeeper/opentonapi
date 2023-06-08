@@ -136,17 +136,17 @@ func (a Action) String() string {
 	return fmt.Sprintf("%v: %+v", a.Type, string(b))
 }
 
-func CollectActionsAndValueFlow(bubble *Bubble, forAccount *tongo.AccountID, book addressBook) ([]Action, *ValueFlow) {
+func CollectActionsAndValueFlow(bubble *Bubble, forAccount *tongo.AccountID, resolver metaResolver) ([]Action, *ValueFlow) {
 	var actions []Action
 	valueFlow := newValueFlow()
 	if forAccount == nil || slices.Contains(bubble.Accounts, *forAccount) {
-		a := bubble.Info.ToAction(book)
+		a := bubble.Info.ToAction(resolver)
 		if a != nil {
 			actions = append(actions, *a)
 		}
 	}
 	for _, c := range bubble.Children {
-		childActions, childValueFlow := CollectActionsAndValueFlow(c, forAccount, book)
+		childActions, childValueFlow := CollectActionsAndValueFlow(c, forAccount, resolver)
 		actions = append(actions, childActions...)
 		valueFlow.Merge(childValueFlow)
 	}

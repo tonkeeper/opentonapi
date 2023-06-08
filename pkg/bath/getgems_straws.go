@@ -11,7 +11,7 @@ type BubbleGetGemsNftPurchase struct {
 	Nft      tongo.AccountID
 }
 
-func (b BubbleGetGemsNftPurchase) ToAction(book addressBook) *Action {
+func (b BubbleGetGemsNftPurchase) ToAction(metaResolver) *Action {
 	return &Action{
 		GetGemsNftPurchase: &GetGemsNftPurchaseAction{
 			Nft:      b.Nft,

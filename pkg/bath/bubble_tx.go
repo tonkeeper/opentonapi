@@ -39,7 +39,7 @@ func dumpCallArgs(v any) string {
 	}
 	return string(bs)
 }
-func (b BubbleTx) ToAction(book addressBook) *Action {
+func (b BubbleTx) ToAction(metaResolver) *Action {
 	if b.external {
 		if b.transactionType == core.TickTockTx {
 			return &Action{

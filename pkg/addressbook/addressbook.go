@@ -22,7 +22,7 @@ type KnownAddress struct {
 	Image       string `json:"image,omitempty"`
 }
 
-// AttachedAccounts represents domains, nft collections for quick search by name are presented
+// AttachedAccount represents domains, nft collections for quick search by name are presented
 type AttachedAccount struct {
 	Name       string `json:"name"`
 	Wallet     string `json:"wallet"`

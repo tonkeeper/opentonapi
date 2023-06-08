@@ -5,6 +5,7 @@ import (
 	"errors"
 	"math/big"
 
+	"github.com/tonkeeper/opentonapi/pkg/core/jetton"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/liteapi"
 
@@ -44,7 +45,14 @@ func (h Handler) GetJettonsBalances(ctx context.Context, params oas.GetJettonsBa
 		if err != nil && !errors.Is(err, core.ErrEntityNotFound) {
 			return &oas.InternalError{Error: err.Error()}, nil
 		}
-		jettonBalance.Jetton = jettonPreview(h.addressBook, wallet.JettonAddress, meta, h.previewGenerator)
+		var normalizedMetadata jetton.NormalizedMetadata
+		info, ok := h.addressBook.GetJettonInfoByAddress(wallet.JettonAddress)
+		if ok {
+			normalizedMetadata = jetton.NormalizeMetadata(meta, &info)
+		} else {
+			normalizedMetadata = jetton.NormalizeMetadata(meta, nil)
+		}
+		jettonBalance.Jetton = jettonPreview(wallet.JettonAddress, normalizedMetadata, h.previewGenerator)
 		balances.Balances = append(balances.Balances, jettonBalance)
 	}
 
@@ -52,33 +60,12 @@ func (h Handler) GetJettonsBalances(ctx context.Context, params oas.GetJettonsBa
 }
 
 func (h Handler) GetJettonInfo(ctx context.Context, params oas.GetJettonInfoParams) (r oas.GetJettonInfoRes, err error) {
-	verification := oas.JettonVerificationTypeNone
 	account, err := tongo.ParseAccountID(params.AccountID)
 	if err != nil {
 		return &oas.BadRequest{Error: err.Error()}, nil
 	}
-	meta, err := h.storage.GetJettonMasterMetadata(ctx, account)
-	metadata := oas.JettonMetadata{Address: account.ToRaw()}
-	info, ok := h.addressBook.GetJettonInfoByAddress(account)
-	if ok {
-		meta.Name = rewriteIfNotEmpty(meta.Name, info.Name)
-		meta.Description = rewriteIfNotEmpty(meta.Description, info.Description)
-		meta.Image = rewriteIfNotEmpty(meta.Image, info.Image)
-		meta.Symbol = rewriteIfNotEmpty(meta.Symbol, info.Symbol)
-		verification = oas.JettonVerificationTypeWhitelist
-	}
-	metadata.Name = meta.Name
-	metadata.Symbol = meta.Symbol
-	metadata.Decimals = meta.Decimals
-	metadata.Social = info.Social
-	metadata.Websites = info.Websites
-
-	if meta.Description != "" {
-		metadata.Description.SetTo(meta.Description)
-	}
-	if meta.Image != "" {
-		metadata.Image.SetTo(meta.Image)
-	}
+	meta := h.GetJettonNormalizedMetadata(ctx, account)
+	metadata := jettonMetadata(account, meta)
 	data, err := h.storage.GetJettonMasterData(ctx, account)
 	if err != nil {
 		return &oas.InternalError{Error: err.Error()}, nil
@@ -88,7 +75,7 @@ func (h Handler) GetJettonInfo(ctx context.Context, params oas.GetJettonInfoPara
 		Mintable:     data.Mintable != 0,
 		TotalSupply:  supply.String(),
 		Metadata:     metadata,
-		Verification: verification,
+		Verification: oas.JettonVerificationType(meta.Verification),
 	}, nil
 }
 

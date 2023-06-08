@@ -40,8 +40,8 @@ func (h Handler) convertRisk(ctx context.Context, risk wallet.Risk, walletAddres
 			if !ok {
 				continue
 			}
-			meta, _ := h.metaCache.getJettonMeta(ctx, jettonWallet.JettonAddress)
-			preview := jettonPreview(h.addressBook, jettonWallet.JettonAddress, meta, h.previewGenerator)
+			meta := h.GetJettonNormalizedMetadata(ctx, jettonWallet.JettonAddress)
+			preview := jettonPreview(jettonWallet.JettonAddress, meta, h.previewGenerator)
 			jettonQuantity := oas.JettonQuantity{
 				Quantity:      quantity.String(),
 				WalletAddress: convertAccountAddress(jettonWallet.Address, h.addressBook),
@@ -106,8 +106,8 @@ func (h Handler) convertAction(ctx context.Context, a bath.Action, acceptLanguag
 			Sender:    convertOptAccountAddress(a.NftItemTransfer.Sender, h.addressBook),
 		})
 	case bath.JettonTransfer:
-		meta, _ := h.metaCache.getJettonMeta(ctx, a.JettonTransfer.Jetton)
-		preview := jettonPreview(h.addressBook, a.JettonTransfer.Jetton, meta, h.previewGenerator)
+		meta := h.GetJettonNormalizedMetadata(ctx, a.JettonTransfer.Jetton)
+		preview := jettonPreview(a.JettonTransfer.Jetton, meta, h.previewGenerator)
 		action.JettonTransfer.SetTo(oas.JettonTransferAction{
 			Amount:           g.Pointer(big.Int(a.JettonTransfer.Amount)).String(),
 			Recipient:        convertOptAccountAddress(a.JettonTransfer.Recipient, h.addressBook),
