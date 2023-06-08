@@ -2,60 +2,42 @@ package api
 
 import (
 	"context"
-	"strconv"
-	"strings"
+	"fmt"
 
 	"github.com/tonkeeper/opentonapi/pkg/bath"
+	"github.com/tonkeeper/opentonapi/pkg/core/jetton"
 	"github.com/tonkeeper/opentonapi/pkg/oas"
-	"github.com/tonkeeper/opentonapi/pkg/references"
 	"github.com/tonkeeper/tongo"
 )
 
-func convertJettonDecimals(decimals string) int {
-	if decimals == "" {
-		return 9
-	}
-	dec, err := strconv.Atoi(decimals)
-	if err != nil {
-		return 9
-	}
-	return dec
-}
-
-func jettonPreview(addressBook addressBook, master tongo.AccountID, meta tongo.JettonMetadata, imgGenerator previewGenerator) oas.JettonPreview {
-	verification := oas.JettonVerificationTypeNone
-	if meta.Name == "" {
-		meta.Name = "Unknown Token"
-	}
-	if meta.Symbol == "" {
-		meta.Symbol = "UKWN"
-	}
-	normalizedSymbol := strings.TrimSpace(strings.ToUpper(meta.Symbol))
-	if normalizedSymbol == "TON" || normalizedSymbol == "TОN" { //eng and russian
-		meta.Symbol = "SCAM"
-	}
-
-	if meta.Image == "" {
-		meta.Image = references.Placeholder
-	}
-	info, ok := addressBook.GetJettonInfoByAddress(master)
-	if ok {
-		meta.Name = rewriteIfNotEmpty(meta.Name, info.Name)
-		meta.Description = rewriteIfNotEmpty(meta.Description, info.Description)
-		meta.Image = rewriteIfNotEmpty(meta.Image, info.Image)
-		meta.Symbol = rewriteIfNotEmpty(meta.Symbol, info.Symbol)
-		verification = oas.JettonVerificationTypeWhitelist
-	}
-
-	jetton := oas.JettonPreview{
+func jettonPreview(master tongo.AccountID, meta jetton.NormalizedMetadata, imgGenerator previewGenerator) oas.JettonPreview {
+	preview := oas.JettonPreview{
 		Address:      master.ToRaw(),
 		Name:         meta.Name,
 		Symbol:       meta.Symbol,
-		Verification: verification,
-		Decimals:     convertJettonDecimals(meta.Decimals),
+		Verification: oas.JettonVerificationType(meta.Verification),
+		Decimals:     meta.Decimals,
 		Image:        imgGenerator.GenerateImageUrl(meta.Image, 200, 200),
 	}
-	return jetton
+	return preview
+}
+
+func jettonMetadata(account tongo.AccountID, meta jetton.NormalizedMetadata) oas.JettonMetadata {
+	metadata := oas.JettonMetadata{
+		Address:  account.ToRaw(),
+		Name:     meta.Name,
+		Symbol:   meta.Symbol,
+		Decimals: fmt.Sprintf("%d", meta.Decimals),
+		Social:   meta.Social,
+		Websites: meta.Websites,
+	}
+	if meta.Description != "" {
+		metadata.Description.SetTo(meta.Description)
+	}
+	if meta.Image != "" {
+		metadata.Image.SetTo(meta.Image)
+	}
+	return metadata
 }
 
 func (h Handler) convertJettonHistory(ctx context.Context, account tongo.AccountID, traceIDs []tongo.Bits256, acceptLanguage oas.OptString) ([]oas.AccountEvent, int64, error) {
@@ -68,7 +50,7 @@ func (h Handler) convertJettonHistory(ctx context.Context, account tongo.Account
 		}
 		result, err := bath.FindActions(trace,
 			bath.WithStraws([]bath.Straw{bath.FindJettonTransfer}),
-			bath.WithAddressbook(h.addressBook))
+			bath.WithMetaResolver(h))
 		if err != nil {
 			return nil, 0, err
 		}

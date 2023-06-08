@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"github.com/tonkeeper/opentonapi/pkg/core/jetton"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/config"
 	"go.uber.org/zap"
@@ -17,12 +18,7 @@ import (
 	"github.com/tonkeeper/opentonapi/pkg/litestorage"
 )
 
-type nft struct {
-	Address  string
-	Quantity int64
-}
-
-type jetton struct {
+type jettonItem struct {
 	Address  string
 	Quantity int64
 }
@@ -31,13 +27,24 @@ type accountValueFlow struct {
 	Account string
 	Ton     int64
 	Fee     int64
-	Jettons []jetton
+	Jettons []jettonItem
 }
 
 type result struct {
 	Actions  []Action
 	Accounts []accountValueFlow
 }
+type mockMetaResolver struct {
+}
+
+func (m *mockMetaResolver) GetJettonNormalizedMetadata(ctx context.Context, master tongo.AccountID) jetton.NormalizedMetadata {
+	return jetton.NormalizedMetadata{
+		Name:     "jUSDT",
+		Decimals: 8,
+	}
+}
+
+var _ metaResolver = &mockMetaResolver{}
 
 func TestFindActions(t *testing.T) {
 	var servers []config.LiteServer
@@ -80,9 +87,10 @@ func TestFindActions(t *testing.T) {
 			filenamePrefix: "nft-transfer",
 		},
 		{
-			name:           "nft purchase",
-			hash:           "8feb00edd889f8a36fb8af5b4d5370190fcbe872088cd1247c445e3c3b39a795",
-			filenamePrefix: "getgems-nft-purchase",
+			name:             "nft purchase",
+			hash:             "8feb00edd889f8a36fb8af5b4d5370190fcbe872088cd1247c445e3c3b39a795",
+			filenamePrefix:   "getgems-nft-purchase",
+			additionalStraws: []Straw{FindGetGemsNftPurchase},
 		},
 		{
 			name:             "get gems nft purchase",
@@ -109,15 +117,17 @@ func TestFindActions(t *testing.T) {
 		t.Run(c.name, func(t *testing.T) {
 			trace, err := storage.GetTrace(context.Background(), tongo.MustParseHash(c.hash))
 			require.Nil(t, err)
-			actionsList, err := FindActions(trace, WithStraws(append(c.additionalStraws, DefaultStraws...)))
+			actionsList, err := FindActions(trace,
+				WithStraws(append(c.additionalStraws, DefaultStraws...)),
+				WithMetaResolver(&mockMetaResolver{}))
 			require.Nil(t, err)
 			results := result{
 				Actions: actionsList.Actions,
 			}
 			for accountID, flow := range actionsList.ValueFlow.Accounts {
-				var jettons []jetton
+				var jettons []jettonItem
 				for address, quantity := range flow.Jettons {
-					jettons = append(jettons, jetton{Address: address.String(), Quantity: quantity.Int64()})
+					jettons = append(jettons, jettonItem{Address: address.String(), Quantity: quantity.Int64()})
 				}
 				accountFlow := accountValueFlow{
 					Account: accountID.String(),

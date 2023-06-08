@@ -4,27 +4,28 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/prometheus/client_golang/prometheus"
 	"math/big"
+
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/tonkeeper/opentonapi/pkg/core/jetton"
 
 	"github.com/shopspring/decimal"
 	"github.com/sourcegraph/conc/iter"
-	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
 	"github.com/tonkeeper/tongo/liteapi"
 )
 
-func (s *LiteStorage) GetJettonWalletsByOwnerAddress(ctx context.Context, address tongo.AccountID) ([]core.JettonWallet, error) {
+func (s *LiteStorage) GetJettonWalletsByOwnerAddress(ctx context.Context, address tongo.AccountID) ([]jetton.Wallet, error) {
 	timer := prometheus.NewTimer(prometheus.ObserverFunc(func(v float64) {
 		storageTimeHistogramVec.WithLabelValues("get_jetton_wallets_by_owner").Observe(v)
 	}))
 	defer timer.ObserveDuration()
 	jettons := s.knownAccounts["jettons"]
-	mapper := iter.Mapper[tongo.AccountID, *core.JettonWallet]{
+	mapper := iter.Mapper[tongo.AccountID, *jetton.Wallet]{
 		MaxGoroutines: s.maxGoroutines,
 	}
-	wallets, err := mapper.MapErr(jettons, func(jettonMaster *tongo.AccountID) (*core.JettonWallet, error) {
+	wallets, err := mapper.MapErr(jettons, func(jettonMaster *tongo.AccountID) (*jetton.Wallet, error) {
 		_, result, err := abi.GetWalletAddress(ctx, s.client, *jettonMaster, address.ToMsgAddress())
 		if err != nil {
 			return nil, err
@@ -57,7 +58,7 @@ func (s *LiteStorage) GetJettonWalletsByOwnerAddress(ctx context.Context, addres
 			return nil, nil
 		}
 		balance := big.Int(jettonWallet.Balance)
-		wallet := core.JettonWallet{
+		wallet := jetton.Wallet{
 			Address:       *walletAddress,
 			Balance:       decimal.NewFromBigInt(&balance, 0),
 			OwnerAddress:  &address,
@@ -68,7 +69,7 @@ func (s *LiteStorage) GetJettonWalletsByOwnerAddress(ctx context.Context, addres
 	if err != nil {
 		return nil, err
 	}
-	var results []core.JettonWallet
+	var results []jetton.Wallet
 	for _, wallet := range wallets {
 		if wallet != nil {
 			results = append(results, *wallet)
