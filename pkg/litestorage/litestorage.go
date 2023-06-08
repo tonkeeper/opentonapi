@@ -5,10 +5,11 @@ import (
 	"crypto/ed25519"
 	"errors"
 	"fmt"
-	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promauto"
 	"math/big"
 	"time"
+
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promauto"
 
 	"github.com/avast/retry-go"
 	"github.com/puzpuzpuz/xsync/v2"
@@ -349,12 +350,12 @@ func (s *LiteStorage) FindAllDomainsResolvedToAddress(ctx context.Context, a ton
 	return nil, nil
 }
 
-func (s *LiteStorage) GetWalletPubKey(address tongo.AccountID) (ed25519.PublicKey, error) {
+func (s *LiteStorage) GetWalletPubKey(ctx context.Context, address tongo.AccountID) (ed25519.PublicKey, error) {
 	timer := prometheus.NewTimer(prometheus.ObserverFunc(func(v float64) {
 		storageTimeHistogramVec.WithLabelValues("get_wallet_by_pubkey").Observe(v)
 	}))
 	defer timer.ObserveDuration()
-	_, result, err := abi.GetPublicKey(context.Background(), s.client, address)
+	_, result, err := abi.GetPublicKey(ctx, s.client, address)
 	if err != nil {
 		return nil, err
 	}

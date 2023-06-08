@@ -12,7 +12,9 @@ import (
 	"github.com/tonkeeper/opentonapi/pkg/oas"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
+	"github.com/tonkeeper/tongo/boc"
 	"github.com/tonkeeper/tongo/tlb"
+	walletTongo "github.com/tonkeeper/tongo/wallet"
 )
 
 func (h Handler) GetAccount(ctx context.Context, params oas.GetAccountParams) (oas.GetAccountRes, error) {
@@ -225,9 +227,50 @@ func (h Handler) GetPublicKeyByAccountID(ctx context.Context, params oas.GetPubl
 	if err != nil {
 		return &oas.BadRequest{Error: err.Error()}, nil
 	}
-	pubKey, err := h.storage.GetWalletPubKey(accountID)
+	pubKey, err := h.storage.GetWalletPubKey(ctx, accountID)
 	if err != nil {
-		return &oas.InternalError{Error: err.Error()}, nil
+		state, err := h.storage.GetRawAccount(ctx, accountID)
+		if err != nil {
+			return &oas.InternalError{Error: err.Error()}, nil
+		}
+		pubKey, err = pubkeyFromCodeData(state.Code, state.Data)
+		if err != nil {
+			return &oas.InternalError{Error: err.Error()}, nil
+		}
 	}
 	return &oas.GetPublicKeyByAccountIDOK{PublicKey: hex.EncodeToString(pubKey)}, nil
+}
+
+func pubkeyFromCodeData(code, data []byte) ([]byte, error) {
+	cells, err := boc.DeserializeBoc(code)
+	if err != nil {
+		return nil, err
+	}
+	if len(cells) != 1 {
+		return nil, fmt.Errorf("invalid boc with code")
+	}
+	codeHash, err := cells[0].Hash()
+	if err != nil {
+		return nil, err
+	}
+	ver, ok := walletTongo.GetVerByCodeHash([32]byte(codeHash))
+	if !ok {
+		return nil, fmt.Errorf("unknown wallet version")
+	}
+	switch ver {
+	case walletTongo.V3R1:
+		var dataBody walletTongo.DataV3
+		cells, err = boc.DeserializeBoc(data)
+		if err != nil {
+			return nil, err
+		}
+		err = tlb.Unmarshal(cells[0], &dataBody)
+		if err != nil {
+			return nil, err
+		}
+		return dataBody.PublicKey[:], nil
+	default:
+		return nil, fmt.Errorf("unknown wallet version")
+	}
+
 }

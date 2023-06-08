@@ -63,7 +63,7 @@ type storage interface {
 
 	GetAllAuctions(ctx context.Context) ([]core.Auction, error)
 
-	GetWalletPubKey(address tongo.AccountID) (ed25519.PublicKey, error)
+	GetWalletPubKey(ctx context.Context, address tongo.AccountID) (ed25519.PublicKey, error)
 }
 
 // chainState provides current blockchain state which change very rarely or slow like staking APY income
