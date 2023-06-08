@@ -1,11 +1,9 @@
 package bath
 
 import (
-	"context"
 	"fmt"
 	"math/big"
 
-	"github.com/tonkeeper/opentonapi/pkg/core/jetton"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
 	"github.com/tonkeeper/tongo/boc"
@@ -82,7 +80,7 @@ type BubbleNftTransfer struct {
 	payload   any //todo: replace any
 }
 
-func (b BubbleNftTransfer) ToAction(metaResolver) (action *Action) {
+func (b BubbleNftTransfer) ToAction() (action *Action) {
 	a := Action{
 		NftItemTransfer: &NftTransferAction{
 			Recipient: b.recipient.Addr(),
@@ -91,12 +89,6 @@ func (b BubbleNftTransfer) ToAction(metaResolver) (action *Action) {
 		},
 		Success: b.success,
 		Type:    NftItemTransfer,
-		SimplePreview: SimplePreview{
-			Name:      "NFT Transfer",
-			MessageID: nftTransferMessageID,
-			Accounts:  distinctAccounts(b.account.Address, b.sender.Address, b.recipient.Address),
-			Value:     "1 NFT",
-		},
 	}
 	if c, ok := b.payload.(string); ok {
 		a.NftItemTransfer.Comment = &c
@@ -216,15 +208,7 @@ type BubbleJettonTransfer struct {
 	payload                       any
 }
 
-func (b BubbleJettonTransfer) ToAction(resolver metaResolver) (action *Action) {
-	jettonName := jetton.UnknownJettonName
-	decimals := 0
-	if resolver != nil {
-		metadata := resolver.GetJettonNormalizedMetadata(context.Background(), b.master)
-		jettonName = metadata.Name
-		decimals = metadata.Decimals
-	}
-	scaledAmount := jetton.Scale(b.amount, decimals)
+func (b BubbleJettonTransfer) ToAction() (action *Action) {
 	a := Action{
 		JettonTransfer: &JettonTransferAction{
 			Jetton:           b.master,
@@ -236,16 +220,6 @@ func (b BubbleJettonTransfer) ToAction(resolver metaResolver) (action *Action) {
 		},
 		Success: b.success,
 		Type:    JettonTransfer,
-		SimplePreview: SimplePreview{
-			Name:      "Jetton Transfer",
-			MessageID: jettonTransferMessageID,
-			TemplateData: map[string]interface{}{
-				"Value":      scaledAmount.String(),
-				"JettonName": jettonName,
-			},
-			Accounts: distinctAccounts(b.recipient.Address, b.sender.Address, b.master),
-			Value:    fmt.Sprintf("%v %v", scaledAmount, jettonName),
-		},
 	}
 	if c, ok := b.payload.(string); ok {
 		a.JettonTransfer.Comment = &c

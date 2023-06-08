@@ -1,11 +1,11 @@
-package jetton
+package core
 
 import (
 	"github.com/shopspring/decimal"
 	"github.com/tonkeeper/tongo"
 )
 
-type Wallet struct {
+type JettonWallet struct {
 	// Address of a jetton wallet.
 	Address      tongo.AccountID
 	Balance      decimal.Decimal

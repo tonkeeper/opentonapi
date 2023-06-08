@@ -1,4 +1,4 @@
-package jetton
+package api
 
 import (
 	"math/big"

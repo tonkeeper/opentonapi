@@ -2,7 +2,6 @@ package bath
 
 import (
 	"github.com/tonkeeper/tongo/abi"
-	"github.com/tonkeeper/tongo/utils"
 )
 
 type BubbleSubscription struct {
@@ -87,8 +86,7 @@ func FindExtendedSubscription(bubble *Bubble) bool {
 	return false
 }
 
-func (b BubbleSubscription) ToAction(metaResolver) (action *Action) {
-	value := utils.HumanFriendlyCoinsRepr(b.Amount)
+func (b BubbleSubscription) ToAction() (action *Action) {
 	return &Action{
 		Subscription: &SubscriptionAction{
 			Subscription: b.Subscription.Address,
@@ -99,14 +97,5 @@ func (b BubbleSubscription) ToAction(metaResolver) (action *Action) {
 		},
 		Success: true,
 		Type:    Subscription,
-		SimplePreview: SimplePreview{
-			Name:      "Subscription",
-			MessageID: subscriptionMessageID,
-			TemplateData: map[string]interface{}{
-				"Value": value,
-			},
-			Accounts: distinctAccounts(b.Beneficiary.Address, b.Subscriber.Address),
-			Value:    value,
-		},
 	}
 }

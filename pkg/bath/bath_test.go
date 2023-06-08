@@ -10,7 +10,6 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"github.com/tonkeeper/opentonapi/pkg/core/jetton"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/config"
 	"go.uber.org/zap"
@@ -34,17 +33,6 @@ type result struct {
 	Actions  []Action
 	Accounts []accountValueFlow
 }
-type mockMetaResolver struct {
-}
-
-func (m *mockMetaResolver) GetJettonNormalizedMetadata(ctx context.Context, master tongo.AccountID) jetton.NormalizedMetadata {
-	return jetton.NormalizedMetadata{
-		Name:     "jUSDT",
-		Decimals: 8,
-	}
-}
-
-var _ metaResolver = &mockMetaResolver{}
 
 func TestFindActions(t *testing.T) {
 	var servers []config.LiteServer
@@ -118,8 +106,7 @@ func TestFindActions(t *testing.T) {
 			trace, err := storage.GetTrace(context.Background(), tongo.MustParseHash(c.hash))
 			require.Nil(t, err)
 			actionsList, err := FindActions(trace,
-				WithStraws(append(c.additionalStraws, DefaultStraws...)),
-				WithMetaResolver(&mockMetaResolver{}))
+				WithStraws(append(c.additionalStraws, DefaultStraws...)))
 			require.Nil(t, err)
 			results := result{
 				Actions: actionsList.Actions,

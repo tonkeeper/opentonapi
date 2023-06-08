@@ -33,19 +33,12 @@ func TestBubbleTx_ToAction(t *testing.T) {
 				},
 				Success: true,
 				Type:    SmartContractExec,
-				SimplePreview: SimplePreview{
-					Name: "Smart Contract Execution",
-					Accounts: []tongo.AccountID{
-						tongo.MustParseAccountID("-1:5555555555555555555555555555555555555555555555555555555555555555"),
-					},
-					MessageID: "smartContractExecAction",
-				},
 			},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			action := tt.tx.ToAction(nil)
+			action := tt.tx.ToAction()
 			require.Equal(t, tt.want, action)
 		})
 	}

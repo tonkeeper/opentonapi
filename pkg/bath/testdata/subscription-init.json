@@ -17,19 +17,7 @@
        "UnSubscription": null,
        "AuctionBid": null,
        "Success": true,
-       "Type": "Subscription",
-       "SimplePreview": {
-         "Name": "Subscription",
-         "Value": "5 Ton",
-         "Accounts": [
-           "0:54887d7c01ead183691a703afff08adc7b653fba2022df3a4963dae5171aa2ca",
-           "0:8c6170617fe0432475039842669ba87a8e46c5064f5d47460c737d31e53ca416"
-         ],
-         "MessageID": "subscriptionAction",
-         "TemplateData": {
-           "Value": "5 Ton"
-         }
-       }
+       "Type": "Subscription"
      }
    ],
    "Accounts": [

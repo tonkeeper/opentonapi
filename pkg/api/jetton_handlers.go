@@ -5,7 +5,6 @@ import (
 	"errors"
 	"math/big"
 
-	"github.com/tonkeeper/opentonapi/pkg/core/jetton"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/liteapi"
 
@@ -45,12 +44,12 @@ func (h Handler) GetJettonsBalances(ctx context.Context, params oas.GetJettonsBa
 		if err != nil && !errors.Is(err, core.ErrEntityNotFound) {
 			return &oas.InternalError{Error: err.Error()}, nil
 		}
-		var normalizedMetadata jetton.NormalizedMetadata
+		var normalizedMetadata NormalizedMetadata
 		info, ok := h.addressBook.GetJettonInfoByAddress(wallet.JettonAddress)
 		if ok {
-			normalizedMetadata = jetton.NormalizeMetadata(meta, &info)
+			normalizedMetadata = NormalizeMetadata(meta, &info)
 		} else {
-			normalizedMetadata = jetton.NormalizeMetadata(meta, nil)
+			normalizedMetadata = NormalizeMetadata(meta, nil)
 		}
 		jettonBalance.Jetton = jettonPreview(wallet.JettonAddress, normalizedMetadata, h.previewGenerator)
 		balances.Balances = append(balances.Balances, jettonBalance)

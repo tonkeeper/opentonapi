@@ -1,4 +1,4 @@
-package jetton
+package api
 
 import (
 	"math/big"
@@ -78,13 +78,6 @@ func NormalizeMetadata(meta tep64.Metadata, info *addressbook.KnownJetton) Norma
 		Social:       social,
 		Websites:     websites,
 	}
-}
-
-func rewriteIfNotEmpty(src, dest string) string {
-	if dest != "" {
-		return dest
-	}
-	return src
 }
 
 func convertJettonDecimals(decimals string) int {
