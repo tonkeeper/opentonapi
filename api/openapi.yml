@@ -561,6 +561,7 @@ paths:
         - Accounts
       parameters:
         - $ref: '#/components/parameters/accountIdParameter'
+        - $ref: '#/components/parameters/collectionQuery'
         - $ref: '#/components/parameters/limit'
         - $ref: '#/components/parameters/offset'
         - in: query
@@ -1422,7 +1423,6 @@ components:
       schema:
         type: string
         example: get_wallet_address
-
     domainNameParameter:
       in: path
       name: domain_name
@@ -1431,7 +1431,6 @@ components:
       schema:
         type: string
         example: wallet.ton
-
     domainFilterParameter:
       in: query
       name: tld
@@ -1440,7 +1439,6 @@ components:
       schema:
         type: string
         example: ton
-
     traceIdParameter:
       in: path
       name: trace_id
@@ -1449,7 +1447,6 @@ components:
       schema:
         type: string
         example: 97264395BD65A255A429B11326C84128B7D70FFED7949ABAE3036D506BA38621
-
     eventIdParameter:
       in: path
       name: event_id
@@ -1491,6 +1488,14 @@ components:
         default: 30
         minimum: 1
         maximum: 90
+    collectionQuery:
+      in: query
+      name: collection
+      required: false
+      description: "nft collection"
+      schema:
+        type: string
+        example: "0:06d811f426598591b32b2c49f29f66c821368e4acb1de16762b04e0174532465"
 
   requestBodies:
     MethodParameters:

@@ -35,6 +35,16 @@
      "type": "string"
     }
    },
+   "collectionQuery": {
+    "description": "nft collection",
+    "in": "query",
+    "name": "collection",
+    "required": false,
+    "schema": {
+     "example": "0:06d811f426598591b32b2c49f29f66c821368e4acb1de16762b04e0174532465",
+     "type": "string"
+    }
+   },
    "domainFilterParameter": {
     "description": "domain filter for current auctions \"ton\" or \"t.me\"",
     "in": "query",
@@ -3392,6 +3402,9 @@
     "parameters": [
      {
       "$ref": "#/components/parameters/accountIdParameter"
+     },
+     {
+      "$ref": "#/components/parameters/collectionQuery"
      },
      {
       "$ref": "#/components/parameters/limit"

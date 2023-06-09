@@ -2611,8 +2611,10 @@ func decodeGetNftItemByAddressParams(args [1]string, r *http.Request) (params Ge
 type GetNftItemsByOwnerParams struct {
 	// Account ID.
 	AccountID string
-	Limit     OptInt
-	Offset    OptInt
+	// Nft collection.
+	Collection OptString
+	Limit      OptInt
+	Offset     OptInt
 	// Selling nft items in ton implemented usually via transfer items to special selling account. This
 	// option enables including items which owned not directly.
 	IndirectOwnership OptBool
@@ -2625,6 +2627,15 @@ func unpackGetNftItemsByOwnerParams(packed middleware.Parameters) (params GetNft
 			In:   "path",
 		}
 		params.AccountID = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "collection",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.Collection = v.(OptString)
+		}
 	}
 	{
 		key := middleware.ParameterKey{
@@ -2687,6 +2698,40 @@ func decodeGetNftItemsByOwnerParams(args [1]string, r *http.Request) (params Get
 			}
 		} else {
 			return params, errors.New("path: account_id: not specified")
+		}
+	}
+	// Decode query: collection.
+	{
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "collection",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotCollectionVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotCollectionVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.Collection.SetTo(paramsDotCollectionVal)
+				return nil
+			}); err != nil {
+				return params, errors.Wrap(err, "query: collection: parse")
+			}
 		}
 	}
 	// Set default value for query: limit.

@@ -3074,6 +3074,10 @@ func (s *Server) handleGetNftItemsByOwnerRequest(args [1]string, w http.Response
 					In:   "path",
 				}: params.AccountID,
 				{
+					Name: "collection",
+					In:   "query",
+				}: params.Collection,
+				{
 					Name: "limit",
 					In:   "query",
 				}: params.Limit,
