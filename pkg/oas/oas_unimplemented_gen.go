@@ -22,6 +22,15 @@ func (UnimplementedHandler) DnsBackResolve(ctx context.Context, params DnsBackRe
 	return r, ht.ErrNotImplemented
 }
 
+// DnsInfo implements dnsInfo operation.
+//
+// Get full information about domain name.
+//
+// GET /v2/dns/{domain_name}
+func (UnimplementedHandler) DnsInfo(ctx context.Context, params DnsInfoParams) (r DnsInfoRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // DnsResolve implements dnsResolve operation.
 //
 // DNS resolve for domain name.

@@ -131,7 +131,7 @@
     "required": false,
     "schema": {
      "default": 30,
-     "maximum": 90,
+     "maximum": 360,
      "minimum": 1,
      "type": "integer"
     }
@@ -1294,6 +1294,24 @@
     },
     "required": [
      "data"
+    ],
+    "type": "object"
+   },
+   "DomainInfo": {
+    "properties": {
+     "expiring_at": {
+      "description": "date of expiring. optional. not all domain in ton has expiration date",
+      "type": "integer"
+     },
+     "item": {
+      "$ref": "#/components/schemas/NftItem"
+     },
+     "name": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "name"
     ],
     "type": "object"
    },
@@ -4014,6 +4032,44 @@
      },
      "401": {
       "$ref": "#/components/responses/UnauthorizedError"
+     },
+     "500": {
+      "$ref": "#/components/responses/InternalError"
+     }
+    },
+    "tags": [
+     "DNS"
+    ]
+   }
+  },
+  "/v2/dns/{domain_name}": {
+   "get": {
+    "description": "get full information about domain name",
+    "operationId": "dnsInfo",
+    "parameters": [
+     {
+      "$ref": "#/components/parameters/domainNameParameter"
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/DomainInfo"
+        }
+       }
+      },
+      "description": "domain info"
+     },
+     "400": {
+      "$ref": "#/components/responses/BadRequest"
+     },
+     "401": {
+      "$ref": "#/components/responses/UnauthorizedError"
+     },
+     "404": {
+      "$ref": "#/components/responses/NotFound"
      },
      "500": {
       "$ref": "#/components/responses/InternalError"

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+
 	"github.com/prometheus/client_golang/prometheus"
 
 	"github.com/tonkeeper/opentonapi/pkg/core"
@@ -150,4 +151,8 @@ func (s *LiteStorage) GetLiquidPool(ctx context.Context, pool tongo.AccountID) (
 		TotalAmount:     p.TotalBalance,
 		VerifiedSources: bytes.Equal(hash, references.TFLiquidPoolCodeHash[:]),
 	}, err
+}
+
+func (s *LiteStorage) GetLiquidPools(ctx context.Context) ([]core.LiquidPool, error) {
+	return nil, nil
 }

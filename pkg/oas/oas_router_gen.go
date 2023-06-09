@@ -708,7 +708,16 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				elem = elem[idx:]
 
 				if len(elem) == 0 {
-					break
+					switch r.Method {
+					case "GET":
+						s.handleDnsInfoRequest([1]string{
+							args[0],
+						}, w, r)
+					default:
+						s.notAllowed(w, r, "GET")
+					}
+
+					return
 				}
 				switch elem[0] {
 				case '/': // Prefix: "/"
@@ -2021,7 +2030,16 @@ func (s *Server) FindRoute(method, path string) (r Route, _ bool) {
 				elem = elem[idx:]
 
 				if len(elem) == 0 {
-					break
+					switch method {
+					case "GET":
+						r.name = "DnsInfo"
+						r.operationID = "dnsInfo"
+						r.args = args
+						r.count = 1
+						return r, true
+					default:
+						return
+					}
 				}
 				switch elem[0] {
 				case '/': // Prefix: "/"

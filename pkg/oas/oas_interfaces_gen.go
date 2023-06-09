@@ -5,6 +5,10 @@ type DnsBackResolveRes interface {
 	dnsBackResolveRes()
 }
 
+type DnsInfoRes interface {
+	dnsInfoRes()
+}
+
 type DnsResolveRes interface {
 	dnsResolveRes()
 }

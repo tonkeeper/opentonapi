@@ -14,6 +14,12 @@ type Handler interface {
 	//
 	// GET /v2/accounts/{account_id}/dns/backresolve
 	DnsBackResolve(ctx context.Context, params DnsBackResolveParams) (DnsBackResolveRes, error)
+	// DnsInfo implements dnsInfo operation.
+	//
+	// Get full information about domain name.
+	//
+	// GET /v2/dns/{domain_name}
+	DnsInfo(ctx context.Context, params DnsInfoParams) (DnsInfoRes, error)
 	// DnsResolve implements dnsResolve operation.
 	//
 	// DNS resolve for domain name.

@@ -41,6 +41,7 @@ type storage interface {
 	GetTFPools(ctx context.Context) ([]core.TFPool, error)
 	GetTFPool(ctx context.Context, pool tongo.AccountID) (core.TFPool, error)
 	GetLiquidPool(ctx context.Context, pool tongo.AccountID) (core.LiquidPool, error)
+	GetLiquidPools(ctx context.Context) ([]core.LiquidPool, error)
 
 	GetNFTs(ctx context.Context, accounts []tongo.AccountID) ([]core.NftItem, error)
 	SearchNFTs(ctx context.Context,

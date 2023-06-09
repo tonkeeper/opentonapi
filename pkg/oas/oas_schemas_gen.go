@@ -979,6 +979,7 @@ func (s *BadRequest) SetError(val string) {
 }
 
 func (*BadRequest) dnsBackResolveRes()               {}
+func (*BadRequest) dnsInfoRes()                      {}
 func (*BadRequest) dnsResolveRes()                   {}
 func (*BadRequest) emulateMessageToAccountEventRes() {}
 func (*BadRequest) emulateMessageToEventRes()        {}
@@ -1687,6 +1688,46 @@ func (s *DomainBids) SetData(val []DomainBid) {
 
 func (*DomainBids) getDomainBidsRes() {}
 
+// Ref: #/components/schemas/DomainInfo
+type DomainInfo struct {
+	Name string `json:"name"`
+	// Date of expiring. optional. not all domain in ton has expiration date.
+	ExpiringAt OptInt     `json:"expiring_at"`
+	Item       OptNftItem `json:"item"`
+}
+
+// GetName returns the value of Name.
+func (s DomainInfo) GetName() string {
+	return s.Name
+}
+
+// GetExpiringAt returns the value of ExpiringAt.
+func (s DomainInfo) GetExpiringAt() OptInt {
+	return s.ExpiringAt
+}
+
+// GetItem returns the value of Item.
+func (s DomainInfo) GetItem() OptNftItem {
+	return s.Item
+}
+
+// SetName sets the value of Name.
+func (s *DomainInfo) SetName(val string) {
+	s.Name = val
+}
+
+// SetExpiringAt sets the value of ExpiringAt.
+func (s *DomainInfo) SetExpiringAt(val OptInt) {
+	s.ExpiringAt = val
+}
+
+// SetItem sets the value of Item.
+func (s *DomainInfo) SetItem(val OptNftItem) {
+	s.Item = val
+}
+
+func (*DomainInfo) dnsInfoRes() {}
+
 // Ref: #/components/schemas/DomainNames
 type DomainNames struct {
 	Domains []string `json:"domains"`
@@ -2133,6 +2174,7 @@ func (s *InternalError) SetError(val string) {
 }
 
 func (*InternalError) dnsBackResolveRes()               {}
+func (*InternalError) dnsInfoRes()                      {}
 func (*InternalError) dnsResolveRes()                   {}
 func (*InternalError) emulateMessageToAccountEventRes() {}
 func (*InternalError) emulateMessageToEventRes()        {}
@@ -3269,6 +3311,7 @@ func (s *NotFound) SetError(val string) {
 }
 
 func (*NotFound) dnsBackResolveRes()            {}
+func (*NotFound) dnsInfoRes()                   {}
 func (*NotFound) dnsResolveRes()                {}
 func (*NotFound) getAccountRes()                {}
 func (*NotFound) getAccountTransactionsRes()    {}
@@ -6478,6 +6521,7 @@ func (s *UnauthorizedError) SetError(val string) {
 }
 
 func (*UnauthorizedError) dnsBackResolveRes()               {}
+func (*UnauthorizedError) dnsInfoRes()                      {}
 func (*UnauthorizedError) dnsResolveRes()                   {}
 func (*UnauthorizedError) emulateMessageToAccountEventRes() {}
 func (*UnauthorizedError) emulateMessageToEventRes()        {}

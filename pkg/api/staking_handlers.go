@@ -107,6 +107,14 @@ func (h Handler) StakingPools(ctx context.Context, params oas.StakingPoolsParams
 		result.Pools = append(result.Pools, pool)
 	}
 
+	liquidPools, err := h.storage.GetLiquidPools(ctx)
+	if err != nil {
+		return nil, err
+	}
+	for _, p := range liquidPools {
+		result.Pools = append(result.Pools, convertLiquidStaking(p, h.state.GetAPY()))
+	}
+
 	slices.SortFunc(result.Pools, func(a, b oas.PoolInfo) bool {
 		return a.Apy > b.Apy
 	})
@@ -123,6 +131,11 @@ func (h Handler) StakingPools(ctx context.Context, params oas.StakingPoolsParams
 			Name:        references.TFPoolImplementationsName,
 			Description: i18n.T(params.AcceptLanguage.Value, i18n.C{MessageID: "poolImplementationDescription", TemplateData: map[string]interface{}{"Deposit": minTF / 1_000_000_000}}),
 			URL:         references.TFPoolImplementationsURL,
+		},
+		string(oas.PoolInfoImplementationLiquidTF): {
+			Name:        references.LiquidImplementationsName,
+			Description: i18n.T(params.AcceptLanguage.Value, i18n.C{MessageID: "poolImplementationDescription", TemplateData: map[string]interface{}{"Deposit": 10}}),
+			URL:         references.LiquidImplementationsUrl,
 		},
 	})
 

@@ -65,6 +65,58 @@ func decodeDnsBackResolveParams(args [1]string, r *http.Request) (params DnsBack
 	return params, nil
 }
 
+// DnsInfoParams is parameters of dnsInfo operation.
+type DnsInfoParams struct {
+	// Domain name with .ton or .t.me.
+	DomainName string
+}
+
+func unpackDnsInfoParams(packed middleware.Parameters) (params DnsInfoParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "domain_name",
+			In:   "path",
+		}
+		params.DomainName = packed[key].(string)
+	}
+	return params
+}
+
+func decodeDnsInfoParams(args [1]string, r *http.Request) (params DnsInfoParams, _ error) {
+	// Decode path: domain_name.
+	{
+		param := args[0]
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "domain_name",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.DomainName = c
+				return nil
+			}(); err != nil {
+				return params, errors.Wrap(err, "path: domain_name: parse")
+			}
+		} else {
+			return params, errors.New("path: domain_name: not specified")
+		}
+	}
+	return params, nil
+}
+
 // DnsResolveParams is parameters of dnsResolve operation.
 type DnsResolveParams struct {
 	// Domain name with .ton or .t.me.
@@ -1011,7 +1063,7 @@ func decodeGetDnsExpiringParams(args [1]string, r *http.Request) (params GetDnsE
 							MinSet:        true,
 							Min:           1,
 							MaxSet:        true,
-							Max:           90,
+							Max:           360,
 							MinExclusive:  false,
 							MaxExclusive:  false,
 							MultipleOfSet: false,
