@@ -3,6 +3,8 @@ package api
 import (
 	"context"
 	"errors"
+	"fmt"
+
 	"github.com/tonkeeper/opentonapi/internal/g"
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/opentonapi/pkg/oas"
@@ -39,6 +41,26 @@ func (h Handler) GetTransaction(ctx context.Context, params oas.GetTransactionPa
 	}
 	transaction := convertTransaction(*txs, h.addressBook)
 	return &transaction, nil
+}
+
+func (h Handler) GetRawTransaction(ctx context.Context, params oas.GetRawTransactionParams) (r oas.GetRawTransactionRes, _ error) {
+	hash, err := tongo.ParseHash(params.TransactionID)
+	if err != nil {
+		return &oas.BadRequest{Error: err.Error()}, nil
+	}
+	tx, err := h.storage.GetTransaction(ctx, hash)
+	if errors.Is(err, core.ErrEntityNotFound) {
+		return &oas.NotFound{Error: "transaction not found"}, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	rawTx, err := h.storage.GetRawTransactions(ctx, 1, tx.Account, tx.Lt, hash)
+	if err != nil {
+		return &oas.InternalError{Error: err.Error()}, nil
+	}
+	fmt.Println(rawTx, err) // TODO: in working
+	return &oas.Transaction{}, nil
 }
 
 func (h Handler) GetBlockTransactions(ctx context.Context, params oas.GetBlockTransactionsParams) (oas.GetBlockTransactionsRes, error) {

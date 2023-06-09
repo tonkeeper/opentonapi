@@ -319,6 +319,15 @@ func (UnimplementedHandler) GetRawAccount(ctx context.Context, params GetRawAcco
 	return r, ht.ErrNotImplemented
 }
 
+// GetRawTransaction implements getRawTransaction operation.
+//
+// Get raw transaction data.
+//
+// GET /v2/blockchain/transactions/{transaction_id}/raw
+func (UnimplementedHandler) GetRawTransaction(ctx context.Context, params GetRawTransactionParams) (r GetRawTransactionRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // GetSearchAccounts implements getSearchAccounts operation.
 //
 // Search for accounts by name. You can find the account by the first characters of the domain.

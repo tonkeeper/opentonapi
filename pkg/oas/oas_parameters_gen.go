@@ -3026,6 +3026,58 @@ func decodeGetRawAccountParams(args [1]string, r *http.Request) (params GetRawAc
 	return params, nil
 }
 
+// GetRawTransactionParams is parameters of getRawTransaction operation.
+type GetRawTransactionParams struct {
+	// Transaction ID.
+	TransactionID string
+}
+
+func unpackGetRawTransactionParams(packed middleware.Parameters) (params GetRawTransactionParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "transaction_id",
+			In:   "path",
+		}
+		params.TransactionID = packed[key].(string)
+	}
+	return params
+}
+
+func decodeGetRawTransactionParams(args [1]string, r *http.Request) (params GetRawTransactionParams, _ error) {
+	// Decode path: transaction_id.
+	{
+		param := args[0]
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "transaction_id",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.TransactionID = c
+				return nil
+			}(); err != nil {
+				return params, errors.Wrap(err, "path: transaction_id: parse")
+			}
+		} else {
+			return params, errors.New("path: transaction_id: not specified")
+		}
+	}
+	return params, nil
+}
+
 // GetSearchAccountsParams is parameters of getSearchAccounts operation.
 type GetSearchAccountsParams struct {
 	Name string

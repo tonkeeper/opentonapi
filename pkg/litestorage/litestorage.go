@@ -385,3 +385,7 @@ func (s *LiteStorage) GetDnsExpiring(ctx context.Context, id tongo.AccountID, pe
 	defer timer.ObserveDuration()
 	return nil, nil
 }
+
+func (s *LiteStorage) GetRawTransactions(ctx context.Context, count uint32, accountID tongo.AccountID, lt uint64, hash tongo.Bits256) ([]tongo.Transaction, error) {
+	return s.client.GetTransactions(ctx, count, accountID, lt, hash)
+}

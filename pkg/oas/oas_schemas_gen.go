@@ -1007,6 +1007,7 @@ func (*BadRequest) getNftItemsByOwnerRes()           {}
 func (*BadRequest) getPublicKeyByAccountIDRes()      {}
 func (*BadRequest) getRatesRes()                     {}
 func (*BadRequest) getRawAccountRes()                {}
+func (*BadRequest) getRawTransactionRes()            {}
 func (*BadRequest) getSearchAccountsRes()            {}
 func (*BadRequest) getStorageProvidersRes()          {}
 func (*BadRequest) getSubscriptionsByAccountRes()    {}
@@ -2165,6 +2166,7 @@ func (*InternalError) getNftItemsByOwnerRes()           {}
 func (*InternalError) getPublicKeyByAccountIDRes()      {}
 func (*InternalError) getRatesRes()                     {}
 func (*InternalError) getRawAccountRes()                {}
+func (*InternalError) getRawTransactionRes()            {}
 func (*InternalError) getSearchAccountsRes()            {}
 func (*InternalError) getStorageProvidersRes()          {}
 func (*InternalError) getSubscriptionsByAccountRes()    {}
@@ -3288,6 +3290,7 @@ func (*NotFound) getNftItemByAddressRes()       {}
 func (*NotFound) getNftItemsByAddressesRes()    {}
 func (*NotFound) getNftItemsByOwnerRes()        {}
 func (*NotFound) getRawAccountRes()             {}
+func (*NotFound) getRawTransactionRes()         {}
 func (*NotFound) getSearchAccountsRes()         {}
 func (*NotFound) getSubscriptionsByAccountRes() {}
 func (*NotFound) getTraceRes()                  {}
@@ -6324,7 +6327,8 @@ func (s *Transaction) SetDestroyed(val bool) {
 	s.Destroyed = val
 }
 
-func (*Transaction) getTransactionRes() {}
+func (*Transaction) getRawTransactionRes() {}
+func (*Transaction) getTransactionRes()    {}
 
 // Ref: #/components/schemas/TransactionType
 type TransactionType string
@@ -6510,6 +6514,7 @@ func (*UnauthorizedError) getNftItemsByOwnerRes()           {}
 func (*UnauthorizedError) getPublicKeyByAccountIDRes()      {}
 func (*UnauthorizedError) getRatesRes()                     {}
 func (*UnauthorizedError) getRawAccountRes()                {}
+func (*UnauthorizedError) getRawTransactionRes()            {}
 func (*UnauthorizedError) getSearchAccountsRes()            {}
 func (*UnauthorizedError) getStorageProvidersRes()          {}
 func (*UnauthorizedError) getSubscriptionsByAccountRes()    {}

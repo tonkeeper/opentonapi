@@ -3423,6 +3423,105 @@ func (s *Server) handleGetRawAccountRequest(args [1]string, w http.ResponseWrite
 	}
 }
 
+// handleGetRawTransactionRequest handles getRawTransaction operation.
+//
+// Get raw transaction data.
+//
+// GET /v2/blockchain/transactions/{transaction_id}/raw
+func (s *Server) handleGetRawTransactionRequest(args [1]string, w http.ResponseWriter, r *http.Request) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("getRawTransaction"),
+	}
+
+	// Start a span for this request.
+	ctx, span := s.cfg.Tracer.Start(r.Context(), "GetRawTransaction",
+		trace.WithAttributes(otelAttrs...),
+		serverSpanKind,
+	)
+	defer span.End()
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		elapsedDuration := time.Since(startTime)
+		s.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+	}()
+
+	// Increment request counter.
+	s.requests.Add(ctx, 1, otelAttrs...)
+
+	var (
+		recordError = func(stage string, err error) {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			s.errors.Add(ctx, 1, otelAttrs...)
+		}
+		err          error
+		opErrContext = ogenerrors.OperationContext{
+			Name: "GetRawTransaction",
+			ID:   "getRawTransaction",
+		}
+	)
+	params, err := decodeGetRawTransactionParams(args, r)
+	if err != nil {
+		err = &ogenerrors.DecodeParamsError{
+			OperationContext: opErrContext,
+			Err:              err,
+		}
+		recordError("DecodeParams", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+
+	var response GetRawTransactionRes
+	if m := s.cfg.Middleware; m != nil {
+		mreq := middleware.Request{
+			Context:       ctx,
+			OperationName: "GetRawTransaction",
+			OperationID:   "getRawTransaction",
+			Body:          nil,
+			Params: middleware.Parameters{
+				{
+					Name: "transaction_id",
+					In:   "path",
+				}: params.TransactionID,
+			},
+			Raw: r,
+		}
+
+		type (
+			Request  = struct{}
+			Params   = GetRawTransactionParams
+			Response = GetRawTransactionRes
+		)
+		response, err = middleware.HookMiddleware[
+			Request,
+			Params,
+			Response,
+		](
+			m,
+			mreq,
+			unpackGetRawTransactionParams,
+			func(ctx context.Context, request Request, params Params) (Response, error) {
+				return s.h.GetRawTransaction(ctx, params)
+			},
+		)
+	} else {
+		response, err = s.h.GetRawTransaction(ctx, params)
+	}
+	if err != nil {
+		recordError("Internal", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+
+	if err := encodeGetRawTransactionResponse(response, w, span); err != nil {
+		recordError("EncodeResponse", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+}
+
 // handleGetSearchAccountsRequest handles getSearchAccounts operation.
 //
 // Search for accounts by name. You can find the account by the first characters of the domain.

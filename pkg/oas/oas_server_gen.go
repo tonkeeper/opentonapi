@@ -215,6 +215,12 @@ type Handler interface {
 	//
 	// GET /v2/blockchain/accounts/{account_id}
 	GetRawAccount(ctx context.Context, params GetRawAccountParams) (GetRawAccountRes, error)
+	// GetRawTransaction implements getRawTransaction operation.
+	//
+	// Get raw transaction data.
+	//
+	// GET /v2/blockchain/transactions/{transaction_id}/raw
+	GetRawTransaction(ctx context.Context, params GetRawTransactionParams) (GetRawTransactionRes, error)
 	// GetSearchAccounts implements getSearchAccounts operation.
 	//
 	// Search for accounts by name. You can find the account by the first characters of the domain.

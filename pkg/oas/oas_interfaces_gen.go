@@ -133,6 +133,10 @@ type GetRawAccountRes interface {
 	getRawAccountRes()
 }
 
+type GetRawTransactionRes interface {
+	getRawTransactionRes()
+}
+
 type GetSearchAccountsRes interface {
 	getSearchAccountsRes()
 }

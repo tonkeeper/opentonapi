@@ -632,12 +632,15 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 					}
 
 					// Param: "transaction_id"
-					// Leaf parameter
-					args[0] = elem
-					elem = ""
+					// Match until "/"
+					idx := strings.IndexByte(elem, '/')
+					if idx < 0 {
+						idx = len(elem)
+					}
+					args[0] = elem[:idx]
+					elem = elem[idx:]
 
 					if len(elem) == 0 {
-						// Leaf node.
 						switch r.Method {
 						case "GET":
 							s.handleGetTransactionRequest([1]string{
@@ -648,6 +651,28 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 						}
 
 						return
+					}
+					switch elem[0] {
+					case '/': // Prefix: "/raw"
+						if l := len("/raw"); len(elem) >= l && elem[0:l] == "/raw" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						if len(elem) == 0 {
+							// Leaf node.
+							switch r.Method {
+							case "GET":
+								s.handleGetRawTransactionRequest([1]string{
+									args[0],
+								}, w, r)
+							default:
+								s.notAllowed(w, r, "GET")
+							}
+
+							return
+						}
 					}
 				case 'v': // Prefix: "validators"
 					if l := len("validators"); len(elem) >= l && elem[0:l] == "validators" {
@@ -1953,14 +1978,17 @@ func (s *Server) FindRoute(method, path string) (r Route, _ bool) {
 					}
 
 					// Param: "transaction_id"
-					// Leaf parameter
-					args[0] = elem
-					elem = ""
+					// Match until "/"
+					idx := strings.IndexByte(elem, '/')
+					if idx < 0 {
+						idx = len(elem)
+					}
+					args[0] = elem[:idx]
+					elem = elem[idx:]
 
 					if len(elem) == 0 {
 						switch method {
 						case "GET":
-							// Leaf: GetTransaction
 							r.name = "GetTransaction"
 							r.operationID = "getTransaction"
 							r.args = args
@@ -1968,6 +1996,28 @@ func (s *Server) FindRoute(method, path string) (r Route, _ bool) {
 							return r, true
 						default:
 							return
+						}
+					}
+					switch elem[0] {
+					case '/': // Prefix: "/raw"
+						if l := len("/raw"); len(elem) >= l && elem[0:l] == "/raw" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						if len(elem) == 0 {
+							switch method {
+							case "GET":
+								// Leaf: GetRawTransaction
+								r.name = "GetRawTransaction"
+								r.operationID = "getRawTransaction"
+								r.args = args
+								r.count = 1
+								return r, true
+							default:
+								return
+							}
 						}
 					}
 				case 'v': // Prefix: "validators"

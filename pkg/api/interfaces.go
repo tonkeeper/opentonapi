@@ -24,6 +24,7 @@ type storage interface {
 	GetBlockHeader(ctx context.Context, id tongo.BlockID) (*core.BlockHeader, error)
 	LastMasterchainBlockHeader(ctx context.Context) (*core.BlockHeader, error)
 	GetTransaction(ctx context.Context, hash tongo.Bits256) (*core.Transaction, error)
+	GetRawTransactions(ctx context.Context, count uint32, accountID tongo.AccountID, lt uint64, hash tongo.Bits256) ([]tongo.Transaction, error)
 	// GetBlockTransactions returns low-level information about transactions in a particular block.
 	GetBlockTransactions(ctx context.Context, id tongo.BlockID) ([]*core.Transaction, error)
 	GetAccountTransactions(ctx context.Context, id tongo.AccountID, limit int, beforeLt, afterLt uint64) ([]*core.Transaction, error)

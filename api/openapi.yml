@@ -83,6 +83,30 @@ paths:
         '500':
           $ref: '#/components/responses/InternalError'
 
+  /v2/blockchain/transactions/{transaction_id}/raw:
+    get:
+      description: Get raw transaction data
+      operationId: getRawTransaction
+      tags:
+        - Blockchain
+      parameters:
+        - $ref: '#/components/parameters/transactionIdParameter'
+      responses:
+        '200':
+          description: transaction
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Transaction' # TODO: change to rawTx
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
   /v2/blockchain/validators:
     get:
       description: Get validators
