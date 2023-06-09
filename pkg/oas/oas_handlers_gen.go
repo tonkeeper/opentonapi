@@ -4886,7 +4886,7 @@ func (s *Server) handleStakingPoolsRequest(args [0]string, w http.ResponseWriter
 //
 // Account verification and token issuance.
 //
-// POST /v2/tonconnect/proof
+// POST /v2/wallet/auth/proof
 func (s *Server) handleTonConnectProofRequest(args [0]string, w http.ResponseWriter, r *http.Request) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("tonConnectProof"),

@@ -1267,33 +1267,6 @@ paths:
           $ref: '#/components/responses/UnauthorizedError'
         '500':
           $ref: '#/components/responses/InternalError'
-  /v2/tonconnect/proof:
-    post:
-      description: Account verification and token issuance
-      operationId: tonConnectProof
-      tags:
-        - Connect
-      requestBody:
-        $ref: "#/components/requestBodies/TonConnectProof"
-      responses:
-        '200':
-          description: "token"
-          content:
-            application/json:
-              schema:
-                type: object
-                required:
-                  - token
-                properties:
-                  token:
-                    type: string
-                    example: "NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2ODQ3..."
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '500':
-          $ref: '#/components/responses/InternalError'
   /v2/tonconnect/stateinit:
     post:
       description: "Get account info by state init"
@@ -1362,6 +1335,33 @@ paths:
       responses:
         '200':
           description: "success"
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /v2/wallet/auth/proof:
+    post:
+      description: Account verification and token issuance
+      operationId: tonConnectProof
+      tags:
+        - Wallet
+      requestBody:
+        $ref: "#/components/requestBodies/TonConnectProof"
+      responses:
+        '200':
+          description: "token"
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - token
+                properties:
+                  token:
+                    type: string
+                    example: "NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2ODQ3..."
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':

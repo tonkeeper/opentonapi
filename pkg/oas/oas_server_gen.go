@@ -309,7 +309,7 @@ type Handler interface {
 	//
 	// Account verification and token issuance.
 	//
-	// POST /v2/tonconnect/proof
+	// POST /v2/wallet/auth/proof
 	TonConnectProof(ctx context.Context, req TonConnectProofReq) (TonConnectProofRes, error)
 }
 

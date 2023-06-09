@@ -458,7 +458,7 @@ func (UnimplementedHandler) StakingPools(ctx context.Context, params StakingPool
 //
 // Account verification and token issuance.
 //
-// POST /v2/tonconnect/proof
+// POST /v2/wallet/auth/proof
 func (UnimplementedHandler) TonConnectProof(ctx context.Context, req TonConnectProofReq) (r TonConnectProofRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
