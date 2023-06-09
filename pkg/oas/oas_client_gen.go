@@ -2809,6 +2809,23 @@ func (c *Client) GetNftItemsByOwner(ctx context.Context, params GetNftItemsByOwn
 	stage = "EncodeQueryParams"
 	q := uri.NewQueryEncoder()
 	{
+		// Encode "collection" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "collection",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.Collection.Get(); ok {
+				return e.EncodeValue(conv.StringToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
 		// Encode "limit" parameter.
 		cfg := uri.QueryParameterEncodingConfig{
 			Name:    "limit",

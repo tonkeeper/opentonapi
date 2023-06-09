@@ -58,8 +58,17 @@ func (h Handler) GetNftItemsByOwner(ctx context.Context, params oas.GetNftItemsB
 	if err != nil {
 		return &oas.BadRequest{Error: err.Error()}, nil
 	}
+	var collectionFilter *core.Filter[tongo.AccountID]
+	collectionQuery := params.Collection.Value
+	if collectionQuery != "" {
+		collection, err := tongo.ParseAccountID(collectionQuery)
+		if err != nil {
+			return &oas.BadRequest{Error: err.Error()}, nil
+		}
+		collectionFilter = &core.Filter[tongo.AccountID]{Value: collection}
+	}
 	ids, err := h.storage.SearchNFTs(ctx,
-		nil,
+		collectionFilter,
 		&core.Filter[tongo.AccountID]{Value: account},
 		params.IndirectOwnership.Value,
 		true,
