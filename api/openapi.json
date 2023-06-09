@@ -4731,48 +4731,6 @@
     ]
    }
   },
-  "/v2/tonconnect/proof": {
-   "post": {
-    "description": "Account verification and token issuance",
-    "operationId": "tonConnectProof",
-    "requestBody": {
-     "$ref": "#/components/requestBodies/TonConnectProof"
-    },
-    "responses": {
-     "200": {
-      "content": {
-       "application/json": {
-        "schema": {
-         "properties": {
-          "token": {
-           "example": "NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2ODQ3...",
-           "type": "string"
-          }
-         },
-         "required": [
-          "token"
-         ],
-         "type": "object"
-        }
-       }
-      },
-      "description": "token"
-     },
-     "400": {
-      "$ref": "#/components/responses/BadRequest"
-     },
-     "401": {
-      "$ref": "#/components/responses/UnauthorizedError"
-     },
-     "500": {
-      "$ref": "#/components/responses/InternalError"
-     }
-    },
-    "tags": [
-     "Connect"
-    ]
-   }
-  },
   "/v2/tonconnect/stateinit": {
    "post": {
     "description": "Get account info by state init",
@@ -4874,6 +4832,48 @@
     },
     "tags": [
      "Traces"
+    ]
+   }
+  },
+  "/v2/wallet/auth/proof": {
+   "post": {
+    "description": "Account verification and token issuance",
+    "operationId": "tonConnectProof",
+    "requestBody": {
+     "$ref": "#/components/requestBodies/TonConnectProof"
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "token": {
+           "example": "NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2ODQ3...",
+           "type": "string"
+          }
+         },
+         "required": [
+          "token"
+         ],
+         "type": "object"
+        }
+       }
+      },
+      "description": "token"
+     },
+     "400": {
+      "$ref": "#/components/responses/BadRequest"
+     },
+     "401": {
+      "$ref": "#/components/responses/UnauthorizedError"
+     },
+     "500": {
+      "$ref": "#/components/responses/InternalError"
+     }
+    },
+    "tags": [
+     "Wallet"
     ]
    }
   },

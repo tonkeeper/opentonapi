@@ -4330,7 +4330,7 @@ func (c *Client) StakingPools(ctx context.Context, params StakingPoolsParams) (r
 //
 // Account verification and token issuance.
 //
-// POST /v2/tonconnect/proof
+// POST /v2/wallet/auth/proof
 func (c *Client) TonConnectProof(ctx context.Context, request TonConnectProofReq) (res TonConnectProofRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("tonConnectProof"),
@@ -4364,7 +4364,7 @@ func (c *Client) TonConnectProof(ctx context.Context, request TonConnectProofReq
 
 	stage = "BuildURL"
 	u := uri.Clone(c.requestURL(ctx))
-	u.Path += "/v2/tonconnect/proof"
+	u.Path += "/v2/wallet/auth/proof"
 
 	stage = "EncodeRequest"
 	r, err := ht.NewRequest(ctx, "POST", u, nil)
