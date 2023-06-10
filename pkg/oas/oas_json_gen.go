@@ -8417,6 +8417,12 @@ func (s Message) encodeFields(e *jx.Encoder) {
 		}
 	}
 	{
+		if s.RawBody.Set {
+			e.FieldStart("raw_body")
+			s.RawBody.Encode(e)
+		}
+	}
+	{
 		if s.DecodedOpName.Set {
 			e.FieldStart("decoded_op_name")
 			s.DecodedOpName.Encode(e)
@@ -8431,7 +8437,7 @@ func (s Message) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfMessage = [15]string{
+var jsonFieldsNameOfMessage = [16]string{
 	0:  "created_lt",
 	1:  "ihr_disabled",
 	2:  "bounce",
@@ -8445,8 +8451,9 @@ var jsonFieldsNameOfMessage = [15]string{
 	10: "created_at",
 	11: "op_code",
 	12: "init",
-	13: "decoded_op_name",
-	14: "decoded_body",
+	13: "raw_body",
+	14: "decoded_op_name",
+	15: "decoded_body",
 }
 
 // Decode decodes Message from json.
@@ -8606,6 +8613,16 @@ func (s *Message) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"init\"")
 			}
+		case "raw_body":
+			if err := func() error {
+				s.RawBody.Reset()
+				if err := s.RawBody.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"raw_body\"")
+			}
 		case "decoded_op_name":
 			if err := func() error {
 				s.DecodedOpName.Reset()
@@ -8617,7 +8634,7 @@ func (s *Message) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"decoded_op_name\"")
 			}
 		case "decoded_body":
-			requiredBitSet[1] |= 1 << 6
+			requiredBitSet[1] |= 1 << 7
 			if err := func() error {
 				v, err := d.RawAppend(nil)
 				s.DecodedBody = jx.Raw(v)
@@ -8639,7 +8656,7 @@ func (s *Message) Decode(d *jx.Decoder) error {
 	var failures []validate.FieldError
 	for i, mask := range [2]uint8{
 		0b01111111,
-		0b01000110,
+		0b10000110,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.

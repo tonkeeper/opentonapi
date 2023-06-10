@@ -2642,21 +2642,23 @@ func (*JettonsBalances) getJettonsBalancesRes() {}
 
 // Ref: #/components/schemas/Message
 type Message struct {
-	CreatedLt     int64             `json:"created_lt"`
-	IhrDisabled   bool              `json:"ihr_disabled"`
-	Bounce        bool              `json:"bounce"`
-	Bounced       bool              `json:"bounced"`
-	Value         int64             `json:"value"`
-	FwdFee        int64             `json:"fwd_fee"`
-	IhrFee        int64             `json:"ihr_fee"`
-	Destination   OptAccountAddress `json:"destination"`
-	Source        OptAccountAddress `json:"source"`
-	ImportFee     int64             `json:"import_fee"`
-	CreatedAt     int64             `json:"created_at"`
-	OpCode        OptString         `json:"op_code"`
-	Init          OptStateInit      `json:"init"`
-	DecodedOpName OptString         `json:"decoded_op_name"`
-	DecodedBody   jx.Raw            `json:"decoded_body"`
+	CreatedLt   int64             `json:"created_lt"`
+	IhrDisabled bool              `json:"ihr_disabled"`
+	Bounce      bool              `json:"bounce"`
+	Bounced     bool              `json:"bounced"`
+	Value       int64             `json:"value"`
+	FwdFee      int64             `json:"fwd_fee"`
+	IhrFee      int64             `json:"ihr_fee"`
+	Destination OptAccountAddress `json:"destination"`
+	Source      OptAccountAddress `json:"source"`
+	ImportFee   int64             `json:"import_fee"`
+	CreatedAt   int64             `json:"created_at"`
+	OpCode      OptString         `json:"op_code"`
+	Init        OptStateInit      `json:"init"`
+	// Hex-encoded BoC with raw message body.
+	RawBody       OptString `json:"raw_body"`
+	DecodedOpName OptString `json:"decoded_op_name"`
+	DecodedBody   jx.Raw    `json:"decoded_body"`
 }
 
 // GetCreatedLt returns the value of CreatedLt.
@@ -2722,6 +2724,11 @@ func (s Message) GetOpCode() OptString {
 // GetInit returns the value of Init.
 func (s Message) GetInit() OptStateInit {
 	return s.Init
+}
+
+// GetRawBody returns the value of RawBody.
+func (s Message) GetRawBody() OptString {
+	return s.RawBody
 }
 
 // GetDecodedOpName returns the value of DecodedOpName.
@@ -2797,6 +2804,11 @@ func (s *Message) SetOpCode(val OptString) {
 // SetInit sets the value of Init.
 func (s *Message) SetInit(val OptStateInit) {
 	s.Init = val
+}
+
+// SetRawBody sets the value of RawBody.
+func (s *Message) SetRawBody(val OptString) {
+	s.RawBody = val
 }
 
 // SetDecodedOpName sets the value of DecodedOpName.

@@ -1768,6 +1768,11 @@
       "example": "0xdeadbeaf",
       "type": "string"
      },
+     "raw_body": {
+      "description": "hex-encoded BoC with raw message body",
+      "example": "B5EE9C7201010101001100001D00048656C6C6F2C20776F726C64218",
+      "type": "string"
+     },
      "source": {
       "$ref": "#/components/schemas/AccountAddress"
      },

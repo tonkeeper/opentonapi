@@ -152,6 +152,9 @@ func convertMessage(m core.Message, book addressBook) oas.Message {
 		ImportFee:   m.ImportFee,
 		CreatedAt:   int64(m.CreatedAt),
 	}
+	if len(m.Body) != 0 {
+		msg.RawBody.SetTo(hex.EncodeToString(m.Body))
+	}
 	if m.OpCode != nil {
 		msg.OpCode = oas.NewOptString("0x" + hex.EncodeToString(binary.BigEndian.AppendUint32(nil, *m.OpCode)))
 	}

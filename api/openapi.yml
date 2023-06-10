@@ -1857,6 +1857,10 @@ components:
           example: "0xdeadbeaf"
         init:
           $ref: '#/components/schemas/StateInit'
+        raw_body:
+          type: string
+          description: hex-encoded BoC with raw message body
+          example: "B5EE9C7201010101001100001D00048656C6C6F2C20776F726C64218"
         decoded_op_name:
           type: string
           example: "nft_transfer"
