@@ -10,7 +10,7 @@ COPY pkg pkg
 RUN go build -o /tmp/opentonapi github.com/tonkeeper/opentonapi/cmd/api
 
 
-FROM ubuntu as runner
+FROM ubuntu:20.04 as runner
 RUN apt-get update && \
     apt-get install -y openssl ca-certificates && \
     rm -rf /var/lib/apt/lists/*
