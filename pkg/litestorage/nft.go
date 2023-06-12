@@ -81,3 +81,13 @@ func (s *LiteStorage) GetNftCollectionByCollectionAddress(ctx context.Context, a
 	}
 	return collection, nil
 }
+
+func (s *LiteStorage) NftSaleContracts(ctx context.Context, contracts []tongo.AccountID) (map[tongo.AccountID]core.NftSaleContract, error) {
+	//TODO implement
+	return map[tongo.AccountID]core.NftSaleContract{}, nil
+}
+
+func (s *LiteStorage) GetGemsContracts(ctx context.Context, getGems []tongo.AccountID) (map[tongo.AccountID]core.NftSaleContract, error) {
+	//TODO implement
+	return map[tongo.AccountID]core.NftSaleContract{}, nil
+}

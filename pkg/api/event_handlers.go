@@ -55,11 +55,14 @@ func (h Handler) GetEvent(ctx context.Context, params oas.GetEventParams) (oas.G
 	if err != nil {
 		return &oas.InternalError{Error: err.Error()}, nil
 	}
-	result, err := bath.FindActions(trace)
+	result, err := bath.FindActions(ctx, trace, bath.WithInformationSource(h.storage))
 	if err != nil {
-		return nil, err
+		return &oas.InternalError{Error: err.Error()}, nil
 	}
-	event := h.toEvent(ctx, trace, result, params.AcceptLanguage)
+	event, err := h.toEvent(ctx, trace, result, params.AcceptLanguage)
+	if err != nil {
+		return &oas.InternalError{Error: err.Error()}, nil
+	}
 	return &event, nil
 }
 
@@ -79,11 +82,14 @@ func (h Handler) GetEventsByAccount(ctx context.Context, params oas.GetEventsByA
 		if err != nil {
 			return &oas.InternalError{Error: err.Error()}, nil
 		}
-		result, err := bath.FindActions(trace, bath.ForAccount(account))
+		result, err := bath.FindActions(ctx, trace, bath.ForAccount(account), bath.WithInformationSource(h.storage))
 		if err != nil {
 			return &oas.InternalError{Error: err.Error()}, nil
 		}
-		events[i] = h.toAccountEvent(ctx, account, trace, result, params.AcceptLanguage)
+		events[i], err = h.toAccountEvent(ctx, account, trace, result, params.AcceptLanguage)
+		if err != nil {
+			return &oas.InternalError{Error: err.Error()}, nil
+		}
 		lastLT = trace.Lt
 	}
 	return &oas.AccountEvents{Events: events, NextFrom: int64(lastLT)}, nil
@@ -122,12 +128,14 @@ func (h Handler) EmulateMessageToAccountEvent(ctx context.Context, req oas.Emula
 	if err != nil {
 		return &oas.InternalError{Error: err.Error()}, nil
 	}
-	result, err := bath.FindActions(trace)
+	result, err := bath.FindActions(ctx, trace)
 	if err != nil {
 		return &oas.InternalError{Error: err.Error()}, nil
 	}
-
-	event := h.toAccountEvent(ctx, account, trace, result, params.AcceptLanguage)
+	event, err := h.toAccountEvent(ctx, account, trace, result, params.AcceptLanguage)
+	if err != nil {
+		return &oas.InternalError{Error: err.Error()}, nil
+	}
 	return &event, nil
 }
 
@@ -153,11 +161,14 @@ func (h Handler) EmulateMessageToEvent(ctx context.Context, req oas.EmulateMessa
 	if err != nil {
 		return &oas.InternalError{Error: err.Error()}, nil
 	}
-	result, err := bath.FindActions(trace)
+	result, err := bath.FindActions(ctx, trace)
 	if err != nil {
 		return &oas.InternalError{Error: err.Error()}, nil
 	}
-	event := h.toEvent(ctx, trace, result, params.AcceptLanguage)
+	event, err := h.toEvent(ctx, trace, result, params.AcceptLanguage)
+	if err != nil {
+		return &oas.InternalError{Error: err.Error()}, nil
+	}
 	return &event, nil
 }
 
@@ -241,11 +252,14 @@ func (h Handler) EmulateWalletMessage(ctx context.Context, req oas.EmulateWallet
 		return &oas.InternalError{Error: err.Error()}, nil
 	}
 	t := convertTrace(*trace, h.addressBook)
-	result, err := bath.FindActions(trace, bath.ForAccount(*walletAddress))
+	result, err := bath.FindActions(ctx, trace, bath.ForAccount(*walletAddress))
 	if err != nil {
 		return &oas.InternalError{Error: err.Error()}, nil
 	}
-	event := h.toAccountEvent(ctx, *walletAddress, trace, result, params.AcceptLanguage)
+	event, err := h.toAccountEvent(ctx, *walletAddress, trace, result, params.AcceptLanguage)
+	if err != nil {
+		return &oas.InternalError{Error: err.Error()}, nil
+	}
 	oasRisk, err := h.convertRisk(ctx, *risk, *walletAddress)
 	if err != nil {
 		return &oas.InternalError{Error: err.Error()}, nil

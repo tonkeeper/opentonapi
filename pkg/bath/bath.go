@@ -1,6 +1,8 @@
 package bath
 
 import (
+	"context"
+
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/tongo"
 )
@@ -11,8 +13,9 @@ type ActionsList struct {
 }
 
 type Options struct {
-	straws  []Straw
-	account *tongo.AccountID
+	straws            []Straw
+	account           *tongo.AccountID
+	informationSource core.InformationSource
 }
 
 type Option func(*Options)
@@ -30,14 +33,23 @@ func ForAccount(a tongo.AccountID) Option {
 	}
 }
 
+func WithInformationSource(source core.InformationSource) Option {
+	return func(options *Options) {
+		options.informationSource = source
+	}
+}
+
 // FindActions finds known action patterns in the given trace and
 // returns a list of actions.
-func FindActions(trace *core.Trace, opts ...Option) (*ActionsList, error) {
+func FindActions(ctx context.Context, trace *core.Trace, opts ...Option) (*ActionsList, error) {
 	options := Options{
 		straws: DefaultStraws,
 	}
 	for _, o := range opts {
 		o(&options)
+	}
+	if err := core.CollectAdditionalInfo(ctx, options.informationSource, trace); err != nil {
+		return nil, err
 	}
 	bubble := fromTrace(trace)
 	MergeAllBubbles(bubble, options.straws)

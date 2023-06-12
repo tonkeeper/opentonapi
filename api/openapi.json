@@ -2005,18 +2005,19 @@
      "amount": {
       "$ref": "#/components/schemas/Price"
      },
+     "auction_type": {
+      "enum": [
+       "DNS.tg",
+       "getgems",
+       "basic"
+      ],
+      "type": "string"
+     },
      "buyer": {
       "$ref": "#/components/schemas/AccountAddress"
      },
      "nft": {
       "$ref": "#/components/schemas/NftItem"
-     },
-     "purchase_type": {
-      "enum": [
-       "DNS.tg",
-       "getgems"
-      ],
-      "type": "string"
      },
      "seller": {
       "$ref": "#/components/schemas/AccountAddress"

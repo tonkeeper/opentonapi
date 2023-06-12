@@ -16,11 +16,11 @@ import (
 type Straw func(bubble *Bubble) (success bool)
 
 var DefaultStraws = []Straw{
-	FindGetGemsNftPurchase,
 	FindNFTTransfer,
 	FindJettonTransfer,
 	FindInitialSubscription,
 	FindExtendedSubscription,
+	FindNftPurchase,
 }
 
 func FindNFTTransfer(bubble *Bubble) bool {
@@ -133,8 +133,8 @@ func FindJettonTransfer(bubble *Bubble) bool {
 		},
 		payload: cellToTextComment(boc.Cell(intention.ForwardPayload.Value)),
 	}
-	if master, ok := transferBubbleInfo.additionalInfo["jetton_master"]; ok {
-		transfer.master, _ = master.(tongo.AccountID)
+	if transferBubbleInfo.additionalInfo != nil && transferBubbleInfo.additionalInfo.JettonMaster != nil {
+		transfer.master = *transferBubbleInfo.additionalInfo.JettonMaster
 	}
 	newBubble := Bubble{
 		Children:  bubble.Children,
