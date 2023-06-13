@@ -15,6 +15,8 @@ import (
 )
 
 type storage interface {
+	core.InformationSource
+
 	// GetRawAccount returns low-level information about an account taken directly from the blockchain.
 	GetRawAccount(ctx context.Context, id tongo.AccountID) (*core.Account, error)
 	// GetRawAccounts returns low-level information about several accounts taken directly from the blockchain.

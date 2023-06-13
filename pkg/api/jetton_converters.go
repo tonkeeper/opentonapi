@@ -47,8 +47,9 @@ func (h Handler) convertJettonHistory(ctx context.Context, account tongo.Account
 		if err != nil {
 			return nil, 0, err
 		}
-		result, err := bath.FindActions(trace,
-			bath.WithStraws([]bath.Straw{bath.FindJettonTransfer}))
+		result, err := bath.FindActions(ctx, trace,
+			bath.WithStraws([]bath.Straw{bath.FindJettonTransfer}),
+			bath.WithInformationSource(h.storage))
 		if err != nil {
 			return nil, 0, err
 		}
@@ -62,7 +63,10 @@ func (h Handler) convertJettonHistory(ctx context.Context, account tongo.Account
 			InProgress: trace.InProgress(),
 		}
 		for _, action := range result.Actions {
-			convertedAction, spamDetected := h.convertAction(ctx, action, acceptLanguage)
+			convertedAction, spamDetected, err := h.convertAction(ctx, action, acceptLanguage)
+			if err != nil {
+				return nil, 0, err
+			}
 			if !event.IsScam && spamDetected {
 				event.IsScam = true
 			}

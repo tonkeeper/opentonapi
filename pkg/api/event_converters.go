@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"math/big"
 	"sort"
+	"strings"
 
 	rules "github.com/tonkeeper/scam_backoffice_rules"
 	"github.com/tonkeeper/tongo"
@@ -97,7 +98,16 @@ func (h Handler) convertRisk(ctx context.Context, risk wallet.Risk, walletAddres
 	return oasRisk, nil
 }
 
-func (h Handler) convertAction(ctx context.Context, a bath.Action, acceptLanguage oas.OptString) (oas.Action, bool) {
+func optionalFromMeta(metadata oas.NftItemMetadata, name string) string {
+	value, ok := metadata[name]
+	if !ok {
+		return ""
+	}
+	return strings.Trim(string(value), `"`)
+}
+
+func (h Handler) convertAction(ctx context.Context, a bath.Action, acceptLanguage oas.OptString) (oas.Action, bool, error) {
+
 	action := oas.Action{
 		Type: oas.ActionType(a.Type),
 	}
@@ -219,16 +229,37 @@ func (h Handler) convertAction(ctx context.Context, a bath.Action, acceptLanguag
 			Address:    a.ContractDeploy.Address.ToRaw(),
 			Interfaces: a.ContractDeploy.Interfaces,
 		})
-	case bath.GetGemsNftPurchase:
+	case bath.NftPurchase:
+		price := a.NftPurchase.Price
+		value := utils.HumanFriendlyCoinsRepr(price)
+		items, err := h.storage.GetNFTs(ctx, []tongo.AccountID{a.NftPurchase.Nft})
+		if err != nil {
+			return oas.Action{}, false, err
+		}
+		var nft oas.NftItem
+		var nftImage string
+		if len(items) == 1 {
+			// opentonapi doesn't implement GetNFTs() now
+			nft = convertNFT(ctx, items[0], h.addressBook, h.previewGenerator, h.metaCache)
+			nftImage = optionalFromMeta(nft.Metadata, "image")
+		}
 		action.SimplePreview = oas.ActionSimplePreview{
 			Name: "NFT Purchase",
 			Description: i18n.T(acceptLanguage.Value, i18n.C{
 				MessageID:    nftPurchaseMessageID,
 				TemplateData: map[string]interface{}{},
 			}),
-			Accounts: distinctAccounts(h.addressBook, &a.GetGemsNftPurchase.Nft, &a.GetGemsNftPurchase.NewOwner),
-			Value:    oas.NewOptString(fmt.Sprintf("1 NFT")),
+			Accounts:   distinctAccounts(h.addressBook, &a.NftPurchase.Nft, &a.NftPurchase.Buyer),
+			Value:      oas.NewOptString(value),
+			ValueImage: oas.NewOptString(nftImage),
 		}
+		action.NftPurchase.SetTo(oas.NftPurchaseAction{
+			AuctionType: oas.NftPurchaseActionAuctionType(a.NftPurchase.AuctionType),
+			Amount:      oas.Price{Value: fmt.Sprintf("%d", price)},
+			Nft:         nft,
+			Seller:      convertAccountAddress(a.NftPurchase.Seller, h.addressBook),
+			Buyer:       convertAccountAddress(a.NftPurchase.Buyer, h.addressBook),
+		})
 	case bath.SmartContractExec:
 		op := "Call"
 		if a.SmartContractExec.Operation != "" {
@@ -253,7 +284,7 @@ func (h Handler) convertAction(ctx context.Context, a bath.Action, acceptLanguag
 		}
 		action.SmartContractExec.SetTo(contractAction)
 	}
-	return action, spamDetected
+	return action, spamDetected, nil
 }
 
 func convertAccountValueFlow(accountID tongo.AccountID, flow *bath.AccountValueFlow, book addressBook) oas.ValueFlow {
@@ -271,7 +302,7 @@ func convertAccountValueFlow(accountID tongo.AccountID, flow *bath.AccountValueF
 	return valueFlow
 }
 
-func (h Handler) toEvent(ctx context.Context, trace *core.Trace, result *bath.ActionsList, lang oas.OptString) oas.Event {
+func (h Handler) toEvent(ctx context.Context, trace *core.Trace, result *bath.ActionsList, lang oas.OptString) (oas.Event, error) {
 	event := oas.Event{
 		EventID:    trace.Hash.Hex(),
 		Timestamp:  trace.Utime,
@@ -282,17 +313,20 @@ func (h Handler) toEvent(ctx context.Context, trace *core.Trace, result *bath.Ac
 		InProgress: trace.InProgress(),
 	}
 	for i, a := range result.Actions {
-		convertedAction, spamDetected := h.convertAction(ctx, a, lang)
+		convertedAction, spamDetected, err := h.convertAction(ctx, a, lang)
+		if err != nil {
+			return oas.Event{}, err
+		}
 		event.IsScam = event.IsScam || spamDetected
 		event.Actions[i] = convertedAction
 	}
 	for accountID, flow := range result.ValueFlow.Accounts {
 		event.ValueFlow = append(event.ValueFlow, convertAccountValueFlow(accountID, flow, h.addressBook))
 	}
-	return event
+	return event, nil
 }
 
-func (h Handler) toAccountEvent(ctx context.Context, account tongo.AccountID, trace *core.Trace, result *bath.ActionsList, lang oas.OptString) oas.AccountEvent {
+func (h Handler) toAccountEvent(ctx context.Context, account tongo.AccountID, trace *core.Trace, result *bath.ActionsList, lang oas.OptString) (oas.AccountEvent, error) {
 	e := oas.AccountEvent{
 		EventID:    trace.Hash.Hex(),
 		Account:    convertAccountAddress(account, h.addressBook),
@@ -304,7 +338,10 @@ func (h Handler) toAccountEvent(ctx context.Context, account tongo.AccountID, tr
 		Extra:      result.Extra(account, trace),
 	}
 	for _, a := range result.Actions {
-		convertedAction, spamDetected := h.convertAction(ctx, a, lang)
+		convertedAction, spamDetected, err := h.convertAction(ctx, a, lang)
+		if err != nil {
+			return oas.AccountEvent{}, err
+		}
 		if !e.IsScam && spamDetected {
 			e.IsScam = true
 		}
@@ -321,5 +358,5 @@ func (h Handler) toAccountEvent(ctx context.Context, account tongo.AccountID, tr
 			},
 		}}
 	}
-	return e
+	return e, nil
 }

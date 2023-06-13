@@ -2815,11 +2815,12 @@ components:
         - auction_type
         - nft
       properties:
-        purchase_type:
+        auction_type:
           type: string
           enum:
             - DNS.tg
             - getgems
+            - basic
         amount:
           $ref: '#/components/schemas/Price'
         nft:

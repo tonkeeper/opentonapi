@@ -1,10 +1,6 @@
 {
    "Actions": [
      {
-       "TonTransfer": null,
-       "SmartContractExec": null,
-       "NftItemTransfer": null,
-       "GetGemsNftPurchase": null,
        "JettonTransfer": {
          "Comment": "",
          "Jetton": "0:0000000000000000000000000000000000000000000000000000000000000000",
@@ -15,10 +11,6 @@
          "Amount": "1000000",
          "Refund": null
        },
-       "ContractDeploy": null,
-       "Subscription": null,
-       "UnSubscription": null,
-       "AuctionBid": null,
        "Success": true,
        "Type": "JettonTransfer"
      }

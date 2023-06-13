@@ -1160,20 +1160,13 @@ func (s NftItems) Validate() error {
 func (s NftPurchaseAction) Validate() error {
 	var failures []validate.FieldError
 	if err := func() error {
-		if s.PurchaseType.Set {
-			if err := func() error {
-				if err := s.PurchaseType.Value.Validate(); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return err
-			}
+		if err := s.AuctionType.Validate(); err != nil {
+			return err
 		}
 		return nil
 	}(); err != nil {
 		failures = append(failures, validate.FieldError{
-			Name:  "purchase_type",
+			Name:  "auction_type",
 			Error: err,
 		})
 	}
@@ -1193,11 +1186,13 @@ func (s NftPurchaseAction) Validate() error {
 	}
 	return nil
 }
-func (s NftPurchaseActionPurchaseType) Validate() error {
+func (s NftPurchaseActionAuctionType) Validate() error {
 	switch s {
 	case "DNS.tg":
 		return nil
 	case "getgems":
+		return nil
+	case "basic":
 		return nil
 	default:
 		return errors.Errorf("invalid value: %v", s)

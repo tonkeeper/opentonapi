@@ -3244,16 +3244,16 @@ func (*NftItems) getNftItemsByOwnerRes()     {}
 
 // Ref: #/components/schemas/NftPurchaseAction
 type NftPurchaseAction struct {
-	PurchaseType OptNftPurchaseActionPurchaseType `json:"purchase_type"`
-	Amount       Price                            `json:"amount"`
-	Nft          NftItem                          `json:"nft"`
-	Seller       AccountAddress                   `json:"seller"`
-	Buyer        AccountAddress                   `json:"buyer"`
+	AuctionType NftPurchaseActionAuctionType `json:"auction_type"`
+	Amount      Price                        `json:"amount"`
+	Nft         NftItem                      `json:"nft"`
+	Seller      AccountAddress               `json:"seller"`
+	Buyer       AccountAddress               `json:"buyer"`
 }
 
-// GetPurchaseType returns the value of PurchaseType.
-func (s NftPurchaseAction) GetPurchaseType() OptNftPurchaseActionPurchaseType {
-	return s.PurchaseType
+// GetAuctionType returns the value of AuctionType.
+func (s NftPurchaseAction) GetAuctionType() NftPurchaseActionAuctionType {
+	return s.AuctionType
 }
 
 // GetAmount returns the value of Amount.
@@ -3276,9 +3276,9 @@ func (s NftPurchaseAction) GetBuyer() AccountAddress {
 	return s.Buyer
 }
 
-// SetPurchaseType sets the value of PurchaseType.
-func (s *NftPurchaseAction) SetPurchaseType(val OptNftPurchaseActionPurchaseType) {
-	s.PurchaseType = val
+// SetAuctionType sets the value of AuctionType.
+func (s *NftPurchaseAction) SetAuctionType(val NftPurchaseActionAuctionType) {
+	s.AuctionType = val
 }
 
 // SetAmount sets the value of Amount.
@@ -3301,11 +3301,12 @@ func (s *NftPurchaseAction) SetBuyer(val AccountAddress) {
 	s.Buyer = val
 }
 
-type NftPurchaseActionPurchaseType string
+type NftPurchaseActionAuctionType string
 
 const (
-	NftPurchaseActionPurchaseTypeDNSTg   NftPurchaseActionPurchaseType = "DNS.tg"
-	NftPurchaseActionPurchaseTypeGetgems NftPurchaseActionPurchaseType = "getgems"
+	NftPurchaseActionAuctionTypeDNSTg   NftPurchaseActionAuctionType = "DNS.tg"
+	NftPurchaseActionAuctionTypeGetgems NftPurchaseActionAuctionType = "getgems"
+	NftPurchaseActionAuctionTypeBasic   NftPurchaseActionAuctionType = "basic"
 )
 
 type NotFound struct {
@@ -4312,52 +4313,6 @@ func (o OptNftPurchaseAction) Get() (v NftPurchaseAction, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptNftPurchaseAction) Or(d NftPurchaseAction) NftPurchaseAction {
-	if v, ok := o.Get(); ok {
-		return v
-	}
-	return d
-}
-
-// NewOptNftPurchaseActionPurchaseType returns new OptNftPurchaseActionPurchaseType with value set to v.
-func NewOptNftPurchaseActionPurchaseType(v NftPurchaseActionPurchaseType) OptNftPurchaseActionPurchaseType {
-	return OptNftPurchaseActionPurchaseType{
-		Value: v,
-		Set:   true,
-	}
-}
-
-// OptNftPurchaseActionPurchaseType is optional NftPurchaseActionPurchaseType.
-type OptNftPurchaseActionPurchaseType struct {
-	Value NftPurchaseActionPurchaseType
-	Set   bool
-}
-
-// IsSet returns true if OptNftPurchaseActionPurchaseType was set.
-func (o OptNftPurchaseActionPurchaseType) IsSet() bool { return o.Set }
-
-// Reset unsets value.
-func (o *OptNftPurchaseActionPurchaseType) Reset() {
-	var v NftPurchaseActionPurchaseType
-	o.Value = v
-	o.Set = false
-}
-
-// SetTo sets value to v.
-func (o *OptNftPurchaseActionPurchaseType) SetTo(v NftPurchaseActionPurchaseType) {
-	o.Set = true
-	o.Value = v
-}
-
-// Get returns value and boolean that denotes whether value was set.
-func (o OptNftPurchaseActionPurchaseType) Get() (v NftPurchaseActionPurchaseType, ok bool) {
-	if !o.Set {
-		return v, false
-	}
-	return o.Value, true
-}
-
-// Or returns value if set, or given parameter if does not.
-func (o OptNftPurchaseActionPurchaseType) Or(d NftPurchaseActionPurchaseType) NftPurchaseActionPurchaseType {
 	if v, ok := o.Get(); ok {
 		return v
 	}

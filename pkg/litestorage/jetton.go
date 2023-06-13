@@ -117,3 +117,8 @@ func (s *LiteStorage) GetAccountJettonsHistory(ctx context.Context, address tong
 func (s *LiteStorage) GetAccountJettonHistoryByID(ctx context.Context, address, jettonMaster tongo.AccountID, limit int, beforeLT *int64, startTime *int64, endTime *int64) ([]tongo.Bits256, error) {
 	return nil, nil
 }
+
+func (s *LiteStorage) JettonMastersForWallets(ctx context.Context, wallets []tongo.AccountID) (map[tongo.AccountID]tongo.AccountID, error) {
+	// TODO: implement
+	return map[tongo.AccountID]tongo.AccountID{}, nil
+}

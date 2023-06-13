@@ -10,6 +10,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"github.com/tonkeeper/opentonapi/internal/g"
+	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/config"
 	"go.uber.org/zap"
@@ -34,6 +36,36 @@ type result struct {
 	Accounts []accountValueFlow
 }
 
+type mockInfoSource struct {
+	OnJettonMastersForWallets func(ctx context.Context, wallets []tongo.AccountID) (map[tongo.AccountID]tongo.AccountID, error)
+	OnGetGemsContracts        func(ctx context.Context, getGems []tongo.AccountID) (map[tongo.AccountID]core.NftSaleContract, error)
+	OnNftSaleContracts        func(ctx context.Context, contracts []tongo.AccountID) (map[tongo.AccountID]core.NftSaleContract, error)
+}
+
+func (m *mockInfoSource) NftSaleContracts(ctx context.Context, contracts []tongo.AccountID) (map[tongo.AccountID]core.NftSaleContract, error) {
+	if m.OnNftSaleContracts == nil {
+		return map[tongo.AccountID]core.NftSaleContract{}, nil
+	}
+	return m.OnNftSaleContracts(ctx, contracts)
+
+}
+
+func (m *mockInfoSource) JettonMastersForWallets(ctx context.Context, wallets []tongo.AccountID) (map[tongo.AccountID]tongo.AccountID, error) {
+	if m.OnJettonMastersForWallets == nil {
+		return map[tongo.AccountID]tongo.AccountID{}, nil
+	}
+	return m.OnJettonMastersForWallets(ctx, wallets)
+}
+
+func (m *mockInfoSource) GetGemsContracts(ctx context.Context, getGems []tongo.AccountID) (map[tongo.AccountID]core.NftSaleContract, error) {
+	if m.OnGetGemsContracts == nil {
+		return map[tongo.AccountID]core.NftSaleContract{}, nil
+	}
+	return m.OnGetGemsContracts(ctx, getGems)
+}
+
+var _ core.InformationSource = &mockInfoSource{}
+
 func TestFindActions(t *testing.T) {
 	var servers []config.LiteServer
 	if env, ok := os.LookupEnv("LITE_SERVERS"); ok {
@@ -51,6 +83,7 @@ func TestFindActions(t *testing.T) {
 			tongo.MustParseAccountID("0:54887d7c01ead183691a703afff08adc7b653fba2022df3a4963dae5171aa2ca"),
 			tongo.MustParseAccountID("0:84796c47a337716be8919014070016bd16498021b27325778394ea1893544ba6"),
 			tongo.MustParseAccountID("0:533f30de5722157b8471f5503b9fc5800c8d8397e79743f796b11e609adae69f"),
+			tongo.MustParseAccountID("0:fe98106451d88f11b91d962dbaf032ac43134cc8f3470fb683312c258971b9ed"),
 		}))
 	if err != nil {
 		t.Fatal(err)
@@ -60,6 +93,7 @@ func TestFindActions(t *testing.T) {
 		account          string
 		hash             string
 		filenamePrefix   string
+		source           core.InformationSource
 		valueFlow        ValueFlow
 		additionalStraws []Straw
 	}
@@ -75,16 +109,34 @@ func TestFindActions(t *testing.T) {
 			filenamePrefix: "nft-transfer",
 		},
 		{
-			name:             "nft purchase",
-			hash:             "8feb00edd889f8a36fb8af5b4d5370190fcbe872088cd1247c445e3c3b39a795",
-			filenamePrefix:   "getgems-nft-purchase",
-			additionalStraws: []Straw{FindGetGemsNftPurchase},
+			name:           "nft purchase",
+			hash:           "8feb00edd889f8a36fb8af5b4d5370190fcbe872088cd1247c445e3c3b39a795",
+			filenamePrefix: "getgems-nft-purchase",
+			source: &mockInfoSource{
+				OnGetGemsContracts: func(ctx context.Context, getGems []tongo.AccountID) (map[tongo.AccountID]core.NftSaleContract, error) {
+					return map[tongo.AccountID]core.NftSaleContract{
+						tongo.MustParseAccountID("0:4495a1921ab497b0eacee0d78838f8aeaba12481c29ec592c7fd5cbdd5b5ad0e"): {
+							NftPrice: 1_200_000_000,
+							Owner:    g.Pointer(tongo.MustParseAccountID("0:353d4cb749da429dbee9387ff7f65c0d99a922396a3d239eff8be465422771a0")),
+						},
+					}, nil
+				},
+			},
 		},
 		{
-			name:             "get gems nft purchase",
-			hash:             "8feb00edd889f8a36fb8af5b4d5370190fcbe872088cd1247c445e3c3b39a795",
-			filenamePrefix:   "getgems-nft-purchase-with-straw",
-			additionalStraws: []Straw{FindGetGemsNftPurchase},
+			name:           "nft purchase at Disintar Marketplace",
+			hash:           "7592e2c406c4320c408341989d42fae6dc18654af0f2110d76b3c44c2b0b5495",
+			filenamePrefix: "disintar-nft-purchase",
+			source: &mockInfoSource{
+				OnNftSaleContracts: func(ctx context.Context, getGems []tongo.AccountID) (map[tongo.AccountID]core.NftSaleContract, error) {
+					return map[tongo.AccountID]core.NftSaleContract{
+						tongo.MustParseAccountID("0:82e5172540cc7b9aeb8dfa6a82c2053f7008f484f94472efa369a9628a8c896a"): {
+							NftPrice: 1_200_000_000,
+							Owner:    g.Pointer(tongo.MustParseAccountID("0:bbf8ca0967809097d1aa67afee9cb2db2b9aa5e5f66c50a5c92033dc57b1cc23")),
+						},
+					}, nil
+				},
+			},
 		},
 		{
 			name:           "subscription initialization",
@@ -105,8 +157,10 @@ func TestFindActions(t *testing.T) {
 		t.Run(c.name, func(t *testing.T) {
 			trace, err := storage.GetTrace(context.Background(), tongo.MustParseHash(c.hash))
 			require.Nil(t, err)
-			actionsList, err := FindActions(trace,
-				WithStraws(append(c.additionalStraws, DefaultStraws...)))
+			actionsList, err := FindActions(context.Background(),
+				trace,
+				WithStraws(append(c.additionalStraws, DefaultStraws...)),
+				WithInformationSource(c.source))
 			require.Nil(t, err)
 			results := result{
 				Actions: actionsList.Actions,

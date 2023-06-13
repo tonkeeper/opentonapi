@@ -10071,10 +10071,9 @@ func (s NftPurchaseAction) Encode(e *jx.Encoder) {
 // encodeFields encodes fields.
 func (s NftPurchaseAction) encodeFields(e *jx.Encoder) {
 	{
-		if s.PurchaseType.Set {
-			e.FieldStart("purchase_type")
-			s.PurchaseType.Encode(e)
-		}
+
+		e.FieldStart("auction_type")
+		s.AuctionType.Encode(e)
 	}
 	{
 
@@ -10099,7 +10098,7 @@ func (s NftPurchaseAction) encodeFields(e *jx.Encoder) {
 }
 
 var jsonFieldsNameOfNftPurchaseAction = [5]string{
-	0: "purchase_type",
+	0: "auction_type",
 	1: "amount",
 	2: "nft",
 	3: "seller",
@@ -10115,15 +10114,15 @@ func (s *NftPurchaseAction) Decode(d *jx.Decoder) error {
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
-		case "purchase_type":
+		case "auction_type":
+			requiredBitSet[0] |= 1 << 0
 			if err := func() error {
-				s.PurchaseType.Reset()
-				if err := s.PurchaseType.Decode(d); err != nil {
+				if err := s.AuctionType.Decode(d); err != nil {
 					return err
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"purchase_type\"")
+				return errors.Wrap(err, "decode field \"auction_type\"")
 			}
 		case "amount":
 			requiredBitSet[0] |= 1 << 1
@@ -10175,7 +10174,7 @@ func (s *NftPurchaseAction) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b00011110,
+		0b00011111,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -10221,42 +10220,44 @@ func (s *NftPurchaseAction) UnmarshalJSON(data []byte) error {
 	return s.Decode(d)
 }
 
-// Encode encodes NftPurchaseActionPurchaseType as json.
-func (s NftPurchaseActionPurchaseType) Encode(e *jx.Encoder) {
+// Encode encodes NftPurchaseActionAuctionType as json.
+func (s NftPurchaseActionAuctionType) Encode(e *jx.Encoder) {
 	e.Str(string(s))
 }
 
-// Decode decodes NftPurchaseActionPurchaseType from json.
-func (s *NftPurchaseActionPurchaseType) Decode(d *jx.Decoder) error {
+// Decode decodes NftPurchaseActionAuctionType from json.
+func (s *NftPurchaseActionAuctionType) Decode(d *jx.Decoder) error {
 	if s == nil {
-		return errors.New("invalid: unable to decode NftPurchaseActionPurchaseType to nil")
+		return errors.New("invalid: unable to decode NftPurchaseActionAuctionType to nil")
 	}
 	v, err := d.StrBytes()
 	if err != nil {
 		return err
 	}
 	// Try to use constant string.
-	switch NftPurchaseActionPurchaseType(v) {
-	case NftPurchaseActionPurchaseTypeDNSTg:
-		*s = NftPurchaseActionPurchaseTypeDNSTg
-	case NftPurchaseActionPurchaseTypeGetgems:
-		*s = NftPurchaseActionPurchaseTypeGetgems
+	switch NftPurchaseActionAuctionType(v) {
+	case NftPurchaseActionAuctionTypeDNSTg:
+		*s = NftPurchaseActionAuctionTypeDNSTg
+	case NftPurchaseActionAuctionTypeGetgems:
+		*s = NftPurchaseActionAuctionTypeGetgems
+	case NftPurchaseActionAuctionTypeBasic:
+		*s = NftPurchaseActionAuctionTypeBasic
 	default:
-		*s = NftPurchaseActionPurchaseType(v)
+		*s = NftPurchaseActionAuctionType(v)
 	}
 
 	return nil
 }
 
 // MarshalJSON implements stdjson.Marshaler.
-func (s NftPurchaseActionPurchaseType) MarshalJSON() ([]byte, error) {
+func (s NftPurchaseActionAuctionType) MarshalJSON() ([]byte, error) {
 	e := jx.Encoder{}
 	s.Encode(&e)
 	return e.Bytes(), nil
 }
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *NftPurchaseActionPurchaseType) UnmarshalJSON(data []byte) error {
+func (s *NftPurchaseActionAuctionType) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -11056,39 +11057,6 @@ func (s OptNftPurchaseAction) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *OptNftPurchaseAction) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
-// Encode encodes NftPurchaseActionPurchaseType as json.
-func (o OptNftPurchaseActionPurchaseType) Encode(e *jx.Encoder) {
-	if !o.Set {
-		return
-	}
-	e.Str(string(o.Value))
-}
-
-// Decode decodes NftPurchaseActionPurchaseType from json.
-func (o *OptNftPurchaseActionPurchaseType) Decode(d *jx.Decoder) error {
-	if o == nil {
-		return errors.New("invalid: unable to decode OptNftPurchaseActionPurchaseType to nil")
-	}
-	o.Set = true
-	if err := o.Value.Decode(d); err != nil {
-		return err
-	}
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s OptNftPurchaseActionPurchaseType) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *OptNftPurchaseActionPurchaseType) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }

@@ -21,7 +21,7 @@ type BubbleTx struct {
 	decodedBody     *core.DecodedMessageBody
 	init            []byte
 
-	additionalInfo                  map[string]interface{} //place for storing different data from trace which can be useful later
+	additionalInfo                  *core.TraceAdditionalInfo
 	accountWasActiveAtComputingTime bool
 }
 

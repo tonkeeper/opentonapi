@@ -8,14 +8,6 @@
          "Sender": "0:2cf3b5b8c891e517c9addbda1c0386a09ccacbb0e3faf630b51cfc8152325acb",
          "Refund": null
        },
-       "SmartContractExec": null,
-       "NftItemTransfer": null,
-       "GetGemsNftPurchase": null,
-       "JettonTransfer": null,
-       "ContractDeploy": null,
-       "Subscription": null,
-       "UnSubscription": null,
-       "AuctionBid": null,
        "Success": true,
        "Type": "TonTransfer"
      }

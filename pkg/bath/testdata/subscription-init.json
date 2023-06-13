@@ -1,12 +1,6 @@
 {
    "Actions": [
      {
-       "TonTransfer": null,
-       "SmartContractExec": null,
-       "NftItemTransfer": null,
-       "GetGemsNftPurchase": null,
-       "JettonTransfer": null,
-       "ContractDeploy": null,
        "Subscription": {
          "Subscription": "0:47580dd4cab600a751875071ef7482d99ce5cfada7293e9ebc7c3e07125846f6",
          "Subscriber": "0:54887d7c01ead183691a703afff08adc7b653fba2022df3a4963dae5171aa2ca",
@@ -14,8 +8,6 @@
          "Amount": 5000000000,
          "First": true
        },
-       "UnSubscription": null,
-       "AuctionBid": null,
        "Success": true,
        "Type": "Subscription"
      }
