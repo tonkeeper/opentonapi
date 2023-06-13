@@ -34,7 +34,7 @@ func (h Handler) TonConnectProof(ctx context.Context, request oas.TonConnectProo
 			StateInit: request.Proof.StateInit.Value,
 		},
 	}
-	verified, pubKey, err := h.tonConnect.CheckProof(&proof)
+	verified, pubKey, err := h.tonConnect.CheckProof(ctx, &proof)
 	if err != nil || !verified {
 		return &oas.BadRequest{Error: "failed verify proof"}, nil
 	}
