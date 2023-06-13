@@ -238,16 +238,22 @@ func (h Handler) convertAction(ctx context.Context, a bath.Action, acceptLanguag
 		}
 		var nft oas.NftItem
 		var nftImage string
+		var name string
 		if len(items) == 1 {
 			// opentonapi doesn't implement GetNFTs() now
 			nft = convertNFT(ctx, items[0], h.addressBook, h.previewGenerator, h.metaCache)
-			nftImage = optionalFromMeta(nft.Metadata, "image")
+			if len(nft.Previews) > 0 {
+				nftImage = nft.Previews[0].URL
+			}
+			name = optionalFromMeta(nft.Metadata, "name")
 		}
 		action.SimplePreview = oas.ActionSimplePreview{
 			Name: "NFT Purchase",
 			Description: i18n.T(acceptLanguage.Value, i18n.C{
-				MessageID:    nftPurchaseMessageID,
-				TemplateData: map[string]interface{}{},
+				MessageID: nftPurchaseMessageID,
+				TemplateData: map[string]interface{}{
+					"Name": name,
+				},
 			}),
 			Accounts:   distinctAccounts(h.addressBook, &a.NftPurchase.Nft, &a.NftPurchase.Buyer),
 			Value:      oas.NewOptString(value),
@@ -255,7 +261,7 @@ func (h Handler) convertAction(ctx context.Context, a bath.Action, acceptLanguag
 		}
 		action.NftPurchase.SetTo(oas.NftPurchaseAction{
 			AuctionType: oas.NftPurchaseActionAuctionType(a.NftPurchase.AuctionType),
-			Amount:      oas.Price{Value: fmt.Sprintf("%d", price)},
+			Amount:      oas.Price{Value: fmt.Sprintf("%d", price), TokenName: "TON"},
 			Nft:         nft,
 			Seller:      convertAccountAddress(a.NftPurchase.Seller, h.addressBook),
 			Buyer:       convertAccountAddress(a.NftPurchase.Buyer, h.addressBook),
