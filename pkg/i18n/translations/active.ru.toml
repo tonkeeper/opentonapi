@@ -15,4 +15,4 @@ other = "Перевод {{.Value}} {{.JettonName}}"
 other = "Перевод NFT"
 
 [nftPurchaseAction]
-other = "Покупка NFT"
+other = "Покупка NFT {{.Name}}"
