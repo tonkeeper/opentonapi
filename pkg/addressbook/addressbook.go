@@ -1,14 +1,17 @@
 package addressbook
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
+	"time"
 
 	"golang.org/x/exp/maps"
 
 	"github.com/shopspring/decimal"
+	"github.com/shurcooL/graphql"
 	"github.com/tonkeeper/tongo"
 	"go.uber.org/zap"
 )
@@ -60,6 +63,7 @@ type KnownCollection struct {
 	MaxItems    int64    `json:"max_items"`
 	Websites    []string `json:"websites,omitempty"`
 	Social      []string `json:"social,omitempty"`
+	Approvers   []string
 }
 
 type Options struct {
@@ -186,9 +190,11 @@ func NewAddressBook(logger *zap.Logger, addressPath, jettonPath, collectionPath 
 				continue
 			}
 			i.Address = a.ToRaw()
+			i.Approvers = append(i.Approvers, "tonkeeper")
 			collections[a] = i
 		}
 	}
+	go getGGWhitelist(collections)
 	for _, v := range getPools(logger) {
 		a, err := tongo.ParseAccountID(v.Address)
 		if err != nil {
@@ -230,4 +236,49 @@ func downloadJson[T any](url string) ([]T, error) {
 		return nil, err
 	}
 	return data, nil
+}
+
+func getGGWhitelist(collections map[tongo.AccountID]KnownCollection) {
+	client := graphql.NewClient("https://api.getgems.io/graphql", nil)
+	for {
+		addresses, err := _getGGWhitelist(client)
+		if err != nil {
+			fmt.Println("get nft collection whitelist: %v\n", err)
+			time.Sleep(time.Minute * 3)
+			continue
+		}
+		for _, a := range addresses {
+			c := collections[a]
+			c.Approvers = append(c.Approvers, "getgems")
+			collections[a] = c
+		}
+		return
+	}
+
+}
+
+func _getGGWhitelist(client *graphql.Client) ([]tongo.AccountID, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
+	defer cancel()
+	var q struct {
+		NftCollections struct {
+			Items []struct {
+				Address    graphql.String
+				IsApproved graphql.Boolean
+			}
+		} `graphql:"nftCollections(first: 100000, filter: {approve:Approved,verify:Verified})"`
+	}
+	err := client.Query(ctx, &q, nil)
+	if err != nil {
+		return nil, err
+	}
+	var addr []tongo.AccountID
+	for _, collection := range q.NftCollections.Items {
+		aa, err := tongo.ParseAccountID(string(collection.Address))
+		if err != nil {
+			return nil, err
+		}
+		addr = append(addr, aa)
+	}
+	return addr, nil
 }

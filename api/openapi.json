@@ -1894,7 +1894,11 @@
      },
      "approved_by": {
       "items": {
-       "example": "GetGems",
+       "enum": [
+        "getgems",
+        "tonkeeper"
+       ],
+       "example": "getgems",
        "type": "string"
       },
       "type": "array"

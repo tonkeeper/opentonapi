@@ -44,8 +44,15 @@ func convertNFT(ctx context.Context, item core.NftItem, book addressBook, previe
 	}
 	var image string
 	if item.CollectionAddress != nil {
-		if _, prs := book.GetCollectionInfoByAddress(*item.CollectionAddress); prs {
-			i.ApprovedBy = []string{"tonkeeper"} //todo: make enum
+		if cc, prs := book.GetCollectionInfoByAddress(*item.CollectionAddress); prs {
+			for _, a := range cc.Approvers {
+				switch a {
+				case "tonkeeper":
+					i.ApprovedBy = append(i.ApprovedBy, oas.NftItemApprovedByItemTonkeeper)
+				case "getgems":
+					i.ApprovedBy = append(i.ApprovedBy, oas.NftItemApprovedByItemGetgems)
+				}
+			}
 		}
 		cInfo, _ := metaCache.getCollectionMeta(ctx, *item.CollectionAddress)
 		i.Collection.SetTo(oas.NftItemCollection{

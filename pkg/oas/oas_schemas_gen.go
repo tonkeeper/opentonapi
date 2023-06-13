@@ -3002,16 +3002,16 @@ func (*NftCollections) getNftCollectionsRes() {}
 
 // Ref: #/components/schemas/NftItem
 type NftItem struct {
-	Address    string               `json:"address"`
-	Index      int64                `json:"index"`
-	Owner      OptAccountAddress    `json:"owner"`
-	Collection OptNftItemCollection `json:"collection"`
-	Verified   bool                 `json:"verified"`
-	Metadata   NftItemMetadata      `json:"metadata"`
-	Sale       OptSale              `json:"sale"`
-	Previews   []ImagePreview       `json:"previews"`
-	DNS        OptString            `json:"dns"`
-	ApprovedBy []string             `json:"approved_by"`
+	Address    string                  `json:"address"`
+	Index      int64                   `json:"index"`
+	Owner      OptAccountAddress       `json:"owner"`
+	Collection OptNftItemCollection    `json:"collection"`
+	Verified   bool                    `json:"verified"`
+	Metadata   NftItemMetadata         `json:"metadata"`
+	Sale       OptSale                 `json:"sale"`
+	Previews   []ImagePreview          `json:"previews"`
+	DNS        OptString               `json:"dns"`
+	ApprovedBy []NftItemApprovedByItem `json:"approved_by"`
 }
 
 // GetAddress returns the value of Address.
@@ -3060,7 +3060,7 @@ func (s NftItem) GetDNS() OptString {
 }
 
 // GetApprovedBy returns the value of ApprovedBy.
-func (s NftItem) GetApprovedBy() []string {
+func (s NftItem) GetApprovedBy() []NftItemApprovedByItem {
 	return s.ApprovedBy
 }
 
@@ -3110,11 +3110,18 @@ func (s *NftItem) SetDNS(val OptString) {
 }
 
 // SetApprovedBy sets the value of ApprovedBy.
-func (s *NftItem) SetApprovedBy(val []string) {
+func (s *NftItem) SetApprovedBy(val []NftItemApprovedByItem) {
 	s.ApprovedBy = val
 }
 
 func (*NftItem) getNftItemByAddressRes() {}
+
+type NftItemApprovedByItem string
+
+const (
+	NftItemApprovedByItemGetgems   NftItemApprovedByItem = "getgems"
+	NftItemApprovedByItemTonkeeper NftItemApprovedByItem = "tonkeeper"
+)
 
 type NftItemCollection struct {
 	Address string `json:"address"`

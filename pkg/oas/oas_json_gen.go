@@ -9391,7 +9391,7 @@ func (s NftItem) encodeFields(e *jx.Encoder) {
 		e.FieldStart("approved_by")
 		e.ArrStart()
 		for _, elem := range s.ApprovedBy {
-			e.Str(elem)
+			elem.Encode(e)
 		}
 		e.ArrEnd()
 	}
@@ -9525,12 +9525,10 @@ func (s *NftItem) Decode(d *jx.Decoder) error {
 		case "approved_by":
 			requiredBitSet[1] |= 1 << 1
 			if err := func() error {
-				s.ApprovedBy = make([]string, 0)
+				s.ApprovedBy = make([]NftItemApprovedByItem, 0)
 				if err := d.Arr(func(d *jx.Decoder) error {
-					var elem string
-					v, err := d.Str()
-					elem = string(v)
-					if err != nil {
+					var elem NftItemApprovedByItem
+					if err := elem.Decode(d); err != nil {
 						return err
 					}
 					s.ApprovedBy = append(s.ApprovedBy, elem)
@@ -9595,6 +9593,46 @@ func (s NftItem) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *NftItem) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes NftItemApprovedByItem as json.
+func (s NftItemApprovedByItem) Encode(e *jx.Encoder) {
+	e.Str(string(s))
+}
+
+// Decode decodes NftItemApprovedByItem from json.
+func (s *NftItemApprovedByItem) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode NftItemApprovedByItem to nil")
+	}
+	v, err := d.StrBytes()
+	if err != nil {
+		return err
+	}
+	// Try to use constant string.
+	switch NftItemApprovedByItem(v) {
+	case NftItemApprovedByItemGetgems:
+		*s = NftItemApprovedByItemGetgems
+	case NftItemApprovedByItemTonkeeper:
+		*s = NftItemApprovedByItemTonkeeper
+	default:
+		*s = NftItemApprovedByItem(v)
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s NftItemApprovedByItem) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *NftItemApprovedByItem) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }

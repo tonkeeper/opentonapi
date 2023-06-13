@@ -1085,6 +1085,23 @@ func (s NftItem) Validate() error {
 		if s.ApprovedBy == nil {
 			return errors.New("nil is invalid value")
 		}
+		var failures []validate.FieldError
+		for i, elem := range s.ApprovedBy {
+			if err := func() error {
+				if err := elem.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				failures = append(failures, validate.FieldError{
+					Name:  fmt.Sprintf("[%d]", i),
+					Error: err,
+				})
+			}
+		}
+		if len(failures) > 0 {
+			return &validate.Error{Fields: failures}
+		}
 		return nil
 	}(); err != nil {
 		failures = append(failures, validate.FieldError{
@@ -1096,6 +1113,16 @@ func (s NftItem) Validate() error {
 		return &validate.Error{Fields: failures}
 	}
 	return nil
+}
+func (s NftItemApprovedByItem) Validate() error {
+	switch s {
+	case "getgems":
+		return nil
+	case "tonkeeper":
+		return nil
+	default:
+		return errors.Errorf("invalid value: %v", s)
+	}
 }
 func (s NftItemTransferAction) Validate() error {
 	var failures []validate.FieldError

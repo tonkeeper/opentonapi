@@ -2486,8 +2486,10 @@ components:
           type: array
           items:
             type: string
-            example: GetGems
-
+            example: getgems
+            enum:
+              - getgems
+              - tonkeeper
     NftItems:
       type: object
       required:
