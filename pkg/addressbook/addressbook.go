@@ -261,20 +261,15 @@ func _getGGWhitelist(client *graphql.Client) ([]tongo.AccountID, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
 	defer cancel()
 	var q struct {
-		NftCollections struct {
-			Items []struct {
-				Address    graphql.String
-				IsApproved graphql.Boolean
-			}
-		} `graphql:"nftCollections(first: 100000, filter: {approve:Approved,verify:Verified})"`
+		GetAddressesOfVerifiedCollections []graphql.String `graphql:"getAddressesOfVerifiedCollections"`
 	}
 	err := client.Query(ctx, &q, nil)
 	if err != nil {
 		return nil, err
 	}
 	var addr []tongo.AccountID
-	for _, collection := range q.NftCollections.Items {
-		aa, err := tongo.ParseAccountID(string(collection.Address))
+	for _, collection := range q.GetAddressesOfVerifiedCollections {
+		aa, err := tongo.ParseAccountID(string(collection))
 		if err != nil {
 			return nil, err
 		}
