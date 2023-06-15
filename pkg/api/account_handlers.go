@@ -15,6 +15,7 @@ import (
 	"github.com/tonkeeper/tongo/boc"
 	"github.com/tonkeeper/tongo/tlb"
 	walletTongo "github.com/tonkeeper/tongo/wallet"
+	"golang.org/x/exp/maps"
 )
 
 func (h Handler) GetAccount(ctx context.Context, params oas.GetAccountParams) (oas.GetAccountRes, error) {
@@ -198,27 +199,35 @@ func (h Handler) GetDnsExpiring(ctx context.Context, params oas.GetDnsExpiringPa
 	if err != nil {
 		return &oas.InternalError{Error: err.Error()}, nil
 	}
+	accounts := make([]tongo.AccountID, 0, len(dnsExpiring))
+	accountDns := make(map[tongo.AccountID]oas.DnsExpiringItemsItem)
 	var response oas.DnsExpiring
 	for _, dns := range dnsExpiring {
 		dnsExpireItem := oas.DnsExpiringItemsItem{
 			ExpiringAt: dns.ExpiringAt,
 			Name:       dns.Name,
 		}
-		if dns.DnsItem != nil {
-			items, err := h.storage.GetNFTs(ctx, []tongo.AccountID{dns.DnsItem.Address})
-			if err != nil {
-				return &oas.InternalError{Error: err.Error()}, nil
-			}
-			if len(items) > 0 {
-				dnsExpireItem.DNSItem = convertNFT(ctx, items[0], h.addressBook, h.previewGenerator, h.metaCache)
-			}
+		if dns.DnsItem == nil {
+			response.Items = append(response.Items, dnsExpireItem)
+			continue
 		}
-		response.Items = append(response.Items, dnsExpireItem)
+		accounts = append(accounts, dns.DnsItem.Address)
+		accountDns[dns.DnsItem.Address] = dnsExpireItem
 	}
+	nfts, err := h.storage.GetNFTs(ctx, accounts)
+	if err != nil {
+		return &oas.InternalError{Error: err.Error()}, nil
+	}
+	for _, nft := range nfts {
+		dns := accountDns[nft.Address]
+		dns.DNSItem = convertNFT(ctx, nft, h.addressBook, h.previewGenerator, h.metaCache)
+		accountDns[nft.Address] = dns
+	}
+	response.Items = append(response.Items, maps.Values(accountDns)...)
 	sort.Slice(response.Items, func(i, j int) bool {
 		return response.Items[i].ExpiringAt > response.Items[j].ExpiringAt
 	})
-
+	
 	return &response, nil
 }
 
