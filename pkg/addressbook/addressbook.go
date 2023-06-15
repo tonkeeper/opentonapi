@@ -243,7 +243,7 @@ func getGGWhitelist(collections map[tongo.AccountID]KnownCollection) {
 	for {
 		addresses, err := _getGGWhitelist(client)
 		if err != nil {
-			fmt.Println("get nft collection whitelist: %v\n", err)
+			fmt.Printf("get nft collection whitelist: %v\n", err)
 			time.Sleep(time.Minute * 3)
 			continue
 		}
