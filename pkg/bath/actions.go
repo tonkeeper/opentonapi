@@ -22,6 +22,8 @@ const (
 	ContractDeploy    ActionType = "ContractDeploy"
 	Subscription      ActionType = "Subscription"
 	UnSubscription    ActionType = "UnSubscribe"
+	DepositStake      ActionType = "DepositStake"
+	RecoverStake      ActionType = "RecoverStake"
 	AuctionBid        ActionType = "AuctionBid"
 	AuctionTgInitBid  ActionType = "AuctionTgInitBid"
 
@@ -57,6 +59,8 @@ type (
 		Subscription      *SubscriptionAction   `json:",omitempty"`
 		UnSubscription    *UnSubscriptionAction `json:",omitempty"`
 		AuctionBid        *AuctionBidAction     `json:",omitempty"`
+		DepositStake      *DepositStakeAction   `json:",omitempty"`
+		RecoverStake      *RecoverStakeAction   `json:",omitempty"`
 		Success           bool
 		Type              ActionType
 	}
@@ -89,6 +93,18 @@ type (
 		Seller      tongo.AccountID
 		AuctionType NftAuctionType
 		Price       int64
+	}
+
+	DepositStakeAction struct {
+		Amount  int64
+		Elector tongo.AccountID
+		Staker  tongo.AccountID
+	}
+
+	RecoverStakeAction struct {
+		Amount  int64
+		Elector tongo.AccountID
+		Staker  tongo.AccountID
 	}
 
 	JettonTransferAction struct {

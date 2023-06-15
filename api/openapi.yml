@@ -2601,6 +2601,8 @@ components:
             - UnSubscribe
             - AuctionBid
             - NftPurchase
+            - DepositStake
+            - RecoverStake
             - SmartContractExec
             - Unknown
         status:
@@ -2626,6 +2628,10 @@ components:
           $ref: '#/components/schemas/AuctionBidAction'
         NftPurchase:
           $ref: '#/components/schemas/NftPurchaseAction'
+        DepositStake:
+          $ref: '#/components/schemas/DepositStakeAction'
+        RecoverStake:
+          $ref: '#/components/schemas/RecoverStakeAction'
         SmartContractExec:
           $ref: '#/components/schemas/SmartContractAction'
         simple_preview:
@@ -2806,6 +2812,32 @@ components:
         beneficiary:
           $ref: '#/components/schemas/AccountAddress'
         bidder:
+          $ref: '#/components/schemas/AccountAddress'
+
+    DepositStakeAction:
+      type: object
+      required:
+        - amount
+        - staker
+      properties:
+        amount:
+          type: integer
+          format: int64
+          example: 1660050553
+        staker:
+          $ref: '#/components/schemas/AccountAddress'
+
+    RecoverStakeAction:
+      type: object
+      required:
+        - amount
+        - staker
+      properties:
+        amount:
+          type: integer
+          format: int64
+          example: 1660050553
+        staker:
           $ref: '#/components/schemas/AccountAddress'
 
     NftPurchaseAction:

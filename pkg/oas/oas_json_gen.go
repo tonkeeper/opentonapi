@@ -1635,6 +1635,18 @@ func (s Action) encodeFields(e *jx.Encoder) {
 		}
 	}
 	{
+		if s.DepositStake.Set {
+			e.FieldStart("DepositStake")
+			s.DepositStake.Encode(e)
+		}
+	}
+	{
+		if s.RecoverStake.Set {
+			e.FieldStart("RecoverStake")
+			s.RecoverStake.Encode(e)
+		}
+	}
+	{
 		if s.SmartContractExec.Set {
 			e.FieldStart("SmartContractExec")
 			s.SmartContractExec.Encode(e)
@@ -1647,7 +1659,7 @@ func (s Action) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfAction = [12]string{
+var jsonFieldsNameOfAction = [14]string{
 	0:  "type",
 	1:  "status",
 	2:  "TonTransfer",
@@ -1658,8 +1670,10 @@ var jsonFieldsNameOfAction = [12]string{
 	7:  "UnSubscribe",
 	8:  "AuctionBid",
 	9:  "NftPurchase",
-	10: "SmartContractExec",
-	11: "simple_preview",
+	10: "DepositStake",
+	11: "RecoverStake",
+	12: "SmartContractExec",
+	13: "simple_preview",
 }
 
 // Decode decodes Action from json.
@@ -1771,6 +1785,26 @@ func (s *Action) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"NftPurchase\"")
 			}
+		case "DepositStake":
+			if err := func() error {
+				s.DepositStake.Reset()
+				if err := s.DepositStake.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"DepositStake\"")
+			}
+		case "RecoverStake":
+			if err := func() error {
+				s.RecoverStake.Reset()
+				if err := s.RecoverStake.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"RecoverStake\"")
+			}
 		case "SmartContractExec":
 			if err := func() error {
 				s.SmartContractExec.Reset()
@@ -1782,7 +1816,7 @@ func (s *Action) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"SmartContractExec\"")
 			}
 		case "simple_preview":
-			requiredBitSet[1] |= 1 << 3
+			requiredBitSet[1] |= 1 << 5
 			if err := func() error {
 				if err := s.SimplePreview.Decode(d); err != nil {
 					return err
@@ -1802,7 +1836,7 @@ func (s *Action) Decode(d *jx.Decoder) error {
 	var failures []validate.FieldError
 	for i, mask := range [2]uint8{
 		0b00000011,
-		0b00001000,
+		0b00100000,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -2285,6 +2319,10 @@ func (s *ActionType) Decode(d *jx.Decoder) error {
 		*s = ActionTypeAuctionBid
 	case ActionTypeNftPurchase:
 		*s = ActionTypeNftPurchase
+	case ActionTypeDepositStake:
+		*s = ActionTypeDepositStake
+	case ActionTypeRecoverStake:
+		*s = ActionTypeRecoverStake
 	case ActionTypeSmartContractExec:
 		*s = ActionTypeSmartContractExec
 	case ActionTypeUnknown:
@@ -4117,6 +4155,119 @@ func (s CreditPhase) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *CreditPhase) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s DepositStakeAction) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s DepositStakeAction) encodeFields(e *jx.Encoder) {
+	{
+
+		e.FieldStart("amount")
+		e.Int64(s.Amount)
+	}
+	{
+
+		e.FieldStart("staker")
+		s.Staker.Encode(e)
+	}
+}
+
+var jsonFieldsNameOfDepositStakeAction = [2]string{
+	0: "amount",
+	1: "staker",
+}
+
+// Decode decodes DepositStakeAction from json.
+func (s *DepositStakeAction) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode DepositStakeAction to nil")
+	}
+	var requiredBitSet [1]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "amount":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				v, err := d.Int64()
+				s.Amount = int64(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"amount\"")
+			}
+		case "staker":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				if err := s.Staker.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"staker\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode DepositStakeAction")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00000011,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfDepositStakeAction) {
+					name = jsonFieldsNameOfDepositStakeAction[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s DepositStakeAction) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *DepositStakeAction) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -10696,6 +10847,39 @@ func (s *OptCreditPhase) UnmarshalJSON(data []byte) error {
 	return s.Decode(d)
 }
 
+// Encode encodes DepositStakeAction as json.
+func (o OptDepositStakeAction) Encode(e *jx.Encoder) {
+	if !o.Set {
+		return
+	}
+	o.Value.Encode(e)
+}
+
+// Decode decodes DepositStakeAction from json.
+func (o *OptDepositStakeAction) Decode(d *jx.Decoder) error {
+	if o == nil {
+		return errors.New("invalid: unable to decode OptDepositStakeAction to nil")
+	}
+	o.Set = true
+	if err := o.Value.Decode(d); err != nil {
+		return err
+	}
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s OptDepositStakeAction) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *OptDepositStakeAction) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
 // Encode encodes GetAccountsReq as json.
 func (o OptGetAccountsReq) Encode(e *jx.Encoder) {
 	if !o.Set {
@@ -11129,6 +11313,39 @@ func (s OptRawAccountExtraBalance) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *OptRawAccountExtraBalance) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes RecoverStakeAction as json.
+func (o OptRecoverStakeAction) Encode(e *jx.Encoder) {
+	if !o.Set {
+		return
+	}
+	o.Value.Encode(e)
+}
+
+// Decode decodes RecoverStakeAction from json.
+func (o *OptRecoverStakeAction) Decode(d *jx.Decoder) error {
+	if o == nil {
+		return errors.New("invalid: unable to decode OptRecoverStakeAction to nil")
+	}
+	o.Set = true
+	if err := o.Value.Decode(d); err != nil {
+		return err
+	}
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s OptRecoverStakeAction) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *OptRecoverStakeAction) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -12353,6 +12570,119 @@ func (s RawAccountExtraBalance) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *RawAccountExtraBalance) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s RecoverStakeAction) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s RecoverStakeAction) encodeFields(e *jx.Encoder) {
+	{
+
+		e.FieldStart("amount")
+		e.Int64(s.Amount)
+	}
+	{
+
+		e.FieldStart("staker")
+		s.Staker.Encode(e)
+	}
+}
+
+var jsonFieldsNameOfRecoverStakeAction = [2]string{
+	0: "amount",
+	1: "staker",
+}
+
+// Decode decodes RecoverStakeAction from json.
+func (s *RecoverStakeAction) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode RecoverStakeAction to nil")
+	}
+	var requiredBitSet [1]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "amount":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				v, err := d.Int64()
+				s.Amount = int64(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"amount\"")
+			}
+		case "staker":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				if err := s.Staker.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"staker\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode RecoverStakeAction")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00000011,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfRecoverStakeAction) {
+					name = jsonFieldsNameOfRecoverStakeAction[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s RecoverStakeAction) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *RecoverStakeAction) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }

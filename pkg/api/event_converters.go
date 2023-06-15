@@ -28,6 +28,8 @@ const (
 	jettonTransferMessageID = "jettonTransferAction"
 	smartContractMessageID  = "smartContractExecAction"
 	subscriptionMessageID   = "subscriptionAction"
+	depositStakeMessageID   = "depositStakeAction"
+	recoverStakeMessageID   = "recoverStakeAction"
 )
 
 func distinctAccounts(book addressBook, accounts ...*tongo.AccountID) []oas.AccountAddress {
@@ -266,6 +268,40 @@ func (h Handler) convertAction(ctx context.Context, a bath.Action, acceptLanguag
 			Seller:      convertAccountAddress(a.NftPurchase.Seller, h.addressBook),
 			Buyer:       convertAccountAddress(a.NftPurchase.Buyer, h.addressBook),
 		})
+	case bath.DepositStake:
+		value := utils.HumanFriendlyCoinsRepr(a.DepositStake.Amount)
+		action.DepositStake.SetTo(oas.DepositStakeAction{
+			Amount: a.DepositStake.Amount,
+			Staker: convertAccountAddress(a.DepositStake.Staker, h.addressBook),
+		})
+		action.SimplePreview = oas.ActionSimplePreview{
+			Name: "Deposit Stake",
+			Description: i18n.T(acceptLanguage.Value, i18n.C{
+				MessageID: depositStakeMessageID,
+				TemplateData: map[string]interface{}{
+					"Amount": value,
+				},
+			}),
+			Value:    oas.NewOptString(value),
+			Accounts: distinctAccounts(h.addressBook, &a.DepositStake.Elector, &a.DepositStake.Staker),
+		}
+	case bath.RecoverStake:
+		value := utils.HumanFriendlyCoinsRepr(a.RecoverStake.Amount)
+		action.RecoverStake.SetTo(oas.RecoverStakeAction{
+			Amount: a.RecoverStake.Amount,
+			Staker: convertAccountAddress(a.RecoverStake.Staker, h.addressBook),
+		})
+		action.SimplePreview = oas.ActionSimplePreview{
+			Name: "Recover Stake",
+			Description: i18n.T(acceptLanguage.Value, i18n.C{
+				MessageID: recoverStakeMessageID,
+				TemplateData: map[string]interface{}{
+					"Amount": value,
+				},
+			}),
+			Value:    oas.NewOptString(value),
+			Accounts: distinctAccounts(h.addressBook, &a.RecoverStake.Elector, &a.RecoverStake.Staker),
+		}
 	case bath.SmartContractExec:
 		op := "Call"
 		if a.SmartContractExec.Operation != "" {

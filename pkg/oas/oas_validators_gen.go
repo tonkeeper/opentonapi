@@ -391,6 +391,10 @@ func (s ActionType) Validate() error {
 		return nil
 	case "NftPurchase":
 		return nil
+	case "DepositStake":
+		return nil
+	case "RecoverStake":
+		return nil
 	case "SmartContractExec":
 		return nil
 	case "Unknown":
