@@ -530,6 +530,8 @@ type Action struct {
 	UnSubscribe       OptUnSubscriptionAction  `json:"UnSubscribe"`
 	AuctionBid        OptAuctionBidAction      `json:"AuctionBid"`
 	NftPurchase       OptNftPurchaseAction     `json:"NftPurchase"`
+	DepositStake      OptDepositStakeAction    `json:"DepositStake"`
+	RecoverStake      OptRecoverStakeAction    `json:"RecoverStake"`
 	SmartContractExec OptSmartContractAction   `json:"SmartContractExec"`
 	SimplePreview     ActionSimplePreview      `json:"simple_preview"`
 }
@@ -582,6 +584,16 @@ func (s Action) GetAuctionBid() OptAuctionBidAction {
 // GetNftPurchase returns the value of NftPurchase.
 func (s Action) GetNftPurchase() OptNftPurchaseAction {
 	return s.NftPurchase
+}
+
+// GetDepositStake returns the value of DepositStake.
+func (s Action) GetDepositStake() OptDepositStakeAction {
+	return s.DepositStake
+}
+
+// GetRecoverStake returns the value of RecoverStake.
+func (s Action) GetRecoverStake() OptRecoverStakeAction {
+	return s.RecoverStake
 }
 
 // GetSmartContractExec returns the value of SmartContractExec.
@@ -642,6 +654,16 @@ func (s *Action) SetAuctionBid(val OptAuctionBidAction) {
 // SetNftPurchase sets the value of NftPurchase.
 func (s *Action) SetNftPurchase(val OptNftPurchaseAction) {
 	s.NftPurchase = val
+}
+
+// SetDepositStake sets the value of DepositStake.
+func (s *Action) SetDepositStake(val OptDepositStakeAction) {
+	s.DepositStake = val
+}
+
+// SetRecoverStake sets the value of RecoverStake.
+func (s *Action) SetRecoverStake(val OptRecoverStakeAction) {
+	s.RecoverStake = val
 }
 
 // SetSmartContractExec sets the value of SmartContractExec.
@@ -805,6 +827,8 @@ const (
 	ActionTypeUnSubscribe       ActionType = "UnSubscribe"
 	ActionTypeAuctionBid        ActionType = "AuctionBid"
 	ActionTypeNftPurchase       ActionType = "NftPurchase"
+	ActionTypeDepositStake      ActionType = "DepositStake"
+	ActionTypeRecoverStake      ActionType = "RecoverStake"
 	ActionTypeSmartContractExec ActionType = "SmartContractExec"
 	ActionTypeUnknown           ActionType = "Unknown"
 )
@@ -1506,6 +1530,32 @@ func (s *CreditPhase) SetFeesCollected(val int64) {
 // SetCredit sets the value of Credit.
 func (s *CreditPhase) SetCredit(val int64) {
 	s.Credit = val
+}
+
+// Ref: #/components/schemas/DepositStakeAction
+type DepositStakeAction struct {
+	Amount int64          `json:"amount"`
+	Staker AccountAddress `json:"staker"`
+}
+
+// GetAmount returns the value of Amount.
+func (s DepositStakeAction) GetAmount() int64 {
+	return s.Amount
+}
+
+// GetStaker returns the value of Staker.
+func (s DepositStakeAction) GetStaker() AccountAddress {
+	return s.Staker
+}
+
+// SetAmount sets the value of Amount.
+func (s *DepositStakeAction) SetAmount(val int64) {
+	s.Amount = val
+}
+
+// SetStaker sets the value of Staker.
+func (s *DepositStakeAction) SetStaker(val AccountAddress) {
+	s.Staker = val
 }
 
 // Ref: #/components/schemas/DnsExpiring
@@ -3774,6 +3824,52 @@ func (o OptCreditPhase) Or(d CreditPhase) CreditPhase {
 	return d
 }
 
+// NewOptDepositStakeAction returns new OptDepositStakeAction with value set to v.
+func NewOptDepositStakeAction(v DepositStakeAction) OptDepositStakeAction {
+	return OptDepositStakeAction{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptDepositStakeAction is optional DepositStakeAction.
+type OptDepositStakeAction struct {
+	Value DepositStakeAction
+	Set   bool
+}
+
+// IsSet returns true if OptDepositStakeAction was set.
+func (o OptDepositStakeAction) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptDepositStakeAction) Reset() {
+	var v DepositStakeAction
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptDepositStakeAction) SetTo(v DepositStakeAction) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptDepositStakeAction) Get() (v DepositStakeAction, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptDepositStakeAction) Or(d DepositStakeAction) DepositStakeAction {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptGetAccountsReq returns new OptGetAccountsReq with value set to v.
 func NewOptGetAccountsReq(v GetAccountsReq) OptGetAccountsReq {
 	return OptGetAccountsReq{
@@ -4366,6 +4462,52 @@ func (o OptRawAccountExtraBalance) Get() (v RawAccountExtraBalance, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptRawAccountExtraBalance) Or(d RawAccountExtraBalance) RawAccountExtraBalance {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptRecoverStakeAction returns new OptRecoverStakeAction with value set to v.
+func NewOptRecoverStakeAction(v RecoverStakeAction) OptRecoverStakeAction {
+	return OptRecoverStakeAction{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptRecoverStakeAction is optional RecoverStakeAction.
+type OptRecoverStakeAction struct {
+	Value RecoverStakeAction
+	Set   bool
+}
+
+// IsSet returns true if OptRecoverStakeAction was set.
+func (o OptRecoverStakeAction) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptRecoverStakeAction) Reset() {
+	var v RecoverStakeAction
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptRecoverStakeAction) SetTo(v RecoverStakeAction) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptRecoverStakeAction) Get() (v RecoverStakeAction, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptRecoverStakeAction) Or(d RecoverStakeAction) RecoverStakeAction {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -5195,6 +5337,32 @@ func (s *RawAccountExtraBalance) init() RawAccountExtraBalance {
 		*s = m
 	}
 	return m
+}
+
+// Ref: #/components/schemas/RecoverStakeAction
+type RecoverStakeAction struct {
+	Amount int64          `json:"amount"`
+	Staker AccountAddress `json:"staker"`
+}
+
+// GetAmount returns the value of Amount.
+func (s RecoverStakeAction) GetAmount() int64 {
+	return s.Amount
+}
+
+// GetStaker returns the value of Staker.
+func (s RecoverStakeAction) GetStaker() AccountAddress {
+	return s.Staker
+}
+
+// SetAmount sets the value of Amount.
+func (s *RecoverStakeAction) SetAmount(val int64) {
+	s.Amount = val
+}
+
+// SetStaker sets the value of Staker.
+func (s *RecoverStakeAction) SetStaker(val AccountAddress) {
+	s.Staker = val
 }
 
 // Ref: #/components/schemas/Refund

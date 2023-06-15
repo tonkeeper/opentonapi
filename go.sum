@@ -268,10 +268,8 @@ github.com/stretchr/testify v1.8.1 h1:w7B6lhMri9wdJUVmEZPGGhZzrYTPvgJArz7wNPgYKs
 github.com/stretchr/testify v1.8.1/go.mod h1:w2LPCIKwWwSfY2zedu0+kehJoqGctiVI29o6fzry7u4=
 github.com/tonkeeper/scam_backoffice_rules v0.0.0-20230413094040-a66ab71fb269 h1:roJPVpmFnUZX6YCUqzoD5+0+Z2ruuuXmxWKS+IH3O2s=
 github.com/tonkeeper/scam_backoffice_rules v0.0.0-20230413094040-a66ab71fb269/go.mod h1:VGp8QednbWkKHcpQVlWyO0XSqAA0cR6d9wEdrDmHbbA=
-github.com/tonkeeper/tongo v1.1.2-0.20230613142834-d288ff73f9f6 h1:+j84fDe+Gol48eBFcYI5IqKiKjLVfZSalpzWRGf3rus=
-github.com/tonkeeper/tongo v1.1.2-0.20230613142834-d288ff73f9f6/go.mod h1:LdOBjpUz6vLp1EdX3E0XLNks9YI5XMSqaQahfOMrBEY=
-github.com/tonkeeper/tongo v1.1.2-0.20230614170918-21867e935297 h1:dH9HmZUn/l+93SeDrLHxzEqod+OdX8313gp/NR+WECE=
-github.com/tonkeeper/tongo v1.1.2-0.20230614170918-21867e935297/go.mod h1:LdOBjpUz6vLp1EdX3E0XLNks9YI5XMSqaQahfOMrBEY=
+github.com/tonkeeper/tongo v1.1.2-0.20230614212647-93fc48518802 h1:XG9ic1xSrs6a5qmrEZWQXRZ97X7SofJ16EhX1fbJ0os=
+github.com/tonkeeper/tongo v1.1.2-0.20230614212647-93fc48518802/go.mod h1:LdOBjpUz6vLp1EdX3E0XLNks9YI5XMSqaQahfOMrBEY=
 github.com/valyala/bytebufferpool v1.0.0 h1:GqA5TC/0021Y/b9FG4Oi9Mr3q7XYx6KllzawFIhcdPw=
 github.com/valyala/bytebufferpool v1.0.0/go.mod h1:6bBcMArwyJ5K/AmCkWv1jt77kVWyCJ6HpOuEn7z0Csc=
 github.com/valyala/fasttemplate v1.2.1/go.mod h1:KHLXt3tVN2HBp8eijSv/kGJopbvo7S+qRAEEKiv+SiQ=
@@ -318,12 +316,8 @@ golang.org/x/exp v0.0.0-20191227195350-da58074b4299/go.mod h1:2RIsYlXP63K8oxa1u0
 golang.org/x/exp v0.0.0-20200119233911-0405dc783f0a/go.mod h1:2RIsYlXP63K8oxa1u096TMicItID8zy7Y6sNkU49FU4=
 golang.org/x/exp v0.0.0-20200207192155-f17229e696bd/go.mod h1:J/WKrq2StrnmMY6+EHIKF9dgMWnmCNThgcyBT1FY9mM=
 golang.org/x/exp v0.0.0-20200224162631-6cc2880d07d6/go.mod h1:3jZMyOhIsHpP37uCMkUooju7aAi5cS1Q23tOzKc+0MU=
-golang.org/x/exp v0.0.0-20221006183845-316c7553db56 h1:BrYbdKcCNjLyrN6aKqXy4hPw9qGI8IATkj4EWv9Q+kQ=
-golang.org/x/exp v0.0.0-20221006183845-316c7553db56/go.mod h1:cyybsKvd6eL0RnXn6p/Grxp8F5bW7iYuBgsNCOHpMYE=
 golang.org/x/exp v0.0.0-20230116083435-1de6713980de h1:DBWn//IJw30uYCgERoxCg84hWtA97F4wMiKOIh00Uf0=
 golang.org/x/exp v0.0.0-20230116083435-1de6713980de/go.mod h1:CxIveKay+FTh1D0yPZemJVgC/95VzuuOLq5Qi4xnoYc=
-golang.org/x/exp v0.0.0-20230522175609-2e198f4a06a1 h1:k/i9J1pBpvlfR+9QsetwPyERsqu1GIbi967PQMq3Ivc=
-golang.org/x/exp v0.0.0-20230522175609-2e198f4a06a1/go.mod h1:V1LtkGg67GoY2N1AnLN78QLrzxkLyJw7RJb1gzOOz9w=
 golang.org/x/image v0.0.0-20190227222117-0694c2d4d067/go.mod h1:kZ7UVZpmo3dzQBMxlp+ypCbDeSB+sBbTgSJuh5dn5js=
 golang.org/x/image v0.0.0-20190802002840-cff245a6509b/go.mod h1:FeLwcggjj3mMvU+oOTbSwawSJRM1uh48EjtB4UJZlP0=
 golang.org/x/lint v0.0.0-20181026193005-c67002cb31c3/go.mod h1:UVdnD1Gm6xHRNCYTkRU2/jEulfH38KcIWyp/GAMgvoE=

@@ -16,3 +16,9 @@ other = "Перевод NFT"
 
 [nftPurchaseAction]
 other = "Покупка NFT {{.Name}}"
+
+[depositStakeAction]
+other = "Стейкинг {{.Amount}}"
+
+[recoverStakeAction]
+other = "Вывод {{.Amount}}"

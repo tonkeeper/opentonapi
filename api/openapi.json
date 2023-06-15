@@ -694,6 +694,9 @@
      "ContractDeploy": {
       "$ref": "#/components/schemas/ContractDeployAction"
      },
+     "DepositStake": {
+      "$ref": "#/components/schemas/DepositStakeAction"
+     },
      "JettonTransfer": {
       "$ref": "#/components/schemas/JettonTransferAction"
      },
@@ -702,6 +705,9 @@
      },
      "NftPurchase": {
       "$ref": "#/components/schemas/NftPurchaseAction"
+     },
+     "RecoverStake": {
+      "$ref": "#/components/schemas/RecoverStakeAction"
      },
      "SmartContractExec": {
       "$ref": "#/components/schemas/SmartContractAction"
@@ -737,6 +743,8 @@
        "UnSubscribe",
        "AuctionBid",
        "NftPurchase",
+       "DepositStake",
+       "RecoverStake",
        "SmartContractExec",
        "Unknown"
       ],
@@ -1186,6 +1194,23 @@
     "required": [
      "fees_collected",
      "credit"
+    ],
+    "type": "object"
+   },
+   "DepositStakeAction": {
+    "properties": {
+     "amount": {
+      "example": 1660050553,
+      "format": "int64",
+      "type": "integer"
+     },
+     "staker": {
+      "$ref": "#/components/schemas/AccountAddress"
+     }
+    },
+    "required": [
+     "amount",
+     "staker"
     ],
     "type": "object"
    },
@@ -2199,6 +2224,23 @@
      "status",
      "last_transaction_lt",
      "storage"
+    ],
+    "type": "object"
+   },
+   "RecoverStakeAction": {
+    "properties": {
+     "amount": {
+      "example": 1660050553,
+      "format": "int64",
+      "type": "integer"
+     },
+     "staker": {
+      "$ref": "#/components/schemas/AccountAddress"
+     }
+    },
+    "required": [
+     "amount",
+     "staker"
     ],
     "type": "object"
    },
