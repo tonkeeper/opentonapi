@@ -3539,7 +3539,6 @@ components:
             required:
               - expiring_at
               - name
-              - dns_item
             properties:
               expiring_at:
                 type: integer

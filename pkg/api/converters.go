@@ -85,14 +85,6 @@ func convertOptAccountAddress(id *tongo.AccountID, book addressBook) oas.OptAcco
 	return oas.OptAccountAddress{}
 }
 
-func pointerToOptString(s *string) oas.OptString {
-	var o oas.OptString
-	if s != nil {
-		o.SetTo(*s)
-	}
-	return o
-}
-
 func rewriteIfNotEmpty(src, dest string) string {
 	if dest != "" {
 		return dest

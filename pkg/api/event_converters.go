@@ -135,7 +135,7 @@ func (h Handler) convertAction(ctx context.Context, a bath.Action, acceptLanguag
 		}
 		action.TonTransfer.SetTo(oas.TonTransferAction{
 			Amount:    a.TonTransfer.Amount,
-			Comment:   pointerToOptString(a.TonTransfer.Comment),
+			Comment:   g.Opt(a.TonTransfer.Comment),
 			Recipient: convertAccountAddress(a.TonTransfer.Recipient, h.addressBook),
 			Sender:    convertAccountAddress(a.TonTransfer.Sender, h.addressBook),
 		})
@@ -181,7 +181,7 @@ func (h Handler) convertAction(ctx context.Context, a bath.Action, acceptLanguag
 			Jetton:           preview,
 			RecipientsWallet: a.JettonTransfer.RecipientsWallet.ToRaw(),
 			SendersWallet:    a.JettonTransfer.SendersWallet.ToRaw(),
-			Comment:          pointerToOptString(a.JettonTransfer.Comment),
+			Comment:          g.Opt(a.JettonTransfer.Comment),
 		})
 		if len(preview.Image) > 0 {
 			action.SimplePreview.ValueImage = oas.NewOptString(preview.Image)

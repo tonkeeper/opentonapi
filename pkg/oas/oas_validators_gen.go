@@ -594,8 +594,15 @@ func (s DnsExpiring) Validate() error {
 func (s DnsExpiringItemsItem) Validate() error {
 	var failures []validate.FieldError
 	if err := func() error {
-		if err := s.DNSItem.Validate(); err != nil {
-			return err
+		if s.DNSItem.Set {
+			if err := func() error {
+				if err := s.DNSItem.Value.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
 		}
 		return nil
 	}(); err != nil {

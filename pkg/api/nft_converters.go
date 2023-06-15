@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/tonkeeper/opentonapi/internal/g"
 
 	"github.com/go-faster/jx"
 	"github.com/tonkeeper/opentonapi/pkg/core"
@@ -18,7 +19,7 @@ func convertNFT(ctx context.Context, item core.NftItem, book addressBook, previe
 		Owner:    convertOptAccountAddress(item.OwnerAddress, book),
 		Verified: item.Verified,
 		Metadata: anyToJSONRawMap(item.Metadata, false),
-		DNS:      pointerToOptString(item.DNS),
+		DNS:      g.Opt(item.DNS),
 	}
 	if item.Sale != nil {
 		tokenName := "TON"

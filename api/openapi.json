@@ -1234,8 +1234,7 @@
        },
        "required": [
         "expiring_at",
-        "name",
-        "dns_item"
+        "name"
        ],
        "type": "object"
       },

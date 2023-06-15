@@ -24,3 +24,19 @@ func NilToNil[I any, O any](f func(i I) O, i *I) *O {
 	}
 	return Pointer(f(*i))
 }
+
+func Opt[T any](t *T) struct {
+	Value T
+	Set   bool
+} {
+	if t == nil {
+		return struct {
+			Value T
+			Set   bool
+		}{}
+	}
+	return struct {
+		Value T
+		Set   bool
+	}{Value: *t, Set: true}
+}

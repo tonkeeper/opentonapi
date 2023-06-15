@@ -4399,9 +4399,10 @@ func (s DnsExpiringItemsItem) encodeFields(e *jx.Encoder) {
 		e.Str(s.Name)
 	}
 	{
-
-		e.FieldStart("dns_item")
-		s.DNSItem.Encode(e)
+		if s.DNSItem.Set {
+			e.FieldStart("dns_item")
+			s.DNSItem.Encode(e)
+		}
 	}
 }
 
@@ -4445,8 +4446,8 @@ func (s *DnsExpiringItemsItem) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"name\"")
 			}
 		case "dns_item":
-			requiredBitSet[0] |= 1 << 2
 			if err := func() error {
+				s.DNSItem.Reset()
 				if err := s.DNSItem.Decode(d); err != nil {
 					return err
 				}
@@ -4464,7 +4465,7 @@ func (s *DnsExpiringItemsItem) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b00000111,
+		0b00000011,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.

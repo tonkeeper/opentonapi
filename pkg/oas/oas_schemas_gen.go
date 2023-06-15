@@ -1576,9 +1576,9 @@ func (s *DnsExpiring) SetItems(val []DnsExpiringItemsItem) {
 func (*DnsExpiring) getDnsExpiringRes() {}
 
 type DnsExpiringItemsItem struct {
-	ExpiringAt int64   `json:"expiring_at"`
-	Name       string  `json:"name"`
-	DNSItem    NftItem `json:"dns_item"`
+	ExpiringAt int64      `json:"expiring_at"`
+	Name       string     `json:"name"`
+	DNSItem    OptNftItem `json:"dns_item"`
 }
 
 // GetExpiringAt returns the value of ExpiringAt.
@@ -1592,7 +1592,7 @@ func (s DnsExpiringItemsItem) GetName() string {
 }
 
 // GetDNSItem returns the value of DNSItem.
-func (s DnsExpiringItemsItem) GetDNSItem() NftItem {
+func (s DnsExpiringItemsItem) GetDNSItem() OptNftItem {
 	return s.DNSItem
 }
 
@@ -1607,7 +1607,7 @@ func (s *DnsExpiringItemsItem) SetName(val string) {
 }
 
 // SetDNSItem sets the value of DNSItem.
-func (s *DnsExpiringItemsItem) SetDNSItem(val NftItem) {
+func (s *DnsExpiringItemsItem) SetDNSItem(val OptNftItem) {
 	s.DNSItem = val
 }
 
