@@ -84,8 +84,10 @@ func (h Handler) StakingPools(ctx context.Context, params oas.StakingPoolsParams
 		}
 	}
 	for _, p := range tfPools {
-		if availableFor != nil && !slices.Contains(participatePools, p.Address) && (p.Nominators >= p.MaxNominators || //hide nominators without slots
-			p.MinNominatorStake < 10_000_000_000_000) { //hide nominators with unsafe minimal stake
+		if availableFor != nil && !slices.Contains(participatePools, p.Address) &&
+			(p.Nominators >= p.MaxNominators || //hide nominators without slots
+				p.ValidatorShare < 4000 || //hide validators which take less than 40%
+				p.MinNominatorStake < 10_000_000_000_000) { //hide nominators with unsafe minimal stake
 			continue
 		}
 		info, _ := h.addressBook.GetTFPoolInfo(p.Address)
