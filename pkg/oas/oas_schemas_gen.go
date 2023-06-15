@@ -4934,6 +4934,8 @@ type PoolInfo struct {
 	CurrentNominators int `json:"current_nominators"`
 	// Maximum number of nominators.
 	MaxNominators int `json:"max_nominators"`
+	// For liquid staking master account of jetton.
+	LiquidJettonMaster OptString `json:"liquid_jetton_master"`
 }
 
 // GetAddress returns the value of Address.
@@ -4991,6 +4993,11 @@ func (s PoolInfo) GetMaxNominators() int {
 	return s.MaxNominators
 }
 
+// GetLiquidJettonMaster returns the value of LiquidJettonMaster.
+func (s PoolInfo) GetLiquidJettonMaster() OptString {
+	return s.LiquidJettonMaster
+}
+
 // SetAddress sets the value of Address.
 func (s *PoolInfo) SetAddress(val string) {
 	s.Address = val
@@ -5044,6 +5051,11 @@ func (s *PoolInfo) SetCurrentNominators(val int) {
 // SetMaxNominators sets the value of MaxNominators.
 func (s *PoolInfo) SetMaxNominators(val int) {
 	s.MaxNominators = val
+}
+
+// SetLiquidJettonMaster sets the value of LiquidJettonMaster.
+func (s *PoolInfo) SetLiquidJettonMaster(val OptString) {
+	s.LiquidJettonMaster = val
 }
 
 type PoolInfoImplementation string

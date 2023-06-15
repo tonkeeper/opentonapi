@@ -11,4 +11,4 @@ var TFPoolCodeHash = tongo.MustParseHash("9A3EC14BC098F6B44064C305222CAEA2800F17
 const LiquidImplementationsName = "Liquid staking"
 const LiquidImplementationsUrl = "https://ton.org"
 
-var TFLiquidPoolCodeHash = tongo.MustParseHash("e7a160ae9b4e86a406a3767e575c3d215c88181e9e10af1f1af4de62685cabbf")
+var TFLiquidPoolCodeHash = tongo.MustParseHash("e8eeae986d782a96eef432c45edd1f0a84b943416ccd8caa42118c0dc7b1d34a")

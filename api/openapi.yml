@@ -3422,6 +3422,10 @@ components:
           type: integer
           example: 100
           description: maximum number of nominators
+        liquid_jetton_master:
+          type: string
+          example: "0:4a91d32d0289bda9813ae00ff7640e6c38fdce76e4583dd6afc463b70c7d767c"
+          description: "for liquid staking master account of jetton"
     PoolImplementation:
       type: object
       required:

@@ -4,7 +4,7 @@ import (
 	"github.com/tonkeeper/tongo"
 )
 
-type WhalesNominator struct {
+type Nominator struct {
 	Pool                  tongo.AccountID
 	Member                tongo.AccountID
 	MemberBalance         int64

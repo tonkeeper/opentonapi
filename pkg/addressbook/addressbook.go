@@ -194,7 +194,7 @@ func NewAddressBook(logger *zap.Logger, addressPath, jettonPath, collectionPath 
 			collections[a] = i
 		}
 	}
-	go getGGWhitelist(collections)
+	go getGGWhitelist(collections, logger)
 	for _, v := range getPools(logger) {
 		a, err := tongo.ParseAccountID(v.Address)
 		if err != nil {
@@ -238,12 +238,12 @@ func downloadJson[T any](url string) ([]T, error) {
 	return data, nil
 }
 
-func getGGWhitelist(collections map[tongo.AccountID]KnownCollection) {
+func getGGWhitelist(collections map[tongo.AccountID]KnownCollection, logger *zap.Logger) {
 	client := graphql.NewClient("https://api.getgems.io/graphql", nil)
 	for {
 		addresses, err := _getGGWhitelist(client)
 		if err != nil {
-			fmt.Printf("get nft collection whitelist: %v\n", err)
+			logger.Info(fmt.Sprintf("get nft collection whitelist: %v", err))
 			time.Sleep(time.Minute * 3)
 			continue
 		}

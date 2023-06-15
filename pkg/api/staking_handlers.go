@@ -63,7 +63,7 @@ func (h Handler) StakingPoolInfo(ctx context.Context, params oas.StakingPoolInfo
 func (h Handler) StakingPools(ctx context.Context, params oas.StakingPoolsParams) (r oas.StakingPoolsRes, _ error) {
 	var result oas.StakingPoolsOK
 
-	tfPools, err := h.storage.GetTFPools(ctx)
+	tfPools, err := h.storage.GetTFPools(ctx, !params.IncludeUnverified.Value)
 	if err != nil {
 		return nil, err
 	}
@@ -107,7 +107,7 @@ func (h Handler) StakingPools(ctx context.Context, params oas.StakingPoolsParams
 		result.Pools = append(result.Pools, pool)
 	}
 
-	liquidPools, err := h.storage.GetLiquidPools(ctx)
+	liquidPools, err := h.storage.GetLiquidPools(ctx, !params.IncludeUnverified.Value)
 	if err != nil {
 		return nil, err
 	}
@@ -154,11 +154,27 @@ func (h Handler) PoolsByNominators(ctx context.Context, params oas.PoolsByNomina
 		}
 		return &oas.InternalError{Error: err.Error()}, nil
 	}
+	tfPools, err := h.storage.GetParticipatingInTfPools(ctx, accountID)
+	if err != nil {
+		if errors.Is(err, core.ErrEntityNotFound) {
+			return &oas.NotFound{Error: err.Error()}, nil
+		}
+		return &oas.InternalError{Error: err.Error()}, nil
+	}
 	var result oas.AccountStaking
 	for _, w := range whalesPools {
 		if _, ok := references.WhalesPools[w.Pool]; !ok {
 			continue //skip unknown pools
 		}
+		result.Pools = append(result.Pools, oas.AccountStakingInfo{
+			Pool:            w.Pool.ToRaw(),
+			Amount:          w.MemberBalance,
+			PendingDeposit:  w.MemberPendingDeposit,
+			PendingWithdraw: w.MemberPendingWithdraw,
+			ReadyWithdraw:   w.MemberWithdraw,
+		})
+	}
+	for _, w := range tfPools {
 		result.Pools = append(result.Pools, oas.AccountStakingInfo{
 			Pool:            w.Pool.ToRaw(),
 			Amount:          w.MemberBalance,

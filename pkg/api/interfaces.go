@@ -37,13 +37,14 @@ type storage interface {
 	// GetStorageProviders returns a list of storage contracts deployed to the blockchain.
 	GetStorageProviders(ctx context.Context) ([]core.StorageProvider, error)
 
-	GetParticipatingInWhalesPools(ctx context.Context, id tongo.AccountID) ([]core.WhalesNominator, error)
-	GetWhalesPoolMemberInfo(ctx context.Context, pool, member tongo.AccountID) (core.WhalesNominator, error)
+	GetParticipatingInWhalesPools(ctx context.Context, id tongo.AccountID) ([]core.Nominator, error)
+	GetWhalesPoolMemberInfo(ctx context.Context, pool, member tongo.AccountID) (core.Nominator, error)
 	GetWhalesPoolInfo(ctx context.Context, id tongo.AccountID) (abi.GetParams_WhalesNominatorResult, abi.GetStakingStatusResult, int, error)
-	GetTFPools(ctx context.Context) ([]core.TFPool, error)
+	GetParticipatingInTfPools(ctx context.Context, member tongo.AccountID) ([]core.Nominator, error)
+	GetTFPools(ctx context.Context, onlyVerified bool) ([]core.TFPool, error)
 	GetTFPool(ctx context.Context, pool tongo.AccountID) (core.TFPool, error)
 	GetLiquidPool(ctx context.Context, pool tongo.AccountID) (core.LiquidPool, error)
-	GetLiquidPools(ctx context.Context) ([]core.LiquidPool, error)
+	GetLiquidPools(ctx context.Context, onlyVerified bool) ([]core.LiquidPool, error)
 
 	GetNFTs(ctx context.Context, accounts []tongo.AccountID) ([]core.NftItem, error)
 	SearchNFTs(ctx context.Context,
