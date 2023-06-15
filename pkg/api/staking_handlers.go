@@ -62,22 +62,29 @@ func (h Handler) StakingPoolInfo(ctx context.Context, params oas.StakingPoolInfo
 
 func (h Handler) StakingPools(ctx context.Context, params oas.StakingPoolsParams) (r oas.StakingPoolsRes, _ error) {
 	var result oas.StakingPoolsOK
-
 	tfPools, err := h.storage.GetTFPools(ctx, !params.IncludeUnverified.Value)
 	if err != nil {
 		return nil, err
 	}
 	var minTF, minWhales int64
 	var availableFor *tongo.AccountID
+	var participatePools []tongo.AccountID
 	if params.AvailableFor.IsSet() {
 		a, err := tongo.ParseAccountID(params.AvailableFor.Value)
 		if err != nil {
 			return &oas.BadRequest{Error: err.Error()}, nil
 		}
 		availableFor = &a
+		pools, err := h.storage.GetParticipatingInTfPools(ctx, a)
+		if err != nil {
+			return nil, err
+		}
+		for _, p := range pools {
+			participatePools = append(participatePools, p.Pool)
+		}
 	}
 	for _, p := range tfPools {
-		if availableFor != nil && (p.Nominators >= p.MaxNominators || //hide nominators without slots
+		if availableFor != nil && !slices.Contains(participatePools, p.Address) && (p.Nominators >= p.MaxNominators || //hide nominators without slots
 			p.MinNominatorStake < 10_000_000_000_000) { //hide nominators with unsafe minimal stake
 			continue
 		}
