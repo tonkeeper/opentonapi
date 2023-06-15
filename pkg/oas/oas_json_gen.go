@@ -11697,9 +11697,15 @@ func (s PoolInfo) encodeFields(e *jx.Encoder) {
 		e.FieldStart("max_nominators")
 		e.Int(s.MaxNominators)
 	}
+	{
+		if s.LiquidJettonMaster.Set {
+			e.FieldStart("liquid_jetton_master")
+			s.LiquidJettonMaster.Encode(e)
+		}
+	}
 }
 
-var jsonFieldsNameOfPoolInfo = [11]string{
+var jsonFieldsNameOfPoolInfo = [12]string{
 	0:  "address",
 	1:  "name",
 	2:  "total_amount",
@@ -11711,6 +11717,7 @@ var jsonFieldsNameOfPoolInfo = [11]string{
 	8:  "verified",
 	9:  "current_nominators",
 	10: "max_nominators",
+	11: "liquid_jetton_master",
 }
 
 // Decode decodes PoolInfo from json.
@@ -11851,6 +11858,16 @@ func (s *PoolInfo) Decode(d *jx.Decoder) error {
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"max_nominators\"")
+			}
+		case "liquid_jetton_master":
+			if err := func() error {
+				s.LiquidJettonMaster.Reset()
+				if err := s.LiquidJettonMaster.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"liquid_jetton_master\"")
 			}
 		default:
 			return d.Skip()

@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"github.com/tonkeeper/tongo/tlb"
+	"math/big"
 
 	"github.com/prometheus/client_golang/prometheus"
 
@@ -13,23 +15,23 @@ import (
 	"github.com/tonkeeper/tongo/abi"
 )
 
-func (s *LiteStorage) GetWhalesPoolMemberInfo(ctx context.Context, pool, member tongo.AccountID) (core.WhalesNominator, error) {
+func (s *LiteStorage) GetWhalesPoolMemberInfo(ctx context.Context, pool, member tongo.AccountID) (core.Nominator, error) {
 	timer := prometheus.NewTimer(prometheus.ObserverFunc(func(v float64) {
 		storageTimeHistogramVec.WithLabelValues("get_whales_pool_member_info").Observe(v)
 	}))
 	defer timer.ObserveDuration()
 	_, value, err := abi.GetMember(ctx, s.client, pool, member.ToMsgAddress())
 	if err != nil {
-		return core.WhalesNominator{}, err
+		return core.Nominator{}, err
 	}
 	m, ok := value.(abi.GetMember_WhalesNominatorResult)
 	if !ok {
-		return core.WhalesNominator{}, fmt.Errorf("invalid result")
+		return core.Nominator{}, fmt.Errorf("invalid result")
 	}
 	if m.MemberBalance+m.MemberWithdraw+m.MemberPendingWithdraw+m.MemberPendingDeposit == 0 {
-		return core.WhalesNominator{}, fmt.Errorf("not pool member")
+		return core.Nominator{}, fmt.Errorf("not pool member")
 	}
-	return core.WhalesNominator{
+	return core.Nominator{
 		Pool:                  pool,
 		Member:                member,
 		MemberBalance:         m.MemberBalance,
@@ -39,18 +41,49 @@ func (s *LiteStorage) GetWhalesPoolMemberInfo(ctx context.Context, pool, member 
 	}, nil
 }
 
-func (s *LiteStorage) GetParticipatingInWhalesPools(ctx context.Context, member tongo.AccountID) ([]core.WhalesNominator, error) {
+func (s *LiteStorage) GetParticipatingInWhalesPools(ctx context.Context, member tongo.AccountID) ([]core.Nominator, error) {
 	timer := prometheus.NewTimer(prometheus.ObserverFunc(func(v float64) {
 		storageTimeHistogramVec.WithLabelValues("get_participating_in_whales_pool").Observe(v)
 	}))
 	defer timer.ObserveDuration()
-	var result []core.WhalesNominator
+	var result []core.Nominator
 	for k := range references.WhalesPools {
 		info, err := s.GetWhalesPoolMemberInfo(ctx, k, member)
 		if err != nil {
 			continue
 		}
 		result = append(result, info)
+	}
+	return result, nil
+}
+
+func (s *LiteStorage) GetParticipatingInTfPools(ctx context.Context, member tongo.AccountID) ([]core.Nominator, error) {
+	timer := prometheus.NewTimer(prometheus.ObserverFunc(func(v float64) {
+		storageTimeHistogramVec.WithLabelValues("get_participating_in_tf_pools").Observe(v)
+	}))
+	defer timer.ObserveDuration()
+	var result []core.Nominator
+	fmt.Println(len(s.knownAccounts["tf_pools"]))
+	for _, a := range s.knownAccounts["tf_pools"] {
+		var i big.Int
+		i.SetBytes(member.Address[:])
+		_, p, err := abi.GetNominatorData(ctx, s.client, a, tlb.Int257(i))
+		if err != nil {
+			continue
+		}
+		if data, ok := p.(abi.GetNominatorDataResult); ok {
+			nominator := core.Nominator{
+				Pool:                 a,
+				Member:               member,
+				MemberPendingDeposit: int64(data.PendingDepositAmount),
+				MemberBalance:        int64(data.Amount),
+			}
+			if data.WithdrawFound {
+				nominator.MemberPendingWithdraw = nominator.MemberBalance
+				nominator.MemberBalance = 0
+			}
+			result = append(result, nominator)
+		}
 	}
 	return result, nil
 }
@@ -120,7 +153,7 @@ func (s *LiteStorage) GetTFPool(ctx context.Context, pool tongo.AccountID) (core
 		VerifiedSources:   bytes.Equal(hash, references.TFPoolCodeHash[:]),
 	}, nil
 }
-func (s *LiteStorage) GetTFPools(ctx context.Context) ([]core.TFPool, error) {
+func (s *LiteStorage) GetTFPools(ctx context.Context, onlyVerified bool) ([]core.TFPool, error) {
 	var result []core.TFPool
 	for _, a := range s.knownAccounts["tf_pools"] {
 		p, err := s.GetTFPool(ctx, a)
@@ -153,6 +186,6 @@ func (s *LiteStorage) GetLiquidPool(ctx context.Context, pool tongo.AccountID) (
 	}, err
 }
 
-func (s *LiteStorage) GetLiquidPools(ctx context.Context) ([]core.LiquidPool, error) {
+func (s *LiteStorage) GetLiquidPools(ctx context.Context, onlyVerified bool) ([]core.LiquidPool, error) {
 	return nil, nil
 }
