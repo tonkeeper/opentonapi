@@ -241,6 +241,34 @@ func (h Handler) GetPublicKeyByAccountID(ctx context.Context, params oas.GetPubl
 	return &oas.GetPublicKeyByAccountIDOK{PublicKey: hex.EncodeToString(pubKey)}, nil
 }
 
+func (h Handler) GetSubscriptionsByAccount(ctx context.Context, params oas.GetSubscriptionsByAccountParams) (res oas.GetSubscriptionsByAccountRes, err error) {
+	accountID, err := tongo.ParseAccountID(params.AccountID)
+	if err != nil {
+		return &oas.BadRequest{Error: err.Error()}, nil
+	}
+	subscriptions, err := h.storage.GetSubscriptions(ctx, accountID)
+	if err != nil {
+		return &oas.InternalError{Error: err.Error()}, nil
+	}
+	var response oas.Subscriptions
+	for _, subscription := range subscriptions {
+		response.Subscriptions = append(response.Subscriptions, oas.Subscription{
+			Address:            subscription.AccountID.ToRaw(),
+			WalletAddress:      subscription.WalletAccountID.ToRaw(),
+			BeneficiaryAddress: subscription.BeneficiaryAccountID.ToRaw(),
+			Amount:             subscription.Amount,
+			Period:             subscription.Period,
+			StartTime:          subscription.StartTime,
+			Timeout:            subscription.Timeout,
+			LastPaymentTime:    subscription.LastPaymentTime,
+			LastRequestTime:    subscription.LastRequestTime,
+			SubscriptionID:     subscription.SubscriptionID,
+			FailedAttempts:     subscription.FailedAttempts,
+		})
+	}
+	return &response, nil
+}
+
 func pubkeyFromCodeData(code, data []byte) ([]byte, error) {
 	cells, err := boc.DeserializeBoc(code)
 	if err != nil {

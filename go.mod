@@ -18,6 +18,7 @@ require (
 	github.com/prometheus/client_golang v1.14.0
 	github.com/puzpuzpuz/xsync/v2 v2.4.0
 	github.com/shopspring/decimal v1.3.1
+	github.com/shurcooL/graphql v0.0.0-20220606043923-3cf50f8a0a29
 	github.com/sourcegraph/conc v0.3.0
 	github.com/stretchr/testify v1.8.1
 	github.com/tonkeeper/scam_backoffice_rules v0.0.0-20230413094040-a66ab71fb269
@@ -27,6 +28,7 @@ require (
 	go.opentelemetry.io/otel/trace v1.11.1
 	go.uber.org/multierr v1.9.0
 	go.uber.org/zap v1.24.0
+	golang.org/x/exp v0.0.0-20230116083435-1de6713980de
 	golang.org/x/text v0.9.0
 	gopkg.in/yaml.v3 v3.0.1
 )
@@ -54,7 +56,6 @@ require (
 	github.com/prometheus/common v0.37.0 // indirect
 	github.com/prometheus/procfs v0.8.0 // indirect
 	github.com/segmentio/asm v1.2.0 // indirect
-	github.com/shurcooL/graphql v0.0.0-20220606043923-3cf50f8a0a29 // indirect
 	github.com/snksoft/crc v1.1.0 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasttemplate v1.2.2 // indirect
