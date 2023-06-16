@@ -122,6 +122,8 @@ func FindTFNominatorAction(bubble *Bubble) bool {
 				}
 				return nil
 			})
+	default:
+		return false
 	}
 	newBubble.Info = BubbleTFNominator{
 		Command:  command,
