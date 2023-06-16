@@ -8,6 +8,8 @@ import (
 type TFCommand string
 
 const (
+	TfDepositStakeRequest            TFCommand = "TfDepositStakeRequest"
+	TfRecoverStakeRequest            TFCommand = "TfRecoverStakeRequest"
 	TfRequestWithdraw                TFCommand = "TfRequestWithdraw"
 	TfProcessPendingWithdrawRequests TFCommand = "TfProcessPendingWithdrawRequests"
 	TfDeposit                        TFCommand = "TfDeposit"
@@ -61,6 +63,10 @@ func FindTFNominatorAction(bubble *Bubble) bool {
 		ValueFlow: bubble.ValueFlow,
 	}
 	switch *bubbleTx.opCode {
+	case 0x4e73744b: // todo: replace with abi.ElectorNewStakeMsgOp
+		command = TfDepositStakeRequest
+	case 0x47657424: // todo: replace with abi.ElectorRecoverStake
+		command = TfRecoverStakeRequest
 	case 0:
 		if bubbleTx.decodedBody == nil {
 			return false
