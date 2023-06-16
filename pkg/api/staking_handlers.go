@@ -76,7 +76,7 @@ func (h Handler) StakingPools(ctx context.Context, params oas.StakingPoolsParams
 		}
 		availableFor = &a
 		pools, err := h.storage.GetParticipatingInTfPools(ctx, a)
-		if err != nil {
+		if err != nil && !errors.Is(err, core.ErrEntityNotFound) {
 			return nil, err
 		}
 		for _, p := range pools {
