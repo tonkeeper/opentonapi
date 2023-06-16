@@ -312,23 +312,35 @@ func (h Handler) convertAction(ctx context.Context, a bath.Action, acceptLanguag
 		if a.SmartContractExec.Operation != "" {
 			op = a.SmartContractExec.Operation
 		}
+		messageID := smartContractMessageID
+		switch a.SmartContractExec.Operation {
+		case string(bath.TfDeposit):
+			description := i18n.T(acceptLanguage.Value, i18n.C{
+				MessageID: tfDepositMessageID,
+			})
+			op = description
+		case string(bath.TfRequestWithdraw):
+			description := i18n.T(acceptLanguage.Value, i18n.C{
+				MessageID: tfRequestWithdrawMessageID,
+			})
+			op = description
+		case string(bath.TfUpdateValidatorSet):
+			description := i18n.T(acceptLanguage.Value, i18n.C{
+				MessageID: tfUpdateValidatorSetAction,
+			})
+			op = description
+		case string(bath.TfProcessPendingWithdrawRequests):
+			description := i18n.T(acceptLanguage.Value, i18n.C{
+				MessageID: tfProcessPendingWithdrawRequestsAction,
+			})
+			op = description
+		}
 		contractAction := oas.SmartContractAction{
 			Executor:    convertAccountAddress(a.SmartContractExec.Executor, h.addressBook),
 			Contract:    convertAccountAddress(a.SmartContractExec.Contract, h.addressBook),
 			TonAttached: a.SmartContractExec.TonAttached,
 			Operation:   op,
 			Refund:      oas.OptRefund{},
-		}
-		messageID := smartContractMessageID
-		switch a.SmartContractExec.Operation {
-		case string(bath.TfDeposit):
-			messageID = tfDepositMessageID
-		case string(bath.TfRequestWithdraw):
-			messageID = tfRequestWithdrawMessageID
-		case string(bath.TfUpdateValidatorSet):
-			messageID = tfUpdateValidatorSetAction
-		case string(bath.TfProcessPendingWithdrawRequests):
-			messageID = tfProcessPendingWithdrawRequestsAction
 		}
 		action.SimplePreview = oas.ActionSimplePreview{
 			Name: "Smart Contract Execution",
