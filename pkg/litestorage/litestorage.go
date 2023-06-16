@@ -8,13 +8,11 @@ import (
 	"math/big"
 	"time"
 
+	"github.com/avast/retry-go"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
-
-	"github.com/avast/retry-go"
 	"github.com/puzpuzpuz/xsync/v2"
 	"github.com/sourcegraph/conc/iter"
-	"github.com/tonkeeper/opentonapi/pkg/blockchain/indexer"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
 	"github.com/tonkeeper/tongo/config"
@@ -23,6 +21,7 @@ import (
 	"github.com/tonkeeper/tongo/tlb"
 	"go.uber.org/zap"
 
+	"github.com/tonkeeper/opentonapi/pkg/blockchain/indexer"
 	"github.com/tonkeeper/opentonapi/pkg/core"
 )
 
@@ -35,11 +34,25 @@ var storageTimeHistogramVec = promauto.NewHistogramVec(
 	[]string{"method"},
 )
 
+// inMsgCreatedLT is used as a key to look up a transaction's hash based on in msg's account and created lt.
+type inMsgCreatedLT struct {
+	account tongo.AccountID
+	lt      uint64
+}
+
+func extractInMsgCreatedLT(accountID tongo.AccountID, tx *tlb.Transaction) (inMsgCreatedLT, bool) {
+	if tx.Msgs.InMsg.Exists && tx.Msgs.InMsg.Value.Value.Info.IntMsgInfo != nil {
+		return inMsgCreatedLT{account: accountID, lt: tx.Msgs.InMsg.Value.Value.Info.IntMsgInfo.CreatedLt}, true
+	}
+	return inMsgCreatedLT{}, false
+}
+
 type LiteStorage struct {
 	logger                  *zap.Logger
 	client                  *liteapi.Client
 	jettonMetaCache         *xsync.MapOf[string, tep64.Metadata]
 	transactionsIndexByHash *xsync.MapOf[tongo.Bits256, *core.Transaction]
+	transactionsByInMsgLT   *xsync.MapOf[inMsgCreatedLT, tongo.Bits256]
 	blockCache              *xsync.MapOf[tongo.BlockIDExt, *tlb.Block]
 	accountInterfacesCache  *xsync.MapOf[tongo.AccountID, []abi.ContractInterface]
 	knownAccounts           map[string][]tongo.AccountID
@@ -51,6 +64,7 @@ type LiteStorage struct {
 
 type Options struct {
 	preloadAccounts []tongo.AccountID
+	preloadBlocks   []tongo.BlockID
 	servers         []config.LiteServer
 	tfPools         []tongo.AccountID
 	jettons         []tongo.AccountID
@@ -61,6 +75,12 @@ type Options struct {
 func WithPreloadAccounts(a []tongo.AccountID) Option {
 	return func(o *Options) {
 		o.preloadAccounts = a
+	}
+}
+
+func WithPreloadBlocks(ids []tongo.BlockID) Option {
+	return func(o *Options) {
+		o.preloadBlocks = ids
 	}
 }
 
@@ -120,12 +140,25 @@ func NewLiteStorage(log *zap.Logger, opts ...Option) (*LiteStorage, error) {
 		// TODO: implement expiration logic for the caches below.
 		jettonMetaCache:         xsync.NewMapOf[tep64.Metadata](),
 		transactionsIndexByHash: xsync.NewTypedMapOf[tongo.Bits256, *core.Transaction](hashBits256),
+		transactionsByInMsgLT:   xsync.NewTypedMapOf[inMsgCreatedLT, tongo.Bits256](hashInMsgCreatedLT),
 		blockCache:              xsync.NewTypedMapOf[tongo.BlockIDExt, *tlb.Block](hashBlockIDExt),
 		accountInterfacesCache:  xsync.NewTypedMapOf[tongo.AccountID, []abi.ContractInterface](hashAccountID),
 	}
 	storage.knownAccounts["tf_pools"] = o.tfPools
 	storage.knownAccounts["jettons"] = o.jettons
 
+	for _, a := range o.preloadAccounts {
+		storage.trackingAccounts[a] = struct{}{}
+	}
+
+	blockIterator := iter.Iterator[tongo.BlockID]{MaxGoroutines: storage.maxGoroutines}
+	blockIterator.ForEach(o.preloadBlocks, func(id *tongo.BlockID) {
+		if err := storage.preloadBlock(*id); err != nil {
+			log.Error("failed to preload block",
+				zap.String("blockID", id.String()),
+				zap.Error(err))
+		}
+	})
 	iterator := iter.Iterator[tongo.AccountID]{MaxGoroutines: storage.maxGoroutines}
 	iterator.ForEach(o.preloadAccounts, func(accountID *tongo.AccountID) {
 		if err := storage.preloadAccount(*accountID); err != nil {
@@ -134,9 +167,6 @@ func NewLiteStorage(log *zap.Logger, opts ...Option) (*LiteStorage, error) {
 				zap.Error(err))
 		}
 	})
-	for _, a := range o.preloadAccounts {
-		storage.trackingAccounts[a] = struct{}{}
-	}
 	go storage.run(o.blockCh)
 	return storage, nil
 }
@@ -158,6 +188,9 @@ func (s *LiteStorage) run(ch <-chan indexer.IDandBlock) {
 					continue
 				}
 				s.transactionsIndexByHash.Store(hash, transaction)
+				if createLT, ok := extractInMsgCreatedLT(accountID, tx); ok {
+					s.transactionsByInMsgLT.Store(createLT, hash)
+				}
 			}
 		}
 	}
@@ -225,9 +258,41 @@ func (s *LiteStorage) preloadAccount(a tongo.AccountID) error {
 		if err != nil {
 			return err
 		}
-		s.transactionsIndexByHash.Store(tongo.Bits256(tx.Hash()), t)
+		hash := tongo.Bits256(tx.Hash())
+		s.transactionsIndexByHash.Store(hash, t)
+		if createLT, ok := extractInMsgCreatedLT(a, &tx.Transaction); ok {
+			s.transactionsByInMsgLT.Store(createLT, hash)
+		}
 	}
+	return nil
+}
 
+func (s *LiteStorage) preloadBlock(id tongo.BlockID) error {
+	ctx := context.Background()
+	extID, _, err := s.client.LookupBlock(ctx, id, 1, nil, nil)
+	if err != nil {
+		return err
+	}
+	block, err := s.client.GetBlock(ctx, extID)
+	if err != nil {
+		return err
+	}
+	s.blockCache.Store(extID, &block)
+	for _, tx := range block.AllTransactions() {
+		accountID := tongo.AccountID{
+			Workchain: extID.Workchain,
+			Address:   tx.AccountAddr,
+		}
+		t, err := core.ConvertTransaction(extID.Workchain, tongo.Transaction{Transaction: *tx, BlockID: extID})
+		if err != nil {
+			return err
+		}
+		hash := tongo.Bits256(tx.Hash())
+		s.transactionsIndexByHash.Store(hash, t)
+		if createLT, ok := extractInMsgCreatedLT(accountID, tx); ok {
+			s.transactionsByInMsgLT.Store(createLT, hash)
+		}
+	}
 	return nil
 }
 
@@ -294,7 +359,15 @@ func (s *LiteStorage) GetBlockTransactions(ctx context.Context, id tongo.BlockID
 }
 
 func (s *LiteStorage) searchTxInCache(a tongo.AccountID, lt uint64) *core.Transaction {
-	return nil
+	hash, ok := s.transactionsByInMsgLT.Load(inMsgCreatedLT{account: a, lt: lt})
+	if !ok {
+		return nil
+	}
+	tx, ok := s.transactionsIndexByHash.Load(hash)
+	if !ok {
+		return nil
+	}
+	return tx
 }
 
 func (s *LiteStorage) GetStorageProviders(ctx context.Context) ([]core.StorageProvider, error) {

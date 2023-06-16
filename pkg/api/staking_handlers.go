@@ -7,8 +7,8 @@ import (
 	"github.com/tonkeeper/tongo"
 	"golang.org/x/exp/slices"
 
+	"github.com/tonkeeper/opentonapi/pkg/api/i18n"
 	"github.com/tonkeeper/opentonapi/pkg/core"
-	"github.com/tonkeeper/opentonapi/pkg/i18n"
 	"github.com/tonkeeper/opentonapi/pkg/oas"
 	"github.com/tonkeeper/opentonapi/pkg/references"
 )
