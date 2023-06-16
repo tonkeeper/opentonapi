@@ -31,10 +31,12 @@ const (
 	depositStakeMessageID   = "depositStakeAction"
 	recoverStakeMessageID   = "recoverStakeAction"
 
-	tfDepositMessageID                     = "tfDepositAction"
-	tfRequestWithdrawMessageID             = "tfRequestWithdrawAction"
-	tfProcessPendingWithdrawRequestsAction = "tfProcessPendingWithdrawRequestsAction"
-	tfUpdateValidatorSetAction             = "tfUpdateValidatorSetAction"
+	tfDepositMessageID                        = "tfDepositAction"
+	tfRequestWithdrawMessageID                = "tfRequestWithdrawAction"
+	tfProcessPendingWithdrawRequestsMessageID = "tfProcessPendingWithdrawRequestsAction"
+	tfUpdateValidatorSetMessageID             = "tfUpdateValidatorSetAction"
+	tfDepositStakeRequestMessageID            = "tfDepositStakeRequestAction"
+	tfRecoverStakeRequestMessageID            = "tfRecoverStakeRequestAction"
 )
 
 func distinctAccounts(book addressBook, accounts ...*tongo.AccountID) []oas.AccountAddress {
@@ -326,12 +328,22 @@ func (h Handler) convertAction(ctx context.Context, a bath.Action, acceptLanguag
 			op = description
 		case string(bath.TfUpdateValidatorSet):
 			description := i18n.T(acceptLanguage.Value, i18n.C{
-				MessageID: tfUpdateValidatorSetAction,
+				MessageID: tfUpdateValidatorSetMessageID,
 			})
 			op = description
 		case string(bath.TfProcessPendingWithdrawRequests):
 			description := i18n.T(acceptLanguage.Value, i18n.C{
-				MessageID: tfProcessPendingWithdrawRequestsAction,
+				MessageID: tfProcessPendingWithdrawRequestsMessageID,
+			})
+			op = description
+		case string(bath.TfDepositStakeRequest):
+			description := i18n.T(acceptLanguage.Value, i18n.C{
+				MessageID: tfDepositStakeRequestMessageID,
+			})
+			op = description
+		case string(bath.TfRecoverStakeRequest):
+			description := i18n.T(acceptLanguage.Value, i18n.C{
+				MessageID: tfRecoverStakeRequestMessageID,
 			})
 			op = description
 		}
