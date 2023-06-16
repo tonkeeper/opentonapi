@@ -84,7 +84,24 @@ func TestFindActions(t *testing.T) {
 			tongo.MustParseAccountID("0:84796c47a337716be8919014070016bd16498021b27325778394ea1893544ba6"),
 			tongo.MustParseAccountID("0:533f30de5722157b8471f5503b9fc5800c8d8397e79743f796b11e609adae69f"),
 			tongo.MustParseAccountID("0:fe98106451d88f11b91d962dbaf032ac43134cc8f3470fb683312c258971b9ed"),
-		}))
+			tongo.MustParseAccountID("Ef_Mkp0G2m4bB953bRjMdbHis2gA0TlY_Tzlhd8ETtFj1CZa"),
+		}),
+		litestorage.WithPreloadBlocks([]tongo.BlockID{
+			// tf nominator deposit
+			tongo.MustParseBlockID("(0,8000000000000000,35205653)"),
+			tongo.MustParseBlockID("(-1,8000000000000000,29537038)"),
+			// tf nominator process withdraws
+			tongo.MustParseBlockID("(-1,8000000000000000,28086143)"),
+			tongo.MustParseBlockID("(0,8000000000000000,33674077)"),
+			// tf nominator withdraw request
+			tongo.MustParseBlockID("(0,8000000000000000,35988956)"),
+			tongo.MustParseBlockID("(-1,8000000000000000,30311440)"),
+			tongo.MustParseBlockID("(0,8000000000000000,35988959)"),
+			// tf update validator set
+			tongo.MustParseBlockID("(-1,8000000000000000,30311911)"),
+		}),
+	)
+
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -152,6 +169,26 @@ func TestFindActions(t *testing.T) {
 			name:           "jetton transfer",
 			hash:           "75a0c3eef9a40479f3dd1fc82ff3728b9547a89044adb72862384c01428553bc",
 			filenamePrefix: "jetton-transfer",
+		},
+		{
+			name:           "tf nominator deposit",
+			hash:           "6e90e927c76d2eeed4e854586ea788ae6e7df50b72ca422fea2c396dd03b4c2f",
+			filenamePrefix: "tf-nominator-deposit",
+		},
+		{
+			name:           "tf nominator process withdraw requests",
+			hash:           "89eb69765b3b4cd2635657d60a0e6c8be9422095e0dff4b98469f40f8d0a5566",
+			filenamePrefix: "tf-nominator-process-withdraw-requests",
+		},
+		{
+			name:           "tf nominator withdraw request",
+			hash:           "67247836603b8e2b538520ad57661ad594dc6f4cf2740c0c3a3529a11ae14c23",
+			filenamePrefix: "tf-nominator-request-a-withdraw",
+		},
+		{
+			name:           "tf update validator set",
+			hash:           "8ee4410c8159287702c78a32e166a8566036c752092d1d8cc520e890e6181042",
+			filenamePrefix: "tf-update-validator-set",
 		},
 	} {
 		t.Run(c.name, func(t *testing.T) {

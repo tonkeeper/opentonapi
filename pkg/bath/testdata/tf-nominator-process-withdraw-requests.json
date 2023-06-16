@@ -1,0 +1,46 @@
+{
+   "Actions": [
+     {
+       "SmartContractExec": {
+         "TonAttached": 183890000,
+         "Executor": "-1:9af16c60bf0a73fc83d60e5d6b9225e692dda47148949670436c0f80af7f7646",
+         "Contract": "-1:be0454b023bb0d84ba3bf0f874b4da9d77af1d146a2aa467492bf3d05d22d434",
+         "Operation": "TfProcessPendingWithdrawRequests",
+         "Payload": ""
+       },
+       "Success": true,
+       "Type": "SmartContractExec"
+     },
+     {
+       "TonTransfer": {
+         "Amount": 9999990000000,
+         "Comment": null,
+         "Recipient": "0:d0a9dc6bb3bfcce8c99dcfb025b36f550784e4f6a62c80a839b81601a202950d",
+         "Sender": "-1:be0454b023bb0d84ba3bf0f874b4da9d77af1d146a2aa467492bf3d05d22d434",
+         "Refund": null
+       },
+       "Success": true,
+       "Type": "TonTransfer"
+     }
+   ],
+   "Accounts": [
+     {
+       "Account": "-1:9af16c60bf0a73fc83d60e5d6b9225e692dda47148949670436c0f80af7f7646",
+       "Ton": -183890000,
+       "Fee": 54720284,
+       "Jettons": null
+     },
+     {
+       "Account": "-1:be0454b023bb0d84ba3bf0f874b4da9d77af1d146a2aa467492bf3d05d22d434",
+       "Ton": -9999806110000,
+       "Fee": 193895761,
+       "Jettons": null
+     },
+     {
+       "Account": "0:d0a9dc6bb3bfcce8c99dcfb025b36f550784e4f6a62c80a839b81601a202950d",
+       "Ton": 9999990000000,
+       "Fee": 775309,
+       "Jettons": null
+     }
+   ]
+ }

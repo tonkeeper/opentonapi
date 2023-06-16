@@ -1,0 +1,29 @@
+{
+   "Actions": [
+     {
+       "SmartContractExec": {
+         "TonAttached": 10001000000000,
+         "Executor": "0:d0a9dc6bb3bfcce8c99dcfb025b36f550784e4f6a62c80a839b81601a202950d",
+         "Contract": "-1:cc929d06da6e1b07de776d18cc75b1e2b36800d13958fd3ce585df044ed163d4",
+         "Operation": "TfDeposit",
+         "Payload": ""
+       },
+       "Success": true,
+       "Type": "SmartContractExec"
+     }
+   ],
+   "Accounts": [
+     {
+       "Account": "-1:cc929d06da6e1b07de776d18cc75b1e2b36800d13958fd3ce585df044ed163d4",
+       "Ton": 10001000000000,
+       "Fee": 111384467,
+       "Jettons": null
+     },
+     {
+       "Account": "0:d0a9dc6bb3bfcce8c99dcfb025b36f550784e4f6a62c80a839b81601a202950d",
+       "Ton": -10001000000000,
+       "Fee": 14881798,
+       "Jettons": null
+     }
+   ]
+ }

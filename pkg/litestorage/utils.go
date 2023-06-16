@@ -1,6 +1,7 @@
 package litestorage
 
 import (
+	"fmt"
 	"hash/maphash"
 
 	"github.com/tonkeeper/tongo"
@@ -24,5 +25,12 @@ func hashBits256(seed maphash.Seed, s tongo.Bits256) uint64 {
 	var h maphash.Hash
 	h.SetSeed(seed)
 	h.WriteString(s.Hex())
+	return h.Sum64()
+}
+
+func hashInMsgCreatedLT(seed maphash.Seed, alt inMsgCreatedLT) uint64 {
+	var h maphash.Hash
+	h.SetSeed(seed)
+	h.WriteString(fmt.Sprintf("%s:%d", alt.account.String(), alt.lt))
 	return h.Sum64()
 }

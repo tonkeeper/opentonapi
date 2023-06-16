@@ -48,6 +48,7 @@ func TestLiteStorage_run(t *testing.T) {
 			s := &LiteStorage{
 				logger:                  zap.L(),
 				transactionsIndexByHash: xsync.NewTypedMapOf[tongo.Bits256, *core.Transaction](hashBits256),
+				transactionsByInMsgLT:   xsync.NewTypedMapOf[inMsgCreatedLT, tongo.Bits256](hashInMsgCreatedLT),
 				trackingAccounts:        tt.trackingAccounts,
 			}
 			ch := make(chan indexer.IDandBlock)

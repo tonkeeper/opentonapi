@@ -13,9 +13,9 @@ import (
 	"golang.org/x/exp/slices"
 
 	"github.com/tonkeeper/opentonapi/internal/g"
+	"github.com/tonkeeper/opentonapi/pkg/api/i18n"
 	"github.com/tonkeeper/opentonapi/pkg/bath"
 	"github.com/tonkeeper/opentonapi/pkg/core"
-	"github.com/tonkeeper/opentonapi/pkg/i18n"
 	"github.com/tonkeeper/opentonapi/pkg/oas"
 	"github.com/tonkeeper/opentonapi/pkg/wallet"
 )
@@ -30,6 +30,11 @@ const (
 	subscriptionMessageID   = "subscriptionAction"
 	depositStakeMessageID   = "depositStakeAction"
 	recoverStakeMessageID   = "recoverStakeAction"
+
+	tfDepositMessageID                     = "tfDepositAction"
+	tfRequestWithdrawMessageID             = "tfRequestWithdrawAction"
+	tfProcessPendingWithdrawRequestsAction = "tfProcessPendingWithdrawRequestsAction"
+	tfUpdateValidatorSetAction             = "tfUpdateValidatorSetAction"
 )
 
 func distinctAccounts(book addressBook, accounts ...*tongo.AccountID) []oas.AccountAddress {
@@ -314,10 +319,21 @@ func (h Handler) convertAction(ctx context.Context, a bath.Action, acceptLanguag
 			Operation:   op,
 			Refund:      oas.OptRefund{},
 		}
+		messageID := smartContractMessageID
+		switch a.SmartContractExec.Operation {
+		case string(bath.TfDeposit):
+			messageID = tfDepositMessageID
+		case string(bath.TfRequestWithdraw):
+			messageID = tfRequestWithdrawMessageID
+		case string(bath.TfUpdateValidatorSet):
+			messageID = tfUpdateValidatorSetAction
+		case string(bath.TfProcessPendingWithdrawRequests):
+			messageID = tfProcessPendingWithdrawRequestsAction
+		}
 		action.SimplePreview = oas.ActionSimplePreview{
 			Name: "Smart Contract Execution",
 			Description: i18n.T(acceptLanguage.Value, i18n.C{
-				MessageID: smartContractMessageID,
+				MessageID: messageID,
 			}),
 			Accounts: distinctAccounts(h.addressBook, &a.SmartContractExec.Executor, &a.SmartContractExec.Contract),
 		}
