@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	"github.com/ogen-go/ogen/middleware"
+	"github.com/ogen-go/ogen/ogenerrors"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	"go.uber.org/zap"
@@ -87,10 +88,17 @@ type errorJSON struct {
 
 func ogenErrorsHandler(ctx context.Context, w http.ResponseWriter, r *http.Request, err error) {
 	w.Header().Set("content-type", "application/json")
-	if errors.Is(err, ErrRateLimit) {
-		w.WriteHeader(http.StatusTooManyRequests)
-	} else {
-		w.WriteHeader(http.StatusInternalServerError)
+	switch err.(type) {
+	case *ogenerrors.DecodeParamsError:
+		// a quick workaround on Sunday
+		// todo: fix it properly
+		w.WriteHeader(http.StatusBadRequest)
+	default:
+		if errors.Is(err, ErrRateLimit) {
+			w.WriteHeader(http.StatusTooManyRequests)
+		} else {
+			w.WriteHeader(http.StatusInternalServerError)
+		}
 	}
 	json.NewEncoder(w).Encode(&errorJSON{Error: err.Error()})
 }
