@@ -7,6 +7,7 @@ import (
 
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
+	"github.com/tonkeeper/tongo/liteclient"
 	"github.com/tonkeeper/tongo/tep64"
 	"github.com/tonkeeper/tongo/tlb"
 
@@ -78,6 +79,26 @@ type storage interface {
 	GetLastConfig() (tlb.ConfigParams, error)
 
 	GetSeqno(ctx context.Context, account tongo.AccountID) (uint32, error)
+
+	liteStorageRaw
+}
+
+type liteStorageRaw interface {
+	GetMasterchainInfoRaw(ctx context.Context) (liteclient.LiteServerMasterchainInfoC, error)
+	GetMasterchainInfoExtRaw(ctx context.Context, mode uint32) (liteclient.LiteServerMasterchainInfoExtC, error)
+	GetTimeRaw(ctx context.Context) (uint32, error)
+	GetBlockRaw(ctx context.Context, id tongo.BlockIDExt) (liteclient.LiteServerBlockDataC, error)
+	GetStateRaw(ctx context.Context, id tongo.BlockIDExt) (liteclient.LiteServerBlockStateC, error)
+	GetBlockHeaderRaw(ctx context.Context, id tongo.BlockIDExt, mode uint32) (liteclient.LiteServerBlockHeaderC, error)
+	SendMessageRaw(ctx context.Context, payload []byte) (uint32, error)
+	GetAccountStateRaw(ctx context.Context, accountID tongo.AccountID) (liteclient.LiteServerAccountStateC, error)
+	GetShardInfoRaw(ctx context.Context, id tongo.BlockIDExt, workchain uint32, shard uint64, exact bool) (liteclient.LiteServerShardInfoC, error)
+	GetShardsAllInfo(ctx context.Context, id tongo.BlockIDExt) (liteclient.LiteServerAllShardsInfoC, error)
+	GetTransactionsRaw(ctx context.Context, count uint32, accountID tongo.AccountID, lt uint64, hash tongo.Bits256) (liteclient.LiteServerTransactionListC, error)
+	ListBlockTransactionsRaw(ctx context.Context, id tongo.BlockIDExt, mode, count uint32, after *liteclient.LiteServerTransactionId3C) (liteclient.LiteServerBlockTransactionsC, error)
+	GetBlockProofRaw(ctx context.Context, knownBlock tongo.BlockIDExt, targetBlock *tongo.BlockIDExt) (liteclient.LiteServerPartialBlockProofC, error)
+	GetConfigAllRaw(ctx context.Context, mode uint32, id tongo.BlockIDExt) (liteclient.LiteServerConfigInfoC, error)
+	GetShardBlockProofRaw(ctx context.Context, id tongo.BlockIDExt) (liteclient.LiteServerShardBlockProofC, error)
 }
 
 // chainState provides current blockchain state which change very rarely or slow like staking APY income

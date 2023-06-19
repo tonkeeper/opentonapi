@@ -112,6 +112,15 @@ func (UnimplementedHandler) GetAccountSeqno(ctx context.Context, params GetAccou
 	return r, ht.ErrNotImplemented
 }
 
+// GetAccountStateLiteServer implements getAccountStateLiteServer operation.
+//
+// Get account state.
+//
+// GET /v2/liteserver/get_account_state/{account_id}
+func (UnimplementedHandler) GetAccountStateLiteServer(ctx context.Context, params GetAccountStateLiteServerParams) (r GetAccountStateLiteServerRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // GetAccountTransactions implements getAccountTransactions operation.
 //
 // Get account transactions.
@@ -139,12 +148,48 @@ func (UnimplementedHandler) GetAllAuctions(ctx context.Context, params GetAllAuc
 	return r, ht.ErrNotImplemented
 }
 
+// GetAllShardsInfoLiteServer implements getAllShardsInfoLiteServer operation.
+//
+// Get all shards info.
+//
+// GET /v2/liteserver/get_all_shards_info/{block_id}
+func (UnimplementedHandler) GetAllShardsInfoLiteServer(ctx context.Context, params GetAllShardsInfoLiteServerParams) (r GetAllShardsInfoLiteServerRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // GetBlock implements getBlock operation.
 //
 // Get block data.
 //
 // GET /v2/blockchain/blocks/{block_id}
 func (UnimplementedHandler) GetBlock(ctx context.Context, params GetBlockParams) (r GetBlockRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// GetBlockHeaderLiteServer implements getBlockHeaderLiteServer operation.
+//
+// Get block header.
+//
+// GET /v2/liteserver/get_block_header/{block_id}
+func (UnimplementedHandler) GetBlockHeaderLiteServer(ctx context.Context, params GetBlockHeaderLiteServerParams) (r GetBlockHeaderLiteServerRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// GetBlockLiteServer implements getBlockLiteServer operation.
+//
+// Get block.
+//
+// GET /v2/liteserver/get_block/{block_id}
+func (UnimplementedHandler) GetBlockLiteServer(ctx context.Context, params GetBlockLiteServerParams) (r GetBlockLiteServerRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// GetBlockProofLiteServer implements getBlockProofLiteServer operation.
+//
+// Get block proof.
+//
+// GET /v2/liteserver/get_block_proof
+func (UnimplementedHandler) GetBlockProofLiteServer(ctx context.Context, params GetBlockProofLiteServerParams) (r GetBlockProofLiteServerRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -163,6 +208,15 @@ func (UnimplementedHandler) GetBlockTransactions(ctx context.Context, params Get
 //
 // GET /v2/blockchain/config
 func (UnimplementedHandler) GetConfig(ctx context.Context) (r GetConfigRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// GetConfigAllLiteServer implements getConfigAllLiteServer operation.
+//
+// Get config all.
+//
+// GET /v2/liteserver/get_config_all/{block_id}
+func (UnimplementedHandler) GetConfigAllLiteServer(ctx context.Context, params GetConfigAllLiteServerParams) (r GetConfigAllLiteServerRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -265,12 +319,39 @@ func (UnimplementedHandler) GetJettonsHistoryByID(ctx context.Context, params Ge
 	return r, ht.ErrNotImplemented
 }
 
+// GetListBlockTransactionsLiteServer implements getListBlockTransactionsLiteServer operation.
+//
+// Get list block transactions.
+//
+// GET /v2/liteserver/list_block_transactions/{block_id}
+func (UnimplementedHandler) GetListBlockTransactionsLiteServer(ctx context.Context, params GetListBlockTransactionsLiteServerParams) (r GetListBlockTransactionsLiteServerRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // GetMasterchainHead implements getMasterchainHead operation.
 //
 // Get last known masterchain block.
 //
 // GET /v2/blockchain/masterchain-head
 func (UnimplementedHandler) GetMasterchainHead(ctx context.Context) (r GetMasterchainHeadRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// GetMasterchainInfoExtLiteServer implements getMasterchainInfoExtLiteServer operation.
+//
+// Get masterchain info ext.
+//
+// GET /v2/liteserver/get_masterchain_info_ext
+func (UnimplementedHandler) GetMasterchainInfoExtLiteServer(ctx context.Context, params GetMasterchainInfoExtLiteServerParams) (r GetMasterchainInfoExtLiteServerRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// GetMasterchainInfoLiteServer implements getMasterchainInfoLiteServer operation.
+//
+// Get masterchain info.
+//
+// GET /v2/liteserver/get_masterchain_info
+func (UnimplementedHandler) GetMasterchainInfoLiteServer(ctx context.Context) (r GetMasterchainInfoLiteServerRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -355,6 +436,33 @@ func (UnimplementedHandler) GetSearchAccounts(ctx context.Context, params GetSea
 	return r, ht.ErrNotImplemented
 }
 
+// GetShardBlockProofLiteServer implements getShardBlockProofLiteServer operation.
+//
+// Get shard block proof.
+//
+// GET /v2/liteserver/get_shard_block_proof/{block_id}
+func (UnimplementedHandler) GetShardBlockProofLiteServer(ctx context.Context, params GetShardBlockProofLiteServerParams) (r GetShardBlockProofLiteServerRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// GetShardInfoLiteServer implements getShardInfoLiteServer operation.
+//
+// Get shard info.
+//
+// GET /v2/liteserver/get_shard_info/{block_id}
+func (UnimplementedHandler) GetShardInfoLiteServer(ctx context.Context, params GetShardInfoLiteServerParams) (r GetShardInfoLiteServerRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// GetStateLiteServer implements getStateLiteServer operation.
+//
+// Get block state.
+//
+// GET /v2/liteserver/get_state/{block_id}
+func (UnimplementedHandler) GetStateLiteServer(ctx context.Context, params GetStateLiteServerParams) (r GetStateLiteServerRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // GetStorageProviders implements getStorageProviders operation.
 //
 // Get TON storage providers deployed to the blockchain.
@@ -370,6 +478,15 @@ func (UnimplementedHandler) GetStorageProviders(ctx context.Context) (r GetStora
 //
 // GET /v2/accounts/{account_id}/subscriptions
 func (UnimplementedHandler) GetSubscriptionsByAccount(ctx context.Context, params GetSubscriptionsByAccountParams) (r GetSubscriptionsByAccountRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// GetTimeLiteServer implements getTimeLiteServer operation.
+//
+// Get time.
+//
+// GET /v2/liteserver/get_time
+func (UnimplementedHandler) GetTimeLiteServer(ctx context.Context) (r GetTimeLiteServerRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -415,6 +532,15 @@ func (UnimplementedHandler) GetTransaction(ctx context.Context, params GetTransa
 //
 // GET /v2/blockchain/messages/{msg_id}/transaction
 func (UnimplementedHandler) GetTransactionByMessageHash(ctx context.Context, params GetTransactionByMessageHashParams) (r GetTransactionByMessageHashRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// GetTransactionsLiteServer implements getTransactionsLiteServer operation.
+//
+// Get transactions.
+//
+// GET /v2/liteserver/get_transactions/{account_id}
+func (UnimplementedHandler) GetTransactionsLiteServer(ctx context.Context, params GetTransactionsLiteServerParams) (r GetTransactionsLiteServerRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -469,6 +595,15 @@ func (UnimplementedHandler) ReindexAccount(ctx context.Context, params ReindexAc
 //
 // POST /v2/blockchain/message
 func (UnimplementedHandler) SendMessage(ctx context.Context, req SendMessageReq) (r SendMessageRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// SendMessageLiteServer implements sendMessageLiteServer operation.
+//
+// Send message.
+//
+// POST /v2/liteserver/send_message
+func (UnimplementedHandler) SendMessageLiteServer(ctx context.Context, req SendMessageLiteServerReq) (r SendMessageLiteServerRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 

@@ -1532,6 +1532,668 @@ paths:
           $ref: '#/components/responses/InternalError'
 
 
+  /v2/liteserver/get_masterchain_info:
+    get:
+      description: "Get masterchain info"
+      operationId: getMasterchainInfoLiteServer
+      tags:
+        - Lite Server
+      responses:
+        '200':
+          description: "masterchain info"
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - last
+                  - state_root_hash
+                  - init
+                properties:
+                  last:
+                    $ref: '#/components/schemas/BlockRaw'
+                  state_root_hash:
+                    type: string
+                    example: 131D0C65055F04E9C19D687B51BC70F952FD9CA6F02C2801D3B89964A779DF85
+                  init:
+                    $ref: '#/components/schemas/InitStateRaw'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /v2/liteserver/get_masterchain_info_ext:
+    get:
+      description: "Get masterchain info ext"
+      operationId: getMasterchainInfoExtLiteServer
+      tags:
+        - Lite Server
+      parameters:
+        - $ref: '#/components/parameters/modeQuery'
+      responses:
+        '200':
+          description: "masterchain info ext"
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - mode
+                  - version
+                  - capabilities
+                  - last
+                  - last_utime
+                  - now
+                  - state_root_hash
+                  - init
+                properties:
+                  mode:
+                    type: integer
+                    format: uint32
+                    example: 0
+                  version:
+                    type: integer
+                    format: uint32
+                    example: 257
+                  capabilities:
+                    type: integer
+                    format: uint64
+                    example: 7
+                  last:
+                    $ref: '#/components/schemas/BlockRaw'
+                  last_utime:
+                    type: integer
+                    format: uint32
+                    example: 1687938199
+                  now:
+                    type: integer
+                    format: uint32
+                    example: 1687938204
+                  state_root_hash:
+                    type: string
+                    example: 131D0C65055F04E9C19D687B51BC70F952FD9CA6F02C2801D3B89964A779DF85
+                  init:
+                    $ref: '#/components/schemas/InitStateRaw'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /v2/liteserver/get_time:
+    get:
+      description: "Get time"
+      operationId: getTimeLiteServer
+      tags:
+        - Lite Server
+      responses:
+        '200':
+          description: "time"
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - time
+                properties:
+                  time:
+                    type: integer
+                    format: uint32
+                    example: 1687146728
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /v2/liteserver/get_block/{block_id}:
+    get:
+      description: "Get block"
+      operationId: getBlockLiteServer
+      tags:
+        - Lite Server
+      parameters:
+        - $ref: '#/components/parameters/blockIdExtParameter'
+      responses:
+        '200':
+          description: "block"
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - id
+                  - data
+                properties:
+                  id:
+                    $ref: '#/components/schemas/BlockRaw'
+                  data:
+                    type: string
+                    example: 131D0C65055F04E9C19D687B51BC70F952FD9CA6F02C2801D3B89964A779DF85
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /v2/liteserver/get_state/{block_id}:
+    get:
+      description: "Get block state"
+      operationId: getStateLiteServer
+      tags:
+        - Lite Server
+      parameters:
+        - $ref: '#/components/parameters/blockIdExtParameter'
+      responses:
+        '200':
+          description: "state"
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - id
+                  - root_hash
+                  - file_hash
+                  - data
+                properties:
+                  id:
+                    $ref: '#/components/schemas/BlockRaw'
+                  root_hash:
+                    type: string
+                    example: 131D0C65055F04E9C19D687B51BC70F952FD9CA6F02C2801D3B89964A779DF85
+                  file_hash:
+                    type: string
+                    example: A6A0BD6608672B11B79538A50B2204E748305C12AA0DED9C16CF0006CE3AF8DB
+                  data:
+                    type: string
+                    example: 131D0C65055F04E9C19D687B51BC70F952FD9CA6F02C2801D3B89964A779DF85
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /v2/liteserver/get_block_header/{block_id}:
+    get:
+      description: "Get block header"
+      operationId: getBlockHeaderLiteServer
+      tags:
+        - Lite Server
+      parameters:
+        - $ref: '#/components/parameters/blockIdExtParameter'
+        - $ref: '#/components/parameters/modeQuery'
+      responses:
+        '200':
+          description: "block header"
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - id
+                  - mode
+                  - header_proof
+                properties:
+                  id:
+                    $ref: '#/components/schemas/BlockRaw'
+                  mode:
+                    type: integer
+                    format: uint32
+                    example: 0
+                  header_proof:
+                    type: string
+                    example: 131D0C65055F04E9C19D687B51BC70F952FD9CA6F02C2801D3B89964A779DF85
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /v2/liteserver/send_message:
+    post:
+      description: "Send message"
+      operationId: sendMessageLiteServer
+      tags:
+        - Lite Server
+      requestBody:
+        $ref: "#/components/requestBodies/LiteServerSendMessageRequest"
+      responses:
+        '200':
+          description: "code"
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - code
+                properties:
+                  code:
+                    type: integer
+                    format: uint32
+                    example: 200
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /v2/liteserver/get_account_state/{account_id}:
+    get:
+      description: "Get account state"
+      operationId: getAccountStateLiteServer
+      tags:
+        - Lite Server
+      parameters:
+        - $ref: '#/components/parameters/accountIdParameter'
+      responses:
+        '200':
+          description: "account state"
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - id
+                  - shardblk
+                  - shard_proof
+                  - proof
+                  - state
+                properties:
+                  id:
+                    $ref: '#/components/schemas/BlockRaw'
+                  shardblk:
+                    $ref: '#/components/schemas/BlockRaw'
+                  shard_proof:
+                    type: string
+                    example: 131D0C65055F04E9C19D687B51BC70F952FD9CA6F02C2801D3B89964A779DF85
+                  proof:
+                    type: string
+                    example: 131D0C65055F04E9C19D687B51BC70F952FD9CA6F02C2801D3B89964A779DF85
+                  state:
+                    type: string
+                    example: 131D0C65055F04E9C19D687B51BC70F952FD9CA6F02C2801D3B89964A779DF85
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /v2/liteserver/get_shard_info/{block_id}:
+    get:
+      description: "Get shard info"
+      operationId: getShardInfoLiteServer
+      tags:
+        - Lite Server
+      parameters:
+        - $ref: '#/components/parameters/blockIdExtParameter'
+        - $ref: '#/components/parameters/workchainQuery'
+        - $ref: '#/components/parameters/shardQuery'
+        - $ref: '#/components/parameters/exactQuery'
+      responses:
+        '200':
+          description: "shard info"
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - id
+                  - shardblk
+                  - shard_proof
+                  - shard_descr
+                properties:
+                  id:
+                    $ref: '#/components/schemas/BlockRaw'
+                  shardblk:
+                    $ref: '#/components/schemas/BlockRaw'
+                  shard_proof:
+                    type: string
+                    example: 131D0C65055F04E9C19D687B51BC70F952FD9CA6F02C2801D3B89964A779DF85
+                  shard_descr:
+                    type: string
+                    example: 131D0C65055F04E9C19D687B51BC70F952FD9CA6F02C2801D3B89964A779DF85
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /v2/liteserver/get_all_shards_info/{block_id}:
+    get:
+      description: "Get all shards info"
+      operationId: getAllShardsInfoLiteServer
+      tags:
+        - Lite Server
+      parameters:
+        - $ref: '#/components/parameters/blockIdExtParameter'
+      responses:
+        '200':
+          description: "shards info"
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - id
+                  - proof
+                  - data
+                properties:
+                  id:
+                    $ref: '#/components/schemas/BlockRaw'
+                  proof:
+                    type: string
+                    example: 131D0C65055F04E9C19D687B51BC70F952FD9CA6F02C2801D3B89964A779DF85
+                  data:
+                    type: string
+                    example: 131D0C65055F04E9C19D687B51BC70F952FD9CA6F02C2801D3B89964A779DF85
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /v2/liteserver/get_transactions/{account_id}:
+    get:
+      description: "Get transactions"
+      operationId: getTransactionsLiteServer
+      tags:
+        - Lite Server
+      parameters:
+        - $ref: '#/components/parameters/accountIdParameter'
+        - $ref: '#/components/parameters/countQuery'
+        - $ref: '#/components/parameters/ltMustQuery'
+        - $ref: '#/components/parameters/hashQuery'
+      responses:
+        '200':
+          description: "transactions"
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - ids
+                  - transactions
+                properties:
+                  ids:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/BlockRaw'
+                  transactions:
+                    type: string
+                    example: 131D0C65055F04E9C19D687B51BC70F952FD9CA6F02C2801D3B89964A779DF85
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /v2/liteserver/list_block_transactions/{block_id}:
+    get:
+      description: "Get list block transactions"
+      operationId: getListBlockTransactionsLiteServer
+      tags:
+        - Lite Server
+      parameters:
+        - $ref: '#/components/parameters/blockIdExtParameter'
+        - $ref: '#/components/parameters/modeQuery'
+        - $ref: '#/components/parameters/countQuery'
+        - $ref: '#/components/parameters/accountIdQuery'
+        - $ref: '#/components/parameters/ltQuery'
+      responses:
+        '200':
+          description: "list block transactions"
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - id
+                  - req_count
+                  - incomplete
+                  - ids
+                  - proof
+                properties:
+                  id:
+                    $ref: '#/components/schemas/BlockRaw'
+                  req_count:
+                    type: integer
+                    format: uint32
+                    example: 100
+                  incomplete:
+                    type: boolean
+                    example: true
+                  ids:
+                    type: array
+                    items:
+                      type: object
+                      required:
+                        - mode
+                      properties:
+                        mode:
+                          type: integer
+                          format: uint32
+                          example: 0
+                        account:
+                          type: string
+                          example: 131D0C65055F04E9C19D687B51BC70F952FD9CA6F02C2801D3B89964A779DF85
+                        lt:
+                          type: integer
+                          format: uint64
+                        hash:
+                          type: string
+                          example: 131D0C65055F04E9C19D687B51BC70F952FD9CA6F02C2801D3B89964A779DF85
+                  proof:
+                    type: string
+                    example: 131D0C65055F04E9C19D687B51BC70F952FD9CA6F02C2801D3B89964A779DF85
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /v2/liteserver/get_block_proof:
+    get:
+      description: "Get block proof"
+      operationId: getBlockProofLiteServer
+      tags:
+        - Lite Server
+      parameters:
+        - $ref: '#/components/parameters/knownBlockIdExtQuery'
+        - $ref: '#/components/parameters/targetBlockIdExtQuery'
+        - $ref: '#/components/parameters/modeQuery'
+      responses:
+        '200':
+          description: "proof"
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - complete
+                  - from
+                  - to
+                  - steps
+                properties:
+                  complete:
+                    type: boolean
+                    example: true
+                  from:
+                    $ref: '#/components/schemas/BlockRaw'
+                  to:
+                    $ref: '#/components/schemas/BlockRaw'
+                  steps:
+                    type: array
+                    items:
+                      type: object
+                      required:
+                        - lite_server_block_link_back
+                        - lite_server_block_link_forward
+                      properties:
+                        lite_server_block_link_back:
+                          type: object
+                          required:
+                            - to_key_block
+                            - from
+                            - to
+                            - dest_proof
+                            - proof
+                            - state_proof
+                          properties:
+                            to_key_block:
+                              type: boolean
+                              example: false
+                            from:
+                              $ref: '#/components/schemas/BlockRaw'
+                            to:
+                              $ref: '#/components/schemas/BlockRaw'
+                            dest_proof:
+                              type: string
+                              example: 131D0C65055F04E9C19D687B51BC70F952FD9CA6F02C2801D3B89964A779DF85
+                            proof:
+                              type: string
+                              example: 131D0C65055F04E9C19D687B51BC70F952FD9CA6F02C2801D3B89964A779DF85
+                            state_proof:
+                              type: string
+                              example: 131D0C65055F04E9C19D687B51BC70F952FD9CA6F02C2801D3B89964A779DF85
+                        lite_server_block_link_forward:
+                          type: object
+                          required:
+                            - to_key_block
+                            - from
+                            - to
+                            - dest_proof
+                            - config_proof
+                            - signatures
+                          properties:
+                            to_key_block:
+                              type: boolean
+                              example: false
+                            from:
+                              $ref: '#/components/schemas/BlockRaw'
+                            to:
+                              $ref: '#/components/schemas/BlockRaw'
+                            dest_proof:
+                              type: string
+                              example: 131D0C65055F04E9C19D687B51BC70F952FD9CA6F02C2801D3B89964A779DF85
+                            config_proof:
+                              type: string
+                              example: 131D0C65055F04E9C19D687B51BC70F952FD9CA6F02C2801D3B89964A779DF85
+                            signatures:
+                              type: object
+                              required:
+                                - validator_set_hash
+                                - catchain_seqno
+                                - signatures
+                              properties:
+                                validator_set_hash:
+                                  type: integer
+                                  format: uint32
+                                catchain_seqno:
+                                  type: integer
+                                  format: uint32
+                                signatures:
+                                  type: array
+                                  items:
+                                    type: object
+                                    required:
+                                      - node_id_short
+                                      - signature
+                                    properties:
+                                      node_id_short:
+                                        type: string
+                                        example: 131D0C65055F04E9C19D687B51BC70F952FD9CA6F02C2801D3B89964A779DF85
+                                      signature:
+                                        type: string
+                                        example: 131D0C65055F04E9C19D687B51BC70F952FD9CA6F02C2801D3B89964A779DF85
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /v2/liteserver/get_config_all/{block_id}:
+    get:
+      description: "Get config all"
+      operationId: getConfigAllLiteServer
+      tags:
+        - Lite Server
+      parameters:
+        - $ref: '#/components/parameters/blockIdExtParameter'
+        - $ref: '#/components/parameters/modeQuery'
+      responses:
+        '200':
+          description: "config"
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - mode
+                  - id
+                  - state_proof
+                  - config_proof
+                properties:
+                  mode:
+                    type: integer
+                    format: uint32
+                    example: 0
+                  id:
+                    $ref: '#/components/schemas/BlockRaw'
+                  state_proof:
+                    type: string
+                    example: 131D0C65055F04E9C19D687B51BC70F952FD9CA6F02C2801D3B89964A779DF85
+                  config_proof:
+                    type: string
+                    example: 131D0C65055F04E9C19D687B51BC70F952FD9CA6F02C2801D3B89964A779DF85
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /v2/liteserver/get_shard_block_proof/{block_id}:
+    get:
+      description: "Get shard block proof"
+      operationId: getShardBlockProofLiteServer
+      tags:
+        - Lite Server
+      parameters:
+        - $ref: '#/components/parameters/blockIdExtParameter'
+      responses:
+        '200':
+          description: "shard"
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - masterchain_id
+                  - links
+                properties:
+                  masterchain_id:
+                    $ref: '#/components/schemas/BlockRaw'
+                  links:
+                    type: array
+                    items:
+                      type: object
+                      required:
+                        - id
+                        - proof
+                      properties:
+                        id:
+                          $ref: '#/components/schemas/BlockRaw'
+                        proof:
+                          type: string
+                          example: 131D0C65055F04E9C19D687B51BC70F952FD9CA6F02C2801D3B89964A779DF85
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
 components:
   parameters:
     blockIdParameter:
@@ -1542,6 +2204,14 @@ components:
       schema:
         type: string
         example: (-1,8000000000000000,4234234)
+    blockIdExtParameter:
+      in: path
+      name: block_id
+      required: true
+      description: "block ID: (workchain,shard,seqno,root_hash,file_hash)"
+      schema:
+        type: string
+        example: (-1,8000000000000000,4234234,3E575DAB1D25...90D8,47192E5C46C...BB29)
     transactionIdParameter:
       in: path
       name: transaction_id
@@ -1672,6 +2342,100 @@ components:
       schema:
         type: string
         example: "0:06d811f426598591b32b2c49f29f66c821368e4acb1de16762b04e0174532465"
+    modeQuery:
+      in: query
+      name: mode
+      required: true
+      description: "mode"
+      schema:
+        type: integer
+        format: uint32
+        example: 0
+    countQuery:
+      in: query
+      name: count
+      required: true
+      description: "count"
+      schema:
+        type: integer
+        format: uint32
+        example: 100
+    knownBlockIdExtQuery:
+      in: query
+      name: known_block
+      required: true
+      description: "known block: (workchain,shard,seqno,root_hash,file_hash)"
+      schema:
+        type: string
+        example: (-1,8000000000000000,4234234,3E575DAB1D25...90D8,47192E5C46C...BB29)
+    targetBlockIdExtQuery:
+      in: query
+      name: target_block
+      required: false
+      description: "target block: (workchain,shard,seqno,root_hash,file_hash)"
+      schema:
+        type: string
+        example: (-1,8000000000000000,4234234,3E575DAB1D25...90D8,47192E5C46C...BB29)
+    ltMustQuery:
+      in: query
+      name: lt
+      required: true
+      description: "lt"
+      schema:
+        type: integer
+        format: uint64
+        example: 23814011000000
+    ltQuery:
+      in: query
+      name: lt
+      description: "lt"
+      schema:
+        type: integer
+        format: uint64
+        example: 23814011000000
+    hashQuery:
+      in: query
+      name: hash
+      required: true
+      description: "hash"
+      schema:
+        type: string
+        example: "131D0C65055F04E9C19D687B51BC70F952FD9CA6F02C2801D3B89964A779DF85"
+    workchainQuery:
+      in: query
+      name: workchain
+      required: true
+      description: "workchain"
+      schema:
+        type: integer
+        format: uint32
+        example: 1
+    shardQuery:
+      in: query
+      name: shard
+      required: true
+      description: "shard"
+      schema:
+        type: integer
+        format: uint64
+        example: 1
+    exactQuery:
+      in: query
+      name: exact
+      required: true
+      description: "exact"
+      schema:
+        type: boolean
+        example: false
+    accountIdQuery:
+      in: query
+      name: account_id
+      required: false
+      description: account ID
+      explode: false
+      schema:
+        type: string
+        example: 0:97264395BD65A255A429B11326C84128B7D70FFED7949ABAE3036D506BA38621
 
   requestBodies:
     MethodParameters:
@@ -1680,7 +2444,6 @@ components:
         application/json:
           schema:
             type: object
-
     Boc:
       description: bag-of-cells serialized to base64
       required: true
@@ -1770,6 +2533,18 @@ components:
               - state_init
             properties:
               state_init:
+                type: string
+    LiteServerSendMessageRequest:
+      description: "Data that is expected"
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - body
+            properties:
+              body:
                 type: string
 
   schemas:
@@ -3790,7 +4565,51 @@ components:
         seqno:
           type: integer
           format: uint32
-  
+    BlockRaw:
+      type: object
+      required:
+        - workchain
+        - shard
+        - seqno
+        - root_hash
+        - file_hash
+      properties:
+        workchain:
+          type: integer
+          example: 4294967295
+          format: uint32
+        shard:
+          type: integer
+          example: 9223372036854775808
+          format: uint64
+        seqno:
+          type: integer
+          example: 30699640
+          format: uint32
+        root_hash:
+          type: string
+          example: 131D0C65055F04E9C19D687B51BC70F952FD9CA6F02C2801D3B89964A779DF85
+        file_hash:
+          type: string
+          example: A6A0BD6608672B11B79538A50B2204E748305C12AA0DED9C16CF0006CE3AF8DB
+    InitStateRaw:
+      type: object
+      required:
+        - workchain
+        - root_hash
+        - file_hash
+      properties:
+        workchain:
+          type: integer
+          example: 4294967295
+          format: uint32
+        root_hash:
+          type: string
+          example: 131D0C65055F04E9C19D687B51BC70F952FD9CA6F02C2801D3B89964A779DF85
+        file_hash:
+          type: string
+          example: A6A0BD6608672B11B79538A50B2204E748305C12AA0DED9C16CF0006CE3AF8DB
+
   responses:
     NotFound:
       description: The specified resource was not found
