@@ -25,6 +25,27 @@
      "type": "array"
     }
    },
+   "accountIdQuery": {
+    "description": "account ID",
+    "explode": false,
+    "in": "query",
+    "name": "account_id",
+    "required": false,
+    "schema": {
+     "example": "0:97264395BD65A255A429B11326C84128B7D70FFED7949ABAE3036D506BA38621",
+     "type": "string"
+    }
+   },
+   "blockIdExtParameter": {
+    "description": "block ID: (workchain,shard,seqno,root_hash,file_hash)",
+    "in": "path",
+    "name": "block_id",
+    "required": true,
+    "schema": {
+     "example": "(-1,8000000000000000,4234234,3E575DAB1D25...90D8,47192E5C46C...BB29)",
+     "type": "string"
+    }
+   },
    "blockIdParameter": {
     "description": "block ID",
     "in": "path",
@@ -43,6 +64,17 @@
     "schema": {
      "example": "0:06d811f426598591b32b2c49f29f66c821368e4acb1de16762b04e0174532465",
      "type": "string"
+    }
+   },
+   "countQuery": {
+    "description": "count",
+    "in": "query",
+    "name": "count",
+    "required": true,
+    "schema": {
+     "example": 100,
+     "format": "uint32",
+     "type": "integer"
     }
    },
    "domainFilterParameter": {
@@ -75,6 +107,26 @@
      "type": "string"
     }
    },
+   "exactQuery": {
+    "description": "exact",
+    "in": "query",
+    "name": "exact",
+    "required": true,
+    "schema": {
+     "example": false,
+     "type": "boolean"
+    }
+   },
+   "hashQuery": {
+    "description": "hash",
+    "in": "query",
+    "name": "hash",
+    "required": true,
+    "schema": {
+     "example": "131D0C65055F04E9C19D687B51BC70F952FD9CA6F02C2801D3B89964A779DF85",
+     "type": "string"
+    }
+   },
    "i18n": {
     "in": "header",
     "name": "Accept-Language",
@@ -95,6 +147,16 @@
      "type": "string"
     }
    },
+   "knownBlockIdExtQuery": {
+    "description": "known block: (workchain,shard,seqno,root_hash,file_hash)",
+    "in": "query",
+    "name": "known_block",
+    "required": true,
+    "schema": {
+     "example": "(-1,8000000000000000,4234234,3E575DAB1D25...90D8,47192E5C46C...BB29)",
+     "type": "string"
+    }
+   },
    "limit": {
     "in": "query",
     "name": "limit",
@@ -102,6 +164,27 @@
     "schema": {
      "default": 1000,
      "maximum": 1000,
+     "type": "integer"
+    }
+   },
+   "ltMustQuery": {
+    "description": "lt",
+    "in": "query",
+    "name": "lt",
+    "required": true,
+    "schema": {
+     "example": 23814011000000,
+     "format": "uint64",
+     "type": "integer"
+    }
+   },
+   "ltQuery": {
+    "description": "lt",
+    "in": "query",
+    "name": "lt",
+    "schema": {
+     "example": 23814011000000,
+     "format": "uint64",
      "type": "integer"
     }
    },
@@ -113,6 +196,17 @@
     "schema": {
      "example": "get_wallet_address",
      "type": "string"
+    }
+   },
+   "modeQuery": {
+    "description": "mode",
+    "in": "query",
+    "name": "mode",
+    "required": true,
+    "schema": {
+     "example": 0,
+     "format": "uint32",
+     "type": "integer"
     }
    },
    "offset": {
@@ -136,6 +230,27 @@
      "type": "integer"
     }
    },
+   "shardQuery": {
+    "description": "shard",
+    "in": "query",
+    "name": "shard",
+    "required": true,
+    "schema": {
+     "example": 1,
+     "format": "uint64",
+     "type": "integer"
+    }
+   },
+   "targetBlockIdExtQuery": {
+    "description": "target block: (workchain,shard,seqno,root_hash,file_hash)",
+    "in": "query",
+    "name": "target_block",
+    "required": false,
+    "schema": {
+     "example": "(-1,8000000000000000,4234234,3E575DAB1D25...90D8,47192E5C46C...BB29)",
+     "type": "string"
+    }
+   },
    "traceIdParameter": {
     "description": "trace ID or transaction hash in hex (without 0x) or base64url format",
     "in": "path",
@@ -154,6 +269,17 @@
     "schema": {
      "example": "97264395BD65A255A429B11326C84128B7D70FFED7949ABAE3036D506BA38621",
      "type": "string"
+    }
+   },
+   "workchainQuery": {
+    "description": "workchain",
+    "in": "query",
+    "name": "workchain",
+    "required": true,
+    "schema": {
+     "example": 1,
+     "format": "uint32",
+     "type": "integer"
     }
    }
   },
@@ -210,6 +336,25 @@
      }
     },
     "description": "bag-of-cells serialized to base64",
+    "required": true
+   },
+   "LiteServerSendMessageRequest": {
+    "content": {
+     "application/json": {
+      "schema": {
+       "properties": {
+        "body": {
+         "type": "string"
+        }
+       },
+       "required": [
+        "body"
+       ],
+       "type": "object"
+      }
+     }
+    },
+    "description": "Data that is expected",
     "required": true
    },
    "MethodParameters": {
@@ -1085,6 +1230,41 @@
     ],
     "type": "object"
    },
+   "BlockRaw": {
+    "properties": {
+     "file_hash": {
+      "example": "A6A0BD6608672B11B79538A50B2204E748305C12AA0DED9C16CF0006CE3AF8DB",
+      "type": "string"
+     },
+     "root_hash": {
+      "example": "131D0C65055F04E9C19D687B51BC70F952FD9CA6F02C2801D3B89964A779DF85",
+      "type": "string"
+     },
+     "seqno": {
+      "example": 30699640,
+      "format": "uint32",
+      "type": "integer"
+     },
+     "shard": {
+      "example": 9223372036854775808,
+      "format": "uint64",
+      "type": "integer"
+     },
+     "workchain": {
+      "example": 4294967295,
+      "format": "uint32",
+      "type": "integer"
+     }
+    },
+    "required": [
+     "workchain",
+     "shard",
+     "seqno",
+     "root_hash",
+     "file_hash"
+    ],
+    "type": "object"
+   },
    "BouncePhaseType": {
     "enum": [
      "TrPhaseBounceNegfunds",
@@ -1507,6 +1687,29 @@
     "required": [
      "resolution",
      "url"
+    ],
+    "type": "object"
+   },
+   "InitStateRaw": {
+    "properties": {
+     "file_hash": {
+      "example": "A6A0BD6608672B11B79538A50B2204E748305C12AA0DED9C16CF0006CE3AF8DB",
+      "type": "string"
+     },
+     "root_hash": {
+      "example": "131D0C65055F04E9C19D687B51BC70F952FD9CA6F02C2801D3B89964A779DF85",
+      "type": "string"
+     },
+     "workchain": {
+      "example": 4294967295,
+      "format": "uint32",
+      "type": "integer"
+     }
+    },
+    "required": [
+     "workchain",
+     "root_hash",
+     "file_hash"
     ],
     "type": "object"
    },
@@ -4326,6 +4529,1022 @@
     },
     "tags": [
      "Jettons"
+    ]
+   }
+  },
+  "/v2/liteserver/get_account_state/{account_id}": {
+   "get": {
+    "description": "Get account state",
+    "operationId": "getAccountStateLiteServer",
+    "parameters": [
+     {
+      "$ref": "#/components/parameters/accountIdParameter"
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "id": {
+           "$ref": "#/components/schemas/BlockRaw"
+          },
+          "proof": {
+           "example": "131D0C65055F04E9C19D687B51BC70F952FD9CA6F02C2801D3B89964A779DF85",
+           "type": "string"
+          },
+          "shard_proof": {
+           "example": "131D0C65055F04E9C19D687B51BC70F952FD9CA6F02C2801D3B89964A779DF85",
+           "type": "string"
+          },
+          "shardblk": {
+           "$ref": "#/components/schemas/BlockRaw"
+          },
+          "state": {
+           "example": "131D0C65055F04E9C19D687B51BC70F952FD9CA6F02C2801D3B89964A779DF85",
+           "type": "string"
+          }
+         },
+         "required": [
+          "id",
+          "shardblk",
+          "shard_proof",
+          "proof",
+          "state"
+         ],
+         "type": "object"
+        }
+       }
+      },
+      "description": "account state"
+     },
+     "400": {
+      "$ref": "#/components/responses/BadRequest"
+     },
+     "401": {
+      "$ref": "#/components/responses/UnauthorizedError"
+     },
+     "500": {
+      "$ref": "#/components/responses/InternalError"
+     }
+    },
+    "tags": [
+     "Lite Server"
+    ]
+   }
+  },
+  "/v2/liteserver/get_all_shards_info/{block_id}": {
+   "get": {
+    "description": "Get all shards info",
+    "operationId": "getAllShardsInfoLiteServer",
+    "parameters": [
+     {
+      "$ref": "#/components/parameters/blockIdExtParameter"
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "data": {
+           "example": "131D0C65055F04E9C19D687B51BC70F952FD9CA6F02C2801D3B89964A779DF85",
+           "type": "string"
+          },
+          "id": {
+           "$ref": "#/components/schemas/BlockRaw"
+          },
+          "proof": {
+           "example": "131D0C65055F04E9C19D687B51BC70F952FD9CA6F02C2801D3B89964A779DF85",
+           "type": "string"
+          }
+         },
+         "required": [
+          "id",
+          "proof",
+          "data"
+         ],
+         "type": "object"
+        }
+       }
+      },
+      "description": "shards info"
+     },
+     "400": {
+      "$ref": "#/components/responses/BadRequest"
+     },
+     "401": {
+      "$ref": "#/components/responses/UnauthorizedError"
+     },
+     "500": {
+      "$ref": "#/components/responses/InternalError"
+     }
+    },
+    "tags": [
+     "Lite Server"
+    ]
+   }
+  },
+  "/v2/liteserver/get_block/{block_id}": {
+   "get": {
+    "description": "Get block",
+    "operationId": "getBlockLiteServer",
+    "parameters": [
+     {
+      "$ref": "#/components/parameters/blockIdExtParameter"
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "data": {
+           "example": "131D0C65055F04E9C19D687B51BC70F952FD9CA6F02C2801D3B89964A779DF85",
+           "type": "string"
+          },
+          "id": {
+           "$ref": "#/components/schemas/BlockRaw"
+          }
+         },
+         "required": [
+          "id",
+          "data"
+         ],
+         "type": "object"
+        }
+       }
+      },
+      "description": "block"
+     },
+     "400": {
+      "$ref": "#/components/responses/BadRequest"
+     },
+     "401": {
+      "$ref": "#/components/responses/UnauthorizedError"
+     },
+     "500": {
+      "$ref": "#/components/responses/InternalError"
+     }
+    },
+    "tags": [
+     "Lite Server"
+    ]
+   }
+  },
+  "/v2/liteserver/get_block_header/{block_id}": {
+   "get": {
+    "description": "Get block header",
+    "operationId": "getBlockHeaderLiteServer",
+    "parameters": [
+     {
+      "$ref": "#/components/parameters/blockIdExtParameter"
+     },
+     {
+      "$ref": "#/components/parameters/modeQuery"
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "header_proof": {
+           "example": "131D0C65055F04E9C19D687B51BC70F952FD9CA6F02C2801D3B89964A779DF85",
+           "type": "string"
+          },
+          "id": {
+           "$ref": "#/components/schemas/BlockRaw"
+          },
+          "mode": {
+           "example": 0,
+           "format": "uint32",
+           "type": "integer"
+          }
+         },
+         "required": [
+          "id",
+          "mode",
+          "header_proof"
+         ],
+         "type": "object"
+        }
+       }
+      },
+      "description": "block header"
+     },
+     "400": {
+      "$ref": "#/components/responses/BadRequest"
+     },
+     "401": {
+      "$ref": "#/components/responses/UnauthorizedError"
+     },
+     "500": {
+      "$ref": "#/components/responses/InternalError"
+     }
+    },
+    "tags": [
+     "Lite Server"
+    ]
+   }
+  },
+  "/v2/liteserver/get_block_proof": {
+   "get": {
+    "description": "Get block proof",
+    "operationId": "getBlockProofLiteServer",
+    "parameters": [
+     {
+      "$ref": "#/components/parameters/knownBlockIdExtQuery"
+     },
+     {
+      "$ref": "#/components/parameters/targetBlockIdExtQuery"
+     },
+     {
+      "$ref": "#/components/parameters/modeQuery"
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "complete": {
+           "example": true,
+           "type": "boolean"
+          },
+          "from": {
+           "$ref": "#/components/schemas/BlockRaw"
+          },
+          "steps": {
+           "items": {
+            "properties": {
+             "lite_server_block_link_back": {
+              "properties": {
+               "dest_proof": {
+                "example": "131D0C65055F04E9C19D687B51BC70F952FD9CA6F02C2801D3B89964A779DF85",
+                "type": "string"
+               },
+               "from": {
+                "$ref": "#/components/schemas/BlockRaw"
+               },
+               "proof": {
+                "example": "131D0C65055F04E9C19D687B51BC70F952FD9CA6F02C2801D3B89964A779DF85",
+                "type": "string"
+               },
+               "state_proof": {
+                "example": "131D0C65055F04E9C19D687B51BC70F952FD9CA6F02C2801D3B89964A779DF85",
+                "type": "string"
+               },
+               "to": {
+                "$ref": "#/components/schemas/BlockRaw"
+               },
+               "to_key_block": {
+                "example": false,
+                "type": "boolean"
+               }
+              },
+              "required": [
+               "to_key_block",
+               "from",
+               "to",
+               "dest_proof",
+               "proof",
+               "state_proof"
+              ],
+              "type": "object"
+             },
+             "lite_server_block_link_forward": {
+              "properties": {
+               "config_proof": {
+                "example": "131D0C65055F04E9C19D687B51BC70F952FD9CA6F02C2801D3B89964A779DF85",
+                "type": "string"
+               },
+               "dest_proof": {
+                "example": "131D0C65055F04E9C19D687B51BC70F952FD9CA6F02C2801D3B89964A779DF85",
+                "type": "string"
+               },
+               "from": {
+                "$ref": "#/components/schemas/BlockRaw"
+               },
+               "signatures": {
+                "properties": {
+                 "catchain_seqno": {
+                  "format": "uint32",
+                  "type": "integer"
+                 },
+                 "signatures": {
+                  "items": {
+                   "properties": {
+                    "node_id_short": {
+                     "example": "131D0C65055F04E9C19D687B51BC70F952FD9CA6F02C2801D3B89964A779DF85",
+                     "type": "string"
+                    },
+                    "signature": {
+                     "example": "131D0C65055F04E9C19D687B51BC70F952FD9CA6F02C2801D3B89964A779DF85",
+                     "type": "string"
+                    }
+                   },
+                   "required": [
+                    "node_id_short",
+                    "signature"
+                   ],
+                   "type": "object"
+                  },
+                  "type": "array"
+                 },
+                 "validator_set_hash": {
+                  "format": "uint32",
+                  "type": "integer"
+                 }
+                },
+                "required": [
+                 "validator_set_hash",
+                 "catchain_seqno",
+                 "signatures"
+                ],
+                "type": "object"
+               },
+               "to": {
+                "$ref": "#/components/schemas/BlockRaw"
+               },
+               "to_key_block": {
+                "example": false,
+                "type": "boolean"
+               }
+              },
+              "required": [
+               "to_key_block",
+               "from",
+               "to",
+               "dest_proof",
+               "config_proof",
+               "signatures"
+              ],
+              "type": "object"
+             }
+            },
+            "required": [
+             "lite_server_block_link_back",
+             "lite_server_block_link_forward"
+            ],
+            "type": "object"
+           },
+           "type": "array"
+          },
+          "to": {
+           "$ref": "#/components/schemas/BlockRaw"
+          }
+         },
+         "required": [
+          "complete",
+          "from",
+          "to",
+          "steps"
+         ],
+         "type": "object"
+        }
+       }
+      },
+      "description": "proof"
+     },
+     "400": {
+      "$ref": "#/components/responses/BadRequest"
+     },
+     "401": {
+      "$ref": "#/components/responses/UnauthorizedError"
+     },
+     "500": {
+      "$ref": "#/components/responses/InternalError"
+     }
+    },
+    "tags": [
+     "Lite Server"
+    ]
+   }
+  },
+  "/v2/liteserver/get_config_all/{block_id}": {
+   "get": {
+    "description": "Get config all",
+    "operationId": "getConfigAllLiteServer",
+    "parameters": [
+     {
+      "$ref": "#/components/parameters/blockIdExtParameter"
+     },
+     {
+      "$ref": "#/components/parameters/modeQuery"
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "config_proof": {
+           "example": "131D0C65055F04E9C19D687B51BC70F952FD9CA6F02C2801D3B89964A779DF85",
+           "type": "string"
+          },
+          "id": {
+           "$ref": "#/components/schemas/BlockRaw"
+          },
+          "mode": {
+           "example": 0,
+           "format": "uint32",
+           "type": "integer"
+          },
+          "state_proof": {
+           "example": "131D0C65055F04E9C19D687B51BC70F952FD9CA6F02C2801D3B89964A779DF85",
+           "type": "string"
+          }
+         },
+         "required": [
+          "mode",
+          "id",
+          "state_proof",
+          "config_proof"
+         ],
+         "type": "object"
+        }
+       }
+      },
+      "description": "config"
+     },
+     "400": {
+      "$ref": "#/components/responses/BadRequest"
+     },
+     "401": {
+      "$ref": "#/components/responses/UnauthorizedError"
+     },
+     "500": {
+      "$ref": "#/components/responses/InternalError"
+     }
+    },
+    "tags": [
+     "Lite Server"
+    ]
+   }
+  },
+  "/v2/liteserver/get_masterchain_info": {
+   "get": {
+    "description": "Get masterchain info",
+    "operationId": "getMasterchainInfoLiteServer",
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "init": {
+           "$ref": "#/components/schemas/InitStateRaw"
+          },
+          "last": {
+           "$ref": "#/components/schemas/BlockRaw"
+          },
+          "state_root_hash": {
+           "example": "131D0C65055F04E9C19D687B51BC70F952FD9CA6F02C2801D3B89964A779DF85",
+           "type": "string"
+          }
+         },
+         "required": [
+          "last",
+          "state_root_hash",
+          "init"
+         ],
+         "type": "object"
+        }
+       }
+      },
+      "description": "masterchain info"
+     },
+     "400": {
+      "$ref": "#/components/responses/BadRequest"
+     },
+     "401": {
+      "$ref": "#/components/responses/UnauthorizedError"
+     },
+     "500": {
+      "$ref": "#/components/responses/InternalError"
+     }
+    },
+    "tags": [
+     "Lite Server"
+    ]
+   }
+  },
+  "/v2/liteserver/get_masterchain_info_ext": {
+   "get": {
+    "description": "Get masterchain info ext",
+    "operationId": "getMasterchainInfoExtLiteServer",
+    "parameters": [
+     {
+      "$ref": "#/components/parameters/modeQuery"
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "capabilities": {
+           "example": 7,
+           "format": "uint64",
+           "type": "integer"
+          },
+          "init": {
+           "$ref": "#/components/schemas/InitStateRaw"
+          },
+          "last": {
+           "$ref": "#/components/schemas/BlockRaw"
+          },
+          "last_utime": {
+           "example": 1687938199,
+           "format": "uint32",
+           "type": "integer"
+          },
+          "mode": {
+           "example": 0,
+           "format": "uint32",
+           "type": "integer"
+          },
+          "now": {
+           "example": 1687938204,
+           "format": "uint32",
+           "type": "integer"
+          },
+          "state_root_hash": {
+           "example": "131D0C65055F04E9C19D687B51BC70F952FD9CA6F02C2801D3B89964A779DF85",
+           "type": "string"
+          },
+          "version": {
+           "example": 257,
+           "format": "uint32",
+           "type": "integer"
+          }
+         },
+         "required": [
+          "mode",
+          "version",
+          "capabilities",
+          "last",
+          "last_utime",
+          "now",
+          "state_root_hash",
+          "init"
+         ],
+         "type": "object"
+        }
+       }
+      },
+      "description": "masterchain info ext"
+     },
+     "400": {
+      "$ref": "#/components/responses/BadRequest"
+     },
+     "401": {
+      "$ref": "#/components/responses/UnauthorizedError"
+     },
+     "500": {
+      "$ref": "#/components/responses/InternalError"
+     }
+    },
+    "tags": [
+     "Lite Server"
+    ]
+   }
+  },
+  "/v2/liteserver/get_shard_block_proof/{block_id}": {
+   "get": {
+    "description": "Get shard block proof",
+    "operationId": "getShardBlockProofLiteServer",
+    "parameters": [
+     {
+      "$ref": "#/components/parameters/blockIdExtParameter"
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "links": {
+           "items": {
+            "properties": {
+             "id": {
+              "$ref": "#/components/schemas/BlockRaw"
+             },
+             "proof": {
+              "example": "131D0C65055F04E9C19D687B51BC70F952FD9CA6F02C2801D3B89964A779DF85",
+              "type": "string"
+             }
+            },
+            "required": [
+             "id",
+             "proof"
+            ],
+            "type": "object"
+           },
+           "type": "array"
+          },
+          "masterchain_id": {
+           "$ref": "#/components/schemas/BlockRaw"
+          }
+         },
+         "required": [
+          "masterchain_id",
+          "links"
+         ],
+         "type": "object"
+        }
+       }
+      },
+      "description": "shard"
+     },
+     "400": {
+      "$ref": "#/components/responses/BadRequest"
+     },
+     "401": {
+      "$ref": "#/components/responses/UnauthorizedError"
+     },
+     "500": {
+      "$ref": "#/components/responses/InternalError"
+     }
+    },
+    "tags": [
+     "Lite Server"
+    ]
+   }
+  },
+  "/v2/liteserver/get_shard_info/{block_id}": {
+   "get": {
+    "description": "Get shard info",
+    "operationId": "getShardInfoLiteServer",
+    "parameters": [
+     {
+      "$ref": "#/components/parameters/blockIdExtParameter"
+     },
+     {
+      "$ref": "#/components/parameters/workchainQuery"
+     },
+     {
+      "$ref": "#/components/parameters/shardQuery"
+     },
+     {
+      "$ref": "#/components/parameters/exactQuery"
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "id": {
+           "$ref": "#/components/schemas/BlockRaw"
+          },
+          "shard_descr": {
+           "example": "131D0C65055F04E9C19D687B51BC70F952FD9CA6F02C2801D3B89964A779DF85",
+           "type": "string"
+          },
+          "shard_proof": {
+           "example": "131D0C65055F04E9C19D687B51BC70F952FD9CA6F02C2801D3B89964A779DF85",
+           "type": "string"
+          },
+          "shardblk": {
+           "$ref": "#/components/schemas/BlockRaw"
+          }
+         },
+         "required": [
+          "id",
+          "shardblk",
+          "shard_proof",
+          "shard_descr"
+         ],
+         "type": "object"
+        }
+       }
+      },
+      "description": "shard info"
+     },
+     "400": {
+      "$ref": "#/components/responses/BadRequest"
+     },
+     "401": {
+      "$ref": "#/components/responses/UnauthorizedError"
+     },
+     "500": {
+      "$ref": "#/components/responses/InternalError"
+     }
+    },
+    "tags": [
+     "Lite Server"
+    ]
+   }
+  },
+  "/v2/liteserver/get_state/{block_id}": {
+   "get": {
+    "description": "Get block state",
+    "operationId": "getStateLiteServer",
+    "parameters": [
+     {
+      "$ref": "#/components/parameters/blockIdExtParameter"
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "data": {
+           "example": "131D0C65055F04E9C19D687B51BC70F952FD9CA6F02C2801D3B89964A779DF85",
+           "type": "string"
+          },
+          "file_hash": {
+           "example": "A6A0BD6608672B11B79538A50B2204E748305C12AA0DED9C16CF0006CE3AF8DB",
+           "type": "string"
+          },
+          "id": {
+           "$ref": "#/components/schemas/BlockRaw"
+          },
+          "root_hash": {
+           "example": "131D0C65055F04E9C19D687B51BC70F952FD9CA6F02C2801D3B89964A779DF85",
+           "type": "string"
+          }
+         },
+         "required": [
+          "id",
+          "root_hash",
+          "file_hash",
+          "data"
+         ],
+         "type": "object"
+        }
+       }
+      },
+      "description": "state"
+     },
+     "400": {
+      "$ref": "#/components/responses/BadRequest"
+     },
+     "401": {
+      "$ref": "#/components/responses/UnauthorizedError"
+     },
+     "500": {
+      "$ref": "#/components/responses/InternalError"
+     }
+    },
+    "tags": [
+     "Lite Server"
+    ]
+   }
+  },
+  "/v2/liteserver/get_time": {
+   "get": {
+    "description": "Get time",
+    "operationId": "getTimeLiteServer",
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "time": {
+           "example": 1687146728,
+           "format": "uint32",
+           "type": "integer"
+          }
+         },
+         "required": [
+          "time"
+         ],
+         "type": "object"
+        }
+       }
+      },
+      "description": "time"
+     },
+     "400": {
+      "$ref": "#/components/responses/BadRequest"
+     },
+     "401": {
+      "$ref": "#/components/responses/UnauthorizedError"
+     },
+     "500": {
+      "$ref": "#/components/responses/InternalError"
+     }
+    },
+    "tags": [
+     "Lite Server"
+    ]
+   }
+  },
+  "/v2/liteserver/get_transactions/{account_id}": {
+   "get": {
+    "description": "Get transactions",
+    "operationId": "getTransactionsLiteServer",
+    "parameters": [
+     {
+      "$ref": "#/components/parameters/accountIdParameter"
+     },
+     {
+      "$ref": "#/components/parameters/countQuery"
+     },
+     {
+      "$ref": "#/components/parameters/ltMustQuery"
+     },
+     {
+      "$ref": "#/components/parameters/hashQuery"
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "ids": {
+           "items": {
+            "$ref": "#/components/schemas/BlockRaw"
+           },
+           "type": "array"
+          },
+          "transactions": {
+           "example": "131D0C65055F04E9C19D687B51BC70F952FD9CA6F02C2801D3B89964A779DF85",
+           "type": "string"
+          }
+         },
+         "required": [
+          "ids",
+          "transactions"
+         ],
+         "type": "object"
+        }
+       }
+      },
+      "description": "transactions"
+     },
+     "400": {
+      "$ref": "#/components/responses/BadRequest"
+     },
+     "401": {
+      "$ref": "#/components/responses/UnauthorizedError"
+     },
+     "500": {
+      "$ref": "#/components/responses/InternalError"
+     }
+    },
+    "tags": [
+     "Lite Server"
+    ]
+   }
+  },
+  "/v2/liteserver/list_block_transactions/{block_id}": {
+   "get": {
+    "description": "Get list block transactions",
+    "operationId": "getListBlockTransactionsLiteServer",
+    "parameters": [
+     {
+      "$ref": "#/components/parameters/blockIdExtParameter"
+     },
+     {
+      "$ref": "#/components/parameters/modeQuery"
+     },
+     {
+      "$ref": "#/components/parameters/countQuery"
+     },
+     {
+      "$ref": "#/components/parameters/accountIdQuery"
+     },
+     {
+      "$ref": "#/components/parameters/ltQuery"
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "id": {
+           "$ref": "#/components/schemas/BlockRaw"
+          },
+          "ids": {
+           "items": {
+            "properties": {
+             "account": {
+              "example": "131D0C65055F04E9C19D687B51BC70F952FD9CA6F02C2801D3B89964A779DF85",
+              "type": "string"
+             },
+             "hash": {
+              "example": "131D0C65055F04E9C19D687B51BC70F952FD9CA6F02C2801D3B89964A779DF85",
+              "type": "string"
+             },
+             "lt": {
+              "format": "uint64",
+              "type": "integer"
+             },
+             "mode": {
+              "example": 0,
+              "format": "uint32",
+              "type": "integer"
+             }
+            },
+            "required": [
+             "mode"
+            ],
+            "type": "object"
+           },
+           "type": "array"
+          },
+          "incomplete": {
+           "example": true,
+           "type": "boolean"
+          },
+          "proof": {
+           "example": "131D0C65055F04E9C19D687B51BC70F952FD9CA6F02C2801D3B89964A779DF85",
+           "type": "string"
+          },
+          "req_count": {
+           "example": 100,
+           "format": "uint32",
+           "type": "integer"
+          }
+         },
+         "required": [
+          "id",
+          "req_count",
+          "incomplete",
+          "ids",
+          "proof"
+         ],
+         "type": "object"
+        }
+       }
+      },
+      "description": "list block transactions"
+     },
+     "400": {
+      "$ref": "#/components/responses/BadRequest"
+     },
+     "401": {
+      "$ref": "#/components/responses/UnauthorizedError"
+     },
+     "500": {
+      "$ref": "#/components/responses/InternalError"
+     }
+    },
+    "tags": [
+     "Lite Server"
+    ]
+   }
+  },
+  "/v2/liteserver/send_message": {
+   "post": {
+    "description": "Send message",
+    "operationId": "sendMessageLiteServer",
+    "requestBody": {
+     "$ref": "#/components/requestBodies/LiteServerSendMessageRequest"
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "code": {
+           "example": 200,
+           "format": "uint32",
+           "type": "integer"
+          }
+         },
+         "required": [
+          "code"
+         ],
+         "type": "object"
+        }
+       }
+      },
+      "description": "code"
+     },
+     "400": {
+      "$ref": "#/components/responses/BadRequest"
+     },
+     "401": {
+      "$ref": "#/components/responses/UnauthorizedError"
+     },
+     "500": {
+      "$ref": "#/components/responses/InternalError"
+     }
+    },
+    "tags": [
+     "Lite Server"
     ]
    }
   },

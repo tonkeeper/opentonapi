@@ -68,6 +68,12 @@ type Handler interface {
 	//
 	// POST /v2/tonconnect/stateinit
 	GetAccountInfoByStateInit(ctx context.Context, req GetAccountInfoByStateInitReq) (GetAccountInfoByStateInitRes, error)
+	// GetAccountStateLiteServer implements getAccountStateLiteServer operation.
+	//
+	// Get account state.
+	//
+	// GET /v2/liteserver/get_account_state/{account_id}
+	GetAccountStateLiteServer(ctx context.Context, params GetAccountStateLiteServerParams) (GetAccountStateLiteServerRes, error)
 	// GetAccountTransactions implements getAccountTransactions operation.
 	//
 	// Get account transactions.
@@ -86,12 +92,36 @@ type Handler interface {
 	//
 	// GET /v2/dns/auctions
 	GetAllAuctions(ctx context.Context, params GetAllAuctionsParams) (GetAllAuctionsRes, error)
+	// GetAllShardsInfoLiteServer implements getAllShardsInfoLiteServer operation.
+	//
+	// Get all shards info.
+	//
+	// GET /v2/liteserver/get_all_shards_info/{block_id}
+	GetAllShardsInfoLiteServer(ctx context.Context, params GetAllShardsInfoLiteServerParams) (GetAllShardsInfoLiteServerRes, error)
 	// GetBlock implements getBlock operation.
 	//
 	// Get block data.
 	//
 	// GET /v2/blockchain/blocks/{block_id}
 	GetBlock(ctx context.Context, params GetBlockParams) (GetBlockRes, error)
+	// GetBlockHeaderLiteServer implements getBlockHeaderLiteServer operation.
+	//
+	// Get block header.
+	//
+	// GET /v2/liteserver/get_block_header/{block_id}
+	GetBlockHeaderLiteServer(ctx context.Context, params GetBlockHeaderLiteServerParams) (GetBlockHeaderLiteServerRes, error)
+	// GetBlockLiteServer implements getBlockLiteServer operation.
+	//
+	// Get block.
+	//
+	// GET /v2/liteserver/get_block/{block_id}
+	GetBlockLiteServer(ctx context.Context, params GetBlockLiteServerParams) (GetBlockLiteServerRes, error)
+	// GetBlockProofLiteServer implements getBlockProofLiteServer operation.
+	//
+	// Get block proof.
+	//
+	// GET /v2/liteserver/get_block_proof
+	GetBlockProofLiteServer(ctx context.Context, params GetBlockProofLiteServerParams) (GetBlockProofLiteServerRes, error)
 	// GetBlockTransactions implements getBlockTransactions operation.
 	//
 	// Get transactions from block.
@@ -104,6 +134,12 @@ type Handler interface {
 	//
 	// GET /v2/blockchain/config
 	GetConfig(ctx context.Context) (GetConfigRes, error)
+	// GetConfigAllLiteServer implements getConfigAllLiteServer operation.
+	//
+	// Get config all.
+	//
+	// GET /v2/liteserver/get_config_all/{block_id}
+	GetConfigAllLiteServer(ctx context.Context, params GetConfigAllLiteServerParams) (GetConfigAllLiteServerRes, error)
 	// GetDnsExpiring implements getDnsExpiring operation.
 	//
 	// Get expiring .ton dns.
@@ -167,12 +203,30 @@ type Handler interface {
 	//
 	// GET /v2/accounts/{account_id}/jettons/{jetton_id}/history
 	GetJettonsHistoryByID(ctx context.Context, params GetJettonsHistoryByIDParams) (GetJettonsHistoryByIDRes, error)
+	// GetListBlockTransactionsLiteServer implements getListBlockTransactionsLiteServer operation.
+	//
+	// Get list block transactions.
+	//
+	// GET /v2/liteserver/list_block_transactions/{block_id}
+	GetListBlockTransactionsLiteServer(ctx context.Context, params GetListBlockTransactionsLiteServerParams) (GetListBlockTransactionsLiteServerRes, error)
 	// GetMasterchainHead implements getMasterchainHead operation.
 	//
 	// Get last known masterchain block.
 	//
 	// GET /v2/blockchain/masterchain-head
 	GetMasterchainHead(ctx context.Context) (GetMasterchainHeadRes, error)
+	// GetMasterchainInfoExtLiteServer implements getMasterchainInfoExtLiteServer operation.
+	//
+	// Get masterchain info ext.
+	//
+	// GET /v2/liteserver/get_masterchain_info_ext
+	GetMasterchainInfoExtLiteServer(ctx context.Context, params GetMasterchainInfoExtLiteServerParams) (GetMasterchainInfoExtLiteServerRes, error)
+	// GetMasterchainInfoLiteServer implements getMasterchainInfoLiteServer operation.
+	//
+	// Get masterchain info.
+	//
+	// GET /v2/liteserver/get_masterchain_info
+	GetMasterchainInfoLiteServer(ctx context.Context) (GetMasterchainInfoLiteServerRes, error)
 	// GetNftCollection implements getNftCollection operation.
 	//
 	// Get NFT collection by collection address.
@@ -227,6 +281,24 @@ type Handler interface {
 	//
 	// GET /v2/accounts/search
 	GetSearchAccounts(ctx context.Context, params GetSearchAccountsParams) (GetSearchAccountsRes, error)
+	// GetShardBlockProofLiteServer implements getShardBlockProofLiteServer operation.
+	//
+	// Get shard block proof.
+	//
+	// GET /v2/liteserver/get_shard_block_proof/{block_id}
+	GetShardBlockProofLiteServer(ctx context.Context, params GetShardBlockProofLiteServerParams) (GetShardBlockProofLiteServerRes, error)
+	// GetShardInfoLiteServer implements getShardInfoLiteServer operation.
+	//
+	// Get shard info.
+	//
+	// GET /v2/liteserver/get_shard_info/{block_id}
+	GetShardInfoLiteServer(ctx context.Context, params GetShardInfoLiteServerParams) (GetShardInfoLiteServerRes, error)
+	// GetStateLiteServer implements getStateLiteServer operation.
+	//
+	// Get block state.
+	//
+	// GET /v2/liteserver/get_state/{block_id}
+	GetStateLiteServer(ctx context.Context, params GetStateLiteServerParams) (GetStateLiteServerRes, error)
 	// GetStorageProviders implements getStorageProviders operation.
 	//
 	// Get TON storage providers deployed to the blockchain.
@@ -239,6 +311,12 @@ type Handler interface {
 	//
 	// GET /v2/accounts/{account_id}/subscriptions
 	GetSubscriptionsByAccount(ctx context.Context, params GetSubscriptionsByAccountParams) (GetSubscriptionsByAccountRes, error)
+	// GetTimeLiteServer implements getTimeLiteServer operation.
+	//
+	// Get time.
+	//
+	// GET /v2/liteserver/get_time
+	GetTimeLiteServer(ctx context.Context) (GetTimeLiteServerRes, error)
 	// GetTonConnectPayload implements getTonConnectPayload operation.
 	//
 	// Get a payload for further token receipt.
@@ -263,6 +341,12 @@ type Handler interface {
 	//
 	// GET /v2/blockchain/transactions/{transaction_id}
 	GetTransaction(ctx context.Context, params GetTransactionParams) (GetTransactionRes, error)
+	// GetTransactionsLiteServer implements getTransactionsLiteServer operation.
+	//
+	// Get transactions.
+	//
+	// GET /v2/liteserver/get_transactions/{account_id}
+	GetTransactionsLiteServer(ctx context.Context, params GetTransactionsLiteServerParams) (GetTransactionsLiteServerRes, error)
 	// GetValidators implements getValidators operation.
 	//
 	// Get validators.
@@ -293,6 +377,12 @@ type Handler interface {
 	//
 	// POST /v2/blockchain/message
 	SendMessage(ctx context.Context, req SendMessageReq) (SendMessageRes, error)
+	// SendMessageLiteServer implements sendMessageLiteServer operation.
+	//
+	// Send message.
+	//
+	// POST /v2/liteserver/send_message
+	SendMessageLiteServer(ctx context.Context, req SendMessageLiteServerReq) (SendMessageLiteServerRes, error)
 	// SetWalletBackup implements setWalletBackup operation.
 	//
 	// Set backup info.
