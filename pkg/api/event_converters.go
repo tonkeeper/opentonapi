@@ -9,7 +9,6 @@ import (
 
 	rules "github.com/tonkeeper/scam_backoffice_rules"
 	"github.com/tonkeeper/tongo"
-	"github.com/tonkeeper/tongo/utils"
 	"golang.org/x/exp/slices"
 
 	"github.com/tonkeeper/opentonapi/internal/g"
@@ -152,7 +151,7 @@ func (h Handler) convertAction(ctx context.Context, a bath.Action, acceptLanguag
 				Origin: a.TonTransfer.Refund.Origin,
 			})
 		}
-		value := utils.HumanFriendlyCoinsRepr(a.TonTransfer.Amount)
+		value := i18n.FormatTONs(a.TonTransfer.Amount)
 		action.SimplePreview = oas.ActionSimplePreview{
 			Name: "Ton Transfer",
 			Description: i18n.T(acceptLanguage.Value, i18n.C{
@@ -215,7 +214,7 @@ func (h Handler) convertAction(ctx context.Context, a bath.Action, acceptLanguag
 			Subscription: a.Subscription.Subscription.ToRaw(),
 			Initial:      a.Subscription.First,
 		})
-		value := utils.HumanFriendlyCoinsRepr(a.Subscription.Amount)
+		value := i18n.FormatTONs(a.Subscription.Amount)
 		action.SimplePreview = oas.ActionSimplePreview{
 			Name: "Subscription",
 			Description: i18n.T(acceptLanguage.Value, i18n.C{
@@ -240,7 +239,7 @@ func (h Handler) convertAction(ctx context.Context, a bath.Action, acceptLanguag
 		})
 	case bath.NftPurchase:
 		price := a.NftPurchase.Price
-		value := utils.HumanFriendlyCoinsRepr(price)
+		value := i18n.FormatTONs(price)
 		items, err := h.storage.GetNFTs(ctx, []tongo.AccountID{a.NftPurchase.Nft})
 		if err != nil {
 			return oas.Action{}, false, err
@@ -276,7 +275,7 @@ func (h Handler) convertAction(ctx context.Context, a bath.Action, acceptLanguag
 			Buyer:       convertAccountAddress(a.NftPurchase.Buyer, h.addressBook),
 		})
 	case bath.DepositStake:
-		value := utils.HumanFriendlyCoinsRepr(a.DepositStake.Amount)
+		value := i18n.FormatTONs(a.DepositStake.Amount)
 		action.DepositStake.SetTo(oas.DepositStakeAction{
 			Amount: a.DepositStake.Amount,
 			Staker: convertAccountAddress(a.DepositStake.Staker, h.addressBook),
@@ -293,7 +292,7 @@ func (h Handler) convertAction(ctx context.Context, a bath.Action, acceptLanguag
 			Accounts: distinctAccounts(h.addressBook, &a.DepositStake.Elector, &a.DepositStake.Staker),
 		}
 	case bath.RecoverStake:
-		value := utils.HumanFriendlyCoinsRepr(a.RecoverStake.Amount)
+		value := i18n.FormatTONs(a.RecoverStake.Amount)
 		action.RecoverStake.SetTo(oas.RecoverStakeAction{
 			Amount: a.RecoverStake.Amount,
 			Staker: convertAccountAddress(a.RecoverStake.Staker, h.addressBook),
