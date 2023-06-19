@@ -14,23 +14,23 @@ func TestFormatTONs(t *testing.T) {
 	}{
 		{
 			amount: 33000_544_000_000,
-			want:   "33,000.544",
+			want:   "33,000.544 TON",
 		},
 		{
 			amount: 33000_000_000_000,
-			want:   "33,000",
+			want:   "33,000 TON",
 		},
 		{
 			amount: 1_000_000_000,
-			want:   "1",
+			want:   "1 TON",
 		},
 		{
 			amount: 1_000_000,
-			want:   "0.001",
+			want:   "0.001 TON",
 		},
 		{
 			amount: 566_450_333_222_111,
-			want:   "566,450.333222111",
+			want:   "566,450.333222111 TON",
 		},
 	}
 	for _, tt := range tests {

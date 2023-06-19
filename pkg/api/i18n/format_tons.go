@@ -1,6 +1,7 @@
 package i18n
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/shopspring/decimal"
@@ -14,11 +15,11 @@ func FormatTONs(amount int64) string {
 	x := decimal.New(amount, -9)
 	intPart := p.Sprintf("%v", x.IntPart())
 	if x.Equal(decimal.New(x.IntPart(), 0)) {
-		return intPart
+		return fmt.Sprintf("%v TON", intPart)
 	}
 	parts := strings.Split(x.String(), ".")
 	if len(parts) != 2 {
-		return intPart
+		return fmt.Sprintf("%v TON", intPart)
 	}
-	return intPart + "." + parts[1]
+	return fmt.Sprintf("%v.%v TON", intPart, parts[1])
 }
