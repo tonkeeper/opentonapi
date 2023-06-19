@@ -91,7 +91,7 @@ func FindRecoverStake(bubble *Bubble) bool {
 		return false
 	}
 	recoverStake := BubbleRecoverStake{
-		Amount: bubbleTx.inputAmount,
+		Amount: 0,
 		Staker: bubbleTx.inputFrom.Address,
 	}
 	newBubble := Bubble{
@@ -108,6 +108,7 @@ func FindRecoverStake(bubble *Bubble) bool {
 				return nil
 			}
 			recoverStake.Success = true
+			recoverStake.Amount = response.inputAmount
 			newBubble.ValueFlow.Merge(child.ValueFlow)
 			return &Merge{children: child.Children}
 		})
