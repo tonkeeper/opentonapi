@@ -2101,7 +2101,7 @@ components:
       required:
         - validators
       properties:
-        transactions:
+        validators:
           type: array
           items:
             $ref: '#/components/schemas/Validator'
