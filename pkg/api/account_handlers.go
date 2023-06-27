@@ -200,6 +200,9 @@ func (h Handler) GetDnsExpiring(ctx context.Context, params oas.GetDnsExpiringPa
 	}
 	accounts := make([]tongo.AccountID, 0, len(dnsExpiring))
 	var response oas.DnsExpiring
+	if len(dnsExpiring) == 0 {
+		return &response, nil
+	}
 	for _, dns := range dnsExpiring {
 		if dns.DnsItem != nil {
 			accounts = append(accounts, dns.DnsItem.Address)

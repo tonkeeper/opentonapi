@@ -28,4 +28,5 @@ type LiquidPool struct {
 	Address         tongo.AccountID
 	TotalAmount     int64
 	VerifiedSources bool
+	JettonMaster    tongo.AccountID
 }

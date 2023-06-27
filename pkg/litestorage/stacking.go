@@ -165,11 +165,11 @@ func (s *LiteStorage) GetTFPools(ctx context.Context, onlyVerified bool) ([]core
 	return result, nil
 }
 func (s *LiteStorage) GetLiquidPool(ctx context.Context, pool tongo.AccountID) (core.LiquidPool, error) {
-	_, v, err := abi.GetFinanceData(ctx, s.client, pool)
+	_, v, err := abi.GetPoolFullData(ctx, s.client, pool)
 	if err != nil {
 		return core.LiquidPool{}, err
 	}
-	p, ok := v.(abi.GetFinanceData_PoolResult)
+	p, ok := v.(abi.GetPoolFullDataResult)
 	if !ok {
 		return core.LiquidPool{}, fmt.Errorf("invalid type")
 	}
@@ -179,10 +179,15 @@ func (s *LiteStorage) GetLiquidPool(ctx context.Context, pool tongo.AccountID) (
 	}
 	code := state.Account.Account.Storage.State.AccountActive.StateInit.Code.Value.Value
 	hash, err := code.Hash()
+	jettonMaster, err := tongo.AccountIDFromTlb(p.JettonMinter)
+	if err != nil || jettonMaster == nil {
+		return core.LiquidPool{}, fmt.Errorf("invalid pool jetton %v", jettonMaster)
+	}
 	return core.LiquidPool{
 		Address:         pool,
 		TotalAmount:     p.TotalBalance,
 		VerifiedSources: bytes.Equal(hash, references.TFLiquidPoolCodeHash[:]),
+		JettonMaster:    *jettonMaster,
 	}, err
 }
 

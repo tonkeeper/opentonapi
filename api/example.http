@@ -61,6 +61,9 @@ GET {{host}}/v2/nfts/collections/EQDaaxtmY6Dk0YzIV0zNnbUpbjZ92TJHBvO72esc0srwv8K
 GET {{host}}/v2/dns/auctions
 
 ###
+GET {{host}}/v2/dns/abdul.ton/bids
+
+###
 GET {{host}}/v2/accounts/EQDD3n4osteDDhhSerivXKBzi-IJbIhCTkxRYSlhHEh_hyAW/publickey
 
 ###

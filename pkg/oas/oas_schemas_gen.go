@@ -833,6 +833,32 @@ const (
 	ActionTypeUnknown           ActionType = "Unknown"
 )
 
+// Ref: #/components/schemas/ApyHistory
+type ApyHistory struct {
+	Apy  float64 `json:"apy"`
+	Time int     `json:"time"`
+}
+
+// GetApy returns the value of Apy.
+func (s ApyHistory) GetApy() float64 {
+	return s.Apy
+}
+
+// GetTime returns the value of Time.
+func (s ApyHistory) GetTime() int {
+	return s.Time
+}
+
+// SetApy sets the value of Apy.
+func (s *ApyHistory) SetApy(val float64) {
+	s.Apy = val
+}
+
+// SetTime sets the value of Time.
+func (s *ApyHistory) SetTime(val int) {
+	s.Time = val
+}
+
 // Ref: #/components/schemas/Auction
 type Auction struct {
 	Domain string `json:"domain"`
@@ -1044,6 +1070,7 @@ func (*BadRequest) poolsByNominatorsRes()            {}
 func (*BadRequest) reindexAccountRes()               {}
 func (*BadRequest) sendMessageRes()                  {}
 func (*BadRequest) setWalletBackupRes()              {}
+func (*BadRequest) stakingPoolHistoryRes()           {}
 func (*BadRequest) stakingPoolInfoRes()              {}
 func (*BadRequest) stakingPoolsRes()                 {}
 func (*BadRequest) tonConnectProofRes()              {}
@@ -2270,6 +2297,7 @@ func (*InternalError) poolsByNominatorsRes()            {}
 func (*InternalError) reindexAccountRes()               {}
 func (*InternalError) sendMessageRes()                  {}
 func (*InternalError) setWalletBackupRes()              {}
+func (*InternalError) stakingPoolHistoryRes()           {}
 func (*InternalError) stakingPoolInfoRes()              {}
 func (*InternalError) stakingPoolsRes()                 {}
 func (*InternalError) tonConnectProofRes()              {}
@@ -3407,6 +3435,7 @@ func (*NotFound) getTraceRes()                  {}
 func (*NotFound) getTracesByAccountRes()        {}
 func (*NotFound) getTransactionRes()            {}
 func (*NotFound) poolsByNominatorsRes()         {}
+func (*NotFound) stakingPoolHistoryRes()        {}
 func (*NotFound) stakingPoolInfoRes()           {}
 func (*NotFound) stakingPoolsRes()              {}
 
@@ -5609,6 +5638,22 @@ func (s *SmartContractAction) SetRefund(val OptRefund) {
 	s.Refund = val
 }
 
+type StakingPoolHistoryOK struct {
+	Apy []ApyHistory `json:"apy"`
+}
+
+// GetApy returns the value of Apy.
+func (s StakingPoolHistoryOK) GetApy() []ApyHistory {
+	return s.Apy
+}
+
+// SetApy sets the value of Apy.
+func (s *StakingPoolHistoryOK) SetApy(val []ApyHistory) {
+	s.Apy = val
+}
+
+func (*StakingPoolHistoryOK) stakingPoolHistoryRes() {}
+
 type StakingPoolInfoOK struct {
 	Implementation PoolImplementation `json:"implementation"`
 	Pool           PoolInfo           `json:"pool"`
@@ -6721,6 +6766,7 @@ func (*UnauthorizedError) poolsByNominatorsRes()            {}
 func (*UnauthorizedError) reindexAccountRes()               {}
 func (*UnauthorizedError) sendMessageRes()                  {}
 func (*UnauthorizedError) setWalletBackupRes()              {}
+func (*UnauthorizedError) stakingPoolHistoryRes()           {}
 func (*UnauthorizedError) stakingPoolInfoRes()              {}
 func (*UnauthorizedError) stakingPoolsRes()                 {}
 func (*UnauthorizedError) tonConnectProofRes()              {}

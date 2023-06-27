@@ -445,6 +445,15 @@ func (UnimplementedHandler) SetWalletBackup(ctx context.Context, req SetWalletBa
 	return r, ht.ErrNotImplemented
 }
 
+// StakingPoolHistory implements stakingPoolHistory operation.
+//
+// Pool info.
+//
+// GET /v2/staking/pool/{account_id}/history
+func (UnimplementedHandler) StakingPoolHistory(ctx context.Context, params StakingPoolHistoryParams) (r StakingPoolHistoryRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // StakingPoolInfo implements stakingPoolInfo operation.
 //
 // Pool info.

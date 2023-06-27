@@ -1149,6 +1149,37 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/InternalError'
+  /v2/staking/pool/{account_id}/history:
+    get:
+      description: Pool info
+      operationId: stakingPoolHistory
+      tags:
+        - Staking
+      parameters:
+        - $ref: '#/components/parameters/accountIdParameter'
+      responses:
+        '200':
+          description: "history"
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - apy
+                properties:
+                  apy:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ApyHistory'
+
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
   /v2/staking/pools:
     get:
       description: All pools available in network
@@ -1510,7 +1541,7 @@ components:
         type: integer
         default: 30
         minimum: 1
-        maximum: 360
+        maximum: 366
     collectionQuery:
       in: query
       name: collection
@@ -2978,6 +3009,17 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/TraceId'
+
+    ApyHistory:
+      type: object
+      required:
+        - apy
+        - time
+      properties:
+        apy:
+          type: number
+        time:
+          type: integer
 
     Subscription:
       type: object

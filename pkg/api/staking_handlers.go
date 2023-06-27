@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/tonkeeper/tongo"
 	"golang.org/x/exp/slices"
@@ -193,4 +194,8 @@ func (h Handler) PoolsByNominators(ctx context.Context, params oas.PoolsByNomina
 		})
 	}
 	return &result, nil
+}
+
+func (h Handler) StakingPoolHistory(ctx context.Context, params oas.StakingPoolHistoryParams) (oas.StakingPoolHistoryRes, error) {
+	return nil, fmt.Errorf("not implemented")
 }

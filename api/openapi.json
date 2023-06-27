@@ -131,7 +131,7 @@
     "required": false,
     "schema": {
      "default": 30,
-     "maximum": 360,
+     "maximum": 366,
      "minimum": 1,
      "type": "integer"
     }
@@ -829,6 +829,21 @@
      "name",
      "description",
      "accounts"
+    ],
+    "type": "object"
+   },
+   "ApyHistory": {
+    "properties": {
+     "apy": {
+      "type": "number"
+     },
+     "time": {
+      "type": "integer"
+     }
+    },
+    "required": [
+     "apy",
+     "time"
     ],
     "type": "object"
    },
@@ -4668,6 +4683,55 @@
        }
       },
       "description": "user pools"
+     },
+     "400": {
+      "$ref": "#/components/responses/BadRequest"
+     },
+     "401": {
+      "$ref": "#/components/responses/UnauthorizedError"
+     },
+     "404": {
+      "$ref": "#/components/responses/NotFound"
+     },
+     "500": {
+      "$ref": "#/components/responses/InternalError"
+     }
+    },
+    "tags": [
+     "Staking"
+    ]
+   }
+  },
+  "/v2/staking/pool/{account_id}/history": {
+   "get": {
+    "description": "Pool info",
+    "operationId": "stakingPoolHistory",
+    "parameters": [
+     {
+      "$ref": "#/components/parameters/accountIdParameter"
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "apy": {
+           "items": {
+            "$ref": "#/components/schemas/ApyHistory"
+           },
+           "type": "array"
+          }
+         },
+         "required": [
+          "apy"
+         ],
+         "type": "object"
+        }
+       }
+      },
+      "description": "history"
      },
      "400": {
       "$ref": "#/components/responses/BadRequest"

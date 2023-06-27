@@ -299,6 +299,12 @@ type Handler interface {
 	//
 	// PUT /v2/wallet/backup
 	SetWalletBackup(ctx context.Context, req SetWalletBackupReq, params SetWalletBackupParams) (SetWalletBackupRes, error)
+	// StakingPoolHistory implements stakingPoolHistory operation.
+	//
+	// Pool info.
+	//
+	// GET /v2/staking/pool/{account_id}/history
+	StakingPoolHistory(ctx context.Context, params StakingPoolHistoryParams) (StakingPoolHistoryRes, error)
 	// StakingPoolInfo implements stakingPoolInfo operation.
 	//
 	// Pool info.

@@ -1063,7 +1063,7 @@ func decodeGetDnsExpiringParams(args [1]string, r *http.Request) (params GetDnsE
 							MinSet:        true,
 							Min:           1,
 							MaxSet:        true,
-							Max:           360,
+							Max:           366,
 							MinExclusive:  false,
 							MaxExclusive:  false,
 							MultipleOfSet: false,
@@ -3666,6 +3666,58 @@ func decodeSetWalletBackupParams(args [0]string, r *http.Request) (params SetWal
 			}
 		} else {
 			return params, errors.New("header: X-TonConnect-Auth: not specified")
+		}
+	}
+	return params, nil
+}
+
+// StakingPoolHistoryParams is parameters of stakingPoolHistory operation.
+type StakingPoolHistoryParams struct {
+	// Account ID.
+	AccountID string
+}
+
+func unpackStakingPoolHistoryParams(packed middleware.Parameters) (params StakingPoolHistoryParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "account_id",
+			In:   "path",
+		}
+		params.AccountID = packed[key].(string)
+	}
+	return params
+}
+
+func decodeStakingPoolHistoryParams(args [1]string, r *http.Request) (params StakingPoolHistoryParams, _ error) {
+	// Decode path: account_id.
+	{
+		param := args[0]
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "account_id",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.AccountID = c
+				return nil
+			}(); err != nil {
+				return params, errors.Wrap(err, "path: account_id: parse")
+			}
+		} else {
+			return params, errors.New("path: account_id: not specified")
 		}
 	}
 	return params, nil

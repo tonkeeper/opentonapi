@@ -189,6 +189,10 @@ type SetWalletBackupRes interface {
 	setWalletBackupRes()
 }
 
+type StakingPoolHistoryRes interface {
+	stakingPoolHistoryRes()
+}
+
 type StakingPoolInfoRes interface {
 	stakingPoolInfoRes()
 }
