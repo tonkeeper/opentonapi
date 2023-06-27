@@ -6742,17 +6742,17 @@ func (s *Validator) SetAddress(val string) {
 
 // Ref: #/components/schemas/Validators
 type Validators struct {
-	Transactions []Validator `json:"transactions"`
+	Validators []Validator `json:"validators"`
 }
 
-// GetTransactions returns the value of Transactions.
-func (s Validators) GetTransactions() []Validator {
-	return s.Transactions
+// GetValidators returns the value of Validators.
+func (s Validators) GetValidators() []Validator {
+	return s.Validators
 }
 
-// SetTransactions sets the value of Transactions.
-func (s *Validators) SetTransactions(val []Validator) {
-	s.Transactions = val
+// SetValidators sets the value of Validators.
+func (s *Validators) SetValidators(val []Validator) {
+	s.Validators = val
 }
 
 func (*Validators) getValidatorsRes() {}

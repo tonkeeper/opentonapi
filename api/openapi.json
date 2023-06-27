@@ -2843,7 +2843,7 @@
    },
    "Validators": {
     "properties": {
-     "transactions": {
+     "validators": {
       "items": {
        "$ref": "#/components/schemas/Validator"
       },
