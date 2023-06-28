@@ -114,8 +114,19 @@ func optionalFromMeta(metadata oas.NftItemMetadata, name string) string {
 	return strings.Trim(string(value), `"`)
 }
 
-func (h Handler) convertAction(ctx context.Context, a bath.Action, acceptLanguage oas.OptString) (oas.Action, bool, error) {
+// signedValue adds either + or - in front of the provided value depending on who is looking at a simple preview.
+func signedValue(value string, viewer, source, destination tongo.AccountID) string {
+	if viewer == source {
+		return fmt.Sprintf("-%s", value)
+	}
+	if viewer == destination {
+		return fmt.Sprintf("+%s", value)
+	}
+	return value
 
+}
+
+func (h Handler) convertAction(ctx context.Context, viewer tongo.AccountID, a bath.Action, acceptLanguage oas.OptString) (oas.Action, bool, error) {
 	action := oas.Action{
 		Type: oas.ActionType(a.Type),
 	}
@@ -288,7 +299,7 @@ func (h Handler) convertAction(ctx context.Context, a bath.Action, acceptLanguag
 					"Amount": value,
 				},
 			}),
-			Value:    oas.NewOptString(value),
+			Value:    oas.NewOptString(signedValue(value, viewer, a.DepositStake.Staker, a.DepositStake.Elector)),
 			Accounts: distinctAccounts(h.addressBook, &a.DepositStake.Elector, &a.DepositStake.Staker),
 		}
 	case bath.RecoverStake:
@@ -305,7 +316,7 @@ func (h Handler) convertAction(ctx context.Context, a bath.Action, acceptLanguag
 					"Amount": value,
 				},
 			}),
-			Value:    oas.NewOptString(value),
+			Value:    oas.NewOptString(signedValue(value, viewer, a.RecoverStake.Elector, a.RecoverStake.Staker)),
 			Accounts: distinctAccounts(h.addressBook, &a.RecoverStake.Elector, &a.RecoverStake.Staker),
 		}
 	case bath.SmartContractExec:
@@ -394,7 +405,7 @@ func (h Handler) toEvent(ctx context.Context, trace *core.Trace, result *bath.Ac
 		InProgress: trace.InProgress(),
 	}
 	for i, a := range result.Actions {
-		convertedAction, spamDetected, err := h.convertAction(ctx, a, lang)
+		convertedAction, spamDetected, err := h.convertAction(ctx, tongo.AccountID{}, a, lang)
 		if err != nil {
 			return oas.Event{}, err
 		}
@@ -419,7 +430,7 @@ func (h Handler) toAccountEvent(ctx context.Context, account tongo.AccountID, tr
 		Extra:      result.Extra(account, trace),
 	}
 	for _, a := range result.Actions {
-		convertedAction, spamDetected, err := h.convertAction(ctx, a, lang)
+		convertedAction, spamDetected, err := h.convertAction(ctx, account, a, lang)
 		if err != nil {
 			return oas.AccountEvent{}, err
 		}
