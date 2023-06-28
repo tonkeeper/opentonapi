@@ -63,7 +63,7 @@ func (h Handler) convertJettonHistory(ctx context.Context, account tongo.Account
 			InProgress: trace.InProgress(),
 		}
 		for _, action := range result.Actions {
-			convertedAction, spamDetected, err := h.convertAction(ctx, action, acceptLanguage)
+			convertedAction, spamDetected, err := h.convertAction(ctx, account, action, acceptLanguage)
 			if err != nil {
 				return nil, 0, err
 			}
