@@ -11,14 +11,15 @@ import (
 )
 
 // Risk specifies assets that could be lost
-// if a message would be sent to a malicious smart contract.
+// if a message was taken from a malicious actor.
 // It makes sense to understand the risk BEFORE sending a message to the blockchain.
 type Risk struct {
 	// According to https://docs.ton.org/develop/smart-contracts/messages#message-modes
 	TransferAllRemainingBalance bool
 	Ton                         uint64
-	Jettons                     map[tongo.AccountID]big.Int
-	Nfts                        []tongo.AccountID
+	// Jettons are not normalized and have to be post-processed with respect to Jetton masters' decimals.
+	Jettons map[tongo.AccountID]big.Int
+	Nfts    []tongo.AccountID
 }
 
 func ExtractRisk(version walletTongo.Version, msg *boc.Cell) (*Risk, error) {
@@ -60,6 +61,15 @@ func ExtractRisk(version walletTongo.Version, msg *boc.Cell) (*Risk, error) {
 			}
 			// here, destination is an NFT
 			risk.Nfts = append(risk.Nfts, *destination)
+		case abi.JettonBurnMsgBody:
+			if destination == nil {
+				continue
+			}
+			// here, destination is a jetton wallet
+			amount := big.Int(x.Amount)
+			currentJettons := risk.Jettons[*destination]
+			var total big.Int
+			risk.Jettons[*destination] = *total.Add(&currentJettons, &amount)
 		case abi.JettonTransferMsgBody:
 			if destination == nil {
 				continue
