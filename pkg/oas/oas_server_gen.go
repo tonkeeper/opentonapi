@@ -80,6 +80,12 @@ type Handler interface {
 	//
 	// POST /v2/accounts/_bulk
 	GetAccounts(ctx context.Context, req OptGetAccountsReq) (GetAccountsRes, error)
+	// GetAccountsByPublicKey implements getAccountsByPublicKey operation.
+	//
+	// Get accounts by public key.
+	//
+	// GET /v2/accounts/{public_key}/resolve
+	GetAccountsByPublicKey(ctx context.Context, params GetAccountsByPublicKeyParams) (GetAccountsByPublicKeyRes, error)
 	// GetAllAuctions implements getAllAuctions operation.
 	//
 	// Get all auctions.

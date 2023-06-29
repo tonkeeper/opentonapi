@@ -1273,6 +1273,105 @@ func (s *Server) handleGetAccountsRequest(args [0]string, w http.ResponseWriter,
 	}
 }
 
+// handleGetAccountsByPublicKeyRequest handles getAccountsByPublicKey operation.
+//
+// Get accounts by public key.
+//
+// GET /v2/accounts/{public_key}/resolve
+func (s *Server) handleGetAccountsByPublicKeyRequest(args [1]string, w http.ResponseWriter, r *http.Request) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("getAccountsByPublicKey"),
+	}
+
+	// Start a span for this request.
+	ctx, span := s.cfg.Tracer.Start(r.Context(), "GetAccountsByPublicKey",
+		trace.WithAttributes(otelAttrs...),
+		serverSpanKind,
+	)
+	defer span.End()
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		elapsedDuration := time.Since(startTime)
+		s.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+	}()
+
+	// Increment request counter.
+	s.requests.Add(ctx, 1, otelAttrs...)
+
+	var (
+		recordError = func(stage string, err error) {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			s.errors.Add(ctx, 1, otelAttrs...)
+		}
+		err          error
+		opErrContext = ogenerrors.OperationContext{
+			Name: "GetAccountsByPublicKey",
+			ID:   "getAccountsByPublicKey",
+		}
+	)
+	params, err := decodeGetAccountsByPublicKeyParams(args, r)
+	if err != nil {
+		err = &ogenerrors.DecodeParamsError{
+			OperationContext: opErrContext,
+			Err:              err,
+		}
+		recordError("DecodeParams", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+
+	var response GetAccountsByPublicKeyRes
+	if m := s.cfg.Middleware; m != nil {
+		mreq := middleware.Request{
+			Context:       ctx,
+			OperationName: "GetAccountsByPublicKey",
+			OperationID:   "getAccountsByPublicKey",
+			Body:          nil,
+			Params: middleware.Parameters{
+				{
+					Name: "public_key",
+					In:   "path",
+				}: params.PublicKey,
+			},
+			Raw: r,
+		}
+
+		type (
+			Request  = struct{}
+			Params   = GetAccountsByPublicKeyParams
+			Response = GetAccountsByPublicKeyRes
+		)
+		response, err = middleware.HookMiddleware[
+			Request,
+			Params,
+			Response,
+		](
+			m,
+			mreq,
+			unpackGetAccountsByPublicKeyParams,
+			func(ctx context.Context, request Request, params Params) (Response, error) {
+				return s.h.GetAccountsByPublicKey(ctx, params)
+			},
+		)
+	} else {
+		response, err = s.h.GetAccountsByPublicKey(ctx, params)
+	}
+	if err != nil {
+		recordError("Internal", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+
+	if err := encodeGetAccountsByPublicKeyResponse(response, w, span); err != nil {
+		recordError("EncodeResponse", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+}
+
 // handleGetAllAuctionsRequest handles getAllAuctions operation.
 //
 // Get all auctions.

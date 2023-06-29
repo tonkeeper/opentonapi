@@ -45,6 +45,10 @@ type GetAccountTransactionsRes interface {
 	getAccountTransactionsRes()
 }
 
+type GetAccountsByPublicKeyRes interface {
+	getAccountsByPublicKeyRes()
+}
+
 type GetAccountsRes interface {
 	getAccountsRes()
 }

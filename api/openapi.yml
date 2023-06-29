@@ -797,6 +797,27 @@ paths:
           $ref: '#/components/responses/UnauthorizedError'
         '500':
           $ref: '#/components/responses/InternalError'
+  /v2/accounts/{public_key}/resolve:
+    get:
+      description: "Get accounts by public key"
+      operationId: getAccountsByPublicKey
+      tags:
+        - Accounts
+      parameters:
+        - $ref: '#/components/parameters/publicKeyParameter'
+      responses:
+        '200':
+          description: a list of accounts
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Accounts'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalError'
 
   /v2/dns/{domain_name}:
     get:
@@ -1509,6 +1530,13 @@ components:
       schema:
         type: string
         example: 97264395BD65A255A429B11326C84128B7D70FFED7949ABAE3036D506BA38621
+    publicKeyParameter:
+      in: path
+      name: public_key
+      required: true
+      schema:
+        type: string
+        example: NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2ODQ3...
     i18n:
       in: header
       name: Accept-Language

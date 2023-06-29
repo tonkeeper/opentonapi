@@ -136,6 +136,15 @@
      "type": "integer"
     }
    },
+   "publicKeyParameter": {
+    "in": "path",
+    "name": "public_key",
+    "required": true,
+    "schema": {
+     "example": "NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2ODQ3...",
+     "type": "string"
+    }
+   },
    "traceIdParameter": {
     "description": "trace ID or transaction hash in hex (without 0x) or base64url format",
     "in": "path",
@@ -3690,6 +3699,41 @@
      },
      "404": {
       "$ref": "#/components/responses/NotFound"
+     },
+     "500": {
+      "$ref": "#/components/responses/InternalError"
+     }
+    },
+    "tags": [
+     "Accounts"
+    ]
+   }
+  },
+  "/v2/accounts/{public_key}/resolve": {
+   "get": {
+    "description": "Get accounts by public key",
+    "operationId": "getAccountsByPublicKey",
+    "parameters": [
+     {
+      "$ref": "#/components/parameters/publicKeyParameter"
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Accounts"
+        }
+       }
+      },
+      "description": "a list of accounts"
+     },
+     "400": {
+      "$ref": "#/components/responses/BadRequest"
+     },
+     "401": {
+      "$ref": "#/components/responses/UnauthorizedError"
      },
      "500": {
       "$ref": "#/components/responses/InternalError"

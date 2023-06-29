@@ -516,7 +516,8 @@ func (s *Accounts) SetAccounts(val []Account) {
 	s.Accounts = val
 }
 
-func (*Accounts) getAccountsRes() {}
+func (*Accounts) getAccountsByPublicKeyRes() {}
+func (*Accounts) getAccountsRes()            {}
 
 // Ref: #/components/schemas/Action
 type Action struct {
@@ -1039,6 +1040,7 @@ func (*BadRequest) execGetMethodRes()                {}
 func (*BadRequest) getAccountInfoByStateInitRes()    {}
 func (*BadRequest) getAccountRes()                   {}
 func (*BadRequest) getAccountTransactionsRes()       {}
+func (*BadRequest) getAccountsByPublicKeyRes()       {}
 func (*BadRequest) getAccountsRes()                  {}
 func (*BadRequest) getBlockRes()                     {}
 func (*BadRequest) getBlockTransactionsRes()         {}
@@ -2261,6 +2263,7 @@ func (*InternalError) execGetMethodRes()                {}
 func (*InternalError) getAccountInfoByStateInitRes()    {}
 func (*InternalError) getAccountRes()                   {}
 func (*InternalError) getAccountTransactionsRes()       {}
+func (*InternalError) getAccountsByPublicKeyRes()       {}
 func (*InternalError) getAccountsRes()                  {}
 func (*InternalError) getAllAuctionsRes()               {}
 func (*InternalError) getBlockRes()                     {}
@@ -6730,6 +6733,7 @@ func (*UnauthorizedError) execGetMethodRes()                {}
 func (*UnauthorizedError) getAccountInfoByStateInitRes()    {}
 func (*UnauthorizedError) getAccountRes()                   {}
 func (*UnauthorizedError) getAccountTransactionsRes()       {}
+func (*UnauthorizedError) getAccountsByPublicKeyRes()       {}
 func (*UnauthorizedError) getAccountsRes()                  {}
 func (*UnauthorizedError) getAllAuctionsRes()               {}
 func (*UnauthorizedError) getBlockRes()                     {}

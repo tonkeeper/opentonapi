@@ -281,6 +281,43 @@ func (h Handler) GetSubscriptionsByAccount(ctx context.Context, params oas.GetSu
 	return &response, nil
 }
 
+func (h Handler) GetAccountsByPublicKey(ctx context.Context, params oas.GetAccountsByPublicKeyParams) (oas.GetAccountsByPublicKeyRes, error) {
+	publicKey, err := hex.DecodeString(params.PublicKey)
+	if err != nil {
+		return &oas.BadRequest{Error: err.Error()}, nil
+	}
+	versions := []walletTongo.Version{
+		walletTongo.V1R1, walletTongo.V1R2, walletTongo.V1R3,
+		walletTongo.V2R1, walletTongo.V2R2,
+		walletTongo.V3R1, walletTongo.V3R2,
+		walletTongo.V4R1, walletTongo.V4R2,
+	}
+	var walletAddresses []tongo.AccountID
+	for _, version := range versions {
+		walletAddress, err := walletTongo.GenerateWalletAddress(publicKey, version, 0, nil)
+		if err != nil {
+			continue
+		}
+		walletAddresses = append(walletAddresses, walletAddress)
+	}
+	accounts, err := h.storage.GetRawAccounts(ctx, walletAddresses)
+	if err != nil {
+		return &oas.InternalError{Error: err.Error()}, nil
+	}
+	results := make([]oas.Account, 0, len(accounts))
+	for _, account := range accounts {
+		ab, found := h.addressBook.GetAddressInfoByAddress(account.AccountAddress)
+		var res oas.Account
+		if found {
+			res = convertToAccount(account, &ab)
+		} else {
+			res = convertToAccount(account, nil)
+		}
+		results = append(results, res)
+	}
+	return &oas.Accounts{Accounts: results}, nil
+}
+
 func pubkeyFromCodeData(code, data []byte) ([]byte, error) {
 	cells, err := boc.DeserializeBoc(code)
 	if err != nil {

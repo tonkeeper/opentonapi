@@ -347,25 +347,57 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 							return
 						}
-					case 'r': // Prefix: "reindex"
-						if l := len("reindex"); len(elem) >= l && elem[0:l] == "reindex" {
+					case 'r': // Prefix: "re"
+						if l := len("re"); len(elem) >= l && elem[0:l] == "re" {
 							elem = elem[l:]
 						} else {
 							break
 						}
 
 						if len(elem) == 0 {
-							// Leaf node.
-							switch r.Method {
-							case "POST":
-								s.handleReindexAccountRequest([1]string{
-									args[0],
-								}, w, r)
-							default:
-								s.notAllowed(w, r, "POST")
+							break
+						}
+						switch elem[0] {
+						case 'i': // Prefix: "index"
+							if l := len("index"); len(elem) >= l && elem[0:l] == "index" {
+								elem = elem[l:]
+							} else {
+								break
 							}
 
-							return
+							if len(elem) == 0 {
+								// Leaf node.
+								switch r.Method {
+								case "POST":
+									s.handleReindexAccountRequest([1]string{
+										args[0],
+									}, w, r)
+								default:
+									s.notAllowed(w, r, "POST")
+								}
+
+								return
+							}
+						case 's': // Prefix: "solve"
+							if l := len("solve"); len(elem) >= l && elem[0:l] == "solve" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							if len(elem) == 0 {
+								// Leaf node.
+								switch r.Method {
+								case "GET":
+									s.handleGetAccountsByPublicKeyRequest([1]string{
+										args[0],
+									}, w, r)
+								default:
+									s.notAllowed(w, r, "GET")
+								}
+
+								return
+							}
 						}
 					case 's': // Prefix: "subscriptions"
 						if l := len("subscriptions"); len(elem) >= l && elem[0:l] == "subscriptions" {
@@ -1685,24 +1717,56 @@ func (s *Server) FindRoute(method, path string) (r Route, _ bool) {
 								return
 							}
 						}
-					case 'r': // Prefix: "reindex"
-						if l := len("reindex"); len(elem) >= l && elem[0:l] == "reindex" {
+					case 'r': // Prefix: "re"
+						if l := len("re"); len(elem) >= l && elem[0:l] == "re" {
 							elem = elem[l:]
 						} else {
 							break
 						}
 
 						if len(elem) == 0 {
-							switch method {
-							case "POST":
-								// Leaf: ReindexAccount
-								r.name = "ReindexAccount"
-								r.operationID = "reindexAccount"
-								r.args = args
-								r.count = 1
-								return r, true
-							default:
-								return
+							break
+						}
+						switch elem[0] {
+						case 'i': // Prefix: "index"
+							if l := len("index"); len(elem) >= l && elem[0:l] == "index" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							if len(elem) == 0 {
+								switch method {
+								case "POST":
+									// Leaf: ReindexAccount
+									r.name = "ReindexAccount"
+									r.operationID = "reindexAccount"
+									r.args = args
+									r.count = 1
+									return r, true
+								default:
+									return
+								}
+							}
+						case 's': // Prefix: "solve"
+							if l := len("solve"); len(elem) >= l && elem[0:l] == "solve" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							if len(elem) == 0 {
+								switch method {
+								case "GET":
+									// Leaf: GetAccountsByPublicKey
+									r.name = "GetAccountsByPublicKey"
+									r.operationID = "getAccountsByPublicKey"
+									r.args = args
+									r.count = 1
+									return r, true
+								default:
+									return
+								}
 							}
 						}
 					case 's': // Prefix: "subscriptions"
