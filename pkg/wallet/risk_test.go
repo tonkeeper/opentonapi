@@ -47,6 +47,16 @@ func TestExtractRisk(t *testing.T) {
 				},
 			},
 		},
+		{
+			name: "jetton burn",
+			boc:  "te6ccgEBAwEA0QAB4YgA2ZpktQsYby0n9cV5VWOFINBjScIU2HdondFsK3lDpEAERYqYf/AQLsoaKRNPN7EZ6psYUfF6tePIUVmp73mKuJUnCLzm6Dg21F+C61R6vR7J4MlVKpZI+j1Z712vFW6oUU1NGLsk2BJoAAAB0AAcAQGHYgAJB2aiF7KQ/MqPG/iowHH4XVJoO7U00zTZL6YsVn8DKaHc1lAAAAAAAAAAAAAAAAAAAFlfB7x2mKNkA9fVjzGM4yMCACj1wAJckeZgvsTeh8gmpa+viwUnkQ==",
+			want: &Risk{
+				Jettons: map[tongo.AccountID]big.Int{
+					tongo.MustParseAccountID("0:120ecd442f6521f9951e37f15180e3f0baa4d0776a69a669b25f4c58acfe0653"): *big.NewInt(1625650),
+				},
+				Ton: 1_000_000_000,
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
