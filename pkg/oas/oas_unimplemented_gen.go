@@ -220,6 +220,15 @@ func (UnimplementedHandler) GetJettonInfo(ctx context.Context, params GetJettonI
 	return r, ht.ErrNotImplemented
 }
 
+// GetJettons implements getJettons operation.
+//
+// Get a list of all indexed jetton masters in the blockchain.
+//
+// GET /v2/jettons
+func (UnimplementedHandler) GetJettons(ctx context.Context, params GetJettonsParams) (r GetJettonsRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // GetJettonsBalances implements getJettonsBalances operation.
 //
 // Get all Jettons balances by owner address.

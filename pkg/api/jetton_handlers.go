@@ -107,3 +107,43 @@ func (h Handler) GetJettonsHistoryByID(ctx context.Context, params oas.GetJetton
 	events, lastLT, err := h.convertJettonHistory(ctx, account, traceIDs, params.AcceptLanguage)
 	return &oas.AccountEvents{Events: events, NextFrom: lastLT}, nil
 }
+
+func (h Handler) GetJettons(ctx context.Context, params oas.GetJettonsParams) (r oas.GetJettonsRes, _ error) {
+	limit := 1000
+	offset := 0
+	if params.Limit.IsSet() {
+		limit = int(params.Limit.Value)
+	}
+	if limit > 1000 {
+		limit = 1000
+	}
+	if limit < 0 {
+		limit = 1000
+	}
+	if params.Offset.IsSet() {
+		offset = int(params.Offset.Value)
+	}
+	if offset < 0 {
+		offset = 0
+	}
+	jettons, err := h.storage.GetJettonMasters(ctx, limit, offset)
+	if err != nil {
+		return &oas.InternalError{Error: err.Error()}, nil
+	}
+	results := make([]oas.JettonInfo, 0, len(jettons))
+	for _, master := range jettons {
+		meta := h.GetJettonNormalizedMetadata(ctx, master.Address)
+		metadata := jettonMetadata(master.Address, meta)
+		info := oas.JettonInfo{
+			Mintable:     master.Mintable,
+			TotalSupply:  master.TotalSupply.String(),
+			Metadata:     metadata,
+			Verification: oas.JettonVerificationType(meta.Verification),
+		}
+		results = append(results, info)
+	}
+	return &oas.Jettons{
+		Jettons: results,
+	}, nil
+
+}

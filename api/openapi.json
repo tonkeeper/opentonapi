@@ -1739,6 +1739,20 @@
     ],
     "type": "string"
    },
+   "Jettons": {
+    "properties": {
+     "jettons": {
+      "items": {
+       "$ref": "#/components/schemas/JettonInfo"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "jettons"
+    ],
+    "type": "object"
+   },
    "JettonsBalances": {
     "properties": {
      "balances": {
@@ -4303,6 +4317,56 @@
     },
     "tags": [
      "Events"
+    ]
+   }
+  },
+  "/v2/jettons": {
+   "get": {
+    "description": "Get a list of all indexed jetton masters in the blockchain.",
+    "operationId": "getJettons",
+    "parameters": [
+     {
+      "in": "query",
+      "name": "limit",
+      "schema": {
+       "default": 100,
+       "example": 15,
+       "format": "int32",
+       "maximum": 1000,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "offset",
+      "schema": {
+       "default": 0,
+       "example": 10,
+       "format": "int32",
+       "type": "integer"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Jettons"
+        }
+       }
+      },
+      "description": "a list of jettons"
+     },
+     "401": {
+      "$ref": "#/components/responses/UnauthorizedError"
+     },
+     "500": {
+      "$ref": "#/components/responses/InternalError"
+     }
+    },
+    "tags": [
+     "Jettons"
     ]
    }
   },

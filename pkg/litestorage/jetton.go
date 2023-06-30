@@ -122,3 +122,8 @@ func (s *LiteStorage) JettonMastersForWallets(ctx context.Context, wallets []ton
 	// TODO: implement
 	return map[tongo.AccountID]tongo.AccountID{}, nil
 }
+
+func (s *LiteStorage) GetJettonMasters(ctx context.Context, limit, offset int) ([]core.JettonMaster, error) {
+	// TODO: implement
+	return nil, nil
+}

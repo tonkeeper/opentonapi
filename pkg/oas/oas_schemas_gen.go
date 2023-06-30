@@ -2275,6 +2275,7 @@ func (*InternalError) getJettonInfoRes()                {}
 func (*InternalError) getJettonsBalancesRes()           {}
 func (*InternalError) getJettonsHistoryByIDRes()        {}
 func (*InternalError) getJettonsHistoryRes()            {}
+func (*InternalError) getJettonsRes()                   {}
 func (*InternalError) getMasterchainHeadRes()           {}
 func (*InternalError) getNftCollectionRes()             {}
 func (*InternalError) getNftCollectionsRes()            {}
@@ -2700,6 +2701,23 @@ const (
 	JettonVerificationTypeBlacklist JettonVerificationType = "blacklist"
 	JettonVerificationTypeNone      JettonVerificationType = "none"
 )
+
+// Ref: #/components/schemas/Jettons
+type Jettons struct {
+	Jettons []JettonInfo `json:"jettons"`
+}
+
+// GetJettons returns the value of Jettons.
+func (s Jettons) GetJettons() []JettonInfo {
+	return s.Jettons
+}
+
+// SetJettons sets the value of Jettons.
+func (s *Jettons) SetJettons(val []JettonInfo) {
+	s.Jettons = val
+}
+
+func (*Jettons) getJettonsRes() {}
 
 // Ref: #/components/schemas/JettonsBalances
 type JettonsBalances struct {
@@ -6744,6 +6762,7 @@ func (*UnauthorizedError) getJettonInfoRes()                {}
 func (*UnauthorizedError) getJettonsBalancesRes()           {}
 func (*UnauthorizedError) getJettonsHistoryByIDRes()        {}
 func (*UnauthorizedError) getJettonsHistoryRes()            {}
+func (*UnauthorizedError) getJettonsRes()                   {}
 func (*UnauthorizedError) getMasterchainHeadRes()           {}
 func (*UnauthorizedError) getNftCollectionRes()             {}
 func (*UnauthorizedError) getNftCollectionsRes()            {}
