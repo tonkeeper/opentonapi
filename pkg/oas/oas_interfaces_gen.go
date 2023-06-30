@@ -101,6 +101,10 @@ type GetJettonsHistoryRes interface {
 	getJettonsHistoryRes()
 }
 
+type GetJettonsRes interface {
+	getJettonsRes()
+}
+
 type GetMasterchainHeadRes interface {
 	getMasterchainHeadRes()
 }

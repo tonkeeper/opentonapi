@@ -69,6 +69,7 @@ type storage interface {
 
 	GetWalletPubKey(ctx context.Context, address tongo.AccountID) (ed25519.PublicKey, error)
 	GetSubscriptions(ctx context.Context, address tongo.AccountID) ([]core.Subscription, error)
+	GetJettonMasters(ctx context.Context, limit, offset int) ([]core.JettonMaster, error)
 }
 
 // chainState provides current blockchain state which change very rarely or slow like staking APY income

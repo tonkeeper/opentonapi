@@ -1070,6 +1070,40 @@ paths:
         '500':
           $ref: '#/components/responses/InternalError'
 
+  /v2/jettons:
+    get:
+      description: Get a list of all indexed jetton masters in the blockchain.
+      operationId: getJettons
+      tags:
+        - Jettons
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            format: int32
+            maximum: 1000
+            default: 100
+            example: 15
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            format: int32
+            default: 0
+            example: 10
+      responses:
+        '200':
+          description: "a list of jettons"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Jettons'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
   /v2/jettons/{account_id}:
     get:
       description: Get jetton metadata by jetton master address
@@ -3381,6 +3415,15 @@ components:
           items:
             type: string
             example: [ "https://coinmarketcap.com/currencies/drv/", "https://www.coingecko.com/en/coins/durov" ]
+    Jettons:
+          type: object
+          required:
+            - jettons
+          properties:
+            jettons:
+              type: array
+              items:
+                $ref: '#/components/schemas/JettonInfo'
     JettonInfo:
       type: object
       required:

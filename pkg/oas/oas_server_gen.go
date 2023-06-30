@@ -149,6 +149,12 @@ type Handler interface {
 	//
 	// GET /v2/jettons/{account_id}
 	GetJettonInfo(ctx context.Context, params GetJettonInfoParams) (GetJettonInfoRes, error)
+	// GetJettons implements getJettons operation.
+	//
+	// Get a list of all indexed jetton masters in the blockchain.
+	//
+	// GET /v2/jettons
+	GetJettons(ctx context.Context, params GetJettonsParams) (GetJettonsRes, error)
 	// GetJettonsBalances implements getJettonsBalances operation.
 	//
 	// Get all Jettons balances by owner address.
