@@ -72,7 +72,6 @@ type storage interface {
 	GetJettonMasters(ctx context.Context, limit, offset int) ([]core.JettonMaster, error)
 
 	GetLastConfig() ([]byte, error)
-	RunSmcMethod(context.Context, tongo.AccountID, string, tlb.VmStack) (uint32, tlb.VmStack, error)
 }
 
 // chainState provides current blockchain state which change very rarely or slow like staking APY income
