@@ -31,3 +31,7 @@ func (h Handler) GetAllAuctions(ctx context.Context, params oas.GetAllAuctionsPa
 	auctionsRes.Total = int64(len(auctionsRes.Data))
 	return &auctionsRes, nil
 }
+
+func (h Handler) GetDomainBids(ctx context.Context, params oas.GetDomainBidsParams) (oas.GetDomainBidsRes, error) {
+	return &oas.DomainBids{}, nil
+}

@@ -117,7 +117,7 @@ func (h Handler) StakingPools(ctx context.Context, params oas.StakingPoolsParams
 		result.Pools = append(result.Pools, pool)
 	}
 
-	liquidPools, err := h.storage.GetLiquidPools(ctx, !params.IncludeUnverified.Value)
+	liquidPools, err := h.storage.GetLiquidPools(ctx, false) //todo: return !params.IncludeUnverified.Value
 	if err != nil {
 		return nil, err
 	}
