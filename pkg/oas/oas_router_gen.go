@@ -982,6 +982,47 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 					return
 				}
+			case 'p': // Prefix: "pubkeys/"
+				if l := len("pubkeys/"); len(elem) >= l && elem[0:l] == "pubkeys/" {
+					elem = elem[l:]
+				} else {
+					break
+				}
+
+				// Param: "public_key"
+				// Match until "/"
+				idx := strings.IndexByte(elem, '/')
+				if idx < 0 {
+					idx = len(elem)
+				}
+				args[0] = elem[:idx]
+				elem = elem[idx:]
+
+				if len(elem) == 0 {
+					break
+				}
+				switch elem[0] {
+				case '/': // Prefix: "/wallets"
+					if l := len("/wallets"); len(elem) >= l && elem[0:l] == "/wallets" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					if len(elem) == 0 {
+						// Leaf node.
+						switch r.Method {
+						case "GET":
+							s.handleGetWalletsByPublicKeyRequest([1]string{
+								args[0],
+							}, w, r)
+						default:
+							s.notAllowed(w, r, "GET")
+						}
+
+						return
+					}
+				}
 			case 'r': // Prefix: "rates"
 				if l := len("rates"); len(elem) >= l && elem[0:l] == "rates" {
 					elem = elem[l:]
@@ -2354,6 +2395,47 @@ func (s *Server) FindRoute(method, path string) (r Route, _ bool) {
 						return r, true
 					default:
 						return
+					}
+				}
+			case 'p': // Prefix: "pubkeys/"
+				if l := len("pubkeys/"); len(elem) >= l && elem[0:l] == "pubkeys/" {
+					elem = elem[l:]
+				} else {
+					break
+				}
+
+				// Param: "public_key"
+				// Match until "/"
+				idx := strings.IndexByte(elem, '/')
+				if idx < 0 {
+					idx = len(elem)
+				}
+				args[0] = elem[:idx]
+				elem = elem[idx:]
+
+				if len(elem) == 0 {
+					break
+				}
+				switch elem[0] {
+				case '/': // Prefix: "/wallets"
+					if l := len("/wallets"); len(elem) >= l && elem[0:l] == "/wallets" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					if len(elem) == 0 {
+						switch method {
+						case "GET":
+							// Leaf: GetWalletsByPublicKey
+							r.name = "GetWalletsByPublicKey"
+							r.operationID = "getWalletsByPublicKey"
+							r.args = args
+							r.count = 1
+							return r, true
+						default:
+							return
+						}
 					}
 				}
 			case 'r': // Prefix: "rates"

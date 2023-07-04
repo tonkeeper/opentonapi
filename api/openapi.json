@@ -136,6 +136,15 @@
      "type": "integer"
     }
    },
+   "publicKeyParameter": {
+    "in": "path",
+    "name": "public_key",
+    "required": true,
+    "schema": {
+     "example": "NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2ODQ3...",
+     "type": "string"
+    }
+   },
    "traceIdParameter": {
     "description": "trace ID or transaction hash in hex (without 0x) or base64url format",
     "in": "path",
@@ -4611,6 +4620,41 @@
     },
     "tags": [
      "NFT"
+    ]
+   }
+  },
+  "/v2/pubkeys/{public_key}/wallets": {
+   "get": {
+    "description": "Get wallets by public key",
+    "operationId": "getWalletsByPublicKey",
+    "parameters": [
+     {
+      "$ref": "#/components/parameters/publicKeyParameter"
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Accounts"
+        }
+       }
+      },
+      "description": "a list of wallets"
+     },
+     "400": {
+      "$ref": "#/components/responses/BadRequest"
+     },
+     "401": {
+      "$ref": "#/components/responses/UnauthorizedError"
+     },
+     "500": {
+      "$ref": "#/components/responses/InternalError"
+     }
+    },
+    "tags": [
+     "Wallets"
     ]
    }
   },

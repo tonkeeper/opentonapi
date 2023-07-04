@@ -116,3 +116,40 @@ func getTotalBalances(ctx context.Context, storage storage, pubKey []byte) (int6
 
 	return balance, nil
 }
+
+func (h Handler) GetWalletsByPublicKey(ctx context.Context, params oas.GetWalletsByPublicKeyParams) (oas.GetWalletsByPublicKeyRes, error) {
+	publicKey, err := hex.DecodeString(params.PublicKey)
+	if err != nil {
+		return &oas.BadRequest{Error: err.Error()}, nil
+	}
+	versions := []wallet.Version{
+		wallet.V1R1, wallet.V1R2, wallet.V1R3,
+		wallet.V2R1, wallet.V2R2,
+		wallet.V3R1, wallet.V3R2,
+		wallet.V4R1, wallet.V4R2,
+	}
+	var walletAddresses []tongo.AccountID
+	for _, version := range versions {
+		walletAddress, err := wallet.GenerateWalletAddress(publicKey, version, 0, nil)
+		if err != nil {
+			continue
+		}
+		walletAddresses = append(walletAddresses, walletAddress)
+	}
+	accounts, err := h.storage.GetRawAccounts(ctx, walletAddresses)
+	if err != nil {
+		return &oas.InternalError{Error: err.Error()}, nil
+	}
+	results := make([]oas.Account, 0, len(accounts))
+	for _, account := range accounts {
+		ab, found := h.addressBook.GetAddressInfoByAddress(account.AccountAddress)
+		var res oas.Account
+		if found {
+			res = convertToAccount(account, &ab)
+		} else {
+			res = convertToAccount(account, nil)
+		}
+		results = append(results, res)
+	}
+	return &oas.Accounts{Accounts: results}, nil
+}

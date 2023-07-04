@@ -418,6 +418,15 @@ func (UnimplementedHandler) GetWalletBackup(ctx context.Context, params GetWalle
 	return r, ht.ErrNotImplemented
 }
 
+// GetWalletsByPublicKey implements getWalletsByPublicKey operation.
+//
+// Get wallets by public key.
+//
+// GET /v2/pubkeys/{public_key}/wallets
+func (UnimplementedHandler) GetWalletsByPublicKey(ctx context.Context, params GetWalletsByPublicKeyParams) (r GetWalletsByPublicKeyRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // PoolsByNominators implements poolsByNominators operation.
 //
 // All pools where account participates.

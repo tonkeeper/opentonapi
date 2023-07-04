@@ -281,6 +281,12 @@ type Handler interface {
 	//
 	// GET /v2/wallet/backup
 	GetWalletBackup(ctx context.Context, params GetWalletBackupParams) (GetWalletBackupRes, error)
+	// GetWalletsByPublicKey implements getWalletsByPublicKey operation.
+	//
+	// Get wallets by public key.
+	//
+	// GET /v2/pubkeys/{public_key}/wallets
+	GetWalletsByPublicKey(ctx context.Context, params GetWalletsByPublicKeyParams) (GetWalletsByPublicKeyRes, error)
 	// PoolsByNominators implements poolsByNominators operation.
 	//
 	// All pools where account participates.

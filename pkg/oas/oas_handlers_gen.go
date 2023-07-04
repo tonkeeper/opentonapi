@@ -4467,6 +4467,105 @@ func (s *Server) handleGetWalletBackupRequest(args [0]string, w http.ResponseWri
 	}
 }
 
+// handleGetWalletsByPublicKeyRequest handles getWalletsByPublicKey operation.
+//
+// Get wallets by public key.
+//
+// GET /v2/pubkeys/{public_key}/wallets
+func (s *Server) handleGetWalletsByPublicKeyRequest(args [1]string, w http.ResponseWriter, r *http.Request) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("getWalletsByPublicKey"),
+	}
+
+	// Start a span for this request.
+	ctx, span := s.cfg.Tracer.Start(r.Context(), "GetWalletsByPublicKey",
+		trace.WithAttributes(otelAttrs...),
+		serverSpanKind,
+	)
+	defer span.End()
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		elapsedDuration := time.Since(startTime)
+		s.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+	}()
+
+	// Increment request counter.
+	s.requests.Add(ctx, 1, otelAttrs...)
+
+	var (
+		recordError = func(stage string, err error) {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			s.errors.Add(ctx, 1, otelAttrs...)
+		}
+		err          error
+		opErrContext = ogenerrors.OperationContext{
+			Name: "GetWalletsByPublicKey",
+			ID:   "getWalletsByPublicKey",
+		}
+	)
+	params, err := decodeGetWalletsByPublicKeyParams(args, r)
+	if err != nil {
+		err = &ogenerrors.DecodeParamsError{
+			OperationContext: opErrContext,
+			Err:              err,
+		}
+		recordError("DecodeParams", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+
+	var response GetWalletsByPublicKeyRes
+	if m := s.cfg.Middleware; m != nil {
+		mreq := middleware.Request{
+			Context:       ctx,
+			OperationName: "GetWalletsByPublicKey",
+			OperationID:   "getWalletsByPublicKey",
+			Body:          nil,
+			Params: middleware.Parameters{
+				{
+					Name: "public_key",
+					In:   "path",
+				}: params.PublicKey,
+			},
+			Raw: r,
+		}
+
+		type (
+			Request  = struct{}
+			Params   = GetWalletsByPublicKeyParams
+			Response = GetWalletsByPublicKeyRes
+		)
+		response, err = middleware.HookMiddleware[
+			Request,
+			Params,
+			Response,
+		](
+			m,
+			mreq,
+			unpackGetWalletsByPublicKeyParams,
+			func(ctx context.Context, request Request, params Params) (Response, error) {
+				return s.h.GetWalletsByPublicKey(ctx, params)
+			},
+		)
+	} else {
+		response, err = s.h.GetWalletsByPublicKey(ctx, params)
+	}
+	if err != nil {
+		recordError("Internal", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+
+	if err := encodeGetWalletsByPublicKeyResponse(response, w, span); err != nil {
+		recordError("EncodeResponse", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+}
+
 // handlePoolsByNominatorsRequest handles poolsByNominators operation.
 //
 // All pools where account participates.

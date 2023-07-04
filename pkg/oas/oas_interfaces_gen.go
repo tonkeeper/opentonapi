@@ -177,6 +177,10 @@ type GetWalletBackupRes interface {
 	getWalletBackupRes()
 }
 
+type GetWalletsByPublicKeyRes interface {
+	getWalletsByPublicKeyRes()
+}
+
 type PoolsByNominatorsRes interface {
 	poolsByNominatorsRes()
 }

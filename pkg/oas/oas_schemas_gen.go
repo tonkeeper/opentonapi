@@ -516,7 +516,8 @@ func (s *Accounts) SetAccounts(val []Account) {
 	s.Accounts = val
 }
 
-func (*Accounts) getAccountsRes() {}
+func (*Accounts) getAccountsRes()           {}
+func (*Accounts) getWalletsByPublicKeyRes() {}
 
 // Ref: #/components/schemas/Action
 type Action struct {
@@ -1066,6 +1067,7 @@ func (*BadRequest) getTraceRes()                     {}
 func (*BadRequest) getTracesByAccountRes()           {}
 func (*BadRequest) getTransactionRes()               {}
 func (*BadRequest) getWalletBackupRes()              {}
+func (*BadRequest) getWalletsByPublicKeyRes()        {}
 func (*BadRequest) poolsByNominatorsRes()            {}
 func (*BadRequest) reindexAccountRes()               {}
 func (*BadRequest) sendMessageRes()                  {}
@@ -2294,6 +2296,7 @@ func (*InternalError) getTracesByAccountRes()           {}
 func (*InternalError) getTransactionRes()               {}
 func (*InternalError) getValidatorsRes()                {}
 func (*InternalError) getWalletBackupRes()              {}
+func (*InternalError) getWalletsByPublicKeyRes()        {}
 func (*InternalError) poolsByNominatorsRes()            {}
 func (*InternalError) reindexAccountRes()               {}
 func (*InternalError) sendMessageRes()                  {}
@@ -6781,6 +6784,7 @@ func (*UnauthorizedError) getTracesByAccountRes()           {}
 func (*UnauthorizedError) getTransactionRes()               {}
 func (*UnauthorizedError) getValidatorsRes()                {}
 func (*UnauthorizedError) getWalletBackupRes()              {}
+func (*UnauthorizedError) getWalletsByPublicKeyRes()        {}
 func (*UnauthorizedError) poolsByNominatorsRes()            {}
 func (*UnauthorizedError) reindexAccountRes()               {}
 func (*UnauthorizedError) sendMessageRes()                  {}
