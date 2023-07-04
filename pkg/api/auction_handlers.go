@@ -2,8 +2,9 @@ package api
 
 import (
 	"context"
-	"github.com/tonkeeper/opentonapi/pkg/oas"
 	"strings"
+
+	"github.com/tonkeeper/opentonapi/pkg/oas"
 )
 
 func (h Handler) GetAllAuctions(ctx context.Context, params oas.GetAllAuctionsParams) (oas.GetAllAuctionsRes, error) {
@@ -33,5 +34,20 @@ func (h Handler) GetAllAuctions(ctx context.Context, params oas.GetAllAuctionsPa
 }
 
 func (h Handler) GetDomainBids(ctx context.Context, params oas.GetDomainBidsParams) (oas.GetDomainBidsRes, error) {
-	return &oas.DomainBids{}, nil
+	domain := strings.ToLower(params.DomainName)
+	bids, err := h.storage.GetDomainBids(ctx, strings.TrimSuffix(domain, ".ton"))
+	if err != nil {
+		return &oas.BadRequest{Error: err.Error()}, nil
+	}
+	var domainBids oas.DomainBids
+	for _, bid := range bids {
+		domainBids.Data = append(domainBids.Data, oas.DomainBid{
+			Bidder:  convertAccountAddress(bid.Bidder, h.addressBook),
+			Success: bid.Success,
+			TxTime:  bid.TxTime,
+			Value:   int64(bid.Value),
+			TxHash:  bid.TxHash.Hex(),
+		})
+	}
+	return &domainBids, nil
 }

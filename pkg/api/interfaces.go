@@ -66,6 +66,7 @@ type storage interface {
 	GetAccountJettonHistoryByID(ctx context.Context, address, jettonMaster tongo.AccountID, limit int, beforeLT *int64, startTime *int64, endTime *int64) ([]tongo.Bits256, error)
 
 	GetAllAuctions(ctx context.Context) ([]core.Auction, error)
+	GetDomainBids(ctx context.Context, domain string) ([]core.DomainBid, error)
 
 	GetWalletPubKey(ctx context.Context, address tongo.AccountID) (ed25519.PublicKey, error)
 	GetSubscriptions(ctx context.Context, address tongo.AccountID) ([]core.Subscription, error)
