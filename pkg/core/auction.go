@@ -9,3 +9,11 @@ type Auction struct {
 	Owner  tongo.AccountID
 	Price  int64
 }
+
+type DomainBid struct {
+	Bidder  tongo.AccountID
+	Success bool
+	TxTime  int64
+	Value   uint64
+	TxHash  tongo.Bits256
+}
