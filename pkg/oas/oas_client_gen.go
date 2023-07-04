@@ -1087,83 +1087,6 @@ func (c *Client) GetAccounts(ctx context.Context, request OptGetAccountsReq) (re
 	return result, nil
 }
 
-// GetAccountsByPublicKey invokes getAccountsByPublicKey operation.
-//
-// Get accounts by public key.
-//
-// GET /v2/accounts/{public_key}/resolve
-func (c *Client) GetAccountsByPublicKey(ctx context.Context, params GetAccountsByPublicKeyParams) (res GetAccountsByPublicKeyRes, err error) {
-	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("getAccountsByPublicKey"),
-	}
-
-	// Run stopwatch.
-	startTime := time.Now()
-	defer func() {
-		elapsedDuration := time.Since(startTime)
-		c.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
-	}()
-
-	// Increment request counter.
-	c.requests.Add(ctx, 1, otelAttrs...)
-
-	// Start a span for this request.
-	ctx, span := c.cfg.Tracer.Start(ctx, "GetAccountsByPublicKey",
-		trace.WithAttributes(otelAttrs...),
-		clientSpanKind,
-	)
-	// Track stage for error reporting.
-	var stage string
-	defer func() {
-		if err != nil {
-			span.RecordError(err)
-			span.SetStatus(codes.Error, stage)
-			c.errors.Add(ctx, 1, otelAttrs...)
-		}
-		span.End()
-	}()
-
-	stage = "BuildURL"
-	u := uri.Clone(c.requestURL(ctx))
-	u.Path += "/v2/accounts/"
-	{
-		// Encode "public_key" parameter.
-		e := uri.NewPathEncoder(uri.PathEncoderConfig{
-			Param:   "public_key",
-			Style:   uri.PathStyleSimple,
-			Explode: false,
-		})
-		if err := func() error {
-			return e.EncodeValue(conv.StringToString(params.PublicKey))
-		}(); err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		u.Path += e.Result()
-	}
-	u.Path += "/resolve"
-
-	stage = "EncodeRequest"
-	r, err := ht.NewRequest(ctx, "GET", u, nil)
-	if err != nil {
-		return res, errors.Wrap(err, "create request")
-	}
-
-	stage = "SendRequest"
-	resp, err := c.cfg.Client.Do(r)
-	if err != nil {
-		return res, errors.Wrap(err, "do request")
-	}
-	defer resp.Body.Close()
-
-	stage = "DecodeResponse"
-	result, err := decodeGetAccountsByPublicKeyResponse(resp)
-	if err != nil {
-		return res, errors.Wrap(err, "decode response")
-	}
-
-	return result, nil
-}
-
 // GetAllAuctions invokes getAllAuctions operation.
 //
 // Get all auctions.
@@ -3964,6 +3887,83 @@ func (c *Client) GetWalletBackup(ctx context.Context, params GetWalletBackupPara
 
 	stage = "DecodeResponse"
 	result, err := decodeGetWalletBackupResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// GetWalletsByPublicKey invokes getWalletsByPublicKey operation.
+//
+// Get wallets by public key.
+//
+// GET /v2/pubkeys/{public_key}/wallets
+func (c *Client) GetWalletsByPublicKey(ctx context.Context, params GetWalletsByPublicKeyParams) (res GetWalletsByPublicKeyRes, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("getWalletsByPublicKey"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, otelAttrs...)
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, "GetWalletsByPublicKey",
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, otelAttrs...)
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	u.Path += "/v2/pubkeys/"
+	{
+		// Encode "public_key" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "public_key",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.PublicKey))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		u.Path += e.Result()
+	}
+	u.Path += "/wallets"
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u, nil)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeGetWalletsByPublicKeyResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}

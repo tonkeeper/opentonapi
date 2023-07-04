@@ -347,57 +347,25 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 							return
 						}
-					case 'r': // Prefix: "re"
-						if l := len("re"); len(elem) >= l && elem[0:l] == "re" {
+					case 'r': // Prefix: "reindex"
+						if l := len("reindex"); len(elem) >= l && elem[0:l] == "reindex" {
 							elem = elem[l:]
 						} else {
 							break
 						}
 
 						if len(elem) == 0 {
-							break
-						}
-						switch elem[0] {
-						case 'i': // Prefix: "index"
-							if l := len("index"); len(elem) >= l && elem[0:l] == "index" {
-								elem = elem[l:]
-							} else {
-								break
+							// Leaf node.
+							switch r.Method {
+							case "POST":
+								s.handleReindexAccountRequest([1]string{
+									args[0],
+								}, w, r)
+							default:
+								s.notAllowed(w, r, "POST")
 							}
 
-							if len(elem) == 0 {
-								// Leaf node.
-								switch r.Method {
-								case "POST":
-									s.handleReindexAccountRequest([1]string{
-										args[0],
-									}, w, r)
-								default:
-									s.notAllowed(w, r, "POST")
-								}
-
-								return
-							}
-						case 's': // Prefix: "solve"
-							if l := len("solve"); len(elem) >= l && elem[0:l] == "solve" {
-								elem = elem[l:]
-							} else {
-								break
-							}
-
-							if len(elem) == 0 {
-								// Leaf node.
-								switch r.Method {
-								case "GET":
-									s.handleGetAccountsByPublicKeyRequest([1]string{
-										args[0],
-									}, w, r)
-								default:
-									s.notAllowed(w, r, "GET")
-								}
-
-								return
-							}
+							return
 						}
 					case 's': // Prefix: "subscriptions"
 						if l := len("subscriptions"); len(elem) >= l && elem[0:l] == "subscriptions" {
@@ -994,6 +962,47 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 					}
 
 					return
+				}
+			case 'p': // Prefix: "pubkeys/"
+				if l := len("pubkeys/"); len(elem) >= l && elem[0:l] == "pubkeys/" {
+					elem = elem[l:]
+				} else {
+					break
+				}
+
+				// Param: "public_key"
+				// Match until "/"
+				idx := strings.IndexByte(elem, '/')
+				if idx < 0 {
+					idx = len(elem)
+				}
+				args[0] = elem[:idx]
+				elem = elem[idx:]
+
+				if len(elem) == 0 {
+					break
+				}
+				switch elem[0] {
+				case '/': // Prefix: "/wallets"
+					if l := len("/wallets"); len(elem) >= l && elem[0:l] == "/wallets" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					if len(elem) == 0 {
+						// Leaf node.
+						switch r.Method {
+						case "GET":
+							s.handleGetWalletsByPublicKeyRequest([1]string{
+								args[0],
+							}, w, r)
+						default:
+							s.notAllowed(w, r, "GET")
+						}
+
+						return
+					}
 				}
 			case 'r': // Prefix: "rates"
 				if l := len("rates"); len(elem) >= l && elem[0:l] == "rates" {
@@ -1717,56 +1726,24 @@ func (s *Server) FindRoute(method, path string) (r Route, _ bool) {
 								return
 							}
 						}
-					case 'r': // Prefix: "re"
-						if l := len("re"); len(elem) >= l && elem[0:l] == "re" {
+					case 'r': // Prefix: "reindex"
+						if l := len("reindex"); len(elem) >= l && elem[0:l] == "reindex" {
 							elem = elem[l:]
 						} else {
 							break
 						}
 
 						if len(elem) == 0 {
-							break
-						}
-						switch elem[0] {
-						case 'i': // Prefix: "index"
-							if l := len("index"); len(elem) >= l && elem[0:l] == "index" {
-								elem = elem[l:]
-							} else {
-								break
-							}
-
-							if len(elem) == 0 {
-								switch method {
-								case "POST":
-									// Leaf: ReindexAccount
-									r.name = "ReindexAccount"
-									r.operationID = "reindexAccount"
-									r.args = args
-									r.count = 1
-									return r, true
-								default:
-									return
-								}
-							}
-						case 's': // Prefix: "solve"
-							if l := len("solve"); len(elem) >= l && elem[0:l] == "solve" {
-								elem = elem[l:]
-							} else {
-								break
-							}
-
-							if len(elem) == 0 {
-								switch method {
-								case "GET":
-									// Leaf: GetAccountsByPublicKey
-									r.name = "GetAccountsByPublicKey"
-									r.operationID = "getAccountsByPublicKey"
-									r.args = args
-									r.count = 1
-									return r, true
-								default:
-									return
-								}
+							switch method {
+							case "POST":
+								// Leaf: ReindexAccount
+								r.name = "ReindexAccount"
+								r.operationID = "reindexAccount"
+								r.args = args
+								r.count = 1
+								return r, true
+							default:
+								return
 							}
 						}
 					case 's': // Prefix: "subscriptions"
@@ -2378,6 +2355,47 @@ func (s *Server) FindRoute(method, path string) (r Route, _ bool) {
 						return r, true
 					default:
 						return
+					}
+				}
+			case 'p': // Prefix: "pubkeys/"
+				if l := len("pubkeys/"); len(elem) >= l && elem[0:l] == "pubkeys/" {
+					elem = elem[l:]
+				} else {
+					break
+				}
+
+				// Param: "public_key"
+				// Match until "/"
+				idx := strings.IndexByte(elem, '/')
+				if idx < 0 {
+					idx = len(elem)
+				}
+				args[0] = elem[:idx]
+				elem = elem[idx:]
+
+				if len(elem) == 0 {
+					break
+				}
+				switch elem[0] {
+				case '/': // Prefix: "/wallets"
+					if l := len("/wallets"); len(elem) >= l && elem[0:l] == "/wallets" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					if len(elem) == 0 {
+						switch method {
+						case "GET":
+							// Leaf: GetWalletsByPublicKey
+							r.name = "GetWalletsByPublicKey"
+							r.operationID = "getWalletsByPublicKey"
+							r.args = args
+							r.count = 1
+							return r, true
+						default:
+							return
+						}
 					}
 				}
 			case 'r': // Prefix: "rates"

@@ -121,15 +121,6 @@ func (UnimplementedHandler) GetAccounts(ctx context.Context, req OptGetAccountsR
 	return r, ht.ErrNotImplemented
 }
 
-// GetAccountsByPublicKey implements getAccountsByPublicKey operation.
-//
-// Get accounts by public key.
-//
-// GET /v2/accounts/{public_key}/resolve
-func (UnimplementedHandler) GetAccountsByPublicKey(ctx context.Context, params GetAccountsByPublicKeyParams) (r GetAccountsByPublicKeyRes, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
 // GetAllAuctions implements getAllAuctions operation.
 //
 // Get all auctions.
@@ -415,6 +406,15 @@ func (UnimplementedHandler) GetValidators(ctx context.Context) (r GetValidatorsR
 //
 // GET /v2/wallet/backup
 func (UnimplementedHandler) GetWalletBackup(ctx context.Context, params GetWalletBackupParams) (r GetWalletBackupRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// GetWalletsByPublicKey implements getWalletsByPublicKey operation.
+//
+// Get wallets by public key.
+//
+// GET /v2/pubkeys/{public_key}/wallets
+func (UnimplementedHandler) GetWalletsByPublicKey(ctx context.Context, params GetWalletsByPublicKeyParams) (r GetWalletsByPublicKeyRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 

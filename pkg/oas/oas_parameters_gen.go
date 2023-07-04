@@ -796,57 +796,6 @@ func decodeGetAccountTransactionsParams(args [1]string, r *http.Request) (params
 	return params, nil
 }
 
-// GetAccountsByPublicKeyParams is parameters of getAccountsByPublicKey operation.
-type GetAccountsByPublicKeyParams struct {
-	PublicKey string
-}
-
-func unpackGetAccountsByPublicKeyParams(packed middleware.Parameters) (params GetAccountsByPublicKeyParams) {
-	{
-		key := middleware.ParameterKey{
-			Name: "public_key",
-			In:   "path",
-		}
-		params.PublicKey = packed[key].(string)
-	}
-	return params
-}
-
-func decodeGetAccountsByPublicKeyParams(args [1]string, r *http.Request) (params GetAccountsByPublicKeyParams, _ error) {
-	// Decode path: public_key.
-	{
-		param := args[0]
-		if len(param) > 0 {
-			d := uri.NewPathDecoder(uri.PathDecoderConfig{
-				Param:   "public_key",
-				Value:   param,
-				Style:   uri.PathStyleSimple,
-				Explode: false,
-			})
-
-			if err := func() error {
-				val, err := d.DecodeValue()
-				if err != nil {
-					return err
-				}
-
-				c, err := conv.ToString(val)
-				if err != nil {
-					return err
-				}
-
-				params.PublicKey = c
-				return nil
-			}(); err != nil {
-				return params, errors.Wrap(err, "path: public_key: parse")
-			}
-		} else {
-			return params, errors.New("path: public_key: not specified")
-		}
-	}
-	return params, nil
-}
-
 // GetAllAuctionsParams is parameters of getAllAuctions operation.
 type GetAllAuctionsParams struct {
 	// Domain filter for current auctions "ton" or "t.me".
@@ -3565,6 +3514,57 @@ func decodeGetWalletBackupParams(args [0]string, r *http.Request) (params GetWal
 			}
 		} else {
 			return params, errors.New("header: X-TonConnect-Auth: not specified")
+		}
+	}
+	return params, nil
+}
+
+// GetWalletsByPublicKeyParams is parameters of getWalletsByPublicKey operation.
+type GetWalletsByPublicKeyParams struct {
+	PublicKey string
+}
+
+func unpackGetWalletsByPublicKeyParams(packed middleware.Parameters) (params GetWalletsByPublicKeyParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "public_key",
+			In:   "path",
+		}
+		params.PublicKey = packed[key].(string)
+	}
+	return params
+}
+
+func decodeGetWalletsByPublicKeyParams(args [1]string, r *http.Request) (params GetWalletsByPublicKeyParams, _ error) {
+	// Decode path: public_key.
+	{
+		param := args[0]
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "public_key",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.PublicKey = c
+				return nil
+			}(); err != nil {
+				return params, errors.Wrap(err, "path: public_key: parse")
+			}
+		} else {
+			return params, errors.New("path: public_key: not specified")
 		}
 	}
 	return params, nil

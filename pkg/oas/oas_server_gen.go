@@ -80,12 +80,6 @@ type Handler interface {
 	//
 	// POST /v2/accounts/_bulk
 	GetAccounts(ctx context.Context, req OptGetAccountsReq) (GetAccountsRes, error)
-	// GetAccountsByPublicKey implements getAccountsByPublicKey operation.
-	//
-	// Get accounts by public key.
-	//
-	// GET /v2/accounts/{public_key}/resolve
-	GetAccountsByPublicKey(ctx context.Context, params GetAccountsByPublicKeyParams) (GetAccountsByPublicKeyRes, error)
 	// GetAllAuctions implements getAllAuctions operation.
 	//
 	// Get all auctions.
@@ -281,6 +275,12 @@ type Handler interface {
 	//
 	// GET /v2/wallet/backup
 	GetWalletBackup(ctx context.Context, params GetWalletBackupParams) (GetWalletBackupRes, error)
+	// GetWalletsByPublicKey implements getWalletsByPublicKey operation.
+	//
+	// Get wallets by public key.
+	//
+	// GET /v2/pubkeys/{public_key}/wallets
+	GetWalletsByPublicKey(ctx context.Context, params GetWalletsByPublicKeyParams) (GetWalletsByPublicKeyRes, error)
 	// PoolsByNominators implements poolsByNominators operation.
 	//
 	// All pools where account participates.

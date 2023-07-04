@@ -45,10 +45,6 @@ type GetAccountTransactionsRes interface {
 	getAccountTransactionsRes()
 }
 
-type GetAccountsByPublicKeyRes interface {
-	getAccountsByPublicKeyRes()
-}
-
 type GetAccountsRes interface {
 	getAccountsRes()
 }
@@ -175,6 +171,10 @@ type GetValidatorsRes interface {
 
 type GetWalletBackupRes interface {
 	getWalletBackupRes()
+}
+
+type GetWalletsByPublicKeyRes interface {
+	getWalletsByPublicKeyRes()
 }
 
 type PoolsByNominatorsRes interface {
