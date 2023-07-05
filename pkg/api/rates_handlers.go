@@ -27,33 +27,31 @@ func (h *Handler) GetRates(ctx context.Context, params oas.GetRatesParams) (res 
 
 	rates := h.tonRates.GetRates()
 
-	ratesRes := make(map[string]map[string]map[string]interface{})
+	type tokenRate struct {
+		Prices map[string]float64 `json:"prices"`
+	}
+
+	ratesRes := make(map[string]tokenRate)
 	for _, token := range tokens {
+		if token == "ton" {
+			token = "TON"
+		}
 		for _, currency := range currencies {
 			tonPriceToCurrency, ok := rates[currency]
 			if !ok {
 				return &oas.BadRequest{Error: "invalid currency: " + currency}, nil
 			}
-
-			if token == "ton" {
-				token = "TON"
-			}
-
 			tokenPrice, ok := rates[token]
 			if !ok {
-				return &oas.BadRequest{Error: "invalid token: " + token}, nil
-			}
-
-			tokenPrice = (1 / tokenPrice) * tonPriceToCurrency
-
-			rate, ok := ratesRes[token]
-			if !ok {
-				ratesRes[token] = map[string]map[string]interface{}{"prices": {currency: tokenPrice}}
+				ratesRes[token] = tokenRate{Prices: map[string]float64{}}
 				continue
 			}
-
-			rate["prices"][currency] = tokenPrice
-			ratesRes[token] = rate
+			rate, ok := ratesRes[token]
+			if !ok {
+				rate = tokenRate{Prices: map[string]float64{}}
+				ratesRes[token] = rate
+			}
+			rate.Prices[currency] = (1 / tokenPrice) * tonPriceToCurrency
 		}
 	}
 
