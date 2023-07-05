@@ -83,12 +83,73 @@ func (r *TonRates) getRates() (map[string]float64, error) {
 }
 
 func (r *TonRates) getPools() map[string]float64 {
-	resp, err := http.Get("https://api.dedust.io/v2/pools")
+	dedustPool := r.getDedustPool()
+	stonFiPool := r.getStonFiPool()
+	for address, price := range stonFiPool {
+		dedustPool[address] = price
+	}
+	return dedustPool
+}
+
+func (r *TonRates) getStonFiPool() map[string]float64 {
+	resp, err := http.Get("https://api.ston.fi/v1/assets")
 	if err != nil {
-		log.Errorf("failed to fetch rates: %v", err)
+		log.Errorf("failed to fetch stonfi rates: %v", err)
 		return nil
 	}
 	defer resp.Body.Close()
+
+	type Pool struct {
+		ContractAddress string  `json:"contract_address"`
+		Symbol          string  `json:"symbol"`
+		UsdPrice        *string `json:"usd_price"`
+		Decimals        int32   `json:"decimals"`
+	}
+
+	var respBody struct {
+		AssetList []Pool `json:"asset_list"`
+	}
+	if err = json.NewDecoder(resp.Body).Decode(&respBody); err != nil {
+		log.Errorf("failed to decode response: %v", err)
+		return nil
+	}
+
+	mapOfPool := make(map[string]float64)
+	for _, pool := range respBody.AssetList {
+		if pool.UsdPrice == nil {
+			continue
+		}
+		price, err := strconv.ParseFloat(*pool.UsdPrice, 64)
+		if err != nil {
+			log.Errorf("failed to convert stonfi price: %v", err)
+			continue
+		}
+		mapOfPool[pool.ContractAddress] = price
+	}
+
+	return mapOfPool
+}
+
+func (r *TonRates) getDedustPool() map[string]float64 {
+	resp, err := http.Get("https://api.dedust.io/v2/pools")
+	if err != nil {
+		log.Errorf("failed to fetch dedust rates: %v", err)
+		return nil
+	}
+	defer resp.Body.Close()
+
+	type Pool struct {
+		Assets []struct {
+			Type     string `json:"type"`
+			Address  string `json:"address"`
+			Metadata *struct {
+				Name     string  `json:"name"`
+				Symbol   string  `json:"symbol"`
+				Decimals float64 `json:"decimals"`
+			} `json:"metadata"`
+		} `json:"assets"`
+		Reserves []string `json:"reserves"`
+	}
 
 	var respBody []Pool
 	if err = json.NewDecoder(resp.Body).Decode(&respBody); err != nil {
@@ -157,37 +218,6 @@ func (r *TonRates) getPools() map[string]float64 {
 	return mapOfPool
 }
 
-type Pool struct {
-	Assets []struct {
-		Type     string `json:"type"`
-		Address  string `json:"address"`
-		Metadata *struct {
-			Name     string  `json:"name"`
-			Symbol   string  `json:"symbol"`
-			Decimals float64 `json:"decimals"`
-		} `json:"metadata"`
-	} `json:"assets"`
-	Reserves []string `json:"reserves"`
-}
-
-type huobiPrice struct {
-	Status string `json:"status"`
-	Tick   struct {
-		Data []struct {
-			Ts     int64   `json:"ts"`
-			Amount float64 `json:"amount"`
-			Price  float64 `json:"price"`
-		} `json:"data"`
-	} `json:"tick"`
-}
-
-type okxPrice struct {
-	Code string `json:"code"`
-	Data []struct {
-		Last string `json:"last"`
-	} `json:"data"`
-}
-
 func getHuobiPrice() float64 {
 	resp, err := http.Get("https://api.huobi.pro/market/trade?symbol=tonusdt")
 	if err != nil {
@@ -196,7 +226,17 @@ func getHuobiPrice() float64 {
 	}
 	defer resp.Body.Close()
 
-	var respBody huobiPrice
+	var respBody struct {
+		Status string `json:"status"`
+		Tick   struct {
+			Data []struct {
+				Ts     int64   `json:"ts"`
+				Amount float64 `json:"amount"`
+				Price  float64 `json:"price"`
+			} `json:"data"`
+		} `json:"tick"`
+	}
+
 	if err = json.NewDecoder(resp.Body).Decode(&respBody); err != nil {
 		log.Errorf("failed to decode response: %v", err)
 		return 0
@@ -223,7 +263,13 @@ func getOKXPrice() float64 {
 	}
 	defer resp.Body.Close()
 
-	var respBody okxPrice
+	var respBody struct {
+		Code string `json:"code"`
+		Data []struct {
+			Last string `json:"last"`
+		} `json:"data"`
+	}
+
 	if err = json.NewDecoder(resp.Body).Decode(&respBody); err != nil {
 		log.Errorf("failed to decode response: %v", err)
 		return 0
