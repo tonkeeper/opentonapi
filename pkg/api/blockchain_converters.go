@@ -4,6 +4,7 @@ import (
 	"encoding/binary"
 	"encoding/hex"
 	"fmt"
+	"github.com/tonkeeper/tongo/tlb"
 
 	jsoniter "github.com/json-iterator/go"
 	"github.com/tonkeeper/opentonapi/internal/g"
@@ -170,4 +171,70 @@ func convertMessage(m core.Message, book addressBook) oas.Message {
 		msg.DecodedBody = value
 	}
 	return msg
+}
+
+func convertConfig(cfg tlb.ConfigParams) (*oas.Config, error) {
+	var config oas.Config
+	for _, a := range []struct {
+		index   tlb.Uint32
+		pointer *string
+	}{
+		{0, &config.R0},
+		{1, &config.R1},
+		{2, &config.R2},
+		{4, &config.R4},
+	} {
+		c, prs := cfg.Config.Get(a.index)
+		if !prs {
+			return nil, fmt.Errorf("config doesn't have %v param", a.index)
+		}
+		var b tlb.Bits256
+		err := tlb.Unmarshal(&c.Value, &b)
+		if err != nil {
+			return nil, err
+		}
+		*a.pointer = b.Hex()
+	}
+	for _, a := range []struct {
+		index   tlb.Uint32
+		pointer *oas.OptValidatorsSet
+	}{
+		{32, &config.R32},
+		{33, &config.R33},
+		{34, &config.R34},
+		{35, &config.R35},
+		{36, &config.R36},
+		{37, &config.R37},
+	} {
+		var set tlb.ValidatorsSet
+		c, prs := cfg.Config.Get(a.index)
+		if !prs {
+			continue
+		}
+		err := tlb.Unmarshal(&c.Value, &set)
+		if err != nil {
+			return nil, err
+		}
+		*a.pointer = convertValidatorSet(set)
+	}
+
+	return &config, nil
+}
+
+func convertValidatorSet(set tlb.ValidatorsSet) oas.OptValidatorsSet {
+	var s oas.ValidatorsSet
+	s.UtimeUntil = int(set.Common().UtimeUntil)
+	s.UtimeSince = int(set.Common().UtimeSince)
+	s.Main = int(set.Common().Main)
+	s.Total = int(set.Common().Total)
+	var l []tlb.ValidatorDescr
+	if set.SumType == "Validators" {
+		l = set.Validators.List.Values()
+	} else {
+		l = set.ValidatorsExt.List.Values()
+	}
+	for _, d := range l {
+		s.List = append(s.List, oas.ValidatorsSetListItem{PublicKey: d.PubKey().Hex()})
+	}
+	return oas.NewOptValidatorsSet(s)
 }

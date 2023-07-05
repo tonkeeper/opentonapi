@@ -2180,7 +2180,34 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Transaction'
-
+    ValidatorsSet:
+      type: object
+      required:
+        - utime_since
+        - utime_until
+        - total
+        - main
+        - list
+      properties:
+        utime_since:
+          type: integer
+        utime_until:
+          type: integer
+        total:
+          type: integer
+        main:
+          type: integer
+        total_weight:
+          type: integer
+        list:
+          type: array
+          items:
+            type: object
+            required:
+              - public_key
+            properties:
+              public_key:
+                type: string
     Validator:
       type: object
       required:
@@ -2372,13 +2399,40 @@ components:
     Config:
       type: object
       required:
-        - boc
+        - raw
+        - "0"
+        - "1"
+        - "2"
+        - "4"
       properties:
-        boc:
+        raw:
           type: string
           description: config boc in base64 format
           example: te6ccgEBBgEARAABFP8A9KQT9LzyyAsBAgEgAgMCAUgEBQAE8jAAONBsIdMfMO1E0NM/MAHAAZekyMs/ye1UkzDyBuIAEaE0MdqJoaZ+YQ==
-
+        "0":
+          type: string
+          description: "config address"
+        "1":
+          type: string
+          description: "elector address"
+        "2":
+          type: string
+          description: "minter address"
+        "4":
+          type: string
+          description: "dns root address"
+        "32":
+          $ref: '#/components/schemas/ValidatorsSet'
+        "33":
+          $ref: '#/components/schemas/ValidatorsSet'
+        "34":
+          $ref: '#/components/schemas/ValidatorsSet'
+        "35":
+          $ref: '#/components/schemas/ValidatorsSet'
+        "36":
+          $ref: '#/components/schemas/ValidatorsSet'
+        "37":
+          $ref: '#/components/schemas/ValidatorsSet'
     DomainNames:
       type: object
       required:

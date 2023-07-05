@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/tonkeeper/tongo/tlb"
 
 	"github.com/tonkeeper/tongo"
 	"golang.org/x/exp/slices"
@@ -35,13 +36,27 @@ func (h Handler) StakingPoolInfo(ctx context.Context, params oas.StakingPoolInfo
 	}
 	lPool, err := h.storage.GetLiquidPool(ctx, poolID)
 	if err == nil {
+		config, err := h.storage.GetLastConfig()
+		if err != nil {
+			return &oas.InternalError{Error: err.Error()}, nil
+		}
+		var cycleStart, cycleEnd uint32
+		if c, prs := config.Config.Get(34); prs {
+			var set tlb.ValidatorsSet
+			err = tlb.Unmarshal(&c.Value, &set)
+			if err != nil {
+				return &oas.InternalError{Error: err.Error()}, nil
+			}
+			cycleEnd = set.Common().UtimeUntil
+			cycleStart = set.Common().UtimeSince
+		}
 		return &oas.StakingPoolInfoOK{
 			Implementation: oas.PoolImplementation{
 				Name:        references.LiquidImplementationsName,
 				Description: i18n.T(params.AcceptLanguage.Value, i18n.C{MessageID: "poolImplementationDescription", TemplateData: map[string]interface{}{"Deposit": 100}}),
 				URL:         references.LiquidImplementationsUrl,
 			},
-			Pool: convertLiquidStaking(lPool, h.state.GetAPY()),
+			Pool: convertLiquidStaking(lPool, h.state.GetAPY(), cycleStart, cycleEnd),
 		}, nil
 	}
 	p, err := h.storage.GetTFPool(ctx, poolID)
@@ -121,8 +136,22 @@ func (h Handler) StakingPools(ctx context.Context, params oas.StakingPoolsParams
 	if err != nil {
 		return nil, err
 	}
+	config, err := h.storage.GetLastConfig()
+	if err != nil {
+		return &oas.InternalError{Error: err.Error()}, nil
+	}
+	var cycleStart, cycleEnd uint32
+	if c, prs := config.Config.Get(34); prs {
+		var set tlb.ValidatorsSet
+		err = tlb.Unmarshal(&c.Value, &set)
+		if err != nil {
+			return &oas.InternalError{Error: err.Error()}, nil
+		}
+		cycleEnd = set.Common().UtimeUntil
+		cycleStart = set.Common().UtimeSince
+	}
 	for _, p := range liquidPools {
-		result.Pools = append(result.Pools, convertLiquidStaking(p, h.state.GetAPY()))
+		result.Pools = append(result.Pools, convertLiquidStaking(p, h.state.GetAPY(), cycleStart, cycleEnd))
 	}
 
 	slices.SortFunc(result.Pools, func(a, b oas.PoolInfo) bool {
@@ -171,6 +200,14 @@ func (h Handler) PoolsByNominators(ctx context.Context, params oas.PoolsByNomina
 		}
 		return &oas.InternalError{Error: err.Error()}, nil
 	}
+	liquidPools, err := h.storage.GetParticipatingInLiquidPools(ctx, accountID)
+	if err != nil {
+		if errors.Is(err, core.ErrEntityNotFound) {
+			return &oas.NotFound{Error: err.Error()}, nil
+		}
+		return &oas.InternalError{Error: err.Error()}, nil
+	}
+
 	var result oas.AccountStaking
 	for _, w := range whalesPools {
 		if _, ok := references.WhalesPools[w.Pool]; !ok {
@@ -185,6 +222,15 @@ func (h Handler) PoolsByNominators(ctx context.Context, params oas.PoolsByNomina
 		})
 	}
 	for _, w := range tfPools {
+		result.Pools = append(result.Pools, oas.AccountStakingInfo{
+			Pool:            w.Pool.ToRaw(),
+			Amount:          w.MemberBalance,
+			PendingDeposit:  w.MemberPendingDeposit,
+			PendingWithdraw: w.MemberPendingWithdraw,
+			ReadyWithdraw:   w.MemberWithdraw,
+		})
+	}
+	for _, w := range liquidPools {
 		result.Pools = append(result.Pools, oas.AccountStakingInfo{
 			Pool:            w.Pool.ToRaw(),
 			Amount:          w.MemberBalance,

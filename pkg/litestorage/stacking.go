@@ -194,3 +194,7 @@ func (s *LiteStorage) GetLiquidPool(ctx context.Context, pool tongo.AccountID) (
 func (s *LiteStorage) GetLiquidPools(ctx context.Context, onlyVerified bool) ([]core.LiquidPool, error) {
 	return nil, nil
 }
+
+func (s *LiteStorage) GetParticipatingInLiquidPools(ctx context.Context, member tongo.AccountID) ([]core.Nominator, error) {
+	return nil, nil
+}

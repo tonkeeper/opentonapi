@@ -68,3 +68,6 @@ GET {{host}}/v2/accounts/EQDD3n4osteDDhhSerivXKBzi-IJbIhCTkxRYSlhHEh_hyAW/public
 
 ###
 GET {{host}}/v2/accounts/EQDVcJxVsF27MHNKKDlP3iGcYxEU2TEt6QEmN-2MyEjMo7be/dns/expiring?period=90
+
+###
+GET {{host}}/v2/blockchain/config

@@ -1168,14 +1168,52 @@
    },
    "Config": {
     "properties": {
-     "boc": {
+     "0": {
+      "description": "config address",
+      "type": "string"
+     },
+     "1": {
+      "description": "elector address",
+      "type": "string"
+     },
+     "2": {
+      "description": "minter address",
+      "type": "string"
+     },
+     "32": {
+      "$ref": "#/components/schemas/ValidatorsSet"
+     },
+     "33": {
+      "$ref": "#/components/schemas/ValidatorsSet"
+     },
+     "34": {
+      "$ref": "#/components/schemas/ValidatorsSet"
+     },
+     "35": {
+      "$ref": "#/components/schemas/ValidatorsSet"
+     },
+     "36": {
+      "$ref": "#/components/schemas/ValidatorsSet"
+     },
+     "37": {
+      "$ref": "#/components/schemas/ValidatorsSet"
+     },
+     "4": {
+      "description": "dns root address",
+      "type": "string"
+     },
+     "raw": {
       "description": "config boc in base64 format",
       "example": "te6ccgEBBgEARAABFP8A9KQT9LzyyAsBAgEgAgMCAUgEBQAE8jAAONBsIdMfMO1E0NM/MAHAAZekyMs/ye1UkzDyBuIAEaE0MdqJoaZ+YQ==",
       "type": "string"
      }
     },
     "required": [
-     "boc"
+     "raw",
+     "0",
+     "1",
+     "2",
+     "4"
     ],
     "type": "object"
    },
@@ -2890,6 +2928,47 @@
     },
     "required": [
      "validators"
+    ],
+    "type": "object"
+   },
+   "ValidatorsSet": {
+    "properties": {
+     "list": {
+      "items": {
+       "properties": {
+        "public_key": {
+         "type": "string"
+        }
+       },
+       "required": [
+        "public_key"
+       ],
+       "type": "object"
+      },
+      "type": "array"
+     },
+     "main": {
+      "type": "integer"
+     },
+     "total": {
+      "type": "integer"
+     },
+     "total_weight": {
+      "type": "integer"
+     },
+     "utime_since": {
+      "type": "integer"
+     },
+     "utime_until": {
+      "type": "integer"
+     }
+    },
+    "required": [
+     "utime_since",
+     "utime_until",
+     "total",
+     "main",
+     "list"
     ],
     "type": "object"
    },

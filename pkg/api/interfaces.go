@@ -44,6 +44,7 @@ type storage interface {
 	GetTFPools(ctx context.Context, onlyVerified bool) ([]core.TFPool, error)
 	GetTFPool(ctx context.Context, pool tongo.AccountID) (core.TFPool, error)
 	GetLiquidPool(ctx context.Context, pool tongo.AccountID) (core.LiquidPool, error)
+	GetParticipatingInLiquidPools(ctx context.Context, member tongo.AccountID) ([]core.Nominator, error)
 	GetLiquidPools(ctx context.Context, onlyVerified bool) ([]core.LiquidPool, error)
 
 	GetNFTs(ctx context.Context, accounts []tongo.AccountID) ([]core.NftItem, error)
@@ -72,7 +73,7 @@ type storage interface {
 	GetSubscriptions(ctx context.Context, address tongo.AccountID) ([]core.Subscription, error)
 	GetJettonMasters(ctx context.Context, limit, offset int) ([]core.JettonMaster, error)
 
-	GetLastConfig() ([]byte, error)
+	GetLastConfig() (tlb.ConfigParams, error)
 }
 
 // chainState provides current blockchain state which change very rarely or slow like staking APY income

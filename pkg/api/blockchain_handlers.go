@@ -7,6 +7,8 @@ import (
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/opentonapi/pkg/oas"
 	"github.com/tonkeeper/tongo"
+	"github.com/tonkeeper/tongo/boc"
+	"github.com/tonkeeper/tongo/tlb"
 )
 
 func (h Handler) GetBlock(ctx context.Context, params oas.GetBlockParams) (r oas.GetBlockRes, _ error) {
@@ -65,4 +67,26 @@ func (h Handler) GetMasterchainHead(ctx context.Context) (r oas.GetMasterchainHe
 		return &oas.InternalError{Error: err.Error()}, nil
 	}
 	return g.Pointer(convertBlockHeader(*header)), nil
+}
+
+func (h Handler) GetConfig(ctx context.Context) (r oas.GetConfigRes, _ error) {
+	cfg, err := h.storage.GetLastConfig()
+	if err != nil {
+		return &oas.InternalError{Error: err.Error()}, nil
+	}
+	c := boc.NewCell()
+	err = tlb.Marshal(c, cfg)
+	if err != nil {
+		return &oas.InternalError{Error: err.Error()}, nil
+	}
+	raw, err := c.ToBocString()
+	if err != nil {
+		return &oas.InternalError{Error: err.Error()}, nil
+	}
+	out, err := convertConfig(cfg)
+	if err != nil {
+		return &oas.InternalError{Error: err.Error()}, nil
+	}
+	out.Raw = raw
+	return out, nil
 }

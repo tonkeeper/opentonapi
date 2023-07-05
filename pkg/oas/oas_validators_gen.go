@@ -556,6 +556,121 @@ func (s ComputeSkipReason) Validate() error {
 		return errors.Errorf("invalid value: %v", s)
 	}
 }
+func (s Config) Validate() error {
+	var failures []validate.FieldError
+	if err := func() error {
+		if s.R32.Set {
+			if err := func() error {
+				if err := s.R32.Value.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "32",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if s.R33.Set {
+			if err := func() error {
+				if err := s.R33.Value.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "33",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if s.R34.Set {
+			if err := func() error {
+				if err := s.R34.Value.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "34",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if s.R35.Set {
+			if err := func() error {
+				if err := s.R35.Value.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "35",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if s.R36.Set {
+			if err := func() error {
+				if err := s.R36.Value.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "36",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if s.R37.Set {
+			if err := func() error {
+				if err := s.R37.Value.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "37",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
 func (s ContractDeployAction) Validate() error {
 	var failures []validate.FieldError
 	if err := func() error {
@@ -1899,6 +2014,24 @@ func (s Validators) Validate() error {
 	}(); err != nil {
 		failures = append(failures, validate.FieldError{
 			Name:  "validators",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+func (s ValidatorsSet) Validate() error {
+	var failures []validate.FieldError
+	if err := func() error {
+		if s.List == nil {
+			return errors.New("nil is invalid value")
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "list",
 			Error: err,
 		})
 	}

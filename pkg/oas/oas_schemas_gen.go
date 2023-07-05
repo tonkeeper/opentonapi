@@ -1494,17 +1494,131 @@ const (
 // Ref: #/components/schemas/Config
 type Config struct {
 	// Config boc in base64 format.
-	Boc string `json:"boc"`
+	Raw string `json:"raw"`
+	// Config address.
+	R0 string `json:"0"`
+	// Elector address.
+	R1 string `json:"1"`
+	// Minter address.
+	R2 string `json:"2"`
+	// Dns root address.
+	R4  string           `json:"4"`
+	R32 OptValidatorsSet `json:"32"`
+	R33 OptValidatorsSet `json:"33"`
+	R34 OptValidatorsSet `json:"34"`
+	R35 OptValidatorsSet `json:"35"`
+	R36 OptValidatorsSet `json:"36"`
+	R37 OptValidatorsSet `json:"37"`
 }
 
-// GetBoc returns the value of Boc.
-func (s Config) GetBoc() string {
-	return s.Boc
+// GetRaw returns the value of Raw.
+func (s Config) GetRaw() string {
+	return s.Raw
 }
 
-// SetBoc sets the value of Boc.
-func (s *Config) SetBoc(val string) {
-	s.Boc = val
+// GetR0 returns the value of R0.
+func (s Config) GetR0() string {
+	return s.R0
+}
+
+// GetR1 returns the value of R1.
+func (s Config) GetR1() string {
+	return s.R1
+}
+
+// GetR2 returns the value of R2.
+func (s Config) GetR2() string {
+	return s.R2
+}
+
+// GetR4 returns the value of R4.
+func (s Config) GetR4() string {
+	return s.R4
+}
+
+// GetR32 returns the value of R32.
+func (s Config) GetR32() OptValidatorsSet {
+	return s.R32
+}
+
+// GetR33 returns the value of R33.
+func (s Config) GetR33() OptValidatorsSet {
+	return s.R33
+}
+
+// GetR34 returns the value of R34.
+func (s Config) GetR34() OptValidatorsSet {
+	return s.R34
+}
+
+// GetR35 returns the value of R35.
+func (s Config) GetR35() OptValidatorsSet {
+	return s.R35
+}
+
+// GetR36 returns the value of R36.
+func (s Config) GetR36() OptValidatorsSet {
+	return s.R36
+}
+
+// GetR37 returns the value of R37.
+func (s Config) GetR37() OptValidatorsSet {
+	return s.R37
+}
+
+// SetRaw sets the value of Raw.
+func (s *Config) SetRaw(val string) {
+	s.Raw = val
+}
+
+// SetR0 sets the value of R0.
+func (s *Config) SetR0(val string) {
+	s.R0 = val
+}
+
+// SetR1 sets the value of R1.
+func (s *Config) SetR1(val string) {
+	s.R1 = val
+}
+
+// SetR2 sets the value of R2.
+func (s *Config) SetR2(val string) {
+	s.R2 = val
+}
+
+// SetR4 sets the value of R4.
+func (s *Config) SetR4(val string) {
+	s.R4 = val
+}
+
+// SetR32 sets the value of R32.
+func (s *Config) SetR32(val OptValidatorsSet) {
+	s.R32 = val
+}
+
+// SetR33 sets the value of R33.
+func (s *Config) SetR33(val OptValidatorsSet) {
+	s.R33 = val
+}
+
+// SetR34 sets the value of R34.
+func (s *Config) SetR34(val OptValidatorsSet) {
+	s.R34 = val
+}
+
+// SetR35 sets the value of R35.
+func (s *Config) SetR35(val OptValidatorsSet) {
+	s.R35 = val
+}
+
+// SetR36 sets the value of R36.
+func (s *Config) SetR36(val OptValidatorsSet) {
+	s.R36 = val
+}
+
+// SetR37 sets the value of R37.
+func (s *Config) SetR37(val OptValidatorsSet) {
+	s.R37 = val
 }
 
 func (*Config) getConfigRes() {}
@@ -5024,6 +5138,52 @@ func (o OptUnSubscriptionAction) Or(d UnSubscriptionAction) UnSubscriptionAction
 	return d
 }
 
+// NewOptValidatorsSet returns new OptValidatorsSet with value set to v.
+func NewOptValidatorsSet(v ValidatorsSet) OptValidatorsSet {
+	return OptValidatorsSet{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptValidatorsSet is optional ValidatorsSet.
+type OptValidatorsSet struct {
+	Value ValidatorsSet
+	Set   bool
+}
+
+// IsSet returns true if OptValidatorsSet was set.
+func (o OptValidatorsSet) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptValidatorsSet) Reset() {
+	var v ValidatorsSet
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptValidatorsSet) SetTo(v ValidatorsSet) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptValidatorsSet) Get() (v ValidatorsSet, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptValidatorsSet) Or(d ValidatorsSet) ValidatorsSet {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptWalletDNS returns new OptWalletDNS with value set to v.
 func NewOptWalletDNS(v WalletDNS) OptWalletDNS {
 	return OptWalletDNS{
@@ -6825,6 +6985,90 @@ func (s *Validators) SetValidators(val []Validator) {
 }
 
 func (*Validators) getValidatorsRes() {}
+
+// Ref: #/components/schemas/ValidatorsSet
+type ValidatorsSet struct {
+	UtimeSince  int                     `json:"utime_since"`
+	UtimeUntil  int                     `json:"utime_until"`
+	Total       int                     `json:"total"`
+	Main        int                     `json:"main"`
+	TotalWeight OptInt                  `json:"total_weight"`
+	List        []ValidatorsSetListItem `json:"list"`
+}
+
+// GetUtimeSince returns the value of UtimeSince.
+func (s ValidatorsSet) GetUtimeSince() int {
+	return s.UtimeSince
+}
+
+// GetUtimeUntil returns the value of UtimeUntil.
+func (s ValidatorsSet) GetUtimeUntil() int {
+	return s.UtimeUntil
+}
+
+// GetTotal returns the value of Total.
+func (s ValidatorsSet) GetTotal() int {
+	return s.Total
+}
+
+// GetMain returns the value of Main.
+func (s ValidatorsSet) GetMain() int {
+	return s.Main
+}
+
+// GetTotalWeight returns the value of TotalWeight.
+func (s ValidatorsSet) GetTotalWeight() OptInt {
+	return s.TotalWeight
+}
+
+// GetList returns the value of List.
+func (s ValidatorsSet) GetList() []ValidatorsSetListItem {
+	return s.List
+}
+
+// SetUtimeSince sets the value of UtimeSince.
+func (s *ValidatorsSet) SetUtimeSince(val int) {
+	s.UtimeSince = val
+}
+
+// SetUtimeUntil sets the value of UtimeUntil.
+func (s *ValidatorsSet) SetUtimeUntil(val int) {
+	s.UtimeUntil = val
+}
+
+// SetTotal sets the value of Total.
+func (s *ValidatorsSet) SetTotal(val int) {
+	s.Total = val
+}
+
+// SetMain sets the value of Main.
+func (s *ValidatorsSet) SetMain(val int) {
+	s.Main = val
+}
+
+// SetTotalWeight sets the value of TotalWeight.
+func (s *ValidatorsSet) SetTotalWeight(val OptInt) {
+	s.TotalWeight = val
+}
+
+// SetList sets the value of List.
+func (s *ValidatorsSet) SetList(val []ValidatorsSetListItem) {
+	s.List = val
+}
+
+type ValidatorsSetListItem struct {
+	PublicKey string `json:"public_key"`
+}
+
+// GetPublicKey returns the value of PublicKey.
+func (s ValidatorsSetListItem) GetPublicKey() string {
+	return s.PublicKey
+}
+
+// SetPublicKey sets the value of PublicKey.
+func (s *ValidatorsSetListItem) SetPublicKey(val string) {
+	s.PublicKey = val
+}
 
 // Ref: #/components/schemas/ValueFlow
 type ValueFlow struct {
