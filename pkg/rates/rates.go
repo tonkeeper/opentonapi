@@ -67,7 +67,7 @@ func (r *TonRates) getRates() (map[string]float64, error) {
 	meanTonPriceToUSD := (huobi + okx) / 2
 
 	fiatPrices := getFiatPrices()
-	pools := r.getPools()
+	pools := r.getPools(meanTonPriceToUSD)
 
 	rates := make(map[string]float64)
 	for currency, price := range fiatPrices {
@@ -82,16 +82,16 @@ func (r *TonRates) getRates() (map[string]float64, error) {
 	return rates, nil
 }
 
-func (r *TonRates) getPools() map[string]float64 {
+func (r *TonRates) getPools(tonPrice float64) map[string]float64 {
 	dedustPool := r.getDedustPool()
-	stonFiPool := r.getStonFiPool()
+	stonFiPool := r.getStonFiPool(tonPrice)
 	for address, price := range stonFiPool {
 		dedustPool[address] = price
 	}
 	return dedustPool
 }
 
-func (r *TonRates) getStonFiPool() map[string]float64 {
+func (r *TonRates) getStonFiPool(tonPrice float64) map[string]float64 {
 	resp, err := http.Get("https://api.ston.fi/v1/assets")
 	if err != nil {
 		log.Errorf("failed to fetch stonfi rates: %v", err)
@@ -124,7 +124,7 @@ func (r *TonRates) getStonFiPool() map[string]float64 {
 			log.Errorf("failed to convert stonfi price: %v", err)
 			continue
 		}
-		mapOfPool[pool.ContractAddress] = price
+		mapOfPool[pool.ContractAddress] = tonPrice / price
 	}
 
 	return mapOfPool
