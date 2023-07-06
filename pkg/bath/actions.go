@@ -20,7 +20,7 @@ const (
 	NftPurchase       ActionType = "NftPurchase"
 	JettonTransfer    ActionType = "JettonTransfer"
 	ContractDeploy    ActionType = "ContractDeploy"
-	Subscription      ActionType = "Subscription"
+	Subscription      ActionType = "Subscribe"
 	UnSubscription    ActionType = "UnSubscribe"
 	DepositStake      ActionType = "DepositStake"
 	RecoverStake      ActionType = "RecoverStake"

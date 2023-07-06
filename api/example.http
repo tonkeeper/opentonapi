@@ -34,7 +34,7 @@ GET {{host}}/v2/events/44dc48dcdb9f0ff5250543025182e94b39bfb8cdc939c28d98c46e602
 GET {{host}}/v2/blockchain/accounts/EQAvDfWFG0oYX19jwNDNBBL1rKNT9XfaGP9HyTb5nb2Eml6y/methods/get_wallet_address?args=EQCnM2nIemDP3fRihoXiuyo8ETt0LILd1LUqFlZba7nErMv_
 
 ###
-GET {{host}}/v2/accounts/EQAs87W4yJHlF8mt29ocA4agnMrLsOP69jC1HPyBUjJay-7l/nfts
+GET {{host}}/v2/accounts/EQAs87W4yJHlF8mt29ocA4agnMrLsOP69jC1HPyBUjJay-7l/dns/expiring
 
 ###
 GET {{host}}/v2/accounts/EQAs87W4yJHlF8mt29ocA4agnMrLsOP69jC1HPyBUjJay-7l/events?limit=25

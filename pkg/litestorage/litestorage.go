@@ -451,7 +451,7 @@ func (s *LiteStorage) ReindexAccount(ctx context.Context, accountID tongo.Accoun
 	return nil
 }
 
-func (s *LiteStorage) GetDnsExpiring(ctx context.Context, id tongo.AccountID, period int) ([]core.DnsExpiring, error) {
+func (s *LiteStorage) GetDnsExpiring(ctx context.Context, id tongo.AccountID, period *int) ([]core.DnsExpiring, error) {
 	timer := prometheus.NewTimer(prometheus.ObserverFunc(func(v float64) {
 		storageTimeHistogramVec.WithLabelValues("get_dns_expiring").Observe(v)
 	}))

@@ -1019,11 +1019,6 @@ func decodeGetDnsExpiringParams(args [1]string, r *http.Request) (params GetDnsE
 			return params, errors.New("path: account_id: not specified")
 		}
 	}
-	// Set default value for query: period.
-	{
-		val := int(30)
-		params.Period.SetTo(val)
-	}
 	// Decode query: period.
 	{
 		cfg := uri.QueryParameterDecodingConfig{
@@ -1063,7 +1058,7 @@ func decodeGetDnsExpiringParams(args [1]string, r *http.Request) (params GetDnsE
 							MinSet:        true,
 							Min:           1,
 							MaxSet:        true,
-							Max:           366,
+							Max:           3660,
 							MinExclusive:  false,
 							MaxExclusive:  false,
 							MultipleOfSet: false,

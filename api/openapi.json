@@ -130,8 +130,7 @@
     "name": "period",
     "required": false,
     "schema": {
-     "default": 30,
-     "maximum": 366,
+     "maximum": 3660,
      "minimum": 1,
      "type": "integer"
     }

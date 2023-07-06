@@ -194,7 +194,11 @@ func (h Handler) GetDnsExpiring(ctx context.Context, params oas.GetDnsExpiringPa
 	if err != nil {
 		return &oas.BadRequest{Error: err.Error()}, nil
 	}
-	dnsExpiring, err := h.storage.GetDnsExpiring(ctx, accountID, params.Period.Value)
+	var period *int
+	if params.Period.Set {
+		period = &params.Period.Value
+	}
+	dnsExpiring, err := h.storage.GetDnsExpiring(ctx, accountID, period)
 	if err != nil {
 		return &oas.InternalError{Error: err.Error()}, nil
 	}
