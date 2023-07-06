@@ -84,10 +84,10 @@ func (r *TonRates) getRates() (map[string]float64, error) {
 
 func (r *TonRates) getPools(tonPrice float64) map[string]float64 {
 	dedustPool := r.getDedustPool()
-	stonFiPool := r.getStonFiPool(tonPrice)
-	for address, price := range stonFiPool {
-		dedustPool[address] = price
-	}
+	//stonFiPool := r.getStonFiPool(tonPrice)
+	//for address, price := range stonFiPool {
+	//	dedustPool[address] = price
+	//}
 	return dedustPool
 }
 
