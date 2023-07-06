@@ -11,6 +11,11 @@ type BubbleSubscription struct {
 	First                                 bool
 }
 
+type BubbleUnSubscription struct {
+	Subscription, Subscriber, Beneficiary Account
+	Success                               bool
+}
+
 func FindInitialSubscription(bubble *Bubble) bool {
 	txBubble, ok := bubble.Info.(BubbleTx)
 	if !ok {
@@ -97,5 +102,52 @@ func (b BubbleSubscription) ToAction() (action *Action) {
 		},
 		Success: true,
 		Type:    Subscription,
+	}
+}
+
+func FindUnSubscription(bubble *Bubble) bool {
+	if len(bubble.Children) != 1 ||
+		len(bubble.Children[0].Children) != 1 {
+		return false
+	}
+	secondBubble := bubble.Children[0]
+	thirdBubble := bubble.Children[0].Children[0]
+	firstTX, ok1 := bubble.Info.(BubbleTx)
+	secondTX, ok2 := secondBubble.Info.(BubbleTx)
+	thirdTX, ok3 := thirdBubble.Info.(BubbleTx)
+	if !(ok1 && ok2 && ok3) {
+		return false
+	}
+	if !(secondTX.operation(abi.WalletPluginDestructMsgOp) && thirdTX.operation(abi.WalletPluginDestructMsgOp)) {
+		return false
+	}
+	newBubble := Bubble{
+		Accounts:  append(bubble.Accounts, firstTX.account.Address, secondTX.account.Address, thirdTX.account.Address),
+		ValueFlow: bubble.ValueFlow,
+	}
+	var success bool
+	newBubble.Children = thirdBubble.Children
+	newBubble.ValueFlow.Merge(bubble.ValueFlow)
+	newBubble.ValueFlow.Merge(secondBubble.ValueFlow)
+	newBubble.ValueFlow.Merge(thirdBubble.ValueFlow)
+	newBubble.Info = BubbleUnSubscription{
+		Subscriber:   firstTX.account,
+		Subscription: secondTX.account,
+		Beneficiary:  thirdTX.account,
+		Success:      success,
+	}
+	*bubble = newBubble
+	return true
+}
+
+func (b BubbleUnSubscription) ToAction() (action *Action) {
+	return &Action{
+		UnSubscription: &UnSubscriptionAction{
+			Subscription: b.Subscription.Address,
+			Subscriber:   b.Subscriber.Address,
+			Beneficiary:  b.Beneficiary.Address,
+		},
+		Success: true,
+		Type:    UnSubscription,
 	}
 }

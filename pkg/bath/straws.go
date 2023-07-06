@@ -20,6 +20,7 @@ var DefaultStraws = []Straw{
 	FindJettonTransfer,
 	FindInitialSubscription,
 	FindExtendedSubscription,
+	FindUnSubscription,
 	FindNftPurchase,
 	FindDepositStake,
 	FindRecoverStake,
