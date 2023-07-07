@@ -1039,6 +1039,7 @@ func (*BadRequest) emulateWalletMessageRes()         {}
 func (*BadRequest) execGetMethodRes()                {}
 func (*BadRequest) getAccountInfoByStateInitRes()    {}
 func (*BadRequest) getAccountRes()                   {}
+func (*BadRequest) getAccountSeqnoRes()              {}
 func (*BadRequest) getAccountTransactionsRes()       {}
 func (*BadRequest) getAccountsRes()                  {}
 func (*BadRequest) getBlockRes()                     {}
@@ -2376,6 +2377,7 @@ func (*InternalError) emulateWalletMessageRes()         {}
 func (*InternalError) execGetMethodRes()                {}
 func (*InternalError) getAccountInfoByStateInitRes()    {}
 func (*InternalError) getAccountRes()                   {}
+func (*InternalError) getAccountSeqnoRes()              {}
 func (*InternalError) getAccountTransactionsRes()       {}
 func (*InternalError) getAccountsRes()                  {}
 func (*InternalError) getAllAuctionsRes()               {}
@@ -5732,6 +5734,23 @@ func (s *SendMessageReq) SetBoc(val string) {
 	s.Boc = val
 }
 
+// Ref: #/components/schemas/Seqno
+type Seqno struct {
+	Seqno uint32 `json:"seqno"`
+}
+
+// GetSeqno returns the value of Seqno.
+func (s Seqno) GetSeqno() uint32 {
+	return s.Seqno
+}
+
+// SetSeqno sets the value of Seqno.
+func (s *Seqno) SetSeqno(val uint32) {
+	s.Seqno = val
+}
+
+func (*Seqno) getAccountSeqnoRes() {}
+
 // SetWalletBackupOK is response for SetWalletBackup operation.
 type SetWalletBackupOK struct{}
 
@@ -6910,6 +6929,7 @@ func (*UnauthorizedError) emulateWalletMessageRes()         {}
 func (*UnauthorizedError) execGetMethodRes()                {}
 func (*UnauthorizedError) getAccountInfoByStateInitRes()    {}
 func (*UnauthorizedError) getAccountRes()                   {}
+func (*UnauthorizedError) getAccountSeqnoRes()              {}
 func (*UnauthorizedError) getAccountTransactionsRes()       {}
 func (*UnauthorizedError) getAccountsRes()                  {}
 func (*UnauthorizedError) getAllAuctionsRes()               {}

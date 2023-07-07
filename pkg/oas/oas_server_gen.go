@@ -68,6 +68,12 @@ type Handler interface {
 	//
 	// POST /v2/tonconnect/stateinit
 	GetAccountInfoByStateInit(ctx context.Context, req GetAccountInfoByStateInitReq) (GetAccountInfoByStateInitRes, error)
+	// GetAccountSeqno implements getAccountSeqno operation.
+	//
+	// Get account seqno.
+	//
+	// GET /v2/wallet/{account_id}/seqno
+	GetAccountSeqno(ctx context.Context, params GetAccountSeqnoParams) (GetAccountSeqnoRes, error)
 	// GetAccountTransactions implements getAccountTransactions operation.
 	//
 	// Get account transactions.

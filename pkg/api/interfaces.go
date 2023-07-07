@@ -74,6 +74,8 @@ type storage interface {
 	GetJettonMasters(ctx context.Context, limit, offset int) ([]core.JettonMaster, error)
 
 	GetLastConfig() (tlb.ConfigParams, error)
+
+	GetSeqno(ctx context.Context, account tongo.AccountID) (uint32, error)
 }
 
 // chainState provides current blockchain state which change very rarely or slow like staking APY income
