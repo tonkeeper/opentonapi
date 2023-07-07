@@ -180,6 +180,28 @@ func NewAddressBook(logger *zap.Logger, addressPath, jettonPath, collectionPath 
 			jettons[a] = i
 		}
 	}
+	redoubtJetts, err := getRedoubtJettons()
+	if err != nil {
+		logger.Info("fail to load redoubt jettons")
+	} else {
+		for _, jetton := range redoubtJetts {
+			_, ok := jettons[tongo.MustParseAccountID(jetton.Address)]
+			if !ok {
+				jettons[tongo.MustParseAccountID(jetton.Address)] = jetton
+			}
+		}
+	}
+	stonfiJettons, err := getStonfiJettons()
+	if err != nil {
+		logger.Info("fail to load stonfi jettons")
+	} else {
+		for _, jetton := range stonfiJettons {
+			_, ok := jettons[tongo.MustParseAccountID(jetton.Address)]
+			if !ok {
+				jettons[tongo.MustParseAccountID(jetton.Address)] = jetton
+			}
+		}
+	}
 	colls, err := downloadJson[KnownCollection](collectionPath)
 	if err != nil {
 		logger.Info("fail to load collections.json")
@@ -276,4 +298,58 @@ func _getGGWhitelist(client *graphql.Client) ([]tongo.AccountID, error) {
 		addr = append(addr, aa)
 	}
 	return addr, nil
+}
+
+func getRedoubtJettons() ([]KnownJetton, error) {
+	response, err := http.Get("https://api.redoubt.online/v2/feed/jettons")
+	if err != nil {
+		return nil, err
+	}
+	defer response.Body.Close()
+	if response.StatusCode >= 300 {
+		return nil, fmt.Errorf("invalid status code %v", response.StatusCode)
+	}
+	var respBody struct {
+		Jettons []KnownJetton `json:"jettons"`
+	}
+	if err = json.NewDecoder(response.Body).Decode(&respBody); err != nil {
+		return nil, err
+	}
+	for idx, jetton := range respBody.Jettons {
+		address, err := tongo.ParseAccountID(jetton.Address)
+		if err != nil {
+			continue
+		}
+		jetton.Address = address.ToRaw()
+		respBody.Jettons[idx] = jetton
+	}
+	return respBody.Jettons, nil
+}
+
+func getStonfiJettons() ([]KnownJetton, error) {
+	response, err := http.Get("https://api.ston.fi/v1/pools")
+	if err != nil {
+		return nil, err
+	}
+	defer response.Body.Close()
+	if response.StatusCode >= 300 {
+		return nil, fmt.Errorf("invalid status code %v", response.StatusCode)
+	}
+	var respBody struct {
+		PoolList []struct {
+			Address string `json:"address"`
+		} `json:"pool_list"`
+	}
+	if err = json.NewDecoder(response.Body).Decode(&respBody); err != nil {
+		return nil, err
+	}
+	var jettons []KnownJetton
+	for _, jetton := range respBody.PoolList {
+		address, err := tongo.ParseAccountID(jetton.Address)
+		if err != nil {
+			continue
+		}
+		jettons = append(jettons, KnownJetton{Address: address.ToRaw()})
+	}
+	return jettons, nil
 }
