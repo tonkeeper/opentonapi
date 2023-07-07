@@ -5358,6 +5358,41 @@
      "Emulation"
     ]
    }
+  },
+  "/v2/wallet/{account_id}/seqno": {
+   "get": {
+    "description": "Get account seqno",
+    "operationId": "getAccountSeqno",
+    "parameters": [
+     {
+      "$ref": "#/components/parameters/accountIdParameter"
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Accounts"
+        }
+       }
+      },
+      "description": "seqno"
+     },
+     "400": {
+      "$ref": "#/components/responses/BadRequest"
+     },
+     "401": {
+      "$ref": "#/components/responses/UnauthorizedError"
+     },
+     "500": {
+      "$ref": "#/components/responses/InternalError"
+     }
+    },
+    "tags": [
+     "Wallets"
+    ]
+   }
   }
  },
  "servers": [

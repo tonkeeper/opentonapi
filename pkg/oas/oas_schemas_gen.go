@@ -516,6 +516,7 @@ func (s *Accounts) SetAccounts(val []Account) {
 	s.Accounts = val
 }
 
+func (*Accounts) getAccountSeqnoRes()       {}
 func (*Accounts) getAccountsRes()           {}
 func (*Accounts) getWalletsByPublicKeyRes() {}
 
@@ -1039,6 +1040,7 @@ func (*BadRequest) emulateWalletMessageRes()         {}
 func (*BadRequest) execGetMethodRes()                {}
 func (*BadRequest) getAccountInfoByStateInitRes()    {}
 func (*BadRequest) getAccountRes()                   {}
+func (*BadRequest) getAccountSeqnoRes()              {}
 func (*BadRequest) getAccountTransactionsRes()       {}
 func (*BadRequest) getAccountsRes()                  {}
 func (*BadRequest) getBlockRes()                     {}
@@ -2376,6 +2378,7 @@ func (*InternalError) emulateWalletMessageRes()         {}
 func (*InternalError) execGetMethodRes()                {}
 func (*InternalError) getAccountInfoByStateInitRes()    {}
 func (*InternalError) getAccountRes()                   {}
+func (*InternalError) getAccountSeqnoRes()              {}
 func (*InternalError) getAccountTransactionsRes()       {}
 func (*InternalError) getAccountsRes()                  {}
 func (*InternalError) getAllAuctionsRes()               {}
@@ -6910,6 +6913,7 @@ func (*UnauthorizedError) emulateWalletMessageRes()         {}
 func (*UnauthorizedError) execGetMethodRes()                {}
 func (*UnauthorizedError) getAccountInfoByStateInitRes()    {}
 func (*UnauthorizedError) getAccountRes()                   {}
+func (*UnauthorizedError) getAccountSeqnoRes()              {}
 func (*UnauthorizedError) getAccountTransactionsRes()       {}
 func (*UnauthorizedError) getAccountsRes()                  {}
 func (*UnauthorizedError) getAllAuctionsRes()               {}

@@ -41,6 +41,10 @@ type GetAccountRes interface {
 	getAccountRes()
 }
 
+type GetAccountSeqnoRes interface {
+	getAccountSeqnoRes()
+}
+
 type GetAccountTransactionsRes interface {
 	getAccountTransactionsRes()
 }

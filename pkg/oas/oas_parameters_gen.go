@@ -580,6 +580,58 @@ func decodeGetAccountParams(args [1]string, r *http.Request) (params GetAccountP
 	return params, nil
 }
 
+// GetAccountSeqnoParams is parameters of getAccountSeqno operation.
+type GetAccountSeqnoParams struct {
+	// Account ID.
+	AccountID string
+}
+
+func unpackGetAccountSeqnoParams(packed middleware.Parameters) (params GetAccountSeqnoParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "account_id",
+			In:   "path",
+		}
+		params.AccountID = packed[key].(string)
+	}
+	return params
+}
+
+func decodeGetAccountSeqnoParams(args [1]string, r *http.Request) (params GetAccountSeqnoParams, _ error) {
+	// Decode path: account_id.
+	{
+		param := args[0]
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "account_id",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.AccountID = c
+				return nil
+			}(); err != nil {
+				return params, errors.Wrap(err, "path: account_id: parse")
+			}
+		} else {
+			return params, errors.New("path: account_id: not specified")
+		}
+	}
+	return params, nil
+}
+
 // GetAccountTransactionsParams is parameters of getAccountTransactions operation.
 type GetAccountTransactionsParams struct {
 	// Account ID.

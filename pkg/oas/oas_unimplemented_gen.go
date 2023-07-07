@@ -103,6 +103,15 @@ func (UnimplementedHandler) GetAccountInfoByStateInit(ctx context.Context, req G
 	return r, ht.ErrNotImplemented
 }
 
+// GetAccountSeqno implements getAccountSeqno operation.
+//
+// Get account seqno.
+//
+// GET /v2/wallet/{account_id}/seqno
+func (UnimplementedHandler) GetAccountSeqno(ctx context.Context, params GetAccountSeqnoParams) (r GetAccountSeqnoRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // GetAccountTransactions implements getAccountTransactions operation.
 //
 // Get account transactions.

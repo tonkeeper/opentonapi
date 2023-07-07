@@ -12,8 +12,11 @@ import (
 	"time"
 
 	"github.com/tonkeeper/opentonapi/pkg/oas"
+	"github.com/tonkeeper/opentonapi/pkg/wallet"
 	"github.com/tonkeeper/tongo"
-	"github.com/tonkeeper/tongo/wallet"
+	"github.com/tonkeeper/tongo/abi"
+	"github.com/tonkeeper/tongo/tlb"
+	tongoWallet "github.com/tonkeeper/tongo/wallet"
 )
 
 func (h Handler) SetWalletBackup(ctx context.Context, request oas.SetWalletBackupReq, params oas.SetWalletBackupParams) (res oas.SetWalletBackupRes, err error) {
@@ -90,16 +93,16 @@ func checkTonConnectToken(authToken, secret string) ([]byte, bool, error) {
 func getTotalBalances(ctx context.Context, storage storage, pubKey []byte) (int64, error) {
 	var balance int64
 
-	versions := []wallet.Version{
-		wallet.V1R1, wallet.V1R2, wallet.V1R3,
-		wallet.V2R1, wallet.V2R2,
-		wallet.V3R1, wallet.V3R2,
-		wallet.V4R1, wallet.V4R2,
+	versions := []tongoWallet.Version{
+		tongoWallet.V1R1, tongoWallet.V1R2, tongoWallet.V1R3,
+		tongoWallet.V2R1, tongoWallet.V2R2,
+		tongoWallet.V3R1, tongoWallet.V3R2,
+		tongoWallet.V4R1, tongoWallet.V4R2,
 	}
 
 	var walletAddresses []tongo.AccountID
 	for _, version := range versions {
-		walletAddress, err := wallet.GenerateWalletAddress(pubKey, version, 0, nil)
+		walletAddress, err := tongoWallet.GenerateWalletAddress(pubKey, version, 0, nil)
 		if err != nil {
 			continue
 		}
@@ -122,15 +125,15 @@ func (h Handler) GetWalletsByPublicKey(ctx context.Context, params oas.GetWallet
 	if err != nil {
 		return &oas.BadRequest{Error: err.Error()}, nil
 	}
-	versions := []wallet.Version{
-		wallet.V1R1, wallet.V1R2, wallet.V1R3,
-		wallet.V2R1, wallet.V2R2,
-		wallet.V3R1, wallet.V3R2,
-		wallet.V4R1, wallet.V4R2,
+	versions := []tongoWallet.Version{
+		tongoWallet.V1R1, tongoWallet.V1R2, tongoWallet.V1R3,
+		tongoWallet.V2R1, tongoWallet.V2R2,
+		tongoWallet.V3R1, tongoWallet.V3R2,
+		tongoWallet.V4R1, tongoWallet.V4R2,
 	}
 	var walletAddresses []tongo.AccountID
 	for _, version := range versions {
-		walletAddress, err := wallet.GenerateWalletAddress(publicKey, version, 0, nil)
+		walletAddress, err := tongoWallet.GenerateWalletAddress(publicKey, version, 0, nil)
 		if err != nil {
 			continue
 		}
@@ -152,4 +155,41 @@ func (h Handler) GetWalletsByPublicKey(ctx context.Context, params oas.GetWallet
 		results = append(results, res)
 	}
 	return &oas.Accounts{Accounts: results}, nil
+}
+
+func (h Handler) GetAccountSeqno(ctx context.Context, params oas.GetAccountSeqnoParams) (res oas.GetAccountSeqnoRes, err error) {
+	accountID, err := tongo.ParseAccountID(params.AccountID)
+	if err != nil {
+		return &oas.BadRequest{Error: err.Error()}, nil
+	}
+	account, err := h.storage.GetRawAccount(ctx, accountID)
+	if err != nil {
+		return &oas.InternalError{Error: err.Error()}, nil
+	}
+	walletVersion, err := wallet.GetVersionByCode(account.Code)
+	if err != nil {
+		return &oas.InternalError{Error: err.Error()}, nil
+	}
+
+	switch walletVersion {
+	case tongoWallet.V1R1, tongoWallet.V1R2, tongoWallet.V1R3, tongoWallet.V3R1:
+		var data tongoWallet.DataV1V2
+		err = tlb.Unmarshal(account.Data, &data)
+		if err != nil {
+			return nil, err
+		}
+
+	default:
+		//seqno, err := client.GetSeqno(context.Background(), w.GetAddress())
+		//if err != nil {
+		//	t.Fatalf("Unable to get wallet seqno: %v", err)
+		//}
+		q, _, err := abi.Seqno(ctx, h.executor, accountID)
+		if err != nil {
+			return &oas.InternalError{Error: err.Error()}, nil
+		}
+		fmt.Println(q)
+	}
+
+	return nil, nil
 }

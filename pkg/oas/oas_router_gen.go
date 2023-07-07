@@ -1380,6 +1380,40 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 						return
 					}
 				}
+				// Param: "account_id"
+				// Match until "/"
+				idx := strings.IndexByte(elem, '/')
+				if idx < 0 {
+					idx = len(elem)
+				}
+				args[0] = elem[:idx]
+				elem = elem[idx:]
+
+				if len(elem) == 0 {
+					break
+				}
+				switch elem[0] {
+				case '/': // Prefix: "/seqno"
+					if l := len("/seqno"); len(elem) >= l && elem[0:l] == "/seqno" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					if len(elem) == 0 {
+						// Leaf node.
+						switch r.Method {
+						case "GET":
+							s.handleGetAccountSeqnoRequest([1]string{
+								args[0],
+							}, w, r)
+						default:
+							s.notAllowed(w, r, "GET")
+						}
+
+						return
+					}
+				}
 			}
 		}
 	}
@@ -2812,6 +2846,40 @@ func (s *Server) FindRoute(method, path string) (r Route, _ bool) {
 							r.operationID = "emulateWalletMessage"
 							r.args = args
 							r.count = 0
+							return r, true
+						default:
+							return
+						}
+					}
+				}
+				// Param: "account_id"
+				// Match until "/"
+				idx := strings.IndexByte(elem, '/')
+				if idx < 0 {
+					idx = len(elem)
+				}
+				args[0] = elem[:idx]
+				elem = elem[idx:]
+
+				if len(elem) == 0 {
+					break
+				}
+				switch elem[0] {
+				case '/': // Prefix: "/seqno"
+					if l := len("/seqno"); len(elem) >= l && elem[0:l] == "/seqno" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					if len(elem) == 0 {
+						switch method {
+						case "GET":
+							// Leaf: GetAccountSeqno
+							r.name = "GetAccountSeqno"
+							r.operationID = "getAccountSeqno"
+							r.args = args
+							r.count = 1
 							return r, true
 						default:
 							return

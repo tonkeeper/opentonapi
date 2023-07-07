@@ -1478,6 +1478,27 @@ paths:
           $ref: '#/components/responses/UnauthorizedError'
         '500':
           $ref: '#/components/responses/InternalError'
+  /v2/wallet/{account_id}/seqno:
+    get:
+      description: "Get account seqno"
+      operationId: getAccountSeqno
+      tags:
+        - Wallets
+      parameters:
+        - $ref: '#/components/parameters/accountIdParameter'
+      responses:
+        '200':
+          description: account seqno
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Accounts'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalError'
 
 
 components:
@@ -3498,14 +3519,14 @@ components:
             type: string
             example: [ "https://coinmarketcap.com/currencies/drv/", "https://www.coingecko.com/en/coins/durov" ]
     Jettons:
-          type: object
-          required:
-            - jettons
-          properties:
-            jettons:
-              type: array
-              items:
-                $ref: '#/components/schemas/JettonInfo'
+      type: object
+      required:
+        - jettons
+      properties:
+        jettons:
+          type: array
+          items:
+            $ref: '#/components/schemas/JettonInfo'
     JettonInfo:
       type: object
       required:
