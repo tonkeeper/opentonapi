@@ -2397,6 +2397,18 @@
     ],
     "type": "object"
    },
+   "Seqno": {
+    "properties": {
+     "seqno": {
+      "format": "uint32",
+      "type": "integer"
+     }
+    },
+    "required": [
+     "seqno"
+    ],
+    "type": "object"
+   },
    "SmartContractAction": {
     "properties": {
      "contract": {
@@ -5373,11 +5385,11 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/Accounts"
+         "$ref": "#/components/schemas/Seqno"
         }
        }
       },
-      "description": "seqno"
+      "description": "account seqno"
      },
      "400": {
       "$ref": "#/components/responses/BadRequest"

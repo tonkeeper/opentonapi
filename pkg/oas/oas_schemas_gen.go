@@ -516,7 +516,6 @@ func (s *Accounts) SetAccounts(val []Account) {
 	s.Accounts = val
 }
 
-func (*Accounts) getAccountSeqnoRes()       {}
 func (*Accounts) getAccountsRes()           {}
 func (*Accounts) getWalletsByPublicKeyRes() {}
 
@@ -5734,6 +5733,23 @@ func (s SendMessageReq) GetBoc() string {
 func (s *SendMessageReq) SetBoc(val string) {
 	s.Boc = val
 }
+
+// Ref: #/components/schemas/Seqno
+type Seqno struct {
+	Seqno uint32 `json:"seqno"`
+}
+
+// GetSeqno returns the value of Seqno.
+func (s Seqno) GetSeqno() uint32 {
+	return s.Seqno
+}
+
+// SetSeqno sets the value of Seqno.
+func (s *Seqno) SetSeqno(val uint32) {
+	s.Seqno = val
+}
+
+func (*Seqno) getAccountSeqnoRes() {}
 
 // SetWalletBackupOK is response for SetWalletBackup operation.
 type SetWalletBackupOK struct{}

@@ -1409,7 +1409,7 @@ func decodeGetAccountSeqnoResponse(resp *http.Response) (res GetAccountSeqnoRes,
 			}
 
 			d := jx.DecodeBytes(b)
-			var response Accounts
+			var response Seqno
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err

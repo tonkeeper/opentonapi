@@ -16,7 +16,7 @@ func GetVersionByCode(code []byte) (wallet.Version, error) {
 	if err != nil {
 		return 0, err
 	}
-	if len(cells) != 0 {
+	if len(cells) != 1 {
 		return 0, fmt.Errorf("can't get wallet version because its code contains multiple root cells")
 	}
 	hash, err := cells[0].Hash()

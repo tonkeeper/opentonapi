@@ -611,7 +611,7 @@ func encodeGetAccountInfoByStateInitResponse(response GetAccountInfoByStateInitR
 
 func encodeGetAccountSeqnoResponse(response GetAccountSeqnoRes, w http.ResponseWriter, span trace.Span) error {
 	switch response := response.(type) {
-	case *Accounts:
+	case *Seqno:
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(200)
 		span.SetStatus(codes.Ok, http.StatusText(200))

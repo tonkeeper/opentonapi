@@ -14,7 +14,7 @@ import (
 	"github.com/tonkeeper/opentonapi/pkg/oas"
 	"github.com/tonkeeper/opentonapi/pkg/wallet"
 	"github.com/tonkeeper/tongo"
-	"github.com/tonkeeper/tongo/abi"
+	"github.com/tonkeeper/tongo/boc"
 	"github.com/tonkeeper/tongo/tlb"
 	tongoWallet "github.com/tonkeeper/tongo/wallet"
 )
@@ -170,26 +170,31 @@ func (h Handler) GetAccountSeqno(ctx context.Context, params oas.GetAccountSeqno
 	if err != nil {
 		return &oas.InternalError{Error: err.Error()}, nil
 	}
-
+	cells, err := boc.DeserializeBoc(account.Data)
+	if err != nil {
+		return &oas.InternalError{Error: err.Error()}, nil
+	}
+	var seqno uint32
 	switch walletVersion {
-	case tongoWallet.V1R1, tongoWallet.V1R2, tongoWallet.V1R3, tongoWallet.V3R1:
+	case tongoWallet.V1R1, tongoWallet.V1R2, tongoWallet.V1R3:
 		var data tongoWallet.DataV1V2
-		err = tlb.Unmarshal(account.Data, &data)
-		if err != nil {
-			return nil, err
-		}
-
-	default:
-		//seqno, err := client.GetSeqno(context.Background(), w.GetAddress())
-		//if err != nil {
-		//	t.Fatalf("Unable to get wallet seqno: %v", err)
-		//}
-		q, _, err := abi.Seqno(ctx, h.executor, accountID)
+		err = tlb.Unmarshal(cells[0], &data)
 		if err != nil {
 			return &oas.InternalError{Error: err.Error()}, nil
 		}
-		fmt.Println(q)
+		seqno = data.Seqno
+	case tongoWallet.V3R1:
+		var data tongoWallet.DataV3
+		err = tlb.Unmarshal(cells[0], &data)
+		if err != nil {
+			return &oas.InternalError{Error: err.Error()}, nil
+		}
+		seqno = data.Seqno
+	default:
+		seqno, err = h.storage.GetSeqno(ctx, accountID)
+		if err != nil {
+			return &oas.InternalError{Error: err.Error()}, nil
+		}
 	}
-
-	return nil, nil
+	return &oas.Seqno{Seqno: seqno}, nil
 }
