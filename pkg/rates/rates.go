@@ -67,7 +67,7 @@ func (r *TonRates) getRates() (map[string]float64, error) {
 	meanTonPriceToUSD := (huobi + okx) / 2
 
 	fiatPrices := getFiatPrices()
-	pools := r.getPools(meanTonPriceToUSD)
+	pools := r.getPools()
 
 	rates := make(map[string]float64)
 	for currency, price := range fiatPrices {
@@ -82,13 +82,45 @@ func (r *TonRates) getRates() (map[string]float64, error) {
 	return rates, nil
 }
 
-func (r *TonRates) getPools(tonPrice float64) map[string]float64 {
+func (r *TonRates) getPools() map[string]float64 {
 	dedustPool := r.getDedustPool()
-	//stonFiPool := r.getStonFiPool(tonPrice)
-	//for address, price := range stonFiPool {
-	//	dedustPool[address] = price
-	//}
+	redoubtPool := getRedoubtPool()
+	for address, price := range redoubtPool {
+		dedustPool[address] = price
+	}
 	return dedustPool
+}
+
+func getRedoubtPool() map[string]float64 {
+	resp, err := http.Get("https://api.redoubt.online/v2/feed/jettons")
+	if err != nil {
+		log.Errorf("failed to fetch redoubt rates: %v", err)
+		return nil
+	}
+	defer resp.Body.Close()
+
+	type Pool struct {
+		Name    string `json:"name"`
+		Address string `json:"address"`
+		Price   struct {
+			Ton float64 `json:"ton"`
+		} `json:"price"`
+	}
+
+	var respBody struct {
+		Jettons []Pool `json:"jettons"`
+	}
+	if err = json.NewDecoder(resp.Body).Decode(&respBody); err != nil {
+		log.Errorf("failed to decode response: %v", err)
+		return nil
+	}
+
+	mapOfPool := make(map[string]float64)
+	for _, pool := range respBody.Jettons {
+		mapOfPool[pool.Address] = 1 / pool.Price.Ton
+	}
+
+	return mapOfPool
 }
 
 func (r *TonRates) getStonFiPool(tonPrice float64) map[string]float64 {
