@@ -87,7 +87,7 @@ func (h Handler) GetJettonsHistory(ctx context.Context, params oas.GetJettonsHis
 	if err != nil {
 		return &oas.InternalError{Error: err.Error()}, nil
 	}
-	events, lastLT, err := h.convertJettonHistory(ctx, account, traceIDs, params.AcceptLanguage)
+	events, lastLT, err := h.convertJettonHistory(ctx, account, nil, traceIDs, params.AcceptLanguage)
 	return &oas.AccountEvents{Events: events, NextFrom: lastLT}, nil
 }
 
@@ -104,7 +104,7 @@ func (h Handler) GetJettonsHistoryByID(ctx context.Context, params oas.GetJetton
 	if err != nil {
 		return &oas.InternalError{Error: err.Error()}, nil
 	}
-	events, lastLT, err := h.convertJettonHistory(ctx, account, traceIDs, params.AcceptLanguage)
+	events, lastLT, err := h.convertJettonHistory(ctx, account, &jettonMasterAccount, traceIDs, params.AcceptLanguage)
 	return &oas.AccountEvents{Events: events, NextFrom: lastLT}, nil
 }
 

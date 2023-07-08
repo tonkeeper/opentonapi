@@ -39,7 +39,7 @@ func jettonMetadata(account tongo.AccountID, meta NormalizedMetadata) oas.Jetton
 	return metadata
 }
 
-func (h Handler) convertJettonHistory(ctx context.Context, account tongo.AccountID, traceIDs []tongo.Bits256, acceptLanguage oas.OptString) ([]oas.AccountEvent, int64, error) {
+func (h Handler) convertJettonHistory(ctx context.Context, account tongo.AccountID, master *tongo.AccountID, traceIDs []tongo.Bits256, acceptLanguage oas.OptString) ([]oas.AccountEvent, int64, error) {
 	var lastLT uint64
 	events := []oas.AccountEvent{}
 	for _, traceID := range traceIDs {
@@ -63,15 +63,18 @@ func (h Handler) convertJettonHistory(ctx context.Context, account tongo.Account
 			InProgress: trace.InProgress(),
 		}
 		for _, action := range result.Actions {
+			if action.Type != bath.JettonTransfer {
+				continue
+			}
+			if master != nil && action.JettonTransfer.Jetton != *master {
+				continue
+			}
 			convertedAction, spamDetected, err := h.convertAction(ctx, account, action, acceptLanguage)
 			if err != nil {
 				return nil, 0, err
 			}
 			if !event.IsScam && spamDetected {
 				event.IsScam = true
-			}
-			if convertedAction.Type != oas.ActionTypeJettonTransfer {
-				continue
 			}
 			event.Actions = append(event.Actions, convertedAction)
 		}
