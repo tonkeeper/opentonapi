@@ -13,7 +13,6 @@ import (
 	"github.com/google/martian/log"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/liteapi"
-	"go.uber.org/zap"
 )
 
 type TonRates struct { // the values are equated to the TON
@@ -26,10 +25,10 @@ func (r *TonRates) GetRates() map[string]float64 {
 	return r.Rates
 }
 
-func InitTonRates(logger *zap.Logger) *TonRates {
+func InitTonRates() *TonRates {
 	executor, err := liteapi.NewClientWithDefaultMainnet()
 	if err != nil {
-		logger.Fatal("failed init ton rates", zap.Error(err))
+		panic(fmt.Sprintf("failed init ton rates: %v", err))
 	}
 	rates := &TonRates{
 		Rates:    map[string]float64{},
