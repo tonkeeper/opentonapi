@@ -342,6 +342,10 @@ func (s *LiteStorage) GetTransaction(ctx context.Context, hash tongo.Bits256) (*
 	return nil, fmt.Errorf("not found tx %x", hash)
 }
 
+func (s *LiteStorage) GetTransactionByMsg(ctx context.Context, hash tongo.Bits256) (*core.Transaction, error) {
+	return nil, nil
+}
+
 func (s *LiteStorage) GetBlockTransactions(ctx context.Context, id tongo.BlockID) ([]*core.Transaction, error) {
 	timer := prometheus.NewTimer(prometheus.ObserverFunc(func(v float64) {
 		storageTimeHistogramVec.WithLabelValues("get_block_transactions").Observe(v)

@@ -82,6 +82,29 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/InternalError'
+  /v2/blockchain/transactions/message/{msg_id}:
+    get:
+      description: Get transaction data by message hash
+      operationId: getTransactionByMessageHash
+      tags:
+        - Blockchain
+      parameters:
+        - $ref: '#/components/parameters/messageIdParameter'
+      responses:
+        '200':
+          description: transaction
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Transaction'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
 
   /v2/blockchain/validators:
     get:
@@ -1516,6 +1539,14 @@ components:
       name: transaction_id
       required: true
       description: transaction ID
+      schema:
+        type: string
+        example: 97264395BD65A255A429B11326C84128B7D70FFED7949ABAE3036D506BA38621
+    messageIdParameter:
+      in: path
+      name: msg_id
+      required: true
+      description: message ID
       schema:
         type: string
         example: 97264395BD65A255A429B11326C84128B7D70FFED7949ABAE3036D506BA38621

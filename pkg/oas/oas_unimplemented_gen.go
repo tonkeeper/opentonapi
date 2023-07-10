@@ -409,6 +409,15 @@ func (UnimplementedHandler) GetTransaction(ctx context.Context, params GetTransa
 	return r, ht.ErrNotImplemented
 }
 
+// GetTransactionByMessageHash implements getTransactionByMessageHash operation.
+//
+// Get transaction data by message hash.
+//
+// GET /v2/blockchain/transactions/message/{msg_id}
+func (UnimplementedHandler) GetTransactionByMessageHash(ctx context.Context, params GetTransactionByMessageHashParams) (r GetTransactionByMessageHashRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // GetValidators implements getValidators operation.
 //
 // Get validators.

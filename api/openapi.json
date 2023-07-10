@@ -105,6 +105,16 @@
      "type": "integer"
     }
    },
+   "messageIdParameter": {
+    "description": "message ID",
+    "in": "path",
+    "name": "msg_id",
+    "required": true,
+    "schema": {
+     "example": "97264395BD65A255A429B11326C84128B7D70FFED7949ABAE3036D506BA38621",
+     "type": "string"
+    }
+   },
    "methodNameParameter": {
     "description": "contract get method name",
     "in": "path",
@@ -4119,6 +4129,44 @@
      },
      "401": {
       "$ref": "#/components/responses/UnauthorizedError"
+     },
+     "500": {
+      "$ref": "#/components/responses/InternalError"
+     }
+    },
+    "tags": [
+     "Blockchain"
+    ]
+   }
+  },
+  "/v2/blockchain/transactions/message/{msg_id}": {
+   "get": {
+    "description": "Get transaction data by message hash",
+    "operationId": "getTransactionByMessageHash",
+    "parameters": [
+     {
+      "$ref": "#/components/parameters/messageIdParameter"
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Transaction"
+        }
+       }
+      },
+      "description": "transaction"
+     },
+     "400": {
+      "$ref": "#/components/responses/BadRequest"
+     },
+     "401": {
+      "$ref": "#/components/responses/UnauthorizedError"
+     },
+     "404": {
+      "$ref": "#/components/responses/NotFound"
      },
      "500": {
       "$ref": "#/components/responses/InternalError"
