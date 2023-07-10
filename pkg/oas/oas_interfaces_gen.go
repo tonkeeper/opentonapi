@@ -169,6 +169,10 @@ type GetTracesByAccountRes interface {
 	getTracesByAccountRes()
 }
 
+type GetTransactionByMessageHashRes interface {
+	getTransactionByMessageHashRes()
+}
+
 type GetTransactionRes interface {
 	getTransactionRes()
 }

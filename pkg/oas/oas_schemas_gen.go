@@ -1066,6 +1066,7 @@ func (*BadRequest) getSubscriptionsByAccountRes()    {}
 func (*BadRequest) getTonConnectPayloadRes()         {}
 func (*BadRequest) getTraceRes()                     {}
 func (*BadRequest) getTracesByAccountRes()           {}
+func (*BadRequest) getTransactionByMessageHashRes()  {}
 func (*BadRequest) getTransactionRes()               {}
 func (*BadRequest) getWalletBackupRes()              {}
 func (*BadRequest) getWalletsByPublicKeyRes()        {}
@@ -2409,6 +2410,7 @@ func (*InternalError) getSubscriptionsByAccountRes()    {}
 func (*InternalError) getTonConnectPayloadRes()         {}
 func (*InternalError) getTraceRes()                     {}
 func (*InternalError) getTracesByAccountRes()           {}
+func (*InternalError) getTransactionByMessageHashRes()  {}
 func (*InternalError) getTransactionRes()               {}
 func (*InternalError) getValidatorsRes()                {}
 func (*InternalError) getWalletBackupRes()              {}
@@ -3545,36 +3547,37 @@ func (s *NotFound) SetError(val string) {
 	s.Error = val
 }
 
-func (*NotFound) dnsBackResolveRes()            {}
-func (*NotFound) dnsInfoRes()                   {}
-func (*NotFound) dnsResolveRes()                {}
-func (*NotFound) getAccountRes()                {}
-func (*NotFound) getAccountTransactionsRes()    {}
-func (*NotFound) getBlockRes()                  {}
-func (*NotFound) getBlockTransactionsRes()      {}
-func (*NotFound) getDnsExpiringRes()            {}
-func (*NotFound) getDomainBidsRes()             {}
-func (*NotFound) getEventRes()                  {}
-func (*NotFound) getEventsByAccountRes()        {}
-func (*NotFound) getItemsFromCollectionRes()    {}
-func (*NotFound) getJettonInfoRes()             {}
-func (*NotFound) getJettonsBalancesRes()        {}
-func (*NotFound) getJettonsHistoryByIDRes()     {}
-func (*NotFound) getJettonsHistoryRes()         {}
-func (*NotFound) getNftCollectionRes()          {}
-func (*NotFound) getNftItemByAddressRes()       {}
-func (*NotFound) getNftItemsByAddressesRes()    {}
-func (*NotFound) getNftItemsByOwnerRes()        {}
-func (*NotFound) getRawAccountRes()             {}
-func (*NotFound) getSearchAccountsRes()         {}
-func (*NotFound) getSubscriptionsByAccountRes() {}
-func (*NotFound) getTraceRes()                  {}
-func (*NotFound) getTracesByAccountRes()        {}
-func (*NotFound) getTransactionRes()            {}
-func (*NotFound) poolsByNominatorsRes()         {}
-func (*NotFound) stakingPoolHistoryRes()        {}
-func (*NotFound) stakingPoolInfoRes()           {}
-func (*NotFound) stakingPoolsRes()              {}
+func (*NotFound) dnsBackResolveRes()              {}
+func (*NotFound) dnsInfoRes()                     {}
+func (*NotFound) dnsResolveRes()                  {}
+func (*NotFound) getAccountRes()                  {}
+func (*NotFound) getAccountTransactionsRes()      {}
+func (*NotFound) getBlockRes()                    {}
+func (*NotFound) getBlockTransactionsRes()        {}
+func (*NotFound) getDnsExpiringRes()              {}
+func (*NotFound) getDomainBidsRes()               {}
+func (*NotFound) getEventRes()                    {}
+func (*NotFound) getEventsByAccountRes()          {}
+func (*NotFound) getItemsFromCollectionRes()      {}
+func (*NotFound) getJettonInfoRes()               {}
+func (*NotFound) getJettonsBalancesRes()          {}
+func (*NotFound) getJettonsHistoryByIDRes()       {}
+func (*NotFound) getJettonsHistoryRes()           {}
+func (*NotFound) getNftCollectionRes()            {}
+func (*NotFound) getNftItemByAddressRes()         {}
+func (*NotFound) getNftItemsByAddressesRes()      {}
+func (*NotFound) getNftItemsByOwnerRes()          {}
+func (*NotFound) getRawAccountRes()               {}
+func (*NotFound) getSearchAccountsRes()           {}
+func (*NotFound) getSubscriptionsByAccountRes()   {}
+func (*NotFound) getTraceRes()                    {}
+func (*NotFound) getTracesByAccountRes()          {}
+func (*NotFound) getTransactionByMessageHashRes() {}
+func (*NotFound) getTransactionRes()              {}
+func (*NotFound) poolsByNominatorsRes()           {}
+func (*NotFound) stakingPoolHistoryRes()          {}
+func (*NotFound) stakingPoolInfoRes()             {}
+func (*NotFound) stakingPoolsRes()                {}
 
 // NewOptAccountAddress returns new OptAccountAddress with value set to v.
 func NewOptAccountAddress(v AccountAddress) OptAccountAddress {
@@ -6766,7 +6769,8 @@ func (s *Transaction) SetDestroyed(val bool) {
 	s.Destroyed = val
 }
 
-func (*Transaction) getTransactionRes() {}
+func (*Transaction) getTransactionByMessageHashRes() {}
+func (*Transaction) getTransactionRes()              {}
 
 // Ref: #/components/schemas/TransactionType
 type TransactionType string
@@ -6961,6 +6965,7 @@ func (*UnauthorizedError) getSubscriptionsByAccountRes()    {}
 func (*UnauthorizedError) getTonConnectPayloadRes()         {}
 func (*UnauthorizedError) getTraceRes()                     {}
 func (*UnauthorizedError) getTracesByAccountRes()           {}
+func (*UnauthorizedError) getTransactionByMessageHashRes()  {}
 func (*UnauthorizedError) getTransactionRes()               {}
 func (*UnauthorizedError) getValidatorsRes()                {}
 func (*UnauthorizedError) getWalletBackupRes()              {}

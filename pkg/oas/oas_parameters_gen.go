@@ -3653,6 +3653,58 @@ func decodeGetTransactionParams(args [1]string, r *http.Request) (params GetTran
 	return params, nil
 }
 
+// GetTransactionByMessageHashParams is parameters of getTransactionByMessageHash operation.
+type GetTransactionByMessageHashParams struct {
+	// Message ID.
+	MsgID string
+}
+
+func unpackGetTransactionByMessageHashParams(packed middleware.Parameters) (params GetTransactionByMessageHashParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "msg_id",
+			In:   "path",
+		}
+		params.MsgID = packed[key].(string)
+	}
+	return params
+}
+
+func decodeGetTransactionByMessageHashParams(args [1]string, r *http.Request) (params GetTransactionByMessageHashParams, _ error) {
+	// Decode path: msg_id.
+	{
+		param := args[0]
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "msg_id",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.MsgID = c
+				return nil
+			}(); err != nil {
+				return params, errors.Wrap(err, "path: msg_id: parse")
+			}
+		} else {
+			return params, errors.New("path: msg_id: not specified")
+		}
+	}
+	return params, nil
+}
+
 // GetWalletBackupParams is parameters of getWalletBackup operation.
 type GetWalletBackupParams struct {
 	XTonConnectAuth string

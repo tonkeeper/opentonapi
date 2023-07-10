@@ -631,6 +631,36 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 						break
 					}
 
+					if len(elem) == 0 {
+						break
+					}
+					switch elem[0] {
+					case 'm': // Prefix: "message/"
+						if l := len("message/"); len(elem) >= l && elem[0:l] == "message/" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						// Param: "msg_id"
+						// Leaf parameter
+						args[0] = elem
+						elem = ""
+
+						if len(elem) == 0 {
+							// Leaf node.
+							switch r.Method {
+							case "GET":
+								s.handleGetTransactionByMessageHashRequest([1]string{
+									args[0],
+								}, w, r)
+							default:
+								s.notAllowed(w, r, "GET")
+							}
+
+							return
+						}
+					}
 					// Param: "transaction_id"
 					// Leaf parameter
 					args[0] = elem
@@ -2068,6 +2098,36 @@ func (s *Server) FindRoute(method, path string) (r Route, _ bool) {
 						break
 					}
 
+					if len(elem) == 0 {
+						break
+					}
+					switch elem[0] {
+					case 'm': // Prefix: "message/"
+						if l := len("message/"); len(elem) >= l && elem[0:l] == "message/" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						// Param: "msg_id"
+						// Leaf parameter
+						args[0] = elem
+						elem = ""
+
+						if len(elem) == 0 {
+							switch method {
+							case "GET":
+								// Leaf: GetTransactionByMessageHash
+								r.name = "GetTransactionByMessageHash"
+								r.operationID = "getTransactionByMessageHash"
+								r.args = args
+								r.count = 1
+								return r, true
+							default:
+								return
+							}
+						}
+					}
 					// Param: "transaction_id"
 					// Leaf parameter
 					args[0] = elem
