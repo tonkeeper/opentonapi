@@ -3048,7 +3048,6 @@ components:
         - amount_in
         - amount_out
         - user_wallet
-        - stonfi_pool
         - stonfi_router
         - jetton_wallet_in
         - jetton_master_in
@@ -3062,8 +3061,6 @@ components:
           type: string
           example: "1660050553"
         user_wallet:
-          $ref: '#/components/schemas/AccountAddress'
-        stonfi_pool:
           $ref: '#/components/schemas/AccountAddress'
         stonfi_router:
           $ref: '#/components/schemas/AccountAddress'

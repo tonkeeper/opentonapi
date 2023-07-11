@@ -5733,7 +5733,6 @@ type STONfiSwapAction struct {
 	AmountIn        string         `json:"amount_in"`
 	AmountOut       string         `json:"amount_out"`
 	UserWallet      AccountAddress `json:"user_wallet"`
-	StonfiPool      AccountAddress `json:"stonfi_pool"`
 	StonfiRouter    AccountAddress `json:"stonfi_router"`
 	JettonWalletIn  string         `json:"jetton_wallet_in"`
 	JettonMasterIn  JettonPreview  `json:"jetton_master_in"`
@@ -5754,11 +5753,6 @@ func (s STONfiSwapAction) GetAmountOut() string {
 // GetUserWallet returns the value of UserWallet.
 func (s STONfiSwapAction) GetUserWallet() AccountAddress {
 	return s.UserWallet
-}
-
-// GetStonfiPool returns the value of StonfiPool.
-func (s STONfiSwapAction) GetStonfiPool() AccountAddress {
-	return s.StonfiPool
 }
 
 // GetStonfiRouter returns the value of StonfiRouter.
@@ -5799,11 +5793,6 @@ func (s *STONfiSwapAction) SetAmountOut(val string) {
 // SetUserWallet sets the value of UserWallet.
 func (s *STONfiSwapAction) SetUserWallet(val AccountAddress) {
 	s.UserWallet = val
-}
-
-// SetStonfiPool sets the value of StonfiPool.
-func (s *STONfiSwapAction) SetStonfiPool(val AccountAddress) {
-	s.StonfiPool = val
 }
 
 // SetStonfiRouter sets the value of StonfiRouter.

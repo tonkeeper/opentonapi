@@ -17,7 +17,6 @@
      {
        "STONfiSwap": {
          "UserWallet": "0:6ccd325a858c379693fae2bcaab1c2906831a4e10a6c3bb44ee8b615bca1d220",
-         "STONfiPool": "0:0a95e1d4ebe7860d051f8b861730dbdee1440fd11180211914e0089146580351",
          "STONfiRouter": "0:779dcc815138d9500e449c5291e7f12738c23d575b5310000f6a253bd607384e",
          "JettonWalletIn": "0:1150b518b2626ad51899f98887f8824b70065456455f7fe2813f012699a4061f",
          "JettonMasterIn": "0:8cdc1d7640ad5ee326527fc1ad0514f468b30dc84b0173f0e155f451b4e11f7c",

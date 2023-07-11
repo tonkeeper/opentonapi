@@ -149,7 +149,6 @@ type (
 
 	STONfiSwapAction struct {
 		UserWallet      tongo.AccountID
-		STONfiPool      tongo.AccountID
 		STONfiRouter    tongo.AccountID
 		JettonWalletIn  tongo.AccountID
 		JettonMasterIn  tongo.AccountID

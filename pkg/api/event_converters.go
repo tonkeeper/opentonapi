@@ -330,7 +330,6 @@ func (h Handler) convertAction(ctx context.Context, viewer tongo.AccountID, a ba
 			AmountOut:       fmt.Sprintf("%v", a.STONfiSwap.AmountOut),
 			UserWallet:      convertAccountAddress(a.STONfiSwap.UserWallet, h.addressBook),
 			StonfiRouter:    convertAccountAddress(a.STONfiSwap.STONfiRouter, h.addressBook),
-			StonfiPool:      convertAccountAddress(a.STONfiSwap.STONfiPool, h.addressBook),
 			JettonWalletIn:  a.STONfiSwap.JettonWalletIn.String(),
 			JettonMasterIn:  jettonInPreview,
 			JettonWalletOut: a.STONfiSwap.JettonWalletOut.String(),
@@ -349,7 +348,7 @@ func (h Handler) convertAction(ctx context.Context, viewer tongo.AccountID, a ba
 			}),
 			Accounts: distinctAccounts(h.addressBook,
 				&a.STONfiSwap.UserWallet,
-				&a.STONfiSwap.STONfiPool),
+				&a.STONfiSwap.STONfiRouter),
 		}
 	case bath.SmartContractExec:
 		op := "Call"

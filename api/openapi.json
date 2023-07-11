@@ -2412,9 +2412,6 @@
       "example": "0:dea8f638b789172ce36d10a20318125e52c649aa84893cd77858224fe2b9b0ee",
       "type": "string"
      },
-     "stonfi_pool": {
-      "$ref": "#/components/schemas/AccountAddress"
-     },
      "stonfi_router": {
       "$ref": "#/components/schemas/AccountAddress"
      },
@@ -2426,7 +2423,6 @@
      "amount_in",
      "amount_out",
      "user_wallet",
-     "stonfi_pool",
      "stonfi_router",
      "jetton_wallet_in",
      "jetton_master_in",

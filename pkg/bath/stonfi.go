@@ -10,7 +10,6 @@ type BubbleSTONfiSwap struct {
 	AmountIn        uint64
 	AmountOut       uint64
 	UserWallet      tongo.AccountID
-	STONfiPool      tongo.AccountID
 	STONfiRouter    tongo.AccountID
 	JettonWalletIn  tongo.AccountID
 	JettonMasterIn  tongo.AccountID
@@ -23,7 +22,6 @@ func (b BubbleSTONfiSwap) ToAction() *Action {
 	return &Action{
 		STONfiSwap: &STONfiSwapAction{
 			UserWallet:      b.UserWallet,
-			STONfiPool:      b.STONfiPool,
 			STONfiRouter:    b.STONfiRouter,
 			JettonWalletIn:  b.JettonWalletIn,
 			JettonMasterIn:  b.JettonMasterIn,
@@ -77,7 +75,6 @@ func FindSTONfiSwap(bubble *Bubble) bool {
 	}
 	stonfiSwap := BubbleSTONfiSwap{
 		UserWallet:      *userWallet,
-		STONfiPool:      bubbleTx.account.Address,
 		JettonWalletIn:  jettonWalletIn,
 		JettonWalletOut: jettonWalletOut,
 		JettonMasterIn:  bubbleTx.additionalInfo.JettonMasters[jettonWalletIn],

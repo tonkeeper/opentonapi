@@ -13522,11 +13522,6 @@ func (s STONfiSwapAction) encodeFields(e *jx.Encoder) {
 	}
 	{
 
-		e.FieldStart("stonfi_pool")
-		s.StonfiPool.Encode(e)
-	}
-	{
-
 		e.FieldStart("stonfi_router")
 		s.StonfiRouter.Encode(e)
 	}
@@ -13552,16 +13547,15 @@ func (s STONfiSwapAction) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfSTONfiSwapAction = [9]string{
+var jsonFieldsNameOfSTONfiSwapAction = [8]string{
 	0: "amount_in",
 	1: "amount_out",
 	2: "user_wallet",
-	3: "stonfi_pool",
-	4: "stonfi_router",
-	5: "jetton_wallet_in",
-	6: "jetton_master_in",
-	7: "jetton_wallet_out",
-	8: "jetton_master_out",
+	3: "stonfi_router",
+	4: "jetton_wallet_in",
+	5: "jetton_master_in",
+	6: "jetton_wallet_out",
+	7: "jetton_master_out",
 }
 
 // Decode decodes STONfiSwapAction from json.
@@ -13569,7 +13563,7 @@ func (s *STONfiSwapAction) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode STONfiSwapAction to nil")
 	}
-	var requiredBitSet [2]uint8
+	var requiredBitSet [1]uint8
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
@@ -13607,18 +13601,8 @@ func (s *STONfiSwapAction) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"user_wallet\"")
 			}
-		case "stonfi_pool":
-			requiredBitSet[0] |= 1 << 3
-			if err := func() error {
-				if err := s.StonfiPool.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"stonfi_pool\"")
-			}
 		case "stonfi_router":
-			requiredBitSet[0] |= 1 << 4
+			requiredBitSet[0] |= 1 << 3
 			if err := func() error {
 				if err := s.StonfiRouter.Decode(d); err != nil {
 					return err
@@ -13628,7 +13612,7 @@ func (s *STONfiSwapAction) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"stonfi_router\"")
 			}
 		case "jetton_wallet_in":
-			requiredBitSet[0] |= 1 << 5
+			requiredBitSet[0] |= 1 << 4
 			if err := func() error {
 				v, err := d.Str()
 				s.JettonWalletIn = string(v)
@@ -13640,7 +13624,7 @@ func (s *STONfiSwapAction) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"jetton_wallet_in\"")
 			}
 		case "jetton_master_in":
-			requiredBitSet[0] |= 1 << 6
+			requiredBitSet[0] |= 1 << 5
 			if err := func() error {
 				if err := s.JettonMasterIn.Decode(d); err != nil {
 					return err
@@ -13650,7 +13634,7 @@ func (s *STONfiSwapAction) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"jetton_master_in\"")
 			}
 		case "jetton_wallet_out":
-			requiredBitSet[0] |= 1 << 7
+			requiredBitSet[0] |= 1 << 6
 			if err := func() error {
 				v, err := d.Str()
 				s.JettonWalletOut = string(v)
@@ -13662,7 +13646,7 @@ func (s *STONfiSwapAction) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"jetton_wallet_out\"")
 			}
 		case "jetton_master_out":
-			requiredBitSet[1] |= 1 << 0
+			requiredBitSet[0] |= 1 << 7
 			if err := func() error {
 				if err := s.JettonMasterOut.Decode(d); err != nil {
 					return err
@@ -13680,9 +13664,8 @@ func (s *STONfiSwapAction) Decode(d *jx.Decoder) error {
 	}
 	// Validate required fields.
 	var failures []validate.FieldError
-	for i, mask := range [2]uint8{
+	for i, mask := range [1]uint8{
 		0b11111111,
-		0b00000001,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
