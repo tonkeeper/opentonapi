@@ -119,8 +119,25 @@ func (s *LiteStorage) GetAccountJettonHistoryByID(ctx context.Context, address, 
 }
 
 func (s *LiteStorage) JettonMastersForWallets(ctx context.Context, wallets []tongo.AccountID) (map[tongo.AccountID]tongo.AccountID, error) {
-	// TODO: implement
-	return map[tongo.AccountID]tongo.AccountID{}, nil
+	masters := make(map[tongo.AccountID]tongo.AccountID)
+	for _, wallet := range wallets {
+		_, value, err := abi.GetWalletData(ctx, s.client, wallet)
+		if err != nil {
+			return nil, err
+		}
+		data, ok := value.(abi.GetWalletDataResult)
+		if !ok {
+			continue
+		}
+		master, err := tongo.AccountIDFromTlb(data.Jetton)
+		if err != nil {
+			return nil, err
+		}
+		if master != nil {
+			masters[wallet] = *master
+		}
+	}
+	return masters, nil
 }
 
 func (s *LiteStorage) GetJettonMasters(ctx context.Context, limit, offset int) ([]core.JettonMaster, error) {

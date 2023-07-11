@@ -2802,6 +2802,7 @@ components:
             - NftPurchase
             - DepositStake
             - RecoverStake
+            - STONfiSwap
             - SmartContractExec
             - Unknown
         status:
@@ -2831,6 +2832,8 @@ components:
           $ref: '#/components/schemas/DepositStakeAction'
         RecoverStake:
           $ref: '#/components/schemas/RecoverStakeAction'
+        STONfiSwap:
+          $ref: '#/components/schemas/STONfiSwapAction'
         SmartContractExec:
           $ref: '#/components/schemas/SmartContractAction'
         simple_preview:
@@ -3038,6 +3041,42 @@ components:
           example: 1660050553
         staker:
           $ref: '#/components/schemas/AccountAddress'
+
+    STONfiSwapAction:
+      type: object
+      required:
+        - amount_in
+        - amount_out
+        - user_wallet
+        - stonfi_pool
+        - stonfi_router
+        - jetton_wallet_in
+        - jetton_master_in
+        - jetton_wallet_out
+        - jetton_master_out
+      properties:
+        amount_in:
+          type: string
+          example: "1660050553"
+        amount_out:
+          type: string
+          example: "1660050553"
+        user_wallet:
+          $ref: '#/components/schemas/AccountAddress'
+        stonfi_pool:
+          $ref: '#/components/schemas/AccountAddress'
+        stonfi_router:
+          $ref: '#/components/schemas/AccountAddress'
+        jetton_wallet_in:
+          type: string
+          example: 0:dea8f638b789172ce36d10a20318125e52c649aa84893cd77858224fe2b9b0ee
+        jetton_master_in:
+          $ref: '#/components/schemas/JettonPreview'
+        jetton_wallet_out:
+          type: string
+          example: 0:dea8f638b789172ce36d10a20318125e52c649aa84893cd77858224fe2b9b0ee
+        jetton_master_out:
+          $ref: '#/components/schemas/JettonPreview'
 
     NftPurchaseAction:
       type: object

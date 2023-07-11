@@ -3,7 +3,7 @@
      {
        "JettonTransfer": {
          "Comment": "",
-         "Jetton": "0:0000000000000000000000000000000000000000000000000000000000000000",
+         "Jetton": "0:0871bd56a8daf413bace5e03b471b01942755b4b4ea6807daf801bed044ea9d1",
          "Recipient": "0:2cf3b5b8c891e517c9addbda1c0386a09ccacbb0e3faf630b51cfc8152325acb",
          "Sender": "0:2cf3b5b8c891e517c9addbda1c0386a09ccacbb0e3faf630b51cfc8152325acb",
          "RecipientsWallet": "0:54d72ac7254c6e4b4a5a3066d41fc7f3f1f604fdf40d6784d6778f3b874e09da",
@@ -22,7 +22,7 @@
        "Fee": 8423384,
        "Jettons": [
          {
-           "Address": "0:0000000000000000000000000000000000000000000000000000000000000000",
+           "Address": "0:0871bd56a8daf413bace5e03b471b01942755b4b4ea6807daf801bed044ea9d1",
            "Quantity": 1000000
          }
        ]

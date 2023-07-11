@@ -533,6 +533,7 @@ type Action struct {
 	NftPurchase       OptNftPurchaseAction     `json:"NftPurchase"`
 	DepositStake      OptDepositStakeAction    `json:"DepositStake"`
 	RecoverStake      OptRecoverStakeAction    `json:"RecoverStake"`
+	STONfiSwap        OptSTONfiSwapAction      `json:"STONfiSwap"`
 	SmartContractExec OptSmartContractAction   `json:"SmartContractExec"`
 	SimplePreview     ActionSimplePreview      `json:"simple_preview"`
 }
@@ -595,6 +596,11 @@ func (s Action) GetDepositStake() OptDepositStakeAction {
 // GetRecoverStake returns the value of RecoverStake.
 func (s Action) GetRecoverStake() OptRecoverStakeAction {
 	return s.RecoverStake
+}
+
+// GetSTONfiSwap returns the value of STONfiSwap.
+func (s Action) GetSTONfiSwap() OptSTONfiSwapAction {
+	return s.STONfiSwap
 }
 
 // GetSmartContractExec returns the value of SmartContractExec.
@@ -665,6 +671,11 @@ func (s *Action) SetDepositStake(val OptDepositStakeAction) {
 // SetRecoverStake sets the value of RecoverStake.
 func (s *Action) SetRecoverStake(val OptRecoverStakeAction) {
 	s.RecoverStake = val
+}
+
+// SetSTONfiSwap sets the value of STONfiSwap.
+func (s *Action) SetSTONfiSwap(val OptSTONfiSwapAction) {
+	s.STONfiSwap = val
 }
 
 // SetSmartContractExec sets the value of SmartContractExec.
@@ -830,6 +841,7 @@ const (
 	ActionTypeNftPurchase       ActionType = "NftPurchase"
 	ActionTypeDepositStake      ActionType = "DepositStake"
 	ActionTypeRecoverStake      ActionType = "RecoverStake"
+	ActionTypeSTONfiSwap        ActionType = "STONfiSwap"
 	ActionTypeSmartContractExec ActionType = "SmartContractExec"
 	ActionTypeUnknown           ActionType = "Unknown"
 )
@@ -4729,6 +4741,52 @@ func (o OptRefund) Or(d Refund) Refund {
 	return d
 }
 
+// NewOptSTONfiSwapAction returns new OptSTONfiSwapAction with value set to v.
+func NewOptSTONfiSwapAction(v STONfiSwapAction) OptSTONfiSwapAction {
+	return OptSTONfiSwapAction{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptSTONfiSwapAction is optional STONfiSwapAction.
+type OptSTONfiSwapAction struct {
+	Value STONfiSwapAction
+	Set   bool
+}
+
+// IsSet returns true if OptSTONfiSwapAction was set.
+func (o OptSTONfiSwapAction) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptSTONfiSwapAction) Reset() {
+	var v STONfiSwapAction
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptSTONfiSwapAction) SetTo(v STONfiSwapAction) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptSTONfiSwapAction) Get() (v STONfiSwapAction, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptSTONfiSwapAction) Or(d STONfiSwapAction) STONfiSwapAction {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptSale returns new OptSale with value set to v.
 func NewOptSale(v Sale) OptSale {
 	return OptSale{
@@ -5668,6 +5726,109 @@ func (s *Risk) SetJettons(val []JettonQuantity) {
 // SetNfts sets the value of Nfts.
 func (s *Risk) SetNfts(val []NftItem) {
 	s.Nfts = val
+}
+
+// Ref: #/components/schemas/STONfiSwapAction
+type STONfiSwapAction struct {
+	AmountIn        string         `json:"amount_in"`
+	AmountOut       string         `json:"amount_out"`
+	UserWallet      AccountAddress `json:"user_wallet"`
+	StonfiPool      AccountAddress `json:"stonfi_pool"`
+	StonfiRouter    AccountAddress `json:"stonfi_router"`
+	JettonWalletIn  string         `json:"jetton_wallet_in"`
+	JettonMasterIn  JettonPreview  `json:"jetton_master_in"`
+	JettonWalletOut string         `json:"jetton_wallet_out"`
+	JettonMasterOut JettonPreview  `json:"jetton_master_out"`
+}
+
+// GetAmountIn returns the value of AmountIn.
+func (s STONfiSwapAction) GetAmountIn() string {
+	return s.AmountIn
+}
+
+// GetAmountOut returns the value of AmountOut.
+func (s STONfiSwapAction) GetAmountOut() string {
+	return s.AmountOut
+}
+
+// GetUserWallet returns the value of UserWallet.
+func (s STONfiSwapAction) GetUserWallet() AccountAddress {
+	return s.UserWallet
+}
+
+// GetStonfiPool returns the value of StonfiPool.
+func (s STONfiSwapAction) GetStonfiPool() AccountAddress {
+	return s.StonfiPool
+}
+
+// GetStonfiRouter returns the value of StonfiRouter.
+func (s STONfiSwapAction) GetStonfiRouter() AccountAddress {
+	return s.StonfiRouter
+}
+
+// GetJettonWalletIn returns the value of JettonWalletIn.
+func (s STONfiSwapAction) GetJettonWalletIn() string {
+	return s.JettonWalletIn
+}
+
+// GetJettonMasterIn returns the value of JettonMasterIn.
+func (s STONfiSwapAction) GetJettonMasterIn() JettonPreview {
+	return s.JettonMasterIn
+}
+
+// GetJettonWalletOut returns the value of JettonWalletOut.
+func (s STONfiSwapAction) GetJettonWalletOut() string {
+	return s.JettonWalletOut
+}
+
+// GetJettonMasterOut returns the value of JettonMasterOut.
+func (s STONfiSwapAction) GetJettonMasterOut() JettonPreview {
+	return s.JettonMasterOut
+}
+
+// SetAmountIn sets the value of AmountIn.
+func (s *STONfiSwapAction) SetAmountIn(val string) {
+	s.AmountIn = val
+}
+
+// SetAmountOut sets the value of AmountOut.
+func (s *STONfiSwapAction) SetAmountOut(val string) {
+	s.AmountOut = val
+}
+
+// SetUserWallet sets the value of UserWallet.
+func (s *STONfiSwapAction) SetUserWallet(val AccountAddress) {
+	s.UserWallet = val
+}
+
+// SetStonfiPool sets the value of StonfiPool.
+func (s *STONfiSwapAction) SetStonfiPool(val AccountAddress) {
+	s.StonfiPool = val
+}
+
+// SetStonfiRouter sets the value of StonfiRouter.
+func (s *STONfiSwapAction) SetStonfiRouter(val AccountAddress) {
+	s.StonfiRouter = val
+}
+
+// SetJettonWalletIn sets the value of JettonWalletIn.
+func (s *STONfiSwapAction) SetJettonWalletIn(val string) {
+	s.JettonWalletIn = val
+}
+
+// SetJettonMasterIn sets the value of JettonMasterIn.
+func (s *STONfiSwapAction) SetJettonMasterIn(val JettonPreview) {
+	s.JettonMasterIn = val
+}
+
+// SetJettonWalletOut sets the value of JettonWalletOut.
+func (s *STONfiSwapAction) SetJettonWalletOut(val string) {
+	s.JettonWalletOut = val
+}
+
+// SetJettonMasterOut sets the value of JettonMasterOut.
+func (s *STONfiSwapAction) SetJettonMasterOut(val JettonPreview) {
+	s.JettonMasterOut = val
 }
 
 // Ref: #/components/schemas/Sale
