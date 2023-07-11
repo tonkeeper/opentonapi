@@ -279,7 +279,7 @@ type Handler interface {
 	//
 	// Get transaction data by message hash.
 	//
-	// GET /v2/blockchain/transactions/message/{msg_id}
+	// GET /v2/blockchain/messages/{msg_id}/transaction
 	GetTransactionByMessageHash(ctx context.Context, params GetTransactionByMessageHashParams) (GetTransactionByMessageHashRes, error)
 	// GetValidators implements getValidators operation.
 	//

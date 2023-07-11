@@ -28,7 +28,7 @@ GET {{host}}/v2/nfts/EQDw41DE6TProVIyDIeMWpx4SJutvd8hYUHRQjtR2tSfxz8q
 GET {{metrics}}/metrics
 
 ###
-GET {{host}}/v2/events/f4084a0210b80866a3f0fbc6734373e6f4642d8134d43e0305666a913973797d
+GET {{host}}/v2/events/81C7CC0C66452E5F1BC26A5D89B2B30AAB49B3B88EC9D035921B7DD3F343276F
 
 ###
 GET {{host}}/v2/blockchain/accounts/EQAvDfWFG0oYX19jwNDNBBL1rKNT9XfaGP9HyTb5nb2Eml6y/methods/get_wallet_address?args=EQCnM2nIemDP3fRihoXiuyo8ETt0LILd1LUqFlZba7nErMv_
@@ -71,3 +71,6 @@ GET {{host}}/v2/accounts/EQDVcJxVsF27MHNKKDlP3iGcYxEU2TEt6QEmN-2MyEjMo7be/dns/ex
 
 ###
 GET {{host}}/v2/blockchain/config
+
+###
+GET {{host}}/v2/blockchain/messages/81C7CC0C66452E5F1BC26A5D89B2B30AAB49B3B88EC9D035921B7DD3F343276F/transaction

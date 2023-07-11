@@ -1797,6 +1797,23 @@ func (c *Client) GetEventsByAccount(ctx context.Context, params GetEventsByAccou
 	stage = "EncodeQueryParams"
 	q := uri.NewQueryEncoder()
 	{
+		// Encode "subject_only" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "subject_only",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.SubjectOnly.Get(); ok {
+				return e.EncodeValue(conv.BoolToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
 		// Encode "before_lt" parameter.
 		cfg := uri.QueryParameterEncodingConfig{
 			Name:    "before_lt",
@@ -3937,7 +3954,7 @@ func (c *Client) GetTransaction(ctx context.Context, params GetTransactionParams
 //
 // Get transaction data by message hash.
 //
-// GET /v2/blockchain/transactions/message/{msg_id}
+// GET /v2/blockchain/messages/{msg_id}/transaction
 func (c *Client) GetTransactionByMessageHash(ctx context.Context, params GetTransactionByMessageHashParams) (res GetTransactionByMessageHashRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getTransactionByMessageHash"),
@@ -3971,7 +3988,7 @@ func (c *Client) GetTransactionByMessageHash(ctx context.Context, params GetTran
 
 	stage = "BuildURL"
 	u := uri.Clone(c.requestURL(ctx))
-	u.Path += "/v2/blockchain/transactions/message/"
+	u.Path += "/v2/blockchain/messages/"
 	{
 		// Encode "msg_id" parameter.
 		e := uri.NewPathEncoder(uri.PathEncoderConfig{
@@ -3986,6 +4003,7 @@ func (c *Client) GetTransactionByMessageHash(ctx context.Context, params GetTran
 		}
 		u.Path += e.Result()
 	}
+	u.Path += "/transaction"
 
 	stage = "EncodeRequest"
 	r, err := ht.NewRequest(ctx, "GET", u, nil)

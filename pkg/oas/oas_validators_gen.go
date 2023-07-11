@@ -897,17 +897,6 @@ func (s Event) Validate() error {
 		})
 	}
 	if err := func() error {
-		if s.Fees == nil {
-			return errors.New("nil is invalid value")
-		}
-		return nil
-	}(); err != nil {
-		failures = append(failures, validate.FieldError{
-			Name:  "fees",
-			Error: err,
-		})
-	}
-	if err := func() error {
 		if s.ValueFlow == nil {
 			return errors.New("nil is invalid value")
 		}

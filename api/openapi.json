@@ -518,10 +518,6 @@
       "format": "int64",
       "type": "integer"
      },
-     "fee": {
-      "$ref": "#/components/schemas/Fee",
-      "deprecated": true
-     },
      "in_progress": {
       "description": "Event is not finished yet. Transactions still happening",
       "example": false,
@@ -547,7 +543,6 @@
      "event_id",
      "timestamp",
      "actions",
-     "fee",
      "account",
      "is_scam",
      "lt",
@@ -1453,12 +1448,6 @@
       "example": "e8b0e3fee4a26bd2317ac1f9952fcdc87dc08fdb617656b5202416323337372e",
       "type": "string"
      },
-     "fees": {
-      "items": {
-       "$ref": "#/components/schemas/Fee"
-      },
-      "type": "array"
-     },
      "in_progress": {
       "description": "Event is not finished yet. Transactions still happening",
       "example": false,
@@ -1495,48 +1484,6 @@
      "is_scam",
      "lt",
      "in_progress"
-    ],
-    "type": "object"
-   },
-   "Fee": {
-    "properties": {
-     "account": {
-      "$ref": "#/components/schemas/AccountAddress"
-     },
-     "deposit": {
-      "example": 110,
-      "format": "int64",
-      "type": "integer"
-     },
-     "gas": {
-      "example": 80,
-      "format": "int64",
-      "type": "integer"
-     },
-     "refund": {
-      "example": 100,
-      "format": "int64",
-      "type": "integer"
-     },
-     "rent": {
-      "example": 10,
-      "format": "int64",
-      "type": "integer"
-     },
-     "total": {
-      "description": "gas + rent + deposit - refund",
-      "example": 100,
-      "format": "int64",
-      "type": "integer"
-     }
-    },
-    "required": [
-     "account",
-     "total",
-     "gas",
-     "rent",
-     "deposit",
-     "refund"
     ],
     "type": "object"
    },
@@ -3338,6 +3285,16 @@
       "$ref": "#/components/parameters/i18n"
      },
      {
+      "description": "filter actions where requested account is not real subject (for example sender or reciver jettons)",
+      "in": "query",
+      "name": "subject_only",
+      "required": false,
+      "schema": {
+       "default": false,
+       "type": "boolean"
+      }
+     },
+     {
       "description": "omit this parameter to get last events",
       "in": "query",
       "name": "before_lt",
@@ -4186,7 +4143,7 @@
     ]
    }
   },
-  "/v2/blockchain/transactions/message/{msg_id}": {
+  "/v2/blockchain/messages/{msg_id}/transaction": {
    "get": {
     "description": "Get transaction data by message hash",
     "operationId": "getTransactionByMessageHash",
