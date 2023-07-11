@@ -64,6 +64,10 @@ func (m *mockInfoSource) GetGemsContracts(ctx context.Context, getGems []tongo.A
 	return m.OnGetGemsContracts(ctx, getGems)
 }
 
+func (m *mockInfoSource) STONfiPools(ctx context.Context, pools []tongo.AccountID) (map[tongo.AccountID]core.STONfiPool, error) {
+	return map[tongo.AccountID]core.STONfiPool{}, nil
+}
+
 var _ core.InformationSource = &mockInfoSource{}
 
 func TestFindActions(t *testing.T) {
@@ -99,6 +103,10 @@ func TestFindActions(t *testing.T) {
 			tongo.MustParseBlockID("(0,8000000000000000,35988959)"),
 			// tf update validator set
 			tongo.MustParseBlockID("(-1,8000000000000000,30311911)"),
+			// stonfi swap
+			tongo.MustParseBlockID("(0,8000000000000000,36716516)"),
+			// stonfi swap
+			tongo.MustParseBlockID("(0,8000000000000000,36693371)"),
 		}),
 	)
 
@@ -190,14 +198,28 @@ func TestFindActions(t *testing.T) {
 			hash:           "8ee4410c8159287702c78a32e166a8566036c752092d1d8cc520e890e6181042",
 			filenamePrefix: "tf-update-validator-set",
 		},
+		{
+			name:           "stonfi swap",
+			hash:           "ace68c0da7833cb042ce6049cfac5fcf5fa9f3c93bfc9c02871381253d9e2157",
+			filenamePrefix: "stonfi-swap-jUSDT-STON",
+		},
+		{
+			name:           "stonfi buying jUSDT",
+			hash:           "449aae1c0b5ebe55bc7c9efa6e511bd31b659b4bc92f3f40f50598fbbd9ca243",
+			filenamePrefix: "stonfi-purchase-jUSDT",
+		},
 	} {
 		t.Run(c.name, func(t *testing.T) {
 			trace, err := storage.GetTrace(context.Background(), tongo.MustParseHash(c.hash))
 			require.Nil(t, err)
+			source := c.source
+			if c.source == nil {
+				source = storage
+			}
 			actionsList, err := FindActions(context.Background(),
 				trace,
 				WithStraws(append(c.additionalStraws, DefaultStraws...)),
-				WithInformationSource(c.source))
+				WithInformationSource(source))
 			require.Nil(t, err)
 			results := result{
 				Actions: actionsList.Actions,

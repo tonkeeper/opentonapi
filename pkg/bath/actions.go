@@ -24,6 +24,7 @@ const (
 	UnSubscription    ActionType = "UnSubscribe"
 	DepositStake      ActionType = "DepositStake"
 	RecoverStake      ActionType = "RecoverStake"
+	STONfiSwap        ActionType = "STONfiSwap"
 	AuctionBid        ActionType = "AuctionBid"
 	AuctionTgInitBid  ActionType = "AuctionTgInitBid"
 
@@ -61,6 +62,7 @@ type (
 		AuctionBid        *AuctionBidAction     `json:",omitempty"`
 		DepositStake      *DepositStakeAction   `json:",omitempty"`
 		RecoverStake      *RecoverStakeAction   `json:",omitempty"`
+		STONfiSwap        *STONfiSwapAction     `json:",omitempty"`
 		Success           bool
 		Type              ActionType
 	}
@@ -143,6 +145,17 @@ type (
 		Bid            int64
 		Item           *core.NftItem
 		AuctionType    string
+	}
+
+	STONfiSwapAction struct {
+		UserWallet      tongo.AccountID
+		STONfiRouter    tongo.AccountID
+		JettonWalletIn  tongo.AccountID
+		JettonMasterIn  tongo.AccountID
+		JettonWalletOut tongo.AccountID
+		JettonMasterOut tongo.AccountID
+		AmountIn        uint64
+		AmountOut       uint64
 	}
 )
 

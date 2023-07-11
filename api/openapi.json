@@ -727,6 +727,9 @@
      "RecoverStake": {
       "$ref": "#/components/schemas/RecoverStakeAction"
      },
+     "STONfiSwap": {
+      "$ref": "#/components/schemas/STONfiSwapAction"
+     },
      "SmartContractExec": {
       "$ref": "#/components/schemas/SmartContractAction"
      },
@@ -763,6 +766,7 @@
        "NftPurchase",
        "DepositStake",
        "RecoverStake",
+       "STONfiSwap",
        "SmartContractExec",
        "Unknown"
       ],
@@ -2381,6 +2385,49 @@
      "ton",
      "jettons",
      "nfts"
+    ],
+    "type": "object"
+   },
+   "STONfiSwapAction": {
+    "properties": {
+     "amount_in": {
+      "example": "1660050553",
+      "type": "string"
+     },
+     "amount_out": {
+      "example": "1660050553",
+      "type": "string"
+     },
+     "jetton_master_in": {
+      "$ref": "#/components/schemas/JettonPreview"
+     },
+     "jetton_master_out": {
+      "$ref": "#/components/schemas/JettonPreview"
+     },
+     "jetton_wallet_in": {
+      "example": "0:dea8f638b789172ce36d10a20318125e52c649aa84893cd77858224fe2b9b0ee",
+      "type": "string"
+     },
+     "jetton_wallet_out": {
+      "example": "0:dea8f638b789172ce36d10a20318125e52c649aa84893cd77858224fe2b9b0ee",
+      "type": "string"
+     },
+     "stonfi_router": {
+      "$ref": "#/components/schemas/AccountAddress"
+     },
+     "user_wallet": {
+      "$ref": "#/components/schemas/AccountAddress"
+     }
+    },
+    "required": [
+     "amount_in",
+     "amount_out",
+     "user_wallet",
+     "stonfi_router",
+     "jetton_wallet_in",
+     "jetton_master_in",
+     "jetton_wallet_out",
+     "jetton_master_out"
     ],
     "type": "object"
    },

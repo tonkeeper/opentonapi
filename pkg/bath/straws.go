@@ -25,6 +25,7 @@ var DefaultStraws = []Straw{
 	FindDepositStake,
 	FindRecoverStake,
 	FindTFNominatorAction,
+	FindSTONfiSwap,
 }
 
 func FindNFTTransfer(bubble *Bubble) bool {
@@ -148,6 +149,19 @@ func FindJettonTransfer(bubble *Bubble) bool {
 	newBubble.ValueFlow.AddJettons(*recipient, transfer.master, big.Int(intention.Amount))
 	if transferBubbleInfo.success {
 		newBubble.Children = ProcessChildren(bubble.Children,
+			func(notify *Bubble) *Merge {
+				// pTON sends a jetton-notify msg just after a jetton-transfer operation.
+				notifyTx, ok := notify.Info.(BubbleTx)
+				if !ok {
+					return nil
+				}
+				if !notifyTx.operation(abi.JettonNotifyMsgOp) {
+					return nil
+				}
+				newBubble.ValueFlow.Merge(notify.ValueFlow)
+				newBubble.Accounts = append(newBubble.Accounts, notify.Accounts...)
+				return &Merge{children: notify.Children}
+			},
 			func(child *Bubble) *Merge {
 				receiveBubbleInfo, ok := child.Info.(BubbleTx)
 				if !ok {

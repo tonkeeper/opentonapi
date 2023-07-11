@@ -96,3 +96,10 @@ func Scale(amount tlb.VarUInteger16, decimals int) decimal.Decimal {
 	value := big.Int(amount)
 	return decimal.NewFromBigInt(&value, int32(-decimals))
 }
+
+// ScaleJettons returns a proper decimal representation of jettons taking metadata.Decimals into account.
+func ScaleJettons(amount uint64, decimals int) decimal.Decimal {
+	value := new(big.Int)
+	value.SetUint64(amount)
+	return decimal.NewFromBigInt(value, int32(-decimals))
+}

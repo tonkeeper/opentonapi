@@ -20,8 +20,12 @@ type Trace struct {
 // but not directly extracted from it or a corresponding transaction.
 type TraceAdditionalInfo struct {
 	JettonMaster *tongo.AccountID
+	// JettonMasters maps a jetton wallet to its jetton master.
+	JettonMasters map[tongo.AccountID]tongo.AccountID
 	// NftSaleContract is set, if a transaction's account implements "get_sale_data" method.
 	NftSaleContract *NftSaleContract
+	// STONfiPool is set, if a transaction's account implements "get_pool_data" method and abi.StonfiPool interface.
+	STONfiPool *STONfiPool
 }
 
 func (t *Trace) InProgress() bool {
@@ -42,11 +46,18 @@ type NftSaleContract struct {
 	Owner *tongo.AccountID
 }
 
+// STONfiPool holds partial results of execution of STONfi's "get_pool_data" method.
+type STONfiPool struct {
+	Token0 tongo.AccountID
+	Token1 tongo.AccountID
+}
+
 // InformationSource provides methods to construct TraceAdditionalInfo.
 type InformationSource interface {
 	JettonMastersForWallets(ctx context.Context, wallets []tongo.AccountID) (map[tongo.AccountID]tongo.AccountID, error)
 	GetGemsContracts(ctx context.Context, getGems []tongo.AccountID) (map[tongo.AccountID]NftSaleContract, error)
 	NftSaleContracts(ctx context.Context, contracts []tongo.AccountID) (map[tongo.AccountID]NftSaleContract, error)
+	STONfiPools(ctx context.Context, poolIDs []tongo.AccountID) (map[tongo.AccountID]STONfiPool, error)
 }
 
 func isDestinationJettonWallet(inMsg *Message) bool {
@@ -82,6 +93,7 @@ func CollectAdditionalInfo(ctx context.Context, infoSource InformationSource, tr
 	var jettonWallets []tongo.AccountID
 	var getGemsContracts []tongo.AccountID
 	var basicNftSale []tongo.AccountID
+	var stonfiPoolIDs []tongo.AccountID
 	visit(trace, func(trace *Trace) {
 		if isDestinationJettonWallet(trace.InMsg) {
 			jettonWallets = append(jettonWallets, *trace.InMsg.Destination)
@@ -92,7 +104,18 @@ func CollectAdditionalInfo(ctx context.Context, infoSource InformationSource, tr
 		if hasInterface(trace.AccountInterfaces, abi.NftSale) {
 			basicNftSale = append(basicNftSale, trace.Account)
 		}
+		if hasInterface(trace.AccountInterfaces, abi.StonfiPool) {
+			stonfiPoolIDs = append(stonfiPoolIDs, trace.Account)
+		}
 	})
+	stonfiPools, err := infoSource.STONfiPools(ctx, stonfiPoolIDs)
+	if err != nil {
+		return err
+	}
+	for _, pool := range stonfiPools {
+		jettonWallets = append(jettonWallets, pool.Token0)
+		jettonWallets = append(jettonWallets, pool.Token1)
+	}
 	masters, err := infoSource.JettonMastersForWallets(ctx, jettonWallets)
 	if err != nil {
 		return err
@@ -106,7 +129,9 @@ func CollectAdditionalInfo(ctx context.Context, infoSource InformationSource, tr
 		return err
 	}
 	visit(trace, func(trace *Trace) {
-		trace.AdditionalInfo = &TraceAdditionalInfo{}
+		trace.AdditionalInfo = &TraceAdditionalInfo{
+			JettonMasters: map[tongo.AccountID]tongo.AccountID{},
+		}
 		if isDestinationJettonWallet(trace.InMsg) {
 			if master, ok := masters[*trace.InMsg.Destination]; ok {
 				trace.AdditionalInfo.JettonMaster = &master
@@ -120,6 +145,17 @@ func CollectAdditionalInfo(ctx context.Context, infoSource InformationSource, tr
 		if hasInterface(trace.AccountInterfaces, abi.NftSale) {
 			if sale, ok := basicNftSales[trace.Account]; ok {
 				trace.AdditionalInfo.NftSaleContract = &sale
+			}
+		}
+		if hasInterface(trace.AccountInterfaces, abi.StonfiPool) {
+			if pool, ok := stonfiPools[trace.Account]; ok {
+				trace.AdditionalInfo.STONfiPool = &pool
+				if master, ok := masters[pool.Token0]; ok {
+					trace.AdditionalInfo.JettonMasters[pool.Token0] = master
+				}
+				if master, ok := masters[pool.Token1]; ok {
+					trace.AdditionalInfo.JettonMasters[pool.Token1] = master
+				}
 			}
 		}
 	})

@@ -29,6 +29,7 @@ const (
 	subscriptionMessageID   = "subscriptionAction"
 	depositStakeMessageID   = "depositStakeAction"
 	recoverStakeMessageID   = "recoverStakeAction"
+	stonfiSwapMessageID     = "stonfiSwapAction"
 
 	tfDepositMessageID                        = "tfDepositAction"
 	tfRequestWithdrawMessageID                = "tfRequestWithdrawAction"
@@ -318,6 +319,36 @@ func (h Handler) convertAction(ctx context.Context, viewer tongo.AccountID, a ba
 			}),
 			Value:    oas.NewOptString(signedValue(value, viewer, a.RecoverStake.Elector, a.RecoverStake.Staker)),
 			Accounts: distinctAccounts(h.addressBook, &a.RecoverStake.Elector, &a.RecoverStake.Staker),
+		}
+	case bath.STONfiSwap:
+		jettonInMeta := h.GetJettonNormalizedMetadata(ctx, a.STONfiSwap.JettonMasterIn)
+		jettonInPreview := jettonPreview(a.STONfiSwap.JettonMasterIn, jettonInMeta, h.previewGenerator)
+		jettonOutMeta := h.GetJettonNormalizedMetadata(ctx, a.STONfiSwap.JettonMasterOut)
+		jettonOutPreview := jettonPreview(a.STONfiSwap.JettonMasterOut, jettonOutMeta, h.previewGenerator)
+		action.STONfiSwap.SetTo(oas.STONfiSwapAction{
+			AmountIn:        fmt.Sprintf("%v", a.STONfiSwap.AmountIn),
+			AmountOut:       fmt.Sprintf("%v", a.STONfiSwap.AmountOut),
+			UserWallet:      convertAccountAddress(a.STONfiSwap.UserWallet, h.addressBook),
+			StonfiRouter:    convertAccountAddress(a.STONfiSwap.STONfiRouter, h.addressBook),
+			JettonWalletIn:  a.STONfiSwap.JettonWalletIn.String(),
+			JettonMasterIn:  jettonInPreview,
+			JettonWalletOut: a.STONfiSwap.JettonWalletOut.String(),
+			JettonMasterOut: jettonOutPreview,
+		})
+		action.SimplePreview = oas.ActionSimplePreview{
+			Name: "STONfi Swap",
+			Description: i18n.T(acceptLanguage.Value, i18n.C{
+				MessageID: stonfiSwapMessageID,
+				TemplateData: map[string]interface{}{
+					"AmountIn":  ScaleJettons(a.STONfiSwap.AmountIn, jettonInMeta.Decimals).String(),
+					"AmountOut": ScaleJettons(a.STONfiSwap.AmountOut, jettonOutMeta.Decimals).String(),
+					"JettonIn":  jettonInPreview.GetSymbol(),
+					"JettonOut": jettonOutPreview.GetSymbol(),
+				},
+			}),
+			Accounts: distinctAccounts(h.addressBook,
+				&a.STONfiSwap.UserWallet,
+				&a.STONfiSwap.STONfiRouter),
 		}
 	case bath.SmartContractExec:
 		op := "Call"
