@@ -17,7 +17,10 @@ import (
 type mockTonRates struct {
 }
 
-func (m *mockTonRates) GetRates() map[string]float64 {
+func (m *mockTonRates) GetTodayRates() map[string]float64 {
+	return map[string]float64{}
+}
+func (m *mockTonRates) GetYesterdayRates() map[string]float64 {
 	return map[string]float64{}
 }
 
