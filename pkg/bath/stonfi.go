@@ -36,24 +36,32 @@ func (b BubbleSTONfiSwap) ToAction() *Action {
 }
 
 func FindSTONfiSwap(bubble *Bubble) bool {
-	bubbleTx, ok := bubble.Info.(BubbleTx)
+	jettonTx, ok := bubble.Info.(BubbleJettonTransfer)
 	if !ok {
 		return false
 	}
-	if !bubbleTx.account.Is(abi.StonfiPool) {
+	if len(bubble.Children) != 1 {
 		return false
 	}
-	if !bubbleTx.operation(abi.StonfiSwapMsgOp) {
+	child := bubble.Children[0]
+	swapTx, ok := child.Info.(BubbleTx)
+	if !ok {
 		return false
 	}
-	if bubbleTx.inputFrom == nil {
+	if !swapTx.account.Is(abi.StonfiPool) {
 		return false
 	}
-	pool := bubbleTx.additionalInfo.STONfiPool
+	if !swapTx.operation(abi.StonfiSwapMsgOp) {
+		return false
+	}
+	if swapTx.inputFrom == nil {
+		return false
+	}
+	pool := swapTx.additionalInfo.STONfiPool
 	if pool == nil {
 		return false
 	}
-	swap := bubbleTx.decodedBody.Value.(abi.StonfiSwapMsgBody)
+	swap := swapTx.decodedBody.Value.(abi.StonfiSwapMsgBody)
 	sender, err := tongo.AccountIDFromTlb(swap.SenderAddress)
 	if err != nil || sender == nil {
 		return false
@@ -77,16 +85,17 @@ func FindSTONfiSwap(bubble *Bubble) bool {
 		UserWallet:      *userWallet,
 		JettonWalletIn:  jettonWalletIn,
 		JettonWalletOut: jettonWalletOut,
-		JettonMasterIn:  bubbleTx.additionalInfo.JettonMasters[jettonWalletIn],
-		JettonMasterOut: bubbleTx.additionalInfo.JettonMasters[jettonWalletOut],
+		JettonMasterIn:  swapTx.additionalInfo.JettonMasters[jettonWalletIn],
+		JettonMasterOut: swapTx.additionalInfo.JettonMasters[jettonWalletOut],
 		AmountIn:        uint64(swap.JettonAmount),
 		Success:         false,
 	}
 	newBubble := Bubble{
-		Accounts:  bubble.Accounts,
-		ValueFlow: bubble.ValueFlow,
+		Accounts:  append(child.Accounts, bubble.Accounts...),
+		ValueFlow: child.ValueFlow,
 	}
-	newBubble.Children = ProcessChildren(bubble.Children,
+	newBubble.ValueFlow.Merge(bubble.ValueFlow)
+	newBubble.Children = ProcessChildren(child.Children,
 		func(payment *Bubble) *Merge {
 			tx, ok := payment.Info.(BubbleTx)
 			if !ok {
@@ -111,7 +120,19 @@ func FindSTONfiSwap(bubble *Bubble) bool {
 			stonfiSwap.STONfiRouter = tx.account.Address
 			newBubble.ValueFlow.Merge(payment.ValueFlow)
 			newBubble.Accounts = append(newBubble.Accounts, payment.Accounts...)
-			return &Merge{children: payment.Children}
+			children := ProcessChildren(payment.Children,
+				func(jettonTransfer *Bubble) *Merge {
+					tx, ok := jettonTransfer.Info.(BubbleJettonTransfer)
+					if !ok {
+						return nil
+					}
+					if tx.recipient.Address != jettonTx.sender.Address {
+						return nil
+					}
+					newBubble.ValueFlow.Merge(jettonTransfer.ValueFlow)
+					return &Merge{children: jettonTransfer.Children}
+				})
+			return &Merge{children: children}
 		})
 	newBubble.Info = stonfiSwap
 	*bubble = newBubble
