@@ -33,7 +33,7 @@ func TestHandler_GetJettonsBalances(t *testing.T) {
 				tongo.MustParseAccountID("0:65de083a0007638233b6668354e50e44cd4225f1730d66b8b1f19e5d26690751"), // Lavandos
 			}))
 			require.Nil(t, err)
-			h, err := NewHandler(logger, WithStorage(liteStorage), WithExecutor(liteStorage), WithTonRates(&mockTonRates{}))
+			h, err := NewHandler(logger, WithStorage(liteStorage), WithExecutor(liteStorage))
 			require.Nil(t, err)
 			res, err := h.GetJettonsBalances(context.Background(), tt.params)
 			require.Nil(t, err)

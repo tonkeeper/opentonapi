@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/go-faster/errors"
+	"github.com/tonkeeper/opentonapi/pkg/rates"
 	rules "github.com/tonkeeper/scam_backoffice_rules"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/contract/dns"
@@ -18,7 +19,6 @@ import (
 	"github.com/tonkeeper/opentonapi/pkg/config"
 	"github.com/tonkeeper/opentonapi/pkg/image"
 	"github.com/tonkeeper/opentonapi/pkg/oas"
-	"github.com/tonkeeper/opentonapi/pkg/rates"
 )
 
 // Compile-time check for Handler.
@@ -36,7 +36,7 @@ type Handler struct {
 	dns              *dns.DNS
 	limits           Limits
 	spamRules        func() rules.Rules
-	tonRates         tonRates
+	ratesSource      ratesSource
 	metaCache        metadataCache
 	tonConnect       *tonconnect.Server
 }
@@ -51,7 +51,7 @@ type Options struct {
 	executor         executor
 	limits           Limits
 	spamRules        func() rules.Rules
-	tonRates         tonRates
+	ratesSource      ratesSource
 	tonConnectSecret string
 }
 
@@ -104,9 +104,9 @@ func WithSpamRules(spamRules func() rules.Rules) Option {
 	}
 }
 
-func WithTonRates(rates tonRates) Option {
+func WithRatesSource(source ratesSource) Option {
 	return func(o *Options) {
-		o.tonRates = rates
+		o.ratesSource = source
 	}
 }
 
@@ -142,8 +142,8 @@ func NewHandler(logger *zap.Logger, opts ...Option) (*Handler, error) {
 			return defaultRules
 		}
 	}
-	if options.tonRates == nil {
-		options.tonRates = rates.InitTonRates()
+	if options.ratesSource == nil {
+		options.ratesSource = rates.InitCalculator(options.storage)
 	}
 	if options.executor == nil {
 		return nil, fmt.Errorf("executor is not configured")
@@ -164,7 +164,7 @@ func NewHandler(logger *zap.Logger, opts ...Option) (*Handler, error) {
 		dns:              dnsClient,
 		limits:           options.limits,
 		spamRules:        options.spamRules,
-		tonRates:         options.tonRates,
+		ratesSource:      options.ratesSource,
 		metaCache: metadataCache{
 			collectionsCache: cache.NewLRUCache[tongo.AccountID, tep64.Metadata](10000, "nft_metadata_cache"),
 			jettonsCache:     cache.NewLRUCache[tongo.AccountID, tep64.Metadata](10000, "jetton_metadata_cache"),
