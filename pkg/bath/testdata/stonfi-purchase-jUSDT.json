@@ -1,20 +1,6 @@
 {
    "Actions": [
      {
-       "JettonTransfer": {
-         "Comment": "Call: 0x25938561",
-         "Jetton": "0:8cdc1d7640ad5ee326527fc1ad0514f468b30dc84b0173f0e155f451b4e11f7c",
-         "Recipient": "0:779dcc815138d9500e449c5291e7f12738c23d575b5310000f6a253bd607384e",
-         "Sender": "0:6ccd325a858c379693fae2bcaab1c2906831a4e10a6c3bb44ee8b615bca1d220",
-         "RecipientsWallet": "0:0000000000000000000000000000000000000000000000000000000000000000",
-         "SendersWallet": "0:1150b518b2626ad51899f98887f8824b70065456455f7fe2813f012699a4061f",
-         "Amount": "1000000000",
-         "Refund": null
-       },
-       "Success": false,
-       "Type": "JettonTransfer"
-     },
-     {
        "STONfiSwap": {
          "UserWallet": "0:6ccd325a858c379693fae2bcaab1c2906831a4e10a6c3bb44ee8b615bca1d220",
          "STONfiRouter": "0:779dcc815138d9500e449c5291e7f12738c23d575b5310000f6a253bd607384e",
@@ -27,20 +13,6 @@
        },
        "Success": true,
        "Type": "STONfiSwap"
-     },
-     {
-       "JettonTransfer": {
-         "Comment": "Call: 0xc64370e5",
-         "Jetton": "0:729c13b6df2c07cbf0a06ab63d34af454f3d320ec1bcd8fb5c6d24d0806a17c2",
-         "Recipient": "0:6ccd325a858c379693fae2bcaab1c2906831a4e10a6c3bb44ee8b615bca1d220",
-         "Sender": "0:779dcc815138d9500e449c5291e7f12738c23d575b5310000f6a253bd607384e",
-         "RecipientsWallet": "0:96ac9b952d050f79c07a2e5e0b94872a5bc189f8633882ac33ea82f5f9670a38",
-         "SendersWallet": "0:14ac072c56291232d7cd93ddec120235c5e5cf5e2027f49bbc5aa276e5d224d8",
-         "Amount": "1358766",
-         "Refund": null
-       },
-       "Success": true,
-       "Type": "JettonTransfer"
      }
    ],
    "Accounts": [
