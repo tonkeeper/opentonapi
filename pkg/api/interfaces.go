@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"crypto/ed25519"
+	"time"
 
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
@@ -112,8 +113,8 @@ type addressBook interface {
 	SearchAttachedAccountsByPrefix(prefix string) []addressbook.AttachedAccount
 }
 
-type tonRates interface {
-	GetRates() map[string]float64
+type ratesSource interface {
+	GetRates(date time.Time) (map[string]float64, error)
 }
 
 type metadataCache struct {

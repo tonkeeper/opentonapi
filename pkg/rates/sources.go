@@ -8,67 +8,33 @@ import (
 	"net/http"
 	"strconv"
 	"sync"
-	"time"
 
-	"github.com/google/martian/log"
+	"github.com/labstack/gommon/log"
 	"github.com/tonkeeper/tongo"
-	"github.com/tonkeeper/tongo/liteapi"
+	"github.com/tonkeeper/tongo/tep64"
 )
 
-type TonRates struct { // the values are equated to the TON
-	mu       sync.RWMutex
-	executor *liteapi.Client
-	Rates    map[string]float64
+type storage interface {
+	GetJettonMasterMetadata(ctx context.Context, master tongo.AccountID) (tep64.Metadata, error)
 }
 
-func (r *TonRates) GetRates() map[string]float64 {
-	return r.Rates
-}
-
-func InitTonRates() *TonRates {
-	executor, err := liteapi.NewClientWithDefaultMainnet()
-	if err != nil {
-		panic(fmt.Sprintf("failed init ton rates: %v", err))
-	}
-	rates := &TonRates{
-		Rates:    map[string]float64{},
-		executor: executor,
-	}
-
-	go func() {
-		for {
-			rates.refresh()
-			time.Sleep(time.Minute * 5)
-		}
-	}()
-
-	return rates
-}
-
-func (r *TonRates) refresh() {
-	r.mu.Lock()
-	defer r.mu.Unlock()
-	rates, err := r.getRates()
-	if err != nil {
-		return
-	}
-	r.Rates = rates
-}
-
-func (r *TonRates) getRates() (map[string]float64, error) {
-	okx := getOKXPrice()
-	huobi := getHuobiPrice()
-
-	if okx == 0 && huobi == 0 {
+func (r *ratesMock) GetCurrentRates() (map[string]float64, error) {
+	fiatPrices := getFiatPrices()
+	tonPriceOKX := getTonOKXPrice()
+	tonPriceHuobi := getTonHuobiPrice()
+	if tonPriceOKX == 0 && tonPriceHuobi == 0 {
 		return nil, fmt.Errorf("failed to get ton price")
 	}
+	meanTonPriceToUSD := (tonPriceHuobi + tonPriceOKX) / 2
 
-	meanTonPriceToUSD := (huobi + okx) / 2
-
-	fiatPrices := getFiatPrices()
-	pools := r.getPools()
+	pools := r.getDedustPool()
+	redoubtPool := getRedoubtPool()
+	for address, price := range redoubtPool {
+		pools[address] = price
+	}
 
 	rates := make(map[string]float64)
+	rates["TON"] = 1
 	for currency, price := range fiatPrices {
 		rates[currency] = meanTonPriceToUSD * price
 	}
@@ -76,18 +42,7 @@ func (r *TonRates) getRates() (map[string]float64, error) {
 		rates[token] = coinsCount
 	}
 
-	rates["TON"] = 1
-
 	return rates, nil
-}
-
-func (r *TonRates) getPools() map[string]float64 {
-	dedustPool := r.getDedustPool()
-	redoubtPool := getRedoubtPool()
-	for address, price := range redoubtPool {
-		dedustPool[address] = price
-	}
-	return dedustPool
 }
 
 func getRedoubtPool() map[string]float64 {
@@ -122,7 +77,7 @@ func getRedoubtPool() map[string]float64 {
 	return mapOfPool
 }
 
-func (r *TonRates) getStonFiPool(tonPrice float64) map[string]float64 {
+func getStonFiPool(tonPrice float64) map[string]float64 {
 	resp, err := http.Get("https://api.ston.fi/v1/assets")
 	if err != nil {
 		log.Errorf("failed to fetch stonfi rates: %v", err)
@@ -161,7 +116,7 @@ func (r *TonRates) getStonFiPool(tonPrice float64) map[string]float64 {
 	return mapOfPool
 }
 
-func (r *TonRates) getDedustPool() map[string]float64 {
+func (r *ratesMock) getDedustPool() map[string]float64 {
 	resp, err := http.Get("https://api.dedust.io/v2/pools")
 	if err != nil {
 		log.Errorf("failed to fetch dedust rates: %v", err)
@@ -217,7 +172,7 @@ func (r *TonRates) getDedustPool() map[string]float64 {
 			secondReserveDecimals := float64(9)
 			if secondAsset.Metadata == nil || secondAsset.Metadata.Decimals != 0 {
 				accountID, _ := tongo.ParseAccountID(secondAsset.Address)
-				meta, err := r.executor.GetJettonData(context.Background(), accountID)
+				meta, err := r.storage.GetJettonMasterMetadata(context.Background(), accountID)
 				if err == nil && meta.Decimals != "" {
 					decimals, err := strconv.Atoi(meta.Decimals)
 					if err == nil {
@@ -249,7 +204,7 @@ func (r *TonRates) getDedustPool() map[string]float64 {
 	return mapOfPool
 }
 
-func getHuobiPrice() float64 {
+func getTonHuobiPrice() float64 {
 	resp, err := http.Get("https://api.huobi.pro/market/trade?symbol=tonusdt")
 	if err != nil {
 		log.Errorf("can't load huobi price")
@@ -286,7 +241,7 @@ func getHuobiPrice() float64 {
 	return respBody.Tick.Data[0].Price
 }
 
-func getOKXPrice() float64 {
+func getTonOKXPrice() float64 {
 	resp, err := http.Get("https://www.okx.com/api/v5/market/ticker?instId=TON-USDT")
 	if err != nil {
 		log.Errorf("can't load okx price")
