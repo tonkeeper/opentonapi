@@ -16,28 +16,34 @@ import (
 )
 
 type TonRates struct { // the values are equated to the TON
-	mu       sync.RWMutex
-	executor *liteapi.Client
-	Rates    map[string]float64
+	mu             sync.RWMutex
+	executor       *liteapi.Client
+	TodayRates     map[string]float64
+	YesterdayRates map[string]float64
 }
 
-func (r *TonRates) GetRates() map[string]float64 {
-	return r.Rates
+func (r *TonRates) GetTodayRates() map[string]float64 {
+	return r.TodayRates
 }
 
-func InitTonRates() *TonRates {
+func (r *TonRates) GetYesterdayRates() map[string]float64 {
+	return r.YesterdayRates
+}
+
+func InitTonRates(historicalPriceUrl string) *TonRates {
 	executor, err := liteapi.NewClientWithDefaultMainnet()
 	if err != nil {
 		panic(fmt.Sprintf("failed init ton rates: %v", err))
 	}
 	rates := &TonRates{
-		Rates:    map[string]float64{},
-		executor: executor,
+		TodayRates:     map[string]float64{},
+		YesterdayRates: map[string]float64{},
+		executor:       executor,
 	}
 
 	go func() {
 		for {
-			rates.refresh()
+			rates.refresh(historicalPriceUrl)
 			time.Sleep(time.Minute * 5)
 		}
 	}()
@@ -45,17 +51,26 @@ func InitTonRates() *TonRates {
 	return rates
 }
 
-func (r *TonRates) refresh() {
-	r.mu.Lock()
-	defer r.mu.Unlock()
-	rates, err := r.getRates()
+func (r *TonRates) refresh(historicalPriceUrl string) {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+	todayRates, err := r.getTodayRates()
 	if err != nil {
 		return
 	}
-	r.Rates = rates
+	r.TodayRates = todayRates
+
+	if historicalPriceUrl == "" {
+		return
+	}
+	yesterdayRates, err := r.getYesterdayRates(historicalPriceUrl)
+	if err != nil {
+		return
+	}
+	r.YesterdayRates = yesterdayRates
 }
 
-func (r *TonRates) getRates() (map[string]float64, error) {
+func (r *TonRates) getTodayRates() (map[string]float64, error) {
 	okx := getOKXPrice()
 	huobi := getHuobiPrice()
 
@@ -79,6 +94,28 @@ func (r *TonRates) getRates() (map[string]float64, error) {
 	rates["TON"] = 1
 
 	return rates, nil
+}
+
+func (r *TonRates) getYesterdayRates(url string) (map[string]float64, error) {
+	resp, err := http.Get(url)
+	if err != nil {
+		log.Errorf("failed to fetch yesterday rates: %v", err)
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	var respBody struct {
+		Rates struct {
+			TodayRates     map[string]float64 `json:"today_rates"`
+			YesterdayRates map[string]float64 `json:"yesterday_rates"`
+		} `json:"rates"`
+	}
+	if err = json.NewDecoder(resp.Body).Decode(&respBody); err != nil {
+		log.Errorf("failed to decode response: %v", err)
+		return nil, err
+	}
+
+	return respBody.Rates.YesterdayRates, nil
 }
 
 func (r *TonRates) getPools() map[string]float64 {

@@ -3,6 +3,8 @@ package api
 import (
 	"context"
 	"encoding/json"
+	"fmt"
+	"math"
 	"strings"
 
 	"github.com/tonkeeper/opentonapi/pkg/oas"
@@ -25,33 +27,60 @@ func (h *Handler) GetRates(ctx context.Context, params oas.GetRatesParams) (res 
 		return &oas.BadRequest{"max params limit is 50 items"}, nil
 	}
 
-	rates := h.tonRates.GetRates()
+	mapOfYesterdayRates := h.tonRates.GetYesterdayRates()
+	mapOfTodayRates := h.tonRates.GetTodayRates()
 
-	type tokenRate struct {
-		Prices map[string]float64 `json:"prices"`
+	type tokenRates struct {
+		Prices  map[string]float64 `json:"prices"`
+		Diff24h map[string]string  `json:"diff_24h"`
 	}
 
-	ratesRes := make(map[string]tokenRate)
+	ratesRes := make(map[string]tokenRates)
 	for _, token := range tokens {
 		if token == "ton" {
 			token = "TON"
 		}
 		for _, currency := range currencies {
-			tonPriceToCurrency, ok := rates[currency]
+			todayCurrencyPrice, ok := mapOfTodayRates[currency]
 			if !ok {
-				return &oas.BadRequest{Error: "invalid currency: " + currency}, nil
+				return &oas.BadRequest{fmt.Sprintf("invalid currency: %v", currency)}, nil
 			}
-			tokenPrice, ok := rates[token]
+			yesterdayCurrencyPrice, ok := mapOfYesterdayRates[currency]
 			if !ok {
-				ratesRes[token] = tokenRate{Prices: map[string]float64{}}
+				yesterdayCurrencyPrice = 0
+			}
+
+			todayTokenPrice, ok := mapOfTodayRates[token]
+			if !ok {
+				ratesRes[token] = tokenRates{Prices: map[string]float64{}, Diff24h: map[string]string{}}
 				continue
 			}
+			yesterdayTokenPrice, ok := mapOfYesterdayRates[token]
+			if !ok {
+				yesterdayTokenPrice = 0
+			}
+
 			rate, ok := ratesRes[token]
 			if !ok {
-				rate = tokenRate{Prices: map[string]float64{}}
+				rate = tokenRates{Prices: map[string]float64{}, Diff24h: map[string]string{}}
 				ratesRes[token] = rate
 			}
-			rate.Prices[currency] = (1 / tokenPrice) * tonPriceToCurrency
+
+			convertedTodayPrice := (1 / todayTokenPrice) * todayCurrencyPrice
+			convertedYesterdayPrice := (1 / yesterdayTokenPrice) * yesterdayCurrencyPrice
+
+			rate.Prices[currency] = convertedTodayPrice
+
+			diff := ((convertedTodayPrice - convertedYesterdayPrice) / convertedYesterdayPrice) * 100
+			diff = math.Round(diff*100) / 100
+			switch true {
+			case diff < 0:
+				rate.Diff24h[currency] = fmt.Sprintf("%.2f%%", diff)
+			case diff > 0:
+				rate.Diff24h[currency] = fmt.Sprintf("+%.2f%%", diff)
+			default:
+				rate.Diff24h[currency] = "0"
+			}
 		}
 	}
 
