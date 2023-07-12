@@ -454,7 +454,6 @@ func (h Handler) toAccountEvent(ctx context.Context, account tongo.AccountID, tr
 		EventID:    trace.Hash.Hex(),
 		Account:    convertAccountAddress(account, h.addressBook),
 		Timestamp:  trace.Utime,
-		Fee:        oas.Fee{Account: convertAccountAddress(account, h.addressBook)},
 		IsScam:     false,
 		Lt:         int64(trace.Lt),
 		InProgress: trace.InProgress(),

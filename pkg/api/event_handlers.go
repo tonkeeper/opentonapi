@@ -36,6 +36,13 @@ func (h Handler) GetTrace(ctx context.Context, params oas.GetTraceParams) (r oas
 		return &oas.BadRequest{Error: err.Error()}, nil
 	}
 	t, err := h.storage.GetTrace(ctx, hash)
+	if errors.Is(err, core.ErrEntityNotFound) {
+		txHash, err2 := h.storage.SearchTransactionByMessageHash(ctx, hash)
+		if err2 != nil {
+			return &oas.NotFound{Error: err.Error()}, nil
+		}
+		t, err = h.storage.GetTrace(ctx, *txHash)
+	}
 	if err != nil {
 		return nil, err
 	}
@@ -50,7 +57,11 @@ func (h Handler) GetEvent(ctx context.Context, params oas.GetEventParams) (oas.G
 	}
 	trace, err := h.storage.GetTrace(ctx, traceID)
 	if errors.Is(err, core.ErrEntityNotFound) {
-		return &oas.NotFound{Error: err.Error()}, nil
+		txHash, err2 := h.storage.SearchTransactionByMessageHash(ctx, traceID)
+		if err2 != nil {
+			return &oas.NotFound{Error: err.Error()}, nil
+		}
+		trace, err = h.storage.GetTrace(ctx, *txHash)
 	}
 	if err != nil {
 		return &oas.InternalError{Error: err.Error()}, nil

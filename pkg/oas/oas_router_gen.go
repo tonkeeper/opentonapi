@@ -613,7 +613,6 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 						}
 
 						if len(elem) == 0 {
-							// Leaf node.
 							switch r.Method {
 							case "POST":
 								s.handleSendMessageRequest([0]string{}, w, r)
@@ -623,6 +622,49 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 							return
 						}
+						switch elem[0] {
+						case 's': // Prefix: "s/"
+							if l := len("s/"); len(elem) >= l && elem[0:l] == "s/" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							// Param: "msg_id"
+							// Match until "/"
+							idx := strings.IndexByte(elem, '/')
+							if idx < 0 {
+								idx = len(elem)
+							}
+							args[0] = elem[:idx]
+							elem = elem[idx:]
+
+							if len(elem) == 0 {
+								break
+							}
+							switch elem[0] {
+							case '/': // Prefix: "/transaction"
+								if l := len("/transaction"); len(elem) >= l && elem[0:l] == "/transaction" {
+									elem = elem[l:]
+								} else {
+									break
+								}
+
+								if len(elem) == 0 {
+									// Leaf node.
+									switch r.Method {
+									case "GET":
+										s.handleGetTransactionByMessageHashRequest([1]string{
+											args[0],
+										}, w, r)
+									default:
+										s.notAllowed(w, r, "GET")
+									}
+
+									return
+								}
+							}
+						}
 					}
 				case 't': // Prefix: "transactions/"
 					if l := len("transactions/"); len(elem) >= l && elem[0:l] == "transactions/" {
@@ -631,36 +673,6 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 						break
 					}
 
-					if len(elem) == 0 {
-						break
-					}
-					switch elem[0] {
-					case 'm': // Prefix: "message/"
-						if l := len("message/"); len(elem) >= l && elem[0:l] == "message/" {
-							elem = elem[l:]
-						} else {
-							break
-						}
-
-						// Param: "msg_id"
-						// Leaf parameter
-						args[0] = elem
-						elem = ""
-
-						if len(elem) == 0 {
-							// Leaf node.
-							switch r.Method {
-							case "GET":
-								s.handleGetTransactionByMessageHashRequest([1]string{
-									args[0],
-								}, w, r)
-							default:
-								s.notAllowed(w, r, "GET")
-							}
-
-							return
-						}
-					}
 					// Param: "transaction_id"
 					// Leaf parameter
 					args[0] = elem
@@ -2080,7 +2092,6 @@ func (s *Server) FindRoute(method, path string) (r Route, _ bool) {
 						if len(elem) == 0 {
 							switch method {
 							case "POST":
-								// Leaf: SendMessage
 								r.name = "SendMessage"
 								r.operationID = "sendMessage"
 								r.args = args
@@ -2088,6 +2099,49 @@ func (s *Server) FindRoute(method, path string) (r Route, _ bool) {
 								return r, true
 							default:
 								return
+							}
+						}
+						switch elem[0] {
+						case 's': // Prefix: "s/"
+							if l := len("s/"); len(elem) >= l && elem[0:l] == "s/" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							// Param: "msg_id"
+							// Match until "/"
+							idx := strings.IndexByte(elem, '/')
+							if idx < 0 {
+								idx = len(elem)
+							}
+							args[0] = elem[:idx]
+							elem = elem[idx:]
+
+							if len(elem) == 0 {
+								break
+							}
+							switch elem[0] {
+							case '/': // Prefix: "/transaction"
+								if l := len("/transaction"); len(elem) >= l && elem[0:l] == "/transaction" {
+									elem = elem[l:]
+								} else {
+									break
+								}
+
+								if len(elem) == 0 {
+									switch method {
+									case "GET":
+										// Leaf: GetTransactionByMessageHash
+										r.name = "GetTransactionByMessageHash"
+										r.operationID = "getTransactionByMessageHash"
+										r.args = args
+										r.count = 1
+										return r, true
+									default:
+										return
+									}
+								}
 							}
 						}
 					}
@@ -2098,36 +2152,6 @@ func (s *Server) FindRoute(method, path string) (r Route, _ bool) {
 						break
 					}
 
-					if len(elem) == 0 {
-						break
-					}
-					switch elem[0] {
-					case 'm': // Prefix: "message/"
-						if l := len("message/"); len(elem) >= l && elem[0:l] == "message/" {
-							elem = elem[l:]
-						} else {
-							break
-						}
-
-						// Param: "msg_id"
-						// Leaf parameter
-						args[0] = elem
-						elem = ""
-
-						if len(elem) == 0 {
-							switch method {
-							case "GET":
-								// Leaf: GetTransactionByMessageHash
-								r.name = "GetTransactionByMessageHash"
-								r.operationID = "getTransactionByMessageHash"
-								r.args = args
-								r.count = 1
-								return r, true
-							default:
-								return
-							}
-						}
-					}
 					// Param: "transaction_id"
 					// Leaf parameter
 					args[0] = elem

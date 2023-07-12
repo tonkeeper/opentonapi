@@ -518,11 +518,6 @@ func (s AccountEvent) encodeFields(e *jx.Encoder) {
 	}
 	{
 
-		e.FieldStart("fee")
-		s.Fee.Encode(e)
-	}
-	{
-
 		e.FieldStart("is_scam")
 		e.Bool(s.IsScam)
 	}
@@ -543,16 +538,15 @@ func (s AccountEvent) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfAccountEvent = [9]string{
+var jsonFieldsNameOfAccountEvent = [8]string{
 	0: "event_id",
 	1: "account",
 	2: "timestamp",
 	3: "actions",
-	4: "fee",
-	5: "is_scam",
-	6: "lt",
-	7: "in_progress",
-	8: "extra",
+	4: "is_scam",
+	5: "lt",
+	6: "in_progress",
+	7: "extra",
 }
 
 // Decode decodes AccountEvent from json.
@@ -560,7 +554,7 @@ func (s *AccountEvent) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode AccountEvent to nil")
 	}
-	var requiredBitSet [2]uint8
+	var requiredBitSet [1]uint8
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
@@ -616,18 +610,8 @@ func (s *AccountEvent) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"actions\"")
 			}
-		case "fee":
-			requiredBitSet[0] |= 1 << 4
-			if err := func() error {
-				if err := s.Fee.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"fee\"")
-			}
 		case "is_scam":
-			requiredBitSet[0] |= 1 << 5
+			requiredBitSet[0] |= 1 << 4
 			if err := func() error {
 				v, err := d.Bool()
 				s.IsScam = bool(v)
@@ -639,7 +623,7 @@ func (s *AccountEvent) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"is_scam\"")
 			}
 		case "lt":
-			requiredBitSet[0] |= 1 << 6
+			requiredBitSet[0] |= 1 << 5
 			if err := func() error {
 				v, err := d.Int64()
 				s.Lt = int64(v)
@@ -651,7 +635,7 @@ func (s *AccountEvent) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"lt\"")
 			}
 		case "in_progress":
-			requiredBitSet[0] |= 1 << 7
+			requiredBitSet[0] |= 1 << 6
 			if err := func() error {
 				v, err := d.Bool()
 				s.InProgress = bool(v)
@@ -663,7 +647,7 @@ func (s *AccountEvent) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"in_progress\"")
 			}
 		case "extra":
-			requiredBitSet[1] |= 1 << 0
+			requiredBitSet[0] |= 1 << 7
 			if err := func() error {
 				v, err := d.Int64()
 				s.Extra = int64(v)
@@ -683,9 +667,8 @@ func (s *AccountEvent) Decode(d *jx.Decoder) error {
 	}
 	// Validate required fields.
 	var failures []validate.FieldError
-	for i, mask := range [2]uint8{
+	for i, mask := range [1]uint8{
 		0b11111111,
-		0b00000001,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -5913,15 +5896,6 @@ func (s Event) encodeFields(e *jx.Encoder) {
 	}
 	{
 
-		e.FieldStart("fees")
-		e.ArrStart()
-		for _, elem := range s.Fees {
-			elem.Encode(e)
-		}
-		e.ArrEnd()
-	}
-	{
-
 		e.FieldStart("value_flow")
 		e.ArrStart()
 		for _, elem := range s.ValueFlow {
@@ -5946,15 +5920,14 @@ func (s Event) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfEvent = [8]string{
+var jsonFieldsNameOfEvent = [7]string{
 	0: "event_id",
 	1: "timestamp",
 	2: "actions",
-	3: "fees",
-	4: "value_flow",
-	5: "is_scam",
-	6: "lt",
-	7: "in_progress",
+	3: "value_flow",
+	4: "is_scam",
+	5: "lt",
+	6: "in_progress",
 }
 
 // Decode decodes Event from json.
@@ -6008,26 +5981,8 @@ func (s *Event) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"actions\"")
 			}
-		case "fees":
-			requiredBitSet[0] |= 1 << 3
-			if err := func() error {
-				s.Fees = make([]Fee, 0)
-				if err := d.Arr(func(d *jx.Decoder) error {
-					var elem Fee
-					if err := elem.Decode(d); err != nil {
-						return err
-					}
-					s.Fees = append(s.Fees, elem)
-					return nil
-				}); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"fees\"")
-			}
 		case "value_flow":
-			requiredBitSet[0] |= 1 << 4
+			requiredBitSet[0] |= 1 << 3
 			if err := func() error {
 				s.ValueFlow = make([]ValueFlow, 0)
 				if err := d.Arr(func(d *jx.Decoder) error {
@@ -6045,7 +6000,7 @@ func (s *Event) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"value_flow\"")
 			}
 		case "is_scam":
-			requiredBitSet[0] |= 1 << 5
+			requiredBitSet[0] |= 1 << 4
 			if err := func() error {
 				v, err := d.Bool()
 				s.IsScam = bool(v)
@@ -6057,7 +6012,7 @@ func (s *Event) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"is_scam\"")
 			}
 		case "lt":
-			requiredBitSet[0] |= 1 << 6
+			requiredBitSet[0] |= 1 << 5
 			if err := func() error {
 				v, err := d.Int64()
 				s.Lt = int64(v)
@@ -6069,7 +6024,7 @@ func (s *Event) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"lt\"")
 			}
 		case "in_progress":
-			requiredBitSet[0] |= 1 << 7
+			requiredBitSet[0] |= 1 << 6
 			if err := func() error {
 				v, err := d.Bool()
 				s.InProgress = bool(v)
@@ -6090,7 +6045,7 @@ func (s *Event) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b11111111,
+		0b01111111,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -6132,191 +6087,6 @@ func (s Event) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *Event) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
-// Encode implements json.Marshaler.
-func (s Fee) Encode(e *jx.Encoder) {
-	e.ObjStart()
-	s.encodeFields(e)
-	e.ObjEnd()
-}
-
-// encodeFields encodes fields.
-func (s Fee) encodeFields(e *jx.Encoder) {
-	{
-
-		e.FieldStart("account")
-		s.Account.Encode(e)
-	}
-	{
-
-		e.FieldStart("total")
-		e.Int64(s.Total)
-	}
-	{
-
-		e.FieldStart("gas")
-		e.Int64(s.Gas)
-	}
-	{
-
-		e.FieldStart("rent")
-		e.Int64(s.Rent)
-	}
-	{
-
-		e.FieldStart("deposit")
-		e.Int64(s.Deposit)
-	}
-	{
-
-		e.FieldStart("refund")
-		e.Int64(s.Refund)
-	}
-}
-
-var jsonFieldsNameOfFee = [6]string{
-	0: "account",
-	1: "total",
-	2: "gas",
-	3: "rent",
-	4: "deposit",
-	5: "refund",
-}
-
-// Decode decodes Fee from json.
-func (s *Fee) Decode(d *jx.Decoder) error {
-	if s == nil {
-		return errors.New("invalid: unable to decode Fee to nil")
-	}
-	var requiredBitSet [1]uint8
-
-	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
-		switch string(k) {
-		case "account":
-			requiredBitSet[0] |= 1 << 0
-			if err := func() error {
-				if err := s.Account.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"account\"")
-			}
-		case "total":
-			requiredBitSet[0] |= 1 << 1
-			if err := func() error {
-				v, err := d.Int64()
-				s.Total = int64(v)
-				if err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"total\"")
-			}
-		case "gas":
-			requiredBitSet[0] |= 1 << 2
-			if err := func() error {
-				v, err := d.Int64()
-				s.Gas = int64(v)
-				if err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"gas\"")
-			}
-		case "rent":
-			requiredBitSet[0] |= 1 << 3
-			if err := func() error {
-				v, err := d.Int64()
-				s.Rent = int64(v)
-				if err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"rent\"")
-			}
-		case "deposit":
-			requiredBitSet[0] |= 1 << 4
-			if err := func() error {
-				v, err := d.Int64()
-				s.Deposit = int64(v)
-				if err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"deposit\"")
-			}
-		case "refund":
-			requiredBitSet[0] |= 1 << 5
-			if err := func() error {
-				v, err := d.Int64()
-				s.Refund = int64(v)
-				if err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"refund\"")
-			}
-		default:
-			return d.Skip()
-		}
-		return nil
-	}); err != nil {
-		return errors.Wrap(err, "decode Fee")
-	}
-	// Validate required fields.
-	var failures []validate.FieldError
-	for i, mask := range [1]uint8{
-		0b00111111,
-	} {
-		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
-			// Mask only required fields and check equality to mask using XOR.
-			//
-			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
-			// Bits of fields which would be set are actually bits of missed fields.
-			missed := bits.OnesCount8(result)
-			for bitN := 0; bitN < missed; bitN++ {
-				bitIdx := bits.TrailingZeros8(result)
-				fieldIdx := i*8 + bitIdx
-				var name string
-				if fieldIdx < len(jsonFieldsNameOfFee) {
-					name = jsonFieldsNameOfFee[fieldIdx]
-				} else {
-					name = strconv.Itoa(fieldIdx)
-				}
-				failures = append(failures, validate.FieldError{
-					Name:  name,
-					Error: validate.ErrFieldRequired,
-				})
-				// Reset bit.
-				result &^= 1 << bitIdx
-			}
-		}
-	}
-	if len(failures) > 0 {
-		return &validate.Error{Fields: failures}
-	}
-
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s Fee) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *Fee) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }

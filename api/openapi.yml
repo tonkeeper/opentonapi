@@ -82,7 +82,8 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/InternalError'
-  /v2/blockchain/transactions/message/{msg_id}:
+
+  /v2/blockchain/messages/{msg_id}/transaction:
     get:
       description: Get transaction data by message hash
       operationId: getTransactionByMessageHash
@@ -619,6 +620,13 @@ paths:
       parameters:
         - $ref: '#/components/parameters/accountIdParameter'
         - $ref: '#/components/parameters/i18n'
+        - name: subject_only
+          in: query
+          description: "filter actions where requested account is not real subject (for example sender or reciver jettons)"
+          schema:
+            type: boolean
+            default: false
+          required: false
         - name: before_lt
           in: query
           description: "omit this parameter to get last events"
@@ -2699,40 +2707,6 @@ components:
           items:
             $ref: '#/components/schemas/NftItem'
 
-    Fee:
-      type: object
-      required:
-        - account
-        - total
-        - gas
-        - rent
-        - deposit
-        - refund
-      properties:
-        account:
-          $ref: '#/components/schemas/AccountAddress'
-        total:
-          type: integer
-          format: int64
-          example: 100
-          description: "gas + rent + deposit - refund"
-        gas:
-          type: integer
-          format: int64
-          example: 80
-        rent:
-          type: integer
-          format: int64
-          example: 10
-        deposit:
-          type: integer
-          format: int64
-          example: 110
-        refund:
-          type: integer
-          format: int64
-          example: 100
-
     Refund:
       type: object
       required:
@@ -3134,7 +3108,6 @@ components:
         - event_id
         - timestamp
         - actions
-        - fee
         - account
         - is_scam
         - lt
@@ -3154,9 +3127,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Action'
-        fee:
-          $ref: '#/components/schemas/Fee'
-          deprecated: true
         is_scam:
           type: boolean
           description: scam
@@ -3523,10 +3493,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Action'
-        fees:
-          type: array
-          items:
-            $ref: '#/components/schemas/Fee'
         value_flow:
           type: array
           items:

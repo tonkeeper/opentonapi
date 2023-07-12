@@ -413,7 +413,7 @@ func (UnimplementedHandler) GetTransaction(ctx context.Context, params GetTransa
 //
 // Get transaction data by message hash.
 //
-// GET /v2/blockchain/transactions/message/{msg_id}
+// GET /v2/blockchain/messages/{msg_id}/transaction
 func (UnimplementedHandler) GetTransactionByMessageHash(ctx context.Context, params GetTransactionByMessageHashParams) (r GetTransactionByMessageHashRes, _ error) {
 	return r, ht.ErrNotImplemented
 }

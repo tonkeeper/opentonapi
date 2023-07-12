@@ -92,8 +92,11 @@ func (h Handler) GetRawAccount(ctx context.Context, params oas.GetRawAccountPara
 		return &oas.BadRequest{Error: err.Error()}, nil
 	}
 	rawAccount, err := h.storage.GetRawAccount(ctx, accountID)
+	if errors.Is(err, core.ErrEntityNotFound) {
+		return &oas.NotFound{Error: err.Error()}, nil
+	}
 	if err != nil {
-		return &oas.BadRequest{Error: err.Error()}, nil
+		return &oas.InternalError{Error: err.Error()}, nil
 	}
 	res := convertToRawAccount(rawAccount)
 	return &res, nil

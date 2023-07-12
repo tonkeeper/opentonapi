@@ -49,10 +49,13 @@ func (h Handler) GetTransactionByMessageHash(ctx context.Context, params oas.Get
 	if err != nil {
 		return &oas.BadRequest{Error: err.Error()}, nil
 	}
-	txs, err := h.storage.GetTransactionByMsg(ctx, hash)
+	txHash, err := h.storage.SearchTransactionByMessageHash(ctx, hash)
 	if errors.Is(err, core.ErrEntityNotFound) {
 		return &oas.NotFound{Error: "transaction not found"}, nil
+	} else if errors.Is(err, core.ErrTooManyEntities) {
+		return &oas.NotFound{Error: "more than one transaction with messages hash"}, nil
 	}
+	txs, err := h.storage.GetTransaction(ctx, *txHash)
 	if err != nil {
 		return nil, err
 	}

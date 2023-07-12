@@ -342,8 +342,21 @@ func (s *LiteStorage) GetTransaction(ctx context.Context, hash tongo.Bits256) (*
 	return nil, fmt.Errorf("not found tx %x", hash)
 }
 
-func (s *LiteStorage) GetTransactionByMsg(ctx context.Context, hash tongo.Bits256) (*core.Transaction, error) {
-	return nil, nil
+func (s *LiteStorage) SearchTransactionByMessageHash(ctx context.Context, hash tongo.Bits256) (*tongo.Bits256, error) {
+	//var txHash tongo.Bits256
+	//found := false
+	//s.transactionsIndexByHash.Range(func(key tongo.Bits256, value *core.Transaction) bool {
+	//	if value.InMsg != nil && value.InMsg.Hash {
+	//		txHash = key
+	//		found =true
+	//		return false
+	//	}
+	//	return true
+	//})
+	//if found {
+	//	return &txHash, nil
+	//}
+	return nil, core.ErrEntityNotFound
 }
 
 func (s *LiteStorage) GetBlockTransactions(ctx context.Context, id tongo.BlockID) ([]*core.Transaction, error) {

@@ -1289,6 +1289,8 @@ type GetEventsByAccountParams struct {
 	// Account ID.
 	AccountID      string
 	AcceptLanguage OptString
+	// Filter actions where requested account is not real subject (for example sender or reciver jettons).
+	SubjectOnly OptBool
 	// Omit this parameter to get last events.
 	BeforeLt  OptInt64
 	Limit     int
@@ -1311,6 +1313,15 @@ func unpackGetEventsByAccountParams(packed middleware.Parameters) (params GetEve
 		}
 		if v, ok := packed[key]; ok {
 			params.AcceptLanguage = v.(OptString)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "subject_only",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.SubjectOnly = v.(OptBool)
 		}
 	}
 	{
@@ -1418,6 +1429,45 @@ func decodeGetEventsByAccountParams(args [1]string, r *http.Request) (params Get
 				return nil
 			}); err != nil {
 				return params, errors.Wrap(err, "header: Accept-Language: parse")
+			}
+		}
+	}
+	// Set default value for query: subject_only.
+	{
+		val := bool(false)
+		params.SubjectOnly.SetTo(val)
+	}
+	// Decode query: subject_only.
+	{
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "subject_only",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotSubjectOnlyVal bool
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToBool(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotSubjectOnlyVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.SubjectOnly.SetTo(paramsDotSubjectOnlyVal)
+				return nil
+			}); err != nil {
+				return params, errors.Wrap(err, "query: subject_only: parse")
 			}
 		}
 	}

@@ -196,7 +196,6 @@ type AccountEvent struct {
 	Account   AccountAddress `json:"account"`
 	Timestamp int64          `json:"timestamp"`
 	Actions   []Action       `json:"actions"`
-	Fee       Fee            `json:"fee"`
 	// Scam.
 	IsScam bool  `json:"is_scam"`
 	Lt     int64 `json:"lt"`
@@ -224,11 +223,6 @@ func (s AccountEvent) GetTimestamp() int64 {
 // GetActions returns the value of Actions.
 func (s AccountEvent) GetActions() []Action {
 	return s.Actions
-}
-
-// GetFee returns the value of Fee.
-func (s AccountEvent) GetFee() Fee {
-	return s.Fee
 }
 
 // GetIsScam returns the value of IsScam.
@@ -269,11 +263,6 @@ func (s *AccountEvent) SetTimestamp(val int64) {
 // SetActions sets the value of Actions.
 func (s *AccountEvent) SetActions(val []Action) {
 	s.Actions = val
-}
-
-// SetFee sets the value of Fee.
-func (s *AccountEvent) SetFee(val Fee) {
-	s.Fee = val
 }
 
 // SetIsScam sets the value of IsScam.
@@ -2013,7 +2002,6 @@ type Event struct {
 	EventID   string      `json:"event_id"`
 	Timestamp int64       `json:"timestamp"`
 	Actions   []Action    `json:"actions"`
-	Fees      []Fee       `json:"fees"`
 	ValueFlow []ValueFlow `json:"value_flow"`
 	// Scam.
 	IsScam bool  `json:"is_scam"`
@@ -2035,11 +2023,6 @@ func (s Event) GetTimestamp() int64 {
 // GetActions returns the value of Actions.
 func (s Event) GetActions() []Action {
 	return s.Actions
-}
-
-// GetFees returns the value of Fees.
-func (s Event) GetFees() []Fee {
-	return s.Fees
 }
 
 // GetValueFlow returns the value of ValueFlow.
@@ -2077,11 +2060,6 @@ func (s *Event) SetActions(val []Action) {
 	s.Actions = val
 }
 
-// SetFees sets the value of Fees.
-func (s *Event) SetFees(val []Fee) {
-	s.Fees = val
-}
-
 // SetValueFlow sets the value of ValueFlow.
 func (s *Event) SetValueFlow(val []ValueFlow) {
 	s.ValueFlow = val
@@ -2104,77 +2082,6 @@ func (s *Event) SetInProgress(val bool) {
 
 func (*Event) emulateMessageToEventRes() {}
 func (*Event) getEventRes()              {}
-
-// Ref: #/components/schemas/Fee
-type Fee struct {
-	Account AccountAddress `json:"account"`
-	// Gas + rent + deposit - refund.
-	Total   int64 `json:"total"`
-	Gas     int64 `json:"gas"`
-	Rent    int64 `json:"rent"`
-	Deposit int64 `json:"deposit"`
-	Refund  int64 `json:"refund"`
-}
-
-// GetAccount returns the value of Account.
-func (s Fee) GetAccount() AccountAddress {
-	return s.Account
-}
-
-// GetTotal returns the value of Total.
-func (s Fee) GetTotal() int64 {
-	return s.Total
-}
-
-// GetGas returns the value of Gas.
-func (s Fee) GetGas() int64 {
-	return s.Gas
-}
-
-// GetRent returns the value of Rent.
-func (s Fee) GetRent() int64 {
-	return s.Rent
-}
-
-// GetDeposit returns the value of Deposit.
-func (s Fee) GetDeposit() int64 {
-	return s.Deposit
-}
-
-// GetRefund returns the value of Refund.
-func (s Fee) GetRefund() int64 {
-	return s.Refund
-}
-
-// SetAccount sets the value of Account.
-func (s *Fee) SetAccount(val AccountAddress) {
-	s.Account = val
-}
-
-// SetTotal sets the value of Total.
-func (s *Fee) SetTotal(val int64) {
-	s.Total = val
-}
-
-// SetGas sets the value of Gas.
-func (s *Fee) SetGas(val int64) {
-	s.Gas = val
-}
-
-// SetRent sets the value of Rent.
-func (s *Fee) SetRent(val int64) {
-	s.Rent = val
-}
-
-// SetDeposit sets the value of Deposit.
-func (s *Fee) SetDeposit(val int64) {
-	s.Deposit = val
-}
-
-// SetRefund sets the value of Refund.
-func (s *Fee) SetRefund(val int64) {
-	s.Refund = val
-}
 
 // Ref: #/components/schemas/FoundAccounts
 type FoundAccounts struct {

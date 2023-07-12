@@ -2130,6 +2130,10 @@ func (s *Server) handleGetEventsByAccountRequest(args [1]string, w http.Response
 					In:   "header",
 				}: params.AcceptLanguage,
 				{
+					Name: "subject_only",
+					In:   "query",
+				}: params.SubjectOnly,
+				{
 					Name: "before_lt",
 					In:   "query",
 				}: params.BeforeLt,
@@ -4391,7 +4395,7 @@ func (s *Server) handleGetTransactionRequest(args [1]string, w http.ResponseWrit
 //
 // Get transaction data by message hash.
 //
-// GET /v2/blockchain/transactions/message/{msg_id}
+// GET /v2/blockchain/messages/{msg_id}/transaction
 func (s *Server) handleGetTransactionByMessageHashRequest(args [1]string, w http.ResponseWriter, r *http.Request) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getTransactionByMessageHash"),
