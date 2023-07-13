@@ -15,3 +15,7 @@
 ### 2023-07-04 
 
 - /v2/pubkeys/{public_key}/wallets
+
+### 2023-07-11
+
+- /v2/blockchain/messages/{msg_id}/transaction

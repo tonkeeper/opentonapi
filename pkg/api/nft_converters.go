@@ -74,7 +74,7 @@ func convertNFT(ctx context.Context, item core.NftItem, book addressBook, previe
 	if image == "" {
 		image = references.Placeholder
 	}
-	for _, size := range []int{100, 500, 1500} {
+	for _, size := range []int{5, 100, 500, 1500} {
 		url := previewGen.GenerateImageUrl(image, size, size)
 		i.Previews = append(i.Previews, oas.ImagePreview{
 			Resolution: fmt.Sprintf("%vx%v", size, size),
