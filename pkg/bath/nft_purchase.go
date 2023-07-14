@@ -77,6 +77,7 @@ func FindNftPurchase(bubble *Bubble) bool {
 				return nil
 			}
 			newBubble.ValueFlow.Merge(child.ValueFlow)
+			newBubble.MergeContractDeployments(child)
 			nft = nftTransfer.account.Address
 			newBubble.Accounts = append(newBubble.Accounts, nft)
 			if nftTransfer.sender != nil {

@@ -26,6 +26,11 @@ var DefaultStraws = []Straw{
 	FindRecoverStake,
 	FindTFNominatorAction,
 	FindSTONfiSwap,
+	// FindContractDeploy goes after other straws
+	// because it inserts ContractDeploy actions in an action chain.
+	// Usually, a straw looks for a strict sequence of bubbles like (Jetton Transfer) -> (Jetton Notify) and
+	// such a straw would be broken with (Jetton Transfer) -> (Contract Deploy) -> (Jetton Notify).
+	FindContractDeploy,
 }
 
 func FindNFTTransfer(bubble *Bubble) bool {
@@ -45,8 +50,9 @@ func FindNFTTransfer(bubble *Bubble) bool {
 			recipient: parseAccount(transfer.NewOwner),
 			payload:   cellToTextComment(boc.Cell(transfer.ForwardPayload.Value)),
 		},
-		Accounts:  append(bubble.Accounts, nftBubble.account.Address),
-		ValueFlow: bubble.ValueFlow,
+		Accounts:            append(bubble.Accounts, nftBubble.account.Address),
+		ValueFlow:           bubble.ValueFlow,
+		ContractDeployments: bubble.ContractDeployments,
 	}
 	newBubble.Children = ProcessChildren(bubble.Children,
 		func(child *Bubble) *Merge {
@@ -58,6 +64,7 @@ func FindNFTTransfer(bubble *Bubble) bool {
 				return nil
 			}
 			newBubble.ValueFlow.Merge(child.ValueFlow)
+			newBubble.MergeContractDeployments(child)
 			newBubble.Accounts = append(newBubble.Accounts, child.Accounts...)
 			return &Merge{children: child.Children}
 		},
@@ -71,6 +78,7 @@ func FindNFTTransfer(bubble *Bubble) bool {
 			}
 			newBubble.Accounts = append(newBubble.Accounts, child.Accounts...)
 			newBubble.ValueFlow.Merge(child.ValueFlow)
+			newBubble.MergeContractDeployments(child)
 			return &Merge{children: child.Children}
 		})
 	*bubble = newBubble
@@ -142,9 +150,10 @@ func FindJettonTransfer(bubble *Bubble) bool {
 		transfer.master = *transferBubbleInfo.additionalInfo.JettonMaster
 	}
 	newBubble := Bubble{
-		Children:  bubble.Children,
-		ValueFlow: bubble.ValueFlow,
-		Accounts:  bubble.Accounts,
+		Children:            bubble.Children,
+		ValueFlow:           bubble.ValueFlow,
+		Accounts:            bubble.Accounts,
+		ContractDeployments: bubble.ContractDeployments,
 	}
 	newBubble.ValueFlow.AddJettons(*recipient, transfer.master, big.Int(intention.Amount))
 	if transferBubbleInfo.success {
@@ -159,6 +168,7 @@ func FindJettonTransfer(bubble *Bubble) bool {
 					return nil
 				}
 				newBubble.ValueFlow.Merge(notify.ValueFlow)
+				newBubble.MergeContractDeployments(notify)
 				newBubble.Accounts = append(newBubble.Accounts, notify.Accounts...)
 				return &Merge{children: notify.Children}
 			},
@@ -175,6 +185,7 @@ func FindJettonTransfer(bubble *Bubble) bool {
 				}
 				transfer.recipientWallet = receiveBubbleInfo.account.Address
 				newBubble.Accounts = append(newBubble.Accounts, child.Accounts...)
+				newBubble.MergeContractDeployments(child)
 				children := ProcessChildren(child.Children,
 					func(excess *Bubble) *Merge {
 						tx, ok := excess.Info.(BubbleTx)
@@ -185,6 +196,7 @@ func FindJettonTransfer(bubble *Bubble) bool {
 							return nil
 						}
 						newBubble.ValueFlow.Merge(excess.ValueFlow)
+						newBubble.MergeContractDeployments(excess)
 						newBubble.Accounts = append(newBubble.Accounts, excess.Accounts...)
 						return &Merge{children: excess.Children}
 					},
@@ -202,6 +214,7 @@ func FindJettonTransfer(bubble *Bubble) bool {
 						}
 						transfer.recipient.Interfaces = tx.account.Interfaces
 						newBubble.ValueFlow.Merge(notify.ValueFlow)
+						newBubble.MergeContractDeployments(notify)
 						newBubble.Accounts = append(newBubble.Accounts, notify.Accounts...)
 						return &Merge{children: notify.Children}
 					},

@@ -30,6 +30,7 @@ const (
 	depositStakeMessageID   = "depositStakeAction"
 	recoverStakeMessageID   = "recoverStakeAction"
 	stonfiSwapMessageID     = "stonfiSwapAction"
+	contractDeployMessageID = "contractDeployAction"
 
 	tfDepositMessageID                        = "tfDepositAction"
 	tfRequestWithdrawMessageID                = "tfRequestWithdrawAction"
@@ -245,10 +246,24 @@ func (h Handler) convertAction(ctx context.Context, viewer tongo.AccountID, a ba
 			Subscription: a.UnSubscription.Subscription.ToRaw(),
 		})
 	case bath.ContractDeploy:
+		interfaces := make([]string, 0, len(a.ContractDeploy.Interfaces))
+		for _, iface := range a.ContractDeploy.Interfaces {
+			interfaces = append(interfaces, string(iface))
+		}
 		action.ContractDeploy.SetTo(oas.ContractDeployAction{
 			Address:    a.ContractDeploy.Address.ToRaw(),
-			Interfaces: a.ContractDeploy.Interfaces,
+			Interfaces: interfaces,
 		})
+		action.SimplePreview = oas.ActionSimplePreview{
+			Name: "Contract Deploy",
+			Description: i18n.T(acceptLanguage.Value, i18n.C{
+				MessageID: contractDeployMessageID,
+				TemplateData: map[string]interface{}{
+					"Interfaces": strings.Join(interfaces, ", "),
+				},
+			}),
+			Accounts: distinctAccounts(h.addressBook, &a.ContractDeploy.Address),
+		}
 	case bath.NftPurchase:
 		price := a.NftPurchase.Price
 		value := i18n.FormatTONs(price)
