@@ -97,20 +97,13 @@ func (h Handler) GetEventsByAccount(ctx context.Context, params oas.GetEventsByA
 		if err != nil {
 			return &oas.InternalError{Error: err.Error()}, nil
 		}
-		events[i], err = h.toAccountEvent(ctx, account, trace, result, params.AcceptLanguage)
+		events[i], err = h.toAccountEvent(ctx, account, trace, result, params.AcceptLanguage, params.SubjectOnly.Value)
 		if err != nil {
 			return &oas.InternalError{Error: err.Error()}, nil
 		}
 		lastLT = trace.Lt
 	}
 	return &oas.AccountEvents{Events: events, NextFrom: int64(lastLT)}, nil
-}
-
-func optIntToPointer(o oas.OptInt64) *int64 {
-	if !o.IsSet() {
-		return nil
-	}
-	return &o.Value
 }
 
 func (h Handler) EmulateMessageToAccountEvent(ctx context.Context, req oas.EmulateMessageToAccountEventReq, params oas.EmulateMessageToAccountEventParams) (r oas.EmulateMessageToAccountEventRes, _ error) {
@@ -143,7 +136,7 @@ func (h Handler) EmulateMessageToAccountEvent(ctx context.Context, req oas.Emula
 	if err != nil {
 		return &oas.InternalError{Error: err.Error()}, nil
 	}
-	event, err := h.toAccountEvent(ctx, account, trace, result, params.AcceptLanguage)
+	event, err := h.toAccountEvent(ctx, account, trace, result, params.AcceptLanguage, false)
 	if err != nil {
 		return &oas.InternalError{Error: err.Error()}, nil
 	}
@@ -267,7 +260,7 @@ func (h Handler) EmulateWalletMessage(ctx context.Context, req oas.EmulateWallet
 	if err != nil {
 		return &oas.InternalError{Error: err.Error()}, nil
 	}
-	event, err := h.toAccountEvent(ctx, *walletAddress, trace, result, params.AcceptLanguage)
+	event, err := h.toAccountEvent(ctx, *walletAddress, trace, result, params.AcceptLanguage, true)
 	if err != nil {
 		return &oas.InternalError{Error: err.Error()}, nil
 	}
