@@ -195,6 +195,32 @@ func (a Action) ContributeToExtra(account tongo.AccountID, extra int64) int64 {
 	return extra
 }
 
+func (a Action) IsSubject(account tongo.AccountID) bool {
+	for _, i := range []interface{ SubjectAccounts() []tongo.AccountID }{
+		a.TonTransfer,
+		a.SmartContractExec,
+		a.NftItemTransfer,
+		a.NftPurchase,
+		a.JettonTransfer,
+		a.ContractDeploy,
+		a.Subscription,
+		a.UnSubscription,
+		a.AuctionBid,
+		a.DepositStake,
+		a.RecoverStake,
+		a.STONfiSwap,
+	} {
+		if i != nil {
+			return slices.Contains(i.SubjectAccounts(), account)
+		}
+	}
+	return false
+}
+
+func (a *TonTransferAction) SubjectAccounts() []tongo.AccountID {
+	return []tongo.AccountID{a.Sender, a.Recipient}
+}
+
 func (a *TonTransferAction) ContributeToExtra(account tongo.AccountID, extra int64) int64 {
 	if a.Sender == account {
 		return extra - a.Amount
@@ -205,6 +231,10 @@ func (a *TonTransferAction) ContributeToExtra(account tongo.AccountID, extra int
 	return extra
 }
 
+func (a *SmartContractAction) SubjectAccounts() []tongo.AccountID {
+	return []tongo.AccountID{a.Contract, a.Executor}
+}
+
 func (a *SmartContractAction) ContributeToExtra(account tongo.AccountID, extra int64) int64 {
 	if a.Executor == account {
 		return extra - a.TonAttached
@@ -213,4 +243,60 @@ func (a *SmartContractAction) ContributeToExtra(account tongo.AccountID, extra i
 		return extra + a.TonAttached
 	}
 	return extra
+}
+
+func (a *NftTransferAction) SubjectAccounts() []tongo.AccountID {
+	accounts := make([]tongo.AccountID, 0, 2)
+	if a.Sender != nil {
+		accounts = append(accounts, *a.Sender)
+	}
+	if a.Recipient != nil {
+		accounts = append(accounts, *a.Recipient)
+	}
+	return accounts
+}
+
+func (a *JettonTransferAction) SubjectAccounts() []tongo.AccountID {
+	accounts := make([]tongo.AccountID, 0, 2)
+	if a.Sender != nil {
+		accounts = append(accounts, *a.Sender)
+	}
+	if a.Recipient != nil {
+		accounts = append(accounts, *a.Recipient)
+	}
+	return accounts
+}
+
+func (a *SubscriptionAction) SubjectAccounts() []tongo.AccountID {
+	return []tongo.AccountID{a.Subscriber, a.Beneficiary}
+}
+
+func (a *NftPurchaseAction) SubjectAccounts() []tongo.AccountID {
+	return []tongo.AccountID{a.Buyer, a.Seller}
+}
+
+func (a *AuctionBidAction) SubjectAccounts() []tongo.AccountID {
+	accounts := make([]tongo.AccountID, 0, 2)
+	accounts = append(accounts, a.Bidder)
+	if a.PreviousBidder != nil {
+		accounts = append(accounts, *a.PreviousBidder)
+	}
+	return accounts
+}
+func (a *ContractDeployAction) SubjectAccounts() []tongo.AccountID {
+	return []tongo.AccountID{a.Address}
+}
+
+func (a *STONfiSwapAction) SubjectAccounts() []tongo.AccountID {
+	return []tongo.AccountID{a.UserWallet}
+}
+func (a *UnSubscriptionAction) SubjectAccounts() []tongo.AccountID {
+	return []tongo.AccountID{a.Subscriber, a.Beneficiary}
+}
+func (a *DepositStakeAction) SubjectAccounts() []tongo.AccountID {
+	return []tongo.AccountID{a.Staker}
+}
+
+func (a *RecoverStakeAction) SubjectAccounts() []tongo.AccountID {
+	return []tongo.AccountID{a.Staker}
 }

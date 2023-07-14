@@ -464,7 +464,7 @@ func (h Handler) toEvent(ctx context.Context, trace *core.Trace, result *bath.Ac
 	return event, nil
 }
 
-func (h Handler) toAccountEvent(ctx context.Context, account tongo.AccountID, trace *core.Trace, result *bath.ActionsList, lang oas.OptString) (oas.AccountEvent, error) {
+func (h Handler) toAccountEvent(ctx context.Context, account tongo.AccountID, trace *core.Trace, result *bath.ActionsList, lang oas.OptString, subjectOnly bool) (oas.AccountEvent, error) {
 	e := oas.AccountEvent{
 		EventID:    trace.Hash.Hex(),
 		Account:    convertAccountAddress(account, h.addressBook),
@@ -481,6 +481,9 @@ func (h Handler) toAccountEvent(ctx context.Context, account tongo.AccountID, tr
 		}
 		if !e.IsScam && spamDetected {
 			e.IsScam = true
+		}
+		if subjectOnly && !a.IsSubject(account) {
+			continue
 		}
 		e.Actions = append(e.Actions, convertedAction)
 	}

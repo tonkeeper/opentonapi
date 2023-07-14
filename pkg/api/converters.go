@@ -78,6 +78,13 @@ func convertAccountAddress(id tongo.AccountID, book addressBook) oas.AccountAddr
 	return address
 }
 
+func optIntToPointer(o oas.OptInt64) *int64 {
+	if !o.IsSet() {
+		return nil
+	}
+	return &o.Value
+}
+
 func convertOptAccountAddress(id *tongo.AccountID, book addressBook) oas.OptAccountAddress {
 	if id != nil {
 		return oas.OptAccountAddress{Value: convertAccountAddress(*id, book), Set: true}
