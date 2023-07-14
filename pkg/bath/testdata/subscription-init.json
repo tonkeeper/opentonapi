@@ -10,6 +10,14 @@
        },
        "Success": true,
        "Type": "Subscribe"
+     },
+     {
+       "ContractDeploy": {
+         "Address": "0:47580dd4cab600a751875071ef7482d99ce5cfada7293e9ebc7c3e07125846f6",
+         "Interfaces": null
+       },
+       "Success": true,
+       "Type": "ContractDeploy"
      }
    ],
    "Accounts": [

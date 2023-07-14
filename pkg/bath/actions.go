@@ -6,6 +6,7 @@ import (
 	"reflect"
 
 	"github.com/tonkeeper/tongo"
+	"github.com/tonkeeper/tongo/abi"
 	"github.com/tonkeeper/tongo/tlb"
 	"golang.org/x/exp/slices"
 
@@ -122,7 +123,7 @@ type (
 
 	ContractDeployAction struct {
 		Address    tongo.AccountID
-		Interfaces []string
+		Interfaces []abi.ContractInterface
 	}
 
 	SubscriptionAction struct {

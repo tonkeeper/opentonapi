@@ -107,6 +107,12 @@ func TestFindActions(t *testing.T) {
 			tongo.MustParseBlockID("(0,8000000000000000,36716516)"),
 			// stonfi swap
 			tongo.MustParseBlockID("(0,8000000000000000,36693371)"),
+			// deploy contract actions
+			tongo.MustParseBlockID("(0,8000000000000000,22029126)"),
+			// deploy contract failed
+			tongo.MustParseBlockID("(0,8000000000000000,32606229)"),
+			tongo.MustParseBlockID("(-1,8000000000000000,27037607)"),
+			tongo.MustParseBlockID("(0,8000000000000000,32606232)"),
 		}),
 	)
 
@@ -207,6 +213,16 @@ func TestFindActions(t *testing.T) {
 			name:           "stonfi buying jUSDT",
 			hash:           "449aae1c0b5ebe55bc7c9efa6e511bd31b659b4bc92f3f40f50598fbbd9ca243",
 			filenamePrefix: "stonfi-purchase-jUSDT",
+		},
+		{
+			name:           "deploy contract action",
+			hash:           "657623f3db93397a3bb956e0e621d7a37e4ff27b80013a68f2dd91c8094b50e3",
+			filenamePrefix: "deploy-contract",
+		},
+		{
+			name:           "deploy contract failed",
+			hash:           "32467cfe9b9faecf6cd2a8055bfc7243e289fec6b2f479df2bcbf78eac9826a0",
+			filenamePrefix: "deploy-contract-failed",
 		},
 	} {
 		t.Run(c.name, func(t *testing.T) {

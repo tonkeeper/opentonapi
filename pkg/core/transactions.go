@@ -3,6 +3,7 @@ package core
 import (
 	"math/big"
 
+	"github.com/tonkeeper/tongo/abi"
 	"github.com/tonkeeper/tongo/tlb"
 
 	"github.com/tonkeeper/tongo"
@@ -122,16 +123,17 @@ func (m Message) IsEmission() bool {
 
 type Message struct {
 	MessageID
-	IhrDisabled bool
-	Bounce      bool
-	Bounced     bool
-	Value       int64
-	FwdFee      int64
-	IhrFee      int64
-	ImportFee   int64
-	Init        []byte
-	Body        []byte
-	CreatedAt   uint32
+	IhrDisabled    bool
+	Bounce         bool
+	Bounced        bool
+	Value          int64
+	FwdFee         int64
+	IhrFee         int64
+	ImportFee      int64
+	Init           []byte
+	InitInterfaces []abi.ContractInterface
+	Body           []byte
+	CreatedAt      uint32
 	// OpCode is the first 32 bits of a message body indicating a possible operation.
 	OpCode      *uint32
 	DecodedBody *DecodedMessageBody

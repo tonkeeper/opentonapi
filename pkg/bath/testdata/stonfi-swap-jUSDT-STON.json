@@ -13,6 +13,14 @@
        },
        "Success": true,
        "Type": "STONfiSwap"
+     },
+     {
+       "ContractDeploy": {
+         "Address": "0:d56f88e98b46d844642cab1e83833fa062a8ad6fdba62ae71c636f8f8802501d",
+         "Interfaces": null
+       },
+       "Success": true,
+       "Type": "ContractDeploy"
      }
    ],
    "Accounts": [

@@ -6,6 +6,7 @@ import (
 
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/tongo"
+	"github.com/tonkeeper/tongo/abi"
 	"github.com/tonkeeper/tongo/tlb"
 )
 
@@ -17,6 +18,16 @@ type Bubble struct {
 	Accounts  []tongo.AccountID
 	Children  []*Bubble
 	ValueFlow *ValueFlow
+	// ContractDeployments specifies a list of contracts initialized by this bubble.
+	ContractDeployments map[tongo.AccountID]ContractDeployment
+}
+
+// ContractDeployment holds information about initialization of a contract.
+// TODO: should ContractDeployment contains LT/time of a deployment so we can sort several ContractDeploy actions?
+type ContractDeployment struct {
+	//// initInterfaces is a list of interfaces implemented by the code of stateInit.
+	initInterfaces []abi.ContractInterface
+	success        bool
 }
 
 func (b Bubble) String() string {
@@ -33,6 +44,16 @@ func (b Bubble) String() string {
 		}
 	}
 	return buf.String()
+}
+
+// MergeContractDeployments copies contract deployments from other bubble.
+func (b *Bubble) MergeContractDeployments(other *Bubble) {
+	if b.ContractDeployments == nil {
+		b.ContractDeployments = make(map[tongo.AccountID]ContractDeployment, len(other.ContractDeployments))
+	}
+	for accountID, deployment := range other.ContractDeployments {
+		b.ContractDeployments[accountID] = deployment
+	}
 }
 
 type actioner interface {
@@ -52,6 +73,7 @@ func fromTrace(trace *core.Trace) *Bubble {
 		accountWasActiveAtComputingTime: trace.Type != core.OrdinaryTx || trace.ComputePhase == nil || trace.ComputePhase.SkipReason != tlb.ComputeSkipReasonNoState,
 		additionalInfo:                  trace.AdditionalInfo,
 	}
+
 	accounts := []tongo.AccountID{trace.Account}
 	var source *Account
 	if trace.InMsg != nil && trace.InMsg.Source != nil {
@@ -61,6 +83,7 @@ func fromTrace(trace *core.Trace) *Bubble {
 		accounts = append(accounts, source.Address)
 	}
 	var inputAmount int64
+	var initInterfaces []abi.ContractInterface
 	if msg := trace.InMsg; msg != nil {
 		btx.bounce = msg.Bounce
 		btx.bounced = msg.Bounced
@@ -70,12 +93,14 @@ func fromTrace(trace *core.Trace) *Bubble {
 		btx.decodedBody = msg.DecodedBody
 		btx.inputFrom = source
 		btx.init = msg.Init
+		initInterfaces = msg.InitInterfaces
 	}
 	aggregatedFee := trace.TotalFee
 	b := Bubble{
-		Info:     btx,
-		Accounts: accounts,
-		Children: make([]*Bubble, len(trace.Children)),
+		Info:                btx,
+		Accounts:            accounts,
+		Children:            make([]*Bubble, len(trace.Children)),
+		ContractDeployments: map[tongo.AccountID]ContractDeployment{},
 		ValueFlow: &ValueFlow{
 			Accounts: map[tongo.AccountID]*AccountValueFlow{
 				trace.Account: {
@@ -84,6 +109,14 @@ func fromTrace(trace *core.Trace) *Bubble {
 			},
 		},
 	}
+	contractDeployed := trace.EndStatus == tlb.AccountActive && trace.OrigStatus != tlb.AccountActive
+	if contractDeployed {
+		b.ContractDeployments[trace.Account] = ContractDeployment{
+			success:        btx.success,
+			initInterfaces: initInterfaces,
+		}
+	}
+
 	for _, outMsg := range trace.OutMsgs {
 		b.ValueFlow.AddTons(trace.Account, -outMsg.Value)
 		aggregatedFee += outMsg.FwdFee

@@ -88,6 +88,7 @@ func FindTFNominatorAction(bubble *Bubble) bool {
 						// this is a send-excess transfer, let's eliminate it
 						amount -= tx.inputAmount
 						newBubble.ValueFlow.Merge(child.ValueFlow)
+						newBubble.MergeContractDeployments(child)
 						return &Merge{children: child.Children}
 					}
 					return nil
@@ -108,6 +109,7 @@ func FindTFNominatorAction(bubble *Bubble) bool {
 					// this is a send-excess transfer, let's eliminate it
 					amount -= tx.inputAmount
 					newBubble.ValueFlow.Merge(child.ValueFlow)
+					newBubble.MergeContractDeployments(child)
 					return &Merge{children: child.Children}
 				}
 				return nil
@@ -124,6 +126,7 @@ func FindTFNominatorAction(bubble *Bubble) bool {
 					// this is a send-excess transfer, let's eliminate it
 					amount -= tx.inputAmount
 					newBubble.ValueFlow.Merge(child.ValueFlow)
+					newBubble.MergeContractDeployments(child)
 					return &Merge{children: child.Children}
 				}
 				return nil

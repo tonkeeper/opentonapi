@@ -40,8 +40,9 @@ func FindDepositStake(bubble *Bubble) bool {
 		Staker: bubbleTx.inputFrom.Address,
 	}
 	newBubble := Bubble{
-		Accounts:  bubble.Accounts,
-		ValueFlow: bubble.ValueFlow,
+		Accounts:            bubble.Accounts,
+		ValueFlow:           bubble.ValueFlow,
+		ContractDeployments: bubble.ContractDeployments,
 	}
 	newBubble.Children = ProcessChildren(bubble.Children,
 		func(child *Bubble) *Merge {
@@ -54,6 +55,7 @@ func FindDepositStake(bubble *Bubble) bool {
 			}
 			stake.Success = true
 			newBubble.ValueFlow.Merge(child.ValueFlow)
+			newBubble.MergeContractDeployments(child)
 			return &Merge{children: child.Children}
 		})
 	newBubble.Info = stake
@@ -95,8 +97,9 @@ func FindRecoverStake(bubble *Bubble) bool {
 		Staker: bubbleTx.inputFrom.Address,
 	}
 	newBubble := Bubble{
-		Accounts:  bubble.Accounts,
-		ValueFlow: bubble.ValueFlow,
+		Accounts:            bubble.Accounts,
+		ValueFlow:           bubble.ValueFlow,
+		ContractDeployments: bubble.ContractDeployments,
 	}
 	newBubble.Children = ProcessChildren(bubble.Children,
 		func(child *Bubble) *Merge {
@@ -110,6 +113,7 @@ func FindRecoverStake(bubble *Bubble) bool {
 			recoverStake.Success = true
 			recoverStake.Amount = response.inputAmount
 			newBubble.ValueFlow.Merge(child.ValueFlow)
+			newBubble.MergeContractDeployments(child)
 			return &Merge{children: child.Children}
 		})
 	newBubble.Info = recoverStake
