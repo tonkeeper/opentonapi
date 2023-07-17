@@ -874,7 +874,6 @@ func (c *Client) GetAccountInfoByStateInit(ctx context.Context, request GetAccou
 	return result, nil
 }
 
-<<<<<<< HEAD
 // GetAccountSeqno invokes getAccountSeqno operation.
 //
 // Get account seqno.
@@ -883,16 +882,6 @@ func (c *Client) GetAccountInfoByStateInit(ctx context.Context, request GetAccou
 func (c *Client) GetAccountSeqno(ctx context.Context, params GetAccountSeqnoParams) (res GetAccountSeqnoRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getAccountSeqno"),
-=======
-// GetAccountStateLiteServer invokes getAccountStateLiteServer operation.
-//
-// Get account state.
-//
-// GET /v2/liteserver/get_account_state/{account_id}
-func (c *Client) GetAccountStateLiteServer(ctx context.Context, params GetAccountStateLiteServerParams) (res GetAccountStateLiteServerRes, err error) {
-	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("getAccountStateLiteServer"),
->>>>>>> create_raw_methods
 	}
 
 	// Run stopwatch.
@@ -906,11 +895,7 @@ func (c *Client) GetAccountStateLiteServer(ctx context.Context, params GetAccoun
 	c.requests.Add(ctx, 1, otelAttrs...)
 
 	// Start a span for this request.
-<<<<<<< HEAD
 	ctx, span := c.cfg.Tracer.Start(ctx, "GetAccountSeqno",
-=======
-	ctx, span := c.cfg.Tracer.Start(ctx, "GetAccountStateLiteServer",
->>>>>>> create_raw_methods
 		trace.WithAttributes(otelAttrs...),
 		clientSpanKind,
 	)
@@ -927,11 +912,7 @@ func (c *Client) GetAccountStateLiteServer(ctx context.Context, params GetAccoun
 
 	stage = "BuildURL"
 	u := uri.Clone(c.requestURL(ctx))
-<<<<<<< HEAD
 	u.Path += "/v2/wallet/"
-=======
-	u.Path += "/v2/liteserver/get_account_state/"
->>>>>>> create_raw_methods
 	{
 		// Encode "account_id" parameter.
 		e := uri.NewPathEncoder(uri.PathEncoderConfig{
@@ -946,10 +927,7 @@ func (c *Client) GetAccountStateLiteServer(ctx context.Context, params GetAccoun
 		}
 		u.Path += e.Result()
 	}
-<<<<<<< HEAD
 	u.Path += "/seqno"
-=======
->>>>>>> create_raw_methods
 
 	stage = "EncodeRequest"
 	r, err := ht.NewRequest(ctx, "GET", u, nil)
@@ -965,11 +943,83 @@ func (c *Client) GetAccountStateLiteServer(ctx context.Context, params GetAccoun
 	defer resp.Body.Close()
 
 	stage = "DecodeResponse"
-<<<<<<< HEAD
 	result, err := decodeGetAccountSeqnoResponse(resp)
-=======
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// GetAccountStateLiteServer invokes getAccountStateLiteServer operation.
+//
+// Get account state.
+//
+// GET /v2/liteserver/get_account_state/{account_id}
+func (c *Client) GetAccountStateLiteServer(ctx context.Context, params GetAccountStateLiteServerParams) (res GetAccountStateLiteServerRes, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("getAccountStateLiteServer"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, otelAttrs...)
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, "GetAccountStateLiteServer",
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, otelAttrs...)
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	u.Path += "/v2/liteserver/get_account_state/"
+	{
+		// Encode "account_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "account_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.AccountID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		u.Path += e.Result()
+	}
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u, nil)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
 	result, err := decodeGetAccountStateLiteServerResponse(resp)
->>>>>>> create_raw_methods
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -5047,7 +5097,6 @@ func (c *Client) GetTransaction(ctx context.Context, params GetTransactionParams
 	return result, nil
 }
 
-<<<<<<< HEAD
 // GetTransactionByMessageHash invokes getTransactionByMessageHash operation.
 //
 // Get transaction data by message hash.
@@ -5056,16 +5105,6 @@ func (c *Client) GetTransaction(ctx context.Context, params GetTransactionParams
 func (c *Client) GetTransactionByMessageHash(ctx context.Context, params GetTransactionByMessageHashParams) (res GetTransactionByMessageHashRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getTransactionByMessageHash"),
-=======
-// GetTransactionsLiteServer invokes getTransactionsLiteServer operation.
-//
-// Get transactions.
-//
-// GET /v2/liteserver/get_transactions/{account_id}
-func (c *Client) GetTransactionsLiteServer(ctx context.Context, params GetTransactionsLiteServerParams) (res GetTransactionsLiteServerRes, err error) {
-	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("getTransactionsLiteServer"),
->>>>>>> create_raw_methods
 	}
 
 	// Run stopwatch.
@@ -5079,11 +5118,7 @@ func (c *Client) GetTransactionsLiteServer(ctx context.Context, params GetTransa
 	c.requests.Add(ctx, 1, otelAttrs...)
 
 	// Start a span for this request.
-<<<<<<< HEAD
 	ctx, span := c.cfg.Tracer.Start(ctx, "GetTransactionByMessageHash",
-=======
-	ctx, span := c.cfg.Tracer.Start(ctx, "GetTransactionsLiteServer",
->>>>>>> create_raw_methods
 		trace.WithAttributes(otelAttrs...),
 		clientSpanKind,
 	)
@@ -5100,36 +5135,98 @@ func (c *Client) GetTransactionsLiteServer(ctx context.Context, params GetTransa
 
 	stage = "BuildURL"
 	u := uri.Clone(c.requestURL(ctx))
-<<<<<<< HEAD
 	u.Path += "/v2/blockchain/messages/"
 	{
 		// Encode "msg_id" parameter.
 		e := uri.NewPathEncoder(uri.PathEncoderConfig{
 			Param:   "msg_id",
-=======
-	u.Path += "/v2/liteserver/get_transactions/"
-	{
-		// Encode "account_id" parameter.
-		e := uri.NewPathEncoder(uri.PathEncoderConfig{
-			Param:   "account_id",
->>>>>>> create_raw_methods
 			Style:   uri.PathStyleSimple,
 			Explode: false,
 		})
 		if err := func() error {
-<<<<<<< HEAD
 			return e.EncodeValue(conv.StringToString(params.MsgID))
-=======
-			return e.EncodeValue(conv.StringToString(params.AccountID))
->>>>>>> create_raw_methods
 		}(); err != nil {
 			return res, errors.Wrap(err, "encode path")
 		}
 		u.Path += e.Result()
 	}
-<<<<<<< HEAD
 	u.Path += "/transaction"
-=======
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u, nil)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeGetTransactionByMessageHashResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// GetTransactionsLiteServer invokes getTransactionsLiteServer operation.
+//
+// Get transactions.
+//
+// GET /v2/liteserver/get_transactions/{account_id}
+func (c *Client) GetTransactionsLiteServer(ctx context.Context, params GetTransactionsLiteServerParams) (res GetTransactionsLiteServerRes, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("getTransactionsLiteServer"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, otelAttrs...)
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, "GetTransactionsLiteServer",
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, otelAttrs...)
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	u.Path += "/v2/liteserver/get_transactions/"
+	{
+		// Encode "account_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "account_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.AccountID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		u.Path += e.Result()
+	}
 
 	stage = "EncodeQueryParams"
 	q := uri.NewQueryEncoder()
@@ -5176,7 +5273,6 @@ func (c *Client) GetTransactionsLiteServer(ctx context.Context, params GetTransa
 		}
 	}
 	u.RawQuery = q.Values().Encode()
->>>>>>> create_raw_methods
 
 	stage = "EncodeRequest"
 	r, err := ht.NewRequest(ctx, "GET", u, nil)
@@ -5192,11 +5288,7 @@ func (c *Client) GetTransactionsLiteServer(ctx context.Context, params GetTransa
 	defer resp.Body.Close()
 
 	stage = "DecodeResponse"
-<<<<<<< HEAD
-	result, err := decodeGetTransactionByMessageHashResponse(resp)
-=======
 	result, err := decodeGetTransactionsLiteServerResponse(resp)
->>>>>>> create_raw_methods
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}

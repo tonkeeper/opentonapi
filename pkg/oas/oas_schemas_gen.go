@@ -1030,57 +1030,6 @@ func (s *BadRequest) SetError(val string) {
 	s.Error = val
 }
 
-<<<<<<< HEAD
-func (*BadRequest) dnsBackResolveRes()               {}
-func (*BadRequest) dnsInfoRes()                      {}
-func (*BadRequest) dnsResolveRes()                   {}
-func (*BadRequest) emulateMessageToAccountEventRes() {}
-func (*BadRequest) emulateMessageToEventRes()        {}
-func (*BadRequest) emulateMessageToTraceRes()        {}
-func (*BadRequest) emulateWalletMessageRes()         {}
-func (*BadRequest) execGetMethodRes()                {}
-func (*BadRequest) getAccountInfoByStateInitRes()    {}
-func (*BadRequest) getAccountRes()                   {}
-func (*BadRequest) getAccountSeqnoRes()              {}
-func (*BadRequest) getAccountTransactionsRes()       {}
-func (*BadRequest) getAccountsRes()                  {}
-func (*BadRequest) getBlockRes()                     {}
-func (*BadRequest) getBlockTransactionsRes()         {}
-func (*BadRequest) getDnsExpiringRes()               {}
-func (*BadRequest) getDomainBidsRes()                {}
-func (*BadRequest) getEventRes()                     {}
-func (*BadRequest) getEventsByAccountRes()           {}
-func (*BadRequest) getItemsFromCollectionRes()       {}
-func (*BadRequest) getJettonInfoRes()                {}
-func (*BadRequest) getJettonsBalancesRes()           {}
-func (*BadRequest) getJettonsHistoryByIDRes()        {}
-func (*BadRequest) getJettonsHistoryRes()            {}
-func (*BadRequest) getNftCollectionRes()             {}
-func (*BadRequest) getNftItemByAddressRes()          {}
-func (*BadRequest) getNftItemsByAddressesRes()       {}
-func (*BadRequest) getNftItemsByOwnerRes()           {}
-func (*BadRequest) getPublicKeyByAccountIDRes()      {}
-func (*BadRequest) getRatesRes()                     {}
-func (*BadRequest) getRawAccountRes()                {}
-func (*BadRequest) getSearchAccountsRes()            {}
-func (*BadRequest) getStorageProvidersRes()          {}
-func (*BadRequest) getSubscriptionsByAccountRes()    {}
-func (*BadRequest) getTonConnectPayloadRes()         {}
-func (*BadRequest) getTraceRes()                     {}
-func (*BadRequest) getTracesByAccountRes()           {}
-func (*BadRequest) getTransactionByMessageHashRes()  {}
-func (*BadRequest) getTransactionRes()               {}
-func (*BadRequest) getWalletBackupRes()              {}
-func (*BadRequest) getWalletsByPublicKeyRes()        {}
-func (*BadRequest) poolsByNominatorsRes()            {}
-func (*BadRequest) reindexAccountRes()               {}
-func (*BadRequest) sendMessageRes()                  {}
-func (*BadRequest) setWalletBackupRes()              {}
-func (*BadRequest) stakingPoolHistoryRes()           {}
-func (*BadRequest) stakingPoolInfoRes()              {}
-func (*BadRequest) stakingPoolsRes()                 {}
-func (*BadRequest) tonConnectProofRes()              {}
-=======
 func (*BadRequest) dnsBackResolveRes()                     {}
 func (*BadRequest) dnsInfoRes()                            {}
 func (*BadRequest) dnsResolveRes()                         {}
@@ -1091,6 +1040,7 @@ func (*BadRequest) emulateWalletMessageRes()               {}
 func (*BadRequest) execGetMethodRes()                      {}
 func (*BadRequest) getAccountInfoByStateInitRes()          {}
 func (*BadRequest) getAccountRes()                         {}
+func (*BadRequest) getAccountSeqnoRes()                    {}
 func (*BadRequest) getAccountStateLiteServerRes()          {}
 func (*BadRequest) getAccountTransactionsRes()             {}
 func (*BadRequest) getAccountsRes()                        {}
@@ -1130,18 +1080,20 @@ func (*BadRequest) getTimeLiteServerRes()                  {}
 func (*BadRequest) getTonConnectPayloadRes()               {}
 func (*BadRequest) getTraceRes()                           {}
 func (*BadRequest) getTracesByAccountRes()                 {}
+func (*BadRequest) getTransactionByMessageHashRes()        {}
 func (*BadRequest) getTransactionRes()                     {}
 func (*BadRequest) getTransactionsLiteServerRes()          {}
 func (*BadRequest) getWalletBackupRes()                    {}
+func (*BadRequest) getWalletsByPublicKeyRes()              {}
 func (*BadRequest) poolsByNominatorsRes()                  {}
 func (*BadRequest) reindexAccountRes()                     {}
 func (*BadRequest) sendMessageLiteServerRes()              {}
 func (*BadRequest) sendMessageRes()                        {}
 func (*BadRequest) setWalletBackupRes()                    {}
+func (*BadRequest) stakingPoolHistoryRes()                 {}
 func (*BadRequest) stakingPoolInfoRes()                    {}
 func (*BadRequest) stakingPoolsRes()                       {}
 func (*BadRequest) tonConnectProofRes()                    {}
->>>>>>> create_raw_methods
 
 // Ref: #/components/schemas/Block
 type Block struct {
@@ -2205,82 +2157,6 @@ func (s *Event) SetInProgress(val bool) {
 func (*Event) emulateMessageToEventRes() {}
 func (*Event) getEventRes()              {}
 
-<<<<<<< HEAD
-// Ref: #/components/schemas/FoundAccounts
-type FoundAccounts struct {
-	Addresses []FoundAccountsAddressesItem `json:"addresses"`
-=======
-// Ref: #/components/schemas/Fee
-type Fee struct {
-	Account AccountAddress `json:"account"`
-	// Gas + rent + deposit - refund.
-	Total   int64 `json:"total"`
-	Gas     int64 `json:"gas"`
-	Rent    int64 `json:"rent"`
-	Deposit int64 `json:"deposit"`
-	Refund  int64 `json:"refund"`
-}
-
-// GetAccount returns the value of Account.
-func (s Fee) GetAccount() AccountAddress {
-	return s.Account
-}
-
-// GetTotal returns the value of Total.
-func (s Fee) GetTotal() int64 {
-	return s.Total
-}
-
-// GetGas returns the value of Gas.
-func (s Fee) GetGas() int64 {
-	return s.Gas
-}
-
-// GetRent returns the value of Rent.
-func (s Fee) GetRent() int64 {
-	return s.Rent
-}
-
-// GetDeposit returns the value of Deposit.
-func (s Fee) GetDeposit() int64 {
-	return s.Deposit
-}
-
-// GetRefund returns the value of Refund.
-func (s Fee) GetRefund() int64 {
-	return s.Refund
-}
-
-// SetAccount sets the value of Account.
-func (s *Fee) SetAccount(val AccountAddress) {
-	s.Account = val
-}
-
-// SetTotal sets the value of Total.
-func (s *Fee) SetTotal(val int64) {
-	s.Total = val
-}
-
-// SetGas sets the value of Gas.
-func (s *Fee) SetGas(val int64) {
-	s.Gas = val
-}
-
-// SetRent sets the value of Rent.
-func (s *Fee) SetRent(val int64) {
-	s.Rent = val
-}
-
-// SetDeposit sets the value of Deposit.
-func (s *Fee) SetDeposit(val int64) {
-	s.Deposit = val
-}
-
-// SetRefund sets the value of Refund.
-func (s *Fee) SetRefund(val int64) {
-	s.Refund = val
-}
-
 // Ref: #/components/schemas/FoundAccounts
 type FoundAccounts struct {
 	Addresses []FoundAccountsAddressesItem `json:"addresses"`
@@ -3002,7 +2878,6 @@ func (s *GetMasterchainInfoExtLiteServerOK) SetMode(val uint32) {
 // SetVersion sets the value of Version.
 func (s *GetMasterchainInfoExtLiteServerOK) SetVersion(val uint32) {
 	s.Version = val
->>>>>>> create_raw_methods
 }
 
 // SetCapabilities sets the value of Capabilities.
@@ -3439,63 +3314,6 @@ func (s *InternalError) SetError(val string) {
 	s.Error = val
 }
 
-<<<<<<< HEAD
-func (*InternalError) dnsBackResolveRes()               {}
-func (*InternalError) dnsInfoRes()                      {}
-func (*InternalError) dnsResolveRes()                   {}
-func (*InternalError) emulateMessageToAccountEventRes() {}
-func (*InternalError) emulateMessageToEventRes()        {}
-func (*InternalError) emulateMessageToTraceRes()        {}
-func (*InternalError) emulateWalletMessageRes()         {}
-func (*InternalError) execGetMethodRes()                {}
-func (*InternalError) getAccountInfoByStateInitRes()    {}
-func (*InternalError) getAccountRes()                   {}
-func (*InternalError) getAccountSeqnoRes()              {}
-func (*InternalError) getAccountTransactionsRes()       {}
-func (*InternalError) getAccountsRes()                  {}
-func (*InternalError) getAllAuctionsRes()               {}
-func (*InternalError) getBlockRes()                     {}
-func (*InternalError) getBlockTransactionsRes()         {}
-func (*InternalError) getConfigRes()                    {}
-func (*InternalError) getDnsExpiringRes()               {}
-func (*InternalError) getDomainBidsRes()                {}
-func (*InternalError) getEventRes()                     {}
-func (*InternalError) getEventsByAccountRes()           {}
-func (*InternalError) getItemsFromCollectionRes()       {}
-func (*InternalError) getJettonInfoRes()                {}
-func (*InternalError) getJettonsBalancesRes()           {}
-func (*InternalError) getJettonsHistoryByIDRes()        {}
-func (*InternalError) getJettonsHistoryRes()            {}
-func (*InternalError) getJettonsRes()                   {}
-func (*InternalError) getMasterchainHeadRes()           {}
-func (*InternalError) getNftCollectionRes()             {}
-func (*InternalError) getNftCollectionsRes()            {}
-func (*InternalError) getNftItemByAddressRes()          {}
-func (*InternalError) getNftItemsByAddressesRes()       {}
-func (*InternalError) getNftItemsByOwnerRes()           {}
-func (*InternalError) getPublicKeyByAccountIDRes()      {}
-func (*InternalError) getRatesRes()                     {}
-func (*InternalError) getRawAccountRes()                {}
-func (*InternalError) getSearchAccountsRes()            {}
-func (*InternalError) getStorageProvidersRes()          {}
-func (*InternalError) getSubscriptionsByAccountRes()    {}
-func (*InternalError) getTonConnectPayloadRes()         {}
-func (*InternalError) getTraceRes()                     {}
-func (*InternalError) getTracesByAccountRes()           {}
-func (*InternalError) getTransactionByMessageHashRes()  {}
-func (*InternalError) getTransactionRes()               {}
-func (*InternalError) getValidatorsRes()                {}
-func (*InternalError) getWalletBackupRes()              {}
-func (*InternalError) getWalletsByPublicKeyRes()        {}
-func (*InternalError) poolsByNominatorsRes()            {}
-func (*InternalError) reindexAccountRes()               {}
-func (*InternalError) sendMessageRes()                  {}
-func (*InternalError) setWalletBackupRes()              {}
-func (*InternalError) stakingPoolHistoryRes()           {}
-func (*InternalError) stakingPoolInfoRes()              {}
-func (*InternalError) stakingPoolsRes()                 {}
-func (*InternalError) tonConnectProofRes()              {}
-=======
 func (*InternalError) dnsBackResolveRes()                     {}
 func (*InternalError) dnsInfoRes()                            {}
 func (*InternalError) dnsResolveRes()                         {}
@@ -3506,6 +3324,7 @@ func (*InternalError) emulateWalletMessageRes()               {}
 func (*InternalError) execGetMethodRes()                      {}
 func (*InternalError) getAccountInfoByStateInitRes()          {}
 func (*InternalError) getAccountRes()                         {}
+func (*InternalError) getAccountSeqnoRes()                    {}
 func (*InternalError) getAccountStateLiteServerRes()          {}
 func (*InternalError) getAccountTransactionsRes()             {}
 func (*InternalError) getAccountsRes()                        {}
@@ -3527,6 +3346,7 @@ func (*InternalError) getJettonInfoRes()                      {}
 func (*InternalError) getJettonsBalancesRes()                 {}
 func (*InternalError) getJettonsHistoryByIDRes()              {}
 func (*InternalError) getJettonsHistoryRes()                  {}
+func (*InternalError) getJettonsRes()                         {}
 func (*InternalError) getListBlockTransactionsLiteServerRes() {}
 func (*InternalError) getMasterchainHeadRes()                 {}
 func (*InternalError) getMasterchainInfoExtLiteServerRes()    {}
@@ -3549,19 +3369,21 @@ func (*InternalError) getTimeLiteServerRes()                  {}
 func (*InternalError) getTonConnectPayloadRes()               {}
 func (*InternalError) getTraceRes()                           {}
 func (*InternalError) getTracesByAccountRes()                 {}
+func (*InternalError) getTransactionByMessageHashRes()        {}
 func (*InternalError) getTransactionRes()                     {}
 func (*InternalError) getTransactionsLiteServerRes()          {}
 func (*InternalError) getValidatorsRes()                      {}
 func (*InternalError) getWalletBackupRes()                    {}
+func (*InternalError) getWalletsByPublicKeyRes()              {}
 func (*InternalError) poolsByNominatorsRes()                  {}
 func (*InternalError) reindexAccountRes()                     {}
 func (*InternalError) sendMessageLiteServerRes()              {}
 func (*InternalError) sendMessageRes()                        {}
 func (*InternalError) setWalletBackupRes()                    {}
+func (*InternalError) stakingPoolHistoryRes()                 {}
 func (*InternalError) stakingPoolInfoRes()                    {}
 func (*InternalError) stakingPoolsRes()                       {}
 func (*InternalError) tonConnectProofRes()                    {}
->>>>>>> create_raw_methods
 
 // Ref: #/components/schemas/JettonBalance
 type JettonBalance struct {
@@ -8276,63 +8098,6 @@ func (s *UnauthorizedError) SetError(val string) {
 	s.Error = val
 }
 
-<<<<<<< HEAD
-func (*UnauthorizedError) dnsBackResolveRes()               {}
-func (*UnauthorizedError) dnsInfoRes()                      {}
-func (*UnauthorizedError) dnsResolveRes()                   {}
-func (*UnauthorizedError) emulateMessageToAccountEventRes() {}
-func (*UnauthorizedError) emulateMessageToEventRes()        {}
-func (*UnauthorizedError) emulateMessageToTraceRes()        {}
-func (*UnauthorizedError) emulateWalletMessageRes()         {}
-func (*UnauthorizedError) execGetMethodRes()                {}
-func (*UnauthorizedError) getAccountInfoByStateInitRes()    {}
-func (*UnauthorizedError) getAccountRes()                   {}
-func (*UnauthorizedError) getAccountSeqnoRes()              {}
-func (*UnauthorizedError) getAccountTransactionsRes()       {}
-func (*UnauthorizedError) getAccountsRes()                  {}
-func (*UnauthorizedError) getAllAuctionsRes()               {}
-func (*UnauthorizedError) getBlockRes()                     {}
-func (*UnauthorizedError) getBlockTransactionsRes()         {}
-func (*UnauthorizedError) getConfigRes()                    {}
-func (*UnauthorizedError) getDnsExpiringRes()               {}
-func (*UnauthorizedError) getDomainBidsRes()                {}
-func (*UnauthorizedError) getEventRes()                     {}
-func (*UnauthorizedError) getEventsByAccountRes()           {}
-func (*UnauthorizedError) getItemsFromCollectionRes()       {}
-func (*UnauthorizedError) getJettonInfoRes()                {}
-func (*UnauthorizedError) getJettonsBalancesRes()           {}
-func (*UnauthorizedError) getJettonsHistoryByIDRes()        {}
-func (*UnauthorizedError) getJettonsHistoryRes()            {}
-func (*UnauthorizedError) getJettonsRes()                   {}
-func (*UnauthorizedError) getMasterchainHeadRes()           {}
-func (*UnauthorizedError) getNftCollectionRes()             {}
-func (*UnauthorizedError) getNftCollectionsRes()            {}
-func (*UnauthorizedError) getNftItemByAddressRes()          {}
-func (*UnauthorizedError) getNftItemsByAddressesRes()       {}
-func (*UnauthorizedError) getNftItemsByOwnerRes()           {}
-func (*UnauthorizedError) getPublicKeyByAccountIDRes()      {}
-func (*UnauthorizedError) getRatesRes()                     {}
-func (*UnauthorizedError) getRawAccountRes()                {}
-func (*UnauthorizedError) getSearchAccountsRes()            {}
-func (*UnauthorizedError) getStorageProvidersRes()          {}
-func (*UnauthorizedError) getSubscriptionsByAccountRes()    {}
-func (*UnauthorizedError) getTonConnectPayloadRes()         {}
-func (*UnauthorizedError) getTraceRes()                     {}
-func (*UnauthorizedError) getTracesByAccountRes()           {}
-func (*UnauthorizedError) getTransactionByMessageHashRes()  {}
-func (*UnauthorizedError) getTransactionRes()               {}
-func (*UnauthorizedError) getValidatorsRes()                {}
-func (*UnauthorizedError) getWalletBackupRes()              {}
-func (*UnauthorizedError) getWalletsByPublicKeyRes()        {}
-func (*UnauthorizedError) poolsByNominatorsRes()            {}
-func (*UnauthorizedError) reindexAccountRes()               {}
-func (*UnauthorizedError) sendMessageRes()                  {}
-func (*UnauthorizedError) setWalletBackupRes()              {}
-func (*UnauthorizedError) stakingPoolHistoryRes()           {}
-func (*UnauthorizedError) stakingPoolInfoRes()              {}
-func (*UnauthorizedError) stakingPoolsRes()                 {}
-func (*UnauthorizedError) tonConnectProofRes()              {}
-=======
 func (*UnauthorizedError) dnsBackResolveRes()                     {}
 func (*UnauthorizedError) dnsInfoRes()                            {}
 func (*UnauthorizedError) dnsResolveRes()                         {}
@@ -8343,6 +8108,7 @@ func (*UnauthorizedError) emulateWalletMessageRes()               {}
 func (*UnauthorizedError) execGetMethodRes()                      {}
 func (*UnauthorizedError) getAccountInfoByStateInitRes()          {}
 func (*UnauthorizedError) getAccountRes()                         {}
+func (*UnauthorizedError) getAccountSeqnoRes()                    {}
 func (*UnauthorizedError) getAccountStateLiteServerRes()          {}
 func (*UnauthorizedError) getAccountTransactionsRes()             {}
 func (*UnauthorizedError) getAccountsRes()                        {}
@@ -8364,6 +8130,7 @@ func (*UnauthorizedError) getJettonInfoRes()                      {}
 func (*UnauthorizedError) getJettonsBalancesRes()                 {}
 func (*UnauthorizedError) getJettonsHistoryByIDRes()              {}
 func (*UnauthorizedError) getJettonsHistoryRes()                  {}
+func (*UnauthorizedError) getJettonsRes()                         {}
 func (*UnauthorizedError) getListBlockTransactionsLiteServerRes() {}
 func (*UnauthorizedError) getMasterchainHeadRes()                 {}
 func (*UnauthorizedError) getMasterchainInfoExtLiteServerRes()    {}
@@ -8386,19 +8153,21 @@ func (*UnauthorizedError) getTimeLiteServerRes()                  {}
 func (*UnauthorizedError) getTonConnectPayloadRes()               {}
 func (*UnauthorizedError) getTraceRes()                           {}
 func (*UnauthorizedError) getTracesByAccountRes()                 {}
+func (*UnauthorizedError) getTransactionByMessageHashRes()        {}
 func (*UnauthorizedError) getTransactionRes()                     {}
 func (*UnauthorizedError) getTransactionsLiteServerRes()          {}
 func (*UnauthorizedError) getValidatorsRes()                      {}
 func (*UnauthorizedError) getWalletBackupRes()                    {}
+func (*UnauthorizedError) getWalletsByPublicKeyRes()              {}
 func (*UnauthorizedError) poolsByNominatorsRes()                  {}
 func (*UnauthorizedError) reindexAccountRes()                     {}
 func (*UnauthorizedError) sendMessageLiteServerRes()              {}
 func (*UnauthorizedError) sendMessageRes()                        {}
 func (*UnauthorizedError) setWalletBackupRes()                    {}
+func (*UnauthorizedError) stakingPoolHistoryRes()                 {}
 func (*UnauthorizedError) stakingPoolInfoRes()                    {}
 func (*UnauthorizedError) stakingPoolsRes()                       {}
 func (*UnauthorizedError) tonConnectProofRes()                    {}
->>>>>>> create_raw_methods
 
 // Ref: #/components/schemas/Validator
 type Validator struct {

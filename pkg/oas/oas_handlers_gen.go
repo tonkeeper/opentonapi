@@ -1063,7 +1063,6 @@ func (s *Server) handleGetAccountInfoByStateInitRequest(args [0]string, w http.R
 	}
 }
 
-<<<<<<< HEAD
 // handleGetAccountSeqnoRequest handles getAccountSeqno operation.
 //
 // Get account seqno.
@@ -1076,20 +1075,6 @@ func (s *Server) handleGetAccountSeqnoRequest(args [1]string, w http.ResponseWri
 
 	// Start a span for this request.
 	ctx, span := s.cfg.Tracer.Start(r.Context(), "GetAccountSeqno",
-=======
-// handleGetAccountStateLiteServerRequest handles getAccountStateLiteServer operation.
-//
-// Get account state.
-//
-// GET /v2/liteserver/get_account_state/{account_id}
-func (s *Server) handleGetAccountStateLiteServerRequest(args [1]string, w http.ResponseWriter, r *http.Request) {
-	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("getAccountStateLiteServer"),
-	}
-
-	// Start a span for this request.
-	ctx, span := s.cfg.Tracer.Start(r.Context(), "GetAccountStateLiteServer",
->>>>>>> create_raw_methods
 		trace.WithAttributes(otelAttrs...),
 		serverSpanKind,
 	)
@@ -1113,19 +1098,11 @@ func (s *Server) handleGetAccountStateLiteServerRequest(args [1]string, w http.R
 		}
 		err          error
 		opErrContext = ogenerrors.OperationContext{
-<<<<<<< HEAD
 			Name: "GetAccountSeqno",
 			ID:   "getAccountSeqno",
 		}
 	)
 	params, err := decodeGetAccountSeqnoParams(args, r)
-=======
-			Name: "GetAccountStateLiteServer",
-			ID:   "getAccountStateLiteServer",
-		}
-	)
-	params, err := decodeGetAccountStateLiteServerParams(args, r)
->>>>>>> create_raw_methods
 	if err != nil {
 		err = &ogenerrors.DecodeParamsError{
 			OperationContext: opErrContext,
@@ -1136,21 +1113,12 @@ func (s *Server) handleGetAccountStateLiteServerRequest(args [1]string, w http.R
 		return
 	}
 
-<<<<<<< HEAD
 	var response GetAccountSeqnoRes
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:       ctx,
 			OperationName: "GetAccountSeqno",
 			OperationID:   "getAccountSeqno",
-=======
-	var response GetAccountStateLiteServerRes
-	if m := s.cfg.Middleware; m != nil {
-		mreq := middleware.Request{
-			Context:       ctx,
-			OperationName: "GetAccountStateLiteServer",
-			OperationID:   "getAccountStateLiteServer",
->>>>>>> create_raw_methods
 			Body:          nil,
 			Params: middleware.Parameters{
 				{
@@ -1163,13 +1131,8 @@ func (s *Server) handleGetAccountStateLiteServerRequest(args [1]string, w http.R
 
 		type (
 			Request  = struct{}
-<<<<<<< HEAD
 			Params   = GetAccountSeqnoParams
 			Response = GetAccountSeqnoRes
-=======
-			Params   = GetAccountStateLiteServerParams
-			Response = GetAccountStateLiteServerRes
->>>>>>> create_raw_methods
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -1178,7 +1141,6 @@ func (s *Server) handleGetAccountStateLiteServerRequest(args [1]string, w http.R
 		](
 			m,
 			mreq,
-<<<<<<< HEAD
 			unpackGetAccountSeqnoParams,
 			func(ctx context.Context, request Request, params Params) (Response, error) {
 				return s.h.GetAccountSeqno(ctx, params)
@@ -1186,15 +1148,6 @@ func (s *Server) handleGetAccountStateLiteServerRequest(args [1]string, w http.R
 		)
 	} else {
 		response, err = s.h.GetAccountSeqno(ctx, params)
-=======
-			unpackGetAccountStateLiteServerParams,
-			func(ctx context.Context, request Request, params Params) (Response, error) {
-				return s.h.GetAccountStateLiteServer(ctx, params)
-			},
-		)
-	} else {
-		response, err = s.h.GetAccountStateLiteServer(ctx, params)
->>>>>>> create_raw_methods
 	}
 	if err != nil {
 		recordError("Internal", err)
@@ -1202,11 +1155,106 @@ func (s *Server) handleGetAccountStateLiteServerRequest(args [1]string, w http.R
 		return
 	}
 
-<<<<<<< HEAD
 	if err := encodeGetAccountSeqnoResponse(response, w, span); err != nil {
-=======
+		recordError("EncodeResponse", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+}
+
+// handleGetAccountStateLiteServerRequest handles getAccountStateLiteServer operation.
+//
+// Get account state.
+//
+// GET /v2/liteserver/get_account_state/{account_id}
+func (s *Server) handleGetAccountStateLiteServerRequest(args [1]string, w http.ResponseWriter, r *http.Request) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("getAccountStateLiteServer"),
+	}
+
+	// Start a span for this request.
+	ctx, span := s.cfg.Tracer.Start(r.Context(), "GetAccountStateLiteServer",
+		trace.WithAttributes(otelAttrs...),
+		serverSpanKind,
+	)
+	defer span.End()
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		elapsedDuration := time.Since(startTime)
+		s.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+	}()
+
+	// Increment request counter.
+	s.requests.Add(ctx, 1, otelAttrs...)
+
+	var (
+		recordError = func(stage string, err error) {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			s.errors.Add(ctx, 1, otelAttrs...)
+		}
+		err          error
+		opErrContext = ogenerrors.OperationContext{
+			Name: "GetAccountStateLiteServer",
+			ID:   "getAccountStateLiteServer",
+		}
+	)
+	params, err := decodeGetAccountStateLiteServerParams(args, r)
+	if err != nil {
+		err = &ogenerrors.DecodeParamsError{
+			OperationContext: opErrContext,
+			Err:              err,
+		}
+		recordError("DecodeParams", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+
+	var response GetAccountStateLiteServerRes
+	if m := s.cfg.Middleware; m != nil {
+		mreq := middleware.Request{
+			Context:       ctx,
+			OperationName: "GetAccountStateLiteServer",
+			OperationID:   "getAccountStateLiteServer",
+			Body:          nil,
+			Params: middleware.Parameters{
+				{
+					Name: "account_id",
+					In:   "path",
+				}: params.AccountID,
+			},
+			Raw: r,
+		}
+
+		type (
+			Request  = struct{}
+			Params   = GetAccountStateLiteServerParams
+			Response = GetAccountStateLiteServerRes
+		)
+		response, err = middleware.HookMiddleware[
+			Request,
+			Params,
+			Response,
+		](
+			m,
+			mreq,
+			unpackGetAccountStateLiteServerParams,
+			func(ctx context.Context, request Request, params Params) (Response, error) {
+				return s.h.GetAccountStateLiteServer(ctx, params)
+			},
+		)
+	} else {
+		response, err = s.h.GetAccountStateLiteServer(ctx, params)
+	}
+	if err != nil {
+		recordError("Internal", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+
 	if err := encodeGetAccountStateLiteServerResponse(response, w, span); err != nil {
->>>>>>> create_raw_methods
 		recordError("EncodeResponse", err)
 		s.cfg.ErrorHandler(ctx, w, r, err)
 		return
@@ -2171,42 +2219,8 @@ func (s *Server) handleGetConfigRequest(args [0]string, w http.ResponseWriter, r
 			OperationName: "GetConfig",
 			OperationID:   "getConfig",
 			Body:          nil,
-<<<<<<< HEAD
-			Params: middleware.Parameters{
-				{
-					Name: "account_id",
-					In:   "path",
-				}: params.AccountID,
-				{
-					Name: "Accept-Language",
-					In:   "header",
-				}: params.AcceptLanguage,
-				{
-					Name: "subject_only",
-					In:   "query",
-				}: params.SubjectOnly,
-				{
-					Name: "before_lt",
-					In:   "query",
-				}: params.BeforeLt,
-				{
-					Name: "limit",
-					In:   "query",
-				}: params.Limit,
-				{
-					Name: "start_date",
-					In:   "query",
-				}: params.StartDate,
-				{
-					Name: "end_date",
-					In:   "query",
-				}: params.EndDate,
-			},
-			Raw: r,
-=======
 			Params:        middleware.Parameters{},
 			Raw:           r,
->>>>>>> create_raw_methods
 		}
 
 		type (
@@ -2448,114 +2462,7 @@ func (s *Server) handleGetDnsExpiringRequest(args [1]string, w http.ResponseWrit
 	}
 }
 
-<<<<<<< HEAD
-// handleGetJettonsRequest handles getJettons operation.
-//
-// Get a list of all indexed jetton masters in the blockchain.
-//
-// GET /v2/jettons
-func (s *Server) handleGetJettonsRequest(args [0]string, w http.ResponseWriter, r *http.Request) {
-	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("getJettons"),
-	}
-
-	// Start a span for this request.
-	ctx, span := s.cfg.Tracer.Start(r.Context(), "GetJettons",
-		trace.WithAttributes(otelAttrs...),
-		serverSpanKind,
-	)
-	defer span.End()
-
-	// Run stopwatch.
-	startTime := time.Now()
-	defer func() {
-		elapsedDuration := time.Since(startTime)
-		s.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
-	}()
-
-	// Increment request counter.
-	s.requests.Add(ctx, 1, otelAttrs...)
-
-	var (
-		recordError = func(stage string, err error) {
-			span.RecordError(err)
-			span.SetStatus(codes.Error, stage)
-			s.errors.Add(ctx, 1, otelAttrs...)
-		}
-		err          error
-		opErrContext = ogenerrors.OperationContext{
-			Name: "GetJettons",
-			ID:   "getJettons",
-		}
-	)
-	params, err := decodeGetJettonsParams(args, r)
-	if err != nil {
-		err = &ogenerrors.DecodeParamsError{
-			OperationContext: opErrContext,
-			Err:              err,
-		}
-		recordError("DecodeParams", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
-		return
-	}
-
-	var response GetJettonsRes
-	if m := s.cfg.Middleware; m != nil {
-		mreq := middleware.Request{
-			Context:       ctx,
-			OperationName: "GetJettons",
-			OperationID:   "getJettons",
-			Body:          nil,
-			Params: middleware.Parameters{
-				{
-					Name: "limit",
-					In:   "query",
-				}: params.Limit,
-				{
-					Name: "offset",
-					In:   "query",
-				}: params.Offset,
-			},
-			Raw: r,
-		}
-
-		type (
-			Request  = struct{}
-			Params   = GetJettonsParams
-			Response = GetJettonsRes
-		)
-		response, err = middleware.HookMiddleware[
-			Request,
-			Params,
-			Response,
-		](
-			m,
-			mreq,
-			unpackGetJettonsParams,
-			func(ctx context.Context, request Request, params Params) (Response, error) {
-				return s.h.GetJettons(ctx, params)
-			},
-		)
-	} else {
-		response, err = s.h.GetJettons(ctx, params)
-	}
-	if err != nil {
-		recordError("Internal", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
-		return
-	}
-
-	if err := encodeGetJettonsResponse(response, w, span); err != nil {
-		recordError("EncodeResponse", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
-		return
-	}
-}
-
-// handleGetJettonsBalancesRequest handles getJettonsBalances operation.
-=======
 // handleGetDomainBidsRequest handles getDomainBids operation.
->>>>>>> create_raw_methods
 //
 // Get domain bids.
 //
@@ -2833,6 +2740,10 @@ func (s *Server) handleGetEventsByAccountRequest(args [1]string, w http.Response
 					In:   "header",
 				}: params.AcceptLanguage,
 				{
+					Name: "subject_only",
+					In:   "query",
+				}: params.SubjectOnly,
+				{
 					Name: "before_lt",
 					In:   "query",
 				}: params.BeforeLt,
@@ -3085,6 +2996,109 @@ func (s *Server) handleGetJettonInfoRequest(args [1]string, w http.ResponseWrite
 	}
 
 	if err := encodeGetJettonInfoResponse(response, w, span); err != nil {
+		recordError("EncodeResponse", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+}
+
+// handleGetJettonsRequest handles getJettons operation.
+//
+// Get a list of all indexed jetton masters in the blockchain.
+//
+// GET /v2/jettons
+func (s *Server) handleGetJettonsRequest(args [0]string, w http.ResponseWriter, r *http.Request) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("getJettons"),
+	}
+
+	// Start a span for this request.
+	ctx, span := s.cfg.Tracer.Start(r.Context(), "GetJettons",
+		trace.WithAttributes(otelAttrs...),
+		serverSpanKind,
+	)
+	defer span.End()
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		elapsedDuration := time.Since(startTime)
+		s.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+	}()
+
+	// Increment request counter.
+	s.requests.Add(ctx, 1, otelAttrs...)
+
+	var (
+		recordError = func(stage string, err error) {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			s.errors.Add(ctx, 1, otelAttrs...)
+		}
+		err          error
+		opErrContext = ogenerrors.OperationContext{
+			Name: "GetJettons",
+			ID:   "getJettons",
+		}
+	)
+	params, err := decodeGetJettonsParams(args, r)
+	if err != nil {
+		err = &ogenerrors.DecodeParamsError{
+			OperationContext: opErrContext,
+			Err:              err,
+		}
+		recordError("DecodeParams", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+
+	var response GetJettonsRes
+	if m := s.cfg.Middleware; m != nil {
+		mreq := middleware.Request{
+			Context:       ctx,
+			OperationName: "GetJettons",
+			OperationID:   "getJettons",
+			Body:          nil,
+			Params: middleware.Parameters{
+				{
+					Name: "limit",
+					In:   "query",
+				}: params.Limit,
+				{
+					Name: "offset",
+					In:   "query",
+				}: params.Offset,
+			},
+			Raw: r,
+		}
+
+		type (
+			Request  = struct{}
+			Params   = GetJettonsParams
+			Response = GetJettonsRes
+		)
+		response, err = middleware.HookMiddleware[
+			Request,
+			Params,
+			Response,
+		](
+			m,
+			mreq,
+			unpackGetJettonsParams,
+			func(ctx context.Context, request Request, params Params) (Response, error) {
+				return s.h.GetJettons(ctx, params)
+			},
+		)
+	} else {
+		response, err = s.h.GetJettons(ctx, params)
+	}
+	if err != nil {
+		recordError("Internal", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+
+	if err := encodeGetJettonsResponse(response, w, span); err != nil {
 		recordError("EncodeResponse", err)
 		s.cfg.ErrorHandler(ctx, w, r, err)
 		return
@@ -5670,7 +5684,6 @@ func (s *Server) handleGetTransactionRequest(args [1]string, w http.ResponseWrit
 	}
 }
 
-<<<<<<< HEAD
 // handleGetTransactionByMessageHashRequest handles getTransactionByMessageHash operation.
 //
 // Get transaction data by message hash.
@@ -5683,20 +5696,6 @@ func (s *Server) handleGetTransactionByMessageHashRequest(args [1]string, w http
 
 	// Start a span for this request.
 	ctx, span := s.cfg.Tracer.Start(r.Context(), "GetTransactionByMessageHash",
-=======
-// handleGetTransactionsLiteServerRequest handles getTransactionsLiteServer operation.
-//
-// Get transactions.
-//
-// GET /v2/liteserver/get_transactions/{account_id}
-func (s *Server) handleGetTransactionsLiteServerRequest(args [1]string, w http.ResponseWriter, r *http.Request) {
-	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("getTransactionsLiteServer"),
-	}
-
-	// Start a span for this request.
-	ctx, span := s.cfg.Tracer.Start(r.Context(), "GetTransactionsLiteServer",
->>>>>>> create_raw_methods
 		trace.WithAttributes(otelAttrs...),
 		serverSpanKind,
 	)
@@ -5720,19 +5719,11 @@ func (s *Server) handleGetTransactionsLiteServerRequest(args [1]string, w http.R
 		}
 		err          error
 		opErrContext = ogenerrors.OperationContext{
-<<<<<<< HEAD
 			Name: "GetTransactionByMessageHash",
 			ID:   "getTransactionByMessageHash",
 		}
 	)
 	params, err := decodeGetTransactionByMessageHashParams(args, r)
-=======
-			Name: "GetTransactionsLiteServer",
-			ID:   "getTransactionsLiteServer",
-		}
-	)
-	params, err := decodeGetTransactionsLiteServerParams(args, r)
->>>>>>> create_raw_methods
 	if err != nil {
 		err = &ogenerrors.DecodeParamsError{
 			OperationContext: opErrContext,
@@ -5743,7 +5734,6 @@ func (s *Server) handleGetTransactionsLiteServerRequest(args [1]string, w http.R
 		return
 	}
 
-<<<<<<< HEAD
 	var response GetTransactionByMessageHashRes
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
@@ -5756,7 +5746,93 @@ func (s *Server) handleGetTransactionsLiteServerRequest(args [1]string, w http.R
 					Name: "msg_id",
 					In:   "path",
 				}: params.MsgID,
-=======
+			},
+			Raw: r,
+		}
+
+		type (
+			Request  = struct{}
+			Params   = GetTransactionByMessageHashParams
+			Response = GetTransactionByMessageHashRes
+		)
+		response, err = middleware.HookMiddleware[
+			Request,
+			Params,
+			Response,
+		](
+			m,
+			mreq,
+			unpackGetTransactionByMessageHashParams,
+			func(ctx context.Context, request Request, params Params) (Response, error) {
+				return s.h.GetTransactionByMessageHash(ctx, params)
+			},
+		)
+	} else {
+		response, err = s.h.GetTransactionByMessageHash(ctx, params)
+	}
+	if err != nil {
+		recordError("Internal", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+
+	if err := encodeGetTransactionByMessageHashResponse(response, w, span); err != nil {
+		recordError("EncodeResponse", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+}
+
+// handleGetTransactionsLiteServerRequest handles getTransactionsLiteServer operation.
+//
+// Get transactions.
+//
+// GET /v2/liteserver/get_transactions/{account_id}
+func (s *Server) handleGetTransactionsLiteServerRequest(args [1]string, w http.ResponseWriter, r *http.Request) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("getTransactionsLiteServer"),
+	}
+
+	// Start a span for this request.
+	ctx, span := s.cfg.Tracer.Start(r.Context(), "GetTransactionsLiteServer",
+		trace.WithAttributes(otelAttrs...),
+		serverSpanKind,
+	)
+	defer span.End()
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		elapsedDuration := time.Since(startTime)
+		s.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+	}()
+
+	// Increment request counter.
+	s.requests.Add(ctx, 1, otelAttrs...)
+
+	var (
+		recordError = func(stage string, err error) {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			s.errors.Add(ctx, 1, otelAttrs...)
+		}
+		err          error
+		opErrContext = ogenerrors.OperationContext{
+			Name: "GetTransactionsLiteServer",
+			ID:   "getTransactionsLiteServer",
+		}
+	)
+	params, err := decodeGetTransactionsLiteServerParams(args, r)
+	if err != nil {
+		err = &ogenerrors.DecodeParamsError{
+			OperationContext: opErrContext,
+			Err:              err,
+		}
+		recordError("DecodeParams", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+
 	var response GetTransactionsLiteServerRes
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
@@ -5781,20 +5857,14 @@ func (s *Server) handleGetTransactionsLiteServerRequest(args [1]string, w http.R
 					Name: "hash",
 					In:   "query",
 				}: params.Hash,
->>>>>>> create_raw_methods
 			},
 			Raw: r,
 		}
 
 		type (
 			Request  = struct{}
-<<<<<<< HEAD
-			Params   = GetTransactionByMessageHashParams
-			Response = GetTransactionByMessageHashRes
-=======
 			Params   = GetTransactionsLiteServerParams
 			Response = GetTransactionsLiteServerRes
->>>>>>> create_raw_methods
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -5803,15 +5873,6 @@ func (s *Server) handleGetTransactionsLiteServerRequest(args [1]string, w http.R
 		](
 			m,
 			mreq,
-<<<<<<< HEAD
-			unpackGetTransactionByMessageHashParams,
-			func(ctx context.Context, request Request, params Params) (Response, error) {
-				return s.h.GetTransactionByMessageHash(ctx, params)
-			},
-		)
-	} else {
-		response, err = s.h.GetTransactionByMessageHash(ctx, params)
-=======
 			unpackGetTransactionsLiteServerParams,
 			func(ctx context.Context, request Request, params Params) (Response, error) {
 				return s.h.GetTransactionsLiteServer(ctx, params)
@@ -5819,7 +5880,6 @@ func (s *Server) handleGetTransactionsLiteServerRequest(args [1]string, w http.R
 		)
 	} else {
 		response, err = s.h.GetTransactionsLiteServer(ctx, params)
->>>>>>> create_raw_methods
 	}
 	if err != nil {
 		recordError("Internal", err)
@@ -5827,11 +5887,7 @@ func (s *Server) handleGetTransactionsLiteServerRequest(args [1]string, w http.R
 		return
 	}
 
-<<<<<<< HEAD
-	if err := encodeGetTransactionByMessageHashResponse(response, w, span); err != nil {
-=======
 	if err := encodeGetTransactionsLiteServerResponse(response, w, span); err != nil {
->>>>>>> create_raw_methods
 		recordError("EncodeResponse", err)
 		s.cfg.ErrorHandler(ctx, w, r, err)
 		return

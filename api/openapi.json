@@ -167,16 +167,6 @@
      "type": "integer"
     }
    },
-<<<<<<< HEAD
-   "messageIdParameter": {
-    "description": "message ID",
-    "in": "path",
-    "name": "msg_id",
-    "required": true,
-    "schema": {
-     "example": "97264395BD65A255A429B11326C84128B7D70FFED7949ABAE3036D506BA38621",
-     "type": "string"
-=======
    "ltMustQuery": {
     "description": "lt",
     "in": "query",
@@ -196,7 +186,16 @@
      "example": 23814011000000,
      "format": "uint64",
      "type": "integer"
->>>>>>> create_raw_methods
+    }
+   },
+   "messageIdParameter": {
+    "description": "message ID",
+    "in": "path",
+    "name": "msg_id",
+    "required": true,
+    "schema": {
+     "example": "97264395BD65A255A429B11326C84128B7D70FFED7949ABAE3036D506BA38621",
+     "type": "string"
     }
    },
    "methodNameParameter": {
@@ -240,14 +239,15 @@
      "type": "integer"
     }
    },
-<<<<<<< HEAD
    "publicKeyParameter": {
     "in": "path",
     "name": "public_key",
     "required": true,
     "schema": {
      "example": "NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2ODQ3...",
-=======
+     "type": "string"
+    }
+   },
    "shardQuery": {
     "description": "shard",
     "in": "query",
@@ -266,7 +266,6 @@
     "required": false,
     "schema": {
      "example": "(-1,8000000000000000,4234234,3E575DAB1D25...90D8,47192E5C46C...BB29)",
->>>>>>> create_raw_methods
      "type": "string"
     }
    },

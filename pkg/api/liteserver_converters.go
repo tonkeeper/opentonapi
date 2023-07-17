@@ -363,7 +363,7 @@ func convertBlockProof(blockProof liteclient.LiteServerPartialBlockProofC) (*oas
 	return convertedBlockProof, nil
 }
 
-func convertConfig(config liteclient.LiteServerConfigInfoC) (*oas.GetConfigAllLiteServerOK, error) {
+func convertAllConfig(config liteclient.LiteServerConfigInfoC) (*oas.GetConfigAllLiteServerOK, error) {
 	convertedConfig := oas.GetConfigAllLiteServerOK{
 		Mode: config.Mode,
 		ID: oas.BlockRaw{

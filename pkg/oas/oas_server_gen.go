@@ -68,21 +68,18 @@ type Handler interface {
 	//
 	// POST /v2/tonconnect/stateinit
 	GetAccountInfoByStateInit(ctx context.Context, req GetAccountInfoByStateInitReq) (GetAccountInfoByStateInitRes, error)
-<<<<<<< HEAD
 	// GetAccountSeqno implements getAccountSeqno operation.
 	//
 	// Get account seqno.
 	//
 	// GET /v2/wallet/{account_id}/seqno
 	GetAccountSeqno(ctx context.Context, params GetAccountSeqnoParams) (GetAccountSeqnoRes, error)
-=======
 	// GetAccountStateLiteServer implements getAccountStateLiteServer operation.
 	//
 	// Get account state.
 	//
 	// GET /v2/liteserver/get_account_state/{account_id}
 	GetAccountStateLiteServer(ctx context.Context, params GetAccountStateLiteServerParams) (GetAccountStateLiteServerRes, error)
->>>>>>> create_raw_methods
 	// GetAccountTransactions implements getAccountTransactions operation.
 	//
 	// Get account transactions.
@@ -356,21 +353,18 @@ type Handler interface {
 	//
 	// GET /v2/blockchain/transactions/{transaction_id}
 	GetTransaction(ctx context.Context, params GetTransactionParams) (GetTransactionRes, error)
-<<<<<<< HEAD
 	// GetTransactionByMessageHash implements getTransactionByMessageHash operation.
 	//
 	// Get transaction data by message hash.
 	//
 	// GET /v2/blockchain/messages/{msg_id}/transaction
 	GetTransactionByMessageHash(ctx context.Context, params GetTransactionByMessageHashParams) (GetTransactionByMessageHashRes, error)
-=======
 	// GetTransactionsLiteServer implements getTransactionsLiteServer operation.
 	//
 	// Get transactions.
 	//
 	// GET /v2/liteserver/get_transactions/{account_id}
 	GetTransactionsLiteServer(ctx context.Context, params GetTransactionsLiteServerParams) (GetTransactionsLiteServerRes, error)
->>>>>>> create_raw_methods
 	// GetValidators implements getValidators operation.
 	//
 	// Get validators.

@@ -41,13 +41,12 @@ type GetAccountRes interface {
 	getAccountRes()
 }
 
-<<<<<<< HEAD
 type GetAccountSeqnoRes interface {
 	getAccountSeqnoRes()
-=======
+}
+
 type GetAccountStateLiteServerRes interface {
 	getAccountStateLiteServerRes()
->>>>>>> create_raw_methods
 }
 
 type GetAccountTransactionsRes interface {
@@ -130,13 +129,12 @@ type GetJettonsHistoryRes interface {
 	getJettonsHistoryRes()
 }
 
-<<<<<<< HEAD
 type GetJettonsRes interface {
 	getJettonsRes()
-=======
+}
+
 type GetListBlockTransactionsLiteServerRes interface {
 	getListBlockTransactionsLiteServerRes()
->>>>>>> create_raw_methods
 }
 
 type GetMasterchainHeadRes interface {

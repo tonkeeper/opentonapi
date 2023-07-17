@@ -880,7 +880,6 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 					return
 				}
-<<<<<<< HEAD
 				switch elem[0] {
 				case '/': // Prefix: "/"
 					if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
@@ -908,12 +907,8 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 						return
 					}
 				}
-			case 'n': // Prefix: "nfts/"
-				if l := len("nfts/"); len(elem) >= l && elem[0:l] == "nfts/" {
-=======
 			case 'l': // Prefix: "liteserver/"
 				if l := len("liteserver/"); len(elem) >= l && elem[0:l] == "liteserver/" {
->>>>>>> create_raw_methods
 					elem = elem[l:]
 				} else {
 					break
@@ -970,135 +965,8 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 								return
 							}
-<<<<<<< HEAD
-						}
-					}
-				}
-				// Param: "account_id"
-				// Leaf parameter
-				args[0] = elem
-				elem = ""
-
-				if len(elem) == 0 {
-					// Leaf node.
-					switch r.Method {
-					case "GET":
-						s.handleGetNftItemByAddressRequest([1]string{
-							args[0],
-						}, w, r)
-					default:
-						s.notAllowed(w, r, "GET")
-					}
-
-					return
-				}
-			case 'p': // Prefix: "pubkeys/"
-				if l := len("pubkeys/"); len(elem) >= l && elem[0:l] == "pubkeys/" {
-					elem = elem[l:]
-				} else {
-					break
-				}
-
-				// Param: "public_key"
-				// Match until "/"
-				idx := strings.IndexByte(elem, '/')
-				if idx < 0 {
-					idx = len(elem)
-				}
-				args[0] = elem[:idx]
-				elem = elem[idx:]
-
-				if len(elem) == 0 {
-					break
-				}
-				switch elem[0] {
-				case '/': // Prefix: "/wallets"
-					if l := len("/wallets"); len(elem) >= l && elem[0:l] == "/wallets" {
-						elem = elem[l:]
-					} else {
-						break
-					}
-
-					if len(elem) == 0 {
-						// Leaf node.
-						switch r.Method {
-						case "GET":
-							s.handleGetWalletsByPublicKeyRequest([1]string{
-								args[0],
-							}, w, r)
-						default:
-							s.notAllowed(w, r, "GET")
-						}
-
-						return
-					}
-				}
-			case 'r': // Prefix: "rates"
-				if l := len("rates"); len(elem) >= l && elem[0:l] == "rates" {
-					elem = elem[l:]
-				} else {
-					break
-				}
-
-				if len(elem) == 0 {
-					// Leaf node.
-					switch r.Method {
-					case "GET":
-						s.handleGetRatesRequest([0]string{}, w, r)
-					default:
-						s.notAllowed(w, r, "GET")
-					}
-
-					return
-				}
-			case 's': // Prefix: "st"
-				if l := len("st"); len(elem) >= l && elem[0:l] == "st" {
-					elem = elem[l:]
-				} else {
-					break
-				}
-
-				if len(elem) == 0 {
-					break
-				}
-				switch elem[0] {
-				case 'a': // Prefix: "aking/"
-					if l := len("aking/"); len(elem) >= l && elem[0:l] == "aking/" {
-						elem = elem[l:]
-					} else {
-						break
-					}
-
-					if len(elem) == 0 {
-						break
-					}
-					switch elem[0] {
-					case 'n': // Prefix: "nominator/"
-						if l := len("nominator/"); len(elem) >= l && elem[0:l] == "nominator/" {
-							elem = elem[l:]
-						} else {
-							break
-						}
-
-						// Param: "account_id"
-						// Match until "/"
-						idx := strings.IndexByte(elem, '/')
-						if idx < 0 {
-							idx = len(elem)
-						}
-						args[0] = elem[:idx]
-						elem = elem[idx:]
-
-						if len(elem) == 0 {
-							break
-						}
-						switch elem[0] {
-						case '/': // Prefix: "/pools"
-							if l := len("/pools"); len(elem) >= l && elem[0:l] == "/pools" {
-=======
 						case 'l': // Prefix: "ll_shards_info/"
 							if l := len("ll_shards_info/"); len(elem) >= l && elem[0:l] == "ll_shards_info/" {
->>>>>>> create_raw_methods
 								elem = elem[l:]
 							} else {
 								break
@@ -1141,23 +1009,13 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 								break
 							}
 
-<<<<<<< HEAD
-							// Param: "account_id"
-							// Match until "/"
-							idx := strings.IndexByte(elem, '/')
-							if idx < 0 {
-								idx = len(elem)
-							}
-							args[0] = elem[:idx]
-							elem = elem[idx:]
-=======
 							// Param: "block_id"
 							// Leaf parameter
 							args[0] = elem
 							elem = ""
->>>>>>> create_raw_methods
 
 							if len(elem) == 0 {
+								// Leaf node.
 								switch r.Method {
 								case "GET":
 									s.handleGetBlockLiteServerRequest([1]string{
@@ -1169,35 +1027,8 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 								return
 							}
-<<<<<<< HEAD
-							switch elem[0] {
-							case '/': // Prefix: "/history"
-								if l := len("/history"); len(elem) >= l && elem[0:l] == "/history" {
-									elem = elem[l:]
-								} else {
-									break
-								}
-
-								if len(elem) == 0 {
-									// Leaf node.
-									switch r.Method {
-									case "GET":
-										s.handleStakingPoolHistoryRequest([1]string{
-											args[0],
-										}, w, r)
-									default:
-										s.notAllowed(w, r, "GET")
-									}
-
-									return
-								}
-							}
-						case 's': // Prefix: "s"
-							if l := len("s"); len(elem) >= l && elem[0:l] == "s" {
-=======
 						case '_': // Prefix: "_"
 							if l := len("_"); len(elem) >= l && elem[0:l] == "_" {
->>>>>>> create_raw_methods
 								elem = elem[l:]
 							} else {
 								break
@@ -1559,63 +1390,6 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 						return
 					}
-<<<<<<< HEAD
-				}
-				// Param: "account_id"
-				// Match until "/"
-				idx := strings.IndexByte(elem, '/')
-				if idx < 0 {
-					idx = len(elem)
-				}
-				args[0] = elem[:idx]
-				elem = elem[idx:]
-
-				if len(elem) == 0 {
-					break
-				}
-				switch elem[0] {
-				case '/': // Prefix: "/seqno"
-					if l := len("/seqno"); len(elem) >= l && elem[0:l] == "/seqno" {
-						elem = elem[l:]
-					} else {
-						break
-					}
-
-					if len(elem) == 0 {
-						// Leaf node.
-						switch r.Method {
-						case "GET":
-							s.handleGetAccountSeqnoRequest([1]string{
-								args[0],
-							}, w, r)
-						default:
-							s.notAllowed(w, r, "GET")
-						}
-
-						return
-					}
-				}
-			}
-		}
-	}
-	s.notFound(w, r)
-}
-
-// Route is route object.
-type Route struct {
-	name        string
-	operationID string
-	count       int
-	args        [2]string
-}
-
-// Name returns ogen operation name.
-//
-// It is guaranteed to be unique and not empty.
-func (r Route) Name() string {
-	return r.name
-}
-=======
 					switch elem[0] {
 					case '/': // Prefix: "/"
 						if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
@@ -1623,7 +1397,6 @@ func (r Route) Name() string {
 						} else {
 							break
 						}
->>>>>>> create_raw_methods
 
 						// Param: "account_id"
 						// Match until "/"
@@ -1687,6 +1460,47 @@ func (r Route) Name() string {
 					}
 
 					return
+				}
+			case 'p': // Prefix: "pubkeys/"
+				if l := len("pubkeys/"); len(elem) >= l && elem[0:l] == "pubkeys/" {
+					elem = elem[l:]
+				} else {
+					break
+				}
+
+				// Param: "public_key"
+				// Match until "/"
+				idx := strings.IndexByte(elem, '/')
+				if idx < 0 {
+					idx = len(elem)
+				}
+				args[0] = elem[:idx]
+				elem = elem[idx:]
+
+				if len(elem) == 0 {
+					break
+				}
+				switch elem[0] {
+				case '/': // Prefix: "/wallets"
+					if l := len("/wallets"); len(elem) >= l && elem[0:l] == "/wallets" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					if len(elem) == 0 {
+						// Leaf node.
+						switch r.Method {
+						case "GET":
+							s.handleGetWalletsByPublicKeyRequest([1]string{
+								args[0],
+							}, w, r)
+						default:
+							s.notAllowed(w, r, "GET")
+						}
+
+						return
+					}
 				}
 			case 'r': // Prefix: "rates"
 				if l := len("rates"); len(elem) >= l && elem[0:l] == "rates" {
@@ -1788,12 +1602,15 @@ func (r Route) Name() string {
 							}
 
 							// Param: "account_id"
-							// Leaf parameter
-							args[0] = elem
-							elem = ""
+							// Match until "/"
+							idx := strings.IndexByte(elem, '/')
+							if idx < 0 {
+								idx = len(elem)
+							}
+							args[0] = elem[:idx]
+							elem = elem[idx:]
 
 							if len(elem) == 0 {
-								// Leaf node.
 								switch r.Method {
 								case "GET":
 									s.handleStakingPoolInfoRequest([1]string{
@@ -1804,6 +1621,28 @@ func (r Route) Name() string {
 								}
 
 								return
+							}
+							switch elem[0] {
+							case '/': // Prefix: "/history"
+								if l := len("/history"); len(elem) >= l && elem[0:l] == "/history" {
+									elem = elem[l:]
+								} else {
+									break
+								}
+
+								if len(elem) == 0 {
+									// Leaf node.
+									switch r.Method {
+									case "GET":
+										s.handleStakingPoolHistoryRequest([1]string{
+											args[0],
+										}, w, r)
+									default:
+										s.notAllowed(w, r, "GET")
+									}
+
+									return
+								}
 							}
 						case 's': // Prefix: "s"
 							if l := len("s"); len(elem) >= l && elem[0:l] == "s" {
@@ -2015,6 +1854,40 @@ func (r Route) Name() string {
 							s.handleEmulateWalletMessageRequest([0]string{}, w, r)
 						default:
 							s.notAllowed(w, r, "POST")
+						}
+
+						return
+					}
+				}
+				// Param: "account_id"
+				// Match until "/"
+				idx := strings.IndexByte(elem, '/')
+				if idx < 0 {
+					idx = len(elem)
+				}
+				args[0] = elem[:idx]
+				elem = elem[idx:]
+
+				if len(elem) == 0 {
+					break
+				}
+				switch elem[0] {
+				case '/': // Prefix: "/seqno"
+					if l := len("/seqno"); len(elem) >= l && elem[0:l] == "/seqno" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					if len(elem) == 0 {
+						// Leaf node.
+						switch r.Method {
+						case "GET":
+							s.handleGetAccountSeqnoRequest([1]string{
+								args[0],
+							}, w, r)
+						default:
+							s.notAllowed(w, r, "GET")
 						}
 
 						return
@@ -2395,14 +2268,9 @@ func (s *Server) FindRoute(method, path string) (r Route, _ bool) {
 						if len(elem) == 0 {
 							switch method {
 							case "POST":
-<<<<<<< HEAD
-								r.name = "SendMessage"
-								r.operationID = "sendMessage"
-=======
 								// Leaf: ReindexAccount
 								r.name = "ReindexAccount"
 								r.operationID = "reindexAccount"
->>>>>>> create_raw_methods
 								r.args = args
 								r.count = 1
 								return r, true
@@ -2448,49 +2316,6 @@ func (s *Server) FindRoute(method, path string) (r Route, _ bool) {
 								return r, true
 							default:
 								return
-							}
-						}
-						switch elem[0] {
-						case 's': // Prefix: "s/"
-							if l := len("s/"); len(elem) >= l && elem[0:l] == "s/" {
-								elem = elem[l:]
-							} else {
-								break
-							}
-
-							// Param: "msg_id"
-							// Match until "/"
-							idx := strings.IndexByte(elem, '/')
-							if idx < 0 {
-								idx = len(elem)
-							}
-							args[0] = elem[:idx]
-							elem = elem[idx:]
-
-							if len(elem) == 0 {
-								break
-							}
-							switch elem[0] {
-							case '/': // Prefix: "/transaction"
-								if l := len("/transaction"); len(elem) >= l && elem[0:l] == "/transaction" {
-									elem = elem[l:]
-								} else {
-									break
-								}
-
-								if len(elem) == 0 {
-									switch method {
-									case "GET":
-										// Leaf: GetTransactionByMessageHash
-										r.name = "GetTransactionByMessageHash"
-										r.operationID = "getTransactionByMessageHash"
-										r.args = args
-										r.count = 1
-										return r, true
-									default:
-										return
-									}
-								}
 							}
 						}
 					}
@@ -2704,7 +2529,6 @@ func (s *Server) FindRoute(method, path string) (r Route, _ bool) {
 						if len(elem) == 0 {
 							switch method {
 							case "POST":
-								// Leaf: SendMessage
 								r.name = "SendMessage"
 								r.operationID = "sendMessage"
 								r.args = args
@@ -2712,6 +2536,49 @@ func (s *Server) FindRoute(method, path string) (r Route, _ bool) {
 								return r, true
 							default:
 								return
+							}
+						}
+						switch elem[0] {
+						case 's': // Prefix: "s/"
+							if l := len("s/"); len(elem) >= l && elem[0:l] == "s/" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							// Param: "msg_id"
+							// Match until "/"
+							idx := strings.IndexByte(elem, '/')
+							if idx < 0 {
+								idx = len(elem)
+							}
+							args[0] = elem[:idx]
+							elem = elem[idx:]
+
+							if len(elem) == 0 {
+								break
+							}
+							switch elem[0] {
+							case '/': // Prefix: "/transaction"
+								if l := len("/transaction"); len(elem) >= l && elem[0:l] == "/transaction" {
+									elem = elem[l:]
+								} else {
+									break
+								}
+
+								if len(elem) == 0 {
+									switch method {
+									case "GET":
+										// Leaf: GetTransactionByMessageHash
+										r.name = "GetTransactionByMessageHash"
+										r.operationID = "getTransactionByMessageHash"
+										r.args = args
+										r.count = 1
+										return r, true
+									default:
+										return
+									}
+								}
 							}
 						}
 					}
@@ -2937,11 +2804,33 @@ func (s *Server) FindRoute(method, path string) (r Route, _ bool) {
 						return
 					}
 				}
-<<<<<<< HEAD
 				switch elem[0] {
 				case '/': // Prefix: "/"
 					if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
-=======
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					// Param: "account_id"
+					// Leaf parameter
+					args[0] = elem
+					elem = ""
+
+					if len(elem) == 0 {
+						switch method {
+						case "GET":
+							// Leaf: GetJettonInfo
+							r.name = "GetJettonInfo"
+							r.operationID = "getJettonInfo"
+							r.args = args
+							r.count = 1
+							return r, true
+						default:
+							return
+						}
+					}
+				}
 			case 'l': // Prefix: "liteserver/"
 				if l := len("liteserver/"); len(elem) >= l && elem[0:l] == "liteserver/" {
 					elem = elem[l:]
@@ -3345,17 +3234,12 @@ func (s *Server) FindRoute(method, path string) (r Route, _ bool) {
 					}
 				case 'l': // Prefix: "list_block_transactions/"
 					if l := len("list_block_transactions/"); len(elem) >= l && elem[0:l] == "list_block_transactions/" {
->>>>>>> create_raw_methods
 						elem = elem[l:]
 					} else {
 						break
 					}
 
-<<<<<<< HEAD
-					// Param: "account_id"
-=======
 					// Param: "block_id"
->>>>>>> create_raw_methods
 					// Leaf parameter
 					args[0] = elem
 					elem = ""
@@ -3363,15 +3247,9 @@ func (s *Server) FindRoute(method, path string) (r Route, _ bool) {
 					if len(elem) == 0 {
 						switch method {
 						case "GET":
-<<<<<<< HEAD
-							// Leaf: GetJettonInfo
-							r.name = "GetJettonInfo"
-							r.operationID = "getJettonInfo"
-=======
 							// Leaf: GetListBlockTransactionsLiteServer
 							r.name = "GetListBlockTransactionsLiteServer"
 							r.operationID = "getListBlockTransactionsLiteServer"
->>>>>>> create_raw_methods
 							r.args = args
 							r.count = 1
 							return r, true
@@ -3379,8 +3257,6 @@ func (s *Server) FindRoute(method, path string) (r Route, _ bool) {
 							return
 						}
 					}
-<<<<<<< HEAD
-=======
 				case 's': // Prefix: "send_message"
 					if l := len("send_message"); len(elem) >= l && elem[0:l] == "send_message" {
 						elem = elem[l:]
@@ -3401,7 +3277,6 @@ func (s *Server) FindRoute(method, path string) (r Route, _ bool) {
 							return
 						}
 					}
->>>>>>> create_raw_methods
 				}
 			case 'n': // Prefix: "nfts/"
 				if l := len("nfts/"); len(elem) >= l && elem[0:l] == "nfts/" {

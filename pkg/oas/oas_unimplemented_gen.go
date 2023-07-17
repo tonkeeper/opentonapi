@@ -103,21 +103,21 @@ func (UnimplementedHandler) GetAccountInfoByStateInit(ctx context.Context, req G
 	return r, ht.ErrNotImplemented
 }
 
-<<<<<<< HEAD
 // GetAccountSeqno implements getAccountSeqno operation.
 //
 // Get account seqno.
 //
 // GET /v2/wallet/{account_id}/seqno
 func (UnimplementedHandler) GetAccountSeqno(ctx context.Context, params GetAccountSeqnoParams) (r GetAccountSeqnoRes, _ error) {
-=======
+	return r, ht.ErrNotImplemented
+}
+
 // GetAccountStateLiteServer implements getAccountStateLiteServer operation.
 //
 // Get account state.
 //
 // GET /v2/liteserver/get_account_state/{account_id}
 func (UnimplementedHandler) GetAccountStateLiteServer(ctx context.Context, params GetAccountStateLiteServerParams) (r GetAccountStateLiteServerRes, _ error) {
->>>>>>> create_raw_methods
 	return r, ht.ErrNotImplemented
 }
 
@@ -526,21 +526,21 @@ func (UnimplementedHandler) GetTransaction(ctx context.Context, params GetTransa
 	return r, ht.ErrNotImplemented
 }
 
-<<<<<<< HEAD
 // GetTransactionByMessageHash implements getTransactionByMessageHash operation.
 //
 // Get transaction data by message hash.
 //
 // GET /v2/blockchain/messages/{msg_id}/transaction
 func (UnimplementedHandler) GetTransactionByMessageHash(ctx context.Context, params GetTransactionByMessageHashParams) (r GetTransactionByMessageHashRes, _ error) {
-=======
+	return r, ht.ErrNotImplemented
+}
+
 // GetTransactionsLiteServer implements getTransactionsLiteServer operation.
 //
 // Get transactions.
 //
 // GET /v2/liteserver/get_transactions/{account_id}
 func (UnimplementedHandler) GetTransactionsLiteServer(ctx context.Context, params GetTransactionsLiteServerParams) (r GetTransactionsLiteServerRes, _ error) {
->>>>>>> create_raw_methods
 	return r, ht.ErrNotImplemented
 }
 

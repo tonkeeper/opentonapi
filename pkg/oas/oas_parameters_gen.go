@@ -580,22 +580,13 @@ func decodeGetAccountParams(args [1]string, r *http.Request) (params GetAccountP
 	return params, nil
 }
 
-<<<<<<< HEAD
 // GetAccountSeqnoParams is parameters of getAccountSeqno operation.
 type GetAccountSeqnoParams struct {
-=======
-// GetAccountStateLiteServerParams is parameters of getAccountStateLiteServer operation.
-type GetAccountStateLiteServerParams struct {
->>>>>>> create_raw_methods
 	// Account ID.
 	AccountID string
 }
 
-<<<<<<< HEAD
 func unpackGetAccountSeqnoParams(packed middleware.Parameters) (params GetAccountSeqnoParams) {
-=======
-func unpackGetAccountStateLiteServerParams(packed middleware.Parameters) (params GetAccountStateLiteServerParams) {
->>>>>>> create_raw_methods
 	{
 		key := middleware.ParameterKey{
 			Name: "account_id",
@@ -606,11 +597,59 @@ func unpackGetAccountStateLiteServerParams(packed middleware.Parameters) (params
 	return params
 }
 
-<<<<<<< HEAD
 func decodeGetAccountSeqnoParams(args [1]string, r *http.Request) (params GetAccountSeqnoParams, _ error) {
-=======
+	// Decode path: account_id.
+	{
+		param := args[0]
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "account_id",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.AccountID = c
+				return nil
+			}(); err != nil {
+				return params, errors.Wrap(err, "path: account_id: parse")
+			}
+		} else {
+			return params, errors.New("path: account_id: not specified")
+		}
+	}
+	return params, nil
+}
+
+// GetAccountStateLiteServerParams is parameters of getAccountStateLiteServer operation.
+type GetAccountStateLiteServerParams struct {
+	// Account ID.
+	AccountID string
+}
+
+func unpackGetAccountStateLiteServerParams(packed middleware.Parameters) (params GetAccountStateLiteServerParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "account_id",
+			In:   "path",
+		}
+		params.AccountID = packed[key].(string)
+	}
+	return params
+}
+
 func decodeGetAccountStateLiteServerParams(args [1]string, r *http.Request) (params GetAccountStateLiteServerParams, _ error) {
->>>>>>> create_raw_methods
 	// Decode path: account_id.
 	{
 		param := args[0]
@@ -1082,11 +1121,7 @@ func decodeGetBlockHeaderLiteServerParams(args [1]string, r *http.Request) (para
 			return params, errors.New("path: block_id: not specified")
 		}
 	}
-<<<<<<< HEAD
-	// Decode query: period.
-=======
 	// Decode query: mode.
->>>>>>> create_raw_methods
 	{
 		cfg := uri.QueryParameterDecodingConfig{
 			Name:    "mode",
@@ -1109,35 +1144,7 @@ func decodeGetBlockHeaderLiteServerParams(args [1]string, r *http.Request) (para
 				params.Mode = c
 				return nil
 			}); err != nil {
-<<<<<<< HEAD
-				return params, errors.Wrap(err, "query: period: parse")
-			}
-			if err := func() error {
-				if params.Period.Set {
-					if err := func() error {
-						if err := (validate.Int{
-							MinSet:        true,
-							Min:           1,
-							MaxSet:        true,
-							Max:           3660,
-							MinExclusive:  false,
-							MaxExclusive:  false,
-							MultipleOfSet: false,
-							MultipleOf:    0,
-						}).Validate(int64(params.Period.Value)); err != nil {
-							return errors.Wrap(err, "int")
-						}
-						return nil
-					}(); err != nil {
-						return err
-					}
-				}
-				return nil
-			}(); err != nil {
-				return params, errors.Wrap(err, "query: period: invalid")
-=======
 				return params, errors.Wrap(err, "query: mode: parse")
->>>>>>> create_raw_methods
 			}
 		} else {
 			return params, errors.Wrap(err, "query")
@@ -1332,25 +1339,10 @@ func decodeGetBlockProofLiteServerParams(args [0]string, r *http.Request) (param
 	return params, nil
 }
 
-<<<<<<< HEAD
-// GetEventsByAccountParams is parameters of getEventsByAccount operation.
-type GetEventsByAccountParams struct {
-	// Account ID.
-	AccountID      string
-	AcceptLanguage OptString
-	// Filter actions where requested account is not real subject (for example sender or reciver jettons).
-	SubjectOnly OptBool
-	// Omit this parameter to get last events.
-	BeforeLt  OptInt64
-	Limit     int
-	StartDate OptInt64
-	EndDate   OptInt64
-=======
 // GetBlockTransactionsParams is parameters of getBlockTransactions operation.
 type GetBlockTransactionsParams struct {
 	// Block ID.
 	BlockID string
->>>>>>> create_raw_methods
 }
 
 func unpackGetBlockTransactionsParams(packed middleware.Parameters) (params GetBlockTransactionsParams) {
@@ -1359,38 +1351,7 @@ func unpackGetBlockTransactionsParams(packed middleware.Parameters) (params GetB
 			Name: "block_id",
 			In:   "path",
 		}
-<<<<<<< HEAD
-		params.AccountID = packed[key].(string)
-	}
-	{
-		key := middleware.ParameterKey{
-			Name: "Accept-Language",
-			In:   "header",
-		}
-		if v, ok := packed[key]; ok {
-			params.AcceptLanguage = v.(OptString)
-		}
-	}
-	{
-		key := middleware.ParameterKey{
-			Name: "subject_only",
-			In:   "query",
-		}
-		if v, ok := packed[key]; ok {
-			params.SubjectOnly = v.(OptBool)
-		}
-	}
-	{
-		key := middleware.ParameterKey{
-			Name: "before_lt",
-			In:   "query",
-		}
-		if v, ok := packed[key]; ok {
-			params.BeforeLt = v.(OptInt64)
-		}
-=======
 		params.BlockID = packed[key].(string)
->>>>>>> create_raw_methods
 	}
 	return params
 }
@@ -1489,50 +1450,7 @@ func decodeGetConfigAllLiteServerParams(args [1]string, r *http.Request) (params
 			return params, errors.New("path: block_id: not specified")
 		}
 	}
-<<<<<<< HEAD
-	// Set default value for query: subject_only.
-	{
-		val := bool(false)
-		params.SubjectOnly.SetTo(val)
-	}
-	// Decode query: subject_only.
-	{
-		cfg := uri.QueryParameterDecodingConfig{
-			Name:    "subject_only",
-			Style:   uri.QueryStyleForm,
-			Explode: true,
-		}
-
-		if err := q.HasParam(cfg); err == nil {
-			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
-				var paramsDotSubjectOnlyVal bool
-				if err := func() error {
-					val, err := d.DecodeValue()
-					if err != nil {
-						return err
-					}
-
-					c, err := conv.ToBool(val)
-					if err != nil {
-						return err
-					}
-
-					paramsDotSubjectOnlyVal = c
-					return nil
-				}(); err != nil {
-					return err
-				}
-				params.SubjectOnly.SetTo(paramsDotSubjectOnlyVal)
-				return nil
-			}); err != nil {
-				return params, errors.Wrap(err, "query: subject_only: parse")
-			}
-		}
-	}
-	// Decode query: before_lt.
-=======
 	// Decode query: mode.
->>>>>>> create_raw_methods
 	{
 		cfg := uri.QueryParameterDecodingConfig{
 			Name:    "mode",
@@ -1625,11 +1543,6 @@ func decodeGetDnsExpiringParams(args [1]string, r *http.Request) (params GetDnsE
 			return params, errors.New("path: account_id: not specified")
 		}
 	}
-	// Set default value for query: period.
-	{
-		val := int(30)
-		params.Period.SetTo(val)
-	}
 	// Decode query: period.
 	{
 		cfg := uri.QueryParameterDecodingConfig{
@@ -1669,7 +1582,7 @@ func decodeGetDnsExpiringParams(args [1]string, r *http.Request) (params GetDnsE
 							MinSet:        true,
 							Min:           1,
 							MaxSet:        true,
-							Max:           360,
+							Max:           3660,
 							MinExclusive:  false,
 							MaxExclusive:  false,
 							MultipleOfSet: false,
@@ -1848,6 +1761,8 @@ type GetEventsByAccountParams struct {
 	// Account ID.
 	AccountID      string
 	AcceptLanguage OptString
+	// Filter actions where requested account is not real subject (for example sender or reciver jettons).
+	SubjectOnly OptBool
 	// Omit this parameter to get last events.
 	BeforeLt  OptInt64
 	Limit     int
@@ -1870,6 +1785,15 @@ func unpackGetEventsByAccountParams(packed middleware.Parameters) (params GetEve
 		}
 		if v, ok := packed[key]; ok {
 			params.AcceptLanguage = v.(OptString)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "subject_only",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.SubjectOnly = v.(OptBool)
 		}
 	}
 	{
@@ -1980,6 +1904,45 @@ func decodeGetEventsByAccountParams(args [1]string, r *http.Request) (params Get
 			}
 		}
 	}
+	// Set default value for query: subject_only.
+	{
+		val := bool(false)
+		params.SubjectOnly.SetTo(val)
+	}
+	// Decode query: subject_only.
+	{
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "subject_only",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotSubjectOnlyVal bool
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToBool(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotSubjectOnlyVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.SubjectOnly.SetTo(paramsDotSubjectOnlyVal)
+				return nil
+			}); err != nil {
+				return params, errors.Wrap(err, "query: subject_only: parse")
+			}
+		}
+	}
 	// Decode query: before_lt.
 	{
 		cfg := uri.QueryParameterDecodingConfig{
@@ -2060,155 +2023,7 @@ func decodeGetEventsByAccountParams(args [1]string, r *http.Request) (params Get
 			return params, errors.Wrap(err, "query")
 		}
 	}
-<<<<<<< HEAD
-	return params, nil
-}
-
-// GetJettonsParams is parameters of getJettons operation.
-type GetJettonsParams struct {
-	Limit  OptInt32
-	Offset OptInt32
-}
-
-func unpackGetJettonsParams(packed middleware.Parameters) (params GetJettonsParams) {
-	{
-		key := middleware.ParameterKey{
-			Name: "limit",
-			In:   "query",
-		}
-		if v, ok := packed[key]; ok {
-			params.Limit = v.(OptInt32)
-		}
-	}
-	{
-		key := middleware.ParameterKey{
-			Name: "offset",
-			In:   "query",
-		}
-		if v, ok := packed[key]; ok {
-			params.Offset = v.(OptInt32)
-		}
-	}
-	return params
-}
-
-func decodeGetJettonsParams(args [0]string, r *http.Request) (params GetJettonsParams, _ error) {
-	q := uri.NewQueryDecoder(r.URL.Query())
-	// Set default value for query: limit.
-	{
-		val := int32(100)
-		params.Limit.SetTo(val)
-	}
-	// Decode query: limit.
-	{
-		cfg := uri.QueryParameterDecodingConfig{
-			Name:    "limit",
-			Style:   uri.QueryStyleForm,
-			Explode: true,
-		}
-
-		if err := q.HasParam(cfg); err == nil {
-			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
-				var paramsDotLimitVal int32
-				if err := func() error {
-					val, err := d.DecodeValue()
-					if err != nil {
-						return err
-					}
-
-					c, err := conv.ToInt32(val)
-					if err != nil {
-						return err
-					}
-
-					paramsDotLimitVal = c
-					return nil
-				}(); err != nil {
-					return err
-				}
-				params.Limit.SetTo(paramsDotLimitVal)
-				return nil
-			}); err != nil {
-				return params, errors.Wrap(err, "query: limit: parse")
-			}
-			if err := func() error {
-				if params.Limit.Set {
-					if err := func() error {
-						if err := (validate.Int{
-							MinSet:        false,
-							Min:           0,
-							MaxSet:        true,
-							Max:           1000,
-							MinExclusive:  false,
-							MaxExclusive:  false,
-							MultipleOfSet: false,
-							MultipleOf:    0,
-						}).Validate(int64(params.Limit.Value)); err != nil {
-							return errors.Wrap(err, "int")
-						}
-						return nil
-					}(); err != nil {
-						return err
-					}
-				}
-				return nil
-			}(); err != nil {
-				return params, errors.Wrap(err, "query: limit: invalid")
-			}
-		}
-	}
-	// Set default value for query: offset.
-	{
-		val := int32(0)
-		params.Offset.SetTo(val)
-	}
-	// Decode query: offset.
-	{
-		cfg := uri.QueryParameterDecodingConfig{
-			Name:    "offset",
-			Style:   uri.QueryStyleForm,
-			Explode: true,
-		}
-
-		if err := q.HasParam(cfg); err == nil {
-			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
-				var paramsDotOffsetVal int32
-				if err := func() error {
-					val, err := d.DecodeValue()
-					if err != nil {
-						return err
-					}
-
-					c, err := conv.ToInt32(val)
-					if err != nil {
-						return err
-					}
-
-					paramsDotOffsetVal = c
-					return nil
-				}(); err != nil {
-					return err
-				}
-				params.Offset.SetTo(paramsDotOffsetVal)
-				return nil
-			}); err != nil {
-				return params, errors.Wrap(err, "query: offset: parse")
-			}
-		}
-	}
-	return params, nil
-}
-
-// GetJettonsBalancesParams is parameters of getJettonsBalances operation.
-type GetJettonsBalancesParams struct {
-	// Account ID.
-	AccountID string
-}
-
-func unpackGetJettonsBalancesParams(packed middleware.Parameters) (params GetJettonsBalancesParams) {
-=======
 	// Decode query: start_date.
->>>>>>> create_raw_methods
 	{
 		cfg := uri.QueryParameterDecodingConfig{
 			Name:    "start_date",
@@ -2501,6 +2316,141 @@ func decodeGetJettonInfoParams(args [1]string, r *http.Request) (params GetJetto
 			}
 		} else {
 			return params, errors.New("path: account_id: not specified")
+		}
+	}
+	return params, nil
+}
+
+// GetJettonsParams is parameters of getJettons operation.
+type GetJettonsParams struct {
+	Limit  OptInt32
+	Offset OptInt32
+}
+
+func unpackGetJettonsParams(packed middleware.Parameters) (params GetJettonsParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "limit",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.Limit = v.(OptInt32)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "offset",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.Offset = v.(OptInt32)
+		}
+	}
+	return params
+}
+
+func decodeGetJettonsParams(args [0]string, r *http.Request) (params GetJettonsParams, _ error) {
+	q := uri.NewQueryDecoder(r.URL.Query())
+	// Set default value for query: limit.
+	{
+		val := int32(100)
+		params.Limit.SetTo(val)
+	}
+	// Decode query: limit.
+	{
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "limit",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotLimitVal int32
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToInt32(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotLimitVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.Limit.SetTo(paramsDotLimitVal)
+				return nil
+			}); err != nil {
+				return params, errors.Wrap(err, "query: limit: parse")
+			}
+			if err := func() error {
+				if params.Limit.Set {
+					if err := func() error {
+						if err := (validate.Int{
+							MinSet:        false,
+							Min:           0,
+							MaxSet:        true,
+							Max:           1000,
+							MinExclusive:  false,
+							MaxExclusive:  false,
+							MultipleOfSet: false,
+							MultipleOf:    0,
+						}).Validate(int64(params.Limit.Value)); err != nil {
+							return errors.Wrap(err, "int")
+						}
+						return nil
+					}(); err != nil {
+						return err
+					}
+				}
+				return nil
+			}(); err != nil {
+				return params, errors.Wrap(err, "query: limit: invalid")
+			}
+		}
+	}
+	// Set default value for query: offset.
+	{
+		val := int32(0)
+		params.Offset.SetTo(val)
+	}
+	// Decode query: offset.
+	{
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "offset",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotOffsetVal int32
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToInt32(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotOffsetVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.Offset.SetTo(paramsDotOffsetVal)
+				return nil
+			}); err != nil {
+				return params, errors.Wrap(err, "query: offset: parse")
+			}
 		}
 	}
 	return params, nil
@@ -4766,7 +4716,6 @@ func decodeGetTransactionParams(args [1]string, r *http.Request) (params GetTran
 	return params, nil
 }
 
-<<<<<<< HEAD
 // GetTransactionByMessageHashParams is parameters of getTransactionByMessageHash operation.
 type GetTransactionByMessageHashParams struct {
 	// Message ID.
@@ -4780,7 +4729,45 @@ func unpackGetTransactionByMessageHashParams(packed middleware.Parameters) (para
 			In:   "path",
 		}
 		params.MsgID = packed[key].(string)
-=======
+	}
+	return params
+}
+
+func decodeGetTransactionByMessageHashParams(args [1]string, r *http.Request) (params GetTransactionByMessageHashParams, _ error) {
+	// Decode path: msg_id.
+	{
+		param := args[0]
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "msg_id",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.MsgID = c
+				return nil
+			}(); err != nil {
+				return params, errors.Wrap(err, "path: msg_id: parse")
+			}
+		} else {
+			return params, errors.New("path: msg_id: not specified")
+		}
+	}
+	return params, nil
+}
+
 // GetTransactionsLiteServerParams is parameters of getTransactionsLiteServer operation.
 type GetTransactionsLiteServerParams struct {
 	// Account ID.
@@ -4821,28 +4808,18 @@ func unpackGetTransactionsLiteServerParams(packed middleware.Parameters) (params
 			In:   "query",
 		}
 		params.Hash = packed[key].(string)
->>>>>>> create_raw_methods
 	}
 	return params
 }
 
-<<<<<<< HEAD
-func decodeGetTransactionByMessageHashParams(args [1]string, r *http.Request) (params GetTransactionByMessageHashParams, _ error) {
-	// Decode path: msg_id.
-=======
 func decodeGetTransactionsLiteServerParams(args [1]string, r *http.Request) (params GetTransactionsLiteServerParams, _ error) {
 	q := uri.NewQueryDecoder(r.URL.Query())
 	// Decode path: account_id.
->>>>>>> create_raw_methods
 	{
 		param := args[0]
 		if len(param) > 0 {
 			d := uri.NewPathDecoder(uri.PathDecoderConfig{
-<<<<<<< HEAD
-				Param:   "msg_id",
-=======
 				Param:   "account_id",
->>>>>>> create_raw_methods
 				Value:   param,
 				Style:   uri.PathStyleSimple,
 				Explode: false,
@@ -4859,15 +4836,6 @@ func decodeGetTransactionsLiteServerParams(args [1]string, r *http.Request) (par
 					return err
 				}
 
-<<<<<<< HEAD
-				params.MsgID = c
-				return nil
-			}(); err != nil {
-				return params, errors.Wrap(err, "path: msg_id: parse")
-			}
-		} else {
-			return params, errors.New("path: msg_id: not specified")
-=======
 				params.AccountID = c
 				return nil
 			}(); err != nil {
@@ -4962,7 +4930,6 @@ func decodeGetTransactionsLiteServerParams(args [1]string, r *http.Request) (par
 			}
 		} else {
 			return params, errors.Wrap(err, "query")
->>>>>>> create_raw_methods
 		}
 	}
 	return params, nil
