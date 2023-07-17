@@ -948,6 +948,113 @@ func (s GetAccountsReq) Validate() error {
 	}
 	return nil
 }
+func (s GetBlockProofLiteServerOK) Validate() error {
+	var failures []validate.FieldError
+	if err := func() error {
+		if s.Steps == nil {
+			return errors.New("nil is invalid value")
+		}
+		var failures []validate.FieldError
+		for i, elem := range s.Steps {
+			if err := func() error {
+				if err := elem.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				failures = append(failures, validate.FieldError{
+					Name:  fmt.Sprintf("[%d]", i),
+					Error: err,
+				})
+			}
+		}
+		if len(failures) > 0 {
+			return &validate.Error{Fields: failures}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "steps",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+func (s GetBlockProofLiteServerOKStepsItem) Validate() error {
+	var failures []validate.FieldError
+	if err := func() error {
+		if err := s.LiteServerBlockLinkForward.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "lite_server_block_link_forward",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+func (s GetBlockProofLiteServerOKStepsItemLiteServerBlockLinkForward) Validate() error {
+	var failures []validate.FieldError
+	if err := func() error {
+		if err := s.Signatures.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "signatures",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+func (s GetBlockProofLiteServerOKStepsItemLiteServerBlockLinkForwardSignatures) Validate() error {
+	var failures []validate.FieldError
+	if err := func() error {
+		if s.Signatures == nil {
+			return errors.New("nil is invalid value")
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "signatures",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+func (s GetListBlockTransactionsLiteServerOK) Validate() error {
+	var failures []validate.FieldError
+	if err := func() error {
+		if s.Ids == nil {
+			return errors.New("nil is invalid value")
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "ids",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
 func (s GetNftItemsByAddressesReq) Validate() error {
 	var failures []validate.FieldError
 	if err := func() error {
@@ -966,6 +1073,24 @@ func (s GetNftItemsByAddressesReq) Validate() error {
 	}
 	return nil
 }
+func (s GetShardBlockProofLiteServerOK) Validate() error {
+	var failures []validate.FieldError
+	if err := func() error {
+		if s.Links == nil {
+			return errors.New("nil is invalid value")
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "links",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
 func (s GetStorageProvidersOK) Validate() error {
 	var failures []validate.FieldError
 	if err := func() error {
@@ -976,6 +1101,24 @@ func (s GetStorageProvidersOK) Validate() error {
 	}(); err != nil {
 		failures = append(failures, validate.FieldError{
 			Name:  "providers",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+func (s GetTransactionsLiteServerOK) Validate() error {
+	var failures []validate.FieldError
+	if err := func() error {
+		if s.Ids == nil {
+			return errors.New("nil is invalid value")
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "ids",
 			Error: err,
 		})
 	}

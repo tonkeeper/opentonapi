@@ -22,6 +22,26 @@ func blockIdFromString(s string) (tongo.BlockID, error) {
 	return id, nil
 }
 
+func blockIdExtFromString(s string) (tongo.BlockIDExt, error) {
+	var (
+		id                 tongo.BlockIDExt
+		rootHash, fileHash []byte
+	)
+	_, err := fmt.Sscanf(s, "(%d,%x,%d,%x,%x)", &id.Workchain, &id.Shard, &id.Seqno, &rootHash, &fileHash)
+	if err != nil {
+		return tongo.BlockIDExt{}, err
+	}
+	err = id.RootHash.FromBytes(rootHash)
+	if err != nil {
+		return tongo.BlockIDExt{}, err
+	}
+	err = id.FileHash.FromBytes(fileHash)
+	if err != nil {
+		return tongo.BlockIDExt{}, err
+	}
+	return id, nil
+}
+
 func convertBlockHeader(b core.BlockHeader) oas.Block {
 	res := oas.Block{
 		WorkchainID:       b.Workchain,

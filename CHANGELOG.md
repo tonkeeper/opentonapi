@@ -19,3 +19,7 @@
 ### 2023-07-11
 
 - /v2/blockchain/messages/{msg_id}/transaction
+
+### 2023-07-17
+- Add methods for get raw data, see /v2/liteserver/...
+- /v2/rates supports changing percent the daily price

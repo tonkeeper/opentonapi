@@ -1162,6 +1162,105 @@ func (s *Server) handleGetAccountSeqnoRequest(args [1]string, w http.ResponseWri
 	}
 }
 
+// handleGetAccountStateLiteServerRequest handles getAccountStateLiteServer operation.
+//
+// Get account state.
+//
+// GET /v2/liteserver/get_account_state/{account_id}
+func (s *Server) handleGetAccountStateLiteServerRequest(args [1]string, w http.ResponseWriter, r *http.Request) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("getAccountStateLiteServer"),
+	}
+
+	// Start a span for this request.
+	ctx, span := s.cfg.Tracer.Start(r.Context(), "GetAccountStateLiteServer",
+		trace.WithAttributes(otelAttrs...),
+		serverSpanKind,
+	)
+	defer span.End()
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		elapsedDuration := time.Since(startTime)
+		s.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+	}()
+
+	// Increment request counter.
+	s.requests.Add(ctx, 1, otelAttrs...)
+
+	var (
+		recordError = func(stage string, err error) {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			s.errors.Add(ctx, 1, otelAttrs...)
+		}
+		err          error
+		opErrContext = ogenerrors.OperationContext{
+			Name: "GetAccountStateLiteServer",
+			ID:   "getAccountStateLiteServer",
+		}
+	)
+	params, err := decodeGetAccountStateLiteServerParams(args, r)
+	if err != nil {
+		err = &ogenerrors.DecodeParamsError{
+			OperationContext: opErrContext,
+			Err:              err,
+		}
+		recordError("DecodeParams", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+
+	var response GetAccountStateLiteServerRes
+	if m := s.cfg.Middleware; m != nil {
+		mreq := middleware.Request{
+			Context:       ctx,
+			OperationName: "GetAccountStateLiteServer",
+			OperationID:   "getAccountStateLiteServer",
+			Body:          nil,
+			Params: middleware.Parameters{
+				{
+					Name: "account_id",
+					In:   "path",
+				}: params.AccountID,
+			},
+			Raw: r,
+		}
+
+		type (
+			Request  = struct{}
+			Params   = GetAccountStateLiteServerParams
+			Response = GetAccountStateLiteServerRes
+		)
+		response, err = middleware.HookMiddleware[
+			Request,
+			Params,
+			Response,
+		](
+			m,
+			mreq,
+			unpackGetAccountStateLiteServerParams,
+			func(ctx context.Context, request Request, params Params) (Response, error) {
+				return s.h.GetAccountStateLiteServer(ctx, params)
+			},
+		)
+	} else {
+		response, err = s.h.GetAccountStateLiteServer(ctx, params)
+	}
+	if err != nil {
+		recordError("Internal", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+
+	if err := encodeGetAccountStateLiteServerResponse(response, w, span); err != nil {
+		recordError("EncodeResponse", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+}
+
 // handleGetAccountTransactionsRequest handles getAccountTransactions operation.
 //
 // Get account transactions.
@@ -1471,6 +1570,105 @@ func (s *Server) handleGetAllAuctionsRequest(args [0]string, w http.ResponseWrit
 	}
 }
 
+// handleGetAllShardsInfoLiteServerRequest handles getAllShardsInfoLiteServer operation.
+//
+// Get all shards info.
+//
+// GET /v2/liteserver/get_all_shards_info/{block_id}
+func (s *Server) handleGetAllShardsInfoLiteServerRequest(args [1]string, w http.ResponseWriter, r *http.Request) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("getAllShardsInfoLiteServer"),
+	}
+
+	// Start a span for this request.
+	ctx, span := s.cfg.Tracer.Start(r.Context(), "GetAllShardsInfoLiteServer",
+		trace.WithAttributes(otelAttrs...),
+		serverSpanKind,
+	)
+	defer span.End()
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		elapsedDuration := time.Since(startTime)
+		s.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+	}()
+
+	// Increment request counter.
+	s.requests.Add(ctx, 1, otelAttrs...)
+
+	var (
+		recordError = func(stage string, err error) {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			s.errors.Add(ctx, 1, otelAttrs...)
+		}
+		err          error
+		opErrContext = ogenerrors.OperationContext{
+			Name: "GetAllShardsInfoLiteServer",
+			ID:   "getAllShardsInfoLiteServer",
+		}
+	)
+	params, err := decodeGetAllShardsInfoLiteServerParams(args, r)
+	if err != nil {
+		err = &ogenerrors.DecodeParamsError{
+			OperationContext: opErrContext,
+			Err:              err,
+		}
+		recordError("DecodeParams", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+
+	var response GetAllShardsInfoLiteServerRes
+	if m := s.cfg.Middleware; m != nil {
+		mreq := middleware.Request{
+			Context:       ctx,
+			OperationName: "GetAllShardsInfoLiteServer",
+			OperationID:   "getAllShardsInfoLiteServer",
+			Body:          nil,
+			Params: middleware.Parameters{
+				{
+					Name: "block_id",
+					In:   "path",
+				}: params.BlockID,
+			},
+			Raw: r,
+		}
+
+		type (
+			Request  = struct{}
+			Params   = GetAllShardsInfoLiteServerParams
+			Response = GetAllShardsInfoLiteServerRes
+		)
+		response, err = middleware.HookMiddleware[
+			Request,
+			Params,
+			Response,
+		](
+			m,
+			mreq,
+			unpackGetAllShardsInfoLiteServerParams,
+			func(ctx context.Context, request Request, params Params) (Response, error) {
+				return s.h.GetAllShardsInfoLiteServer(ctx, params)
+			},
+		)
+	} else {
+		response, err = s.h.GetAllShardsInfoLiteServer(ctx, params)
+	}
+	if err != nil {
+		recordError("Internal", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+
+	if err := encodeGetAllShardsInfoLiteServerResponse(response, w, span); err != nil {
+		recordError("EncodeResponse", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+}
+
 // handleGetBlockRequest handles getBlock operation.
 //
 // Get block data.
@@ -1564,6 +1762,315 @@ func (s *Server) handleGetBlockRequest(args [1]string, w http.ResponseWriter, r 
 	}
 
 	if err := encodeGetBlockResponse(response, w, span); err != nil {
+		recordError("EncodeResponse", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+}
+
+// handleGetBlockHeaderLiteServerRequest handles getBlockHeaderLiteServer operation.
+//
+// Get block header.
+//
+// GET /v2/liteserver/get_block_header/{block_id}
+func (s *Server) handleGetBlockHeaderLiteServerRequest(args [1]string, w http.ResponseWriter, r *http.Request) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("getBlockHeaderLiteServer"),
+	}
+
+	// Start a span for this request.
+	ctx, span := s.cfg.Tracer.Start(r.Context(), "GetBlockHeaderLiteServer",
+		trace.WithAttributes(otelAttrs...),
+		serverSpanKind,
+	)
+	defer span.End()
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		elapsedDuration := time.Since(startTime)
+		s.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+	}()
+
+	// Increment request counter.
+	s.requests.Add(ctx, 1, otelAttrs...)
+
+	var (
+		recordError = func(stage string, err error) {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			s.errors.Add(ctx, 1, otelAttrs...)
+		}
+		err          error
+		opErrContext = ogenerrors.OperationContext{
+			Name: "GetBlockHeaderLiteServer",
+			ID:   "getBlockHeaderLiteServer",
+		}
+	)
+	params, err := decodeGetBlockHeaderLiteServerParams(args, r)
+	if err != nil {
+		err = &ogenerrors.DecodeParamsError{
+			OperationContext: opErrContext,
+			Err:              err,
+		}
+		recordError("DecodeParams", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+
+	var response GetBlockHeaderLiteServerRes
+	if m := s.cfg.Middleware; m != nil {
+		mreq := middleware.Request{
+			Context:       ctx,
+			OperationName: "GetBlockHeaderLiteServer",
+			OperationID:   "getBlockHeaderLiteServer",
+			Body:          nil,
+			Params: middleware.Parameters{
+				{
+					Name: "block_id",
+					In:   "path",
+				}: params.BlockID,
+				{
+					Name: "mode",
+					In:   "query",
+				}: params.Mode,
+			},
+			Raw: r,
+		}
+
+		type (
+			Request  = struct{}
+			Params   = GetBlockHeaderLiteServerParams
+			Response = GetBlockHeaderLiteServerRes
+		)
+		response, err = middleware.HookMiddleware[
+			Request,
+			Params,
+			Response,
+		](
+			m,
+			mreq,
+			unpackGetBlockHeaderLiteServerParams,
+			func(ctx context.Context, request Request, params Params) (Response, error) {
+				return s.h.GetBlockHeaderLiteServer(ctx, params)
+			},
+		)
+	} else {
+		response, err = s.h.GetBlockHeaderLiteServer(ctx, params)
+	}
+	if err != nil {
+		recordError("Internal", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+
+	if err := encodeGetBlockHeaderLiteServerResponse(response, w, span); err != nil {
+		recordError("EncodeResponse", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+}
+
+// handleGetBlockLiteServerRequest handles getBlockLiteServer operation.
+//
+// Get block.
+//
+// GET /v2/liteserver/get_block/{block_id}
+func (s *Server) handleGetBlockLiteServerRequest(args [1]string, w http.ResponseWriter, r *http.Request) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("getBlockLiteServer"),
+	}
+
+	// Start a span for this request.
+	ctx, span := s.cfg.Tracer.Start(r.Context(), "GetBlockLiteServer",
+		trace.WithAttributes(otelAttrs...),
+		serverSpanKind,
+	)
+	defer span.End()
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		elapsedDuration := time.Since(startTime)
+		s.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+	}()
+
+	// Increment request counter.
+	s.requests.Add(ctx, 1, otelAttrs...)
+
+	var (
+		recordError = func(stage string, err error) {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			s.errors.Add(ctx, 1, otelAttrs...)
+		}
+		err          error
+		opErrContext = ogenerrors.OperationContext{
+			Name: "GetBlockLiteServer",
+			ID:   "getBlockLiteServer",
+		}
+	)
+	params, err := decodeGetBlockLiteServerParams(args, r)
+	if err != nil {
+		err = &ogenerrors.DecodeParamsError{
+			OperationContext: opErrContext,
+			Err:              err,
+		}
+		recordError("DecodeParams", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+
+	var response GetBlockLiteServerRes
+	if m := s.cfg.Middleware; m != nil {
+		mreq := middleware.Request{
+			Context:       ctx,
+			OperationName: "GetBlockLiteServer",
+			OperationID:   "getBlockLiteServer",
+			Body:          nil,
+			Params: middleware.Parameters{
+				{
+					Name: "block_id",
+					In:   "path",
+				}: params.BlockID,
+			},
+			Raw: r,
+		}
+
+		type (
+			Request  = struct{}
+			Params   = GetBlockLiteServerParams
+			Response = GetBlockLiteServerRes
+		)
+		response, err = middleware.HookMiddleware[
+			Request,
+			Params,
+			Response,
+		](
+			m,
+			mreq,
+			unpackGetBlockLiteServerParams,
+			func(ctx context.Context, request Request, params Params) (Response, error) {
+				return s.h.GetBlockLiteServer(ctx, params)
+			},
+		)
+	} else {
+		response, err = s.h.GetBlockLiteServer(ctx, params)
+	}
+	if err != nil {
+		recordError("Internal", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+
+	if err := encodeGetBlockLiteServerResponse(response, w, span); err != nil {
+		recordError("EncodeResponse", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+}
+
+// handleGetBlockProofLiteServerRequest handles getBlockProofLiteServer operation.
+//
+// Get block proof.
+//
+// GET /v2/liteserver/get_block_proof
+func (s *Server) handleGetBlockProofLiteServerRequest(args [0]string, w http.ResponseWriter, r *http.Request) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("getBlockProofLiteServer"),
+	}
+
+	// Start a span for this request.
+	ctx, span := s.cfg.Tracer.Start(r.Context(), "GetBlockProofLiteServer",
+		trace.WithAttributes(otelAttrs...),
+		serverSpanKind,
+	)
+	defer span.End()
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		elapsedDuration := time.Since(startTime)
+		s.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+	}()
+
+	// Increment request counter.
+	s.requests.Add(ctx, 1, otelAttrs...)
+
+	var (
+		recordError = func(stage string, err error) {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			s.errors.Add(ctx, 1, otelAttrs...)
+		}
+		err          error
+		opErrContext = ogenerrors.OperationContext{
+			Name: "GetBlockProofLiteServer",
+			ID:   "getBlockProofLiteServer",
+		}
+	)
+	params, err := decodeGetBlockProofLiteServerParams(args, r)
+	if err != nil {
+		err = &ogenerrors.DecodeParamsError{
+			OperationContext: opErrContext,
+			Err:              err,
+		}
+		recordError("DecodeParams", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+
+	var response GetBlockProofLiteServerRes
+	if m := s.cfg.Middleware; m != nil {
+		mreq := middleware.Request{
+			Context:       ctx,
+			OperationName: "GetBlockProofLiteServer",
+			OperationID:   "getBlockProofLiteServer",
+			Body:          nil,
+			Params: middleware.Parameters{
+				{
+					Name: "known_block",
+					In:   "query",
+				}: params.KnownBlock,
+				{
+					Name: "target_block",
+					In:   "query",
+				}: params.TargetBlock,
+				{
+					Name: "mode",
+					In:   "query",
+				}: params.Mode,
+			},
+			Raw: r,
+		}
+
+		type (
+			Request  = struct{}
+			Params   = GetBlockProofLiteServerParams
+			Response = GetBlockProofLiteServerRes
+		)
+		response, err = middleware.HookMiddleware[
+			Request,
+			Params,
+			Response,
+		](
+			m,
+			mreq,
+			unpackGetBlockProofLiteServerParams,
+			func(ctx context.Context, request Request, params Params) (Response, error) {
+				return s.h.GetBlockProofLiteServer(ctx, params)
+			},
+		)
+	} else {
+		response, err = s.h.GetBlockProofLiteServer(ctx, params)
+	}
+	if err != nil {
+		recordError("Internal", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+
+	if err := encodeGetBlockProofLiteServerResponse(response, w, span); err != nil {
 		recordError("EncodeResponse", err)
 		s.cfg.ErrorHandler(ctx, w, r, err)
 		return
@@ -1743,6 +2250,109 @@ func (s *Server) handleGetConfigRequest(args [0]string, w http.ResponseWriter, r
 	}
 
 	if err := encodeGetConfigResponse(response, w, span); err != nil {
+		recordError("EncodeResponse", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+}
+
+// handleGetConfigAllLiteServerRequest handles getConfigAllLiteServer operation.
+//
+// Get config all.
+//
+// GET /v2/liteserver/get_config_all/{block_id}
+func (s *Server) handleGetConfigAllLiteServerRequest(args [1]string, w http.ResponseWriter, r *http.Request) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("getConfigAllLiteServer"),
+	}
+
+	// Start a span for this request.
+	ctx, span := s.cfg.Tracer.Start(r.Context(), "GetConfigAllLiteServer",
+		trace.WithAttributes(otelAttrs...),
+		serverSpanKind,
+	)
+	defer span.End()
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		elapsedDuration := time.Since(startTime)
+		s.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+	}()
+
+	// Increment request counter.
+	s.requests.Add(ctx, 1, otelAttrs...)
+
+	var (
+		recordError = func(stage string, err error) {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			s.errors.Add(ctx, 1, otelAttrs...)
+		}
+		err          error
+		opErrContext = ogenerrors.OperationContext{
+			Name: "GetConfigAllLiteServer",
+			ID:   "getConfigAllLiteServer",
+		}
+	)
+	params, err := decodeGetConfigAllLiteServerParams(args, r)
+	if err != nil {
+		err = &ogenerrors.DecodeParamsError{
+			OperationContext: opErrContext,
+			Err:              err,
+		}
+		recordError("DecodeParams", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+
+	var response GetConfigAllLiteServerRes
+	if m := s.cfg.Middleware; m != nil {
+		mreq := middleware.Request{
+			Context:       ctx,
+			OperationName: "GetConfigAllLiteServer",
+			OperationID:   "getConfigAllLiteServer",
+			Body:          nil,
+			Params: middleware.Parameters{
+				{
+					Name: "block_id",
+					In:   "path",
+				}: params.BlockID,
+				{
+					Name: "mode",
+					In:   "query",
+				}: params.Mode,
+			},
+			Raw: r,
+		}
+
+		type (
+			Request  = struct{}
+			Params   = GetConfigAllLiteServerParams
+			Response = GetConfigAllLiteServerRes
+		)
+		response, err = middleware.HookMiddleware[
+			Request,
+			Params,
+			Response,
+		](
+			m,
+			mreq,
+			unpackGetConfigAllLiteServerParams,
+			func(ctx context.Context, request Request, params Params) (Response, error) {
+				return s.h.GetConfigAllLiteServer(ctx, params)
+			},
+		)
+	} else {
+		response, err = s.h.GetConfigAllLiteServer(ctx, params)
+	}
+	if err != nil {
+		recordError("Internal", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+
+	if err := encodeGetConfigAllLiteServerResponse(response, w, span); err != nil {
 		recordError("EncodeResponse", err)
 		s.cfg.ErrorHandler(ctx, w, r, err)
 		return
@@ -2836,6 +3446,121 @@ func (s *Server) handleGetJettonsHistoryByIDRequest(args [2]string, w http.Respo
 	}
 }
 
+// handleGetListBlockTransactionsLiteServerRequest handles getListBlockTransactionsLiteServer operation.
+//
+// Get list block transactions.
+//
+// GET /v2/liteserver/list_block_transactions/{block_id}
+func (s *Server) handleGetListBlockTransactionsLiteServerRequest(args [1]string, w http.ResponseWriter, r *http.Request) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("getListBlockTransactionsLiteServer"),
+	}
+
+	// Start a span for this request.
+	ctx, span := s.cfg.Tracer.Start(r.Context(), "GetListBlockTransactionsLiteServer",
+		trace.WithAttributes(otelAttrs...),
+		serverSpanKind,
+	)
+	defer span.End()
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		elapsedDuration := time.Since(startTime)
+		s.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+	}()
+
+	// Increment request counter.
+	s.requests.Add(ctx, 1, otelAttrs...)
+
+	var (
+		recordError = func(stage string, err error) {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			s.errors.Add(ctx, 1, otelAttrs...)
+		}
+		err          error
+		opErrContext = ogenerrors.OperationContext{
+			Name: "GetListBlockTransactionsLiteServer",
+			ID:   "getListBlockTransactionsLiteServer",
+		}
+	)
+	params, err := decodeGetListBlockTransactionsLiteServerParams(args, r)
+	if err != nil {
+		err = &ogenerrors.DecodeParamsError{
+			OperationContext: opErrContext,
+			Err:              err,
+		}
+		recordError("DecodeParams", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+
+	var response GetListBlockTransactionsLiteServerRes
+	if m := s.cfg.Middleware; m != nil {
+		mreq := middleware.Request{
+			Context:       ctx,
+			OperationName: "GetListBlockTransactionsLiteServer",
+			OperationID:   "getListBlockTransactionsLiteServer",
+			Body:          nil,
+			Params: middleware.Parameters{
+				{
+					Name: "block_id",
+					In:   "path",
+				}: params.BlockID,
+				{
+					Name: "mode",
+					In:   "query",
+				}: params.Mode,
+				{
+					Name: "count",
+					In:   "query",
+				}: params.Count,
+				{
+					Name: "account_id",
+					In:   "query",
+				}: params.AccountID,
+				{
+					Name: "lt",
+					In:   "query",
+				}: params.Lt,
+			},
+			Raw: r,
+		}
+
+		type (
+			Request  = struct{}
+			Params   = GetListBlockTransactionsLiteServerParams
+			Response = GetListBlockTransactionsLiteServerRes
+		)
+		response, err = middleware.HookMiddleware[
+			Request,
+			Params,
+			Response,
+		](
+			m,
+			mreq,
+			unpackGetListBlockTransactionsLiteServerParams,
+			func(ctx context.Context, request Request, params Params) (Response, error) {
+				return s.h.GetListBlockTransactionsLiteServer(ctx, params)
+			},
+		)
+	} else {
+		response, err = s.h.GetListBlockTransactionsLiteServer(ctx, params)
+	}
+	if err != nil {
+		recordError("Internal", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+
+	if err := encodeGetListBlockTransactionsLiteServerResponse(response, w, span); err != nil {
+		recordError("EncodeResponse", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+}
+
 // handleGetMasterchainHeadRequest handles getMasterchainHead operation.
 //
 // Get last known masterchain block.
@@ -2910,6 +3635,185 @@ func (s *Server) handleGetMasterchainHeadRequest(args [0]string, w http.Response
 	}
 
 	if err := encodeGetMasterchainHeadResponse(response, w, span); err != nil {
+		recordError("EncodeResponse", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+}
+
+// handleGetMasterchainInfoExtLiteServerRequest handles getMasterchainInfoExtLiteServer operation.
+//
+// Get masterchain info ext.
+//
+// GET /v2/liteserver/get_masterchain_info_ext
+func (s *Server) handleGetMasterchainInfoExtLiteServerRequest(args [0]string, w http.ResponseWriter, r *http.Request) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("getMasterchainInfoExtLiteServer"),
+	}
+
+	// Start a span for this request.
+	ctx, span := s.cfg.Tracer.Start(r.Context(), "GetMasterchainInfoExtLiteServer",
+		trace.WithAttributes(otelAttrs...),
+		serverSpanKind,
+	)
+	defer span.End()
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		elapsedDuration := time.Since(startTime)
+		s.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+	}()
+
+	// Increment request counter.
+	s.requests.Add(ctx, 1, otelAttrs...)
+
+	var (
+		recordError = func(stage string, err error) {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			s.errors.Add(ctx, 1, otelAttrs...)
+		}
+		err          error
+		opErrContext = ogenerrors.OperationContext{
+			Name: "GetMasterchainInfoExtLiteServer",
+			ID:   "getMasterchainInfoExtLiteServer",
+		}
+	)
+	params, err := decodeGetMasterchainInfoExtLiteServerParams(args, r)
+	if err != nil {
+		err = &ogenerrors.DecodeParamsError{
+			OperationContext: opErrContext,
+			Err:              err,
+		}
+		recordError("DecodeParams", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+
+	var response GetMasterchainInfoExtLiteServerRes
+	if m := s.cfg.Middleware; m != nil {
+		mreq := middleware.Request{
+			Context:       ctx,
+			OperationName: "GetMasterchainInfoExtLiteServer",
+			OperationID:   "getMasterchainInfoExtLiteServer",
+			Body:          nil,
+			Params: middleware.Parameters{
+				{
+					Name: "mode",
+					In:   "query",
+				}: params.Mode,
+			},
+			Raw: r,
+		}
+
+		type (
+			Request  = struct{}
+			Params   = GetMasterchainInfoExtLiteServerParams
+			Response = GetMasterchainInfoExtLiteServerRes
+		)
+		response, err = middleware.HookMiddleware[
+			Request,
+			Params,
+			Response,
+		](
+			m,
+			mreq,
+			unpackGetMasterchainInfoExtLiteServerParams,
+			func(ctx context.Context, request Request, params Params) (Response, error) {
+				return s.h.GetMasterchainInfoExtLiteServer(ctx, params)
+			},
+		)
+	} else {
+		response, err = s.h.GetMasterchainInfoExtLiteServer(ctx, params)
+	}
+	if err != nil {
+		recordError("Internal", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+
+	if err := encodeGetMasterchainInfoExtLiteServerResponse(response, w, span); err != nil {
+		recordError("EncodeResponse", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+}
+
+// handleGetMasterchainInfoLiteServerRequest handles getMasterchainInfoLiteServer operation.
+//
+// Get masterchain info.
+//
+// GET /v2/liteserver/get_masterchain_info
+func (s *Server) handleGetMasterchainInfoLiteServerRequest(args [0]string, w http.ResponseWriter, r *http.Request) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("getMasterchainInfoLiteServer"),
+	}
+
+	// Start a span for this request.
+	ctx, span := s.cfg.Tracer.Start(r.Context(), "GetMasterchainInfoLiteServer",
+		trace.WithAttributes(otelAttrs...),
+		serverSpanKind,
+	)
+	defer span.End()
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		elapsedDuration := time.Since(startTime)
+		s.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+	}()
+
+	// Increment request counter.
+	s.requests.Add(ctx, 1, otelAttrs...)
+
+	var (
+		recordError = func(stage string, err error) {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			s.errors.Add(ctx, 1, otelAttrs...)
+		}
+		err error
+	)
+
+	var response GetMasterchainInfoLiteServerRes
+	if m := s.cfg.Middleware; m != nil {
+		mreq := middleware.Request{
+			Context:       ctx,
+			OperationName: "GetMasterchainInfoLiteServer",
+			OperationID:   "getMasterchainInfoLiteServer",
+			Body:          nil,
+			Params:        middleware.Parameters{},
+			Raw:           r,
+		}
+
+		type (
+			Request  = struct{}
+			Params   = struct{}
+			Response = GetMasterchainInfoLiteServerRes
+		)
+		response, err = middleware.HookMiddleware[
+			Request,
+			Params,
+			Response,
+		](
+			m,
+			mreq,
+			nil,
+			func(ctx context.Context, request Request, params Params) (Response, error) {
+				return s.h.GetMasterchainInfoLiteServer(ctx)
+			},
+		)
+	} else {
+		response, err = s.h.GetMasterchainInfoLiteServer(ctx)
+	}
+	if err != nil {
+		recordError("Internal", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+
+	if err := encodeGetMasterchainInfoLiteServerResponse(response, w, span); err != nil {
 		recordError("EncodeResponse", err)
 		s.cfg.ErrorHandler(ctx, w, r, err)
 		return
@@ -3831,6 +4735,315 @@ func (s *Server) handleGetSearchAccountsRequest(args [0]string, w http.ResponseW
 	}
 }
 
+// handleGetShardBlockProofLiteServerRequest handles getShardBlockProofLiteServer operation.
+//
+// Get shard block proof.
+//
+// GET /v2/liteserver/get_shard_block_proof/{block_id}
+func (s *Server) handleGetShardBlockProofLiteServerRequest(args [1]string, w http.ResponseWriter, r *http.Request) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("getShardBlockProofLiteServer"),
+	}
+
+	// Start a span for this request.
+	ctx, span := s.cfg.Tracer.Start(r.Context(), "GetShardBlockProofLiteServer",
+		trace.WithAttributes(otelAttrs...),
+		serverSpanKind,
+	)
+	defer span.End()
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		elapsedDuration := time.Since(startTime)
+		s.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+	}()
+
+	// Increment request counter.
+	s.requests.Add(ctx, 1, otelAttrs...)
+
+	var (
+		recordError = func(stage string, err error) {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			s.errors.Add(ctx, 1, otelAttrs...)
+		}
+		err          error
+		opErrContext = ogenerrors.OperationContext{
+			Name: "GetShardBlockProofLiteServer",
+			ID:   "getShardBlockProofLiteServer",
+		}
+	)
+	params, err := decodeGetShardBlockProofLiteServerParams(args, r)
+	if err != nil {
+		err = &ogenerrors.DecodeParamsError{
+			OperationContext: opErrContext,
+			Err:              err,
+		}
+		recordError("DecodeParams", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+
+	var response GetShardBlockProofLiteServerRes
+	if m := s.cfg.Middleware; m != nil {
+		mreq := middleware.Request{
+			Context:       ctx,
+			OperationName: "GetShardBlockProofLiteServer",
+			OperationID:   "getShardBlockProofLiteServer",
+			Body:          nil,
+			Params: middleware.Parameters{
+				{
+					Name: "block_id",
+					In:   "path",
+				}: params.BlockID,
+			},
+			Raw: r,
+		}
+
+		type (
+			Request  = struct{}
+			Params   = GetShardBlockProofLiteServerParams
+			Response = GetShardBlockProofLiteServerRes
+		)
+		response, err = middleware.HookMiddleware[
+			Request,
+			Params,
+			Response,
+		](
+			m,
+			mreq,
+			unpackGetShardBlockProofLiteServerParams,
+			func(ctx context.Context, request Request, params Params) (Response, error) {
+				return s.h.GetShardBlockProofLiteServer(ctx, params)
+			},
+		)
+	} else {
+		response, err = s.h.GetShardBlockProofLiteServer(ctx, params)
+	}
+	if err != nil {
+		recordError("Internal", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+
+	if err := encodeGetShardBlockProofLiteServerResponse(response, w, span); err != nil {
+		recordError("EncodeResponse", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+}
+
+// handleGetShardInfoLiteServerRequest handles getShardInfoLiteServer operation.
+//
+// Get shard info.
+//
+// GET /v2/liteserver/get_shard_info/{block_id}
+func (s *Server) handleGetShardInfoLiteServerRequest(args [1]string, w http.ResponseWriter, r *http.Request) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("getShardInfoLiteServer"),
+	}
+
+	// Start a span for this request.
+	ctx, span := s.cfg.Tracer.Start(r.Context(), "GetShardInfoLiteServer",
+		trace.WithAttributes(otelAttrs...),
+		serverSpanKind,
+	)
+	defer span.End()
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		elapsedDuration := time.Since(startTime)
+		s.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+	}()
+
+	// Increment request counter.
+	s.requests.Add(ctx, 1, otelAttrs...)
+
+	var (
+		recordError = func(stage string, err error) {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			s.errors.Add(ctx, 1, otelAttrs...)
+		}
+		err          error
+		opErrContext = ogenerrors.OperationContext{
+			Name: "GetShardInfoLiteServer",
+			ID:   "getShardInfoLiteServer",
+		}
+	)
+	params, err := decodeGetShardInfoLiteServerParams(args, r)
+	if err != nil {
+		err = &ogenerrors.DecodeParamsError{
+			OperationContext: opErrContext,
+			Err:              err,
+		}
+		recordError("DecodeParams", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+
+	var response GetShardInfoLiteServerRes
+	if m := s.cfg.Middleware; m != nil {
+		mreq := middleware.Request{
+			Context:       ctx,
+			OperationName: "GetShardInfoLiteServer",
+			OperationID:   "getShardInfoLiteServer",
+			Body:          nil,
+			Params: middleware.Parameters{
+				{
+					Name: "block_id",
+					In:   "path",
+				}: params.BlockID,
+				{
+					Name: "workchain",
+					In:   "query",
+				}: params.Workchain,
+				{
+					Name: "shard",
+					In:   "query",
+				}: params.Shard,
+				{
+					Name: "exact",
+					In:   "query",
+				}: params.Exact,
+			},
+			Raw: r,
+		}
+
+		type (
+			Request  = struct{}
+			Params   = GetShardInfoLiteServerParams
+			Response = GetShardInfoLiteServerRes
+		)
+		response, err = middleware.HookMiddleware[
+			Request,
+			Params,
+			Response,
+		](
+			m,
+			mreq,
+			unpackGetShardInfoLiteServerParams,
+			func(ctx context.Context, request Request, params Params) (Response, error) {
+				return s.h.GetShardInfoLiteServer(ctx, params)
+			},
+		)
+	} else {
+		response, err = s.h.GetShardInfoLiteServer(ctx, params)
+	}
+	if err != nil {
+		recordError("Internal", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+
+	if err := encodeGetShardInfoLiteServerResponse(response, w, span); err != nil {
+		recordError("EncodeResponse", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+}
+
+// handleGetStateLiteServerRequest handles getStateLiteServer operation.
+//
+// Get block state.
+//
+// GET /v2/liteserver/get_state/{block_id}
+func (s *Server) handleGetStateLiteServerRequest(args [1]string, w http.ResponseWriter, r *http.Request) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("getStateLiteServer"),
+	}
+
+	// Start a span for this request.
+	ctx, span := s.cfg.Tracer.Start(r.Context(), "GetStateLiteServer",
+		trace.WithAttributes(otelAttrs...),
+		serverSpanKind,
+	)
+	defer span.End()
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		elapsedDuration := time.Since(startTime)
+		s.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+	}()
+
+	// Increment request counter.
+	s.requests.Add(ctx, 1, otelAttrs...)
+
+	var (
+		recordError = func(stage string, err error) {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			s.errors.Add(ctx, 1, otelAttrs...)
+		}
+		err          error
+		opErrContext = ogenerrors.OperationContext{
+			Name: "GetStateLiteServer",
+			ID:   "getStateLiteServer",
+		}
+	)
+	params, err := decodeGetStateLiteServerParams(args, r)
+	if err != nil {
+		err = &ogenerrors.DecodeParamsError{
+			OperationContext: opErrContext,
+			Err:              err,
+		}
+		recordError("DecodeParams", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+
+	var response GetStateLiteServerRes
+	if m := s.cfg.Middleware; m != nil {
+		mreq := middleware.Request{
+			Context:       ctx,
+			OperationName: "GetStateLiteServer",
+			OperationID:   "getStateLiteServer",
+			Body:          nil,
+			Params: middleware.Parameters{
+				{
+					Name: "block_id",
+					In:   "path",
+				}: params.BlockID,
+			},
+			Raw: r,
+		}
+
+		type (
+			Request  = struct{}
+			Params   = GetStateLiteServerParams
+			Response = GetStateLiteServerRes
+		)
+		response, err = middleware.HookMiddleware[
+			Request,
+			Params,
+			Response,
+		](
+			m,
+			mreq,
+			unpackGetStateLiteServerParams,
+			func(ctx context.Context, request Request, params Params) (Response, error) {
+				return s.h.GetStateLiteServer(ctx, params)
+			},
+		)
+	} else {
+		response, err = s.h.GetStateLiteServer(ctx, params)
+	}
+	if err != nil {
+		recordError("Internal", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+
+	if err := encodeGetStateLiteServerResponse(response, w, span); err != nil {
+		recordError("EncodeResponse", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+}
+
 // handleGetStorageProvidersRequest handles getStorageProviders operation.
 //
 // Get TON storage providers deployed to the blockchain.
@@ -4004,6 +5217,86 @@ func (s *Server) handleGetSubscriptionsByAccountRequest(args [1]string, w http.R
 	}
 
 	if err := encodeGetSubscriptionsByAccountResponse(response, w, span); err != nil {
+		recordError("EncodeResponse", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+}
+
+// handleGetTimeLiteServerRequest handles getTimeLiteServer operation.
+//
+// Get time.
+//
+// GET /v2/liteserver/get_time
+func (s *Server) handleGetTimeLiteServerRequest(args [0]string, w http.ResponseWriter, r *http.Request) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("getTimeLiteServer"),
+	}
+
+	// Start a span for this request.
+	ctx, span := s.cfg.Tracer.Start(r.Context(), "GetTimeLiteServer",
+		trace.WithAttributes(otelAttrs...),
+		serverSpanKind,
+	)
+	defer span.End()
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		elapsedDuration := time.Since(startTime)
+		s.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+	}()
+
+	// Increment request counter.
+	s.requests.Add(ctx, 1, otelAttrs...)
+
+	var (
+		recordError = func(stage string, err error) {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			s.errors.Add(ctx, 1, otelAttrs...)
+		}
+		err error
+	)
+
+	var response GetTimeLiteServerRes
+	if m := s.cfg.Middleware; m != nil {
+		mreq := middleware.Request{
+			Context:       ctx,
+			OperationName: "GetTimeLiteServer",
+			OperationID:   "getTimeLiteServer",
+			Body:          nil,
+			Params:        middleware.Parameters{},
+			Raw:           r,
+		}
+
+		type (
+			Request  = struct{}
+			Params   = struct{}
+			Response = GetTimeLiteServerRes
+		)
+		response, err = middleware.HookMiddleware[
+			Request,
+			Params,
+			Response,
+		](
+			m,
+			mreq,
+			nil,
+			func(ctx context.Context, request Request, params Params) (Response, error) {
+				return s.h.GetTimeLiteServer(ctx)
+			},
+		)
+	} else {
+		response, err = s.h.GetTimeLiteServer(ctx)
+	}
+	if err != nil {
+		recordError("Internal", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+
+	if err := encodeGetTimeLiteServerResponse(response, w, span); err != nil {
 		recordError("EncodeResponse", err)
 		s.cfg.ErrorHandler(ctx, w, r, err)
 		return
@@ -4484,6 +5777,117 @@ func (s *Server) handleGetTransactionByMessageHashRequest(args [1]string, w http
 	}
 
 	if err := encodeGetTransactionByMessageHashResponse(response, w, span); err != nil {
+		recordError("EncodeResponse", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+}
+
+// handleGetTransactionsLiteServerRequest handles getTransactionsLiteServer operation.
+//
+// Get transactions.
+//
+// GET /v2/liteserver/get_transactions/{account_id}
+func (s *Server) handleGetTransactionsLiteServerRequest(args [1]string, w http.ResponseWriter, r *http.Request) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("getTransactionsLiteServer"),
+	}
+
+	// Start a span for this request.
+	ctx, span := s.cfg.Tracer.Start(r.Context(), "GetTransactionsLiteServer",
+		trace.WithAttributes(otelAttrs...),
+		serverSpanKind,
+	)
+	defer span.End()
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		elapsedDuration := time.Since(startTime)
+		s.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+	}()
+
+	// Increment request counter.
+	s.requests.Add(ctx, 1, otelAttrs...)
+
+	var (
+		recordError = func(stage string, err error) {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			s.errors.Add(ctx, 1, otelAttrs...)
+		}
+		err          error
+		opErrContext = ogenerrors.OperationContext{
+			Name: "GetTransactionsLiteServer",
+			ID:   "getTransactionsLiteServer",
+		}
+	)
+	params, err := decodeGetTransactionsLiteServerParams(args, r)
+	if err != nil {
+		err = &ogenerrors.DecodeParamsError{
+			OperationContext: opErrContext,
+			Err:              err,
+		}
+		recordError("DecodeParams", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+
+	var response GetTransactionsLiteServerRes
+	if m := s.cfg.Middleware; m != nil {
+		mreq := middleware.Request{
+			Context:       ctx,
+			OperationName: "GetTransactionsLiteServer",
+			OperationID:   "getTransactionsLiteServer",
+			Body:          nil,
+			Params: middleware.Parameters{
+				{
+					Name: "account_id",
+					In:   "path",
+				}: params.AccountID,
+				{
+					Name: "count",
+					In:   "query",
+				}: params.Count,
+				{
+					Name: "lt",
+					In:   "query",
+				}: params.Lt,
+				{
+					Name: "hash",
+					In:   "query",
+				}: params.Hash,
+			},
+			Raw: r,
+		}
+
+		type (
+			Request  = struct{}
+			Params   = GetTransactionsLiteServerParams
+			Response = GetTransactionsLiteServerRes
+		)
+		response, err = middleware.HookMiddleware[
+			Request,
+			Params,
+			Response,
+		](
+			m,
+			mreq,
+			unpackGetTransactionsLiteServerParams,
+			func(ctx context.Context, request Request, params Params) (Response, error) {
+				return s.h.GetTransactionsLiteServer(ctx, params)
+			},
+		)
+	} else {
+		response, err = s.h.GetTransactionsLiteServer(ctx, params)
+	}
+	if err != nil {
+		recordError("Internal", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+
+	if err := encodeGetTransactionsLiteServerResponse(response, w, span); err != nil {
 		recordError("EncodeResponse", err)
 		s.cfg.ErrorHandler(ctx, w, r, err)
 		return
@@ -5059,6 +6463,105 @@ func (s *Server) handleSendMessageRequest(args [0]string, w http.ResponseWriter,
 	}
 
 	if err := encodeSendMessageResponse(response, w, span); err != nil {
+		recordError("EncodeResponse", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+}
+
+// handleSendMessageLiteServerRequest handles sendMessageLiteServer operation.
+//
+// Send message.
+//
+// POST /v2/liteserver/send_message
+func (s *Server) handleSendMessageLiteServerRequest(args [0]string, w http.ResponseWriter, r *http.Request) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("sendMessageLiteServer"),
+	}
+
+	// Start a span for this request.
+	ctx, span := s.cfg.Tracer.Start(r.Context(), "SendMessageLiteServer",
+		trace.WithAttributes(otelAttrs...),
+		serverSpanKind,
+	)
+	defer span.End()
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		elapsedDuration := time.Since(startTime)
+		s.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+	}()
+
+	// Increment request counter.
+	s.requests.Add(ctx, 1, otelAttrs...)
+
+	var (
+		recordError = func(stage string, err error) {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			s.errors.Add(ctx, 1, otelAttrs...)
+		}
+		err          error
+		opErrContext = ogenerrors.OperationContext{
+			Name: "SendMessageLiteServer",
+			ID:   "sendMessageLiteServer",
+		}
+	)
+	request, close, err := s.decodeSendMessageLiteServerRequest(r)
+	if err != nil {
+		err = &ogenerrors.DecodeRequestError{
+			OperationContext: opErrContext,
+			Err:              err,
+		}
+		recordError("DecodeRequest", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+	defer func() {
+		if err := close(); err != nil {
+			recordError("CloseRequest", err)
+		}
+	}()
+
+	var response SendMessageLiteServerRes
+	if m := s.cfg.Middleware; m != nil {
+		mreq := middleware.Request{
+			Context:       ctx,
+			OperationName: "SendMessageLiteServer",
+			OperationID:   "sendMessageLiteServer",
+			Body:          request,
+			Params:        middleware.Parameters{},
+			Raw:           r,
+		}
+
+		type (
+			Request  = SendMessageLiteServerReq
+			Params   = struct{}
+			Response = SendMessageLiteServerRes
+		)
+		response, err = middleware.HookMiddleware[
+			Request,
+			Params,
+			Response,
+		](
+			m,
+			mreq,
+			nil,
+			func(ctx context.Context, request Request, params Params) (Response, error) {
+				return s.h.SendMessageLiteServer(ctx, request)
+			},
+		)
+	} else {
+		response, err = s.h.SendMessageLiteServer(ctx, request)
+	}
+	if err != nil {
+		recordError("Internal", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+
+	if err := encodeSendMessageLiteServerResponse(response, w, span); err != nil {
 		recordError("EncodeResponse", err)
 		s.cfg.ErrorHandler(ctx, w, r, err)
 		return
