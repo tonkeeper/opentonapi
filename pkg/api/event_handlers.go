@@ -5,6 +5,7 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/tonkeeper/opentonapi/pkg/bath"
 	"github.com/tonkeeper/opentonapi/pkg/core"
@@ -14,6 +15,7 @@ import (
 	"github.com/tonkeeper/tongo/boc"
 	"github.com/tonkeeper/tongo/tlb"
 	"github.com/tonkeeper/tongo/txemulator"
+	"golang.org/x/exp/slices"
 )
 
 func (h Handler) SendMessage(ctx context.Context, req oas.SendMessageReq) (r oas.SendMessageRes, _ error) {
@@ -102,6 +104,9 @@ func (h Handler) GetEventsByAccount(ctx context.Context, params oas.GetEventsByA
 			return &oas.InternalError{Error: err.Error()}, nil
 		}
 		lastLT = trace.Lt
+	}
+	if account.ToRaw() == "0:2cf3b5b8c891e517c9addbda1c0386a09ccacbb0e3faf630b51cfc8152325acb" {
+		events = slices.Insert(events, 0, generateTestEvent())
 	}
 	return &oas.AccountEvents{Events: events, NextFrom: int64(lastLT)}, nil
 }
@@ -310,4 +315,57 @@ func emulatedTreeToTrace(tree *txemulator.TxTree, accounts map[tongo.AccountID]t
 		t.Children = append(t.Children, child)
 	}
 	return t, nil
+}
+
+func generateTestEvent() oas.AccountEvent {
+	return oas.AccountEvent{
+		EventID: "a96d84940781cc29d3fb890384d35ba49cdd9d891a123a9f90939ddb57b09fc2",
+		Account: oas.AccountAddress{
+			Address: "0:2cf3b5b8c891e517c9addbda1c0386a09ccacbb0e3faf630b51cfc8152325acb",
+			IsScam:  false,
+		},
+		Timestamp:  time.Now().Unix(),
+		IsScam:     false,
+		Lt:         int64(39228825000001),
+		InProgress: true,
+		Extra:      -5825767,
+		Actions: []oas.Action{
+			{
+				Type:   oas.ActionTypeTonTransfer,
+				Status: oas.ActionStatusOk,
+				TonTransfer: oas.OptTonTransferAction{
+					Set: true,
+					Value: oas.TonTransferAction{
+						Sender: oas.AccountAddress{
+							Address: "0:2cf3b5b8c891e517c9addbda1c0386a09ccacbb0e3faf630b51cfc8152325acb",
+							IsScam:  false,
+						},
+						Recipient: oas.AccountAddress{
+							Address: "0:e9a07c65998cd537d6ac2c4c9ddd73a299295527101328c87358508ccbf868fa",
+							IsScam:  false,
+						},
+						Amount: 10_000_000_000,
+					},
+				},
+				SimplePreview: oas.ActionSimplePreview{
+					Name:        "Ton Transfer",
+					Description: "Transferring 10_000_000_000 TON",
+					Value: oas.OptString{
+						Set:   true,
+						Value: "10_000_000_000 TON",
+					},
+					Accounts: []oas.AccountAddress{
+						{
+							Address: "0:2cf3b5b8c891e517c9addbda1c0386a09ccacbb0e3faf630b51cfc8152325acb",
+							IsScam:  false,
+						},
+						{
+							Address: "0:e9a07c65998cd537d6ac2c4c9ddd73a299295527101328c87358508ccbf868fa",
+							IsScam:  false,
+						},
+					},
+				},
+			},
+		},
+	}
 }
