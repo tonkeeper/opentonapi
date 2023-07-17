@@ -874,6 +874,7 @@ func (c *Client) GetAccountInfoByStateInit(ctx context.Context, request GetAccou
 	return result, nil
 }
 
+<<<<<<< HEAD
 // GetAccountSeqno invokes getAccountSeqno operation.
 //
 // Get account seqno.
@@ -882,6 +883,16 @@ func (c *Client) GetAccountInfoByStateInit(ctx context.Context, request GetAccou
 func (c *Client) GetAccountSeqno(ctx context.Context, params GetAccountSeqnoParams) (res GetAccountSeqnoRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getAccountSeqno"),
+=======
+// GetAccountStateLiteServer invokes getAccountStateLiteServer operation.
+//
+// Get account state.
+//
+// GET /v2/liteserver/get_account_state/{account_id}
+func (c *Client) GetAccountStateLiteServer(ctx context.Context, params GetAccountStateLiteServerParams) (res GetAccountStateLiteServerRes, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("getAccountStateLiteServer"),
+>>>>>>> create_raw_methods
 	}
 
 	// Run stopwatch.
@@ -895,7 +906,11 @@ func (c *Client) GetAccountSeqno(ctx context.Context, params GetAccountSeqnoPara
 	c.requests.Add(ctx, 1, otelAttrs...)
 
 	// Start a span for this request.
+<<<<<<< HEAD
 	ctx, span := c.cfg.Tracer.Start(ctx, "GetAccountSeqno",
+=======
+	ctx, span := c.cfg.Tracer.Start(ctx, "GetAccountStateLiteServer",
+>>>>>>> create_raw_methods
 		trace.WithAttributes(otelAttrs...),
 		clientSpanKind,
 	)
@@ -912,7 +927,11 @@ func (c *Client) GetAccountSeqno(ctx context.Context, params GetAccountSeqnoPara
 
 	stage = "BuildURL"
 	u := uri.Clone(c.requestURL(ctx))
+<<<<<<< HEAD
 	u.Path += "/v2/wallet/"
+=======
+	u.Path += "/v2/liteserver/get_account_state/"
+>>>>>>> create_raw_methods
 	{
 		// Encode "account_id" parameter.
 		e := uri.NewPathEncoder(uri.PathEncoderConfig{
@@ -927,7 +946,10 @@ func (c *Client) GetAccountSeqno(ctx context.Context, params GetAccountSeqnoPara
 		}
 		u.Path += e.Result()
 	}
+<<<<<<< HEAD
 	u.Path += "/seqno"
+=======
+>>>>>>> create_raw_methods
 
 	stage = "EncodeRequest"
 	r, err := ht.NewRequest(ctx, "GET", u, nil)
@@ -943,7 +965,11 @@ func (c *Client) GetAccountSeqno(ctx context.Context, params GetAccountSeqnoPara
 	defer resp.Body.Close()
 
 	stage = "DecodeResponse"
+<<<<<<< HEAD
 	result, err := decodeGetAccountSeqnoResponse(resp)
+=======
+	result, err := decodeGetAccountStateLiteServerResponse(resp)
+>>>>>>> create_raw_methods
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -1247,6 +1273,82 @@ func (c *Client) GetAllAuctions(ctx context.Context, params GetAllAuctionsParams
 	return result, nil
 }
 
+// GetAllShardsInfoLiteServer invokes getAllShardsInfoLiteServer operation.
+//
+// Get all shards info.
+//
+// GET /v2/liteserver/get_all_shards_info/{block_id}
+func (c *Client) GetAllShardsInfoLiteServer(ctx context.Context, params GetAllShardsInfoLiteServerParams) (res GetAllShardsInfoLiteServerRes, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("getAllShardsInfoLiteServer"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, otelAttrs...)
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, "GetAllShardsInfoLiteServer",
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, otelAttrs...)
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	u.Path += "/v2/liteserver/get_all_shards_info/"
+	{
+		// Encode "block_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "block_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.BlockID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		u.Path += e.Result()
+	}
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u, nil)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeGetAllShardsInfoLiteServerResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
 // GetBlock invokes getBlock operation.
 //
 // Get block data.
@@ -1316,6 +1418,287 @@ func (c *Client) GetBlock(ctx context.Context, params GetBlockParams) (res GetBl
 
 	stage = "DecodeResponse"
 	result, err := decodeGetBlockResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// GetBlockHeaderLiteServer invokes getBlockHeaderLiteServer operation.
+//
+// Get block header.
+//
+// GET /v2/liteserver/get_block_header/{block_id}
+func (c *Client) GetBlockHeaderLiteServer(ctx context.Context, params GetBlockHeaderLiteServerParams) (res GetBlockHeaderLiteServerRes, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("getBlockHeaderLiteServer"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, otelAttrs...)
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, "GetBlockHeaderLiteServer",
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, otelAttrs...)
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	u.Path += "/v2/liteserver/get_block_header/"
+	{
+		// Encode "block_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "block_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.BlockID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		u.Path += e.Result()
+	}
+
+	stage = "EncodeQueryParams"
+	q := uri.NewQueryEncoder()
+	{
+		// Encode "mode" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "mode",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			return e.EncodeValue(conv.Uint32ToString(params.Mode))
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	u.RawQuery = q.Values().Encode()
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u, nil)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeGetBlockHeaderLiteServerResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// GetBlockLiteServer invokes getBlockLiteServer operation.
+//
+// Get block.
+//
+// GET /v2/liteserver/get_block/{block_id}
+func (c *Client) GetBlockLiteServer(ctx context.Context, params GetBlockLiteServerParams) (res GetBlockLiteServerRes, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("getBlockLiteServer"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, otelAttrs...)
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, "GetBlockLiteServer",
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, otelAttrs...)
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	u.Path += "/v2/liteserver/get_block/"
+	{
+		// Encode "block_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "block_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.BlockID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		u.Path += e.Result()
+	}
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u, nil)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeGetBlockLiteServerResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// GetBlockProofLiteServer invokes getBlockProofLiteServer operation.
+//
+// Get block proof.
+//
+// GET /v2/liteserver/get_block_proof
+func (c *Client) GetBlockProofLiteServer(ctx context.Context, params GetBlockProofLiteServerParams) (res GetBlockProofLiteServerRes, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("getBlockProofLiteServer"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, otelAttrs...)
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, "GetBlockProofLiteServer",
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, otelAttrs...)
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	u.Path += "/v2/liteserver/get_block_proof"
+
+	stage = "EncodeQueryParams"
+	q := uri.NewQueryEncoder()
+	{
+		// Encode "known_block" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "known_block",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			return e.EncodeValue(conv.StringToString(params.KnownBlock))
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "target_block" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "target_block",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.TargetBlock.Get(); ok {
+				return e.EncodeValue(conv.StringToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "mode" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "mode",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			return e.EncodeValue(conv.Uint32ToString(params.Mode))
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	u.RawQuery = q.Values().Encode()
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u, nil)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeGetBlockProofLiteServerResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -1455,6 +1838,100 @@ func (c *Client) GetConfig(ctx context.Context) (res GetConfigRes, err error) {
 
 	stage = "DecodeResponse"
 	result, err := decodeGetConfigResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// GetConfigAllLiteServer invokes getConfigAllLiteServer operation.
+//
+// Get config all.
+//
+// GET /v2/liteserver/get_config_all/{block_id}
+func (c *Client) GetConfigAllLiteServer(ctx context.Context, params GetConfigAllLiteServerParams) (res GetConfigAllLiteServerRes, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("getConfigAllLiteServer"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, otelAttrs...)
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, "GetConfigAllLiteServer",
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, otelAttrs...)
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	u.Path += "/v2/liteserver/get_config_all/"
+	{
+		// Encode "block_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "block_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.BlockID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		u.Path += e.Result()
+	}
+
+	stage = "EncodeQueryParams"
+	q := uri.NewQueryEncoder()
+	{
+		// Encode "mode" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "mode",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			return e.EncodeValue(conv.Uint32ToString(params.Mode))
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	u.RawQuery = q.Values().Encode()
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u, nil)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeGetConfigAllLiteServerResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -2628,6 +3105,148 @@ func (c *Client) GetJettonsHistoryByID(ctx context.Context, params GetJettonsHis
 	return result, nil
 }
 
+// GetListBlockTransactionsLiteServer invokes getListBlockTransactionsLiteServer operation.
+//
+// Get list block transactions.
+//
+// GET /v2/liteserver/list_block_transactions/{block_id}
+func (c *Client) GetListBlockTransactionsLiteServer(ctx context.Context, params GetListBlockTransactionsLiteServerParams) (res GetListBlockTransactionsLiteServerRes, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("getListBlockTransactionsLiteServer"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, otelAttrs...)
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, "GetListBlockTransactionsLiteServer",
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, otelAttrs...)
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	u.Path += "/v2/liteserver/list_block_transactions/"
+	{
+		// Encode "block_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "block_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.BlockID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		u.Path += e.Result()
+	}
+
+	stage = "EncodeQueryParams"
+	q := uri.NewQueryEncoder()
+	{
+		// Encode "mode" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "mode",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			return e.EncodeValue(conv.Uint32ToString(params.Mode))
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "count" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "count",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			return e.EncodeValue(conv.Uint32ToString(params.Count))
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "account_id" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "account_id",
+			Style:   uri.QueryStyleForm,
+			Explode: false,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.AccountID.Get(); ok {
+				return e.EncodeValue(conv.StringToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "lt" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "lt",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.Lt.Get(); ok {
+				return e.EncodeValue(conv.Uint64ToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	u.RawQuery = q.Values().Encode()
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u, nil)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeGetListBlockTransactionsLiteServerResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
 // GetMasterchainHead invokes getMasterchainHead operation.
 //
 // Get last known masterchain block.
@@ -2683,6 +3302,148 @@ func (c *Client) GetMasterchainHead(ctx context.Context) (res GetMasterchainHead
 
 	stage = "DecodeResponse"
 	result, err := decodeGetMasterchainHeadResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// GetMasterchainInfoExtLiteServer invokes getMasterchainInfoExtLiteServer operation.
+//
+// Get masterchain info ext.
+//
+// GET /v2/liteserver/get_masterchain_info_ext
+func (c *Client) GetMasterchainInfoExtLiteServer(ctx context.Context, params GetMasterchainInfoExtLiteServerParams) (res GetMasterchainInfoExtLiteServerRes, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("getMasterchainInfoExtLiteServer"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, otelAttrs...)
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, "GetMasterchainInfoExtLiteServer",
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, otelAttrs...)
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	u.Path += "/v2/liteserver/get_masterchain_info_ext"
+
+	stage = "EncodeQueryParams"
+	q := uri.NewQueryEncoder()
+	{
+		// Encode "mode" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "mode",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			return e.EncodeValue(conv.Uint32ToString(params.Mode))
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	u.RawQuery = q.Values().Encode()
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u, nil)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeGetMasterchainInfoExtLiteServerResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// GetMasterchainInfoLiteServer invokes getMasterchainInfoLiteServer operation.
+//
+// Get masterchain info.
+//
+// GET /v2/liteserver/get_masterchain_info
+func (c *Client) GetMasterchainInfoLiteServer(ctx context.Context) (res GetMasterchainInfoLiteServerRes, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("getMasterchainInfoLiteServer"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, otelAttrs...)
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, "GetMasterchainInfoLiteServer",
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, otelAttrs...)
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	u.Path += "/v2/liteserver/get_masterchain_info"
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u, nil)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeGetMasterchainInfoLiteServerResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -3499,6 +4260,280 @@ func (c *Client) GetSearchAccounts(ctx context.Context, params GetSearchAccounts
 	return result, nil
 }
 
+// GetShardBlockProofLiteServer invokes getShardBlockProofLiteServer operation.
+//
+// Get shard block proof.
+//
+// GET /v2/liteserver/get_shard_block_proof/{block_id}
+func (c *Client) GetShardBlockProofLiteServer(ctx context.Context, params GetShardBlockProofLiteServerParams) (res GetShardBlockProofLiteServerRes, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("getShardBlockProofLiteServer"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, otelAttrs...)
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, "GetShardBlockProofLiteServer",
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, otelAttrs...)
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	u.Path += "/v2/liteserver/get_shard_block_proof/"
+	{
+		// Encode "block_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "block_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.BlockID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		u.Path += e.Result()
+	}
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u, nil)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeGetShardBlockProofLiteServerResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// GetShardInfoLiteServer invokes getShardInfoLiteServer operation.
+//
+// Get shard info.
+//
+// GET /v2/liteserver/get_shard_info/{block_id}
+func (c *Client) GetShardInfoLiteServer(ctx context.Context, params GetShardInfoLiteServerParams) (res GetShardInfoLiteServerRes, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("getShardInfoLiteServer"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, otelAttrs...)
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, "GetShardInfoLiteServer",
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, otelAttrs...)
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	u.Path += "/v2/liteserver/get_shard_info/"
+	{
+		// Encode "block_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "block_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.BlockID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		u.Path += e.Result()
+	}
+
+	stage = "EncodeQueryParams"
+	q := uri.NewQueryEncoder()
+	{
+		// Encode "workchain" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "workchain",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			return e.EncodeValue(conv.Uint32ToString(params.Workchain))
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "shard" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "shard",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			return e.EncodeValue(conv.Uint64ToString(params.Shard))
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "exact" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "exact",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			return e.EncodeValue(conv.BoolToString(params.Exact))
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	u.RawQuery = q.Values().Encode()
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u, nil)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeGetShardInfoLiteServerResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// GetStateLiteServer invokes getStateLiteServer operation.
+//
+// Get block state.
+//
+// GET /v2/liteserver/get_state/{block_id}
+func (c *Client) GetStateLiteServer(ctx context.Context, params GetStateLiteServerParams) (res GetStateLiteServerRes, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("getStateLiteServer"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, otelAttrs...)
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, "GetStateLiteServer",
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, otelAttrs...)
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	u.Path += "/v2/liteserver/get_state/"
+	{
+		// Encode "block_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "block_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.BlockID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		u.Path += e.Result()
+	}
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u, nil)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeGetStateLiteServerResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
 // GetStorageProviders invokes getStorageProviders operation.
 //
 // Get TON storage providers deployed to the blockchain.
@@ -3631,6 +4666,68 @@ func (c *Client) GetSubscriptionsByAccount(ctx context.Context, params GetSubscr
 
 	stage = "DecodeResponse"
 	result, err := decodeGetSubscriptionsByAccountResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// GetTimeLiteServer invokes getTimeLiteServer operation.
+//
+// Get time.
+//
+// GET /v2/liteserver/get_time
+func (c *Client) GetTimeLiteServer(ctx context.Context) (res GetTimeLiteServerRes, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("getTimeLiteServer"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, otelAttrs...)
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, "GetTimeLiteServer",
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, otelAttrs...)
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	u.Path += "/v2/liteserver/get_time"
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u, nil)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeGetTimeLiteServerResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -3950,6 +5047,7 @@ func (c *Client) GetTransaction(ctx context.Context, params GetTransactionParams
 	return result, nil
 }
 
+<<<<<<< HEAD
 // GetTransactionByMessageHash invokes getTransactionByMessageHash operation.
 //
 // Get transaction data by message hash.
@@ -3958,6 +5056,16 @@ func (c *Client) GetTransaction(ctx context.Context, params GetTransactionParams
 func (c *Client) GetTransactionByMessageHash(ctx context.Context, params GetTransactionByMessageHashParams) (res GetTransactionByMessageHashRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getTransactionByMessageHash"),
+=======
+// GetTransactionsLiteServer invokes getTransactionsLiteServer operation.
+//
+// Get transactions.
+//
+// GET /v2/liteserver/get_transactions/{account_id}
+func (c *Client) GetTransactionsLiteServer(ctx context.Context, params GetTransactionsLiteServerParams) (res GetTransactionsLiteServerRes, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("getTransactionsLiteServer"),
+>>>>>>> create_raw_methods
 	}
 
 	// Run stopwatch.
@@ -3971,7 +5079,11 @@ func (c *Client) GetTransactionByMessageHash(ctx context.Context, params GetTran
 	c.requests.Add(ctx, 1, otelAttrs...)
 
 	// Start a span for this request.
+<<<<<<< HEAD
 	ctx, span := c.cfg.Tracer.Start(ctx, "GetTransactionByMessageHash",
+=======
+	ctx, span := c.cfg.Tracer.Start(ctx, "GetTransactionsLiteServer",
+>>>>>>> create_raw_methods
 		trace.WithAttributes(otelAttrs...),
 		clientSpanKind,
 	)
@@ -3988,22 +5100,83 @@ func (c *Client) GetTransactionByMessageHash(ctx context.Context, params GetTran
 
 	stage = "BuildURL"
 	u := uri.Clone(c.requestURL(ctx))
+<<<<<<< HEAD
 	u.Path += "/v2/blockchain/messages/"
 	{
 		// Encode "msg_id" parameter.
 		e := uri.NewPathEncoder(uri.PathEncoderConfig{
 			Param:   "msg_id",
+=======
+	u.Path += "/v2/liteserver/get_transactions/"
+	{
+		// Encode "account_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "account_id",
+>>>>>>> create_raw_methods
 			Style:   uri.PathStyleSimple,
 			Explode: false,
 		})
 		if err := func() error {
+<<<<<<< HEAD
 			return e.EncodeValue(conv.StringToString(params.MsgID))
+=======
+			return e.EncodeValue(conv.StringToString(params.AccountID))
+>>>>>>> create_raw_methods
 		}(); err != nil {
 			return res, errors.Wrap(err, "encode path")
 		}
 		u.Path += e.Result()
 	}
+<<<<<<< HEAD
 	u.Path += "/transaction"
+=======
+
+	stage = "EncodeQueryParams"
+	q := uri.NewQueryEncoder()
+	{
+		// Encode "count" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "count",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			return e.EncodeValue(conv.Uint32ToString(params.Count))
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "lt" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "lt",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			return e.EncodeValue(conv.Uint64ToString(params.Lt))
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "hash" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "hash",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			return e.EncodeValue(conv.StringToString(params.Hash))
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	u.RawQuery = q.Values().Encode()
+>>>>>>> create_raw_methods
 
 	stage = "EncodeRequest"
 	r, err := ht.NewRequest(ctx, "GET", u, nil)
@@ -4019,7 +5192,11 @@ func (c *Client) GetTransactionByMessageHash(ctx context.Context, params GetTran
 	defer resp.Body.Close()
 
 	stage = "DecodeResponse"
+<<<<<<< HEAD
 	result, err := decodeGetTransactionByMessageHashResponse(resp)
+=======
+	result, err := decodeGetTransactionsLiteServerResponse(resp)
+>>>>>>> create_raw_methods
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -4454,6 +5631,71 @@ func (c *Client) SendMessage(ctx context.Context, request SendMessageReq) (res S
 
 	stage = "DecodeResponse"
 	result, err := decodeSendMessageResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// SendMessageLiteServer invokes sendMessageLiteServer operation.
+//
+// Send message.
+//
+// POST /v2/liteserver/send_message
+func (c *Client) SendMessageLiteServer(ctx context.Context, request SendMessageLiteServerReq) (res SendMessageLiteServerRes, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("sendMessageLiteServer"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, otelAttrs...)
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, "SendMessageLiteServer",
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, otelAttrs...)
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	u.Path += "/v2/liteserver/send_message"
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "POST", u, nil)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeSendMessageLiteServerRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeSendMessageLiteServerResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}

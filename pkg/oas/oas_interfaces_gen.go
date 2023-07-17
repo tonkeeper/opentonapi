@@ -41,8 +41,13 @@ type GetAccountRes interface {
 	getAccountRes()
 }
 
+<<<<<<< HEAD
 type GetAccountSeqnoRes interface {
 	getAccountSeqnoRes()
+=======
+type GetAccountStateLiteServerRes interface {
+	getAccountStateLiteServerRes()
+>>>>>>> create_raw_methods
 }
 
 type GetAccountTransactionsRes interface {
@@ -57,12 +62,32 @@ type GetAllAuctionsRes interface {
 	getAllAuctionsRes()
 }
 
+type GetAllShardsInfoLiteServerRes interface {
+	getAllShardsInfoLiteServerRes()
+}
+
+type GetBlockHeaderLiteServerRes interface {
+	getBlockHeaderLiteServerRes()
+}
+
+type GetBlockLiteServerRes interface {
+	getBlockLiteServerRes()
+}
+
+type GetBlockProofLiteServerRes interface {
+	getBlockProofLiteServerRes()
+}
+
 type GetBlockRes interface {
 	getBlockRes()
 }
 
 type GetBlockTransactionsRes interface {
 	getBlockTransactionsRes()
+}
+
+type GetConfigAllLiteServerRes interface {
+	getConfigAllLiteServerRes()
 }
 
 type GetConfigRes interface {
@@ -105,12 +130,25 @@ type GetJettonsHistoryRes interface {
 	getJettonsHistoryRes()
 }
 
+<<<<<<< HEAD
 type GetJettonsRes interface {
 	getJettonsRes()
+=======
+type GetListBlockTransactionsLiteServerRes interface {
+	getListBlockTransactionsLiteServerRes()
+>>>>>>> create_raw_methods
 }
 
 type GetMasterchainHeadRes interface {
 	getMasterchainHeadRes()
+}
+
+type GetMasterchainInfoExtLiteServerRes interface {
+	getMasterchainInfoExtLiteServerRes()
+}
+
+type GetMasterchainInfoLiteServerRes interface {
+	getMasterchainInfoLiteServerRes()
 }
 
 type GetNftCollectionRes interface {
@@ -149,12 +187,28 @@ type GetSearchAccountsRes interface {
 	getSearchAccountsRes()
 }
 
+type GetShardBlockProofLiteServerRes interface {
+	getShardBlockProofLiteServerRes()
+}
+
+type GetShardInfoLiteServerRes interface {
+	getShardInfoLiteServerRes()
+}
+
+type GetStateLiteServerRes interface {
+	getStateLiteServerRes()
+}
+
 type GetStorageProvidersRes interface {
 	getStorageProvidersRes()
 }
 
 type GetSubscriptionsByAccountRes interface {
 	getSubscriptionsByAccountRes()
+}
+
+type GetTimeLiteServerRes interface {
+	getTimeLiteServerRes()
 }
 
 type GetTonConnectPayloadRes interface {
@@ -177,6 +231,10 @@ type GetTransactionRes interface {
 	getTransactionRes()
 }
 
+type GetTransactionsLiteServerRes interface {
+	getTransactionsLiteServerRes()
+}
+
 type GetValidatorsRes interface {
 	getValidatorsRes()
 }
@@ -195,6 +253,10 @@ type PoolsByNominatorsRes interface {
 
 type ReindexAccountRes interface {
 	reindexAccountRes()
+}
+
+type SendMessageLiteServerRes interface {
+	sendMessageLiteServerRes()
 }
 
 type SendMessageRes interface {

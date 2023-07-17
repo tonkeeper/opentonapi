@@ -880,6 +880,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 					return
 				}
+<<<<<<< HEAD
 				switch elem[0] {
 				case '/': // Prefix: "/"
 					if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
@@ -909,6 +910,10 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				}
 			case 'n': // Prefix: "nfts/"
 				if l := len("nfts/"); len(elem) >= l && elem[0:l] == "nfts/" {
+=======
+			case 'l': // Prefix: "liteserver/"
+				if l := len("liteserver/"); len(elem) >= l && elem[0:l] == "liteserver/" {
+>>>>>>> create_raw_methods
 					elem = elem[l:]
 				} else {
 					break
@@ -918,83 +923,45 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 					break
 				}
 				switch elem[0] {
-				case '_': // Prefix: "_bulk"
-					if l := len("_bulk"); len(elem) >= l && elem[0:l] == "_bulk" {
+				case 'g': // Prefix: "get_"
+					if l := len("get_"); len(elem) >= l && elem[0:l] == "get_" {
 						elem = elem[l:]
 					} else {
 						break
 					}
 
 					if len(elem) == 0 {
-						// Leaf node.
-						switch r.Method {
-						case "POST":
-							s.handleGetNftItemsByAddressesRequest([0]string{}, w, r)
-						default:
-							s.notAllowed(w, r, "POST")
-						}
-
-						return
-					}
-				case 'c': // Prefix: "collections"
-					if l := len("collections"); len(elem) >= l && elem[0:l] == "collections" {
-						elem = elem[l:]
-					} else {
 						break
-					}
-
-					if len(elem) == 0 {
-						switch r.Method {
-						case "GET":
-							s.handleGetNftCollectionsRequest([0]string{}, w, r)
-						default:
-							s.notAllowed(w, r, "GET")
-						}
-
-						return
 					}
 					switch elem[0] {
-					case '/': // Prefix: "/"
-						if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+					case 'a': // Prefix: "a"
+						if l := len("a"); len(elem) >= l && elem[0:l] == "a" {
 							elem = elem[l:]
 						} else {
 							break
 						}
 
-						// Param: "account_id"
-						// Match until "/"
-						idx := strings.IndexByte(elem, '/')
-						if idx < 0 {
-							idx = len(elem)
-						}
-						args[0] = elem[:idx]
-						elem = elem[idx:]
-
 						if len(elem) == 0 {
-							switch r.Method {
-							case "GET":
-								s.handleGetNftCollectionRequest([1]string{
-									args[0],
-								}, w, r)
-							default:
-								s.notAllowed(w, r, "GET")
-							}
-
-							return
+							break
 						}
 						switch elem[0] {
-						case '/': // Prefix: "/items"
-							if l := len("/items"); len(elem) >= l && elem[0:l] == "/items" {
+						case 'c': // Prefix: "ccount_state/"
+							if l := len("ccount_state/"); len(elem) >= l && elem[0:l] == "ccount_state/" {
 								elem = elem[l:]
 							} else {
 								break
 							}
 
+							// Param: "account_id"
+							// Leaf parameter
+							args[0] = elem
+							elem = ""
+
 							if len(elem) == 0 {
 								// Leaf node.
 								switch r.Method {
 								case "GET":
-									s.handleGetItemsFromCollectionRequest([1]string{
+									s.handleGetAccountStateLiteServerRequest([1]string{
 										args[0],
 									}, w, r)
 								default:
@@ -1003,6 +970,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 								return
 							}
+<<<<<<< HEAD
 						}
 					}
 				}
@@ -1127,6 +1095,661 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 						switch elem[0] {
 						case '/': // Prefix: "/pools"
 							if l := len("/pools"); len(elem) >= l && elem[0:l] == "/pools" {
+=======
+						case 'l': // Prefix: "ll_shards_info/"
+							if l := len("ll_shards_info/"); len(elem) >= l && elem[0:l] == "ll_shards_info/" {
+>>>>>>> create_raw_methods
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							// Param: "block_id"
+							// Leaf parameter
+							args[0] = elem
+							elem = ""
+
+							if len(elem) == 0 {
+								// Leaf node.
+								switch r.Method {
+								case "GET":
+									s.handleGetAllShardsInfoLiteServerRequest([1]string{
+										args[0],
+									}, w, r)
+								default:
+									s.notAllowed(w, r, "GET")
+								}
+
+								return
+							}
+						}
+					case 'b': // Prefix: "block"
+						if l := len("block"); len(elem) >= l && elem[0:l] == "block" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						if len(elem) == 0 {
+							break
+						}
+						switch elem[0] {
+						case '/': // Prefix: "/"
+							if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+<<<<<<< HEAD
+							// Param: "account_id"
+							// Match until "/"
+							idx := strings.IndexByte(elem, '/')
+							if idx < 0 {
+								idx = len(elem)
+							}
+							args[0] = elem[:idx]
+							elem = elem[idx:]
+=======
+							// Param: "block_id"
+							// Leaf parameter
+							args[0] = elem
+							elem = ""
+>>>>>>> create_raw_methods
+
+							if len(elem) == 0 {
+								switch r.Method {
+								case "GET":
+									s.handleGetBlockLiteServerRequest([1]string{
+										args[0],
+									}, w, r)
+								default:
+									s.notAllowed(w, r, "GET")
+								}
+
+								return
+							}
+<<<<<<< HEAD
+							switch elem[0] {
+							case '/': // Prefix: "/history"
+								if l := len("/history"); len(elem) >= l && elem[0:l] == "/history" {
+									elem = elem[l:]
+								} else {
+									break
+								}
+
+								if len(elem) == 0 {
+									// Leaf node.
+									switch r.Method {
+									case "GET":
+										s.handleStakingPoolHistoryRequest([1]string{
+											args[0],
+										}, w, r)
+									default:
+										s.notAllowed(w, r, "GET")
+									}
+
+									return
+								}
+							}
+						case 's': // Prefix: "s"
+							if l := len("s"); len(elem) >= l && elem[0:l] == "s" {
+=======
+						case '_': // Prefix: "_"
+							if l := len("_"); len(elem) >= l && elem[0:l] == "_" {
+>>>>>>> create_raw_methods
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							if len(elem) == 0 {
+								break
+							}
+							switch elem[0] {
+							case 'h': // Prefix: "header/"
+								if l := len("header/"); len(elem) >= l && elem[0:l] == "header/" {
+									elem = elem[l:]
+								} else {
+									break
+								}
+
+								// Param: "block_id"
+								// Leaf parameter
+								args[0] = elem
+								elem = ""
+
+								if len(elem) == 0 {
+									// Leaf node.
+									switch r.Method {
+									case "GET":
+										s.handleGetBlockHeaderLiteServerRequest([1]string{
+											args[0],
+										}, w, r)
+									default:
+										s.notAllowed(w, r, "GET")
+									}
+
+									return
+								}
+							case 'p': // Prefix: "proof"
+								if l := len("proof"); len(elem) >= l && elem[0:l] == "proof" {
+									elem = elem[l:]
+								} else {
+									break
+								}
+
+								if len(elem) == 0 {
+									// Leaf node.
+									switch r.Method {
+									case "GET":
+										s.handleGetBlockProofLiteServerRequest([0]string{}, w, r)
+									default:
+										s.notAllowed(w, r, "GET")
+									}
+
+									return
+								}
+							}
+						}
+					case 'c': // Prefix: "config_all/"
+						if l := len("config_all/"); len(elem) >= l && elem[0:l] == "config_all/" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						// Param: "block_id"
+						// Leaf parameter
+						args[0] = elem
+						elem = ""
+
+						if len(elem) == 0 {
+							// Leaf node.
+							switch r.Method {
+							case "GET":
+								s.handleGetConfigAllLiteServerRequest([1]string{
+									args[0],
+								}, w, r)
+							default:
+								s.notAllowed(w, r, "GET")
+							}
+
+							return
+						}
+					case 'm': // Prefix: "masterchain_info"
+						if l := len("masterchain_info"); len(elem) >= l && elem[0:l] == "masterchain_info" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						if len(elem) == 0 {
+							switch r.Method {
+							case "GET":
+								s.handleGetMasterchainInfoLiteServerRequest([0]string{}, w, r)
+							default:
+								s.notAllowed(w, r, "GET")
+							}
+
+							return
+						}
+						switch elem[0] {
+						case '_': // Prefix: "_ext"
+							if l := len("_ext"); len(elem) >= l && elem[0:l] == "_ext" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							if len(elem) == 0 {
+								// Leaf node.
+								switch r.Method {
+								case "GET":
+									s.handleGetMasterchainInfoExtLiteServerRequest([0]string{}, w, r)
+								default:
+									s.notAllowed(w, r, "GET")
+								}
+
+								return
+							}
+						}
+					case 's': // Prefix: "s"
+						if l := len("s"); len(elem) >= l && elem[0:l] == "s" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						if len(elem) == 0 {
+							break
+						}
+						switch elem[0] {
+						case 'h': // Prefix: "hard_"
+							if l := len("hard_"); len(elem) >= l && elem[0:l] == "hard_" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							if len(elem) == 0 {
+								break
+							}
+							switch elem[0] {
+							case 'b': // Prefix: "block_proof/"
+								if l := len("block_proof/"); len(elem) >= l && elem[0:l] == "block_proof/" {
+									elem = elem[l:]
+								} else {
+									break
+								}
+
+								// Param: "block_id"
+								// Leaf parameter
+								args[0] = elem
+								elem = ""
+
+								if len(elem) == 0 {
+									// Leaf node.
+									switch r.Method {
+									case "GET":
+										s.handleGetShardBlockProofLiteServerRequest([1]string{
+											args[0],
+										}, w, r)
+									default:
+										s.notAllowed(w, r, "GET")
+									}
+
+									return
+								}
+							case 'i': // Prefix: "info/"
+								if l := len("info/"); len(elem) >= l && elem[0:l] == "info/" {
+									elem = elem[l:]
+								} else {
+									break
+								}
+
+								// Param: "block_id"
+								// Leaf parameter
+								args[0] = elem
+								elem = ""
+
+								if len(elem) == 0 {
+									// Leaf node.
+									switch r.Method {
+									case "GET":
+										s.handleGetShardInfoLiteServerRequest([1]string{
+											args[0],
+										}, w, r)
+									default:
+										s.notAllowed(w, r, "GET")
+									}
+
+									return
+								}
+							}
+						case 't': // Prefix: "tate/"
+							if l := len("tate/"); len(elem) >= l && elem[0:l] == "tate/" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							// Param: "block_id"
+							// Leaf parameter
+							args[0] = elem
+							elem = ""
+
+							if len(elem) == 0 {
+								// Leaf node.
+								switch r.Method {
+								case "GET":
+									s.handleGetStateLiteServerRequest([1]string{
+										args[0],
+									}, w, r)
+								default:
+									s.notAllowed(w, r, "GET")
+								}
+
+								return
+							}
+						}
+					case 't': // Prefix: "t"
+						if l := len("t"); len(elem) >= l && elem[0:l] == "t" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						if len(elem) == 0 {
+							break
+						}
+						switch elem[0] {
+						case 'i': // Prefix: "ime"
+							if l := len("ime"); len(elem) >= l && elem[0:l] == "ime" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							if len(elem) == 0 {
+								// Leaf node.
+								switch r.Method {
+								case "GET":
+									s.handleGetTimeLiteServerRequest([0]string{}, w, r)
+								default:
+									s.notAllowed(w, r, "GET")
+								}
+
+								return
+							}
+						case 'r': // Prefix: "ransactions/"
+							if l := len("ransactions/"); len(elem) >= l && elem[0:l] == "ransactions/" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							// Param: "account_id"
+							// Leaf parameter
+							args[0] = elem
+							elem = ""
+
+							if len(elem) == 0 {
+								// Leaf node.
+								switch r.Method {
+								case "GET":
+									s.handleGetTransactionsLiteServerRequest([1]string{
+										args[0],
+									}, w, r)
+								default:
+									s.notAllowed(w, r, "GET")
+								}
+
+								return
+							}
+						}
+					}
+				case 'l': // Prefix: "list_block_transactions/"
+					if l := len("list_block_transactions/"); len(elem) >= l && elem[0:l] == "list_block_transactions/" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					// Param: "block_id"
+					// Leaf parameter
+					args[0] = elem
+					elem = ""
+
+					if len(elem) == 0 {
+						// Leaf node.
+						switch r.Method {
+						case "GET":
+							s.handleGetListBlockTransactionsLiteServerRequest([1]string{
+								args[0],
+							}, w, r)
+						default:
+							s.notAllowed(w, r, "GET")
+						}
+
+						return
+					}
+				case 's': // Prefix: "send_message"
+					if l := len("send_message"); len(elem) >= l && elem[0:l] == "send_message" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					if len(elem) == 0 {
+						// Leaf node.
+						switch r.Method {
+						case "POST":
+							s.handleSendMessageLiteServerRequest([0]string{}, w, r)
+						default:
+							s.notAllowed(w, r, "POST")
+						}
+
+						return
+					}
+				}
+			case 'n': // Prefix: "nfts/"
+				if l := len("nfts/"); len(elem) >= l && elem[0:l] == "nfts/" {
+					elem = elem[l:]
+				} else {
+					break
+				}
+
+				if len(elem) == 0 {
+					break
+				}
+				switch elem[0] {
+				case '_': // Prefix: "_bulk"
+					if l := len("_bulk"); len(elem) >= l && elem[0:l] == "_bulk" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					if len(elem) == 0 {
+						// Leaf node.
+						switch r.Method {
+						case "POST":
+							s.handleGetNftItemsByAddressesRequest([0]string{}, w, r)
+						default:
+							s.notAllowed(w, r, "POST")
+						}
+
+						return
+					}
+				case 'c': // Prefix: "collections"
+					if l := len("collections"); len(elem) >= l && elem[0:l] == "collections" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					if len(elem) == 0 {
+						switch r.Method {
+						case "GET":
+							s.handleGetNftCollectionsRequest([0]string{}, w, r)
+						default:
+							s.notAllowed(w, r, "GET")
+						}
+
+						return
+					}
+<<<<<<< HEAD
+				}
+				// Param: "account_id"
+				// Match until "/"
+				idx := strings.IndexByte(elem, '/')
+				if idx < 0 {
+					idx = len(elem)
+				}
+				args[0] = elem[:idx]
+				elem = elem[idx:]
+
+				if len(elem) == 0 {
+					break
+				}
+				switch elem[0] {
+				case '/': // Prefix: "/seqno"
+					if l := len("/seqno"); len(elem) >= l && elem[0:l] == "/seqno" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					if len(elem) == 0 {
+						// Leaf node.
+						switch r.Method {
+						case "GET":
+							s.handleGetAccountSeqnoRequest([1]string{
+								args[0],
+							}, w, r)
+						default:
+							s.notAllowed(w, r, "GET")
+						}
+
+						return
+					}
+				}
+			}
+		}
+	}
+	s.notFound(w, r)
+}
+
+// Route is route object.
+type Route struct {
+	name        string
+	operationID string
+	count       int
+	args        [2]string
+}
+
+// Name returns ogen operation name.
+//
+// It is guaranteed to be unique and not empty.
+func (r Route) Name() string {
+	return r.name
+}
+=======
+					switch elem[0] {
+					case '/': // Prefix: "/"
+						if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+>>>>>>> create_raw_methods
+
+						// Param: "account_id"
+						// Match until "/"
+						idx := strings.IndexByte(elem, '/')
+						if idx < 0 {
+							idx = len(elem)
+						}
+						args[0] = elem[:idx]
+						elem = elem[idx:]
+
+						if len(elem) == 0 {
+							switch r.Method {
+							case "GET":
+								s.handleGetNftCollectionRequest([1]string{
+									args[0],
+								}, w, r)
+							default:
+								s.notAllowed(w, r, "GET")
+							}
+
+							return
+						}
+						switch elem[0] {
+						case '/': // Prefix: "/items"
+							if l := len("/items"); len(elem) >= l && elem[0:l] == "/items" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							if len(elem) == 0 {
+								// Leaf node.
+								switch r.Method {
+								case "GET":
+									s.handleGetItemsFromCollectionRequest([1]string{
+										args[0],
+									}, w, r)
+								default:
+									s.notAllowed(w, r, "GET")
+								}
+
+								return
+							}
+						}
+					}
+				}
+				// Param: "account_id"
+				// Leaf parameter
+				args[0] = elem
+				elem = ""
+
+				if len(elem) == 0 {
+					// Leaf node.
+					switch r.Method {
+					case "GET":
+						s.handleGetNftItemByAddressRequest([1]string{
+							args[0],
+						}, w, r)
+					default:
+						s.notAllowed(w, r, "GET")
+					}
+
+					return
+				}
+			case 'r': // Prefix: "rates"
+				if l := len("rates"); len(elem) >= l && elem[0:l] == "rates" {
+					elem = elem[l:]
+				} else {
+					break
+				}
+
+				if len(elem) == 0 {
+					// Leaf node.
+					switch r.Method {
+					case "GET":
+						s.handleGetRatesRequest([0]string{}, w, r)
+					default:
+						s.notAllowed(w, r, "GET")
+					}
+
+					return
+				}
+			case 's': // Prefix: "st"
+				if l := len("st"); len(elem) >= l && elem[0:l] == "st" {
+					elem = elem[l:]
+				} else {
+					break
+				}
+
+				if len(elem) == 0 {
+					break
+				}
+				switch elem[0] {
+				case 'a': // Prefix: "aking/"
+					if l := len("aking/"); len(elem) >= l && elem[0:l] == "aking/" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					if len(elem) == 0 {
+						break
+					}
+					switch elem[0] {
+					case 'n': // Prefix: "nominator/"
+						if l := len("nominator/"); len(elem) >= l && elem[0:l] == "nominator/" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						// Param: "account_id"
+						// Match until "/"
+						idx := strings.IndexByte(elem, '/')
+						if idx < 0 {
+							idx = len(elem)
+						}
+						args[0] = elem[:idx]
+						elem = elem[idx:]
+
+						if len(elem) == 0 {
+							break
+						}
+						switch elem[0] {
+						case '/': // Prefix: "/pools"
+							if l := len("/pools"); len(elem) >= l && elem[0:l] == "/pools" {
 								elem = elem[l:]
 							} else {
 								break
@@ -1165,15 +1788,12 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 							}
 
 							// Param: "account_id"
-							// Match until "/"
-							idx := strings.IndexByte(elem, '/')
-							if idx < 0 {
-								idx = len(elem)
-							}
-							args[0] = elem[:idx]
-							elem = elem[idx:]
+							// Leaf parameter
+							args[0] = elem
+							elem = ""
 
 							if len(elem) == 0 {
+								// Leaf node.
 								switch r.Method {
 								case "GET":
 									s.handleStakingPoolInfoRequest([1]string{
@@ -1184,28 +1804,6 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 								}
 
 								return
-							}
-							switch elem[0] {
-							case '/': // Prefix: "/history"
-								if l := len("/history"); len(elem) >= l && elem[0:l] == "/history" {
-									elem = elem[l:]
-								} else {
-									break
-								}
-
-								if len(elem) == 0 {
-									// Leaf node.
-									switch r.Method {
-									case "GET":
-										s.handleStakingPoolHistoryRequest([1]string{
-											args[0],
-										}, w, r)
-									default:
-										s.notAllowed(w, r, "GET")
-									}
-
-									return
-								}
 							}
 						case 's': // Prefix: "s"
 							if l := len("s"); len(elem) >= l && elem[0:l] == "s" {
@@ -1417,40 +2015,6 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 							s.handleEmulateWalletMessageRequest([0]string{}, w, r)
 						default:
 							s.notAllowed(w, r, "POST")
-						}
-
-						return
-					}
-				}
-				// Param: "account_id"
-				// Match until "/"
-				idx := strings.IndexByte(elem, '/')
-				if idx < 0 {
-					idx = len(elem)
-				}
-				args[0] = elem[:idx]
-				elem = elem[idx:]
-
-				if len(elem) == 0 {
-					break
-				}
-				switch elem[0] {
-				case '/': // Prefix: "/seqno"
-					if l := len("/seqno"); len(elem) >= l && elem[0:l] == "/seqno" {
-						elem = elem[l:]
-					} else {
-						break
-					}
-
-					if len(elem) == 0 {
-						// Leaf node.
-						switch r.Method {
-						case "GET":
-							s.handleGetAccountSeqnoRequest([1]string{
-								args[0],
-							}, w, r)
-						default:
-							s.notAllowed(w, r, "GET")
 						}
 
 						return
@@ -1831,9 +2395,14 @@ func (s *Server) FindRoute(method, path string) (r Route, _ bool) {
 						if len(elem) == 0 {
 							switch method {
 							case "POST":
+<<<<<<< HEAD
+								r.name = "SendMessage"
+								r.operationID = "sendMessage"
+=======
 								// Leaf: ReindexAccount
 								r.name = "ReindexAccount"
 								r.operationID = "reindexAccount"
+>>>>>>> create_raw_methods
 								r.args = args
 								r.count = 1
 								return r, true
@@ -1879,6 +2448,49 @@ func (s *Server) FindRoute(method, path string) (r Route, _ bool) {
 								return r, true
 							default:
 								return
+							}
+						}
+						switch elem[0] {
+						case 's': // Prefix: "s/"
+							if l := len("s/"); len(elem) >= l && elem[0:l] == "s/" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							// Param: "msg_id"
+							// Match until "/"
+							idx := strings.IndexByte(elem, '/')
+							if idx < 0 {
+								idx = len(elem)
+							}
+							args[0] = elem[:idx]
+							elem = elem[idx:]
+
+							if len(elem) == 0 {
+								break
+							}
+							switch elem[0] {
+							case '/': // Prefix: "/transaction"
+								if l := len("/transaction"); len(elem) >= l && elem[0:l] == "/transaction" {
+									elem = elem[l:]
+								} else {
+									break
+								}
+
+								if len(elem) == 0 {
+									switch method {
+									case "GET":
+										// Leaf: GetTransactionByMessageHash
+										r.name = "GetTransactionByMessageHash"
+										r.operationID = "getTransactionByMessageHash"
+										r.args = args
+										r.count = 1
+										return r, true
+									default:
+										return
+									}
+								}
 							}
 						}
 					}
@@ -2092,6 +2704,7 @@ func (s *Server) FindRoute(method, path string) (r Route, _ bool) {
 						if len(elem) == 0 {
 							switch method {
 							case "POST":
+								// Leaf: SendMessage
 								r.name = "SendMessage"
 								r.operationID = "sendMessage"
 								r.args = args
@@ -2099,49 +2712,6 @@ func (s *Server) FindRoute(method, path string) (r Route, _ bool) {
 								return r, true
 							default:
 								return
-							}
-						}
-						switch elem[0] {
-						case 's': // Prefix: "s/"
-							if l := len("s/"); len(elem) >= l && elem[0:l] == "s/" {
-								elem = elem[l:]
-							} else {
-								break
-							}
-
-							// Param: "msg_id"
-							// Match until "/"
-							idx := strings.IndexByte(elem, '/')
-							if idx < 0 {
-								idx = len(elem)
-							}
-							args[0] = elem[:idx]
-							elem = elem[idx:]
-
-							if len(elem) == 0 {
-								break
-							}
-							switch elem[0] {
-							case '/': // Prefix: "/transaction"
-								if l := len("/transaction"); len(elem) >= l && elem[0:l] == "/transaction" {
-									elem = elem[l:]
-								} else {
-									break
-								}
-
-								if len(elem) == 0 {
-									switch method {
-									case "GET":
-										// Leaf: GetTransactionByMessageHash
-										r.name = "GetTransactionByMessageHash"
-										r.operationID = "getTransactionByMessageHash"
-										r.args = args
-										r.count = 1
-										return r, true
-									default:
-										return
-									}
-								}
 							}
 						}
 					}
@@ -2367,15 +2937,425 @@ func (s *Server) FindRoute(method, path string) (r Route, _ bool) {
 						return
 					}
 				}
+<<<<<<< HEAD
 				switch elem[0] {
 				case '/': // Prefix: "/"
 					if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+=======
+			case 'l': // Prefix: "liteserver/"
+				if l := len("liteserver/"); len(elem) >= l && elem[0:l] == "liteserver/" {
+					elem = elem[l:]
+				} else {
+					break
+				}
+
+				if len(elem) == 0 {
+					break
+				}
+				switch elem[0] {
+				case 'g': // Prefix: "get_"
+					if l := len("get_"); len(elem) >= l && elem[0:l] == "get_" {
 						elem = elem[l:]
 					} else {
 						break
 					}
 
+					if len(elem) == 0 {
+						break
+					}
+					switch elem[0] {
+					case 'a': // Prefix: "a"
+						if l := len("a"); len(elem) >= l && elem[0:l] == "a" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						if len(elem) == 0 {
+							break
+						}
+						switch elem[0] {
+						case 'c': // Prefix: "ccount_state/"
+							if l := len("ccount_state/"); len(elem) >= l && elem[0:l] == "ccount_state/" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							// Param: "account_id"
+							// Leaf parameter
+							args[0] = elem
+							elem = ""
+
+							if len(elem) == 0 {
+								switch method {
+								case "GET":
+									// Leaf: GetAccountStateLiteServer
+									r.name = "GetAccountStateLiteServer"
+									r.operationID = "getAccountStateLiteServer"
+									r.args = args
+									r.count = 1
+									return r, true
+								default:
+									return
+								}
+							}
+						case 'l': // Prefix: "ll_shards_info/"
+							if l := len("ll_shards_info/"); len(elem) >= l && elem[0:l] == "ll_shards_info/" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							// Param: "block_id"
+							// Leaf parameter
+							args[0] = elem
+							elem = ""
+
+							if len(elem) == 0 {
+								switch method {
+								case "GET":
+									// Leaf: GetAllShardsInfoLiteServer
+									r.name = "GetAllShardsInfoLiteServer"
+									r.operationID = "getAllShardsInfoLiteServer"
+									r.args = args
+									r.count = 1
+									return r, true
+								default:
+									return
+								}
+							}
+						}
+					case 'b': // Prefix: "block"
+						if l := len("block"); len(elem) >= l && elem[0:l] == "block" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						if len(elem) == 0 {
+							break
+						}
+						switch elem[0] {
+						case '/': // Prefix: "/"
+							if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							// Param: "block_id"
+							// Leaf parameter
+							args[0] = elem
+							elem = ""
+
+							if len(elem) == 0 {
+								switch method {
+								case "GET":
+									// Leaf: GetBlockLiteServer
+									r.name = "GetBlockLiteServer"
+									r.operationID = "getBlockLiteServer"
+									r.args = args
+									r.count = 1
+									return r, true
+								default:
+									return
+								}
+							}
+						case '_': // Prefix: "_"
+							if l := len("_"); len(elem) >= l && elem[0:l] == "_" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							if len(elem) == 0 {
+								break
+							}
+							switch elem[0] {
+							case 'h': // Prefix: "header/"
+								if l := len("header/"); len(elem) >= l && elem[0:l] == "header/" {
+									elem = elem[l:]
+								} else {
+									break
+								}
+
+								// Param: "block_id"
+								// Leaf parameter
+								args[0] = elem
+								elem = ""
+
+								if len(elem) == 0 {
+									switch method {
+									case "GET":
+										// Leaf: GetBlockHeaderLiteServer
+										r.name = "GetBlockHeaderLiteServer"
+										r.operationID = "getBlockHeaderLiteServer"
+										r.args = args
+										r.count = 1
+										return r, true
+									default:
+										return
+									}
+								}
+							case 'p': // Prefix: "proof"
+								if l := len("proof"); len(elem) >= l && elem[0:l] == "proof" {
+									elem = elem[l:]
+								} else {
+									break
+								}
+
+								if len(elem) == 0 {
+									switch method {
+									case "GET":
+										// Leaf: GetBlockProofLiteServer
+										r.name = "GetBlockProofLiteServer"
+										r.operationID = "getBlockProofLiteServer"
+										r.args = args
+										r.count = 0
+										return r, true
+									default:
+										return
+									}
+								}
+							}
+						}
+					case 'c': // Prefix: "config_all/"
+						if l := len("config_all/"); len(elem) >= l && elem[0:l] == "config_all/" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						// Param: "block_id"
+						// Leaf parameter
+						args[0] = elem
+						elem = ""
+
+						if len(elem) == 0 {
+							switch method {
+							case "GET":
+								// Leaf: GetConfigAllLiteServer
+								r.name = "GetConfigAllLiteServer"
+								r.operationID = "getConfigAllLiteServer"
+								r.args = args
+								r.count = 1
+								return r, true
+							default:
+								return
+							}
+						}
+					case 'm': // Prefix: "masterchain_info"
+						if l := len("masterchain_info"); len(elem) >= l && elem[0:l] == "masterchain_info" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						if len(elem) == 0 {
+							switch method {
+							case "GET":
+								r.name = "GetMasterchainInfoLiteServer"
+								r.operationID = "getMasterchainInfoLiteServer"
+								r.args = args
+								r.count = 0
+								return r, true
+							default:
+								return
+							}
+						}
+						switch elem[0] {
+						case '_': // Prefix: "_ext"
+							if l := len("_ext"); len(elem) >= l && elem[0:l] == "_ext" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							if len(elem) == 0 {
+								switch method {
+								case "GET":
+									// Leaf: GetMasterchainInfoExtLiteServer
+									r.name = "GetMasterchainInfoExtLiteServer"
+									r.operationID = "getMasterchainInfoExtLiteServer"
+									r.args = args
+									r.count = 0
+									return r, true
+								default:
+									return
+								}
+							}
+						}
+					case 's': // Prefix: "s"
+						if l := len("s"); len(elem) >= l && elem[0:l] == "s" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						if len(elem) == 0 {
+							break
+						}
+						switch elem[0] {
+						case 'h': // Prefix: "hard_"
+							if l := len("hard_"); len(elem) >= l && elem[0:l] == "hard_" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							if len(elem) == 0 {
+								break
+							}
+							switch elem[0] {
+							case 'b': // Prefix: "block_proof/"
+								if l := len("block_proof/"); len(elem) >= l && elem[0:l] == "block_proof/" {
+									elem = elem[l:]
+								} else {
+									break
+								}
+
+								// Param: "block_id"
+								// Leaf parameter
+								args[0] = elem
+								elem = ""
+
+								if len(elem) == 0 {
+									switch method {
+									case "GET":
+										// Leaf: GetShardBlockProofLiteServer
+										r.name = "GetShardBlockProofLiteServer"
+										r.operationID = "getShardBlockProofLiteServer"
+										r.args = args
+										r.count = 1
+										return r, true
+									default:
+										return
+									}
+								}
+							case 'i': // Prefix: "info/"
+								if l := len("info/"); len(elem) >= l && elem[0:l] == "info/" {
+									elem = elem[l:]
+								} else {
+									break
+								}
+
+								// Param: "block_id"
+								// Leaf parameter
+								args[0] = elem
+								elem = ""
+
+								if len(elem) == 0 {
+									switch method {
+									case "GET":
+										// Leaf: GetShardInfoLiteServer
+										r.name = "GetShardInfoLiteServer"
+										r.operationID = "getShardInfoLiteServer"
+										r.args = args
+										r.count = 1
+										return r, true
+									default:
+										return
+									}
+								}
+							}
+						case 't': // Prefix: "tate/"
+							if l := len("tate/"); len(elem) >= l && elem[0:l] == "tate/" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							// Param: "block_id"
+							// Leaf parameter
+							args[0] = elem
+							elem = ""
+
+							if len(elem) == 0 {
+								switch method {
+								case "GET":
+									// Leaf: GetStateLiteServer
+									r.name = "GetStateLiteServer"
+									r.operationID = "getStateLiteServer"
+									r.args = args
+									r.count = 1
+									return r, true
+								default:
+									return
+								}
+							}
+						}
+					case 't': // Prefix: "t"
+						if l := len("t"); len(elem) >= l && elem[0:l] == "t" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						if len(elem) == 0 {
+							break
+						}
+						switch elem[0] {
+						case 'i': // Prefix: "ime"
+							if l := len("ime"); len(elem) >= l && elem[0:l] == "ime" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							if len(elem) == 0 {
+								switch method {
+								case "GET":
+									// Leaf: GetTimeLiteServer
+									r.name = "GetTimeLiteServer"
+									r.operationID = "getTimeLiteServer"
+									r.args = args
+									r.count = 0
+									return r, true
+								default:
+									return
+								}
+							}
+						case 'r': // Prefix: "ransactions/"
+							if l := len("ransactions/"); len(elem) >= l && elem[0:l] == "ransactions/" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							// Param: "account_id"
+							// Leaf parameter
+							args[0] = elem
+							elem = ""
+
+							if len(elem) == 0 {
+								switch method {
+								case "GET":
+									// Leaf: GetTransactionsLiteServer
+									r.name = "GetTransactionsLiteServer"
+									r.operationID = "getTransactionsLiteServer"
+									r.args = args
+									r.count = 1
+									return r, true
+								default:
+									return
+								}
+							}
+						}
+					}
+				case 'l': // Prefix: "list_block_transactions/"
+					if l := len("list_block_transactions/"); len(elem) >= l && elem[0:l] == "list_block_transactions/" {
+>>>>>>> create_raw_methods
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+<<<<<<< HEAD
 					// Param: "account_id"
+=======
+					// Param: "block_id"
+>>>>>>> create_raw_methods
 					// Leaf parameter
 					args[0] = elem
 					elem = ""
@@ -2383,9 +3363,15 @@ func (s *Server) FindRoute(method, path string) (r Route, _ bool) {
 					if len(elem) == 0 {
 						switch method {
 						case "GET":
+<<<<<<< HEAD
 							// Leaf: GetJettonInfo
 							r.name = "GetJettonInfo"
 							r.operationID = "getJettonInfo"
+=======
+							// Leaf: GetListBlockTransactionsLiteServer
+							r.name = "GetListBlockTransactionsLiteServer"
+							r.operationID = "getListBlockTransactionsLiteServer"
+>>>>>>> create_raw_methods
 							r.args = args
 							r.count = 1
 							return r, true
@@ -2393,6 +3379,29 @@ func (s *Server) FindRoute(method, path string) (r Route, _ bool) {
 							return
 						}
 					}
+<<<<<<< HEAD
+=======
+				case 's': // Prefix: "send_message"
+					if l := len("send_message"); len(elem) >= l && elem[0:l] == "send_message" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					if len(elem) == 0 {
+						switch method {
+						case "POST":
+							// Leaf: SendMessageLiteServer
+							r.name = "SendMessageLiteServer"
+							r.operationID = "sendMessageLiteServer"
+							r.args = args
+							r.count = 0
+							return r, true
+						default:
+							return
+						}
+					}
+>>>>>>> create_raw_methods
 				}
 			case 'n': // Prefix: "nfts/"
 				if l := len("nfts/"); len(elem) >= l && elem[0:l] == "nfts/" {

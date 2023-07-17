@@ -135,6 +135,20 @@ func encodeSendMessageRequest(
 	return nil
 }
 
+func encodeSendMessageLiteServerRequest(
+	req SendMessageLiteServerReq,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := jx.GetEncoder()
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
 func encodeSetWalletBackupRequest(
 	req SetWalletBackupReq,
 	r *http.Request,
