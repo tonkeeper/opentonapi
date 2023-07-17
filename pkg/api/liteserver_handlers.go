@@ -227,7 +227,7 @@ func (h Handler) GetConfigAllLiteServer(ctx context.Context, params oas.GetConfi
 	if err != nil {
 		return &oas.InternalError{Error: err.Error()}, nil
 	}
-	resp, err := convertConfig(config)
+	resp, err := convertRawConfig(config)
 	if err != nil {
 		return &oas.InternalError{Error: err.Error()}, nil
 	}
