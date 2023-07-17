@@ -5,6 +5,7 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/tonkeeper/opentonapi/pkg/bath"
 	"github.com/tonkeeper/opentonapi/pkg/core"
@@ -14,6 +15,7 @@ import (
 	"github.com/tonkeeper/tongo/boc"
 	"github.com/tonkeeper/tongo/tlb"
 	"github.com/tonkeeper/tongo/txemulator"
+	"golang.org/x/exp/slices"
 )
 
 func (h Handler) SendMessage(ctx context.Context, req oas.SendMessageReq) (r oas.SendMessageRes, _ error) {
@@ -104,10 +106,7 @@ func (h Handler) GetEventsByAccount(ctx context.Context, params oas.GetEventsByA
 		lastLT = trace.Lt
 	}
 	if account.ToRaw() == "0:2cf3b5b8c891e517c9addbda1c0386a09ccacbb0e3faf630b51cfc8152325acb" {
-		testEvent := generateTestEvent()
-		events = append(events, testEvent)
-		copy(events[1:], events)
-		events[0] = testEvent
+		events = slices.Insert(events, 0, generateTestEvent())
 	}
 	return &oas.AccountEvents{Events: events, NextFrom: int64(lastLT)}, nil
 }
@@ -325,7 +324,7 @@ func generateTestEvent() oas.AccountEvent {
 			Address: "0:2cf3b5b8c891e517c9addbda1c0386a09ccacbb0e3faf630b51cfc8152325acb",
 			IsScam:  false,
 		},
-		Timestamp:  1689595351,
+		Timestamp:  time.Now().Unix(),
 		IsScam:     false,
 		Lt:         int64(39228825000001),
 		InProgress: true,
