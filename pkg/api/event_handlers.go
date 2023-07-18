@@ -5,7 +5,6 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
-	"time"
 
 	"github.com/tonkeeper/opentonapi/pkg/bath"
 	"github.com/tonkeeper/opentonapi/pkg/core"
@@ -37,6 +36,10 @@ func (h Handler) GetTrace(ctx context.Context, params oas.GetTraceParams) (r oas
 	if err != nil {
 		return &oas.BadRequest{Error: err.Error()}, nil
 	}
+	if hash.Hex() == testEventID {
+		testTrace := getTestTrace()
+		return &testTrace, nil
+	}
 	t, err := h.storage.GetTrace(ctx, hash)
 	if errors.Is(err, core.ErrEntityNotFound) {
 		txHash, err2 := h.storage.SearchTransactionByMessageHash(ctx, hash)
@@ -56,6 +59,10 @@ func (h Handler) GetEvent(ctx context.Context, params oas.GetEventParams) (oas.G
 	traceID, err := tongo.ParseHash(params.EventID)
 	if err != nil {
 		return &oas.BadRequest{Error: err.Error()}, nil
+	}
+	if traceID.Hex() == testEventID {
+		testEvent := getTestEvent()
+		return &testEvent, nil
 	}
 	trace, err := h.storage.GetTrace(ctx, traceID)
 	if errors.Is(err, core.ErrEntityNotFound) {
@@ -105,8 +112,8 @@ func (h Handler) GetEventsByAccount(ctx context.Context, params oas.GetEventsByA
 		}
 		lastLT = trace.Lt
 	}
-	if account.ToRaw() == "0:2cf3b5b8c891e517c9addbda1c0386a09ccacbb0e3faf630b51cfc8152325acb" {
-		events = slices.Insert(events, 0, generateTestEvent())
+	if account.ToRaw() == testEventAccount {
+		events = slices.Insert(events, 0, getTestAccountEvent())
 	}
 	for i, j := 0, len(events)-1; i < j; i, j = i+1, j-1 {
 		events[i], events[j] = events[j], events[i]
@@ -318,57 +325,4 @@ func emulatedTreeToTrace(tree *txemulator.TxTree, accounts map[tongo.AccountID]t
 		t.Children = append(t.Children, child)
 	}
 	return t, nil
-}
-
-func generateTestEvent() oas.AccountEvent {
-	return oas.AccountEvent{
-		EventID: "a96d84940781cc29d3fb890384d35ba49cdd9d891a123a9f90939ddb57b09fc2",
-		Account: oas.AccountAddress{
-			Address: "0:2cf3b5b8c891e517c9addbda1c0386a09ccacbb0e3faf630b51cfc8152325acb",
-			IsScam:  false,
-		},
-		Timestamp:  time.Now().Unix(),
-		IsScam:     false,
-		Lt:         int64(39228825000001),
-		InProgress: true,
-		Extra:      -5825767,
-		Actions: []oas.Action{
-			{
-				Type:   oas.ActionTypeTonTransfer,
-				Status: oas.ActionStatusOk,
-				TonTransfer: oas.OptTonTransferAction{
-					Set: true,
-					Value: oas.TonTransferAction{
-						Sender: oas.AccountAddress{
-							Address: "0:2cf3b5b8c891e517c9addbda1c0386a09ccacbb0e3faf630b51cfc8152325acb",
-							IsScam:  false,
-						},
-						Recipient: oas.AccountAddress{
-							Address: "0:e9a07c65998cd537d6ac2c4c9ddd73a299295527101328c87358508ccbf868fa",
-							IsScam:  false,
-						},
-						Amount: 10_000_000_000,
-					},
-				},
-				SimplePreview: oas.ActionSimplePreview{
-					Name:        "Ton Transfer",
-					Description: "Transferring 10_000_000_000 TON",
-					Value: oas.OptString{
-						Set:   true,
-						Value: "10_000_000_000 TON",
-					},
-					Accounts: []oas.AccountAddress{
-						{
-							Address: "0:2cf3b5b8c891e517c9addbda1c0386a09ccacbb0e3faf630b51cfc8152325acb",
-							IsScam:  false,
-						},
-						{
-							Address: "0:e9a07c65998cd537d6ac2c4c9ddd73a299295527101328c87358508ccbf868fa",
-							IsScam:  false,
-						},
-					},
-				},
-			},
-		},
-	}
 }

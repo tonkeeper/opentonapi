@@ -33,6 +33,10 @@ func (h Handler) GetTransaction(ctx context.Context, params oas.GetTransactionPa
 	if err != nil {
 		return &oas.BadRequest{Error: err.Error()}, nil
 	}
+	if hash.Hex() == testEventID {
+		testTx := getTestTransaction()
+		return &testTx, nil
+	}
 	txs, err := h.storage.GetTransaction(ctx, hash)
 	if errors.Is(err, core.ErrEntityNotFound) {
 		return &oas.NotFound{Error: "transaction not found"}, nil
