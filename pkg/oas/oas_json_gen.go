@@ -6036,6 +6036,121 @@ func (s *EmulateWalletMessageReq) UnmarshalJSON(data []byte) error {
 }
 
 // Encode implements json.Marshaler.
+func (s EncryptedComment) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s EncryptedComment) encodeFields(e *jx.Encoder) {
+	{
+
+		e.FieldStart("encryption_type")
+		e.Str(s.EncryptionType)
+	}
+	{
+
+		e.FieldStart("cipher_text")
+		e.Str(s.CipherText)
+	}
+}
+
+var jsonFieldsNameOfEncryptedComment = [2]string{
+	0: "encryption_type",
+	1: "cipher_text",
+}
+
+// Decode decodes EncryptedComment from json.
+func (s *EncryptedComment) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode EncryptedComment to nil")
+	}
+	var requiredBitSet [1]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "encryption_type":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				v, err := d.Str()
+				s.EncryptionType = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"encryption_type\"")
+			}
+		case "cipher_text":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				v, err := d.Str()
+				s.CipherText = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"cipher_text\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode EncryptedComment")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00000011,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfEncryptedComment) {
+					name = jsonFieldsNameOfEncryptedComment[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s EncryptedComment) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *EncryptedComment) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
 func (s Event) Encode(e *jx.Encoder) {
 	e.ObjStart()
 	s.encodeFields(e)
@@ -11554,6 +11669,12 @@ func (s JettonTransferAction) encodeFields(e *jx.Encoder) {
 		}
 	}
 	{
+		if s.EncryptedComment.Set {
+			e.FieldStart("encrypted_comment")
+			s.EncryptedComment.Encode(e)
+		}
+	}
+	{
 		if s.Refund.Set {
 			e.FieldStart("refund")
 			s.Refund.Encode(e)
@@ -11566,15 +11687,16 @@ func (s JettonTransferAction) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfJettonTransferAction = [8]string{
+var jsonFieldsNameOfJettonTransferAction = [9]string{
 	0: "sender",
 	1: "recipient",
 	2: "senders_wallet",
 	3: "recipients_wallet",
 	4: "amount",
 	5: "comment",
-	6: "refund",
-	7: "jetton",
+	6: "encrypted_comment",
+	7: "refund",
+	8: "jetton",
 }
 
 // Decode decodes JettonTransferAction from json.
@@ -11582,7 +11704,7 @@ func (s *JettonTransferAction) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode JettonTransferAction to nil")
 	}
-	var requiredBitSet [1]uint8
+	var requiredBitSet [2]uint8
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
@@ -11652,6 +11774,16 @@ func (s *JettonTransferAction) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"comment\"")
 			}
+		case "encrypted_comment":
+			if err := func() error {
+				s.EncryptedComment.Reset()
+				if err := s.EncryptedComment.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"encrypted_comment\"")
+			}
 		case "refund":
 			if err := func() error {
 				s.Refund.Reset()
@@ -11663,7 +11795,7 @@ func (s *JettonTransferAction) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"refund\"")
 			}
 		case "jetton":
-			requiredBitSet[0] |= 1 << 7
+			requiredBitSet[1] |= 1 << 0
 			if err := func() error {
 				if err := s.Jetton.Decode(d); err != nil {
 					return err
@@ -11681,8 +11813,9 @@ func (s *JettonTransferAction) Decode(d *jx.Decoder) error {
 	}
 	// Validate required fields.
 	var failures []validate.FieldError
-	for i, mask := range [1]uint8{
-		0b10011100,
+	for i, mask := range [2]uint8{
+		0b00011100,
+		0b00000001,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -13489,6 +13622,12 @@ func (s NftItemTransferAction) encodeFields(e *jx.Encoder) {
 		}
 	}
 	{
+		if s.EncryptedComment.Set {
+			e.FieldStart("encrypted_comment")
+			s.EncryptedComment.Encode(e)
+		}
+	}
+	{
 		if s.Payload.Set {
 			e.FieldStart("payload")
 			s.Payload.Encode(e)
@@ -13502,13 +13641,14 @@ func (s NftItemTransferAction) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfNftItemTransferAction = [6]string{
+var jsonFieldsNameOfNftItemTransferAction = [7]string{
 	0: "sender",
 	1: "recipient",
 	2: "nft",
 	3: "comment",
-	4: "payload",
-	5: "refund",
+	4: "encrypted_comment",
+	5: "payload",
+	6: "refund",
 }
 
 // Decode decodes NftItemTransferAction from json.
@@ -13561,6 +13701,16 @@ func (s *NftItemTransferAction) Decode(d *jx.Decoder) error {
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"comment\"")
+			}
+		case "encrypted_comment":
+			if err := func() error {
+				s.EncryptedComment.Reset()
+				if err := s.EncryptedComment.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"encrypted_comment\"")
 			}
 		case "payload":
 			if err := func() error {
@@ -14371,6 +14521,39 @@ func (s OptDepositStakeAction) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *OptDepositStakeAction) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes EncryptedComment as json.
+func (o OptEncryptedComment) Encode(e *jx.Encoder) {
+	if !o.Set {
+		return
+	}
+	o.Value.Encode(e)
+}
+
+// Decode decodes EncryptedComment from json.
+func (o *OptEncryptedComment) Decode(d *jx.Decoder) error {
+	if o == nil {
+		return errors.New("invalid: unable to decode OptEncryptedComment to nil")
+	}
+	o.Set = true
+	if err := o.Value.Decode(d); err != nil {
+		return err
+	}
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s OptEncryptedComment) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *OptEncryptedComment) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -19419,6 +19602,12 @@ func (s TonTransferAction) encodeFields(e *jx.Encoder) {
 		}
 	}
 	{
+		if s.EncryptedComment.Set {
+			e.FieldStart("encrypted_comment")
+			s.EncryptedComment.Encode(e)
+		}
+	}
+	{
 		if s.Refund.Set {
 			e.FieldStart("refund")
 			s.Refund.Encode(e)
@@ -19426,12 +19615,13 @@ func (s TonTransferAction) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfTonTransferAction = [5]string{
+var jsonFieldsNameOfTonTransferAction = [6]string{
 	0: "sender",
 	1: "recipient",
 	2: "amount",
 	3: "comment",
-	4: "refund",
+	4: "encrypted_comment",
+	5: "refund",
 }
 
 // Decode decodes TonTransferAction from json.
@@ -19484,6 +19674,16 @@ func (s *TonTransferAction) Decode(d *jx.Decoder) error {
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"comment\"")
+			}
+		case "encrypted_comment":
+			if err := func() error {
+				s.EncryptedComment.Reset()
+				if err := s.EncryptedComment.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"encrypted_comment\"")
 			}
 		case "refund":
 			if err := func() error {

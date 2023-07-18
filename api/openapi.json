@@ -1604,6 +1604,23 @@
     ],
     "type": "object"
    },
+   "EncryptedComment": {
+    "properties": {
+     "cipher_text": {
+      "example": "A6A0BD6608672B...CE3AF8DB",
+      "type": "string"
+     },
+     "encryption_type": {
+      "example": "simple",
+      "type": "string"
+     }
+    },
+    "required": [
+     "encryption_type",
+     "cipher_text"
+    ],
+    "type": "object"
+   },
    "Error": {
     "properties": {
      "error": {
@@ -1911,6 +1928,9 @@
      "comment": {
       "example": "Hi! This is your salary. \nFrom accounting with love.",
       "type": "string"
+     },
+     "encrypted_comment": {
+      "$ref": "#/components/schemas/EncryptedComment"
      },
      "jetton": {
       "$ref": "#/components/schemas/JettonPreview"
@@ -2228,6 +2248,9 @@
      "comment": {
       "example": "Hi! This is your salary. \nFrom accounting with love.",
       "type": "string"
+     },
+     "encrypted_comment": {
+      "$ref": "#/components/schemas/EncryptedComment"
      },
      "nft": {
       "example": "",
@@ -2850,6 +2873,9 @@
      "comment": {
       "example": "Hi! This is your salary. \nFrom accounting with love.",
       "type": "string"
+     },
+     "encrypted_comment": {
+      "$ref": "#/components/schemas/EncryptedComment"
      },
      "recipient": {
       "$ref": "#/components/schemas/AccountAddress"

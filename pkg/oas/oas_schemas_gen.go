@@ -2071,6 +2071,32 @@ func (s *EmulateWalletMessageReq) SetBoc(val string) {
 	s.Boc = val
 }
 
+// Ref: #/components/schemas/EncryptedComment
+type EncryptedComment struct {
+	EncryptionType string `json:"encryption_type"`
+	CipherText     string `json:"cipher_text"`
+}
+
+// GetEncryptionType returns the value of EncryptionType.
+func (s EncryptedComment) GetEncryptionType() string {
+	return s.EncryptionType
+}
+
+// GetCipherText returns the value of CipherText.
+func (s EncryptedComment) GetCipherText() string {
+	return s.CipherText
+}
+
+// SetEncryptionType sets the value of EncryptionType.
+func (s *EncryptedComment) SetEncryptionType(val string) {
+	s.EncryptionType = val
+}
+
+// SetCipherText sets the value of CipherText.
+func (s *EncryptedComment) SetCipherText(val string) {
+	s.CipherText = val
+}
+
 // Ref: #/components/schemas/Event
 type Event struct {
 	EventID   string      `json:"event_id"`
@@ -3689,10 +3715,11 @@ type JettonTransferAction struct {
 	SendersWallet    string            `json:"senders_wallet"`
 	RecipientsWallet string            `json:"recipients_wallet"`
 	// Amount in quanta of tokens.
-	Amount  string        `json:"amount"`
-	Comment OptString     `json:"comment"`
-	Refund  OptRefund     `json:"refund"`
-	Jetton  JettonPreview `json:"jetton"`
+	Amount           string              `json:"amount"`
+	Comment          OptString           `json:"comment"`
+	EncryptedComment OptEncryptedComment `json:"encrypted_comment"`
+	Refund           OptRefund           `json:"refund"`
+	Jetton           JettonPreview       `json:"jetton"`
 }
 
 // GetSender returns the value of Sender.
@@ -3723,6 +3750,11 @@ func (s JettonTransferAction) GetAmount() string {
 // GetComment returns the value of Comment.
 func (s JettonTransferAction) GetComment() OptString {
 	return s.Comment
+}
+
+// GetEncryptedComment returns the value of EncryptedComment.
+func (s JettonTransferAction) GetEncryptedComment() OptEncryptedComment {
+	return s.EncryptedComment
 }
 
 // GetRefund returns the value of Refund.
@@ -3763,6 +3795,11 @@ func (s *JettonTransferAction) SetAmount(val string) {
 // SetComment sets the value of Comment.
 func (s *JettonTransferAction) SetComment(val OptString) {
 	s.Comment = val
+}
+
+// SetEncryptedComment sets the value of EncryptedComment.
+func (s *JettonTransferAction) SetEncryptedComment(val OptEncryptedComment) {
+	s.EncryptedComment = val
 }
 
 // SetRefund sets the value of Refund.
@@ -4339,10 +4376,11 @@ func (s *NftItemMetadata) init() NftItemMetadata {
 
 // Ref: #/components/schemas/NftItemTransferAction
 type NftItemTransferAction struct {
-	Sender    OptAccountAddress `json:"sender"`
-	Recipient OptAccountAddress `json:"recipient"`
-	Nft       string            `json:"nft"`
-	Comment   OptString         `json:"comment"`
+	Sender           OptAccountAddress   `json:"sender"`
+	Recipient        OptAccountAddress   `json:"recipient"`
+	Nft              string              `json:"nft"`
+	Comment          OptString           `json:"comment"`
+	EncryptedComment OptEncryptedComment `json:"encrypted_comment"`
 	// Raw hex encoded payload.
 	Payload OptString `json:"payload"`
 	Refund  OptRefund `json:"refund"`
@@ -4366,6 +4404,11 @@ func (s NftItemTransferAction) GetNft() string {
 // GetComment returns the value of Comment.
 func (s NftItemTransferAction) GetComment() OptString {
 	return s.Comment
+}
+
+// GetEncryptedComment returns the value of EncryptedComment.
+func (s NftItemTransferAction) GetEncryptedComment() OptEncryptedComment {
+	return s.EncryptedComment
 }
 
 // GetPayload returns the value of Payload.
@@ -4396,6 +4439,11 @@ func (s *NftItemTransferAction) SetNft(val string) {
 // SetComment sets the value of Comment.
 func (s *NftItemTransferAction) SetComment(val OptString) {
 	s.Comment = val
+}
+
+// SetEncryptedComment sets the value of EncryptedComment.
+func (s *NftItemTransferAction) SetEncryptedComment(val OptEncryptedComment) {
+	s.EncryptedComment = val
 }
 
 // SetPayload sets the value of Payload.
@@ -4994,6 +5042,52 @@ func (o OptDepositStakeAction) Get() (v DepositStakeAction, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptDepositStakeAction) Or(d DepositStakeAction) DepositStakeAction {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptEncryptedComment returns new OptEncryptedComment with value set to v.
+func NewOptEncryptedComment(v EncryptedComment) OptEncryptedComment {
+	return OptEncryptedComment{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptEncryptedComment is optional EncryptedComment.
+type OptEncryptedComment struct {
+	Value EncryptedComment
+	Set   bool
+}
+
+// IsSet returns true if OptEncryptedComment was set.
+func (o OptEncryptedComment) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptEncryptedComment) Reset() {
+	var v EncryptedComment
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptEncryptedComment) SetTo(v EncryptedComment) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptEncryptedComment) Get() (v EncryptedComment, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptEncryptedComment) Or(d EncryptedComment) EncryptedComment {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -7549,9 +7643,10 @@ type TonTransferAction struct {
 	Sender    AccountAddress `json:"sender"`
 	Recipient AccountAddress `json:"recipient"`
 	// Amount in nanotons.
-	Amount  int64     `json:"amount"`
-	Comment OptString `json:"comment"`
-	Refund  OptRefund `json:"refund"`
+	Amount           int64               `json:"amount"`
+	Comment          OptString           `json:"comment"`
+	EncryptedComment OptEncryptedComment `json:"encrypted_comment"`
+	Refund           OptRefund           `json:"refund"`
 }
 
 // GetSender returns the value of Sender.
@@ -7572,6 +7667,11 @@ func (s TonTransferAction) GetAmount() int64 {
 // GetComment returns the value of Comment.
 func (s TonTransferAction) GetComment() OptString {
 	return s.Comment
+}
+
+// GetEncryptedComment returns the value of EncryptedComment.
+func (s TonTransferAction) GetEncryptedComment() OptEncryptedComment {
+	return s.EncryptedComment
 }
 
 // GetRefund returns the value of Refund.
@@ -7597,6 +7697,11 @@ func (s *TonTransferAction) SetAmount(val int64) {
 // SetComment sets the value of Comment.
 func (s *TonTransferAction) SetComment(val OptString) {
 	s.Comment = val
+}
+
+// SetEncryptedComment sets the value of EncryptedComment.
+func (s *TonTransferAction) SetEncryptedComment(val OptEncryptedComment) {
+	s.EncryptedComment = val
 }
 
 // SetRefund sets the value of Refund.

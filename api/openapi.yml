@@ -3607,6 +3607,8 @@ components:
         comment:
           type: string
           example: "Hi! This is your salary. \nFrom accounting with love."
+        encrypted_comment:
+          $ref: '#/components/schemas/EncryptedComment'
         refund:
           $ref: '#/components/schemas/Refund'
 
@@ -3650,6 +3652,8 @@ components:
         comment:
           type: string
           example: "Hi! This is your salary. \nFrom accounting with love."
+        encrypted_comment:
+          $ref: '#/components/schemas/EncryptedComment'
         payload:
           type: string
           description: raw hex encoded payload
@@ -3682,6 +3686,8 @@ components:
         comment:
           type: string
           example: "Hi! This is your salary. \nFrom accounting with love."
+        encrypted_comment:
+          $ref: '#/components/schemas/EncryptedComment'
         refund:
           $ref: '#/components/schemas/Refund'
         jetton:
@@ -4609,6 +4615,18 @@ components:
         file_hash:
           type: string
           example: A6A0BD6608672B11B79538A50B2204E748305C12AA0DED9C16CF0006CE3AF8DB
+    EncryptedComment:
+      type: object
+      required:
+        - encryption_type
+        - cipher_text
+      properties:
+        encryption_type:
+          type: string
+          example: "simple"
+        cipher_text:
+          type: string
+          example: "A6A0BD6608672B...CE3AF8DB"
 
   responses:
     NotFound:
