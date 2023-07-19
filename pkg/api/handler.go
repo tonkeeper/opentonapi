@@ -173,8 +173,8 @@ func NewHandler(logger *zap.Logger, opts ...Option) (*Handler, error) {
 			storage:          options.storage,
 		},
 		mempoolEmulateCache: mempoolEmulateCache{
-			tracesCache:         cache.NewLRUCache[tongo.Bits256, *core.Trace](10000, "mempool_traces_cache"),
-			accountsTracesCache: cache.NewLRUCache[tongo.AccountID, []tongo.Bits256](10000, "accounts_traces_cache"),
+			tracesCache:         cache.NewLRUCache[string, *core.Trace](10000, "mempool_traces_cache"),
+			accountsTracesCache: cache.NewLRUCache[tongo.AccountID, []string](10000, "accounts_traces_cache"),
 		},
 		tonConnect: tonConnect,
 	}, nil

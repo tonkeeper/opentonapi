@@ -148,6 +148,6 @@ type metadataCache struct {
 }
 
 type mempoolEmulateCache struct {
-	tracesCache         cache.Cache[tongo.Bits256, *core.Trace]
-	accountsTracesCache cache.Cache[tongo.AccountID, []tongo.Bits256]
+	tracesCache         cache.Cache[string, *core.Trace]
+	accountsTracesCache cache.Cache[tongo.AccountID, []string]
 }
