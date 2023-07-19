@@ -210,7 +210,7 @@ func (a Action) IsSubject(account tongo.AccountID) bool {
 		a.RecoverStake,
 		a.STONfiSwap,
 	} {
-		if i != nil {
+		if i != nil && !reflect.ValueOf(i).IsNil() {
 			return slices.Contains(i.SubjectAccounts(), account)
 		}
 	}
