@@ -115,8 +115,10 @@ func (h Handler) GetEventsByAccount(ctx context.Context, params oas.GetEventsByA
 	if account.ToRaw() == testEventAccount {
 		events = slices.Insert(events, 0, getTestAccountEvent())
 	}
-	for i, j := 0, len(events)-1; i < j; i, j = i+1, j-1 {
-		events[i], events[j] = events[j], events[i]
+	for _, event := range events {
+		for i, j := 0, len(event.Actions)-1; i < j; i, j = i+1, j-1 {
+			event.Actions[i], event.Actions[j] = event.Actions[j], event.Actions[i]
+		}
 	}
 	return &oas.AccountEvents{Events: events, NextFrom: int64(lastLT)}, nil
 }
