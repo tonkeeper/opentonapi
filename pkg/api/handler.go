@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/go-faster/errors"
+	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/opentonapi/pkg/rates"
 	rules "github.com/tonkeeper/scam_backoffice_rules"
 	"github.com/tonkeeper/tongo"
@@ -27,18 +28,19 @@ var _ oas.Handler = (*Handler)(nil)
 type Handler struct {
 	oas.UnimplementedHandler // automatically implement all methods
 
-	addressBook      addressBook
-	storage          storage
-	state            chainState
-	msgSender        messageSender
-	previewGenerator previewGenerator
-	executor         executor
-	dns              *dns.DNS
-	limits           Limits
-	spamRules        func() rules.Rules
-	ratesSource      ratesSource
-	metaCache        metadataCache
-	tonConnect       *tonconnect.Server
+	addressBook         addressBook
+	storage             storage
+	state               chainState
+	msgSender           messageSender
+	previewGenerator    previewGenerator
+	executor            executor
+	dns                 *dns.DNS
+	limits              Limits
+	spamRules           func() rules.Rules
+	ratesSource         ratesSource
+	metaCache           metadataCache
+	mempoolEmulateCache mempoolEmulateCache
+	tonConnect          *tonconnect.Server
 }
 
 // Options configures behavior of a Handler instance.
@@ -169,6 +171,10 @@ func NewHandler(logger *zap.Logger, opts ...Option) (*Handler, error) {
 			collectionsCache: cache.NewLRUCache[tongo.AccountID, tep64.Metadata](10000, "nft_metadata_cache"),
 			jettonsCache:     cache.NewLRUCache[tongo.AccountID, tep64.Metadata](10000, "jetton_metadata_cache"),
 			storage:          options.storage,
+		},
+		mempoolEmulateCache: mempoolEmulateCache{
+			tracesCache:         cache.NewLRUCache[string, *core.Trace](10000, "mempool_traces_cache"),
+			accountsTracesCache: cache.NewLRUCache[tongo.AccountID, []string](10000, "accounts_traces_cache"),
 		},
 		tonConnect: tonConnect,
 	}, nil

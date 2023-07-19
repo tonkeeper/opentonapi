@@ -5,8 +5,10 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/tonkeeper/opentonapi/pkg/bath"
+	"github.com/tonkeeper/opentonapi/pkg/cache"
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/opentonapi/pkg/oas"
 	"github.com/tonkeeper/opentonapi/pkg/wallet"
@@ -14,6 +16,7 @@ import (
 	"github.com/tonkeeper/tongo/boc"
 	"github.com/tonkeeper/tongo/tlb"
 	"github.com/tonkeeper/tongo/txemulator"
+	"golang.org/x/exp/maps"
 	"golang.org/x/exp/slices"
 )
 
@@ -28,6 +31,7 @@ func (h Handler) SendMessage(ctx context.Context, req oas.SendMessageReq) (r oas
 	if err := h.msgSender.SendMessage(ctx, payload); err != nil {
 		return &oas.InternalError{Error: err.Error()}, nil
 	}
+	go h.addToMempool(ctx, payload)
 	return &oas.SendMessageOK{}, nil
 }
 
@@ -40,16 +44,19 @@ func (h Handler) GetTrace(ctx context.Context, params oas.GetTraceParams) (r oas
 		testTrace := getTestTrace()
 		return &testTrace, nil
 	}
-	t, err := h.storage.GetTrace(ctx, hash)
-	if errors.Is(err, core.ErrEntityNotFound) {
-		txHash, err2 := h.storage.SearchTransactionByMessageHash(ctx, hash)
-		if err2 != nil {
-			return &oas.NotFound{Error: err.Error()}, nil
+	t, ok := h.mempoolEmulateCache.tracesCache.Get(hash.Hex())
+	if !ok {
+		t, err = h.storage.GetTrace(ctx, hash)
+		if errors.Is(err, core.ErrEntityNotFound) {
+			txHash, err2 := h.storage.SearchTransactionByMessageHash(ctx, hash)
+			if err2 != nil {
+				return &oas.NotFound{Error: err.Error()}, nil
+			}
+			t, err = h.storage.GetTrace(ctx, *txHash)
 		}
-		t, err = h.storage.GetTrace(ctx, *txHash)
-	}
-	if err != nil {
-		return nil, err
+		if err != nil {
+			return nil, err
+		}
 	}
 	trace := convertTrace(*t, h.addressBook)
 	return &trace, nil
@@ -91,13 +98,33 @@ func (h Handler) GetEventsByAccount(ctx context.Context, params oas.GetEventsByA
 	if err != nil {
 		return &oas.BadRequest{Error: err.Error()}, nil
 	}
-	traceIDs, err := h.storage.SearchTraces(ctx, account, params.Limit, optIntToPointer(params.BeforeLt), optIntToPointer(params.StartDate), optIntToPointer(params.EndDate))
+	tracesID, err := h.storage.SearchTraces(ctx, account, params.Limit, optIntToPointer(params.BeforeLt), optIntToPointer(params.StartDate), optIntToPointer(params.EndDate))
 	if err != nil && !errors.Is(err, core.ErrEntityNotFound) {
 		return &oas.InternalError{Error: err.Error()}, nil
 	}
-	events := make([]oas.AccountEvent, len(traceIDs))
+	mapOfTracesID := make(map[string]bool)
+	for _, traceID := range tracesID {
+		mapOfTracesID[traceID.Hex()] = true
+	}
+	var (
+		memTraces          []*core.Trace
+		memActualHexTraces []string
+	)
+	memTracesHex, ok := h.mempoolEmulateCache.accountsTracesCache.Get(account)
+	if ok {
+		for _, traceHex := range memTracesHex {
+			memTrace, ok := h.mempoolEmulateCache.tracesCache.Get(traceHex)
+			if !ok || mapOfTracesID[traceHex] {
+				continue
+			}
+			memTraces = append(memTraces, memTrace)
+			memActualHexTraces = append(memActualHexTraces, traceHex)
+		}
+		h.mempoolEmulateCache.accountsTracesCache.Set(account, memActualHexTraces)
+	}
+	events := make([]oas.AccountEvent, len(tracesID))
 	var lastLT uint64
-	for i, traceID := range traceIDs {
+	for i, traceID := range tracesID {
 		trace, err := h.storage.GetTrace(ctx, traceID)
 		if err != nil {
 			return &oas.InternalError{Error: err.Error()}, nil
@@ -111,6 +138,17 @@ func (h Handler) GetEventsByAccount(ctx context.Context, params oas.GetEventsByA
 			return &oas.InternalError{Error: err.Error()}, nil
 		}
 		lastLT = trace.Lt
+	}
+	for _, trace := range memTraces {
+		result, err := bath.FindActions(ctx, trace, bath.ForAccount(account), bath.WithInformationSource(h.storage))
+		if err != nil {
+			return &oas.InternalError{Error: err.Error()}, nil
+		}
+		event, err := h.toAccountEvent(ctx, account, trace, result, params.AcceptLanguage, params.SubjectOnly.Value)
+		if err != nil {
+			return &oas.InternalError{Error: err.Error()}, nil
+		}
+		events = slices.Insert(events, 0, event)
 	}
 	if account.ToRaw() == testEventAccount {
 		events = slices.Insert(events, 0, getTestAccountEvent())
@@ -291,6 +329,45 @@ func (h Handler) EmulateWalletMessage(ctx context.Context, req oas.EmulateWallet
 		Risk:  oasRisk,
 	}
 	return &consequences, nil
+}
+
+func (h Handler) addToMempool(ctx context.Context, bytesBoc []byte) {
+	msgCell, err := boc.DeserializeBoc(bytesBoc)
+	if err != nil {
+		return
+	}
+	var message tlb.Message
+	err = tlb.Unmarshal(msgCell[0], &message)
+	if err != nil {
+		return
+	}
+	emulator, err := txemulator.NewTraceBuilder()
+	if err != nil {
+		return
+	}
+	tree, err := emulator.Run(ctx, message)
+	if err != nil {
+		return
+	}
+	trace, err := emulatedTreeToTrace(tree, emulator.FinalStates())
+	if err != nil {
+		return
+	}
+	accounts := make(map[tongo.AccountID]bool)
+	var traverse func(*core.Trace)
+	traverse = func(node *core.Trace) {
+		accounts[node.Account] = true
+		for _, child := range node.Children {
+			traverse(child)
+		}
+	}
+	traverse(trace)
+	h.mempoolEmulateCache.tracesCache.Set(trace.Hash.Hex(), trace, cache.WithExpiration(time.Second*20))
+	for _, account := range maps.Keys(accounts) {
+		traces, _ := h.mempoolEmulateCache.accountsTracesCache.Get(account)
+		traces = slices.Insert(traces, 0, trace.Hash.Hex())
+		h.mempoolEmulateCache.accountsTracesCache.Set(account, traces)
+	}
 }
 
 func emulatedTreeToTrace(tree *txemulator.TxTree, accounts map[tongo.AccountID]tlb.ShardAccount) (*core.Trace, error) {

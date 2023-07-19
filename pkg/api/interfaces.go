@@ -146,3 +146,8 @@ type metadataCache struct {
 		GetNftCollectionByCollectionAddress(ctx context.Context, address tongo.AccountID) (core.NftCollection, error)
 	}
 }
+
+type mempoolEmulateCache struct {
+	tracesCache         cache.Cache[string, *core.Trace]
+	accountsTracesCache cache.Cache[tongo.AccountID, []string]
+}
