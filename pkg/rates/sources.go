@@ -19,7 +19,14 @@ type storage interface {
 }
 
 func (r *ratesMock) GetCurrentRates() (map[string]float64, error) {
-	fiatPrices := getFiatPrices()
+	fiatPrices := getCoinbaseFiatPrices()
+	fiatExchangeratePrices := getExchangerateFiatPrices()
+	for currency, rate := range fiatExchangeratePrices {
+		_, ok := fiatPrices[currency]
+		if !ok {
+			fiatPrices[currency] = rate
+		}
+	}
 	tonPriceOKX := getTonOKXPrice()
 	tonPriceHuobi := getTonHuobiPrice()
 	if tonPriceOKX == 0 && tonPriceHuobi == 0 {
@@ -280,7 +287,31 @@ func getTonOKXPrice() float64 {
 	return price
 }
 
-func getFiatPrices() map[string]float64 {
+func getExchangerateFiatPrices() map[string]float64 {
+	resp, err := http.Get("https://api.exchangerate.host/latest?base=USD")
+	if err != nil {
+		log.Errorf("can't load exchangerate prices")
+		return nil
+	}
+	defer resp.Body.Close()
+
+	var respBody struct {
+		Rates map[string]float64 `json:"rates"`
+	}
+	if err = json.NewDecoder(resp.Body).Decode(&respBody); err != nil {
+		log.Errorf("failed to decode response: %v", err)
+		return nil
+	}
+
+	mapOfPrices := make(map[string]float64)
+	for currency, rate := range respBody.Rates {
+		mapOfPrices[currency] = rate
+	}
+
+	return mapOfPrices
+}
+
+func getCoinbaseFiatPrices() map[string]float64 {
 	resp, err := http.Get("https://api.coinbase.com/v2/exchange-rates?currency=USD")
 	if err != nil {
 		log.Errorf("can't load coinbase prices")
