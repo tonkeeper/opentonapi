@@ -5,8 +5,10 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/tonkeeper/opentonapi/pkg/bath"
+	"github.com/tonkeeper/opentonapi/pkg/cache"
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/opentonapi/pkg/oas"
 	"github.com/tonkeeper/opentonapi/pkg/wallet"
@@ -14,6 +16,7 @@ import (
 	"github.com/tonkeeper/tongo/boc"
 	"github.com/tonkeeper/tongo/tlb"
 	"github.com/tonkeeper/tongo/txemulator"
+	"golang.org/x/exp/maps"
 	"golang.org/x/exp/slices"
 )
 
@@ -28,6 +31,7 @@ func (h Handler) SendMessage(ctx context.Context, req oas.SendMessageReq) (r oas
 	if err := h.msgSender.SendMessage(ctx, payload); err != nil {
 		return &oas.InternalError{Error: err.Error()}, nil
 	}
+	go h.addToMempool(ctx, payload)
 	return &oas.SendMessageOK{}, nil
 }
 
@@ -291,6 +295,45 @@ func (h Handler) EmulateWalletMessage(ctx context.Context, req oas.EmulateWallet
 		Risk:  oasRisk,
 	}
 	return &consequences, nil
+}
+
+func (h Handler) addToMempool(ctx context.Context, bytesBoc []byte) {
+	msgCell, err := boc.DeserializeBoc(bytesBoc)
+	if err != nil {
+		return
+	}
+	var message tlb.Message
+	err = tlb.Unmarshal(msgCell[0], &message)
+	if err != nil {
+		return
+	}
+	emulator, err := txemulator.NewTraceBuilder()
+	if err != nil {
+		return
+	}
+	tree, err := emulator.Run(ctx, message)
+	if err != nil {
+		return
+	}
+	trace, err := emulatedTreeToTrace(tree, emulator.FinalStates())
+	if err != nil {
+		return
+	}
+	accounts := make(map[tongo.AccountID]bool)
+	var traverse func(*core.Trace)
+	traverse = func(node *core.Trace) {
+		accounts[node.Account] = true
+		for _, child := range node.Children {
+			traverse(child)
+		}
+	}
+	traverse(trace)
+	h.mempoolEmulateCache.tracesCache.Set(trace.Hash, trace, cache.WithExpiration(time.Second*20))
+	for _, account := range maps.Keys(accounts) {
+		traces, _ := h.mempoolEmulateCache.accountsTracesCache.Get(account)
+		traces = slices.Insert(traces, 0, trace.Hash)
+		h.mempoolEmulateCache.accountsTracesCache.Set(account, traces)
+	}
 }
 
 func emulatedTreeToTrace(tree *txemulator.TxTree, accounts map[tongo.AccountID]tlb.ShardAccount) (*core.Trace, error) {
