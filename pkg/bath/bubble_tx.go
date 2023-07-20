@@ -52,7 +52,7 @@ func (b BubbleTx) ToAction() *Action {
 		}
 		return nil
 	}
-	if b.opCode != nil && *b.opCode != 0 && b.accountWasActiveAtComputingTime && !b.account.Is(abi.Wallet) {
+	if b.opCode != nil && (*b.opCode == 0 || b.operation(abi.EncryptedTextCommentMsgOp)) && b.accountWasActiveAtComputingTime && !b.account.Is(abi.Wallet) {
 		operation := fmt.Sprintf("0x%08x", *b.opCode)
 		payload := ""
 		if b.decodedBody != nil {
@@ -81,10 +81,12 @@ func (b BubbleTx) ToAction() *Action {
 		Type:    TonTransfer,
 	}
 	if b.decodedBody != nil {
-		s, ok := b.decodedBody.Value.(abi.TextCommentMsgBody)
-		if ok {
+		switch s := b.decodedBody.Value.(type) {
+		case abi.TextCommentMsgBody:
 			converted := string(s.Text)
 			a.TonTransfer.Comment = &converted
+		case abi.EncryptedTextCommentMsgBody:
+			a.TonTransfer.EncryptedComment = &EncryptedComment{EncryptionType: "simple", CipherText: s.CipherText}
 		}
 	}
 	return a

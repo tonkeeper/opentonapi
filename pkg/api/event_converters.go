@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"encoding/hex"
 	"fmt"
 	"math/big"
 	"sort"
@@ -153,10 +154,11 @@ func (h Handler) convertAction(ctx context.Context, viewer tongo.AccountID, a ba
 			}
 		}
 		action.TonTransfer.SetTo(oas.TonTransferAction{
-			Amount:    a.TonTransfer.Amount,
-			Comment:   g.Opt(a.TonTransfer.Comment),
-			Recipient: convertAccountAddress(a.TonTransfer.Recipient, h.addressBook),
-			Sender:    convertAccountAddress(a.TonTransfer.Sender, h.addressBook),
+			Amount:           a.TonTransfer.Amount,
+			Comment:          g.Opt(a.TonTransfer.Comment),
+			Recipient:        convertAccountAddress(a.TonTransfer.Recipient, h.addressBook),
+			Sender:           convertAccountAddress(a.TonTransfer.Sender, h.addressBook),
+			EncryptedComment: convertEncryptedComment(a.TonTransfer.EncryptedComment),
 		})
 		if a.TonTransfer.Refund != nil {
 			action.TonTransfer.Value.Refund.SetTo(oas.Refund{
@@ -178,9 +180,11 @@ func (h Handler) convertAction(ctx context.Context, viewer tongo.AccountID, a ba
 		}
 	case bath.NftItemTransfer:
 		action.NftItemTransfer.SetTo(oas.NftItemTransferAction{
-			Nft:       a.NftItemTransfer.Nft.ToRaw(),
-			Recipient: convertOptAccountAddress(a.NftItemTransfer.Recipient, h.addressBook),
-			Sender:    convertOptAccountAddress(a.NftItemTransfer.Sender, h.addressBook),
+			Nft:              a.NftItemTransfer.Nft.ToRaw(),
+			Recipient:        convertOptAccountAddress(a.NftItemTransfer.Recipient, h.addressBook),
+			Sender:           convertOptAccountAddress(a.NftItemTransfer.Sender, h.addressBook),
+			Comment:          g.Opt(a.NftItemTransfer.Comment),
+			EncryptedComment: convertEncryptedComment(a.NftItemTransfer.EncryptedComment),
 		})
 		action.SimplePreview = oas.ActionSimplePreview{
 			Name: "NFT Transfer",
@@ -201,6 +205,7 @@ func (h Handler) convertAction(ctx context.Context, viewer tongo.AccountID, a ba
 			RecipientsWallet: a.JettonTransfer.RecipientsWallet.ToRaw(),
 			SendersWallet:    a.JettonTransfer.SendersWallet.ToRaw(),
 			Comment:          g.Opt(a.JettonTransfer.Comment),
+			EncryptedComment: convertEncryptedComment(a.JettonTransfer.EncryptedComment),
 		})
 		if len(preview.Image) > 0 {
 			action.SimplePreview.ValueImage = oas.NewOptString(preview.Image)
@@ -499,4 +504,12 @@ func (h Handler) toAccountEvent(ctx context.Context, account tongo.AccountID, tr
 		}}
 	}
 	return e, nil
+}
+
+func convertEncryptedComment(comment *bath.EncryptedComment) oas.OptEncryptedComment {
+	c := oas.OptEncryptedComment{}
+	if comment != nil {
+		c.SetTo(oas.EncryptedComment{EncryptionType: comment.EncryptionType, CipherText: hex.EncodeToString(comment.CipherText)})
+	}
+	return c
 }

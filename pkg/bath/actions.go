@@ -50,6 +50,10 @@ type (
 		Type   RefundType
 		Origin string
 	}
+	EncryptedComment struct {
+		EncryptionType string
+		CipherText     []byte
+	}
 
 	Action struct {
 		TonTransfer       *TonTransferAction    `json:",omitempty"`
@@ -68,11 +72,12 @@ type (
 		Type              ActionType
 	}
 	TonTransferAction struct {
-		Amount    int64
-		Comment   *string
-		Recipient tongo.AccountID
-		Sender    tongo.AccountID
-		Refund    *Refund
+		Amount           int64
+		Comment          *string
+		EncryptedComment *EncryptedComment
+		Recipient        tongo.AccountID
+		Sender           tongo.AccountID
+		Refund           *Refund
 	}
 	SmartContractAction struct {
 		TonAttached int64
@@ -83,11 +88,12 @@ type (
 	}
 
 	NftTransferAction struct {
-		Comment   *string
-		Recipient *tongo.AccountID
-		Sender    *tongo.AccountID
-		Nft       tongo.AccountID
-		Refund    *Refund
+		Comment          *string
+		EncryptedComment *EncryptedComment
+		Recipient        *tongo.AccountID
+		Sender           *tongo.AccountID
+		Nft              tongo.AccountID
+		Refund           *Refund
 	}
 
 	NftPurchaseAction struct {
@@ -112,6 +118,7 @@ type (
 
 	JettonTransferAction struct {
 		Comment          *string
+		EncryptedComment *EncryptedComment
 		Jetton           tongo.AccountID
 		Recipient        *tongo.AccountID
 		Sender           *tongo.AccountID

@@ -103,8 +103,11 @@ func (b BubbleNftTransfer) ToAction() (action *Action) {
 		Success: b.success,
 		Type:    NftItemTransfer,
 	}
-	if c, ok := b.payload.(string); ok {
+	switch c := b.payload.(type) {
+	case string:
 		a.NftItemTransfer.Comment = &c
+	case EncryptedComment:
+		a.NftItemTransfer.EncryptedComment = &c
 	}
 	return &a
 }
@@ -116,6 +119,12 @@ func cellToTextComment(payloadCell boc.Cell) any {
 	}
 	payloadCell.ResetCounters()
 	op, err := payloadCell.ReadUint(32)
+	if uint32(op) == abi.EncryptedTextCommentMsgOpCode {
+		var b tlb.Bytes
+		if tlb.Unmarshal(&payloadCell, &b) == nil {
+			return EncryptedComment{CipherText: b, EncryptionType: "simple"}
+		}
+	}
 	if err == nil {
 		return fmt.Sprintf("Call: 0x%x", op)
 	}
@@ -252,8 +261,11 @@ func (b BubbleJettonTransfer) ToAction() (action *Action) {
 		Success: b.success,
 		Type:    JettonTransfer,
 	}
-	if c, ok := b.payload.(string); ok {
-		a.JettonTransfer.Comment = &c
+	switch c := b.payload.(type) {
+	case string:
+		a.NftItemTransfer.Comment = &c
+	case EncryptedComment:
+		a.NftItemTransfer.EncryptedComment = &c
 	}
 	return &a
 }
