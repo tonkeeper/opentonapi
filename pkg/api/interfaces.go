@@ -147,7 +147,7 @@ type metadataCache struct {
 	}
 }
 
-type mempoolEmulateCache struct {
-	tracesCache         cache.Cache[string, *core.Trace]
-	accountsTracesCache cache.Cache[tongo.AccountID, []string]
+type mempoolEmulate struct {
+	traces         cache.Cache[string, *core.Trace]
+	accountsTraces cache.Cache[tongo.AccountID, []string]
 }

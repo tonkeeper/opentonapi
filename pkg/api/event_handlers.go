@@ -44,22 +44,43 @@ func (h Handler) GetTrace(ctx context.Context, params oas.GetTraceParams) (r oas
 		testTrace := getTestTrace()
 		return &testTrace, nil
 	}
-	t, ok := h.mempoolEmulateCache.tracesCache.Get(hash.Hex())
-	if !ok {
-		t, err = h.storage.GetTrace(ctx, hash)
-		if errors.Is(err, core.ErrEntityNotFound) {
-			txHash, err2 := h.storage.SearchTransactionByMessageHash(ctx, hash)
-			if err2 != nil {
-				return &oas.NotFound{Error: err.Error()}, nil
-			}
-			t, err = h.storage.GetTrace(ctx, *txHash)
+
+	var trace *core.Trace
+	for attempt := 0; attempt <= 3; attempt++ {
+		if trace != nil {
+			break
 		}
-		if err != nil {
-			return nil, err
+		switch attempt {
+		case 0:
+			trace, err = h.storage.GetTrace(ctx, hash)
+			if err != nil && err != core.ErrEntityNotFound {
+				return &oas.InternalError{Error: err.Error()}, nil
+			}
+		case 1:
+			txHash, err := h.storage.SearchTransactionByMessageHash(ctx, hash)
+			if err != nil && err != core.ErrEntityNotFound {
+				return &oas.InternalError{Error: err.Error()}, nil
+			}
+			if err == core.ErrEntityNotFound {
+				continue
+			}
+			trace, err = h.storage.GetTrace(ctx, *txHash)
+			if err != nil && err != core.ErrEntityNotFound {
+				return &oas.InternalError{Error: err.Error()}, nil
+			}
+		case 2:
+			var ok bool
+			trace, ok = h.mempoolEmulate.traces.Get(hash.Hex())
+			if !ok {
+				return &oas.BadRequest{Error: core.ErrEntityNotFound.Error()}, nil
+			}
 		}
 	}
-	trace := convertTrace(*t, h.addressBook)
-	return &trace, nil
+	if trace == nil {
+		return &oas.BadRequest{Error: core.ErrEntityNotFound.Error()}, nil
+	}
+	convertedTrace := convertTrace(*trace, h.addressBook)
+	return &convertedTrace, nil
 }
 
 func (h Handler) GetEvent(ctx context.Context, params oas.GetEventParams) (oas.GetEventRes, error) {
@@ -110,17 +131,17 @@ func (h Handler) GetEventsByAccount(ctx context.Context, params oas.GetEventsByA
 		memTraces          []*core.Trace
 		memActualHexTraces []string
 	)
-	memTracesHex, ok := h.mempoolEmulateCache.accountsTracesCache.Get(account)
+	memTracesHex, ok := h.mempoolEmulate.accountsTraces.Get(account)
 	if ok {
 		for _, traceHex := range memTracesHex {
-			memTrace, ok := h.mempoolEmulateCache.tracesCache.Get(traceHex)
+			memTrace, ok := h.mempoolEmulate.traces.Get(traceHex)
 			if !ok || mapOfTracesID[traceHex] {
 				continue
 			}
 			memTraces = append(memTraces, memTrace)
 			memActualHexTraces = append(memActualHexTraces, traceHex)
 		}
-		h.mempoolEmulateCache.accountsTracesCache.Set(account, memActualHexTraces)
+		h.mempoolEmulate.accountsTraces.Set(account, memActualHexTraces)
 	}
 	events := make([]oas.AccountEvent, len(tracesID))
 	var lastLT uint64
@@ -362,11 +383,11 @@ func (h Handler) addToMempool(ctx context.Context, bytesBoc []byte) {
 		}
 	}
 	traverse(trace)
-	h.mempoolEmulateCache.tracesCache.Set(trace.Hash.Hex(), trace, cache.WithExpiration(time.Second*20))
+	h.mempoolEmulate.traces.Set(trace.Hash.Hex(), trace, cache.WithExpiration(time.Second*30))
 	for _, account := range maps.Keys(accounts) {
-		traces, _ := h.mempoolEmulateCache.accountsTracesCache.Get(account)
+		traces, _ := h.mempoolEmulate.accountsTraces.Get(account)
 		traces = slices.Insert(traces, 0, trace.Hash.Hex())
-		h.mempoolEmulateCache.accountsTracesCache.Set(account, traces)
+		h.mempoolEmulate.accountsTraces.Set(account, traces)
 	}
 }
 
