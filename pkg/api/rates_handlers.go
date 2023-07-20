@@ -54,33 +54,30 @@ func (h *Handler) GetRates(ctx context.Context, params oas.GetRatesParams) (res 
 			if !ok {
 				return &oas.BadRequest{fmt.Sprintf("invalid currency: %v", currency)}, nil
 			}
-			yesterdayCurrencyPrice, ok := yesterdayRates[currency]
-			if !ok {
-				yesterdayCurrencyPrice = 0
-			}
-
-			todayTokenPrice, ok := todayRates[token]
-			if !ok {
-				ratesRes[token] = tokenRates{Prices: map[string]float64{}, Diff24h: map[string]string{}}
-				continue
-			}
-			yesterdayTokenPrice, ok := yesterdayRates[token]
-			if !ok {
-				yesterdayTokenPrice = 0
-			}
-
 			rate, ok := ratesRes[token]
 			if !ok {
 				rate = tokenRates{Prices: map[string]float64{}, Diff24h: map[string]string{}}
 				ratesRes[token] = rate
 			}
+			todayTokenPrice, ok := todayRates[token]
+			if !ok {
+				ratesRes[token] = tokenRates{Prices: map[string]float64{}, Diff24h: map[string]string{}}
+				continue
+			}
 
-			convertedTodayPrice := (1 / todayTokenPrice) * todayCurrencyPrice
-			convertedYesterdayPrice := (1 / yesterdayTokenPrice) * yesterdayCurrencyPrice
-
+			var convertedTodayPrice, convertedYesterdayPrice, diff float64
+			if todayTokenPrice != 0 {
+				convertedTodayPrice = (1 / todayTokenPrice) * todayCurrencyPrice
+			}
 			rate.Prices[currency] = convertedTodayPrice
 
-			diff := ((convertedTodayPrice - convertedYesterdayPrice) / convertedYesterdayPrice) * 100
+			if yesterdayRates[token] != 0 {
+				convertedYesterdayPrice = (1 / yesterdayRates[token]) * yesterdayRates[currency]
+			}
+			if convertedYesterdayPrice != 0 {
+				diff = ((convertedTodayPrice - convertedYesterdayPrice) / convertedYesterdayPrice) * 100
+			}
+
 			diff = math.Round(diff*100) / 100
 			switch true {
 			case diff < 0:
