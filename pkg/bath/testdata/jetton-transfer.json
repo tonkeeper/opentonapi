@@ -3,6 +3,7 @@
      {
        "JettonTransfer": {
          "Comment": "",
+         "EncryptedComment": null,
          "Jetton": "0:0871bd56a8daf413bace5e03b471b01942755b4b4ea6807daf801bed044ea9d1",
          "Recipient": "0:2cf3b5b8c891e517c9addbda1c0386a09ccacbb0e3faf630b51cfc8152325acb",
          "Sender": "0:2cf3b5b8c891e517c9addbda1c0386a09ccacbb0e3faf630b51cfc8152325acb",

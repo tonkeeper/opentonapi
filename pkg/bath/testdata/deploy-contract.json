@@ -12,6 +12,7 @@
        "TonTransfer": {
          "Amount": 5993073999,
          "Comment": null,
+         "EncryptedComment": null,
          "Recipient": "0:2cf3b5b8c891e517c9addbda1c0386a09ccacbb0e3faf630b51cfc8152325acb",
          "Sender": "0:e351d7af505bbae196ea434b13db91adcdffc5063ff2d7b9f0f76139b3c7b99a",
          "Refund": null

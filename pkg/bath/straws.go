@@ -263,9 +263,9 @@ func (b BubbleJettonTransfer) ToAction() (action *Action) {
 	}
 	switch c := b.payload.(type) {
 	case string:
-		a.NftItemTransfer.Comment = &c
+		a.JettonTransfer.Comment = &c
 	case EncryptedComment:
-		a.NftItemTransfer.EncryptedComment = &c
+		a.JettonTransfer.EncryptedComment = &c
 	}
 	return &a
 }
