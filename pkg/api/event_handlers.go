@@ -31,7 +31,7 @@ func (h Handler) SendMessage(ctx context.Context, req oas.SendMessageReq) (r oas
 	if err := h.msgSender.SendMessage(ctx, payload); err != nil {
 		return &oas.InternalError{Error: err.Error()}, nil
 	}
-	go h.addToMempool(ctx, payload)
+	go h.addToMempool(context.Background(), payload)
 	return &oas.SendMessageOK{}, nil
 }
 
