@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/tonkeeper/opentonapi/internal/g"
+	"github.com/tonkeeper/tongo/boc"
 	"github.com/tonkeeper/tongo/tlb"
 
 	"github.com/tonkeeper/tongo"
@@ -243,5 +245,50 @@ func (h Handler) PoolsByNominators(ctx context.Context, params oas.PoolsByNomina
 }
 
 func (h Handler) StakingPoolHistory(ctx context.Context, params oas.StakingPoolHistoryParams) (oas.StakingPoolHistoryRes, error) {
-	return nil, fmt.Errorf("not implemented")
+	poolID, err := tongo.ParseAccountID(params.AccountID)
+	if err != nil {
+		return &oas.BadRequest{Error: err.Error()}, nil
+	}
+	_, err = h.storage.GetLiquidPool(ctx, poolID)
+	if errors.Is(err, core.ErrEntityNotFound) {
+		return &oas.NotFound{Error: err.Error()}, nil
+	}
+	logAddress := tlb.MsgAddress{SumType: "AddrExtern"}
+	logAddress.AddrExtern = &struct {
+		Len             tlb.Uint9
+		ExternalAddress boc.BitString
+	}{Len: 256, ExternalAddress: g.Must(boc.BitStringFromFiftHex("0000000000000000000000000000000000000000000000000000000000000003"))}
+	logs, err := h.storage.GetLogs(ctx, poolID, &logAddress, 100, 0)
+	if err != nil {
+		return &oas.InternalError{Error: err.Error()}, nil
+	}
+	var result oas.StakingPoolHistoryOK
+	var prevTime uint32
+	for i, l := range logs {
+		if i == 0 {
+			prevTime = l.CreatedAt
+			continue
+		}
+		cells, err := boc.DeserializeBoc(l.Body)
+		if err != nil {
+			return &oas.InternalError{Error: err.Error()}, nil
+		}
+		var round struct {
+			RoundID  tlb.Uint32
+			Borrowed tlb.Coins
+			Returned tlb.Coins
+			Profit   tlb.SignedCoins
+		}
+		err = tlb.Unmarshal(cells[0], &round)
+		if err != nil {
+			return &oas.InternalError{Error: err.Error()}, nil
+		}
+		result.Apy = append(result.Apy, oas.ApyHistory{
+			Apy:  float64(round.Profit) / float64(round.Borrowed) / float64(l.CreatedAt-prevTime) * 3600 * 24 * 365 * 100,
+			Time: int(l.CreatedAt),
+		})
+		prevTime = l.CreatedAt
+		fmt.Printf("%+v\n", round)
+	}
+	return &result, nil
 }

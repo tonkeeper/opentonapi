@@ -1,6 +1,7 @@
 package core
 
 import (
+	"github.com/tonkeeper/tongo/boc"
 	"math/big"
 
 	"github.com/tonkeeper/tongo/abi"
@@ -123,17 +124,19 @@ func (m Message) IsEmission() bool {
 
 type Message struct {
 	MessageID
-	IhrDisabled    bool
-	Bounce         bool
-	Bounced        bool
-	Value          int64
-	FwdFee         int64
-	IhrFee         int64
-	ImportFee      int64
-	Init           []byte
-	InitInterfaces []abi.ContractInterface
-	Body           []byte
-	CreatedAt      uint32
+	SourceExtern      *ExternalAddress
+	DestinationExtern *ExternalAddress
+	IhrDisabled       bool
+	Bounce            bool
+	Bounced           bool
+	Value             int64
+	FwdFee            int64
+	IhrFee            int64
+	ImportFee         int64
+	Init              []byte
+	InitInterfaces    []abi.ContractInterface
+	Body              []byte
+	CreatedAt         uint32
 	// OpCode is the first 32 bits of a message body indicating a possible operation.
 	OpCode      *uint32
 	DecodedBody *DecodedMessageBody
@@ -143,4 +146,16 @@ type Message struct {
 type DecodedMessageBody struct {
 	Operation string
 	Value     any
+}
+
+// ExternalAddress represents either the source or destination address of
+// external inbound(ExtInMsg) or external outbound(ExtOutMsg) message correspondingly.
+type ExternalAddress = boc.BitString
+
+func externalAddressFromTlb(address tlb.MsgAddress) *ExternalAddress {
+	if address.SumType != "AddrExtern" {
+		return nil
+	}
+	external := address.AddrExtern.ExternalAddress
+	return &external
 }
