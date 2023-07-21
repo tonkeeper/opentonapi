@@ -113,6 +113,8 @@ func TestFindActions(t *testing.T) {
 			tongo.MustParseBlockID("(0,8000000000000000,32606229)"),
 			tongo.MustParseBlockID("(-1,8000000000000000,27037607)"),
 			tongo.MustParseBlockID("(0,8000000000000000,32606232)"),
+			// encrypted comment
+			tongo.MustParseBlockID("(0,8000000000000000,36828763)"),
 		}),
 	)
 
@@ -223,6 +225,11 @@ func TestFindActions(t *testing.T) {
 			name:           "deploy contract failed",
 			hash:           "32467cfe9b9faecf6cd2a8055bfc7243e289fec6b2f479df2bcbf78eac9826a0",
 			filenamePrefix: "deploy-contract-failed",
+		},
+		{
+			name:           "encrypted comment",
+			hash:           "6f3e1f2c05df05345198a9d26456dcb51d4c78ce64ced56fb9976e92941211d3",
+			filenamePrefix: "encrypted-comment",
 		},
 	} {
 		t.Run(c.name, func(t *testing.T) {
