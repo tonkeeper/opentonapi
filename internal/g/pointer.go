@@ -40,3 +40,10 @@ func Opt[T any](t *T) struct {
 		Set   bool
 	}{Value: *t, Set: true}
 }
+
+func Must[T any](t *T, err error) T {
+	if err != nil {
+		panic(err)
+	}
+	return *t
+}

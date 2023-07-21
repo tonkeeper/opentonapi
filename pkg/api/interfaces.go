@@ -33,6 +33,7 @@ type storage interface {
 	GetBlockTransactions(ctx context.Context, id tongo.BlockID) ([]*core.Transaction, error)
 	GetAccountTransactions(ctx context.Context, id tongo.AccountID, limit int, beforeLt, afterLt uint64) ([]*core.Transaction, error)
 	GetDnsExpiring(ctx context.Context, id tongo.AccountID, period *int) ([]core.DnsExpiring, error)
+	GetLogs(ctx context.Context, account tongo.AccountID, destination *tlb.MsgAddress, limit int, beforeLT uint64) ([]core.Message, error)
 
 	GetTrace(ctx context.Context, hash tongo.Bits256) (*core.Trace, error)
 	SearchTraces(ctx context.Context, a tongo.AccountID, limit int, beforeLT *int64, startTime *int64, endTime *int64) ([]tongo.Bits256, error)

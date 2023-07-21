@@ -74,3 +74,6 @@ GET {{host}}/v2/blockchain/config
 
 ###
 GET {{host}}/v2/blockchain/messages/81C7CC0C66452E5F1BC26A5D89B2B30AAB49B3B88EC9D035921B7DD3F343276F/transaction
+
+###
+GET {{host}}/v2/staking/pool/EQANFsYyYn-GSZ4oajUJmboDURZU-udMHf9JxzO4vYM_hOh9/history

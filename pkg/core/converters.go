@@ -310,11 +310,12 @@ func ConvertMessage(message tlb.Message, txLT uint64) (Message, error) {
 				CreatedLt:   txLT,
 				Destination: dest,
 			},
-			ImportFee:   int64(info.ImportFee),
-			Body:        body,
-			OpCode:      opCode,
-			DecodedBody: decodedBody,
-			Init:        init,
+			SourceExtern: externalAddressFromTlb(info.Src),
+			ImportFee:    int64(info.ImportFee),
+			Body:         body,
+			OpCode:       opCode,
+			DecodedBody:  decodedBody,
+			Init:         init,
 		}, nil
 	case "ExtOutMsgInfo":
 		info := message.Info.ExtOutMsgInfo
@@ -327,11 +328,12 @@ func ConvertMessage(message tlb.Message, txLT uint64) (Message, error) {
 				CreatedLt: info.CreatedLt,
 				Source:    source,
 			},
-			Body:        body,
-			DecodedBody: decodedBody,
-			CreatedAt:   info.CreatedAt,
-			OpCode:      opCode,
-			Init:        []byte{},
+			DestinationExtern: externalAddressFromTlb(info.Dest),
+			Body:              body,
+			DecodedBody:       decodedBody,
+			CreatedAt:         info.CreatedAt,
+			OpCode:            opCode,
+			Init:              []byte{},
 		}, nil
 	}
 	return Message{}, fmt.Errorf("invalid message")
