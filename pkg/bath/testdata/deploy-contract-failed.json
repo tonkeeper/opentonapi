@@ -4,6 +4,7 @@
        "TonTransfer": {
          "Amount": 100000000,
          "Comment": null,
+         "EncryptedComment": null,
          "Recipient": "-1:def630230329e2961dd105feb015f8169fda5189e3a0e7a43bc5cabc9821b0c1",
          "Sender": "0:2a51f944720857a9dc3a62097a7ba94f12ff91a8e4c6c0bcc6c169845667082d",
          "Refund": null
@@ -23,6 +24,7 @@
        "TonTransfer": {
          "Amount": 85940000,
          "Comment": null,
+         "EncryptedComment": null,
          "Recipient": "0:2a51f944720857a9dc3a62097a7ba94f12ff91a8e4c6c0bcc6c169845667082d",
          "Sender": "-1:def630230329e2961dd105feb015f8169fda5189e3a0e7a43bc5cabc9821b0c1",
          "Refund": null

@@ -4,6 +4,7 @@
        "TonTransfer": {
          "Amount": 7570000000,
          "Comment": "Telegram Premium for 6 months \n\nRef#FHJAZvYc",
+         "EncryptedComment": null,
          "Recipient": "0:408da3b28b6c065a593e10391269baaa9c5f8caebc0c69d9f0aabbab2a99256b",
          "Sender": "0:2cf3b5b8c891e517c9addbda1c0386a09ccacbb0e3faf630b51cfc8152325acb",
          "Refund": null
