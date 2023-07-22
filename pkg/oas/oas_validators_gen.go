@@ -310,9 +310,9 @@ func (s Action) Validate() error {
 		})
 	}
 	if err := func() error {
-		if s.STONfiSwap.Set {
+		if s.JettonSwap.Set {
 			if err := func() error {
-				if err := s.STONfiSwap.Value.Validate(); err != nil {
+				if err := s.JettonSwap.Value.Validate(); err != nil {
 					return err
 				}
 				return nil
@@ -323,7 +323,7 @@ func (s Action) Validate() error {
 		return nil
 	}(); err != nil {
 		failures = append(failures, validate.FieldError{
-			Name:  "STONfiSwap",
+			Name:  "JettonSwap",
 			Error: err,
 		})
 	}
@@ -413,7 +413,7 @@ func (s ActionType) Validate() error {
 		return nil
 	case "RecoverStake":
 		return nil
-	case "STONfiSwap":
+	case "JettonSwap":
 		return nil
 	case "SmartContractExec":
 		return nil
@@ -1199,6 +1199,56 @@ func (s JettonQuantity) Validate() error {
 	}
 	return nil
 }
+func (s JettonSwapAction) Validate() error {
+	var failures []validate.FieldError
+	if err := func() error {
+		if err := s.Dex.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "dex",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if err := s.JettonMasterIn.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "jetton_master_in",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if err := s.JettonMasterOut.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "jetton_master_out",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+func (s JettonSwapActionDex) Validate() error {
+	switch s {
+	case "stonfi":
+		return nil
+	case "dedust":
+		return nil
+	default:
+		return errors.Errorf("invalid value: %v", s)
+	}
+}
 func (s JettonTransferAction) Validate() error {
 	var failures []validate.FieldError
 	if err := func() error {
@@ -1683,35 +1733,6 @@ func (s Risk) Validate() error {
 	}(); err != nil {
 		failures = append(failures, validate.FieldError{
 			Name:  "nfts",
-			Error: err,
-		})
-	}
-	if len(failures) > 0 {
-		return &validate.Error{Fields: failures}
-	}
-	return nil
-}
-func (s STONfiSwapAction) Validate() error {
-	var failures []validate.FieldError
-	if err := func() error {
-		if err := s.JettonMasterIn.Validate(); err != nil {
-			return err
-		}
-		return nil
-	}(); err != nil {
-		failures = append(failures, validate.FieldError{
-			Name:  "jetton_master_in",
-			Error: err,
-		})
-	}
-	if err := func() error {
-		if err := s.JettonMasterOut.Validate(); err != nil {
-			return err
-		}
-		return nil
-	}(); err != nil {
-		failures = append(failures, validate.FieldError{
-			Name:  "jetton_master_out",
 			Error: err,
 		})
 	}
