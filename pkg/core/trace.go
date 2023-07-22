@@ -32,7 +32,12 @@ func (t *Trace) InProgress() bool {
 	return t.countUncompleted() != 0
 }
 func (t *Trace) countUncompleted() int {
-	c := len(t.OutMsgs) //todo: not count externals
+	c := 0
+	for i := range t.OutMsgs {
+		if t.OutMsgs[i].Destination != nil {
+			c++
+		}
+	}
 	for _, st := range t.Children {
 		c += st.countUncompleted()
 	}
