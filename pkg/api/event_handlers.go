@@ -31,7 +31,7 @@ func (h Handler) SendMessage(ctx context.Context, req oas.SendMessageReq) (r oas
 	if err := h.msgSender.SendMessage(ctx, payload); err != nil {
 		return &oas.InternalError{Error: err.Error()}, nil
 	}
-	go h.addToMempool(context.Background(), payload)
+	go h.addToMempool(payload)
 	return &oas.SendMessageOK{}, nil
 }
 
@@ -352,7 +352,9 @@ func (h Handler) EmulateWalletMessage(ctx context.Context, req oas.EmulateWallet
 	return &consequences, nil
 }
 
-func (h Handler) addToMempool(ctx context.Context, bytesBoc []byte) {
+func (h Handler) addToMempool(bytesBoc []byte) {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
 	msgCell, err := boc.DeserializeBoc(bytesBoc)
 	if err != nil {
 		return
