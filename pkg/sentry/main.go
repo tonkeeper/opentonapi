@@ -2,6 +2,7 @@ package sentry
 
 import (
 	"fmt"
+	"github.com/getsentry/sentry-go"
 	"os"
 	"time"
 )
@@ -9,6 +10,14 @@ import (
 type SentryInfoData map[string]interface{}
 
 var inited = false
+
+const (
+	LevelDebug   = sentry.LevelDebug
+	LevelInfo    = sentry.LevelInfo
+	LevelWarning = sentry.LevelWarning
+	LevelError   = sentry.LevelError
+	LevelFatal   = sentry.LevelFatal
+)
 
 func init() {
 	dsn := os.Getenv("SENTRY_DSN")

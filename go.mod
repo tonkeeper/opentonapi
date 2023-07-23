@@ -3,7 +3,7 @@ module github.com/tonkeeper/opentonapi
 go 1.20
 
 require (
-	github.com/BurntSushi/toml v1.0.0
+	github.com/BurntSushi/toml v1.2.1
 	github.com/Code-Hex/go-generics-cache v1.3.0
 	github.com/avast/retry-go v3.0.0+incompatible
 	github.com/caarlos0/env/v6 v6.10.1
@@ -20,7 +20,7 @@ require (
 	github.com/shopspring/decimal v1.3.1
 	github.com/shurcooL/graphql v0.0.0-20220606043923-3cf50f8a0a29
 	github.com/sourcegraph/conc v0.3.0
-	github.com/stretchr/testify v1.8.1
+	github.com/stretchr/testify v1.8.2
 	github.com/tonkeeper/scam_backoffice_rules v0.0.0-20230413094040-a66ab71fb269
 	github.com/tonkeeper/tongo v1.2.0
 	go.opentelemetry.io/otel v1.11.1
@@ -39,6 +39,7 @@ require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dlclark/regexp2 v1.7.0 // indirect
 	github.com/fatih/color v1.13.0 // indirect
+	github.com/getsentry/sentry-go v0.22.0 // indirect
 	github.com/go-faster/yamlx v0.3.8 // indirect
 	github.com/go-logr/logr v1.2.3 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
@@ -60,12 +61,12 @@ require (
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasttemplate v1.2.2 // indirect
 	go.uber.org/atomic v1.10.0 // indirect
-	golang.org/x/crypto v0.0.0-20220321153916-2c7772ba3064 // indirect
+	golang.org/x/crypto v0.7.0 // indirect
 	golang.org/x/mod v0.8.0 // indirect
-	golang.org/x/net v0.7.0 // indirect
+	golang.org/x/net v0.8.0 // indirect
 	golang.org/x/sync v0.1.0 // indirect
 	golang.org/x/sys v0.7.0 // indirect
 	golang.org/x/tools v0.6.0 // indirect
-	google.golang.org/protobuf v1.28.1 // indirect
+	google.golang.org/protobuf v1.29.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )

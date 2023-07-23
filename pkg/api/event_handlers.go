@@ -12,6 +12,7 @@ import (
 	"github.com/tonkeeper/opentonapi/pkg/cache"
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/opentonapi/pkg/oas"
+	"github.com/tonkeeper/opentonapi/pkg/sentry"
 	"github.com/tonkeeper/opentonapi/pkg/wallet"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/boc"
@@ -30,6 +31,7 @@ func (h Handler) SendMessage(ctx context.Context, req oas.SendMessageReq) (r oas
 		return &oas.BadRequest{Error: err.Error()}, nil
 	}
 	if err := h.msgSender.SendMessage(ctx, payload); err != nil {
+		sentry.Send("sending message", sentry.SentryInfoData{"payload": req.Boc}, sentry.LevelError)
 		return &oas.InternalError{Error: err.Error()}, nil
 	}
 	go h.addToMempool(payload)
