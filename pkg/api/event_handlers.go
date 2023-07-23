@@ -373,7 +373,7 @@ func (h Handler) addToMempool(bytesBoc []byte) {
 	for _, account := range maps.Keys(accounts) {
 		traces, _ := h.mempoolEmulate.accountsTraces.Get(account)
 		traces = slices.Insert(traces, 0, hex.EncodeToString(hash))
-		h.mempoolEmulate.accountsTraces.Set(account, traces)
+		h.mempoolEmulate.accountsTraces.Set(account, traces, cache.WithExpiration(time.Second*30))
 	}
 }
 
