@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"net/http"
 	"sort"
 
 	jsoniter "github.com/json-iterator/go"
@@ -17,10 +18,10 @@ import (
 	walletTongo "github.com/tonkeeper/tongo/wallet"
 )
 
-func (h Handler) GetAccount(ctx context.Context, params oas.GetAccountParams) (oas.GetAccountRes, error) {
+func (h Handler) GetAccount(ctx context.Context, params oas.GetAccountParams) (*oas.Account, error) {
 	accountID, err := tongo.ParseAccountID(params.AccountID)
 	if err != nil {
-		return &oas.BadRequest{Error: err.Error()}, nil
+		return nil, toError(http.StatusBadRequest, err)
 	}
 	account, err := h.storage.GetRawAccount(ctx, accountID)
 	if errors.Is(err, core.ErrEntityNotFound) {
@@ -30,7 +31,7 @@ func (h Handler) GetAccount(ctx context.Context, params oas.GetAccountParams) (o
 		}, nil
 	}
 	if err != nil {
-		return &oas.BadRequest{Error: err.Error()}, nil
+		return nil, toError(http.StatusInternalServerError, err)
 	}
 	ab, found := h.addressBook.GetAddressInfoByAddress(accountID)
 	var res oas.Account
@@ -42,26 +43,26 @@ func (h Handler) GetAccount(ctx context.Context, params oas.GetAccountParams) (o
 	return &res, nil
 }
 
-func (h Handler) GetAccounts(ctx context.Context, req oas.OptGetAccountsReq) (r oas.GetAccountsRes, _ error) {
-	if len(req.Value.AccountIds) == 0 {
-		return &oas.BadRequest{Error: "empty list of ids"}, nil
+func (h Handler) GetAccounts(ctx context.Context, request oas.OptGetAccountsReq) (*oas.Accounts, error) {
+	if len(request.Value.AccountIds) == 0 {
+		return nil, toError(http.StatusBadRequest, fmt.Errorf("empty list of ids"))
 	}
-	if !h.limits.isBulkQuantityAllowed(len(req.Value.AccountIds)) {
-		return &oas.BadRequest{Error: fmt.Sprintf("the maximum number of accounts to request at once: %v", h.limits.BulkLimits)}, nil
+	if !h.limits.isBulkQuantityAllowed(len(request.Value.AccountIds)) {
+		return nil, toError(http.StatusBadRequest, fmt.Errorf("the maximum number of accounts to request at once: %v", h.limits.BulkLimits))
 	}
 	var ids []tongo.AccountID
-	allAccountIDs := make(map[tongo.AccountID]struct{}, len(req.Value.AccountIds))
-	for _, str := range req.Value.AccountIds {
+	allAccountIDs := make(map[tongo.AccountID]struct{}, len(request.Value.AccountIds))
+	for _, str := range request.Value.AccountIds {
 		accountID, err := tongo.ParseAccountID(str)
 		if err != nil {
-			return &oas.BadRequest{Error: err.Error()}, nil
+			return nil, toError(http.StatusBadRequest, err)
 		}
 		ids = append(ids, accountID)
 		allAccountIDs[accountID] = struct{}{}
 	}
 	accounts, err := h.storage.GetRawAccounts(ctx, ids)
 	if err != nil {
-		return &oas.InternalError{Error: err.Error()}, nil
+		return nil, toError(http.StatusInternalServerError, err)
 	}
 	results := make([]oas.Account, 0, len(accounts))
 	for _, account := range accounts {
@@ -86,38 +87,38 @@ func (h Handler) GetAccounts(ctx context.Context, req oas.OptGetAccountsReq) (r 
 	return &oas.Accounts{Accounts: results}, nil
 }
 
-func (h Handler) GetRawAccount(ctx context.Context, params oas.GetRawAccountParams) (r oas.GetRawAccountRes, _ error) {
+func (h Handler) GetRawAccount(ctx context.Context, params oas.GetRawAccountParams) (*oas.RawAccount, error) {
 	accountID, err := tongo.ParseAccountID(params.AccountID)
 	if err != nil {
-		return &oas.BadRequest{Error: err.Error()}, nil
+		return nil, toError(http.StatusBadRequest, err)
 	}
 	rawAccount, err := h.storage.GetRawAccount(ctx, accountID)
 	if errors.Is(err, core.ErrEntityNotFound) {
-		return &oas.NotFound{Error: err.Error()}, nil
+		return nil, toError(http.StatusNotFound, err)
 	}
 	if err != nil {
-		return &oas.InternalError{Error: err.Error()}, nil
+		return nil, toError(http.StatusInternalServerError, err)
 	}
 	res := convertToRawAccount(rawAccount)
 	return &res, nil
 }
 
-func (h Handler) ExecGetMethod(ctx context.Context, params oas.ExecGetMethodParams) (oas.ExecGetMethodRes, error) {
+func (h Handler) ExecGetMethod(ctx context.Context, params oas.ExecGetMethodParams) (*oas.MethodExecutionResult, error) {
 	id, err := tongo.ParseAccountID(params.AccountID)
 	if err != nil {
-		return &oas.BadRequest{Error: err.Error()}, nil
+		return nil, toError(http.StatusBadRequest, err)
 	}
 	var stack tlb.VmStack
 	for _, p := range params.Args {
 		r, err := stringToTVMStackRecord(p)
 		if err != nil {
-			return &oas.BadRequest{Error: fmt.Sprintf("can't parse arg '%v' as any TVMStackValue", p)}, nil
+			return nil, toError(http.StatusBadRequest, fmt.Errorf("can't parse arg '%v' as any TVMStackValue", p))
 		}
 		stack = append(stack, r)
 	}
 	exitCode, stack, err := h.executor.RunSmcMethod(ctx, id, params.MethodName, stack)
 	if err != nil {
-		return &oas.InternalError{Error: err.Error()}, nil
+		return nil, toError(http.StatusInternalServerError, err)
 	}
 	result := oas.MethodExecutionResult{
 		Success:  exitCode == 0 || exitCode == 1,
@@ -127,7 +128,7 @@ func (h Handler) ExecGetMethod(ctx context.Context, params oas.ExecGetMethodPara
 	for i := range stack {
 		value, err := convertTvmStackValue(stack[i])
 		if err != nil {
-			return &oas.InternalError{Error: err.Error()}, nil
+			return nil, toError(http.StatusInternalServerError, err)
 		}
 		result.Stack = append(result.Stack, value)
 	}
@@ -136,7 +137,7 @@ func (h Handler) ExecGetMethod(ctx context.Context, params oas.ExecGetMethodPara
 		if err == nil {
 			value, err := jsoniter.Marshal(v)
 			if err != nil {
-				return nil, err
+				return nil, toError(http.StatusInternalServerError, err)
 			}
 			result.SetDecoded(value)
 			break
@@ -146,17 +147,17 @@ func (h Handler) ExecGetMethod(ctx context.Context, params oas.ExecGetMethodPara
 	return &result, nil
 }
 
-func (h Handler) GetAccountTransactions(ctx context.Context, params oas.GetAccountTransactionsParams) (r oas.GetAccountTransactionsRes, err error) {
+func (h Handler) GetAccountTransactions(ctx context.Context, params oas.GetAccountTransactionsParams) (*oas.Transactions, error) {
 	a, err := tongo.ParseAccountID(params.AccountID)
 	if err != nil {
-		return &oas.BadRequest{Error: err.Error()}, nil
+		return nil, toError(http.StatusBadRequest, err)
 	}
 	if params.BeforeLt.Value == 0 {
 		params.BeforeLt.Value = 1 << 62
 	}
 	txs, err := h.storage.GetAccountTransactions(ctx, a, int(params.Limit.Value), uint64(params.BeforeLt.Value), uint64(params.AfterLt.Value))
 	if err != nil {
-		return &oas.InternalError{Error: err.Error()}, nil
+		return nil, toError(http.StatusInternalServerError, err)
 	}
 	result := oas.Transactions{
 		Transactions: make([]oas.Transaction, len(txs)),
@@ -167,7 +168,7 @@ func (h Handler) GetAccountTransactions(ctx context.Context, params oas.GetAccou
 	return &result, nil
 }
 
-func (h Handler) GetSearchAccounts(ctx context.Context, params oas.GetSearchAccountsParams) (res oas.GetSearchAccountsRes, err error) {
+func (h Handler) GetSearchAccounts(ctx context.Context, params oas.GetSearchAccountsParams) (*oas.FoundAccounts, error) {
 	accounts := h.addressBook.SearchAttachedAccountsByPrefix(params.Name)
 	var response oas.FoundAccounts
 	for _, account := range accounts {
@@ -181,21 +182,21 @@ func (h Handler) GetSearchAccounts(ctx context.Context, params oas.GetSearchAcco
 }
 
 // ReindexAccount updates internal cache for a particular account.
-func (h Handler) ReindexAccount(ctx context.Context, params oas.ReindexAccountParams) (r oas.ReindexAccountRes, err error) {
+func (h Handler) ReindexAccount(ctx context.Context, params oas.ReindexAccountParams) error {
 	accountID, err := tongo.ParseAccountID(params.AccountID)
 	if err != nil {
-		return &oas.BadRequest{Error: err.Error()}, nil
+		return toError(http.StatusBadRequest, err)
 	}
 	if err = h.storage.ReindexAccount(ctx, accountID); err != nil {
-		return &oas.InternalError{Error: err.Error()}, nil
+		return toError(http.StatusInternalServerError, err)
 	}
-	return &oas.ReindexAccountOK{}, nil
+	return nil
 }
 
-func (h Handler) GetDnsExpiring(ctx context.Context, params oas.GetDnsExpiringParams) (r oas.GetDnsExpiringRes, _ error) {
+func (h Handler) GetDnsExpiring(ctx context.Context, params oas.GetDnsExpiringParams) (*oas.DnsExpiring, error) {
 	accountID, err := tongo.ParseAccountID(params.AccountID)
 	if err != nil {
-		return &oas.BadRequest{Error: err.Error()}, nil
+		return nil, toError(http.StatusBadRequest, err)
 	}
 	var period *int
 	if params.Period.Set {
@@ -203,7 +204,7 @@ func (h Handler) GetDnsExpiring(ctx context.Context, params oas.GetDnsExpiringPa
 	}
 	dnsExpiring, err := h.storage.GetDnsExpiring(ctx, accountID, period)
 	if err != nil {
-		return &oas.InternalError{Error: err.Error()}, nil
+		return nil, toError(http.StatusInternalServerError, err)
 	}
 	accounts := make([]tongo.AccountID, 0, len(dnsExpiring))
 	var response oas.DnsExpiring
@@ -217,7 +218,7 @@ func (h Handler) GetDnsExpiring(ctx context.Context, params oas.GetDnsExpiringPa
 	}
 	nfts, err := h.storage.GetNFTs(ctx, accounts)
 	if err != nil {
-		return &oas.InternalError{Error: err.Error()}, nil
+		return nil, toError(http.StatusInternalServerError, err)
 	}
 	for _, dns := range dnsExpiring {
 		dei := oas.DnsExpiringItemsItem{
@@ -241,33 +242,33 @@ func (h Handler) GetDnsExpiring(ctx context.Context, params oas.GetDnsExpiringPa
 	return &response, nil
 }
 
-func (h Handler) GetPublicKeyByAccountID(ctx context.Context, params oas.GetPublicKeyByAccountIDParams) (r oas.GetPublicKeyByAccountIDRes, _ error) {
+func (h Handler) GetPublicKeyByAccountID(ctx context.Context, params oas.GetPublicKeyByAccountIDParams) (*oas.GetPublicKeyByAccountIDOK, error) {
 	accountID, err := tongo.ParseAccountID(params.AccountID)
 	if err != nil {
-		return &oas.BadRequest{Error: err.Error()}, nil
+		return nil, toError(http.StatusBadRequest, err)
 	}
 	pubKey, err := h.storage.GetWalletPubKey(ctx, accountID)
 	if err != nil {
 		state, err := h.storage.GetRawAccount(ctx, accountID)
 		if err != nil {
-			return &oas.InternalError{Error: err.Error()}, nil
+			return nil, toError(http.StatusInternalServerError, err)
 		}
 		pubKey, err = pubkeyFromCodeData(state.Code, state.Data)
 		if err != nil {
-			return &oas.InternalError{Error: err.Error()}, nil
+			return nil, toError(http.StatusInternalServerError, err)
 		}
 	}
 	return &oas.GetPublicKeyByAccountIDOK{PublicKey: hex.EncodeToString(pubKey)}, nil
 }
 
-func (h Handler) GetSubscriptionsByAccount(ctx context.Context, params oas.GetSubscriptionsByAccountParams) (res oas.GetSubscriptionsByAccountRes, err error) {
+func (h Handler) GetSubscriptionsByAccount(ctx context.Context, params oas.GetSubscriptionsByAccountParams) (*oas.Subscriptions, error) {
 	accountID, err := tongo.ParseAccountID(params.AccountID)
 	if err != nil {
-		return &oas.BadRequest{Error: err.Error()}, nil
+		return nil, toError(http.StatusBadRequest, err)
 	}
 	subscriptions, err := h.storage.GetSubscriptions(ctx, accountID)
 	if err != nil {
-		return &oas.InternalError{Error: err.Error()}, nil
+		return nil, toError(http.StatusInternalServerError, err)
 	}
 	var response oas.Subscriptions
 	for _, subscription := range subscriptions {
@@ -319,5 +320,4 @@ func pubkeyFromCodeData(code, data []byte) ([]byte, error) {
 	default:
 		return nil, fmt.Errorf("unknown wallet version")
 	}
-
 }

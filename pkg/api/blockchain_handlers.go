@@ -3,6 +3,8 @@ package api
 import (
 	"context"
 	"errors"
+	"fmt"
+	"net/http"
 
 	"github.com/tonkeeper/opentonapi/internal/g"
 	"github.com/tonkeeper/opentonapi/pkg/core"
@@ -12,14 +14,14 @@ import (
 	"github.com/tonkeeper/tongo/tlb"
 )
 
-func (h Handler) GetBlock(ctx context.Context, params oas.GetBlockParams) (r oas.GetBlockRes, _ error) {
+func (h Handler) GetBlock(ctx context.Context, params oas.GetBlockParams) (r *oas.Block, _ error) {
 	id, err := blockIdFromString(params.BlockID)
 	if err != nil {
-		return &oas.BadRequest{Error: err.Error()}, nil
+		return nil, toError(http.StatusBadRequest, err)
 	}
 	block, err := h.storage.GetBlockHeader(ctx, id)
 	if errors.Is(err, core.ErrEntityNotFound) {
-		return &oas.NotFound{Error: "block not found"}, nil
+		return nil, toError(http.StatusNotFound, err)
 	}
 	if err != nil {
 		return r, err
@@ -28,10 +30,10 @@ func (h Handler) GetBlock(ctx context.Context, params oas.GetBlockParams) (r oas
 	return &res, nil
 }
 
-func (h Handler) GetTransaction(ctx context.Context, params oas.GetTransactionParams) (r oas.GetTransactionRes, _ error) {
+func (h Handler) GetTransaction(ctx context.Context, params oas.GetTransactionParams) (r *oas.Transaction, _ error) {
 	hash, err := tongo.ParseHash(params.TransactionID)
 	if err != nil {
-		return &oas.BadRequest{Error: err.Error()}, nil
+		return nil, toError(http.StatusBadRequest, err)
 	}
 	if hash.Hex() == testEventID {
 		testTx := getTestTransaction()
@@ -39,42 +41,42 @@ func (h Handler) GetTransaction(ctx context.Context, params oas.GetTransactionPa
 	}
 	txs, err := h.storage.GetTransaction(ctx, hash)
 	if errors.Is(err, core.ErrEntityNotFound) {
-		return &oas.NotFound{Error: "transaction not found"}, nil
+		return nil, toError(http.StatusNotFound, err)
 	}
 	if err != nil {
-		return nil, err
+		return nil, toError(http.StatusInternalServerError, err)
 	}
 	transaction := convertTransaction(*txs, h.addressBook)
 	return &transaction, nil
 }
 
-func (h Handler) GetTransactionByMessageHash(ctx context.Context, params oas.GetTransactionByMessageHashParams) (r oas.GetTransactionByMessageHashRes, _ error) {
+func (h Handler) GetTransactionByMessageHash(ctx context.Context, params oas.GetTransactionByMessageHashParams) (*oas.Transaction, error) {
 	hash, err := tongo.ParseHash(params.MsgID)
 	if err != nil {
-		return &oas.BadRequest{Error: err.Error()}, nil
+		return nil, toError(http.StatusBadRequest, err)
 	}
 	txHash, err := h.storage.SearchTransactionByMessageHash(ctx, hash)
 	if errors.Is(err, core.ErrEntityNotFound) {
-		return &oas.NotFound{Error: "transaction not found"}, nil
+		return nil, toError(http.StatusNotFound, fmt.Errorf("transaction not found"))
 	} else if errors.Is(err, core.ErrTooManyEntities) {
-		return &oas.NotFound{Error: "more than one transaction with messages hash"}, nil
+		return nil, toError(http.StatusNotFound, fmt.Errorf("more than one transaction with messages hash"))
 	}
 	txs, err := h.storage.GetTransaction(ctx, *txHash)
 	if err != nil {
-		return nil, err
+		return nil, toError(http.StatusInternalServerError, err)
 	}
 	transaction := convertTransaction(*txs, h.addressBook)
 	return &transaction, nil
 }
 
-func (h Handler) GetBlockTransactions(ctx context.Context, params oas.GetBlockTransactionsParams) (oas.GetBlockTransactionsRes, error) {
+func (h Handler) GetBlockTransactions(ctx context.Context, params oas.GetBlockTransactionsParams) (*oas.Transactions, error) {
 	id, err := blockIdFromString(params.BlockID)
 	if err != nil {
-		return &oas.BadRequest{Error: err.Error()}, nil
+		return nil, toError(http.StatusBadRequest, err)
 	}
 	transactions, err := h.storage.GetBlockTransactions(ctx, id)
 	if err != nil {
-		return &oas.BadRequest{Error: err.Error()}, nil
+		return nil, toError(http.StatusInternalServerError, err)
 	}
 	res := oas.Transactions{
 		Transactions: make([]oas.Transaction, 0, len(transactions)),
@@ -85,31 +87,31 @@ func (h Handler) GetBlockTransactions(ctx context.Context, params oas.GetBlockTr
 	return &res, nil
 }
 
-func (h Handler) GetMasterchainHead(ctx context.Context) (r oas.GetMasterchainHeadRes, err error) {
+func (h Handler) GetMasterchainHead(ctx context.Context) (*oas.Block, error) {
 	header, err := h.storage.LastMasterchainBlockHeader(ctx)
 	if err != nil {
-		return &oas.InternalError{Error: err.Error()}, nil
+		return nil, toError(http.StatusInternalServerError, err)
 	}
 	return g.Pointer(convertBlockHeader(*header)), nil
 }
 
-func (h Handler) GetConfig(ctx context.Context) (r oas.GetConfigRes, _ error) {
+func (h Handler) GetConfig(ctx context.Context) (*oas.Config, error) {
 	cfg, err := h.storage.GetLastConfig()
 	if err != nil {
-		return &oas.InternalError{Error: err.Error()}, nil
+		return nil, toError(http.StatusInternalServerError, err)
 	}
 	c := boc.NewCell()
 	err = tlb.Marshal(c, cfg)
 	if err != nil {
-		return &oas.InternalError{Error: err.Error()}, nil
+		return nil, toError(http.StatusInternalServerError, err)
 	}
 	raw, err := c.ToBocString()
 	if err != nil {
-		return &oas.InternalError{Error: err.Error()}, nil
+		return nil, toError(http.StatusInternalServerError, err)
 	}
 	out, err := convertConfig(cfg)
 	if err != nil {
-		return &oas.InternalError{Error: err.Error()}, nil
+		return nil, toError(http.StatusInternalServerError, err)
 	}
 	out.Raw = raw
 	return out, nil

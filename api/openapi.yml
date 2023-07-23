@@ -26,14 +26,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Block'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/InternalError'
+        'default':
+          $ref: '#/components/responses/Error'
 
   /v2/blockchain/blocks/{block_id}/transactions:
     get:
@@ -50,15 +44,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Transactions'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '500':
-          $ref: '#/components/responses/InternalError'
-
+        'default':
+          $ref: '#/components/responses/Error'
   /v2/blockchain/transactions/{transaction_id}:
     get:
       description: Get transaction data
@@ -74,14 +61,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Transaction'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/InternalError'
+        'default':
+          $ref: '#/components/responses/Error'
 
   /v2/blockchain/messages/{msg_id}/transaction:
     get:
@@ -98,14 +79,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Transaction'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/InternalError'
+        'default':
+          $ref: '#/components/responses/Error'
 
   /v2/blockchain/validators:
     get:
@@ -120,10 +95,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Validators'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '500':
-          $ref: '#/components/responses/InternalError'
+        'default':
+          $ref: '#/components/responses/Error'
 
   /v2/blockchain/masterchain-head:
     get:
@@ -138,10 +111,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Block'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '500':
-          $ref: '#/components/responses/InternalError'
+        'default':
+          $ref: '#/components/responses/Error'
 
   /v2/blockchain/accounts/{account_id}:
     get:
@@ -158,14 +129,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RawAccount'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/InternalError'
+        'default':
+          $ref: '#/components/responses/Error'
+
   /v2/blockchain/accounts/{account_id}/transactions:
     get:
       description: Get account transactions
@@ -203,14 +169,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Transactions'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/InternalError'
+        'default':
+          $ref: '#/components/responses/Error'
+
 
   /v2/blockchain/accounts/{account_id}/methods/{method_name}:
     get:
@@ -237,13 +198,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/MethodExecutionResult'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '500':
-          $ref: '#/components/responses/InternalError'
-
+        'default':
+          $ref: '#/components/responses/Error'
   /v2/blockchain/message:
     post:
       description: Send message to blockchain
@@ -255,13 +211,8 @@ paths:
       responses:
         '200':
           description: "success"
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '500':
-          $ref: '#/components/responses/InternalError'
-
+        'default':
+          $ref: '#/components/responses/Error'
   /v2/events/emulate:
     post:
       description: Emulate sending message to blockchain
@@ -279,13 +230,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Event'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '500':
-          $ref: '#/components/responses/InternalError'
-
+        'default':
+          $ref: '#/components/responses/Error'
   /v2/traces/emulate:
     post:
       description: Emulate sending message to blockchain
@@ -301,13 +247,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Trace'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '500':
-          $ref: '#/components/responses/InternalError'
-
+        'default':
+          $ref: '#/components/responses/Error'
   /v2/wallet/emulate:
     post:
       description: Emulate sending message to blockchain
@@ -325,13 +266,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/MessageConsequences'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '500':
-          $ref: '#/components/responses/InternalError'
-
+        'default':
+          $ref: '#/components/responses/Error'
   /v2/accounts/{account_id}/events/emulate:
     post:
       description: Emulate sending message to blockchain
@@ -350,13 +286,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AccountEvent'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '500':
-          $ref: '#/components/responses/InternalError'
-
+        'default':
+          $ref: '#/components/responses/Error'
   /v2/blockchain/config:
     get:
       description: Get blockchain config
@@ -370,10 +301,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Config'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '500':
-          $ref: '#/components/responses/InternalError'
+        'default':
+          $ref: '#/components/responses/Error'
 
   /v2/accounts/_bulk:
     post:
@@ -390,12 +319,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Accounts'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '500':
-          $ref: '#/components/responses/InternalError'
+        'default':
+          $ref: '#/components/responses/Error'
+
 
   /v2/accounts/{account_id}:
     get:
@@ -412,14 +338,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Account'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/InternalError'
+        'default':
+          $ref: '#/components/responses/Error'
+
 
   /v2/accounts/{account_id}/dns/backresolve:
     get:
@@ -436,14 +357,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/DomainNames'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/InternalError'
+        'default':
+          $ref: '#/components/responses/Error'
+
 
   /v2/accounts/{account_id}/jettons:
     get:
@@ -460,14 +376,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/JettonsBalances'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/InternalError'
+        'default':
+          $ref: '#/components/responses/Error'
+
   
   /v2/accounts/{account_id}/jettons/history:
     get:
@@ -514,14 +425,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AccountEvents'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/InternalError'
+        'default':
+          $ref: '#/components/responses/Error'
+
   /v2/accounts/{account_id}/jettons/{jetton_id}/history:
     get:
       description: "Get the transfer jetton history for account_id and jetton_id"
@@ -568,14 +474,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AccountEvents'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/InternalError'
+        'default':
+          $ref: '#/components/responses/Error'
+
 
   /v2/accounts/{account_id}/nfts:
     get:
@@ -602,14 +503,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/NftItems'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/InternalError'
+        'default':
+          $ref: '#/components/responses/Error'
+
 
   /v2/accounts/{account_id}/events:
     get:
@@ -663,14 +559,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AccountEvents'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/InternalError'
+        'default':
+          $ref: '#/components/responses/Error'
+
 
   /v2/accounts/{account_id}/traces:
     get:
@@ -695,14 +586,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/TraceIds'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/InternalError'
+        'default':
+          $ref: '#/components/responses/Error'
+
 
   /v2/accounts/{account_id}/subscriptions:
     get:
@@ -719,14 +605,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Subscriptions'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/InternalError'
+        'default':
+          $ref: '#/components/responses/Error'
+
 
   /v2/accounts/{account_id}/reindex:
     post:
@@ -739,13 +620,8 @@ paths:
       responses:
         '200':
           description: "success"
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '500':
-          $ref: '#/components/responses/InternalError'
-
+        'default':
+          $ref: '#/components/responses/Error'
   /v2/accounts/search:
     get:
       description: "Search for accounts by name. You can find the account by the first characters of the domain."
@@ -767,14 +643,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/FoundAccounts'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/InternalError'
+        'default':
+          $ref: '#/components/responses/Error'
+
   
   /v2/accounts/{account_id}/dns/expiring:
     get:
@@ -792,14 +663,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/DnsExpiring'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/InternalError'
+        'default':
+          $ref: '#/components/responses/Error'
+
   
   /v2/accounts/{account_id}/publickey:
     get:
@@ -822,13 +688,8 @@ paths:
                   public_key:
                     type: string
                     example: "NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2ODQ3..."
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '500':
-          $ref: '#/components/responses/InternalError'
-
+        'default':
+          $ref: '#/components/responses/Error'
   /v2/dns/{domain_name}:
     get:
       description: get full information about domain name
@@ -844,14 +705,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/DomainInfo'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/InternalError'
+        'default':
+          $ref: '#/components/responses/Error'
+
   /v2/dns/{domain_name}/resolve:
     get:
       description: DNS resolve for domain name
@@ -867,14 +723,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/DnsRecord'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/InternalError'
+        'default':
+          $ref: '#/components/responses/Error'
+
 
   /v2/dns/{domain_name}/bids:
     get:
@@ -891,14 +742,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/DomainBids'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/InternalError'
+        'default':
+          $ref: '#/components/responses/Error'
+
 
   /v2/dns/auctions:
     get:
@@ -915,10 +761,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Auctions'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '500':
-          $ref: '#/components/responses/InternalError'
+        'default':
+          $ref: '#/components/responses/Error'
 
   /v2/nfts/collections:
     get:
@@ -949,10 +793,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/NftCollections'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '500':
-          $ref: '#/components/responses/InternalError'
+        'default':
+          $ref: '#/components/responses/Error'
 
   /v2/nfts/collections/{account_id}:
     get:
@@ -969,14 +811,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/NftCollection'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/InternalError'
+        'default':
+          $ref: '#/components/responses/Error'
+
 
   /v2/nfts/collections/{account_id}/items:
     get:
@@ -995,14 +832,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/NftItems'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/InternalError'
+        'default':
+          $ref: '#/components/responses/Error'
+
 
   /v2/nfts/_bulk:
     post:
@@ -1019,14 +851,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/NftItems'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/InternalError'
+        'default':
+          $ref: '#/components/responses/Error'
+
 
   /v2/nfts/{account_id}:
     get:
@@ -1043,14 +870,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/NftItem'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/InternalError'
+        'default':
+          $ref: '#/components/responses/Error'
+
 
   /v2/traces/{trace_id}:
     get:
@@ -1067,14 +889,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Trace'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/InternalError'
+        'default':
+          $ref: '#/components/responses/Error'
+
 
   /v2/events/{event_id}:
     get:
@@ -1092,14 +909,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Event'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/InternalError'
+        'default':
+          $ref: '#/components/responses/Error'
+
 
   /v2/jettons:
     get:
@@ -1130,10 +942,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Jettons'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '500':
-          $ref: '#/components/responses/InternalError'
+        'default':
+          $ref: '#/components/responses/Error'
 
   /v2/jettons/{account_id}:
     get:
@@ -1150,14 +960,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/JettonInfo'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/InternalError'
+        'default':
+          $ref: '#/components/responses/Error'
+
 
   /v2/staking/nominator/{account_id}/pools:
     get:
@@ -1174,14 +979,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AccountStaking'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/InternalError'
+        'default':
+          $ref: '#/components/responses/Error'
+
   /v2/staking/pool/{account_id}:
     get:
       description: Pool info
@@ -1206,14 +1006,9 @@ paths:
                     $ref: '#/components/schemas/PoolImplementation'
                   pool:
                     $ref: '#/components/schemas/PoolInfo'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/InternalError'
+        'default':
+          $ref: '#/components/responses/Error'
+
   /v2/staking/pool/{account_id}/history:
     get:
       description: Pool info
@@ -1237,14 +1032,9 @@ paths:
                     items:
                       $ref: '#/components/schemas/ApyHistory'
 
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/InternalError'
+        'default':
+          $ref: '#/components/responses/Error'
+
   /v2/staking/pools:
     get:
       description: All pools available in network
@@ -1286,14 +1076,9 @@ paths:
                     type: object
                     additionalProperties:
                       $ref: '#/components/schemas/PoolImplementation'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/InternalError'
+        'default':
+          $ref: '#/components/responses/Error'
+
   /v2/storage/providers:
     get:
       description: Get TON storage providers deployed to the blockchain.
@@ -1314,13 +1099,8 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/StorageProvider'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '500':
-          $ref: '#/components/responses/InternalError'
-
+        'default':
+          $ref: '#/components/responses/Error'
   /v2/rates:
     get:
       description: Get the token price to the currency
@@ -1355,13 +1135,8 @@ paths:
                   rates:
                     additionalProperties: true
                     example: { }
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '500':
-          $ref: '#/components/responses/InternalError'
-  
+        'default':
+          $ref: '#/components/responses/Error'  
   /v2/tonconnect/payload:
     get:
       description: Get a payload for further token receipt
@@ -1381,12 +1156,8 @@ paths:
                   payload:
                     type: string
                     example: "84jHVNLQmZsAAAAAZB0Zryi2wqVJI-KaKNXOvCijEi46YyYzkaSHyJrMPBMOkVZa"
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '500':
-          $ref: '#/components/responses/InternalError'
+        'default':
+          $ref: '#/components/responses/Error'
   /v2/tonconnect/stateinit:
     post:
       description: "Get account info by state init"
@@ -1402,13 +1173,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AccountInfoByStateInit'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '500':
-          $ref: '#/components/responses/InternalError'
-  
+        'default':
+          $ref: '#/components/responses/Error'  
   /v2/wallet/backup:
     get:
       description: Get backup info
@@ -1433,12 +1199,8 @@ paths:
                 properties:
                   dump:
                     type: string
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '500':
-          $ref: '#/components/responses/InternalError'
+        'default':
+          $ref: '#/components/responses/Error'
     put:
       description: Set backup info
       operationId: setWalletBackup
@@ -1455,12 +1217,8 @@ paths:
       responses:
         '200':
           description: "success"
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '500':
-          $ref: '#/components/responses/InternalError'
+        'default':
+          $ref: '#/components/responses/Error'
   /v2/wallet/auth/proof:
     post:
       description: Account verification and token issuance
@@ -1482,12 +1240,8 @@ paths:
                   token:
                     type: string
                     example: "NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2ODQ3..."
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '500':
-          $ref: '#/components/responses/InternalError'
+        'default':
+          $ref: '#/components/responses/Error'
   /v2/pubkeys/{public_key}/wallets:
     get:
       description: "Get wallets by public key"
@@ -1503,12 +1257,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Accounts'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '500':
-          $ref: '#/components/responses/InternalError'
+        'default':
+          $ref: '#/components/responses/Error'
   /v2/wallet/{account_id}/seqno:
     get:
       description: "Get account seqno"
@@ -1524,13 +1274,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Seqno'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '500':
-          $ref: '#/components/responses/InternalError'
-
+        'default':
+          $ref: '#/components/responses/Error'
 
   /v2/liteserver/get_masterchain_info:
     get:
@@ -1557,12 +1302,8 @@ paths:
                     example: 131D0C65055F04E9C19D687B51BC70F952FD9CA6F02C2801D3B89964A779DF85
                   init:
                     $ref: '#/components/schemas/InitStateRaw'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '500':
-          $ref: '#/components/responses/InternalError'
+        'default':
+          $ref: '#/components/responses/Error'
   /v2/liteserver/get_masterchain_info_ext:
     get:
       description: "Get masterchain info ext"
@@ -1615,12 +1356,8 @@ paths:
                     example: 131D0C65055F04E9C19D687B51BC70F952FD9CA6F02C2801D3B89964A779DF85
                   init:
                     $ref: '#/components/schemas/InitStateRaw'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '500':
-          $ref: '#/components/responses/InternalError'
+        'default':
+          $ref: '#/components/responses/Error'
   /v2/liteserver/get_time:
     get:
       description: "Get time"
@@ -1641,12 +1378,8 @@ paths:
                     type: integer
                     format: uint32
                     example: 1687146728
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '500':
-          $ref: '#/components/responses/InternalError'
+        'default':
+          $ref: '#/components/responses/Error'
   /v2/liteserver/get_block/{block_id}:
     get:
       description: "Get block"
@@ -1671,12 +1404,8 @@ paths:
                   data:
                     type: string
                     example: 131D0C65055F04E9C19D687B51BC70F952FD9CA6F02C2801D3B89964A779DF85
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '500':
-          $ref: '#/components/responses/InternalError'
+        'default':
+          $ref: '#/components/responses/Error'
   /v2/liteserver/get_state/{block_id}:
     get:
       description: "Get block state"
@@ -1709,12 +1438,8 @@ paths:
                   data:
                     type: string
                     example: 131D0C65055F04E9C19D687B51BC70F952FD9CA6F02C2801D3B89964A779DF85
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '500':
-          $ref: '#/components/responses/InternalError'
+        'default':
+          $ref: '#/components/responses/Error'
   /v2/liteserver/get_block_header/{block_id}:
     get:
       description: "Get block header"
@@ -1745,12 +1470,8 @@ paths:
                   header_proof:
                     type: string
                     example: 131D0C65055F04E9C19D687B51BC70F952FD9CA6F02C2801D3B89964A779DF85
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '500':
-          $ref: '#/components/responses/InternalError'
+        'default':
+          $ref: '#/components/responses/Error'
   /v2/liteserver/send_message:
     post:
       description: "Send message"
@@ -1773,12 +1494,8 @@ paths:
                     type: integer
                     format: uint32
                     example: 200
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '500':
-          $ref: '#/components/responses/InternalError'
+        'default':
+          $ref: '#/components/responses/Error'
   /v2/liteserver/get_account_state/{account_id}:
     get:
       description: "Get account state"
@@ -1814,12 +1531,8 @@ paths:
                   state:
                     type: string
                     example: 131D0C65055F04E9C19D687B51BC70F952FD9CA6F02C2801D3B89964A779DF85
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '500':
-          $ref: '#/components/responses/InternalError'
+        'default':
+          $ref: '#/components/responses/Error'
   /v2/liteserver/get_shard_info/{block_id}:
     get:
       description: "Get shard info"
@@ -1854,12 +1567,8 @@ paths:
                   shard_descr:
                     type: string
                     example: 131D0C65055F04E9C19D687B51BC70F952FD9CA6F02C2801D3B89964A779DF85
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '500':
-          $ref: '#/components/responses/InternalError'
+        'default':
+          $ref: '#/components/responses/Error'
   /v2/liteserver/get_all_shards_info/{block_id}:
     get:
       description: "Get all shards info"
@@ -1888,12 +1597,8 @@ paths:
                   data:
                     type: string
                     example: 131D0C65055F04E9C19D687B51BC70F952FD9CA6F02C2801D3B89964A779DF85
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '500':
-          $ref: '#/components/responses/InternalError'
+        'default':
+          $ref: '#/components/responses/Error'
   /v2/liteserver/get_transactions/{account_id}:
     get:
       description: "Get transactions"
@@ -1923,12 +1628,8 @@ paths:
                   transactions:
                     type: string
                     example: 131D0C65055F04E9C19D687B51BC70F952FD9CA6F02C2801D3B89964A779DF85
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '500':
-          $ref: '#/components/responses/InternalError'
+        'default':
+          $ref: '#/components/responses/Error'
   /v2/liteserver/list_block_transactions/{block_id}:
     get:
       description: "Get list block transactions"
@@ -1987,12 +1688,8 @@ paths:
                   proof:
                     type: string
                     example: 131D0C65055F04E9C19D687B51BC70F952FD9CA6F02C2801D3B89964A779DF85
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '500':
-          $ref: '#/components/responses/InternalError'
+        'default':
+          $ref: '#/components/responses/Error'
   /v2/liteserver/get_block_proof:
     get:
       description: "Get block proof"
@@ -2107,12 +1804,8 @@ paths:
                                       signature:
                                         type: string
                                         example: 131D0C65055F04E9C19D687B51BC70F952FD9CA6F02C2801D3B89964A779DF85
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '500':
-          $ref: '#/components/responses/InternalError'
+        'default':
+          $ref: '#/components/responses/Error'
   /v2/liteserver/get_config_all/{block_id}:
     get:
       description: "Get config all"
@@ -2147,12 +1840,8 @@ paths:
                   config_proof:
                     type: string
                     example: 131D0C65055F04E9C19D687B51BC70F952FD9CA6F02C2801D3B89964A779DF85
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '500':
-          $ref: '#/components/responses/InternalError'
+        'default':
+          $ref: '#/components/responses/Error'
   /v2/liteserver/get_shard_block_proof/{block_id}:
     get:
       description: "Get shard block proof"
@@ -2187,13 +1876,8 @@ paths:
                         proof:
                           type: string
                           example: 131D0C65055F04E9C19D687B51BC70F952FD9CA6F02C2801D3B89964A779DF85
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '500':
-          $ref: '#/components/responses/InternalError'
-
+        'default':
+          $ref: '#/components/responses/Error'
 components:
   parameters:
     blockIdParameter:
@@ -4637,41 +4321,8 @@ components:
           example: "A6A0BD6608672B...CE3AF8DB"
 
   responses:
-    NotFound:
-      description: The specified resource was not found
-      content:
-        application/json:
-          schema:
-            type: object
-            required:
-              - error
-            properties:
-              error:
-                type: string
-    InternalError:
-      description: Something went wrong on server side
-      content:
-        application/json:
-          schema:
-            type: object
-            required:
-              - error
-            properties:
-              error:
-                type: string
-    BadRequest:
-      description: Something went wrong on client side
-      content:
-        application/json:
-          schema:
-            type: object
-            required:
-              - error
-            properties:
-              error:
-                type: string
-    UnauthorizedError:
-      description: Access token is missing or invalid
+    Error:
+      description: Some error during request processing
       content:
         application/json:
           schema:

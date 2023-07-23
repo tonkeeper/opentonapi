@@ -19,6 +19,10 @@ import (
 	"github.com/tonkeeper/tongo"
 )
 
+func toError(code int, err error) *oas.ErrorStatusCode {
+	return &oas.ErrorStatusCode{StatusCode: code, Response: oas.Error{Error: err.Error()}}
+}
+
 func anyToJSONRawMap(a any, toSnake bool) map[string]jx.Raw { //todo: переписать этот ужас
 	var m = map[string]jx.Raw{}
 	if am, ok := a.(map[string]any); ok {

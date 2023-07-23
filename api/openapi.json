@@ -468,7 +468,7 @@
    }
   },
   "responses": {
-   "BadRequest": {
+   "Error": {
     "content": {
      "application/json": {
       "schema": {
@@ -484,61 +484,7 @@
       }
      }
     },
-    "description": "Something went wrong on client side"
-   },
-   "InternalError": {
-    "content": {
-     "application/json": {
-      "schema": {
-       "properties": {
-        "error": {
-         "type": "string"
-        }
-       },
-       "required": [
-        "error"
-       ],
-       "type": "object"
-      }
-     }
-    },
-    "description": "Something went wrong on server side"
-   },
-   "NotFound": {
-    "content": {
-     "application/json": {
-      "schema": {
-       "properties": {
-        "error": {
-         "type": "string"
-        }
-       },
-       "required": [
-        "error"
-       ],
-       "type": "object"
-      }
-     }
-    },
-    "description": "The specified resource was not found"
-   },
-   "UnauthorizedError": {
-    "content": {
-     "application/json": {
-      "schema": {
-       "properties": {
-        "error": {
-         "type": "string"
-        }
-       },
-       "required": [
-        "error"
-       ],
-       "type": "object"
-      }
-     }
-    },
-    "description": "Access token is missing or invalid"
+    "description": "Some error during request processing"
    }
   },
   "schemas": {
@@ -3336,14 +3282,8 @@
       },
       "description": "a list of accounts"
      },
-     "400": {
-      "$ref": "#/components/responses/BadRequest"
-     },
-     "401": {
-      "$ref": "#/components/responses/UnauthorizedError"
-     },
-     "500": {
-      "$ref": "#/components/responses/InternalError"
+     "default": {
+      "$ref": "#/components/responses/Error"
      }
     },
     "tags": [
@@ -3378,17 +3318,8 @@
       },
       "description": "found accounts"
      },
-     "400": {
-      "$ref": "#/components/responses/BadRequest"
-     },
-     "401": {
-      "$ref": "#/components/responses/UnauthorizedError"
-     },
-     "404": {
-      "$ref": "#/components/responses/NotFound"
-     },
-     "500": {
-      "$ref": "#/components/responses/InternalError"
+     "default": {
+      "$ref": "#/components/responses/Error"
      }
     },
     "tags": [
@@ -3416,17 +3347,8 @@
       },
       "description": "account"
      },
-     "400": {
-      "$ref": "#/components/responses/BadRequest"
-     },
-     "401": {
-      "$ref": "#/components/responses/UnauthorizedError"
-     },
-     "404": {
-      "$ref": "#/components/responses/NotFound"
-     },
-     "500": {
-      "$ref": "#/components/responses/InternalError"
+     "default": {
+      "$ref": "#/components/responses/Error"
      }
     },
     "tags": [
@@ -3454,17 +3376,8 @@
       },
       "description": "domains for wallet account"
      },
-     "400": {
-      "$ref": "#/components/responses/BadRequest"
-     },
-     "401": {
-      "$ref": "#/components/responses/UnauthorizedError"
-     },
-     "404": {
-      "$ref": "#/components/responses/NotFound"
-     },
-     "500": {
-      "$ref": "#/components/responses/InternalError"
+     "default": {
+      "$ref": "#/components/responses/Error"
      }
     },
     "tags": [
@@ -3495,17 +3408,8 @@
       },
       "description": "expiring .ton dns"
      },
-     "400": {
-      "$ref": "#/components/responses/BadRequest"
-     },
-     "401": {
-      "$ref": "#/components/responses/UnauthorizedError"
-     },
-     "404": {
-      "$ref": "#/components/responses/NotFound"
-     },
-     "500": {
-      "$ref": "#/components/responses/InternalError"
+     "default": {
+      "$ref": "#/components/responses/Error"
      }
     },
     "tags": [
@@ -3587,17 +3491,8 @@
       },
       "description": "events"
      },
-     "400": {
-      "$ref": "#/components/responses/BadRequest"
-     },
-     "401": {
-      "$ref": "#/components/responses/UnauthorizedError"
-     },
-     "404": {
-      "$ref": "#/components/responses/NotFound"
-     },
-     "500": {
-      "$ref": "#/components/responses/InternalError"
+     "default": {
+      "$ref": "#/components/responses/Error"
      }
     },
     "tags": [
@@ -3631,14 +3526,8 @@
       },
       "description": "event"
      },
-     "400": {
-      "$ref": "#/components/responses/BadRequest"
-     },
-     "401": {
-      "$ref": "#/components/responses/UnauthorizedError"
-     },
-     "500": {
-      "$ref": "#/components/responses/InternalError"
+     "default": {
+      "$ref": "#/components/responses/Error"
      }
     },
     "tags": [
@@ -3666,17 +3555,8 @@
       },
       "description": "jetton balances"
      },
-     "400": {
-      "$ref": "#/components/responses/BadRequest"
-     },
-     "401": {
-      "$ref": "#/components/responses/UnauthorizedError"
-     },
-     "404": {
-      "$ref": "#/components/responses/NotFound"
-     },
-     "500": {
-      "$ref": "#/components/responses/InternalError"
+     "default": {
+      "$ref": "#/components/responses/Error"
      }
     },
     "tags": [
@@ -3748,17 +3628,8 @@
       },
       "description": "jetton history"
      },
-     "400": {
-      "$ref": "#/components/responses/BadRequest"
-     },
-     "401": {
-      "$ref": "#/components/responses/UnauthorizedError"
-     },
-     "404": {
-      "$ref": "#/components/responses/NotFound"
-     },
-     "500": {
-      "$ref": "#/components/responses/InternalError"
+     "default": {
+      "$ref": "#/components/responses/Error"
      }
     },
     "tags": [
@@ -3833,17 +3704,8 @@
       },
       "description": "jetton history"
      },
-     "400": {
-      "$ref": "#/components/responses/BadRequest"
-     },
-     "401": {
-      "$ref": "#/components/responses/UnauthorizedError"
-     },
-     "404": {
-      "$ref": "#/components/responses/NotFound"
-     },
-     "500": {
-      "$ref": "#/components/responses/InternalError"
+     "default": {
+      "$ref": "#/components/responses/Error"
      }
     },
     "tags": [
@@ -3890,17 +3752,8 @@
       },
       "description": "nft items"
      },
-     "400": {
-      "$ref": "#/components/responses/BadRequest"
-     },
-     "401": {
-      "$ref": "#/components/responses/UnauthorizedError"
-     },
-     "404": {
-      "$ref": "#/components/responses/NotFound"
-     },
-     "500": {
-      "$ref": "#/components/responses/InternalError"
+     "default": {
+      "$ref": "#/components/responses/Error"
      }
     },
     "tags": [
@@ -3937,14 +3790,8 @@
       },
       "description": "public key"
      },
-     "400": {
-      "$ref": "#/components/responses/BadRequest"
-     },
-     "401": {
-      "$ref": "#/components/responses/UnauthorizedError"
-     },
-     "500": {
-      "$ref": "#/components/responses/InternalError"
+     "default": {
+      "$ref": "#/components/responses/Error"
      }
     },
     "tags": [
@@ -3965,14 +3812,8 @@
      "200": {
       "description": "success"
      },
-     "400": {
-      "$ref": "#/components/responses/BadRequest"
-     },
-     "401": {
-      "$ref": "#/components/responses/UnauthorizedError"
-     },
-     "500": {
-      "$ref": "#/components/responses/InternalError"
+     "default": {
+      "$ref": "#/components/responses/Error"
      }
     },
     "tags": [
@@ -4000,17 +3841,8 @@
       },
       "description": "subscriptions"
      },
-     "400": {
-      "$ref": "#/components/responses/BadRequest"
-     },
-     "401": {
-      "$ref": "#/components/responses/UnauthorizedError"
-     },
-     "404": {
-      "$ref": "#/components/responses/NotFound"
-     },
-     "500": {
-      "$ref": "#/components/responses/InternalError"
+     "default": {
+      "$ref": "#/components/responses/Error"
      }
     },
     "tags": [
@@ -4049,17 +3881,8 @@
       },
       "description": "traces"
      },
-     "400": {
-      "$ref": "#/components/responses/BadRequest"
-     },
-     "401": {
-      "$ref": "#/components/responses/UnauthorizedError"
-     },
-     "404": {
-      "$ref": "#/components/responses/NotFound"
-     },
-     "500": {
-      "$ref": "#/components/responses/InternalError"
+     "default": {
+      "$ref": "#/components/responses/Error"
      }
     },
     "tags": [
@@ -4087,17 +3910,8 @@
       },
       "description": "raw account"
      },
-     "400": {
-      "$ref": "#/components/responses/BadRequest"
-     },
-     "401": {
-      "$ref": "#/components/responses/UnauthorizedError"
-     },
-     "404": {
-      "$ref": "#/components/responses/NotFound"
-     },
-     "500": {
-      "$ref": "#/components/responses/InternalError"
+     "default": {
+      "$ref": "#/components/responses/Error"
      }
     },
     "tags": [
@@ -4143,14 +3957,8 @@
       },
       "description": "result"
      },
-     "400": {
-      "$ref": "#/components/responses/BadRequest"
-     },
-     "401": {
-      "$ref": "#/components/responses/UnauthorizedError"
-     },
-     "500": {
-      "$ref": "#/components/responses/InternalError"
+     "default": {
+      "$ref": "#/components/responses/Error"
      }
     },
     "tags": [
@@ -4209,17 +4017,8 @@
       },
       "description": "account transactions"
      },
-     "400": {
-      "$ref": "#/components/responses/BadRequest"
-     },
-     "401": {
-      "$ref": "#/components/responses/UnauthorizedError"
-     },
-     "404": {
-      "$ref": "#/components/responses/NotFound"
-     },
-     "500": {
-      "$ref": "#/components/responses/InternalError"
+     "default": {
+      "$ref": "#/components/responses/Error"
      }
     },
     "tags": [
@@ -4247,17 +4046,8 @@
       },
       "description": "block"
      },
-     "400": {
-      "$ref": "#/components/responses/BadRequest"
-     },
-     "401": {
-      "$ref": "#/components/responses/UnauthorizedError"
-     },
-     "404": {
-      "$ref": "#/components/responses/NotFound"
-     },
-     "500": {
-      "$ref": "#/components/responses/InternalError"
+     "default": {
+      "$ref": "#/components/responses/Error"
      }
     },
     "tags": [
@@ -4285,17 +4075,8 @@
       },
       "description": "transactions"
      },
-     "400": {
-      "$ref": "#/components/responses/BadRequest"
-     },
-     "401": {
-      "$ref": "#/components/responses/UnauthorizedError"
-     },
-     "404": {
-      "$ref": "#/components/responses/NotFound"
-     },
-     "500": {
-      "$ref": "#/components/responses/InternalError"
+     "default": {
+      "$ref": "#/components/responses/Error"
      }
     },
     "tags": [
@@ -4318,11 +4099,8 @@
       },
       "description": "blockchain config"
      },
-     "401": {
-      "$ref": "#/components/responses/UnauthorizedError"
-     },
-     "500": {
-      "$ref": "#/components/responses/InternalError"
+     "default": {
+      "$ref": "#/components/responses/Error"
      }
     },
     "tags": [
@@ -4345,11 +4123,8 @@
       },
       "description": "masterchain head"
      },
-     "401": {
-      "$ref": "#/components/responses/UnauthorizedError"
-     },
-     "500": {
-      "$ref": "#/components/responses/InternalError"
+     "default": {
+      "$ref": "#/components/responses/Error"
      }
     },
     "tags": [
@@ -4368,14 +4143,8 @@
      "200": {
       "description": "success"
      },
-     "400": {
-      "$ref": "#/components/responses/BadRequest"
-     },
-     "401": {
-      "$ref": "#/components/responses/UnauthorizedError"
-     },
-     "500": {
-      "$ref": "#/components/responses/InternalError"
+     "default": {
+      "$ref": "#/components/responses/Error"
      }
     },
     "tags": [
@@ -4403,17 +4172,8 @@
       },
       "description": "transaction"
      },
-     "400": {
-      "$ref": "#/components/responses/BadRequest"
-     },
-     "401": {
-      "$ref": "#/components/responses/UnauthorizedError"
-     },
-     "404": {
-      "$ref": "#/components/responses/NotFound"
-     },
-     "500": {
-      "$ref": "#/components/responses/InternalError"
+     "default": {
+      "$ref": "#/components/responses/Error"
      }
     },
     "tags": [
@@ -4441,17 +4201,8 @@
       },
       "description": "transaction"
      },
-     "400": {
-      "$ref": "#/components/responses/BadRequest"
-     },
-     "401": {
-      "$ref": "#/components/responses/UnauthorizedError"
-     },
-     "404": {
-      "$ref": "#/components/responses/NotFound"
-     },
-     "500": {
-      "$ref": "#/components/responses/InternalError"
+     "default": {
+      "$ref": "#/components/responses/Error"
      }
     },
     "tags": [
@@ -4474,11 +4225,8 @@
       },
       "description": "validators"
      },
-     "401": {
-      "$ref": "#/components/responses/UnauthorizedError"
-     },
-     "500": {
-      "$ref": "#/components/responses/InternalError"
+     "default": {
+      "$ref": "#/components/responses/Error"
      }
     },
     "tags": [
@@ -4506,11 +4254,8 @@
       },
       "description": "auctions"
      },
-     "401": {
-      "$ref": "#/components/responses/UnauthorizedError"
-     },
-     "500": {
-      "$ref": "#/components/responses/InternalError"
+     "default": {
+      "$ref": "#/components/responses/Error"
      }
     },
     "tags": [
@@ -4538,17 +4283,8 @@
       },
       "description": "domain info"
      },
-     "400": {
-      "$ref": "#/components/responses/BadRequest"
-     },
-     "401": {
-      "$ref": "#/components/responses/UnauthorizedError"
-     },
-     "404": {
-      "$ref": "#/components/responses/NotFound"
-     },
-     "500": {
-      "$ref": "#/components/responses/InternalError"
+     "default": {
+      "$ref": "#/components/responses/Error"
      }
     },
     "tags": [
@@ -4576,17 +4312,8 @@
       },
       "description": "domain bids"
      },
-     "400": {
-      "$ref": "#/components/responses/BadRequest"
-     },
-     "401": {
-      "$ref": "#/components/responses/UnauthorizedError"
-     },
-     "404": {
-      "$ref": "#/components/responses/NotFound"
-     },
-     "500": {
-      "$ref": "#/components/responses/InternalError"
+     "default": {
+      "$ref": "#/components/responses/Error"
      }
     },
     "tags": [
@@ -4614,17 +4341,8 @@
       },
       "description": "dns record"
      },
-     "400": {
-      "$ref": "#/components/responses/BadRequest"
-     },
-     "401": {
-      "$ref": "#/components/responses/UnauthorizedError"
-     },
-     "404": {
-      "$ref": "#/components/responses/NotFound"
-     },
-     "500": {
-      "$ref": "#/components/responses/InternalError"
+     "default": {
+      "$ref": "#/components/responses/Error"
      }
     },
     "tags": [
@@ -4655,14 +4373,8 @@
       },
       "description": "event"
      },
-     "400": {
-      "$ref": "#/components/responses/BadRequest"
-     },
-     "401": {
-      "$ref": "#/components/responses/UnauthorizedError"
-     },
-     "500": {
-      "$ref": "#/components/responses/InternalError"
+     "default": {
+      "$ref": "#/components/responses/Error"
      }
     },
     "tags": [
@@ -4693,17 +4405,8 @@
       },
       "description": "event"
      },
-     "400": {
-      "$ref": "#/components/responses/BadRequest"
-     },
-     "401": {
-      "$ref": "#/components/responses/UnauthorizedError"
-     },
-     "404": {
-      "$ref": "#/components/responses/NotFound"
-     },
-     "500": {
-      "$ref": "#/components/responses/InternalError"
+     "default": {
+      "$ref": "#/components/responses/Error"
      }
     },
     "tags": [
@@ -4749,11 +4452,8 @@
       },
       "description": "a list of jettons"
      },
-     "401": {
-      "$ref": "#/components/responses/UnauthorizedError"
-     },
-     "500": {
-      "$ref": "#/components/responses/InternalError"
+     "default": {
+      "$ref": "#/components/responses/Error"
      }
     },
     "tags": [
@@ -4781,17 +4481,8 @@
       },
       "description": "jetton info"
      },
-     "400": {
-      "$ref": "#/components/responses/BadRequest"
-     },
-     "401": {
-      "$ref": "#/components/responses/UnauthorizedError"
-     },
-     "404": {
-      "$ref": "#/components/responses/NotFound"
-     },
-     "500": {
-      "$ref": "#/components/responses/InternalError"
+     "default": {
+      "$ref": "#/components/responses/Error"
      }
     },
     "tags": [
@@ -4846,14 +4537,8 @@
       },
       "description": "account state"
      },
-     "400": {
-      "$ref": "#/components/responses/BadRequest"
-     },
-     "401": {
-      "$ref": "#/components/responses/UnauthorizedError"
-     },
-     "500": {
-      "$ref": "#/components/responses/InternalError"
+     "default": {
+      "$ref": "#/components/responses/Error"
      }
     },
     "tags": [
@@ -4899,14 +4584,8 @@
       },
       "description": "shards info"
      },
-     "400": {
-      "$ref": "#/components/responses/BadRequest"
-     },
-     "401": {
-      "$ref": "#/components/responses/UnauthorizedError"
-     },
-     "500": {
-      "$ref": "#/components/responses/InternalError"
+     "default": {
+      "$ref": "#/components/responses/Error"
      }
     },
     "tags": [
@@ -4947,14 +4626,8 @@
       },
       "description": "block"
      },
-     "400": {
-      "$ref": "#/components/responses/BadRequest"
-     },
-     "401": {
-      "$ref": "#/components/responses/UnauthorizedError"
-     },
-     "500": {
-      "$ref": "#/components/responses/InternalError"
+     "default": {
+      "$ref": "#/components/responses/Error"
      }
     },
     "tags": [
@@ -5004,14 +4677,8 @@
       },
       "description": "block header"
      },
-     "400": {
-      "$ref": "#/components/responses/BadRequest"
-     },
-     "401": {
-      "$ref": "#/components/responses/UnauthorizedError"
-     },
-     "500": {
-      "$ref": "#/components/responses/InternalError"
+     "default": {
+      "$ref": "#/components/responses/Error"
      }
     },
     "tags": [
@@ -5179,14 +4846,8 @@
       },
       "description": "proof"
      },
-     "400": {
-      "$ref": "#/components/responses/BadRequest"
-     },
-     "401": {
-      "$ref": "#/components/responses/UnauthorizedError"
-     },
-     "500": {
-      "$ref": "#/components/responses/InternalError"
+     "default": {
+      "$ref": "#/components/responses/Error"
      }
     },
     "tags": [
@@ -5241,14 +4902,8 @@
       },
       "description": "config"
      },
-     "400": {
-      "$ref": "#/components/responses/BadRequest"
-     },
-     "401": {
-      "$ref": "#/components/responses/UnauthorizedError"
-     },
-     "500": {
-      "$ref": "#/components/responses/InternalError"
+     "default": {
+      "$ref": "#/components/responses/Error"
      }
     },
     "tags": [
@@ -5288,14 +4943,8 @@
       },
       "description": "masterchain info"
      },
-     "400": {
-      "$ref": "#/components/responses/BadRequest"
-     },
-     "401": {
-      "$ref": "#/components/responses/UnauthorizedError"
-     },
-     "500": {
-      "$ref": "#/components/responses/InternalError"
+     "default": {
+      "$ref": "#/components/responses/Error"
      }
     },
     "tags": [
@@ -5370,14 +5019,8 @@
       },
       "description": "masterchain info ext"
      },
-     "400": {
-      "$ref": "#/components/responses/BadRequest"
-     },
-     "401": {
-      "$ref": "#/components/responses/UnauthorizedError"
-     },
-     "500": {
-      "$ref": "#/components/responses/InternalError"
+     "default": {
+      "$ref": "#/components/responses/Error"
      }
     },
     "tags": [
@@ -5433,14 +5076,8 @@
       },
       "description": "shard"
      },
-     "400": {
-      "$ref": "#/components/responses/BadRequest"
-     },
-     "401": {
-      "$ref": "#/components/responses/UnauthorizedError"
-     },
-     "500": {
-      "$ref": "#/components/responses/InternalError"
+     "default": {
+      "$ref": "#/components/responses/Error"
      }
     },
     "tags": [
@@ -5499,14 +5136,8 @@
       },
       "description": "shard info"
      },
-     "400": {
-      "$ref": "#/components/responses/BadRequest"
-     },
-     "401": {
-      "$ref": "#/components/responses/UnauthorizedError"
-     },
-     "500": {
-      "$ref": "#/components/responses/InternalError"
+     "default": {
+      "$ref": "#/components/responses/Error"
      }
     },
     "tags": [
@@ -5557,14 +5188,8 @@
       },
       "description": "state"
      },
-     "400": {
-      "$ref": "#/components/responses/BadRequest"
-     },
-     "401": {
-      "$ref": "#/components/responses/UnauthorizedError"
-     },
-     "500": {
-      "$ref": "#/components/responses/InternalError"
+     "default": {
+      "$ref": "#/components/responses/Error"
      }
     },
     "tags": [
@@ -5597,14 +5222,8 @@
       },
       "description": "time"
      },
-     "400": {
-      "$ref": "#/components/responses/BadRequest"
-     },
-     "401": {
-      "$ref": "#/components/responses/UnauthorizedError"
-     },
-     "500": {
-      "$ref": "#/components/responses/InternalError"
+     "default": {
+      "$ref": "#/components/responses/Error"
      }
     },
     "tags": [
@@ -5657,14 +5276,8 @@
       },
       "description": "transactions"
      },
-     "400": {
-      "$ref": "#/components/responses/BadRequest"
-     },
-     "401": {
-      "$ref": "#/components/responses/UnauthorizedError"
-     },
-     "500": {
-      "$ref": "#/components/responses/InternalError"
+     "default": {
+      "$ref": "#/components/responses/Error"
      }
     },
     "tags": [
@@ -5757,14 +5370,8 @@
       },
       "description": "list block transactions"
      },
-     "400": {
-      "$ref": "#/components/responses/BadRequest"
-     },
-     "401": {
-      "$ref": "#/components/responses/UnauthorizedError"
-     },
-     "500": {
-      "$ref": "#/components/responses/InternalError"
+     "default": {
+      "$ref": "#/components/responses/Error"
      }
     },
     "tags": [
@@ -5800,14 +5407,8 @@
       },
       "description": "code"
      },
-     "400": {
-      "$ref": "#/components/responses/BadRequest"
-     },
-     "401": {
-      "$ref": "#/components/responses/UnauthorizedError"
-     },
-     "500": {
-      "$ref": "#/components/responses/InternalError"
+     "default": {
+      "$ref": "#/components/responses/Error"
      }
     },
     "tags": [
@@ -5833,17 +5434,8 @@
       },
       "description": "nft items"
      },
-     "400": {
-      "$ref": "#/components/responses/BadRequest"
-     },
-     "401": {
-      "$ref": "#/components/responses/UnauthorizedError"
-     },
-     "404": {
-      "$ref": "#/components/responses/NotFound"
-     },
-     "500": {
-      "$ref": "#/components/responses/InternalError"
+     "default": {
+      "$ref": "#/components/responses/Error"
      }
     },
     "tags": [
@@ -5889,11 +5481,8 @@
       },
       "description": "nft collections"
      },
-     "401": {
-      "$ref": "#/components/responses/UnauthorizedError"
-     },
-     "500": {
-      "$ref": "#/components/responses/InternalError"
+     "default": {
+      "$ref": "#/components/responses/Error"
      }
     },
     "tags": [
@@ -5921,17 +5510,8 @@
       },
       "description": "nft collection"
      },
-     "400": {
-      "$ref": "#/components/responses/BadRequest"
-     },
-     "401": {
-      "$ref": "#/components/responses/UnauthorizedError"
-     },
-     "404": {
-      "$ref": "#/components/responses/NotFound"
-     },
-     "500": {
-      "$ref": "#/components/responses/InternalError"
+     "default": {
+      "$ref": "#/components/responses/Error"
      }
     },
     "tags": [
@@ -5965,17 +5545,8 @@
       },
       "description": "nft collection"
      },
-     "400": {
-      "$ref": "#/components/responses/BadRequest"
-     },
-     "401": {
-      "$ref": "#/components/responses/UnauthorizedError"
-     },
-     "404": {
-      "$ref": "#/components/responses/NotFound"
-     },
-     "500": {
-      "$ref": "#/components/responses/InternalError"
+     "default": {
+      "$ref": "#/components/responses/Error"
      }
     },
     "tags": [
@@ -6003,17 +5574,8 @@
       },
       "description": "nft item"
      },
-     "400": {
-      "$ref": "#/components/responses/BadRequest"
-     },
-     "401": {
-      "$ref": "#/components/responses/UnauthorizedError"
-     },
-     "404": {
-      "$ref": "#/components/responses/NotFound"
-     },
-     "500": {
-      "$ref": "#/components/responses/InternalError"
+     "default": {
+      "$ref": "#/components/responses/Error"
      }
     },
     "tags": [
@@ -6041,14 +5603,8 @@
       },
       "description": "a list of wallets"
      },
-     "400": {
-      "$ref": "#/components/responses/BadRequest"
-     },
-     "401": {
-      "$ref": "#/components/responses/UnauthorizedError"
-     },
-     "500": {
-      "$ref": "#/components/responses/InternalError"
+     "default": {
+      "$ref": "#/components/responses/Error"
      }
     },
     "tags": [
@@ -6102,14 +5658,8 @@
       },
       "description": "ton price"
      },
-     "400": {
-      "$ref": "#/components/responses/BadRequest"
-     },
-     "401": {
-      "$ref": "#/components/responses/UnauthorizedError"
-     },
-     "500": {
-      "$ref": "#/components/responses/InternalError"
+     "default": {
+      "$ref": "#/components/responses/Error"
      }
     },
     "tags": [
@@ -6137,17 +5687,8 @@
       },
       "description": "user pools"
      },
-     "400": {
-      "$ref": "#/components/responses/BadRequest"
-     },
-     "401": {
-      "$ref": "#/components/responses/UnauthorizedError"
-     },
-     "404": {
-      "$ref": "#/components/responses/NotFound"
-     },
-     "500": {
-      "$ref": "#/components/responses/InternalError"
+     "default": {
+      "$ref": "#/components/responses/Error"
      }
     },
     "tags": [
@@ -6190,17 +5731,8 @@
       },
       "description": "user pools"
      },
-     "400": {
-      "$ref": "#/components/responses/BadRequest"
-     },
-     "401": {
-      "$ref": "#/components/responses/UnauthorizedError"
-     },
-     "404": {
-      "$ref": "#/components/responses/NotFound"
-     },
-     "500": {
-      "$ref": "#/components/responses/InternalError"
+     "default": {
+      "$ref": "#/components/responses/Error"
      }
     },
     "tags": [
@@ -6239,17 +5771,8 @@
       },
       "description": "history"
      },
-     "400": {
-      "$ref": "#/components/responses/BadRequest"
-     },
-     "401": {
-      "$ref": "#/components/responses/UnauthorizedError"
-     },
-     "404": {
-      "$ref": "#/components/responses/NotFound"
-     },
-     "500": {
-      "$ref": "#/components/responses/InternalError"
+     "default": {
+      "$ref": "#/components/responses/Error"
      }
     },
     "tags": [
@@ -6315,17 +5838,8 @@
       },
       "description": "list of pools"
      },
-     "400": {
-      "$ref": "#/components/responses/BadRequest"
-     },
-     "401": {
-      "$ref": "#/components/responses/UnauthorizedError"
-     },
-     "404": {
-      "$ref": "#/components/responses/NotFound"
-     },
-     "500": {
-      "$ref": "#/components/responses/InternalError"
+     "default": {
+      "$ref": "#/components/responses/Error"
      }
     },
     "tags": [
@@ -6359,14 +5873,8 @@
       },
       "description": "list of storage providers"
      },
-     "400": {
-      "$ref": "#/components/responses/BadRequest"
-     },
-     "401": {
-      "$ref": "#/components/responses/UnauthorizedError"
-     },
-     "500": {
-      "$ref": "#/components/responses/InternalError"
+     "default": {
+      "$ref": "#/components/responses/Error"
      }
     },
     "tags": [
@@ -6398,14 +5906,8 @@
       },
       "description": "payload"
      },
-     "400": {
-      "$ref": "#/components/responses/BadRequest"
-     },
-     "401": {
-      "$ref": "#/components/responses/UnauthorizedError"
-     },
-     "500": {
-      "$ref": "#/components/responses/InternalError"
+     "default": {
+      "$ref": "#/components/responses/Error"
      }
     },
     "tags": [
@@ -6431,14 +5933,8 @@
       },
       "description": "account info"
      },
-     "400": {
-      "$ref": "#/components/responses/BadRequest"
-     },
-     "401": {
-      "$ref": "#/components/responses/UnauthorizedError"
-     },
-     "500": {
-      "$ref": "#/components/responses/InternalError"
+     "default": {
+      "$ref": "#/components/responses/Error"
      }
     },
     "tags": [
@@ -6464,14 +5960,8 @@
       },
       "description": "event"
      },
-     "400": {
-      "$ref": "#/components/responses/BadRequest"
-     },
-     "401": {
-      "$ref": "#/components/responses/UnauthorizedError"
-     },
-     "500": {
-      "$ref": "#/components/responses/InternalError"
+     "default": {
+      "$ref": "#/components/responses/Error"
      }
     },
     "tags": [
@@ -6499,17 +5989,8 @@
       },
       "description": "trace"
      },
-     "400": {
-      "$ref": "#/components/responses/BadRequest"
-     },
-     "401": {
-      "$ref": "#/components/responses/UnauthorizedError"
-     },
-     "404": {
-      "$ref": "#/components/responses/NotFound"
-     },
-     "500": {
-      "$ref": "#/components/responses/InternalError"
+     "default": {
+      "$ref": "#/components/responses/Error"
      }
     },
     "tags": [
@@ -6544,14 +6025,8 @@
       },
       "description": "token"
      },
-     "400": {
-      "$ref": "#/components/responses/BadRequest"
-     },
-     "401": {
-      "$ref": "#/components/responses/UnauthorizedError"
-     },
-     "500": {
-      "$ref": "#/components/responses/InternalError"
+     "default": {
+      "$ref": "#/components/responses/Error"
      }
     },
     "tags": [
@@ -6592,14 +6067,8 @@
       },
       "description": "backup"
      },
-     "400": {
-      "$ref": "#/components/responses/BadRequest"
-     },
-     "401": {
-      "$ref": "#/components/responses/UnauthorizedError"
-     },
-     "500": {
-      "$ref": "#/components/responses/InternalError"
+     "default": {
+      "$ref": "#/components/responses/Error"
      }
     },
     "tags": [
@@ -6626,14 +6095,8 @@
      "200": {
       "description": "success"
      },
-     "400": {
-      "$ref": "#/components/responses/BadRequest"
-     },
-     "401": {
-      "$ref": "#/components/responses/UnauthorizedError"
-     },
-     "500": {
-      "$ref": "#/components/responses/InternalError"
+     "default": {
+      "$ref": "#/components/responses/Error"
      }
     },
     "tags": [
@@ -6664,14 +6127,8 @@
       },
       "description": "event"
      },
-     "400": {
-      "$ref": "#/components/responses/BadRequest"
-     },
-     "401": {
-      "$ref": "#/components/responses/UnauthorizedError"
-     },
-     "500": {
-      "$ref": "#/components/responses/InternalError"
+     "default": {
+      "$ref": "#/components/responses/Error"
      }
     },
     "tags": [
@@ -6699,14 +6156,8 @@
       },
       "description": "account seqno"
      },
-     "400": {
-      "$ref": "#/components/responses/BadRequest"
-     },
-     "401": {
-      "$ref": "#/components/responses/UnauthorizedError"
-     },
-     "500": {
-      "$ref": "#/components/responses/InternalError"
+     "default": {
+      "$ref": "#/components/responses/Error"
      }
     },
     "tags": [

@@ -7,10 +7,14 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/go-faster/errors"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/codes"
+	"go.opentelemetry.io/otel/metric"
+	semconv "go.opentelemetry.io/otel/semconv/v1.19.0"
 	"go.opentelemetry.io/otel/trace"
 
+	ht "github.com/ogen-go/ogen/http"
 	"github.com/ogen-go/ogen/middleware"
 	"github.com/ogen-go/ogen/ogenerrors"
 	"github.com/ogen-go/ogen/otelogen"
@@ -21,9 +25,11 @@ import (
 // Get domains for wallet account.
 //
 // GET /v2/accounts/{account_id}/dns/backresolve
-func (s *Server) handleDnsBackResolveRequest(args [1]string, w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleDnsBackResolveRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("dnsBackResolve"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/accounts/{account_id}/dns/backresolve"),
 	}
 
 	// Start a span for this request.
@@ -37,17 +43,18 @@ func (s *Server) handleDnsBackResolveRequest(args [1]string, w http.ResponseWrit
 	startTime := time.Now()
 	defer func() {
 		elapsedDuration := time.Since(startTime)
-		s.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		s.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
 	}()
 
 	// Increment request counter.
-	s.requests.Add(ctx, 1, otelAttrs...)
+	s.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 
 	var (
 		recordError = func(stage string, err error) {
 			span.RecordError(err)
 			span.SetStatus(codes.Error, stage)
-			s.errors.Add(ctx, 1, otelAttrs...)
+			s.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 		}
 		err          error
 		opErrContext = ogenerrors.OperationContext{
@@ -55,7 +62,7 @@ func (s *Server) handleDnsBackResolveRequest(args [1]string, w http.ResponseWrit
 			ID:   "dnsBackResolve",
 		}
 	)
-	params, err := decodeDnsBackResolveParams(args, r)
+	params, err := decodeDnsBackResolveParams(args, argsEscaped, r)
 	if err != nil {
 		err = &ogenerrors.DecodeParamsError{
 			OperationContext: opErrContext,
@@ -66,7 +73,7 @@ func (s *Server) handleDnsBackResolveRequest(args [1]string, w http.ResponseWrit
 		return
 	}
 
-	var response DnsBackResolveRes
+	var response *DomainNames
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:       ctx,
@@ -85,7 +92,7 @@ func (s *Server) handleDnsBackResolveRequest(args [1]string, w http.ResponseWrit
 		type (
 			Request  = struct{}
 			Params   = DnsBackResolveParams
-			Response = DnsBackResolveRes
+			Response = *DomainNames
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -95,8 +102,9 @@ func (s *Server) handleDnsBackResolveRequest(args [1]string, w http.ResponseWrit
 			m,
 			mreq,
 			unpackDnsBackResolveParams,
-			func(ctx context.Context, request Request, params Params) (Response, error) {
-				return s.h.DnsBackResolve(ctx, params)
+			func(ctx context.Context, request Request, params Params) (response Response, err error) {
+				response, err = s.h.DnsBackResolve(ctx, params)
+				return response, err
 			},
 		)
 	} else {
@@ -104,7 +112,15 @@ func (s *Server) handleDnsBackResolveRequest(args [1]string, w http.ResponseWrit
 	}
 	if err != nil {
 		recordError("Internal", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
+			encodeErrorResponse(errRes, w, span)
+			return
+		}
+		if errors.Is(err, ht.ErrNotImplemented) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
 		return
 	}
 
@@ -120,9 +136,11 @@ func (s *Server) handleDnsBackResolveRequest(args [1]string, w http.ResponseWrit
 // Get full information about domain name.
 //
 // GET /v2/dns/{domain_name}
-func (s *Server) handleDnsInfoRequest(args [1]string, w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleDnsInfoRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("dnsInfo"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/dns/{domain_name}"),
 	}
 
 	// Start a span for this request.
@@ -136,17 +154,18 @@ func (s *Server) handleDnsInfoRequest(args [1]string, w http.ResponseWriter, r *
 	startTime := time.Now()
 	defer func() {
 		elapsedDuration := time.Since(startTime)
-		s.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		s.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
 	}()
 
 	// Increment request counter.
-	s.requests.Add(ctx, 1, otelAttrs...)
+	s.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 
 	var (
 		recordError = func(stage string, err error) {
 			span.RecordError(err)
 			span.SetStatus(codes.Error, stage)
-			s.errors.Add(ctx, 1, otelAttrs...)
+			s.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 		}
 		err          error
 		opErrContext = ogenerrors.OperationContext{
@@ -154,7 +173,7 @@ func (s *Server) handleDnsInfoRequest(args [1]string, w http.ResponseWriter, r *
 			ID:   "dnsInfo",
 		}
 	)
-	params, err := decodeDnsInfoParams(args, r)
+	params, err := decodeDnsInfoParams(args, argsEscaped, r)
 	if err != nil {
 		err = &ogenerrors.DecodeParamsError{
 			OperationContext: opErrContext,
@@ -165,7 +184,7 @@ func (s *Server) handleDnsInfoRequest(args [1]string, w http.ResponseWriter, r *
 		return
 	}
 
-	var response DnsInfoRes
+	var response *DomainInfo
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:       ctx,
@@ -184,7 +203,7 @@ func (s *Server) handleDnsInfoRequest(args [1]string, w http.ResponseWriter, r *
 		type (
 			Request  = struct{}
 			Params   = DnsInfoParams
-			Response = DnsInfoRes
+			Response = *DomainInfo
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -194,8 +213,9 @@ func (s *Server) handleDnsInfoRequest(args [1]string, w http.ResponseWriter, r *
 			m,
 			mreq,
 			unpackDnsInfoParams,
-			func(ctx context.Context, request Request, params Params) (Response, error) {
-				return s.h.DnsInfo(ctx, params)
+			func(ctx context.Context, request Request, params Params) (response Response, err error) {
+				response, err = s.h.DnsInfo(ctx, params)
+				return response, err
 			},
 		)
 	} else {
@@ -203,7 +223,15 @@ func (s *Server) handleDnsInfoRequest(args [1]string, w http.ResponseWriter, r *
 	}
 	if err != nil {
 		recordError("Internal", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
+			encodeErrorResponse(errRes, w, span)
+			return
+		}
+		if errors.Is(err, ht.ErrNotImplemented) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
 		return
 	}
 
@@ -219,9 +247,11 @@ func (s *Server) handleDnsInfoRequest(args [1]string, w http.ResponseWriter, r *
 // DNS resolve for domain name.
 //
 // GET /v2/dns/{domain_name}/resolve
-func (s *Server) handleDnsResolveRequest(args [1]string, w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleDnsResolveRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("dnsResolve"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/dns/{domain_name}/resolve"),
 	}
 
 	// Start a span for this request.
@@ -235,17 +265,18 @@ func (s *Server) handleDnsResolveRequest(args [1]string, w http.ResponseWriter, 
 	startTime := time.Now()
 	defer func() {
 		elapsedDuration := time.Since(startTime)
-		s.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		s.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
 	}()
 
 	// Increment request counter.
-	s.requests.Add(ctx, 1, otelAttrs...)
+	s.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 
 	var (
 		recordError = func(stage string, err error) {
 			span.RecordError(err)
 			span.SetStatus(codes.Error, stage)
-			s.errors.Add(ctx, 1, otelAttrs...)
+			s.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 		}
 		err          error
 		opErrContext = ogenerrors.OperationContext{
@@ -253,7 +284,7 @@ func (s *Server) handleDnsResolveRequest(args [1]string, w http.ResponseWriter, 
 			ID:   "dnsResolve",
 		}
 	)
-	params, err := decodeDnsResolveParams(args, r)
+	params, err := decodeDnsResolveParams(args, argsEscaped, r)
 	if err != nil {
 		err = &ogenerrors.DecodeParamsError{
 			OperationContext: opErrContext,
@@ -264,7 +295,7 @@ func (s *Server) handleDnsResolveRequest(args [1]string, w http.ResponseWriter, 
 		return
 	}
 
-	var response DnsResolveRes
+	var response *DnsRecord
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:       ctx,
@@ -283,7 +314,7 @@ func (s *Server) handleDnsResolveRequest(args [1]string, w http.ResponseWriter, 
 		type (
 			Request  = struct{}
 			Params   = DnsResolveParams
-			Response = DnsResolveRes
+			Response = *DnsRecord
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -293,8 +324,9 @@ func (s *Server) handleDnsResolveRequest(args [1]string, w http.ResponseWriter, 
 			m,
 			mreq,
 			unpackDnsResolveParams,
-			func(ctx context.Context, request Request, params Params) (Response, error) {
-				return s.h.DnsResolve(ctx, params)
+			func(ctx context.Context, request Request, params Params) (response Response, err error) {
+				response, err = s.h.DnsResolve(ctx, params)
+				return response, err
 			},
 		)
 	} else {
@@ -302,7 +334,15 @@ func (s *Server) handleDnsResolveRequest(args [1]string, w http.ResponseWriter, 
 	}
 	if err != nil {
 		recordError("Internal", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
+			encodeErrorResponse(errRes, w, span)
+			return
+		}
+		if errors.Is(err, ht.ErrNotImplemented) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
 		return
 	}
 
@@ -318,9 +358,11 @@ func (s *Server) handleDnsResolveRequest(args [1]string, w http.ResponseWriter, 
 // Emulate sending message to blockchain.
 //
 // POST /v2/accounts/{account_id}/events/emulate
-func (s *Server) handleEmulateMessageToAccountEventRequest(args [1]string, w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleEmulateMessageToAccountEventRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("emulateMessageToAccountEvent"),
+		semconv.HTTPMethodKey.String("POST"),
+		semconv.HTTPRouteKey.String("/v2/accounts/{account_id}/events/emulate"),
 	}
 
 	// Start a span for this request.
@@ -334,17 +376,18 @@ func (s *Server) handleEmulateMessageToAccountEventRequest(args [1]string, w htt
 	startTime := time.Now()
 	defer func() {
 		elapsedDuration := time.Since(startTime)
-		s.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		s.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
 	}()
 
 	// Increment request counter.
-	s.requests.Add(ctx, 1, otelAttrs...)
+	s.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 
 	var (
 		recordError = func(stage string, err error) {
 			span.RecordError(err)
 			span.SetStatus(codes.Error, stage)
-			s.errors.Add(ctx, 1, otelAttrs...)
+			s.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 		}
 		err          error
 		opErrContext = ogenerrors.OperationContext{
@@ -352,7 +395,7 @@ func (s *Server) handleEmulateMessageToAccountEventRequest(args [1]string, w htt
 			ID:   "emulateMessageToAccountEvent",
 		}
 	)
-	params, err := decodeEmulateMessageToAccountEventParams(args, r)
+	params, err := decodeEmulateMessageToAccountEventParams(args, argsEscaped, r)
 	if err != nil {
 		err = &ogenerrors.DecodeParamsError{
 			OperationContext: opErrContext,
@@ -378,7 +421,7 @@ func (s *Server) handleEmulateMessageToAccountEventRequest(args [1]string, w htt
 		}
 	}()
 
-	var response EmulateMessageToAccountEventRes
+	var response *AccountEvent
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:       ctx,
@@ -399,9 +442,9 @@ func (s *Server) handleEmulateMessageToAccountEventRequest(args [1]string, w htt
 		}
 
 		type (
-			Request  = EmulateMessageToAccountEventReq
+			Request  = *EmulateMessageToAccountEventReq
 			Params   = EmulateMessageToAccountEventParams
-			Response = EmulateMessageToAccountEventRes
+			Response = *AccountEvent
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -411,8 +454,9 @@ func (s *Server) handleEmulateMessageToAccountEventRequest(args [1]string, w htt
 			m,
 			mreq,
 			unpackEmulateMessageToAccountEventParams,
-			func(ctx context.Context, request Request, params Params) (Response, error) {
-				return s.h.EmulateMessageToAccountEvent(ctx, request, params)
+			func(ctx context.Context, request Request, params Params) (response Response, err error) {
+				response, err = s.h.EmulateMessageToAccountEvent(ctx, request, params)
+				return response, err
 			},
 		)
 	} else {
@@ -420,7 +464,15 @@ func (s *Server) handleEmulateMessageToAccountEventRequest(args [1]string, w htt
 	}
 	if err != nil {
 		recordError("Internal", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
+			encodeErrorResponse(errRes, w, span)
+			return
+		}
+		if errors.Is(err, ht.ErrNotImplemented) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
 		return
 	}
 
@@ -436,9 +488,11 @@ func (s *Server) handleEmulateMessageToAccountEventRequest(args [1]string, w htt
 // Emulate sending message to blockchain.
 //
 // POST /v2/events/emulate
-func (s *Server) handleEmulateMessageToEventRequest(args [0]string, w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleEmulateMessageToEventRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("emulateMessageToEvent"),
+		semconv.HTTPMethodKey.String("POST"),
+		semconv.HTTPRouteKey.String("/v2/events/emulate"),
 	}
 
 	// Start a span for this request.
@@ -452,17 +506,18 @@ func (s *Server) handleEmulateMessageToEventRequest(args [0]string, w http.Respo
 	startTime := time.Now()
 	defer func() {
 		elapsedDuration := time.Since(startTime)
-		s.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		s.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
 	}()
 
 	// Increment request counter.
-	s.requests.Add(ctx, 1, otelAttrs...)
+	s.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 
 	var (
 		recordError = func(stage string, err error) {
 			span.RecordError(err)
 			span.SetStatus(codes.Error, stage)
-			s.errors.Add(ctx, 1, otelAttrs...)
+			s.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 		}
 		err          error
 		opErrContext = ogenerrors.OperationContext{
@@ -470,7 +525,7 @@ func (s *Server) handleEmulateMessageToEventRequest(args [0]string, w http.Respo
 			ID:   "emulateMessageToEvent",
 		}
 	)
-	params, err := decodeEmulateMessageToEventParams(args, r)
+	params, err := decodeEmulateMessageToEventParams(args, argsEscaped, r)
 	if err != nil {
 		err = &ogenerrors.DecodeParamsError{
 			OperationContext: opErrContext,
@@ -496,7 +551,7 @@ func (s *Server) handleEmulateMessageToEventRequest(args [0]string, w http.Respo
 		}
 	}()
 
-	var response EmulateMessageToEventRes
+	var response *Event
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:       ctx,
@@ -513,9 +568,9 @@ func (s *Server) handleEmulateMessageToEventRequest(args [0]string, w http.Respo
 		}
 
 		type (
-			Request  = EmulateMessageToEventReq
+			Request  = *EmulateMessageToEventReq
 			Params   = EmulateMessageToEventParams
-			Response = EmulateMessageToEventRes
+			Response = *Event
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -525,8 +580,9 @@ func (s *Server) handleEmulateMessageToEventRequest(args [0]string, w http.Respo
 			m,
 			mreq,
 			unpackEmulateMessageToEventParams,
-			func(ctx context.Context, request Request, params Params) (Response, error) {
-				return s.h.EmulateMessageToEvent(ctx, request, params)
+			func(ctx context.Context, request Request, params Params) (response Response, err error) {
+				response, err = s.h.EmulateMessageToEvent(ctx, request, params)
+				return response, err
 			},
 		)
 	} else {
@@ -534,7 +590,15 @@ func (s *Server) handleEmulateMessageToEventRequest(args [0]string, w http.Respo
 	}
 	if err != nil {
 		recordError("Internal", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
+			encodeErrorResponse(errRes, w, span)
+			return
+		}
+		if errors.Is(err, ht.ErrNotImplemented) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
 		return
 	}
 
@@ -550,9 +614,11 @@ func (s *Server) handleEmulateMessageToEventRequest(args [0]string, w http.Respo
 // Emulate sending message to blockchain.
 //
 // POST /v2/traces/emulate
-func (s *Server) handleEmulateMessageToTraceRequest(args [0]string, w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleEmulateMessageToTraceRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("emulateMessageToTrace"),
+		semconv.HTTPMethodKey.String("POST"),
+		semconv.HTTPRouteKey.String("/v2/traces/emulate"),
 	}
 
 	// Start a span for this request.
@@ -566,17 +632,18 @@ func (s *Server) handleEmulateMessageToTraceRequest(args [0]string, w http.Respo
 	startTime := time.Now()
 	defer func() {
 		elapsedDuration := time.Since(startTime)
-		s.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		s.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
 	}()
 
 	// Increment request counter.
-	s.requests.Add(ctx, 1, otelAttrs...)
+	s.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 
 	var (
 		recordError = func(stage string, err error) {
 			span.RecordError(err)
 			span.SetStatus(codes.Error, stage)
-			s.errors.Add(ctx, 1, otelAttrs...)
+			s.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 		}
 		err          error
 		opErrContext = ogenerrors.OperationContext{
@@ -600,7 +667,7 @@ func (s *Server) handleEmulateMessageToTraceRequest(args [0]string, w http.Respo
 		}
 	}()
 
-	var response EmulateMessageToTraceRes
+	var response *Trace
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:       ctx,
@@ -612,9 +679,9 @@ func (s *Server) handleEmulateMessageToTraceRequest(args [0]string, w http.Respo
 		}
 
 		type (
-			Request  = EmulateMessageToTraceReq
+			Request  = *EmulateMessageToTraceReq
 			Params   = struct{}
-			Response = EmulateMessageToTraceRes
+			Response = *Trace
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -624,8 +691,9 @@ func (s *Server) handleEmulateMessageToTraceRequest(args [0]string, w http.Respo
 			m,
 			mreq,
 			nil,
-			func(ctx context.Context, request Request, params Params) (Response, error) {
-				return s.h.EmulateMessageToTrace(ctx, request)
+			func(ctx context.Context, request Request, params Params) (response Response, err error) {
+				response, err = s.h.EmulateMessageToTrace(ctx, request)
+				return response, err
 			},
 		)
 	} else {
@@ -633,7 +701,15 @@ func (s *Server) handleEmulateMessageToTraceRequest(args [0]string, w http.Respo
 	}
 	if err != nil {
 		recordError("Internal", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
+			encodeErrorResponse(errRes, w, span)
+			return
+		}
+		if errors.Is(err, ht.ErrNotImplemented) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
 		return
 	}
 
@@ -649,9 +725,11 @@ func (s *Server) handleEmulateMessageToTraceRequest(args [0]string, w http.Respo
 // Emulate sending message to blockchain.
 //
 // POST /v2/wallet/emulate
-func (s *Server) handleEmulateWalletMessageRequest(args [0]string, w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleEmulateWalletMessageRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("emulateWalletMessage"),
+		semconv.HTTPMethodKey.String("POST"),
+		semconv.HTTPRouteKey.String("/v2/wallet/emulate"),
 	}
 
 	// Start a span for this request.
@@ -665,17 +743,18 @@ func (s *Server) handleEmulateWalletMessageRequest(args [0]string, w http.Respon
 	startTime := time.Now()
 	defer func() {
 		elapsedDuration := time.Since(startTime)
-		s.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		s.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
 	}()
 
 	// Increment request counter.
-	s.requests.Add(ctx, 1, otelAttrs...)
+	s.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 
 	var (
 		recordError = func(stage string, err error) {
 			span.RecordError(err)
 			span.SetStatus(codes.Error, stage)
-			s.errors.Add(ctx, 1, otelAttrs...)
+			s.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 		}
 		err          error
 		opErrContext = ogenerrors.OperationContext{
@@ -683,7 +762,7 @@ func (s *Server) handleEmulateWalletMessageRequest(args [0]string, w http.Respon
 			ID:   "emulateWalletMessage",
 		}
 	)
-	params, err := decodeEmulateWalletMessageParams(args, r)
+	params, err := decodeEmulateWalletMessageParams(args, argsEscaped, r)
 	if err != nil {
 		err = &ogenerrors.DecodeParamsError{
 			OperationContext: opErrContext,
@@ -709,7 +788,7 @@ func (s *Server) handleEmulateWalletMessageRequest(args [0]string, w http.Respon
 		}
 	}()
 
-	var response EmulateWalletMessageRes
+	var response *MessageConsequences
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:       ctx,
@@ -726,9 +805,9 @@ func (s *Server) handleEmulateWalletMessageRequest(args [0]string, w http.Respon
 		}
 
 		type (
-			Request  = EmulateWalletMessageReq
+			Request  = *EmulateWalletMessageReq
 			Params   = EmulateWalletMessageParams
-			Response = EmulateWalletMessageRes
+			Response = *MessageConsequences
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -738,8 +817,9 @@ func (s *Server) handleEmulateWalletMessageRequest(args [0]string, w http.Respon
 			m,
 			mreq,
 			unpackEmulateWalletMessageParams,
-			func(ctx context.Context, request Request, params Params) (Response, error) {
-				return s.h.EmulateWalletMessage(ctx, request, params)
+			func(ctx context.Context, request Request, params Params) (response Response, err error) {
+				response, err = s.h.EmulateWalletMessage(ctx, request, params)
+				return response, err
 			},
 		)
 	} else {
@@ -747,7 +827,15 @@ func (s *Server) handleEmulateWalletMessageRequest(args [0]string, w http.Respon
 	}
 	if err != nil {
 		recordError("Internal", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
+			encodeErrorResponse(errRes, w, span)
+			return
+		}
+		if errors.Is(err, ht.ErrNotImplemented) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
 		return
 	}
 
@@ -763,9 +851,11 @@ func (s *Server) handleEmulateWalletMessageRequest(args [0]string, w http.Respon
 // Execute get method for account.
 //
 // GET /v2/blockchain/accounts/{account_id}/methods/{method_name}
-func (s *Server) handleExecGetMethodRequest(args [2]string, w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleExecGetMethodRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("execGetMethod"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/blockchain/accounts/{account_id}/methods/{method_name}"),
 	}
 
 	// Start a span for this request.
@@ -779,17 +869,18 @@ func (s *Server) handleExecGetMethodRequest(args [2]string, w http.ResponseWrite
 	startTime := time.Now()
 	defer func() {
 		elapsedDuration := time.Since(startTime)
-		s.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		s.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
 	}()
 
 	// Increment request counter.
-	s.requests.Add(ctx, 1, otelAttrs...)
+	s.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 
 	var (
 		recordError = func(stage string, err error) {
 			span.RecordError(err)
 			span.SetStatus(codes.Error, stage)
-			s.errors.Add(ctx, 1, otelAttrs...)
+			s.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 		}
 		err          error
 		opErrContext = ogenerrors.OperationContext{
@@ -797,7 +888,7 @@ func (s *Server) handleExecGetMethodRequest(args [2]string, w http.ResponseWrite
 			ID:   "execGetMethod",
 		}
 	)
-	params, err := decodeExecGetMethodParams(args, r)
+	params, err := decodeExecGetMethodParams(args, argsEscaped, r)
 	if err != nil {
 		err = &ogenerrors.DecodeParamsError{
 			OperationContext: opErrContext,
@@ -808,7 +899,7 @@ func (s *Server) handleExecGetMethodRequest(args [2]string, w http.ResponseWrite
 		return
 	}
 
-	var response ExecGetMethodRes
+	var response *MethodExecutionResult
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:       ctx,
@@ -835,7 +926,7 @@ func (s *Server) handleExecGetMethodRequest(args [2]string, w http.ResponseWrite
 		type (
 			Request  = struct{}
 			Params   = ExecGetMethodParams
-			Response = ExecGetMethodRes
+			Response = *MethodExecutionResult
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -845,8 +936,9 @@ func (s *Server) handleExecGetMethodRequest(args [2]string, w http.ResponseWrite
 			m,
 			mreq,
 			unpackExecGetMethodParams,
-			func(ctx context.Context, request Request, params Params) (Response, error) {
-				return s.h.ExecGetMethod(ctx, params)
+			func(ctx context.Context, request Request, params Params) (response Response, err error) {
+				response, err = s.h.ExecGetMethod(ctx, params)
+				return response, err
 			},
 		)
 	} else {
@@ -854,7 +946,15 @@ func (s *Server) handleExecGetMethodRequest(args [2]string, w http.ResponseWrite
 	}
 	if err != nil {
 		recordError("Internal", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
+			encodeErrorResponse(errRes, w, span)
+			return
+		}
+		if errors.Is(err, ht.ErrNotImplemented) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
 		return
 	}
 
@@ -870,9 +970,11 @@ func (s *Server) handleExecGetMethodRequest(args [2]string, w http.ResponseWrite
 // Get human-friendly information about an account without low-level details.
 //
 // GET /v2/accounts/{account_id}
-func (s *Server) handleGetAccountRequest(args [1]string, w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleGetAccountRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getAccount"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/accounts/{account_id}"),
 	}
 
 	// Start a span for this request.
@@ -886,17 +988,18 @@ func (s *Server) handleGetAccountRequest(args [1]string, w http.ResponseWriter, 
 	startTime := time.Now()
 	defer func() {
 		elapsedDuration := time.Since(startTime)
-		s.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		s.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
 	}()
 
 	// Increment request counter.
-	s.requests.Add(ctx, 1, otelAttrs...)
+	s.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 
 	var (
 		recordError = func(stage string, err error) {
 			span.RecordError(err)
 			span.SetStatus(codes.Error, stage)
-			s.errors.Add(ctx, 1, otelAttrs...)
+			s.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 		}
 		err          error
 		opErrContext = ogenerrors.OperationContext{
@@ -904,7 +1007,7 @@ func (s *Server) handleGetAccountRequest(args [1]string, w http.ResponseWriter, 
 			ID:   "getAccount",
 		}
 	)
-	params, err := decodeGetAccountParams(args, r)
+	params, err := decodeGetAccountParams(args, argsEscaped, r)
 	if err != nil {
 		err = &ogenerrors.DecodeParamsError{
 			OperationContext: opErrContext,
@@ -915,7 +1018,7 @@ func (s *Server) handleGetAccountRequest(args [1]string, w http.ResponseWriter, 
 		return
 	}
 
-	var response GetAccountRes
+	var response *Account
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:       ctx,
@@ -934,7 +1037,7 @@ func (s *Server) handleGetAccountRequest(args [1]string, w http.ResponseWriter, 
 		type (
 			Request  = struct{}
 			Params   = GetAccountParams
-			Response = GetAccountRes
+			Response = *Account
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -944,8 +1047,9 @@ func (s *Server) handleGetAccountRequest(args [1]string, w http.ResponseWriter, 
 			m,
 			mreq,
 			unpackGetAccountParams,
-			func(ctx context.Context, request Request, params Params) (Response, error) {
-				return s.h.GetAccount(ctx, params)
+			func(ctx context.Context, request Request, params Params) (response Response, err error) {
+				response, err = s.h.GetAccount(ctx, params)
+				return response, err
 			},
 		)
 	} else {
@@ -953,7 +1057,15 @@ func (s *Server) handleGetAccountRequest(args [1]string, w http.ResponseWriter, 
 	}
 	if err != nil {
 		recordError("Internal", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
+			encodeErrorResponse(errRes, w, span)
+			return
+		}
+		if errors.Is(err, ht.ErrNotImplemented) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
 		return
 	}
 
@@ -969,9 +1081,11 @@ func (s *Server) handleGetAccountRequest(args [1]string, w http.ResponseWriter, 
 // Get account info by state init.
 //
 // POST /v2/tonconnect/stateinit
-func (s *Server) handleGetAccountInfoByStateInitRequest(args [0]string, w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleGetAccountInfoByStateInitRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getAccountInfoByStateInit"),
+		semconv.HTTPMethodKey.String("POST"),
+		semconv.HTTPRouteKey.String("/v2/tonconnect/stateinit"),
 	}
 
 	// Start a span for this request.
@@ -985,17 +1099,18 @@ func (s *Server) handleGetAccountInfoByStateInitRequest(args [0]string, w http.R
 	startTime := time.Now()
 	defer func() {
 		elapsedDuration := time.Since(startTime)
-		s.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		s.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
 	}()
 
 	// Increment request counter.
-	s.requests.Add(ctx, 1, otelAttrs...)
+	s.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 
 	var (
 		recordError = func(stage string, err error) {
 			span.RecordError(err)
 			span.SetStatus(codes.Error, stage)
-			s.errors.Add(ctx, 1, otelAttrs...)
+			s.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 		}
 		err          error
 		opErrContext = ogenerrors.OperationContext{
@@ -1019,7 +1134,7 @@ func (s *Server) handleGetAccountInfoByStateInitRequest(args [0]string, w http.R
 		}
 	}()
 
-	var response GetAccountInfoByStateInitRes
+	var response *AccountInfoByStateInit
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:       ctx,
@@ -1031,9 +1146,9 @@ func (s *Server) handleGetAccountInfoByStateInitRequest(args [0]string, w http.R
 		}
 
 		type (
-			Request  = GetAccountInfoByStateInitReq
+			Request  = *GetAccountInfoByStateInitReq
 			Params   = struct{}
-			Response = GetAccountInfoByStateInitRes
+			Response = *AccountInfoByStateInit
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -1043,8 +1158,9 @@ func (s *Server) handleGetAccountInfoByStateInitRequest(args [0]string, w http.R
 			m,
 			mreq,
 			nil,
-			func(ctx context.Context, request Request, params Params) (Response, error) {
-				return s.h.GetAccountInfoByStateInit(ctx, request)
+			func(ctx context.Context, request Request, params Params) (response Response, err error) {
+				response, err = s.h.GetAccountInfoByStateInit(ctx, request)
+				return response, err
 			},
 		)
 	} else {
@@ -1052,7 +1168,15 @@ func (s *Server) handleGetAccountInfoByStateInitRequest(args [0]string, w http.R
 	}
 	if err != nil {
 		recordError("Internal", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
+			encodeErrorResponse(errRes, w, span)
+			return
+		}
+		if errors.Is(err, ht.ErrNotImplemented) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
 		return
 	}
 
@@ -1068,9 +1192,11 @@ func (s *Server) handleGetAccountInfoByStateInitRequest(args [0]string, w http.R
 // Get account seqno.
 //
 // GET /v2/wallet/{account_id}/seqno
-func (s *Server) handleGetAccountSeqnoRequest(args [1]string, w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleGetAccountSeqnoRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getAccountSeqno"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/wallet/{account_id}/seqno"),
 	}
 
 	// Start a span for this request.
@@ -1084,17 +1210,18 @@ func (s *Server) handleGetAccountSeqnoRequest(args [1]string, w http.ResponseWri
 	startTime := time.Now()
 	defer func() {
 		elapsedDuration := time.Since(startTime)
-		s.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		s.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
 	}()
 
 	// Increment request counter.
-	s.requests.Add(ctx, 1, otelAttrs...)
+	s.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 
 	var (
 		recordError = func(stage string, err error) {
 			span.RecordError(err)
 			span.SetStatus(codes.Error, stage)
-			s.errors.Add(ctx, 1, otelAttrs...)
+			s.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 		}
 		err          error
 		opErrContext = ogenerrors.OperationContext{
@@ -1102,7 +1229,7 @@ func (s *Server) handleGetAccountSeqnoRequest(args [1]string, w http.ResponseWri
 			ID:   "getAccountSeqno",
 		}
 	)
-	params, err := decodeGetAccountSeqnoParams(args, r)
+	params, err := decodeGetAccountSeqnoParams(args, argsEscaped, r)
 	if err != nil {
 		err = &ogenerrors.DecodeParamsError{
 			OperationContext: opErrContext,
@@ -1113,7 +1240,7 @@ func (s *Server) handleGetAccountSeqnoRequest(args [1]string, w http.ResponseWri
 		return
 	}
 
-	var response GetAccountSeqnoRes
+	var response *Seqno
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:       ctx,
@@ -1132,7 +1259,7 @@ func (s *Server) handleGetAccountSeqnoRequest(args [1]string, w http.ResponseWri
 		type (
 			Request  = struct{}
 			Params   = GetAccountSeqnoParams
-			Response = GetAccountSeqnoRes
+			Response = *Seqno
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -1142,8 +1269,9 @@ func (s *Server) handleGetAccountSeqnoRequest(args [1]string, w http.ResponseWri
 			m,
 			mreq,
 			unpackGetAccountSeqnoParams,
-			func(ctx context.Context, request Request, params Params) (Response, error) {
-				return s.h.GetAccountSeqno(ctx, params)
+			func(ctx context.Context, request Request, params Params) (response Response, err error) {
+				response, err = s.h.GetAccountSeqno(ctx, params)
+				return response, err
 			},
 		)
 	} else {
@@ -1151,7 +1279,15 @@ func (s *Server) handleGetAccountSeqnoRequest(args [1]string, w http.ResponseWri
 	}
 	if err != nil {
 		recordError("Internal", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
+			encodeErrorResponse(errRes, w, span)
+			return
+		}
+		if errors.Is(err, ht.ErrNotImplemented) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
 		return
 	}
 
@@ -1167,9 +1303,11 @@ func (s *Server) handleGetAccountSeqnoRequest(args [1]string, w http.ResponseWri
 // Get account state.
 //
 // GET /v2/liteserver/get_account_state/{account_id}
-func (s *Server) handleGetAccountStateLiteServerRequest(args [1]string, w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleGetAccountStateLiteServerRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getAccountStateLiteServer"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/liteserver/get_account_state/{account_id}"),
 	}
 
 	// Start a span for this request.
@@ -1183,17 +1321,18 @@ func (s *Server) handleGetAccountStateLiteServerRequest(args [1]string, w http.R
 	startTime := time.Now()
 	defer func() {
 		elapsedDuration := time.Since(startTime)
-		s.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		s.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
 	}()
 
 	// Increment request counter.
-	s.requests.Add(ctx, 1, otelAttrs...)
+	s.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 
 	var (
 		recordError = func(stage string, err error) {
 			span.RecordError(err)
 			span.SetStatus(codes.Error, stage)
-			s.errors.Add(ctx, 1, otelAttrs...)
+			s.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 		}
 		err          error
 		opErrContext = ogenerrors.OperationContext{
@@ -1201,7 +1340,7 @@ func (s *Server) handleGetAccountStateLiteServerRequest(args [1]string, w http.R
 			ID:   "getAccountStateLiteServer",
 		}
 	)
-	params, err := decodeGetAccountStateLiteServerParams(args, r)
+	params, err := decodeGetAccountStateLiteServerParams(args, argsEscaped, r)
 	if err != nil {
 		err = &ogenerrors.DecodeParamsError{
 			OperationContext: opErrContext,
@@ -1212,7 +1351,7 @@ func (s *Server) handleGetAccountStateLiteServerRequest(args [1]string, w http.R
 		return
 	}
 
-	var response GetAccountStateLiteServerRes
+	var response *GetAccountStateLiteServerOK
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:       ctx,
@@ -1231,7 +1370,7 @@ func (s *Server) handleGetAccountStateLiteServerRequest(args [1]string, w http.R
 		type (
 			Request  = struct{}
 			Params   = GetAccountStateLiteServerParams
-			Response = GetAccountStateLiteServerRes
+			Response = *GetAccountStateLiteServerOK
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -1241,8 +1380,9 @@ func (s *Server) handleGetAccountStateLiteServerRequest(args [1]string, w http.R
 			m,
 			mreq,
 			unpackGetAccountStateLiteServerParams,
-			func(ctx context.Context, request Request, params Params) (Response, error) {
-				return s.h.GetAccountStateLiteServer(ctx, params)
+			func(ctx context.Context, request Request, params Params) (response Response, err error) {
+				response, err = s.h.GetAccountStateLiteServer(ctx, params)
+				return response, err
 			},
 		)
 	} else {
@@ -1250,7 +1390,15 @@ func (s *Server) handleGetAccountStateLiteServerRequest(args [1]string, w http.R
 	}
 	if err != nil {
 		recordError("Internal", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
+			encodeErrorResponse(errRes, w, span)
+			return
+		}
+		if errors.Is(err, ht.ErrNotImplemented) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
 		return
 	}
 
@@ -1266,9 +1414,11 @@ func (s *Server) handleGetAccountStateLiteServerRequest(args [1]string, w http.R
 // Get account transactions.
 //
 // GET /v2/blockchain/accounts/{account_id}/transactions
-func (s *Server) handleGetAccountTransactionsRequest(args [1]string, w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleGetAccountTransactionsRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getAccountTransactions"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/blockchain/accounts/{account_id}/transactions"),
 	}
 
 	// Start a span for this request.
@@ -1282,17 +1432,18 @@ func (s *Server) handleGetAccountTransactionsRequest(args [1]string, w http.Resp
 	startTime := time.Now()
 	defer func() {
 		elapsedDuration := time.Since(startTime)
-		s.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		s.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
 	}()
 
 	// Increment request counter.
-	s.requests.Add(ctx, 1, otelAttrs...)
+	s.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 
 	var (
 		recordError = func(stage string, err error) {
 			span.RecordError(err)
 			span.SetStatus(codes.Error, stage)
-			s.errors.Add(ctx, 1, otelAttrs...)
+			s.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 		}
 		err          error
 		opErrContext = ogenerrors.OperationContext{
@@ -1300,7 +1451,7 @@ func (s *Server) handleGetAccountTransactionsRequest(args [1]string, w http.Resp
 			ID:   "getAccountTransactions",
 		}
 	)
-	params, err := decodeGetAccountTransactionsParams(args, r)
+	params, err := decodeGetAccountTransactionsParams(args, argsEscaped, r)
 	if err != nil {
 		err = &ogenerrors.DecodeParamsError{
 			OperationContext: opErrContext,
@@ -1311,7 +1462,7 @@ func (s *Server) handleGetAccountTransactionsRequest(args [1]string, w http.Resp
 		return
 	}
 
-	var response GetAccountTransactionsRes
+	var response *Transactions
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:       ctx,
@@ -1342,7 +1493,7 @@ func (s *Server) handleGetAccountTransactionsRequest(args [1]string, w http.Resp
 		type (
 			Request  = struct{}
 			Params   = GetAccountTransactionsParams
-			Response = GetAccountTransactionsRes
+			Response = *Transactions
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -1352,8 +1503,9 @@ func (s *Server) handleGetAccountTransactionsRequest(args [1]string, w http.Resp
 			m,
 			mreq,
 			unpackGetAccountTransactionsParams,
-			func(ctx context.Context, request Request, params Params) (Response, error) {
-				return s.h.GetAccountTransactions(ctx, params)
+			func(ctx context.Context, request Request, params Params) (response Response, err error) {
+				response, err = s.h.GetAccountTransactions(ctx, params)
+				return response, err
 			},
 		)
 	} else {
@@ -1361,7 +1513,15 @@ func (s *Server) handleGetAccountTransactionsRequest(args [1]string, w http.Resp
 	}
 	if err != nil {
 		recordError("Internal", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
+			encodeErrorResponse(errRes, w, span)
+			return
+		}
+		if errors.Is(err, ht.ErrNotImplemented) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
 		return
 	}
 
@@ -1377,9 +1537,11 @@ func (s *Server) handleGetAccountTransactionsRequest(args [1]string, w http.Resp
 // Get human-friendly information about several accounts without low-level details.
 //
 // POST /v2/accounts/_bulk
-func (s *Server) handleGetAccountsRequest(args [0]string, w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleGetAccountsRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getAccounts"),
+		semconv.HTTPMethodKey.String("POST"),
+		semconv.HTTPRouteKey.String("/v2/accounts/_bulk"),
 	}
 
 	// Start a span for this request.
@@ -1393,17 +1555,18 @@ func (s *Server) handleGetAccountsRequest(args [0]string, w http.ResponseWriter,
 	startTime := time.Now()
 	defer func() {
 		elapsedDuration := time.Since(startTime)
-		s.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		s.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
 	}()
 
 	// Increment request counter.
-	s.requests.Add(ctx, 1, otelAttrs...)
+	s.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 
 	var (
 		recordError = func(stage string, err error) {
 			span.RecordError(err)
 			span.SetStatus(codes.Error, stage)
-			s.errors.Add(ctx, 1, otelAttrs...)
+			s.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 		}
 		err          error
 		opErrContext = ogenerrors.OperationContext{
@@ -1427,7 +1590,7 @@ func (s *Server) handleGetAccountsRequest(args [0]string, w http.ResponseWriter,
 		}
 	}()
 
-	var response GetAccountsRes
+	var response *Accounts
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:       ctx,
@@ -1441,7 +1604,7 @@ func (s *Server) handleGetAccountsRequest(args [0]string, w http.ResponseWriter,
 		type (
 			Request  = OptGetAccountsReq
 			Params   = struct{}
-			Response = GetAccountsRes
+			Response = *Accounts
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -1451,8 +1614,9 @@ func (s *Server) handleGetAccountsRequest(args [0]string, w http.ResponseWriter,
 			m,
 			mreq,
 			nil,
-			func(ctx context.Context, request Request, params Params) (Response, error) {
-				return s.h.GetAccounts(ctx, request)
+			func(ctx context.Context, request Request, params Params) (response Response, err error) {
+				response, err = s.h.GetAccounts(ctx, request)
+				return response, err
 			},
 		)
 	} else {
@@ -1460,7 +1624,15 @@ func (s *Server) handleGetAccountsRequest(args [0]string, w http.ResponseWriter,
 	}
 	if err != nil {
 		recordError("Internal", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
+			encodeErrorResponse(errRes, w, span)
+			return
+		}
+		if errors.Is(err, ht.ErrNotImplemented) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
 		return
 	}
 
@@ -1476,9 +1648,11 @@ func (s *Server) handleGetAccountsRequest(args [0]string, w http.ResponseWriter,
 // Get all auctions.
 //
 // GET /v2/dns/auctions
-func (s *Server) handleGetAllAuctionsRequest(args [0]string, w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleGetAllAuctionsRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getAllAuctions"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/dns/auctions"),
 	}
 
 	// Start a span for this request.
@@ -1492,17 +1666,18 @@ func (s *Server) handleGetAllAuctionsRequest(args [0]string, w http.ResponseWrit
 	startTime := time.Now()
 	defer func() {
 		elapsedDuration := time.Since(startTime)
-		s.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		s.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
 	}()
 
 	// Increment request counter.
-	s.requests.Add(ctx, 1, otelAttrs...)
+	s.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 
 	var (
 		recordError = func(stage string, err error) {
 			span.RecordError(err)
 			span.SetStatus(codes.Error, stage)
-			s.errors.Add(ctx, 1, otelAttrs...)
+			s.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 		}
 		err          error
 		opErrContext = ogenerrors.OperationContext{
@@ -1510,7 +1685,7 @@ func (s *Server) handleGetAllAuctionsRequest(args [0]string, w http.ResponseWrit
 			ID:   "getAllAuctions",
 		}
 	)
-	params, err := decodeGetAllAuctionsParams(args, r)
+	params, err := decodeGetAllAuctionsParams(args, argsEscaped, r)
 	if err != nil {
 		err = &ogenerrors.DecodeParamsError{
 			OperationContext: opErrContext,
@@ -1521,7 +1696,7 @@ func (s *Server) handleGetAllAuctionsRequest(args [0]string, w http.ResponseWrit
 		return
 	}
 
-	var response GetAllAuctionsRes
+	var response *Auctions
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:       ctx,
@@ -1540,7 +1715,7 @@ func (s *Server) handleGetAllAuctionsRequest(args [0]string, w http.ResponseWrit
 		type (
 			Request  = struct{}
 			Params   = GetAllAuctionsParams
-			Response = GetAllAuctionsRes
+			Response = *Auctions
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -1550,8 +1725,9 @@ func (s *Server) handleGetAllAuctionsRequest(args [0]string, w http.ResponseWrit
 			m,
 			mreq,
 			unpackGetAllAuctionsParams,
-			func(ctx context.Context, request Request, params Params) (Response, error) {
-				return s.h.GetAllAuctions(ctx, params)
+			func(ctx context.Context, request Request, params Params) (response Response, err error) {
+				response, err = s.h.GetAllAuctions(ctx, params)
+				return response, err
 			},
 		)
 	} else {
@@ -1559,7 +1735,15 @@ func (s *Server) handleGetAllAuctionsRequest(args [0]string, w http.ResponseWrit
 	}
 	if err != nil {
 		recordError("Internal", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
+			encodeErrorResponse(errRes, w, span)
+			return
+		}
+		if errors.Is(err, ht.ErrNotImplemented) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
 		return
 	}
 
@@ -1575,9 +1759,11 @@ func (s *Server) handleGetAllAuctionsRequest(args [0]string, w http.ResponseWrit
 // Get all shards info.
 //
 // GET /v2/liteserver/get_all_shards_info/{block_id}
-func (s *Server) handleGetAllShardsInfoLiteServerRequest(args [1]string, w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleGetAllShardsInfoLiteServerRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getAllShardsInfoLiteServer"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/liteserver/get_all_shards_info/{block_id}"),
 	}
 
 	// Start a span for this request.
@@ -1591,17 +1777,18 @@ func (s *Server) handleGetAllShardsInfoLiteServerRequest(args [1]string, w http.
 	startTime := time.Now()
 	defer func() {
 		elapsedDuration := time.Since(startTime)
-		s.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		s.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
 	}()
 
 	// Increment request counter.
-	s.requests.Add(ctx, 1, otelAttrs...)
+	s.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 
 	var (
 		recordError = func(stage string, err error) {
 			span.RecordError(err)
 			span.SetStatus(codes.Error, stage)
-			s.errors.Add(ctx, 1, otelAttrs...)
+			s.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 		}
 		err          error
 		opErrContext = ogenerrors.OperationContext{
@@ -1609,7 +1796,7 @@ func (s *Server) handleGetAllShardsInfoLiteServerRequest(args [1]string, w http.
 			ID:   "getAllShardsInfoLiteServer",
 		}
 	)
-	params, err := decodeGetAllShardsInfoLiteServerParams(args, r)
+	params, err := decodeGetAllShardsInfoLiteServerParams(args, argsEscaped, r)
 	if err != nil {
 		err = &ogenerrors.DecodeParamsError{
 			OperationContext: opErrContext,
@@ -1620,7 +1807,7 @@ func (s *Server) handleGetAllShardsInfoLiteServerRequest(args [1]string, w http.
 		return
 	}
 
-	var response GetAllShardsInfoLiteServerRes
+	var response *GetAllShardsInfoLiteServerOK
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:       ctx,
@@ -1639,7 +1826,7 @@ func (s *Server) handleGetAllShardsInfoLiteServerRequest(args [1]string, w http.
 		type (
 			Request  = struct{}
 			Params   = GetAllShardsInfoLiteServerParams
-			Response = GetAllShardsInfoLiteServerRes
+			Response = *GetAllShardsInfoLiteServerOK
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -1649,8 +1836,9 @@ func (s *Server) handleGetAllShardsInfoLiteServerRequest(args [1]string, w http.
 			m,
 			mreq,
 			unpackGetAllShardsInfoLiteServerParams,
-			func(ctx context.Context, request Request, params Params) (Response, error) {
-				return s.h.GetAllShardsInfoLiteServer(ctx, params)
+			func(ctx context.Context, request Request, params Params) (response Response, err error) {
+				response, err = s.h.GetAllShardsInfoLiteServer(ctx, params)
+				return response, err
 			},
 		)
 	} else {
@@ -1658,7 +1846,15 @@ func (s *Server) handleGetAllShardsInfoLiteServerRequest(args [1]string, w http.
 	}
 	if err != nil {
 		recordError("Internal", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
+			encodeErrorResponse(errRes, w, span)
+			return
+		}
+		if errors.Is(err, ht.ErrNotImplemented) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
 		return
 	}
 
@@ -1674,9 +1870,11 @@ func (s *Server) handleGetAllShardsInfoLiteServerRequest(args [1]string, w http.
 // Get block data.
 //
 // GET /v2/blockchain/blocks/{block_id}
-func (s *Server) handleGetBlockRequest(args [1]string, w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleGetBlockRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getBlock"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/blockchain/blocks/{block_id}"),
 	}
 
 	// Start a span for this request.
@@ -1690,17 +1888,18 @@ func (s *Server) handleGetBlockRequest(args [1]string, w http.ResponseWriter, r 
 	startTime := time.Now()
 	defer func() {
 		elapsedDuration := time.Since(startTime)
-		s.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		s.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
 	}()
 
 	// Increment request counter.
-	s.requests.Add(ctx, 1, otelAttrs...)
+	s.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 
 	var (
 		recordError = func(stage string, err error) {
 			span.RecordError(err)
 			span.SetStatus(codes.Error, stage)
-			s.errors.Add(ctx, 1, otelAttrs...)
+			s.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 		}
 		err          error
 		opErrContext = ogenerrors.OperationContext{
@@ -1708,7 +1907,7 @@ func (s *Server) handleGetBlockRequest(args [1]string, w http.ResponseWriter, r 
 			ID:   "getBlock",
 		}
 	)
-	params, err := decodeGetBlockParams(args, r)
+	params, err := decodeGetBlockParams(args, argsEscaped, r)
 	if err != nil {
 		err = &ogenerrors.DecodeParamsError{
 			OperationContext: opErrContext,
@@ -1719,7 +1918,7 @@ func (s *Server) handleGetBlockRequest(args [1]string, w http.ResponseWriter, r 
 		return
 	}
 
-	var response GetBlockRes
+	var response *Block
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:       ctx,
@@ -1738,7 +1937,7 @@ func (s *Server) handleGetBlockRequest(args [1]string, w http.ResponseWriter, r 
 		type (
 			Request  = struct{}
 			Params   = GetBlockParams
-			Response = GetBlockRes
+			Response = *Block
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -1748,8 +1947,9 @@ func (s *Server) handleGetBlockRequest(args [1]string, w http.ResponseWriter, r 
 			m,
 			mreq,
 			unpackGetBlockParams,
-			func(ctx context.Context, request Request, params Params) (Response, error) {
-				return s.h.GetBlock(ctx, params)
+			func(ctx context.Context, request Request, params Params) (response Response, err error) {
+				response, err = s.h.GetBlock(ctx, params)
+				return response, err
 			},
 		)
 	} else {
@@ -1757,7 +1957,15 @@ func (s *Server) handleGetBlockRequest(args [1]string, w http.ResponseWriter, r 
 	}
 	if err != nil {
 		recordError("Internal", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
+			encodeErrorResponse(errRes, w, span)
+			return
+		}
+		if errors.Is(err, ht.ErrNotImplemented) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
 		return
 	}
 
@@ -1773,9 +1981,11 @@ func (s *Server) handleGetBlockRequest(args [1]string, w http.ResponseWriter, r 
 // Get block header.
 //
 // GET /v2/liteserver/get_block_header/{block_id}
-func (s *Server) handleGetBlockHeaderLiteServerRequest(args [1]string, w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleGetBlockHeaderLiteServerRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getBlockHeaderLiteServer"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/liteserver/get_block_header/{block_id}"),
 	}
 
 	// Start a span for this request.
@@ -1789,17 +1999,18 @@ func (s *Server) handleGetBlockHeaderLiteServerRequest(args [1]string, w http.Re
 	startTime := time.Now()
 	defer func() {
 		elapsedDuration := time.Since(startTime)
-		s.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		s.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
 	}()
 
 	// Increment request counter.
-	s.requests.Add(ctx, 1, otelAttrs...)
+	s.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 
 	var (
 		recordError = func(stage string, err error) {
 			span.RecordError(err)
 			span.SetStatus(codes.Error, stage)
-			s.errors.Add(ctx, 1, otelAttrs...)
+			s.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 		}
 		err          error
 		opErrContext = ogenerrors.OperationContext{
@@ -1807,7 +2018,7 @@ func (s *Server) handleGetBlockHeaderLiteServerRequest(args [1]string, w http.Re
 			ID:   "getBlockHeaderLiteServer",
 		}
 	)
-	params, err := decodeGetBlockHeaderLiteServerParams(args, r)
+	params, err := decodeGetBlockHeaderLiteServerParams(args, argsEscaped, r)
 	if err != nil {
 		err = &ogenerrors.DecodeParamsError{
 			OperationContext: opErrContext,
@@ -1818,7 +2029,7 @@ func (s *Server) handleGetBlockHeaderLiteServerRequest(args [1]string, w http.Re
 		return
 	}
 
-	var response GetBlockHeaderLiteServerRes
+	var response *GetBlockHeaderLiteServerOK
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:       ctx,
@@ -1841,7 +2052,7 @@ func (s *Server) handleGetBlockHeaderLiteServerRequest(args [1]string, w http.Re
 		type (
 			Request  = struct{}
 			Params   = GetBlockHeaderLiteServerParams
-			Response = GetBlockHeaderLiteServerRes
+			Response = *GetBlockHeaderLiteServerOK
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -1851,8 +2062,9 @@ func (s *Server) handleGetBlockHeaderLiteServerRequest(args [1]string, w http.Re
 			m,
 			mreq,
 			unpackGetBlockHeaderLiteServerParams,
-			func(ctx context.Context, request Request, params Params) (Response, error) {
-				return s.h.GetBlockHeaderLiteServer(ctx, params)
+			func(ctx context.Context, request Request, params Params) (response Response, err error) {
+				response, err = s.h.GetBlockHeaderLiteServer(ctx, params)
+				return response, err
 			},
 		)
 	} else {
@@ -1860,7 +2072,15 @@ func (s *Server) handleGetBlockHeaderLiteServerRequest(args [1]string, w http.Re
 	}
 	if err != nil {
 		recordError("Internal", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
+			encodeErrorResponse(errRes, w, span)
+			return
+		}
+		if errors.Is(err, ht.ErrNotImplemented) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
 		return
 	}
 
@@ -1876,9 +2096,11 @@ func (s *Server) handleGetBlockHeaderLiteServerRequest(args [1]string, w http.Re
 // Get block.
 //
 // GET /v2/liteserver/get_block/{block_id}
-func (s *Server) handleGetBlockLiteServerRequest(args [1]string, w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleGetBlockLiteServerRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getBlockLiteServer"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/liteserver/get_block/{block_id}"),
 	}
 
 	// Start a span for this request.
@@ -1892,17 +2114,18 @@ func (s *Server) handleGetBlockLiteServerRequest(args [1]string, w http.Response
 	startTime := time.Now()
 	defer func() {
 		elapsedDuration := time.Since(startTime)
-		s.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		s.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
 	}()
 
 	// Increment request counter.
-	s.requests.Add(ctx, 1, otelAttrs...)
+	s.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 
 	var (
 		recordError = func(stage string, err error) {
 			span.RecordError(err)
 			span.SetStatus(codes.Error, stage)
-			s.errors.Add(ctx, 1, otelAttrs...)
+			s.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 		}
 		err          error
 		opErrContext = ogenerrors.OperationContext{
@@ -1910,7 +2133,7 @@ func (s *Server) handleGetBlockLiteServerRequest(args [1]string, w http.Response
 			ID:   "getBlockLiteServer",
 		}
 	)
-	params, err := decodeGetBlockLiteServerParams(args, r)
+	params, err := decodeGetBlockLiteServerParams(args, argsEscaped, r)
 	if err != nil {
 		err = &ogenerrors.DecodeParamsError{
 			OperationContext: opErrContext,
@@ -1921,7 +2144,7 @@ func (s *Server) handleGetBlockLiteServerRequest(args [1]string, w http.Response
 		return
 	}
 
-	var response GetBlockLiteServerRes
+	var response *GetBlockLiteServerOK
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:       ctx,
@@ -1940,7 +2163,7 @@ func (s *Server) handleGetBlockLiteServerRequest(args [1]string, w http.Response
 		type (
 			Request  = struct{}
 			Params   = GetBlockLiteServerParams
-			Response = GetBlockLiteServerRes
+			Response = *GetBlockLiteServerOK
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -1950,8 +2173,9 @@ func (s *Server) handleGetBlockLiteServerRequest(args [1]string, w http.Response
 			m,
 			mreq,
 			unpackGetBlockLiteServerParams,
-			func(ctx context.Context, request Request, params Params) (Response, error) {
-				return s.h.GetBlockLiteServer(ctx, params)
+			func(ctx context.Context, request Request, params Params) (response Response, err error) {
+				response, err = s.h.GetBlockLiteServer(ctx, params)
+				return response, err
 			},
 		)
 	} else {
@@ -1959,7 +2183,15 @@ func (s *Server) handleGetBlockLiteServerRequest(args [1]string, w http.Response
 	}
 	if err != nil {
 		recordError("Internal", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
+			encodeErrorResponse(errRes, w, span)
+			return
+		}
+		if errors.Is(err, ht.ErrNotImplemented) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
 		return
 	}
 
@@ -1975,9 +2207,11 @@ func (s *Server) handleGetBlockLiteServerRequest(args [1]string, w http.Response
 // Get block proof.
 //
 // GET /v2/liteserver/get_block_proof
-func (s *Server) handleGetBlockProofLiteServerRequest(args [0]string, w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleGetBlockProofLiteServerRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getBlockProofLiteServer"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/liteserver/get_block_proof"),
 	}
 
 	// Start a span for this request.
@@ -1991,17 +2225,18 @@ func (s *Server) handleGetBlockProofLiteServerRequest(args [0]string, w http.Res
 	startTime := time.Now()
 	defer func() {
 		elapsedDuration := time.Since(startTime)
-		s.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		s.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
 	}()
 
 	// Increment request counter.
-	s.requests.Add(ctx, 1, otelAttrs...)
+	s.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 
 	var (
 		recordError = func(stage string, err error) {
 			span.RecordError(err)
 			span.SetStatus(codes.Error, stage)
-			s.errors.Add(ctx, 1, otelAttrs...)
+			s.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 		}
 		err          error
 		opErrContext = ogenerrors.OperationContext{
@@ -2009,7 +2244,7 @@ func (s *Server) handleGetBlockProofLiteServerRequest(args [0]string, w http.Res
 			ID:   "getBlockProofLiteServer",
 		}
 	)
-	params, err := decodeGetBlockProofLiteServerParams(args, r)
+	params, err := decodeGetBlockProofLiteServerParams(args, argsEscaped, r)
 	if err != nil {
 		err = &ogenerrors.DecodeParamsError{
 			OperationContext: opErrContext,
@@ -2020,7 +2255,7 @@ func (s *Server) handleGetBlockProofLiteServerRequest(args [0]string, w http.Res
 		return
 	}
 
-	var response GetBlockProofLiteServerRes
+	var response *GetBlockProofLiteServerOK
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:       ctx,
@@ -2047,7 +2282,7 @@ func (s *Server) handleGetBlockProofLiteServerRequest(args [0]string, w http.Res
 		type (
 			Request  = struct{}
 			Params   = GetBlockProofLiteServerParams
-			Response = GetBlockProofLiteServerRes
+			Response = *GetBlockProofLiteServerOK
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -2057,8 +2292,9 @@ func (s *Server) handleGetBlockProofLiteServerRequest(args [0]string, w http.Res
 			m,
 			mreq,
 			unpackGetBlockProofLiteServerParams,
-			func(ctx context.Context, request Request, params Params) (Response, error) {
-				return s.h.GetBlockProofLiteServer(ctx, params)
+			func(ctx context.Context, request Request, params Params) (response Response, err error) {
+				response, err = s.h.GetBlockProofLiteServer(ctx, params)
+				return response, err
 			},
 		)
 	} else {
@@ -2066,7 +2302,15 @@ func (s *Server) handleGetBlockProofLiteServerRequest(args [0]string, w http.Res
 	}
 	if err != nil {
 		recordError("Internal", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
+			encodeErrorResponse(errRes, w, span)
+			return
+		}
+		if errors.Is(err, ht.ErrNotImplemented) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
 		return
 	}
 
@@ -2082,9 +2326,11 @@ func (s *Server) handleGetBlockProofLiteServerRequest(args [0]string, w http.Res
 // Get transactions from block.
 //
 // GET /v2/blockchain/blocks/{block_id}/transactions
-func (s *Server) handleGetBlockTransactionsRequest(args [1]string, w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleGetBlockTransactionsRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getBlockTransactions"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/blockchain/blocks/{block_id}/transactions"),
 	}
 
 	// Start a span for this request.
@@ -2098,17 +2344,18 @@ func (s *Server) handleGetBlockTransactionsRequest(args [1]string, w http.Respon
 	startTime := time.Now()
 	defer func() {
 		elapsedDuration := time.Since(startTime)
-		s.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		s.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
 	}()
 
 	// Increment request counter.
-	s.requests.Add(ctx, 1, otelAttrs...)
+	s.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 
 	var (
 		recordError = func(stage string, err error) {
 			span.RecordError(err)
 			span.SetStatus(codes.Error, stage)
-			s.errors.Add(ctx, 1, otelAttrs...)
+			s.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 		}
 		err          error
 		opErrContext = ogenerrors.OperationContext{
@@ -2116,7 +2363,7 @@ func (s *Server) handleGetBlockTransactionsRequest(args [1]string, w http.Respon
 			ID:   "getBlockTransactions",
 		}
 	)
-	params, err := decodeGetBlockTransactionsParams(args, r)
+	params, err := decodeGetBlockTransactionsParams(args, argsEscaped, r)
 	if err != nil {
 		err = &ogenerrors.DecodeParamsError{
 			OperationContext: opErrContext,
@@ -2127,7 +2374,7 @@ func (s *Server) handleGetBlockTransactionsRequest(args [1]string, w http.Respon
 		return
 	}
 
-	var response GetBlockTransactionsRes
+	var response *Transactions
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:       ctx,
@@ -2146,7 +2393,7 @@ func (s *Server) handleGetBlockTransactionsRequest(args [1]string, w http.Respon
 		type (
 			Request  = struct{}
 			Params   = GetBlockTransactionsParams
-			Response = GetBlockTransactionsRes
+			Response = *Transactions
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -2156,8 +2403,9 @@ func (s *Server) handleGetBlockTransactionsRequest(args [1]string, w http.Respon
 			m,
 			mreq,
 			unpackGetBlockTransactionsParams,
-			func(ctx context.Context, request Request, params Params) (Response, error) {
-				return s.h.GetBlockTransactions(ctx, params)
+			func(ctx context.Context, request Request, params Params) (response Response, err error) {
+				response, err = s.h.GetBlockTransactions(ctx, params)
+				return response, err
 			},
 		)
 	} else {
@@ -2165,7 +2413,15 @@ func (s *Server) handleGetBlockTransactionsRequest(args [1]string, w http.Respon
 	}
 	if err != nil {
 		recordError("Internal", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
+			encodeErrorResponse(errRes, w, span)
+			return
+		}
+		if errors.Is(err, ht.ErrNotImplemented) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
 		return
 	}
 
@@ -2181,9 +2437,11 @@ func (s *Server) handleGetBlockTransactionsRequest(args [1]string, w http.Respon
 // Get blockchain config.
 //
 // GET /v2/blockchain/config
-func (s *Server) handleGetConfigRequest(args [0]string, w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleGetConfigRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getConfig"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/blockchain/config"),
 	}
 
 	// Start a span for this request.
@@ -2197,22 +2455,23 @@ func (s *Server) handleGetConfigRequest(args [0]string, w http.ResponseWriter, r
 	startTime := time.Now()
 	defer func() {
 		elapsedDuration := time.Since(startTime)
-		s.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		s.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
 	}()
 
 	// Increment request counter.
-	s.requests.Add(ctx, 1, otelAttrs...)
+	s.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 
 	var (
 		recordError = func(stage string, err error) {
 			span.RecordError(err)
 			span.SetStatus(codes.Error, stage)
-			s.errors.Add(ctx, 1, otelAttrs...)
+			s.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 		}
 		err error
 	)
 
-	var response GetConfigRes
+	var response *Config
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:       ctx,
@@ -2226,7 +2485,7 @@ func (s *Server) handleGetConfigRequest(args [0]string, w http.ResponseWriter, r
 		type (
 			Request  = struct{}
 			Params   = struct{}
-			Response = GetConfigRes
+			Response = *Config
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -2236,8 +2495,9 @@ func (s *Server) handleGetConfigRequest(args [0]string, w http.ResponseWriter, r
 			m,
 			mreq,
 			nil,
-			func(ctx context.Context, request Request, params Params) (Response, error) {
-				return s.h.GetConfig(ctx)
+			func(ctx context.Context, request Request, params Params) (response Response, err error) {
+				response, err = s.h.GetConfig(ctx)
+				return response, err
 			},
 		)
 	} else {
@@ -2245,7 +2505,15 @@ func (s *Server) handleGetConfigRequest(args [0]string, w http.ResponseWriter, r
 	}
 	if err != nil {
 		recordError("Internal", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
+			encodeErrorResponse(errRes, w, span)
+			return
+		}
+		if errors.Is(err, ht.ErrNotImplemented) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
 		return
 	}
 
@@ -2261,9 +2529,11 @@ func (s *Server) handleGetConfigRequest(args [0]string, w http.ResponseWriter, r
 // Get config all.
 //
 // GET /v2/liteserver/get_config_all/{block_id}
-func (s *Server) handleGetConfigAllLiteServerRequest(args [1]string, w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleGetConfigAllLiteServerRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getConfigAllLiteServer"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/liteserver/get_config_all/{block_id}"),
 	}
 
 	// Start a span for this request.
@@ -2277,17 +2547,18 @@ func (s *Server) handleGetConfigAllLiteServerRequest(args [1]string, w http.Resp
 	startTime := time.Now()
 	defer func() {
 		elapsedDuration := time.Since(startTime)
-		s.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		s.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
 	}()
 
 	// Increment request counter.
-	s.requests.Add(ctx, 1, otelAttrs...)
+	s.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 
 	var (
 		recordError = func(stage string, err error) {
 			span.RecordError(err)
 			span.SetStatus(codes.Error, stage)
-			s.errors.Add(ctx, 1, otelAttrs...)
+			s.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 		}
 		err          error
 		opErrContext = ogenerrors.OperationContext{
@@ -2295,7 +2566,7 @@ func (s *Server) handleGetConfigAllLiteServerRequest(args [1]string, w http.Resp
 			ID:   "getConfigAllLiteServer",
 		}
 	)
-	params, err := decodeGetConfigAllLiteServerParams(args, r)
+	params, err := decodeGetConfigAllLiteServerParams(args, argsEscaped, r)
 	if err != nil {
 		err = &ogenerrors.DecodeParamsError{
 			OperationContext: opErrContext,
@@ -2306,7 +2577,7 @@ func (s *Server) handleGetConfigAllLiteServerRequest(args [1]string, w http.Resp
 		return
 	}
 
-	var response GetConfigAllLiteServerRes
+	var response *GetConfigAllLiteServerOK
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:       ctx,
@@ -2329,7 +2600,7 @@ func (s *Server) handleGetConfigAllLiteServerRequest(args [1]string, w http.Resp
 		type (
 			Request  = struct{}
 			Params   = GetConfigAllLiteServerParams
-			Response = GetConfigAllLiteServerRes
+			Response = *GetConfigAllLiteServerOK
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -2339,8 +2610,9 @@ func (s *Server) handleGetConfigAllLiteServerRequest(args [1]string, w http.Resp
 			m,
 			mreq,
 			unpackGetConfigAllLiteServerParams,
-			func(ctx context.Context, request Request, params Params) (Response, error) {
-				return s.h.GetConfigAllLiteServer(ctx, params)
+			func(ctx context.Context, request Request, params Params) (response Response, err error) {
+				response, err = s.h.GetConfigAllLiteServer(ctx, params)
+				return response, err
 			},
 		)
 	} else {
@@ -2348,7 +2620,15 @@ func (s *Server) handleGetConfigAllLiteServerRequest(args [1]string, w http.Resp
 	}
 	if err != nil {
 		recordError("Internal", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
+			encodeErrorResponse(errRes, w, span)
+			return
+		}
+		if errors.Is(err, ht.ErrNotImplemented) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
 		return
 	}
 
@@ -2364,9 +2644,11 @@ func (s *Server) handleGetConfigAllLiteServerRequest(args [1]string, w http.Resp
 // Get expiring .ton dns.
 //
 // GET /v2/accounts/{account_id}/dns/expiring
-func (s *Server) handleGetDnsExpiringRequest(args [1]string, w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleGetDnsExpiringRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getDnsExpiring"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/accounts/{account_id}/dns/expiring"),
 	}
 
 	// Start a span for this request.
@@ -2380,17 +2662,18 @@ func (s *Server) handleGetDnsExpiringRequest(args [1]string, w http.ResponseWrit
 	startTime := time.Now()
 	defer func() {
 		elapsedDuration := time.Since(startTime)
-		s.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		s.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
 	}()
 
 	// Increment request counter.
-	s.requests.Add(ctx, 1, otelAttrs...)
+	s.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 
 	var (
 		recordError = func(stage string, err error) {
 			span.RecordError(err)
 			span.SetStatus(codes.Error, stage)
-			s.errors.Add(ctx, 1, otelAttrs...)
+			s.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 		}
 		err          error
 		opErrContext = ogenerrors.OperationContext{
@@ -2398,7 +2681,7 @@ func (s *Server) handleGetDnsExpiringRequest(args [1]string, w http.ResponseWrit
 			ID:   "getDnsExpiring",
 		}
 	)
-	params, err := decodeGetDnsExpiringParams(args, r)
+	params, err := decodeGetDnsExpiringParams(args, argsEscaped, r)
 	if err != nil {
 		err = &ogenerrors.DecodeParamsError{
 			OperationContext: opErrContext,
@@ -2409,7 +2692,7 @@ func (s *Server) handleGetDnsExpiringRequest(args [1]string, w http.ResponseWrit
 		return
 	}
 
-	var response GetDnsExpiringRes
+	var response *DnsExpiring
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:       ctx,
@@ -2432,7 +2715,7 @@ func (s *Server) handleGetDnsExpiringRequest(args [1]string, w http.ResponseWrit
 		type (
 			Request  = struct{}
 			Params   = GetDnsExpiringParams
-			Response = GetDnsExpiringRes
+			Response = *DnsExpiring
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -2442,8 +2725,9 @@ func (s *Server) handleGetDnsExpiringRequest(args [1]string, w http.ResponseWrit
 			m,
 			mreq,
 			unpackGetDnsExpiringParams,
-			func(ctx context.Context, request Request, params Params) (Response, error) {
-				return s.h.GetDnsExpiring(ctx, params)
+			func(ctx context.Context, request Request, params Params) (response Response, err error) {
+				response, err = s.h.GetDnsExpiring(ctx, params)
+				return response, err
 			},
 		)
 	} else {
@@ -2451,7 +2735,15 @@ func (s *Server) handleGetDnsExpiringRequest(args [1]string, w http.ResponseWrit
 	}
 	if err != nil {
 		recordError("Internal", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
+			encodeErrorResponse(errRes, w, span)
+			return
+		}
+		if errors.Is(err, ht.ErrNotImplemented) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
 		return
 	}
 
@@ -2467,9 +2759,11 @@ func (s *Server) handleGetDnsExpiringRequest(args [1]string, w http.ResponseWrit
 // Get domain bids.
 //
 // GET /v2/dns/{domain_name}/bids
-func (s *Server) handleGetDomainBidsRequest(args [1]string, w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleGetDomainBidsRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getDomainBids"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/dns/{domain_name}/bids"),
 	}
 
 	// Start a span for this request.
@@ -2483,17 +2777,18 @@ func (s *Server) handleGetDomainBidsRequest(args [1]string, w http.ResponseWrite
 	startTime := time.Now()
 	defer func() {
 		elapsedDuration := time.Since(startTime)
-		s.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		s.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
 	}()
 
 	// Increment request counter.
-	s.requests.Add(ctx, 1, otelAttrs...)
+	s.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 
 	var (
 		recordError = func(stage string, err error) {
 			span.RecordError(err)
 			span.SetStatus(codes.Error, stage)
-			s.errors.Add(ctx, 1, otelAttrs...)
+			s.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 		}
 		err          error
 		opErrContext = ogenerrors.OperationContext{
@@ -2501,7 +2796,7 @@ func (s *Server) handleGetDomainBidsRequest(args [1]string, w http.ResponseWrite
 			ID:   "getDomainBids",
 		}
 	)
-	params, err := decodeGetDomainBidsParams(args, r)
+	params, err := decodeGetDomainBidsParams(args, argsEscaped, r)
 	if err != nil {
 		err = &ogenerrors.DecodeParamsError{
 			OperationContext: opErrContext,
@@ -2512,7 +2807,7 @@ func (s *Server) handleGetDomainBidsRequest(args [1]string, w http.ResponseWrite
 		return
 	}
 
-	var response GetDomainBidsRes
+	var response *DomainBids
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:       ctx,
@@ -2531,7 +2826,7 @@ func (s *Server) handleGetDomainBidsRequest(args [1]string, w http.ResponseWrite
 		type (
 			Request  = struct{}
 			Params   = GetDomainBidsParams
-			Response = GetDomainBidsRes
+			Response = *DomainBids
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -2541,8 +2836,9 @@ func (s *Server) handleGetDomainBidsRequest(args [1]string, w http.ResponseWrite
 			m,
 			mreq,
 			unpackGetDomainBidsParams,
-			func(ctx context.Context, request Request, params Params) (Response, error) {
-				return s.h.GetDomainBids(ctx, params)
+			func(ctx context.Context, request Request, params Params) (response Response, err error) {
+				response, err = s.h.GetDomainBids(ctx, params)
+				return response, err
 			},
 		)
 	} else {
@@ -2550,7 +2846,15 @@ func (s *Server) handleGetDomainBidsRequest(args [1]string, w http.ResponseWrite
 	}
 	if err != nil {
 		recordError("Internal", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
+			encodeErrorResponse(errRes, w, span)
+			return
+		}
+		if errors.Is(err, ht.ErrNotImplemented) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
 		return
 	}
 
@@ -2571,9 +2875,11 @@ func (s *Server) handleGetDomainBidsRequest(args [1]string, w http.ResponseWrite
 // changed at any time.
 //
 // GET /v2/events/{event_id}
-func (s *Server) handleGetEventRequest(args [1]string, w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleGetEventRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getEvent"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/events/{event_id}"),
 	}
 
 	// Start a span for this request.
@@ -2587,17 +2893,18 @@ func (s *Server) handleGetEventRequest(args [1]string, w http.ResponseWriter, r 
 	startTime := time.Now()
 	defer func() {
 		elapsedDuration := time.Since(startTime)
-		s.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		s.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
 	}()
 
 	// Increment request counter.
-	s.requests.Add(ctx, 1, otelAttrs...)
+	s.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 
 	var (
 		recordError = func(stage string, err error) {
 			span.RecordError(err)
 			span.SetStatus(codes.Error, stage)
-			s.errors.Add(ctx, 1, otelAttrs...)
+			s.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 		}
 		err          error
 		opErrContext = ogenerrors.OperationContext{
@@ -2605,7 +2912,7 @@ func (s *Server) handleGetEventRequest(args [1]string, w http.ResponseWriter, r 
 			ID:   "getEvent",
 		}
 	)
-	params, err := decodeGetEventParams(args, r)
+	params, err := decodeGetEventParams(args, argsEscaped, r)
 	if err != nil {
 		err = &ogenerrors.DecodeParamsError{
 			OperationContext: opErrContext,
@@ -2616,7 +2923,7 @@ func (s *Server) handleGetEventRequest(args [1]string, w http.ResponseWriter, r 
 		return
 	}
 
-	var response GetEventRes
+	var response *Event
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:       ctx,
@@ -2639,7 +2946,7 @@ func (s *Server) handleGetEventRequest(args [1]string, w http.ResponseWriter, r 
 		type (
 			Request  = struct{}
 			Params   = GetEventParams
-			Response = GetEventRes
+			Response = *Event
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -2649,8 +2956,9 @@ func (s *Server) handleGetEventRequest(args [1]string, w http.ResponseWriter, r 
 			m,
 			mreq,
 			unpackGetEventParams,
-			func(ctx context.Context, request Request, params Params) (Response, error) {
-				return s.h.GetEvent(ctx, params)
+			func(ctx context.Context, request Request, params Params) (response Response, err error) {
+				response, err = s.h.GetEvent(ctx, params)
+				return response, err
 			},
 		)
 	} else {
@@ -2658,7 +2966,15 @@ func (s *Server) handleGetEventRequest(args [1]string, w http.ResponseWriter, r 
 	}
 	if err != nil {
 		recordError("Internal", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
+			encodeErrorResponse(errRes, w, span)
+			return
+		}
+		if errors.Is(err, ht.ErrNotImplemented) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
 		return
 	}
 
@@ -2678,9 +2994,11 @@ func (s *Server) handleGetEventRequest(args [1]string, w http.ResponseWriter, r 
 // to build any logic on top of actions because actions can be changed at any time.
 //
 // GET /v2/accounts/{account_id}/events
-func (s *Server) handleGetEventsByAccountRequest(args [1]string, w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleGetEventsByAccountRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getEventsByAccount"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/accounts/{account_id}/events"),
 	}
 
 	// Start a span for this request.
@@ -2694,17 +3012,18 @@ func (s *Server) handleGetEventsByAccountRequest(args [1]string, w http.Response
 	startTime := time.Now()
 	defer func() {
 		elapsedDuration := time.Since(startTime)
-		s.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		s.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
 	}()
 
 	// Increment request counter.
-	s.requests.Add(ctx, 1, otelAttrs...)
+	s.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 
 	var (
 		recordError = func(stage string, err error) {
 			span.RecordError(err)
 			span.SetStatus(codes.Error, stage)
-			s.errors.Add(ctx, 1, otelAttrs...)
+			s.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 		}
 		err          error
 		opErrContext = ogenerrors.OperationContext{
@@ -2712,7 +3031,7 @@ func (s *Server) handleGetEventsByAccountRequest(args [1]string, w http.Response
 			ID:   "getEventsByAccount",
 		}
 	)
-	params, err := decodeGetEventsByAccountParams(args, r)
+	params, err := decodeGetEventsByAccountParams(args, argsEscaped, r)
 	if err != nil {
 		err = &ogenerrors.DecodeParamsError{
 			OperationContext: opErrContext,
@@ -2723,7 +3042,7 @@ func (s *Server) handleGetEventsByAccountRequest(args [1]string, w http.Response
 		return
 	}
 
-	var response GetEventsByAccountRes
+	var response *AccountEvents
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:       ctx,
@@ -2766,7 +3085,7 @@ func (s *Server) handleGetEventsByAccountRequest(args [1]string, w http.Response
 		type (
 			Request  = struct{}
 			Params   = GetEventsByAccountParams
-			Response = GetEventsByAccountRes
+			Response = *AccountEvents
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -2776,8 +3095,9 @@ func (s *Server) handleGetEventsByAccountRequest(args [1]string, w http.Response
 			m,
 			mreq,
 			unpackGetEventsByAccountParams,
-			func(ctx context.Context, request Request, params Params) (Response, error) {
-				return s.h.GetEventsByAccount(ctx, params)
+			func(ctx context.Context, request Request, params Params) (response Response, err error) {
+				response, err = s.h.GetEventsByAccount(ctx, params)
+				return response, err
 			},
 		)
 	} else {
@@ -2785,7 +3105,15 @@ func (s *Server) handleGetEventsByAccountRequest(args [1]string, w http.Response
 	}
 	if err != nil {
 		recordError("Internal", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
+			encodeErrorResponse(errRes, w, span)
+			return
+		}
+		if errors.Is(err, ht.ErrNotImplemented) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
 		return
 	}
 
@@ -2801,9 +3129,11 @@ func (s *Server) handleGetEventsByAccountRequest(args [1]string, w http.Response
 // Get NFT items from collection by collection address.
 //
 // GET /v2/nfts/collections/{account_id}/items
-func (s *Server) handleGetItemsFromCollectionRequest(args [1]string, w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleGetItemsFromCollectionRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getItemsFromCollection"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/nfts/collections/{account_id}/items"),
 	}
 
 	// Start a span for this request.
@@ -2817,17 +3147,18 @@ func (s *Server) handleGetItemsFromCollectionRequest(args [1]string, w http.Resp
 	startTime := time.Now()
 	defer func() {
 		elapsedDuration := time.Since(startTime)
-		s.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		s.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
 	}()
 
 	// Increment request counter.
-	s.requests.Add(ctx, 1, otelAttrs...)
+	s.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 
 	var (
 		recordError = func(stage string, err error) {
 			span.RecordError(err)
 			span.SetStatus(codes.Error, stage)
-			s.errors.Add(ctx, 1, otelAttrs...)
+			s.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 		}
 		err          error
 		opErrContext = ogenerrors.OperationContext{
@@ -2835,7 +3166,7 @@ func (s *Server) handleGetItemsFromCollectionRequest(args [1]string, w http.Resp
 			ID:   "getItemsFromCollection",
 		}
 	)
-	params, err := decodeGetItemsFromCollectionParams(args, r)
+	params, err := decodeGetItemsFromCollectionParams(args, argsEscaped, r)
 	if err != nil {
 		err = &ogenerrors.DecodeParamsError{
 			OperationContext: opErrContext,
@@ -2846,7 +3177,7 @@ func (s *Server) handleGetItemsFromCollectionRequest(args [1]string, w http.Resp
 		return
 	}
 
-	var response GetItemsFromCollectionRes
+	var response *NftItems
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:       ctx,
@@ -2873,7 +3204,7 @@ func (s *Server) handleGetItemsFromCollectionRequest(args [1]string, w http.Resp
 		type (
 			Request  = struct{}
 			Params   = GetItemsFromCollectionParams
-			Response = GetItemsFromCollectionRes
+			Response = *NftItems
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -2883,8 +3214,9 @@ func (s *Server) handleGetItemsFromCollectionRequest(args [1]string, w http.Resp
 			m,
 			mreq,
 			unpackGetItemsFromCollectionParams,
-			func(ctx context.Context, request Request, params Params) (Response, error) {
-				return s.h.GetItemsFromCollection(ctx, params)
+			func(ctx context.Context, request Request, params Params) (response Response, err error) {
+				response, err = s.h.GetItemsFromCollection(ctx, params)
+				return response, err
 			},
 		)
 	} else {
@@ -2892,7 +3224,15 @@ func (s *Server) handleGetItemsFromCollectionRequest(args [1]string, w http.Resp
 	}
 	if err != nil {
 		recordError("Internal", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
+			encodeErrorResponse(errRes, w, span)
+			return
+		}
+		if errors.Is(err, ht.ErrNotImplemented) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
 		return
 	}
 
@@ -2908,9 +3248,11 @@ func (s *Server) handleGetItemsFromCollectionRequest(args [1]string, w http.Resp
 // Get jetton metadata by jetton master address.
 //
 // GET /v2/jettons/{account_id}
-func (s *Server) handleGetJettonInfoRequest(args [1]string, w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleGetJettonInfoRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getJettonInfo"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/jettons/{account_id}"),
 	}
 
 	// Start a span for this request.
@@ -2924,17 +3266,18 @@ func (s *Server) handleGetJettonInfoRequest(args [1]string, w http.ResponseWrite
 	startTime := time.Now()
 	defer func() {
 		elapsedDuration := time.Since(startTime)
-		s.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		s.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
 	}()
 
 	// Increment request counter.
-	s.requests.Add(ctx, 1, otelAttrs...)
+	s.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 
 	var (
 		recordError = func(stage string, err error) {
 			span.RecordError(err)
 			span.SetStatus(codes.Error, stage)
-			s.errors.Add(ctx, 1, otelAttrs...)
+			s.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 		}
 		err          error
 		opErrContext = ogenerrors.OperationContext{
@@ -2942,7 +3285,7 @@ func (s *Server) handleGetJettonInfoRequest(args [1]string, w http.ResponseWrite
 			ID:   "getJettonInfo",
 		}
 	)
-	params, err := decodeGetJettonInfoParams(args, r)
+	params, err := decodeGetJettonInfoParams(args, argsEscaped, r)
 	if err != nil {
 		err = &ogenerrors.DecodeParamsError{
 			OperationContext: opErrContext,
@@ -2953,7 +3296,7 @@ func (s *Server) handleGetJettonInfoRequest(args [1]string, w http.ResponseWrite
 		return
 	}
 
-	var response GetJettonInfoRes
+	var response *JettonInfo
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:       ctx,
@@ -2972,7 +3315,7 @@ func (s *Server) handleGetJettonInfoRequest(args [1]string, w http.ResponseWrite
 		type (
 			Request  = struct{}
 			Params   = GetJettonInfoParams
-			Response = GetJettonInfoRes
+			Response = *JettonInfo
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -2982,8 +3325,9 @@ func (s *Server) handleGetJettonInfoRequest(args [1]string, w http.ResponseWrite
 			m,
 			mreq,
 			unpackGetJettonInfoParams,
-			func(ctx context.Context, request Request, params Params) (Response, error) {
-				return s.h.GetJettonInfo(ctx, params)
+			func(ctx context.Context, request Request, params Params) (response Response, err error) {
+				response, err = s.h.GetJettonInfo(ctx, params)
+				return response, err
 			},
 		)
 	} else {
@@ -2991,7 +3335,15 @@ func (s *Server) handleGetJettonInfoRequest(args [1]string, w http.ResponseWrite
 	}
 	if err != nil {
 		recordError("Internal", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
+			encodeErrorResponse(errRes, w, span)
+			return
+		}
+		if errors.Is(err, ht.ErrNotImplemented) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
 		return
 	}
 
@@ -3007,9 +3359,11 @@ func (s *Server) handleGetJettonInfoRequest(args [1]string, w http.ResponseWrite
 // Get a list of all indexed jetton masters in the blockchain.
 //
 // GET /v2/jettons
-func (s *Server) handleGetJettonsRequest(args [0]string, w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleGetJettonsRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getJettons"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/jettons"),
 	}
 
 	// Start a span for this request.
@@ -3023,17 +3377,18 @@ func (s *Server) handleGetJettonsRequest(args [0]string, w http.ResponseWriter, 
 	startTime := time.Now()
 	defer func() {
 		elapsedDuration := time.Since(startTime)
-		s.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		s.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
 	}()
 
 	// Increment request counter.
-	s.requests.Add(ctx, 1, otelAttrs...)
+	s.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 
 	var (
 		recordError = func(stage string, err error) {
 			span.RecordError(err)
 			span.SetStatus(codes.Error, stage)
-			s.errors.Add(ctx, 1, otelAttrs...)
+			s.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 		}
 		err          error
 		opErrContext = ogenerrors.OperationContext{
@@ -3041,7 +3396,7 @@ func (s *Server) handleGetJettonsRequest(args [0]string, w http.ResponseWriter, 
 			ID:   "getJettons",
 		}
 	)
-	params, err := decodeGetJettonsParams(args, r)
+	params, err := decodeGetJettonsParams(args, argsEscaped, r)
 	if err != nil {
 		err = &ogenerrors.DecodeParamsError{
 			OperationContext: opErrContext,
@@ -3052,7 +3407,7 @@ func (s *Server) handleGetJettonsRequest(args [0]string, w http.ResponseWriter, 
 		return
 	}
 
-	var response GetJettonsRes
+	var response *Jettons
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:       ctx,
@@ -3075,7 +3430,7 @@ func (s *Server) handleGetJettonsRequest(args [0]string, w http.ResponseWriter, 
 		type (
 			Request  = struct{}
 			Params   = GetJettonsParams
-			Response = GetJettonsRes
+			Response = *Jettons
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -3085,8 +3440,9 @@ func (s *Server) handleGetJettonsRequest(args [0]string, w http.ResponseWriter, 
 			m,
 			mreq,
 			unpackGetJettonsParams,
-			func(ctx context.Context, request Request, params Params) (Response, error) {
-				return s.h.GetJettons(ctx, params)
+			func(ctx context.Context, request Request, params Params) (response Response, err error) {
+				response, err = s.h.GetJettons(ctx, params)
+				return response, err
 			},
 		)
 	} else {
@@ -3094,7 +3450,15 @@ func (s *Server) handleGetJettonsRequest(args [0]string, w http.ResponseWriter, 
 	}
 	if err != nil {
 		recordError("Internal", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
+			encodeErrorResponse(errRes, w, span)
+			return
+		}
+		if errors.Is(err, ht.ErrNotImplemented) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
 		return
 	}
 
@@ -3110,9 +3474,11 @@ func (s *Server) handleGetJettonsRequest(args [0]string, w http.ResponseWriter, 
 // Get all Jettons balances by owner address.
 //
 // GET /v2/accounts/{account_id}/jettons
-func (s *Server) handleGetJettonsBalancesRequest(args [1]string, w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleGetJettonsBalancesRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getJettonsBalances"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/accounts/{account_id}/jettons"),
 	}
 
 	// Start a span for this request.
@@ -3126,17 +3492,18 @@ func (s *Server) handleGetJettonsBalancesRequest(args [1]string, w http.Response
 	startTime := time.Now()
 	defer func() {
 		elapsedDuration := time.Since(startTime)
-		s.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		s.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
 	}()
 
 	// Increment request counter.
-	s.requests.Add(ctx, 1, otelAttrs...)
+	s.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 
 	var (
 		recordError = func(stage string, err error) {
 			span.RecordError(err)
 			span.SetStatus(codes.Error, stage)
-			s.errors.Add(ctx, 1, otelAttrs...)
+			s.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 		}
 		err          error
 		opErrContext = ogenerrors.OperationContext{
@@ -3144,7 +3511,7 @@ func (s *Server) handleGetJettonsBalancesRequest(args [1]string, w http.Response
 			ID:   "getJettonsBalances",
 		}
 	)
-	params, err := decodeGetJettonsBalancesParams(args, r)
+	params, err := decodeGetJettonsBalancesParams(args, argsEscaped, r)
 	if err != nil {
 		err = &ogenerrors.DecodeParamsError{
 			OperationContext: opErrContext,
@@ -3155,7 +3522,7 @@ func (s *Server) handleGetJettonsBalancesRequest(args [1]string, w http.Response
 		return
 	}
 
-	var response GetJettonsBalancesRes
+	var response *JettonsBalances
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:       ctx,
@@ -3174,7 +3541,7 @@ func (s *Server) handleGetJettonsBalancesRequest(args [1]string, w http.Response
 		type (
 			Request  = struct{}
 			Params   = GetJettonsBalancesParams
-			Response = GetJettonsBalancesRes
+			Response = *JettonsBalances
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -3184,8 +3551,9 @@ func (s *Server) handleGetJettonsBalancesRequest(args [1]string, w http.Response
 			m,
 			mreq,
 			unpackGetJettonsBalancesParams,
-			func(ctx context.Context, request Request, params Params) (Response, error) {
-				return s.h.GetJettonsBalances(ctx, params)
+			func(ctx context.Context, request Request, params Params) (response Response, err error) {
+				response, err = s.h.GetJettonsBalances(ctx, params)
+				return response, err
 			},
 		)
 	} else {
@@ -3193,7 +3561,15 @@ func (s *Server) handleGetJettonsBalancesRequest(args [1]string, w http.Response
 	}
 	if err != nil {
 		recordError("Internal", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
+			encodeErrorResponse(errRes, w, span)
+			return
+		}
+		if errors.Is(err, ht.ErrNotImplemented) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
 		return
 	}
 
@@ -3209,9 +3585,11 @@ func (s *Server) handleGetJettonsBalancesRequest(args [1]string, w http.Response
 // Get the transfer jettons history for account_id.
 //
 // GET /v2/accounts/{account_id}/jettons/history
-func (s *Server) handleGetJettonsHistoryRequest(args [1]string, w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleGetJettonsHistoryRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getJettonsHistory"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/accounts/{account_id}/jettons/history"),
 	}
 
 	// Start a span for this request.
@@ -3225,17 +3603,18 @@ func (s *Server) handleGetJettonsHistoryRequest(args [1]string, w http.ResponseW
 	startTime := time.Now()
 	defer func() {
 		elapsedDuration := time.Since(startTime)
-		s.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		s.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
 	}()
 
 	// Increment request counter.
-	s.requests.Add(ctx, 1, otelAttrs...)
+	s.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 
 	var (
 		recordError = func(stage string, err error) {
 			span.RecordError(err)
 			span.SetStatus(codes.Error, stage)
-			s.errors.Add(ctx, 1, otelAttrs...)
+			s.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 		}
 		err          error
 		opErrContext = ogenerrors.OperationContext{
@@ -3243,7 +3622,7 @@ func (s *Server) handleGetJettonsHistoryRequest(args [1]string, w http.ResponseW
 			ID:   "getJettonsHistory",
 		}
 	)
-	params, err := decodeGetJettonsHistoryParams(args, r)
+	params, err := decodeGetJettonsHistoryParams(args, argsEscaped, r)
 	if err != nil {
 		err = &ogenerrors.DecodeParamsError{
 			OperationContext: opErrContext,
@@ -3254,7 +3633,7 @@ func (s *Server) handleGetJettonsHistoryRequest(args [1]string, w http.ResponseW
 		return
 	}
 
-	var response GetJettonsHistoryRes
+	var response *AccountEvents
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:       ctx,
@@ -3293,7 +3672,7 @@ func (s *Server) handleGetJettonsHistoryRequest(args [1]string, w http.ResponseW
 		type (
 			Request  = struct{}
 			Params   = GetJettonsHistoryParams
-			Response = GetJettonsHistoryRes
+			Response = *AccountEvents
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -3303,8 +3682,9 @@ func (s *Server) handleGetJettonsHistoryRequest(args [1]string, w http.ResponseW
 			m,
 			mreq,
 			unpackGetJettonsHistoryParams,
-			func(ctx context.Context, request Request, params Params) (Response, error) {
-				return s.h.GetJettonsHistory(ctx, params)
+			func(ctx context.Context, request Request, params Params) (response Response, err error) {
+				response, err = s.h.GetJettonsHistory(ctx, params)
+				return response, err
 			},
 		)
 	} else {
@@ -3312,7 +3692,15 @@ func (s *Server) handleGetJettonsHistoryRequest(args [1]string, w http.ResponseW
 	}
 	if err != nil {
 		recordError("Internal", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
+			encodeErrorResponse(errRes, w, span)
+			return
+		}
+		if errors.Is(err, ht.ErrNotImplemented) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
 		return
 	}
 
@@ -3328,9 +3716,11 @@ func (s *Server) handleGetJettonsHistoryRequest(args [1]string, w http.ResponseW
 // Get the transfer jetton history for account_id and jetton_id.
 //
 // GET /v2/accounts/{account_id}/jettons/{jetton_id}/history
-func (s *Server) handleGetJettonsHistoryByIDRequest(args [2]string, w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleGetJettonsHistoryByIDRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getJettonsHistoryByID"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/accounts/{account_id}/jettons/{jetton_id}/history"),
 	}
 
 	// Start a span for this request.
@@ -3344,17 +3734,18 @@ func (s *Server) handleGetJettonsHistoryByIDRequest(args [2]string, w http.Respo
 	startTime := time.Now()
 	defer func() {
 		elapsedDuration := time.Since(startTime)
-		s.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		s.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
 	}()
 
 	// Increment request counter.
-	s.requests.Add(ctx, 1, otelAttrs...)
+	s.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 
 	var (
 		recordError = func(stage string, err error) {
 			span.RecordError(err)
 			span.SetStatus(codes.Error, stage)
-			s.errors.Add(ctx, 1, otelAttrs...)
+			s.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 		}
 		err          error
 		opErrContext = ogenerrors.OperationContext{
@@ -3362,7 +3753,7 @@ func (s *Server) handleGetJettonsHistoryByIDRequest(args [2]string, w http.Respo
 			ID:   "getJettonsHistoryByID",
 		}
 	)
-	params, err := decodeGetJettonsHistoryByIDParams(args, r)
+	params, err := decodeGetJettonsHistoryByIDParams(args, argsEscaped, r)
 	if err != nil {
 		err = &ogenerrors.DecodeParamsError{
 			OperationContext: opErrContext,
@@ -3373,7 +3764,7 @@ func (s *Server) handleGetJettonsHistoryByIDRequest(args [2]string, w http.Respo
 		return
 	}
 
-	var response GetJettonsHistoryByIDRes
+	var response *AccountEvents
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:       ctx,
@@ -3416,7 +3807,7 @@ func (s *Server) handleGetJettonsHistoryByIDRequest(args [2]string, w http.Respo
 		type (
 			Request  = struct{}
 			Params   = GetJettonsHistoryByIDParams
-			Response = GetJettonsHistoryByIDRes
+			Response = *AccountEvents
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -3426,8 +3817,9 @@ func (s *Server) handleGetJettonsHistoryByIDRequest(args [2]string, w http.Respo
 			m,
 			mreq,
 			unpackGetJettonsHistoryByIDParams,
-			func(ctx context.Context, request Request, params Params) (Response, error) {
-				return s.h.GetJettonsHistoryByID(ctx, params)
+			func(ctx context.Context, request Request, params Params) (response Response, err error) {
+				response, err = s.h.GetJettonsHistoryByID(ctx, params)
+				return response, err
 			},
 		)
 	} else {
@@ -3435,7 +3827,15 @@ func (s *Server) handleGetJettonsHistoryByIDRequest(args [2]string, w http.Respo
 	}
 	if err != nil {
 		recordError("Internal", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
+			encodeErrorResponse(errRes, w, span)
+			return
+		}
+		if errors.Is(err, ht.ErrNotImplemented) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
 		return
 	}
 
@@ -3451,9 +3851,11 @@ func (s *Server) handleGetJettonsHistoryByIDRequest(args [2]string, w http.Respo
 // Get list block transactions.
 //
 // GET /v2/liteserver/list_block_transactions/{block_id}
-func (s *Server) handleGetListBlockTransactionsLiteServerRequest(args [1]string, w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleGetListBlockTransactionsLiteServerRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getListBlockTransactionsLiteServer"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/liteserver/list_block_transactions/{block_id}"),
 	}
 
 	// Start a span for this request.
@@ -3467,17 +3869,18 @@ func (s *Server) handleGetListBlockTransactionsLiteServerRequest(args [1]string,
 	startTime := time.Now()
 	defer func() {
 		elapsedDuration := time.Since(startTime)
-		s.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		s.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
 	}()
 
 	// Increment request counter.
-	s.requests.Add(ctx, 1, otelAttrs...)
+	s.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 
 	var (
 		recordError = func(stage string, err error) {
 			span.RecordError(err)
 			span.SetStatus(codes.Error, stage)
-			s.errors.Add(ctx, 1, otelAttrs...)
+			s.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 		}
 		err          error
 		opErrContext = ogenerrors.OperationContext{
@@ -3485,7 +3888,7 @@ func (s *Server) handleGetListBlockTransactionsLiteServerRequest(args [1]string,
 			ID:   "getListBlockTransactionsLiteServer",
 		}
 	)
-	params, err := decodeGetListBlockTransactionsLiteServerParams(args, r)
+	params, err := decodeGetListBlockTransactionsLiteServerParams(args, argsEscaped, r)
 	if err != nil {
 		err = &ogenerrors.DecodeParamsError{
 			OperationContext: opErrContext,
@@ -3496,7 +3899,7 @@ func (s *Server) handleGetListBlockTransactionsLiteServerRequest(args [1]string,
 		return
 	}
 
-	var response GetListBlockTransactionsLiteServerRes
+	var response *GetListBlockTransactionsLiteServerOK
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:       ctx,
@@ -3531,7 +3934,7 @@ func (s *Server) handleGetListBlockTransactionsLiteServerRequest(args [1]string,
 		type (
 			Request  = struct{}
 			Params   = GetListBlockTransactionsLiteServerParams
-			Response = GetListBlockTransactionsLiteServerRes
+			Response = *GetListBlockTransactionsLiteServerOK
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -3541,8 +3944,9 @@ func (s *Server) handleGetListBlockTransactionsLiteServerRequest(args [1]string,
 			m,
 			mreq,
 			unpackGetListBlockTransactionsLiteServerParams,
-			func(ctx context.Context, request Request, params Params) (Response, error) {
-				return s.h.GetListBlockTransactionsLiteServer(ctx, params)
+			func(ctx context.Context, request Request, params Params) (response Response, err error) {
+				response, err = s.h.GetListBlockTransactionsLiteServer(ctx, params)
+				return response, err
 			},
 		)
 	} else {
@@ -3550,7 +3954,15 @@ func (s *Server) handleGetListBlockTransactionsLiteServerRequest(args [1]string,
 	}
 	if err != nil {
 		recordError("Internal", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
+			encodeErrorResponse(errRes, w, span)
+			return
+		}
+		if errors.Is(err, ht.ErrNotImplemented) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
 		return
 	}
 
@@ -3566,9 +3978,11 @@ func (s *Server) handleGetListBlockTransactionsLiteServerRequest(args [1]string,
 // Get last known masterchain block.
 //
 // GET /v2/blockchain/masterchain-head
-func (s *Server) handleGetMasterchainHeadRequest(args [0]string, w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleGetMasterchainHeadRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getMasterchainHead"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/blockchain/masterchain-head"),
 	}
 
 	// Start a span for this request.
@@ -3582,22 +3996,23 @@ func (s *Server) handleGetMasterchainHeadRequest(args [0]string, w http.Response
 	startTime := time.Now()
 	defer func() {
 		elapsedDuration := time.Since(startTime)
-		s.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		s.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
 	}()
 
 	// Increment request counter.
-	s.requests.Add(ctx, 1, otelAttrs...)
+	s.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 
 	var (
 		recordError = func(stage string, err error) {
 			span.RecordError(err)
 			span.SetStatus(codes.Error, stage)
-			s.errors.Add(ctx, 1, otelAttrs...)
+			s.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 		}
 		err error
 	)
 
-	var response GetMasterchainHeadRes
+	var response *Block
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:       ctx,
@@ -3611,7 +4026,7 @@ func (s *Server) handleGetMasterchainHeadRequest(args [0]string, w http.Response
 		type (
 			Request  = struct{}
 			Params   = struct{}
-			Response = GetMasterchainHeadRes
+			Response = *Block
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -3621,8 +4036,9 @@ func (s *Server) handleGetMasterchainHeadRequest(args [0]string, w http.Response
 			m,
 			mreq,
 			nil,
-			func(ctx context.Context, request Request, params Params) (Response, error) {
-				return s.h.GetMasterchainHead(ctx)
+			func(ctx context.Context, request Request, params Params) (response Response, err error) {
+				response, err = s.h.GetMasterchainHead(ctx)
+				return response, err
 			},
 		)
 	} else {
@@ -3630,7 +4046,15 @@ func (s *Server) handleGetMasterchainHeadRequest(args [0]string, w http.Response
 	}
 	if err != nil {
 		recordError("Internal", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
+			encodeErrorResponse(errRes, w, span)
+			return
+		}
+		if errors.Is(err, ht.ErrNotImplemented) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
 		return
 	}
 
@@ -3646,9 +4070,11 @@ func (s *Server) handleGetMasterchainHeadRequest(args [0]string, w http.Response
 // Get masterchain info ext.
 //
 // GET /v2/liteserver/get_masterchain_info_ext
-func (s *Server) handleGetMasterchainInfoExtLiteServerRequest(args [0]string, w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleGetMasterchainInfoExtLiteServerRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getMasterchainInfoExtLiteServer"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/liteserver/get_masterchain_info_ext"),
 	}
 
 	// Start a span for this request.
@@ -3662,17 +4088,18 @@ func (s *Server) handleGetMasterchainInfoExtLiteServerRequest(args [0]string, w 
 	startTime := time.Now()
 	defer func() {
 		elapsedDuration := time.Since(startTime)
-		s.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		s.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
 	}()
 
 	// Increment request counter.
-	s.requests.Add(ctx, 1, otelAttrs...)
+	s.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 
 	var (
 		recordError = func(stage string, err error) {
 			span.RecordError(err)
 			span.SetStatus(codes.Error, stage)
-			s.errors.Add(ctx, 1, otelAttrs...)
+			s.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 		}
 		err          error
 		opErrContext = ogenerrors.OperationContext{
@@ -3680,7 +4107,7 @@ func (s *Server) handleGetMasterchainInfoExtLiteServerRequest(args [0]string, w 
 			ID:   "getMasterchainInfoExtLiteServer",
 		}
 	)
-	params, err := decodeGetMasterchainInfoExtLiteServerParams(args, r)
+	params, err := decodeGetMasterchainInfoExtLiteServerParams(args, argsEscaped, r)
 	if err != nil {
 		err = &ogenerrors.DecodeParamsError{
 			OperationContext: opErrContext,
@@ -3691,7 +4118,7 @@ func (s *Server) handleGetMasterchainInfoExtLiteServerRequest(args [0]string, w 
 		return
 	}
 
-	var response GetMasterchainInfoExtLiteServerRes
+	var response *GetMasterchainInfoExtLiteServerOK
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:       ctx,
@@ -3710,7 +4137,7 @@ func (s *Server) handleGetMasterchainInfoExtLiteServerRequest(args [0]string, w 
 		type (
 			Request  = struct{}
 			Params   = GetMasterchainInfoExtLiteServerParams
-			Response = GetMasterchainInfoExtLiteServerRes
+			Response = *GetMasterchainInfoExtLiteServerOK
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -3720,8 +4147,9 @@ func (s *Server) handleGetMasterchainInfoExtLiteServerRequest(args [0]string, w 
 			m,
 			mreq,
 			unpackGetMasterchainInfoExtLiteServerParams,
-			func(ctx context.Context, request Request, params Params) (Response, error) {
-				return s.h.GetMasterchainInfoExtLiteServer(ctx, params)
+			func(ctx context.Context, request Request, params Params) (response Response, err error) {
+				response, err = s.h.GetMasterchainInfoExtLiteServer(ctx, params)
+				return response, err
 			},
 		)
 	} else {
@@ -3729,7 +4157,15 @@ func (s *Server) handleGetMasterchainInfoExtLiteServerRequest(args [0]string, w 
 	}
 	if err != nil {
 		recordError("Internal", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
+			encodeErrorResponse(errRes, w, span)
+			return
+		}
+		if errors.Is(err, ht.ErrNotImplemented) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
 		return
 	}
 
@@ -3745,9 +4181,11 @@ func (s *Server) handleGetMasterchainInfoExtLiteServerRequest(args [0]string, w 
 // Get masterchain info.
 //
 // GET /v2/liteserver/get_masterchain_info
-func (s *Server) handleGetMasterchainInfoLiteServerRequest(args [0]string, w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleGetMasterchainInfoLiteServerRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getMasterchainInfoLiteServer"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/liteserver/get_masterchain_info"),
 	}
 
 	// Start a span for this request.
@@ -3761,22 +4199,23 @@ func (s *Server) handleGetMasterchainInfoLiteServerRequest(args [0]string, w htt
 	startTime := time.Now()
 	defer func() {
 		elapsedDuration := time.Since(startTime)
-		s.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		s.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
 	}()
 
 	// Increment request counter.
-	s.requests.Add(ctx, 1, otelAttrs...)
+	s.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 
 	var (
 		recordError = func(stage string, err error) {
 			span.RecordError(err)
 			span.SetStatus(codes.Error, stage)
-			s.errors.Add(ctx, 1, otelAttrs...)
+			s.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 		}
 		err error
 	)
 
-	var response GetMasterchainInfoLiteServerRes
+	var response *GetMasterchainInfoLiteServerOK
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:       ctx,
@@ -3790,7 +4229,7 @@ func (s *Server) handleGetMasterchainInfoLiteServerRequest(args [0]string, w htt
 		type (
 			Request  = struct{}
 			Params   = struct{}
-			Response = GetMasterchainInfoLiteServerRes
+			Response = *GetMasterchainInfoLiteServerOK
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -3800,8 +4239,9 @@ func (s *Server) handleGetMasterchainInfoLiteServerRequest(args [0]string, w htt
 			m,
 			mreq,
 			nil,
-			func(ctx context.Context, request Request, params Params) (Response, error) {
-				return s.h.GetMasterchainInfoLiteServer(ctx)
+			func(ctx context.Context, request Request, params Params) (response Response, err error) {
+				response, err = s.h.GetMasterchainInfoLiteServer(ctx)
+				return response, err
 			},
 		)
 	} else {
@@ -3809,7 +4249,15 @@ func (s *Server) handleGetMasterchainInfoLiteServerRequest(args [0]string, w htt
 	}
 	if err != nil {
 		recordError("Internal", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
+			encodeErrorResponse(errRes, w, span)
+			return
+		}
+		if errors.Is(err, ht.ErrNotImplemented) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
 		return
 	}
 
@@ -3825,9 +4273,11 @@ func (s *Server) handleGetMasterchainInfoLiteServerRequest(args [0]string, w htt
 // Get NFT collection by collection address.
 //
 // GET /v2/nfts/collections/{account_id}
-func (s *Server) handleGetNftCollectionRequest(args [1]string, w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleGetNftCollectionRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getNftCollection"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/nfts/collections/{account_id}"),
 	}
 
 	// Start a span for this request.
@@ -3841,17 +4291,18 @@ func (s *Server) handleGetNftCollectionRequest(args [1]string, w http.ResponseWr
 	startTime := time.Now()
 	defer func() {
 		elapsedDuration := time.Since(startTime)
-		s.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		s.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
 	}()
 
 	// Increment request counter.
-	s.requests.Add(ctx, 1, otelAttrs...)
+	s.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 
 	var (
 		recordError = func(stage string, err error) {
 			span.RecordError(err)
 			span.SetStatus(codes.Error, stage)
-			s.errors.Add(ctx, 1, otelAttrs...)
+			s.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 		}
 		err          error
 		opErrContext = ogenerrors.OperationContext{
@@ -3859,7 +4310,7 @@ func (s *Server) handleGetNftCollectionRequest(args [1]string, w http.ResponseWr
 			ID:   "getNftCollection",
 		}
 	)
-	params, err := decodeGetNftCollectionParams(args, r)
+	params, err := decodeGetNftCollectionParams(args, argsEscaped, r)
 	if err != nil {
 		err = &ogenerrors.DecodeParamsError{
 			OperationContext: opErrContext,
@@ -3870,7 +4321,7 @@ func (s *Server) handleGetNftCollectionRequest(args [1]string, w http.ResponseWr
 		return
 	}
 
-	var response GetNftCollectionRes
+	var response *NftCollection
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:       ctx,
@@ -3889,7 +4340,7 @@ func (s *Server) handleGetNftCollectionRequest(args [1]string, w http.ResponseWr
 		type (
 			Request  = struct{}
 			Params   = GetNftCollectionParams
-			Response = GetNftCollectionRes
+			Response = *NftCollection
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -3899,8 +4350,9 @@ func (s *Server) handleGetNftCollectionRequest(args [1]string, w http.ResponseWr
 			m,
 			mreq,
 			unpackGetNftCollectionParams,
-			func(ctx context.Context, request Request, params Params) (Response, error) {
-				return s.h.GetNftCollection(ctx, params)
+			func(ctx context.Context, request Request, params Params) (response Response, err error) {
+				response, err = s.h.GetNftCollection(ctx, params)
+				return response, err
 			},
 		)
 	} else {
@@ -3908,7 +4360,15 @@ func (s *Server) handleGetNftCollectionRequest(args [1]string, w http.ResponseWr
 	}
 	if err != nil {
 		recordError("Internal", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
+			encodeErrorResponse(errRes, w, span)
+			return
+		}
+		if errors.Is(err, ht.ErrNotImplemented) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
 		return
 	}
 
@@ -3924,9 +4384,11 @@ func (s *Server) handleGetNftCollectionRequest(args [1]string, w http.ResponseWr
 // Get NFT collections.
 //
 // GET /v2/nfts/collections
-func (s *Server) handleGetNftCollectionsRequest(args [0]string, w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleGetNftCollectionsRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getNftCollections"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/nfts/collections"),
 	}
 
 	// Start a span for this request.
@@ -3940,17 +4402,18 @@ func (s *Server) handleGetNftCollectionsRequest(args [0]string, w http.ResponseW
 	startTime := time.Now()
 	defer func() {
 		elapsedDuration := time.Since(startTime)
-		s.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		s.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
 	}()
 
 	// Increment request counter.
-	s.requests.Add(ctx, 1, otelAttrs...)
+	s.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 
 	var (
 		recordError = func(stage string, err error) {
 			span.RecordError(err)
 			span.SetStatus(codes.Error, stage)
-			s.errors.Add(ctx, 1, otelAttrs...)
+			s.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 		}
 		err          error
 		opErrContext = ogenerrors.OperationContext{
@@ -3958,7 +4421,7 @@ func (s *Server) handleGetNftCollectionsRequest(args [0]string, w http.ResponseW
 			ID:   "getNftCollections",
 		}
 	)
-	params, err := decodeGetNftCollectionsParams(args, r)
+	params, err := decodeGetNftCollectionsParams(args, argsEscaped, r)
 	if err != nil {
 		err = &ogenerrors.DecodeParamsError{
 			OperationContext: opErrContext,
@@ -3969,7 +4432,7 @@ func (s *Server) handleGetNftCollectionsRequest(args [0]string, w http.ResponseW
 		return
 	}
 
-	var response GetNftCollectionsRes
+	var response *NftCollections
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:       ctx,
@@ -3992,7 +4455,7 @@ func (s *Server) handleGetNftCollectionsRequest(args [0]string, w http.ResponseW
 		type (
 			Request  = struct{}
 			Params   = GetNftCollectionsParams
-			Response = GetNftCollectionsRes
+			Response = *NftCollections
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -4002,8 +4465,9 @@ func (s *Server) handleGetNftCollectionsRequest(args [0]string, w http.ResponseW
 			m,
 			mreq,
 			unpackGetNftCollectionsParams,
-			func(ctx context.Context, request Request, params Params) (Response, error) {
-				return s.h.GetNftCollections(ctx, params)
+			func(ctx context.Context, request Request, params Params) (response Response, err error) {
+				response, err = s.h.GetNftCollections(ctx, params)
+				return response, err
 			},
 		)
 	} else {
@@ -4011,7 +4475,15 @@ func (s *Server) handleGetNftCollectionsRequest(args [0]string, w http.ResponseW
 	}
 	if err != nil {
 		recordError("Internal", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
+			encodeErrorResponse(errRes, w, span)
+			return
+		}
+		if errors.Is(err, ht.ErrNotImplemented) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
 		return
 	}
 
@@ -4027,9 +4499,11 @@ func (s *Server) handleGetNftCollectionsRequest(args [0]string, w http.ResponseW
 // Get NFT item by its address.
 //
 // GET /v2/nfts/{account_id}
-func (s *Server) handleGetNftItemByAddressRequest(args [1]string, w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleGetNftItemByAddressRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getNftItemByAddress"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/nfts/{account_id}"),
 	}
 
 	// Start a span for this request.
@@ -4043,17 +4517,18 @@ func (s *Server) handleGetNftItemByAddressRequest(args [1]string, w http.Respons
 	startTime := time.Now()
 	defer func() {
 		elapsedDuration := time.Since(startTime)
-		s.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		s.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
 	}()
 
 	// Increment request counter.
-	s.requests.Add(ctx, 1, otelAttrs...)
+	s.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 
 	var (
 		recordError = func(stage string, err error) {
 			span.RecordError(err)
 			span.SetStatus(codes.Error, stage)
-			s.errors.Add(ctx, 1, otelAttrs...)
+			s.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 		}
 		err          error
 		opErrContext = ogenerrors.OperationContext{
@@ -4061,7 +4536,7 @@ func (s *Server) handleGetNftItemByAddressRequest(args [1]string, w http.Respons
 			ID:   "getNftItemByAddress",
 		}
 	)
-	params, err := decodeGetNftItemByAddressParams(args, r)
+	params, err := decodeGetNftItemByAddressParams(args, argsEscaped, r)
 	if err != nil {
 		err = &ogenerrors.DecodeParamsError{
 			OperationContext: opErrContext,
@@ -4072,7 +4547,7 @@ func (s *Server) handleGetNftItemByAddressRequest(args [1]string, w http.Respons
 		return
 	}
 
-	var response GetNftItemByAddressRes
+	var response *NftItem
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:       ctx,
@@ -4091,7 +4566,7 @@ func (s *Server) handleGetNftItemByAddressRequest(args [1]string, w http.Respons
 		type (
 			Request  = struct{}
 			Params   = GetNftItemByAddressParams
-			Response = GetNftItemByAddressRes
+			Response = *NftItem
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -4101,8 +4576,9 @@ func (s *Server) handleGetNftItemByAddressRequest(args [1]string, w http.Respons
 			m,
 			mreq,
 			unpackGetNftItemByAddressParams,
-			func(ctx context.Context, request Request, params Params) (Response, error) {
-				return s.h.GetNftItemByAddress(ctx, params)
+			func(ctx context.Context, request Request, params Params) (response Response, err error) {
+				response, err = s.h.GetNftItemByAddress(ctx, params)
+				return response, err
 			},
 		)
 	} else {
@@ -4110,7 +4586,15 @@ func (s *Server) handleGetNftItemByAddressRequest(args [1]string, w http.Respons
 	}
 	if err != nil {
 		recordError("Internal", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
+			encodeErrorResponse(errRes, w, span)
+			return
+		}
+		if errors.Is(err, ht.ErrNotImplemented) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
 		return
 	}
 
@@ -4126,9 +4610,11 @@ func (s *Server) handleGetNftItemByAddressRequest(args [1]string, w http.Respons
 // Get NFT items by their addresses.
 //
 // POST /v2/nfts/_bulk
-func (s *Server) handleGetNftItemsByAddressesRequest(args [0]string, w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleGetNftItemsByAddressesRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getNftItemsByAddresses"),
+		semconv.HTTPMethodKey.String("POST"),
+		semconv.HTTPRouteKey.String("/v2/nfts/_bulk"),
 	}
 
 	// Start a span for this request.
@@ -4142,17 +4628,18 @@ func (s *Server) handleGetNftItemsByAddressesRequest(args [0]string, w http.Resp
 	startTime := time.Now()
 	defer func() {
 		elapsedDuration := time.Since(startTime)
-		s.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		s.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
 	}()
 
 	// Increment request counter.
-	s.requests.Add(ctx, 1, otelAttrs...)
+	s.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 
 	var (
 		recordError = func(stage string, err error) {
 			span.RecordError(err)
 			span.SetStatus(codes.Error, stage)
-			s.errors.Add(ctx, 1, otelAttrs...)
+			s.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 		}
 		err          error
 		opErrContext = ogenerrors.OperationContext{
@@ -4176,7 +4663,7 @@ func (s *Server) handleGetNftItemsByAddressesRequest(args [0]string, w http.Resp
 		}
 	}()
 
-	var response GetNftItemsByAddressesRes
+	var response *NftItems
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:       ctx,
@@ -4190,7 +4677,7 @@ func (s *Server) handleGetNftItemsByAddressesRequest(args [0]string, w http.Resp
 		type (
 			Request  = OptGetNftItemsByAddressesReq
 			Params   = struct{}
-			Response = GetNftItemsByAddressesRes
+			Response = *NftItems
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -4200,8 +4687,9 @@ func (s *Server) handleGetNftItemsByAddressesRequest(args [0]string, w http.Resp
 			m,
 			mreq,
 			nil,
-			func(ctx context.Context, request Request, params Params) (Response, error) {
-				return s.h.GetNftItemsByAddresses(ctx, request)
+			func(ctx context.Context, request Request, params Params) (response Response, err error) {
+				response, err = s.h.GetNftItemsByAddresses(ctx, request)
+				return response, err
 			},
 		)
 	} else {
@@ -4209,7 +4697,15 @@ func (s *Server) handleGetNftItemsByAddressesRequest(args [0]string, w http.Resp
 	}
 	if err != nil {
 		recordError("Internal", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
+			encodeErrorResponse(errRes, w, span)
+			return
+		}
+		if errors.Is(err, ht.ErrNotImplemented) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
 		return
 	}
 
@@ -4225,9 +4721,11 @@ func (s *Server) handleGetNftItemsByAddressesRequest(args [0]string, w http.Resp
 // Get all NFT items by owner address.
 //
 // GET /v2/accounts/{account_id}/nfts
-func (s *Server) handleGetNftItemsByOwnerRequest(args [1]string, w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleGetNftItemsByOwnerRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getNftItemsByOwner"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/accounts/{account_id}/nfts"),
 	}
 
 	// Start a span for this request.
@@ -4241,17 +4739,18 @@ func (s *Server) handleGetNftItemsByOwnerRequest(args [1]string, w http.Response
 	startTime := time.Now()
 	defer func() {
 		elapsedDuration := time.Since(startTime)
-		s.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		s.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
 	}()
 
 	// Increment request counter.
-	s.requests.Add(ctx, 1, otelAttrs...)
+	s.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 
 	var (
 		recordError = func(stage string, err error) {
 			span.RecordError(err)
 			span.SetStatus(codes.Error, stage)
-			s.errors.Add(ctx, 1, otelAttrs...)
+			s.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 		}
 		err          error
 		opErrContext = ogenerrors.OperationContext{
@@ -4259,7 +4758,7 @@ func (s *Server) handleGetNftItemsByOwnerRequest(args [1]string, w http.Response
 			ID:   "getNftItemsByOwner",
 		}
 	)
-	params, err := decodeGetNftItemsByOwnerParams(args, r)
+	params, err := decodeGetNftItemsByOwnerParams(args, argsEscaped, r)
 	if err != nil {
 		err = &ogenerrors.DecodeParamsError{
 			OperationContext: opErrContext,
@@ -4270,7 +4769,7 @@ func (s *Server) handleGetNftItemsByOwnerRequest(args [1]string, w http.Response
 		return
 	}
 
-	var response GetNftItemsByOwnerRes
+	var response *NftItems
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:       ctx,
@@ -4305,7 +4804,7 @@ func (s *Server) handleGetNftItemsByOwnerRequest(args [1]string, w http.Response
 		type (
 			Request  = struct{}
 			Params   = GetNftItemsByOwnerParams
-			Response = GetNftItemsByOwnerRes
+			Response = *NftItems
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -4315,8 +4814,9 @@ func (s *Server) handleGetNftItemsByOwnerRequest(args [1]string, w http.Response
 			m,
 			mreq,
 			unpackGetNftItemsByOwnerParams,
-			func(ctx context.Context, request Request, params Params) (Response, error) {
-				return s.h.GetNftItemsByOwner(ctx, params)
+			func(ctx context.Context, request Request, params Params) (response Response, err error) {
+				response, err = s.h.GetNftItemsByOwner(ctx, params)
+				return response, err
 			},
 		)
 	} else {
@@ -4324,7 +4824,15 @@ func (s *Server) handleGetNftItemsByOwnerRequest(args [1]string, w http.Response
 	}
 	if err != nil {
 		recordError("Internal", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
+			encodeErrorResponse(errRes, w, span)
+			return
+		}
+		if errors.Is(err, ht.ErrNotImplemented) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
 		return
 	}
 
@@ -4340,9 +4848,11 @@ func (s *Server) handleGetNftItemsByOwnerRequest(args [1]string, w http.Response
 // Get public key by account id.
 //
 // GET /v2/accounts/{account_id}/publickey
-func (s *Server) handleGetPublicKeyByAccountIDRequest(args [1]string, w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleGetPublicKeyByAccountIDRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getPublicKeyByAccountID"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/accounts/{account_id}/publickey"),
 	}
 
 	// Start a span for this request.
@@ -4356,17 +4866,18 @@ func (s *Server) handleGetPublicKeyByAccountIDRequest(args [1]string, w http.Res
 	startTime := time.Now()
 	defer func() {
 		elapsedDuration := time.Since(startTime)
-		s.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		s.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
 	}()
 
 	// Increment request counter.
-	s.requests.Add(ctx, 1, otelAttrs...)
+	s.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 
 	var (
 		recordError = func(stage string, err error) {
 			span.RecordError(err)
 			span.SetStatus(codes.Error, stage)
-			s.errors.Add(ctx, 1, otelAttrs...)
+			s.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 		}
 		err          error
 		opErrContext = ogenerrors.OperationContext{
@@ -4374,7 +4885,7 @@ func (s *Server) handleGetPublicKeyByAccountIDRequest(args [1]string, w http.Res
 			ID:   "getPublicKeyByAccountID",
 		}
 	)
-	params, err := decodeGetPublicKeyByAccountIDParams(args, r)
+	params, err := decodeGetPublicKeyByAccountIDParams(args, argsEscaped, r)
 	if err != nil {
 		err = &ogenerrors.DecodeParamsError{
 			OperationContext: opErrContext,
@@ -4385,7 +4896,7 @@ func (s *Server) handleGetPublicKeyByAccountIDRequest(args [1]string, w http.Res
 		return
 	}
 
-	var response GetPublicKeyByAccountIDRes
+	var response *GetPublicKeyByAccountIDOK
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:       ctx,
@@ -4404,7 +4915,7 @@ func (s *Server) handleGetPublicKeyByAccountIDRequest(args [1]string, w http.Res
 		type (
 			Request  = struct{}
 			Params   = GetPublicKeyByAccountIDParams
-			Response = GetPublicKeyByAccountIDRes
+			Response = *GetPublicKeyByAccountIDOK
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -4414,8 +4925,9 @@ func (s *Server) handleGetPublicKeyByAccountIDRequest(args [1]string, w http.Res
 			m,
 			mreq,
 			unpackGetPublicKeyByAccountIDParams,
-			func(ctx context.Context, request Request, params Params) (Response, error) {
-				return s.h.GetPublicKeyByAccountID(ctx, params)
+			func(ctx context.Context, request Request, params Params) (response Response, err error) {
+				response, err = s.h.GetPublicKeyByAccountID(ctx, params)
+				return response, err
 			},
 		)
 	} else {
@@ -4423,7 +4935,15 @@ func (s *Server) handleGetPublicKeyByAccountIDRequest(args [1]string, w http.Res
 	}
 	if err != nil {
 		recordError("Internal", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
+			encodeErrorResponse(errRes, w, span)
+			return
+		}
+		if errors.Is(err, ht.ErrNotImplemented) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
 		return
 	}
 
@@ -4439,9 +4959,11 @@ func (s *Server) handleGetPublicKeyByAccountIDRequest(args [1]string, w http.Res
 // Get the token price to the currency.
 //
 // GET /v2/rates
-func (s *Server) handleGetRatesRequest(args [0]string, w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleGetRatesRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getRates"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/rates"),
 	}
 
 	// Start a span for this request.
@@ -4455,17 +4977,18 @@ func (s *Server) handleGetRatesRequest(args [0]string, w http.ResponseWriter, r 
 	startTime := time.Now()
 	defer func() {
 		elapsedDuration := time.Since(startTime)
-		s.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		s.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
 	}()
 
 	// Increment request counter.
-	s.requests.Add(ctx, 1, otelAttrs...)
+	s.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 
 	var (
 		recordError = func(stage string, err error) {
 			span.RecordError(err)
 			span.SetStatus(codes.Error, stage)
-			s.errors.Add(ctx, 1, otelAttrs...)
+			s.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 		}
 		err          error
 		opErrContext = ogenerrors.OperationContext{
@@ -4473,7 +4996,7 @@ func (s *Server) handleGetRatesRequest(args [0]string, w http.ResponseWriter, r 
 			ID:   "getRates",
 		}
 	)
-	params, err := decodeGetRatesParams(args, r)
+	params, err := decodeGetRatesParams(args, argsEscaped, r)
 	if err != nil {
 		err = &ogenerrors.DecodeParamsError{
 			OperationContext: opErrContext,
@@ -4484,7 +5007,7 @@ func (s *Server) handleGetRatesRequest(args [0]string, w http.ResponseWriter, r 
 		return
 	}
 
-	var response GetRatesRes
+	var response *GetRatesOK
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:       ctx,
@@ -4507,7 +5030,7 @@ func (s *Server) handleGetRatesRequest(args [0]string, w http.ResponseWriter, r 
 		type (
 			Request  = struct{}
 			Params   = GetRatesParams
-			Response = GetRatesRes
+			Response = *GetRatesOK
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -4517,8 +5040,9 @@ func (s *Server) handleGetRatesRequest(args [0]string, w http.ResponseWriter, r 
 			m,
 			mreq,
 			unpackGetRatesParams,
-			func(ctx context.Context, request Request, params Params) (Response, error) {
-				return s.h.GetRates(ctx, params)
+			func(ctx context.Context, request Request, params Params) (response Response, err error) {
+				response, err = s.h.GetRates(ctx, params)
+				return response, err
 			},
 		)
 	} else {
@@ -4526,7 +5050,15 @@ func (s *Server) handleGetRatesRequest(args [0]string, w http.ResponseWriter, r 
 	}
 	if err != nil {
 		recordError("Internal", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
+			encodeErrorResponse(errRes, w, span)
+			return
+		}
+		if errors.Is(err, ht.ErrNotImplemented) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
 		return
 	}
 
@@ -4542,9 +5074,11 @@ func (s *Server) handleGetRatesRequest(args [0]string, w http.ResponseWriter, r 
 // Get low-level information about an account taken directly from the blockchain.
 //
 // GET /v2/blockchain/accounts/{account_id}
-func (s *Server) handleGetRawAccountRequest(args [1]string, w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleGetRawAccountRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getRawAccount"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/blockchain/accounts/{account_id}"),
 	}
 
 	// Start a span for this request.
@@ -4558,17 +5092,18 @@ func (s *Server) handleGetRawAccountRequest(args [1]string, w http.ResponseWrite
 	startTime := time.Now()
 	defer func() {
 		elapsedDuration := time.Since(startTime)
-		s.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		s.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
 	}()
 
 	// Increment request counter.
-	s.requests.Add(ctx, 1, otelAttrs...)
+	s.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 
 	var (
 		recordError = func(stage string, err error) {
 			span.RecordError(err)
 			span.SetStatus(codes.Error, stage)
-			s.errors.Add(ctx, 1, otelAttrs...)
+			s.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 		}
 		err          error
 		opErrContext = ogenerrors.OperationContext{
@@ -4576,7 +5111,7 @@ func (s *Server) handleGetRawAccountRequest(args [1]string, w http.ResponseWrite
 			ID:   "getRawAccount",
 		}
 	)
-	params, err := decodeGetRawAccountParams(args, r)
+	params, err := decodeGetRawAccountParams(args, argsEscaped, r)
 	if err != nil {
 		err = &ogenerrors.DecodeParamsError{
 			OperationContext: opErrContext,
@@ -4587,7 +5122,7 @@ func (s *Server) handleGetRawAccountRequest(args [1]string, w http.ResponseWrite
 		return
 	}
 
-	var response GetRawAccountRes
+	var response *RawAccount
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:       ctx,
@@ -4606,7 +5141,7 @@ func (s *Server) handleGetRawAccountRequest(args [1]string, w http.ResponseWrite
 		type (
 			Request  = struct{}
 			Params   = GetRawAccountParams
-			Response = GetRawAccountRes
+			Response = *RawAccount
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -4616,8 +5151,9 @@ func (s *Server) handleGetRawAccountRequest(args [1]string, w http.ResponseWrite
 			m,
 			mreq,
 			unpackGetRawAccountParams,
-			func(ctx context.Context, request Request, params Params) (Response, error) {
-				return s.h.GetRawAccount(ctx, params)
+			func(ctx context.Context, request Request, params Params) (response Response, err error) {
+				response, err = s.h.GetRawAccount(ctx, params)
+				return response, err
 			},
 		)
 	} else {
@@ -4625,7 +5161,15 @@ func (s *Server) handleGetRawAccountRequest(args [1]string, w http.ResponseWrite
 	}
 	if err != nil {
 		recordError("Internal", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
+			encodeErrorResponse(errRes, w, span)
+			return
+		}
+		if errors.Is(err, ht.ErrNotImplemented) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
 		return
 	}
 
@@ -4641,9 +5185,11 @@ func (s *Server) handleGetRawAccountRequest(args [1]string, w http.ResponseWrite
 // Search for accounts by name. You can find the account by the first characters of the domain.
 //
 // GET /v2/accounts/search
-func (s *Server) handleGetSearchAccountsRequest(args [0]string, w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleGetSearchAccountsRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getSearchAccounts"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/accounts/search"),
 	}
 
 	// Start a span for this request.
@@ -4657,17 +5203,18 @@ func (s *Server) handleGetSearchAccountsRequest(args [0]string, w http.ResponseW
 	startTime := time.Now()
 	defer func() {
 		elapsedDuration := time.Since(startTime)
-		s.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		s.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
 	}()
 
 	// Increment request counter.
-	s.requests.Add(ctx, 1, otelAttrs...)
+	s.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 
 	var (
 		recordError = func(stage string, err error) {
 			span.RecordError(err)
 			span.SetStatus(codes.Error, stage)
-			s.errors.Add(ctx, 1, otelAttrs...)
+			s.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 		}
 		err          error
 		opErrContext = ogenerrors.OperationContext{
@@ -4675,7 +5222,7 @@ func (s *Server) handleGetSearchAccountsRequest(args [0]string, w http.ResponseW
 			ID:   "getSearchAccounts",
 		}
 	)
-	params, err := decodeGetSearchAccountsParams(args, r)
+	params, err := decodeGetSearchAccountsParams(args, argsEscaped, r)
 	if err != nil {
 		err = &ogenerrors.DecodeParamsError{
 			OperationContext: opErrContext,
@@ -4686,7 +5233,7 @@ func (s *Server) handleGetSearchAccountsRequest(args [0]string, w http.ResponseW
 		return
 	}
 
-	var response GetSearchAccountsRes
+	var response *FoundAccounts
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:       ctx,
@@ -4705,7 +5252,7 @@ func (s *Server) handleGetSearchAccountsRequest(args [0]string, w http.ResponseW
 		type (
 			Request  = struct{}
 			Params   = GetSearchAccountsParams
-			Response = GetSearchAccountsRes
+			Response = *FoundAccounts
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -4715,8 +5262,9 @@ func (s *Server) handleGetSearchAccountsRequest(args [0]string, w http.ResponseW
 			m,
 			mreq,
 			unpackGetSearchAccountsParams,
-			func(ctx context.Context, request Request, params Params) (Response, error) {
-				return s.h.GetSearchAccounts(ctx, params)
+			func(ctx context.Context, request Request, params Params) (response Response, err error) {
+				response, err = s.h.GetSearchAccounts(ctx, params)
+				return response, err
 			},
 		)
 	} else {
@@ -4724,7 +5272,15 @@ func (s *Server) handleGetSearchAccountsRequest(args [0]string, w http.ResponseW
 	}
 	if err != nil {
 		recordError("Internal", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
+			encodeErrorResponse(errRes, w, span)
+			return
+		}
+		if errors.Is(err, ht.ErrNotImplemented) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
 		return
 	}
 
@@ -4740,9 +5296,11 @@ func (s *Server) handleGetSearchAccountsRequest(args [0]string, w http.ResponseW
 // Get shard block proof.
 //
 // GET /v2/liteserver/get_shard_block_proof/{block_id}
-func (s *Server) handleGetShardBlockProofLiteServerRequest(args [1]string, w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleGetShardBlockProofLiteServerRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getShardBlockProofLiteServer"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/liteserver/get_shard_block_proof/{block_id}"),
 	}
 
 	// Start a span for this request.
@@ -4756,17 +5314,18 @@ func (s *Server) handleGetShardBlockProofLiteServerRequest(args [1]string, w htt
 	startTime := time.Now()
 	defer func() {
 		elapsedDuration := time.Since(startTime)
-		s.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		s.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
 	}()
 
 	// Increment request counter.
-	s.requests.Add(ctx, 1, otelAttrs...)
+	s.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 
 	var (
 		recordError = func(stage string, err error) {
 			span.RecordError(err)
 			span.SetStatus(codes.Error, stage)
-			s.errors.Add(ctx, 1, otelAttrs...)
+			s.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 		}
 		err          error
 		opErrContext = ogenerrors.OperationContext{
@@ -4774,7 +5333,7 @@ func (s *Server) handleGetShardBlockProofLiteServerRequest(args [1]string, w htt
 			ID:   "getShardBlockProofLiteServer",
 		}
 	)
-	params, err := decodeGetShardBlockProofLiteServerParams(args, r)
+	params, err := decodeGetShardBlockProofLiteServerParams(args, argsEscaped, r)
 	if err != nil {
 		err = &ogenerrors.DecodeParamsError{
 			OperationContext: opErrContext,
@@ -4785,7 +5344,7 @@ func (s *Server) handleGetShardBlockProofLiteServerRequest(args [1]string, w htt
 		return
 	}
 
-	var response GetShardBlockProofLiteServerRes
+	var response *GetShardBlockProofLiteServerOK
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:       ctx,
@@ -4804,7 +5363,7 @@ func (s *Server) handleGetShardBlockProofLiteServerRequest(args [1]string, w htt
 		type (
 			Request  = struct{}
 			Params   = GetShardBlockProofLiteServerParams
-			Response = GetShardBlockProofLiteServerRes
+			Response = *GetShardBlockProofLiteServerOK
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -4814,8 +5373,9 @@ func (s *Server) handleGetShardBlockProofLiteServerRequest(args [1]string, w htt
 			m,
 			mreq,
 			unpackGetShardBlockProofLiteServerParams,
-			func(ctx context.Context, request Request, params Params) (Response, error) {
-				return s.h.GetShardBlockProofLiteServer(ctx, params)
+			func(ctx context.Context, request Request, params Params) (response Response, err error) {
+				response, err = s.h.GetShardBlockProofLiteServer(ctx, params)
+				return response, err
 			},
 		)
 	} else {
@@ -4823,7 +5383,15 @@ func (s *Server) handleGetShardBlockProofLiteServerRequest(args [1]string, w htt
 	}
 	if err != nil {
 		recordError("Internal", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
+			encodeErrorResponse(errRes, w, span)
+			return
+		}
+		if errors.Is(err, ht.ErrNotImplemented) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
 		return
 	}
 
@@ -4839,9 +5407,11 @@ func (s *Server) handleGetShardBlockProofLiteServerRequest(args [1]string, w htt
 // Get shard info.
 //
 // GET /v2/liteserver/get_shard_info/{block_id}
-func (s *Server) handleGetShardInfoLiteServerRequest(args [1]string, w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleGetShardInfoLiteServerRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getShardInfoLiteServer"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/liteserver/get_shard_info/{block_id}"),
 	}
 
 	// Start a span for this request.
@@ -4855,17 +5425,18 @@ func (s *Server) handleGetShardInfoLiteServerRequest(args [1]string, w http.Resp
 	startTime := time.Now()
 	defer func() {
 		elapsedDuration := time.Since(startTime)
-		s.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		s.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
 	}()
 
 	// Increment request counter.
-	s.requests.Add(ctx, 1, otelAttrs...)
+	s.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 
 	var (
 		recordError = func(stage string, err error) {
 			span.RecordError(err)
 			span.SetStatus(codes.Error, stage)
-			s.errors.Add(ctx, 1, otelAttrs...)
+			s.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 		}
 		err          error
 		opErrContext = ogenerrors.OperationContext{
@@ -4873,7 +5444,7 @@ func (s *Server) handleGetShardInfoLiteServerRequest(args [1]string, w http.Resp
 			ID:   "getShardInfoLiteServer",
 		}
 	)
-	params, err := decodeGetShardInfoLiteServerParams(args, r)
+	params, err := decodeGetShardInfoLiteServerParams(args, argsEscaped, r)
 	if err != nil {
 		err = &ogenerrors.DecodeParamsError{
 			OperationContext: opErrContext,
@@ -4884,7 +5455,7 @@ func (s *Server) handleGetShardInfoLiteServerRequest(args [1]string, w http.Resp
 		return
 	}
 
-	var response GetShardInfoLiteServerRes
+	var response *GetShardInfoLiteServerOK
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:       ctx,
@@ -4915,7 +5486,7 @@ func (s *Server) handleGetShardInfoLiteServerRequest(args [1]string, w http.Resp
 		type (
 			Request  = struct{}
 			Params   = GetShardInfoLiteServerParams
-			Response = GetShardInfoLiteServerRes
+			Response = *GetShardInfoLiteServerOK
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -4925,8 +5496,9 @@ func (s *Server) handleGetShardInfoLiteServerRequest(args [1]string, w http.Resp
 			m,
 			mreq,
 			unpackGetShardInfoLiteServerParams,
-			func(ctx context.Context, request Request, params Params) (Response, error) {
-				return s.h.GetShardInfoLiteServer(ctx, params)
+			func(ctx context.Context, request Request, params Params) (response Response, err error) {
+				response, err = s.h.GetShardInfoLiteServer(ctx, params)
+				return response, err
 			},
 		)
 	} else {
@@ -4934,7 +5506,15 @@ func (s *Server) handleGetShardInfoLiteServerRequest(args [1]string, w http.Resp
 	}
 	if err != nil {
 		recordError("Internal", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
+			encodeErrorResponse(errRes, w, span)
+			return
+		}
+		if errors.Is(err, ht.ErrNotImplemented) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
 		return
 	}
 
@@ -4950,9 +5530,11 @@ func (s *Server) handleGetShardInfoLiteServerRequest(args [1]string, w http.Resp
 // Get block state.
 //
 // GET /v2/liteserver/get_state/{block_id}
-func (s *Server) handleGetStateLiteServerRequest(args [1]string, w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleGetStateLiteServerRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getStateLiteServer"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/liteserver/get_state/{block_id}"),
 	}
 
 	// Start a span for this request.
@@ -4966,17 +5548,18 @@ func (s *Server) handleGetStateLiteServerRequest(args [1]string, w http.Response
 	startTime := time.Now()
 	defer func() {
 		elapsedDuration := time.Since(startTime)
-		s.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		s.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
 	}()
 
 	// Increment request counter.
-	s.requests.Add(ctx, 1, otelAttrs...)
+	s.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 
 	var (
 		recordError = func(stage string, err error) {
 			span.RecordError(err)
 			span.SetStatus(codes.Error, stage)
-			s.errors.Add(ctx, 1, otelAttrs...)
+			s.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 		}
 		err          error
 		opErrContext = ogenerrors.OperationContext{
@@ -4984,7 +5567,7 @@ func (s *Server) handleGetStateLiteServerRequest(args [1]string, w http.Response
 			ID:   "getStateLiteServer",
 		}
 	)
-	params, err := decodeGetStateLiteServerParams(args, r)
+	params, err := decodeGetStateLiteServerParams(args, argsEscaped, r)
 	if err != nil {
 		err = &ogenerrors.DecodeParamsError{
 			OperationContext: opErrContext,
@@ -4995,7 +5578,7 @@ func (s *Server) handleGetStateLiteServerRequest(args [1]string, w http.Response
 		return
 	}
 
-	var response GetStateLiteServerRes
+	var response *GetStateLiteServerOK
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:       ctx,
@@ -5014,7 +5597,7 @@ func (s *Server) handleGetStateLiteServerRequest(args [1]string, w http.Response
 		type (
 			Request  = struct{}
 			Params   = GetStateLiteServerParams
-			Response = GetStateLiteServerRes
+			Response = *GetStateLiteServerOK
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -5024,8 +5607,9 @@ func (s *Server) handleGetStateLiteServerRequest(args [1]string, w http.Response
 			m,
 			mreq,
 			unpackGetStateLiteServerParams,
-			func(ctx context.Context, request Request, params Params) (Response, error) {
-				return s.h.GetStateLiteServer(ctx, params)
+			func(ctx context.Context, request Request, params Params) (response Response, err error) {
+				response, err = s.h.GetStateLiteServer(ctx, params)
+				return response, err
 			},
 		)
 	} else {
@@ -5033,7 +5617,15 @@ func (s *Server) handleGetStateLiteServerRequest(args [1]string, w http.Response
 	}
 	if err != nil {
 		recordError("Internal", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
+			encodeErrorResponse(errRes, w, span)
+			return
+		}
+		if errors.Is(err, ht.ErrNotImplemented) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
 		return
 	}
 
@@ -5049,9 +5641,11 @@ func (s *Server) handleGetStateLiteServerRequest(args [1]string, w http.Response
 // Get TON storage providers deployed to the blockchain.
 //
 // GET /v2/storage/providers
-func (s *Server) handleGetStorageProvidersRequest(args [0]string, w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleGetStorageProvidersRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getStorageProviders"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/storage/providers"),
 	}
 
 	// Start a span for this request.
@@ -5065,22 +5659,23 @@ func (s *Server) handleGetStorageProvidersRequest(args [0]string, w http.Respons
 	startTime := time.Now()
 	defer func() {
 		elapsedDuration := time.Since(startTime)
-		s.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		s.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
 	}()
 
 	// Increment request counter.
-	s.requests.Add(ctx, 1, otelAttrs...)
+	s.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 
 	var (
 		recordError = func(stage string, err error) {
 			span.RecordError(err)
 			span.SetStatus(codes.Error, stage)
-			s.errors.Add(ctx, 1, otelAttrs...)
+			s.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 		}
 		err error
 	)
 
-	var response GetStorageProvidersRes
+	var response *GetStorageProvidersOK
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:       ctx,
@@ -5094,7 +5689,7 @@ func (s *Server) handleGetStorageProvidersRequest(args [0]string, w http.Respons
 		type (
 			Request  = struct{}
 			Params   = struct{}
-			Response = GetStorageProvidersRes
+			Response = *GetStorageProvidersOK
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -5104,8 +5699,9 @@ func (s *Server) handleGetStorageProvidersRequest(args [0]string, w http.Respons
 			m,
 			mreq,
 			nil,
-			func(ctx context.Context, request Request, params Params) (Response, error) {
-				return s.h.GetStorageProviders(ctx)
+			func(ctx context.Context, request Request, params Params) (response Response, err error) {
+				response, err = s.h.GetStorageProviders(ctx)
+				return response, err
 			},
 		)
 	} else {
@@ -5113,7 +5709,15 @@ func (s *Server) handleGetStorageProvidersRequest(args [0]string, w http.Respons
 	}
 	if err != nil {
 		recordError("Internal", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
+			encodeErrorResponse(errRes, w, span)
+			return
+		}
+		if errors.Is(err, ht.ErrNotImplemented) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
 		return
 	}
 
@@ -5129,9 +5733,11 @@ func (s *Server) handleGetStorageProvidersRequest(args [0]string, w http.Respons
 // Get all subscriptions by wallet address.
 //
 // GET /v2/accounts/{account_id}/subscriptions
-func (s *Server) handleGetSubscriptionsByAccountRequest(args [1]string, w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleGetSubscriptionsByAccountRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getSubscriptionsByAccount"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/accounts/{account_id}/subscriptions"),
 	}
 
 	// Start a span for this request.
@@ -5145,17 +5751,18 @@ func (s *Server) handleGetSubscriptionsByAccountRequest(args [1]string, w http.R
 	startTime := time.Now()
 	defer func() {
 		elapsedDuration := time.Since(startTime)
-		s.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		s.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
 	}()
 
 	// Increment request counter.
-	s.requests.Add(ctx, 1, otelAttrs...)
+	s.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 
 	var (
 		recordError = func(stage string, err error) {
 			span.RecordError(err)
 			span.SetStatus(codes.Error, stage)
-			s.errors.Add(ctx, 1, otelAttrs...)
+			s.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 		}
 		err          error
 		opErrContext = ogenerrors.OperationContext{
@@ -5163,7 +5770,7 @@ func (s *Server) handleGetSubscriptionsByAccountRequest(args [1]string, w http.R
 			ID:   "getSubscriptionsByAccount",
 		}
 	)
-	params, err := decodeGetSubscriptionsByAccountParams(args, r)
+	params, err := decodeGetSubscriptionsByAccountParams(args, argsEscaped, r)
 	if err != nil {
 		err = &ogenerrors.DecodeParamsError{
 			OperationContext: opErrContext,
@@ -5174,7 +5781,7 @@ func (s *Server) handleGetSubscriptionsByAccountRequest(args [1]string, w http.R
 		return
 	}
 
-	var response GetSubscriptionsByAccountRes
+	var response *Subscriptions
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:       ctx,
@@ -5193,7 +5800,7 @@ func (s *Server) handleGetSubscriptionsByAccountRequest(args [1]string, w http.R
 		type (
 			Request  = struct{}
 			Params   = GetSubscriptionsByAccountParams
-			Response = GetSubscriptionsByAccountRes
+			Response = *Subscriptions
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -5203,8 +5810,9 @@ func (s *Server) handleGetSubscriptionsByAccountRequest(args [1]string, w http.R
 			m,
 			mreq,
 			unpackGetSubscriptionsByAccountParams,
-			func(ctx context.Context, request Request, params Params) (Response, error) {
-				return s.h.GetSubscriptionsByAccount(ctx, params)
+			func(ctx context.Context, request Request, params Params) (response Response, err error) {
+				response, err = s.h.GetSubscriptionsByAccount(ctx, params)
+				return response, err
 			},
 		)
 	} else {
@@ -5212,7 +5820,15 @@ func (s *Server) handleGetSubscriptionsByAccountRequest(args [1]string, w http.R
 	}
 	if err != nil {
 		recordError("Internal", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
+			encodeErrorResponse(errRes, w, span)
+			return
+		}
+		if errors.Is(err, ht.ErrNotImplemented) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
 		return
 	}
 
@@ -5228,9 +5844,11 @@ func (s *Server) handleGetSubscriptionsByAccountRequest(args [1]string, w http.R
 // Get time.
 //
 // GET /v2/liteserver/get_time
-func (s *Server) handleGetTimeLiteServerRequest(args [0]string, w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleGetTimeLiteServerRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getTimeLiteServer"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/liteserver/get_time"),
 	}
 
 	// Start a span for this request.
@@ -5244,22 +5862,23 @@ func (s *Server) handleGetTimeLiteServerRequest(args [0]string, w http.ResponseW
 	startTime := time.Now()
 	defer func() {
 		elapsedDuration := time.Since(startTime)
-		s.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		s.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
 	}()
 
 	// Increment request counter.
-	s.requests.Add(ctx, 1, otelAttrs...)
+	s.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 
 	var (
 		recordError = func(stage string, err error) {
 			span.RecordError(err)
 			span.SetStatus(codes.Error, stage)
-			s.errors.Add(ctx, 1, otelAttrs...)
+			s.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 		}
 		err error
 	)
 
-	var response GetTimeLiteServerRes
+	var response *GetTimeLiteServerOK
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:       ctx,
@@ -5273,7 +5892,7 @@ func (s *Server) handleGetTimeLiteServerRequest(args [0]string, w http.ResponseW
 		type (
 			Request  = struct{}
 			Params   = struct{}
-			Response = GetTimeLiteServerRes
+			Response = *GetTimeLiteServerOK
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -5283,8 +5902,9 @@ func (s *Server) handleGetTimeLiteServerRequest(args [0]string, w http.ResponseW
 			m,
 			mreq,
 			nil,
-			func(ctx context.Context, request Request, params Params) (Response, error) {
-				return s.h.GetTimeLiteServer(ctx)
+			func(ctx context.Context, request Request, params Params) (response Response, err error) {
+				response, err = s.h.GetTimeLiteServer(ctx)
+				return response, err
 			},
 		)
 	} else {
@@ -5292,7 +5912,15 @@ func (s *Server) handleGetTimeLiteServerRequest(args [0]string, w http.ResponseW
 	}
 	if err != nil {
 		recordError("Internal", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
+			encodeErrorResponse(errRes, w, span)
+			return
+		}
+		if errors.Is(err, ht.ErrNotImplemented) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
 		return
 	}
 
@@ -5308,9 +5936,11 @@ func (s *Server) handleGetTimeLiteServerRequest(args [0]string, w http.ResponseW
 // Get a payload for further token receipt.
 //
 // GET /v2/tonconnect/payload
-func (s *Server) handleGetTonConnectPayloadRequest(args [0]string, w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleGetTonConnectPayloadRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getTonConnectPayload"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/tonconnect/payload"),
 	}
 
 	// Start a span for this request.
@@ -5324,22 +5954,23 @@ func (s *Server) handleGetTonConnectPayloadRequest(args [0]string, w http.Respon
 	startTime := time.Now()
 	defer func() {
 		elapsedDuration := time.Since(startTime)
-		s.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		s.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
 	}()
 
 	// Increment request counter.
-	s.requests.Add(ctx, 1, otelAttrs...)
+	s.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 
 	var (
 		recordError = func(stage string, err error) {
 			span.RecordError(err)
 			span.SetStatus(codes.Error, stage)
-			s.errors.Add(ctx, 1, otelAttrs...)
+			s.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 		}
 		err error
 	)
 
-	var response GetTonConnectPayloadRes
+	var response *GetTonConnectPayloadOK
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:       ctx,
@@ -5353,7 +5984,7 @@ func (s *Server) handleGetTonConnectPayloadRequest(args [0]string, w http.Respon
 		type (
 			Request  = struct{}
 			Params   = struct{}
-			Response = GetTonConnectPayloadRes
+			Response = *GetTonConnectPayloadOK
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -5363,8 +5994,9 @@ func (s *Server) handleGetTonConnectPayloadRequest(args [0]string, w http.Respon
 			m,
 			mreq,
 			nil,
-			func(ctx context.Context, request Request, params Params) (Response, error) {
-				return s.h.GetTonConnectPayload(ctx)
+			func(ctx context.Context, request Request, params Params) (response Response, err error) {
+				response, err = s.h.GetTonConnectPayload(ctx)
+				return response, err
 			},
 		)
 	} else {
@@ -5372,7 +6004,15 @@ func (s *Server) handleGetTonConnectPayloadRequest(args [0]string, w http.Respon
 	}
 	if err != nil {
 		recordError("Internal", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
+			encodeErrorResponse(errRes, w, span)
+			return
+		}
+		if errors.Is(err, ht.ErrNotImplemented) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
 		return
 	}
 
@@ -5388,9 +6028,11 @@ func (s *Server) handleGetTonConnectPayloadRequest(args [0]string, w http.Respon
 // Get the trace by trace ID or hash of any transaction in trace.
 //
 // GET /v2/traces/{trace_id}
-func (s *Server) handleGetTraceRequest(args [1]string, w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleGetTraceRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getTrace"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/traces/{trace_id}"),
 	}
 
 	// Start a span for this request.
@@ -5404,17 +6046,18 @@ func (s *Server) handleGetTraceRequest(args [1]string, w http.ResponseWriter, r 
 	startTime := time.Now()
 	defer func() {
 		elapsedDuration := time.Since(startTime)
-		s.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		s.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
 	}()
 
 	// Increment request counter.
-	s.requests.Add(ctx, 1, otelAttrs...)
+	s.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 
 	var (
 		recordError = func(stage string, err error) {
 			span.RecordError(err)
 			span.SetStatus(codes.Error, stage)
-			s.errors.Add(ctx, 1, otelAttrs...)
+			s.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 		}
 		err          error
 		opErrContext = ogenerrors.OperationContext{
@@ -5422,7 +6065,7 @@ func (s *Server) handleGetTraceRequest(args [1]string, w http.ResponseWriter, r 
 			ID:   "getTrace",
 		}
 	)
-	params, err := decodeGetTraceParams(args, r)
+	params, err := decodeGetTraceParams(args, argsEscaped, r)
 	if err != nil {
 		err = &ogenerrors.DecodeParamsError{
 			OperationContext: opErrContext,
@@ -5433,7 +6076,7 @@ func (s *Server) handleGetTraceRequest(args [1]string, w http.ResponseWriter, r 
 		return
 	}
 
-	var response GetTraceRes
+	var response *Trace
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:       ctx,
@@ -5452,7 +6095,7 @@ func (s *Server) handleGetTraceRequest(args [1]string, w http.ResponseWriter, r 
 		type (
 			Request  = struct{}
 			Params   = GetTraceParams
-			Response = GetTraceRes
+			Response = *Trace
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -5462,8 +6105,9 @@ func (s *Server) handleGetTraceRequest(args [1]string, w http.ResponseWriter, r 
 			m,
 			mreq,
 			unpackGetTraceParams,
-			func(ctx context.Context, request Request, params Params) (Response, error) {
-				return s.h.GetTrace(ctx, params)
+			func(ctx context.Context, request Request, params Params) (response Response, err error) {
+				response, err = s.h.GetTrace(ctx, params)
+				return response, err
 			},
 		)
 	} else {
@@ -5471,7 +6115,15 @@ func (s *Server) handleGetTraceRequest(args [1]string, w http.ResponseWriter, r 
 	}
 	if err != nil {
 		recordError("Internal", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
+			encodeErrorResponse(errRes, w, span)
+			return
+		}
+		if errors.Is(err, ht.ErrNotImplemented) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
 		return
 	}
 
@@ -5487,9 +6139,11 @@ func (s *Server) handleGetTraceRequest(args [1]string, w http.ResponseWriter, r 
 // Get traces for account.
 //
 // GET /v2/accounts/{account_id}/traces
-func (s *Server) handleGetTracesByAccountRequest(args [1]string, w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleGetTracesByAccountRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getTracesByAccount"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/accounts/{account_id}/traces"),
 	}
 
 	// Start a span for this request.
@@ -5503,17 +6157,18 @@ func (s *Server) handleGetTracesByAccountRequest(args [1]string, w http.Response
 	startTime := time.Now()
 	defer func() {
 		elapsedDuration := time.Since(startTime)
-		s.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		s.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
 	}()
 
 	// Increment request counter.
-	s.requests.Add(ctx, 1, otelAttrs...)
+	s.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 
 	var (
 		recordError = func(stage string, err error) {
 			span.RecordError(err)
 			span.SetStatus(codes.Error, stage)
-			s.errors.Add(ctx, 1, otelAttrs...)
+			s.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 		}
 		err          error
 		opErrContext = ogenerrors.OperationContext{
@@ -5521,7 +6176,7 @@ func (s *Server) handleGetTracesByAccountRequest(args [1]string, w http.Response
 			ID:   "getTracesByAccount",
 		}
 	)
-	params, err := decodeGetTracesByAccountParams(args, r)
+	params, err := decodeGetTracesByAccountParams(args, argsEscaped, r)
 	if err != nil {
 		err = &ogenerrors.DecodeParamsError{
 			OperationContext: opErrContext,
@@ -5532,7 +6187,7 @@ func (s *Server) handleGetTracesByAccountRequest(args [1]string, w http.Response
 		return
 	}
 
-	var response GetTracesByAccountRes
+	var response *TraceIds
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:       ctx,
@@ -5555,7 +6210,7 @@ func (s *Server) handleGetTracesByAccountRequest(args [1]string, w http.Response
 		type (
 			Request  = struct{}
 			Params   = GetTracesByAccountParams
-			Response = GetTracesByAccountRes
+			Response = *TraceIds
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -5565,8 +6220,9 @@ func (s *Server) handleGetTracesByAccountRequest(args [1]string, w http.Response
 			m,
 			mreq,
 			unpackGetTracesByAccountParams,
-			func(ctx context.Context, request Request, params Params) (Response, error) {
-				return s.h.GetTracesByAccount(ctx, params)
+			func(ctx context.Context, request Request, params Params) (response Response, err error) {
+				response, err = s.h.GetTracesByAccount(ctx, params)
+				return response, err
 			},
 		)
 	} else {
@@ -5574,7 +6230,15 @@ func (s *Server) handleGetTracesByAccountRequest(args [1]string, w http.Response
 	}
 	if err != nil {
 		recordError("Internal", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
+			encodeErrorResponse(errRes, w, span)
+			return
+		}
+		if errors.Is(err, ht.ErrNotImplemented) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
 		return
 	}
 
@@ -5590,9 +6254,11 @@ func (s *Server) handleGetTracesByAccountRequest(args [1]string, w http.Response
 // Get transaction data.
 //
 // GET /v2/blockchain/transactions/{transaction_id}
-func (s *Server) handleGetTransactionRequest(args [1]string, w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleGetTransactionRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getTransaction"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/blockchain/transactions/{transaction_id}"),
 	}
 
 	// Start a span for this request.
@@ -5606,17 +6272,18 @@ func (s *Server) handleGetTransactionRequest(args [1]string, w http.ResponseWrit
 	startTime := time.Now()
 	defer func() {
 		elapsedDuration := time.Since(startTime)
-		s.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		s.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
 	}()
 
 	// Increment request counter.
-	s.requests.Add(ctx, 1, otelAttrs...)
+	s.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 
 	var (
 		recordError = func(stage string, err error) {
 			span.RecordError(err)
 			span.SetStatus(codes.Error, stage)
-			s.errors.Add(ctx, 1, otelAttrs...)
+			s.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 		}
 		err          error
 		opErrContext = ogenerrors.OperationContext{
@@ -5624,7 +6291,7 @@ func (s *Server) handleGetTransactionRequest(args [1]string, w http.ResponseWrit
 			ID:   "getTransaction",
 		}
 	)
-	params, err := decodeGetTransactionParams(args, r)
+	params, err := decodeGetTransactionParams(args, argsEscaped, r)
 	if err != nil {
 		err = &ogenerrors.DecodeParamsError{
 			OperationContext: opErrContext,
@@ -5635,7 +6302,7 @@ func (s *Server) handleGetTransactionRequest(args [1]string, w http.ResponseWrit
 		return
 	}
 
-	var response GetTransactionRes
+	var response *Transaction
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:       ctx,
@@ -5654,7 +6321,7 @@ func (s *Server) handleGetTransactionRequest(args [1]string, w http.ResponseWrit
 		type (
 			Request  = struct{}
 			Params   = GetTransactionParams
-			Response = GetTransactionRes
+			Response = *Transaction
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -5664,8 +6331,9 @@ func (s *Server) handleGetTransactionRequest(args [1]string, w http.ResponseWrit
 			m,
 			mreq,
 			unpackGetTransactionParams,
-			func(ctx context.Context, request Request, params Params) (Response, error) {
-				return s.h.GetTransaction(ctx, params)
+			func(ctx context.Context, request Request, params Params) (response Response, err error) {
+				response, err = s.h.GetTransaction(ctx, params)
+				return response, err
 			},
 		)
 	} else {
@@ -5673,7 +6341,15 @@ func (s *Server) handleGetTransactionRequest(args [1]string, w http.ResponseWrit
 	}
 	if err != nil {
 		recordError("Internal", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
+			encodeErrorResponse(errRes, w, span)
+			return
+		}
+		if errors.Is(err, ht.ErrNotImplemented) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
 		return
 	}
 
@@ -5689,9 +6365,11 @@ func (s *Server) handleGetTransactionRequest(args [1]string, w http.ResponseWrit
 // Get transaction data by message hash.
 //
 // GET /v2/blockchain/messages/{msg_id}/transaction
-func (s *Server) handleGetTransactionByMessageHashRequest(args [1]string, w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleGetTransactionByMessageHashRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getTransactionByMessageHash"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/blockchain/messages/{msg_id}/transaction"),
 	}
 
 	// Start a span for this request.
@@ -5705,17 +6383,18 @@ func (s *Server) handleGetTransactionByMessageHashRequest(args [1]string, w http
 	startTime := time.Now()
 	defer func() {
 		elapsedDuration := time.Since(startTime)
-		s.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		s.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
 	}()
 
 	// Increment request counter.
-	s.requests.Add(ctx, 1, otelAttrs...)
+	s.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 
 	var (
 		recordError = func(stage string, err error) {
 			span.RecordError(err)
 			span.SetStatus(codes.Error, stage)
-			s.errors.Add(ctx, 1, otelAttrs...)
+			s.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 		}
 		err          error
 		opErrContext = ogenerrors.OperationContext{
@@ -5723,7 +6402,7 @@ func (s *Server) handleGetTransactionByMessageHashRequest(args [1]string, w http
 			ID:   "getTransactionByMessageHash",
 		}
 	)
-	params, err := decodeGetTransactionByMessageHashParams(args, r)
+	params, err := decodeGetTransactionByMessageHashParams(args, argsEscaped, r)
 	if err != nil {
 		err = &ogenerrors.DecodeParamsError{
 			OperationContext: opErrContext,
@@ -5734,7 +6413,7 @@ func (s *Server) handleGetTransactionByMessageHashRequest(args [1]string, w http
 		return
 	}
 
-	var response GetTransactionByMessageHashRes
+	var response *Transaction
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:       ctx,
@@ -5753,7 +6432,7 @@ func (s *Server) handleGetTransactionByMessageHashRequest(args [1]string, w http
 		type (
 			Request  = struct{}
 			Params   = GetTransactionByMessageHashParams
-			Response = GetTransactionByMessageHashRes
+			Response = *Transaction
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -5763,8 +6442,9 @@ func (s *Server) handleGetTransactionByMessageHashRequest(args [1]string, w http
 			m,
 			mreq,
 			unpackGetTransactionByMessageHashParams,
-			func(ctx context.Context, request Request, params Params) (Response, error) {
-				return s.h.GetTransactionByMessageHash(ctx, params)
+			func(ctx context.Context, request Request, params Params) (response Response, err error) {
+				response, err = s.h.GetTransactionByMessageHash(ctx, params)
+				return response, err
 			},
 		)
 	} else {
@@ -5772,7 +6452,15 @@ func (s *Server) handleGetTransactionByMessageHashRequest(args [1]string, w http
 	}
 	if err != nil {
 		recordError("Internal", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
+			encodeErrorResponse(errRes, w, span)
+			return
+		}
+		if errors.Is(err, ht.ErrNotImplemented) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
 		return
 	}
 
@@ -5788,9 +6476,11 @@ func (s *Server) handleGetTransactionByMessageHashRequest(args [1]string, w http
 // Get transactions.
 //
 // GET /v2/liteserver/get_transactions/{account_id}
-func (s *Server) handleGetTransactionsLiteServerRequest(args [1]string, w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleGetTransactionsLiteServerRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getTransactionsLiteServer"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/liteserver/get_transactions/{account_id}"),
 	}
 
 	// Start a span for this request.
@@ -5804,17 +6494,18 @@ func (s *Server) handleGetTransactionsLiteServerRequest(args [1]string, w http.R
 	startTime := time.Now()
 	defer func() {
 		elapsedDuration := time.Since(startTime)
-		s.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		s.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
 	}()
 
 	// Increment request counter.
-	s.requests.Add(ctx, 1, otelAttrs...)
+	s.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 
 	var (
 		recordError = func(stage string, err error) {
 			span.RecordError(err)
 			span.SetStatus(codes.Error, stage)
-			s.errors.Add(ctx, 1, otelAttrs...)
+			s.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 		}
 		err          error
 		opErrContext = ogenerrors.OperationContext{
@@ -5822,7 +6513,7 @@ func (s *Server) handleGetTransactionsLiteServerRequest(args [1]string, w http.R
 			ID:   "getTransactionsLiteServer",
 		}
 	)
-	params, err := decodeGetTransactionsLiteServerParams(args, r)
+	params, err := decodeGetTransactionsLiteServerParams(args, argsEscaped, r)
 	if err != nil {
 		err = &ogenerrors.DecodeParamsError{
 			OperationContext: opErrContext,
@@ -5833,7 +6524,7 @@ func (s *Server) handleGetTransactionsLiteServerRequest(args [1]string, w http.R
 		return
 	}
 
-	var response GetTransactionsLiteServerRes
+	var response *GetTransactionsLiteServerOK
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:       ctx,
@@ -5864,7 +6555,7 @@ func (s *Server) handleGetTransactionsLiteServerRequest(args [1]string, w http.R
 		type (
 			Request  = struct{}
 			Params   = GetTransactionsLiteServerParams
-			Response = GetTransactionsLiteServerRes
+			Response = *GetTransactionsLiteServerOK
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -5874,8 +6565,9 @@ func (s *Server) handleGetTransactionsLiteServerRequest(args [1]string, w http.R
 			m,
 			mreq,
 			unpackGetTransactionsLiteServerParams,
-			func(ctx context.Context, request Request, params Params) (Response, error) {
-				return s.h.GetTransactionsLiteServer(ctx, params)
+			func(ctx context.Context, request Request, params Params) (response Response, err error) {
+				response, err = s.h.GetTransactionsLiteServer(ctx, params)
+				return response, err
 			},
 		)
 	} else {
@@ -5883,7 +6575,15 @@ func (s *Server) handleGetTransactionsLiteServerRequest(args [1]string, w http.R
 	}
 	if err != nil {
 		recordError("Internal", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
+			encodeErrorResponse(errRes, w, span)
+			return
+		}
+		if errors.Is(err, ht.ErrNotImplemented) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
 		return
 	}
 
@@ -5899,9 +6599,11 @@ func (s *Server) handleGetTransactionsLiteServerRequest(args [1]string, w http.R
 // Get validators.
 //
 // GET /v2/blockchain/validators
-func (s *Server) handleGetValidatorsRequest(args [0]string, w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleGetValidatorsRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getValidators"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/blockchain/validators"),
 	}
 
 	// Start a span for this request.
@@ -5915,22 +6617,23 @@ func (s *Server) handleGetValidatorsRequest(args [0]string, w http.ResponseWrite
 	startTime := time.Now()
 	defer func() {
 		elapsedDuration := time.Since(startTime)
-		s.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		s.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
 	}()
 
 	// Increment request counter.
-	s.requests.Add(ctx, 1, otelAttrs...)
+	s.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 
 	var (
 		recordError = func(stage string, err error) {
 			span.RecordError(err)
 			span.SetStatus(codes.Error, stage)
-			s.errors.Add(ctx, 1, otelAttrs...)
+			s.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 		}
 		err error
 	)
 
-	var response GetValidatorsRes
+	var response *Validators
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:       ctx,
@@ -5944,7 +6647,7 @@ func (s *Server) handleGetValidatorsRequest(args [0]string, w http.ResponseWrite
 		type (
 			Request  = struct{}
 			Params   = struct{}
-			Response = GetValidatorsRes
+			Response = *Validators
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -5954,8 +6657,9 @@ func (s *Server) handleGetValidatorsRequest(args [0]string, w http.ResponseWrite
 			m,
 			mreq,
 			nil,
-			func(ctx context.Context, request Request, params Params) (Response, error) {
-				return s.h.GetValidators(ctx)
+			func(ctx context.Context, request Request, params Params) (response Response, err error) {
+				response, err = s.h.GetValidators(ctx)
+				return response, err
 			},
 		)
 	} else {
@@ -5963,7 +6667,15 @@ func (s *Server) handleGetValidatorsRequest(args [0]string, w http.ResponseWrite
 	}
 	if err != nil {
 		recordError("Internal", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
+			encodeErrorResponse(errRes, w, span)
+			return
+		}
+		if errors.Is(err, ht.ErrNotImplemented) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
 		return
 	}
 
@@ -5979,9 +6691,11 @@ func (s *Server) handleGetValidatorsRequest(args [0]string, w http.ResponseWrite
 // Get backup info.
 //
 // GET /v2/wallet/backup
-func (s *Server) handleGetWalletBackupRequest(args [0]string, w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleGetWalletBackupRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getWalletBackup"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/wallet/backup"),
 	}
 
 	// Start a span for this request.
@@ -5995,17 +6709,18 @@ func (s *Server) handleGetWalletBackupRequest(args [0]string, w http.ResponseWri
 	startTime := time.Now()
 	defer func() {
 		elapsedDuration := time.Since(startTime)
-		s.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		s.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
 	}()
 
 	// Increment request counter.
-	s.requests.Add(ctx, 1, otelAttrs...)
+	s.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 
 	var (
 		recordError = func(stage string, err error) {
 			span.RecordError(err)
 			span.SetStatus(codes.Error, stage)
-			s.errors.Add(ctx, 1, otelAttrs...)
+			s.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 		}
 		err          error
 		opErrContext = ogenerrors.OperationContext{
@@ -6013,7 +6728,7 @@ func (s *Server) handleGetWalletBackupRequest(args [0]string, w http.ResponseWri
 			ID:   "getWalletBackup",
 		}
 	)
-	params, err := decodeGetWalletBackupParams(args, r)
+	params, err := decodeGetWalletBackupParams(args, argsEscaped, r)
 	if err != nil {
 		err = &ogenerrors.DecodeParamsError{
 			OperationContext: opErrContext,
@@ -6024,7 +6739,7 @@ func (s *Server) handleGetWalletBackupRequest(args [0]string, w http.ResponseWri
 		return
 	}
 
-	var response GetWalletBackupRes
+	var response *GetWalletBackupOK
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:       ctx,
@@ -6043,7 +6758,7 @@ func (s *Server) handleGetWalletBackupRequest(args [0]string, w http.ResponseWri
 		type (
 			Request  = struct{}
 			Params   = GetWalletBackupParams
-			Response = GetWalletBackupRes
+			Response = *GetWalletBackupOK
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -6053,8 +6768,9 @@ func (s *Server) handleGetWalletBackupRequest(args [0]string, w http.ResponseWri
 			m,
 			mreq,
 			unpackGetWalletBackupParams,
-			func(ctx context.Context, request Request, params Params) (Response, error) {
-				return s.h.GetWalletBackup(ctx, params)
+			func(ctx context.Context, request Request, params Params) (response Response, err error) {
+				response, err = s.h.GetWalletBackup(ctx, params)
+				return response, err
 			},
 		)
 	} else {
@@ -6062,7 +6778,15 @@ func (s *Server) handleGetWalletBackupRequest(args [0]string, w http.ResponseWri
 	}
 	if err != nil {
 		recordError("Internal", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
+			encodeErrorResponse(errRes, w, span)
+			return
+		}
+		if errors.Is(err, ht.ErrNotImplemented) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
 		return
 	}
 
@@ -6078,9 +6802,11 @@ func (s *Server) handleGetWalletBackupRequest(args [0]string, w http.ResponseWri
 // Get wallets by public key.
 //
 // GET /v2/pubkeys/{public_key}/wallets
-func (s *Server) handleGetWalletsByPublicKeyRequest(args [1]string, w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleGetWalletsByPublicKeyRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getWalletsByPublicKey"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/pubkeys/{public_key}/wallets"),
 	}
 
 	// Start a span for this request.
@@ -6094,17 +6820,18 @@ func (s *Server) handleGetWalletsByPublicKeyRequest(args [1]string, w http.Respo
 	startTime := time.Now()
 	defer func() {
 		elapsedDuration := time.Since(startTime)
-		s.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		s.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
 	}()
 
 	// Increment request counter.
-	s.requests.Add(ctx, 1, otelAttrs...)
+	s.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 
 	var (
 		recordError = func(stage string, err error) {
 			span.RecordError(err)
 			span.SetStatus(codes.Error, stage)
-			s.errors.Add(ctx, 1, otelAttrs...)
+			s.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 		}
 		err          error
 		opErrContext = ogenerrors.OperationContext{
@@ -6112,7 +6839,7 @@ func (s *Server) handleGetWalletsByPublicKeyRequest(args [1]string, w http.Respo
 			ID:   "getWalletsByPublicKey",
 		}
 	)
-	params, err := decodeGetWalletsByPublicKeyParams(args, r)
+	params, err := decodeGetWalletsByPublicKeyParams(args, argsEscaped, r)
 	if err != nil {
 		err = &ogenerrors.DecodeParamsError{
 			OperationContext: opErrContext,
@@ -6123,7 +6850,7 @@ func (s *Server) handleGetWalletsByPublicKeyRequest(args [1]string, w http.Respo
 		return
 	}
 
-	var response GetWalletsByPublicKeyRes
+	var response *Accounts
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:       ctx,
@@ -6142,7 +6869,7 @@ func (s *Server) handleGetWalletsByPublicKeyRequest(args [1]string, w http.Respo
 		type (
 			Request  = struct{}
 			Params   = GetWalletsByPublicKeyParams
-			Response = GetWalletsByPublicKeyRes
+			Response = *Accounts
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -6152,8 +6879,9 @@ func (s *Server) handleGetWalletsByPublicKeyRequest(args [1]string, w http.Respo
 			m,
 			mreq,
 			unpackGetWalletsByPublicKeyParams,
-			func(ctx context.Context, request Request, params Params) (Response, error) {
-				return s.h.GetWalletsByPublicKey(ctx, params)
+			func(ctx context.Context, request Request, params Params) (response Response, err error) {
+				response, err = s.h.GetWalletsByPublicKey(ctx, params)
+				return response, err
 			},
 		)
 	} else {
@@ -6161,7 +6889,15 @@ func (s *Server) handleGetWalletsByPublicKeyRequest(args [1]string, w http.Respo
 	}
 	if err != nil {
 		recordError("Internal", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
+			encodeErrorResponse(errRes, w, span)
+			return
+		}
+		if errors.Is(err, ht.ErrNotImplemented) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
 		return
 	}
 
@@ -6177,9 +6913,11 @@ func (s *Server) handleGetWalletsByPublicKeyRequest(args [1]string, w http.Respo
 // All pools where account participates.
 //
 // GET /v2/staking/nominator/{account_id}/pools
-func (s *Server) handlePoolsByNominatorsRequest(args [1]string, w http.ResponseWriter, r *http.Request) {
+func (s *Server) handlePoolsByNominatorsRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("poolsByNominators"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/staking/nominator/{account_id}/pools"),
 	}
 
 	// Start a span for this request.
@@ -6193,17 +6931,18 @@ func (s *Server) handlePoolsByNominatorsRequest(args [1]string, w http.ResponseW
 	startTime := time.Now()
 	defer func() {
 		elapsedDuration := time.Since(startTime)
-		s.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		s.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
 	}()
 
 	// Increment request counter.
-	s.requests.Add(ctx, 1, otelAttrs...)
+	s.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 
 	var (
 		recordError = func(stage string, err error) {
 			span.RecordError(err)
 			span.SetStatus(codes.Error, stage)
-			s.errors.Add(ctx, 1, otelAttrs...)
+			s.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 		}
 		err          error
 		opErrContext = ogenerrors.OperationContext{
@@ -6211,7 +6950,7 @@ func (s *Server) handlePoolsByNominatorsRequest(args [1]string, w http.ResponseW
 			ID:   "poolsByNominators",
 		}
 	)
-	params, err := decodePoolsByNominatorsParams(args, r)
+	params, err := decodePoolsByNominatorsParams(args, argsEscaped, r)
 	if err != nil {
 		err = &ogenerrors.DecodeParamsError{
 			OperationContext: opErrContext,
@@ -6222,7 +6961,7 @@ func (s *Server) handlePoolsByNominatorsRequest(args [1]string, w http.ResponseW
 		return
 	}
 
-	var response PoolsByNominatorsRes
+	var response *AccountStaking
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:       ctx,
@@ -6241,7 +6980,7 @@ func (s *Server) handlePoolsByNominatorsRequest(args [1]string, w http.ResponseW
 		type (
 			Request  = struct{}
 			Params   = PoolsByNominatorsParams
-			Response = PoolsByNominatorsRes
+			Response = *AccountStaking
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -6251,8 +6990,9 @@ func (s *Server) handlePoolsByNominatorsRequest(args [1]string, w http.ResponseW
 			m,
 			mreq,
 			unpackPoolsByNominatorsParams,
-			func(ctx context.Context, request Request, params Params) (Response, error) {
-				return s.h.PoolsByNominators(ctx, params)
+			func(ctx context.Context, request Request, params Params) (response Response, err error) {
+				response, err = s.h.PoolsByNominators(ctx, params)
+				return response, err
 			},
 		)
 	} else {
@@ -6260,7 +7000,15 @@ func (s *Server) handlePoolsByNominatorsRequest(args [1]string, w http.ResponseW
 	}
 	if err != nil {
 		recordError("Internal", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
+			encodeErrorResponse(errRes, w, span)
+			return
+		}
+		if errors.Is(err, ht.ErrNotImplemented) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
 		return
 	}
 
@@ -6276,9 +7024,11 @@ func (s *Server) handlePoolsByNominatorsRequest(args [1]string, w http.ResponseW
 // Update internal cache for a particular account.
 //
 // POST /v2/accounts/{account_id}/reindex
-func (s *Server) handleReindexAccountRequest(args [1]string, w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleReindexAccountRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("reindexAccount"),
+		semconv.HTTPMethodKey.String("POST"),
+		semconv.HTTPRouteKey.String("/v2/accounts/{account_id}/reindex"),
 	}
 
 	// Start a span for this request.
@@ -6292,17 +7042,18 @@ func (s *Server) handleReindexAccountRequest(args [1]string, w http.ResponseWrit
 	startTime := time.Now()
 	defer func() {
 		elapsedDuration := time.Since(startTime)
-		s.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		s.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
 	}()
 
 	// Increment request counter.
-	s.requests.Add(ctx, 1, otelAttrs...)
+	s.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 
 	var (
 		recordError = func(stage string, err error) {
 			span.RecordError(err)
 			span.SetStatus(codes.Error, stage)
-			s.errors.Add(ctx, 1, otelAttrs...)
+			s.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 		}
 		err          error
 		opErrContext = ogenerrors.OperationContext{
@@ -6310,7 +7061,7 @@ func (s *Server) handleReindexAccountRequest(args [1]string, w http.ResponseWrit
 			ID:   "reindexAccount",
 		}
 	)
-	params, err := decodeReindexAccountParams(args, r)
+	params, err := decodeReindexAccountParams(args, argsEscaped, r)
 	if err != nil {
 		err = &ogenerrors.DecodeParamsError{
 			OperationContext: opErrContext,
@@ -6321,7 +7072,7 @@ func (s *Server) handleReindexAccountRequest(args [1]string, w http.ResponseWrit
 		return
 	}
 
-	var response ReindexAccountRes
+	var response *ReindexAccountOK
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:       ctx,
@@ -6340,7 +7091,7 @@ func (s *Server) handleReindexAccountRequest(args [1]string, w http.ResponseWrit
 		type (
 			Request  = struct{}
 			Params   = ReindexAccountParams
-			Response = ReindexAccountRes
+			Response = *ReindexAccountOK
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -6350,16 +7101,25 @@ func (s *Server) handleReindexAccountRequest(args [1]string, w http.ResponseWrit
 			m,
 			mreq,
 			unpackReindexAccountParams,
-			func(ctx context.Context, request Request, params Params) (Response, error) {
-				return s.h.ReindexAccount(ctx, params)
+			func(ctx context.Context, request Request, params Params) (response Response, err error) {
+				err = s.h.ReindexAccount(ctx, params)
+				return response, err
 			},
 		)
 	} else {
-		response, err = s.h.ReindexAccount(ctx, params)
+		err = s.h.ReindexAccount(ctx, params)
 	}
 	if err != nil {
 		recordError("Internal", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
+			encodeErrorResponse(errRes, w, span)
+			return
+		}
+		if errors.Is(err, ht.ErrNotImplemented) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
 		return
 	}
 
@@ -6375,9 +7135,11 @@ func (s *Server) handleReindexAccountRequest(args [1]string, w http.ResponseWrit
 // Send message to blockchain.
 //
 // POST /v2/blockchain/message
-func (s *Server) handleSendMessageRequest(args [0]string, w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleSendMessageRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("sendMessage"),
+		semconv.HTTPMethodKey.String("POST"),
+		semconv.HTTPRouteKey.String("/v2/blockchain/message"),
 	}
 
 	// Start a span for this request.
@@ -6391,17 +7153,18 @@ func (s *Server) handleSendMessageRequest(args [0]string, w http.ResponseWriter,
 	startTime := time.Now()
 	defer func() {
 		elapsedDuration := time.Since(startTime)
-		s.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		s.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
 	}()
 
 	// Increment request counter.
-	s.requests.Add(ctx, 1, otelAttrs...)
+	s.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 
 	var (
 		recordError = func(stage string, err error) {
 			span.RecordError(err)
 			span.SetStatus(codes.Error, stage)
-			s.errors.Add(ctx, 1, otelAttrs...)
+			s.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 		}
 		err          error
 		opErrContext = ogenerrors.OperationContext{
@@ -6425,7 +7188,7 @@ func (s *Server) handleSendMessageRequest(args [0]string, w http.ResponseWriter,
 		}
 	}()
 
-	var response SendMessageRes
+	var response *SendMessageOK
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:       ctx,
@@ -6437,9 +7200,9 @@ func (s *Server) handleSendMessageRequest(args [0]string, w http.ResponseWriter,
 		}
 
 		type (
-			Request  = SendMessageReq
+			Request  = *SendMessageReq
 			Params   = struct{}
-			Response = SendMessageRes
+			Response = *SendMessageOK
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -6449,16 +7212,25 @@ func (s *Server) handleSendMessageRequest(args [0]string, w http.ResponseWriter,
 			m,
 			mreq,
 			nil,
-			func(ctx context.Context, request Request, params Params) (Response, error) {
-				return s.h.SendMessage(ctx, request)
+			func(ctx context.Context, request Request, params Params) (response Response, err error) {
+				err = s.h.SendMessage(ctx, request)
+				return response, err
 			},
 		)
 	} else {
-		response, err = s.h.SendMessage(ctx, request)
+		err = s.h.SendMessage(ctx, request)
 	}
 	if err != nil {
 		recordError("Internal", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
+			encodeErrorResponse(errRes, w, span)
+			return
+		}
+		if errors.Is(err, ht.ErrNotImplemented) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
 		return
 	}
 
@@ -6474,9 +7246,11 @@ func (s *Server) handleSendMessageRequest(args [0]string, w http.ResponseWriter,
 // Send message.
 //
 // POST /v2/liteserver/send_message
-func (s *Server) handleSendMessageLiteServerRequest(args [0]string, w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleSendMessageLiteServerRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("sendMessageLiteServer"),
+		semconv.HTTPMethodKey.String("POST"),
+		semconv.HTTPRouteKey.String("/v2/liteserver/send_message"),
 	}
 
 	// Start a span for this request.
@@ -6490,17 +7264,18 @@ func (s *Server) handleSendMessageLiteServerRequest(args [0]string, w http.Respo
 	startTime := time.Now()
 	defer func() {
 		elapsedDuration := time.Since(startTime)
-		s.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		s.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
 	}()
 
 	// Increment request counter.
-	s.requests.Add(ctx, 1, otelAttrs...)
+	s.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 
 	var (
 		recordError = func(stage string, err error) {
 			span.RecordError(err)
 			span.SetStatus(codes.Error, stage)
-			s.errors.Add(ctx, 1, otelAttrs...)
+			s.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 		}
 		err          error
 		opErrContext = ogenerrors.OperationContext{
@@ -6524,7 +7299,7 @@ func (s *Server) handleSendMessageLiteServerRequest(args [0]string, w http.Respo
 		}
 	}()
 
-	var response SendMessageLiteServerRes
+	var response *SendMessageLiteServerOK
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:       ctx,
@@ -6536,9 +7311,9 @@ func (s *Server) handleSendMessageLiteServerRequest(args [0]string, w http.Respo
 		}
 
 		type (
-			Request  = SendMessageLiteServerReq
+			Request  = *SendMessageLiteServerReq
 			Params   = struct{}
-			Response = SendMessageLiteServerRes
+			Response = *SendMessageLiteServerOK
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -6548,8 +7323,9 @@ func (s *Server) handleSendMessageLiteServerRequest(args [0]string, w http.Respo
 			m,
 			mreq,
 			nil,
-			func(ctx context.Context, request Request, params Params) (Response, error) {
-				return s.h.SendMessageLiteServer(ctx, request)
+			func(ctx context.Context, request Request, params Params) (response Response, err error) {
+				response, err = s.h.SendMessageLiteServer(ctx, request)
+				return response, err
 			},
 		)
 	} else {
@@ -6557,7 +7333,15 @@ func (s *Server) handleSendMessageLiteServerRequest(args [0]string, w http.Respo
 	}
 	if err != nil {
 		recordError("Internal", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
+			encodeErrorResponse(errRes, w, span)
+			return
+		}
+		if errors.Is(err, ht.ErrNotImplemented) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
 		return
 	}
 
@@ -6573,9 +7357,11 @@ func (s *Server) handleSendMessageLiteServerRequest(args [0]string, w http.Respo
 // Set backup info.
 //
 // PUT /v2/wallet/backup
-func (s *Server) handleSetWalletBackupRequest(args [0]string, w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleSetWalletBackupRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("setWalletBackup"),
+		semconv.HTTPMethodKey.String("PUT"),
+		semconv.HTTPRouteKey.String("/v2/wallet/backup"),
 	}
 
 	// Start a span for this request.
@@ -6589,17 +7375,18 @@ func (s *Server) handleSetWalletBackupRequest(args [0]string, w http.ResponseWri
 	startTime := time.Now()
 	defer func() {
 		elapsedDuration := time.Since(startTime)
-		s.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		s.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
 	}()
 
 	// Increment request counter.
-	s.requests.Add(ctx, 1, otelAttrs...)
+	s.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 
 	var (
 		recordError = func(stage string, err error) {
 			span.RecordError(err)
 			span.SetStatus(codes.Error, stage)
-			s.errors.Add(ctx, 1, otelAttrs...)
+			s.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 		}
 		err          error
 		opErrContext = ogenerrors.OperationContext{
@@ -6607,7 +7394,7 @@ func (s *Server) handleSetWalletBackupRequest(args [0]string, w http.ResponseWri
 			ID:   "setWalletBackup",
 		}
 	)
-	params, err := decodeSetWalletBackupParams(args, r)
+	params, err := decodeSetWalletBackupParams(args, argsEscaped, r)
 	if err != nil {
 		err = &ogenerrors.DecodeParamsError{
 			OperationContext: opErrContext,
@@ -6633,7 +7420,7 @@ func (s *Server) handleSetWalletBackupRequest(args [0]string, w http.ResponseWri
 		}
 	}()
 
-	var response SetWalletBackupRes
+	var response *SetWalletBackupOK
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:       ctx,
@@ -6652,7 +7439,7 @@ func (s *Server) handleSetWalletBackupRequest(args [0]string, w http.ResponseWri
 		type (
 			Request  = SetWalletBackupReq
 			Params   = SetWalletBackupParams
-			Response = SetWalletBackupRes
+			Response = *SetWalletBackupOK
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -6662,16 +7449,25 @@ func (s *Server) handleSetWalletBackupRequest(args [0]string, w http.ResponseWri
 			m,
 			mreq,
 			unpackSetWalletBackupParams,
-			func(ctx context.Context, request Request, params Params) (Response, error) {
-				return s.h.SetWalletBackup(ctx, request, params)
+			func(ctx context.Context, request Request, params Params) (response Response, err error) {
+				err = s.h.SetWalletBackup(ctx, request, params)
+				return response, err
 			},
 		)
 	} else {
-		response, err = s.h.SetWalletBackup(ctx, request, params)
+		err = s.h.SetWalletBackup(ctx, request, params)
 	}
 	if err != nil {
 		recordError("Internal", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
+			encodeErrorResponse(errRes, w, span)
+			return
+		}
+		if errors.Is(err, ht.ErrNotImplemented) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
 		return
 	}
 
@@ -6687,9 +7483,11 @@ func (s *Server) handleSetWalletBackupRequest(args [0]string, w http.ResponseWri
 // Pool info.
 //
 // GET /v2/staking/pool/{account_id}/history
-func (s *Server) handleStakingPoolHistoryRequest(args [1]string, w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleStakingPoolHistoryRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("stakingPoolHistory"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/staking/pool/{account_id}/history"),
 	}
 
 	// Start a span for this request.
@@ -6703,17 +7501,18 @@ func (s *Server) handleStakingPoolHistoryRequest(args [1]string, w http.Response
 	startTime := time.Now()
 	defer func() {
 		elapsedDuration := time.Since(startTime)
-		s.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		s.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
 	}()
 
 	// Increment request counter.
-	s.requests.Add(ctx, 1, otelAttrs...)
+	s.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 
 	var (
 		recordError = func(stage string, err error) {
 			span.RecordError(err)
 			span.SetStatus(codes.Error, stage)
-			s.errors.Add(ctx, 1, otelAttrs...)
+			s.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 		}
 		err          error
 		opErrContext = ogenerrors.OperationContext{
@@ -6721,7 +7520,7 @@ func (s *Server) handleStakingPoolHistoryRequest(args [1]string, w http.Response
 			ID:   "stakingPoolHistory",
 		}
 	)
-	params, err := decodeStakingPoolHistoryParams(args, r)
+	params, err := decodeStakingPoolHistoryParams(args, argsEscaped, r)
 	if err != nil {
 		err = &ogenerrors.DecodeParamsError{
 			OperationContext: opErrContext,
@@ -6732,7 +7531,7 @@ func (s *Server) handleStakingPoolHistoryRequest(args [1]string, w http.Response
 		return
 	}
 
-	var response StakingPoolHistoryRes
+	var response *StakingPoolHistoryOK
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:       ctx,
@@ -6751,7 +7550,7 @@ func (s *Server) handleStakingPoolHistoryRequest(args [1]string, w http.Response
 		type (
 			Request  = struct{}
 			Params   = StakingPoolHistoryParams
-			Response = StakingPoolHistoryRes
+			Response = *StakingPoolHistoryOK
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -6761,8 +7560,9 @@ func (s *Server) handleStakingPoolHistoryRequest(args [1]string, w http.Response
 			m,
 			mreq,
 			unpackStakingPoolHistoryParams,
-			func(ctx context.Context, request Request, params Params) (Response, error) {
-				return s.h.StakingPoolHistory(ctx, params)
+			func(ctx context.Context, request Request, params Params) (response Response, err error) {
+				response, err = s.h.StakingPoolHistory(ctx, params)
+				return response, err
 			},
 		)
 	} else {
@@ -6770,7 +7570,15 @@ func (s *Server) handleStakingPoolHistoryRequest(args [1]string, w http.Response
 	}
 	if err != nil {
 		recordError("Internal", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
+			encodeErrorResponse(errRes, w, span)
+			return
+		}
+		if errors.Is(err, ht.ErrNotImplemented) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
 		return
 	}
 
@@ -6786,9 +7594,11 @@ func (s *Server) handleStakingPoolHistoryRequest(args [1]string, w http.Response
 // Pool info.
 //
 // GET /v2/staking/pool/{account_id}
-func (s *Server) handleStakingPoolInfoRequest(args [1]string, w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleStakingPoolInfoRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("stakingPoolInfo"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/staking/pool/{account_id}"),
 	}
 
 	// Start a span for this request.
@@ -6802,17 +7612,18 @@ func (s *Server) handleStakingPoolInfoRequest(args [1]string, w http.ResponseWri
 	startTime := time.Now()
 	defer func() {
 		elapsedDuration := time.Since(startTime)
-		s.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		s.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
 	}()
 
 	// Increment request counter.
-	s.requests.Add(ctx, 1, otelAttrs...)
+	s.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 
 	var (
 		recordError = func(stage string, err error) {
 			span.RecordError(err)
 			span.SetStatus(codes.Error, stage)
-			s.errors.Add(ctx, 1, otelAttrs...)
+			s.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 		}
 		err          error
 		opErrContext = ogenerrors.OperationContext{
@@ -6820,7 +7631,7 @@ func (s *Server) handleStakingPoolInfoRequest(args [1]string, w http.ResponseWri
 			ID:   "stakingPoolInfo",
 		}
 	)
-	params, err := decodeStakingPoolInfoParams(args, r)
+	params, err := decodeStakingPoolInfoParams(args, argsEscaped, r)
 	if err != nil {
 		err = &ogenerrors.DecodeParamsError{
 			OperationContext: opErrContext,
@@ -6831,7 +7642,7 @@ func (s *Server) handleStakingPoolInfoRequest(args [1]string, w http.ResponseWri
 		return
 	}
 
-	var response StakingPoolInfoRes
+	var response *StakingPoolInfoOK
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:       ctx,
@@ -6854,7 +7665,7 @@ func (s *Server) handleStakingPoolInfoRequest(args [1]string, w http.ResponseWri
 		type (
 			Request  = struct{}
 			Params   = StakingPoolInfoParams
-			Response = StakingPoolInfoRes
+			Response = *StakingPoolInfoOK
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -6864,8 +7675,9 @@ func (s *Server) handleStakingPoolInfoRequest(args [1]string, w http.ResponseWri
 			m,
 			mreq,
 			unpackStakingPoolInfoParams,
-			func(ctx context.Context, request Request, params Params) (Response, error) {
-				return s.h.StakingPoolInfo(ctx, params)
+			func(ctx context.Context, request Request, params Params) (response Response, err error) {
+				response, err = s.h.StakingPoolInfo(ctx, params)
+				return response, err
 			},
 		)
 	} else {
@@ -6873,7 +7685,15 @@ func (s *Server) handleStakingPoolInfoRequest(args [1]string, w http.ResponseWri
 	}
 	if err != nil {
 		recordError("Internal", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
+			encodeErrorResponse(errRes, w, span)
+			return
+		}
+		if errors.Is(err, ht.ErrNotImplemented) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
 		return
 	}
 
@@ -6889,9 +7709,11 @@ func (s *Server) handleStakingPoolInfoRequest(args [1]string, w http.ResponseWri
 // All pools available in network.
 //
 // GET /v2/staking/pools
-func (s *Server) handleStakingPoolsRequest(args [0]string, w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleStakingPoolsRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("stakingPools"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/staking/pools"),
 	}
 
 	// Start a span for this request.
@@ -6905,17 +7727,18 @@ func (s *Server) handleStakingPoolsRequest(args [0]string, w http.ResponseWriter
 	startTime := time.Now()
 	defer func() {
 		elapsedDuration := time.Since(startTime)
-		s.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		s.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
 	}()
 
 	// Increment request counter.
-	s.requests.Add(ctx, 1, otelAttrs...)
+	s.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 
 	var (
 		recordError = func(stage string, err error) {
 			span.RecordError(err)
 			span.SetStatus(codes.Error, stage)
-			s.errors.Add(ctx, 1, otelAttrs...)
+			s.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 		}
 		err          error
 		opErrContext = ogenerrors.OperationContext{
@@ -6923,7 +7746,7 @@ func (s *Server) handleStakingPoolsRequest(args [0]string, w http.ResponseWriter
 			ID:   "stakingPools",
 		}
 	)
-	params, err := decodeStakingPoolsParams(args, r)
+	params, err := decodeStakingPoolsParams(args, argsEscaped, r)
 	if err != nil {
 		err = &ogenerrors.DecodeParamsError{
 			OperationContext: opErrContext,
@@ -6934,7 +7757,7 @@ func (s *Server) handleStakingPoolsRequest(args [0]string, w http.ResponseWriter
 		return
 	}
 
-	var response StakingPoolsRes
+	var response *StakingPoolsOK
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:       ctx,
@@ -6961,7 +7784,7 @@ func (s *Server) handleStakingPoolsRequest(args [0]string, w http.ResponseWriter
 		type (
 			Request  = struct{}
 			Params   = StakingPoolsParams
-			Response = StakingPoolsRes
+			Response = *StakingPoolsOK
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -6971,8 +7794,9 @@ func (s *Server) handleStakingPoolsRequest(args [0]string, w http.ResponseWriter
 			m,
 			mreq,
 			unpackStakingPoolsParams,
-			func(ctx context.Context, request Request, params Params) (Response, error) {
-				return s.h.StakingPools(ctx, params)
+			func(ctx context.Context, request Request, params Params) (response Response, err error) {
+				response, err = s.h.StakingPools(ctx, params)
+				return response, err
 			},
 		)
 	} else {
@@ -6980,7 +7804,15 @@ func (s *Server) handleStakingPoolsRequest(args [0]string, w http.ResponseWriter
 	}
 	if err != nil {
 		recordError("Internal", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
+			encodeErrorResponse(errRes, w, span)
+			return
+		}
+		if errors.Is(err, ht.ErrNotImplemented) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
 		return
 	}
 
@@ -6996,9 +7828,11 @@ func (s *Server) handleStakingPoolsRequest(args [0]string, w http.ResponseWriter
 // Account verification and token issuance.
 //
 // POST /v2/wallet/auth/proof
-func (s *Server) handleTonConnectProofRequest(args [0]string, w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleTonConnectProofRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("tonConnectProof"),
+		semconv.HTTPMethodKey.String("POST"),
+		semconv.HTTPRouteKey.String("/v2/wallet/auth/proof"),
 	}
 
 	// Start a span for this request.
@@ -7012,17 +7846,18 @@ func (s *Server) handleTonConnectProofRequest(args [0]string, w http.ResponseWri
 	startTime := time.Now()
 	defer func() {
 		elapsedDuration := time.Since(startTime)
-		s.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		s.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
 	}()
 
 	// Increment request counter.
-	s.requests.Add(ctx, 1, otelAttrs...)
+	s.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 
 	var (
 		recordError = func(stage string, err error) {
 			span.RecordError(err)
 			span.SetStatus(codes.Error, stage)
-			s.errors.Add(ctx, 1, otelAttrs...)
+			s.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 		}
 		err          error
 		opErrContext = ogenerrors.OperationContext{
@@ -7046,7 +7881,7 @@ func (s *Server) handleTonConnectProofRequest(args [0]string, w http.ResponseWri
 		}
 	}()
 
-	var response TonConnectProofRes
+	var response *TonConnectProofOK
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:       ctx,
@@ -7058,9 +7893,9 @@ func (s *Server) handleTonConnectProofRequest(args [0]string, w http.ResponseWri
 		}
 
 		type (
-			Request  = TonConnectProofReq
+			Request  = *TonConnectProofReq
 			Params   = struct{}
-			Response = TonConnectProofRes
+			Response = *TonConnectProofOK
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -7070,8 +7905,9 @@ func (s *Server) handleTonConnectProofRequest(args [0]string, w http.ResponseWri
 			m,
 			mreq,
 			nil,
-			func(ctx context.Context, request Request, params Params) (Response, error) {
-				return s.h.TonConnectProof(ctx, request)
+			func(ctx context.Context, request Request, params Params) (response Response, err error) {
+				response, err = s.h.TonConnectProof(ctx, request)
+				return response, err
 			},
 		)
 	} else {
@@ -7079,7 +7915,15 @@ func (s *Server) handleTonConnectProofRequest(args [0]string, w http.ResponseWri
 	}
 	if err != nil {
 		recordError("Internal", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
+			encodeErrorResponse(errRes, w, span)
+			return
+		}
+		if errors.Is(err, ht.ErrNotImplemented) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
 		return
 	}
 

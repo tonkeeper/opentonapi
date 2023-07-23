@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net/http"
+
 	"github.com/tonkeeper/opentonapi/internal/g"
 	"github.com/tonkeeper/tongo/boc"
 	"github.com/tonkeeper/tongo/tlb"
@@ -17,15 +19,15 @@ import (
 	"github.com/tonkeeper/opentonapi/pkg/references"
 )
 
-func (h Handler) StakingPoolInfo(ctx context.Context, params oas.StakingPoolInfoParams) (oas.StakingPoolInfoRes, error) {
+func (h Handler) StakingPoolInfo(ctx context.Context, params oas.StakingPoolInfoParams) (*oas.StakingPoolInfoOK, error) {
 	poolID, err := tongo.ParseAccountID(params.AccountID)
 	if err != nil {
-		return &oas.BadRequest{Error: err.Error()}, nil
+		return nil, toError(http.StatusBadRequest, err)
 	}
 	if w, prs := references.WhalesPools[poolID]; prs {
 		poolConfig, poolStatus, nominatorsCount, err := h.storage.GetWhalesPoolInfo(ctx, poolID)
 		if err != nil {
-			return &oas.InternalError{Error: err.Error()}, nil
+			return nil, toError(http.StatusInternalServerError, err)
 		}
 		return &oas.StakingPoolInfoOK{
 			Implementation: oas.PoolImplementation{
@@ -40,14 +42,14 @@ func (h Handler) StakingPoolInfo(ctx context.Context, params oas.StakingPoolInfo
 	if err == nil {
 		config, err := h.storage.GetLastConfig()
 		if err != nil {
-			return &oas.InternalError{Error: err.Error()}, nil
+			return nil, toError(http.StatusInternalServerError, err)
 		}
 		var cycleStart, cycleEnd uint32
 		if c, prs := config.Config.Get(34); prs {
 			var set tlb.ValidatorsSet
 			err = tlb.Unmarshal(&c.Value, &set)
 			if err != nil {
-				return &oas.InternalError{Error: err.Error()}, nil
+				return nil, toError(http.StatusInternalServerError, err)
 			}
 			cycleEnd = set.Common().UtimeUntil
 			cycleStart = set.Common().UtimeSince
@@ -63,7 +65,7 @@ func (h Handler) StakingPoolInfo(ctx context.Context, params oas.StakingPoolInfo
 	}
 	p, err := h.storage.GetTFPool(ctx, poolID)
 	if err != nil {
-		return &oas.InternalError{Error: "pool not found: " + err.Error()}, nil
+		return nil, toError(http.StatusInternalServerError, fmt.Errorf("pool not found: %v", err.Error()))
 	}
 
 	info, _ := h.addressBook.GetTFPoolInfo(p.Address)
@@ -78,11 +80,11 @@ func (h Handler) StakingPoolInfo(ctx context.Context, params oas.StakingPoolInfo
 	}, nil
 }
 
-func (h Handler) StakingPools(ctx context.Context, params oas.StakingPoolsParams) (r oas.StakingPoolsRes, _ error) {
+func (h Handler) StakingPools(ctx context.Context, params oas.StakingPoolsParams) (*oas.StakingPoolsOK, error) {
 	var result oas.StakingPoolsOK
 	tfPools, err := h.storage.GetTFPools(ctx, !params.IncludeUnverified.Value)
 	if err != nil {
-		return nil, err
+		return nil, toError(http.StatusInternalServerError, err)
 	}
 	var minTF, minWhales int64
 	var availableFor *tongo.AccountID
@@ -90,12 +92,12 @@ func (h Handler) StakingPools(ctx context.Context, params oas.StakingPoolsParams
 	if params.AvailableFor.IsSet() {
 		a, err := tongo.ParseAccountID(params.AvailableFor.Value)
 		if err != nil {
-			return &oas.BadRequest{Error: err.Error()}, nil
+			return nil, toError(http.StatusBadRequest, err)
 		}
 		availableFor = &a
 		pools, err := h.storage.GetParticipatingInTfPools(ctx, a)
 		if err != nil && !errors.Is(err, core.ErrEntityNotFound) {
-			return nil, err
+			return nil, toError(http.StatusInternalServerError, err)
 		}
 		for _, p := range pools {
 			participatePools = append(participatePools, p.Pool)
@@ -136,18 +138,18 @@ func (h Handler) StakingPools(ctx context.Context, params oas.StakingPoolsParams
 
 	liquidPools, err := h.storage.GetLiquidPools(ctx, false) //todo: return !params.IncludeUnverified.Value
 	if err != nil {
-		return nil, err
+		return nil, toError(http.StatusInternalServerError, err)
 	}
 	config, err := h.storage.GetLastConfig()
 	if err != nil {
-		return &oas.InternalError{Error: err.Error()}, nil
+		return nil, toError(http.StatusInternalServerError, err)
 	}
 	var cycleStart, cycleEnd uint32
 	if c, prs := config.Config.Get(34); prs {
 		var set tlb.ValidatorsSet
 		err = tlb.Unmarshal(&c.Value, &set)
 		if err != nil {
-			return &oas.InternalError{Error: err.Error()}, nil
+			return nil, toError(http.StatusInternalServerError, err)
 		}
 		cycleEnd = set.Common().UtimeUntil
 		cycleStart = set.Common().UtimeSince
@@ -183,31 +185,31 @@ func (h Handler) StakingPools(ctx context.Context, params oas.StakingPoolsParams
 	return &result, nil
 }
 
-func (h Handler) PoolsByNominators(ctx context.Context, params oas.PoolsByNominatorsParams) (oas.PoolsByNominatorsRes, error) {
+func (h Handler) PoolsByNominators(ctx context.Context, params oas.PoolsByNominatorsParams) (*oas.AccountStaking, error) {
 	accountID, err := tongo.ParseAccountID(params.AccountID)
 	if err != nil {
-		return &oas.BadRequest{Error: err.Error()}, nil
+		return nil, toError(http.StatusBadRequest, err)
 	}
 	whalesPools, err := h.storage.GetParticipatingInWhalesPools(ctx, accountID)
 	if err != nil {
 		if errors.Is(err, core.ErrEntityNotFound) {
-			return &oas.NotFound{Error: err.Error()}, nil
+			return nil, toError(http.StatusNotFound, err)
 		}
-		return &oas.InternalError{Error: err.Error()}, nil
+		return nil, toError(http.StatusInternalServerError, err)
 	}
 	tfPools, err := h.storage.GetParticipatingInTfPools(ctx, accountID)
 	if err != nil {
 		if errors.Is(err, core.ErrEntityNotFound) {
-			return &oas.NotFound{Error: err.Error()}, nil
+			return nil, toError(http.StatusNotFound, err)
 		}
-		return &oas.InternalError{Error: err.Error()}, nil
+		return nil, toError(http.StatusInternalServerError, err)
 	}
 	liquidPools, err := h.storage.GetParticipatingInLiquidPools(ctx, accountID)
 	if err != nil {
 		if errors.Is(err, core.ErrEntityNotFound) {
-			return &oas.NotFound{Error: err.Error()}, nil
+			return nil, toError(http.StatusNotFound, err)
 		}
-		return &oas.InternalError{Error: err.Error()}, nil
+		return nil, toError(http.StatusInternalServerError, err)
 	}
 
 	var result oas.AccountStaking
@@ -244,14 +246,14 @@ func (h Handler) PoolsByNominators(ctx context.Context, params oas.PoolsByNomina
 	return &result, nil
 }
 
-func (h Handler) StakingPoolHistory(ctx context.Context, params oas.StakingPoolHistoryParams) (oas.StakingPoolHistoryRes, error) {
+func (h Handler) StakingPoolHistory(ctx context.Context, params oas.StakingPoolHistoryParams) (*oas.StakingPoolHistoryOK, error) {
 	poolID, err := tongo.ParseAccountID(params.AccountID)
 	if err != nil {
-		return &oas.BadRequest{Error: err.Error()}, nil
+		return nil, toError(http.StatusBadRequest, err)
 	}
 	_, err = h.storage.GetLiquidPool(ctx, poolID)
 	if errors.Is(err, core.ErrEntityNotFound) {
-		return &oas.NotFound{Error: err.Error()}, nil
+		return nil, toError(http.StatusNotFound, err)
 	}
 	logAddress := tlb.MsgAddress{SumType: "AddrExtern"}
 	logAddress.AddrExtern = &struct {
@@ -260,7 +262,7 @@ func (h Handler) StakingPoolHistory(ctx context.Context, params oas.StakingPoolH
 	}{Len: 256, ExternalAddress: g.Must(boc.BitStringFromFiftHex("0000000000000000000000000000000000000000000000000000000000000003"))}
 	logs, err := h.storage.GetLogs(ctx, poolID, &logAddress, 100, 0)
 	if err != nil {
-		return &oas.InternalError{Error: err.Error()}, nil
+		return nil, toError(http.StatusInternalServerError, err)
 	}
 	var result oas.StakingPoolHistoryOK
 	var prevTime uint32
@@ -271,7 +273,7 @@ func (h Handler) StakingPoolHistory(ctx context.Context, params oas.StakingPoolH
 		}
 		cells, err := boc.DeserializeBoc(l.Body)
 		if err != nil {
-			return &oas.InternalError{Error: err.Error()}, nil
+			return nil, toError(http.StatusInternalServerError, err)
 		}
 		var round struct {
 			RoundID  tlb.Uint32
@@ -281,7 +283,7 @@ func (h Handler) StakingPoolHistory(ctx context.Context, params oas.StakingPoolH
 		}
 		err = tlb.Unmarshal(cells[0], &round)
 		if err != nil {
-			return &oas.InternalError{Error: err.Error()}, nil
+			return nil, toError(http.StatusInternalServerError, err)
 		}
 		result.Apy = append(result.Apy, oas.ApyHistory{
 			Apy:  float64(round.Profit) / float64(round.Borrowed) / float64(l.CreatedAt-prevTime) * 3600 * 24 * 365 * 100,

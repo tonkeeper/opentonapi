@@ -5,38 +5,39 @@ import (
 	"encoding/json"
 	"fmt"
 	"math"
+	"net/http"
 	"strings"
 	"time"
 
 	"github.com/tonkeeper/opentonapi/pkg/oas"
 )
 
-func (h *Handler) GetRates(ctx context.Context, params oas.GetRatesParams) (res oas.GetRatesRes, err error) {
+func (h *Handler) GetRates(ctx context.Context, params oas.GetRatesParams) (*oas.GetRatesOK, error) {
 	params.Tokens = strings.TrimSpace(params.Tokens)
 	tokens := strings.Split(params.Tokens, ",")
 	if len(tokens) == 0 {
-		return &oas.BadRequest{"tokens is required param"}, nil
+		return nil, toError(http.StatusBadRequest, fmt.Errorf("tokens is required param"))
 	}
 
 	params.Currencies = strings.TrimSpace(strings.ToUpper(params.Currencies))
 	currencies := strings.Split(params.Currencies, ",")
 	if len(currencies) == 0 {
-		return &oas.BadRequest{"currencies is required param"}, nil
+		return nil, toError(http.StatusBadRequest, fmt.Errorf("currencies is required param"))
 	}
 
 	if len(tokens) > 50 || len(currencies) > 50 {
-		return &oas.BadRequest{"max params limit is 50 items"}, nil
+		return nil, toError(http.StatusBadRequest, fmt.Errorf("max params limit is 50 items"))
 	}
 
 	now := time.Now().UTC()
 	yesterday := now.AddDate(0, 0, -1)
 	todayRates, err := h.ratesSource.GetRates(now)
 	if err != nil {
-		return &oas.InternalError{Error: err.Error()}, nil
+		return nil, toError(http.StatusInternalServerError, err)
 	}
 	yesterdayRates, err := h.ratesSource.GetRates(yesterday)
 	if err != nil {
-		return &oas.InternalError{Error: err.Error()}, nil
+		return nil, toError(http.StatusInternalServerError, err)
 	}
 
 	type tokenRates struct {
@@ -52,7 +53,7 @@ func (h *Handler) GetRates(ctx context.Context, params oas.GetRatesParams) (res 
 		for _, currency := range currencies {
 			todayCurrencyPrice, ok := todayRates[currency]
 			if !ok {
-				return &oas.BadRequest{fmt.Sprintf("invalid currency: %v", currency)}, nil
+				return nil, toError(http.StatusBadRequest, fmt.Errorf("invalid currency: %v", currency))
 			}
 			rate, ok := ratesRes[token]
 			if !ok {
@@ -92,7 +93,7 @@ func (h *Handler) GetRates(ctx context.Context, params oas.GetRatesParams) (res 
 
 	bytesRatesRes, err := json.Marshal(ratesRes)
 	if err != nil {
-		return &oas.InternalError{Error: err.Error()}, nil
+		return nil, toError(http.StatusInternalServerError, err)
 	}
 
 	return &oas.GetRatesOK{Rates: bytesRatesRes}, nil

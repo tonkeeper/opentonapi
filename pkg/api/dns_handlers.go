@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"fmt"
+	"net/http"
 
 	"github.com/tonkeeper/opentonapi/pkg/oas"
 	"github.com/tonkeeper/opentonapi/pkg/references"
@@ -10,14 +11,14 @@ import (
 	"github.com/tonkeeper/tongo/tlb"
 )
 
-func (h Handler) DnsBackResolve(ctx context.Context, params oas.DnsBackResolveParams) (r oas.DnsBackResolveRes, err error) {
+func (h Handler) DnsBackResolve(ctx context.Context, params oas.DnsBackResolveParams) (*oas.DomainNames, error) {
 	a, err := tongo.ParseAccountID(params.AccountID)
 	if err != nil {
-		return &oas.BadRequest{Error: err.Error()}, nil
+		return nil, toError(http.StatusBadRequest, err)
 	}
 	domains, err := h.storage.FindAllDomainsResolvedToAddress(ctx, a, references.DomainSuffixes)
 	if err != nil {
-		return &oas.InternalError{Error: err.Error()}, nil
+		return nil, toError(http.StatusInternalServerError, err)
 	}
 	var result []string
 	for _, d := range domains {
@@ -47,10 +48,10 @@ func (h Handler) DnsBackResolve(ctx context.Context, params oas.DnsBackResolvePa
 	return &oas.DomainNames{Domains: result}, nil
 }
 
-func (h Handler) DnsResolve(ctx context.Context, params oas.DnsResolveParams) (oas.DnsResolveRes, error) {
+func (h Handler) DnsResolve(ctx context.Context, params oas.DnsResolveParams) (*oas.DnsRecord, error) {
 	records, err := h.dns.Resolve(ctx, params.DomainName)
 	if err != nil {
-		return &oas.InternalError{Error: err.Error()}, nil
+		return nil, toError(http.StatusInternalServerError, err)
 	}
 	result := oas.DnsRecord{}
 	for _, r := range records {

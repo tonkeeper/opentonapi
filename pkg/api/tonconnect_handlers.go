@@ -6,6 +6,8 @@ import (
 	"crypto/sha256"
 	"encoding/base64"
 	"encoding/hex"
+	"fmt"
+	"net/http"
 
 	"github.com/tonkeeper/opentonapi/pkg/oas"
 	"github.com/tonkeeper/tongo"
@@ -14,16 +16,15 @@ import (
 	"github.com/tonkeeper/tongo/tonconnect"
 )
 
-func (h Handler) GetTonConnectPayload(ctx context.Context) (res oas.GetTonConnectPayloadRes, err error) {
+func (h Handler) GetTonConnectPayload(ctx context.Context) (*oas.GetTonConnectPayloadOK, error) {
 	payload, err := h.tonConnect.GeneratePayload()
 	if err != nil {
-		return &oas.InternalError{Error: err.Error()}, nil
+		return nil, toError(http.StatusInternalServerError, err)
 	}
-
 	return &oas.GetTonConnectPayloadOK{Payload: payload}, nil
 }
 
-func (h Handler) TonConnectProof(ctx context.Context, request oas.TonConnectProofReq) (res oas.TonConnectProofRes, err error) {
+func (h Handler) TonConnectProof(ctx context.Context, request *oas.TonConnectProofReq) (*oas.TonConnectProofOK, error) {
 	proof := tonconnect.Proof{
 		Address: request.Address,
 		Proof: tonconnect.ProofData{
@@ -36,7 +37,7 @@ func (h Handler) TonConnectProof(ctx context.Context, request oas.TonConnectProo
 	}
 	verified, pubKey, err := h.tonConnect.CheckProof(ctx, &proof)
 	if err != nil || !verified {
-		return &oas.BadRequest{Error: "failed verify proof"}, nil
+		return nil, toError(http.StatusBadRequest, fmt.Errorf("failed verify proof"))
 	}
 
 	hmacHash := hmac.New(sha256.New, []byte(h.tonConnect.GetSecret()))
@@ -48,15 +49,15 @@ func (h Handler) TonConnectProof(ctx context.Context, request oas.TonConnectProo
 	return &oas.TonConnectProofOK{Token: signedToken}, nil
 }
 
-func (h Handler) GetAccountInfoByStateInit(ctx context.Context, request oas.GetAccountInfoByStateInitReq) (res oas.GetAccountInfoByStateInitRes, err error) {
+func (h Handler) GetAccountInfoByStateInit(ctx context.Context, request *oas.GetAccountInfoByStateInitReq) (*oas.AccountInfoByStateInit, error) {
 	pubKey, err := tonconnect.ParseStateInit(request.StateInit)
 	if err != nil {
-		return &oas.BadRequest{Error: err.Error()}, nil
+		return nil, toError(http.StatusBadRequest, err)
 	}
 	cells, _ := boc.DeserializeBocBase64(request.StateInit)
 	cellHash, err := cells[0].Hash()
 	if err != nil {
-		return &oas.BadRequest{Error: err.Error()}, nil
+		return nil, toError(http.StatusInternalServerError, err)
 	}
 	accountID := tongo.AccountID{Workchain: int32(0), Address: tlb.Bits256(cellHash[:])}
 

@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"math/big"
+	"net/http"
 
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/liteapi"
@@ -12,17 +13,17 @@ import (
 	"github.com/tonkeeper/opentonapi/pkg/oas"
 )
 
-func (h Handler) GetJettonsBalances(ctx context.Context, params oas.GetJettonsBalancesParams) (oas.GetJettonsBalancesRes, error) {
+func (h Handler) GetJettonsBalances(ctx context.Context, params oas.GetJettonsBalancesParams) (*oas.JettonsBalances, error) {
 	accountID, err := tongo.ParseAccountID(params.AccountID)
 	if err != nil {
-		return &oas.BadRequest{Error: err.Error()}, nil
+		return nil, toError(http.StatusBadRequest, err)
 	}
 	wallets, err := h.storage.GetJettonWalletsByOwnerAddress(ctx, accountID)
 	if err != nil {
 		if errors.Is(err, core.ErrEntityNotFound) {
-			return &oas.NotFound{Error: err.Error()}, nil
+			return nil, toError(http.StatusNotFound, err)
 		}
-		return &oas.InternalError{Error: err.Error()}, nil
+		return nil, toError(http.StatusInternalServerError, err)
 	}
 	var balances = oas.JettonsBalances{
 		Balances: make([]oas.JettonBalance, 0, len(wallets)),
@@ -42,7 +43,7 @@ func (h Handler) GetJettonsBalances(ctx context.Context, params oas.GetJettonsBa
 			continue
 		}
 		if err != nil && !errors.Is(err, core.ErrEntityNotFound) {
-			return &oas.InternalError{Error: err.Error()}, nil
+			return nil, toError(http.StatusNotFound, err)
 		}
 		var normalizedMetadata NormalizedMetadata
 		info, ok := h.addressBook.GetJettonInfoByAddress(wallet.JettonAddress)
@@ -58,16 +59,16 @@ func (h Handler) GetJettonsBalances(ctx context.Context, params oas.GetJettonsBa
 	return &balances, nil
 }
 
-func (h Handler) GetJettonInfo(ctx context.Context, params oas.GetJettonInfoParams) (r oas.GetJettonInfoRes, err error) {
+func (h Handler) GetJettonInfo(ctx context.Context, params oas.GetJettonInfoParams) (*oas.JettonInfo, error) {
 	account, err := tongo.ParseAccountID(params.AccountID)
 	if err != nil {
-		return &oas.BadRequest{Error: err.Error()}, nil
+		return nil, toError(http.StatusBadRequest, err)
 	}
 	meta := h.GetJettonNormalizedMetadata(ctx, account)
 	metadata := jettonMetadata(account, meta)
 	data, err := h.storage.GetJettonMasterData(ctx, account)
 	if err != nil {
-		return &oas.InternalError{Error: err.Error()}, nil
+		return nil, toError(http.StatusInternalServerError, err)
 	}
 	supply := big.Int(data.TotalSupply)
 	return &oas.JettonInfo{
@@ -78,37 +79,43 @@ func (h Handler) GetJettonInfo(ctx context.Context, params oas.GetJettonInfoPara
 	}, nil
 }
 
-func (h Handler) GetJettonsHistory(ctx context.Context, params oas.GetJettonsHistoryParams) (res oas.GetJettonsHistoryRes, err error) {
+func (h Handler) GetJettonsHistory(ctx context.Context, params oas.GetJettonsHistoryParams) (*oas.AccountEvents, error) {
 	account, err := tongo.ParseAccountID(params.AccountID)
 	if err != nil {
-		return &oas.BadRequest{Error: err.Error()}, nil
+		return nil, toError(http.StatusBadRequest, err)
 	}
 	traceIDs, err := h.storage.GetAccountJettonsHistory(ctx, account, params.Limit, optIntToPointer(params.BeforeLt), optIntToPointer(params.StartDate), optIntToPointer(params.EndDate))
 	if err != nil {
-		return &oas.InternalError{Error: err.Error()}, nil
+		return nil, toError(http.StatusInternalServerError, err)
 	}
 	events, lastLT, err := h.convertJettonHistory(ctx, account, nil, traceIDs, params.AcceptLanguage)
+	if err != nil {
+		return nil, toError(http.StatusInternalServerError, err)
+	}
 	return &oas.AccountEvents{Events: events, NextFrom: lastLT}, nil
 }
 
-func (h Handler) GetJettonsHistoryByID(ctx context.Context, params oas.GetJettonsHistoryByIDParams) (res oas.GetJettonsHistoryByIDRes, err error) {
+func (h Handler) GetJettonsHistoryByID(ctx context.Context, params oas.GetJettonsHistoryByIDParams) (*oas.AccountEvents, error) {
 	account, err := tongo.ParseAccountID(params.AccountID)
 	if err != nil {
-		return &oas.BadRequest{Error: err.Error()}, nil
+		return nil, toError(http.StatusBadRequest, err)
 	}
 	jettonMasterAccount, err := tongo.ParseAccountID(params.JettonID)
 	if err != nil {
-		return &oas.BadRequest{Error: err.Error()}, nil
+		return nil, toError(http.StatusBadRequest, err)
 	}
 	traceIDs, err := h.storage.GetAccountJettonHistoryByID(ctx, account, jettonMasterAccount, params.Limit, optIntToPointer(params.BeforeLt), optIntToPointer(params.StartDate), optIntToPointer(params.EndDate))
 	if err != nil {
-		return &oas.InternalError{Error: err.Error()}, nil
+		return nil, toError(http.StatusInternalServerError, err)
 	}
 	events, lastLT, err := h.convertJettonHistory(ctx, account, &jettonMasterAccount, traceIDs, params.AcceptLanguage)
+	if err != nil {
+		return nil, toError(http.StatusInternalServerError, err)
+	}
 	return &oas.AccountEvents{Events: events, NextFrom: lastLT}, nil
 }
 
-func (h Handler) GetJettons(ctx context.Context, params oas.GetJettonsParams) (r oas.GetJettonsRes, _ error) {
+func (h Handler) GetJettons(ctx context.Context, params oas.GetJettonsParams) (*oas.Jettons, error) {
 	limit := 1000
 	offset := 0
 	if params.Limit.IsSet() {
@@ -128,7 +135,7 @@ func (h Handler) GetJettons(ctx context.Context, params oas.GetJettonsParams) (r
 	}
 	jettons, err := h.storage.GetJettonMasters(ctx, limit, offset)
 	if err != nil {
-		return &oas.InternalError{Error: err.Error()}, nil
+		return nil, toError(http.StatusInternalServerError, err)
 	}
 	results := make([]oas.JettonInfo, 0, len(jettons))
 	for _, master := range jettons {

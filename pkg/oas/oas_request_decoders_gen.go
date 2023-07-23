@@ -11,11 +11,12 @@ import (
 	"github.com/go-faster/jx"
 	"go.uber.org/multierr"
 
+	"github.com/ogen-go/ogen/ogenerrors"
 	"github.com/ogen-go/ogen/validate"
 )
 
 func (s *Server) decodeEmulateMessageToAccountEventRequest(r *http.Request) (
-	req EmulateMessageToAccountEventReq,
+	req *EmulateMessageToAccountEventReq,
 	close func() error,
 	rerr error,
 ) {
@@ -43,8 +44,6 @@ func (s *Server) decodeEmulateMessageToAccountEventRequest(r *http.Request) (
 		if r.ContentLength == 0 {
 			return req, close, validate.ErrBodyRequired
 		}
-
-		var request EmulateMessageToAccountEventReq
 		buf, err := io.ReadAll(r.Body)
 		if err != nil {
 			return req, close, err
@@ -55,25 +54,32 @@ func (s *Server) decodeEmulateMessageToAccountEventRequest(r *http.Request) (
 		}
 
 		d := jx.DecodeBytes(buf)
+
+		var request EmulateMessageToAccountEventReq
 		if err := func() error {
 			if err := request.Decode(d); err != nil {
 				return err
 			}
+			if err := d.Skip(); err != io.EOF {
+				return errors.New("unexpected trailing data")
+			}
 			return nil
 		}(); err != nil {
-			return req, close, errors.Wrap(err, "decode \"application/json\"")
+			err = &ogenerrors.DecodeBodyError{
+				ContentType: ct,
+				Body:        buf,
+				Err:         err,
+			}
+			return req, close, err
 		}
-		if err := d.Skip(); err != io.EOF {
-			return req, close, errors.New("unexpected trailing data")
-		}
-		return request, close, nil
+		return &request, close, nil
 	default:
 		return req, close, validate.InvalidContentType(ct)
 	}
 }
 
 func (s *Server) decodeEmulateMessageToEventRequest(r *http.Request) (
-	req EmulateMessageToEventReq,
+	req *EmulateMessageToEventReq,
 	close func() error,
 	rerr error,
 ) {
@@ -101,8 +107,6 @@ func (s *Server) decodeEmulateMessageToEventRequest(r *http.Request) (
 		if r.ContentLength == 0 {
 			return req, close, validate.ErrBodyRequired
 		}
-
-		var request EmulateMessageToEventReq
 		buf, err := io.ReadAll(r.Body)
 		if err != nil {
 			return req, close, err
@@ -113,25 +117,32 @@ func (s *Server) decodeEmulateMessageToEventRequest(r *http.Request) (
 		}
 
 		d := jx.DecodeBytes(buf)
+
+		var request EmulateMessageToEventReq
 		if err := func() error {
 			if err := request.Decode(d); err != nil {
 				return err
 			}
+			if err := d.Skip(); err != io.EOF {
+				return errors.New("unexpected trailing data")
+			}
 			return nil
 		}(); err != nil {
-			return req, close, errors.Wrap(err, "decode \"application/json\"")
+			err = &ogenerrors.DecodeBodyError{
+				ContentType: ct,
+				Body:        buf,
+				Err:         err,
+			}
+			return req, close, err
 		}
-		if err := d.Skip(); err != io.EOF {
-			return req, close, errors.New("unexpected trailing data")
-		}
-		return request, close, nil
+		return &request, close, nil
 	default:
 		return req, close, validate.InvalidContentType(ct)
 	}
 }
 
 func (s *Server) decodeEmulateMessageToTraceRequest(r *http.Request) (
-	req EmulateMessageToTraceReq,
+	req *EmulateMessageToTraceReq,
 	close func() error,
 	rerr error,
 ) {
@@ -159,8 +170,6 @@ func (s *Server) decodeEmulateMessageToTraceRequest(r *http.Request) (
 		if r.ContentLength == 0 {
 			return req, close, validate.ErrBodyRequired
 		}
-
-		var request EmulateMessageToTraceReq
 		buf, err := io.ReadAll(r.Body)
 		if err != nil {
 			return req, close, err
@@ -171,25 +180,32 @@ func (s *Server) decodeEmulateMessageToTraceRequest(r *http.Request) (
 		}
 
 		d := jx.DecodeBytes(buf)
+
+		var request EmulateMessageToTraceReq
 		if err := func() error {
 			if err := request.Decode(d); err != nil {
 				return err
 			}
+			if err := d.Skip(); err != io.EOF {
+				return errors.New("unexpected trailing data")
+			}
 			return nil
 		}(); err != nil {
-			return req, close, errors.Wrap(err, "decode \"application/json\"")
+			err = &ogenerrors.DecodeBodyError{
+				ContentType: ct,
+				Body:        buf,
+				Err:         err,
+			}
+			return req, close, err
 		}
-		if err := d.Skip(); err != io.EOF {
-			return req, close, errors.New("unexpected trailing data")
-		}
-		return request, close, nil
+		return &request, close, nil
 	default:
 		return req, close, validate.InvalidContentType(ct)
 	}
 }
 
 func (s *Server) decodeEmulateWalletMessageRequest(r *http.Request) (
-	req EmulateWalletMessageReq,
+	req *EmulateWalletMessageReq,
 	close func() error,
 	rerr error,
 ) {
@@ -217,8 +233,6 @@ func (s *Server) decodeEmulateWalletMessageRequest(r *http.Request) (
 		if r.ContentLength == 0 {
 			return req, close, validate.ErrBodyRequired
 		}
-
-		var request EmulateWalletMessageReq
 		buf, err := io.ReadAll(r.Body)
 		if err != nil {
 			return req, close, err
@@ -229,25 +243,32 @@ func (s *Server) decodeEmulateWalletMessageRequest(r *http.Request) (
 		}
 
 		d := jx.DecodeBytes(buf)
+
+		var request EmulateWalletMessageReq
 		if err := func() error {
 			if err := request.Decode(d); err != nil {
 				return err
 			}
+			if err := d.Skip(); err != io.EOF {
+				return errors.New("unexpected trailing data")
+			}
 			return nil
 		}(); err != nil {
-			return req, close, errors.Wrap(err, "decode \"application/json\"")
+			err = &ogenerrors.DecodeBodyError{
+				ContentType: ct,
+				Body:        buf,
+				Err:         err,
+			}
+			return req, close, err
 		}
-		if err := d.Skip(); err != io.EOF {
-			return req, close, errors.New("unexpected trailing data")
-		}
-		return request, close, nil
+		return &request, close, nil
 	default:
 		return req, close, validate.InvalidContentType(ct)
 	}
 }
 
 func (s *Server) decodeGetAccountInfoByStateInitRequest(r *http.Request) (
-	req GetAccountInfoByStateInitReq,
+	req *GetAccountInfoByStateInitReq,
 	close func() error,
 	rerr error,
 ) {
@@ -275,8 +296,6 @@ func (s *Server) decodeGetAccountInfoByStateInitRequest(r *http.Request) (
 		if r.ContentLength == 0 {
 			return req, close, validate.ErrBodyRequired
 		}
-
-		var request GetAccountInfoByStateInitReq
 		buf, err := io.ReadAll(r.Body)
 		if err != nil {
 			return req, close, err
@@ -287,18 +306,25 @@ func (s *Server) decodeGetAccountInfoByStateInitRequest(r *http.Request) (
 		}
 
 		d := jx.DecodeBytes(buf)
+
+		var request GetAccountInfoByStateInitReq
 		if err := func() error {
 			if err := request.Decode(d); err != nil {
 				return err
 			}
+			if err := d.Skip(); err != io.EOF {
+				return errors.New("unexpected trailing data")
+			}
 			return nil
 		}(); err != nil {
-			return req, close, errors.Wrap(err, "decode \"application/json\"")
+			err = &ogenerrors.DecodeBodyError{
+				ContentType: ct,
+				Body:        buf,
+				Err:         err,
+			}
+			return req, close, err
 		}
-		if err := d.Skip(); err != io.EOF {
-			return req, close, errors.New("unexpected trailing data")
-		}
-		return request, close, nil
+		return &request, close, nil
 	default:
 		return req, close, validate.InvalidContentType(ct)
 	}
@@ -336,8 +362,6 @@ func (s *Server) decodeGetAccountsRequest(r *http.Request) (
 		if r.ContentLength == 0 {
 			return req, close, nil
 		}
-
-		var request OptGetAccountsReq
 		buf, err := io.ReadAll(r.Body)
 		if err != nil {
 			return req, close, err
@@ -348,22 +372,29 @@ func (s *Server) decodeGetAccountsRequest(r *http.Request) (
 		}
 
 		d := jx.DecodeBytes(buf)
+
+		var request OptGetAccountsReq
 		if err := func() error {
 			request.Reset()
 			if err := request.Decode(d); err != nil {
 				return err
 			}
+			if err := d.Skip(); err != io.EOF {
+				return errors.New("unexpected trailing data")
+			}
 			return nil
 		}(); err != nil {
-			return req, close, errors.Wrap(err, "decode \"application/json\"")
-		}
-		if err := d.Skip(); err != io.EOF {
-			return req, close, errors.New("unexpected trailing data")
+			err = &ogenerrors.DecodeBodyError{
+				ContentType: ct,
+				Body:        buf,
+				Err:         err,
+			}
+			return req, close, err
 		}
 		if err := func() error {
-			if request.Set {
+			if value, ok := request.Get(); ok {
 				if err := func() error {
-					if err := request.Value.Validate(); err != nil {
+					if err := value.Validate(); err != nil {
 						return err
 					}
 					return nil
@@ -413,8 +444,6 @@ func (s *Server) decodeGetNftItemsByAddressesRequest(r *http.Request) (
 		if r.ContentLength == 0 {
 			return req, close, nil
 		}
-
-		var request OptGetNftItemsByAddressesReq
 		buf, err := io.ReadAll(r.Body)
 		if err != nil {
 			return req, close, err
@@ -425,22 +454,29 @@ func (s *Server) decodeGetNftItemsByAddressesRequest(r *http.Request) (
 		}
 
 		d := jx.DecodeBytes(buf)
+
+		var request OptGetNftItemsByAddressesReq
 		if err := func() error {
 			request.Reset()
 			if err := request.Decode(d); err != nil {
 				return err
 			}
+			if err := d.Skip(); err != io.EOF {
+				return errors.New("unexpected trailing data")
+			}
 			return nil
 		}(); err != nil {
-			return req, close, errors.Wrap(err, "decode \"application/json\"")
-		}
-		if err := d.Skip(); err != io.EOF {
-			return req, close, errors.New("unexpected trailing data")
+			err = &ogenerrors.DecodeBodyError{
+				ContentType: ct,
+				Body:        buf,
+				Err:         err,
+			}
+			return req, close, err
 		}
 		if err := func() error {
-			if request.Set {
+			if value, ok := request.Get(); ok {
 				if err := func() error {
-					if err := request.Value.Validate(); err != nil {
+					if err := value.Validate(); err != nil {
 						return err
 					}
 					return nil
@@ -459,7 +495,7 @@ func (s *Server) decodeGetNftItemsByAddressesRequest(r *http.Request) (
 }
 
 func (s *Server) decodeSendMessageRequest(r *http.Request) (
-	req SendMessageReq,
+	req *SendMessageReq,
 	close func() error,
 	rerr error,
 ) {
@@ -487,8 +523,6 @@ func (s *Server) decodeSendMessageRequest(r *http.Request) (
 		if r.ContentLength == 0 {
 			return req, close, validate.ErrBodyRequired
 		}
-
-		var request SendMessageReq
 		buf, err := io.ReadAll(r.Body)
 		if err != nil {
 			return req, close, err
@@ -499,25 +533,32 @@ func (s *Server) decodeSendMessageRequest(r *http.Request) (
 		}
 
 		d := jx.DecodeBytes(buf)
+
+		var request SendMessageReq
 		if err := func() error {
 			if err := request.Decode(d); err != nil {
 				return err
 			}
+			if err := d.Skip(); err != io.EOF {
+				return errors.New("unexpected trailing data")
+			}
 			return nil
 		}(); err != nil {
-			return req, close, errors.Wrap(err, "decode \"application/json\"")
+			err = &ogenerrors.DecodeBodyError{
+				ContentType: ct,
+				Body:        buf,
+				Err:         err,
+			}
+			return req, close, err
 		}
-		if err := d.Skip(); err != io.EOF {
-			return req, close, errors.New("unexpected trailing data")
-		}
-		return request, close, nil
+		return &request, close, nil
 	default:
 		return req, close, validate.InvalidContentType(ct)
 	}
 }
 
 func (s *Server) decodeSendMessageLiteServerRequest(r *http.Request) (
-	req SendMessageLiteServerReq,
+	req *SendMessageLiteServerReq,
 	close func() error,
 	rerr error,
 ) {
@@ -545,8 +586,6 @@ func (s *Server) decodeSendMessageLiteServerRequest(r *http.Request) (
 		if r.ContentLength == 0 {
 			return req, close, validate.ErrBodyRequired
 		}
-
-		var request SendMessageLiteServerReq
 		buf, err := io.ReadAll(r.Body)
 		if err != nil {
 			return req, close, err
@@ -557,18 +596,25 @@ func (s *Server) decodeSendMessageLiteServerRequest(r *http.Request) (
 		}
 
 		d := jx.DecodeBytes(buf)
+
+		var request SendMessageLiteServerReq
 		if err := func() error {
 			if err := request.Decode(d); err != nil {
 				return err
 			}
+			if err := d.Skip(); err != io.EOF {
+				return errors.New("unexpected trailing data")
+			}
 			return nil
 		}(); err != nil {
-			return req, close, errors.Wrap(err, "decode \"application/json\"")
+			err = &ogenerrors.DecodeBodyError{
+				ContentType: ct,
+				Body:        buf,
+				Err:         err,
+			}
+			return req, close, err
 		}
-		if err := d.Skip(); err != io.EOF {
-			return req, close, errors.New("unexpected trailing data")
-		}
-		return request, close, nil
+		return &request, close, nil
 	default:
 		return req, close, validate.InvalidContentType(ct)
 	}
@@ -609,7 +655,7 @@ func (s *Server) decodeSetWalletBackupRequest(r *http.Request) (
 }
 
 func (s *Server) decodeTonConnectProofRequest(r *http.Request) (
-	req TonConnectProofReq,
+	req *TonConnectProofReq,
 	close func() error,
 	rerr error,
 ) {
@@ -637,8 +683,6 @@ func (s *Server) decodeTonConnectProofRequest(r *http.Request) (
 		if r.ContentLength == 0 {
 			return req, close, validate.ErrBodyRequired
 		}
-
-		var request TonConnectProofReq
 		buf, err := io.ReadAll(r.Body)
 		if err != nil {
 			return req, close, err
@@ -649,18 +693,25 @@ func (s *Server) decodeTonConnectProofRequest(r *http.Request) (
 		}
 
 		d := jx.DecodeBytes(buf)
+
+		var request TonConnectProofReq
 		if err := func() error {
 			if err := request.Decode(d); err != nil {
 				return err
 			}
+			if err := d.Skip(); err != io.EOF {
+				return errors.New("unexpected trailing data")
+			}
 			return nil
 		}(); err != nil {
-			return req, close, errors.Wrap(err, "decode \"application/json\"")
+			err = &ogenerrors.DecodeBodyError{
+				ContentType: ct,
+				Body:        buf,
+				Err:         err,
+			}
+			return req, close, err
 		}
-		if err := d.Skip(); err != io.EOF {
-			return req, close, errors.New("unexpected trailing data")
-		}
-		return request, close, nil
+		return &request, close, nil
 	default:
 		return req, close, validate.InvalidContentType(ct)
 	}

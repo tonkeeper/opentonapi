@@ -4,11 +4,13 @@ package oas
 
 import (
 	"net/http"
+	"net/url"
 
 	"github.com/go-faster/errors"
 
 	"github.com/ogen-go/ogen/conv"
 	"github.com/ogen-go/ogen/middleware"
+	"github.com/ogen-go/ogen/ogenerrors"
 	"github.com/ogen-go/ogen/uri"
 	"github.com/ogen-go/ogen/validate"
 )
@@ -30,10 +32,17 @@ func unpackDnsBackResolveParams(packed middleware.Parameters) (params DnsBackRes
 	return params
 }
 
-func decodeDnsBackResolveParams(args [1]string, r *http.Request) (params DnsBackResolveParams, _ error) {
+func decodeDnsBackResolveParams(args [1]string, argsEscaped bool, r *http.Request) (params DnsBackResolveParams, _ error) {
 	// Decode path: account_id.
-	{
+	if err := func() error {
 		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
 		if len(param) > 0 {
 			d := uri.NewPathDecoder(uri.PathDecoderConfig{
 				Param:   "account_id",
@@ -56,10 +65,17 @@ func decodeDnsBackResolveParams(args [1]string, r *http.Request) (params DnsBack
 				params.AccountID = c
 				return nil
 			}(); err != nil {
-				return params, errors.Wrap(err, "path: account_id: parse")
+				return err
 			}
 		} else {
-			return params, errors.New("path: account_id: not specified")
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account_id",
+			In:   "path",
+			Err:  err,
 		}
 	}
 	return params, nil
@@ -82,10 +98,17 @@ func unpackDnsInfoParams(packed middleware.Parameters) (params DnsInfoParams) {
 	return params
 }
 
-func decodeDnsInfoParams(args [1]string, r *http.Request) (params DnsInfoParams, _ error) {
+func decodeDnsInfoParams(args [1]string, argsEscaped bool, r *http.Request) (params DnsInfoParams, _ error) {
 	// Decode path: domain_name.
-	{
+	if err := func() error {
 		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
 		if len(param) > 0 {
 			d := uri.NewPathDecoder(uri.PathDecoderConfig{
 				Param:   "domain_name",
@@ -108,10 +131,17 @@ func decodeDnsInfoParams(args [1]string, r *http.Request) (params DnsInfoParams,
 				params.DomainName = c
 				return nil
 			}(); err != nil {
-				return params, errors.Wrap(err, "path: domain_name: parse")
+				return err
 			}
 		} else {
-			return params, errors.New("path: domain_name: not specified")
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "domain_name",
+			In:   "path",
+			Err:  err,
 		}
 	}
 	return params, nil
@@ -134,10 +164,17 @@ func unpackDnsResolveParams(packed middleware.Parameters) (params DnsResolvePara
 	return params
 }
 
-func decodeDnsResolveParams(args [1]string, r *http.Request) (params DnsResolveParams, _ error) {
+func decodeDnsResolveParams(args [1]string, argsEscaped bool, r *http.Request) (params DnsResolveParams, _ error) {
 	// Decode path: domain_name.
-	{
+	if err := func() error {
 		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
 		if len(param) > 0 {
 			d := uri.NewPathDecoder(uri.PathDecoderConfig{
 				Param:   "domain_name",
@@ -160,10 +197,17 @@ func decodeDnsResolveParams(args [1]string, r *http.Request) (params DnsResolveP
 				params.DomainName = c
 				return nil
 			}(); err != nil {
-				return params, errors.Wrap(err, "path: domain_name: parse")
+				return err
 			}
 		} else {
-			return params, errors.New("path: domain_name: not specified")
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "domain_name",
+			In:   "path",
+			Err:  err,
 		}
 	}
 	return params, nil
@@ -196,7 +240,7 @@ func unpackEmulateMessageToAccountEventParams(packed middleware.Parameters) (par
 	return params
 }
 
-func decodeEmulateMessageToAccountEventParams(args [1]string, r *http.Request) (params EmulateMessageToAccountEventParams, _ error) {
+func decodeEmulateMessageToAccountEventParams(args [1]string, argsEscaped bool, r *http.Request) (params EmulateMessageToAccountEventParams, _ error) {
 	h := uri.NewHeaderDecoder(r.Header)
 	// Set default value for header: Accept-Language.
 	{
@@ -204,7 +248,7 @@ func decodeEmulateMessageToAccountEventParams(args [1]string, r *http.Request) (
 		params.AcceptLanguage.SetTo(val)
 	}
 	// Decode header: Accept-Language.
-	{
+	if err := func() error {
 		cfg := uri.HeaderParameterDecodingConfig{
 			Name:    "Accept-Language",
 			Explode: false,
@@ -231,13 +275,27 @@ func decodeEmulateMessageToAccountEventParams(args [1]string, r *http.Request) (
 				params.AcceptLanguage.SetTo(paramsDotAcceptLanguageVal)
 				return nil
 			}); err != nil {
-				return params, errors.Wrap(err, "header: Accept-Language: parse")
+				return err
 			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "Accept-Language",
+			In:   "header",
+			Err:  err,
 		}
 	}
 	// Decode path: account_id.
-	{
+	if err := func() error {
 		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
 		if len(param) > 0 {
 			d := uri.NewPathDecoder(uri.PathDecoderConfig{
 				Param:   "account_id",
@@ -260,10 +318,17 @@ func decodeEmulateMessageToAccountEventParams(args [1]string, r *http.Request) (
 				params.AccountID = c
 				return nil
 			}(); err != nil {
-				return params, errors.Wrap(err, "path: account_id: parse")
+				return err
 			}
 		} else {
-			return params, errors.New("path: account_id: not specified")
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account_id",
+			In:   "path",
+			Err:  err,
 		}
 	}
 	return params, nil
@@ -287,7 +352,7 @@ func unpackEmulateMessageToEventParams(packed middleware.Parameters) (params Emu
 	return params
 }
 
-func decodeEmulateMessageToEventParams(args [0]string, r *http.Request) (params EmulateMessageToEventParams, _ error) {
+func decodeEmulateMessageToEventParams(args [0]string, argsEscaped bool, r *http.Request) (params EmulateMessageToEventParams, _ error) {
 	h := uri.NewHeaderDecoder(r.Header)
 	// Set default value for header: Accept-Language.
 	{
@@ -295,7 +360,7 @@ func decodeEmulateMessageToEventParams(args [0]string, r *http.Request) (params 
 		params.AcceptLanguage.SetTo(val)
 	}
 	// Decode header: Accept-Language.
-	{
+	if err := func() error {
 		cfg := uri.HeaderParameterDecodingConfig{
 			Name:    "Accept-Language",
 			Explode: false,
@@ -322,8 +387,15 @@ func decodeEmulateMessageToEventParams(args [0]string, r *http.Request) (params 
 				params.AcceptLanguage.SetTo(paramsDotAcceptLanguageVal)
 				return nil
 			}); err != nil {
-				return params, errors.Wrap(err, "header: Accept-Language: parse")
+				return err
 			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "Accept-Language",
+			In:   "header",
+			Err:  err,
 		}
 	}
 	return params, nil
@@ -347,7 +419,7 @@ func unpackEmulateWalletMessageParams(packed middleware.Parameters) (params Emul
 	return params
 }
 
-func decodeEmulateWalletMessageParams(args [0]string, r *http.Request) (params EmulateWalletMessageParams, _ error) {
+func decodeEmulateWalletMessageParams(args [0]string, argsEscaped bool, r *http.Request) (params EmulateWalletMessageParams, _ error) {
 	h := uri.NewHeaderDecoder(r.Header)
 	// Set default value for header: Accept-Language.
 	{
@@ -355,7 +427,7 @@ func decodeEmulateWalletMessageParams(args [0]string, r *http.Request) (params E
 		params.AcceptLanguage.SetTo(val)
 	}
 	// Decode header: Accept-Language.
-	{
+	if err := func() error {
 		cfg := uri.HeaderParameterDecodingConfig{
 			Name:    "Accept-Language",
 			Explode: false,
@@ -382,8 +454,15 @@ func decodeEmulateWalletMessageParams(args [0]string, r *http.Request) (params E
 				params.AcceptLanguage.SetTo(paramsDotAcceptLanguageVal)
 				return nil
 			}); err != nil {
-				return params, errors.Wrap(err, "header: Accept-Language: parse")
+				return err
 			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "Accept-Language",
+			In:   "header",
+			Err:  err,
 		}
 	}
 	return params, nil
@@ -425,11 +504,18 @@ func unpackExecGetMethodParams(packed middleware.Parameters) (params ExecGetMeth
 	return params
 }
 
-func decodeExecGetMethodParams(args [2]string, r *http.Request) (params ExecGetMethodParams, _ error) {
+func decodeExecGetMethodParams(args [2]string, argsEscaped bool, r *http.Request) (params ExecGetMethodParams, _ error) {
 	q := uri.NewQueryDecoder(r.URL.Query())
 	// Decode path: account_id.
-	{
+	if err := func() error {
 		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
 		if len(param) > 0 {
 			d := uri.NewPathDecoder(uri.PathDecoderConfig{
 				Param:   "account_id",
@@ -452,15 +538,29 @@ func decodeExecGetMethodParams(args [2]string, r *http.Request) (params ExecGetM
 				params.AccountID = c
 				return nil
 			}(); err != nil {
-				return params, errors.Wrap(err, "path: account_id: parse")
+				return err
 			}
 		} else {
-			return params, errors.New("path: account_id: not specified")
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account_id",
+			In:   "path",
+			Err:  err,
 		}
 	}
 	// Decode path: method_name.
-	{
+	if err := func() error {
 		param := args[1]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
 		if len(param) > 0 {
 			d := uri.NewPathDecoder(uri.PathDecoderConfig{
 				Param:   "method_name",
@@ -483,14 +583,21 @@ func decodeExecGetMethodParams(args [2]string, r *http.Request) (params ExecGetM
 				params.MethodName = c
 				return nil
 			}(); err != nil {
-				return params, errors.Wrap(err, "path: method_name: parse")
+				return err
 			}
 		} else {
-			return params, errors.New("path: method_name: not specified")
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "method_name",
+			In:   "path",
+			Err:  err,
 		}
 	}
 	// Decode query: args.
-	{
+	if err := func() error {
 		cfg := uri.QueryParameterDecodingConfig{
 			Name:    "args",
 			Style:   uri.QueryStyleForm,
@@ -521,8 +628,15 @@ func decodeExecGetMethodParams(args [2]string, r *http.Request) (params ExecGetM
 					return nil
 				})
 			}); err != nil {
-				return params, errors.Wrap(err, "query: args: parse")
+				return err
 			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "args",
+			In:   "query",
+			Err:  err,
 		}
 	}
 	return params, nil
@@ -545,10 +659,17 @@ func unpackGetAccountParams(packed middleware.Parameters) (params GetAccountPara
 	return params
 }
 
-func decodeGetAccountParams(args [1]string, r *http.Request) (params GetAccountParams, _ error) {
+func decodeGetAccountParams(args [1]string, argsEscaped bool, r *http.Request) (params GetAccountParams, _ error) {
 	// Decode path: account_id.
-	{
+	if err := func() error {
 		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
 		if len(param) > 0 {
 			d := uri.NewPathDecoder(uri.PathDecoderConfig{
 				Param:   "account_id",
@@ -571,10 +692,17 @@ func decodeGetAccountParams(args [1]string, r *http.Request) (params GetAccountP
 				params.AccountID = c
 				return nil
 			}(); err != nil {
-				return params, errors.Wrap(err, "path: account_id: parse")
+				return err
 			}
 		} else {
-			return params, errors.New("path: account_id: not specified")
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account_id",
+			In:   "path",
+			Err:  err,
 		}
 	}
 	return params, nil
@@ -597,10 +725,17 @@ func unpackGetAccountSeqnoParams(packed middleware.Parameters) (params GetAccoun
 	return params
 }
 
-func decodeGetAccountSeqnoParams(args [1]string, r *http.Request) (params GetAccountSeqnoParams, _ error) {
+func decodeGetAccountSeqnoParams(args [1]string, argsEscaped bool, r *http.Request) (params GetAccountSeqnoParams, _ error) {
 	// Decode path: account_id.
-	{
+	if err := func() error {
 		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
 		if len(param) > 0 {
 			d := uri.NewPathDecoder(uri.PathDecoderConfig{
 				Param:   "account_id",
@@ -623,10 +758,17 @@ func decodeGetAccountSeqnoParams(args [1]string, r *http.Request) (params GetAcc
 				params.AccountID = c
 				return nil
 			}(); err != nil {
-				return params, errors.Wrap(err, "path: account_id: parse")
+				return err
 			}
 		} else {
-			return params, errors.New("path: account_id: not specified")
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account_id",
+			In:   "path",
+			Err:  err,
 		}
 	}
 	return params, nil
@@ -649,10 +791,17 @@ func unpackGetAccountStateLiteServerParams(packed middleware.Parameters) (params
 	return params
 }
 
-func decodeGetAccountStateLiteServerParams(args [1]string, r *http.Request) (params GetAccountStateLiteServerParams, _ error) {
+func decodeGetAccountStateLiteServerParams(args [1]string, argsEscaped bool, r *http.Request) (params GetAccountStateLiteServerParams, _ error) {
 	// Decode path: account_id.
-	{
+	if err := func() error {
 		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
 		if len(param) > 0 {
 			d := uri.NewPathDecoder(uri.PathDecoderConfig{
 				Param:   "account_id",
@@ -675,10 +824,17 @@ func decodeGetAccountStateLiteServerParams(args [1]string, r *http.Request) (par
 				params.AccountID = c
 				return nil
 			}(); err != nil {
-				return params, errors.Wrap(err, "path: account_id: parse")
+				return err
 			}
 		} else {
-			return params, errors.New("path: account_id: not specified")
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account_id",
+			In:   "path",
+			Err:  err,
 		}
 	}
 	return params, nil
@@ -733,11 +889,18 @@ func unpackGetAccountTransactionsParams(packed middleware.Parameters) (params Ge
 	return params
 }
 
-func decodeGetAccountTransactionsParams(args [1]string, r *http.Request) (params GetAccountTransactionsParams, _ error) {
+func decodeGetAccountTransactionsParams(args [1]string, argsEscaped bool, r *http.Request) (params GetAccountTransactionsParams, _ error) {
 	q := uri.NewQueryDecoder(r.URL.Query())
 	// Decode path: account_id.
-	{
+	if err := func() error {
 		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
 		if len(param) > 0 {
 			d := uri.NewPathDecoder(uri.PathDecoderConfig{
 				Param:   "account_id",
@@ -760,14 +923,21 @@ func decodeGetAccountTransactionsParams(args [1]string, r *http.Request) (params
 				params.AccountID = c
 				return nil
 			}(); err != nil {
-				return params, errors.Wrap(err, "path: account_id: parse")
+				return err
 			}
 		} else {
-			return params, errors.New("path: account_id: not specified")
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account_id",
+			In:   "path",
+			Err:  err,
 		}
 	}
 	// Decode query: after_lt.
-	{
+	if err := func() error {
 		cfg := uri.QueryParameterDecodingConfig{
 			Name:    "after_lt",
 			Style:   uri.QueryStyleForm,
@@ -796,12 +966,19 @@ func decodeGetAccountTransactionsParams(args [1]string, r *http.Request) (params
 				params.AfterLt.SetTo(paramsDotAfterLtVal)
 				return nil
 			}); err != nil {
-				return params, errors.Wrap(err, "query: after_lt: parse")
+				return err
 			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "after_lt",
+			In:   "query",
+			Err:  err,
 		}
 	}
 	// Decode query: before_lt.
-	{
+	if err := func() error {
 		cfg := uri.QueryParameterDecodingConfig{
 			Name:    "before_lt",
 			Style:   uri.QueryStyleForm,
@@ -830,8 +1007,15 @@ func decodeGetAccountTransactionsParams(args [1]string, r *http.Request) (params
 				params.BeforeLt.SetTo(paramsDotBeforeLtVal)
 				return nil
 			}); err != nil {
-				return params, errors.Wrap(err, "query: before_lt: parse")
+				return err
 			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "before_lt",
+			In:   "query",
+			Err:  err,
 		}
 	}
 	// Set default value for query: limit.
@@ -840,7 +1024,7 @@ func decodeGetAccountTransactionsParams(args [1]string, r *http.Request) (params
 		params.Limit.SetTo(val)
 	}
 	// Decode query: limit.
-	{
+	if err := func() error {
 		cfg := uri.QueryParameterDecodingConfig{
 			Name:    "limit",
 			Style:   uri.QueryStyleForm,
@@ -869,10 +1053,10 @@ func decodeGetAccountTransactionsParams(args [1]string, r *http.Request) (params
 				params.Limit.SetTo(paramsDotLimitVal)
 				return nil
 			}); err != nil {
-				return params, errors.Wrap(err, "query: limit: parse")
+				return err
 			}
 			if err := func() error {
-				if params.Limit.Set {
+				if value, ok := params.Limit.Get(); ok {
 					if err := func() error {
 						if err := (validate.Int{
 							MinSet:        false,
@@ -883,7 +1067,7 @@ func decodeGetAccountTransactionsParams(args [1]string, r *http.Request) (params
 							MaxExclusive:  false,
 							MultipleOfSet: false,
 							MultipleOf:    0,
-						}).Validate(int64(params.Limit.Value)); err != nil {
+						}).Validate(int64(value)); err != nil {
 							return errors.Wrap(err, "int")
 						}
 						return nil
@@ -893,8 +1077,15 @@ func decodeGetAccountTransactionsParams(args [1]string, r *http.Request) (params
 				}
 				return nil
 			}(); err != nil {
-				return params, errors.Wrap(err, "query: limit: invalid")
+				return err
 			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "limit",
+			In:   "query",
+			Err:  err,
 		}
 	}
 	return params, nil
@@ -919,10 +1110,10 @@ func unpackGetAllAuctionsParams(packed middleware.Parameters) (params GetAllAuct
 	return params
 }
 
-func decodeGetAllAuctionsParams(args [0]string, r *http.Request) (params GetAllAuctionsParams, _ error) {
+func decodeGetAllAuctionsParams(args [0]string, argsEscaped bool, r *http.Request) (params GetAllAuctionsParams, _ error) {
 	q := uri.NewQueryDecoder(r.URL.Query())
 	// Decode query: tld.
-	{
+	if err := func() error {
 		cfg := uri.QueryParameterDecodingConfig{
 			Name:    "tld",
 			Style:   uri.QueryStyleForm,
@@ -951,8 +1142,15 @@ func decodeGetAllAuctionsParams(args [0]string, r *http.Request) (params GetAllA
 				params.Tld.SetTo(paramsDotTldVal)
 				return nil
 			}); err != nil {
-				return params, errors.Wrap(err, "query: tld: parse")
+				return err
 			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "tld",
+			In:   "query",
+			Err:  err,
 		}
 	}
 	return params, nil
@@ -975,10 +1173,17 @@ func unpackGetAllShardsInfoLiteServerParams(packed middleware.Parameters) (param
 	return params
 }
 
-func decodeGetAllShardsInfoLiteServerParams(args [1]string, r *http.Request) (params GetAllShardsInfoLiteServerParams, _ error) {
+func decodeGetAllShardsInfoLiteServerParams(args [1]string, argsEscaped bool, r *http.Request) (params GetAllShardsInfoLiteServerParams, _ error) {
 	// Decode path: block_id.
-	{
+	if err := func() error {
 		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
 		if len(param) > 0 {
 			d := uri.NewPathDecoder(uri.PathDecoderConfig{
 				Param:   "block_id",
@@ -1001,10 +1206,17 @@ func decodeGetAllShardsInfoLiteServerParams(args [1]string, r *http.Request) (pa
 				params.BlockID = c
 				return nil
 			}(); err != nil {
-				return params, errors.Wrap(err, "path: block_id: parse")
+				return err
 			}
 		} else {
-			return params, errors.New("path: block_id: not specified")
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "block_id",
+			In:   "path",
+			Err:  err,
 		}
 	}
 	return params, nil
@@ -1027,10 +1239,17 @@ func unpackGetBlockParams(packed middleware.Parameters) (params GetBlockParams) 
 	return params
 }
 
-func decodeGetBlockParams(args [1]string, r *http.Request) (params GetBlockParams, _ error) {
+func decodeGetBlockParams(args [1]string, argsEscaped bool, r *http.Request) (params GetBlockParams, _ error) {
 	// Decode path: block_id.
-	{
+	if err := func() error {
 		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
 		if len(param) > 0 {
 			d := uri.NewPathDecoder(uri.PathDecoderConfig{
 				Param:   "block_id",
@@ -1053,10 +1272,17 @@ func decodeGetBlockParams(args [1]string, r *http.Request) (params GetBlockParam
 				params.BlockID = c
 				return nil
 			}(); err != nil {
-				return params, errors.Wrap(err, "path: block_id: parse")
+				return err
 			}
 		} else {
-			return params, errors.New("path: block_id: not specified")
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "block_id",
+			In:   "path",
+			Err:  err,
 		}
 	}
 	return params, nil
@@ -1088,11 +1314,18 @@ func unpackGetBlockHeaderLiteServerParams(packed middleware.Parameters) (params 
 	return params
 }
 
-func decodeGetBlockHeaderLiteServerParams(args [1]string, r *http.Request) (params GetBlockHeaderLiteServerParams, _ error) {
+func decodeGetBlockHeaderLiteServerParams(args [1]string, argsEscaped bool, r *http.Request) (params GetBlockHeaderLiteServerParams, _ error) {
 	q := uri.NewQueryDecoder(r.URL.Query())
 	// Decode path: block_id.
-	{
+	if err := func() error {
 		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
 		if len(param) > 0 {
 			d := uri.NewPathDecoder(uri.PathDecoderConfig{
 				Param:   "block_id",
@@ -1115,14 +1348,21 @@ func decodeGetBlockHeaderLiteServerParams(args [1]string, r *http.Request) (para
 				params.BlockID = c
 				return nil
 			}(); err != nil {
-				return params, errors.Wrap(err, "path: block_id: parse")
+				return err
 			}
 		} else {
-			return params, errors.New("path: block_id: not specified")
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "block_id",
+			In:   "path",
+			Err:  err,
 		}
 	}
 	// Decode query: mode.
-	{
+	if err := func() error {
 		cfg := uri.QueryParameterDecodingConfig{
 			Name:    "mode",
 			Style:   uri.QueryStyleForm,
@@ -1144,10 +1384,17 @@ func decodeGetBlockHeaderLiteServerParams(args [1]string, r *http.Request) (para
 				params.Mode = c
 				return nil
 			}); err != nil {
-				return params, errors.Wrap(err, "query: mode: parse")
+				return err
 			}
 		} else {
-			return params, errors.Wrap(err, "query")
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "mode",
+			In:   "query",
+			Err:  err,
 		}
 	}
 	return params, nil
@@ -1170,10 +1417,17 @@ func unpackGetBlockLiteServerParams(packed middleware.Parameters) (params GetBlo
 	return params
 }
 
-func decodeGetBlockLiteServerParams(args [1]string, r *http.Request) (params GetBlockLiteServerParams, _ error) {
+func decodeGetBlockLiteServerParams(args [1]string, argsEscaped bool, r *http.Request) (params GetBlockLiteServerParams, _ error) {
 	// Decode path: block_id.
-	{
+	if err := func() error {
 		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
 		if len(param) > 0 {
 			d := uri.NewPathDecoder(uri.PathDecoderConfig{
 				Param:   "block_id",
@@ -1196,10 +1450,17 @@ func decodeGetBlockLiteServerParams(args [1]string, r *http.Request) (params Get
 				params.BlockID = c
 				return nil
 			}(); err != nil {
-				return params, errors.Wrap(err, "path: block_id: parse")
+				return err
 			}
 		} else {
-			return params, errors.New("path: block_id: not specified")
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "block_id",
+			In:   "path",
+			Err:  err,
 		}
 	}
 	return params, nil
@@ -1242,10 +1503,10 @@ func unpackGetBlockProofLiteServerParams(packed middleware.Parameters) (params G
 	return params
 }
 
-func decodeGetBlockProofLiteServerParams(args [0]string, r *http.Request) (params GetBlockProofLiteServerParams, _ error) {
+func decodeGetBlockProofLiteServerParams(args [0]string, argsEscaped bool, r *http.Request) (params GetBlockProofLiteServerParams, _ error) {
 	q := uri.NewQueryDecoder(r.URL.Query())
 	// Decode query: known_block.
-	{
+	if err := func() error {
 		cfg := uri.QueryParameterDecodingConfig{
 			Name:    "known_block",
 			Style:   uri.QueryStyleForm,
@@ -1267,14 +1528,21 @@ func decodeGetBlockProofLiteServerParams(args [0]string, r *http.Request) (param
 				params.KnownBlock = c
 				return nil
 			}); err != nil {
-				return params, errors.Wrap(err, "query: known_block: parse")
+				return err
 			}
 		} else {
-			return params, errors.Wrap(err, "query")
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "known_block",
+			In:   "query",
+			Err:  err,
 		}
 	}
 	// Decode query: target_block.
-	{
+	if err := func() error {
 		cfg := uri.QueryParameterDecodingConfig{
 			Name:    "target_block",
 			Style:   uri.QueryStyleForm,
@@ -1303,12 +1571,19 @@ func decodeGetBlockProofLiteServerParams(args [0]string, r *http.Request) (param
 				params.TargetBlock.SetTo(paramsDotTargetBlockVal)
 				return nil
 			}); err != nil {
-				return params, errors.Wrap(err, "query: target_block: parse")
+				return err
 			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "target_block",
+			In:   "query",
+			Err:  err,
 		}
 	}
 	// Decode query: mode.
-	{
+	if err := func() error {
 		cfg := uri.QueryParameterDecodingConfig{
 			Name:    "mode",
 			Style:   uri.QueryStyleForm,
@@ -1330,10 +1605,17 @@ func decodeGetBlockProofLiteServerParams(args [0]string, r *http.Request) (param
 				params.Mode = c
 				return nil
 			}); err != nil {
-				return params, errors.Wrap(err, "query: mode: parse")
+				return err
 			}
 		} else {
-			return params, errors.Wrap(err, "query")
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "mode",
+			In:   "query",
+			Err:  err,
 		}
 	}
 	return params, nil
@@ -1356,10 +1638,17 @@ func unpackGetBlockTransactionsParams(packed middleware.Parameters) (params GetB
 	return params
 }
 
-func decodeGetBlockTransactionsParams(args [1]string, r *http.Request) (params GetBlockTransactionsParams, _ error) {
+func decodeGetBlockTransactionsParams(args [1]string, argsEscaped bool, r *http.Request) (params GetBlockTransactionsParams, _ error) {
 	// Decode path: block_id.
-	{
+	if err := func() error {
 		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
 		if len(param) > 0 {
 			d := uri.NewPathDecoder(uri.PathDecoderConfig{
 				Param:   "block_id",
@@ -1382,10 +1671,17 @@ func decodeGetBlockTransactionsParams(args [1]string, r *http.Request) (params G
 				params.BlockID = c
 				return nil
 			}(); err != nil {
-				return params, errors.Wrap(err, "path: block_id: parse")
+				return err
 			}
 		} else {
-			return params, errors.New("path: block_id: not specified")
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "block_id",
+			In:   "path",
+			Err:  err,
 		}
 	}
 	return params, nil
@@ -1417,11 +1713,18 @@ func unpackGetConfigAllLiteServerParams(packed middleware.Parameters) (params Ge
 	return params
 }
 
-func decodeGetConfigAllLiteServerParams(args [1]string, r *http.Request) (params GetConfigAllLiteServerParams, _ error) {
+func decodeGetConfigAllLiteServerParams(args [1]string, argsEscaped bool, r *http.Request) (params GetConfigAllLiteServerParams, _ error) {
 	q := uri.NewQueryDecoder(r.URL.Query())
 	// Decode path: block_id.
-	{
+	if err := func() error {
 		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
 		if len(param) > 0 {
 			d := uri.NewPathDecoder(uri.PathDecoderConfig{
 				Param:   "block_id",
@@ -1444,14 +1747,21 @@ func decodeGetConfigAllLiteServerParams(args [1]string, r *http.Request) (params
 				params.BlockID = c
 				return nil
 			}(); err != nil {
-				return params, errors.Wrap(err, "path: block_id: parse")
+				return err
 			}
 		} else {
-			return params, errors.New("path: block_id: not specified")
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "block_id",
+			In:   "path",
+			Err:  err,
 		}
 	}
 	// Decode query: mode.
-	{
+	if err := func() error {
 		cfg := uri.QueryParameterDecodingConfig{
 			Name:    "mode",
 			Style:   uri.QueryStyleForm,
@@ -1473,10 +1783,17 @@ func decodeGetConfigAllLiteServerParams(args [1]string, r *http.Request) (params
 				params.Mode = c
 				return nil
 			}); err != nil {
-				return params, errors.Wrap(err, "query: mode: parse")
+				return err
 			}
 		} else {
-			return params, errors.Wrap(err, "query")
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "mode",
+			In:   "query",
+			Err:  err,
 		}
 	}
 	return params, nil
@@ -1510,11 +1827,18 @@ func unpackGetDnsExpiringParams(packed middleware.Parameters) (params GetDnsExpi
 	return params
 }
 
-func decodeGetDnsExpiringParams(args [1]string, r *http.Request) (params GetDnsExpiringParams, _ error) {
+func decodeGetDnsExpiringParams(args [1]string, argsEscaped bool, r *http.Request) (params GetDnsExpiringParams, _ error) {
 	q := uri.NewQueryDecoder(r.URL.Query())
 	// Decode path: account_id.
-	{
+	if err := func() error {
 		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
 		if len(param) > 0 {
 			d := uri.NewPathDecoder(uri.PathDecoderConfig{
 				Param:   "account_id",
@@ -1537,14 +1861,21 @@ func decodeGetDnsExpiringParams(args [1]string, r *http.Request) (params GetDnsE
 				params.AccountID = c
 				return nil
 			}(); err != nil {
-				return params, errors.Wrap(err, "path: account_id: parse")
+				return err
 			}
 		} else {
-			return params, errors.New("path: account_id: not specified")
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account_id",
+			In:   "path",
+			Err:  err,
 		}
 	}
 	// Decode query: period.
-	{
+	if err := func() error {
 		cfg := uri.QueryParameterDecodingConfig{
 			Name:    "period",
 			Style:   uri.QueryStyleForm,
@@ -1573,10 +1904,10 @@ func decodeGetDnsExpiringParams(args [1]string, r *http.Request) (params GetDnsE
 				params.Period.SetTo(paramsDotPeriodVal)
 				return nil
 			}); err != nil {
-				return params, errors.Wrap(err, "query: period: parse")
+				return err
 			}
 			if err := func() error {
-				if params.Period.Set {
+				if value, ok := params.Period.Get(); ok {
 					if err := func() error {
 						if err := (validate.Int{
 							MinSet:        true,
@@ -1587,7 +1918,7 @@ func decodeGetDnsExpiringParams(args [1]string, r *http.Request) (params GetDnsE
 							MaxExclusive:  false,
 							MultipleOfSet: false,
 							MultipleOf:    0,
-						}).Validate(int64(params.Period.Value)); err != nil {
+						}).Validate(int64(value)); err != nil {
 							return errors.Wrap(err, "int")
 						}
 						return nil
@@ -1597,8 +1928,15 @@ func decodeGetDnsExpiringParams(args [1]string, r *http.Request) (params GetDnsE
 				}
 				return nil
 			}(); err != nil {
-				return params, errors.Wrap(err, "query: period: invalid")
+				return err
 			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "period",
+			In:   "query",
+			Err:  err,
 		}
 	}
 	return params, nil
@@ -1621,10 +1959,17 @@ func unpackGetDomainBidsParams(packed middleware.Parameters) (params GetDomainBi
 	return params
 }
 
-func decodeGetDomainBidsParams(args [1]string, r *http.Request) (params GetDomainBidsParams, _ error) {
+func decodeGetDomainBidsParams(args [1]string, argsEscaped bool, r *http.Request) (params GetDomainBidsParams, _ error) {
 	// Decode path: domain_name.
-	{
+	if err := func() error {
 		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
 		if len(param) > 0 {
 			d := uri.NewPathDecoder(uri.PathDecoderConfig{
 				Param:   "domain_name",
@@ -1647,10 +1992,17 @@ func decodeGetDomainBidsParams(args [1]string, r *http.Request) (params GetDomai
 				params.DomainName = c
 				return nil
 			}(); err != nil {
-				return params, errors.Wrap(err, "path: domain_name: parse")
+				return err
 			}
 		} else {
-			return params, errors.New("path: domain_name: not specified")
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "domain_name",
+			In:   "path",
+			Err:  err,
 		}
 	}
 	return params, nil
@@ -1683,11 +2035,18 @@ func unpackGetEventParams(packed middleware.Parameters) (params GetEventParams) 
 	return params
 }
 
-func decodeGetEventParams(args [1]string, r *http.Request) (params GetEventParams, _ error) {
+func decodeGetEventParams(args [1]string, argsEscaped bool, r *http.Request) (params GetEventParams, _ error) {
 	h := uri.NewHeaderDecoder(r.Header)
 	// Decode path: event_id.
-	{
+	if err := func() error {
 		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
 		if len(param) > 0 {
 			d := uri.NewPathDecoder(uri.PathDecoderConfig{
 				Param:   "event_id",
@@ -1710,10 +2069,17 @@ func decodeGetEventParams(args [1]string, r *http.Request) (params GetEventParam
 				params.EventID = c
 				return nil
 			}(); err != nil {
-				return params, errors.Wrap(err, "path: event_id: parse")
+				return err
 			}
 		} else {
-			return params, errors.New("path: event_id: not specified")
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "event_id",
+			In:   "path",
+			Err:  err,
 		}
 	}
 	// Set default value for header: Accept-Language.
@@ -1722,7 +2088,7 @@ func decodeGetEventParams(args [1]string, r *http.Request) (params GetEventParam
 		params.AcceptLanguage.SetTo(val)
 	}
 	// Decode header: Accept-Language.
-	{
+	if err := func() error {
 		cfg := uri.HeaderParameterDecodingConfig{
 			Name:    "Accept-Language",
 			Explode: false,
@@ -1749,8 +2115,15 @@ func decodeGetEventParams(args [1]string, r *http.Request) (params GetEventParam
 				params.AcceptLanguage.SetTo(paramsDotAcceptLanguageVal)
 				return nil
 			}); err != nil {
-				return params, errors.Wrap(err, "header: Accept-Language: parse")
+				return err
 			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "Accept-Language",
+			In:   "header",
+			Err:  err,
 		}
 	}
 	return params, nil
@@ -1833,12 +2206,19 @@ func unpackGetEventsByAccountParams(packed middleware.Parameters) (params GetEve
 	return params
 }
 
-func decodeGetEventsByAccountParams(args [1]string, r *http.Request) (params GetEventsByAccountParams, _ error) {
+func decodeGetEventsByAccountParams(args [1]string, argsEscaped bool, r *http.Request) (params GetEventsByAccountParams, _ error) {
 	q := uri.NewQueryDecoder(r.URL.Query())
 	h := uri.NewHeaderDecoder(r.Header)
 	// Decode path: account_id.
-	{
+	if err := func() error {
 		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
 		if len(param) > 0 {
 			d := uri.NewPathDecoder(uri.PathDecoderConfig{
 				Param:   "account_id",
@@ -1861,10 +2241,17 @@ func decodeGetEventsByAccountParams(args [1]string, r *http.Request) (params Get
 				params.AccountID = c
 				return nil
 			}(); err != nil {
-				return params, errors.Wrap(err, "path: account_id: parse")
+				return err
 			}
 		} else {
-			return params, errors.New("path: account_id: not specified")
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account_id",
+			In:   "path",
+			Err:  err,
 		}
 	}
 	// Set default value for header: Accept-Language.
@@ -1873,7 +2260,7 @@ func decodeGetEventsByAccountParams(args [1]string, r *http.Request) (params Get
 		params.AcceptLanguage.SetTo(val)
 	}
 	// Decode header: Accept-Language.
-	{
+	if err := func() error {
 		cfg := uri.HeaderParameterDecodingConfig{
 			Name:    "Accept-Language",
 			Explode: false,
@@ -1900,8 +2287,15 @@ func decodeGetEventsByAccountParams(args [1]string, r *http.Request) (params Get
 				params.AcceptLanguage.SetTo(paramsDotAcceptLanguageVal)
 				return nil
 			}); err != nil {
-				return params, errors.Wrap(err, "header: Accept-Language: parse")
+				return err
 			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "Accept-Language",
+			In:   "header",
+			Err:  err,
 		}
 	}
 	// Set default value for query: subject_only.
@@ -1910,7 +2304,7 @@ func decodeGetEventsByAccountParams(args [1]string, r *http.Request) (params Get
 		params.SubjectOnly.SetTo(val)
 	}
 	// Decode query: subject_only.
-	{
+	if err := func() error {
 		cfg := uri.QueryParameterDecodingConfig{
 			Name:    "subject_only",
 			Style:   uri.QueryStyleForm,
@@ -1939,12 +2333,19 @@ func decodeGetEventsByAccountParams(args [1]string, r *http.Request) (params Get
 				params.SubjectOnly.SetTo(paramsDotSubjectOnlyVal)
 				return nil
 			}); err != nil {
-				return params, errors.Wrap(err, "query: subject_only: parse")
+				return err
 			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "subject_only",
+			In:   "query",
+			Err:  err,
 		}
 	}
 	// Decode query: before_lt.
-	{
+	if err := func() error {
 		cfg := uri.QueryParameterDecodingConfig{
 			Name:    "before_lt",
 			Style:   uri.QueryStyleForm,
@@ -1973,12 +2374,19 @@ func decodeGetEventsByAccountParams(args [1]string, r *http.Request) (params Get
 				params.BeforeLt.SetTo(paramsDotBeforeLtVal)
 				return nil
 			}); err != nil {
-				return params, errors.Wrap(err, "query: before_lt: parse")
+				return err
 			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "before_lt",
+			In:   "query",
+			Err:  err,
 		}
 	}
 	// Decode query: limit.
-	{
+	if err := func() error {
 		cfg := uri.QueryParameterDecodingConfig{
 			Name:    "limit",
 			Style:   uri.QueryStyleForm,
@@ -2000,7 +2408,7 @@ func decodeGetEventsByAccountParams(args [1]string, r *http.Request) (params Get
 				params.Limit = c
 				return nil
 			}); err != nil {
-				return params, errors.Wrap(err, "query: limit: parse")
+				return err
 			}
 			if err := func() error {
 				if err := (validate.Int{
@@ -2017,14 +2425,21 @@ func decodeGetEventsByAccountParams(args [1]string, r *http.Request) (params Get
 				}
 				return nil
 			}(); err != nil {
-				return params, errors.Wrap(err, "query: limit: invalid")
+				return err
 			}
 		} else {
-			return params, errors.Wrap(err, "query")
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "limit",
+			In:   "query",
+			Err:  err,
 		}
 	}
 	// Decode query: start_date.
-	{
+	if err := func() error {
 		cfg := uri.QueryParameterDecodingConfig{
 			Name:    "start_date",
 			Style:   uri.QueryStyleForm,
@@ -2053,12 +2468,19 @@ func decodeGetEventsByAccountParams(args [1]string, r *http.Request) (params Get
 				params.StartDate.SetTo(paramsDotStartDateVal)
 				return nil
 			}); err != nil {
-				return params, errors.Wrap(err, "query: start_date: parse")
+				return err
 			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "start_date",
+			In:   "query",
+			Err:  err,
 		}
 	}
 	// Decode query: end_date.
-	{
+	if err := func() error {
 		cfg := uri.QueryParameterDecodingConfig{
 			Name:    "end_date",
 			Style:   uri.QueryStyleForm,
@@ -2087,8 +2509,15 @@ func decodeGetEventsByAccountParams(args [1]string, r *http.Request) (params Get
 				params.EndDate.SetTo(paramsDotEndDateVal)
 				return nil
 			}); err != nil {
-				return params, errors.Wrap(err, "query: end_date: parse")
+				return err
 			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "end_date",
+			In:   "query",
+			Err:  err,
 		}
 	}
 	return params, nil
@@ -2131,11 +2560,18 @@ func unpackGetItemsFromCollectionParams(packed middleware.Parameters) (params Ge
 	return params
 }
 
-func decodeGetItemsFromCollectionParams(args [1]string, r *http.Request) (params GetItemsFromCollectionParams, _ error) {
+func decodeGetItemsFromCollectionParams(args [1]string, argsEscaped bool, r *http.Request) (params GetItemsFromCollectionParams, _ error) {
 	q := uri.NewQueryDecoder(r.URL.Query())
 	// Decode path: account_id.
-	{
+	if err := func() error {
 		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
 		if len(param) > 0 {
 			d := uri.NewPathDecoder(uri.PathDecoderConfig{
 				Param:   "account_id",
@@ -2158,10 +2594,17 @@ func decodeGetItemsFromCollectionParams(args [1]string, r *http.Request) (params
 				params.AccountID = c
 				return nil
 			}(); err != nil {
-				return params, errors.Wrap(err, "path: account_id: parse")
+				return err
 			}
 		} else {
-			return params, errors.New("path: account_id: not specified")
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account_id",
+			In:   "path",
+			Err:  err,
 		}
 	}
 	// Set default value for query: limit.
@@ -2170,7 +2613,7 @@ func decodeGetItemsFromCollectionParams(args [1]string, r *http.Request) (params
 		params.Limit.SetTo(val)
 	}
 	// Decode query: limit.
-	{
+	if err := func() error {
 		cfg := uri.QueryParameterDecodingConfig{
 			Name:    "limit",
 			Style:   uri.QueryStyleForm,
@@ -2199,10 +2642,10 @@ func decodeGetItemsFromCollectionParams(args [1]string, r *http.Request) (params
 				params.Limit.SetTo(paramsDotLimitVal)
 				return nil
 			}); err != nil {
-				return params, errors.Wrap(err, "query: limit: parse")
+				return err
 			}
 			if err := func() error {
-				if params.Limit.Set {
+				if value, ok := params.Limit.Get(); ok {
 					if err := func() error {
 						if err := (validate.Int{
 							MinSet:        false,
@@ -2213,7 +2656,7 @@ func decodeGetItemsFromCollectionParams(args [1]string, r *http.Request) (params
 							MaxExclusive:  false,
 							MultipleOfSet: false,
 							MultipleOf:    0,
-						}).Validate(int64(params.Limit.Value)); err != nil {
+						}).Validate(int64(value)); err != nil {
 							return errors.Wrap(err, "int")
 						}
 						return nil
@@ -2223,8 +2666,15 @@ func decodeGetItemsFromCollectionParams(args [1]string, r *http.Request) (params
 				}
 				return nil
 			}(); err != nil {
-				return params, errors.Wrap(err, "query: limit: invalid")
+				return err
 			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "limit",
+			In:   "query",
+			Err:  err,
 		}
 	}
 	// Set default value for query: offset.
@@ -2233,7 +2683,7 @@ func decodeGetItemsFromCollectionParams(args [1]string, r *http.Request) (params
 		params.Offset.SetTo(val)
 	}
 	// Decode query: offset.
-	{
+	if err := func() error {
 		cfg := uri.QueryParameterDecodingConfig{
 			Name:    "offset",
 			Style:   uri.QueryStyleForm,
@@ -2262,8 +2712,15 @@ func decodeGetItemsFromCollectionParams(args [1]string, r *http.Request) (params
 				params.Offset.SetTo(paramsDotOffsetVal)
 				return nil
 			}); err != nil {
-				return params, errors.Wrap(err, "query: offset: parse")
+				return err
 			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "offset",
+			In:   "query",
+			Err:  err,
 		}
 	}
 	return params, nil
@@ -2286,10 +2743,17 @@ func unpackGetJettonInfoParams(packed middleware.Parameters) (params GetJettonIn
 	return params
 }
 
-func decodeGetJettonInfoParams(args [1]string, r *http.Request) (params GetJettonInfoParams, _ error) {
+func decodeGetJettonInfoParams(args [1]string, argsEscaped bool, r *http.Request) (params GetJettonInfoParams, _ error) {
 	// Decode path: account_id.
-	{
+	if err := func() error {
 		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
 		if len(param) > 0 {
 			d := uri.NewPathDecoder(uri.PathDecoderConfig{
 				Param:   "account_id",
@@ -2312,10 +2776,17 @@ func decodeGetJettonInfoParams(args [1]string, r *http.Request) (params GetJetto
 				params.AccountID = c
 				return nil
 			}(); err != nil {
-				return params, errors.Wrap(err, "path: account_id: parse")
+				return err
 			}
 		} else {
-			return params, errors.New("path: account_id: not specified")
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account_id",
+			In:   "path",
+			Err:  err,
 		}
 	}
 	return params, nil
@@ -2349,7 +2820,7 @@ func unpackGetJettonsParams(packed middleware.Parameters) (params GetJettonsPara
 	return params
 }
 
-func decodeGetJettonsParams(args [0]string, r *http.Request) (params GetJettonsParams, _ error) {
+func decodeGetJettonsParams(args [0]string, argsEscaped bool, r *http.Request) (params GetJettonsParams, _ error) {
 	q := uri.NewQueryDecoder(r.URL.Query())
 	// Set default value for query: limit.
 	{
@@ -2357,7 +2828,7 @@ func decodeGetJettonsParams(args [0]string, r *http.Request) (params GetJettonsP
 		params.Limit.SetTo(val)
 	}
 	// Decode query: limit.
-	{
+	if err := func() error {
 		cfg := uri.QueryParameterDecodingConfig{
 			Name:    "limit",
 			Style:   uri.QueryStyleForm,
@@ -2386,10 +2857,10 @@ func decodeGetJettonsParams(args [0]string, r *http.Request) (params GetJettonsP
 				params.Limit.SetTo(paramsDotLimitVal)
 				return nil
 			}); err != nil {
-				return params, errors.Wrap(err, "query: limit: parse")
+				return err
 			}
 			if err := func() error {
-				if params.Limit.Set {
+				if value, ok := params.Limit.Get(); ok {
 					if err := func() error {
 						if err := (validate.Int{
 							MinSet:        false,
@@ -2400,7 +2871,7 @@ func decodeGetJettonsParams(args [0]string, r *http.Request) (params GetJettonsP
 							MaxExclusive:  false,
 							MultipleOfSet: false,
 							MultipleOf:    0,
-						}).Validate(int64(params.Limit.Value)); err != nil {
+						}).Validate(int64(value)); err != nil {
 							return errors.Wrap(err, "int")
 						}
 						return nil
@@ -2410,8 +2881,15 @@ func decodeGetJettonsParams(args [0]string, r *http.Request) (params GetJettonsP
 				}
 				return nil
 			}(); err != nil {
-				return params, errors.Wrap(err, "query: limit: invalid")
+				return err
 			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "limit",
+			In:   "query",
+			Err:  err,
 		}
 	}
 	// Set default value for query: offset.
@@ -2420,7 +2898,7 @@ func decodeGetJettonsParams(args [0]string, r *http.Request) (params GetJettonsP
 		params.Offset.SetTo(val)
 	}
 	// Decode query: offset.
-	{
+	if err := func() error {
 		cfg := uri.QueryParameterDecodingConfig{
 			Name:    "offset",
 			Style:   uri.QueryStyleForm,
@@ -2449,8 +2927,15 @@ func decodeGetJettonsParams(args [0]string, r *http.Request) (params GetJettonsP
 				params.Offset.SetTo(paramsDotOffsetVal)
 				return nil
 			}); err != nil {
-				return params, errors.Wrap(err, "query: offset: parse")
+				return err
 			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "offset",
+			In:   "query",
+			Err:  err,
 		}
 	}
 	return params, nil
@@ -2473,10 +2958,17 @@ func unpackGetJettonsBalancesParams(packed middleware.Parameters) (params GetJet
 	return params
 }
 
-func decodeGetJettonsBalancesParams(args [1]string, r *http.Request) (params GetJettonsBalancesParams, _ error) {
+func decodeGetJettonsBalancesParams(args [1]string, argsEscaped bool, r *http.Request) (params GetJettonsBalancesParams, _ error) {
 	// Decode path: account_id.
-	{
+	if err := func() error {
 		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
 		if len(param) > 0 {
 			d := uri.NewPathDecoder(uri.PathDecoderConfig{
 				Param:   "account_id",
@@ -2499,10 +2991,17 @@ func decodeGetJettonsBalancesParams(args [1]string, r *http.Request) (params Get
 				params.AccountID = c
 				return nil
 			}(); err != nil {
-				return params, errors.Wrap(err, "path: account_id: parse")
+				return err
 			}
 		} else {
-			return params, errors.New("path: account_id: not specified")
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account_id",
+			In:   "path",
+			Err:  err,
 		}
 	}
 	return params, nil
@@ -2574,12 +3073,19 @@ func unpackGetJettonsHistoryParams(packed middleware.Parameters) (params GetJett
 	return params
 }
 
-func decodeGetJettonsHistoryParams(args [1]string, r *http.Request) (params GetJettonsHistoryParams, _ error) {
+func decodeGetJettonsHistoryParams(args [1]string, argsEscaped bool, r *http.Request) (params GetJettonsHistoryParams, _ error) {
 	q := uri.NewQueryDecoder(r.URL.Query())
 	h := uri.NewHeaderDecoder(r.Header)
 	// Decode path: account_id.
-	{
+	if err := func() error {
 		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
 		if len(param) > 0 {
 			d := uri.NewPathDecoder(uri.PathDecoderConfig{
 				Param:   "account_id",
@@ -2602,10 +3108,17 @@ func decodeGetJettonsHistoryParams(args [1]string, r *http.Request) (params GetJ
 				params.AccountID = c
 				return nil
 			}(); err != nil {
-				return params, errors.Wrap(err, "path: account_id: parse")
+				return err
 			}
 		} else {
-			return params, errors.New("path: account_id: not specified")
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account_id",
+			In:   "path",
+			Err:  err,
 		}
 	}
 	// Set default value for header: Accept-Language.
@@ -2614,7 +3127,7 @@ func decodeGetJettonsHistoryParams(args [1]string, r *http.Request) (params GetJ
 		params.AcceptLanguage.SetTo(val)
 	}
 	// Decode header: Accept-Language.
-	{
+	if err := func() error {
 		cfg := uri.HeaderParameterDecodingConfig{
 			Name:    "Accept-Language",
 			Explode: false,
@@ -2641,12 +3154,19 @@ func decodeGetJettonsHistoryParams(args [1]string, r *http.Request) (params GetJ
 				params.AcceptLanguage.SetTo(paramsDotAcceptLanguageVal)
 				return nil
 			}); err != nil {
-				return params, errors.Wrap(err, "header: Accept-Language: parse")
+				return err
 			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "Accept-Language",
+			In:   "header",
+			Err:  err,
 		}
 	}
 	// Decode query: before_lt.
-	{
+	if err := func() error {
 		cfg := uri.QueryParameterDecodingConfig{
 			Name:    "before_lt",
 			Style:   uri.QueryStyleForm,
@@ -2675,12 +3195,19 @@ func decodeGetJettonsHistoryParams(args [1]string, r *http.Request) (params GetJ
 				params.BeforeLt.SetTo(paramsDotBeforeLtVal)
 				return nil
 			}); err != nil {
-				return params, errors.Wrap(err, "query: before_lt: parse")
+				return err
 			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "before_lt",
+			In:   "query",
+			Err:  err,
 		}
 	}
 	// Decode query: limit.
-	{
+	if err := func() error {
 		cfg := uri.QueryParameterDecodingConfig{
 			Name:    "limit",
 			Style:   uri.QueryStyleForm,
@@ -2702,7 +3229,7 @@ func decodeGetJettonsHistoryParams(args [1]string, r *http.Request) (params GetJ
 				params.Limit = c
 				return nil
 			}); err != nil {
-				return params, errors.Wrap(err, "query: limit: parse")
+				return err
 			}
 			if err := func() error {
 				if err := (validate.Int{
@@ -2719,14 +3246,21 @@ func decodeGetJettonsHistoryParams(args [1]string, r *http.Request) (params GetJ
 				}
 				return nil
 			}(); err != nil {
-				return params, errors.Wrap(err, "query: limit: invalid")
+				return err
 			}
 		} else {
-			return params, errors.Wrap(err, "query")
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "limit",
+			In:   "query",
+			Err:  err,
 		}
 	}
 	// Decode query: start_date.
-	{
+	if err := func() error {
 		cfg := uri.QueryParameterDecodingConfig{
 			Name:    "start_date",
 			Style:   uri.QueryStyleForm,
@@ -2755,12 +3289,19 @@ func decodeGetJettonsHistoryParams(args [1]string, r *http.Request) (params GetJ
 				params.StartDate.SetTo(paramsDotStartDateVal)
 				return nil
 			}); err != nil {
-				return params, errors.Wrap(err, "query: start_date: parse")
+				return err
 			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "start_date",
+			In:   "query",
+			Err:  err,
 		}
 	}
 	// Decode query: end_date.
-	{
+	if err := func() error {
 		cfg := uri.QueryParameterDecodingConfig{
 			Name:    "end_date",
 			Style:   uri.QueryStyleForm,
@@ -2789,8 +3330,15 @@ func decodeGetJettonsHistoryParams(args [1]string, r *http.Request) (params GetJ
 				params.EndDate.SetTo(paramsDotEndDateVal)
 				return nil
 			}); err != nil {
-				return params, errors.Wrap(err, "query: end_date: parse")
+				return err
 			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "end_date",
+			In:   "query",
+			Err:  err,
 		}
 	}
 	return params, nil
@@ -2871,12 +3419,19 @@ func unpackGetJettonsHistoryByIDParams(packed middleware.Parameters) (params Get
 	return params
 }
 
-func decodeGetJettonsHistoryByIDParams(args [2]string, r *http.Request) (params GetJettonsHistoryByIDParams, _ error) {
+func decodeGetJettonsHistoryByIDParams(args [2]string, argsEscaped bool, r *http.Request) (params GetJettonsHistoryByIDParams, _ error) {
 	q := uri.NewQueryDecoder(r.URL.Query())
 	h := uri.NewHeaderDecoder(r.Header)
 	// Decode path: account_id.
-	{
+	if err := func() error {
 		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
 		if len(param) > 0 {
 			d := uri.NewPathDecoder(uri.PathDecoderConfig{
 				Param:   "account_id",
@@ -2899,15 +3454,29 @@ func decodeGetJettonsHistoryByIDParams(args [2]string, r *http.Request) (params 
 				params.AccountID = c
 				return nil
 			}(); err != nil {
-				return params, errors.Wrap(err, "path: account_id: parse")
+				return err
 			}
 		} else {
-			return params, errors.New("path: account_id: not specified")
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account_id",
+			In:   "path",
+			Err:  err,
 		}
 	}
 	// Decode path: jetton_id.
-	{
+	if err := func() error {
 		param := args[1]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
 		if len(param) > 0 {
 			d := uri.NewPathDecoder(uri.PathDecoderConfig{
 				Param:   "jetton_id",
@@ -2930,10 +3499,17 @@ func decodeGetJettonsHistoryByIDParams(args [2]string, r *http.Request) (params 
 				params.JettonID = c
 				return nil
 			}(); err != nil {
-				return params, errors.Wrap(err, "path: jetton_id: parse")
+				return err
 			}
 		} else {
-			return params, errors.New("path: jetton_id: not specified")
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "jetton_id",
+			In:   "path",
+			Err:  err,
 		}
 	}
 	// Set default value for header: Accept-Language.
@@ -2942,7 +3518,7 @@ func decodeGetJettonsHistoryByIDParams(args [2]string, r *http.Request) (params 
 		params.AcceptLanguage.SetTo(val)
 	}
 	// Decode header: Accept-Language.
-	{
+	if err := func() error {
 		cfg := uri.HeaderParameterDecodingConfig{
 			Name:    "Accept-Language",
 			Explode: false,
@@ -2969,12 +3545,19 @@ func decodeGetJettonsHistoryByIDParams(args [2]string, r *http.Request) (params 
 				params.AcceptLanguage.SetTo(paramsDotAcceptLanguageVal)
 				return nil
 			}); err != nil {
-				return params, errors.Wrap(err, "header: Accept-Language: parse")
+				return err
 			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "Accept-Language",
+			In:   "header",
+			Err:  err,
 		}
 	}
 	// Decode query: before_lt.
-	{
+	if err := func() error {
 		cfg := uri.QueryParameterDecodingConfig{
 			Name:    "before_lt",
 			Style:   uri.QueryStyleForm,
@@ -3003,12 +3586,19 @@ func decodeGetJettonsHistoryByIDParams(args [2]string, r *http.Request) (params 
 				params.BeforeLt.SetTo(paramsDotBeforeLtVal)
 				return nil
 			}); err != nil {
-				return params, errors.Wrap(err, "query: before_lt: parse")
+				return err
 			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "before_lt",
+			In:   "query",
+			Err:  err,
 		}
 	}
 	// Decode query: limit.
-	{
+	if err := func() error {
 		cfg := uri.QueryParameterDecodingConfig{
 			Name:    "limit",
 			Style:   uri.QueryStyleForm,
@@ -3030,7 +3620,7 @@ func decodeGetJettonsHistoryByIDParams(args [2]string, r *http.Request) (params 
 				params.Limit = c
 				return nil
 			}); err != nil {
-				return params, errors.Wrap(err, "query: limit: parse")
+				return err
 			}
 			if err := func() error {
 				if err := (validate.Int{
@@ -3047,14 +3637,21 @@ func decodeGetJettonsHistoryByIDParams(args [2]string, r *http.Request) (params 
 				}
 				return nil
 			}(); err != nil {
-				return params, errors.Wrap(err, "query: limit: invalid")
+				return err
 			}
 		} else {
-			return params, errors.Wrap(err, "query")
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "limit",
+			In:   "query",
+			Err:  err,
 		}
 	}
 	// Decode query: start_date.
-	{
+	if err := func() error {
 		cfg := uri.QueryParameterDecodingConfig{
 			Name:    "start_date",
 			Style:   uri.QueryStyleForm,
@@ -3083,12 +3680,19 @@ func decodeGetJettonsHistoryByIDParams(args [2]string, r *http.Request) (params 
 				params.StartDate.SetTo(paramsDotStartDateVal)
 				return nil
 			}); err != nil {
-				return params, errors.Wrap(err, "query: start_date: parse")
+				return err
 			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "start_date",
+			In:   "query",
+			Err:  err,
 		}
 	}
 	// Decode query: end_date.
-	{
+	if err := func() error {
 		cfg := uri.QueryParameterDecodingConfig{
 			Name:    "end_date",
 			Style:   uri.QueryStyleForm,
@@ -3117,8 +3721,15 @@ func decodeGetJettonsHistoryByIDParams(args [2]string, r *http.Request) (params 
 				params.EndDate.SetTo(paramsDotEndDateVal)
 				return nil
 			}); err != nil {
-				return params, errors.Wrap(err, "query: end_date: parse")
+				return err
 			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "end_date",
+			In:   "query",
+			Err:  err,
 		}
 	}
 	return params, nil
@@ -3181,11 +3792,18 @@ func unpackGetListBlockTransactionsLiteServerParams(packed middleware.Parameters
 	return params
 }
 
-func decodeGetListBlockTransactionsLiteServerParams(args [1]string, r *http.Request) (params GetListBlockTransactionsLiteServerParams, _ error) {
+func decodeGetListBlockTransactionsLiteServerParams(args [1]string, argsEscaped bool, r *http.Request) (params GetListBlockTransactionsLiteServerParams, _ error) {
 	q := uri.NewQueryDecoder(r.URL.Query())
 	// Decode path: block_id.
-	{
+	if err := func() error {
 		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
 		if len(param) > 0 {
 			d := uri.NewPathDecoder(uri.PathDecoderConfig{
 				Param:   "block_id",
@@ -3208,14 +3826,21 @@ func decodeGetListBlockTransactionsLiteServerParams(args [1]string, r *http.Requ
 				params.BlockID = c
 				return nil
 			}(); err != nil {
-				return params, errors.Wrap(err, "path: block_id: parse")
+				return err
 			}
 		} else {
-			return params, errors.New("path: block_id: not specified")
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "block_id",
+			In:   "path",
+			Err:  err,
 		}
 	}
 	// Decode query: mode.
-	{
+	if err := func() error {
 		cfg := uri.QueryParameterDecodingConfig{
 			Name:    "mode",
 			Style:   uri.QueryStyleForm,
@@ -3237,14 +3862,21 @@ func decodeGetListBlockTransactionsLiteServerParams(args [1]string, r *http.Requ
 				params.Mode = c
 				return nil
 			}); err != nil {
-				return params, errors.Wrap(err, "query: mode: parse")
+				return err
 			}
 		} else {
-			return params, errors.Wrap(err, "query")
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "mode",
+			In:   "query",
+			Err:  err,
 		}
 	}
 	// Decode query: count.
-	{
+	if err := func() error {
 		cfg := uri.QueryParameterDecodingConfig{
 			Name:    "count",
 			Style:   uri.QueryStyleForm,
@@ -3266,14 +3898,21 @@ func decodeGetListBlockTransactionsLiteServerParams(args [1]string, r *http.Requ
 				params.Count = c
 				return nil
 			}); err != nil {
-				return params, errors.Wrap(err, "query: count: parse")
+				return err
 			}
 		} else {
-			return params, errors.Wrap(err, "query")
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "count",
+			In:   "query",
+			Err:  err,
 		}
 	}
 	// Decode query: account_id.
-	{
+	if err := func() error {
 		cfg := uri.QueryParameterDecodingConfig{
 			Name:    "account_id",
 			Style:   uri.QueryStyleForm,
@@ -3302,12 +3941,19 @@ func decodeGetListBlockTransactionsLiteServerParams(args [1]string, r *http.Requ
 				params.AccountID.SetTo(paramsDotAccountIDVal)
 				return nil
 			}); err != nil {
-				return params, errors.Wrap(err, "query: account_id: parse")
+				return err
 			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account_id",
+			In:   "query",
+			Err:  err,
 		}
 	}
 	// Decode query: lt.
-	{
+	if err := func() error {
 		cfg := uri.QueryParameterDecodingConfig{
 			Name:    "lt",
 			Style:   uri.QueryStyleForm,
@@ -3336,8 +3982,15 @@ func decodeGetListBlockTransactionsLiteServerParams(args [1]string, r *http.Requ
 				params.Lt.SetTo(paramsDotLtVal)
 				return nil
 			}); err != nil {
-				return params, errors.Wrap(err, "query: lt: parse")
+				return err
 			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "lt",
+			In:   "query",
+			Err:  err,
 		}
 	}
 	return params, nil
@@ -3360,10 +4013,10 @@ func unpackGetMasterchainInfoExtLiteServerParams(packed middleware.Parameters) (
 	return params
 }
 
-func decodeGetMasterchainInfoExtLiteServerParams(args [0]string, r *http.Request) (params GetMasterchainInfoExtLiteServerParams, _ error) {
+func decodeGetMasterchainInfoExtLiteServerParams(args [0]string, argsEscaped bool, r *http.Request) (params GetMasterchainInfoExtLiteServerParams, _ error) {
 	q := uri.NewQueryDecoder(r.URL.Query())
 	// Decode query: mode.
-	{
+	if err := func() error {
 		cfg := uri.QueryParameterDecodingConfig{
 			Name:    "mode",
 			Style:   uri.QueryStyleForm,
@@ -3385,10 +4038,17 @@ func decodeGetMasterchainInfoExtLiteServerParams(args [0]string, r *http.Request
 				params.Mode = c
 				return nil
 			}); err != nil {
-				return params, errors.Wrap(err, "query: mode: parse")
+				return err
 			}
 		} else {
-			return params, errors.Wrap(err, "query")
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "mode",
+			In:   "query",
+			Err:  err,
 		}
 	}
 	return params, nil
@@ -3411,10 +4071,17 @@ func unpackGetNftCollectionParams(packed middleware.Parameters) (params GetNftCo
 	return params
 }
 
-func decodeGetNftCollectionParams(args [1]string, r *http.Request) (params GetNftCollectionParams, _ error) {
+func decodeGetNftCollectionParams(args [1]string, argsEscaped bool, r *http.Request) (params GetNftCollectionParams, _ error) {
 	// Decode path: account_id.
-	{
+	if err := func() error {
 		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
 		if len(param) > 0 {
 			d := uri.NewPathDecoder(uri.PathDecoderConfig{
 				Param:   "account_id",
@@ -3437,10 +4104,17 @@ func decodeGetNftCollectionParams(args [1]string, r *http.Request) (params GetNf
 				params.AccountID = c
 				return nil
 			}(); err != nil {
-				return params, errors.Wrap(err, "path: account_id: parse")
+				return err
 			}
 		} else {
-			return params, errors.New("path: account_id: not specified")
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account_id",
+			In:   "path",
+			Err:  err,
 		}
 	}
 	return params, nil
@@ -3474,7 +4148,7 @@ func unpackGetNftCollectionsParams(packed middleware.Parameters) (params GetNftC
 	return params
 }
 
-func decodeGetNftCollectionsParams(args [0]string, r *http.Request) (params GetNftCollectionsParams, _ error) {
+func decodeGetNftCollectionsParams(args [0]string, argsEscaped bool, r *http.Request) (params GetNftCollectionsParams, _ error) {
 	q := uri.NewQueryDecoder(r.URL.Query())
 	// Set default value for query: limit.
 	{
@@ -3482,7 +4156,7 @@ func decodeGetNftCollectionsParams(args [0]string, r *http.Request) (params GetN
 		params.Limit.SetTo(val)
 	}
 	// Decode query: limit.
-	{
+	if err := func() error {
 		cfg := uri.QueryParameterDecodingConfig{
 			Name:    "limit",
 			Style:   uri.QueryStyleForm,
@@ -3511,10 +4185,10 @@ func decodeGetNftCollectionsParams(args [0]string, r *http.Request) (params GetN
 				params.Limit.SetTo(paramsDotLimitVal)
 				return nil
 			}); err != nil {
-				return params, errors.Wrap(err, "query: limit: parse")
+				return err
 			}
 			if err := func() error {
-				if params.Limit.Set {
+				if value, ok := params.Limit.Get(); ok {
 					if err := func() error {
 						if err := (validate.Int{
 							MinSet:        false,
@@ -3525,7 +4199,7 @@ func decodeGetNftCollectionsParams(args [0]string, r *http.Request) (params GetN
 							MaxExclusive:  false,
 							MultipleOfSet: false,
 							MultipleOf:    0,
-						}).Validate(int64(params.Limit.Value)); err != nil {
+						}).Validate(int64(value)); err != nil {
 							return errors.Wrap(err, "int")
 						}
 						return nil
@@ -3535,8 +4209,15 @@ func decodeGetNftCollectionsParams(args [0]string, r *http.Request) (params GetN
 				}
 				return nil
 			}(); err != nil {
-				return params, errors.Wrap(err, "query: limit: invalid")
+				return err
 			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "limit",
+			In:   "query",
+			Err:  err,
 		}
 	}
 	// Set default value for query: offset.
@@ -3545,7 +4226,7 @@ func decodeGetNftCollectionsParams(args [0]string, r *http.Request) (params GetN
 		params.Offset.SetTo(val)
 	}
 	// Decode query: offset.
-	{
+	if err := func() error {
 		cfg := uri.QueryParameterDecodingConfig{
 			Name:    "offset",
 			Style:   uri.QueryStyleForm,
@@ -3574,8 +4255,15 @@ func decodeGetNftCollectionsParams(args [0]string, r *http.Request) (params GetN
 				params.Offset.SetTo(paramsDotOffsetVal)
 				return nil
 			}); err != nil {
-				return params, errors.Wrap(err, "query: offset: parse")
+				return err
 			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "offset",
+			In:   "query",
+			Err:  err,
 		}
 	}
 	return params, nil
@@ -3598,10 +4286,17 @@ func unpackGetNftItemByAddressParams(packed middleware.Parameters) (params GetNf
 	return params
 }
 
-func decodeGetNftItemByAddressParams(args [1]string, r *http.Request) (params GetNftItemByAddressParams, _ error) {
+func decodeGetNftItemByAddressParams(args [1]string, argsEscaped bool, r *http.Request) (params GetNftItemByAddressParams, _ error) {
 	// Decode path: account_id.
-	{
+	if err := func() error {
 		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
 		if len(param) > 0 {
 			d := uri.NewPathDecoder(uri.PathDecoderConfig{
 				Param:   "account_id",
@@ -3624,10 +4319,17 @@ func decodeGetNftItemByAddressParams(args [1]string, r *http.Request) (params Ge
 				params.AccountID = c
 				return nil
 			}(); err != nil {
-				return params, errors.Wrap(err, "path: account_id: parse")
+				return err
 			}
 		} else {
-			return params, errors.New("path: account_id: not specified")
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account_id",
+			In:   "path",
+			Err:  err,
 		}
 	}
 	return params, nil
@@ -3693,11 +4395,18 @@ func unpackGetNftItemsByOwnerParams(packed middleware.Parameters) (params GetNft
 	return params
 }
 
-func decodeGetNftItemsByOwnerParams(args [1]string, r *http.Request) (params GetNftItemsByOwnerParams, _ error) {
+func decodeGetNftItemsByOwnerParams(args [1]string, argsEscaped bool, r *http.Request) (params GetNftItemsByOwnerParams, _ error) {
 	q := uri.NewQueryDecoder(r.URL.Query())
 	// Decode path: account_id.
-	{
+	if err := func() error {
 		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
 		if len(param) > 0 {
 			d := uri.NewPathDecoder(uri.PathDecoderConfig{
 				Param:   "account_id",
@@ -3720,14 +4429,21 @@ func decodeGetNftItemsByOwnerParams(args [1]string, r *http.Request) (params Get
 				params.AccountID = c
 				return nil
 			}(); err != nil {
-				return params, errors.Wrap(err, "path: account_id: parse")
+				return err
 			}
 		} else {
-			return params, errors.New("path: account_id: not specified")
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account_id",
+			In:   "path",
+			Err:  err,
 		}
 	}
 	// Decode query: collection.
-	{
+	if err := func() error {
 		cfg := uri.QueryParameterDecodingConfig{
 			Name:    "collection",
 			Style:   uri.QueryStyleForm,
@@ -3756,8 +4472,15 @@ func decodeGetNftItemsByOwnerParams(args [1]string, r *http.Request) (params Get
 				params.Collection.SetTo(paramsDotCollectionVal)
 				return nil
 			}); err != nil {
-				return params, errors.Wrap(err, "query: collection: parse")
+				return err
 			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "collection",
+			In:   "query",
+			Err:  err,
 		}
 	}
 	// Set default value for query: limit.
@@ -3766,7 +4489,7 @@ func decodeGetNftItemsByOwnerParams(args [1]string, r *http.Request) (params Get
 		params.Limit.SetTo(val)
 	}
 	// Decode query: limit.
-	{
+	if err := func() error {
 		cfg := uri.QueryParameterDecodingConfig{
 			Name:    "limit",
 			Style:   uri.QueryStyleForm,
@@ -3795,10 +4518,10 @@ func decodeGetNftItemsByOwnerParams(args [1]string, r *http.Request) (params Get
 				params.Limit.SetTo(paramsDotLimitVal)
 				return nil
 			}); err != nil {
-				return params, errors.Wrap(err, "query: limit: parse")
+				return err
 			}
 			if err := func() error {
-				if params.Limit.Set {
+				if value, ok := params.Limit.Get(); ok {
 					if err := func() error {
 						if err := (validate.Int{
 							MinSet:        false,
@@ -3809,7 +4532,7 @@ func decodeGetNftItemsByOwnerParams(args [1]string, r *http.Request) (params Get
 							MaxExclusive:  false,
 							MultipleOfSet: false,
 							MultipleOf:    0,
-						}).Validate(int64(params.Limit.Value)); err != nil {
+						}).Validate(int64(value)); err != nil {
 							return errors.Wrap(err, "int")
 						}
 						return nil
@@ -3819,8 +4542,15 @@ func decodeGetNftItemsByOwnerParams(args [1]string, r *http.Request) (params Get
 				}
 				return nil
 			}(); err != nil {
-				return params, errors.Wrap(err, "query: limit: invalid")
+				return err
 			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "limit",
+			In:   "query",
+			Err:  err,
 		}
 	}
 	// Set default value for query: offset.
@@ -3829,7 +4559,7 @@ func decodeGetNftItemsByOwnerParams(args [1]string, r *http.Request) (params Get
 		params.Offset.SetTo(val)
 	}
 	// Decode query: offset.
-	{
+	if err := func() error {
 		cfg := uri.QueryParameterDecodingConfig{
 			Name:    "offset",
 			Style:   uri.QueryStyleForm,
@@ -3858,8 +4588,15 @@ func decodeGetNftItemsByOwnerParams(args [1]string, r *http.Request) (params Get
 				params.Offset.SetTo(paramsDotOffsetVal)
 				return nil
 			}); err != nil {
-				return params, errors.Wrap(err, "query: offset: parse")
+				return err
 			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "offset",
+			In:   "query",
+			Err:  err,
 		}
 	}
 	// Set default value for query: indirect_ownership.
@@ -3868,7 +4605,7 @@ func decodeGetNftItemsByOwnerParams(args [1]string, r *http.Request) (params Get
 		params.IndirectOwnership.SetTo(val)
 	}
 	// Decode query: indirect_ownership.
-	{
+	if err := func() error {
 		cfg := uri.QueryParameterDecodingConfig{
 			Name:    "indirect_ownership",
 			Style:   uri.QueryStyleForm,
@@ -3897,8 +4634,15 @@ func decodeGetNftItemsByOwnerParams(args [1]string, r *http.Request) (params Get
 				params.IndirectOwnership.SetTo(paramsDotIndirectOwnershipVal)
 				return nil
 			}); err != nil {
-				return params, errors.Wrap(err, "query: indirect_ownership: parse")
+				return err
 			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "indirect_ownership",
+			In:   "query",
+			Err:  err,
 		}
 	}
 	return params, nil
@@ -3921,10 +4665,17 @@ func unpackGetPublicKeyByAccountIDParams(packed middleware.Parameters) (params G
 	return params
 }
 
-func decodeGetPublicKeyByAccountIDParams(args [1]string, r *http.Request) (params GetPublicKeyByAccountIDParams, _ error) {
+func decodeGetPublicKeyByAccountIDParams(args [1]string, argsEscaped bool, r *http.Request) (params GetPublicKeyByAccountIDParams, _ error) {
 	// Decode path: account_id.
-	{
+	if err := func() error {
 		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
 		if len(param) > 0 {
 			d := uri.NewPathDecoder(uri.PathDecoderConfig{
 				Param:   "account_id",
@@ -3947,10 +4698,17 @@ func decodeGetPublicKeyByAccountIDParams(args [1]string, r *http.Request) (param
 				params.AccountID = c
 				return nil
 			}(); err != nil {
-				return params, errors.Wrap(err, "path: account_id: parse")
+				return err
 			}
 		} else {
-			return params, errors.New("path: account_id: not specified")
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account_id",
+			In:   "path",
+			Err:  err,
 		}
 	}
 	return params, nil
@@ -3982,10 +4740,10 @@ func unpackGetRatesParams(packed middleware.Parameters) (params GetRatesParams) 
 	return params
 }
 
-func decodeGetRatesParams(args [0]string, r *http.Request) (params GetRatesParams, _ error) {
+func decodeGetRatesParams(args [0]string, argsEscaped bool, r *http.Request) (params GetRatesParams, _ error) {
 	q := uri.NewQueryDecoder(r.URL.Query())
 	// Decode query: tokens.
-	{
+	if err := func() error {
 		cfg := uri.QueryParameterDecodingConfig{
 			Name:    "tokens",
 			Style:   uri.QueryStyleForm,
@@ -4007,14 +4765,21 @@ func decodeGetRatesParams(args [0]string, r *http.Request) (params GetRatesParam
 				params.Tokens = c
 				return nil
 			}); err != nil {
-				return params, errors.Wrap(err, "query: tokens: parse")
+				return err
 			}
 		} else {
-			return params, errors.Wrap(err, "query")
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "tokens",
+			In:   "query",
+			Err:  err,
 		}
 	}
 	// Decode query: currencies.
-	{
+	if err := func() error {
 		cfg := uri.QueryParameterDecodingConfig{
 			Name:    "currencies",
 			Style:   uri.QueryStyleForm,
@@ -4036,10 +4801,17 @@ func decodeGetRatesParams(args [0]string, r *http.Request) (params GetRatesParam
 				params.Currencies = c
 				return nil
 			}); err != nil {
-				return params, errors.Wrap(err, "query: currencies: parse")
+				return err
 			}
 		} else {
-			return params, errors.Wrap(err, "query")
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "currencies",
+			In:   "query",
+			Err:  err,
 		}
 	}
 	return params, nil
@@ -4062,10 +4834,17 @@ func unpackGetRawAccountParams(packed middleware.Parameters) (params GetRawAccou
 	return params
 }
 
-func decodeGetRawAccountParams(args [1]string, r *http.Request) (params GetRawAccountParams, _ error) {
+func decodeGetRawAccountParams(args [1]string, argsEscaped bool, r *http.Request) (params GetRawAccountParams, _ error) {
 	// Decode path: account_id.
-	{
+	if err := func() error {
 		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
 		if len(param) > 0 {
 			d := uri.NewPathDecoder(uri.PathDecoderConfig{
 				Param:   "account_id",
@@ -4088,10 +4867,17 @@ func decodeGetRawAccountParams(args [1]string, r *http.Request) (params GetRawAc
 				params.AccountID = c
 				return nil
 			}(); err != nil {
-				return params, errors.Wrap(err, "path: account_id: parse")
+				return err
 			}
 		} else {
-			return params, errors.New("path: account_id: not specified")
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account_id",
+			In:   "path",
+			Err:  err,
 		}
 	}
 	return params, nil
@@ -4113,10 +4899,10 @@ func unpackGetSearchAccountsParams(packed middleware.Parameters) (params GetSear
 	return params
 }
 
-func decodeGetSearchAccountsParams(args [0]string, r *http.Request) (params GetSearchAccountsParams, _ error) {
+func decodeGetSearchAccountsParams(args [0]string, argsEscaped bool, r *http.Request) (params GetSearchAccountsParams, _ error) {
 	q := uri.NewQueryDecoder(r.URL.Query())
 	// Decode query: name.
-	{
+	if err := func() error {
 		cfg := uri.QueryParameterDecodingConfig{
 			Name:    "name",
 			Style:   uri.QueryStyleForm,
@@ -4138,7 +4924,7 @@ func decodeGetSearchAccountsParams(args [0]string, r *http.Request) (params GetS
 				params.Name = c
 				return nil
 			}); err != nil {
-				return params, errors.Wrap(err, "query: name: parse")
+				return err
 			}
 			if err := func() error {
 				if err := (validate.String{
@@ -4154,10 +4940,17 @@ func decodeGetSearchAccountsParams(args [0]string, r *http.Request) (params GetS
 				}
 				return nil
 			}(); err != nil {
-				return params, errors.Wrap(err, "query: name: invalid")
+				return err
 			}
 		} else {
-			return params, errors.Wrap(err, "query")
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "name",
+			In:   "query",
+			Err:  err,
 		}
 	}
 	return params, nil
@@ -4180,10 +4973,17 @@ func unpackGetShardBlockProofLiteServerParams(packed middleware.Parameters) (par
 	return params
 }
 
-func decodeGetShardBlockProofLiteServerParams(args [1]string, r *http.Request) (params GetShardBlockProofLiteServerParams, _ error) {
+func decodeGetShardBlockProofLiteServerParams(args [1]string, argsEscaped bool, r *http.Request) (params GetShardBlockProofLiteServerParams, _ error) {
 	// Decode path: block_id.
-	{
+	if err := func() error {
 		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
 		if len(param) > 0 {
 			d := uri.NewPathDecoder(uri.PathDecoderConfig{
 				Param:   "block_id",
@@ -4206,10 +5006,17 @@ func decodeGetShardBlockProofLiteServerParams(args [1]string, r *http.Request) (
 				params.BlockID = c
 				return nil
 			}(); err != nil {
-				return params, errors.Wrap(err, "path: block_id: parse")
+				return err
 			}
 		} else {
-			return params, errors.New("path: block_id: not specified")
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "block_id",
+			In:   "path",
+			Err:  err,
 		}
 	}
 	return params, nil
@@ -4259,11 +5066,18 @@ func unpackGetShardInfoLiteServerParams(packed middleware.Parameters) (params Ge
 	return params
 }
 
-func decodeGetShardInfoLiteServerParams(args [1]string, r *http.Request) (params GetShardInfoLiteServerParams, _ error) {
+func decodeGetShardInfoLiteServerParams(args [1]string, argsEscaped bool, r *http.Request) (params GetShardInfoLiteServerParams, _ error) {
 	q := uri.NewQueryDecoder(r.URL.Query())
 	// Decode path: block_id.
-	{
+	if err := func() error {
 		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
 		if len(param) > 0 {
 			d := uri.NewPathDecoder(uri.PathDecoderConfig{
 				Param:   "block_id",
@@ -4286,14 +5100,21 @@ func decodeGetShardInfoLiteServerParams(args [1]string, r *http.Request) (params
 				params.BlockID = c
 				return nil
 			}(); err != nil {
-				return params, errors.Wrap(err, "path: block_id: parse")
+				return err
 			}
 		} else {
-			return params, errors.New("path: block_id: not specified")
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "block_id",
+			In:   "path",
+			Err:  err,
 		}
 	}
 	// Decode query: workchain.
-	{
+	if err := func() error {
 		cfg := uri.QueryParameterDecodingConfig{
 			Name:    "workchain",
 			Style:   uri.QueryStyleForm,
@@ -4315,14 +5136,21 @@ func decodeGetShardInfoLiteServerParams(args [1]string, r *http.Request) (params
 				params.Workchain = c
 				return nil
 			}); err != nil {
-				return params, errors.Wrap(err, "query: workchain: parse")
+				return err
 			}
 		} else {
-			return params, errors.Wrap(err, "query")
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "workchain",
+			In:   "query",
+			Err:  err,
 		}
 	}
 	// Decode query: shard.
-	{
+	if err := func() error {
 		cfg := uri.QueryParameterDecodingConfig{
 			Name:    "shard",
 			Style:   uri.QueryStyleForm,
@@ -4344,14 +5172,21 @@ func decodeGetShardInfoLiteServerParams(args [1]string, r *http.Request) (params
 				params.Shard = c
 				return nil
 			}); err != nil {
-				return params, errors.Wrap(err, "query: shard: parse")
+				return err
 			}
 		} else {
-			return params, errors.Wrap(err, "query")
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "shard",
+			In:   "query",
+			Err:  err,
 		}
 	}
 	// Decode query: exact.
-	{
+	if err := func() error {
 		cfg := uri.QueryParameterDecodingConfig{
 			Name:    "exact",
 			Style:   uri.QueryStyleForm,
@@ -4373,10 +5208,17 @@ func decodeGetShardInfoLiteServerParams(args [1]string, r *http.Request) (params
 				params.Exact = c
 				return nil
 			}); err != nil {
-				return params, errors.Wrap(err, "query: exact: parse")
+				return err
 			}
 		} else {
-			return params, errors.Wrap(err, "query")
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "exact",
+			In:   "query",
+			Err:  err,
 		}
 	}
 	return params, nil
@@ -4399,10 +5241,17 @@ func unpackGetStateLiteServerParams(packed middleware.Parameters) (params GetSta
 	return params
 }
 
-func decodeGetStateLiteServerParams(args [1]string, r *http.Request) (params GetStateLiteServerParams, _ error) {
+func decodeGetStateLiteServerParams(args [1]string, argsEscaped bool, r *http.Request) (params GetStateLiteServerParams, _ error) {
 	// Decode path: block_id.
-	{
+	if err := func() error {
 		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
 		if len(param) > 0 {
 			d := uri.NewPathDecoder(uri.PathDecoderConfig{
 				Param:   "block_id",
@@ -4425,10 +5274,17 @@ func decodeGetStateLiteServerParams(args [1]string, r *http.Request) (params Get
 				params.BlockID = c
 				return nil
 			}(); err != nil {
-				return params, errors.Wrap(err, "path: block_id: parse")
+				return err
 			}
 		} else {
-			return params, errors.New("path: block_id: not specified")
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "block_id",
+			In:   "path",
+			Err:  err,
 		}
 	}
 	return params, nil
@@ -4451,10 +5307,17 @@ func unpackGetSubscriptionsByAccountParams(packed middleware.Parameters) (params
 	return params
 }
 
-func decodeGetSubscriptionsByAccountParams(args [1]string, r *http.Request) (params GetSubscriptionsByAccountParams, _ error) {
+func decodeGetSubscriptionsByAccountParams(args [1]string, argsEscaped bool, r *http.Request) (params GetSubscriptionsByAccountParams, _ error) {
 	// Decode path: account_id.
-	{
+	if err := func() error {
 		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
 		if len(param) > 0 {
 			d := uri.NewPathDecoder(uri.PathDecoderConfig{
 				Param:   "account_id",
@@ -4477,10 +5340,17 @@ func decodeGetSubscriptionsByAccountParams(args [1]string, r *http.Request) (par
 				params.AccountID = c
 				return nil
 			}(); err != nil {
-				return params, errors.Wrap(err, "path: account_id: parse")
+				return err
 			}
 		} else {
-			return params, errors.New("path: account_id: not specified")
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account_id",
+			In:   "path",
+			Err:  err,
 		}
 	}
 	return params, nil
@@ -4503,10 +5373,17 @@ func unpackGetTraceParams(packed middleware.Parameters) (params GetTraceParams) 
 	return params
 }
 
-func decodeGetTraceParams(args [1]string, r *http.Request) (params GetTraceParams, _ error) {
+func decodeGetTraceParams(args [1]string, argsEscaped bool, r *http.Request) (params GetTraceParams, _ error) {
 	// Decode path: trace_id.
-	{
+	if err := func() error {
 		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
 		if len(param) > 0 {
 			d := uri.NewPathDecoder(uri.PathDecoderConfig{
 				Param:   "trace_id",
@@ -4529,10 +5406,17 @@ func decodeGetTraceParams(args [1]string, r *http.Request) (params GetTraceParam
 				params.TraceID = c
 				return nil
 			}(); err != nil {
-				return params, errors.Wrap(err, "path: trace_id: parse")
+				return err
 			}
 		} else {
-			return params, errors.New("path: trace_id: not specified")
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "trace_id",
+			In:   "path",
+			Err:  err,
 		}
 	}
 	return params, nil
@@ -4565,11 +5449,18 @@ func unpackGetTracesByAccountParams(packed middleware.Parameters) (params GetTra
 	return params
 }
 
-func decodeGetTracesByAccountParams(args [1]string, r *http.Request) (params GetTracesByAccountParams, _ error) {
+func decodeGetTracesByAccountParams(args [1]string, argsEscaped bool, r *http.Request) (params GetTracesByAccountParams, _ error) {
 	q := uri.NewQueryDecoder(r.URL.Query())
 	// Decode path: account_id.
-	{
+	if err := func() error {
 		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
 		if len(param) > 0 {
 			d := uri.NewPathDecoder(uri.PathDecoderConfig{
 				Param:   "account_id",
@@ -4592,10 +5483,17 @@ func decodeGetTracesByAccountParams(args [1]string, r *http.Request) (params Get
 				params.AccountID = c
 				return nil
 			}(); err != nil {
-				return params, errors.Wrap(err, "path: account_id: parse")
+				return err
 			}
 		} else {
-			return params, errors.New("path: account_id: not specified")
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account_id",
+			In:   "path",
+			Err:  err,
 		}
 	}
 	// Set default value for query: limit.
@@ -4604,7 +5502,7 @@ func decodeGetTracesByAccountParams(args [1]string, r *http.Request) (params Get
 		params.Limit.SetTo(val)
 	}
 	// Decode query: limit.
-	{
+	if err := func() error {
 		cfg := uri.QueryParameterDecodingConfig{
 			Name:    "limit",
 			Style:   uri.QueryStyleForm,
@@ -4633,10 +5531,10 @@ func decodeGetTracesByAccountParams(args [1]string, r *http.Request) (params Get
 				params.Limit.SetTo(paramsDotLimitVal)
 				return nil
 			}); err != nil {
-				return params, errors.Wrap(err, "query: limit: parse")
+				return err
 			}
 			if err := func() error {
-				if params.Limit.Set {
+				if value, ok := params.Limit.Get(); ok {
 					if err := func() error {
 						if err := (validate.Int{
 							MinSet:        false,
@@ -4647,7 +5545,7 @@ func decodeGetTracesByAccountParams(args [1]string, r *http.Request) (params Get
 							MaxExclusive:  false,
 							MultipleOfSet: false,
 							MultipleOf:    0,
-						}).Validate(int64(params.Limit.Value)); err != nil {
+						}).Validate(int64(value)); err != nil {
 							return errors.Wrap(err, "int")
 						}
 						return nil
@@ -4657,8 +5555,15 @@ func decodeGetTracesByAccountParams(args [1]string, r *http.Request) (params Get
 				}
 				return nil
 			}(); err != nil {
-				return params, errors.Wrap(err, "query: limit: invalid")
+				return err
 			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "limit",
+			In:   "query",
+			Err:  err,
 		}
 	}
 	return params, nil
@@ -4681,10 +5586,17 @@ func unpackGetTransactionParams(packed middleware.Parameters) (params GetTransac
 	return params
 }
 
-func decodeGetTransactionParams(args [1]string, r *http.Request) (params GetTransactionParams, _ error) {
+func decodeGetTransactionParams(args [1]string, argsEscaped bool, r *http.Request) (params GetTransactionParams, _ error) {
 	// Decode path: transaction_id.
-	{
+	if err := func() error {
 		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
 		if len(param) > 0 {
 			d := uri.NewPathDecoder(uri.PathDecoderConfig{
 				Param:   "transaction_id",
@@ -4707,10 +5619,17 @@ func decodeGetTransactionParams(args [1]string, r *http.Request) (params GetTran
 				params.TransactionID = c
 				return nil
 			}(); err != nil {
-				return params, errors.Wrap(err, "path: transaction_id: parse")
+				return err
 			}
 		} else {
-			return params, errors.New("path: transaction_id: not specified")
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "transaction_id",
+			In:   "path",
+			Err:  err,
 		}
 	}
 	return params, nil
@@ -4733,10 +5652,17 @@ func unpackGetTransactionByMessageHashParams(packed middleware.Parameters) (para
 	return params
 }
 
-func decodeGetTransactionByMessageHashParams(args [1]string, r *http.Request) (params GetTransactionByMessageHashParams, _ error) {
+func decodeGetTransactionByMessageHashParams(args [1]string, argsEscaped bool, r *http.Request) (params GetTransactionByMessageHashParams, _ error) {
 	// Decode path: msg_id.
-	{
+	if err := func() error {
 		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
 		if len(param) > 0 {
 			d := uri.NewPathDecoder(uri.PathDecoderConfig{
 				Param:   "msg_id",
@@ -4759,10 +5685,17 @@ func decodeGetTransactionByMessageHashParams(args [1]string, r *http.Request) (p
 				params.MsgID = c
 				return nil
 			}(); err != nil {
-				return params, errors.Wrap(err, "path: msg_id: parse")
+				return err
 			}
 		} else {
-			return params, errors.New("path: msg_id: not specified")
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "msg_id",
+			In:   "path",
+			Err:  err,
 		}
 	}
 	return params, nil
@@ -4812,11 +5745,18 @@ func unpackGetTransactionsLiteServerParams(packed middleware.Parameters) (params
 	return params
 }
 
-func decodeGetTransactionsLiteServerParams(args [1]string, r *http.Request) (params GetTransactionsLiteServerParams, _ error) {
+func decodeGetTransactionsLiteServerParams(args [1]string, argsEscaped bool, r *http.Request) (params GetTransactionsLiteServerParams, _ error) {
 	q := uri.NewQueryDecoder(r.URL.Query())
 	// Decode path: account_id.
-	{
+	if err := func() error {
 		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
 		if len(param) > 0 {
 			d := uri.NewPathDecoder(uri.PathDecoderConfig{
 				Param:   "account_id",
@@ -4839,14 +5779,21 @@ func decodeGetTransactionsLiteServerParams(args [1]string, r *http.Request) (par
 				params.AccountID = c
 				return nil
 			}(); err != nil {
-				return params, errors.Wrap(err, "path: account_id: parse")
+				return err
 			}
 		} else {
-			return params, errors.New("path: account_id: not specified")
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account_id",
+			In:   "path",
+			Err:  err,
 		}
 	}
 	// Decode query: count.
-	{
+	if err := func() error {
 		cfg := uri.QueryParameterDecodingConfig{
 			Name:    "count",
 			Style:   uri.QueryStyleForm,
@@ -4868,14 +5815,21 @@ func decodeGetTransactionsLiteServerParams(args [1]string, r *http.Request) (par
 				params.Count = c
 				return nil
 			}); err != nil {
-				return params, errors.Wrap(err, "query: count: parse")
+				return err
 			}
 		} else {
-			return params, errors.Wrap(err, "query")
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "count",
+			In:   "query",
+			Err:  err,
 		}
 	}
 	// Decode query: lt.
-	{
+	if err := func() error {
 		cfg := uri.QueryParameterDecodingConfig{
 			Name:    "lt",
 			Style:   uri.QueryStyleForm,
@@ -4897,14 +5851,21 @@ func decodeGetTransactionsLiteServerParams(args [1]string, r *http.Request) (par
 				params.Lt = c
 				return nil
 			}); err != nil {
-				return params, errors.Wrap(err, "query: lt: parse")
+				return err
 			}
 		} else {
-			return params, errors.Wrap(err, "query")
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "lt",
+			In:   "query",
+			Err:  err,
 		}
 	}
 	// Decode query: hash.
-	{
+	if err := func() error {
 		cfg := uri.QueryParameterDecodingConfig{
 			Name:    "hash",
 			Style:   uri.QueryStyleForm,
@@ -4926,10 +5887,17 @@ func decodeGetTransactionsLiteServerParams(args [1]string, r *http.Request) (par
 				params.Hash = c
 				return nil
 			}); err != nil {
-				return params, errors.Wrap(err, "query: hash: parse")
+				return err
 			}
 		} else {
-			return params, errors.Wrap(err, "query")
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "hash",
+			In:   "query",
+			Err:  err,
 		}
 	}
 	return params, nil
@@ -4951,10 +5919,10 @@ func unpackGetWalletBackupParams(packed middleware.Parameters) (params GetWallet
 	return params
 }
 
-func decodeGetWalletBackupParams(args [0]string, r *http.Request) (params GetWalletBackupParams, _ error) {
+func decodeGetWalletBackupParams(args [0]string, argsEscaped bool, r *http.Request) (params GetWalletBackupParams, _ error) {
 	h := uri.NewHeaderDecoder(r.Header)
 	// Decode header: X-TonConnect-Auth.
-	{
+	if err := func() error {
 		cfg := uri.HeaderParameterDecodingConfig{
 			Name:    "X-TonConnect-Auth",
 			Explode: false,
@@ -4974,10 +5942,17 @@ func decodeGetWalletBackupParams(args [0]string, r *http.Request) (params GetWal
 				params.XTonConnectAuth = c
 				return nil
 			}); err != nil {
-				return params, errors.Wrap(err, "header: X-TonConnect-Auth: parse")
+				return err
 			}
 		} else {
-			return params, errors.New("header: X-TonConnect-Auth: not specified")
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "X-TonConnect-Auth",
+			In:   "header",
+			Err:  err,
 		}
 	}
 	return params, nil
@@ -4999,10 +5974,17 @@ func unpackGetWalletsByPublicKeyParams(packed middleware.Parameters) (params Get
 	return params
 }
 
-func decodeGetWalletsByPublicKeyParams(args [1]string, r *http.Request) (params GetWalletsByPublicKeyParams, _ error) {
+func decodeGetWalletsByPublicKeyParams(args [1]string, argsEscaped bool, r *http.Request) (params GetWalletsByPublicKeyParams, _ error) {
 	// Decode path: public_key.
-	{
+	if err := func() error {
 		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
 		if len(param) > 0 {
 			d := uri.NewPathDecoder(uri.PathDecoderConfig{
 				Param:   "public_key",
@@ -5025,10 +6007,17 @@ func decodeGetWalletsByPublicKeyParams(args [1]string, r *http.Request) (params 
 				params.PublicKey = c
 				return nil
 			}(); err != nil {
-				return params, errors.Wrap(err, "path: public_key: parse")
+				return err
 			}
 		} else {
-			return params, errors.New("path: public_key: not specified")
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "public_key",
+			In:   "path",
+			Err:  err,
 		}
 	}
 	return params, nil
@@ -5051,10 +6040,17 @@ func unpackPoolsByNominatorsParams(packed middleware.Parameters) (params PoolsBy
 	return params
 }
 
-func decodePoolsByNominatorsParams(args [1]string, r *http.Request) (params PoolsByNominatorsParams, _ error) {
+func decodePoolsByNominatorsParams(args [1]string, argsEscaped bool, r *http.Request) (params PoolsByNominatorsParams, _ error) {
 	// Decode path: account_id.
-	{
+	if err := func() error {
 		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
 		if len(param) > 0 {
 			d := uri.NewPathDecoder(uri.PathDecoderConfig{
 				Param:   "account_id",
@@ -5077,10 +6073,17 @@ func decodePoolsByNominatorsParams(args [1]string, r *http.Request) (params Pool
 				params.AccountID = c
 				return nil
 			}(); err != nil {
-				return params, errors.Wrap(err, "path: account_id: parse")
+				return err
 			}
 		} else {
-			return params, errors.New("path: account_id: not specified")
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account_id",
+			In:   "path",
+			Err:  err,
 		}
 	}
 	return params, nil
@@ -5103,10 +6106,17 @@ func unpackReindexAccountParams(packed middleware.Parameters) (params ReindexAcc
 	return params
 }
 
-func decodeReindexAccountParams(args [1]string, r *http.Request) (params ReindexAccountParams, _ error) {
+func decodeReindexAccountParams(args [1]string, argsEscaped bool, r *http.Request) (params ReindexAccountParams, _ error) {
 	// Decode path: account_id.
-	{
+	if err := func() error {
 		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
 		if len(param) > 0 {
 			d := uri.NewPathDecoder(uri.PathDecoderConfig{
 				Param:   "account_id",
@@ -5129,10 +6139,17 @@ func decodeReindexAccountParams(args [1]string, r *http.Request) (params Reindex
 				params.AccountID = c
 				return nil
 			}(); err != nil {
-				return params, errors.Wrap(err, "path: account_id: parse")
+				return err
 			}
 		} else {
-			return params, errors.New("path: account_id: not specified")
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account_id",
+			In:   "path",
+			Err:  err,
 		}
 	}
 	return params, nil
@@ -5154,10 +6171,10 @@ func unpackSetWalletBackupParams(packed middleware.Parameters) (params SetWallet
 	return params
 }
 
-func decodeSetWalletBackupParams(args [0]string, r *http.Request) (params SetWalletBackupParams, _ error) {
+func decodeSetWalletBackupParams(args [0]string, argsEscaped bool, r *http.Request) (params SetWalletBackupParams, _ error) {
 	h := uri.NewHeaderDecoder(r.Header)
 	// Decode header: X-TonConnect-Auth.
-	{
+	if err := func() error {
 		cfg := uri.HeaderParameterDecodingConfig{
 			Name:    "X-TonConnect-Auth",
 			Explode: false,
@@ -5177,10 +6194,17 @@ func decodeSetWalletBackupParams(args [0]string, r *http.Request) (params SetWal
 				params.XTonConnectAuth = c
 				return nil
 			}); err != nil {
-				return params, errors.Wrap(err, "header: X-TonConnect-Auth: parse")
+				return err
 			}
 		} else {
-			return params, errors.New("header: X-TonConnect-Auth: not specified")
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "X-TonConnect-Auth",
+			In:   "header",
+			Err:  err,
 		}
 	}
 	return params, nil
@@ -5203,10 +6227,17 @@ func unpackStakingPoolHistoryParams(packed middleware.Parameters) (params Stakin
 	return params
 }
 
-func decodeStakingPoolHistoryParams(args [1]string, r *http.Request) (params StakingPoolHistoryParams, _ error) {
+func decodeStakingPoolHistoryParams(args [1]string, argsEscaped bool, r *http.Request) (params StakingPoolHistoryParams, _ error) {
 	// Decode path: account_id.
-	{
+	if err := func() error {
 		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
 		if len(param) > 0 {
 			d := uri.NewPathDecoder(uri.PathDecoderConfig{
 				Param:   "account_id",
@@ -5229,10 +6260,17 @@ func decodeStakingPoolHistoryParams(args [1]string, r *http.Request) (params Sta
 				params.AccountID = c
 				return nil
 			}(); err != nil {
-				return params, errors.Wrap(err, "path: account_id: parse")
+				return err
 			}
 		} else {
-			return params, errors.New("path: account_id: not specified")
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account_id",
+			In:   "path",
+			Err:  err,
 		}
 	}
 	return params, nil
@@ -5265,11 +6303,18 @@ func unpackStakingPoolInfoParams(packed middleware.Parameters) (params StakingPo
 	return params
 }
 
-func decodeStakingPoolInfoParams(args [1]string, r *http.Request) (params StakingPoolInfoParams, _ error) {
+func decodeStakingPoolInfoParams(args [1]string, argsEscaped bool, r *http.Request) (params StakingPoolInfoParams, _ error) {
 	h := uri.NewHeaderDecoder(r.Header)
 	// Decode path: account_id.
-	{
+	if err := func() error {
 		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
 		if len(param) > 0 {
 			d := uri.NewPathDecoder(uri.PathDecoderConfig{
 				Param:   "account_id",
@@ -5292,10 +6337,17 @@ func decodeStakingPoolInfoParams(args [1]string, r *http.Request) (params Stakin
 				params.AccountID = c
 				return nil
 			}(); err != nil {
-				return params, errors.Wrap(err, "path: account_id: parse")
+				return err
 			}
 		} else {
-			return params, errors.New("path: account_id: not specified")
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account_id",
+			In:   "path",
+			Err:  err,
 		}
 	}
 	// Set default value for header: Accept-Language.
@@ -5304,7 +6356,7 @@ func decodeStakingPoolInfoParams(args [1]string, r *http.Request) (params Stakin
 		params.AcceptLanguage.SetTo(val)
 	}
 	// Decode header: Accept-Language.
-	{
+	if err := func() error {
 		cfg := uri.HeaderParameterDecodingConfig{
 			Name:    "Accept-Language",
 			Explode: false,
@@ -5331,8 +6383,15 @@ func decodeStakingPoolInfoParams(args [1]string, r *http.Request) (params Stakin
 				params.AcceptLanguage.SetTo(paramsDotAcceptLanguageVal)
 				return nil
 			}); err != nil {
-				return params, errors.Wrap(err, "header: Accept-Language: parse")
+				return err
 			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "Accept-Language",
+			In:   "header",
+			Err:  err,
 		}
 	}
 	return params, nil
@@ -5378,11 +6437,11 @@ func unpackStakingPoolsParams(packed middleware.Parameters) (params StakingPools
 	return params
 }
 
-func decodeStakingPoolsParams(args [0]string, r *http.Request) (params StakingPoolsParams, _ error) {
+func decodeStakingPoolsParams(args [0]string, argsEscaped bool, r *http.Request) (params StakingPoolsParams, _ error) {
 	q := uri.NewQueryDecoder(r.URL.Query())
 	h := uri.NewHeaderDecoder(r.Header)
 	// Decode query: available_for.
-	{
+	if err := func() error {
 		cfg := uri.QueryParameterDecodingConfig{
 			Name:    "available_for",
 			Style:   uri.QueryStyleForm,
@@ -5411,12 +6470,19 @@ func decodeStakingPoolsParams(args [0]string, r *http.Request) (params StakingPo
 				params.AvailableFor.SetTo(paramsDotAvailableForVal)
 				return nil
 			}); err != nil {
-				return params, errors.Wrap(err, "query: available_for: parse")
+				return err
 			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "available_for",
+			In:   "query",
+			Err:  err,
 		}
 	}
 	// Decode query: include_unverified.
-	{
+	if err := func() error {
 		cfg := uri.QueryParameterDecodingConfig{
 			Name:    "include_unverified",
 			Style:   uri.QueryStyleForm,
@@ -5445,8 +6511,15 @@ func decodeStakingPoolsParams(args [0]string, r *http.Request) (params StakingPo
 				params.IncludeUnverified.SetTo(paramsDotIncludeUnverifiedVal)
 				return nil
 			}); err != nil {
-				return params, errors.Wrap(err, "query: include_unverified: parse")
+				return err
 			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "include_unverified",
+			In:   "query",
+			Err:  err,
 		}
 	}
 	// Set default value for header: Accept-Language.
@@ -5455,7 +6528,7 @@ func decodeStakingPoolsParams(args [0]string, r *http.Request) (params StakingPo
 		params.AcceptLanguage.SetTo(val)
 	}
 	// Decode header: Accept-Language.
-	{
+	if err := func() error {
 		cfg := uri.HeaderParameterDecodingConfig{
 			Name:    "Accept-Language",
 			Explode: false,
@@ -5482,8 +6555,15 @@ func decodeStakingPoolsParams(args [0]string, r *http.Request) (params StakingPo
 				params.AcceptLanguage.SetTo(paramsDotAcceptLanguageVal)
 				return nil
 			}); err != nil {
-				return params, errors.Wrap(err, "header: Accept-Language: parse")
+				return err
 			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "Accept-Language",
+			In:   "header",
+			Err:  err,
 		}
 	}
 	return params, nil

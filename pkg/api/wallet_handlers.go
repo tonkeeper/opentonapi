@@ -8,6 +8,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"io"
+	"net/http"
 	"os"
 	"time"
 
@@ -19,54 +20,54 @@ import (
 	tongoWallet "github.com/tonkeeper/tongo/wallet"
 )
 
-func (h Handler) SetWalletBackup(ctx context.Context, request oas.SetWalletBackupReq, params oas.SetWalletBackupParams) (res oas.SetWalletBackupRes, err error) {
+func (h Handler) SetWalletBackup(ctx context.Context, request oas.SetWalletBackupReq, params oas.SetWalletBackupParams) error {
 	pubKey, verify, err := checkTonConnectToken(params.XTonConnectAuth, h.tonConnect.GetSecret())
 	if err != nil {
-		return &oas.BadRequest{Error: err.Error()}, nil
+		return toError(http.StatusBadRequest, err)
 	}
 	if !verify {
-		return &oas.BadRequest{Error: "failed verify"}, nil
+		return toError(http.StatusBadRequest, fmt.Errorf("failed verify"))
 	}
 
 	walletBalance, err := getTotalBalances(ctx, h.storage, pubKey)
 	if err != nil {
-		return &oas.BadRequest{Error: err.Error()}, nil
+		return toError(http.StatusInternalServerError, err)
 	}
 	if walletBalance < int64(tongo.OneTON) {
-		return &oas.BadRequest{Error: "wallet must have more than 1 TON"}, nil
+		return toError(http.StatusBadRequest, fmt.Errorf("wallet must have more than 1 TON"))
 	}
 
 	fileName := fmt.Sprintf("%x.dump", pubKey)
 	tempFileName := fileName + fmt.Sprintf(".temp%v", time.Now().Nanosecond()+time.Now().Second())
 	file, err := os.Create(tempFileName)
 	if err != nil {
-		return &oas.InternalError{Error: err.Error()}, nil
+		return toError(http.StatusInternalServerError, err)
 	}
 	defer file.Close()
 	_, err = io.Copy(file, io.LimitReader(request.Data, 640*1024)) //640K ought to be enough for anybody
 	if err != nil {
-		return &oas.InternalError{Error: err.Error()}, nil
+		return toError(http.StatusInternalServerError, err)
 	}
 	file.Close()
 	err = os.Rename(tempFileName, fileName)
 	if err != nil {
-		return &oas.InternalError{Error: err.Error()}, nil
+		return toError(http.StatusInternalServerError, err)
 	}
-	return &oas.SetWalletBackupOK{}, nil
+	return nil
 }
 
-func (h Handler) GetWalletBackup(ctx context.Context, params oas.GetWalletBackupParams) (res oas.GetWalletBackupRes, err error) {
+func (h Handler) GetWalletBackup(ctx context.Context, params oas.GetWalletBackupParams) (*oas.GetWalletBackupOK, error) {
 	pubKey, verify, err := checkTonConnectToken(params.XTonConnectAuth, h.tonConnect.GetSecret())
 	if err != nil {
-		return &oas.BadRequest{Error: err.Error()}, nil
+		return nil, toError(http.StatusBadRequest, err)
 	}
 	if !verify {
-		return &oas.BadRequest{Error: "failed verify"}, nil
+		return nil, toError(http.StatusBadRequest, fmt.Errorf("failed verify"))
 	}
 
 	dump, err := os.ReadFile(fmt.Sprintf("%v.dump", hex.EncodeToString(pubKey)))
 	if err != nil {
-		return &oas.BadRequest{Error: err.Error()}, nil
+		return nil, toError(http.StatusInternalServerError, err)
 	}
 
 	return &oas.GetWalletBackupOK{Dump: string(dump)}, nil
@@ -120,10 +121,10 @@ func getTotalBalances(ctx context.Context, storage storage, pubKey []byte) (int6
 	return balance, nil
 }
 
-func (h Handler) GetWalletsByPublicKey(ctx context.Context, params oas.GetWalletsByPublicKeyParams) (oas.GetWalletsByPublicKeyRes, error) {
+func (h Handler) GetWalletsByPublicKey(ctx context.Context, params oas.GetWalletsByPublicKeyParams) (*oas.Accounts, error) {
 	publicKey, err := hex.DecodeString(params.PublicKey)
 	if err != nil {
-		return &oas.BadRequest{Error: err.Error()}, nil
+		return nil, toError(http.StatusBadRequest, err)
 	}
 	versions := []tongoWallet.Version{
 		tongoWallet.V1R1, tongoWallet.V1R2, tongoWallet.V1R3,
@@ -141,7 +142,7 @@ func (h Handler) GetWalletsByPublicKey(ctx context.Context, params oas.GetWallet
 	}
 	accounts, err := h.storage.GetRawAccounts(ctx, walletAddresses)
 	if err != nil {
-		return &oas.InternalError{Error: err.Error()}, nil
+		return nil, toError(http.StatusInternalServerError, err)
 	}
 	results := make([]oas.Account, 0, len(accounts))
 	for _, account := range accounts {
@@ -157,22 +158,22 @@ func (h Handler) GetWalletsByPublicKey(ctx context.Context, params oas.GetWallet
 	return &oas.Accounts{Accounts: results}, nil
 }
 
-func (h Handler) GetAccountSeqno(ctx context.Context, params oas.GetAccountSeqnoParams) (res oas.GetAccountSeqnoRes, err error) {
+func (h Handler) GetAccountSeqno(ctx context.Context, params oas.GetAccountSeqnoParams) (*oas.Seqno, error) {
 	accountID, err := tongo.ParseAccountID(params.AccountID)
 	if err != nil {
-		return &oas.BadRequest{Error: err.Error()}, nil
+		return nil, toError(http.StatusBadRequest, err)
 	}
 	account, err := h.storage.GetRawAccount(ctx, accountID)
 	if err != nil {
-		return &oas.InternalError{Error: err.Error()}, nil
+		return nil, toError(http.StatusInternalServerError, err)
 	}
 	walletVersion, err := wallet.GetVersionByCode(account.Code)
 	if err != nil {
-		return &oas.InternalError{Error: err.Error()}, nil
+		return nil, toError(http.StatusInternalServerError, err)
 	}
 	cells, err := boc.DeserializeBoc(account.Data)
 	if err != nil {
-		return &oas.InternalError{Error: err.Error()}, nil
+		return nil, toError(http.StatusInternalServerError, err)
 	}
 	var seqno uint32
 	switch walletVersion {
@@ -180,20 +181,20 @@ func (h Handler) GetAccountSeqno(ctx context.Context, params oas.GetAccountSeqno
 		var data tongoWallet.DataV1V2
 		err = tlb.Unmarshal(cells[0], &data)
 		if err != nil {
-			return &oas.InternalError{Error: err.Error()}, nil
+			return nil, toError(http.StatusInternalServerError, err)
 		}
 		seqno = data.Seqno
 	case tongoWallet.V3R1:
 		var data tongoWallet.DataV3
 		err = tlb.Unmarshal(cells[0], &data)
 		if err != nil {
-			return &oas.InternalError{Error: err.Error()}, nil
+			return nil, toError(http.StatusInternalServerError, err)
 		}
 		seqno = data.Seqno
 	default:
 		seqno, err = h.storage.GetSeqno(ctx, accountID)
 		if err != nil {
-			return &oas.InternalError{Error: err.Error()}, nil
+			return nil, toError(http.StatusInternalServerError, err)
 		}
 	}
 	return &oas.Seqno{Seqno: seqno}, nil

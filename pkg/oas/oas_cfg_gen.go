@@ -7,18 +7,14 @@ import (
 
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/metric"
-	"go.opentelemetry.io/otel/metric/instrument/syncint64"
 	"go.opentelemetry.io/otel/trace"
 
-	ht "github.com/ogen-go/ogen/http"
 	"github.com/ogen-go/ogen/middleware"
 	"github.com/ogen-go/ogen/ogenerrors"
 	"github.com/ogen-go/ogen/otelogen"
 )
 
 var (
-	// Allocate option closure once.
-	clientSpanKind = trace.WithSpanKind(trace.SpanKindClient)
 	// Allocate option closure once.
 	serverSpanKind = trace.WithSpanKind(trace.SpanKindServer)
 )
@@ -40,7 +36,7 @@ func (cfg *otelConfig) initOTEL() {
 		cfg.TracerProvider = otel.GetTracerProvider()
 	}
 	if cfg.MeterProvider == nil {
-		cfg.MeterProvider = metric.NewNoopMeterProvider()
+		cfg.MeterProvider = otel.GetMeterProvider()
 	}
 	cfg.Tracer = cfg.TracerProvider.Tracer(otelogen.Name,
 		trace.WithInstrumentationVersion(otelogen.SemVersion()),
@@ -99,9 +95,9 @@ func newServerConfig(opts ...ServerOption) serverConfig {
 
 type baseServer struct {
 	cfg      serverConfig
-	requests syncint64.Counter
-	errors   syncint64.Counter
-	duration syncint64.Histogram
+	requests metric.Int64Counter
+	errors   metric.Int64Counter
+	duration metric.Float64Histogram
 }
 
 func (s baseServer) notFound(w http.ResponseWriter, r *http.Request) {
@@ -114,77 +110,21 @@ func (s baseServer) notAllowed(w http.ResponseWriter, r *http.Request, allowed s
 
 func (cfg serverConfig) baseServer() (s baseServer, err error) {
 	s = baseServer{cfg: cfg}
-	if s.requests, err = s.cfg.Meter.SyncInt64().Counter(otelogen.ServerRequestCount); err != nil {
+	if s.requests, err = s.cfg.Meter.Int64Counter(otelogen.ServerRequestCount); err != nil {
 		return s, err
 	}
-	if s.errors, err = s.cfg.Meter.SyncInt64().Counter(otelogen.ServerErrorsCount); err != nil {
+	if s.errors, err = s.cfg.Meter.Int64Counter(otelogen.ServerErrorsCount); err != nil {
 		return s, err
 	}
-	if s.duration, err = s.cfg.Meter.SyncInt64().Histogram(otelogen.ServerDuration); err != nil {
+	if s.duration, err = s.cfg.Meter.Float64Histogram(otelogen.ServerDuration); err != nil {
 		return s, err
 	}
 	return s, nil
 }
 
-type clientConfig struct {
-	otelConfig
-	Client ht.Client
-}
-
-// ClientOption is client config option.
-type ClientOption interface {
-	applyClient(*clientConfig)
-}
-
-var _ = []ClientOption{
-	(optionFunc[clientConfig])(nil),
-	(otelOptionFunc)(nil),
-}
-
-func (o optionFunc[C]) applyClient(c *C) {
-	o(c)
-}
-
-func (o otelOptionFunc) applyClient(c *clientConfig) {
-	o(&c.otelConfig)
-}
-
-func newClientConfig(opts ...ClientOption) clientConfig {
-	cfg := clientConfig{
-		Client: http.DefaultClient,
-	}
-	for _, opt := range opts {
-		opt.applyClient(&cfg)
-	}
-	cfg.initOTEL()
-	return cfg
-}
-
-type baseClient struct {
-	cfg      clientConfig
-	requests syncint64.Counter
-	errors   syncint64.Counter
-	duration syncint64.Histogram
-}
-
-func (cfg clientConfig) baseClient() (c baseClient, err error) {
-	c = baseClient{cfg: cfg}
-	if c.requests, err = c.cfg.Meter.SyncInt64().Counter(otelogen.ClientRequestCount); err != nil {
-		return c, err
-	}
-	if c.errors, err = c.cfg.Meter.SyncInt64().Counter(otelogen.ClientErrorsCount); err != nil {
-		return c, err
-	}
-	if c.duration, err = c.cfg.Meter.SyncInt64().Histogram(otelogen.ClientDuration); err != nil {
-		return c, err
-	}
-	return c, nil
-}
-
 // Option is config option.
 type Option interface {
 	ServerOption
-	ClientOption
 }
 
 // WithTracerProvider specifies a tracer provider to use for creating a tracer.
@@ -200,20 +140,11 @@ func WithTracerProvider(provider trace.TracerProvider) Option {
 
 // WithMeterProvider specifies a meter provider to use for creating a meter.
 //
-// If none is specified, the metric.NewNoopMeterProvider is used.
+// If none is specified, the otel.GetMeterProvider() is used.
 func WithMeterProvider(provider metric.MeterProvider) Option {
 	return otelOptionFunc(func(cfg *otelConfig) {
 		if provider != nil {
 			cfg.MeterProvider = provider
-		}
-	})
-}
-
-// WithClient specifies http client to use.
-func WithClient(client ht.Client) ClientOption {
-	return optionFunc[clientConfig](func(cfg *clientConfig) {
-		if client != nil {
-			cfg.Client = client
 		}
 	})
 }

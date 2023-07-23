@@ -2,15 +2,16 @@ package api
 
 import (
 	"context"
+	"net/http"
 	"strings"
 
 	"github.com/tonkeeper/opentonapi/pkg/oas"
 )
 
-func (h Handler) GetAllAuctions(ctx context.Context, params oas.GetAllAuctionsParams) (oas.GetAllAuctionsRes, error) {
+func (h Handler) GetAllAuctions(ctx context.Context, params oas.GetAllAuctionsParams) (*oas.Auctions, error) {
 	auctions, err := h.storage.GetAllAuctions(ctx)
 	if err != nil {
-		return &oas.InternalError{Error: err.Error()}, nil
+		return nil, toError(http.StatusInternalServerError, err)
 	}
 	filter := ""
 	if params.Tld.Value != "" {
@@ -33,11 +34,11 @@ func (h Handler) GetAllAuctions(ctx context.Context, params oas.GetAllAuctionsPa
 	return &auctionsRes, nil
 }
 
-func (h Handler) GetDomainBids(ctx context.Context, params oas.GetDomainBidsParams) (oas.GetDomainBidsRes, error) {
+func (h Handler) GetDomainBids(ctx context.Context, params oas.GetDomainBidsParams) (*oas.DomainBids, error) {
 	domain := strings.ToLower(params.DomainName)
 	bids, err := h.storage.GetDomainBids(ctx, strings.TrimSuffix(domain, ".ton"))
 	if err != nil {
-		return &oas.BadRequest{Error: err.Error()}, nil
+		return nil, toError(http.StatusInternalServerError, err)
 	}
 	var domainBids oas.DomainBids
 	for _, bid := range bids {

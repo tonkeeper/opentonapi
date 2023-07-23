@@ -2,13 +2,15 @@ package api
 
 import (
 	"context"
+	"net/http"
+
 	"github.com/tonkeeper/opentonapi/pkg/oas"
 )
 
-func (h Handler) GetStorageProviders(ctx context.Context) (r oas.GetStorageProvidersRes, _ error) {
+func (h Handler) GetStorageProviders(ctx context.Context) (*oas.GetStorageProvidersOK, error) {
 	providers, err := h.storage.GetStorageProviders(ctx)
 	if err != nil {
-		return nil, err
+		return nil, toError(http.StatusInternalServerError, err)
 	}
 	result := make([]oas.StorageProvider, 0, len(providers))
 	for _, p := range providers {

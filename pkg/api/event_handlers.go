@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"net/http"
 	"time"
 
 	"github.com/tonkeeper/opentonapi/pkg/bath"
@@ -22,20 +23,20 @@ import (
 	"golang.org/x/exp/slices"
 )
 
-func (h Handler) SendMessage(ctx context.Context, req oas.SendMessageReq) (r oas.SendMessageRes, _ error) {
+func (h Handler) SendMessage(ctx context.Context, request *oas.SendMessageReq) error {
 	if h.msgSender == nil {
-		return nil, fmt.Errorf("msg sender is not configured")
+		return toError(http.StatusBadRequest, fmt.Errorf("msg sender is not configured"))
 	}
-	payload, err := base64.StdEncoding.DecodeString(req.Boc)
+	payload, err := base64.StdEncoding.DecodeString(request.Boc)
 	if err != nil {
-		return &oas.BadRequest{Error: err.Error()}, nil
+		return toError(http.StatusBadRequest, err)
 	}
 	if err := h.msgSender.SendMessage(ctx, payload); err != nil {
-		sentry.Send("sending message", sentry.SentryInfoData{"payload": req.Boc}, sentry.LevelError)
-		return &oas.InternalError{Error: err.Error()}, nil
+		sentry.Send("sending message", sentry.SentryInfoData{"payload": request.Boc}, sentry.LevelError)
+		return toError(http.StatusInternalServerError, err)
 	}
 	go h.addToMempool(payload)
-	return &oas.SendMessageOK{}, nil
+	return nil
 }
 
 func (h Handler) getTraceByHash(ctx context.Context, hash tongo.Bits256) (*core.Trace, error) {
@@ -57,10 +58,10 @@ func (h Handler) getTraceByHash(ctx context.Context, hash tongo.Bits256) (*core.
 	return nil, core.ErrEntityNotFound
 }
 
-func (h Handler) GetTrace(ctx context.Context, params oas.GetTraceParams) (r oas.GetTraceRes, _ error) {
+func (h Handler) GetTrace(ctx context.Context, params oas.GetTraceParams) (*oas.Trace, error) {
 	hash, err := tongo.ParseHash(params.TraceID)
 	if err != nil {
-		return &oas.BadRequest{Error: err.Error()}, nil
+		return nil, toError(http.StatusBadRequest, err)
 	}
 	if hash.Hex() == testEventID {
 		testTrace := getTestTrace()
@@ -68,19 +69,19 @@ func (h Handler) GetTrace(ctx context.Context, params oas.GetTraceParams) (r oas
 	}
 	trace, err := h.getTraceByHash(ctx, hash)
 	if errors.Is(err, core.ErrEntityNotFound) {
-		return &oas.NotFound{Error: err.Error()}, nil
+		return nil, toError(http.StatusNotFound, err)
 	}
 	if err != nil {
-		return &oas.InternalError{Error: err.Error()}, nil
+		return nil, toError(http.StatusInternalServerError, err)
 	}
 	convertedTrace := convertTrace(*trace, h.addressBook)
 	return &convertedTrace, nil
 }
 
-func (h Handler) GetEvent(ctx context.Context, params oas.GetEventParams) (oas.GetEventRes, error) {
+func (h Handler) GetEvent(ctx context.Context, params oas.GetEventParams) (*oas.Event, error) {
 	traceID, err := tongo.ParseHash(params.EventID)
 	if err != nil {
-		return &oas.BadRequest{Error: err.Error()}, nil
+		return nil, toError(http.StatusBadRequest, err)
 	}
 	if traceID.Hex() == testEventID {
 		testEvent := getTestEvent()
@@ -88,30 +89,30 @@ func (h Handler) GetEvent(ctx context.Context, params oas.GetEventParams) (oas.G
 	}
 	trace, err := h.getTraceByHash(ctx, traceID)
 	if errors.Is(err, core.ErrEntityNotFound) {
-		return &oas.NotFound{Error: err.Error()}, nil
+		return nil, toError(http.StatusNotFound, err)
 	}
 	if err != nil {
-		return &oas.InternalError{Error: err.Error()}, nil
+		return nil, toError(http.StatusInternalServerError, err)
 	}
 	result, err := bath.FindActions(ctx, trace, bath.WithInformationSource(h.storage))
 	if err != nil {
-		return &oas.InternalError{Error: err.Error()}, nil
+		return nil, toError(http.StatusInternalServerError, err)
 	}
 	event, err := h.toEvent(ctx, trace, result, params.AcceptLanguage)
 	if err != nil {
-		return &oas.InternalError{Error: err.Error()}, nil
+		return nil, toError(http.StatusInternalServerError, err)
 	}
 	return &event, nil
 }
 
-func (h Handler) GetEventsByAccount(ctx context.Context, params oas.GetEventsByAccountParams) (r oas.GetEventsByAccountRes, _ error) {
+func (h Handler) GetEventsByAccount(ctx context.Context, params oas.GetEventsByAccountParams) (*oas.AccountEvents, error) {
 	account, err := tongo.ParseAccountID(params.AccountID)
 	if err != nil {
-		return &oas.BadRequest{Error: err.Error()}, nil
+		return nil, toError(http.StatusBadRequest, err)
 	}
 	traceIDs, err := h.storage.SearchTraces(ctx, account, params.Limit, optIntToPointer(params.BeforeLt), optIntToPointer(params.StartDate), optIntToPointer(params.EndDate))
 	if err != nil && !errors.Is(err, core.ErrEntityNotFound) {
-		return &oas.InternalError{Error: err.Error()}, nil
+		return nil, toError(http.StatusInternalServerError, err)
 	}
 
 	events := make([]oas.AccountEvent, len(traceIDs))
@@ -120,15 +121,15 @@ func (h Handler) GetEventsByAccount(ctx context.Context, params oas.GetEventsByA
 	for i, traceID := range traceIDs {
 		trace, err := h.storage.GetTrace(ctx, traceID)
 		if err != nil {
-			return &oas.InternalError{Error: err.Error()}, nil
+			return nil, toError(http.StatusInternalServerError, err)
 		}
 		result, err := bath.FindActions(ctx, trace, bath.ForAccount(account), bath.WithInformationSource(h.storage))
 		if err != nil {
-			return &oas.InternalError{Error: err.Error()}, nil
+			return nil, toError(http.StatusInternalServerError, err)
 		}
 		events[i], err = h.toAccountEvent(ctx, account, trace, result, params.AcceptLanguage, params.SubjectOnly.Value)
 		if err != nil {
-			return &oas.InternalError{Error: err.Error()}, nil
+			return nil, toError(http.StatusInternalServerError, err)
 		}
 		lastLT = trace.Lt
 	}
@@ -141,11 +142,11 @@ func (h Handler) GetEventsByAccount(ctx context.Context, params oas.GetEventsByA
 			}
 			result, err := bath.FindActions(ctx, trace, bath.ForAccount(account), bath.WithInformationSource(h.storage))
 			if err != nil {
-				return &oas.InternalError{Error: err.Error()}, nil
+				return nil, toError(http.StatusInternalServerError, err)
 			}
 			event, err := h.toAccountEvent(ctx, account, trace, result, params.AcceptLanguage, params.SubjectOnly.Value)
 			if err != nil {
-				return &oas.InternalError{Error: err.Error()}, nil
+				return nil, toError(http.StatusInternalServerError, err)
 			}
 			event.InProgress = true
 			event.EventID = traceHex
@@ -164,97 +165,97 @@ func (h Handler) GetEventsByAccount(ctx context.Context, params oas.GetEventsByA
 	return &oas.AccountEvents{Events: events, NextFrom: int64(lastLT)}, nil
 }
 
-func (h Handler) EmulateMessageToAccountEvent(ctx context.Context, req oas.EmulateMessageToAccountEventReq, params oas.EmulateMessageToAccountEventParams) (r oas.EmulateMessageToAccountEventRes, _ error) {
-	c, err := boc.DeserializeSinglRootBase64(req.Boc)
+func (h Handler) EmulateMessageToAccountEvent(ctx context.Context, request *oas.EmulateMessageToAccountEventReq, params oas.EmulateMessageToAccountEventParams) (*oas.AccountEvent, error) {
+	c, err := boc.DeserializeSinglRootBase64(request.Boc)
 	if err != nil {
-		return &oas.BadRequest{Error: err.Error()}, nil
+		return nil, toError(http.StatusBadRequest, err)
 	}
 	var m tlb.Message
 	err = tlb.Unmarshal(c, &m)
 	if err != nil {
-		return &oas.BadRequest{Error: err.Error()}, nil
+		return nil, toError(http.StatusInternalServerError, err)
 	}
 	account, err := tongo.ParseAccountID(params.AccountID)
 	if err != nil {
-		return &oas.BadRequest{err.Error()}, nil
+		return nil, toError(http.StatusBadRequest, err)
 	}
 	emulator, err := txemulator.NewTraceBuilder()
 	if err != nil {
-		return &oas.InternalError{Error: err.Error()}, err
+		return nil, toError(http.StatusInternalServerError, err)
 	}
 	tree, err := emulator.Run(ctx, m)
 	if err != nil {
-		return &oas.InternalError{Error: err.Error()}, nil
+		return nil, toError(http.StatusInternalServerError, err)
 	}
 	trace, err := emulatedTreeToTrace(tree, emulator.FinalStates())
 	if err != nil {
-		return &oas.InternalError{Error: err.Error()}, nil
+		return nil, toError(http.StatusInternalServerError, err)
 	}
 	result, err := bath.FindActions(ctx, trace)
 	if err != nil {
-		return &oas.InternalError{Error: err.Error()}, nil
+		return nil, toError(http.StatusInternalServerError, err)
 	}
 	event, err := h.toAccountEvent(ctx, account, trace, result, params.AcceptLanguage, false)
 	if err != nil {
-		return &oas.InternalError{Error: err.Error()}, nil
+		return nil, toError(http.StatusInternalServerError, err)
 	}
 	return &event, nil
 }
 
-func (h Handler) EmulateMessageToEvent(ctx context.Context, req oas.EmulateMessageToEventReq, params oas.EmulateMessageToEventParams) (r oas.EmulateMessageToEventRes, _ error) {
-	c, err := boc.DeserializeSinglRootBase64(req.Boc)
+func (h Handler) EmulateMessageToEvent(ctx context.Context, request *oas.EmulateMessageToEventReq, params oas.EmulateMessageToEventParams) (*oas.Event, error) {
+	c, err := boc.DeserializeSinglRootBase64(request.Boc)
 	if err != nil {
-		return &oas.BadRequest{Error: err.Error()}, nil
+		return nil, toError(http.StatusBadRequest, err)
 	}
 	var m tlb.Message
 	err = tlb.Unmarshal(c, &m)
 	if err != nil {
-		return &oas.BadRequest{Error: err.Error()}, nil
+		return nil, toError(http.StatusInternalServerError, err)
 	}
 	emulator, err := txemulator.NewTraceBuilder()
 	if err != nil {
-		return &oas.InternalError{Error: err.Error()}, err
+		return nil, toError(http.StatusInternalServerError, err)
 	}
 	tree, err := emulator.Run(ctx, m)
 	if err != nil {
-		return &oas.InternalError{Error: err.Error()}, nil
+		return nil, toError(http.StatusInternalServerError, err)
 	}
 	trace, err := emulatedTreeToTrace(tree, emulator.FinalStates())
 	if err != nil {
-		return &oas.InternalError{Error: err.Error()}, nil
+		return nil, toError(http.StatusInternalServerError, err)
 	}
 	result, err := bath.FindActions(ctx, trace)
 	if err != nil {
-		return &oas.InternalError{Error: err.Error()}, nil
+		return nil, toError(http.StatusInternalServerError, err)
 	}
 	event, err := h.toEvent(ctx, trace, result, params.AcceptLanguage)
 	if err != nil {
-		return &oas.InternalError{Error: err.Error()}, nil
+		return nil, toError(http.StatusInternalServerError, err)
 	}
 	return &event, nil
 }
 
-func (h Handler) EmulateMessageToTrace(ctx context.Context, req oas.EmulateMessageToTraceReq) (r oas.EmulateMessageToTraceRes, _ error) {
-	c, err := boc.DeserializeSinglRootBase64(req.Boc)
+func (h Handler) EmulateMessageToTrace(ctx context.Context, request *oas.EmulateMessageToTraceReq) (*oas.Trace, error) {
+	c, err := boc.DeserializeSinglRootBase64(request.Boc)
 	if err != nil {
-		return &oas.BadRequest{Error: err.Error()}, nil
+		return nil, toError(http.StatusBadRequest, err)
 	}
 	var m tlb.Message
 	err = tlb.Unmarshal(c, &m)
 	if err != nil {
-		return &oas.BadRequest{Error: err.Error()}, nil
+		return nil, toError(http.StatusInternalServerError, err)
 	}
 	emulator, err := txemulator.NewTraceBuilder()
 	if err != nil {
-		return &oas.InternalError{Error: err.Error()}, err
+		return nil, toError(http.StatusInternalServerError, err)
 	}
 	tree, err := emulator.Run(ctx, m)
 	if err != nil {
-		return &oas.InternalError{Error: err.Error()}, nil
+		return nil, toError(http.StatusInternalServerError, err)
 	}
 	trace, err := emulatedTreeToTrace(tree, emulator.FinalStates())
 	if err != nil {
-		return &oas.InternalError{Error: err.Error()}, nil
+		return nil, toError(http.StatusInternalServerError, err)
 	}
 	t := convertTrace(*trace, h.addressBook)
 	return &t, nil
@@ -274,57 +275,57 @@ func extractDestinationWallet(message tlb.Message) (*tongo.AccountID, error) {
 	return accountID, nil
 }
 
-func (h Handler) EmulateWalletMessage(ctx context.Context, req oas.EmulateWalletMessageReq, params oas.EmulateWalletMessageParams) (oas.EmulateWalletMessageRes, error) {
-	msgCell, err := boc.DeserializeSinglRootBase64(req.Boc)
+func (h Handler) EmulateWalletMessage(ctx context.Context, request *oas.EmulateWalletMessageReq, params oas.EmulateWalletMessageParams) (*oas.MessageConsequences, error) {
+	msgCell, err := boc.DeserializeSinglRootBase64(request.Boc)
 	if err != nil {
-		return &oas.BadRequest{Error: err.Error()}, nil
+		return nil, toError(http.StatusBadRequest, err)
 	}
 	var m tlb.Message
 	err = tlb.Unmarshal(msgCell, &m)
 	if err != nil {
-		return &oas.BadRequest{Error: err.Error()}, nil
+		return nil, toError(http.StatusInternalServerError, err)
 	}
 	walletAddress, err := extractDestinationWallet(m)
 	if err != nil {
-		return &oas.BadRequest{err.Error()}, nil
+		return nil, toError(http.StatusInternalServerError, err)
 	}
 	account, err := h.storage.GetRawAccount(ctx, *walletAddress)
 	if err != nil {
 		// TODO: if not found, take code from stateInit
-		return &oas.InternalError{Error: err.Error()}, nil
+		return nil, toError(http.StatusInternalServerError, err)
 	}
 	walletVersion, err := wallet.GetVersionByCode(account.Code)
 	if err != nil {
-		return &oas.InternalError{Error: err.Error()}, nil
+		return nil, toError(http.StatusInternalServerError, err)
 	}
 	risk, err := wallet.ExtractRisk(walletVersion, msgCell)
 	if err != nil {
-		return nil, err
+		return nil, toError(http.StatusInternalServerError, err)
 	}
 	emulator, err := txemulator.NewTraceBuilder()
 	if err != nil {
-		return &oas.InternalError{Error: err.Error()}, nil
+		return nil, toError(http.StatusInternalServerError, err)
 	}
 	tree, err := emulator.Run(ctx, m)
 	if err != nil {
-		return &oas.InternalError{Error: err.Error()}, nil
+		return nil, toError(http.StatusInternalServerError, err)
 	}
 	trace, err := emulatedTreeToTrace(tree, emulator.FinalStates())
 	if err != nil {
-		return &oas.InternalError{Error: err.Error()}, nil
+		return nil, toError(http.StatusInternalServerError, err)
 	}
 	t := convertTrace(*trace, h.addressBook)
 	result, err := bath.FindActions(ctx, trace, bath.ForAccount(*walletAddress))
 	if err != nil {
-		return &oas.InternalError{Error: err.Error()}, nil
+		return nil, toError(http.StatusInternalServerError, err)
 	}
 	event, err := h.toAccountEvent(ctx, *walletAddress, trace, result, params.AcceptLanguage, true)
 	if err != nil {
-		return &oas.InternalError{Error: err.Error()}, nil
+		return nil, toError(http.StatusInternalServerError, err)
 	}
 	oasRisk, err := h.convertRisk(ctx, *risk, *walletAddress)
 	if err != nil {
-		return &oas.InternalError{Error: err.Error()}, nil
+		return nil, toError(http.StatusInternalServerError, err)
 	}
 	consequences := oas.MessageConsequences{
 		Trace: t,
