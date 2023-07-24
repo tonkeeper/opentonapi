@@ -115,6 +115,8 @@ func TestFindActions(t *testing.T) {
 			tongo.MustParseBlockID("(0,8000000000000000,32606232)"),
 			// encrypted comment
 			tongo.MustParseBlockID("(0,8000000000000000,36828763)"),
+			// cancel sale at getgems
+			tongo.MustParseBlockID("(0,8000000000000000,36025985)"),
 		}),
 	)
 
@@ -230,6 +232,21 @@ func TestFindActions(t *testing.T) {
 			name:           "encrypted comment",
 			hash:           "6f3e1f2c05df05345198a9d26456dcb51d4c78ce64ced56fb9976e92941211d3",
 			filenamePrefix: "encrypted-comment",
+		},
+		{
+			name:           "cancel sale at get gems ",
+			hash:           "9900285c0f5a7cc18bdb61564013452461ead3bba84c6feb5195921e443cd79e",
+			filenamePrefix: "getgetms-cancel-sale",
+			source: &mockInfoSource{
+				OnGetGemsContracts: func(ctx context.Context, getGems []tongo.AccountID) (map[tongo.AccountID]core.NftSaleContract, error) {
+					return map[tongo.AccountID]core.NftSaleContract{
+						tongo.MustParseAccountID("0:30635bdaa6736ad1ed89146b5a34e2cc21e9eca51031a463fe4c89a537304547"): {
+							NftPrice: 1_200_000_000_000,
+							Owner:    g.Pointer(tongo.MustParseAccountID("0:bbf8ca0967809097d1aa67afee9cb2db2b9aa5e5f66c50a5c92033dc57b1cc23")),
+						},
+					}, nil
+				},
+			},
 		},
 	} {
 		t.Run(c.name, func(t *testing.T) {

@@ -35,6 +35,16 @@ func auctionType(account *Account) NftAuctionType {
 	return BasicAuction
 }
 
+func getGemsOpCodeOK(opcode *uint32) bool {
+	if opcode == nil {
+		return true
+	}
+	// according to getgems source code
+	// 0 and 2 are OK
+	// https://github.com/getgems-io/nft-contracts/blob/debcd8516b91320fa9b23bff6636002d639e3f26/packages/contracts/sources/nft-fixprice-sale-v3.fc#L228-L249
+	return *opcode == 2 || *opcode == 0
+}
+
 func FindNftPurchase(bubble *Bubble) bool {
 	txBubble, ok := bubble.Info.(BubbleTx)
 	if !ok {
@@ -63,6 +73,11 @@ func FindNftPurchase(bubble *Bubble) bool {
 	}
 	if transfers != 1 {
 		return false
+	}
+	if txBubble.account.Is(abi.NftSaleGetgems) {
+		if !getGemsOpCodeOK(txBubble.opCode) {
+			return false
+		}
 	}
 	newBubble := Bubble{
 		Accounts:  bubble.Accounts,
