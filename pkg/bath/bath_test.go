@@ -117,6 +117,8 @@ func TestFindActions(t *testing.T) {
 			tongo.MustParseBlockID("(0,8000000000000000,36828763)"),
 			// cancel sale at getgems
 			tongo.MustParseBlockID("(0,8000000000000000,36025985)"),
+			// multiple call contracts
+			tongo.MustParseBlockID("(0,8000000000000000,36692636)"),
 		}),
 	)
 
@@ -124,13 +126,13 @@ func TestFindActions(t *testing.T) {
 		t.Fatal(err)
 	}
 	type Case struct {
-		name             string
-		account          string
-		hash             string
-		filenamePrefix   string
-		source           core.InformationSource
-		valueFlow        ValueFlow
-		additionalStraws []Straw
+		name           string
+		account        string
+		hash           string
+		filenamePrefix string
+		source         core.InformationSource
+		valueFlow      ValueFlow
+		straws         []Straw
 	}
 	for _, c := range []Case{
 		{
@@ -248,6 +250,15 @@ func TestFindActions(t *testing.T) {
 				},
 			},
 		},
+		{
+			name:           "multiple call contracts",
+			hash:           "e87ec0ae9ebdba400b82887462dd0908a954fe2165c1a89775742d85a5e2a5f8",
+			filenamePrefix: "multiple-call-contracts",
+			straws: []Straw{
+				FindNFTTransfer,
+				FindJettonTransfer,
+			},
+		},
 	} {
 		t.Run(c.name, func(t *testing.T) {
 			trace, err := storage.GetTrace(context.Background(), tongo.MustParseHash(c.hash))
@@ -256,9 +267,13 @@ func TestFindActions(t *testing.T) {
 			if c.source == nil {
 				source = storage
 			}
+			straws := DefaultStraws
+			if len(c.straws) > 0 {
+				straws = c.straws
+			}
 			actionsList, err := FindActions(context.Background(),
 				trace,
-				WithStraws(append(c.additionalStraws, DefaultStraws...)),
+				WithStraws(straws),
 				WithInformationSource(source))
 			require.Nil(t, err)
 			results := result{
