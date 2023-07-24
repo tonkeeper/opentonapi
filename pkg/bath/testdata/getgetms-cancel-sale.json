@@ -1,16 +1,15 @@
 {
    "Actions": [
      {
-       "TonTransfer": {
-         "Amount": 1100000000,
-         "Comment": null,
-         "EncryptedComment": null,
-         "Recipient": "0:30635bdaa6736ad1ed89146b5a34e2cc21e9eca51031a463fe4c89a537304547",
-         "Sender": "0:e3e4dbd02b51e1e9c72de4f017f1771be882a8d479a3a1cd8b33535a83fd5fa4",
-         "Refund": null
+       "SmartContractExec": {
+         "TonAttached": 1100000000,
+         "Executor": "0:e3e4dbd02b51e1e9c72de4f017f1771be882a8d479a3a1cd8b33535a83fd5fa4",
+         "Contract": "0:30635bdaa6736ad1ed89146b5a34e2cc21e9eca51031a463fe4c89a537304547",
+         "Operation": "0x00000003",
+         "Payload": ""
        },
        "Success": true,
-       "Type": "TonTransfer"
+       "Type": "SmartContractExec"
      },
      {
        "NftItemTransfer": {
