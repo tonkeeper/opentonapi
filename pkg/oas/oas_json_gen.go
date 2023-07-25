@@ -2265,8 +2265,6 @@ func (s *ActionStatus) Decode(d *jx.Decoder) error {
 		*s = ActionStatusOk
 	case ActionStatusFailed:
 		*s = ActionStatusFailed
-	case ActionStatusPending:
-		*s = ActionStatusPending
 	default:
 		*s = ActionStatus(v)
 	}
@@ -2660,13 +2658,13 @@ func (s AuctionBidAction) encodeFields(e *jx.Encoder) {
 	}
 	{
 
-		e.FieldStart("beneficiary")
-		s.Beneficiary.Encode(e)
+		e.FieldStart("bidder")
+		s.Bidder.Encode(e)
 	}
 	{
 
-		e.FieldStart("bidder")
-		s.Bidder.Encode(e)
+		e.FieldStart("auction")
+		e.Str(s.Auction)
 	}
 }
 
@@ -2674,8 +2672,8 @@ var jsonFieldsNameOfAuctionBidAction = [5]string{
 	0: "auction_type",
 	1: "amount",
 	2: "nft",
-	3: "beneficiary",
-	4: "bidder",
+	3: "bidder",
+	4: "auction",
 }
 
 // Decode decodes AuctionBidAction from json.
@@ -2717,18 +2715,8 @@ func (s *AuctionBidAction) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"nft\"")
 			}
-		case "beneficiary":
-			requiredBitSet[0] |= 1 << 3
-			if err := func() error {
-				if err := s.Beneficiary.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"beneficiary\"")
-			}
 		case "bidder":
-			requiredBitSet[0] |= 1 << 4
+			requiredBitSet[0] |= 1 << 3
 			if err := func() error {
 				if err := s.Bidder.Decode(d); err != nil {
 					return err
@@ -2736,6 +2724,18 @@ func (s *AuctionBidAction) Decode(d *jx.Decoder) error {
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"bidder\"")
+			}
+		case "auction":
+			requiredBitSet[0] |= 1 << 4
+			if err := func() error {
+				v, err := d.Str()
+				s.Auction = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"auction\"")
 			}
 		default:
 			return d.Skip()
@@ -12685,7 +12685,6 @@ func (s *Message) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"decoded_op_name\"")
 			}
 		case "decoded_body":
-			requiredBitSet[1] |= 1 << 7
 			if err := func() error {
 				v, err := d.RawAppend(nil)
 				s.DecodedBody = jx.Raw(v)
@@ -12707,7 +12706,7 @@ func (s *Message) Decode(d *jx.Decoder) error {
 	var failures []validate.FieldError
 	for i, mask := range [2]uint8{
 		0b01111111,
-		0b10000110,
+		0b00000110,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.

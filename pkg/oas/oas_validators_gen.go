@@ -385,8 +385,6 @@ func (s ActionStatus) Validate() error {
 		return nil
 	case "failed":
 		return nil
-	case "pending":
-		return nil
 	default:
 		return errors.Errorf("invalid value: %v", s)
 	}

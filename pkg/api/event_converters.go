@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/hex"
 	"fmt"
+	"github.com/tonkeeper/opentonapi/pkg/references"
 	"math/big"
 	"sort"
 	"strings"
@@ -31,6 +32,7 @@ const (
 	depositStakeMessageID   = "depositStakeAction"
 	recoverStakeMessageID   = "recoverStakeAction"
 	stonfiSwapMessageID     = "stonfiSwapAction"
+	auctionBidMessageID     = "auctionBidAction"
 	contractDeployMessageID = "contractDeployAction"
 
 	tfDepositMessageID                        = "tfDepositAction"
@@ -371,6 +373,43 @@ func (h Handler) convertAction(ctx context.Context, viewer tongo.AccountID, a ba
 			Accounts: distinctAccounts(h.addressBook,
 				&a.STONfiSwap.UserWallet,
 				&a.STONfiSwap.STONfiRouter),
+		}
+	case bath.AuctionBid:
+		var nft oas.OptNftItem
+		if a.AuctionBid.Nft == nil && a.AuctionBid.NftAddress != nil {
+			n, err := h.storage.GetNFTs(ctx, []tongo.AccountID{*a.AuctionBid.NftAddress})
+			if err != nil {
+				return oas.Action{}, false, err
+			}
+			a.AuctionBid.Nft = &n[0]
+		}
+		if a.AuctionBid.Nft == nil {
+			return oas.Action{}, false, fmt.Errorf("nft is nil")
+		}
+		nft.SetTo(convertNFT(ctx, *a.AuctionBid.Nft, h.addressBook, h.previewGenerator, h.metaCache))
+		action.AuctionBid.SetTo(oas.AuctionBidAction{
+			Amount: oas.Price{
+				Value:     fmt.Sprintf("%v", a.AuctionBid.Amount),
+				TokenName: "TON",
+			},
+			Nft:    nft,
+			Bidder: convertAccountAddress(a.AuctionBid.Bidder, h.addressBook),
+		})
+		if a.AuctionBid.Nft.CollectionAddress != nil && *a.AuctionBid.Nft.CollectionAddress == references.RootTelegram {
+			action.AuctionBid.Value.AuctionType = oas.AuctionBidActionAuctionTypeDNSTg
+		}
+		action.SimplePreview = oas.ActionSimplePreview{
+			Name: "Auction bid",
+			Description: i18n.T(acceptLanguage.Value, i18n.C{
+				MessageID: auctionBidMessageID,
+				TemplateData: map[string]interface{}{
+					"Amount":  i18n.FormatTONs(a.AuctionBid.Amount),
+					"NftName": optionalFromMeta(nft.Value.Metadata, "name"),
+				},
+			}),
+			Accounts: distinctAccounts(h.addressBook,
+				&a.AuctionBid.Bidder,
+				&a.AuctionBid.Auction),
 		}
 	case bath.SmartContractExec:
 		op := "Call"

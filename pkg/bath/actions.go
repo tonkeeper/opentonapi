@@ -9,8 +9,6 @@ import (
 	"github.com/tonkeeper/tongo/abi"
 	"github.com/tonkeeper/tongo/tlb"
 	"golang.org/x/exp/slices"
-
-	"github.com/tonkeeper/opentonapi/pkg/core"
 )
 
 const (
@@ -147,14 +145,6 @@ type (
 		Beneficiary  tongo.AccountID
 	}
 
-	AuctionBidAction struct {
-		Bidder         tongo.AccountID
-		PreviousBidder *tongo.AccountID
-		Bid            int64
-		Item           *core.NftItem
-		AuctionType    string
-	}
-
 	STONfiSwapAction struct {
 		UserWallet      tongo.AccountID
 		STONfiRouter    tongo.AccountID
@@ -285,9 +275,6 @@ func (a *NftPurchaseAction) SubjectAccounts() []tongo.AccountID {
 func (a *AuctionBidAction) SubjectAccounts() []tongo.AccountID {
 	accounts := make([]tongo.AccountID, 0, 2)
 	accounts = append(accounts, a.Bidder)
-	if a.PreviousBidder != nil {
-		accounts = append(accounts, *a.PreviousBidder)
-	}
 	return accounts
 }
 func (a *ContractDeployAction) SubjectAccounts() []tongo.AccountID {

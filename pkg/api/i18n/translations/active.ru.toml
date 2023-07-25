@@ -22,3 +22,5 @@ other = "Стейкинг {{.Amount}}"
 
 [recoverStakeAction]
 other = "Вывод {{.Amount}}"
+
+

@@ -18,6 +18,7 @@ type Straw func(bubble *Bubble) (success bool)
 var DefaultStraws = []Straw{
 	FindNFTTransfer,
 	FindJettonTransfer,
+	FindAuctionBidFragmentSimple,
 	FindInitialSubscription,
 	FindExtendedSubscription,
 	FindUnSubscription,

@@ -812,9 +812,8 @@ func (s *ActionSimplePreview) SetAccounts(val []AccountAddress) {
 type ActionStatus string
 
 const (
-	ActionStatusOk      ActionStatus = "ok"
-	ActionStatusFailed  ActionStatus = "failed"
-	ActionStatusPending ActionStatus = "pending"
+	ActionStatusOk     ActionStatus = "ok"
+	ActionStatusFailed ActionStatus = "failed"
 )
 
 type ActionType string
@@ -925,8 +924,8 @@ type AuctionBidAction struct {
 	AuctionType AuctionBidActionAuctionType `json:"auction_type"`
 	Amount      Price                       `json:"amount"`
 	Nft         OptNftItem                  `json:"nft"`
-	Beneficiary AccountAddress              `json:"beneficiary"`
 	Bidder      AccountAddress              `json:"bidder"`
+	Auction     string                      `json:"auction"`
 }
 
 // GetAuctionType returns the value of AuctionType.
@@ -944,14 +943,14 @@ func (s AuctionBidAction) GetNft() OptNftItem {
 	return s.Nft
 }
 
-// GetBeneficiary returns the value of Beneficiary.
-func (s AuctionBidAction) GetBeneficiary() AccountAddress {
-	return s.Beneficiary
-}
-
 // GetBidder returns the value of Bidder.
 func (s AuctionBidAction) GetBidder() AccountAddress {
 	return s.Bidder
+}
+
+// GetAuction returns the value of Auction.
+func (s AuctionBidAction) GetAuction() string {
+	return s.Auction
 }
 
 // SetAuctionType sets the value of AuctionType.
@@ -969,14 +968,14 @@ func (s *AuctionBidAction) SetNft(val OptNftItem) {
 	s.Nft = val
 }
 
-// SetBeneficiary sets the value of Beneficiary.
-func (s *AuctionBidAction) SetBeneficiary(val AccountAddress) {
-	s.Beneficiary = val
-}
-
 // SetBidder sets the value of Bidder.
 func (s *AuctionBidAction) SetBidder(val AccountAddress) {
 	s.Bidder = val
+}
+
+// SetAuction sets the value of Auction.
+func (s *AuctionBidAction) SetAuction(val string) {
+	s.Auction = val
 }
 
 type AuctionBidActionAuctionType string

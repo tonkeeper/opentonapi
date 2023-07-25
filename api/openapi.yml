@@ -2741,7 +2741,6 @@ components:
         - ihr_fee
         - import_fee
         - created_at
-        - decoded_body
       properties:
         created_lt:
           type: integer
@@ -3560,7 +3559,6 @@ components:
           enum:
             - ok
             - failed
-            - pending
         TonTransfer:
           $ref: '#/components/schemas/TonTransferAction'
         ContractDeploy:
@@ -3751,8 +3749,8 @@ components:
       type: object
       required:
         - amount
-        - beneficiary
         - bidder
+        - auction
         - auction_type
       properties:
         auction_type:
@@ -3766,10 +3764,11 @@ components:
           $ref: '#/components/schemas/Price'
         nft:
           $ref: '#/components/schemas/NftItem'
-        beneficiary:
-          $ref: '#/components/schemas/AccountAddress'
         bidder:
           $ref: '#/components/schemas/AccountAddress'
+        auction:
+          type: string
+          example: "0:da6b1b6663a0e4d18cc8574ccd9db5296e367dd9324706f3bbd9eb1cd2caf0bf"
 
     DepositStakeAction:
       type: object

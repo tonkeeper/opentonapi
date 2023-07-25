@@ -888,8 +888,7 @@
      "status": {
       "enum": [
        "ok",
-       "failed",
-       "pending"
+       "failed"
       ],
       "example": "ok",
       "type": "string"
@@ -1049,6 +1048,10 @@
      "amount": {
       "$ref": "#/components/schemas/Price"
      },
+     "auction": {
+      "example": "0:da6b1b6663a0e4d18cc8574ccd9db5296e367dd9324706f3bbd9eb1cd2caf0bf",
+      "type": "string"
+     },
      "auction_type": {
       "enum": [
        "DNS.ton",
@@ -1057,9 +1060,6 @@
        "getgems"
       ],
       "type": "string"
-     },
-     "beneficiary": {
-      "$ref": "#/components/schemas/AccountAddress"
      },
      "bidder": {
       "$ref": "#/components/schemas/AccountAddress"
@@ -1070,8 +1070,8 @@
     },
     "required": [
      "amount",
-     "beneficiary",
      "bidder",
+     "auction",
      "auction_type"
     ],
     "type": "object"
@@ -2125,8 +2125,7 @@
      "fwd_fee",
      "ihr_fee",
      "import_fee",
-     "created_at",
-     "decoded_body"
+     "created_at"
     ],
     "type": "object"
    },
