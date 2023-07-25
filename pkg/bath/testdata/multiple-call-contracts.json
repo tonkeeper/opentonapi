@@ -21,7 +21,7 @@
          "Executor": "0:779dcc815138d9500e449c5291e7f12738c23d575b5310000f6a253bd607384e",
          "Contract": "0:afe41587f4f404b99c567b9cacedd1381f5ff855ccdc112e0cf8291afa7f19f9",
          "Operation": "StonfiSwap",
-         "Payload": "Addrs:\n  Value:\n    FromUser: 0:2cf3b5b8c891e517c9addbda1c0386a09ccacbb0e3faf630b51cfc8152325acb\nHasRefAddress: true\nJettonAmount: \"16666723091\"\nMinOut: \"2087431288\"\nQueryId: 1763571776588606\nSenderAddress: 0:755f21900374af9b39f25e90276caed94409194cad6c32cd12abf336c0df9eb7\nToAddress: 0:2cf3b5b8c891e517c9addbda1c0386a09ccacbb0e3faf630b51cfc8152325acb\n"
+         "Payload": "Addrs:\n  FromUser: 0:2cf3b5b8c891e517c9addbda1c0386a09ccacbb0e3faf630b51cfc8152325acb\nHasRefAddress: true\nJettonAmount: \"16666723091\"\nMinOut: \"2087431288\"\nQueryId: 1763571776588606\nSenderAddress: 0:755f21900374af9b39f25e90276caed94409194cad6c32cd12abf336c0df9eb7\nToAddress: 0:2cf3b5b8c891e517c9addbda1c0386a09ccacbb0e3faf630b51cfc8152325acb\n"
        },
        "Success": true,
        "Type": "SmartContractExec"
