@@ -13706,11 +13706,17 @@ func (s NftItemCollection) encodeFields(e *jx.Encoder) {
 		e.FieldStart("name")
 		e.Str(s.Name)
 	}
+	{
+
+		e.FieldStart("description")
+		e.Str(s.Description)
+	}
 }
 
-var jsonFieldsNameOfNftItemCollection = [2]string{
+var jsonFieldsNameOfNftItemCollection = [3]string{
 	0: "address",
 	1: "name",
+	2: "description",
 }
 
 // Decode decodes NftItemCollection from json.
@@ -13746,6 +13752,18 @@ func (s *NftItemCollection) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"name\"")
 			}
+		case "description":
+			requiredBitSet[0] |= 1 << 2
+			if err := func() error {
+				v, err := d.Str()
+				s.Description = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"description\"")
+			}
 		default:
 			return d.Skip()
 		}
@@ -13756,7 +13774,7 @@ func (s *NftItemCollection) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b00000011,
+		0b00000111,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.

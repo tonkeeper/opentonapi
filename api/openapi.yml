@@ -3440,6 +3440,7 @@ components:
           required:
             - address
             - name
+            - description
           properties:
             address:
               type: string
@@ -3447,6 +3448,9 @@ components:
             name:
               type: string
               example: TON Diamonds
+            description:
+              type: string
+              example: "Best collection in TON network"
         verified:
           type: boolean
           example: true

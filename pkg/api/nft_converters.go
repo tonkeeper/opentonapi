@@ -57,8 +57,9 @@ func convertNFT(ctx context.Context, item core.NftItem, book addressBook, previe
 		}
 		cInfo, _ := metaCache.getCollectionMeta(ctx, *item.CollectionAddress)
 		i.Collection.SetTo(oas.NftItemCollection{
-			Address: item.CollectionAddress.ToRaw(),
-			Name:    cInfo.Name,
+			Address:     item.CollectionAddress.ToRaw(),
+			Name:        cInfo.Name,
+			Description: cInfo.Description,
 		})
 		if *item.CollectionAddress == references.RootDotTon && item.DNS != nil && item.Verified {
 			image = "https://cache.tonapi.io/dns/preview/" + *item.DNS + ".png"

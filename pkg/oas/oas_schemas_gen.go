@@ -4448,8 +4448,9 @@ const (
 )
 
 type NftItemCollection struct {
-	Address string `json:"address"`
-	Name    string `json:"name"`
+	Address     string `json:"address"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
 }
 
 // GetAddress returns the value of Address.
@@ -4462,6 +4463,11 @@ func (s NftItemCollection) GetName() string {
 	return s.Name
 }
 
+// GetDescription returns the value of Description.
+func (s NftItemCollection) GetDescription() string {
+	return s.Description
+}
+
 // SetAddress sets the value of Address.
 func (s *NftItemCollection) SetAddress(val string) {
 	s.Address = val
@@ -4470,6 +4476,11 @@ func (s *NftItemCollection) SetAddress(val string) {
 // SetName sets the value of Name.
 func (s *NftItemCollection) SetName(val string) {
 	s.Name = val
+}
+
+// SetDescription sets the value of Description.
+func (s *NftItemCollection) SetDescription(val string) {
+	s.Description = val
 }
 
 type NftItemMetadata map[string]jx.Raw
