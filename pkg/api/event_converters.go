@@ -392,8 +392,9 @@ func (h Handler) convertAction(ctx context.Context, viewer tongo.AccountID, a ba
 				Value:     fmt.Sprintf("%v", a.AuctionBid.Amount),
 				TokenName: "TON",
 			},
-			Nft:    nft,
-			Bidder: convertAccountAddress(a.AuctionBid.Bidder, h.addressBook),
+			Nft:     nft,
+			Bidder:  convertAccountAddress(a.AuctionBid.Bidder, h.addressBook),
+			Auction: convertAccountAddress(a.AuctionBid.Auction, h.addressBook),
 		})
 		if a.AuctionBid.Nft.CollectionAddress != nil && *a.AuctionBid.Nft.CollectionAddress == references.RootTelegram {
 			action.AuctionBid.Value.AuctionType = oas.AuctionBidActionAuctionTypeDNSTg

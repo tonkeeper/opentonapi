@@ -2664,7 +2664,7 @@ func (s AuctionBidAction) encodeFields(e *jx.Encoder) {
 	{
 
 		e.FieldStart("auction")
-		e.Str(s.Auction)
+		s.Auction.Encode(e)
 	}
 }
 
@@ -2728,9 +2728,7 @@ func (s *AuctionBidAction) Decode(d *jx.Decoder) error {
 		case "auction":
 			requiredBitSet[0] |= 1 << 4
 			if err := func() error {
-				v, err := d.Str()
-				s.Auction = string(v)
-				if err != nil {
+				if err := s.Auction.Decode(d); err != nil {
 					return err
 				}
 				return nil

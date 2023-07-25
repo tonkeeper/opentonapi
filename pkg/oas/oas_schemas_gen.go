@@ -925,7 +925,7 @@ type AuctionBidAction struct {
 	Amount      Price                       `json:"amount"`
 	Nft         OptNftItem                  `json:"nft"`
 	Bidder      AccountAddress              `json:"bidder"`
-	Auction     string                      `json:"auction"`
+	Auction     AccountAddress              `json:"auction"`
 }
 
 // GetAuctionType returns the value of AuctionType.
@@ -949,7 +949,7 @@ func (s AuctionBidAction) GetBidder() AccountAddress {
 }
 
 // GetAuction returns the value of Auction.
-func (s AuctionBidAction) GetAuction() string {
+func (s AuctionBidAction) GetAuction() AccountAddress {
 	return s.Auction
 }
 
@@ -974,7 +974,7 @@ func (s *AuctionBidAction) SetBidder(val AccountAddress) {
 }
 
 // SetAuction sets the value of Auction.
-func (s *AuctionBidAction) SetAuction(val string) {
+func (s *AuctionBidAction) SetAuction(val AccountAddress) {
 	s.Auction = val
 }
 
