@@ -1687,6 +1687,115 @@ func decodeGetBlockTransactionsParams(args [1]string, argsEscaped bool, r *http.
 	return params, nil
 }
 
+// GetChartsRatesParams is parameters of getChartsRates operation.
+type GetChartsRatesParams struct {
+	// Accept jetton master addresses.
+	Token    string
+	Currency OptString
+}
+
+func unpackGetChartsRatesParams(packed middleware.Parameters) (params GetChartsRatesParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "token",
+			In:   "query",
+		}
+		params.Token = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "currency",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.Currency = v.(OptString)
+		}
+	}
+	return params
+}
+
+func decodeGetChartsRatesParams(args [0]string, argsEscaped bool, r *http.Request) (params GetChartsRatesParams, _ error) {
+	q := uri.NewQueryDecoder(r.URL.Query())
+	// Decode query: token.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "token",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.Token = c
+				return nil
+			}); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "token",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Decode query: currency.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "currency",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotCurrencyVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotCurrencyVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.Currency.SetTo(paramsDotCurrencyVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "currency",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
 // GetConfigAllLiteServerParams is parameters of getConfigAllLiteServer operation.
 type GetConfigAllLiteServerParams struct {
 	// Block ID: (workchain,shard,seqno,root_hash,file_hash).

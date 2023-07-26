@@ -1520,7 +1520,6 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				}
 
 				if len(elem) == 0 {
-					// Leaf node.
 					switch r.Method {
 					case "GET":
 						s.handleGetRatesRequest([0]string{}, elemIsEscaped, w, r)
@@ -1529,6 +1528,26 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 					}
 
 					return
+				}
+				switch elem[0] {
+				case '/': // Prefix: "/charts"
+					if l := len("/charts"); len(elem) >= l && elem[0:l] == "/charts" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					if len(elem) == 0 {
+						// Leaf node.
+						switch r.Method {
+						case "GET":
+							s.handleGetChartsRatesRequest([0]string{}, elemIsEscaped, w, r)
+						default:
+							s.notAllowed(w, r, "GET")
+						}
+
+						return
+					}
 				}
 			case 's': // Prefix: "st"
 				if l := len("st"); len(elem) >= l && elem[0:l] == "st" {
@@ -3536,7 +3555,6 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 				if len(elem) == 0 {
 					switch method {
 					case "GET":
-						// Leaf: GetRates
 						r.name = "GetRates"
 						r.operationID = "getRates"
 						r.pathPattern = "/v2/rates"
@@ -3545,6 +3563,29 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 						return r, true
 					default:
 						return
+					}
+				}
+				switch elem[0] {
+				case '/': // Prefix: "/charts"
+					if l := len("/charts"); len(elem) >= l && elem[0:l] == "/charts" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					if len(elem) == 0 {
+						switch method {
+						case "GET":
+							// Leaf: GetChartsRates
+							r.name = "GetChartsRates"
+							r.operationID = "getChartsRates"
+							r.pathPattern = "/v2/rates/charts"
+							r.args = args
+							r.count = 0
+							return r, true
+						default:
+							return
+						}
 					}
 				}
 			case 's': // Prefix: "st"

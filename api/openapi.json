@@ -5667,6 +5667,59 @@
     ]
    }
   },
+  "/v2/rates/charts": {
+   "get": {
+    "description": "Get charts by token",
+    "operationId": "getChartsRates",
+    "parameters": [
+     {
+      "description": "accept jetton master addresses",
+      "in": "query",
+      "name": "token",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "currency",
+      "required": false,
+      "schema": {
+       "example": "usd",
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "charts": {
+           "additionalProperties": true,
+           "example": {}
+          }
+         },
+         "required": [
+          "charts"
+         ],
+         "type": "object"
+        }
+       }
+      },
+      "description": "ton price"
+     },
+     "default": {
+      "$ref": "#/components/responses/Error"
+     }
+    },
+    "tags": [
+     "Rates"
+    ]
+   }
+  },
   "/v2/staking/nominator/{account_id}/pools": {
    "get": {
     "description": "All pools where account participates",

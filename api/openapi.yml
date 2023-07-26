@@ -378,7 +378,7 @@ paths:
                 $ref: '#/components/schemas/JettonsBalances'
         'default':
           $ref: '#/components/responses/Error'
-
+  
   
   /v2/accounts/{account_id}/jettons/history:
     get:
@@ -645,7 +645,7 @@ paths:
                 $ref: '#/components/schemas/FoundAccounts'
         'default':
           $ref: '#/components/responses/Error'
-
+  
   
   /v2/accounts/{account_id}/dns/expiring:
     get:
@@ -665,7 +665,7 @@ paths:
                 $ref: '#/components/schemas/DnsExpiring'
         'default':
           $ref: '#/components/responses/Error'
-
+  
   
   /v2/accounts/{account_id}/publickey:
     get:
@@ -1136,7 +1136,41 @@ paths:
                     additionalProperties: true
                     example: { }
         'default':
-          $ref: '#/components/responses/Error'  
+          $ref: '#/components/responses/Error'
+  /v2/rates/charts:
+    get:
+      description: Get charts by token
+      operationId: getChartsRates
+      tags:
+        - Rates
+      parameters:
+        - in: query
+          name: token
+          description: accept jetton master addresses
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: currency
+          required: false
+          schema:
+            type: string
+            example: usd
+      responses:
+        '200':
+          description: "charts"
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - charts
+                properties:
+                  charts:
+                    additionalProperties: true
+                    example: { }
+        'default':
+          $ref: '#/components/responses/Error'
   /v2/tonconnect/payload:
     get:
       description: Get a payload for further token receipt
@@ -1174,7 +1208,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/AccountInfoByStateInit'
         'default':
-          $ref: '#/components/responses/Error'  
+          $ref: '#/components/responses/Error'
   /v2/wallet/backup:
     get:
       description: Get backup info
