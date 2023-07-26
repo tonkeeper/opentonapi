@@ -18,7 +18,7 @@ type storage interface {
 	GetJettonMasterMetadata(ctx context.Context, master tongo.AccountID) (tep64.Metadata, error)
 }
 
-func (r *ratesMock) GetCurrentRates() (map[string]float64, error) {
+func (r *Mock) GetCurrentRates() (map[string]float64, error) {
 	fiatPrices := getCoinbaseFiatPrices()
 	fiatExchangeratePrices := getExchangerateFiatPrices()
 	for currency, rate := range fiatExchangeratePrices {
@@ -56,7 +56,7 @@ func getRedoubtPool() map[string]float64 {
 	resp, err := http.Get("https://api.redoubt.online/v2/feed/jettons")
 	if err != nil {
 		log.Errorf("failed to fetch redoubt rates: %v", err)
-		return nil
+		return map[string]float64{}
 	}
 	defer resp.Body.Close()
 
@@ -73,7 +73,7 @@ func getRedoubtPool() map[string]float64 {
 	}
 	if err = json.NewDecoder(resp.Body).Decode(&respBody); err != nil {
 		log.Errorf("failed to decode response: %v", err)
-		return nil
+		return map[string]float64{}
 	}
 
 	mapOfPool := make(map[string]float64)
@@ -88,7 +88,7 @@ func getStonFiPool(tonPrice float64) map[string]float64 {
 	resp, err := http.Get("https://api.ston.fi/v1/assets")
 	if err != nil {
 		log.Errorf("failed to fetch stonfi rates: %v", err)
-		return nil
+		return map[string]float64{}
 	}
 	defer resp.Body.Close()
 
@@ -104,7 +104,7 @@ func getStonFiPool(tonPrice float64) map[string]float64 {
 	}
 	if err = json.NewDecoder(resp.Body).Decode(&respBody); err != nil {
 		log.Errorf("failed to decode response: %v", err)
-		return nil
+		return map[string]float64{}
 	}
 
 	mapOfPool := make(map[string]float64)
@@ -123,11 +123,11 @@ func getStonFiPool(tonPrice float64) map[string]float64 {
 	return mapOfPool
 }
 
-func (r *ratesMock) getDedustPool() map[string]float64 {
+func (r *Mock) getDedustPool() map[string]float64 {
 	resp, err := http.Get("https://api.dedust.io/v2/pools")
 	if err != nil {
 		log.Errorf("failed to fetch dedust rates: %v", err)
-		return nil
+		return map[string]float64{}
 	}
 	defer resp.Body.Close()
 
@@ -147,7 +147,7 @@ func (r *ratesMock) getDedustPool() map[string]float64 {
 	var respBody []Pool
 	if err = json.NewDecoder(resp.Body).Decode(&respBody); err != nil {
 		log.Errorf("failed to decode response: %v", err)
-		return nil
+		return map[string]float64{}
 	}
 
 	var wg sync.WaitGroup
@@ -179,7 +179,7 @@ func (r *ratesMock) getDedustPool() map[string]float64 {
 			secondReserveDecimals := float64(9)
 			if secondAsset.Metadata == nil || secondAsset.Metadata.Decimals != 0 {
 				accountID, _ := tongo.ParseAccountID(secondAsset.Address)
-				meta, err := r.storage.GetJettonMasterMetadata(context.Background(), accountID)
+				meta, err := r.Storage.GetJettonMasterMetadata(context.Background(), accountID)
 				if err == nil && meta.Decimals != "" {
 					decimals, err := strconv.Atoi(meta.Decimals)
 					if err == nil {
@@ -291,7 +291,7 @@ func getExchangerateFiatPrices() map[string]float64 {
 	resp, err := http.Get("https://api.exchangerate.host/latest?base=USD")
 	if err != nil {
 		log.Errorf("can't load exchangerate prices")
-		return nil
+		return map[string]float64{}
 	}
 	defer resp.Body.Close()
 
@@ -300,7 +300,7 @@ func getExchangerateFiatPrices() map[string]float64 {
 	}
 	if err = json.NewDecoder(resp.Body).Decode(&respBody); err != nil {
 		log.Errorf("failed to decode response: %v", err)
-		return nil
+		return map[string]float64{}
 	}
 
 	mapOfPrices := make(map[string]float64)
@@ -315,7 +315,7 @@ func getCoinbaseFiatPrices() map[string]float64 {
 	resp, err := http.Get("https://api.coinbase.com/v2/exchange-rates?currency=USD")
 	if err != nil {
 		log.Errorf("can't load coinbase prices")
-		return nil
+		return map[string]float64{}
 	}
 	defer resp.Body.Close()
 
@@ -326,7 +326,7 @@ func getCoinbaseFiatPrices() map[string]float64 {
 	}
 	if err = json.NewDecoder(resp.Body).Decode(&respBody); err != nil {
 		log.Errorf("failed to decode response: %v", err)
-		return nil
+		return map[string]float64{}
 	}
 
 	mapOfPrices := make(map[string]float64)
