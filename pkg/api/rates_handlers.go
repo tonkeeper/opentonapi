@@ -10,7 +10,27 @@ import (
 	"time"
 
 	"github.com/tonkeeper/opentonapi/pkg/oas"
+	"github.com/tonkeeper/tongo"
 )
+
+func (h *Handler) GetChartsRates(ctx context.Context, params oas.GetChartsRatesParams) (*oas.GetChartsRatesOK, error) {
+	accountID, err := tongo.ParseAccountID(params.Token)
+	if err != nil {
+		return nil, toError(http.StatusBadRequest, err)
+	}
+	if params.Currency.Value != "" {
+		params.Currency.Value = strings.ToUpper(params.Currency.Value)
+	}
+	charts, err := h.ratesSource.GetRatesCharts(accountID, params.Currency.Value)
+	if err != nil {
+		return nil, toError(http.StatusInternalServerError, err)
+	}
+	bytesResp, err := json.Marshal(charts)
+	if err != nil {
+		return nil, toError(http.StatusInternalServerError, err)
+	}
+	return &oas.GetChartsRatesOK{Charts: bytesResp}, nil
+}
 
 func (h *Handler) GetRates(ctx context.Context, params oas.GetRatesParams) (*oas.GetRatesOK, error) {
 	params.Tokens = strings.TrimSpace(params.Tokens)

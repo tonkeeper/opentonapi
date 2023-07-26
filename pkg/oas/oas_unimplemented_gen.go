@@ -202,6 +202,15 @@ func (UnimplementedHandler) GetBlockTransactions(ctx context.Context, params Get
 	return r, ht.ErrNotImplemented
 }
 
+// GetChartsRates implements getChartsRates operation.
+//
+// Get charts by token.
+//
+// GET /v2/rates/charts
+func (UnimplementedHandler) GetChartsRates(ctx context.Context, params GetChartsRatesParams) (r *GetChartsRatesOK, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // GetConfig implements getConfig operation.
 //
 // Get blockchain config.

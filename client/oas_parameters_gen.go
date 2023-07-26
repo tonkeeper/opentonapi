@@ -123,6 +123,13 @@ type GetBlockTransactionsParams struct {
 	BlockID string
 }
 
+// GetChartsRatesParams is parameters of getChartsRates operation.
+type GetChartsRatesParams struct {
+	// Accept jetton master addresses.
+	Token    string
+	Currency OptString
+}
+
 // GetConfigAllLiteServerParams is parameters of getConfigAllLiteServer operation.
 type GetConfigAllLiteServerParams struct {
 	// Block ID: (workchain,shard,seqno,root_hash,file_hash).

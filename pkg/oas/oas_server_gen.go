@@ -134,6 +134,12 @@ type Handler interface {
 	//
 	// GET /v2/blockchain/blocks/{block_id}/transactions
 	GetBlockTransactions(ctx context.Context, params GetBlockTransactionsParams) (*Transactions, error)
+	// GetChartsRates implements getChartsRates operation.
+	//
+	// Get charts by token.
+	//
+	// GET /v2/rates/charts
+	GetChartsRates(ctx context.Context, params GetChartsRatesParams) (*GetChartsRatesOK, error)
 	// GetConfig implements getConfig operation.
 	//
 	// Get blockchain config.

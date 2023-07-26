@@ -137,6 +137,7 @@ type addressBook interface {
 
 type ratesSource interface {
 	GetRates(date time.Time) (map[string]float64, error)
+	GetRatesCharts(account tongo.AccountID, currency string) ([][]any, error)
 }
 
 type metadataCache struct {
