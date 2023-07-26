@@ -44,11 +44,11 @@ func (h *Handler) GetRates(ctx context.Context, params oas.GetRatesParams) (*oas
 	}
 	weekRates, err := h.ratesSource.GetRates(weekAgo)
 	if err != nil {
-		return &oas.InternalError{Error: err.Error()}, nil
+		return nil, toError(http.StatusInternalServerError, err)
 	}
 	monthRates, err := h.ratesSource.GetRates(monthAgo)
 	if err != nil {
-		return &oas.InternalError{Error: err.Error()}, nil
+		return nil, toError(http.StatusInternalServerError, err)
 	}
 
 	type tokenRates struct {
