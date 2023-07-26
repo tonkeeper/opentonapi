@@ -145,7 +145,7 @@ func NewHandler(logger *zap.Logger, opts ...Option) (*Handler, error) {
 		}
 	}
 	if options.ratesSource == nil {
-		options.ratesSource = rates.InitCalculator(options.storage)
+		options.ratesSource = rates.Mock{Storage: options.storage}
 	}
 	if options.executor == nil {
 		return nil, fmt.Errorf("executor is not configured")
@@ -166,7 +166,7 @@ func NewHandler(logger *zap.Logger, opts ...Option) (*Handler, error) {
 		dns:              dnsClient,
 		limits:           options.limits,
 		spamRules:        options.spamRules,
-		ratesSource:      options.ratesSource,
+		ratesSource:      rates.InitCalculator(options.ratesSource),
 		metaCache: metadataCache{
 			collectionsCache: cache.NewLRUCache[tongo.AccountID, tep64.Metadata](10000, "nft_metadata_cache"),
 			jettonsCache:     cache.NewLRUCache[tongo.AccountID, tep64.Metadata](10000, "jetton_metadata_cache"),

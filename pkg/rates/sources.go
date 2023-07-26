@@ -18,7 +18,7 @@ type storage interface {
 	GetJettonMasterMetadata(ctx context.Context, master tongo.AccountID) (tep64.Metadata, error)
 }
 
-func (r *ratesMock) GetCurrentRates() (map[string]float64, error) {
+func (r *Mock) GetCurrentRates() (map[string]float64, error) {
 	fiatPrices := getCoinbaseFiatPrices()
 	fiatExchangeratePrices := getExchangerateFiatPrices()
 	for currency, rate := range fiatExchangeratePrices {
@@ -123,7 +123,7 @@ func getStonFiPool(tonPrice float64) map[string]float64 {
 	return mapOfPool
 }
 
-func (r *ratesMock) getDedustPool() map[string]float64 {
+func (r *Mock) getDedustPool() map[string]float64 {
 	resp, err := http.Get("https://api.dedust.io/v2/pools")
 	if err != nil {
 		log.Errorf("failed to fetch dedust rates: %v", err)
@@ -179,7 +179,7 @@ func (r *ratesMock) getDedustPool() map[string]float64 {
 			secondReserveDecimals := float64(9)
 			if secondAsset.Metadata == nil || secondAsset.Metadata.Decimals != 0 {
 				accountID, _ := tongo.ParseAccountID(secondAsset.Address)
-				meta, err := r.storage.GetJettonMasterMetadata(context.Background(), accountID)
+				meta, err := r.Storage.GetJettonMasterMetadata(context.Background(), accountID)
 				if err == nil && meta.Decimals != "" {
 					decimals, err := strconv.Atoi(meta.Decimals)
 					if err == nil {
