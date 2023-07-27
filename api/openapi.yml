@@ -1137,16 +1137,16 @@ paths:
                     example: { }
         'default':
           $ref: '#/components/responses/Error'
-  /v2/rates/charts:
+  /v2/rates/chart:
     get:
-      description: Get charts by token
-      operationId: getChartsRates
+      description: Get chart by token
+      operationId: getChartRates
       tags:
         - Rates
       parameters:
         - in: query
           name: token
-          description: accept jetton master addresses
+          description: accept jetton master address
           required: true
           schema:
             type: string
@@ -1158,15 +1158,15 @@ paths:
             example: usd
       responses:
         '200':
-          description: "charts"
+          description: "chart"
           content:
             application/json:
               schema:
                 type: object
                 required:
-                  - charts
+                  - points
                 properties:
-                  charts:
+                  points:
                     additionalProperties: true
                     example: { }
         'default':

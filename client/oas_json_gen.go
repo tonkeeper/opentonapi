@@ -8068,53 +8068,53 @@ func (s *GetBlockProofLiteServerOKStepsItemLiteServerBlockLinkForwardSignaturesS
 }
 
 // Encode implements json.Marshaler.
-func (s *GetChartsRatesOK) Encode(e *jx.Encoder) {
+func (s *GetChartRatesOK) Encode(e *jx.Encoder) {
 	e.ObjStart()
 	s.encodeFields(e)
 	e.ObjEnd()
 }
 
 // encodeFields encodes fields.
-func (s *GetChartsRatesOK) encodeFields(e *jx.Encoder) {
+func (s *GetChartRatesOK) encodeFields(e *jx.Encoder) {
 	{
-		if len(s.Charts) != 0 {
-			e.FieldStart("charts")
-			e.Raw(s.Charts)
+		if len(s.Points) != 0 {
+			e.FieldStart("points")
+			e.Raw(s.Points)
 		}
 	}
 }
 
-var jsonFieldsNameOfGetChartsRatesOK = [1]string{
-	0: "charts",
+var jsonFieldsNameOfGetChartRatesOK = [1]string{
+	0: "points",
 }
 
-// Decode decodes GetChartsRatesOK from json.
-func (s *GetChartsRatesOK) Decode(d *jx.Decoder) error {
+// Decode decodes GetChartRatesOK from json.
+func (s *GetChartRatesOK) Decode(d *jx.Decoder) error {
 	if s == nil {
-		return errors.New("invalid: unable to decode GetChartsRatesOK to nil")
+		return errors.New("invalid: unable to decode GetChartRatesOK to nil")
 	}
 	var requiredBitSet [1]uint8
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
-		case "charts":
+		case "points":
 			requiredBitSet[0] |= 1 << 0
 			if err := func() error {
 				v, err := d.RawAppend(nil)
-				s.Charts = jx.Raw(v)
+				s.Points = jx.Raw(v)
 				if err != nil {
 					return err
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"charts\"")
+				return errors.Wrap(err, "decode field \"points\"")
 			}
 		default:
 			return d.Skip()
 		}
 		return nil
 	}); err != nil {
-		return errors.Wrap(err, "decode GetChartsRatesOK")
+		return errors.Wrap(err, "decode GetChartRatesOK")
 	}
 	// Validate required fields.
 	var failures []validate.FieldError
@@ -8131,8 +8131,8 @@ func (s *GetChartsRatesOK) Decode(d *jx.Decoder) error {
 				bitIdx := bits.TrailingZeros8(result)
 				fieldIdx := i*8 + bitIdx
 				var name string
-				if fieldIdx < len(jsonFieldsNameOfGetChartsRatesOK) {
-					name = jsonFieldsNameOfGetChartsRatesOK[fieldIdx]
+				if fieldIdx < len(jsonFieldsNameOfGetChartRatesOK) {
+					name = jsonFieldsNameOfGetChartRatesOK[fieldIdx]
 				} else {
 					name = strconv.Itoa(fieldIdx)
 				}
@@ -8153,14 +8153,14 @@ func (s *GetChartsRatesOK) Decode(d *jx.Decoder) error {
 }
 
 // MarshalJSON implements stdjson.Marshaler.
-func (s *GetChartsRatesOK) MarshalJSON() ([]byte, error) {
+func (s *GetChartRatesOK) MarshalJSON() ([]byte, error) {
 	e := jx.Encoder{}
 	s.Encode(&e)
 	return e.Bytes(), nil
 }
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *GetChartsRatesOK) UnmarshalJSON(data []byte) error {
+func (s *GetChartRatesOK) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }

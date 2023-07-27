@@ -2087,20 +2087,20 @@ func (c *Client) sendGetBlockTransactions(ctx context.Context, params GetBlockTr
 	return result, nil
 }
 
-// GetChartsRates invokes getChartsRates operation.
+// GetChartRates invokes getChartRates operation.
 //
-// Get charts by token.
+// Get chart by token.
 //
-// GET /v2/rates/charts
-func (c *Client) GetChartsRates(ctx context.Context, params GetChartsRatesParams) (*GetChartsRatesOK, error) {
-	res, err := c.sendGetChartsRates(ctx, params)
+// GET /v2/rates/chart
+func (c *Client) GetChartRates(ctx context.Context, params GetChartRatesParams) (*GetChartRatesOK, error) {
+	res, err := c.sendGetChartRates(ctx, params)
 	_ = res
 	return res, err
 }
 
-func (c *Client) sendGetChartsRates(ctx context.Context, params GetChartsRatesParams) (res *GetChartsRatesOK, err error) {
+func (c *Client) sendGetChartRates(ctx context.Context, params GetChartRatesParams) (res *GetChartRatesOK, err error) {
 	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("getChartsRates"),
+		otelogen.OperationID("getChartRates"),
 	}
 
 	// Run stopwatch.
@@ -2115,7 +2115,7 @@ func (c *Client) sendGetChartsRates(ctx context.Context, params GetChartsRatesPa
 	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 
 	// Start a span for this request.
-	ctx, span := c.cfg.Tracer.Start(ctx, "GetChartsRates",
+	ctx, span := c.cfg.Tracer.Start(ctx, "GetChartRates",
 		trace.WithAttributes(otelAttrs...),
 		clientSpanKind,
 	)
@@ -2133,7 +2133,7 @@ func (c *Client) sendGetChartsRates(ctx context.Context, params GetChartsRatesPa
 	stage = "BuildURL"
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [1]string
-	pathParts[0] = "/v2/rates/charts"
+	pathParts[0] = "/v2/rates/chart"
 	uri.AddPathParts(u, pathParts[:]...)
 
 	stage = "EncodeQueryParams"
@@ -2185,7 +2185,7 @@ func (c *Client) sendGetChartsRates(ctx context.Context, params GetChartsRatesPa
 	defer resp.Body.Close()
 
 	stage = "DecodeResponse"
-	result, err := decodeGetChartsRatesResponse(resp)
+	result, err := decodeGetChartRatesResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}

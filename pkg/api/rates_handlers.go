@@ -13,7 +13,7 @@ import (
 	"github.com/tonkeeper/tongo"
 )
 
-func (h *Handler) GetChartsRates(ctx context.Context, params oas.GetChartsRatesParams) (*oas.GetChartsRatesOK, error) {
+func (h *Handler) GetChartRates(ctx context.Context, params oas.GetChartRatesParams) (*oas.GetChartRatesOK, error) {
 	accountID, err := tongo.ParseAccountID(params.Token)
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
@@ -21,7 +21,7 @@ func (h *Handler) GetChartsRates(ctx context.Context, params oas.GetChartsRatesP
 	if params.Currency.Value != "" {
 		params.Currency.Value = strings.ToUpper(params.Currency.Value)
 	}
-	charts, err := h.ratesSource.GetRatesCharts(accountID, params.Currency.Value)
+	charts, err := h.ratesSource.GetRatesChart(accountID, params.Currency.Value)
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
@@ -29,7 +29,7 @@ func (h *Handler) GetChartsRates(ctx context.Context, params oas.GetChartsRatesP
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
-	return &oas.GetChartsRatesOK{Charts: bytesResp}, nil
+	return &oas.GetChartRatesOK{Points: bytesResp}, nil
 }
 
 func (h *Handler) GetRates(ctx context.Context, params oas.GetRatesParams) (*oas.GetRatesOK, error) {
@@ -80,8 +80,9 @@ func (h *Handler) GetRates(ctx context.Context, params oas.GetRatesParams) (*oas
 
 	ratesRes := make(map[string]tokenRates)
 	for _, token := range tokens {
-		if token == "ton" {
-			token = "TON"
+		_, err = tongo.ParseAccountID(token)
+		if err != nil {
+			token = strings.ToUpper(token)
 		}
 		for _, currency := range currencies {
 			todayCurrencyPrice, ok := todayRates[currency]

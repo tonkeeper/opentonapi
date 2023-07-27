@@ -11,7 +11,7 @@ import (
 
 type ratesSource interface {
 	GetRates(date time.Time) (map[string]float64, error)
-	GetRatesCharts(account tongo.AccountID, currency string) ([][]any, error)
+	GetRatesChart(account tongo.AccountID, currency string) ([][]any, error)
 }
 
 type calculator struct {
@@ -43,6 +43,37 @@ func InitCalculator(source ratesSource) *calculator {
 	return c
 }
 
+func (c *calculator) refresh() {
+	today := time.Now().UTC().Truncate(24 * time.Hour)
+	yesterday := today.AddDate(0, 0, -1)
+	weekAgo := today.AddDate(0, 0, -7)
+	monthAgo := today.AddDate(0, 0, -30)
+
+	todayRates, err := c.source.GetRates(today)
+	if err != nil {
+		return
+	}
+	yesterdayRates, err := c.source.GetRates(yesterday)
+	if err != nil {
+		return
+	}
+	weekRates, err := c.source.GetRates(weekAgo)
+	if err != nil {
+		return
+	}
+	monthRates, err := c.source.GetRates(monthAgo)
+	if err != nil {
+		return
+	}
+
+	c.mu.RLock()
+	c.todayRates = todayRates
+	c.yesterdayRates = yesterdayRates
+	c.weekRates = weekRates
+	c.monthRates = monthRates
+	c.mu.RUnlock()
+}
+
 func (c *calculator) GetRates(date time.Time) (map[string]float64, error) {
 	c.mu.RLock()
 	defer c.mu.RUnlock()
@@ -68,8 +99,8 @@ func (c *calculator) GetRates(date time.Time) (map[string]float64, error) {
 	return nil, fmt.Errorf("invalid period")
 }
 
-func (c *calculator) GetRatesCharts(account tongo.AccountID, currency string) ([][]any, error) {
-	return c.source.GetRatesCharts(account, currency)
+func (c *calculator) GetRatesChart(account tongo.AccountID, currency string) ([][]any, error) {
+	return c.source.GetRatesChart(account, currency)
 }
 
 type Mock struct {
@@ -80,41 +111,6 @@ func (m Mock) GetRates(date time.Time) (map[string]float64, error) {
 	return m.GetCurrentRates()
 }
 
-func (m Mock) GetRatesCharts(account tongo.AccountID, currency string) ([][]any, error) {
+func (m Mock) GetRatesChart(account tongo.AccountID, currency string) ([][]any, error) {
 	return [][]any{}, nil
-}
-
-func (c *calculator) refresh() {
-	for {
-		today := time.Now().UTC().Truncate(24 * time.Hour)
-		yesterday := today.AddDate(0, 0, -1)
-		weekAgo := today.AddDate(0, 0, -7)
-		monthAgo := today.AddDate(0, 0, -30)
-
-		todayRates, err := c.source.GetRates(today)
-		if err != nil {
-			continue
-		}
-		yesterdayRates, err := c.source.GetRates(yesterday)
-		if err != nil {
-			continue
-		}
-		weekRates, err := c.source.GetRates(weekAgo)
-		if err != nil {
-			continue
-		}
-		monthRates, err := c.source.GetRates(monthAgo)
-		if err != nil {
-			continue
-		}
-
-		c.mu.RLock()
-		c.todayRates = todayRates
-		c.yesterdayRates = yesterdayRates
-		c.weekRates = weekRates
-		c.monthRates = monthRates
-		c.mu.RUnlock()
-
-		time.Sleep(5 * time.Minute)
-	}
 }

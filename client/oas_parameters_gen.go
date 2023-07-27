@@ -123,9 +123,9 @@ type GetBlockTransactionsParams struct {
 	BlockID string
 }
 
-// GetChartsRatesParams is parameters of getChartsRates operation.
-type GetChartsRatesParams struct {
-	// Accept jetton master addresses.
+// GetChartRatesParams is parameters of getChartRates operation.
+type GetChartRatesParams struct {
+	// Accept jetton master address.
 	Token    string
 	Currency OptString
 }

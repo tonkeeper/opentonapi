@@ -2880,18 +2880,18 @@ func (s *GetBlockProofLiteServerOKStepsItemLiteServerBlockLinkForwardSignaturesS
 	s.Signature = val
 }
 
-type GetChartsRatesOK struct {
-	Charts jx.Raw `json:"charts"`
+type GetChartRatesOK struct {
+	Points jx.Raw `json:"points"`
 }
 
-// GetCharts returns the value of Charts.
-func (s *GetChartsRatesOK) GetCharts() jx.Raw {
-	return s.Charts
+// GetPoints returns the value of Points.
+func (s *GetChartRatesOK) GetPoints() jx.Raw {
+	return s.Points
 }
 
-// SetCharts sets the value of Charts.
-func (s *GetChartsRatesOK) SetCharts(val jx.Raw) {
-	s.Charts = val
+// SetPoints sets the value of Points.
+func (s *GetChartRatesOK) SetPoints(val jx.Raw) {
+	s.Points = val
 }
 
 type GetConfigAllLiteServerOK struct {

@@ -1530,8 +1530,8 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 					return
 				}
 				switch elem[0] {
-				case '/': // Prefix: "/charts"
-					if l := len("/charts"); len(elem) >= l && elem[0:l] == "/charts" {
+				case '/': // Prefix: "/chart"
+					if l := len("/chart"); len(elem) >= l && elem[0:l] == "/chart" {
 						elem = elem[l:]
 					} else {
 						break
@@ -1541,7 +1541,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 						// Leaf node.
 						switch r.Method {
 						case "GET":
-							s.handleGetChartsRatesRequest([0]string{}, elemIsEscaped, w, r)
+							s.handleGetChartRatesRequest([0]string{}, elemIsEscaped, w, r)
 						default:
 							s.notAllowed(w, r, "GET")
 						}
@@ -3566,8 +3566,8 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 					}
 				}
 				switch elem[0] {
-				case '/': // Prefix: "/charts"
-					if l := len("/charts"); len(elem) >= l && elem[0:l] == "/charts" {
+				case '/': // Prefix: "/chart"
+					if l := len("/chart"); len(elem) >= l && elem[0:l] == "/chart" {
 						elem = elem[l:]
 					} else {
 						break
@@ -3576,10 +3576,10 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 					if len(elem) == 0 {
 						switch method {
 						case "GET":
-							// Leaf: GetChartsRates
-							r.name = "GetChartsRates"
-							r.operationID = "getChartsRates"
-							r.pathPattern = "/v2/rates/charts"
+							// Leaf: GetChartRates
+							r.name = "GetChartRates"
+							r.operationID = "getChartRates"
+							r.pathPattern = "/v2/rates/chart"
 							r.args = args
 							r.count = 0
 							return r, true

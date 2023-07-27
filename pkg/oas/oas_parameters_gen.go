@@ -1687,14 +1687,14 @@ func decodeGetBlockTransactionsParams(args [1]string, argsEscaped bool, r *http.
 	return params, nil
 }
 
-// GetChartsRatesParams is parameters of getChartsRates operation.
-type GetChartsRatesParams struct {
-	// Accept jetton master addresses.
+// GetChartRatesParams is parameters of getChartRates operation.
+type GetChartRatesParams struct {
+	// Accept jetton master address.
 	Token    string
 	Currency OptString
 }
 
-func unpackGetChartsRatesParams(packed middleware.Parameters) (params GetChartsRatesParams) {
+func unpackGetChartRatesParams(packed middleware.Parameters) (params GetChartRatesParams) {
 	{
 		key := middleware.ParameterKey{
 			Name: "token",
@@ -1714,7 +1714,7 @@ func unpackGetChartsRatesParams(packed middleware.Parameters) (params GetChartsR
 	return params
 }
 
-func decodeGetChartsRatesParams(args [0]string, argsEscaped bool, r *http.Request) (params GetChartsRatesParams, _ error) {
+func decodeGetChartRatesParams(args [0]string, argsEscaped bool, r *http.Request) (params GetChartRatesParams, _ error) {
 	q := uri.NewQueryDecoder(r.URL.Query())
 	// Decode query: token.
 	if err := func() error {

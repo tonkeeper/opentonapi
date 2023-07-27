@@ -1757,7 +1757,7 @@ func decodeGetBlockTransactionsResponse(resp *http.Response) (res *Transactions,
 	return res, errors.Wrap(defRes, "error")
 }
 
-func decodeGetChartsRatesResponse(resp *http.Response) (res *GetChartsRatesOK, _ error) {
+func decodeGetChartRatesResponse(resp *http.Response) (res *GetChartRatesOK, _ error) {
 	switch resp.StatusCode {
 	case 200:
 		// Code 200.
@@ -1773,7 +1773,7 @@ func decodeGetChartsRatesResponse(resp *http.Response) (res *GetChartsRatesOK, _
 			}
 			d := jx.DecodeBytes(buf)
 
-			var response GetChartsRatesOK
+			var response GetChartRatesOK
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err

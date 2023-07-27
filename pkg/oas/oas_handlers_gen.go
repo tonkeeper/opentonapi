@@ -2432,20 +2432,20 @@ func (s *Server) handleGetBlockTransactionsRequest(args [1]string, argsEscaped b
 	}
 }
 
-// handleGetChartsRatesRequest handles getChartsRates operation.
+// handleGetChartRatesRequest handles getChartRates operation.
 //
-// Get charts by token.
+// Get chart by token.
 //
-// GET /v2/rates/charts
-func (s *Server) handleGetChartsRatesRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
+// GET /v2/rates/chart
+func (s *Server) handleGetChartRatesRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("getChartsRates"),
+		otelogen.OperationID("getChartRates"),
 		semconv.HTTPMethodKey.String("GET"),
-		semconv.HTTPRouteKey.String("/v2/rates/charts"),
+		semconv.HTTPRouteKey.String("/v2/rates/chart"),
 	}
 
 	// Start a span for this request.
-	ctx, span := s.cfg.Tracer.Start(r.Context(), "GetChartsRates",
+	ctx, span := s.cfg.Tracer.Start(r.Context(), "GetChartRates",
 		trace.WithAttributes(otelAttrs...),
 		serverSpanKind,
 	)
@@ -2470,11 +2470,11 @@ func (s *Server) handleGetChartsRatesRequest(args [0]string, argsEscaped bool, w
 		}
 		err          error
 		opErrContext = ogenerrors.OperationContext{
-			Name: "GetChartsRates",
-			ID:   "getChartsRates",
+			Name: "GetChartRates",
+			ID:   "getChartRates",
 		}
 	)
-	params, err := decodeGetChartsRatesParams(args, argsEscaped, r)
+	params, err := decodeGetChartRatesParams(args, argsEscaped, r)
 	if err != nil {
 		err = &ogenerrors.DecodeParamsError{
 			OperationContext: opErrContext,
@@ -2485,12 +2485,12 @@ func (s *Server) handleGetChartsRatesRequest(args [0]string, argsEscaped bool, w
 		return
 	}
 
-	var response *GetChartsRatesOK
+	var response *GetChartRatesOK
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:       ctx,
-			OperationName: "GetChartsRates",
-			OperationID:   "getChartsRates",
+			OperationName: "GetChartRates",
+			OperationID:   "getChartRates",
 			Body:          nil,
 			Params: middleware.Parameters{
 				{
@@ -2507,8 +2507,8 @@ func (s *Server) handleGetChartsRatesRequest(args [0]string, argsEscaped bool, w
 
 		type (
 			Request  = struct{}
-			Params   = GetChartsRatesParams
-			Response = *GetChartsRatesOK
+			Params   = GetChartRatesParams
+			Response = *GetChartRatesOK
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -2517,14 +2517,14 @@ func (s *Server) handleGetChartsRatesRequest(args [0]string, argsEscaped bool, w
 		](
 			m,
 			mreq,
-			unpackGetChartsRatesParams,
+			unpackGetChartRatesParams,
 			func(ctx context.Context, request Request, params Params) (response Response, err error) {
-				response, err = s.h.GetChartsRates(ctx, params)
+				response, err = s.h.GetChartRates(ctx, params)
 				return response, err
 			},
 		)
 	} else {
-		response, err = s.h.GetChartsRates(ctx, params)
+		response, err = s.h.GetChartRates(ctx, params)
 	}
 	if err != nil {
 		recordError("Internal", err)
@@ -2540,7 +2540,7 @@ func (s *Server) handleGetChartsRatesRequest(args [0]string, argsEscaped bool, w
 		return
 	}
 
-	if err := encodeGetChartsRatesResponse(response, w, span); err != nil {
+	if err := encodeGetChartRatesResponse(response, w, span); err != nil {
 		recordError("EncodeResponse", err)
 		s.cfg.ErrorHandler(ctx, w, r, err)
 		return

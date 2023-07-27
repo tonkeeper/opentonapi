@@ -5667,13 +5667,13 @@
     ]
    }
   },
-  "/v2/rates/charts": {
+  "/v2/rates/chart": {
    "get": {
-    "description": "Get charts by token",
-    "operationId": "getChartsRates",
+    "description": "Get chart by token",
+    "operationId": "getChartRates",
     "parameters": [
      {
-      "description": "accept jetton master addresses",
+      "description": "accept jetton master address",
       "in": "query",
       "name": "token",
       "required": true,
@@ -5697,19 +5697,19 @@
        "application/json": {
         "schema": {
          "properties": {
-          "charts": {
+          "points": {
            "additionalProperties": true,
            "example": {}
           }
          },
          "required": [
-          "charts"
+          "points"
          ],
          "type": "object"
         }
        }
       },
-      "description": "ton price"
+      "description": "chart"
      },
      "default": {
       "$ref": "#/components/responses/Error"

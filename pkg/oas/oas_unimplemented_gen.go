@@ -202,12 +202,12 @@ func (UnimplementedHandler) GetBlockTransactions(ctx context.Context, params Get
 	return r, ht.ErrNotImplemented
 }
 
-// GetChartsRates implements getChartsRates operation.
+// GetChartRates implements getChartRates operation.
 //
-// Get charts by token.
+// Get chart by token.
 //
-// GET /v2/rates/charts
-func (UnimplementedHandler) GetChartsRates(ctx context.Context, params GetChartsRatesParams) (r *GetChartsRatesOK, _ error) {
+// GET /v2/rates/chart
+func (UnimplementedHandler) GetChartRates(ctx context.Context, params GetChartRatesParams) (r *GetChartRatesOK, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
