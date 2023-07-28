@@ -60,6 +60,7 @@ func FindAuctionBidFragmentSimple(bubble *Bubble) bool {
 		Info: AuctionBidBubble{
 			Type:       "tg",
 			Amount:     txBubble.inputAmount,
+			Auction:    txBubble.account.Address,
 			NftAddress: &txBubble.account.Address,
 			Bidder:     txBubble.inputFrom.Address,
 			Success:    txBubble.success,
