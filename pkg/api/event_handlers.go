@@ -179,7 +179,7 @@ func (h Handler) EmulateMessageToAccountEvent(ctx context.Context, request *oas.
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
 	}
-	emulator, err := txemulator.NewTraceBuilder()
+	emulator, err := txemulator.NewTraceBuilder(txemulator.WithAccountsSource(h.storage))
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
@@ -212,7 +212,7 @@ func (h Handler) EmulateMessageToEvent(ctx context.Context, request *oas.Emulate
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
-	emulator, err := txemulator.NewTraceBuilder()
+	emulator, err := txemulator.NewTraceBuilder(txemulator.WithAccountsSource(h.storage))
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
@@ -245,7 +245,7 @@ func (h Handler) EmulateMessageToTrace(ctx context.Context, request *oas.Emulate
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
-	emulator, err := txemulator.NewTraceBuilder()
+	emulator, err := txemulator.NewTraceBuilder(txemulator.WithAccountsSource(h.storage))
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
@@ -302,7 +302,7 @@ func (h Handler) EmulateWalletMessage(ctx context.Context, request *oas.EmulateW
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
-	emulator, err := txemulator.NewTraceBuilder()
+	emulator, err := txemulator.NewTraceBuilder(txemulator.WithAccountsSource(h.storage))
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
@@ -347,7 +347,7 @@ func (h Handler) addToMempool(bytesBoc []byte) {
 	if err != nil {
 		return
 	}
-	emulator, err := txemulator.NewTraceBuilder()
+	emulator, err := txemulator.NewTraceBuilder(txemulator.WithAccountsSource(h.storage))
 	if err != nil {
 		return
 	}

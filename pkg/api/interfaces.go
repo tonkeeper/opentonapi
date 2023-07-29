@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"crypto/ed25519"
+	"github.com/tonkeeper/tongo/boc"
 	"time"
 
 	"github.com/tonkeeper/tongo"
@@ -80,6 +81,9 @@ type storage interface {
 	GetLastConfig() (tlb.ConfigParams, error)
 
 	GetSeqno(ctx context.Context, account tongo.AccountID) (uint32, error)
+
+	GetAccountState(ctx context.Context, a tongo.AccountID) (tlb.ShardAccount, error)
+	GetLibraries(ctx context.Context, libraries []tongo.Bits256) (map[tongo.Bits256]*boc.Cell, error)
 
 	liteStorageRaw
 }

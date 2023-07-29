@@ -5,6 +5,7 @@ import (
 	"crypto/ed25519"
 	"errors"
 	"fmt"
+	"github.com/tonkeeper/tongo/boc"
 	"math/big"
 	"time"
 
@@ -474,4 +475,8 @@ func (s *LiteStorage) GetDnsExpiring(ctx context.Context, id tongo.AccountID, pe
 	}))
 	defer timer.ObserveDuration()
 	return nil, nil
+}
+
+func (s *LiteStorage) GetLibraries(ctx context.Context, libraries []tongo.Bits256) (map[tongo.Bits256]*boc.Cell, error) {
+	return s.client.GetLibraries(ctx, libraries)
 }
