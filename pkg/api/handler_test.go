@@ -36,10 +36,9 @@ func TestHandler_GetRawAccount(t *testing.T) {
 			require.Nil(t, err)
 			account, err := h.GetRawAccount(context.Background(), tt.params)
 			require.Nil(t, err)
-			rawAccount, ok := account.(*oas.RawAccount)
-			require.True(t, ok)
-			require.Equal(t, tt.wantAddress, rawAccount.Address)
-			require.Equal(t, tt.wantStatus, rawAccount.Status)
+
+			require.Equal(t, tt.wantAddress, account.Address)
+			require.Equal(t, tt.wantStatus, account.Status)
 		})
 	}
 }
@@ -67,10 +66,8 @@ func TestHandler_GetAccount(t *testing.T) {
 			require.Nil(t, err)
 			accountRes, err := h.GetAccount(context.Background(), tt.params)
 			require.Nil(t, err)
-			account, ok := accountRes.(*oas.Account)
-			require.True(t, ok)
-			require.Equal(t, tt.wantAddress, account.Address)
-			require.Equal(t, tt.wantStatus, account.Status)
+			require.Equal(t, tt.wantAddress, accountRes.Address)
+			require.Equal(t, tt.wantStatus, accountRes.Status)
 		})
 	}
 }
@@ -138,17 +135,15 @@ func TestHandler_GetAccounts(t *testing.T) {
 			accountRes, err := h.GetAccounts(context.Background(), tt.params)
 			require.Nil(t, err)
 			if len(tt.wantBadRequestError) > 0 {
-				badRequest, ok := accountRes.(*oas.BadRequest)
+				badRequest, ok := err.(*oas.ErrorStatusCode)
 				require.True(t, ok)
-				require.Equal(t, tt.wantBadRequestError, badRequest.Error)
+				require.Equal(t, tt.wantBadRequestError, badRequest.Response.Error)
 				return
 			}
-			accounts, ok := accountRes.(*oas.Accounts)
-			require.True(t, ok)
-			_ = accounts
+
 			statuses := map[string]string{}
 			names := map[string]string{}
-			for _, account := range accounts.Accounts {
+			for _, account := range accountRes.Accounts {
 				statuses[account.Address] = account.Status
 				names[account.Address] = account.Name.Value
 			}
@@ -186,11 +181,10 @@ func TestHandler_GetTransactions(t *testing.T) {
 			res, err := h.GetBlockTransactions(context.Background(), tt.params)
 			require.Nil(t, err)
 			fmt.Printf("%v\n", res)
-			transactions, ok := res.(*oas.Transactions)
-			require.True(t, ok)
-			require.Equal(t, tt.wantTxCount, len(transactions.Transactions))
+
+			require.Equal(t, tt.wantTxCount, len(res.Transactions))
 			txHashes := map[string]struct{}{}
-			for _, tx := range transactions.Transactions {
+			for _, tx := range res.Transactions {
 				txHashes[tx.Hash] = struct{}{}
 			}
 			require.Equal(t, tt.wantTxHashes, txHashes)

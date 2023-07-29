@@ -37,9 +37,7 @@ func TestHandler_GetJettonsBalances(t *testing.T) {
 			require.Nil(t, err)
 			res, err := h.GetJettonsBalances(context.Background(), tt.params)
 			require.Nil(t, err)
-			balances, ok := res.(*oas.JettonsBalances)
-			require.True(t, ok)
-			pkgTesting.CompareResults(t, balances, tt.filenamePrefix)
+			pkgTesting.CompareResults(t, res, tt.filenamePrefix)
 		})
 	}
 }
