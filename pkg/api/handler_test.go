@@ -133,13 +133,13 @@ func TestHandler_GetAccounts(t *testing.T) {
 				},
 			}
 			accountRes, err := h.GetAccounts(context.Background(), tt.params)
-			require.Nil(t, err)
 			if len(tt.wantBadRequestError) > 0 {
 				badRequest, ok := err.(*oas.ErrorStatusCode)
 				require.True(t, ok)
 				require.Equal(t, tt.wantBadRequestError, badRequest.Response.Error)
 				return
 			}
+			require.Nil(t, err)
 
 			statuses := map[string]string{}
 			names := map[string]string{}
