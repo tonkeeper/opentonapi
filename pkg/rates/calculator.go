@@ -44,7 +44,7 @@ func InitCalculator(source ratesSource) *calculator {
 }
 
 func (c *calculator) refresh() {
-	today := time.Now().UTC().Truncate(24 * time.Hour)
+	today := time.Now().UTC()
 	yesterday := today.AddDate(0, 0, -1)
 	weekAgo := today.AddDate(0, 0, -7)
 	monthAgo := today.AddDate(0, 0, -30)
