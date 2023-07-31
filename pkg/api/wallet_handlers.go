@@ -126,19 +126,9 @@ func (h Handler) GetWalletsByPublicKey(ctx context.Context, params oas.GetWallet
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
 	}
-	versions := []tongoWallet.Version{
-		tongoWallet.V1R1, tongoWallet.V1R2, tongoWallet.V1R3,
-		tongoWallet.V2R1, tongoWallet.V2R2,
-		tongoWallet.V3R1, tongoWallet.V3R2,
-		tongoWallet.V4R1, tongoWallet.V4R2,
-	}
-	var walletAddresses []tongo.AccountID
-	for _, version := range versions {
-		walletAddress, err := tongoWallet.GenerateWalletAddress(publicKey, version, 0, nil)
-		if err != nil {
-			continue
-		}
-		walletAddresses = append(walletAddresses, walletAddress)
+	walletAddresses, err := h.storage.SearchAccountsByPubKey(publicKey)
+	if err != nil {
+		return nil, toError(http.StatusBadRequest, err)
 	}
 	accounts, err := h.storage.GetRawAccounts(ctx, walletAddresses)
 	if err != nil {
