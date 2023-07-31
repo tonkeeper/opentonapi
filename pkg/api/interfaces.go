@@ -3,8 +3,9 @@ package api
 import (
 	"context"
 	"crypto/ed25519"
-	"github.com/tonkeeper/tongo/boc"
 	"time"
+
+	"github.com/tonkeeper/tongo/boc"
 
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
@@ -84,6 +85,8 @@ type storage interface {
 
 	GetAccountState(ctx context.Context, a tongo.AccountID) (tlb.ShardAccount, error)
 	GetLibraries(ctx context.Context, libraries []tongo.Bits256) (map[tongo.Bits256]*boc.Cell, error)
+
+	SearchAccountsByPubKey(pubKey ed25519.PublicKey) ([]tongo.AccountID, error)
 
 	liteStorageRaw
 }

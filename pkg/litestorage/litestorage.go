@@ -5,9 +5,10 @@ import (
 	"crypto/ed25519"
 	"errors"
 	"fmt"
-	"github.com/tonkeeper/tongo/boc"
 	"math/big"
 	"time"
+
+	"github.com/tonkeeper/tongo/boc"
 
 	"github.com/avast/retry-go"
 	"github.com/prometheus/client_golang/prometheus"
@@ -60,7 +61,8 @@ type LiteStorage struct {
 	// maxGoroutines specifies a number of goroutines used to perform some time-consuming operations.
 	maxGoroutines int
 	// trackingAccounts is a list of accounts we track. Defined with ACCOUNTS env variable.
-	trackingAccounts map[tongo.AccountID]struct{}
+	trackingAccounts  map[tongo.AccountID]struct{}
+	pubKeyByAccountID *xsync.MapOf[tongo.AccountID, ed25519.PublicKey]
 }
 
 type Options struct {
@@ -144,6 +146,7 @@ func NewLiteStorage(log *zap.Logger, opts ...Option) (*LiteStorage, error) {
 		transactionsByInMsgLT:   xsync.NewTypedMapOf[inMsgCreatedLT, tongo.Bits256](hashInMsgCreatedLT),
 		blockCache:              xsync.NewTypedMapOf[tongo.BlockIDExt, *tlb.Block](hashBlockIDExt),
 		accountInterfacesCache:  xsync.NewTypedMapOf[tongo.AccountID, []abi.ContractInterface](hashAccountID),
+		pubKeyByAccountID:       xsync.NewTypedMapOf[tongo.AccountID, ed25519.PublicKey](hashAccountID),
 	}
 	storage.knownAccounts["tf_pools"] = o.tfPools
 	storage.knownAccounts["jettons"] = o.jettons
@@ -447,18 +450,21 @@ func (s *LiteStorage) GetWalletPubKey(ctx context.Context, address tongo.Account
 	}))
 	defer timer.ObserveDuration()
 	_, result, err := abi.GetPublicKey(ctx, s.client, address)
-	if err != nil {
-		return nil, err
-	}
-	if r, ok := result.(abi.GetPublicKeyResult); ok {
-		i := big.Int(r.PublicKey)
-		b := i.Bytes()
-		if len(b) < 24 || len(b) > 32 {
-			return nil, fmt.Errorf("invalid publock key")
+	if err == nil {
+		if r, ok := result.(abi.GetPublicKeyResult); ok {
+			i := big.Int(r.PublicKey)
+			b := i.Bytes()
+			if len(b) < 24 || len(b) > 32 {
+				return nil, fmt.Errorf("invalid public key")
+			}
+			return append(make([]byte, 32-len(b)), b...), nil
 		}
-		return append(make([]byte, 32-len(b)), b...), nil
 	}
-	return nil, fmt.Errorf("can't get publick key")
+	pubKey, ok := s.pubKeyByAccountID.Load(address)
+	if ok {
+		return pubKey, nil
+	}
+	return nil, fmt.Errorf("can't get public key")
 }
 
 func (s *LiteStorage) ReindexAccount(ctx context.Context, accountID tongo.AccountID) error {
