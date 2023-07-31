@@ -385,6 +385,32 @@
     },
     "description": "input parameters for contract get method"
    },
+   "SendBoc": {
+    "content": {
+     "application/json": {
+      "schema": {
+       "properties": {
+        "batch": {
+         "items": {
+          "example": "te6ccgECBQEAARUAAkWIAWTtae+KgtbrX26Bep8JSq8lFLfGOoyGR/xwdjfvpvEaHg",
+          "type": "string"
+         },
+         "maxItems": 10,
+         "minItems": 1,
+         "type": "array"
+        },
+        "boc": {
+         "example": "te6ccgECBQEAARUAAkWIAWTtae+KgtbrX26Bep8JSq8lFLfGOoyGR/xwdjfvpvEaHg",
+         "type": "string"
+        }
+       },
+       "type": "object"
+      }
+     }
+    },
+    "description": "bag-of-cells serialized to base64",
+    "required": true
+   },
    "TonConnectProof": {
     "content": {
      "application/json": {
@@ -4137,7 +4163,7 @@
     "description": "Send message to blockchain",
     "operationId": "sendMessage",
     "requestBody": {
-     "$ref": "#/components/requestBodies/Boc"
+     "$ref": "#/components/requestBodies/SendBoc"
     },
     "responses": {
      "200": {

@@ -207,7 +207,7 @@ paths:
       tags:
         - Blockchain
       requestBody:
-        $ref: "#/components/requestBodies/Boc"
+        $ref: "#/components/requestBodies/SendBoc"
       responses:
         '200':
           description: "success"
@@ -2162,6 +2162,24 @@ components:
         application/json:
           schema:
             type: object
+    SendBoc:
+      description: bag-of-cells serialized to base64
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              boc:
+                type: string
+                example: te6ccgECBQEAARUAAkWIAWTtae+KgtbrX26Bep8JSq8lFLfGOoyGR/xwdjfvpvEaHg
+              batch:
+                type: array
+                maxItems: 10
+                minItems: 1
+                items:
+                  type: string
+                  example: te6ccgECBQEAARUAAkWIAWTtae+KgtbrX26Bep8JSq8lFLfGOoyGR/xwdjfvpvEaHg
     Boc:
       description: bag-of-cells serialized to base64
       required: true

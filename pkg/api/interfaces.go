@@ -3,8 +3,9 @@ package api
 import (
 	"context"
 	"crypto/ed25519"
-	"github.com/tonkeeper/tongo/boc"
 	"time"
+
+	"github.com/tonkeeper/tongo/boc"
 
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
@@ -113,8 +114,8 @@ type chainState interface {
 
 // messageSender provides a method to send a raw message to the blockchain.
 type messageSender interface {
-	// SendMessage sends the given payload(a message) to the blockchain.
-	SendMessage(ctx context.Context, payload []byte) error
+	SendMessage(ctx context.Context, payload []byte) error // SendMessage sends the given payload(a message) to the blockchain.
+	MsgsBocAddToMempool(bocMsgs []string)                  // MsgsBocAddToMempool sends a list of boc to the cache for later sending
 }
 
 // executor runs any get methods

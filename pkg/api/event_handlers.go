@@ -27,15 +27,29 @@ func (h Handler) SendMessage(ctx context.Context, request *oas.SendMessageReq) e
 	if h.msgSender == nil {
 		return toError(http.StatusBadRequest, fmt.Errorf("msg sender is not configured"))
 	}
-	payload, err := base64.StdEncoding.DecodeString(request.Boc)
-	if err != nil {
-		return toError(http.StatusBadRequest, err)
+	if !request.Boc.IsSet() && len(request.Batch) == 0 {
+		return toError(http.StatusBadRequest, fmt.Errorf("boc not found"))
 	}
-	if err := h.msgSender.SendMessage(ctx, payload); err != nil {
-		sentry.Send("sending message", sentry.SentryInfoData{"payload": request.Boc}, sentry.LevelError)
-		return toError(http.StatusInternalServerError, err)
+	if request.Boc.IsSet() {
+		payload, err := sendMessage(ctx, request.Boc.Value, h.msgSender)
+		if err != nil {
+			sentry.Send("sending message", sentry.SentryInfoData{"payload": request.Boc}, sentry.LevelError)
+			return toError(http.StatusInternalServerError, err)
+		}
+		go h.addToMempool(payload)
 	}
-	go h.addToMempool(payload)
+	if len(request.Batch) > 0 {
+		var msgsBoc []string
+		for _, msgBoc := range request.Batch {
+			payload, err := sendMessage(ctx, msgBoc, h.msgSender)
+			if err != nil {
+				msgsBoc = append(msgsBoc, base64.StdEncoding.EncodeToString(payload))
+				continue
+			}
+			go h.addToMempool(payload)
+		}
+		h.msgSender.MsgsBocAddToMempool(msgsBoc)
+	}
 	return nil
 }
 
@@ -414,4 +428,16 @@ func emulatedTreeToTrace(tree *txemulator.TxTree, accounts map[tongo.AccountID]t
 		t.Children = append(t.Children, child)
 	}
 	return t, nil
+}
+
+func sendMessage(ctx context.Context, msgBoc string, msgSender messageSender) ([]byte, error) {
+	payload, err := base64.StdEncoding.DecodeString(msgBoc)
+	if err != nil {
+		return nil, err
+	}
+	err = msgSender.SendMessage(ctx, payload)
+	if err != nil {
+		return nil, err
+	}
+	return payload, nil
 }
