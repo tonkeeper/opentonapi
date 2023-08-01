@@ -132,7 +132,7 @@ func TestFindActions(t *testing.T) {
 		filenamePrefix string
 		source         core.InformationSource
 		valueFlow      ValueFlow
-		straws         []Straw
+		straws         []StrawFunc
 	}
 	for _, c := range []Case{
 		{
@@ -254,7 +254,7 @@ func TestFindActions(t *testing.T) {
 			name:           "multiple call contracts",
 			hash:           "e87ec0ae9ebdba400b82887462dd0908a954fe2165c1a89775742d85a5e2a5f8",
 			filenamePrefix: "multiple-call-contracts",
-			straws: []Straw{
+			straws: []StrawFunc{
 				FindNFTTransfer,
 				FindJettonTransfer,
 			},

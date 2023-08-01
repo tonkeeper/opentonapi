@@ -72,5 +72,3 @@ func FindAuctionBidFragmentSimple(bubble *Bubble) bool {
 	*bubble = newBubble
 	return true
 }
-
-//todo: https://tonviewer.com/transaction/16462168398a5c6324602beb1da2e90ab5510aaf180ec00404620a33487fa180
