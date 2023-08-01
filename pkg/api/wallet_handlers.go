@@ -78,6 +78,9 @@ func checkTonConnectToken(authToken, secret string) ([]byte, bool, error) {
 	if err != nil {
 		return nil, false, err
 	}
+	if len(decodedData) <= 32 {
+		return nil, false, fmt.Errorf("invalid payload length")
+	}
 	pubKey := decodedData[:32]
 	signature := decodedData[32:]
 
