@@ -2176,7 +2176,6 @@ components:
               batch:
                 type: array
                 maxItems: 10
-                minItems: 1
                 items:
                   type: string
                   example: te6ccgECBQEAARUAAkWIAWTtae+KgtbrX26Bep8JSq8lFLfGOoyGR/xwdjfvpvEaHg

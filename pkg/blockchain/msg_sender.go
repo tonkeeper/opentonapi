@@ -41,7 +41,7 @@ func NewMsgSender(servers []config.LiteServer, channels []chan []byte) (*MsgSend
 	go func() {
 		for {
 			msgSender.sendMsgsFromMempool()
-			time.Sleep(time.Minute * 10)
+			time.Sleep(time.Second * 5)
 		}
 	}()
 	return msgSender, nil
@@ -55,7 +55,7 @@ func (ms *MsgSender) sendMsgsFromMempool() {
 
 	for boc, createdTime := range ms.messages {
 		payload, err := base64.StdEncoding.DecodeString(boc)
-		if err != nil || now-createdTime > 10800 { // ttl is 3 hours
+		if err != nil || now-createdTime > 5*60 { // ttl is 5 min
 			delete(ms.messages, boc)
 			continue
 		}

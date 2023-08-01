@@ -1805,8 +1805,8 @@ func (s *SendMessageReq) Validate() error {
 	var failures []validate.FieldError
 	if err := func() error {
 		if err := (validate.Array{
-			MinLength:    1,
-			MinLengthSet: true,
+			MinLength:    0,
+			MinLengthSet: false,
 			MaxLength:    10,
 			MaxLengthSet: true,
 		}).ValidateLength(len(s.Batch)); err != nil {
