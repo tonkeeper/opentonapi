@@ -2,7 +2,6 @@ package bath
 
 import (
 	"context"
-
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/tongo"
 )
@@ -84,26 +83,14 @@ func recursiveMerge(bubble *Bubble, s StrawFunc) bool {
 	return false
 }
 
-func (l *ActionsList) Extra(account tongo.AccountID, fullTrace *core.Trace) int64 {
-	extra := traceExtra(account, fullTrace)
+func (l *ActionsList) Extra(account tongo.AccountID) int64 {
+	extra := int64(0)
 	if flow, ok := l.ValueFlow.Accounts[account]; ok {
+		extra += flow.Ton
 		extra -= flow.Fees
 	}
 	for _, action := range l.Actions {
-		extra += action.ContributeToExtra(account)
-	}
-	return extra
-}
-
-func traceExtra(account tongo.AccountID, trace *core.Trace) int64 {
-	var extra int64
-	if trace.Account == account && trace.InMsg != nil {
-		extra += trace.InMsg.Value
-	}
-	for _, child := range trace.Children {
-		if child.Account == account && child.InMsg != nil {
-			extra -= child.InMsg.Value
-		}
+		extra -= action.ContributeToExtra(account)
 	}
 	return extra
 }
