@@ -154,7 +154,7 @@ func (h Handler) GetEventsByAccount(ctx context.Context, params oas.GetEventsByA
 	}
 	if !params.BeforeLt.IsSet() {
 		memHashTraces, _ := h.mempoolEmulate.accountsTraces.Get(account)
-		var parsedHashes map[tongo.Bits256]bool
+		parsedHashes := make(map[tongo.Bits256]bool)
 		for _, traceHash := range memHashTraces {
 			parsedHash, _ := tongo.ParseHash(traceHash)
 			parsedHashes[parsedHash] = true
