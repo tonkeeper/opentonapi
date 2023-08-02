@@ -19,6 +19,7 @@ import (
 	"github.com/tonkeeper/tongo/boc"
 	"github.com/tonkeeper/tongo/tlb"
 	"github.com/tonkeeper/tongo/txemulator"
+	tongoWallet "github.com/tonkeeper/tongo/wallet"
 	"golang.org/x/exp/maps"
 	"golang.org/x/exp/slices"
 )
@@ -27,15 +28,33 @@ func (h Handler) SendMessage(ctx context.Context, request *oas.SendMessageReq) e
 	if h.msgSender == nil {
 		return toError(http.StatusBadRequest, fmt.Errorf("msg sender is not configured"))
 	}
-	payload, err := base64.StdEncoding.DecodeString(request.Boc)
-	if err != nil {
-		return toError(http.StatusBadRequest, err)
+	if !request.Boc.IsSet() && len(request.Batch) == 0 {
+		return toError(http.StatusBadRequest, fmt.Errorf("boc not found"))
 	}
-	if err := h.msgSender.SendMessage(ctx, payload); err != nil {
-		sentry.Send("sending message", sentry.SentryInfoData{"payload": request.Boc}, sentry.LevelError)
-		return toError(http.StatusInternalServerError, err)
+	if request.Boc.IsSet() {
+		payload, err := sendMessage(ctx, request.Boc.Value, h.msgSender)
+		if err != nil {
+			sentry.Send("sending message", sentry.SentryInfoData{"payload": request.Boc}, sentry.LevelError)
+			return toError(http.StatusInternalServerError, err)
+		}
+		go h.addToMempool(payload, nil)
 	}
-	go h.addToMempool(payload)
+	var (
+		msgsBoc      []string
+		shardAccount = map[tongo.AccountID]tlb.ShardAccount{}
+	)
+	for _, msgBoc := range request.Batch {
+		payload, err := base64.StdEncoding.DecodeString(msgBoc)
+		if err != nil {
+			return toError(http.StatusBadRequest, err)
+		}
+		shardAccount, err = h.addToMempool(payload, shardAccount)
+		if err != nil {
+			continue
+		}
+		msgsBoc = append(msgsBoc, msgBoc)
+	}
+	h.msgSender.MsgsBocAddToMempool(msgsBoc)
 	return nil
 }
 
@@ -133,10 +152,21 @@ func (h Handler) GetEventsByAccount(ctx context.Context, params oas.GetEventsByA
 		}
 		lastLT = trace.Lt
 	}
-	if !params.BeforeLt.IsSet() && (len(events) == 0 || time.Now().Unix() > events[0].Timestamp+30) {
-		memTraces, _ := h.mempoolEmulate.accountsTraces.Get(account)
-		for _, traceHex := range memTraces {
-			trace, ok := h.mempoolEmulate.traces.Get(traceHex)
+	if !params.BeforeLt.IsSet() {
+		memHashTraces, _ := h.mempoolEmulate.accountsTraces.Get(account)
+		var parsedHashes map[tongo.Bits256]bool
+		for _, traceHash := range memHashTraces {
+			parsedHash, _ := tongo.ParseHash(traceHash)
+			parsedHashes[parsedHash] = true
+		}
+		for hash := range parsedHashes {
+			_, err = h.storage.SearchTransactionByMessageHash(ctx, hash)
+			if err == nil {
+				delete(parsedHashes, hash)
+			}
+		}
+		for traceHash := range parsedHashes {
+			trace, ok := h.mempoolEmulate.traces.Get(traceHash.Hex())
 			if !ok {
 				continue
 			}
@@ -149,7 +179,7 @@ func (h Handler) GetEventsByAccount(ctx context.Context, params oas.GetEventsByA
 				return nil, toError(http.StatusInternalServerError, err)
 			}
 			event.InProgress = true
-			event.EventID = traceHex
+			event.EventID = traceHash.Hex()
 			events = slices.Insert(events, 0, event)[:len(events)-1]
 			lastLT = uint64(events[len(events)-1].Lt)
 		}
@@ -335,29 +365,41 @@ func (h Handler) EmulateWalletMessage(ctx context.Context, request *oas.EmulateW
 	return &consequences, nil
 }
 
-func (h Handler) addToMempool(bytesBoc []byte) {
+func (h Handler) addToMempool(bytesBoc []byte, shardAccount map[tongo.AccountID]tlb.ShardAccount) (map[tongo.AccountID]tlb.ShardAccount, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
+	if shardAccount == nil {
+		shardAccount = map[tongo.AccountID]tlb.ShardAccount{}
+	}
 	msgCell, err := boc.DeserializeBoc(bytesBoc)
 	if err != nil {
-		return
+		return shardAccount, err
+	}
+	var (
+		ttl = int64(30)
+		msg tongoWallet.MessageV4
+	)
+	err = tlb.Unmarshal(msgCell[0], &msg)
+	if err == nil {
+		ttl = int64(msg.ValidUntil) - time.Now().Unix()
 	}
 	var message tlb.Message
 	err = tlb.Unmarshal(msgCell[0], &message)
 	if err != nil {
-		return
+		return shardAccount, err
 	}
-	emulator, err := txemulator.NewTraceBuilder(txemulator.WithAccountsSource(h.storage))
+	emulator, err := txemulator.NewTraceBuilder(txemulator.WithAccountsSource(h.storage), txemulator.WithAccountsMap(shardAccount))
 	if err != nil {
-		return
+		return shardAccount, err
 	}
 	tree, err := emulator.Run(ctx, message)
 	if err != nil {
-		return
+		return shardAccount, err
 	}
-	trace, err := emulatedTreeToTrace(tree, emulator.FinalStates())
+	newShardAccount := emulator.FinalStates()
+	trace, err := emulatedTreeToTrace(tree, newShardAccount)
 	if err != nil {
-		return
+		return shardAccount, err
 	}
 	accounts := make(map[tongo.AccountID]struct{})
 	var traverse func(*core.Trace)
@@ -370,14 +412,15 @@ func (h Handler) addToMempool(bytesBoc []byte) {
 	traverse(trace)
 	hash, err := msgCell[0].Hash()
 	if err != nil {
-		return
+		return shardAccount, err
 	}
-	h.mempoolEmulate.traces.Set(hex.EncodeToString(hash), trace, cache.WithExpiration(time.Second*30))
+	h.mempoolEmulate.traces.Set(hex.EncodeToString(hash), trace, cache.WithExpiration(time.Second*time.Duration(ttl)))
 	for _, account := range maps.Keys(accounts) {
 		traces, _ := h.mempoolEmulate.accountsTraces.Get(account)
 		traces = slices.Insert(traces, 0, hex.EncodeToString(hash))
-		h.mempoolEmulate.accountsTraces.Set(account, traces, cache.WithExpiration(time.Second*30))
+		h.mempoolEmulate.accountsTraces.Set(account, traces, cache.WithExpiration(time.Second*time.Duration(ttl)))
 	}
+	return newShardAccount, nil
 }
 
 func emulatedTreeToTrace(tree *txemulator.TxTree, accounts map[tongo.AccountID]tlb.ShardAccount) (*core.Trace, error) {
@@ -414,4 +457,16 @@ func emulatedTreeToTrace(tree *txemulator.TxTree, accounts map[tongo.AccountID]t
 		t.Children = append(t.Children, child)
 	}
 	return t, nil
+}
+
+func sendMessage(ctx context.Context, msgBoc string, msgSender messageSender) ([]byte, error) {
+	payload, err := base64.StdEncoding.DecodeString(msgBoc)
+	if err != nil {
+		return nil, err
+	}
+	err = msgSender.SendMessage(ctx, payload)
+	if err != nil {
+		return nil, err
+	}
+	return payload, nil
 }

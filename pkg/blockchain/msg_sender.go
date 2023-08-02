@@ -2,6 +2,9 @@ package blockchain
 
 import (
 	"context"
+	"encoding/base64"
+	"sync"
+	"time"
 
 	"github.com/tonkeeper/tongo/config"
 	"github.com/tonkeeper/tongo/liteapi"
@@ -9,14 +12,19 @@ import (
 
 // MsgSender provides a method to send a message to the blockchain.
 type MsgSender struct {
+	mu     sync.RWMutex
 	client *liteapi.Client
 	// channels is used to send a copy of payload before sending it to the blockchain.
 	channels []chan []byte
+	// messages is used as a cache for boc multi-sending
+	messages map[string]int64 // base64, created unix time
 }
 
 func NewMsgSender(servers []config.LiteServer, channels []chan []byte) (*MsgSender, error) {
-	var err error
-	var client *liteapi.Client
+	var (
+		client *liteapi.Client
+		err    error
+	)
 	if len(servers) == 0 {
 		client, err = liteapi.NewClientWithDefaultMainnet()
 	} else {
@@ -25,7 +33,36 @@ func NewMsgSender(servers []config.LiteServer, channels []chan []byte) (*MsgSend
 	if err != nil {
 		return nil, err
 	}
-	return &MsgSender{client: client, channels: channels}, nil
+	msgSender := &MsgSender{
+		client:   client,
+		channels: channels,
+		messages: map[string]int64{},
+	}
+	go func() {
+		for {
+			msgSender.sendMsgsFromMempool()
+			time.Sleep(time.Second * 5)
+		}
+	}()
+	return msgSender, nil
+}
+
+func (ms *MsgSender) sendMsgsFromMempool() {
+	now := time.Now().Unix()
+
+	ms.mu.RLock()
+	defer ms.mu.RUnlock()
+
+	for boc, createdTime := range ms.messages {
+		payload, err := base64.StdEncoding.DecodeString(boc)
+		if err != nil || now-createdTime > 5*60 { // ttl is 5 min
+			delete(ms.messages, boc)
+			continue
+		}
+		if err := ms.SendMessage(context.Background(), payload); err != nil {
+			continue
+		}
+	}
 }
 
 // SendMessage sends the given payload(a message) to the blockchain.
@@ -38,4 +75,14 @@ func (ms *MsgSender) SendMessage(ctx context.Context, payload []byte) error {
 	}
 	_, err := ms.client.SendMessage(ctx, payload)
 	return err
+}
+
+func (ms *MsgSender) MsgsBocAddToMempool(bocMsgs []string) {
+	now := time.Now().Unix()
+	ms.mu.RLock()
+	defer ms.mu.RUnlock()
+
+	for _, boc := range bocMsgs {
+		ms.messages[boc] = now
+	}
 }

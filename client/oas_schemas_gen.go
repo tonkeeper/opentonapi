@@ -7216,17 +7216,28 @@ func (s *SendMessageLiteServerReq) SetBody(val string) {
 type SendMessageOK struct{}
 
 type SendMessageReq struct {
-	Boc string `json:"boc"`
+	Boc   OptString `json:"boc"`
+	Batch []string  `json:"batch"`
 }
 
 // GetBoc returns the value of Boc.
-func (s *SendMessageReq) GetBoc() string {
+func (s *SendMessageReq) GetBoc() OptString {
 	return s.Boc
 }
 
+// GetBatch returns the value of Batch.
+func (s *SendMessageReq) GetBatch() []string {
+	return s.Batch
+}
+
 // SetBoc sets the value of Boc.
-func (s *SendMessageReq) SetBoc(val string) {
+func (s *SendMessageReq) SetBoc(val OptString) {
 	s.Boc = val
+}
+
+// SetBatch sets the value of Batch.
+func (s *SendMessageReq) SetBatch(val []string) {
+	s.Batch = val
 }
 
 // Ref: #/components/schemas/Seqno
