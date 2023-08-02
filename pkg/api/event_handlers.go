@@ -191,7 +191,7 @@ func (h Handler) EmulateMessageToAccountEvent(ctx context.Context, request *oas.
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
-	result, err := bath.FindActions(ctx, trace)
+	result, err := bath.FindActions(ctx, trace, bath.WithInformationSource(h.storage))
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
@@ -224,7 +224,7 @@ func (h Handler) EmulateMessageToEvent(ctx context.Context, request *oas.Emulate
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
-	result, err := bath.FindActions(ctx, trace)
+	result, err := bath.FindActions(ctx, trace, bath.WithInformationSource(h.storage))
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
@@ -315,7 +315,7 @@ func (h Handler) EmulateWalletMessage(ctx context.Context, request *oas.EmulateW
 		return nil, toError(http.StatusInternalServerError, err)
 	}
 	t := convertTrace(*trace, h.addressBook)
-	result, err := bath.FindActions(ctx, trace, bath.ForAccount(*walletAddress))
+	result, err := bath.FindActions(ctx, trace, bath.ForAccount(*walletAddress), bath.WithInformationSource(h.storage))
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}

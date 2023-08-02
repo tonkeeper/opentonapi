@@ -11,11 +11,11 @@ import (
 	"github.com/tonkeeper/tongo/wallet"
 )
 
-// Straw extracts information from the given bubble and its children and modifies the bubble if needed.
+// StrawFunc extracts information from the given bubble and its children and modifies the bubble if needed.
 // If the bubble is modified this function return true.
-type Straw func(bubble *Bubble) (success bool)
+type StrawFunc func(bubble *Bubble) (success bool)
 
-var DefaultStraws = []Straw{
+var DefaultStraws = []StrawFunc{
 	FindNFTTransfer,
 	FindJettonTransfer,
 	FindAuctionBidFragmentSimple,
@@ -27,6 +27,7 @@ var DefaultStraws = []Straw{
 	FindRecoverStake,
 	FindTFNominatorAction,
 	FindSTONfiSwap,
+	DedustLPJettonMintStraw.Merge,
 	// FindContractDeploy goes after other straws
 	// because it inserts ContractDeploy actions in an action chain.
 	// Usually, a straw looks for a strict sequence of bubbles like (Jetton Transfer) -> (Jetton Notify) and

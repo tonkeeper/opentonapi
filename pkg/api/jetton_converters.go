@@ -48,7 +48,7 @@ func (h Handler) convertJettonHistory(ctx context.Context, account tongo.Account
 			return nil, 0, err
 		}
 		result, err := bath.FindActions(ctx, trace,
-			bath.WithStraws([]bath.Straw{bath.FindJettonTransfer}),
+			bath.WithStraws([]bath.StrawFunc{bath.FindJettonTransfer}),
 			bath.WithInformationSource(h.storage))
 		if err != nil {
 			return nil, 0, err
