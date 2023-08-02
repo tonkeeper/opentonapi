@@ -12,7 +12,6 @@ import (
 )
 
 const (
-	Empty             ActionType = "Empty"
 	TonTransfer       ActionType = "TonTransfer"
 	SmartContractExec ActionType = "SmartContractExec"
 	NftItemTransfer   ActionType = "NftItemTransfer"
@@ -25,7 +24,6 @@ const (
 	RecoverStake      ActionType = "RecoverStake"
 	STONfiSwap        ActionType = "STONfiSwap"
 	AuctionBid        ActionType = "AuctionBid"
-	AuctionTgInitBid  ActionType = "AuctionTgInitBid"
 
 	RefundDnsTg   RefundType = "DNS.tg"
 	RefundDnsTon  RefundType = "DNS.ton"
@@ -182,14 +180,39 @@ func CollectActionsAndValueFlow(bubble *Bubble, forAccount *tongo.AccountID) ([]
 	return actions, valueFlow
 }
 
-func (a Action) ContributeToExtra(account tongo.AccountID, extra int64) int64 {
-	if a.TonTransfer != nil {
-		return a.TonTransfer.ContributeToExtra(account, extra)
+func detectDirection(a, from, to tongo.AccountID, amount int64) int64 {
+	switch {
+	case from == to:
+		return 0
+	case from == a:
+		return -amount
+	case to == a:
+		return amount
 	}
-	if a.SmartContractExec != nil {
-		return a.SmartContractExec.ContributeToExtra(account, extra)
+	return 0
+}
+
+func (a Action) ContributeToExtra(account tongo.AccountID) int64 {
+	switch a.Type {
+	case JettonTransfer, NftItemTransfer, ContractDeploy, UnSubscription, STONfiSwap: // actions without extra
+		return 0
+	case TonTransfer:
+		return detectDirection(account, a.TonTransfer.Sender, a.TonTransfer.Recipient, a.TonTransfer.Amount)
+	case SmartContractExec:
+		return detectDirection(account, a.SmartContractExec.Executor, a.SmartContractExec.Contract, a.SmartContractExec.TonAttached)
+	case NftPurchase:
+		return detectDirection(account, a.NftPurchase.Buyer, a.NftPurchase.Seller, a.NftPurchase.Price)
+	case AuctionBid:
+		return detectDirection(account, a.AuctionBid.Bidder, a.AuctionBid.Auction, a.AuctionBid.Amount)
+	case DepositStake:
+		return detectDirection(account, a.DepositStake.Staker, a.DepositStake.Elector, a.DepositStake.Amount)
+	case RecoverStake:
+		return detectDirection(account, a.RecoverStake.Elector, a.RecoverStake.Staker, a.RecoverStake.Amount)
+	case Subscription:
+		return detectDirection(account, a.Subscription.Subscriber, a.Subscription.Beneficiary, a.Subscription.Amount)
+	default:
+		panic("unknown action type")
 	}
-	return extra
 }
 
 func (a Action) IsSubject(account tongo.AccountID) bool {
@@ -218,28 +241,8 @@ func (a *TonTransferAction) SubjectAccounts() []tongo.AccountID {
 	return []tongo.AccountID{a.Sender, a.Recipient}
 }
 
-func (a *TonTransferAction) ContributeToExtra(account tongo.AccountID, extra int64) int64 {
-	if a.Sender == account {
-		return extra - a.Amount
-	}
-	if a.Recipient == account {
-		return extra + a.Amount
-	}
-	return extra
-}
-
 func (a *SmartContractAction) SubjectAccounts() []tongo.AccountID {
 	return []tongo.AccountID{a.Contract, a.Executor}
-}
-
-func (a *SmartContractAction) ContributeToExtra(account tongo.AccountID, extra int64) int64 {
-	if a.Executor == account {
-		return extra - a.TonAttached
-	}
-	if a.Contract == account {
-		return extra + a.TonAttached
-	}
-	return extra
 }
 
 func (a *NftTransferAction) SubjectAccounts() []tongo.AccountID {

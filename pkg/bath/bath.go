@@ -90,7 +90,7 @@ func (l *ActionsList) Extra(account tongo.AccountID, fullTrace *core.Trace) int6
 		extra -= flow.Fees
 	}
 	for _, action := range l.Actions {
-		extra = action.ContributeToExtra(account, extra)
+		extra += action.ContributeToExtra(account)
 	}
 	return extra
 }

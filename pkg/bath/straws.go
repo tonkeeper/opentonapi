@@ -15,9 +15,15 @@ import (
 // If the bubble is modified this function return true.
 type StrawFunc func(bubble *Bubble) (success bool)
 
+var JettonTransfersBurnsMints = []StrawFunc{
+	FindJettonTransfer,
+	DedustLPJettonMintStraw.Merge,
+}
+
 var DefaultStraws = []StrawFunc{
 	FindNFTTransfer,
 	FindJettonTransfer,
+	DedustLPJettonMintStraw.Merge,
 	FindAuctionBidFragmentSimple,
 	FindInitialSubscription,
 	FindExtendedSubscription,
@@ -27,7 +33,6 @@ var DefaultStraws = []StrawFunc{
 	FindRecoverStake,
 	FindTFNominatorAction,
 	FindSTONfiSwap,
-	DedustLPJettonMintStraw.Merge,
 	// FindContractDeploy goes after other straws
 	// because it inserts ContractDeploy actions in an action chain.
 	// Usually, a straw looks for a strict sequence of bubbles like (Jetton Transfer) -> (Jetton Notify) and
