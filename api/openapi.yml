@@ -13,33 +13,32 @@ servers:
 paths:
   /v2/blockchain/blocks/{block_id}:
     get:
-      description: Get block data
-      operationId: getBlock
+      description: Get blockchain block data
+      operationId: getBlockchainBlock
       tags:
         - Blockchain
       parameters:
-        - $ref: '#/components/parameters/blockIdParameter'
+        - $ref: '#/components/parameters/blockchainBlockIDParameter'
       responses:
         '200':
-          description: block
+          description: blockchain block
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Block'
+                $ref: '#/components/schemas/BlockchainBlock'
         'default':
           $ref: '#/components/responses/Error'
-
   /v2/blockchain/blocks/{block_id}/transactions:
     get:
       description: Get transactions from block
-      operationId: getBlockTransactions
+      operationId: getBlockchainBlockTransactions
       tags:
         - Blockchain
       parameters:
-        - $ref: '#/components/parameters/blockIdParameter'
+        - $ref: '#/components/parameters/blockchainBlockIDParameter'
       responses:
         '200':
-          description: transactions
+          description: blockchain block transactions
           content:
             application/json:
               schema:
@@ -49,111 +48,106 @@ paths:
   /v2/blockchain/transactions/{transaction_id}:
     get:
       description: Get transaction data
-      operationId: getTransaction
+      operationId: getBlockchainTransaction
       tags:
         - Blockchain
       parameters:
-        - $ref: '#/components/parameters/transactionIdParameter'
+        - $ref: '#/components/parameters/transactionIDParameter'
       responses:
         '200':
-          description: transaction
+          description: blockchain transaction
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Transaction'
         'default':
           $ref: '#/components/responses/Error'
-
   /v2/blockchain/messages/{msg_id}/transaction:
     get:
       description: Get transaction data by message hash
-      operationId: getTransactionByMessageHash
+      operationId: getBlockchainTransactionByMessageHash
       tags:
         - Blockchain
       parameters:
-        - $ref: '#/components/parameters/messageIdParameter'
+        - $ref: '#/components/parameters/messageIDParameter'
       responses:
         '200':
-          description: transaction
+          description: transaction by message hash
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Transaction'
         'default':
           $ref: '#/components/responses/Error'
-
-  /v2/blockchain/validators:
+  /v2/blockchain/validators: # not implemented in tonapi v2
     get:
-      description: Get validators
-      operationId: getValidators
+      description: Get blockchain validators
+      operationId: getBlockchainValidators
       tags:
         - Blockchain
       responses:
         '200':
-          description: validators
+          description: blockchain validators
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Validators'
         'default':
           $ref: '#/components/responses/Error'
-
   /v2/blockchain/masterchain-head:
     get:
       description: Get last known masterchain block
-      operationId: getMasterchainHead
+      operationId: getBlockchainMasterchainHead
       tags:
         - Blockchain
       responses:
         '200':
-          description: masterchain head
+          description: blockchain masterchain head
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Block'
+                $ref: '#/components/schemas/BlockchainBlock'
         'default':
           $ref: '#/components/responses/Error'
-
   /v2/blockchain/accounts/{account_id}:
     get:
       description: Get low-level information about an account taken directly from the blockchain.
-      operationId: getRawAccount
+      operationId: getBlockchainRawAccount
       tags:
         - Blockchain
       parameters:
-        - $ref: '#/components/parameters/accountIdParameter'
+        - $ref: '#/components/parameters/accountIDParameter'
       responses:
         '200':
           description: raw account
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RawAccount'
+                $ref: '#/components/schemas/BlockchainRawAccount'
         'default':
           $ref: '#/components/responses/Error'
-
   /v2/blockchain/accounts/{account_id}/transactions:
     get:
       description: Get account transactions
-      operationId: getAccountTransactions
+      operationId: getBlockchainAccountTransactions
       tags:
         - Blockchain
       parameters:
-        - $ref: '#/components/parameters/accountIdParameter'
+        - $ref: '#/components/parameters/accountIDParameter'
         - name: after_lt
           in: query
           description: "omit this parameter to get last transactions"
           schema:
             type: integer
             format: int64
-            example: ""
+            example: 39787624000003
         - name: before_lt
           in: query
           description: "omit this parameter to get last transactions"
           schema:
             type: integer
             format: int64
-            example: 0
+            example: 39787624000003
         - name: limit
           in: query
           schema:
@@ -164,23 +158,21 @@ paths:
             example: 100
       responses:
         '200':
-          description: account transactions
+          description: blockchain account transactions
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Transactions'
         'default':
           $ref: '#/components/responses/Error'
-
-
   /v2/blockchain/accounts/{account_id}/methods/{method_name}:
     get:
       description: Execute get method for account
-      operationId: execGetMethod
+      operationId: execGetMethodForBlockchainAccount
       tags:
         - Blockchain
       parameters:
-        - $ref: '#/components/parameters/accountIdParameter'
+        - $ref: '#/components/parameters/accountIDParameter'
         - $ref: '#/components/parameters/methodNameParameter'
         - name: args
           in: query
@@ -193,7 +185,7 @@ paths:
             example: [ "0:9a33970f617bcd71acf2cd28357c067aa31859c02820d8f01d74c88063a8f4d8" ]
       responses:
         '200':
-          description: "result"
+          description: method execution result
           content:
             application/json:
               schema:
@@ -203,16 +195,32 @@ paths:
   /v2/blockchain/message:
     post:
       description: Send message to blockchain
-      operationId: sendMessage
+      operationId: sendBlockchainMessage
       tags:
         - Blockchain
       requestBody:
-        $ref: "#/components/requestBodies/SendBoc"
+        $ref: "#/components/requestBodies/BatchBoc"
       responses:
         '200':
-          description: "success"
+          description: the message has been sent
         'default':
           $ref: '#/components/responses/Error'
+  /v2/blockchain/config:
+    get:
+      description: Get blockchain config
+      operationId: getBlockchainConfig
+      tags:
+        - Blockchain
+      responses:
+        '200':
+          description: blockchain config
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BlockchainConfig'
+        'default':
+          $ref: '#/components/responses/Error'
+  
   /v2/events/emulate:
     post:
       description: Emulate sending message to blockchain
@@ -225,7 +233,7 @@ paths:
         $ref: "#/components/requestBodies/Boc"
       responses:
         '200':
-          description: "event"
+          description: emulated event
           content:
             application/json:
               schema:
@@ -242,7 +250,7 @@ paths:
         $ref: "#/components/requestBodies/Boc"
       responses:
         '200':
-          description: "event"
+          description: emulated trace
           content:
             application/json:
               schema:
@@ -252,7 +260,7 @@ paths:
   /v2/wallet/emulate:
     post:
       description: Emulate sending message to blockchain
-      operationId: emulateWalletMessage
+      operationId: emulateMessageToWallet
       tags:
         - Emulation
       parameters:
@@ -261,7 +269,7 @@ paths:
         $ref: "#/components/requestBodies/Boc"
       responses:
         '200':
-          description: "event"
+          description: emulated message
           content:
             application/json:
               schema:
@@ -276,31 +284,16 @@ paths:
         - Emulation
       parameters:
         - $ref: '#/components/parameters/i18n'
-        - $ref: '#/components/parameters/accountIdParameter'
+        - $ref: '#/components/parameters/accountIDParameter'
       requestBody:
         $ref: "#/components/requestBodies/Boc"
       responses:
         '200':
-          description: "event"
+          description: emulated message to account
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/AccountEvent'
-        'default':
-          $ref: '#/components/responses/Error'
-  /v2/blockchain/config:
-    get:
-      description: Get blockchain config
-      operationId: getConfig
-      tags:
-        - Blockchain
-      responses:
-        '200':
-          description: blockchain config
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Config'
         'default':
           $ref: '#/components/responses/Error'
 
@@ -311,7 +304,7 @@ paths:
       tags:
         - Accounts
       requestBody:
-        $ref: "#/components/requestBodies/AccountIds"
+        $ref: "#/components/requestBodies/AccountIDs"
       responses:
         '200':
           description: a list of accounts
@@ -321,8 +314,6 @@ paths:
                 $ref: '#/components/schemas/Accounts'
         'default':
           $ref: '#/components/responses/Error'
-
-
   /v2/accounts/{account_id}:
     get:
       description: Get human-friendly information about an account without low-level details.
@@ -330,7 +321,7 @@ paths:
       tags:
         - Accounts
       parameters:
-        - $ref: '#/components/parameters/accountIdParameter'
+        - $ref: '#/components/parameters/accountIDParameter'
       responses:
         '200':
           description: account
@@ -340,54 +331,48 @@ paths:
                 $ref: '#/components/schemas/Account'
         'default':
           $ref: '#/components/responses/Error'
-
-
   /v2/accounts/{account_id}/dns/backresolve:
     get:
-      description: Get domains for wallet account
-      operationId: dnsBackResolve
+      description: Get account's domains
+      operationId: accountDnsBackResolve
       tags:
         - Accounts
       parameters:
-        - $ref: '#/components/parameters/accountIdParameter'
+        - $ref: '#/components/parameters/accountIDParameter'
       responses:
         '200':
-          description: domains for wallet account
+          description: account's domains
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/DomainNames'
         'default':
           $ref: '#/components/responses/Error'
-
-
   /v2/accounts/{account_id}/jettons:
     get:
       description: Get all Jettons balances by owner address
-      operationId: getJettonsBalances
+      operationId: getAccountJettonsBalances
       tags:
         - Accounts
       parameters:
-        - $ref: '#/components/parameters/accountIdParameter'
+        - $ref: '#/components/parameters/accountIDParameter'
       responses:
         '200':
-          description: jetton balances
+          description: account jettons balances
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/JettonsBalances'
         'default':
           $ref: '#/components/responses/Error'
-  
-  
   /v2/accounts/{account_id}/jettons/history:
     get:
-      description: "Get the transfer jettons history for account_id"
-      operationId: getJettonsHistory
+      description: Get the transfer jettons history for account
+      operationId: getAccountJettonsHistory
       tags:
         - Accounts
       parameters:
-        - $ref: '#/components/parameters/accountIdParameter'
+        - $ref: '#/components/parameters/accountIDParameter'
         - $ref: '#/components/parameters/i18n'
         - name: before_lt
           in: query
@@ -420,23 +405,22 @@ paths:
             example: 1668436763
       responses:
         '200':
-          description: jetton history
+          description: account jettons history
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/AccountEvents'
         'default':
           $ref: '#/components/responses/Error'
-
   /v2/accounts/{account_id}/jettons/{jetton_id}/history:
     get:
-      description: "Get the transfer jetton history for account_id and jetton_id"
-      operationId: getJettonsHistoryByID
+      description: Get the transfer jetton history for account and jetton
+      operationId: getAccountJettonHistoryByID
       tags:
         - Accounts
       parameters:
-        - $ref: '#/components/parameters/accountIdParameter'
-        - $ref: '#/components/parameters/jettonIdParameter'
+        - $ref: '#/components/parameters/accountIDParameter'
+        - $ref: '#/components/parameters/jettonIDParameter'
         - $ref: '#/components/parameters/i18n'
         - name: before_lt
           in: query
@@ -469,26 +453,24 @@ paths:
             example: 1668436763
       responses:
         '200':
-          description: jetton history
+          description: account jetton history
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/AccountEvents'
         'default':
           $ref: '#/components/responses/Error'
-
-
   /v2/accounts/{account_id}/nfts:
     get:
       description: Get all NFT items by owner address
-      operationId: getNftItemsByOwner
+      operationId: getAccountNftItems
       tags:
         - Accounts
       parameters:
-        - $ref: '#/components/parameters/accountIdParameter'
+        - $ref: '#/components/parameters/accountIDParameter'
         - $ref: '#/components/parameters/collectionQuery'
-        - $ref: '#/components/parameters/limit'
-        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/limitQuery'
+        - $ref: '#/components/parameters/offsetQuery'
         - in: query
           name: indirect_ownership
           required: false
@@ -498,27 +480,25 @@ paths:
             default: false
       responses:
         '200':
-          description: "nft items"
+          description: account nft items
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/NftItems'
         'default':
           $ref: '#/components/responses/Error'
-
-
   /v2/accounts/{account_id}/events:
     get:
       description: Get events for an account. Each event is built on top of a trace which is a series of transactions caused by one inbound message. TonAPI looks for known patterns inside the trace and splits the trace into actions, where a single action represents a meaningful high-level operation like a Jetton Transfer or an NFT Purchase. Actions are expected to be shown to users. It is advised not to build any logic on top of actions because actions can be changed at any time.
-      operationId: getEventsByAccount
+      operationId: getAccountEvents
       tags:
         - Accounts
       parameters:
-        - $ref: '#/components/parameters/accountIdParameter'
+        - $ref: '#/components/parameters/accountIDParameter'
         - $ref: '#/components/parameters/i18n'
         - name: subject_only
           in: query
-          description: "filter actions where requested account is not real subject (for example sender or reciver jettons)"
+          description: "filter actions where requested account is not real subject (for example sender or receiver jettons)"
           schema:
             type: boolean
             default: false
@@ -554,23 +534,21 @@ paths:
             example: 1668436763
       responses:
         '200':
-          description: "events"
+          description: account's events
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/AccountEvents'
         'default':
           $ref: '#/components/responses/Error'
-
-
-  /v2/accounts/{account_id}/traces:
+  /v2/accounts/{account_id}/traces: # not implemented in tonapi v2
     get:
       description: Get traces for account
-      operationId: getTracesByAccount
+      operationId: getAccountTraces
       tags:
         - Accounts
       parameters:
-        - $ref: '#/components/parameters/accountIdParameter'
+        - $ref: '#/components/parameters/accountIDParameter'
         - name: limit
           in: query
           schema:
@@ -581,51 +559,47 @@ paths:
             example: 100
       responses:
         '200':
-          description: "traces"
+          description: account's traces
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/TraceIds'
+                $ref: '#/components/schemas/TraceIDs'
         'default':
           $ref: '#/components/responses/Error'
-
-
   /v2/accounts/{account_id}/subscriptions:
     get:
       description: Get all subscriptions by wallet address
-      operationId: getSubscriptionsByAccount
+      operationId: getAccountSubscriptions
       tags:
         - Accounts
       parameters:
-        - $ref: '#/components/parameters/accountIdParameter'
+        - $ref: '#/components/parameters/accountIDParameter'
       responses:
         '200':
-          description: "subscriptions"
+          description: account's subscriptions
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Subscriptions'
         'default':
           $ref: '#/components/responses/Error'
-
-
   /v2/accounts/{account_id}/reindex:
     post:
-      description: "Update internal cache for a particular account"
+      description: Update internal cache for a particular account
       operationId: reindexAccount
       tags:
         - Accounts
       parameters:
-        - $ref: '#/components/parameters/accountIdParameter'
+        - $ref: '#/components/parameters/accountIDParameter'
       responses:
         '200':
-          description: "success"
+          description: success
         'default':
           $ref: '#/components/responses/Error'
   /v2/accounts/search:
     get:
-      description: "Search for accounts by name. You can find the account by the first characters of the domain."
-      operationId: getSearchAccounts
+      description: Search by account domain name
+      operationId: searchAccounts
       tags:
         - Accounts
       parameters:
@@ -638,46 +612,42 @@ paths:
             maxLength: 15
       responses:
         '200':
-          description: "found accounts"
+          description: found accounts
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/FoundAccounts'
         'default':
           $ref: '#/components/responses/Error'
-  
-  
   /v2/accounts/{account_id}/dns/expiring:
     get:
-      description: "Get expiring .ton dns"
-      operationId: getDnsExpiring
+      description: Get expiring account .ton dns
+      operationId: getAccountDnsExpiring
       tags:
         - Accounts
       parameters:
-        - $ref: '#/components/parameters/accountIdParameter'
+        - $ref: '#/components/parameters/accountIDParameter'
         - $ref: '#/components/parameters/periodQuery'
       responses:
         '200':
-          description: "expiring .ton dns"
+          description: account's expiring .ton dns
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/DnsExpiring'
         'default':
           $ref: '#/components/responses/Error'
-  
-  
   /v2/accounts/{account_id}/publickey:
     get:
-      description: "Get public key by account id"
-      operationId: getPublicKeyByAccountID
+      description: Get public key by account id
+      operationId: getAccountPublicKey
       tags:
         - Accounts
       parameters:
-        - $ref: '#/components/parameters/accountIdParameter'
+        - $ref: '#/components/parameters/accountIDParameter'
       responses:
         '200':
-          description: "public key"
+          description: account's public key
           content:
             application/json:
               schema:
@@ -690,24 +660,24 @@ paths:
                     example: "NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2ODQ3..."
         'default':
           $ref: '#/components/responses/Error'
-  /v2/dns/{domain_name}:
+  
+  /v2/dns/{domain_name}: # not implemented in tonapi v2
     get:
-      description: get full information about domain name
-      operationId: dnsInfo
+      description: Get full information about domain name
+      operationId: getDnsInfo
       tags:
         - DNS
       parameters:
         - $ref: '#/components/parameters/domainNameParameter'
       responses:
         '200':
-          description: "domain info"
+          description: domain info
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/DomainInfo'
         'default':
           $ref: '#/components/responses/Error'
-
   /v2/dns/{domain_name}/resolve:
     get:
       description: DNS resolve for domain name
@@ -718,15 +688,13 @@ paths:
         - $ref: '#/components/parameters/domainNameParameter'
       responses:
         '200':
-          description: "dns record"
+          description: dns record
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/DnsRecord'
         'default':
           $ref: '#/components/responses/Error'
-
-
   /v2/dns/{domain_name}/bids:
     get:
       description: Get domain bids
@@ -737,15 +705,13 @@ paths:
         - $ref: '#/components/parameters/domainNameParameter'
       responses:
         '200':
-          description: "domain bids"
+          description: domain bids
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/DomainBids'
         'default':
           $ref: '#/components/responses/Error'
-
-
   /v2/dns/auctions:
     get:
       description: Get all auctions
@@ -753,10 +719,10 @@ paths:
       tags:
         - DNS
       parameters:
-        - $ref: '#/components/parameters/domainFilterParameter'
+        - $ref: '#/components/parameters/domainFilterQuery'
       responses:
         '200':
-          description: "auctions"
+          description: auctions
           content:
             application/json:
               schema:
@@ -788,14 +754,13 @@ paths:
             example: 10
       responses:
         '200':
-          description: "nft collections"
+          description: nft collections
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/NftCollections'
         'default':
           $ref: '#/components/responses/Error'
-
   /v2/nfts/collections/{account_id}:
     get:
       description: Get NFT collection by collection address
@@ -803,18 +768,16 @@ paths:
       tags:
         - NFT
       parameters:
-        - $ref: '#/components/parameters/accountIdParameter'
+        - $ref: '#/components/parameters/accountIDParameter'
       responses:
         '200':
-          description: "nft collection"
+          description: nft collection
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/NftCollection'
         'default':
           $ref: '#/components/responses/Error'
-
-
   /v2/nfts/collections/{account_id}/items:
     get:
       description: Get NFT items from collection by collection address
@@ -822,20 +785,18 @@ paths:
       tags:
         - NFT
       parameters:
-        - $ref: '#/components/parameters/accountIdParameter'
-        - $ref: '#/components/parameters/limit'
-        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/accountIDParameter'
+        - $ref: '#/components/parameters/limitQuery'
+        - $ref: '#/components/parameters/offsetQuery'
       responses:
         '200':
-          description: "nft collection"
+          description: nft items
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/NftItems'
         'default':
           $ref: '#/components/responses/Error'
-
-
   /v2/nfts/_bulk:
     post:
       description: Get NFT items by their addresses
@@ -843,18 +804,16 @@ paths:
       tags:
         - NFT
       requestBody:
-        $ref: "#/components/requestBodies/AccountIds"
+        $ref: "#/components/requestBodies/AccountIDs"
       responses:
         '200':
-          description: "nft items"
+          description: nft items
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/NftItems'
         'default':
           $ref: '#/components/responses/Error'
-
-
   /v2/nfts/{account_id}:
     get:
       description: Get NFT item by its address
@@ -862,17 +821,16 @@ paths:
       tags:
         - NFT
       parameters:
-        - $ref: '#/components/parameters/accountIdParameter'
+        - $ref: '#/components/parameters/accountIDParameter'
       responses:
         '200':
-          description: "nft item"
+          description: nft item
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/NftItem'
         'default':
           $ref: '#/components/responses/Error'
-
 
   /v2/traces/{trace_id}:
     get:
@@ -881,17 +839,16 @@ paths:
       tags:
         - Traces
       parameters:
-        - $ref: '#/components/parameters/traceIdParameter'
+        - $ref: '#/components/parameters/traceIDParameter'
       responses:
         '200':
-          description: "trace"
+          description: trace
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Trace'
         'default':
           $ref: '#/components/responses/Error'
-
 
   /v2/events/{event_id}:
     get:
@@ -900,18 +857,17 @@ paths:
       tags:
         - Events
       parameters:
-        - $ref: '#/components/parameters/eventIdParameter'
+        - $ref: '#/components/parameters/eventIDParameter'
         - $ref: '#/components/parameters/i18n'
       responses:
         '200':
-          description: "event"
+          description: event
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Event'
         'default':
           $ref: '#/components/responses/Error'
-
 
   /v2/jettons:
     get:
@@ -937,14 +893,13 @@ paths:
             example: 10
       responses:
         '200':
-          description: "a list of jettons"
+          description: a list of jettons
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Jettons'
         'default':
           $ref: '#/components/responses/Error'
-
   /v2/jettons/{account_id}:
     get:
       description: Get jetton metadata by jetton master address
@@ -952,10 +907,10 @@ paths:
       tags:
         - Jettons
       parameters:
-        - $ref: '#/components/parameters/accountIdParameter'
+        - $ref: '#/components/parameters/accountIDParameter'
       responses:
         '200':
-          description: "jetton info"
+          description: jetton info
           content:
             application/json:
               schema:
@@ -963,37 +918,35 @@ paths:
         'default':
           $ref: '#/components/responses/Error'
 
-
   /v2/staking/nominator/{account_id}/pools:
     get:
       description: All pools where account participates
-      operationId: "poolsByNominators"
+      operationId: getAccountNominatorsPools
       tags:
         - Staking
       parameters:
-        - $ref: '#/components/parameters/accountIdParameter'
+        - $ref: '#/components/parameters/accountIDParameter'
       responses:
         '200':
-          description: "user pools"
+          description: account's pools
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/AccountStaking'
         'default':
           $ref: '#/components/responses/Error'
-
   /v2/staking/pool/{account_id}:
     get:
-      description: Pool info
-      operationId: stakingPoolInfo
+      description: Stacking pool info
+      operationId: getStakingPoolInfo
       tags:
         - Staking
       parameters:
-        - $ref: '#/components/parameters/accountIdParameter'
+        - $ref: '#/components/parameters/accountIDParameter'
         - $ref: '#/components/parameters/i18n'
       responses:
         '200':
-          description: "user pools"
+          description: stacking pool info
           content:
             application/json:
               schema:
@@ -1008,18 +961,17 @@ paths:
                     $ref: '#/components/schemas/PoolInfo'
         'default':
           $ref: '#/components/responses/Error'
-
   /v2/staking/pool/{account_id}/history:
     get:
-      description: Pool info
-      operationId: stakingPoolHistory
+      description: Pool history
+      operationId: getStakingPoolHistory
       tags:
         - Staking
       parameters:
-        - $ref: '#/components/parameters/accountIdParameter'
+        - $ref: '#/components/parameters/accountIDParameter'
       responses:
         '200':
-          description: "history"
+          description: pool history
           content:
             application/json:
               schema:
@@ -1031,14 +983,12 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/ApyHistory'
-
         'default':
           $ref: '#/components/responses/Error'
-
   /v2/staking/pools:
     get:
       description: All pools available in network
-      operationId: stakingPools
+      operationId: getStakingPools
       tags:
         - Staking
       parameters:
@@ -1059,7 +1009,7 @@ paths:
         - $ref: '#/components/parameters/i18n'
       responses:
         '200':
-          description: "list of pools"
+          description: a list of pools
           content:
             application/json:
               schema:
@@ -1087,7 +1037,7 @@ paths:
         - Storage
       responses:
         '200':
-          description: "list of storage providers"
+          description: a list of storage providers
           content:
             application/json:
               schema:
@@ -1101,6 +1051,7 @@ paths:
                       $ref: '#/components/schemas/StorageProvider'
         'default':
           $ref: '#/components/responses/Error'
+  
   /v2/rates:
     get:
       description: Get the token price to the currency
@@ -1124,7 +1075,7 @@ paths:
             example: ton,usd,rub
       responses:
         '200':
-          description: "ton price"
+          description: tokens rates
           content:
             application/json:
               schema:
@@ -1158,7 +1109,7 @@ paths:
             example: usd
       responses:
         '200':
-          description: "chart"
+          description: token chart
           content:
             application/json:
               schema:
@@ -1171,6 +1122,7 @@ paths:
                     example: { }
         'default':
           $ref: '#/components/responses/Error'
+  
   /v2/tonconnect/payload:
     get:
       description: Get a payload for further token receipt
@@ -1179,7 +1131,7 @@ paths:
         - Connect
       responses:
         '200':
-          description: "payload"
+          description: payload
           content:
             application/json:
               schema:
@@ -1194,7 +1146,7 @@ paths:
           $ref: '#/components/responses/Error'
   /v2/tonconnect/stateinit:
     post:
-      description: "Get account info by state init"
+      description: Get account info by state init
       operationId: getAccountInfoByStateInit
       tags:
         - Connect
@@ -1202,13 +1154,14 @@ paths:
         $ref: "#/components/requestBodies/TonConnectStateInit"
       responses:
         '200':
-          description: "account info"
+          description: account info
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/AccountInfoByStateInit'
         'default':
           $ref: '#/components/responses/Error'
+  
   /v2/wallet/backup:
     get:
       description: Get backup info
@@ -1223,7 +1176,7 @@ paths:
           required: true
       responses:
         '200':
-          description: "backup"
+          description: get wallet dump
           content:
             application/json:
               schema:
@@ -1250,7 +1203,7 @@ paths:
         $ref: "#/components/requestBodies/Backup"
       responses:
         '200':
-          description: "success"
+          description: success
         'default':
           $ref: '#/components/responses/Error'
   /v2/wallet/auth/proof:
@@ -1263,7 +1216,7 @@ paths:
         $ref: "#/components/requestBodies/TonConnectProof"
       responses:
         '200':
-          description: "token"
+          description: auth token
           content:
             application/json:
               schema:
@@ -1278,10 +1231,10 @@ paths:
           $ref: '#/components/responses/Error'
   /v2/pubkeys/{public_key}/wallets:
     get:
-      description: "Get wallets by public key"
+      description: Get wallets by public key
       operationId: getWalletsByPublicKey
       tags:
-        - Wallets
+        - Wallet
       parameters:
         - $ref: '#/components/parameters/publicKeyParameter'
       responses:
@@ -1295,12 +1248,12 @@ paths:
           $ref: '#/components/responses/Error'
   /v2/wallet/{account_id}/seqno:
     get:
-      description: "Get account seqno"
+      description: Get account seqno
       operationId: getAccountSeqno
       tags:
-        - Wallets
+        - Wallet
       parameters:
-        - $ref: '#/components/parameters/accountIdParameter'
+        - $ref: '#/components/parameters/accountIDParameter'
       responses:
         '200':
           description: account seqno
@@ -1313,13 +1266,13 @@ paths:
 
   /v2/liteserver/get_masterchain_info:
     get:
-      description: "Get masterchain info"
-      operationId: getMasterchainInfoLiteServer
+      description: Get raw masterchain info
+      operationId: getRawMasterchainInfo
       tags:
         - Lite Server
       responses:
         '200':
-          description: "masterchain info"
+          description: raw masterchain info
           content:
             application/json:
               schema:
@@ -1340,15 +1293,15 @@ paths:
           $ref: '#/components/responses/Error'
   /v2/liteserver/get_masterchain_info_ext:
     get:
-      description: "Get masterchain info ext"
-      operationId: getMasterchainInfoExtLiteServer
+      description: Get raw masterchain info ext
+      operationId: getRawMasterchainInfoExt
       tags:
         - Lite Server
       parameters:
         - $ref: '#/components/parameters/modeQuery'
       responses:
         '200':
-          description: "masterchain info ext"
+          description: raw masterchain info ext
           content:
             application/json:
               schema:
@@ -1394,13 +1347,13 @@ paths:
           $ref: '#/components/responses/Error'
   /v2/liteserver/get_time:
     get:
-      description: "Get time"
-      operationId: getTimeLiteServer
+      description: Get raw time
+      operationId: getRawTime
       tags:
         - Lite Server
       responses:
         '200':
-          description: "time"
+          description: raw time
           content:
             application/json:
               schema:
@@ -1416,15 +1369,15 @@ paths:
           $ref: '#/components/responses/Error'
   /v2/liteserver/get_block/{block_id}:
     get:
-      description: "Get block"
-      operationId: getBlockLiteServer
+      description: Get raw blockchain block
+      operationId: getRawBlockchainBlock
       tags:
         - Lite Server
       parameters:
-        - $ref: '#/components/parameters/blockIdExtParameter'
+        - $ref: '#/components/parameters/blockchainBlockIDExtParameter'
       responses:
         '200':
-          description: "block"
+          description: raw blockchain block
           content:
             application/json:
               schema:
@@ -1442,15 +1395,15 @@ paths:
           $ref: '#/components/responses/Error'
   /v2/liteserver/get_state/{block_id}:
     get:
-      description: "Get block state"
-      operationId: getStateLiteServer
+      description: Get raw blockchain block state
+      operationId: getRawBlockchainBlockState
       tags:
         - Lite Server
       parameters:
-        - $ref: '#/components/parameters/blockIdExtParameter'
+        - $ref: '#/components/parameters/blockchainBlockIDExtParameter'
       responses:
         '200':
-          description: "state"
+          description: raw blockchain block state
           content:
             application/json:
               schema:
@@ -1476,16 +1429,16 @@ paths:
           $ref: '#/components/responses/Error'
   /v2/liteserver/get_block_header/{block_id}:
     get:
-      description: "Get block header"
-      operationId: getBlockHeaderLiteServer
+      description: Get raw blockchain block header
+      operationId: getRawBlockchainBlockHeader
       tags:
         - Lite Server
       parameters:
-        - $ref: '#/components/parameters/blockIdExtParameter'
+        - $ref: '#/components/parameters/blockchainBlockIDExtParameter'
         - $ref: '#/components/parameters/modeQuery'
       responses:
         '200':
-          description: "block header"
+          description: raw blockchain block header
           content:
             application/json:
               schema:
@@ -1508,15 +1461,15 @@ paths:
           $ref: '#/components/responses/Error'
   /v2/liteserver/send_message:
     post:
-      description: "Send message"
-      operationId: sendMessageLiteServer
+      description: Send raw message to blockchain
+      operationId: sendRawMessage
       tags:
         - Lite Server
       requestBody:
         $ref: "#/components/requestBodies/LiteServerSendMessageRequest"
       responses:
         '200':
-          description: "code"
+          description: code
           content:
             application/json:
               schema:
@@ -1532,15 +1485,15 @@ paths:
           $ref: '#/components/responses/Error'
   /v2/liteserver/get_account_state/{account_id}:
     get:
-      description: "Get account state"
-      operationId: getAccountStateLiteServer
+      description: Get raw account state
+      operationId: getRawAccountState
       tags:
         - Lite Server
       parameters:
-        - $ref: '#/components/parameters/accountIdParameter'
+        - $ref: '#/components/parameters/accountIDParameter'
       responses:
         '200':
-          description: "account state"
+          description: raw account state
           content:
             application/json:
               schema:
@@ -1569,18 +1522,18 @@ paths:
           $ref: '#/components/responses/Error'
   /v2/liteserver/get_shard_info/{block_id}:
     get:
-      description: "Get shard info"
-      operationId: getShardInfoLiteServer
+      description: Get raw shard info
+      operationId: getRawShardInfo
       tags:
         - Lite Server
       parameters:
-        - $ref: '#/components/parameters/blockIdExtParameter'
+        - $ref: '#/components/parameters/blockchainBlockIDExtParameter'
         - $ref: '#/components/parameters/workchainQuery'
         - $ref: '#/components/parameters/shardQuery'
         - $ref: '#/components/parameters/exactQuery'
       responses:
         '200':
-          description: "shard info"
+          description: raw shard info
           content:
             application/json:
               schema:
@@ -1605,15 +1558,15 @@ paths:
           $ref: '#/components/responses/Error'
   /v2/liteserver/get_all_shards_info/{block_id}:
     get:
-      description: "Get all shards info"
-      operationId: getAllShardsInfoLiteServer
+      description: Get all raw shards info
+      operationId: getAllRawShardsInfo
       tags:
         - Lite Server
       parameters:
-        - $ref: '#/components/parameters/blockIdExtParameter'
+        - $ref: '#/components/parameters/blockchainBlockIDExtParameter'
       responses:
         '200':
-          description: "shards info"
+          description: all raw shards info
           content:
             application/json:
               schema:
@@ -1635,18 +1588,18 @@ paths:
           $ref: '#/components/responses/Error'
   /v2/liteserver/get_transactions/{account_id}:
     get:
-      description: "Get transactions"
-      operationId: getTransactionsLiteServer
+      description: Get raw transactions
+      operationId: getRawTransactions
       tags:
         - Lite Server
       parameters:
-        - $ref: '#/components/parameters/accountIdParameter'
+        - $ref: '#/components/parameters/accountIDParameter'
         - $ref: '#/components/parameters/countQuery'
         - $ref: '#/components/parameters/ltMustQuery'
         - $ref: '#/components/parameters/hashQuery'
       responses:
         '200':
-          description: "transactions"
+          description: raw transactions
           content:
             application/json:
               schema:
@@ -1666,19 +1619,19 @@ paths:
           $ref: '#/components/responses/Error'
   /v2/liteserver/list_block_transactions/{block_id}:
     get:
-      description: "Get list block transactions"
-      operationId: getListBlockTransactionsLiteServer
+      description: Get raw list block transactions
+      operationId: getRawListBlockTransactions
       tags:
         - Lite Server
       parameters:
-        - $ref: '#/components/parameters/blockIdExtParameter'
+        - $ref: '#/components/parameters/blockchainBlockIDExtParameter'
         - $ref: '#/components/parameters/modeQuery'
         - $ref: '#/components/parameters/countQuery'
-        - $ref: '#/components/parameters/accountIdQuery'
+        - $ref: '#/components/parameters/accountIDQuery'
         - $ref: '#/components/parameters/ltQuery'
       responses:
         '200':
-          description: "list block transactions"
+          description: a list of raw block transactions
           content:
             application/json:
               schema:
@@ -1726,17 +1679,17 @@ paths:
           $ref: '#/components/responses/Error'
   /v2/liteserver/get_block_proof:
     get:
-      description: "Get block proof"
-      operationId: getBlockProofLiteServer
+      description: Get raw block proof
+      operationId: getRawBlockProof
       tags:
         - Lite Server
       parameters:
-        - $ref: '#/components/parameters/knownBlockIdExtQuery'
-        - $ref: '#/components/parameters/targetBlockIdExtQuery'
+        - $ref: '#/components/parameters/knownBlockIDExtQuery'
+        - $ref: '#/components/parameters/targetBlockIDExtQuery'
         - $ref: '#/components/parameters/modeQuery'
       responses:
         '200':
-          description: "proof"
+          description: raw block proof
           content:
             application/json:
               schema:
@@ -1842,16 +1795,16 @@ paths:
           $ref: '#/components/responses/Error'
   /v2/liteserver/get_config_all/{block_id}:
     get:
-      description: "Get config all"
-      operationId: getConfigAllLiteServer
+      description: Get raw config
+      operationId: getRawConfig
       tags:
         - Lite Server
       parameters:
-        - $ref: '#/components/parameters/blockIdExtParameter'
+        - $ref: '#/components/parameters/blockchainBlockIDExtParameter'
         - $ref: '#/components/parameters/modeQuery'
       responses:
         '200':
-          description: "config"
+          description: raw config
           content:
             application/json:
               schema:
@@ -1878,15 +1831,15 @@ paths:
           $ref: '#/components/responses/Error'
   /v2/liteserver/get_shard_block_proof/{block_id}:
     get:
-      description: "Get shard block proof"
-      operationId: getShardBlockProofLiteServer
+      description: Get raw shard block proof
+      operationId: getRawShardBlockProof
       tags:
         - Lite Server
       parameters:
-        - $ref: '#/components/parameters/blockIdExtParameter'
+        - $ref: '#/components/parameters/blockchainBlockIDExtParameter'
       responses:
         '200':
-          description: "shard"
+          description: raw shard block proof
           content:
             application/json:
               schema:
@@ -1914,7 +1867,7 @@ paths:
           $ref: '#/components/responses/Error'
 components:
   parameters:
-    blockIdParameter:
+    blockchainBlockIDParameter:
       in: path
       name: block_id
       required: true
@@ -1922,7 +1875,7 @@ components:
       schema:
         type: string
         example: (-1,8000000000000000,4234234)
-    blockIdExtParameter:
+    blockchainBlockIDExtParameter:
       in: path
       name: block_id
       required: true
@@ -1930,7 +1883,7 @@ components:
       schema:
         type: string
         example: (-1,8000000000000000,4234234,3E575DAB1D25...90D8,47192E5C46C...BB29)
-    transactionIdParameter:
+    transactionIDParameter:
       in: path
       name: transaction_id
       required: true
@@ -1938,7 +1891,7 @@ components:
       schema:
         type: string
         example: 97264395BD65A255A429B11326C84128B7D70FFED7949ABAE3036D506BA38621
-    messageIdParameter:
+    messageIDParameter:
       in: path
       name: msg_id
       required: true
@@ -1946,7 +1899,7 @@ components:
       schema:
         type: string
         example: 97264395BD65A255A429B11326C84128B7D70FFED7949ABAE3036D506BA38621
-    accountIdParameter:
+    accountIDParameter:
       in: path
       name: account_id
       required: true
@@ -1954,7 +1907,7 @@ components:
       schema:
         type: string
         example: 0:97264395BD65A255A429B11326C84128B7D70FFED7949ABAE3036D506BA38621
-    accountIdParameters:
+    accountIDParameters:
       in: path
       name: account_ids
       required: true
@@ -1965,7 +1918,7 @@ components:
         items:
           type: string
           example: 0:97264395BD65A255A429B11326C84128B7D70FFED7949ABAE3036D506BA38621
-    jettonIdParameter:
+    jettonIDParameter:
       in: path
       name: jetton_id
       required: true
@@ -1989,15 +1942,7 @@ components:
       schema:
         type: string
         example: wallet.ton
-    domainFilterParameter:
-      in: query
-      name: tld
-      required: false
-      description: domain filter for current auctions "ton" or "t.me"
-      schema:
-        type: string
-        example: ton
-    traceIdParameter:
+    traceIDParameter:
       in: path
       name: trace_id
       required: true
@@ -2005,7 +1950,7 @@ components:
       schema:
         type: string
         example: 97264395BD65A255A429B11326C84128B7D70FFED7949ABAE3036D506BA38621
-    eventIdParameter:
+    eventIDParameter:
       in: path
       name: event_id
       required: true
@@ -2028,7 +1973,7 @@ components:
         type: string
         example: "ru-RU,ru;q=0.5"
         default: "en"
-    limit:
+    limitQuery:
       in: query
       name: limit
       required: false
@@ -2036,13 +1981,21 @@ components:
         type: integer
         default: 1000
         maximum: 1000
-    offset:
+    offsetQuery:
       in: query
       name: offset
       required: false
       schema:
         type: integer
         default: 0
+    domainFilterQuery:
+      in: query
+      name: tld
+      required: false
+      description: domain filter for current auctions "ton" or "t.me"
+      schema:
+        type: string
+        example: ton
     periodQuery:
       in: query
       name: period
@@ -2078,7 +2031,7 @@ components:
         type: integer
         format: uint32
         example: 100
-    knownBlockIdExtQuery:
+    knownBlockIDExtQuery:
       in: query
       name: known_block
       required: true
@@ -2086,7 +2039,7 @@ components:
       schema:
         type: string
         example: (-1,8000000000000000,4234234,3E575DAB1D25...90D8,47192E5C46C...BB29)
-    targetBlockIdExtQuery:
+    targetBlockIDExtQuery:
       in: query
       name: target_block
       required: false
@@ -2145,7 +2098,7 @@ components:
       schema:
         type: boolean
         example: false
-    accountIdQuery:
+    accountIDQuery:
       in: query
       name: account_id
       required: false
@@ -2162,8 +2115,8 @@ components:
         application/json:
           schema:
             type: object
-    SendBoc:
-      description: bag-of-cells serialized to base64
+    BatchBoc:
+      description: both a single boc and a batch of boc serialized in base64 are accepted
       required: true
       content:
         application/json:
@@ -2192,7 +2145,7 @@ components:
               boc:
                 type: string
                 example: te6ccgECBQEAARUAAkWIAWTtae+KgtbrX26Bep8JSq8lFLfGOoyGR/xwdjfvpvEaHg
-    AccountIds:
+    AccountIDs:
       description: a list of account ids
       content:
         application/json:
@@ -2291,7 +2244,6 @@ components:
         error:
           type: string
           example: error description
-
     AccountAddress:
       type: object
       required:
@@ -2312,8 +2264,7 @@ components:
         icon:
           type: string
           example: https://ton.org/logo.png
-
-    Block:
+    BlockchainBlock:
       type: object
       required:
         - workchain_id
@@ -2342,7 +2293,6 @@ components:
         - out_msg_descr_length
         - rand_seed
         - created_by
-
       properties:
         workchain_id:
           type: integer
@@ -2445,7 +2395,6 @@ components:
         created_by:
           type: string
           example: A6A0BD6608672B11B79538A50B2204E748305C12AA0DED9C16CF0006CE3AF8DB
-
     AccountStatus:
       type: string
       example: active
@@ -2454,7 +2403,6 @@ components:
         - uninit
         - active
         - frozen
-
     StateInit:
       type: object
       required:
@@ -2463,7 +2411,6 @@ components:
         boc:
           type: string
           example: te6ccgEBBgEARAABFP8A9KQT9LzyyAsBAgEgAgMCAUgEBQAE8jAAONBsIdMfMO1E0NM/MAHAAZekyMs/ye1UkzDyBuIAEaE0MdqJoaZ+YQ==
-
     Message:
       type: object
       required:
@@ -2527,7 +2474,6 @@ components:
           type: string
           example: "nft_transfer"
         decoded_body: { } # Free-form JSON value
-
     TransactionType:
       type: string
       example: TransOrd
@@ -2539,7 +2485,6 @@ components:
         - TransMergePrepare
         - TransMergeInstall
         - TransStorage
-
     AccStatusChange:
       type: string
       example: acst_unchanged
@@ -2547,7 +2492,6 @@ components:
         - acst_unchanged
         - acst_frozen
         - acst_deleted
-
     ComputeSkipReason:
       type: string
       example: cskip_no_state
@@ -2555,7 +2499,6 @@ components:
         - cskip_no_state
         - cskip_bad_state
         - cskip_no_gas
-
     BouncePhaseType:
       type: string
       example: cskip_no_state
@@ -2563,7 +2506,6 @@ components:
         - TrPhaseBounceNegfunds
         - TrPhaseBounceNofunds
         - TrPhaseBounceOk
-
     ComputePhase:
       type: object
       required:
@@ -2593,7 +2535,6 @@ components:
           type: integer
           format: int32
           example: 0
-
     StoragePhase:
       type: object
       required:
@@ -2610,7 +2551,6 @@ components:
           example: 25713146000001
         status_change:
           $ref: '#/components/schemas/AccStatusChange'
-
     CreditPhase:
       type: object
       required:
@@ -2625,7 +2565,6 @@ components:
           type: integer
           format: int64
           example: 1000
-
     ActionPhase:
       type: object
       required:
@@ -2654,7 +2593,6 @@ components:
           type: integer
           format: int64
           example: 1000
-
     Transaction:
       type: object
       required:
@@ -2738,7 +2676,6 @@ components:
         destroyed:
           type: boolean
           example: true
-
     Transactions:
       type: object
       required:
@@ -2784,7 +2721,6 @@ components:
         address:
           type: string
           example: 0:55e8809519cd3c49098c9ee45afdafcea7a894a74d0f628d94a115a50e045122
-
     Validators:
       type: object
       required:
@@ -2794,7 +2730,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Validator'
-
     AccountStorageInfo:
       type: object
       required:
@@ -2824,7 +2759,7 @@ components:
           type: integer
           format: int64
           example: 567
-    RawAccount:
+    BlockchainRawAccount:
       type: object
       required:
         - address
@@ -2859,7 +2794,6 @@ components:
           example: active
         storage:
           $ref: '#/components/schemas/AccountStorageInfo'
-
     Account:
       type: object
       required:
@@ -2906,7 +2840,6 @@ components:
           items:
             type: string
           example: [ 'get_item_data' ]
-
     Accounts:
       type: object
       required:
@@ -2916,7 +2849,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Account'
-
     MethodExecutionResult:
       type: object
       required:
@@ -2964,7 +2896,7 @@ components:
           example: [ ]
           items:
             $ref: '#/components/schemas/TvmStackRecord'
-    Config:
+    BlockchainConfig:
       type: object
       required:
         - raw
@@ -3011,7 +2943,6 @@ components:
           items:
             type: string
             example: vasya.ton
-
     DomainBid:
       type: object
       required:
@@ -3038,7 +2969,6 @@ components:
           example: 55e8809519cd3c49098c9ee45afdafcea7a894a74d0f628d94a115a50e045122
         bidder:
           $ref: '#/components/schemas/AccountAddress'
-
     DomainBids:
       type: object
       required:
@@ -3048,14 +2978,12 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/DomainBid'
-
     JettonVerificationType:
       type: string
       enum:
         - whitelist
         - blacklist
         - none
-
     JettonPreview:
       type: object
       required:
@@ -3083,7 +3011,6 @@ components:
           example: https://cache.tonapi.io/images/jetton.jpg
         verification:
           $ref: '#/components/schemas/JettonVerificationType'
-
     JettonBalance:
       type: object
       required:
@@ -3098,7 +3025,6 @@ components:
           $ref: '#/components/schemas/AccountAddress'
         jetton:
           $ref: '#/components/schemas/JettonPreview'
-
     JettonsBalances:
       type: object
       required:
@@ -3108,7 +3034,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/JettonBalance'
-
     Price:
       type: object
       required:
@@ -3121,7 +3046,6 @@ components:
         token_name:
           type: string
           example: TON
-
     ImagePreview:
       type: object
       required:
@@ -3134,7 +3058,6 @@ components:
         url:
           type: string
           example: "https://site.com/pic1.jpg"
-
     Sale:
       type: object
       required:
@@ -3151,7 +3074,6 @@ components:
           $ref: '#/components/schemas/AccountAddress'
         price:
           $ref: '#/components/schemas/Price'
-
     NftItem:
       type: object
       required:
@@ -3219,7 +3141,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/NftItem'
-
     Refund:
       type: object
       required:
@@ -3267,7 +3188,6 @@ components:
                 type: integer
                 format: int64
                 example: 10
-
     Action:
       type: object
       required:
@@ -3324,7 +3244,6 @@ components:
           $ref: '#/components/schemas/SmartContractAction'
         simple_preview:
           $ref: '#/components/schemas/ActionSimplePreview'
-
     TonTransferAction:
       type: object
       required:
@@ -3348,7 +3267,6 @@ components:
           $ref: '#/components/schemas/EncryptedComment'
         refund:
           $ref: '#/components/schemas/Refund'
-
     SmartContractAction:
       type: object
       required:
@@ -3373,7 +3291,6 @@ components:
           type: string
         refund:
           $ref: '#/components/schemas/Refund'
-
     NftItemTransferAction:
       type: object
       required:
@@ -3397,7 +3314,6 @@ components:
           example: '0234de3e21d21b3ee21f3'
         refund:
           $ref: '#/components/schemas/Refund'
-
     JettonTransferAction:
       type: object
       required:
@@ -3429,7 +3345,6 @@ components:
           $ref: '#/components/schemas/Refund'
         jetton:
           $ref: '#/components/schemas/JettonPreview'
-
     ContractDeployAction:
       type: object
       required:
@@ -3444,7 +3359,6 @@ components:
           items:
             type: string
           example: [ "nft_item", "nft_royalty" ]
-
     SubscriptionAction:
       type: object
       required:
@@ -3468,7 +3382,6 @@ components:
         initial:
           type: boolean
           example: false
-
     UnSubscriptionAction:
       type: object
       required:
@@ -3483,7 +3396,6 @@ components:
           example: "0:da6b1b6663a0e4d18cc8574ccd9db5296e367dd9324706f3bbd9eb1cd2caf0bf"
         beneficiary:
           $ref: '#/components/schemas/AccountAddress'
-
     AuctionBidAction:
       type: object
       required:
@@ -3507,7 +3419,6 @@ components:
           $ref: '#/components/schemas/AccountAddress'
         auction:
           $ref: '#/components/schemas/AccountAddress'
-
     DepositStakeAction:
       type: object
       required:
@@ -3520,7 +3431,6 @@ components:
           example: 1660050553
         staker:
           $ref: '#/components/schemas/AccountAddress'
-
     RecoverStakeAction:
       type: object
       required:
@@ -3533,7 +3443,6 @@ components:
           example: 1660050553
         staker:
           $ref: '#/components/schemas/AccountAddress'
-
     JettonSwapAction:
       type: object
       required:
@@ -3572,7 +3481,6 @@ components:
           example: 0:dea8f638b789172ce36d10a20318125e52c649aa84893cd77858224fe2b9b0ee
         jetton_master_out:
           $ref: '#/components/schemas/JettonPreview'
-
     NftPurchaseAction:
       type: object
       required:
@@ -3596,7 +3504,6 @@ components:
           $ref: '#/components/schemas/AccountAddress'
         buyer:
           $ref: '#/components/schemas/AccountAddress'
-
     ActionSimplePreview:
       type: object
       description: shortly describes what this action is about.
@@ -3624,7 +3531,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/AccountAddress'
-
     AccountEvent:
       type: object
       description: An event is built on top of a trace which is a series of transactions caused by one inbound message. TonAPI looks for known patterns inside the trace and splits the trace into actions, where a single action represents a meaningful high-level operation like a Jetton Transfer or an NFT Purchase. Actions are expected to be shown to users. It is advised not to build any logic on top of actions because actions can be changed at any time.
@@ -3668,7 +3574,6 @@ components:
           type: integer
           format: int64
           example: 3
-
     AccountEvents:
       type: object
       required:
@@ -3683,8 +3588,7 @@ components:
           type: integer
           format: int64
           example: 25713146000001
-
-    TraceId:
+    TraceID:
       type: object
       required:
         - id
@@ -3697,8 +3601,7 @@ components:
           type: integer
           format: int64
           example: 1645544908
-
-    TraceIds:
+    TraceIDs:
       type: object
       required:
         - traces
@@ -3706,8 +3609,7 @@ components:
         traces:
           type: array
           items:
-            $ref: '#/components/schemas/TraceId'
-
+            $ref: '#/components/schemas/TraceID'
     ApyHistory:
       type: object
       required:
@@ -3718,7 +3620,6 @@ components:
           type: number
         time:
           type: integer
-
     Subscription:
       type: object
       required:
@@ -3775,7 +3676,6 @@ components:
           type: integer
           format: int32
           example: 0
-
     Subscriptions:
       type: object
       required:
@@ -3785,7 +3685,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Subscription'
-
     Auction:
       type: object
       required:
@@ -3813,7 +3712,6 @@ components:
           type: integer
           format: int64
           example: 1660050553
-
     Auctions:
       type: object
       required:
@@ -3828,7 +3726,6 @@ components:
           type: integer
           format: int64
           example: 1660050553
-
     WalletDNS:
       type: object
       required:
@@ -3886,7 +3783,6 @@ components:
           type: string
           description: "tonstorage bag id"
           example: "da6b1b6663a0e4d18cc8574ccd9db5296e367dd9324706f3bbd9eb1cd2caf0bf"
-
     NftCollection:
       type: object
       required:
@@ -3910,7 +3806,6 @@ components:
           type: object
           additionalProperties: true
           example: { }
-
     NftCollections:
       type: object
       required:
@@ -3920,7 +3815,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/NftCollection'
-
     Trace:
       type: object
       required:
@@ -3938,7 +3832,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Trace'
-
     MessageConsequences:
       type: object
       required:
@@ -3952,7 +3845,6 @@ components:
           $ref: '#/components/schemas/Risk'
         event:
           $ref: '#/components/schemas/AccountEvent'
-
     Risk:
       type: object
       description: Risk specifies assets that could be lost if a message would be sent to a malicious smart contract. It makes sense to understand the risk BEFORE sending a message to the blockchain.
@@ -3978,7 +3870,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/NftItem'
-
     JettonQuantity:
       type: object
       required:
@@ -3993,7 +3884,6 @@ components:
           $ref: '#/components/schemas/AccountAddress'
         jetton:
           $ref: '#/components/schemas/JettonPreview'
-
     Event:
       type: object
       required:
@@ -4033,7 +3923,6 @@ components:
           type: boolean
           example: false
           description: Event is not finished yet. Transactions still happening
-
     JettonMetadata:
       type: object
       required:
@@ -4251,7 +4140,6 @@ components:
           type: integer
           format: int64
           example: 10485760
-    
     FoundAccounts:
       type: object
       required:
@@ -4271,7 +4159,6 @@ components:
               name:
                 type: string
                 example: "blah_blah.ton"
-    
     DnsExpiring:
       type: object
       required:

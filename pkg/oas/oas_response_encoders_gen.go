@@ -11,20 +11,7 @@ import (
 	"go.opentelemetry.io/otel/trace"
 )
 
-func encodeDnsBackResolveResponse(response *DomainNames, w http.ResponseWriter, span trace.Span) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
-
-	e := jx.GetEncoder()
-	response.Encode(e)
-	if _, err := e.WriteTo(w); err != nil {
-		return errors.Wrap(err, "write")
-	}
-	return nil
-}
-
-func encodeDnsInfoResponse(response *DomainInfo, w http.ResponseWriter, span trace.Span) error {
+func encodeAccountDnsBackResolveResponse(response *DomainNames, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
@@ -89,7 +76,7 @@ func encodeEmulateMessageToTraceResponse(response *Trace, w http.ResponseWriter,
 	return nil
 }
 
-func encodeEmulateWalletMessageResponse(response *MessageConsequences, w http.ResponseWriter, span trace.Span) error {
+func encodeEmulateMessageToWalletResponse(response *MessageConsequences, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
@@ -102,7 +89,7 @@ func encodeEmulateWalletMessageResponse(response *MessageConsequences, w http.Re
 	return nil
 }
 
-func encodeExecGetMethodResponse(response *MethodExecutionResult, w http.ResponseWriter, span trace.Span) error {
+func encodeExecGetMethodForBlockchainAccountResponse(response *MethodExecutionResult, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
@@ -128,7 +115,111 @@ func encodeGetAccountResponse(response *Account, w http.ResponseWriter, span tra
 	return nil
 }
 
+func encodeGetAccountDnsExpiringResponse(response *DnsExpiring, w http.ResponseWriter, span trace.Span) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	span.SetStatus(codes.Ok, http.StatusText(200))
+
+	e := jx.GetEncoder()
+	response.Encode(e)
+	if _, err := e.WriteTo(w); err != nil {
+		return errors.Wrap(err, "write")
+	}
+	return nil
+}
+
+func encodeGetAccountEventsResponse(response *AccountEvents, w http.ResponseWriter, span trace.Span) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	span.SetStatus(codes.Ok, http.StatusText(200))
+
+	e := jx.GetEncoder()
+	response.Encode(e)
+	if _, err := e.WriteTo(w); err != nil {
+		return errors.Wrap(err, "write")
+	}
+	return nil
+}
+
 func encodeGetAccountInfoByStateInitResponse(response *AccountInfoByStateInit, w http.ResponseWriter, span trace.Span) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	span.SetStatus(codes.Ok, http.StatusText(200))
+
+	e := jx.GetEncoder()
+	response.Encode(e)
+	if _, err := e.WriteTo(w); err != nil {
+		return errors.Wrap(err, "write")
+	}
+	return nil
+}
+
+func encodeGetAccountJettonHistoryByIDResponse(response *AccountEvents, w http.ResponseWriter, span trace.Span) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	span.SetStatus(codes.Ok, http.StatusText(200))
+
+	e := jx.GetEncoder()
+	response.Encode(e)
+	if _, err := e.WriteTo(w); err != nil {
+		return errors.Wrap(err, "write")
+	}
+	return nil
+}
+
+func encodeGetAccountJettonsBalancesResponse(response *JettonsBalances, w http.ResponseWriter, span trace.Span) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	span.SetStatus(codes.Ok, http.StatusText(200))
+
+	e := jx.GetEncoder()
+	response.Encode(e)
+	if _, err := e.WriteTo(w); err != nil {
+		return errors.Wrap(err, "write")
+	}
+	return nil
+}
+
+func encodeGetAccountJettonsHistoryResponse(response *AccountEvents, w http.ResponseWriter, span trace.Span) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	span.SetStatus(codes.Ok, http.StatusText(200))
+
+	e := jx.GetEncoder()
+	response.Encode(e)
+	if _, err := e.WriteTo(w); err != nil {
+		return errors.Wrap(err, "write")
+	}
+	return nil
+}
+
+func encodeGetAccountNftItemsResponse(response *NftItems, w http.ResponseWriter, span trace.Span) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	span.SetStatus(codes.Ok, http.StatusText(200))
+
+	e := jx.GetEncoder()
+	response.Encode(e)
+	if _, err := e.WriteTo(w); err != nil {
+		return errors.Wrap(err, "write")
+	}
+	return nil
+}
+
+func encodeGetAccountNominatorsPoolsResponse(response *AccountStaking, w http.ResponseWriter, span trace.Span) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	span.SetStatus(codes.Ok, http.StatusText(200))
+
+	e := jx.GetEncoder()
+	response.Encode(e)
+	if _, err := e.WriteTo(w); err != nil {
+		return errors.Wrap(err, "write")
+	}
+	return nil
+}
+
+func encodeGetAccountPublicKeyResponse(response *GetAccountPublicKeyOK, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
@@ -154,7 +245,7 @@ func encodeGetAccountSeqnoResponse(response *Seqno, w http.ResponseWriter, span 
 	return nil
 }
 
-func encodeGetAccountStateLiteServerResponse(response *GetAccountStateLiteServerOK, w http.ResponseWriter, span trace.Span) error {
+func encodeGetAccountSubscriptionsResponse(response *Subscriptions, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
@@ -167,7 +258,7 @@ func encodeGetAccountStateLiteServerResponse(response *GetAccountStateLiteServer
 	return nil
 }
 
-func encodeGetAccountTransactionsResponse(response *Transactions, w http.ResponseWriter, span trace.Span) error {
+func encodeGetAccountTracesResponse(response *TraceIDs, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
@@ -206,7 +297,7 @@ func encodeGetAllAuctionsResponse(response *Auctions, w http.ResponseWriter, spa
 	return nil
 }
 
-func encodeGetAllShardsInfoLiteServerResponse(response *GetAllShardsInfoLiteServerOK, w http.ResponseWriter, span trace.Span) error {
+func encodeGetAllRawShardsInfoResponse(response *GetAllRawShardsInfoOK, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
@@ -219,7 +310,7 @@ func encodeGetAllShardsInfoLiteServerResponse(response *GetAllShardsInfoLiteServ
 	return nil
 }
 
-func encodeGetBlockResponse(response *Block, w http.ResponseWriter, span trace.Span) error {
+func encodeGetBlockchainAccountTransactionsResponse(response *Transactions, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
@@ -232,7 +323,7 @@ func encodeGetBlockResponse(response *Block, w http.ResponseWriter, span trace.S
 	return nil
 }
 
-func encodeGetBlockHeaderLiteServerResponse(response *GetBlockHeaderLiteServerOK, w http.ResponseWriter, span trace.Span) error {
+func encodeGetBlockchainBlockResponse(response *BlockchainBlock, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
@@ -245,7 +336,7 @@ func encodeGetBlockHeaderLiteServerResponse(response *GetBlockHeaderLiteServerOK
 	return nil
 }
 
-func encodeGetBlockLiteServerResponse(response *GetBlockLiteServerOK, w http.ResponseWriter, span trace.Span) error {
+func encodeGetBlockchainBlockTransactionsResponse(response *Transactions, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
@@ -258,7 +349,7 @@ func encodeGetBlockLiteServerResponse(response *GetBlockLiteServerOK, w http.Res
 	return nil
 }
 
-func encodeGetBlockProofLiteServerResponse(response *GetBlockProofLiteServerOK, w http.ResponseWriter, span trace.Span) error {
+func encodeGetBlockchainConfigResponse(response *BlockchainConfig, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
@@ -271,7 +362,59 @@ func encodeGetBlockProofLiteServerResponse(response *GetBlockProofLiteServerOK, 
 	return nil
 }
 
-func encodeGetBlockTransactionsResponse(response *Transactions, w http.ResponseWriter, span trace.Span) error {
+func encodeGetBlockchainMasterchainHeadResponse(response *BlockchainBlock, w http.ResponseWriter, span trace.Span) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	span.SetStatus(codes.Ok, http.StatusText(200))
+
+	e := jx.GetEncoder()
+	response.Encode(e)
+	if _, err := e.WriteTo(w); err != nil {
+		return errors.Wrap(err, "write")
+	}
+	return nil
+}
+
+func encodeGetBlockchainRawAccountResponse(response *BlockchainRawAccount, w http.ResponseWriter, span trace.Span) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	span.SetStatus(codes.Ok, http.StatusText(200))
+
+	e := jx.GetEncoder()
+	response.Encode(e)
+	if _, err := e.WriteTo(w); err != nil {
+		return errors.Wrap(err, "write")
+	}
+	return nil
+}
+
+func encodeGetBlockchainTransactionResponse(response *Transaction, w http.ResponseWriter, span trace.Span) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	span.SetStatus(codes.Ok, http.StatusText(200))
+
+	e := jx.GetEncoder()
+	response.Encode(e)
+	if _, err := e.WriteTo(w); err != nil {
+		return errors.Wrap(err, "write")
+	}
+	return nil
+}
+
+func encodeGetBlockchainTransactionByMessageHashResponse(response *Transaction, w http.ResponseWriter, span trace.Span) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	span.SetStatus(codes.Ok, http.StatusText(200))
+
+	e := jx.GetEncoder()
+	response.Encode(e)
+	if _, err := e.WriteTo(w); err != nil {
+		return errors.Wrap(err, "write")
+	}
+	return nil
+}
+
+func encodeGetBlockchainValidatorsResponse(response *Validators, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
@@ -297,33 +440,7 @@ func encodeGetChartRatesResponse(response *GetChartRatesOK, w http.ResponseWrite
 	return nil
 }
 
-func encodeGetConfigResponse(response *Config, w http.ResponseWriter, span trace.Span) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
-
-	e := jx.GetEncoder()
-	response.Encode(e)
-	if _, err := e.WriteTo(w); err != nil {
-		return errors.Wrap(err, "write")
-	}
-	return nil
-}
-
-func encodeGetConfigAllLiteServerResponse(response *GetConfigAllLiteServerOK, w http.ResponseWriter, span trace.Span) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
-
-	e := jx.GetEncoder()
-	response.Encode(e)
-	if _, err := e.WriteTo(w); err != nil {
-		return errors.Wrap(err, "write")
-	}
-	return nil
-}
-
-func encodeGetDnsExpiringResponse(response *DnsExpiring, w http.ResponseWriter, span trace.Span) error {
+func encodeGetDnsInfoResponse(response *DomainInfo, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
@@ -350,19 +467,6 @@ func encodeGetDomainBidsResponse(response *DomainBids, w http.ResponseWriter, sp
 }
 
 func encodeGetEventResponse(response *Event, w http.ResponseWriter, span trace.Span) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
-
-	e := jx.GetEncoder()
-	response.Encode(e)
-	if _, err := e.WriteTo(w); err != nil {
-		return errors.Wrap(err, "write")
-	}
-	return nil
-}
-
-func encodeGetEventsByAccountResponse(response *AccountEvents, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
@@ -402,97 +506,6 @@ func encodeGetJettonInfoResponse(response *JettonInfo, w http.ResponseWriter, sp
 }
 
 func encodeGetJettonsResponse(response *Jettons, w http.ResponseWriter, span trace.Span) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
-
-	e := jx.GetEncoder()
-	response.Encode(e)
-	if _, err := e.WriteTo(w); err != nil {
-		return errors.Wrap(err, "write")
-	}
-	return nil
-}
-
-func encodeGetJettonsBalancesResponse(response *JettonsBalances, w http.ResponseWriter, span trace.Span) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
-
-	e := jx.GetEncoder()
-	response.Encode(e)
-	if _, err := e.WriteTo(w); err != nil {
-		return errors.Wrap(err, "write")
-	}
-	return nil
-}
-
-func encodeGetJettonsHistoryResponse(response *AccountEvents, w http.ResponseWriter, span trace.Span) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
-
-	e := jx.GetEncoder()
-	response.Encode(e)
-	if _, err := e.WriteTo(w); err != nil {
-		return errors.Wrap(err, "write")
-	}
-	return nil
-}
-
-func encodeGetJettonsHistoryByIDResponse(response *AccountEvents, w http.ResponseWriter, span trace.Span) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
-
-	e := jx.GetEncoder()
-	response.Encode(e)
-	if _, err := e.WriteTo(w); err != nil {
-		return errors.Wrap(err, "write")
-	}
-	return nil
-}
-
-func encodeGetListBlockTransactionsLiteServerResponse(response *GetListBlockTransactionsLiteServerOK, w http.ResponseWriter, span trace.Span) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
-
-	e := jx.GetEncoder()
-	response.Encode(e)
-	if _, err := e.WriteTo(w); err != nil {
-		return errors.Wrap(err, "write")
-	}
-	return nil
-}
-
-func encodeGetMasterchainHeadResponse(response *Block, w http.ResponseWriter, span trace.Span) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
-
-	e := jx.GetEncoder()
-	response.Encode(e)
-	if _, err := e.WriteTo(w); err != nil {
-		return errors.Wrap(err, "write")
-	}
-	return nil
-}
-
-func encodeGetMasterchainInfoExtLiteServerResponse(response *GetMasterchainInfoExtLiteServerOK, w http.ResponseWriter, span trace.Span) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
-
-	e := jx.GetEncoder()
-	response.Encode(e)
-	if _, err := e.WriteTo(w); err != nil {
-		return errors.Wrap(err, "write")
-	}
-	return nil
-}
-
-func encodeGetMasterchainInfoLiteServerResponse(response *GetMasterchainInfoLiteServerOK, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
@@ -557,32 +570,6 @@ func encodeGetNftItemsByAddressesResponse(response *NftItems, w http.ResponseWri
 	return nil
 }
 
-func encodeGetNftItemsByOwnerResponse(response *NftItems, w http.ResponseWriter, span trace.Span) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
-
-	e := jx.GetEncoder()
-	response.Encode(e)
-	if _, err := e.WriteTo(w); err != nil {
-		return errors.Wrap(err, "write")
-	}
-	return nil
-}
-
-func encodeGetPublicKeyByAccountIDResponse(response *GetPublicKeyByAccountIDOK, w http.ResponseWriter, span trace.Span) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
-
-	e := jx.GetEncoder()
-	response.Encode(e)
-	if _, err := e.WriteTo(w); err != nil {
-		return errors.Wrap(err, "write")
-	}
-	return nil
-}
-
 func encodeGetRatesResponse(response *GetRatesOK, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
@@ -596,7 +583,7 @@ func encodeGetRatesResponse(response *GetRatesOK, w http.ResponseWriter, span tr
 	return nil
 }
 
-func encodeGetRawAccountResponse(response *RawAccount, w http.ResponseWriter, span trace.Span) error {
+func encodeGetRawAccountStateResponse(response *GetRawAccountStateOK, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
@@ -609,7 +596,7 @@ func encodeGetRawAccountResponse(response *RawAccount, w http.ResponseWriter, sp
 	return nil
 }
 
-func encodeGetSearchAccountsResponse(response *FoundAccounts, w http.ResponseWriter, span trace.Span) error {
+func encodeGetRawBlockProofResponse(response *GetRawBlockProofOK, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
@@ -622,7 +609,7 @@ func encodeGetSearchAccountsResponse(response *FoundAccounts, w http.ResponseWri
 	return nil
 }
 
-func encodeGetShardBlockProofLiteServerResponse(response *GetShardBlockProofLiteServerOK, w http.ResponseWriter, span trace.Span) error {
+func encodeGetRawBlockchainBlockResponse(response *GetRawBlockchainBlockOK, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
@@ -635,7 +622,7 @@ func encodeGetShardBlockProofLiteServerResponse(response *GetShardBlockProofLite
 	return nil
 }
 
-func encodeGetShardInfoLiteServerResponse(response *GetShardInfoLiteServerOK, w http.ResponseWriter, span trace.Span) error {
+func encodeGetRawBlockchainBlockHeaderResponse(response *GetRawBlockchainBlockHeaderOK, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
@@ -648,7 +635,150 @@ func encodeGetShardInfoLiteServerResponse(response *GetShardInfoLiteServerOK, w 
 	return nil
 }
 
-func encodeGetStateLiteServerResponse(response *GetStateLiteServerOK, w http.ResponseWriter, span trace.Span) error {
+func encodeGetRawBlockchainBlockStateResponse(response *GetRawBlockchainBlockStateOK, w http.ResponseWriter, span trace.Span) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	span.SetStatus(codes.Ok, http.StatusText(200))
+
+	e := jx.GetEncoder()
+	response.Encode(e)
+	if _, err := e.WriteTo(w); err != nil {
+		return errors.Wrap(err, "write")
+	}
+	return nil
+}
+
+func encodeGetRawConfigResponse(response *GetRawConfigOK, w http.ResponseWriter, span trace.Span) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	span.SetStatus(codes.Ok, http.StatusText(200))
+
+	e := jx.GetEncoder()
+	response.Encode(e)
+	if _, err := e.WriteTo(w); err != nil {
+		return errors.Wrap(err, "write")
+	}
+	return nil
+}
+
+func encodeGetRawListBlockTransactionsResponse(response *GetRawListBlockTransactionsOK, w http.ResponseWriter, span trace.Span) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	span.SetStatus(codes.Ok, http.StatusText(200))
+
+	e := jx.GetEncoder()
+	response.Encode(e)
+	if _, err := e.WriteTo(w); err != nil {
+		return errors.Wrap(err, "write")
+	}
+	return nil
+}
+
+func encodeGetRawMasterchainInfoResponse(response *GetRawMasterchainInfoOK, w http.ResponseWriter, span trace.Span) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	span.SetStatus(codes.Ok, http.StatusText(200))
+
+	e := jx.GetEncoder()
+	response.Encode(e)
+	if _, err := e.WriteTo(w); err != nil {
+		return errors.Wrap(err, "write")
+	}
+	return nil
+}
+
+func encodeGetRawMasterchainInfoExtResponse(response *GetRawMasterchainInfoExtOK, w http.ResponseWriter, span trace.Span) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	span.SetStatus(codes.Ok, http.StatusText(200))
+
+	e := jx.GetEncoder()
+	response.Encode(e)
+	if _, err := e.WriteTo(w); err != nil {
+		return errors.Wrap(err, "write")
+	}
+	return nil
+}
+
+func encodeGetRawShardBlockProofResponse(response *GetRawShardBlockProofOK, w http.ResponseWriter, span trace.Span) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	span.SetStatus(codes.Ok, http.StatusText(200))
+
+	e := jx.GetEncoder()
+	response.Encode(e)
+	if _, err := e.WriteTo(w); err != nil {
+		return errors.Wrap(err, "write")
+	}
+	return nil
+}
+
+func encodeGetRawShardInfoResponse(response *GetRawShardInfoOK, w http.ResponseWriter, span trace.Span) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	span.SetStatus(codes.Ok, http.StatusText(200))
+
+	e := jx.GetEncoder()
+	response.Encode(e)
+	if _, err := e.WriteTo(w); err != nil {
+		return errors.Wrap(err, "write")
+	}
+	return nil
+}
+
+func encodeGetRawTimeResponse(response *GetRawTimeOK, w http.ResponseWriter, span trace.Span) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	span.SetStatus(codes.Ok, http.StatusText(200))
+
+	e := jx.GetEncoder()
+	response.Encode(e)
+	if _, err := e.WriteTo(w); err != nil {
+		return errors.Wrap(err, "write")
+	}
+	return nil
+}
+
+func encodeGetRawTransactionsResponse(response *GetRawTransactionsOK, w http.ResponseWriter, span trace.Span) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	span.SetStatus(codes.Ok, http.StatusText(200))
+
+	e := jx.GetEncoder()
+	response.Encode(e)
+	if _, err := e.WriteTo(w); err != nil {
+		return errors.Wrap(err, "write")
+	}
+	return nil
+}
+
+func encodeGetStakingPoolHistoryResponse(response *GetStakingPoolHistoryOK, w http.ResponseWriter, span trace.Span) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	span.SetStatus(codes.Ok, http.StatusText(200))
+
+	e := jx.GetEncoder()
+	response.Encode(e)
+	if _, err := e.WriteTo(w); err != nil {
+		return errors.Wrap(err, "write")
+	}
+	return nil
+}
+
+func encodeGetStakingPoolInfoResponse(response *GetStakingPoolInfoOK, w http.ResponseWriter, span trace.Span) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	span.SetStatus(codes.Ok, http.StatusText(200))
+
+	e := jx.GetEncoder()
+	response.Encode(e)
+	if _, err := e.WriteTo(w); err != nil {
+		return errors.Wrap(err, "write")
+	}
+	return nil
+}
+
+func encodeGetStakingPoolsResponse(response *GetStakingPoolsOK, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
@@ -662,32 +792,6 @@ func encodeGetStateLiteServerResponse(response *GetStateLiteServerOK, w http.Res
 }
 
 func encodeGetStorageProvidersResponse(response *GetStorageProvidersOK, w http.ResponseWriter, span trace.Span) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
-
-	e := jx.GetEncoder()
-	response.Encode(e)
-	if _, err := e.WriteTo(w); err != nil {
-		return errors.Wrap(err, "write")
-	}
-	return nil
-}
-
-func encodeGetSubscriptionsByAccountResponse(response *Subscriptions, w http.ResponseWriter, span trace.Span) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
-
-	e := jx.GetEncoder()
-	response.Encode(e)
-	if _, err := e.WriteTo(w); err != nil {
-		return errors.Wrap(err, "write")
-	}
-	return nil
-}
-
-func encodeGetTimeLiteServerResponse(response *GetTimeLiteServerOK, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
@@ -726,71 +830,6 @@ func encodeGetTraceResponse(response *Trace, w http.ResponseWriter, span trace.S
 	return nil
 }
 
-func encodeGetTracesByAccountResponse(response *TraceIds, w http.ResponseWriter, span trace.Span) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
-
-	e := jx.GetEncoder()
-	response.Encode(e)
-	if _, err := e.WriteTo(w); err != nil {
-		return errors.Wrap(err, "write")
-	}
-	return nil
-}
-
-func encodeGetTransactionResponse(response *Transaction, w http.ResponseWriter, span trace.Span) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
-
-	e := jx.GetEncoder()
-	response.Encode(e)
-	if _, err := e.WriteTo(w); err != nil {
-		return errors.Wrap(err, "write")
-	}
-	return nil
-}
-
-func encodeGetTransactionByMessageHashResponse(response *Transaction, w http.ResponseWriter, span trace.Span) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
-
-	e := jx.GetEncoder()
-	response.Encode(e)
-	if _, err := e.WriteTo(w); err != nil {
-		return errors.Wrap(err, "write")
-	}
-	return nil
-}
-
-func encodeGetTransactionsLiteServerResponse(response *GetTransactionsLiteServerOK, w http.ResponseWriter, span trace.Span) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
-
-	e := jx.GetEncoder()
-	response.Encode(e)
-	if _, err := e.WriteTo(w); err != nil {
-		return errors.Wrap(err, "write")
-	}
-	return nil
-}
-
-func encodeGetValidatorsResponse(response *Validators, w http.ResponseWriter, span trace.Span) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
-
-	e := jx.GetEncoder()
-	response.Encode(e)
-	if _, err := e.WriteTo(w); err != nil {
-		return errors.Wrap(err, "write")
-	}
-	return nil
-}
-
 func encodeGetWalletBackupResponse(response *GetWalletBackupOK, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
@@ -817,7 +856,14 @@ func encodeGetWalletsByPublicKeyResponse(response *Accounts, w http.ResponseWrit
 	return nil
 }
 
-func encodePoolsByNominatorsResponse(response *AccountStaking, w http.ResponseWriter, span trace.Span) error {
+func encodeReindexAccountResponse(response *ReindexAccountOK, w http.ResponseWriter, span trace.Span) error {
+	w.WriteHeader(200)
+	span.SetStatus(codes.Ok, http.StatusText(200))
+
+	return nil
+}
+
+func encodeSearchAccountsResponse(response *FoundAccounts, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
@@ -830,21 +876,14 @@ func encodePoolsByNominatorsResponse(response *AccountStaking, w http.ResponseWr
 	return nil
 }
 
-func encodeReindexAccountResponse(response *ReindexAccountOK, w http.ResponseWriter, span trace.Span) error {
+func encodeSendBlockchainMessageResponse(response *SendBlockchainMessageOK, w http.ResponseWriter, span trace.Span) error {
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	return nil
 }
 
-func encodeSendMessageResponse(response *SendMessageOK, w http.ResponseWriter, span trace.Span) error {
-	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
-
-	return nil
-}
-
-func encodeSendMessageLiteServerResponse(response *SendMessageLiteServerOK, w http.ResponseWriter, span trace.Span) error {
+func encodeSendRawMessageResponse(response *SendRawMessageOK, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
@@ -861,45 +900,6 @@ func encodeSetWalletBackupResponse(response *SetWalletBackupOK, w http.ResponseW
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
 
-	return nil
-}
-
-func encodeStakingPoolHistoryResponse(response *StakingPoolHistoryOK, w http.ResponseWriter, span trace.Span) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
-
-	e := jx.GetEncoder()
-	response.Encode(e)
-	if _, err := e.WriteTo(w); err != nil {
-		return errors.Wrap(err, "write")
-	}
-	return nil
-}
-
-func encodeStakingPoolInfoResponse(response *StakingPoolInfoOK, w http.ResponseWriter, span trace.Span) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
-
-	e := jx.GetEncoder()
-	response.Encode(e)
-	if _, err := e.WriteTo(w); err != nil {
-		return errors.Wrap(err, "write")
-	}
-	return nil
-}
-
-func encodeStakingPoolsResponse(response *StakingPoolsOK, w http.ResponseWriter, span trace.Span) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
-
-	e := jx.GetEncoder()
-	response.Encode(e)
-	if _, err := e.WriteTo(w); err != nil {
-		return errors.Wrap(err, "write")
-	}
 	return nil
 }
 

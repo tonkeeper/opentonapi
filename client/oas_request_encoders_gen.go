@@ -53,8 +53,8 @@ func encodeEmulateMessageToTraceRequest(
 	return nil
 }
 
-func encodeEmulateWalletMessageRequest(
-	req *EmulateWalletMessageReq,
+func encodeEmulateMessageToWalletRequest(
+	req *EmulateMessageToWalletReq,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"
@@ -121,8 +121,8 @@ func encodeGetNftItemsByAddressesRequest(
 	return nil
 }
 
-func encodeSendMessageRequest(
-	req *SendMessageReq,
+func encodeSendBlockchainMessageRequest(
+	req *SendBlockchainMessageReq,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"
@@ -135,8 +135,8 @@ func encodeSendMessageRequest(
 	return nil
 }
 
-func encodeSendMessageLiteServerRequest(
-	req *SendMessageLiteServerReq,
+func encodeSendRawMessageRequest(
+	req *SendRawMessageReq,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"

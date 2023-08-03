@@ -17,12 +17,12 @@ import (
 func TestHandler_GetRawAccount(t *testing.T) {
 	tests := []struct {
 		name        string
-		params      oas.GetRawAccountParams
+		params      oas.GetBlockchainRawAccountParams
 		wantStatus  string
 		wantAddress string
 	}{
 		{
-			params:      oas.GetRawAccountParams{AccountID: "EQDendoireMDFMufOUzkqNpFIay83GnjV2tgGMbA64wA3siV"},
+			params:      oas.GetBlockchainRawAccountParams{AccountID: "EQDendoireMDFMufOUzkqNpFIay83GnjV2tgGMbA64wA3siV"},
 			wantAddress: "0:de9dda22ade30314cb9f394ce4a8da4521acbcdc69e3576b6018c6c0eb8c00de",
 			wantStatus:  "active",
 		},
@@ -34,7 +34,7 @@ func TestHandler_GetRawAccount(t *testing.T) {
 			require.Nil(t, err)
 			h, err := NewHandler(logger, WithStorage(liteStorage), WithExecutor(liteStorage))
 			require.Nil(t, err)
-			account, err := h.GetRawAccount(context.Background(), tt.params)
+			account, err := h.GetBlockchainRawAccount(context.Background(), tt.params)
 			require.Nil(t, err)
 
 			require.Equal(t, tt.wantAddress, account.Address)
@@ -157,12 +157,12 @@ func TestHandler_GetTransactions(t *testing.T) {
 	t.Skip() //todo: find better way to test transaction because liteserver can drop old transactions
 	tests := []struct {
 		name         string
-		params       oas.GetBlockTransactionsParams
+		params       oas.GetBlockchainBlockTransactionsParams
 		wantTxCount  int
 		wantTxHashes map[string]struct{}
 	}{
 		{
-			params:      oas.GetBlockTransactionsParams{BlockID: "(-1,8000000000000000,28741341)"},
+			params:      oas.GetBlockchainBlockTransactionsParams{BlockID: "(-1,8000000000000000,28741341)"},
 			wantTxCount: 3,
 			wantTxHashes: map[string]struct{}{
 				"fec4f77e8b72eec62d14944d9cf99171a32c03783c8e6e30590aabbe35236f9b": {},
@@ -178,7 +178,7 @@ func TestHandler_GetTransactions(t *testing.T) {
 			require.Nil(t, err)
 			h, err := NewHandler(logger, WithStorage(liteStorage), WithExecutor(liteStorage))
 			require.Nil(t, err)
-			res, err := h.GetBlockTransactions(context.Background(), tt.params)
+			res, err := h.GetBlockchainBlockTransactions(context.Background(), tt.params)
 			require.Nil(t, err)
 			fmt.Printf("%v\n", res)
 

@@ -14,7 +14,7 @@ import (
 	"github.com/tonkeeper/tongo/tlb"
 )
 
-func (h Handler) GetBlock(ctx context.Context, params oas.GetBlockParams) (r *oas.Block, _ error) {
+func (h Handler) GetBlockchainBlock(ctx context.Context, params oas.GetBlockchainBlockParams) (*oas.BlockchainBlock, error) {
 	id, err := blockIdFromString(params.BlockID)
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
@@ -24,13 +24,31 @@ func (h Handler) GetBlock(ctx context.Context, params oas.GetBlockParams) (r *oa
 		return nil, toError(http.StatusNotFound, err)
 	}
 	if err != nil {
-		return r, err
+		return nil, err
 	}
 	res := convertBlockHeader(*block)
 	return &res, nil
 }
 
-func (h Handler) GetTransaction(ctx context.Context, params oas.GetTransactionParams) (r *oas.Transaction, _ error) {
+func (h Handler) GetBlockchainBlockTransactions(ctx context.Context, params oas.GetBlockchainBlockTransactionsParams) (*oas.Transactions, error) {
+	id, err := blockIdFromString(params.BlockID)
+	if err != nil {
+		return nil, toError(http.StatusBadRequest, err)
+	}
+	transactions, err := h.storage.GetBlockTransactions(ctx, id)
+	if err != nil {
+		return nil, toError(http.StatusInternalServerError, err)
+	}
+	res := oas.Transactions{
+		Transactions: make([]oas.Transaction, 0, len(transactions)),
+	}
+	for _, tx := range transactions {
+		res.Transactions = append(res.Transactions, convertTransaction(*tx, h.addressBook))
+	}
+	return &res, nil
+}
+
+func (h Handler) GetBlockchainTransaction(ctx context.Context, params oas.GetBlockchainTransactionParams) (*oas.Transaction, error) {
 	hash, err := tongo.ParseHash(params.TransactionID)
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
@@ -46,7 +64,7 @@ func (h Handler) GetTransaction(ctx context.Context, params oas.GetTransactionPa
 	return &transaction, nil
 }
 
-func (h Handler) GetTransactionByMessageHash(ctx context.Context, params oas.GetTransactionByMessageHashParams) (*oas.Transaction, error) {
+func (h Handler) GetBlockchainTransactionByMessageHash(ctx context.Context, params oas.GetBlockchainTransactionByMessageHashParams) (*oas.Transaction, error) {
 	hash, err := tongo.ParseHash(params.MsgID)
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
@@ -65,25 +83,7 @@ func (h Handler) GetTransactionByMessageHash(ctx context.Context, params oas.Get
 	return &transaction, nil
 }
 
-func (h Handler) GetBlockTransactions(ctx context.Context, params oas.GetBlockTransactionsParams) (*oas.Transactions, error) {
-	id, err := blockIdFromString(params.BlockID)
-	if err != nil {
-		return nil, toError(http.StatusBadRequest, err)
-	}
-	transactions, err := h.storage.GetBlockTransactions(ctx, id)
-	if err != nil {
-		return nil, toError(http.StatusInternalServerError, err)
-	}
-	res := oas.Transactions{
-		Transactions: make([]oas.Transaction, 0, len(transactions)),
-	}
-	for _, tx := range transactions {
-		res.Transactions = append(res.Transactions, convertTransaction(*tx, h.addressBook))
-	}
-	return &res, nil
-}
-
-func (h Handler) GetMasterchainHead(ctx context.Context) (*oas.Block, error) {
+func (h Handler) GetBlockchainMasterchainHead(ctx context.Context) (*oas.BlockchainBlock, error) {
 	header, err := h.storage.LastMasterchainBlockHeader(ctx)
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
@@ -91,7 +91,7 @@ func (h Handler) GetMasterchainHead(ctx context.Context) (*oas.Block, error) {
 	return g.Pointer(convertBlockHeader(*header)), nil
 }
 
-func (h Handler) GetConfig(ctx context.Context) (*oas.Config, error) {
+func (h Handler) GetBlockchainConfig(ctx context.Context) (*oas.BlockchainConfig, error) {
 	cfg, err := h.storage.GetLastConfig()
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)

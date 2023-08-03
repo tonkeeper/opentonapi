@@ -1,7 +1,7 @@
 {
  "components": {
   "parameters": {
-   "accountIdParameter": {
+   "accountIDParameter": {
     "description": "account ID",
     "in": "path",
     "name": "account_id",
@@ -11,7 +11,7 @@
      "type": "string"
     }
    },
-   "accountIdParameters": {
+   "accountIDParameters": {
     "description": "account ID",
     "explode": false,
     "in": "path",
@@ -25,7 +25,7 @@
      "type": "array"
     }
    },
-   "accountIdQuery": {
+   "accountIDQuery": {
     "description": "account ID",
     "explode": false,
     "in": "query",
@@ -36,7 +36,7 @@
      "type": "string"
     }
    },
-   "blockIdExtParameter": {
+   "blockchainBlockIDExtParameter": {
     "description": "block ID: (workchain,shard,seqno,root_hash,file_hash)",
     "in": "path",
     "name": "block_id",
@@ -46,7 +46,7 @@
      "type": "string"
     }
    },
-   "blockIdParameter": {
+   "blockchainBlockIDParameter": {
     "description": "block ID",
     "in": "path",
     "name": "block_id",
@@ -77,7 +77,7 @@
      "type": "integer"
     }
    },
-   "domainFilterParameter": {
+   "domainFilterQuery": {
     "description": "domain filter for current auctions \"ton\" or \"t.me\"",
     "in": "query",
     "name": "tld",
@@ -97,7 +97,7 @@
      "type": "string"
     }
    },
-   "eventIdParameter": {
+   "eventIDParameter": {
     "description": "event ID or transaction hash in hex (without 0x) or base64url format",
     "in": "path",
     "name": "event_id",
@@ -137,7 +137,7 @@
      "type": "string"
     }
    },
-   "jettonIdParameter": {
+   "jettonIDParameter": {
     "description": "jetton ID",
     "in": "path",
     "name": "jetton_id",
@@ -147,7 +147,7 @@
      "type": "string"
     }
    },
-   "knownBlockIdExtQuery": {
+   "knownBlockIDExtQuery": {
     "description": "known block: (workchain,shard,seqno,root_hash,file_hash)",
     "in": "query",
     "name": "known_block",
@@ -157,7 +157,7 @@
      "type": "string"
     }
    },
-   "limit": {
+   "limitQuery": {
     "in": "query",
     "name": "limit",
     "required": false,
@@ -188,7 +188,7 @@
      "type": "integer"
     }
    },
-   "messageIdParameter": {
+   "messageIDParameter": {
     "description": "message ID",
     "in": "path",
     "name": "msg_id",
@@ -219,7 +219,7 @@
      "type": "integer"
     }
    },
-   "offset": {
+   "offsetQuery": {
     "in": "query",
     "name": "offset",
     "required": false,
@@ -259,7 +259,7 @@
      "type": "integer"
     }
    },
-   "targetBlockIdExtQuery": {
+   "targetBlockIDExtQuery": {
     "description": "target block: (workchain,shard,seqno,root_hash,file_hash)",
     "in": "query",
     "name": "target_block",
@@ -269,7 +269,7 @@
      "type": "string"
     }
    },
-   "traceIdParameter": {
+   "traceIDParameter": {
     "description": "trace ID or transaction hash in hex (without 0x) or base64url format",
     "in": "path",
     "name": "trace_id",
@@ -279,7 +279,7 @@
      "type": "string"
     }
    },
-   "transactionIdParameter": {
+   "transactionIDParameter": {
     "description": "transaction ID",
     "in": "path",
     "name": "transaction_id",
@@ -302,7 +302,7 @@
    }
   },
   "requestBodies": {
-   "AccountIds": {
+   "AccountIDs": {
     "content": {
      "application/json": {
       "schema": {
@@ -334,6 +334,31 @@
      }
     },
     "description": "Information for saving backup",
+    "required": true
+   },
+   "BatchBoc": {
+    "content": {
+     "application/json": {
+      "schema": {
+       "properties": {
+        "batch": {
+         "items": {
+          "example": "te6ccgECBQEAARUAAkWIAWTtae+KgtbrX26Bep8JSq8lFLfGOoyGR/xwdjfvpvEaHg",
+          "type": "string"
+         },
+         "maxItems": 10,
+         "type": "array"
+        },
+        "boc": {
+         "example": "te6ccgECBQEAARUAAkWIAWTtae+KgtbrX26Bep8JSq8lFLfGOoyGR/xwdjfvpvEaHg",
+         "type": "string"
+        }
+       },
+       "type": "object"
+      }
+     }
+    },
+    "description": "both a single boc and a batch of boc serialized in base64 are accepted",
     "required": true
    },
    "Boc": {
@@ -384,31 +409,6 @@
      }
     },
     "description": "input parameters for contract get method"
-   },
-   "SendBoc": {
-    "content": {
-     "application/json": {
-      "schema": {
-       "properties": {
-        "batch": {
-         "items": {
-          "example": "te6ccgECBQEAARUAAkWIAWTtae+KgtbrX26Bep8JSq8lFLfGOoyGR/xwdjfvpvEaHg",
-          "type": "string"
-         },
-         "maxItems": 10,
-         "type": "array"
-        },
-        "boc": {
-         "example": "te6ccgECBQEAARUAAkWIAWTtae+KgtbrX26Bep8JSq8lFLfGOoyGR/xwdjfvpvEaHg",
-         "type": "string"
-        }
-       },
-       "type": "object"
-      }
-     }
-    },
-    "description": "bag-of-cells serialized to base64",
-    "required": true
    },
    "TonConnectProof": {
     "content": {
@@ -1066,7 +1066,42 @@
     ],
     "type": "object"
    },
-   "Block": {
+   "BlockRaw": {
+    "properties": {
+     "file_hash": {
+      "example": "A6A0BD6608672B11B79538A50B2204E748305C12AA0DED9C16CF0006CE3AF8DB",
+      "type": "string"
+     },
+     "root_hash": {
+      "example": "131D0C65055F04E9C19D687B51BC70F952FD9CA6F02C2801D3B89964A779DF85",
+      "type": "string"
+     },
+     "seqno": {
+      "example": 30699640,
+      "format": "uint32",
+      "type": "integer"
+     },
+     "shard": {
+      "example": 9223372036854775808,
+      "format": "uint64",
+      "type": "integer"
+     },
+     "workchain": {
+      "example": 4294967295,
+      "format": "uint32",
+      "type": "integer"
+     }
+    },
+    "required": [
+     "workchain",
+     "shard",
+     "seqno",
+     "root_hash",
+     "file_hash"
+    ],
+    "type": "object"
+   },
+   "BlockchainBlock": {
     "properties": {
      "after_merge": {
       "example": true,
@@ -1232,38 +1267,101 @@
     ],
     "type": "object"
    },
-   "BlockRaw": {
+   "BlockchainConfig": {
     "properties": {
-     "file_hash": {
-      "example": "A6A0BD6608672B11B79538A50B2204E748305C12AA0DED9C16CF0006CE3AF8DB",
+     "0": {
+      "description": "config address",
       "type": "string"
      },
-     "root_hash": {
-      "example": "131D0C65055F04E9C19D687B51BC70F952FD9CA6F02C2801D3B89964A779DF85",
+     "1": {
+      "description": "elector address",
       "type": "string"
      },
-     "seqno": {
-      "example": 30699640,
-      "format": "uint32",
-      "type": "integer"
+     "2": {
+      "description": "minter address",
+      "type": "string"
      },
-     "shard": {
-      "example": 9223372036854775808,
-      "format": "uint64",
-      "type": "integer"
+     "32": {
+      "$ref": "#/components/schemas/ValidatorsSet"
      },
-     "workchain": {
-      "example": 4294967295,
-      "format": "uint32",
-      "type": "integer"
+     "33": {
+      "$ref": "#/components/schemas/ValidatorsSet"
+     },
+     "34": {
+      "$ref": "#/components/schemas/ValidatorsSet"
+     },
+     "35": {
+      "$ref": "#/components/schemas/ValidatorsSet"
+     },
+     "36": {
+      "$ref": "#/components/schemas/ValidatorsSet"
+     },
+     "37": {
+      "$ref": "#/components/schemas/ValidatorsSet"
+     },
+     "4": {
+      "description": "dns root address",
+      "type": "string"
+     },
+     "raw": {
+      "description": "config boc in base64 format",
+      "example": "te6ccgEBBgEARAABFP8A9KQT9LzyyAsBAgEgAgMCAUgEBQAE8jAAONBsIdMfMO1E0NM/MAHAAZekyMs/ye1UkzDyBuIAEaE0MdqJoaZ+YQ==",
+      "type": "string"
      }
     },
     "required": [
-     "workchain",
-     "shard",
-     "seqno",
-     "root_hash",
-     "file_hash"
+     "raw",
+     "0",
+     "1",
+     "2",
+     "4"
+    ],
+    "type": "object"
+   },
+   "BlockchainRawAccount": {
+    "properties": {
+     "address": {
+      "example": "0:da6b1b6663a0e4d18cc8574ccd9db5296e367dd9324706f3bbd9eb1cd2caf0bf",
+      "type": "string"
+     },
+     "balance": {
+      "example": 123456789,
+      "format": "int64",
+      "type": "integer"
+     },
+     "code": {
+      "example": "b5ee9c72410104010087000114ff00f4a413f4a0f2c80b0102012002030002d200dfa5ffff76a268698fe9ffe8e42c5267858f90e785ffe4f6aa6467c444ffb365ffc10802faf0807d014035e7a064b87d804077e7857fc10803dfd2407d014035e7a064b86467cd8903a32b9ba4410803ade68afd014035e7a045ea432b6363796103bb7b9363210c678b64b87d807d8040c249b3e4",
+      "type": "string"
+     },
+     "data": {
+      "example": "b5ee9c7241010101002600004811fd096c0000000000000000000000000000000000000000000000000000000000000000cb78264d",
+      "type": "string"
+     },
+     "extra_balance": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "last_transaction_lt": {
+      "example": 123456789,
+      "format": "int64",
+      "type": "integer"
+     },
+     "status": {
+      "example": "active",
+      "type": "string"
+     },
+     "storage": {
+      "$ref": "#/components/schemas/AccountStorageInfo"
+     }
+    },
+    "required": [
+     "address",
+     "balance",
+     "status",
+     "last_transaction_lt",
+     "storage"
     ],
     "type": "object"
    },
@@ -1323,57 +1421,6 @@
     ],
     "example": "cskip_no_state",
     "type": "string"
-   },
-   "Config": {
-    "properties": {
-     "0": {
-      "description": "config address",
-      "type": "string"
-     },
-     "1": {
-      "description": "elector address",
-      "type": "string"
-     },
-     "2": {
-      "description": "minter address",
-      "type": "string"
-     },
-     "32": {
-      "$ref": "#/components/schemas/ValidatorsSet"
-     },
-     "33": {
-      "$ref": "#/components/schemas/ValidatorsSet"
-     },
-     "34": {
-      "$ref": "#/components/schemas/ValidatorsSet"
-     },
-     "35": {
-      "$ref": "#/components/schemas/ValidatorsSet"
-     },
-     "36": {
-      "$ref": "#/components/schemas/ValidatorsSet"
-     },
-     "37": {
-      "$ref": "#/components/schemas/ValidatorsSet"
-     },
-     "4": {
-      "description": "dns root address",
-      "type": "string"
-     },
-     "raw": {
-      "description": "config boc in base64 format",
-      "example": "te6ccgEBBgEARAABFP8A9KQT9LzyyAsBAgEgAgMCAUgEBQAE8jAAONBsIdMfMO1E0NM/MAHAAZekyMs/ye1UkzDyBuIAEaE0MdqJoaZ+YQ==",
-      "type": "string"
-     }
-    },
-    "required": [
-     "raw",
-     "0",
-     "1",
-     "2",
-     "4"
-    ],
-    "type": "object"
    },
    "ContractDeployAction": {
     "properties": {
@@ -2466,53 +2513,6 @@
     ],
     "type": "object"
    },
-   "RawAccount": {
-    "properties": {
-     "address": {
-      "example": "0:da6b1b6663a0e4d18cc8574ccd9db5296e367dd9324706f3bbd9eb1cd2caf0bf",
-      "type": "string"
-     },
-     "balance": {
-      "example": 123456789,
-      "format": "int64",
-      "type": "integer"
-     },
-     "code": {
-      "example": "b5ee9c72410104010087000114ff00f4a413f4a0f2c80b0102012002030002d200dfa5ffff76a268698fe9ffe8e42c5267858f90e785ffe4f6aa6467c444ffb365ffc10802faf0807d014035e7a064b87d804077e7857fc10803dfd2407d014035e7a064b86467cd8903a32b9ba4410803ade68afd014035e7a045ea432b6363796103bb7b9363210c678b64b87d807d8040c249b3e4",
-      "type": "string"
-     },
-     "data": {
-      "example": "b5ee9c7241010101002600004811fd096c0000000000000000000000000000000000000000000000000000000000000000cb78264d",
-      "type": "string"
-     },
-     "extra_balance": {
-      "additionalProperties": {
-       "type": "string"
-      },
-      "type": "object"
-     },
-     "last_transaction_lt": {
-      "example": 123456789,
-      "format": "int64",
-      "type": "integer"
-     },
-     "status": {
-      "example": "active",
-      "type": "string"
-     },
-     "storage": {
-      "$ref": "#/components/schemas/AccountStorageInfo"
-     }
-    },
-    "required": [
-     "address",
-     "balance",
-     "status",
-     "last_transaction_lt",
-     "storage"
-    ],
-    "type": "object"
-   },
    "RecoverStakeAction": {
     "properties": {
      "amount": {
@@ -2904,7 +2904,7 @@
     ],
     "type": "object"
    },
-   "TraceId": {
+   "TraceID": {
     "properties": {
      "id": {
       "example": "55e8809519cd3c49098c9ee45afdafcea7a894a74d0f628d94a115a50e045122",
@@ -2922,11 +2922,11 @@
     ],
     "type": "object"
    },
-   "TraceIds": {
+   "TraceIDs": {
     "properties": {
      "traces": {
       "items": {
-       "$ref": "#/components/schemas/TraceId"
+       "$ref": "#/components/schemas/TraceID"
       },
       "type": "array"
      }
@@ -3294,7 +3294,7 @@
     "description": "Get human-friendly information about several accounts without low-level details.",
     "operationId": "getAccounts",
     "requestBody": {
-     "$ref": "#/components/requestBodies/AccountIds"
+     "$ref": "#/components/requestBodies/AccountIDs"
     },
     "responses": {
      "200": {
@@ -3318,8 +3318,8 @@
   },
   "/v2/accounts/search": {
    "get": {
-    "description": "Search for accounts by name. You can find the account by the first characters of the domain.",
-    "operationId": "getSearchAccounts",
+    "description": "Search by account domain name",
+    "operationId": "searchAccounts",
     "parameters": [
      {
       "in": "query",
@@ -3358,7 +3358,7 @@
     "operationId": "getAccount",
     "parameters": [
      {
-      "$ref": "#/components/parameters/accountIdParameter"
+      "$ref": "#/components/parameters/accountIDParameter"
      }
     ],
     "responses": {
@@ -3383,11 +3383,11 @@
   },
   "/v2/accounts/{account_id}/dns/backresolve": {
    "get": {
-    "description": "Get domains for wallet account",
-    "operationId": "dnsBackResolve",
+    "description": "Get account's domains",
+    "operationId": "accountDnsBackResolve",
     "parameters": [
      {
-      "$ref": "#/components/parameters/accountIdParameter"
+      "$ref": "#/components/parameters/accountIDParameter"
      }
     ],
     "responses": {
@@ -3399,7 +3399,7 @@
         }
        }
       },
-      "description": "domains for wallet account"
+      "description": "account's domains"
      },
      "default": {
       "$ref": "#/components/responses/Error"
@@ -3412,11 +3412,11 @@
   },
   "/v2/accounts/{account_id}/dns/expiring": {
    "get": {
-    "description": "Get expiring .ton dns",
-    "operationId": "getDnsExpiring",
+    "description": "Get expiring account .ton dns",
+    "operationId": "getAccountDnsExpiring",
     "parameters": [
      {
-      "$ref": "#/components/parameters/accountIdParameter"
+      "$ref": "#/components/parameters/accountIDParameter"
      },
      {
       "$ref": "#/components/parameters/periodQuery"
@@ -3431,7 +3431,7 @@
         }
        }
       },
-      "description": "expiring .ton dns"
+      "description": "account's expiring .ton dns"
      },
      "default": {
       "$ref": "#/components/responses/Error"
@@ -3445,16 +3445,16 @@
   "/v2/accounts/{account_id}/events": {
    "get": {
     "description": "Get events for an account. Each event is built on top of a trace which is a series of transactions caused by one inbound message. TonAPI looks for known patterns inside the trace and splits the trace into actions, where a single action represents a meaningful high-level operation like a Jetton Transfer or an NFT Purchase. Actions are expected to be shown to users. It is advised not to build any logic on top of actions because actions can be changed at any time.",
-    "operationId": "getEventsByAccount",
+    "operationId": "getAccountEvents",
     "parameters": [
      {
-      "$ref": "#/components/parameters/accountIdParameter"
+      "$ref": "#/components/parameters/accountIDParameter"
      },
      {
       "$ref": "#/components/parameters/i18n"
      },
      {
-      "description": "filter actions where requested account is not real subject (for example sender or reciver jettons)",
+      "description": "filter actions where requested account is not real subject (for example sender or receiver jettons)",
       "in": "query",
       "name": "subject_only",
       "required": false,
@@ -3514,7 +3514,7 @@
         }
        }
       },
-      "description": "events"
+      "description": "account's events"
      },
      "default": {
       "$ref": "#/components/responses/Error"
@@ -3534,7 +3534,7 @@
       "$ref": "#/components/parameters/i18n"
      },
      {
-      "$ref": "#/components/parameters/accountIdParameter"
+      "$ref": "#/components/parameters/accountIDParameter"
      }
     ],
     "requestBody": {
@@ -3549,7 +3549,7 @@
         }
        }
       },
-      "description": "event"
+      "description": "emulated message to account"
      },
      "default": {
       "$ref": "#/components/responses/Error"
@@ -3563,10 +3563,10 @@
   "/v2/accounts/{account_id}/jettons": {
    "get": {
     "description": "Get all Jettons balances by owner address",
-    "operationId": "getJettonsBalances",
+    "operationId": "getAccountJettonsBalances",
     "parameters": [
      {
-      "$ref": "#/components/parameters/accountIdParameter"
+      "$ref": "#/components/parameters/accountIDParameter"
      }
     ],
     "responses": {
@@ -3578,7 +3578,7 @@
         }
        }
       },
-      "description": "jetton balances"
+      "description": "account jettons balances"
      },
      "default": {
       "$ref": "#/components/responses/Error"
@@ -3591,11 +3591,11 @@
   },
   "/v2/accounts/{account_id}/jettons/history": {
    "get": {
-    "description": "Get the transfer jettons history for account_id",
-    "operationId": "getJettonsHistory",
+    "description": "Get the transfer jettons history for account",
+    "operationId": "getAccountJettonsHistory",
     "parameters": [
      {
-      "$ref": "#/components/parameters/accountIdParameter"
+      "$ref": "#/components/parameters/accountIDParameter"
      },
      {
       "$ref": "#/components/parameters/i18n"
@@ -3651,7 +3651,7 @@
         }
        }
       },
-      "description": "jetton history"
+      "description": "account jettons history"
      },
      "default": {
       "$ref": "#/components/responses/Error"
@@ -3664,14 +3664,14 @@
   },
   "/v2/accounts/{account_id}/jettons/{jetton_id}/history": {
    "get": {
-    "description": "Get the transfer jetton history for account_id and jetton_id",
-    "operationId": "getJettonsHistoryByID",
+    "description": "Get the transfer jetton history for account and jetton",
+    "operationId": "getAccountJettonHistoryByID",
     "parameters": [
      {
-      "$ref": "#/components/parameters/accountIdParameter"
+      "$ref": "#/components/parameters/accountIDParameter"
      },
      {
-      "$ref": "#/components/parameters/jettonIdParameter"
+      "$ref": "#/components/parameters/jettonIDParameter"
      },
      {
       "$ref": "#/components/parameters/i18n"
@@ -3727,7 +3727,7 @@
         }
        }
       },
-      "description": "jetton history"
+      "description": "account jetton history"
      },
      "default": {
       "$ref": "#/components/responses/Error"
@@ -3741,19 +3741,19 @@
   "/v2/accounts/{account_id}/nfts": {
    "get": {
     "description": "Get all NFT items by owner address",
-    "operationId": "getNftItemsByOwner",
+    "operationId": "getAccountNftItems",
     "parameters": [
      {
-      "$ref": "#/components/parameters/accountIdParameter"
+      "$ref": "#/components/parameters/accountIDParameter"
      },
      {
       "$ref": "#/components/parameters/collectionQuery"
      },
      {
-      "$ref": "#/components/parameters/limit"
+      "$ref": "#/components/parameters/limitQuery"
      },
      {
-      "$ref": "#/components/parameters/offset"
+      "$ref": "#/components/parameters/offsetQuery"
      },
      {
       "description": "Selling nft items in ton implemented usually via transfer items to special selling account. This option enables including items which owned not directly.",
@@ -3775,7 +3775,7 @@
         }
        }
       },
-      "description": "nft items"
+      "description": "account nft items"
      },
      "default": {
       "$ref": "#/components/responses/Error"
@@ -3789,10 +3789,10 @@
   "/v2/accounts/{account_id}/publickey": {
    "get": {
     "description": "Get public key by account id",
-    "operationId": "getPublicKeyByAccountID",
+    "operationId": "getAccountPublicKey",
     "parameters": [
      {
-      "$ref": "#/components/parameters/accountIdParameter"
+      "$ref": "#/components/parameters/accountIDParameter"
      }
     ],
     "responses": {
@@ -3813,7 +3813,7 @@
         }
        }
       },
-      "description": "public key"
+      "description": "account's public key"
      },
      "default": {
       "$ref": "#/components/responses/Error"
@@ -3830,7 +3830,7 @@
     "operationId": "reindexAccount",
     "parameters": [
      {
-      "$ref": "#/components/parameters/accountIdParameter"
+      "$ref": "#/components/parameters/accountIDParameter"
      }
     ],
     "responses": {
@@ -3849,10 +3849,10 @@
   "/v2/accounts/{account_id}/subscriptions": {
    "get": {
     "description": "Get all subscriptions by wallet address",
-    "operationId": "getSubscriptionsByAccount",
+    "operationId": "getAccountSubscriptions",
     "parameters": [
      {
-      "$ref": "#/components/parameters/accountIdParameter"
+      "$ref": "#/components/parameters/accountIDParameter"
      }
     ],
     "responses": {
@@ -3864,7 +3864,7 @@
         }
        }
       },
-      "description": "subscriptions"
+      "description": "account's subscriptions"
      },
      "default": {
       "$ref": "#/components/responses/Error"
@@ -3878,10 +3878,10 @@
   "/v2/accounts/{account_id}/traces": {
    "get": {
     "description": "Get traces for account",
-    "operationId": "getTracesByAccount",
+    "operationId": "getAccountTraces",
     "parameters": [
      {
-      "$ref": "#/components/parameters/accountIdParameter"
+      "$ref": "#/components/parameters/accountIDParameter"
      },
      {
       "in": "query",
@@ -3900,11 +3900,11 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/TraceIds"
+         "$ref": "#/components/schemas/TraceIDs"
         }
        }
       },
-      "description": "traces"
+      "description": "account's traces"
      },
      "default": {
       "$ref": "#/components/responses/Error"
@@ -3918,10 +3918,10 @@
   "/v2/blockchain/accounts/{account_id}": {
    "get": {
     "description": "Get low-level information about an account taken directly from the blockchain.",
-    "operationId": "getRawAccount",
+    "operationId": "getBlockchainRawAccount",
     "parameters": [
      {
-      "$ref": "#/components/parameters/accountIdParameter"
+      "$ref": "#/components/parameters/accountIDParameter"
      }
     ],
     "responses": {
@@ -3929,7 +3929,7 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/RawAccount"
+         "$ref": "#/components/schemas/BlockchainRawAccount"
         }
        }
       },
@@ -3947,10 +3947,10 @@
   "/v2/blockchain/accounts/{account_id}/methods/{method_name}": {
    "get": {
     "description": "Execute get method for account",
-    "operationId": "execGetMethod",
+    "operationId": "execGetMethodForBlockchainAccount",
     "parameters": [
      {
-      "$ref": "#/components/parameters/accountIdParameter"
+      "$ref": "#/components/parameters/accountIDParameter"
      },
      {
       "$ref": "#/components/parameters/methodNameParameter"
@@ -3980,7 +3980,7 @@
         }
        }
       },
-      "description": "result"
+      "description": "method execution result"
      },
      "default": {
       "$ref": "#/components/responses/Error"
@@ -3994,17 +3994,17 @@
   "/v2/blockchain/accounts/{account_id}/transactions": {
    "get": {
     "description": "Get account transactions",
-    "operationId": "getAccountTransactions",
+    "operationId": "getBlockchainAccountTransactions",
     "parameters": [
      {
-      "$ref": "#/components/parameters/accountIdParameter"
+      "$ref": "#/components/parameters/accountIDParameter"
      },
      {
       "description": "omit this parameter to get last transactions",
       "in": "query",
       "name": "after_lt",
       "schema": {
-       "example": "",
+       "example": 39787624000003,
        "format": "int64",
        "type": "integer"
       }
@@ -4014,7 +4014,7 @@
       "in": "query",
       "name": "before_lt",
       "schema": {
-       "example": 0,
+       "example": 39787624000003,
        "format": "int64",
        "type": "integer"
       }
@@ -4040,7 +4040,7 @@
         }
        }
       },
-      "description": "account transactions"
+      "description": "blockchain account transactions"
      },
      "default": {
       "$ref": "#/components/responses/Error"
@@ -4053,11 +4053,11 @@
   },
   "/v2/blockchain/blocks/{block_id}": {
    "get": {
-    "description": "Get block data",
-    "operationId": "getBlock",
+    "description": "Get blockchain block data",
+    "operationId": "getBlockchainBlock",
     "parameters": [
      {
-      "$ref": "#/components/parameters/blockIdParameter"
+      "$ref": "#/components/parameters/blockchainBlockIDParameter"
      }
     ],
     "responses": {
@@ -4065,11 +4065,11 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/Block"
+         "$ref": "#/components/schemas/BlockchainBlock"
         }
        }
       },
-      "description": "block"
+      "description": "blockchain block"
      },
      "default": {
       "$ref": "#/components/responses/Error"
@@ -4083,10 +4083,10 @@
   "/v2/blockchain/blocks/{block_id}/transactions": {
    "get": {
     "description": "Get transactions from block",
-    "operationId": "getBlockTransactions",
+    "operationId": "getBlockchainBlockTransactions",
     "parameters": [
      {
-      "$ref": "#/components/parameters/blockIdParameter"
+      "$ref": "#/components/parameters/blockchainBlockIDParameter"
      }
     ],
     "responses": {
@@ -4098,7 +4098,7 @@
         }
        }
       },
-      "description": "transactions"
+      "description": "blockchain block transactions"
      },
      "default": {
       "$ref": "#/components/responses/Error"
@@ -4112,13 +4112,13 @@
   "/v2/blockchain/config": {
    "get": {
     "description": "Get blockchain config",
-    "operationId": "getConfig",
+    "operationId": "getBlockchainConfig",
     "responses": {
      "200": {
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/Config"
+         "$ref": "#/components/schemas/BlockchainConfig"
         }
        }
       },
@@ -4136,17 +4136,17 @@
   "/v2/blockchain/masterchain-head": {
    "get": {
     "description": "Get last known masterchain block",
-    "operationId": "getMasterchainHead",
+    "operationId": "getBlockchainMasterchainHead",
     "responses": {
      "200": {
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/Block"
+         "$ref": "#/components/schemas/BlockchainBlock"
         }
        }
       },
-      "description": "masterchain head"
+      "description": "blockchain masterchain head"
      },
      "default": {
       "$ref": "#/components/responses/Error"
@@ -4160,13 +4160,13 @@
   "/v2/blockchain/message": {
    "post": {
     "description": "Send message to blockchain",
-    "operationId": "sendMessage",
+    "operationId": "sendBlockchainMessage",
     "requestBody": {
-     "$ref": "#/components/requestBodies/SendBoc"
+     "$ref": "#/components/requestBodies/BatchBoc"
     },
     "responses": {
      "200": {
-      "description": "success"
+      "description": "the message has been sent"
      },
      "default": {
       "$ref": "#/components/responses/Error"
@@ -4180,10 +4180,10 @@
   "/v2/blockchain/messages/{msg_id}/transaction": {
    "get": {
     "description": "Get transaction data by message hash",
-    "operationId": "getTransactionByMessageHash",
+    "operationId": "getBlockchainTransactionByMessageHash",
     "parameters": [
      {
-      "$ref": "#/components/parameters/messageIdParameter"
+      "$ref": "#/components/parameters/messageIDParameter"
      }
     ],
     "responses": {
@@ -4195,7 +4195,7 @@
         }
        }
       },
-      "description": "transaction"
+      "description": "transaction by message hash"
      },
      "default": {
       "$ref": "#/components/responses/Error"
@@ -4209,10 +4209,10 @@
   "/v2/blockchain/transactions/{transaction_id}": {
    "get": {
     "description": "Get transaction data",
-    "operationId": "getTransaction",
+    "operationId": "getBlockchainTransaction",
     "parameters": [
      {
-      "$ref": "#/components/parameters/transactionIdParameter"
+      "$ref": "#/components/parameters/transactionIDParameter"
      }
     ],
     "responses": {
@@ -4224,7 +4224,7 @@
         }
        }
       },
-      "description": "transaction"
+      "description": "blockchain transaction"
      },
      "default": {
       "$ref": "#/components/responses/Error"
@@ -4237,8 +4237,8 @@
   },
   "/v2/blockchain/validators": {
    "get": {
-    "description": "Get validators",
-    "operationId": "getValidators",
+    "description": "Get blockchain validators",
+    "operationId": "getBlockchainValidators",
     "responses": {
      "200": {
       "content": {
@@ -4248,7 +4248,7 @@
         }
        }
       },
-      "description": "validators"
+      "description": "blockchain validators"
      },
      "default": {
       "$ref": "#/components/responses/Error"
@@ -4265,7 +4265,7 @@
     "operationId": "getAllAuctions",
     "parameters": [
      {
-      "$ref": "#/components/parameters/domainFilterParameter"
+      "$ref": "#/components/parameters/domainFilterQuery"
      }
     ],
     "responses": {
@@ -4290,8 +4290,8 @@
   },
   "/v2/dns/{domain_name}": {
    "get": {
-    "description": "get full information about domain name",
-    "operationId": "dnsInfo",
+    "description": "Get full information about domain name",
+    "operationId": "getDnsInfo",
     "parameters": [
      {
       "$ref": "#/components/parameters/domainNameParameter"
@@ -4396,7 +4396,7 @@
         }
        }
       },
-      "description": "event"
+      "description": "emulated event"
      },
      "default": {
       "$ref": "#/components/responses/Error"
@@ -4413,7 +4413,7 @@
     "operationId": "getEvent",
     "parameters": [
      {
-      "$ref": "#/components/parameters/eventIdParameter"
+      "$ref": "#/components/parameters/eventIDParameter"
      },
      {
       "$ref": "#/components/parameters/i18n"
@@ -4492,7 +4492,7 @@
     "operationId": "getJettonInfo",
     "parameters": [
      {
-      "$ref": "#/components/parameters/accountIdParameter"
+      "$ref": "#/components/parameters/accountIDParameter"
      }
     ],
     "responses": {
@@ -4504,7 +4504,7 @@
         }
        }
       },
-      "description": "jetton info"
+      "description": "jetton's info"
      },
      "default": {
       "$ref": "#/components/responses/Error"
@@ -4517,11 +4517,11 @@
   },
   "/v2/liteserver/get_account_state/{account_id}": {
    "get": {
-    "description": "Get account state",
-    "operationId": "getAccountStateLiteServer",
+    "description": "Get raw account state",
+    "operationId": "getRawAccountState",
     "parameters": [
      {
-      "$ref": "#/components/parameters/accountIdParameter"
+      "$ref": "#/components/parameters/accountIDParameter"
      }
     ],
     "responses": {
@@ -4560,7 +4560,7 @@
         }
        }
       },
-      "description": "account state"
+      "description": "raw account state"
      },
      "default": {
       "$ref": "#/components/responses/Error"
@@ -4573,11 +4573,11 @@
   },
   "/v2/liteserver/get_all_shards_info/{block_id}": {
    "get": {
-    "description": "Get all shards info",
-    "operationId": "getAllShardsInfoLiteServer",
+    "description": "Get all raw shards info",
+    "operationId": "getAllRawShardsInfo",
     "parameters": [
      {
-      "$ref": "#/components/parameters/blockIdExtParameter"
+      "$ref": "#/components/parameters/blockchainBlockIDExtParameter"
      }
     ],
     "responses": {
@@ -4607,7 +4607,7 @@
         }
        }
       },
-      "description": "shards info"
+      "description": "all raw shards info"
      },
      "default": {
       "$ref": "#/components/responses/Error"
@@ -4620,11 +4620,11 @@
   },
   "/v2/liteserver/get_block/{block_id}": {
    "get": {
-    "description": "Get block",
-    "operationId": "getBlockLiteServer",
+    "description": "Get raw blockchain block",
+    "operationId": "getRawBlockchainBlock",
     "parameters": [
      {
-      "$ref": "#/components/parameters/blockIdExtParameter"
+      "$ref": "#/components/parameters/blockchainBlockIDExtParameter"
      }
     ],
     "responses": {
@@ -4649,7 +4649,7 @@
         }
        }
       },
-      "description": "block"
+      "description": "raw blockchain block"
      },
      "default": {
       "$ref": "#/components/responses/Error"
@@ -4662,11 +4662,11 @@
   },
   "/v2/liteserver/get_block_header/{block_id}": {
    "get": {
-    "description": "Get block header",
-    "operationId": "getBlockHeaderLiteServer",
+    "description": "Get raw blockchain block header",
+    "operationId": "getRawBlockchainBlockHeader",
     "parameters": [
      {
-      "$ref": "#/components/parameters/blockIdExtParameter"
+      "$ref": "#/components/parameters/blockchainBlockIDExtParameter"
      },
      {
       "$ref": "#/components/parameters/modeQuery"
@@ -4700,7 +4700,7 @@
         }
        }
       },
-      "description": "block header"
+      "description": "raw blockchain block header"
      },
      "default": {
       "$ref": "#/components/responses/Error"
@@ -4713,14 +4713,14 @@
   },
   "/v2/liteserver/get_block_proof": {
    "get": {
-    "description": "Get block proof",
-    "operationId": "getBlockProofLiteServer",
+    "description": "Get raw block proof",
+    "operationId": "getRawBlockProof",
     "parameters": [
      {
-      "$ref": "#/components/parameters/knownBlockIdExtQuery"
+      "$ref": "#/components/parameters/knownBlockIDExtQuery"
      },
      {
-      "$ref": "#/components/parameters/targetBlockIdExtQuery"
+      "$ref": "#/components/parameters/targetBlockIDExtQuery"
      },
      {
       "$ref": "#/components/parameters/modeQuery"
@@ -4869,7 +4869,7 @@
         }
        }
       },
-      "description": "proof"
+      "description": "raw block proof"
      },
      "default": {
       "$ref": "#/components/responses/Error"
@@ -4882,11 +4882,11 @@
   },
   "/v2/liteserver/get_config_all/{block_id}": {
    "get": {
-    "description": "Get config all",
-    "operationId": "getConfigAllLiteServer",
+    "description": "Get raw config",
+    "operationId": "getRawConfig",
     "parameters": [
      {
-      "$ref": "#/components/parameters/blockIdExtParameter"
+      "$ref": "#/components/parameters/blockchainBlockIDExtParameter"
      },
      {
       "$ref": "#/components/parameters/modeQuery"
@@ -4925,7 +4925,7 @@
         }
        }
       },
-      "description": "config"
+      "description": "raw config"
      },
      "default": {
       "$ref": "#/components/responses/Error"
@@ -4938,8 +4938,8 @@
   },
   "/v2/liteserver/get_masterchain_info": {
    "get": {
-    "description": "Get masterchain info",
-    "operationId": "getMasterchainInfoLiteServer",
+    "description": "Get raw masterchain info",
+    "operationId": "getRawMasterchainInfo",
     "responses": {
      "200": {
       "content": {
@@ -4966,7 +4966,7 @@
         }
        }
       },
-      "description": "masterchain info"
+      "description": "raw masterchain info"
      },
      "default": {
       "$ref": "#/components/responses/Error"
@@ -4979,8 +4979,8 @@
   },
   "/v2/liteserver/get_masterchain_info_ext": {
    "get": {
-    "description": "Get masterchain info ext",
-    "operationId": "getMasterchainInfoExtLiteServer",
+    "description": "Get raw masterchain info ext",
+    "operationId": "getRawMasterchainInfoExt",
     "parameters": [
      {
       "$ref": "#/components/parameters/modeQuery"
@@ -5042,7 +5042,7 @@
         }
        }
       },
-      "description": "masterchain info ext"
+      "description": "raw masterchain info ext"
      },
      "default": {
       "$ref": "#/components/responses/Error"
@@ -5055,11 +5055,11 @@
   },
   "/v2/liteserver/get_shard_block_proof/{block_id}": {
    "get": {
-    "description": "Get shard block proof",
-    "operationId": "getShardBlockProofLiteServer",
+    "description": "Get raw shard block proof",
+    "operationId": "getRawShardBlockProof",
     "parameters": [
      {
-      "$ref": "#/components/parameters/blockIdExtParameter"
+      "$ref": "#/components/parameters/blockchainBlockIDExtParameter"
      }
     ],
     "responses": {
@@ -5099,7 +5099,7 @@
         }
        }
       },
-      "description": "shard"
+      "description": "raw shard block proof"
      },
      "default": {
       "$ref": "#/components/responses/Error"
@@ -5112,11 +5112,11 @@
   },
   "/v2/liteserver/get_shard_info/{block_id}": {
    "get": {
-    "description": "Get shard info",
-    "operationId": "getShardInfoLiteServer",
+    "description": "Get raw shard info",
+    "operationId": "getRawShardInfo",
     "parameters": [
      {
-      "$ref": "#/components/parameters/blockIdExtParameter"
+      "$ref": "#/components/parameters/blockchainBlockIDExtParameter"
      },
      {
       "$ref": "#/components/parameters/workchainQuery"
@@ -5159,7 +5159,7 @@
         }
        }
       },
-      "description": "shard info"
+      "description": "raw shard info"
      },
      "default": {
       "$ref": "#/components/responses/Error"
@@ -5172,11 +5172,11 @@
   },
   "/v2/liteserver/get_state/{block_id}": {
    "get": {
-    "description": "Get block state",
-    "operationId": "getStateLiteServer",
+    "description": "Get raw blockchain block state",
+    "operationId": "getRawBlockchainBlockState",
     "parameters": [
      {
-      "$ref": "#/components/parameters/blockIdExtParameter"
+      "$ref": "#/components/parameters/blockchainBlockIDExtParameter"
      }
     ],
     "responses": {
@@ -5211,7 +5211,7 @@
         }
        }
       },
-      "description": "state"
+      "description": "raw blockchain block state"
      },
      "default": {
       "$ref": "#/components/responses/Error"
@@ -5224,8 +5224,8 @@
   },
   "/v2/liteserver/get_time": {
    "get": {
-    "description": "Get time",
-    "operationId": "getTimeLiteServer",
+    "description": "Get raw time",
+    "operationId": "getRawTime",
     "responses": {
      "200": {
       "content": {
@@ -5245,7 +5245,7 @@
         }
        }
       },
-      "description": "time"
+      "description": "raw time"
      },
      "default": {
       "$ref": "#/components/responses/Error"
@@ -5258,11 +5258,11 @@
   },
   "/v2/liteserver/get_transactions/{account_id}": {
    "get": {
-    "description": "Get transactions",
-    "operationId": "getTransactionsLiteServer",
+    "description": "Get raw transactions",
+    "operationId": "getRawTransactions",
     "parameters": [
      {
-      "$ref": "#/components/parameters/accountIdParameter"
+      "$ref": "#/components/parameters/accountIDParameter"
      },
      {
       "$ref": "#/components/parameters/countQuery"
@@ -5299,7 +5299,7 @@
         }
        }
       },
-      "description": "transactions"
+      "description": "raw transactions"
      },
      "default": {
       "$ref": "#/components/responses/Error"
@@ -5312,11 +5312,11 @@
   },
   "/v2/liteserver/list_block_transactions/{block_id}": {
    "get": {
-    "description": "Get list block transactions",
-    "operationId": "getListBlockTransactionsLiteServer",
+    "description": "Get raw list block transactions",
+    "operationId": "getRawListBlockTransactions",
     "parameters": [
      {
-      "$ref": "#/components/parameters/blockIdExtParameter"
+      "$ref": "#/components/parameters/blockchainBlockIDExtParameter"
      },
      {
       "$ref": "#/components/parameters/modeQuery"
@@ -5325,7 +5325,7 @@
       "$ref": "#/components/parameters/countQuery"
      },
      {
-      "$ref": "#/components/parameters/accountIdQuery"
+      "$ref": "#/components/parameters/accountIDQuery"
      },
      {
       "$ref": "#/components/parameters/ltQuery"
@@ -5393,7 +5393,7 @@
         }
        }
       },
-      "description": "list block transactions"
+      "description": "a list of raw block transactions"
      },
      "default": {
       "$ref": "#/components/responses/Error"
@@ -5406,8 +5406,8 @@
   },
   "/v2/liteserver/send_message": {
    "post": {
-    "description": "Send message",
-    "operationId": "sendMessageLiteServer",
+    "description": "Send raw message to blockchain",
+    "operationId": "sendRawMessage",
     "requestBody": {
      "$ref": "#/components/requestBodies/LiteServerSendMessageRequest"
     },
@@ -5446,7 +5446,7 @@
     "description": "Get NFT items by their addresses",
     "operationId": "getNftItemsByAddresses",
     "requestBody": {
-     "$ref": "#/components/requestBodies/AccountIds"
+     "$ref": "#/components/requestBodies/AccountIDs"
     },
     "responses": {
      "200": {
@@ -5521,7 +5521,7 @@
     "operationId": "getNftCollection",
     "parameters": [
      {
-      "$ref": "#/components/parameters/accountIdParameter"
+      "$ref": "#/components/parameters/accountIDParameter"
      }
     ],
     "responses": {
@@ -5550,13 +5550,13 @@
     "operationId": "getItemsFromCollection",
     "parameters": [
      {
-      "$ref": "#/components/parameters/accountIdParameter"
+      "$ref": "#/components/parameters/accountIDParameter"
      },
      {
-      "$ref": "#/components/parameters/limit"
+      "$ref": "#/components/parameters/limitQuery"
      },
      {
-      "$ref": "#/components/parameters/offset"
+      "$ref": "#/components/parameters/offsetQuery"
      }
     ],
     "responses": {
@@ -5568,7 +5568,7 @@
         }
        }
       },
-      "description": "nft collection"
+      "description": "nft items"
      },
      "default": {
       "$ref": "#/components/responses/Error"
@@ -5585,7 +5585,7 @@
     "operationId": "getNftItemByAddress",
     "parameters": [
      {
-      "$ref": "#/components/parameters/accountIdParameter"
+      "$ref": "#/components/parameters/accountIDParameter"
      }
     ],
     "responses": {
@@ -5633,7 +5633,7 @@
      }
     },
     "tags": [
-     "Wallets"
+     "Wallet"
     ]
    }
   },
@@ -5681,7 +5681,7 @@
         }
        }
       },
-      "description": "ton price"
+      "description": "tokens rates"
      },
      "default": {
       "$ref": "#/components/responses/Error"
@@ -5734,7 +5734,7 @@
         }
        }
       },
-      "description": "chart"
+      "description": "token chart"
      },
      "default": {
       "$ref": "#/components/responses/Error"
@@ -5748,10 +5748,10 @@
   "/v2/staking/nominator/{account_id}/pools": {
    "get": {
     "description": "All pools where account participates",
-    "operationId": "poolsByNominators",
+    "operationId": "getAccountNominatorsPools",
     "parameters": [
      {
-      "$ref": "#/components/parameters/accountIdParameter"
+      "$ref": "#/components/parameters/accountIDParameter"
      }
     ],
     "responses": {
@@ -5763,7 +5763,7 @@
         }
        }
       },
-      "description": "user pools"
+      "description": "account's pools"
      },
      "default": {
       "$ref": "#/components/responses/Error"
@@ -5776,11 +5776,11 @@
   },
   "/v2/staking/pool/{account_id}": {
    "get": {
-    "description": "Pool info",
-    "operationId": "stakingPoolInfo",
+    "description": "Stacking pool info",
+    "operationId": "getStakingPoolInfo",
     "parameters": [
      {
-      "$ref": "#/components/parameters/accountIdParameter"
+      "$ref": "#/components/parameters/accountIDParameter"
      },
      {
       "$ref": "#/components/parameters/i18n"
@@ -5807,7 +5807,7 @@
         }
        }
       },
-      "description": "user pools"
+      "description": "stacking pool info"
      },
      "default": {
       "$ref": "#/components/responses/Error"
@@ -5820,11 +5820,11 @@
   },
   "/v2/staking/pool/{account_id}/history": {
    "get": {
-    "description": "Pool info",
-    "operationId": "stakingPoolHistory",
+    "description": "Pool history",
+    "operationId": "getStakingPoolHistory",
     "parameters": [
      {
-      "$ref": "#/components/parameters/accountIdParameter"
+      "$ref": "#/components/parameters/accountIDParameter"
      }
     ],
     "responses": {
@@ -5847,7 +5847,7 @@
         }
        }
       },
-      "description": "history"
+      "description": "pool history"
      },
      "default": {
       "$ref": "#/components/responses/Error"
@@ -5861,7 +5861,7 @@
   "/v2/staking/pools": {
    "get": {
     "description": "All pools available in network",
-    "operationId": "stakingPools",
+    "operationId": "getStakingPools",
     "parameters": [
      {
       "description": "account ID",
@@ -6036,7 +6036,7 @@
         }
        }
       },
-      "description": "event"
+      "description": "emulated trace"
      },
      "default": {
       "$ref": "#/components/responses/Error"
@@ -6053,7 +6053,7 @@
     "operationId": "getTrace",
     "parameters": [
      {
-      "$ref": "#/components/parameters/traceIdParameter"
+      "$ref": "#/components/parameters/traceIDParameter"
      }
     ],
     "responses": {
@@ -6101,7 +6101,7 @@
         }
        }
       },
-      "description": "token"
+      "description": "auth token"
      },
      "default": {
       "$ref": "#/components/responses/Error"
@@ -6143,7 +6143,7 @@
         }
        }
       },
-      "description": "backup"
+      "description": "get wallet dump"
      },
      "default": {
       "$ref": "#/components/responses/Error"
@@ -6185,7 +6185,7 @@
   "/v2/wallet/emulate": {
    "post": {
     "description": "Emulate sending message to blockchain",
-    "operationId": "emulateWalletMessage",
+    "operationId": "emulateMessageToWallet",
     "parameters": [
      {
       "$ref": "#/components/parameters/i18n"
@@ -6203,7 +6203,7 @@
         }
        }
       },
-      "description": "event"
+      "description": "emulated message"
      },
      "default": {
       "$ref": "#/components/responses/Error"
@@ -6220,7 +6220,7 @@
     "operationId": "getAccountSeqno",
     "parameters": [
      {
-      "$ref": "#/components/parameters/accountIdParameter"
+      "$ref": "#/components/parameters/accountIDParameter"
      }
     ],
     "responses": {
@@ -6239,7 +6239,7 @@
      }
     },
     "tags": [
-     "Wallets"
+     "Wallet"
     ]
    }
   }

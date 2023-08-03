@@ -522,7 +522,7 @@ func (s *Auctions) Validate() error {
 	return nil
 }
 
-func (s *Block) Validate() error {
+func (s *BlockchainBlock) Validate() error {
 	var failures []validate.FieldError
 	if err := func() error {
 		if s.PrevRefs == nil {
@@ -541,59 +541,7 @@ func (s *Block) Validate() error {
 	return nil
 }
 
-func (s BouncePhaseType) Validate() error {
-	switch s {
-	case "TrPhaseBounceNegfunds":
-		return nil
-	case "TrPhaseBounceNofunds":
-		return nil
-	case "TrPhaseBounceOk":
-		return nil
-	default:
-		return errors.Errorf("invalid value: %v", s)
-	}
-}
-
-func (s *ComputePhase) Validate() error {
-	var failures []validate.FieldError
-	if err := func() error {
-		if value, ok := s.SkipReason.Get(); ok {
-			if err := func() error {
-				if err := value.Validate(); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return err
-			}
-		}
-		return nil
-	}(); err != nil {
-		failures = append(failures, validate.FieldError{
-			Name:  "skip_reason",
-			Error: err,
-		})
-	}
-	if len(failures) > 0 {
-		return &validate.Error{Fields: failures}
-	}
-	return nil
-}
-
-func (s ComputeSkipReason) Validate() error {
-	switch s {
-	case "cskip_no_state":
-		return nil
-	case "cskip_bad_state":
-		return nil
-	case "cskip_no_gas":
-		return nil
-	default:
-		return errors.Errorf("invalid value: %v", s)
-	}
-}
-
-func (s *Config) Validate() error {
+func (s *BlockchainConfig) Validate() error {
 	var failures []validate.FieldError
 	if err := func() error {
 		if value, ok := s.R32.Get(); ok {
@@ -707,6 +655,58 @@ func (s *Config) Validate() error {
 		return &validate.Error{Fields: failures}
 	}
 	return nil
+}
+
+func (s BouncePhaseType) Validate() error {
+	switch s {
+	case "TrPhaseBounceNegfunds":
+		return nil
+	case "TrPhaseBounceNofunds":
+		return nil
+	case "TrPhaseBounceOk":
+		return nil
+	default:
+		return errors.Errorf("invalid value: %v", s)
+	}
+}
+
+func (s *ComputePhase) Validate() error {
+	var failures []validate.FieldError
+	if err := func() error {
+		if value, ok := s.SkipReason.Get(); ok {
+			if err := func() error {
+				if err := value.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "skip_reason",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s ComputeSkipReason) Validate() error {
+	switch s {
+	case "cskip_no_state":
+		return nil
+	case "cskip_bad_state":
+		return nil
+	case "cskip_no_gas":
+		return nil
+	default:
+		return errors.Errorf("invalid value: %v", s)
+	}
 }
 
 func (s *ContractDeployAction) Validate() error {
@@ -976,7 +976,26 @@ func (s *GetAccountsReq) Validate() error {
 	return nil
 }
 
-func (s *GetBlockProofLiteServerOK) Validate() error {
+func (s *GetNftItemsByAddressesReq) Validate() error {
+	var failures []validate.FieldError
+	if err := func() error {
+		if s.AccountIds == nil {
+			return errors.New("nil is invalid value")
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "account_ids",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s *GetRawBlockProofOK) Validate() error {
 	var failures []validate.FieldError
 	if err := func() error {
 		if s.Steps == nil {
@@ -1012,7 +1031,7 @@ func (s *GetBlockProofLiteServerOK) Validate() error {
 	return nil
 }
 
-func (s *GetBlockProofLiteServerOKStepsItem) Validate() error {
+func (s *GetRawBlockProofOKStepsItem) Validate() error {
 	var failures []validate.FieldError
 	if err := func() error {
 		if err := s.LiteServerBlockLinkForward.Validate(); err != nil {
@@ -1031,7 +1050,7 @@ func (s *GetBlockProofLiteServerOKStepsItem) Validate() error {
 	return nil
 }
 
-func (s *GetBlockProofLiteServerOKStepsItemLiteServerBlockLinkForward) Validate() error {
+func (s *GetRawBlockProofOKStepsItemLiteServerBlockLinkForward) Validate() error {
 	var failures []validate.FieldError
 	if err := func() error {
 		if err := s.Signatures.Validate(); err != nil {
@@ -1050,7 +1069,7 @@ func (s *GetBlockProofLiteServerOKStepsItemLiteServerBlockLinkForward) Validate(
 	return nil
 }
 
-func (s *GetBlockProofLiteServerOKStepsItemLiteServerBlockLinkForwardSignatures) Validate() error {
+func (s *GetRawBlockProofOKStepsItemLiteServerBlockLinkForwardSignatures) Validate() error {
 	var failures []validate.FieldError
 	if err := func() error {
 		if s.Signatures == nil {
@@ -1069,7 +1088,7 @@ func (s *GetBlockProofLiteServerOKStepsItemLiteServerBlockLinkForwardSignatures)
 	return nil
 }
 
-func (s *GetListBlockTransactionsLiteServerOK) Validate() error {
+func (s *GetRawListBlockTransactionsOK) Validate() error {
 	var failures []validate.FieldError
 	if err := func() error {
 		if s.Ids == nil {
@@ -1088,26 +1107,7 @@ func (s *GetListBlockTransactionsLiteServerOK) Validate() error {
 	return nil
 }
 
-func (s *GetNftItemsByAddressesReq) Validate() error {
-	var failures []validate.FieldError
-	if err := func() error {
-		if s.AccountIds == nil {
-			return errors.New("nil is invalid value")
-		}
-		return nil
-	}(); err != nil {
-		failures = append(failures, validate.FieldError{
-			Name:  "account_ids",
-			Error: err,
-		})
-	}
-	if len(failures) > 0 {
-		return &validate.Error{Fields: failures}
-	}
-	return nil
-}
-
-func (s *GetShardBlockProofLiteServerOK) Validate() error {
+func (s *GetRawShardBlockProofOK) Validate() error {
 	var failures []validate.FieldError
 	if err := func() error {
 		if s.Links == nil {
@@ -1117,6 +1117,116 @@ func (s *GetShardBlockProofLiteServerOK) Validate() error {
 	}(); err != nil {
 		failures = append(failures, validate.FieldError{
 			Name:  "links",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s *GetRawTransactionsOK) Validate() error {
+	var failures []validate.FieldError
+	if err := func() error {
+		if s.Ids == nil {
+			return errors.New("nil is invalid value")
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "ids",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s *GetStakingPoolHistoryOK) Validate() error {
+	var failures []validate.FieldError
+	if err := func() error {
+		if s.Apy == nil {
+			return errors.New("nil is invalid value")
+		}
+		var failures []validate.FieldError
+		for i, elem := range s.Apy {
+			if err := func() error {
+				if err := elem.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				failures = append(failures, validate.FieldError{
+					Name:  fmt.Sprintf("[%d]", i),
+					Error: err,
+				})
+			}
+		}
+		if len(failures) > 0 {
+			return &validate.Error{Fields: failures}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "apy",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s *GetStakingPoolInfoOK) Validate() error {
+	var failures []validate.FieldError
+	if err := func() error {
+		if err := s.Pool.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "pool",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s *GetStakingPoolsOK) Validate() error {
+	var failures []validate.FieldError
+	if err := func() error {
+		if s.Pools == nil {
+			return errors.New("nil is invalid value")
+		}
+		var failures []validate.FieldError
+		for i, elem := range s.Pools {
+			if err := func() error {
+				if err := elem.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				failures = append(failures, validate.FieldError{
+					Name:  fmt.Sprintf("[%d]", i),
+					Error: err,
+				})
+			}
+		}
+		if len(failures) > 0 {
+			return &validate.Error{Fields: failures}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "pools",
 			Error: err,
 		})
 	}
@@ -1136,25 +1246,6 @@ func (s *GetStorageProvidersOK) Validate() error {
 	}(); err != nil {
 		failures = append(failures, validate.FieldError{
 			Name:  "providers",
-			Error: err,
-		})
-	}
-	if len(failures) > 0 {
-		return &validate.Error{Fields: failures}
-	}
-	return nil
-}
-
-func (s *GetTransactionsLiteServerOK) Validate() error {
-	var failures []validate.FieldError
-	if err := func() error {
-		if s.Ids == nil {
-			return errors.New("nil is invalid value")
-		}
-		return nil
-	}(); err != nil {
-		failures = append(failures, validate.FieldError{
-			Name:  "ids",
 			Error: err,
 		})
 	}
@@ -1801,7 +1892,7 @@ func (s *Risk) Validate() error {
 	return nil
 }
 
-func (s *SendMessageReq) Validate() error {
+func (s *SendBlockchainMessageReq) Validate() error {
 	var failures []validate.FieldError
 	if err := func() error {
 		if err := (validate.Array{
@@ -1842,97 +1933,6 @@ func (s *SmartContractAction) Validate() error {
 	}(); err != nil {
 		failures = append(failures, validate.FieldError{
 			Name:  "refund",
-			Error: err,
-		})
-	}
-	if len(failures) > 0 {
-		return &validate.Error{Fields: failures}
-	}
-	return nil
-}
-
-func (s *StakingPoolHistoryOK) Validate() error {
-	var failures []validate.FieldError
-	if err := func() error {
-		if s.Apy == nil {
-			return errors.New("nil is invalid value")
-		}
-		var failures []validate.FieldError
-		for i, elem := range s.Apy {
-			if err := func() error {
-				if err := elem.Validate(); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				failures = append(failures, validate.FieldError{
-					Name:  fmt.Sprintf("[%d]", i),
-					Error: err,
-				})
-			}
-		}
-		if len(failures) > 0 {
-			return &validate.Error{Fields: failures}
-		}
-		return nil
-	}(); err != nil {
-		failures = append(failures, validate.FieldError{
-			Name:  "apy",
-			Error: err,
-		})
-	}
-	if len(failures) > 0 {
-		return &validate.Error{Fields: failures}
-	}
-	return nil
-}
-
-func (s *StakingPoolInfoOK) Validate() error {
-	var failures []validate.FieldError
-	if err := func() error {
-		if err := s.Pool.Validate(); err != nil {
-			return err
-		}
-		return nil
-	}(); err != nil {
-		failures = append(failures, validate.FieldError{
-			Name:  "pool",
-			Error: err,
-		})
-	}
-	if len(failures) > 0 {
-		return &validate.Error{Fields: failures}
-	}
-	return nil
-}
-
-func (s *StakingPoolsOK) Validate() error {
-	var failures []validate.FieldError
-	if err := func() error {
-		if s.Pools == nil {
-			return errors.New("nil is invalid value")
-		}
-		var failures []validate.FieldError
-		for i, elem := range s.Pools {
-			if err := func() error {
-				if err := elem.Validate(); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				failures = append(failures, validate.FieldError{
-					Name:  fmt.Sprintf("[%d]", i),
-					Error: err,
-				})
-			}
-		}
-		if len(failures) > 0 {
-			return &validate.Error{Fields: failures}
-		}
-		return nil
-	}(); err != nil {
-		failures = append(failures, validate.FieldError{
-			Name:  "pools",
 			Error: err,
 		})
 	}
@@ -2061,7 +2061,7 @@ func (s *Trace) Validate() error {
 	return nil
 }
 
-func (s *TraceIds) Validate() error {
+func (s *TraceIDs) Validate() error {
 	var failures []validate.FieldError
 	if err := func() error {
 		if s.Traces == nil {

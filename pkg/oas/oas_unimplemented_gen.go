@@ -13,21 +13,12 @@ type UnimplementedHandler struct{}
 
 var _ Handler = UnimplementedHandler{}
 
-// DnsBackResolve implements dnsBackResolve operation.
+// AccountDnsBackResolve implements accountDnsBackResolve operation.
 //
-// Get domains for wallet account.
+// Get account's domains.
 //
 // GET /v2/accounts/{account_id}/dns/backresolve
-func (UnimplementedHandler) DnsBackResolve(ctx context.Context, params DnsBackResolveParams) (r *DomainNames, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
-// DnsInfo implements dnsInfo operation.
-//
-// Get full information about domain name.
-//
-// GET /v2/dns/{domain_name}
-func (UnimplementedHandler) DnsInfo(ctx context.Context, params DnsInfoParams) (r *DomainInfo, _ error) {
+func (UnimplementedHandler) AccountDnsBackResolve(ctx context.Context, params AccountDnsBackResolveParams) (r *DomainNames, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -67,21 +58,21 @@ func (UnimplementedHandler) EmulateMessageToTrace(ctx context.Context, req *Emul
 	return r, ht.ErrNotImplemented
 }
 
-// EmulateWalletMessage implements emulateWalletMessage operation.
+// EmulateMessageToWallet implements emulateMessageToWallet operation.
 //
 // Emulate sending message to blockchain.
 //
 // POST /v2/wallet/emulate
-func (UnimplementedHandler) EmulateWalletMessage(ctx context.Context, req *EmulateWalletMessageReq, params EmulateWalletMessageParams) (r *MessageConsequences, _ error) {
+func (UnimplementedHandler) EmulateMessageToWallet(ctx context.Context, req *EmulateMessageToWalletReq, params EmulateMessageToWalletParams) (r *MessageConsequences, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
-// ExecGetMethod implements execGetMethod operation.
+// ExecGetMethodForBlockchainAccount implements execGetMethodForBlockchainAccount operation.
 //
 // Execute get method for account.
 //
 // GET /v2/blockchain/accounts/{account_id}/methods/{method_name}
-func (UnimplementedHandler) ExecGetMethod(ctx context.Context, params ExecGetMethodParams) (r *MethodExecutionResult, _ error) {
+func (UnimplementedHandler) ExecGetMethodForBlockchainAccount(ctx context.Context, params ExecGetMethodForBlockchainAccountParams) (r *MethodExecutionResult, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -94,12 +85,88 @@ func (UnimplementedHandler) GetAccount(ctx context.Context, params GetAccountPar
 	return r, ht.ErrNotImplemented
 }
 
+// GetAccountDnsExpiring implements getAccountDnsExpiring operation.
+//
+// Get expiring account .ton dns.
+//
+// GET /v2/accounts/{account_id}/dns/expiring
+func (UnimplementedHandler) GetAccountDnsExpiring(ctx context.Context, params GetAccountDnsExpiringParams) (r *DnsExpiring, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// GetAccountEvents implements getAccountEvents operation.
+//
+// Get events for an account. Each event is built on top of a trace which is a series of transactions
+// caused by one inbound message. TonAPI looks for known patterns inside the trace and splits the
+// trace into actions, where a single action represents a meaningful high-level operation like a
+// Jetton Transfer or an NFT Purchase. Actions are expected to be shown to users. It is advised not
+// to build any logic on top of actions because actions can be changed at any time.
+//
+// GET /v2/accounts/{account_id}/events
+func (UnimplementedHandler) GetAccountEvents(ctx context.Context, params GetAccountEventsParams) (r *AccountEvents, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // GetAccountInfoByStateInit implements getAccountInfoByStateInit operation.
 //
 // Get account info by state init.
 //
 // POST /v2/tonconnect/stateinit
 func (UnimplementedHandler) GetAccountInfoByStateInit(ctx context.Context, req *GetAccountInfoByStateInitReq) (r *AccountInfoByStateInit, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// GetAccountJettonHistoryByID implements getAccountJettonHistoryByID operation.
+//
+// Get the transfer jetton history for account and jetton.
+//
+// GET /v2/accounts/{account_id}/jettons/{jetton_id}/history
+func (UnimplementedHandler) GetAccountJettonHistoryByID(ctx context.Context, params GetAccountJettonHistoryByIDParams) (r *AccountEvents, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// GetAccountJettonsBalances implements getAccountJettonsBalances operation.
+//
+// Get all Jettons balances by owner address.
+//
+// GET /v2/accounts/{account_id}/jettons
+func (UnimplementedHandler) GetAccountJettonsBalances(ctx context.Context, params GetAccountJettonsBalancesParams) (r *JettonsBalances, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// GetAccountJettonsHistory implements getAccountJettonsHistory operation.
+//
+// Get the transfer jettons history for account.
+//
+// GET /v2/accounts/{account_id}/jettons/history
+func (UnimplementedHandler) GetAccountJettonsHistory(ctx context.Context, params GetAccountJettonsHistoryParams) (r *AccountEvents, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// GetAccountNftItems implements getAccountNftItems operation.
+//
+// Get all NFT items by owner address.
+//
+// GET /v2/accounts/{account_id}/nfts
+func (UnimplementedHandler) GetAccountNftItems(ctx context.Context, params GetAccountNftItemsParams) (r *NftItems, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// GetAccountNominatorsPools implements getAccountNominatorsPools operation.
+//
+// All pools where account participates.
+//
+// GET /v2/staking/nominator/{account_id}/pools
+func (UnimplementedHandler) GetAccountNominatorsPools(ctx context.Context, params GetAccountNominatorsPoolsParams) (r *AccountStaking, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// GetAccountPublicKey implements getAccountPublicKey operation.
+//
+// Get public key by account id.
+//
+// GET /v2/accounts/{account_id}/publickey
+func (UnimplementedHandler) GetAccountPublicKey(ctx context.Context, params GetAccountPublicKeyParams) (r *GetAccountPublicKeyOK, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -112,21 +179,21 @@ func (UnimplementedHandler) GetAccountSeqno(ctx context.Context, params GetAccou
 	return r, ht.ErrNotImplemented
 }
 
-// GetAccountStateLiteServer implements getAccountStateLiteServer operation.
+// GetAccountSubscriptions implements getAccountSubscriptions operation.
 //
-// Get account state.
+// Get all subscriptions by wallet address.
 //
-// GET /v2/liteserver/get_account_state/{account_id}
-func (UnimplementedHandler) GetAccountStateLiteServer(ctx context.Context, params GetAccountStateLiteServerParams) (r *GetAccountStateLiteServerOK, _ error) {
+// GET /v2/accounts/{account_id}/subscriptions
+func (UnimplementedHandler) GetAccountSubscriptions(ctx context.Context, params GetAccountSubscriptionsParams) (r *Subscriptions, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
-// GetAccountTransactions implements getAccountTransactions operation.
+// GetAccountTraces implements getAccountTraces operation.
 //
-// Get account transactions.
+// Get traces for account.
 //
-// GET /v2/blockchain/accounts/{account_id}/transactions
-func (UnimplementedHandler) GetAccountTransactions(ctx context.Context, params GetAccountTransactionsParams) (r *Transactions, _ error) {
+// GET /v2/accounts/{account_id}/traces
+func (UnimplementedHandler) GetAccountTraces(ctx context.Context, params GetAccountTracesParams) (r *TraceIDs, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -148,57 +215,93 @@ func (UnimplementedHandler) GetAllAuctions(ctx context.Context, params GetAllAuc
 	return r, ht.ErrNotImplemented
 }
 
-// GetAllShardsInfoLiteServer implements getAllShardsInfoLiteServer operation.
+// GetAllRawShardsInfo implements getAllRawShardsInfo operation.
 //
-// Get all shards info.
+// Get all raw shards info.
 //
 // GET /v2/liteserver/get_all_shards_info/{block_id}
-func (UnimplementedHandler) GetAllShardsInfoLiteServer(ctx context.Context, params GetAllShardsInfoLiteServerParams) (r *GetAllShardsInfoLiteServerOK, _ error) {
+func (UnimplementedHandler) GetAllRawShardsInfo(ctx context.Context, params GetAllRawShardsInfoParams) (r *GetAllRawShardsInfoOK, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
-// GetBlock implements getBlock operation.
+// GetBlockchainAccountTransactions implements getBlockchainAccountTransactions operation.
 //
-// Get block data.
+// Get account transactions.
+//
+// GET /v2/blockchain/accounts/{account_id}/transactions
+func (UnimplementedHandler) GetBlockchainAccountTransactions(ctx context.Context, params GetBlockchainAccountTransactionsParams) (r *Transactions, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// GetBlockchainBlock implements getBlockchainBlock operation.
+//
+// Get blockchain block data.
 //
 // GET /v2/blockchain/blocks/{block_id}
-func (UnimplementedHandler) GetBlock(ctx context.Context, params GetBlockParams) (r *Block, _ error) {
+func (UnimplementedHandler) GetBlockchainBlock(ctx context.Context, params GetBlockchainBlockParams) (r *BlockchainBlock, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
-// GetBlockHeaderLiteServer implements getBlockHeaderLiteServer operation.
-//
-// Get block header.
-//
-// GET /v2/liteserver/get_block_header/{block_id}
-func (UnimplementedHandler) GetBlockHeaderLiteServer(ctx context.Context, params GetBlockHeaderLiteServerParams) (r *GetBlockHeaderLiteServerOK, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
-// GetBlockLiteServer implements getBlockLiteServer operation.
-//
-// Get block.
-//
-// GET /v2/liteserver/get_block/{block_id}
-func (UnimplementedHandler) GetBlockLiteServer(ctx context.Context, params GetBlockLiteServerParams) (r *GetBlockLiteServerOK, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
-// GetBlockProofLiteServer implements getBlockProofLiteServer operation.
-//
-// Get block proof.
-//
-// GET /v2/liteserver/get_block_proof
-func (UnimplementedHandler) GetBlockProofLiteServer(ctx context.Context, params GetBlockProofLiteServerParams) (r *GetBlockProofLiteServerOK, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
-// GetBlockTransactions implements getBlockTransactions operation.
+// GetBlockchainBlockTransactions implements getBlockchainBlockTransactions operation.
 //
 // Get transactions from block.
 //
 // GET /v2/blockchain/blocks/{block_id}/transactions
-func (UnimplementedHandler) GetBlockTransactions(ctx context.Context, params GetBlockTransactionsParams) (r *Transactions, _ error) {
+func (UnimplementedHandler) GetBlockchainBlockTransactions(ctx context.Context, params GetBlockchainBlockTransactionsParams) (r *Transactions, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// GetBlockchainConfig implements getBlockchainConfig operation.
+//
+// Get blockchain config.
+//
+// GET /v2/blockchain/config
+func (UnimplementedHandler) GetBlockchainConfig(ctx context.Context) (r *BlockchainConfig, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// GetBlockchainMasterchainHead implements getBlockchainMasterchainHead operation.
+//
+// Get last known masterchain block.
+//
+// GET /v2/blockchain/masterchain-head
+func (UnimplementedHandler) GetBlockchainMasterchainHead(ctx context.Context) (r *BlockchainBlock, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// GetBlockchainRawAccount implements getBlockchainRawAccount operation.
+//
+// Get low-level information about an account taken directly from the blockchain.
+//
+// GET /v2/blockchain/accounts/{account_id}
+func (UnimplementedHandler) GetBlockchainRawAccount(ctx context.Context, params GetBlockchainRawAccountParams) (r *BlockchainRawAccount, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// GetBlockchainTransaction implements getBlockchainTransaction operation.
+//
+// Get transaction data.
+//
+// GET /v2/blockchain/transactions/{transaction_id}
+func (UnimplementedHandler) GetBlockchainTransaction(ctx context.Context, params GetBlockchainTransactionParams) (r *Transaction, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// GetBlockchainTransactionByMessageHash implements getBlockchainTransactionByMessageHash operation.
+//
+// Get transaction data by message hash.
+//
+// GET /v2/blockchain/messages/{msg_id}/transaction
+func (UnimplementedHandler) GetBlockchainTransactionByMessageHash(ctx context.Context, params GetBlockchainTransactionByMessageHashParams) (r *Transaction, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// GetBlockchainValidators implements getBlockchainValidators operation.
+//
+// Get blockchain validators.
+//
+// GET /v2/blockchain/validators
+func (UnimplementedHandler) GetBlockchainValidators(ctx context.Context) (r *Validators, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -211,30 +314,12 @@ func (UnimplementedHandler) GetChartRates(ctx context.Context, params GetChartRa
 	return r, ht.ErrNotImplemented
 }
 
-// GetConfig implements getConfig operation.
+// GetDnsInfo implements getDnsInfo operation.
 //
-// Get blockchain config.
+// Get full information about domain name.
 //
-// GET /v2/blockchain/config
-func (UnimplementedHandler) GetConfig(ctx context.Context) (r *Config, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
-// GetConfigAllLiteServer implements getConfigAllLiteServer operation.
-//
-// Get config all.
-//
-// GET /v2/liteserver/get_config_all/{block_id}
-func (UnimplementedHandler) GetConfigAllLiteServer(ctx context.Context, params GetConfigAllLiteServerParams) (r *GetConfigAllLiteServerOK, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
-// GetDnsExpiring implements getDnsExpiring operation.
-//
-// Get expiring .ton dns.
-//
-// GET /v2/accounts/{account_id}/dns/expiring
-func (UnimplementedHandler) GetDnsExpiring(ctx context.Context, params GetDnsExpiringParams) (r *DnsExpiring, _ error) {
+// GET /v2/dns/{domain_name}
+func (UnimplementedHandler) GetDnsInfo(ctx context.Context, params GetDnsInfoParams) (r *DomainInfo, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -258,19 +343,6 @@ func (UnimplementedHandler) GetDomainBids(ctx context.Context, params GetDomainB
 //
 // GET /v2/events/{event_id}
 func (UnimplementedHandler) GetEvent(ctx context.Context, params GetEventParams) (r *Event, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
-// GetEventsByAccount implements getEventsByAccount operation.
-//
-// Get events for an account. Each event is built on top of a trace which is a series of transactions
-// caused by one inbound message. TonAPI looks for known patterns inside the trace and splits the
-// trace into actions, where a single action represents a meaningful high-level operation like a
-// Jetton Transfer or an NFT Purchase. Actions are expected to be shown to users. It is advised not
-// to build any logic on top of actions because actions can be changed at any time.
-//
-// GET /v2/accounts/{account_id}/events
-func (UnimplementedHandler) GetEventsByAccount(ctx context.Context, params GetEventsByAccountParams) (r *AccountEvents, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -298,69 +370,6 @@ func (UnimplementedHandler) GetJettonInfo(ctx context.Context, params GetJettonI
 //
 // GET /v2/jettons
 func (UnimplementedHandler) GetJettons(ctx context.Context, params GetJettonsParams) (r *Jettons, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
-// GetJettonsBalances implements getJettonsBalances operation.
-//
-// Get all Jettons balances by owner address.
-//
-// GET /v2/accounts/{account_id}/jettons
-func (UnimplementedHandler) GetJettonsBalances(ctx context.Context, params GetJettonsBalancesParams) (r *JettonsBalances, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
-// GetJettonsHistory implements getJettonsHistory operation.
-//
-// Get the transfer jettons history for account_id.
-//
-// GET /v2/accounts/{account_id}/jettons/history
-func (UnimplementedHandler) GetJettonsHistory(ctx context.Context, params GetJettonsHistoryParams) (r *AccountEvents, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
-// GetJettonsHistoryByID implements getJettonsHistoryByID operation.
-//
-// Get the transfer jetton history for account_id and jetton_id.
-//
-// GET /v2/accounts/{account_id}/jettons/{jetton_id}/history
-func (UnimplementedHandler) GetJettonsHistoryByID(ctx context.Context, params GetJettonsHistoryByIDParams) (r *AccountEvents, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
-// GetListBlockTransactionsLiteServer implements getListBlockTransactionsLiteServer operation.
-//
-// Get list block transactions.
-//
-// GET /v2/liteserver/list_block_transactions/{block_id}
-func (UnimplementedHandler) GetListBlockTransactionsLiteServer(ctx context.Context, params GetListBlockTransactionsLiteServerParams) (r *GetListBlockTransactionsLiteServerOK, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
-// GetMasterchainHead implements getMasterchainHead operation.
-//
-// Get last known masterchain block.
-//
-// GET /v2/blockchain/masterchain-head
-func (UnimplementedHandler) GetMasterchainHead(ctx context.Context) (r *Block, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
-// GetMasterchainInfoExtLiteServer implements getMasterchainInfoExtLiteServer operation.
-//
-// Get masterchain info ext.
-//
-// GET /v2/liteserver/get_masterchain_info_ext
-func (UnimplementedHandler) GetMasterchainInfoExtLiteServer(ctx context.Context, params GetMasterchainInfoExtLiteServerParams) (r *GetMasterchainInfoExtLiteServerOK, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
-// GetMasterchainInfoLiteServer implements getMasterchainInfoLiteServer operation.
-//
-// Get masterchain info.
-//
-// GET /v2/liteserver/get_masterchain_info
-func (UnimplementedHandler) GetMasterchainInfoLiteServer(ctx context.Context) (r *GetMasterchainInfoLiteServerOK, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -400,24 +409,6 @@ func (UnimplementedHandler) GetNftItemsByAddresses(ctx context.Context, req OptG
 	return r, ht.ErrNotImplemented
 }
 
-// GetNftItemsByOwner implements getNftItemsByOwner operation.
-//
-// Get all NFT items by owner address.
-//
-// GET /v2/accounts/{account_id}/nfts
-func (UnimplementedHandler) GetNftItemsByOwner(ctx context.Context, params GetNftItemsByOwnerParams) (r *NftItems, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
-// GetPublicKeyByAccountID implements getPublicKeyByAccountID operation.
-//
-// Get public key by account id.
-//
-// GET /v2/accounts/{account_id}/publickey
-func (UnimplementedHandler) GetPublicKeyByAccountID(ctx context.Context, params GetPublicKeyByAccountIDParams) (r *GetPublicKeyByAccountIDOK, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
 // GetRates implements getRates operation.
 //
 // Get the token price to the currency.
@@ -427,48 +418,147 @@ func (UnimplementedHandler) GetRates(ctx context.Context, params GetRatesParams)
 	return r, ht.ErrNotImplemented
 }
 
-// GetRawAccount implements getRawAccount operation.
+// GetRawAccountState implements getRawAccountState operation.
 //
-// Get low-level information about an account taken directly from the blockchain.
+// Get raw account state.
 //
-// GET /v2/blockchain/accounts/{account_id}
-func (UnimplementedHandler) GetRawAccount(ctx context.Context, params GetRawAccountParams) (r *RawAccount, _ error) {
+// GET /v2/liteserver/get_account_state/{account_id}
+func (UnimplementedHandler) GetRawAccountState(ctx context.Context, params GetRawAccountStateParams) (r *GetRawAccountStateOK, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
-// GetSearchAccounts implements getSearchAccounts operation.
+// GetRawBlockProof implements getRawBlockProof operation.
 //
-// Search for accounts by name. You can find the account by the first characters of the domain.
+// Get raw block proof.
 //
-// GET /v2/accounts/search
-func (UnimplementedHandler) GetSearchAccounts(ctx context.Context, params GetSearchAccountsParams) (r *FoundAccounts, _ error) {
+// GET /v2/liteserver/get_block_proof
+func (UnimplementedHandler) GetRawBlockProof(ctx context.Context, params GetRawBlockProofParams) (r *GetRawBlockProofOK, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
-// GetShardBlockProofLiteServer implements getShardBlockProofLiteServer operation.
+// GetRawBlockchainBlock implements getRawBlockchainBlock operation.
 //
-// Get shard block proof.
+// Get raw blockchain block.
 //
-// GET /v2/liteserver/get_shard_block_proof/{block_id}
-func (UnimplementedHandler) GetShardBlockProofLiteServer(ctx context.Context, params GetShardBlockProofLiteServerParams) (r *GetShardBlockProofLiteServerOK, _ error) {
+// GET /v2/liteserver/get_block/{block_id}
+func (UnimplementedHandler) GetRawBlockchainBlock(ctx context.Context, params GetRawBlockchainBlockParams) (r *GetRawBlockchainBlockOK, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
-// GetShardInfoLiteServer implements getShardInfoLiteServer operation.
+// GetRawBlockchainBlockHeader implements getRawBlockchainBlockHeader operation.
 //
-// Get shard info.
+// Get raw blockchain block header.
 //
-// GET /v2/liteserver/get_shard_info/{block_id}
-func (UnimplementedHandler) GetShardInfoLiteServer(ctx context.Context, params GetShardInfoLiteServerParams) (r *GetShardInfoLiteServerOK, _ error) {
+// GET /v2/liteserver/get_block_header/{block_id}
+func (UnimplementedHandler) GetRawBlockchainBlockHeader(ctx context.Context, params GetRawBlockchainBlockHeaderParams) (r *GetRawBlockchainBlockHeaderOK, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
-// GetStateLiteServer implements getStateLiteServer operation.
+// GetRawBlockchainBlockState implements getRawBlockchainBlockState operation.
 //
-// Get block state.
+// Get raw blockchain block state.
 //
 // GET /v2/liteserver/get_state/{block_id}
-func (UnimplementedHandler) GetStateLiteServer(ctx context.Context, params GetStateLiteServerParams) (r *GetStateLiteServerOK, _ error) {
+func (UnimplementedHandler) GetRawBlockchainBlockState(ctx context.Context, params GetRawBlockchainBlockStateParams) (r *GetRawBlockchainBlockStateOK, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// GetRawConfig implements getRawConfig operation.
+//
+// Get raw config.
+//
+// GET /v2/liteserver/get_config_all/{block_id}
+func (UnimplementedHandler) GetRawConfig(ctx context.Context, params GetRawConfigParams) (r *GetRawConfigOK, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// GetRawListBlockTransactions implements getRawListBlockTransactions operation.
+//
+// Get raw list block transactions.
+//
+// GET /v2/liteserver/list_block_transactions/{block_id}
+func (UnimplementedHandler) GetRawListBlockTransactions(ctx context.Context, params GetRawListBlockTransactionsParams) (r *GetRawListBlockTransactionsOK, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// GetRawMasterchainInfo implements getRawMasterchainInfo operation.
+//
+// Get raw masterchain info.
+//
+// GET /v2/liteserver/get_masterchain_info
+func (UnimplementedHandler) GetRawMasterchainInfo(ctx context.Context) (r *GetRawMasterchainInfoOK, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// GetRawMasterchainInfoExt implements getRawMasterchainInfoExt operation.
+//
+// Get raw masterchain info ext.
+//
+// GET /v2/liteserver/get_masterchain_info_ext
+func (UnimplementedHandler) GetRawMasterchainInfoExt(ctx context.Context, params GetRawMasterchainInfoExtParams) (r *GetRawMasterchainInfoExtOK, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// GetRawShardBlockProof implements getRawShardBlockProof operation.
+//
+// Get raw shard block proof.
+//
+// GET /v2/liteserver/get_shard_block_proof/{block_id}
+func (UnimplementedHandler) GetRawShardBlockProof(ctx context.Context, params GetRawShardBlockProofParams) (r *GetRawShardBlockProofOK, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// GetRawShardInfo implements getRawShardInfo operation.
+//
+// Get raw shard info.
+//
+// GET /v2/liteserver/get_shard_info/{block_id}
+func (UnimplementedHandler) GetRawShardInfo(ctx context.Context, params GetRawShardInfoParams) (r *GetRawShardInfoOK, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// GetRawTime implements getRawTime operation.
+//
+// Get raw time.
+//
+// GET /v2/liteserver/get_time
+func (UnimplementedHandler) GetRawTime(ctx context.Context) (r *GetRawTimeOK, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// GetRawTransactions implements getRawTransactions operation.
+//
+// Get raw transactions.
+//
+// GET /v2/liteserver/get_transactions/{account_id}
+func (UnimplementedHandler) GetRawTransactions(ctx context.Context, params GetRawTransactionsParams) (r *GetRawTransactionsOK, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// GetStakingPoolHistory implements getStakingPoolHistory operation.
+//
+// Pool history.
+//
+// GET /v2/staking/pool/{account_id}/history
+func (UnimplementedHandler) GetStakingPoolHistory(ctx context.Context, params GetStakingPoolHistoryParams) (r *GetStakingPoolHistoryOK, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// GetStakingPoolInfo implements getStakingPoolInfo operation.
+//
+// Stacking pool info.
+//
+// GET /v2/staking/pool/{account_id}
+func (UnimplementedHandler) GetStakingPoolInfo(ctx context.Context, params GetStakingPoolInfoParams) (r *GetStakingPoolInfoOK, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// GetStakingPools implements getStakingPools operation.
+//
+// All pools available in network.
+//
+// GET /v2/staking/pools
+func (UnimplementedHandler) GetStakingPools(ctx context.Context, params GetStakingPoolsParams) (r *GetStakingPoolsOK, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -478,24 +568,6 @@ func (UnimplementedHandler) GetStateLiteServer(ctx context.Context, params GetSt
 //
 // GET /v2/storage/providers
 func (UnimplementedHandler) GetStorageProviders(ctx context.Context) (r *GetStorageProvidersOK, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
-// GetSubscriptionsByAccount implements getSubscriptionsByAccount operation.
-//
-// Get all subscriptions by wallet address.
-//
-// GET /v2/accounts/{account_id}/subscriptions
-func (UnimplementedHandler) GetSubscriptionsByAccount(ctx context.Context, params GetSubscriptionsByAccountParams) (r *Subscriptions, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
-// GetTimeLiteServer implements getTimeLiteServer operation.
-//
-// Get time.
-//
-// GET /v2/liteserver/get_time
-func (UnimplementedHandler) GetTimeLiteServer(ctx context.Context) (r *GetTimeLiteServerOK, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -517,51 +589,6 @@ func (UnimplementedHandler) GetTrace(ctx context.Context, params GetTraceParams)
 	return r, ht.ErrNotImplemented
 }
 
-// GetTracesByAccount implements getTracesByAccount operation.
-//
-// Get traces for account.
-//
-// GET /v2/accounts/{account_id}/traces
-func (UnimplementedHandler) GetTracesByAccount(ctx context.Context, params GetTracesByAccountParams) (r *TraceIds, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
-// GetTransaction implements getTransaction operation.
-//
-// Get transaction data.
-//
-// GET /v2/blockchain/transactions/{transaction_id}
-func (UnimplementedHandler) GetTransaction(ctx context.Context, params GetTransactionParams) (r *Transaction, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
-// GetTransactionByMessageHash implements getTransactionByMessageHash operation.
-//
-// Get transaction data by message hash.
-//
-// GET /v2/blockchain/messages/{msg_id}/transaction
-func (UnimplementedHandler) GetTransactionByMessageHash(ctx context.Context, params GetTransactionByMessageHashParams) (r *Transaction, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
-// GetTransactionsLiteServer implements getTransactionsLiteServer operation.
-//
-// Get transactions.
-//
-// GET /v2/liteserver/get_transactions/{account_id}
-func (UnimplementedHandler) GetTransactionsLiteServer(ctx context.Context, params GetTransactionsLiteServerParams) (r *GetTransactionsLiteServerOK, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
-// GetValidators implements getValidators operation.
-//
-// Get validators.
-//
-// GET /v2/blockchain/validators
-func (UnimplementedHandler) GetValidators(ctx context.Context) (r *Validators, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
 // GetWalletBackup implements getWalletBackup operation.
 //
 // Get backup info.
@@ -580,15 +607,6 @@ func (UnimplementedHandler) GetWalletsByPublicKey(ctx context.Context, params Ge
 	return r, ht.ErrNotImplemented
 }
 
-// PoolsByNominators implements poolsByNominators operation.
-//
-// All pools where account participates.
-//
-// GET /v2/staking/nominator/{account_id}/pools
-func (UnimplementedHandler) PoolsByNominators(ctx context.Context, params PoolsByNominatorsParams) (r *AccountStaking, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
 // ReindexAccount implements reindexAccount operation.
 //
 // Update internal cache for a particular account.
@@ -598,21 +616,30 @@ func (UnimplementedHandler) ReindexAccount(ctx context.Context, params ReindexAc
 	return ht.ErrNotImplemented
 }
 
-// SendMessage implements sendMessage operation.
+// SearchAccounts implements searchAccounts operation.
+//
+// Search by account domain name.
+//
+// GET /v2/accounts/search
+func (UnimplementedHandler) SearchAccounts(ctx context.Context, params SearchAccountsParams) (r *FoundAccounts, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// SendBlockchainMessage implements sendBlockchainMessage operation.
 //
 // Send message to blockchain.
 //
 // POST /v2/blockchain/message
-func (UnimplementedHandler) SendMessage(ctx context.Context, req *SendMessageReq) error {
+func (UnimplementedHandler) SendBlockchainMessage(ctx context.Context, req *SendBlockchainMessageReq) error {
 	return ht.ErrNotImplemented
 }
 
-// SendMessageLiteServer implements sendMessageLiteServer operation.
+// SendRawMessage implements sendRawMessage operation.
 //
-// Send message.
+// Send raw message to blockchain.
 //
 // POST /v2/liteserver/send_message
-func (UnimplementedHandler) SendMessageLiteServer(ctx context.Context, req *SendMessageLiteServerReq) (r *SendMessageLiteServerOK, _ error) {
+func (UnimplementedHandler) SendRawMessage(ctx context.Context, req *SendRawMessageReq) (r *SendRawMessageOK, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -623,33 +650,6 @@ func (UnimplementedHandler) SendMessageLiteServer(ctx context.Context, req *Send
 // PUT /v2/wallet/backup
 func (UnimplementedHandler) SetWalletBackup(ctx context.Context, req SetWalletBackupReq, params SetWalletBackupParams) error {
 	return ht.ErrNotImplemented
-}
-
-// StakingPoolHistory implements stakingPoolHistory operation.
-//
-// Pool info.
-//
-// GET /v2/staking/pool/{account_id}/history
-func (UnimplementedHandler) StakingPoolHistory(ctx context.Context, params StakingPoolHistoryParams) (r *StakingPoolHistoryOK, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
-// StakingPoolInfo implements stakingPoolInfo operation.
-//
-// Pool info.
-//
-// GET /v2/staking/pool/{account_id}
-func (UnimplementedHandler) StakingPoolInfo(ctx context.Context, params StakingPoolInfoParams) (r *StakingPoolInfoOK, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
-// StakingPools implements stakingPools operation.
-//
-// All pools available in network.
-//
-// GET /v2/staking/pools
-func (UnimplementedHandler) StakingPools(ctx context.Context, params StakingPoolsParams) (r *StakingPoolsOK, _ error) {
-	return r, ht.ErrNotImplemented
 }
 
 // TonConnectProof implements tonConnectProof operation.

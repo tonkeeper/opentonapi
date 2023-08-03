@@ -11,12 +11,12 @@ import (
 	"github.com/tonkeeper/tongo/tlb"
 )
 
-func (h Handler) DnsBackResolve(ctx context.Context, params oas.DnsBackResolveParams) (*oas.DomainNames, error) {
-	a, err := tongo.ParseAccountID(params.AccountID)
+func (h Handler) AccountDnsBackResolve(ctx context.Context, params oas.AccountDnsBackResolveParams) (*oas.DomainNames, error) {
+	accountID, err := tongo.ParseAccountID(params.AccountID)
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
 	}
-	domains, err := h.storage.FindAllDomainsResolvedToAddress(ctx, a, references.DomainSuffixes)
+	domains, err := h.storage.FindAllDomainsResolvedToAddress(ctx, accountID, references.DomainSuffixes)
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
@@ -35,7 +35,7 @@ func (h Handler) DnsBackResolve(ctx context.Context, params oas.DnsBackResolvePa
 			if err != nil || w == nil {
 				break
 			}
-			if *w != a {
+			if *w != accountID {
 				break
 			}
 			found = true
