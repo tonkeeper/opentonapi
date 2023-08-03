@@ -82,10 +82,6 @@ func (h Handler) GetTrace(ctx context.Context, params oas.GetTraceParams) (*oas.
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
 	}
-	if hash.Hex() == testEventID {
-		testTrace := getTestTrace()
-		return &testTrace, nil
-	}
 	trace, err := h.getTraceByHash(ctx, hash)
 	if errors.Is(err, core.ErrEntityNotFound) {
 		return nil, toError(http.StatusNotFound, err)
@@ -101,10 +97,6 @@ func (h Handler) GetEvent(ctx context.Context, params oas.GetEventParams) (*oas.
 	traceID, err := tongo.ParseHash(params.EventID)
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
-	}
-	if traceID.Hex() == testEventID {
-		testEvent := getTestEvent()
-		return &testEvent, nil
 	}
 	trace, err := h.getTraceByHash(ctx, traceID)
 	if errors.Is(err, core.ErrEntityNotFound) {
@@ -183,9 +175,6 @@ func (h Handler) GetEventsByAccount(ctx context.Context, params oas.GetEventsByA
 			events = slices.Insert(events, 0, event)[:len(events)-1]
 			lastLT = uint64(events[len(events)-1].Lt)
 		}
-	}
-	if account.ToRaw() == testEventAccount {
-		events = slices.Insert(events, 0, getTestAccountEvent())
 	}
 	for _, event := range events {
 		for i, j := 0, len(event.Actions)-1; i < j; i, j = i+1, j-1 {
