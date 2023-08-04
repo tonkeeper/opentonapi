@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/tonkeeper/opentonapi/pkg/oas"
 	"github.com/tonkeeper/opentonapi/pkg/references"
@@ -86,10 +87,38 @@ func (h Handler) DnsResolve(ctx context.Context, params oas.DnsResolveParams) (*
 	return &result, nil
 }
 
+func (h Handler) GetDnsInfo(ctx context.Context, params oas.GetDnsInfoParams) (*oas.DomainInfo, error) {
+	name, err := convertDomainName(params.DomainName)
+	if err != nil {
+		return nil, toError(http.StatusBadRequest, err)
+	}
+	nft, expTime, err := h.storage.GetDomainInfo(ctx, name)
+	if err != nil {
+		return nil, toError(http.StatusInternalServerError, err)
+	}
+	convertedDomainInfo := oas.DomainInfo{
+		Name: params.DomainName,
+	}
+	convertedDomainInfo.Item.SetTo(convertNFT(ctx, nft, h.addressBook, h.previewGenerator, h.metaCache))
+	if expTime != 0 {
+		convertedDomainInfo.ExpiringAt.SetTo(expTime)
+	}
+	return &convertedDomainInfo, nil
+}
+
 func convertMsgAddress(address tlb.MsgAddress) string {
 	a, _ := tongo.AccountIDFromTlb(address)
 	if a == nil {
 		return ""
 	}
 	return a.ToRaw()
+}
+
+func convertDomainName(s string) (string, error) {
+	s = strings.ToLower(s)
+	name := strings.TrimSuffix(s, ".ton")
+	if len(name) < 4 || len(name) > 126 {
+		return "", fmt.Errorf("invalid domain len")
+	}
+	return name, nil
 }

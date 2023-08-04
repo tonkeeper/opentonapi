@@ -661,7 +661,7 @@ paths:
         'default':
           $ref: '#/components/responses/Error'
   
-  /v2/dns/{domain_name}: # not implemented in tonapi v2
+  /v2/dns/{domain_name}:
     get:
       description: Get full information about domain name
       operationId: getDnsInfo
@@ -3761,6 +3761,7 @@ components:
           type: string
         expiring_at:
           type: integer
+          format: int64
           description: date of expiring. optional. not all domain in ton has expiration date
         item:
           $ref: '#/components/schemas/NftItem'

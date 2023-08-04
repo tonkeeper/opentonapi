@@ -1592,6 +1592,7 @@
     "properties": {
      "expiring_at": {
       "description": "date of expiring. optional. not all domain in ton has expiration date",
+      "format": "int64",
       "type": "integer"
      },
      "item": {
@@ -4504,7 +4505,7 @@
         }
        }
       },
-      "description": "jetton's info"
+      "description": "jetton info"
      },
      "default": {
       "$ref": "#/components/responses/Error"
@@ -5914,7 +5915,7 @@
         }
        }
       },
-      "description": "list of pools"
+      "description": "a list of pools"
      },
      "default": {
       "$ref": "#/components/responses/Error"
@@ -5949,7 +5950,7 @@
         }
        }
       },
-      "description": "list of storage providers"
+      "description": "a list of storage providers"
      },
      "default": {
       "$ref": "#/components/responses/Error"

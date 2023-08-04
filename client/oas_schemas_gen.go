@@ -2235,7 +2235,7 @@ func (s *DomainBids) SetData(val []DomainBid) {
 type DomainInfo struct {
 	Name string `json:"name"`
 	// Date of expiring. optional. not all domain in ton has expiration date.
-	ExpiringAt OptInt     `json:"expiring_at"`
+	ExpiringAt OptInt64   `json:"expiring_at"`
 	Item       OptNftItem `json:"item"`
 }
 
@@ -2245,7 +2245,7 @@ func (s *DomainInfo) GetName() string {
 }
 
 // GetExpiringAt returns the value of ExpiringAt.
-func (s *DomainInfo) GetExpiringAt() OptInt {
+func (s *DomainInfo) GetExpiringAt() OptInt64 {
 	return s.ExpiringAt
 }
 
@@ -2260,7 +2260,7 @@ func (s *DomainInfo) SetName(val string) {
 }
 
 // SetExpiringAt sets the value of ExpiringAt.
-func (s *DomainInfo) SetExpiringAt(val OptInt) {
+func (s *DomainInfo) SetExpiringAt(val OptInt64) {
 	s.ExpiringAt = val
 }
 
