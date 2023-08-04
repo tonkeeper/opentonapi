@@ -19526,7 +19526,7 @@ func (s *TraceID) encodeFields(e *jx.Encoder) {
 	}
 	{
 		e.FieldStart("utime")
-		e.Int64(s.Utime)
+		e.UInt64(s.Utime)
 	}
 }
 
@@ -19559,8 +19559,8 @@ func (s *TraceID) Decode(d *jx.Decoder) error {
 		case "utime":
 			requiredBitSet[0] |= 1 << 1
 			if err := func() error {
-				v, err := d.Int64()
-				s.Utime = int64(v)
+				v, err := d.UInt64()
+				s.Utime = uint64(v)
 				if err != nil {
 					return err
 				}

@@ -288,6 +288,29 @@ func (h Handler) GetAccountSubscriptions(ctx context.Context, params oas.GetAcco
 	return &response, nil
 }
 
+func (h Handler) GetAccountTraces(ctx context.Context, params oas.GetAccountTracesParams) (*oas.TraceIDs, error) {
+	accountID, err := tongo.ParseAccountID(params.AccountID)
+	if err != nil {
+		return nil, toError(http.StatusBadRequest, err)
+	}
+	traceIDs, err := h.storage.SearchTraces(ctx, accountID, params.Limit.Value, nil, nil, nil)
+	if err != nil && !errors.Is(err, core.ErrEntityNotFound) {
+		return nil, toError(http.StatusInternalServerError, err)
+	}
+	var traces oas.TraceIDs
+	for _, traceID := range traceIDs {
+		trace, err := h.storage.GetTrace(ctx, traceID)
+		if err != nil {
+			return nil, toError(http.StatusInternalServerError, err)
+		}
+		traces.Traces = append(traces.Traces, oas.TraceID{
+			ID:    trace.Hash.Hex(),
+			Utime: trace.Lt,
+		})
+	}
+	return &traces, nil
+}
+
 func pubkeyFromCodeData(code, data []byte) ([]byte, error) {
 	cells, err := boc.DeserializeBoc(code)
 	if err != nil {

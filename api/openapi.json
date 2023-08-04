@@ -2913,7 +2913,7 @@
      },
      "utime": {
       "example": 1645544908,
-      "format": "int64",
+      "format": "uint64",
       "type": "integer"
      }
     },
@@ -3890,7 +3890,6 @@
       "schema": {
        "default": 100,
        "example": 100,
-       "format": "int32",
        "maximum": 1000,
        "type": "integer"
       }

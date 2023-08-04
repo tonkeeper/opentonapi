@@ -541,7 +541,7 @@ paths:
                 $ref: '#/components/schemas/AccountEvents'
         'default':
           $ref: '#/components/responses/Error'
-  /v2/accounts/{account_id}/traces: # not implemented in tonapi v2
+  /v2/accounts/{account_id}/traces:
     get:
       description: Get traces for account
       operationId: getAccountTraces
@@ -553,7 +553,6 @@ paths:
           in: query
           schema:
             type: integer
-            format: int32
             maximum: 1000
             default: 100
             example: 100
@@ -3599,7 +3598,7 @@ components:
           example: 55e8809519cd3c49098c9ee45afdafcea7a894a74d0f628d94a115a50e045122
         utime:
           type: integer
-          format: int64
+          format: uint64
           example: 1645544908
     TraceIDs:
       type: object

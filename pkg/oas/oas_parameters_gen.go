@@ -2554,7 +2554,7 @@ func decodeGetAccountSubscriptionsParams(args [1]string, argsEscaped bool, r *ht
 type GetAccountTracesParams struct {
 	// Account ID.
 	AccountID string
-	Limit     OptInt32
+	Limit     OptInt
 }
 
 func unpackGetAccountTracesParams(packed middleware.Parameters) (params GetAccountTracesParams) {
@@ -2571,7 +2571,7 @@ func unpackGetAccountTracesParams(packed middleware.Parameters) (params GetAccou
 			In:   "query",
 		}
 		if v, ok := packed[key]; ok {
-			params.Limit = v.(OptInt32)
+			params.Limit = v.(OptInt)
 		}
 	}
 	return params
@@ -2626,7 +2626,7 @@ func decodeGetAccountTracesParams(args [1]string, argsEscaped bool, r *http.Requ
 	}
 	// Set default value for query: limit.
 	{
-		val := int32(100)
+		val := int(100)
 		params.Limit.SetTo(val)
 	}
 	// Decode query: limit.
@@ -2639,14 +2639,14 @@ func decodeGetAccountTracesParams(args [1]string, argsEscaped bool, r *http.Requ
 
 		if err := q.HasParam(cfg); err == nil {
 			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
-				var paramsDotLimitVal int32
+				var paramsDotLimitVal int
 				if err := func() error {
 					val, err := d.DecodeValue()
 					if err != nil {
 						return err
 					}
 
-					c, err := conv.ToInt32(val)
+					c, err := conv.ToInt(val)
 					if err != nil {
 						return err
 					}

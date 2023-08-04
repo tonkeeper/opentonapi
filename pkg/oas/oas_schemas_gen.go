@@ -7972,7 +7972,7 @@ func (s *Trace) SetChildren(val []Trace) {
 // Ref: #/components/schemas/TraceID
 type TraceID struct {
 	ID    string `json:"id"`
-	Utime int64  `json:"utime"`
+	Utime uint64 `json:"utime"`
 }
 
 // GetID returns the value of ID.
@@ -7981,7 +7981,7 @@ func (s *TraceID) GetID() string {
 }
 
 // GetUtime returns the value of Utime.
-func (s *TraceID) GetUtime() int64 {
+func (s *TraceID) GetUtime() uint64 {
 	return s.Utime
 }
 
@@ -7991,7 +7991,7 @@ func (s *TraceID) SetID(val string) {
 }
 
 // SetUtime sets the value of Utime.
-func (s *TraceID) SetUtime(val int64) {
+func (s *TraceID) SetUtime(val uint64) {
 	s.Utime = val
 }
 

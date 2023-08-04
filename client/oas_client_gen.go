@@ -2279,7 +2279,7 @@ func (c *Client) sendGetAccountTraces(ctx context.Context, params GetAccountTrac
 
 		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
 			if val, ok := params.Limit.Get(); ok {
-				return e.EncodeValue(conv.Int32ToString(val))
+				return e.EncodeValue(conv.IntToString(val))
 			}
 			return nil
 		}); err != nil {
