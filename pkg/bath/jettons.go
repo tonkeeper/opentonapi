@@ -1,10 +1,67 @@
 package bath
 
-import "github.com/tonkeeper/tongo/abi"
+import (
+	"github.com/tonkeeper/tongo"
+	"github.com/tonkeeper/tongo/abi"
+	"github.com/tonkeeper/tongo/tlb"
+)
+
+type BubbleJettonTransfer struct {
+	sender, recipient             *Account
+	senderWallet, recipientWallet tongo.AccountID
+	master                        tongo.AccountID
+	amount                        tlb.VarUInteger16
+	success                       bool
+	payload                       any
+}
+
+func (b BubbleJettonTransfer) ToAction() (action *Action) {
+	a := Action{
+		JettonTransfer: &JettonTransferAction{
+			Jetton:           b.master,
+			Recipient:        b.recipient.Addr(),
+			Sender:           b.sender.Addr(),
+			RecipientsWallet: b.recipientWallet,
+			SendersWallet:    b.senderWallet,
+			Amount:           b.amount,
+		},
+		Success: b.success,
+		Type:    JettonTransfer,
+	}
+	switch c := b.payload.(type) {
+	case string:
+		a.JettonTransfer.Comment = &c
+	case EncryptedComment:
+		a.JettonTransfer.EncryptedComment = &c
+	}
+	return &a
+}
+
+type BubbleJettonMint struct {
+	recipient       *Account
+	recipientWallet tongo.AccountID
+	master          tongo.AccountID
+	amount          tlb.VarUInteger16
+	success         bool
+}
+
+func (b BubbleJettonMint) ToAction() (action *Action) {
+	a := Action{
+		JettonMint: &JettonMintAction{
+			Jetton:           b.master,
+			Recipient:        b.recipient.Addr(),
+			RecipientsWallet: b.recipientWallet,
+			Amount:           b.amount,
+		},
+		Success: b.success,
+		Type:    JettonMint,
+	}
+	return &a
+}
 
 // example: https://tonviewer.com/transaction/6d33487c44249d7844db8fac38a5cecf1502ec7e0c09d266e98e95a2b1be17b5
-var DedustLPJettonMintStraw = Straw[BubbleJettonTransfer]{
-	CheckFuncs: []bubbleCheck{IsTx, HasOpcode(0xb56b9598)}, //todo: switch to check interface to be jetton master and rename straw to be more generic
+var DedustLPJettonMintStraw = Straw[BubbleJettonTransfer]{ //todo: rewrite to mint
+	CheckFuncs: []bubbleCheck{IsTx, Or(HasOpcode(0xb56b9598), HasOpcode(0x1674b0a0))}, //todo: switch to check interface to be jetton master and rename straw to be more generic
 	Builder: func(newAction *BubbleJettonTransfer, bubble *Bubble) (err error) {
 		tx := bubble.Info.(BubbleTx)
 		newAction.sender = &tx.account

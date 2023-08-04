@@ -84,6 +84,12 @@ func IsTx(b *Bubble) bool {
 	return ok
 }
 
+func Or(check1, check2 bubbleCheck) bubbleCheck {
+	return func(bubble *Bubble) bool {
+		return check1(bubble) || check2(bubble)
+	}
+}
+
 func HasOpcode(op uint32) bubbleCheck {
 	return func(b *Bubble) bool {
 		opCode := b.Info.(BubbleTx).opCode

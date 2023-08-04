@@ -17,6 +17,8 @@ const (
 	NftItemTransfer   ActionType = "NftItemTransfer"
 	NftPurchase       ActionType = "NftPurchase"
 	JettonTransfer    ActionType = "JettonTransfer"
+	JettonMint        ActionType = "JettonMint"
+	JettonBurn        ActionType = "JettonBurn"
 	ContractDeploy    ActionType = "ContractDeploy"
 	Subscription      ActionType = "Subscribe"
 	UnSubscription    ActionType = "UnSubscribe"
@@ -57,6 +59,8 @@ type (
 		NftItemTransfer   *NftTransferAction    `json:",omitempty"`
 		NftPurchase       *NftPurchaseAction    `json:",omitempty"`
 		JettonTransfer    *JettonTransferAction `json:",omitempty"`
+		JettonMint        *JettonMintAction     `json:",omitempty"`
+		JettonBurn        *JettonBurnAction     `json:",omitempty"`
 		ContractDeploy    *ContractDeployAction `json:",omitempty"`
 		Subscription      *SubscriptionAction   `json:",omitempty"`
 		UnSubscription    *UnSubscriptionAction `json:",omitempty"`
@@ -122,6 +126,20 @@ type (
 		SendersWallet    tongo.AccountID
 		Amount           tlb.VarUInteger16
 		Refund           *Refund
+	}
+
+	JettonMintAction struct {
+		Jetton           tongo.AccountID
+		Recipient        *tongo.AccountID
+		RecipientsWallet tongo.AccountID
+		Amount           tlb.VarUInteger16
+	}
+
+	JettonBurnAction struct {
+		Jetton        tongo.AccountID
+		Sender        *tongo.AccountID
+		SendersWallet tongo.AccountID
+		Amount        tlb.VarUInteger16
 	}
 
 	ContractDeployAction struct {

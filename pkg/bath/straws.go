@@ -245,34 +245,3 @@ func FindJettonTransfer(bubble *Bubble) bool {
 	*bubble = newBubble
 	return true
 }
-
-type BubbleJettonTransfer struct {
-	sender, recipient             *Account
-	senderWallet, recipientWallet tongo.AccountID
-	master                        tongo.AccountID
-	amount                        tlb.VarUInteger16
-	success                       bool
-	payload                       any
-}
-
-func (b BubbleJettonTransfer) ToAction() (action *Action) {
-	a := Action{
-		JettonTransfer: &JettonTransferAction{
-			Jetton:           b.master,
-			Recipient:        b.recipient.Addr(),
-			Sender:           b.sender.Addr(),
-			RecipientsWallet: b.recipientWallet,
-			SendersWallet:    b.senderWallet,
-			Amount:           b.amount,
-		},
-		Success: b.success,
-		Type:    JettonTransfer,
-	}
-	switch c := b.payload.(type) {
-	case string:
-		a.JettonTransfer.Comment = &c
-	case EncryptedComment:
-		a.JettonTransfer.EncryptedComment = &c
-	}
-	return &a
-}
