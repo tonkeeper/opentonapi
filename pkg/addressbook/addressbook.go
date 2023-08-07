@@ -6,14 +6,14 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"sync"
 	"time"
-
-	"golang.org/x/exp/maps"
 
 	"github.com/shopspring/decimal"
 	"github.com/shurcooL/graphql"
 	"github.com/tonkeeper/tongo"
 	"go.uber.org/zap"
+	"golang.org/x/exp/maps"
 )
 
 // KnownAddress represents additional manually crafted information about a particular account in the blockchain.
@@ -84,6 +84,7 @@ func WithAdditionalAddressesSource(a addresser) Option {
 
 // Book holds information about known accounts, jettons, NFT collections manually crafted by the tonkeeper team and the community.
 type Book struct {
+	mu          sync.RWMutex
 	addresses   map[tongo.AccountID]KnownAddress
 	collections map[tongo.AccountID]KnownCollection
 	jettons     map[tongo.AccountID]KnownJetton
@@ -98,6 +99,9 @@ type TFPoolInfo struct {
 }
 
 func (b *Book) GetAddressInfoByAddress(a tongo.AccountID) (KnownAddress, bool) {
+	b.mu.RLock()
+	defer b.mu.RUnlock()
+
 	if a1, ok := b.addresses[a]; ok {
 		return a1, ok
 	}
@@ -110,6 +114,9 @@ func (b *Book) GetAddressInfoByAddress(a tongo.AccountID) (KnownAddress, bool) {
 }
 
 func (b *Book) SearchAttachedAccountsByPrefix(prefix string) []AttachedAccount {
+	b.mu.RLock()
+	defer b.mu.RUnlock()
+
 	for i := range b.addressers {
 		foundAccounts := b.addressers[i].SearchAttachedAccounts(prefix)
 		if len(foundAccounts) > 0 {
@@ -120,16 +127,45 @@ func (b *Book) SearchAttachedAccountsByPrefix(prefix string) []AttachedAccount {
 }
 
 func (b *Book) GetTFPoolInfo(a tongo.AccountID) (TFPoolInfo, bool) {
+	b.mu.RLock()
+	defer b.mu.RUnlock()
 	info, ok := b.tfPools[a]
 	return info, ok
 }
 
+func (b *Book) GetKnownCollections() map[tongo.AccountID]KnownCollection {
+	b.mu.RLock()
+	defer b.mu.RUnlock()
+
+	collections := make(map[tongo.AccountID]KnownCollection, len(b.collections))
+	for accountID, collection := range b.collections {
+		collections[accountID] = collection
+	}
+	return collections
+}
+
 func (b *Book) GetCollectionInfoByAddress(a tongo.AccountID) (KnownCollection, bool) {
+	b.mu.RLock()
+	defer b.mu.RUnlock()
 	c, ok := b.collections[a]
 	return c, ok
 }
 
+func (b *Book) GetKnownJettons() map[tongo.AccountID]KnownJetton {
+	b.mu.RLock()
+	defer b.mu.RUnlock()
+
+	jettons := make(map[tongo.AccountID]KnownJetton, len(b.jettons))
+	for accountID, jetton := range b.jettons {
+		jettons[accountID] = jetton
+	}
+	return jettons
+}
+
 func (b *Book) GetJettonInfoByAddress(a tongo.AccountID) (KnownJetton, bool) {
+	b.mu.RLock()
+	defer b.mu.RUnlock()
+
 	j, ok := b.jettons[a]
 	if ok {
 		j.Verification = Whitelist
@@ -139,8 +175,10 @@ func (b *Book) GetJettonInfoByAddress(a tongo.AccountID) (KnownJetton, bool) {
 	return j, ok
 }
 
-func (b *Book) GetKnownJettons() map[tongo.AccountID]KnownJetton {
-	return b.jettons
+func (b *Book) TFPools() []tongo.AccountID {
+	b.mu.RLock()
+	defer b.mu.RUnlock()
+	return maps.Keys(b.tfPools)
 }
 
 func NewAddressBook(logger *zap.Logger, addressPath, jettonPath, collectionPath string, opts ...Option) *Book {
@@ -153,91 +191,135 @@ func NewAddressBook(logger *zap.Logger, addressPath, jettonPath, collectionPath 
 	jettons := make(map[tongo.AccountID]KnownJetton)
 	tfPools := make(map[tongo.AccountID]TFPoolInfo)
 
-	addrs, err := downloadJson[KnownAddress](addressPath)
-	if err != nil {
-		logger.Info("fail to load accounts.json")
-	} else {
-		for _, i := range addrs {
-			a, err := tongo.ParseAccountID(i.Address)
-			if err != nil {
-				continue
-			}
-			i.Address = a.ToRaw()
-
-			addresses[a] = i
-		}
-	}
-	jetts, err := downloadJson[KnownJetton](jettonPath)
-	if err != nil {
-		logger.Info("fail to load jettons.json")
-	} else {
-		for _, i := range jetts {
-			a, err := tongo.ParseAccountID(i.Address)
-			if err != nil {
-				continue
-			}
-			i.Address = a.ToRaw()
-			jettons[a] = i
-		}
-	}
-	redoubtJetts, err := getRedoubtJettons()
-	if err != nil {
-		logger.Info("fail to load redoubt jettons")
-	} else {
-		for _, jetton := range redoubtJetts {
-			_, ok := jettons[tongo.MustParseAccountID(jetton.Address)]
-			if !ok {
-				jettons[tongo.MustParseAccountID(jetton.Address)] = jetton
-			}
-		}
-	}
-	stonfiJettons, err := getStonfiJettons()
-	if err != nil {
-		logger.Info("fail to load stonfi jettons")
-	} else {
-		for _, jetton := range stonfiJettons {
-			_, ok := jettons[tongo.MustParseAccountID(jetton.Address)]
-			if !ok {
-				jettons[tongo.MustParseAccountID(jetton.Address)] = jetton
-			}
-		}
-	}
-	colls, err := downloadJson[KnownCollection](collectionPath)
-	if err != nil {
-		logger.Info("fail to load collections.json")
-	} else {
-		for _, i := range colls {
-			a, err := tongo.ParseAccountID(i.Address)
-			if err != nil {
-				continue
-			}
-			i.Address = a.ToRaw()
-			i.Approvers = append(i.Approvers, "tonkeeper")
-			collections[a] = i
-		}
-	}
-	go getGGWhitelist(collections, logger)
-	for _, v := range getPools(logger) {
-		a, err := tongo.ParseAccountID(v.Address)
-		if err != nil {
-			logger.Error("parse account in pools", zap.Error(err))
-			continue
-		}
-		v.Address = a.ToRaw()
-		tfPools[a] = v
-	}
-
-	return &Book{
+	book := &Book{
 		addresses:   addresses,
 		collections: collections,
 		jettons:     jettons,
 		tfPools:     tfPools,
 		addressers:  options.addressers,
 	}
+
+	go func() {
+		for {
+			book.refresh(logger, addressPath, jettonPath, collectionPath)
+			time.Sleep(time.Minute * 10)
+		}
+	}()
+
+	go book.getGGWhitelist(logger)
+
+	return book
 }
 
-func (b *Book) TFPools() []tongo.AccountID {
-	return maps.Keys(b.tfPools)
+func (b *Book) refresh(logger *zap.Logger, addressPath, jettonPath, collectionPath string) {
+	go b.refreshAddresses(logger, addressPath)
+	go b.refreshJettons(logger, jettonPath)
+	go b.refreshRedoubtJettons(logger)
+	go b.refreshStonfiJettons(logger)
+	go b.refreshCollections(logger, collectionPath)
+	go b.refreshTfPools(logger)
+}
+
+func (b *Book) refreshAddresses(logger *zap.Logger, addressPath string) {
+	addresses, err := downloadJson[KnownAddress](addressPath)
+	if err != nil {
+		logger.Info("failed to load accounts.json")
+		return
+	}
+	b.mu.Lock()
+	defer b.mu.Unlock()
+	for _, item := range addresses {
+		accountID, err := tongo.ParseAccountID(item.Address)
+		if err != nil {
+			continue
+		}
+		item.Address = accountID.ToRaw()
+		b.addresses[accountID] = item
+	}
+}
+
+func (b *Book) refreshJettons(logger *zap.Logger, jettonPath string) {
+	jettons, err := downloadJson[KnownJetton](jettonPath)
+	if err != nil {
+		logger.Info("failed to load jettons.json")
+		return
+	}
+	b.mu.Lock()
+	defer b.mu.Unlock()
+	for _, item := range jettons {
+		accountID, err := tongo.ParseAccountID(item.Address)
+		if err != nil {
+			continue
+		}
+		item.Address = accountID.ToRaw()
+		b.jettons[accountID] = item
+	}
+}
+
+func (b *Book) refreshRedoubtJettons(logger *zap.Logger) {
+	jettons, err := getRedoubtJettons()
+	if err != nil {
+		logger.Info("failed to load redoubt jettons")
+		return
+	}
+	b.mu.Lock()
+	defer b.mu.Unlock()
+	for _, jetton := range jettons {
+		_, ok := b.jettons[tongo.MustParseAccountID(jetton.Address)]
+		if !ok {
+			b.jettons[tongo.MustParseAccountID(jetton.Address)] = jetton
+		}
+	}
+}
+
+func (b *Book) refreshStonfiJettons(logger *zap.Logger) {
+	jettons, err := getStonfiJettons()
+	if err != nil {
+		logger.Info("failed to load stonfi jettons")
+		return
+	}
+	b.mu.Lock()
+	defer b.mu.Unlock()
+	for _, jetton := range jettons {
+		_, ok := b.jettons[tongo.MustParseAccountID(jetton.Address)]
+		if !ok {
+			b.jettons[tongo.MustParseAccountID(jetton.Address)] = jetton
+		}
+	}
+}
+
+func (b *Book) refreshCollections(logger *zap.Logger, collectionPath string) {
+	collections, err := downloadJson[KnownCollection](collectionPath)
+	if err != nil {
+		logger.Info("fail to load collections.json")
+		return
+	}
+	b.mu.Lock()
+	defer b.mu.Unlock()
+	for _, item := range collections {
+		accountID, err := tongo.ParseAccountID(item.Address)
+		if err != nil {
+			continue
+		}
+		item.Address = accountID.ToRaw()
+		item.Approvers = append(item.Approvers, "tonkeeper")
+		b.collections[accountID] = item
+	}
+}
+
+func (b *Book) refreshTfPools(logger *zap.Logger) {
+	b.mu.Lock()
+	defer b.mu.Unlock()
+
+	for _, pool := range getPools(logger) {
+		accountID, err := tongo.ParseAccountID(pool.Address)
+		if err != nil {
+			logger.Error("failed to parse account in pools", zap.Error(err))
+			continue
+		}
+		pool.Address = accountID.ToRaw()
+		b.tfPools[accountID] = pool
+	}
 }
 
 func downloadJson[T any](url string) ([]T, error) {
@@ -260,23 +342,30 @@ func downloadJson[T any](url string) ([]T, error) {
 	return data, nil
 }
 
-func getGGWhitelist(collections map[tongo.AccountID]KnownCollection, logger *zap.Logger) {
+func (b *Book) getGGWhitelist(logger *zap.Logger) {
 	client := graphql.NewClient("https://api.getgems.io/graphql", nil)
 	for {
+		if len(b.GetKnownCollections()) == 0 {
+			time.Sleep(time.Second * 10)
+			continue
+		}
 		addresses, err := _getGGWhitelist(client)
 		if err != nil {
-			logger.Info(fmt.Sprintf("get nft collection whitelist: %v", err))
+			logger.Warn(fmt.Sprintf("get nft collection whitelist: %v", err))
 			time.Sleep(time.Minute * 3)
 			continue
 		}
-		for _, a := range addresses {
-			c := collections[a]
-			c.Approvers = append(c.Approvers, "getgems")
-			collections[a] = c
+		b.mu.Lock()
+		for _, account := range addresses {
+			collection, ok := b.collections[account]
+			if ok {
+				collection.Approvers = append(b.collections[account].Approvers, "getgems")
+				b.collections[account] = collection
+			}
 		}
+		b.mu.Unlock()
 		return
 	}
-
 }
 
 func _getGGWhitelist(client *graphql.Client) ([]tongo.AccountID, error) {
