@@ -8,8 +8,8 @@ import (
 	"github.com/tonkeeper/opentonapi/pkg/oas"
 )
 
-func convertToRawAccount(account *core.Account) oas.RawAccount {
-	rawAccount := oas.RawAccount{
+func convertToRawAccount(account *core.Account) oas.BlockchainRawAccount {
+	rawAccount := oas.BlockchainRawAccount{
 		Address:           account.AccountAddress.ToRaw(),
 		Balance:           account.TonBalance,
 		LastTransactionLt: int64(account.LastTransactionLt),
@@ -27,7 +27,7 @@ func convertToRawAccount(account *core.Account) oas.RawAccount {
 		for key, value := range account.ExtraBalances {
 			balances[fmt.Sprintf("%v", key)] = fmt.Sprintf("%v", value)
 		}
-		rawAccount.ExtraBalance = oas.NewOptRawAccountExtraBalance(balances)
+		rawAccount.ExtraBalance = oas.NewOptBlockchainRawAccountExtraBalance(balances)
 	}
 	if account.Code != nil && len(account.Code) != 0 {
 		rawAccount.Code = oas.NewOptString(fmt.Sprintf("%x", account.Code[:]))

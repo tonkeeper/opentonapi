@@ -204,8 +204,8 @@ func (s *Server) decodeEmulateMessageToTraceRequest(r *http.Request) (
 	}
 }
 
-func (s *Server) decodeEmulateWalletMessageRequest(r *http.Request) (
-	req *EmulateWalletMessageReq,
+func (s *Server) decodeEmulateMessageToWalletRequest(r *http.Request) (
+	req *EmulateMessageToWalletReq,
 	close func() error,
 	rerr error,
 ) {
@@ -244,7 +244,7 @@ func (s *Server) decodeEmulateWalletMessageRequest(r *http.Request) (
 
 		d := jx.DecodeBytes(buf)
 
-		var request EmulateWalletMessageReq
+		var request EmulateMessageToWalletReq
 		if err := func() error {
 			if err := request.Decode(d); err != nil {
 				return err
@@ -494,8 +494,8 @@ func (s *Server) decodeGetNftItemsByAddressesRequest(r *http.Request) (
 	}
 }
 
-func (s *Server) decodeSendMessageRequest(r *http.Request) (
-	req *SendMessageReq,
+func (s *Server) decodeSendBlockchainMessageRequest(r *http.Request) (
+	req *SendBlockchainMessageReq,
 	close func() error,
 	rerr error,
 ) {
@@ -534,7 +534,7 @@ func (s *Server) decodeSendMessageRequest(r *http.Request) (
 
 		d := jx.DecodeBytes(buf)
 
-		var request SendMessageReq
+		var request SendBlockchainMessageReq
 		if err := func() error {
 			if err := request.Decode(d); err != nil {
 				return err
@@ -565,8 +565,8 @@ func (s *Server) decodeSendMessageRequest(r *http.Request) (
 	}
 }
 
-func (s *Server) decodeSendMessageLiteServerRequest(r *http.Request) (
-	req *SendMessageLiteServerReq,
+func (s *Server) decodeSendRawMessageRequest(r *http.Request) (
+	req *SendRawMessageReq,
 	close func() error,
 	rerr error,
 ) {
@@ -605,7 +605,7 @@ func (s *Server) decodeSendMessageLiteServerRequest(r *http.Request) (
 
 		d := jx.DecodeBytes(buf)
 
-		var request SendMessageLiteServerReq
+		var request SendRawMessageReq
 		if err := func() error {
 			if err := request.Decode(d); err != nil {
 				return err

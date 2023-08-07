@@ -13,7 +13,7 @@ import (
 	"github.com/tonkeeper/opentonapi/pkg/oas"
 )
 
-func (h Handler) GetJettonsBalances(ctx context.Context, params oas.GetJettonsBalancesParams) (*oas.JettonsBalances, error) {
+func (h Handler) GetAccountJettonsBalances(ctx context.Context, params oas.GetAccountJettonsBalancesParams) (*oas.JettonsBalances, error) {
 	accountID, err := tongo.ParseAccountID(params.AccountID)
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
@@ -60,13 +60,13 @@ func (h Handler) GetJettonsBalances(ctx context.Context, params oas.GetJettonsBa
 }
 
 func (h Handler) GetJettonInfo(ctx context.Context, params oas.GetJettonInfoParams) (*oas.JettonInfo, error) {
-	account, err := tongo.ParseAccountID(params.AccountID)
+	accountID, err := tongo.ParseAccountID(params.AccountID)
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
 	}
-	meta := h.GetJettonNormalizedMetadata(ctx, account)
-	metadata := jettonMetadata(account, meta)
-	data, err := h.storage.GetJettonMasterData(ctx, account)
+	meta := h.GetJettonNormalizedMetadata(ctx, accountID)
+	metadata := jettonMetadata(accountID, meta)
+	data, err := h.storage.GetJettonMasterData(ctx, accountID)
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
@@ -79,36 +79,36 @@ func (h Handler) GetJettonInfo(ctx context.Context, params oas.GetJettonInfoPara
 	}, nil
 }
 
-func (h Handler) GetJettonsHistory(ctx context.Context, params oas.GetJettonsHistoryParams) (*oas.AccountEvents, error) {
-	account, err := tongo.ParseAccountID(params.AccountID)
+func (h Handler) GetAccountJettonsHistory(ctx context.Context, params oas.GetAccountJettonsHistoryParams) (*oas.AccountEvents, error) {
+	accountID, err := tongo.ParseAccountID(params.AccountID)
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
 	}
-	traceIDs, err := h.storage.GetAccountJettonsHistory(ctx, account, params.Limit, optIntToPointer(params.BeforeLt), optIntToPointer(params.StartDate), optIntToPointer(params.EndDate))
+	traceIDs, err := h.storage.GetAccountJettonsHistory(ctx, accountID, params.Limit, optIntToPointer(params.BeforeLt), optIntToPointer(params.StartDate), optIntToPointer(params.EndDate))
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
-	events, lastLT, err := h.convertJettonHistory(ctx, account, nil, traceIDs, params.AcceptLanguage)
+	events, lastLT, err := h.convertJettonHistory(ctx, accountID, nil, traceIDs, params.AcceptLanguage)
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
 	return &oas.AccountEvents{Events: events, NextFrom: lastLT}, nil
 }
 
-func (h Handler) GetJettonsHistoryByID(ctx context.Context, params oas.GetJettonsHistoryByIDParams) (*oas.AccountEvents, error) {
-	account, err := tongo.ParseAccountID(params.AccountID)
+func (h Handler) GetAccountJettonHistoryByID(ctx context.Context, params oas.GetAccountJettonHistoryByIDParams) (*oas.AccountEvents, error) {
+	accountID, err := tongo.ParseAccountID(params.AccountID)
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
 	}
-	jettonMasterAccount, err := tongo.ParseAccountID(params.JettonID)
+	jettonMasterAccountID, err := tongo.ParseAccountID(params.JettonID)
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
 	}
-	traceIDs, err := h.storage.GetAccountJettonHistoryByID(ctx, account, jettonMasterAccount, params.Limit, optIntToPointer(params.BeforeLt), optIntToPointer(params.StartDate), optIntToPointer(params.EndDate))
+	traceIDs, err := h.storage.GetAccountJettonHistoryByID(ctx, accountID, jettonMasterAccountID, params.Limit, optIntToPointer(params.BeforeLt), optIntToPointer(params.StartDate), optIntToPointer(params.EndDate))
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
-	events, lastLT, err := h.convertJettonHistory(ctx, account, &jettonMasterAccount, traceIDs, params.AcceptLanguage)
+	events, lastLT, err := h.convertJettonHistory(ctx, accountID, &jettonMasterAccountID, traceIDs, params.AcceptLanguage)
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}

@@ -95,7 +95,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 						// Leaf node.
 						switch r.Method {
 						case "GET":
-							s.handleGetSearchAccountsRequest([0]string{}, elemIsEscaped, w, r)
+							s.handleSearchAccountsRequest([0]string{}, elemIsEscaped, w, r)
 						default:
 							s.notAllowed(w, r, "GET")
 						}
@@ -158,7 +158,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 								// Leaf node.
 								switch r.Method {
 								case "GET":
-									s.handleDnsBackResolveRequest([1]string{
+									s.handleAccountDnsBackResolveRequest([1]string{
 										args[0],
 									}, elemIsEscaped, w, r)
 								default:
@@ -178,7 +178,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 								// Leaf node.
 								switch r.Method {
 								case "GET":
-									s.handleGetDnsExpiringRequest([1]string{
+									s.handleGetAccountDnsExpiringRequest([1]string{
 										args[0],
 									}, elemIsEscaped, w, r)
 								default:
@@ -198,7 +198,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 						if len(elem) == 0 {
 							switch r.Method {
 							case "GET":
-								s.handleGetEventsByAccountRequest([1]string{
+								s.handleGetAccountEventsRequest([1]string{
 									args[0],
 								}, elemIsEscaped, w, r)
 							default:
@@ -239,7 +239,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 						if len(elem) == 0 {
 							switch r.Method {
 							case "GET":
-								s.handleGetJettonsBalancesRequest([1]string{
+								s.handleGetAccountJettonsBalancesRequest([1]string{
 									args[0],
 								}, elemIsEscaped, w, r)
 							default:
@@ -271,7 +271,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 									// Leaf node.
 									switch r.Method {
 									case "GET":
-										s.handleGetJettonsHistoryRequest([1]string{
+										s.handleGetAccountJettonsHistoryRequest([1]string{
 											args[0],
 										}, elemIsEscaped, w, r)
 									default:
@@ -305,7 +305,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 									// Leaf node.
 									switch r.Method {
 									case "GET":
-										s.handleGetJettonsHistoryByIDRequest([2]string{
+										s.handleGetAccountJettonHistoryByIDRequest([2]string{
 											args[0],
 											args[1],
 										}, elemIsEscaped, w, r)
@@ -328,7 +328,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 							// Leaf node.
 							switch r.Method {
 							case "GET":
-								s.handleGetNftItemsByOwnerRequest([1]string{
+								s.handleGetAccountNftItemsRequest([1]string{
 									args[0],
 								}, elemIsEscaped, w, r)
 							default:
@@ -348,7 +348,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 							// Leaf node.
 							switch r.Method {
 							case "GET":
-								s.handleGetPublicKeyByAccountIDRequest([1]string{
+								s.handleGetAccountPublicKeyRequest([1]string{
 									args[0],
 								}, elemIsEscaped, w, r)
 							default:
@@ -388,7 +388,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 							// Leaf node.
 							switch r.Method {
 							case "GET":
-								s.handleGetSubscriptionsByAccountRequest([1]string{
+								s.handleGetAccountSubscriptionsRequest([1]string{
 									args[0],
 								}, elemIsEscaped, w, r)
 							default:
@@ -408,7 +408,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 							// Leaf node.
 							switch r.Method {
 							case "GET":
-								s.handleGetTracesByAccountRequest([1]string{
+								s.handleGetAccountTracesRequest([1]string{
 									args[0],
 								}, elemIsEscaped, w, r)
 							default:
@@ -449,7 +449,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 					if len(elem) == 0 {
 						switch r.Method {
 						case "GET":
-							s.handleGetRawAccountRequest([1]string{
+							s.handleGetBlockchainRawAccountRequest([1]string{
 								args[0],
 							}, elemIsEscaped, w, r)
 						default:
@@ -486,7 +486,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 								// Leaf node.
 								switch r.Method {
 								case "GET":
-									s.handleExecGetMethodRequest([2]string{
+									s.handleExecGetMethodForBlockchainAccountRequest([2]string{
 										args[0],
 										args[1],
 									}, elemIsEscaped, w, r)
@@ -507,7 +507,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 								// Leaf node.
 								switch r.Method {
 								case "GET":
-									s.handleGetAccountTransactionsRequest([1]string{
+									s.handleGetBlockchainAccountTransactionsRequest([1]string{
 										args[0],
 									}, elemIsEscaped, w, r)
 								default:
@@ -537,7 +537,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 					if len(elem) == 0 {
 						switch r.Method {
 						case "GET":
-							s.handleGetBlockRequest([1]string{
+							s.handleGetBlockchainBlockRequest([1]string{
 								args[0],
 							}, elemIsEscaped, w, r)
 						default:
@@ -558,7 +558,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 							// Leaf node.
 							switch r.Method {
 							case "GET":
-								s.handleGetBlockTransactionsRequest([1]string{
+								s.handleGetBlockchainBlockTransactionsRequest([1]string{
 									args[0],
 								}, elemIsEscaped, w, r)
 							default:
@@ -579,7 +579,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 						// Leaf node.
 						switch r.Method {
 						case "GET":
-							s.handleGetConfigRequest([0]string{}, elemIsEscaped, w, r)
+							s.handleGetBlockchainConfigRequest([0]string{}, elemIsEscaped, w, r)
 						default:
 							s.notAllowed(w, r, "GET")
 						}
@@ -608,7 +608,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 							// Leaf node.
 							switch r.Method {
 							case "GET":
-								s.handleGetMasterchainHeadRequest([0]string{}, elemIsEscaped, w, r)
+								s.handleGetBlockchainMasterchainHeadRequest([0]string{}, elemIsEscaped, w, r)
 							default:
 								s.notAllowed(w, r, "GET")
 							}
@@ -625,7 +625,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 						if len(elem) == 0 {
 							switch r.Method {
 							case "POST":
-								s.handleSendMessageRequest([0]string{}, elemIsEscaped, w, r)
+								s.handleSendBlockchainMessageRequest([0]string{}, elemIsEscaped, w, r)
 							default:
 								s.notAllowed(w, r, "POST")
 							}
@@ -664,7 +664,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 									// Leaf node.
 									switch r.Method {
 									case "GET":
-										s.handleGetTransactionByMessageHashRequest([1]string{
+										s.handleGetBlockchainTransactionByMessageHashRequest([1]string{
 											args[0],
 										}, elemIsEscaped, w, r)
 									default:
@@ -692,7 +692,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 						// Leaf node.
 						switch r.Method {
 						case "GET":
-							s.handleGetTransactionRequest([1]string{
+							s.handleGetBlockchainTransactionRequest([1]string{
 								args[0],
 							}, elemIsEscaped, w, r)
 						default:
@@ -712,7 +712,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 						// Leaf node.
 						switch r.Method {
 						case "GET":
-							s.handleGetValidatorsRequest([0]string{}, elemIsEscaped, w, r)
+							s.handleGetBlockchainValidatorsRequest([0]string{}, elemIsEscaped, w, r)
 						default:
 							s.notAllowed(w, r, "GET")
 						}
@@ -762,7 +762,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				if len(elem) == 0 {
 					switch r.Method {
 					case "GET":
-						s.handleDnsInfoRequest([1]string{
+						s.handleGetDnsInfoRequest([1]string{
 							args[0],
 						}, elemIsEscaped, w, r)
 					default:
@@ -966,7 +966,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 								// Leaf node.
 								switch r.Method {
 								case "GET":
-									s.handleGetAccountStateLiteServerRequest([1]string{
+									s.handleGetRawAccountStateRequest([1]string{
 										args[0],
 									}, elemIsEscaped, w, r)
 								default:
@@ -991,7 +991,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 								// Leaf node.
 								switch r.Method {
 								case "GET":
-									s.handleGetAllShardsInfoLiteServerRequest([1]string{
+									s.handleGetAllRawShardsInfoRequest([1]string{
 										args[0],
 									}, elemIsEscaped, w, r)
 								default:
@@ -1028,7 +1028,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 								// Leaf node.
 								switch r.Method {
 								case "GET":
-									s.handleGetBlockLiteServerRequest([1]string{
+									s.handleGetRawBlockchainBlockRequest([1]string{
 										args[0],
 									}, elemIsEscaped, w, r)
 								default:
@@ -1064,7 +1064,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 									// Leaf node.
 									switch r.Method {
 									case "GET":
-										s.handleGetBlockHeaderLiteServerRequest([1]string{
+										s.handleGetRawBlockchainBlockHeaderRequest([1]string{
 											args[0],
 										}, elemIsEscaped, w, r)
 									default:
@@ -1084,7 +1084,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 									// Leaf node.
 									switch r.Method {
 									case "GET":
-										s.handleGetBlockProofLiteServerRequest([0]string{}, elemIsEscaped, w, r)
+										s.handleGetRawBlockProofRequest([0]string{}, elemIsEscaped, w, r)
 									default:
 										s.notAllowed(w, r, "GET")
 									}
@@ -1109,7 +1109,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 							// Leaf node.
 							switch r.Method {
 							case "GET":
-								s.handleGetConfigAllLiteServerRequest([1]string{
+								s.handleGetRawConfigRequest([1]string{
 									args[0],
 								}, elemIsEscaped, w, r)
 							default:
@@ -1128,7 +1128,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 						if len(elem) == 0 {
 							switch r.Method {
 							case "GET":
-								s.handleGetMasterchainInfoLiteServerRequest([0]string{}, elemIsEscaped, w, r)
+								s.handleGetRawMasterchainInfoRequest([0]string{}, elemIsEscaped, w, r)
 							default:
 								s.notAllowed(w, r, "GET")
 							}
@@ -1147,7 +1147,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 								// Leaf node.
 								switch r.Method {
 								case "GET":
-									s.handleGetMasterchainInfoExtLiteServerRequest([0]string{}, elemIsEscaped, w, r)
+									s.handleGetRawMasterchainInfoExtRequest([0]string{}, elemIsEscaped, w, r)
 								default:
 									s.notAllowed(w, r, "GET")
 								}
@@ -1193,7 +1193,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 									// Leaf node.
 									switch r.Method {
 									case "GET":
-										s.handleGetShardBlockProofLiteServerRequest([1]string{
+										s.handleGetRawShardBlockProofRequest([1]string{
 											args[0],
 										}, elemIsEscaped, w, r)
 									default:
@@ -1218,7 +1218,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 									// Leaf node.
 									switch r.Method {
 									case "GET":
-										s.handleGetShardInfoLiteServerRequest([1]string{
+										s.handleGetRawShardInfoRequest([1]string{
 											args[0],
 										}, elemIsEscaped, w, r)
 									default:
@@ -1244,7 +1244,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 								// Leaf node.
 								switch r.Method {
 								case "GET":
-									s.handleGetStateLiteServerRequest([1]string{
+									s.handleGetRawBlockchainBlockStateRequest([1]string{
 										args[0],
 									}, elemIsEscaped, w, r)
 								default:
@@ -1276,7 +1276,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 								// Leaf node.
 								switch r.Method {
 								case "GET":
-									s.handleGetTimeLiteServerRequest([0]string{}, elemIsEscaped, w, r)
+									s.handleGetRawTimeRequest([0]string{}, elemIsEscaped, w, r)
 								default:
 									s.notAllowed(w, r, "GET")
 								}
@@ -1299,7 +1299,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 								// Leaf node.
 								switch r.Method {
 								case "GET":
-									s.handleGetTransactionsLiteServerRequest([1]string{
+									s.handleGetRawTransactionsRequest([1]string{
 										args[0],
 									}, elemIsEscaped, w, r)
 								default:
@@ -1326,7 +1326,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 						// Leaf node.
 						switch r.Method {
 						case "GET":
-							s.handleGetListBlockTransactionsLiteServerRequest([1]string{
+							s.handleGetRawListBlockTransactionsRequest([1]string{
 								args[0],
 							}, elemIsEscaped, w, r)
 						default:
@@ -1346,7 +1346,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 						// Leaf node.
 						switch r.Method {
 						case "POST":
-							s.handleSendMessageLiteServerRequest([0]string{}, elemIsEscaped, w, r)
+							s.handleSendRawMessageRequest([0]string{}, elemIsEscaped, w, r)
 						default:
 							s.notAllowed(w, r, "POST")
 						}
@@ -1602,7 +1602,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 								// Leaf node.
 								switch r.Method {
 								case "GET":
-									s.handlePoolsByNominatorsRequest([1]string{
+									s.handleGetAccountNominatorsPoolsRequest([1]string{
 										args[0],
 									}, elemIsEscaped, w, r)
 								default:
@@ -1642,7 +1642,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 							if len(elem) == 0 {
 								switch r.Method {
 								case "GET":
-									s.handleStakingPoolInfoRequest([1]string{
+									s.handleGetStakingPoolInfoRequest([1]string{
 										args[0],
 									}, elemIsEscaped, w, r)
 								default:
@@ -1663,7 +1663,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 									// Leaf node.
 									switch r.Method {
 									case "GET":
-										s.handleStakingPoolHistoryRequest([1]string{
+										s.handleGetStakingPoolHistoryRequest([1]string{
 											args[0],
 										}, elemIsEscaped, w, r)
 									default:
@@ -1684,7 +1684,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 								// Leaf node.
 								switch r.Method {
 								case "GET":
-									s.handleStakingPoolsRequest([0]string{}, elemIsEscaped, w, r)
+									s.handleGetStakingPoolsRequest([0]string{}, elemIsEscaped, w, r)
 								default:
 									s.notAllowed(w, r, "GET")
 								}
@@ -1880,7 +1880,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 						// Leaf node.
 						switch r.Method {
 						case "POST":
-							s.handleEmulateWalletMessageRequest([0]string{}, elemIsEscaped, w, r)
+							s.handleEmulateMessageToWalletRequest([0]string{}, elemIsEscaped, w, r)
 						default:
 							s.notAllowed(w, r, "POST")
 						}
@@ -2045,9 +2045,9 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 					if len(elem) == 0 {
 						switch method {
 						case "GET":
-							// Leaf: GetSearchAccounts
-							r.name = "GetSearchAccounts"
-							r.operationID = "getSearchAccounts"
+							// Leaf: SearchAccounts
+							r.name = "SearchAccounts"
+							r.operationID = "searchAccounts"
 							r.pathPattern = "/v2/accounts/search"
 							r.args = args
 							r.count = 0
@@ -2112,9 +2112,9 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 							if len(elem) == 0 {
 								switch method {
 								case "GET":
-									// Leaf: DnsBackResolve
-									r.name = "DnsBackResolve"
-									r.operationID = "dnsBackResolve"
+									// Leaf: AccountDnsBackResolve
+									r.name = "AccountDnsBackResolve"
+									r.operationID = "accountDnsBackResolve"
 									r.pathPattern = "/v2/accounts/{account_id}/dns/backresolve"
 									r.args = args
 									r.count = 1
@@ -2133,9 +2133,9 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 							if len(elem) == 0 {
 								switch method {
 								case "GET":
-									// Leaf: GetDnsExpiring
-									r.name = "GetDnsExpiring"
-									r.operationID = "getDnsExpiring"
+									// Leaf: GetAccountDnsExpiring
+									r.name = "GetAccountDnsExpiring"
+									r.operationID = "getAccountDnsExpiring"
 									r.pathPattern = "/v2/accounts/{account_id}/dns/expiring"
 									r.args = args
 									r.count = 1
@@ -2155,8 +2155,8 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 						if len(elem) == 0 {
 							switch method {
 							case "GET":
-								r.name = "GetEventsByAccount"
-								r.operationID = "getEventsByAccount"
+								r.name = "GetAccountEvents"
+								r.operationID = "getAccountEvents"
 								r.pathPattern = "/v2/accounts/{account_id}/events"
 								r.args = args
 								r.count = 1
@@ -2198,8 +2198,8 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 						if len(elem) == 0 {
 							switch method {
 							case "GET":
-								r.name = "GetJettonsBalances"
-								r.operationID = "getJettonsBalances"
+								r.name = "GetAccountJettonsBalances"
+								r.operationID = "getAccountJettonsBalances"
 								r.pathPattern = "/v2/accounts/{account_id}/jettons"
 								r.args = args
 								r.count = 1
@@ -2230,9 +2230,9 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 								if len(elem) == 0 {
 									switch method {
 									case "GET":
-										// Leaf: GetJettonsHistory
-										r.name = "GetJettonsHistory"
-										r.operationID = "getJettonsHistory"
+										// Leaf: GetAccountJettonsHistory
+										r.name = "GetAccountJettonsHistory"
+										r.operationID = "getAccountJettonsHistory"
 										r.pathPattern = "/v2/accounts/{account_id}/jettons/history"
 										r.args = args
 										r.count = 1
@@ -2265,9 +2265,9 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 								if len(elem) == 0 {
 									switch method {
 									case "GET":
-										// Leaf: GetJettonsHistoryByID
-										r.name = "GetJettonsHistoryByID"
-										r.operationID = "getJettonsHistoryByID"
+										// Leaf: GetAccountJettonHistoryByID
+										r.name = "GetAccountJettonHistoryByID"
+										r.operationID = "getAccountJettonHistoryByID"
 										r.pathPattern = "/v2/accounts/{account_id}/jettons/{jetton_id}/history"
 										r.args = args
 										r.count = 2
@@ -2288,9 +2288,9 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 						if len(elem) == 0 {
 							switch method {
 							case "GET":
-								// Leaf: GetNftItemsByOwner
-								r.name = "GetNftItemsByOwner"
-								r.operationID = "getNftItemsByOwner"
+								// Leaf: GetAccountNftItems
+								r.name = "GetAccountNftItems"
+								r.operationID = "getAccountNftItems"
 								r.pathPattern = "/v2/accounts/{account_id}/nfts"
 								r.args = args
 								r.count = 1
@@ -2309,9 +2309,9 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 						if len(elem) == 0 {
 							switch method {
 							case "GET":
-								// Leaf: GetPublicKeyByAccountID
-								r.name = "GetPublicKeyByAccountID"
-								r.operationID = "getPublicKeyByAccountID"
+								// Leaf: GetAccountPublicKey
+								r.name = "GetAccountPublicKey"
+								r.operationID = "getAccountPublicKey"
 								r.pathPattern = "/v2/accounts/{account_id}/publickey"
 								r.args = args
 								r.count = 1
@@ -2351,9 +2351,9 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 						if len(elem) == 0 {
 							switch method {
 							case "GET":
-								// Leaf: GetSubscriptionsByAccount
-								r.name = "GetSubscriptionsByAccount"
-								r.operationID = "getSubscriptionsByAccount"
+								// Leaf: GetAccountSubscriptions
+								r.name = "GetAccountSubscriptions"
+								r.operationID = "getAccountSubscriptions"
 								r.pathPattern = "/v2/accounts/{account_id}/subscriptions"
 								r.args = args
 								r.count = 1
@@ -2372,9 +2372,9 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 						if len(elem) == 0 {
 							switch method {
 							case "GET":
-								// Leaf: GetTracesByAccount
-								r.name = "GetTracesByAccount"
-								r.operationID = "getTracesByAccount"
+								// Leaf: GetAccountTraces
+								r.name = "GetAccountTraces"
+								r.operationID = "getAccountTraces"
 								r.pathPattern = "/v2/accounts/{account_id}/traces"
 								r.args = args
 								r.count = 1
@@ -2415,8 +2415,8 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 					if len(elem) == 0 {
 						switch method {
 						case "GET":
-							r.name = "GetRawAccount"
-							r.operationID = "getRawAccount"
+							r.name = "GetBlockchainRawAccount"
+							r.operationID = "getBlockchainRawAccount"
 							r.pathPattern = "/v2/blockchain/accounts/{account_id}"
 							r.args = args
 							r.count = 1
@@ -2452,9 +2452,9 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 							if len(elem) == 0 {
 								switch method {
 								case "GET":
-									// Leaf: ExecGetMethod
-									r.name = "ExecGetMethod"
-									r.operationID = "execGetMethod"
+									// Leaf: ExecGetMethodForBlockchainAccount
+									r.name = "ExecGetMethodForBlockchainAccount"
+									r.operationID = "execGetMethodForBlockchainAccount"
 									r.pathPattern = "/v2/blockchain/accounts/{account_id}/methods/{method_name}"
 									r.args = args
 									r.count = 2
@@ -2473,9 +2473,9 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 							if len(elem) == 0 {
 								switch method {
 								case "GET":
-									// Leaf: GetAccountTransactions
-									r.name = "GetAccountTransactions"
-									r.operationID = "getAccountTransactions"
+									// Leaf: GetBlockchainAccountTransactions
+									r.name = "GetBlockchainAccountTransactions"
+									r.operationID = "getBlockchainAccountTransactions"
 									r.pathPattern = "/v2/blockchain/accounts/{account_id}/transactions"
 									r.args = args
 									r.count = 1
@@ -2505,8 +2505,8 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 					if len(elem) == 0 {
 						switch method {
 						case "GET":
-							r.name = "GetBlock"
-							r.operationID = "getBlock"
+							r.name = "GetBlockchainBlock"
+							r.operationID = "getBlockchainBlock"
 							r.pathPattern = "/v2/blockchain/blocks/{block_id}"
 							r.args = args
 							r.count = 1
@@ -2526,9 +2526,9 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 						if len(elem) == 0 {
 							switch method {
 							case "GET":
-								// Leaf: GetBlockTransactions
-								r.name = "GetBlockTransactions"
-								r.operationID = "getBlockTransactions"
+								// Leaf: GetBlockchainBlockTransactions
+								r.name = "GetBlockchainBlockTransactions"
+								r.operationID = "getBlockchainBlockTransactions"
 								r.pathPattern = "/v2/blockchain/blocks/{block_id}/transactions"
 								r.args = args
 								r.count = 1
@@ -2548,9 +2548,9 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 					if len(elem) == 0 {
 						switch method {
 						case "GET":
-							// Leaf: GetConfig
-							r.name = "GetConfig"
-							r.operationID = "getConfig"
+							// Leaf: GetBlockchainConfig
+							r.name = "GetBlockchainConfig"
+							r.operationID = "getBlockchainConfig"
 							r.pathPattern = "/v2/blockchain/config"
 							r.args = args
 							r.count = 0
@@ -2580,9 +2580,9 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 						if len(elem) == 0 {
 							switch method {
 							case "GET":
-								// Leaf: GetMasterchainHead
-								r.name = "GetMasterchainHead"
-								r.operationID = "getMasterchainHead"
+								// Leaf: GetBlockchainMasterchainHead
+								r.name = "GetBlockchainMasterchainHead"
+								r.operationID = "getBlockchainMasterchainHead"
 								r.pathPattern = "/v2/blockchain/masterchain-head"
 								r.args = args
 								r.count = 0
@@ -2601,8 +2601,8 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 						if len(elem) == 0 {
 							switch method {
 							case "POST":
-								r.name = "SendMessage"
-								r.operationID = "sendMessage"
+								r.name = "SendBlockchainMessage"
+								r.operationID = "sendBlockchainMessage"
 								r.pathPattern = "/v2/blockchain/message"
 								r.args = args
 								r.count = 0
@@ -2642,9 +2642,9 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 								if len(elem) == 0 {
 									switch method {
 									case "GET":
-										// Leaf: GetTransactionByMessageHash
-										r.name = "GetTransactionByMessageHash"
-										r.operationID = "getTransactionByMessageHash"
+										// Leaf: GetBlockchainTransactionByMessageHash
+										r.name = "GetBlockchainTransactionByMessageHash"
+										r.operationID = "getBlockchainTransactionByMessageHash"
 										r.pathPattern = "/v2/blockchain/messages/{msg_id}/transaction"
 										r.args = args
 										r.count = 1
@@ -2671,9 +2671,9 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 					if len(elem) == 0 {
 						switch method {
 						case "GET":
-							// Leaf: GetTransaction
-							r.name = "GetTransaction"
-							r.operationID = "getTransaction"
+							// Leaf: GetBlockchainTransaction
+							r.name = "GetBlockchainTransaction"
+							r.operationID = "getBlockchainTransaction"
 							r.pathPattern = "/v2/blockchain/transactions/{transaction_id}"
 							r.args = args
 							r.count = 1
@@ -2692,9 +2692,9 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 					if len(elem) == 0 {
 						switch method {
 						case "GET":
-							// Leaf: GetValidators
-							r.name = "GetValidators"
-							r.operationID = "getValidators"
+							// Leaf: GetBlockchainValidators
+							r.name = "GetBlockchainValidators"
+							r.operationID = "getBlockchainValidators"
 							r.pathPattern = "/v2/blockchain/validators"
 							r.args = args
 							r.count = 0
@@ -2749,8 +2749,8 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 				if len(elem) == 0 {
 					switch method {
 					case "GET":
-						r.name = "DnsInfo"
-						r.operationID = "dnsInfo"
+						r.name = "GetDnsInfo"
+						r.operationID = "getDnsInfo"
 						r.pathPattern = "/v2/dns/{domain_name}"
 						r.args = args
 						r.count = 1
@@ -2963,9 +2963,9 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 							if len(elem) == 0 {
 								switch method {
 								case "GET":
-									// Leaf: GetAccountStateLiteServer
-									r.name = "GetAccountStateLiteServer"
-									r.operationID = "getAccountStateLiteServer"
+									// Leaf: GetRawAccountState
+									r.name = "GetRawAccountState"
+									r.operationID = "getRawAccountState"
 									r.pathPattern = "/v2/liteserver/get_account_state/{account_id}"
 									r.args = args
 									r.count = 1
@@ -2989,9 +2989,9 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 							if len(elem) == 0 {
 								switch method {
 								case "GET":
-									// Leaf: GetAllShardsInfoLiteServer
-									r.name = "GetAllShardsInfoLiteServer"
-									r.operationID = "getAllShardsInfoLiteServer"
+									// Leaf: GetAllRawShardsInfo
+									r.name = "GetAllRawShardsInfo"
+									r.operationID = "getAllRawShardsInfo"
 									r.pathPattern = "/v2/liteserver/get_all_shards_info/{block_id}"
 									r.args = args
 									r.count = 1
@@ -3027,9 +3027,9 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 							if len(elem) == 0 {
 								switch method {
 								case "GET":
-									// Leaf: GetBlockLiteServer
-									r.name = "GetBlockLiteServer"
-									r.operationID = "getBlockLiteServer"
+									// Leaf: GetRawBlockchainBlock
+									r.name = "GetRawBlockchainBlock"
+									r.operationID = "getRawBlockchainBlock"
 									r.pathPattern = "/v2/liteserver/get_block/{block_id}"
 									r.args = args
 									r.count = 1
@@ -3064,9 +3064,9 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 								if len(elem) == 0 {
 									switch method {
 									case "GET":
-										// Leaf: GetBlockHeaderLiteServer
-										r.name = "GetBlockHeaderLiteServer"
-										r.operationID = "getBlockHeaderLiteServer"
+										// Leaf: GetRawBlockchainBlockHeader
+										r.name = "GetRawBlockchainBlockHeader"
+										r.operationID = "getRawBlockchainBlockHeader"
 										r.pathPattern = "/v2/liteserver/get_block_header/{block_id}"
 										r.args = args
 										r.count = 1
@@ -3085,9 +3085,9 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 								if len(elem) == 0 {
 									switch method {
 									case "GET":
-										// Leaf: GetBlockProofLiteServer
-										r.name = "GetBlockProofLiteServer"
-										r.operationID = "getBlockProofLiteServer"
+										// Leaf: GetRawBlockProof
+										r.name = "GetRawBlockProof"
+										r.operationID = "getRawBlockProof"
 										r.pathPattern = "/v2/liteserver/get_block_proof"
 										r.args = args
 										r.count = 0
@@ -3113,9 +3113,9 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 						if len(elem) == 0 {
 							switch method {
 							case "GET":
-								// Leaf: GetConfigAllLiteServer
-								r.name = "GetConfigAllLiteServer"
-								r.operationID = "getConfigAllLiteServer"
+								// Leaf: GetRawConfig
+								r.name = "GetRawConfig"
+								r.operationID = "getRawConfig"
 								r.pathPattern = "/v2/liteserver/get_config_all/{block_id}"
 								r.args = args
 								r.count = 1
@@ -3134,8 +3134,8 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 						if len(elem) == 0 {
 							switch method {
 							case "GET":
-								r.name = "GetMasterchainInfoLiteServer"
-								r.operationID = "getMasterchainInfoLiteServer"
+								r.name = "GetRawMasterchainInfo"
+								r.operationID = "getRawMasterchainInfo"
 								r.pathPattern = "/v2/liteserver/get_masterchain_info"
 								r.args = args
 								r.count = 0
@@ -3155,9 +3155,9 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 							if len(elem) == 0 {
 								switch method {
 								case "GET":
-									// Leaf: GetMasterchainInfoExtLiteServer
-									r.name = "GetMasterchainInfoExtLiteServer"
-									r.operationID = "getMasterchainInfoExtLiteServer"
+									// Leaf: GetRawMasterchainInfoExt
+									r.name = "GetRawMasterchainInfoExt"
+									r.operationID = "getRawMasterchainInfoExt"
 									r.pathPattern = "/v2/liteserver/get_masterchain_info_ext"
 									r.args = args
 									r.count = 0
@@ -3204,9 +3204,9 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 								if len(elem) == 0 {
 									switch method {
 									case "GET":
-										// Leaf: GetShardBlockProofLiteServer
-										r.name = "GetShardBlockProofLiteServer"
-										r.operationID = "getShardBlockProofLiteServer"
+										// Leaf: GetRawShardBlockProof
+										r.name = "GetRawShardBlockProof"
+										r.operationID = "getRawShardBlockProof"
 										r.pathPattern = "/v2/liteserver/get_shard_block_proof/{block_id}"
 										r.args = args
 										r.count = 1
@@ -3230,9 +3230,9 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 								if len(elem) == 0 {
 									switch method {
 									case "GET":
-										// Leaf: GetShardInfoLiteServer
-										r.name = "GetShardInfoLiteServer"
-										r.operationID = "getShardInfoLiteServer"
+										// Leaf: GetRawShardInfo
+										r.name = "GetRawShardInfo"
+										r.operationID = "getRawShardInfo"
 										r.pathPattern = "/v2/liteserver/get_shard_info/{block_id}"
 										r.args = args
 										r.count = 1
@@ -3257,9 +3257,9 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 							if len(elem) == 0 {
 								switch method {
 								case "GET":
-									// Leaf: GetStateLiteServer
-									r.name = "GetStateLiteServer"
-									r.operationID = "getStateLiteServer"
+									// Leaf: GetRawBlockchainBlockState
+									r.name = "GetRawBlockchainBlockState"
+									r.operationID = "getRawBlockchainBlockState"
 									r.pathPattern = "/v2/liteserver/get_state/{block_id}"
 									r.args = args
 									r.count = 1
@@ -3290,9 +3290,9 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 							if len(elem) == 0 {
 								switch method {
 								case "GET":
-									// Leaf: GetTimeLiteServer
-									r.name = "GetTimeLiteServer"
-									r.operationID = "getTimeLiteServer"
+									// Leaf: GetRawTime
+									r.name = "GetRawTime"
+									r.operationID = "getRawTime"
 									r.pathPattern = "/v2/liteserver/get_time"
 									r.args = args
 									r.count = 0
@@ -3316,9 +3316,9 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 							if len(elem) == 0 {
 								switch method {
 								case "GET":
-									// Leaf: GetTransactionsLiteServer
-									r.name = "GetTransactionsLiteServer"
-									r.operationID = "getTransactionsLiteServer"
+									// Leaf: GetRawTransactions
+									r.name = "GetRawTransactions"
+									r.operationID = "getRawTransactions"
 									r.pathPattern = "/v2/liteserver/get_transactions/{account_id}"
 									r.args = args
 									r.count = 1
@@ -3344,9 +3344,9 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 					if len(elem) == 0 {
 						switch method {
 						case "GET":
-							// Leaf: GetListBlockTransactionsLiteServer
-							r.name = "GetListBlockTransactionsLiteServer"
-							r.operationID = "getListBlockTransactionsLiteServer"
+							// Leaf: GetRawListBlockTransactions
+							r.name = "GetRawListBlockTransactions"
+							r.operationID = "getRawListBlockTransactions"
 							r.pathPattern = "/v2/liteserver/list_block_transactions/{block_id}"
 							r.args = args
 							r.count = 1
@@ -3365,9 +3365,9 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 					if len(elem) == 0 {
 						switch method {
 						case "POST":
-							// Leaf: SendMessageLiteServer
-							r.name = "SendMessageLiteServer"
-							r.operationID = "sendMessageLiteServer"
+							// Leaf: SendRawMessage
+							r.name = "SendRawMessage"
+							r.operationID = "sendRawMessage"
 							r.pathPattern = "/v2/liteserver/send_message"
 							r.args = args
 							r.count = 0
@@ -3640,9 +3640,9 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 							if len(elem) == 0 {
 								switch method {
 								case "GET":
-									// Leaf: PoolsByNominators
-									r.name = "PoolsByNominators"
-									r.operationID = "poolsByNominators"
+									// Leaf: GetAccountNominatorsPools
+									r.name = "GetAccountNominatorsPools"
+									r.operationID = "getAccountNominatorsPools"
 									r.pathPattern = "/v2/staking/nominator/{account_id}/pools"
 									r.args = args
 									r.count = 1
@@ -3682,8 +3682,8 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 							if len(elem) == 0 {
 								switch method {
 								case "GET":
-									r.name = "StakingPoolInfo"
-									r.operationID = "stakingPoolInfo"
+									r.name = "GetStakingPoolInfo"
+									r.operationID = "getStakingPoolInfo"
 									r.pathPattern = "/v2/staking/pool/{account_id}"
 									r.args = args
 									r.count = 1
@@ -3703,9 +3703,9 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 								if len(elem) == 0 {
 									switch method {
 									case "GET":
-										// Leaf: StakingPoolHistory
-										r.name = "StakingPoolHistory"
-										r.operationID = "stakingPoolHistory"
+										// Leaf: GetStakingPoolHistory
+										r.name = "GetStakingPoolHistory"
+										r.operationID = "getStakingPoolHistory"
 										r.pathPattern = "/v2/staking/pool/{account_id}/history"
 										r.args = args
 										r.count = 1
@@ -3725,9 +3725,9 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 							if len(elem) == 0 {
 								switch method {
 								case "GET":
-									// Leaf: StakingPools
-									r.name = "StakingPools"
-									r.operationID = "stakingPools"
+									// Leaf: GetStakingPools
+									r.name = "GetStakingPools"
+									r.operationID = "getStakingPools"
 									r.pathPattern = "/v2/staking/pools"
 									r.args = args
 									r.count = 0
@@ -3949,9 +3949,9 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 					if len(elem) == 0 {
 						switch method {
 						case "POST":
-							// Leaf: EmulateWalletMessage
-							r.name = "EmulateWalletMessage"
-							r.operationID = "emulateWalletMessage"
+							// Leaf: EmulateMessageToWallet
+							r.name = "EmulateMessageToWallet"
+							r.operationID = "emulateMessageToWallet"
 							r.pathPattern = "/v2/wallet/emulate"
 							r.args = args
 							r.count = 0

@@ -8,18 +8,12 @@ import (
 
 // Handler handles operations described by OpenAPI v3 specification.
 type Handler interface {
-	// DnsBackResolve implements dnsBackResolve operation.
+	// AccountDnsBackResolve implements accountDnsBackResolve operation.
 	//
-	// Get domains for wallet account.
+	// Get account's domains.
 	//
 	// GET /v2/accounts/{account_id}/dns/backresolve
-	DnsBackResolve(ctx context.Context, params DnsBackResolveParams) (*DomainNames, error)
-	// DnsInfo implements dnsInfo operation.
-	//
-	// Get full information about domain name.
-	//
-	// GET /v2/dns/{domain_name}
-	DnsInfo(ctx context.Context, params DnsInfoParams) (*DomainInfo, error)
+	AccountDnsBackResolve(ctx context.Context, params AccountDnsBackResolveParams) (*DomainNames, error)
 	// DnsResolve implements dnsResolve operation.
 	//
 	// DNS resolve for domain name.
@@ -44,48 +38,100 @@ type Handler interface {
 	//
 	// POST /v2/traces/emulate
 	EmulateMessageToTrace(ctx context.Context, req *EmulateMessageToTraceReq) (*Trace, error)
-	// EmulateWalletMessage implements emulateWalletMessage operation.
+	// EmulateMessageToWallet implements emulateMessageToWallet operation.
 	//
 	// Emulate sending message to blockchain.
 	//
 	// POST /v2/wallet/emulate
-	EmulateWalletMessage(ctx context.Context, req *EmulateWalletMessageReq, params EmulateWalletMessageParams) (*MessageConsequences, error)
-	// ExecGetMethod implements execGetMethod operation.
+	EmulateMessageToWallet(ctx context.Context, req *EmulateMessageToWalletReq, params EmulateMessageToWalletParams) (*MessageConsequences, error)
+	// ExecGetMethodForBlockchainAccount implements execGetMethodForBlockchainAccount operation.
 	//
 	// Execute get method for account.
 	//
 	// GET /v2/blockchain/accounts/{account_id}/methods/{method_name}
-	ExecGetMethod(ctx context.Context, params ExecGetMethodParams) (*MethodExecutionResult, error)
+	ExecGetMethodForBlockchainAccount(ctx context.Context, params ExecGetMethodForBlockchainAccountParams) (*MethodExecutionResult, error)
 	// GetAccount implements getAccount operation.
 	//
 	// Get human-friendly information about an account without low-level details.
 	//
 	// GET /v2/accounts/{account_id}
 	GetAccount(ctx context.Context, params GetAccountParams) (*Account, error)
+	// GetAccountDnsExpiring implements getAccountDnsExpiring operation.
+	//
+	// Get expiring account .ton dns.
+	//
+	// GET /v2/accounts/{account_id}/dns/expiring
+	GetAccountDnsExpiring(ctx context.Context, params GetAccountDnsExpiringParams) (*DnsExpiring, error)
+	// GetAccountEvents implements getAccountEvents operation.
+	//
+	// Get events for an account. Each event is built on top of a trace which is a series of transactions
+	// caused by one inbound message. TonAPI looks for known patterns inside the trace and splits the
+	// trace into actions, where a single action represents a meaningful high-level operation like a
+	// Jetton Transfer or an NFT Purchase. Actions are expected to be shown to users. It is advised not
+	// to build any logic on top of actions because actions can be changed at any time.
+	//
+	// GET /v2/accounts/{account_id}/events
+	GetAccountEvents(ctx context.Context, params GetAccountEventsParams) (*AccountEvents, error)
 	// GetAccountInfoByStateInit implements getAccountInfoByStateInit operation.
 	//
 	// Get account info by state init.
 	//
 	// POST /v2/tonconnect/stateinit
 	GetAccountInfoByStateInit(ctx context.Context, req *GetAccountInfoByStateInitReq) (*AccountInfoByStateInit, error)
+	// GetAccountJettonHistoryByID implements getAccountJettonHistoryByID operation.
+	//
+	// Get the transfer jetton history for account and jetton.
+	//
+	// GET /v2/accounts/{account_id}/jettons/{jetton_id}/history
+	GetAccountJettonHistoryByID(ctx context.Context, params GetAccountJettonHistoryByIDParams) (*AccountEvents, error)
+	// GetAccountJettonsBalances implements getAccountJettonsBalances operation.
+	//
+	// Get all Jettons balances by owner address.
+	//
+	// GET /v2/accounts/{account_id}/jettons
+	GetAccountJettonsBalances(ctx context.Context, params GetAccountJettonsBalancesParams) (*JettonsBalances, error)
+	// GetAccountJettonsHistory implements getAccountJettonsHistory operation.
+	//
+	// Get the transfer jettons history for account.
+	//
+	// GET /v2/accounts/{account_id}/jettons/history
+	GetAccountJettonsHistory(ctx context.Context, params GetAccountJettonsHistoryParams) (*AccountEvents, error)
+	// GetAccountNftItems implements getAccountNftItems operation.
+	//
+	// Get all NFT items by owner address.
+	//
+	// GET /v2/accounts/{account_id}/nfts
+	GetAccountNftItems(ctx context.Context, params GetAccountNftItemsParams) (*NftItems, error)
+	// GetAccountNominatorsPools implements getAccountNominatorsPools operation.
+	//
+	// All pools where account participates.
+	//
+	// GET /v2/staking/nominator/{account_id}/pools
+	GetAccountNominatorsPools(ctx context.Context, params GetAccountNominatorsPoolsParams) (*AccountStaking, error)
+	// GetAccountPublicKey implements getAccountPublicKey operation.
+	//
+	// Get public key by account id.
+	//
+	// GET /v2/accounts/{account_id}/publickey
+	GetAccountPublicKey(ctx context.Context, params GetAccountPublicKeyParams) (*GetAccountPublicKeyOK, error)
 	// GetAccountSeqno implements getAccountSeqno operation.
 	//
 	// Get account seqno.
 	//
 	// GET /v2/wallet/{account_id}/seqno
 	GetAccountSeqno(ctx context.Context, params GetAccountSeqnoParams) (*Seqno, error)
-	// GetAccountStateLiteServer implements getAccountStateLiteServer operation.
+	// GetAccountSubscriptions implements getAccountSubscriptions operation.
 	//
-	// Get account state.
+	// Get all subscriptions by wallet address.
 	//
-	// GET /v2/liteserver/get_account_state/{account_id}
-	GetAccountStateLiteServer(ctx context.Context, params GetAccountStateLiteServerParams) (*GetAccountStateLiteServerOK, error)
-	// GetAccountTransactions implements getAccountTransactions operation.
+	// GET /v2/accounts/{account_id}/subscriptions
+	GetAccountSubscriptions(ctx context.Context, params GetAccountSubscriptionsParams) (*Subscriptions, error)
+	// GetAccountTraces implements getAccountTraces operation.
 	//
-	// Get account transactions.
+	// Get traces for account.
 	//
-	// GET /v2/blockchain/accounts/{account_id}/transactions
-	GetAccountTransactions(ctx context.Context, params GetAccountTransactionsParams) (*Transactions, error)
+	// GET /v2/accounts/{account_id}/traces
+	GetAccountTraces(ctx context.Context, params GetAccountTracesParams) (*TraceIDs, error)
 	// GetAccounts implements getAccounts operation.
 	//
 	// Get human-friendly information about several accounts without low-level details.
@@ -98,66 +144,78 @@ type Handler interface {
 	//
 	// GET /v2/dns/auctions
 	GetAllAuctions(ctx context.Context, params GetAllAuctionsParams) (*Auctions, error)
-	// GetAllShardsInfoLiteServer implements getAllShardsInfoLiteServer operation.
+	// GetAllRawShardsInfo implements getAllRawShardsInfo operation.
 	//
-	// Get all shards info.
+	// Get all raw shards info.
 	//
 	// GET /v2/liteserver/get_all_shards_info/{block_id}
-	GetAllShardsInfoLiteServer(ctx context.Context, params GetAllShardsInfoLiteServerParams) (*GetAllShardsInfoLiteServerOK, error)
-	// GetBlock implements getBlock operation.
+	GetAllRawShardsInfo(ctx context.Context, params GetAllRawShardsInfoParams) (*GetAllRawShardsInfoOK, error)
+	// GetBlockchainAccountTransactions implements getBlockchainAccountTransactions operation.
 	//
-	// Get block data.
+	// Get account transactions.
+	//
+	// GET /v2/blockchain/accounts/{account_id}/transactions
+	GetBlockchainAccountTransactions(ctx context.Context, params GetBlockchainAccountTransactionsParams) (*Transactions, error)
+	// GetBlockchainBlock implements getBlockchainBlock operation.
+	//
+	// Get blockchain block data.
 	//
 	// GET /v2/blockchain/blocks/{block_id}
-	GetBlock(ctx context.Context, params GetBlockParams) (*Block, error)
-	// GetBlockHeaderLiteServer implements getBlockHeaderLiteServer operation.
-	//
-	// Get block header.
-	//
-	// GET /v2/liteserver/get_block_header/{block_id}
-	GetBlockHeaderLiteServer(ctx context.Context, params GetBlockHeaderLiteServerParams) (*GetBlockHeaderLiteServerOK, error)
-	// GetBlockLiteServer implements getBlockLiteServer operation.
-	//
-	// Get block.
-	//
-	// GET /v2/liteserver/get_block/{block_id}
-	GetBlockLiteServer(ctx context.Context, params GetBlockLiteServerParams) (*GetBlockLiteServerOK, error)
-	// GetBlockProofLiteServer implements getBlockProofLiteServer operation.
-	//
-	// Get block proof.
-	//
-	// GET /v2/liteserver/get_block_proof
-	GetBlockProofLiteServer(ctx context.Context, params GetBlockProofLiteServerParams) (*GetBlockProofLiteServerOK, error)
-	// GetBlockTransactions implements getBlockTransactions operation.
+	GetBlockchainBlock(ctx context.Context, params GetBlockchainBlockParams) (*BlockchainBlock, error)
+	// GetBlockchainBlockTransactions implements getBlockchainBlockTransactions operation.
 	//
 	// Get transactions from block.
 	//
 	// GET /v2/blockchain/blocks/{block_id}/transactions
-	GetBlockTransactions(ctx context.Context, params GetBlockTransactionsParams) (*Transactions, error)
+	GetBlockchainBlockTransactions(ctx context.Context, params GetBlockchainBlockTransactionsParams) (*Transactions, error)
+	// GetBlockchainConfig implements getBlockchainConfig operation.
+	//
+	// Get blockchain config.
+	//
+	// GET /v2/blockchain/config
+	GetBlockchainConfig(ctx context.Context) (*BlockchainConfig, error)
+	// GetBlockchainMasterchainHead implements getBlockchainMasterchainHead operation.
+	//
+	// Get last known masterchain block.
+	//
+	// GET /v2/blockchain/masterchain-head
+	GetBlockchainMasterchainHead(ctx context.Context) (*BlockchainBlock, error)
+	// GetBlockchainRawAccount implements getBlockchainRawAccount operation.
+	//
+	// Get low-level information about an account taken directly from the blockchain.
+	//
+	// GET /v2/blockchain/accounts/{account_id}
+	GetBlockchainRawAccount(ctx context.Context, params GetBlockchainRawAccountParams) (*BlockchainRawAccount, error)
+	// GetBlockchainTransaction implements getBlockchainTransaction operation.
+	//
+	// Get transaction data.
+	//
+	// GET /v2/blockchain/transactions/{transaction_id}
+	GetBlockchainTransaction(ctx context.Context, params GetBlockchainTransactionParams) (*Transaction, error)
+	// GetBlockchainTransactionByMessageHash implements getBlockchainTransactionByMessageHash operation.
+	//
+	// Get transaction data by message hash.
+	//
+	// GET /v2/blockchain/messages/{msg_id}/transaction
+	GetBlockchainTransactionByMessageHash(ctx context.Context, params GetBlockchainTransactionByMessageHashParams) (*Transaction, error)
+	// GetBlockchainValidators implements getBlockchainValidators operation.
+	//
+	// Get blockchain validators.
+	//
+	// GET /v2/blockchain/validators
+	GetBlockchainValidators(ctx context.Context) (*Validators, error)
 	// GetChartRates implements getChartRates operation.
 	//
 	// Get chart by token.
 	//
 	// GET /v2/rates/chart
 	GetChartRates(ctx context.Context, params GetChartRatesParams) (*GetChartRatesOK, error)
-	// GetConfig implements getConfig operation.
+	// GetDnsInfo implements getDnsInfo operation.
 	//
-	// Get blockchain config.
+	// Get full information about domain name.
 	//
-	// GET /v2/blockchain/config
-	GetConfig(ctx context.Context) (*Config, error)
-	// GetConfigAllLiteServer implements getConfigAllLiteServer operation.
-	//
-	// Get config all.
-	//
-	// GET /v2/liteserver/get_config_all/{block_id}
-	GetConfigAllLiteServer(ctx context.Context, params GetConfigAllLiteServerParams) (*GetConfigAllLiteServerOK, error)
-	// GetDnsExpiring implements getDnsExpiring operation.
-	//
-	// Get expiring .ton dns.
-	//
-	// GET /v2/accounts/{account_id}/dns/expiring
-	GetDnsExpiring(ctx context.Context, params GetDnsExpiringParams) (*DnsExpiring, error)
+	// GET /v2/dns/{domain_name}
+	GetDnsInfo(ctx context.Context, params GetDnsInfoParams) (*DomainInfo, error)
 	// GetDomainBids implements getDomainBids operation.
 	//
 	// Get domain bids.
@@ -175,16 +233,6 @@ type Handler interface {
 	//
 	// GET /v2/events/{event_id}
 	GetEvent(ctx context.Context, params GetEventParams) (*Event, error)
-	// GetEventsByAccount implements getEventsByAccount operation.
-	//
-	// Get events for an account. Each event is built on top of a trace which is a series of transactions
-	// caused by one inbound message. TonAPI looks for known patterns inside the trace and splits the
-	// trace into actions, where a single action represents a meaningful high-level operation like a
-	// Jetton Transfer or an NFT Purchase. Actions are expected to be shown to users. It is advised not
-	// to build any logic on top of actions because actions can be changed at any time.
-	//
-	// GET /v2/accounts/{account_id}/events
-	GetEventsByAccount(ctx context.Context, params GetEventsByAccountParams) (*AccountEvents, error)
 	// GetItemsFromCollection implements getItemsFromCollection operation.
 	//
 	// Get NFT items from collection by collection address.
@@ -203,48 +251,6 @@ type Handler interface {
 	//
 	// GET /v2/jettons
 	GetJettons(ctx context.Context, params GetJettonsParams) (*Jettons, error)
-	// GetJettonsBalances implements getJettonsBalances operation.
-	//
-	// Get all Jettons balances by owner address.
-	//
-	// GET /v2/accounts/{account_id}/jettons
-	GetJettonsBalances(ctx context.Context, params GetJettonsBalancesParams) (*JettonsBalances, error)
-	// GetJettonsHistory implements getJettonsHistory operation.
-	//
-	// Get the transfer jettons history for account_id.
-	//
-	// GET /v2/accounts/{account_id}/jettons/history
-	GetJettonsHistory(ctx context.Context, params GetJettonsHistoryParams) (*AccountEvents, error)
-	// GetJettonsHistoryByID implements getJettonsHistoryByID operation.
-	//
-	// Get the transfer jetton history for account_id and jetton_id.
-	//
-	// GET /v2/accounts/{account_id}/jettons/{jetton_id}/history
-	GetJettonsHistoryByID(ctx context.Context, params GetJettonsHistoryByIDParams) (*AccountEvents, error)
-	// GetListBlockTransactionsLiteServer implements getListBlockTransactionsLiteServer operation.
-	//
-	// Get list block transactions.
-	//
-	// GET /v2/liteserver/list_block_transactions/{block_id}
-	GetListBlockTransactionsLiteServer(ctx context.Context, params GetListBlockTransactionsLiteServerParams) (*GetListBlockTransactionsLiteServerOK, error)
-	// GetMasterchainHead implements getMasterchainHead operation.
-	//
-	// Get last known masterchain block.
-	//
-	// GET /v2/blockchain/masterchain-head
-	GetMasterchainHead(ctx context.Context) (*Block, error)
-	// GetMasterchainInfoExtLiteServer implements getMasterchainInfoExtLiteServer operation.
-	//
-	// Get masterchain info ext.
-	//
-	// GET /v2/liteserver/get_masterchain_info_ext
-	GetMasterchainInfoExtLiteServer(ctx context.Context, params GetMasterchainInfoExtLiteServerParams) (*GetMasterchainInfoExtLiteServerOK, error)
-	// GetMasterchainInfoLiteServer implements getMasterchainInfoLiteServer operation.
-	//
-	// Get masterchain info.
-	//
-	// GET /v2/liteserver/get_masterchain_info
-	GetMasterchainInfoLiteServer(ctx context.Context) (*GetMasterchainInfoLiteServerOK, error)
 	// GetNftCollection implements getNftCollection operation.
 	//
 	// Get NFT collection by collection address.
@@ -269,72 +275,114 @@ type Handler interface {
 	//
 	// POST /v2/nfts/_bulk
 	GetNftItemsByAddresses(ctx context.Context, req OptGetNftItemsByAddressesReq) (*NftItems, error)
-	// GetNftItemsByOwner implements getNftItemsByOwner operation.
-	//
-	// Get all NFT items by owner address.
-	//
-	// GET /v2/accounts/{account_id}/nfts
-	GetNftItemsByOwner(ctx context.Context, params GetNftItemsByOwnerParams) (*NftItems, error)
-	// GetPublicKeyByAccountID implements getPublicKeyByAccountID operation.
-	//
-	// Get public key by account id.
-	//
-	// GET /v2/accounts/{account_id}/publickey
-	GetPublicKeyByAccountID(ctx context.Context, params GetPublicKeyByAccountIDParams) (*GetPublicKeyByAccountIDOK, error)
 	// GetRates implements getRates operation.
 	//
 	// Get the token price to the currency.
 	//
 	// GET /v2/rates
 	GetRates(ctx context.Context, params GetRatesParams) (*GetRatesOK, error)
-	// GetRawAccount implements getRawAccount operation.
+	// GetRawAccountState implements getRawAccountState operation.
 	//
-	// Get low-level information about an account taken directly from the blockchain.
+	// Get raw account state.
 	//
-	// GET /v2/blockchain/accounts/{account_id}
-	GetRawAccount(ctx context.Context, params GetRawAccountParams) (*RawAccount, error)
-	// GetSearchAccounts implements getSearchAccounts operation.
+	// GET /v2/liteserver/get_account_state/{account_id}
+	GetRawAccountState(ctx context.Context, params GetRawAccountStateParams) (*GetRawAccountStateOK, error)
+	// GetRawBlockProof implements getRawBlockProof operation.
 	//
-	// Search for accounts by name. You can find the account by the first characters of the domain.
+	// Get raw block proof.
 	//
-	// GET /v2/accounts/search
-	GetSearchAccounts(ctx context.Context, params GetSearchAccountsParams) (*FoundAccounts, error)
-	// GetShardBlockProofLiteServer implements getShardBlockProofLiteServer operation.
+	// GET /v2/liteserver/get_block_proof
+	GetRawBlockProof(ctx context.Context, params GetRawBlockProofParams) (*GetRawBlockProofOK, error)
+	// GetRawBlockchainBlock implements getRawBlockchainBlock operation.
 	//
-	// Get shard block proof.
+	// Get raw blockchain block.
 	//
-	// GET /v2/liteserver/get_shard_block_proof/{block_id}
-	GetShardBlockProofLiteServer(ctx context.Context, params GetShardBlockProofLiteServerParams) (*GetShardBlockProofLiteServerOK, error)
-	// GetShardInfoLiteServer implements getShardInfoLiteServer operation.
+	// GET /v2/liteserver/get_block/{block_id}
+	GetRawBlockchainBlock(ctx context.Context, params GetRawBlockchainBlockParams) (*GetRawBlockchainBlockOK, error)
+	// GetRawBlockchainBlockHeader implements getRawBlockchainBlockHeader operation.
 	//
-	// Get shard info.
+	// Get raw blockchain block header.
 	//
-	// GET /v2/liteserver/get_shard_info/{block_id}
-	GetShardInfoLiteServer(ctx context.Context, params GetShardInfoLiteServerParams) (*GetShardInfoLiteServerOK, error)
-	// GetStateLiteServer implements getStateLiteServer operation.
+	// GET /v2/liteserver/get_block_header/{block_id}
+	GetRawBlockchainBlockHeader(ctx context.Context, params GetRawBlockchainBlockHeaderParams) (*GetRawBlockchainBlockHeaderOK, error)
+	// GetRawBlockchainBlockState implements getRawBlockchainBlockState operation.
 	//
-	// Get block state.
+	// Get raw blockchain block state.
 	//
 	// GET /v2/liteserver/get_state/{block_id}
-	GetStateLiteServer(ctx context.Context, params GetStateLiteServerParams) (*GetStateLiteServerOK, error)
+	GetRawBlockchainBlockState(ctx context.Context, params GetRawBlockchainBlockStateParams) (*GetRawBlockchainBlockStateOK, error)
+	// GetRawConfig implements getRawConfig operation.
+	//
+	// Get raw config.
+	//
+	// GET /v2/liteserver/get_config_all/{block_id}
+	GetRawConfig(ctx context.Context, params GetRawConfigParams) (*GetRawConfigOK, error)
+	// GetRawListBlockTransactions implements getRawListBlockTransactions operation.
+	//
+	// Get raw list block transactions.
+	//
+	// GET /v2/liteserver/list_block_transactions/{block_id}
+	GetRawListBlockTransactions(ctx context.Context, params GetRawListBlockTransactionsParams) (*GetRawListBlockTransactionsOK, error)
+	// GetRawMasterchainInfo implements getRawMasterchainInfo operation.
+	//
+	// Get raw masterchain info.
+	//
+	// GET /v2/liteserver/get_masterchain_info
+	GetRawMasterchainInfo(ctx context.Context) (*GetRawMasterchainInfoOK, error)
+	// GetRawMasterchainInfoExt implements getRawMasterchainInfoExt operation.
+	//
+	// Get raw masterchain info ext.
+	//
+	// GET /v2/liteserver/get_masterchain_info_ext
+	GetRawMasterchainInfoExt(ctx context.Context, params GetRawMasterchainInfoExtParams) (*GetRawMasterchainInfoExtOK, error)
+	// GetRawShardBlockProof implements getRawShardBlockProof operation.
+	//
+	// Get raw shard block proof.
+	//
+	// GET /v2/liteserver/get_shard_block_proof/{block_id}
+	GetRawShardBlockProof(ctx context.Context, params GetRawShardBlockProofParams) (*GetRawShardBlockProofOK, error)
+	// GetRawShardInfo implements getRawShardInfo operation.
+	//
+	// Get raw shard info.
+	//
+	// GET /v2/liteserver/get_shard_info/{block_id}
+	GetRawShardInfo(ctx context.Context, params GetRawShardInfoParams) (*GetRawShardInfoOK, error)
+	// GetRawTime implements getRawTime operation.
+	//
+	// Get raw time.
+	//
+	// GET /v2/liteserver/get_time
+	GetRawTime(ctx context.Context) (*GetRawTimeOK, error)
+	// GetRawTransactions implements getRawTransactions operation.
+	//
+	// Get raw transactions.
+	//
+	// GET /v2/liteserver/get_transactions/{account_id}
+	GetRawTransactions(ctx context.Context, params GetRawTransactionsParams) (*GetRawTransactionsOK, error)
+	// GetStakingPoolHistory implements getStakingPoolHistory operation.
+	//
+	// Pool history.
+	//
+	// GET /v2/staking/pool/{account_id}/history
+	GetStakingPoolHistory(ctx context.Context, params GetStakingPoolHistoryParams) (*GetStakingPoolHistoryOK, error)
+	// GetStakingPoolInfo implements getStakingPoolInfo operation.
+	//
+	// Stacking pool info.
+	//
+	// GET /v2/staking/pool/{account_id}
+	GetStakingPoolInfo(ctx context.Context, params GetStakingPoolInfoParams) (*GetStakingPoolInfoOK, error)
+	// GetStakingPools implements getStakingPools operation.
+	//
+	// All pools available in network.
+	//
+	// GET /v2/staking/pools
+	GetStakingPools(ctx context.Context, params GetStakingPoolsParams) (*GetStakingPoolsOK, error)
 	// GetStorageProviders implements getStorageProviders operation.
 	//
 	// Get TON storage providers deployed to the blockchain.
 	//
 	// GET /v2/storage/providers
 	GetStorageProviders(ctx context.Context) (*GetStorageProvidersOK, error)
-	// GetSubscriptionsByAccount implements getSubscriptionsByAccount operation.
-	//
-	// Get all subscriptions by wallet address.
-	//
-	// GET /v2/accounts/{account_id}/subscriptions
-	GetSubscriptionsByAccount(ctx context.Context, params GetSubscriptionsByAccountParams) (*Subscriptions, error)
-	// GetTimeLiteServer implements getTimeLiteServer operation.
-	//
-	// Get time.
-	//
-	// GET /v2/liteserver/get_time
-	GetTimeLiteServer(ctx context.Context) (*GetTimeLiteServerOK, error)
 	// GetTonConnectPayload implements getTonConnectPayload operation.
 	//
 	// Get a payload for further token receipt.
@@ -347,36 +395,6 @@ type Handler interface {
 	//
 	// GET /v2/traces/{trace_id}
 	GetTrace(ctx context.Context, params GetTraceParams) (*Trace, error)
-	// GetTracesByAccount implements getTracesByAccount operation.
-	//
-	// Get traces for account.
-	//
-	// GET /v2/accounts/{account_id}/traces
-	GetTracesByAccount(ctx context.Context, params GetTracesByAccountParams) (*TraceIds, error)
-	// GetTransaction implements getTransaction operation.
-	//
-	// Get transaction data.
-	//
-	// GET /v2/blockchain/transactions/{transaction_id}
-	GetTransaction(ctx context.Context, params GetTransactionParams) (*Transaction, error)
-	// GetTransactionByMessageHash implements getTransactionByMessageHash operation.
-	//
-	// Get transaction data by message hash.
-	//
-	// GET /v2/blockchain/messages/{msg_id}/transaction
-	GetTransactionByMessageHash(ctx context.Context, params GetTransactionByMessageHashParams) (*Transaction, error)
-	// GetTransactionsLiteServer implements getTransactionsLiteServer operation.
-	//
-	// Get transactions.
-	//
-	// GET /v2/liteserver/get_transactions/{account_id}
-	GetTransactionsLiteServer(ctx context.Context, params GetTransactionsLiteServerParams) (*GetTransactionsLiteServerOK, error)
-	// GetValidators implements getValidators operation.
-	//
-	// Get validators.
-	//
-	// GET /v2/blockchain/validators
-	GetValidators(ctx context.Context) (*Validators, error)
 	// GetWalletBackup implements getWalletBackup operation.
 	//
 	// Get backup info.
@@ -389,54 +407,36 @@ type Handler interface {
 	//
 	// GET /v2/pubkeys/{public_key}/wallets
 	GetWalletsByPublicKey(ctx context.Context, params GetWalletsByPublicKeyParams) (*Accounts, error)
-	// PoolsByNominators implements poolsByNominators operation.
-	//
-	// All pools where account participates.
-	//
-	// GET /v2/staking/nominator/{account_id}/pools
-	PoolsByNominators(ctx context.Context, params PoolsByNominatorsParams) (*AccountStaking, error)
 	// ReindexAccount implements reindexAccount operation.
 	//
 	// Update internal cache for a particular account.
 	//
 	// POST /v2/accounts/{account_id}/reindex
 	ReindexAccount(ctx context.Context, params ReindexAccountParams) error
-	// SendMessage implements sendMessage operation.
+	// SearchAccounts implements searchAccounts operation.
+	//
+	// Search by account domain name.
+	//
+	// GET /v2/accounts/search
+	SearchAccounts(ctx context.Context, params SearchAccountsParams) (*FoundAccounts, error)
+	// SendBlockchainMessage implements sendBlockchainMessage operation.
 	//
 	// Send message to blockchain.
 	//
 	// POST /v2/blockchain/message
-	SendMessage(ctx context.Context, req *SendMessageReq) error
-	// SendMessageLiteServer implements sendMessageLiteServer operation.
+	SendBlockchainMessage(ctx context.Context, req *SendBlockchainMessageReq) error
+	// SendRawMessage implements sendRawMessage operation.
 	//
-	// Send message.
+	// Send raw message to blockchain.
 	//
 	// POST /v2/liteserver/send_message
-	SendMessageLiteServer(ctx context.Context, req *SendMessageLiteServerReq) (*SendMessageLiteServerOK, error)
+	SendRawMessage(ctx context.Context, req *SendRawMessageReq) (*SendRawMessageOK, error)
 	// SetWalletBackup implements setWalletBackup operation.
 	//
 	// Set backup info.
 	//
 	// PUT /v2/wallet/backup
 	SetWalletBackup(ctx context.Context, req SetWalletBackupReq, params SetWalletBackupParams) error
-	// StakingPoolHistory implements stakingPoolHistory operation.
-	//
-	// Pool info.
-	//
-	// GET /v2/staking/pool/{account_id}/history
-	StakingPoolHistory(ctx context.Context, params StakingPoolHistoryParams) (*StakingPoolHistoryOK, error)
-	// StakingPoolInfo implements stakingPoolInfo operation.
-	//
-	// Pool info.
-	//
-	// GET /v2/staking/pool/{account_id}
-	StakingPoolInfo(ctx context.Context, params StakingPoolInfoParams) (*StakingPoolInfoOK, error)
-	// StakingPools implements stakingPools operation.
-	//
-	// All pools available in network.
-	//
-	// GET /v2/staking/pools
-	StakingPools(ctx context.Context, params StakingPoolsParams) (*StakingPoolsOK, error)
 	// TonConnectProof implements tonConnectProof operation.
 	//
 	// Account verification and token issuance.

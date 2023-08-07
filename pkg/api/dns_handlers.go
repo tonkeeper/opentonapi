@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/tonkeeper/opentonapi/pkg/oas"
 	"github.com/tonkeeper/opentonapi/pkg/references"
@@ -11,12 +12,12 @@ import (
 	"github.com/tonkeeper/tongo/tlb"
 )
 
-func (h Handler) DnsBackResolve(ctx context.Context, params oas.DnsBackResolveParams) (*oas.DomainNames, error) {
-	a, err := tongo.ParseAccountID(params.AccountID)
+func (h Handler) AccountDnsBackResolve(ctx context.Context, params oas.AccountDnsBackResolveParams) (*oas.DomainNames, error) {
+	accountID, err := tongo.ParseAccountID(params.AccountID)
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
 	}
-	domains, err := h.storage.FindAllDomainsResolvedToAddress(ctx, a, references.DomainSuffixes)
+	domains, err := h.storage.FindAllDomainsResolvedToAddress(ctx, accountID, references.DomainSuffixes)
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
@@ -35,7 +36,7 @@ func (h Handler) DnsBackResolve(ctx context.Context, params oas.DnsBackResolvePa
 			if err != nil || w == nil {
 				break
 			}
-			if *w != a {
+			if *w != accountID {
 				break
 			}
 			found = true
@@ -86,10 +87,38 @@ func (h Handler) DnsResolve(ctx context.Context, params oas.DnsResolveParams) (*
 	return &result, nil
 }
 
+func (h Handler) GetDnsInfo(ctx context.Context, params oas.GetDnsInfoParams) (*oas.DomainInfo, error) {
+	name, err := convertDomainName(params.DomainName)
+	if err != nil {
+		return nil, toError(http.StatusBadRequest, err)
+	}
+	nft, expTime, err := h.storage.GetDomainInfo(ctx, name)
+	if err != nil {
+		return nil, toError(http.StatusInternalServerError, err)
+	}
+	convertedDomainInfo := oas.DomainInfo{
+		Name: params.DomainName,
+	}
+	convertedDomainInfo.Item.SetTo(convertNFT(ctx, nft, h.addressBook, h.previewGenerator, h.metaCache))
+	if expTime != 0 {
+		convertedDomainInfo.ExpiringAt.SetTo(expTime)
+	}
+	return &convertedDomainInfo, nil
+}
+
 func convertMsgAddress(address tlb.MsgAddress) string {
 	a, _ := tongo.AccountIDFromTlb(address)
 	if a == nil {
 		return ""
 	}
 	return a.ToRaw()
+}
+
+func convertDomainName(s string) (string, error) {
+	s = strings.ToLower(s)
+	name := strings.TrimSuffix(s, ".ton")
+	if len(name) < 4 || len(name) > 126 {
+		return "", fmt.Errorf("invalid domain len")
+	}
+	return name, nil
 }

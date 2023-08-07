@@ -96,14 +96,12 @@ func checkTonConnectToken(authToken, secret string) ([]byte, bool, error) {
 
 func getTotalBalances(ctx context.Context, storage storage, pubKey []byte) (int64, error) {
 	var balance int64
-
 	versions := []tongoWallet.Version{
 		tongoWallet.V1R1, tongoWallet.V1R2, tongoWallet.V1R3,
 		tongoWallet.V2R1, tongoWallet.V2R2,
 		tongoWallet.V3R1, tongoWallet.V3R2,
 		tongoWallet.V4R1, tongoWallet.V4R2,
 	}
-
 	var walletAddresses []tongo.AccountID
 	for _, version := range versions {
 		walletAddress, err := tongoWallet.GenerateWalletAddress(pubKey, version, 0, nil)
@@ -112,7 +110,6 @@ func getTotalBalances(ctx context.Context, storage storage, pubKey []byte) (int6
 		}
 		walletAddresses = append(walletAddresses, walletAddress)
 	}
-
 	for _, address := range walletAddresses {
 		account, err := storage.GetRawAccount(ctx, address)
 		if err != nil {
@@ -120,7 +117,6 @@ func getTotalBalances(ctx context.Context, storage storage, pubKey []byte) (int6
 		}
 		balance += account.TonBalance
 	}
-
 	return balance, nil
 }
 

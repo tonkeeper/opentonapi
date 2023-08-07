@@ -64,20 +64,20 @@ func (c *Client) requestURL(ctx context.Context) *url.URL {
 	return u
 }
 
-// DnsBackResolve invokes dnsBackResolve operation.
+// AccountDnsBackResolve invokes accountDnsBackResolve operation.
 //
-// Get domains for wallet account.
+// Get account's domains.
 //
 // GET /v2/accounts/{account_id}/dns/backresolve
-func (c *Client) DnsBackResolve(ctx context.Context, params DnsBackResolveParams) (*DomainNames, error) {
-	res, err := c.sendDnsBackResolve(ctx, params)
+func (c *Client) AccountDnsBackResolve(ctx context.Context, params AccountDnsBackResolveParams) (*DomainNames, error) {
+	res, err := c.sendAccountDnsBackResolve(ctx, params)
 	_ = res
 	return res, err
 }
 
-func (c *Client) sendDnsBackResolve(ctx context.Context, params DnsBackResolveParams) (res *DomainNames, err error) {
+func (c *Client) sendAccountDnsBackResolve(ctx context.Context, params AccountDnsBackResolveParams) (res *DomainNames, err error) {
 	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("dnsBackResolve"),
+		otelogen.OperationID("accountDnsBackResolve"),
 	}
 
 	// Run stopwatch.
@@ -92,7 +92,7 @@ func (c *Client) sendDnsBackResolve(ctx context.Context, params DnsBackResolvePa
 	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 
 	// Start a span for this request.
-	ctx, span := c.cfg.Tracer.Start(ctx, "DnsBackResolve",
+	ctx, span := c.cfg.Tracer.Start(ctx, "AccountDnsBackResolve",
 		trace.WithAttributes(otelAttrs...),
 		clientSpanKind,
 	)
@@ -146,96 +146,7 @@ func (c *Client) sendDnsBackResolve(ctx context.Context, params DnsBackResolvePa
 	defer resp.Body.Close()
 
 	stage = "DecodeResponse"
-	result, err := decodeDnsBackResolveResponse(resp)
-	if err != nil {
-		return res, errors.Wrap(err, "decode response")
-	}
-
-	return result, nil
-}
-
-// DnsInfo invokes dnsInfo operation.
-//
-// Get full information about domain name.
-//
-// GET /v2/dns/{domain_name}
-func (c *Client) DnsInfo(ctx context.Context, params DnsInfoParams) (*DomainInfo, error) {
-	res, err := c.sendDnsInfo(ctx, params)
-	_ = res
-	return res, err
-}
-
-func (c *Client) sendDnsInfo(ctx context.Context, params DnsInfoParams) (res *DomainInfo, err error) {
-	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("dnsInfo"),
-	}
-
-	// Run stopwatch.
-	startTime := time.Now()
-	defer func() {
-		// Use floating point division here for higher precision (instead of Millisecond method).
-		elapsedDuration := time.Since(startTime)
-		c.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
-	}()
-
-	// Increment request counter.
-	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
-
-	// Start a span for this request.
-	ctx, span := c.cfg.Tracer.Start(ctx, "DnsInfo",
-		trace.WithAttributes(otelAttrs...),
-		clientSpanKind,
-	)
-	// Track stage for error reporting.
-	var stage string
-	defer func() {
-		if err != nil {
-			span.RecordError(err)
-			span.SetStatus(codes.Error, stage)
-			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
-		}
-		span.End()
-	}()
-
-	stage = "BuildURL"
-	u := uri.Clone(c.requestURL(ctx))
-	var pathParts [2]string
-	pathParts[0] = "/v2/dns/"
-	{
-		// Encode "domain_name" parameter.
-		e := uri.NewPathEncoder(uri.PathEncoderConfig{
-			Param:   "domain_name",
-			Style:   uri.PathStyleSimple,
-			Explode: false,
-		})
-		if err := func() error {
-			return e.EncodeValue(conv.StringToString(params.DomainName))
-		}(); err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		encoded, err := e.Result()
-		if err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		pathParts[1] = encoded
-	}
-	uri.AddPathParts(u, pathParts[:]...)
-
-	stage = "EncodeRequest"
-	r, err := ht.NewRequest(ctx, "GET", u)
-	if err != nil {
-		return res, errors.Wrap(err, "create request")
-	}
-
-	stage = "SendRequest"
-	resp, err := c.cfg.Client.Do(r)
-	if err != nil {
-		return res, errors.Wrap(err, "do request")
-	}
-	defer resp.Body.Close()
-
-	stage = "DecodeResponse"
-	result, err := decodeDnsInfoResponse(resp)
+	result, err := decodeAccountDnsBackResolveResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -608,20 +519,20 @@ func (c *Client) sendEmulateMessageToTrace(ctx context.Context, request *Emulate
 	return result, nil
 }
 
-// EmulateWalletMessage invokes emulateWalletMessage operation.
+// EmulateMessageToWallet invokes emulateMessageToWallet operation.
 //
 // Emulate sending message to blockchain.
 //
 // POST /v2/wallet/emulate
-func (c *Client) EmulateWalletMessage(ctx context.Context, request *EmulateWalletMessageReq, params EmulateWalletMessageParams) (*MessageConsequences, error) {
-	res, err := c.sendEmulateWalletMessage(ctx, request, params)
+func (c *Client) EmulateMessageToWallet(ctx context.Context, request *EmulateMessageToWalletReq, params EmulateMessageToWalletParams) (*MessageConsequences, error) {
+	res, err := c.sendEmulateMessageToWallet(ctx, request, params)
 	_ = res
 	return res, err
 }
 
-func (c *Client) sendEmulateWalletMessage(ctx context.Context, request *EmulateWalletMessageReq, params EmulateWalletMessageParams) (res *MessageConsequences, err error) {
+func (c *Client) sendEmulateMessageToWallet(ctx context.Context, request *EmulateMessageToWalletReq, params EmulateMessageToWalletParams) (res *MessageConsequences, err error) {
 	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("emulateWalletMessage"),
+		otelogen.OperationID("emulateMessageToWallet"),
 	}
 
 	// Run stopwatch.
@@ -636,7 +547,7 @@ func (c *Client) sendEmulateWalletMessage(ctx context.Context, request *EmulateW
 	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 
 	// Start a span for this request.
-	ctx, span := c.cfg.Tracer.Start(ctx, "EmulateWalletMessage",
+	ctx, span := c.cfg.Tracer.Start(ctx, "EmulateMessageToWallet",
 		trace.WithAttributes(otelAttrs...),
 		clientSpanKind,
 	)
@@ -662,7 +573,7 @@ func (c *Client) sendEmulateWalletMessage(ctx context.Context, request *EmulateW
 	if err != nil {
 		return res, errors.Wrap(err, "create request")
 	}
-	if err := encodeEmulateWalletMessageRequest(request, r); err != nil {
+	if err := encodeEmulateMessageToWalletRequest(request, r); err != nil {
 		return res, errors.Wrap(err, "encode request")
 	}
 
@@ -691,7 +602,7 @@ func (c *Client) sendEmulateWalletMessage(ctx context.Context, request *EmulateW
 	defer resp.Body.Close()
 
 	stage = "DecodeResponse"
-	result, err := decodeEmulateWalletMessageResponse(resp)
+	result, err := decodeEmulateMessageToWalletResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -699,20 +610,20 @@ func (c *Client) sendEmulateWalletMessage(ctx context.Context, request *EmulateW
 	return result, nil
 }
 
-// ExecGetMethod invokes execGetMethod operation.
+// ExecGetMethodForBlockchainAccount invokes execGetMethodForBlockchainAccount operation.
 //
 // Execute get method for account.
 //
 // GET /v2/blockchain/accounts/{account_id}/methods/{method_name}
-func (c *Client) ExecGetMethod(ctx context.Context, params ExecGetMethodParams) (*MethodExecutionResult, error) {
-	res, err := c.sendExecGetMethod(ctx, params)
+func (c *Client) ExecGetMethodForBlockchainAccount(ctx context.Context, params ExecGetMethodForBlockchainAccountParams) (*MethodExecutionResult, error) {
+	res, err := c.sendExecGetMethodForBlockchainAccount(ctx, params)
 	_ = res
 	return res, err
 }
 
-func (c *Client) sendExecGetMethod(ctx context.Context, params ExecGetMethodParams) (res *MethodExecutionResult, err error) {
+func (c *Client) sendExecGetMethodForBlockchainAccount(ctx context.Context, params ExecGetMethodForBlockchainAccountParams) (res *MethodExecutionResult, err error) {
 	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("execGetMethod"),
+		otelogen.OperationID("execGetMethodForBlockchainAccount"),
 	}
 
 	// Run stopwatch.
@@ -727,7 +638,7 @@ func (c *Client) sendExecGetMethod(ctx context.Context, params ExecGetMethodPara
 	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 
 	// Start a span for this request.
-	ctx, span := c.cfg.Tracer.Start(ctx, "ExecGetMethod",
+	ctx, span := c.cfg.Tracer.Start(ctx, "ExecGetMethodForBlockchainAccount",
 		trace.WithAttributes(otelAttrs...),
 		clientSpanKind,
 	)
@@ -826,7 +737,7 @@ func (c *Client) sendExecGetMethod(ctx context.Context, params ExecGetMethodPara
 	defer resp.Body.Close()
 
 	stage = "DecodeResponse"
-	result, err := decodeExecGetMethodResponse(resp)
+	result, err := decodeExecGetMethodForBlockchainAccountResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -923,6 +834,314 @@ func (c *Client) sendGetAccount(ctx context.Context, params GetAccountParams) (r
 	return result, nil
 }
 
+// GetAccountDnsExpiring invokes getAccountDnsExpiring operation.
+//
+// Get expiring account .ton dns.
+//
+// GET /v2/accounts/{account_id}/dns/expiring
+func (c *Client) GetAccountDnsExpiring(ctx context.Context, params GetAccountDnsExpiringParams) (*DnsExpiring, error) {
+	res, err := c.sendGetAccountDnsExpiring(ctx, params)
+	_ = res
+	return res, err
+}
+
+func (c *Client) sendGetAccountDnsExpiring(ctx context.Context, params GetAccountDnsExpiringParams) (res *DnsExpiring, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("getAccountDnsExpiring"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, "GetAccountDnsExpiring",
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [3]string
+	pathParts[0] = "/v2/accounts/"
+	{
+		// Encode "account_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "account_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.AccountID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/dns/expiring"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeQueryParams"
+	q := uri.NewQueryEncoder()
+	{
+		// Encode "period" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "period",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.Period.Get(); ok {
+				return e.EncodeValue(conv.IntToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	u.RawQuery = q.Values().Encode()
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeGetAccountDnsExpiringResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// GetAccountEvents invokes getAccountEvents operation.
+//
+// Get events for an account. Each event is built on top of a trace which is a series of transactions
+// caused by one inbound message. TonAPI looks for known patterns inside the trace and splits the
+// trace into actions, where a single action represents a meaningful high-level operation like a
+// Jetton Transfer or an NFT Purchase. Actions are expected to be shown to users. It is advised not
+// to build any logic on top of actions because actions can be changed at any time.
+//
+// GET /v2/accounts/{account_id}/events
+func (c *Client) GetAccountEvents(ctx context.Context, params GetAccountEventsParams) (*AccountEvents, error) {
+	res, err := c.sendGetAccountEvents(ctx, params)
+	_ = res
+	return res, err
+}
+
+func (c *Client) sendGetAccountEvents(ctx context.Context, params GetAccountEventsParams) (res *AccountEvents, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("getAccountEvents"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, "GetAccountEvents",
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [3]string
+	pathParts[0] = "/v2/accounts/"
+	{
+		// Encode "account_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "account_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.AccountID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/events"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeQueryParams"
+	q := uri.NewQueryEncoder()
+	{
+		// Encode "subject_only" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "subject_only",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.SubjectOnly.Get(); ok {
+				return e.EncodeValue(conv.BoolToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "before_lt" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "before_lt",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.BeforeLt.Get(); ok {
+				return e.EncodeValue(conv.Int64ToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "limit" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "limit",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			return e.EncodeValue(conv.IntToString(params.Limit))
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "start_date" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "start_date",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.StartDate.Get(); ok {
+				return e.EncodeValue(conv.Int64ToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "end_date" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "end_date",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.EndDate.Get(); ok {
+				return e.EncodeValue(conv.Int64ToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	u.RawQuery = q.Values().Encode()
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "EncodeHeaderParams"
+	h := uri.NewHeaderEncoder(r.Header)
+	{
+		cfg := uri.HeaderParameterEncodingConfig{
+			Name:    "Accept-Language",
+			Explode: false,
+		}
+		if err := h.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.AcceptLanguage.Get(); ok {
+				return e.EncodeValue(conv.StringToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode header")
+		}
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeGetAccountEventsResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
 // GetAccountInfoByStateInit invokes getAccountInfoByStateInit operation.
 //
 // Get account info by state init.
@@ -990,6 +1209,809 @@ func (c *Client) sendGetAccountInfoByStateInit(ctx context.Context, request *Get
 
 	stage = "DecodeResponse"
 	result, err := decodeGetAccountInfoByStateInitResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// GetAccountJettonHistoryByID invokes getAccountJettonHistoryByID operation.
+//
+// Get the transfer jetton history for account and jetton.
+//
+// GET /v2/accounts/{account_id}/jettons/{jetton_id}/history
+func (c *Client) GetAccountJettonHistoryByID(ctx context.Context, params GetAccountJettonHistoryByIDParams) (*AccountEvents, error) {
+	res, err := c.sendGetAccountJettonHistoryByID(ctx, params)
+	_ = res
+	return res, err
+}
+
+func (c *Client) sendGetAccountJettonHistoryByID(ctx context.Context, params GetAccountJettonHistoryByIDParams) (res *AccountEvents, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("getAccountJettonHistoryByID"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, "GetAccountJettonHistoryByID",
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [5]string
+	pathParts[0] = "/v2/accounts/"
+	{
+		// Encode "account_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "account_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.AccountID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/jettons/"
+	{
+		// Encode "jetton_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "jetton_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.JettonID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/history"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeQueryParams"
+	q := uri.NewQueryEncoder()
+	{
+		// Encode "before_lt" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "before_lt",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.BeforeLt.Get(); ok {
+				return e.EncodeValue(conv.Int64ToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "limit" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "limit",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			return e.EncodeValue(conv.IntToString(params.Limit))
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "start_date" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "start_date",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.StartDate.Get(); ok {
+				return e.EncodeValue(conv.Int64ToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "end_date" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "end_date",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.EndDate.Get(); ok {
+				return e.EncodeValue(conv.Int64ToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	u.RawQuery = q.Values().Encode()
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "EncodeHeaderParams"
+	h := uri.NewHeaderEncoder(r.Header)
+	{
+		cfg := uri.HeaderParameterEncodingConfig{
+			Name:    "Accept-Language",
+			Explode: false,
+		}
+		if err := h.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.AcceptLanguage.Get(); ok {
+				return e.EncodeValue(conv.StringToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode header")
+		}
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeGetAccountJettonHistoryByIDResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// GetAccountJettonsBalances invokes getAccountJettonsBalances operation.
+//
+// Get all Jettons balances by owner address.
+//
+// GET /v2/accounts/{account_id}/jettons
+func (c *Client) GetAccountJettonsBalances(ctx context.Context, params GetAccountJettonsBalancesParams) (*JettonsBalances, error) {
+	res, err := c.sendGetAccountJettonsBalances(ctx, params)
+	_ = res
+	return res, err
+}
+
+func (c *Client) sendGetAccountJettonsBalances(ctx context.Context, params GetAccountJettonsBalancesParams) (res *JettonsBalances, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("getAccountJettonsBalances"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, "GetAccountJettonsBalances",
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [3]string
+	pathParts[0] = "/v2/accounts/"
+	{
+		// Encode "account_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "account_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.AccountID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/jettons"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeGetAccountJettonsBalancesResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// GetAccountJettonsHistory invokes getAccountJettonsHistory operation.
+//
+// Get the transfer jettons history for account.
+//
+// GET /v2/accounts/{account_id}/jettons/history
+func (c *Client) GetAccountJettonsHistory(ctx context.Context, params GetAccountJettonsHistoryParams) (*AccountEvents, error) {
+	res, err := c.sendGetAccountJettonsHistory(ctx, params)
+	_ = res
+	return res, err
+}
+
+func (c *Client) sendGetAccountJettonsHistory(ctx context.Context, params GetAccountJettonsHistoryParams) (res *AccountEvents, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("getAccountJettonsHistory"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, "GetAccountJettonsHistory",
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [3]string
+	pathParts[0] = "/v2/accounts/"
+	{
+		// Encode "account_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "account_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.AccountID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/jettons/history"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeQueryParams"
+	q := uri.NewQueryEncoder()
+	{
+		// Encode "before_lt" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "before_lt",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.BeforeLt.Get(); ok {
+				return e.EncodeValue(conv.Int64ToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "limit" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "limit",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			return e.EncodeValue(conv.IntToString(params.Limit))
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "start_date" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "start_date",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.StartDate.Get(); ok {
+				return e.EncodeValue(conv.Int64ToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "end_date" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "end_date",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.EndDate.Get(); ok {
+				return e.EncodeValue(conv.Int64ToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	u.RawQuery = q.Values().Encode()
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "EncodeHeaderParams"
+	h := uri.NewHeaderEncoder(r.Header)
+	{
+		cfg := uri.HeaderParameterEncodingConfig{
+			Name:    "Accept-Language",
+			Explode: false,
+		}
+		if err := h.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.AcceptLanguage.Get(); ok {
+				return e.EncodeValue(conv.StringToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode header")
+		}
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeGetAccountJettonsHistoryResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// GetAccountNftItems invokes getAccountNftItems operation.
+//
+// Get all NFT items by owner address.
+//
+// GET /v2/accounts/{account_id}/nfts
+func (c *Client) GetAccountNftItems(ctx context.Context, params GetAccountNftItemsParams) (*NftItems, error) {
+	res, err := c.sendGetAccountNftItems(ctx, params)
+	_ = res
+	return res, err
+}
+
+func (c *Client) sendGetAccountNftItems(ctx context.Context, params GetAccountNftItemsParams) (res *NftItems, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("getAccountNftItems"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, "GetAccountNftItems",
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [3]string
+	pathParts[0] = "/v2/accounts/"
+	{
+		// Encode "account_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "account_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.AccountID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/nfts"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeQueryParams"
+	q := uri.NewQueryEncoder()
+	{
+		// Encode "collection" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "collection",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.Collection.Get(); ok {
+				return e.EncodeValue(conv.StringToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "limit" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "limit",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.Limit.Get(); ok {
+				return e.EncodeValue(conv.IntToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "offset" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "offset",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.Offset.Get(); ok {
+				return e.EncodeValue(conv.IntToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "indirect_ownership" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "indirect_ownership",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.IndirectOwnership.Get(); ok {
+				return e.EncodeValue(conv.BoolToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	u.RawQuery = q.Values().Encode()
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeGetAccountNftItemsResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// GetAccountNominatorsPools invokes getAccountNominatorsPools operation.
+//
+// All pools where account participates.
+//
+// GET /v2/staking/nominator/{account_id}/pools
+func (c *Client) GetAccountNominatorsPools(ctx context.Context, params GetAccountNominatorsPoolsParams) (*AccountStaking, error) {
+	res, err := c.sendGetAccountNominatorsPools(ctx, params)
+	_ = res
+	return res, err
+}
+
+func (c *Client) sendGetAccountNominatorsPools(ctx context.Context, params GetAccountNominatorsPoolsParams) (res *AccountStaking, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("getAccountNominatorsPools"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, "GetAccountNominatorsPools",
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [3]string
+	pathParts[0] = "/v2/staking/nominator/"
+	{
+		// Encode "account_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "account_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.AccountID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/pools"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeGetAccountNominatorsPoolsResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// GetAccountPublicKey invokes getAccountPublicKey operation.
+//
+// Get public key by account id.
+//
+// GET /v2/accounts/{account_id}/publickey
+func (c *Client) GetAccountPublicKey(ctx context.Context, params GetAccountPublicKeyParams) (*GetAccountPublicKeyOK, error) {
+	res, err := c.sendGetAccountPublicKey(ctx, params)
+	_ = res
+	return res, err
+}
+
+func (c *Client) sendGetAccountPublicKey(ctx context.Context, params GetAccountPublicKeyParams) (res *GetAccountPublicKeyOK, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("getAccountPublicKey"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, "GetAccountPublicKey",
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [3]string
+	pathParts[0] = "/v2/accounts/"
+	{
+		// Encode "account_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "account_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.AccountID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/publickey"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeGetAccountPublicKeyResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -1087,20 +2109,20 @@ func (c *Client) sendGetAccountSeqno(ctx context.Context, params GetAccountSeqno
 	return result, nil
 }
 
-// GetAccountStateLiteServer invokes getAccountStateLiteServer operation.
+// GetAccountSubscriptions invokes getAccountSubscriptions operation.
 //
-// Get account state.
+// Get all subscriptions by wallet address.
 //
-// GET /v2/liteserver/get_account_state/{account_id}
-func (c *Client) GetAccountStateLiteServer(ctx context.Context, params GetAccountStateLiteServerParams) (*GetAccountStateLiteServerOK, error) {
-	res, err := c.sendGetAccountStateLiteServer(ctx, params)
+// GET /v2/accounts/{account_id}/subscriptions
+func (c *Client) GetAccountSubscriptions(ctx context.Context, params GetAccountSubscriptionsParams) (*Subscriptions, error) {
+	res, err := c.sendGetAccountSubscriptions(ctx, params)
 	_ = res
 	return res, err
 }
 
-func (c *Client) sendGetAccountStateLiteServer(ctx context.Context, params GetAccountStateLiteServerParams) (res *GetAccountStateLiteServerOK, err error) {
+func (c *Client) sendGetAccountSubscriptions(ctx context.Context, params GetAccountSubscriptionsParams) (res *Subscriptions, err error) {
 	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("getAccountStateLiteServer"),
+		otelogen.OperationID("getAccountSubscriptions"),
 	}
 
 	// Run stopwatch.
@@ -1115,96 +2137,7 @@ func (c *Client) sendGetAccountStateLiteServer(ctx context.Context, params GetAc
 	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 
 	// Start a span for this request.
-	ctx, span := c.cfg.Tracer.Start(ctx, "GetAccountStateLiteServer",
-		trace.WithAttributes(otelAttrs...),
-		clientSpanKind,
-	)
-	// Track stage for error reporting.
-	var stage string
-	defer func() {
-		if err != nil {
-			span.RecordError(err)
-			span.SetStatus(codes.Error, stage)
-			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
-		}
-		span.End()
-	}()
-
-	stage = "BuildURL"
-	u := uri.Clone(c.requestURL(ctx))
-	var pathParts [2]string
-	pathParts[0] = "/v2/liteserver/get_account_state/"
-	{
-		// Encode "account_id" parameter.
-		e := uri.NewPathEncoder(uri.PathEncoderConfig{
-			Param:   "account_id",
-			Style:   uri.PathStyleSimple,
-			Explode: false,
-		})
-		if err := func() error {
-			return e.EncodeValue(conv.StringToString(params.AccountID))
-		}(); err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		encoded, err := e.Result()
-		if err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		pathParts[1] = encoded
-	}
-	uri.AddPathParts(u, pathParts[:]...)
-
-	stage = "EncodeRequest"
-	r, err := ht.NewRequest(ctx, "GET", u)
-	if err != nil {
-		return res, errors.Wrap(err, "create request")
-	}
-
-	stage = "SendRequest"
-	resp, err := c.cfg.Client.Do(r)
-	if err != nil {
-		return res, errors.Wrap(err, "do request")
-	}
-	defer resp.Body.Close()
-
-	stage = "DecodeResponse"
-	result, err := decodeGetAccountStateLiteServerResponse(resp)
-	if err != nil {
-		return res, errors.Wrap(err, "decode response")
-	}
-
-	return result, nil
-}
-
-// GetAccountTransactions invokes getAccountTransactions operation.
-//
-// Get account transactions.
-//
-// GET /v2/blockchain/accounts/{account_id}/transactions
-func (c *Client) GetAccountTransactions(ctx context.Context, params GetAccountTransactionsParams) (*Transactions, error) {
-	res, err := c.sendGetAccountTransactions(ctx, params)
-	_ = res
-	return res, err
-}
-
-func (c *Client) sendGetAccountTransactions(ctx context.Context, params GetAccountTransactionsParams) (res *Transactions, err error) {
-	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("getAccountTransactions"),
-	}
-
-	// Run stopwatch.
-	startTime := time.Now()
-	defer func() {
-		// Use floating point division here for higher precision (instead of Millisecond method).
-		elapsedDuration := time.Since(startTime)
-		c.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
-	}()
-
-	// Increment request counter.
-	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
-
-	// Start a span for this request.
-	ctx, span := c.cfg.Tracer.Start(ctx, "GetAccountTransactions",
+	ctx, span := c.cfg.Tracer.Start(ctx, "GetAccountSubscriptions",
 		trace.WithAttributes(otelAttrs...),
 		clientSpanKind,
 	)
@@ -1222,7 +2155,7 @@ func (c *Client) sendGetAccountTransactions(ctx context.Context, params GetAccou
 	stage = "BuildURL"
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [3]string
-	pathParts[0] = "/v2/blockchain/accounts/"
+	pathParts[0] = "/v2/accounts/"
 	{
 		// Encode "account_id" parameter.
 		e := uri.NewPathEncoder(uri.PathEncoderConfig{
@@ -1241,45 +2174,101 @@ func (c *Client) sendGetAccountTransactions(ctx context.Context, params GetAccou
 		}
 		pathParts[1] = encoded
 	}
-	pathParts[2] = "/transactions"
+	pathParts[2] = "/subscriptions"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeGetAccountSubscriptionsResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// GetAccountTraces invokes getAccountTraces operation.
+//
+// Get traces for account.
+//
+// GET /v2/accounts/{account_id}/traces
+func (c *Client) GetAccountTraces(ctx context.Context, params GetAccountTracesParams) (*TraceIDs, error) {
+	res, err := c.sendGetAccountTraces(ctx, params)
+	_ = res
+	return res, err
+}
+
+func (c *Client) sendGetAccountTraces(ctx context.Context, params GetAccountTracesParams) (res *TraceIDs, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("getAccountTraces"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, "GetAccountTraces",
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [3]string
+	pathParts[0] = "/v2/accounts/"
+	{
+		// Encode "account_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "account_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.AccountID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/traces"
 	uri.AddPathParts(u, pathParts[:]...)
 
 	stage = "EncodeQueryParams"
 	q := uri.NewQueryEncoder()
-	{
-		// Encode "after_lt" parameter.
-		cfg := uri.QueryParameterEncodingConfig{
-			Name:    "after_lt",
-			Style:   uri.QueryStyleForm,
-			Explode: true,
-		}
-
-		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
-			if val, ok := params.AfterLt.Get(); ok {
-				return e.EncodeValue(conv.Int64ToString(val))
-			}
-			return nil
-		}); err != nil {
-			return res, errors.Wrap(err, "encode query")
-		}
-	}
-	{
-		// Encode "before_lt" parameter.
-		cfg := uri.QueryParameterEncodingConfig{
-			Name:    "before_lt",
-			Style:   uri.QueryStyleForm,
-			Explode: true,
-		}
-
-		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
-			if val, ok := params.BeforeLt.Get(); ok {
-				return e.EncodeValue(conv.Int64ToString(val))
-			}
-			return nil
-		}); err != nil {
-			return res, errors.Wrap(err, "encode query")
-		}
-	}
 	{
 		// Encode "limit" parameter.
 		cfg := uri.QueryParameterEncodingConfig{
@@ -1290,7 +2279,7 @@ func (c *Client) sendGetAccountTransactions(ctx context.Context, params GetAccou
 
 		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
 			if val, ok := params.Limit.Get(); ok {
-				return e.EncodeValue(conv.Int32ToString(val))
+				return e.EncodeValue(conv.IntToString(val))
 			}
 			return nil
 		}); err != nil {
@@ -1313,7 +2302,7 @@ func (c *Client) sendGetAccountTransactions(ctx context.Context, params GetAccou
 	defer resp.Body.Close()
 
 	stage = "DecodeResponse"
-	result, err := decodeGetAccountTransactionsResponse(resp)
+	result, err := decodeGetAccountTracesResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -1503,20 +2492,20 @@ func (c *Client) sendGetAllAuctions(ctx context.Context, params GetAllAuctionsPa
 	return result, nil
 }
 
-// GetAllShardsInfoLiteServer invokes getAllShardsInfoLiteServer operation.
+// GetAllRawShardsInfo invokes getAllRawShardsInfo operation.
 //
-// Get all shards info.
+// Get all raw shards info.
 //
 // GET /v2/liteserver/get_all_shards_info/{block_id}
-func (c *Client) GetAllShardsInfoLiteServer(ctx context.Context, params GetAllShardsInfoLiteServerParams) (*GetAllShardsInfoLiteServerOK, error) {
-	res, err := c.sendGetAllShardsInfoLiteServer(ctx, params)
+func (c *Client) GetAllRawShardsInfo(ctx context.Context, params GetAllRawShardsInfoParams) (*GetAllRawShardsInfoOK, error) {
+	res, err := c.sendGetAllRawShardsInfo(ctx, params)
 	_ = res
 	return res, err
 }
 
-func (c *Client) sendGetAllShardsInfoLiteServer(ctx context.Context, params GetAllShardsInfoLiteServerParams) (res *GetAllShardsInfoLiteServerOK, err error) {
+func (c *Client) sendGetAllRawShardsInfo(ctx context.Context, params GetAllRawShardsInfoParams) (res *GetAllRawShardsInfoOK, err error) {
 	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("getAllShardsInfoLiteServer"),
+		otelogen.OperationID("getAllRawShardsInfo"),
 	}
 
 	// Run stopwatch.
@@ -1531,7 +2520,7 @@ func (c *Client) sendGetAllShardsInfoLiteServer(ctx context.Context, params GetA
 	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 
 	// Start a span for this request.
-	ctx, span := c.cfg.Tracer.Start(ctx, "GetAllShardsInfoLiteServer",
+	ctx, span := c.cfg.Tracer.Start(ctx, "GetAllRawShardsInfo",
 		trace.WithAttributes(otelAttrs...),
 		clientSpanKind,
 	)
@@ -1584,7 +2573,7 @@ func (c *Client) sendGetAllShardsInfoLiteServer(ctx context.Context, params GetA
 	defer resp.Body.Close()
 
 	stage = "DecodeResponse"
-	result, err := decodeGetAllShardsInfoLiteServerResponse(resp)
+	result, err := decodeGetAllRawShardsInfoResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -1592,20 +2581,20 @@ func (c *Client) sendGetAllShardsInfoLiteServer(ctx context.Context, params GetA
 	return result, nil
 }
 
-// GetBlock invokes getBlock operation.
+// GetBlockchainAccountTransactions invokes getBlockchainAccountTransactions operation.
 //
-// Get block data.
+// Get account transactions.
 //
-// GET /v2/blockchain/blocks/{block_id}
-func (c *Client) GetBlock(ctx context.Context, params GetBlockParams) (*Block, error) {
-	res, err := c.sendGetBlock(ctx, params)
+// GET /v2/blockchain/accounts/{account_id}/transactions
+func (c *Client) GetBlockchainAccountTransactions(ctx context.Context, params GetBlockchainAccountTransactionsParams) (*Transactions, error) {
+	res, err := c.sendGetBlockchainAccountTransactions(ctx, params)
 	_ = res
 	return res, err
 }
 
-func (c *Client) sendGetBlock(ctx context.Context, params GetBlockParams) (res *Block, err error) {
+func (c *Client) sendGetBlockchainAccountTransactions(ctx context.Context, params GetBlockchainAccountTransactionsParams) (res *Transactions, err error) {
 	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("getBlock"),
+		otelogen.OperationID("getBlockchainAccountTransactions"),
 	}
 
 	// Run stopwatch.
@@ -1620,7 +2609,152 @@ func (c *Client) sendGetBlock(ctx context.Context, params GetBlockParams) (res *
 	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 
 	// Start a span for this request.
-	ctx, span := c.cfg.Tracer.Start(ctx, "GetBlock",
+	ctx, span := c.cfg.Tracer.Start(ctx, "GetBlockchainAccountTransactions",
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [3]string
+	pathParts[0] = "/v2/blockchain/accounts/"
+	{
+		// Encode "account_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "account_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.AccountID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/transactions"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeQueryParams"
+	q := uri.NewQueryEncoder()
+	{
+		// Encode "after_lt" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "after_lt",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.AfterLt.Get(); ok {
+				return e.EncodeValue(conv.Int64ToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "before_lt" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "before_lt",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.BeforeLt.Get(); ok {
+				return e.EncodeValue(conv.Int64ToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "limit" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "limit",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.Limit.Get(); ok {
+				return e.EncodeValue(conv.Int32ToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	u.RawQuery = q.Values().Encode()
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeGetBlockchainAccountTransactionsResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// GetBlockchainBlock invokes getBlockchainBlock operation.
+//
+// Get blockchain block data.
+//
+// GET /v2/blockchain/blocks/{block_id}
+func (c *Client) GetBlockchainBlock(ctx context.Context, params GetBlockchainBlockParams) (*BlockchainBlock, error) {
+	res, err := c.sendGetBlockchainBlock(ctx, params)
+	_ = res
+	return res, err
+}
+
+func (c *Client) sendGetBlockchainBlock(ctx context.Context, params GetBlockchainBlockParams) (res *BlockchainBlock, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("getBlockchainBlock"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, "GetBlockchainBlock",
 		trace.WithAttributes(otelAttrs...),
 		clientSpanKind,
 	)
@@ -1673,7 +2807,7 @@ func (c *Client) sendGetBlock(ctx context.Context, params GetBlockParams) (res *
 	defer resp.Body.Close()
 
 	stage = "DecodeResponse"
-	result, err := decodeGetBlockResponse(resp)
+	result, err := decodeGetBlockchainBlockResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -1681,336 +2815,20 @@ func (c *Client) sendGetBlock(ctx context.Context, params GetBlockParams) (res *
 	return result, nil
 }
 
-// GetBlockHeaderLiteServer invokes getBlockHeaderLiteServer operation.
-//
-// Get block header.
-//
-// GET /v2/liteserver/get_block_header/{block_id}
-func (c *Client) GetBlockHeaderLiteServer(ctx context.Context, params GetBlockHeaderLiteServerParams) (*GetBlockHeaderLiteServerOK, error) {
-	res, err := c.sendGetBlockHeaderLiteServer(ctx, params)
-	_ = res
-	return res, err
-}
-
-func (c *Client) sendGetBlockHeaderLiteServer(ctx context.Context, params GetBlockHeaderLiteServerParams) (res *GetBlockHeaderLiteServerOK, err error) {
-	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("getBlockHeaderLiteServer"),
-	}
-
-	// Run stopwatch.
-	startTime := time.Now()
-	defer func() {
-		// Use floating point division here for higher precision (instead of Millisecond method).
-		elapsedDuration := time.Since(startTime)
-		c.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
-	}()
-
-	// Increment request counter.
-	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
-
-	// Start a span for this request.
-	ctx, span := c.cfg.Tracer.Start(ctx, "GetBlockHeaderLiteServer",
-		trace.WithAttributes(otelAttrs...),
-		clientSpanKind,
-	)
-	// Track stage for error reporting.
-	var stage string
-	defer func() {
-		if err != nil {
-			span.RecordError(err)
-			span.SetStatus(codes.Error, stage)
-			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
-		}
-		span.End()
-	}()
-
-	stage = "BuildURL"
-	u := uri.Clone(c.requestURL(ctx))
-	var pathParts [2]string
-	pathParts[0] = "/v2/liteserver/get_block_header/"
-	{
-		// Encode "block_id" parameter.
-		e := uri.NewPathEncoder(uri.PathEncoderConfig{
-			Param:   "block_id",
-			Style:   uri.PathStyleSimple,
-			Explode: false,
-		})
-		if err := func() error {
-			return e.EncodeValue(conv.StringToString(params.BlockID))
-		}(); err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		encoded, err := e.Result()
-		if err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		pathParts[1] = encoded
-	}
-	uri.AddPathParts(u, pathParts[:]...)
-
-	stage = "EncodeQueryParams"
-	q := uri.NewQueryEncoder()
-	{
-		// Encode "mode" parameter.
-		cfg := uri.QueryParameterEncodingConfig{
-			Name:    "mode",
-			Style:   uri.QueryStyleForm,
-			Explode: true,
-		}
-
-		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
-			return e.EncodeValue(conv.Uint32ToString(params.Mode))
-		}); err != nil {
-			return res, errors.Wrap(err, "encode query")
-		}
-	}
-	u.RawQuery = q.Values().Encode()
-
-	stage = "EncodeRequest"
-	r, err := ht.NewRequest(ctx, "GET", u)
-	if err != nil {
-		return res, errors.Wrap(err, "create request")
-	}
-
-	stage = "SendRequest"
-	resp, err := c.cfg.Client.Do(r)
-	if err != nil {
-		return res, errors.Wrap(err, "do request")
-	}
-	defer resp.Body.Close()
-
-	stage = "DecodeResponse"
-	result, err := decodeGetBlockHeaderLiteServerResponse(resp)
-	if err != nil {
-		return res, errors.Wrap(err, "decode response")
-	}
-
-	return result, nil
-}
-
-// GetBlockLiteServer invokes getBlockLiteServer operation.
-//
-// Get block.
-//
-// GET /v2/liteserver/get_block/{block_id}
-func (c *Client) GetBlockLiteServer(ctx context.Context, params GetBlockLiteServerParams) (*GetBlockLiteServerOK, error) {
-	res, err := c.sendGetBlockLiteServer(ctx, params)
-	_ = res
-	return res, err
-}
-
-func (c *Client) sendGetBlockLiteServer(ctx context.Context, params GetBlockLiteServerParams) (res *GetBlockLiteServerOK, err error) {
-	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("getBlockLiteServer"),
-	}
-
-	// Run stopwatch.
-	startTime := time.Now()
-	defer func() {
-		// Use floating point division here for higher precision (instead of Millisecond method).
-		elapsedDuration := time.Since(startTime)
-		c.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
-	}()
-
-	// Increment request counter.
-	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
-
-	// Start a span for this request.
-	ctx, span := c.cfg.Tracer.Start(ctx, "GetBlockLiteServer",
-		trace.WithAttributes(otelAttrs...),
-		clientSpanKind,
-	)
-	// Track stage for error reporting.
-	var stage string
-	defer func() {
-		if err != nil {
-			span.RecordError(err)
-			span.SetStatus(codes.Error, stage)
-			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
-		}
-		span.End()
-	}()
-
-	stage = "BuildURL"
-	u := uri.Clone(c.requestURL(ctx))
-	var pathParts [2]string
-	pathParts[0] = "/v2/liteserver/get_block/"
-	{
-		// Encode "block_id" parameter.
-		e := uri.NewPathEncoder(uri.PathEncoderConfig{
-			Param:   "block_id",
-			Style:   uri.PathStyleSimple,
-			Explode: false,
-		})
-		if err := func() error {
-			return e.EncodeValue(conv.StringToString(params.BlockID))
-		}(); err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		encoded, err := e.Result()
-		if err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		pathParts[1] = encoded
-	}
-	uri.AddPathParts(u, pathParts[:]...)
-
-	stage = "EncodeRequest"
-	r, err := ht.NewRequest(ctx, "GET", u)
-	if err != nil {
-		return res, errors.Wrap(err, "create request")
-	}
-
-	stage = "SendRequest"
-	resp, err := c.cfg.Client.Do(r)
-	if err != nil {
-		return res, errors.Wrap(err, "do request")
-	}
-	defer resp.Body.Close()
-
-	stage = "DecodeResponse"
-	result, err := decodeGetBlockLiteServerResponse(resp)
-	if err != nil {
-		return res, errors.Wrap(err, "decode response")
-	}
-
-	return result, nil
-}
-
-// GetBlockProofLiteServer invokes getBlockProofLiteServer operation.
-//
-// Get block proof.
-//
-// GET /v2/liteserver/get_block_proof
-func (c *Client) GetBlockProofLiteServer(ctx context.Context, params GetBlockProofLiteServerParams) (*GetBlockProofLiteServerOK, error) {
-	res, err := c.sendGetBlockProofLiteServer(ctx, params)
-	_ = res
-	return res, err
-}
-
-func (c *Client) sendGetBlockProofLiteServer(ctx context.Context, params GetBlockProofLiteServerParams) (res *GetBlockProofLiteServerOK, err error) {
-	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("getBlockProofLiteServer"),
-	}
-
-	// Run stopwatch.
-	startTime := time.Now()
-	defer func() {
-		// Use floating point division here for higher precision (instead of Millisecond method).
-		elapsedDuration := time.Since(startTime)
-		c.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
-	}()
-
-	// Increment request counter.
-	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
-
-	// Start a span for this request.
-	ctx, span := c.cfg.Tracer.Start(ctx, "GetBlockProofLiteServer",
-		trace.WithAttributes(otelAttrs...),
-		clientSpanKind,
-	)
-	// Track stage for error reporting.
-	var stage string
-	defer func() {
-		if err != nil {
-			span.RecordError(err)
-			span.SetStatus(codes.Error, stage)
-			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
-		}
-		span.End()
-	}()
-
-	stage = "BuildURL"
-	u := uri.Clone(c.requestURL(ctx))
-	var pathParts [1]string
-	pathParts[0] = "/v2/liteserver/get_block_proof"
-	uri.AddPathParts(u, pathParts[:]...)
-
-	stage = "EncodeQueryParams"
-	q := uri.NewQueryEncoder()
-	{
-		// Encode "known_block" parameter.
-		cfg := uri.QueryParameterEncodingConfig{
-			Name:    "known_block",
-			Style:   uri.QueryStyleForm,
-			Explode: true,
-		}
-
-		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
-			return e.EncodeValue(conv.StringToString(params.KnownBlock))
-		}); err != nil {
-			return res, errors.Wrap(err, "encode query")
-		}
-	}
-	{
-		// Encode "target_block" parameter.
-		cfg := uri.QueryParameterEncodingConfig{
-			Name:    "target_block",
-			Style:   uri.QueryStyleForm,
-			Explode: true,
-		}
-
-		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
-			if val, ok := params.TargetBlock.Get(); ok {
-				return e.EncodeValue(conv.StringToString(val))
-			}
-			return nil
-		}); err != nil {
-			return res, errors.Wrap(err, "encode query")
-		}
-	}
-	{
-		// Encode "mode" parameter.
-		cfg := uri.QueryParameterEncodingConfig{
-			Name:    "mode",
-			Style:   uri.QueryStyleForm,
-			Explode: true,
-		}
-
-		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
-			return e.EncodeValue(conv.Uint32ToString(params.Mode))
-		}); err != nil {
-			return res, errors.Wrap(err, "encode query")
-		}
-	}
-	u.RawQuery = q.Values().Encode()
-
-	stage = "EncodeRequest"
-	r, err := ht.NewRequest(ctx, "GET", u)
-	if err != nil {
-		return res, errors.Wrap(err, "create request")
-	}
-
-	stage = "SendRequest"
-	resp, err := c.cfg.Client.Do(r)
-	if err != nil {
-		return res, errors.Wrap(err, "do request")
-	}
-	defer resp.Body.Close()
-
-	stage = "DecodeResponse"
-	result, err := decodeGetBlockProofLiteServerResponse(resp)
-	if err != nil {
-		return res, errors.Wrap(err, "decode response")
-	}
-
-	return result, nil
-}
-
-// GetBlockTransactions invokes getBlockTransactions operation.
+// GetBlockchainBlockTransactions invokes getBlockchainBlockTransactions operation.
 //
 // Get transactions from block.
 //
 // GET /v2/blockchain/blocks/{block_id}/transactions
-func (c *Client) GetBlockTransactions(ctx context.Context, params GetBlockTransactionsParams) (*Transactions, error) {
-	res, err := c.sendGetBlockTransactions(ctx, params)
+func (c *Client) GetBlockchainBlockTransactions(ctx context.Context, params GetBlockchainBlockTransactionsParams) (*Transactions, error) {
+	res, err := c.sendGetBlockchainBlockTransactions(ctx, params)
 	_ = res
 	return res, err
 }
 
-func (c *Client) sendGetBlockTransactions(ctx context.Context, params GetBlockTransactionsParams) (res *Transactions, err error) {
+func (c *Client) sendGetBlockchainBlockTransactions(ctx context.Context, params GetBlockchainBlockTransactionsParams) (res *Transactions, err error) {
 	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("getBlockTransactions"),
+		otelogen.OperationID("getBlockchainBlockTransactions"),
 	}
 
 	// Run stopwatch.
@@ -2025,7 +2843,7 @@ func (c *Client) sendGetBlockTransactions(ctx context.Context, params GetBlockTr
 	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 
 	// Start a span for this request.
-	ctx, span := c.cfg.Tracer.Start(ctx, "GetBlockTransactions",
+	ctx, span := c.cfg.Tracer.Start(ctx, "GetBlockchainBlockTransactions",
 		trace.WithAttributes(otelAttrs...),
 		clientSpanKind,
 	)
@@ -2079,7 +2897,488 @@ func (c *Client) sendGetBlockTransactions(ctx context.Context, params GetBlockTr
 	defer resp.Body.Close()
 
 	stage = "DecodeResponse"
-	result, err := decodeGetBlockTransactionsResponse(resp)
+	result, err := decodeGetBlockchainBlockTransactionsResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// GetBlockchainConfig invokes getBlockchainConfig operation.
+//
+// Get blockchain config.
+//
+// GET /v2/blockchain/config
+func (c *Client) GetBlockchainConfig(ctx context.Context) (*BlockchainConfig, error) {
+	res, err := c.sendGetBlockchainConfig(ctx)
+	_ = res
+	return res, err
+}
+
+func (c *Client) sendGetBlockchainConfig(ctx context.Context) (res *BlockchainConfig, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("getBlockchainConfig"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, "GetBlockchainConfig",
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [1]string
+	pathParts[0] = "/v2/blockchain/config"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeGetBlockchainConfigResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// GetBlockchainMasterchainHead invokes getBlockchainMasterchainHead operation.
+//
+// Get last known masterchain block.
+//
+// GET /v2/blockchain/masterchain-head
+func (c *Client) GetBlockchainMasterchainHead(ctx context.Context) (*BlockchainBlock, error) {
+	res, err := c.sendGetBlockchainMasterchainHead(ctx)
+	_ = res
+	return res, err
+}
+
+func (c *Client) sendGetBlockchainMasterchainHead(ctx context.Context) (res *BlockchainBlock, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("getBlockchainMasterchainHead"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, "GetBlockchainMasterchainHead",
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [1]string
+	pathParts[0] = "/v2/blockchain/masterchain-head"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeGetBlockchainMasterchainHeadResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// GetBlockchainRawAccount invokes getBlockchainRawAccount operation.
+//
+// Get low-level information about an account taken directly from the blockchain.
+//
+// GET /v2/blockchain/accounts/{account_id}
+func (c *Client) GetBlockchainRawAccount(ctx context.Context, params GetBlockchainRawAccountParams) (*BlockchainRawAccount, error) {
+	res, err := c.sendGetBlockchainRawAccount(ctx, params)
+	_ = res
+	return res, err
+}
+
+func (c *Client) sendGetBlockchainRawAccount(ctx context.Context, params GetBlockchainRawAccountParams) (res *BlockchainRawAccount, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("getBlockchainRawAccount"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, "GetBlockchainRawAccount",
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [2]string
+	pathParts[0] = "/v2/blockchain/accounts/"
+	{
+		// Encode "account_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "account_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.AccountID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeGetBlockchainRawAccountResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// GetBlockchainTransaction invokes getBlockchainTransaction operation.
+//
+// Get transaction data.
+//
+// GET /v2/blockchain/transactions/{transaction_id}
+func (c *Client) GetBlockchainTransaction(ctx context.Context, params GetBlockchainTransactionParams) (*Transaction, error) {
+	res, err := c.sendGetBlockchainTransaction(ctx, params)
+	_ = res
+	return res, err
+}
+
+func (c *Client) sendGetBlockchainTransaction(ctx context.Context, params GetBlockchainTransactionParams) (res *Transaction, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("getBlockchainTransaction"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, "GetBlockchainTransaction",
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [2]string
+	pathParts[0] = "/v2/blockchain/transactions/"
+	{
+		// Encode "transaction_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "transaction_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.TransactionID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeGetBlockchainTransactionResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// GetBlockchainTransactionByMessageHash invokes getBlockchainTransactionByMessageHash operation.
+//
+// Get transaction data by message hash.
+//
+// GET /v2/blockchain/messages/{msg_id}/transaction
+func (c *Client) GetBlockchainTransactionByMessageHash(ctx context.Context, params GetBlockchainTransactionByMessageHashParams) (*Transaction, error) {
+	res, err := c.sendGetBlockchainTransactionByMessageHash(ctx, params)
+	_ = res
+	return res, err
+}
+
+func (c *Client) sendGetBlockchainTransactionByMessageHash(ctx context.Context, params GetBlockchainTransactionByMessageHashParams) (res *Transaction, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("getBlockchainTransactionByMessageHash"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, "GetBlockchainTransactionByMessageHash",
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [3]string
+	pathParts[0] = "/v2/blockchain/messages/"
+	{
+		// Encode "msg_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "msg_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.MsgID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/transaction"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeGetBlockchainTransactionByMessageHashResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// GetBlockchainValidators invokes getBlockchainValidators operation.
+//
+// Get blockchain validators.
+//
+// GET /v2/blockchain/validators
+func (c *Client) GetBlockchainValidators(ctx context.Context) (*Validators, error) {
+	res, err := c.sendGetBlockchainValidators(ctx)
+	_ = res
+	return res, err
+}
+
+func (c *Client) sendGetBlockchainValidators(ctx context.Context) (res *Validators, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("getBlockchainValidators"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, "GetBlockchainValidators",
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [1]string
+	pathParts[0] = "/v2/blockchain/validators"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeGetBlockchainValidatorsResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -2193,20 +3492,20 @@ func (c *Client) sendGetChartRates(ctx context.Context, params GetChartRatesPara
 	return result, nil
 }
 
-// GetConfig invokes getConfig operation.
+// GetDnsInfo invokes getDnsInfo operation.
 //
-// Get blockchain config.
+// Get full information about domain name.
 //
-// GET /v2/blockchain/config
-func (c *Client) GetConfig(ctx context.Context) (*Config, error) {
-	res, err := c.sendGetConfig(ctx)
+// GET /v2/dns/{domain_name}
+func (c *Client) GetDnsInfo(ctx context.Context, params GetDnsInfoParams) (*DomainInfo, error) {
+	res, err := c.sendGetDnsInfo(ctx, params)
 	_ = res
 	return res, err
 }
 
-func (c *Client) sendGetConfig(ctx context.Context) (res *Config, err error) {
+func (c *Client) sendGetDnsInfo(ctx context.Context, params GetDnsInfoParams) (res *DomainInfo, err error) {
 	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("getConfig"),
+		otelogen.OperationID("getDnsInfo"),
 	}
 
 	// Run stopwatch.
@@ -2221,78 +3520,7 @@ func (c *Client) sendGetConfig(ctx context.Context) (res *Config, err error) {
 	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 
 	// Start a span for this request.
-	ctx, span := c.cfg.Tracer.Start(ctx, "GetConfig",
-		trace.WithAttributes(otelAttrs...),
-		clientSpanKind,
-	)
-	// Track stage for error reporting.
-	var stage string
-	defer func() {
-		if err != nil {
-			span.RecordError(err)
-			span.SetStatus(codes.Error, stage)
-			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
-		}
-		span.End()
-	}()
-
-	stage = "BuildURL"
-	u := uri.Clone(c.requestURL(ctx))
-	var pathParts [1]string
-	pathParts[0] = "/v2/blockchain/config"
-	uri.AddPathParts(u, pathParts[:]...)
-
-	stage = "EncodeRequest"
-	r, err := ht.NewRequest(ctx, "GET", u)
-	if err != nil {
-		return res, errors.Wrap(err, "create request")
-	}
-
-	stage = "SendRequest"
-	resp, err := c.cfg.Client.Do(r)
-	if err != nil {
-		return res, errors.Wrap(err, "do request")
-	}
-	defer resp.Body.Close()
-
-	stage = "DecodeResponse"
-	result, err := decodeGetConfigResponse(resp)
-	if err != nil {
-		return res, errors.Wrap(err, "decode response")
-	}
-
-	return result, nil
-}
-
-// GetConfigAllLiteServer invokes getConfigAllLiteServer operation.
-//
-// Get config all.
-//
-// GET /v2/liteserver/get_config_all/{block_id}
-func (c *Client) GetConfigAllLiteServer(ctx context.Context, params GetConfigAllLiteServerParams) (*GetConfigAllLiteServerOK, error) {
-	res, err := c.sendGetConfigAllLiteServer(ctx, params)
-	_ = res
-	return res, err
-}
-
-func (c *Client) sendGetConfigAllLiteServer(ctx context.Context, params GetConfigAllLiteServerParams) (res *GetConfigAllLiteServerOK, err error) {
-	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("getConfigAllLiteServer"),
-	}
-
-	// Run stopwatch.
-	startTime := time.Now()
-	defer func() {
-		// Use floating point division here for higher precision (instead of Millisecond method).
-		elapsedDuration := time.Since(startTime)
-		c.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
-	}()
-
-	// Increment request counter.
-	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
-
-	// Start a span for this request.
-	ctx, span := c.cfg.Tracer.Start(ctx, "GetConfigAllLiteServer",
+	ctx, span := c.cfg.Tracer.Start(ctx, "GetDnsInfo",
 		trace.WithAttributes(otelAttrs...),
 		clientSpanKind,
 	)
@@ -2310,16 +3538,16 @@ func (c *Client) sendGetConfigAllLiteServer(ctx context.Context, params GetConfi
 	stage = "BuildURL"
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [2]string
-	pathParts[0] = "/v2/liteserver/get_config_all/"
+	pathParts[0] = "/v2/dns/"
 	{
-		// Encode "block_id" parameter.
+		// Encode "domain_name" parameter.
 		e := uri.NewPathEncoder(uri.PathEncoderConfig{
-			Param:   "block_id",
+			Param:   "domain_name",
 			Style:   uri.PathStyleSimple,
 			Explode: false,
 		})
 		if err := func() error {
-			return e.EncodeValue(conv.StringToString(params.BlockID))
+			return e.EncodeValue(conv.StringToString(params.DomainName))
 		}(); err != nil {
 			return res, errors.Wrap(err, "encode path")
 		}
@@ -2330,24 +3558,6 @@ func (c *Client) sendGetConfigAllLiteServer(ctx context.Context, params GetConfi
 		pathParts[1] = encoded
 	}
 	uri.AddPathParts(u, pathParts[:]...)
-
-	stage = "EncodeQueryParams"
-	q := uri.NewQueryEncoder()
-	{
-		// Encode "mode" parameter.
-		cfg := uri.QueryParameterEncodingConfig{
-			Name:    "mode",
-			Style:   uri.QueryStyleForm,
-			Explode: true,
-		}
-
-		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
-			return e.EncodeValue(conv.Uint32ToString(params.Mode))
-		}); err != nil {
-			return res, errors.Wrap(err, "encode query")
-		}
-	}
-	u.RawQuery = q.Values().Encode()
 
 	stage = "EncodeRequest"
 	r, err := ht.NewRequest(ctx, "GET", u)
@@ -2363,118 +3573,7 @@ func (c *Client) sendGetConfigAllLiteServer(ctx context.Context, params GetConfi
 	defer resp.Body.Close()
 
 	stage = "DecodeResponse"
-	result, err := decodeGetConfigAllLiteServerResponse(resp)
-	if err != nil {
-		return res, errors.Wrap(err, "decode response")
-	}
-
-	return result, nil
-}
-
-// GetDnsExpiring invokes getDnsExpiring operation.
-//
-// Get expiring .ton dns.
-//
-// GET /v2/accounts/{account_id}/dns/expiring
-func (c *Client) GetDnsExpiring(ctx context.Context, params GetDnsExpiringParams) (*DnsExpiring, error) {
-	res, err := c.sendGetDnsExpiring(ctx, params)
-	_ = res
-	return res, err
-}
-
-func (c *Client) sendGetDnsExpiring(ctx context.Context, params GetDnsExpiringParams) (res *DnsExpiring, err error) {
-	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("getDnsExpiring"),
-	}
-
-	// Run stopwatch.
-	startTime := time.Now()
-	defer func() {
-		// Use floating point division here for higher precision (instead of Millisecond method).
-		elapsedDuration := time.Since(startTime)
-		c.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
-	}()
-
-	// Increment request counter.
-	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
-
-	// Start a span for this request.
-	ctx, span := c.cfg.Tracer.Start(ctx, "GetDnsExpiring",
-		trace.WithAttributes(otelAttrs...),
-		clientSpanKind,
-	)
-	// Track stage for error reporting.
-	var stage string
-	defer func() {
-		if err != nil {
-			span.RecordError(err)
-			span.SetStatus(codes.Error, stage)
-			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
-		}
-		span.End()
-	}()
-
-	stage = "BuildURL"
-	u := uri.Clone(c.requestURL(ctx))
-	var pathParts [3]string
-	pathParts[0] = "/v2/accounts/"
-	{
-		// Encode "account_id" parameter.
-		e := uri.NewPathEncoder(uri.PathEncoderConfig{
-			Param:   "account_id",
-			Style:   uri.PathStyleSimple,
-			Explode: false,
-		})
-		if err := func() error {
-			return e.EncodeValue(conv.StringToString(params.AccountID))
-		}(); err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		encoded, err := e.Result()
-		if err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		pathParts[1] = encoded
-	}
-	pathParts[2] = "/dns/expiring"
-	uri.AddPathParts(u, pathParts[:]...)
-
-	stage = "EncodeQueryParams"
-	q := uri.NewQueryEncoder()
-	{
-		// Encode "period" parameter.
-		cfg := uri.QueryParameterEncodingConfig{
-			Name:    "period",
-			Style:   uri.QueryStyleForm,
-			Explode: true,
-		}
-
-		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
-			if val, ok := params.Period.Get(); ok {
-				return e.EncodeValue(conv.IntToString(val))
-			}
-			return nil
-		}); err != nil {
-			return res, errors.Wrap(err, "encode query")
-		}
-	}
-	u.RawQuery = q.Values().Encode()
-
-	stage = "EncodeRequest"
-	r, err := ht.NewRequest(ctx, "GET", u)
-	if err != nil {
-		return res, errors.Wrap(err, "create request")
-	}
-
-	stage = "SendRequest"
-	resp, err := c.cfg.Client.Do(r)
-	if err != nil {
-		return res, errors.Wrap(err, "do request")
-	}
-	defer resp.Body.Close()
-
-	stage = "DecodeResponse"
-	result, err := decodeGetDnsExpiringResponse(resp)
+	result, err := decodeGetDnsInfoResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -2676,203 +3775,6 @@ func (c *Client) sendGetEvent(ctx context.Context, params GetEventParams) (res *
 
 	stage = "DecodeResponse"
 	result, err := decodeGetEventResponse(resp)
-	if err != nil {
-		return res, errors.Wrap(err, "decode response")
-	}
-
-	return result, nil
-}
-
-// GetEventsByAccount invokes getEventsByAccount operation.
-//
-// Get events for an account. Each event is built on top of a trace which is a series of transactions
-// caused by one inbound message. TonAPI looks for known patterns inside the trace and splits the
-// trace into actions, where a single action represents a meaningful high-level operation like a
-// Jetton Transfer or an NFT Purchase. Actions are expected to be shown to users. It is advised not
-// to build any logic on top of actions because actions can be changed at any time.
-//
-// GET /v2/accounts/{account_id}/events
-func (c *Client) GetEventsByAccount(ctx context.Context, params GetEventsByAccountParams) (*AccountEvents, error) {
-	res, err := c.sendGetEventsByAccount(ctx, params)
-	_ = res
-	return res, err
-}
-
-func (c *Client) sendGetEventsByAccount(ctx context.Context, params GetEventsByAccountParams) (res *AccountEvents, err error) {
-	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("getEventsByAccount"),
-	}
-
-	// Run stopwatch.
-	startTime := time.Now()
-	defer func() {
-		// Use floating point division here for higher precision (instead of Millisecond method).
-		elapsedDuration := time.Since(startTime)
-		c.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
-	}()
-
-	// Increment request counter.
-	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
-
-	// Start a span for this request.
-	ctx, span := c.cfg.Tracer.Start(ctx, "GetEventsByAccount",
-		trace.WithAttributes(otelAttrs...),
-		clientSpanKind,
-	)
-	// Track stage for error reporting.
-	var stage string
-	defer func() {
-		if err != nil {
-			span.RecordError(err)
-			span.SetStatus(codes.Error, stage)
-			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
-		}
-		span.End()
-	}()
-
-	stage = "BuildURL"
-	u := uri.Clone(c.requestURL(ctx))
-	var pathParts [3]string
-	pathParts[0] = "/v2/accounts/"
-	{
-		// Encode "account_id" parameter.
-		e := uri.NewPathEncoder(uri.PathEncoderConfig{
-			Param:   "account_id",
-			Style:   uri.PathStyleSimple,
-			Explode: false,
-		})
-		if err := func() error {
-			return e.EncodeValue(conv.StringToString(params.AccountID))
-		}(); err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		encoded, err := e.Result()
-		if err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		pathParts[1] = encoded
-	}
-	pathParts[2] = "/events"
-	uri.AddPathParts(u, pathParts[:]...)
-
-	stage = "EncodeQueryParams"
-	q := uri.NewQueryEncoder()
-	{
-		// Encode "subject_only" parameter.
-		cfg := uri.QueryParameterEncodingConfig{
-			Name:    "subject_only",
-			Style:   uri.QueryStyleForm,
-			Explode: true,
-		}
-
-		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
-			if val, ok := params.SubjectOnly.Get(); ok {
-				return e.EncodeValue(conv.BoolToString(val))
-			}
-			return nil
-		}); err != nil {
-			return res, errors.Wrap(err, "encode query")
-		}
-	}
-	{
-		// Encode "before_lt" parameter.
-		cfg := uri.QueryParameterEncodingConfig{
-			Name:    "before_lt",
-			Style:   uri.QueryStyleForm,
-			Explode: true,
-		}
-
-		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
-			if val, ok := params.BeforeLt.Get(); ok {
-				return e.EncodeValue(conv.Int64ToString(val))
-			}
-			return nil
-		}); err != nil {
-			return res, errors.Wrap(err, "encode query")
-		}
-	}
-	{
-		// Encode "limit" parameter.
-		cfg := uri.QueryParameterEncodingConfig{
-			Name:    "limit",
-			Style:   uri.QueryStyleForm,
-			Explode: true,
-		}
-
-		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
-			return e.EncodeValue(conv.IntToString(params.Limit))
-		}); err != nil {
-			return res, errors.Wrap(err, "encode query")
-		}
-	}
-	{
-		// Encode "start_date" parameter.
-		cfg := uri.QueryParameterEncodingConfig{
-			Name:    "start_date",
-			Style:   uri.QueryStyleForm,
-			Explode: true,
-		}
-
-		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
-			if val, ok := params.StartDate.Get(); ok {
-				return e.EncodeValue(conv.Int64ToString(val))
-			}
-			return nil
-		}); err != nil {
-			return res, errors.Wrap(err, "encode query")
-		}
-	}
-	{
-		// Encode "end_date" parameter.
-		cfg := uri.QueryParameterEncodingConfig{
-			Name:    "end_date",
-			Style:   uri.QueryStyleForm,
-			Explode: true,
-		}
-
-		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
-			if val, ok := params.EndDate.Get(); ok {
-				return e.EncodeValue(conv.Int64ToString(val))
-			}
-			return nil
-		}); err != nil {
-			return res, errors.Wrap(err, "encode query")
-		}
-	}
-	u.RawQuery = q.Values().Encode()
-
-	stage = "EncodeRequest"
-	r, err := ht.NewRequest(ctx, "GET", u)
-	if err != nil {
-		return res, errors.Wrap(err, "create request")
-	}
-
-	stage = "EncodeHeaderParams"
-	h := uri.NewHeaderEncoder(r.Header)
-	{
-		cfg := uri.HeaderParameterEncodingConfig{
-			Name:    "Accept-Language",
-			Explode: false,
-		}
-		if err := h.EncodeParam(cfg, func(e uri.Encoder) error {
-			if val, ok := params.AcceptLanguage.Get(); ok {
-				return e.EncodeValue(conv.StringToString(val))
-			}
-			return nil
-		}); err != nil {
-			return res, errors.Wrap(err, "encode header")
-		}
-	}
-
-	stage = "SendRequest"
-	resp, err := c.cfg.Client.Do(r)
-	if err != nil {
-		return res, errors.Wrap(err, "do request")
-	}
-	defer resp.Body.Close()
-
-	stage = "DecodeResponse"
-	result, err := decodeGetEventsByAccountResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -3199,853 +4101,6 @@ func (c *Client) sendGetJettons(ctx context.Context, params GetJettonsParams) (r
 
 	stage = "DecodeResponse"
 	result, err := decodeGetJettonsResponse(resp)
-	if err != nil {
-		return res, errors.Wrap(err, "decode response")
-	}
-
-	return result, nil
-}
-
-// GetJettonsBalances invokes getJettonsBalances operation.
-//
-// Get all Jettons balances by owner address.
-//
-// GET /v2/accounts/{account_id}/jettons
-func (c *Client) GetJettonsBalances(ctx context.Context, params GetJettonsBalancesParams) (*JettonsBalances, error) {
-	res, err := c.sendGetJettonsBalances(ctx, params)
-	_ = res
-	return res, err
-}
-
-func (c *Client) sendGetJettonsBalances(ctx context.Context, params GetJettonsBalancesParams) (res *JettonsBalances, err error) {
-	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("getJettonsBalances"),
-	}
-
-	// Run stopwatch.
-	startTime := time.Now()
-	defer func() {
-		// Use floating point division here for higher precision (instead of Millisecond method).
-		elapsedDuration := time.Since(startTime)
-		c.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
-	}()
-
-	// Increment request counter.
-	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
-
-	// Start a span for this request.
-	ctx, span := c.cfg.Tracer.Start(ctx, "GetJettonsBalances",
-		trace.WithAttributes(otelAttrs...),
-		clientSpanKind,
-	)
-	// Track stage for error reporting.
-	var stage string
-	defer func() {
-		if err != nil {
-			span.RecordError(err)
-			span.SetStatus(codes.Error, stage)
-			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
-		}
-		span.End()
-	}()
-
-	stage = "BuildURL"
-	u := uri.Clone(c.requestURL(ctx))
-	var pathParts [3]string
-	pathParts[0] = "/v2/accounts/"
-	{
-		// Encode "account_id" parameter.
-		e := uri.NewPathEncoder(uri.PathEncoderConfig{
-			Param:   "account_id",
-			Style:   uri.PathStyleSimple,
-			Explode: false,
-		})
-		if err := func() error {
-			return e.EncodeValue(conv.StringToString(params.AccountID))
-		}(); err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		encoded, err := e.Result()
-		if err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		pathParts[1] = encoded
-	}
-	pathParts[2] = "/jettons"
-	uri.AddPathParts(u, pathParts[:]...)
-
-	stage = "EncodeRequest"
-	r, err := ht.NewRequest(ctx, "GET", u)
-	if err != nil {
-		return res, errors.Wrap(err, "create request")
-	}
-
-	stage = "SendRequest"
-	resp, err := c.cfg.Client.Do(r)
-	if err != nil {
-		return res, errors.Wrap(err, "do request")
-	}
-	defer resp.Body.Close()
-
-	stage = "DecodeResponse"
-	result, err := decodeGetJettonsBalancesResponse(resp)
-	if err != nil {
-		return res, errors.Wrap(err, "decode response")
-	}
-
-	return result, nil
-}
-
-// GetJettonsHistory invokes getJettonsHistory operation.
-//
-// Get the transfer jettons history for account_id.
-//
-// GET /v2/accounts/{account_id}/jettons/history
-func (c *Client) GetJettonsHistory(ctx context.Context, params GetJettonsHistoryParams) (*AccountEvents, error) {
-	res, err := c.sendGetJettonsHistory(ctx, params)
-	_ = res
-	return res, err
-}
-
-func (c *Client) sendGetJettonsHistory(ctx context.Context, params GetJettonsHistoryParams) (res *AccountEvents, err error) {
-	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("getJettonsHistory"),
-	}
-
-	// Run stopwatch.
-	startTime := time.Now()
-	defer func() {
-		// Use floating point division here for higher precision (instead of Millisecond method).
-		elapsedDuration := time.Since(startTime)
-		c.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
-	}()
-
-	// Increment request counter.
-	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
-
-	// Start a span for this request.
-	ctx, span := c.cfg.Tracer.Start(ctx, "GetJettonsHistory",
-		trace.WithAttributes(otelAttrs...),
-		clientSpanKind,
-	)
-	// Track stage for error reporting.
-	var stage string
-	defer func() {
-		if err != nil {
-			span.RecordError(err)
-			span.SetStatus(codes.Error, stage)
-			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
-		}
-		span.End()
-	}()
-
-	stage = "BuildURL"
-	u := uri.Clone(c.requestURL(ctx))
-	var pathParts [3]string
-	pathParts[0] = "/v2/accounts/"
-	{
-		// Encode "account_id" parameter.
-		e := uri.NewPathEncoder(uri.PathEncoderConfig{
-			Param:   "account_id",
-			Style:   uri.PathStyleSimple,
-			Explode: false,
-		})
-		if err := func() error {
-			return e.EncodeValue(conv.StringToString(params.AccountID))
-		}(); err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		encoded, err := e.Result()
-		if err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		pathParts[1] = encoded
-	}
-	pathParts[2] = "/jettons/history"
-	uri.AddPathParts(u, pathParts[:]...)
-
-	stage = "EncodeQueryParams"
-	q := uri.NewQueryEncoder()
-	{
-		// Encode "before_lt" parameter.
-		cfg := uri.QueryParameterEncodingConfig{
-			Name:    "before_lt",
-			Style:   uri.QueryStyleForm,
-			Explode: true,
-		}
-
-		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
-			if val, ok := params.BeforeLt.Get(); ok {
-				return e.EncodeValue(conv.Int64ToString(val))
-			}
-			return nil
-		}); err != nil {
-			return res, errors.Wrap(err, "encode query")
-		}
-	}
-	{
-		// Encode "limit" parameter.
-		cfg := uri.QueryParameterEncodingConfig{
-			Name:    "limit",
-			Style:   uri.QueryStyleForm,
-			Explode: true,
-		}
-
-		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
-			return e.EncodeValue(conv.IntToString(params.Limit))
-		}); err != nil {
-			return res, errors.Wrap(err, "encode query")
-		}
-	}
-	{
-		// Encode "start_date" parameter.
-		cfg := uri.QueryParameterEncodingConfig{
-			Name:    "start_date",
-			Style:   uri.QueryStyleForm,
-			Explode: true,
-		}
-
-		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
-			if val, ok := params.StartDate.Get(); ok {
-				return e.EncodeValue(conv.Int64ToString(val))
-			}
-			return nil
-		}); err != nil {
-			return res, errors.Wrap(err, "encode query")
-		}
-	}
-	{
-		// Encode "end_date" parameter.
-		cfg := uri.QueryParameterEncodingConfig{
-			Name:    "end_date",
-			Style:   uri.QueryStyleForm,
-			Explode: true,
-		}
-
-		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
-			if val, ok := params.EndDate.Get(); ok {
-				return e.EncodeValue(conv.Int64ToString(val))
-			}
-			return nil
-		}); err != nil {
-			return res, errors.Wrap(err, "encode query")
-		}
-	}
-	u.RawQuery = q.Values().Encode()
-
-	stage = "EncodeRequest"
-	r, err := ht.NewRequest(ctx, "GET", u)
-	if err != nil {
-		return res, errors.Wrap(err, "create request")
-	}
-
-	stage = "EncodeHeaderParams"
-	h := uri.NewHeaderEncoder(r.Header)
-	{
-		cfg := uri.HeaderParameterEncodingConfig{
-			Name:    "Accept-Language",
-			Explode: false,
-		}
-		if err := h.EncodeParam(cfg, func(e uri.Encoder) error {
-			if val, ok := params.AcceptLanguage.Get(); ok {
-				return e.EncodeValue(conv.StringToString(val))
-			}
-			return nil
-		}); err != nil {
-			return res, errors.Wrap(err, "encode header")
-		}
-	}
-
-	stage = "SendRequest"
-	resp, err := c.cfg.Client.Do(r)
-	if err != nil {
-		return res, errors.Wrap(err, "do request")
-	}
-	defer resp.Body.Close()
-
-	stage = "DecodeResponse"
-	result, err := decodeGetJettonsHistoryResponse(resp)
-	if err != nil {
-		return res, errors.Wrap(err, "decode response")
-	}
-
-	return result, nil
-}
-
-// GetJettonsHistoryByID invokes getJettonsHistoryByID operation.
-//
-// Get the transfer jetton history for account_id and jetton_id.
-//
-// GET /v2/accounts/{account_id}/jettons/{jetton_id}/history
-func (c *Client) GetJettonsHistoryByID(ctx context.Context, params GetJettonsHistoryByIDParams) (*AccountEvents, error) {
-	res, err := c.sendGetJettonsHistoryByID(ctx, params)
-	_ = res
-	return res, err
-}
-
-func (c *Client) sendGetJettonsHistoryByID(ctx context.Context, params GetJettonsHistoryByIDParams) (res *AccountEvents, err error) {
-	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("getJettonsHistoryByID"),
-	}
-
-	// Run stopwatch.
-	startTime := time.Now()
-	defer func() {
-		// Use floating point division here for higher precision (instead of Millisecond method).
-		elapsedDuration := time.Since(startTime)
-		c.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
-	}()
-
-	// Increment request counter.
-	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
-
-	// Start a span for this request.
-	ctx, span := c.cfg.Tracer.Start(ctx, "GetJettonsHistoryByID",
-		trace.WithAttributes(otelAttrs...),
-		clientSpanKind,
-	)
-	// Track stage for error reporting.
-	var stage string
-	defer func() {
-		if err != nil {
-			span.RecordError(err)
-			span.SetStatus(codes.Error, stage)
-			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
-		}
-		span.End()
-	}()
-
-	stage = "BuildURL"
-	u := uri.Clone(c.requestURL(ctx))
-	var pathParts [5]string
-	pathParts[0] = "/v2/accounts/"
-	{
-		// Encode "account_id" parameter.
-		e := uri.NewPathEncoder(uri.PathEncoderConfig{
-			Param:   "account_id",
-			Style:   uri.PathStyleSimple,
-			Explode: false,
-		})
-		if err := func() error {
-			return e.EncodeValue(conv.StringToString(params.AccountID))
-		}(); err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		encoded, err := e.Result()
-		if err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		pathParts[1] = encoded
-	}
-	pathParts[2] = "/jettons/"
-	{
-		// Encode "jetton_id" parameter.
-		e := uri.NewPathEncoder(uri.PathEncoderConfig{
-			Param:   "jetton_id",
-			Style:   uri.PathStyleSimple,
-			Explode: false,
-		})
-		if err := func() error {
-			return e.EncodeValue(conv.StringToString(params.JettonID))
-		}(); err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		encoded, err := e.Result()
-		if err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		pathParts[3] = encoded
-	}
-	pathParts[4] = "/history"
-	uri.AddPathParts(u, pathParts[:]...)
-
-	stage = "EncodeQueryParams"
-	q := uri.NewQueryEncoder()
-	{
-		// Encode "before_lt" parameter.
-		cfg := uri.QueryParameterEncodingConfig{
-			Name:    "before_lt",
-			Style:   uri.QueryStyleForm,
-			Explode: true,
-		}
-
-		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
-			if val, ok := params.BeforeLt.Get(); ok {
-				return e.EncodeValue(conv.Int64ToString(val))
-			}
-			return nil
-		}); err != nil {
-			return res, errors.Wrap(err, "encode query")
-		}
-	}
-	{
-		// Encode "limit" parameter.
-		cfg := uri.QueryParameterEncodingConfig{
-			Name:    "limit",
-			Style:   uri.QueryStyleForm,
-			Explode: true,
-		}
-
-		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
-			return e.EncodeValue(conv.IntToString(params.Limit))
-		}); err != nil {
-			return res, errors.Wrap(err, "encode query")
-		}
-	}
-	{
-		// Encode "start_date" parameter.
-		cfg := uri.QueryParameterEncodingConfig{
-			Name:    "start_date",
-			Style:   uri.QueryStyleForm,
-			Explode: true,
-		}
-
-		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
-			if val, ok := params.StartDate.Get(); ok {
-				return e.EncodeValue(conv.Int64ToString(val))
-			}
-			return nil
-		}); err != nil {
-			return res, errors.Wrap(err, "encode query")
-		}
-	}
-	{
-		// Encode "end_date" parameter.
-		cfg := uri.QueryParameterEncodingConfig{
-			Name:    "end_date",
-			Style:   uri.QueryStyleForm,
-			Explode: true,
-		}
-
-		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
-			if val, ok := params.EndDate.Get(); ok {
-				return e.EncodeValue(conv.Int64ToString(val))
-			}
-			return nil
-		}); err != nil {
-			return res, errors.Wrap(err, "encode query")
-		}
-	}
-	u.RawQuery = q.Values().Encode()
-
-	stage = "EncodeRequest"
-	r, err := ht.NewRequest(ctx, "GET", u)
-	if err != nil {
-		return res, errors.Wrap(err, "create request")
-	}
-
-	stage = "EncodeHeaderParams"
-	h := uri.NewHeaderEncoder(r.Header)
-	{
-		cfg := uri.HeaderParameterEncodingConfig{
-			Name:    "Accept-Language",
-			Explode: false,
-		}
-		if err := h.EncodeParam(cfg, func(e uri.Encoder) error {
-			if val, ok := params.AcceptLanguage.Get(); ok {
-				return e.EncodeValue(conv.StringToString(val))
-			}
-			return nil
-		}); err != nil {
-			return res, errors.Wrap(err, "encode header")
-		}
-	}
-
-	stage = "SendRequest"
-	resp, err := c.cfg.Client.Do(r)
-	if err != nil {
-		return res, errors.Wrap(err, "do request")
-	}
-	defer resp.Body.Close()
-
-	stage = "DecodeResponse"
-	result, err := decodeGetJettonsHistoryByIDResponse(resp)
-	if err != nil {
-		return res, errors.Wrap(err, "decode response")
-	}
-
-	return result, nil
-}
-
-// GetListBlockTransactionsLiteServer invokes getListBlockTransactionsLiteServer operation.
-//
-// Get list block transactions.
-//
-// GET /v2/liteserver/list_block_transactions/{block_id}
-func (c *Client) GetListBlockTransactionsLiteServer(ctx context.Context, params GetListBlockTransactionsLiteServerParams) (*GetListBlockTransactionsLiteServerOK, error) {
-	res, err := c.sendGetListBlockTransactionsLiteServer(ctx, params)
-	_ = res
-	return res, err
-}
-
-func (c *Client) sendGetListBlockTransactionsLiteServer(ctx context.Context, params GetListBlockTransactionsLiteServerParams) (res *GetListBlockTransactionsLiteServerOK, err error) {
-	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("getListBlockTransactionsLiteServer"),
-	}
-
-	// Run stopwatch.
-	startTime := time.Now()
-	defer func() {
-		// Use floating point division here for higher precision (instead of Millisecond method).
-		elapsedDuration := time.Since(startTime)
-		c.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
-	}()
-
-	// Increment request counter.
-	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
-
-	// Start a span for this request.
-	ctx, span := c.cfg.Tracer.Start(ctx, "GetListBlockTransactionsLiteServer",
-		trace.WithAttributes(otelAttrs...),
-		clientSpanKind,
-	)
-	// Track stage for error reporting.
-	var stage string
-	defer func() {
-		if err != nil {
-			span.RecordError(err)
-			span.SetStatus(codes.Error, stage)
-			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
-		}
-		span.End()
-	}()
-
-	stage = "BuildURL"
-	u := uri.Clone(c.requestURL(ctx))
-	var pathParts [2]string
-	pathParts[0] = "/v2/liteserver/list_block_transactions/"
-	{
-		// Encode "block_id" parameter.
-		e := uri.NewPathEncoder(uri.PathEncoderConfig{
-			Param:   "block_id",
-			Style:   uri.PathStyleSimple,
-			Explode: false,
-		})
-		if err := func() error {
-			return e.EncodeValue(conv.StringToString(params.BlockID))
-		}(); err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		encoded, err := e.Result()
-		if err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		pathParts[1] = encoded
-	}
-	uri.AddPathParts(u, pathParts[:]...)
-
-	stage = "EncodeQueryParams"
-	q := uri.NewQueryEncoder()
-	{
-		// Encode "mode" parameter.
-		cfg := uri.QueryParameterEncodingConfig{
-			Name:    "mode",
-			Style:   uri.QueryStyleForm,
-			Explode: true,
-		}
-
-		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
-			return e.EncodeValue(conv.Uint32ToString(params.Mode))
-		}); err != nil {
-			return res, errors.Wrap(err, "encode query")
-		}
-	}
-	{
-		// Encode "count" parameter.
-		cfg := uri.QueryParameterEncodingConfig{
-			Name:    "count",
-			Style:   uri.QueryStyleForm,
-			Explode: true,
-		}
-
-		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
-			return e.EncodeValue(conv.Uint32ToString(params.Count))
-		}); err != nil {
-			return res, errors.Wrap(err, "encode query")
-		}
-	}
-	{
-		// Encode "account_id" parameter.
-		cfg := uri.QueryParameterEncodingConfig{
-			Name:    "account_id",
-			Style:   uri.QueryStyleForm,
-			Explode: false,
-		}
-
-		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
-			if val, ok := params.AccountID.Get(); ok {
-				return e.EncodeValue(conv.StringToString(val))
-			}
-			return nil
-		}); err != nil {
-			return res, errors.Wrap(err, "encode query")
-		}
-	}
-	{
-		// Encode "lt" parameter.
-		cfg := uri.QueryParameterEncodingConfig{
-			Name:    "lt",
-			Style:   uri.QueryStyleForm,
-			Explode: true,
-		}
-
-		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
-			if val, ok := params.Lt.Get(); ok {
-				return e.EncodeValue(conv.Uint64ToString(val))
-			}
-			return nil
-		}); err != nil {
-			return res, errors.Wrap(err, "encode query")
-		}
-	}
-	u.RawQuery = q.Values().Encode()
-
-	stage = "EncodeRequest"
-	r, err := ht.NewRequest(ctx, "GET", u)
-	if err != nil {
-		return res, errors.Wrap(err, "create request")
-	}
-
-	stage = "SendRequest"
-	resp, err := c.cfg.Client.Do(r)
-	if err != nil {
-		return res, errors.Wrap(err, "do request")
-	}
-	defer resp.Body.Close()
-
-	stage = "DecodeResponse"
-	result, err := decodeGetListBlockTransactionsLiteServerResponse(resp)
-	if err != nil {
-		return res, errors.Wrap(err, "decode response")
-	}
-
-	return result, nil
-}
-
-// GetMasterchainHead invokes getMasterchainHead operation.
-//
-// Get last known masterchain block.
-//
-// GET /v2/blockchain/masterchain-head
-func (c *Client) GetMasterchainHead(ctx context.Context) (*Block, error) {
-	res, err := c.sendGetMasterchainHead(ctx)
-	_ = res
-	return res, err
-}
-
-func (c *Client) sendGetMasterchainHead(ctx context.Context) (res *Block, err error) {
-	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("getMasterchainHead"),
-	}
-
-	// Run stopwatch.
-	startTime := time.Now()
-	defer func() {
-		// Use floating point division here for higher precision (instead of Millisecond method).
-		elapsedDuration := time.Since(startTime)
-		c.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
-	}()
-
-	// Increment request counter.
-	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
-
-	// Start a span for this request.
-	ctx, span := c.cfg.Tracer.Start(ctx, "GetMasterchainHead",
-		trace.WithAttributes(otelAttrs...),
-		clientSpanKind,
-	)
-	// Track stage for error reporting.
-	var stage string
-	defer func() {
-		if err != nil {
-			span.RecordError(err)
-			span.SetStatus(codes.Error, stage)
-			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
-		}
-		span.End()
-	}()
-
-	stage = "BuildURL"
-	u := uri.Clone(c.requestURL(ctx))
-	var pathParts [1]string
-	pathParts[0] = "/v2/blockchain/masterchain-head"
-	uri.AddPathParts(u, pathParts[:]...)
-
-	stage = "EncodeRequest"
-	r, err := ht.NewRequest(ctx, "GET", u)
-	if err != nil {
-		return res, errors.Wrap(err, "create request")
-	}
-
-	stage = "SendRequest"
-	resp, err := c.cfg.Client.Do(r)
-	if err != nil {
-		return res, errors.Wrap(err, "do request")
-	}
-	defer resp.Body.Close()
-
-	stage = "DecodeResponse"
-	result, err := decodeGetMasterchainHeadResponse(resp)
-	if err != nil {
-		return res, errors.Wrap(err, "decode response")
-	}
-
-	return result, nil
-}
-
-// GetMasterchainInfoExtLiteServer invokes getMasterchainInfoExtLiteServer operation.
-//
-// Get masterchain info ext.
-//
-// GET /v2/liteserver/get_masterchain_info_ext
-func (c *Client) GetMasterchainInfoExtLiteServer(ctx context.Context, params GetMasterchainInfoExtLiteServerParams) (*GetMasterchainInfoExtLiteServerOK, error) {
-	res, err := c.sendGetMasterchainInfoExtLiteServer(ctx, params)
-	_ = res
-	return res, err
-}
-
-func (c *Client) sendGetMasterchainInfoExtLiteServer(ctx context.Context, params GetMasterchainInfoExtLiteServerParams) (res *GetMasterchainInfoExtLiteServerOK, err error) {
-	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("getMasterchainInfoExtLiteServer"),
-	}
-
-	// Run stopwatch.
-	startTime := time.Now()
-	defer func() {
-		// Use floating point division here for higher precision (instead of Millisecond method).
-		elapsedDuration := time.Since(startTime)
-		c.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
-	}()
-
-	// Increment request counter.
-	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
-
-	// Start a span for this request.
-	ctx, span := c.cfg.Tracer.Start(ctx, "GetMasterchainInfoExtLiteServer",
-		trace.WithAttributes(otelAttrs...),
-		clientSpanKind,
-	)
-	// Track stage for error reporting.
-	var stage string
-	defer func() {
-		if err != nil {
-			span.RecordError(err)
-			span.SetStatus(codes.Error, stage)
-			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
-		}
-		span.End()
-	}()
-
-	stage = "BuildURL"
-	u := uri.Clone(c.requestURL(ctx))
-	var pathParts [1]string
-	pathParts[0] = "/v2/liteserver/get_masterchain_info_ext"
-	uri.AddPathParts(u, pathParts[:]...)
-
-	stage = "EncodeQueryParams"
-	q := uri.NewQueryEncoder()
-	{
-		// Encode "mode" parameter.
-		cfg := uri.QueryParameterEncodingConfig{
-			Name:    "mode",
-			Style:   uri.QueryStyleForm,
-			Explode: true,
-		}
-
-		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
-			return e.EncodeValue(conv.Uint32ToString(params.Mode))
-		}); err != nil {
-			return res, errors.Wrap(err, "encode query")
-		}
-	}
-	u.RawQuery = q.Values().Encode()
-
-	stage = "EncodeRequest"
-	r, err := ht.NewRequest(ctx, "GET", u)
-	if err != nil {
-		return res, errors.Wrap(err, "create request")
-	}
-
-	stage = "SendRequest"
-	resp, err := c.cfg.Client.Do(r)
-	if err != nil {
-		return res, errors.Wrap(err, "do request")
-	}
-	defer resp.Body.Close()
-
-	stage = "DecodeResponse"
-	result, err := decodeGetMasterchainInfoExtLiteServerResponse(resp)
-	if err != nil {
-		return res, errors.Wrap(err, "decode response")
-	}
-
-	return result, nil
-}
-
-// GetMasterchainInfoLiteServer invokes getMasterchainInfoLiteServer operation.
-//
-// Get masterchain info.
-//
-// GET /v2/liteserver/get_masterchain_info
-func (c *Client) GetMasterchainInfoLiteServer(ctx context.Context) (*GetMasterchainInfoLiteServerOK, error) {
-	res, err := c.sendGetMasterchainInfoLiteServer(ctx)
-	_ = res
-	return res, err
-}
-
-func (c *Client) sendGetMasterchainInfoLiteServer(ctx context.Context) (res *GetMasterchainInfoLiteServerOK, err error) {
-	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("getMasterchainInfoLiteServer"),
-	}
-
-	// Run stopwatch.
-	startTime := time.Now()
-	defer func() {
-		// Use floating point division here for higher precision (instead of Millisecond method).
-		elapsedDuration := time.Since(startTime)
-		c.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
-	}()
-
-	// Increment request counter.
-	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
-
-	// Start a span for this request.
-	ctx, span := c.cfg.Tracer.Start(ctx, "GetMasterchainInfoLiteServer",
-		trace.WithAttributes(otelAttrs...),
-		clientSpanKind,
-	)
-	// Track stage for error reporting.
-	var stage string
-	defer func() {
-		if err != nil {
-			span.RecordError(err)
-			span.SetStatus(codes.Error, stage)
-			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
-		}
-		span.End()
-	}()
-
-	stage = "BuildURL"
-	u := uri.Clone(c.requestURL(ctx))
-	var pathParts [1]string
-	pathParts[0] = "/v2/liteserver/get_masterchain_info"
-	uri.AddPathParts(u, pathParts[:]...)
-
-	stage = "EncodeRequest"
-	r, err := ht.NewRequest(ctx, "GET", u)
-	if err != nil {
-		return res, errors.Wrap(err, "create request")
-	}
-
-	stage = "SendRequest"
-	resp, err := c.cfg.Client.Do(r)
-	if err != nil {
-		return res, errors.Wrap(err, "do request")
-	}
-	defer resp.Body.Close()
-
-	stage = "DecodeResponse"
-	result, err := decodeGetMasterchainInfoLiteServerResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -4430,258 +4485,6 @@ func (c *Client) sendGetNftItemsByAddresses(ctx context.Context, request OptGetN
 	return result, nil
 }
 
-// GetNftItemsByOwner invokes getNftItemsByOwner operation.
-//
-// Get all NFT items by owner address.
-//
-// GET /v2/accounts/{account_id}/nfts
-func (c *Client) GetNftItemsByOwner(ctx context.Context, params GetNftItemsByOwnerParams) (*NftItems, error) {
-	res, err := c.sendGetNftItemsByOwner(ctx, params)
-	_ = res
-	return res, err
-}
-
-func (c *Client) sendGetNftItemsByOwner(ctx context.Context, params GetNftItemsByOwnerParams) (res *NftItems, err error) {
-	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("getNftItemsByOwner"),
-	}
-
-	// Run stopwatch.
-	startTime := time.Now()
-	defer func() {
-		// Use floating point division here for higher precision (instead of Millisecond method).
-		elapsedDuration := time.Since(startTime)
-		c.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
-	}()
-
-	// Increment request counter.
-	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
-
-	// Start a span for this request.
-	ctx, span := c.cfg.Tracer.Start(ctx, "GetNftItemsByOwner",
-		trace.WithAttributes(otelAttrs...),
-		clientSpanKind,
-	)
-	// Track stage for error reporting.
-	var stage string
-	defer func() {
-		if err != nil {
-			span.RecordError(err)
-			span.SetStatus(codes.Error, stage)
-			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
-		}
-		span.End()
-	}()
-
-	stage = "BuildURL"
-	u := uri.Clone(c.requestURL(ctx))
-	var pathParts [3]string
-	pathParts[0] = "/v2/accounts/"
-	{
-		// Encode "account_id" parameter.
-		e := uri.NewPathEncoder(uri.PathEncoderConfig{
-			Param:   "account_id",
-			Style:   uri.PathStyleSimple,
-			Explode: false,
-		})
-		if err := func() error {
-			return e.EncodeValue(conv.StringToString(params.AccountID))
-		}(); err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		encoded, err := e.Result()
-		if err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		pathParts[1] = encoded
-	}
-	pathParts[2] = "/nfts"
-	uri.AddPathParts(u, pathParts[:]...)
-
-	stage = "EncodeQueryParams"
-	q := uri.NewQueryEncoder()
-	{
-		// Encode "collection" parameter.
-		cfg := uri.QueryParameterEncodingConfig{
-			Name:    "collection",
-			Style:   uri.QueryStyleForm,
-			Explode: true,
-		}
-
-		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
-			if val, ok := params.Collection.Get(); ok {
-				return e.EncodeValue(conv.StringToString(val))
-			}
-			return nil
-		}); err != nil {
-			return res, errors.Wrap(err, "encode query")
-		}
-	}
-	{
-		// Encode "limit" parameter.
-		cfg := uri.QueryParameterEncodingConfig{
-			Name:    "limit",
-			Style:   uri.QueryStyleForm,
-			Explode: true,
-		}
-
-		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
-			if val, ok := params.Limit.Get(); ok {
-				return e.EncodeValue(conv.IntToString(val))
-			}
-			return nil
-		}); err != nil {
-			return res, errors.Wrap(err, "encode query")
-		}
-	}
-	{
-		// Encode "offset" parameter.
-		cfg := uri.QueryParameterEncodingConfig{
-			Name:    "offset",
-			Style:   uri.QueryStyleForm,
-			Explode: true,
-		}
-
-		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
-			if val, ok := params.Offset.Get(); ok {
-				return e.EncodeValue(conv.IntToString(val))
-			}
-			return nil
-		}); err != nil {
-			return res, errors.Wrap(err, "encode query")
-		}
-	}
-	{
-		// Encode "indirect_ownership" parameter.
-		cfg := uri.QueryParameterEncodingConfig{
-			Name:    "indirect_ownership",
-			Style:   uri.QueryStyleForm,
-			Explode: true,
-		}
-
-		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
-			if val, ok := params.IndirectOwnership.Get(); ok {
-				return e.EncodeValue(conv.BoolToString(val))
-			}
-			return nil
-		}); err != nil {
-			return res, errors.Wrap(err, "encode query")
-		}
-	}
-	u.RawQuery = q.Values().Encode()
-
-	stage = "EncodeRequest"
-	r, err := ht.NewRequest(ctx, "GET", u)
-	if err != nil {
-		return res, errors.Wrap(err, "create request")
-	}
-
-	stage = "SendRequest"
-	resp, err := c.cfg.Client.Do(r)
-	if err != nil {
-		return res, errors.Wrap(err, "do request")
-	}
-	defer resp.Body.Close()
-
-	stage = "DecodeResponse"
-	result, err := decodeGetNftItemsByOwnerResponse(resp)
-	if err != nil {
-		return res, errors.Wrap(err, "decode response")
-	}
-
-	return result, nil
-}
-
-// GetPublicKeyByAccountID invokes getPublicKeyByAccountID operation.
-//
-// Get public key by account id.
-//
-// GET /v2/accounts/{account_id}/publickey
-func (c *Client) GetPublicKeyByAccountID(ctx context.Context, params GetPublicKeyByAccountIDParams) (*GetPublicKeyByAccountIDOK, error) {
-	res, err := c.sendGetPublicKeyByAccountID(ctx, params)
-	_ = res
-	return res, err
-}
-
-func (c *Client) sendGetPublicKeyByAccountID(ctx context.Context, params GetPublicKeyByAccountIDParams) (res *GetPublicKeyByAccountIDOK, err error) {
-	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("getPublicKeyByAccountID"),
-	}
-
-	// Run stopwatch.
-	startTime := time.Now()
-	defer func() {
-		// Use floating point division here for higher precision (instead of Millisecond method).
-		elapsedDuration := time.Since(startTime)
-		c.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
-	}()
-
-	// Increment request counter.
-	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
-
-	// Start a span for this request.
-	ctx, span := c.cfg.Tracer.Start(ctx, "GetPublicKeyByAccountID",
-		trace.WithAttributes(otelAttrs...),
-		clientSpanKind,
-	)
-	// Track stage for error reporting.
-	var stage string
-	defer func() {
-		if err != nil {
-			span.RecordError(err)
-			span.SetStatus(codes.Error, stage)
-			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
-		}
-		span.End()
-	}()
-
-	stage = "BuildURL"
-	u := uri.Clone(c.requestURL(ctx))
-	var pathParts [3]string
-	pathParts[0] = "/v2/accounts/"
-	{
-		// Encode "account_id" parameter.
-		e := uri.NewPathEncoder(uri.PathEncoderConfig{
-			Param:   "account_id",
-			Style:   uri.PathStyleSimple,
-			Explode: false,
-		})
-		if err := func() error {
-			return e.EncodeValue(conv.StringToString(params.AccountID))
-		}(); err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		encoded, err := e.Result()
-		if err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		pathParts[1] = encoded
-	}
-	pathParts[2] = "/publickey"
-	uri.AddPathParts(u, pathParts[:]...)
-
-	stage = "EncodeRequest"
-	r, err := ht.NewRequest(ctx, "GET", u)
-	if err != nil {
-		return res, errors.Wrap(err, "create request")
-	}
-
-	stage = "SendRequest"
-	resp, err := c.cfg.Client.Do(r)
-	if err != nil {
-		return res, errors.Wrap(err, "do request")
-	}
-	defer resp.Body.Close()
-
-	stage = "DecodeResponse"
-	result, err := decodeGetPublicKeyByAccountIDResponse(resp)
-	if err != nil {
-		return res, errors.Wrap(err, "decode response")
-	}
-
-	return result, nil
-}
-
 // GetRates invokes getRates operation.
 //
 // Get the token price to the currency.
@@ -4785,20 +4588,20 @@ func (c *Client) sendGetRates(ctx context.Context, params GetRatesParams) (res *
 	return result, nil
 }
 
-// GetRawAccount invokes getRawAccount operation.
+// GetRawAccountState invokes getRawAccountState operation.
 //
-// Get low-level information about an account taken directly from the blockchain.
+// Get raw account state.
 //
-// GET /v2/blockchain/accounts/{account_id}
-func (c *Client) GetRawAccount(ctx context.Context, params GetRawAccountParams) (*RawAccount, error) {
-	res, err := c.sendGetRawAccount(ctx, params)
+// GET /v2/liteserver/get_account_state/{account_id}
+func (c *Client) GetRawAccountState(ctx context.Context, params GetRawAccountStateParams) (*GetRawAccountStateOK, error) {
+	res, err := c.sendGetRawAccountState(ctx, params)
 	_ = res
 	return res, err
 }
 
-func (c *Client) sendGetRawAccount(ctx context.Context, params GetRawAccountParams) (res *RawAccount, err error) {
+func (c *Client) sendGetRawAccountState(ctx context.Context, params GetRawAccountStateParams) (res *GetRawAccountStateOK, err error) {
 	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("getRawAccount"),
+		otelogen.OperationID("getRawAccountState"),
 	}
 
 	// Run stopwatch.
@@ -4813,7 +4616,7 @@ func (c *Client) sendGetRawAccount(ctx context.Context, params GetRawAccountPara
 	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 
 	// Start a span for this request.
-	ctx, span := c.cfg.Tracer.Start(ctx, "GetRawAccount",
+	ctx, span := c.cfg.Tracer.Start(ctx, "GetRawAccountState",
 		trace.WithAttributes(otelAttrs...),
 		clientSpanKind,
 	)
@@ -4831,7 +4634,7 @@ func (c *Client) sendGetRawAccount(ctx context.Context, params GetRawAccountPara
 	stage = "BuildURL"
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [2]string
-	pathParts[0] = "/v2/blockchain/accounts/"
+	pathParts[0] = "/v2/liteserver/get_account_state/"
 	{
 		// Encode "account_id" parameter.
 		e := uri.NewPathEncoder(uri.PathEncoderConfig{
@@ -4866,7 +4669,7 @@ func (c *Client) sendGetRawAccount(ctx context.Context, params GetRawAccountPara
 	defer resp.Body.Close()
 
 	stage = "DecodeResponse"
-	result, err := decodeGetRawAccountResponse(resp)
+	result, err := decodeGetRawAccountStateResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -4874,20 +4677,20 @@ func (c *Client) sendGetRawAccount(ctx context.Context, params GetRawAccountPara
 	return result, nil
 }
 
-// GetSearchAccounts invokes getSearchAccounts operation.
+// GetRawBlockProof invokes getRawBlockProof operation.
 //
-// Search for accounts by name. You can find the account by the first characters of the domain.
+// Get raw block proof.
 //
-// GET /v2/accounts/search
-func (c *Client) GetSearchAccounts(ctx context.Context, params GetSearchAccountsParams) (*FoundAccounts, error) {
-	res, err := c.sendGetSearchAccounts(ctx, params)
+// GET /v2/liteserver/get_block_proof
+func (c *Client) GetRawBlockProof(ctx context.Context, params GetRawBlockProofParams) (*GetRawBlockProofOK, error) {
+	res, err := c.sendGetRawBlockProof(ctx, params)
 	_ = res
 	return res, err
 }
 
-func (c *Client) sendGetSearchAccounts(ctx context.Context, params GetSearchAccountsParams) (res *FoundAccounts, err error) {
+func (c *Client) sendGetRawBlockProof(ctx context.Context, params GetRawBlockProofParams) (res *GetRawBlockProofOK, err error) {
 	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("getSearchAccounts"),
+		otelogen.OperationID("getRawBlockProof"),
 	}
 
 	// Run stopwatch.
@@ -4902,7 +4705,7 @@ func (c *Client) sendGetSearchAccounts(ctx context.Context, params GetSearchAcco
 	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 
 	// Start a span for this request.
-	ctx, span := c.cfg.Tracer.Start(ctx, "GetSearchAccounts",
+	ctx, span := c.cfg.Tracer.Start(ctx, "GetRawBlockProof",
 		trace.WithAttributes(otelAttrs...),
 		clientSpanKind,
 	)
@@ -4920,21 +4723,52 @@ func (c *Client) sendGetSearchAccounts(ctx context.Context, params GetSearchAcco
 	stage = "BuildURL"
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [1]string
-	pathParts[0] = "/v2/accounts/search"
+	pathParts[0] = "/v2/liteserver/get_block_proof"
 	uri.AddPathParts(u, pathParts[:]...)
 
 	stage = "EncodeQueryParams"
 	q := uri.NewQueryEncoder()
 	{
-		// Encode "name" parameter.
+		// Encode "known_block" parameter.
 		cfg := uri.QueryParameterEncodingConfig{
-			Name:    "name",
+			Name:    "known_block",
 			Style:   uri.QueryStyleForm,
 			Explode: true,
 		}
 
 		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
-			return e.EncodeValue(conv.StringToString(params.Name))
+			return e.EncodeValue(conv.StringToString(params.KnownBlock))
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "target_block" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "target_block",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.TargetBlock.Get(); ok {
+				return e.EncodeValue(conv.StringToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "mode" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "mode",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			return e.EncodeValue(conv.Uint32ToString(params.Mode))
 		}); err != nil {
 			return res, errors.Wrap(err, "encode query")
 		}
@@ -4955,7 +4789,7 @@ func (c *Client) sendGetSearchAccounts(ctx context.Context, params GetSearchAcco
 	defer resp.Body.Close()
 
 	stage = "DecodeResponse"
-	result, err := decodeGetSearchAccountsResponse(resp)
+	result, err := decodeGetRawBlockProofResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -4963,20 +4797,20 @@ func (c *Client) sendGetSearchAccounts(ctx context.Context, params GetSearchAcco
 	return result, nil
 }
 
-// GetShardBlockProofLiteServer invokes getShardBlockProofLiteServer operation.
+// GetRawBlockchainBlock invokes getRawBlockchainBlock operation.
 //
-// Get shard block proof.
+// Get raw blockchain block.
 //
-// GET /v2/liteserver/get_shard_block_proof/{block_id}
-func (c *Client) GetShardBlockProofLiteServer(ctx context.Context, params GetShardBlockProofLiteServerParams) (*GetShardBlockProofLiteServerOK, error) {
-	res, err := c.sendGetShardBlockProofLiteServer(ctx, params)
+// GET /v2/liteserver/get_block/{block_id}
+func (c *Client) GetRawBlockchainBlock(ctx context.Context, params GetRawBlockchainBlockParams) (*GetRawBlockchainBlockOK, error) {
+	res, err := c.sendGetRawBlockchainBlock(ctx, params)
 	_ = res
 	return res, err
 }
 
-func (c *Client) sendGetShardBlockProofLiteServer(ctx context.Context, params GetShardBlockProofLiteServerParams) (res *GetShardBlockProofLiteServerOK, err error) {
+func (c *Client) sendGetRawBlockchainBlock(ctx context.Context, params GetRawBlockchainBlockParams) (res *GetRawBlockchainBlockOK, err error) {
 	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("getShardBlockProofLiteServer"),
+		otelogen.OperationID("getRawBlockchainBlock"),
 	}
 
 	// Run stopwatch.
@@ -4991,7 +4825,714 @@ func (c *Client) sendGetShardBlockProofLiteServer(ctx context.Context, params Ge
 	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 
 	// Start a span for this request.
-	ctx, span := c.cfg.Tracer.Start(ctx, "GetShardBlockProofLiteServer",
+	ctx, span := c.cfg.Tracer.Start(ctx, "GetRawBlockchainBlock",
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [2]string
+	pathParts[0] = "/v2/liteserver/get_block/"
+	{
+		// Encode "block_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "block_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.BlockID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeGetRawBlockchainBlockResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// GetRawBlockchainBlockHeader invokes getRawBlockchainBlockHeader operation.
+//
+// Get raw blockchain block header.
+//
+// GET /v2/liteserver/get_block_header/{block_id}
+func (c *Client) GetRawBlockchainBlockHeader(ctx context.Context, params GetRawBlockchainBlockHeaderParams) (*GetRawBlockchainBlockHeaderOK, error) {
+	res, err := c.sendGetRawBlockchainBlockHeader(ctx, params)
+	_ = res
+	return res, err
+}
+
+func (c *Client) sendGetRawBlockchainBlockHeader(ctx context.Context, params GetRawBlockchainBlockHeaderParams) (res *GetRawBlockchainBlockHeaderOK, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("getRawBlockchainBlockHeader"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, "GetRawBlockchainBlockHeader",
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [2]string
+	pathParts[0] = "/v2/liteserver/get_block_header/"
+	{
+		// Encode "block_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "block_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.BlockID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeQueryParams"
+	q := uri.NewQueryEncoder()
+	{
+		// Encode "mode" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "mode",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			return e.EncodeValue(conv.Uint32ToString(params.Mode))
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	u.RawQuery = q.Values().Encode()
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeGetRawBlockchainBlockHeaderResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// GetRawBlockchainBlockState invokes getRawBlockchainBlockState operation.
+//
+// Get raw blockchain block state.
+//
+// GET /v2/liteserver/get_state/{block_id}
+func (c *Client) GetRawBlockchainBlockState(ctx context.Context, params GetRawBlockchainBlockStateParams) (*GetRawBlockchainBlockStateOK, error) {
+	res, err := c.sendGetRawBlockchainBlockState(ctx, params)
+	_ = res
+	return res, err
+}
+
+func (c *Client) sendGetRawBlockchainBlockState(ctx context.Context, params GetRawBlockchainBlockStateParams) (res *GetRawBlockchainBlockStateOK, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("getRawBlockchainBlockState"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, "GetRawBlockchainBlockState",
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [2]string
+	pathParts[0] = "/v2/liteserver/get_state/"
+	{
+		// Encode "block_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "block_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.BlockID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeGetRawBlockchainBlockStateResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// GetRawConfig invokes getRawConfig operation.
+//
+// Get raw config.
+//
+// GET /v2/liteserver/get_config_all/{block_id}
+func (c *Client) GetRawConfig(ctx context.Context, params GetRawConfigParams) (*GetRawConfigOK, error) {
+	res, err := c.sendGetRawConfig(ctx, params)
+	_ = res
+	return res, err
+}
+
+func (c *Client) sendGetRawConfig(ctx context.Context, params GetRawConfigParams) (res *GetRawConfigOK, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("getRawConfig"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, "GetRawConfig",
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [2]string
+	pathParts[0] = "/v2/liteserver/get_config_all/"
+	{
+		// Encode "block_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "block_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.BlockID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeQueryParams"
+	q := uri.NewQueryEncoder()
+	{
+		// Encode "mode" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "mode",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			return e.EncodeValue(conv.Uint32ToString(params.Mode))
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	u.RawQuery = q.Values().Encode()
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeGetRawConfigResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// GetRawListBlockTransactions invokes getRawListBlockTransactions operation.
+//
+// Get raw list block transactions.
+//
+// GET /v2/liteserver/list_block_transactions/{block_id}
+func (c *Client) GetRawListBlockTransactions(ctx context.Context, params GetRawListBlockTransactionsParams) (*GetRawListBlockTransactionsOK, error) {
+	res, err := c.sendGetRawListBlockTransactions(ctx, params)
+	_ = res
+	return res, err
+}
+
+func (c *Client) sendGetRawListBlockTransactions(ctx context.Context, params GetRawListBlockTransactionsParams) (res *GetRawListBlockTransactionsOK, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("getRawListBlockTransactions"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, "GetRawListBlockTransactions",
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [2]string
+	pathParts[0] = "/v2/liteserver/list_block_transactions/"
+	{
+		// Encode "block_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "block_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.BlockID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeQueryParams"
+	q := uri.NewQueryEncoder()
+	{
+		// Encode "mode" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "mode",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			return e.EncodeValue(conv.Uint32ToString(params.Mode))
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "count" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "count",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			return e.EncodeValue(conv.Uint32ToString(params.Count))
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "account_id" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "account_id",
+			Style:   uri.QueryStyleForm,
+			Explode: false,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.AccountID.Get(); ok {
+				return e.EncodeValue(conv.StringToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "lt" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "lt",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.Lt.Get(); ok {
+				return e.EncodeValue(conv.Uint64ToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	u.RawQuery = q.Values().Encode()
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeGetRawListBlockTransactionsResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// GetRawMasterchainInfo invokes getRawMasterchainInfo operation.
+//
+// Get raw masterchain info.
+//
+// GET /v2/liteserver/get_masterchain_info
+func (c *Client) GetRawMasterchainInfo(ctx context.Context) (*GetRawMasterchainInfoOK, error) {
+	res, err := c.sendGetRawMasterchainInfo(ctx)
+	_ = res
+	return res, err
+}
+
+func (c *Client) sendGetRawMasterchainInfo(ctx context.Context) (res *GetRawMasterchainInfoOK, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("getRawMasterchainInfo"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, "GetRawMasterchainInfo",
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [1]string
+	pathParts[0] = "/v2/liteserver/get_masterchain_info"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeGetRawMasterchainInfoResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// GetRawMasterchainInfoExt invokes getRawMasterchainInfoExt operation.
+//
+// Get raw masterchain info ext.
+//
+// GET /v2/liteserver/get_masterchain_info_ext
+func (c *Client) GetRawMasterchainInfoExt(ctx context.Context, params GetRawMasterchainInfoExtParams) (*GetRawMasterchainInfoExtOK, error) {
+	res, err := c.sendGetRawMasterchainInfoExt(ctx, params)
+	_ = res
+	return res, err
+}
+
+func (c *Client) sendGetRawMasterchainInfoExt(ctx context.Context, params GetRawMasterchainInfoExtParams) (res *GetRawMasterchainInfoExtOK, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("getRawMasterchainInfoExt"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, "GetRawMasterchainInfoExt",
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [1]string
+	pathParts[0] = "/v2/liteserver/get_masterchain_info_ext"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeQueryParams"
+	q := uri.NewQueryEncoder()
+	{
+		// Encode "mode" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "mode",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			return e.EncodeValue(conv.Uint32ToString(params.Mode))
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	u.RawQuery = q.Values().Encode()
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeGetRawMasterchainInfoExtResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// GetRawShardBlockProof invokes getRawShardBlockProof operation.
+//
+// Get raw shard block proof.
+//
+// GET /v2/liteserver/get_shard_block_proof/{block_id}
+func (c *Client) GetRawShardBlockProof(ctx context.Context, params GetRawShardBlockProofParams) (*GetRawShardBlockProofOK, error) {
+	res, err := c.sendGetRawShardBlockProof(ctx, params)
+	_ = res
+	return res, err
+}
+
+func (c *Client) sendGetRawShardBlockProof(ctx context.Context, params GetRawShardBlockProofParams) (res *GetRawShardBlockProofOK, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("getRawShardBlockProof"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, "GetRawShardBlockProof",
 		trace.WithAttributes(otelAttrs...),
 		clientSpanKind,
 	)
@@ -5044,7 +5585,7 @@ func (c *Client) sendGetShardBlockProofLiteServer(ctx context.Context, params Ge
 	defer resp.Body.Close()
 
 	stage = "DecodeResponse"
-	result, err := decodeGetShardBlockProofLiteServerResponse(resp)
+	result, err := decodeGetRawShardBlockProofResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -5052,20 +5593,20 @@ func (c *Client) sendGetShardBlockProofLiteServer(ctx context.Context, params Ge
 	return result, nil
 }
 
-// GetShardInfoLiteServer invokes getShardInfoLiteServer operation.
+// GetRawShardInfo invokes getRawShardInfo operation.
 //
-// Get shard info.
+// Get raw shard info.
 //
 // GET /v2/liteserver/get_shard_info/{block_id}
-func (c *Client) GetShardInfoLiteServer(ctx context.Context, params GetShardInfoLiteServerParams) (*GetShardInfoLiteServerOK, error) {
-	res, err := c.sendGetShardInfoLiteServer(ctx, params)
+func (c *Client) GetRawShardInfo(ctx context.Context, params GetRawShardInfoParams) (*GetRawShardInfoOK, error) {
+	res, err := c.sendGetRawShardInfo(ctx, params)
 	_ = res
 	return res, err
 }
 
-func (c *Client) sendGetShardInfoLiteServer(ctx context.Context, params GetShardInfoLiteServerParams) (res *GetShardInfoLiteServerOK, err error) {
+func (c *Client) sendGetRawShardInfo(ctx context.Context, params GetRawShardInfoParams) (res *GetRawShardInfoOK, err error) {
 	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("getShardInfoLiteServer"),
+		otelogen.OperationID("getRawShardInfo"),
 	}
 
 	// Run stopwatch.
@@ -5080,7 +5621,7 @@ func (c *Client) sendGetShardInfoLiteServer(ctx context.Context, params GetShard
 	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 
 	// Start a span for this request.
-	ctx, span := c.cfg.Tracer.Start(ctx, "GetShardInfoLiteServer",
+	ctx, span := c.cfg.Tracer.Start(ctx, "GetRawShardInfo",
 		trace.WithAttributes(otelAttrs...),
 		clientSpanKind,
 	)
@@ -5179,7 +5720,7 @@ func (c *Client) sendGetShardInfoLiteServer(ctx context.Context, params GetShard
 	defer resp.Body.Close()
 
 	stage = "DecodeResponse"
-	result, err := decodeGetShardInfoLiteServerResponse(resp)
+	result, err := decodeGetRawShardInfoResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -5187,20 +5728,20 @@ func (c *Client) sendGetShardInfoLiteServer(ctx context.Context, params GetShard
 	return result, nil
 }
 
-// GetStateLiteServer invokes getStateLiteServer operation.
+// GetRawTime invokes getRawTime operation.
 //
-// Get block state.
+// Get raw time.
 //
-// GET /v2/liteserver/get_state/{block_id}
-func (c *Client) GetStateLiteServer(ctx context.Context, params GetStateLiteServerParams) (*GetStateLiteServerOK, error) {
-	res, err := c.sendGetStateLiteServer(ctx, params)
+// GET /v2/liteserver/get_time
+func (c *Client) GetRawTime(ctx context.Context) (*GetRawTimeOK, error) {
+	res, err := c.sendGetRawTime(ctx)
 	_ = res
 	return res, err
 }
 
-func (c *Client) sendGetStateLiteServer(ctx context.Context, params GetStateLiteServerParams) (res *GetStateLiteServerOK, err error) {
+func (c *Client) sendGetRawTime(ctx context.Context) (res *GetRawTimeOK, err error) {
 	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("getStateLiteServer"),
+		otelogen.OperationID("getRawTime"),
 	}
 
 	// Run stopwatch.
@@ -5215,7 +5756,78 @@ func (c *Client) sendGetStateLiteServer(ctx context.Context, params GetStateLite
 	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 
 	// Start a span for this request.
-	ctx, span := c.cfg.Tracer.Start(ctx, "GetStateLiteServer",
+	ctx, span := c.cfg.Tracer.Start(ctx, "GetRawTime",
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [1]string
+	pathParts[0] = "/v2/liteserver/get_time"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeGetRawTimeResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// GetRawTransactions invokes getRawTransactions operation.
+//
+// Get raw transactions.
+//
+// GET /v2/liteserver/get_transactions/{account_id}
+func (c *Client) GetRawTransactions(ctx context.Context, params GetRawTransactionsParams) (*GetRawTransactionsOK, error) {
+	res, err := c.sendGetRawTransactions(ctx, params)
+	_ = res
+	return res, err
+}
+
+func (c *Client) sendGetRawTransactions(ctx context.Context, params GetRawTransactionsParams) (res *GetRawTransactionsOK, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("getRawTransactions"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, "GetRawTransactions",
 		trace.WithAttributes(otelAttrs...),
 		clientSpanKind,
 	)
@@ -5233,16 +5845,241 @@ func (c *Client) sendGetStateLiteServer(ctx context.Context, params GetStateLite
 	stage = "BuildURL"
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [2]string
-	pathParts[0] = "/v2/liteserver/get_state/"
+	pathParts[0] = "/v2/liteserver/get_transactions/"
 	{
-		// Encode "block_id" parameter.
+		// Encode "account_id" parameter.
 		e := uri.NewPathEncoder(uri.PathEncoderConfig{
-			Param:   "block_id",
+			Param:   "account_id",
 			Style:   uri.PathStyleSimple,
 			Explode: false,
 		})
 		if err := func() error {
-			return e.EncodeValue(conv.StringToString(params.BlockID))
+			return e.EncodeValue(conv.StringToString(params.AccountID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeQueryParams"
+	q := uri.NewQueryEncoder()
+	{
+		// Encode "count" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "count",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			return e.EncodeValue(conv.Uint32ToString(params.Count))
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "lt" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "lt",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			return e.EncodeValue(conv.Uint64ToString(params.Lt))
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "hash" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "hash",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			return e.EncodeValue(conv.StringToString(params.Hash))
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	u.RawQuery = q.Values().Encode()
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeGetRawTransactionsResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// GetStakingPoolHistory invokes getStakingPoolHistory operation.
+//
+// Pool history.
+//
+// GET /v2/staking/pool/{account_id}/history
+func (c *Client) GetStakingPoolHistory(ctx context.Context, params GetStakingPoolHistoryParams) (*GetStakingPoolHistoryOK, error) {
+	res, err := c.sendGetStakingPoolHistory(ctx, params)
+	_ = res
+	return res, err
+}
+
+func (c *Client) sendGetStakingPoolHistory(ctx context.Context, params GetStakingPoolHistoryParams) (res *GetStakingPoolHistoryOK, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("getStakingPoolHistory"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, "GetStakingPoolHistory",
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [3]string
+	pathParts[0] = "/v2/staking/pool/"
+	{
+		// Encode "account_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "account_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.AccountID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/history"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeGetStakingPoolHistoryResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// GetStakingPoolInfo invokes getStakingPoolInfo operation.
+//
+// Stacking pool info.
+//
+// GET /v2/staking/pool/{account_id}
+func (c *Client) GetStakingPoolInfo(ctx context.Context, params GetStakingPoolInfoParams) (*GetStakingPoolInfoOK, error) {
+	res, err := c.sendGetStakingPoolInfo(ctx, params)
+	_ = res
+	return res, err
+}
+
+func (c *Client) sendGetStakingPoolInfo(ctx context.Context, params GetStakingPoolInfoParams) (res *GetStakingPoolInfoOK, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("getStakingPoolInfo"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, "GetStakingPoolInfo",
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [2]string
+	pathParts[0] = "/v2/staking/pool/"
+	{
+		// Encode "account_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "account_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.AccountID))
 		}(); err != nil {
 			return res, errors.Wrap(err, "encode path")
 		}
@@ -5260,6 +6097,23 @@ func (c *Client) sendGetStateLiteServer(ctx context.Context, params GetStateLite
 		return res, errors.Wrap(err, "create request")
 	}
 
+	stage = "EncodeHeaderParams"
+	h := uri.NewHeaderEncoder(r.Header)
+	{
+		cfg := uri.HeaderParameterEncodingConfig{
+			Name:    "Accept-Language",
+			Explode: false,
+		}
+		if err := h.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.AcceptLanguage.Get(); ok {
+				return e.EncodeValue(conv.StringToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode header")
+		}
+	}
+
 	stage = "SendRequest"
 	resp, err := c.cfg.Client.Do(r)
 	if err != nil {
@@ -5268,7 +6122,133 @@ func (c *Client) sendGetStateLiteServer(ctx context.Context, params GetStateLite
 	defer resp.Body.Close()
 
 	stage = "DecodeResponse"
-	result, err := decodeGetStateLiteServerResponse(resp)
+	result, err := decodeGetStakingPoolInfoResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// GetStakingPools invokes getStakingPools operation.
+//
+// All pools available in network.
+//
+// GET /v2/staking/pools
+func (c *Client) GetStakingPools(ctx context.Context, params GetStakingPoolsParams) (*GetStakingPoolsOK, error) {
+	res, err := c.sendGetStakingPools(ctx, params)
+	_ = res
+	return res, err
+}
+
+func (c *Client) sendGetStakingPools(ctx context.Context, params GetStakingPoolsParams) (res *GetStakingPoolsOK, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("getStakingPools"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, "GetStakingPools",
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [1]string
+	pathParts[0] = "/v2/staking/pools"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeQueryParams"
+	q := uri.NewQueryEncoder()
+	{
+		// Encode "available_for" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "available_for",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.AvailableFor.Get(); ok {
+				return e.EncodeValue(conv.StringToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "include_unverified" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "include_unverified",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.IncludeUnverified.Get(); ok {
+				return e.EncodeValue(conv.BoolToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	u.RawQuery = q.Values().Encode()
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "EncodeHeaderParams"
+	h := uri.NewHeaderEncoder(r.Header)
+	{
+		cfg := uri.HeaderParameterEncodingConfig{
+			Name:    "Accept-Language",
+			Explode: false,
+		}
+		if err := h.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.AcceptLanguage.Get(); ok {
+				return e.EncodeValue(conv.StringToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode header")
+		}
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeGetStakingPoolsResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -5340,167 +6320,6 @@ func (c *Client) sendGetStorageProviders(ctx context.Context) (res *GetStoragePr
 
 	stage = "DecodeResponse"
 	result, err := decodeGetStorageProvidersResponse(resp)
-	if err != nil {
-		return res, errors.Wrap(err, "decode response")
-	}
-
-	return result, nil
-}
-
-// GetSubscriptionsByAccount invokes getSubscriptionsByAccount operation.
-//
-// Get all subscriptions by wallet address.
-//
-// GET /v2/accounts/{account_id}/subscriptions
-func (c *Client) GetSubscriptionsByAccount(ctx context.Context, params GetSubscriptionsByAccountParams) (*Subscriptions, error) {
-	res, err := c.sendGetSubscriptionsByAccount(ctx, params)
-	_ = res
-	return res, err
-}
-
-func (c *Client) sendGetSubscriptionsByAccount(ctx context.Context, params GetSubscriptionsByAccountParams) (res *Subscriptions, err error) {
-	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("getSubscriptionsByAccount"),
-	}
-
-	// Run stopwatch.
-	startTime := time.Now()
-	defer func() {
-		// Use floating point division here for higher precision (instead of Millisecond method).
-		elapsedDuration := time.Since(startTime)
-		c.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
-	}()
-
-	// Increment request counter.
-	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
-
-	// Start a span for this request.
-	ctx, span := c.cfg.Tracer.Start(ctx, "GetSubscriptionsByAccount",
-		trace.WithAttributes(otelAttrs...),
-		clientSpanKind,
-	)
-	// Track stage for error reporting.
-	var stage string
-	defer func() {
-		if err != nil {
-			span.RecordError(err)
-			span.SetStatus(codes.Error, stage)
-			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
-		}
-		span.End()
-	}()
-
-	stage = "BuildURL"
-	u := uri.Clone(c.requestURL(ctx))
-	var pathParts [3]string
-	pathParts[0] = "/v2/accounts/"
-	{
-		// Encode "account_id" parameter.
-		e := uri.NewPathEncoder(uri.PathEncoderConfig{
-			Param:   "account_id",
-			Style:   uri.PathStyleSimple,
-			Explode: false,
-		})
-		if err := func() error {
-			return e.EncodeValue(conv.StringToString(params.AccountID))
-		}(); err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		encoded, err := e.Result()
-		if err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		pathParts[1] = encoded
-	}
-	pathParts[2] = "/subscriptions"
-	uri.AddPathParts(u, pathParts[:]...)
-
-	stage = "EncodeRequest"
-	r, err := ht.NewRequest(ctx, "GET", u)
-	if err != nil {
-		return res, errors.Wrap(err, "create request")
-	}
-
-	stage = "SendRequest"
-	resp, err := c.cfg.Client.Do(r)
-	if err != nil {
-		return res, errors.Wrap(err, "do request")
-	}
-	defer resp.Body.Close()
-
-	stage = "DecodeResponse"
-	result, err := decodeGetSubscriptionsByAccountResponse(resp)
-	if err != nil {
-		return res, errors.Wrap(err, "decode response")
-	}
-
-	return result, nil
-}
-
-// GetTimeLiteServer invokes getTimeLiteServer operation.
-//
-// Get time.
-//
-// GET /v2/liteserver/get_time
-func (c *Client) GetTimeLiteServer(ctx context.Context) (*GetTimeLiteServerOK, error) {
-	res, err := c.sendGetTimeLiteServer(ctx)
-	_ = res
-	return res, err
-}
-
-func (c *Client) sendGetTimeLiteServer(ctx context.Context) (res *GetTimeLiteServerOK, err error) {
-	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("getTimeLiteServer"),
-	}
-
-	// Run stopwatch.
-	startTime := time.Now()
-	defer func() {
-		// Use floating point division here for higher precision (instead of Millisecond method).
-		elapsedDuration := time.Since(startTime)
-		c.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
-	}()
-
-	// Increment request counter.
-	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
-
-	// Start a span for this request.
-	ctx, span := c.cfg.Tracer.Start(ctx, "GetTimeLiteServer",
-		trace.WithAttributes(otelAttrs...),
-		clientSpanKind,
-	)
-	// Track stage for error reporting.
-	var stage string
-	defer func() {
-		if err != nil {
-			span.RecordError(err)
-			span.SetStatus(codes.Error, stage)
-			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
-		}
-		span.End()
-	}()
-
-	stage = "BuildURL"
-	u := uri.Clone(c.requestURL(ctx))
-	var pathParts [1]string
-	pathParts[0] = "/v2/liteserver/get_time"
-	uri.AddPathParts(u, pathParts[:]...)
-
-	stage = "EncodeRequest"
-	r, err := ht.NewRequest(ctx, "GET", u)
-	if err != nil {
-		return res, errors.Wrap(err, "create request")
-	}
-
-	stage = "SendRequest"
-	resp, err := c.cfg.Client.Do(r)
-	if err != nil {
-		return res, errors.Wrap(err, "do request")
-	}
-	defer resp.Body.Close()
-
-	stage = "DecodeResponse"
-	result, err := decodeGetTimeLiteServerResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -5661,502 +6480,6 @@ func (c *Client) sendGetTrace(ctx context.Context, params GetTraceParams) (res *
 
 	stage = "DecodeResponse"
 	result, err := decodeGetTraceResponse(resp)
-	if err != nil {
-		return res, errors.Wrap(err, "decode response")
-	}
-
-	return result, nil
-}
-
-// GetTracesByAccount invokes getTracesByAccount operation.
-//
-// Get traces for account.
-//
-// GET /v2/accounts/{account_id}/traces
-func (c *Client) GetTracesByAccount(ctx context.Context, params GetTracesByAccountParams) (*TraceIds, error) {
-	res, err := c.sendGetTracesByAccount(ctx, params)
-	_ = res
-	return res, err
-}
-
-func (c *Client) sendGetTracesByAccount(ctx context.Context, params GetTracesByAccountParams) (res *TraceIds, err error) {
-	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("getTracesByAccount"),
-	}
-
-	// Run stopwatch.
-	startTime := time.Now()
-	defer func() {
-		// Use floating point division here for higher precision (instead of Millisecond method).
-		elapsedDuration := time.Since(startTime)
-		c.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
-	}()
-
-	// Increment request counter.
-	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
-
-	// Start a span for this request.
-	ctx, span := c.cfg.Tracer.Start(ctx, "GetTracesByAccount",
-		trace.WithAttributes(otelAttrs...),
-		clientSpanKind,
-	)
-	// Track stage for error reporting.
-	var stage string
-	defer func() {
-		if err != nil {
-			span.RecordError(err)
-			span.SetStatus(codes.Error, stage)
-			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
-		}
-		span.End()
-	}()
-
-	stage = "BuildURL"
-	u := uri.Clone(c.requestURL(ctx))
-	var pathParts [3]string
-	pathParts[0] = "/v2/accounts/"
-	{
-		// Encode "account_id" parameter.
-		e := uri.NewPathEncoder(uri.PathEncoderConfig{
-			Param:   "account_id",
-			Style:   uri.PathStyleSimple,
-			Explode: false,
-		})
-		if err := func() error {
-			return e.EncodeValue(conv.StringToString(params.AccountID))
-		}(); err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		encoded, err := e.Result()
-		if err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		pathParts[1] = encoded
-	}
-	pathParts[2] = "/traces"
-	uri.AddPathParts(u, pathParts[:]...)
-
-	stage = "EncodeQueryParams"
-	q := uri.NewQueryEncoder()
-	{
-		// Encode "limit" parameter.
-		cfg := uri.QueryParameterEncodingConfig{
-			Name:    "limit",
-			Style:   uri.QueryStyleForm,
-			Explode: true,
-		}
-
-		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
-			if val, ok := params.Limit.Get(); ok {
-				return e.EncodeValue(conv.Int32ToString(val))
-			}
-			return nil
-		}); err != nil {
-			return res, errors.Wrap(err, "encode query")
-		}
-	}
-	u.RawQuery = q.Values().Encode()
-
-	stage = "EncodeRequest"
-	r, err := ht.NewRequest(ctx, "GET", u)
-	if err != nil {
-		return res, errors.Wrap(err, "create request")
-	}
-
-	stage = "SendRequest"
-	resp, err := c.cfg.Client.Do(r)
-	if err != nil {
-		return res, errors.Wrap(err, "do request")
-	}
-	defer resp.Body.Close()
-
-	stage = "DecodeResponse"
-	result, err := decodeGetTracesByAccountResponse(resp)
-	if err != nil {
-		return res, errors.Wrap(err, "decode response")
-	}
-
-	return result, nil
-}
-
-// GetTransaction invokes getTransaction operation.
-//
-// Get transaction data.
-//
-// GET /v2/blockchain/transactions/{transaction_id}
-func (c *Client) GetTransaction(ctx context.Context, params GetTransactionParams) (*Transaction, error) {
-	res, err := c.sendGetTransaction(ctx, params)
-	_ = res
-	return res, err
-}
-
-func (c *Client) sendGetTransaction(ctx context.Context, params GetTransactionParams) (res *Transaction, err error) {
-	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("getTransaction"),
-	}
-
-	// Run stopwatch.
-	startTime := time.Now()
-	defer func() {
-		// Use floating point division here for higher precision (instead of Millisecond method).
-		elapsedDuration := time.Since(startTime)
-		c.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
-	}()
-
-	// Increment request counter.
-	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
-
-	// Start a span for this request.
-	ctx, span := c.cfg.Tracer.Start(ctx, "GetTransaction",
-		trace.WithAttributes(otelAttrs...),
-		clientSpanKind,
-	)
-	// Track stage for error reporting.
-	var stage string
-	defer func() {
-		if err != nil {
-			span.RecordError(err)
-			span.SetStatus(codes.Error, stage)
-			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
-		}
-		span.End()
-	}()
-
-	stage = "BuildURL"
-	u := uri.Clone(c.requestURL(ctx))
-	var pathParts [2]string
-	pathParts[0] = "/v2/blockchain/transactions/"
-	{
-		// Encode "transaction_id" parameter.
-		e := uri.NewPathEncoder(uri.PathEncoderConfig{
-			Param:   "transaction_id",
-			Style:   uri.PathStyleSimple,
-			Explode: false,
-		})
-		if err := func() error {
-			return e.EncodeValue(conv.StringToString(params.TransactionID))
-		}(); err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		encoded, err := e.Result()
-		if err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		pathParts[1] = encoded
-	}
-	uri.AddPathParts(u, pathParts[:]...)
-
-	stage = "EncodeRequest"
-	r, err := ht.NewRequest(ctx, "GET", u)
-	if err != nil {
-		return res, errors.Wrap(err, "create request")
-	}
-
-	stage = "SendRequest"
-	resp, err := c.cfg.Client.Do(r)
-	if err != nil {
-		return res, errors.Wrap(err, "do request")
-	}
-	defer resp.Body.Close()
-
-	stage = "DecodeResponse"
-	result, err := decodeGetTransactionResponse(resp)
-	if err != nil {
-		return res, errors.Wrap(err, "decode response")
-	}
-
-	return result, nil
-}
-
-// GetTransactionByMessageHash invokes getTransactionByMessageHash operation.
-//
-// Get transaction data by message hash.
-//
-// GET /v2/blockchain/messages/{msg_id}/transaction
-func (c *Client) GetTransactionByMessageHash(ctx context.Context, params GetTransactionByMessageHashParams) (*Transaction, error) {
-	res, err := c.sendGetTransactionByMessageHash(ctx, params)
-	_ = res
-	return res, err
-}
-
-func (c *Client) sendGetTransactionByMessageHash(ctx context.Context, params GetTransactionByMessageHashParams) (res *Transaction, err error) {
-	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("getTransactionByMessageHash"),
-	}
-
-	// Run stopwatch.
-	startTime := time.Now()
-	defer func() {
-		// Use floating point division here for higher precision (instead of Millisecond method).
-		elapsedDuration := time.Since(startTime)
-		c.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
-	}()
-
-	// Increment request counter.
-	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
-
-	// Start a span for this request.
-	ctx, span := c.cfg.Tracer.Start(ctx, "GetTransactionByMessageHash",
-		trace.WithAttributes(otelAttrs...),
-		clientSpanKind,
-	)
-	// Track stage for error reporting.
-	var stage string
-	defer func() {
-		if err != nil {
-			span.RecordError(err)
-			span.SetStatus(codes.Error, stage)
-			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
-		}
-		span.End()
-	}()
-
-	stage = "BuildURL"
-	u := uri.Clone(c.requestURL(ctx))
-	var pathParts [3]string
-	pathParts[0] = "/v2/blockchain/messages/"
-	{
-		// Encode "msg_id" parameter.
-		e := uri.NewPathEncoder(uri.PathEncoderConfig{
-			Param:   "msg_id",
-			Style:   uri.PathStyleSimple,
-			Explode: false,
-		})
-		if err := func() error {
-			return e.EncodeValue(conv.StringToString(params.MsgID))
-		}(); err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		encoded, err := e.Result()
-		if err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		pathParts[1] = encoded
-	}
-	pathParts[2] = "/transaction"
-	uri.AddPathParts(u, pathParts[:]...)
-
-	stage = "EncodeRequest"
-	r, err := ht.NewRequest(ctx, "GET", u)
-	if err != nil {
-		return res, errors.Wrap(err, "create request")
-	}
-
-	stage = "SendRequest"
-	resp, err := c.cfg.Client.Do(r)
-	if err != nil {
-		return res, errors.Wrap(err, "do request")
-	}
-	defer resp.Body.Close()
-
-	stage = "DecodeResponse"
-	result, err := decodeGetTransactionByMessageHashResponse(resp)
-	if err != nil {
-		return res, errors.Wrap(err, "decode response")
-	}
-
-	return result, nil
-}
-
-// GetTransactionsLiteServer invokes getTransactionsLiteServer operation.
-//
-// Get transactions.
-//
-// GET /v2/liteserver/get_transactions/{account_id}
-func (c *Client) GetTransactionsLiteServer(ctx context.Context, params GetTransactionsLiteServerParams) (*GetTransactionsLiteServerOK, error) {
-	res, err := c.sendGetTransactionsLiteServer(ctx, params)
-	_ = res
-	return res, err
-}
-
-func (c *Client) sendGetTransactionsLiteServer(ctx context.Context, params GetTransactionsLiteServerParams) (res *GetTransactionsLiteServerOK, err error) {
-	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("getTransactionsLiteServer"),
-	}
-
-	// Run stopwatch.
-	startTime := time.Now()
-	defer func() {
-		// Use floating point division here for higher precision (instead of Millisecond method).
-		elapsedDuration := time.Since(startTime)
-		c.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
-	}()
-
-	// Increment request counter.
-	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
-
-	// Start a span for this request.
-	ctx, span := c.cfg.Tracer.Start(ctx, "GetTransactionsLiteServer",
-		trace.WithAttributes(otelAttrs...),
-		clientSpanKind,
-	)
-	// Track stage for error reporting.
-	var stage string
-	defer func() {
-		if err != nil {
-			span.RecordError(err)
-			span.SetStatus(codes.Error, stage)
-			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
-		}
-		span.End()
-	}()
-
-	stage = "BuildURL"
-	u := uri.Clone(c.requestURL(ctx))
-	var pathParts [2]string
-	pathParts[0] = "/v2/liteserver/get_transactions/"
-	{
-		// Encode "account_id" parameter.
-		e := uri.NewPathEncoder(uri.PathEncoderConfig{
-			Param:   "account_id",
-			Style:   uri.PathStyleSimple,
-			Explode: false,
-		})
-		if err := func() error {
-			return e.EncodeValue(conv.StringToString(params.AccountID))
-		}(); err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		encoded, err := e.Result()
-		if err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		pathParts[1] = encoded
-	}
-	uri.AddPathParts(u, pathParts[:]...)
-
-	stage = "EncodeQueryParams"
-	q := uri.NewQueryEncoder()
-	{
-		// Encode "count" parameter.
-		cfg := uri.QueryParameterEncodingConfig{
-			Name:    "count",
-			Style:   uri.QueryStyleForm,
-			Explode: true,
-		}
-
-		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
-			return e.EncodeValue(conv.Uint32ToString(params.Count))
-		}); err != nil {
-			return res, errors.Wrap(err, "encode query")
-		}
-	}
-	{
-		// Encode "lt" parameter.
-		cfg := uri.QueryParameterEncodingConfig{
-			Name:    "lt",
-			Style:   uri.QueryStyleForm,
-			Explode: true,
-		}
-
-		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
-			return e.EncodeValue(conv.Uint64ToString(params.Lt))
-		}); err != nil {
-			return res, errors.Wrap(err, "encode query")
-		}
-	}
-	{
-		// Encode "hash" parameter.
-		cfg := uri.QueryParameterEncodingConfig{
-			Name:    "hash",
-			Style:   uri.QueryStyleForm,
-			Explode: true,
-		}
-
-		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
-			return e.EncodeValue(conv.StringToString(params.Hash))
-		}); err != nil {
-			return res, errors.Wrap(err, "encode query")
-		}
-	}
-	u.RawQuery = q.Values().Encode()
-
-	stage = "EncodeRequest"
-	r, err := ht.NewRequest(ctx, "GET", u)
-	if err != nil {
-		return res, errors.Wrap(err, "create request")
-	}
-
-	stage = "SendRequest"
-	resp, err := c.cfg.Client.Do(r)
-	if err != nil {
-		return res, errors.Wrap(err, "do request")
-	}
-	defer resp.Body.Close()
-
-	stage = "DecodeResponse"
-	result, err := decodeGetTransactionsLiteServerResponse(resp)
-	if err != nil {
-		return res, errors.Wrap(err, "decode response")
-	}
-
-	return result, nil
-}
-
-// GetValidators invokes getValidators operation.
-//
-// Get validators.
-//
-// GET /v2/blockchain/validators
-func (c *Client) GetValidators(ctx context.Context) (*Validators, error) {
-	res, err := c.sendGetValidators(ctx)
-	_ = res
-	return res, err
-}
-
-func (c *Client) sendGetValidators(ctx context.Context) (res *Validators, err error) {
-	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("getValidators"),
-	}
-
-	// Run stopwatch.
-	startTime := time.Now()
-	defer func() {
-		// Use floating point division here for higher precision (instead of Millisecond method).
-		elapsedDuration := time.Since(startTime)
-		c.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
-	}()
-
-	// Increment request counter.
-	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
-
-	// Start a span for this request.
-	ctx, span := c.cfg.Tracer.Start(ctx, "GetValidators",
-		trace.WithAttributes(otelAttrs...),
-		clientSpanKind,
-	)
-	// Track stage for error reporting.
-	var stage string
-	defer func() {
-		if err != nil {
-			span.RecordError(err)
-			span.SetStatus(codes.Error, stage)
-			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
-		}
-		span.End()
-	}()
-
-	stage = "BuildURL"
-	u := uri.Clone(c.requestURL(ctx))
-	var pathParts [1]string
-	pathParts[0] = "/v2/blockchain/validators"
-	uri.AddPathParts(u, pathParts[:]...)
-
-	stage = "EncodeRequest"
-	r, err := ht.NewRequest(ctx, "GET", u)
-	if err != nil {
-		return res, errors.Wrap(err, "create request")
-	}
-
-	stage = "SendRequest"
-	resp, err := c.cfg.Client.Do(r)
-	if err != nil {
-		return res, errors.Wrap(err, "do request")
-	}
-	defer resp.Body.Close()
-
-	stage = "DecodeResponse"
-	result, err := decodeGetValidatorsResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -6339,96 +6662,6 @@ func (c *Client) sendGetWalletsByPublicKey(ctx context.Context, params GetWallet
 	return result, nil
 }
 
-// PoolsByNominators invokes poolsByNominators operation.
-//
-// All pools where account participates.
-//
-// GET /v2/staking/nominator/{account_id}/pools
-func (c *Client) PoolsByNominators(ctx context.Context, params PoolsByNominatorsParams) (*AccountStaking, error) {
-	res, err := c.sendPoolsByNominators(ctx, params)
-	_ = res
-	return res, err
-}
-
-func (c *Client) sendPoolsByNominators(ctx context.Context, params PoolsByNominatorsParams) (res *AccountStaking, err error) {
-	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("poolsByNominators"),
-	}
-
-	// Run stopwatch.
-	startTime := time.Now()
-	defer func() {
-		// Use floating point division here for higher precision (instead of Millisecond method).
-		elapsedDuration := time.Since(startTime)
-		c.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
-	}()
-
-	// Increment request counter.
-	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
-
-	// Start a span for this request.
-	ctx, span := c.cfg.Tracer.Start(ctx, "PoolsByNominators",
-		trace.WithAttributes(otelAttrs...),
-		clientSpanKind,
-	)
-	// Track stage for error reporting.
-	var stage string
-	defer func() {
-		if err != nil {
-			span.RecordError(err)
-			span.SetStatus(codes.Error, stage)
-			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
-		}
-		span.End()
-	}()
-
-	stage = "BuildURL"
-	u := uri.Clone(c.requestURL(ctx))
-	var pathParts [3]string
-	pathParts[0] = "/v2/staking/nominator/"
-	{
-		// Encode "account_id" parameter.
-		e := uri.NewPathEncoder(uri.PathEncoderConfig{
-			Param:   "account_id",
-			Style:   uri.PathStyleSimple,
-			Explode: false,
-		})
-		if err := func() error {
-			return e.EncodeValue(conv.StringToString(params.AccountID))
-		}(); err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		encoded, err := e.Result()
-		if err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		pathParts[1] = encoded
-	}
-	pathParts[2] = "/pools"
-	uri.AddPathParts(u, pathParts[:]...)
-
-	stage = "EncodeRequest"
-	r, err := ht.NewRequest(ctx, "GET", u)
-	if err != nil {
-		return res, errors.Wrap(err, "create request")
-	}
-
-	stage = "SendRequest"
-	resp, err := c.cfg.Client.Do(r)
-	if err != nil {
-		return res, errors.Wrap(err, "do request")
-	}
-	defer resp.Body.Close()
-
-	stage = "DecodeResponse"
-	result, err := decodePoolsByNominatorsResponse(resp)
-	if err != nil {
-		return res, errors.Wrap(err, "decode response")
-	}
-
-	return result, nil
-}
-
 // ReindexAccount invokes reindexAccount operation.
 //
 // Update internal cache for a particular account.
@@ -6519,20 +6752,109 @@ func (c *Client) sendReindexAccount(ctx context.Context, params ReindexAccountPa
 	return result, nil
 }
 
-// SendMessage invokes sendMessage operation.
+// SearchAccounts invokes searchAccounts operation.
+//
+// Search by account domain name.
+//
+// GET /v2/accounts/search
+func (c *Client) SearchAccounts(ctx context.Context, params SearchAccountsParams) (*FoundAccounts, error) {
+	res, err := c.sendSearchAccounts(ctx, params)
+	_ = res
+	return res, err
+}
+
+func (c *Client) sendSearchAccounts(ctx context.Context, params SearchAccountsParams) (res *FoundAccounts, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("searchAccounts"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, "SearchAccounts",
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [1]string
+	pathParts[0] = "/v2/accounts/search"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeQueryParams"
+	q := uri.NewQueryEncoder()
+	{
+		// Encode "name" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "name",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			return e.EncodeValue(conv.StringToString(params.Name))
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	u.RawQuery = q.Values().Encode()
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeSearchAccountsResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// SendBlockchainMessage invokes sendBlockchainMessage operation.
 //
 // Send message to blockchain.
 //
 // POST /v2/blockchain/message
-func (c *Client) SendMessage(ctx context.Context, request *SendMessageReq) error {
-	res, err := c.sendSendMessage(ctx, request)
+func (c *Client) SendBlockchainMessage(ctx context.Context, request *SendBlockchainMessageReq) error {
+	res, err := c.sendSendBlockchainMessage(ctx, request)
 	_ = res
 	return err
 }
 
-func (c *Client) sendSendMessage(ctx context.Context, request *SendMessageReq) (res *SendMessageOK, err error) {
+func (c *Client) sendSendBlockchainMessage(ctx context.Context, request *SendBlockchainMessageReq) (res *SendBlockchainMessageOK, err error) {
 	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("sendMessage"),
+		otelogen.OperationID("sendBlockchainMessage"),
 	}
 	// Validate request before sending.
 	if err := func() error {
@@ -6556,7 +6878,7 @@ func (c *Client) sendSendMessage(ctx context.Context, request *SendMessageReq) (
 	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 
 	// Start a span for this request.
-	ctx, span := c.cfg.Tracer.Start(ctx, "SendMessage",
+	ctx, span := c.cfg.Tracer.Start(ctx, "SendBlockchainMessage",
 		trace.WithAttributes(otelAttrs...),
 		clientSpanKind,
 	)
@@ -6582,7 +6904,7 @@ func (c *Client) sendSendMessage(ctx context.Context, request *SendMessageReq) (
 	if err != nil {
 		return res, errors.Wrap(err, "create request")
 	}
-	if err := encodeSendMessageRequest(request, r); err != nil {
+	if err := encodeSendBlockchainMessageRequest(request, r); err != nil {
 		return res, errors.Wrap(err, "encode request")
 	}
 
@@ -6594,7 +6916,7 @@ func (c *Client) sendSendMessage(ctx context.Context, request *SendMessageReq) (
 	defer resp.Body.Close()
 
 	stage = "DecodeResponse"
-	result, err := decodeSendMessageResponse(resp)
+	result, err := decodeSendBlockchainMessageResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -6602,20 +6924,20 @@ func (c *Client) sendSendMessage(ctx context.Context, request *SendMessageReq) (
 	return result, nil
 }
 
-// SendMessageLiteServer invokes sendMessageLiteServer operation.
+// SendRawMessage invokes sendRawMessage operation.
 //
-// Send message.
+// Send raw message to blockchain.
 //
 // POST /v2/liteserver/send_message
-func (c *Client) SendMessageLiteServer(ctx context.Context, request *SendMessageLiteServerReq) (*SendMessageLiteServerOK, error) {
-	res, err := c.sendSendMessageLiteServer(ctx, request)
+func (c *Client) SendRawMessage(ctx context.Context, request *SendRawMessageReq) (*SendRawMessageOK, error) {
+	res, err := c.sendSendRawMessage(ctx, request)
 	_ = res
 	return res, err
 }
 
-func (c *Client) sendSendMessageLiteServer(ctx context.Context, request *SendMessageLiteServerReq) (res *SendMessageLiteServerOK, err error) {
+func (c *Client) sendSendRawMessage(ctx context.Context, request *SendRawMessageReq) (res *SendRawMessageOK, err error) {
 	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("sendMessageLiteServer"),
+		otelogen.OperationID("sendRawMessage"),
 	}
 
 	// Run stopwatch.
@@ -6630,7 +6952,7 @@ func (c *Client) sendSendMessageLiteServer(ctx context.Context, request *SendMes
 	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 
 	// Start a span for this request.
-	ctx, span := c.cfg.Tracer.Start(ctx, "SendMessageLiteServer",
+	ctx, span := c.cfg.Tracer.Start(ctx, "SendRawMessage",
 		trace.WithAttributes(otelAttrs...),
 		clientSpanKind,
 	)
@@ -6656,7 +6978,7 @@ func (c *Client) sendSendMessageLiteServer(ctx context.Context, request *SendMes
 	if err != nil {
 		return res, errors.Wrap(err, "create request")
 	}
-	if err := encodeSendMessageLiteServerRequest(request, r); err != nil {
+	if err := encodeSendRawMessageRequest(request, r); err != nil {
 		return res, errors.Wrap(err, "encode request")
 	}
 
@@ -6668,7 +6990,7 @@ func (c *Client) sendSendMessageLiteServer(ctx context.Context, request *SendMes
 	defer resp.Body.Close()
 
 	stage = "DecodeResponse"
-	result, err := decodeSendMessageLiteServerResponse(resp)
+	result, err := decodeSendRawMessageResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -6757,328 +7079,6 @@ func (c *Client) sendSetWalletBackup(ctx context.Context, request SetWalletBacku
 
 	stage = "DecodeResponse"
 	result, err := decodeSetWalletBackupResponse(resp)
-	if err != nil {
-		return res, errors.Wrap(err, "decode response")
-	}
-
-	return result, nil
-}
-
-// StakingPoolHistory invokes stakingPoolHistory operation.
-//
-// Pool info.
-//
-// GET /v2/staking/pool/{account_id}/history
-func (c *Client) StakingPoolHistory(ctx context.Context, params StakingPoolHistoryParams) (*StakingPoolHistoryOK, error) {
-	res, err := c.sendStakingPoolHistory(ctx, params)
-	_ = res
-	return res, err
-}
-
-func (c *Client) sendStakingPoolHistory(ctx context.Context, params StakingPoolHistoryParams) (res *StakingPoolHistoryOK, err error) {
-	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("stakingPoolHistory"),
-	}
-
-	// Run stopwatch.
-	startTime := time.Now()
-	defer func() {
-		// Use floating point division here for higher precision (instead of Millisecond method).
-		elapsedDuration := time.Since(startTime)
-		c.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
-	}()
-
-	// Increment request counter.
-	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
-
-	// Start a span for this request.
-	ctx, span := c.cfg.Tracer.Start(ctx, "StakingPoolHistory",
-		trace.WithAttributes(otelAttrs...),
-		clientSpanKind,
-	)
-	// Track stage for error reporting.
-	var stage string
-	defer func() {
-		if err != nil {
-			span.RecordError(err)
-			span.SetStatus(codes.Error, stage)
-			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
-		}
-		span.End()
-	}()
-
-	stage = "BuildURL"
-	u := uri.Clone(c.requestURL(ctx))
-	var pathParts [3]string
-	pathParts[0] = "/v2/staking/pool/"
-	{
-		// Encode "account_id" parameter.
-		e := uri.NewPathEncoder(uri.PathEncoderConfig{
-			Param:   "account_id",
-			Style:   uri.PathStyleSimple,
-			Explode: false,
-		})
-		if err := func() error {
-			return e.EncodeValue(conv.StringToString(params.AccountID))
-		}(); err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		encoded, err := e.Result()
-		if err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		pathParts[1] = encoded
-	}
-	pathParts[2] = "/history"
-	uri.AddPathParts(u, pathParts[:]...)
-
-	stage = "EncodeRequest"
-	r, err := ht.NewRequest(ctx, "GET", u)
-	if err != nil {
-		return res, errors.Wrap(err, "create request")
-	}
-
-	stage = "SendRequest"
-	resp, err := c.cfg.Client.Do(r)
-	if err != nil {
-		return res, errors.Wrap(err, "do request")
-	}
-	defer resp.Body.Close()
-
-	stage = "DecodeResponse"
-	result, err := decodeStakingPoolHistoryResponse(resp)
-	if err != nil {
-		return res, errors.Wrap(err, "decode response")
-	}
-
-	return result, nil
-}
-
-// StakingPoolInfo invokes stakingPoolInfo operation.
-//
-// Pool info.
-//
-// GET /v2/staking/pool/{account_id}
-func (c *Client) StakingPoolInfo(ctx context.Context, params StakingPoolInfoParams) (*StakingPoolInfoOK, error) {
-	res, err := c.sendStakingPoolInfo(ctx, params)
-	_ = res
-	return res, err
-}
-
-func (c *Client) sendStakingPoolInfo(ctx context.Context, params StakingPoolInfoParams) (res *StakingPoolInfoOK, err error) {
-	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("stakingPoolInfo"),
-	}
-
-	// Run stopwatch.
-	startTime := time.Now()
-	defer func() {
-		// Use floating point division here for higher precision (instead of Millisecond method).
-		elapsedDuration := time.Since(startTime)
-		c.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
-	}()
-
-	// Increment request counter.
-	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
-
-	// Start a span for this request.
-	ctx, span := c.cfg.Tracer.Start(ctx, "StakingPoolInfo",
-		trace.WithAttributes(otelAttrs...),
-		clientSpanKind,
-	)
-	// Track stage for error reporting.
-	var stage string
-	defer func() {
-		if err != nil {
-			span.RecordError(err)
-			span.SetStatus(codes.Error, stage)
-			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
-		}
-		span.End()
-	}()
-
-	stage = "BuildURL"
-	u := uri.Clone(c.requestURL(ctx))
-	var pathParts [2]string
-	pathParts[0] = "/v2/staking/pool/"
-	{
-		// Encode "account_id" parameter.
-		e := uri.NewPathEncoder(uri.PathEncoderConfig{
-			Param:   "account_id",
-			Style:   uri.PathStyleSimple,
-			Explode: false,
-		})
-		if err := func() error {
-			return e.EncodeValue(conv.StringToString(params.AccountID))
-		}(); err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		encoded, err := e.Result()
-		if err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		pathParts[1] = encoded
-	}
-	uri.AddPathParts(u, pathParts[:]...)
-
-	stage = "EncodeRequest"
-	r, err := ht.NewRequest(ctx, "GET", u)
-	if err != nil {
-		return res, errors.Wrap(err, "create request")
-	}
-
-	stage = "EncodeHeaderParams"
-	h := uri.NewHeaderEncoder(r.Header)
-	{
-		cfg := uri.HeaderParameterEncodingConfig{
-			Name:    "Accept-Language",
-			Explode: false,
-		}
-		if err := h.EncodeParam(cfg, func(e uri.Encoder) error {
-			if val, ok := params.AcceptLanguage.Get(); ok {
-				return e.EncodeValue(conv.StringToString(val))
-			}
-			return nil
-		}); err != nil {
-			return res, errors.Wrap(err, "encode header")
-		}
-	}
-
-	stage = "SendRequest"
-	resp, err := c.cfg.Client.Do(r)
-	if err != nil {
-		return res, errors.Wrap(err, "do request")
-	}
-	defer resp.Body.Close()
-
-	stage = "DecodeResponse"
-	result, err := decodeStakingPoolInfoResponse(resp)
-	if err != nil {
-		return res, errors.Wrap(err, "decode response")
-	}
-
-	return result, nil
-}
-
-// StakingPools invokes stakingPools operation.
-//
-// All pools available in network.
-//
-// GET /v2/staking/pools
-func (c *Client) StakingPools(ctx context.Context, params StakingPoolsParams) (*StakingPoolsOK, error) {
-	res, err := c.sendStakingPools(ctx, params)
-	_ = res
-	return res, err
-}
-
-func (c *Client) sendStakingPools(ctx context.Context, params StakingPoolsParams) (res *StakingPoolsOK, err error) {
-	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("stakingPools"),
-	}
-
-	// Run stopwatch.
-	startTime := time.Now()
-	defer func() {
-		// Use floating point division here for higher precision (instead of Millisecond method).
-		elapsedDuration := time.Since(startTime)
-		c.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
-	}()
-
-	// Increment request counter.
-	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
-
-	// Start a span for this request.
-	ctx, span := c.cfg.Tracer.Start(ctx, "StakingPools",
-		trace.WithAttributes(otelAttrs...),
-		clientSpanKind,
-	)
-	// Track stage for error reporting.
-	var stage string
-	defer func() {
-		if err != nil {
-			span.RecordError(err)
-			span.SetStatus(codes.Error, stage)
-			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
-		}
-		span.End()
-	}()
-
-	stage = "BuildURL"
-	u := uri.Clone(c.requestURL(ctx))
-	var pathParts [1]string
-	pathParts[0] = "/v2/staking/pools"
-	uri.AddPathParts(u, pathParts[:]...)
-
-	stage = "EncodeQueryParams"
-	q := uri.NewQueryEncoder()
-	{
-		// Encode "available_for" parameter.
-		cfg := uri.QueryParameterEncodingConfig{
-			Name:    "available_for",
-			Style:   uri.QueryStyleForm,
-			Explode: true,
-		}
-
-		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
-			if val, ok := params.AvailableFor.Get(); ok {
-				return e.EncodeValue(conv.StringToString(val))
-			}
-			return nil
-		}); err != nil {
-			return res, errors.Wrap(err, "encode query")
-		}
-	}
-	{
-		// Encode "include_unverified" parameter.
-		cfg := uri.QueryParameterEncodingConfig{
-			Name:    "include_unverified",
-			Style:   uri.QueryStyleForm,
-			Explode: true,
-		}
-
-		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
-			if val, ok := params.IncludeUnverified.Get(); ok {
-				return e.EncodeValue(conv.BoolToString(val))
-			}
-			return nil
-		}); err != nil {
-			return res, errors.Wrap(err, "encode query")
-		}
-	}
-	u.RawQuery = q.Values().Encode()
-
-	stage = "EncodeRequest"
-	r, err := ht.NewRequest(ctx, "GET", u)
-	if err != nil {
-		return res, errors.Wrap(err, "create request")
-	}
-
-	stage = "EncodeHeaderParams"
-	h := uri.NewHeaderEncoder(r.Header)
-	{
-		cfg := uri.HeaderParameterEncodingConfig{
-			Name:    "Accept-Language",
-			Explode: false,
-		}
-		if err := h.EncodeParam(cfg, func(e uri.Encoder) error {
-			if val, ok := params.AcceptLanguage.Get(); ok {
-				return e.EncodeValue(conv.StringToString(val))
-			}
-			return nil
-		}); err != nil {
-			return res, errors.Wrap(err, "encode header")
-		}
-	}
-
-	stage = "SendRequest"
-	resp, err := c.cfg.Client.Do(r)
-	if err != nil {
-		return res, errors.Wrap(err, "do request")
-	}
-	defer resp.Body.Close()
-
-	stage = "DecodeResponse"
-	result, err := decodeStakingPoolsResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}

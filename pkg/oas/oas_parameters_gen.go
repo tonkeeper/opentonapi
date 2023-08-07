@@ -15,13 +15,13 @@ import (
 	"github.com/ogen-go/ogen/validate"
 )
 
-// DnsBackResolveParams is parameters of dnsBackResolve operation.
-type DnsBackResolveParams struct {
+// AccountDnsBackResolveParams is parameters of accountDnsBackResolve operation.
+type AccountDnsBackResolveParams struct {
 	// Account ID.
 	AccountID string
 }
 
-func unpackDnsBackResolveParams(packed middleware.Parameters) (params DnsBackResolveParams) {
+func unpackAccountDnsBackResolveParams(packed middleware.Parameters) (params AccountDnsBackResolveParams) {
 	{
 		key := middleware.ParameterKey{
 			Name: "account_id",
@@ -32,7 +32,7 @@ func unpackDnsBackResolveParams(packed middleware.Parameters) (params DnsBackRes
 	return params
 }
 
-func decodeDnsBackResolveParams(args [1]string, argsEscaped bool, r *http.Request) (params DnsBackResolveParams, _ error) {
+func decodeAccountDnsBackResolveParams(args [1]string, argsEscaped bool, r *http.Request) (params AccountDnsBackResolveParams, _ error) {
 	// Decode path: account_id.
 	if err := func() error {
 		param := args[0]
@@ -74,72 +74,6 @@ func decodeDnsBackResolveParams(args [1]string, argsEscaped bool, r *http.Reques
 	}(); err != nil {
 		return params, &ogenerrors.DecodeParamError{
 			Name: "account_id",
-			In:   "path",
-			Err:  err,
-		}
-	}
-	return params, nil
-}
-
-// DnsInfoParams is parameters of dnsInfo operation.
-type DnsInfoParams struct {
-	// Domain name with .ton or .t.me.
-	DomainName string
-}
-
-func unpackDnsInfoParams(packed middleware.Parameters) (params DnsInfoParams) {
-	{
-		key := middleware.ParameterKey{
-			Name: "domain_name",
-			In:   "path",
-		}
-		params.DomainName = packed[key].(string)
-	}
-	return params
-}
-
-func decodeDnsInfoParams(args [1]string, argsEscaped bool, r *http.Request) (params DnsInfoParams, _ error) {
-	// Decode path: domain_name.
-	if err := func() error {
-		param := args[0]
-		if argsEscaped {
-			unescaped, err := url.PathUnescape(args[0])
-			if err != nil {
-				return errors.Wrap(err, "unescape path")
-			}
-			param = unescaped
-		}
-		if len(param) > 0 {
-			d := uri.NewPathDecoder(uri.PathDecoderConfig{
-				Param:   "domain_name",
-				Value:   param,
-				Style:   uri.PathStyleSimple,
-				Explode: false,
-			})
-
-			if err := func() error {
-				val, err := d.DecodeValue()
-				if err != nil {
-					return err
-				}
-
-				c, err := conv.ToString(val)
-				if err != nil {
-					return err
-				}
-
-				params.DomainName = c
-				return nil
-			}(); err != nil {
-				return err
-			}
-		} else {
-			return validate.ErrFieldRequired
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "domain_name",
 			In:   "path",
 			Err:  err,
 		}
@@ -401,12 +335,12 @@ func decodeEmulateMessageToEventParams(args [0]string, argsEscaped bool, r *http
 	return params, nil
 }
 
-// EmulateWalletMessageParams is parameters of emulateWalletMessage operation.
-type EmulateWalletMessageParams struct {
+// EmulateMessageToWalletParams is parameters of emulateMessageToWallet operation.
+type EmulateMessageToWalletParams struct {
 	AcceptLanguage OptString
 }
 
-func unpackEmulateWalletMessageParams(packed middleware.Parameters) (params EmulateWalletMessageParams) {
+func unpackEmulateMessageToWalletParams(packed middleware.Parameters) (params EmulateMessageToWalletParams) {
 	{
 		key := middleware.ParameterKey{
 			Name: "Accept-Language",
@@ -419,7 +353,7 @@ func unpackEmulateWalletMessageParams(packed middleware.Parameters) (params Emul
 	return params
 }
 
-func decodeEmulateWalletMessageParams(args [0]string, argsEscaped bool, r *http.Request) (params EmulateWalletMessageParams, _ error) {
+func decodeEmulateMessageToWalletParams(args [0]string, argsEscaped bool, r *http.Request) (params EmulateMessageToWalletParams, _ error) {
 	h := uri.NewHeaderDecoder(r.Header)
 	// Set default value for header: Accept-Language.
 	{
@@ -468,8 +402,8 @@ func decodeEmulateWalletMessageParams(args [0]string, argsEscaped bool, r *http.
 	return params, nil
 }
 
-// ExecGetMethodParams is parameters of execGetMethod operation.
-type ExecGetMethodParams struct {
+// ExecGetMethodForBlockchainAccountParams is parameters of execGetMethodForBlockchainAccount operation.
+type ExecGetMethodForBlockchainAccountParams struct {
 	// Account ID.
 	AccountID string
 	// Contract get method name.
@@ -477,7 +411,7 @@ type ExecGetMethodParams struct {
 	Args       []string
 }
 
-func unpackExecGetMethodParams(packed middleware.Parameters) (params ExecGetMethodParams) {
+func unpackExecGetMethodForBlockchainAccountParams(packed middleware.Parameters) (params ExecGetMethodForBlockchainAccountParams) {
 	{
 		key := middleware.ParameterKey{
 			Name: "account_id",
@@ -504,7 +438,7 @@ func unpackExecGetMethodParams(packed middleware.Parameters) (params ExecGetMeth
 	return params
 }
 
-func decodeExecGetMethodParams(args [2]string, argsEscaped bool, r *http.Request) (params ExecGetMethodParams, _ error) {
+func decodeExecGetMethodForBlockchainAccountParams(args [2]string, argsEscaped bool, r *http.Request) (params ExecGetMethodForBlockchainAccountParams, _ error) {
 	q := uri.NewQueryDecoder(r.URL.Query())
 	// Decode path: account_id.
 	if err := func() error {
@@ -708,1215 +642,15 @@ func decodeGetAccountParams(args [1]string, argsEscaped bool, r *http.Request) (
 	return params, nil
 }
 
-// GetAccountSeqnoParams is parameters of getAccountSeqno operation.
-type GetAccountSeqnoParams struct {
-	// Account ID.
-	AccountID string
-}
-
-func unpackGetAccountSeqnoParams(packed middleware.Parameters) (params GetAccountSeqnoParams) {
-	{
-		key := middleware.ParameterKey{
-			Name: "account_id",
-			In:   "path",
-		}
-		params.AccountID = packed[key].(string)
-	}
-	return params
-}
-
-func decodeGetAccountSeqnoParams(args [1]string, argsEscaped bool, r *http.Request) (params GetAccountSeqnoParams, _ error) {
-	// Decode path: account_id.
-	if err := func() error {
-		param := args[0]
-		if argsEscaped {
-			unescaped, err := url.PathUnescape(args[0])
-			if err != nil {
-				return errors.Wrap(err, "unescape path")
-			}
-			param = unescaped
-		}
-		if len(param) > 0 {
-			d := uri.NewPathDecoder(uri.PathDecoderConfig{
-				Param:   "account_id",
-				Value:   param,
-				Style:   uri.PathStyleSimple,
-				Explode: false,
-			})
-
-			if err := func() error {
-				val, err := d.DecodeValue()
-				if err != nil {
-					return err
-				}
-
-				c, err := conv.ToString(val)
-				if err != nil {
-					return err
-				}
-
-				params.AccountID = c
-				return nil
-			}(); err != nil {
-				return err
-			}
-		} else {
-			return validate.ErrFieldRequired
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "account_id",
-			In:   "path",
-			Err:  err,
-		}
-	}
-	return params, nil
-}
-
-// GetAccountStateLiteServerParams is parameters of getAccountStateLiteServer operation.
-type GetAccountStateLiteServerParams struct {
-	// Account ID.
-	AccountID string
-}
-
-func unpackGetAccountStateLiteServerParams(packed middleware.Parameters) (params GetAccountStateLiteServerParams) {
-	{
-		key := middleware.ParameterKey{
-			Name: "account_id",
-			In:   "path",
-		}
-		params.AccountID = packed[key].(string)
-	}
-	return params
-}
-
-func decodeGetAccountStateLiteServerParams(args [1]string, argsEscaped bool, r *http.Request) (params GetAccountStateLiteServerParams, _ error) {
-	// Decode path: account_id.
-	if err := func() error {
-		param := args[0]
-		if argsEscaped {
-			unescaped, err := url.PathUnescape(args[0])
-			if err != nil {
-				return errors.Wrap(err, "unescape path")
-			}
-			param = unescaped
-		}
-		if len(param) > 0 {
-			d := uri.NewPathDecoder(uri.PathDecoderConfig{
-				Param:   "account_id",
-				Value:   param,
-				Style:   uri.PathStyleSimple,
-				Explode: false,
-			})
-
-			if err := func() error {
-				val, err := d.DecodeValue()
-				if err != nil {
-					return err
-				}
-
-				c, err := conv.ToString(val)
-				if err != nil {
-					return err
-				}
-
-				params.AccountID = c
-				return nil
-			}(); err != nil {
-				return err
-			}
-		} else {
-			return validate.ErrFieldRequired
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "account_id",
-			In:   "path",
-			Err:  err,
-		}
-	}
-	return params, nil
-}
-
-// GetAccountTransactionsParams is parameters of getAccountTransactions operation.
-type GetAccountTransactionsParams struct {
-	// Account ID.
-	AccountID string
-	// Omit this parameter to get last transactions.
-	AfterLt OptInt64
-	// Omit this parameter to get last transactions.
-	BeforeLt OptInt64
-	Limit    OptInt32
-}
-
-func unpackGetAccountTransactionsParams(packed middleware.Parameters) (params GetAccountTransactionsParams) {
-	{
-		key := middleware.ParameterKey{
-			Name: "account_id",
-			In:   "path",
-		}
-		params.AccountID = packed[key].(string)
-	}
-	{
-		key := middleware.ParameterKey{
-			Name: "after_lt",
-			In:   "query",
-		}
-		if v, ok := packed[key]; ok {
-			params.AfterLt = v.(OptInt64)
-		}
-	}
-	{
-		key := middleware.ParameterKey{
-			Name: "before_lt",
-			In:   "query",
-		}
-		if v, ok := packed[key]; ok {
-			params.BeforeLt = v.(OptInt64)
-		}
-	}
-	{
-		key := middleware.ParameterKey{
-			Name: "limit",
-			In:   "query",
-		}
-		if v, ok := packed[key]; ok {
-			params.Limit = v.(OptInt32)
-		}
-	}
-	return params
-}
-
-func decodeGetAccountTransactionsParams(args [1]string, argsEscaped bool, r *http.Request) (params GetAccountTransactionsParams, _ error) {
-	q := uri.NewQueryDecoder(r.URL.Query())
-	// Decode path: account_id.
-	if err := func() error {
-		param := args[0]
-		if argsEscaped {
-			unescaped, err := url.PathUnescape(args[0])
-			if err != nil {
-				return errors.Wrap(err, "unescape path")
-			}
-			param = unescaped
-		}
-		if len(param) > 0 {
-			d := uri.NewPathDecoder(uri.PathDecoderConfig{
-				Param:   "account_id",
-				Value:   param,
-				Style:   uri.PathStyleSimple,
-				Explode: false,
-			})
-
-			if err := func() error {
-				val, err := d.DecodeValue()
-				if err != nil {
-					return err
-				}
-
-				c, err := conv.ToString(val)
-				if err != nil {
-					return err
-				}
-
-				params.AccountID = c
-				return nil
-			}(); err != nil {
-				return err
-			}
-		} else {
-			return validate.ErrFieldRequired
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "account_id",
-			In:   "path",
-			Err:  err,
-		}
-	}
-	// Decode query: after_lt.
-	if err := func() error {
-		cfg := uri.QueryParameterDecodingConfig{
-			Name:    "after_lt",
-			Style:   uri.QueryStyleForm,
-			Explode: true,
-		}
-
-		if err := q.HasParam(cfg); err == nil {
-			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
-				var paramsDotAfterLtVal int64
-				if err := func() error {
-					val, err := d.DecodeValue()
-					if err != nil {
-						return err
-					}
-
-					c, err := conv.ToInt64(val)
-					if err != nil {
-						return err
-					}
-
-					paramsDotAfterLtVal = c
-					return nil
-				}(); err != nil {
-					return err
-				}
-				params.AfterLt.SetTo(paramsDotAfterLtVal)
-				return nil
-			}); err != nil {
-				return err
-			}
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "after_lt",
-			In:   "query",
-			Err:  err,
-		}
-	}
-	// Decode query: before_lt.
-	if err := func() error {
-		cfg := uri.QueryParameterDecodingConfig{
-			Name:    "before_lt",
-			Style:   uri.QueryStyleForm,
-			Explode: true,
-		}
-
-		if err := q.HasParam(cfg); err == nil {
-			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
-				var paramsDotBeforeLtVal int64
-				if err := func() error {
-					val, err := d.DecodeValue()
-					if err != nil {
-						return err
-					}
-
-					c, err := conv.ToInt64(val)
-					if err != nil {
-						return err
-					}
-
-					paramsDotBeforeLtVal = c
-					return nil
-				}(); err != nil {
-					return err
-				}
-				params.BeforeLt.SetTo(paramsDotBeforeLtVal)
-				return nil
-			}); err != nil {
-				return err
-			}
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "before_lt",
-			In:   "query",
-			Err:  err,
-		}
-	}
-	// Set default value for query: limit.
-	{
-		val := int32(100)
-		params.Limit.SetTo(val)
-	}
-	// Decode query: limit.
-	if err := func() error {
-		cfg := uri.QueryParameterDecodingConfig{
-			Name:    "limit",
-			Style:   uri.QueryStyleForm,
-			Explode: true,
-		}
-
-		if err := q.HasParam(cfg); err == nil {
-			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
-				var paramsDotLimitVal int32
-				if err := func() error {
-					val, err := d.DecodeValue()
-					if err != nil {
-						return err
-					}
-
-					c, err := conv.ToInt32(val)
-					if err != nil {
-						return err
-					}
-
-					paramsDotLimitVal = c
-					return nil
-				}(); err != nil {
-					return err
-				}
-				params.Limit.SetTo(paramsDotLimitVal)
-				return nil
-			}); err != nil {
-				return err
-			}
-			if err := func() error {
-				if value, ok := params.Limit.Get(); ok {
-					if err := func() error {
-						if err := (validate.Int{
-							MinSet:        false,
-							Min:           0,
-							MaxSet:        true,
-							Max:           1000,
-							MinExclusive:  false,
-							MaxExclusive:  false,
-							MultipleOfSet: false,
-							MultipleOf:    0,
-						}).Validate(int64(value)); err != nil {
-							return errors.Wrap(err, "int")
-						}
-						return nil
-					}(); err != nil {
-						return err
-					}
-				}
-				return nil
-			}(); err != nil {
-				return err
-			}
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "limit",
-			In:   "query",
-			Err:  err,
-		}
-	}
-	return params, nil
-}
-
-// GetAllAuctionsParams is parameters of getAllAuctions operation.
-type GetAllAuctionsParams struct {
-	// Domain filter for current auctions "ton" or "t.me".
-	Tld OptString
-}
-
-func unpackGetAllAuctionsParams(packed middleware.Parameters) (params GetAllAuctionsParams) {
-	{
-		key := middleware.ParameterKey{
-			Name: "tld",
-			In:   "query",
-		}
-		if v, ok := packed[key]; ok {
-			params.Tld = v.(OptString)
-		}
-	}
-	return params
-}
-
-func decodeGetAllAuctionsParams(args [0]string, argsEscaped bool, r *http.Request) (params GetAllAuctionsParams, _ error) {
-	q := uri.NewQueryDecoder(r.URL.Query())
-	// Decode query: tld.
-	if err := func() error {
-		cfg := uri.QueryParameterDecodingConfig{
-			Name:    "tld",
-			Style:   uri.QueryStyleForm,
-			Explode: true,
-		}
-
-		if err := q.HasParam(cfg); err == nil {
-			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
-				var paramsDotTldVal string
-				if err := func() error {
-					val, err := d.DecodeValue()
-					if err != nil {
-						return err
-					}
-
-					c, err := conv.ToString(val)
-					if err != nil {
-						return err
-					}
-
-					paramsDotTldVal = c
-					return nil
-				}(); err != nil {
-					return err
-				}
-				params.Tld.SetTo(paramsDotTldVal)
-				return nil
-			}); err != nil {
-				return err
-			}
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "tld",
-			In:   "query",
-			Err:  err,
-		}
-	}
-	return params, nil
-}
-
-// GetAllShardsInfoLiteServerParams is parameters of getAllShardsInfoLiteServer operation.
-type GetAllShardsInfoLiteServerParams struct {
-	// Block ID: (workchain,shard,seqno,root_hash,file_hash).
-	BlockID string
-}
-
-func unpackGetAllShardsInfoLiteServerParams(packed middleware.Parameters) (params GetAllShardsInfoLiteServerParams) {
-	{
-		key := middleware.ParameterKey{
-			Name: "block_id",
-			In:   "path",
-		}
-		params.BlockID = packed[key].(string)
-	}
-	return params
-}
-
-func decodeGetAllShardsInfoLiteServerParams(args [1]string, argsEscaped bool, r *http.Request) (params GetAllShardsInfoLiteServerParams, _ error) {
-	// Decode path: block_id.
-	if err := func() error {
-		param := args[0]
-		if argsEscaped {
-			unescaped, err := url.PathUnescape(args[0])
-			if err != nil {
-				return errors.Wrap(err, "unescape path")
-			}
-			param = unescaped
-		}
-		if len(param) > 0 {
-			d := uri.NewPathDecoder(uri.PathDecoderConfig{
-				Param:   "block_id",
-				Value:   param,
-				Style:   uri.PathStyleSimple,
-				Explode: false,
-			})
-
-			if err := func() error {
-				val, err := d.DecodeValue()
-				if err != nil {
-					return err
-				}
-
-				c, err := conv.ToString(val)
-				if err != nil {
-					return err
-				}
-
-				params.BlockID = c
-				return nil
-			}(); err != nil {
-				return err
-			}
-		} else {
-			return validate.ErrFieldRequired
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "block_id",
-			In:   "path",
-			Err:  err,
-		}
-	}
-	return params, nil
-}
-
-// GetBlockParams is parameters of getBlock operation.
-type GetBlockParams struct {
-	// Block ID.
-	BlockID string
-}
-
-func unpackGetBlockParams(packed middleware.Parameters) (params GetBlockParams) {
-	{
-		key := middleware.ParameterKey{
-			Name: "block_id",
-			In:   "path",
-		}
-		params.BlockID = packed[key].(string)
-	}
-	return params
-}
-
-func decodeGetBlockParams(args [1]string, argsEscaped bool, r *http.Request) (params GetBlockParams, _ error) {
-	// Decode path: block_id.
-	if err := func() error {
-		param := args[0]
-		if argsEscaped {
-			unescaped, err := url.PathUnescape(args[0])
-			if err != nil {
-				return errors.Wrap(err, "unescape path")
-			}
-			param = unescaped
-		}
-		if len(param) > 0 {
-			d := uri.NewPathDecoder(uri.PathDecoderConfig{
-				Param:   "block_id",
-				Value:   param,
-				Style:   uri.PathStyleSimple,
-				Explode: false,
-			})
-
-			if err := func() error {
-				val, err := d.DecodeValue()
-				if err != nil {
-					return err
-				}
-
-				c, err := conv.ToString(val)
-				if err != nil {
-					return err
-				}
-
-				params.BlockID = c
-				return nil
-			}(); err != nil {
-				return err
-			}
-		} else {
-			return validate.ErrFieldRequired
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "block_id",
-			In:   "path",
-			Err:  err,
-		}
-	}
-	return params, nil
-}
-
-// GetBlockHeaderLiteServerParams is parameters of getBlockHeaderLiteServer operation.
-type GetBlockHeaderLiteServerParams struct {
-	// Block ID: (workchain,shard,seqno,root_hash,file_hash).
-	BlockID string
-	// Mode.
-	Mode uint32
-}
-
-func unpackGetBlockHeaderLiteServerParams(packed middleware.Parameters) (params GetBlockHeaderLiteServerParams) {
-	{
-		key := middleware.ParameterKey{
-			Name: "block_id",
-			In:   "path",
-		}
-		params.BlockID = packed[key].(string)
-	}
-	{
-		key := middleware.ParameterKey{
-			Name: "mode",
-			In:   "query",
-		}
-		params.Mode = packed[key].(uint32)
-	}
-	return params
-}
-
-func decodeGetBlockHeaderLiteServerParams(args [1]string, argsEscaped bool, r *http.Request) (params GetBlockHeaderLiteServerParams, _ error) {
-	q := uri.NewQueryDecoder(r.URL.Query())
-	// Decode path: block_id.
-	if err := func() error {
-		param := args[0]
-		if argsEscaped {
-			unescaped, err := url.PathUnescape(args[0])
-			if err != nil {
-				return errors.Wrap(err, "unescape path")
-			}
-			param = unescaped
-		}
-		if len(param) > 0 {
-			d := uri.NewPathDecoder(uri.PathDecoderConfig{
-				Param:   "block_id",
-				Value:   param,
-				Style:   uri.PathStyleSimple,
-				Explode: false,
-			})
-
-			if err := func() error {
-				val, err := d.DecodeValue()
-				if err != nil {
-					return err
-				}
-
-				c, err := conv.ToString(val)
-				if err != nil {
-					return err
-				}
-
-				params.BlockID = c
-				return nil
-			}(); err != nil {
-				return err
-			}
-		} else {
-			return validate.ErrFieldRequired
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "block_id",
-			In:   "path",
-			Err:  err,
-		}
-	}
-	// Decode query: mode.
-	if err := func() error {
-		cfg := uri.QueryParameterDecodingConfig{
-			Name:    "mode",
-			Style:   uri.QueryStyleForm,
-			Explode: true,
-		}
-
-		if err := q.HasParam(cfg); err == nil {
-			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
-				val, err := d.DecodeValue()
-				if err != nil {
-					return err
-				}
-
-				c, err := conv.ToUint32(val)
-				if err != nil {
-					return err
-				}
-
-				params.Mode = c
-				return nil
-			}); err != nil {
-				return err
-			}
-		} else {
-			return validate.ErrFieldRequired
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "mode",
-			In:   "query",
-			Err:  err,
-		}
-	}
-	return params, nil
-}
-
-// GetBlockLiteServerParams is parameters of getBlockLiteServer operation.
-type GetBlockLiteServerParams struct {
-	// Block ID: (workchain,shard,seqno,root_hash,file_hash).
-	BlockID string
-}
-
-func unpackGetBlockLiteServerParams(packed middleware.Parameters) (params GetBlockLiteServerParams) {
-	{
-		key := middleware.ParameterKey{
-			Name: "block_id",
-			In:   "path",
-		}
-		params.BlockID = packed[key].(string)
-	}
-	return params
-}
-
-func decodeGetBlockLiteServerParams(args [1]string, argsEscaped bool, r *http.Request) (params GetBlockLiteServerParams, _ error) {
-	// Decode path: block_id.
-	if err := func() error {
-		param := args[0]
-		if argsEscaped {
-			unescaped, err := url.PathUnescape(args[0])
-			if err != nil {
-				return errors.Wrap(err, "unescape path")
-			}
-			param = unescaped
-		}
-		if len(param) > 0 {
-			d := uri.NewPathDecoder(uri.PathDecoderConfig{
-				Param:   "block_id",
-				Value:   param,
-				Style:   uri.PathStyleSimple,
-				Explode: false,
-			})
-
-			if err := func() error {
-				val, err := d.DecodeValue()
-				if err != nil {
-					return err
-				}
-
-				c, err := conv.ToString(val)
-				if err != nil {
-					return err
-				}
-
-				params.BlockID = c
-				return nil
-			}(); err != nil {
-				return err
-			}
-		} else {
-			return validate.ErrFieldRequired
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "block_id",
-			In:   "path",
-			Err:  err,
-		}
-	}
-	return params, nil
-}
-
-// GetBlockProofLiteServerParams is parameters of getBlockProofLiteServer operation.
-type GetBlockProofLiteServerParams struct {
-	// Known block: (workchain,shard,seqno,root_hash,file_hash).
-	KnownBlock string
-	// Target block: (workchain,shard,seqno,root_hash,file_hash).
-	TargetBlock OptString
-	// Mode.
-	Mode uint32
-}
-
-func unpackGetBlockProofLiteServerParams(packed middleware.Parameters) (params GetBlockProofLiteServerParams) {
-	{
-		key := middleware.ParameterKey{
-			Name: "known_block",
-			In:   "query",
-		}
-		params.KnownBlock = packed[key].(string)
-	}
-	{
-		key := middleware.ParameterKey{
-			Name: "target_block",
-			In:   "query",
-		}
-		if v, ok := packed[key]; ok {
-			params.TargetBlock = v.(OptString)
-		}
-	}
-	{
-		key := middleware.ParameterKey{
-			Name: "mode",
-			In:   "query",
-		}
-		params.Mode = packed[key].(uint32)
-	}
-	return params
-}
-
-func decodeGetBlockProofLiteServerParams(args [0]string, argsEscaped bool, r *http.Request) (params GetBlockProofLiteServerParams, _ error) {
-	q := uri.NewQueryDecoder(r.URL.Query())
-	// Decode query: known_block.
-	if err := func() error {
-		cfg := uri.QueryParameterDecodingConfig{
-			Name:    "known_block",
-			Style:   uri.QueryStyleForm,
-			Explode: true,
-		}
-
-		if err := q.HasParam(cfg); err == nil {
-			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
-				val, err := d.DecodeValue()
-				if err != nil {
-					return err
-				}
-
-				c, err := conv.ToString(val)
-				if err != nil {
-					return err
-				}
-
-				params.KnownBlock = c
-				return nil
-			}); err != nil {
-				return err
-			}
-		} else {
-			return validate.ErrFieldRequired
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "known_block",
-			In:   "query",
-			Err:  err,
-		}
-	}
-	// Decode query: target_block.
-	if err := func() error {
-		cfg := uri.QueryParameterDecodingConfig{
-			Name:    "target_block",
-			Style:   uri.QueryStyleForm,
-			Explode: true,
-		}
-
-		if err := q.HasParam(cfg); err == nil {
-			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
-				var paramsDotTargetBlockVal string
-				if err := func() error {
-					val, err := d.DecodeValue()
-					if err != nil {
-						return err
-					}
-
-					c, err := conv.ToString(val)
-					if err != nil {
-						return err
-					}
-
-					paramsDotTargetBlockVal = c
-					return nil
-				}(); err != nil {
-					return err
-				}
-				params.TargetBlock.SetTo(paramsDotTargetBlockVal)
-				return nil
-			}); err != nil {
-				return err
-			}
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "target_block",
-			In:   "query",
-			Err:  err,
-		}
-	}
-	// Decode query: mode.
-	if err := func() error {
-		cfg := uri.QueryParameterDecodingConfig{
-			Name:    "mode",
-			Style:   uri.QueryStyleForm,
-			Explode: true,
-		}
-
-		if err := q.HasParam(cfg); err == nil {
-			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
-				val, err := d.DecodeValue()
-				if err != nil {
-					return err
-				}
-
-				c, err := conv.ToUint32(val)
-				if err != nil {
-					return err
-				}
-
-				params.Mode = c
-				return nil
-			}); err != nil {
-				return err
-			}
-		} else {
-			return validate.ErrFieldRequired
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "mode",
-			In:   "query",
-			Err:  err,
-		}
-	}
-	return params, nil
-}
-
-// GetBlockTransactionsParams is parameters of getBlockTransactions operation.
-type GetBlockTransactionsParams struct {
-	// Block ID.
-	BlockID string
-}
-
-func unpackGetBlockTransactionsParams(packed middleware.Parameters) (params GetBlockTransactionsParams) {
-	{
-		key := middleware.ParameterKey{
-			Name: "block_id",
-			In:   "path",
-		}
-		params.BlockID = packed[key].(string)
-	}
-	return params
-}
-
-func decodeGetBlockTransactionsParams(args [1]string, argsEscaped bool, r *http.Request) (params GetBlockTransactionsParams, _ error) {
-	// Decode path: block_id.
-	if err := func() error {
-		param := args[0]
-		if argsEscaped {
-			unescaped, err := url.PathUnescape(args[0])
-			if err != nil {
-				return errors.Wrap(err, "unescape path")
-			}
-			param = unescaped
-		}
-		if len(param) > 0 {
-			d := uri.NewPathDecoder(uri.PathDecoderConfig{
-				Param:   "block_id",
-				Value:   param,
-				Style:   uri.PathStyleSimple,
-				Explode: false,
-			})
-
-			if err := func() error {
-				val, err := d.DecodeValue()
-				if err != nil {
-					return err
-				}
-
-				c, err := conv.ToString(val)
-				if err != nil {
-					return err
-				}
-
-				params.BlockID = c
-				return nil
-			}(); err != nil {
-				return err
-			}
-		} else {
-			return validate.ErrFieldRequired
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "block_id",
-			In:   "path",
-			Err:  err,
-		}
-	}
-	return params, nil
-}
-
-// GetChartRatesParams is parameters of getChartRates operation.
-type GetChartRatesParams struct {
-	// Accept jetton master address.
-	Token    string
-	Currency OptString
-}
-
-func unpackGetChartRatesParams(packed middleware.Parameters) (params GetChartRatesParams) {
-	{
-		key := middleware.ParameterKey{
-			Name: "token",
-			In:   "query",
-		}
-		params.Token = packed[key].(string)
-	}
-	{
-		key := middleware.ParameterKey{
-			Name: "currency",
-			In:   "query",
-		}
-		if v, ok := packed[key]; ok {
-			params.Currency = v.(OptString)
-		}
-	}
-	return params
-}
-
-func decodeGetChartRatesParams(args [0]string, argsEscaped bool, r *http.Request) (params GetChartRatesParams, _ error) {
-	q := uri.NewQueryDecoder(r.URL.Query())
-	// Decode query: token.
-	if err := func() error {
-		cfg := uri.QueryParameterDecodingConfig{
-			Name:    "token",
-			Style:   uri.QueryStyleForm,
-			Explode: true,
-		}
-
-		if err := q.HasParam(cfg); err == nil {
-			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
-				val, err := d.DecodeValue()
-				if err != nil {
-					return err
-				}
-
-				c, err := conv.ToString(val)
-				if err != nil {
-					return err
-				}
-
-				params.Token = c
-				return nil
-			}); err != nil {
-				return err
-			}
-		} else {
-			return validate.ErrFieldRequired
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "token",
-			In:   "query",
-			Err:  err,
-		}
-	}
-	// Decode query: currency.
-	if err := func() error {
-		cfg := uri.QueryParameterDecodingConfig{
-			Name:    "currency",
-			Style:   uri.QueryStyleForm,
-			Explode: true,
-		}
-
-		if err := q.HasParam(cfg); err == nil {
-			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
-				var paramsDotCurrencyVal string
-				if err := func() error {
-					val, err := d.DecodeValue()
-					if err != nil {
-						return err
-					}
-
-					c, err := conv.ToString(val)
-					if err != nil {
-						return err
-					}
-
-					paramsDotCurrencyVal = c
-					return nil
-				}(); err != nil {
-					return err
-				}
-				params.Currency.SetTo(paramsDotCurrencyVal)
-				return nil
-			}); err != nil {
-				return err
-			}
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "currency",
-			In:   "query",
-			Err:  err,
-		}
-	}
-	return params, nil
-}
-
-// GetConfigAllLiteServerParams is parameters of getConfigAllLiteServer operation.
-type GetConfigAllLiteServerParams struct {
-	// Block ID: (workchain,shard,seqno,root_hash,file_hash).
-	BlockID string
-	// Mode.
-	Mode uint32
-}
-
-func unpackGetConfigAllLiteServerParams(packed middleware.Parameters) (params GetConfigAllLiteServerParams) {
-	{
-		key := middleware.ParameterKey{
-			Name: "block_id",
-			In:   "path",
-		}
-		params.BlockID = packed[key].(string)
-	}
-	{
-		key := middleware.ParameterKey{
-			Name: "mode",
-			In:   "query",
-		}
-		params.Mode = packed[key].(uint32)
-	}
-	return params
-}
-
-func decodeGetConfigAllLiteServerParams(args [1]string, argsEscaped bool, r *http.Request) (params GetConfigAllLiteServerParams, _ error) {
-	q := uri.NewQueryDecoder(r.URL.Query())
-	// Decode path: block_id.
-	if err := func() error {
-		param := args[0]
-		if argsEscaped {
-			unescaped, err := url.PathUnescape(args[0])
-			if err != nil {
-				return errors.Wrap(err, "unescape path")
-			}
-			param = unescaped
-		}
-		if len(param) > 0 {
-			d := uri.NewPathDecoder(uri.PathDecoderConfig{
-				Param:   "block_id",
-				Value:   param,
-				Style:   uri.PathStyleSimple,
-				Explode: false,
-			})
-
-			if err := func() error {
-				val, err := d.DecodeValue()
-				if err != nil {
-					return err
-				}
-
-				c, err := conv.ToString(val)
-				if err != nil {
-					return err
-				}
-
-				params.BlockID = c
-				return nil
-			}(); err != nil {
-				return err
-			}
-		} else {
-			return validate.ErrFieldRequired
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "block_id",
-			In:   "path",
-			Err:  err,
-		}
-	}
-	// Decode query: mode.
-	if err := func() error {
-		cfg := uri.QueryParameterDecodingConfig{
-			Name:    "mode",
-			Style:   uri.QueryStyleForm,
-			Explode: true,
-		}
-
-		if err := q.HasParam(cfg); err == nil {
-			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
-				val, err := d.DecodeValue()
-				if err != nil {
-					return err
-				}
-
-				c, err := conv.ToUint32(val)
-				if err != nil {
-					return err
-				}
-
-				params.Mode = c
-				return nil
-			}); err != nil {
-				return err
-			}
-		} else {
-			return validate.ErrFieldRequired
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "mode",
-			In:   "query",
-			Err:  err,
-		}
-	}
-	return params, nil
-}
-
-// GetDnsExpiringParams is parameters of getDnsExpiring operation.
-type GetDnsExpiringParams struct {
+// GetAccountDnsExpiringParams is parameters of getAccountDnsExpiring operation.
+type GetAccountDnsExpiringParams struct {
 	// Account ID.
 	AccountID string
 	// Number of days before expiration.
 	Period OptInt
 }
 
-func unpackGetDnsExpiringParams(packed middleware.Parameters) (params GetDnsExpiringParams) {
+func unpackGetAccountDnsExpiringParams(packed middleware.Parameters) (params GetAccountDnsExpiringParams) {
 	{
 		key := middleware.ParameterKey{
 			Name: "account_id",
@@ -1936,7 +670,7 @@ func unpackGetDnsExpiringParams(packed middleware.Parameters) (params GetDnsExpi
 	return params
 }
 
-func decodeGetDnsExpiringParams(args [1]string, argsEscaped bool, r *http.Request) (params GetDnsExpiringParams, _ error) {
+func decodeGetAccountDnsExpiringParams(args [1]string, argsEscaped bool, r *http.Request) (params GetAccountDnsExpiringParams, _ error) {
 	q := uri.NewQueryDecoder(r.URL.Query())
 	// Decode path: account_id.
 	if err := func() error {
@@ -2051,199 +785,12 @@ func decodeGetDnsExpiringParams(args [1]string, argsEscaped bool, r *http.Reques
 	return params, nil
 }
 
-// GetDomainBidsParams is parameters of getDomainBids operation.
-type GetDomainBidsParams struct {
-	// Domain name with .ton or .t.me.
-	DomainName string
-}
-
-func unpackGetDomainBidsParams(packed middleware.Parameters) (params GetDomainBidsParams) {
-	{
-		key := middleware.ParameterKey{
-			Name: "domain_name",
-			In:   "path",
-		}
-		params.DomainName = packed[key].(string)
-	}
-	return params
-}
-
-func decodeGetDomainBidsParams(args [1]string, argsEscaped bool, r *http.Request) (params GetDomainBidsParams, _ error) {
-	// Decode path: domain_name.
-	if err := func() error {
-		param := args[0]
-		if argsEscaped {
-			unescaped, err := url.PathUnescape(args[0])
-			if err != nil {
-				return errors.Wrap(err, "unescape path")
-			}
-			param = unescaped
-		}
-		if len(param) > 0 {
-			d := uri.NewPathDecoder(uri.PathDecoderConfig{
-				Param:   "domain_name",
-				Value:   param,
-				Style:   uri.PathStyleSimple,
-				Explode: false,
-			})
-
-			if err := func() error {
-				val, err := d.DecodeValue()
-				if err != nil {
-					return err
-				}
-
-				c, err := conv.ToString(val)
-				if err != nil {
-					return err
-				}
-
-				params.DomainName = c
-				return nil
-			}(); err != nil {
-				return err
-			}
-		} else {
-			return validate.ErrFieldRequired
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "domain_name",
-			In:   "path",
-			Err:  err,
-		}
-	}
-	return params, nil
-}
-
-// GetEventParams is parameters of getEvent operation.
-type GetEventParams struct {
-	// Event ID or transaction hash in hex (without 0x) or base64url format.
-	EventID        string
-	AcceptLanguage OptString
-}
-
-func unpackGetEventParams(packed middleware.Parameters) (params GetEventParams) {
-	{
-		key := middleware.ParameterKey{
-			Name: "event_id",
-			In:   "path",
-		}
-		params.EventID = packed[key].(string)
-	}
-	{
-		key := middleware.ParameterKey{
-			Name: "Accept-Language",
-			In:   "header",
-		}
-		if v, ok := packed[key]; ok {
-			params.AcceptLanguage = v.(OptString)
-		}
-	}
-	return params
-}
-
-func decodeGetEventParams(args [1]string, argsEscaped bool, r *http.Request) (params GetEventParams, _ error) {
-	h := uri.NewHeaderDecoder(r.Header)
-	// Decode path: event_id.
-	if err := func() error {
-		param := args[0]
-		if argsEscaped {
-			unescaped, err := url.PathUnescape(args[0])
-			if err != nil {
-				return errors.Wrap(err, "unescape path")
-			}
-			param = unescaped
-		}
-		if len(param) > 0 {
-			d := uri.NewPathDecoder(uri.PathDecoderConfig{
-				Param:   "event_id",
-				Value:   param,
-				Style:   uri.PathStyleSimple,
-				Explode: false,
-			})
-
-			if err := func() error {
-				val, err := d.DecodeValue()
-				if err != nil {
-					return err
-				}
-
-				c, err := conv.ToString(val)
-				if err != nil {
-					return err
-				}
-
-				params.EventID = c
-				return nil
-			}(); err != nil {
-				return err
-			}
-		} else {
-			return validate.ErrFieldRequired
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "event_id",
-			In:   "path",
-			Err:  err,
-		}
-	}
-	// Set default value for header: Accept-Language.
-	{
-		val := string("en")
-		params.AcceptLanguage.SetTo(val)
-	}
-	// Decode header: Accept-Language.
-	if err := func() error {
-		cfg := uri.HeaderParameterDecodingConfig{
-			Name:    "Accept-Language",
-			Explode: false,
-		}
-		if err := h.HasParam(cfg); err == nil {
-			if err := h.DecodeParam(cfg, func(d uri.Decoder) error {
-				var paramsDotAcceptLanguageVal string
-				if err := func() error {
-					val, err := d.DecodeValue()
-					if err != nil {
-						return err
-					}
-
-					c, err := conv.ToString(val)
-					if err != nil {
-						return err
-					}
-
-					paramsDotAcceptLanguageVal = c
-					return nil
-				}(); err != nil {
-					return err
-				}
-				params.AcceptLanguage.SetTo(paramsDotAcceptLanguageVal)
-				return nil
-			}); err != nil {
-				return err
-			}
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "Accept-Language",
-			In:   "header",
-			Err:  err,
-		}
-	}
-	return params, nil
-}
-
-// GetEventsByAccountParams is parameters of getEventsByAccount operation.
-type GetEventsByAccountParams struct {
+// GetAccountEventsParams is parameters of getAccountEvents operation.
+type GetAccountEventsParams struct {
 	// Account ID.
 	AccountID      string
 	AcceptLanguage OptString
-	// Filter actions where requested account is not real subject (for example sender or reciver jettons).
+	// Filter actions where requested account is not real subject (for example sender or receiver jettons).
 	SubjectOnly OptBool
 	// Omit this parameter to get last events.
 	BeforeLt  OptInt64
@@ -2252,7 +799,7 @@ type GetEventsByAccountParams struct {
 	EndDate   OptInt64
 }
 
-func unpackGetEventsByAccountParams(packed middleware.Parameters) (params GetEventsByAccountParams) {
+func unpackGetAccountEventsParams(packed middleware.Parameters) (params GetAccountEventsParams) {
 	{
 		key := middleware.ParameterKey{
 			Name: "account_id",
@@ -2315,7 +862,7 @@ func unpackGetEventsByAccountParams(packed middleware.Parameters) (params GetEve
 	return params
 }
 
-func decodeGetEventsByAccountParams(args [1]string, argsEscaped bool, r *http.Request) (params GetEventsByAccountParams, _ error) {
+func decodeGetAccountEventsParams(args [1]string, argsEscaped bool, r *http.Request) (params GetAccountEventsParams, _ error) {
 	q := uri.NewQueryDecoder(r.URL.Query())
 	h := uri.NewHeaderDecoder(r.Header)
 	// Decode path: account_id.
@@ -2626,6 +1173,2598 @@ func decodeGetEventsByAccountParams(args [1]string, argsEscaped bool, r *http.Re
 		return params, &ogenerrors.DecodeParamError{
 			Name: "end_date",
 			In:   "query",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// GetAccountJettonHistoryByIDParams is parameters of getAccountJettonHistoryByID operation.
+type GetAccountJettonHistoryByIDParams struct {
+	// Account ID.
+	AccountID string
+	// Jetton ID.
+	JettonID       string
+	AcceptLanguage OptString
+	// Omit this parameter to get last events.
+	BeforeLt  OptInt64
+	Limit     int
+	StartDate OptInt64
+	EndDate   OptInt64
+}
+
+func unpackGetAccountJettonHistoryByIDParams(packed middleware.Parameters) (params GetAccountJettonHistoryByIDParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "account_id",
+			In:   "path",
+		}
+		params.AccountID = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "jetton_id",
+			In:   "path",
+		}
+		params.JettonID = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "Accept-Language",
+			In:   "header",
+		}
+		if v, ok := packed[key]; ok {
+			params.AcceptLanguage = v.(OptString)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "before_lt",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.BeforeLt = v.(OptInt64)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "limit",
+			In:   "query",
+		}
+		params.Limit = packed[key].(int)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "start_date",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.StartDate = v.(OptInt64)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "end_date",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.EndDate = v.(OptInt64)
+		}
+	}
+	return params
+}
+
+func decodeGetAccountJettonHistoryByIDParams(args [2]string, argsEscaped bool, r *http.Request) (params GetAccountJettonHistoryByIDParams, _ error) {
+	q := uri.NewQueryDecoder(r.URL.Query())
+	h := uri.NewHeaderDecoder(r.Header)
+	// Decode path: account_id.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "account_id",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.AccountID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account_id",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: jetton_id.
+	if err := func() error {
+		param := args[1]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "jetton_id",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.JettonID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "jetton_id",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Set default value for header: Accept-Language.
+	{
+		val := string("en")
+		params.AcceptLanguage.SetTo(val)
+	}
+	// Decode header: Accept-Language.
+	if err := func() error {
+		cfg := uri.HeaderParameterDecodingConfig{
+			Name:    "Accept-Language",
+			Explode: false,
+		}
+		if err := h.HasParam(cfg); err == nil {
+			if err := h.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotAcceptLanguageVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotAcceptLanguageVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.AcceptLanguage.SetTo(paramsDotAcceptLanguageVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "Accept-Language",
+			In:   "header",
+			Err:  err,
+		}
+	}
+	// Decode query: before_lt.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "before_lt",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotBeforeLtVal int64
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToInt64(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotBeforeLtVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.BeforeLt.SetTo(paramsDotBeforeLtVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "before_lt",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Decode query: limit.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "limit",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToInt(val)
+				if err != nil {
+					return err
+				}
+
+				params.Limit = c
+				return nil
+			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if err := (validate.Int{
+					MinSet:        false,
+					Min:           0,
+					MaxSet:        true,
+					Max:           1000,
+					MinExclusive:  false,
+					MaxExclusive:  false,
+					MultipleOfSet: false,
+					MultipleOf:    0,
+				}).Validate(int64(params.Limit)); err != nil {
+					return errors.Wrap(err, "int")
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "limit",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Decode query: start_date.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "start_date",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotStartDateVal int64
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToInt64(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotStartDateVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.StartDate.SetTo(paramsDotStartDateVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "start_date",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Decode query: end_date.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "end_date",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotEndDateVal int64
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToInt64(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotEndDateVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.EndDate.SetTo(paramsDotEndDateVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "end_date",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// GetAccountJettonsBalancesParams is parameters of getAccountJettonsBalances operation.
+type GetAccountJettonsBalancesParams struct {
+	// Account ID.
+	AccountID string
+}
+
+func unpackGetAccountJettonsBalancesParams(packed middleware.Parameters) (params GetAccountJettonsBalancesParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "account_id",
+			In:   "path",
+		}
+		params.AccountID = packed[key].(string)
+	}
+	return params
+}
+
+func decodeGetAccountJettonsBalancesParams(args [1]string, argsEscaped bool, r *http.Request) (params GetAccountJettonsBalancesParams, _ error) {
+	// Decode path: account_id.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "account_id",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.AccountID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account_id",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// GetAccountJettonsHistoryParams is parameters of getAccountJettonsHistory operation.
+type GetAccountJettonsHistoryParams struct {
+	// Account ID.
+	AccountID      string
+	AcceptLanguage OptString
+	// Omit this parameter to get last events.
+	BeforeLt  OptInt64
+	Limit     int
+	StartDate OptInt64
+	EndDate   OptInt64
+}
+
+func unpackGetAccountJettonsHistoryParams(packed middleware.Parameters) (params GetAccountJettonsHistoryParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "account_id",
+			In:   "path",
+		}
+		params.AccountID = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "Accept-Language",
+			In:   "header",
+		}
+		if v, ok := packed[key]; ok {
+			params.AcceptLanguage = v.(OptString)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "before_lt",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.BeforeLt = v.(OptInt64)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "limit",
+			In:   "query",
+		}
+		params.Limit = packed[key].(int)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "start_date",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.StartDate = v.(OptInt64)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "end_date",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.EndDate = v.(OptInt64)
+		}
+	}
+	return params
+}
+
+func decodeGetAccountJettonsHistoryParams(args [1]string, argsEscaped bool, r *http.Request) (params GetAccountJettonsHistoryParams, _ error) {
+	q := uri.NewQueryDecoder(r.URL.Query())
+	h := uri.NewHeaderDecoder(r.Header)
+	// Decode path: account_id.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "account_id",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.AccountID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account_id",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Set default value for header: Accept-Language.
+	{
+		val := string("en")
+		params.AcceptLanguage.SetTo(val)
+	}
+	// Decode header: Accept-Language.
+	if err := func() error {
+		cfg := uri.HeaderParameterDecodingConfig{
+			Name:    "Accept-Language",
+			Explode: false,
+		}
+		if err := h.HasParam(cfg); err == nil {
+			if err := h.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotAcceptLanguageVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotAcceptLanguageVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.AcceptLanguage.SetTo(paramsDotAcceptLanguageVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "Accept-Language",
+			In:   "header",
+			Err:  err,
+		}
+	}
+	// Decode query: before_lt.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "before_lt",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotBeforeLtVal int64
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToInt64(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotBeforeLtVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.BeforeLt.SetTo(paramsDotBeforeLtVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "before_lt",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Decode query: limit.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "limit",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToInt(val)
+				if err != nil {
+					return err
+				}
+
+				params.Limit = c
+				return nil
+			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if err := (validate.Int{
+					MinSet:        false,
+					Min:           0,
+					MaxSet:        true,
+					Max:           1000,
+					MinExclusive:  false,
+					MaxExclusive:  false,
+					MultipleOfSet: false,
+					MultipleOf:    0,
+				}).Validate(int64(params.Limit)); err != nil {
+					return errors.Wrap(err, "int")
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "limit",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Decode query: start_date.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "start_date",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotStartDateVal int64
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToInt64(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotStartDateVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.StartDate.SetTo(paramsDotStartDateVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "start_date",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Decode query: end_date.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "end_date",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotEndDateVal int64
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToInt64(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotEndDateVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.EndDate.SetTo(paramsDotEndDateVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "end_date",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// GetAccountNftItemsParams is parameters of getAccountNftItems operation.
+type GetAccountNftItemsParams struct {
+	// Account ID.
+	AccountID string
+	// Nft collection.
+	Collection OptString
+	Limit      OptInt
+	Offset     OptInt
+	// Selling nft items in ton implemented usually via transfer items to special selling account. This
+	// option enables including items which owned not directly.
+	IndirectOwnership OptBool
+}
+
+func unpackGetAccountNftItemsParams(packed middleware.Parameters) (params GetAccountNftItemsParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "account_id",
+			In:   "path",
+		}
+		params.AccountID = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "collection",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.Collection = v.(OptString)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "limit",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.Limit = v.(OptInt)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "offset",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.Offset = v.(OptInt)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "indirect_ownership",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.IndirectOwnership = v.(OptBool)
+		}
+	}
+	return params
+}
+
+func decodeGetAccountNftItemsParams(args [1]string, argsEscaped bool, r *http.Request) (params GetAccountNftItemsParams, _ error) {
+	q := uri.NewQueryDecoder(r.URL.Query())
+	// Decode path: account_id.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "account_id",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.AccountID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account_id",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode query: collection.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "collection",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotCollectionVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotCollectionVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.Collection.SetTo(paramsDotCollectionVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "collection",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Set default value for query: limit.
+	{
+		val := int(1000)
+		params.Limit.SetTo(val)
+	}
+	// Decode query: limit.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "limit",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotLimitVal int
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToInt(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotLimitVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.Limit.SetTo(paramsDotLimitVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if value, ok := params.Limit.Get(); ok {
+					if err := func() error {
+						if err := (validate.Int{
+							MinSet:        false,
+							Min:           0,
+							MaxSet:        true,
+							Max:           1000,
+							MinExclusive:  false,
+							MaxExclusive:  false,
+							MultipleOfSet: false,
+							MultipleOf:    0,
+						}).Validate(int64(value)); err != nil {
+							return errors.Wrap(err, "int")
+						}
+						return nil
+					}(); err != nil {
+						return err
+					}
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "limit",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Set default value for query: offset.
+	{
+		val := int(0)
+		params.Offset.SetTo(val)
+	}
+	// Decode query: offset.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "offset",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotOffsetVal int
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToInt(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotOffsetVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.Offset.SetTo(paramsDotOffsetVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "offset",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Set default value for query: indirect_ownership.
+	{
+		val := bool(false)
+		params.IndirectOwnership.SetTo(val)
+	}
+	// Decode query: indirect_ownership.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "indirect_ownership",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotIndirectOwnershipVal bool
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToBool(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotIndirectOwnershipVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.IndirectOwnership.SetTo(paramsDotIndirectOwnershipVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "indirect_ownership",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// GetAccountNominatorsPoolsParams is parameters of getAccountNominatorsPools operation.
+type GetAccountNominatorsPoolsParams struct {
+	// Account ID.
+	AccountID string
+}
+
+func unpackGetAccountNominatorsPoolsParams(packed middleware.Parameters) (params GetAccountNominatorsPoolsParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "account_id",
+			In:   "path",
+		}
+		params.AccountID = packed[key].(string)
+	}
+	return params
+}
+
+func decodeGetAccountNominatorsPoolsParams(args [1]string, argsEscaped bool, r *http.Request) (params GetAccountNominatorsPoolsParams, _ error) {
+	// Decode path: account_id.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "account_id",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.AccountID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account_id",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// GetAccountPublicKeyParams is parameters of getAccountPublicKey operation.
+type GetAccountPublicKeyParams struct {
+	// Account ID.
+	AccountID string
+}
+
+func unpackGetAccountPublicKeyParams(packed middleware.Parameters) (params GetAccountPublicKeyParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "account_id",
+			In:   "path",
+		}
+		params.AccountID = packed[key].(string)
+	}
+	return params
+}
+
+func decodeGetAccountPublicKeyParams(args [1]string, argsEscaped bool, r *http.Request) (params GetAccountPublicKeyParams, _ error) {
+	// Decode path: account_id.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "account_id",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.AccountID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account_id",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// GetAccountSeqnoParams is parameters of getAccountSeqno operation.
+type GetAccountSeqnoParams struct {
+	// Account ID.
+	AccountID string
+}
+
+func unpackGetAccountSeqnoParams(packed middleware.Parameters) (params GetAccountSeqnoParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "account_id",
+			In:   "path",
+		}
+		params.AccountID = packed[key].(string)
+	}
+	return params
+}
+
+func decodeGetAccountSeqnoParams(args [1]string, argsEscaped bool, r *http.Request) (params GetAccountSeqnoParams, _ error) {
+	// Decode path: account_id.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "account_id",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.AccountID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account_id",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// GetAccountSubscriptionsParams is parameters of getAccountSubscriptions operation.
+type GetAccountSubscriptionsParams struct {
+	// Account ID.
+	AccountID string
+}
+
+func unpackGetAccountSubscriptionsParams(packed middleware.Parameters) (params GetAccountSubscriptionsParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "account_id",
+			In:   "path",
+		}
+		params.AccountID = packed[key].(string)
+	}
+	return params
+}
+
+func decodeGetAccountSubscriptionsParams(args [1]string, argsEscaped bool, r *http.Request) (params GetAccountSubscriptionsParams, _ error) {
+	// Decode path: account_id.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "account_id",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.AccountID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account_id",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// GetAccountTracesParams is parameters of getAccountTraces operation.
+type GetAccountTracesParams struct {
+	// Account ID.
+	AccountID string
+	Limit     OptInt
+}
+
+func unpackGetAccountTracesParams(packed middleware.Parameters) (params GetAccountTracesParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "account_id",
+			In:   "path",
+		}
+		params.AccountID = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "limit",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.Limit = v.(OptInt)
+		}
+	}
+	return params
+}
+
+func decodeGetAccountTracesParams(args [1]string, argsEscaped bool, r *http.Request) (params GetAccountTracesParams, _ error) {
+	q := uri.NewQueryDecoder(r.URL.Query())
+	// Decode path: account_id.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "account_id",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.AccountID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account_id",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Set default value for query: limit.
+	{
+		val := int(100)
+		params.Limit.SetTo(val)
+	}
+	// Decode query: limit.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "limit",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotLimitVal int
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToInt(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotLimitVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.Limit.SetTo(paramsDotLimitVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if value, ok := params.Limit.Get(); ok {
+					if err := func() error {
+						if err := (validate.Int{
+							MinSet:        false,
+							Min:           0,
+							MaxSet:        true,
+							Max:           1000,
+							MinExclusive:  false,
+							MaxExclusive:  false,
+							MultipleOfSet: false,
+							MultipleOf:    0,
+						}).Validate(int64(value)); err != nil {
+							return errors.Wrap(err, "int")
+						}
+						return nil
+					}(); err != nil {
+						return err
+					}
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "limit",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// GetAllAuctionsParams is parameters of getAllAuctions operation.
+type GetAllAuctionsParams struct {
+	// Domain filter for current auctions "ton" or "t.me".
+	Tld OptString
+}
+
+func unpackGetAllAuctionsParams(packed middleware.Parameters) (params GetAllAuctionsParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "tld",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.Tld = v.(OptString)
+		}
+	}
+	return params
+}
+
+func decodeGetAllAuctionsParams(args [0]string, argsEscaped bool, r *http.Request) (params GetAllAuctionsParams, _ error) {
+	q := uri.NewQueryDecoder(r.URL.Query())
+	// Decode query: tld.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "tld",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotTldVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotTldVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.Tld.SetTo(paramsDotTldVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "tld",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// GetAllRawShardsInfoParams is parameters of getAllRawShardsInfo operation.
+type GetAllRawShardsInfoParams struct {
+	// Block ID: (workchain,shard,seqno,root_hash,file_hash).
+	BlockID string
+}
+
+func unpackGetAllRawShardsInfoParams(packed middleware.Parameters) (params GetAllRawShardsInfoParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "block_id",
+			In:   "path",
+		}
+		params.BlockID = packed[key].(string)
+	}
+	return params
+}
+
+func decodeGetAllRawShardsInfoParams(args [1]string, argsEscaped bool, r *http.Request) (params GetAllRawShardsInfoParams, _ error) {
+	// Decode path: block_id.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "block_id",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.BlockID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "block_id",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// GetBlockchainAccountTransactionsParams is parameters of getBlockchainAccountTransactions operation.
+type GetBlockchainAccountTransactionsParams struct {
+	// Account ID.
+	AccountID string
+	// Omit this parameter to get last transactions.
+	AfterLt OptInt64
+	// Omit this parameter to get last transactions.
+	BeforeLt OptInt64
+	Limit    OptInt32
+}
+
+func unpackGetBlockchainAccountTransactionsParams(packed middleware.Parameters) (params GetBlockchainAccountTransactionsParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "account_id",
+			In:   "path",
+		}
+		params.AccountID = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "after_lt",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.AfterLt = v.(OptInt64)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "before_lt",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.BeforeLt = v.(OptInt64)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "limit",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.Limit = v.(OptInt32)
+		}
+	}
+	return params
+}
+
+func decodeGetBlockchainAccountTransactionsParams(args [1]string, argsEscaped bool, r *http.Request) (params GetBlockchainAccountTransactionsParams, _ error) {
+	q := uri.NewQueryDecoder(r.URL.Query())
+	// Decode path: account_id.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "account_id",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.AccountID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account_id",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode query: after_lt.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "after_lt",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotAfterLtVal int64
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToInt64(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotAfterLtVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.AfterLt.SetTo(paramsDotAfterLtVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "after_lt",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Decode query: before_lt.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "before_lt",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotBeforeLtVal int64
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToInt64(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotBeforeLtVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.BeforeLt.SetTo(paramsDotBeforeLtVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "before_lt",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Set default value for query: limit.
+	{
+		val := int32(100)
+		params.Limit.SetTo(val)
+	}
+	// Decode query: limit.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "limit",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotLimitVal int32
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToInt32(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotLimitVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.Limit.SetTo(paramsDotLimitVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if value, ok := params.Limit.Get(); ok {
+					if err := func() error {
+						if err := (validate.Int{
+							MinSet:        false,
+							Min:           0,
+							MaxSet:        true,
+							Max:           1000,
+							MinExclusive:  false,
+							MaxExclusive:  false,
+							MultipleOfSet: false,
+							MultipleOf:    0,
+						}).Validate(int64(value)); err != nil {
+							return errors.Wrap(err, "int")
+						}
+						return nil
+					}(); err != nil {
+						return err
+					}
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "limit",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// GetBlockchainBlockParams is parameters of getBlockchainBlock operation.
+type GetBlockchainBlockParams struct {
+	// Block ID.
+	BlockID string
+}
+
+func unpackGetBlockchainBlockParams(packed middleware.Parameters) (params GetBlockchainBlockParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "block_id",
+			In:   "path",
+		}
+		params.BlockID = packed[key].(string)
+	}
+	return params
+}
+
+func decodeGetBlockchainBlockParams(args [1]string, argsEscaped bool, r *http.Request) (params GetBlockchainBlockParams, _ error) {
+	// Decode path: block_id.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "block_id",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.BlockID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "block_id",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// GetBlockchainBlockTransactionsParams is parameters of getBlockchainBlockTransactions operation.
+type GetBlockchainBlockTransactionsParams struct {
+	// Block ID.
+	BlockID string
+}
+
+func unpackGetBlockchainBlockTransactionsParams(packed middleware.Parameters) (params GetBlockchainBlockTransactionsParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "block_id",
+			In:   "path",
+		}
+		params.BlockID = packed[key].(string)
+	}
+	return params
+}
+
+func decodeGetBlockchainBlockTransactionsParams(args [1]string, argsEscaped bool, r *http.Request) (params GetBlockchainBlockTransactionsParams, _ error) {
+	// Decode path: block_id.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "block_id",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.BlockID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "block_id",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// GetBlockchainRawAccountParams is parameters of getBlockchainRawAccount operation.
+type GetBlockchainRawAccountParams struct {
+	// Account ID.
+	AccountID string
+}
+
+func unpackGetBlockchainRawAccountParams(packed middleware.Parameters) (params GetBlockchainRawAccountParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "account_id",
+			In:   "path",
+		}
+		params.AccountID = packed[key].(string)
+	}
+	return params
+}
+
+func decodeGetBlockchainRawAccountParams(args [1]string, argsEscaped bool, r *http.Request) (params GetBlockchainRawAccountParams, _ error) {
+	// Decode path: account_id.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "account_id",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.AccountID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account_id",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// GetBlockchainTransactionParams is parameters of getBlockchainTransaction operation.
+type GetBlockchainTransactionParams struct {
+	// Transaction ID.
+	TransactionID string
+}
+
+func unpackGetBlockchainTransactionParams(packed middleware.Parameters) (params GetBlockchainTransactionParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "transaction_id",
+			In:   "path",
+		}
+		params.TransactionID = packed[key].(string)
+	}
+	return params
+}
+
+func decodeGetBlockchainTransactionParams(args [1]string, argsEscaped bool, r *http.Request) (params GetBlockchainTransactionParams, _ error) {
+	// Decode path: transaction_id.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "transaction_id",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.TransactionID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "transaction_id",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// GetBlockchainTransactionByMessageHashParams is parameters of getBlockchainTransactionByMessageHash operation.
+type GetBlockchainTransactionByMessageHashParams struct {
+	// Message ID.
+	MsgID string
+}
+
+func unpackGetBlockchainTransactionByMessageHashParams(packed middleware.Parameters) (params GetBlockchainTransactionByMessageHashParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "msg_id",
+			In:   "path",
+		}
+		params.MsgID = packed[key].(string)
+	}
+	return params
+}
+
+func decodeGetBlockchainTransactionByMessageHashParams(args [1]string, argsEscaped bool, r *http.Request) (params GetBlockchainTransactionByMessageHashParams, _ error) {
+	// Decode path: msg_id.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "msg_id",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.MsgID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "msg_id",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// GetChartRatesParams is parameters of getChartRates operation.
+type GetChartRatesParams struct {
+	// Accept jetton master address.
+	Token    string
+	Currency OptString
+}
+
+func unpackGetChartRatesParams(packed middleware.Parameters) (params GetChartRatesParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "token",
+			In:   "query",
+		}
+		params.Token = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "currency",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.Currency = v.(OptString)
+		}
+	}
+	return params
+}
+
+func decodeGetChartRatesParams(args [0]string, argsEscaped bool, r *http.Request) (params GetChartRatesParams, _ error) {
+	q := uri.NewQueryDecoder(r.URL.Query())
+	// Decode query: token.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "token",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.Token = c
+				return nil
+			}); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "token",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Decode query: currency.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "currency",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotCurrencyVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotCurrencyVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.Currency.SetTo(paramsDotCurrencyVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "currency",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// GetDnsInfoParams is parameters of getDnsInfo operation.
+type GetDnsInfoParams struct {
+	// Domain name with .ton or .t.me.
+	DomainName string
+}
+
+func unpackGetDnsInfoParams(packed middleware.Parameters) (params GetDnsInfoParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "domain_name",
+			In:   "path",
+		}
+		params.DomainName = packed[key].(string)
+	}
+	return params
+}
+
+func decodeGetDnsInfoParams(args [1]string, argsEscaped bool, r *http.Request) (params GetDnsInfoParams, _ error) {
+	// Decode path: domain_name.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "domain_name",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.DomainName = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "domain_name",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// GetDomainBidsParams is parameters of getDomainBids operation.
+type GetDomainBidsParams struct {
+	// Domain name with .ton or .t.me.
+	DomainName string
+}
+
+func unpackGetDomainBidsParams(packed middleware.Parameters) (params GetDomainBidsParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "domain_name",
+			In:   "path",
+		}
+		params.DomainName = packed[key].(string)
+	}
+	return params
+}
+
+func decodeGetDomainBidsParams(args [1]string, argsEscaped bool, r *http.Request) (params GetDomainBidsParams, _ error) {
+	// Decode path: domain_name.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "domain_name",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.DomainName = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "domain_name",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// GetEventParams is parameters of getEvent operation.
+type GetEventParams struct {
+	// Event ID or transaction hash in hex (without 0x) or base64url format.
+	EventID        string
+	AcceptLanguage OptString
+}
+
+func unpackGetEventParams(packed middleware.Parameters) (params GetEventParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "event_id",
+			In:   "path",
+		}
+		params.EventID = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "Accept-Language",
+			In:   "header",
+		}
+		if v, ok := packed[key]; ok {
+			params.AcceptLanguage = v.(OptString)
+		}
+	}
+	return params
+}
+
+func decodeGetEventParams(args [1]string, argsEscaped bool, r *http.Request) (params GetEventParams, _ error) {
+	h := uri.NewHeaderDecoder(r.Header)
+	// Decode path: event_id.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "event_id",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.EventID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "event_id",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Set default value for header: Accept-Language.
+	{
+		val := string("en")
+		params.AcceptLanguage.SetTo(val)
+	}
+	// Decode header: Accept-Language.
+	if err := func() error {
+		cfg := uri.HeaderParameterDecodingConfig{
+			Name:    "Accept-Language",
+			Explode: false,
+		}
+		if err := h.HasParam(cfg); err == nil {
+			if err := h.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotAcceptLanguageVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotAcceptLanguageVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.AcceptLanguage.SetTo(paramsDotAcceptLanguageVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "Accept-Language",
+			In:   "header",
 			Err:  err,
 		}
 	}
@@ -3050,1119 +4189,6 @@ func decodeGetJettonsParams(args [0]string, argsEscaped bool, r *http.Request) (
 	return params, nil
 }
 
-// GetJettonsBalancesParams is parameters of getJettonsBalances operation.
-type GetJettonsBalancesParams struct {
-	// Account ID.
-	AccountID string
-}
-
-func unpackGetJettonsBalancesParams(packed middleware.Parameters) (params GetJettonsBalancesParams) {
-	{
-		key := middleware.ParameterKey{
-			Name: "account_id",
-			In:   "path",
-		}
-		params.AccountID = packed[key].(string)
-	}
-	return params
-}
-
-func decodeGetJettonsBalancesParams(args [1]string, argsEscaped bool, r *http.Request) (params GetJettonsBalancesParams, _ error) {
-	// Decode path: account_id.
-	if err := func() error {
-		param := args[0]
-		if argsEscaped {
-			unescaped, err := url.PathUnescape(args[0])
-			if err != nil {
-				return errors.Wrap(err, "unescape path")
-			}
-			param = unescaped
-		}
-		if len(param) > 0 {
-			d := uri.NewPathDecoder(uri.PathDecoderConfig{
-				Param:   "account_id",
-				Value:   param,
-				Style:   uri.PathStyleSimple,
-				Explode: false,
-			})
-
-			if err := func() error {
-				val, err := d.DecodeValue()
-				if err != nil {
-					return err
-				}
-
-				c, err := conv.ToString(val)
-				if err != nil {
-					return err
-				}
-
-				params.AccountID = c
-				return nil
-			}(); err != nil {
-				return err
-			}
-		} else {
-			return validate.ErrFieldRequired
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "account_id",
-			In:   "path",
-			Err:  err,
-		}
-	}
-	return params, nil
-}
-
-// GetJettonsHistoryParams is parameters of getJettonsHistory operation.
-type GetJettonsHistoryParams struct {
-	// Account ID.
-	AccountID      string
-	AcceptLanguage OptString
-	// Omit this parameter to get last events.
-	BeforeLt  OptInt64
-	Limit     int
-	StartDate OptInt64
-	EndDate   OptInt64
-}
-
-func unpackGetJettonsHistoryParams(packed middleware.Parameters) (params GetJettonsHistoryParams) {
-	{
-		key := middleware.ParameterKey{
-			Name: "account_id",
-			In:   "path",
-		}
-		params.AccountID = packed[key].(string)
-	}
-	{
-		key := middleware.ParameterKey{
-			Name: "Accept-Language",
-			In:   "header",
-		}
-		if v, ok := packed[key]; ok {
-			params.AcceptLanguage = v.(OptString)
-		}
-	}
-	{
-		key := middleware.ParameterKey{
-			Name: "before_lt",
-			In:   "query",
-		}
-		if v, ok := packed[key]; ok {
-			params.BeforeLt = v.(OptInt64)
-		}
-	}
-	{
-		key := middleware.ParameterKey{
-			Name: "limit",
-			In:   "query",
-		}
-		params.Limit = packed[key].(int)
-	}
-	{
-		key := middleware.ParameterKey{
-			Name: "start_date",
-			In:   "query",
-		}
-		if v, ok := packed[key]; ok {
-			params.StartDate = v.(OptInt64)
-		}
-	}
-	{
-		key := middleware.ParameterKey{
-			Name: "end_date",
-			In:   "query",
-		}
-		if v, ok := packed[key]; ok {
-			params.EndDate = v.(OptInt64)
-		}
-	}
-	return params
-}
-
-func decodeGetJettonsHistoryParams(args [1]string, argsEscaped bool, r *http.Request) (params GetJettonsHistoryParams, _ error) {
-	q := uri.NewQueryDecoder(r.URL.Query())
-	h := uri.NewHeaderDecoder(r.Header)
-	// Decode path: account_id.
-	if err := func() error {
-		param := args[0]
-		if argsEscaped {
-			unescaped, err := url.PathUnescape(args[0])
-			if err != nil {
-				return errors.Wrap(err, "unescape path")
-			}
-			param = unescaped
-		}
-		if len(param) > 0 {
-			d := uri.NewPathDecoder(uri.PathDecoderConfig{
-				Param:   "account_id",
-				Value:   param,
-				Style:   uri.PathStyleSimple,
-				Explode: false,
-			})
-
-			if err := func() error {
-				val, err := d.DecodeValue()
-				if err != nil {
-					return err
-				}
-
-				c, err := conv.ToString(val)
-				if err != nil {
-					return err
-				}
-
-				params.AccountID = c
-				return nil
-			}(); err != nil {
-				return err
-			}
-		} else {
-			return validate.ErrFieldRequired
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "account_id",
-			In:   "path",
-			Err:  err,
-		}
-	}
-	// Set default value for header: Accept-Language.
-	{
-		val := string("en")
-		params.AcceptLanguage.SetTo(val)
-	}
-	// Decode header: Accept-Language.
-	if err := func() error {
-		cfg := uri.HeaderParameterDecodingConfig{
-			Name:    "Accept-Language",
-			Explode: false,
-		}
-		if err := h.HasParam(cfg); err == nil {
-			if err := h.DecodeParam(cfg, func(d uri.Decoder) error {
-				var paramsDotAcceptLanguageVal string
-				if err := func() error {
-					val, err := d.DecodeValue()
-					if err != nil {
-						return err
-					}
-
-					c, err := conv.ToString(val)
-					if err != nil {
-						return err
-					}
-
-					paramsDotAcceptLanguageVal = c
-					return nil
-				}(); err != nil {
-					return err
-				}
-				params.AcceptLanguage.SetTo(paramsDotAcceptLanguageVal)
-				return nil
-			}); err != nil {
-				return err
-			}
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "Accept-Language",
-			In:   "header",
-			Err:  err,
-		}
-	}
-	// Decode query: before_lt.
-	if err := func() error {
-		cfg := uri.QueryParameterDecodingConfig{
-			Name:    "before_lt",
-			Style:   uri.QueryStyleForm,
-			Explode: true,
-		}
-
-		if err := q.HasParam(cfg); err == nil {
-			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
-				var paramsDotBeforeLtVal int64
-				if err := func() error {
-					val, err := d.DecodeValue()
-					if err != nil {
-						return err
-					}
-
-					c, err := conv.ToInt64(val)
-					if err != nil {
-						return err
-					}
-
-					paramsDotBeforeLtVal = c
-					return nil
-				}(); err != nil {
-					return err
-				}
-				params.BeforeLt.SetTo(paramsDotBeforeLtVal)
-				return nil
-			}); err != nil {
-				return err
-			}
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "before_lt",
-			In:   "query",
-			Err:  err,
-		}
-	}
-	// Decode query: limit.
-	if err := func() error {
-		cfg := uri.QueryParameterDecodingConfig{
-			Name:    "limit",
-			Style:   uri.QueryStyleForm,
-			Explode: true,
-		}
-
-		if err := q.HasParam(cfg); err == nil {
-			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
-				val, err := d.DecodeValue()
-				if err != nil {
-					return err
-				}
-
-				c, err := conv.ToInt(val)
-				if err != nil {
-					return err
-				}
-
-				params.Limit = c
-				return nil
-			}); err != nil {
-				return err
-			}
-			if err := func() error {
-				if err := (validate.Int{
-					MinSet:        false,
-					Min:           0,
-					MaxSet:        true,
-					Max:           1000,
-					MinExclusive:  false,
-					MaxExclusive:  false,
-					MultipleOfSet: false,
-					MultipleOf:    0,
-				}).Validate(int64(params.Limit)); err != nil {
-					return errors.Wrap(err, "int")
-				}
-				return nil
-			}(); err != nil {
-				return err
-			}
-		} else {
-			return validate.ErrFieldRequired
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "limit",
-			In:   "query",
-			Err:  err,
-		}
-	}
-	// Decode query: start_date.
-	if err := func() error {
-		cfg := uri.QueryParameterDecodingConfig{
-			Name:    "start_date",
-			Style:   uri.QueryStyleForm,
-			Explode: true,
-		}
-
-		if err := q.HasParam(cfg); err == nil {
-			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
-				var paramsDotStartDateVal int64
-				if err := func() error {
-					val, err := d.DecodeValue()
-					if err != nil {
-						return err
-					}
-
-					c, err := conv.ToInt64(val)
-					if err != nil {
-						return err
-					}
-
-					paramsDotStartDateVal = c
-					return nil
-				}(); err != nil {
-					return err
-				}
-				params.StartDate.SetTo(paramsDotStartDateVal)
-				return nil
-			}); err != nil {
-				return err
-			}
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "start_date",
-			In:   "query",
-			Err:  err,
-		}
-	}
-	// Decode query: end_date.
-	if err := func() error {
-		cfg := uri.QueryParameterDecodingConfig{
-			Name:    "end_date",
-			Style:   uri.QueryStyleForm,
-			Explode: true,
-		}
-
-		if err := q.HasParam(cfg); err == nil {
-			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
-				var paramsDotEndDateVal int64
-				if err := func() error {
-					val, err := d.DecodeValue()
-					if err != nil {
-						return err
-					}
-
-					c, err := conv.ToInt64(val)
-					if err != nil {
-						return err
-					}
-
-					paramsDotEndDateVal = c
-					return nil
-				}(); err != nil {
-					return err
-				}
-				params.EndDate.SetTo(paramsDotEndDateVal)
-				return nil
-			}); err != nil {
-				return err
-			}
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "end_date",
-			In:   "query",
-			Err:  err,
-		}
-	}
-	return params, nil
-}
-
-// GetJettonsHistoryByIDParams is parameters of getJettonsHistoryByID operation.
-type GetJettonsHistoryByIDParams struct {
-	// Account ID.
-	AccountID string
-	// Jetton ID.
-	JettonID       string
-	AcceptLanguage OptString
-	// Omit this parameter to get last events.
-	BeforeLt  OptInt64
-	Limit     int
-	StartDate OptInt64
-	EndDate   OptInt64
-}
-
-func unpackGetJettonsHistoryByIDParams(packed middleware.Parameters) (params GetJettonsHistoryByIDParams) {
-	{
-		key := middleware.ParameterKey{
-			Name: "account_id",
-			In:   "path",
-		}
-		params.AccountID = packed[key].(string)
-	}
-	{
-		key := middleware.ParameterKey{
-			Name: "jetton_id",
-			In:   "path",
-		}
-		params.JettonID = packed[key].(string)
-	}
-	{
-		key := middleware.ParameterKey{
-			Name: "Accept-Language",
-			In:   "header",
-		}
-		if v, ok := packed[key]; ok {
-			params.AcceptLanguage = v.(OptString)
-		}
-	}
-	{
-		key := middleware.ParameterKey{
-			Name: "before_lt",
-			In:   "query",
-		}
-		if v, ok := packed[key]; ok {
-			params.BeforeLt = v.(OptInt64)
-		}
-	}
-	{
-		key := middleware.ParameterKey{
-			Name: "limit",
-			In:   "query",
-		}
-		params.Limit = packed[key].(int)
-	}
-	{
-		key := middleware.ParameterKey{
-			Name: "start_date",
-			In:   "query",
-		}
-		if v, ok := packed[key]; ok {
-			params.StartDate = v.(OptInt64)
-		}
-	}
-	{
-		key := middleware.ParameterKey{
-			Name: "end_date",
-			In:   "query",
-		}
-		if v, ok := packed[key]; ok {
-			params.EndDate = v.(OptInt64)
-		}
-	}
-	return params
-}
-
-func decodeGetJettonsHistoryByIDParams(args [2]string, argsEscaped bool, r *http.Request) (params GetJettonsHistoryByIDParams, _ error) {
-	q := uri.NewQueryDecoder(r.URL.Query())
-	h := uri.NewHeaderDecoder(r.Header)
-	// Decode path: account_id.
-	if err := func() error {
-		param := args[0]
-		if argsEscaped {
-			unescaped, err := url.PathUnescape(args[0])
-			if err != nil {
-				return errors.Wrap(err, "unescape path")
-			}
-			param = unescaped
-		}
-		if len(param) > 0 {
-			d := uri.NewPathDecoder(uri.PathDecoderConfig{
-				Param:   "account_id",
-				Value:   param,
-				Style:   uri.PathStyleSimple,
-				Explode: false,
-			})
-
-			if err := func() error {
-				val, err := d.DecodeValue()
-				if err != nil {
-					return err
-				}
-
-				c, err := conv.ToString(val)
-				if err != nil {
-					return err
-				}
-
-				params.AccountID = c
-				return nil
-			}(); err != nil {
-				return err
-			}
-		} else {
-			return validate.ErrFieldRequired
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "account_id",
-			In:   "path",
-			Err:  err,
-		}
-	}
-	// Decode path: jetton_id.
-	if err := func() error {
-		param := args[1]
-		if argsEscaped {
-			unescaped, err := url.PathUnescape(args[1])
-			if err != nil {
-				return errors.Wrap(err, "unescape path")
-			}
-			param = unescaped
-		}
-		if len(param) > 0 {
-			d := uri.NewPathDecoder(uri.PathDecoderConfig{
-				Param:   "jetton_id",
-				Value:   param,
-				Style:   uri.PathStyleSimple,
-				Explode: false,
-			})
-
-			if err := func() error {
-				val, err := d.DecodeValue()
-				if err != nil {
-					return err
-				}
-
-				c, err := conv.ToString(val)
-				if err != nil {
-					return err
-				}
-
-				params.JettonID = c
-				return nil
-			}(); err != nil {
-				return err
-			}
-		} else {
-			return validate.ErrFieldRequired
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "jetton_id",
-			In:   "path",
-			Err:  err,
-		}
-	}
-	// Set default value for header: Accept-Language.
-	{
-		val := string("en")
-		params.AcceptLanguage.SetTo(val)
-	}
-	// Decode header: Accept-Language.
-	if err := func() error {
-		cfg := uri.HeaderParameterDecodingConfig{
-			Name:    "Accept-Language",
-			Explode: false,
-		}
-		if err := h.HasParam(cfg); err == nil {
-			if err := h.DecodeParam(cfg, func(d uri.Decoder) error {
-				var paramsDotAcceptLanguageVal string
-				if err := func() error {
-					val, err := d.DecodeValue()
-					if err != nil {
-						return err
-					}
-
-					c, err := conv.ToString(val)
-					if err != nil {
-						return err
-					}
-
-					paramsDotAcceptLanguageVal = c
-					return nil
-				}(); err != nil {
-					return err
-				}
-				params.AcceptLanguage.SetTo(paramsDotAcceptLanguageVal)
-				return nil
-			}); err != nil {
-				return err
-			}
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "Accept-Language",
-			In:   "header",
-			Err:  err,
-		}
-	}
-	// Decode query: before_lt.
-	if err := func() error {
-		cfg := uri.QueryParameterDecodingConfig{
-			Name:    "before_lt",
-			Style:   uri.QueryStyleForm,
-			Explode: true,
-		}
-
-		if err := q.HasParam(cfg); err == nil {
-			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
-				var paramsDotBeforeLtVal int64
-				if err := func() error {
-					val, err := d.DecodeValue()
-					if err != nil {
-						return err
-					}
-
-					c, err := conv.ToInt64(val)
-					if err != nil {
-						return err
-					}
-
-					paramsDotBeforeLtVal = c
-					return nil
-				}(); err != nil {
-					return err
-				}
-				params.BeforeLt.SetTo(paramsDotBeforeLtVal)
-				return nil
-			}); err != nil {
-				return err
-			}
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "before_lt",
-			In:   "query",
-			Err:  err,
-		}
-	}
-	// Decode query: limit.
-	if err := func() error {
-		cfg := uri.QueryParameterDecodingConfig{
-			Name:    "limit",
-			Style:   uri.QueryStyleForm,
-			Explode: true,
-		}
-
-		if err := q.HasParam(cfg); err == nil {
-			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
-				val, err := d.DecodeValue()
-				if err != nil {
-					return err
-				}
-
-				c, err := conv.ToInt(val)
-				if err != nil {
-					return err
-				}
-
-				params.Limit = c
-				return nil
-			}); err != nil {
-				return err
-			}
-			if err := func() error {
-				if err := (validate.Int{
-					MinSet:        false,
-					Min:           0,
-					MaxSet:        true,
-					Max:           1000,
-					MinExclusive:  false,
-					MaxExclusive:  false,
-					MultipleOfSet: false,
-					MultipleOf:    0,
-				}).Validate(int64(params.Limit)); err != nil {
-					return errors.Wrap(err, "int")
-				}
-				return nil
-			}(); err != nil {
-				return err
-			}
-		} else {
-			return validate.ErrFieldRequired
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "limit",
-			In:   "query",
-			Err:  err,
-		}
-	}
-	// Decode query: start_date.
-	if err := func() error {
-		cfg := uri.QueryParameterDecodingConfig{
-			Name:    "start_date",
-			Style:   uri.QueryStyleForm,
-			Explode: true,
-		}
-
-		if err := q.HasParam(cfg); err == nil {
-			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
-				var paramsDotStartDateVal int64
-				if err := func() error {
-					val, err := d.DecodeValue()
-					if err != nil {
-						return err
-					}
-
-					c, err := conv.ToInt64(val)
-					if err != nil {
-						return err
-					}
-
-					paramsDotStartDateVal = c
-					return nil
-				}(); err != nil {
-					return err
-				}
-				params.StartDate.SetTo(paramsDotStartDateVal)
-				return nil
-			}); err != nil {
-				return err
-			}
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "start_date",
-			In:   "query",
-			Err:  err,
-		}
-	}
-	// Decode query: end_date.
-	if err := func() error {
-		cfg := uri.QueryParameterDecodingConfig{
-			Name:    "end_date",
-			Style:   uri.QueryStyleForm,
-			Explode: true,
-		}
-
-		if err := q.HasParam(cfg); err == nil {
-			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
-				var paramsDotEndDateVal int64
-				if err := func() error {
-					val, err := d.DecodeValue()
-					if err != nil {
-						return err
-					}
-
-					c, err := conv.ToInt64(val)
-					if err != nil {
-						return err
-					}
-
-					paramsDotEndDateVal = c
-					return nil
-				}(); err != nil {
-					return err
-				}
-				params.EndDate.SetTo(paramsDotEndDateVal)
-				return nil
-			}); err != nil {
-				return err
-			}
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "end_date",
-			In:   "query",
-			Err:  err,
-		}
-	}
-	return params, nil
-}
-
-// GetListBlockTransactionsLiteServerParams is parameters of getListBlockTransactionsLiteServer operation.
-type GetListBlockTransactionsLiteServerParams struct {
-	// Block ID: (workchain,shard,seqno,root_hash,file_hash).
-	BlockID string
-	// Mode.
-	Mode uint32
-	// Count.
-	Count uint32
-	// Account ID.
-	AccountID OptString
-	// Lt.
-	Lt OptUint64
-}
-
-func unpackGetListBlockTransactionsLiteServerParams(packed middleware.Parameters) (params GetListBlockTransactionsLiteServerParams) {
-	{
-		key := middleware.ParameterKey{
-			Name: "block_id",
-			In:   "path",
-		}
-		params.BlockID = packed[key].(string)
-	}
-	{
-		key := middleware.ParameterKey{
-			Name: "mode",
-			In:   "query",
-		}
-		params.Mode = packed[key].(uint32)
-	}
-	{
-		key := middleware.ParameterKey{
-			Name: "count",
-			In:   "query",
-		}
-		params.Count = packed[key].(uint32)
-	}
-	{
-		key := middleware.ParameterKey{
-			Name: "account_id",
-			In:   "query",
-		}
-		if v, ok := packed[key]; ok {
-			params.AccountID = v.(OptString)
-		}
-	}
-	{
-		key := middleware.ParameterKey{
-			Name: "lt",
-			In:   "query",
-		}
-		if v, ok := packed[key]; ok {
-			params.Lt = v.(OptUint64)
-		}
-	}
-	return params
-}
-
-func decodeGetListBlockTransactionsLiteServerParams(args [1]string, argsEscaped bool, r *http.Request) (params GetListBlockTransactionsLiteServerParams, _ error) {
-	q := uri.NewQueryDecoder(r.URL.Query())
-	// Decode path: block_id.
-	if err := func() error {
-		param := args[0]
-		if argsEscaped {
-			unescaped, err := url.PathUnescape(args[0])
-			if err != nil {
-				return errors.Wrap(err, "unescape path")
-			}
-			param = unescaped
-		}
-		if len(param) > 0 {
-			d := uri.NewPathDecoder(uri.PathDecoderConfig{
-				Param:   "block_id",
-				Value:   param,
-				Style:   uri.PathStyleSimple,
-				Explode: false,
-			})
-
-			if err := func() error {
-				val, err := d.DecodeValue()
-				if err != nil {
-					return err
-				}
-
-				c, err := conv.ToString(val)
-				if err != nil {
-					return err
-				}
-
-				params.BlockID = c
-				return nil
-			}(); err != nil {
-				return err
-			}
-		} else {
-			return validate.ErrFieldRequired
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "block_id",
-			In:   "path",
-			Err:  err,
-		}
-	}
-	// Decode query: mode.
-	if err := func() error {
-		cfg := uri.QueryParameterDecodingConfig{
-			Name:    "mode",
-			Style:   uri.QueryStyleForm,
-			Explode: true,
-		}
-
-		if err := q.HasParam(cfg); err == nil {
-			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
-				val, err := d.DecodeValue()
-				if err != nil {
-					return err
-				}
-
-				c, err := conv.ToUint32(val)
-				if err != nil {
-					return err
-				}
-
-				params.Mode = c
-				return nil
-			}); err != nil {
-				return err
-			}
-		} else {
-			return validate.ErrFieldRequired
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "mode",
-			In:   "query",
-			Err:  err,
-		}
-	}
-	// Decode query: count.
-	if err := func() error {
-		cfg := uri.QueryParameterDecodingConfig{
-			Name:    "count",
-			Style:   uri.QueryStyleForm,
-			Explode: true,
-		}
-
-		if err := q.HasParam(cfg); err == nil {
-			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
-				val, err := d.DecodeValue()
-				if err != nil {
-					return err
-				}
-
-				c, err := conv.ToUint32(val)
-				if err != nil {
-					return err
-				}
-
-				params.Count = c
-				return nil
-			}); err != nil {
-				return err
-			}
-		} else {
-			return validate.ErrFieldRequired
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "count",
-			In:   "query",
-			Err:  err,
-		}
-	}
-	// Decode query: account_id.
-	if err := func() error {
-		cfg := uri.QueryParameterDecodingConfig{
-			Name:    "account_id",
-			Style:   uri.QueryStyleForm,
-			Explode: false,
-		}
-
-		if err := q.HasParam(cfg); err == nil {
-			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
-				var paramsDotAccountIDVal string
-				if err := func() error {
-					val, err := d.DecodeValue()
-					if err != nil {
-						return err
-					}
-
-					c, err := conv.ToString(val)
-					if err != nil {
-						return err
-					}
-
-					paramsDotAccountIDVal = c
-					return nil
-				}(); err != nil {
-					return err
-				}
-				params.AccountID.SetTo(paramsDotAccountIDVal)
-				return nil
-			}); err != nil {
-				return err
-			}
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "account_id",
-			In:   "query",
-			Err:  err,
-		}
-	}
-	// Decode query: lt.
-	if err := func() error {
-		cfg := uri.QueryParameterDecodingConfig{
-			Name:    "lt",
-			Style:   uri.QueryStyleForm,
-			Explode: true,
-		}
-
-		if err := q.HasParam(cfg); err == nil {
-			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
-				var paramsDotLtVal uint64
-				if err := func() error {
-					val, err := d.DecodeValue()
-					if err != nil {
-						return err
-					}
-
-					c, err := conv.ToUint64(val)
-					if err != nil {
-						return err
-					}
-
-					paramsDotLtVal = c
-					return nil
-				}(); err != nil {
-					return err
-				}
-				params.Lt.SetTo(paramsDotLtVal)
-				return nil
-			}); err != nil {
-				return err
-			}
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "lt",
-			In:   "query",
-			Err:  err,
-		}
-	}
-	return params, nil
-}
-
-// GetMasterchainInfoExtLiteServerParams is parameters of getMasterchainInfoExtLiteServer operation.
-type GetMasterchainInfoExtLiteServerParams struct {
-	// Mode.
-	Mode uint32
-}
-
-func unpackGetMasterchainInfoExtLiteServerParams(packed middleware.Parameters) (params GetMasterchainInfoExtLiteServerParams) {
-	{
-		key := middleware.ParameterKey{
-			Name: "mode",
-			In:   "query",
-		}
-		params.Mode = packed[key].(uint32)
-	}
-	return params
-}
-
-func decodeGetMasterchainInfoExtLiteServerParams(args [0]string, argsEscaped bool, r *http.Request) (params GetMasterchainInfoExtLiteServerParams, _ error) {
-	q := uri.NewQueryDecoder(r.URL.Query())
-	// Decode query: mode.
-	if err := func() error {
-		cfg := uri.QueryParameterDecodingConfig{
-			Name:    "mode",
-			Style:   uri.QueryStyleForm,
-			Explode: true,
-		}
-
-		if err := q.HasParam(cfg); err == nil {
-			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
-				val, err := d.DecodeValue()
-				if err != nil {
-					return err
-				}
-
-				c, err := conv.ToUint32(val)
-				if err != nil {
-					return err
-				}
-
-				params.Mode = c
-				return nil
-			}); err != nil {
-				return err
-			}
-		} else {
-			return validate.ErrFieldRequired
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "mode",
-			In:   "query",
-			Err:  err,
-		}
-	}
-	return params, nil
-}
-
 // GetNftCollectionParams is parameters of getNftCollection operation.
 type GetNftCollectionParams struct {
 	// Account ID.
@@ -4444,385 +4470,6 @@ func decodeGetNftItemByAddressParams(args [1]string, argsEscaped bool, r *http.R
 	return params, nil
 }
 
-// GetNftItemsByOwnerParams is parameters of getNftItemsByOwner operation.
-type GetNftItemsByOwnerParams struct {
-	// Account ID.
-	AccountID string
-	// Nft collection.
-	Collection OptString
-	Limit      OptInt
-	Offset     OptInt
-	// Selling nft items in ton implemented usually via transfer items to special selling account. This
-	// option enables including items which owned not directly.
-	IndirectOwnership OptBool
-}
-
-func unpackGetNftItemsByOwnerParams(packed middleware.Parameters) (params GetNftItemsByOwnerParams) {
-	{
-		key := middleware.ParameterKey{
-			Name: "account_id",
-			In:   "path",
-		}
-		params.AccountID = packed[key].(string)
-	}
-	{
-		key := middleware.ParameterKey{
-			Name: "collection",
-			In:   "query",
-		}
-		if v, ok := packed[key]; ok {
-			params.Collection = v.(OptString)
-		}
-	}
-	{
-		key := middleware.ParameterKey{
-			Name: "limit",
-			In:   "query",
-		}
-		if v, ok := packed[key]; ok {
-			params.Limit = v.(OptInt)
-		}
-	}
-	{
-		key := middleware.ParameterKey{
-			Name: "offset",
-			In:   "query",
-		}
-		if v, ok := packed[key]; ok {
-			params.Offset = v.(OptInt)
-		}
-	}
-	{
-		key := middleware.ParameterKey{
-			Name: "indirect_ownership",
-			In:   "query",
-		}
-		if v, ok := packed[key]; ok {
-			params.IndirectOwnership = v.(OptBool)
-		}
-	}
-	return params
-}
-
-func decodeGetNftItemsByOwnerParams(args [1]string, argsEscaped bool, r *http.Request) (params GetNftItemsByOwnerParams, _ error) {
-	q := uri.NewQueryDecoder(r.URL.Query())
-	// Decode path: account_id.
-	if err := func() error {
-		param := args[0]
-		if argsEscaped {
-			unescaped, err := url.PathUnescape(args[0])
-			if err != nil {
-				return errors.Wrap(err, "unescape path")
-			}
-			param = unescaped
-		}
-		if len(param) > 0 {
-			d := uri.NewPathDecoder(uri.PathDecoderConfig{
-				Param:   "account_id",
-				Value:   param,
-				Style:   uri.PathStyleSimple,
-				Explode: false,
-			})
-
-			if err := func() error {
-				val, err := d.DecodeValue()
-				if err != nil {
-					return err
-				}
-
-				c, err := conv.ToString(val)
-				if err != nil {
-					return err
-				}
-
-				params.AccountID = c
-				return nil
-			}(); err != nil {
-				return err
-			}
-		} else {
-			return validate.ErrFieldRequired
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "account_id",
-			In:   "path",
-			Err:  err,
-		}
-	}
-	// Decode query: collection.
-	if err := func() error {
-		cfg := uri.QueryParameterDecodingConfig{
-			Name:    "collection",
-			Style:   uri.QueryStyleForm,
-			Explode: true,
-		}
-
-		if err := q.HasParam(cfg); err == nil {
-			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
-				var paramsDotCollectionVal string
-				if err := func() error {
-					val, err := d.DecodeValue()
-					if err != nil {
-						return err
-					}
-
-					c, err := conv.ToString(val)
-					if err != nil {
-						return err
-					}
-
-					paramsDotCollectionVal = c
-					return nil
-				}(); err != nil {
-					return err
-				}
-				params.Collection.SetTo(paramsDotCollectionVal)
-				return nil
-			}); err != nil {
-				return err
-			}
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "collection",
-			In:   "query",
-			Err:  err,
-		}
-	}
-	// Set default value for query: limit.
-	{
-		val := int(1000)
-		params.Limit.SetTo(val)
-	}
-	// Decode query: limit.
-	if err := func() error {
-		cfg := uri.QueryParameterDecodingConfig{
-			Name:    "limit",
-			Style:   uri.QueryStyleForm,
-			Explode: true,
-		}
-
-		if err := q.HasParam(cfg); err == nil {
-			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
-				var paramsDotLimitVal int
-				if err := func() error {
-					val, err := d.DecodeValue()
-					if err != nil {
-						return err
-					}
-
-					c, err := conv.ToInt(val)
-					if err != nil {
-						return err
-					}
-
-					paramsDotLimitVal = c
-					return nil
-				}(); err != nil {
-					return err
-				}
-				params.Limit.SetTo(paramsDotLimitVal)
-				return nil
-			}); err != nil {
-				return err
-			}
-			if err := func() error {
-				if value, ok := params.Limit.Get(); ok {
-					if err := func() error {
-						if err := (validate.Int{
-							MinSet:        false,
-							Min:           0,
-							MaxSet:        true,
-							Max:           1000,
-							MinExclusive:  false,
-							MaxExclusive:  false,
-							MultipleOfSet: false,
-							MultipleOf:    0,
-						}).Validate(int64(value)); err != nil {
-							return errors.Wrap(err, "int")
-						}
-						return nil
-					}(); err != nil {
-						return err
-					}
-				}
-				return nil
-			}(); err != nil {
-				return err
-			}
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "limit",
-			In:   "query",
-			Err:  err,
-		}
-	}
-	// Set default value for query: offset.
-	{
-		val := int(0)
-		params.Offset.SetTo(val)
-	}
-	// Decode query: offset.
-	if err := func() error {
-		cfg := uri.QueryParameterDecodingConfig{
-			Name:    "offset",
-			Style:   uri.QueryStyleForm,
-			Explode: true,
-		}
-
-		if err := q.HasParam(cfg); err == nil {
-			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
-				var paramsDotOffsetVal int
-				if err := func() error {
-					val, err := d.DecodeValue()
-					if err != nil {
-						return err
-					}
-
-					c, err := conv.ToInt(val)
-					if err != nil {
-						return err
-					}
-
-					paramsDotOffsetVal = c
-					return nil
-				}(); err != nil {
-					return err
-				}
-				params.Offset.SetTo(paramsDotOffsetVal)
-				return nil
-			}); err != nil {
-				return err
-			}
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "offset",
-			In:   "query",
-			Err:  err,
-		}
-	}
-	// Set default value for query: indirect_ownership.
-	{
-		val := bool(false)
-		params.IndirectOwnership.SetTo(val)
-	}
-	// Decode query: indirect_ownership.
-	if err := func() error {
-		cfg := uri.QueryParameterDecodingConfig{
-			Name:    "indirect_ownership",
-			Style:   uri.QueryStyleForm,
-			Explode: true,
-		}
-
-		if err := q.HasParam(cfg); err == nil {
-			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
-				var paramsDotIndirectOwnershipVal bool
-				if err := func() error {
-					val, err := d.DecodeValue()
-					if err != nil {
-						return err
-					}
-
-					c, err := conv.ToBool(val)
-					if err != nil {
-						return err
-					}
-
-					paramsDotIndirectOwnershipVal = c
-					return nil
-				}(); err != nil {
-					return err
-				}
-				params.IndirectOwnership.SetTo(paramsDotIndirectOwnershipVal)
-				return nil
-			}); err != nil {
-				return err
-			}
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "indirect_ownership",
-			In:   "query",
-			Err:  err,
-		}
-	}
-	return params, nil
-}
-
-// GetPublicKeyByAccountIDParams is parameters of getPublicKeyByAccountID operation.
-type GetPublicKeyByAccountIDParams struct {
-	// Account ID.
-	AccountID string
-}
-
-func unpackGetPublicKeyByAccountIDParams(packed middleware.Parameters) (params GetPublicKeyByAccountIDParams) {
-	{
-		key := middleware.ParameterKey{
-			Name: "account_id",
-			In:   "path",
-		}
-		params.AccountID = packed[key].(string)
-	}
-	return params
-}
-
-func decodeGetPublicKeyByAccountIDParams(args [1]string, argsEscaped bool, r *http.Request) (params GetPublicKeyByAccountIDParams, _ error) {
-	// Decode path: account_id.
-	if err := func() error {
-		param := args[0]
-		if argsEscaped {
-			unescaped, err := url.PathUnescape(args[0])
-			if err != nil {
-				return errors.Wrap(err, "unescape path")
-			}
-			param = unescaped
-		}
-		if len(param) > 0 {
-			d := uri.NewPathDecoder(uri.PathDecoderConfig{
-				Param:   "account_id",
-				Value:   param,
-				Style:   uri.PathStyleSimple,
-				Explode: false,
-			})
-
-			if err := func() error {
-				val, err := d.DecodeValue()
-				if err != nil {
-					return err
-				}
-
-				c, err := conv.ToString(val)
-				if err != nil {
-					return err
-				}
-
-				params.AccountID = c
-				return nil
-			}(); err != nil {
-				return err
-			}
-		} else {
-			return validate.ErrFieldRequired
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "account_id",
-			In:   "path",
-			Err:  err,
-		}
-	}
-	return params, nil
-}
-
 // GetRatesParams is parameters of getRates operation.
 type GetRatesParams struct {
 	// Accept ton and jetton master addresses, separated by commas.
@@ -4926,13 +4573,13 @@ func decodeGetRatesParams(args [0]string, argsEscaped bool, r *http.Request) (pa
 	return params, nil
 }
 
-// GetRawAccountParams is parameters of getRawAccount operation.
-type GetRawAccountParams struct {
+// GetRawAccountStateParams is parameters of getRawAccountState operation.
+type GetRawAccountStateParams struct {
 	// Account ID.
 	AccountID string
 }
 
-func unpackGetRawAccountParams(packed middleware.Parameters) (params GetRawAccountParams) {
+func unpackGetRawAccountStateParams(packed middleware.Parameters) (params GetRawAccountStateParams) {
 	{
 		key := middleware.ParameterKey{
 			Name: "account_id",
@@ -4943,7 +4590,7 @@ func unpackGetRawAccountParams(packed middleware.Parameters) (params GetRawAccou
 	return params
 }
 
-func decodeGetRawAccountParams(args [1]string, argsEscaped bool, r *http.Request) (params GetRawAccountParams, _ error) {
+func decodeGetRawAccountStateParams(args [1]string, argsEscaped bool, r *http.Request) (params GetRawAccountStateParams, _ error) {
 	// Decode path: account_id.
 	if err := func() error {
 		param := args[0]
@@ -4992,28 +4639,49 @@ func decodeGetRawAccountParams(args [1]string, argsEscaped bool, r *http.Request
 	return params, nil
 }
 
-// GetSearchAccountsParams is parameters of getSearchAccounts operation.
-type GetSearchAccountsParams struct {
-	Name string
+// GetRawBlockProofParams is parameters of getRawBlockProof operation.
+type GetRawBlockProofParams struct {
+	// Known block: (workchain,shard,seqno,root_hash,file_hash).
+	KnownBlock string
+	// Target block: (workchain,shard,seqno,root_hash,file_hash).
+	TargetBlock OptString
+	// Mode.
+	Mode uint32
 }
 
-func unpackGetSearchAccountsParams(packed middleware.Parameters) (params GetSearchAccountsParams) {
+func unpackGetRawBlockProofParams(packed middleware.Parameters) (params GetRawBlockProofParams) {
 	{
 		key := middleware.ParameterKey{
-			Name: "name",
+			Name: "known_block",
 			In:   "query",
 		}
-		params.Name = packed[key].(string)
+		params.KnownBlock = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "target_block",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.TargetBlock = v.(OptString)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "mode",
+			In:   "query",
+		}
+		params.Mode = packed[key].(uint32)
 	}
 	return params
 }
 
-func decodeGetSearchAccountsParams(args [0]string, argsEscaped bool, r *http.Request) (params GetSearchAccountsParams, _ error) {
+func decodeGetRawBlockProofParams(args [0]string, argsEscaped bool, r *http.Request) (params GetRawBlockProofParams, _ error) {
 	q := uri.NewQueryDecoder(r.URL.Query())
-	// Decode query: name.
+	// Decode query: known_block.
 	if err := func() error {
 		cfg := uri.QueryParameterDecodingConfig{
-			Name:    "name",
+			Name:    "known_block",
 			Style:   uri.QueryStyleForm,
 			Explode: true,
 		}
@@ -5030,25 +4698,9 @@ func decodeGetSearchAccountsParams(args [0]string, argsEscaped bool, r *http.Req
 					return err
 				}
 
-				params.Name = c
+				params.KnownBlock = c
 				return nil
 			}); err != nil {
-				return err
-			}
-			if err := func() error {
-				if err := (validate.String{
-					MinLength:    3,
-					MinLengthSet: true,
-					MaxLength:    15,
-					MaxLengthSet: true,
-					Email:        false,
-					Hostname:     false,
-					Regex:        nil,
-				}).Validate(string(params.Name)); err != nil {
-					return errors.Wrap(err, "string")
-				}
-				return nil
-			}(); err != nil {
 				return err
 			}
 		} else {
@@ -5057,7 +4709,84 @@ func decodeGetSearchAccountsParams(args [0]string, argsEscaped bool, r *http.Req
 		return nil
 	}(); err != nil {
 		return params, &ogenerrors.DecodeParamError{
-			Name: "name",
+			Name: "known_block",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Decode query: target_block.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "target_block",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotTargetBlockVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotTargetBlockVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.TargetBlock.SetTo(paramsDotTargetBlockVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "target_block",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Decode query: mode.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "mode",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToUint32(val)
+				if err != nil {
+					return err
+				}
+
+				params.Mode = c
+				return nil
+			}); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "mode",
 			In:   "query",
 			Err:  err,
 		}
@@ -5065,13 +4794,13 @@ func decodeGetSearchAccountsParams(args [0]string, argsEscaped bool, r *http.Req
 	return params, nil
 }
 
-// GetShardBlockProofLiteServerParams is parameters of getShardBlockProofLiteServer operation.
-type GetShardBlockProofLiteServerParams struct {
+// GetRawBlockchainBlockParams is parameters of getRawBlockchainBlock operation.
+type GetRawBlockchainBlockParams struct {
 	// Block ID: (workchain,shard,seqno,root_hash,file_hash).
 	BlockID string
 }
 
-func unpackGetShardBlockProofLiteServerParams(packed middleware.Parameters) (params GetShardBlockProofLiteServerParams) {
+func unpackGetRawBlockchainBlockParams(packed middleware.Parameters) (params GetRawBlockchainBlockParams) {
 	{
 		key := middleware.ParameterKey{
 			Name: "block_id",
@@ -5082,7 +4811,7 @@ func unpackGetShardBlockProofLiteServerParams(packed middleware.Parameters) (par
 	return params
 }
 
-func decodeGetShardBlockProofLiteServerParams(args [1]string, argsEscaped bool, r *http.Request) (params GetShardBlockProofLiteServerParams, _ error) {
+func decodeGetRawBlockchainBlockParams(args [1]string, argsEscaped bool, r *http.Request) (params GetRawBlockchainBlockParams, _ error) {
 	// Decode path: block_id.
 	if err := func() error {
 		param := args[0]
@@ -5131,8 +4860,683 @@ func decodeGetShardBlockProofLiteServerParams(args [1]string, argsEscaped bool, 
 	return params, nil
 }
 
-// GetShardInfoLiteServerParams is parameters of getShardInfoLiteServer operation.
-type GetShardInfoLiteServerParams struct {
+// GetRawBlockchainBlockHeaderParams is parameters of getRawBlockchainBlockHeader operation.
+type GetRawBlockchainBlockHeaderParams struct {
+	// Block ID: (workchain,shard,seqno,root_hash,file_hash).
+	BlockID string
+	// Mode.
+	Mode uint32
+}
+
+func unpackGetRawBlockchainBlockHeaderParams(packed middleware.Parameters) (params GetRawBlockchainBlockHeaderParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "block_id",
+			In:   "path",
+		}
+		params.BlockID = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "mode",
+			In:   "query",
+		}
+		params.Mode = packed[key].(uint32)
+	}
+	return params
+}
+
+func decodeGetRawBlockchainBlockHeaderParams(args [1]string, argsEscaped bool, r *http.Request) (params GetRawBlockchainBlockHeaderParams, _ error) {
+	q := uri.NewQueryDecoder(r.URL.Query())
+	// Decode path: block_id.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "block_id",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.BlockID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "block_id",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode query: mode.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "mode",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToUint32(val)
+				if err != nil {
+					return err
+				}
+
+				params.Mode = c
+				return nil
+			}); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "mode",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// GetRawBlockchainBlockStateParams is parameters of getRawBlockchainBlockState operation.
+type GetRawBlockchainBlockStateParams struct {
+	// Block ID: (workchain,shard,seqno,root_hash,file_hash).
+	BlockID string
+}
+
+func unpackGetRawBlockchainBlockStateParams(packed middleware.Parameters) (params GetRawBlockchainBlockStateParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "block_id",
+			In:   "path",
+		}
+		params.BlockID = packed[key].(string)
+	}
+	return params
+}
+
+func decodeGetRawBlockchainBlockStateParams(args [1]string, argsEscaped bool, r *http.Request) (params GetRawBlockchainBlockStateParams, _ error) {
+	// Decode path: block_id.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "block_id",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.BlockID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "block_id",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// GetRawConfigParams is parameters of getRawConfig operation.
+type GetRawConfigParams struct {
+	// Block ID: (workchain,shard,seqno,root_hash,file_hash).
+	BlockID string
+	// Mode.
+	Mode uint32
+}
+
+func unpackGetRawConfigParams(packed middleware.Parameters) (params GetRawConfigParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "block_id",
+			In:   "path",
+		}
+		params.BlockID = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "mode",
+			In:   "query",
+		}
+		params.Mode = packed[key].(uint32)
+	}
+	return params
+}
+
+func decodeGetRawConfigParams(args [1]string, argsEscaped bool, r *http.Request) (params GetRawConfigParams, _ error) {
+	q := uri.NewQueryDecoder(r.URL.Query())
+	// Decode path: block_id.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "block_id",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.BlockID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "block_id",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode query: mode.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "mode",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToUint32(val)
+				if err != nil {
+					return err
+				}
+
+				params.Mode = c
+				return nil
+			}); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "mode",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// GetRawListBlockTransactionsParams is parameters of getRawListBlockTransactions operation.
+type GetRawListBlockTransactionsParams struct {
+	// Block ID: (workchain,shard,seqno,root_hash,file_hash).
+	BlockID string
+	// Mode.
+	Mode uint32
+	// Count.
+	Count uint32
+	// Account ID.
+	AccountID OptString
+	// Lt.
+	Lt OptUint64
+}
+
+func unpackGetRawListBlockTransactionsParams(packed middleware.Parameters) (params GetRawListBlockTransactionsParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "block_id",
+			In:   "path",
+		}
+		params.BlockID = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "mode",
+			In:   "query",
+		}
+		params.Mode = packed[key].(uint32)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "count",
+			In:   "query",
+		}
+		params.Count = packed[key].(uint32)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "account_id",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.AccountID = v.(OptString)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "lt",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.Lt = v.(OptUint64)
+		}
+	}
+	return params
+}
+
+func decodeGetRawListBlockTransactionsParams(args [1]string, argsEscaped bool, r *http.Request) (params GetRawListBlockTransactionsParams, _ error) {
+	q := uri.NewQueryDecoder(r.URL.Query())
+	// Decode path: block_id.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "block_id",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.BlockID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "block_id",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode query: mode.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "mode",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToUint32(val)
+				if err != nil {
+					return err
+				}
+
+				params.Mode = c
+				return nil
+			}); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "mode",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Decode query: count.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "count",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToUint32(val)
+				if err != nil {
+					return err
+				}
+
+				params.Count = c
+				return nil
+			}); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "count",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Decode query: account_id.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "account_id",
+			Style:   uri.QueryStyleForm,
+			Explode: false,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotAccountIDVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotAccountIDVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.AccountID.SetTo(paramsDotAccountIDVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account_id",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Decode query: lt.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "lt",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotLtVal uint64
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToUint64(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotLtVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.Lt.SetTo(paramsDotLtVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "lt",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// GetRawMasterchainInfoExtParams is parameters of getRawMasterchainInfoExt operation.
+type GetRawMasterchainInfoExtParams struct {
+	// Mode.
+	Mode uint32
+}
+
+func unpackGetRawMasterchainInfoExtParams(packed middleware.Parameters) (params GetRawMasterchainInfoExtParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "mode",
+			In:   "query",
+		}
+		params.Mode = packed[key].(uint32)
+	}
+	return params
+}
+
+func decodeGetRawMasterchainInfoExtParams(args [0]string, argsEscaped bool, r *http.Request) (params GetRawMasterchainInfoExtParams, _ error) {
+	q := uri.NewQueryDecoder(r.URL.Query())
+	// Decode query: mode.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "mode",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToUint32(val)
+				if err != nil {
+					return err
+				}
+
+				params.Mode = c
+				return nil
+			}); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "mode",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// GetRawShardBlockProofParams is parameters of getRawShardBlockProof operation.
+type GetRawShardBlockProofParams struct {
+	// Block ID: (workchain,shard,seqno,root_hash,file_hash).
+	BlockID string
+}
+
+func unpackGetRawShardBlockProofParams(packed middleware.Parameters) (params GetRawShardBlockProofParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "block_id",
+			In:   "path",
+		}
+		params.BlockID = packed[key].(string)
+	}
+	return params
+}
+
+func decodeGetRawShardBlockProofParams(args [1]string, argsEscaped bool, r *http.Request) (params GetRawShardBlockProofParams, _ error) {
+	// Decode path: block_id.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "block_id",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.BlockID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "block_id",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// GetRawShardInfoParams is parameters of getRawShardInfo operation.
+type GetRawShardInfoParams struct {
 	// Block ID: (workchain,shard,seqno,root_hash,file_hash).
 	BlockID string
 	// Workchain.
@@ -5143,7 +5547,7 @@ type GetShardInfoLiteServerParams struct {
 	Exact bool
 }
 
-func unpackGetShardInfoLiteServerParams(packed middleware.Parameters) (params GetShardInfoLiteServerParams) {
+func unpackGetRawShardInfoParams(packed middleware.Parameters) (params GetRawShardInfoParams) {
 	{
 		key := middleware.ParameterKey{
 			Name: "block_id",
@@ -5175,7 +5579,7 @@ func unpackGetShardInfoLiteServerParams(packed middleware.Parameters) (params Ge
 	return params
 }
 
-func decodeGetShardInfoLiteServerParams(args [1]string, argsEscaped bool, r *http.Request) (params GetShardInfoLiteServerParams, _ error) {
+func decodeGetRawShardInfoParams(args [1]string, argsEscaped bool, r *http.Request) (params GetRawShardInfoParams, _ error) {
 	q := uri.NewQueryDecoder(r.URL.Query())
 	// Decode path: block_id.
 	if err := func() error {
@@ -5333,485 +5737,8 @@ func decodeGetShardInfoLiteServerParams(args [1]string, argsEscaped bool, r *htt
 	return params, nil
 }
 
-// GetStateLiteServerParams is parameters of getStateLiteServer operation.
-type GetStateLiteServerParams struct {
-	// Block ID: (workchain,shard,seqno,root_hash,file_hash).
-	BlockID string
-}
-
-func unpackGetStateLiteServerParams(packed middleware.Parameters) (params GetStateLiteServerParams) {
-	{
-		key := middleware.ParameterKey{
-			Name: "block_id",
-			In:   "path",
-		}
-		params.BlockID = packed[key].(string)
-	}
-	return params
-}
-
-func decodeGetStateLiteServerParams(args [1]string, argsEscaped bool, r *http.Request) (params GetStateLiteServerParams, _ error) {
-	// Decode path: block_id.
-	if err := func() error {
-		param := args[0]
-		if argsEscaped {
-			unescaped, err := url.PathUnescape(args[0])
-			if err != nil {
-				return errors.Wrap(err, "unescape path")
-			}
-			param = unescaped
-		}
-		if len(param) > 0 {
-			d := uri.NewPathDecoder(uri.PathDecoderConfig{
-				Param:   "block_id",
-				Value:   param,
-				Style:   uri.PathStyleSimple,
-				Explode: false,
-			})
-
-			if err := func() error {
-				val, err := d.DecodeValue()
-				if err != nil {
-					return err
-				}
-
-				c, err := conv.ToString(val)
-				if err != nil {
-					return err
-				}
-
-				params.BlockID = c
-				return nil
-			}(); err != nil {
-				return err
-			}
-		} else {
-			return validate.ErrFieldRequired
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "block_id",
-			In:   "path",
-			Err:  err,
-		}
-	}
-	return params, nil
-}
-
-// GetSubscriptionsByAccountParams is parameters of getSubscriptionsByAccount operation.
-type GetSubscriptionsByAccountParams struct {
-	// Account ID.
-	AccountID string
-}
-
-func unpackGetSubscriptionsByAccountParams(packed middleware.Parameters) (params GetSubscriptionsByAccountParams) {
-	{
-		key := middleware.ParameterKey{
-			Name: "account_id",
-			In:   "path",
-		}
-		params.AccountID = packed[key].(string)
-	}
-	return params
-}
-
-func decodeGetSubscriptionsByAccountParams(args [1]string, argsEscaped bool, r *http.Request) (params GetSubscriptionsByAccountParams, _ error) {
-	// Decode path: account_id.
-	if err := func() error {
-		param := args[0]
-		if argsEscaped {
-			unescaped, err := url.PathUnescape(args[0])
-			if err != nil {
-				return errors.Wrap(err, "unescape path")
-			}
-			param = unescaped
-		}
-		if len(param) > 0 {
-			d := uri.NewPathDecoder(uri.PathDecoderConfig{
-				Param:   "account_id",
-				Value:   param,
-				Style:   uri.PathStyleSimple,
-				Explode: false,
-			})
-
-			if err := func() error {
-				val, err := d.DecodeValue()
-				if err != nil {
-					return err
-				}
-
-				c, err := conv.ToString(val)
-				if err != nil {
-					return err
-				}
-
-				params.AccountID = c
-				return nil
-			}(); err != nil {
-				return err
-			}
-		} else {
-			return validate.ErrFieldRequired
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "account_id",
-			In:   "path",
-			Err:  err,
-		}
-	}
-	return params, nil
-}
-
-// GetTraceParams is parameters of getTrace operation.
-type GetTraceParams struct {
-	// Trace ID or transaction hash in hex (without 0x) or base64url format.
-	TraceID string
-}
-
-func unpackGetTraceParams(packed middleware.Parameters) (params GetTraceParams) {
-	{
-		key := middleware.ParameterKey{
-			Name: "trace_id",
-			In:   "path",
-		}
-		params.TraceID = packed[key].(string)
-	}
-	return params
-}
-
-func decodeGetTraceParams(args [1]string, argsEscaped bool, r *http.Request) (params GetTraceParams, _ error) {
-	// Decode path: trace_id.
-	if err := func() error {
-		param := args[0]
-		if argsEscaped {
-			unescaped, err := url.PathUnescape(args[0])
-			if err != nil {
-				return errors.Wrap(err, "unescape path")
-			}
-			param = unescaped
-		}
-		if len(param) > 0 {
-			d := uri.NewPathDecoder(uri.PathDecoderConfig{
-				Param:   "trace_id",
-				Value:   param,
-				Style:   uri.PathStyleSimple,
-				Explode: false,
-			})
-
-			if err := func() error {
-				val, err := d.DecodeValue()
-				if err != nil {
-					return err
-				}
-
-				c, err := conv.ToString(val)
-				if err != nil {
-					return err
-				}
-
-				params.TraceID = c
-				return nil
-			}(); err != nil {
-				return err
-			}
-		} else {
-			return validate.ErrFieldRequired
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "trace_id",
-			In:   "path",
-			Err:  err,
-		}
-	}
-	return params, nil
-}
-
-// GetTracesByAccountParams is parameters of getTracesByAccount operation.
-type GetTracesByAccountParams struct {
-	// Account ID.
-	AccountID string
-	Limit     OptInt32
-}
-
-func unpackGetTracesByAccountParams(packed middleware.Parameters) (params GetTracesByAccountParams) {
-	{
-		key := middleware.ParameterKey{
-			Name: "account_id",
-			In:   "path",
-		}
-		params.AccountID = packed[key].(string)
-	}
-	{
-		key := middleware.ParameterKey{
-			Name: "limit",
-			In:   "query",
-		}
-		if v, ok := packed[key]; ok {
-			params.Limit = v.(OptInt32)
-		}
-	}
-	return params
-}
-
-func decodeGetTracesByAccountParams(args [1]string, argsEscaped bool, r *http.Request) (params GetTracesByAccountParams, _ error) {
-	q := uri.NewQueryDecoder(r.URL.Query())
-	// Decode path: account_id.
-	if err := func() error {
-		param := args[0]
-		if argsEscaped {
-			unescaped, err := url.PathUnescape(args[0])
-			if err != nil {
-				return errors.Wrap(err, "unescape path")
-			}
-			param = unescaped
-		}
-		if len(param) > 0 {
-			d := uri.NewPathDecoder(uri.PathDecoderConfig{
-				Param:   "account_id",
-				Value:   param,
-				Style:   uri.PathStyleSimple,
-				Explode: false,
-			})
-
-			if err := func() error {
-				val, err := d.DecodeValue()
-				if err != nil {
-					return err
-				}
-
-				c, err := conv.ToString(val)
-				if err != nil {
-					return err
-				}
-
-				params.AccountID = c
-				return nil
-			}(); err != nil {
-				return err
-			}
-		} else {
-			return validate.ErrFieldRequired
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "account_id",
-			In:   "path",
-			Err:  err,
-		}
-	}
-	// Set default value for query: limit.
-	{
-		val := int32(100)
-		params.Limit.SetTo(val)
-	}
-	// Decode query: limit.
-	if err := func() error {
-		cfg := uri.QueryParameterDecodingConfig{
-			Name:    "limit",
-			Style:   uri.QueryStyleForm,
-			Explode: true,
-		}
-
-		if err := q.HasParam(cfg); err == nil {
-			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
-				var paramsDotLimitVal int32
-				if err := func() error {
-					val, err := d.DecodeValue()
-					if err != nil {
-						return err
-					}
-
-					c, err := conv.ToInt32(val)
-					if err != nil {
-						return err
-					}
-
-					paramsDotLimitVal = c
-					return nil
-				}(); err != nil {
-					return err
-				}
-				params.Limit.SetTo(paramsDotLimitVal)
-				return nil
-			}); err != nil {
-				return err
-			}
-			if err := func() error {
-				if value, ok := params.Limit.Get(); ok {
-					if err := func() error {
-						if err := (validate.Int{
-							MinSet:        false,
-							Min:           0,
-							MaxSet:        true,
-							Max:           1000,
-							MinExclusive:  false,
-							MaxExclusive:  false,
-							MultipleOfSet: false,
-							MultipleOf:    0,
-						}).Validate(int64(value)); err != nil {
-							return errors.Wrap(err, "int")
-						}
-						return nil
-					}(); err != nil {
-						return err
-					}
-				}
-				return nil
-			}(); err != nil {
-				return err
-			}
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "limit",
-			In:   "query",
-			Err:  err,
-		}
-	}
-	return params, nil
-}
-
-// GetTransactionParams is parameters of getTransaction operation.
-type GetTransactionParams struct {
-	// Transaction ID.
-	TransactionID string
-}
-
-func unpackGetTransactionParams(packed middleware.Parameters) (params GetTransactionParams) {
-	{
-		key := middleware.ParameterKey{
-			Name: "transaction_id",
-			In:   "path",
-		}
-		params.TransactionID = packed[key].(string)
-	}
-	return params
-}
-
-func decodeGetTransactionParams(args [1]string, argsEscaped bool, r *http.Request) (params GetTransactionParams, _ error) {
-	// Decode path: transaction_id.
-	if err := func() error {
-		param := args[0]
-		if argsEscaped {
-			unescaped, err := url.PathUnescape(args[0])
-			if err != nil {
-				return errors.Wrap(err, "unescape path")
-			}
-			param = unescaped
-		}
-		if len(param) > 0 {
-			d := uri.NewPathDecoder(uri.PathDecoderConfig{
-				Param:   "transaction_id",
-				Value:   param,
-				Style:   uri.PathStyleSimple,
-				Explode: false,
-			})
-
-			if err := func() error {
-				val, err := d.DecodeValue()
-				if err != nil {
-					return err
-				}
-
-				c, err := conv.ToString(val)
-				if err != nil {
-					return err
-				}
-
-				params.TransactionID = c
-				return nil
-			}(); err != nil {
-				return err
-			}
-		} else {
-			return validate.ErrFieldRequired
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "transaction_id",
-			In:   "path",
-			Err:  err,
-		}
-	}
-	return params, nil
-}
-
-// GetTransactionByMessageHashParams is parameters of getTransactionByMessageHash operation.
-type GetTransactionByMessageHashParams struct {
-	// Message ID.
-	MsgID string
-}
-
-func unpackGetTransactionByMessageHashParams(packed middleware.Parameters) (params GetTransactionByMessageHashParams) {
-	{
-		key := middleware.ParameterKey{
-			Name: "msg_id",
-			In:   "path",
-		}
-		params.MsgID = packed[key].(string)
-	}
-	return params
-}
-
-func decodeGetTransactionByMessageHashParams(args [1]string, argsEscaped bool, r *http.Request) (params GetTransactionByMessageHashParams, _ error) {
-	// Decode path: msg_id.
-	if err := func() error {
-		param := args[0]
-		if argsEscaped {
-			unescaped, err := url.PathUnescape(args[0])
-			if err != nil {
-				return errors.Wrap(err, "unescape path")
-			}
-			param = unescaped
-		}
-		if len(param) > 0 {
-			d := uri.NewPathDecoder(uri.PathDecoderConfig{
-				Param:   "msg_id",
-				Value:   param,
-				Style:   uri.PathStyleSimple,
-				Explode: false,
-			})
-
-			if err := func() error {
-				val, err := d.DecodeValue()
-				if err != nil {
-					return err
-				}
-
-				c, err := conv.ToString(val)
-				if err != nil {
-					return err
-				}
-
-				params.MsgID = c
-				return nil
-			}(); err != nil {
-				return err
-			}
-		} else {
-			return validate.ErrFieldRequired
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "msg_id",
-			In:   "path",
-			Err:  err,
-		}
-	}
-	return params, nil
-}
-
-// GetTransactionsLiteServerParams is parameters of getTransactionsLiteServer operation.
-type GetTransactionsLiteServerParams struct {
+// GetRawTransactionsParams is parameters of getRawTransactions operation.
+type GetRawTransactionsParams struct {
 	// Account ID.
 	AccountID string
 	// Count.
@@ -5822,7 +5749,7 @@ type GetTransactionsLiteServerParams struct {
 	Hash string
 }
 
-func unpackGetTransactionsLiteServerParams(packed middleware.Parameters) (params GetTransactionsLiteServerParams) {
+func unpackGetRawTransactionsParams(packed middleware.Parameters) (params GetRawTransactionsParams) {
 	{
 		key := middleware.ParameterKey{
 			Name: "account_id",
@@ -5854,7 +5781,7 @@ func unpackGetTransactionsLiteServerParams(packed middleware.Parameters) (params
 	return params
 }
 
-func decodeGetTransactionsLiteServerParams(args [1]string, argsEscaped bool, r *http.Request) (params GetTransactionsLiteServerParams, _ error) {
+func decodeGetRawTransactionsParams(args [1]string, argsEscaped bool, r *http.Request) (params GetRawTransactionsParams, _ error) {
 	q := uri.NewQueryDecoder(r.URL.Query())
 	// Decode path: account_id.
 	if err := func() error {
@@ -6012,133 +5939,13 @@ func decodeGetTransactionsLiteServerParams(args [1]string, argsEscaped bool, r *
 	return params, nil
 }
 
-// GetWalletBackupParams is parameters of getWalletBackup operation.
-type GetWalletBackupParams struct {
-	XTonConnectAuth string
-}
-
-func unpackGetWalletBackupParams(packed middleware.Parameters) (params GetWalletBackupParams) {
-	{
-		key := middleware.ParameterKey{
-			Name: "X-TonConnect-Auth",
-			In:   "header",
-		}
-		params.XTonConnectAuth = packed[key].(string)
-	}
-	return params
-}
-
-func decodeGetWalletBackupParams(args [0]string, argsEscaped bool, r *http.Request) (params GetWalletBackupParams, _ error) {
-	h := uri.NewHeaderDecoder(r.Header)
-	// Decode header: X-TonConnect-Auth.
-	if err := func() error {
-		cfg := uri.HeaderParameterDecodingConfig{
-			Name:    "X-TonConnect-Auth",
-			Explode: false,
-		}
-		if err := h.HasParam(cfg); err == nil {
-			if err := h.DecodeParam(cfg, func(d uri.Decoder) error {
-				val, err := d.DecodeValue()
-				if err != nil {
-					return err
-				}
-
-				c, err := conv.ToString(val)
-				if err != nil {
-					return err
-				}
-
-				params.XTonConnectAuth = c
-				return nil
-			}); err != nil {
-				return err
-			}
-		} else {
-			return validate.ErrFieldRequired
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "X-TonConnect-Auth",
-			In:   "header",
-			Err:  err,
-		}
-	}
-	return params, nil
-}
-
-// GetWalletsByPublicKeyParams is parameters of getWalletsByPublicKey operation.
-type GetWalletsByPublicKeyParams struct {
-	PublicKey string
-}
-
-func unpackGetWalletsByPublicKeyParams(packed middleware.Parameters) (params GetWalletsByPublicKeyParams) {
-	{
-		key := middleware.ParameterKey{
-			Name: "public_key",
-			In:   "path",
-		}
-		params.PublicKey = packed[key].(string)
-	}
-	return params
-}
-
-func decodeGetWalletsByPublicKeyParams(args [1]string, argsEscaped bool, r *http.Request) (params GetWalletsByPublicKeyParams, _ error) {
-	// Decode path: public_key.
-	if err := func() error {
-		param := args[0]
-		if argsEscaped {
-			unescaped, err := url.PathUnescape(args[0])
-			if err != nil {
-				return errors.Wrap(err, "unescape path")
-			}
-			param = unescaped
-		}
-		if len(param) > 0 {
-			d := uri.NewPathDecoder(uri.PathDecoderConfig{
-				Param:   "public_key",
-				Value:   param,
-				Style:   uri.PathStyleSimple,
-				Explode: false,
-			})
-
-			if err := func() error {
-				val, err := d.DecodeValue()
-				if err != nil {
-					return err
-				}
-
-				c, err := conv.ToString(val)
-				if err != nil {
-					return err
-				}
-
-				params.PublicKey = c
-				return nil
-			}(); err != nil {
-				return err
-			}
-		} else {
-			return validate.ErrFieldRequired
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "public_key",
-			In:   "path",
-			Err:  err,
-		}
-	}
-	return params, nil
-}
-
-// PoolsByNominatorsParams is parameters of poolsByNominators operation.
-type PoolsByNominatorsParams struct {
+// GetStakingPoolHistoryParams is parameters of getStakingPoolHistory operation.
+type GetStakingPoolHistoryParams struct {
 	// Account ID.
 	AccountID string
 }
 
-func unpackPoolsByNominatorsParams(packed middleware.Parameters) (params PoolsByNominatorsParams) {
+func unpackGetStakingPoolHistoryParams(packed middleware.Parameters) (params GetStakingPoolHistoryParams) {
 	{
 		key := middleware.ParameterKey{
 			Name: "account_id",
@@ -6149,7 +5956,7 @@ func unpackPoolsByNominatorsParams(packed middleware.Parameters) (params PoolsBy
 	return params
 }
 
-func decodePoolsByNominatorsParams(args [1]string, argsEscaped bool, r *http.Request) (params PoolsByNominatorsParams, _ error) {
+func decodeGetStakingPoolHistoryParams(args [1]string, argsEscaped bool, r *http.Request) (params GetStakingPoolHistoryParams, _ error) {
 	// Decode path: account_id.
 	if err := func() error {
 		param := args[0]
@@ -6198,201 +6005,14 @@ func decodePoolsByNominatorsParams(args [1]string, argsEscaped bool, r *http.Req
 	return params, nil
 }
 
-// ReindexAccountParams is parameters of reindexAccount operation.
-type ReindexAccountParams struct {
-	// Account ID.
-	AccountID string
-}
-
-func unpackReindexAccountParams(packed middleware.Parameters) (params ReindexAccountParams) {
-	{
-		key := middleware.ParameterKey{
-			Name: "account_id",
-			In:   "path",
-		}
-		params.AccountID = packed[key].(string)
-	}
-	return params
-}
-
-func decodeReindexAccountParams(args [1]string, argsEscaped bool, r *http.Request) (params ReindexAccountParams, _ error) {
-	// Decode path: account_id.
-	if err := func() error {
-		param := args[0]
-		if argsEscaped {
-			unescaped, err := url.PathUnescape(args[0])
-			if err != nil {
-				return errors.Wrap(err, "unescape path")
-			}
-			param = unescaped
-		}
-		if len(param) > 0 {
-			d := uri.NewPathDecoder(uri.PathDecoderConfig{
-				Param:   "account_id",
-				Value:   param,
-				Style:   uri.PathStyleSimple,
-				Explode: false,
-			})
-
-			if err := func() error {
-				val, err := d.DecodeValue()
-				if err != nil {
-					return err
-				}
-
-				c, err := conv.ToString(val)
-				if err != nil {
-					return err
-				}
-
-				params.AccountID = c
-				return nil
-			}(); err != nil {
-				return err
-			}
-		} else {
-			return validate.ErrFieldRequired
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "account_id",
-			In:   "path",
-			Err:  err,
-		}
-	}
-	return params, nil
-}
-
-// SetWalletBackupParams is parameters of setWalletBackup operation.
-type SetWalletBackupParams struct {
-	XTonConnectAuth string
-}
-
-func unpackSetWalletBackupParams(packed middleware.Parameters) (params SetWalletBackupParams) {
-	{
-		key := middleware.ParameterKey{
-			Name: "X-TonConnect-Auth",
-			In:   "header",
-		}
-		params.XTonConnectAuth = packed[key].(string)
-	}
-	return params
-}
-
-func decodeSetWalletBackupParams(args [0]string, argsEscaped bool, r *http.Request) (params SetWalletBackupParams, _ error) {
-	h := uri.NewHeaderDecoder(r.Header)
-	// Decode header: X-TonConnect-Auth.
-	if err := func() error {
-		cfg := uri.HeaderParameterDecodingConfig{
-			Name:    "X-TonConnect-Auth",
-			Explode: false,
-		}
-		if err := h.HasParam(cfg); err == nil {
-			if err := h.DecodeParam(cfg, func(d uri.Decoder) error {
-				val, err := d.DecodeValue()
-				if err != nil {
-					return err
-				}
-
-				c, err := conv.ToString(val)
-				if err != nil {
-					return err
-				}
-
-				params.XTonConnectAuth = c
-				return nil
-			}); err != nil {
-				return err
-			}
-		} else {
-			return validate.ErrFieldRequired
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "X-TonConnect-Auth",
-			In:   "header",
-			Err:  err,
-		}
-	}
-	return params, nil
-}
-
-// StakingPoolHistoryParams is parameters of stakingPoolHistory operation.
-type StakingPoolHistoryParams struct {
-	// Account ID.
-	AccountID string
-}
-
-func unpackStakingPoolHistoryParams(packed middleware.Parameters) (params StakingPoolHistoryParams) {
-	{
-		key := middleware.ParameterKey{
-			Name: "account_id",
-			In:   "path",
-		}
-		params.AccountID = packed[key].(string)
-	}
-	return params
-}
-
-func decodeStakingPoolHistoryParams(args [1]string, argsEscaped bool, r *http.Request) (params StakingPoolHistoryParams, _ error) {
-	// Decode path: account_id.
-	if err := func() error {
-		param := args[0]
-		if argsEscaped {
-			unescaped, err := url.PathUnescape(args[0])
-			if err != nil {
-				return errors.Wrap(err, "unescape path")
-			}
-			param = unescaped
-		}
-		if len(param) > 0 {
-			d := uri.NewPathDecoder(uri.PathDecoderConfig{
-				Param:   "account_id",
-				Value:   param,
-				Style:   uri.PathStyleSimple,
-				Explode: false,
-			})
-
-			if err := func() error {
-				val, err := d.DecodeValue()
-				if err != nil {
-					return err
-				}
-
-				c, err := conv.ToString(val)
-				if err != nil {
-					return err
-				}
-
-				params.AccountID = c
-				return nil
-			}(); err != nil {
-				return err
-			}
-		} else {
-			return validate.ErrFieldRequired
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "account_id",
-			In:   "path",
-			Err:  err,
-		}
-	}
-	return params, nil
-}
-
-// StakingPoolInfoParams is parameters of stakingPoolInfo operation.
-type StakingPoolInfoParams struct {
+// GetStakingPoolInfoParams is parameters of getStakingPoolInfo operation.
+type GetStakingPoolInfoParams struct {
 	// Account ID.
 	AccountID      string
 	AcceptLanguage OptString
 }
 
-func unpackStakingPoolInfoParams(packed middleware.Parameters) (params StakingPoolInfoParams) {
+func unpackGetStakingPoolInfoParams(packed middleware.Parameters) (params GetStakingPoolInfoParams) {
 	{
 		key := middleware.ParameterKey{
 			Name: "account_id",
@@ -6412,7 +6032,7 @@ func unpackStakingPoolInfoParams(packed middleware.Parameters) (params StakingPo
 	return params
 }
 
-func decodeStakingPoolInfoParams(args [1]string, argsEscaped bool, r *http.Request) (params StakingPoolInfoParams, _ error) {
+func decodeGetStakingPoolInfoParams(args [1]string, argsEscaped bool, r *http.Request) (params GetStakingPoolInfoParams, _ error) {
 	h := uri.NewHeaderDecoder(r.Header)
 	// Decode path: account_id.
 	if err := func() error {
@@ -6506,8 +6126,8 @@ func decodeStakingPoolInfoParams(args [1]string, argsEscaped bool, r *http.Reque
 	return params, nil
 }
 
-// StakingPoolsParams is parameters of stakingPools operation.
-type StakingPoolsParams struct {
+// GetStakingPoolsParams is parameters of getStakingPools operation.
+type GetStakingPoolsParams struct {
 	// Account ID.
 	AvailableFor OptString
 	// Return also pools not from white list - just compatible by interfaces (maybe dangerous!).
@@ -6515,7 +6135,7 @@ type StakingPoolsParams struct {
 	AcceptLanguage    OptString
 }
 
-func unpackStakingPoolsParams(packed middleware.Parameters) (params StakingPoolsParams) {
+func unpackGetStakingPoolsParams(packed middleware.Parameters) (params GetStakingPoolsParams) {
 	{
 		key := middleware.ParameterKey{
 			Name: "available_for",
@@ -6546,7 +6166,7 @@ func unpackStakingPoolsParams(packed middleware.Parameters) (params StakingPools
 	return params
 }
 
-func decodeStakingPoolsParams(args [0]string, argsEscaped bool, r *http.Request) (params StakingPoolsParams, _ error) {
+func decodeGetStakingPoolsParams(args [0]string, argsEscaped bool, r *http.Request) (params GetStakingPoolsParams, _ error) {
 	q := uri.NewQueryDecoder(r.URL.Query())
 	h := uri.NewHeaderDecoder(r.Header)
 	// Decode query: available_for.
@@ -6671,6 +6291,386 @@ func decodeStakingPoolsParams(args [0]string, argsEscaped bool, r *http.Request)
 	}(); err != nil {
 		return params, &ogenerrors.DecodeParamError{
 			Name: "Accept-Language",
+			In:   "header",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// GetTraceParams is parameters of getTrace operation.
+type GetTraceParams struct {
+	// Trace ID or transaction hash in hex (without 0x) or base64url format.
+	TraceID string
+}
+
+func unpackGetTraceParams(packed middleware.Parameters) (params GetTraceParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "trace_id",
+			In:   "path",
+		}
+		params.TraceID = packed[key].(string)
+	}
+	return params
+}
+
+func decodeGetTraceParams(args [1]string, argsEscaped bool, r *http.Request) (params GetTraceParams, _ error) {
+	// Decode path: trace_id.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "trace_id",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.TraceID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "trace_id",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// GetWalletBackupParams is parameters of getWalletBackup operation.
+type GetWalletBackupParams struct {
+	XTonConnectAuth string
+}
+
+func unpackGetWalletBackupParams(packed middleware.Parameters) (params GetWalletBackupParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "X-TonConnect-Auth",
+			In:   "header",
+		}
+		params.XTonConnectAuth = packed[key].(string)
+	}
+	return params
+}
+
+func decodeGetWalletBackupParams(args [0]string, argsEscaped bool, r *http.Request) (params GetWalletBackupParams, _ error) {
+	h := uri.NewHeaderDecoder(r.Header)
+	// Decode header: X-TonConnect-Auth.
+	if err := func() error {
+		cfg := uri.HeaderParameterDecodingConfig{
+			Name:    "X-TonConnect-Auth",
+			Explode: false,
+		}
+		if err := h.HasParam(cfg); err == nil {
+			if err := h.DecodeParam(cfg, func(d uri.Decoder) error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.XTonConnectAuth = c
+				return nil
+			}); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "X-TonConnect-Auth",
+			In:   "header",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// GetWalletsByPublicKeyParams is parameters of getWalletsByPublicKey operation.
+type GetWalletsByPublicKeyParams struct {
+	PublicKey string
+}
+
+func unpackGetWalletsByPublicKeyParams(packed middleware.Parameters) (params GetWalletsByPublicKeyParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "public_key",
+			In:   "path",
+		}
+		params.PublicKey = packed[key].(string)
+	}
+	return params
+}
+
+func decodeGetWalletsByPublicKeyParams(args [1]string, argsEscaped bool, r *http.Request) (params GetWalletsByPublicKeyParams, _ error) {
+	// Decode path: public_key.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "public_key",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.PublicKey = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "public_key",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// ReindexAccountParams is parameters of reindexAccount operation.
+type ReindexAccountParams struct {
+	// Account ID.
+	AccountID string
+}
+
+func unpackReindexAccountParams(packed middleware.Parameters) (params ReindexAccountParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "account_id",
+			In:   "path",
+		}
+		params.AccountID = packed[key].(string)
+	}
+	return params
+}
+
+func decodeReindexAccountParams(args [1]string, argsEscaped bool, r *http.Request) (params ReindexAccountParams, _ error) {
+	// Decode path: account_id.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "account_id",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.AccountID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account_id",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// SearchAccountsParams is parameters of searchAccounts operation.
+type SearchAccountsParams struct {
+	Name string
+}
+
+func unpackSearchAccountsParams(packed middleware.Parameters) (params SearchAccountsParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "name",
+			In:   "query",
+		}
+		params.Name = packed[key].(string)
+	}
+	return params
+}
+
+func decodeSearchAccountsParams(args [0]string, argsEscaped bool, r *http.Request) (params SearchAccountsParams, _ error) {
+	q := uri.NewQueryDecoder(r.URL.Query())
+	// Decode query: name.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "name",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.Name = c
+				return nil
+			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if err := (validate.String{
+					MinLength:    3,
+					MinLengthSet: true,
+					MaxLength:    15,
+					MaxLengthSet: true,
+					Email:        false,
+					Hostname:     false,
+					Regex:        nil,
+				}).Validate(string(params.Name)); err != nil {
+					return errors.Wrap(err, "string")
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "name",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// SetWalletBackupParams is parameters of setWalletBackup operation.
+type SetWalletBackupParams struct {
+	XTonConnectAuth string
+}
+
+func unpackSetWalletBackupParams(packed middleware.Parameters) (params SetWalletBackupParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "X-TonConnect-Auth",
+			In:   "header",
+		}
+		params.XTonConnectAuth = packed[key].(string)
+	}
+	return params
+}
+
+func decodeSetWalletBackupParams(args [0]string, argsEscaped bool, r *http.Request) (params SetWalletBackupParams, _ error) {
+	h := uri.NewHeaderDecoder(r.Header)
+	// Decode header: X-TonConnect-Auth.
+	if err := func() error {
+		cfg := uri.HeaderParameterDecodingConfig{
+			Name:    "X-TonConnect-Auth",
+			Explode: false,
+		}
+		if err := h.HasParam(cfg); err == nil {
+			if err := h.DecodeParam(cfg, func(d uri.Decoder) error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.XTonConnectAuth = c
+				return nil
+			}); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "X-TonConnect-Auth",
 			In:   "header",
 			Err:  err,
 		}

@@ -22,8 +22,8 @@ func errChain(mappings ...error) error {
 	return nil
 }
 
-func convertMasterchainInfo(info liteclient.LiteServerMasterchainInfoC) (*oas.GetMasterchainInfoLiteServerOK, error) {
-	convertedInfo := oas.GetMasterchainInfoLiteServerOK{
+func convertMasterchainInfo(info liteclient.LiteServerMasterchainInfoC) (*oas.GetRawMasterchainInfoOK, error) {
+	convertedInfo := oas.GetRawMasterchainInfoOK{
 		Last: oas.BlockRaw{
 			Workchain: info.Last.Workchain,
 			Shard:     info.Last.Shard,
@@ -46,8 +46,8 @@ func convertMasterchainInfo(info liteclient.LiteServerMasterchainInfoC) (*oas.Ge
 	return &convertedInfo, nil
 }
 
-func convertMasterchainInfoExt(info liteclient.LiteServerMasterchainInfoExtC) (*oas.GetMasterchainInfoExtLiteServerOK, error) {
-	convertedInfo := oas.GetMasterchainInfoExtLiteServerOK{
+func convertMasterchainInfoExt(info liteclient.LiteServerMasterchainInfoExtC) (*oas.GetRawMasterchainInfoExtOK, error) {
+	convertedInfo := oas.GetRawMasterchainInfoExtOK{
 		Mode:         info.Mode,
 		Version:      info.Version,
 		Capabilities: info.Capabilities,
@@ -75,8 +75,8 @@ func convertMasterchainInfoExt(info liteclient.LiteServerMasterchainInfoExtC) (*
 	return &convertedInfo, nil
 }
 
-func convertBlock(block liteclient.LiteServerBlockDataC) (*oas.GetBlockLiteServerOK, error) {
-	convertedBlock := oas.GetBlockLiteServerOK{
+func convertBlock(block liteclient.LiteServerBlockDataC) (*oas.GetRawBlockchainBlockOK, error) {
+	convertedBlock := oas.GetRawBlockchainBlockOK{
 		ID: oas.BlockRaw{
 			Workchain: block.Id.Workchain,
 			Shard:     block.Id.Shard,
@@ -94,8 +94,8 @@ func convertBlock(block liteclient.LiteServerBlockDataC) (*oas.GetBlockLiteServe
 	return &convertedBlock, nil
 }
 
-func convertState(state liteclient.LiteServerBlockStateC) (*oas.GetStateLiteServerOK, error) {
-	convertedState := oas.GetStateLiteServerOK{
+func convertState(state liteclient.LiteServerBlockStateC) (*oas.GetRawBlockchainBlockStateOK, error) {
+	convertedState := oas.GetRawBlockchainBlockStateOK{
 		ID: oas.BlockRaw{
 			Workchain: state.Id.Workchain,
 			Shard:     state.Id.Shard,
@@ -115,8 +115,8 @@ func convertState(state liteclient.LiteServerBlockStateC) (*oas.GetStateLiteServ
 	return &convertedState, nil
 }
 
-func convertBlockHeaderRaw(blockHeader liteclient.LiteServerBlockHeaderC) (*oas.GetBlockHeaderLiteServerOK, error) {
-	convertedBlockHeader := oas.GetBlockHeaderLiteServerOK{
+func convertBlockHeaderRaw(blockHeader liteclient.LiteServerBlockHeaderC) (*oas.GetRawBlockchainBlockHeaderOK, error) {
+	convertedBlockHeader := oas.GetRawBlockchainBlockHeaderOK{
 		ID: oas.BlockRaw{
 			Workchain: blockHeader.Id.Workchain,
 			Shard:     blockHeader.Id.Shard,
@@ -135,8 +135,8 @@ func convertBlockHeaderRaw(blockHeader liteclient.LiteServerBlockHeaderC) (*oas.
 	return &convertedBlockHeader, nil
 }
 
-func convertAccountState(accountState liteclient.LiteServerAccountStateC) (*oas.GetAccountStateLiteServerOK, error) {
-	convertedAccountState := oas.GetAccountStateLiteServerOK{
+func convertAccountState(accountState liteclient.LiteServerAccountStateC) (*oas.GetRawAccountStateOK, error) {
+	convertedAccountState := oas.GetRawAccountStateOK{
 		ID: oas.BlockRaw{
 			Workchain: accountState.Id.Workchain,
 			Shard:     accountState.Id.Shard,
@@ -163,8 +163,8 @@ func convertAccountState(accountState liteclient.LiteServerAccountStateC) (*oas.
 	return &convertedAccountState, nil
 }
 
-func convertShardInfo(shardInfo liteclient.LiteServerShardInfoC) (*oas.GetShardInfoLiteServerOK, error) {
-	convertedShardInfo := oas.GetShardInfoLiteServerOK{
+func convertShardInfo(shardInfo liteclient.LiteServerShardInfoC) (*oas.GetRawShardInfoOK, error) {
+	convertedShardInfo := oas.GetRawShardInfoOK{
 		ID: oas.BlockRaw{
 			Workchain: shardInfo.Id.Workchain,
 			Shard:     shardInfo.Id.Shard,
@@ -190,8 +190,8 @@ func convertShardInfo(shardInfo liteclient.LiteServerShardInfoC) (*oas.GetShardI
 	return &convertedShardInfo, nil
 }
 
-func convertShardsAllInfo(shardsAllInfo liteclient.LiteServerAllShardsInfoC) (*oas.GetAllShardsInfoLiteServerOK, error) {
-	convertedShardsAllInfo := oas.GetAllShardsInfoLiteServerOK{
+func convertShardsAllInfo(shardsAllInfo liteclient.LiteServerAllShardsInfoC) (*oas.GetAllRawShardsInfoOK, error) {
+	convertedShardsAllInfo := oas.GetAllRawShardsInfoOK{
 		ID: oas.BlockRaw{
 			Workchain: shardsAllInfo.Id.Workchain,
 			Shard:     shardsAllInfo.Id.Shard,
@@ -210,8 +210,8 @@ func convertShardsAllInfo(shardsAllInfo liteclient.LiteServerAllShardsInfoC) (*o
 	return &convertedShardsAllInfo, nil
 }
 
-func convertTransactions(txs liteclient.LiteServerTransactionListC) (*oas.GetTransactionsLiteServerOK, error) {
-	convertedTransactions := oas.GetTransactionsLiteServerOK{
+func convertTransactions(txs liteclient.LiteServerTransactionListC) (*oas.GetRawTransactionsOK, error) {
+	convertedTransactions := oas.GetRawTransactionsOK{
 		Transactions: hex.EncodeToString(txs.Transactions),
 	}
 	for _, tx := range txs.Ids {
@@ -232,8 +232,8 @@ func convertTransactions(txs liteclient.LiteServerTransactionListC) (*oas.GetTra
 	return &convertedTransactions, nil
 }
 
-func convertListBlockTxs(txs liteclient.LiteServerBlockTransactionsC) (*oas.GetListBlockTransactionsLiteServerOK, error) {
-	convertedTxs := &oas.GetListBlockTransactionsLiteServerOK{
+func convertListBlockTxs(txs liteclient.LiteServerBlockTransactionsC) (*oas.GetRawListBlockTransactionsOK, error) {
+	convertedTxs := &oas.GetRawListBlockTransactionsOK{
 		ID: oas.BlockRaw{
 			Workchain: txs.Id.Workchain,
 			Shard:     txs.Id.Shard,
@@ -251,7 +251,7 @@ func convertListBlockTxs(txs liteclient.LiteServerBlockTransactionsC) (*oas.GetL
 		return nil, err
 	}
 	for _, tx := range txs.Ids {
-		item := oas.GetListBlockTransactionsLiteServerOKIdsItem{Mode: tx.Mode}
+		item := oas.GetRawListBlockTransactionsOKIdsItem{Mode: tx.Mode}
 		if tx.Account != nil {
 			err = errChain(toJson(&item.Account.Value, tx.Account))
 			if err != nil {
@@ -272,8 +272,8 @@ func convertListBlockTxs(txs liteclient.LiteServerBlockTransactionsC) (*oas.GetL
 	return convertedTxs, nil
 }
 
-func convertBlockProof(blockProof liteclient.LiteServerPartialBlockProofC) (*oas.GetBlockProofLiteServerOK, error) {
-	convertedBlockProof := &oas.GetBlockProofLiteServerOK{
+func convertBlockProof(blockProof liteclient.LiteServerPartialBlockProofC) (*oas.GetRawBlockProofOK, error) {
+	convertedBlockProof := &oas.GetRawBlockProofOK{
 		Complete: blockProof.Complete,
 		From: oas.BlockRaw{
 			Workchain: blockProof.From.Workchain,
@@ -296,9 +296,9 @@ func convertBlockProof(blockProof liteclient.LiteServerPartialBlockProofC) (*oas
 		return nil, err
 	}
 	for _, step := range blockProof.Steps {
-		signatures := []oas.GetBlockProofLiteServerOKStepsItemLiteServerBlockLinkForwardSignaturesSignaturesItem{}
+		signatures := []oas.GetRawBlockProofOKStepsItemLiteServerBlockLinkForwardSignaturesSignaturesItem{}
 		for _, signature := range step.LiteServerBlockLinkForward.Signatures.Signatures {
-			item := oas.GetBlockProofLiteServerOKStepsItemLiteServerBlockLinkForwardSignaturesSignaturesItem{
+			item := oas.GetRawBlockProofOKStepsItemLiteServerBlockLinkForwardSignaturesSignaturesItem{
 				Signature: hex.EncodeToString(signature.Signature),
 			}
 			err = errChain(toJson(&item.NodeIDShort, signature.NodeIdShort))
@@ -307,8 +307,8 @@ func convertBlockProof(blockProof liteclient.LiteServerPartialBlockProofC) (*oas
 			}
 			signatures = append(signatures, item)
 		}
-		item := oas.GetBlockProofLiteServerOKStepsItem{
-			LiteServerBlockLinkBack: oas.GetBlockProofLiteServerOKStepsItemLiteServerBlockLinkBack{
+		item := oas.GetRawBlockProofOKStepsItem{
+			LiteServerBlockLinkBack: oas.GetRawBlockProofOKStepsItemLiteServerBlockLinkBack{
 				ToKeyBlock: step.LiteServerBlockLinkBack.ToKeyBlock,
 				From: oas.BlockRaw{
 					Workchain: step.LiteServerBlockLinkBack.From.Workchain,
@@ -324,7 +324,7 @@ func convertBlockProof(blockProof liteclient.LiteServerPartialBlockProofC) (*oas
 				Proof:      hex.EncodeToString(step.LiteServerBlockLinkBack.Proof),
 				StateProof: hex.EncodeToString(step.LiteServerBlockLinkBack.StateProof),
 			},
-			LiteServerBlockLinkForward: oas.GetBlockProofLiteServerOKStepsItemLiteServerBlockLinkForward{
+			LiteServerBlockLinkForward: oas.GetRawBlockProofOKStepsItemLiteServerBlockLinkForward{
 				ToKeyBlock: step.LiteServerBlockLinkForward.ToKeyBlock,
 				From: oas.BlockRaw{
 					Workchain: step.LiteServerBlockLinkForward.From.Workchain,
@@ -338,7 +338,7 @@ func convertBlockProof(blockProof liteclient.LiteServerPartialBlockProofC) (*oas
 				},
 				DestProof:   hex.EncodeToString(step.LiteServerBlockLinkForward.DestProof),
 				ConfigProof: hex.EncodeToString(step.LiteServerBlockLinkForward.ConfigProof),
-				Signatures: oas.GetBlockProofLiteServerOKStepsItemLiteServerBlockLinkForwardSignatures{
+				Signatures: oas.GetRawBlockProofOKStepsItemLiteServerBlockLinkForwardSignatures{
 					ValidatorSetHash: step.LiteServerBlockLinkForward.Signatures.ValidatorSetHash,
 					CatchainSeqno:    step.LiteServerBlockLinkForward.Signatures.CatchainSeqno,
 					Signatures:       signatures,
@@ -363,8 +363,8 @@ func convertBlockProof(blockProof liteclient.LiteServerPartialBlockProofC) (*oas
 	return convertedBlockProof, nil
 }
 
-func convertRawConfig(config liteclient.LiteServerConfigInfoC) (*oas.GetConfigAllLiteServerOK, error) {
-	convertedConfig := oas.GetConfigAllLiteServerOK{
+func convertRawConfig(config liteclient.LiteServerConfigInfoC) (*oas.GetRawConfigOK, error) {
+	convertedConfig := oas.GetRawConfigOK{
 		Mode: config.Mode,
 		ID: oas.BlockRaw{
 			Workchain: config.Id.Workchain,
@@ -384,8 +384,8 @@ func convertRawConfig(config liteclient.LiteServerConfigInfoC) (*oas.GetConfigAl
 	return &convertedConfig, nil
 }
 
-func convertShardBlockProof(shardBlockProof liteclient.LiteServerShardBlockProofC) (*oas.GetShardBlockProofLiteServerOK, error) {
-	convertedShardBlockProof := oas.GetShardBlockProofLiteServerOK{
+func convertShardBlockProof(shardBlockProof liteclient.LiteServerShardBlockProofC) (*oas.GetRawShardBlockProofOK, error) {
+	convertedShardBlockProof := oas.GetRawShardBlockProofOK{
 		MasterchainID: oas.BlockRaw{
 			Workchain: shardBlockProof.MasterchainId.Workchain,
 			Shard:     shardBlockProof.MasterchainId.Shard,
@@ -400,7 +400,7 @@ func convertShardBlockProof(shardBlockProof liteclient.LiteServerShardBlockProof
 		return nil, err
 	}
 	for _, link := range shardBlockProof.Links {
-		shardBlock := oas.GetShardBlockProofLiteServerOKLinksItem{
+		shardBlock := oas.GetRawShardBlockProofOKLinksItem{
 			ID: oas.BlockRaw{
 				Workchain: link.Id.Workchain,
 				Shard:     link.Id.Shard,

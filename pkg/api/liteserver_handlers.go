@@ -10,7 +10,7 @@ import (
 	"github.com/tonkeeper/tongo/liteclient"
 )
 
-func (h Handler) GetMasterchainInfoLiteServer(ctx context.Context) (*oas.GetMasterchainInfoLiteServerOK, error) {
+func (h Handler) GetRawMasterchainInfo(ctx context.Context) (*oas.GetRawMasterchainInfoOK, error) {
 	info, err := h.storage.GetMasterchainInfoRaw(ctx)
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
@@ -22,7 +22,7 @@ func (h Handler) GetMasterchainInfoLiteServer(ctx context.Context) (*oas.GetMast
 	return resp, nil
 }
 
-func (h Handler) GetMasterchainInfoExtLiteServer(ctx context.Context, params oas.GetMasterchainInfoExtLiteServerParams) (*oas.GetMasterchainInfoExtLiteServerOK, error) {
+func (h Handler) GetRawMasterchainInfoExt(ctx context.Context, params oas.GetRawMasterchainInfoExtParams) (*oas.GetRawMasterchainInfoExtOK, error) {
 	info, err := h.storage.GetMasterchainInfoExtRaw(ctx, params.Mode)
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
@@ -34,15 +34,15 @@ func (h Handler) GetMasterchainInfoExtLiteServer(ctx context.Context, params oas
 	return resp, nil
 }
 
-func (h Handler) GetTimeLiteServer(ctx context.Context) (*oas.GetTimeLiteServerOK, error) {
+func (h Handler) GetRawTime(ctx context.Context) (*oas.GetRawTimeOK, error) {
 	time, err := h.storage.GetTimeRaw(ctx)
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
-	return &oas.GetTimeLiteServerOK{Time: time}, nil
+	return &oas.GetRawTimeOK{Time: time}, nil
 }
 
-func (h Handler) GetBlockLiteServer(ctx context.Context, params oas.GetBlockLiteServerParams) (*oas.GetBlockLiteServerOK, error) {
+func (h Handler) GetRawBlockchainBlock(ctx context.Context, params oas.GetRawBlockchainBlockParams) (*oas.GetRawBlockchainBlockOK, error) {
 	id, err := blockIdExtFromString(params.BlockID)
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
@@ -58,7 +58,7 @@ func (h Handler) GetBlockLiteServer(ctx context.Context, params oas.GetBlockLite
 	return resp, nil
 }
 
-func (h Handler) GetStateLiteServer(ctx context.Context, params oas.GetStateLiteServerParams) (*oas.GetStateLiteServerOK, error) {
+func (h Handler) GetRawBlockchainBlockState(ctx context.Context, params oas.GetRawBlockchainBlockStateParams) (*oas.GetRawBlockchainBlockStateOK, error) {
 	id, err := blockIdExtFromString(params.BlockID)
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
@@ -74,7 +74,7 @@ func (h Handler) GetStateLiteServer(ctx context.Context, params oas.GetStateLite
 	return resp, nil
 }
 
-func (h Handler) GetBlockHeaderLiteServer(ctx context.Context, params oas.GetBlockHeaderLiteServerParams) (*oas.GetBlockHeaderLiteServerOK, error) {
+func (h Handler) GetRawBlockchainBlockHeader(ctx context.Context, params oas.GetRawBlockchainBlockHeaderParams) (*oas.GetRawBlockchainBlockHeaderOK, error) {
 	id, err := blockIdExtFromString(params.BlockID)
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
@@ -90,7 +90,7 @@ func (h Handler) GetBlockHeaderLiteServer(ctx context.Context, params oas.GetBlo
 	return resp, nil
 }
 
-func (h Handler) SendMessageLiteServer(ctx context.Context, request *oas.SendMessageLiteServerReq) (*oas.SendMessageLiteServerOK, error) {
+func (h Handler) SendRawMessage(ctx context.Context, request *oas.SendRawMessageReq) (*oas.SendRawMessageOK, error) {
 	payload, err := json.Marshal(request.Body)
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
@@ -99,10 +99,10 @@ func (h Handler) SendMessageLiteServer(ctx context.Context, request *oas.SendMes
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
-	return &oas.SendMessageLiteServerOK{Code: code}, nil
+	return &oas.SendRawMessageOK{Code: code}, nil
 }
 
-func (h Handler) GetAccountStateLiteServer(ctx context.Context, params oas.GetAccountStateLiteServerParams) (*oas.GetAccountStateLiteServerOK, error) {
+func (h Handler) GetRawAccountState(ctx context.Context, params oas.GetRawAccountStateParams) (*oas.GetRawAccountStateOK, error) {
 	accountID, err := tongo.ParseAccountID(params.AccountID)
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
@@ -118,7 +118,7 @@ func (h Handler) GetAccountStateLiteServer(ctx context.Context, params oas.GetAc
 	return resp, nil
 }
 
-func (h Handler) GetShardInfoLiteServer(ctx context.Context, params oas.GetShardInfoLiteServerParams) (*oas.GetShardInfoLiteServerOK, error) {
+func (h Handler) GetRawShardInfo(ctx context.Context, params oas.GetRawShardInfoParams) (*oas.GetRawShardInfoOK, error) {
 	blockID, err := blockIdExtFromString(params.BlockID)
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
@@ -134,7 +134,7 @@ func (h Handler) GetShardInfoLiteServer(ctx context.Context, params oas.GetShard
 	return resp, nil
 }
 
-func (h Handler) GetAllShardsInfoLiteServer(ctx context.Context, params oas.GetAllShardsInfoLiteServerParams) (*oas.GetAllShardsInfoLiteServerOK, error) {
+func (h Handler) GetAllRawShardsInfo(ctx context.Context, params oas.GetAllRawShardsInfoParams) (*oas.GetAllRawShardsInfoOK, error) {
 	blockID, err := blockIdExtFromString(params.BlockID)
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
@@ -150,7 +150,7 @@ func (h Handler) GetAllShardsInfoLiteServer(ctx context.Context, params oas.GetA
 	return resp, nil
 }
 
-func (h Handler) GetTransactionsLiteServer(ctx context.Context, params oas.GetTransactionsLiteServerParams) (*oas.GetTransactionsLiteServerOK, error) {
+func (h Handler) GetRawTransactions(ctx context.Context, params oas.GetRawTransactionsParams) (*oas.GetRawTransactionsOK, error) {
 	accountID, err := tongo.ParseAccountID(params.AccountID)
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
@@ -170,7 +170,7 @@ func (h Handler) GetTransactionsLiteServer(ctx context.Context, params oas.GetTr
 	return resp, nil
 }
 
-func (h Handler) GetListBlockTransactionsLiteServer(ctx context.Context, params oas.GetListBlockTransactionsLiteServerParams) (*oas.GetListBlockTransactionsLiteServerOK, error) {
+func (h Handler) GetRawListBlockTransactions(ctx context.Context, params oas.GetRawListBlockTransactionsParams) (*oas.GetRawListBlockTransactionsOK, error) {
 	blockID, err := blockIdExtFromString(params.BlockID)
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
@@ -195,7 +195,7 @@ func (h Handler) GetListBlockTransactionsLiteServer(ctx context.Context, params 
 	return resp, nil
 }
 
-func (h Handler) GetBlockProofLiteServer(ctx context.Context, params oas.GetBlockProofLiteServerParams) (*oas.GetBlockProofLiteServerOK, error) {
+func (h Handler) GetRawBlockProof(ctx context.Context, params oas.GetRawBlockProofParams) (*oas.GetRawBlockProofOK, error) {
 	knownBlockID, err := blockIdExtFromString(params.KnownBlock)
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
@@ -219,7 +219,7 @@ func (h Handler) GetBlockProofLiteServer(ctx context.Context, params oas.GetBloc
 	return resp, nil
 }
 
-func (h Handler) GetConfigAllLiteServer(ctx context.Context, params oas.GetConfigAllLiteServerParams) (*oas.GetConfigAllLiteServerOK, error) {
+func (h Handler) GetRawConfig(ctx context.Context, params oas.GetRawConfigParams) (*oas.GetRawConfigOK, error) {
 	blockID, err := blockIdExtFromString(params.BlockID)
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
@@ -235,7 +235,7 @@ func (h Handler) GetConfigAllLiteServer(ctx context.Context, params oas.GetConfi
 	return resp, nil
 }
 
-func (h Handler) GetShardBlockProofLiteServer(ctx context.Context, params oas.GetShardBlockProofLiteServerParams) (*oas.GetShardBlockProofLiteServerOK, error) {
+func (h Handler) GetRawShardBlockProof(ctx context.Context, params oas.GetRawShardBlockProofParams) (*oas.GetRawShardBlockProofOK, error) {
 	blockID, err := blockIdExtFromString(params.BlockID)
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)

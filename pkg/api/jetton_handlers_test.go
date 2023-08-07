@@ -16,12 +16,12 @@ import (
 func TestHandler_GetJettonsBalances(t *testing.T) {
 	tests := []struct {
 		name           string
-		params         oas.GetJettonsBalancesParams
+		params         oas.GetAccountJettonsBalancesParams
 		filenamePrefix string
 	}{
 		{
 			name:           "all good",
-			params:         oas.GetJettonsBalancesParams{AccountID: "0:533f30de5722157b8471f5503b9fc5800c8d8397e79743f796b11e609adae69f"},
+			params:         oas.GetAccountJettonsBalancesParams{AccountID: "0:533f30de5722157b8471f5503b9fc5800c8d8397e79743f796b11e609adae69f"},
 			filenamePrefix: "jetton-balances",
 		},
 	}
@@ -35,7 +35,7 @@ func TestHandler_GetJettonsBalances(t *testing.T) {
 			require.Nil(t, err)
 			h, err := NewHandler(logger, WithStorage(liteStorage), WithExecutor(liteStorage))
 			require.Nil(t, err)
-			res, err := h.GetJettonsBalances(context.Background(), tt.params)
+			res, err := h.GetAccountJettonsBalances(context.Background(), tt.params)
 			require.Nil(t, err)
 			pkgTesting.CompareResults(t, res, tt.filenamePrefix)
 		})

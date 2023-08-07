@@ -1214,318 +1214,6 @@ func (s *Auctions) SetTotal(val int64) {
 	s.Total = val
 }
 
-// Ref: #/components/schemas/Block
-type Block struct {
-	WorkchainID             int32     `json:"workchain_id"`
-	Shard                   string    `json:"shard"`
-	Seqno                   int32     `json:"seqno"`
-	RootHash                string    `json:"root_hash"`
-	FileHash                string    `json:"file_hash"`
-	GlobalID                int32     `json:"global_id"`
-	Version                 int32     `json:"version"`
-	AfterMerge              bool      `json:"after_merge"`
-	BeforeSplit             bool      `json:"before_split"`
-	AfterSplit              bool      `json:"after_split"`
-	WantSplit               bool      `json:"want_split"`
-	WantMerge               bool      `json:"want_merge"`
-	KeyBlock                bool      `json:"key_block"`
-	GenUtime                int64     `json:"gen_utime"`
-	StartLt                 int64     `json:"start_lt"`
-	EndLt                   int64     `json:"end_lt"`
-	VertSeqno               int32     `json:"vert_seqno"`
-	GenCatchainSeqno        int32     `json:"gen_catchain_seqno"`
-	MinRefMcSeqno           int32     `json:"min_ref_mc_seqno"`
-	PrevKeyBlockSeqno       int32     `json:"prev_key_block_seqno"`
-	GenSoftwareVersion      OptInt32  `json:"gen_software_version"`
-	GenSoftwareCapabilities OptInt64  `json:"gen_software_capabilities"`
-	MasterRef               OptString `json:"master_ref"`
-	PrevRefs                []string  `json:"prev_refs"`
-	InMsgDescrLength        int64     `json:"in_msg_descr_length"`
-	OutMsgDescrLength       int64     `json:"out_msg_descr_length"`
-	RandSeed                string    `json:"rand_seed"`
-	CreatedBy               string    `json:"created_by"`
-}
-
-// GetWorkchainID returns the value of WorkchainID.
-func (s *Block) GetWorkchainID() int32 {
-	return s.WorkchainID
-}
-
-// GetShard returns the value of Shard.
-func (s *Block) GetShard() string {
-	return s.Shard
-}
-
-// GetSeqno returns the value of Seqno.
-func (s *Block) GetSeqno() int32 {
-	return s.Seqno
-}
-
-// GetRootHash returns the value of RootHash.
-func (s *Block) GetRootHash() string {
-	return s.RootHash
-}
-
-// GetFileHash returns the value of FileHash.
-func (s *Block) GetFileHash() string {
-	return s.FileHash
-}
-
-// GetGlobalID returns the value of GlobalID.
-func (s *Block) GetGlobalID() int32 {
-	return s.GlobalID
-}
-
-// GetVersion returns the value of Version.
-func (s *Block) GetVersion() int32 {
-	return s.Version
-}
-
-// GetAfterMerge returns the value of AfterMerge.
-func (s *Block) GetAfterMerge() bool {
-	return s.AfterMerge
-}
-
-// GetBeforeSplit returns the value of BeforeSplit.
-func (s *Block) GetBeforeSplit() bool {
-	return s.BeforeSplit
-}
-
-// GetAfterSplit returns the value of AfterSplit.
-func (s *Block) GetAfterSplit() bool {
-	return s.AfterSplit
-}
-
-// GetWantSplit returns the value of WantSplit.
-func (s *Block) GetWantSplit() bool {
-	return s.WantSplit
-}
-
-// GetWantMerge returns the value of WantMerge.
-func (s *Block) GetWantMerge() bool {
-	return s.WantMerge
-}
-
-// GetKeyBlock returns the value of KeyBlock.
-func (s *Block) GetKeyBlock() bool {
-	return s.KeyBlock
-}
-
-// GetGenUtime returns the value of GenUtime.
-func (s *Block) GetGenUtime() int64 {
-	return s.GenUtime
-}
-
-// GetStartLt returns the value of StartLt.
-func (s *Block) GetStartLt() int64 {
-	return s.StartLt
-}
-
-// GetEndLt returns the value of EndLt.
-func (s *Block) GetEndLt() int64 {
-	return s.EndLt
-}
-
-// GetVertSeqno returns the value of VertSeqno.
-func (s *Block) GetVertSeqno() int32 {
-	return s.VertSeqno
-}
-
-// GetGenCatchainSeqno returns the value of GenCatchainSeqno.
-func (s *Block) GetGenCatchainSeqno() int32 {
-	return s.GenCatchainSeqno
-}
-
-// GetMinRefMcSeqno returns the value of MinRefMcSeqno.
-func (s *Block) GetMinRefMcSeqno() int32 {
-	return s.MinRefMcSeqno
-}
-
-// GetPrevKeyBlockSeqno returns the value of PrevKeyBlockSeqno.
-func (s *Block) GetPrevKeyBlockSeqno() int32 {
-	return s.PrevKeyBlockSeqno
-}
-
-// GetGenSoftwareVersion returns the value of GenSoftwareVersion.
-func (s *Block) GetGenSoftwareVersion() OptInt32 {
-	return s.GenSoftwareVersion
-}
-
-// GetGenSoftwareCapabilities returns the value of GenSoftwareCapabilities.
-func (s *Block) GetGenSoftwareCapabilities() OptInt64 {
-	return s.GenSoftwareCapabilities
-}
-
-// GetMasterRef returns the value of MasterRef.
-func (s *Block) GetMasterRef() OptString {
-	return s.MasterRef
-}
-
-// GetPrevRefs returns the value of PrevRefs.
-func (s *Block) GetPrevRefs() []string {
-	return s.PrevRefs
-}
-
-// GetInMsgDescrLength returns the value of InMsgDescrLength.
-func (s *Block) GetInMsgDescrLength() int64 {
-	return s.InMsgDescrLength
-}
-
-// GetOutMsgDescrLength returns the value of OutMsgDescrLength.
-func (s *Block) GetOutMsgDescrLength() int64 {
-	return s.OutMsgDescrLength
-}
-
-// GetRandSeed returns the value of RandSeed.
-func (s *Block) GetRandSeed() string {
-	return s.RandSeed
-}
-
-// GetCreatedBy returns the value of CreatedBy.
-func (s *Block) GetCreatedBy() string {
-	return s.CreatedBy
-}
-
-// SetWorkchainID sets the value of WorkchainID.
-func (s *Block) SetWorkchainID(val int32) {
-	s.WorkchainID = val
-}
-
-// SetShard sets the value of Shard.
-func (s *Block) SetShard(val string) {
-	s.Shard = val
-}
-
-// SetSeqno sets the value of Seqno.
-func (s *Block) SetSeqno(val int32) {
-	s.Seqno = val
-}
-
-// SetRootHash sets the value of RootHash.
-func (s *Block) SetRootHash(val string) {
-	s.RootHash = val
-}
-
-// SetFileHash sets the value of FileHash.
-func (s *Block) SetFileHash(val string) {
-	s.FileHash = val
-}
-
-// SetGlobalID sets the value of GlobalID.
-func (s *Block) SetGlobalID(val int32) {
-	s.GlobalID = val
-}
-
-// SetVersion sets the value of Version.
-func (s *Block) SetVersion(val int32) {
-	s.Version = val
-}
-
-// SetAfterMerge sets the value of AfterMerge.
-func (s *Block) SetAfterMerge(val bool) {
-	s.AfterMerge = val
-}
-
-// SetBeforeSplit sets the value of BeforeSplit.
-func (s *Block) SetBeforeSplit(val bool) {
-	s.BeforeSplit = val
-}
-
-// SetAfterSplit sets the value of AfterSplit.
-func (s *Block) SetAfterSplit(val bool) {
-	s.AfterSplit = val
-}
-
-// SetWantSplit sets the value of WantSplit.
-func (s *Block) SetWantSplit(val bool) {
-	s.WantSplit = val
-}
-
-// SetWantMerge sets the value of WantMerge.
-func (s *Block) SetWantMerge(val bool) {
-	s.WantMerge = val
-}
-
-// SetKeyBlock sets the value of KeyBlock.
-func (s *Block) SetKeyBlock(val bool) {
-	s.KeyBlock = val
-}
-
-// SetGenUtime sets the value of GenUtime.
-func (s *Block) SetGenUtime(val int64) {
-	s.GenUtime = val
-}
-
-// SetStartLt sets the value of StartLt.
-func (s *Block) SetStartLt(val int64) {
-	s.StartLt = val
-}
-
-// SetEndLt sets the value of EndLt.
-func (s *Block) SetEndLt(val int64) {
-	s.EndLt = val
-}
-
-// SetVertSeqno sets the value of VertSeqno.
-func (s *Block) SetVertSeqno(val int32) {
-	s.VertSeqno = val
-}
-
-// SetGenCatchainSeqno sets the value of GenCatchainSeqno.
-func (s *Block) SetGenCatchainSeqno(val int32) {
-	s.GenCatchainSeqno = val
-}
-
-// SetMinRefMcSeqno sets the value of MinRefMcSeqno.
-func (s *Block) SetMinRefMcSeqno(val int32) {
-	s.MinRefMcSeqno = val
-}
-
-// SetPrevKeyBlockSeqno sets the value of PrevKeyBlockSeqno.
-func (s *Block) SetPrevKeyBlockSeqno(val int32) {
-	s.PrevKeyBlockSeqno = val
-}
-
-// SetGenSoftwareVersion sets the value of GenSoftwareVersion.
-func (s *Block) SetGenSoftwareVersion(val OptInt32) {
-	s.GenSoftwareVersion = val
-}
-
-// SetGenSoftwareCapabilities sets the value of GenSoftwareCapabilities.
-func (s *Block) SetGenSoftwareCapabilities(val OptInt64) {
-	s.GenSoftwareCapabilities = val
-}
-
-// SetMasterRef sets the value of MasterRef.
-func (s *Block) SetMasterRef(val OptString) {
-	s.MasterRef = val
-}
-
-// SetPrevRefs sets the value of PrevRefs.
-func (s *Block) SetPrevRefs(val []string) {
-	s.PrevRefs = val
-}
-
-// SetInMsgDescrLength sets the value of InMsgDescrLength.
-func (s *Block) SetInMsgDescrLength(val int64) {
-	s.InMsgDescrLength = val
-}
-
-// SetOutMsgDescrLength sets the value of OutMsgDescrLength.
-func (s *Block) SetOutMsgDescrLength(val int64) {
-	s.OutMsgDescrLength = val
-}
-
-// SetRandSeed sets the value of RandSeed.
-func (s *Block) SetRandSeed(val string) {
-	s.RandSeed = val
-}
-
-// SetCreatedBy sets the value of CreatedBy.
-func (s *Block) SetCreatedBy(val string) {
-	s.CreatedBy = val
-}
-
 // Ref: #/components/schemas/BlockRaw
 type BlockRaw struct {
 	Workchain uint32 `json:"workchain"`
@@ -1583,6 +1271,551 @@ func (s *BlockRaw) SetRootHash(val string) {
 // SetFileHash sets the value of FileHash.
 func (s *BlockRaw) SetFileHash(val string) {
 	s.FileHash = val
+}
+
+// Ref: #/components/schemas/BlockchainBlock
+type BlockchainBlock struct {
+	WorkchainID             int32     `json:"workchain_id"`
+	Shard                   string    `json:"shard"`
+	Seqno                   int32     `json:"seqno"`
+	RootHash                string    `json:"root_hash"`
+	FileHash                string    `json:"file_hash"`
+	GlobalID                int32     `json:"global_id"`
+	Version                 int32     `json:"version"`
+	AfterMerge              bool      `json:"after_merge"`
+	BeforeSplit             bool      `json:"before_split"`
+	AfterSplit              bool      `json:"after_split"`
+	WantSplit               bool      `json:"want_split"`
+	WantMerge               bool      `json:"want_merge"`
+	KeyBlock                bool      `json:"key_block"`
+	GenUtime                int64     `json:"gen_utime"`
+	StartLt                 int64     `json:"start_lt"`
+	EndLt                   int64     `json:"end_lt"`
+	VertSeqno               int32     `json:"vert_seqno"`
+	GenCatchainSeqno        int32     `json:"gen_catchain_seqno"`
+	MinRefMcSeqno           int32     `json:"min_ref_mc_seqno"`
+	PrevKeyBlockSeqno       int32     `json:"prev_key_block_seqno"`
+	GenSoftwareVersion      OptInt32  `json:"gen_software_version"`
+	GenSoftwareCapabilities OptInt64  `json:"gen_software_capabilities"`
+	MasterRef               OptString `json:"master_ref"`
+	PrevRefs                []string  `json:"prev_refs"`
+	InMsgDescrLength        int64     `json:"in_msg_descr_length"`
+	OutMsgDescrLength       int64     `json:"out_msg_descr_length"`
+	RandSeed                string    `json:"rand_seed"`
+	CreatedBy               string    `json:"created_by"`
+}
+
+// GetWorkchainID returns the value of WorkchainID.
+func (s *BlockchainBlock) GetWorkchainID() int32 {
+	return s.WorkchainID
+}
+
+// GetShard returns the value of Shard.
+func (s *BlockchainBlock) GetShard() string {
+	return s.Shard
+}
+
+// GetSeqno returns the value of Seqno.
+func (s *BlockchainBlock) GetSeqno() int32 {
+	return s.Seqno
+}
+
+// GetRootHash returns the value of RootHash.
+func (s *BlockchainBlock) GetRootHash() string {
+	return s.RootHash
+}
+
+// GetFileHash returns the value of FileHash.
+func (s *BlockchainBlock) GetFileHash() string {
+	return s.FileHash
+}
+
+// GetGlobalID returns the value of GlobalID.
+func (s *BlockchainBlock) GetGlobalID() int32 {
+	return s.GlobalID
+}
+
+// GetVersion returns the value of Version.
+func (s *BlockchainBlock) GetVersion() int32 {
+	return s.Version
+}
+
+// GetAfterMerge returns the value of AfterMerge.
+func (s *BlockchainBlock) GetAfterMerge() bool {
+	return s.AfterMerge
+}
+
+// GetBeforeSplit returns the value of BeforeSplit.
+func (s *BlockchainBlock) GetBeforeSplit() bool {
+	return s.BeforeSplit
+}
+
+// GetAfterSplit returns the value of AfterSplit.
+func (s *BlockchainBlock) GetAfterSplit() bool {
+	return s.AfterSplit
+}
+
+// GetWantSplit returns the value of WantSplit.
+func (s *BlockchainBlock) GetWantSplit() bool {
+	return s.WantSplit
+}
+
+// GetWantMerge returns the value of WantMerge.
+func (s *BlockchainBlock) GetWantMerge() bool {
+	return s.WantMerge
+}
+
+// GetKeyBlock returns the value of KeyBlock.
+func (s *BlockchainBlock) GetKeyBlock() bool {
+	return s.KeyBlock
+}
+
+// GetGenUtime returns the value of GenUtime.
+func (s *BlockchainBlock) GetGenUtime() int64 {
+	return s.GenUtime
+}
+
+// GetStartLt returns the value of StartLt.
+func (s *BlockchainBlock) GetStartLt() int64 {
+	return s.StartLt
+}
+
+// GetEndLt returns the value of EndLt.
+func (s *BlockchainBlock) GetEndLt() int64 {
+	return s.EndLt
+}
+
+// GetVertSeqno returns the value of VertSeqno.
+func (s *BlockchainBlock) GetVertSeqno() int32 {
+	return s.VertSeqno
+}
+
+// GetGenCatchainSeqno returns the value of GenCatchainSeqno.
+func (s *BlockchainBlock) GetGenCatchainSeqno() int32 {
+	return s.GenCatchainSeqno
+}
+
+// GetMinRefMcSeqno returns the value of MinRefMcSeqno.
+func (s *BlockchainBlock) GetMinRefMcSeqno() int32 {
+	return s.MinRefMcSeqno
+}
+
+// GetPrevKeyBlockSeqno returns the value of PrevKeyBlockSeqno.
+func (s *BlockchainBlock) GetPrevKeyBlockSeqno() int32 {
+	return s.PrevKeyBlockSeqno
+}
+
+// GetGenSoftwareVersion returns the value of GenSoftwareVersion.
+func (s *BlockchainBlock) GetGenSoftwareVersion() OptInt32 {
+	return s.GenSoftwareVersion
+}
+
+// GetGenSoftwareCapabilities returns the value of GenSoftwareCapabilities.
+func (s *BlockchainBlock) GetGenSoftwareCapabilities() OptInt64 {
+	return s.GenSoftwareCapabilities
+}
+
+// GetMasterRef returns the value of MasterRef.
+func (s *BlockchainBlock) GetMasterRef() OptString {
+	return s.MasterRef
+}
+
+// GetPrevRefs returns the value of PrevRefs.
+func (s *BlockchainBlock) GetPrevRefs() []string {
+	return s.PrevRefs
+}
+
+// GetInMsgDescrLength returns the value of InMsgDescrLength.
+func (s *BlockchainBlock) GetInMsgDescrLength() int64 {
+	return s.InMsgDescrLength
+}
+
+// GetOutMsgDescrLength returns the value of OutMsgDescrLength.
+func (s *BlockchainBlock) GetOutMsgDescrLength() int64 {
+	return s.OutMsgDescrLength
+}
+
+// GetRandSeed returns the value of RandSeed.
+func (s *BlockchainBlock) GetRandSeed() string {
+	return s.RandSeed
+}
+
+// GetCreatedBy returns the value of CreatedBy.
+func (s *BlockchainBlock) GetCreatedBy() string {
+	return s.CreatedBy
+}
+
+// SetWorkchainID sets the value of WorkchainID.
+func (s *BlockchainBlock) SetWorkchainID(val int32) {
+	s.WorkchainID = val
+}
+
+// SetShard sets the value of Shard.
+func (s *BlockchainBlock) SetShard(val string) {
+	s.Shard = val
+}
+
+// SetSeqno sets the value of Seqno.
+func (s *BlockchainBlock) SetSeqno(val int32) {
+	s.Seqno = val
+}
+
+// SetRootHash sets the value of RootHash.
+func (s *BlockchainBlock) SetRootHash(val string) {
+	s.RootHash = val
+}
+
+// SetFileHash sets the value of FileHash.
+func (s *BlockchainBlock) SetFileHash(val string) {
+	s.FileHash = val
+}
+
+// SetGlobalID sets the value of GlobalID.
+func (s *BlockchainBlock) SetGlobalID(val int32) {
+	s.GlobalID = val
+}
+
+// SetVersion sets the value of Version.
+func (s *BlockchainBlock) SetVersion(val int32) {
+	s.Version = val
+}
+
+// SetAfterMerge sets the value of AfterMerge.
+func (s *BlockchainBlock) SetAfterMerge(val bool) {
+	s.AfterMerge = val
+}
+
+// SetBeforeSplit sets the value of BeforeSplit.
+func (s *BlockchainBlock) SetBeforeSplit(val bool) {
+	s.BeforeSplit = val
+}
+
+// SetAfterSplit sets the value of AfterSplit.
+func (s *BlockchainBlock) SetAfterSplit(val bool) {
+	s.AfterSplit = val
+}
+
+// SetWantSplit sets the value of WantSplit.
+func (s *BlockchainBlock) SetWantSplit(val bool) {
+	s.WantSplit = val
+}
+
+// SetWantMerge sets the value of WantMerge.
+func (s *BlockchainBlock) SetWantMerge(val bool) {
+	s.WantMerge = val
+}
+
+// SetKeyBlock sets the value of KeyBlock.
+func (s *BlockchainBlock) SetKeyBlock(val bool) {
+	s.KeyBlock = val
+}
+
+// SetGenUtime sets the value of GenUtime.
+func (s *BlockchainBlock) SetGenUtime(val int64) {
+	s.GenUtime = val
+}
+
+// SetStartLt sets the value of StartLt.
+func (s *BlockchainBlock) SetStartLt(val int64) {
+	s.StartLt = val
+}
+
+// SetEndLt sets the value of EndLt.
+func (s *BlockchainBlock) SetEndLt(val int64) {
+	s.EndLt = val
+}
+
+// SetVertSeqno sets the value of VertSeqno.
+func (s *BlockchainBlock) SetVertSeqno(val int32) {
+	s.VertSeqno = val
+}
+
+// SetGenCatchainSeqno sets the value of GenCatchainSeqno.
+func (s *BlockchainBlock) SetGenCatchainSeqno(val int32) {
+	s.GenCatchainSeqno = val
+}
+
+// SetMinRefMcSeqno sets the value of MinRefMcSeqno.
+func (s *BlockchainBlock) SetMinRefMcSeqno(val int32) {
+	s.MinRefMcSeqno = val
+}
+
+// SetPrevKeyBlockSeqno sets the value of PrevKeyBlockSeqno.
+func (s *BlockchainBlock) SetPrevKeyBlockSeqno(val int32) {
+	s.PrevKeyBlockSeqno = val
+}
+
+// SetGenSoftwareVersion sets the value of GenSoftwareVersion.
+func (s *BlockchainBlock) SetGenSoftwareVersion(val OptInt32) {
+	s.GenSoftwareVersion = val
+}
+
+// SetGenSoftwareCapabilities sets the value of GenSoftwareCapabilities.
+func (s *BlockchainBlock) SetGenSoftwareCapabilities(val OptInt64) {
+	s.GenSoftwareCapabilities = val
+}
+
+// SetMasterRef sets the value of MasterRef.
+func (s *BlockchainBlock) SetMasterRef(val OptString) {
+	s.MasterRef = val
+}
+
+// SetPrevRefs sets the value of PrevRefs.
+func (s *BlockchainBlock) SetPrevRefs(val []string) {
+	s.PrevRefs = val
+}
+
+// SetInMsgDescrLength sets the value of InMsgDescrLength.
+func (s *BlockchainBlock) SetInMsgDescrLength(val int64) {
+	s.InMsgDescrLength = val
+}
+
+// SetOutMsgDescrLength sets the value of OutMsgDescrLength.
+func (s *BlockchainBlock) SetOutMsgDescrLength(val int64) {
+	s.OutMsgDescrLength = val
+}
+
+// SetRandSeed sets the value of RandSeed.
+func (s *BlockchainBlock) SetRandSeed(val string) {
+	s.RandSeed = val
+}
+
+// SetCreatedBy sets the value of CreatedBy.
+func (s *BlockchainBlock) SetCreatedBy(val string) {
+	s.CreatedBy = val
+}
+
+// Ref: #/components/schemas/BlockchainConfig
+type BlockchainConfig struct {
+	// Config boc in base64 format.
+	Raw string `json:"raw"`
+	// Config address.
+	R0 string `json:"0"`
+	// Elector address.
+	R1 string `json:"1"`
+	// Minter address.
+	R2 string `json:"2"`
+	// Dns root address.
+	R4  string           `json:"4"`
+	R32 OptValidatorsSet `json:"32"`
+	R33 OptValidatorsSet `json:"33"`
+	R34 OptValidatorsSet `json:"34"`
+	R35 OptValidatorsSet `json:"35"`
+	R36 OptValidatorsSet `json:"36"`
+	R37 OptValidatorsSet `json:"37"`
+}
+
+// GetRaw returns the value of Raw.
+func (s *BlockchainConfig) GetRaw() string {
+	return s.Raw
+}
+
+// GetR0 returns the value of R0.
+func (s *BlockchainConfig) GetR0() string {
+	return s.R0
+}
+
+// GetR1 returns the value of R1.
+func (s *BlockchainConfig) GetR1() string {
+	return s.R1
+}
+
+// GetR2 returns the value of R2.
+func (s *BlockchainConfig) GetR2() string {
+	return s.R2
+}
+
+// GetR4 returns the value of R4.
+func (s *BlockchainConfig) GetR4() string {
+	return s.R4
+}
+
+// GetR32 returns the value of R32.
+func (s *BlockchainConfig) GetR32() OptValidatorsSet {
+	return s.R32
+}
+
+// GetR33 returns the value of R33.
+func (s *BlockchainConfig) GetR33() OptValidatorsSet {
+	return s.R33
+}
+
+// GetR34 returns the value of R34.
+func (s *BlockchainConfig) GetR34() OptValidatorsSet {
+	return s.R34
+}
+
+// GetR35 returns the value of R35.
+func (s *BlockchainConfig) GetR35() OptValidatorsSet {
+	return s.R35
+}
+
+// GetR36 returns the value of R36.
+func (s *BlockchainConfig) GetR36() OptValidatorsSet {
+	return s.R36
+}
+
+// GetR37 returns the value of R37.
+func (s *BlockchainConfig) GetR37() OptValidatorsSet {
+	return s.R37
+}
+
+// SetRaw sets the value of Raw.
+func (s *BlockchainConfig) SetRaw(val string) {
+	s.Raw = val
+}
+
+// SetR0 sets the value of R0.
+func (s *BlockchainConfig) SetR0(val string) {
+	s.R0 = val
+}
+
+// SetR1 sets the value of R1.
+func (s *BlockchainConfig) SetR1(val string) {
+	s.R1 = val
+}
+
+// SetR2 sets the value of R2.
+func (s *BlockchainConfig) SetR2(val string) {
+	s.R2 = val
+}
+
+// SetR4 sets the value of R4.
+func (s *BlockchainConfig) SetR4(val string) {
+	s.R4 = val
+}
+
+// SetR32 sets the value of R32.
+func (s *BlockchainConfig) SetR32(val OptValidatorsSet) {
+	s.R32 = val
+}
+
+// SetR33 sets the value of R33.
+func (s *BlockchainConfig) SetR33(val OptValidatorsSet) {
+	s.R33 = val
+}
+
+// SetR34 sets the value of R34.
+func (s *BlockchainConfig) SetR34(val OptValidatorsSet) {
+	s.R34 = val
+}
+
+// SetR35 sets the value of R35.
+func (s *BlockchainConfig) SetR35(val OptValidatorsSet) {
+	s.R35 = val
+}
+
+// SetR36 sets the value of R36.
+func (s *BlockchainConfig) SetR36(val OptValidatorsSet) {
+	s.R36 = val
+}
+
+// SetR37 sets the value of R37.
+func (s *BlockchainConfig) SetR37(val OptValidatorsSet) {
+	s.R37 = val
+}
+
+// Ref: #/components/schemas/BlockchainRawAccount
+type BlockchainRawAccount struct {
+	Address           string                              `json:"address"`
+	Balance           int64                               `json:"balance"`
+	ExtraBalance      OptBlockchainRawAccountExtraBalance `json:"extra_balance"`
+	Code              OptString                           `json:"code"`
+	Data              OptString                           `json:"data"`
+	LastTransactionLt int64                               `json:"last_transaction_lt"`
+	Status            string                              `json:"status"`
+	Storage           AccountStorageInfo                  `json:"storage"`
+}
+
+// GetAddress returns the value of Address.
+func (s *BlockchainRawAccount) GetAddress() string {
+	return s.Address
+}
+
+// GetBalance returns the value of Balance.
+func (s *BlockchainRawAccount) GetBalance() int64 {
+	return s.Balance
+}
+
+// GetExtraBalance returns the value of ExtraBalance.
+func (s *BlockchainRawAccount) GetExtraBalance() OptBlockchainRawAccountExtraBalance {
+	return s.ExtraBalance
+}
+
+// GetCode returns the value of Code.
+func (s *BlockchainRawAccount) GetCode() OptString {
+	return s.Code
+}
+
+// GetData returns the value of Data.
+func (s *BlockchainRawAccount) GetData() OptString {
+	return s.Data
+}
+
+// GetLastTransactionLt returns the value of LastTransactionLt.
+func (s *BlockchainRawAccount) GetLastTransactionLt() int64 {
+	return s.LastTransactionLt
+}
+
+// GetStatus returns the value of Status.
+func (s *BlockchainRawAccount) GetStatus() string {
+	return s.Status
+}
+
+// GetStorage returns the value of Storage.
+func (s *BlockchainRawAccount) GetStorage() AccountStorageInfo {
+	return s.Storage
+}
+
+// SetAddress sets the value of Address.
+func (s *BlockchainRawAccount) SetAddress(val string) {
+	s.Address = val
+}
+
+// SetBalance sets the value of Balance.
+func (s *BlockchainRawAccount) SetBalance(val int64) {
+	s.Balance = val
+}
+
+// SetExtraBalance sets the value of ExtraBalance.
+func (s *BlockchainRawAccount) SetExtraBalance(val OptBlockchainRawAccountExtraBalance) {
+	s.ExtraBalance = val
+}
+
+// SetCode sets the value of Code.
+func (s *BlockchainRawAccount) SetCode(val OptString) {
+	s.Code = val
+}
+
+// SetData sets the value of Data.
+func (s *BlockchainRawAccount) SetData(val OptString) {
+	s.Data = val
+}
+
+// SetLastTransactionLt sets the value of LastTransactionLt.
+func (s *BlockchainRawAccount) SetLastTransactionLt(val int64) {
+	s.LastTransactionLt = val
+}
+
+// SetStatus sets the value of Status.
+func (s *BlockchainRawAccount) SetStatus(val string) {
+	s.Status = val
+}
+
+// SetStorage sets the value of Storage.
+func (s *BlockchainRawAccount) SetStorage(val AccountStorageInfo) {
+	s.Storage = val
+}
+
+type BlockchainRawAccountExtraBalance map[string]string
+
+func (s *BlockchainRawAccountExtraBalance) init() BlockchainRawAccountExtraBalance {
+	m := *s
+	if m == nil {
+		m = map[string]string{}
+		*s = m
+	}
+	return m
 }
 
 // Ref: #/components/schemas/BouncePhaseType
@@ -1744,136 +1977,6 @@ func (s *ComputeSkipReason) UnmarshalText(data []byte) error {
 	default:
 		return errors.Errorf("invalid value: %q", data)
 	}
-}
-
-// Ref: #/components/schemas/Config
-type Config struct {
-	// Config boc in base64 format.
-	Raw string `json:"raw"`
-	// Config address.
-	R0 string `json:"0"`
-	// Elector address.
-	R1 string `json:"1"`
-	// Minter address.
-	R2 string `json:"2"`
-	// Dns root address.
-	R4  string           `json:"4"`
-	R32 OptValidatorsSet `json:"32"`
-	R33 OptValidatorsSet `json:"33"`
-	R34 OptValidatorsSet `json:"34"`
-	R35 OptValidatorsSet `json:"35"`
-	R36 OptValidatorsSet `json:"36"`
-	R37 OptValidatorsSet `json:"37"`
-}
-
-// GetRaw returns the value of Raw.
-func (s *Config) GetRaw() string {
-	return s.Raw
-}
-
-// GetR0 returns the value of R0.
-func (s *Config) GetR0() string {
-	return s.R0
-}
-
-// GetR1 returns the value of R1.
-func (s *Config) GetR1() string {
-	return s.R1
-}
-
-// GetR2 returns the value of R2.
-func (s *Config) GetR2() string {
-	return s.R2
-}
-
-// GetR4 returns the value of R4.
-func (s *Config) GetR4() string {
-	return s.R4
-}
-
-// GetR32 returns the value of R32.
-func (s *Config) GetR32() OptValidatorsSet {
-	return s.R32
-}
-
-// GetR33 returns the value of R33.
-func (s *Config) GetR33() OptValidatorsSet {
-	return s.R33
-}
-
-// GetR34 returns the value of R34.
-func (s *Config) GetR34() OptValidatorsSet {
-	return s.R34
-}
-
-// GetR35 returns the value of R35.
-func (s *Config) GetR35() OptValidatorsSet {
-	return s.R35
-}
-
-// GetR36 returns the value of R36.
-func (s *Config) GetR36() OptValidatorsSet {
-	return s.R36
-}
-
-// GetR37 returns the value of R37.
-func (s *Config) GetR37() OptValidatorsSet {
-	return s.R37
-}
-
-// SetRaw sets the value of Raw.
-func (s *Config) SetRaw(val string) {
-	s.Raw = val
-}
-
-// SetR0 sets the value of R0.
-func (s *Config) SetR0(val string) {
-	s.R0 = val
-}
-
-// SetR1 sets the value of R1.
-func (s *Config) SetR1(val string) {
-	s.R1 = val
-}
-
-// SetR2 sets the value of R2.
-func (s *Config) SetR2(val string) {
-	s.R2 = val
-}
-
-// SetR4 sets the value of R4.
-func (s *Config) SetR4(val string) {
-	s.R4 = val
-}
-
-// SetR32 sets the value of R32.
-func (s *Config) SetR32(val OptValidatorsSet) {
-	s.R32 = val
-}
-
-// SetR33 sets the value of R33.
-func (s *Config) SetR33(val OptValidatorsSet) {
-	s.R33 = val
-}
-
-// SetR34 sets the value of R34.
-func (s *Config) SetR34(val OptValidatorsSet) {
-	s.R34 = val
-}
-
-// SetR35 sets the value of R35.
-func (s *Config) SetR35(val OptValidatorsSet) {
-	s.R35 = val
-}
-
-// SetR36 sets the value of R36.
-func (s *Config) SetR36(val OptValidatorsSet) {
-	s.R36 = val
-}
-
-// SetR37 sets the value of R37.
-func (s *Config) SetR37(val OptValidatorsSet) {
-	s.R37 = val
 }
 
 // Ref: #/components/schemas/ContractDeployAction
@@ -2132,7 +2235,7 @@ func (s *DomainBids) SetData(val []DomainBid) {
 type DomainInfo struct {
 	Name string `json:"name"`
 	// Date of expiring. optional. not all domain in ton has expiration date.
-	ExpiringAt OptInt     `json:"expiring_at"`
+	ExpiringAt OptInt64   `json:"expiring_at"`
 	Item       OptNftItem `json:"item"`
 }
 
@@ -2142,7 +2245,7 @@ func (s *DomainInfo) GetName() string {
 }
 
 // GetExpiringAt returns the value of ExpiringAt.
-func (s *DomainInfo) GetExpiringAt() OptInt {
+func (s *DomainInfo) GetExpiringAt() OptInt64 {
 	return s.ExpiringAt
 }
 
@@ -2157,7 +2260,7 @@ func (s *DomainInfo) SetName(val string) {
 }
 
 // SetExpiringAt sets the value of ExpiringAt.
-func (s *DomainInfo) SetExpiringAt(val OptInt) {
+func (s *DomainInfo) SetExpiringAt(val OptInt64) {
 	s.ExpiringAt = val
 }
 
@@ -2223,17 +2326,17 @@ func (s *EmulateMessageToTraceReq) SetBoc(val string) {
 	s.Boc = val
 }
 
-type EmulateWalletMessageReq struct {
+type EmulateMessageToWalletReq struct {
 	Boc string `json:"boc"`
 }
 
 // GetBoc returns the value of Boc.
-func (s *EmulateWalletMessageReq) GetBoc() string {
+func (s *EmulateMessageToWalletReq) GetBoc() string {
 	return s.Boc
 }
 
 // SetBoc sets the value of Boc.
-func (s *EmulateWalletMessageReq) SetBoc(val string) {
+func (s *EmulateMessageToWalletReq) SetBoc(val string) {
 	s.Boc = val
 }
 
@@ -2440,62 +2543,18 @@ func (s *GetAccountInfoByStateInitReq) SetStateInit(val string) {
 	s.StateInit = val
 }
 
-type GetAccountStateLiteServerOK struct {
-	ID         BlockRaw `json:"id"`
-	Shardblk   BlockRaw `json:"shardblk"`
-	ShardProof string   `json:"shard_proof"`
-	Proof      string   `json:"proof"`
-	State      string   `json:"state"`
+type GetAccountPublicKeyOK struct {
+	PublicKey string `json:"public_key"`
 }
 
-// GetID returns the value of ID.
-func (s *GetAccountStateLiteServerOK) GetID() BlockRaw {
-	return s.ID
+// GetPublicKey returns the value of PublicKey.
+func (s *GetAccountPublicKeyOK) GetPublicKey() string {
+	return s.PublicKey
 }
 
-// GetShardblk returns the value of Shardblk.
-func (s *GetAccountStateLiteServerOK) GetShardblk() BlockRaw {
-	return s.Shardblk
-}
-
-// GetShardProof returns the value of ShardProof.
-func (s *GetAccountStateLiteServerOK) GetShardProof() string {
-	return s.ShardProof
-}
-
-// GetProof returns the value of Proof.
-func (s *GetAccountStateLiteServerOK) GetProof() string {
-	return s.Proof
-}
-
-// GetState returns the value of State.
-func (s *GetAccountStateLiteServerOK) GetState() string {
-	return s.State
-}
-
-// SetID sets the value of ID.
-func (s *GetAccountStateLiteServerOK) SetID(val BlockRaw) {
-	s.ID = val
-}
-
-// SetShardblk sets the value of Shardblk.
-func (s *GetAccountStateLiteServerOK) SetShardblk(val BlockRaw) {
-	s.Shardblk = val
-}
-
-// SetShardProof sets the value of ShardProof.
-func (s *GetAccountStateLiteServerOK) SetShardProof(val string) {
-	s.ShardProof = val
-}
-
-// SetProof sets the value of Proof.
-func (s *GetAccountStateLiteServerOK) SetProof(val string) {
-	s.Proof = val
-}
-
-// SetState sets the value of State.
-func (s *GetAccountStateLiteServerOK) SetState(val string) {
-	s.State = val
+// SetPublicKey sets the value of PublicKey.
+func (s *GetAccountPublicKeyOK) SetPublicKey(val string) {
+	s.PublicKey = val
 }
 
 type GetAccountsReq struct {
@@ -2512,372 +2571,40 @@ func (s *GetAccountsReq) SetAccountIds(val []string) {
 	s.AccountIds = val
 }
 
-type GetAllShardsInfoLiteServerOK struct {
+type GetAllRawShardsInfoOK struct {
 	ID    BlockRaw `json:"id"`
 	Proof string   `json:"proof"`
 	Data  string   `json:"data"`
 }
 
 // GetID returns the value of ID.
-func (s *GetAllShardsInfoLiteServerOK) GetID() BlockRaw {
+func (s *GetAllRawShardsInfoOK) GetID() BlockRaw {
 	return s.ID
 }
 
 // GetProof returns the value of Proof.
-func (s *GetAllShardsInfoLiteServerOK) GetProof() string {
+func (s *GetAllRawShardsInfoOK) GetProof() string {
 	return s.Proof
 }
 
 // GetData returns the value of Data.
-func (s *GetAllShardsInfoLiteServerOK) GetData() string {
+func (s *GetAllRawShardsInfoOK) GetData() string {
 	return s.Data
 }
 
 // SetID sets the value of ID.
-func (s *GetAllShardsInfoLiteServerOK) SetID(val BlockRaw) {
+func (s *GetAllRawShardsInfoOK) SetID(val BlockRaw) {
 	s.ID = val
 }
 
 // SetProof sets the value of Proof.
-func (s *GetAllShardsInfoLiteServerOK) SetProof(val string) {
+func (s *GetAllRawShardsInfoOK) SetProof(val string) {
 	s.Proof = val
 }
 
 // SetData sets the value of Data.
-func (s *GetAllShardsInfoLiteServerOK) SetData(val string) {
+func (s *GetAllRawShardsInfoOK) SetData(val string) {
 	s.Data = val
-}
-
-type GetBlockHeaderLiteServerOK struct {
-	ID          BlockRaw `json:"id"`
-	Mode        uint32   `json:"mode"`
-	HeaderProof string   `json:"header_proof"`
-}
-
-// GetID returns the value of ID.
-func (s *GetBlockHeaderLiteServerOK) GetID() BlockRaw {
-	return s.ID
-}
-
-// GetMode returns the value of Mode.
-func (s *GetBlockHeaderLiteServerOK) GetMode() uint32 {
-	return s.Mode
-}
-
-// GetHeaderProof returns the value of HeaderProof.
-func (s *GetBlockHeaderLiteServerOK) GetHeaderProof() string {
-	return s.HeaderProof
-}
-
-// SetID sets the value of ID.
-func (s *GetBlockHeaderLiteServerOK) SetID(val BlockRaw) {
-	s.ID = val
-}
-
-// SetMode sets the value of Mode.
-func (s *GetBlockHeaderLiteServerOK) SetMode(val uint32) {
-	s.Mode = val
-}
-
-// SetHeaderProof sets the value of HeaderProof.
-func (s *GetBlockHeaderLiteServerOK) SetHeaderProof(val string) {
-	s.HeaderProof = val
-}
-
-type GetBlockLiteServerOK struct {
-	ID   BlockRaw `json:"id"`
-	Data string   `json:"data"`
-}
-
-// GetID returns the value of ID.
-func (s *GetBlockLiteServerOK) GetID() BlockRaw {
-	return s.ID
-}
-
-// GetData returns the value of Data.
-func (s *GetBlockLiteServerOK) GetData() string {
-	return s.Data
-}
-
-// SetID sets the value of ID.
-func (s *GetBlockLiteServerOK) SetID(val BlockRaw) {
-	s.ID = val
-}
-
-// SetData sets the value of Data.
-func (s *GetBlockLiteServerOK) SetData(val string) {
-	s.Data = val
-}
-
-type GetBlockProofLiteServerOK struct {
-	Complete bool                                 `json:"complete"`
-	From     BlockRaw                             `json:"from"`
-	To       BlockRaw                             `json:"to"`
-	Steps    []GetBlockProofLiteServerOKStepsItem `json:"steps"`
-}
-
-// GetComplete returns the value of Complete.
-func (s *GetBlockProofLiteServerOK) GetComplete() bool {
-	return s.Complete
-}
-
-// GetFrom returns the value of From.
-func (s *GetBlockProofLiteServerOK) GetFrom() BlockRaw {
-	return s.From
-}
-
-// GetTo returns the value of To.
-func (s *GetBlockProofLiteServerOK) GetTo() BlockRaw {
-	return s.To
-}
-
-// GetSteps returns the value of Steps.
-func (s *GetBlockProofLiteServerOK) GetSteps() []GetBlockProofLiteServerOKStepsItem {
-	return s.Steps
-}
-
-// SetComplete sets the value of Complete.
-func (s *GetBlockProofLiteServerOK) SetComplete(val bool) {
-	s.Complete = val
-}
-
-// SetFrom sets the value of From.
-func (s *GetBlockProofLiteServerOK) SetFrom(val BlockRaw) {
-	s.From = val
-}
-
-// SetTo sets the value of To.
-func (s *GetBlockProofLiteServerOK) SetTo(val BlockRaw) {
-	s.To = val
-}
-
-// SetSteps sets the value of Steps.
-func (s *GetBlockProofLiteServerOK) SetSteps(val []GetBlockProofLiteServerOKStepsItem) {
-	s.Steps = val
-}
-
-type GetBlockProofLiteServerOKStepsItem struct {
-	LiteServerBlockLinkBack    GetBlockProofLiteServerOKStepsItemLiteServerBlockLinkBack    `json:"lite_server_block_link_back"`
-	LiteServerBlockLinkForward GetBlockProofLiteServerOKStepsItemLiteServerBlockLinkForward `json:"lite_server_block_link_forward"`
-}
-
-// GetLiteServerBlockLinkBack returns the value of LiteServerBlockLinkBack.
-func (s *GetBlockProofLiteServerOKStepsItem) GetLiteServerBlockLinkBack() GetBlockProofLiteServerOKStepsItemLiteServerBlockLinkBack {
-	return s.LiteServerBlockLinkBack
-}
-
-// GetLiteServerBlockLinkForward returns the value of LiteServerBlockLinkForward.
-func (s *GetBlockProofLiteServerOKStepsItem) GetLiteServerBlockLinkForward() GetBlockProofLiteServerOKStepsItemLiteServerBlockLinkForward {
-	return s.LiteServerBlockLinkForward
-}
-
-// SetLiteServerBlockLinkBack sets the value of LiteServerBlockLinkBack.
-func (s *GetBlockProofLiteServerOKStepsItem) SetLiteServerBlockLinkBack(val GetBlockProofLiteServerOKStepsItemLiteServerBlockLinkBack) {
-	s.LiteServerBlockLinkBack = val
-}
-
-// SetLiteServerBlockLinkForward sets the value of LiteServerBlockLinkForward.
-func (s *GetBlockProofLiteServerOKStepsItem) SetLiteServerBlockLinkForward(val GetBlockProofLiteServerOKStepsItemLiteServerBlockLinkForward) {
-	s.LiteServerBlockLinkForward = val
-}
-
-type GetBlockProofLiteServerOKStepsItemLiteServerBlockLinkBack struct {
-	ToKeyBlock bool     `json:"to_key_block"`
-	From       BlockRaw `json:"from"`
-	To         BlockRaw `json:"to"`
-	DestProof  string   `json:"dest_proof"`
-	Proof      string   `json:"proof"`
-	StateProof string   `json:"state_proof"`
-}
-
-// GetToKeyBlock returns the value of ToKeyBlock.
-func (s *GetBlockProofLiteServerOKStepsItemLiteServerBlockLinkBack) GetToKeyBlock() bool {
-	return s.ToKeyBlock
-}
-
-// GetFrom returns the value of From.
-func (s *GetBlockProofLiteServerOKStepsItemLiteServerBlockLinkBack) GetFrom() BlockRaw {
-	return s.From
-}
-
-// GetTo returns the value of To.
-func (s *GetBlockProofLiteServerOKStepsItemLiteServerBlockLinkBack) GetTo() BlockRaw {
-	return s.To
-}
-
-// GetDestProof returns the value of DestProof.
-func (s *GetBlockProofLiteServerOKStepsItemLiteServerBlockLinkBack) GetDestProof() string {
-	return s.DestProof
-}
-
-// GetProof returns the value of Proof.
-func (s *GetBlockProofLiteServerOKStepsItemLiteServerBlockLinkBack) GetProof() string {
-	return s.Proof
-}
-
-// GetStateProof returns the value of StateProof.
-func (s *GetBlockProofLiteServerOKStepsItemLiteServerBlockLinkBack) GetStateProof() string {
-	return s.StateProof
-}
-
-// SetToKeyBlock sets the value of ToKeyBlock.
-func (s *GetBlockProofLiteServerOKStepsItemLiteServerBlockLinkBack) SetToKeyBlock(val bool) {
-	s.ToKeyBlock = val
-}
-
-// SetFrom sets the value of From.
-func (s *GetBlockProofLiteServerOKStepsItemLiteServerBlockLinkBack) SetFrom(val BlockRaw) {
-	s.From = val
-}
-
-// SetTo sets the value of To.
-func (s *GetBlockProofLiteServerOKStepsItemLiteServerBlockLinkBack) SetTo(val BlockRaw) {
-	s.To = val
-}
-
-// SetDestProof sets the value of DestProof.
-func (s *GetBlockProofLiteServerOKStepsItemLiteServerBlockLinkBack) SetDestProof(val string) {
-	s.DestProof = val
-}
-
-// SetProof sets the value of Proof.
-func (s *GetBlockProofLiteServerOKStepsItemLiteServerBlockLinkBack) SetProof(val string) {
-	s.Proof = val
-}
-
-// SetStateProof sets the value of StateProof.
-func (s *GetBlockProofLiteServerOKStepsItemLiteServerBlockLinkBack) SetStateProof(val string) {
-	s.StateProof = val
-}
-
-type GetBlockProofLiteServerOKStepsItemLiteServerBlockLinkForward struct {
-	ToKeyBlock  bool                                                                   `json:"to_key_block"`
-	From        BlockRaw                                                               `json:"from"`
-	To          BlockRaw                                                               `json:"to"`
-	DestProof   string                                                                 `json:"dest_proof"`
-	ConfigProof string                                                                 `json:"config_proof"`
-	Signatures  GetBlockProofLiteServerOKStepsItemLiteServerBlockLinkForwardSignatures `json:"signatures"`
-}
-
-// GetToKeyBlock returns the value of ToKeyBlock.
-func (s *GetBlockProofLiteServerOKStepsItemLiteServerBlockLinkForward) GetToKeyBlock() bool {
-	return s.ToKeyBlock
-}
-
-// GetFrom returns the value of From.
-func (s *GetBlockProofLiteServerOKStepsItemLiteServerBlockLinkForward) GetFrom() BlockRaw {
-	return s.From
-}
-
-// GetTo returns the value of To.
-func (s *GetBlockProofLiteServerOKStepsItemLiteServerBlockLinkForward) GetTo() BlockRaw {
-	return s.To
-}
-
-// GetDestProof returns the value of DestProof.
-func (s *GetBlockProofLiteServerOKStepsItemLiteServerBlockLinkForward) GetDestProof() string {
-	return s.DestProof
-}
-
-// GetConfigProof returns the value of ConfigProof.
-func (s *GetBlockProofLiteServerOKStepsItemLiteServerBlockLinkForward) GetConfigProof() string {
-	return s.ConfigProof
-}
-
-// GetSignatures returns the value of Signatures.
-func (s *GetBlockProofLiteServerOKStepsItemLiteServerBlockLinkForward) GetSignatures() GetBlockProofLiteServerOKStepsItemLiteServerBlockLinkForwardSignatures {
-	return s.Signatures
-}
-
-// SetToKeyBlock sets the value of ToKeyBlock.
-func (s *GetBlockProofLiteServerOKStepsItemLiteServerBlockLinkForward) SetToKeyBlock(val bool) {
-	s.ToKeyBlock = val
-}
-
-// SetFrom sets the value of From.
-func (s *GetBlockProofLiteServerOKStepsItemLiteServerBlockLinkForward) SetFrom(val BlockRaw) {
-	s.From = val
-}
-
-// SetTo sets the value of To.
-func (s *GetBlockProofLiteServerOKStepsItemLiteServerBlockLinkForward) SetTo(val BlockRaw) {
-	s.To = val
-}
-
-// SetDestProof sets the value of DestProof.
-func (s *GetBlockProofLiteServerOKStepsItemLiteServerBlockLinkForward) SetDestProof(val string) {
-	s.DestProof = val
-}
-
-// SetConfigProof sets the value of ConfigProof.
-func (s *GetBlockProofLiteServerOKStepsItemLiteServerBlockLinkForward) SetConfigProof(val string) {
-	s.ConfigProof = val
-}
-
-// SetSignatures sets the value of Signatures.
-func (s *GetBlockProofLiteServerOKStepsItemLiteServerBlockLinkForward) SetSignatures(val GetBlockProofLiteServerOKStepsItemLiteServerBlockLinkForwardSignatures) {
-	s.Signatures = val
-}
-
-type GetBlockProofLiteServerOKStepsItemLiteServerBlockLinkForwardSignatures struct {
-	ValidatorSetHash uint32                                                                                 `json:"validator_set_hash"`
-	CatchainSeqno    uint32                                                                                 `json:"catchain_seqno"`
-	Signatures       []GetBlockProofLiteServerOKStepsItemLiteServerBlockLinkForwardSignaturesSignaturesItem `json:"signatures"`
-}
-
-// GetValidatorSetHash returns the value of ValidatorSetHash.
-func (s *GetBlockProofLiteServerOKStepsItemLiteServerBlockLinkForwardSignatures) GetValidatorSetHash() uint32 {
-	return s.ValidatorSetHash
-}
-
-// GetCatchainSeqno returns the value of CatchainSeqno.
-func (s *GetBlockProofLiteServerOKStepsItemLiteServerBlockLinkForwardSignatures) GetCatchainSeqno() uint32 {
-	return s.CatchainSeqno
-}
-
-// GetSignatures returns the value of Signatures.
-func (s *GetBlockProofLiteServerOKStepsItemLiteServerBlockLinkForwardSignatures) GetSignatures() []GetBlockProofLiteServerOKStepsItemLiteServerBlockLinkForwardSignaturesSignaturesItem {
-	return s.Signatures
-}
-
-// SetValidatorSetHash sets the value of ValidatorSetHash.
-func (s *GetBlockProofLiteServerOKStepsItemLiteServerBlockLinkForwardSignatures) SetValidatorSetHash(val uint32) {
-	s.ValidatorSetHash = val
-}
-
-// SetCatchainSeqno sets the value of CatchainSeqno.
-func (s *GetBlockProofLiteServerOKStepsItemLiteServerBlockLinkForwardSignatures) SetCatchainSeqno(val uint32) {
-	s.CatchainSeqno = val
-}
-
-// SetSignatures sets the value of Signatures.
-func (s *GetBlockProofLiteServerOKStepsItemLiteServerBlockLinkForwardSignatures) SetSignatures(val []GetBlockProofLiteServerOKStepsItemLiteServerBlockLinkForwardSignaturesSignaturesItem) {
-	s.Signatures = val
-}
-
-type GetBlockProofLiteServerOKStepsItemLiteServerBlockLinkForwardSignaturesSignaturesItem struct {
-	NodeIDShort string `json:"node_id_short"`
-	Signature   string `json:"signature"`
-}
-
-// GetNodeIDShort returns the value of NodeIDShort.
-func (s *GetBlockProofLiteServerOKStepsItemLiteServerBlockLinkForwardSignaturesSignaturesItem) GetNodeIDShort() string {
-	return s.NodeIDShort
-}
-
-// GetSignature returns the value of Signature.
-func (s *GetBlockProofLiteServerOKStepsItemLiteServerBlockLinkForwardSignaturesSignaturesItem) GetSignature() string {
-	return s.Signature
-}
-
-// SetNodeIDShort sets the value of NodeIDShort.
-func (s *GetBlockProofLiteServerOKStepsItemLiteServerBlockLinkForwardSignaturesSignaturesItem) SetNodeIDShort(val string) {
-	s.NodeIDShort = val
-}
-
-// SetSignature sets the value of Signature.
-func (s *GetBlockProofLiteServerOKStepsItemLiteServerBlockLinkForwardSignaturesSignaturesItem) SetSignature(val string) {
-	s.Signature = val
 }
 
 type GetChartRatesOK struct {
@@ -2894,285 +2621,6 @@ func (s *GetChartRatesOK) SetPoints(val jx.Raw) {
 	s.Points = val
 }
 
-type GetConfigAllLiteServerOK struct {
-	Mode        uint32   `json:"mode"`
-	ID          BlockRaw `json:"id"`
-	StateProof  string   `json:"state_proof"`
-	ConfigProof string   `json:"config_proof"`
-}
-
-// GetMode returns the value of Mode.
-func (s *GetConfigAllLiteServerOK) GetMode() uint32 {
-	return s.Mode
-}
-
-// GetID returns the value of ID.
-func (s *GetConfigAllLiteServerOK) GetID() BlockRaw {
-	return s.ID
-}
-
-// GetStateProof returns the value of StateProof.
-func (s *GetConfigAllLiteServerOK) GetStateProof() string {
-	return s.StateProof
-}
-
-// GetConfigProof returns the value of ConfigProof.
-func (s *GetConfigAllLiteServerOK) GetConfigProof() string {
-	return s.ConfigProof
-}
-
-// SetMode sets the value of Mode.
-func (s *GetConfigAllLiteServerOK) SetMode(val uint32) {
-	s.Mode = val
-}
-
-// SetID sets the value of ID.
-func (s *GetConfigAllLiteServerOK) SetID(val BlockRaw) {
-	s.ID = val
-}
-
-// SetStateProof sets the value of StateProof.
-func (s *GetConfigAllLiteServerOK) SetStateProof(val string) {
-	s.StateProof = val
-}
-
-// SetConfigProof sets the value of ConfigProof.
-func (s *GetConfigAllLiteServerOK) SetConfigProof(val string) {
-	s.ConfigProof = val
-}
-
-type GetListBlockTransactionsLiteServerOK struct {
-	ID         BlockRaw                                      `json:"id"`
-	ReqCount   uint32                                        `json:"req_count"`
-	Incomplete bool                                          `json:"incomplete"`
-	Ids        []GetListBlockTransactionsLiteServerOKIdsItem `json:"ids"`
-	Proof      string                                        `json:"proof"`
-}
-
-// GetID returns the value of ID.
-func (s *GetListBlockTransactionsLiteServerOK) GetID() BlockRaw {
-	return s.ID
-}
-
-// GetReqCount returns the value of ReqCount.
-func (s *GetListBlockTransactionsLiteServerOK) GetReqCount() uint32 {
-	return s.ReqCount
-}
-
-// GetIncomplete returns the value of Incomplete.
-func (s *GetListBlockTransactionsLiteServerOK) GetIncomplete() bool {
-	return s.Incomplete
-}
-
-// GetIds returns the value of Ids.
-func (s *GetListBlockTransactionsLiteServerOK) GetIds() []GetListBlockTransactionsLiteServerOKIdsItem {
-	return s.Ids
-}
-
-// GetProof returns the value of Proof.
-func (s *GetListBlockTransactionsLiteServerOK) GetProof() string {
-	return s.Proof
-}
-
-// SetID sets the value of ID.
-func (s *GetListBlockTransactionsLiteServerOK) SetID(val BlockRaw) {
-	s.ID = val
-}
-
-// SetReqCount sets the value of ReqCount.
-func (s *GetListBlockTransactionsLiteServerOK) SetReqCount(val uint32) {
-	s.ReqCount = val
-}
-
-// SetIncomplete sets the value of Incomplete.
-func (s *GetListBlockTransactionsLiteServerOK) SetIncomplete(val bool) {
-	s.Incomplete = val
-}
-
-// SetIds sets the value of Ids.
-func (s *GetListBlockTransactionsLiteServerOK) SetIds(val []GetListBlockTransactionsLiteServerOKIdsItem) {
-	s.Ids = val
-}
-
-// SetProof sets the value of Proof.
-func (s *GetListBlockTransactionsLiteServerOK) SetProof(val string) {
-	s.Proof = val
-}
-
-type GetListBlockTransactionsLiteServerOKIdsItem struct {
-	Mode    uint32    `json:"mode"`
-	Account OptString `json:"account"`
-	Lt      OptUint64 `json:"lt"`
-	Hash    OptString `json:"hash"`
-}
-
-// GetMode returns the value of Mode.
-func (s *GetListBlockTransactionsLiteServerOKIdsItem) GetMode() uint32 {
-	return s.Mode
-}
-
-// GetAccount returns the value of Account.
-func (s *GetListBlockTransactionsLiteServerOKIdsItem) GetAccount() OptString {
-	return s.Account
-}
-
-// GetLt returns the value of Lt.
-func (s *GetListBlockTransactionsLiteServerOKIdsItem) GetLt() OptUint64 {
-	return s.Lt
-}
-
-// GetHash returns the value of Hash.
-func (s *GetListBlockTransactionsLiteServerOKIdsItem) GetHash() OptString {
-	return s.Hash
-}
-
-// SetMode sets the value of Mode.
-func (s *GetListBlockTransactionsLiteServerOKIdsItem) SetMode(val uint32) {
-	s.Mode = val
-}
-
-// SetAccount sets the value of Account.
-func (s *GetListBlockTransactionsLiteServerOKIdsItem) SetAccount(val OptString) {
-	s.Account = val
-}
-
-// SetLt sets the value of Lt.
-func (s *GetListBlockTransactionsLiteServerOKIdsItem) SetLt(val OptUint64) {
-	s.Lt = val
-}
-
-// SetHash sets the value of Hash.
-func (s *GetListBlockTransactionsLiteServerOKIdsItem) SetHash(val OptString) {
-	s.Hash = val
-}
-
-type GetMasterchainInfoExtLiteServerOK struct {
-	Mode          uint32       `json:"mode"`
-	Version       uint32       `json:"version"`
-	Capabilities  uint64       `json:"capabilities"`
-	Last          BlockRaw     `json:"last"`
-	LastUtime     uint32       `json:"last_utime"`
-	Now           uint32       `json:"now"`
-	StateRootHash string       `json:"state_root_hash"`
-	Init          InitStateRaw `json:"init"`
-}
-
-// GetMode returns the value of Mode.
-func (s *GetMasterchainInfoExtLiteServerOK) GetMode() uint32 {
-	return s.Mode
-}
-
-// GetVersion returns the value of Version.
-func (s *GetMasterchainInfoExtLiteServerOK) GetVersion() uint32 {
-	return s.Version
-}
-
-// GetCapabilities returns the value of Capabilities.
-func (s *GetMasterchainInfoExtLiteServerOK) GetCapabilities() uint64 {
-	return s.Capabilities
-}
-
-// GetLast returns the value of Last.
-func (s *GetMasterchainInfoExtLiteServerOK) GetLast() BlockRaw {
-	return s.Last
-}
-
-// GetLastUtime returns the value of LastUtime.
-func (s *GetMasterchainInfoExtLiteServerOK) GetLastUtime() uint32 {
-	return s.LastUtime
-}
-
-// GetNow returns the value of Now.
-func (s *GetMasterchainInfoExtLiteServerOK) GetNow() uint32 {
-	return s.Now
-}
-
-// GetStateRootHash returns the value of StateRootHash.
-func (s *GetMasterchainInfoExtLiteServerOK) GetStateRootHash() string {
-	return s.StateRootHash
-}
-
-// GetInit returns the value of Init.
-func (s *GetMasterchainInfoExtLiteServerOK) GetInit() InitStateRaw {
-	return s.Init
-}
-
-// SetMode sets the value of Mode.
-func (s *GetMasterchainInfoExtLiteServerOK) SetMode(val uint32) {
-	s.Mode = val
-}
-
-// SetVersion sets the value of Version.
-func (s *GetMasterchainInfoExtLiteServerOK) SetVersion(val uint32) {
-	s.Version = val
-}
-
-// SetCapabilities sets the value of Capabilities.
-func (s *GetMasterchainInfoExtLiteServerOK) SetCapabilities(val uint64) {
-	s.Capabilities = val
-}
-
-// SetLast sets the value of Last.
-func (s *GetMasterchainInfoExtLiteServerOK) SetLast(val BlockRaw) {
-	s.Last = val
-}
-
-// SetLastUtime sets the value of LastUtime.
-func (s *GetMasterchainInfoExtLiteServerOK) SetLastUtime(val uint32) {
-	s.LastUtime = val
-}
-
-// SetNow sets the value of Now.
-func (s *GetMasterchainInfoExtLiteServerOK) SetNow(val uint32) {
-	s.Now = val
-}
-
-// SetStateRootHash sets the value of StateRootHash.
-func (s *GetMasterchainInfoExtLiteServerOK) SetStateRootHash(val string) {
-	s.StateRootHash = val
-}
-
-// SetInit sets the value of Init.
-func (s *GetMasterchainInfoExtLiteServerOK) SetInit(val InitStateRaw) {
-	s.Init = val
-}
-
-type GetMasterchainInfoLiteServerOK struct {
-	Last          BlockRaw     `json:"last"`
-	StateRootHash string       `json:"state_root_hash"`
-	Init          InitStateRaw `json:"init"`
-}
-
-// GetLast returns the value of Last.
-func (s *GetMasterchainInfoLiteServerOK) GetLast() BlockRaw {
-	return s.Last
-}
-
-// GetStateRootHash returns the value of StateRootHash.
-func (s *GetMasterchainInfoLiteServerOK) GetStateRootHash() string {
-	return s.StateRootHash
-}
-
-// GetInit returns the value of Init.
-func (s *GetMasterchainInfoLiteServerOK) GetInit() InitStateRaw {
-	return s.Init
-}
-
-// SetLast sets the value of Last.
-func (s *GetMasterchainInfoLiteServerOK) SetLast(val BlockRaw) {
-	s.Last = val
-}
-
-// SetStateRootHash sets the value of StateRootHash.
-func (s *GetMasterchainInfoLiteServerOK) SetStateRootHash(val string) {
-	s.StateRootHash = val
-}
-
-// SetInit sets the value of Init.
-func (s *GetMasterchainInfoLiteServerOK) SetInit(val InitStateRaw) {
-	s.Init = val
-}
-
 type GetNftItemsByAddressesReq struct {
 	AccountIds []string `json:"account_ids"`
 }
@@ -3185,20 +2633,6 @@ func (s *GetNftItemsByAddressesReq) GetAccountIds() []string {
 // SetAccountIds sets the value of AccountIds.
 func (s *GetNftItemsByAddressesReq) SetAccountIds(val []string) {
 	s.AccountIds = val
-}
-
-type GetPublicKeyByAccountIDOK struct {
-	PublicKey string `json:"public_key"`
-}
-
-// GetPublicKey returns the value of PublicKey.
-func (s *GetPublicKeyByAccountIDOK) GetPublicKey() string {
-	return s.PublicKey
-}
-
-// SetPublicKey sets the value of PublicKey.
-func (s *GetPublicKeyByAccountIDOK) SetPublicKey(val string) {
-	s.PublicKey = val
 }
 
 type GetRatesOK struct {
@@ -3215,104 +2649,397 @@ func (s *GetRatesOK) SetRates(val jx.Raw) {
 	s.Rates = val
 }
 
-type GetShardBlockProofLiteServerOK struct {
-	MasterchainID BlockRaw                                  `json:"masterchain_id"`
-	Links         []GetShardBlockProofLiteServerOKLinksItem `json:"links"`
-}
-
-// GetMasterchainID returns the value of MasterchainID.
-func (s *GetShardBlockProofLiteServerOK) GetMasterchainID() BlockRaw {
-	return s.MasterchainID
-}
-
-// GetLinks returns the value of Links.
-func (s *GetShardBlockProofLiteServerOK) GetLinks() []GetShardBlockProofLiteServerOKLinksItem {
-	return s.Links
-}
-
-// SetMasterchainID sets the value of MasterchainID.
-func (s *GetShardBlockProofLiteServerOK) SetMasterchainID(val BlockRaw) {
-	s.MasterchainID = val
-}
-
-// SetLinks sets the value of Links.
-func (s *GetShardBlockProofLiteServerOK) SetLinks(val []GetShardBlockProofLiteServerOKLinksItem) {
-	s.Links = val
-}
-
-type GetShardBlockProofLiteServerOKLinksItem struct {
-	ID    BlockRaw `json:"id"`
-	Proof string   `json:"proof"`
-}
-
-// GetID returns the value of ID.
-func (s *GetShardBlockProofLiteServerOKLinksItem) GetID() BlockRaw {
-	return s.ID
-}
-
-// GetProof returns the value of Proof.
-func (s *GetShardBlockProofLiteServerOKLinksItem) GetProof() string {
-	return s.Proof
-}
-
-// SetID sets the value of ID.
-func (s *GetShardBlockProofLiteServerOKLinksItem) SetID(val BlockRaw) {
-	s.ID = val
-}
-
-// SetProof sets the value of Proof.
-func (s *GetShardBlockProofLiteServerOKLinksItem) SetProof(val string) {
-	s.Proof = val
-}
-
-type GetShardInfoLiteServerOK struct {
+type GetRawAccountStateOK struct {
 	ID         BlockRaw `json:"id"`
 	Shardblk   BlockRaw `json:"shardblk"`
 	ShardProof string   `json:"shard_proof"`
-	ShardDescr string   `json:"shard_descr"`
+	Proof      string   `json:"proof"`
+	State      string   `json:"state"`
 }
 
 // GetID returns the value of ID.
-func (s *GetShardInfoLiteServerOK) GetID() BlockRaw {
+func (s *GetRawAccountStateOK) GetID() BlockRaw {
 	return s.ID
 }
 
 // GetShardblk returns the value of Shardblk.
-func (s *GetShardInfoLiteServerOK) GetShardblk() BlockRaw {
+func (s *GetRawAccountStateOK) GetShardblk() BlockRaw {
 	return s.Shardblk
 }
 
 // GetShardProof returns the value of ShardProof.
-func (s *GetShardInfoLiteServerOK) GetShardProof() string {
+func (s *GetRawAccountStateOK) GetShardProof() string {
 	return s.ShardProof
 }
 
-// GetShardDescr returns the value of ShardDescr.
-func (s *GetShardInfoLiteServerOK) GetShardDescr() string {
-	return s.ShardDescr
+// GetProof returns the value of Proof.
+func (s *GetRawAccountStateOK) GetProof() string {
+	return s.Proof
+}
+
+// GetState returns the value of State.
+func (s *GetRawAccountStateOK) GetState() string {
+	return s.State
 }
 
 // SetID sets the value of ID.
-func (s *GetShardInfoLiteServerOK) SetID(val BlockRaw) {
+func (s *GetRawAccountStateOK) SetID(val BlockRaw) {
 	s.ID = val
 }
 
 // SetShardblk sets the value of Shardblk.
-func (s *GetShardInfoLiteServerOK) SetShardblk(val BlockRaw) {
+func (s *GetRawAccountStateOK) SetShardblk(val BlockRaw) {
 	s.Shardblk = val
 }
 
 // SetShardProof sets the value of ShardProof.
-func (s *GetShardInfoLiteServerOK) SetShardProof(val string) {
+func (s *GetRawAccountStateOK) SetShardProof(val string) {
 	s.ShardProof = val
 }
 
-// SetShardDescr sets the value of ShardDescr.
-func (s *GetShardInfoLiteServerOK) SetShardDescr(val string) {
-	s.ShardDescr = val
+// SetProof sets the value of Proof.
+func (s *GetRawAccountStateOK) SetProof(val string) {
+	s.Proof = val
 }
 
-type GetStateLiteServerOK struct {
+// SetState sets the value of State.
+func (s *GetRawAccountStateOK) SetState(val string) {
+	s.State = val
+}
+
+type GetRawBlockProofOK struct {
+	Complete bool                          `json:"complete"`
+	From     BlockRaw                      `json:"from"`
+	To       BlockRaw                      `json:"to"`
+	Steps    []GetRawBlockProofOKStepsItem `json:"steps"`
+}
+
+// GetComplete returns the value of Complete.
+func (s *GetRawBlockProofOK) GetComplete() bool {
+	return s.Complete
+}
+
+// GetFrom returns the value of From.
+func (s *GetRawBlockProofOK) GetFrom() BlockRaw {
+	return s.From
+}
+
+// GetTo returns the value of To.
+func (s *GetRawBlockProofOK) GetTo() BlockRaw {
+	return s.To
+}
+
+// GetSteps returns the value of Steps.
+func (s *GetRawBlockProofOK) GetSteps() []GetRawBlockProofOKStepsItem {
+	return s.Steps
+}
+
+// SetComplete sets the value of Complete.
+func (s *GetRawBlockProofOK) SetComplete(val bool) {
+	s.Complete = val
+}
+
+// SetFrom sets the value of From.
+func (s *GetRawBlockProofOK) SetFrom(val BlockRaw) {
+	s.From = val
+}
+
+// SetTo sets the value of To.
+func (s *GetRawBlockProofOK) SetTo(val BlockRaw) {
+	s.To = val
+}
+
+// SetSteps sets the value of Steps.
+func (s *GetRawBlockProofOK) SetSteps(val []GetRawBlockProofOKStepsItem) {
+	s.Steps = val
+}
+
+type GetRawBlockProofOKStepsItem struct {
+	LiteServerBlockLinkBack    GetRawBlockProofOKStepsItemLiteServerBlockLinkBack    `json:"lite_server_block_link_back"`
+	LiteServerBlockLinkForward GetRawBlockProofOKStepsItemLiteServerBlockLinkForward `json:"lite_server_block_link_forward"`
+}
+
+// GetLiteServerBlockLinkBack returns the value of LiteServerBlockLinkBack.
+func (s *GetRawBlockProofOKStepsItem) GetLiteServerBlockLinkBack() GetRawBlockProofOKStepsItemLiteServerBlockLinkBack {
+	return s.LiteServerBlockLinkBack
+}
+
+// GetLiteServerBlockLinkForward returns the value of LiteServerBlockLinkForward.
+func (s *GetRawBlockProofOKStepsItem) GetLiteServerBlockLinkForward() GetRawBlockProofOKStepsItemLiteServerBlockLinkForward {
+	return s.LiteServerBlockLinkForward
+}
+
+// SetLiteServerBlockLinkBack sets the value of LiteServerBlockLinkBack.
+func (s *GetRawBlockProofOKStepsItem) SetLiteServerBlockLinkBack(val GetRawBlockProofOKStepsItemLiteServerBlockLinkBack) {
+	s.LiteServerBlockLinkBack = val
+}
+
+// SetLiteServerBlockLinkForward sets the value of LiteServerBlockLinkForward.
+func (s *GetRawBlockProofOKStepsItem) SetLiteServerBlockLinkForward(val GetRawBlockProofOKStepsItemLiteServerBlockLinkForward) {
+	s.LiteServerBlockLinkForward = val
+}
+
+type GetRawBlockProofOKStepsItemLiteServerBlockLinkBack struct {
+	ToKeyBlock bool     `json:"to_key_block"`
+	From       BlockRaw `json:"from"`
+	To         BlockRaw `json:"to"`
+	DestProof  string   `json:"dest_proof"`
+	Proof      string   `json:"proof"`
+	StateProof string   `json:"state_proof"`
+}
+
+// GetToKeyBlock returns the value of ToKeyBlock.
+func (s *GetRawBlockProofOKStepsItemLiteServerBlockLinkBack) GetToKeyBlock() bool {
+	return s.ToKeyBlock
+}
+
+// GetFrom returns the value of From.
+func (s *GetRawBlockProofOKStepsItemLiteServerBlockLinkBack) GetFrom() BlockRaw {
+	return s.From
+}
+
+// GetTo returns the value of To.
+func (s *GetRawBlockProofOKStepsItemLiteServerBlockLinkBack) GetTo() BlockRaw {
+	return s.To
+}
+
+// GetDestProof returns the value of DestProof.
+func (s *GetRawBlockProofOKStepsItemLiteServerBlockLinkBack) GetDestProof() string {
+	return s.DestProof
+}
+
+// GetProof returns the value of Proof.
+func (s *GetRawBlockProofOKStepsItemLiteServerBlockLinkBack) GetProof() string {
+	return s.Proof
+}
+
+// GetStateProof returns the value of StateProof.
+func (s *GetRawBlockProofOKStepsItemLiteServerBlockLinkBack) GetStateProof() string {
+	return s.StateProof
+}
+
+// SetToKeyBlock sets the value of ToKeyBlock.
+func (s *GetRawBlockProofOKStepsItemLiteServerBlockLinkBack) SetToKeyBlock(val bool) {
+	s.ToKeyBlock = val
+}
+
+// SetFrom sets the value of From.
+func (s *GetRawBlockProofOKStepsItemLiteServerBlockLinkBack) SetFrom(val BlockRaw) {
+	s.From = val
+}
+
+// SetTo sets the value of To.
+func (s *GetRawBlockProofOKStepsItemLiteServerBlockLinkBack) SetTo(val BlockRaw) {
+	s.To = val
+}
+
+// SetDestProof sets the value of DestProof.
+func (s *GetRawBlockProofOKStepsItemLiteServerBlockLinkBack) SetDestProof(val string) {
+	s.DestProof = val
+}
+
+// SetProof sets the value of Proof.
+func (s *GetRawBlockProofOKStepsItemLiteServerBlockLinkBack) SetProof(val string) {
+	s.Proof = val
+}
+
+// SetStateProof sets the value of StateProof.
+func (s *GetRawBlockProofOKStepsItemLiteServerBlockLinkBack) SetStateProof(val string) {
+	s.StateProof = val
+}
+
+type GetRawBlockProofOKStepsItemLiteServerBlockLinkForward struct {
+	ToKeyBlock  bool                                                            `json:"to_key_block"`
+	From        BlockRaw                                                        `json:"from"`
+	To          BlockRaw                                                        `json:"to"`
+	DestProof   string                                                          `json:"dest_proof"`
+	ConfigProof string                                                          `json:"config_proof"`
+	Signatures  GetRawBlockProofOKStepsItemLiteServerBlockLinkForwardSignatures `json:"signatures"`
+}
+
+// GetToKeyBlock returns the value of ToKeyBlock.
+func (s *GetRawBlockProofOKStepsItemLiteServerBlockLinkForward) GetToKeyBlock() bool {
+	return s.ToKeyBlock
+}
+
+// GetFrom returns the value of From.
+func (s *GetRawBlockProofOKStepsItemLiteServerBlockLinkForward) GetFrom() BlockRaw {
+	return s.From
+}
+
+// GetTo returns the value of To.
+func (s *GetRawBlockProofOKStepsItemLiteServerBlockLinkForward) GetTo() BlockRaw {
+	return s.To
+}
+
+// GetDestProof returns the value of DestProof.
+func (s *GetRawBlockProofOKStepsItemLiteServerBlockLinkForward) GetDestProof() string {
+	return s.DestProof
+}
+
+// GetConfigProof returns the value of ConfigProof.
+func (s *GetRawBlockProofOKStepsItemLiteServerBlockLinkForward) GetConfigProof() string {
+	return s.ConfigProof
+}
+
+// GetSignatures returns the value of Signatures.
+func (s *GetRawBlockProofOKStepsItemLiteServerBlockLinkForward) GetSignatures() GetRawBlockProofOKStepsItemLiteServerBlockLinkForwardSignatures {
+	return s.Signatures
+}
+
+// SetToKeyBlock sets the value of ToKeyBlock.
+func (s *GetRawBlockProofOKStepsItemLiteServerBlockLinkForward) SetToKeyBlock(val bool) {
+	s.ToKeyBlock = val
+}
+
+// SetFrom sets the value of From.
+func (s *GetRawBlockProofOKStepsItemLiteServerBlockLinkForward) SetFrom(val BlockRaw) {
+	s.From = val
+}
+
+// SetTo sets the value of To.
+func (s *GetRawBlockProofOKStepsItemLiteServerBlockLinkForward) SetTo(val BlockRaw) {
+	s.To = val
+}
+
+// SetDestProof sets the value of DestProof.
+func (s *GetRawBlockProofOKStepsItemLiteServerBlockLinkForward) SetDestProof(val string) {
+	s.DestProof = val
+}
+
+// SetConfigProof sets the value of ConfigProof.
+func (s *GetRawBlockProofOKStepsItemLiteServerBlockLinkForward) SetConfigProof(val string) {
+	s.ConfigProof = val
+}
+
+// SetSignatures sets the value of Signatures.
+func (s *GetRawBlockProofOKStepsItemLiteServerBlockLinkForward) SetSignatures(val GetRawBlockProofOKStepsItemLiteServerBlockLinkForwardSignatures) {
+	s.Signatures = val
+}
+
+type GetRawBlockProofOKStepsItemLiteServerBlockLinkForwardSignatures struct {
+	ValidatorSetHash uint32                                                                          `json:"validator_set_hash"`
+	CatchainSeqno    uint32                                                                          `json:"catchain_seqno"`
+	Signatures       []GetRawBlockProofOKStepsItemLiteServerBlockLinkForwardSignaturesSignaturesItem `json:"signatures"`
+}
+
+// GetValidatorSetHash returns the value of ValidatorSetHash.
+func (s *GetRawBlockProofOKStepsItemLiteServerBlockLinkForwardSignatures) GetValidatorSetHash() uint32 {
+	return s.ValidatorSetHash
+}
+
+// GetCatchainSeqno returns the value of CatchainSeqno.
+func (s *GetRawBlockProofOKStepsItemLiteServerBlockLinkForwardSignatures) GetCatchainSeqno() uint32 {
+	return s.CatchainSeqno
+}
+
+// GetSignatures returns the value of Signatures.
+func (s *GetRawBlockProofOKStepsItemLiteServerBlockLinkForwardSignatures) GetSignatures() []GetRawBlockProofOKStepsItemLiteServerBlockLinkForwardSignaturesSignaturesItem {
+	return s.Signatures
+}
+
+// SetValidatorSetHash sets the value of ValidatorSetHash.
+func (s *GetRawBlockProofOKStepsItemLiteServerBlockLinkForwardSignatures) SetValidatorSetHash(val uint32) {
+	s.ValidatorSetHash = val
+}
+
+// SetCatchainSeqno sets the value of CatchainSeqno.
+func (s *GetRawBlockProofOKStepsItemLiteServerBlockLinkForwardSignatures) SetCatchainSeqno(val uint32) {
+	s.CatchainSeqno = val
+}
+
+// SetSignatures sets the value of Signatures.
+func (s *GetRawBlockProofOKStepsItemLiteServerBlockLinkForwardSignatures) SetSignatures(val []GetRawBlockProofOKStepsItemLiteServerBlockLinkForwardSignaturesSignaturesItem) {
+	s.Signatures = val
+}
+
+type GetRawBlockProofOKStepsItemLiteServerBlockLinkForwardSignaturesSignaturesItem struct {
+	NodeIDShort string `json:"node_id_short"`
+	Signature   string `json:"signature"`
+}
+
+// GetNodeIDShort returns the value of NodeIDShort.
+func (s *GetRawBlockProofOKStepsItemLiteServerBlockLinkForwardSignaturesSignaturesItem) GetNodeIDShort() string {
+	return s.NodeIDShort
+}
+
+// GetSignature returns the value of Signature.
+func (s *GetRawBlockProofOKStepsItemLiteServerBlockLinkForwardSignaturesSignaturesItem) GetSignature() string {
+	return s.Signature
+}
+
+// SetNodeIDShort sets the value of NodeIDShort.
+func (s *GetRawBlockProofOKStepsItemLiteServerBlockLinkForwardSignaturesSignaturesItem) SetNodeIDShort(val string) {
+	s.NodeIDShort = val
+}
+
+// SetSignature sets the value of Signature.
+func (s *GetRawBlockProofOKStepsItemLiteServerBlockLinkForwardSignaturesSignaturesItem) SetSignature(val string) {
+	s.Signature = val
+}
+
+type GetRawBlockchainBlockHeaderOK struct {
+	ID          BlockRaw `json:"id"`
+	Mode        uint32   `json:"mode"`
+	HeaderProof string   `json:"header_proof"`
+}
+
+// GetID returns the value of ID.
+func (s *GetRawBlockchainBlockHeaderOK) GetID() BlockRaw {
+	return s.ID
+}
+
+// GetMode returns the value of Mode.
+func (s *GetRawBlockchainBlockHeaderOK) GetMode() uint32 {
+	return s.Mode
+}
+
+// GetHeaderProof returns the value of HeaderProof.
+func (s *GetRawBlockchainBlockHeaderOK) GetHeaderProof() string {
+	return s.HeaderProof
+}
+
+// SetID sets the value of ID.
+func (s *GetRawBlockchainBlockHeaderOK) SetID(val BlockRaw) {
+	s.ID = val
+}
+
+// SetMode sets the value of Mode.
+func (s *GetRawBlockchainBlockHeaderOK) SetMode(val uint32) {
+	s.Mode = val
+}
+
+// SetHeaderProof sets the value of HeaderProof.
+func (s *GetRawBlockchainBlockHeaderOK) SetHeaderProof(val string) {
+	s.HeaderProof = val
+}
+
+type GetRawBlockchainBlockOK struct {
+	ID   BlockRaw `json:"id"`
+	Data string   `json:"data"`
+}
+
+// GetID returns the value of ID.
+func (s *GetRawBlockchainBlockOK) GetID() BlockRaw {
+	return s.ID
+}
+
+// GetData returns the value of Data.
+func (s *GetRawBlockchainBlockOK) GetData() string {
+	return s.Data
+}
+
+// SetID sets the value of ID.
+func (s *GetRawBlockchainBlockOK) SetID(val BlockRaw) {
+	s.ID = val
+}
+
+// SetData sets the value of Data.
+func (s *GetRawBlockchainBlockOK) SetData(val string) {
+	s.Data = val
+}
+
+type GetRawBlockchainBlockStateOK struct {
 	ID       BlockRaw `json:"id"`
 	RootHash string   `json:"root_hash"`
 	FileHash string   `json:"file_hash"`
@@ -3320,43 +3047,533 @@ type GetStateLiteServerOK struct {
 }
 
 // GetID returns the value of ID.
-func (s *GetStateLiteServerOK) GetID() BlockRaw {
+func (s *GetRawBlockchainBlockStateOK) GetID() BlockRaw {
 	return s.ID
 }
 
 // GetRootHash returns the value of RootHash.
-func (s *GetStateLiteServerOK) GetRootHash() string {
+func (s *GetRawBlockchainBlockStateOK) GetRootHash() string {
 	return s.RootHash
 }
 
 // GetFileHash returns the value of FileHash.
-func (s *GetStateLiteServerOK) GetFileHash() string {
+func (s *GetRawBlockchainBlockStateOK) GetFileHash() string {
 	return s.FileHash
 }
 
 // GetData returns the value of Data.
-func (s *GetStateLiteServerOK) GetData() string {
+func (s *GetRawBlockchainBlockStateOK) GetData() string {
 	return s.Data
 }
 
 // SetID sets the value of ID.
-func (s *GetStateLiteServerOK) SetID(val BlockRaw) {
+func (s *GetRawBlockchainBlockStateOK) SetID(val BlockRaw) {
 	s.ID = val
 }
 
 // SetRootHash sets the value of RootHash.
-func (s *GetStateLiteServerOK) SetRootHash(val string) {
+func (s *GetRawBlockchainBlockStateOK) SetRootHash(val string) {
 	s.RootHash = val
 }
 
 // SetFileHash sets the value of FileHash.
-func (s *GetStateLiteServerOK) SetFileHash(val string) {
+func (s *GetRawBlockchainBlockStateOK) SetFileHash(val string) {
 	s.FileHash = val
 }
 
 // SetData sets the value of Data.
-func (s *GetStateLiteServerOK) SetData(val string) {
+func (s *GetRawBlockchainBlockStateOK) SetData(val string) {
 	s.Data = val
+}
+
+type GetRawConfigOK struct {
+	Mode        uint32   `json:"mode"`
+	ID          BlockRaw `json:"id"`
+	StateProof  string   `json:"state_proof"`
+	ConfigProof string   `json:"config_proof"`
+}
+
+// GetMode returns the value of Mode.
+func (s *GetRawConfigOK) GetMode() uint32 {
+	return s.Mode
+}
+
+// GetID returns the value of ID.
+func (s *GetRawConfigOK) GetID() BlockRaw {
+	return s.ID
+}
+
+// GetStateProof returns the value of StateProof.
+func (s *GetRawConfigOK) GetStateProof() string {
+	return s.StateProof
+}
+
+// GetConfigProof returns the value of ConfigProof.
+func (s *GetRawConfigOK) GetConfigProof() string {
+	return s.ConfigProof
+}
+
+// SetMode sets the value of Mode.
+func (s *GetRawConfigOK) SetMode(val uint32) {
+	s.Mode = val
+}
+
+// SetID sets the value of ID.
+func (s *GetRawConfigOK) SetID(val BlockRaw) {
+	s.ID = val
+}
+
+// SetStateProof sets the value of StateProof.
+func (s *GetRawConfigOK) SetStateProof(val string) {
+	s.StateProof = val
+}
+
+// SetConfigProof sets the value of ConfigProof.
+func (s *GetRawConfigOK) SetConfigProof(val string) {
+	s.ConfigProof = val
+}
+
+type GetRawListBlockTransactionsOK struct {
+	ID         BlockRaw                               `json:"id"`
+	ReqCount   uint32                                 `json:"req_count"`
+	Incomplete bool                                   `json:"incomplete"`
+	Ids        []GetRawListBlockTransactionsOKIdsItem `json:"ids"`
+	Proof      string                                 `json:"proof"`
+}
+
+// GetID returns the value of ID.
+func (s *GetRawListBlockTransactionsOK) GetID() BlockRaw {
+	return s.ID
+}
+
+// GetReqCount returns the value of ReqCount.
+func (s *GetRawListBlockTransactionsOK) GetReqCount() uint32 {
+	return s.ReqCount
+}
+
+// GetIncomplete returns the value of Incomplete.
+func (s *GetRawListBlockTransactionsOK) GetIncomplete() bool {
+	return s.Incomplete
+}
+
+// GetIds returns the value of Ids.
+func (s *GetRawListBlockTransactionsOK) GetIds() []GetRawListBlockTransactionsOKIdsItem {
+	return s.Ids
+}
+
+// GetProof returns the value of Proof.
+func (s *GetRawListBlockTransactionsOK) GetProof() string {
+	return s.Proof
+}
+
+// SetID sets the value of ID.
+func (s *GetRawListBlockTransactionsOK) SetID(val BlockRaw) {
+	s.ID = val
+}
+
+// SetReqCount sets the value of ReqCount.
+func (s *GetRawListBlockTransactionsOK) SetReqCount(val uint32) {
+	s.ReqCount = val
+}
+
+// SetIncomplete sets the value of Incomplete.
+func (s *GetRawListBlockTransactionsOK) SetIncomplete(val bool) {
+	s.Incomplete = val
+}
+
+// SetIds sets the value of Ids.
+func (s *GetRawListBlockTransactionsOK) SetIds(val []GetRawListBlockTransactionsOKIdsItem) {
+	s.Ids = val
+}
+
+// SetProof sets the value of Proof.
+func (s *GetRawListBlockTransactionsOK) SetProof(val string) {
+	s.Proof = val
+}
+
+type GetRawListBlockTransactionsOKIdsItem struct {
+	Mode    uint32    `json:"mode"`
+	Account OptString `json:"account"`
+	Lt      OptUint64 `json:"lt"`
+	Hash    OptString `json:"hash"`
+}
+
+// GetMode returns the value of Mode.
+func (s *GetRawListBlockTransactionsOKIdsItem) GetMode() uint32 {
+	return s.Mode
+}
+
+// GetAccount returns the value of Account.
+func (s *GetRawListBlockTransactionsOKIdsItem) GetAccount() OptString {
+	return s.Account
+}
+
+// GetLt returns the value of Lt.
+func (s *GetRawListBlockTransactionsOKIdsItem) GetLt() OptUint64 {
+	return s.Lt
+}
+
+// GetHash returns the value of Hash.
+func (s *GetRawListBlockTransactionsOKIdsItem) GetHash() OptString {
+	return s.Hash
+}
+
+// SetMode sets the value of Mode.
+func (s *GetRawListBlockTransactionsOKIdsItem) SetMode(val uint32) {
+	s.Mode = val
+}
+
+// SetAccount sets the value of Account.
+func (s *GetRawListBlockTransactionsOKIdsItem) SetAccount(val OptString) {
+	s.Account = val
+}
+
+// SetLt sets the value of Lt.
+func (s *GetRawListBlockTransactionsOKIdsItem) SetLt(val OptUint64) {
+	s.Lt = val
+}
+
+// SetHash sets the value of Hash.
+func (s *GetRawListBlockTransactionsOKIdsItem) SetHash(val OptString) {
+	s.Hash = val
+}
+
+type GetRawMasterchainInfoExtOK struct {
+	Mode          uint32       `json:"mode"`
+	Version       uint32       `json:"version"`
+	Capabilities  uint64       `json:"capabilities"`
+	Last          BlockRaw     `json:"last"`
+	LastUtime     uint32       `json:"last_utime"`
+	Now           uint32       `json:"now"`
+	StateRootHash string       `json:"state_root_hash"`
+	Init          InitStateRaw `json:"init"`
+}
+
+// GetMode returns the value of Mode.
+func (s *GetRawMasterchainInfoExtOK) GetMode() uint32 {
+	return s.Mode
+}
+
+// GetVersion returns the value of Version.
+func (s *GetRawMasterchainInfoExtOK) GetVersion() uint32 {
+	return s.Version
+}
+
+// GetCapabilities returns the value of Capabilities.
+func (s *GetRawMasterchainInfoExtOK) GetCapabilities() uint64 {
+	return s.Capabilities
+}
+
+// GetLast returns the value of Last.
+func (s *GetRawMasterchainInfoExtOK) GetLast() BlockRaw {
+	return s.Last
+}
+
+// GetLastUtime returns the value of LastUtime.
+func (s *GetRawMasterchainInfoExtOK) GetLastUtime() uint32 {
+	return s.LastUtime
+}
+
+// GetNow returns the value of Now.
+func (s *GetRawMasterchainInfoExtOK) GetNow() uint32 {
+	return s.Now
+}
+
+// GetStateRootHash returns the value of StateRootHash.
+func (s *GetRawMasterchainInfoExtOK) GetStateRootHash() string {
+	return s.StateRootHash
+}
+
+// GetInit returns the value of Init.
+func (s *GetRawMasterchainInfoExtOK) GetInit() InitStateRaw {
+	return s.Init
+}
+
+// SetMode sets the value of Mode.
+func (s *GetRawMasterchainInfoExtOK) SetMode(val uint32) {
+	s.Mode = val
+}
+
+// SetVersion sets the value of Version.
+func (s *GetRawMasterchainInfoExtOK) SetVersion(val uint32) {
+	s.Version = val
+}
+
+// SetCapabilities sets the value of Capabilities.
+func (s *GetRawMasterchainInfoExtOK) SetCapabilities(val uint64) {
+	s.Capabilities = val
+}
+
+// SetLast sets the value of Last.
+func (s *GetRawMasterchainInfoExtOK) SetLast(val BlockRaw) {
+	s.Last = val
+}
+
+// SetLastUtime sets the value of LastUtime.
+func (s *GetRawMasterchainInfoExtOK) SetLastUtime(val uint32) {
+	s.LastUtime = val
+}
+
+// SetNow sets the value of Now.
+func (s *GetRawMasterchainInfoExtOK) SetNow(val uint32) {
+	s.Now = val
+}
+
+// SetStateRootHash sets the value of StateRootHash.
+func (s *GetRawMasterchainInfoExtOK) SetStateRootHash(val string) {
+	s.StateRootHash = val
+}
+
+// SetInit sets the value of Init.
+func (s *GetRawMasterchainInfoExtOK) SetInit(val InitStateRaw) {
+	s.Init = val
+}
+
+type GetRawMasterchainInfoOK struct {
+	Last          BlockRaw     `json:"last"`
+	StateRootHash string       `json:"state_root_hash"`
+	Init          InitStateRaw `json:"init"`
+}
+
+// GetLast returns the value of Last.
+func (s *GetRawMasterchainInfoOK) GetLast() BlockRaw {
+	return s.Last
+}
+
+// GetStateRootHash returns the value of StateRootHash.
+func (s *GetRawMasterchainInfoOK) GetStateRootHash() string {
+	return s.StateRootHash
+}
+
+// GetInit returns the value of Init.
+func (s *GetRawMasterchainInfoOK) GetInit() InitStateRaw {
+	return s.Init
+}
+
+// SetLast sets the value of Last.
+func (s *GetRawMasterchainInfoOK) SetLast(val BlockRaw) {
+	s.Last = val
+}
+
+// SetStateRootHash sets the value of StateRootHash.
+func (s *GetRawMasterchainInfoOK) SetStateRootHash(val string) {
+	s.StateRootHash = val
+}
+
+// SetInit sets the value of Init.
+func (s *GetRawMasterchainInfoOK) SetInit(val InitStateRaw) {
+	s.Init = val
+}
+
+type GetRawShardBlockProofOK struct {
+	MasterchainID BlockRaw                           `json:"masterchain_id"`
+	Links         []GetRawShardBlockProofOKLinksItem `json:"links"`
+}
+
+// GetMasterchainID returns the value of MasterchainID.
+func (s *GetRawShardBlockProofOK) GetMasterchainID() BlockRaw {
+	return s.MasterchainID
+}
+
+// GetLinks returns the value of Links.
+func (s *GetRawShardBlockProofOK) GetLinks() []GetRawShardBlockProofOKLinksItem {
+	return s.Links
+}
+
+// SetMasterchainID sets the value of MasterchainID.
+func (s *GetRawShardBlockProofOK) SetMasterchainID(val BlockRaw) {
+	s.MasterchainID = val
+}
+
+// SetLinks sets the value of Links.
+func (s *GetRawShardBlockProofOK) SetLinks(val []GetRawShardBlockProofOKLinksItem) {
+	s.Links = val
+}
+
+type GetRawShardBlockProofOKLinksItem struct {
+	ID    BlockRaw `json:"id"`
+	Proof string   `json:"proof"`
+}
+
+// GetID returns the value of ID.
+func (s *GetRawShardBlockProofOKLinksItem) GetID() BlockRaw {
+	return s.ID
+}
+
+// GetProof returns the value of Proof.
+func (s *GetRawShardBlockProofOKLinksItem) GetProof() string {
+	return s.Proof
+}
+
+// SetID sets the value of ID.
+func (s *GetRawShardBlockProofOKLinksItem) SetID(val BlockRaw) {
+	s.ID = val
+}
+
+// SetProof sets the value of Proof.
+func (s *GetRawShardBlockProofOKLinksItem) SetProof(val string) {
+	s.Proof = val
+}
+
+type GetRawShardInfoOK struct {
+	ID         BlockRaw `json:"id"`
+	Shardblk   BlockRaw `json:"shardblk"`
+	ShardProof string   `json:"shard_proof"`
+	ShardDescr string   `json:"shard_descr"`
+}
+
+// GetID returns the value of ID.
+func (s *GetRawShardInfoOK) GetID() BlockRaw {
+	return s.ID
+}
+
+// GetShardblk returns the value of Shardblk.
+func (s *GetRawShardInfoOK) GetShardblk() BlockRaw {
+	return s.Shardblk
+}
+
+// GetShardProof returns the value of ShardProof.
+func (s *GetRawShardInfoOK) GetShardProof() string {
+	return s.ShardProof
+}
+
+// GetShardDescr returns the value of ShardDescr.
+func (s *GetRawShardInfoOK) GetShardDescr() string {
+	return s.ShardDescr
+}
+
+// SetID sets the value of ID.
+func (s *GetRawShardInfoOK) SetID(val BlockRaw) {
+	s.ID = val
+}
+
+// SetShardblk sets the value of Shardblk.
+func (s *GetRawShardInfoOK) SetShardblk(val BlockRaw) {
+	s.Shardblk = val
+}
+
+// SetShardProof sets the value of ShardProof.
+func (s *GetRawShardInfoOK) SetShardProof(val string) {
+	s.ShardProof = val
+}
+
+// SetShardDescr sets the value of ShardDescr.
+func (s *GetRawShardInfoOK) SetShardDescr(val string) {
+	s.ShardDescr = val
+}
+
+type GetRawTimeOK struct {
+	Time uint32 `json:"time"`
+}
+
+// GetTime returns the value of Time.
+func (s *GetRawTimeOK) GetTime() uint32 {
+	return s.Time
+}
+
+// SetTime sets the value of Time.
+func (s *GetRawTimeOK) SetTime(val uint32) {
+	s.Time = val
+}
+
+type GetRawTransactionsOK struct {
+	Ids          []BlockRaw `json:"ids"`
+	Transactions string     `json:"transactions"`
+}
+
+// GetIds returns the value of Ids.
+func (s *GetRawTransactionsOK) GetIds() []BlockRaw {
+	return s.Ids
+}
+
+// GetTransactions returns the value of Transactions.
+func (s *GetRawTransactionsOK) GetTransactions() string {
+	return s.Transactions
+}
+
+// SetIds sets the value of Ids.
+func (s *GetRawTransactionsOK) SetIds(val []BlockRaw) {
+	s.Ids = val
+}
+
+// SetTransactions sets the value of Transactions.
+func (s *GetRawTransactionsOK) SetTransactions(val string) {
+	s.Transactions = val
+}
+
+type GetStakingPoolHistoryOK struct {
+	Apy []ApyHistory `json:"apy"`
+}
+
+// GetApy returns the value of Apy.
+func (s *GetStakingPoolHistoryOK) GetApy() []ApyHistory {
+	return s.Apy
+}
+
+// SetApy sets the value of Apy.
+func (s *GetStakingPoolHistoryOK) SetApy(val []ApyHistory) {
+	s.Apy = val
+}
+
+type GetStakingPoolInfoOK struct {
+	Implementation PoolImplementation `json:"implementation"`
+	Pool           PoolInfo           `json:"pool"`
+}
+
+// GetImplementation returns the value of Implementation.
+func (s *GetStakingPoolInfoOK) GetImplementation() PoolImplementation {
+	return s.Implementation
+}
+
+// GetPool returns the value of Pool.
+func (s *GetStakingPoolInfoOK) GetPool() PoolInfo {
+	return s.Pool
+}
+
+// SetImplementation sets the value of Implementation.
+func (s *GetStakingPoolInfoOK) SetImplementation(val PoolImplementation) {
+	s.Implementation = val
+}
+
+// SetPool sets the value of Pool.
+func (s *GetStakingPoolInfoOK) SetPool(val PoolInfo) {
+	s.Pool = val
+}
+
+type GetStakingPoolsOK struct {
+	Pools           []PoolInfo                       `json:"pools"`
+	Implementations GetStakingPoolsOKImplementations `json:"implementations"`
+}
+
+// GetPools returns the value of Pools.
+func (s *GetStakingPoolsOK) GetPools() []PoolInfo {
+	return s.Pools
+}
+
+// GetImplementations returns the value of Implementations.
+func (s *GetStakingPoolsOK) GetImplementations() GetStakingPoolsOKImplementations {
+	return s.Implementations
+}
+
+// SetPools sets the value of Pools.
+func (s *GetStakingPoolsOK) SetPools(val []PoolInfo) {
+	s.Pools = val
+}
+
+// SetImplementations sets the value of Implementations.
+func (s *GetStakingPoolsOK) SetImplementations(val GetStakingPoolsOKImplementations) {
+	s.Implementations = val
+}
+
+type GetStakingPoolsOKImplementations map[string]PoolImplementation
+
+func (s *GetStakingPoolsOKImplementations) init() GetStakingPoolsOKImplementations {
+	m := *s
+	if m == nil {
+		m = map[string]PoolImplementation{}
+		*s = m
+	}
+	return m
 }
 
 type GetStorageProvidersOK struct {
@@ -3373,20 +3590,6 @@ func (s *GetStorageProvidersOK) SetProviders(val []StorageProvider) {
 	s.Providers = val
 }
 
-type GetTimeLiteServerOK struct {
-	Time uint32 `json:"time"`
-}
-
-// GetTime returns the value of Time.
-func (s *GetTimeLiteServerOK) GetTime() uint32 {
-	return s.Time
-}
-
-// SetTime sets the value of Time.
-func (s *GetTimeLiteServerOK) SetTime(val uint32) {
-	s.Time = val
-}
-
 type GetTonConnectPayloadOK struct {
 	Payload string `json:"payload"`
 }
@@ -3399,31 +3602,6 @@ func (s *GetTonConnectPayloadOK) GetPayload() string {
 // SetPayload sets the value of Payload.
 func (s *GetTonConnectPayloadOK) SetPayload(val string) {
 	s.Payload = val
-}
-
-type GetTransactionsLiteServerOK struct {
-	Ids          []BlockRaw `json:"ids"`
-	Transactions string     `json:"transactions"`
-}
-
-// GetIds returns the value of Ids.
-func (s *GetTransactionsLiteServerOK) GetIds() []BlockRaw {
-	return s.Ids
-}
-
-// GetTransactions returns the value of Transactions.
-func (s *GetTransactionsLiteServerOK) GetTransactions() string {
-	return s.Transactions
-}
-
-// SetIds sets the value of Ids.
-func (s *GetTransactionsLiteServerOK) SetIds(val []BlockRaw) {
-	s.Ids = val
-}
-
-// SetTransactions sets the value of Transactions.
-func (s *GetTransactionsLiteServerOK) SetTransactions(val string) {
-	s.Transactions = val
 }
 
 type GetWalletBackupOK struct {
@@ -4987,6 +5165,52 @@ func (o OptAuctionBidAction) Or(d AuctionBidAction) AuctionBidAction {
 	return d
 }
 
+// NewOptBlockchainRawAccountExtraBalance returns new OptBlockchainRawAccountExtraBalance with value set to v.
+func NewOptBlockchainRawAccountExtraBalance(v BlockchainRawAccountExtraBalance) OptBlockchainRawAccountExtraBalance {
+	return OptBlockchainRawAccountExtraBalance{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptBlockchainRawAccountExtraBalance is optional BlockchainRawAccountExtraBalance.
+type OptBlockchainRawAccountExtraBalance struct {
+	Value BlockchainRawAccountExtraBalance
+	Set   bool
+}
+
+// IsSet returns true if OptBlockchainRawAccountExtraBalance was set.
+func (o OptBlockchainRawAccountExtraBalance) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptBlockchainRawAccountExtraBalance) Reset() {
+	var v BlockchainRawAccountExtraBalance
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptBlockchainRawAccountExtraBalance) SetTo(v BlockchainRawAccountExtraBalance) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptBlockchainRawAccountExtraBalance) Get() (v BlockchainRawAccountExtraBalance, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptBlockchainRawAccountExtraBalance) Or(d BlockchainRawAccountExtraBalance) BlockchainRawAccountExtraBalance {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptBool returns new OptBool with value set to v.
 func NewOptBool(v bool) OptBool {
 	return OptBool{
@@ -5953,52 +6177,6 @@ func (o OptNftPurchaseAction) Or(d NftPurchaseAction) NftPurchaseAction {
 	return d
 }
 
-// NewOptRawAccountExtraBalance returns new OptRawAccountExtraBalance with value set to v.
-func NewOptRawAccountExtraBalance(v RawAccountExtraBalance) OptRawAccountExtraBalance {
-	return OptRawAccountExtraBalance{
-		Value: v,
-		Set:   true,
-	}
-}
-
-// OptRawAccountExtraBalance is optional RawAccountExtraBalance.
-type OptRawAccountExtraBalance struct {
-	Value RawAccountExtraBalance
-	Set   bool
-}
-
-// IsSet returns true if OptRawAccountExtraBalance was set.
-func (o OptRawAccountExtraBalance) IsSet() bool { return o.Set }
-
-// Reset unsets value.
-func (o *OptRawAccountExtraBalance) Reset() {
-	var v RawAccountExtraBalance
-	o.Value = v
-	o.Set = false
-}
-
-// SetTo sets value to v.
-func (o *OptRawAccountExtraBalance) SetTo(v RawAccountExtraBalance) {
-	o.Set = true
-	o.Value = v
-}
-
-// Get returns value and boolean that denotes whether value was set.
-func (o OptRawAccountExtraBalance) Get() (v RawAccountExtraBalance, ok bool) {
-	if !o.Set {
-		return v, false
-	}
-	return o.Value, true
-}
-
-// Or returns value if set, or given parameter if does not.
-func (o OptRawAccountExtraBalance) Or(d RawAccountExtraBalance) RawAccountExtraBalance {
-	if v, ok := o.Get(); ok {
-		return v
-	}
-	return d
-}
-
 // NewOptRecoverStakeAction returns new OptRecoverStakeAction with value set to v.
 func NewOptRecoverStakeAction(v RecoverStakeAction) OptRecoverStakeAction {
 	return OptRecoverStakeAction{
@@ -6888,109 +7066,6 @@ func (s *Price) SetTokenName(val string) {
 	s.TokenName = val
 }
 
-// Ref: #/components/schemas/RawAccount
-type RawAccount struct {
-	Address           string                    `json:"address"`
-	Balance           int64                     `json:"balance"`
-	ExtraBalance      OptRawAccountExtraBalance `json:"extra_balance"`
-	Code              OptString                 `json:"code"`
-	Data              OptString                 `json:"data"`
-	LastTransactionLt int64                     `json:"last_transaction_lt"`
-	Status            string                    `json:"status"`
-	Storage           AccountStorageInfo        `json:"storage"`
-}
-
-// GetAddress returns the value of Address.
-func (s *RawAccount) GetAddress() string {
-	return s.Address
-}
-
-// GetBalance returns the value of Balance.
-func (s *RawAccount) GetBalance() int64 {
-	return s.Balance
-}
-
-// GetExtraBalance returns the value of ExtraBalance.
-func (s *RawAccount) GetExtraBalance() OptRawAccountExtraBalance {
-	return s.ExtraBalance
-}
-
-// GetCode returns the value of Code.
-func (s *RawAccount) GetCode() OptString {
-	return s.Code
-}
-
-// GetData returns the value of Data.
-func (s *RawAccount) GetData() OptString {
-	return s.Data
-}
-
-// GetLastTransactionLt returns the value of LastTransactionLt.
-func (s *RawAccount) GetLastTransactionLt() int64 {
-	return s.LastTransactionLt
-}
-
-// GetStatus returns the value of Status.
-func (s *RawAccount) GetStatus() string {
-	return s.Status
-}
-
-// GetStorage returns the value of Storage.
-func (s *RawAccount) GetStorage() AccountStorageInfo {
-	return s.Storage
-}
-
-// SetAddress sets the value of Address.
-func (s *RawAccount) SetAddress(val string) {
-	s.Address = val
-}
-
-// SetBalance sets the value of Balance.
-func (s *RawAccount) SetBalance(val int64) {
-	s.Balance = val
-}
-
-// SetExtraBalance sets the value of ExtraBalance.
-func (s *RawAccount) SetExtraBalance(val OptRawAccountExtraBalance) {
-	s.ExtraBalance = val
-}
-
-// SetCode sets the value of Code.
-func (s *RawAccount) SetCode(val OptString) {
-	s.Code = val
-}
-
-// SetData sets the value of Data.
-func (s *RawAccount) SetData(val OptString) {
-	s.Data = val
-}
-
-// SetLastTransactionLt sets the value of LastTransactionLt.
-func (s *RawAccount) SetLastTransactionLt(val int64) {
-	s.LastTransactionLt = val
-}
-
-// SetStatus sets the value of Status.
-func (s *RawAccount) SetStatus(val string) {
-	s.Status = val
-}
-
-// SetStorage sets the value of Storage.
-func (s *RawAccount) SetStorage(val AccountStorageInfo) {
-	s.Storage = val
-}
-
-type RawAccountExtraBalance map[string]string
-
-func (s *RawAccountExtraBalance) init() RawAccountExtraBalance {
-	m := *s
-	if m == nil {
-		m = map[string]string{}
-		*s = m
-	}
-	return m
-}
-
 // Ref: #/components/schemas/RecoverStakeAction
 type RecoverStakeAction struct {
 	Amount int64          `json:"amount"`
@@ -7184,60 +7259,60 @@ func (s *Sale) SetPrice(val Price) {
 	s.Price = val
 }
 
-type SendMessageLiteServerOK struct {
-	Code uint32 `json:"code"`
-}
+// SendBlockchainMessageOK is response for SendBlockchainMessage operation.
+type SendBlockchainMessageOK struct{}
 
-// GetCode returns the value of Code.
-func (s *SendMessageLiteServerOK) GetCode() uint32 {
-	return s.Code
-}
-
-// SetCode sets the value of Code.
-func (s *SendMessageLiteServerOK) SetCode(val uint32) {
-	s.Code = val
-}
-
-type SendMessageLiteServerReq struct {
-	Body string `json:"body"`
-}
-
-// GetBody returns the value of Body.
-func (s *SendMessageLiteServerReq) GetBody() string {
-	return s.Body
-}
-
-// SetBody sets the value of Body.
-func (s *SendMessageLiteServerReq) SetBody(val string) {
-	s.Body = val
-}
-
-// SendMessageOK is response for SendMessage operation.
-type SendMessageOK struct{}
-
-type SendMessageReq struct {
+type SendBlockchainMessageReq struct {
 	Boc   OptString `json:"boc"`
 	Batch []string  `json:"batch"`
 }
 
 // GetBoc returns the value of Boc.
-func (s *SendMessageReq) GetBoc() OptString {
+func (s *SendBlockchainMessageReq) GetBoc() OptString {
 	return s.Boc
 }
 
 // GetBatch returns the value of Batch.
-func (s *SendMessageReq) GetBatch() []string {
+func (s *SendBlockchainMessageReq) GetBatch() []string {
 	return s.Batch
 }
 
 // SetBoc sets the value of Boc.
-func (s *SendMessageReq) SetBoc(val OptString) {
+func (s *SendBlockchainMessageReq) SetBoc(val OptString) {
 	s.Boc = val
 }
 
 // SetBatch sets the value of Batch.
-func (s *SendMessageReq) SetBatch(val []string) {
+func (s *SendBlockchainMessageReq) SetBatch(val []string) {
 	s.Batch = val
+}
+
+type SendRawMessageOK struct {
+	Code uint32 `json:"code"`
+}
+
+// GetCode returns the value of Code.
+func (s *SendRawMessageOK) GetCode() uint32 {
+	return s.Code
+}
+
+// SetCode sets the value of Code.
+func (s *SendRawMessageOK) SetCode(val uint32) {
+	s.Code = val
+}
+
+type SendRawMessageReq struct {
+	Body string `json:"body"`
+}
+
+// GetBody returns the value of Body.
+func (s *SendRawMessageReq) GetBody() string {
+	return s.Body
+}
+
+// SetBody sets the value of Body.
+func (s *SendRawMessageReq) SetBody(val string) {
+	s.Body = val
 }
 
 // Ref: #/components/schemas/Seqno
@@ -7341,81 +7416,6 @@ func (s *SmartContractAction) SetPayload(val OptString) {
 // SetRefund sets the value of Refund.
 func (s *SmartContractAction) SetRefund(val OptRefund) {
 	s.Refund = val
-}
-
-type StakingPoolHistoryOK struct {
-	Apy []ApyHistory `json:"apy"`
-}
-
-// GetApy returns the value of Apy.
-func (s *StakingPoolHistoryOK) GetApy() []ApyHistory {
-	return s.Apy
-}
-
-// SetApy sets the value of Apy.
-func (s *StakingPoolHistoryOK) SetApy(val []ApyHistory) {
-	s.Apy = val
-}
-
-type StakingPoolInfoOK struct {
-	Implementation PoolImplementation `json:"implementation"`
-	Pool           PoolInfo           `json:"pool"`
-}
-
-// GetImplementation returns the value of Implementation.
-func (s *StakingPoolInfoOK) GetImplementation() PoolImplementation {
-	return s.Implementation
-}
-
-// GetPool returns the value of Pool.
-func (s *StakingPoolInfoOK) GetPool() PoolInfo {
-	return s.Pool
-}
-
-// SetImplementation sets the value of Implementation.
-func (s *StakingPoolInfoOK) SetImplementation(val PoolImplementation) {
-	s.Implementation = val
-}
-
-// SetPool sets the value of Pool.
-func (s *StakingPoolInfoOK) SetPool(val PoolInfo) {
-	s.Pool = val
-}
-
-type StakingPoolsOK struct {
-	Pools           []PoolInfo                    `json:"pools"`
-	Implementations StakingPoolsOKImplementations `json:"implementations"`
-}
-
-// GetPools returns the value of Pools.
-func (s *StakingPoolsOK) GetPools() []PoolInfo {
-	return s.Pools
-}
-
-// GetImplementations returns the value of Implementations.
-func (s *StakingPoolsOK) GetImplementations() StakingPoolsOKImplementations {
-	return s.Implementations
-}
-
-// SetPools sets the value of Pools.
-func (s *StakingPoolsOK) SetPools(val []PoolInfo) {
-	s.Pools = val
-}
-
-// SetImplementations sets the value of Implementations.
-func (s *StakingPoolsOK) SetImplementations(val StakingPoolsOKImplementations) {
-	s.Implementations = val
-}
-
-type StakingPoolsOKImplementations map[string]PoolImplementation
-
-func (s *StakingPoolsOKImplementations) init() StakingPoolsOKImplementations {
-	m := *s
-	if m == nil {
-		m = map[string]PoolImplementation{}
-		*s = m
-	}
-	return m
 }
 
 // Ref: #/components/schemas/StateInit
@@ -7969,44 +7969,44 @@ func (s *Trace) SetChildren(val []Trace) {
 	s.Children = val
 }
 
-// Ref: #/components/schemas/TraceId
-type TraceId struct {
+// Ref: #/components/schemas/TraceID
+type TraceID struct {
 	ID    string `json:"id"`
-	Utime int64  `json:"utime"`
+	Utime uint64 `json:"utime"`
 }
 
 // GetID returns the value of ID.
-func (s *TraceId) GetID() string {
+func (s *TraceID) GetID() string {
 	return s.ID
 }
 
 // GetUtime returns the value of Utime.
-func (s *TraceId) GetUtime() int64 {
+func (s *TraceID) GetUtime() uint64 {
 	return s.Utime
 }
 
 // SetID sets the value of ID.
-func (s *TraceId) SetID(val string) {
+func (s *TraceID) SetID(val string) {
 	s.ID = val
 }
 
 // SetUtime sets the value of Utime.
-func (s *TraceId) SetUtime(val int64) {
+func (s *TraceID) SetUtime(val uint64) {
 	s.Utime = val
 }
 
-// Ref: #/components/schemas/TraceIds
-type TraceIds struct {
-	Traces []TraceId `json:"traces"`
+// Ref: #/components/schemas/TraceIDs
+type TraceIDs struct {
+	Traces []TraceID `json:"traces"`
 }
 
 // GetTraces returns the value of Traces.
-func (s *TraceIds) GetTraces() []TraceId {
+func (s *TraceIDs) GetTraces() []TraceID {
 	return s.Traces
 }
 
 // SetTraces sets the value of Traces.
-func (s *TraceIds) SetTraces(val []TraceId) {
+func (s *TraceIDs) SetTraces(val []TraceID) {
 	s.Traces = val
 }
 

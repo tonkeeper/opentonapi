@@ -4,6 +4,7 @@ import (
 	"encoding/binary"
 	"encoding/hex"
 	"fmt"
+
 	"github.com/tonkeeper/tongo/tlb"
 
 	jsoniter "github.com/json-iterator/go"
@@ -42,8 +43,8 @@ func blockIdExtFromString(s string) (tongo.BlockIDExt, error) {
 	return id, nil
 }
 
-func convertBlockHeader(b core.BlockHeader) oas.Block {
-	res := oas.Block{
+func convertBlockHeader(b core.BlockHeader) oas.BlockchainBlock {
+	res := oas.BlockchainBlock{
 		WorkchainID:       b.Workchain,
 		Shard:             fmt.Sprintf("%x", b.Shard),
 		Seqno:             int32(b.Seqno),
@@ -193,8 +194,8 @@ func convertMessage(m core.Message, book addressBook) oas.Message {
 	return msg
 }
 
-func convertConfig(cfg tlb.ConfigParams) (*oas.Config, error) {
-	var config oas.Config
+func convertConfig(cfg tlb.ConfigParams) (*oas.BlockchainConfig, error) {
+	var config oas.BlockchainConfig
 	for _, a := range []struct {
 		index   tlb.Uint32
 		pointer *string

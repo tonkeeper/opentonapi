@@ -2,16 +2,10 @@
 
 package client
 
-// DnsBackResolveParams is parameters of dnsBackResolve operation.
-type DnsBackResolveParams struct {
+// AccountDnsBackResolveParams is parameters of accountDnsBackResolve operation.
+type AccountDnsBackResolveParams struct {
 	// Account ID.
 	AccountID string
-}
-
-// DnsInfoParams is parameters of dnsInfo operation.
-type DnsInfoParams struct {
-	// Domain name with .ton or .t.me.
-	DomainName string
 }
 
 // DnsResolveParams is parameters of dnsResolve operation.
@@ -32,13 +26,13 @@ type EmulateMessageToEventParams struct {
 	AcceptLanguage OptString
 }
 
-// EmulateWalletMessageParams is parameters of emulateWalletMessage operation.
-type EmulateWalletMessageParams struct {
+// EmulateMessageToWalletParams is parameters of emulateMessageToWallet operation.
+type EmulateMessageToWalletParams struct {
 	AcceptLanguage OptString
 }
 
-// ExecGetMethodParams is parameters of execGetMethod operation.
-type ExecGetMethodParams struct {
+// ExecGetMethodForBlockchainAccountParams is parameters of execGetMethodForBlockchainAccount operation.
+type ExecGetMethodForBlockchainAccountParams struct {
 	// Account ID.
 	AccountID string
 	// Contract get method name.
@@ -52,20 +46,118 @@ type GetAccountParams struct {
 	AccountID string
 }
 
+// GetAccountDnsExpiringParams is parameters of getAccountDnsExpiring operation.
+type GetAccountDnsExpiringParams struct {
+	// Account ID.
+	AccountID string
+	// Number of days before expiration.
+	Period OptInt
+}
+
+// GetAccountEventsParams is parameters of getAccountEvents operation.
+type GetAccountEventsParams struct {
+	// Account ID.
+	AccountID      string
+	AcceptLanguage OptString
+	// Filter actions where requested account is not real subject (for example sender or receiver jettons).
+	SubjectOnly OptBool
+	// Omit this parameter to get last events.
+	BeforeLt  OptInt64
+	Limit     int
+	StartDate OptInt64
+	EndDate   OptInt64
+}
+
+// GetAccountJettonHistoryByIDParams is parameters of getAccountJettonHistoryByID operation.
+type GetAccountJettonHistoryByIDParams struct {
+	// Account ID.
+	AccountID string
+	// Jetton ID.
+	JettonID       string
+	AcceptLanguage OptString
+	// Omit this parameter to get last events.
+	BeforeLt  OptInt64
+	Limit     int
+	StartDate OptInt64
+	EndDate   OptInt64
+}
+
+// GetAccountJettonsBalancesParams is parameters of getAccountJettonsBalances operation.
+type GetAccountJettonsBalancesParams struct {
+	// Account ID.
+	AccountID string
+}
+
+// GetAccountJettonsHistoryParams is parameters of getAccountJettonsHistory operation.
+type GetAccountJettonsHistoryParams struct {
+	// Account ID.
+	AccountID      string
+	AcceptLanguage OptString
+	// Omit this parameter to get last events.
+	BeforeLt  OptInt64
+	Limit     int
+	StartDate OptInt64
+	EndDate   OptInt64
+}
+
+// GetAccountNftItemsParams is parameters of getAccountNftItems operation.
+type GetAccountNftItemsParams struct {
+	// Account ID.
+	AccountID string
+	// Nft collection.
+	Collection OptString
+	Limit      OptInt
+	Offset     OptInt
+	// Selling nft items in ton implemented usually via transfer items to special selling account. This
+	// option enables including items which owned not directly.
+	IndirectOwnership OptBool
+}
+
+// GetAccountNominatorsPoolsParams is parameters of getAccountNominatorsPools operation.
+type GetAccountNominatorsPoolsParams struct {
+	// Account ID.
+	AccountID string
+}
+
+// GetAccountPublicKeyParams is parameters of getAccountPublicKey operation.
+type GetAccountPublicKeyParams struct {
+	// Account ID.
+	AccountID string
+}
+
 // GetAccountSeqnoParams is parameters of getAccountSeqno operation.
 type GetAccountSeqnoParams struct {
 	// Account ID.
 	AccountID string
 }
 
-// GetAccountStateLiteServerParams is parameters of getAccountStateLiteServer operation.
-type GetAccountStateLiteServerParams struct {
+// GetAccountSubscriptionsParams is parameters of getAccountSubscriptions operation.
+type GetAccountSubscriptionsParams struct {
 	// Account ID.
 	AccountID string
 }
 
-// GetAccountTransactionsParams is parameters of getAccountTransactions operation.
-type GetAccountTransactionsParams struct {
+// GetAccountTracesParams is parameters of getAccountTraces operation.
+type GetAccountTracesParams struct {
+	// Account ID.
+	AccountID string
+	Limit     OptInt
+}
+
+// GetAllAuctionsParams is parameters of getAllAuctions operation.
+type GetAllAuctionsParams struct {
+	// Domain filter for current auctions "ton" or "t.me".
+	Tld OptString
+}
+
+// GetAllRawShardsInfoParams is parameters of getAllRawShardsInfo operation.
+type GetAllRawShardsInfoParams struct {
+	// Block ID: (workchain,shard,seqno,root_hash,file_hash).
+	BlockID string
+}
+
+// GetBlockchainAccountTransactionsParams is parameters of getBlockchainAccountTransactions operation.
+type GetBlockchainAccountTransactionsParams struct {
 	// Account ID.
 	AccountID string
 	// Omit this parameter to get last transactions.
@@ -75,52 +167,34 @@ type GetAccountTransactionsParams struct {
 	Limit    OptInt32
 }
 
-// GetAllAuctionsParams is parameters of getAllAuctions operation.
-type GetAllAuctionsParams struct {
-	// Domain filter for current auctions "ton" or "t.me".
-	Tld OptString
-}
-
-// GetAllShardsInfoLiteServerParams is parameters of getAllShardsInfoLiteServer operation.
-type GetAllShardsInfoLiteServerParams struct {
-	// Block ID: (workchain,shard,seqno,root_hash,file_hash).
-	BlockID string
-}
-
-// GetBlockParams is parameters of getBlock operation.
-type GetBlockParams struct {
+// GetBlockchainBlockParams is parameters of getBlockchainBlock operation.
+type GetBlockchainBlockParams struct {
 	// Block ID.
 	BlockID string
 }
 
-// GetBlockHeaderLiteServerParams is parameters of getBlockHeaderLiteServer operation.
-type GetBlockHeaderLiteServerParams struct {
-	// Block ID: (workchain,shard,seqno,root_hash,file_hash).
-	BlockID string
-	// Mode.
-	Mode uint32
-}
-
-// GetBlockLiteServerParams is parameters of getBlockLiteServer operation.
-type GetBlockLiteServerParams struct {
-	// Block ID: (workchain,shard,seqno,root_hash,file_hash).
-	BlockID string
-}
-
-// GetBlockProofLiteServerParams is parameters of getBlockProofLiteServer operation.
-type GetBlockProofLiteServerParams struct {
-	// Known block: (workchain,shard,seqno,root_hash,file_hash).
-	KnownBlock string
-	// Target block: (workchain,shard,seqno,root_hash,file_hash).
-	TargetBlock OptString
-	// Mode.
-	Mode uint32
-}
-
-// GetBlockTransactionsParams is parameters of getBlockTransactions operation.
-type GetBlockTransactionsParams struct {
+// GetBlockchainBlockTransactionsParams is parameters of getBlockchainBlockTransactions operation.
+type GetBlockchainBlockTransactionsParams struct {
 	// Block ID.
 	BlockID string
+}
+
+// GetBlockchainRawAccountParams is parameters of getBlockchainRawAccount operation.
+type GetBlockchainRawAccountParams struct {
+	// Account ID.
+	AccountID string
+}
+
+// GetBlockchainTransactionParams is parameters of getBlockchainTransaction operation.
+type GetBlockchainTransactionParams struct {
+	// Transaction ID.
+	TransactionID string
+}
+
+// GetBlockchainTransactionByMessageHashParams is parameters of getBlockchainTransactionByMessageHash operation.
+type GetBlockchainTransactionByMessageHashParams struct {
+	// Message ID.
+	MsgID string
 }
 
 // GetChartRatesParams is parameters of getChartRates operation.
@@ -130,20 +204,10 @@ type GetChartRatesParams struct {
 	Currency OptString
 }
 
-// GetConfigAllLiteServerParams is parameters of getConfigAllLiteServer operation.
-type GetConfigAllLiteServerParams struct {
-	// Block ID: (workchain,shard,seqno,root_hash,file_hash).
-	BlockID string
-	// Mode.
-	Mode uint32
-}
-
-// GetDnsExpiringParams is parameters of getDnsExpiring operation.
-type GetDnsExpiringParams struct {
-	// Account ID.
-	AccountID string
-	// Number of days before expiration.
-	Period OptInt
+// GetDnsInfoParams is parameters of getDnsInfo operation.
+type GetDnsInfoParams struct {
+	// Domain name with .ton or .t.me.
+	DomainName string
 }
 
 // GetDomainBidsParams is parameters of getDomainBids operation.
@@ -157,20 +221,6 @@ type GetEventParams struct {
 	// Event ID or transaction hash in hex (without 0x) or base64url format.
 	EventID        string
 	AcceptLanguage OptString
-}
-
-// GetEventsByAccountParams is parameters of getEventsByAccount operation.
-type GetEventsByAccountParams struct {
-	// Account ID.
-	AccountID      string
-	AcceptLanguage OptString
-	// Filter actions where requested account is not real subject (for example sender or reciver jettons).
-	SubjectOnly OptBool
-	// Omit this parameter to get last events.
-	BeforeLt  OptInt64
-	Limit     int
-	StartDate OptInt64
-	EndDate   OptInt64
 }
 
 // GetItemsFromCollectionParams is parameters of getItemsFromCollection operation.
@@ -193,58 +243,6 @@ type GetJettonsParams struct {
 	Offset OptInt32
 }
 
-// GetJettonsBalancesParams is parameters of getJettonsBalances operation.
-type GetJettonsBalancesParams struct {
-	// Account ID.
-	AccountID string
-}
-
-// GetJettonsHistoryParams is parameters of getJettonsHistory operation.
-type GetJettonsHistoryParams struct {
-	// Account ID.
-	AccountID      string
-	AcceptLanguage OptString
-	// Omit this parameter to get last events.
-	BeforeLt  OptInt64
-	Limit     int
-	StartDate OptInt64
-	EndDate   OptInt64
-}
-
-// GetJettonsHistoryByIDParams is parameters of getJettonsHistoryByID operation.
-type GetJettonsHistoryByIDParams struct {
-	// Account ID.
-	AccountID string
-	// Jetton ID.
-	JettonID       string
-	AcceptLanguage OptString
-	// Omit this parameter to get last events.
-	BeforeLt  OptInt64
-	Limit     int
-	StartDate OptInt64
-	EndDate   OptInt64
-}
-
-// GetListBlockTransactionsLiteServerParams is parameters of getListBlockTransactionsLiteServer operation.
-type GetListBlockTransactionsLiteServerParams struct {
-	// Block ID: (workchain,shard,seqno,root_hash,file_hash).
-	BlockID string
-	// Mode.
-	Mode uint32
-	// Count.
-	Count uint32
-	// Account ID.
-	AccountID OptString
-	// Lt.
-	Lt OptUint64
-}
-
-// GetMasterchainInfoExtLiteServerParams is parameters of getMasterchainInfoExtLiteServer operation.
-type GetMasterchainInfoExtLiteServerParams struct {
-	// Mode.
-	Mode uint32
-}
-
 // GetNftCollectionParams is parameters of getNftCollection operation.
 type GetNftCollectionParams struct {
 	// Account ID.
@@ -263,25 +261,6 @@ type GetNftItemByAddressParams struct {
 	AccountID string
 }
 
-// GetNftItemsByOwnerParams is parameters of getNftItemsByOwner operation.
-type GetNftItemsByOwnerParams struct {
-	// Account ID.
-	AccountID string
-	// Nft collection.
-	Collection OptString
-	Limit      OptInt
-	Offset     OptInt
-	// Selling nft items in ton implemented usually via transfer items to special selling account. This
-	// option enables including items which owned not directly.
-	IndirectOwnership OptBool
-}
-
-// GetPublicKeyByAccountIDParams is parameters of getPublicKeyByAccountID operation.
-type GetPublicKeyByAccountIDParams struct {
-	// Account ID.
-	AccountID string
-}
-
 // GetRatesParams is parameters of getRates operation.
 type GetRatesParams struct {
 	// Accept ton and jetton master addresses, separated by commas.
@@ -290,25 +269,78 @@ type GetRatesParams struct {
 	Currencies string
 }
 
-// GetRawAccountParams is parameters of getRawAccount operation.
-type GetRawAccountParams struct {
+// GetRawAccountStateParams is parameters of getRawAccountState operation.
+type GetRawAccountStateParams struct {
 	// Account ID.
 	AccountID string
 }
 
-// GetSearchAccountsParams is parameters of getSearchAccounts operation.
-type GetSearchAccountsParams struct {
-	Name string
+// GetRawBlockProofParams is parameters of getRawBlockProof operation.
+type GetRawBlockProofParams struct {
+	// Known block: (workchain,shard,seqno,root_hash,file_hash).
+	KnownBlock string
+	// Target block: (workchain,shard,seqno,root_hash,file_hash).
+	TargetBlock OptString
+	// Mode.
+	Mode uint32
 }
 
-// GetShardBlockProofLiteServerParams is parameters of getShardBlockProofLiteServer operation.
-type GetShardBlockProofLiteServerParams struct {
+// GetRawBlockchainBlockParams is parameters of getRawBlockchainBlock operation.
+type GetRawBlockchainBlockParams struct {
 	// Block ID: (workchain,shard,seqno,root_hash,file_hash).
 	BlockID string
 }
 
-// GetShardInfoLiteServerParams is parameters of getShardInfoLiteServer operation.
-type GetShardInfoLiteServerParams struct {
+// GetRawBlockchainBlockHeaderParams is parameters of getRawBlockchainBlockHeader operation.
+type GetRawBlockchainBlockHeaderParams struct {
+	// Block ID: (workchain,shard,seqno,root_hash,file_hash).
+	BlockID string
+	// Mode.
+	Mode uint32
+}
+
+// GetRawBlockchainBlockStateParams is parameters of getRawBlockchainBlockState operation.
+type GetRawBlockchainBlockStateParams struct {
+	// Block ID: (workchain,shard,seqno,root_hash,file_hash).
+	BlockID string
+}
+
+// GetRawConfigParams is parameters of getRawConfig operation.
+type GetRawConfigParams struct {
+	// Block ID: (workchain,shard,seqno,root_hash,file_hash).
+	BlockID string
+	// Mode.
+	Mode uint32
+}
+
+// GetRawListBlockTransactionsParams is parameters of getRawListBlockTransactions operation.
+type GetRawListBlockTransactionsParams struct {
+	// Block ID: (workchain,shard,seqno,root_hash,file_hash).
+	BlockID string
+	// Mode.
+	Mode uint32
+	// Count.
+	Count uint32
+	// Account ID.
+	AccountID OptString
+	// Lt.
+	Lt OptUint64
+}
+
+// GetRawMasterchainInfoExtParams is parameters of getRawMasterchainInfoExt operation.
+type GetRawMasterchainInfoExtParams struct {
+	// Mode.
+	Mode uint32
+}
+
+// GetRawShardBlockProofParams is parameters of getRawShardBlockProof operation.
+type GetRawShardBlockProofParams struct {
+	// Block ID: (workchain,shard,seqno,root_hash,file_hash).
+	BlockID string
+}
+
+// GetRawShardInfoParams is parameters of getRawShardInfo operation.
+type GetRawShardInfoParams struct {
 	// Block ID: (workchain,shard,seqno,root_hash,file_hash).
 	BlockID string
 	// Workchain.
@@ -319,45 +351,8 @@ type GetShardInfoLiteServerParams struct {
 	Exact bool
 }
 
-// GetStateLiteServerParams is parameters of getStateLiteServer operation.
-type GetStateLiteServerParams struct {
-	// Block ID: (workchain,shard,seqno,root_hash,file_hash).
-	BlockID string
-}
-
-// GetSubscriptionsByAccountParams is parameters of getSubscriptionsByAccount operation.
-type GetSubscriptionsByAccountParams struct {
-	// Account ID.
-	AccountID string
-}
-
-// GetTraceParams is parameters of getTrace operation.
-type GetTraceParams struct {
-	// Trace ID or transaction hash in hex (without 0x) or base64url format.
-	TraceID string
-}
-
-// GetTracesByAccountParams is parameters of getTracesByAccount operation.
-type GetTracesByAccountParams struct {
-	// Account ID.
-	AccountID string
-	Limit     OptInt32
-}
-
-// GetTransactionParams is parameters of getTransaction operation.
-type GetTransactionParams struct {
-	// Transaction ID.
-	TransactionID string
-}
-
-// GetTransactionByMessageHashParams is parameters of getTransactionByMessageHash operation.
-type GetTransactionByMessageHashParams struct {
-	// Message ID.
-	MsgID string
-}
-
-// GetTransactionsLiteServerParams is parameters of getTransactionsLiteServer operation.
-type GetTransactionsLiteServerParams struct {
+// GetRawTransactionsParams is parameters of getRawTransactions operation.
+type GetRawTransactionsParams struct {
 	// Account ID.
 	AccountID string
 	// Count.
@@ -366,6 +361,34 @@ type GetTransactionsLiteServerParams struct {
 	Lt uint64
 	// Hash.
 	Hash string
+}
+
+// GetStakingPoolHistoryParams is parameters of getStakingPoolHistory operation.
+type GetStakingPoolHistoryParams struct {
+	// Account ID.
+	AccountID string
+}
+
+// GetStakingPoolInfoParams is parameters of getStakingPoolInfo operation.
+type GetStakingPoolInfoParams struct {
+	// Account ID.
+	AccountID      string
+	AcceptLanguage OptString
+}
+
+// GetStakingPoolsParams is parameters of getStakingPools operation.
+type GetStakingPoolsParams struct {
+	// Account ID.
+	AvailableFor OptString
+	// Return also pools not from white list - just compatible by interfaces (maybe dangerous!).
+	IncludeUnverified OptBool
+	AcceptLanguage    OptString
+}
+
+// GetTraceParams is parameters of getTrace operation.
+type GetTraceParams struct {
+	// Trace ID or transaction hash in hex (without 0x) or base64url format.
+	TraceID string
 }
 
 // GetWalletBackupParams is parameters of getWalletBackup operation.
@@ -378,41 +401,18 @@ type GetWalletsByPublicKeyParams struct {
 	PublicKey string
 }
 
-// PoolsByNominatorsParams is parameters of poolsByNominators operation.
-type PoolsByNominatorsParams struct {
-	// Account ID.
-	AccountID string
-}
-
 // ReindexAccountParams is parameters of reindexAccount operation.
 type ReindexAccountParams struct {
 	// Account ID.
 	AccountID string
 }
 
+// SearchAccountsParams is parameters of searchAccounts operation.
+type SearchAccountsParams struct {
+	Name string
+}
+
 // SetWalletBackupParams is parameters of setWalletBackup operation.
 type SetWalletBackupParams struct {
 	XTonConnectAuth string
-}
-
-// StakingPoolHistoryParams is parameters of stakingPoolHistory operation.
-type StakingPoolHistoryParams struct {
-	// Account ID.
-	AccountID string
-}
-
-// StakingPoolInfoParams is parameters of stakingPoolInfo operation.
-type StakingPoolInfoParams struct {
-	// Account ID.
-	AccountID      string
-	AcceptLanguage OptString
-}
-
-// StakingPoolsParams is parameters of stakingPools operation.
-type StakingPoolsParams struct {
-	// Account ID.
-	AvailableFor OptString
-	// Return also pools not from white list - just compatible by interfaces (maybe dangerous!).
-	IncludeUnverified OptBool
-	AcceptLanguage    OptString
 }
