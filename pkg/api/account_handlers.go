@@ -163,7 +163,7 @@ func (h Handler) GetAccountTransactions(ctx context.Context, params oas.GetAccou
 		Transactions: make([]oas.Transaction, len(txs)),
 	}
 	for i, tx := range txs {
-		result.Transactions[i] = convertTransaction(*tx, h.addressBook)
+		result.Transactions[i] = convertTransaction(*tx, h.addressBook, h.previewGenerator)
 	}
 	return &result, nil
 }

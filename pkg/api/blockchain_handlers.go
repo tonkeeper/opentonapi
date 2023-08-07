@@ -42,7 +42,7 @@ func (h Handler) GetTransaction(ctx context.Context, params oas.GetTransactionPa
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
-	transaction := convertTransaction(*txs, h.addressBook)
+	transaction := convertTransaction(*txs, h.addressBook, h.previewGenerator)
 	return &transaction, nil
 }
 
@@ -61,7 +61,7 @@ func (h Handler) GetTransactionByMessageHash(ctx context.Context, params oas.Get
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
-	transaction := convertTransaction(*txs, h.addressBook)
+	transaction := convertTransaction(*txs, h.addressBook, h.previewGenerator)
 	return &transaction, nil
 }
 
@@ -78,7 +78,7 @@ func (h Handler) GetBlockTransactions(ctx context.Context, params oas.GetBlockTr
 		Transactions: make([]oas.Transaction, 0, len(transactions)),
 	}
 	for _, tx := range transactions {
-		res.Transactions = append(res.Transactions, convertTransaction(*tx, h.addressBook))
+		res.Transactions = append(res.Transactions, convertTransaction(*tx, h.addressBook, h.previewGenerator))
 	}
 	return &res, nil
 }
