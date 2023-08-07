@@ -119,7 +119,7 @@ func (h Handler) GetBlockchainAccountTransactions(ctx context.Context, params oa
 		Transactions: make([]oas.Transaction, len(txs)),
 	}
 	for i, tx := range txs {
-		result.Transactions[i] = convertTransaction(*tx, h.addressBook)
+		result.Transactions[i] = convertTransaction(*tx, h.addressBook, h.previewGenerator)
 	}
 	return &result, nil
 }

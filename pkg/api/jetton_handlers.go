@@ -31,7 +31,7 @@ func (h Handler) GetAccountJettonsBalances(ctx context.Context, params oas.GetAc
 	for _, wallet := range wallets {
 		jettonBalance := oas.JettonBalance{
 			Balance:       wallet.Balance.String(),
-			WalletAddress: convertAccountAddress(wallet.Address, h.addressBook),
+			WalletAddress: convertAccountAddress(wallet.Address, h.addressBook, h.previewGenerator),
 		}
 		meta, err := h.storage.GetJettonMasterMetadata(ctx, wallet.JettonAddress)
 		if err != nil && err.Error() == "not enough refs" {
