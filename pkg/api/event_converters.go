@@ -89,8 +89,8 @@ func (h Handler) convertRisk(ctx context.Context, risk wallet.Risk, walletAddres
 			if !ok {
 				continue
 			}
-			meta := h.GetJettonNormalizedMetadata(ctx, jettonWallet.JettonAddress)
-			preview := jettonPreview(jettonWallet.JettonAddress, meta, h.previewGenerator)
+			meta := h.GetJettonNormalizedMetadata(ctx, jettonWallet.JettonAddress, h.previewGenerator)
+			preview := jettonPreview(jettonWallet.JettonAddress, meta)
 			jettonQuantity := oas.JettonQuantity{
 				Quantity:      quantity.String(),
 				WalletAddress: convertAccountAddress(jettonWallet.Address, h.addressBook, h.previewGenerator),
@@ -198,8 +198,8 @@ func (h Handler) convertAction(ctx context.Context, viewer tongo.AccountID, a ba
 			Value:    oas.NewOptString(fmt.Sprintf("1 NFT")),
 		}
 	case bath.JettonTransfer:
-		meta := h.GetJettonNormalizedMetadata(ctx, a.JettonTransfer.Jetton)
-		preview := jettonPreview(a.JettonTransfer.Jetton, meta, h.previewGenerator)
+		meta := h.GetJettonNormalizedMetadata(ctx, a.JettonTransfer.Jetton, h.previewGenerator)
+		preview := jettonPreview(a.JettonTransfer.Jetton, meta)
 		action.JettonTransfer.SetTo(oas.JettonTransferAction{
 			Amount:           g.Pointer(big.Int(a.JettonTransfer.Amount)).String(),
 			Recipient:        convertOptAccountAddress(a.JettonTransfer.Recipient, h.addressBook, h.previewGenerator),
@@ -345,10 +345,10 @@ func (h Handler) convertAction(ctx context.Context, viewer tongo.AccountID, a ba
 		}
 	case bath.STONfiSwap:
 		action.Type = "JettonSwap"
-		jettonInMeta := h.GetJettonNormalizedMetadata(ctx, a.STONfiSwap.JettonMasterIn)
-		jettonInPreview := jettonPreview(a.STONfiSwap.JettonMasterIn, jettonInMeta, h.previewGenerator)
-		jettonOutMeta := h.GetJettonNormalizedMetadata(ctx, a.STONfiSwap.JettonMasterOut)
-		jettonOutPreview := jettonPreview(a.STONfiSwap.JettonMasterOut, jettonOutMeta, h.previewGenerator)
+		jettonInMeta := h.GetJettonNormalizedMetadata(ctx, a.STONfiSwap.JettonMasterIn, h.previewGenerator)
+		jettonInPreview := jettonPreview(a.STONfiSwap.JettonMasterIn, jettonInMeta)
+		jettonOutMeta := h.GetJettonNormalizedMetadata(ctx, a.STONfiSwap.JettonMasterOut, h.previewGenerator)
+		jettonOutPreview := jettonPreview(a.STONfiSwap.JettonMasterOut, jettonOutMeta)
 		action.JettonSwap.SetTo(oas.JettonSwapAction{
 			Dex:             oas.JettonSwapActionDexStonfi,
 			AmountIn:        fmt.Sprintf("%v", a.STONfiSwap.AmountIn),

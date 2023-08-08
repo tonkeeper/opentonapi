@@ -37,7 +37,7 @@ type NormalizedMetadata struct {
 	Websites     []string
 }
 
-func NormalizeMetadata(meta tep64.Metadata, info *addressbook.KnownJetton) NormalizedMetadata {
+func NormalizeMetadata(meta tep64.Metadata, info *addressbook.KnownJetton, imgGenerator previewGenerator) NormalizedMetadata {
 	verification := VerificationNone
 	name := meta.Name
 	if name == "" {
@@ -51,9 +51,9 @@ func NormalizeMetadata(meta tep64.Metadata, info *addressbook.KnownJetton) Norma
 	if normalizedSymbol == "TON" || normalizedSymbol == "TОN" { //eng and russian
 		symbol = "SCAM"
 	}
-	image := meta.Image
-	if meta.Image == "" {
-		image = references.Placeholder
+	image := references.Placeholder
+	if meta.Image != "" {
+		image = imgGenerator.GenerateImageUrl(meta.Image, 200, 200)
 	}
 	description := meta.Description
 	var social []string

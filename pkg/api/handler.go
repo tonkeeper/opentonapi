@@ -180,12 +180,12 @@ func NewHandler(logger *zap.Logger, opts ...Option) (*Handler, error) {
 	}, nil
 }
 
-func (h Handler) GetJettonNormalizedMetadata(ctx context.Context, master tongo.AccountID) NormalizedMetadata {
+func (h Handler) GetJettonNormalizedMetadata(ctx context.Context, master tongo.AccountID, imgGenerator previewGenerator) NormalizedMetadata {
 	meta, _ := h.metaCache.getJettonMeta(ctx, master)
 	// TODO: should we ignore the second returned value?
 	info, ok := h.addressBook.GetJettonInfoByAddress(master)
 	if ok {
-		return NormalizeMetadata(meta, &info)
+		return NormalizeMetadata(meta, &info, imgGenerator)
 	}
-	return NormalizeMetadata(meta, nil)
+	return NormalizeMetadata(meta, nil, imgGenerator)
 }

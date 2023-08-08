@@ -9,14 +9,14 @@ import (
 	"github.com/tonkeeper/tongo"
 )
 
-func jettonPreview(master tongo.AccountID, meta NormalizedMetadata, imgGenerator previewGenerator) oas.JettonPreview {
+func jettonPreview(master tongo.AccountID, meta NormalizedMetadata) oas.JettonPreview {
 	preview := oas.JettonPreview{
 		Address:      master.ToRaw(),
 		Name:         meta.Name,
 		Symbol:       meta.Symbol,
 		Verification: oas.JettonVerificationType(meta.Verification),
 		Decimals:     meta.Decimals,
-		Image:        imgGenerator.GenerateImageUrl(meta.Image, 200, 200),
+		Image:        meta.Image,
 	}
 	return preview
 }

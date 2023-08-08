@@ -48,11 +48,11 @@ func (h Handler) GetAccountJettonsBalances(ctx context.Context, params oas.GetAc
 		var normalizedMetadata NormalizedMetadata
 		info, ok := h.addressBook.GetJettonInfoByAddress(wallet.JettonAddress)
 		if ok {
-			normalizedMetadata = NormalizeMetadata(meta, &info)
+			normalizedMetadata = NormalizeMetadata(meta, &info, h.previewGenerator)
 		} else {
-			normalizedMetadata = NormalizeMetadata(meta, nil)
+			normalizedMetadata = NormalizeMetadata(meta, nil, h.previewGenerator)
 		}
-		jettonBalance.Jetton = jettonPreview(wallet.JettonAddress, normalizedMetadata, h.previewGenerator)
+		jettonBalance.Jetton = jettonPreview(wallet.JettonAddress, normalizedMetadata)
 		balances.Balances = append(balances.Balances, jettonBalance)
 	}
 
@@ -64,7 +64,7 @@ func (h Handler) GetJettonInfo(ctx context.Context, params oas.GetJettonInfoPara
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
 	}
-	meta := h.GetJettonNormalizedMetadata(ctx, accountID)
+	meta := h.GetJettonNormalizedMetadata(ctx, accountID, h.previewGenerator)
 	metadata := jettonMetadata(accountID, meta)
 	data, err := h.storage.GetJettonMasterData(ctx, accountID)
 	if err != nil {
@@ -139,7 +139,7 @@ func (h Handler) GetJettons(ctx context.Context, params oas.GetJettonsParams) (*
 	}
 	results := make([]oas.JettonInfo, 0, len(jettons))
 	for _, master := range jettons {
-		meta := h.GetJettonNormalizedMetadata(ctx, master.Address)
+		meta := h.GetJettonNormalizedMetadata(ctx, master.Address, h.previewGenerator)
 		metadata := jettonMetadata(master.Address, meta)
 		info := oas.JettonInfo{
 			Mintable:     master.Mintable,
