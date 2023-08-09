@@ -373,11 +373,9 @@ func (b *Book) getGGWhitelist(logger *zap.Logger) {
 		}
 		b.mu.Lock()
 		for _, account := range addresses {
-			collection, ok := b.collections[account]
-			if ok {
-				collection.Approvers = unique(append(b.collections[account].Approvers, "getgems"))
-				b.collections[account] = collection
-			}
+			collection := b.collections[account]
+			collection.Approvers = unique(append(collection.Approvers, "getgems"))
+			b.collections[account] = collection
 		}
 		b.mu.Unlock()
 		return
