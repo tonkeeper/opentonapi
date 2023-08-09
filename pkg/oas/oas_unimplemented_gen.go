@@ -98,7 +98,7 @@ func (UnimplementedHandler) GetAccountDnsExpiring(ctx context.Context, params Ge
 //
 // Get event for an account by event_id.
 //
-// GET /v2/accounts/{account_id}/event/{event_id}
+// GET /v2/accounts/{account_id}/events/{event_id}
 func (UnimplementedHandler) GetAccountEvent(ctx context.Context, params GetAccountEventParams) (r *AccountEvent, _ error) {
 	return r, ht.ErrNotImplemented
 }

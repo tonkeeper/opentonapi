@@ -949,7 +949,7 @@ func (c *Client) sendGetAccountDnsExpiring(ctx context.Context, params GetAccoun
 //
 // Get event for an account by event_id.
 //
-// GET /v2/accounts/{account_id}/event/{event_id}
+// GET /v2/accounts/{account_id}/events/{event_id}
 func (c *Client) GetAccountEvent(ctx context.Context, params GetAccountEventParams) (*AccountEvent, error) {
 	res, err := c.sendGetAccountEvent(ctx, params)
 	_ = res
@@ -1010,7 +1010,7 @@ func (c *Client) sendGetAccountEvent(ctx context.Context, params GetAccountEvent
 		}
 		pathParts[1] = encoded
 	}
-	pathParts[2] = "/event/"
+	pathParts[2] = "/events/"
 	{
 		// Encode "event_id" parameter.
 		e := uri.NewPathEncoder(uri.PathEncoderConfig{
