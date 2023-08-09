@@ -4068,6 +4068,8 @@ components:
         - verified
         - current_nominators
         - max_nominators
+        - nominators_stake
+        - validator_stake
       properties:
         address:
           type: string
@@ -4118,6 +4120,16 @@ components:
           type: string
           example: "0:4a91d32d0289bda9813ae00ff7640e6c38fdce76e4583dd6afc463b70c7d767c"
           description: "for liquid staking master account of jetton"
+        nominators_stake:
+          type: integer
+          format: int64
+          example: 5000000000
+          description: "total stake of all nominators"
+        validator_stake:
+          type: integer
+          format: int64
+          example: 5000000000
+          description: "stake of validator"
     PoolImplementation:
       type: object
       required:

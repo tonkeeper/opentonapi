@@ -2472,7 +2472,19 @@
       "example": "Tonkeeper pool",
       "type": "string"
      },
+     "nominators_stake": {
+      "description": "total stake of all nominators",
+      "example": 5000000000,
+      "format": "int64",
+      "type": "integer"
+     },
      "total_amount": {
+      "format": "int64",
+      "type": "integer"
+     },
+     "validator_stake": {
+      "description": "stake of validator",
+      "example": 5000000000,
       "format": "int64",
       "type": "integer"
      },
@@ -2493,7 +2505,9 @@
      "cycle_end",
      "verified",
      "current_nominators",
-     "max_nominators"
+     "max_nominators",
+     "nominators_stake",
+     "validator_stake"
     ],
     "type": "object"
    },

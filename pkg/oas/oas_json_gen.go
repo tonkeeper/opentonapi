@@ -16253,9 +16253,17 @@ func (s *PoolInfo) encodeFields(e *jx.Encoder) {
 			s.LiquidJettonMaster.Encode(e)
 		}
 	}
+	{
+		e.FieldStart("nominators_stake")
+		e.Int64(s.NominatorsStake)
+	}
+	{
+		e.FieldStart("validator_stake")
+		e.Int64(s.ValidatorStake)
+	}
 }
 
-var jsonFieldsNameOfPoolInfo = [12]string{
+var jsonFieldsNameOfPoolInfo = [14]string{
 	0:  "address",
 	1:  "name",
 	2:  "total_amount",
@@ -16268,6 +16276,8 @@ var jsonFieldsNameOfPoolInfo = [12]string{
 	9:  "current_nominators",
 	10: "max_nominators",
 	11: "liquid_jetton_master",
+	12: "nominators_stake",
+	13: "validator_stake",
 }
 
 // Decode decodes PoolInfo from json.
@@ -16419,6 +16429,30 @@ func (s *PoolInfo) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"liquid_jetton_master\"")
 			}
+		case "nominators_stake":
+			requiredBitSet[1] |= 1 << 4
+			if err := func() error {
+				v, err := d.Int64()
+				s.NominatorsStake = int64(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"nominators_stake\"")
+			}
+		case "validator_stake":
+			requiredBitSet[1] |= 1 << 5
+			if err := func() error {
+				v, err := d.Int64()
+				s.ValidatorStake = int64(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"validator_stake\"")
+			}
 		default:
 			return d.Skip()
 		}
@@ -16430,7 +16464,7 @@ func (s *PoolInfo) Decode(d *jx.Decoder) error {
 	var failures []validate.FieldError
 	for i, mask := range [2]uint8{
 		0b11111111,
-		0b00000111,
+		0b00110111,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.

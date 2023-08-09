@@ -9,18 +9,24 @@ import (
 	"github.com/tonkeeper/tongo/abi"
 )
 
-func convertStakingWhalesPool(address tongo.AccountID, w references.WhalesPoolInfo, poolStatus abi.GetStakingStatusResult, poolConfig abi.GetParams_WhalesNominatorResult, apy float64, verified bool, nominators int) oas.PoolInfo {
+func convertStakingWhalesPool(address tongo.AccountID, w references.WhalesPoolInfo, poolStatus abi.GetStakingStatusResult, poolConfig abi.GetParams_WhalesNominatorResult, apy float64, verified bool, nominators []core.Nominator) oas.PoolInfo {
+	var nominatorsStake int64
+	for _, n := range nominators {
+		nominatorsStake += n.MemberBalance
+	}
 	return oas.PoolInfo{
 		Address:           address.ToRaw(),
 		Name:              w.Name + " " + w.Queue,
 		TotalAmount:       int64(poolStatus.StakeSent),
+		NominatorsStake:   nominatorsStake,
+		ValidatorStake:    int64(poolStatus.StakeSent) - nominatorsStake,
 		Implementation:    oas.PoolInfoImplementationWhales,
 		Apy:               apy * float64(10000-poolConfig.PoolFee) / 10000,
 		MinStake:          poolConfig.MinStake + poolConfig.DepositFee + poolConfig.ReceiptPrice,
 		CycleEnd:          int64(poolStatus.StakeUntil),
 		CycleStart:        int64(poolStatus.StakeAt),
 		Verified:          verified,
-		CurrentNominators: nominators,
+		CurrentNominators: len(nominators),
 		MaxNominators:     30000,
 	}
 }
@@ -42,6 +48,8 @@ func convertStakingTFPool(p core.TFPool, info addressbook.TFPoolInfo, apy float6
 		Verified:          p.VerifiedSources,
 		CurrentNominators: p.Nominators,
 		MaxNominators:     p.MaxNominators,
+		NominatorsStake:   p.NominatorsStake,
+		ValidatorStake:    p.ValidatorStake,
 	}
 }
 

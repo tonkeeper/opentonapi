@@ -14,7 +14,10 @@ type Nominator struct {
 }
 
 type TFPool struct {
-	Address           tongo.AccountID
+	Address         tongo.AccountID
+	ValidatorStake  int64
+	NominatorsStake int64
+	// TotalAmount = ValidatorStake + NominatorsStake
 	TotalAmount       int64
 	MinNominatorStake int64
 	ValidatorShare    uint32
