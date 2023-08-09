@@ -1080,6 +1080,129 @@ func (s *Server) handleGetAccountDnsExpiringRequest(args [1]string, argsEscaped 
 	}
 }
 
+// handleGetAccountEventRequest handles getAccountEvent operation.
+//
+// Get event for an account by event_id.
+//
+// GET /v2/accounts/{account_id}/event/{event_id}
+func (s *Server) handleGetAccountEventRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("getAccountEvent"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/accounts/{account_id}/event/{event_id}"),
+	}
+
+	// Start a span for this request.
+	ctx, span := s.cfg.Tracer.Start(r.Context(), "GetAccountEvent",
+		trace.WithAttributes(otelAttrs...),
+		serverSpanKind,
+	)
+	defer span.End()
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		elapsedDuration := time.Since(startTime)
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		s.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	s.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	var (
+		recordError = func(stage string, err error) {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			s.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		err          error
+		opErrContext = ogenerrors.OperationContext{
+			Name: "GetAccountEvent",
+			ID:   "getAccountEvent",
+		}
+	)
+	params, err := decodeGetAccountEventParams(args, argsEscaped, r)
+	if err != nil {
+		err = &ogenerrors.DecodeParamsError{
+			OperationContext: opErrContext,
+			Err:              err,
+		}
+		recordError("DecodeParams", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+
+	var response *AccountEvent
+	if m := s.cfg.Middleware; m != nil {
+		mreq := middleware.Request{
+			Context:       ctx,
+			OperationName: "GetAccountEvent",
+			OperationID:   "getAccountEvent",
+			Body:          nil,
+			Params: middleware.Parameters{
+				{
+					Name: "account_id",
+					In:   "path",
+				}: params.AccountID,
+				{
+					Name: "event_id",
+					In:   "path",
+				}: params.EventID,
+				{
+					Name: "Accept-Language",
+					In:   "header",
+				}: params.AcceptLanguage,
+				{
+					Name: "subject_only",
+					In:   "query",
+				}: params.SubjectOnly,
+			},
+			Raw: r,
+		}
+
+		type (
+			Request  = struct{}
+			Params   = GetAccountEventParams
+			Response = *AccountEvent
+		)
+		response, err = middleware.HookMiddleware[
+			Request,
+			Params,
+			Response,
+		](
+			m,
+			mreq,
+			unpackGetAccountEventParams,
+			func(ctx context.Context, request Request, params Params) (response Response, err error) {
+				response, err = s.h.GetAccountEvent(ctx, params)
+				return response, err
+			},
+		)
+	} else {
+		response, err = s.h.GetAccountEvent(ctx, params)
+	}
+	if err != nil {
+		recordError("Internal", err)
+		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
+			encodeErrorResponse(errRes, w, span)
+			return
+		}
+		if errors.Is(err, ht.ErrNotImplemented) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
+		return
+	}
+
+	if err := encodeGetAccountEventResponse(response, w, span); err != nil {
+		recordError("EncodeResponse", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+}
+
 // handleGetAccountEventsRequest handles getAccountEvents operation.
 //
 // Get events for an account. Each event is built on top of a trace which is a series of transactions

@@ -94,6 +94,15 @@ func (UnimplementedHandler) GetAccountDnsExpiring(ctx context.Context, params Ge
 	return r, ht.ErrNotImplemented
 }
 
+// GetAccountEvent implements getAccountEvent operation.
+//
+// Get event for an account by event_id.
+//
+// GET /v2/accounts/{account_id}/event/{event_id}
+func (UnimplementedHandler) GetAccountEvent(ctx context.Context, params GetAccountEventParams) (r *AccountEvent, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // GetAccountEvents implements getAccountEvents operation.
 //
 // Get events for an account. Each event is built on top of a trace which is a series of transactions

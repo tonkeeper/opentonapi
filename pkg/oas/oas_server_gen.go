@@ -62,6 +62,12 @@ type Handler interface {
 	//
 	// GET /v2/accounts/{account_id}/dns/expiring
 	GetAccountDnsExpiring(ctx context.Context, params GetAccountDnsExpiringParams) (*DnsExpiring, error)
+	// GetAccountEvent implements getAccountEvent operation.
+	//
+	// Get event for an account by event_id.
+	//
+	// GET /v2/accounts/{account_id}/event/{event_id}
+	GetAccountEvent(ctx context.Context, params GetAccountEventParams) (*AccountEvent, error)
 	// GetAccountEvents implements getAccountEvents operation.
 	//
 	// Get events for an account. Each event is built on top of a trace which is a series of transactions

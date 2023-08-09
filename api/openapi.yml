@@ -387,7 +387,7 @@ paths:
           required: true
           schema:
             type: integer
-            example: 1000
+            example: 100
             maximum: 1000
         - name: start_date
           in: query
@@ -435,7 +435,7 @@ paths:
           required: true
           schema:
             type: integer
-            example: 1000
+            example: 100
             maximum: 1000
         - name: start_date
           in: query
@@ -516,7 +516,7 @@ paths:
           required: true
           schema:
             type: integer
-            example: 1000
+            example: 100
             maximum: 1000
         - name: start_date
           in: query
@@ -539,6 +539,32 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AccountEvents'
+        'default':
+          $ref: '#/components/responses/Error'
+  /v2/accounts/{account_id}/event/{event_id}:
+    get:
+      description: Get event for an account by event_id
+      operationId: getAccountEvent
+      tags:
+        - Accounts
+      parameters:
+        - $ref: '#/components/parameters/accountIDParameter'
+        - $ref: '#/components/parameters/eventIDParameter'
+        - $ref: '#/components/parameters/i18n'
+        - name: subject_only
+          in: query
+          description: "filter actions where requested account is not real subject (for example sender or receiver jettons)"
+          schema:
+            type: boolean
+            default: false
+          required: false
+      responses:
+        '200':
+          description: account's event
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountEvent'
         'default':
           $ref: '#/components/responses/Error'
   /v2/accounts/{account_id}/traces:

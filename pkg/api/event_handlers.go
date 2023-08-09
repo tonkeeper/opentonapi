@@ -184,6 +184,33 @@ func (h Handler) GetAccountEvents(ctx context.Context, params oas.GetAccountEven
 	return &oas.AccountEvents{Events: events, NextFrom: int64(lastLT)}, nil
 }
 
+func (h Handler) GetAccountEvent(ctx context.Context, params oas.GetAccountEventParams) (*oas.AccountEvent, error) {
+	accountID, err := tongo.ParseAccountID(params.AccountID)
+	if err != nil {
+		return nil, toError(http.StatusBadRequest, err)
+	}
+	traceID, err := tongo.ParseHash(params.EventID)
+	if err != nil {
+		return nil, toError(http.StatusBadRequest, err)
+	}
+	trace, err := h.storage.GetTrace(ctx, traceID)
+	if err != nil {
+		return nil, toError(http.StatusInternalServerError, err)
+	}
+	result, err := bath.FindActions(ctx, trace, bath.ForAccount(accountID), bath.WithInformationSource(h.storage))
+	if err != nil {
+		return nil, toError(http.StatusInternalServerError, err)
+	}
+	event, err := h.toAccountEvent(ctx, accountID, trace, result, params.AcceptLanguage, params.SubjectOnly.Value)
+	if err != nil {
+		return nil, toError(http.StatusInternalServerError, err)
+	}
+	for i, j := 0, len(event.Actions)-1; i < j; i, j = i+1, j-1 {
+		event.Actions[i], event.Actions[j] = event.Actions[j], event.Actions[i]
+	}
+	return &event, nil
+}
+
 func (h Handler) EmulateMessageToAccountEvent(ctx context.Context, request *oas.EmulateMessageToAccountEventReq, params oas.EmulateMessageToAccountEventParams) (*oas.AccountEvent, error) {
 	c, err := boc.DeserializeSinglRootBase64(request.Boc)
 	if err != nil {

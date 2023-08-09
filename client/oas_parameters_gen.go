@@ -54,6 +54,17 @@ type GetAccountDnsExpiringParams struct {
 	Period OptInt
 }
 
+// GetAccountEventParams is parameters of getAccountEvent operation.
+type GetAccountEventParams struct {
+	// Account ID.
+	AccountID string
+	// Event ID or transaction hash in hex (without 0x) or base64url format.
+	EventID        string
+	AcceptLanguage OptString
+	// Filter actions where requested account is not real subject (for example sender or receiver jettons).
+	SubjectOnly OptBool
+}
+
 // GetAccountEventsParams is parameters of getAccountEvents operation.
 type GetAccountEventsParams struct {
 	// Account ID.

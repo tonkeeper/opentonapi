@@ -785,6 +785,239 @@ func decodeGetAccountDnsExpiringParams(args [1]string, argsEscaped bool, r *http
 	return params, nil
 }
 
+// GetAccountEventParams is parameters of getAccountEvent operation.
+type GetAccountEventParams struct {
+	// Account ID.
+	AccountID string
+	// Event ID or transaction hash in hex (without 0x) or base64url format.
+	EventID        string
+	AcceptLanguage OptString
+	// Filter actions where requested account is not real subject (for example sender or receiver jettons).
+	SubjectOnly OptBool
+}
+
+func unpackGetAccountEventParams(packed middleware.Parameters) (params GetAccountEventParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "account_id",
+			In:   "path",
+		}
+		params.AccountID = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "event_id",
+			In:   "path",
+		}
+		params.EventID = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "Accept-Language",
+			In:   "header",
+		}
+		if v, ok := packed[key]; ok {
+			params.AcceptLanguage = v.(OptString)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "subject_only",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.SubjectOnly = v.(OptBool)
+		}
+	}
+	return params
+}
+
+func decodeGetAccountEventParams(args [2]string, argsEscaped bool, r *http.Request) (params GetAccountEventParams, _ error) {
+	q := uri.NewQueryDecoder(r.URL.Query())
+	h := uri.NewHeaderDecoder(r.Header)
+	// Decode path: account_id.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "account_id",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.AccountID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account_id",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: event_id.
+	if err := func() error {
+		param := args[1]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "event_id",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.EventID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "event_id",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Set default value for header: Accept-Language.
+	{
+		val := string("en")
+		params.AcceptLanguage.SetTo(val)
+	}
+	// Decode header: Accept-Language.
+	if err := func() error {
+		cfg := uri.HeaderParameterDecodingConfig{
+			Name:    "Accept-Language",
+			Explode: false,
+		}
+		if err := h.HasParam(cfg); err == nil {
+			if err := h.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotAcceptLanguageVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotAcceptLanguageVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.AcceptLanguage.SetTo(paramsDotAcceptLanguageVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "Accept-Language",
+			In:   "header",
+			Err:  err,
+		}
+	}
+	// Set default value for query: subject_only.
+	{
+		val := bool(false)
+		params.SubjectOnly.SetTo(val)
+	}
+	// Decode query: subject_only.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "subject_only",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotSubjectOnlyVal bool
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToBool(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotSubjectOnlyVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.SubjectOnly.SetTo(paramsDotSubjectOnlyVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "subject_only",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
 // GetAccountEventsParams is parameters of getAccountEvents operation.
 type GetAccountEventsParams struct {
 	// Account ID.
