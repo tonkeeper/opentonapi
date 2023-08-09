@@ -4,8 +4,9 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"github.com/tonkeeper/tongo/tlb"
 	"math/big"
+
+	"github.com/tonkeeper/tongo/tlb"
 
 	"github.com/prometheus/client_golang/prometheus"
 
@@ -88,7 +89,7 @@ func (s *LiteStorage) GetParticipatingInTfPools(ctx context.Context, member tong
 	return result, nil
 }
 
-func (s *LiteStorage) GetWhalesPoolInfo(ctx context.Context, id tongo.AccountID) (abi.GetParams_WhalesNominatorResult, abi.GetStakingStatusResult, int, error) {
+func (s *LiteStorage) GetWhalesPoolInfo(ctx context.Context, id tongo.AccountID) (abi.GetParams_WhalesNominatorResult, abi.GetStakingStatusResult, []core.Nominator, error) {
 	timer := prometheus.NewTimer(prometheus.ObserverFunc(func(v float64) {
 		storageTimeHistogramVec.WithLabelValues("get_whales_pool_info").Observe(v)
 	}))
@@ -98,26 +99,36 @@ func (s *LiteStorage) GetWhalesPoolInfo(ctx context.Context, id tongo.AccountID)
 	var ok bool
 	method, value, err := abi.GetParams(ctx, s.client, id)
 	if err != nil {
-		return params, status, 0, err
+		return params, status, nil, err
 	}
 	params, ok = value.(abi.GetParams_WhalesNominatorResult)
 	if !ok {
-		return params, status, 0, fmt.Errorf("get_params returns type %v", method)
+		return params, status, nil, fmt.Errorf("get_params returns type %v", method)
 	}
 	method, value, err = abi.GetStakingStatus(ctx, s.client, id)
 	if err != nil {
-		return params, status, 0, err
+		return params, status, nil, err
 	}
 	status, ok = value.(abi.GetStakingStatusResult)
 	if !ok {
-		return params, status, 0, fmt.Errorf("get_staking returns type %v", method)
+		return params, status, nil, fmt.Errorf("get_staking returns type %v", method)
 	}
 	method, value, err = abi.GetMembersRaw(ctx, s.client, id)
-	nominators, ok := value.(abi.GetMembersRaw_WhalesNominatorResult)
+	nominatorResult, ok := value.(abi.GetMembersRaw_WhalesNominatorResult)
 	if !ok {
-		return params, status, 0, fmt.Errorf("get_members returns type %v", method)
+		return params, status, nil, fmt.Errorf("get_members returns type %v", method)
 	}
-	return params, status, len(nominators.Members.List.Keys()), nil
+	var nominators []core.Nominator
+	for _, n := range nominatorResult.Members.List.Values() {
+		nominators = append(nominators, core.Nominator{
+			// TODO: fill in a nominator address
+			MemberBalance:         int64(n.Balance),
+			MemberPendingDeposit:  int64(n.PendingDeposit),
+			MemberPendingWithdraw: int64(n.PendingWithdraw),
+			MemberWithdraw:        int64(n.MemberWithdraw),
+		})
+	}
+	return params, status, nominators, nil
 }
 
 func (s *LiteStorage) GetTFPool(ctx context.Context, pool tongo.AccountID) (core.TFPool, error) {
@@ -144,6 +155,8 @@ func (s *LiteStorage) GetTFPool(ctx context.Context, pool tongo.AccountID) (core
 	}
 	return core.TFPool{
 		Address:           pool,
+		ValidatorStake:    poolData.ValidatorAmount,
+		NominatorsStake:   poolData.StakeAmountSent - poolData.ValidatorAmount,
 		TotalAmount:       poolData.StakeAmountSent,
 		MinNominatorStake: poolData.MinNominatorStake,
 		ValidatorShare:    poolData.ValidatorRewardShare,

@@ -25,7 +25,7 @@ func (h Handler) GetStakingPoolInfo(ctx context.Context, params oas.GetStakingPo
 		return nil, toError(http.StatusBadRequest, err)
 	}
 	if w, prs := references.WhalesPools[poolID]; prs {
-		poolConfig, poolStatus, nominatorsCount, err := h.storage.GetWhalesPoolInfo(ctx, poolID)
+		poolConfig, poolStatus, nominators, err := h.storage.GetWhalesPoolInfo(ctx, poolID)
 		if err != nil {
 			return nil, toError(http.StatusInternalServerError, err)
 		}
@@ -35,7 +35,7 @@ func (h Handler) GetStakingPoolInfo(ctx context.Context, params oas.GetStakingPo
 				Description: i18n.T(params.AcceptLanguage.Value, i18n.C{MessageID: "poolImplementationDescription", TemplateData: map[string]interface{}{"Deposit": poolConfig.MinStake / 1_000_000_000}}),
 				URL:         references.WhalesPoolImplementationsURL,
 			},
-			Pool: convertStakingWhalesPool(poolID, w, poolStatus, poolConfig, h.state.GetAPY(), true, nominatorsCount),
+			Pool: convertStakingWhalesPool(poolID, w, poolStatus, poolConfig, h.state.GetAPY(), true, nominators),
 		}, nil
 	}
 	lPool, err := h.storage.GetLiquidPool(ctx, poolID)

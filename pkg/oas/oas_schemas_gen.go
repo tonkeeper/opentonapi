@@ -6879,6 +6879,10 @@ type PoolInfo struct {
 	MaxNominators int `json:"max_nominators"`
 	// For liquid staking master account of jetton.
 	LiquidJettonMaster OptString `json:"liquid_jetton_master"`
+	// Total stake of all nominators.
+	NominatorsStake int64 `json:"nominators_stake"`
+	// Stake of validator.
+	ValidatorStake int64 `json:"validator_stake"`
 }
 
 // GetAddress returns the value of Address.
@@ -6941,6 +6945,16 @@ func (s *PoolInfo) GetLiquidJettonMaster() OptString {
 	return s.LiquidJettonMaster
 }
 
+// GetNominatorsStake returns the value of NominatorsStake.
+func (s *PoolInfo) GetNominatorsStake() int64 {
+	return s.NominatorsStake
+}
+
+// GetValidatorStake returns the value of ValidatorStake.
+func (s *PoolInfo) GetValidatorStake() int64 {
+	return s.ValidatorStake
+}
+
 // SetAddress sets the value of Address.
 func (s *PoolInfo) SetAddress(val string) {
 	s.Address = val
@@ -6999,6 +7013,16 @@ func (s *PoolInfo) SetMaxNominators(val int) {
 // SetLiquidJettonMaster sets the value of LiquidJettonMaster.
 func (s *PoolInfo) SetLiquidJettonMaster(val OptString) {
 	s.LiquidJettonMaster = val
+}
+
+// SetNominatorsStake sets the value of NominatorsStake.
+func (s *PoolInfo) SetNominatorsStake(val int64) {
+	s.NominatorsStake = val
+}
+
+// SetValidatorStake sets the value of ValidatorStake.
+func (s *PoolInfo) SetValidatorStake(val int64) {
+	s.ValidatorStake = val
 }
 
 type PoolInfoImplementation string
