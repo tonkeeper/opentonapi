@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"sort"
 	"sync"
 	"time"
 
@@ -14,6 +15,7 @@ import (
 	"github.com/tonkeeper/tongo"
 	"go.uber.org/zap"
 	"golang.org/x/exp/maps"
+	"golang.org/x/exp/slices"
 )
 
 // KnownAddress represents additional manually crafted information about a particular account in the blockchain.
@@ -288,6 +290,11 @@ func (b *Book) refreshStonfiJettons(logger *zap.Logger) {
 	}
 }
 
+func unique(approvers []string) []string {
+	sort.Strings(approvers)
+	return slices.Compact(approvers)
+}
+
 func (b *Book) refreshCollections(logger *zap.Logger, collectionPath string) {
 	collections, err := downloadJson[KnownCollection](collectionPath)
 	if err != nil {
@@ -297,12 +304,21 @@ func (b *Book) refreshCollections(logger *zap.Logger, collectionPath string) {
 	b.mu.Lock()
 	defer b.mu.Unlock()
 	for _, item := range collections {
+		// TODO: remove items that were previously added but aren't present in the current list.
 		accountID, err := tongo.ParseAccountID(item.Address)
 		if err != nil {
 			continue
 		}
-		item.Address = accountID.ToRaw()
-		item.Approvers = append(item.Approvers, "tonkeeper")
+		currentCollection, ok := b.collections[accountID]
+		if !ok {
+			// this is a new item, so we only add tonkeeper as approver.
+			item.Address = accountID.ToRaw()
+			item.Approvers = unique(append(item.Approvers, "tonkeeper"))
+			b.collections[accountID] = item
+			continue
+		}
+		// this is an existing item, so we merge approvers and remove duplicates adding tonkeeper.
+		item.Approvers = unique(append(append(currentCollection.Approvers, item.Approvers...), "tonkeeper"))
 		b.collections[accountID] = item
 	}
 }
@@ -359,7 +375,7 @@ func (b *Book) getGGWhitelist(logger *zap.Logger) {
 		for _, account := range addresses {
 			collection, ok := b.collections[account]
 			if ok {
-				collection.Approvers = append(b.collections[account].Approvers, "getgems")
+				collection.Approvers = unique(append(b.collections[account].Approvers, "getgems"))
 				b.collections[account] = collection
 			}
 		}
