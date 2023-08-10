@@ -356,7 +356,6 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 						}
 
 						if len(elem) == 0 {
-							// Leaf node.
 							switch r.Method {
 							case "GET":
 								s.handleGetAccountNftItemsRequest([1]string{
@@ -367,6 +366,28 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 							}
 
 							return
+						}
+						switch elem[0] {
+						case '/': // Prefix: "/history"
+							if l := len("/history"); len(elem) >= l && elem[0:l] == "/history" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							if len(elem) == 0 {
+								// Leaf node.
+								switch r.Method {
+								case "GET":
+									s.handleGetAccountNftHistoryRequest([1]string{
+										args[0],
+									}, elemIsEscaped, w, r)
+								default:
+									s.notAllowed(w, r, "GET")
+								}
+
+								return
+							}
 						}
 					case 'p': // Prefix: "publickey"
 						if l := len("publickey"); len(elem) >= l && elem[0:l] == "publickey" {
@@ -1485,12 +1506,15 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 					}
 				}
 				// Param: "account_id"
-				// Leaf parameter
-				args[0] = elem
-				elem = ""
+				// Match until "/"
+				idx := strings.IndexByte(elem, '/')
+				if idx < 0 {
+					idx = len(elem)
+				}
+				args[0] = elem[:idx]
+				elem = elem[idx:]
 
 				if len(elem) == 0 {
-					// Leaf node.
 					switch r.Method {
 					case "GET":
 						s.handleGetNftItemByAddressRequest([1]string{
@@ -1501,6 +1525,28 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 					}
 
 					return
+				}
+				switch elem[0] {
+				case '/': // Prefix: "/history"
+					if l := len("/history"); len(elem) >= l && elem[0:l] == "/history" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					if len(elem) == 0 {
+						// Leaf node.
+						switch r.Method {
+						case "GET":
+							s.handleGetNftHistoryByIDRequest([1]string{
+								args[0],
+							}, elemIsEscaped, w, r)
+						default:
+							s.notAllowed(w, r, "GET")
+						}
+
+						return
+					}
 				}
 			case 'p': // Prefix: "pubkeys/"
 				if l := len("pubkeys/"); len(elem) >= l && elem[0:l] == "pubkeys/" {
@@ -2350,7 +2396,6 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 						if len(elem) == 0 {
 							switch method {
 							case "GET":
-								// Leaf: GetAccountNftItems
 								r.name = "GetAccountNftItems"
 								r.operationID = "getAccountNftItems"
 								r.pathPattern = "/v2/accounts/{account_id}/nfts"
@@ -2359,6 +2404,29 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 								return r, true
 							default:
 								return
+							}
+						}
+						switch elem[0] {
+						case '/': // Prefix: "/history"
+							if l := len("/history"); len(elem) >= l && elem[0:l] == "/history" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							if len(elem) == 0 {
+								switch method {
+								case "GET":
+									// Leaf: GetAccountNftHistory
+									r.name = "GetAccountNftHistory"
+									r.operationID = "getAccountNftHistory"
+									r.pathPattern = "/v2/accounts/{account_id}/nfts/history"
+									r.args = args
+									r.count = 1
+									return r, true
+								default:
+									return
+								}
 							}
 						}
 					case 'p': // Prefix: "publickey"
@@ -3547,14 +3615,17 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 					}
 				}
 				// Param: "account_id"
-				// Leaf parameter
-				args[0] = elem
-				elem = ""
+				// Match until "/"
+				idx := strings.IndexByte(elem, '/')
+				if idx < 0 {
+					idx = len(elem)
+				}
+				args[0] = elem[:idx]
+				elem = elem[idx:]
 
 				if len(elem) == 0 {
 					switch method {
 					case "GET":
-						// Leaf: GetNftItemByAddress
 						r.name = "GetNftItemByAddress"
 						r.operationID = "getNftItemByAddress"
 						r.pathPattern = "/v2/nfts/{account_id}"
@@ -3563,6 +3634,29 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 						return r, true
 					default:
 						return
+					}
+				}
+				switch elem[0] {
+				case '/': // Prefix: "/history"
+					if l := len("/history"); len(elem) >= l && elem[0:l] == "/history" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					if len(elem) == 0 {
+						switch method {
+						case "GET":
+							// Leaf: GetNftHistoryByID
+							r.name = "GetNftHistoryByID"
+							r.operationID = "getNftHistoryByID"
+							r.pathPattern = "/v2/nfts/{account_id}/history"
+							r.args = args
+							r.count = 1
+							return r, true
+						default:
+							return
+						}
 					}
 				}
 			case 'p': // Prefix: "pubkeys/"

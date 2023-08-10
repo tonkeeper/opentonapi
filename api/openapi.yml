@@ -487,6 +487,53 @@ paths:
                 $ref: '#/components/schemas/NftItems'
         'default':
           $ref: '#/components/responses/Error'
+  /v2/accounts/{account_id}/nfts/history:
+    get:
+      description: Get the transfer nft history
+      operationId: getAccountNftHistory
+      tags:
+        - NFT
+      parameters:
+        - $ref: '#/components/parameters/accountIDParameter'
+        - $ref: '#/components/parameters/i18n'
+        - name: before_lt
+          in: query
+          description: "omit this parameter to get last events"
+          required: false
+          schema:
+            type: integer
+            format: int64
+            example: 25758317000002
+        - name: limit
+          in: query
+          required: true
+          schema:
+            type: integer
+            example: 100
+            maximum: 1000
+        - name: start_date
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+            example: 1668436763
+        - name: end_date
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+            example: 1668436763
+      responses:
+        '200':
+          description: nft history
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountEvents'
+        'default':
+          $ref: '#/components/responses/Error'
   /v2/accounts/{account_id}/events:
     get:
       description: Get events for an account. Each event is built on top of a trace which is a series of transactions caused by one inbound message. TonAPI looks for known patterns inside the trace and splits the trace into actions, where a single action represents a meaningful high-level operation like a Jetton Transfer or an NFT Purchase. Actions are expected to be shown to users. It is advised not to build any logic on top of actions because actions can be changed at any time.
@@ -856,7 +903,53 @@ paths:
                 $ref: '#/components/schemas/NftItem'
         'default':
           $ref: '#/components/responses/Error'
-
+  /v2/nfts/{account_id}/history:
+    get:
+      description: Get the transfer nfts history for account
+      operationId: getNftHistoryByID
+      tags:
+        - NFT
+      parameters:
+        - $ref: '#/components/parameters/accountIDParameter'
+        - $ref: '#/components/parameters/i18n'
+        - name: before_lt
+          in: query
+          description: "omit this parameter to get last events"
+          required: false
+          schema:
+            type: integer
+            format: int64
+            example: 25758317000002
+        - name: limit
+          in: query
+          required: true
+          schema:
+            type: integer
+            example: 100
+            maximum: 1000
+        - name: start_date
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+            example: 1668436763
+        - name: end_date
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+            example: 1668436763
+      responses:
+        '200':
+          description: nft history
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountEvents'
+        'default':
+          $ref: '#/components/responses/Error'
   /v2/traces/{trace_id}:
     get:
       description: Get the trace by trace ID or hash of any transaction in trace

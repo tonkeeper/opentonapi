@@ -54,15 +54,11 @@ type storage interface {
 	GetLiquidPools(ctx context.Context, onlyVerified bool) ([]core.LiquidPool, error)
 
 	GetNFTs(ctx context.Context, accounts []tongo.AccountID) ([]core.NftItem, error)
-	SearchNFTs(ctx context.Context,
-		collection *core.Filter[tongo.AccountID],
-		owner *core.Filter[tongo.AccountID],
-		includeOnSale bool,
-		onlyVerified bool,
-		limit, offset int,
-	) ([]tongo.AccountID, error)
+	SearchNFTs(ctx context.Context, collection *core.Filter[tongo.AccountID], owner *core.Filter[tongo.AccountID], includeOnSale bool, onlyVerified bool, limit, offset int) ([]tongo.AccountID, error)
 	GetNftCollections(ctx context.Context, limit, offset *int32) ([]core.NftCollection, error)
 	GetNftCollectionByCollectionAddress(ctx context.Context, address tongo.AccountID) (core.NftCollection, error)
+	GetAccountNftsHistory(ctx context.Context, address tongo.AccountID, limit int, beforeLT *int64, startTime *int64, endTime *int64) ([]tongo.Bits256, error)
+	GetNftHistory(ctx context.Context, address tongo.AccountID, limit int, beforeLT *int64, startTime *int64, endTime *int64) ([]tongo.Bits256, error)
 
 	FindAllDomainsResolvedToAddress(ctx context.Context, a tongo.AccountID, collections map[tongo.AccountID]string) ([]string, error)
 

@@ -3846,6 +3846,79 @@
     ]
    }
   },
+  "/v2/accounts/{account_id}/nfts/history": {
+   "get": {
+    "description": "Get the transfer nft history",
+    "operationId": "getAccountNftHistory",
+    "parameters": [
+     {
+      "$ref": "#/components/parameters/accountIDParameter"
+     },
+     {
+      "$ref": "#/components/parameters/i18n"
+     },
+     {
+      "description": "omit this parameter to get last events",
+      "in": "query",
+      "name": "before_lt",
+      "required": false,
+      "schema": {
+       "example": 25758317000002,
+       "format": "int64",
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "limit",
+      "required": true,
+      "schema": {
+       "example": 100,
+       "maximum": 1000,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "start_date",
+      "required": false,
+      "schema": {
+       "example": 1668436763,
+       "format": "int64",
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "end_date",
+      "required": false,
+      "schema": {
+       "example": 1668436763,
+       "format": "int64",
+       "type": "integer"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/AccountEvents"
+        }
+       }
+      },
+      "description": "nft history"
+     },
+     "default": {
+      "$ref": "#/components/responses/Error"
+     }
+    },
+    "tags": [
+     "NFT"
+    ]
+   }
+  },
   "/v2/accounts/{account_id}/publickey": {
    "get": {
     "description": "Get public key by account id",
@@ -5657,6 +5730,79 @@
        }
       },
       "description": "nft item"
+     },
+     "default": {
+      "$ref": "#/components/responses/Error"
+     }
+    },
+    "tags": [
+     "NFT"
+    ]
+   }
+  },
+  "/v2/nfts/{account_id}/history": {
+   "get": {
+    "description": "Get the transfer nfts history for account",
+    "operationId": "getNftHistoryByID",
+    "parameters": [
+     {
+      "$ref": "#/components/parameters/accountIDParameter"
+     },
+     {
+      "$ref": "#/components/parameters/i18n"
+     },
+     {
+      "description": "omit this parameter to get last events",
+      "in": "query",
+      "name": "before_lt",
+      "required": false,
+      "schema": {
+       "example": 25758317000002,
+       "format": "int64",
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "limit",
+      "required": true,
+      "schema": {
+       "example": 100,
+       "maximum": 1000,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "start_date",
+      "required": false,
+      "schema": {
+       "example": 1668436763,
+       "format": "int64",
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "end_date",
+      "required": false,
+      "schema": {
+       "example": 1668436763,
+       "format": "int64",
+       "type": "integer"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/AccountEvents"
+        }
+       }
+      },
+      "description": "nft history"
      },
      "default": {
       "$ref": "#/components/responses/Error"

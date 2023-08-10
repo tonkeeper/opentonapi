@@ -311,6 +311,22 @@ func (h Handler) GetAccountTraces(ctx context.Context, params oas.GetAccountTrac
 	return &traces, nil
 }
 
+func (h Handler) GetAccountNftHistory(ctx context.Context, params oas.GetAccountNftHistoryParams) (*oas.AccountEvents, error) {
+	accountID, err := tongo.ParseAccountID(params.AccountID)
+	if err != nil {
+		return nil, toError(http.StatusBadRequest, err)
+	}
+	traceIDs, err := h.storage.GetAccountNftsHistory(ctx, accountID, params.Limit, optIntToPointer(params.BeforeLt), optIntToPointer(params.StartDate), optIntToPointer(params.EndDate))
+	if err != nil {
+		return nil, toError(http.StatusInternalServerError, err)
+	}
+	events, lastLT, err := h.convertNftHistory(ctx, accountID, traceIDs, params.AcceptLanguage)
+	if err != nil {
+		return nil, toError(http.StatusInternalServerError, err)
+	}
+	return &oas.AccountEvents{Events: events, NextFrom: lastLT}, nil
+}
+
 func pubkeyFromCodeData(code, data []byte) ([]byte, error) {
 	cells, err := boc.DeserializeBoc(code)
 	if err != nil {
