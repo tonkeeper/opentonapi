@@ -111,6 +111,18 @@ type GetAccountJettonsHistoryParams struct {
 	EndDate   OptInt64
 }
 
+// GetAccountNftHistoryParams is parameters of getAccountNftHistory operation.
+type GetAccountNftHistoryParams struct {
+	// Account ID.
+	AccountID      string
+	AcceptLanguage OptString
+	// Omit this parameter to get last events.
+	BeforeLt  OptInt64
+	Limit     int
+	StartDate OptInt64
+	EndDate   OptInt64
+}
+
 // GetAccountNftItemsParams is parameters of getAccountNftItems operation.
 type GetAccountNftItemsParams struct {
 	// Account ID.
@@ -264,6 +276,18 @@ type GetNftCollectionParams struct {
 type GetNftCollectionsParams struct {
 	Limit  OptInt32
 	Offset OptInt32
+}
+
+// GetNftHistoryByIDParams is parameters of getNftHistoryByID operation.
+type GetNftHistoryByIDParams struct {
+	// Account ID.
+	AccountID      string
+	AcceptLanguage OptString
+	// Omit this parameter to get last events.
+	BeforeLt  OptInt64
+	Limit     int
+	StartDate OptInt64
+	EndDate   OptInt64
 }
 
 // GetNftItemByAddressParams is parameters of getNftItemByAddress operation.

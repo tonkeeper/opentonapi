@@ -102,6 +102,12 @@ type Handler interface {
 	//
 	// GET /v2/accounts/{account_id}/jettons/history
 	GetAccountJettonsHistory(ctx context.Context, params GetAccountJettonsHistoryParams) (*AccountEvents, error)
+	// GetAccountNftHistory implements getAccountNftHistory operation.
+	//
+	// Get the transfer nft history.
+	//
+	// GET /v2/accounts/{account_id}/nfts/history
+	GetAccountNftHistory(ctx context.Context, params GetAccountNftHistoryParams) (*AccountEvents, error)
 	// GetAccountNftItems implements getAccountNftItems operation.
 	//
 	// Get all NFT items by owner address.
@@ -269,6 +275,12 @@ type Handler interface {
 	//
 	// GET /v2/nfts/collections
 	GetNftCollections(ctx context.Context, params GetNftCollectionsParams) (*NftCollections, error)
+	// GetNftHistoryByID implements getNftHistoryByID operation.
+	//
+	// Get the transfer nfts history for account.
+	//
+	// GET /v2/nfts/{account_id}/history
+	GetNftHistoryByID(ctx context.Context, params GetNftHistoryByIDParams) (*AccountEvents, error)
 	// GetNftItemByAddress implements getNftItemByAddress operation.
 	//
 	// Get NFT item by its address.

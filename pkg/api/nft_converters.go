@@ -6,6 +6,8 @@ import (
 	"fmt"
 
 	"github.com/tonkeeper/opentonapi/internal/g"
+	"github.com/tonkeeper/opentonapi/pkg/bath"
+	"github.com/tonkeeper/tongo"
 
 	"github.com/go-faster/jx"
 	"github.com/tonkeeper/opentonapi/pkg/core"
@@ -105,4 +107,47 @@ func convertNftCollection(collection core.NftCollection, book addressBook, imgGe
 		c.Metadata.SetTo(metadata)
 	}
 	return c
+}
+
+func (h Handler) convertNftHistory(ctx context.Context, account tongo.AccountID, traceIDs []tongo.Bits256, acceptLanguage oas.OptString) ([]oas.AccountEvent, int64, error) {
+	var lastLT uint64
+	events := []oas.AccountEvent{}
+	for _, traceID := range traceIDs {
+		trace, err := h.storage.GetTrace(ctx, traceID)
+		if err != nil {
+			return nil, 0, err
+		}
+		result, err := bath.FindActions(ctx, trace, bath.WithInformationSource(h.storage))
+		if err != nil {
+			return nil, 0, err
+		}
+		event := oas.AccountEvent{
+			EventID:    trace.Hash.Hex(),
+			Account:    convertAccountAddress(account, h.addressBook, h.previewGenerator),
+			Timestamp:  trace.Utime,
+			IsScam:     false,
+			Lt:         int64(trace.Lt),
+			InProgress: trace.InProgress(),
+		}
+		for _, action := range result.Actions {
+			if action.Type != bath.NftItemTransfer {
+				continue
+			}
+			convertedAction, spamDetected, err := h.convertAction(ctx, account, action, acceptLanguage)
+			if err != nil {
+				return nil, 0, err
+			}
+			if !event.IsScam && spamDetected {
+				event.IsScam = true
+			}
+			event.Actions = append(event.Actions, convertedAction)
+		}
+		if len(event.Actions) == 0 {
+			continue
+		}
+		events = append(events, event)
+		lastLT = trace.Lt
+	}
+
+	return events, int64(lastLT), nil
 }

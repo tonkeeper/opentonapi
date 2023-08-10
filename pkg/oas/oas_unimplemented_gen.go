@@ -152,6 +152,15 @@ func (UnimplementedHandler) GetAccountJettonsHistory(ctx context.Context, params
 	return r, ht.ErrNotImplemented
 }
 
+// GetAccountNftHistory implements getAccountNftHistory operation.
+//
+// Get the transfer nft history.
+//
+// GET /v2/accounts/{account_id}/nfts/history
+func (UnimplementedHandler) GetAccountNftHistory(ctx context.Context, params GetAccountNftHistoryParams) (r *AccountEvents, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // GetAccountNftItems implements getAccountNftItems operation.
 //
 // Get all NFT items by owner address.
@@ -397,6 +406,15 @@ func (UnimplementedHandler) GetNftCollection(ctx context.Context, params GetNftC
 //
 // GET /v2/nfts/collections
 func (UnimplementedHandler) GetNftCollections(ctx context.Context, params GetNftCollectionsParams) (r *NftCollections, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// GetNftHistoryByID implements getNftHistoryByID operation.
+//
+// Get the transfer nfts history for account.
+//
+// GET /v2/nfts/{account_id}/history
+func (UnimplementedHandler) GetNftHistoryByID(ctx context.Context, params GetNftHistoryByIDParams) (r *AccountEvents, _ error) {
 	return r, ht.ErrNotImplemented
 }
 

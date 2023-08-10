@@ -141,3 +141,19 @@ func (h Handler) GetItemsFromCollection(ctx context.Context, params oas.GetItems
 	}
 	return &result, nil
 }
+
+func (h Handler) GetNftHistoryByID(ctx context.Context, params oas.GetNftHistoryByIDParams) (*oas.AccountEvents, error) {
+	accountID, err := tongo.ParseAccountID(params.AccountID)
+	if err != nil {
+		return nil, toError(http.StatusBadRequest, err)
+	}
+	traceIDs, err := h.storage.GetNftHistory(ctx, accountID, params.Limit, optIntToPointer(params.BeforeLt), optIntToPointer(params.StartDate), optIntToPointer(params.EndDate))
+	if err != nil {
+		return nil, toError(http.StatusInternalServerError, err)
+	}
+	events, lastLT, err := h.convertNftHistory(ctx, accountID, traceIDs, params.AcceptLanguage)
+	if err != nil {
+		return nil, toError(http.StatusInternalServerError, err)
+	}
+	return &oas.AccountEvents{Events: events, NextFrom: lastLT}, nil
+}
