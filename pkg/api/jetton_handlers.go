@@ -70,12 +70,17 @@ func (h Handler) GetJettonInfo(ctx context.Context, params oas.GetJettonInfoPara
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
+	holdersCount, err := h.storage.GetJettonsHoldersCount(ctx, []tongo.AccountID{accountID})
+	if err != nil {
+		return nil, toError(http.StatusInternalServerError, err)
+	}
 	supply := big.Int(data.TotalSupply)
 	return &oas.JettonInfo{
 		Mintable:     data.Mintable != 0,
 		TotalSupply:  supply.String(),
 		Metadata:     metadata,
 		Verification: oas.JettonVerificationType(meta.Verification),
+		HoldersCount: holdersCount[accountID],
 	}, nil
 }
 
@@ -138,6 +143,14 @@ func (h Handler) GetJettons(ctx context.Context, params oas.GetJettonsParams) (*
 		return nil, toError(http.StatusInternalServerError, err)
 	}
 	results := make([]oas.JettonInfo, 0, len(jettons))
+	var addresses []tongo.AccountID
+	for _, jetton := range jettons {
+		addresses = append(addresses, jetton.Address)
+	}
+	jettonsHolders, err := h.storage.GetJettonsHoldersCount(ctx, addresses)
+	if err != nil {
+		return nil, toError(http.StatusInternalServerError, err)
+	}
 	for _, master := range jettons {
 		meta := h.GetJettonNormalizedMetadata(ctx, master.Address, h.previewGenerator)
 		metadata := jettonMetadata(master.Address, meta)
@@ -146,6 +159,7 @@ func (h Handler) GetJettons(ctx context.Context, params oas.GetJettonsParams) (*
 			TotalSupply:  master.TotalSupply.String(),
 			Metadata:     metadata,
 			Verification: oas.JettonVerificationType(meta.Verification),
+			HoldersCount: jettonsHolders[master.Address],
 		}
 		results = append(results, info)
 	}

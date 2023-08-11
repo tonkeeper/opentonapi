@@ -144,3 +144,7 @@ func (s *LiteStorage) GetJettonMasters(ctx context.Context, limit, offset int) (
 	// TODO: implement
 	return nil, nil
 }
+
+func (s *LiteStorage) GetJettonsHoldersCount(ctx context.Context, accountIDs []tongo.AccountID) (map[tongo.AccountID]int32, error) {
+	return map[tongo.AccountID]int32{}, nil
+}

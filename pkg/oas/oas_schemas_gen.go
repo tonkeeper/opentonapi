@@ -3724,6 +3724,7 @@ type JettonInfo struct {
 	TotalSupply  string                 `json:"total_supply"`
 	Metadata     JettonMetadata         `json:"metadata"`
 	Verification JettonVerificationType `json:"verification"`
+	HoldersCount int32                  `json:"holders_count"`
 }
 
 // GetMintable returns the value of Mintable.
@@ -3746,6 +3747,11 @@ func (s *JettonInfo) GetVerification() JettonVerificationType {
 	return s.Verification
 }
 
+// GetHoldersCount returns the value of HoldersCount.
+func (s *JettonInfo) GetHoldersCount() int32 {
+	return s.HoldersCount
+}
+
 // SetMintable sets the value of Mintable.
 func (s *JettonInfo) SetMintable(val bool) {
 	s.Mintable = val
@@ -3764,6 +3770,11 @@ func (s *JettonInfo) SetMetadata(val JettonMetadata) {
 // SetVerification sets the value of Verification.
 func (s *JettonInfo) SetVerification(val JettonVerificationType) {
 	s.Verification = val
+}
+
+// SetHoldersCount sets the value of HoldersCount.
+func (s *JettonInfo) SetHoldersCount(val int32) {
+	s.HoldersCount = val
 }
 
 // Ref: #/components/schemas/JettonMetadata
