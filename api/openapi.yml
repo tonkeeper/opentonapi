@@ -4006,6 +4006,7 @@ components:
         - total_supply
         - metadata
         - verification
+        - holders_count
       properties:
         mintable:
           type: boolean
@@ -4017,6 +4018,10 @@ components:
           $ref: '#/components/schemas/JettonMetadata'
         verification:
           $ref: '#/components/schemas/JettonVerificationType'
+        holders_count:
+          type: integer
+          format: int32
+          example: 2000
     AccountStaking:
       type: object
       required:

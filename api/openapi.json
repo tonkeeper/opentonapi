@@ -1792,6 +1792,11 @@
    },
    "JettonInfo": {
     "properties": {
+     "holders_count": {
+      "example": 2000,
+      "format": "int32",
+      "type": "integer"
+     },
      "metadata": {
       "$ref": "#/components/schemas/JettonMetadata"
      },
@@ -1811,7 +1816,8 @@
      "mintable",
      "total_supply",
      "metadata",
-     "verification"
+     "verification",
+     "holders_count"
     ],
     "type": "object"
    },
