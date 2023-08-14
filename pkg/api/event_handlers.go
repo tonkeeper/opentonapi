@@ -391,13 +391,10 @@ func (h Handler) addToMempool(bytesBoc []byte, shardAccount map[tongo.AccountID]
 	if err != nil {
 		return shardAccount, err
 	}
-	var (
-		ttl = int64(30)
-		msg tongoWallet.MessageV4
-	)
-	err = tlb.Unmarshal(msgCell[0], &msg)
+	ttl := int64(30)
+	msgV4, err := tongoWallet.DecodeMessageV4(msgCell[0])
 	if err == nil {
-		ttl = int64(msg.ValidUntil) - time.Now().Unix()
+		ttl = int64(msgV4.ValidUntil) - time.Now().Unix()
 	}
 	var message tlb.Message
 	err = tlb.Unmarshal(msgCell[0], &message)
