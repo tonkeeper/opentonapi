@@ -2529,6 +2529,20 @@ func (s *FoundAccountsAddressesItem) SetName(val string) {
 	s.Name = val
 }
 
+type GetAccountDiffOK struct {
+	BalanceChange int64 `json:"balance_change"`
+}
+
+// GetBalanceChange returns the value of BalanceChange.
+func (s *GetAccountDiffOK) GetBalanceChange() int64 {
+	return s.BalanceChange
+}
+
+// SetBalanceChange sets the value of BalanceChange.
+func (s *GetAccountDiffOK) SetBalanceChange(val int64) {
+	s.BalanceChange = val
+}
+
 type GetAccountInfoByStateInitReq struct {
 	StateInit string `json:"state_init"`
 }
