@@ -216,8 +216,8 @@ func NewAddressBook(logger *zap.Logger, addressPath, jettonPath, collectionPath 
 func (b *Book) refresh(logger *zap.Logger, addressPath, jettonPath, collectionPath string) {
 	go b.refreshAddresses(logger, addressPath)
 	go b.refreshJettons(logger, jettonPath)
-	go b.refreshRedoubtJettons(logger)
 	go b.refreshStonfiJettons(logger)
+	go b.refreshMegatonJettons(logger)
 	go b.refreshCollections(logger, collectionPath)
 	go b.refreshTfPools(logger)
 }
@@ -258,10 +258,10 @@ func (b *Book) refreshJettons(logger *zap.Logger, jettonPath string) {
 	}
 }
 
-func (b *Book) refreshRedoubtJettons(logger *zap.Logger) {
-	jettons, err := getRedoubtJettons()
+func (b *Book) refreshMegatonJettons(logger *zap.Logger) {
+	jettons, err := getMegatonJettons()
 	if err != nil {
-		logger.Info("failed to load redoubt jettons")
+		logger.Info("failed to load megaton jettons")
 		return
 	}
 	b.mu.Lock()
@@ -403,8 +403,8 @@ func _getGGWhitelist(client *graphql.Client) ([]tongo.AccountID, error) {
 	return addr, nil
 }
 
-func getRedoubtJettons() ([]KnownJetton, error) {
-	response, err := http.Get("https://api.redoubt.online/v2/feed/jettons")
+func getMegatonJettons() ([]KnownJetton, error) {
+	response, err := http.Get("https://megaton.fi/api/token/infoList")
 	if err != nil {
 		return nil, err
 	}
@@ -412,21 +412,19 @@ func getRedoubtJettons() ([]KnownJetton, error) {
 	if response.StatusCode >= 300 {
 		return nil, fmt.Errorf("invalid status code %v", response.StatusCode)
 	}
-	var respBody struct {
-		Jettons []KnownJetton `json:"jettons"`
-	}
+	var respBody []KnownJetton
 	if err = json.NewDecoder(response.Body).Decode(&respBody); err != nil {
 		return nil, err
 	}
-	for idx, jetton := range respBody.Jettons {
+	for idx, jetton := range respBody {
 		address, err := tongo.ParseAccountID(jetton.Address)
 		if err != nil {
 			continue
 		}
 		jetton.Address = address.ToRaw()
-		respBody.Jettons[idx] = jetton
+		respBody[idx] = jetton
 	}
-	return respBody.Jettons, nil
+	return respBody, nil
 }
 
 func getStonfiJettons() ([]KnownJetton, error) {

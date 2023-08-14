@@ -35,9 +35,17 @@ func (m *Mock) GetCurrentRates() (map[string]float64, error) {
 	meanTonPriceToUSD := (tonPriceHuobi + tonPriceOKX) / 2
 
 	pools := m.getDedustPool()
-	redoubtPool := getRedoubtPool()
-	for address, price := range redoubtPool {
-		pools[address] = price
+	megatonPool := getMegatonPool()
+	for address, price := range megatonPool {
+		if _, ok := pools[address]; !ok {
+			pools[address] = price
+		}
+	}
+	stonfiPools := getStonFiPool(meanTonPriceToUSD)
+	for address, price := range stonfiPools {
+		if _, ok := pools[address]; !ok {
+			pools[address] = price
+		}
 	}
 
 	rates := make(map[string]float64)
@@ -52,33 +60,34 @@ func (m *Mock) GetCurrentRates() (map[string]float64, error) {
 	return rates, nil
 }
 
-func getRedoubtPool() map[string]float64 {
-	resp, err := http.Get("https://api.redoubt.online/v2/feed/jettons")
+func getMegatonPool() map[string]float64 {
+	resp, err := http.Get("https://megaton.fi/api/token/infoList")
 	if err != nil {
-		log.Errorf("failed to fetch redoubt rates: %v", err)
+		log.Errorf("failed to fetch megaton rates: %v", err)
 		return map[string]float64{}
 	}
 	defer resp.Body.Close()
 
+	if resp.StatusCode >= 300 {
+		log.Errorf("invalid status code megaton rates: %v", resp.StatusCode)
+		return map[string]float64{}
+	}
 	type Pool struct {
-		Name    string `json:"name"`
-		Address string `json:"address"`
-		Price   struct {
-			Ton float64 `json:"ton"`
-		} `json:"price"`
+		Address string  `json:"address"`
+		Price   float64 `json:"price"`
 	}
-
-	var respBody struct {
-		Jettons []Pool `json:"jettons"`
-	}
+	var respBody []Pool
 	if err = json.NewDecoder(resp.Body).Decode(&respBody); err != nil {
 		log.Errorf("failed to decode response: %v", err)
 		return map[string]float64{}
 	}
 
 	mapOfPool := make(map[string]float64)
-	for _, pool := range respBody.Jettons {
-		mapOfPool[pool.Address] = 1 / pool.Price.Ton
+	for _, pool := range respBody {
+		if pool.Price == 0 {
+			continue
+		}
+		mapOfPool[pool.Address] = 1 / pool.Price
 	}
 
 	return mapOfPool
@@ -94,9 +103,7 @@ func getStonFiPool(tonPrice float64) map[string]float64 {
 
 	type Pool struct {
 		ContractAddress string  `json:"contract_address"`
-		Symbol          string  `json:"symbol"`
-		UsdPrice        *string `json:"usd_price"`
-		Decimals        int32   `json:"decimals"`
+		DexUsdPrice     *string `json:"dex_usd_price"`
 	}
 
 	var respBody struct {
@@ -109,12 +116,15 @@ func getStonFiPool(tonPrice float64) map[string]float64 {
 
 	mapOfPool := make(map[string]float64)
 	for _, pool := range respBody.AssetList {
-		if pool.UsdPrice == nil {
+		if pool.DexUsdPrice == nil {
 			continue
 		}
-		price, err := strconv.ParseFloat(*pool.UsdPrice, 64)
+		price, err := strconv.ParseFloat(*pool.DexUsdPrice, 64)
 		if err != nil {
 			log.Errorf("failed to convert stonfi price: %v", err)
+			continue
+		}
+		if price == 0 {
 			continue
 		}
 		mapOfPool[pool.ContractAddress] = tonPrice / price
