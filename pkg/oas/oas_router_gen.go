@@ -136,8 +136,8 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 						break
 					}
 					switch elem[0] {
-					case 'd': // Prefix: "dns/"
-						if l := len("dns/"); len(elem) >= l && elem[0:l] == "dns/" {
+					case 'd': // Prefix: "d"
+						if l := len("d"); len(elem) >= l && elem[0:l] == "d" {
 							elem = elem[l:]
 						} else {
 							break
@@ -147,8 +147,8 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 							break
 						}
 						switch elem[0] {
-						case 'b': // Prefix: "backresolve"
-							if l := len("backresolve"); len(elem) >= l && elem[0:l] == "backresolve" {
+						case 'i': // Prefix: "iff"
+							if l := len("iff"); len(elem) >= l && elem[0:l] == "iff" {
 								elem = elem[l:]
 							} else {
 								break
@@ -158,7 +158,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 								// Leaf node.
 								switch r.Method {
 								case "GET":
-									s.handleAccountDnsBackResolveRequest([1]string{
+									s.handleGetAccountDiffRequest([1]string{
 										args[0],
 									}, elemIsEscaped, w, r)
 								default:
@@ -167,25 +167,57 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 								return
 							}
-						case 'e': // Prefix: "expiring"
-							if l := len("expiring"); len(elem) >= l && elem[0:l] == "expiring" {
+						case 'n': // Prefix: "ns/"
+							if l := len("ns/"); len(elem) >= l && elem[0:l] == "ns/" {
 								elem = elem[l:]
 							} else {
 								break
 							}
 
 							if len(elem) == 0 {
-								// Leaf node.
-								switch r.Method {
-								case "GET":
-									s.handleGetAccountDnsExpiringRequest([1]string{
-										args[0],
-									}, elemIsEscaped, w, r)
-								default:
-									s.notAllowed(w, r, "GET")
+								break
+							}
+							switch elem[0] {
+							case 'b': // Prefix: "backresolve"
+								if l := len("backresolve"); len(elem) >= l && elem[0:l] == "backresolve" {
+									elem = elem[l:]
+								} else {
+									break
 								}
 
-								return
+								if len(elem) == 0 {
+									// Leaf node.
+									switch r.Method {
+									case "GET":
+										s.handleAccountDnsBackResolveRequest([1]string{
+											args[0],
+										}, elemIsEscaped, w, r)
+									default:
+										s.notAllowed(w, r, "GET")
+									}
+
+									return
+								}
+							case 'e': // Prefix: "expiring"
+								if l := len("expiring"); len(elem) >= l && elem[0:l] == "expiring" {
+									elem = elem[l:]
+								} else {
+									break
+								}
+
+								if len(elem) == 0 {
+									// Leaf node.
+									switch r.Method {
+									case "GET":
+										s.handleGetAccountDnsExpiringRequest([1]string{
+											args[0],
+										}, elemIsEscaped, w, r)
+									default:
+										s.notAllowed(w, r, "GET")
+									}
+
+									return
+								}
 							}
 						}
 					case 'e': // Prefix: "events"
@@ -2168,8 +2200,8 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 						break
 					}
 					switch elem[0] {
-					case 'd': // Prefix: "dns/"
-						if l := len("dns/"); len(elem) >= l && elem[0:l] == "dns/" {
+					case 'd': // Prefix: "d"
+						if l := len("d"); len(elem) >= l && elem[0:l] == "d" {
 							elem = elem[l:]
 						} else {
 							break
@@ -2179,8 +2211,8 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 							break
 						}
 						switch elem[0] {
-						case 'b': // Prefix: "backresolve"
-							if l := len("backresolve"); len(elem) >= l && elem[0:l] == "backresolve" {
+						case 'i': // Prefix: "iff"
+							if l := len("iff"); len(elem) >= l && elem[0:l] == "iff" {
 								elem = elem[l:]
 							} else {
 								break
@@ -2189,10 +2221,10 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 							if len(elem) == 0 {
 								switch method {
 								case "GET":
-									// Leaf: AccountDnsBackResolve
-									r.name = "AccountDnsBackResolve"
-									r.operationID = "accountDnsBackResolve"
-									r.pathPattern = "/v2/accounts/{account_id}/dns/backresolve"
+									// Leaf: GetAccountDiff
+									r.name = "GetAccountDiff"
+									r.operationID = "getAccountDiff"
+									r.pathPattern = "/v2/accounts/{account_id}/diff"
 									r.args = args
 									r.count = 1
 									return r, true
@@ -2200,25 +2232,58 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 									return
 								}
 							}
-						case 'e': // Prefix: "expiring"
-							if l := len("expiring"); len(elem) >= l && elem[0:l] == "expiring" {
+						case 'n': // Prefix: "ns/"
+							if l := len("ns/"); len(elem) >= l && elem[0:l] == "ns/" {
 								elem = elem[l:]
 							} else {
 								break
 							}
 
 							if len(elem) == 0 {
-								switch method {
-								case "GET":
-									// Leaf: GetAccountDnsExpiring
-									r.name = "GetAccountDnsExpiring"
-									r.operationID = "getAccountDnsExpiring"
-									r.pathPattern = "/v2/accounts/{account_id}/dns/expiring"
-									r.args = args
-									r.count = 1
-									return r, true
-								default:
-									return
+								break
+							}
+							switch elem[0] {
+							case 'b': // Prefix: "backresolve"
+								if l := len("backresolve"); len(elem) >= l && elem[0:l] == "backresolve" {
+									elem = elem[l:]
+								} else {
+									break
+								}
+
+								if len(elem) == 0 {
+									switch method {
+									case "GET":
+										// Leaf: AccountDnsBackResolve
+										r.name = "AccountDnsBackResolve"
+										r.operationID = "accountDnsBackResolve"
+										r.pathPattern = "/v2/accounts/{account_id}/dns/backresolve"
+										r.args = args
+										r.count = 1
+										return r, true
+									default:
+										return
+									}
+								}
+							case 'e': // Prefix: "expiring"
+								if l := len("expiring"); len(elem) >= l && elem[0:l] == "expiring" {
+									elem = elem[l:]
+								} else {
+									break
+								}
+
+								if len(elem) == 0 {
+									switch method {
+									case "GET":
+										// Leaf: GetAccountDnsExpiring
+										r.name = "GetAccountDnsExpiring"
+										r.operationID = "getAccountDnsExpiring"
+										r.pathPattern = "/v2/accounts/{account_id}/dns/expiring"
+										r.args = args
+										r.count = 1
+										return r, true
+									default:
+										return
+									}
 								}
 							}
 						}

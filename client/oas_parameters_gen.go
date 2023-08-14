@@ -46,6 +46,14 @@ type GetAccountParams struct {
 	AccountID string
 }
 
+// GetAccountDiffParams is parameters of getAccountDiff operation.
+type GetAccountDiffParams struct {
+	// Account ID.
+	AccountID string
+	StartDate int64
+	EndDate   int64
+}
+
 // GetAccountDnsExpiringParams is parameters of getAccountDnsExpiring operation.
 type GetAccountDnsExpiringParams struct {
 	// Account ID.

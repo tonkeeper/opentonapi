@@ -56,6 +56,12 @@ type Handler interface {
 	//
 	// GET /v2/accounts/{account_id}
 	GetAccount(ctx context.Context, params GetAccountParams) (*Account, error)
+	// GetAccountDiff implements getAccountDiff operation.
+	//
+	// Get account's balance change.
+	//
+	// GET /v2/accounts/{account_id}/diff
+	GetAccountDiff(ctx context.Context, params GetAccountDiffParams) (*GetAccountDiffOK, error)
 	// GetAccountDnsExpiring implements getAccountDnsExpiring operation.
 	//
 	// Get expiring account .ton dns.

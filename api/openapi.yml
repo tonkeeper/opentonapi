@@ -732,6 +732,44 @@ paths:
                     example: "NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2ODQ3..."
         'default':
           $ref: '#/components/responses/Error'
+  /v2/accounts/{account_id}/diff:
+    get:
+      description: Get account's balance change
+      operationId: getAccountDiff
+      tags:
+        - Accounts
+      parameters:
+        - $ref: '#/components/parameters/accountIDParameter'
+        - name: start_date
+          in: query
+          required: true
+          schema:
+            type: integer
+            format: int64
+            example: 1668436763
+        - name: end_date
+          in: query
+          required: true
+          schema:
+            type: integer
+            format: int64
+            example: 1668436763
+      responses:
+        '200':
+          description: account's balance change
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - balance_change
+                properties:
+                  balance_change:
+                    type: integer
+                    format: int64
+                    example: 1000000000
+        'default':
+          $ref: '#/components/responses/Error'
   
   /v2/dns/{domain_name}:
     get:

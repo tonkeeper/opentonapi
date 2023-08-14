@@ -311,6 +311,18 @@ func (h Handler) GetAccountTraces(ctx context.Context, params oas.GetAccountTrac
 	return &traces, nil
 }
 
+func (h Handler) GetAccountDiff(ctx context.Context, params oas.GetAccountDiffParams) (*oas.GetAccountDiffOK, error) {
+	accountID, err := tongo.ParseAccountID(params.AccountID)
+	if err != nil {
+		return nil, toError(http.StatusBadRequest, err)
+	}
+	balanceChange, err := h.storage.GetAccountDiff(ctx, accountID, params.StartDate, params.EndDate)
+	if err != nil {
+		return nil, toError(http.StatusInternalServerError, err)
+	}
+	return &oas.GetAccountDiffOK{BalanceChange: balanceChange}, nil
+}
+
 func (h Handler) GetAccountNftHistory(ctx context.Context, params oas.GetAccountNftHistoryParams) (*oas.AccountEvents, error) {
 	accountID, err := tongo.ParseAccountID(params.AccountID)
 	if err != nil {

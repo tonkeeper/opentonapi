@@ -3402,6 +3402,65 @@
     ]
    }
   },
+  "/v2/accounts/{account_id}/diff": {
+   "get": {
+    "description": "Get account's balance change",
+    "operationId": "getAccountDiff",
+    "parameters": [
+     {
+      "$ref": "#/components/parameters/accountIDParameter"
+     },
+     {
+      "in": "query",
+      "name": "start_date",
+      "required": true,
+      "schema": {
+       "example": 1668436763,
+       "format": "int64",
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "end_date",
+      "required": true,
+      "schema": {
+       "example": 1668436763,
+       "format": "int64",
+       "type": "integer"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "balance_change": {
+           "example": 1000000000,
+           "format": "int64",
+           "type": "integer"
+          }
+         },
+         "required": [
+          "balance_change"
+         ],
+         "type": "object"
+        }
+       }
+      },
+      "description": "account's balance change"
+     },
+     "default": {
+      "$ref": "#/components/responses/Error"
+     }
+    },
+    "tags": [
+     "Accounts"
+    ]
+   }
+  },
   "/v2/accounts/{account_id}/dns/backresolve": {
    "get": {
     "description": "Get account's domains",

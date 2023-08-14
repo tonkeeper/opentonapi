@@ -85,6 +85,15 @@ func (UnimplementedHandler) GetAccount(ctx context.Context, params GetAccountPar
 	return r, ht.ErrNotImplemented
 }
 
+// GetAccountDiff implements getAccountDiff operation.
+//
+// Get account's balance change.
+//
+// GET /v2/accounts/{account_id}/diff
+func (UnimplementedHandler) GetAccountDiff(ctx context.Context, params GetAccountDiffParams) (r *GetAccountDiffOK, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // GetAccountDnsExpiring implements getAccountDnsExpiring operation.
 //
 // Get expiring account .ton dns.
