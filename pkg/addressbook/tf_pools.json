@@ -268,5 +268,10 @@
   "name": "Amplifier #1",
   "groupName": "Amplifier",
   "address": "Ef8wqS4UJfAKLNtvNUpOskq-_2kD94ShUWvgwfV48mfBaw0B"
+ },
+ {
+  "name": "Tonstakers",
+  "groupName": "Tonstakers",
+  "address": "EQCkWxfyhAkim3g2DjKQQg8T5P4g-Q1-K_jErGcDJZ4i-vqR"
  }
 ]

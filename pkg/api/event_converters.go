@@ -149,7 +149,7 @@ func (h Handler) convertAction(ctx context.Context, viewer tongo.AccountID, a ba
 	}
 	switch a.Type {
 	case bath.TonTransfer:
-		if a.TonTransfer.Comment != nil {
+		if a.TonTransfer.Amount < int64(tongo.OneTON) && a.TonTransfer.Comment != nil {
 			spamAction := rules.CheckAction(h.spamRules(), *a.TonTransfer.Comment)
 			if spamAction == rules.Drop {
 				*a.TonTransfer.Comment = ""
