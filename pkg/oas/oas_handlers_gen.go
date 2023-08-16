@@ -4122,6 +4122,14 @@ func (s *Server) handleGetChartRatesRequest(args [0]string, argsEscaped bool, w 
 					Name: "currency",
 					In:   "query",
 				}: params.Currency,
+				{
+					Name: "start_date",
+					In:   "query",
+				}: params.StartDate,
+				{
+					Name: "end_date",
+					In:   "query",
+				}: params.EndDate,
 			},
 			Raw: r,
 		}

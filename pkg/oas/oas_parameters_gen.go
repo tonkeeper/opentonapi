@@ -4137,8 +4137,10 @@ func decodeGetBlockchainTransactionByMessageHashParams(args [1]string, argsEscap
 // GetChartRatesParams is parameters of getChartRates operation.
 type GetChartRatesParams struct {
 	// Accept jetton master address.
-	Token    string
-	Currency OptString
+	Token     string
+	Currency  OptString
+	StartDate OptInt64
+	EndDate   OptInt64
 }
 
 func unpackGetChartRatesParams(packed middleware.Parameters) (params GetChartRatesParams) {
@@ -4156,6 +4158,24 @@ func unpackGetChartRatesParams(packed middleware.Parameters) (params GetChartRat
 		}
 		if v, ok := packed[key]; ok {
 			params.Currency = v.(OptString)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "start_date",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.StartDate = v.(OptInt64)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "end_date",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.EndDate = v.(OptInt64)
 		}
 	}
 	return params
@@ -4236,6 +4256,88 @@ func decodeGetChartRatesParams(args [0]string, argsEscaped bool, r *http.Request
 	}(); err != nil {
 		return params, &ogenerrors.DecodeParamError{
 			Name: "currency",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Decode query: start_date.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "start_date",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotStartDateVal int64
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToInt64(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotStartDateVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.StartDate.SetTo(paramsDotStartDateVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "start_date",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Decode query: end_date.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "end_date",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotEndDateVal int64
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToInt64(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotEndDateVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.EndDate.SetTo(paramsDotEndDateVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "end_date",
 			In:   "query",
 			Err:  err,
 		}

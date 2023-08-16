@@ -3912,6 +3912,40 @@ func (c *Client) sendGetChartRates(ctx context.Context, params GetChartRatesPara
 			return res, errors.Wrap(err, "encode query")
 		}
 	}
+	{
+		// Encode "start_date" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "start_date",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.StartDate.Get(); ok {
+				return e.EncodeValue(conv.Int64ToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "end_date" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "end_date",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.EndDate.Get(); ok {
+				return e.EncodeValue(conv.Int64ToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
 	u.RawQuery = q.Values().Encode()
 
 	stage = "EncodeRequest"

@@ -14,14 +14,29 @@ import (
 )
 
 func (h *Handler) GetChartRates(ctx context.Context, params oas.GetChartRatesParams) (*oas.GetChartRatesOK, error) {
-	accountID, err := tongo.ParseAccountID(params.Token)
-	if err != nil {
-		return nil, toError(http.StatusBadRequest, err)
+	var (
+		token              string
+		startDate, endDate *int64
+	)
+	if strings.ToUpper(params.Token) == "TON" {
+		token = "TON"
+	} else {
+		accountID, err := tongo.ParseAccountID(params.Token)
+		if err != nil {
+			return nil, toError(http.StatusBadRequest, err)
+		}
+		token = accountID.ToRaw()
 	}
-	if params.Currency.Value != "" {
+	if params.Currency.Set {
 		params.Currency.Value = strings.ToUpper(params.Currency.Value)
 	}
-	charts, err := h.ratesSource.GetRatesChart(accountID, params.Currency.Value)
+	if params.StartDate.Set {
+		startDate = &params.StartDate.Value
+	}
+	if params.EndDate.Set {
+		endDate = &params.EndDate.Value
+	}
+	charts, err := h.ratesSource.GetRatesChart(token, params.Currency.Value, startDate, endDate)
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}

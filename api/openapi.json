@@ -5984,6 +5984,26 @@
        "example": "usd",
        "type": "string"
       }
+     },
+     {
+      "in": "query",
+      "name": "start_date",
+      "required": false,
+      "schema": {
+       "example": 1668436763,
+       "format": "int64",
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "end_date",
+      "required": false,
+      "schema": {
+       "example": 1668436763,
+       "format": "int64",
+       "type": "integer"
+      }
      }
     ],
     "responses": {

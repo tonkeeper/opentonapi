@@ -1263,6 +1263,20 @@ paths:
           schema:
             type: string
             example: usd
+        - name: start_date
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+            example: 1668436763
+        - name: end_date
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+            example: 1668436763          
       responses:
         '200':
           description: token chart

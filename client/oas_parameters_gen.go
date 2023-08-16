@@ -231,8 +231,10 @@ type GetBlockchainTransactionByMessageHashParams struct {
 // GetChartRatesParams is parameters of getChartRates operation.
 type GetChartRatesParams struct {
 	// Accept jetton master address.
-	Token    string
-	Currency OptString
+	Token     string
+	Currency  OptString
+	StartDate OptInt64
+	EndDate   OptInt64
 }
 
 // GetDnsInfoParams is parameters of getDnsInfo operation.

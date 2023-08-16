@@ -5,13 +5,11 @@ import (
 	"log"
 	"sync"
 	"time"
-
-	"github.com/tonkeeper/tongo"
 )
 
 type ratesSource interface {
 	GetRates(date time.Time) (map[string]float64, error)
-	GetRatesChart(account tongo.AccountID, currency string) ([][]any, error)
+	GetRatesChart(token string, currency string, startDate *int64, endDate *int64) ([][]any, error)
 }
 
 type calculator struct {
@@ -99,8 +97,8 @@ func (c *calculator) GetRates(date time.Time) (map[string]float64, error) {
 	return nil, fmt.Errorf("invalid period")
 }
 
-func (c *calculator) GetRatesChart(account tongo.AccountID, currency string) ([][]any, error) {
-	return c.source.GetRatesChart(account, currency)
+func (c *calculator) GetRatesChart(token string, currency string, startDate *int64, endDate *int64) ([][]any, error) {
+	return c.source.GetRatesChart(token, currency, startDate, endDate)
 }
 
 type Mock struct {
@@ -111,6 +109,6 @@ func (m Mock) GetRates(date time.Time) (map[string]float64, error) {
 	return m.GetCurrentRates()
 }
 
-func (m Mock) GetRatesChart(account tongo.AccountID, currency string) ([][]any, error) {
+func (m Mock) GetRatesChart(token string, currency string, startDate *int64, endDate *int64) ([][]any, error) {
 	return [][]any{}, nil
 }
