@@ -21,7 +21,7 @@ func (s *LiteStorage) GetWhalesPoolMemberInfo(ctx context.Context, pool, member 
 		storageTimeHistogramVec.WithLabelValues("get_whales_pool_member_info").Observe(v)
 	}))
 	defer timer.ObserveDuration()
-	_, value, err := abi.GetMember(ctx, s.client, pool, member.ToMsgAddress())
+	_, value, err := abi.GetMember(ctx, s.executor, pool, member.ToMsgAddress())
 	if err != nil {
 		return core.Nominator{}, err
 	}
@@ -68,7 +68,7 @@ func (s *LiteStorage) GetParticipatingInTfPools(ctx context.Context, member tong
 	for _, a := range s.knownAccounts["tf_pools"] {
 		var i big.Int
 		i.SetBytes(member.Address[:])
-		_, p, err := abi.GetNominatorData(ctx, s.client, a, tlb.Int257(i))
+		_, p, err := abi.GetNominatorData(ctx, s.executor, a, tlb.Int257(i))
 		if err != nil {
 			continue
 		}
@@ -97,7 +97,7 @@ func (s *LiteStorage) GetWhalesPoolInfo(ctx context.Context, id tongo.AccountID)
 	var params abi.GetParams_WhalesNominatorResult
 	var status abi.GetStakingStatusResult
 	var ok bool
-	method, value, err := abi.GetParams(ctx, s.client, id)
+	method, value, err := abi.GetParams(ctx, s.executor, id)
 	if err != nil {
 		return params, status, nil, err
 	}
@@ -105,7 +105,7 @@ func (s *LiteStorage) GetWhalesPoolInfo(ctx context.Context, id tongo.AccountID)
 	if !ok {
 		return params, status, nil, fmt.Errorf("get_params returns type %v", method)
 	}
-	method, value, err = abi.GetStakingStatus(ctx, s.client, id)
+	method, value, err = abi.GetStakingStatus(ctx, s.executor, id)
 	if err != nil {
 		return params, status, nil, err
 	}
@@ -113,7 +113,7 @@ func (s *LiteStorage) GetWhalesPoolInfo(ctx context.Context, id tongo.AccountID)
 	if !ok {
 		return params, status, nil, fmt.Errorf("get_staking returns type %v", method)
 	}
-	method, value, err = abi.GetMembersRaw(ctx, s.client, id)
+	method, value, err = abi.GetMembersRaw(ctx, s.executor, id)
 	nominatorResult, ok := value.(abi.GetMembersRaw_WhalesNominatorResult)
 	if !ok {
 		return params, status, nil, fmt.Errorf("get_members returns type %v", method)
@@ -136,7 +136,7 @@ func (s *LiteStorage) GetTFPool(ctx context.Context, pool tongo.AccountID) (core
 		storageTimeHistogramVec.WithLabelValues("get_tf_pool").Observe(v)
 	}))
 	defer timer.ObserveDuration()
-	t, v, err := abi.GetPoolData(ctx, s.client, pool)
+	t, v, err := abi.GetPoolData(ctx, s.executor, pool)
 	if err != nil {
 		return core.TFPool{}, err
 	}
@@ -178,7 +178,7 @@ func (s *LiteStorage) GetTFPools(ctx context.Context, onlyVerified bool) ([]core
 	return result, nil
 }
 func (s *LiteStorage) GetLiquidPool(ctx context.Context, pool tongo.AccountID) (core.LiquidPool, error) {
-	_, v, err := abi.GetPoolFullData(ctx, s.client, pool)
+	_, v, err := abi.GetPoolFullData(ctx, s.executor, pool)
 	if err != nil {
 		return core.LiquidPool{}, err
 	}

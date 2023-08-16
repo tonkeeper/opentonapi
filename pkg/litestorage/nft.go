@@ -38,7 +38,7 @@ func (s *LiteStorage) GetNftCollectionByCollectionAddress(ctx context.Context, a
 		storageTimeHistogramVec.WithLabelValues("get_nft_collection").Observe(v)
 	}))
 	defer timer.ObserveDuration()
-	_, value, err := abi.GetCollectionData(ctx, s.client, address)
+	_, value, err := abi.GetCollectionData(ctx, s.executor, address)
 	if err != nil {
 		return core.NftCollection{}, nil
 	}

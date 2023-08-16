@@ -11,7 +11,7 @@ import (
 func (s *LiteStorage) STONfiPools(ctx context.Context, poolIDs []tongo.AccountID) (map[tongo.AccountID]core.STONfiPool, error) {
 	pools := make(map[tongo.AccountID]core.STONfiPool)
 	for _, poolID := range poolIDs {
-		_, value, err := abi.GetPoolData(ctx, s.client, poolID)
+		_, value, err := abi.GetPoolData(ctx, s.executor, poolID)
 		if err != nil {
 			return nil, err
 		}

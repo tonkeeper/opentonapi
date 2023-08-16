@@ -52,6 +52,7 @@ func extractInMsgCreatedLT(accountID tongo.AccountID, tx *tlb.Transaction) (inMs
 type LiteStorage struct {
 	logger                  *zap.Logger
 	client                  *liteapi.Client
+	executor                abi.Executor
 	jettonMetaCache         *xsync.MapOf[string, tep64.Metadata]
 	transactionsIndexByHash *xsync.MapOf[tongo.Bits256, *core.Transaction]
 	transactionsByInMsgLT   *xsync.MapOf[inMsgCreatedLT, tongo.Bits256]
@@ -71,6 +72,7 @@ type Options struct {
 	servers         []config.LiteServer
 	tfPools         []tongo.AccountID
 	jettons         []tongo.AccountID
+	executor        abi.Executor
 	// blockCh is used to receive new blocks in the blockchain, if set.
 	blockCh <-chan indexer.IDandBlock
 }
@@ -130,12 +132,15 @@ func NewLiteStorage(log *zap.Logger, opts ...Option) (*LiteStorage, error) {
 	if err != nil {
 		return nil, err
 	}
-
+	if o.executor == nil {
+		o.executor = client
+	}
 	storage := &LiteStorage{
 		logger: log,
 		// TODO: introduce an env variable to configure this number
 		maxGoroutines: 5,
 		client:        client,
+		executor:      o.executor,
 		// read-only data
 		knownAccounts:    make(map[string][]tongo.AccountID),
 		trackingAccounts: map[tongo.AccountID]struct{}{},
@@ -173,6 +178,10 @@ func NewLiteStorage(log *zap.Logger, opts ...Option) (*LiteStorage, error) {
 	})
 	go storage.run(o.blockCh)
 	return storage, nil
+}
+
+func (s *LiteStorage) SetExecutor(e abi.Executor) {
+	s.executor = e
 }
 
 func (s *LiteStorage) run(ch <-chan indexer.IDandBlock) {
@@ -449,7 +458,7 @@ func (s *LiteStorage) GetWalletPubKey(ctx context.Context, address tongo.Account
 		storageTimeHistogramVec.WithLabelValues("get_wallet_by_pubkey").Observe(v)
 	}))
 	defer timer.ObserveDuration()
-	_, result, err := abi.GetPublicKey(ctx, s.client, address)
+	_, result, err := abi.GetPublicKey(ctx, s.executor, address)
 	if err == nil {
 		if r, ok := result.(abi.GetPublicKeyResult); ok {
 			i := big.Int(r.PublicKey)

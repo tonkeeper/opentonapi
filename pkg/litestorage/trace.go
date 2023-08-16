@@ -140,7 +140,7 @@ func (s *LiteStorage) getAccountInterfaces(ctx context.Context, id tongo.Account
 		return nil, err
 	}
 	inspector := abi.NewContractInspector()
-	cd, err := inspector.InspectContract(ctx, account.Code, s.client, id)
+	cd, err := inspector.InspectContract(ctx, account.Code, s.executor, id)
 	if err != nil {
 		return nil, err
 	}

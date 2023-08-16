@@ -16,6 +16,7 @@ func TestLiteStorage_getAccountInterfaces(t *testing.T) {
 	require.Nil(t, err)
 	storage := LiteStorage{
 		client:                 cli,
+		executor:               cli,
 		accountInterfacesCache: xsync.NewTypedMapOf[tongo.AccountID, []abi.ContractInterface](hashAccountID),
 	}
 

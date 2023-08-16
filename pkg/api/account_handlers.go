@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"github.com/tonkeeper/tongo/utils"
 	"net/http"
 	"sort"
 
@@ -137,7 +138,7 @@ func (h Handler) ExecGetMethodForBlockchainAccount(ctx context.Context, params o
 		}
 		stack = append(stack, r)
 	}
-	exitCode, stack, err := h.executor.RunSmcMethod(ctx, accountID, params.MethodName, stack)
+	exitCode, stack, err := h.executor.RunSmcMethodByID(ctx, accountID, utils.MethodIdFromName(params.MethodName), stack)
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}

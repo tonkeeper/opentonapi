@@ -25,7 +25,7 @@ func (s *LiteStorage) GetJettonWalletsByOwnerAddress(ctx context.Context, addres
 		MaxGoroutines: s.maxGoroutines,
 	}
 	wallets, err := mapper.MapErr(jettons, func(jettonMaster *tongo.AccountID) (*core.JettonWallet, error) {
-		_, result, err := abi.GetWalletAddress(ctx, s.client, *jettonMaster, address.ToMsgAddress())
+		_, result, err := abi.GetWalletAddress(ctx, s.executor, *jettonMaster, address.ToMsgAddress())
 		if err != nil {
 			return nil, err
 		}
@@ -37,7 +37,7 @@ func (s *LiteStorage) GetJettonWalletsByOwnerAddress(ctx context.Context, addres
 		if walletAddress == nil {
 			return nil, nil
 		}
-		_, result, err = abi.GetWalletData(ctx, s.client, *walletAddress)
+		_, result, err = abi.GetWalletData(ctx, s.executor, *walletAddress)
 		if err != nil && errors.Is(err, liteapi.ErrAccountNotFound) {
 			// our account doesn't have a corresponding wallet account, ignore this error.
 			return nil, nil
@@ -99,7 +99,7 @@ func (s *LiteStorage) GetJettonMasterData(ctx context.Context, master tongo.Acco
 		storageTimeHistogramVec.WithLabelValues("get_jetton_master_data").Observe(v)
 	}))
 	defer timer.ObserveDuration()
-	_, value, err := abi.GetJettonData(ctx, s.client, master)
+	_, value, err := abi.GetJettonData(ctx, s.executor, master)
 	if err != nil {
 		return abi.GetJettonDataResult{}, err
 	}
@@ -121,7 +121,7 @@ func (s *LiteStorage) GetAccountJettonHistoryByID(ctx context.Context, address, 
 func (s *LiteStorage) JettonMastersForWallets(ctx context.Context, wallets []tongo.AccountID) (map[tongo.AccountID]tongo.AccountID, error) {
 	masters := make(map[tongo.AccountID]tongo.AccountID)
 	for _, wallet := range wallets {
-		_, value, err := abi.GetWalletData(ctx, s.client, wallet)
+		_, value, err := abi.GetWalletData(ctx, s.executor, wallet)
 		if err != nil {
 			return nil, err
 		}
