@@ -28,6 +28,7 @@ type TFPool struct {
 }
 
 type LiquidPool struct {
+	Name            string
 	Address         tongo.AccountID
 	TotalAmount     int64
 	VerifiedSources bool
