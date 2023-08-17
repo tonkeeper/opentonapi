@@ -40,6 +40,8 @@ func (h Handler) GetStakingPoolInfo(ctx context.Context, params oas.GetStakingPo
 	}
 	lPool, err := h.storage.GetLiquidPool(ctx, poolID)
 	if err == nil {
+		info, _ := h.addressBook.GetAddressInfoByAddress(lPool.Address)
+		lPool.Name = info.Name
 		config, err := h.storage.GetLastConfig()
 		if err != nil {
 			return nil, toError(http.StatusInternalServerError, err)
@@ -155,6 +157,8 @@ func (h Handler) GetStakingPools(ctx context.Context, params oas.GetStakingPools
 		cycleStart = set.Common().UtimeSince
 	}
 	for _, p := range liquidPools {
+		info, _ := h.addressBook.GetAddressInfoByAddress(p.Address)
+		p.Name = info.Name
 		result.Pools = append(result.Pools, convertLiquidStaking(p, h.state.GetAPY(), cycleStart, cycleEnd))
 	}
 
