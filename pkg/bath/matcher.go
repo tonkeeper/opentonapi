@@ -84,6 +84,21 @@ func IsTx(b *Bubble) bool {
 	return ok
 }
 
+func IsJettonTransfer(b *Bubble) bool {
+	_, ok := b.Info.(BubbleJettonTransfer)
+	return ok
+}
+
+func IsJettonReceiver(iface abi.ContractInterface) bubbleCheck {
+	return func(bubble *Bubble) bool {
+		t, ok := bubble.Info.(BubbleJettonTransfer)
+		if !ok {
+			return false
+		}
+		return t.recipient.Is(iface)
+	}
+}
+
 func Or(check1, check2 bubbleCheck) bubbleCheck {
 	return func(bubble *Bubble) bool {
 		return check1(bubble) || check2(bubble)

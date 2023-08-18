@@ -1955,7 +1955,8 @@
      "dex": {
       "enum": [
        "stonfi",
-       "dedust"
+       "dedust",
+       "megatonfi"
       ],
       "type": "string"
      },

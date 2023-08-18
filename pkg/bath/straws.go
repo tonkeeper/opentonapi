@@ -24,6 +24,7 @@ var DefaultStraws = []StrawFunc{
 	FindNFTTransfer,
 	FindJettonTransfer,
 	DedustLPJettonMintStraw.Merge,
+	MegatonFiJettonSwap.Merge,
 	FindAuctionBidFragmentSimple,
 	FindInitialSubscription,
 	FindExtendedSubscription,

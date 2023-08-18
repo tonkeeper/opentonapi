@@ -4107,8 +4107,9 @@ func (s *JettonSwapAction) SetJettonMasterOut(val JettonPreview) {
 type JettonSwapActionDex string
 
 const (
-	JettonSwapActionDexStonfi JettonSwapActionDex = "stonfi"
-	JettonSwapActionDexDedust JettonSwapActionDex = "dedust"
+	JettonSwapActionDexStonfi    JettonSwapActionDex = "stonfi"
+	JettonSwapActionDexDedust    JettonSwapActionDex = "dedust"
+	JettonSwapActionDexMegatonfi JettonSwapActionDex = "megatonfi"
 )
 
 // MarshalText implements encoding.TextMarshaler.
@@ -4117,6 +4118,8 @@ func (s JettonSwapActionDex) MarshalText() ([]byte, error) {
 	case JettonSwapActionDexStonfi:
 		return []byte(s), nil
 	case JettonSwapActionDexDedust:
+		return []byte(s), nil
+	case JettonSwapActionDexMegatonfi:
 		return []byte(s), nil
 	default:
 		return nil, errors.Errorf("invalid value: %q", s)
@@ -4131,6 +4134,9 @@ func (s *JettonSwapActionDex) UnmarshalText(data []byte) error {
 		return nil
 	case JettonSwapActionDexDedust:
 		*s = JettonSwapActionDexDedust
+		return nil
+	case JettonSwapActionDexMegatonfi:
+		*s = JettonSwapActionDexMegatonfi
 		return nil
 	default:
 		return errors.Errorf("invalid value: %q", data)

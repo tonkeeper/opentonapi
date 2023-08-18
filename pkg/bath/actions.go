@@ -24,7 +24,7 @@ const (
 	UnSubscription    ActionType = "UnSubscribe"
 	DepositStake      ActionType = "DepositStake"
 	RecoverStake      ActionType = "RecoverStake"
-	STONfiSwap        ActionType = "STONfiSwap"
+	JettonSwap        ActionType = "JettonSwap"
 	AuctionBid        ActionType = "AuctionBid"
 
 	RefundDnsTg   RefundType = "DNS.tg"
@@ -67,7 +67,7 @@ type (
 		AuctionBid        *AuctionBidAction     `json:",omitempty"`
 		DepositStake      *DepositStakeAction   `json:",omitempty"`
 		RecoverStake      *RecoverStakeAction   `json:",omitempty"`
-		STONfiSwap        *STONfiSwapAction     `json:",omitempty"`
+		JettonSwap        *JettonSwapAction     `json:",omitempty"`
 		Success           bool
 		Type              ActionType
 	}
@@ -161,9 +161,10 @@ type (
 		Beneficiary  tongo.AccountID
 	}
 
-	STONfiSwapAction struct {
+	JettonSwapAction struct {
+		Dex             Dex
 		UserWallet      tongo.AccountID
-		STONfiRouter    tongo.AccountID
+		Router          tongo.AccountID
 		JettonWalletIn  tongo.AccountID
 		JettonMasterIn  tongo.AccountID
 		JettonWalletOut tongo.AccountID
@@ -212,7 +213,7 @@ func detectDirection(a, from, to tongo.AccountID, amount int64) int64 {
 
 func (a Action) ContributeToExtra(account tongo.AccountID) int64 {
 	switch a.Type {
-	case JettonTransfer, NftItemTransfer, ContractDeploy, UnSubscription, STONfiSwap: // actions without extra
+	case JettonTransfer, NftItemTransfer, ContractDeploy, UnSubscription, JettonSwap: // actions without extra
 		return 0
 	case TonTransfer:
 		return detectDirection(account, a.TonTransfer.Sender, a.TonTransfer.Recipient, a.TonTransfer.Amount)
@@ -246,7 +247,7 @@ func (a Action) IsSubject(account tongo.AccountID) bool {
 		a.AuctionBid,
 		a.DepositStake,
 		a.RecoverStake,
-		a.STONfiSwap,
+		a.JettonSwap,
 	} {
 		if i != nil && !reflect.ValueOf(i).IsNil() {
 			return slices.Contains(i.SubjectAccounts(), account)
@@ -302,7 +303,7 @@ func (a *ContractDeployAction) SubjectAccounts() []tongo.AccountID {
 	return []tongo.AccountID{a.Address}
 }
 
-func (a *STONfiSwapAction) SubjectAccounts() []tongo.AccountID {
+func (a *JettonSwapAction) SubjectAccounts() []tongo.AccountID {
 	return []tongo.AccountID{a.UserWallet}
 }
 func (a *UnSubscriptionAction) SubjectAccounts() []tongo.AccountID {
