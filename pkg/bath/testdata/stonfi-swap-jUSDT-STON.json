@@ -1,9 +1,10 @@
 {
    "Actions": [
      {
-       "STONfiSwap": {
+       "JettonSwap": {
+         "Dex": "stonfi",
          "UserWallet": "0:6ccd325a858c379693fae2bcaab1c2906831a4e10a6c3bb44ee8b615bca1d220",
-         "STONfiRouter": "0:779dcc815138d9500e449c5291e7f12738c23d575b5310000f6a253bd607384e",
+         "Router": "0:779dcc815138d9500e449c5291e7f12738c23d575b5310000f6a253bd607384e",
          "JettonWalletIn": "0:14ac072c56291232d7cd93ddec120235c5e5cf5e2027f49bbc5aa276e5d224d8",
          "JettonMasterIn": "0:729c13b6df2c07cbf0a06ab63d34af454f3d320ec1bcd8fb5c6d24d0806a17c2",
          "JettonWalletOut": "0:87b92241aa6a57df31271460c109c54dfd989a1aea032f6107d2c65d6e8879ce",
@@ -12,7 +13,7 @@
          "AmountOut": 1001318534
        },
        "Success": true,
-       "Type": "STONfiSwap"
+       "Type": "JettonSwap"
      },
      {
        "ContractDeploy": {

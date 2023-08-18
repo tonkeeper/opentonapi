@@ -12409,6 +12409,8 @@ func (s *JettonSwapActionDex) Decode(d *jx.Decoder) error {
 		*s = JettonSwapActionDexStonfi
 	case JettonSwapActionDexDedust:
 		*s = JettonSwapActionDexDedust
+	case JettonSwapActionDexMegatonfi:
+		*s = JettonSwapActionDexMegatonfi
 	default:
 		*s = JettonSwapActionDex(v)
 	}

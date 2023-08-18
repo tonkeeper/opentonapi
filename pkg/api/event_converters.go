@@ -32,7 +32,7 @@ const (
 	subscriptionMessageID   = "subscriptionAction"
 	depositStakeMessageID   = "depositStakeAction"
 	recoverStakeMessageID   = "recoverStakeAction"
-	stonfiSwapMessageID     = "stonfiSwapAction"
+	jettonSwapMessageID     = "jettonSwapAction"
 	auctionBidMessageID     = "auctionBidAction"
 	contractDeployMessageID = "contractDeployAction"
 
@@ -343,37 +343,46 @@ func (h Handler) convertAction(ctx context.Context, viewer tongo.AccountID, a ba
 			Value:    oas.NewOptString(signedValue(value, viewer, a.RecoverStake.Elector, a.RecoverStake.Staker)),
 			Accounts: distinctAccounts(h.addressBook, h.previewGenerator, &a.RecoverStake.Elector, &a.RecoverStake.Staker),
 		}
-	case bath.STONfiSwap:
+	case bath.JettonSwap:
 		action.Type = "JettonSwap"
-		jettonInMeta := h.GetJettonNormalizedMetadata(ctx, a.STONfiSwap.JettonMasterIn, h.previewGenerator)
-		jettonInPreview := jettonPreview(a.STONfiSwap.JettonMasterIn, jettonInMeta)
-		jettonOutMeta := h.GetJettonNormalizedMetadata(ctx, a.STONfiSwap.JettonMasterOut, h.previewGenerator)
-		jettonOutPreview := jettonPreview(a.STONfiSwap.JettonMasterOut, jettonOutMeta)
+		jettonInMeta := h.GetJettonNormalizedMetadata(ctx, a.JettonSwap.JettonMasterIn, h.previewGenerator)
+		jettonInPreview := jettonPreview(a.JettonSwap.JettonMasterIn, jettonInMeta)
+		jettonOutMeta := h.GetJettonNormalizedMetadata(ctx, a.JettonSwap.JettonMasterOut, h.previewGenerator)
+		jettonOutPreview := jettonPreview(a.JettonSwap.JettonMasterOut, jettonOutMeta)
+		var dex oas.JettonSwapActionDex
+		switch a.JettonSwap.Dex {
+		case bath.Stonfi:
+			dex = oas.JettonSwapActionDexStonfi
+		case bath.Megatonfi:
+			dex = oas.JettonSwapActionDexMegatonfi
+		case bath.Dedust:
+			dex = oas.JettonSwapActionDexDedust
+		}
 		action.JettonSwap.SetTo(oas.JettonSwapAction{
-			Dex:             oas.JettonSwapActionDexStonfi,
-			AmountIn:        fmt.Sprintf("%v", a.STONfiSwap.AmountIn),
-			AmountOut:       fmt.Sprintf("%v", a.STONfiSwap.AmountOut),
-			UserWallet:      convertAccountAddress(a.STONfiSwap.UserWallet, h.addressBook, h.previewGenerator),
-			Router:          convertAccountAddress(a.STONfiSwap.STONfiRouter, h.addressBook, h.previewGenerator),
-			JettonWalletIn:  a.STONfiSwap.JettonWalletIn.String(),
+			Dex:             dex,
+			AmountIn:        fmt.Sprintf("%v", a.JettonSwap.AmountIn),
+			AmountOut:       fmt.Sprintf("%v", a.JettonSwap.AmountOut),
+			UserWallet:      convertAccountAddress(a.JettonSwap.UserWallet, h.addressBook, h.previewGenerator),
+			Router:          convertAccountAddress(a.JettonSwap.Router, h.addressBook, h.previewGenerator),
+			JettonWalletIn:  a.JettonSwap.JettonWalletIn.String(),
 			JettonMasterIn:  jettonInPreview,
-			JettonWalletOut: a.STONfiSwap.JettonWalletOut.String(),
+			JettonWalletOut: a.JettonSwap.JettonWalletOut.String(),
 			JettonMasterOut: jettonOutPreview,
 		})
 		action.SimplePreview = oas.ActionSimplePreview{
 			Name: "Swap Tokens",
 			Description: i18n.T(acceptLanguage.Value, i18n.C{
-				MessageID: stonfiSwapMessageID,
+				MessageID: jettonSwapMessageID,
 				TemplateData: map[string]interface{}{
-					"AmountIn":  ScaleJettons(a.STONfiSwap.AmountIn, jettonInMeta.Decimals).String(),
-					"AmountOut": ScaleJettons(a.STONfiSwap.AmountOut, jettonOutMeta.Decimals).String(),
+					"AmountIn":  ScaleJettons(a.JettonSwap.AmountIn, jettonInMeta.Decimals).String(),
+					"AmountOut": ScaleJettons(a.JettonSwap.AmountOut, jettonOutMeta.Decimals).String(),
 					"JettonIn":  jettonInPreview.GetSymbol(),
 					"JettonOut": jettonOutPreview.GetSymbol(),
 				},
 			}),
 			Accounts: distinctAccounts(h.addressBook, h.previewGenerator,
-				&a.STONfiSwap.UserWallet,
-				&a.STONfiSwap.STONfiRouter),
+				&a.JettonSwap.UserWallet,
+				&a.JettonSwap.Router),
 		}
 	case bath.AuctionBid:
 		var nft oas.OptNftItem

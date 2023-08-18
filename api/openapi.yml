@@ -3631,6 +3631,7 @@ components:
           enum:
             - stonfi
             - dedust
+            - megatonfi
         amount_in:
           type: string
           example: "1660050553"

@@ -119,6 +119,8 @@ func TestFindActions(t *testing.T) {
 			tongo.MustParseBlockID("(0,8000000000000000,36025985)"),
 			// multiple call contracts
 			tongo.MustParseBlockID("(0,8000000000000000,36692636)"),
+			// megatonfi swap
+			tongo.MustParseBlockID("(0,8000000000000000,37707758)"),
 		}),
 	)
 
@@ -259,6 +261,15 @@ func TestFindActions(t *testing.T) {
 				FindJettonTransfer,
 			},
 		},
+		{
+			name:           "megatonfi swap",
+			hash:           "6a4c8e0dca5b052ab75f535df9d42ede949054f0004d3dd7aa6197af9dff0e1e",
+			filenamePrefix: "megatonfi-swap",
+			straws: []StrawFunc{
+				FindJettonTransfer,
+				MegatonFiJettonSwap.Merge,
+			},
+		},
 	} {
 		t.Run(c.name, func(t *testing.T) {
 			trace, err := storage.GetTrace(context.Background(), tongo.MustParseHash(c.hash))
@@ -284,6 +295,9 @@ func TestFindActions(t *testing.T) {
 				for address, quantity := range flow.Jettons {
 					jettons = append(jettons, jettonItem{Address: address.String(), Quantity: quantity.Int64()})
 				}
+				sort.Slice(jettons, func(i, j int) bool {
+					return jettons[i].Address < jettons[j].Address
+				})
 				accountFlow := accountValueFlow{
 					Account: accountID.String(),
 					Ton:     flow.Ton,

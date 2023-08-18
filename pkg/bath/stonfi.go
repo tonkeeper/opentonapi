@@ -5,12 +5,21 @@ import (
 	"github.com/tonkeeper/tongo/abi"
 )
 
-// BubbleSTONfiSwap contains information about a swap operation at the STONfi dex.
-type BubbleSTONfiSwap struct {
+type Dex string
+
+const (
+	Stonfi    Dex = "stonfi"
+	Megatonfi Dex = "megatonfi"
+	Dedust    Dex = "dedust"
+)
+
+// BubbleJettonSwap contains information about a jetton swap operation at a dex.
+type BubbleJettonSwap struct {
+	Dex             Dex
 	AmountIn        uint64
 	AmountOut       uint64
 	UserWallet      tongo.AccountID
-	STONfiRouter    tongo.AccountID
+	Router          tongo.AccountID
 	JettonWalletIn  tongo.AccountID
 	JettonMasterIn  tongo.AccountID
 	JettonWalletOut tongo.AccountID
@@ -18,11 +27,12 @@ type BubbleSTONfiSwap struct {
 	Success         bool
 }
 
-func (b BubbleSTONfiSwap) ToAction() *Action {
+func (b BubbleJettonSwap) ToAction() *Action {
 	return &Action{
-		STONfiSwap: &STONfiSwapAction{
+		JettonSwap: &JettonSwapAction{
+			Dex:             b.Dex,
 			UserWallet:      b.UserWallet,
-			STONfiRouter:    b.STONfiRouter,
+			Router:          b.Router,
 			JettonWalletIn:  b.JettonWalletIn,
 			JettonMasterIn:  b.JettonMasterIn,
 			JettonWalletOut: b.JettonWalletOut,
@@ -30,7 +40,7 @@ func (b BubbleSTONfiSwap) ToAction() *Action {
 			AmountIn:        b.AmountIn,
 			AmountOut:       b.AmountOut,
 		},
-		Type:    STONfiSwap,
+		Type:    JettonSwap,
 		Success: b.Success,
 	}
 }
@@ -81,7 +91,8 @@ func FindSTONfiSwap(bubble *Bubble) bool {
 		token0Out = true
 		jettonWalletOut = pool.Token0
 	}
-	stonfiSwap := BubbleSTONfiSwap{
+	stonfiSwap := BubbleJettonSwap{
+		Dex:             Stonfi,
 		UserWallet:      *userWallet,
 		JettonWalletIn:  jettonWalletIn,
 		JettonWalletOut: jettonWalletOut,
@@ -119,7 +130,7 @@ func FindSTONfiSwap(bubble *Bubble) bool {
 					stonfiSwap.AmountOut = uint64(paymentRequest.Params.Value.Amount1Out)
 				}
 			}
-			stonfiSwap.STONfiRouter = tx.account.Address
+			stonfiSwap.Router = tx.account.Address
 			newBubble.ValueFlow.Merge(payment.ValueFlow)
 			newBubble.MergeContractDeployments(payment)
 			newBubble.Accounts = append(newBubble.Accounts, payment.Accounts...)
