@@ -20,10 +20,8 @@ type storage interface {
 
 func (m *Mock) GetCurrentRates() (map[string]float64, error) {
 	fiatPrices := getCoinbaseFiatPrices()
-	fiatExchangeratePrices := getExchangerateFiatPrices()
-	for currency, rate := range fiatExchangeratePrices {
-		_, ok := fiatPrices[currency]
-		if !ok {
+	for currency, rate := range getExchangerateFiatPrices() {
+		if _, ok := fiatPrices[currency]; !ok {
 			fiatPrices[currency] = rate
 		}
 	}
@@ -84,10 +82,9 @@ func getMegatonPool() map[string]float64 {
 
 	mapOfPool := make(map[string]float64)
 	for _, pool := range respBody {
-		if pool.Price == 0 {
-			continue
+		if pool.Price != 0 {
+			mapOfPool[pool.Address] = 1 / pool.Price
 		}
-		mapOfPool[pool.Address] = 1 / pool.Price
 	}
 
 	return mapOfPool
@@ -120,14 +117,9 @@ func getStonFiPool(tonPrice float64) map[string]float64 {
 			continue
 		}
 		price, err := strconv.ParseFloat(*pool.DexUsdPrice, 64)
-		if err != nil {
-			log.Errorf("failed to convert stonfi price: %v", err)
-			continue
+		if err == nil && price != 0 {
+			mapOfPool[pool.ContractAddress] = tonPrice / price
 		}
-		if price == 0 {
-			continue
-		}
-		mapOfPool[pool.ContractAddress] = tonPrice / price
 	}
 
 	return mapOfPool
@@ -142,11 +134,10 @@ func (m *Mock) getDedustPool() map[string]float64 {
 	defer resp.Body.Close()
 
 	type Pool struct {
-		Assets []struct {
-			Type     string `json:"type"`
+		TotalSupply string `json:"totalSupply"`
+		Assets      []struct {
 			Address  string `json:"address"`
 			Metadata *struct {
-				Name     string  `json:"name"`
 				Symbol   string  `json:"symbol"`
 				Decimals float64 `json:"decimals"`
 			} `json:"metadata"`
@@ -168,20 +159,15 @@ func (m *Mock) getDedustPool() map[string]float64 {
 		go func(pool Pool) {
 			defer wg.Done()
 
-			if len(pool.Assets) != 2 {
-				log.Errorf("count of assets not 2")
+			if pool.TotalSupply < "1000000000" || len(pool.Assets) != 2 {
 				return
 			}
-			firstAsset := pool.Assets[0]
-			secondAsset := pool.Assets[1]
 
+			firstAsset, secondAsset := pool.Assets[0], pool.Assets[1]
 			if firstAsset.Metadata == nil || firstAsset.Metadata.Symbol != "TON" {
 				return
 			}
-
-			firstReserve := pool.Reserves[0]
-			secondReserve := pool.Reserves[1]
-
+			firstReserve, secondReserve := pool.Reserves[0], pool.Reserves[1]
 			if firstReserve == "0" || secondReserve == "0" {
 				return
 			}
@@ -244,12 +230,10 @@ func getTonHuobiPrice() float64 {
 		log.Errorf("failed to decode response: %v", err)
 		return 0
 	}
-
 	if respBody.Status != "ok" {
 		log.Errorf("failed to get huobi price: %v", err)
 		return 0
 	}
-
 	if len(respBody.Tick.Data) == 0 {
 		log.Errorf("invalid price")
 		return 0
@@ -277,12 +261,10 @@ func getTonOKXPrice() float64 {
 		log.Errorf("failed to decode response: %v", err)
 		return 0
 	}
-
 	if respBody.Code != "0" {
 		log.Errorf("failed to get okx price: %v", err)
 		return 0
 	}
-
 	if len(respBody.Data) == 0 {
 		log.Errorf("invalid price")
 		return 0
@@ -342,11 +324,9 @@ func getCoinbaseFiatPrices() map[string]float64 {
 	mapOfPrices := make(map[string]float64)
 	for currency, rate := range respBody.Data.Rates {
 		rateConverted, err := strconv.ParseFloat(rate, 64)
-		if err != nil {
-			log.Errorf("failed to convert str to float64 %v, err: %v", rate, err)
-			continue
+		if err == nil {
+			mapOfPrices[currency] = rateConverted
 		}
-		mapOfPrices[currency] = rateConverted
 	}
 
 	return mapOfPrices
