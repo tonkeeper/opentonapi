@@ -58,7 +58,7 @@ func (h Handler) GetStakingPoolInfo(ctx context.Context, params oas.GetStakingPo
 		}
 		return &oas.GetStakingPoolInfoOK{
 			Implementation: oas.PoolImplementation{
-				Name:        references.LiquidImplementationsName,
+				Name:        references.TonstakersImplementationsName,
 				Description: i18n.T(params.AcceptLanguage.Value, i18n.C{MessageID: "poolImplementationDescription", TemplateData: map[string]interface{}{"Deposit": 100}}),
 				URL:         references.LiquidImplementationsUrl,
 			},
@@ -180,7 +180,7 @@ func (h Handler) GetStakingPools(ctx context.Context, params oas.GetStakingPools
 			URL:         references.TFPoolImplementationsURL,
 		},
 		string(oas.PoolInfoImplementationLiquidTF): {
-			Name:        references.LiquidImplementationsName,
+			Name:        references.TonstakersImplementationsName,
 			Description: i18n.T(params.AcceptLanguage.Value, i18n.C{MessageID: "poolImplementationDescription", TemplateData: map[string]interface{}{"Deposit": 10}}),
 			URL:         references.LiquidImplementationsUrl,
 		},
