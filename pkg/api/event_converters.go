@@ -149,9 +149,8 @@ func (h Handler) convertAction(ctx context.Context, viewer tongo.AccountID, a ba
 	}
 	switch a.Type {
 	case bath.TonTransfer:
-		if a.TonTransfer.Comment != nil {
-			spamAction := rules.CheckAction(h.spamRules(), *a.TonTransfer.Comment)
-			if spamAction == rules.Drop {
+		if a.TonTransfer.Amount < int64(tongo.OneTON) && a.TonTransfer.Comment != nil {
+			if spamAction := rules.CheckAction(h.spamRules(), *a.TonTransfer.Comment); spamAction == rules.Drop {
 				*a.TonTransfer.Comment = ""
 				spamDetected = true
 			}
@@ -182,6 +181,11 @@ func (h Handler) convertAction(ctx context.Context, viewer tongo.AccountID, a ba
 			Value:    oas.NewOptString(value),
 		}
 	case bath.NftItemTransfer:
+		if a.NftItemTransfer.Comment != nil {
+			if spamAction := rules.CheckAction(h.spamRules(), *a.NftItemTransfer.Comment); spamAction == rules.Drop {
+				spamDetected = true
+			}
+		}
 		action.NftItemTransfer.SetTo(oas.NftItemTransferAction{
 			Nft:              a.NftItemTransfer.Nft.ToRaw(),
 			Recipient:        convertOptAccountAddress(a.NftItemTransfer.Recipient, h.addressBook, h.previewGenerator),
@@ -198,6 +202,11 @@ func (h Handler) convertAction(ctx context.Context, viewer tongo.AccountID, a ba
 			Value:    oas.NewOptString(fmt.Sprintf("1 NFT")),
 		}
 	case bath.JettonTransfer:
+		if a.JettonTransfer.Comment != nil {
+			if spamAction := rules.CheckAction(h.spamRules(), *a.JettonTransfer.Comment); spamAction == rules.Drop {
+				spamDetected = true
+			}
+		}
 		meta := h.GetJettonNormalizedMetadata(ctx, a.JettonTransfer.Jetton, h.previewGenerator)
 		preview := jettonPreview(a.JettonTransfer.Jetton, meta)
 		action.JettonTransfer.SetTo(oas.JettonTransferAction{
