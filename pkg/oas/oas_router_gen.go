@@ -554,6 +554,26 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 							break
 						}
 						switch elem[0] {
+						case 'i': // Prefix: "inspect"
+							if l := len("inspect"); len(elem) >= l && elem[0:l] == "inspect" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							if len(elem) == 0 {
+								// Leaf node.
+								switch r.Method {
+								case "GET":
+									s.handleBlockchainAccountInspectRequest([1]string{
+										args[0],
+									}, elemIsEscaped, w, r)
+								default:
+									s.notAllowed(w, r, "GET")
+								}
+
+								return
+							}
 						case 'm': // Prefix: "methods/"
 							if l := len("methods/"); len(elem) >= l && elem[0:l] == "methods/" {
 								elem = elem[l:]
@@ -2632,6 +2652,27 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 							break
 						}
 						switch elem[0] {
+						case 'i': // Prefix: "inspect"
+							if l := len("inspect"); len(elem) >= l && elem[0:l] == "inspect" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							if len(elem) == 0 {
+								switch method {
+								case "GET":
+									// Leaf: BlockchainAccountInspect
+									r.name = "BlockchainAccountInspect"
+									r.operationID = "blockchainAccountInspect"
+									r.pathPattern = "/v2/blockchain/accounts/{account_id}/inspect"
+									r.args = args
+									r.count = 1
+									return r, true
+								default:
+									return
+								}
+							}
 						case 'm': // Prefix: "methods/"
 							if l := len("methods/"); len(elem) >= l && elem[0:l] == "methods/" {
 								elem = elem[l:]

@@ -1273,6 +1273,106 @@ func (s *BlockRaw) SetFileHash(val string) {
 	s.FileHash = val
 }
 
+// Ref: #/components/schemas/BlockchainAccountInspect
+type BlockchainAccountInspect struct {
+	Code     string                                `json:"code"`
+	CodeHash string                                `json:"code_hash"`
+	Methods  []BlockchainAccountInspectMethodsItem `json:"methods"`
+	Compiler OptBlockchainAccountInspectCompiler   `json:"compiler"`
+}
+
+// GetCode returns the value of Code.
+func (s *BlockchainAccountInspect) GetCode() string {
+	return s.Code
+}
+
+// GetCodeHash returns the value of CodeHash.
+func (s *BlockchainAccountInspect) GetCodeHash() string {
+	return s.CodeHash
+}
+
+// GetMethods returns the value of Methods.
+func (s *BlockchainAccountInspect) GetMethods() []BlockchainAccountInspectMethodsItem {
+	return s.Methods
+}
+
+// GetCompiler returns the value of Compiler.
+func (s *BlockchainAccountInspect) GetCompiler() OptBlockchainAccountInspectCompiler {
+	return s.Compiler
+}
+
+// SetCode sets the value of Code.
+func (s *BlockchainAccountInspect) SetCode(val string) {
+	s.Code = val
+}
+
+// SetCodeHash sets the value of CodeHash.
+func (s *BlockchainAccountInspect) SetCodeHash(val string) {
+	s.CodeHash = val
+}
+
+// SetMethods sets the value of Methods.
+func (s *BlockchainAccountInspect) SetMethods(val []BlockchainAccountInspectMethodsItem) {
+	s.Methods = val
+}
+
+// SetCompiler sets the value of Compiler.
+func (s *BlockchainAccountInspect) SetCompiler(val OptBlockchainAccountInspectCompiler) {
+	s.Compiler = val
+}
+
+type BlockchainAccountInspectCompiler string
+
+const (
+	BlockchainAccountInspectCompilerFunc BlockchainAccountInspectCompiler = "func"
+)
+
+// MarshalText implements encoding.TextMarshaler.
+func (s BlockchainAccountInspectCompiler) MarshalText() ([]byte, error) {
+	switch s {
+	case BlockchainAccountInspectCompilerFunc:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *BlockchainAccountInspectCompiler) UnmarshalText(data []byte) error {
+	switch BlockchainAccountInspectCompiler(data) {
+	case BlockchainAccountInspectCompilerFunc:
+		*s = BlockchainAccountInspectCompilerFunc
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+type BlockchainAccountInspectMethodsItem struct {
+	ID     int64  `json:"id"`
+	Method string `json:"method"`
+}
+
+// GetID returns the value of ID.
+func (s *BlockchainAccountInspectMethodsItem) GetID() int64 {
+	return s.ID
+}
+
+// GetMethod returns the value of Method.
+func (s *BlockchainAccountInspectMethodsItem) GetMethod() string {
+	return s.Method
+}
+
+// SetID sets the value of ID.
+func (s *BlockchainAccountInspectMethodsItem) SetID(val int64) {
+	s.ID = val
+}
+
+// SetMethod sets the value of Method.
+func (s *BlockchainAccountInspectMethodsItem) SetMethod(val string) {
+	s.Method = val
+}
+
 // Ref: #/components/schemas/BlockchainBlock
 type BlockchainBlock struct {
 	WorkchainID             int32     `json:"workchain_id"`
@@ -5190,6 +5290,52 @@ func (o OptAuctionBidAction) Get() (v AuctionBidAction, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptAuctionBidAction) Or(d AuctionBidAction) AuctionBidAction {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptBlockchainAccountInspectCompiler returns new OptBlockchainAccountInspectCompiler with value set to v.
+func NewOptBlockchainAccountInspectCompiler(v BlockchainAccountInspectCompiler) OptBlockchainAccountInspectCompiler {
+	return OptBlockchainAccountInspectCompiler{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptBlockchainAccountInspectCompiler is optional BlockchainAccountInspectCompiler.
+type OptBlockchainAccountInspectCompiler struct {
+	Value BlockchainAccountInspectCompiler
+	Set   bool
+}
+
+// IsSet returns true if OptBlockchainAccountInspectCompiler was set.
+func (o OptBlockchainAccountInspectCompiler) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptBlockchainAccountInspectCompiler) Reset() {
+	var v BlockchainAccountInspectCompiler
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptBlockchainAccountInspectCompiler) SetTo(v BlockchainAccountInspectCompiler) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptBlockchainAccountInspectCompiler) Get() (v BlockchainAccountInspectCompiler, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptBlockchainAccountInspectCompiler) Or(d BlockchainAccountInspectCompiler) BlockchainAccountInspectCompiler {
 	if v, ok := o.Get(); ok {
 		return v
 	}

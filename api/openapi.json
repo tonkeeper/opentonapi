@@ -1101,6 +1101,48 @@
     ],
     "type": "object"
    },
+   "BlockchainAccountInspect": {
+    "properties": {
+     "code": {
+      "type": "string"
+     },
+     "code_hash": {
+      "type": "string"
+     },
+     "compiler": {
+      "enum": [
+       "func"
+      ],
+      "type": "string"
+     },
+     "methods": {
+      "items": {
+       "properties": {
+        "id": {
+         "format": "int64",
+         "type": "integer"
+        },
+        "method": {
+         "example": "get_something",
+         "type": "string"
+        }
+       },
+       "required": [
+        "id",
+        "method"
+       ],
+       "type": "object"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "code",
+     "code_hash",
+     "methods"
+    ],
+    "type": "object"
+   },
    "BlockchainBlock": {
     "properties": {
      "after_merge": {
@@ -4132,6 +4174,35 @@
        }
       },
       "description": "raw account"
+     },
+     "default": {
+      "$ref": "#/components/responses/Error"
+     }
+    },
+    "tags": [
+     "Blockchain"
+    ]
+   }
+  },
+  "/v2/blockchain/accounts/{account_id}/inspect": {
+   "get": {
+    "description": "Blockchain account inspect",
+    "operationId": "blockchainAccountInspect",
+    "parameters": [
+     {
+      "$ref": "#/components/parameters/accountIDParameter"
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/BlockchainAccountInspect"
+        }
+       }
+      },
+      "description": "blockchain account inspect"
      },
      "default": {
       "$ref": "#/components/responses/Error"

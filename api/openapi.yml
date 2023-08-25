@@ -220,6 +220,23 @@ paths:
                 $ref: '#/components/schemas/BlockchainConfig'
         'default':
           $ref: '#/components/responses/Error'
+  /v2/blockchain/accounts/{account_id}/inspect:
+    get:
+      description: Blockchain account inspect
+      operationId: blockchainAccountInspect
+      tags:
+        - Blockchain
+      parameters:
+        - $ref: '#/components/parameters/accountIDParameter'
+      responses:
+        '200':
+          description: blockchain account inspect
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BlockchainAccountInspect'
+        'default':
+          $ref: '#/components/responses/Error'
   
   /v2/events/emulate:
     post:
@@ -1276,7 +1293,7 @@ paths:
           schema:
             type: integer
             format: int64
-            example: 1668436763          
+            example: 1668436763
       responses:
         '200':
           description: token chart
@@ -4446,7 +4463,36 @@ components:
         cipher_text:
           type: string
           example: "A6A0BD6608672B...CE3AF8DB"
-
+    BlockchainAccountInspect:
+      type: object
+      required:
+        - code
+        - code_hash
+        - methods
+      properties:
+        code:
+          type: string
+        code_hash:
+          type: string
+        methods:
+          type: array
+          items:
+            type: object
+            required:
+              - id
+              - method
+            properties:
+              id:
+                type: integer
+                format: int64
+              method:
+                type: string
+                example: "get_something"
+        compiler:
+          type: string
+          enum:
+            - func
+  
   responses:
     Error:
       description: Some error during request processing

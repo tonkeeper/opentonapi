@@ -8,6 +8,12 @@ type AccountDnsBackResolveParams struct {
 	AccountID string
 }
 
+// BlockchainAccountInspectParams is parameters of blockchainAccountInspect operation.
+type BlockchainAccountInspectParams struct {
+	// Account ID.
+	AccountID string
+}
+
 // DnsResolveParams is parameters of dnsResolve operation.
 type DnsResolveParams struct {
 	// Domain name with .ton or .t.me.

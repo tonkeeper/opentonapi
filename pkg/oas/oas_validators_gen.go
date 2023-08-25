@@ -522,6 +522,52 @@ func (s *Auctions) Validate() error {
 	return nil
 }
 
+func (s *BlockchainAccountInspect) Validate() error {
+	var failures []validate.FieldError
+	if err := func() error {
+		if s.Methods == nil {
+			return errors.New("nil is invalid value")
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "methods",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if value, ok := s.Compiler.Get(); ok {
+			if err := func() error {
+				if err := value.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "compiler",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s BlockchainAccountInspectCompiler) Validate() error {
+	switch s {
+	case "func":
+		return nil
+	default:
+		return errors.Errorf("invalid value: %v", s)
+	}
+}
+
 func (s *BlockchainBlock) Validate() error {
 	var failures []validate.FieldError
 	if err := func() error {

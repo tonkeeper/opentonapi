@@ -5,9 +5,11 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
-	"github.com/tonkeeper/tongo/utils"
 	"net/http"
 	"sort"
+
+	"github.com/tonkeeper/tongo/code"
+	"github.com/tonkeeper/tongo/utils"
 
 	jsoniter "github.com/json-iterator/go"
 	"github.com/tonkeeper/opentonapi/pkg/core"
@@ -338,6 +340,46 @@ func (h Handler) GetAccountNftHistory(ctx context.Context, params oas.GetAccount
 		return nil, toError(http.StatusInternalServerError, err)
 	}
 	return &oas.AccountEvents{Events: events, NextFrom: lastLT}, nil
+}
+
+func (h Handler) BlockchainAccountInspect(ctx context.Context, params oas.BlockchainAccountInspectParams) (*oas.BlockchainAccountInspect, error) {
+	accountID, err := tongo.ParseAccountID(params.AccountID)
+	if err != nil {
+		return nil, toError(http.StatusBadRequest, err)
+	}
+	account, err := h.storage.GetRawAccount(ctx, accountID)
+	if err != nil {
+		return nil, toError(http.StatusInternalServerError, err)
+	}
+	cells, err := boc.DeserializeBoc(account.Code)
+	if err != nil {
+		return nil, toError(http.StatusInternalServerError, err)
+	}
+	if len(cells) != 1 {
+		return nil, toError(http.StatusInternalServerError, fmt.Errorf("invalid boc with code"))
+	}
+	codeHash, err := cells[0].Hash()
+	if err != nil {
+		return nil, toError(http.StatusInternalServerError, err)
+	}
+	methods, err := code.ParseContractMethods(account.Code)
+	if err != nil {
+		return nil, toError(http.StatusInternalServerError, err)
+	}
+	resp := oas.BlockchainAccountInspect{
+		Code:     hex.EncodeToString(account.Code),
+		CodeHash: hex.EncodeToString(codeHash),
+		Compiler: oas.NewOptBlockchainAccountInspectCompiler(oas.BlockchainAccountInspectCompilerFunc),
+	}
+	for _, methodID := range methods {
+		if method, ok := code.Methods[methodID]; ok {
+			resp.Methods = append(resp.Methods, oas.BlockchainAccountInspectMethodsItem{
+				ID:     methodID,
+				Method: string(method),
+			})
+		}
+	}
+	return &resp, nil
 }
 
 func pubkeyFromCodeData(code, data []byte) ([]byte, error) {
