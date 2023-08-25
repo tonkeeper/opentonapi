@@ -81,6 +81,72 @@ func decodeAccountDnsBackResolveParams(args [1]string, argsEscaped bool, r *http
 	return params, nil
 }
 
+// BlockchainAccountInspectParams is parameters of blockchainAccountInspect operation.
+type BlockchainAccountInspectParams struct {
+	// Account ID.
+	AccountID string
+}
+
+func unpackBlockchainAccountInspectParams(packed middleware.Parameters) (params BlockchainAccountInspectParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "account_id",
+			In:   "path",
+		}
+		params.AccountID = packed[key].(string)
+	}
+	return params
+}
+
+func decodeBlockchainAccountInspectParams(args [1]string, argsEscaped bool, r *http.Request) (params BlockchainAccountInspectParams, _ error) {
+	// Decode path: account_id.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "account_id",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.AccountID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account_id",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
 // DnsResolveParams is parameters of dnsResolve operation.
 type DnsResolveParams struct {
 	// Domain name with .ton or .t.me.

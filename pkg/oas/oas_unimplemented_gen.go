@@ -22,6 +22,15 @@ func (UnimplementedHandler) AccountDnsBackResolve(ctx context.Context, params Ac
 	return r, ht.ErrNotImplemented
 }
 
+// BlockchainAccountInspect implements blockchainAccountInspect operation.
+//
+// Blockchain account inspect.
+//
+// GET /v2/blockchain/accounts/{account_id}/inspect
+func (UnimplementedHandler) BlockchainAccountInspect(ctx context.Context, params BlockchainAccountInspectParams) (r *BlockchainAccountInspect, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // DnsResolve implements dnsResolve operation.
 //
 // DNS resolve for domain name.
