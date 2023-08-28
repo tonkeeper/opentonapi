@@ -19,6 +19,8 @@ type storage interface {
 }
 
 func (m *Mock) GetCurrentRates() (map[string]float64, error) {
+	rates := make(map[string]float64)
+
 	fiatPrices := getCoinbaseFiatPrices()
 	for currency, rate := range getExchangerateFiatPrices() {
 		if _, ok := fiatPrices[currency]; !ok {
@@ -45,8 +47,11 @@ func (m *Mock) GetCurrentRates() (map[string]float64, error) {
 			pools[address] = price
 		}
 	}
+	tonstakersPrice, err := getTonstakersPrice()
+	if err == nil {
+		rates["EQC98_qAmNEptUtPc7W6xdHh_ZHrBUFpw5Ft_IzNU20QAJav"] = tonstakersPrice
+	}
 
-	rates := make(map[string]float64)
 	rates["TON"] = 1
 	for currency, price := range fiatPrices {
 		rates[currency] = meanTonPriceToUSD * price
@@ -330,4 +335,38 @@ func getCoinbaseFiatPrices() map[string]float64 {
 	}
 
 	return mapOfPrices
+}
+
+func getTonstakersPrice() (float64, error) {
+	resp, err := http.Get("https://tonapi.io/v2/blockchain/accounts/EQCkWxfyhAkim3g2DjKQQg8T5P4g-Q1-K_jErGcDJZ4i-vqR/methods/get_pool_full_data")
+	if err != nil {
+		log.Errorf("can't load tonstakers price")
+		return 0, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return 0, fmt.Errorf("bad status code: %v", resp.StatusCode)
+	}
+	var respBody struct {
+		Success bool `json:"success"`
+		Decoded struct {
+			TotalBalance int64 `json:"total_balance"`
+			Supply       int64 `json:"supply"`
+		}
+	}
+	if err = json.NewDecoder(resp.Body).Decode(&respBody); err != nil {
+		log.Errorf("failed to decode response: %v", err)
+		return 0, err
+	}
+
+	if !respBody.Success {
+		return 0, fmt.Errorf("failed success")
+	}
+	if respBody.Decoded.Supply == 0 || respBody.Decoded.TotalBalance == 0 {
+		return 0, fmt.Errorf("empty balance")
+	}
+
+	price := float64(respBody.Decoded.TotalBalance) / float64(respBody.Decoded.Supply)
+	return price, nil
 }
