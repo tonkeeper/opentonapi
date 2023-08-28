@@ -55,9 +55,9 @@ func (h Handler) GetAccount(ctx context.Context, params oas.GetAccountParams) (*
 	ab, found := h.addressBook.GetAddressInfoByAddress(accountID)
 	var res oas.Account
 	if found {
-		res = convertToAccount(account, &ab)
+		res = convertToAccount(account, &ab, h.state)
 	} else {
-		res = convertToAccount(account, nil)
+		res = convertToAccount(account, nil, h.state)
 	}
 	return &res, nil
 }
@@ -89,9 +89,9 @@ func (h Handler) GetAccounts(ctx context.Context, request oas.OptGetAccountsReq)
 		ab, found := h.addressBook.GetAddressInfoByAddress(account.AccountAddress)
 		var res oas.Account
 		if found {
-			res = convertToAccount(account, &ab)
+			res = convertToAccount(account, &ab, h.state)
 		} else {
-			res = convertToAccount(account, nil)
+			res = convertToAccount(account, nil, h.state)
 		}
 		results = append(results, res)
 	}

@@ -138,9 +138,9 @@ func (h Handler) GetWalletsByPublicKey(ctx context.Context, params oas.GetWallet
 		ab, found := h.addressBook.GetAddressInfoByAddress(account.AccountAddress)
 		var res oas.Account
 		if found {
-			res = convertToAccount(account, &ab)
+			res = convertToAccount(account, &ab, h.state)
 		} else {
-			res = convertToAccount(account, nil)
+			res = convertToAccount(account, nil, h.state)
 		}
 		results = append(results, res)
 	}

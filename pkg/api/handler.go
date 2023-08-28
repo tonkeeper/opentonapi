@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"fmt"
+	"github.com/tonkeeper/opentonapi/pkg/chainstate"
 
 	"github.com/go-faster/errors"
 	"github.com/tonkeeper/opentonapi/pkg/core"
@@ -16,7 +17,6 @@ import (
 
 	"github.com/tonkeeper/opentonapi/pkg/addressbook"
 	"github.com/tonkeeper/opentonapi/pkg/cache"
-	"github.com/tonkeeper/opentonapi/pkg/chainstate"
 	"github.com/tonkeeper/opentonapi/pkg/config"
 	"github.com/tonkeeper/opentonapi/pkg/image"
 	"github.com/tonkeeper/opentonapi/pkg/oas"
@@ -129,11 +129,12 @@ func NewHandler(logger *zap.Logger, opts ...Option) (*Handler, error) {
 	if options.addressBook == nil {
 		options.addressBook = addressbook.NewAddressBook(logger, config.AddressPath, config.JettonPath, config.CollectionPath)
 	}
-	if options.chainState == nil {
-		options.chainState = chainstate.NewChainState()
-	}
 	if options.storage == nil {
 		return nil, errors.New("storage is not configured")
+	}
+
+	if options.chainState == nil {
+		options.chainState = chainstate.NewChainState(options.storage)
 	}
 	if options.previewGenerator == nil {
 		options.previewGenerator = image.NewImgGenerator()

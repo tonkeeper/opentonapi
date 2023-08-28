@@ -38,7 +38,7 @@ func convertToRawAccount(account *core.Account) oas.BlockchainRawAccount {
 	return rawAccount
 }
 
-func convertToAccount(account *core.Account, ab *addressbook.KnownAddress) oas.Account {
+func convertToAccount(account *core.Account, ab *addressbook.KnownAddress, state chainState) oas.Account {
 	acc := oas.Account{
 		Address:      account.AccountAddress.ToRaw(),
 		Balance:      account.TonBalance,
@@ -46,6 +46,9 @@ func convertToAccount(account *core.Account, ab *addressbook.KnownAddress) oas.A
 		Status:       account.Status,
 		Interfaces:   account.Interfaces,
 		GetMethods:   account.GetMethods,
+	}
+	if state.CheckIsSuspended(account.AccountAddress) {
+		acc.IsSuspended.SetTo(true)
 	}
 	if ab == nil {
 		return acc

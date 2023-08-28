@@ -111,6 +111,7 @@ type liteStorageRaw interface {
 // chainState provides current blockchain state which change very rarely or slow like staking APY income
 type chainState interface {
 	GetAPY() float64
+	CheckIsSuspended(id tongo.AccountID) bool
 }
 
 // messageSender provides a method to send a raw message to the blockchain.
@@ -133,7 +134,7 @@ type previewGenerator interface {
 // The information is stored in "https://github.com/tonkeeper/ton-assets/" and
 // is being maintained by the tonkeeper team and the community.
 type addressBook interface {
-	GetAddressInfoByAddress(a tongo.AccountID) (addressbook.KnownAddress, bool)
+	GetAddressInfoByAddress(a tongo.AccountID) (addressbook.KnownAddress, bool) // todo: maybe rewrite to pointer
 	GetCollectionInfoByAddress(a tongo.AccountID) (addressbook.KnownCollection, bool)
 	GetJettonInfoByAddress(a tongo.AccountID) (addressbook.KnownJetton, bool)
 	GetTFPoolInfo(a tongo.AccountID) (addressbook.TFPoolInfo, bool)
