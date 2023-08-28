@@ -10,6 +10,7 @@ import (
 	"sync"
 
 	"github.com/labstack/gommon/log"
+	"github.com/tonkeeper/opentonapi/pkg/references"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/tep64"
 )
@@ -47,9 +48,9 @@ func (m *Mock) GetCurrentRates() (map[string]float64, error) {
 			pools[address] = price
 		}
 	}
-	tonstakersPrice, err := getTonstakersPrice()
+	tonstakersJetton, tonstakersPrice, err := getTonstakersPrice(references.TonstakersAccountPool)
 	if err == nil {
-		rates["EQC98_qAmNEptUtPc7W6xdHh_ZHrBUFpw5Ft_IzNU20QAJav"] = tonstakersPrice
+		rates[tonstakersJetton.ToHuman(true, false)] = tonstakersPrice
 	}
 
 	rates["TON"] = 1
@@ -337,36 +338,43 @@ func getCoinbaseFiatPrices() map[string]float64 {
 	return mapOfPrices
 }
 
-func getTonstakersPrice() (float64, error) {
-	resp, err := http.Get("https://tonapi.io/v2/blockchain/accounts/EQCkWxfyhAkim3g2DjKQQg8T5P4g-Q1-K_jErGcDJZ4i-vqR/methods/get_pool_full_data")
+// getTonstakersPrice is used to retrieve the price and token address of an account on the Tonstakers pool.
+// We are using the TonApi, because the standard liteserver executor is incapable of invoking methods on the account
+func getTonstakersPrice(pool tongo.AccountID) (tongo.AccountID, float64, error) {
+	resp, err := http.Get(fmt.Sprintf("https://tonapi.io/v2/blockchain/accounts/%v/methods/get_pool_full_data", pool.ToRaw()))
 	if err != nil {
 		log.Errorf("can't load tonstakers price")
-		return 0, err
+		return tongo.AccountID{}, 0, err
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return 0, fmt.Errorf("bad status code: %v", resp.StatusCode)
+		return tongo.AccountID{}, 0, fmt.Errorf("bad status code: %v", resp.StatusCode)
 	}
 	var respBody struct {
 		Success bool `json:"success"`
 		Decoded struct {
-			TotalBalance int64 `json:"total_balance"`
-			Supply       int64 `json:"supply"`
+			JettonMinter string `json:"jetton_minter"`
+			TotalBalance int64  `json:"total_balance"`
+			Supply       int64  `json:"supply"`
 		}
 	}
 	if err = json.NewDecoder(resp.Body).Decode(&respBody); err != nil {
 		log.Errorf("failed to decode response: %v", err)
-		return 0, err
+		return tongo.AccountID{}, 0, err
 	}
 
 	if !respBody.Success {
-		return 0, fmt.Errorf("failed success")
+		return tongo.AccountID{}, 0, fmt.Errorf("failed success")
 	}
 	if respBody.Decoded.Supply == 0 || respBody.Decoded.TotalBalance == 0 {
-		return 0, fmt.Errorf("empty balance")
+		return tongo.AccountID{}, 0, fmt.Errorf("empty balance")
 	}
-
+	accountJetton, err := tongo.ParseAccountID(respBody.Decoded.JettonMinter)
+	if err != nil {
+		return tongo.AccountID{}, 0, err
+	}
 	price := float64(respBody.Decoded.TotalBalance) / float64(respBody.Decoded.Supply)
-	return price, nil
+
+	return accountJetton, price, nil
 }
