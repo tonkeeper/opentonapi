@@ -3027,6 +3027,8 @@ components:
           items:
             type: string
           example: [ 'get_item_data' ]
+        is_suspended:
+          type: boolean
     Accounts:
       type: object
       required:
@@ -3091,6 +3093,7 @@ components:
         - "1"
         - "2"
         - "4"
+        - "44"
       properties:
         raw:
           type: string
@@ -3120,6 +3123,19 @@ components:
           $ref: '#/components/schemas/ValidatorsSet'
         "37":
           $ref: '#/components/schemas/ValidatorsSet'
+        "44":
+          type: object
+          description: suspended accounts
+          required:
+            - accounts
+            - suspended_until
+          properties:
+            accounts:
+              type: array
+              items:
+                type: string
+            suspended_until:
+              type: integer
     DomainNames:
       type: object
       required:

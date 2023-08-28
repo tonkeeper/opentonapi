@@ -238,6 +238,25 @@ func convertConfig(cfg tlb.ConfigParams) (*oas.BlockchainConfig, error) {
 		}
 		*a.pointer = convertValidatorSet(set)
 	}
+	{
+		c, prs := cfg.Config.Get(44)
+		if !prs {
+			return nil, fmt.Errorf("config doesn't have %v param", 44)
+		}
+		var blockedAccounts struct {
+			Prefix         byte
+			Map            tlb.HashmapE[accID, struct{}]
+			SuspendedUntil uint32
+		}
+		err := tlb.Unmarshal(&c.Value, &blockedAccounts)
+		if err != nil {
+			return nil, err
+		}
+		config.R44.SetSuspendedUntil(int(blockedAccounts.SuspendedUntil))
+		for _, a := range blockedAccounts.Map.Items() {
+			config.R44.Accounts = append(config.R44.Accounts, tongo.AccountID(a.Key).String())
+		}
+	}
 
 	return &config, nil
 }
@@ -258,4 +277,10 @@ func convertValidatorSet(set tlb.ValidatorsSet) oas.OptValidatorsSet {
 		s.List = append(s.List, oas.ValidatorsSetListItem{PublicKey: d.PubKey().Hex()})
 	}
 	return oas.NewOptValidatorsSet(s)
+}
+
+type accID tongo.AccountID
+
+func (a accID) FixedSize() int {
+	return 288 // (32+256) * 8
 }

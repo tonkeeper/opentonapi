@@ -557,6 +557,9 @@
       "example": true,
       "type": "boolean"
      },
+     "is_suspended": {
+      "type": "boolean"
+     },
      "last_activity": {
       "description": "unix timestamp",
       "example": 123456789,
@@ -1345,6 +1348,25 @@
       "description": "dns root address",
       "type": "string"
      },
+     "44": {
+      "description": "suspended accounts",
+      "properties": {
+       "accounts": {
+        "items": {
+         "type": "string"
+        },
+        "type": "array"
+       },
+       "suspended_until": {
+        "type": "integer"
+       }
+      },
+      "required": [
+       "accounts",
+       "suspended_until"
+      ],
+      "type": "object"
+     },
      "raw": {
       "description": "config boc in base64 format",
       "example": "te6ccgEBBgEARAABFP8A9KQT9LzyyAsBAgEgAgMCAUgEBQAE8jAAONBsIdMfMO1E0NM/MAHAAZekyMs/ye1UkzDyBuIAEaE0MdqJoaZ+YQ==",
@@ -1356,7 +1378,8 @@
      "0",
      "1",
      "2",
-     "4"
+     "4",
+     "44"
     ],
     "type": "object"
    },

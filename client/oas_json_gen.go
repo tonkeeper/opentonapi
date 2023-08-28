@@ -121,19 +121,26 @@ func (s *Account) encodeFields(e *jx.Encoder) {
 		}
 		e.ArrEnd()
 	}
+	{
+		if s.IsSuspended.Set {
+			e.FieldStart("is_suspended")
+			s.IsSuspended.Encode(e)
+		}
+	}
 }
 
-var jsonFieldsNameOfAccount = [10]string{
-	0: "address",
-	1: "balance",
-	2: "last_activity",
-	3: "status",
-	4: "interfaces",
-	5: "name",
-	6: "is_scam",
-	7: "icon",
-	8: "memo_required",
-	9: "get_methods",
+var jsonFieldsNameOfAccount = [11]string{
+	0:  "address",
+	1:  "balance",
+	2:  "last_activity",
+	3:  "status",
+	4:  "interfaces",
+	5:  "name",
+	6:  "is_scam",
+	7:  "icon",
+	8:  "memo_required",
+	9:  "get_methods",
+	10: "is_suspended",
 }
 
 // Decode decodes Account from json.
@@ -271,6 +278,16 @@ func (s *Account) Decode(d *jx.Decoder) error {
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"get_methods\"")
+			}
+		case "is_suspended":
+			if err := func() error {
+				s.IsSuspended.Reset()
+				if err := s.IsSuspended.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"is_suspended\"")
 			}
 		default:
 			return d.Skip()
@@ -4012,9 +4029,13 @@ func (s *BlockchainConfig) encodeFields(e *jx.Encoder) {
 			s.R37.Encode(e)
 		}
 	}
+	{
+		e.FieldStart("44")
+		s.R44.Encode(e)
+	}
 }
 
-var jsonFieldsNameOfBlockchainConfig = [11]string{
+var jsonFieldsNameOfBlockchainConfig = [12]string{
 	0:  "raw",
 	1:  "0",
 	2:  "1",
@@ -4026,6 +4047,7 @@ var jsonFieldsNameOfBlockchainConfig = [11]string{
 	8:  "35",
 	9:  "36",
 	10: "37",
+	11: "44",
 }
 
 // Decode decodes BlockchainConfig from json.
@@ -4157,6 +4179,16 @@ func (s *BlockchainConfig) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"37\"")
 			}
+		case "44":
+			requiredBitSet[1] |= 1 << 3
+			if err := func() error {
+				if err := s.R44.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"44\"")
+			}
 		default:
 			return d.Skip()
 		}
@@ -4168,7 +4200,7 @@ func (s *BlockchainConfig) Decode(d *jx.Decoder) error {
 	var failures []validate.FieldError
 	for i, mask := range [2]uint8{
 		0b00011111,
-		0b00000000,
+		0b00001000,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -4210,6 +4242,131 @@ func (s *BlockchainConfig) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *BlockchainConfig) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *BlockchainConfig44) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *BlockchainConfig44) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("accounts")
+		e.ArrStart()
+		for _, elem := range s.Accounts {
+			e.Str(elem)
+		}
+		e.ArrEnd()
+	}
+	{
+		e.FieldStart("suspended_until")
+		e.Int(s.SuspendedUntil)
+	}
+}
+
+var jsonFieldsNameOfBlockchainConfig44 = [2]string{
+	0: "accounts",
+	1: "suspended_until",
+}
+
+// Decode decodes BlockchainConfig44 from json.
+func (s *BlockchainConfig44) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode BlockchainConfig44 to nil")
+	}
+	var requiredBitSet [1]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "accounts":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				s.Accounts = make([]string, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem string
+					v, err := d.Str()
+					elem = string(v)
+					if err != nil {
+						return err
+					}
+					s.Accounts = append(s.Accounts, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"accounts\"")
+			}
+		case "suspended_until":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				v, err := d.Int()
+				s.SuspendedUntil = int(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"suspended_until\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode BlockchainConfig44")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00000011,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfBlockchainConfig44) {
+					name = jsonFieldsNameOfBlockchainConfig44[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *BlockchainConfig44) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *BlockchainConfig44) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }

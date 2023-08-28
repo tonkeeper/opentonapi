@@ -67,6 +67,7 @@ type Account struct {
 	Icon         OptString `json:"icon"`
 	MemoRequired OptBool   `json:"memo_required"`
 	GetMethods   []string  `json:"get_methods"`
+	IsSuspended  OptBool   `json:"is_suspended"`
 }
 
 // GetAddress returns the value of Address.
@@ -119,6 +120,11 @@ func (s *Account) GetGetMethods() []string {
 	return s.GetMethods
 }
 
+// GetIsSuspended returns the value of IsSuspended.
+func (s *Account) GetIsSuspended() OptBool {
+	return s.IsSuspended
+}
+
 // SetAddress sets the value of Address.
 func (s *Account) SetAddress(val string) {
 	s.Address = val
@@ -167,6 +173,11 @@ func (s *Account) SetMemoRequired(val OptBool) {
 // SetGetMethods sets the value of GetMethods.
 func (s *Account) SetGetMethods(val []string) {
 	s.GetMethods = val
+}
+
+// SetIsSuspended sets the value of IsSuspended.
+func (s *Account) SetIsSuspended(val OptBool) {
+	s.IsSuspended = val
 }
 
 // Ref: #/components/schemas/AccountAddress
@@ -1703,6 +1714,8 @@ type BlockchainConfig struct {
 	R35 OptValidatorsSet `json:"35"`
 	R36 OptValidatorsSet `json:"36"`
 	R37 OptValidatorsSet `json:"37"`
+	// Suspended accounts.
+	R44 BlockchainConfig44 `json:"44"`
 }
 
 // GetRaw returns the value of Raw.
@@ -1760,6 +1773,11 @@ func (s *BlockchainConfig) GetR37() OptValidatorsSet {
 	return s.R37
 }
 
+// GetR44 returns the value of R44.
+func (s *BlockchainConfig) GetR44() BlockchainConfig44 {
+	return s.R44
+}
+
 // SetRaw sets the value of Raw.
 func (s *BlockchainConfig) SetRaw(val string) {
 	s.Raw = val
@@ -1813,6 +1831,37 @@ func (s *BlockchainConfig) SetR36(val OptValidatorsSet) {
 // SetR37 sets the value of R37.
 func (s *BlockchainConfig) SetR37(val OptValidatorsSet) {
 	s.R37 = val
+}
+
+// SetR44 sets the value of R44.
+func (s *BlockchainConfig) SetR44(val BlockchainConfig44) {
+	s.R44 = val
+}
+
+// Suspended accounts.
+type BlockchainConfig44 struct {
+	Accounts       []string `json:"accounts"`
+	SuspendedUntil int      `json:"suspended_until"`
+}
+
+// GetAccounts returns the value of Accounts.
+func (s *BlockchainConfig44) GetAccounts() []string {
+	return s.Accounts
+}
+
+// GetSuspendedUntil returns the value of SuspendedUntil.
+func (s *BlockchainConfig44) GetSuspendedUntil() int {
+	return s.SuspendedUntil
+}
+
+// SetAccounts sets the value of Accounts.
+func (s *BlockchainConfig44) SetAccounts(val []string) {
+	s.Accounts = val
+}
+
+// SetSuspendedUntil sets the value of SuspendedUntil.
+func (s *BlockchainConfig44) SetSuspendedUntil(val int) {
+	s.SuspendedUntil = val
 }
 
 // Ref: #/components/schemas/BlockchainRawAccount
