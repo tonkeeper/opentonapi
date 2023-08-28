@@ -280,17 +280,19 @@ func (h Handler) GetStakingPoolHistory(ctx context.Context, params oas.GetStakin
 			return nil, toError(http.StatusInternalServerError, err)
 		}
 		var round struct {
-			RoundID  tlb.Uint32
-			Borrowed tlb.Coins
-			Returned tlb.Coins
-			Profit   tlb.SignedCoins
+			RoundID      tlb.Uint32
+			Borrowed     tlb.Coins
+			Returned     tlb.Coins
+			Profit       tlb.SignedCoins
+			TotalBalance tlb.Coins
+			Supply       tlb.Coins
 		}
 		err = tlb.Unmarshal(cells[0], &round)
 		if err != nil {
 			return nil, toError(http.StatusInternalServerError, err)
 		}
 		result.Apy = append(result.Apy, oas.ApyHistory{
-			Apy:  float64(round.Profit) / float64(round.Borrowed) / float64(l.CreatedAt-prevTime) * 3600 * 24 * 365 * 100,
+			Apy:  float64(round.Profit) / float64(round.TotalBalance) / float64(l.CreatedAt-prevTime) * 3600 * 24 * 365 * 100,
 			Time: int(l.CreatedAt),
 		})
 		prevTime = l.CreatedAt
