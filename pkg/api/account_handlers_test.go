@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"fmt"
+	"github.com/tonkeeper/opentonapi/pkg/chainstate"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -128,6 +129,7 @@ func TestHandler_GetAccounts(t *testing.T) {
 			h := Handler{
 				addressBook: addressbook.NewAddressBook(logger, config.AddressPath, config.JettonPath, config.CollectionPath),
 				storage:     liteStorage,
+				state:       chainstate.NewChainState(liteStorage),
 				limits: Limits{
 					BulkLimits: 4,
 				},
