@@ -3623,6 +3623,7 @@ components:
         auction:
           $ref: '#/components/schemas/AccountAddress'
     DepositStakeAction:
+      description: "validator's participation in elections"
       type: object
       required:
         - amount

@@ -50,6 +50,9 @@ func (h Handler) AccountDnsBackResolve(ctx context.Context, params oas.AccountDn
 }
 
 func (h Handler) DnsResolve(ctx context.Context, params oas.DnsResolveParams) (*oas.DnsRecord, error) {
+	if len(params.DomainName) == 48 || len(params.DomainName) == 52 {
+		return nil, toError(http.StatusBadRequest, fmt.Errorf("domains with length 48 and 52 can't be resolved by security issues"))
+	}
 	records, err := h.dns.Resolve(ctx, params.DomainName)
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
