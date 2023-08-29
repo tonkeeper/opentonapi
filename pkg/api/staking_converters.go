@@ -53,7 +53,7 @@ func convertStakingTFPool(p core.TFPool, info addressbook.TFPoolInfo, apy float6
 	}
 }
 
-func convertLiquidStaking(p core.LiquidPool, apy float64, cycleStart, cycleEnd uint32) oas.PoolInfo {
+func convertLiquidStaking(p core.LiquidPool, cycleStart, cycleEnd uint32) oas.PoolInfo {
 	name := p.Name
 	if name == "" {
 		name = p.Address.ToHuman(true, false)
@@ -63,7 +63,7 @@ func convertLiquidStaking(p core.LiquidPool, apy float64, cycleStart, cycleEnd u
 		Name:               name,
 		TotalAmount:        p.TotalAmount,
 		Implementation:     oas.PoolInfoImplementationLiquidTF,
-		Apy:                apy,
+		Apy:                p.APY,
 		MinStake:           int64(tongo.OneTON),
 		Verified:           p.VerifiedSources,
 		CurrentNominators:  1,

@@ -62,7 +62,7 @@ func (h Handler) GetStakingPoolInfo(ctx context.Context, params oas.GetStakingPo
 				Description: i18n.T(params.AcceptLanguage.Value, i18n.C{MessageID: "poolImplementationDescription", TemplateData: map[string]interface{}{"Deposit": 100}}),
 				URL:         references.LiquidImplementationsUrl,
 			},
-			Pool: convertLiquidStaking(lPool, h.state.GetAPY(), cycleStart, cycleEnd),
+			Pool: convertLiquidStaking(lPool, cycleStart, cycleEnd),
 		}, nil
 	}
 	p, err := h.storage.GetTFPool(ctx, poolID)
@@ -159,7 +159,7 @@ func (h Handler) GetStakingPools(ctx context.Context, params oas.GetStakingPools
 	for _, p := range liquidPools {
 		info, _ := h.addressBook.GetAddressInfoByAddress(p.Address)
 		p.Name = info.Name
-		result.Pools = append(result.Pools, convertLiquidStaking(p, h.state.GetAPY(), cycleStart, cycleEnd))
+		result.Pools = append(result.Pools, convertLiquidStaking(p, cycleStart, cycleEnd))
 	}
 
 	slices.SortFunc(result.Pools, func(a, b oas.PoolInfo) bool {
@@ -296,7 +296,6 @@ func (h Handler) GetStakingPoolHistory(ctx context.Context, params oas.GetStakin
 			Time: int(l.CreatedAt),
 		})
 		prevTime = l.CreatedAt
-		fmt.Printf("%+v\n", round)
 	}
 	return &result, nil
 }

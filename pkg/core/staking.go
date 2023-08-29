@@ -33,4 +33,5 @@ type LiquidPool struct {
 	TotalAmount     int64
 	VerifiedSources bool
 	JettonMaster    tongo.AccountID
+	APY             float64
 }
