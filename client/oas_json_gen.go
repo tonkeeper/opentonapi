@@ -16917,12 +16917,21 @@ func (s *PoolImplementation) encodeFields(e *jx.Encoder) {
 		e.FieldStart("url")
 		e.Str(s.URL)
 	}
+	{
+		e.FieldStart("socials")
+		e.ArrStart()
+		for _, elem := range s.Socials {
+			e.Str(elem)
+		}
+		e.ArrEnd()
+	}
 }
 
-var jsonFieldsNameOfPoolImplementation = [3]string{
+var jsonFieldsNameOfPoolImplementation = [4]string{
 	0: "name",
 	1: "description",
 	2: "url",
+	3: "socials",
 }
 
 // Decode decodes PoolImplementation from json.
@@ -16970,6 +16979,26 @@ func (s *PoolImplementation) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"url\"")
 			}
+		case "socials":
+			requiredBitSet[0] |= 1 << 3
+			if err := func() error {
+				s.Socials = make([]string, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem string
+					v, err := d.Str()
+					elem = string(v)
+					if err != nil {
+						return err
+					}
+					s.Socials = append(s.Socials, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"socials\"")
+			}
 		default:
 			return d.Skip()
 		}
@@ -16980,7 +17009,7 @@ func (s *PoolImplementation) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b00000111,
+		0b00001111,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.

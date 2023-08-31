@@ -62,6 +62,7 @@ func (h Handler) GetStakingPoolInfo(ctx context.Context, params oas.GetStakingPo
 				Name:        references.TonstakersImplementationsName,
 				Description: i18n.T(params.AcceptLanguage.Value, i18n.C{MessageID: "poolImplementationDescription", TemplateData: map[string]interface{}{"Deposit": 100}}),
 				URL:         references.LiquidImplementationsUrl,
+				Socials:     references.TonstakersSocialLinks,
 			},
 			Pool: convertLiquidStaking(lPool, cycleStart, cycleEnd),
 		}, nil
@@ -184,6 +185,7 @@ func (h Handler) GetStakingPools(ctx context.Context, params oas.GetStakingPools
 			Name:        references.TonstakersImplementationsName,
 			Description: i18n.T(params.AcceptLanguage.Value, i18n.C{MessageID: "poolImplementationDescription", TemplateData: map[string]interface{}{"Deposit": 10}}),
 			URL:         references.LiquidImplementationsUrl,
+			Socials:     references.TonstakersSocialLinks,
 		},
 	})
 

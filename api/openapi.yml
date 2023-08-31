@@ -4357,6 +4357,7 @@ components:
         - name
         - description
         - url
+        - socials
       properties:
         name:
           type: string
@@ -4367,6 +4368,11 @@ components:
         url:
           type: string
           example: "https://tonvalidators.org/"
+        socials:
+          type: array
+          items:
+            type: string
+            example: "https://t.me/tonwhales"
     StorageProvider:
       type: object
       required:

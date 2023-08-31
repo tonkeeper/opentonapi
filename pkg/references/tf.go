@@ -11,7 +11,8 @@ var TFPoolCodeHash = tongo.MustParseHash("9A3EC14BC098F6B44064C305222CAEA2800F17
 var TonstakersAccountPool = tongo.MustParseAccountID("EQCkWxfyhAkim3g2DjKQQg8T5P4g-Q1-K_jErGcDJZ4i-vqR")
 
 const TonstakersImplementationsName = "Tonstakers"
-const LiquidImplementationsName = "Liquid staking"
-const LiquidImplementationsUrl = "https://ton.org"
+const LiquidImplementationsUrl = "https://tonstakers.com/"
+
+var TonstakersSocialLinks = []string{"https://t.me/thetonstakers", "https://twitter.com/tonstakers"}
 
 var TFLiquidPoolCodeHash = tongo.MustParseHash("e8eeae986d782a96eef432c45edd1f0a84b943416ccd8caa42118c0dc7b1d34a")

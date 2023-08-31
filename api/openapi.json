@@ -2506,6 +2506,13 @@
       "example": "TON Whales",
       "type": "string"
      },
+     "socials": {
+      "items": {
+       "example": "https://t.me/tonwhales",
+       "type": "string"
+      },
+      "type": "array"
+     },
      "url": {
       "example": "https://tonvalidators.org/",
       "type": "string"
@@ -2514,7 +2521,8 @@
     "required": [
      "name",
      "description",
-     "url"
+     "url",
+     "socials"
     ],
     "type": "object"
    },

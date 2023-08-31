@@ -1260,6 +1260,17 @@ func (s *GetStakingPoolHistoryOK) Validate() error {
 func (s *GetStakingPoolInfoOK) Validate() error {
 	var failures []validate.FieldError
 	if err := func() error {
+		if err := s.Implementation.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "implementation",
+			Error: err,
+		})
+	}
+	if err := func() error {
 		if err := s.Pool.Validate(); err != nil {
 			return err
 		}
@@ -1306,6 +1317,39 @@ func (s *GetStakingPoolsOK) Validate() error {
 			Error: err,
 		})
 	}
+	if err := func() error {
+		if err := s.Implementations.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "implementations",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s GetStakingPoolsOKImplementations) Validate() error {
+	var failures []validate.FieldError
+	for key, elem := range s {
+		if err := func() error {
+			if err := elem.Validate(); err != nil {
+				return err
+			}
+			return nil
+		}(); err != nil {
+			failures = append(failures, validate.FieldError{
+				Name:  key,
+				Error: err,
+			})
+		}
+	}
+
 	if len(failures) > 0 {
 		return &validate.Error{Fields: failures}
 	}
@@ -1848,6 +1892,25 @@ func (s NftPurchaseActionAuctionType) Validate() error {
 	default:
 		return errors.Errorf("invalid value: %v", s)
 	}
+}
+
+func (s *PoolImplementation) Validate() error {
+	var failures []validate.FieldError
+	if err := func() error {
+		if s.Socials == nil {
+			return errors.New("nil is invalid value")
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "socials",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
 }
 
 func (s *PoolInfo) Validate() error {

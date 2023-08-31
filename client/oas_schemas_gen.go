@@ -7090,9 +7090,10 @@ func (o OptWalletDNS) Or(d WalletDNS) WalletDNS {
 
 // Ref: #/components/schemas/PoolImplementation
 type PoolImplementation struct {
-	Name        string `json:"name"`
-	Description string `json:"description"`
-	URL         string `json:"url"`
+	Name        string   `json:"name"`
+	Description string   `json:"description"`
+	URL         string   `json:"url"`
+	Socials     []string `json:"socials"`
 }
 
 // GetName returns the value of Name.
@@ -7110,6 +7111,11 @@ func (s *PoolImplementation) GetURL() string {
 	return s.URL
 }
 
+// GetSocials returns the value of Socials.
+func (s *PoolImplementation) GetSocials() []string {
+	return s.Socials
+}
+
 // SetName sets the value of Name.
 func (s *PoolImplementation) SetName(val string) {
 	s.Name = val
@@ -7123,6 +7129,11 @@ func (s *PoolImplementation) SetDescription(val string) {
 // SetURL sets the value of URL.
 func (s *PoolImplementation) SetURL(val string) {
 	s.URL = val
+}
+
+// SetSocials sets the value of Socials.
+func (s *PoolImplementation) SetSocials(val []string) {
+	s.Socials = val
 }
 
 // Ref: #/components/schemas/PoolInfo
