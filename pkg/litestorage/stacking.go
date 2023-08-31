@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"math"
 	"math/big"
 
 	"github.com/tonkeeper/tongo/tlb"
@@ -202,7 +201,7 @@ func (s *LiteStorage) GetLiquidPool(ctx context.Context, pool tongo.AccountID) (
 		TotalAmount:     p.TotalBalance,
 		VerifiedSources: bytes.Equal(hash, references.TFLiquidPoolCodeHash[:]),
 		JettonMaster:    *jettonMaster,
-		APY:             (math.Pow(1+float64(p.InterestRate)/float64(1<<24)*(1-float64(p.GovernanceFee)/float64(1<<24)), 3600*24*366/(1<<16)) - 1) * 100,
+		APY:             core.CalculateAPY(p.PrevRoundBorrowers.Expected, p.PrevRoundBorrowers.Borrowed, p.InterestRate),
 	}, err
 }
 

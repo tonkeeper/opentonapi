@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"math"
 	"net/http"
 
 	"github.com/tonkeeper/opentonapi/internal/g"
@@ -269,12 +270,7 @@ func (h Handler) GetStakingPoolHistory(ctx context.Context, params oas.GetStakin
 		return nil, toError(http.StatusInternalServerError, err)
 	}
 	var result oas.GetStakingPoolHistoryOK
-	var prevTime uint32
-	for i, l := range logs {
-		if i == 0 {
-			prevTime = l.CreatedAt
-			continue
-		}
+	for _, l := range logs {
 		cells, err := boc.DeserializeBoc(l.Body)
 		if err != nil {
 			return nil, toError(http.StatusInternalServerError, err)
@@ -292,10 +288,9 @@ func (h Handler) GetStakingPoolHistory(ctx context.Context, params oas.GetStakin
 			return nil, toError(http.StatusInternalServerError, err)
 		}
 		result.Apy = append(result.Apy, oas.ApyHistory{
-			Apy:  float64(round.Profit) / float64(round.TotalBalance) / float64(l.CreatedAt-prevTime) * 3600 * 24 * 365 * 100,
+			Apy:  (math.Pow(float64(round.Returned-round.Borrowed)/float64(round.TotalBalance)+1, 365*24*60*60/float64(65536)) - 1) * 100,
 			Time: int(l.CreatedAt),
 		})
-		prevTime = l.CreatedAt
 	}
 	return &result, nil
 }
