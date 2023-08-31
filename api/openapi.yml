@@ -1090,6 +1090,23 @@ paths:
                 $ref: '#/components/schemas/JettonInfo'
         'default':
           $ref: '#/components/responses/Error'
+  /v2/jettons/{account_id}/holders:
+    get:
+      description: Get jetton's holders
+      operationId: getJettonHolders
+      tags:
+        - Jettons
+      parameters:
+        - $ref: '#/components/parameters/accountIDParameter'
+      responses:
+        '200':
+          description: jetton's holders
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JettonHolders'
+        'default':
+          $ref: '#/components/responses/Error'
 
   /v2/staking/nominator/{account_id}/pools:
     get:
@@ -4202,6 +4219,25 @@ components:
           type: integer
           format: int32
           example: 2000
+    JettonHolders:
+      type: object
+      required:
+        - addresses
+      properties:
+        addresses:
+          type: array
+          items:
+            type: object
+            required:
+              - address
+              - balance
+            properties:
+              address:
+                type: string
+                example: 0:10C1073837B93FDAAD594284CE8B8EFF7B9CF25427440EB2FC682762E1471365
+              balance:
+                type: string
+                example: 1000000000
     AccountStaking:
       type: object
       required:

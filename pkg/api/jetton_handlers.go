@@ -166,5 +166,23 @@ func (h Handler) GetJettons(ctx context.Context, params oas.GetJettonsParams) (*
 	return &oas.Jettons{
 		Jettons: results,
 	}, nil
+}
 
+func (h Handler) GetJettonHolders(ctx context.Context, params oas.GetJettonHoldersParams) (*oas.JettonHolders, error) {
+	accountID, err := tongo.ParseAccountID(params.AccountID)
+	if err != nil {
+		return nil, toError(http.StatusBadRequest, err)
+	}
+	holders, err := h.storage.GetJettonHolders(ctx, accountID)
+	if err != nil {
+		return nil, toError(http.StatusInternalServerError, err)
+	}
+	var results oas.JettonHolders
+	for _, holder := range holders {
+		results.Addresses = append(results.Addresses, oas.JettonHoldersAddressesItem{
+			Address: holder.Address.ToRaw(),
+			Balance: holder.Balance.String(),
+		})
+	}
+	return &results, nil
 }

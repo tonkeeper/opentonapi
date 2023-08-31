@@ -263,6 +263,12 @@ type Handler interface {
 	//
 	// GET /v2/nfts/collections/{account_id}/items
 	GetItemsFromCollection(ctx context.Context, params GetItemsFromCollectionParams) (*NftItems, error)
+	// GetJettonHolders implements getJettonHolders operation.
+	//
+	// Get jetton's holders.
+	//
+	// GET /v2/jettons/{account_id}/holders
+	GetJettonHolders(ctx context.Context, params GetJettonHoldersParams) (*JettonHolders, error)
 	// GetJettonInfo implements getJettonInfo operation.
 	//
 	// Get jetton metadata by jetton master address.

@@ -1350,6 +1350,25 @@ func (s *JettonBalance) Validate() error {
 	return nil
 }
 
+func (s *JettonHolders) Validate() error {
+	var failures []validate.FieldError
+	if err := func() error {
+		if s.Addresses == nil {
+			return errors.New("nil is invalid value")
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "addresses",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
 func (s *JettonInfo) Validate() error {
 	var failures []validate.FieldError
 	if err := func() error {

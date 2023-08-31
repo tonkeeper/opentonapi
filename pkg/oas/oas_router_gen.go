@@ -1003,12 +1003,15 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 					}
 
 					// Param: "account_id"
-					// Leaf parameter
-					args[0] = elem
-					elem = ""
+					// Match until "/"
+					idx := strings.IndexByte(elem, '/')
+					if idx < 0 {
+						idx = len(elem)
+					}
+					args[0] = elem[:idx]
+					elem = elem[idx:]
 
 					if len(elem) == 0 {
-						// Leaf node.
 						switch r.Method {
 						case "GET":
 							s.handleGetJettonInfoRequest([1]string{
@@ -1019,6 +1022,28 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 						}
 
 						return
+					}
+					switch elem[0] {
+					case '/': // Prefix: "/holders"
+						if l := len("/holders"); len(elem) >= l && elem[0:l] == "/holders" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						if len(elem) == 0 {
+							// Leaf node.
+							switch r.Method {
+							case "GET":
+								s.handleGetJettonHoldersRequest([1]string{
+									args[0],
+								}, elemIsEscaped, w, r)
+							default:
+								s.notAllowed(w, r, "GET")
+							}
+
+							return
+						}
 					}
 				}
 			case 'l': // Prefix: "liteserver/"
@@ -3132,14 +3157,17 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 					}
 
 					// Param: "account_id"
-					// Leaf parameter
-					args[0] = elem
-					elem = ""
+					// Match until "/"
+					idx := strings.IndexByte(elem, '/')
+					if idx < 0 {
+						idx = len(elem)
+					}
+					args[0] = elem[:idx]
+					elem = elem[idx:]
 
 					if len(elem) == 0 {
 						switch method {
 						case "GET":
-							// Leaf: GetJettonInfo
 							r.name = "GetJettonInfo"
 							r.operationID = "getJettonInfo"
 							r.pathPattern = "/v2/jettons/{account_id}"
@@ -3148,6 +3176,29 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 							return r, true
 						default:
 							return
+						}
+					}
+					switch elem[0] {
+					case '/': // Prefix: "/holders"
+						if l := len("/holders"); len(elem) >= l && elem[0:l] == "/holders" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						if len(elem) == 0 {
+							switch method {
+							case "GET":
+								// Leaf: GetJettonHolders
+								r.name = "GetJettonHolders"
+								r.operationID = "getJettonHolders"
+								r.pathPattern = "/v2/jettons/{account_id}/holders"
+								r.args = args
+								r.count = 1
+								return r, true
+							default:
+								return
+							}
 						}
 					}
 				}

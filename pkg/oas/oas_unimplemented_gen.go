@@ -391,6 +391,15 @@ func (UnimplementedHandler) GetItemsFromCollection(ctx context.Context, params G
 	return r, ht.ErrNotImplemented
 }
 
+// GetJettonHolders implements getJettonHolders operation.
+//
+// Get jetton's holders.
+//
+// GET /v2/jettons/{account_id}/holders
+func (UnimplementedHandler) GetJettonHolders(ctx context.Context, params GetJettonHoldersParams) (r *JettonHolders, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // GetJettonInfo implements getJettonInfo operation.
 //
 // Get jetton metadata by jetton master address.

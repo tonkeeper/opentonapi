@@ -270,6 +270,12 @@ type GetItemsFromCollectionParams struct {
 	Offset    OptInt
 }
 
+// GetJettonHoldersParams is parameters of getJettonHolders operation.
+type GetJettonHoldersParams struct {
+	// Account ID.
+	AccountID string
+}
+
 // GetJettonInfoParams is parameters of getJettonInfo operation.
 type GetJettonInfoParams struct {
 	// Account ID.
