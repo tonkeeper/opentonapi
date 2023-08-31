@@ -17,6 +17,12 @@ type JettonWallet struct {
 	Code          []byte
 }
 
+type JettonHolder struct {
+	JettonAddress tongo.AccountID
+	Address       tongo.AccountID
+	Balance       decimal.Decimal
+}
+
 type JettonMaster struct {
 	// Address of a jetton master.
 	Address     tongo.AccountID

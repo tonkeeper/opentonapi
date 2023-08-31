@@ -2180,6 +2180,7 @@ func (s *CreditPhase) SetCredit(val int64) {
 	s.Credit = val
 }
 
+// Validator's participation in elections.
 // Ref: #/components/schemas/DepositStakeAction
 type DepositStakeAction struct {
 	Amount int64          `json:"amount"`
@@ -3879,6 +3880,46 @@ func (s *JettonBalance) SetWalletAddress(val AccountAddress) {
 // SetJetton sets the value of Jetton.
 func (s *JettonBalance) SetJetton(val JettonPreview) {
 	s.Jetton = val
+}
+
+// Ref: #/components/schemas/JettonHolders
+type JettonHolders struct {
+	Addresses []JettonHoldersAddressesItem `json:"addresses"`
+}
+
+// GetAddresses returns the value of Addresses.
+func (s *JettonHolders) GetAddresses() []JettonHoldersAddressesItem {
+	return s.Addresses
+}
+
+// SetAddresses sets the value of Addresses.
+func (s *JettonHolders) SetAddresses(val []JettonHoldersAddressesItem) {
+	s.Addresses = val
+}
+
+type JettonHoldersAddressesItem struct {
+	Address string `json:"address"`
+	Balance string `json:"balance"`
+}
+
+// GetAddress returns the value of Address.
+func (s *JettonHoldersAddressesItem) GetAddress() string {
+	return s.Address
+}
+
+// GetBalance returns the value of Balance.
+func (s *JettonHoldersAddressesItem) GetBalance() string {
+	return s.Balance
+}
+
+// SetAddress sets the value of Address.
+func (s *JettonHoldersAddressesItem) SetAddress(val string) {
+	s.Address = val
+}
+
+// SetBalance sets the value of Balance.
+func (s *JettonHoldersAddressesItem) SetBalance(val string) {
+	s.Balance = val
 }
 
 // Ref: #/components/schemas/JettonInfo

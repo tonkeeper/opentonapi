@@ -1530,6 +1530,7 @@
     "type": "object"
    },
    "DepositStakeAction": {
+    "description": "validator's participation in elections",
     "properties": {
      "amount": {
       "example": 1660050553,
@@ -1852,6 +1853,34 @@
      "balance",
      "wallet_address",
      "jetton"
+    ],
+    "type": "object"
+   },
+   "JettonHolders": {
+    "properties": {
+     "addresses": {
+      "items": {
+       "properties": {
+        "address": {
+         "example": "0:10C1073837B93FDAAD594284CE8B8EFF7B9CF25427440EB2FC682762E1471365",
+         "type": "string"
+        },
+        "balance": {
+         "example": 1000000000,
+         "type": "string"
+        }
+       },
+       "required": [
+        "address",
+        "balance"
+       ],
+       "type": "object"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "addresses"
     ],
     "type": "object"
    },
@@ -4797,6 +4826,35 @@
        }
       },
       "description": "jetton info"
+     },
+     "default": {
+      "$ref": "#/components/responses/Error"
+     }
+    },
+    "tags": [
+     "Jettons"
+    ]
+   }
+  },
+  "/v2/jettons/{account_id}/holders": {
+   "get": {
+    "description": "Get jetton's holders",
+    "operationId": "getJettonHolders",
+    "parameters": [
+     {
+      "$ref": "#/components/parameters/accountIDParameter"
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/JettonHolders"
+        }
+       }
+      },
+      "description": "jetton's holders"
      },
      "default": {
       "$ref": "#/components/responses/Error"
