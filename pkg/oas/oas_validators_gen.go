@@ -263,6 +263,42 @@ func (s *Action) Validate() error {
 		})
 	}
 	if err := func() error {
+		if value, ok := s.JettonBurn.Get(); ok {
+			if err := func() error {
+				if err := value.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "JettonBurn",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if value, ok := s.JettonMint.Get(); ok {
+			if err := func() error {
+				if err := value.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "JettonMint",
+			Error: err,
+		})
+	}
+	if err := func() error {
 		if value, ok := s.NftItemTransfer.Get(); ok {
 			if err := func() error {
 				if err := value.Validate(); err != nil {
@@ -404,6 +440,10 @@ func (s ActionType) Validate() error {
 	case "TonTransfer":
 		return nil
 	case "JettonTransfer":
+		return nil
+	case "JettonBurn":
+		return nil
+	case "JettonMint":
 		return nil
 	case "NftItemTransfer":
 		return nil
@@ -1394,6 +1434,25 @@ func (s *JettonBalance) Validate() error {
 	return nil
 }
 
+func (s *JettonBurnAction) Validate() error {
+	var failures []validate.FieldError
+	if err := func() error {
+		if err := s.Jetton.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "jetton",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
 func (s *JettonHolders) Validate() error {
 	var failures []validate.FieldError
 	if err := func() error {
@@ -1423,6 +1482,25 @@ func (s *JettonInfo) Validate() error {
 	}(); err != nil {
 		failures = append(failures, validate.FieldError{
 			Name:  "verification",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s *JettonMintAction) Validate() error {
+	var failures []validate.FieldError
+	if err := func() error {
+		if err := s.Jetton.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "jetton",
 			Error: err,
 		})
 	}

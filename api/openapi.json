@@ -829,6 +829,12 @@
      "DepositStake": {
       "$ref": "#/components/schemas/DepositStakeAction"
      },
+     "JettonBurn": {
+      "$ref": "#/components/schemas/JettonBurnAction"
+     },
+     "JettonMint": {
+      "$ref": "#/components/schemas/JettonMintAction"
+     },
      "JettonSwap": {
       "$ref": "#/components/schemas/JettonSwapAction"
      },
@@ -871,6 +877,8 @@
       "enum": [
        "TonTransfer",
        "JettonTransfer",
+       "JettonBurn",
+       "JettonMint",
        "NftItemTransfer",
        "ContractDeploy",
        "Subscribe",
@@ -1856,6 +1864,32 @@
     ],
     "type": "object"
    },
+   "JettonBurnAction": {
+    "properties": {
+     "amount": {
+      "description": "amount in quanta of tokens",
+      "example": 1000000000,
+      "type": "string"
+     },
+     "jetton": {
+      "$ref": "#/components/schemas/JettonPreview"
+     },
+     "sender": {
+      "$ref": "#/components/schemas/AccountAddress"
+     },
+     "senders_wallet": {
+      "example": "0:E93E7D444180608B8520C00DC664383A387356FB6E16FDDF99DBE5E1415A574B",
+      "type": "string"
+     }
+    },
+    "required": [
+     "amount",
+     "jetton",
+     "sender",
+     "senders_wallet"
+    ],
+    "type": "object"
+   },
    "JettonHolders": {
     "properties": {
      "addresses": {
@@ -1977,6 +2011,32 @@
      "name",
      "symbol",
      "decimals"
+    ],
+    "type": "object"
+   },
+   "JettonMintAction": {
+    "properties": {
+     "amount": {
+      "description": "amount in quanta of tokens",
+      "example": 1000000000,
+      "type": "string"
+     },
+     "jetton": {
+      "$ref": "#/components/schemas/JettonPreview"
+     },
+     "recipient": {
+      "$ref": "#/components/schemas/AccountAddress"
+     },
+     "recipients_wallet": {
+      "example": "0:E93E7D444180608B8520C00DC664383A387356FB6E16FDDF99DBE5E1415A574B",
+      "type": "string"
+     }
+    },
+    "required": [
+     "amount",
+     "jetton",
+     "recipient",
+     "recipients_wallet"
     ],
     "type": "object"
    },

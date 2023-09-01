@@ -3421,6 +3421,8 @@ components:
           enum:
             - TonTransfer
             - JettonTransfer
+            - JettonBurn
+            - JettonMint
             - NftItemTransfer
             - ContractDeploy
             - Subscribe
@@ -3444,6 +3446,10 @@ components:
           $ref: '#/components/schemas/ContractDeployAction'
         JettonTransfer:
           $ref: '#/components/schemas/JettonTransferAction'
+        JettonBurn:
+          $ref: '#/components/schemas/JettonBurnAction'
+        JettonMint:
+          $ref: '#/components/schemas/JettonMintAction'
         NftItemTransfer:
           $ref: '#/components/schemas/NftItemTransferAction'
         Subscribe:
@@ -3563,6 +3569,44 @@ components:
           $ref: '#/components/schemas/EncryptedComment'
         refund:
           $ref: '#/components/schemas/Refund'
+        jetton:
+          $ref: '#/components/schemas/JettonPreview'
+    JettonBurnAction:
+      type: object
+      required:
+        - amount
+        - jetton
+        - sender
+        - senders_wallet
+      properties:
+        sender:
+          $ref: '#/components/schemas/AccountAddress'
+        senders_wallet:
+          type: string
+          example: 0:E93E7D444180608B8520C00DC664383A387356FB6E16FDDF99DBE5E1415A574B
+        amount:
+          type: string
+          description: amount in quanta of tokens
+          example: 1000000000
+        jetton:
+          $ref: '#/components/schemas/JettonPreview'
+    JettonMintAction:
+      type: object
+      required:
+        - amount
+        - jetton
+        - recipient
+        - recipients_wallet
+      properties:
+        recipient:
+          $ref: '#/components/schemas/AccountAddress'
+        recipients_wallet:
+          type: string
+          example: 0:E93E7D444180608B8520C00DC664383A387356FB6E16FDDF99DBE5E1415A574B
+        amount:
+          type: string
+          description: amount in quanta of tokens
+          example: 1000000000
         jetton:
           $ref: '#/components/schemas/JettonPreview'
     ContractDeployAction:

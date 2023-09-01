@@ -584,6 +584,8 @@ type Action struct {
 	TonTransfer       OptTonTransferAction     `json:"TonTransfer"`
 	ContractDeploy    OptContractDeployAction  `json:"ContractDeploy"`
 	JettonTransfer    OptJettonTransferAction  `json:"JettonTransfer"`
+	JettonBurn        OptJettonBurnAction      `json:"JettonBurn"`
+	JettonMint        OptJettonMintAction      `json:"JettonMint"`
 	NftItemTransfer   OptNftItemTransferAction `json:"NftItemTransfer"`
 	Subscribe         OptSubscriptionAction    `json:"Subscribe"`
 	UnSubscribe       OptUnSubscriptionAction  `json:"UnSubscribe"`
@@ -619,6 +621,16 @@ func (s *Action) GetContractDeploy() OptContractDeployAction {
 // GetJettonTransfer returns the value of JettonTransfer.
 func (s *Action) GetJettonTransfer() OptJettonTransferAction {
 	return s.JettonTransfer
+}
+
+// GetJettonBurn returns the value of JettonBurn.
+func (s *Action) GetJettonBurn() OptJettonBurnAction {
+	return s.JettonBurn
+}
+
+// GetJettonMint returns the value of JettonMint.
+func (s *Action) GetJettonMint() OptJettonMintAction {
+	return s.JettonMint
 }
 
 // GetNftItemTransfer returns the value of NftItemTransfer.
@@ -694,6 +706,16 @@ func (s *Action) SetContractDeploy(val OptContractDeployAction) {
 // SetJettonTransfer sets the value of JettonTransfer.
 func (s *Action) SetJettonTransfer(val OptJettonTransferAction) {
 	s.JettonTransfer = val
+}
+
+// SetJettonBurn sets the value of JettonBurn.
+func (s *Action) SetJettonBurn(val OptJettonBurnAction) {
+	s.JettonBurn = val
+}
+
+// SetJettonMint sets the value of JettonMint.
+func (s *Action) SetJettonMint(val OptJettonMintAction) {
+	s.JettonMint = val
 }
 
 // SetNftItemTransfer sets the value of NftItemTransfer.
@@ -916,6 +938,8 @@ type ActionType string
 const (
 	ActionTypeTonTransfer       ActionType = "TonTransfer"
 	ActionTypeJettonTransfer    ActionType = "JettonTransfer"
+	ActionTypeJettonBurn        ActionType = "JettonBurn"
+	ActionTypeJettonMint        ActionType = "JettonMint"
 	ActionTypeNftItemTransfer   ActionType = "NftItemTransfer"
 	ActionTypeContractDeploy    ActionType = "ContractDeploy"
 	ActionTypeSubscribe         ActionType = "Subscribe"
@@ -935,6 +959,10 @@ func (s ActionType) MarshalText() ([]byte, error) {
 	case ActionTypeTonTransfer:
 		return []byte(s), nil
 	case ActionTypeJettonTransfer:
+		return []byte(s), nil
+	case ActionTypeJettonBurn:
+		return []byte(s), nil
+	case ActionTypeJettonMint:
 		return []byte(s), nil
 	case ActionTypeNftItemTransfer:
 		return []byte(s), nil
@@ -971,6 +999,12 @@ func (s *ActionType) UnmarshalText(data []byte) error {
 		return nil
 	case ActionTypeJettonTransfer:
 		*s = ActionTypeJettonTransfer
+		return nil
+	case ActionTypeJettonBurn:
+		*s = ActionTypeJettonBurn
+		return nil
+	case ActionTypeJettonMint:
+		*s = ActionTypeJettonMint
 		return nil
 	case ActionTypeNftItemTransfer:
 		*s = ActionTypeNftItemTransfer
@@ -3882,6 +3916,55 @@ func (s *JettonBalance) SetJetton(val JettonPreview) {
 	s.Jetton = val
 }
 
+// Ref: #/components/schemas/JettonBurnAction
+type JettonBurnAction struct {
+	Sender        AccountAddress `json:"sender"`
+	SendersWallet string         `json:"senders_wallet"`
+	// Amount in quanta of tokens.
+	Amount string        `json:"amount"`
+	Jetton JettonPreview `json:"jetton"`
+}
+
+// GetSender returns the value of Sender.
+func (s *JettonBurnAction) GetSender() AccountAddress {
+	return s.Sender
+}
+
+// GetSendersWallet returns the value of SendersWallet.
+func (s *JettonBurnAction) GetSendersWallet() string {
+	return s.SendersWallet
+}
+
+// GetAmount returns the value of Amount.
+func (s *JettonBurnAction) GetAmount() string {
+	return s.Amount
+}
+
+// GetJetton returns the value of Jetton.
+func (s *JettonBurnAction) GetJetton() JettonPreview {
+	return s.Jetton
+}
+
+// SetSender sets the value of Sender.
+func (s *JettonBurnAction) SetSender(val AccountAddress) {
+	s.Sender = val
+}
+
+// SetSendersWallet sets the value of SendersWallet.
+func (s *JettonBurnAction) SetSendersWallet(val string) {
+	s.SendersWallet = val
+}
+
+// SetAmount sets the value of Amount.
+func (s *JettonBurnAction) SetAmount(val string) {
+	s.Amount = val
+}
+
+// SetJetton sets the value of Jetton.
+func (s *JettonBurnAction) SetJetton(val JettonPreview) {
+	s.Jetton = val
+}
+
 // Ref: #/components/schemas/JettonHolders
 type JettonHolders struct {
 	Addresses []JettonHoldersAddressesItem `json:"addresses"`
@@ -4082,6 +4165,55 @@ func (s *JettonMetadata) SetWebsites(val []string) {
 // SetCatalogs sets the value of Catalogs.
 func (s *JettonMetadata) SetCatalogs(val []string) {
 	s.Catalogs = val
+}
+
+// Ref: #/components/schemas/JettonMintAction
+type JettonMintAction struct {
+	Recipient        AccountAddress `json:"recipient"`
+	RecipientsWallet string         `json:"recipients_wallet"`
+	// Amount in quanta of tokens.
+	Amount string        `json:"amount"`
+	Jetton JettonPreview `json:"jetton"`
+}
+
+// GetRecipient returns the value of Recipient.
+func (s *JettonMintAction) GetRecipient() AccountAddress {
+	return s.Recipient
+}
+
+// GetRecipientsWallet returns the value of RecipientsWallet.
+func (s *JettonMintAction) GetRecipientsWallet() string {
+	return s.RecipientsWallet
+}
+
+// GetAmount returns the value of Amount.
+func (s *JettonMintAction) GetAmount() string {
+	return s.Amount
+}
+
+// GetJetton returns the value of Jetton.
+func (s *JettonMintAction) GetJetton() JettonPreview {
+	return s.Jetton
+}
+
+// SetRecipient sets the value of Recipient.
+func (s *JettonMintAction) SetRecipient(val AccountAddress) {
+	s.Recipient = val
+}
+
+// SetRecipientsWallet sets the value of RecipientsWallet.
+func (s *JettonMintAction) SetRecipientsWallet(val string) {
+	s.RecipientsWallet = val
+}
+
+// SetAmount sets the value of Amount.
+func (s *JettonMintAction) SetAmount(val string) {
+	s.Amount = val
+}
+
+// SetJetton sets the value of Jetton.
+func (s *JettonMintAction) SetJetton(val JettonPreview) {
+	s.Jetton = val
 }
 
 // Ref: #/components/schemas/JettonPreview
@@ -6070,6 +6202,98 @@ func (o OptInt64) Get() (v int64, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptInt64) Or(d int64) int64 {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptJettonBurnAction returns new OptJettonBurnAction with value set to v.
+func NewOptJettonBurnAction(v JettonBurnAction) OptJettonBurnAction {
+	return OptJettonBurnAction{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptJettonBurnAction is optional JettonBurnAction.
+type OptJettonBurnAction struct {
+	Value JettonBurnAction
+	Set   bool
+}
+
+// IsSet returns true if OptJettonBurnAction was set.
+func (o OptJettonBurnAction) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptJettonBurnAction) Reset() {
+	var v JettonBurnAction
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptJettonBurnAction) SetTo(v JettonBurnAction) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptJettonBurnAction) Get() (v JettonBurnAction, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptJettonBurnAction) Or(d JettonBurnAction) JettonBurnAction {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptJettonMintAction returns new OptJettonMintAction with value set to v.
+func NewOptJettonMintAction(v JettonMintAction) OptJettonMintAction {
+	return OptJettonMintAction{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptJettonMintAction is optional JettonMintAction.
+type OptJettonMintAction struct {
+	Value JettonMintAction
+	Set   bool
+}
+
+// IsSet returns true if OptJettonMintAction was set.
+func (o OptJettonMintAction) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptJettonMintAction) Reset() {
+	var v JettonMintAction
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptJettonMintAction) SetTo(v JettonMintAction) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptJettonMintAction) Get() (v JettonMintAction, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptJettonMintAction) Or(d JettonMintAction) JettonMintAction {
 	if v, ok := o.Get(); ok {
 		return v
 	}
