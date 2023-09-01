@@ -318,9 +318,9 @@ func (h Handler) convertAction(ctx context.Context, viewer tongo.AccountID, a ba
 			Seller:      convertAccountAddress(a.NftPurchase.Seller, h.addressBook, h.previewGenerator),
 			Buyer:       convertAccountAddress(a.NftPurchase.Buyer, h.addressBook, h.previewGenerator),
 		})
-	case bath.DepositStake:
+	case bath.ElectionsDepositStake:
 		value := i18n.FormatTONs(a.DepositStake.Amount)
-		action.DepositStake.SetTo(oas.DepositStakeAction{
+		action.ElectionsDepositStake.SetTo(oas.ElectionsDepositStakeAction{
 			Amount: a.DepositStake.Amount,
 			Staker: convertAccountAddress(a.DepositStake.Staker, h.addressBook, h.previewGenerator),
 		})
@@ -335,9 +335,9 @@ func (h Handler) convertAction(ctx context.Context, viewer tongo.AccountID, a ba
 			Value:    oas.NewOptString(signedValue(value, viewer, a.DepositStake.Staker, a.DepositStake.Elector)),
 			Accounts: distinctAccounts(h.addressBook, h.previewGenerator, &a.DepositStake.Elector, &a.DepositStake.Staker),
 		}
-	case bath.RecoverStake:
+	case bath.ElectionsRecoverStake:
 		value := i18n.FormatTONs(a.RecoverStake.Amount)
-		action.RecoverStake.SetTo(oas.RecoverStakeAction{
+		action.ElectionsRecoverStake.SetTo(oas.ElectionsRecoverStakeAction{
 			Amount: a.RecoverStake.Amount,
 			Staker: convertAccountAddress(a.RecoverStake.Staker, h.addressBook, h.previewGenerator),
 		})

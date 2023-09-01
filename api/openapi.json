@@ -829,6 +829,12 @@
      "DepositStake": {
       "$ref": "#/components/schemas/DepositStakeAction"
      },
+     "ElectionsDepositStake": {
+      "$ref": "#/components/schemas/ElectionsDepositStakeAction"
+     },
+     "ElectionsRecoverStake": {
+      "$ref": "#/components/schemas/ElectionsRecoverStakeAction"
+     },
      "JettonBurn": {
       "$ref": "#/components/schemas/JettonBurnAction"
      },
@@ -847,9 +853,6 @@
      "NftPurchase": {
       "$ref": "#/components/schemas/NftPurchaseAction"
      },
-     "RecoverStake": {
-      "$ref": "#/components/schemas/RecoverStakeAction"
-     },
      "SmartContractExec": {
       "$ref": "#/components/schemas/SmartContractAction"
      },
@@ -861,6 +864,12 @@
      },
      "UnSubscribe": {
       "$ref": "#/components/schemas/UnSubscriptionAction"
+     },
+     "WithdrawStake": {
+      "$ref": "#/components/schemas/WithdrawStakeAction"
+     },
+     "WithdrawStakeRequest": {
+      "$ref": "#/components/schemas/WithdrawStakeRequestAction"
      },
      "simple_preview": {
       "$ref": "#/components/schemas/ActionSimplePreview"
@@ -886,9 +895,12 @@
        "AuctionBid",
        "NftPurchase",
        "DepositStake",
-       "RecoverStake",
+       "WithdrawStake",
+       "WithdrawStakeRequest",
        "JettonSwap",
        "SmartContractExec",
+       "ElectionsRecoverStake",
+       "ElectionsDepositStake",
        "Unknown"
       ],
       "example": "TonTransfer",
@@ -1545,13 +1557,17 @@
       "format": "int64",
       "type": "integer"
      },
+     "pool": {
+      "$ref": "#/components/schemas/AccountAddress"
+     },
      "staker": {
       "$ref": "#/components/schemas/AccountAddress"
      }
     },
     "required": [
      "amount",
-     "staker"
+     "staker",
+     "pool"
     ],
     "type": "object"
    },
@@ -1693,6 +1709,40 @@
     },
     "required": [
      "domains"
+    ],
+    "type": "object"
+   },
+   "ElectionsDepositStakeAction": {
+    "properties": {
+     "amount": {
+      "example": 1660050553,
+      "format": "int64",
+      "type": "integer"
+     },
+     "staker": {
+      "$ref": "#/components/schemas/AccountAddress"
+     }
+    },
+    "required": [
+     "amount",
+     "staker"
+    ],
+    "type": "object"
+   },
+   "ElectionsRecoverStakeAction": {
+    "properties": {
+     "amount": {
+      "example": 1660050553,
+      "format": "int64",
+      "type": "integer"
+     },
+     "staker": {
+      "$ref": "#/components/schemas/AccountAddress"
+     }
+    },
+    "required": [
+     "amount",
+     "staker"
     ],
     "type": "object"
    },
@@ -2697,23 +2747,6 @@
     ],
     "type": "object"
    },
-   "RecoverStakeAction": {
-    "properties": {
-     "amount": {
-      "example": 1660050553,
-      "format": "int64",
-      "type": "integer"
-     },
-     "staker": {
-      "$ref": "#/components/schemas/AccountAddress"
-     }
-    },
-    "required": [
-     "amount",
-     "staker"
-    ],
-    "type": "object"
-   },
    "Refund": {
     "properties": {
      "origin": {
@@ -3457,6 +3490,49 @@
      "has_method_pubkey",
      "has_method_seqno",
      "names"
+    ],
+    "type": "object"
+   },
+   "WithdrawStakeAction": {
+    "description": "validator's participation in elections",
+    "properties": {
+     "amount": {
+      "example": 1660050553,
+      "format": "int64",
+      "type": "integer"
+     },
+     "pool": {
+      "$ref": "#/components/schemas/AccountAddress"
+     },
+     "staker": {
+      "$ref": "#/components/schemas/AccountAddress"
+     }
+    },
+    "required": [
+     "amount",
+     "staker",
+     "pool"
+    ],
+    "type": "object"
+   },
+   "WithdrawStakeRequestAction": {
+    "description": "validator's participation in elections",
+    "properties": {
+     "amount": {
+      "example": 1660050553,
+      "format": "int64",
+      "type": "integer"
+     },
+     "pool": {
+      "$ref": "#/components/schemas/AccountAddress"
+     },
+     "staker": {
+      "$ref": "#/components/schemas/AccountAddress"
+     }
+    },
+    "required": [
+     "staker",
+     "pool"
     ],
     "type": "object"
    }

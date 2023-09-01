@@ -20,7 +20,7 @@ func (ds BubbleDepositStake) ToAction() *Action {
 			Staker:  ds.Staker,
 		},
 		Success: ds.Success,
-		Type:    DepositStake,
+		Type:    ElectionsDepositStake,
 	}
 }
 
@@ -77,7 +77,7 @@ func (b BubbleRecoverStake) ToAction() *Action {
 			Staker:  b.Staker,
 		},
 		Success: b.Success,
-		Type:    RecoverStake,
+		Type:    ElectionsRecoverStake,
 	}
 }
 

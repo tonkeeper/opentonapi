@@ -12,20 +12,20 @@ import (
 )
 
 const (
-	TonTransfer       ActionType = "TonTransfer"
-	SmartContractExec ActionType = "SmartContractExec"
-	NftItemTransfer   ActionType = "NftItemTransfer"
-	NftPurchase       ActionType = "NftPurchase"
-	JettonTransfer    ActionType = "JettonTransfer"
-	JettonMint        ActionType = "JettonMint"
-	JettonBurn        ActionType = "JettonBurn"
-	ContractDeploy    ActionType = "ContractDeploy"
-	Subscription      ActionType = "Subscribe"
-	UnSubscription    ActionType = "UnSubscribe"
-	DepositStake      ActionType = "DepositStake"
-	RecoverStake      ActionType = "RecoverStake"
-	JettonSwap        ActionType = "JettonSwap"
-	AuctionBid        ActionType = "AuctionBid"
+	TonTransfer           ActionType = "TonTransfer"
+	SmartContractExec     ActionType = "SmartContractExec"
+	NftItemTransfer       ActionType = "NftItemTransfer"
+	NftPurchase           ActionType = "NftPurchase"
+	JettonTransfer        ActionType = "JettonTransfer"
+	JettonMint            ActionType = "JettonMint"
+	JettonBurn            ActionType = "JettonBurn"
+	ContractDeploy        ActionType = "ContractDeploy"
+	Subscription          ActionType = "Subscribe"
+	UnSubscription        ActionType = "UnSubscribe"
+	ElectionsDepositStake ActionType = "ElectionsDepositStake"
+	ElectionsRecoverStake ActionType = "ElectionsRecoverStake"
+	JettonSwap            ActionType = "JettonSwap"
+	AuctionBid            ActionType = "AuctionBid"
 
 	RefundDnsTg   RefundType = "DNS.tg"
 	RefundDnsTon  RefundType = "DNS.ton"
@@ -223,9 +223,9 @@ func (a Action) ContributeToExtra(account tongo.AccountID) int64 {
 		return detectDirection(account, a.NftPurchase.Buyer, a.NftPurchase.Seller, a.NftPurchase.Price)
 	case AuctionBid:
 		return detectDirection(account, a.AuctionBid.Bidder, a.AuctionBid.Auction, a.AuctionBid.Amount)
-	case DepositStake:
+	case ElectionsDepositStake:
 		return detectDirection(account, a.DepositStake.Staker, a.DepositStake.Elector, a.DepositStake.Amount)
-	case RecoverStake:
+	case ElectionsRecoverStake:
 		return detectDirection(account, a.RecoverStake.Elector, a.RecoverStake.Staker, a.RecoverStake.Amount)
 	case Subscription:
 		return detectDirection(account, a.Subscription.Subscriber, a.Subscription.Beneficiary, a.Subscription.Amount)

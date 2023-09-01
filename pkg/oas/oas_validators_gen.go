@@ -459,11 +459,17 @@ func (s ActionType) Validate() error {
 		return nil
 	case "DepositStake":
 		return nil
-	case "RecoverStake":
+	case "WithdrawStake":
+		return nil
+	case "WithdrawStakeRequest":
 		return nil
 	case "JettonSwap":
 		return nil
 	case "SmartContractExec":
+		return nil
+	case "ElectionsRecoverStake":
+		return nil
+	case "ElectionsDepositStake":
 		return nil
 	case "Unknown":
 		return nil

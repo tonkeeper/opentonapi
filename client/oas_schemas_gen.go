@@ -579,23 +579,26 @@ func (s *Accounts) SetAccounts(val []Account) {
 
 // Ref: #/components/schemas/Action
 type Action struct {
-	Type              ActionType               `json:"type"`
-	Status            ActionStatus             `json:"status"`
-	TonTransfer       OptTonTransferAction     `json:"TonTransfer"`
-	ContractDeploy    OptContractDeployAction  `json:"ContractDeploy"`
-	JettonTransfer    OptJettonTransferAction  `json:"JettonTransfer"`
-	JettonBurn        OptJettonBurnAction      `json:"JettonBurn"`
-	JettonMint        OptJettonMintAction      `json:"JettonMint"`
-	NftItemTransfer   OptNftItemTransferAction `json:"NftItemTransfer"`
-	Subscribe         OptSubscriptionAction    `json:"Subscribe"`
-	UnSubscribe       OptUnSubscriptionAction  `json:"UnSubscribe"`
-	AuctionBid        OptAuctionBidAction      `json:"AuctionBid"`
-	NftPurchase       OptNftPurchaseAction     `json:"NftPurchase"`
-	DepositStake      OptDepositStakeAction    `json:"DepositStake"`
-	RecoverStake      OptRecoverStakeAction    `json:"RecoverStake"`
-	JettonSwap        OptJettonSwapAction      `json:"JettonSwap"`
-	SmartContractExec OptSmartContractAction   `json:"SmartContractExec"`
-	SimplePreview     ActionSimplePreview      `json:"simple_preview"`
+	Type                  ActionType                     `json:"type"`
+	Status                ActionStatus                   `json:"status"`
+	TonTransfer           OptTonTransferAction           `json:"TonTransfer"`
+	ContractDeploy        OptContractDeployAction        `json:"ContractDeploy"`
+	JettonTransfer        OptJettonTransferAction        `json:"JettonTransfer"`
+	JettonBurn            OptJettonBurnAction            `json:"JettonBurn"`
+	JettonMint            OptJettonMintAction            `json:"JettonMint"`
+	NftItemTransfer       OptNftItemTransferAction       `json:"NftItemTransfer"`
+	Subscribe             OptSubscriptionAction          `json:"Subscribe"`
+	UnSubscribe           OptUnSubscriptionAction        `json:"UnSubscribe"`
+	AuctionBid            OptAuctionBidAction            `json:"AuctionBid"`
+	NftPurchase           OptNftPurchaseAction           `json:"NftPurchase"`
+	DepositStake          OptDepositStakeAction          `json:"DepositStake"`
+	WithdrawStake         OptWithdrawStakeAction         `json:"WithdrawStake"`
+	WithdrawStakeRequest  OptWithdrawStakeRequestAction  `json:"WithdrawStakeRequest"`
+	ElectionsDepositStake OptElectionsDepositStakeAction `json:"ElectionsDepositStake"`
+	ElectionsRecoverStake OptElectionsRecoverStakeAction `json:"ElectionsRecoverStake"`
+	JettonSwap            OptJettonSwapAction            `json:"JettonSwap"`
+	SmartContractExec     OptSmartContractAction         `json:"SmartContractExec"`
+	SimplePreview         ActionSimplePreview            `json:"simple_preview"`
 }
 
 // GetType returns the value of Type.
@@ -663,9 +666,24 @@ func (s *Action) GetDepositStake() OptDepositStakeAction {
 	return s.DepositStake
 }
 
-// GetRecoverStake returns the value of RecoverStake.
-func (s *Action) GetRecoverStake() OptRecoverStakeAction {
-	return s.RecoverStake
+// GetWithdrawStake returns the value of WithdrawStake.
+func (s *Action) GetWithdrawStake() OptWithdrawStakeAction {
+	return s.WithdrawStake
+}
+
+// GetWithdrawStakeRequest returns the value of WithdrawStakeRequest.
+func (s *Action) GetWithdrawStakeRequest() OptWithdrawStakeRequestAction {
+	return s.WithdrawStakeRequest
+}
+
+// GetElectionsDepositStake returns the value of ElectionsDepositStake.
+func (s *Action) GetElectionsDepositStake() OptElectionsDepositStakeAction {
+	return s.ElectionsDepositStake
+}
+
+// GetElectionsRecoverStake returns the value of ElectionsRecoverStake.
+func (s *Action) GetElectionsRecoverStake() OptElectionsRecoverStakeAction {
+	return s.ElectionsRecoverStake
 }
 
 // GetJettonSwap returns the value of JettonSwap.
@@ -748,9 +766,24 @@ func (s *Action) SetDepositStake(val OptDepositStakeAction) {
 	s.DepositStake = val
 }
 
-// SetRecoverStake sets the value of RecoverStake.
-func (s *Action) SetRecoverStake(val OptRecoverStakeAction) {
-	s.RecoverStake = val
+// SetWithdrawStake sets the value of WithdrawStake.
+func (s *Action) SetWithdrawStake(val OptWithdrawStakeAction) {
+	s.WithdrawStake = val
+}
+
+// SetWithdrawStakeRequest sets the value of WithdrawStakeRequest.
+func (s *Action) SetWithdrawStakeRequest(val OptWithdrawStakeRequestAction) {
+	s.WithdrawStakeRequest = val
+}
+
+// SetElectionsDepositStake sets the value of ElectionsDepositStake.
+func (s *Action) SetElectionsDepositStake(val OptElectionsDepositStakeAction) {
+	s.ElectionsDepositStake = val
+}
+
+// SetElectionsRecoverStake sets the value of ElectionsRecoverStake.
+func (s *Action) SetElectionsRecoverStake(val OptElectionsRecoverStakeAction) {
+	s.ElectionsRecoverStake = val
 }
 
 // SetJettonSwap sets the value of JettonSwap.
@@ -936,21 +969,24 @@ func (s *ActionStatus) UnmarshalText(data []byte) error {
 type ActionType string
 
 const (
-	ActionTypeTonTransfer       ActionType = "TonTransfer"
-	ActionTypeJettonTransfer    ActionType = "JettonTransfer"
-	ActionTypeJettonBurn        ActionType = "JettonBurn"
-	ActionTypeJettonMint        ActionType = "JettonMint"
-	ActionTypeNftItemTransfer   ActionType = "NftItemTransfer"
-	ActionTypeContractDeploy    ActionType = "ContractDeploy"
-	ActionTypeSubscribe         ActionType = "Subscribe"
-	ActionTypeUnSubscribe       ActionType = "UnSubscribe"
-	ActionTypeAuctionBid        ActionType = "AuctionBid"
-	ActionTypeNftPurchase       ActionType = "NftPurchase"
-	ActionTypeDepositStake      ActionType = "DepositStake"
-	ActionTypeRecoverStake      ActionType = "RecoverStake"
-	ActionTypeJettonSwap        ActionType = "JettonSwap"
-	ActionTypeSmartContractExec ActionType = "SmartContractExec"
-	ActionTypeUnknown           ActionType = "Unknown"
+	ActionTypeTonTransfer           ActionType = "TonTransfer"
+	ActionTypeJettonTransfer        ActionType = "JettonTransfer"
+	ActionTypeJettonBurn            ActionType = "JettonBurn"
+	ActionTypeJettonMint            ActionType = "JettonMint"
+	ActionTypeNftItemTransfer       ActionType = "NftItemTransfer"
+	ActionTypeContractDeploy        ActionType = "ContractDeploy"
+	ActionTypeSubscribe             ActionType = "Subscribe"
+	ActionTypeUnSubscribe           ActionType = "UnSubscribe"
+	ActionTypeAuctionBid            ActionType = "AuctionBid"
+	ActionTypeNftPurchase           ActionType = "NftPurchase"
+	ActionTypeDepositStake          ActionType = "DepositStake"
+	ActionTypeWithdrawStake         ActionType = "WithdrawStake"
+	ActionTypeWithdrawStakeRequest  ActionType = "WithdrawStakeRequest"
+	ActionTypeJettonSwap            ActionType = "JettonSwap"
+	ActionTypeSmartContractExec     ActionType = "SmartContractExec"
+	ActionTypeElectionsRecoverStake ActionType = "ElectionsRecoverStake"
+	ActionTypeElectionsDepositStake ActionType = "ElectionsDepositStake"
+	ActionTypeUnknown               ActionType = "Unknown"
 )
 
 // MarshalText implements encoding.TextMarshaler.
@@ -978,11 +1014,17 @@ func (s ActionType) MarshalText() ([]byte, error) {
 		return []byte(s), nil
 	case ActionTypeDepositStake:
 		return []byte(s), nil
-	case ActionTypeRecoverStake:
+	case ActionTypeWithdrawStake:
+		return []byte(s), nil
+	case ActionTypeWithdrawStakeRequest:
 		return []byte(s), nil
 	case ActionTypeJettonSwap:
 		return []byte(s), nil
 	case ActionTypeSmartContractExec:
+		return []byte(s), nil
+	case ActionTypeElectionsRecoverStake:
+		return []byte(s), nil
+	case ActionTypeElectionsDepositStake:
 		return []byte(s), nil
 	case ActionTypeUnknown:
 		return []byte(s), nil
@@ -1027,14 +1069,23 @@ func (s *ActionType) UnmarshalText(data []byte) error {
 	case ActionTypeDepositStake:
 		*s = ActionTypeDepositStake
 		return nil
-	case ActionTypeRecoverStake:
-		*s = ActionTypeRecoverStake
+	case ActionTypeWithdrawStake:
+		*s = ActionTypeWithdrawStake
+		return nil
+	case ActionTypeWithdrawStakeRequest:
+		*s = ActionTypeWithdrawStakeRequest
 		return nil
 	case ActionTypeJettonSwap:
 		*s = ActionTypeJettonSwap
 		return nil
 	case ActionTypeSmartContractExec:
 		*s = ActionTypeSmartContractExec
+		return nil
+	case ActionTypeElectionsRecoverStake:
+		*s = ActionTypeElectionsRecoverStake
+		return nil
+	case ActionTypeElectionsDepositStake:
+		*s = ActionTypeElectionsDepositStake
 		return nil
 	case ActionTypeUnknown:
 		*s = ActionTypeUnknown
@@ -2219,6 +2270,7 @@ func (s *CreditPhase) SetCredit(val int64) {
 type DepositStakeAction struct {
 	Amount int64          `json:"amount"`
 	Staker AccountAddress `json:"staker"`
+	Pool   AccountAddress `json:"pool"`
 }
 
 // GetAmount returns the value of Amount.
@@ -2231,6 +2283,11 @@ func (s *DepositStakeAction) GetStaker() AccountAddress {
 	return s.Staker
 }
 
+// GetPool returns the value of Pool.
+func (s *DepositStakeAction) GetPool() AccountAddress {
+	return s.Pool
+}
+
 // SetAmount sets the value of Amount.
 func (s *DepositStakeAction) SetAmount(val int64) {
 	s.Amount = val
@@ -2239,6 +2296,11 @@ func (s *DepositStakeAction) SetAmount(val int64) {
 // SetStaker sets the value of Staker.
 func (s *DepositStakeAction) SetStaker(val AccountAddress) {
 	s.Staker = val
+}
+
+// SetPool sets the value of Pool.
+func (s *DepositStakeAction) SetPool(val AccountAddress) {
+	s.Pool = val
 }
 
 // Ref: #/components/schemas/DnsExpiring
@@ -2466,6 +2528,58 @@ func (s *DomainNames) GetDomains() []string {
 // SetDomains sets the value of Domains.
 func (s *DomainNames) SetDomains(val []string) {
 	s.Domains = val
+}
+
+// Ref: #/components/schemas/ElectionsDepositStakeAction
+type ElectionsDepositStakeAction struct {
+	Amount int64          `json:"amount"`
+	Staker AccountAddress `json:"staker"`
+}
+
+// GetAmount returns the value of Amount.
+func (s *ElectionsDepositStakeAction) GetAmount() int64 {
+	return s.Amount
+}
+
+// GetStaker returns the value of Staker.
+func (s *ElectionsDepositStakeAction) GetStaker() AccountAddress {
+	return s.Staker
+}
+
+// SetAmount sets the value of Amount.
+func (s *ElectionsDepositStakeAction) SetAmount(val int64) {
+	s.Amount = val
+}
+
+// SetStaker sets the value of Staker.
+func (s *ElectionsDepositStakeAction) SetStaker(val AccountAddress) {
+	s.Staker = val
+}
+
+// Ref: #/components/schemas/ElectionsRecoverStakeAction
+type ElectionsRecoverStakeAction struct {
+	Amount int64          `json:"amount"`
+	Staker AccountAddress `json:"staker"`
+}
+
+// GetAmount returns the value of Amount.
+func (s *ElectionsRecoverStakeAction) GetAmount() int64 {
+	return s.Amount
+}
+
+// GetStaker returns the value of Staker.
+func (s *ElectionsRecoverStakeAction) GetStaker() AccountAddress {
+	return s.Staker
+}
+
+// SetAmount sets the value of Amount.
+func (s *ElectionsRecoverStakeAction) SetAmount(val int64) {
+	s.Amount = val
+}
+
+// SetStaker sets the value of Staker.
+func (s *ElectionsRecoverStakeAction) SetStaker(val AccountAddress) {
+	s.Staker = val
 }
 
 type EmulateMessageToAccountEventReq struct {
@@ -5932,6 +6046,98 @@ func (o OptDepositStakeAction) Or(d DepositStakeAction) DepositStakeAction {
 	return d
 }
 
+// NewOptElectionsDepositStakeAction returns new OptElectionsDepositStakeAction with value set to v.
+func NewOptElectionsDepositStakeAction(v ElectionsDepositStakeAction) OptElectionsDepositStakeAction {
+	return OptElectionsDepositStakeAction{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptElectionsDepositStakeAction is optional ElectionsDepositStakeAction.
+type OptElectionsDepositStakeAction struct {
+	Value ElectionsDepositStakeAction
+	Set   bool
+}
+
+// IsSet returns true if OptElectionsDepositStakeAction was set.
+func (o OptElectionsDepositStakeAction) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptElectionsDepositStakeAction) Reset() {
+	var v ElectionsDepositStakeAction
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptElectionsDepositStakeAction) SetTo(v ElectionsDepositStakeAction) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptElectionsDepositStakeAction) Get() (v ElectionsDepositStakeAction, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptElectionsDepositStakeAction) Or(d ElectionsDepositStakeAction) ElectionsDepositStakeAction {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptElectionsRecoverStakeAction returns new OptElectionsRecoverStakeAction with value set to v.
+func NewOptElectionsRecoverStakeAction(v ElectionsRecoverStakeAction) OptElectionsRecoverStakeAction {
+	return OptElectionsRecoverStakeAction{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptElectionsRecoverStakeAction is optional ElectionsRecoverStakeAction.
+type OptElectionsRecoverStakeAction struct {
+	Value ElectionsRecoverStakeAction
+	Set   bool
+}
+
+// IsSet returns true if OptElectionsRecoverStakeAction was set.
+func (o OptElectionsRecoverStakeAction) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptElectionsRecoverStakeAction) Reset() {
+	var v ElectionsRecoverStakeAction
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptElectionsRecoverStakeAction) SetTo(v ElectionsRecoverStakeAction) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptElectionsRecoverStakeAction) Get() (v ElectionsRecoverStakeAction, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptElectionsRecoverStakeAction) Or(d ElectionsRecoverStakeAction) ElectionsRecoverStakeAction {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptEncryptedComment returns new OptEncryptedComment with value set to v.
 func NewOptEncryptedComment(v EncryptedComment) OptEncryptedComment {
 	return OptEncryptedComment{
@@ -6668,52 +6874,6 @@ func (o OptNftPurchaseAction) Or(d NftPurchaseAction) NftPurchaseAction {
 	return d
 }
 
-// NewOptRecoverStakeAction returns new OptRecoverStakeAction with value set to v.
-func NewOptRecoverStakeAction(v RecoverStakeAction) OptRecoverStakeAction {
-	return OptRecoverStakeAction{
-		Value: v,
-		Set:   true,
-	}
-}
-
-// OptRecoverStakeAction is optional RecoverStakeAction.
-type OptRecoverStakeAction struct {
-	Value RecoverStakeAction
-	Set   bool
-}
-
-// IsSet returns true if OptRecoverStakeAction was set.
-func (o OptRecoverStakeAction) IsSet() bool { return o.Set }
-
-// Reset unsets value.
-func (o *OptRecoverStakeAction) Reset() {
-	var v RecoverStakeAction
-	o.Value = v
-	o.Set = false
-}
-
-// SetTo sets value to v.
-func (o *OptRecoverStakeAction) SetTo(v RecoverStakeAction) {
-	o.Set = true
-	o.Value = v
-}
-
-// Get returns value and boolean that denotes whether value was set.
-func (o OptRecoverStakeAction) Get() (v RecoverStakeAction, ok bool) {
-	if !o.Set {
-		return v, false
-	}
-	return o.Value, true
-}
-
-// Or returns value if set, or given parameter if does not.
-func (o OptRecoverStakeAction) Or(d RecoverStakeAction) RecoverStakeAction {
-	if v, ok := o.Get(); ok {
-		return v
-	}
-	return d
-}
-
 // NewOptRefund returns new OptRefund with value set to v.
 func NewOptRefund(v Refund) OptRefund {
 	return OptRefund{
@@ -7312,6 +7472,98 @@ func (o OptWalletDNS) Or(d WalletDNS) WalletDNS {
 	return d
 }
 
+// NewOptWithdrawStakeAction returns new OptWithdrawStakeAction with value set to v.
+func NewOptWithdrawStakeAction(v WithdrawStakeAction) OptWithdrawStakeAction {
+	return OptWithdrawStakeAction{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptWithdrawStakeAction is optional WithdrawStakeAction.
+type OptWithdrawStakeAction struct {
+	Value WithdrawStakeAction
+	Set   bool
+}
+
+// IsSet returns true if OptWithdrawStakeAction was set.
+func (o OptWithdrawStakeAction) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptWithdrawStakeAction) Reset() {
+	var v WithdrawStakeAction
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptWithdrawStakeAction) SetTo(v WithdrawStakeAction) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptWithdrawStakeAction) Get() (v WithdrawStakeAction, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptWithdrawStakeAction) Or(d WithdrawStakeAction) WithdrawStakeAction {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptWithdrawStakeRequestAction returns new OptWithdrawStakeRequestAction with value set to v.
+func NewOptWithdrawStakeRequestAction(v WithdrawStakeRequestAction) OptWithdrawStakeRequestAction {
+	return OptWithdrawStakeRequestAction{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptWithdrawStakeRequestAction is optional WithdrawStakeRequestAction.
+type OptWithdrawStakeRequestAction struct {
+	Value WithdrawStakeRequestAction
+	Set   bool
+}
+
+// IsSet returns true if OptWithdrawStakeRequestAction was set.
+func (o OptWithdrawStakeRequestAction) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptWithdrawStakeRequestAction) Reset() {
+	var v WithdrawStakeRequestAction
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptWithdrawStakeRequestAction) SetTo(v WithdrawStakeRequestAction) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptWithdrawStakeRequestAction) Get() (v WithdrawStakeRequestAction, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptWithdrawStakeRequestAction) Or(d WithdrawStakeRequestAction) WithdrawStakeRequestAction {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // Ref: #/components/schemas/PoolImplementation
 type PoolImplementation struct {
 	Name        string   `json:"name"`
@@ -7590,32 +7842,6 @@ func (s *Price) SetValue(val string) {
 // SetTokenName sets the value of TokenName.
 func (s *Price) SetTokenName(val string) {
 	s.TokenName = val
-}
-
-// Ref: #/components/schemas/RecoverStakeAction
-type RecoverStakeAction struct {
-	Amount int64          `json:"amount"`
-	Staker AccountAddress `json:"staker"`
-}
-
-// GetAmount returns the value of Amount.
-func (s *RecoverStakeAction) GetAmount() int64 {
-	return s.Amount
-}
-
-// GetStaker returns the value of Staker.
-func (s *RecoverStakeAction) GetStaker() AccountAddress {
-	return s.Staker
-}
-
-// SetAmount sets the value of Amount.
-func (s *RecoverStakeAction) SetAmount(val int64) {
-	s.Amount = val
-}
-
-// SetStaker sets the value of Staker.
-func (s *RecoverStakeAction) SetStaker(val AccountAddress) {
-	s.Staker = val
 }
 
 // Ref: #/components/schemas/Refund
@@ -9263,4 +9489,80 @@ func (s *WalletDNS) SetHasMethodSeqno(val bool) {
 // SetNames sets the value of Names.
 func (s *WalletDNS) SetNames(val []string) {
 	s.Names = val
+}
+
+// Validator's participation in elections.
+// Ref: #/components/schemas/WithdrawStakeAction
+type WithdrawStakeAction struct {
+	Amount int64          `json:"amount"`
+	Staker AccountAddress `json:"staker"`
+	Pool   AccountAddress `json:"pool"`
+}
+
+// GetAmount returns the value of Amount.
+func (s *WithdrawStakeAction) GetAmount() int64 {
+	return s.Amount
+}
+
+// GetStaker returns the value of Staker.
+func (s *WithdrawStakeAction) GetStaker() AccountAddress {
+	return s.Staker
+}
+
+// GetPool returns the value of Pool.
+func (s *WithdrawStakeAction) GetPool() AccountAddress {
+	return s.Pool
+}
+
+// SetAmount sets the value of Amount.
+func (s *WithdrawStakeAction) SetAmount(val int64) {
+	s.Amount = val
+}
+
+// SetStaker sets the value of Staker.
+func (s *WithdrawStakeAction) SetStaker(val AccountAddress) {
+	s.Staker = val
+}
+
+// SetPool sets the value of Pool.
+func (s *WithdrawStakeAction) SetPool(val AccountAddress) {
+	s.Pool = val
+}
+
+// Validator's participation in elections.
+// Ref: #/components/schemas/WithdrawStakeRequestAction
+type WithdrawStakeRequestAction struct {
+	Amount OptInt64       `json:"amount"`
+	Staker AccountAddress `json:"staker"`
+	Pool   AccountAddress `json:"pool"`
+}
+
+// GetAmount returns the value of Amount.
+func (s *WithdrawStakeRequestAction) GetAmount() OptInt64 {
+	return s.Amount
+}
+
+// GetStaker returns the value of Staker.
+func (s *WithdrawStakeRequestAction) GetStaker() AccountAddress {
+	return s.Staker
+}
+
+// GetPool returns the value of Pool.
+func (s *WithdrawStakeRequestAction) GetPool() AccountAddress {
+	return s.Pool
+}
+
+// SetAmount sets the value of Amount.
+func (s *WithdrawStakeRequestAction) SetAmount(val OptInt64) {
+	s.Amount = val
+}
+
+// SetStaker sets the value of Staker.
+func (s *WithdrawStakeRequestAction) SetStaker(val AccountAddress) {
+	s.Staker = val
+}
+
+// SetPool sets the value of Pool.
+func (s *WithdrawStakeRequestAction) SetPool(val AccountAddress) {
+	s.Pool = val
 }

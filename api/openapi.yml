@@ -3430,9 +3430,12 @@ components:
             - AuctionBid
             - NftPurchase
             - DepositStake
-            - RecoverStake
+            - WithdrawStake
+            - WithdrawStakeRequest
             - JettonSwap
             - SmartContractExec
+            - ElectionsRecoverStake
+            - ElectionsDepositStake
             - Unknown
         status:
           type: string
@@ -3462,8 +3465,14 @@ components:
           $ref: '#/components/schemas/NftPurchaseAction'
         DepositStake:
           $ref: '#/components/schemas/DepositStakeAction'
-        RecoverStake:
-          $ref: '#/components/schemas/RecoverStakeAction'
+        WithdrawStake:
+          $ref: '#/components/schemas/WithdrawStakeAction'
+        WithdrawStakeRequest:
+          $ref: '#/components/schemas/WithdrawStakeRequestAction'
+        ElectionsDepositStake:
+          $ref: '#/components/schemas/ElectionsDepositStakeAction'
+        ElectionsRecoverStake:
+          $ref: '#/components/schemas/ElectionsRecoverStakeAction'
         JettonSwap:
           $ref: '#/components/schemas/JettonSwapAction'
         SmartContractExec:
@@ -3689,6 +3698,7 @@ components:
       required:
         - amount
         - staker
+        - pool
       properties:
         amount:
           type: integer
@@ -3696,7 +3706,52 @@ components:
           example: 1660050553
         staker:
           $ref: '#/components/schemas/AccountAddress'
-    RecoverStakeAction:
+        pool:
+          $ref: '#/components/schemas/AccountAddress'
+    WithdrawStakeAction:
+      description: "validator's participation in elections"
+      type: object
+      required:
+        - amount
+        - staker
+        - pool
+      properties:
+        amount:
+          type: integer
+          format: int64
+          example: 1660050553
+        staker:
+          $ref: '#/components/schemas/AccountAddress'
+        pool:
+          $ref: '#/components/schemas/AccountAddress'
+    WithdrawStakeRequestAction:
+      description: "validator's participation in elections"
+      type: object
+      required:
+        - staker
+        - pool
+      properties:
+        amount:
+          type: integer
+          format: int64
+          example: 1660050553
+        staker:
+          $ref: '#/components/schemas/AccountAddress'
+        pool:
+          $ref: '#/components/schemas/AccountAddress'
+    ElectionsRecoverStakeAction:
+      type: object
+      required:
+        - amount
+        - staker
+      properties:
+        amount:
+          type: integer
+          format: int64
+          example: 1660050553
+        staker:
+          $ref: '#/components/schemas/AccountAddress'
+    ElectionsDepositStakeAction:
       type: object
       required:
         - amount
