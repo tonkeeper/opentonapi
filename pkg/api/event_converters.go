@@ -28,6 +28,8 @@ const (
 	nftTransferMessageID    = "nftTransferAction"
 	nftPurchaseMessageID    = "nftPurchaseAction"
 	jettonTransferMessageID = "jettonTransferAction"
+	jettonMintMessageID     = "jettonMintAction"
+	jettonBurnMessageID     = "jettonBurnAction"
 	smartContractMessageID  = "smartContractExecAction"
 	subscriptionMessageID   = "subscriptionAction"
 	depositStakeMessageID   = "depositStakeAction"
@@ -36,8 +38,6 @@ const (
 	auctionBidMessageID     = "auctionBidAction"
 	contractDeployMessageID = "contractDeployAction"
 
-	tfDepositMessageID                        = "tfDepositAction"
-	tfRequestWithdrawMessageID                = "tfRequestWithdrawAction"
 	tfProcessPendingWithdrawRequestsMessageID = "tfProcessPendingWithdrawRequestsAction"
 	tfUpdateValidatorSetMessageID             = "tfUpdateValidatorSetAction"
 	tfDepositStakeRequestMessageID            = "tfDepositStakeRequestAction"
@@ -235,7 +235,56 @@ func (h Handler) convertAction(ctx context.Context, viewer tongo.AccountID, a ba
 			Accounts: distinctAccounts(h.addressBook, h.previewGenerator, a.JettonTransfer.Recipient, a.JettonTransfer.Sender, &a.JettonTransfer.Jetton),
 			Value:    oas.NewOptString(fmt.Sprintf("%v %v", amount, meta.Name)),
 		}
-
+	case bath.JettonMint:
+		meta := h.GetJettonNormalizedMetadata(ctx, a.JettonMint.Jetton, h.previewGenerator)
+		preview := jettonPreview(a.JettonMint.Jetton, meta)
+		action.JettonMint.SetTo(oas.JettonMintAction{
+			Amount:           g.Pointer(big.Int(a.JettonMint.Amount)).String(),
+			Recipient:        convertAccountAddress(a.JettonMint.Recipient, h.addressBook, h.previewGenerator),
+			Jetton:           preview,
+			RecipientsWallet: a.JettonMint.RecipientsWallet.ToRaw(),
+		})
+		if len(preview.Image) > 0 {
+			action.SimplePreview.ValueImage = oas.NewOptString(preview.Image)
+		}
+		amount := Scale(a.JettonMint.Amount, meta.Decimals).String()
+		action.SimplePreview = oas.ActionSimplePreview{
+			Name: "Jetton Mint",
+			Description: i18n.T(acceptLanguage.Value, i18n.C{
+				MessageID: jettonMintMessageID,
+				TemplateData: map[string]interface{}{
+					"Value":      amount,
+					"JettonName": meta.Name,
+				},
+			}),
+			Accounts: distinctAccounts(h.addressBook, h.previewGenerator, &a.JettonMint.Recipient, &a.JettonMint.Jetton),
+			Value:    oas.NewOptString(fmt.Sprintf("%v %v", amount, meta.Name)),
+		}
+	case bath.JettonBurn:
+		meta := h.GetJettonNormalizedMetadata(ctx, a.JettonBurn.Jetton, h.previewGenerator)
+		preview := jettonPreview(a.JettonBurn.Jetton, meta)
+		action.JettonBurn.SetTo(oas.JettonBurnAction{
+			Amount:        g.Pointer(big.Int(a.JettonBurn.Amount)).String(),
+			Sender:        convertAccountAddress(a.JettonBurn.Sender, h.addressBook, h.previewGenerator),
+			Jetton:        preview,
+			SendersWallet: a.JettonBurn.SendersWallet.ToRaw(),
+		})
+		if len(preview.Image) > 0 {
+			action.SimplePreview.ValueImage = oas.NewOptString(preview.Image)
+		}
+		amount := Scale(a.JettonBurn.Amount, meta.Decimals).String()
+		action.SimplePreview = oas.ActionSimplePreview{
+			Name: "Jetton Burn",
+			Description: i18n.T(acceptLanguage.Value, i18n.C{
+				MessageID: jettonBurnMessageID,
+				TemplateData: map[string]interface{}{
+					"Value":      amount,
+					"JettonName": meta.Name,
+				},
+			}),
+			Accounts: distinctAccounts(h.addressBook, h.previewGenerator, &a.JettonBurn.Sender, &a.JettonBurn.Jetton),
+			Value:    oas.NewOptString(fmt.Sprintf("%v %v", amount, meta.Name)),
+		}
 	case bath.Subscription:
 		action.Subscribe.SetTo(oas.SubscriptionAction{
 			Amount:       a.Subscription.Amount,
@@ -319,10 +368,10 @@ func (h Handler) convertAction(ctx context.Context, viewer tongo.AccountID, a ba
 			Buyer:       convertAccountAddress(a.NftPurchase.Buyer, h.addressBook, h.previewGenerator),
 		})
 	case bath.ElectionsDepositStake:
-		value := i18n.FormatTONs(a.DepositStake.Amount)
+		value := i18n.FormatTONs(a.ElectionsDepositStake.Amount)
 		action.ElectionsDepositStake.SetTo(oas.ElectionsDepositStakeAction{
-			Amount: a.DepositStake.Amount,
-			Staker: convertAccountAddress(a.DepositStake.Staker, h.addressBook, h.previewGenerator),
+			Amount: a.ElectionsDepositStake.Amount,
+			Staker: convertAccountAddress(a.ElectionsDepositStake.Staker, h.addressBook, h.previewGenerator),
 		})
 		action.SimplePreview = oas.ActionSimplePreview{
 			Name: "Deposit Stake",
@@ -332,14 +381,14 @@ func (h Handler) convertAction(ctx context.Context, viewer tongo.AccountID, a ba
 					"Amount": value,
 				},
 			}),
-			Value:    oas.NewOptString(signedValue(value, viewer, a.DepositStake.Staker, a.DepositStake.Elector)),
-			Accounts: distinctAccounts(h.addressBook, h.previewGenerator, &a.DepositStake.Elector, &a.DepositStake.Staker),
+			Value:    oas.NewOptString(signedValue(value, viewer, a.ElectionsDepositStake.Staker, a.ElectionsDepositStake.Elector)),
+			Accounts: distinctAccounts(h.addressBook, h.previewGenerator, &a.ElectionsDepositStake.Elector, &a.ElectionsDepositStake.Staker),
 		}
 	case bath.ElectionsRecoverStake:
-		value := i18n.FormatTONs(a.RecoverStake.Amount)
+		value := i18n.FormatTONs(a.ElectionsRecoverStake.Amount)
 		action.ElectionsRecoverStake.SetTo(oas.ElectionsRecoverStakeAction{
-			Amount: a.RecoverStake.Amount,
-			Staker: convertAccountAddress(a.RecoverStake.Staker, h.addressBook, h.previewGenerator),
+			Amount: a.ElectionsRecoverStake.Amount,
+			Staker: convertAccountAddress(a.ElectionsRecoverStake.Staker, h.addressBook, h.previewGenerator),
 		})
 		action.SimplePreview = oas.ActionSimplePreview{
 			Name: "Recover Stake",
@@ -349,8 +398,8 @@ func (h Handler) convertAction(ctx context.Context, viewer tongo.AccountID, a ba
 					"Amount": value,
 				},
 			}),
-			Value:    oas.NewOptString(signedValue(value, viewer, a.RecoverStake.Elector, a.RecoverStake.Staker)),
-			Accounts: distinctAccounts(h.addressBook, h.previewGenerator, &a.RecoverStake.Elector, &a.RecoverStake.Staker),
+			Value:    oas.NewOptString(signedValue(value, viewer, a.ElectionsRecoverStake.Elector, a.ElectionsRecoverStake.Staker)),
+			Accounts: distinctAccounts(h.addressBook, h.previewGenerator, &a.ElectionsRecoverStake.Elector, &a.ElectionsRecoverStake.Staker),
 		}
 	case bath.JettonSwap:
 		action.Type = "JettonSwap"
@@ -438,16 +487,6 @@ func (h Handler) convertAction(ctx context.Context, viewer tongo.AccountID, a ba
 		}
 		messageID := smartContractMessageID
 		switch a.SmartContractExec.Operation {
-		case string(bath.TfDeposit):
-			description := i18n.T(acceptLanguage.Value, i18n.C{
-				MessageID: tfDepositMessageID,
-			})
-			op = description
-		case string(bath.TfRequestWithdraw):
-			description := i18n.T(acceptLanguage.Value, i18n.C{
-				MessageID: tfRequestWithdrawMessageID,
-			})
-			op = description
 		case string(bath.TfUpdateValidatorSet):
 			description := i18n.T(acceptLanguage.Value, i18n.C{
 				MessageID: tfUpdateValidatorSetMessageID,

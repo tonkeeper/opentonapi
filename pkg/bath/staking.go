@@ -6,15 +6,15 @@ import (
 	"github.com/tonkeeper/tongo/abi"
 )
 
-type BubbleDepositStake struct {
+type BubbleElectionsDepositStake struct {
 	Staker  tongo.AccountID
 	Amount  int64
 	Success bool
 }
 
-func (ds BubbleDepositStake) ToAction() *Action {
+func (ds BubbleElectionsDepositStake) ToAction() *Action {
 	return &Action{
-		DepositStake: &DepositStakeAction{
+		ElectionsDepositStake: &ElectionsDepositStakeAction{
 			Amount:  ds.Amount,
 			Elector: config.ElectorAddress(),
 			Staker:  ds.Staker,
@@ -24,54 +24,34 @@ func (ds BubbleDepositStake) ToAction() *Action {
 	}
 }
 
-func FindDepositStake(bubble *Bubble) bool {
-	bubbleTx, ok := bubble.Info.(BubbleTx)
-	if !ok {
-		return false
-	}
-	if !bubbleTx.operation(abi.ElectorNewStakeMsgOp) {
-		return false
-	}
-	if bubbleTx.account.Address != config.ElectorAddress() {
-		return false
-	}
-	stake := BubbleDepositStake{
-		Amount: bubbleTx.inputAmount,
-		Staker: bubbleTx.inputFrom.Address,
-	}
-	newBubble := Bubble{
-		Accounts:            bubble.Accounts,
-		ValueFlow:           bubble.ValueFlow,
-		ContractDeployments: bubble.ContractDeployments,
-	}
-	newBubble.Children = ProcessChildren(bubble.Children,
-		func(child *Bubble) *Merge {
-			confirmation, ok := child.Info.(BubbleTx)
-			if !ok {
+var ElectionsDepositStakeStraw = Straw[BubbleElectionsDepositStake]{
+	CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.ElectorNewStakeMsgOp), IsAccount(config.ElectorAddress())},
+	Builder: func(newAction *BubbleElectionsDepositStake, bubble *Bubble) error {
+		bubbleTx := bubble.Info.(BubbleTx)
+		newAction.Amount = bubbleTx.inputAmount
+		newAction.Staker = bubbleTx.inputFrom.Address
+		return nil
+	},
+	Children: []Straw[BubbleElectionsDepositStake]{
+		{
+			CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.ElectorNewStakeConfirmationMsgOp)},
+			Builder: func(newAction *BubbleElectionsDepositStake, bubble *Bubble) error {
+				newAction.Success = true
 				return nil
-			}
-			if !confirmation.operation(abi.ElectorNewStakeConfirmationMsgOp) {
-				return nil
-			}
-			stake.Success = true
-			newBubble.ValueFlow.Merge(child.ValueFlow)
-			newBubble.MergeContractDeployments(child)
-			return &Merge{children: child.Children}
-		})
-	newBubble.Info = stake
-	*bubble = newBubble
-	return true
+			},
+		},
+	},
 }
 
-type BubbleRecoverStake struct {
+type BubbleElectionsRecoverStake struct {
 	Staker  tongo.AccountID
 	Amount  int64
 	Success bool
 }
 
-func (b BubbleRecoverStake) ToAction() *Action {
+func (b BubbleElectionsRecoverStake) ToAction() *Action {
 	return &Action{
-		RecoverStake: &RecoverStakeAction{
+		ElectionsRecoverStake: &ElectionsRecoverStakeAction{
 			Amount:  b.Amount,
 			Elector: config.ElectorAddress(),
 			Staker:  b.Staker,
@@ -81,43 +61,133 @@ func (b BubbleRecoverStake) ToAction() *Action {
 	}
 }
 
-func FindRecoverStake(bubble *Bubble) bool {
-	bubbleTx, ok := bubble.Info.(BubbleTx)
-	if !ok {
-		return false
-	}
-	if !bubbleTx.operation(abi.ElectorRecoverStakeRequestMsgOp) {
-		return false
-	}
-	if bubbleTx.account.Address != config.ElectorAddress() {
-		return false
-	}
-	recoverStake := BubbleRecoverStake{
-		Amount: 0,
-		Staker: bubbleTx.inputFrom.Address,
-	}
-	newBubble := Bubble{
-		Accounts:            bubble.Accounts,
-		ValueFlow:           bubble.ValueFlow,
-		ContractDeployments: bubble.ContractDeployments,
-	}
-	newBubble.Children = ProcessChildren(bubble.Children,
-		func(child *Bubble) *Merge {
-			response, ok := child.Info.(BubbleTx)
-			if !ok {
+var ElectionsRecoverStakeStraw = Straw[BubbleElectionsRecoverStake]{
+	CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.ElectorRecoverStakeRequestMsgOp), IsAccount(config.ElectorAddress())},
+	Builder: func(newAction *BubbleElectionsRecoverStake, bubble *Bubble) error {
+		bubbleTx := bubble.Info.(BubbleTx)
+		newAction.Staker = bubbleTx.inputFrom.Address
+		return nil
+	},
+	Children: []Straw[BubbleElectionsRecoverStake]{
+		{
+			CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.ElectorRecoverStakeResponseMsgOp)},
+			Builder: func(newAction *BubbleElectionsRecoverStake, bubble *Bubble) error {
+				newAction.Amount = bubble.Info.(BubbleTx).inputAmount
+				newAction.Success = true
 				return nil
-			}
-			if !response.operation(abi.ElectorRecoverStakeResponseMsgOp) {
-				return nil
-			}
-			recoverStake.Success = true
-			recoverStake.Amount = response.inputAmount
-			newBubble.ValueFlow.Merge(child.ValueFlow)
-			newBubble.MergeContractDeployments(child)
-			return &Merge{children: child.Children}
-		})
-	newBubble.Info = recoverStake
-	*bubble = newBubble
-	return true
+			},
+		},
+	},
+}
 
+type BubbleDepositStake struct {
+	Staker  tongo.AccountID
+	Amount  int64
+	Success bool
+	Pool    tongo.AccountID
+}
+
+func (ds BubbleDepositStake) ToAction() *Action {
+	return &Action{
+		DepositStake: &DepositStakeAction{
+			Amount: ds.Amount,
+			Pool:   ds.Pool,
+			Staker: ds.Staker,
+		},
+		Success: ds.Success,
+		Type:    DepositStake,
+	}
+}
+
+var DepositTFStakeStraw = Straw[BubbleDepositStake]{
+	CheckFuncs: []bubbleCheck{IsTx, HasInterface(abi.TfNominator), HasTextComment("d")},
+	Builder: func(newAction *BubbleDepositStake, bubble *Bubble) error {
+		tx := bubble.Info.(BubbleTx)
+		newAction.Pool = tx.account.Address
+		newAction.Staker = tx.inputFrom.Address
+		newAction.Amount = tx.inputAmount
+		newAction.Success = tx.success
+		return nil
+	},
+	Children: []Straw[BubbleDepositStake]{
+		{
+			Optional:   true,
+			CheckFuncs: []bubbleCheck{IsTx, HasOpcode(0xffffffff)},
+		},
+	},
+}
+
+type BubbleWithdrawStakeRequest struct {
+	Staker         tongo.AccountID
+	Amount         *int64
+	Success        bool
+	Pool           tongo.AccountID
+	attachedAmount int64 //
+}
+
+func (ds BubbleWithdrawStakeRequest) ToAction() *Action {
+	return &Action{
+		WithdrawStakeRequest: &WithdrawStakeRequestAction{
+			Amount: ds.Amount,
+			Pool:   ds.Pool,
+			Staker: ds.Staker,
+		},
+		Success: ds.Success,
+		Type:    WithdrawStakeRequest,
+	}
+}
+
+var WithdrawTFStakeRequestStraw = Straw[BubbleWithdrawStakeRequest]{
+	CheckFuncs: []bubbleCheck{IsTx, HasInterface(abi.TfNominator), HasTextComment("w")},
+	Builder: func(newAction *BubbleWithdrawStakeRequest, bubble *Bubble) error {
+		tx := bubble.Info.(BubbleTx)
+		newAction.Pool = tx.account.Address
+		newAction.Staker = tx.inputFrom.Address
+		newAction.Success = tx.success
+		newAction.attachedAmount = tx.inputAmount //maybe should extract fee but it is not important
+		return nil
+	},
+	Children: []Straw[BubbleWithdrawStakeRequest]{
+		{
+			Optional:   true,
+			CheckFuncs: []bubbleCheck{IsTx, AmountInterval(0, int64(tongo.OneTON))},
+		},
+	},
+}
+
+type BubbleWithdrawStake struct {
+	Staker tongo.AccountID
+	Amount int64
+	Pool   tongo.AccountID
+}
+
+func (ds BubbleWithdrawStake) ToAction() *Action {
+	return &Action{
+		WithdrawStake: &WithdrawStakeAction{
+			Amount: ds.Amount,
+			Pool:   ds.Pool,
+			Staker: ds.Staker,
+		},
+		Type: WithdrawStake,
+	}
+}
+
+var WithdrawStakeImmediatelyStraw = Straw[BubbleWithdrawStake]{
+	CheckFuncs: []bubbleCheck{Is(BubbleWithdrawStakeRequest{})},
+	Builder: func(newAction *BubbleWithdrawStake, bubble *Bubble) error {
+		req := bubble.Info.(BubbleWithdrawStakeRequest)
+		newAction.Pool = req.Pool
+		newAction.Staker = req.Staker
+		newAction.Amount = -req.attachedAmount
+		return nil
+	},
+	Children: []Straw[BubbleWithdrawStake]{
+		{
+			CheckFuncs: []bubbleCheck{IsTx, AmountInterval(int64(tongo.OneTON), 1<<63-1)},
+			Builder: func(newAction *BubbleWithdrawStake, bubble *Bubble) error {
+				newAction.Amount += bubble.Info.(BubbleTx).inputAmount
+				return nil
+			},
+		},
+	},
 }

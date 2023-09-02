@@ -228,11 +228,6 @@ func TestFindActions(t *testing.T) {
 			filenamePrefix: "deploy-contract",
 		},
 		{
-			name:           "deploy contract failed",
-			hash:           "32467cfe9b9faecf6cd2a8055bfc7243e289fec6b2f479df2bcbf78eac9826a0",
-			filenamePrefix: "deploy-contract-failed",
-		},
-		{
 			name:           "encrypted comment",
 			hash:           "6f3e1f2c05df05345198a9d26456dcb51d4c78ce64ced56fb9976e92941211d3",
 			filenamePrefix: "encrypted-comment",

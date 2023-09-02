@@ -1,14 +1,6 @@
 {
    "Actions": [
      {
-       "ContractDeploy": {
-         "Address": "0:533f30de5722157b8471f5503b9fc5800c8d8397e79743f796b11e609adae69f",
-         "Interfaces": null
-       },
-       "Success": true,
-       "Type": "ContractDeploy"
-     },
-     {
        "NftPurchase": {
          "Nft": "0:63864e10646c9a2214651aec6dddf3379da9273a99c83fcce23c77da188b1348",
          "Buyer": "0:533f30de5722157b8471f5503b9fc5800c8d8397e79743f796b11e609adae69f",
@@ -54,6 +46,14 @@
        },
        "Success": true,
        "Type": "TonTransfer"
+     },
+     {
+       "ContractDeploy": {
+         "Address": "0:533f30de5722157b8471f5503b9fc5800c8d8397e79743f796b11e609adae69f",
+         "Interfaces": null
+       },
+       "Success": true,
+       "Type": "ContractDeploy"
      }
    ],
    "Accounts": [

@@ -106,8 +106,6 @@ func FindSTONfiSwap(bubble *Bubble) bool {
 		ValueFlow: child.ValueFlow,
 	}
 	newBubble.ValueFlow.Merge(bubble.ValueFlow)
-	newBubble.MergeContractDeployments(child)
-	newBubble.MergeContractDeployments(bubble)
 	newBubble.Children = ProcessChildren(child.Children,
 		func(payment *Bubble) *Merge {
 			tx, ok := payment.Info.(BubbleTx)
@@ -132,7 +130,6 @@ func FindSTONfiSwap(bubble *Bubble) bool {
 			}
 			stonfiSwap.Router = tx.account.Address
 			newBubble.ValueFlow.Merge(payment.ValueFlow)
-			newBubble.MergeContractDeployments(payment)
 			newBubble.Accounts = append(newBubble.Accounts, payment.Accounts...)
 			children := ProcessChildren(payment.Children,
 				func(jettonTransfer *Bubble) *Merge {
@@ -144,7 +141,6 @@ func FindSTONfiSwap(bubble *Bubble) bool {
 						return nil
 					}
 					newBubble.ValueFlow.Merge(jettonTransfer.ValueFlow)
-					newBubble.MergeContractDeployments(jettonTransfer)
 					return &Merge{children: jettonTransfer.Children}
 				})
 			return &Merge{children: children}

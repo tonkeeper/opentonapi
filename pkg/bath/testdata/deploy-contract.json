@@ -1,14 +1,6 @@
 {
    "Actions": [
      {
-       "ContractDeploy": {
-         "Address": "0:e351d7af505bbae196ea434b13db91adcdffc5063ff2d7b9f0f76139b3c7b99a",
-         "Interfaces": null
-       },
-       "Success": true,
-       "Type": "ContractDeploy"
-     },
-     {
        "TonTransfer": {
          "Amount": 5993073999,
          "Comment": null,
@@ -19,6 +11,14 @@
        },
        "Success": true,
        "Type": "TonTransfer"
+     },
+     {
+       "ContractDeploy": {
+         "Address": "0:e351d7af505bbae196ea434b13db91adcdffc5063ff2d7b9f0f76139b3c7b99a",
+         "Interfaces": null
+       },
+       "Success": true,
+       "Type": "ContractDeploy"
      }
    ],
    "Accounts": [

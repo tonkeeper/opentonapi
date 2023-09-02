@@ -25,9 +25,8 @@ func FindInitialSubscription(bubble *Bubble) bool {
 		return false
 	}
 	newBubble := Bubble{
-		Accounts:            append(bubble.Accounts, txBubble.account.Address),
-		ValueFlow:           bubble.ValueFlow,
-		ContractDeployments: bubble.ContractDeployments,
+		Accounts:  append(bubble.Accounts, txBubble.account.Address),
+		ValueFlow: bubble.ValueFlow,
 	}
 	var beneficiary, subscriber Account
 	if txBubble.inputFrom != nil {
@@ -46,7 +45,6 @@ func FindInitialSubscription(bubble *Bubble) bool {
 			success = true
 			beneficiary = tx.account
 			newBubble.ValueFlow.Merge(child.ValueFlow)
-			newBubble.MergeContractDeployments(child)
 			newBubble.Accounts = append(newBubble.Accounts, tx.account.Address)
 			return &Merge{children: child.Children}
 		})
@@ -124,17 +122,14 @@ func FindUnSubscription(bubble *Bubble) bool {
 		return false
 	}
 	newBubble := Bubble{
-		Accounts:            append(bubble.Accounts, firstTX.account.Address, secondTX.account.Address, thirdTX.account.Address),
-		ValueFlow:           bubble.ValueFlow,
-		ContractDeployments: bubble.ContractDeployments,
+		Accounts:  append(bubble.Accounts, firstTX.account.Address, secondTX.account.Address, thirdTX.account.Address),
+		ValueFlow: bubble.ValueFlow,
 	}
 	var success bool
 	newBubble.Children = thirdBubble.Children
 	newBubble.ValueFlow.Merge(bubble.ValueFlow)
 	newBubble.ValueFlow.Merge(secondBubble.ValueFlow)
-	newBubble.MergeContractDeployments(secondBubble)
 	newBubble.ValueFlow.Merge(thirdBubble.ValueFlow)
-	newBubble.MergeContractDeployments(thirdBubble)
 	newBubble.Info = BubbleUnSubscription{
 		Subscriber:   firstTX.account,
 		Subscription: secondTX.account,

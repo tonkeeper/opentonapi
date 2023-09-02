@@ -18,8 +18,6 @@ type Bubble struct {
 	Accounts  []tongo.AccountID
 	Children  []*Bubble
 	ValueFlow *ValueFlow
-	// ContractDeployments specifies a list of contracts initialized by this bubble.
-	ContractDeployments map[tongo.AccountID]ContractDeployment
 }
 
 // ContractDeployment holds information about initialization of a contract.
@@ -44,16 +42,6 @@ func (b Bubble) String() string {
 		}
 	}
 	return buf.String()
-}
-
-// MergeContractDeployments copies contract deployments from other bubble.
-func (b *Bubble) MergeContractDeployments(other *Bubble) {
-	if b.ContractDeployments == nil {
-		b.ContractDeployments = make(map[tongo.AccountID]ContractDeployment, len(other.ContractDeployments))
-	}
-	for accountID, deployment := range other.ContractDeployments {
-		b.ContractDeployments[accountID] = deployment
-	}
 }
 
 type actioner interface {
@@ -97,10 +85,9 @@ func fromTrace(trace *core.Trace) *Bubble {
 	}
 	aggregatedFee := trace.TotalFee
 	b := Bubble{
-		Info:                btx,
-		Accounts:            accounts,
-		Children:            make([]*Bubble, len(trace.Children)),
-		ContractDeployments: map[tongo.AccountID]ContractDeployment{},
+		Info:     btx,
+		Accounts: accounts,
+		Children: make([]*Bubble, len(trace.Children)),
 		ValueFlow: &ValueFlow{
 			Accounts: map[tongo.AccountID]*AccountValueFlow{
 				trace.Account: {
@@ -108,13 +95,6 @@ func fromTrace(trace *core.Trace) *Bubble {
 				},
 			},
 		},
-	}
-	contractDeployed := trace.EndStatus == tlb.AccountActive && trace.OrigStatus != tlb.AccountActive
-	if contractDeployed {
-		b.ContractDeployments[trace.Account] = ContractDeployment{
-			success:        btx.success,
-			initInterfaces: initInterfaces,
-		}
 	}
 
 	for _, outMsg := range trace.OutMsgs {
@@ -130,6 +110,18 @@ func fromTrace(trace *core.Trace) *Bubble {
 			aggregatedFee += c.InMsg.FwdFee
 		}
 		b.Children[i] = fromTrace(c)
+	}
+	contractDeployed := trace.EndStatus == tlb.AccountActive && trace.OrigStatus != tlb.AccountActive
+	if contractDeployed {
+		b.Children = append(b.Children, &Bubble{
+			Info: BubbleContractDeploy{
+				Contract:              trace.Account,
+				Success:               true,
+				AccountInitInterfaces: initInterfaces,
+			},
+			Accounts:  []tongo.AccountID{trace.Account},
+			ValueFlow: &ValueFlow{},
+		})
 	}
 	b.ValueFlow.Accounts[trace.Account].Fees = aggregatedFee
 	return &b

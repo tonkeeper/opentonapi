@@ -14,6 +14,14 @@
        },
        "Success": true,
        "Type": "JettonSwap"
+     },
+     {
+       "ContractDeploy": {
+         "Address": "0:c41b4974e738756c04cf400399a51acb604e68c7a3df12dde36b9b7c614b9db2",
+         "Interfaces": null
+       },
+       "Success": true,
+       "Type": "ContractDeploy"
      }
    ],
    "Accounts": [

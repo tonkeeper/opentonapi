@@ -24,28 +24,3 @@ func (b BubbleContractDeploy) ToAction() *Action {
 		Type:    ContractDeploy,
 	}
 }
-
-// FindContractDeploy looks for contract deployments in the given bubble and
-// creates a new ContractDeploy action for each.
-// So at the end the bubble will look like:
-// bubble -> ContractDeploy -> ContractDeploy -> bubble.children.
-func FindContractDeploy(bubble *Bubble) bool {
-	if len(bubble.ContractDeployments) == 0 {
-		return false
-	}
-	for accountID, deployment := range bubble.ContractDeployments {
-		newBubble := Bubble{
-			Info: BubbleContractDeploy{
-				Contract:              accountID,
-				AccountInitInterfaces: deployment.initInterfaces,
-				Success:               deployment.success,
-			},
-			Accounts:  []tongo.AccountID{accountID},
-			Children:  bubble.Children,
-			ValueFlow: &ValueFlow{},
-		}
-		bubble.Children = []*Bubble{&newBubble}
-	}
-	bubble.ContractDeployments = nil
-	return true
-}

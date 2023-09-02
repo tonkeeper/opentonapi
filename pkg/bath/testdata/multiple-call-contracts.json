@@ -77,6 +77,14 @@
        },
        "Success": true,
        "Type": "JettonTransfer"
+     },
+     {
+       "ContractDeploy": {
+         "Address": "0:ba799c63dfaa07244c407dc5ebd6e8ffb1807f636ca6d02677e7848100234ef3",
+         "Interfaces": null
+       },
+       "Success": true,
+       "Type": "ContractDeploy"
      }
    ],
    "Accounts": [

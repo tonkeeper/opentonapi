@@ -10,9 +10,7 @@ type TFCommand string
 const (
 	TfDepositStakeRequest            TFCommand = "TfDepositStakeRequest"
 	TfRecoverStakeRequest            TFCommand = "TfRecoverStakeRequest"
-	TfRequestWithdraw                TFCommand = "TfRequestWithdraw"
 	TfProcessPendingWithdrawRequests TFCommand = "TfProcessPendingWithdrawRequests"
-	TfDeposit                        TFCommand = "TfDeposit"
 	TfUpdateValidatorSet             TFCommand = "TfUpdateValidatorSet"
 )
 
@@ -63,40 +61,10 @@ func FindTFNominatorAction(bubble *Bubble) bool {
 		ValueFlow: bubble.ValueFlow,
 	}
 	switch *bubbleTx.opCode {
-	case 0x4e73744b: // todo: replace with abi.ElectorNewStakeMsgOp
+	case abi.ElectorNewStakeMsgOpCode:
 		command = TfDepositStakeRequest
-	case 0x47657424: // todo: replace with abi.ElectorRecoverStake
+	case abi.ElectorRecoverStakeRequestMsgOpCode:
 		command = TfRecoverStakeRequest
-	case 0:
-		if bubbleTx.decodedBody == nil {
-			return false
-		}
-		text := bubbleTx.decodedBody.Value.(abi.TextCommentMsgBody)
-		if len(string(text.Text)) != 1 {
-			return false
-		}
-		switch string(text.Text) {
-		case "w":
-			command = TfRequestWithdraw
-			children = ProcessChildren(bubble.Children,
-				func(child *Bubble) *Merge {
-					tx, ok := child.Info.(BubbleTx)
-					if !ok {
-						return nil
-					}
-					if tx.opCode == nil && tx.account.Address == sender {
-						// this is a send-excess transfer, let's eliminate it
-						amount -= tx.inputAmount
-						newBubble.ValueFlow.Merge(child.ValueFlow)
-						newBubble.MergeContractDeployments(child)
-						return &Merge{children: child.Children}
-					}
-					return nil
-				})
-		case "d":
-			command = TfDeposit
-		}
-
 	case 2:
 		command = TfProcessPendingWithdrawRequests
 		children = ProcessChildren(bubble.Children,
@@ -109,7 +77,6 @@ func FindTFNominatorAction(bubble *Bubble) bool {
 					// this is a send-excess transfer, let's eliminate it
 					amount -= tx.inputAmount
 					newBubble.ValueFlow.Merge(child.ValueFlow)
-					newBubble.MergeContractDeployments(child)
 					return &Merge{children: child.Children}
 				}
 				return nil
@@ -126,7 +93,6 @@ func FindTFNominatorAction(bubble *Bubble) bool {
 					// this is a send-excess transfer, let's eliminate it
 					amount -= tx.inputAmount
 					newBubble.ValueFlow.Merge(child.ValueFlow)
-					newBubble.MergeContractDeployments(child)
 					return &Merge{children: child.Children}
 				}
 				return nil

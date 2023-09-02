@@ -38,7 +38,7 @@ func (b BubbleJettonTransfer) ToAction() (action *Action) {
 }
 
 type BubbleJettonMint struct {
-	recipient       *Account
+	recipient       Account
 	recipientWallet tongo.AccountID
 	master          tongo.AccountID
 	amount          tlb.VarUInteger16
@@ -49,7 +49,7 @@ func (b BubbleJettonMint) ToAction() (action *Action) {
 	a := Action{
 		JettonMint: &JettonMintAction{
 			Jetton:           b.master,
-			Recipient:        b.recipient.Addr(),
+			Recipient:        b.recipient.Address,
 			RecipientsWallet: b.recipientWallet,
 			Amount:           b.amount,
 		},
@@ -59,19 +59,18 @@ func (b BubbleJettonMint) ToAction() (action *Action) {
 	return &a
 }
 
-// example: https://tonviewer.com/transaction/6d33487c44249d7844db8fac38a5cecf1502ec7e0c09d266e98e95a2b1be17b5
-var DedustLPJettonMintStraw = Straw[BubbleJettonTransfer]{ //todo: rewrite to mint
+// DedustLPJettonMintStraw example: https://tonviewer.com/transaction/6d33487c44249d7844db8fac38a5cecf1502ec7e0c09d266e98e95a2b1be17b5
+var DedustLPJettonMintStraw = Straw[BubbleJettonMint]{
 	CheckFuncs: []bubbleCheck{IsTx, Or(HasOpcode(0xb56b9598), HasOpcode(0x1674b0a0))}, //todo: switch to check interface to be jetton master and rename straw to be more generic
-	Builder: func(newAction *BubbleJettonTransfer, bubble *Bubble) (err error) {
+	Builder: func(newAction *BubbleJettonMint, bubble *Bubble) (err error) {
 		tx := bubble.Info.(BubbleTx)
-		newAction.sender = &tx.account
 		newAction.master = tx.account.Address
 		return nil
 	},
-	Children: []Straw[BubbleJettonTransfer]{
+	Children: []Straw[BubbleJettonMint]{
 		{
 			CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.JettonInternalTransferMsgOp)},
-			Builder: func(newAction *BubbleJettonTransfer, bubble *Bubble) error {
+			Builder: func(newAction *BubbleJettonMint, bubble *Bubble) error {
 				tx := bubble.Info.(BubbleTx)
 				msg := tx.decodedBody.Value.(abi.JettonInternalTransferMsgBody)
 				newAction.amount = msg.Amount
@@ -79,12 +78,12 @@ var DedustLPJettonMintStraw = Straw[BubbleJettonTransfer]{ //todo: rewrite to mi
 				newAction.success = tx.success
 				return nil
 			},
-			Children: []Straw[BubbleJettonTransfer]{
+			Children: []Straw[BubbleJettonMint]{
 				{
 					CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.JettonNotifyMsgOp)},
-					Builder: func(newAction *BubbleJettonTransfer, bubble *Bubble) error {
+					Builder: func(newAction *BubbleJettonMint, bubble *Bubble) error {
 						tx := bubble.Info.(BubbleTx)
-						newAction.recipient = &tx.account
+						newAction.recipient = tx.account
 						return nil
 					},
 				},

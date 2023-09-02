@@ -24,6 +24,9 @@ const (
 	UnSubscription        ActionType = "UnSubscribe"
 	ElectionsDepositStake ActionType = "ElectionsDepositStake"
 	ElectionsRecoverStake ActionType = "ElectionsRecoverStake"
+	DepositStake          ActionType = "DepositStake"
+	WithdrawStake         ActionType = "WithdrawStake"
+	WithdrawStakeRequest  ActionType = "WithdrawStakeRequest"
 	JettonSwap            ActionType = "JettonSwap"
 	AuctionBid            ActionType = "AuctionBid"
 
@@ -54,22 +57,25 @@ type (
 	}
 
 	Action struct {
-		TonTransfer       *TonTransferAction    `json:",omitempty"`
-		SmartContractExec *SmartContractAction  `json:",omitempty"`
-		NftItemTransfer   *NftTransferAction    `json:",omitempty"`
-		NftPurchase       *NftPurchaseAction    `json:",omitempty"`
-		JettonTransfer    *JettonTransferAction `json:",omitempty"`
-		JettonMint        *JettonMintAction     `json:",omitempty"`
-		JettonBurn        *JettonBurnAction     `json:",omitempty"`
-		ContractDeploy    *ContractDeployAction `json:",omitempty"`
-		Subscription      *SubscriptionAction   `json:",omitempty"`
-		UnSubscription    *UnSubscriptionAction `json:",omitempty"`
-		AuctionBid        *AuctionBidAction     `json:",omitempty"`
-		DepositStake      *DepositStakeAction   `json:",omitempty"`
-		RecoverStake      *RecoverStakeAction   `json:",omitempty"`
-		JettonSwap        *JettonSwapAction     `json:",omitempty"`
-		Success           bool
-		Type              ActionType
+		TonTransfer           *TonTransferAction           `json:",omitempty"`
+		SmartContractExec     *SmartContractAction         `json:",omitempty"`
+		NftItemTransfer       *NftTransferAction           `json:",omitempty"`
+		NftPurchase           *NftPurchaseAction           `json:",omitempty"`
+		JettonTransfer        *JettonTransferAction        `json:",omitempty"`
+		JettonMint            *JettonMintAction            `json:",omitempty"`
+		JettonBurn            *JettonBurnAction            `json:",omitempty"`
+		ContractDeploy        *ContractDeployAction        `json:",omitempty"`
+		Subscription          *SubscriptionAction          `json:",omitempty"`
+		UnSubscription        *UnSubscriptionAction        `json:",omitempty"`
+		AuctionBid            *AuctionBidAction            `json:",omitempty"`
+		ElectionsDepositStake *ElectionsDepositStakeAction `json:",omitempty"`
+		ElectionsRecoverStake *ElectionsRecoverStakeAction `json:",omitempty"`
+		DepositStake          *DepositStakeAction          `json:",omitempty"`
+		WithdrawStake         *WithdrawStakeAction         `json:",omitempty"`
+		WithdrawStakeRequest  *WithdrawStakeRequestAction  `json:",omitempty"`
+		JettonSwap            *JettonSwapAction            `json:",omitempty"`
+		Success               bool
+		Type                  ActionType
 	}
 	TonTransferAction struct {
 		Amount           int64
@@ -104,13 +110,13 @@ type (
 		Price       int64
 	}
 
-	DepositStakeAction struct {
+	ElectionsDepositStakeAction struct {
 		Amount  int64
 		Elector tongo.AccountID
 		Staker  tongo.AccountID
 	}
 
-	RecoverStakeAction struct {
+	ElectionsRecoverStakeAction struct {
 		Amount  int64
 		Elector tongo.AccountID
 		Staker  tongo.AccountID
@@ -130,14 +136,14 @@ type (
 
 	JettonMintAction struct {
 		Jetton           tongo.AccountID
-		Recipient        *tongo.AccountID
+		Recipient        tongo.AccountID
 		RecipientsWallet tongo.AccountID
 		Amount           tlb.VarUInteger16
 	}
 
 	JettonBurnAction struct {
 		Jetton        tongo.AccountID
-		Sender        *tongo.AccountID
+		Sender        tongo.AccountID
 		SendersWallet tongo.AccountID
 		Amount        tlb.VarUInteger16
 	}
@@ -171,6 +177,21 @@ type (
 		JettonMasterOut tongo.AccountID
 		AmountIn        uint64
 		AmountOut       uint64
+	}
+	DepositStakeAction struct {
+		Staker tongo.AccountID
+		Amount int64
+		Pool   tongo.AccountID
+	}
+	WithdrawStakeAction struct {
+		Staker tongo.AccountID
+		Amount int64
+		Pool   tongo.AccountID
+	}
+	WithdrawStakeRequestAction struct {
+		Staker tongo.AccountID
+		Amount *int64
+		Pool   tongo.AccountID
 	}
 )
 
@@ -224,9 +245,9 @@ func (a Action) ContributeToExtra(account tongo.AccountID) int64 {
 	case AuctionBid:
 		return detectDirection(account, a.AuctionBid.Bidder, a.AuctionBid.Auction, a.AuctionBid.Amount)
 	case ElectionsDepositStake:
-		return detectDirection(account, a.DepositStake.Staker, a.DepositStake.Elector, a.DepositStake.Amount)
+		return detectDirection(account, a.ElectionsDepositStake.Staker, a.ElectionsDepositStake.Elector, a.ElectionsDepositStake.Amount)
 	case ElectionsRecoverStake:
-		return detectDirection(account, a.RecoverStake.Elector, a.RecoverStake.Staker, a.RecoverStake.Amount)
+		return detectDirection(account, a.ElectionsRecoverStake.Elector, a.ElectionsRecoverStake.Staker, a.ElectionsRecoverStake.Amount)
 	case Subscription:
 		return detectDirection(account, a.Subscription.Subscriber, a.Subscription.Beneficiary, a.Subscription.Amount)
 	default:
@@ -245,9 +266,11 @@ func (a Action) IsSubject(account tongo.AccountID) bool {
 		a.Subscription,
 		a.UnSubscription,
 		a.AuctionBid,
-		a.DepositStake,
-		a.RecoverStake,
+		a.ElectionsDepositStake,
+		a.ElectionsRecoverStake,
 		a.JettonSwap,
+		a.JettonMint,
+		a.JettonBurn,
 	} {
 		if i != nil && !reflect.ValueOf(i).IsNil() {
 			return slices.Contains(i.SubjectAccounts(), account)
@@ -309,10 +332,18 @@ func (a *JettonSwapAction) SubjectAccounts() []tongo.AccountID {
 func (a *UnSubscriptionAction) SubjectAccounts() []tongo.AccountID {
 	return []tongo.AccountID{a.Subscriber, a.Beneficiary}
 }
-func (a *DepositStakeAction) SubjectAccounts() []tongo.AccountID {
+func (a *ElectionsDepositStakeAction) SubjectAccounts() []tongo.AccountID {
 	return []tongo.AccountID{a.Staker}
 }
 
-func (a *RecoverStakeAction) SubjectAccounts() []tongo.AccountID {
+func (a *ElectionsRecoverStakeAction) SubjectAccounts() []tongo.AccountID {
 	return []tongo.AccountID{a.Staker}
+}
+
+func (a *JettonBurnAction) SubjectAccounts() []tongo.AccountID {
+	return []tongo.AccountID{a.Sender}
+}
+
+func (a *JettonMintAction) SubjectAccounts() []tongo.AccountID {
+	return []tongo.AccountID{a.Recipient}
 }

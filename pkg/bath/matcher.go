@@ -2,7 +2,9 @@ package bath
 
 import (
 	"github.com/tonkeeper/opentonapi/pkg/sentry"
+	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
+	"reflect"
 )
 
 type bubbleCheck func(bubble *Bubble) bool
@@ -29,7 +31,7 @@ func (s Straw[newBubbleT]) match(mapping map[*Bubble]Straw[newBubbleT], bubble *
 				break
 			}
 		}
-		if !found {
+		if !(found || childStraw.Optional) {
 			return false
 		}
 	}
@@ -84,6 +86,12 @@ func IsTx(b *Bubble) bool {
 	return ok
 }
 
+func Is(t actioner) bubbleCheck {
+	return func(bubble *Bubble) bool {
+		return reflect.TypeOf(bubble.Info) == reflect.TypeOf(t)
+	}
+}
+
 func IsJettonTransfer(b *Bubble) bool {
 	_, ok := b.Info.(BubbleJettonTransfer)
 	return ok
@@ -115,5 +123,34 @@ func HasOpcode(op uint32) bubbleCheck {
 func HasOperation(name abi.MsgOpName) bubbleCheck {
 	return func(b *Bubble) bool {
 		return b.Info.(BubbleTx).operation(name)
+	}
+}
+func IsAccount(id tongo.AccountID) bubbleCheck {
+	return func(bubble *Bubble) bool {
+		return bubble.Info.(BubbleTx).account.Address == id
+	}
+}
+func HasTextComment(comment string) bubbleCheck {
+	return func(bubble *Bubble) bool {
+		body := bubble.Info.(BubbleTx).decodedBody
+		if body == nil {
+			return false
+		}
+		if body.Operation != abi.TextCommentMsgOp {
+			return false
+		}
+		return string(body.Value.(abi.TextCommentMsgBody).Text) == comment
+	}
+}
+func HasInterface(iface abi.ContractInterface) bubbleCheck {
+	return func(bubble *Bubble) bool {
+		return bubble.Info.(BubbleTx).account.Is(iface)
+	}
+}
+
+func AmountInterval(min, max int64) bubbleCheck {
+	return func(bubble *Bubble) bool {
+		amount := bubble.Info.(BubbleTx).inputAmount
+		return amount >= min && amount <= max
 	}
 }
