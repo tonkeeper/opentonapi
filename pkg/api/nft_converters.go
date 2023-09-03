@@ -133,7 +133,7 @@ func (h Handler) convertNftHistory(ctx context.Context, account tongo.AccountID,
 			if action.Type != bath.NftItemTransfer {
 				continue
 			}
-			convertedAction, spamDetected, err := h.convertAction(ctx, account, action, acceptLanguage)
+			convertedAction, spamDetected, err := h.convertAction(ctx, &account, action, acceptLanguage)
 			if err != nil {
 				return nil, 0, err
 			}
