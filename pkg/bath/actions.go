@@ -3,6 +3,7 @@ package bath
 import (
 	"encoding/json"
 	"fmt"
+	"math/big"
 	"reflect"
 
 	"github.com/tonkeeper/tongo"
@@ -175,8 +176,8 @@ type (
 		JettonMasterIn  tongo.AccountID
 		JettonWalletOut tongo.AccountID
 		JettonMasterOut tongo.AccountID
-		AmountIn        uint64
-		AmountOut       uint64
+		AmountIn        big.Int
+		AmountOut       big.Int
 	}
 	DepositStakeAction struct {
 		Staker tongo.AccountID

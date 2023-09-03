@@ -89,6 +89,8 @@ func TestFindActions(t *testing.T) {
 			tongo.MustParseAccountID("0:533f30de5722157b8471f5503b9fc5800c8d8397e79743f796b11e609adae69f"),
 			tongo.MustParseAccountID("0:fe98106451d88f11b91d962dbaf032ac43134cc8f3470fb683312c258971b9ed"),
 			tongo.MustParseAccountID("Ef_Mkp0G2m4bB953bRjMdbHis2gA0TlY_Tzlhd8ETtFj1CZa"),
+			//failed stonfi swap
+			tongo.MustParseAccountID("EQDnAzaMBU_5opYldxgC_6Y3fWH5tgnvnyv2AsaB1tRztqnx"),
 		}),
 		litestorage.WithPreloadBlocks([]tongo.BlockID{
 			// tf nominator deposit
@@ -107,12 +109,10 @@ func TestFindActions(t *testing.T) {
 			tongo.MustParseBlockID("(0,8000000000000000,36716516)"),
 			// stonfi swap
 			tongo.MustParseBlockID("(0,8000000000000000,36693371)"),
+			// failed stonfi swap
+			tongo.MustParseBlockID("(0,8000000000000000,38072131)"),
 			// deploy contract actions
 			tongo.MustParseBlockID("(0,8000000000000000,22029126)"),
-			// deploy contract failed
-			tongo.MustParseBlockID("(0,8000000000000000,32606229)"),
-			tongo.MustParseBlockID("(-1,8000000000000000,27037607)"),
-			tongo.MustParseBlockID("(0,8000000000000000,32606232)"),
 			// encrypted comment
 			tongo.MustParseBlockID("(0,8000000000000000,36828763)"),
 			// cancel sale at getgems
@@ -221,6 +221,11 @@ func TestFindActions(t *testing.T) {
 			name:           "stonfi buying jUSDT",
 			hash:           "449aae1c0b5ebe55bc7c9efa6e511bd31b659b4bc92f3f40f50598fbbd9ca243",
 			filenamePrefix: "stonfi-purchase-jUSDT",
+		},
+		{
+			name:           "failed stonfi swap",
+			hash:           "77f5acb88fd863e9c00a164eb551ef83c17088d1f603bf463f64f952b93406b0",
+			filenamePrefix: "stonfi-failed-swap",
 		},
 		{
 			name:           "deploy contract action",

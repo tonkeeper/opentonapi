@@ -24,7 +24,7 @@ var DefaultStraws = []StrawFunc{
 	FindNFTTransfer,
 	FindJettonTransfer,
 	FindNftPurchase,
-	FindSTONfiSwap,
+	StonfiSwapStraw.Merge,
 	FindAuctionBidFragmentSimple,
 	DedustLPJettonMintStraw.Merge,
 	MegatonFiJettonSwap.Merge,
@@ -178,6 +178,7 @@ func FindJettonTransfer(bubble *Bubble) bool {
 				if !notifyTx.operation(abi.JettonNotifyMsgOp) {
 					return nil
 				}
+				transfer.success = true
 				newBubble.ValueFlow.Merge(notify.ValueFlow)
 				newBubble.Accounts = append(newBubble.Accounts, notify.Accounts...)
 				return &Merge{children: notify.Children}

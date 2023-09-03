@@ -4,68 +4,94 @@ import (
 	"github.com/tonkeeper/opentonapi/pkg/sentry"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
+	"golang.org/x/exp/slices"
 	"unsafe"
 )
 
 type bubbleCheck func(bubble *Bubble) bool
 type Straw[newBubbleT actioner] struct {
-	CheckFuncs []bubbleCheck
-	Builder    func(newAction *newBubbleT, bubble *Bubble) error
-	Children   []Straw[newBubbleT]
-	Optional   bool
+	CheckFuncs  []bubbleCheck
+	Builder     func(newAction *newBubbleT, bubble *Bubble) error
+	SingleChild *Straw[newBubbleT]
+	Children    []Straw[newBubbleT]
+	Optional    bool
 }
 
 //todo: https://tonviewer.com/transaction/16462168398a5c6324602beb1da2e90ab5510aaf180ec00404620a33487fa180
 
-func (s Straw[newBubbleT]) match(mapping map[*Bubble]Straw[newBubbleT], bubble *Bubble) bool {
+func (s Straw[newBubbleT]) match(bubble *Bubble) (mappings []struct {
+	s Straw[newBubbleT]
+	b *Bubble
+}) {
 	for _, checkFunc := range s.CheckFuncs {
 		if !checkFunc(bubble) {
-			return false
+			return nil
+		}
+	}
+	if s.SingleChild != nil && len(s.Children) != 0 {
+		panic("Straw can't have both SingleChild and Children")
+	}
+	if s.SingleChild != nil {
+		found := false
+		for _, child := range bubble.Children {
+			m := s.SingleChild.match(child)
+			if len(m) != 0 {
+				found = true
+				mappings = append(mappings, m...)
+				break
+			}
+		}
+		if !(found || s.SingleChild.Optional) {
+			return nil
 		}
 	}
 	for _, childStraw := range s.Children {
 		found := false
 		for _, child := range bubble.Children {
-			if childStraw.match(mapping, child) {
+			m := childStraw.match(child)
+			if len(m) != 0 {
 				found = true
+				mappings = append(mappings, m...)
 				break
 			}
 		}
 		if !(found || childStraw.Optional) {
-			return false
+			return nil
 		}
 	}
-	if _, ok := mapping[bubble]; ok {
-		//todo: log or maybe return error
-		return false
-	}
-
-	mapping[bubble] = s
-	return true
+	mappings = append(mappings, struct {
+		s Straw[newBubbleT]
+		b *Bubble
+	}{s, bubble})
+	return mappings
 }
 
 func (s Straw[newBubbleT]) Merge(bubble *Bubble) bool {
-	mapping := make(map[*Bubble]Straw[newBubbleT])
-	if !s.match(mapping, bubble) {
+	mapping := s.match(bubble)
+	if len(mapping) == 0 {
 		return false
 	}
 	var newBubble newBubbleT
 	var newChildren []*Bubble
 	newAccounts := bubble.Accounts
 	nvf := newValueFlow()
-	nvf.Merge(bubble.ValueFlow)
-	for b, straw := range mapping {
-		if straw.Builder != nil {
-			err := straw.Builder(&newBubble, b)
+	for i := len(mapping) - 1; i >= 0; i-- {
+		if mapping[i].s.Builder != nil {
+			err := mapping[i].s.Builder(&newBubble, mapping[i].b)
 			if err != nil {
-				sentry.Send("Straw.Merge", sentry.SentryInfoData{"error": err.Error(), "bubble": b.String()}, sentry.LevelError)
+				sentry.Send("Straw.Merge", sentry.SentryInfoData{"error": err.Error(), "bubble": mapping[i].b.String()}, sentry.LevelError)
 				return false
 			}
 		}
-		nvf.Merge(b.ValueFlow)
-		newAccounts = append(newAccounts, b.Accounts...)
-		for _, child := range b.Children {
-			if _, ok := mapping[child]; ok {
+		nvf.Merge(mapping[i].b.ValueFlow)
+		newAccounts = append(newAccounts, mapping[i].b.Accounts...)
+		for _, child := range mapping[i].b.Children {
+			if slices.ContainsFunc(mapping, func(s struct {
+				s Straw[newBubbleT]
+				b *Bubble
+			}) bool {
+				return s.b == child
+			}) {
 				continue
 			}
 			newChildren = append(newChildren, child)

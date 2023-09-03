@@ -1,8 +1,6 @@
 package bath
 
 import (
-	"math/big"
-
 	"github.com/tonkeeper/tongo/abi"
 )
 
@@ -12,8 +10,7 @@ var MegatonFiJettonSwap = Straw[BubbleJettonSwap]{
 	Builder: func(newAction *BubbleJettonSwap, bubble *Bubble) error {
 		tx := bubble.Info.(BubbleJettonTransfer)
 		newAction.UserWallet = tx.sender.Address
-		amountIn := big.Int(tx.amount)
-		newAction.AmountIn = amountIn.Uint64()
+		newAction.AmountIn = tx.amount
 		newAction.Router = tx.recipient.Address
 		newAction.JettonWalletIn = tx.senderWallet
 		newAction.JettonMasterIn = tx.master
@@ -34,8 +31,7 @@ var MegatonFiJettonSwap = Straw[BubbleJettonSwap]{
 								newAction.Success = tx.success
 								newAction.JettonWalletOut = tx.recipientWallet
 								newAction.JettonMasterOut = tx.master
-								amountOut := big.Int(tx.amount)
-								newAction.AmountOut = amountOut.Uint64()
+								newAction.AmountOut = tx.amount
 								return nil
 							},
 						},
