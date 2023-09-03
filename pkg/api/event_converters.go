@@ -532,8 +532,8 @@ func (h Handler) convertAction(ctx context.Context, viewer *tongo.AccountID, a b
 		}
 		action.JettonSwap.SetTo(oas.JettonSwapAction{
 			Dex:             dex,
-			AmountIn:        fmt.Sprintf("%v", a.JettonSwap.AmountIn),
-			AmountOut:       fmt.Sprintf("%v", a.JettonSwap.AmountOut),
+			AmountIn:        a.JettonSwap.AmountIn.String(),
+			AmountOut:       a.JettonSwap.AmountOut.String(),
 			UserWallet:      convertAccountAddress(a.JettonSwap.UserWallet, h.addressBook, h.previewGenerator),
 			Router:          convertAccountAddress(a.JettonSwap.Router, h.addressBook, h.previewGenerator),
 			JettonWalletIn:  a.JettonSwap.JettonWalletIn.String(),
