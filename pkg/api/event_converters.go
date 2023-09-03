@@ -5,7 +5,6 @@ import (
 	"encoding/hex"
 	"fmt"
 	"math/big"
-	"sort"
 	"strings"
 
 	"github.com/tonkeeper/opentonapi/pkg/references"
@@ -23,19 +22,18 @@ import (
 )
 
 func distinctAccounts(book addressBook, imgGenerator previewGenerator, accounts ...*tongo.AccountID) []oas.AccountAddress {
-	var okAccounts []*tongo.AccountID
+	okAccounts := make([]*tongo.AccountID, 0, len(accounts))
 	for _, account := range accounts {
 		if account == nil {
 			continue
 		}
+		if slices.Contains(okAccounts, account) {
+			continue
+		}
 		okAccounts = append(okAccounts, account)
 	}
-	sort.Slice(accounts, func(i, j int) bool {
-		return accounts[i].String() < accounts[j].String()
-	})
-	sortedAccounts := slices.Compact(accounts)
-	result := make([]oas.AccountAddress, 0, len(sortedAccounts))
-	for _, account := range sortedAccounts {
+	result := make([]oas.AccountAddress, 0, len(okAccounts))
+	for _, account := range okAccounts {
 		result = append(result, convertAccountAddress(*account, book, imgGenerator))
 	}
 	return result
