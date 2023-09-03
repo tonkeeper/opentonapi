@@ -121,13 +121,18 @@ func (h Handler) GetStakingPools(ctx context.Context, params oas.GetStakingPools
 		}
 		result.Pools = append(result.Pools, pool)
 	}
-
+	var participateInWhalePools []core.Nominator
+	if availableFor != nil {
+		participateInWhalePools, err = h.storage.GetParticipatingInWhalesPools(ctx, *availableFor)
+		if err != nil {
+			return nil, toError(http.StatusInternalServerError, err)
+		}
+	}
 	for k, w := range references.WhalesPools {
-		if availableFor != nil {
-			_, err = h.storage.GetWhalesPoolMemberInfo(ctx, k, *availableFor)
-			if err != nil && !w.AvailableFor(*availableFor) {
-				continue
-			}
+		if availableFor != nil && !w.AvailableFor(*availableFor) && !slices.ContainsFunc(participateInWhalePools, func(n core.Nominator) bool {
+			return n.Pool == k
+		}) { //hide pools which are not available for nominator
+			continue
 		}
 		poolConfig, poolStatus, nominatorsCount, err := h.storage.GetWhalesPoolInfo(ctx, k)
 		if err != nil {
