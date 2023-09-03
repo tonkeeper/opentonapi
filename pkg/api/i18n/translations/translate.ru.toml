@@ -1,0 +1,43 @@
+[auctionBidMessage]
+hash = "sha1-2c36361e0b08b227113726c6bb7ec4f336e20a96"
+other = "Bidding {{.Amount}} for {{.NftName}}"
+
+[contractDeployAction]
+hash = "sha1-4c05c3202bf5c51fb041f25f87fae835dd59c1ca"
+other = "Deploying a contract{{ if .Interfaces }} with interfaces {{.Interfaces}}{{ end }}"
+
+[electionsDepositStakeAction]
+hash = "sha1-2f0c2be92cda83ffd039db1fbb4264ed08675812"
+other = "Depositing {{.Amount}} for stake"
+
+[electionsRecoverStakeAction]
+hash = "sha1-1b113ae18ae7bc8fc10b00aa58f6a1f54ba53d18"
+other = "Recover {{.Amount}} stake"
+
+[jettonBurnAction]
+hash = "sha1-98168652a41a4d9a0044029b4c03cbc2606a4f94"
+other = "Burning {{.Value}} {{.JettonName}}"
+
+[jettonMintAction]
+hash = "sha1-4a789fa79f71339b6144faad63e3b6b1e0e54f7f"
+other = "Minting {{.Value}} {{.JettonName}}"
+
+[jettonSwapAction]
+hash = "sha1-84af68ffef3b74c3ba384a21586aad7068520603"
+other = "Swapping {{.AmountIn}} {{.JettonIn}} for {{.AmountOut}} {{.JettonOut}}"
+
+[smartContractExecMessage]
+hash = "sha1-4257ab338895db2ef6e518d8e20bde3815249bd5"
+other = "Execution of smart contract"
+
+[tonTransferAction]
+hash = "sha1-033820aa9bbe4761f0c6829bb7e2830892920316"
+other = "Transferring {{.Value}}"
+
+[withdrawStakeAction]
+hash = "sha1-f2a2dd30da61919d98fe81bc156fdbc608a9c25d"
+other = "Withdraw {{.Value}} from staking pool"
+
+[withdrawStakeRequestAction]
+hash = "sha1-e368b0eb1ed2eddd20c1c015f0e648325802784b"
+other = "Request to withdraw {{.Value}} from staking pool."

@@ -1,26 +1,23 @@
+[depositStakeAction]
+hash = "sha1-485da3104305584a7ae6c9cf2bcfc9098fcb05f1"
+other = "Стейкинг {{.Amount}}"
+
+[jettonTransferAction]
+hash = "sha1-ccb6cbae2eb8763be4aa1f21ab5ade08aa88e24d"
+other = "Перевод {{.Value}} {{.JettonName}}"
+
+[nftPurchaseAction]
+hash = "sha1-cde361711f631c2a2c210f9524ad3212120423ec"
+other = "Покупка NFT {{.Name}}"
+
+[nftTransferAction]
+hash = "sha1-8fcbb9475c07593528f618f5e97291169e8fc824"
+other = "Перевод NFT"
+
 [poolImplementationDescription]
 hash = "sha1-6865607e146fc7e6ec44550c3888b35b97ac0638"
 other = "Минимальный депозит {{.Deposit}} ТОН"
 
-[smartContractExecAction]
-other = "Выполнение смарт-контракта"
-
 [subscriptionAction]
+hash = "sha1-c5a82fe2e46cfa9d4568240967ec2bb4f261c4fd"
 other = "Оплата подписки {{.Value}}"
-
-[jettonTransferAction]
-other = "Перевод {{.Value}} {{.JettonName}}"
-
-[nftTransferAction]
-other = "Перевод NFT"
-
-[nftPurchaseAction]
-other = "Покупка NFT {{.Name}}"
-
-[depositStakeAction]
-other = "Стейкинг {{.Amount}}"
-
-[recoverStakeAction]
-other = "Вывод {{.Amount}}"
-
-

@@ -4,7 +4,7 @@ import (
 	"github.com/tonkeeper/opentonapi/pkg/sentry"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
-	"reflect"
+	"unsafe"
 )
 
 type bubbleCheck func(bubble *Bubble) bool
@@ -86,9 +86,14 @@ func IsTx(b *Bubble) bool {
 	return ok
 }
 
+type interfaceType struct {
+	typ  unsafe.Pointer
+	word unsafe.Pointer
+}
+
 func Is(t actioner) bubbleCheck {
 	return func(bubble *Bubble) bool {
-		return reflect.TypeOf(bubble.Info) == reflect.TypeOf(t)
+		return (*interfaceType)(unsafe.Pointer(&t)).typ == (*interfaceType)(unsafe.Pointer(&bubble.Info)).typ //faster than reflect 10x
 	}
 }
 

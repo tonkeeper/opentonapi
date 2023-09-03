@@ -234,7 +234,7 @@ func detectDirection(a, from, to tongo.AccountID, amount int64) int64 {
 
 func (a Action) ContributeToExtra(account tongo.AccountID) int64 {
 	switch a.Type {
-	case JettonTransfer, NftItemTransfer, ContractDeploy, UnSubscription, JettonSwap: // actions without extra
+	case JettonTransfer, NftItemTransfer, ContractDeploy, UnSubscription, JettonSwap, WithdrawStakeRequest: // actions without extra
 		return 0
 	case TonTransfer:
 		return detectDirection(account, a.TonTransfer.Sender, a.TonTransfer.Recipient, a.TonTransfer.Amount)
@@ -250,6 +250,10 @@ func (a Action) ContributeToExtra(account tongo.AccountID) int64 {
 		return detectDirection(account, a.ElectionsRecoverStake.Elector, a.ElectionsRecoverStake.Staker, a.ElectionsRecoverStake.Amount)
 	case Subscription:
 		return detectDirection(account, a.Subscription.Subscriber, a.Subscription.Beneficiary, a.Subscription.Amount)
+	case DepositStake:
+		return detectDirection(account, a.DepositStake.Staker, a.DepositStake.Pool, a.DepositStake.Amount)
+	case WithdrawStake:
+		return detectDirection(account, a.WithdrawStake.Pool, a.WithdrawStake.Staker, a.WithdrawStake.Amount)
 	default:
 		panic("unknown action type")
 	}
@@ -268,6 +272,9 @@ func (a Action) IsSubject(account tongo.AccountID) bool {
 		a.AuctionBid,
 		a.ElectionsDepositStake,
 		a.ElectionsRecoverStake,
+		a.DepositStake,
+		a.WithdrawStake,
+		a.WithdrawStakeRequest,
 		a.JettonSwap,
 		a.JettonMint,
 		a.JettonBurn,
@@ -346,4 +353,15 @@ func (a *JettonBurnAction) SubjectAccounts() []tongo.AccountID {
 
 func (a *JettonMintAction) SubjectAccounts() []tongo.AccountID {
 	return []tongo.AccountID{a.Recipient}
+}
+
+func (a *DepositStakeAction) SubjectAccounts() []tongo.AccountID {
+	return []tongo.AccountID{a.Staker, a.Pool}
+}
+
+func (a *WithdrawStakeAction) SubjectAccounts() []tongo.AccountID {
+	return []tongo.AccountID{a.Staker, a.Pool}
+}
+func (a *WithdrawStakeRequestAction) SubjectAccounts() []tongo.AccountID {
+	return []tongo.AccountID{a.Staker, a.Pool}
 }

@@ -10,10 +10,13 @@ test:
 gen:
 	go generate
 collect_i18n:
-	goi18n extract -outdir pkg/i18n/translations -packagepath "github.com/tonkeeper/opentonapi/pkg/i18n" -messagetype M
-	#go run github.com/nicksnyder/go-i18n/v2/goi18n extract -outdir pkg/i18n/translations todo: switch to this version after https://github.com/nicksnyder/go-i18n/pull/295
+	goi18n extract -outdir pkg/api/i18n/translations -packagepath "github.com/tonkeeper/opentonapi/pkg/api/i18n" -messagetype M
+	#go run github.com/nicksnyder/go-i18n/v2/goi18n extract -outdir pkg/api/i18n/translations todo: switch to this version after https://github.com/nicksnyder/go-i18n/pull/295
 translate:
-	goi18n merge -outdir pkg/i18n/translations/ pkg/i18n/translations/active.en.toml  pkg/i18n/translations/active.ru.toml
+	goi18n merge -outdir pkg/api/i18n/translations/ pkg/api/i18n/translations/active.en.toml  pkg/api/i18n/translations/active.ru.toml
 
+install_i18n:
+	git clone https://github.com/mr-tron/go-i18n/
+	cd go-i18n/v2 && go build -o $GOPATH/bin/goi18n github.com/nicksnyder/go-i18n/v2/goi18n
 run:
 	go run cmd/api/main.go

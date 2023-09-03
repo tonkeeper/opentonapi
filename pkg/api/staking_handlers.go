@@ -173,7 +173,7 @@ func (h Handler) GetStakingPools(ctx context.Context, params oas.GetStakingPools
 			Description: i18n.T(params.AcceptLanguage.Value, i18n.C{DefaultMessage: &i18n.M{
 				ID:    "poolImplementationDescription",
 				Other: "Minimum deposit {{.Deposit}} TON",
-			}, TemplateData: map[string]interface{}{"Deposit": minWhales / 1_000_000_000}}),
+			}, TemplateData: i18n.Template{"Deposit": minWhales / 1_000_000_000}}),
 			URL: references.WhalesPoolImplementationsURL,
 		},
 		string(oas.PoolInfoImplementationTf): {

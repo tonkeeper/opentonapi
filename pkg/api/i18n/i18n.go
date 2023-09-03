@@ -25,6 +25,7 @@ func init() {
 
 type C = i18n.LocalizeConfig
 type M = i18n.Message
+type Template = map[string]interface{}
 
 func T(lang string, c C) string {
 	s, _ := i18n.NewLocalizer(bundle, lang).Localize(&c)
