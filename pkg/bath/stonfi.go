@@ -96,8 +96,7 @@ func FindSTONfiSwap(bubble *Bubble) bool {
 		UserWallet:      *userWallet,
 		JettonWalletIn:  jettonWalletIn,
 		JettonWalletOut: jettonWalletOut,
-		JettonMasterIn:  swapTx.additionalInfo.JettonMasters[jettonWalletIn],
-		JettonMasterOut: swapTx.additionalInfo.JettonMasters[jettonWalletOut],
+		JettonMasterIn:  jettonTx.master,
 		AmountIn:        uint64(swap.JettonAmount),
 		Success:         false,
 	}
@@ -137,6 +136,7 @@ func FindSTONfiSwap(bubble *Bubble) bool {
 					if !ok {
 						return nil
 					}
+					stonfiSwap.JettonMasterOut = tx.master
 					if tx.recipient.Address != jettonTx.sender.Address {
 						return nil
 					}
