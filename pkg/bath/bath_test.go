@@ -121,6 +121,8 @@ func TestFindActions(t *testing.T) {
 			tongo.MustParseBlockID("(0,8000000000000000,36692636)"),
 			// megatonfi swap
 			tongo.MustParseBlockID("(0,8000000000000000,37707758)"),
+			// deposit liquid staking
+			tongo.MustParseBlockID("(0,8000000000000000,38159152)"),
 		}),
 	)
 
@@ -269,6 +271,11 @@ func TestFindActions(t *testing.T) {
 				FindJettonTransfer,
 				MegatonFiJettonSwap.Merge,
 			},
+		},
+		{
+			name:           "deposit liquid staking",
+			hash:           "482ef80fc6a147fba22c9e1d426ae0a5208e490aaccf0f0c51fd0a78b278a2a1",
+			filenamePrefix: "deposit-liquid-staking",
 		},
 	} {
 		t.Run(c.name, func(t *testing.T) {

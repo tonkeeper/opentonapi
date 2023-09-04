@@ -1,6 +1,7 @@
 package bath
 
 import (
+	"fmt"
 	"github.com/tonkeeper/opentonapi/pkg/sentry"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
@@ -183,5 +184,25 @@ func AmountInterval(min, max int64) bubbleCheck {
 	return func(bubble *Bubble) bool {
 		amount := bubble.Info.(BubbleTx).inputAmount
 		return amount >= min && amount <= max
+	}
+}
+
+func IsBounced(bubble *Bubble) bool {
+	tx, ok := bubble.Info.(BubbleTx)
+	return ok && tx.bounced
+}
+
+// todo: rewrite
+func JettonTransferOpCode(opCode uint32) bubbleCheck {
+	return func(bubble *Bubble) bool {
+		tx, ok := bubble.Info.(BubbleJettonTransfer)
+		if !ok {
+			return false
+		}
+		comment, ok := tx.payload.(string)
+		if !ok {
+			return false
+		}
+		return comment == fmt.Sprintf("Call: 0x%x", opCode)
 	}
 }

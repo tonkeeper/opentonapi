@@ -84,7 +84,7 @@ var StonfiSwapStraw = Straw[BubbleJettonSwap]{
 				return nil
 			},
 			SingleChild: &Straw[BubbleJettonSwap]{
-				CheckFuncs: []bubbleCheck{Is(BubbleJettonTransfer{})},
+				CheckFuncs: []bubbleCheck{Is(BubbleJettonTransfer{}), Or(JettonTransferOpCode(0xc64370e5), JettonTransferOpCode(0x5ffe1295))}, //todo: rewrite after jetton operation decoding
 				Builder: func(newAction *BubbleJettonSwap, bubble *Bubble) error {
 					jettonTx := bubble.Info.(BubbleJettonTransfer)
 					if jettonTx.senderWallet != newAction.JettonWalletOut {
@@ -101,5 +101,5 @@ var StonfiSwapStraw = Straw[BubbleJettonSwap]{
 }
 
 // https://dev.tonviewer.com/transaction/e19381edd8f05922eeba3c31f4b8b4b737478b4ca7b37130bdbbfd7bfa773227
-// todo: mint
+// todo: add liquidity (mint lp tokens)
 var StonfiMintStraw = Straw[BubbleJettonMint]{}

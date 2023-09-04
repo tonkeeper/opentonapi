@@ -1,0 +1,57 @@
+{
+   "Actions": [
+     {
+       "DepositStake": {
+         "Staker": "0:2cf3b5b8c891e517c9addbda1c0386a09ccacbb0e3faf630b51cfc8152325acb",
+         "Amount": 10000000000,
+         "Pool": "0:a45b17f28409229b78360e3290420f13e4fe20f90d7e2bf8c4ac6703259e22fa"
+       },
+       "Success": true,
+       "Type": "DepositStake"
+     },
+     {
+       "JettonMint": {
+         "Jetton": "0:bdf3fa8098d129b54b4f73b5bac5d1e1fd91eb054169c3916dfc8ccd536d1000",
+         "Recipient": "0:2cf3b5b8c891e517c9addbda1c0386a09ccacbb0e3faf630b51cfc8152325acb",
+         "RecipientsWallet": "0:84752f1d4cb8486d2952fe3f608674c92715f72c15660c7579bb78446b6bc523",
+         "Amount": "9990926232"
+       },
+       "Success": true,
+       "Type": "JettonMint"
+     },
+     {
+       "ContractDeploy": {
+         "Address": "0:84752f1d4cb8486d2952fe3f608674c92715f72c15660c7579bb78446b6bc523",
+         "Interfaces": null
+       },
+       "Success": true,
+       "Type": "ContractDeploy"
+     }
+   ],
+   "Accounts": [
+     {
+       "Account": "0:2cf3b5b8c891e517c9addbda1c0386a09ccacbb0e3faf630b51cfc8152325acb",
+       "Ton": -10054673000,
+       "Fee": 8000603,
+       "Jettons": null
+     },
+     {
+       "Account": "0:84752f1d4cb8486d2952fe3f608674c92715f72c15660c7579bb78446b6bc523",
+       "Ton": 25370000,
+       "Fee": 15370000,
+       "Jettons": null
+     },
+     {
+       "Account": "0:a45b17f28409229b78360e3290420f13e4fe20f90d7e2bf8c4ac6703259e22fa",
+       "Ton": 10017986000,
+       "Fee": 18031824,
+       "Jettons": null
+     },
+     {
+       "Account": "0:bdf3fa8098d129b54b4f73b5bac5d1e1fd91eb054169c3916dfc8ccd536d1000",
+       "Ton": 11317000,
+       "Fee": 11365499,
+       "Jettons": null
+     }
+   ]
+ }

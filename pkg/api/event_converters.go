@@ -248,7 +248,7 @@ func (h Handler) convertActionJettonMint(ctx context.Context, m *bath.JettonMint
 				"JettonName": meta.Name,
 			},
 		}),
-		Accounts: distinctAccounts(viewer, h.addressBook, h.previewGenerator, &m.Recipient, &m.Jetton),
+		Accounts: distinctAccounts(viewer, h.addressBook, h.previewGenerator, &m.Jetton, &m.Recipient),
 		Value:    oas.NewOptString(fmt.Sprintf("%v %v", amount, meta.Name)),
 	}
 	if len(preview.Image) > 0 {

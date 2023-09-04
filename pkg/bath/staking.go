@@ -109,11 +109,9 @@ var DepositTFStakeStraw = Straw[BubbleDepositStake]{
 		newAction.Success = tx.success
 		return nil
 	},
-	Children: []Straw[BubbleDepositStake]{
-		{
-			Optional:   true,
-			CheckFuncs: []bubbleCheck{IsTx, HasOpcode(0xffffffff)},
-		},
+	SingleChild: &Straw[BubbleDepositStake]{
+		CheckFuncs: []bubbleCheck{IsBounced},
+		Optional:   true,
 	},
 }
 
@@ -181,13 +179,27 @@ var WithdrawStakeImmediatelyStraw = Straw[BubbleWithdrawStake]{
 		newAction.Amount = -req.attachedAmount
 		return nil
 	},
-	Children: []Straw[BubbleWithdrawStake]{
-		{
-			CheckFuncs: []bubbleCheck{IsTx, AmountInterval(int64(tongo.OneTON), 1<<63-1)},
-			Builder: func(newAction *BubbleWithdrawStake, bubble *Bubble) error {
-				newAction.Amount += bubble.Info.(BubbleTx).inputAmount
-				return nil
-			},
+	SingleChild: &Straw[BubbleWithdrawStake]{
+		CheckFuncs: []bubbleCheck{IsTx, AmountInterval(int64(tongo.OneTON), 1<<63-1)},
+		Builder: func(newAction *BubbleWithdrawStake, bubble *Bubble) error {
+			newAction.Amount += bubble.Info.(BubbleTx).inputAmount
+			return nil
 		},
+	},
+}
+
+var DepositLiquidStakeStraw = Straw[BubbleDepositStake]{
+	CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.TonstakePoolDepositMsgOp)}, //todo: check interface HasInterface(abi.TonstakePool),
+	Builder: func(newAction *BubbleDepositStake, bubble *Bubble) error {
+		tx := bubble.Info.(BubbleTx)
+		newAction.Pool = tx.account.Address
+		newAction.Staker = tx.inputFrom.Address
+		newAction.Amount = tx.inputAmount - int64(tongo.OneTON)
+		newAction.Success = tx.success
+		return nil
+	},
+	SingleChild: &Straw[BubbleDepositStake]{
+		CheckFuncs: []bubbleCheck{IsBounced},
+		Optional:   true,
 	},
 }

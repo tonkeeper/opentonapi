@@ -31,6 +31,7 @@ var DefaultStraws = []StrawFunc{
 	FindInitialSubscription,
 	FindExtendedSubscription,
 	FindUnSubscription,
+	DepositLiquidStakeStraw.Merge,
 	ElectionsDepositStakeStraw.Merge,
 	ElectionsRecoverStakeStraw.Merge,
 	DepositTFStakeStraw.Merge,
