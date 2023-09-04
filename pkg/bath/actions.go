@@ -235,7 +235,7 @@ func detectDirection(a, from, to tongo.AccountID, amount int64) int64 {
 
 func (a Action) ContributeToExtra(account tongo.AccountID) int64 {
 	switch a.Type {
-	case JettonTransfer, NftItemTransfer, ContractDeploy, UnSubscription, JettonSwap, WithdrawStakeRequest: // actions without extra
+	case JettonTransfer, NftItemTransfer, ContractDeploy, UnSubscription, JettonSwap, JettonMint, JettonBurn, WithdrawStakeRequest: // actions without extra
 		return 0
 	case TonTransfer:
 		return detectDirection(account, a.TonTransfer.Sender, a.TonTransfer.Recipient, a.TonTransfer.Amount)
