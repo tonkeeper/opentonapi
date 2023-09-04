@@ -124,7 +124,7 @@ func (h Handler) GetStakingPools(ctx context.Context, params oas.GetStakingPools
 	var participateInWhalePools []core.Nominator
 	if availableFor != nil {
 		participateInWhalePools, err = h.storage.GetParticipatingInWhalesPools(ctx, *availableFor)
-		if err != nil {
+		if err != nil && !errors.Is(err, core.ErrEntityNotFound) {
 			return nil, toError(http.StatusInternalServerError, err)
 		}
 	}
