@@ -12,6 +12,7 @@ import (
 
 	"github.com/shopspring/decimal"
 	"github.com/shurcooL/graphql"
+	"github.com/tonkeeper/opentonapi/pkg/image"
 	"github.com/tonkeeper/tongo"
 	"go.uber.org/zap"
 	"golang.org/x/exp/maps"
@@ -30,6 +31,7 @@ type KnownAddress struct {
 // AttachedAccount represents domains, nft collections for quick search by name are presented
 type AttachedAccount struct {
 	Name       string `json:"name"`
+	Preview    string `json:"preview"`
 	Wallet     string `json:"wallet"`
 	Normalized string
 }
@@ -68,14 +70,20 @@ type KnownCollection struct {
 	Approvers   []string
 }
 
-type Options struct {
-	addressers []addresser
-}
 type Option func(o *Options)
+
+type Options struct {
+	addressers       []addresser
+	previewGenerator previewGenerator
+}
 
 type addresser interface {
 	GetAddress(a tongo.AccountID) (KnownAddress, bool)
 	SearchAttachedAccounts(prefix string) []AttachedAccount
+}
+
+type previewGenerator interface {
+	GenerateImageUrl(url string, height, width int) string
 }
 
 func WithAdditionalAddressesSource(a addresser) Option {
@@ -84,14 +92,21 @@ func WithAdditionalAddressesSource(a addresser) Option {
 	}
 }
 
+func WithPreviewGenerator(p previewGenerator) Option {
+	return func(o *Options) {
+		o.previewGenerator = p
+	}
+}
+
 // Book holds information about known accounts, jettons, NFT collections manually crafted by the tonkeeper team and the community.
 type Book struct {
-	mu          sync.RWMutex
-	addresses   map[tongo.AccountID]KnownAddress
-	collections map[tongo.AccountID]KnownCollection
-	jettons     map[tongo.AccountID]KnownJetton
-	tfPools     map[tongo.AccountID]TFPoolInfo
-	addressers  []addresser
+	mu               sync.RWMutex
+	addresses        map[tongo.AccountID]KnownAddress
+	collections      map[tongo.AccountID]KnownCollection
+	jettons          map[tongo.AccountID]KnownJetton
+	tfPools          map[tongo.AccountID]TFPoolInfo
+	addressers       []addresser
+	previewGenerator previewGenerator
 }
 
 type TFPoolInfo struct {
@@ -193,12 +208,17 @@ func NewAddressBook(logger *zap.Logger, addressPath, jettonPath, collectionPath 
 	jettons := make(map[tongo.AccountID]KnownJetton)
 	tfPools := make(map[tongo.AccountID]TFPoolInfo)
 
+	if options.previewGenerator == nil {
+		options.previewGenerator = image.NewImgGenerator()
+	}
+
 	book := &Book{
-		addresses:   addresses,
-		collections: collections,
-		jettons:     jettons,
-		tfPools:     tfPools,
-		addressers:  options.addressers,
+		addresses:        addresses,
+		collections:      collections,
+		jettons:          jettons,
+		tfPools:          tfPools,
+		addressers:       options.addressers,
+		previewGenerator: options.previewGenerator,
 	}
 
 	go func() {

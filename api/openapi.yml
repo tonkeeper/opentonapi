@@ -4516,6 +4516,7 @@ components:
             required:
               - address
               - name
+              - preview
             properties:
               address:
                 type: string
@@ -4523,6 +4524,9 @@ components:
               name:
                 type: string
                 example: "blah_blah.ton"
+              preview:
+                type: string
+                example: "https://cache.tonapi.io/images/media.jpg"
     DnsExpiring:
       type: object
       required:

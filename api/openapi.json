@@ -1838,11 +1838,16 @@
         "name": {
          "example": "blah_blah.ton",
          "type": "string"
+        },
+        "preview": {
+         "example": "https://cache.tonapi.io/images/media.jpg",
+         "type": "string"
         }
        },
        "required": [
         "address",
-        "name"
+        "name",
+        "preview"
        ],
        "type": "object"
       },

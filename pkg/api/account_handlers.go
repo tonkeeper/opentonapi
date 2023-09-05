@@ -177,6 +177,7 @@ func (h Handler) SearchAccounts(ctx context.Context, params oas.SearchAccountsPa
 		response.Addresses = append(response.Addresses, oas.FoundAccountsAddressesItem{
 			Address: account.Wallet,
 			Name:    account.Name,
+			Preview: account.Preview,
 		})
 	}
 
