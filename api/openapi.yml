@@ -4128,6 +4128,10 @@ components:
           type: object
           additionalProperties: true
           example: { }
+        previews:
+          type: array
+          items:
+            $ref: '#/components/schemas/ImagePreview'
     NftCollections:
       type: object
       required:

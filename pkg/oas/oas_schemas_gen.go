@@ -5027,6 +5027,7 @@ type NftCollection struct {
 	Owner                OptAccountAddress        `json:"owner"`
 	RawCollectionContent string                   `json:"raw_collection_content"`
 	Metadata             OptNftCollectionMetadata `json:"metadata"`
+	Previews             []ImagePreview           `json:"previews"`
 }
 
 // GetAddress returns the value of Address.
@@ -5054,6 +5055,11 @@ func (s *NftCollection) GetMetadata() OptNftCollectionMetadata {
 	return s.Metadata
 }
 
+// GetPreviews returns the value of Previews.
+func (s *NftCollection) GetPreviews() []ImagePreview {
+	return s.Previews
+}
+
 // SetAddress sets the value of Address.
 func (s *NftCollection) SetAddress(val string) {
 	s.Address = val
@@ -5077,6 +5083,11 @@ func (s *NftCollection) SetRawCollectionContent(val string) {
 // SetMetadata sets the value of Metadata.
 func (s *NftCollection) SetMetadata(val OptNftCollectionMetadata) {
 	s.Metadata = val
+}
+
+// SetPreviews sets the value of Previews.
+func (s *NftCollection) SetPreviews(val []ImagePreview) {
+	s.Previews = val
 }
 
 type NftCollectionMetadata map[string]jx.Raw

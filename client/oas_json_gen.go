@@ -14887,14 +14887,25 @@ func (s *NftCollection) encodeFields(e *jx.Encoder) {
 			s.Metadata.Encode(e)
 		}
 	}
+	{
+		if s.Previews != nil {
+			e.FieldStart("previews")
+			e.ArrStart()
+			for _, elem := range s.Previews {
+				elem.Encode(e)
+			}
+			e.ArrEnd()
+		}
+	}
 }
 
-var jsonFieldsNameOfNftCollection = [5]string{
+var jsonFieldsNameOfNftCollection = [6]string{
 	0: "address",
 	1: "next_item_index",
 	2: "owner",
 	3: "raw_collection_content",
 	4: "metadata",
+	5: "previews",
 }
 
 // Decode decodes NftCollection from json.
@@ -14961,6 +14972,23 @@ func (s *NftCollection) Decode(d *jx.Decoder) error {
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"metadata\"")
+			}
+		case "previews":
+			if err := func() error {
+				s.Previews = make([]ImagePreview, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem ImagePreview
+					if err := elem.Decode(d); err != nil {
+						return err
+					}
+					s.Previews = append(s.Previews, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"previews\"")
 			}
 		default:
 			return d.Skip()

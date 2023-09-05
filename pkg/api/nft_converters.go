@@ -95,16 +95,28 @@ func convertNftCollection(collection core.NftCollection, book addressBook, imgGe
 		RawCollectionContent: fmt.Sprintf("%x", collection.CollectionContent[:]),
 		Owner:                convertOptAccountAddress(collection.OwnerAddress, book, imgGenerator),
 	}
-	if len(collection.Metadata) != 0 {
-		metadata := map[string]jx.Raw{}
-		for k, v := range collection.Metadata {
-			var err error
-			metadata[k], err = json.Marshal(v)
-			if err != nil {
-				continue
-			}
+	if len(collection.Metadata) == 0 {
+		return c
+	}
+	metadata := map[string]jx.Raw{}
+	for k, v := range collection.Metadata {
+		var err error
+		metadata[k], err = json.Marshal(v)
+		if err != nil {
+			continue
 		}
-		c.Metadata.SetTo(metadata)
+	}
+	c.Metadata.SetTo(metadata)
+	image, ok := collection.Metadata["image"]
+	if !ok || image.(string) == "" {
+		return c
+	}
+	for _, size := range []int{5, 100, 500, 1500} {
+		url := imgGenerator.GenerateImageUrl(image.(string), size, size)
+		c.Previews = append(c.Previews, oas.ImagePreview{
+			Resolution: fmt.Sprintf("%vx%v", size, size),
+			URL:        url,
+		})
 	}
 	return c
 }

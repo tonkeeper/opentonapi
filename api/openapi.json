@@ -2422,6 +2422,12 @@
      "owner": {
       "$ref": "#/components/schemas/AccountAddress"
      },
+     "previews": {
+      "items": {
+       "$ref": "#/components/schemas/ImagePreview"
+      },
+      "type": "array"
+     },
      "raw_collection_content": {
       "example": "697066733a2f2f516d596e437861746f5178433571584b79773971656768415853626f3544644e6a32387631487669437a47355359",
       "type": "string"
