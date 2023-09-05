@@ -115,7 +115,7 @@ func convertNftCollection(collection core.NftCollection, book addressBook) oas.N
 	}
 	c.Metadata.SetTo(metadata)
 	for _, size := range []int{5, 100, 500, 1500} {
-		url := imgGenerator.GenerateImageUrl(image, size, size)
+		url := imgGenerator.DefaultGenerator.GenerateImageUrl(image, size, size)
 		c.Previews = append(c.Previews, oas.ImagePreview{
 			Resolution: fmt.Sprintf("%vx%v", size, size),
 			URL:        url,

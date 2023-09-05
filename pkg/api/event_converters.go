@@ -534,8 +534,8 @@ func (h Handler) convertAction(ctx context.Context, viewer *tongo.AccountID, a b
 			Dex:             dex,
 			AmountIn:        a.JettonSwap.AmountIn.String(),
 			AmountOut:       a.JettonSwap.AmountOut.String(),
-			UserWallet:      convertAccountAddress(a.JettonSwap.UserWallet, h.addressBook, h.previewGenerator),
-			Router:          convertAccountAddress(a.JettonSwap.Router, h.addressBook, h.previewGenerator),
+			UserWallet:      convertAccountAddress(a.JettonSwap.UserWallet, h.addressBook),
+			Router:          convertAccountAddress(a.JettonSwap.Router, h.addressBook),
 			JettonMasterIn:  oas.NewOptJettonPreview(jettonInPreview),
 			JettonMasterOut: oas.NewOptJettonPreview(jettonOutPreview),
 		})
