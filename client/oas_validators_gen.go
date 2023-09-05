@@ -1568,8 +1568,15 @@ func (s *JettonSwapAction) Validate() error {
 		})
 	}
 	if err := func() error {
-		if err := s.JettonMasterIn.Validate(); err != nil {
-			return err
+		if value, ok := s.JettonMasterIn.Get(); ok {
+			if err := func() error {
+				if err := value.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
 		}
 		return nil
 	}(); err != nil {
@@ -1579,8 +1586,15 @@ func (s *JettonSwapAction) Validate() error {
 		})
 	}
 	if err := func() error {
-		if err := s.JettonMasterOut.Validate(); err != nil {
-			return err
+		if value, ok := s.JettonMasterOut.Get(); ok {
+			if err := func() error {
+				if err := value.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
 		}
 		return nil
 	}(); err != nil {

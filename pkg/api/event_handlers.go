@@ -233,7 +233,7 @@ func (h Handler) EmulateMessageToAccountEvent(ctx context.Context, request *oas.
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
-	trace, err := emulatedTreeToTrace(tree, emulator.FinalStates())
+	trace, err := emulatedTreeToTrace(ctx, tree, emulator.FinalStates())
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
@@ -266,7 +266,7 @@ func (h Handler) EmulateMessageToEvent(ctx context.Context, request *oas.Emulate
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
-	trace, err := emulatedTreeToTrace(tree, emulator.FinalStates())
+	trace, err := emulatedTreeToTrace(ctx, tree, emulator.FinalStates())
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
@@ -299,7 +299,7 @@ func (h Handler) EmulateMessageToTrace(ctx context.Context, request *oas.Emulate
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
-	trace, err := emulatedTreeToTrace(tree, emulator.FinalStates())
+	trace, err := emulatedTreeToTrace(ctx, tree, emulator.FinalStates())
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
@@ -356,7 +356,7 @@ func (h Handler) EmulateMessageToWallet(ctx context.Context, request *oas.Emulat
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
-	trace, err := emulatedTreeToTrace(tree, emulator.FinalStates())
+	trace, err := emulatedTreeToTrace(ctx, tree, emulator.FinalStates())
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
@@ -410,7 +410,7 @@ func (h Handler) addToMempool(bytesBoc []byte, shardAccount map[tongo.AccountID]
 		return shardAccount, err
 	}
 	newShardAccount := emulator.FinalStates()
-	trace, err := emulatedTreeToTrace(tree, newShardAccount)
+	trace, err := emulatedTreeToTrace(ctx, tree, newShardAccount)
 	if err != nil {
 		return shardAccount, err
 	}
@@ -436,7 +436,7 @@ func (h Handler) addToMempool(bytesBoc []byte, shardAccount map[tongo.AccountID]
 	return newShardAccount, nil
 }
 
-func emulatedTreeToTrace(tree *txemulator.TxTree, accounts map[tongo.AccountID]tlb.ShardAccount) (*core.Trace, error) {
+func emulatedTreeToTrace(ctx context.Context, tree *txemulator.TxTree, accounts map[tongo.AccountID]tlb.ShardAccount) (*core.Trace, error) {
 	if !tree.TX.Msgs.InMsg.Exists {
 		return nil, errors.New("there is no incoming message in emulation result")
 	}
@@ -460,15 +460,15 @@ func emulatedTreeToTrace(tree *txemulator.TxTree, accounts map[tongo.AccountID]t
 	t := &core.Trace{
 		Transaction:       *transaction,
 		AccountInterfaces: nil, //todo: do
-		AdditionalInfo:    nil, //todo: do
 	}
 	for i := range tree.Children {
-		child, err := emulatedTreeToTrace(tree.Children[i], accounts)
+		child, err := emulatedTreeToTrace(ctx, tree.Children[i], accounts)
 		if err != nil {
 			return nil, err
 		}
 		t.Children = append(t.Children, child)
 	}
+	//core.CollectAdditionalInfo(ctx, newSharedAccountExecutor(), t)
 	return t, nil
 }
 
@@ -483,3 +483,36 @@ func sendMessage(ctx context.Context, msgBoc string, msgSender messageSender) ([
 	}
 	return payload, nil
 }
+
+//
+//type shardsAccountExecutor struct {
+//	accounts map[tongo.AccountID]tlb.ShardAccount
+//}
+//
+//func (s shardsAccountExecutor) JettonMastersForWallets(ctx context.Context, wallets []tongo.AccountID) (map[tongo.AccountID]tongo.AccountID, error) {
+//	for _, wallet := range wallets {
+//		if _, ok := s.accounts[wallet]; !ok {
+//			return nil, errors.New("wallet not found")
+//		}
+//	}
+//}
+//
+//func (s shardsAccountExecutor) GetGemsContracts(ctx context.Context, getGems []tongo.AccountID) (map[tongo.AccountID]core.NftSaleContract, error) {
+//	//TODO implement me
+//	panic("implement me")
+//}
+//
+//func (s shardsAccountExecutor) NftSaleContracts(ctx context.Context, contracts []tongo.AccountID) (map[tongo.AccountID]core.NftSaleContract, error) {
+//	//TODO implement me
+//	panic("implement me")
+//}
+//
+//func (s shardsAccountExecutor) STONfiPools(ctx context.Context, poolIDs []tongo.AccountID) (map[tongo.AccountID]core.STONfiPool, error) {
+//	//TODO implement me
+//	panic("implement me")
+//}
+//
+//func newSharedAccountExecutor() *shardsAccountExecutor {
+//
+//	return &shardsAccountExecutor{}
+//}

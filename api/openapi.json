@@ -2170,16 +2170,16 @@
      "jetton_master_out": {
       "$ref": "#/components/schemas/JettonPreview"
      },
-     "jetton_wallet_in": {
-      "example": "0:dea8f638b789172ce36d10a20318125e52c649aa84893cd77858224fe2b9b0ee",
-      "type": "string"
-     },
-     "jetton_wallet_out": {
-      "example": "0:dea8f638b789172ce36d10a20318125e52c649aa84893cd77858224fe2b9b0ee",
-      "type": "string"
-     },
      "router": {
       "$ref": "#/components/schemas/AccountAddress"
+     },
+     "ton_in": {
+      "example": 1000000000,
+      "type": "integer"
+     },
+     "ton_out": {
+      "example": 2000000000,
+      "type": "integer"
      },
      "user_wallet": {
       "$ref": "#/components/schemas/AccountAddress"
@@ -2190,11 +2190,7 @@
      "amount_in",
      "amount_out",
      "user_wallet",
-     "router",
-     "jetton_wallet_in",
-     "jetton_master_in",
-     "jetton_wallet_out",
-     "jetton_master_out"
+     "router"
     ],
     "type": "object"
    },

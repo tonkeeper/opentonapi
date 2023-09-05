@@ -252,6 +252,9 @@ func (a Action) ContributeToExtra(account tongo.AccountID) int64 {
 	case Subscription:
 		return detectDirection(account, a.Subscription.Subscriber, a.Subscription.Beneficiary, a.Subscription.Amount)
 	case DepositStake:
+		if !a.Success {
+			return 0
+		}
 		return detectDirection(account, a.DepositStake.Staker, a.DepositStake.Pool, a.DepositStake.Amount)
 	case WithdrawStake:
 		return detectDirection(account, a.WithdrawStake.Pool, a.WithdrawStake.Staker, a.WithdrawStake.Amount)

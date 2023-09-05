@@ -4442,12 +4442,12 @@ type JettonSwapAction struct {
 	Dex             JettonSwapActionDex `json:"dex"`
 	AmountIn        string              `json:"amount_in"`
 	AmountOut       string              `json:"amount_out"`
+	TonIn           OptInt              `json:"ton_in"`
+	TonOut          OptInt              `json:"ton_out"`
 	UserWallet      AccountAddress      `json:"user_wallet"`
 	Router          AccountAddress      `json:"router"`
-	JettonWalletIn  string              `json:"jetton_wallet_in"`
-	JettonMasterIn  JettonPreview       `json:"jetton_master_in"`
-	JettonWalletOut string              `json:"jetton_wallet_out"`
-	JettonMasterOut JettonPreview       `json:"jetton_master_out"`
+	JettonMasterIn  OptJettonPreview    `json:"jetton_master_in"`
+	JettonMasterOut OptJettonPreview    `json:"jetton_master_out"`
 }
 
 // GetDex returns the value of Dex.
@@ -4465,6 +4465,16 @@ func (s *JettonSwapAction) GetAmountOut() string {
 	return s.AmountOut
 }
 
+// GetTonIn returns the value of TonIn.
+func (s *JettonSwapAction) GetTonIn() OptInt {
+	return s.TonIn
+}
+
+// GetTonOut returns the value of TonOut.
+func (s *JettonSwapAction) GetTonOut() OptInt {
+	return s.TonOut
+}
+
 // GetUserWallet returns the value of UserWallet.
 func (s *JettonSwapAction) GetUserWallet() AccountAddress {
 	return s.UserWallet
@@ -4475,23 +4485,13 @@ func (s *JettonSwapAction) GetRouter() AccountAddress {
 	return s.Router
 }
 
-// GetJettonWalletIn returns the value of JettonWalletIn.
-func (s *JettonSwapAction) GetJettonWalletIn() string {
-	return s.JettonWalletIn
-}
-
 // GetJettonMasterIn returns the value of JettonMasterIn.
-func (s *JettonSwapAction) GetJettonMasterIn() JettonPreview {
+func (s *JettonSwapAction) GetJettonMasterIn() OptJettonPreview {
 	return s.JettonMasterIn
 }
 
-// GetJettonWalletOut returns the value of JettonWalletOut.
-func (s *JettonSwapAction) GetJettonWalletOut() string {
-	return s.JettonWalletOut
-}
-
 // GetJettonMasterOut returns the value of JettonMasterOut.
-func (s *JettonSwapAction) GetJettonMasterOut() JettonPreview {
+func (s *JettonSwapAction) GetJettonMasterOut() OptJettonPreview {
 	return s.JettonMasterOut
 }
 
@@ -4510,6 +4510,16 @@ func (s *JettonSwapAction) SetAmountOut(val string) {
 	s.AmountOut = val
 }
 
+// SetTonIn sets the value of TonIn.
+func (s *JettonSwapAction) SetTonIn(val OptInt) {
+	s.TonIn = val
+}
+
+// SetTonOut sets the value of TonOut.
+func (s *JettonSwapAction) SetTonOut(val OptInt) {
+	s.TonOut = val
+}
+
 // SetUserWallet sets the value of UserWallet.
 func (s *JettonSwapAction) SetUserWallet(val AccountAddress) {
 	s.UserWallet = val
@@ -4520,23 +4530,13 @@ func (s *JettonSwapAction) SetRouter(val AccountAddress) {
 	s.Router = val
 }
 
-// SetJettonWalletIn sets the value of JettonWalletIn.
-func (s *JettonSwapAction) SetJettonWalletIn(val string) {
-	s.JettonWalletIn = val
-}
-
 // SetJettonMasterIn sets the value of JettonMasterIn.
-func (s *JettonSwapAction) SetJettonMasterIn(val JettonPreview) {
+func (s *JettonSwapAction) SetJettonMasterIn(val OptJettonPreview) {
 	s.JettonMasterIn = val
 }
 
-// SetJettonWalletOut sets the value of JettonWalletOut.
-func (s *JettonSwapAction) SetJettonWalletOut(val string) {
-	s.JettonWalletOut = val
-}
-
 // SetJettonMasterOut sets the value of JettonMasterOut.
-func (s *JettonSwapAction) SetJettonMasterOut(val JettonPreview) {
+func (s *JettonSwapAction) SetJettonMasterOut(val OptJettonPreview) {
 	s.JettonMasterOut = val
 }
 
@@ -6511,6 +6511,52 @@ func (o OptJettonMintAction) Get() (v JettonMintAction, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptJettonMintAction) Or(d JettonMintAction) JettonMintAction {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptJettonPreview returns new OptJettonPreview with value set to v.
+func NewOptJettonPreview(v JettonPreview) OptJettonPreview {
+	return OptJettonPreview{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptJettonPreview is optional JettonPreview.
+type OptJettonPreview struct {
+	Value JettonPreview
+	Set   bool
+}
+
+// IsSet returns true if OptJettonPreview was set.
+func (o OptJettonPreview) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptJettonPreview) Reset() {
+	var v JettonPreview
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptJettonPreview) SetTo(v JettonPreview) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptJettonPreview) Get() (v JettonPreview, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptJettonPreview) Or(d JettonPreview) JettonPreview {
 	if v, ok := o.Get(); ok {
 		return v
 	}

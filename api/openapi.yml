@@ -3771,10 +3771,6 @@ components:
         - amount_out
         - user_wallet
         - router
-        - jetton_wallet_in
-        - jetton_master_in
-        - jetton_wallet_out
-        - jetton_master_out
       properties:
         dex:
           type: string
@@ -3788,18 +3784,18 @@ components:
         amount_out:
           type: string
           example: "1660050553"
+        ton_in:
+          type: integer
+          example: 1000000000
+        ton_out:
+          type: integer
+          example: 2000000000
         user_wallet:
           $ref: '#/components/schemas/AccountAddress'
         router:
           $ref: '#/components/schemas/AccountAddress'
-        jetton_wallet_in:
-          type: string
-          example: 0:dea8f638b789172ce36d10a20318125e52c649aa84893cd77858224fe2b9b0ee
         jetton_master_in:
           $ref: '#/components/schemas/JettonPreview'
-        jetton_wallet_out:
-          type: string
-          example: 0:dea8f638b789172ce36d10a20318125e52c649aa84893cd77858224fe2b9b0ee
         jetton_master_out:
           $ref: '#/components/schemas/JettonPreview'
     NftPurchaseAction:

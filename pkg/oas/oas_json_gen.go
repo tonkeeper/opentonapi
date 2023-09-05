@@ -13491,6 +13491,18 @@ func (s *JettonSwapAction) encodeFields(e *jx.Encoder) {
 		e.Str(s.AmountOut)
 	}
 	{
+		if s.TonIn.Set {
+			e.FieldStart("ton_in")
+			s.TonIn.Encode(e)
+		}
+	}
+	{
+		if s.TonOut.Set {
+			e.FieldStart("ton_out")
+			s.TonOut.Encode(e)
+		}
+	}
+	{
 		e.FieldStart("user_wallet")
 		s.UserWallet.Encode(e)
 	}
@@ -13499,20 +13511,16 @@ func (s *JettonSwapAction) encodeFields(e *jx.Encoder) {
 		s.Router.Encode(e)
 	}
 	{
-		e.FieldStart("jetton_wallet_in")
-		e.Str(s.JettonWalletIn)
+		if s.JettonMasterIn.Set {
+			e.FieldStart("jetton_master_in")
+			s.JettonMasterIn.Encode(e)
+		}
 	}
 	{
-		e.FieldStart("jetton_master_in")
-		s.JettonMasterIn.Encode(e)
-	}
-	{
-		e.FieldStart("jetton_wallet_out")
-		e.Str(s.JettonWalletOut)
-	}
-	{
-		e.FieldStart("jetton_master_out")
-		s.JettonMasterOut.Encode(e)
+		if s.JettonMasterOut.Set {
+			e.FieldStart("jetton_master_out")
+			s.JettonMasterOut.Encode(e)
+		}
 	}
 }
 
@@ -13520,11 +13528,11 @@ var jsonFieldsNameOfJettonSwapAction = [9]string{
 	0: "dex",
 	1: "amount_in",
 	2: "amount_out",
-	3: "user_wallet",
-	4: "router",
-	5: "jetton_wallet_in",
-	6: "jetton_master_in",
-	7: "jetton_wallet_out",
+	3: "ton_in",
+	4: "ton_out",
+	5: "user_wallet",
+	6: "router",
+	7: "jetton_master_in",
 	8: "jetton_master_out",
 }
 
@@ -13571,8 +13579,28 @@ func (s *JettonSwapAction) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"amount_out\"")
 			}
+		case "ton_in":
+			if err := func() error {
+				s.TonIn.Reset()
+				if err := s.TonIn.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"ton_in\"")
+			}
+		case "ton_out":
+			if err := func() error {
+				s.TonOut.Reset()
+				if err := s.TonOut.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"ton_out\"")
+			}
 		case "user_wallet":
-			requiredBitSet[0] |= 1 << 3
+			requiredBitSet[0] |= 1 << 5
 			if err := func() error {
 				if err := s.UserWallet.Decode(d); err != nil {
 					return err
@@ -13582,7 +13610,7 @@ func (s *JettonSwapAction) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"user_wallet\"")
 			}
 		case "router":
-			requiredBitSet[0] |= 1 << 4
+			requiredBitSet[0] |= 1 << 6
 			if err := func() error {
 				if err := s.Router.Decode(d); err != nil {
 					return err
@@ -13591,21 +13619,9 @@ func (s *JettonSwapAction) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"router\"")
 			}
-		case "jetton_wallet_in":
-			requiredBitSet[0] |= 1 << 5
-			if err := func() error {
-				v, err := d.Str()
-				s.JettonWalletIn = string(v)
-				if err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"jetton_wallet_in\"")
-			}
 		case "jetton_master_in":
-			requiredBitSet[0] |= 1 << 6
 			if err := func() error {
+				s.JettonMasterIn.Reset()
 				if err := s.JettonMasterIn.Decode(d); err != nil {
 					return err
 				}
@@ -13613,21 +13629,9 @@ func (s *JettonSwapAction) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"jetton_master_in\"")
 			}
-		case "jetton_wallet_out":
-			requiredBitSet[0] |= 1 << 7
-			if err := func() error {
-				v, err := d.Str()
-				s.JettonWalletOut = string(v)
-				if err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"jetton_wallet_out\"")
-			}
 		case "jetton_master_out":
-			requiredBitSet[1] |= 1 << 0
 			if err := func() error {
+				s.JettonMasterOut.Reset()
 				if err := s.JettonMasterOut.Decode(d); err != nil {
 					return err
 				}
@@ -13645,8 +13649,8 @@ func (s *JettonSwapAction) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [2]uint8{
-		0b11111111,
-		0b00000001,
+		0b01100111,
+		0b00000000,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -16938,6 +16942,39 @@ func (s OptJettonMintAction) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *OptJettonMintAction) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes JettonPreview as json.
+func (o OptJettonPreview) Encode(e *jx.Encoder) {
+	if !o.Set {
+		return
+	}
+	o.Value.Encode(e)
+}
+
+// Decode decodes JettonPreview from json.
+func (o *OptJettonPreview) Decode(d *jx.Decoder) error {
+	if o == nil {
+		return errors.New("invalid: unable to decode OptJettonPreview to nil")
+	}
+	o.Set = true
+	if err := o.Value.Decode(d); err != nil {
+		return err
+	}
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s OptJettonPreview) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *OptJettonPreview) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }

@@ -99,20 +99,22 @@ func convertNftCollection(collection core.NftCollection, book addressBook, imgGe
 		return c
 	}
 	metadata := map[string]jx.Raw{}
+	image := references.Placeholder
 	for k, v := range collection.Metadata {
 		var err error
+		if k == "image" {
+			if i, ok := v.(string); ok && i != "" {
+				image = i
+			}
+		}
 		metadata[k], err = json.Marshal(v)
 		if err != nil {
 			continue
 		}
 	}
 	c.Metadata.SetTo(metadata)
-	image, ok := collection.Metadata["image"]
-	if !ok || image.(string) == "" {
-		return c
-	}
 	for _, size := range []int{5, 100, 500, 1500} {
-		url := imgGenerator.GenerateImageUrl(image.(string), size, size)
+		url := imgGenerator.GenerateImageUrl(image, size, size)
 		c.Previews = append(c.Previews, oas.ImagePreview{
 			Resolution: fmt.Sprintf("%vx%v", size, size),
 			URL:        url,
@@ -129,7 +131,7 @@ func (h Handler) convertNftHistory(ctx context.Context, account tongo.AccountID,
 		if err != nil {
 			return nil, 0, err
 		}
-		result, err := bath.FindActions(ctx, trace, bath.WithInformationSource(h.storage))
+		result, err := bath.FindActions(ctx, trace, bath.WithInformationSource(h.storage), bath.WithStraws([]bath.StrawFunc{bath.FindNFTTransfer}))
 		if err != nil {
 			return nil, 0, err
 		}
