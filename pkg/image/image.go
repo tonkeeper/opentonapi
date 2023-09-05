@@ -9,3 +9,7 @@ func (g *PreviewGenerator) GenerateImageUrl(url string, height, width int) strin
 func NewImgGenerator() *PreviewGenerator {
 	return &PreviewGenerator{}
 }
+
+var DefaultGenerator interface {
+	GenerateImageUrl(url string, height, width int) string
+} = NewImgGenerator()

@@ -89,7 +89,7 @@ func (h Handler) GetTrace(ctx context.Context, params oas.GetTraceParams) (*oas.
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
-	convertedTrace := convertTrace(*trace, h.addressBook, h.previewGenerator)
+	convertedTrace := convertTrace(*trace, h.addressBook)
 	return &convertedTrace, nil
 }
 
@@ -303,7 +303,7 @@ func (h Handler) EmulateMessageToTrace(ctx context.Context, request *oas.Emulate
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
-	t := convertTrace(*trace, h.addressBook, h.previewGenerator)
+	t := convertTrace(*trace, h.addressBook)
 	return &t, nil
 }
 
@@ -360,7 +360,7 @@ func (h Handler) EmulateMessageToWallet(ctx context.Context, request *oas.Emulat
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
-	t := convertTrace(*trace, h.addressBook, h.previewGenerator)
+	t := convertTrace(*trace, h.addressBook)
 	result, err := bath.FindActions(ctx, trace, bath.ForAccount(*walletAddress), bath.WithInformationSource(h.storage))
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)

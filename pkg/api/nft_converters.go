@@ -7,6 +7,7 @@ import (
 
 	"github.com/tonkeeper/opentonapi/internal/g"
 	"github.com/tonkeeper/opentonapi/pkg/bath"
+	imgGenerator "github.com/tonkeeper/opentonapi/pkg/image"
 	"github.com/tonkeeper/tongo"
 
 	"github.com/go-faster/jx"
@@ -15,11 +16,11 @@ import (
 	"github.com/tonkeeper/opentonapi/pkg/references"
 )
 
-func convertNFT(ctx context.Context, item core.NftItem, book addressBook, imgGenerator previewGenerator, metaCache metadataCache) oas.NftItem {
+func convertNFT(ctx context.Context, item core.NftItem, book addressBook, metaCache metadataCache) oas.NftItem {
 	i := oas.NftItem{
 		Address:  item.Address.ToRaw(),
 		Index:    item.Index.BigInt().Int64(),
-		Owner:    convertOptAccountAddress(item.OwnerAddress, book, imgGenerator),
+		Owner:    convertOptAccountAddress(item.OwnerAddress, book),
 		Verified: item.Verified,
 		Metadata: anyToJSONRawMap(item.Metadata, false),
 		DNS:      g.Opt(item.DNS),
@@ -36,8 +37,8 @@ func convertNFT(ctx context.Context, item core.NftItem, book addressBook, imgGen
 		i.SetSale(oas.OptSale{
 			Value: oas.Sale{
 				Address: item.Sale.Contract.ToRaw(),
-				Market:  convertAccountAddress(item.Sale.Marketplace, book, imgGenerator),
-				Owner:   convertOptAccountAddress(item.Sale.Seller, book, imgGenerator),
+				Market:  convertAccountAddress(item.Sale.Marketplace, book),
+				Owner:   convertOptAccountAddress(item.Sale.Seller, book),
 				Price: oas.Price{
 					Value:     fmt.Sprintf("%v", item.Sale.Price.Amount),
 					TokenName: tokenName,
@@ -79,7 +80,7 @@ func convertNFT(ctx context.Context, item core.NftItem, book addressBook, imgGen
 		image = references.Placeholder
 	}
 	for _, size := range []int{5, 100, 500, 1500} {
-		url := imgGenerator.GenerateImageUrl(image, size, size)
+		url := imgGenerator.DefaultGenerator.GenerateImageUrl(image, size, size)
 		i.Previews = append(i.Previews, oas.ImagePreview{
 			Resolution: fmt.Sprintf("%vx%v", size, size),
 			URL:        url,
@@ -88,12 +89,12 @@ func convertNFT(ctx context.Context, item core.NftItem, book addressBook, imgGen
 	return i
 }
 
-func convertNftCollection(collection core.NftCollection, book addressBook, imgGenerator previewGenerator) oas.NftCollection {
+func convertNftCollection(collection core.NftCollection, book addressBook) oas.NftCollection {
 	c := oas.NftCollection{
 		Address:              collection.Address.ToRaw(),
 		NextItemIndex:        int64(collection.NextItemIndex),
 		RawCollectionContent: fmt.Sprintf("%x", collection.CollectionContent[:]),
-		Owner:                convertOptAccountAddress(collection.OwnerAddress, book, imgGenerator),
+		Owner:                convertOptAccountAddress(collection.OwnerAddress, book),
 	}
 	if len(collection.Metadata) != 0 {
 		metadata := map[string]jx.Raw{}
@@ -123,7 +124,7 @@ func (h Handler) convertNftHistory(ctx context.Context, account tongo.AccountID,
 		}
 		event := oas.AccountEvent{
 			EventID:    trace.Hash.Hex(),
-			Account:    convertAccountAddress(account, h.addressBook, h.previewGenerator),
+			Account:    convertAccountAddress(account, h.addressBook),
 			Timestamp:  trace.Utime,
 			IsScam:     false,
 			Lt:         int64(trace.Lt),

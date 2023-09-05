@@ -7,6 +7,7 @@ import (
 
 	"github.com/shopspring/decimal"
 	"github.com/tonkeeper/opentonapi/pkg/addressbook"
+	imgGenerator "github.com/tonkeeper/opentonapi/pkg/image"
 	"github.com/tonkeeper/opentonapi/pkg/references"
 	"github.com/tonkeeper/tongo/tep64"
 	"github.com/tonkeeper/tongo/tlb"
@@ -37,7 +38,7 @@ type NormalizedMetadata struct {
 	Websites     []string
 }
 
-func NormalizeMetadata(meta tep64.Metadata, info *addressbook.KnownJetton, imgGenerator previewGenerator) NormalizedMetadata {
+func NormalizeMetadata(meta tep64.Metadata, info *addressbook.KnownJetton) NormalizedMetadata {
 	verification := VerificationNone
 	name := meta.Name
 	if name == "" {
@@ -53,7 +54,7 @@ func NormalizeMetadata(meta tep64.Metadata, info *addressbook.KnownJetton, imgGe
 	}
 	image := references.Placeholder
 	if meta.Image != "" {
-		image = imgGenerator.GenerateImageUrl(meta.Image, 200, 200)
+		image = imgGenerator.DefaultGenerator.GenerateImageUrl(meta.Image, 200, 200)
 	}
 	description := meta.Description
 	var social []string

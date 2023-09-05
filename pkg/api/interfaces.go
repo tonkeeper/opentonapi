@@ -127,10 +127,6 @@ type executor interface {
 	RunSmcMethodByID(context.Context, tongo.AccountID, int, tlb.VmStack) (uint32, tlb.VmStack, error)
 }
 
-type previewGenerator interface {
-	GenerateImageUrl(url string, height, width int) string
-}
-
 // addressBook provides methods to request additional information about accounts, NFT collections and jettons
 // The information is stored in "https://github.com/tonkeeper/ton-assets/" and
 // is being maintained by the tonkeeper team and the community.
