@@ -6,6 +6,9 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"github.com/tonkeeper/tongo/abi"
+	"github.com/tonkeeper/tongo/tvm"
+	"math/big"
 	"net/http"
 	"time"
 
@@ -458,8 +461,7 @@ func emulatedTreeToTrace(ctx context.Context, tree *txemulator.TxTree, accounts 
 		return nil, err
 	}
 	t := &core.Trace{
-		Transaction:       *transaction,
-		AccountInterfaces: nil, //todo: do
+		Transaction: *transaction,
 	}
 	for i := range tree.Children {
 		child, err := emulatedTreeToTrace(ctx, tree.Children[i], accounts)
@@ -468,7 +470,69 @@ func emulatedTreeToTrace(ctx context.Context, tree *txemulator.TxTree, accounts 
 		}
 		t.Children = append(t.Children, child)
 	}
-	//core.CollectAdditionalInfo(ctx, newSharedAccountExecutor(), t)
+	executor := newSharedAccountExecutor(accounts)
+	for k, v := range accounts {
+		code := accountCode(v)
+		if code == nil {
+			continue
+		}
+		b, err := code.ToBoc()
+		if err != nil {
+			return nil, err
+		}
+		inspectionResult, err := abi.NewContractInspector().InspectContract(ctx, b, executor, k)
+		if err != nil {
+			return nil, err
+		}
+		t.AccountInterfaces = inspectionResult.ImplementedInterfaces()
+		for _, i := range inspectionResult.Interfaces {
+			for _, m := range i.GetMethods {
+				switch data := m.Result.(type) {
+				case abi.GetWalletDataResult:
+					t.AdditionalInfo.JettonMaster, _ = tongo.AccountIDFromTlb(data.Jetton)
+				case abi.GetSaleData_GetgemsResult:
+					price := big.Int(data.FullPrice)
+					owner, err := tongo.AccountIDFromTlb(data.Owner)
+					if err != nil {
+						continue
+					}
+					t.AdditionalInfo.NftSaleContract = &core.NftSaleContract{
+						NftPrice: price.Int64(),
+						Owner:    owner,
+					}
+				case abi.GetSaleData_BasicResult:
+					price := big.Int(data.FullPrice)
+					owner, err := tongo.AccountIDFromTlb(data.Owner)
+					if err != nil {
+						continue
+					}
+					t.AdditionalInfo.NftSaleContract = &core.NftSaleContract{
+						NftPrice: price.Int64(),
+						Owner:    owner,
+					}
+				case abi.GetSaleData_GetgemsAuctionResult:
+					owner, err := tongo.AccountIDFromTlb(data.Owner)
+					if err != nil {
+						continue
+					}
+					t.AdditionalInfo.NftSaleContract = &core.NftSaleContract{
+						NftPrice: int64(data.MaxBid),
+						Owner:    owner,
+					}
+				case abi.GetPoolData_StonfiResult:
+					t0, err0 := tongo.AccountIDFromTlb(data.Token0Address)
+					t1, err1 := tongo.AccountIDFromTlb(data.Token1Address)
+					if err1 != nil || err0 != nil {
+						continue
+					}
+					t.AdditionalInfo.STONfiPool = &core.STONfiPool{
+						Token0: *t0,
+						Token1: *t1,
+					}
+				}
+			}
+		}
+	}
 	return t, nil
 }
 
@@ -484,35 +548,57 @@ func sendMessage(ctx context.Context, msgBoc string, msgSender messageSender) ([
 	return payload, nil
 }
 
-//
-//type shardsAccountExecutor struct {
-//	accounts map[tongo.AccountID]tlb.ShardAccount
-//}
-//
-//func (s shardsAccountExecutor) JettonMastersForWallets(ctx context.Context, wallets []tongo.AccountID) (map[tongo.AccountID]tongo.AccountID, error) {
-//	for _, wallet := range wallets {
-//		if _, ok := s.accounts[wallet]; !ok {
-//			return nil, errors.New("wallet not found")
-//		}
-//	}
-//}
-//
-//func (s shardsAccountExecutor) GetGemsContracts(ctx context.Context, getGems []tongo.AccountID) (map[tongo.AccountID]core.NftSaleContract, error) {
-//	//TODO implement me
-//	panic("implement me")
-//}
-//
-//func (s shardsAccountExecutor) NftSaleContracts(ctx context.Context, contracts []tongo.AccountID) (map[tongo.AccountID]core.NftSaleContract, error) {
-//	//TODO implement me
-//	panic("implement me")
-//}
-//
-//func (s shardsAccountExecutor) STONfiPools(ctx context.Context, poolIDs []tongo.AccountID) (map[tongo.AccountID]core.STONfiPool, error) {
-//	//TODO implement me
-//	panic("implement me")
-//}
-//
-//func newSharedAccountExecutor() *shardsAccountExecutor {
-//
-//	return &shardsAccountExecutor{}
-//}
+type shardsAccountExecutor struct {
+	accounts map[tongo.AccountID]tlb.ShardAccount
+}
+
+func (s shardsAccountExecutor) RunSmcMethodByID(ctx context.Context, accountID tongo.AccountID, methodID int, params tlb.VmStack) (uint32, tlb.VmStack, error) {
+	w, ok := s.accounts[accountID]
+	if !ok {
+		return 0, nil, errors.New("address not found")
+	}
+	code, data := accountCode(w), accountData(w)
+	if code == nil || data == nil {
+		return 0, nil, errors.New("account not found")
+	}
+	config, _ := boc.DeserializeSinglRootBase64(txemulator.DefaultConfig)
+	e, err := tvm.NewEmulator(code, data, config) //todo:libs
+	if err != nil {
+		return 0, nil, err
+	}
+	return e.RunSmcMethodByID(ctx, accountID, methodID, params)
+}
+
+func newSharedAccountExecutor(a map[tongo.AccountID]tlb.ShardAccount) *shardsAccountExecutor {
+	return &shardsAccountExecutor{accounts: a}
+}
+
+func accountCode(account tlb.ShardAccount) *boc.Cell {
+	if account.Account.SumType == "AccountNone" {
+		return nil
+	}
+	if account.Account.Account.Storage.State.SumType != "AccountActive" {
+		return nil
+	}
+	code := account.Account.Account.Storage.State.AccountActive.StateInit.Code
+	if !code.Exists {
+		return nil
+	}
+	cell := code.Value.Value
+	return &cell
+}
+
+func accountData(account tlb.ShardAccount) *boc.Cell {
+	if account.Account.SumType == "AccountNone" {
+		return nil
+	}
+	if account.Account.Account.Storage.State.SumType != "AccountActive" {
+		return nil
+	}
+	data := account.Account.Account.Storage.State.AccountActive.StateInit.Data
+	if !data.Exists {
+		return nil
+	}
+	cell := data.Value.Value
+	return &cell
+}
