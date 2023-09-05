@@ -2805,6 +2805,7 @@ func (s *FoundAccounts) SetAddresses(val []FoundAccountsAddressesItem) {
 type FoundAccountsAddressesItem struct {
 	Address string `json:"address"`
 	Name    string `json:"name"`
+	Preview string `json:"preview"`
 }
 
 // GetAddress returns the value of Address.
@@ -2817,6 +2818,11 @@ func (s *FoundAccountsAddressesItem) GetName() string {
 	return s.Name
 }
 
+// GetPreview returns the value of Preview.
+func (s *FoundAccountsAddressesItem) GetPreview() string {
+	return s.Preview
+}
+
 // SetAddress sets the value of Address.
 func (s *FoundAccountsAddressesItem) SetAddress(val string) {
 	s.Address = val
@@ -2825,6 +2831,11 @@ func (s *FoundAccountsAddressesItem) SetAddress(val string) {
 // SetName sets the value of Name.
 func (s *FoundAccountsAddressesItem) SetName(val string) {
 	s.Name = val
+}
+
+// SetPreview sets the value of Preview.
+func (s *FoundAccountsAddressesItem) SetPreview(val string) {
+	s.Preview = val
 }
 
 type GetAccountDiffOK struct {

@@ -122,7 +122,7 @@ func (h Handler) GetBlockchainAccountTransactions(ctx context.Context, params oa
 		Transactions: make([]oas.Transaction, len(txs)),
 	}
 	for i, tx := range txs {
-		result.Transactions[i] = convertTransaction(*tx, h.addressBook, h.previewGenerator)
+		result.Transactions[i] = convertTransaction(*tx, h.addressBook)
 	}
 	return &result, nil
 }
@@ -177,6 +177,7 @@ func (h Handler) SearchAccounts(ctx context.Context, params oas.SearchAccountsPa
 		response.Addresses = append(response.Addresses, oas.FoundAccountsAddressesItem{
 			Address: account.Wallet,
 			Name:    account.Name,
+			Preview: account.Preview,
 		})
 	}
 
@@ -230,7 +231,7 @@ func (h Handler) GetAccountDnsExpiring(ctx context.Context, params oas.GetAccoun
 		if dns.DnsItem != nil {
 			for _, n := range nfts {
 				if n.Address == dns.DnsItem.Address {
-					dei.DNSItem = oas.NewOptNftItem(convertNFT(ctx, n, h.addressBook, h.previewGenerator, h.metaCache))
+					dei.DNSItem = oas.NewOptNftItem(convertNFT(ctx, n, h.addressBook, h.metaCache))
 					break
 				}
 			}

@@ -31,7 +31,7 @@ func (h Handler) GetAccountJettonsBalances(ctx context.Context, params oas.GetAc
 	for _, wallet := range wallets {
 		jettonBalance := oas.JettonBalance{
 			Balance:       wallet.Balance.String(),
-			WalletAddress: convertAccountAddress(wallet.Address, h.addressBook, h.previewGenerator),
+			WalletAddress: convertAccountAddress(wallet.Address, h.addressBook),
 		}
 		meta, err := h.storage.GetJettonMasterMetadata(ctx, wallet.JettonAddress)
 		if err != nil && err.Error() == "not enough refs" {
@@ -48,9 +48,9 @@ func (h Handler) GetAccountJettonsBalances(ctx context.Context, params oas.GetAc
 		var normalizedMetadata NormalizedMetadata
 		info, ok := h.addressBook.GetJettonInfoByAddress(wallet.JettonAddress)
 		if ok {
-			normalizedMetadata = NormalizeMetadata(meta, &info, h.previewGenerator)
+			normalizedMetadata = NormalizeMetadata(meta, &info)
 		} else {
-			normalizedMetadata = NormalizeMetadata(meta, nil, h.previewGenerator)
+			normalizedMetadata = NormalizeMetadata(meta, nil)
 		}
 		jettonBalance.Jetton = jettonPreview(wallet.JettonAddress, normalizedMetadata)
 		balances.Balances = append(balances.Balances, jettonBalance)
@@ -64,7 +64,7 @@ func (h Handler) GetJettonInfo(ctx context.Context, params oas.GetJettonInfoPara
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
 	}
-	meta := h.GetJettonNormalizedMetadata(ctx, accountID, h.previewGenerator)
+	meta := h.GetJettonNormalizedMetadata(ctx, accountID)
 	metadata := jettonMetadata(accountID, meta)
 	data, err := h.storage.GetJettonMasterData(ctx, accountID)
 	if err != nil {
@@ -152,7 +152,7 @@ func (h Handler) GetJettons(ctx context.Context, params oas.GetJettonsParams) (*
 		return nil, toError(http.StatusInternalServerError, err)
 	}
 	for _, master := range jettons {
-		meta := h.GetJettonNormalizedMetadata(ctx, master.Address, h.previewGenerator)
+		meta := h.GetJettonNormalizedMetadata(ctx, master.Address)
 		metadata := jettonMetadata(master.Address, meta)
 		info := oas.JettonInfo{
 			Mintable:     master.Mintable,

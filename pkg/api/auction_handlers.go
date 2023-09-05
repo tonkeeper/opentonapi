@@ -43,7 +43,7 @@ func (h Handler) GetDomainBids(ctx context.Context, params oas.GetDomainBidsPara
 	var domainBids oas.DomainBids
 	for _, bid := range bids {
 		domainBids.Data = append(domainBids.Data, oas.DomainBid{
-			Bidder:  convertAccountAddress(bid.Bidder, h.addressBook, h.previewGenerator),
+			Bidder:  convertAccountAddress(bid.Bidder, h.addressBook),
 			Success: bid.Success,
 			TxTime:  bid.TxTime,
 			Value:   int64(bid.Value),

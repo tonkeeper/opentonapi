@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"fmt"
+
 	"github.com/tonkeeper/opentonapi/pkg/chainstate"
 
 	"github.com/go-faster/errors"
@@ -18,7 +19,6 @@ import (
 	"github.com/tonkeeper/opentonapi/pkg/addressbook"
 	"github.com/tonkeeper/opentonapi/pkg/cache"
 	"github.com/tonkeeper/opentonapi/pkg/config"
-	"github.com/tonkeeper/opentonapi/pkg/image"
 	"github.com/tonkeeper/opentonapi/pkg/oas"
 )
 
@@ -28,19 +28,18 @@ var _ oas.Handler = (*Handler)(nil)
 type Handler struct {
 	oas.UnimplementedHandler // automatically implement all methods
 
-	addressBook      addressBook
-	storage          storage
-	state            chainState
-	msgSender        messageSender
-	previewGenerator previewGenerator
-	executor         executor
-	dns              *dns.DNS
-	limits           Limits
-	spamRules        func() rules.Rules
-	ratesSource      ratesSource
-	metaCache        metadataCache
-	mempoolEmulate   mempoolEmulate
-	tonConnect       *tonconnect.Server
+	addressBook    addressBook
+	storage        storage
+	state          chainState
+	msgSender      messageSender
+	executor       executor
+	dns            *dns.DNS
+	limits         Limits
+	spamRules      func() rules.Rules
+	ratesSource    ratesSource
+	metaCache      metadataCache
+	mempoolEmulate mempoolEmulate
+	tonConnect     *tonconnect.Server
 }
 
 // Options configures behavior of a Handler instance.
@@ -49,7 +48,6 @@ type Options struct {
 	chainState       chainState
 	addressBook      addressBook
 	msgSender        messageSender
-	previewGenerator previewGenerator
 	executor         executor
 	limits           Limits
 	spamRules        func() rules.Rules
@@ -79,12 +77,6 @@ func WithAddressBook(book addressBook) Option {
 func WithMessageSender(msgSender messageSender) Option {
 	return func(o *Options) {
 		o.msgSender = msgSender
-	}
-}
-
-func WithPreviewGenerator(previewGenerator previewGenerator) Option {
-	return func(o *Options) {
-		o.previewGenerator = previewGenerator
 	}
 }
 
@@ -136,9 +128,6 @@ func NewHandler(logger *zap.Logger, opts ...Option) (*Handler, error) {
 	if options.chainState == nil {
 		options.chainState = chainstate.NewChainState(options.storage)
 	}
-	if options.previewGenerator == nil {
-		options.previewGenerator = image.NewImgGenerator()
-	}
 	if options.spamRules == nil {
 		options.spamRules = func() rules.Rules {
 			defaultRules := rules.GetDefaultRules()
@@ -158,16 +147,15 @@ func NewHandler(logger *zap.Logger, opts ...Option) (*Handler, error) {
 	dnsClient := dns.NewDNS(tongo.MustParseAccountID("-1:e56754f83426f69b09267bd876ac97c44821345b7e266bd956a7bfbfb98df35c"), options.executor) //todo: move to chain config
 
 	return &Handler{
-		storage:          options.storage,
-		state:            options.chainState,
-		addressBook:      options.addressBook,
-		msgSender:        options.msgSender,
-		previewGenerator: options.previewGenerator,
-		executor:         options.executor,
-		dns:              dnsClient,
-		limits:           options.limits,
-		spamRules:        options.spamRules,
-		ratesSource:      rates.InitCalculator(options.ratesSource),
+		storage:     options.storage,
+		state:       options.chainState,
+		addressBook: options.addressBook,
+		msgSender:   options.msgSender,
+		executor:    options.executor,
+		dns:         dnsClient,
+		limits:      options.limits,
+		spamRules:   options.spamRules,
+		ratesSource: rates.InitCalculator(options.ratesSource),
 		metaCache: metadataCache{
 			collectionsCache: cache.NewLRUCache[tongo.AccountID, tep64.Metadata](10000, "nft_metadata_cache"),
 			jettonsCache:     cache.NewLRUCache[tongo.AccountID, tep64.Metadata](10000, "jetton_metadata_cache"),
@@ -181,12 +169,12 @@ func NewHandler(logger *zap.Logger, opts ...Option) (*Handler, error) {
 	}, nil
 }
 
-func (h Handler) GetJettonNormalizedMetadata(ctx context.Context, master tongo.AccountID, imgGenerator previewGenerator) NormalizedMetadata {
+func (h Handler) GetJettonNormalizedMetadata(ctx context.Context, master tongo.AccountID) NormalizedMetadata {
 	meta, _ := h.metaCache.getJettonMeta(ctx, master)
 	// TODO: should we ignore the second returned value?
 	info, ok := h.addressBook.GetJettonInfoByAddress(master)
 	if ok {
-		return NormalizeMetadata(meta, &info, imgGenerator)
+		return NormalizeMetadata(meta, &info)
 	}
-	return NormalizeMetadata(meta, nil, imgGenerator)
+	return NormalizeMetadata(meta, nil)
 }

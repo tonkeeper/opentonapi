@@ -30,6 +30,7 @@ type KnownAddress struct {
 // AttachedAccount represents domains, nft collections for quick search by name are presented
 type AttachedAccount struct {
 	Name       string `json:"name"`
+	Preview    string `json:"preview"`
 	Wallet     string `json:"wallet"`
 	Normalized string
 }
@@ -68,10 +69,11 @@ type KnownCollection struct {
 	Approvers   []string
 }
 
+type Option func(o *Options)
+
 type Options struct {
 	addressers []addresser
 }
-type Option func(o *Options)
 
 type addresser interface {
 	GetAddress(a tongo.AccountID) (KnownAddress, bool)

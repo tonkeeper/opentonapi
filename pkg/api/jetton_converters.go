@@ -55,7 +55,7 @@ func (h Handler) convertJettonHistory(ctx context.Context, account tongo.Account
 		}
 		event := oas.AccountEvent{
 			EventID:    trace.Hash.Hex(),
-			Account:    convertAccountAddress(account, h.addressBook, h.previewGenerator),
+			Account:    convertAccountAddress(account, h.addressBook),
 			Timestamp:  trace.Utime,
 			IsScam:     false,
 			Lt:         int64(trace.Lt),

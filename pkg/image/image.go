@@ -10,6 +10,6 @@ func NewImgGenerator() *PreviewGenerator {
 	return &PreviewGenerator{}
 }
 
-var DefaultGererator interface {
+var DefaultGenerator interface {
 	GenerateImageUrl(url string, height, width int) string
 } = NewImgGenerator()

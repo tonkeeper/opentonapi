@@ -11,6 +11,7 @@ import (
 	"unicode"
 
 	"github.com/tonkeeper/opentonapi/internal/g"
+	imgGenerator "github.com/tonkeeper/opentonapi/pkg/image"
 	"github.com/tonkeeper/tongo/boc"
 	"github.com/tonkeeper/tongo/tlb"
 
@@ -67,7 +68,7 @@ func anyToJSONRawMap(a any, toSnake bool) map[string]jx.Raw { //todo: переп
 	return m
 }
 
-func convertAccountAddress(id tongo.AccountID, book addressBook, imgGenerator previewGenerator) oas.AccountAddress {
+func convertAccountAddress(id tongo.AccountID, book addressBook) oas.AccountAddress {
 	i, prs := book.GetAddressInfoByAddress(id)
 	address := oas.AccountAddress{Address: id.ToRaw()}
 	if prs {
@@ -75,7 +76,7 @@ func convertAccountAddress(id tongo.AccountID, book addressBook, imgGenerator pr
 			address.SetName(oas.NewOptString(i.Name))
 		}
 		if i.Image != "" {
-			address.SetIcon(oas.NewOptString(imgGenerator.GenerateImageUrl(i.Image, 200, 200)))
+			address.SetIcon(oas.NewOptString(imgGenerator.DefaultGenerator.GenerateImageUrl(i.Image, 200, 200)))
 		}
 		address.IsScam = i.IsScam
 	}
@@ -89,9 +90,9 @@ func optIntToPointer(o oas.OptInt64) *int64 {
 	return &o.Value
 }
 
-func convertOptAccountAddress(id *tongo.AccountID, book addressBook, imgGenerator previewGenerator) oas.OptAccountAddress {
+func convertOptAccountAddress(id *tongo.AccountID, book addressBook) oas.OptAccountAddress {
 	if id != nil {
-		return oas.OptAccountAddress{Value: convertAccountAddress(*id, book, imgGenerator), Set: true}
+		return oas.OptAccountAddress{Value: convertAccountAddress(*id, book), Set: true}
 	}
 	return oas.OptAccountAddress{}
 }

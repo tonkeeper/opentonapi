@@ -83,11 +83,11 @@ func convertBlockHeader(b core.BlockHeader) oas.BlockchainBlock {
 	return res
 }
 
-func convertTransaction(t core.Transaction, book addressBook, imgGenerator previewGenerator) oas.Transaction {
+func convertTransaction(t core.Transaction, book addressBook) oas.Transaction {
 	tx := oas.Transaction{
 		Hash:            t.Hash.Hex(),
 		Lt:              int64(t.Lt),
-		Account:         convertAccountAddress(t.Account, book, imgGenerator),
+		Account:         convertAccountAddress(t.Account, book),
 		Success:         t.Success,
 		Utime:           t.Utime,
 		OrigStatus:      oas.AccountStatus(t.OrigStatus),
@@ -107,10 +107,10 @@ func convertTransaction(t core.Transaction, book addressBook, imgGenerator previ
 		tx.PrevTransHash.Set = true
 	}
 	if t.InMsg != nil {
-		tx.InMsg.SetTo(convertMessage(*t.InMsg, book, imgGenerator))
+		tx.InMsg.SetTo(convertMessage(*t.InMsg, book))
 	}
 	for _, m := range t.OutMsgs {
-		tx.OutMsgs = append(tx.OutMsgs, convertMessage(m, book, imgGenerator))
+		tx.OutMsgs = append(tx.OutMsgs, convertMessage(m, book))
 	}
 	if t.ActionPhase != nil {
 		phase := oas.ActionPhase{
@@ -160,7 +160,7 @@ func convertTransaction(t core.Transaction, book addressBook, imgGenerator previ
 	return tx
 }
 
-func convertMessage(m core.Message, book addressBook, imgGenerator previewGenerator) oas.Message {
+func convertMessage(m core.Message, book addressBook) oas.Message {
 	msg := oas.Message{
 		CreatedLt:   int64(m.CreatedLt),
 		IhrDisabled: m.IhrDisabled,
@@ -169,8 +169,8 @@ func convertMessage(m core.Message, book addressBook, imgGenerator previewGenera
 		Value:       m.Value,
 		FwdFee:      m.FwdFee,
 		IhrFee:      m.IhrFee,
-		Destination: convertOptAccountAddress(m.Destination, book, imgGenerator),
-		Source:      convertOptAccountAddress(m.Source, book, imgGenerator),
+		Destination: convertOptAccountAddress(m.Destination, book),
+		Source:      convertOptAccountAddress(m.Source, book),
 		ImportFee:   m.ImportFee,
 		CreatedAt:   int64(m.CreatedAt),
 	}
