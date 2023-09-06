@@ -1,3 +1,4 @@
+helloWorld = "Hello world!"
 auctionBidMessage = "Bidding {{.Amount}} for {{.NftName}}"
 contractDeployAction = "Deploying a contract{{ if .Interfaces }} with interfaces {{.Interfaces}}{{ end }}"
 depositStakeAction = "Deposit {{.Value}} to staking pool"
