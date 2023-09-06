@@ -107,14 +107,14 @@ func (h Handler) GetAccounts(ctx context.Context, request oas.OptGetAccountsReq)
 }
 
 func (h Handler) GetBlockchainAccountTransactions(ctx context.Context, params oas.GetBlockchainAccountTransactionsParams) (*oas.Transactions, error) {
-	accountID, err := tongo.ParseAccountID(params.AccountID)
+	accountID, err := tongo.ParseAddress(params.AccountID)
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
 	}
 	if params.BeforeLt.Value == 0 {
 		params.BeforeLt.Value = 1 << 62
 	}
-	txs, err := h.storage.GetAccountTransactions(ctx, accountID, int(params.Limit.Value), uint64(params.BeforeLt.Value), uint64(params.AfterLt.Value))
+	txs, err := h.storage.GetAccountTransactions(ctx, accountID.ID, int(params.Limit.Value), uint64(params.BeforeLt.Value), uint64(params.AfterLt.Value))
 	if errors.Is(err, core.ErrEntityNotFound) {
 		return &oas.Transactions{}, nil
 	}
