@@ -7,6 +7,7 @@ import (
 	"github.com/tonkeeper/opentonapi/pkg/references"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
+	"github.com/tonkeeper/tongo/ton"
 )
 
 func convertStakingWhalesPool(address tongo.AccountID, w references.WhalesPoolInfo, poolStatus abi.GetStakingStatusResult, poolConfig abi.GetParams_WhalesNominatorResult, apy float64, verified bool, nominators []core.Nominator) oas.PoolInfo {
@@ -64,7 +65,7 @@ func convertLiquidStaking(p core.LiquidPool, cycleStart, cycleEnd uint32) oas.Po
 		TotalAmount:        p.TotalAmount,
 		Implementation:     oas.PoolInfoImplementationLiquidTF,
 		Apy:                p.APY,
-		MinStake:           int64(tongo.OneTON),
+		MinStake:           int64(ton.OneTON),
 		Verified:           p.VerifiedSources,
 		CurrentNominators:  1,
 		MaxNominators:      0,

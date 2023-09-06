@@ -63,8 +63,7 @@ var StonfiSwapStraw = Straw[BubbleJettonSwap]{
 			tx := bubble.Info.(BubbleTx)
 			a, b := tx.additionalInfo.STONfiPool.Token0, tx.additionalInfo.STONfiPool.Token1
 			body := tx.decodedBody.Value.(abi.StonfiSwapMsgBody)
-			amountOut := big.NewInt(int64(body.MinOut))
-			newAction.AmountOut = tlb.VarUInteger16(*amountOut)
+			newAction.AmountOut = body.MinOut
 			s, err := tongo.AccountIDFromTlb(body.SenderAddress)
 			if err != nil {
 				return err

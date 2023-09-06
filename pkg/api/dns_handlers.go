@@ -2,7 +2,9 @@ package api
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"github.com/tonkeeper/tongo/contract/dns"
 	"net/http"
 	"strings"
 
@@ -54,6 +56,9 @@ func (h Handler) DnsResolve(ctx context.Context, params oas.DnsResolveParams) (*
 		return nil, toError(http.StatusBadRequest, fmt.Errorf("domains with length 48 and 52 can't be resolved by security issues"))
 	}
 	records, err := h.dns.Resolve(ctx, params.DomainName)
+	if errors.Is(err, dns.ErrNotResolved) {
+		return nil, toError(http.StatusNotFound, err)
+	}
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}

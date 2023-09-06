@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/hex"
 	"fmt"
+	"github.com/tonkeeper/tongo/ton"
 	"math/big"
 	"strings"
 
@@ -115,7 +116,7 @@ func signedValue(value string, viewer *tongo.AccountID, source, destination tong
 
 func (h Handler) convertActionTonTransfer(t *bath.TonTransferAction, acceptLanguage string, viewer *tongo.AccountID) (oas.OptTonTransferAction, oas.ActionSimplePreview, bool) {
 	var spamDetected bool
-	if t.Amount < int64(tongo.OneTON) && t.Comment != nil {
+	if t.Amount < int64(ton.OneTON) && t.Comment != nil {
 		if spamAction := rules.CheckAction(h.spamRules(), *t.Comment); spamAction == rules.Drop {
 			*t.Comment = ""
 			spamDetected = true

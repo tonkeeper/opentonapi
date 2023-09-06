@@ -4,6 +4,7 @@ import (
 	"github.com/tonkeeper/opentonapi/pkg/blockchain/config"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
+	"github.com/tonkeeper/tongo/ton"
 )
 
 type BubbleElectionsDepositStake struct {
@@ -148,7 +149,7 @@ var WithdrawTFStakeRequestStraw = Straw[BubbleWithdrawStakeRequest]{
 	Children: []Straw[BubbleWithdrawStakeRequest]{
 		{
 			Optional:   true,
-			CheckFuncs: []bubbleCheck{IsTx, AmountInterval(0, int64(tongo.OneTON))},
+			CheckFuncs: []bubbleCheck{IsTx, AmountInterval(0, int64(ton.OneTON))},
 		},
 	},
 }
@@ -180,7 +181,7 @@ var WithdrawStakeImmediatelyStraw = Straw[BubbleWithdrawStake]{
 		return nil
 	},
 	SingleChild: &Straw[BubbleWithdrawStake]{
-		CheckFuncs: []bubbleCheck{IsTx, AmountInterval(int64(tongo.OneTON), 1<<63-1)},
+		CheckFuncs: []bubbleCheck{IsTx, AmountInterval(int64(ton.OneTON), 1<<63-1)},
 		Builder: func(newAction *BubbleWithdrawStake, bubble *Bubble) error {
 			newAction.Amount += bubble.Info.(BubbleTx).inputAmount
 			return nil
@@ -194,7 +195,7 @@ var DepositLiquidStakeStraw = Straw[BubbleDepositStake]{
 		tx := bubble.Info.(BubbleTx)
 		newAction.Pool = tx.account.Address
 		newAction.Staker = tx.inputFrom.Address
-		newAction.Amount = tx.inputAmount - int64(tongo.OneTON)
+		newAction.Amount = tx.inputAmount - int64(ton.OneTON)
 		newAction.Success = tx.success
 		return nil
 	},

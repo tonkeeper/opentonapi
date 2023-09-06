@@ -7,6 +7,7 @@ import (
 	"encoding/base64"
 	"encoding/hex"
 	"fmt"
+	"github.com/tonkeeper/tongo/ton"
 	"io"
 	"net/http"
 	"os"
@@ -33,7 +34,7 @@ func (h Handler) SetWalletBackup(ctx context.Context, request oas.SetWalletBacku
 	if err != nil {
 		return toError(http.StatusInternalServerError, err)
 	}
-	if walletBalance < int64(tongo.OneTON) {
+	if walletBalance < int64(ton.OneTON) {
 		return toError(http.StatusBadRequest, fmt.Errorf("wallet must have more than 1 TON"))
 	}
 

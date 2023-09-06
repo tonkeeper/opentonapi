@@ -115,6 +115,9 @@ func (h Handler) GetBlockchainAccountTransactions(ctx context.Context, params oa
 		params.BeforeLt.Value = 1 << 62
 	}
 	txs, err := h.storage.GetAccountTransactions(ctx, accountID, int(params.Limit.Value), uint64(params.BeforeLt.Value), uint64(params.AfterLt.Value))
+	if errors.Is(err, core.ErrEntityNotFound) {
+		return &oas.Transactions{}, nil
+	}
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
