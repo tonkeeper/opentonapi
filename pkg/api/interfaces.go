@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"crypto/ed25519"
+	"sync"
 	"time"
 
 	"github.com/tonkeeper/tongo/boc"
@@ -155,6 +156,7 @@ type metadataCache struct {
 }
 
 type mempoolEmulate struct {
+	mu             sync.RWMutex
 	traces         cache.Cache[string, *core.Trace]
 	accountsTraces cache.Cache[tongo.AccountID, []string]
 }

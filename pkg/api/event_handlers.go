@@ -20,7 +20,6 @@ import (
 	"github.com/tonkeeper/tongo/tlb"
 	"github.com/tonkeeper/tongo/txemulator"
 	tongoWallet "github.com/tonkeeper/tongo/wallet"
-	"golang.org/x/exp/maps"
 	"golang.org/x/exp/slices"
 )
 
@@ -428,7 +427,9 @@ func (h Handler) addToMempool(bytesBoc []byte, shardAccount map[tongo.AccountID]
 		return shardAccount, err
 	}
 	h.mempoolEmulate.traces.Set(hex.EncodeToString(hash), trace, cache.WithExpiration(time.Second*time.Duration(ttl)))
-	for _, account := range maps.Keys(accounts) {
+	h.mempoolEmulate.mu.Lock()
+	defer h.mempoolEmulate.mu.Unlock()
+	for account := range accounts {
 		traces, _ := h.mempoolEmulate.accountsTraces.Get(account)
 		traces = slices.Insert(traces, 0, hex.EncodeToString(hash))
 		h.mempoolEmulate.accountsTraces.Set(account, traces, cache.WithExpiration(time.Second*time.Duration(ttl)))
