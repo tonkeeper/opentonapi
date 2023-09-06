@@ -462,7 +462,8 @@ func emulatedTreeToTrace(ctx context.Context, tree *txemulator.TxTree, accounts 
 		return nil, err
 	}
 	t := &core.Trace{
-		Transaction: *transaction,
+		Transaction:    *transaction,
+		AdditionalInfo: &core.TraceAdditionalInfo{},
 	}
 	for i := range tree.Children {
 		child, err := emulatedTreeToTrace(ctx, tree.Children[i], accounts)
