@@ -79,7 +79,7 @@ type storage interface {
 	GetSubscriptions(ctx context.Context, address tongo.AccountID) ([]core.Subscription, error)
 	GetJettonMasters(ctx context.Context, limit, offset int) ([]core.JettonMaster, error)
 
-	GetLastConfig() (tlb.ConfigParams, error)
+	GetLastConfig(ctx context.Context) (tlb.ConfigParams, error)
 
 	GetSeqno(ctx context.Context, account tongo.AccountID) (uint32, error)
 

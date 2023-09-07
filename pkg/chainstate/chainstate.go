@@ -1,13 +1,15 @@
 package chainstate
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/tonkeeper/tongo"
-	"github.com/tonkeeper/tongo/tlb"
 	"net/http"
 	"sync"
 	"time"
+
+	"github.com/tonkeeper/tongo"
+	"github.com/tonkeeper/tongo/tlb"
 )
 
 type ChainState struct {
@@ -18,7 +20,7 @@ type ChainState struct {
 }
 
 type config interface {
-	GetLastConfig() (tlb.ConfigParams, error)
+	GetLastConfig(ctx context.Context) (tlb.ConfigParams, error)
 }
 
 func (s *ChainState) GetAPY() float64 {
@@ -53,7 +55,7 @@ func (s *ChainState) refresh() {
 }
 
 func suspended(conf config) (map[tongo.AccountID]struct{}, error) {
-	cfg, err := conf.GetLastConfig()
+	cfg, err := conf.GetLastConfig(context.TODO())
 	if err != nil {
 		return nil, err
 	}

@@ -6,6 +6,6 @@ import (
 	"github.com/tonkeeper/tongo/tlb"
 )
 
-func (c *LiteStorage) GetLastConfig() (tlb.ConfigParams, error) {
-	return c.client.GetConfigAll(context.Background(), 0)
+func (c *LiteStorage) GetLastConfig(ctx context.Context) (tlb.ConfigParams, error) {
+	return c.client.GetConfigAll(ctx, 0)
 }
