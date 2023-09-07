@@ -88,6 +88,9 @@ type storage interface {
 
 	SearchAccountsByPubKey(pubKey ed25519.PublicKey) ([]tongo.AccountID, error)
 
+	// TrimmedConfigBase64 returns the current trimmed blockchain config in a base64 format.
+	TrimmedConfigBase64() (string, error)
+
 	liteStorageRaw
 }
 
