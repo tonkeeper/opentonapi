@@ -4,7 +4,6 @@ import (
 	"context"
 	"crypto/ed25519"
 	"sync"
-	"time"
 
 	"github.com/tonkeeper/tongo/boc"
 
@@ -142,7 +141,7 @@ type addressBook interface {
 }
 
 type ratesSource interface {
-	GetRates(date time.Time) (map[string]float64, error)
+	GetRates(date int64) (map[string]float64, error)
 	GetRatesChart(token string, currency string, startDate *int64, endDate *int64) ([][]any, error)
 }
 

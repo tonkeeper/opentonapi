@@ -65,11 +65,11 @@ func (h *Handler) GetRates(ctx context.Context, params oas.GetRatesParams) (*oas
 	}
 
 	today := time.Now().UTC()
-	yesterday := today.AddDate(0, 0, -1)
-	weekAgo := today.AddDate(0, 0, -7)
-	monthAgo := today.AddDate(0, 0, -30)
+	yesterday := today.AddDate(0, 0, -1).Unix()
+	weekAgo := today.AddDate(0, 0, -7).Unix()
+	monthAgo := today.AddDate(0, 0, -30).Unix()
 
-	todayRates, err := h.ratesSource.GetRates(today)
+	todayRates, err := h.ratesSource.GetRates(today.Unix())
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}

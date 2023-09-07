@@ -8,7 +8,7 @@ import (
 )
 
 type ratesSource interface {
-	GetRates(date time.Time) (map[string]float64, error)
+	GetRates(date int64) (map[string]float64, error)
 	GetRatesChart(token string, currency string, startDate *int64, endDate *int64) ([][]any, error)
 }
 
@@ -43,11 +43,11 @@ func InitCalculator(source ratesSource) *calculator {
 
 func (c *calculator) refresh() {
 	today := time.Now().UTC()
-	yesterday := today.AddDate(0, 0, -1)
-	weekAgo := today.AddDate(0, 0, -7)
-	monthAgo := today.AddDate(0, 0, -30)
+	yesterday := today.AddDate(0, 0, -1).Unix()
+	weekAgo := today.AddDate(0, 0, -7).Unix()
+	monthAgo := today.AddDate(0, 0, -30).Unix()
 
-	todayRates, err := c.source.GetRates(today)
+	todayRates, err := c.source.GetRates(today.Unix())
 	if err != nil {
 		return
 	}
@@ -72,13 +72,13 @@ func (c *calculator) refresh() {
 	c.mu.RUnlock()
 }
 
-func (c *calculator) GetRates(date time.Time) (map[string]float64, error) {
+func (c *calculator) GetRates(date int64) (map[string]float64, error) {
 	c.mu.RLock()
 	defer c.mu.RUnlock()
 
-	truncatedDate := date.Truncate(24 * time.Hour)
+	truncatedDate := time.Unix(date, 0).Truncate(time.Hour * 24).UTC()
 
-	today := time.Now().UTC().Truncate(24 * time.Hour)
+	today := time.Now().Truncate(time.Hour * 24).UTC()
 	yesterday := today.AddDate(0, 0, -1)
 	weekAgo := today.AddDate(0, 0, -7)
 	monthAgo := today.AddDate(0, 0, -30)
@@ -105,7 +105,7 @@ type Mock struct {
 	Storage storage
 }
 
-func (m Mock) GetRates(date time.Time) (map[string]float64, error) {
+func (m Mock) GetRates(date int64) (map[string]float64, error) {
 	return m.GetCurrentRates()
 }
 
