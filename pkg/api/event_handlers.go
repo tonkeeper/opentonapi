@@ -241,7 +241,7 @@ func (h Handler) EmulateMessageToAccountEvent(ctx context.Context, request *oas.
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
-	trace, err := emulatedTreeToTrace(ctx, configBase64, tree, emulator.FinalStates())
+	trace, err := emulatedTreeToTrace(ctx, h.storage, configBase64, tree, emulator.FinalStates())
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
@@ -280,7 +280,7 @@ func (h Handler) EmulateMessageToEvent(ctx context.Context, request *oas.Emulate
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
-	trace, err := emulatedTreeToTrace(ctx, configBase64, tree, emulator.FinalStates())
+	trace, err := emulatedTreeToTrace(ctx, h.storage, configBase64, tree, emulator.FinalStates())
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
@@ -319,7 +319,7 @@ func (h Handler) EmulateMessageToTrace(ctx context.Context, request *oas.Emulate
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
-	trace, err := emulatedTreeToTrace(ctx, configBase64, tree, emulator.FinalStates())
+	trace, err := emulatedTreeToTrace(ctx, h.storage, configBase64, tree, emulator.FinalStates())
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
@@ -382,7 +382,7 @@ func (h Handler) EmulateMessageToWallet(ctx context.Context, request *oas.Emulat
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
-	trace, err := emulatedTreeToTrace(ctx, configBase64, tree, emulator.FinalStates())
+	trace, err := emulatedTreeToTrace(ctx, h.storage, configBase64, tree, emulator.FinalStates())
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
@@ -442,7 +442,7 @@ func (h Handler) addToMempool(bytesBoc []byte, shardAccount map[tongo.AccountID]
 		return shardAccount, err
 	}
 	newShardAccount := emulator.FinalStates()
-	trace, err := emulatedTreeToTrace(ctx, config, tree, newShardAccount)
+	trace, err := emulatedTreeToTrace(ctx, h.storage, config, tree, newShardAccount)
 	if err != nil {
 		return shardAccount, err
 	}
@@ -470,7 +470,7 @@ func (h Handler) addToMempool(bytesBoc []byte, shardAccount map[tongo.AccountID]
 	return newShardAccount, nil
 }
 
-func emulatedTreeToTrace(ctx context.Context, configBase64 string, tree *txemulator.TxTree, accounts map[tongo.AccountID]tlb.ShardAccount) (*core.Trace, error) {
+func emulatedTreeToTrace(ctx context.Context, resolver core.LibraryResolver, configBase64 string, tree *txemulator.TxTree, accounts map[tongo.AccountID]tlb.ShardAccount) (*core.Trace, error) {
 	if !tree.TX.Msgs.InMsg.Exists {
 		return nil, errors.New("there is no incoming message in emulation result")
 	}
@@ -496,13 +496,13 @@ func emulatedTreeToTrace(ctx context.Context, configBase64 string, tree *txemula
 		AdditionalInfo: &core.TraceAdditionalInfo{},
 	}
 	for i := range tree.Children {
-		child, err := emulatedTreeToTrace(ctx, configBase64, tree.Children[i], accounts)
+		child, err := emulatedTreeToTrace(ctx, resolver, configBase64, tree.Children[i], accounts)
 		if err != nil {
 			return nil, err
 		}
 		t.Children = append(t.Children, child)
 	}
-	executor := newSharedAccountExecutor(accounts, configBase64)
+	executor := newSharedAccountExecutor(accounts, resolver, configBase64)
 	for k, v := range accounts {
 		code := accountCode(v)
 		if code == nil {

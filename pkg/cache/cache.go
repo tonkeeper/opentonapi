@@ -46,4 +46,9 @@ func (c *Cache[K, V]) Set(key K, val V, opts ...cache.ItemOption) {
 	c.cache.Set(key, val, opts...)
 }
 
+// Keys returns the keys of the cache. the order is relied on algorithms.
+func (c *Cache[K, V]) Keys() []K {
+	return c.cache.Keys()
+}
+
 var WithExpiration = cache.WithExpiration

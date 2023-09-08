@@ -14,6 +14,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/puzpuzpuz/xsync/v2"
 	"github.com/sourcegraph/conc/iter"
+	"github.com/tonkeeper/opentonapi/pkg/cache"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
 	"github.com/tonkeeper/tongo/boc"
@@ -76,13 +77,17 @@ type LiteStorage struct {
 	transactionsByInMsgLT   *xsync.MapOf[inMsgCreatedLT, tongo.Bits256]
 	blockCache              *xsync.MapOf[tongo.BlockIDExt, *tlb.Block]
 	accountInterfacesCache  *xsync.MapOf[tongo.AccountID, []abi.ContractInterface]
-	knownAccounts           map[string][]tongo.AccountID
+	// tvmLibraryCache contains public tvm libraries.
+	// As a library is immutable, it's ok to cache it.
+	tvmLibraryCache cache.Cache[string, boc.Cell]
+	knownAccounts   map[string][]tongo.AccountID
 	// maxGoroutines specifies a number of goroutines used to perform some time-consuming operations.
 	maxGoroutines int
 	// trackingAccounts is a list of accounts we track. Defined with ACCOUNTS env variable.
 	trackingAccounts  map[tongo.AccountID]struct{}
 	pubKeyByAccountID *xsync.MapOf[tongo.AccountID, ed25519.PublicKey]
 
+	stopCh chan struct{}
 	// mu protects trimmedConfigBase64.
 	mu sync.RWMutex
 	// trimmedConfigBase64 is a blockchain config but with a limited set of keys.
@@ -166,6 +171,7 @@ func NewLiteStorage(log *zap.Logger, opts ...Option) (*LiteStorage, error) {
 		maxGoroutines: 5,
 		client:        client,
 		executor:      o.executor,
+		stopCh:        make(chan struct{}),
 		// read-only data
 		knownAccounts:    make(map[string][]tongo.AccountID),
 		trackingAccounts: map[tongo.AccountID]struct{}{},
@@ -177,6 +183,7 @@ func NewLiteStorage(log *zap.Logger, opts ...Option) (*LiteStorage, error) {
 		blockCache:              xsync.NewTypedMapOf[tongo.BlockIDExt, *tlb.Block](hashBlockIDExt),
 		accountInterfacesCache:  xsync.NewTypedMapOf[tongo.AccountID, []abi.ContractInterface](hashAccountID),
 		pubKeyByAccountID:       xsync.NewTypedMapOf[tongo.AccountID, ed25519.PublicKey](hashAccountID),
+		tvmLibraryCache:         cache.NewLRUCache[string, boc.Cell](10000, "tvm_libraries"),
 	}
 	storage.knownAccounts["tf_pools"] = o.tfPools
 	storage.knownAccounts["jettons"] = o.jettons
@@ -210,10 +217,17 @@ func (s *LiteStorage) SetExecutor(e abi.Executor) {
 	s.executor = e
 }
 
+// Shutdown stops all background goroutines.
+func (s *LiteStorage) Shutdown() {
+	s.stopCh <- struct{}{}
+}
+
 func (s *LiteStorage) runBlockchainConfigUpdate(updateInterval time.Duration) {
 	go func() {
 		for {
 			select {
+			case <-s.stopCh:
+				return
 			// TODO: find better way to update config.
 			// For example, we can update a config once a new key block is added to the blockchain.
 			case <-time.After(updateInterval):
@@ -537,10 +551,6 @@ func (s *LiteStorage) GetDnsExpiring(ctx context.Context, id tongo.AccountID, pe
 	}))
 	defer timer.ObserveDuration()
 	return nil, nil
-}
-
-func (s *LiteStorage) GetLibraries(ctx context.Context, libraries []tongo.Bits256) (map[tongo.Bits256]*boc.Cell, error) {
-	return s.client.GetLibraries(ctx, libraries)
 }
 
 // TrimmedConfigBase64 returns the current trimmed blockchain config in a base64 format.

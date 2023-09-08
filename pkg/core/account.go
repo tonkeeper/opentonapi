@@ -5,6 +5,7 @@ import (
 
 	"github.com/shopspring/decimal"
 	"github.com/tonkeeper/tongo"
+	"github.com/tonkeeper/tongo/boc"
 )
 
 // Account holds low-level details about a particular account taken directly from the blockchain.
@@ -21,6 +22,7 @@ type Account struct {
 	Interfaces        []string
 	LastActivityTime  int64
 	GetMethods        []string
+	Libraries         map[tongo.Bits256]*boc.Cell
 }
 
 // StorageInfo is taken from TLB storage_stat:StorageInfo.
