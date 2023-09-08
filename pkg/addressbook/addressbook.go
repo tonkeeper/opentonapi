@@ -6,7 +6,9 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"regexp"
 	"sort"
+	"strings"
 	"sync"
 	"time"
 
@@ -18,13 +20,16 @@ import (
 	"golang.org/x/exp/slices"
 )
 
+var NormalizeReg = regexp.MustCompile("[^\\p{L}\\p{N}]")
+
 // KnownAddress represents additional manually crafted information about a particular account in the blockchain.
 type KnownAddress struct {
-	IsScam      bool   `json:"is_scam,omitempty"`
-	RequireMemo bool   `json:"require_memo,omitempty"`
-	Name        string `json:"name"`
-	Address     string `json:"address"`
-	Image       string `json:"image,omitempty"`
+	IsScam         bool   `json:"is_scam,omitempty"`
+	RequireMemo    bool   `json:"require_memo,omitempty"`
+	Name           string `json:"name"`
+	NormalizedName string `json:"-"`
+	Address        string `json:"address"`
+	Image          string `json:"image,omitempty"`
 }
 
 // AttachedAccount represents domains, nft collections for quick search by name are presented
@@ -45,28 +50,30 @@ const (
 
 // KnownJetton represents additional manually crafted information about a particular jetton in the blockchain.
 type KnownJetton struct {
-	Name          string                 `json:"name"`
-	Verification  JettonVerificationType `json:"verification"`
-	Description   string                 `json:"description"`
-	Image         string                 `json:"image"`
-	Address       string                 `json:"address"`
-	Symbol        string                 `json:"symbol"`
-	MaxSupply     decimal.Decimal        `json:"max_supply"`
-	Websites      []string               `json:"websites,omitempty"`
-	Social        []string               `json:"social,omitempty"`
-	Coinmarketcap string                 `json:"coinmarketcap,omitempty"`
-	Coingecko     string                 `json:"coingecko,omitempty"`
+	Name           string                 `json:"name"`
+	NormalizedName string                 `json:"-"`
+	Verification   JettonVerificationType `json:"verification"`
+	Description    string                 `json:"description"`
+	Image          string                 `json:"image"`
+	Address        string                 `json:"address"`
+	Symbol         string                 `json:"symbol"`
+	MaxSupply      decimal.Decimal        `json:"max_supply"`
+	Websites       []string               `json:"websites,omitempty"`
+	Social         []string               `json:"social,omitempty"`
+	Coinmarketcap  string                 `json:"coinmarketcap,omitempty"`
+	Coingecko      string                 `json:"coingecko,omitempty"`
 }
 
 // KnownCollection represents additional manually crafted information about a particular NFT collection in the blockchain.
 type KnownCollection struct {
-	Name        string   `json:"name"`
-	Description string   `json:"description"`
-	Address     string   `json:"address"`
-	MaxItems    int64    `json:"max_items"`
-	Websites    []string `json:"websites,omitempty"`
-	Social      []string `json:"social,omitempty"`
-	Approvers   []string
+	Name           string   `json:"name"`
+	NormalizedName string   `json:"-"`
+	Description    string   `json:"description"`
+	Address        string   `json:"address"`
+	MaxItems       int64    `json:"max_items"`
+	Websites       []string `json:"websites,omitempty"`
+	Social         []string `json:"social,omitempty"`
+	Approvers      []string
 }
 
 type Option func(o *Options)
@@ -121,13 +128,35 @@ func (b *Book) SearchAttachedAccountsByPrefix(prefix string) []AttachedAccount {
 	b.mu.RLock()
 	defer b.mu.RUnlock()
 
+	knownJettons := b.GetKnownJettons()
+	normalizeKnownJettonsName := make(map[string]KnownJetton)
+	for _, jetton := range knownJettons {
+		if jetton.NormalizedName == "" {
+			continue
+		}
+		normalizeKnownJettonsName[jetton.NormalizedName] = jetton
+	}
+	var foundAccounts []AttachedAccount
 	for i := range b.addressers {
-		foundAccounts := b.addressers[i].SearchAttachedAccounts(prefix)
+		fmt.Println(i)
+		foundAccounts = b.addressers[i].SearchAttachedAccounts(prefix)
+		fmt.Println(foundAccounts)
 		if len(foundAccounts) > 0 {
-			return foundAccounts
+			break
 		}
 	}
-	return []AttachedAccount{}
+	for idx, account := range foundAccounts {
+		knownJetton, ok := normalizeKnownJettonsName[account.Normalized]
+		if !ok {
+			continue
+		}
+		if knownJetton.Address != account.Wallet {
+			account.Name += " SCAM"
+		}
+		foundAccounts[idx] = account
+	}
+
+	return foundAccounts
 }
 
 func (b *Book) GetTFPoolInfo(a tongo.AccountID) (TFPoolInfo, bool) {
@@ -237,6 +266,9 @@ func (b *Book) refreshAddresses(logger *zap.Logger, addressPath string) {
 		if err != nil {
 			continue
 		}
+		if item.Name != "" {
+			item.NormalizedName = strings.ToLower(NormalizeReg.ReplaceAllString(item.Name, ""))
+		}
 		item.Address = accountID.ToRaw()
 		b.addresses[accountID] = item
 	}
@@ -254,6 +286,9 @@ func (b *Book) refreshJettons(logger *zap.Logger, jettonPath string) {
 		accountID, err := tongo.ParseAccountID(item.Address)
 		if err != nil {
 			continue
+		}
+		if item.Name != "" {
+			item.NormalizedName = strings.ToLower(NormalizeReg.ReplaceAllString(item.Name, ""))
 		}
 		item.Address = accountID.ToRaw()
 		b.jettons[accountID] = item
@@ -310,6 +345,9 @@ func (b *Book) refreshCollections(logger *zap.Logger, collectionPath string) {
 		accountID, err := tongo.ParseAccountID(item.Address)
 		if err != nil {
 			continue
+		}
+		if item.Name != "" {
+			item.NormalizedName = strings.ToLower(NormalizeReg.ReplaceAllString(item.Name, ""))
 		}
 		currentCollection, ok := b.collections[accountID]
 		if !ok {
@@ -424,6 +462,9 @@ func getMegatonJettons() ([]KnownJetton, error) {
 			continue
 		}
 		jetton.Address = address.ToRaw()
+		if jetton.Name != "" {
+			jetton.NormalizedName = strings.ToLower(NormalizeReg.ReplaceAllString(jetton.Name, ""))
+		}
 		respBody[idx] = jetton
 	}
 	return respBody, nil
