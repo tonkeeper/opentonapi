@@ -240,6 +240,7 @@ func (h Handler) EmulateMessageToAccountEvent(ctx context.Context, request *oas.
 	}
 	emulator, err := txemulator.NewTraceBuilder(
 		txemulator.WithAccountsSource(h.storage),
+		txemulator.WithSignatureCheck(),
 		txemulator.WithConfigBase64(configBase64))
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
@@ -279,6 +280,7 @@ func (h Handler) EmulateMessageToEvent(ctx context.Context, request *oas.Emulate
 	}
 	emulator, err := txemulator.NewTraceBuilder(
 		txemulator.WithAccountsSource(h.storage),
+		txemulator.WithSignatureCheck(),
 		txemulator.WithConfigBase64(configBase64))
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
@@ -318,6 +320,7 @@ func (h Handler) EmulateMessageToTrace(ctx context.Context, request *oas.Emulate
 	}
 	emulator, err := txemulator.NewTraceBuilder(
 		txemulator.WithAccountsSource(h.storage),
+		txemulator.WithSignatureCheck(),
 		txemulator.WithConfigBase64(configBase64))
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)

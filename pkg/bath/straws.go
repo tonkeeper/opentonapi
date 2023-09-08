@@ -17,12 +17,14 @@ type StrawFunc func(bubble *Bubble) (success bool)
 
 var JettonTransfersBurnsMints = []StrawFunc{
 	FindJettonTransfer,
+	JettonBurnStraw.Merge,
 	DedustLPJettonMintStraw.Merge,
 }
 
 var DefaultStraws = []StrawFunc{
 	FindNFTTransfer,
 	FindJettonTransfer,
+	JettonBurnStraw.Merge,
 	FindNftPurchase,
 	StonfiSwapStraw.Merge,
 	FindAuctionBidFragmentSimple,

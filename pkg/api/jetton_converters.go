@@ -62,7 +62,7 @@ func (h Handler) convertJettonHistory(ctx context.Context, account tongo.Account
 			InProgress: trace.InProgress(),
 		}
 		for _, action := range result.Actions {
-			if action.Type != bath.JettonTransfer {
+			if action.Type != bath.JettonTransfer && action.Type != bath.JettonBurn && action.Type != bath.JettonMint {
 				continue
 			}
 			if master != nil && action.JettonTransfer.Jetton != *master {
