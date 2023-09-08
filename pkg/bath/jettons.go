@@ -124,6 +124,9 @@ var JettonBurnStraw = Straw[BubbleJettonBurn]{
 		if tx.inputFrom != nil {
 			newAction.sender = *tx.inputFrom
 		}
+		if tx.additionalInfo.JettonMaster != nil {
+			newAction.master = *tx.additionalInfo.JettonMaster
+		}
 		newAction.senderWallet = tx.account.Address
 		newAction.success = tx.success
 		return nil
