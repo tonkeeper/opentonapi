@@ -39,7 +39,14 @@ func (h Handler) SendBlockchainMessage(ctx context.Context, request *oas.SendBlo
 			sentry.Send("sending message", sentry.SentryInfoData{"payload": request.Boc}, sentry.LevelError)
 			return toError(http.StatusInternalServerError, err)
 		}
-		go h.addToMempool(payload, nil)
+		go func() {
+			defer func() {
+				if err := recover(); err != nil {
+					sentry.Send("addToMempool", sentry.SentryInfoData{"payload": request.Boc}, sentry.LevelError)
+				}
+			}()
+			h.addToMempool(payload, nil)
+		}()
 	}
 	var (
 		batchOfBoc   []string
