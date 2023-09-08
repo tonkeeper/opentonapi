@@ -65,7 +65,9 @@ func (h Handler) convertJettonHistory(ctx context.Context, account tongo.Account
 			if action.Type != bath.JettonTransfer && action.Type != bath.JettonBurn && action.Type != bath.JettonMint {
 				continue
 			}
-			if master != nil && action.JettonTransfer.Jetton != *master {
+			if master != nil && ((action.JettonTransfer != nil && action.JettonTransfer.Jetton != *master) ||
+				(action.JettonMint != nil && action.JettonMint.Jetton != *master) ||
+				(action.JettonBurn != nil && action.JettonBurn.Jetton != *master)) {
 				continue
 			}
 			convertedAction, spamDetected, err := h.convertAction(ctx, &account, action, acceptLanguage)
