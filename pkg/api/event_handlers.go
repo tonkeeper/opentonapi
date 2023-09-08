@@ -240,7 +240,7 @@ func (h Handler) EmulateMessageToAccountEvent(ctx context.Context, request *oas.
 	}
 	emulator, err := txemulator.NewTraceBuilder(
 		txemulator.WithAccountsSource(h.storage),
-		txemulator.WithSignatureCheck(),
+		//txemulator.WithSignatureCheck(), todo: uncomment after tonspace switch to /v2/eallet/emulate
 		txemulator.WithConfigBase64(configBase64))
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
