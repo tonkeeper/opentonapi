@@ -30,6 +30,18 @@ func TestHandler_EmulateMessageToAccountEvent(t *testing.T) {
 				oas.ActionTypeContractDeploy,
 			},
 		},
+		{
+			name: "all good - account requires a public library",
+			request: oas.EmulateMessageToAccountEventReq{
+				Boc: "te6cckEBAgEAoAABz4gBahvXA1d597WU+VHmK/4MThUfY4WrH36i9HDzIYRSKR4EvarVUSxQjIWI94OkBEM96M0tkECkPU4K/yg+X2XGUZ6o7/SZ7Msx2G0QAL3xVP9IBo2AVy/VXqkOwkdy8C4oUAAAABAcAQBmYgA2ZpktQsYby0n9cV5VWOFINBjScIU2HdondFsK3lDpEBgMNQAAAAAAAAAAAAAAAAAAUlsD/w==",
+			},
+			params: oas.EmulateMessageToAccountEventParams{
+				AccountID: "EQC1DeuBq7z72sp8qPMV_wYnCo-xwtWPv1F6OHmQwikUj-cH",
+			},
+			wantActions: []oas.ActionType{
+				oas.ActionTypeTonTransfer,
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

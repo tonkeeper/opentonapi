@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 
+	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/boc"
 	"github.com/tonkeeper/tongo/tlb"
@@ -13,14 +14,23 @@ import (
 type shardsAccountExecutor struct {
 	accounts     map[tongo.AccountID]tlb.ShardAccount
 	configBase64 string
+	resolver     core.LibraryResolver
+}
+
+func newSharedAccountExecutor(accounts map[tongo.AccountID]tlb.ShardAccount, resolver core.LibraryResolver, configBase64 string) *shardsAccountExecutor {
+	return &shardsAccountExecutor{
+		accounts:     accounts,
+		configBase64: configBase64,
+		resolver:     resolver,
+	}
 }
 
 func (s shardsAccountExecutor) RunSmcMethodByID(ctx context.Context, accountID tongo.AccountID, methodID int, params tlb.VmStack) (uint32, tlb.VmStack, error) {
-	w, ok := s.accounts[accountID]
+	account, ok := s.accounts[accountID]
 	if !ok {
 		return 0, nil, errors.New("address not found")
 	}
-	code, data := accountCode(w), accountData(w)
+	code, data := accountCode(account), accountData(account)
 	if code == nil || data == nil {
 		return 0, nil, errors.New("account not found")
 	}
@@ -32,15 +42,16 @@ func (s shardsAccountExecutor) RunSmcMethodByID(ctx context.Context, accountID t
 	if err != nil {
 		return 0, nil, err
 	}
-	e, err := tvm.NewEmulatorFromBOCsBase64(codeBoc, dataBoc, s.configBase64) //todo:libs
+	libraries := core.StateInitLibraries(accountLibraries(account))
+	librariesBase64, err := core.PrepareLibraries(ctx, code, libraries, s.resolver)
+	if err != nil {
+		return 0, nil, err
+	}
+	e, err := tvm.NewEmulatorFromBOCsBase64(codeBoc, dataBoc, s.configBase64, tvm.WithLibrariesBase64(librariesBase64))
 	if err != nil {
 		return 0, nil, err
 	}
 	return e.RunSmcMethodByID(ctx, accountID, methodID, params)
-}
-
-func newSharedAccountExecutor(a map[tongo.AccountID]tlb.ShardAccount, configBase64 string) *shardsAccountExecutor {
-	return &shardsAccountExecutor{accounts: a, configBase64: configBase64}
 }
 
 func accountCode(account tlb.ShardAccount) *boc.Cell {
@@ -71,4 +82,14 @@ func accountData(account tlb.ShardAccount) *boc.Cell {
 	}
 	cell := data.Value.Value
 	return &cell
+}
+
+func accountLibraries(account tlb.ShardAccount) *tlb.HashmapE[tlb.Bits256, tlb.SimpleLib] {
+	if account.Account.SumType == "AccountNone" {
+		return nil
+	}
+	if account.Account.Account.Storage.State.SumType != "AccountActive" {
+		return nil
+	}
+	return &account.Account.Account.Storage.State.AccountActive.StateInit.Library
 }
