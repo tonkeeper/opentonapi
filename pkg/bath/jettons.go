@@ -124,7 +124,7 @@ var JettonBurnStraw = Straw[BubbleJettonBurn]{
 		if tx.inputFrom != nil {
 			newAction.sender = *tx.inputFrom
 		}
-		if tx.additionalInfo.JettonMaster != nil {
+		if tx.additionalInfo.JettonMaster != nil { //todo: find why it doesn't set https://dev.tonviewer.com/transaction/b563b85a8e56bad6333a5999a34137f302b14764b4ad1ebb4ecbecab2e16fa32
 			newAction.master = *tx.additionalInfo.JettonMaster
 		}
 		newAction.senderWallet = tx.account.Address
@@ -133,6 +133,10 @@ var JettonBurnStraw = Straw[BubbleJettonBurn]{
 	},
 	SingleChild: &Straw[BubbleJettonBurn]{
 		CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.JettonBurnNotificationMsgOp)},
-		Optional:   true,
+		Builder: func(newAction *BubbleJettonBurn, bubble *Bubble) error { //todo: remove after fixing additionalInfo few lines above
+			newAction.master = bubble.Info.(BubbleTx).account.Address
+			return nil
+		},
+		Optional: true,
 	},
 }
