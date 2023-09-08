@@ -6,11 +6,17 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
-	"github.com/tonkeeper/tongo/abi"
-	"github.com/tonkeeper/tongo/tvm"
 	"math/big"
 	"net/http"
 	"time"
+
+	"github.com/tonkeeper/tongo"
+	"github.com/tonkeeper/tongo/abi"
+	"github.com/tonkeeper/tongo/boc"
+	"github.com/tonkeeper/tongo/tlb"
+	"github.com/tonkeeper/tongo/txemulator"
+	tongoWallet "github.com/tonkeeper/tongo/wallet"
+	"golang.org/x/exp/slices"
 
 	"github.com/tonkeeper/opentonapi/pkg/bath"
 	"github.com/tonkeeper/opentonapi/pkg/cache"
@@ -18,12 +24,6 @@ import (
 	"github.com/tonkeeper/opentonapi/pkg/oas"
 	"github.com/tonkeeper/opentonapi/pkg/sentry"
 	"github.com/tonkeeper/opentonapi/pkg/wallet"
-	"github.com/tonkeeper/tongo"
-	"github.com/tonkeeper/tongo/boc"
-	"github.com/tonkeeper/tongo/tlb"
-	"github.com/tonkeeper/tongo/txemulator"
-	tongoWallet "github.com/tonkeeper/tongo/wallet"
-	"golang.org/x/exp/slices"
 )
 
 func (h Handler) SendBlockchainMessage(ctx context.Context, request *oas.SendBlockchainMessageReq) error {
@@ -227,7 +227,13 @@ func (h Handler) EmulateMessageToAccountEvent(ctx context.Context, request *oas.
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
 	}
-	emulator, err := txemulator.NewTraceBuilder(txemulator.WithAccountsSource(h.storage))
+	configBase64, err := h.storage.TrimmedConfigBase64()
+	if err != nil {
+		return nil, toError(http.StatusInternalServerError, err)
+	}
+	emulator, err := txemulator.NewTraceBuilder(
+		txemulator.WithAccountsSource(h.storage),
+		txemulator.WithConfigBase64(configBase64))
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
@@ -235,7 +241,7 @@ func (h Handler) EmulateMessageToAccountEvent(ctx context.Context, request *oas.
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
-	trace, err := emulatedTreeToTrace(ctx, tree, emulator.FinalStates())
+	trace, err := emulatedTreeToTrace(ctx, configBase64, tree, emulator.FinalStates())
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
@@ -260,7 +266,13 @@ func (h Handler) EmulateMessageToEvent(ctx context.Context, request *oas.Emulate
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
-	emulator, err := txemulator.NewTraceBuilder(txemulator.WithAccountsSource(h.storage))
+	configBase64, err := h.storage.TrimmedConfigBase64()
+	if err != nil {
+		return nil, toError(http.StatusInternalServerError, err)
+	}
+	emulator, err := txemulator.NewTraceBuilder(
+		txemulator.WithAccountsSource(h.storage),
+		txemulator.WithConfigBase64(configBase64))
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
@@ -268,7 +280,7 @@ func (h Handler) EmulateMessageToEvent(ctx context.Context, request *oas.Emulate
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
-	trace, err := emulatedTreeToTrace(ctx, tree, emulator.FinalStates())
+	trace, err := emulatedTreeToTrace(ctx, configBase64, tree, emulator.FinalStates())
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
@@ -293,7 +305,13 @@ func (h Handler) EmulateMessageToTrace(ctx context.Context, request *oas.Emulate
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
-	emulator, err := txemulator.NewTraceBuilder(txemulator.WithAccountsSource(h.storage))
+	configBase64, err := h.storage.TrimmedConfigBase64()
+	if err != nil {
+		return nil, toError(http.StatusInternalServerError, err)
+	}
+	emulator, err := txemulator.NewTraceBuilder(
+		txemulator.WithAccountsSource(h.storage),
+		txemulator.WithConfigBase64(configBase64))
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
@@ -301,7 +319,7 @@ func (h Handler) EmulateMessageToTrace(ctx context.Context, request *oas.Emulate
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
-	trace, err := emulatedTreeToTrace(ctx, tree, emulator.FinalStates())
+	trace, err := emulatedTreeToTrace(ctx, configBase64, tree, emulator.FinalStates())
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
@@ -350,7 +368,13 @@ func (h Handler) EmulateMessageToWallet(ctx context.Context, request *oas.Emulat
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
-	emulator, err := txemulator.NewTraceBuilder(txemulator.WithAccountsSource(h.storage))
+	configBase64, err := h.storage.TrimmedConfigBase64()
+	if err != nil {
+		return nil, toError(http.StatusInternalServerError, err)
+	}
+	emulator, err := txemulator.NewTraceBuilder(
+		txemulator.WithAccountsSource(h.storage),
+		txemulator.WithConfigBase64(configBase64))
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
@@ -358,7 +382,7 @@ func (h Handler) EmulateMessageToWallet(ctx context.Context, request *oas.Emulat
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
-	trace, err := emulatedTreeToTrace(ctx, tree, emulator.FinalStates())
+	trace, err := emulatedTreeToTrace(ctx, configBase64, tree, emulator.FinalStates())
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
@@ -403,7 +427,13 @@ func (h Handler) addToMempool(bytesBoc []byte, shardAccount map[tongo.AccountID]
 	if err != nil {
 		return shardAccount, err
 	}
-	emulator, err := txemulator.NewTraceBuilder(txemulator.WithAccountsSource(h.storage), txemulator.WithAccountsMap(shardAccount))
+	config, err := h.storage.TrimmedConfigBase64()
+	if err != nil {
+		return nil, toError(http.StatusInternalServerError, err)
+	}
+	emulator, err := txemulator.NewTraceBuilder(txemulator.WithAccountsSource(h.storage),
+		txemulator.WithAccountsMap(shardAccount),
+		txemulator.WithConfigBase64(config))
 	if err != nil {
 		return shardAccount, err
 	}
@@ -412,7 +442,7 @@ func (h Handler) addToMempool(bytesBoc []byte, shardAccount map[tongo.AccountID]
 		return shardAccount, err
 	}
 	newShardAccount := emulator.FinalStates()
-	trace, err := emulatedTreeToTrace(ctx, tree, newShardAccount)
+	trace, err := emulatedTreeToTrace(ctx, config, tree, newShardAccount)
 	if err != nil {
 		return shardAccount, err
 	}
@@ -440,7 +470,7 @@ func (h Handler) addToMempool(bytesBoc []byte, shardAccount map[tongo.AccountID]
 	return newShardAccount, nil
 }
 
-func emulatedTreeToTrace(ctx context.Context, tree *txemulator.TxTree, accounts map[tongo.AccountID]tlb.ShardAccount) (*core.Trace, error) {
+func emulatedTreeToTrace(ctx context.Context, configBase64 string, tree *txemulator.TxTree, accounts map[tongo.AccountID]tlb.ShardAccount) (*core.Trace, error) {
 	if !tree.TX.Msgs.InMsg.Exists {
 		return nil, errors.New("there is no incoming message in emulation result")
 	}
@@ -466,13 +496,13 @@ func emulatedTreeToTrace(ctx context.Context, tree *txemulator.TxTree, accounts 
 		AdditionalInfo: &core.TraceAdditionalInfo{},
 	}
 	for i := range tree.Children {
-		child, err := emulatedTreeToTrace(ctx, tree.Children[i], accounts)
+		child, err := emulatedTreeToTrace(ctx, configBase64, tree.Children[i], accounts)
 		if err != nil {
 			return nil, err
 		}
 		t.Children = append(t.Children, child)
 	}
-	executor := newSharedAccountExecutor(accounts)
+	executor := newSharedAccountExecutor(accounts, configBase64)
 	for k, v := range accounts {
 		code := accountCode(v)
 		if code == nil {
@@ -548,59 +578,4 @@ func sendMessage(ctx context.Context, msgBoc string, msgSender messageSender) ([
 		return nil, err
 	}
 	return payload, nil
-}
-
-type shardsAccountExecutor struct {
-	accounts map[tongo.AccountID]tlb.ShardAccount
-}
-
-func (s shardsAccountExecutor) RunSmcMethodByID(ctx context.Context, accountID tongo.AccountID, methodID int, params tlb.VmStack) (uint32, tlb.VmStack, error) {
-	w, ok := s.accounts[accountID]
-	if !ok {
-		return 0, nil, errors.New("address not found")
-	}
-	code, data := accountCode(w), accountData(w)
-	if code == nil || data == nil {
-		return 0, nil, errors.New("account not found")
-	}
-	config, _ := boc.DeserializeSinglRootBase64(txemulator.DefaultConfig)
-	e, err := tvm.NewEmulator(code, data, config) //todo:libs
-	if err != nil {
-		return 0, nil, err
-	}
-	return e.RunSmcMethodByID(ctx, accountID, methodID, params)
-}
-
-func newSharedAccountExecutor(a map[tongo.AccountID]tlb.ShardAccount) *shardsAccountExecutor {
-	return &shardsAccountExecutor{accounts: a}
-}
-
-func accountCode(account tlb.ShardAccount) *boc.Cell {
-	if account.Account.SumType == "AccountNone" {
-		return nil
-	}
-	if account.Account.Account.Storage.State.SumType != "AccountActive" {
-		return nil
-	}
-	code := account.Account.Account.Storage.State.AccountActive.StateInit.Code
-	if !code.Exists {
-		return nil
-	}
-	cell := code.Value.Value
-	return &cell
-}
-
-func accountData(account tlb.ShardAccount) *boc.Cell {
-	if account.Account.SumType == "AccountNone" {
-		return nil
-	}
-	if account.Account.Account.Storage.State.SumType != "AccountActive" {
-		return nil
-	}
-	data := account.Account.Account.Storage.State.AccountActive.StateInit.Data
-	if !data.Exists {
-		return nil
-	}
-	cell := data.Value.Value
-	return &cell
 }

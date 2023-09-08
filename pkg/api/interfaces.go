@@ -79,7 +79,7 @@ type storage interface {
 	GetSubscriptions(ctx context.Context, address tongo.AccountID) ([]core.Subscription, error)
 	GetJettonMasters(ctx context.Context, limit, offset int) ([]core.JettonMaster, error)
 
-	GetLastConfig() (tlb.ConfigParams, error)
+	GetLastConfig(ctx context.Context) (tlb.ConfigParams, error)
 
 	GetSeqno(ctx context.Context, account tongo.AccountID) (uint32, error)
 
@@ -87,6 +87,9 @@ type storage interface {
 	GetLibraries(ctx context.Context, libraries []tongo.Bits256) (map[tongo.Bits256]*boc.Cell, error)
 
 	SearchAccountsByPubKey(pubKey ed25519.PublicKey) ([]tongo.AccountID, error)
+
+	// TrimmedConfigBase64 returns the current trimmed blockchain config in a base64 format.
+	TrimmedConfigBase64() (string, error)
 
 	liteStorageRaw
 }

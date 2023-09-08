@@ -8,7 +8,9 @@ import (
 	"github.com/puzpuzpuz/xsync/v2"
 	"github.com/stretchr/testify/require"
 	"github.com/tonkeeper/tongo"
+	"github.com/tonkeeper/tongo/boc"
 	"github.com/tonkeeper/tongo/liteapi"
+	"github.com/tonkeeper/tongo/tlb"
 	"go.uber.org/zap"
 
 	"github.com/tonkeeper/opentonapi/pkg/blockchain/indexer"
@@ -71,5 +73,51 @@ func TestLiteStorage_run(t *testing.T) {
 			})
 			require.Equal(t, tt.wantTxHashes, txs)
 		})
+	}
+}
+
+func TestLiteStorage_runBlockchainConfigUpdate(t *testing.T) {
+	cli, err := liteapi.NewClient(liteapi.Mainnet(), liteapi.FromEnvs())
+	require.Nil(t, err)
+	s := &LiteStorage{
+		logger: zap.L(),
+		client: cli,
+	}
+	s.runBlockchainConfigUpdate(100 * time.Millisecond)
+
+	time.Sleep(2 * time.Second)
+
+	configBase64 := s.blockchainConfig()
+	require.NotEmpty(t, configBase64)
+}
+
+func TestLiteStorage_TrimmedConfigBase64(t *testing.T) {
+	cli, err := liteapi.NewClient(liteapi.Mainnet(), liteapi.FromEnvs())
+	require.Nil(t, err)
+	s := &LiteStorage{
+		logger: zap.L(),
+		client: cli,
+	}
+	conf := s.blockchainConfig()
+	require.Empty(t, conf)
+	conf, err = s.TrimmedConfigBase64()
+	require.Nil(t, err)
+	require.NotEmpty(t, conf)
+
+	cell, err := boc.DeserializeSinglRootBase64(conf)
+	require.Nil(t, err)
+
+	config := tlb.ConfigParams{}
+	err = tlb.Unmarshal(cell, &config.Config)
+	require.Nil(t, err)
+
+	allowedKeys := map[uint32]struct{}{}
+	for _, key := range allowedConfigKeys {
+		allowedKeys[key] = struct{}{}
+	}
+
+	for _, item := range config.Config.Items() {
+		_, ok := allowedKeys[uint32(item.Key)]
+		require.True(t, ok)
 	}
 }

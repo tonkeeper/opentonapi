@@ -43,7 +43,7 @@ func (h Handler) GetStakingPoolInfo(ctx context.Context, params oas.GetStakingPo
 	if err == nil {
 		info, _ := h.addressBook.GetAddressInfoByAddress(lPool.Address)
 		lPool.Name = info.Name
-		config, err := h.storage.GetLastConfig()
+		config, err := h.storage.GetLastConfig(ctx)
 		if err != nil {
 			return nil, toError(http.StatusInternalServerError, err)
 		}
@@ -149,7 +149,7 @@ func (h Handler) GetStakingPools(ctx context.Context, params oas.GetStakingPools
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
-	config, err := h.storage.GetLastConfig()
+	config, err := h.storage.GetLastConfig(ctx)
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}

@@ -92,7 +92,7 @@ func (h Handler) GetBlockchainMasterchainHead(ctx context.Context) (*oas.Blockch
 }
 
 func (h Handler) GetBlockchainConfig(ctx context.Context) (*oas.BlockchainConfig, error) {
-	cfg, err := h.storage.GetLastConfig()
+	cfg, err := h.storage.GetLastConfig(ctx)
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
