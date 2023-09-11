@@ -6,12 +6,13 @@ import (
 	"github.com/shopspring/decimal"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/boc"
+	"github.com/tonkeeper/tongo/tlb"
 )
 
 // Account holds low-level details about a particular account taken directly from the blockchain.
 type Account struct {
 	AccountAddress    tongo.AccountID
-	Status            string
+	Status            tlb.AccountStatus
 	TonBalance        int64
 	ExtraBalances     map[uint32]decimal.Decimal
 	LastTransactionLt uint64

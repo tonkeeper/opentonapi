@@ -364,7 +364,7 @@ func ConvertToAccount(accountId tongo.AccountID, acc tlb.Account) (*Account, err
 		Code:           []byte{},
 	}
 	if acc.SumType == "AccountNone" {
-		res.Status = string(tlb.AccountNone)
+		res.Status = tlb.AccountNone
 		return res, nil
 	}
 	balance := acc.Account.Storage.Balance
@@ -380,15 +380,15 @@ func ConvertToAccount(accountId tongo.AccountID, acc tlb.Account) (*Account, err
 	}
 	res.LastTransactionLt = acc.Account.Storage.LastTransLt
 	if acc.Account.Storage.State.SumType == "AccountUninit" {
-		res.Status = string(tlb.AccountUninit)
+		res.Status = tlb.AccountUninit
 		return res, nil
 	}
 	if acc.Account.Storage.State.SumType == "AccountFrozen" {
 		res.FrozenHash = g.Pointer(tongo.Bits256(acc.Account.Storage.State.AccountFrozen.StateHash))
-		res.Status = string(tlb.AccountFrozen)
+		res.Status = tlb.AccountFrozen
 		return res, nil
 	}
-	res.Status = string(tlb.AccountActive)
+	res.Status = tlb.AccountActive
 	if acc.Account.Storage.State.AccountActive.StateInit.Data.Exists {
 		data, err := acc.Account.Storage.State.AccountActive.StateInit.Data.Value.Value.ToBoc()
 		if err != nil {
