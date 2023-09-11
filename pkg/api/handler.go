@@ -4,12 +4,11 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/tonkeeper/opentonapi/pkg/chainstate"
-
 	"github.com/go-faster/errors"
+	"github.com/tonkeeper/opentonapi/pkg/chainstate"
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/opentonapi/pkg/rates"
-	rules "github.com/tonkeeper/scam_backoffice_rules"
+	"github.com/tonkeeper/opentonapi/pkg/spam"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/contract/dns"
 	"github.com/tonkeeper/tongo/tep64"
@@ -35,7 +34,7 @@ type Handler struct {
 	executor       executor
 	dns            *dns.DNS
 	limits         Limits
-	spamRules      func() rules.Rules
+	spamFilter     spamFilter
 	ratesSource    ratesSource
 	metaCache      metadataCache
 	mempoolEmulate mempoolEmulate
@@ -50,7 +49,7 @@ type Options struct {
 	msgSender        messageSender
 	executor         executor
 	limits           Limits
-	spamRules        func() rules.Rules
+	spamFilter       spamFilter
 	ratesSource      ratesSource
 	tonConnectSecret string
 }
@@ -92,9 +91,9 @@ func WithLimits(limits Limits) Option {
 	}
 }
 
-func WithSpamRules(spamRules func() rules.Rules) Option {
+func WithSpamFilter(spamFilter spamFilter) Option {
 	return func(o *Options) {
-		o.spamRules = spamRules
+		o.spamFilter = spamFilter
 	}
 }
 
@@ -128,11 +127,8 @@ func NewHandler(logger *zap.Logger, opts ...Option) (*Handler, error) {
 	if options.chainState == nil {
 		options.chainState = chainstate.NewChainState(options.storage)
 	}
-	if options.spamRules == nil {
-		options.spamRules = func() rules.Rules {
-			defaultRules := rules.GetDefaultRules()
-			return defaultRules
-		}
+	if options.spamFilter == nil {
+		options.spamFilter = spam.NewSpamFilter()
 	}
 	if options.ratesSource == nil {
 		options.ratesSource = rates.Mock{Storage: options.storage}
@@ -154,7 +150,7 @@ func NewHandler(logger *zap.Logger, opts ...Option) (*Handler, error) {
 		executor:    options.executor,
 		dns:         dnsClient,
 		limits:      options.limits,
-		spamRules:   options.spamRules,
+		spamFilter:  options.spamFilter,
 		ratesSource: rates.InitCalculator(options.ratesSource),
 		metaCache: metadataCache{
 			collectionsCache: cache.NewLRUCache[tongo.AccountID, tep64.Metadata](10000, "nft_metadata_cache"),

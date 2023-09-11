@@ -32,7 +32,8 @@ type AttachedAccount struct {
 	Name       string `json:"name"`
 	Preview    string `json:"preview"`
 	Wallet     string `json:"wallet"`
-	Normalized string
+	Symbol     string `json:"-"`
+	Normalized string `json:"-"`
 }
 
 type JettonVerificationType string

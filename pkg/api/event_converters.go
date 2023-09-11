@@ -118,7 +118,7 @@ func signedValue(value string, viewer *tongo.AccountID, source, destination tong
 func (h Handler) convertActionTonTransfer(t *bath.TonTransferAction, acceptLanguage string, viewer *tongo.AccountID) (oas.OptTonTransferAction, oas.ActionSimplePreview, bool) {
 	var spamDetected bool
 	if t.Amount < int64(ton.OneTON) && t.Comment != nil {
-		if spamAction := rules.CheckAction(h.spamRules(), *t.Comment); spamAction == rules.Drop {
+		if spamAction := rules.CheckAction(h.spamFilter.GetRules(), *t.Comment); spamAction == rules.Drop {
 			*t.Comment = ""
 			spamDetected = true
 		}
@@ -158,7 +158,7 @@ func (h Handler) convertActionTonTransfer(t *bath.TonTransferAction, acceptLangu
 func (h Handler) convertActionNftTransfer(t *bath.NftTransferAction, acceptLanguage string, viewer *tongo.AccountID) (oas.OptNftItemTransferAction, oas.ActionSimplePreview, bool) {
 	var spamDetected bool
 	if t.Comment != nil {
-		if spamAction := rules.CheckAction(h.spamRules(), *t.Comment); spamAction == rules.Drop {
+		if spamAction := rules.CheckAction(h.spamFilter.GetRules(), *t.Comment); spamAction == rules.Drop {
 			spamDetected = true
 		}
 	}
@@ -187,7 +187,7 @@ func (h Handler) convertActionNftTransfer(t *bath.NftTransferAction, acceptLangu
 func (h Handler) convertActionJettonTransfer(ctx context.Context, t *bath.JettonTransferAction, acceptLanguage string, viewer *tongo.AccountID) (oas.OptJettonTransferAction, oas.ActionSimplePreview, bool) {
 	var spamDetected bool
 	if t.Comment != nil {
-		if spamAction := rules.CheckAction(h.spamRules(), *t.Comment); spamAction == rules.Drop {
+		if spamAction := rules.CheckAction(h.spamFilter.GetRules(), *t.Comment); spamAction == rules.Drop {
 			spamDetected = true
 		}
 	}

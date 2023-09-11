@@ -5,6 +5,7 @@ import (
 	"crypto/ed25519"
 	"sync"
 
+	rules "github.com/tonkeeper/scam_backoffice_rules"
 	"github.com/tonkeeper/tongo/boc"
 
 	"github.com/tonkeeper/tongo"
@@ -146,6 +147,11 @@ type addressBook interface {
 type ratesSource interface {
 	GetRates(date int64) (map[string]float64, error)
 	GetRatesChart(token string, currency string, startDate *int64, endDate *int64) ([][]any, error)
+}
+
+type spamFilter interface {
+	GetRules() rules.Rules
+	CheckJettonAction(address tongo.AccountID, symbol string) rules.TypeOfAction
 }
 
 type metadataCache struct {
