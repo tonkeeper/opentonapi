@@ -9477,12 +9477,18 @@ func (s *ValueFlow) SetJettons(val []ValueFlowJettonsItem) {
 
 type ValueFlowJettonsItem struct {
 	Account  AccountAddress `json:"account"`
+	Jetton   JettonPreview  `json:"jetton"`
 	Quantity int64          `json:"quantity"`
 }
 
 // GetAccount returns the value of Account.
 func (s *ValueFlowJettonsItem) GetAccount() AccountAddress {
 	return s.Account
+}
+
+// GetJetton returns the value of Jetton.
+func (s *ValueFlowJettonsItem) GetJetton() JettonPreview {
+	return s.Jetton
 }
 
 // GetQuantity returns the value of Quantity.
@@ -9493,6 +9499,11 @@ func (s *ValueFlowJettonsItem) GetQuantity() int64 {
 // SetAccount sets the value of Account.
 func (s *ValueFlowJettonsItem) SetAccount(val AccountAddress) {
 	s.Account = val
+}
+
+// SetJetton sets the value of Jetton.
+func (s *ValueFlowJettonsItem) SetJetton(val JettonPreview) {
+	s.Jetton = val
 }
 
 // SetQuantity sets the value of Quantity.

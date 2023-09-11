@@ -40,7 +40,7 @@ func (flow *ValueFlow) AddFee(accountID tongo.AccountID, amount int64) {
 	flow.Accounts[accountID] = &AccountValueFlow{Fees: amount}
 }
 
-func (flow *ValueFlow) AddJettons(accountID tongo.AccountID, jetton tongo.AccountID, value big.Int) {
+func (flow *ValueFlow) AddJettons(accountID tongo.AccountID, jettonMaster tongo.AccountID, value big.Int) {
 	accountFlow, ok := flow.Accounts[accountID]
 	if !ok {
 		accountFlow = &AccountValueFlow{}
@@ -49,10 +49,10 @@ func (flow *ValueFlow) AddJettons(accountID tongo.AccountID, jetton tongo.Accoun
 	if accountFlow.Jettons == nil {
 		accountFlow.Jettons = make(map[tongo.AccountID]big.Int, 1)
 	}
-	current := accountFlow.Jettons[jetton]
+	current := accountFlow.Jettons[jettonMaster]
 	newValue := big.Int{}
 	newValue.Add(&current, &value)
-	accountFlow.Jettons[jetton] = newValue
+	accountFlow.Jettons[jettonMaster] = newValue
 }
 
 func (flow *ValueFlow) Merge(other *ValueFlow) {
