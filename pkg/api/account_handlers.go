@@ -146,7 +146,7 @@ func (h Handler) ExecGetMethodForBlockchainAccount(ctx context.Context, params o
 	exitCode, stack, err := h.executor.RunSmcMethodByID(ctx, accountID, utils.MethodIdFromName(params.MethodName), stack)
 	if err != nil {
 		if errors.Is(err, core.ErrEntityNotFound) {
-			return nil, toError(http.StatusBadRequest, err)
+			return nil, toError(http.StatusNotFound, err)
 		}
 		return nil, toError(http.StatusInternalServerError, err)
 	}
