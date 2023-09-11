@@ -13,7 +13,7 @@ func convertToRawAccount(account *core.Account) oas.BlockchainRawAccount {
 		Address:           account.AccountAddress.ToRaw(),
 		Balance:           account.TonBalance,
 		LastTransactionLt: int64(account.LastTransactionLt),
-		Status:            account.Status,
+		Status:            string(account.Status),
 		Storage: oas.AccountStorageInfo{
 			UsedCells:       account.Storage.UsedCells.Int64(),
 			UsedBits:        account.Storage.UsedBits.Int64(),
@@ -43,7 +43,7 @@ func convertToAccount(account *core.Account, ab *addressbook.KnownAddress, state
 		Address:      account.AccountAddress.ToRaw(),
 		Balance:      account.TonBalance,
 		LastActivity: account.LastActivityTime,
-		Status:       account.Status,
+		Status:       string(account.Status),
 		Interfaces:   account.Interfaces,
 		GetMethods:   account.GetMethods,
 	}
