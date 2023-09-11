@@ -3401,9 +3401,12 @@ components:
             required:
               - account
               - quantity
+              - jetton
             properties:
               account:
                 $ref: '#/components/schemas/AccountAddress'
+              jetton:
+                $ref: '#/components/schemas/JettonPreview'
               quantity:
                 type: integer
                 format: int64

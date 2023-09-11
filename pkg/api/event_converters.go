@@ -4,9 +4,10 @@ import (
 	"context"
 	"encoding/hex"
 	"fmt"
-	"github.com/tonkeeper/tongo/ton"
 	"math/big"
 	"strings"
+
+	"github.com/tonkeeper/tongo/ton"
 
 	"github.com/tonkeeper/opentonapi/pkg/references"
 
@@ -641,15 +642,16 @@ func (h Handler) convertAction(ctx context.Context, viewer *tongo.AccountID, a b
 	return action, spamDetected, nil
 }
 
-func convertAccountValueFlow(accountID tongo.AccountID, flow *bath.AccountValueFlow, book addressBook) oas.ValueFlow {
+func convertAccountValueFlow(accountID tongo.AccountID, flow *bath.AccountValueFlow, book addressBook, previews map[tongo.AccountID]oas.JettonPreview) oas.ValueFlow {
 	valueFlow := oas.ValueFlow{
 		Account: convertAccountAddress(accountID, book),
 		Ton:     flow.Ton,
 		Fees:    flow.Fees,
 	}
-	for jettonItem, quantity := range flow.Jettons {
+	for jettonMaster, quantity := range flow.Jettons {
 		valueFlow.Jettons = append(valueFlow.Jettons, oas.ValueFlowJettonsItem{
-			Account:  convertAccountAddress(jettonItem, book),
+			Account:  convertAccountAddress(jettonMaster, book),
+			Jetton:   previews[jettonMaster],
 			Quantity: quantity.Int64(),
 		})
 	}
@@ -674,8 +676,19 @@ func (h Handler) toEvent(ctx context.Context, trace *core.Trace, result *bath.Ac
 		event.IsScam = event.IsScam || spamDetected
 		event.Actions[i] = convertedAction
 	}
+
+	previews := make(map[tongo.AccountID]oas.JettonPreview)
+	for _, flow := range result.ValueFlow.Accounts {
+		for jettonMaster := range flow.Jettons {
+			if _, ok := previews[jettonMaster]; ok {
+				continue
+			}
+			meta := h.GetJettonNormalizedMetadata(ctx, jettonMaster)
+			previews[jettonMaster] = jettonPreview(jettonMaster, meta)
+		}
+	}
 	for accountID, flow := range result.ValueFlow.Accounts {
-		event.ValueFlow = append(event.ValueFlow, convertAccountValueFlow(accountID, flow, h.addressBook))
+		event.ValueFlow = append(event.ValueFlow, convertAccountValueFlow(accountID, flow, h.addressBook, previews))
 	}
 	return event, nil
 }

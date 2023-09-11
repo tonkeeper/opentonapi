@@ -3436,7 +3436,11 @@
       "items": {
        "properties": {
         "account": {
-         "$ref": "#/components/schemas/AccountAddress"
+         "$ref": "#/components/schemas/AccountAddress",
+         "deprecated": true
+        },
+        "jetton": {
+         "$ref": "#/components/schemas/JettonPreview"
         },
         "quantity": {
          "example": 10,
@@ -3446,7 +3450,8 @@
        },
        "required": [
         "account",
-        "quantity"
+        "quantity",
+        "jetton"
        ],
        "type": "object"
       },
