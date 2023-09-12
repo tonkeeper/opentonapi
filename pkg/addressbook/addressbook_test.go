@@ -3,18 +3,20 @@ package addressbook
 import (
 	"reflect"
 	"testing"
+
+	"github.com/tonkeeper/opentonapi/pkg/oas"
 )
 
 func Test_unique(t *testing.T) {
 	tests := []struct {
 		name      string
-		approvers []string
-		want      []string
+		approvers []oas.NftItemApprovedByItem
+		want      []oas.NftItemApprovedByItem
 	}{
 		{
 			name:      "all good",
-			approvers: []string{"tonkeeper", "getgems", "getgems", "tonkeeper"},
-			want:      []string{"getgems", "tonkeeper"},
+			approvers: []oas.NftItemApprovedByItem{oas.NftItemApprovedByItemTonkeeper, oas.NftItemApprovedByItemGetgems, oas.NftItemApprovedByItemGetgems, oas.NftItemApprovedByItemTonkeeper},
+			want:      []oas.NftItemApprovedByItem{oas.NftItemApprovedByItemGetgems, oas.NftItemApprovedByItemTonkeeper},
 		},
 	}
 	for _, tt := range tests {
@@ -23,7 +25,6 @@ func Test_unique(t *testing.T) {
 			if !reflect.DeepEqual(newList, tt.want) {
 				t.Errorf("unique() = %v, want %v", newList, tt.want)
 			}
-
 		})
 	}
 }

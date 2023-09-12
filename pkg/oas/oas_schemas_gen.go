@@ -5244,8 +5244,9 @@ func (s *NftItem) SetApprovedBy(val []NftItemApprovedByItem) {
 type NftItemApprovedByItem string
 
 const (
-	NftItemApprovedByItemGetgems   NftItemApprovedByItem = "getgems"
-	NftItemApprovedByItemTonkeeper NftItemApprovedByItem = "tonkeeper"
+	NftItemApprovedByItemGetgems     NftItemApprovedByItem = "getgems"
+	NftItemApprovedByItemTonkeeper   NftItemApprovedByItem = "tonkeeper"
+	NftItemApprovedByItemTonDiamonds NftItemApprovedByItem = "ton.diamonds"
 )
 
 // MarshalText implements encoding.TextMarshaler.
@@ -5254,6 +5255,8 @@ func (s NftItemApprovedByItem) MarshalText() ([]byte, error) {
 	case NftItemApprovedByItemGetgems:
 		return []byte(s), nil
 	case NftItemApprovedByItemTonkeeper:
+		return []byte(s), nil
+	case NftItemApprovedByItemTonDiamonds:
 		return []byte(s), nil
 	default:
 		return nil, errors.Errorf("invalid value: %q", s)
@@ -5268,6 +5271,9 @@ func (s *NftItemApprovedByItem) UnmarshalText(data []byte) error {
 		return nil
 	case NftItemApprovedByItemTonkeeper:
 		*s = NftItemApprovedByItemTonkeeper
+		return nil
+	case NftItemApprovedByItemTonDiamonds:
+		*s = NftItemApprovedByItemTonDiamonds
 		return nil
 	default:
 		return errors.Errorf("invalid value: %q", data)
