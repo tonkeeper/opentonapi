@@ -21,6 +21,10 @@ type Config struct {
 		Accounts    accountsList        `env:"ACCOUNTS"`
 		LiteServers []config.LiteServer `env:"LITE_SERVERS"`
 	}
+	AWS struct {
+		AccessKeyID     string `env:"AWS_ACCESS_KEY_ID"`
+		SecretAccessKey string `env:"AWS_SECRET_ACCESS_KEY"`
+	}
 	TonConnect struct {
 		Secret string `env:"TON_CONNECT_SECRET"`
 	}
