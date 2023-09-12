@@ -12,6 +12,8 @@ import (
 
 	"github.com/shopspring/decimal"
 	"github.com/shurcooL/graphql"
+	"github.com/tonkeeper/opentonapi/pkg/oas"
+	"github.com/tonkeeper/opentonapi/pkg/references"
 	"github.com/tonkeeper/tongo"
 	"go.uber.org/zap"
 	"golang.org/x/exp/maps"
@@ -66,7 +68,7 @@ type KnownCollection struct {
 	MaxItems    int64    `json:"max_items"`
 	Websites    []string `json:"websites,omitempty"`
 	Social      []string `json:"social,omitempty"`
-	Approvers   []string
+	Approvers   []oas.NftItemApprovedByItem
 }
 
 type Option func(o *Options)
@@ -211,6 +213,7 @@ func NewAddressBook(logger *zap.Logger, addressPath, jettonPath, collectionPath 
 	}()
 
 	go book.getGGWhitelist(logger)
+	go book.getTonDiamondsWhitelist()
 
 	return book
 }
@@ -292,8 +295,10 @@ func (b *Book) refreshStonfiJettons(logger *zap.Logger) {
 	}
 }
 
-func unique(approvers []string) []string {
-	sort.Strings(approvers)
+func unique(approvers []oas.NftItemApprovedByItem) []oas.NftItemApprovedByItem {
+	sort.Slice(approvers, func(i, j int) bool {
+		return approvers[i] < approvers[j]
+	})
 	return slices.Compact(approvers)
 }
 
@@ -315,12 +320,12 @@ func (b *Book) refreshCollections(logger *zap.Logger, collectionPath string) {
 		if !ok {
 			// this is a new item, so we only add tonkeeper as approver.
 			item.Address = accountID.ToRaw()
-			item.Approvers = unique(append(item.Approvers, "tonkeeper"))
+			item.Approvers = unique(append(item.Approvers, oas.NftItemApprovedByItemTonkeeper))
 			b.collections[accountID] = item
 			continue
 		}
 		// this is an existing item, so we merge approvers and remove duplicates adding tonkeeper.
-		item.Approvers = unique(append(append(currentCollection.Approvers, item.Approvers...), "tonkeeper"))
+		item.Approvers = unique(append(append(currentCollection.Approvers, item.Approvers...), oas.NftItemApprovedByItemTonkeeper))
 		b.collections[accountID] = item
 	}
 }
@@ -376,7 +381,24 @@ func (b *Book) getGGWhitelist(logger *zap.Logger) {
 		b.mu.Lock()
 		for _, account := range addresses {
 			collection := b.collections[account]
-			collection.Approvers = unique(append(collection.Approvers, "getgems"))
+			collection.Approvers = unique(append(collection.Approvers, oas.NftItemApprovedByItemGetgems))
+			b.collections[account] = collection
+		}
+		b.mu.Unlock()
+		return
+	}
+}
+
+func (b *Book) getTonDiamondsWhitelist() {
+	for {
+		if len(b.GetKnownCollections()) == 0 {
+			time.Sleep(time.Second * 10)
+			continue
+		}
+		b.mu.Lock()
+		for _, account := range references.TonDiamondsCollections {
+			collection := b.collections[account]
+			collection.Approvers = unique(append(collection.Approvers, oas.NftItemApprovedByItemTonDiamonds))
 			b.collections[account] = collection
 		}
 		b.mu.Unlock()

@@ -2465,7 +2465,8 @@
       "items": {
        "enum": [
         "getgems",
-        "tonkeeper"
+        "tonkeeper",
+        "ton.diamonds"
        ],
        "example": "getgems",
        "type": "string"
@@ -3436,8 +3437,7 @@
       "items": {
        "properties": {
         "account": {
-         "$ref": "#/components/schemas/AccountAddress",
-         "deprecated": true
+         "$ref": "#/components/schemas/AccountAddress"
         },
         "jetton": {
          "$ref": "#/components/schemas/JettonPreview"

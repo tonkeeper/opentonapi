@@ -51,12 +51,7 @@ func convertNFT(ctx context.Context, item core.NftItem, book addressBook, metaCa
 	if item.CollectionAddress != nil {
 		if cc, prs := book.GetCollectionInfoByAddress(*item.CollectionAddress); prs {
 			for _, a := range cc.Approvers {
-				switch a {
-				case "tonkeeper":
-					i.ApprovedBy = append(i.ApprovedBy, oas.NftItemApprovedByItemTonkeeper)
-				case "getgems":
-					i.ApprovedBy = append(i.ApprovedBy, oas.NftItemApprovedByItemGetgems)
-				}
+				i.ApprovedBy = append(i.ApprovedBy, a)
 			}
 		}
 		cInfo, _ := metaCache.getCollectionMeta(ctx, *item.CollectionAddress)

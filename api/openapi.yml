@@ -3352,6 +3352,7 @@ components:
             enum:
               - getgems
               - tonkeeper
+              - ton.diamonds
     NftItems:
       type: object
       required:
