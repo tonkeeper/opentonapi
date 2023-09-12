@@ -1,6 +1,7 @@
 package core
 
 type AttachedAccount struct {
-	Name  string
-	Image string
+	Name   string
+	Symbol string
+	Image  string
 }

@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"sort"
 
+	rules "github.com/tonkeeper/scam_backoffice_rules"
 	"github.com/tonkeeper/tongo/code"
 	"github.com/tonkeeper/tongo/utils"
 
@@ -180,6 +181,15 @@ func (h Handler) SearchAccounts(ctx context.Context, params oas.SearchAccountsPa
 	accounts := h.addressBook.SearchAttachedAccountsByPrefix(params.Name)
 	var response oas.FoundAccounts
 	for _, account := range accounts {
+		if account.Symbol != "" {
+			accountID, err := tongo.ParseAccountID(account.Wallet)
+			if err != nil {
+				continue
+			}
+			if h.spamFilter.CheckJettonAction(accountID, account.Symbol) == rules.Drop {
+				continue
+			}
+		}
 		response.Addresses = append(response.Addresses, oas.FoundAccountsAddressesItem{
 			Address: account.Wallet,
 			Name:    account.Name,
