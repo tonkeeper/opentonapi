@@ -3703,6 +3703,7 @@ components:
         - amount
         - staker
         - pool
+        - implementation
       properties:
         amount:
           type: integer
@@ -3712,6 +3713,8 @@ components:
           $ref: '#/components/schemas/AccountAddress'
         pool:
           $ref: '#/components/schemas/AccountAddress'
+        implementation:
+          $ref: '#/components/schemas/PoolImplementationType'
     WithdrawStakeAction:
       description: "validator's participation in elections"
       type: object
@@ -3719,6 +3722,7 @@ components:
         - amount
         - staker
         - pool
+        - implementation
       properties:
         amount:
           type: integer
@@ -3728,12 +3732,15 @@ components:
           $ref: '#/components/schemas/AccountAddress'
         pool:
           $ref: '#/components/schemas/AccountAddress'
+        implementation:
+          $ref: '#/components/schemas/PoolImplementationType'
     WithdrawStakeRequestAction:
       description: "validator's participation in elections"
       type: object
       required:
         - staker
         - pool
+        - implementation
       properties:
         amount:
           type: integer
@@ -3743,6 +3750,8 @@ components:
           $ref: '#/components/schemas/AccountAddress'
         pool:
           $ref: '#/components/schemas/AccountAddress'
+        implementation:
+          $ref: '#/components/schemas/PoolImplementationType'
     ElectionsRecoverStakeAction:
       type: object
       required:
@@ -4405,11 +4414,7 @@ components:
           type: integer
           format: int64
         implementation:
-          type: string
-          enum:
-            - whales
-            - tf
-            - liquidTF
+          $ref: '#/components/schemas/PoolImplementationType'
         apy:
           type: number
           description: APY in percent
@@ -4658,6 +4663,12 @@ components:
           type: string
           enum:
             - func
+    PoolImplementationType:
+      type: string
+      enum:
+        - whales
+        - tf
+        - liquidTF
   
   responses:
     Error:

@@ -173,7 +173,7 @@ func (h Handler) GetStakingPools(ctx context.Context, params oas.GetStakingPools
 		return a.Apy > b.Apy
 	})
 	result.SetImplementations(map[string]oas.PoolImplementation{
-		string(oas.PoolInfoImplementationWhales): {
+		string(oas.PoolImplementationTypeWhales): {
 			Name: references.WhalesPoolImplementationsName,
 			Description: i18n.T(params.AcceptLanguage.Value, i18n.C{DefaultMessage: &i18n.M{
 				ID:    "poolImplementationDescription",
@@ -181,12 +181,12 @@ func (h Handler) GetStakingPools(ctx context.Context, params oas.GetStakingPools
 			}, TemplateData: i18n.Template{"Deposit": minWhales / 1_000_000_000}}),
 			URL: references.WhalesPoolImplementationsURL,
 		},
-		string(oas.PoolInfoImplementationTf): {
+		string(oas.PoolImplementationTypeTf): {
 			Name:        references.TFPoolImplementationsName,
 			Description: i18n.T(params.AcceptLanguage.Value, i18n.C{MessageID: "poolImplementationDescription", TemplateData: map[string]interface{}{"Deposit": minTF / 1_000_000_000}}),
 			URL:         references.TFPoolImplementationsURL,
 		},
-		string(oas.PoolInfoImplementationLiquidTF): {
+		string(oas.PoolImplementationTypeLiquidTF): {
 			Name:        references.TonstakersImplementationsName,
 			Description: i18n.T(params.AcceptLanguage.Value, i18n.C{MessageID: "poolImplementationDescription", TemplateData: map[string]interface{}{"Deposit": 10}}),
 			URL:         references.LiquidImplementationsUrl,

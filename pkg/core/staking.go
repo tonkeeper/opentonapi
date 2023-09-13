@@ -33,9 +33,18 @@ type LiquidPool struct {
 	Address         tongo.AccountID
 	TotalAmount     int64
 	VerifiedSources bool
+	TotalStakers    int
 	JettonMaster    tongo.AccountID
 	APY             float64
 }
+
+type StakingImplementation string
+
+const (
+	StakingImplementationTF       StakingImplementation = "tf"
+	StakingImplementationLiquidTF StakingImplementation = "liquidTF"
+	StakingImplementationWhales   StakingImplementation = "whales"
+)
 
 func CalculateAPY(roundExpected, roundBorrowed int64, governanceFee int32) float64 {
 	const secondsPerRound = 1 << 16

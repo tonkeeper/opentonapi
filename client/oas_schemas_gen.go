@@ -2268,9 +2268,10 @@ func (s *CreditPhase) SetCredit(val int64) {
 // Validator's participation in elections.
 // Ref: #/components/schemas/DepositStakeAction
 type DepositStakeAction struct {
-	Amount int64          `json:"amount"`
-	Staker AccountAddress `json:"staker"`
-	Pool   AccountAddress `json:"pool"`
+	Amount         int64                  `json:"amount"`
+	Staker         AccountAddress         `json:"staker"`
+	Pool           AccountAddress         `json:"pool"`
+	Implementation PoolImplementationType `json:"implementation"`
 }
 
 // GetAmount returns the value of Amount.
@@ -2288,6 +2289,11 @@ func (s *DepositStakeAction) GetPool() AccountAddress {
 	return s.Pool
 }
 
+// GetImplementation returns the value of Implementation.
+func (s *DepositStakeAction) GetImplementation() PoolImplementationType {
+	return s.Implementation
+}
+
 // SetAmount sets the value of Amount.
 func (s *DepositStakeAction) SetAmount(val int64) {
 	s.Amount = val
@@ -2301,6 +2307,11 @@ func (s *DepositStakeAction) SetStaker(val AccountAddress) {
 // SetPool sets the value of Pool.
 func (s *DepositStakeAction) SetPool(val AccountAddress) {
 	s.Pool = val
+}
+
+// SetImplementation sets the value of Implementation.
+func (s *DepositStakeAction) SetImplementation(val PoolImplementationType) {
+	s.Implementation = val
 }
 
 // Ref: #/components/schemas/DnsExpiring
@@ -7686,12 +7697,52 @@ func (s *PoolImplementation) SetSocials(val []string) {
 	s.Socials = val
 }
 
+// Ref: #/components/schemas/PoolImplementationType
+type PoolImplementationType string
+
+const (
+	PoolImplementationTypeWhales   PoolImplementationType = "whales"
+	PoolImplementationTypeTf       PoolImplementationType = "tf"
+	PoolImplementationTypeLiquidTF PoolImplementationType = "liquidTF"
+)
+
+// MarshalText implements encoding.TextMarshaler.
+func (s PoolImplementationType) MarshalText() ([]byte, error) {
+	switch s {
+	case PoolImplementationTypeWhales:
+		return []byte(s), nil
+	case PoolImplementationTypeTf:
+		return []byte(s), nil
+	case PoolImplementationTypeLiquidTF:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *PoolImplementationType) UnmarshalText(data []byte) error {
+	switch PoolImplementationType(data) {
+	case PoolImplementationTypeWhales:
+		*s = PoolImplementationTypeWhales
+		return nil
+	case PoolImplementationTypeTf:
+		*s = PoolImplementationTypeTf
+		return nil
+	case PoolImplementationTypeLiquidTF:
+		*s = PoolImplementationTypeLiquidTF
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
 // Ref: #/components/schemas/PoolInfo
 type PoolInfo struct {
 	Address        string                 `json:"address"`
 	Name           string                 `json:"name"`
 	TotalAmount    int64                  `json:"total_amount"`
-	Implementation PoolInfoImplementation `json:"implementation"`
+	Implementation PoolImplementationType `json:"implementation"`
 	// APY in percent.
 	Apy      float64 `json:"apy"`
 	MinStake int64   `json:"min_stake"`
@@ -7729,7 +7780,7 @@ func (s *PoolInfo) GetTotalAmount() int64 {
 }
 
 // GetImplementation returns the value of Implementation.
-func (s *PoolInfo) GetImplementation() PoolInfoImplementation {
+func (s *PoolInfo) GetImplementation() PoolImplementationType {
 	return s.Implementation
 }
 
@@ -7799,7 +7850,7 @@ func (s *PoolInfo) SetTotalAmount(val int64) {
 }
 
 // SetImplementation sets the value of Implementation.
-func (s *PoolInfo) SetImplementation(val PoolInfoImplementation) {
+func (s *PoolInfo) SetImplementation(val PoolImplementationType) {
 	s.Implementation = val
 }
 
@@ -7851,45 +7902,6 @@ func (s *PoolInfo) SetNominatorsStake(val int64) {
 // SetValidatorStake sets the value of ValidatorStake.
 func (s *PoolInfo) SetValidatorStake(val int64) {
 	s.ValidatorStake = val
-}
-
-type PoolInfoImplementation string
-
-const (
-	PoolInfoImplementationWhales   PoolInfoImplementation = "whales"
-	PoolInfoImplementationTf       PoolInfoImplementation = "tf"
-	PoolInfoImplementationLiquidTF PoolInfoImplementation = "liquidTF"
-)
-
-// MarshalText implements encoding.TextMarshaler.
-func (s PoolInfoImplementation) MarshalText() ([]byte, error) {
-	switch s {
-	case PoolInfoImplementationWhales:
-		return []byte(s), nil
-	case PoolInfoImplementationTf:
-		return []byte(s), nil
-	case PoolInfoImplementationLiquidTF:
-		return []byte(s), nil
-	default:
-		return nil, errors.Errorf("invalid value: %q", s)
-	}
-}
-
-// UnmarshalText implements encoding.TextUnmarshaler.
-func (s *PoolInfoImplementation) UnmarshalText(data []byte) error {
-	switch PoolInfoImplementation(data) {
-	case PoolInfoImplementationWhales:
-		*s = PoolInfoImplementationWhales
-		return nil
-	case PoolInfoImplementationTf:
-		*s = PoolInfoImplementationTf
-		return nil
-	case PoolInfoImplementationLiquidTF:
-		*s = PoolInfoImplementationLiquidTF
-		return nil
-	default:
-		return errors.Errorf("invalid value: %q", data)
-	}
 }
 
 // Ref: #/components/schemas/Price
@@ -9579,9 +9591,10 @@ func (s *WalletDNS) SetNames(val []string) {
 // Validator's participation in elections.
 // Ref: #/components/schemas/WithdrawStakeAction
 type WithdrawStakeAction struct {
-	Amount int64          `json:"amount"`
-	Staker AccountAddress `json:"staker"`
-	Pool   AccountAddress `json:"pool"`
+	Amount         int64                  `json:"amount"`
+	Staker         AccountAddress         `json:"staker"`
+	Pool           AccountAddress         `json:"pool"`
+	Implementation PoolImplementationType `json:"implementation"`
 }
 
 // GetAmount returns the value of Amount.
@@ -9599,6 +9612,11 @@ func (s *WithdrawStakeAction) GetPool() AccountAddress {
 	return s.Pool
 }
 
+// GetImplementation returns the value of Implementation.
+func (s *WithdrawStakeAction) GetImplementation() PoolImplementationType {
+	return s.Implementation
+}
+
 // SetAmount sets the value of Amount.
 func (s *WithdrawStakeAction) SetAmount(val int64) {
 	s.Amount = val
@@ -9614,12 +9632,18 @@ func (s *WithdrawStakeAction) SetPool(val AccountAddress) {
 	s.Pool = val
 }
 
+// SetImplementation sets the value of Implementation.
+func (s *WithdrawStakeAction) SetImplementation(val PoolImplementationType) {
+	s.Implementation = val
+}
+
 // Validator's participation in elections.
 // Ref: #/components/schemas/WithdrawStakeRequestAction
 type WithdrawStakeRequestAction struct {
-	Amount OptInt64       `json:"amount"`
-	Staker AccountAddress `json:"staker"`
-	Pool   AccountAddress `json:"pool"`
+	Amount         OptInt64               `json:"amount"`
+	Staker         AccountAddress         `json:"staker"`
+	Pool           AccountAddress         `json:"pool"`
+	Implementation PoolImplementationType `json:"implementation"`
 }
 
 // GetAmount returns the value of Amount.
@@ -9637,6 +9661,11 @@ func (s *WithdrawStakeRequestAction) GetPool() AccountAddress {
 	return s.Pool
 }
 
+// GetImplementation returns the value of Implementation.
+func (s *WithdrawStakeRequestAction) GetImplementation() PoolImplementationType {
+	return s.Implementation
+}
+
 // SetAmount sets the value of Amount.
 func (s *WithdrawStakeRequestAction) SetAmount(val OptInt64) {
 	s.Amount = val
@@ -9650,4 +9679,9 @@ func (s *WithdrawStakeRequestAction) SetStaker(val AccountAddress) {
 // SetPool sets the value of Pool.
 func (s *WithdrawStakeRequestAction) SetPool(val AccountAddress) {
 	s.Pool = val
+}
+
+// SetImplementation sets the value of Implementation.
+func (s *WithdrawStakeRequestAction) SetImplementation(val PoolImplementationType) {
+	s.Implementation = val
 }

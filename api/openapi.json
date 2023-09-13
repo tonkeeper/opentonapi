@@ -1557,6 +1557,9 @@
       "format": "int64",
       "type": "integer"
      },
+     "implementation": {
+      "$ref": "#/components/schemas/PoolImplementationType"
+     },
      "pool": {
       "$ref": "#/components/schemas/AccountAddress"
      },
@@ -1567,7 +1570,8 @@
     "required": [
      "amount",
      "staker",
-     "pool"
+     "pool",
+     "implementation"
     ],
     "type": "object"
    },
@@ -2644,6 +2648,14 @@
     ],
     "type": "object"
    },
+   "PoolImplementationType": {
+    "enum": [
+     "whales",
+     "tf",
+     "liquidTF"
+    ],
+    "type": "string"
+   },
    "PoolInfo": {
     "properties": {
      "address": {
@@ -2673,12 +2685,7 @@
       "type": "integer"
      },
      "implementation": {
-      "enum": [
-       "whales",
-       "tf",
-       "liquidTF"
-      ],
-      "type": "string"
+      "$ref": "#/components/schemas/PoolImplementationType"
      },
      "liquid_jetton_master": {
       "description": "for liquid staking master account of jetton",
@@ -3513,6 +3520,9 @@
       "format": "int64",
       "type": "integer"
      },
+     "implementation": {
+      "$ref": "#/components/schemas/PoolImplementationType"
+     },
      "pool": {
       "$ref": "#/components/schemas/AccountAddress"
      },
@@ -3523,7 +3533,8 @@
     "required": [
      "amount",
      "staker",
-     "pool"
+     "pool",
+     "implementation"
     ],
     "type": "object"
    },
@@ -3535,6 +3546,9 @@
       "format": "int64",
       "type": "integer"
      },
+     "implementation": {
+      "$ref": "#/components/schemas/PoolImplementationType"
+     },
      "pool": {
       "$ref": "#/components/schemas/AccountAddress"
      },
@@ -3544,7 +3558,8 @@
     },
     "required": [
      "staker",
-     "pool"
+     "pool",
+     "implementation"
     ],
     "type": "object"
    }

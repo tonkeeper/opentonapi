@@ -262,9 +262,10 @@ func (h Handler) convertActionJettonMint(ctx context.Context, m *bath.JettonMint
 func (h Handler) convertDepositStake(d *bath.DepositStakeAction, acceptLanguage string, viewer *tongo.AccountID) (oas.OptDepositStakeAction, oas.ActionSimplePreview) {
 	var action oas.OptDepositStakeAction
 	action.SetTo(oas.DepositStakeAction{
-		Amount: d.Amount,
-		Staker: convertAccountAddress(d.Staker, h.addressBook),
-		Pool:   convertAccountAddress(d.Pool, h.addressBook),
+		Amount:         d.Amount,
+		Staker:         convertAccountAddress(d.Staker, h.addressBook),
+		Pool:           convertAccountAddress(d.Pool, h.addressBook),
+		Implementation: oas.PoolImplementationType(d.Implementation),
 	})
 	simplePreview := oas.ActionSimplePreview{
 		Name: "Deposit Stake",
@@ -286,9 +287,10 @@ func (h Handler) convertDepositStake(d *bath.DepositStakeAction, acceptLanguage 
 func (h Handler) convertWithdrawStakeRequest(d *bath.WithdrawStakeRequestAction, acceptLanguage string, viewer *tongo.AccountID) (oas.OptWithdrawStakeRequestAction, oas.ActionSimplePreview) {
 	var action oas.OptWithdrawStakeRequestAction
 	action.SetTo(oas.WithdrawStakeRequestAction{
-		Amount: g.Opt(d.Amount),
-		Staker: convertAccountAddress(d.Staker, h.addressBook),
-		Pool:   convertAccountAddress(d.Pool, h.addressBook),
+		Amount:         g.Opt(d.Amount),
+		Staker:         convertAccountAddress(d.Staker, h.addressBook),
+		Pool:           convertAccountAddress(d.Pool, h.addressBook),
+		Implementation: oas.PoolImplementationType(d.Implementation),
 	})
 	value := "ALL"
 	if d.Amount != nil {
@@ -315,9 +317,10 @@ func (h Handler) convertWithdrawStakeRequest(d *bath.WithdrawStakeRequestAction,
 func (h Handler) convertWithdrawStake(d *bath.WithdrawStakeAction, acceptLanguage string, viewer *tongo.AccountID) (oas.OptWithdrawStakeAction, oas.ActionSimplePreview) {
 	var action oas.OptWithdrawStakeAction
 	action.SetTo(oas.WithdrawStakeAction{
-		Amount: d.Amount,
-		Staker: convertAccountAddress(d.Staker, h.addressBook),
-		Pool:   convertAccountAddress(d.Pool, h.addressBook),
+		Amount:         d.Amount,
+		Staker:         convertAccountAddress(d.Staker, h.addressBook),
+		Pool:           convertAccountAddress(d.Pool, h.addressBook),
+		Implementation: oas.PoolImplementationType(d.Implementation),
 	})
 	simplePreview := oas.ActionSimplePreview{
 		Name: "Withdraw Stake",

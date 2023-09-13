@@ -3,6 +3,7 @@ package bath
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/tonkeeper/opentonapi/pkg/core"
 	"math/big"
 	"reflect"
 
@@ -180,19 +181,22 @@ type (
 		AmountOut       big.Int
 	}
 	DepositStakeAction struct {
-		Staker tongo.AccountID
-		Amount int64
-		Pool   tongo.AccountID
+		Staker         tongo.AccountID
+		Amount         int64
+		Pool           tongo.AccountID
+		Implementation core.StakingImplementation
 	}
 	WithdrawStakeAction struct {
-		Staker tongo.AccountID
-		Amount int64
-		Pool   tongo.AccountID
+		Staker         tongo.AccountID
+		Amount         int64
+		Pool           tongo.AccountID
+		Implementation core.StakingImplementation
 	}
 	WithdrawStakeRequestAction struct {
-		Staker tongo.AccountID
-		Amount *int64
-		Pool   tongo.AccountID
+		Staker         tongo.AccountID
+		Amount         *int64
+		Pool           tongo.AccountID
+		Implementation core.StakingImplementation
 	}
 )
 

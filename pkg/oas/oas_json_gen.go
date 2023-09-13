@@ -5277,12 +5277,17 @@ func (s *DepositStakeAction) encodeFields(e *jx.Encoder) {
 		e.FieldStart("pool")
 		s.Pool.Encode(e)
 	}
+	{
+		e.FieldStart("implementation")
+		s.Implementation.Encode(e)
+	}
 }
 
-var jsonFieldsNameOfDepositStakeAction = [3]string{
+var jsonFieldsNameOfDepositStakeAction = [4]string{
 	0: "amount",
 	1: "staker",
 	2: "pool",
+	3: "implementation",
 }
 
 // Decode decodes DepositStakeAction from json.
@@ -5326,6 +5331,16 @@ func (s *DepositStakeAction) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"pool\"")
 			}
+		case "implementation":
+			requiredBitSet[0] |= 1 << 3
+			if err := func() error {
+				if err := s.Implementation.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"implementation\"")
+			}
 		default:
 			return d.Skip()
 		}
@@ -5336,7 +5351,7 @@ func (s *DepositStakeAction) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b00000111,
+		0b00001111,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -17923,6 +17938,48 @@ func (s *PoolImplementation) UnmarshalJSON(data []byte) error {
 	return s.Decode(d)
 }
 
+// Encode encodes PoolImplementationType as json.
+func (s PoolImplementationType) Encode(e *jx.Encoder) {
+	e.Str(string(s))
+}
+
+// Decode decodes PoolImplementationType from json.
+func (s *PoolImplementationType) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode PoolImplementationType to nil")
+	}
+	v, err := d.StrBytes()
+	if err != nil {
+		return err
+	}
+	// Try to use constant string.
+	switch PoolImplementationType(v) {
+	case PoolImplementationTypeWhales:
+		*s = PoolImplementationTypeWhales
+	case PoolImplementationTypeTf:
+		*s = PoolImplementationTypeTf
+	case PoolImplementationTypeLiquidTF:
+		*s = PoolImplementationTypeLiquidTF
+	default:
+		*s = PoolImplementationType(v)
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s PoolImplementationType) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *PoolImplementationType) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
 // Encode implements json.Marshaler.
 func (s *PoolInfo) Encode(e *jx.Encoder) {
 	e.ObjStart()
@@ -18235,48 +18292,6 @@ func (s *PoolInfo) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *PoolInfo) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
-// Encode encodes PoolInfoImplementation as json.
-func (s PoolInfoImplementation) Encode(e *jx.Encoder) {
-	e.Str(string(s))
-}
-
-// Decode decodes PoolInfoImplementation from json.
-func (s *PoolInfoImplementation) Decode(d *jx.Decoder) error {
-	if s == nil {
-		return errors.New("invalid: unable to decode PoolInfoImplementation to nil")
-	}
-	v, err := d.StrBytes()
-	if err != nil {
-		return err
-	}
-	// Try to use constant string.
-	switch PoolInfoImplementation(v) {
-	case PoolInfoImplementationWhales:
-		*s = PoolInfoImplementationWhales
-	case PoolInfoImplementationTf:
-		*s = PoolInfoImplementationTf
-	case PoolInfoImplementationLiquidTF:
-		*s = PoolInfoImplementationLiquidTF
-	default:
-		*s = PoolInfoImplementation(v)
-	}
-
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s PoolInfoImplementation) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *PoolInfoImplementation) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -23325,12 +23340,17 @@ func (s *WithdrawStakeAction) encodeFields(e *jx.Encoder) {
 		e.FieldStart("pool")
 		s.Pool.Encode(e)
 	}
+	{
+		e.FieldStart("implementation")
+		s.Implementation.Encode(e)
+	}
 }
 
-var jsonFieldsNameOfWithdrawStakeAction = [3]string{
+var jsonFieldsNameOfWithdrawStakeAction = [4]string{
 	0: "amount",
 	1: "staker",
 	2: "pool",
+	3: "implementation",
 }
 
 // Decode decodes WithdrawStakeAction from json.
@@ -23374,6 +23394,16 @@ func (s *WithdrawStakeAction) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"pool\"")
 			}
+		case "implementation":
+			requiredBitSet[0] |= 1 << 3
+			if err := func() error {
+				if err := s.Implementation.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"implementation\"")
+			}
 		default:
 			return d.Skip()
 		}
@@ -23384,7 +23414,7 @@ func (s *WithdrawStakeAction) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b00000111,
+		0b00001111,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -23453,12 +23483,17 @@ func (s *WithdrawStakeRequestAction) encodeFields(e *jx.Encoder) {
 		e.FieldStart("pool")
 		s.Pool.Encode(e)
 	}
+	{
+		e.FieldStart("implementation")
+		s.Implementation.Encode(e)
+	}
 }
 
-var jsonFieldsNameOfWithdrawStakeRequestAction = [3]string{
+var jsonFieldsNameOfWithdrawStakeRequestAction = [4]string{
 	0: "amount",
 	1: "staker",
 	2: "pool",
+	3: "implementation",
 }
 
 // Decode decodes WithdrawStakeRequestAction from json.
@@ -23500,6 +23535,16 @@ func (s *WithdrawStakeRequestAction) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"pool\"")
 			}
+		case "implementation":
+			requiredBitSet[0] |= 1 << 3
+			if err := func() error {
+				if err := s.Implementation.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"implementation\"")
+			}
 		default:
 			return d.Skip()
 		}
@@ -23510,7 +23555,7 @@ func (s *WithdrawStakeRequestAction) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b00000110,
+		0b00001110,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.

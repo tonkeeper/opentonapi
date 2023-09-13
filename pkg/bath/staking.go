@@ -2,6 +2,7 @@ package bath
 
 import (
 	"github.com/tonkeeper/opentonapi/pkg/blockchain/config"
+	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
 	"github.com/tonkeeper/tongo/ton"
@@ -82,18 +83,20 @@ var ElectionsRecoverStakeStraw = Straw[BubbleElectionsRecoverStake]{
 }
 
 type BubbleDepositStake struct {
-	Staker  tongo.AccountID
-	Amount  int64
-	Success bool
-	Pool    tongo.AccountID
+	Staker         tongo.AccountID
+	Amount         int64
+	Success        bool
+	Pool           tongo.AccountID
+	Implementation core.StakingImplementation
 }
 
 func (ds BubbleDepositStake) ToAction() *Action {
 	return &Action{
 		DepositStake: &DepositStakeAction{
-			Amount: ds.Amount,
-			Pool:   ds.Pool,
-			Staker: ds.Staker,
+			Amount:         ds.Amount,
+			Pool:           ds.Pool,
+			Staker:         ds.Staker,
+			Implementation: ds.Implementation,
 		},
 		Success: ds.Success,
 		Type:    DepositStake,
@@ -108,6 +111,7 @@ var DepositTFStakeStraw = Straw[BubbleDepositStake]{
 		newAction.Staker = tx.inputFrom.Address
 		newAction.Amount = tx.inputAmount
 		newAction.Success = tx.success
+		newAction.Implementation = core.StakingImplementationTF
 		return nil
 	},
 	SingleChild: &Straw[BubbleDepositStake]{
@@ -121,15 +125,17 @@ type BubbleWithdrawStakeRequest struct {
 	Amount         *int64
 	Success        bool
 	Pool           tongo.AccountID
+	Implementation core.StakingImplementation
 	attachedAmount int64 //
 }
 
 func (ds BubbleWithdrawStakeRequest) ToAction() *Action {
 	return &Action{
 		WithdrawStakeRequest: &WithdrawStakeRequestAction{
-			Amount: ds.Amount,
-			Pool:   ds.Pool,
-			Staker: ds.Staker,
+			Amount:         ds.Amount,
+			Pool:           ds.Pool,
+			Staker:         ds.Staker,
+			Implementation: ds.Implementation,
 		},
 		Success: ds.Success,
 		Type:    WithdrawStakeRequest,
@@ -144,6 +150,7 @@ var WithdrawTFStakeRequestStraw = Straw[BubbleWithdrawStakeRequest]{
 		newAction.Staker = tx.inputFrom.Address
 		newAction.Success = tx.success
 		newAction.attachedAmount = tx.inputAmount //maybe should extract fee but it is not important
+		newAction.Implementation = core.StakingImplementationTF
 		return nil
 	},
 	Children: []Straw[BubbleWithdrawStakeRequest]{
@@ -155,17 +162,19 @@ var WithdrawTFStakeRequestStraw = Straw[BubbleWithdrawStakeRequest]{
 }
 
 type BubbleWithdrawStake struct {
-	Staker tongo.AccountID
-	Amount int64
-	Pool   tongo.AccountID
+	Staker         tongo.AccountID
+	Amount         int64
+	Pool           tongo.AccountID
+	Implementation core.StakingImplementation
 }
 
 func (ds BubbleWithdrawStake) ToAction() *Action {
 	return &Action{
 		WithdrawStake: &WithdrawStakeAction{
-			Amount: ds.Amount,
-			Pool:   ds.Pool,
-			Staker: ds.Staker,
+			Amount:         ds.Amount,
+			Pool:           ds.Pool,
+			Staker:         ds.Staker,
+			Implementation: ds.Implementation,
 		},
 		Type: WithdrawStake,
 	}
@@ -178,6 +187,7 @@ var WithdrawStakeImmediatelyStraw = Straw[BubbleWithdrawStake]{
 		newAction.Pool = req.Pool
 		newAction.Staker = req.Staker
 		newAction.Amount = -req.attachedAmount
+		newAction.Implementation = req.Implementation
 		return nil
 	},
 	SingleChild: &Straw[BubbleWithdrawStake]{
@@ -197,6 +207,7 @@ var DepositLiquidStakeStraw = Straw[BubbleDepositStake]{
 		newAction.Staker = tx.inputFrom.Address
 		newAction.Amount = tx.inputAmount - int64(ton.OneTON)
 		newAction.Success = tx.success
+		newAction.Implementation = core.StakingImplementationLiquidTF
 		return nil
 	},
 	SingleChild: &Straw[BubbleDepositStake]{

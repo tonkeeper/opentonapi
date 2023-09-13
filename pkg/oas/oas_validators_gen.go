@@ -353,6 +353,60 @@ func (s *Action) Validate() error {
 		})
 	}
 	if err := func() error {
+		if value, ok := s.DepositStake.Get(); ok {
+			if err := func() error {
+				if err := value.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "DepositStake",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if value, ok := s.WithdrawStake.Get(); ok {
+			if err := func() error {
+				if err := value.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "WithdrawStake",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if value, ok := s.WithdrawStakeRequest.Get(); ok {
+			if err := func() error {
+				if err := value.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "WithdrawStakeRequest",
+			Error: err,
+		})
+	}
+	if err := func() error {
 		if value, ok := s.JettonSwap.Get(); ok {
 			if err := func() error {
 				if err := value.Validate(); err != nil {
@@ -841,6 +895,25 @@ func (s *ContractDeployAction) Validate() error {
 	}(); err != nil {
 		failures = append(failures, validate.FieldError{
 			Name:  "interfaces",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s *DepositStakeAction) Validate() error {
+	var failures []validate.FieldError
+	if err := func() error {
+		if err := s.Implementation.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "implementation",
 			Error: err,
 		})
 	}
@@ -2030,6 +2103,19 @@ func (s *PoolImplementation) Validate() error {
 	return nil
 }
 
+func (s PoolImplementationType) Validate() error {
+	switch s {
+	case "whales":
+		return nil
+	case "tf":
+		return nil
+	case "liquidTF":
+		return nil
+	default:
+		return errors.Errorf("invalid value: %v", s)
+	}
+}
+
 func (s *PoolInfo) Validate() error {
 	var failures []validate.FieldError
 	if err := func() error {
@@ -2058,19 +2144,6 @@ func (s *PoolInfo) Validate() error {
 		return &validate.Error{Fields: failures}
 	}
 	return nil
-}
-
-func (s PoolInfoImplementation) Validate() error {
-	switch s {
-	case "whales":
-		return nil
-	case "tf":
-		return nil
-	case "liquidTF":
-		return nil
-	default:
-		return errors.Errorf("invalid value: %v", s)
-	}
 }
 
 func (s *Refund) Validate() error {
@@ -2681,6 +2754,44 @@ func (s *WalletDNS) Validate() error {
 	}(); err != nil {
 		failures = append(failures, validate.FieldError{
 			Name:  "names",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s *WithdrawStakeAction) Validate() error {
+	var failures []validate.FieldError
+	if err := func() error {
+		if err := s.Implementation.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "implementation",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s *WithdrawStakeRequestAction) Validate() error {
+	var failures []validate.FieldError
+	if err := func() error {
+		if err := s.Implementation.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "implementation",
 			Error: err,
 		})
 	}
