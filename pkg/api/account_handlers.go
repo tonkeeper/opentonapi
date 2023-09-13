@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"sort"
 
+	"github.com/tonkeeper/opentonapi/pkg/addressbook"
 	rules "github.com/tonkeeper/scam_backoffice_rules"
 	"github.com/tonkeeper/tongo/code"
 	"github.com/tonkeeper/tongo/utils"
@@ -179,17 +180,23 @@ func (h Handler) ExecGetMethodForBlockchainAccount(ctx context.Context, params o
 
 func (h Handler) SearchAccounts(ctx context.Context, params oas.SearchAccountsParams) (*oas.FoundAccounts, error) {
 	accounts := h.addressBook.SearchAttachedAccountsByPrefix(params.Name)
-	var response oas.FoundAccounts
+	var (
+		response           oas.FoundAccounts
+		mapOfFoundAccounts map[tongo.AccountID]addressbook.AttachedAccount
+	)
 	for _, account := range accounts {
+		accountID, err := tongo.ParseAccountID(account.Wallet)
+		if err != nil {
+			continue
+		}
 		if account.Symbol != "" {
-			accountID, err := tongo.ParseAccountID(account.Wallet)
-			if err != nil {
-				continue
-			}
 			if h.spamFilter.CheckJettonAction(accountID, account.Symbol) == rules.Drop {
 				continue
 			}
 		}
+		mapOfFoundAccounts[accountID] = account
+	}
+	for _, account := range mapOfFoundAccounts {
 		response.Addresses = append(response.Addresses, oas.FoundAccountsAddressesItem{
 			Address: account.Wallet,
 			Name:    account.Name,
