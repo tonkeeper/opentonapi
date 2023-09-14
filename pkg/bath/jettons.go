@@ -1,6 +1,8 @@
 package bath
 
 import (
+	"fmt"
+	"github.com/tonkeeper/opentonapi/internal/g"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
 	"github.com/tonkeeper/tongo/tlb"
@@ -12,7 +14,7 @@ type BubbleJettonTransfer struct {
 	master                        tongo.AccountID
 	amount                        tlb.VarUInteger16
 	success                       bool
-	payload                       any
+	payload                       abi.JettonPayload
 }
 
 func (b BubbleJettonTransfer) ToAction() (action *Action) {
@@ -28,11 +30,20 @@ func (b BubbleJettonTransfer) ToAction() (action *Action) {
 		Success: b.success,
 		Type:    JettonTransfer,
 	}
-	switch c := b.payload.(type) {
-	case string:
-		a.JettonTransfer.Comment = &c
-	case EncryptedComment:
-		a.JettonTransfer.EncryptedComment = &c
+	switch b.payload.SumType {
+	case abi.TextCommentJettonOp:
+		a.JettonTransfer.Comment = g.Pointer(string(b.payload.Value.(abi.TextCommentJettonPayload).Text))
+	case abi.EncryptedTextCommentJettonOp:
+		a.JettonTransfer.EncryptedComment = &EncryptedComment{
+			CipherText:     b.payload.Value.(abi.EncryptedTextCommentJettonPayload).CipherText,
+			EncryptionType: "simple",
+		}
+	default:
+		if b.payload.SumType != abi.UnknownJettonOp {
+			a.JettonTransfer.Comment = g.Pointer("Call: " + b.payload.SumType)
+		} else if b.payload.OpCode != nil {
+			a.JettonTransfer.Comment = g.Pointer(fmt.Sprintf("Call: 0x%08x", *b.payload.OpCode))
+		}
 	}
 	return &a
 }

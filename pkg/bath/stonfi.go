@@ -83,7 +83,7 @@ var StonfiSwapStraw = Straw[BubbleJettonSwap]{
 				return nil
 			},
 			SingleChild: &Straw[BubbleJettonSwap]{
-				CheckFuncs: []bubbleCheck{Is(BubbleJettonTransfer{}), Or(JettonTransferOpCode(0xc64370e5), JettonTransferOpCode(0x5ffe1295))}, //todo: rewrite after jetton operation decoding
+				CheckFuncs: []bubbleCheck{Is(BubbleJettonTransfer{}), Or(JettonTransferOpCode(0xc64370e5), JettonTransferOpCode(0x5ffe1295))}, //todo: rewrite after jetton operation decoding and found what doest these codes mean
 				Builder: func(newAction *BubbleJettonSwap, bubble *Bubble) error {
 					jettonTx := bubble.Info.(BubbleJettonTransfer)
 					if jettonTx.senderWallet != newAction.JettonWalletOut {

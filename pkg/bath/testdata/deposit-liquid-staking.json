@@ -4,7 +4,8 @@
        "DepositStake": {
          "Staker": "0:2cf3b5b8c891e517c9addbda1c0386a09ccacbb0e3faf630b51cfc8152325acb",
          "Amount": 10000000000,
-         "Pool": "0:a45b17f28409229b78360e3290420f13e4fe20f90d7e2bf8c4ac6703259e22fa"
+         "Pool": "0:a45b17f28409229b78360e3290420f13e4fe20f90d7e2bf8c4ac6703259e22fa",
+         "Implementation": "liquidTF"
        },
        "Success": true,
        "Type": "DepositStake"
