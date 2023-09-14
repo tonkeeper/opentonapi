@@ -36,7 +36,7 @@ const (
 	RegularConnection   = 1
 )
 
-type AsyncHandler func(http.ResponseWriter, *http.Request, int) error
+type AsyncHandler func(w http.ResponseWriter, r *http.Request, connectionType int, allowTokenInQuery bool) error
 type AsyncMiddleware func(AsyncHandler) AsyncHandler
 
 type ServerOptions struct {
@@ -98,11 +98,11 @@ func NewServer(log *zap.Logger, handler *Handler, address string, opts ...Server
 	asyncMiddlewares = append(asyncMiddlewares, options.asyncMiddlewares...)
 
 	sseHandler := sse.NewHandler(options.txSource, options.memPool)
-	mux.Handle("/v2/sse/accounts/transactions", wrapAsync(LongLivedConnection, chainMiddlewares(sse.Stream(sseHandler.SubscribeToTransactions), asyncMiddlewares...)))
-	mux.Handle("/v2/sse/mempool", wrapAsync(LongLivedConnection, chainMiddlewares(sse.Stream(sseHandler.SubscribeToMessages), asyncMiddlewares...)))
+	mux.Handle("/v2/sse/accounts/transactions", wrapAsync(LongLivedConnection, true, chainMiddlewares(sse.Stream(sseHandler.SubscribeToTransactions), asyncMiddlewares...)))
+	mux.Handle("/v2/sse/mempool", wrapAsync(LongLivedConnection, true, chainMiddlewares(sse.Stream(sseHandler.SubscribeToMessages), asyncMiddlewares...)))
 
 	websocketHandler := websocket.Handler(log, options.txSource, options.memPool)
-	mux.Handle("/v2/websocket", wrapAsync(LongLivedConnection, chainMiddlewares(websocketHandler, asyncMiddlewares...)))
+	mux.Handle("/v2/websocket", wrapAsync(LongLivedConnection, true, chainMiddlewares(websocketHandler, asyncMiddlewares...)))
 	mux.Handle("/", ogenServer)
 
 	serv := Server{
@@ -117,9 +117,9 @@ func NewServer(log *zap.Logger, handler *Handler, address string, opts ...Server
 	return &serv, nil
 }
 
-func wrapAsync(connectionType int, handler AsyncHandler) http.Handler {
+func wrapAsync(connectionType int, allowTokenInQuery bool, handler AsyncHandler) http.Handler {
 	return http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
-		_ = handler(writer, request, connectionType)
+		_ = handler(writer, request, connectionType, allowTokenInQuery)
 	})
 }
 
@@ -130,8 +130,8 @@ func chainMiddlewares(handler AsyncHandler, middleware ...AsyncMiddleware) Async
 	return handler
 }
 
-func (s *Server) RegisterAsyncHandler(pattern string, handler AsyncHandler, connectionType int) {
-	s.mux.Handle(pattern, wrapAsync(connectionType, chainMiddlewares(handler, s.asyncMiddlewares...)))
+func (s *Server) RegisterAsyncHandler(pattern string, handler AsyncHandler, connectionType int, allowTokenInQuery bool) {
+	s.mux.Handle(pattern, wrapAsync(connectionType, allowTokenInQuery, chainMiddlewares(handler, s.asyncMiddlewares...)))
 }
 
 func (s *Server) Run() {
