@@ -498,6 +498,13 @@ func emulatedTreeToTrace(ctx context.Context, resolver core.LibraryResolver, con
 		Transaction: tree.TX,
 		BlockID:     tongo.BlockIDExt{BlockID: tongo.BlockID{Workchain: int32(a.AddrStd.WorkchainId)}},
 	})
+	filteredMsgs := make([]core.Message, 0, len(transaction.OutMsgs))
+	for _, msg := range transaction.OutMsgs {
+		if msg.Destination == nil {
+			filteredMsgs = append(filteredMsgs, msg)
+		}
+	}
+	transaction.OutMsgs = filteredMsgs //all internal messages in emulation result are delivered to another account and created transaction
 	if err != nil {
 		return nil, err
 	}
