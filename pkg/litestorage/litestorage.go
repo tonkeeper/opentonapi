@@ -44,6 +44,7 @@ var allowedConfigKeys = []uint32{
 	25,
 	32, // 32 + 34 together take up to 98% of the config size
 	34,
+	79, 80, 81, 82, // required by token bridge https://github.com/ton-blockchain/token-bridge-func/blob/3346a901e3e8e1a1e020fac564c845db3220c238/src/func/jetton-bridge/jetton-wallet.fc#L233
 }
 
 var storageTimeHistogramVec = promauto.NewHistogramVec(
