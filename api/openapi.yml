@@ -3800,9 +3800,11 @@ components:
         ton_in:
           type: integer
           example: 1000000000
+          format: int64
         ton_out:
           type: integer
           example: 2000000000
+          format: int64
         user_wallet:
           $ref: '#/components/schemas/AccountAddress'
         router:

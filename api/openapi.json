@@ -2184,10 +2184,12 @@
      },
      "ton_in": {
       "example": 1000000000,
+      "format": "int64",
       "type": "integer"
      },
      "ton_out": {
       "example": 2000000000,
+      "format": "int64",
       "type": "integer"
      },
      "user_wallet": {
