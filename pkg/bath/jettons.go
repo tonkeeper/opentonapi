@@ -14,6 +14,7 @@ type BubbleJettonTransfer struct {
 	master                        tongo.AccountID
 	amount                        tlb.VarUInteger16
 	success                       bool
+	isWrappedTon                  bool
 	payload                       abi.JettonPayload
 }
 
@@ -26,6 +27,7 @@ func (b BubbleJettonTransfer) ToAction() (action *Action) {
 			RecipientsWallet: b.recipientWallet,
 			SendersWallet:    b.senderWallet,
 			Amount:           b.amount,
+			isWrappedTon:     b.isWrappedTon,
 		},
 		Success: b.success,
 		Type:    JettonTransfer,
@@ -38,6 +40,7 @@ func (b BubbleJettonTransfer) ToAction() (action *Action) {
 			CipherText:     b.payload.Value.(abi.EncryptedTextCommentJettonPayload).CipherText,
 			EncryptionType: "simple",
 		}
+	case abi.EmptyJettonOp:
 	default:
 		if b.payload.SumType != abi.UnknownJettonOp {
 			a.JettonTransfer.Comment = g.Pointer("Call: " + b.payload.SumType)

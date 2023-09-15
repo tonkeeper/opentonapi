@@ -115,6 +115,7 @@ func (b BubbleNftTransfer) ToAction() (action *Action) {
 			CipherText:     b.payload.Value.(abi.EncryptedTextCommentNFTPayload).CipherText,
 			EncryptionType: "simple",
 		}
+	case abi.EmptyNFTOp:
 	default:
 		if b.payload.SumType != abi.UnknownNFTOp {
 			a.NftItemTransfer.Comment = g.Pointer("Call: " + b.payload.SumType)
@@ -170,6 +171,7 @@ func FindJettonTransfer(bubble *Bubble) bool {
 					return nil
 				}
 				transfer.success = true
+				transfer.isWrappedTon = true
 				newBubble.ValueFlow.Merge(notify.ValueFlow)
 				newBubble.Accounts = append(newBubble.Accounts, notify.Accounts...)
 				return &Merge{children: notify.Children}
