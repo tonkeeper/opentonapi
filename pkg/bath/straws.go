@@ -37,6 +37,7 @@ var DefaultStraws = []StrawFunc{
 	DepositTFStakeStraw.Merge,
 	WithdrawTFStakeRequestStraw.Merge,
 	WithdrawStakeImmediatelyStraw.Merge,
+	WithdrawLiquidStake.Merge,
 	FindTFNominatorAction,
 }
 

@@ -6,6 +6,7 @@ import (
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
 	"github.com/tonkeeper/tongo/ton"
+	"math/big"
 )
 
 type BubbleElectionsDepositStake struct {
@@ -213,5 +214,26 @@ var DepositLiquidStakeStraw = Straw[BubbleDepositStake]{
 	SingleChild: &Straw[BubbleDepositStake]{
 		CheckFuncs: []bubbleCheck{IsBounced},
 		Optional:   true,
+	},
+}
+
+var WithdrawLiquidStake = Straw[BubbleWithdrawStake]{
+	CheckFuncs: []bubbleCheck{Is(BubbleJettonBurn{})},
+	Builder: func(newAction *BubbleWithdrawStake, bubble *Bubble) error {
+		newAction.Staker = bubble.Info.(BubbleJettonBurn).sender.Address
+		newAction.Implementation = core.StakingImplementationLiquidTF
+		amount := big.Int(bubble.Info.(BubbleJettonBurn).amount)
+		newAction.Amount = amount.Int64()
+		return nil
+	},
+	SingleChild: &Straw[BubbleWithdrawStake]{
+		CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.TonstakePoolWithdrawMsgOp)},
+		Builder: func(newAction *BubbleWithdrawStake, bubble *Bubble) error {
+			newAction.Pool = bubble.Info.(BubbleTx).account.Address
+			return nil
+		},
+		SingleChild: &Straw[BubbleWithdrawStake]{
+			CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.TonstakePoolWithdrawalMsgOp)},
+		},
 	},
 }
