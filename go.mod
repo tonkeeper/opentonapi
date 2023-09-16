@@ -12,7 +12,6 @@ require (
 	github.com/go-faster/errors v0.6.1
 	github.com/go-faster/jx v1.0.0
 	github.com/gorilla/websocket v1.5.0
-	github.com/json-iterator/go v1.1.12
 	github.com/labstack/gommon v0.4.0
 	github.com/nicksnyder/go-i18n/v2 v2.2.1
 	github.com/ogen-go/ogen v0.71.1

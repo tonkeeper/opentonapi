@@ -10,7 +10,6 @@ import (
 	"strings"
 	"unicode"
 
-	"github.com/tonkeeper/opentonapi/internal/g"
 	imgGenerator "github.com/tonkeeper/opentonapi/pkg/image"
 	"github.com/tonkeeper/tongo/boc"
 	"github.com/tonkeeper/tongo/tlb"
@@ -24,13 +23,10 @@ func toError(code int, err error) *oas.ErrorStatusCode {
 	return &oas.ErrorStatusCode{StatusCode: code, Response: oas.Error{Error: err.Error()}}
 }
 
-func anyToJSONRawMap(a any, toSnake bool) map[string]jx.Raw { //todo: переписать этот ужас
+func anyToJSONRawMap(a any) map[string]jx.Raw { //todo: переписать этот ужас
 	var m = map[string]jx.Raw{}
 	if am, ok := a.(map[string]any); ok {
 		for k, v := range am {
-			if toSnake {
-				k = g.CamelToSnake(k)
-			}
 			m[k], _ = json.Marshal(v)
 		}
 		return m
@@ -44,7 +40,7 @@ func anyToJSONRawMap(a any, toSnake bool) map[string]jx.Raw { //todo: переп
 			if aj, ok := t.Field(i).Interface().(json.Marshaler); ok {
 				b, err = aj.MarshalJSON()
 			} else if t.Field(i).Kind() == reflect.Struct {
-				m := anyToJSONRawMap(t.Field(i).Interface(), toSnake)
+				m := anyToJSONRawMap(t.Field(i).Interface())
 				m2 := make(map[string]json.RawMessage)
 				for k, v := range m {
 					m2[k] = json.RawMessage(v)
@@ -57,9 +53,6 @@ func anyToJSONRawMap(a any, toSnake bool) map[string]jx.Raw { //todo: переп
 				panic("some shit")
 			}
 			name := t.Type().Field(i).Name
-			if toSnake {
-				name = g.CamelToSnake(name)
-			}
 			m[name] = b
 		}
 	default:
