@@ -197,3 +197,10 @@ func JettonTransferOpCode(opCode uint32) bubbleCheck {
 		return tx.payload.OpCode != nil && *tx.payload.OpCode == opCode
 	}
 }
+
+func JettonTransferOperation(op abi.JettonOpName) bubbleCheck {
+	return func(bubble *Bubble) bool {
+		tx, _ := bubble.Info.(BubbleJettonTransfer)
+		return tx.payload.SumType == op
+	}
+}

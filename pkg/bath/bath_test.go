@@ -125,6 +125,8 @@ func TestFindActions(t *testing.T) {
 			tongo.MustParseBlockID("(0,8000000000000000,38159152)"),
 			// withdraw liquid staking
 			tongo.MustParseBlockID("(0,8000000000000000,38474426)"),
+			// dedust swap
+			tongo.MustParseBlockID("(0,8000000000000000,38293409)"),
 		}),
 	)
 
@@ -245,6 +247,11 @@ func TestFindActions(t *testing.T) {
 			name:           "tonstake withdraw",
 			hash:           "066ea6e9c4e6a6bbc0d3c2aed8a4d80a76a8d6ae47a6d1baffe1275f667dacf5",
 			filenamePrefix: "tonstake-withdraw",
+		},
+		{
+			name:           "dedust swap",
+			hash:           "831c7f1efaef9ac58fd39981468cea2bbd9c86a1bb72fc425cfc7734ae4a282f",
+			filenamePrefix: "dedust-swap",
 		},
 		{
 			name:           "cancel sale at get gems ",
