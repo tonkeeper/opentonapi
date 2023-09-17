@@ -7,7 +7,7 @@
          "Pool": "0:a45b17f28409229b78360e3290420f13e4fe20f90d7e2bf8c4ac6703259e22fa",
          "Implementation": "liquidTF"
        },
-       "Success": false,
+       "Success": true,
        "Type": "WithdrawStake"
      }
    ],
