@@ -177,7 +177,8 @@ func (ds BubbleWithdrawStake) ToAction() *Action {
 			Staker:         ds.Staker,
 			Implementation: ds.Implementation,
 		},
-		Type: WithdrawStake,
+		Success: true,
+		Type:    WithdrawStake,
 	}
 }
 
