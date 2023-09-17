@@ -17,12 +17,14 @@ var JettonTransfersBurnsMints = []StrawFunc{
 	FindJettonTransfer,
 	JettonBurnStraw.Merge,
 	DedustLPJettonMintStraw.Merge,
+	WtonMintStraw.Merge,
 }
 
 var DefaultStraws = []StrawFunc{
 	FindNFTTransfer,
 	FindJettonTransfer,
 	JettonBurnStraw.Merge,
+	WtonMintStraw.Merge,
 	FindNftPurchase,
 	StonfiSwapStraw.Merge,
 	DedustSwapStraw.Merge,

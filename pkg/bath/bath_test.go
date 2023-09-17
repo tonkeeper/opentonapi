@@ -127,6 +127,8 @@ func TestFindActions(t *testing.T) {
 			tongo.MustParseBlockID("(0,8000000000000000,38474426)"),
 			// dedust swap
 			tongo.MustParseBlockID("(0,8000000000000000,38293409)"),
+			// wton mint
+			tongo.MustParseBlockID("(0,8000000000000000,38493203)"),
 		}),
 	)
 
@@ -252,6 +254,11 @@ func TestFindActions(t *testing.T) {
 			name:           "dedust swap",
 			hash:           "831c7f1efaef9ac58fd39981468cea2bbd9c86a1bb72fc425cfc7734ae4a282f",
 			filenamePrefix: "dedust-swap",
+		},
+		{
+			name:           "wton mint",
+			hash:           "4b8b2a18abb6784c23eefa6f71d20aa2475c0a379dc2459c413e381fc7379803",
+			filenamePrefix: "wton-mint",
 		},
 		{
 			name:           "cancel sale at get gems ",

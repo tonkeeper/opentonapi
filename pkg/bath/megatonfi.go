@@ -44,3 +44,41 @@ var MegatonFiJettonSwap = Straw[BubbleJettonSwap]{
 		},
 	},
 }
+
+var WtonMintStraw = Straw[BubbleJettonMint]{
+	CheckFuncs: []bubbleCheck{IsTx, HasOpcode(0x77a33521)},
+	Builder: func(newAction *BubbleJettonMint, bubble *Bubble) error {
+		newAction.recipient = bubble.Info.(BubbleTx).account
+		return nil
+	},
+	Children: []Straw[BubbleJettonMint]{
+		{
+			CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.JettonInternalTransferMsgOp)},
+			Builder: func(newAction *BubbleJettonMint, bubble *Bubble) error {
+				tx := bubble.Info.(BubbleTx)
+				body := tx.decodedBody.Value.(abi.JettonInternalTransferMsgBody)
+				newAction.amount = body.Amount
+				if tx.additionalInfo != nil && tx.additionalInfo.JettonMaster != nil {
+					newAction.master = *tx.additionalInfo.JettonMaster
+				}
+				newAction.recipientWallet = tx.account.Address
+				newAction.success = tx.success
+				return nil
+			},
+			Children: []Straw[BubbleJettonMint]{
+				{
+					CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.JettonNotifyMsgOp)},
+					Optional:   true,
+				},
+				{
+					CheckFuncs: []bubbleCheck{Is(BubbleContractDeploy{})},
+					Optional:   true,
+				},
+			},
+		},
+		{
+			CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.ExcessMsgOp)},
+			Optional:   true,
+		},
+	},
+}
