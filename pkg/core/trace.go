@@ -67,7 +67,9 @@ func isDestinationJettonWallet(inMsg *Message) bool {
 	if inMsg == nil || inMsg.DecodedBody == nil {
 		return false
 	}
-	return inMsg.DecodedBody.Operation == abi.JettonTransferMsgOp && inMsg.Destination != nil
+	return (inMsg.DecodedBody.Operation == abi.JettonTransferMsgOp ||
+		inMsg.DecodedBody.Operation == abi.JettonInternalTransferMsgOp ||
+		inMsg.DecodedBody.Operation == abi.JettonBurnMsgOp) && inMsg.Destination != nil
 }
 
 func hasInterface(interfacesList []abi.ContractInterface, name abi.ContractInterface) bool {

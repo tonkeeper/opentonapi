@@ -2,7 +2,7 @@
    "Actions": [
      {
        "JettonMint": {
-         "Jetton": "0:0000000000000000000000000000000000000000000000000000000000000000",
+         "Jetton": "0:9a8da514d575d20234c3fb1395ee9138f5f1ad838abc905dc42c2389b46bd015",
          "Recipient": "0:9a8da514d575d20234c3fb1395ee9138f5f1ad838abc905dc42c2389b46bd015",
          "RecipientsWallet": "0:995c183c52e939f5bc3e5ba714f98df742b639db4798130e15af100523586773",
          "Amount": "1000000000"

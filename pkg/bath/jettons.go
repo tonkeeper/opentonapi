@@ -138,7 +138,8 @@ var JettonBurnStraw = Straw[BubbleJettonBurn]{
 		if tx.inputFrom != nil {
 			newAction.sender = *tx.inputFrom
 		}
-		if tx.additionalInfo.JettonMaster != nil { //todo: find why it doesn't set https://dev.tonviewer.com/transaction/b563b85a8e56bad6333a5999a34137f302b14764b4ad1ebb4ecbecab2e16fa32
+		if tx.additionalInfo.JettonMaster != nil { //todo: find why it doesn't set sometimes
+			// maybe it already fixed but this commit where i left comment
 			newAction.master = *tx.additionalInfo.JettonMaster
 		}
 		newAction.senderWallet = tx.account.Address
