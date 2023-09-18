@@ -183,7 +183,7 @@ func (h Handler) SearchAccounts(ctx context.Context, params oas.SearchAccountsPa
 	accounts := h.addressBook.SearchAttachedAccountsByPrefix(params.Name)
 	var (
 		response           oas.FoundAccounts
-		mapOfFoundAccounts map[tongo.AccountID]addressbook.AttachedAccount
+		mapOfFoundAccounts = make(map[tongo.AccountID]addressbook.AttachedAccount)
 	)
 	for _, account := range accounts {
 		accountID, err := tongo.ParseAccountID(account.Wallet)

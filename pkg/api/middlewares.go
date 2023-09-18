@@ -42,13 +42,13 @@ func asyncOperation(req *http.Request) string {
 
 func asyncLoggingMiddleware(logger *zap.Logger) func(next AsyncHandler) AsyncHandler {
 	return func(next AsyncHandler) AsyncHandler {
-		return func(w http.ResponseWriter, r *http.Request, connectionType int) error {
+		return func(w http.ResponseWriter, r *http.Request, connectionType int, allowTokenInQuery bool) error {
 			logger := logger.With(
 				zap.String("operation", asyncOperation(r)),
 				zap.String("path", r.URL.Path),
 			)
 			logger.Info("Handling request")
-			if err := next(w, r, connectionType); err != nil {
+			if err := next(w, r, connectionType, allowTokenInQuery); err != nil {
 				logger.Error("Fail", zap.Error(err))
 				return err
 			}
@@ -73,10 +73,10 @@ func ogenMetricsMiddleware(req middleware.Request, next middleware.Next) (middle
 }
 
 func asyncMetricsMiddleware(next AsyncHandler) AsyncHandler {
-	return func(w http.ResponseWriter, r *http.Request, connectionType int) error {
+	return func(w http.ResponseWriter, r *http.Request, connectionType int, allowTokenInQuery bool) error {
 		t := prometheus.NewTimer(httpResponseTimeMetric.WithLabelValues(asyncOperation(r)))
 		defer t.ObserveDuration()
-		return next(w, r, connectionType)
+		return next(w, r, connectionType, allowTokenInQuery)
 	}
 }
 

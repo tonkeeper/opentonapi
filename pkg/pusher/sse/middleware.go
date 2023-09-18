@@ -19,8 +19,8 @@ func writeError(writer http.ResponseWriter, err error) {
 	writer.Write([]byte(err.Error()))
 }
 
-func Stream(handler handlerFunc) func(writer http.ResponseWriter, request *http.Request, methodType int) error {
-	return func(writer http.ResponseWriter, request *http.Request, connectionType int) error {
+func Stream(handler handlerFunc) func(http.ResponseWriter, *http.Request, int, bool) error {
+	return func(writer http.ResponseWriter, request *http.Request, connectionType int, allowTokenInQuery bool) error {
 		_, ok := writer.(http.Flusher)
 		if !ok {
 			err := errors.InternalServerError("streaming unsupported")
