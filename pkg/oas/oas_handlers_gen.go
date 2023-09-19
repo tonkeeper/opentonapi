@@ -4813,6 +4813,14 @@ func (s *Server) handleGetJettonHoldersRequest(args [1]string, argsEscaped bool,
 					Name: "account_id",
 					In:   "path",
 				}: params.AccountID,
+				{
+					Name: "limit",
+					In:   "query",
+				}: params.Limit,
+				{
+					Name: "offset",
+					In:   "query",
+				}: params.Offset,
 			},
 			Raw: r,
 		}

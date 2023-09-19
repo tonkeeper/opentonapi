@@ -274,6 +274,8 @@ type GetItemsFromCollectionParams struct {
 type GetJettonHoldersParams struct {
 	// Account ID.
 	AccountID string
+	Limit     OptInt
+	Offset    OptInt
 }
 
 // GetJettonInfoParams is parameters of getJettonInfo operation.

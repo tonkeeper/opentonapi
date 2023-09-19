@@ -1098,6 +1098,8 @@ paths:
         - Jettons
       parameters:
         - $ref: '#/components/parameters/accountIDParameter'
+        - $ref: '#/components/parameters/limitQuery'
+        - $ref: '#/components/parameters/offsetQuery'
       responses:
         '200':
           description: jetton's holders
