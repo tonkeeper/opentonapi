@@ -173,7 +173,7 @@ func (h Handler) GetJettonHolders(ctx context.Context, params oas.GetJettonHolde
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
 	}
-	holders, err := h.storage.GetJettonHolders(ctx, accountID)
+	holders, err := h.storage.GetJettonHolders(ctx, accountID, params.Limit.Value, params.Offset.Value)
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
