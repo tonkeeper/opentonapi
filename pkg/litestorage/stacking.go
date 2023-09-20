@@ -201,7 +201,7 @@ func (s *LiteStorage) GetLiquidPool(ctx context.Context, pool tongo.AccountID) (
 		TotalAmount:     p.TotalBalance,
 		VerifiedSources: bytes.Equal(hash, references.TFLiquidPoolCodeHash[:]),
 		JettonMaster:    *jettonMaster,
-		APY:             core.CalculateAPY(p.PrevRoundBorrowers.Expected, p.PrevRoundBorrowers.Borrowed, p.InterestRate),
+		APY:             core.CalculateAPY(p.PrevRoundBorrowers.Expected, p.PrevRoundBorrowers.Borrowed, p.GovernanceFee),
 	}, err
 }
 
