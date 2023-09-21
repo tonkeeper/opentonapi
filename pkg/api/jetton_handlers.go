@@ -110,6 +110,9 @@ func (h Handler) GetAccountJettonHistoryByID(ctx context.Context, params oas.Get
 		return nil, toError(http.StatusBadRequest, err)
 	}
 	traceIDs, err := h.storage.GetAccountJettonHistoryByID(ctx, accountID, jettonMasterAccountID, params.Limit, optIntToPointer(params.BeforeLt), optIntToPointer(params.StartDate), optIntToPointer(params.EndDate))
+	if errors.Is(err, core.ErrEntityNotFound) {
+		return &oas.AccountEvents{}, nil
+	}
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
