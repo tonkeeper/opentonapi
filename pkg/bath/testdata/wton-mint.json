@@ -1,0 +1,34 @@
+{
+   "Actions": [
+     {
+       "JettonMint": {
+         "Jetton": "0:9a8da514d575d20234c3fb1395ee9138f5f1ad838abc905dc42c2389b46bd015",
+         "Recipient": "0:9a8da514d575d20234c3fb1395ee9138f5f1ad838abc905dc42c2389b46bd015",
+         "RecipientsWallet": "0:995c183c52e939f5bc3e5ba714f98df742b639db4798130e15af100523586773",
+         "Amount": "1000000000"
+       },
+       "Success": true,
+       "Type": "JettonMint"
+     }
+   ],
+   "Accounts": [
+     {
+       "Account": "0:2cf3b5b8c891e517c9addbda1c0386a09ccacbb0e3faf630b51cfc8152325acb",
+       "Ton": -1050000000,
+       "Fee": 6953621,
+       "Jettons": null
+     },
+     {
+       "Account": "0:995c183c52e939f5bc3e5ba714f98df742b639db4798130e15af100523586773",
+       "Ton": 20000000,
+       "Fee": 6449000,
+       "Jettons": null
+     },
+     {
+       "Account": "0:9a8da514d575d20234c3fb1395ee9138f5f1ad838abc905dc42c2389b46bd015",
+       "Ton": 1030000000,
+       "Fee": 20485764,
+       "Jettons": null
+     }
+   ]
+ }

@@ -3,11 +3,11 @@ package api
 import (
 	"encoding/binary"
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
 
 	"github.com/tonkeeper/tongo/tlb"
 
-	jsoniter "github.com/json-iterator/go"
 	"github.com/tonkeeper/opentonapi/internal/g"
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/opentonapi/pkg/oas"
@@ -188,8 +188,8 @@ func convertMessage(m core.Message, book addressBook) oas.Message {
 	if m.DecodedBody != nil {
 		msg.DecodedOpName = oas.NewOptString(g.CamelToSnake(m.DecodedBody.Operation))
 		// DecodedBody.Value is a simple struct, there shouldn't be any issue with it.
-		value, _ := jsoniter.Marshal(m.DecodedBody.Value)
-		msg.DecodedBody = value
+		value, _ := json.Marshal(m.DecodedBody.Value)
+		msg.DecodedBody = g.ChangeJsonKeys(value, g.CamelToSnake)
 	}
 	return msg
 }

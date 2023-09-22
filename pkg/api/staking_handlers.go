@@ -54,7 +54,7 @@ func (h Handler) GetStakingPoolInfo(ctx context.Context, params oas.GetStakingPo
 			if err != nil {
 				return nil, toError(http.StatusInternalServerError, err)
 			}
-			cycleEnd = set.Common().UtimeUntil
+			cycleEnd = set.Common().UtimeUntil + 65536/2 + 600 //magic fron @rulon
 			cycleStart = set.Common().UtimeSince
 		}
 		return &oas.GetStakingPoolInfoOK{
@@ -160,7 +160,7 @@ func (h Handler) GetStakingPools(ctx context.Context, params oas.GetStakingPools
 		if err != nil {
 			return nil, toError(http.StatusInternalServerError, err)
 		}
-		cycleEnd = set.Common().UtimeUntil
+		cycleEnd = set.Common().UtimeUntil + 65536/2 + 600 //magic fron @rulon
 		cycleStart = set.Common().UtimeSince
 	}
 	for _, p := range liquidPools {

@@ -2,13 +2,11 @@ package bath
 
 import (
 	"fmt"
+	"github.com/tonkeeper/opentonapi/internal/g"
 	"math/big"
 
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
-	"github.com/tonkeeper/tongo/boc"
-	"github.com/tonkeeper/tongo/tlb"
-	"github.com/tonkeeper/tongo/wallet"
 )
 
 // StrawFunc extracts information from the given bubble and its children and modifies the bubble if needed.
@@ -19,14 +17,17 @@ var JettonTransfersBurnsMints = []StrawFunc{
 	FindJettonTransfer,
 	JettonBurnStraw.Merge,
 	DedustLPJettonMintStraw.Merge,
+	WtonMintStraw.Merge,
 }
 
 var DefaultStraws = []StrawFunc{
 	FindNFTTransfer,
 	FindJettonTransfer,
 	JettonBurnStraw.Merge,
+	WtonMintStraw.Merge,
 	FindNftPurchase,
 	StonfiSwapStraw.Merge,
+	DedustSwapStraw.Merge,
 	FindAuctionBidFragmentSimple,
 	DedustLPJettonMintStraw.Merge,
 	MegatonFiJettonSwap.Merge,
@@ -39,6 +40,7 @@ var DefaultStraws = []StrawFunc{
 	DepositTFStakeStraw.Merge,
 	WithdrawTFStakeRequestStraw.Merge,
 	WithdrawStakeImmediatelyStraw.Merge,
+	WithdrawLiquidStake.Merge,
 	FindTFNominatorAction,
 }
 
@@ -57,7 +59,7 @@ func FindNFTTransfer(bubble *Bubble) bool {
 			account:   nftBubble.account,
 			sender:    nftBubble.inputFrom,
 			recipient: parseAccount(transfer.NewOwner),
-			payload:   cellToTextComment(boc.Cell(transfer.ForwardPayload.Value)),
+			payload:   transfer.ForwardPayload.Value,
 		},
 		Accounts:  append(bubble.Accounts, nftBubble.account.Address),
 		ValueFlow: bubble.ValueFlow,
@@ -96,7 +98,7 @@ type BubbleNftTransfer struct {
 	account   Account
 	sender    *Account
 	recipient *Account
-	payload   any //todo: replace any
+	payload   abi.NFTPayload
 }
 
 func (b BubbleNftTransfer) ToAction() (action *Action) {
@@ -109,32 +111,23 @@ func (b BubbleNftTransfer) ToAction() (action *Action) {
 		Success: b.success,
 		Type:    NftItemTransfer,
 	}
-	switch c := b.payload.(type) {
-	case string:
-		a.NftItemTransfer.Comment = &c
-	case EncryptedComment:
-		a.NftItemTransfer.EncryptedComment = &c
-	}
-	return &a
-}
-
-func cellToTextComment(payloadCell boc.Cell) any {
-	var payload wallet.TextComment
-	if err := tlb.Unmarshal(&payloadCell, &payload); err == nil {
-		return string(payload)
-	}
-	payloadCell.ResetCounters()
-	op, err := payloadCell.ReadUint(32)
-	if uint32(op) == abi.EncryptedTextCommentMsgOpCode {
-		var b tlb.Bytes
-		if tlb.Unmarshal(&payloadCell, &b) == nil {
-			return EncryptedComment{CipherText: b, EncryptionType: "simple"}
+	switch b.payload.SumType {
+	case abi.TextCommentNFTOp:
+		a.NftItemTransfer.Comment = g.Pointer(string(b.payload.Value.(abi.TextCommentNFTPayload).Text))
+	case abi.EncryptedTextCommentNFTOp:
+		a.NftItemTransfer.EncryptedComment = &EncryptedComment{
+			CipherText:     b.payload.Value.(abi.EncryptedTextCommentNFTPayload).CipherText,
+			EncryptionType: "simple",
+		}
+	case abi.EmptyNFTOp:
+	default:
+		if b.payload.SumType != abi.UnknownNFTOp {
+			a.NftItemTransfer.Comment = g.Pointer("Call: " + b.payload.SumType)
+		} else if b.payload.OpCode != nil {
+			a.NftItemTransfer.Comment = g.Pointer(fmt.Sprintf("Call: 0x%08x", *b.payload.OpCode))
 		}
 	}
-	if err == nil {
-		return fmt.Sprintf("Call: 0x%x", op)
-	}
-	return nil
+	return &a
 }
 
 func FindJettonTransfer(bubble *Bubble) bool {
@@ -159,7 +152,7 @@ func FindJettonTransfer(bubble *Bubble) bool {
 		recipient: &Account{
 			Address: *recipient,
 		},
-		payload: cellToTextComment(boc.Cell(intention.ForwardPayload.Value)),
+		payload: intention.ForwardPayload.Value,
 	}
 	if transferBubbleInfo.additionalInfo != nil && transferBubbleInfo.additionalInfo.JettonMaster != nil {
 		transfer.master = *transferBubbleInfo.additionalInfo.JettonMaster
@@ -182,6 +175,7 @@ func FindJettonTransfer(bubble *Bubble) bool {
 					return nil
 				}
 				transfer.success = true
+				transfer.isWrappedTon = true
 				newBubble.ValueFlow.Merge(notify.ValueFlow)
 				newBubble.Accounts = append(newBubble.Accounts, notify.Accounts...)
 				return &Merge{children: notify.Children}

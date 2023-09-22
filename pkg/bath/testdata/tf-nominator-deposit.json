@@ -4,7 +4,8 @@
        "DepositStake": {
          "Staker": "0:d0a9dc6bb3bfcce8c99dcfb025b36f550784e4f6a62c80a839b81601a202950d",
          "Amount": 10001000000000,
-         "Pool": "-1:cc929d06da6e1b07de776d18cc75b1e2b36800d13958fd3ce585df044ed163d4"
+         "Pool": "-1:cc929d06da6e1b07de776d18cc75b1e2b36800d13958fd3ce585df044ed163d4",
+         "Implementation": "tf"
        },
        "Success": true,
        "Type": "DepositStake"

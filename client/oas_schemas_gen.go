@@ -4464,8 +4464,8 @@ type JettonSwapAction struct {
 	Dex             JettonSwapActionDex `json:"dex"`
 	AmountIn        string              `json:"amount_in"`
 	AmountOut       string              `json:"amount_out"`
-	TonIn           OptInt              `json:"ton_in"`
-	TonOut          OptInt              `json:"ton_out"`
+	TonIn           OptInt64            `json:"ton_in"`
+	TonOut          OptInt64            `json:"ton_out"`
 	UserWallet      AccountAddress      `json:"user_wallet"`
 	Router          AccountAddress      `json:"router"`
 	JettonMasterIn  OptJettonPreview    `json:"jetton_master_in"`
@@ -4488,12 +4488,12 @@ func (s *JettonSwapAction) GetAmountOut() string {
 }
 
 // GetTonIn returns the value of TonIn.
-func (s *JettonSwapAction) GetTonIn() OptInt {
+func (s *JettonSwapAction) GetTonIn() OptInt64 {
 	return s.TonIn
 }
 
 // GetTonOut returns the value of TonOut.
-func (s *JettonSwapAction) GetTonOut() OptInt {
+func (s *JettonSwapAction) GetTonOut() OptInt64 {
 	return s.TonOut
 }
 
@@ -4533,12 +4533,12 @@ func (s *JettonSwapAction) SetAmountOut(val string) {
 }
 
 // SetTonIn sets the value of TonIn.
-func (s *JettonSwapAction) SetTonIn(val OptInt) {
+func (s *JettonSwapAction) SetTonIn(val OptInt64) {
 	s.TonIn = val
 }
 
 // SetTonOut sets the value of TonOut.
-func (s *JettonSwapAction) SetTonOut(val OptInt) {
+func (s *JettonSwapAction) SetTonOut(val OptInt64) {
 	s.TonOut = val
 }
 

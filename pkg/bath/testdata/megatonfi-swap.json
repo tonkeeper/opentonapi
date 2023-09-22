@@ -5,12 +5,18 @@
          "Dex": "megatonfi",
          "UserWallet": "0:6ccd325a858c379693fae2bcaab1c2906831a4e10a6c3bb44ee8b615bca1d220",
          "Router": "0:310b71b340182396f5ba08903081a1ef6ab4df571a3ca7b05effa44c4a3b0f92",
-         "JettonWalletIn": "0:9964a2cc8fc6c72d61fb1620df965f60ca848d7f3ca42b9eca3c88b719fcee87",
-         "JettonMasterIn": "0:9a8da514d575d20234c3fb1395ee9138f5f1ad838abc905dc42c2389b46bd015",
-         "JettonWalletOut": "0:c41b4974e738756c04cf400399a51acb604e68c7a3df12dde36b9b7c614b9db2",
-         "JettonMasterOut": "0:bad48411974fe56bde6ddbbc612298f166ddf6be5d504151765204cdbaf0f5f1",
-         "AmountIn": 100000000,
-         "AmountOut": 131164
+         "In": {
+           "Amount": 100000000,
+           "IsTon": false,
+           "JettonMaster": "0:9a8da514d575d20234c3fb1395ee9138f5f1ad838abc905dc42c2389b46bd015",
+           "JettonWallet": "0:9964a2cc8fc6c72d61fb1620df965f60ca848d7f3ca42b9eca3c88b719fcee87"
+         },
+         "Out": {
+           "Amount": 131164,
+           "IsTon": false,
+           "JettonMaster": "0:bad48411974fe56bde6ddbbc612298f166ddf6be5d504151765204cdbaf0f5f1",
+           "JettonWallet": "0:c41b4974e738756c04cf400399a51acb604e68c7a3df12dde36b9b7c614b9db2"
+         }
        },
        "Success": true,
        "Type": "JettonSwap"

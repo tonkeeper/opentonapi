@@ -134,6 +134,7 @@ type (
 		SendersWallet    tongo.AccountID
 		Amount           tlb.VarUInteger16
 		Refund           *Refund
+		isWrappedTon     bool
 	}
 
 	JettonMintAction struct {
@@ -170,15 +171,11 @@ type (
 	}
 
 	JettonSwapAction struct {
-		Dex             Dex
-		UserWallet      tongo.AccountID
-		Router          tongo.AccountID
-		JettonWalletIn  tongo.AccountID
-		JettonMasterIn  tongo.AccountID
-		JettonWalletOut tongo.AccountID
-		JettonMasterOut tongo.AccountID
-		AmountIn        big.Int
-		AmountOut       big.Int
+		Dex        Dex
+		UserWallet tongo.AccountID
+		Router     tongo.AccountID
+		In         assetTransfer
+		Out        assetTransfer
 	}
 	DepositStakeAction struct {
 		Staker         tongo.AccountID
@@ -197,6 +194,12 @@ type (
 		Amount         *int64
 		Pool           tongo.AccountID
 		Implementation core.StakingImplementation
+	}
+	assetTransfer struct {
+		Amount       big.Int
+		IsTon        bool
+		JettonMaster tongo.AccountID
+		JettonWallet tongo.AccountID
 	}
 )
 
@@ -238,8 +241,11 @@ func detectDirection(a, from, to tongo.AccountID, amount int64) int64 {
 }
 
 func (a Action) ContributeToExtra(account tongo.AccountID) int64 {
+	if !a.Success {
+		return 0
+	}
 	switch a.Type {
-	case JettonTransfer, NftItemTransfer, ContractDeploy, UnSubscription, JettonSwap, JettonMint, JettonBurn, WithdrawStakeRequest: // actions without extra
+	case NftItemTransfer, ContractDeploy, UnSubscription, JettonMint, JettonBurn, WithdrawStakeRequest: // actions without extra
 		return 0
 	case TonTransfer:
 		return detectDirection(account, a.TonTransfer.Sender, a.TonTransfer.Recipient, a.TonTransfer.Amount)
@@ -256,10 +262,27 @@ func (a Action) ContributeToExtra(account tongo.AccountID) int64 {
 	case Subscription:
 		return detectDirection(account, a.Subscription.Subscriber, a.Subscription.Beneficiary, a.Subscription.Amount)
 	case DepositStake:
-		if !a.Success {
+		return detectDirection(account, a.DepositStake.Staker, a.DepositStake.Pool, a.DepositStake.Amount)
+	case JettonTransfer:
+		if !a.JettonTransfer.isWrappedTon {
 			return 0
 		}
-		return detectDirection(account, a.DepositStake.Staker, a.DepositStake.Pool, a.DepositStake.Amount)
+		if a.JettonTransfer.Sender == nil || a.JettonTransfer.Recipient == nil { //some fucking shit - we can't detect how to interpretate it
+			return 0
+		}
+		b := big.Int(a.JettonTransfer.Amount)
+		return detectDirection(account, *a.JettonTransfer.Sender, *a.JettonTransfer.Recipient, b.Int64())
+	case JettonSwap:
+		if account != a.JettonSwap.UserWallet {
+			return 0
+		}
+		if a.JettonSwap.In.IsTon {
+			return -a.JettonSwap.In.Amount.Int64()
+		}
+		if a.JettonSwap.Out.IsTon {
+			return a.JettonSwap.Out.Amount.Int64()
+		}
+		return 0
 	case WithdrawStake:
 		return detectDirection(account, a.WithdrawStake.Pool, a.WithdrawStake.Staker, a.WithdrawStake.Amount)
 	default:

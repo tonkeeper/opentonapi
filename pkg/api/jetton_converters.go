@@ -60,6 +60,7 @@ func (h Handler) convertJettonHistory(ctx context.Context, account tongo.Account
 			IsScam:     false,
 			Lt:         int64(trace.Lt),
 			InProgress: trace.InProgress(),
+			Extra:      result.Extra(account),
 		}
 		for _, action := range result.Actions {
 			if action.Type != bath.JettonTransfer && action.Type != bath.JettonBurn && action.Type != bath.JettonMint {

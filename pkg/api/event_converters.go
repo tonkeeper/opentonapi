@@ -521,29 +521,48 @@ func (h Handler) convertAction(ctx context.Context, viewer *tongo.AccountID, a b
 			Accounts: distinctAccounts(viewer, h.addressBook, &a.ElectionsRecoverStake.Elector, &a.ElectionsRecoverStake.Staker),
 		}
 	case bath.JettonSwap:
-		action.Type = "JettonSwap"
-		jettonInMeta := h.GetJettonNormalizedMetadata(ctx, a.JettonSwap.JettonMasterIn)
-		jettonInPreview := jettonPreview(a.JettonSwap.JettonMasterIn, jettonInMeta)
-		jettonOutMeta := h.GetJettonNormalizedMetadata(ctx, a.JettonSwap.JettonMasterOut)
-		jettonOutPreview := jettonPreview(a.JettonSwap.JettonMasterOut, jettonOutMeta)
-		var dex oas.JettonSwapActionDex
+		action.Type = oas.ActionTypeJettonSwap
+		swapAction := oas.JettonSwapAction{
+			UserWallet: convertAccountAddress(a.JettonSwap.UserWallet, h.addressBook),
+			Router:     convertAccountAddress(a.JettonSwap.Router, h.addressBook),
+		}
+		simplePreviewData := i18n.Template{}
+		if a.JettonSwap.In.IsTon {
+			swapAction.TonIn = oas.NewOptInt64(a.JettonSwap.In.Amount.Int64())
+			simplePreviewData["JettonIn"] = "TON"
+			simplePreviewData["AmountIn"] = i18n.FormatTONs(a.JettonSwap.In.Amount.Int64())
+		} else {
+			swapAction.AmountIn = a.JettonSwap.In.Amount.String()
+			jettonInMeta := h.GetJettonNormalizedMetadata(ctx, a.JettonSwap.In.JettonMaster)
+			preview := jettonPreview(a.JettonSwap.In.JettonMaster, jettonInMeta)
+			swapAction.JettonMasterIn.SetTo(preview)
+			simplePreviewData["JettonIn"] = preview.GetSymbol()
+			simplePreviewData["AmountIn"] = ScaleJettons(a.JettonSwap.In.Amount, jettonInMeta.Decimals).String()
+		}
+		if a.JettonSwap.Out.IsTon {
+			swapAction.TonOut = oas.NewOptInt64(a.JettonSwap.Out.Amount.Int64())
+			simplePreviewData["JettonOut"] = "TON"
+			simplePreviewData["AmountOut"] = i18n.FormatTONs(a.JettonSwap.Out.Amount.Int64())
+		} else {
+			swapAction.AmountOut = a.JettonSwap.Out.Amount.String()
+			jettonOutMeta := h.GetJettonNormalizedMetadata(ctx, a.JettonSwap.Out.JettonMaster)
+			preview := jettonPreview(a.JettonSwap.Out.JettonMaster, jettonOutMeta)
+			swapAction.JettonMasterOut.SetTo(preview)
+			simplePreviewData["JettonOut"] = preview.GetSymbol()
+			simplePreviewData["AmountOut"] = ScaleJettons(a.JettonSwap.Out.Amount, jettonOutMeta.Decimals).String()
+		}
+
 		switch a.JettonSwap.Dex {
 		case bath.Stonfi:
-			dex = oas.JettonSwapActionDexStonfi
+			swapAction.Dex = oas.JettonSwapActionDexStonfi
 		case bath.Megatonfi:
-			dex = oas.JettonSwapActionDexMegatonfi
+			swapAction.Dex = oas.JettonSwapActionDexMegatonfi
 		case bath.Dedust:
-			dex = oas.JettonSwapActionDexDedust
+			swapAction.Dex = oas.JettonSwapActionDexDedust
 		}
-		action.JettonSwap.SetTo(oas.JettonSwapAction{
-			Dex:             dex,
-			AmountIn:        a.JettonSwap.AmountIn.String(),
-			AmountOut:       a.JettonSwap.AmountOut.String(),
-			UserWallet:      convertAccountAddress(a.JettonSwap.UserWallet, h.addressBook),
-			Router:          convertAccountAddress(a.JettonSwap.Router, h.addressBook),
-			JettonMasterIn:  oas.NewOptJettonPreview(jettonInPreview),
-			JettonMasterOut: oas.NewOptJettonPreview(jettonOutPreview),
-		})
+
+		action.JettonSwap.SetTo(swapAction)
+
 		action.SimplePreview = oas.ActionSimplePreview{
 			Name: "Swap Tokens",
 			Description: i18n.T(acceptLanguage.Value, i18n.C{
@@ -551,12 +570,7 @@ func (h Handler) convertAction(ctx context.Context, viewer *tongo.AccountID, a b
 					ID:    "jettonSwapAction",
 					Other: "Swapping {{.AmountIn}} {{.JettonIn}} for {{.AmountOut}} {{.JettonOut}}",
 				},
-				TemplateData: i18n.Template{
-					"AmountIn":  ScaleJettons(a.JettonSwap.AmountIn, jettonInMeta.Decimals).String(),
-					"AmountOut": ScaleJettons(a.JettonSwap.AmountOut, jettonOutMeta.Decimals).String(),
-					"JettonIn":  jettonInPreview.GetSymbol(),
-					"JettonOut": jettonOutPreview.GetSymbol(),
-				},
+				TemplateData: simplePreviewData,
 			}),
 			Accounts: distinctAccounts(viewer, h.addressBook, &a.JettonSwap.UserWallet, &a.JettonSwap.Router),
 		}

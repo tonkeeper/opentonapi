@@ -1244,6 +1244,8 @@ type GetAccountEventsParams struct {
 	// Account ID.
 	AccountID      string
 	AcceptLanguage OptString
+	// Show only events that are initiated by this account.
+	Initiator OptBool
 	// Filter actions where requested account is not real subject (for example sender or receiver jettons).
 	SubjectOnly OptBool
 	// Omit this parameter to get last events.
@@ -1268,6 +1270,15 @@ func unpackGetAccountEventsParams(packed middleware.Parameters) (params GetAccou
 		}
 		if v, ok := packed[key]; ok {
 			params.AcceptLanguage = v.(OptString)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "initiator",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.Initiator = v.(OptBool)
 		}
 	}
 	{
@@ -1405,6 +1416,52 @@ func decodeGetAccountEventsParams(args [1]string, argsEscaped bool, r *http.Requ
 		return params, &ogenerrors.DecodeParamError{
 			Name: "Accept-Language",
 			In:   "header",
+			Err:  err,
+		}
+	}
+	// Set default value for query: initiator.
+	{
+		val := bool(false)
+		params.Initiator.SetTo(val)
+	}
+	// Decode query: initiator.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "initiator",
+			Style:   uri.QueryStyleForm,
+			Explode: false,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotInitiatorVal bool
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToBool(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotInitiatorVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.Initiator.SetTo(paramsDotInitiatorVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "initiator",
+			In:   "query",
 			Err:  err,
 		}
 	}

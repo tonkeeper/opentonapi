@@ -1507,6 +1507,10 @@ func (s *Server) handleGetAccountEventsRequest(args [1]string, argsEscaped bool,
 					In:   "header",
 				}: params.AcceptLanguage,
 				{
+					Name: "initiator",
+					In:   "query",
+				}: params.Initiator,
+				{
 					Name: "subject_only",
 					In:   "query",
 				}: params.SubjectOnly,

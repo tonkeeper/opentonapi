@@ -22,7 +22,7 @@ func convertNFT(ctx context.Context, item core.NftItem, book addressBook, metaCa
 		Index:    item.Index.BigInt().Int64(),
 		Owner:    convertOptAccountAddress(item.OwnerAddress, book),
 		Verified: item.Verified,
-		Metadata: anyToJSONRawMap(item.Metadata, false),
+		Metadata: anyToJSONRawMap(item.Metadata),
 		DNS:      g.Opt(item.DNS),
 	}
 	if item.Sale != nil {

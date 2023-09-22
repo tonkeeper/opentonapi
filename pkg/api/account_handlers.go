@@ -3,17 +3,19 @@ package api
 import (
 	"context"
 	"encoding/hex"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
 	"sort"
+
+	"github.com/tonkeeper/opentonapi/internal/g"
 
 	"github.com/tonkeeper/opentonapi/pkg/addressbook"
 	rules "github.com/tonkeeper/scam_backoffice_rules"
 	"github.com/tonkeeper/tongo/code"
 	"github.com/tonkeeper/tongo/utils"
 
-	jsoniter "github.com/json-iterator/go"
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/opentonapi/pkg/oas"
 	"github.com/tonkeeper/tongo"
@@ -167,11 +169,11 @@ func (h Handler) ExecGetMethodForBlockchainAccount(ctx context.Context, params o
 	for _, decoder := range abi.KnownGetMethodsDecoder[params.MethodName] {
 		_, v, err := decoder(stack)
 		if err == nil {
-			value, err := jsoniter.Marshal(v)
+			value, err := json.Marshal(v)
 			if err != nil {
 				return nil, toError(http.StatusInternalServerError, err)
 			}
-			result.SetDecoded(value)
+			result.SetDecoded(g.ChangeJsonKeys(value, g.CamelToSnake))
 			break
 		}
 	}
@@ -320,7 +322,7 @@ func (h Handler) GetAccountTraces(ctx context.Context, params oas.GetAccountTrac
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
 	}
-	traceIDs, err := h.storage.SearchTraces(ctx, accountID, params.Limit.Value, nil, nil, nil)
+	traceIDs, err := h.storage.SearchTraces(ctx, accountID, params.Limit.Value, nil, nil, nil, false)
 	if err != nil && !errors.Is(err, core.ErrEntityNotFound) {
 		return nil, toError(http.StatusInternalServerError, err)
 	}

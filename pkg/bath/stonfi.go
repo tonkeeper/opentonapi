@@ -3,7 +3,6 @@ package bath
 import (
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
-	"github.com/tonkeeper/tongo/tlb"
 	"math/big"
 )
 
@@ -17,30 +16,22 @@ const (
 
 // BubbleJettonSwap contains information about a jetton swap operation at a dex.
 type BubbleJettonSwap struct {
-	Dex             Dex
-	AmountIn        tlb.VarUInteger16
-	AmountOut       tlb.VarUInteger16
-	UserWallet      tongo.AccountID
-	Router          tongo.AccountID
-	JettonWalletIn  tongo.AccountID
-	JettonMasterIn  tongo.AccountID
-	JettonWalletOut tongo.AccountID
-	JettonMasterOut tongo.AccountID
-	Success         bool
+	Dex        Dex
+	UserWallet tongo.AccountID
+	Router     tongo.AccountID
+	Out        assetTransfer
+	In         assetTransfer
+	Success    bool
 }
 
 func (b BubbleJettonSwap) ToAction() *Action {
 	return &Action{
 		JettonSwap: &JettonSwapAction{
-			Dex:             b.Dex,
-			UserWallet:      b.UserWallet,
-			Router:          b.Router,
-			JettonWalletIn:  b.JettonWalletIn,
-			JettonMasterIn:  b.JettonMasterIn,
-			JettonWalletOut: b.JettonWalletOut,
-			JettonMasterOut: b.JettonMasterOut,
-			AmountIn:        big.Int(b.AmountIn),
-			AmountOut:       big.Int(b.AmountOut),
+			Dex:        b.Dex,
+			UserWallet: b.UserWallet,
+			Router:     b.Router,
+			In:         b.In,
+			Out:        b.Out,
 		},
 		Type:    JettonSwap,
 		Success: b.Success,
@@ -53,8 +44,9 @@ var StonfiSwapStraw = Straw[BubbleJettonSwap]{
 		newAction.Dex = Stonfi
 		jettonTx := bubble.Info.(BubbleJettonTransfer)
 		newAction.UserWallet = jettonTx.sender.Address
-		newAction.AmountIn = jettonTx.amount
-		newAction.JettonMasterIn = jettonTx.master
+		newAction.In.Amount = big.Int(jettonTx.amount)
+		newAction.In.IsTon = jettonTx.isWrappedTon
+		newAction.In.JettonMaster = jettonTx.master
 		return nil
 	},
 	SingleChild: &Straw[BubbleJettonSwap]{
@@ -63,7 +55,7 @@ var StonfiSwapStraw = Straw[BubbleJettonSwap]{
 			tx := bubble.Info.(BubbleTx)
 			a, b := tx.additionalInfo.STONfiPool.Token0, tx.additionalInfo.STONfiPool.Token1
 			body := tx.decodedBody.Value.(abi.StonfiSwapMsgBody)
-			newAction.AmountOut = body.MinOut
+			newAction.Out.Amount = big.Int(body.MinOut)
 			s, err := tongo.AccountIDFromTlb(body.SenderAddress)
 			if err != nil {
 				return err
@@ -71,8 +63,8 @@ var StonfiSwapStraw = Straw[BubbleJettonSwap]{
 			if s != nil && *s == b {
 				a, b = b, a
 			}
-			newAction.JettonWalletIn = a
-			newAction.JettonWalletOut = b
+			newAction.In.JettonWallet = a
+			newAction.Out.JettonWallet = b
 			return nil
 		},
 		SingleChild: &Straw[BubbleJettonSwap]{
@@ -83,14 +75,15 @@ var StonfiSwapStraw = Straw[BubbleJettonSwap]{
 				return nil
 			},
 			SingleChild: &Straw[BubbleJettonSwap]{
-				CheckFuncs: []bubbleCheck{Is(BubbleJettonTransfer{}), Or(JettonTransferOpCode(0xc64370e5), JettonTransferOpCode(0x5ffe1295))}, //todo: rewrite after jetton operation decoding
+				CheckFuncs: []bubbleCheck{Is(BubbleJettonTransfer{}), Or(JettonTransferOpCode(0xc64370e5), JettonTransferOpCode(0x5ffe1295))}, //todo: rewrite after jetton operation decoding and found what doest these codes mean
 				Builder: func(newAction *BubbleJettonSwap, bubble *Bubble) error {
 					jettonTx := bubble.Info.(BubbleJettonTransfer)
-					if jettonTx.senderWallet != newAction.JettonWalletOut {
+					if jettonTx.senderWallet != newAction.Out.JettonWallet {
 						return nil
 					}
-					newAction.JettonMasterOut = jettonTx.master
-					newAction.AmountOut = jettonTx.amount
+					newAction.Out.JettonMaster = jettonTx.master
+					newAction.Out.Amount = big.Int(jettonTx.amount)
+					newAction.Out.IsTon = jettonTx.isWrappedTon
 					newAction.Success = true
 					return nil
 				},
