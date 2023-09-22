@@ -560,6 +560,7 @@ paths:
       parameters:
         - $ref: '#/components/parameters/accountIDParameter'
         - $ref: '#/components/parameters/i18n'
+        - $ref: '#/components/parameters/initiatorQuery'
         - name: subject_only
           in: query
           description: "filter actions where requested account is not real subject (for example sender or receiver jettons)"
@@ -2313,6 +2314,14 @@ components:
       schema:
         type: string
         example: 0:97264395BD65A255A429B11326C84128B7D70FFED7949ABAE3036D506BA38621
+    initiatorQuery:
+      in: query
+      name: initiator
+      description: Show only events that are initiated by this account
+      explode: false
+      schema:
+        type: boolean
+        default: false
 
   requestBodies:
     MethodParameters:

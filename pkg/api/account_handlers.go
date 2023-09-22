@@ -6,9 +6,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/tonkeeper/opentonapi/internal/g"
 	"net/http"
 	"sort"
+
+	"github.com/tonkeeper/opentonapi/internal/g"
 
 	"github.com/tonkeeper/opentonapi/pkg/addressbook"
 	rules "github.com/tonkeeper/scam_backoffice_rules"
@@ -321,7 +322,7 @@ func (h Handler) GetAccountTraces(ctx context.Context, params oas.GetAccountTrac
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
 	}
-	traceIDs, err := h.storage.SearchTraces(ctx, accountID, params.Limit.Value, nil, nil, nil)
+	traceIDs, err := h.storage.SearchTraces(ctx, accountID, params.Limit.Value, nil, nil, nil, false)
 	if err != nil && !errors.Is(err, core.ErrEntityNotFound) {
 		return nil, toError(http.StatusInternalServerError, err)
 	}

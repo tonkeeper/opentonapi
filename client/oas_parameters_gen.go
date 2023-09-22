@@ -84,6 +84,8 @@ type GetAccountEventsParams struct {
 	// Account ID.
 	AccountID      string
 	AcceptLanguage OptString
+	// Show only events that are initiated by this account.
+	Initiator OptBool
 	// Filter actions where requested account is not real subject (for example sender or receiver jettons).
 	SubjectOnly OptBool
 	// Omit this parameter to get last events.

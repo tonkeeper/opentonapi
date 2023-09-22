@@ -137,6 +137,16 @@
      "type": "string"
     }
    },
+   "initiatorQuery": {
+    "description": "Show only events that are initiated by this account",
+    "explode": false,
+    "in": "query",
+    "name": "initiator",
+    "schema": {
+     "default": false,
+     "type": "boolean"
+    }
+   },
    "jettonIDParameter": {
     "description": "jetton ID",
     "in": "path",
@@ -3800,6 +3810,9 @@
      },
      {
       "$ref": "#/components/parameters/i18n"
+     },
+     {
+      "$ref": "#/components/parameters/initiatorQuery"
      },
      {
       "description": "filter actions where requested account is not real subject (for example sender or receiver jettons)",

@@ -1378,6 +1378,23 @@ func (c *Client) sendGetAccountEvents(ctx context.Context, params GetAccountEven
 	stage = "EncodeQueryParams"
 	q := uri.NewQueryEncoder()
 	{
+		// Encode "initiator" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "initiator",
+			Style:   uri.QueryStyleForm,
+			Explode: false,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.Initiator.Get(); ok {
+				return e.EncodeValue(conv.BoolToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
 		// Encode "subject_only" parameter.
 		cfg := uri.QueryParameterEncodingConfig{
 			Name:    "subject_only",
