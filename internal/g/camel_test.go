@@ -16,6 +16,8 @@ var cases = []struct {
 	{"simple", `{"A":["B"],"C":1,"D":"e"}`, `{"a":["B"],"c":1,"d":"e"}`},
 	{"hard", `{"A":["b","c"],"C":10.11,"D":"E","F":{"G":"h"}}`, `{"a":["b","c"],"c":10.11,"d":"E","f":{"g":"h"}}`},
 	{"hard2", `{"A":["b","c"],"C":0.25,"D":null,"F":{"G":"h","a":[{"O":"o"},{"D":1},["a",{"C":"d"}]]}}`, `{"a":["b","c"],"c":0.25,"d":null,"f":{"g":"h","a":[{"o":"o"},{"d":1},["a",{"c":"d"}]]}}`},
+	{"multiline", `{"a": "b\nc"}`, `{"a":"b\nc"}`},
+	{"unicode", `{"a": "из сибири с любовью ❤️\""}`, `{"a":"из сибири с любовью ❤️\""}`},
 	{"real",
 		`{"query_id":3411388337375148,"amount":"1500000000000","Sender":"0:2cf3b5b8c891e517c9addbda1c0386a09ccacbb0e3faf630b51cfc8152325acb","forward_payload":{"is_right":true,"value":{"SumType": "StonfiSwap","OpCode":630424929,"Value":{"TokenWallet":"0:14ac072c56291232d7cd93ddec120235c5e5cf5e2027f49bbc5aa276e5d224d8","MinOut":"2839676791","ToAddress":"0:2cf3b5b8c891e517c9addbda1c0386a09ccacbb0e3faf630b51cfc8152325acb","ReferralAddress":null}}}}`,
 		`{"query_id":3411388337375148,"amount":"1500000000000","sender":"0:2cf3b5b8c891e517c9addbda1c0386a09ccacbb0e3faf630b51cfc8152325acb","forward_payload":{"is_right":true,"value":{"sum_type":"StonfiSwap","op_code":630424929,"value":{"token_wallet":"0:14ac072c56291232d7cd93ddec120235c5e5cf5e2027f49bbc5aa276e5d224d8","min_out":"2839676791","to_address":"0:2cf3b5b8c891e517c9addbda1c0386a09ccacbb0e3faf630b51cfc8152325acb","referral_address":null}}}}`,

@@ -32,6 +32,7 @@ func ChangeJsonKeys(input []byte, f func(s string) string) []byte {
 	nextTokenIsKey := false
 	var delimiters int64
 	d := json.NewDecoder(bytes.NewReader(input))
+	d.UseNumber()
 	for {
 		token, err := d.Token()
 		if errors.Is(err, io.EOF) {
@@ -70,9 +71,8 @@ func ChangeJsonKeys(input []byte, f func(s string) string) []byte {
 			if isMap && nextTokenIsKey {
 				v = f(v)
 			}
-			buf.WriteRune('"')
-			buf.WriteString(v)
-			buf.WriteRune('"')
+			b, _ := json.Marshal(v)
+			buf.Write(b)
 		case nil:
 			buf.WriteString("null")
 		}
