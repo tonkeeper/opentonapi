@@ -366,9 +366,9 @@ func (h Handler) EmulateMessageToWallet(ctx context.Context, request *oas.Emulat
 		return nil, toError(http.StatusInternalServerError, err)
 	}
 	var code []byte
-	if account, err := h.storage.GetRawAccount(ctx, *walletAddress); err == nil {
+	if account, err := h.storage.GetRawAccount(ctx, *walletAddress); err == nil && len(account.Code) > 0 {
 		code = account.Code
-	} else if errors.Is(err, core.ErrEntityNotFound) && m.Init.Exists && m.Init.Value.Value.Code.Exists {
+	} else if m.Init.Exists && m.Init.Value.Value.Code.Exists {
 		code, err = m.Init.Value.Value.Code.Value.Value.ToBoc()
 		if err != nil {
 			return nil, toError(http.StatusBadRequest, err)
