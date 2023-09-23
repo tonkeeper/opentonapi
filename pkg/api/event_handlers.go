@@ -365,12 +365,18 @@ func (h Handler) EmulateMessageToWallet(ctx context.Context, request *oas.Emulat
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
-	account, err := h.storage.GetRawAccount(ctx, *walletAddress)
-	if err != nil {
-		// TODO: if not found, take code from stateInit
+	var code []byte
+	if account, err := h.storage.GetRawAccount(ctx, *walletAddress); err == nil {
+		code = account.Code
+	} else if errors.Is(err, core.ErrEntityNotFound) && m.Init.Exists && m.Init.Value.Value.Code.Exists {
+		code, err = m.Init.Value.Value.Code.Value.Value.ToBoc()
+		if err != nil {
+			return nil, toError(http.StatusBadRequest, err)
+		}
+	} else {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
-	walletVersion, err := wallet.GetVersionByCode(account.Code)
+	walletVersion, err := wallet.GetVersionByCode(code)
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
