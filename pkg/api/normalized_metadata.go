@@ -59,7 +59,7 @@ func NormalizeMetadata(meta tep64.Metadata, info *addressbook.KnownJetton) Norma
 	description := meta.Description
 	var social []string
 	var websites []string
-	if info != nil {
+	if info != nil && !info.FromMarket {
 		name = rewriteIfNotEmpty(name, info.Name)
 		description = rewriteIfNotEmpty(description, info.Description)
 		image = rewriteIfNotEmpty(image, info.Image)

@@ -59,6 +59,7 @@ type KnownJetton struct {
 	Social        []string               `json:"social,omitempty"`
 	Coinmarketcap string                 `json:"coinmarketcap,omitempty"`
 	Coingecko     string                 `json:"coingecko,omitempty"`
+	FromMarket    bool                   `json:"-"`
 }
 
 // KnownCollection represents additional manually crafted information about a particular NFT collection in the blockchain.
@@ -174,9 +175,7 @@ func (b *Book) GetJettonInfoByAddress(a tongo.AccountID) (KnownJetton, bool) {
 	defer b.mu.RUnlock()
 
 	j, ok := b.jettons[a]
-	if ok {
-		j.Verification = Whitelist
-	} else {
+	if j.Verification == "" {
 		j.Verification = None
 	}
 	return j, ok
@@ -220,8 +219,8 @@ func NewAddressBook(logger *zap.Logger, addressPath, jettonPath, collectionPath 
 }
 
 func (b *Book) refresh(logger *zap.Logger, addressPath, jettonPath, collectionPath string) {
+	b.refreshWhiteListJettons(logger, jettonPath) // first we have to get all the tokens from the whitelist
 	go b.refreshAddresses(logger, addressPath)
-	go b.refreshJettons(logger, jettonPath)
 	go b.refreshStonfiJettons(logger)
 	go b.refreshMegatonJettons(logger)
 	go b.refreshCollections(logger, collectionPath)
@@ -246,7 +245,7 @@ func (b *Book) refreshAddresses(logger *zap.Logger, addressPath string) {
 	}
 }
 
-func (b *Book) refreshJettons(logger *zap.Logger, jettonPath string) {
+func (b *Book) refreshWhiteListJettons(logger *zap.Logger, jettonPath string) {
 	jettons, err := downloadJson[KnownJetton](jettonPath)
 	if err != nil {
 		logger.Info("failed to load jettons.json")
@@ -260,6 +259,7 @@ func (b *Book) refreshJettons(logger *zap.Logger, jettonPath string) {
 			continue
 		}
 		item.Address = accountID.ToRaw()
+		item.Verification = Whitelist
 		b.jettons[accountID] = item
 	}
 }
@@ -446,6 +446,7 @@ func getMegatonJettons() ([]KnownJetton, error) {
 		if err != nil {
 			continue
 		}
+		jetton.FromMarket = true
 		jetton.Address = address.ToRaw()
 		respBody[idx] = jetton
 	}
@@ -475,7 +476,7 @@ func getStonfiJettons() ([]KnownJetton, error) {
 		if err != nil {
 			continue
 		}
-		jettons = append(jettons, KnownJetton{Address: address.ToRaw()})
+		jettons = append(jettons, KnownJetton{Address: address.ToRaw(), FromMarket: true})
 	}
 	return jettons, nil
 }
