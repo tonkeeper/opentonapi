@@ -181,7 +181,10 @@ func (h Handler) GetAccountEvents(ctx context.Context, params oas.GetAccountEven
 			}
 			event.InProgress = true
 			event.EventID = traceHash.Hex()
-			events = slices.Insert(events, 0, event)[:len(events)-1]
+			events = slices.Insert(events, 0, event)
+			if len(events) > params.Limit {
+				events = events[:params.Limit]
+			}
 			lastLT = uint64(events[len(events)-1].Lt)
 		}
 	}
