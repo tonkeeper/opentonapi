@@ -107,6 +107,12 @@ func (s Straw[newBubbleT]) Merge(bubble *Bubble) bool {
 	return true
 }
 
+// Optional returns copy of declarative straw but optional
+func Optional[T actioner](s Straw[T]) Straw[T] {
+	s.Optional = true
+	return s
+}
+
 func IsTx(b *Bubble) bool {
 	_, ok := b.Info.(BubbleTx)
 	return ok

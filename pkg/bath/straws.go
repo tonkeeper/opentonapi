@@ -20,8 +20,14 @@ var JettonTransfersBurnsMints = []StrawFunc{
 	WtonMintStraw.Merge,
 }
 
+var NFTStraws = []StrawFunc{
+	NftTransferStraw.Merge,
+	NftTransferNotifyStraw.Merge,
+}
+
 var DefaultStraws = []StrawFunc{
-	FindNFTTransfer,
+	NftTransferStraw.Merge,
+	NftTransferNotifyStraw.Merge,
 	FindJettonTransfer,
 	JettonBurnStraw.Merge,
 	WtonMintStraw.Merge,
@@ -44,53 +50,46 @@ var DefaultStraws = []StrawFunc{
 	FindTFNominatorAction,
 }
 
-func FindNFTTransfer(bubble *Bubble) bool {
-	nftBubble, ok := bubble.Info.(BubbleTx)
-	if !ok {
-		return false
-	}
-	if !nftBubble.operation(abi.NftTransferMsgOp) {
-		return false
-	}
-	transfer := nftBubble.decodedBody.Value.(abi.NftTransferMsgBody)
-	newBubble := Bubble{
-		Info: BubbleNftTransfer{
-			success:   nftBubble.success,
-			account:   nftBubble.account,
-			sender:    nftBubble.inputFrom,
-			recipient: parseAccount(transfer.NewOwner),
-			payload:   transfer.ForwardPayload.Value,
+var NftTransferNotifyStraw = Straw[BubbleNftTransfer]{
+	CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.NftOwnershipAssignedMsgOp)},
+	Builder: func(newAction *BubbleNftTransfer, bubble *Bubble) error {
+		receiverTx := bubble.Info.(BubbleTx)
+		transfer := receiverTx.decodedBody.Value.(abi.NftOwnershipAssignedMsgBody)
+		newAction.success = true
+		if receiverTx.inputFrom == nil {
+			return fmt.Errorf("nft transfer notify without sender")
+		}
+		newAction.account = *receiverTx.inputFrom
+		if newAction.sender == nil {
+			newAction.sender = parseAccount(transfer.PrevOwner)
+		}
+		newAction.recipient = &receiverTx.account
+		newAction.payload = transfer.ForwardPayload.Value
+		return nil
+	},
+}
+
+var NftTransferStraw = Straw[BubbleNftTransfer]{
+	CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.NftTransferMsgOp)},
+	Builder: func(newAction *BubbleNftTransfer, bubble *Bubble) error {
+		tx := bubble.Info.(BubbleTx)
+		transfer := tx.decodedBody.Value.(abi.NftTransferMsgBody)
+		newAction.account = tx.account
+		newAction.success = tx.success
+		newAction.sender = tx.inputFrom
+		newAction.payload = transfer.ForwardPayload.Value
+		if newAction.recipient == nil {
+			newAction.recipient = parseAccount(transfer.NewOwner)
+		}
+		return nil
+	},
+	Children: []Straw[BubbleNftTransfer]{
+		Optional(NftTransferNotifyStraw),
+		{
+			CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.ExcessMsgOp)},
+			Optional:   true,
 		},
-		Accounts:  append(bubble.Accounts, nftBubble.account.Address),
-		ValueFlow: bubble.ValueFlow,
-	}
-	newBubble.Children = ProcessChildren(bubble.Children,
-		func(child *Bubble) *Merge {
-			tx, ok := child.Info.(BubbleTx)
-			if !ok {
-				return nil
-			}
-			if !tx.operation(abi.ExcessMsgOp) {
-				return nil
-			}
-			newBubble.ValueFlow.Merge(child.ValueFlow)
-			newBubble.Accounts = append(newBubble.Accounts, child.Accounts...)
-			return &Merge{children: child.Children}
-		},
-		func(child *Bubble) *Merge {
-			tx, ok := child.Info.(BubbleTx)
-			if !ok {
-				return nil
-			}
-			if !tx.operation(abi.NftOwnershipAssignedMsgOp) {
-				return nil
-			}
-			newBubble.Accounts = append(newBubble.Accounts, child.Accounts...)
-			newBubble.ValueFlow.Merge(child.ValueFlow)
-			return &Merge{children: child.Children}
-		})
-	*bubble = newBubble
-	return true
+	},
 }
 
 type BubbleNftTransfer struct {

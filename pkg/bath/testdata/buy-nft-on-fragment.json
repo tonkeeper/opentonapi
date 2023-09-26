@@ -1,0 +1,78 @@
+{
+   "Actions": [
+     {
+       "AuctionBid": {
+         "Type": "tg",
+         "Amount": 4500000000000,
+         "Nft": null,
+         "NftAddress": "0:62abd9cb04accd71441a61ceb6d48d62c3323f4aa2aed89caf3e3ffaff6c9829",
+         "Bidder": "0:d8cd999fb2b1b384e6ca254c3883375e23111a8b78c015b886286c31bf11e29d",
+         "Auction": "0:62abd9cb04accd71441a61ceb6d48d62c3323f4aa2aed89caf3e3ffaff6c9829"
+       },
+       "Success": true,
+       "Type": "AuctionBid"
+     },
+     {
+       "NftItemTransfer": {
+         "Comment": "Call: 0x38127de1",
+         "EncryptedComment": null,
+         "Recipient": "0:d8cd999fb2b1b384e6ca254c3883375e23111a8b78c015b886286c31bf11e29d",
+         "Sender": "0:6e9ae2fdb2c10e52b6711a64e0798e6a6c7187d42c1e1fbfdb2b2e9d1173e0c1",
+         "Nft": "0:62abd9cb04accd71441a61ceb6d48d62c3323f4aa2aed89caf3e3ffaff6c9829",
+         "Refund": null
+       },
+       "Success": true,
+       "Type": "NftItemTransfer"
+     },
+     {
+       "TonTransfer": {
+         "Amount": 224999000000,
+         "Comment": null,
+         "EncryptedComment": null,
+         "Recipient": "0:408da3b28b6c065a593e10391269baaa9c5f8caebc0c69d9f0aabbab2a99256b",
+         "Sender": "0:62abd9cb04accd71441a61ceb6d48d62c3323f4aa2aed89caf3e3ffaff6c9829",
+         "Refund": null
+       },
+       "Success": true,
+       "Type": "TonTransfer"
+     },
+     {
+       "TonTransfer": {
+         "Amount": 4274977607063,
+         "Comment": null,
+         "EncryptedComment": null,
+         "Recipient": "0:6e9ae2fdb2c10e52b6711a64e0798e6a6c7187d42c1e1fbfdb2b2e9d1173e0c1",
+         "Sender": "0:62abd9cb04accd71441a61ceb6d48d62c3323f4aa2aed89caf3e3ffaff6c9829",
+         "Refund": null
+       },
+       "Success": true,
+       "Type": "TonTransfer"
+     }
+   ],
+   "Accounts": [
+     {
+       "Account": "0:408da3b28b6c065a593e10391269baaa9c5f8caebc0c69d9f0aabbab2a99256b",
+       "Ton": 224999000000,
+       "Fee": 100001,
+       "Jettons": null
+     },
+     {
+       "Account": "0:62abd9cb04accd71441a61ceb6d48d62c3323f4aa2aed89caf3e3ffaff6c9829",
+       "Ton": 23392937,
+       "Fee": 22112226,
+       "Jettons": null
+     },
+     {
+       "Account": "0:6e9ae2fdb2c10e52b6711a64e0798e6a6c7187d42c1e1fbfdb2b2e9d1173e0c1",
+       "Ton": 4274977607063,
+       "Fee": 991045,
+       "Jettons": null
+     },
+     {
+       "Account": "0:d8cd999fb2b1b384e6ca254c3883375e23111a8b78c015b886286c31bf11e29d",
+       "Ton": -4500000000000,
+       "Fee": 5840012,
+       "Jettons": null
+     }
+   ]
+ }

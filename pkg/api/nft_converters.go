@@ -127,7 +127,7 @@ func (h Handler) convertNftHistory(ctx context.Context, account tongo.AccountID,
 		if err != nil {
 			return nil, 0, err
 		}
-		result, err := bath.FindActions(ctx, trace, bath.WithInformationSource(h.storage), bath.WithStraws([]bath.StrawFunc{bath.FindNFTTransfer}))
+		result, err := bath.FindActions(ctx, trace, bath.WithInformationSource(h.storage), bath.WithStraws(bath.NFTStraws))
 		if err != nil {
 			return nil, 0, err
 		}

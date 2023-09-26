@@ -91,6 +91,8 @@ func TestFindActions(t *testing.T) {
 			tongo.MustParseAccountID("Ef_Mkp0G2m4bB953bRjMdbHis2gA0TlY_Tzlhd8ETtFj1CZa"),
 			//failed stonfi swap
 			tongo.MustParseAccountID("EQDnAzaMBU_5opYldxgC_6Y3fWH5tgnvnyv2AsaB1tRztqnx"),
+			//durov
+			tongo.MustParseAccountID("EQDYzZmfsrGzhObKJUw4gzdeIxEai3jAFbiGKGwxvxHinaPP"),
 		}),
 		litestorage.WithPreloadBlocks([]tongo.BlockID{
 			// tf nominator deposit
@@ -129,6 +131,8 @@ func TestFindActions(t *testing.T) {
 			tongo.MustParseBlockID("(0,8000000000000000,38293409)"),
 			// wton mint
 			tongo.MustParseBlockID("(0,8000000000000000,38493203)"),
+			// buy nft on fragment
+			tongo.MustParseBlockID("(0,8000000000000000,38499308)"),
 		}),
 	)
 
@@ -280,7 +284,8 @@ func TestFindActions(t *testing.T) {
 			hash:           "e87ec0ae9ebdba400b82887462dd0908a954fe2165c1a89775742d85a5e2a5f8",
 			filenamePrefix: "multiple-call-contracts",
 			straws: []StrawFunc{
-				FindNFTTransfer,
+				NftTransferStraw.Merge,
+				NftTransferNotifyStraw.Merge,
 				FindJettonTransfer,
 			},
 		},
@@ -297,6 +302,11 @@ func TestFindActions(t *testing.T) {
 			name:           "deposit liquid staking",
 			hash:           "482ef80fc6a147fba22c9e1d426ae0a5208e490aaccf0f0c51fd0a78b278a2a1",
 			filenamePrefix: "deposit-liquid-staking",
+		},
+		{
+			name:           "buy nft on fragment",
+			hash:           "db735068c5d52ac56a35079d9821f38ba177d40adaea0073bf0464490d30ccb3",
+			filenamePrefix: "buy-nft-on-fragment",
 		},
 	} {
 		t.Run(c.name, func(t *testing.T) {
