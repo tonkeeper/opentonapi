@@ -122,6 +122,8 @@ func (b BubbleNftTransfer) ToAction() (action *Action) {
 	default:
 		if b.payload.SumType != abi.UnknownNFTOp {
 			a.NftItemTransfer.Comment = g.Pointer("Call: " + b.payload.SumType)
+		} else if b.recipient != nil && b.recipient.Is(abi.Wallet) {
+			// we don't want to show the scary "Call: Ugly HEX" to the wallet contract
 		} else if b.payload.OpCode != nil {
 			a.NftItemTransfer.Comment = g.Pointer(fmt.Sprintf("Call: 0x%08x", *b.payload.OpCode))
 		}
