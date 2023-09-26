@@ -418,6 +418,15 @@ func (UnimplementedHandler) GetJettons(ctx context.Context, params GetJettonsPar
 	return r, ht.ErrNotImplemented
 }
 
+// GetJettonsEvents implements getJettonsEvents operation.
+//
+// Get only jetton transfers in the event.
+//
+// GET /v2/events/{event_id}/jettons
+func (UnimplementedHandler) GetJettonsEvents(ctx context.Context, params GetJettonsEventsParams) (r *Event, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // GetNftCollection implements getNftCollection operation.
 //
 // Get NFT collection by collection address.

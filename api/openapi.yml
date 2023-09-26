@@ -1110,6 +1110,24 @@ paths:
                 $ref: '#/components/schemas/JettonHolders'
         'default':
           $ref: '#/components/responses/Error'
+  /v2/events/{event_id}/jettons:
+    get:
+      description: "Get only jetton transfers in the event"
+      operationId: getJettonsEvents
+      tags:
+        - Jettons
+      parameters:
+        - $ref: '#/components/parameters/eventIDParameter'
+        - $ref: '#/components/parameters/i18n'
+      responses:
+        '200':
+          description: events
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Event'
+        'default':
+          $ref: '#/components/responses/Error'
 
   /v2/staking/nominator/{account_id}/pools:
     get:

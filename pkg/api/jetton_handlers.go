@@ -3,9 +3,11 @@ package api
 import (
 	"context"
 	"errors"
+	"fmt"
 	"math/big"
 	"net/http"
 
+	"github.com/tonkeeper/opentonapi/pkg/bath"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/liteapi"
 
@@ -188,4 +190,37 @@ func (h Handler) GetJettonHolders(ctx context.Context, params oas.GetJettonHolde
 		})
 	}
 	return &results, nil
+}
+
+func (h Handler) GetJettonsEvents(ctx context.Context, params oas.GetJettonsEventsParams) (*oas.Event, error) {
+	traceID, err := tongo.ParseHash(params.EventID)
+	if err != nil {
+		return nil, toError(http.StatusBadRequest, err)
+	}
+	trace, err := h.storage.GetTrace(ctx, traceID)
+	if err != nil {
+		return nil, toError(http.StatusInternalServerError, err)
+	}
+	result, err := bath.FindActions(ctx, trace, bath.WithInformationSource(h.storage), bath.WithStraws([]bath.StrawFunc{bath.FindJettonTransfer}))
+	if err != nil {
+		return nil, toError(http.StatusInternalServerError, err)
+	}
+	actionsList := bath.ActionsList{
+		ValueFlow: &bath.ValueFlow{},
+	}
+	for _, item := range result.Actions {
+		if item.Type != bath.JettonTransfer && item.Type != bath.JettonBurn && item.Type != bath.JettonMint {
+			continue
+		}
+		actionsList.Actions = append(actionsList.Actions, item)
+	}
+	var response oas.Event
+	if len(actionsList.Actions) == 0 {
+		return nil, toError(http.StatusNotFound, fmt.Errorf("event %v has no interaction with jettons", params.EventID))
+	}
+	response, err = h.toEvent(ctx, trace, &actionsList, params.AcceptLanguage)
+	if err != nil {
+		return nil, toError(http.StatusInternalServerError, err)
+	}
+	return &response, nil
 }

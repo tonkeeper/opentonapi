@@ -281,6 +281,12 @@ type Handler interface {
 	//
 	// GET /v2/jettons
 	GetJettons(ctx context.Context, params GetJettonsParams) (*Jettons, error)
+	// GetJettonsEvents implements getJettonsEvents operation.
+	//
+	// Get only jetton transfers in the event.
+	//
+	// GET /v2/events/{event_id}/jettons
+	GetJettonsEvents(ctx context.Context, params GetJettonsEventsParams) (*Event, error)
 	// GetNftCollection implements getNftCollection operation.
 	//
 	// Get NFT collection by collection address.
