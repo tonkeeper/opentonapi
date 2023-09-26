@@ -960,12 +960,15 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 					}
 				}
 				// Param: "event_id"
-				// Leaf parameter
-				args[0] = elem
-				elem = ""
+				// Match until "/"
+				idx := strings.IndexByte(elem, '/')
+				if idx < 0 {
+					idx = len(elem)
+				}
+				args[0] = elem[:idx]
+				elem = elem[idx:]
 
 				if len(elem) == 0 {
-					// Leaf node.
 					switch r.Method {
 					case "GET":
 						s.handleGetEventRequest([1]string{
@@ -976,6 +979,28 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 					}
 
 					return
+				}
+				switch elem[0] {
+				case '/': // Prefix: "/jettons"
+					if l := len("/jettons"); len(elem) >= l && elem[0:l] == "/jettons" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					if len(elem) == 0 {
+						// Leaf node.
+						switch r.Method {
+						case "GET":
+							s.handleGetJettonsEventsRequest([1]string{
+								args[0],
+							}, elemIsEscaped, w, r)
+						default:
+							s.notAllowed(w, r, "GET")
+						}
+
+						return
+					}
 				}
 			case 'j': // Prefix: "jettons"
 				if l := len("jettons"); len(elem) >= l && elem[0:l] == "jettons" {
@@ -3110,14 +3135,17 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 					}
 				}
 				// Param: "event_id"
-				// Leaf parameter
-				args[0] = elem
-				elem = ""
+				// Match until "/"
+				idx := strings.IndexByte(elem, '/')
+				if idx < 0 {
+					idx = len(elem)
+				}
+				args[0] = elem[:idx]
+				elem = elem[idx:]
 
 				if len(elem) == 0 {
 					switch method {
 					case "GET":
-						// Leaf: GetEvent
 						r.name = "GetEvent"
 						r.operationID = "getEvent"
 						r.pathPattern = "/v2/events/{event_id}"
@@ -3126,6 +3154,29 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 						return r, true
 					default:
 						return
+					}
+				}
+				switch elem[0] {
+				case '/': // Prefix: "/jettons"
+					if l := len("/jettons"); len(elem) >= l && elem[0:l] == "/jettons" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					if len(elem) == 0 {
+						switch method {
+						case "GET":
+							// Leaf: GetJettonsEvents
+							r.name = "GetJettonsEvents"
+							r.operationID = "getJettonsEvents"
+							r.pathPattern = "/v2/events/{event_id}/jettons"
+							r.args = args
+							r.count = 1
+							return r, true
+						default:
+							return
+						}
 					}
 				}
 			case 'j': // Prefix: "jettons"

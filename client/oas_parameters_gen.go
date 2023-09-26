@@ -292,6 +292,13 @@ type GetJettonsParams struct {
 	Offset OptInt32
 }
 
+// GetJettonsEventsParams is parameters of getJettonsEvents operation.
+type GetJettonsEventsParams struct {
+	// Event ID or transaction hash in hex (without 0x) or base64url format.
+	EventID        string
+	AcceptLanguage OptString
+}
+
 // GetNftCollectionParams is parameters of getNftCollection operation.
 type GetNftCollectionParams struct {
 	// Account ID.

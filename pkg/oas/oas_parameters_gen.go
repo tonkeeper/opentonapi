@@ -5342,6 +5342,127 @@ func decodeGetJettonsParams(args [0]string, argsEscaped bool, r *http.Request) (
 	return params, nil
 }
 
+// GetJettonsEventsParams is parameters of getJettonsEvents operation.
+type GetJettonsEventsParams struct {
+	// Event ID or transaction hash in hex (without 0x) or base64url format.
+	EventID        string
+	AcceptLanguage OptString
+}
+
+func unpackGetJettonsEventsParams(packed middleware.Parameters) (params GetJettonsEventsParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "event_id",
+			In:   "path",
+		}
+		params.EventID = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "Accept-Language",
+			In:   "header",
+		}
+		if v, ok := packed[key]; ok {
+			params.AcceptLanguage = v.(OptString)
+		}
+	}
+	return params
+}
+
+func decodeGetJettonsEventsParams(args [1]string, argsEscaped bool, r *http.Request) (params GetJettonsEventsParams, _ error) {
+	h := uri.NewHeaderDecoder(r.Header)
+	// Decode path: event_id.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "event_id",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.EventID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "event_id",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Set default value for header: Accept-Language.
+	{
+		val := string("en")
+		params.AcceptLanguage.SetTo(val)
+	}
+	// Decode header: Accept-Language.
+	if err := func() error {
+		cfg := uri.HeaderParameterDecodingConfig{
+			Name:    "Accept-Language",
+			Explode: false,
+		}
+		if err := h.HasParam(cfg); err == nil {
+			if err := h.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotAcceptLanguageVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotAcceptLanguageVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.AcceptLanguage.SetTo(paramsDotAcceptLanguageVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "Accept-Language",
+			In:   "header",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
 // GetNftCollectionParams is parameters of getNftCollection operation.
 type GetNftCollectionParams struct {
 	// Account ID.

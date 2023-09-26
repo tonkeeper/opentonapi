@@ -4946,6 +4946,38 @@
     ]
    }
   },
+  "/v2/events/{event_id}/jettons": {
+   "get": {
+    "description": "Get only jetton transfers in the event",
+    "operationId": "getJettonsEvents",
+    "parameters": [
+     {
+      "$ref": "#/components/parameters/eventIDParameter"
+     },
+     {
+      "$ref": "#/components/parameters/i18n"
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Event"
+        }
+       }
+      },
+      "description": "events"
+     },
+     "default": {
+      "$ref": "#/components/responses/Error"
+     }
+    },
+    "tags": [
+     "Jettons"
+    ]
+   }
+  },
   "/v2/jettons": {
    "get": {
     "description": "Get a list of all indexed jetton masters in the blockchain.",
