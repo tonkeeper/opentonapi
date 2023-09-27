@@ -36,21 +36,21 @@ func (m *Mock) GetCurrentRates() (map[string]float64, error) {
 	meanTonPriceToUSD := (tonPriceHuobi + tonPriceOKX) / 2
 
 	pools := m.getDedustPool()
-	megatonPool := getMegatonPool()
-	for address, price := range megatonPool {
-		if _, ok := pools[address]; !ok {
-			pools[address] = price
-		}
-	}
 	stonfiPools := getStonFiPool(meanTonPriceToUSD)
 	for address, price := range stonfiPools {
 		if _, ok := pools[address]; !ok {
 			pools[address] = price
 		}
 	}
+	megatonPool := getMegatonPool(meanTonPriceToUSD)
+	for address, price := range megatonPool {
+		if _, ok := pools[address]; !ok {
+			pools[address] = price
+		}
+	}
 	tonstakersJetton, tonstakersPrice, err := getTonstakersPrice(references.TonstakersAccountPool)
 	if err == nil {
-		rates[tonstakersJetton.ToHuman(true, false)] = tonstakersPrice
+		pools[tonstakersJetton.ToHuman(true, false)] = tonstakersPrice
 	}
 
 	rates["TON"] = 1
@@ -64,7 +64,7 @@ func (m *Mock) GetCurrentRates() (map[string]float64, error) {
 	return rates, nil
 }
 
-func getMegatonPool() map[string]float64 {
+func getMegatonPool(tonPrice float64) map[string]float64 {
 	resp, err := http.Get("https://megaton.fi/api/token/infoList")
 	if err != nil {
 		log.Errorf("failed to fetch megaton rates: %v", err)
@@ -76,11 +76,10 @@ func getMegatonPool() map[string]float64 {
 		log.Errorf("invalid status code megaton rates: %v", resp.StatusCode)
 		return map[string]float64{}
 	}
-	type Pool struct {
+	var respBody []struct {
 		Address string  `json:"address"`
 		Price   float64 `json:"price"`
 	}
-	var respBody []Pool
 	if err = json.NewDecoder(resp.Body).Decode(&respBody); err != nil {
 		log.Errorf("failed to decode response: %v", err)
 		return map[string]float64{}
@@ -88,9 +87,7 @@ func getMegatonPool() map[string]float64 {
 
 	mapOfPool := make(map[string]float64)
 	for _, pool := range respBody {
-		if pool.Price != 0 {
-			mapOfPool[pool.Address] = 1 / pool.Price
-		}
+		mapOfPool[pool.Address] = pool.Price / tonPrice
 	}
 
 	return mapOfPool
@@ -104,13 +101,11 @@ func getStonFiPool(tonPrice float64) map[string]float64 {
 	}
 	defer resp.Body.Close()
 
-	type Pool struct {
-		ContractAddress string  `json:"contract_address"`
-		DexUsdPrice     *string `json:"dex_usd_price"`
-	}
-
 	var respBody struct {
-		AssetList []Pool `json:"asset_list"`
+		AssetList []struct {
+			ContractAddress string  `json:"contract_address"`
+			DexUsdPrice     *string `json:"dex_usd_price"`
+		} `json:"asset_list"`
 	}
 	if err = json.NewDecoder(resp.Body).Decode(&respBody); err != nil {
 		log.Errorf("failed to decode response: %v", err)
@@ -122,15 +117,15 @@ func getStonFiPool(tonPrice float64) map[string]float64 {
 		if pool.DexUsdPrice == nil {
 			continue
 		}
-		price, err := strconv.ParseFloat(*pool.DexUsdPrice, 64)
-		if err == nil && price != 0 {
-			mapOfPool[pool.ContractAddress] = tonPrice / price
+		if jettonPrice, err := strconv.ParseFloat(*pool.DexUsdPrice, 64); err == nil {
+			mapOfPool[pool.ContractAddress] = jettonPrice / tonPrice
 		}
 	}
 
 	return mapOfPool
 }
 
+// TODO: update code for get price from dedust
 func (m *Mock) getDedustPool() map[string]float64 {
 	resp, err := http.Get("https://api.dedust.io/v2/pools")
 	if err != nil {
@@ -193,7 +188,7 @@ func (m *Mock) getDedustPool() map[string]float64 {
 			firstReserveConverted, _ := strconv.ParseFloat(firstReserve, 64)
 			secondReserveConverted, _ := strconv.ParseFloat(secondReserve, 64)
 
-			price := (secondReserveConverted / math.Pow(10, secondReserveDecimals)) / (firstReserveConverted / math.Pow(10, 9))
+			price := 1 / ((secondReserveConverted / math.Pow(10, secondReserveDecimals)) / (firstReserveConverted / math.Pow(10, 9)))
 			chanMapOfPool <- map[string]float64{secondAsset.Address: price}
 		}(pool)
 	}
@@ -329,8 +324,7 @@ func getCoinbaseFiatPrices() map[string]float64 {
 
 	mapOfPrices := make(map[string]float64)
 	for currency, rate := range respBody.Data.Rates {
-		rateConverted, err := strconv.ParseFloat(rate, 64)
-		if err == nil {
+		if rateConverted, err := strconv.ParseFloat(rate, 64); err == nil {
 			mapOfPrices[currency] = rateConverted
 		}
 	}
@@ -354,9 +348,9 @@ func getTonstakersPrice(pool tongo.AccountID) (tongo.AccountID, float64, error) 
 	var respBody struct {
 		Success bool `json:"success"`
 		Decoded struct {
-			JettonMinter string `json:"jetton_minter"`
-			TotalBalance int64  `json:"total_balance"`
-			Supply       int64  `json:"supply"`
+			JettonMinter    string `json:"jetton_minter"`
+			ProjectBalance  int64  `json:"projected_balance"`
+			ProjectedSupply int64  `json:"projected_supply"`
 		}
 	}
 	if err = json.NewDecoder(resp.Body).Decode(&respBody); err != nil {
@@ -367,14 +361,14 @@ func getTonstakersPrice(pool tongo.AccountID) (tongo.AccountID, float64, error) 
 	if !respBody.Success {
 		return tongo.AccountID{}, 0, fmt.Errorf("failed success")
 	}
-	if respBody.Decoded.Supply == 0 || respBody.Decoded.TotalBalance == 0 {
+	if respBody.Decoded.ProjectBalance == 0 || respBody.Decoded.ProjectedSupply == 0 {
 		return tongo.AccountID{}, 0, fmt.Errorf("empty balance")
 	}
 	accountJetton, err := tongo.ParseAccountID(respBody.Decoded.JettonMinter)
 	if err != nil {
 		return tongo.AccountID{}, 0, err
 	}
-	price := float64(respBody.Decoded.TotalBalance) / float64(respBody.Decoded.Supply)
+	price := float64(respBody.Decoded.ProjectBalance) / float64(respBody.Decoded.ProjectedSupply)
 
 	return accountJetton, price, nil
 }
