@@ -114,24 +114,17 @@ func (h *Handler) GetRates(ctx context.Context, params oas.GetRatesParams) (*oas
 				ratesRes[token] = tokenRates{Prices: map[string]float64{}, Diff24h: map[string]string{}, Diff7d: map[string]string{}, Diff30d: map[string]string{}}
 				continue
 			}
-
-			var convertedTodayPrice, convertedYesterdayPrice, diff24h, diff7w, diff1m float64
-			if todayTokenPrice != 0 {
-				convertedTodayPrice = (1 / todayTokenPrice) * todayCurrencyPrice
-			}
+			convertedTodayPrice := todayTokenPrice * todayCurrencyPrice
 			rate.Prices[currency] = convertedTodayPrice
 
-			convertedYesterdayPrice, _ = calculateConvertedPrice(yesterdayRates, currency, token)
-			convertedWeekPrice, _ := calculateConvertedPrice(weekRates, currency, token)
-			convertedMonthPrice, _ := calculateConvertedPrice(monthRates, currency, token)
-
-			if convertedYesterdayPrice != 0 {
+			var diff24h, diff7w, diff1m float64
+			if convertedYesterdayPrice, _ := calculateConvertedPrice(yesterdayRates, currency, token); convertedYesterdayPrice != 0 {
 				diff24h = ((convertedTodayPrice - convertedYesterdayPrice) / convertedYesterdayPrice) * 100
 			}
-			if convertedWeekPrice != 0 {
+			if convertedWeekPrice, _ := calculateConvertedPrice(weekRates, currency, token); convertedWeekPrice != 0 {
 				diff7w = ((convertedTodayPrice - convertedWeekPrice) / convertedWeekPrice) * 100
 			}
-			if convertedMonthPrice != 0 {
+			if convertedMonthPrice, _ := calculateConvertedPrice(monthRates, currency, token); convertedMonthPrice != 0 {
 				diff1m = ((convertedTodayPrice - convertedMonthPrice) / convertedMonthPrice) * 100
 			}
 
@@ -185,8 +178,5 @@ func calculateConvertedPrice(rates map[string]float64, currency, token string) (
 	if !ok {
 		return 0, fmt.Errorf("invalid token: %v", token)
 	}
-	if tokenPrice != 0 {
-		return (1 / tokenPrice) * currencyPrice, nil
-	}
-	return 0, nil
+	return tokenPrice * currencyPrice, nil
 }
