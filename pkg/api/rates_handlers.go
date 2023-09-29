@@ -60,8 +60,8 @@ func (h *Handler) GetRates(ctx context.Context, params oas.GetRatesParams) (*oas
 		return nil, toError(http.StatusBadRequest, fmt.Errorf("currencies is required param"))
 	}
 
-	if len(tokens) > 50 || len(currencies) > 50 {
-		return nil, toError(http.StatusBadRequest, fmt.Errorf("max params limit is 50 items"))
+	if len(tokens) > 100 || len(currencies) > 100 {
+		return nil, toError(http.StatusBadRequest, fmt.Errorf("max params limit is 100 items"))
 	}
 
 	today := time.Now().UTC()
