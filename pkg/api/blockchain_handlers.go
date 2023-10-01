@@ -55,7 +55,17 @@ func (h Handler) GetBlockchainTransaction(ctx context.Context, params oas.GetBlo
 	}
 	txs, err := h.storage.GetTransaction(ctx, hash)
 	if errors.Is(err, core.ErrEntityNotFound) {
-		return nil, toError(http.StatusNotFound, err)
+		txHash, err := h.storage.SearchTransactionByMessageHash(ctx, hash)
+		if errors.Is(err, core.ErrEntityNotFound) {
+			return nil, toError(http.StatusNotFound, err)
+		}
+		if err != nil {
+			return nil, toError(http.StatusInternalServerError, err)
+		}
+		txs, err = h.storage.GetTransaction(ctx, *txHash)
+		if errors.Is(err, core.ErrEntityNotFound) {
+			return nil, toError(http.StatusNotFound, err)
+		}
 	}
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
