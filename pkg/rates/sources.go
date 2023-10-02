@@ -13,6 +13,7 @@ import (
 	"github.com/tonkeeper/opentonapi/pkg/references"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/tep64"
+	"github.com/tonkeeper/tongo/ton"
 )
 
 type storage interface {
@@ -160,7 +161,7 @@ func (m *Mock) getDedustPool() map[string]float64 {
 		go func(pool Pool) {
 			defer wg.Done()
 
-			if pool.TotalSupply < "1000000000" || len(pool.Assets) != 2 {
+			if len(pool.Assets) != 2 || len(pool.Reserves) != 2 {
 				return
 			}
 
@@ -168,8 +169,15 @@ func (m *Mock) getDedustPool() map[string]float64 {
 			if firstAsset.Metadata == nil || firstAsset.Metadata.Symbol != "TON" {
 				return
 			}
-			firstReserve, secondReserve := pool.Reserves[0], pool.Reserves[1]
-			if firstReserve == "0" || secondReserve == "0" {
+
+			var firstReserve, secondReserve float64
+			if firstReserve, err = strconv.ParseFloat(pool.Reserves[0], 64); err != nil {
+				return
+			}
+			if secondReserve, err = strconv.ParseFloat(pool.Reserves[1], 64); err != nil {
+				return
+			}
+			if firstReserve < float64(100*ton.OneTON) || secondReserve < float64(100*ton.OneTON) {
 				return
 			}
 
@@ -185,10 +193,7 @@ func (m *Mock) getDedustPool() map[string]float64 {
 				}
 			}
 
-			firstReserveConverted, _ := strconv.ParseFloat(firstReserve, 64)
-			secondReserveConverted, _ := strconv.ParseFloat(secondReserve, 64)
-
-			price := 1 / ((secondReserveConverted / math.Pow(10, secondReserveDecimals)) / (firstReserveConverted / math.Pow(10, 9)))
+			price := 1 / ((secondReserve / math.Pow(10, secondReserveDecimals)) / (firstReserve / math.Pow(10, 9)))
 			chanMapOfPool <- map[string]float64{secondAsset.Address: price}
 		}(pool)
 	}
