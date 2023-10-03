@@ -54,12 +54,16 @@ func (h *Handler) GetRates(ctx context.Context, params oas.GetRatesParams) (*oas
 		return nil, toError(http.StatusBadRequest, fmt.Errorf("tokens is required param"))
 	}
 
-	params.Currencies = strings.TrimSpace(strings.ToUpper(params.Currencies))
+	params.Currencies = strings.TrimSpace(params.Currencies)
 	currencies := strings.Split(params.Currencies, ",")
 	if len(currencies) == 0 {
 		return nil, toError(http.StatusBadRequest, fmt.Errorf("currencies is required param"))
 	}
-
+	for i := range currencies {
+		if len(currencies[i]) < 30 { //not jetton
+			currencies[i] = strings.ToUpper(currencies[i])
+		}
+	}
 	if len(tokens) > 100 || len(currencies) > 100 {
 		return nil, toError(http.StatusBadRequest, fmt.Errorf("max params limit is 100 items"))
 	}
