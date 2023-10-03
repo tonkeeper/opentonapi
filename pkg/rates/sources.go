@@ -7,7 +7,6 @@ import (
 	"math"
 	"net/http"
 	"strconv"
-	"sync"
 
 	"github.com/labstack/gommon/log"
 	"github.com/tonkeeper/opentonapi/pkg/references"
@@ -126,7 +125,6 @@ func getStonFiPool(tonPrice float64) map[string]float64 {
 	return mapOfPool
 }
 
-// TODO: update code for get price from dedust
 func (m *Mock) getDedustPool() map[string]float64 {
 	resp, err := http.Get("https://api.dedust.io/v2/pools")
 	if err != nil {
@@ -153,61 +151,44 @@ func (m *Mock) getDedustPool() map[string]float64 {
 		return map[string]float64{}
 	}
 
-	var wg sync.WaitGroup
-	chanMapOfPool := make(chan map[string]float64)
+	mapOfPool := make(map[string]float64)
 	for _, pool := range respBody {
-		wg.Add(1)
+		if len(pool.Assets) != 2 || len(pool.Reserves) != 2 {
+			continue
+		}
 
-		go func(pool Pool) {
-			defer wg.Done()
+		firstAsset, secondAsset := pool.Assets[0], pool.Assets[1]
+		if firstAsset.Metadata == nil || firstAsset.Metadata.Symbol != "TON" {
+			continue
+		}
 
-			if len(pool.Assets) != 2 || len(pool.Reserves) != 2 {
-				return
-			}
+		firstReserve, err := strconv.ParseFloat(pool.Reserves[0], 64)
+		if err != nil {
+			continue
+		}
+		secondReserve, err := strconv.ParseFloat(pool.Reserves[1], 64)
+		if err != nil {
+			continue
+		}
+		if firstReserve < float64(100*ton.OneTON) || secondReserve < float64(100*ton.OneTON) {
+			continue
+		}
 
-			firstAsset, secondAsset := pool.Assets[0], pool.Assets[1]
-			if firstAsset.Metadata == nil || firstAsset.Metadata.Symbol != "TON" {
-				return
-			}
-
-			var firstReserve, secondReserve float64
-			if firstReserve, err = strconv.ParseFloat(pool.Reserves[0], 64); err != nil {
-				return
-			}
-			if secondReserve, err = strconv.ParseFloat(pool.Reserves[1], 64); err != nil {
-				return
-			}
-			if firstReserve < float64(100*ton.OneTON) || secondReserve < float64(100*ton.OneTON) {
-				return
-			}
-
-			secondReserveDecimals := float64(9)
-			if secondAsset.Metadata == nil || secondAsset.Metadata.Decimals != 0 {
-				accountID, _ := tongo.ParseAccountID(secondAsset.Address)
-				meta, err := m.Storage.GetJettonMasterMetadata(context.Background(), accountID)
-				if err == nil && meta.Decimals != "" {
-					decimals, err := strconv.Atoi(meta.Decimals)
-					if err == nil {
-						secondReserveDecimals = float64(decimals)
-					}
+		secondReserveDecimals := float64(9)
+		if secondAsset.Metadata == nil || secondAsset.Metadata.Decimals != 0 {
+			accountID, _ := tongo.ParseAccountID(secondAsset.Address)
+			meta, err := m.Storage.GetJettonMasterMetadata(context.Background(), accountID)
+			if err == nil && meta.Decimals != "" {
+				decimals, err := strconv.Atoi(meta.Decimals)
+				if err == nil {
+					secondReserveDecimals = float64(decimals)
 				}
 			}
-
-			price := 1 / ((secondReserve / math.Pow(10, secondReserveDecimals)) / (firstReserve / math.Pow(10, 9)))
-			chanMapOfPool <- map[string]float64{secondAsset.Address: price}
-		}(pool)
-	}
-
-	go func() {
-		wg.Wait()
-		close(chanMapOfPool)
-	}()
-
-	mapOfPool := make(map[string]float64)
-	for pools := range chanMapOfPool {
-		for address, price := range pools {
-			mapOfPool[address] = price
 		}
+
+		// TODO: change algorithm math price for other type pool (volatile/stable)
+		price := 1 / ((secondReserve / math.Pow(10, secondReserveDecimals)) / (firstReserve / math.Pow(10, 9)))
+		mapOfPool[secondAsset.Address] = price
 	}
 
 	return mapOfPool

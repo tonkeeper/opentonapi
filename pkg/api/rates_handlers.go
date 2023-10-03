@@ -95,8 +95,9 @@ func (h *Handler) GetRates(ctx context.Context, params oas.GetRatesParams) (*oas
 
 	ratesRes := make(map[string]tokenRates)
 	for _, token := range tokens {
-		_, err = tongo.ParseAccountID(token)
-		if err != nil {
+		if accountID, err := tongo.ParseAccountID(token); err == nil {
+			token = accountID.ToHuman(true, false)
+		} else {
 			token = strings.ToUpper(token)
 		}
 		for _, currency := range currencies {
