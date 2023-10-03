@@ -72,6 +72,16 @@ func main() {
 	if err = conn.WriteJSON(request); err != nil {
 		panic(err)
 	}
+	// subscribe to notifications about traces
+	request = JsonRPCRequest{
+		ID:      1,
+		JSONRPC: "2.0",
+		Method:  "subscribe_trace",
+		Params:  []string{"-1:5555555555555555555555555555555555555555555555555555555555555555"},
+	}
+	if err = conn.WriteJSON(request); err != nil {
+		panic(err)
+	}
 	// do nothing
 	select {}
 }

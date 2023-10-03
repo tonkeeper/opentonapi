@@ -24,8 +24,10 @@ type session struct {
 	conn                *websocket.Conn
 	mempool             sources.MemPoolSource
 	txSource            sources.TransactionSource
+	traceSource         sources.TraceSource
 	eventCh             chan event
-	subscriptions       map[tongo.AccountID]sources.CancelFn
+	txSubscriptions     map[tongo.AccountID]sources.CancelFn
+	traceSubscriptions  map[tongo.AccountID]sources.CancelFn
 	mempoolSubscription sources.CancelFn
 	pingInterval        time.Duration
 	subscriptionLimit   int
@@ -37,22 +39,27 @@ type event struct {
 	Params []byte
 }
 
-func newSession(logger *zap.Logger, txSource sources.TransactionSource, mempool sources.MemPoolSource, conn *websocket.Conn) *session {
+func newSession(logger *zap.Logger, txSource sources.TransactionSource, traceSource sources.TraceSource, mempool sources.MemPoolSource, conn *websocket.Conn) *session {
 	return &session{
 		logger: logger,
 		// TODO: use elastic channel to be sure transactionDispatcher doesn't hang
-		eventCh:           make(chan event, 100),
-		conn:              conn,
-		mempool:           mempool,
-		txSource:          txSource,
-		subscriptions:     map[tongo.AccountID]sources.CancelFn{},
-		pingInterval:      5 * time.Second,
-		subscriptionLimit: subscriptionLimit,
+		eventCh:            make(chan event, 100),
+		conn:               conn,
+		mempool:            mempool,
+		txSource:           txSource,
+		txSubscriptions:    map[tongo.AccountID]sources.CancelFn{},
+		traceSource:        traceSource,
+		traceSubscriptions: map[tongo.AccountID]sources.CancelFn{},
+		pingInterval:       5 * time.Second,
+		subscriptionLimit:  subscriptionLimit,
 	}
 }
 
 func (s *session) cancel() {
-	for _, cancelFn := range s.subscriptions {
+	for _, cancelFn := range s.txSubscriptions {
+		cancelFn()
+	}
+	for _, cancelFn := range s.traceSubscriptions {
 		cancelFn()
 	}
 	if s.mempoolSubscription != nil {
@@ -85,6 +92,8 @@ func (s *session) Run(ctx context.Context) chan JsonRPCRequest {
 					response = s.subscribeToTransactions(ctx, request.Params)
 				case "subscribe_mempool":
 					response = s.subscribeToMempool(ctx)
+				case "subscribe_trace":
+					response = s.subscribeToTraces(ctx, request.Params)
 				case "unsubscribe_account":
 					response = s.unsubscribe(request.Params)
 				}
@@ -111,12 +120,12 @@ func (s *session) subscribeToTransactions(ctx context.Context, params []string) 
 		}
 		accounts = append(accounts, accountID)
 	}
-	if len(s.subscriptions)+len(accounts) > s.subscriptionLimit {
+	if len(s.txSubscriptions)+len(accounts) > s.subscriptionLimit {
 		return fmt.Sprintf("you have reached the limit of %v subscriptions", s.subscriptionLimit)
 	}
 	var counter int
 	for _, account := range accounts {
-		if _, ok := s.subscriptions[account]; ok {
+		if _, ok := s.txSubscriptions[account]; ok {
 			continue
 		}
 		options := sources.SubscribeToTransactionsOptions{
@@ -129,7 +138,7 @@ func (s *session) subscribeToTransactions(ctx context.Context, params []string) 
 				Params: eventData,
 			}
 		}, options)
-		s.subscriptions[account] = cancel
+		s.txSubscriptions[account] = cancel
 		counter += 1
 	}
 	return fmt.Sprintf("success! %v new subscriptions created", counter)
@@ -137,6 +146,39 @@ func (s *session) subscribeToTransactions(ctx context.Context, params []string) 
 
 func (s *session) unsubscribe(params []string) string {
 	return "not supported yet"
+}
+
+func (s *session) subscribeToTraces(ctx context.Context, params []string) string {
+	accounts := make([]tongo.AccountID, 0, len(params))
+	for _, a := range params {
+		accountID, err := tongo.ParseAccountID(a)
+		if err != nil {
+			return fmt.Sprintf("failed to process '%v' account: %v", a, err)
+		}
+		accounts = append(accounts, accountID)
+	}
+	if len(s.traceSubscriptions)+len(accounts) > s.subscriptionLimit {
+		return fmt.Sprintf("you have reached the limit of %v subscriptions", s.subscriptionLimit)
+	}
+	var counter int
+	for _, account := range accounts {
+		if _, ok := s.traceSubscriptions[account]; ok {
+			continue
+		}
+		options := sources.SubscribeToTraceOptions{
+			Accounts: []tongo.AccountID{account},
+		}
+		cancel := s.traceSource.SubscribeToTraces(ctx, func(eventData []byte) {
+			s.eventCh <- event{
+				Name:   events.TraceEvent,
+				Method: "trace",
+				Params: eventData,
+			}
+		}, options)
+		s.traceSubscriptions[account] = cancel
+		counter += 1
+	}
+	return fmt.Sprintf("success! %v new subscriptions created", counter)
 }
 
 func (s *session) subscribeToMempool(ctx context.Context) string {

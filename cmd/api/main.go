@@ -61,6 +61,9 @@ func main() {
 	}
 	pusherBlockCh := source.Run(context.TODO())
 
+	tracer := sources.NewTracer(log, storage, source)
+	go tracer.Run(context.TODO())
+
 	idx, err := indexer.New(log, cfg.App.LiteServers)
 	if err != nil {
 		log.Fatal("failed to create blockchain indexer", zap.Error(err))
@@ -72,6 +75,7 @@ func main() {
 
 	server, err := api.NewServer(log, h, fmt.Sprintf(":%d", cfg.API.Port),
 		api.WithTransactionSource(source),
+		api.WithTraceSource(tracer),
 		api.WithMemPool(mempool))
 	if err != nil {
 		log.Fatal("failed to create api handler", zap.Error(err))

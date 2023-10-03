@@ -7,6 +7,7 @@ type Name string
 const (
 	PingEvent      Name = "ping"
 	AccountTxEvent Name = "account-tx"
+	TraceEvent     Name = "trace"
 	MempoolEvent   Name = "mempool"
 )
 
