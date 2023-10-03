@@ -222,8 +222,6 @@ func NewAddressBook(logger *zap.Logger, addressPath, jettonPath, collectionPath 
 func (b *Book) refresh(logger *zap.Logger, addressPath, jettonPath, collectionPath string) {
 	go b.refreshAddresses(logger, addressPath)
 	go b.refreshJettons(logger, jettonPath)
-	go b.refreshStonfiJettons(logger)
-	go b.refreshMegatonJettons(logger)
 	go b.refreshCollections(logger, collectionPath)
 	go b.refreshTfPools(logger)
 }
@@ -261,38 +259,6 @@ func (b *Book) refreshJettons(logger *zap.Logger, jettonPath string) {
 		}
 		item.Address = accountID.ToRaw()
 		b.jettons[accountID] = item
-	}
-}
-
-func (b *Book) refreshMegatonJettons(logger *zap.Logger) {
-	jettons, err := getMegatonJettons()
-	if err != nil {
-		logger.Info("failed to load megaton jettons")
-		return
-	}
-	b.mu.Lock()
-	defer b.mu.Unlock()
-	for _, jetton := range jettons {
-		_, ok := b.jettons[tongo.MustParseAccountID(jetton.Address)]
-		if !ok {
-			b.jettons[tongo.MustParseAccountID(jetton.Address)] = jetton
-		}
-	}
-}
-
-func (b *Book) refreshStonfiJettons(logger *zap.Logger) {
-	jettons, err := getStonfiJettons()
-	if err != nil {
-		logger.Info("failed to load stonfi jettons")
-		return
-	}
-	b.mu.Lock()
-	defer b.mu.Unlock()
-	for _, jetton := range jettons {
-		_, ok := b.jettons[tongo.MustParseAccountID(jetton.Address)]
-		if !ok {
-			b.jettons[tongo.MustParseAccountID(jetton.Address)] = jetton
-		}
 	}
 }
 
@@ -426,56 +392,4 @@ func _getGGWhitelist(client *graphql.Client) ([]tongo.AccountID, error) {
 		addr = append(addr, aa)
 	}
 	return addr, nil
-}
-
-func getMegatonJettons() ([]KnownJetton, error) {
-	response, err := http.Get("https://megaton.fi/api/token/infoList")
-	if err != nil {
-		return nil, err
-	}
-	defer response.Body.Close()
-	if response.StatusCode >= 300 {
-		return nil, fmt.Errorf("invalid status code %v", response.StatusCode)
-	}
-	var respBody []KnownJetton
-	if err = json.NewDecoder(response.Body).Decode(&respBody); err != nil {
-		return nil, err
-	}
-	for idx, jetton := range respBody {
-		address, err := tongo.ParseAccountID(jetton.Address)
-		if err != nil {
-			continue
-		}
-		jetton.Address = address.ToRaw()
-		respBody[idx] = jetton
-	}
-	return respBody, nil
-}
-
-func getStonfiJettons() ([]KnownJetton, error) {
-	response, err := http.Get("https://api.ston.fi/v1/pools")
-	if err != nil {
-		return nil, err
-	}
-	defer response.Body.Close()
-	if response.StatusCode >= 300 {
-		return nil, fmt.Errorf("invalid status code %v", response.StatusCode)
-	}
-	var respBody struct {
-		PoolList []struct {
-			Address string `json:"address"`
-		} `json:"pool_list"`
-	}
-	if err = json.NewDecoder(response.Body).Decode(&respBody); err != nil {
-		return nil, err
-	}
-	var jettons []KnownJetton
-	for _, jetton := range respBody.PoolList {
-		address, err := tongo.ParseAccountID(jetton.Address)
-		if err != nil {
-			continue
-		}
-		jettons = append(jettons, KnownJetton{Address: address.ToRaw()})
-	}
-	return jettons, nil
 }
