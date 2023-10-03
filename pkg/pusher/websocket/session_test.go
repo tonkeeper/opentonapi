@@ -52,7 +52,7 @@ func Test_session_subscribeToTransactions(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			s := &session{
 				eventCh:           make(chan event, 10),
-				subscriptions:     map[tongo.AccountID]sources.CancelFn{},
+				txSubscriptions:   map[tongo.AccountID]sources.CancelFn{},
 				subscriptionLimit: tt.subscriptionLimit,
 				txSource: &mockTxSource{
 					OnSubscribeToTransactions: func(ctx context.Context, deliveryFn sources.DeliveryFn, opts sources.SubscribeToTransactionsOptions) sources.CancelFn {
@@ -64,7 +64,7 @@ func Test_session_subscribeToTransactions(t *testing.T) {
 			msg := s.subscribeToTransactions(context.Background(), tt.params)
 			require.Equal(t, tt.want, msg)
 			subs := make(map[tongo.AccountID]struct{})
-			for sub := range s.subscriptions {
+			for sub := range s.txSubscriptions {
 				subs[sub] = struct{}{}
 			}
 			require.Equal(t, tt.wantSubscriptions, subs)

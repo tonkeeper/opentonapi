@@ -32,8 +32,17 @@ func (m *mockMemPool) SubscribeToMessages(ctx context.Context, deliveryFn source
 	return m.OnSubscribeToMessages(ctx, deliveryFn)
 }
 
+type mockTraceSource struct {
+	OnSubscribeToTraces func(ctx context.Context, deliveryFn sources.DeliveryFn, opts sources.SubscribeToTraceOptions) sources.CancelFn
+}
+
+func (m *mockTraceSource) SubscribeToTraces(ctx context.Context, deliveryFn sources.DeliveryFn, opts sources.SubscribeToTraceOptions) sources.CancelFn {
+	return m.OnSubscribeToTraces(ctx, deliveryFn, opts)
+}
+
 var _ sources.TransactionSource = &mockTxSource{}
 var _ sources.MemPoolSource = &mockMemPool{}
+var _ sources.TraceSource = &mockTraceSource{}
 
 func TestHandler(t *testing.T) {
 	var txSubscribed atomic.Bool   // to make "go test -race" happy
@@ -56,9 +65,19 @@ func TestHandler(t *testing.T) {
 			}, nil
 		},
 	}
+	var traceSubscribed atomic.Bool   // to make "go test -race" happy
+	var traceUnsubscribed atomic.Bool // to make "go test -race" happy
+	traceSource := &mockTraceSource{
+		OnSubscribeToTraces: func(ctx context.Context, deliveryFn sources.DeliveryFn, opts sources.SubscribeToTraceOptions) sources.CancelFn {
+			traceSubscribed.Store(true)
+			return func() {
+				traceUnsubscribed.Store(true)
+			}
+		},
+	}
 	logger, _ := zap.NewDevelopment()
 	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
-		handler := Handler(logger, source, mempool)
+		handler := Handler(logger, source, traceSource, mempool)
 		err := handler(writer, request, 0, false)
 		require.Nil(t, err)
 	}))
@@ -83,10 +102,19 @@ func TestHandler(t *testing.T) {
 			JSONRPC: "2.0",
 			Method:  "subscribe_mempool",
 		},
+		{
+			ID:      3,
+			JSONRPC: "2.0",
+			Method:  "subscribe_trace",
+			Params: []string{
+				"0:5555555555555555555555555555555555555555555555555555555555555555",
+			},
+		},
 	}
 	expectedResponses := [][]byte{
 		[]byte(`{"id":1,"jsonrpc":"2.0","method":"subscribe_account","result":"success! 2 new subscriptions created"}` + "\n"),
 		[]byte(`{"id":2,"jsonrpc":"2.0","method":"subscribe_mempool","result":"success! you have subscribed to mempool"}` + "\n"),
+		[]byte(`{"id":3,"jsonrpc":"2.0","method":"subscribe_trace","result":"success! 1 new subscriptions created"}` + "\n"),
 	}
 
 	for i, request := range requests {
@@ -108,8 +136,12 @@ func TestHandler(t *testing.T) {
 	require.True(t, memPoolSubscribed.Load())
 	require.False(t, memPoolUnsubscribed.Load())
 
+	require.True(t, traceSubscribed.Load())
+	require.False(t, traceUnsubscribed.Load())
+
 	conn.Close()
 	time.Sleep(1 * time.Second)
 	require.True(t, txUnsubscribed.Load())
 	require.True(t, memPoolUnsubscribed.Load())
+	require.True(t, traceUnsubscribed.Load())
 }

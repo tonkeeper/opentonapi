@@ -43,6 +43,7 @@ type ServerOptions struct {
 	ogenMiddlewares  []oas.Middleware
 	asyncMiddlewares []AsyncMiddleware
 	txSource         sources.TransactionSource
+	traceSource      sources.TraceSource
 	memPool          sources.MemPoolSource
 	liteServers      []config.LiteServer
 }
@@ -67,6 +68,12 @@ func WithTransactionSource(txSource sources.TransactionSource) ServerOption {
 	}
 }
 
+func WithTraceSource(tracer sources.TraceSource) ServerOption {
+	return func(options *ServerOptions) {
+		options.traceSource = tracer
+	}
+}
+
 func WithMemPool(memPool sources.MemPoolSource) ServerOption {
 	return func(options *ServerOptions) {
 		options.memPool = memPool
@@ -84,6 +91,9 @@ func NewServer(log *zap.Logger, handler *Handler, address string, opts ...Server
 	if options.memPool == nil {
 		return nil, fmt.Errorf("mempool is not set")
 	}
+	if options.traceSource == nil {
+		return nil, fmt.Errorf("trace source is not set")
+	}
 	ogenMiddlewares := []oas.Middleware{ogenLoggingMiddleware(log), ogenMetricsMiddleware}
 	ogenMiddlewares = append(ogenMiddlewares, options.ogenMiddlewares...)
 
@@ -97,11 +107,12 @@ func NewServer(log *zap.Logger, handler *Handler, address string, opts ...Server
 	asyncMiddlewares := []AsyncMiddleware{asyncLoggingMiddleware(log), asyncMetricsMiddleware}
 	asyncMiddlewares = append(asyncMiddlewares, options.asyncMiddlewares...)
 
-	sseHandler := sse.NewHandler(options.txSource, options.memPool)
+	sseHandler := sse.NewHandler(options.txSource, options.traceSource, options.memPool)
 	mux.Handle("/v2/sse/accounts/transactions", wrapAsync(LongLivedConnection, true, chainMiddlewares(sse.Stream(sseHandler.SubscribeToTransactions), asyncMiddlewares...)))
+	mux.Handle("/v2/sse/accounts/traces", wrapAsync(LongLivedConnection, true, chainMiddlewares(sse.Stream(sseHandler.SubscribeToTraces), asyncMiddlewares...)))
 	mux.Handle("/v2/sse/mempool", wrapAsync(LongLivedConnection, true, chainMiddlewares(sse.Stream(sseHandler.SubscribeToMessages), asyncMiddlewares...)))
 
-	websocketHandler := websocket.Handler(log, options.txSource, options.memPool)
+	websocketHandler := websocket.Handler(log, options.txSource, options.traceSource, options.memPool)
 	mux.Handle("/v2/websocket", wrapAsync(LongLivedConnection, true, chainMiddlewares(websocketHandler, asyncMiddlewares...)))
 	mux.Handle("/", ogenServer)
 

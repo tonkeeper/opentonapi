@@ -32,7 +32,7 @@ type JsonRPCResponse struct {
 	Params  json.RawMessage `json:"params,omitempty"`
 }
 
-func Handler(logger *zap.Logger, txSource sources.TransactionSource, mempool sources.MemPoolSource) func(http.ResponseWriter, *http.Request, int, bool) error {
+func Handler(logger *zap.Logger, txSource sources.TransactionSource, traceSource sources.TraceSource, mempool sources.MemPoolSource) func(http.ResponseWriter, *http.Request, int, bool) error {
 	return func(w http.ResponseWriter, r *http.Request, connectionType int, allowTokenInQuery bool) error {
 		conn, err := upgrader.Upgrade(w, r, nil)
 		if err != nil {
@@ -47,7 +47,7 @@ func Handler(logger *zap.Logger, txSource sources.TransactionSource, mempool sou
 		metrics.OpenWebsocketConnection(utils.TokenNameFromContext(r.Context()))
 		defer metrics.CloseWebsocketConnection(utils.TokenNameFromContext(r.Context()))
 
-		session := newSession(logger, txSource, mempool, conn)
+		session := newSession(logger, txSource, traceSource, mempool, conn)
 		requestCh := session.Run(ctx)
 		for {
 			_, msg, err := conn.ReadMessage()

@@ -5,11 +5,14 @@ import (
 	"fmt"
 
 	"github.com/prometheus/client_golang/prometheus"
-
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
 
 	"github.com/tonkeeper/opentonapi/pkg/core"
+)
+
+const (
+	maxDepthLimit = 1024
 )
 
 func (s *LiteStorage) GetTrace(ctx context.Context, hash tongo.Bits256) (*core.Trace, error) {
@@ -21,11 +24,11 @@ func (s *LiteStorage) GetTrace(ctx context.Context, hash tongo.Bits256) (*core.T
 	if err != nil {
 		return nil, err
 	}
-	root, err := s.findRoot(ctx, tx)
+	root, err := s.findRoot(ctx, tx, 0)
 	if err != nil {
 		return nil, err
 	}
-	trace, err := s.recursiveGetChildren(ctx, *root)
+	trace, err := s.recursiveGetChildren(ctx, *root, 0)
 	return &trace, err
 }
 
@@ -33,7 +36,7 @@ func (s *LiteStorage) SearchTraces(ctx context.Context, a tongo.AccountID, limit
 	return nil, nil
 }
 
-func (s *LiteStorage) recursiveGetChildren(ctx context.Context, tx core.Transaction) (core.Trace, error) {
+func (s *LiteStorage) recursiveGetChildren(ctx context.Context, tx core.Transaction, depth int) (core.Trace, error) {
 	trace := core.Trace{Transaction: tx}
 	externalMessages := make([]core.Message, 0, len(tx.OutMsgs))
 	for _, m := range tx.OutMsgs {
@@ -41,11 +44,11 @@ func (s *LiteStorage) recursiveGetChildren(ctx context.Context, tx core.Transact
 			externalMessages = append(externalMessages, m)
 			continue
 		}
-		tx, err := s.searchTransactionNearBlock(ctx, *m.Destination, m.CreatedLt, tx.BlockID, false)
+		tx, err := s.searchTransactionNearBlock(ctx, *m.Destination, m.CreatedLt, tx.BlockID, false, depth+1)
 		if err != nil {
 			return core.Trace{}, err
 		}
-		child, err := s.recursiveGetChildren(ctx, *tx)
+		child, err := s.recursiveGetChildren(ctx, *tx, depth+1)
 		if err != nil {
 			return core.Trace{}, err
 		}
@@ -60,7 +63,7 @@ func (s *LiteStorage) recursiveGetChildren(ctx context.Context, tx core.Transact
 	return trace, nil
 }
 
-func (s *LiteStorage) findRoot(ctx context.Context, tx *core.Transaction) (*core.Transaction, error) {
+func (s *LiteStorage) findRoot(ctx context.Context, tx *core.Transaction, depth int) (*core.Transaction, error) {
 	if tx == nil {
 		return nil, fmt.Errorf("can't find root of nil transaction")
 	}
@@ -68,15 +71,18 @@ func (s *LiteStorage) findRoot(ctx context.Context, tx *core.Transaction) (*core
 		return tx, nil
 	}
 	var err error
-	tx, err = s.searchTransactionNearBlock(ctx, *tx.InMsg.Source, tx.InMsg.CreatedLt, tx.BlockID, true)
+	tx, err = s.searchTransactionNearBlock(ctx, *tx.InMsg.Source, tx.InMsg.CreatedLt, tx.BlockID, true, depth)
 	if err != nil {
 		return nil, err
 	}
 
-	return s.findRoot(ctx, tx)
+	return s.findRoot(ctx, tx, depth+1)
 }
 
-func (s *LiteStorage) searchTransactionNearBlock(ctx context.Context, a tongo.AccountID, lt uint64, blockID tongo.BlockID, back bool) (*core.Transaction, error) {
+func (s *LiteStorage) searchTransactionNearBlock(ctx context.Context, a tongo.AccountID, lt uint64, blockID tongo.BlockID, back bool, depth int) (*core.Transaction, error) {
+	if depth > maxDepthLimit {
+		return nil, fmt.Errorf("can't find tx because of depth limit")
+	}
 	tx := s.searchTxInCache(a, lt)
 	if tx != nil {
 		return tx, nil
