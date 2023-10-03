@@ -18047,9 +18047,15 @@ func (s *PoolInfo) encodeFields(e *jx.Encoder) {
 		e.FieldStart("validator_stake")
 		e.Int64(s.ValidatorStake)
 	}
+	{
+		if s.CycleLength.Set {
+			e.FieldStart("cycle_length")
+			s.CycleLength.Encode(e)
+		}
+	}
 }
 
-var jsonFieldsNameOfPoolInfo = [14]string{
+var jsonFieldsNameOfPoolInfo = [15]string{
 	0:  "address",
 	1:  "name",
 	2:  "total_amount",
@@ -18064,6 +18070,7 @@ var jsonFieldsNameOfPoolInfo = [14]string{
 	11: "liquid_jetton_master",
 	12: "nominators_stake",
 	13: "validator_stake",
+	14: "cycle_length",
 }
 
 // Decode decodes PoolInfo from json.
@@ -18238,6 +18245,16 @@ func (s *PoolInfo) Decode(d *jx.Decoder) error {
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"validator_stake\"")
+			}
+		case "cycle_length":
+			if err := func() error {
+				s.CycleLength.Reset()
+				if err := s.CycleLength.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"cycle_length\"")
 			}
 		default:
 			return d.Skip()

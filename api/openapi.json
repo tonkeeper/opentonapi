@@ -2690,6 +2690,10 @@
       "format": "int64",
       "type": "integer"
      },
+     "cycle_length": {
+      "format": "int64",
+      "type": "integer"
+     },
      "cycle_start": {
       "description": "current nomination cycle beginning timestamp",
       "example": 1678223064,

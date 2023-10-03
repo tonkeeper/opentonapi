@@ -4490,6 +4490,9 @@ components:
           format: int64
           example: 5000000000
           description: "stake of validator"
+        cycle_length:
+          type: integer
+          format: int64
     PoolImplementation:
       type: object
       required:

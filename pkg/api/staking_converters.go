@@ -29,6 +29,7 @@ func convertStakingWhalesPool(address tongo.AccountID, w references.WhalesPoolIn
 		Verified:          verified,
 		CurrentNominators: len(nominators),
 		MaxNominators:     30000,
+		CycleLength:       oas.NewOptInt64(1 << 17),
 	}
 }
 
@@ -51,6 +52,7 @@ func convertStakingTFPool(p core.TFPool, info addressbook.TFPoolInfo, apy float6
 		MaxNominators:     p.MaxNominators,
 		NominatorsStake:   p.NominatorsStake,
 		ValidatorStake:    p.ValidatorStake,
+		CycleLength:       oas.NewOptInt64(1 << 17),
 	}
 }
 
@@ -72,5 +74,6 @@ func convertLiquidStaking(p core.LiquidPool, cycleStart, cycleEnd uint32) oas.Po
 		LiquidJettonMaster: oas.NewOptString(p.JettonMaster.ToRaw()),
 		CycleStart:         int64(cycleStart),
 		CycleEnd:           int64(cycleEnd),
+		CycleLength:        oas.NewOptInt64(1 << 16),
 	}
 }

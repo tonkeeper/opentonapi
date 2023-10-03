@@ -7761,7 +7761,8 @@ type PoolInfo struct {
 	// Total stake of all nominators.
 	NominatorsStake int64 `json:"nominators_stake"`
 	// Stake of validator.
-	ValidatorStake int64 `json:"validator_stake"`
+	ValidatorStake int64    `json:"validator_stake"`
+	CycleLength    OptInt64 `json:"cycle_length"`
 }
 
 // GetAddress returns the value of Address.
@@ -7834,6 +7835,11 @@ func (s *PoolInfo) GetValidatorStake() int64 {
 	return s.ValidatorStake
 }
 
+// GetCycleLength returns the value of CycleLength.
+func (s *PoolInfo) GetCycleLength() OptInt64 {
+	return s.CycleLength
+}
+
 // SetAddress sets the value of Address.
 func (s *PoolInfo) SetAddress(val string) {
 	s.Address = val
@@ -7902,6 +7908,11 @@ func (s *PoolInfo) SetNominatorsStake(val int64) {
 // SetValidatorStake sets the value of ValidatorStake.
 func (s *PoolInfo) SetValidatorStake(val int64) {
 	s.ValidatorStake = val
+}
+
+// SetCycleLength sets the value of CycleLength.
+func (s *PoolInfo) SetCycleLength(val OptInt64) {
+	s.CycleLength = val
 }
 
 // Ref: #/components/schemas/Price

@@ -76,6 +76,9 @@ func convertNFT(ctx context.Context, item core.NftItem, book addressBook, metaCa
 	}
 	for _, size := range []int{5, 100, 500, 1500} {
 		url := imgGenerator.DefaultGenerator.GenerateImageUrl(image, size, size)
+		if i.Address == "0:2c69220df38c16702e9934aab2a4febf7cc0d7022385c8f76fd2fe5801c76a5c" { //todo: remove before deploy to prod
+			url = "https://subbot.in/upload/FEsu5HUoJA6wENufNiDDzL.webp"
+		}
 		i.Previews = append(i.Previews, oas.ImagePreview{
 			Resolution: fmt.Sprintf("%vx%v", size, size),
 			URL:        url,
