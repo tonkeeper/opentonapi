@@ -72,3 +72,24 @@ func FindAuctionBidFragmentSimple(bubble *Bubble) bool {
 	*bubble = newBubble
 	return true
 }
+
+var TgAuctionV1InitialBidStraw = Straw[AuctionBidBubble]{
+	CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.TelemintDeployMsgOp)},
+	Builder: func(newAction *AuctionBidBubble, bubble *Bubble) error {
+		tx := bubble.Info.(BubbleTx)
+		newAction.Type = "tg"
+		newAction.Amount = tx.inputAmount
+		newAction.Auction = tx.account.Address
+		newAction.Bidder = tx.inputFrom.Address
+		return nil
+	},
+	SingleChild: &Straw[AuctionBidBubble]{
+		CheckFuncs: []bubbleCheck{IsTx, HasOpcode(0x299a3e15)},
+		Builder: func(newAction *AuctionBidBubble, bubble *Bubble) error {
+			tx := bubble.Info.(BubbleTx)
+			newAction.Success = tx.success
+			newAction.NftAddress = &tx.account.Address
+			return nil
+		},
+	},
+}

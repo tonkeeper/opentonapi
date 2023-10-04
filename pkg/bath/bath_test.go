@@ -137,6 +137,8 @@ func TestFindActions(t *testing.T) {
 			tongo.MustParseBlockID("(0,8000000000000000,38499308)"),
 			// liquid withdraw
 			tongo.MustParseBlockID("(0,8000000000000000,38912382)"),
+			//telemint deploy
+			tongo.MustParseBlockID("(0,8000000000000000,38603492)"),
 		}),
 	)
 
@@ -316,6 +318,11 @@ func TestFindActions(t *testing.T) {
 			name:           "liquid witdraw pending request",
 			hash:           "98e8f0a2aeca64b74eecfb871f01debaf19d529d65c3b0fde9034897a79ad557",
 			filenamePrefix: "liquid-withdraw-pending-request",
+		},
+		{
+			name:           "telemint deploy",
+			hash:           "08013737ecc5796d635f5c439d6d6913b4e894a8cdd86fd329c09bc51ea55239",
+			filenamePrefix: "telemint-deploy",
 		},
 	} {
 		t.Run(c.name, func(t *testing.T) {
