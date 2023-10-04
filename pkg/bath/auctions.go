@@ -79,7 +79,6 @@ var TgAuctionV1InitialBidStraw = Straw[AuctionBidBubble]{
 		tx := bubble.Info.(BubbleTx)
 		newAction.Type = "tg"
 		newAction.Amount = tx.inputAmount
-		newAction.Auction = tx.account.Address
 		newAction.Bidder = tx.inputFrom.Address
 		return nil
 	},
@@ -88,6 +87,7 @@ var TgAuctionV1InitialBidStraw = Straw[AuctionBidBubble]{
 		Builder: func(newAction *AuctionBidBubble, bubble *Bubble) error {
 			tx := bubble.Info.(BubbleTx)
 			newAction.Success = tx.success
+			newAction.Auction = tx.account.Address
 			newAction.NftAddress = &tx.account.Address
 			return nil
 		},
