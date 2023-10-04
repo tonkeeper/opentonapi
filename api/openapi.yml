@@ -4373,11 +4373,14 @@ components:
             type: object
             required:
               - address
+              - owner
               - balance
             properties:
               address:
                 type: string
                 example: 0:10C1073837B93FDAAD594284CE8B8EFF7B9CF25427440EB2FC682762E1471365
+              owner:
+                $ref: '#/components/schemas/AccountAddress'
               balance:
                 type: string
                 example: 1000000000

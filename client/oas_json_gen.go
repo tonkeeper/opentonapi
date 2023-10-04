@@ -12522,14 +12522,19 @@ func (s *JettonHoldersAddressesItem) encodeFields(e *jx.Encoder) {
 		e.Str(s.Address)
 	}
 	{
+		e.FieldStart("owner")
+		s.Owner.Encode(e)
+	}
+	{
 		e.FieldStart("balance")
 		e.Str(s.Balance)
 	}
 }
 
-var jsonFieldsNameOfJettonHoldersAddressesItem = [2]string{
+var jsonFieldsNameOfJettonHoldersAddressesItem = [3]string{
 	0: "address",
-	1: "balance",
+	1: "owner",
+	2: "balance",
 }
 
 // Decode decodes JettonHoldersAddressesItem from json.
@@ -12553,8 +12558,18 @@ func (s *JettonHoldersAddressesItem) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"address\"")
 			}
-		case "balance":
+		case "owner":
 			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				if err := s.Owner.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"owner\"")
+			}
+		case "balance":
+			requiredBitSet[0] |= 1 << 2
 			if err := func() error {
 				v, err := d.Str()
 				s.Balance = string(v)
@@ -12575,7 +12590,7 @@ func (s *JettonHoldersAddressesItem) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b00000011,
+		0b00000111,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.

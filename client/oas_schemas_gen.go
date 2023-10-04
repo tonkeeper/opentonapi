@@ -4117,13 +4117,19 @@ func (s *JettonHolders) SetAddresses(val []JettonHoldersAddressesItem) {
 }
 
 type JettonHoldersAddressesItem struct {
-	Address string `json:"address"`
-	Balance string `json:"balance"`
+	Address string         `json:"address"`
+	Owner   AccountAddress `json:"owner"`
+	Balance string         `json:"balance"`
 }
 
 // GetAddress returns the value of Address.
 func (s *JettonHoldersAddressesItem) GetAddress() string {
 	return s.Address
+}
+
+// GetOwner returns the value of Owner.
+func (s *JettonHoldersAddressesItem) GetOwner() AccountAddress {
+	return s.Owner
 }
 
 // GetBalance returns the value of Balance.
@@ -4134,6 +4140,11 @@ func (s *JettonHoldersAddressesItem) GetBalance() string {
 // SetAddress sets the value of Address.
 func (s *JettonHoldersAddressesItem) SetAddress(val string) {
 	s.Address = val
+}
+
+// SetOwner sets the value of Owner.
+func (s *JettonHoldersAddressesItem) SetOwner(val AccountAddress) {
+	s.Owner = val
 }
 
 // SetBalance sets the value of Balance.

@@ -1971,10 +1971,14 @@
         "balance": {
          "example": 1000000000,
          "type": "string"
+        },
+        "owner": {
+         "$ref": "#/components/schemas/AccountAddress"
         }
        },
        "required": [
         "address",
+        "owner",
         "balance"
        ],
        "type": "object"

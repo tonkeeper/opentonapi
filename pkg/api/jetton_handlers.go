@@ -186,6 +186,7 @@ func (h Handler) GetJettonHolders(ctx context.Context, params oas.GetJettonHolde
 	for _, holder := range holders {
 		results.Addresses = append(results.Addresses, oas.JettonHoldersAddressesItem{
 			Address: holder.Address.ToRaw(),
+			Owner:   convertAccountAddress(holder.Owner, h.addressBook),
 			Balance: holder.Balance.String(),
 		})
 	}

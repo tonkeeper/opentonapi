@@ -20,6 +20,7 @@ type JettonWallet struct {
 type JettonHolder struct {
 	JettonAddress tongo.AccountID
 	Address       tongo.AccountID
+	Owner         tongo.AccountID
 	Balance       decimal.Decimal
 }
 
