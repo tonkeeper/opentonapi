@@ -238,3 +238,35 @@ var WithdrawLiquidStake = Straw[BubbleWithdrawStake]{
 		},
 	},
 }
+
+var PendingWithdrawRequestLiquidStraw = Straw[BubbleWithdrawStakeRequest]{
+	CheckFuncs: []bubbleCheck{Is(BubbleJettonBurn{})},
+	Builder: func(newAction *BubbleWithdrawStakeRequest, bubble *Bubble) error {
+		newAction.Staker = bubble.Info.(BubbleJettonBurn).sender.Address
+		newAction.Implementation = core.StakingImplementationLiquidTF
+		amount := big.Int(bubble.Info.(BubbleJettonBurn).amount)
+		i := amount.Int64()
+		newAction.Amount = &i
+		return nil
+	},
+	SingleChild: &Straw[BubbleWithdrawStakeRequest]{
+		CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.TonstakePoolWithdrawMsgOp)},
+		Builder: func(newAction *BubbleWithdrawStakeRequest, bubble *Bubble) error {
+			newAction.Pool = bubble.Info.(BubbleTx).account.Address
+			return nil
+		},
+		SingleChild: &Straw[BubbleWithdrawStakeRequest]{
+			CheckFuncs: []bubbleCheck{IsTx, HasOpcode(0x1674b0a0)},
+			SingleChild: &Straw[BubbleWithdrawStakeRequest]{
+				CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.TonstakeNftInitMsgOp)},
+				SingleChild: &Straw[BubbleWithdrawStakeRequest]{
+					CheckFuncs: []bubbleCheck{Is(BubbleNftTransfer{})},
+					Builder: func(newAction *BubbleWithdrawStakeRequest, bubble *Bubble) error {
+						newAction.Success = true
+						return nil
+					},
+				},
+			},
+		},
+	},
+}

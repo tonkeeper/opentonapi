@@ -93,6 +93,8 @@ func TestFindActions(t *testing.T) {
 			tongo.MustParseAccountID("EQDnAzaMBU_5opYldxgC_6Y3fWH5tgnvnyv2AsaB1tRztqnx"),
 			//durov
 			tongo.MustParseAccountID("EQDYzZmfsrGzhObKJUw4gzdeIxEai3jAFbiGKGwxvxHinaPP"),
+			//liquid withdraw
+			tongo.MustParseAccountID("EQDQ0-rwRJENdk6md9-e8oApwyJJjsIgj9jJnBPQ53ytLGcs"),
 		}),
 		litestorage.WithPreloadBlocks([]tongo.BlockID{
 			// tf nominator deposit
@@ -133,6 +135,8 @@ func TestFindActions(t *testing.T) {
 			tongo.MustParseBlockID("(0,8000000000000000,38493203)"),
 			// buy nft on fragment
 			tongo.MustParseBlockID("(0,8000000000000000,38499308)"),
+			// liquid withdraw
+			tongo.MustParseBlockID("(0,8000000000000000,38912382)"),
 		}),
 	)
 
@@ -307,6 +311,11 @@ func TestFindActions(t *testing.T) {
 			name:           "buy nft on fragment",
 			hash:           "db735068c5d52ac56a35079d9821f38ba177d40adaea0073bf0464490d30ccb3",
 			filenamePrefix: "buy-nft-on-fragment",
+		},
+		{
+			name:           "liquid witdraw pending request",
+			hash:           "98e8f0a2aeca64b74eecfb871f01debaf19d529d65c3b0fde9034897a79ad557",
+			filenamePrefix: "liquid-withdraw-pending-request",
 		},
 	} {
 		t.Run(c.name, func(t *testing.T) {

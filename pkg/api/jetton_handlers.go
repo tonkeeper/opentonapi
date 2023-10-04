@@ -21,10 +21,10 @@ func (h Handler) GetAccountJettonsBalances(ctx context.Context, params oas.GetAc
 		return nil, toError(http.StatusBadRequest, err)
 	}
 	wallets, err := h.storage.GetJettonWalletsByOwnerAddress(ctx, accountID)
+	if errors.Is(err, core.ErrEntityNotFound) {
+		return &oas.JettonsBalances{}, nil
+	}
 	if err != nil {
-		if errors.Is(err, core.ErrEntityNotFound) {
-			return nil, toError(http.StatusNotFound, err)
-		}
 		return nil, toError(http.StatusInternalServerError, err)
 	}
 	var balances = oas.JettonsBalances{
