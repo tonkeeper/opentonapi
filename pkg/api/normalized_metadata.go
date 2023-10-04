@@ -1,13 +1,13 @@
 package api
 
 import (
+	imgGenerator "github.com/tonkeeper/opentonapi/pkg/image"
 	"math/big"
 	"strconv"
 	"strings"
 
 	"github.com/shopspring/decimal"
 	"github.com/tonkeeper/opentonapi/pkg/addressbook"
-	imgGenerator "github.com/tonkeeper/opentonapi/pkg/image"
 	"github.com/tonkeeper/opentonapi/pkg/references"
 	"github.com/tonkeeper/tongo/tep64"
 	"github.com/tonkeeper/tongo/tlb"
@@ -54,7 +54,7 @@ func NormalizeMetadata(meta tep64.Metadata, info *addressbook.KnownJetton) Norma
 	}
 	image := references.Placeholder
 	if meta.Image != "" {
-		image = imgGenerator.DefaultGenerator.GenerateImageUrl(meta.Image, 200, 200)
+		image = meta.Image
 	}
 	description := meta.Description
 	var social []string
@@ -68,6 +68,8 @@ func NormalizeMetadata(meta tep64.Metadata, info *addressbook.KnownJetton) Norma
 		websites = info.Websites
 		verification = VerificationWhitelist
 	}
+
+	image = imgGenerator.DefaultGenerator.GenerateImageUrl(image, 200, 200)
 
 	return NormalizedMetadata{
 		Name:         name,
