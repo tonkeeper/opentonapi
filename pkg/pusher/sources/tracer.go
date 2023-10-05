@@ -77,8 +77,7 @@ func (t *Tracer) SubscribeToTraces(ctx context.Context, deliveryFn DeliveryFn, o
 }
 
 func (t *Tracer) Run(ctx context.Context) {
-	num := 10 // todo: make configurable
-	txCh := make(chan TransactionEventData, num)
+	txCh := make(chan TransactionEventData, 1000)
 	cancelFn := t.source.SubscribeToTransactions(ctx, func(eventData []byte) {
 		var tx TransactionEventData
 		if err := json.Unmarshal(eventData, &tx); err != nil {
@@ -90,33 +89,24 @@ func (t *Tracer) Run(ctx context.Context) {
 
 	defer cancelFn()
 
-	var wg sync.WaitGroup
-	wg.Add(num)
-
-	for i := 0; i < num; i++ {
-		go func() {
-			defer wg.Done()
-			for {
-				select {
-				case <-ctx.Done():
-					return
-				case txEvent := <-txCh:
-					var hash tongo.Bits256
-					if err := hash.FromHex(txEvent.TxHash); err != nil {
-						// this should never happen
-						t.logger.Error("hash.FromHex() failed", zap.Error(err))
-						continue
-					}
-					trace, err := t.storage.GetTrace(ctx, hash)
-					if err != nil {
-						continue
-					}
-					t.dispatch(trace)
-				}
+	for txEvent := range txCh {
+		if ctx.Err() != nil {
+			return
+		}
+		go func(txEvent TransactionEventData) {
+			var hash tongo.Bits256
+			if err := hash.FromHex(txEvent.TxHash); err != nil {
+				// this should never happen
+				t.logger.Error("hash.FromHex() failed", zap.Error(err))
+				return
 			}
-		}()
+			trace, err := t.storage.GetTrace(ctx, hash)
+			if err != nil {
+				return
+			}
+			t.dispatch(trace)
+		}(txEvent)
 	}
-	wg.Wait()
 }
 
 // putTraceInCache returns true if the trace was not in the cache before.
