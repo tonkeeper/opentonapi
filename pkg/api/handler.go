@@ -3,10 +3,12 @@ package api
 import (
 	"context"
 	"fmt"
+	"reflect"
 
 	"github.com/go-faster/errors"
 	"github.com/tonkeeper/opentonapi/pkg/chainstate"
 	"github.com/tonkeeper/opentonapi/pkg/core"
+	"github.com/tonkeeper/opentonapi/pkg/file_storage"
 	"github.com/tonkeeper/opentonapi/pkg/rates"
 	"github.com/tonkeeper/opentonapi/pkg/spam"
 	"github.com/tonkeeper/tongo"
@@ -39,6 +41,7 @@ type Handler struct {
 	metaCache      metadataCache
 	mempoolEmulate mempoolEmulate
 	tonConnect     *tonconnect.Server
+	fileStorage    fileStorage
 }
 
 // Options configures behavior of a Handler instance.
@@ -52,6 +55,7 @@ type Options struct {
 	spamFilter       spamFilter
 	ratesSource      ratesSource
 	tonConnectSecret string
+	fileStorage      fileStorage
 }
 
 type Option func(o *Options)
@@ -109,6 +113,19 @@ func WithTonConnectSecret(tonConnectSecret string) Option {
 	}
 }
 
+func WithFileStorage(fileStorage fileStorage) Option {
+	return func(o *Options) {
+		if isNil(fileStorage) {
+			fileStorage = nil
+		}
+		o.fileStorage = fileStorage
+	}
+}
+
+func isNil(i any) bool {
+	return i == nil || reflect.ValueOf(i).IsNil()
+}
+
 func NewHandler(logger *zap.Logger, opts ...Option) (*Handler, error) {
 	options := &Options{}
 	for _, o := range opts {
@@ -136,6 +153,10 @@ func NewHandler(logger *zap.Logger, opts ...Option) (*Handler, error) {
 	if options.executor == nil {
 		return nil, fmt.Errorf("executor is not configured")
 	}
+	if options.fileStorage == nil {
+		logger.Warn("using local file storage")
+		options.fileStorage = filestorage.NewLocalFileStorage()
+	}
 	tonConnect, err := tonconnect.NewTonConnect(options.executor, options.tonConnectSecret)
 	if err != nil {
 		return nil, fmt.Errorf("failed to init tonconnect")
@@ -161,7 +182,8 @@ func NewHandler(logger *zap.Logger, opts ...Option) (*Handler, error) {
 			traces:         cache.NewLRUCache[string, *core.Trace](10000, "mempool_traces_cache"),
 			accountsTraces: cache.NewLRUCache[tongo.AccountID, []string](10000, "accounts_traces_cache"),
 		},
-		tonConnect: tonConnect,
+		tonConnect:  tonConnect,
+		fileStorage: options.fileStorage,
 	}, nil
 }
 

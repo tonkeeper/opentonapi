@@ -154,6 +154,11 @@ type spamFilter interface {
 	CheckJettonAction(address tongo.AccountID, symbol string) rules.TypeOfAction
 }
 
+type fileStorage interface {
+	SaveWalletBackup(bucketName, fileName string, data []byte) error
+	GetWalletBackup(bucketName, fileName string) ([]byte, error)
+}
+
 type metadataCache struct {
 	collectionsCache cache.Cache[tongo.AccountID, tep64.Metadata]
 	jettonsCache     cache.Cache[tongo.AccountID, tep64.Metadata]

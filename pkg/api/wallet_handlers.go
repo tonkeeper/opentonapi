@@ -7,11 +7,11 @@ import (
 	"encoding/base64"
 	"encoding/hex"
 	"fmt"
-	"github.com/tonkeeper/tongo/ton"
-	"io"
+	"io/ioutil"
 	"net/http"
-	"os"
-	"time"
+
+	filestorage "github.com/tonkeeper/opentonapi/pkg/file_storage"
+	"github.com/tonkeeper/tongo/ton"
 
 	"github.com/tonkeeper/opentonapi/pkg/oas"
 	"github.com/tonkeeper/opentonapi/pkg/wallet"
@@ -38,19 +38,12 @@ func (h Handler) SetWalletBackup(ctx context.Context, request oas.SetWalletBacku
 		return toError(http.StatusBadRequest, fmt.Errorf("wallet must have more than 1 TON"))
 	}
 
-	fileName := fmt.Sprintf("%x.dump", pubKey)
-	tempFileName := fileName + fmt.Sprintf(".temp%v", time.Now().Nanosecond()+time.Now().Second())
-	file, err := os.Create(tempFileName)
+	data, err := ioutil.ReadAll(request.Data)
 	if err != nil {
 		return toError(http.StatusInternalServerError, err)
 	}
-	defer file.Close()
-	_, err = io.Copy(file, io.LimitReader(request.Data, 640*1024)) //640K ought to be enough for anybody
-	if err != nil {
-		return toError(http.StatusInternalServerError, err)
-	}
-	file.Close()
-	err = os.Rename(tempFileName, fileName)
+
+	err = h.fileStorage.SaveWalletBackup(filestorage.WalletBackupBucket, fmt.Sprintf("%v.dump", hex.EncodeToString(pubKey)), data)
 	if err != nil {
 		return toError(http.StatusInternalServerError, err)
 	}
@@ -66,7 +59,7 @@ func (h Handler) GetWalletBackup(ctx context.Context, params oas.GetWalletBackup
 		return nil, toError(http.StatusBadRequest, fmt.Errorf("failed verify"))
 	}
 
-	dump, err := os.ReadFile(fmt.Sprintf("%v.dump", hex.EncodeToString(pubKey)))
+	dump, err := h.fileStorage.GetWalletBackup(filestorage.WalletBackupBucket, fmt.Sprintf("%v.dump", hex.EncodeToString(pubKey)))
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
