@@ -48,7 +48,7 @@ func PrepareLibraries(ctx context.Context, code *boc.Cell, accountLibraries map[
 	if err != nil {
 		return "", err
 	}
-	if len(hashes) == 0 || len(accountLibraries) == 0 {
+	if len(hashes) == 0 && len(accountLibraries) == 0 {
 		return "", nil
 	}
 	libs := make(map[tongo.Bits256]*boc.Cell, len(accountLibraries))
