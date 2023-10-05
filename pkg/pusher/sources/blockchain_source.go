@@ -21,6 +21,7 @@ func NewBlockchainSource(logger *zap.Logger, servers []config.LiteServer) (*Bloc
 	var err error
 	var client *liteapi.Client
 	if len(servers) == 0 {
+		logger.Warn("USING PUBLIC CONFIG for NewBlockchainSource! BE CAREFUL!")
 		client, err = liteapi.NewClientWithDefaultMainnet()
 	} else {
 		client, err = liteapi.NewClient(liteapi.WithLiteServers(servers))

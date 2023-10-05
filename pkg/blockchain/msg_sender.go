@@ -3,6 +3,7 @@ package blockchain
 import (
 	"context"
 	"encoding/base64"
+	"fmt"
 	"sync"
 	"time"
 
@@ -26,6 +27,7 @@ func NewMsgSender(servers []config.LiteServer, channels []chan []byte) (*MsgSend
 		err    error
 	)
 	if len(servers) == 0 {
+		fmt.Println("USING PUBLIC CONFIG for NewMsgSender! BE CAREFUL!")
 		client, err = liteapi.NewClientWithDefaultMainnet()
 	} else {
 		client, err = liteapi.NewClient(liteapi.WithLiteServers(servers))

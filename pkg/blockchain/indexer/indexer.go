@@ -30,6 +30,7 @@ func New(logger *zap.Logger, servers []config.LiteServer) (*Indexer, error) {
 	var err error
 	var client *liteapi.Client
 	if len(servers) == 0 {
+		logger.Warn("USING PUBLIC CONFIG for indexer.New! BE CAREFUL!")
 		client, err = liteapi.NewClientWithDefaultMainnet()
 	} else {
 		client, err = liteapi.NewClient(liteapi.WithLiteServers(servers))
