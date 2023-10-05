@@ -68,6 +68,7 @@ type Account struct {
 	MemoRequired OptBool   `json:"memo_required"`
 	GetMethods   []string  `json:"get_methods"`
 	IsSuspended  OptBool   `json:"is_suspended"`
+	IsWallet     bool      `json:"is_wallet"`
 }
 
 // GetAddress returns the value of Address.
@@ -125,6 +126,11 @@ func (s *Account) GetIsSuspended() OptBool {
 	return s.IsSuspended
 }
 
+// GetIsWallet returns the value of IsWallet.
+func (s *Account) GetIsWallet() bool {
+	return s.IsWallet
+}
+
 // SetAddress sets the value of Address.
 func (s *Account) SetAddress(val string) {
 	s.Address = val
@@ -180,6 +186,11 @@ func (s *Account) SetIsSuspended(val OptBool) {
 	s.IsSuspended = val
 }
 
+// SetIsWallet sets the value of IsWallet.
+func (s *Account) SetIsWallet(val bool) {
+	s.IsWallet = val
+}
+
 // Ref: #/components/schemas/AccountAddress
 type AccountAddress struct {
 	Address string `json:"address"`
@@ -187,8 +198,9 @@ type AccountAddress struct {
 	// and over.
 	Name OptString `json:"name"`
 	// Is this account was marked as part of scammers activity.
-	IsScam bool      `json:"is_scam"`
-	Icon   OptString `json:"icon"`
+	IsScam   bool      `json:"is_scam"`
+	Icon     OptString `json:"icon"`
+	IsWallet bool      `json:"is_wallet"`
 }
 
 // GetAddress returns the value of Address.
@@ -211,6 +223,11 @@ func (s *AccountAddress) GetIcon() OptString {
 	return s.Icon
 }
 
+// GetIsWallet returns the value of IsWallet.
+func (s *AccountAddress) GetIsWallet() bool {
+	return s.IsWallet
+}
+
 // SetAddress sets the value of Address.
 func (s *AccountAddress) SetAddress(val string) {
 	s.Address = val
@@ -229,6 +246,11 @@ func (s *AccountAddress) SetIsScam(val bool) {
 // SetIcon sets the value of Icon.
 func (s *AccountAddress) SetIcon(val OptString) {
 	s.Icon = val
+}
+
+// SetIsWallet sets the value of IsWallet.
+func (s *AccountAddress) SetIsWallet(val bool) {
+	s.IsWallet = val
 }
 
 // An event is built on top of a trace which is a series of transactions caused by one inbound

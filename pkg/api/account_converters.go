@@ -57,6 +57,12 @@ func convertToAccount(account *core.Account, ab *addressbook.KnownAddress, state
 	if len(ab.Name) > 0 {
 		acc.Name = oas.NewOptString(ab.Name)
 	}
+	for _, i := range account.Interfaces {
+		if i == "wallet" {
+			acc.IsWallet = true
+			break
+		}
+	}
 	if len(ab.Image) > 0 {
 		acc.Icon = oas.NewOptString(ab.Image)
 	}

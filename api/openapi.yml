@@ -2482,6 +2482,7 @@ components:
       required:
         - address
         - is_scam
+        - is_wallet
       properties:
         address:
           type: string
@@ -2497,6 +2498,9 @@ components:
         icon:
           type: string
           example: https://ton.org/logo.png
+        is_wallet:
+          type: boolean
+          example: true
     BlockchainBlock:
       type: object
       required:
@@ -3035,6 +3039,7 @@ components:
         - status
         - last_activity
         - get_methods
+        - is_wallet
       properties:
         address:
           type: string
@@ -3074,6 +3079,8 @@ components:
             type: string
           example: [ 'get_item_data' ]
         is_suspended:
+          type: boolean
+        is_wallet:
           type: boolean
     Accounts:
       type: object

@@ -570,6 +570,9 @@
      "is_suspended": {
       "type": "boolean"
      },
+     "is_wallet": {
+      "type": "boolean"
+     },
      "last_activity": {
       "description": "unix timestamp",
       "example": 123456789,
@@ -594,7 +597,8 @@
      "balance",
      "status",
      "last_activity",
-     "get_methods"
+     "get_methods",
+     "is_wallet"
     ],
     "type": "object"
    },
@@ -613,6 +617,10 @@
       "example": true,
       "type": "boolean"
      },
+     "is_wallet": {
+      "example": true,
+      "type": "boolean"
+     },
      "name": {
       "description": "Display name. Data collected from different sources like moderation lists, dns, collections names and over.",
       "example": "Ton foundation",
@@ -621,7 +629,8 @@
     },
     "required": [
      "address",
-     "is_scam"
+     "is_scam",
+     "is_wallet"
     ],
     "type": "object"
    },

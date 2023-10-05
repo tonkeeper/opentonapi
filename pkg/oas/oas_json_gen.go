@@ -127,9 +127,13 @@ func (s *Account) encodeFields(e *jx.Encoder) {
 			s.IsSuspended.Encode(e)
 		}
 	}
+	{
+		e.FieldStart("is_wallet")
+		e.Bool(s.IsWallet)
+	}
 }
 
-var jsonFieldsNameOfAccount = [11]string{
+var jsonFieldsNameOfAccount = [12]string{
 	0:  "address",
 	1:  "balance",
 	2:  "last_activity",
@@ -141,6 +145,7 @@ var jsonFieldsNameOfAccount = [11]string{
 	8:  "memo_required",
 	9:  "get_methods",
 	10: "is_suspended",
+	11: "is_wallet",
 }
 
 // Decode decodes Account from json.
@@ -289,6 +294,18 @@ func (s *Account) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"is_suspended\"")
 			}
+		case "is_wallet":
+			requiredBitSet[1] |= 1 << 3
+			if err := func() error {
+				v, err := d.Bool()
+				s.IsWallet = bool(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"is_wallet\"")
+			}
 		default:
 			return d.Skip()
 		}
@@ -300,7 +317,7 @@ func (s *Account) Decode(d *jx.Decoder) error {
 	var failures []validate.FieldError
 	for i, mask := range [2]uint8{
 		0b00001111,
-		0b00000010,
+		0b00001010,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -375,13 +392,18 @@ func (s *AccountAddress) encodeFields(e *jx.Encoder) {
 			s.Icon.Encode(e)
 		}
 	}
+	{
+		e.FieldStart("is_wallet")
+		e.Bool(s.IsWallet)
+	}
 }
 
-var jsonFieldsNameOfAccountAddress = [4]string{
+var jsonFieldsNameOfAccountAddress = [5]string{
 	0: "address",
 	1: "name",
 	2: "is_scam",
 	3: "icon",
+	4: "is_wallet",
 }
 
 // Decode decodes AccountAddress from json.
@@ -437,6 +459,18 @@ func (s *AccountAddress) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"icon\"")
 			}
+		case "is_wallet":
+			requiredBitSet[0] |= 1 << 4
+			if err := func() error {
+				v, err := d.Bool()
+				s.IsWallet = bool(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"is_wallet\"")
+			}
 		default:
 			return d.Skip()
 		}
@@ -447,7 +481,7 @@ func (s *AccountAddress) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b00000101,
+		0b00010101,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
