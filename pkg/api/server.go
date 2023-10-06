@@ -108,9 +108,9 @@ func NewServer(log *zap.Logger, handler *Handler, address string, opts ...Server
 	asyncMiddlewares = append(asyncMiddlewares, options.asyncMiddlewares...)
 
 	sseHandler := sse.NewHandler(options.txSource, options.traceSource, options.memPool)
-	mux.Handle("/v2/sse/accounts/transactions", wrapAsync(LongLivedConnection, true, chainMiddlewares(sse.Stream(sseHandler.SubscribeToTransactions), asyncMiddlewares...)))
-	mux.Handle("/v2/sse/accounts/traces", wrapAsync(LongLivedConnection, true, chainMiddlewares(sse.Stream(sseHandler.SubscribeToTraces), asyncMiddlewares...)))
-	mux.Handle("/v2/sse/mempool", wrapAsync(LongLivedConnection, true, chainMiddlewares(sse.Stream(sseHandler.SubscribeToMessages), asyncMiddlewares...)))
+	mux.Handle("/v2/sse/accounts/transactions", wrapAsync(LongLivedConnection, true, chainMiddlewares(sse.Stream(log, sseHandler.SubscribeToTransactions), asyncMiddlewares...)))
+	mux.Handle("/v2/sse/accounts/traces", wrapAsync(LongLivedConnection, true, chainMiddlewares(sse.Stream(log, sseHandler.SubscribeToTraces), asyncMiddlewares...)))
+	mux.Handle("/v2/sse/mempool", wrapAsync(LongLivedConnection, true, chainMiddlewares(sse.Stream(log, sseHandler.SubscribeToMessages), asyncMiddlewares...)))
 
 	websocketHandler := websocket.Handler(log, options.txSource, options.traceSource, options.memPool)
 	mux.Handle("/v2/websocket", wrapAsync(LongLivedConnection, true, chainMiddlewares(websocketHandler, asyncMiddlewares...)))

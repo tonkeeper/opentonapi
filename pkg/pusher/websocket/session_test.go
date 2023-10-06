@@ -2,12 +2,13 @@ package websocket
 
 import (
 	"context"
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"github.com/tonkeeper/tongo"
-
 	"github.com/tonkeeper/opentonapi/pkg/pusher/sources"
+	"github.com/tonkeeper/tongo"
+	"go.uber.org/zap"
 )
 
 func Test_session_subscribeToTransactions(t *testing.T) {
@@ -71,6 +72,52 @@ func Test_session_subscribeToTransactions(t *testing.T) {
 			close(s.eventCh)
 			require.Equal(t, tt.wantEvents, len(s.eventCh))
 
+		})
+	}
+}
+
+func Test_session_sendEvent(t *testing.T) {
+	tests := []struct {
+		name           string
+		sendEventCount int
+		wantEvents     map[string]struct{}
+	}{
+		{
+			name:           "some events dropped",
+			sendEventCount: 10,
+			wantEvents: map[string]struct{}{
+				"0": {},
+				"1": {},
+				"2": {},
+				"3": {},
+			},
+		},
+		{
+			name:           "all events delivered",
+			sendEventCount: 3,
+			wantEvents: map[string]struct{}{
+				"0": {},
+				"1": {},
+				"2": {},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			s := &session{
+				logger:  zap.L(),
+				eventCh: make(chan event, 4),
+			}
+			for i := 0; i < tt.sendEventCount; i++ {
+				s.sendEvent(event{Method: fmt.Sprintf("%v", i)})
+			}
+
+			close(s.eventCh)
+			events := make(map[string]struct{})
+			for event := range s.eventCh {
+				events[event.Method] = struct{}{}
+			}
+			require.Equal(t, tt.wantEvents, events)
 		})
 	}
 }

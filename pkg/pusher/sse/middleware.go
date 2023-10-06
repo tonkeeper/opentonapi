@@ -6,6 +6,7 @@ import (
 	"github.com/tonkeeper/opentonapi/pkg/pusher/errors"
 	"github.com/tonkeeper/opentonapi/pkg/pusher/metrics"
 	"github.com/tonkeeper/opentonapi/pkg/pusher/utils"
+	"go.uber.org/zap"
 )
 
 func writeError(writer http.ResponseWriter, err error) {
@@ -19,7 +20,7 @@ func writeError(writer http.ResponseWriter, err error) {
 	writer.Write([]byte(err.Error()))
 }
 
-func Stream(handler handlerFunc) func(http.ResponseWriter, *http.Request, int, bool) error {
+func Stream(logger *zap.Logger, handler handlerFunc) func(http.ResponseWriter, *http.Request, int, bool) error {
 	return func(writer http.ResponseWriter, request *http.Request, connectionType int, allowTokenInQuery bool) error {
 		_, ok := writer.(http.Flusher)
 		if !ok {
@@ -37,7 +38,7 @@ func Stream(handler handlerFunc) func(http.ResponseWriter, *http.Request, int, b
 		defer metrics.CloseSseConnection(utils.TokenNameFromContext(request.Context()))
 
 		// TODO: last-event-id
-		session := newSession()
+		session := newSession(logger)
 		if err := handler(session, request); err != nil {
 			writeError(writer, err)
 			return err
