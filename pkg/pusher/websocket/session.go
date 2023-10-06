@@ -41,9 +41,8 @@ type event struct {
 
 func newSession(logger *zap.Logger, txSource sources.TransactionSource, traceSource sources.TraceSource, mempool sources.MemPoolSource, conn *websocket.Conn) *session {
 	return &session{
-		logger: logger,
-		// TODO: use elastic channel to be sure transactionDispatcher doesn't hang
-		eventCh:            make(chan event, 100),
+		logger:             logger,
+		eventCh:            make(chan event, 1000),
 		conn:               conn,
 		mempool:            mempool,
 		txSource:           txSource,
@@ -111,6 +110,16 @@ func (s *session) Run(ctx context.Context) chan JsonRPCRequest {
 	return requestCh
 }
 
+func (s *session) sendEvent(e event) {
+	select {
+	case s.eventCh <- e:
+	default:
+		// TODO: maybe we should either close the channel or let the user know that we have dropped an event
+		s.logger.Warn("event channel is full, dropping event",
+			zap.String("event", string(e.Name)))
+	}
+}
+
 func (s *session) subscribeToTransactions(ctx context.Context, params []string) string {
 	accounts := make([]tongo.AccountID, 0, len(params))
 	for _, a := range params {
@@ -132,11 +141,11 @@ func (s *session) subscribeToTransactions(ctx context.Context, params []string) 
 			Accounts: []tongo.AccountID{account},
 		}
 		cancel := s.txSource.SubscribeToTransactions(ctx, func(eventData []byte) {
-			s.eventCh <- event{
+			s.sendEvent(event{
 				Name:   events.AccountTxEvent,
 				Method: "account_transaction",
 				Params: eventData,
-			}
+			})
 		}, options)
 		s.txSubscriptions[account] = cancel
 		counter += 1
@@ -169,11 +178,11 @@ func (s *session) subscribeToTraces(ctx context.Context, params []string) string
 			Accounts: []tongo.AccountID{account},
 		}
 		cancel := s.traceSource.SubscribeToTraces(ctx, func(eventData []byte) {
-			s.eventCh <- event{
+			s.sendEvent(event{
 				Name:   events.TraceEvent,
 				Method: "trace",
 				Params: eventData,
-			}
+			})
 		}, options)
 		s.traceSubscriptions[account] = cancel
 		counter += 1
@@ -186,7 +195,7 @@ func (s *session) subscribeToMempool(ctx context.Context) string {
 		return fmt.Sprintf("you are already subscribed to mempool")
 	}
 	cancelFn, err := s.mempool.SubscribeToMessages(ctx, func(eventData []byte) {
-		s.eventCh <- event{Method: "mempool_message", Params: eventData, Name: events.MempoolEvent}
+		s.sendEvent(event{Method: "mempool_message", Params: eventData, Name: events.MempoolEvent})
 	})
 	if err != nil {
 		return err.Error()
