@@ -11,6 +11,7 @@ import (
 
 	"github.com/tonkeeper/opentonapi/pkg/oas"
 	"github.com/tonkeeper/tongo"
+	"github.com/tonkeeper/tongo/ton"
 )
 
 func (h *Handler) GetChartRates(ctx context.Context, params oas.GetChartRatesParams) (*oas.GetChartRatesOK, error) {
@@ -52,6 +53,15 @@ func (h *Handler) GetRates(ctx context.Context, params oas.GetRatesParams) (*oas
 	tokens := strings.Split(params.Tokens, ",")
 	if len(tokens) == 0 {
 		return nil, toError(http.StatusBadRequest, fmt.Errorf("tokens is required param"))
+	}
+	var convertedTokens []string
+	for _, token := range tokens {
+		if accountID, err := ton.ParseAccountID(token); err == nil {
+			token = accountID.ToRaw()
+		} else {
+			token = strings.ToUpper(token)
+		}
+		convertedTokens = append(convertedTokens, token)
 	}
 
 	params.Currencies = strings.TrimSpace(params.Currencies)
@@ -98,12 +108,7 @@ func (h *Handler) GetRates(ctx context.Context, params oas.GetRatesParams) (*oas
 	}
 
 	ratesRes := make(map[string]tokenRates)
-	for _, token := range tokens {
-		if accountID, err := tongo.ParseAccountID(token); err == nil {
-			token = accountID.ToHuman(true, false)
-		} else {
-			token = strings.ToUpper(token)
-		}
+	for _, token := range convertedTokens {
 		for _, currency := range currencies {
 			todayCurrencyPrice, ok := todayRates[currency]
 			if !ok {
