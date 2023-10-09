@@ -7,6 +7,7 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/tonkeeper/opentonapi/pkg/blockchain/indexer"
+	"github.com/tonkeeper/tongo"
 	"go.uber.org/zap"
 	"golang.org/x/exp/maps"
 
@@ -34,6 +35,9 @@ func main() {
 		litestorage.WithLiteServers(cfg.App.LiteServers),
 		litestorage.WithBlockChannel(storageBlockCh),
 	)
+	// The executor is used to resolve DNS records.
+	tongo.SetDefaultExecutor(storage)
+
 	if err != nil {
 		log.Fatal("storage init", zap.Error(err))
 	}
