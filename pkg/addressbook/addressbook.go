@@ -161,12 +161,7 @@ func (b *Book) GetCollectionInfoByAddress(a tongo.AccountID) (KnownCollection, b
 func (b *Book) GetKnownJettons() map[tongo.AccountID]KnownJetton {
 	b.mu.RLock()
 	defer b.mu.RUnlock()
-
-	jettons := make(map[tongo.AccountID]KnownJetton, len(b.jettons))
-	for accountID, jetton := range b.jettons {
-		jettons[accountID] = jetton
-	}
-	return jettons
+	return maps.Clone(b.jettons)
 }
 
 func (b *Book) GetJettonInfoByAddress(a tongo.AccountID) (KnownJetton, bool) {

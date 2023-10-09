@@ -31,6 +31,22 @@
          "image": "https://i.ibb.co/Bj5KqK4/IMG-20221213-115545-207.png",
          "verification": "whitelist"
        }
+     },
+     {
+       "balance": "10000000000000",
+       "wallet_address": {
+         "address": "0:876b3031dd0f2b0e34198063950ea38b5cd31081c18b8eda2bd2f02c81affdfd",
+         "is_scam": false,
+         "is_wallet": false
+       },
+       "jetton": {
+         "address": "0:274b605badfcecca83130b27cd375e6a73233f6e15d782a31dd2a80aff097cc0",
+         "name": "jUSCDT",
+         "symbol": "jUSDТ",
+         "decimals": 9,
+         "image": "https://raw.githubusercontent.com/tonkeeper/opentonapi/master/pkg/references/media/token_placeholder.png",
+         "verification": "blacklist"
+       }
      }
    ]
  }

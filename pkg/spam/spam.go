@@ -7,13 +7,13 @@ import (
 
 type SpamFilter struct {
 	Rules          rules.Rules
-	JettonEvaluate *rules.JettonEvaluate
+	jettonVerifier *rules.JettonVerifier
 }
 
 func NewSpamFilter() *SpamFilter {
 	return &SpamFilter{
 		Rules:          rules.GetDefaultRules(),
-		JettonEvaluate: rules.NewJettonEvaluate(),
+		jettonVerifier: rules.NewJettonVerifier(),
 	}
 }
 
@@ -21,6 +21,6 @@ func (s *SpamFilter) GetRules() rules.Rules {
 	return s.Rules
 }
 
-func (s *SpamFilter) CheckJettonAction(address tongo.AccountID, symbol string) rules.TypeOfAction {
-	return s.JettonEvaluate.SearchAction(address, symbol)
+func (s *SpamFilter) IsJettonBlacklisted(address tongo.AccountID, symbol string) bool {
+	return s.jettonVerifier.IsBlacklisted(address, symbol)
 }

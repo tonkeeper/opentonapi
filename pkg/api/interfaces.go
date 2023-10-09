@@ -151,7 +151,7 @@ type ratesSource interface {
 
 type spamFilter interface {
 	GetRules() rules.Rules
-	CheckJettonAction(address tongo.AccountID, symbol string) rules.TypeOfAction
+	IsJettonBlacklisted(address tongo.AccountID, symbol string) bool
 }
 
 type metadataCache struct {

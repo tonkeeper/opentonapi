@@ -50,9 +50,9 @@ func (h Handler) GetAccountJettonsBalances(ctx context.Context, params oas.GetAc
 		var normalizedMetadata NormalizedMetadata
 		info, ok := h.addressBook.GetJettonInfoByAddress(wallet.JettonAddress)
 		if ok {
-			normalizedMetadata = NormalizeMetadata(meta, &info)
+			normalizedMetadata = NormalizeMetadata(meta, &info, false)
 		} else {
-			normalizedMetadata = NormalizeMetadata(meta, nil)
+			normalizedMetadata = NormalizeMetadata(meta, nil, h.spamFilter.IsJettonBlacklisted(wallet.JettonAddress, meta.Symbol))
 		}
 		jettonBalance.Jetton = jettonPreview(wallet.JettonAddress, normalizedMetadata)
 		balances.Balances = append(balances.Balances, jettonBalance)
