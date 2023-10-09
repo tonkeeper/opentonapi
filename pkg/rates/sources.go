@@ -50,7 +50,7 @@ func (m *Mock) GetCurrentRates() (map[string]float64, error) {
 	}
 	tonstakersJetton, tonstakersPrice, err := getTonstakersPrice(references.TonstakersAccountPool)
 	if err == nil {
-		pools[tonstakersJetton.ToHuman(true, false)] = tonstakersPrice
+		pools[tonstakersJetton] = tonstakersPrice
 	}
 
 	rates["TON"] = 1
@@ -58,23 +58,23 @@ func (m *Mock) GetCurrentRates() (map[string]float64, error) {
 		rates[currency] = meanTonPriceToUSD * price
 	}
 	for token, coinsCount := range pools {
-		rates[token] = coinsCount
+		rates[token.ToRaw()] = coinsCount
 	}
 
 	return rates, nil
 }
 
-func getMegatonPool(tonPrice float64) map[string]float64 {
+func getMegatonPool(tonPrice float64) map[ton.AccountID]float64 {
 	resp, err := http.Get("https://megaton.fi/api/token/infoList")
 	if err != nil {
 		log.Errorf("failed to fetch megaton rates: %v", err)
-		return map[string]float64{}
+		return map[ton.AccountID]float64{}
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode >= 300 {
 		log.Errorf("invalid status code megaton rates: %v", resp.StatusCode)
-		return map[string]float64{}
+		return map[ton.AccountID]float64{}
 	}
 	var respBody []struct {
 		Address string  `json:"address"`
@@ -82,22 +82,26 @@ func getMegatonPool(tonPrice float64) map[string]float64 {
 	}
 	if err = json.NewDecoder(resp.Body).Decode(&respBody); err != nil {
 		log.Errorf("failed to decode response: %v", err)
-		return map[string]float64{}
+		return map[ton.AccountID]float64{}
 	}
 
-	mapOfPool := make(map[string]float64)
+	mapOfPool := make(map[ton.AccountID]float64)
 	for _, pool := range respBody {
-		mapOfPool[pool.Address] = pool.Price / tonPrice
+		accountID, err := ton.ParseAccountID(pool.Address)
+		if err != nil {
+			continue
+		}
+		mapOfPool[accountID] = pool.Price / tonPrice
 	}
 
 	return mapOfPool
 }
 
-func getStonFiPool(tonPrice float64) map[string]float64 {
+func getStonFiPool(tonPrice float64) map[ton.AccountID]float64 {
 	resp, err := http.Get("https://api.ston.fi/v1/assets")
 	if err != nil {
 		log.Errorf("failed to fetch stonfi rates: %v", err)
-		return map[string]float64{}
+		return map[ton.AccountID]float64{}
 	}
 	defer resp.Body.Close()
 
@@ -109,27 +113,31 @@ func getStonFiPool(tonPrice float64) map[string]float64 {
 	}
 	if err = json.NewDecoder(resp.Body).Decode(&respBody); err != nil {
 		log.Errorf("failed to decode response: %v", err)
-		return map[string]float64{}
+		return map[ton.AccountID]float64{}
 	}
 
-	mapOfPool := make(map[string]float64)
+	mapOfPool := make(map[ton.AccountID]float64)
 	for _, pool := range respBody.AssetList {
 		if pool.DexUsdPrice == nil {
 			continue
 		}
+		accountID, err := ton.ParseAccountID(pool.ContractAddress)
+		if err != nil {
+			continue
+		}
 		if jettonPrice, err := strconv.ParseFloat(*pool.DexUsdPrice, 64); err == nil {
-			mapOfPool[pool.ContractAddress] = jettonPrice / tonPrice
+			mapOfPool[accountID] = jettonPrice / tonPrice
 		}
 	}
 
 	return mapOfPool
 }
 
-func (m *Mock) getDedustPool() map[string]float64 {
+func (m *Mock) getDedustPool() map[ton.AccountID]float64 {
 	resp, err := http.Get("https://api.dedust.io/v2/pools")
 	if err != nil {
 		log.Errorf("failed to fetch dedust rates: %v", err)
-		return map[string]float64{}
+		return map[ton.AccountID]float64{}
 	}
 	defer resp.Body.Close()
 
@@ -148,10 +156,10 @@ func (m *Mock) getDedustPool() map[string]float64 {
 	var respBody []Pool
 	if err = json.NewDecoder(resp.Body).Decode(&respBody); err != nil {
 		log.Errorf("failed to decode response: %v", err)
-		return map[string]float64{}
+		return map[ton.AccountID]float64{}
 	}
 
-	mapOfPool := make(map[string]float64)
+	mapOfPool := make(map[ton.AccountID]float64)
 	for _, pool := range respBody {
 		if len(pool.Assets) != 2 || len(pool.Reserves) != 2 {
 			continue
@@ -186,9 +194,14 @@ func (m *Mock) getDedustPool() map[string]float64 {
 			}
 		}
 
+		accountID, err := ton.ParseAccountID(secondAsset.Address)
+		if err != nil {
+			continue
+		}
+
 		// TODO: change algorithm math price for other type pool (volatile/stable)
 		price := 1 / ((secondReserve / math.Pow(10, secondReserveDecimals)) / (firstReserve / math.Pow(10, 9)))
-		mapOfPool[secondAsset.Address] = price
+		mapOfPool[accountID] = price
 	}
 
 	return mapOfPool
