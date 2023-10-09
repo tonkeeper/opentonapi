@@ -105,7 +105,7 @@ func (ds BubbleDepositStake) ToAction() *Action {
 }
 
 var DepositTFStakeStraw = Straw[BubbleDepositStake]{
-	CheckFuncs: []bubbleCheck{IsTx, HasInterface(abi.TfNominator), HasTextComment("d")},
+	CheckFuncs: []bubbleCheck{IsTx, HasInterface(abi.TvPool), HasTextComment("d")},
 	Builder: func(newAction *BubbleDepositStake, bubble *Bubble) error {
 		tx := bubble.Info.(BubbleTx)
 		newAction.Pool = tx.account.Address
@@ -144,7 +144,7 @@ func (ds BubbleWithdrawStakeRequest) ToAction() *Action {
 }
 
 var WithdrawTFStakeRequestStraw = Straw[BubbleWithdrawStakeRequest]{
-	CheckFuncs: []bubbleCheck{IsTx, HasInterface(abi.TfNominator), HasTextComment("w")},
+	CheckFuncs: []bubbleCheck{IsTx, HasInterface(abi.TvPool), HasTextComment("w")},
 	Builder: func(newAction *BubbleWithdrawStakeRequest, bubble *Bubble) error {
 		tx := bubble.Info.(BubbleTx)
 		newAction.Pool = tx.account.Address

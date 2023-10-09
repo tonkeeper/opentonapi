@@ -29,7 +29,7 @@ func (b BubbleNftPurchase) ToAction() *Action {
 }
 
 func auctionType(account *Account) NftAuctionType {
-	if account.Is(abi.NftSaleGetgems) {
+	if account.Is(abi.NftSaleV2) {
 		return GetGemsAuction
 	}
 	return BasicAuction
@@ -50,7 +50,7 @@ func FindNftPurchase(bubble *Bubble) bool {
 	if !ok {
 		return false
 	}
-	if !txBubble.account.Is(abi.NftSaleGetgems) && !txBubble.account.Is(abi.NftSale) {
+	if !txBubble.account.Is(abi.NftSale) {
 		return false
 	}
 	if txBubble.additionalInfo == nil || txBubble.additionalInfo.NftSaleContract == nil {
@@ -74,7 +74,7 @@ func FindNftPurchase(bubble *Bubble) bool {
 	if transfers != 1 {
 		return false
 	}
-	if txBubble.account.Is(abi.NftSaleGetgems) {
+	if txBubble.account.Is(abi.NftSaleV2) {
 		if !getGemsOpCodeOK(txBubble.opCode) {
 			return false
 		}

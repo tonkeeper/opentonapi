@@ -21,7 +21,6 @@ type Bubble struct {
 }
 
 // ContractDeployment holds information about initialization of a contract.
-// TODO: should ContractDeployment contains LT/time of a deployment so we can sort several ContractDeploy actions?
 type ContractDeployment struct {
 	//// initInterfaces is a list of interfaces implemented by the code of stateInit.
 	initInterfaces []abi.ContractInterface

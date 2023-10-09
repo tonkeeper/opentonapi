@@ -1,9 +1,11 @@
 package g
 
-func ToStrings[T ~string](ts []T) []string {
+import "fmt"
+
+func ToStrings[T fmt.Stringer](ts []T) []string {
 	result := make([]string, 0, len(ts))
 	for _, t := range ts {
-		result = append(result, string(t))
+		result = append(result, t.String())
 	}
 	return result
 }

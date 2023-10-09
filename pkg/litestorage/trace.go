@@ -150,7 +150,7 @@ func (s *LiteStorage) getAccountInterfaces(ctx context.Context, id tongo.Account
 	if err != nil {
 		return nil, err
 	}
-	interfaces = cd.ImplementedInterfaces()
+	interfaces = cd.ContractInterfaces
 	s.accountInterfacesCache.Store(id, interfaces)
 	return interfaces, nil
 }

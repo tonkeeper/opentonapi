@@ -44,7 +44,7 @@ func FindTFNominatorAction(bubble *Bubble) bool {
 	if bubbleTx.opCode == nil {
 		return false
 	}
-	if !bubbleTx.account.Is(abi.TfNominator) {
+	if !bubbleTx.account.Is(abi.TvPool) {
 		return false
 	}
 	if bubbleTx.inputFrom == nil {

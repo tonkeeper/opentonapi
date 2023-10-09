@@ -46,7 +46,7 @@ func FindAuctionBidFragmentSimple(bubble *Bubble) bool {
 	if !ok {
 		return false
 	}
-	if !txBubble.account.Is(abi.Telemint) {
+	if !txBubble.account.Is(abi.Teleitem) {
 		return false
 	}
 	if txBubble.opCode != nil {

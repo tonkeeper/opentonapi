@@ -3,7 +3,6 @@ package bath
 import (
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
-	"golang.org/x/exp/slices"
 )
 
 type Account struct {
@@ -19,5 +18,10 @@ func (a *Account) Addr() *tongo.AccountID {
 }
 
 func (a Account) Is(i abi.ContractInterface) bool {
-	return slices.Contains(a.Interfaces, i)
+	for _, iface := range a.Interfaces {
+		if iface.Implements(i) {
+			return true
+		}
+	}
+	return false
 }

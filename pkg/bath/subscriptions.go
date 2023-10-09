@@ -63,7 +63,7 @@ func FindInitialSubscription(bubble *Bubble) bool {
 func FindExtendedSubscription(bubble *Bubble) bool {
 	txBubble, ok := bubble.Info.(BubbleTx)
 	if !ok ||
-		!txBubble.account.Is(abi.Subscription) ||
+		!txBubble.account.Is(abi.SubscriptionV1) ||
 		len(bubble.Children) != 1 ||
 		len(bubble.Children[0].Children) != 1 {
 		return false

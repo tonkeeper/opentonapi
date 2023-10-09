@@ -39,7 +39,7 @@
      },
      {
        "JettonTransfer": {
-         "Comment": "Call: 0x45078540",
+         "Comment": "Call: StonfiSwapOkRef",
          "EncryptedComment": null,
          "Jetton": "0:d0a1ce4cdc187c79615ea618bd6c29617af7a56d966f5a192a768f345ee63fd2",
          "Recipient": "0:6c8eef549f003f4f421d009aede507e3f7535667b639e98fd09b55c8fc0e23cb",
@@ -65,7 +65,7 @@
      },
      {
        "JettonTransfer": {
-         "Comment": "Call: 0xc64370e5",
+         "Comment": "Call: StonfiSwapOk",
          "EncryptedComment": null,
          "Jetton": "0:d0a1ce4cdc187c79615ea618bd6c29617af7a56d966f5a192a768f345ee63fd2",
          "Recipient": "0:2cf3b5b8c891e517c9addbda1c0386a09ccacbb0e3faf630b51cfc8152325acb",

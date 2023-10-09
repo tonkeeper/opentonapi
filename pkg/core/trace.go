@@ -74,7 +74,7 @@ func isDestinationJettonWallet(inMsg *Message) bool {
 
 func hasInterface(interfacesList []abi.ContractInterface, name abi.ContractInterface) bool {
 	for _, iface := range interfacesList {
-		if iface == name {
+		if iface.Implements(name) {
 			return true
 		}
 	}
@@ -103,10 +103,10 @@ func CollectAdditionalInfo(ctx context.Context, infoSource InformationSource, tr
 		if isDestinationJettonWallet(trace.InMsg) {
 			jettonWallets = append(jettonWallets, *trace.InMsg.Destination)
 		}
-		if hasInterface(trace.AccountInterfaces, abi.NftSaleGetgems) {
+		if hasInterface(trace.AccountInterfaces, abi.NftSaleV2) {
 			getGemsContracts = append(getGemsContracts, trace.Account)
 		}
-		if hasInterface(trace.AccountInterfaces, abi.NftSale) {
+		if hasInterface(trace.AccountInterfaces, abi.NftSaleV1) {
 			basicNftSale = append(basicNftSale, trace.Account)
 		}
 		if hasInterface(trace.AccountInterfaces, abi.StonfiPool) {
@@ -140,12 +140,12 @@ func CollectAdditionalInfo(ctx context.Context, infoSource InformationSource, tr
 				trace.AdditionalInfo.JettonMaster = &master
 			}
 		}
-		if hasInterface(trace.AccountInterfaces, abi.NftSaleGetgems) {
+		if hasInterface(trace.AccountInterfaces, abi.NftSaleV2) {
 			if getgems, ok := getGems[trace.Account]; ok {
 				trace.AdditionalInfo.NftSaleContract = &getgems
 			}
 		}
-		if hasInterface(trace.AccountInterfaces, abi.NftSale) {
+		if hasInterface(trace.AccountInterfaces, abi.NftSaleV1) {
 			if sale, ok := basicNftSales[trace.Account]; ok {
 				trace.AdditionalInfo.NftSaleContract = &sale
 			}
