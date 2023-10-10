@@ -208,6 +208,9 @@ var DepositLiquidStakeStraw = Straw[BubbleDepositStake]{
 		newAction.Pool = tx.account.Address
 		newAction.Staker = tx.inputFrom.Address
 		newAction.Amount = tx.inputAmount - int64(ton.OneTON)
+		if newAction.Amount < 0 {
+			newAction.Amount = 0
+		}
 		newAction.Success = tx.success
 		newAction.Implementation = core.StakingImplementationLiquidTF
 		return nil
