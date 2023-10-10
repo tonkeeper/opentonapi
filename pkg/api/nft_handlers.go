@@ -12,7 +12,7 @@ import (
 	"github.com/tonkeeper/opentonapi/pkg/oas"
 )
 
-func (h Handler) GetNftItemsByAddresses(ctx context.Context, request oas.OptGetNftItemsByAddressesReq) (*oas.NftItems, error) {
+func (h *Handler) GetNftItemsByAddresses(ctx context.Context, request oas.OptGetNftItemsByAddressesReq) (*oas.NftItems, error) {
 	if len(request.Value.AccountIds) == 0 {
 		return nil, toError(http.StatusBadRequest, fmt.Errorf("empty list of ids"))
 	}
@@ -38,7 +38,7 @@ func (h Handler) GetNftItemsByAddresses(ctx context.Context, request oas.OptGetN
 	return &result, nil
 }
 
-func (h Handler) GetNftItemByAddress(ctx context.Context, params oas.GetNftItemByAddressParams) (*oas.NftItem, error) {
+func (h *Handler) GetNftItemByAddress(ctx context.Context, params oas.GetNftItemByAddressParams) (*oas.NftItem, error) {
 	accountID, err := tongo.ParseAccountID(params.AccountID)
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
@@ -54,7 +54,7 @@ func (h Handler) GetNftItemByAddress(ctx context.Context, params oas.GetNftItemB
 	return &result, nil
 }
 
-func (h Handler) GetAccountNftItems(ctx context.Context, params oas.GetAccountNftItemsParams) (*oas.NftItems, error) {
+func (h *Handler) GetAccountNftItems(ctx context.Context, params oas.GetAccountNftItemsParams) (*oas.NftItems, error) {
 	accountID, err := tongo.ParseAccountID(params.AccountID)
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
@@ -91,7 +91,7 @@ func (h Handler) GetAccountNftItems(ctx context.Context, params oas.GetAccountNf
 	return &result, nil
 }
 
-func (h Handler) GetNftCollections(ctx context.Context, params oas.GetNftCollectionsParams) (*oas.NftCollections, error) {
+func (h *Handler) GetNftCollections(ctx context.Context, params oas.GetNftCollectionsParams) (*oas.NftCollections, error) {
 	collections, err := h.storage.GetNftCollections(ctx, &params.Limit.Value, &params.Offset.Value)
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
@@ -104,7 +104,7 @@ func (h Handler) GetNftCollections(ctx context.Context, params oas.GetNftCollect
 	return &collectionsRes, nil
 }
 
-func (h Handler) GetNftCollection(ctx context.Context, params oas.GetNftCollectionParams) (*oas.NftCollection, error) {
+func (h *Handler) GetNftCollection(ctx context.Context, params oas.GetNftCollectionParams) (*oas.NftCollection, error) {
 	accountID, err := tongo.ParseAccountID(params.AccountID)
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
@@ -120,7 +120,7 @@ func (h Handler) GetNftCollection(ctx context.Context, params oas.GetNftCollecti
 	return &col, nil
 }
 
-func (h Handler) GetItemsFromCollection(ctx context.Context, params oas.GetItemsFromCollectionParams) (*oas.NftItems, error) {
+func (h *Handler) GetItemsFromCollection(ctx context.Context, params oas.GetItemsFromCollectionParams) (*oas.NftItems, error) {
 	accountID, err := tongo.ParseAccountID(params.AccountID)
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
@@ -142,7 +142,7 @@ func (h Handler) GetItemsFromCollection(ctx context.Context, params oas.GetItems
 	return &result, nil
 }
 
-func (h Handler) GetNftHistoryByID(ctx context.Context, params oas.GetNftHistoryByIDParams) (*oas.AccountEvents, error) {
+func (h *Handler) GetNftHistoryByID(ctx context.Context, params oas.GetNftHistoryByIDParams) (*oas.AccountEvents, error) {
 	accountID, err := tongo.ParseAccountID(params.AccountID)
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)

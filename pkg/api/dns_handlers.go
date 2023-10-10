@@ -4,9 +4,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/tonkeeper/tongo/contract/dns"
 	"net/http"
 	"strings"
+
+	"github.com/tonkeeper/tongo/contract/dns"
 
 	"github.com/tonkeeper/opentonapi/pkg/oas"
 	"github.com/tonkeeper/opentonapi/pkg/references"
@@ -14,7 +15,7 @@ import (
 	"github.com/tonkeeper/tongo/tlb"
 )
 
-func (h Handler) AccountDnsBackResolve(ctx context.Context, params oas.AccountDnsBackResolveParams) (*oas.DomainNames, error) {
+func (h *Handler) AccountDnsBackResolve(ctx context.Context, params oas.AccountDnsBackResolveParams) (*oas.DomainNames, error) {
 	accountID, err := tongo.ParseAccountID(params.AccountID)
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
@@ -51,7 +52,7 @@ func (h Handler) AccountDnsBackResolve(ctx context.Context, params oas.AccountDn
 	return &oas.DomainNames{Domains: result}, nil
 }
 
-func (h Handler) DnsResolve(ctx context.Context, params oas.DnsResolveParams) (*oas.DnsRecord, error) {
+func (h *Handler) DnsResolve(ctx context.Context, params oas.DnsResolveParams) (*oas.DnsRecord, error) {
 	if len(params.DomainName) == 48 || len(params.DomainName) == 52 {
 		return nil, toError(http.StatusBadRequest, fmt.Errorf("domains with length 48 and 52 can't be resolved by security issues"))
 	}
@@ -95,7 +96,7 @@ func (h Handler) DnsResolve(ctx context.Context, params oas.DnsResolveParams) (*
 	return &result, nil
 }
 
-func (h Handler) GetDnsInfo(ctx context.Context, params oas.GetDnsInfoParams) (*oas.DomainInfo, error) {
+func (h *Handler) GetDnsInfo(ctx context.Context, params oas.GetDnsInfoParams) (*oas.DomainInfo, error) {
 	name, err := convertDomainName(params.DomainName)
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)

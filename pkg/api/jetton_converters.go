@@ -39,7 +39,7 @@ func jettonMetadata(account tongo.AccountID, meta NormalizedMetadata) oas.Jetton
 	return metadata
 }
 
-func (h Handler) convertJettonHistory(ctx context.Context, account tongo.AccountID, master *tongo.AccountID, traceIDs []tongo.Bits256, acceptLanguage oas.OptString) ([]oas.AccountEvent, int64, error) {
+func (h *Handler) convertJettonHistory(ctx context.Context, account tongo.AccountID, master *tongo.AccountID, traceIDs []tongo.Bits256, acceptLanguage oas.OptString) ([]oas.AccountEvent, int64, error) {
 	var lastLT uint64
 	events := []oas.AccountEvent{}
 	for _, traceID := range traceIDs {

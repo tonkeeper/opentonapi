@@ -52,7 +52,7 @@ func convertTrace(t core.Trace, book addressBook) oas.Trace {
 	return trace
 }
 
-func (h Handler) convertRisk(ctx context.Context, risk wallet.Risk, walletAddress tongo.AccountID) (oas.Risk, error) {
+func (h *Handler) convertRisk(ctx context.Context, risk wallet.Risk, walletAddress tongo.AccountID) (oas.Risk, error) {
 	oasRisk := oas.Risk{
 		TransferAllRemainingBalance: risk.TransferAllRemainingBalance,
 		// TODO: verify there is no overflow
@@ -115,7 +115,7 @@ func signedValue(value string, viewer *tongo.AccountID, source, destination tong
 	return value
 }
 
-func (h Handler) convertActionTonTransfer(t *bath.TonTransferAction, acceptLanguage string, viewer *tongo.AccountID) (oas.OptTonTransferAction, oas.ActionSimplePreview, bool) {
+func (h *Handler) convertActionTonTransfer(t *bath.TonTransferAction, acceptLanguage string, viewer *tongo.AccountID) (oas.OptTonTransferAction, oas.ActionSimplePreview, bool) {
 	var spamDetected bool
 	if t.Amount < int64(ton.OneTON) && t.Comment != nil {
 		if spamAction := rules.CheckAction(h.spamFilter.GetRules(), *t.Comment); spamAction == rules.Drop {
@@ -155,7 +155,7 @@ func (h Handler) convertActionTonTransfer(t *bath.TonTransferAction, acceptLangu
 	return action, simplePreview, spamDetected
 }
 
-func (h Handler) convertActionNftTransfer(t *bath.NftTransferAction, acceptLanguage string, viewer *tongo.AccountID) (oas.OptNftItemTransferAction, oas.ActionSimplePreview, bool) {
+func (h *Handler) convertActionNftTransfer(t *bath.NftTransferAction, acceptLanguage string, viewer *tongo.AccountID) (oas.OptNftItemTransferAction, oas.ActionSimplePreview, bool) {
 	var spamDetected bool
 	if t.Comment != nil {
 		if spamAction := rules.CheckAction(h.spamFilter.GetRules(), *t.Comment); spamAction == rules.Drop {
@@ -184,7 +184,7 @@ func (h Handler) convertActionNftTransfer(t *bath.NftTransferAction, acceptLangu
 	return action, simplePreview, spamDetected
 }
 
-func (h Handler) convertActionJettonTransfer(ctx context.Context, t *bath.JettonTransferAction, acceptLanguage string, viewer *tongo.AccountID) (oas.OptJettonTransferAction, oas.ActionSimplePreview, bool) {
+func (h *Handler) convertActionJettonTransfer(ctx context.Context, t *bath.JettonTransferAction, acceptLanguage string, viewer *tongo.AccountID) (oas.OptJettonTransferAction, oas.ActionSimplePreview, bool) {
 	var spamDetected bool
 	if t.Comment != nil {
 		if spamAction := rules.CheckAction(h.spamFilter.GetRules(), *t.Comment); spamAction == rules.Drop {
@@ -226,7 +226,7 @@ func (h Handler) convertActionJettonTransfer(ctx context.Context, t *bath.Jetton
 	return action, simplePreview, spamDetected
 }
 
-func (h Handler) convertActionJettonMint(ctx context.Context, m *bath.JettonMintAction, acceptLanguage string, viewer *tongo.AccountID) (oas.OptJettonMintAction, oas.ActionSimplePreview) {
+func (h *Handler) convertActionJettonMint(ctx context.Context, m *bath.JettonMintAction, acceptLanguage string, viewer *tongo.AccountID) (oas.OptJettonMintAction, oas.ActionSimplePreview) {
 	meta := h.GetJettonNormalizedMetadata(ctx, m.Jetton)
 	preview := jettonPreview(m.Jetton, meta)
 	var action oas.OptJettonMintAction
@@ -259,7 +259,7 @@ func (h Handler) convertActionJettonMint(ctx context.Context, m *bath.JettonMint
 	return action, simplePreview
 }
 
-func (h Handler) convertDepositStake(d *bath.DepositStakeAction, acceptLanguage string, viewer *tongo.AccountID) (oas.OptDepositStakeAction, oas.ActionSimplePreview) {
+func (h *Handler) convertDepositStake(d *bath.DepositStakeAction, acceptLanguage string, viewer *tongo.AccountID) (oas.OptDepositStakeAction, oas.ActionSimplePreview) {
 	var action oas.OptDepositStakeAction
 	action.SetTo(oas.DepositStakeAction{
 		Amount:         d.Amount,
@@ -284,7 +284,7 @@ func (h Handler) convertDepositStake(d *bath.DepositStakeAction, acceptLanguage 
 	return action, simplePreview
 }
 
-func (h Handler) convertWithdrawStakeRequest(d *bath.WithdrawStakeRequestAction, acceptLanguage string, viewer *tongo.AccountID) (oas.OptWithdrawStakeRequestAction, oas.ActionSimplePreview) {
+func (h *Handler) convertWithdrawStakeRequest(d *bath.WithdrawStakeRequestAction, acceptLanguage string, viewer *tongo.AccountID) (oas.OptWithdrawStakeRequestAction, oas.ActionSimplePreview) {
 	var action oas.OptWithdrawStakeRequestAction
 	action.SetTo(oas.WithdrawStakeRequestAction{
 		Amount:         g.Opt(d.Amount),
@@ -314,7 +314,7 @@ func (h Handler) convertWithdrawStakeRequest(d *bath.WithdrawStakeRequestAction,
 	return action, simplePreview
 }
 
-func (h Handler) convertWithdrawStake(d *bath.WithdrawStakeAction, acceptLanguage string, viewer *tongo.AccountID) (oas.OptWithdrawStakeAction, oas.ActionSimplePreview) {
+func (h *Handler) convertWithdrawStake(d *bath.WithdrawStakeAction, acceptLanguage string, viewer *tongo.AccountID) (oas.OptWithdrawStakeAction, oas.ActionSimplePreview) {
 	var action oas.OptWithdrawStakeAction
 	action.SetTo(oas.WithdrawStakeAction{
 		Amount:         d.Amount,
@@ -337,7 +337,7 @@ func (h Handler) convertWithdrawStake(d *bath.WithdrawStakeAction, acceptLanguag
 	return action, simplePreview
 }
 
-func (h Handler) convertAction(ctx context.Context, viewer *tongo.AccountID, a bath.Action, acceptLanguage oas.OptString) (oas.Action, bool, error) {
+func (h *Handler) convertAction(ctx context.Context, viewer *tongo.AccountID, a bath.Action, acceptLanguage oas.OptString) (oas.Action, bool, error) {
 	action := oas.Action{
 		Type: oas.ActionType(a.Type),
 	}
@@ -675,7 +675,7 @@ func convertAccountValueFlow(accountID tongo.AccountID, flow *bath.AccountValueF
 	return valueFlow
 }
 
-func (h Handler) toEvent(ctx context.Context, trace *core.Trace, result *bath.ActionsList, lang oas.OptString) (oas.Event, error) {
+func (h *Handler) toEvent(ctx context.Context, trace *core.Trace, result *bath.ActionsList, lang oas.OptString) (oas.Event, error) {
 	event := oas.Event{
 		EventID:    trace.Hash.Hex(),
 		Timestamp:  trace.Utime,
@@ -710,7 +710,7 @@ func (h Handler) toEvent(ctx context.Context, trace *core.Trace, result *bath.Ac
 	return event, nil
 }
 
-func (h Handler) toAccountEvent(ctx context.Context, account tongo.AccountID, trace *core.Trace, result *bath.ActionsList, lang oas.OptString, subjectOnly bool) (oas.AccountEvent, error) {
+func (h *Handler) toAccountEvent(ctx context.Context, account tongo.AccountID, trace *core.Trace, result *bath.ActionsList, lang oas.OptString, subjectOnly bool) (oas.AccountEvent, error) {
 	e := oas.AccountEvent{
 		EventID:    trace.Hash.Hex(),
 		Account:    convertAccountAddress(account, h.addressBook),

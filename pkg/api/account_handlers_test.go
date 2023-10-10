@@ -3,8 +3,9 @@ package api
 import (
 	"context"
 	"fmt"
-	"github.com/tonkeeper/opentonapi/pkg/chainstate"
 	"testing"
+
+	"github.com/tonkeeper/opentonapi/pkg/chainstate"
 
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
@@ -126,7 +127,7 @@ func TestHandler_GetAccounts(t *testing.T) {
 
 			liteStorage, err := litestorage.NewLiteStorage(logger)
 			require.Nil(t, err)
-			h := Handler{
+			h := &Handler{
 				addressBook: addressbook.NewAddressBook(logger, config.AddressPath, config.JettonPath, config.CollectionPath),
 				storage:     liteStorage,
 				state:       chainstate.NewChainState(liteStorage),

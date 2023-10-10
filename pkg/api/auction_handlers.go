@@ -8,7 +8,7 @@ import (
 	"github.com/tonkeeper/opentonapi/pkg/oas"
 )
 
-func (h Handler) GetAllAuctions(ctx context.Context, params oas.GetAllAuctionsParams) (*oas.Auctions, error) {
+func (h *Handler) GetAllAuctions(ctx context.Context, params oas.GetAllAuctionsParams) (*oas.Auctions, error) {
 	auctions, err := h.storage.GetAllAuctions(ctx)
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
@@ -34,7 +34,7 @@ func (h Handler) GetAllAuctions(ctx context.Context, params oas.GetAllAuctionsPa
 	return &auctionsRes, nil
 }
 
-func (h Handler) GetDomainBids(ctx context.Context, params oas.GetDomainBidsParams) (*oas.DomainBids, error) {
+func (h *Handler) GetDomainBids(ctx context.Context, params oas.GetDomainBidsParams) (*oas.DomainBids, error) {
 	domain := strings.ToLower(params.DomainName)
 	bids, err := h.storage.GetDomainBids(ctx, strings.TrimSuffix(domain, ".ton"))
 	if err != nil {
