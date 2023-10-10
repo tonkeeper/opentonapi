@@ -12,7 +12,6 @@ import (
 	"github.com/tonkeeper/opentonapi/internal/g"
 
 	"github.com/tonkeeper/opentonapi/pkg/addressbook"
-	rules "github.com/tonkeeper/scam_backoffice_rules"
 	"github.com/tonkeeper/tongo/code"
 	"github.com/tonkeeper/tongo/utils"
 
@@ -192,7 +191,7 @@ func (h Handler) SearchAccounts(ctx context.Context, params oas.SearchAccountsPa
 			continue
 		}
 		if account.Symbol != "" {
-			if h.spamFilter.CheckJettonAction(accountID, account.Symbol) == rules.Drop {
+			if h.spamFilter.IsJettonBlacklisted(accountID, account.Symbol) {
 				continue
 			}
 		}

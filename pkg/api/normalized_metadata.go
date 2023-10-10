@@ -1,13 +1,13 @@
 package api
 
 import (
-	imgGenerator "github.com/tonkeeper/opentonapi/pkg/image"
 	"math/big"
 	"strconv"
 	"strings"
 
 	"github.com/shopspring/decimal"
 	"github.com/tonkeeper/opentonapi/pkg/addressbook"
+	imgGenerator "github.com/tonkeeper/opentonapi/pkg/image"
 	"github.com/tonkeeper/opentonapi/pkg/references"
 	"github.com/tonkeeper/tongo/tep64"
 	"github.com/tonkeeper/tongo/tlb"
@@ -19,6 +19,7 @@ type VerificationType string
 
 const (
 	VerificationWhitelist VerificationType = "whitelist"
+	VerificationBlacklist VerificationType = "blacklist"
 	VerificationNone      VerificationType = "none"
 )
 
@@ -38,8 +39,11 @@ type NormalizedMetadata struct {
 	Websites     []string
 }
 
-func NormalizeMetadata(meta tep64.Metadata, info *addressbook.KnownJetton) NormalizedMetadata {
+func NormalizeMetadata(meta tep64.Metadata, info *addressbook.KnownJetton, isBlacklisted bool) NormalizedMetadata {
 	verification := VerificationNone
+	if isBlacklisted {
+		verification = VerificationBlacklist
+	}
 	name := meta.Name
 	if name == "" {
 		name = "Unknown Token"

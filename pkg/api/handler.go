@@ -168,9 +168,8 @@ func NewHandler(logger *zap.Logger, opts ...Option) (*Handler, error) {
 func (h Handler) GetJettonNormalizedMetadata(ctx context.Context, master tongo.AccountID) NormalizedMetadata {
 	meta, _ := h.metaCache.getJettonMeta(ctx, master)
 	// TODO: should we ignore the second returned value?
-	info, ok := h.addressBook.GetJettonInfoByAddress(master)
-	if ok {
-		return NormalizeMetadata(meta, &info)
+	if info, ok := h.addressBook.GetJettonInfoByAddress(master); ok {
+		return NormalizeMetadata(meta, &info, false)
 	}
-	return NormalizeMetadata(meta, nil)
+	return NormalizeMetadata(meta, nil, h.spamFilter.IsJettonBlacklisted(master, meta.Symbol))
 }
