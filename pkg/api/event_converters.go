@@ -421,7 +421,7 @@ func (h Handler) convertAction(ctx context.Context, viewer *tongo.AccountID, a b
 	case bath.ContractDeploy:
 		interfaces := make([]string, 0, len(a.ContractDeploy.Interfaces))
 		for _, iface := range a.ContractDeploy.Interfaces {
-			interfaces = append(interfaces, string(iface))
+			interfaces = append(interfaces, iface.String())
 		}
 		action.ContractDeploy.SetTo(oas.ContractDeployAction{
 			Address:    a.ContractDeploy.Address.ToRaw(),
