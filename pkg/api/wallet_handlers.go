@@ -7,11 +7,12 @@ import (
 	"encoding/base64"
 	"encoding/hex"
 	"fmt"
-	"github.com/tonkeeper/tongo/ton"
 	"io"
 	"net/http"
 	"os"
 	"time"
+
+	"github.com/tonkeeper/tongo/ton"
 
 	"github.com/tonkeeper/opentonapi/pkg/oas"
 	"github.com/tonkeeper/opentonapi/pkg/wallet"
@@ -21,7 +22,7 @@ import (
 	tongoWallet "github.com/tonkeeper/tongo/wallet"
 )
 
-func (h Handler) SetWalletBackup(ctx context.Context, request oas.SetWalletBackupReq, params oas.SetWalletBackupParams) error {
+func (h *Handler) SetWalletBackup(ctx context.Context, request oas.SetWalletBackupReq, params oas.SetWalletBackupParams) error {
 	pubKey, verify, err := checkTonConnectToken(params.XTonConnectAuth, h.tonConnect.GetSecret())
 	if err != nil {
 		return toError(http.StatusBadRequest, err)
@@ -57,7 +58,7 @@ func (h Handler) SetWalletBackup(ctx context.Context, request oas.SetWalletBacku
 	return nil
 }
 
-func (h Handler) GetWalletBackup(ctx context.Context, params oas.GetWalletBackupParams) (*oas.GetWalletBackupOK, error) {
+func (h *Handler) GetWalletBackup(ctx context.Context, params oas.GetWalletBackupParams) (*oas.GetWalletBackupOK, error) {
 	pubKey, verify, err := checkTonConnectToken(params.XTonConnectAuth, h.tonConnect.GetSecret())
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
@@ -121,7 +122,7 @@ func getTotalBalances(ctx context.Context, storage storage, pubKey []byte) (int6
 	return balance, nil
 }
 
-func (h Handler) GetWalletsByPublicKey(ctx context.Context, params oas.GetWalletsByPublicKeyParams) (*oas.Accounts, error) {
+func (h *Handler) GetWalletsByPublicKey(ctx context.Context, params oas.GetWalletsByPublicKeyParams) (*oas.Accounts, error) {
 	publicKey, err := hex.DecodeString(params.PublicKey)
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
@@ -148,7 +149,7 @@ func (h Handler) GetWalletsByPublicKey(ctx context.Context, params oas.GetWallet
 	return &oas.Accounts{Accounts: results}, nil
 }
 
-func (h Handler) GetAccountSeqno(ctx context.Context, params oas.GetAccountSeqnoParams) (*oas.Seqno, error) {
+func (h *Handler) GetAccountSeqno(ctx context.Context, params oas.GetAccountSeqnoParams) (*oas.Seqno, error) {
 	accountID, err := tongo.ParseAccountID(params.AccountID)
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)

@@ -20,7 +20,7 @@ import (
 	"github.com/tonkeeper/opentonapi/pkg/references"
 )
 
-func (h Handler) GetStakingPoolInfo(ctx context.Context, params oas.GetStakingPoolInfoParams) (*oas.GetStakingPoolInfoOK, error) {
+func (h *Handler) GetStakingPoolInfo(ctx context.Context, params oas.GetStakingPoolInfoParams) (*oas.GetStakingPoolInfoOK, error) {
 	poolID, err := tongo.ParseAccountID(params.AccountID)
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
@@ -84,7 +84,7 @@ func (h Handler) GetStakingPoolInfo(ctx context.Context, params oas.GetStakingPo
 	}, nil
 }
 
-func (h Handler) GetStakingPools(ctx context.Context, params oas.GetStakingPoolsParams) (*oas.GetStakingPoolsOK, error) {
+func (h *Handler) GetStakingPools(ctx context.Context, params oas.GetStakingPoolsParams) (*oas.GetStakingPoolsOK, error) {
 	var result oas.GetStakingPoolsOK
 	tfPools, err := h.storage.GetTFPools(ctx, !params.IncludeUnverified.Value)
 	if err != nil {
@@ -197,7 +197,7 @@ func (h Handler) GetStakingPools(ctx context.Context, params oas.GetStakingPools
 	return &result, nil
 }
 
-func (h Handler) GetAccountNominatorsPools(ctx context.Context, params oas.GetAccountNominatorsPoolsParams) (*oas.AccountStaking, error) {
+func (h *Handler) GetAccountNominatorsPools(ctx context.Context, params oas.GetAccountNominatorsPoolsParams) (*oas.AccountStaking, error) {
 	accountID, err := tongo.ParseAccountID(params.AccountID)
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
@@ -258,7 +258,7 @@ func (h Handler) GetAccountNominatorsPools(ctx context.Context, params oas.GetAc
 	return &result, nil
 }
 
-func (h Handler) GetStakingPoolHistory(ctx context.Context, params oas.GetStakingPoolHistoryParams) (*oas.GetStakingPoolHistoryOK, error) {
+func (h *Handler) GetStakingPoolHistory(ctx context.Context, params oas.GetStakingPoolHistoryParams) (*oas.GetStakingPoolHistoryOK, error) {
 	poolID, err := tongo.ParseAccountID(params.AccountID)
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)

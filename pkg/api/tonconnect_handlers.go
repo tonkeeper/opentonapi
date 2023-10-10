@@ -16,7 +16,7 @@ import (
 	"github.com/tonkeeper/tongo/tonconnect"
 )
 
-func (h Handler) GetTonConnectPayload(ctx context.Context) (*oas.GetTonConnectPayloadOK, error) {
+func (h *Handler) GetTonConnectPayload(ctx context.Context) (*oas.GetTonConnectPayloadOK, error) {
 	payload, err := h.tonConnect.GeneratePayload()
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
@@ -24,7 +24,7 @@ func (h Handler) GetTonConnectPayload(ctx context.Context) (*oas.GetTonConnectPa
 	return &oas.GetTonConnectPayloadOK{Payload: payload}, nil
 }
 
-func (h Handler) TonConnectProof(ctx context.Context, request *oas.TonConnectProofReq) (*oas.TonConnectProofOK, error) {
+func (h *Handler) TonConnectProof(ctx context.Context, request *oas.TonConnectProofReq) (*oas.TonConnectProofOK, error) {
 	proof := tonconnect.Proof{
 		Address: request.Address,
 		Proof: tonconnect.ProofData{
@@ -49,7 +49,7 @@ func (h Handler) TonConnectProof(ctx context.Context, request *oas.TonConnectPro
 	return &oas.TonConnectProofOK{Token: signedToken}, nil
 }
 
-func (h Handler) GetAccountInfoByStateInit(ctx context.Context, request *oas.GetAccountInfoByStateInitReq) (*oas.AccountInfoByStateInit, error) {
+func (h *Handler) GetAccountInfoByStateInit(ctx context.Context, request *oas.GetAccountInfoByStateInitReq) (*oas.AccountInfoByStateInit, error) {
 	pubKey, err := tonconnect.ParseStateInit(request.StateInit)
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)

@@ -26,7 +26,7 @@ import (
 	"github.com/tonkeeper/opentonapi/pkg/wallet"
 )
 
-func (h Handler) SendBlockchainMessage(ctx context.Context, request *oas.SendBlockchainMessageReq) error {
+func (h *Handler) SendBlockchainMessage(ctx context.Context, request *oas.SendBlockchainMessageReq) error {
 	if h.msgSender == nil {
 		return toError(http.StatusBadRequest, fmt.Errorf("msg sender is not configured"))
 	}
@@ -67,7 +67,7 @@ func (h Handler) SendBlockchainMessage(ctx context.Context, request *oas.SendBlo
 	return nil
 }
 
-func (h Handler) getTraceByHash(ctx context.Context, hash tongo.Bits256) (*core.Trace, error) {
+func (h *Handler) getTraceByHash(ctx context.Context, hash tongo.Bits256) (*core.Trace, error) {
 	trace, err := h.storage.GetTrace(ctx, hash)
 	if err == nil || !errors.Is(err, core.ErrEntityNotFound) {
 		return trace, err
@@ -86,7 +86,7 @@ func (h Handler) getTraceByHash(ctx context.Context, hash tongo.Bits256) (*core.
 	return nil, core.ErrEntityNotFound
 }
 
-func (h Handler) GetTrace(ctx context.Context, params oas.GetTraceParams) (*oas.Trace, error) {
+func (h *Handler) GetTrace(ctx context.Context, params oas.GetTraceParams) (*oas.Trace, error) {
 	hash, err := tongo.ParseHash(params.TraceID)
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
@@ -102,7 +102,7 @@ func (h Handler) GetTrace(ctx context.Context, params oas.GetTraceParams) (*oas.
 	return &convertedTrace, nil
 }
 
-func (h Handler) GetEvent(ctx context.Context, params oas.GetEventParams) (*oas.Event, error) {
+func (h *Handler) GetEvent(ctx context.Context, params oas.GetEventParams) (*oas.Event, error) {
 	traceID, err := tongo.ParseHash(params.EventID)
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
@@ -125,7 +125,7 @@ func (h Handler) GetEvent(ctx context.Context, params oas.GetEventParams) (*oas.
 	return &event, nil
 }
 
-func (h Handler) GetAccountEvents(ctx context.Context, params oas.GetAccountEventsParams) (*oas.AccountEvents, error) {
+func (h *Handler) GetAccountEvents(ctx context.Context, params oas.GetAccountEventsParams) (*oas.AccountEvents, error) {
 	accountID, err := tongo.ParseAccountID(params.AccountID)
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
@@ -196,7 +196,7 @@ func (h Handler) GetAccountEvents(ctx context.Context, params oas.GetAccountEven
 	return &oas.AccountEvents{Events: events, NextFrom: int64(lastLT)}, nil
 }
 
-func (h Handler) GetAccountEvent(ctx context.Context, params oas.GetAccountEventParams) (*oas.AccountEvent, error) {
+func (h *Handler) GetAccountEvent(ctx context.Context, params oas.GetAccountEventParams) (*oas.AccountEvent, error) {
 	accountID, err := tongo.ParseAccountID(params.AccountID)
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
@@ -223,7 +223,7 @@ func (h Handler) GetAccountEvent(ctx context.Context, params oas.GetAccountEvent
 	return &event, nil
 }
 
-func (h Handler) EmulateMessageToAccountEvent(ctx context.Context, request *oas.EmulateMessageToAccountEventReq, params oas.EmulateMessageToAccountEventParams) (*oas.AccountEvent, error) {
+func (h *Handler) EmulateMessageToAccountEvent(ctx context.Context, request *oas.EmulateMessageToAccountEventReq, params oas.EmulateMessageToAccountEventParams) (*oas.AccountEvent, error) {
 	c, err := boc.DeserializeSinglRootBase64(request.Boc)
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
@@ -267,7 +267,7 @@ func (h Handler) EmulateMessageToAccountEvent(ctx context.Context, request *oas.
 	return &event, nil
 }
 
-func (h Handler) EmulateMessageToEvent(ctx context.Context, request *oas.EmulateMessageToEventReq, params oas.EmulateMessageToEventParams) (*oas.Event, error) {
+func (h *Handler) EmulateMessageToEvent(ctx context.Context, request *oas.EmulateMessageToEventReq, params oas.EmulateMessageToEventParams) (*oas.Event, error) {
 	c, err := boc.DeserializeSinglRootBase64(request.Boc)
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
@@ -307,7 +307,7 @@ func (h Handler) EmulateMessageToEvent(ctx context.Context, request *oas.Emulate
 	return &event, nil
 }
 
-func (h Handler) EmulateMessageToTrace(ctx context.Context, request *oas.EmulateMessageToTraceReq) (*oas.Trace, error) {
+func (h *Handler) EmulateMessageToTrace(ctx context.Context, request *oas.EmulateMessageToTraceReq) (*oas.Trace, error) {
 	c, err := boc.DeserializeSinglRootBase64(request.Boc)
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
@@ -354,7 +354,7 @@ func extractDestinationWallet(message tlb.Message) (*tongo.AccountID, error) {
 	return accountID, nil
 }
 
-func (h Handler) EmulateMessageToWallet(ctx context.Context, request *oas.EmulateMessageToWalletReq, params oas.EmulateMessageToWalletParams) (*oas.MessageConsequences, error) {
+func (h *Handler) EmulateMessageToWallet(ctx context.Context, request *oas.EmulateMessageToWalletReq, params oas.EmulateMessageToWalletParams) (*oas.MessageConsequences, error) {
 	msgCell, err := boc.DeserializeSinglRootBase64(request.Boc)
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
@@ -426,7 +426,7 @@ func (h Handler) EmulateMessageToWallet(ctx context.Context, request *oas.Emulat
 	return &consequences, nil
 }
 
-func (h Handler) addToMempool(bytesBoc []byte, shardAccount map[tongo.AccountID]tlb.ShardAccount) (map[tongo.AccountID]tlb.ShardAccount, error) {
+func (h *Handler) addToMempool(bytesBoc []byte, shardAccount map[tongo.AccountID]tlb.ShardAccount) (map[tongo.AccountID]tlb.ShardAccount, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 	if shardAccount == nil {

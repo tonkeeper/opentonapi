@@ -165,7 +165,7 @@ func NewHandler(logger *zap.Logger, opts ...Option) (*Handler, error) {
 	}, nil
 }
 
-func (h Handler) GetJettonNormalizedMetadata(ctx context.Context, master tongo.AccountID) NormalizedMetadata {
+func (h *Handler) GetJettonNormalizedMetadata(ctx context.Context, master tongo.AccountID) NormalizedMetadata {
 	meta, _ := h.metaCache.getJettonMeta(ctx, master)
 	// TODO: should we ignore the second returned value?
 	if info, ok := h.addressBook.GetJettonInfoByAddress(master); ok {

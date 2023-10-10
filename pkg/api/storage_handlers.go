@@ -7,7 +7,7 @@ import (
 	"github.com/tonkeeper/opentonapi/pkg/oas"
 )
 
-func (h Handler) GetStorageProviders(ctx context.Context) (*oas.GetStorageProvidersOK, error) {
+func (h *Handler) GetStorageProviders(ctx context.Context) (*oas.GetStorageProvidersOK, error) {
 	providers, err := h.storage.GetStorageProviders(ctx)
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)

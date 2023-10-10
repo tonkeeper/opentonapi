@@ -15,7 +15,7 @@ import (
 	"github.com/tonkeeper/opentonapi/pkg/oas"
 )
 
-func (h Handler) GetAccountJettonsBalances(ctx context.Context, params oas.GetAccountJettonsBalancesParams) (*oas.JettonsBalances, error) {
+func (h *Handler) GetAccountJettonsBalances(ctx context.Context, params oas.GetAccountJettonsBalancesParams) (*oas.JettonsBalances, error) {
 	accountID, err := tongo.ParseAccountID(params.AccountID)
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
@@ -61,7 +61,7 @@ func (h Handler) GetAccountJettonsBalances(ctx context.Context, params oas.GetAc
 	return &balances, nil
 }
 
-func (h Handler) GetJettonInfo(ctx context.Context, params oas.GetJettonInfoParams) (*oas.JettonInfo, error) {
+func (h *Handler) GetJettonInfo(ctx context.Context, params oas.GetJettonInfoParams) (*oas.JettonInfo, error) {
 	accountID, err := tongo.ParseAccountID(params.AccountID)
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
@@ -86,7 +86,7 @@ func (h Handler) GetJettonInfo(ctx context.Context, params oas.GetJettonInfoPara
 	}, nil
 }
 
-func (h Handler) GetAccountJettonsHistory(ctx context.Context, params oas.GetAccountJettonsHistoryParams) (*oas.AccountEvents, error) {
+func (h *Handler) GetAccountJettonsHistory(ctx context.Context, params oas.GetAccountJettonsHistoryParams) (*oas.AccountEvents, error) {
 	accountID, err := tongo.ParseAccountID(params.AccountID)
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
@@ -102,7 +102,7 @@ func (h Handler) GetAccountJettonsHistory(ctx context.Context, params oas.GetAcc
 	return &oas.AccountEvents{Events: events, NextFrom: lastLT}, nil
 }
 
-func (h Handler) GetAccountJettonHistoryByID(ctx context.Context, params oas.GetAccountJettonHistoryByIDParams) (*oas.AccountEvents, error) {
+func (h *Handler) GetAccountJettonHistoryByID(ctx context.Context, params oas.GetAccountJettonHistoryByIDParams) (*oas.AccountEvents, error) {
 	accountID, err := tongo.ParseAccountID(params.AccountID)
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
@@ -125,7 +125,7 @@ func (h Handler) GetAccountJettonHistoryByID(ctx context.Context, params oas.Get
 	return &oas.AccountEvents{Events: events, NextFrom: lastLT}, nil
 }
 
-func (h Handler) GetJettons(ctx context.Context, params oas.GetJettonsParams) (*oas.Jettons, error) {
+func (h *Handler) GetJettons(ctx context.Context, params oas.GetJettonsParams) (*oas.Jettons, error) {
 	limit := 1000
 	offset := 0
 	if params.Limit.IsSet() {
@@ -173,7 +173,7 @@ func (h Handler) GetJettons(ctx context.Context, params oas.GetJettonsParams) (*
 	}, nil
 }
 
-func (h Handler) GetJettonHolders(ctx context.Context, params oas.GetJettonHoldersParams) (*oas.JettonHolders, error) {
+func (h *Handler) GetJettonHolders(ctx context.Context, params oas.GetJettonHoldersParams) (*oas.JettonHolders, error) {
 	accountID, err := tongo.ParseAccountID(params.AccountID)
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
@@ -193,7 +193,7 @@ func (h Handler) GetJettonHolders(ctx context.Context, params oas.GetJettonHolde
 	return &results, nil
 }
 
-func (h Handler) GetJettonsEvents(ctx context.Context, params oas.GetJettonsEventsParams) (*oas.Event, error) {
+func (h *Handler) GetJettonsEvents(ctx context.Context, params oas.GetJettonsEventsParams) (*oas.Event, error) {
 	traceID, err := tongo.ParseHash(params.EventID)
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
