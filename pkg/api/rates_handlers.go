@@ -54,8 +54,12 @@ func (h *Handler) GetRates(ctx context.Context, params oas.GetRatesParams) (*oas
 	if len(tokens) == 0 {
 		return nil, toError(http.StatusBadRequest, fmt.Errorf("tokens is required param"))
 	}
+	human := false // temporary kludge for keeper
 	var convertedTokens []string
 	for _, token := range tokens {
+		if len(token) == 48 {
+			human = true
+		}
 		if accountID, err := ton.ParseAccountID(token); err == nil {
 			token = accountID.ToRaw()
 		} else {
@@ -70,6 +74,9 @@ func (h *Handler) GetRates(ctx context.Context, params oas.GetRatesParams) (*oas
 		return nil, toError(http.StatusBadRequest, fmt.Errorf("currencies is required param"))
 	}
 	for i := range currencies {
+		if len(currencies[i]) == 48 {
+			human = true
+		}
 		if len(currencies[i]) < 30 { //not jetton
 			currencies[i] = strings.ToUpper(currencies[i])
 		}
@@ -170,7 +177,16 @@ func (h *Handler) GetRates(ctx context.Context, params oas.GetRatesParams) (*oas
 			}
 		}
 	}
-
+	if human { // temporary kludge for keeper
+		temp := make(map[string]tokenRates, len(ratesRes))
+		for k, v := range ratesRes {
+			if len(k) > 48 {
+				k = ton.MustParseAccountID(k).ToHuman(true, false)
+			}
+			temp[k] = v
+		}
+		ratesRes = temp
+	}
 	bytesRatesRes, err := json.Marshal(ratesRes)
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
