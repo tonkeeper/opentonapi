@@ -71,6 +71,9 @@ func (h *Handler) convertJettonHistory(ctx context.Context, account tongo.Accoun
 				(action.JettonBurn != nil && action.JettonBurn.Jetton != *master)) {
 				continue
 			}
+			if !action.IsSubject(account) {
+				continue
+			}
 			convertedAction, spamDetected, err := h.convertAction(ctx, &account, action, acceptLanguage)
 			if err != nil {
 				return nil, 0, err
