@@ -1,9 +1,10 @@
 package bath
 
 import (
+	"math/big"
+
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
-	"math/big"
 )
 
 type Dex string
@@ -65,6 +66,10 @@ var StonfiSwapStraw = Straw[BubbleJettonSwap]{
 			}
 			newAction.In.JettonWallet = a
 			newAction.Out.JettonWallet = b
+			if tx.additionalInfo != nil {
+				newAction.In.JettonMaster, _ = tx.additionalInfo.JettonMaster(a)
+				newAction.Out.JettonMaster, _ = tx.additionalInfo.JettonMaster(b)
+			}
 			return nil
 		},
 		SingleChild: &Straw[BubbleJettonSwap]{
@@ -79,9 +84,10 @@ var StonfiSwapStraw = Straw[BubbleJettonSwap]{
 				Builder: func(newAction *BubbleJettonSwap, bubble *Bubble) error {
 					jettonTx := bubble.Info.(BubbleJettonTransfer)
 					if jettonTx.senderWallet != newAction.Out.JettonWallet {
+						// operation has failed,
+						// stonfi's sent jettons back to the user
 						return nil
 					}
-					newAction.Out.JettonMaster = jettonTx.master
 					newAction.Out.Amount = big.Int(jettonTx.amount)
 					newAction.Out.IsTon = jettonTx.isWrappedTon
 					newAction.Success = true

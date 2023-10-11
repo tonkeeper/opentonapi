@@ -546,7 +546,8 @@ func emulatedTreeToTrace(ctx context.Context, resolver core.LibraryResolver, con
 		for _, m := range inspectionResult.GetMethods {
 			switch data := m.Result.(type) {
 			case abi.GetWalletDataResult:
-				t.AdditionalInfo.JettonMaster, _ = tongo.AccountIDFromTlb(data.Jetton)
+				master, _ := tongo.AccountIDFromTlb(data.Jetton)
+				t.AdditionalInfo.SetJettonMaster(k, *master)
 			case abi.GetSaleData_GetgemsResult:
 				price := big.Int(data.FullPrice)
 				owner, err := tongo.AccountIDFromTlb(data.Owner)
