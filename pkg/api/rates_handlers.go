@@ -121,6 +121,9 @@ func (h *Handler) GetRates(ctx context.Context, params oas.GetRatesParams) (*oas
 			if !ok {
 				return nil, toError(http.StatusBadRequest, fmt.Errorf("invalid currency: %v", currency))
 			}
+			if todayCurrencyPrice == 0 {
+				continue
+			}
 			rate, ok := ratesRes[token]
 			if !ok {
 				rate = tokenRates{Prices: map[string]float64{}, Diff24h: map[string]string{}, Diff7d: map[string]string{}, Diff30d: map[string]string{}}
@@ -131,7 +134,7 @@ func (h *Handler) GetRates(ctx context.Context, params oas.GetRatesParams) (*oas
 				ratesRes[token] = tokenRates{Prices: map[string]float64{}, Diff24h: map[string]string{}, Diff7d: map[string]string{}, Diff30d: map[string]string{}}
 				continue
 			}
-			convertedTodayPrice := todayTokenPrice * todayCurrencyPrice
+			convertedTodayPrice := todayTokenPrice * (1 / todayCurrencyPrice)
 			rate.Prices[currency] = convertedTodayPrice
 
 			var diff24h, diff7w, diff1m float64
@@ -200,9 +203,12 @@ func calculateConvertedPrice(rates map[string]float64, currency, token string) (
 	if !ok {
 		return 0, fmt.Errorf("invalid currency: %v", currency)
 	}
+	if currencyPrice == 0 {
+		return 0, fmt.Errorf("price is zero")
+	}
 	tokenPrice, ok := rates[token]
 	if !ok {
 		return 0, fmt.Errorf("invalid token: %v", token)
 	}
-	return tokenPrice * currencyPrice, nil
+	return tokenPrice * (1 / currencyPrice), nil
 }

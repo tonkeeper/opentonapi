@@ -53,9 +53,14 @@ func (m *Mock) GetCurrentRates() (map[string]float64, error) {
 		pools[tonstakersJetton] = tonstakersPrice
 	}
 
+	// All data is displayed to the ratio to TON
+	// For example: 1 Jetton = ... TON, 1 USD = ... TON
 	rates["TON"] = 1
 	for currency, price := range fiatPrices {
-		rates[currency] = meanTonPriceToUSD * price
+		if price == 0 {
+			continue
+		}
+		rates[currency] = 1 / (price * meanTonPriceToUSD)
 	}
 	for token, coinsCount := range pools {
 		rates[token.ToRaw()] = coinsCount
