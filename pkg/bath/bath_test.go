@@ -137,7 +137,7 @@ func TestFindActions(t *testing.T) {
 			tongo.MustParseBlockID("(0,8000000000000000,38499308)"),
 			// liquid withdraw
 			tongo.MustParseBlockID("(0,8000000000000000,38912382)"),
-			//telemint deploy
+			// telemint deploy
 			tongo.MustParseBlockID("(0,8000000000000000,38603492)"),
 		}),
 	)

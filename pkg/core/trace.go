@@ -19,7 +19,8 @@ type Trace struct {
 // TraceAdditionalInfo holds information about a trace
 // but not directly extracted from it or a corresponding transaction.
 type TraceAdditionalInfo struct {
-	JettonMaster *tongo.AccountID
+	// JettonMasters maps jetton wallets to their masters.
+	JettonMasters map[tongo.AccountID]tongo.AccountID
 	// NftSaleContract is set, if a transaction's account implements "get_sale_data" method.
 	NftSaleContract *NftSaleContract
 	// STONfiPool is set, if a transaction's account implements "get_pool_data" method and abi.StonfiPool interface.
@@ -137,7 +138,7 @@ func CollectAdditionalInfo(ctx context.Context, infoSource InformationSource, tr
 		trace.AdditionalInfo = &TraceAdditionalInfo{}
 		if isDestinationJettonWallet(trace.InMsg) {
 			if master, ok := masters[*trace.InMsg.Destination]; ok {
-				trace.AdditionalInfo.JettonMaster = &master
+				trace.AdditionalInfo.SetJettonMaster(*trace.InMsg.Destination, master)
 			}
 		}
 		if hasInterface(trace.AccountInterfaces, abi.NftSaleV2) {
@@ -153,8 +154,25 @@ func CollectAdditionalInfo(ctx context.Context, infoSource InformationSource, tr
 		if hasInterface(trace.AccountInterfaces, abi.StonfiPool) {
 			if pool, ok := stonfiPools[trace.Account]; ok {
 				trace.AdditionalInfo.STONfiPool = &pool
+				trace.AdditionalInfo.SetJettonMaster(pool.Token0, masters[pool.Token0])
+				trace.AdditionalInfo.SetJettonMaster(pool.Token1, masters[pool.Token1])
 			}
 		}
 	})
 	return nil
+}
+
+func (info *TraceAdditionalInfo) JettonMaster(jettonWallet tongo.AccountID) (tongo.AccountID, bool) {
+	if info.JettonMasters == nil {
+		return tongo.AccountID{}, false
+	}
+	master, ok := info.JettonMasters[jettonWallet]
+	return master, ok
+}
+
+func (info *TraceAdditionalInfo) SetJettonMaster(jettonWallet tongo.AccountID, jettonMaster tongo.AccountID) {
+	if info.JettonMasters == nil {
+		info.JettonMasters = make(map[tongo.AccountID]tongo.AccountID)
+	}
+	info.JettonMasters[jettonWallet] = jettonMaster
 }

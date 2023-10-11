@@ -2,6 +2,7 @@ package bath
 
 import (
 	"fmt"
+
 	"github.com/tonkeeper/opentonapi/internal/g"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
@@ -138,9 +139,11 @@ var JettonBurnStraw = Straw[BubbleJettonBurn]{
 		if tx.inputFrom != nil {
 			newAction.sender = *tx.inputFrom
 		}
-		if tx.additionalInfo.JettonMaster != nil { //todo: find why it doesn't set sometimes
-			// maybe it already fixed but this commit where i left comment
-			newAction.master = *tx.additionalInfo.JettonMaster
+		if tx.additionalInfo != nil {
+			if master, ok := tx.additionalInfo.JettonMaster(tx.account.Address); ok {
+				//todo: find why it doesn't set sometimes (maybe it already fixed but who knows?)
+				newAction.master = master
+			}
 		}
 		newAction.senderWallet = tx.account.Address
 		newAction.success = tx.success
