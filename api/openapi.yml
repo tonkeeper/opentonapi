@@ -4205,6 +4205,9 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Trace'
+        emulated:
+          type: boolean
+          example: false
     MessageConsequences:
       type: object
       required:

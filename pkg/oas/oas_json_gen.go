@@ -21124,12 +21124,19 @@ func (s *Trace) encodeFields(e *jx.Encoder) {
 			e.ArrEnd()
 		}
 	}
+	{
+		if s.Emulated.Set {
+			e.FieldStart("emulated")
+			s.Emulated.Encode(e)
+		}
+	}
 }
 
-var jsonFieldsNameOfTrace = [3]string{
+var jsonFieldsNameOfTrace = [4]string{
 	0: "transaction",
 	1: "interfaces",
 	2: "children",
+	3: "emulated",
 }
 
 // Decode decodes Trace from json.
@@ -21187,6 +21194,16 @@ func (s *Trace) Decode(d *jx.Decoder) error {
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"children\"")
+			}
+		case "emulated":
+			if err := func() error {
+				s.Emulated.Reset()
+				if err := s.Emulated.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"emulated\"")
 			}
 		default:
 			return d.Skip()

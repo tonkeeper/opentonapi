@@ -3145,6 +3145,10 @@
       },
       "type": "array"
      },
+     "emulated": {
+      "example": false,
+      "type": "boolean"
+     },
      "interfaces": {
       "example": [
        "wallet",
