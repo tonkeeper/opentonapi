@@ -594,6 +594,7 @@ func emulatedTreeToTrace(ctx context.Context, resolver core.LibraryResolver, con
 				Token0: *t0,
 				Token1: *t1,
 			}
+			// TODO: find out masters of t0, t1
 		}
 	}
 	return t, nil
