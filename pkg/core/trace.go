@@ -101,6 +101,13 @@ func CollectAdditionalInfo(ctx context.Context, infoSource InformationSource, tr
 	var basicNftSale []tongo.AccountID
 	var stonfiPoolIDs []tongo.AccountID
 	visit(trace, func(trace *Trace) {
+		// when we emulate a trace,
+		// we construct "trace.AdditionalInfo" in emulatedTreeToTrace for all accounts the trace touches.
+		// moreover, some accounts change their states and some of them are not exist in the blockchain,
+		// so we must not inspect them again.
+		if trace.AdditionalInfo != nil {
+			return
+		}
 		if isDestinationJettonWallet(trace.InMsg) {
 			jettonWallets = append(jettonWallets, *trace.InMsg.Destination)
 		}
@@ -135,6 +142,13 @@ func CollectAdditionalInfo(ctx context.Context, infoSource InformationSource, tr
 		return err
 	}
 	visit(trace, func(trace *Trace) {
+		// when we emulate a trace,
+		// we construct "trace.AdditionalInfo" in emulatedTreeToTrace for all accounts the trace touches.
+		// moreover, some accounts change their states and some of them are not exist in the blockchain,
+		// so we must not inspect them again.
+		if trace.AdditionalInfo != nil {
+			return
+		}
 		trace.AdditionalInfo = &TraceAdditionalInfo{}
 		if isDestinationJettonWallet(trace.InMsg) {
 			if master, ok := masters[*trace.InMsg.Destination]; ok {
