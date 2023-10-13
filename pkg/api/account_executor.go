@@ -4,31 +4,34 @@ import (
 	"context"
 	"errors"
 
-	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/boc"
 	"github.com/tonkeeper/tongo/tlb"
 	"github.com/tonkeeper/tongo/tvm"
+
+	"github.com/tonkeeper/opentonapi/pkg/core"
 )
 
 type shardsAccountExecutor struct {
 	accounts     map[tongo.AccountID]tlb.ShardAccount
 	configBase64 string
 	resolver     core.LibraryResolver
+	executor     executor
 }
 
-func newSharedAccountExecutor(accounts map[tongo.AccountID]tlb.ShardAccount, resolver core.LibraryResolver, configBase64 string) *shardsAccountExecutor {
+func newSharedAccountExecutor(accounts map[tongo.AccountID]tlb.ShardAccount, executor executor, resolver core.LibraryResolver, configBase64 string) *shardsAccountExecutor {
 	return &shardsAccountExecutor{
 		accounts:     accounts,
 		configBase64: configBase64,
 		resolver:     resolver,
+		executor:     executor,
 	}
 }
 
 func (s shardsAccountExecutor) RunSmcMethodByID(ctx context.Context, accountID tongo.AccountID, methodID int, params tlb.VmStack) (uint32, tlb.VmStack, error) {
 	account, ok := s.accounts[accountID]
 	if !ok {
-		return 0, nil, errors.New("address not found")
+		return s.executor.RunSmcMethodByID(ctx, accountID, methodID, params)
 	}
 	code, data := accountCode(account), accountData(account)
 	if code == nil || data == nil {
