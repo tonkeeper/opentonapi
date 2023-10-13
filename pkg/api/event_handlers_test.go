@@ -42,6 +42,18 @@ func TestHandler_EmulateMessageToAccountEvent(t *testing.T) {
 				oas.ActionTypeTonTransfer,
 			},
 		},
+		{
+			name: "stonfi swap",
+			request: oas.EmulateMessageToAccountEventReq{
+				Boc: "te6ccgECBQEAAVQAAUWIACH3HsOIrW6qYEGULYwYelIP1FWIbBZWR76TWN6T09tqDAEBnGpXvpSE1bg/EO+niFDpM0t2dr4ixdbn9pAjhkXp39EvtfL99jwb1PftZOBwO8Def181ywRne4BYs5hixmeDcAMpqaMXbo4DyQAAAAMAAwIBqwgAIfcew4itbqpgQZQtjBh6Ug/UVYhsFlZHvpNY3pPT22sAPiDtbeq0MAbjINMSK7AKe4gRyuvoVE1m1xeXoS+XZAsQR4aMAAAAAAAAAAAAAAAAAADAAwFpD4p+pdp2wn0DXAp7ID6IAO87mQKicbKgHIk4pSPP4k5xhHqutqYgAB7USnesDnCcEDk4cAMEAJMlk4VhgBD3JEg1TUr75iTijBghOKm/sxNDXUBl7CD6WMut0Q85xAfRAAQ+49hxFa3VTAgyhbGDD0pB+oqxDYLKyPfSaxvSenttUA==",
+			},
+			params: oas.EmulateMessageToAccountEventParams{
+				AccountID: "0:10fb8f61c456b7553020ca16c60c3d2907ea2ac4360b2b23df49ac6f49e9edb5",
+			},
+			wantActions: []oas.ActionType{
+				oas.ActionTypeJettonSwap,
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
