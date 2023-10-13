@@ -14,6 +14,7 @@ import (
 	"github.com/tonkeeper/tongo/abi"
 	"github.com/tonkeeper/tongo/boc"
 	"github.com/tonkeeper/tongo/tlb"
+	"github.com/tonkeeper/tongo/ton"
 	"github.com/tonkeeper/tongo/txemulator"
 	tongoWallet "github.com/tonkeeper/tongo/wallet"
 	"golang.org/x/exp/slices"
@@ -259,7 +260,7 @@ func (h *Handler) EmulateMessageToAccountEvent(ctx context.Context, request *oas
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
-	trace, err := emulatedTreeToTrace(ctx, h.storage, configBase64, tree, emulator.FinalStates())
+	trace, err := emulatedTreeToTrace(ctx, h.executor, h.storage, configBase64, tree, emulator.FinalStates())
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
@@ -299,7 +300,7 @@ func (h *Handler) EmulateMessageToEvent(ctx context.Context, request *oas.Emulat
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
-	trace, err := emulatedTreeToTrace(ctx, h.storage, configBase64, tree, emulator.FinalStates())
+	trace, err := emulatedTreeToTrace(ctx, h.executor, h.storage, configBase64, tree, emulator.FinalStates())
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
@@ -339,7 +340,7 @@ func (h *Handler) EmulateMessageToTrace(ctx context.Context, request *oas.Emulat
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
-	trace, err := emulatedTreeToTrace(ctx, h.storage, configBase64, tree, emulator.FinalStates())
+	trace, err := emulatedTreeToTrace(ctx, h.executor, h.storage, configBase64, tree, emulator.FinalStates())
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
@@ -408,7 +409,7 @@ func (h *Handler) EmulateMessageToWallet(ctx context.Context, request *oas.Emula
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
-	trace, err := emulatedTreeToTrace(ctx, h.storage, configBase64, tree, emulator.FinalStates())
+	trace, err := emulatedTreeToTrace(ctx, h.executor, h.storage, configBase64, tree, emulator.FinalStates())
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
@@ -468,7 +469,7 @@ func (h *Handler) addToMempool(bytesBoc []byte, shardAccount map[tongo.AccountID
 		return shardAccount, err
 	}
 	newShardAccount := emulator.FinalStates()
-	trace, err := emulatedTreeToTrace(ctx, h.storage, config, tree, newShardAccount)
+	trace, err := emulatedTreeToTrace(ctx, h.executor, h.storage, config, tree, newShardAccount)
 	if err != nil {
 		return shardAccount, err
 	}
@@ -496,7 +497,7 @@ func (h *Handler) addToMempool(bytesBoc []byte, shardAccount map[tongo.AccountID
 	return newShardAccount, nil
 }
 
-func emulatedTreeToTrace(ctx context.Context, resolver core.LibraryResolver, configBase64 string, tree *txemulator.TxTree, accounts map[tongo.AccountID]tlb.ShardAccount) (*core.Trace, error) {
+func emulatedTreeToTrace(ctx context.Context, executor executor, resolver core.LibraryResolver, configBase64 string, tree *txemulator.TxTree, accounts map[tongo.AccountID]tlb.ShardAccount) (*core.Trace, error) {
 	if !tree.TX.Msgs.InMsg.Exists {
 		return nil, errors.New("there is no incoming message in emulation result")
 	}
@@ -529,7 +530,7 @@ func emulatedTreeToTrace(ctx context.Context, resolver core.LibraryResolver, con
 		AdditionalInfo: &core.TraceAdditionalInfo{},
 	}
 	for i := range tree.Children {
-		child, err := emulatedTreeToTrace(ctx, resolver, configBase64, tree.Children[i], accounts)
+		child, err := emulatedTreeToTrace(ctx, executor, resolver, configBase64, tree.Children[i], accounts)
 		if err != nil {
 			return nil, err
 		}
@@ -544,11 +545,12 @@ func emulatedTreeToTrace(ctx context.Context, resolver core.LibraryResolver, con
 	if err != nil {
 		return nil, err
 	}
-	executor := newSharedAccountExecutor(accounts, resolver, configBase64)
-	inspectionResult, err := abi.NewContractInspector().InspectContract(ctx, b, executor, accountID)
+	sharedExecutor := newSharedAccountExecutor(accounts, executor, resolver, configBase64)
+	inspectionResult, err := abi.NewContractInspector().InspectContract(ctx, b, sharedExecutor, accountID)
 	if err != nil {
 		return nil, err
 	}
+	// TODO: for all obtained Jetton Masters confirm that jetton wallets are valid
 	t.AccountInterfaces = inspectionResult.ContractInterfaces
 	for _, m := range inspectionResult.GetMethods {
 		switch data := m.Result.(type) {
@@ -594,7 +596,15 @@ func emulatedTreeToTrace(ctx context.Context, resolver core.LibraryResolver, con
 				Token0: *t0,
 				Token1: *t1,
 			}
-			// TODO: find out masters of t0, t1
+			for _, accountID := range []ton.AccountID{*t0, *t1} {
+				_, value, err := abi.GetWalletData(ctx, sharedExecutor, accountID)
+				if err != nil {
+					return nil, err
+				}
+				data := value.(abi.GetWalletDataResult)
+				master, _ := tongo.AccountIDFromTlb(data.Jetton)
+				t.AdditionalInfo.SetJettonMaster(accountID, *master)
+			}
 		}
 	}
 	return t, nil
