@@ -535,65 +535,64 @@ func emulatedTreeToTrace(ctx context.Context, resolver core.LibraryResolver, con
 		}
 		t.Children = append(t.Children, child)
 	}
+	accountID := t.Account
+	code := accountCode(accounts[accountID])
+	if code == nil {
+		return t, nil
+	}
+	b, err := code.ToBoc()
+	if err != nil {
+		return nil, err
+	}
 	executor := newSharedAccountExecutor(accounts, resolver, configBase64)
-	for k, v := range accounts {
-		code := accountCode(v)
-		if code == nil {
-			continue
-		}
-		b, err := code.ToBoc()
-		if err != nil {
-			return nil, err
-		}
-		inspectionResult, err := abi.NewContractInspector().InspectContract(ctx, b, executor, k)
-		if err != nil {
-			return nil, err
-		}
-		t.AccountInterfaces = inspectionResult.ContractInterfaces
-		for _, m := range inspectionResult.GetMethods {
-			switch data := m.Result.(type) {
-			case abi.GetWalletDataResult:
-				master, _ := tongo.AccountIDFromTlb(data.Jetton)
-				t.AdditionalInfo.SetJettonMaster(k, *master)
-			case abi.GetSaleData_GetgemsResult:
-				price := big.Int(data.FullPrice)
-				owner, err := tongo.AccountIDFromTlb(data.Owner)
-				if err != nil {
-					continue
-				}
-				t.AdditionalInfo.NftSaleContract = &core.NftSaleContract{
-					NftPrice: price.Int64(),
-					Owner:    owner,
-				}
-			case abi.GetSaleData_BasicResult:
-				price := big.Int(data.FullPrice)
-				owner, err := tongo.AccountIDFromTlb(data.Owner)
-				if err != nil {
-					continue
-				}
-				t.AdditionalInfo.NftSaleContract = &core.NftSaleContract{
-					NftPrice: price.Int64(),
-					Owner:    owner,
-				}
-			case abi.GetSaleData_GetgemsAuctionResult:
-				owner, err := tongo.AccountIDFromTlb(data.Owner)
-				if err != nil {
-					continue
-				}
-				t.AdditionalInfo.NftSaleContract = &core.NftSaleContract{
-					NftPrice: int64(data.MaxBid),
-					Owner:    owner,
-				}
-			case abi.GetPoolData_StonfiResult:
-				t0, err0 := tongo.AccountIDFromTlb(data.Token0Address)
-				t1, err1 := tongo.AccountIDFromTlb(data.Token1Address)
-				if err1 != nil || err0 != nil {
-					continue
-				}
-				t.AdditionalInfo.STONfiPool = &core.STONfiPool{
-					Token0: *t0,
-					Token1: *t1,
-				}
+	inspectionResult, err := abi.NewContractInspector().InspectContract(ctx, b, executor, accountID)
+	if err != nil {
+		return nil, err
+	}
+	t.AccountInterfaces = inspectionResult.ContractInterfaces
+	for _, m := range inspectionResult.GetMethods {
+		switch data := m.Result.(type) {
+		case abi.GetWalletDataResult:
+			master, _ := tongo.AccountIDFromTlb(data.Jetton)
+			t.AdditionalInfo.SetJettonMaster(accountID, *master)
+		case abi.GetSaleData_GetgemsResult:
+			price := big.Int(data.FullPrice)
+			owner, err := tongo.AccountIDFromTlb(data.Owner)
+			if err != nil {
+				continue
+			}
+			t.AdditionalInfo.NftSaleContract = &core.NftSaleContract{
+				NftPrice: price.Int64(),
+				Owner:    owner,
+			}
+		case abi.GetSaleData_BasicResult:
+			price := big.Int(data.FullPrice)
+			owner, err := tongo.AccountIDFromTlb(data.Owner)
+			if err != nil {
+				continue
+			}
+			t.AdditionalInfo.NftSaleContract = &core.NftSaleContract{
+				NftPrice: price.Int64(),
+				Owner:    owner,
+			}
+		case abi.GetSaleData_GetgemsAuctionResult:
+			owner, err := tongo.AccountIDFromTlb(data.Owner)
+			if err != nil {
+				continue
+			}
+			t.AdditionalInfo.NftSaleContract = &core.NftSaleContract{
+				NftPrice: int64(data.MaxBid),
+				Owner:    owner,
+			}
+		case abi.GetPoolData_StonfiResult:
+			t0, err0 := tongo.AccountIDFromTlb(data.Token0Address)
+			t1, err1 := tongo.AccountIDFromTlb(data.Token1Address)
+			if err1 != nil || err0 != nil {
+				continue
+			}
+			t.AdditionalInfo.STONfiPool = &core.STONfiPool{
+				Token0: *t0,
+				Token1: *t1,
 			}
 		}
 	}
