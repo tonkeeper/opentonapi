@@ -4040,6 +4040,7 @@ func (s *InitStateRaw) SetFileHash(val string) {
 // Ref: #/components/schemas/JettonBalance
 type JettonBalance struct {
 	Balance       string         `json:"balance"`
+	Price         jx.Raw         `json:"price"`
 	WalletAddress AccountAddress `json:"wallet_address"`
 	Jetton        JettonPreview  `json:"jetton"`
 }
@@ -4047,6 +4048,11 @@ type JettonBalance struct {
 // GetBalance returns the value of Balance.
 func (s *JettonBalance) GetBalance() string {
 	return s.Balance
+}
+
+// GetPrice returns the value of Price.
+func (s *JettonBalance) GetPrice() jx.Raw {
+	return s.Price
 }
 
 // GetWalletAddress returns the value of WalletAddress.
@@ -4062,6 +4068,11 @@ func (s *JettonBalance) GetJetton() JettonPreview {
 // SetBalance sets the value of Balance.
 func (s *JettonBalance) SetBalance(val string) {
 	s.Balance = val
+}
+
+// SetPrice sets the value of Price.
+func (s *JettonBalance) SetPrice(val jx.Raw) {
+	s.Price = val
 }
 
 // SetWalletAddress sets the value of WalletAddress.
