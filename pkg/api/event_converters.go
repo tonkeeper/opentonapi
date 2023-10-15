@@ -529,7 +529,7 @@ func (h *Handler) convertAction(ctx context.Context, viewer *tongo.AccountID, a 
 		simplePreviewData := i18n.Template{}
 		if a.JettonSwap.In.IsTon {
 			swapAction.TonIn = oas.NewOptInt64(a.JettonSwap.In.Amount.Int64())
-			simplePreviewData["JettonIn"] = "TON"
+			simplePreviewData["JettonIn"] = ""
 			simplePreviewData["AmountIn"] = i18n.FormatTONs(a.JettonSwap.In.Amount.Int64())
 		} else {
 			swapAction.AmountIn = a.JettonSwap.In.Amount.String()
@@ -541,7 +541,7 @@ func (h *Handler) convertAction(ctx context.Context, viewer *tongo.AccountID, a 
 		}
 		if a.JettonSwap.Out.IsTon {
 			swapAction.TonOut = oas.NewOptInt64(a.JettonSwap.Out.Amount.Int64())
-			simplePreviewData["JettonOut"] = "TON"
+			simplePreviewData["JettonOut"] = ""
 			simplePreviewData["AmountOut"] = i18n.FormatTONs(a.JettonSwap.Out.Amount.Int64())
 		} else {
 			swapAction.AmountOut = a.JettonSwap.Out.Amount.String()

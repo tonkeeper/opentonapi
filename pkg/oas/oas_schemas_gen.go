@@ -8830,6 +8830,7 @@ type Trace struct {
 	Transaction Transaction `json:"transaction"`
 	Interfaces  []string    `json:"interfaces"`
 	Children    []Trace     `json:"children"`
+	Emulated    OptBool     `json:"emulated"`
 }
 
 // GetTransaction returns the value of Transaction.
@@ -8847,6 +8848,11 @@ func (s *Trace) GetChildren() []Trace {
 	return s.Children
 }
 
+// GetEmulated returns the value of Emulated.
+func (s *Trace) GetEmulated() OptBool {
+	return s.Emulated
+}
+
 // SetTransaction sets the value of Transaction.
 func (s *Trace) SetTransaction(val Transaction) {
 	s.Transaction = val
@@ -8860,6 +8866,11 @@ func (s *Trace) SetInterfaces(val []string) {
 // SetChildren sets the value of Children.
 func (s *Trace) SetChildren(val []Trace) {
 	s.Children = val
+}
+
+// SetEmulated sets the value of Emulated.
+func (s *Trace) SetEmulated(val OptBool) {
+	s.Emulated = val
 }
 
 // Ref: #/components/schemas/TraceID

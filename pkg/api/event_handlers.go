@@ -67,23 +67,24 @@ func (h *Handler) SendBlockchainMessage(ctx context.Context, request *oas.SendBl
 	return nil
 }
 
-func (h *Handler) getTraceByHash(ctx context.Context, hash tongo.Bits256) (*core.Trace, error) {
+func (h *Handler) getTraceByHash(ctx context.Context, hash tongo.Bits256) (*core.Trace, bool, error) {
 	trace, err := h.storage.GetTrace(ctx, hash)
 	if err == nil || !errors.Is(err, core.ErrEntityNotFound) {
-		return trace, err
+		return trace, false, err
 	}
 	txHash, err := h.storage.SearchTransactionByMessageHash(ctx, hash)
 	if err != nil && !errors.Is(err, core.ErrEntityNotFound) {
-		return nil, err
+		return nil, false, err
 	}
 	if err == nil {
-		return h.storage.GetTrace(ctx, *txHash)
+		trace, err = h.storage.GetTrace(ctx, *txHash)
+		return trace, false, err
 	}
 	trace, ok := h.mempoolEmulate.traces.Get(hash.Hex())
 	if ok {
-		return trace, nil
+		return trace, true, nil
 	}
-	return nil, core.ErrEntityNotFound
+	return nil, false, core.ErrEntityNotFound
 }
 
 func (h *Handler) GetTrace(ctx context.Context, params oas.GetTraceParams) (*oas.Trace, error) {
@@ -91,7 +92,7 @@ func (h *Handler) GetTrace(ctx context.Context, params oas.GetTraceParams) (*oas
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
 	}
-	trace, err := h.getTraceByHash(ctx, hash)
+	trace, emulated, err := h.getTraceByHash(ctx, hash)
 	if errors.Is(err, core.ErrEntityNotFound) {
 		return nil, toError(http.StatusNotFound, err)
 	}
@@ -99,6 +100,9 @@ func (h *Handler) GetTrace(ctx context.Context, params oas.GetTraceParams) (*oas
 		return nil, toError(http.StatusInternalServerError, err)
 	}
 	convertedTrace := convertTrace(*trace, h.addressBook)
+	if emulated {
+		convertedTrace.Emulated.SetTo(true)
+	}
 	return &convertedTrace, nil
 }
 
@@ -107,7 +111,7 @@ func (h *Handler) GetEvent(ctx context.Context, params oas.GetEventParams) (*oas
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
 	}
-	trace, err := h.getTraceByHash(ctx, traceID)
+	trace, emulated, err := h.getTraceByHash(ctx, traceID)
 	if errors.Is(err, core.ErrEntityNotFound) {
 		return nil, toError(http.StatusNotFound, err)
 	}
@@ -121,6 +125,9 @@ func (h *Handler) GetEvent(ctx context.Context, params oas.GetEventParams) (*oas
 	event, err := h.toEvent(ctx, trace, result, params.AcceptLanguage)
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
+	}
+	if emulated {
+		event.InProgress = true
 	}
 	return &event, nil
 }
@@ -546,7 +553,8 @@ func emulatedTreeToTrace(ctx context.Context, resolver core.LibraryResolver, con
 		for _, m := range inspectionResult.GetMethods {
 			switch data := m.Result.(type) {
 			case abi.GetWalletDataResult:
-				t.AdditionalInfo.JettonMaster, _ = tongo.AccountIDFromTlb(data.Jetton)
+				master, _ := tongo.AccountIDFromTlb(data.Jetton)
+				t.AdditionalInfo.SetJettonMaster(k, *master)
 			case abi.GetSaleData_GetgemsResult:
 				price := big.Int(data.FullPrice)
 				owner, err := tongo.AccountIDFromTlb(data.Owner)
@@ -587,6 +595,7 @@ func emulatedTreeToTrace(ctx context.Context, resolver core.LibraryResolver, con
 					Token1: *t1,
 				}
 			}
+			// TODO: find out masters of t0, t1
 		}
 	}
 	return t, nil

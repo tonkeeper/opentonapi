@@ -2,8 +2,9 @@ package bath
 
 import (
 	"fmt"
-	"github.com/tonkeeper/opentonapi/internal/g"
 	"math/big"
+
+	"github.com/tonkeeper/opentonapi/internal/g"
 
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
@@ -157,8 +158,10 @@ func FindJettonTransfer(bubble *Bubble) bool {
 		},
 		payload: intention.ForwardPayload.Value,
 	}
-	if transferBubbleInfo.additionalInfo != nil && transferBubbleInfo.additionalInfo.JettonMaster != nil {
-		transfer.master = *transferBubbleInfo.additionalInfo.JettonMaster
+	if transferBubbleInfo.additionalInfo != nil {
+		if master, ok := transferBubbleInfo.additionalInfo.JettonMaster(transferBubbleInfo.account.Address); ok {
+			transfer.master = master
+		}
 	}
 	newBubble := Bubble{
 		Children:  bubble.Children,

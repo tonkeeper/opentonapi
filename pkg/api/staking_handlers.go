@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/shopspring/decimal"
+	"github.com/tonkeeper/tongo/ton"
 	"math"
 	"net/http"
 
@@ -229,33 +231,31 @@ func (h *Handler) GetAccountNominatorsPools(ctx context.Context, params oas.GetA
 		if _, ok := references.WhalesPools[w.Pool]; !ok {
 			continue //skip unknown pools
 		}
-		result.Pools = append(result.Pools, oas.AccountStakingInfo{
-			Pool:            w.Pool.ToRaw(),
-			Amount:          w.MemberBalance,
-			PendingDeposit:  w.MemberPendingDeposit,
-			PendingWithdraw: w.MemberPendingWithdraw,
-			ReadyWithdraw:   w.MemberWithdraw,
-		})
+		result.Pools = append(result.Pools, convertStaking(w))
 	}
 	for _, w := range tfPools {
-		result.Pools = append(result.Pools, oas.AccountStakingInfo{
-			Pool:            w.Pool.ToRaw(),
-			Amount:          w.MemberBalance,
-			PendingDeposit:  w.MemberPendingDeposit,
-			PendingWithdraw: w.MemberPendingWithdraw,
-			ReadyWithdraw:   w.MemberWithdraw,
-		})
+		result.Pools = append(result.Pools, convertStaking(w))
 	}
 	for _, w := range liquidPools {
-		result.Pools = append(result.Pools, oas.AccountStakingInfo{
-			Pool:            w.Pool.ToRaw(),
-			Amount:          w.MemberBalance,
-			PendingDeposit:  w.MemberPendingDeposit,
-			PendingWithdraw: w.MemberPendingWithdraw,
-			ReadyWithdraw:   w.MemberWithdraw,
-		})
+		result.Pools = append(result.Pools, convertStaking(w))
 	}
 	return &result, nil
+}
+func convertStaking(w core.Nominator) oas.AccountStakingInfo {
+	return oas.AccountStakingInfo{
+		Pool:            w.Pool.ToRaw(),
+		Amount:          w.MemberBalance,
+		PendingDeposit:  w.MemberPendingDeposit,
+		PendingWithdraw: roundTons(w.MemberPendingWithdraw),
+		ReadyWithdraw:   w.MemberWithdraw,
+	}
+}
+
+func roundTons(amount int64) int64 {
+	if amount < int64(ton.OneTON) {
+		return amount
+	}
+	return decimal.New(amount, 0).Round(-7).IntPart()
 }
 
 func (h *Handler) GetStakingPoolHistory(ctx context.Context, params oas.GetStakingPoolHistoryParams) (*oas.GetStakingPoolHistoryOK, error) {

@@ -3,7 +3,6 @@ package api
 import (
 	"math/big"
 	"strconv"
-	"strings"
 
 	"github.com/shopspring/decimal"
 	"github.com/tonkeeper/opentonapi/pkg/addressbook"
@@ -40,21 +39,18 @@ type NormalizedMetadata struct {
 }
 
 func NormalizeMetadata(meta tep64.Metadata, info *addressbook.KnownJetton, isBlacklisted bool) NormalizedMetadata {
-	verification := VerificationNone
-	if isBlacklisted {
-		verification = VerificationBlacklist
-	}
-	name := meta.Name
-	if name == "" {
-		name = "Unknown Token"
-	}
 	symbol := meta.Symbol
 	if symbol == "" {
 		symbol = UnknownJettonName
 	}
-	normalizedSymbol := strings.TrimSpace(strings.ToUpper(meta.Symbol))
-	if normalizedSymbol == "TON" || normalizedSymbol == "TОN" { //eng and russian
+	verification := VerificationNone
+	if isBlacklisted {
+		verification = VerificationBlacklist
 		symbol = "SCAM"
+	}
+	name := meta.Name
+	if name == "" {
+		name = "Unknown Token"
 	}
 	image := references.Placeholder
 	if meta.Image != "" {

@@ -128,6 +128,9 @@ func calculateConvertedPrice(rates map[string]float64, currency, token string) (
 	if !ok {
 		return 0, fmt.Errorf("invalid currency: %v", currency)
 	}
+	if currencyPrice == 0 {
+		return 0, fmt.Errorf("price is zero")
+	}
 	tokenPrice, ok := rates[token]
 	if !ok {
 		return 0, fmt.Errorf("invalid token: %v", token)
