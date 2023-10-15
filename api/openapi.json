@@ -77,6 +77,16 @@
      "type": "integer"
     }
    },
+   "currenciesQuery": {
+    "description": "accept ton and all possible fiat currencies, separated by commas",
+    "in": "query",
+    "name": "currencies",
+    "required": false,
+    "schema": {
+     "example": "ton,usd,rub",
+     "type": "string"
+    }
+   },
    "domainFilterQuery": {
     "description": "domain filter for current auctions \"ton\" or \"t.me\"",
     "in": "query",
@@ -1930,6 +1940,10 @@
      },
      "jetton": {
       "$ref": "#/components/schemas/JettonPreview"
+     },
+     "price": {
+      "additionalProperties": true,
+      "example": {}
      },
      "wallet_address": {
       "$ref": "#/components/schemas/AccountAddress"
@@ -3990,6 +4004,9 @@
     "parameters": [
      {
       "$ref": "#/components/parameters/accountIDParameter"
+     },
+     {
+      "$ref": "#/components/parameters/currenciesQuery"
      }
     ],
     "responses": {

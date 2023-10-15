@@ -2085,6 +2085,8 @@ func decodeGetAccountJettonHistoryByIDParams(args [2]string, argsEscaped bool, r
 type GetAccountJettonsBalancesParams struct {
 	// Account ID.
 	AccountID string
+	// Accept ton and all possible fiat currencies, separated by commas.
+	Currencies OptString
 }
 
 func unpackGetAccountJettonsBalancesParams(packed middleware.Parameters) (params GetAccountJettonsBalancesParams) {
@@ -2095,10 +2097,20 @@ func unpackGetAccountJettonsBalancesParams(packed middleware.Parameters) (params
 		}
 		params.AccountID = packed[key].(string)
 	}
+	{
+		key := middleware.ParameterKey{
+			Name: "currencies",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.Currencies = v.(OptString)
+		}
+	}
 	return params
 }
 
 func decodeGetAccountJettonsBalancesParams(args [1]string, argsEscaped bool, r *http.Request) (params GetAccountJettonsBalancesParams, _ error) {
+	q := uri.NewQueryDecoder(r.URL.Query())
 	// Decode path: account_id.
 	if err := func() error {
 		param := args[0]
@@ -2141,6 +2153,47 @@ func decodeGetAccountJettonsBalancesParams(args [1]string, argsEscaped bool, r *
 		return params, &ogenerrors.DecodeParamError{
 			Name: "account_id",
 			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode query: currencies.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "currencies",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotCurrenciesVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotCurrenciesVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.Currencies.SetTo(paramsDotCurrenciesVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "currencies",
+			In:   "query",
 			Err:  err,
 		}
 	}

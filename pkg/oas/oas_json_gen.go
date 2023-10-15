@@ -12181,6 +12181,12 @@ func (s *JettonBalance) encodeFields(e *jx.Encoder) {
 		e.Str(s.Balance)
 	}
 	{
+		if len(s.Price) != 0 {
+			e.FieldStart("price")
+			e.Raw(s.Price)
+		}
+	}
+	{
 		e.FieldStart("wallet_address")
 		s.WalletAddress.Encode(e)
 	}
@@ -12190,10 +12196,11 @@ func (s *JettonBalance) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfJettonBalance = [3]string{
+var jsonFieldsNameOfJettonBalance = [4]string{
 	0: "balance",
-	1: "wallet_address",
-	2: "jetton",
+	1: "price",
+	2: "wallet_address",
+	3: "jetton",
 }
 
 // Decode decodes JettonBalance from json.
@@ -12217,8 +12224,19 @@ func (s *JettonBalance) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"balance\"")
 			}
+		case "price":
+			if err := func() error {
+				v, err := d.RawAppend(nil)
+				s.Price = jx.Raw(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"price\"")
+			}
 		case "wallet_address":
-			requiredBitSet[0] |= 1 << 1
+			requiredBitSet[0] |= 1 << 2
 			if err := func() error {
 				if err := s.WalletAddress.Decode(d); err != nil {
 					return err
@@ -12228,7 +12246,7 @@ func (s *JettonBalance) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"wallet_address\"")
 			}
 		case "jetton":
-			requiredBitSet[0] |= 1 << 2
+			requiredBitSet[0] |= 1 << 3
 			if err := func() error {
 				if err := s.Jetton.Decode(d); err != nil {
 					return err
@@ -12247,7 +12265,7 @@ func (s *JettonBalance) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b00000111,
+		0b00001101,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.

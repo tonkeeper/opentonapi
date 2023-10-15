@@ -373,6 +373,7 @@ paths:
         - Accounts
       parameters:
         - $ref: '#/components/parameters/accountIDParameter'
+        - $ref: '#/components/parameters/currenciesQuery'
       responses:
         '200':
           description: account jettons balances
@@ -2340,6 +2341,14 @@ components:
       schema:
         type: boolean
         default: false
+    currenciesQuery:
+      in: query
+      name: currencies
+      description: accept ton and all possible fiat currencies, separated by commas
+      required: false
+      schema:
+        type: string
+        example: ton,usd,rub
 
   requestBodies:
     MethodParameters:
@@ -3277,6 +3286,9 @@ components:
         balance:
           type: string
           example: 597968399
+        price:
+          additionalProperties: true
+          example: { }
         wallet_address:
           $ref: '#/components/schemas/AccountAddress'
         jetton:

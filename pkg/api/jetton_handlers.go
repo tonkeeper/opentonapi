@@ -2,21 +2,23 @@ package api
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"math/big"
 	"net/http"
+	"strings"
 
 	"github.com/tonkeeper/opentonapi/pkg/bath"
-	"github.com/tonkeeper/tongo"
-	"github.com/tonkeeper/tongo/liteapi"
-
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/opentonapi/pkg/oas"
+	"github.com/tonkeeper/tongo"
+	"github.com/tonkeeper/tongo/liteapi"
+	"github.com/tonkeeper/tongo/ton"
 )
 
 func (h *Handler) GetAccountJettonsBalances(ctx context.Context, params oas.GetAccountJettonsBalancesParams) (*oas.JettonsBalances, error) {
-	accountID, err := tongo.ParseAccountID(params.AccountID)
+	accountID, err := ton.ParseAccountID(params.AccountID)
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
 	}
@@ -30,10 +32,40 @@ func (h *Handler) GetAccountJettonsBalances(ctx context.Context, params oas.GetA
 	var balances = oas.JettonsBalances{
 		Balances: make([]oas.JettonBalance, 0, len(wallets)),
 	}
+	var currencies []string
+	if params.Currencies.IsSet() {
+		params.Currencies.Value = strings.TrimSpace(params.Currencies.Value)
+		currencies = strings.Split(params.Currencies.Value, ",")
+		if len(currencies) > 100 {
+			return nil, toError(http.StatusBadRequest, fmt.Errorf("max params limit is 100 items"))
+		}
+		for idx, currency := range currencies {
+			if jetton, err := ton.ParseAccountID(currency); err == nil {
+				currency = jetton.ToRaw()
+			} else {
+				currency = strings.ToUpper(currency)
+			}
+			currencies[idx] = currency
+		}
+	}
+	todayRates, yesterdayRates, weekRates, monthRates, _ := h.getRates()
 	for _, wallet := range wallets {
 		jettonBalance := oas.JettonBalance{
 			Balance:       wallet.Balance.String(),
 			WalletAddress: convertAccountAddress(wallet.Address, h.addressBook),
+		}
+		rates := make(map[string]TokenRates)
+		for _, currency := range currencies {
+			if rates, err = convertRates(rates, wallet.JettonAddress.ToRaw(), currency, todayRates, yesterdayRates, weekRates, monthRates); err != nil {
+				continue
+			}
+		}
+		price := rates[wallet.JettonAddress.ToRaw()]
+		if len(rates) > 0 && len(price.Prices) > 0 {
+			jettonBalance.Price, err = json.Marshal(price)
+			if err != nil {
+				return nil, toError(http.StatusInternalServerError, err)
+			}
 		}
 		meta, err := h.storage.GetJettonMasterMetadata(ctx, wallet.JettonAddress)
 		if err != nil && err.Error() == "not enough refs" {
