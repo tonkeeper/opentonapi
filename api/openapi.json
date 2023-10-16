@@ -2447,11 +2447,26 @@
     ],
     "type": "object"
    },
+   "NftApprovedBy": {
+    "items": {
+     "enum": [
+      "getgems",
+      "tonkeeper",
+      "ton.diamonds"
+     ],
+     "example": "getgems",
+     "type": "string"
+    },
+    "type": "array"
+   },
    "NftCollection": {
     "properties": {
      "address": {
       "example": "0:FD595F36B4C1535BEC8461490D38EBB9AE3C38DD6ACE17CA63ABE2C6608BE159",
       "type": "string"
+     },
+     "approved_by": {
+      "$ref": "#/components/schemas/NftApprovedBy"
      },
      "metadata": {
       "additionalProperties": true,
@@ -2505,16 +2520,7 @@
       "type": "string"
      },
      "approved_by": {
-      "items": {
-       "enum": [
-        "getgems",
-        "tonkeeper",
-        "ton.diamonds"
-       ],
-       "example": "getgems",
-       "type": "string"
-      },
-      "type": "array"
+      "$ref": "#/components/schemas/NftApprovedBy"
      },
      "collection": {
       "properties": {

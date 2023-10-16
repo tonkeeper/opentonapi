@@ -3326,6 +3326,15 @@ components:
         url:
           type: string
           example: "https://site.com/pic1.jpg"
+    NftApprovedBy:
+      type: array
+      items:
+        type: string
+        example: getgems
+        enum:
+          - getgems
+          - tonkeeper
+          - ton.diamonds
     Sale:
       type: object
       required:
@@ -3393,14 +3402,7 @@ components:
           type: string
           example: crypto.ton
         approved_by:
-          type: array
-          items:
-            type: string
-            example: getgems
-            enum:
-              - getgems
-              - tonkeeper
-              - ton.diamonds
+          $ref: '#/components/schemas/NftApprovedBy'
     NftItems:
       type: object
       required:
@@ -4191,6 +4193,8 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/ImagePreview'
+        approved_by:
+          $ref: '#/components/schemas/NftApprovedBy'
     NftCollections:
       type: object
       required:

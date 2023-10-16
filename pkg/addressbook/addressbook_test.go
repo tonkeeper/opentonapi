@@ -12,13 +12,13 @@ import (
 func Test_unique(t *testing.T) {
 	tests := []struct {
 		name      string
-		approvers []oas.NftItemApprovedByItem
-		want      []oas.NftItemApprovedByItem
+		approvers []oas.NftApprovedByItem
+		want      []oas.NftApprovedByItem
 	}{
 		{
 			name:      "all good",
-			approvers: []oas.NftItemApprovedByItem{oas.NftItemApprovedByItemTonkeeper, oas.NftItemApprovedByItemGetgems, oas.NftItemApprovedByItemGetgems, oas.NftItemApprovedByItemTonkeeper},
-			want:      []oas.NftItemApprovedByItem{oas.NftItemApprovedByItemGetgems, oas.NftItemApprovedByItemTonkeeper},
+			approvers: []oas.NftApprovedByItem{oas.NftApprovedByItemTonkeeper, oas.NftApprovedByItemGetgems, oas.NftApprovedByItemGetgems, oas.NftApprovedByItemTonkeeper},
+			want:      []oas.NftApprovedByItem{oas.NftApprovedByItemGetgems, oas.NftApprovedByItemTonkeeper},
 		},
 	}
 	for _, tt := range tests {

@@ -14957,6 +14957,98 @@ func (s *MethodExecutionResult) UnmarshalJSON(data []byte) error {
 	return s.Decode(d)
 }
 
+// Encode encodes NftApprovedBy as json.
+func (s NftApprovedBy) Encode(e *jx.Encoder) {
+	unwrapped := []NftApprovedByItem(s)
+
+	e.ArrStart()
+	for _, elem := range unwrapped {
+		elem.Encode(e)
+	}
+	e.ArrEnd()
+}
+
+// Decode decodes NftApprovedBy from json.
+func (s *NftApprovedBy) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode NftApprovedBy to nil")
+	}
+	var unwrapped []NftApprovedByItem
+	if err := func() error {
+		unwrapped = make([]NftApprovedByItem, 0)
+		if err := d.Arr(func(d *jx.Decoder) error {
+			var elem NftApprovedByItem
+			if err := elem.Decode(d); err != nil {
+				return err
+			}
+			unwrapped = append(unwrapped, elem)
+			return nil
+		}); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return errors.Wrap(err, "alias")
+	}
+	*s = NftApprovedBy(unwrapped)
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s NftApprovedBy) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *NftApprovedBy) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes NftApprovedByItem as json.
+func (s NftApprovedByItem) Encode(e *jx.Encoder) {
+	e.Str(string(s))
+}
+
+// Decode decodes NftApprovedByItem from json.
+func (s *NftApprovedByItem) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode NftApprovedByItem to nil")
+	}
+	v, err := d.StrBytes()
+	if err != nil {
+		return err
+	}
+	// Try to use constant string.
+	switch NftApprovedByItem(v) {
+	case NftApprovedByItemGetgems:
+		*s = NftApprovedByItemGetgems
+	case NftApprovedByItemTonkeeper:
+		*s = NftApprovedByItemTonkeeper
+	case NftApprovedByItemTonDiamonds:
+		*s = NftApprovedByItemTonDiamonds
+	default:
+		*s = NftApprovedByItem(v)
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s NftApprovedByItem) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *NftApprovedByItem) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
 // Encode implements json.Marshaler.
 func (s *NftCollection) Encode(e *jx.Encoder) {
 	e.ObjStart()
@@ -15000,15 +15092,22 @@ func (s *NftCollection) encodeFields(e *jx.Encoder) {
 			e.ArrEnd()
 		}
 	}
+	{
+		if s.ApprovedBy != nil {
+			e.FieldStart("approved_by")
+			s.ApprovedBy.Encode(e)
+		}
+	}
 }
 
-var jsonFieldsNameOfNftCollection = [6]string{
+var jsonFieldsNameOfNftCollection = [7]string{
 	0: "address",
 	1: "next_item_index",
 	2: "owner",
 	3: "raw_collection_content",
 	4: "metadata",
 	5: "previews",
+	6: "approved_by",
 }
 
 // Decode decodes NftCollection from json.
@@ -15092,6 +15191,15 @@ func (s *NftCollection) Decode(d *jx.Decoder) error {
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"previews\"")
+			}
+		case "approved_by":
+			if err := func() error {
+				if err := s.ApprovedBy.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"approved_by\"")
 			}
 		default:
 			return d.Skip()
@@ -15373,12 +15481,10 @@ func (s *NftItem) encodeFields(e *jx.Encoder) {
 		}
 	}
 	{
-		e.FieldStart("approved_by")
-		e.ArrStart()
-		for _, elem := range s.ApprovedBy {
-			elem.Encode(e)
+		if s.ApprovedBy != nil {
+			e.FieldStart("approved_by")
+			s.ApprovedBy.Encode(e)
 		}
-		e.ArrEnd()
 	}
 }
 
@@ -15510,15 +15616,7 @@ func (s *NftItem) Decode(d *jx.Decoder) error {
 		case "approved_by":
 			requiredBitSet[1] |= 1 << 1
 			if err := func() error {
-				s.ApprovedBy = make([]NftItemApprovedByItem, 0)
-				if err := d.Arr(func(d *jx.Decoder) error {
-					var elem NftItemApprovedByItem
-					if err := elem.Decode(d); err != nil {
-						return err
-					}
-					s.ApprovedBy = append(s.ApprovedBy, elem)
-					return nil
-				}); err != nil {
+				if err := s.ApprovedBy.Decode(d); err != nil {
 					return err
 				}
 				return nil
@@ -15578,48 +15676,6 @@ func (s *NftItem) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *NftItem) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
-// Encode encodes NftItemApprovedByItem as json.
-func (s NftItemApprovedByItem) Encode(e *jx.Encoder) {
-	e.Str(string(s))
-}
-
-// Decode decodes NftItemApprovedByItem from json.
-func (s *NftItemApprovedByItem) Decode(d *jx.Decoder) error {
-	if s == nil {
-		return errors.New("invalid: unable to decode NftItemApprovedByItem to nil")
-	}
-	v, err := d.StrBytes()
-	if err != nil {
-		return err
-	}
-	// Try to use constant string.
-	switch NftItemApprovedByItem(v) {
-	case NftItemApprovedByItemGetgems:
-		*s = NftItemApprovedByItemGetgems
-	case NftItemApprovedByItemTonkeeper:
-		*s = NftItemApprovedByItemTonkeeper
-	case NftItemApprovedByItemTonDiamonds:
-		*s = NftItemApprovedByItemTonDiamonds
-	default:
-		*s = NftItemApprovedByItem(v)
-	}
-
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s NftItemApprovedByItem) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *NftItemApprovedByItem) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }

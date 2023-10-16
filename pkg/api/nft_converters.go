@@ -108,6 +108,11 @@ func convertNftCollection(collection core.NftCollection, book addressBook) oas.N
 			continue
 		}
 	}
+	if known, ok := book.GetCollectionInfoByAddress(collection.Address); ok {
+		for _, a := range known.Approvers {
+			c.ApprovedBy = append(c.ApprovedBy, a)
+		}
+	}
 	c.Metadata.SetTo(metadata)
 	for _, size := range []int{5, 100, 500, 1500} {
 		url := imgGenerator.DefaultGenerator.GenerateImageUrl(image, size, size)

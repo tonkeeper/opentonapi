@@ -1911,16 +1911,54 @@ func (s *MethodExecutionResult) Validate() error {
 	return nil
 }
 
-func (s *NftCollections) Validate() error {
+func (s NftApprovedBy) Validate() error {
+	alias := ([]NftApprovedByItem)(s)
+	if alias == nil {
+		return errors.New("nil is invalid value")
+	}
+	var failures []validate.FieldError
+	for i, elem := range alias {
+		if err := func() error {
+			if err := elem.Validate(); err != nil {
+				return err
+			}
+			return nil
+		}(); err != nil {
+			failures = append(failures, validate.FieldError{
+				Name:  fmt.Sprintf("[%d]", i),
+				Error: err,
+			})
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s NftApprovedByItem) Validate() error {
+	switch s {
+	case "getgems":
+		return nil
+	case "tonkeeper":
+		return nil
+	case "ton.diamonds":
+		return nil
+	default:
+		return errors.Errorf("invalid value: %v", s)
+	}
+}
+
+func (s *NftCollection) Validate() error {
 	var failures []validate.FieldError
 	if err := func() error {
-		if s.NftCollections == nil {
-			return errors.New("nil is invalid value")
+		if err := s.ApprovedBy.Validate(); err != nil {
+			return err
 		}
 		return nil
 	}(); err != nil {
 		failures = append(failures, validate.FieldError{
-			Name:  "nft_collections",
+			Name:  "approved_by",
 			Error: err,
 		})
 	}
@@ -1930,14 +1968,14 @@ func (s *NftCollections) Validate() error {
 	return nil
 }
 
-func (s *NftItem) Validate() error {
+func (s *NftCollections) Validate() error {
 	var failures []validate.FieldError
 	if err := func() error {
-		if s.ApprovedBy == nil {
+		if s.NftCollections == nil {
 			return errors.New("nil is invalid value")
 		}
 		var failures []validate.FieldError
-		for i, elem := range s.ApprovedBy {
+		for i, elem := range s.NftCollections {
 			if err := func() error {
 				if err := elem.Validate(); err != nil {
 					return err
@@ -1956,7 +1994,7 @@ func (s *NftItem) Validate() error {
 		return nil
 	}(); err != nil {
 		failures = append(failures, validate.FieldError{
-			Name:  "approved_by",
+			Name:  "nft_collections",
 			Error: err,
 		})
 	}
@@ -1966,17 +2004,23 @@ func (s *NftItem) Validate() error {
 	return nil
 }
 
-func (s NftItemApprovedByItem) Validate() error {
-	switch s {
-	case "getgems":
+func (s *NftItem) Validate() error {
+	var failures []validate.FieldError
+	if err := func() error {
+		if err := s.ApprovedBy.Validate(); err != nil {
+			return err
+		}
 		return nil
-	case "tonkeeper":
-		return nil
-	case "ton.diamonds":
-		return nil
-	default:
-		return errors.Errorf("invalid value: %v", s)
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "approved_by",
+			Error: err,
+		})
 	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
 }
 
 func (s *NftItemTransferAction) Validate() error {
