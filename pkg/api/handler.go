@@ -128,7 +128,7 @@ func NewHandler(logger *zap.Logger, opts ...Option) (*Handler, error) {
 		options.chainState = chainstate.NewChainState(options.storage)
 	}
 	if options.spamFilter == nil {
-		options.spamFilter = spam.NewSpamFilter()
+		options.spamFilter = spam.NewNoOpSpamFilter()
 	}
 	if options.ratesSource == nil {
 		options.ratesSource = rates.Mock{Storage: options.storage}
