@@ -15,6 +15,7 @@ import (
 	"github.com/tonkeeper/opentonapi/pkg/oas"
 	"github.com/tonkeeper/opentonapi/pkg/references"
 	"github.com/tonkeeper/tongo"
+	"github.com/tonkeeper/tongo/ton"
 	"go.uber.org/zap"
 	"golang.org/x/exp/maps"
 	"golang.org/x/exp/slices"
@@ -328,13 +329,12 @@ func downloadJson[T any](url string) ([]T, error) {
 }
 
 func (b *Book) getGGWhitelist(logger *zap.Logger) {
-	client := graphql.NewClient("https://api.getgems.io/graphql", nil)
 	for {
 		if len(b.GetKnownCollections()) == 0 {
 			time.Sleep(time.Second * 10)
 			continue
 		}
-		addresses, err := _getGGWhitelist(client)
+		addresses, err := FetchGetGemsVerifiedCollections()
 		if err != nil {
 			logger.Warn(fmt.Sprintf("get nft collection whitelist: %v", err))
 			time.Sleep(time.Minute * 3)
@@ -368,7 +368,8 @@ func (b *Book) getTonDiamondsWhitelist() {
 	}
 }
 
-func _getGGWhitelist(client *graphql.Client) ([]tongo.AccountID, error) {
+func FetchGetGemsVerifiedCollections() ([]tongo.AccountID, error) {
+	client := graphql.NewClient("https://api.getgems.io/graphql", nil)
 	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
 	defer cancel()
 	var q struct {
@@ -378,13 +379,13 @@ func _getGGWhitelist(client *graphql.Client) ([]tongo.AccountID, error) {
 	if err != nil {
 		return nil, err
 	}
-	var addr []tongo.AccountID
+	accountIDs := make([]tongo.AccountID, 0, len(q.GetAddressesOfVerifiedCollections))
 	for _, collection := range q.GetAddressesOfVerifiedCollections {
-		aa, err := tongo.ParseAccountID(string(collection))
+		accountID, err := ton.ParseAccountID(string(collection))
 		if err != nil {
 			return nil, err
 		}
-		addr = append(addr, aa)
+		accountIDs = append(accountIDs, accountID)
 	}
-	return addr, nil
+	return accountIDs, nil
 }
