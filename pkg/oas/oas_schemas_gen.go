@@ -5086,6 +5086,47 @@ func (s *MethodExecutionResult) SetDecoded(val jx.Raw) {
 	s.Decoded = val
 }
 
+type NftApprovedBy []NftApprovedByItem
+
+type NftApprovedByItem string
+
+const (
+	NftApprovedByItemGetgems     NftApprovedByItem = "getgems"
+	NftApprovedByItemTonkeeper   NftApprovedByItem = "tonkeeper"
+	NftApprovedByItemTonDiamonds NftApprovedByItem = "ton.diamonds"
+)
+
+// MarshalText implements encoding.TextMarshaler.
+func (s NftApprovedByItem) MarshalText() ([]byte, error) {
+	switch s {
+	case NftApprovedByItemGetgems:
+		return []byte(s), nil
+	case NftApprovedByItemTonkeeper:
+		return []byte(s), nil
+	case NftApprovedByItemTonDiamonds:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *NftApprovedByItem) UnmarshalText(data []byte) error {
+	switch NftApprovedByItem(data) {
+	case NftApprovedByItemGetgems:
+		*s = NftApprovedByItemGetgems
+		return nil
+	case NftApprovedByItemTonkeeper:
+		*s = NftApprovedByItemTonkeeper
+		return nil
+	case NftApprovedByItemTonDiamonds:
+		*s = NftApprovedByItemTonDiamonds
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
 // Ref: #/components/schemas/NftCollection
 type NftCollection struct {
 	Address              string                   `json:"address"`
@@ -5094,6 +5135,7 @@ type NftCollection struct {
 	RawCollectionContent string                   `json:"raw_collection_content"`
 	Metadata             OptNftCollectionMetadata `json:"metadata"`
 	Previews             []ImagePreview           `json:"previews"`
+	ApprovedBy           NftApprovedBy            `json:"approved_by"`
 }
 
 // GetAddress returns the value of Address.
@@ -5126,6 +5168,11 @@ func (s *NftCollection) GetPreviews() []ImagePreview {
 	return s.Previews
 }
 
+// GetApprovedBy returns the value of ApprovedBy.
+func (s *NftCollection) GetApprovedBy() NftApprovedBy {
+	return s.ApprovedBy
+}
+
 // SetAddress sets the value of Address.
 func (s *NftCollection) SetAddress(val string) {
 	s.Address = val
@@ -5156,6 +5203,11 @@ func (s *NftCollection) SetPreviews(val []ImagePreview) {
 	s.Previews = val
 }
 
+// SetApprovedBy sets the value of ApprovedBy.
+func (s *NftCollection) SetApprovedBy(val NftApprovedBy) {
+	s.ApprovedBy = val
+}
+
 type NftCollectionMetadata map[string]jx.Raw
 
 func (s *NftCollectionMetadata) init() NftCollectionMetadata {
@@ -5184,16 +5236,16 @@ func (s *NftCollections) SetNftCollections(val []NftCollection) {
 
 // Ref: #/components/schemas/NftItem
 type NftItem struct {
-	Address    string                  `json:"address"`
-	Index      int64                   `json:"index"`
-	Owner      OptAccountAddress       `json:"owner"`
-	Collection OptNftItemCollection    `json:"collection"`
-	Verified   bool                    `json:"verified"`
-	Metadata   NftItemMetadata         `json:"metadata"`
-	Sale       OptSale                 `json:"sale"`
-	Previews   []ImagePreview          `json:"previews"`
-	DNS        OptString               `json:"dns"`
-	ApprovedBy []NftItemApprovedByItem `json:"approved_by"`
+	Address    string               `json:"address"`
+	Index      int64                `json:"index"`
+	Owner      OptAccountAddress    `json:"owner"`
+	Collection OptNftItemCollection `json:"collection"`
+	Verified   bool                 `json:"verified"`
+	Metadata   NftItemMetadata      `json:"metadata"`
+	Sale       OptSale              `json:"sale"`
+	Previews   []ImagePreview       `json:"previews"`
+	DNS        OptString            `json:"dns"`
+	ApprovedBy NftApprovedBy        `json:"approved_by"`
 }
 
 // GetAddress returns the value of Address.
@@ -5242,7 +5294,7 @@ func (s *NftItem) GetDNS() OptString {
 }
 
 // GetApprovedBy returns the value of ApprovedBy.
-func (s *NftItem) GetApprovedBy() []NftItemApprovedByItem {
+func (s *NftItem) GetApprovedBy() NftApprovedBy {
 	return s.ApprovedBy
 }
 
@@ -5292,47 +5344,8 @@ func (s *NftItem) SetDNS(val OptString) {
 }
 
 // SetApprovedBy sets the value of ApprovedBy.
-func (s *NftItem) SetApprovedBy(val []NftItemApprovedByItem) {
+func (s *NftItem) SetApprovedBy(val NftApprovedBy) {
 	s.ApprovedBy = val
-}
-
-type NftItemApprovedByItem string
-
-const (
-	NftItemApprovedByItemGetgems     NftItemApprovedByItem = "getgems"
-	NftItemApprovedByItemTonkeeper   NftItemApprovedByItem = "tonkeeper"
-	NftItemApprovedByItemTonDiamonds NftItemApprovedByItem = "ton.diamonds"
-)
-
-// MarshalText implements encoding.TextMarshaler.
-func (s NftItemApprovedByItem) MarshalText() ([]byte, error) {
-	switch s {
-	case NftItemApprovedByItemGetgems:
-		return []byte(s), nil
-	case NftItemApprovedByItemTonkeeper:
-		return []byte(s), nil
-	case NftItemApprovedByItemTonDiamonds:
-		return []byte(s), nil
-	default:
-		return nil, errors.Errorf("invalid value: %q", s)
-	}
-}
-
-// UnmarshalText implements encoding.TextUnmarshaler.
-func (s *NftItemApprovedByItem) UnmarshalText(data []byte) error {
-	switch NftItemApprovedByItem(data) {
-	case NftItemApprovedByItemGetgems:
-		*s = NftItemApprovedByItemGetgems
-		return nil
-	case NftItemApprovedByItemTonkeeper:
-		*s = NftItemApprovedByItemTonkeeper
-		return nil
-	case NftItemApprovedByItemTonDiamonds:
-		*s = NftItemApprovedByItemTonDiamonds
-		return nil
-	default:
-		return errors.Errorf("invalid value: %q", data)
-	}
 }
 
 type NftItemCollection struct {

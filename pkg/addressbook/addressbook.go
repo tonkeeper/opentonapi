@@ -70,7 +70,7 @@ type KnownCollection struct {
 	MaxItems    int64    `json:"max_items"`
 	Websites    []string `json:"websites,omitempty"`
 	Social      []string `json:"social,omitempty"`
-	Approvers   []oas.NftItemApprovedByItem
+	Approvers   []oas.NftApprovedByItem
 }
 
 type Option func(o *Options)
@@ -258,7 +258,7 @@ func (b *Book) refreshJettons(logger *zap.Logger, jettonPath string) {
 	}
 }
 
-func unique(approvers []oas.NftItemApprovedByItem) []oas.NftItemApprovedByItem {
+func unique(approvers []oas.NftApprovedByItem) []oas.NftApprovedByItem {
 	sort.Slice(approvers, func(i, j int) bool {
 		return approvers[i] < approvers[j]
 	})
@@ -283,12 +283,12 @@ func (b *Book) refreshCollections(logger *zap.Logger, collectionPath string) {
 		if !ok {
 			// this is a new item, so we only add tonkeeper as approver.
 			item.Address = accountID.ToRaw()
-			item.Approvers = unique(append(item.Approvers, oas.NftItemApprovedByItemTonkeeper))
+			item.Approvers = unique(append(item.Approvers, oas.NftApprovedByItemTonkeeper))
 			b.collections[accountID] = item
 			continue
 		}
 		// this is an existing item, so we merge approvers and remove duplicates adding tonkeeper.
-		item.Approvers = unique(append(append(currentCollection.Approvers, item.Approvers...), oas.NftItemApprovedByItemTonkeeper))
+		item.Approvers = unique(append(append(currentCollection.Approvers, item.Approvers...), oas.NftApprovedByItemTonkeeper))
 		b.collections[accountID] = item
 	}
 }
@@ -343,7 +343,7 @@ func (b *Book) getGGWhitelist(logger *zap.Logger) {
 		b.mu.Lock()
 		for _, account := range addresses {
 			collection := b.collections[account]
-			collection.Approvers = unique(append(collection.Approvers, oas.NftItemApprovedByItemGetgems))
+			collection.Approvers = unique(append(collection.Approvers, oas.NftApprovedByItemGetgems))
 			b.collections[account] = collection
 		}
 		b.mu.Unlock()
@@ -360,7 +360,7 @@ func (b *Book) getTonDiamondsWhitelist() {
 		b.mu.Lock()
 		for _, account := range references.TonDiamondsCollections {
 			collection := b.collections[account]
-			collection.Approvers = unique(append(collection.Approvers, oas.NftItemApprovedByItemTonDiamonds))
+			collection.Approvers = unique(append(collection.Approvers, oas.NftApprovedByItemTonDiamonds))
 			b.collections[account] = collection
 		}
 		b.mu.Unlock()
