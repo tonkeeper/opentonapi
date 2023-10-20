@@ -15093,10 +15093,8 @@ func (s *NftCollection) encodeFields(e *jx.Encoder) {
 		}
 	}
 	{
-		if s.ApprovedBy != nil {
-			e.FieldStart("approved_by")
-			s.ApprovedBy.Encode(e)
-		}
+		e.FieldStart("approved_by")
+		s.ApprovedBy.Encode(e)
 	}
 }
 
@@ -15193,6 +15191,7 @@ func (s *NftCollection) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"previews\"")
 			}
 		case "approved_by":
+			requiredBitSet[0] |= 1 << 6
 			if err := func() error {
 				if err := s.ApprovedBy.Decode(d); err != nil {
 					return err
@@ -15211,7 +15210,7 @@ func (s *NftCollection) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b00001011,
+		0b01001011,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -15481,10 +15480,8 @@ func (s *NftItem) encodeFields(e *jx.Encoder) {
 		}
 	}
 	{
-		if s.ApprovedBy != nil {
-			e.FieldStart("approved_by")
-			s.ApprovedBy.Encode(e)
-		}
+		e.FieldStart("approved_by")
+		s.ApprovedBy.Encode(e)
 	}
 }
 

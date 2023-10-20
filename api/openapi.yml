@@ -4172,6 +4172,7 @@ components:
         - address
         - next_item_index
         - raw_collection_content
+        - approved_by
       properties:
         address:
           type: string

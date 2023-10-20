@@ -23,6 +23,15 @@ const (
 	AccStatusChangeAcstDeleted   AccStatusChange = "acst_deleted"
 )
 
+// AllValues returns all AccStatusChange values.
+func (AccStatusChange) AllValues() []AccStatusChange {
+	return []AccStatusChange{
+		AccStatusChangeAcstUnchanged,
+		AccStatusChangeAcstFrozen,
+		AccStatusChangeAcstDeleted,
+	}
+}
+
 // MarshalText implements encoding.TextMarshaler.
 func (s AccStatusChange) MarshalText() ([]byte, error) {
 	switch s {
@@ -488,6 +497,16 @@ const (
 	AccountStatusActive   AccountStatus = "active"
 	AccountStatusFrozen   AccountStatus = "frozen"
 )
+
+// AllValues returns all AccountStatus values.
+func (AccountStatus) AllValues() []AccountStatus {
+	return []AccountStatus{
+		AccountStatusNonexist,
+		AccountStatusUninit,
+		AccountStatusActive,
+		AccountStatusFrozen,
+	}
+}
 
 // MarshalText implements encoding.TextMarshaler.
 func (s AccountStatus) MarshalText() ([]byte, error) {
@@ -962,6 +981,14 @@ const (
 	ActionStatusFailed ActionStatus = "failed"
 )
 
+// AllValues returns all ActionStatus values.
+func (ActionStatus) AllValues() []ActionStatus {
+	return []ActionStatus{
+		ActionStatusOk,
+		ActionStatusFailed,
+	}
+}
+
 // MarshalText implements encoding.TextMarshaler.
 func (s ActionStatus) MarshalText() ([]byte, error) {
 	switch s {
@@ -1010,6 +1037,30 @@ const (
 	ActionTypeElectionsDepositStake ActionType = "ElectionsDepositStake"
 	ActionTypeUnknown               ActionType = "Unknown"
 )
+
+// AllValues returns all ActionType values.
+func (ActionType) AllValues() []ActionType {
+	return []ActionType{
+		ActionTypeTonTransfer,
+		ActionTypeJettonTransfer,
+		ActionTypeJettonBurn,
+		ActionTypeJettonMint,
+		ActionTypeNftItemTransfer,
+		ActionTypeContractDeploy,
+		ActionTypeSubscribe,
+		ActionTypeUnSubscribe,
+		ActionTypeAuctionBid,
+		ActionTypeNftPurchase,
+		ActionTypeDepositStake,
+		ActionTypeWithdrawStake,
+		ActionTypeWithdrawStakeRequest,
+		ActionTypeJettonSwap,
+		ActionTypeSmartContractExec,
+		ActionTypeElectionsRecoverStake,
+		ActionTypeElectionsDepositStake,
+		ActionTypeUnknown,
+	}
+}
 
 // MarshalText implements encoding.TextMarshaler.
 func (s ActionType) MarshalText() ([]byte, error) {
@@ -1270,6 +1321,16 @@ const (
 	AuctionBidActionAuctionTypeGetgems  AuctionBidActionAuctionType = "getgems"
 )
 
+// AllValues returns all AuctionBidActionAuctionType values.
+func (AuctionBidActionAuctionType) AllValues() []AuctionBidActionAuctionType {
+	return []AuctionBidActionAuctionType{
+		AuctionBidActionAuctionTypeDNSTon,
+		AuctionBidActionAuctionTypeDNSTg,
+		AuctionBidActionAuctionTypeNUMBERTg,
+		AuctionBidActionAuctionTypeGetgems,
+	}
+}
+
 // MarshalText implements encoding.TextMarshaler.
 func (s AuctionBidActionAuctionType) MarshalText() ([]byte, error) {
 	switch s {
@@ -1444,6 +1505,13 @@ type BlockchainAccountInspectCompiler string
 const (
 	BlockchainAccountInspectCompilerFunc BlockchainAccountInspectCompiler = "func"
 )
+
+// AllValues returns all BlockchainAccountInspectCompiler values.
+func (BlockchainAccountInspectCompiler) AllValues() []BlockchainAccountInspectCompiler {
+	return []BlockchainAccountInspectCompiler{
+		BlockchainAccountInspectCompilerFunc,
+	}
+}
 
 // MarshalText implements encoding.TextMarshaler.
 func (s BlockchainAccountInspectCompiler) MarshalText() ([]byte, error) {
@@ -2083,6 +2151,15 @@ const (
 	BouncePhaseTypeTrPhaseBounceOk       BouncePhaseType = "TrPhaseBounceOk"
 )
 
+// AllValues returns all BouncePhaseType values.
+func (BouncePhaseType) AllValues() []BouncePhaseType {
+	return []BouncePhaseType{
+		BouncePhaseTypeTrPhaseBounceNegfunds,
+		BouncePhaseTypeTrPhaseBounceNofunds,
+		BouncePhaseTypeTrPhaseBounceOk,
+	}
+}
+
 // MarshalText implements encoding.TextMarshaler.
 func (s BouncePhaseType) MarshalText() ([]byte, error) {
 	switch s {
@@ -2203,6 +2280,15 @@ const (
 	ComputeSkipReasonCskipBadState ComputeSkipReason = "cskip_bad_state"
 	ComputeSkipReasonCskipNoGas    ComputeSkipReason = "cskip_no_gas"
 )
+
+// AllValues returns all ComputeSkipReason values.
+func (ComputeSkipReason) AllValues() []ComputeSkipReason {
+	return []ComputeSkipReason{
+		ComputeSkipReasonCskipNoState,
+		ComputeSkipReasonCskipBadState,
+		ComputeSkipReasonCskipNoGas,
+	}
+}
 
 // MarshalText implements encoding.TextMarshaler.
 func (s ComputeSkipReason) MarshalText() ([]byte, error) {
@@ -4614,6 +4700,15 @@ const (
 	JettonSwapActionDexMegatonfi JettonSwapActionDex = "megatonfi"
 )
 
+// AllValues returns all JettonSwapActionDex values.
+func (JettonSwapActionDex) AllValues() []JettonSwapActionDex {
+	return []JettonSwapActionDex{
+		JettonSwapActionDexStonfi,
+		JettonSwapActionDexDedust,
+		JettonSwapActionDexMegatonfi,
+	}
+}
+
 // MarshalText implements encoding.TextMarshaler.
 func (s JettonSwapActionDex) MarshalText() ([]byte, error) {
 	switch s {
@@ -4757,6 +4852,15 @@ const (
 	JettonVerificationTypeBlacklist JettonVerificationType = "blacklist"
 	JettonVerificationTypeNone      JettonVerificationType = "none"
 )
+
+// AllValues returns all JettonVerificationType values.
+func (JettonVerificationType) AllValues() []JettonVerificationType {
+	return []JettonVerificationType{
+		JettonVerificationTypeWhitelist,
+		JettonVerificationTypeBlacklist,
+		JettonVerificationTypeNone,
+	}
+}
 
 // MarshalText implements encoding.TextMarshaler.
 func (s JettonVerificationType) MarshalText() ([]byte, error) {
@@ -5095,6 +5199,15 @@ const (
 	NftApprovedByItemTonkeeper   NftApprovedByItem = "tonkeeper"
 	NftApprovedByItemTonDiamonds NftApprovedByItem = "ton.diamonds"
 )
+
+// AllValues returns all NftApprovedByItem values.
+func (NftApprovedByItem) AllValues() []NftApprovedByItem {
+	return []NftApprovedByItem{
+		NftApprovedByItemGetgems,
+		NftApprovedByItemTonkeeper,
+		NftApprovedByItemTonDiamonds,
+	}
+}
 
 // MarshalText implements encoding.TextMarshaler.
 func (s NftApprovedByItem) MarshalText() ([]byte, error) {
@@ -5558,6 +5671,15 @@ const (
 	NftPurchaseActionAuctionTypeGetgems NftPurchaseActionAuctionType = "getgems"
 	NftPurchaseActionAuctionTypeBasic   NftPurchaseActionAuctionType = "basic"
 )
+
+// AllValues returns all NftPurchaseActionAuctionType values.
+func (NftPurchaseActionAuctionType) AllValues() []NftPurchaseActionAuctionType {
+	return []NftPurchaseActionAuctionType{
+		NftPurchaseActionAuctionTypeDNSTg,
+		NftPurchaseActionAuctionTypeGetgems,
+		NftPurchaseActionAuctionTypeBasic,
+	}
+}
 
 // MarshalText implements encoding.TextMarshaler.
 func (s NftPurchaseActionAuctionType) MarshalText() ([]byte, error) {
@@ -7763,6 +7885,15 @@ const (
 	PoolImplementationTypeLiquidTF PoolImplementationType = "liquidTF"
 )
 
+// AllValues returns all PoolImplementationType values.
+func (PoolImplementationType) AllValues() []PoolImplementationType {
+	return []PoolImplementationType{
+		PoolImplementationTypeWhales,
+		PoolImplementationTypeTf,
+		PoolImplementationTypeLiquidTF,
+	}
+}
+
 // MarshalText implements encoding.TextMarshaler.
 func (s PoolImplementationType) MarshalText() ([]byte, error) {
 	switch s {
@@ -8031,6 +8162,15 @@ const (
 	RefundTypeDNSTg   RefundType = "DNS.tg"
 	RefundTypeGetGems RefundType = "GetGems"
 )
+
+// AllValues returns all RefundType values.
+func (RefundType) AllValues() []RefundType {
+	return []RefundType{
+		RefundTypeDNSTon,
+		RefundTypeDNSTg,
+		RefundTypeGetGems,
+	}
+}
 
 // MarshalText implements encoding.TextMarshaler.
 func (s RefundType) MarshalText() ([]byte, error) {
@@ -9197,6 +9337,19 @@ const (
 	TransactionTypeTransStorage      TransactionType = "TransStorage"
 )
 
+// AllValues returns all TransactionType values.
+func (TransactionType) AllValues() []TransactionType {
+	return []TransactionType{
+		TransactionTypeTransOrd,
+		TransactionTypeTransTickTock,
+		TransactionTypeTransSplitPrepare,
+		TransactionTypeTransSplitInstall,
+		TransactionTypeTransMergePrepare,
+		TransactionTypeTransMergeInstall,
+		TransactionTypeTransStorage,
+	}
+}
+
 // MarshalText implements encoding.TextMarshaler.
 func (s TransactionType) MarshalText() ([]byte, error) {
 	switch s {
@@ -9331,6 +9484,17 @@ const (
 	TvmStackRecordTypeNull  TvmStackRecordType = "null"
 	TvmStackRecordTypeTuple TvmStackRecordType = "tuple"
 )
+
+// AllValues returns all TvmStackRecordType values.
+func (TvmStackRecordType) AllValues() []TvmStackRecordType {
+	return []TvmStackRecordType{
+		TvmStackRecordTypeCell,
+		TvmStackRecordTypeNum,
+		TvmStackRecordTypeNan,
+		TvmStackRecordTypeNull,
+		TvmStackRecordTypeTuple,
+	}
+}
 
 // MarshalText implements encoding.TextMarshaler.
 func (s TvmStackRecordType) MarshalText() ([]byte, error) {

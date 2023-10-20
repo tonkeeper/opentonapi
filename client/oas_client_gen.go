@@ -12,6 +12,7 @@ import (
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/metric"
+	semconv "go.opentelemetry.io/otel/semconv/v1.19.0"
 	"go.opentelemetry.io/otel/trace"
 
 	"github.com/ogen-go/ogen/conv"
@@ -19,6 +20,487 @@ import (
 	"github.com/ogen-go/ogen/otelogen"
 	"github.com/ogen-go/ogen/uri"
 )
+
+// Invoker invokes operations described by OpenAPI v3 specification.
+type Invoker interface {
+	// AccountDnsBackResolve invokes accountDnsBackResolve operation.
+	//
+	// Get account's domains.
+	//
+	// GET /v2/accounts/{account_id}/dns/backresolve
+	AccountDnsBackResolve(ctx context.Context, params AccountDnsBackResolveParams) (*DomainNames, error)
+	// BlockchainAccountInspect invokes blockchainAccountInspect operation.
+	//
+	// Blockchain account inspect.
+	//
+	// GET /v2/blockchain/accounts/{account_id}/inspect
+	BlockchainAccountInspect(ctx context.Context, params BlockchainAccountInspectParams) (*BlockchainAccountInspect, error)
+	// DnsResolve invokes dnsResolve operation.
+	//
+	// DNS resolve for domain name.
+	//
+	// GET /v2/dns/{domain_name}/resolve
+	DnsResolve(ctx context.Context, params DnsResolveParams) (*DnsRecord, error)
+	// EmulateMessageToAccountEvent invokes emulateMessageToAccountEvent operation.
+	//
+	// Emulate sending message to blockchain.
+	//
+	// POST /v2/accounts/{account_id}/events/emulate
+	EmulateMessageToAccountEvent(ctx context.Context, request *EmulateMessageToAccountEventReq, params EmulateMessageToAccountEventParams) (*AccountEvent, error)
+	// EmulateMessageToEvent invokes emulateMessageToEvent operation.
+	//
+	// Emulate sending message to blockchain.
+	//
+	// POST /v2/events/emulate
+	EmulateMessageToEvent(ctx context.Context, request *EmulateMessageToEventReq, params EmulateMessageToEventParams) (*Event, error)
+	// EmulateMessageToTrace invokes emulateMessageToTrace operation.
+	//
+	// Emulate sending message to blockchain.
+	//
+	// POST /v2/traces/emulate
+	EmulateMessageToTrace(ctx context.Context, request *EmulateMessageToTraceReq) (*Trace, error)
+	// EmulateMessageToWallet invokes emulateMessageToWallet operation.
+	//
+	// Emulate sending message to blockchain.
+	//
+	// POST /v2/wallet/emulate
+	EmulateMessageToWallet(ctx context.Context, request *EmulateMessageToWalletReq, params EmulateMessageToWalletParams) (*MessageConsequences, error)
+	// ExecGetMethodForBlockchainAccount invokes execGetMethodForBlockchainAccount operation.
+	//
+	// Execute get method for account.
+	//
+	// GET /v2/blockchain/accounts/{account_id}/methods/{method_name}
+	ExecGetMethodForBlockchainAccount(ctx context.Context, params ExecGetMethodForBlockchainAccountParams) (*MethodExecutionResult, error)
+	// GetAccount invokes getAccount operation.
+	//
+	// Get human-friendly information about an account without low-level details.
+	//
+	// GET /v2/accounts/{account_id}
+	GetAccount(ctx context.Context, params GetAccountParams) (*Account, error)
+	// GetAccountDiff invokes getAccountDiff operation.
+	//
+	// Get account's balance change.
+	//
+	// GET /v2/accounts/{account_id}/diff
+	GetAccountDiff(ctx context.Context, params GetAccountDiffParams) (*GetAccountDiffOK, error)
+	// GetAccountDnsExpiring invokes getAccountDnsExpiring operation.
+	//
+	// Get expiring account .ton dns.
+	//
+	// GET /v2/accounts/{account_id}/dns/expiring
+	GetAccountDnsExpiring(ctx context.Context, params GetAccountDnsExpiringParams) (*DnsExpiring, error)
+	// GetAccountEvent invokes getAccountEvent operation.
+	//
+	// Get event for an account by event_id.
+	//
+	// GET /v2/accounts/{account_id}/events/{event_id}
+	GetAccountEvent(ctx context.Context, params GetAccountEventParams) (*AccountEvent, error)
+	// GetAccountEvents invokes getAccountEvents operation.
+	//
+	// Get events for an account. Each event is built on top of a trace which is a series of transactions
+	// caused by one inbound message. TonAPI looks for known patterns inside the trace and splits the
+	// trace into actions, where a single action represents a meaningful high-level operation like a
+	// Jetton Transfer or an NFT Purchase. Actions are expected to be shown to users. It is advised not
+	// to build any logic on top of actions because actions can be changed at any time.
+	//
+	// GET /v2/accounts/{account_id}/events
+	GetAccountEvents(ctx context.Context, params GetAccountEventsParams) (*AccountEvents, error)
+	// GetAccountInfoByStateInit invokes getAccountInfoByStateInit operation.
+	//
+	// Get account info by state init.
+	//
+	// POST /v2/tonconnect/stateinit
+	GetAccountInfoByStateInit(ctx context.Context, request *GetAccountInfoByStateInitReq) (*AccountInfoByStateInit, error)
+	// GetAccountJettonHistoryByID invokes getAccountJettonHistoryByID operation.
+	//
+	// Get the transfer jetton history for account and jetton.
+	//
+	// GET /v2/accounts/{account_id}/jettons/{jetton_id}/history
+	GetAccountJettonHistoryByID(ctx context.Context, params GetAccountJettonHistoryByIDParams) (*AccountEvents, error)
+	// GetAccountJettonsBalances invokes getAccountJettonsBalances operation.
+	//
+	// Get all Jettons balances by owner address.
+	//
+	// GET /v2/accounts/{account_id}/jettons
+	GetAccountJettonsBalances(ctx context.Context, params GetAccountJettonsBalancesParams) (*JettonsBalances, error)
+	// GetAccountJettonsHistory invokes getAccountJettonsHistory operation.
+	//
+	// Get the transfer jettons history for account.
+	//
+	// GET /v2/accounts/{account_id}/jettons/history
+	GetAccountJettonsHistory(ctx context.Context, params GetAccountJettonsHistoryParams) (*AccountEvents, error)
+	// GetAccountNftHistory invokes getAccountNftHistory operation.
+	//
+	// Get the transfer nft history.
+	//
+	// GET /v2/accounts/{account_id}/nfts/history
+	GetAccountNftHistory(ctx context.Context, params GetAccountNftHistoryParams) (*AccountEvents, error)
+	// GetAccountNftItems invokes getAccountNftItems operation.
+	//
+	// Get all NFT items by owner address.
+	//
+	// GET /v2/accounts/{account_id}/nfts
+	GetAccountNftItems(ctx context.Context, params GetAccountNftItemsParams) (*NftItems, error)
+	// GetAccountNominatorsPools invokes getAccountNominatorsPools operation.
+	//
+	// All pools where account participates.
+	//
+	// GET /v2/staking/nominator/{account_id}/pools
+	GetAccountNominatorsPools(ctx context.Context, params GetAccountNominatorsPoolsParams) (*AccountStaking, error)
+	// GetAccountPublicKey invokes getAccountPublicKey operation.
+	//
+	// Get public key by account id.
+	//
+	// GET /v2/accounts/{account_id}/publickey
+	GetAccountPublicKey(ctx context.Context, params GetAccountPublicKeyParams) (*GetAccountPublicKeyOK, error)
+	// GetAccountSeqno invokes getAccountSeqno operation.
+	//
+	// Get account seqno.
+	//
+	// GET /v2/wallet/{account_id}/seqno
+	GetAccountSeqno(ctx context.Context, params GetAccountSeqnoParams) (*Seqno, error)
+	// GetAccountSubscriptions invokes getAccountSubscriptions operation.
+	//
+	// Get all subscriptions by wallet address.
+	//
+	// GET /v2/accounts/{account_id}/subscriptions
+	GetAccountSubscriptions(ctx context.Context, params GetAccountSubscriptionsParams) (*Subscriptions, error)
+	// GetAccountTraces invokes getAccountTraces operation.
+	//
+	// Get traces for account.
+	//
+	// GET /v2/accounts/{account_id}/traces
+	GetAccountTraces(ctx context.Context, params GetAccountTracesParams) (*TraceIDs, error)
+	// GetAccounts invokes getAccounts operation.
+	//
+	// Get human-friendly information about several accounts without low-level details.
+	//
+	// POST /v2/accounts/_bulk
+	GetAccounts(ctx context.Context, request OptGetAccountsReq) (*Accounts, error)
+	// GetAllAuctions invokes getAllAuctions operation.
+	//
+	// Get all auctions.
+	//
+	// GET /v2/dns/auctions
+	GetAllAuctions(ctx context.Context, params GetAllAuctionsParams) (*Auctions, error)
+	// GetAllRawShardsInfo invokes getAllRawShardsInfo operation.
+	//
+	// Get all raw shards info.
+	//
+	// GET /v2/liteserver/get_all_shards_info/{block_id}
+	GetAllRawShardsInfo(ctx context.Context, params GetAllRawShardsInfoParams) (*GetAllRawShardsInfoOK, error)
+	// GetBlockchainAccountTransactions invokes getBlockchainAccountTransactions operation.
+	//
+	// Get account transactions.
+	//
+	// GET /v2/blockchain/accounts/{account_id}/transactions
+	GetBlockchainAccountTransactions(ctx context.Context, params GetBlockchainAccountTransactionsParams) (*Transactions, error)
+	// GetBlockchainBlock invokes getBlockchainBlock operation.
+	//
+	// Get blockchain block data.
+	//
+	// GET /v2/blockchain/blocks/{block_id}
+	GetBlockchainBlock(ctx context.Context, params GetBlockchainBlockParams) (*BlockchainBlock, error)
+	// GetBlockchainBlockTransactions invokes getBlockchainBlockTransactions operation.
+	//
+	// Get transactions from block.
+	//
+	// GET /v2/blockchain/blocks/{block_id}/transactions
+	GetBlockchainBlockTransactions(ctx context.Context, params GetBlockchainBlockTransactionsParams) (*Transactions, error)
+	// GetBlockchainConfig invokes getBlockchainConfig operation.
+	//
+	// Get blockchain config.
+	//
+	// GET /v2/blockchain/config
+	GetBlockchainConfig(ctx context.Context) (*BlockchainConfig, error)
+	// GetBlockchainMasterchainHead invokes getBlockchainMasterchainHead operation.
+	//
+	// Get last known masterchain block.
+	//
+	// GET /v2/blockchain/masterchain-head
+	GetBlockchainMasterchainHead(ctx context.Context) (*BlockchainBlock, error)
+	// GetBlockchainRawAccount invokes getBlockchainRawAccount operation.
+	//
+	// Get low-level information about an account taken directly from the blockchain.
+	//
+	// GET /v2/blockchain/accounts/{account_id}
+	GetBlockchainRawAccount(ctx context.Context, params GetBlockchainRawAccountParams) (*BlockchainRawAccount, error)
+	// GetBlockchainTransaction invokes getBlockchainTransaction operation.
+	//
+	// Get transaction data.
+	//
+	// GET /v2/blockchain/transactions/{transaction_id}
+	GetBlockchainTransaction(ctx context.Context, params GetBlockchainTransactionParams) (*Transaction, error)
+	// GetBlockchainTransactionByMessageHash invokes getBlockchainTransactionByMessageHash operation.
+	//
+	// Get transaction data by message hash.
+	//
+	// GET /v2/blockchain/messages/{msg_id}/transaction
+	GetBlockchainTransactionByMessageHash(ctx context.Context, params GetBlockchainTransactionByMessageHashParams) (*Transaction, error)
+	// GetBlockchainValidators invokes getBlockchainValidators operation.
+	//
+	// Get blockchain validators.
+	//
+	// GET /v2/blockchain/validators
+	GetBlockchainValidators(ctx context.Context) (*Validators, error)
+	// GetChartRates invokes getChartRates operation.
+	//
+	// Get chart by token.
+	//
+	// GET /v2/rates/chart
+	GetChartRates(ctx context.Context, params GetChartRatesParams) (*GetChartRatesOK, error)
+	// GetDnsInfo invokes getDnsInfo operation.
+	//
+	// Get full information about domain name.
+	//
+	// GET /v2/dns/{domain_name}
+	GetDnsInfo(ctx context.Context, params GetDnsInfoParams) (*DomainInfo, error)
+	// GetDomainBids invokes getDomainBids operation.
+	//
+	// Get domain bids.
+	//
+	// GET /v2/dns/{domain_name}/bids
+	GetDomainBids(ctx context.Context, params GetDomainBidsParams) (*DomainBids, error)
+	// GetEvent invokes getEvent operation.
+	//
+	// Get an event either by event ID or a hash of any transaction in a trace. An event is built on top
+	// of a trace which is a series of transactions caused by one inbound message. TonAPI looks for known
+	// patterns inside the trace and splits the trace into actions, where a single action represents a
+	// meaningful high-level operation like a Jetton Transfer or an NFT Purchase. Actions are expected to
+	// be shown to users. It is advised not to build any logic on top of actions because actions can be
+	// changed at any time.
+	//
+	// GET /v2/events/{event_id}
+	GetEvent(ctx context.Context, params GetEventParams) (*Event, error)
+	// GetItemsFromCollection invokes getItemsFromCollection operation.
+	//
+	// Get NFT items from collection by collection address.
+	//
+	// GET /v2/nfts/collections/{account_id}/items
+	GetItemsFromCollection(ctx context.Context, params GetItemsFromCollectionParams) (*NftItems, error)
+	// GetJettonHolders invokes getJettonHolders operation.
+	//
+	// Get jetton's holders.
+	//
+	// GET /v2/jettons/{account_id}/holders
+	GetJettonHolders(ctx context.Context, params GetJettonHoldersParams) (*JettonHolders, error)
+	// GetJettonInfo invokes getJettonInfo operation.
+	//
+	// Get jetton metadata by jetton master address.
+	//
+	// GET /v2/jettons/{account_id}
+	GetJettonInfo(ctx context.Context, params GetJettonInfoParams) (*JettonInfo, error)
+	// GetJettons invokes getJettons operation.
+	//
+	// Get a list of all indexed jetton masters in the blockchain.
+	//
+	// GET /v2/jettons
+	GetJettons(ctx context.Context, params GetJettonsParams) (*Jettons, error)
+	// GetJettonsEvents invokes getJettonsEvents operation.
+	//
+	// Get only jetton transfers in the event.
+	//
+	// GET /v2/events/{event_id}/jettons
+	GetJettonsEvents(ctx context.Context, params GetJettonsEventsParams) (*Event, error)
+	// GetNftCollection invokes getNftCollection operation.
+	//
+	// Get NFT collection by collection address.
+	//
+	// GET /v2/nfts/collections/{account_id}
+	GetNftCollection(ctx context.Context, params GetNftCollectionParams) (*NftCollection, error)
+	// GetNftCollections invokes getNftCollections operation.
+	//
+	// Get NFT collections.
+	//
+	// GET /v2/nfts/collections
+	GetNftCollections(ctx context.Context, params GetNftCollectionsParams) (*NftCollections, error)
+	// GetNftHistoryByID invokes getNftHistoryByID operation.
+	//
+	// Get the transfer nfts history for account.
+	//
+	// GET /v2/nfts/{account_id}/history
+	GetNftHistoryByID(ctx context.Context, params GetNftHistoryByIDParams) (*AccountEvents, error)
+	// GetNftItemByAddress invokes getNftItemByAddress operation.
+	//
+	// Get NFT item by its address.
+	//
+	// GET /v2/nfts/{account_id}
+	GetNftItemByAddress(ctx context.Context, params GetNftItemByAddressParams) (*NftItem, error)
+	// GetNftItemsByAddresses invokes getNftItemsByAddresses operation.
+	//
+	// Get NFT items by their addresses.
+	//
+	// POST /v2/nfts/_bulk
+	GetNftItemsByAddresses(ctx context.Context, request OptGetNftItemsByAddressesReq) (*NftItems, error)
+	// GetRates invokes getRates operation.
+	//
+	// Get the token price to the currency.
+	//
+	// GET /v2/rates
+	GetRates(ctx context.Context, params GetRatesParams) (*GetRatesOK, error)
+	// GetRawAccountState invokes getRawAccountState operation.
+	//
+	// Get raw account state.
+	//
+	// GET /v2/liteserver/get_account_state/{account_id}
+	GetRawAccountState(ctx context.Context, params GetRawAccountStateParams) (*GetRawAccountStateOK, error)
+	// GetRawBlockProof invokes getRawBlockProof operation.
+	//
+	// Get raw block proof.
+	//
+	// GET /v2/liteserver/get_block_proof
+	GetRawBlockProof(ctx context.Context, params GetRawBlockProofParams) (*GetRawBlockProofOK, error)
+	// GetRawBlockchainBlock invokes getRawBlockchainBlock operation.
+	//
+	// Get raw blockchain block.
+	//
+	// GET /v2/liteserver/get_block/{block_id}
+	GetRawBlockchainBlock(ctx context.Context, params GetRawBlockchainBlockParams) (*GetRawBlockchainBlockOK, error)
+	// GetRawBlockchainBlockHeader invokes getRawBlockchainBlockHeader operation.
+	//
+	// Get raw blockchain block header.
+	//
+	// GET /v2/liteserver/get_block_header/{block_id}
+	GetRawBlockchainBlockHeader(ctx context.Context, params GetRawBlockchainBlockHeaderParams) (*GetRawBlockchainBlockHeaderOK, error)
+	// GetRawBlockchainBlockState invokes getRawBlockchainBlockState operation.
+	//
+	// Get raw blockchain block state.
+	//
+	// GET /v2/liteserver/get_state/{block_id}
+	GetRawBlockchainBlockState(ctx context.Context, params GetRawBlockchainBlockStateParams) (*GetRawBlockchainBlockStateOK, error)
+	// GetRawConfig invokes getRawConfig operation.
+	//
+	// Get raw config.
+	//
+	// GET /v2/liteserver/get_config_all/{block_id}
+	GetRawConfig(ctx context.Context, params GetRawConfigParams) (*GetRawConfigOK, error)
+	// GetRawListBlockTransactions invokes getRawListBlockTransactions operation.
+	//
+	// Get raw list block transactions.
+	//
+	// GET /v2/liteserver/list_block_transactions/{block_id}
+	GetRawListBlockTransactions(ctx context.Context, params GetRawListBlockTransactionsParams) (*GetRawListBlockTransactionsOK, error)
+	// GetRawMasterchainInfo invokes getRawMasterchainInfo operation.
+	//
+	// Get raw masterchain info.
+	//
+	// GET /v2/liteserver/get_masterchain_info
+	GetRawMasterchainInfo(ctx context.Context) (*GetRawMasterchainInfoOK, error)
+	// GetRawMasterchainInfoExt invokes getRawMasterchainInfoExt operation.
+	//
+	// Get raw masterchain info ext.
+	//
+	// GET /v2/liteserver/get_masterchain_info_ext
+	GetRawMasterchainInfoExt(ctx context.Context, params GetRawMasterchainInfoExtParams) (*GetRawMasterchainInfoExtOK, error)
+	// GetRawShardBlockProof invokes getRawShardBlockProof operation.
+	//
+	// Get raw shard block proof.
+	//
+	// GET /v2/liteserver/get_shard_block_proof/{block_id}
+	GetRawShardBlockProof(ctx context.Context, params GetRawShardBlockProofParams) (*GetRawShardBlockProofOK, error)
+	// GetRawShardInfo invokes getRawShardInfo operation.
+	//
+	// Get raw shard info.
+	//
+	// GET /v2/liteserver/get_shard_info/{block_id}
+	GetRawShardInfo(ctx context.Context, params GetRawShardInfoParams) (*GetRawShardInfoOK, error)
+	// GetRawTime invokes getRawTime operation.
+	//
+	// Get raw time.
+	//
+	// GET /v2/liteserver/get_time
+	GetRawTime(ctx context.Context) (*GetRawTimeOK, error)
+	// GetRawTransactions invokes getRawTransactions operation.
+	//
+	// Get raw transactions.
+	//
+	// GET /v2/liteserver/get_transactions/{account_id}
+	GetRawTransactions(ctx context.Context, params GetRawTransactionsParams) (*GetRawTransactionsOK, error)
+	// GetStakingPoolHistory invokes getStakingPoolHistory operation.
+	//
+	// Pool history.
+	//
+	// GET /v2/staking/pool/{account_id}/history
+	GetStakingPoolHistory(ctx context.Context, params GetStakingPoolHistoryParams) (*GetStakingPoolHistoryOK, error)
+	// GetStakingPoolInfo invokes getStakingPoolInfo operation.
+	//
+	// Stacking pool info.
+	//
+	// GET /v2/staking/pool/{account_id}
+	GetStakingPoolInfo(ctx context.Context, params GetStakingPoolInfoParams) (*GetStakingPoolInfoOK, error)
+	// GetStakingPools invokes getStakingPools operation.
+	//
+	// All pools available in network.
+	//
+	// GET /v2/staking/pools
+	GetStakingPools(ctx context.Context, params GetStakingPoolsParams) (*GetStakingPoolsOK, error)
+	// GetStorageProviders invokes getStorageProviders operation.
+	//
+	// Get TON storage providers deployed to the blockchain.
+	//
+	// GET /v2/storage/providers
+	GetStorageProviders(ctx context.Context) (*GetStorageProvidersOK, error)
+	// GetTonConnectPayload invokes getTonConnectPayload operation.
+	//
+	// Get a payload for further token receipt.
+	//
+	// GET /v2/tonconnect/payload
+	GetTonConnectPayload(ctx context.Context) (*GetTonConnectPayloadOK, error)
+	// GetTrace invokes getTrace operation.
+	//
+	// Get the trace by trace ID or hash of any transaction in trace.
+	//
+	// GET /v2/traces/{trace_id}
+	GetTrace(ctx context.Context, params GetTraceParams) (*Trace, error)
+	// GetWalletBackup invokes getWalletBackup operation.
+	//
+	// Get backup info.
+	//
+	// GET /v2/wallet/backup
+	GetWalletBackup(ctx context.Context, params GetWalletBackupParams) (*GetWalletBackupOK, error)
+	// GetWalletsByPublicKey invokes getWalletsByPublicKey operation.
+	//
+	// Get wallets by public key.
+	//
+	// GET /v2/pubkeys/{public_key}/wallets
+	GetWalletsByPublicKey(ctx context.Context, params GetWalletsByPublicKeyParams) (*Accounts, error)
+	// ReindexAccount invokes reindexAccount operation.
+	//
+	// Update internal cache for a particular account.
+	//
+	// POST /v2/accounts/{account_id}/reindex
+	ReindexAccount(ctx context.Context, params ReindexAccountParams) error
+	// SearchAccounts invokes searchAccounts operation.
+	//
+	// Search by account domain name.
+	//
+	// GET /v2/accounts/search
+	SearchAccounts(ctx context.Context, params SearchAccountsParams) (*FoundAccounts, error)
+	// SendBlockchainMessage invokes sendBlockchainMessage operation.
+	//
+	// Send message to blockchain.
+	//
+	// POST /v2/blockchain/message
+	SendBlockchainMessage(ctx context.Context, request *SendBlockchainMessageReq) error
+	// SendRawMessage invokes sendRawMessage operation.
+	//
+	// Send raw message to blockchain.
+	//
+	// POST /v2/liteserver/send_message
+	SendRawMessage(ctx context.Context, request *SendRawMessageReq) (*SendRawMessageOK, error)
+	// SetWalletBackup invokes setWalletBackup operation.
+	//
+	// Set backup info.
+	//
+	// PUT /v2/wallet/backup
+	SetWalletBackup(ctx context.Context, request SetWalletBackupReq, params SetWalletBackupParams) error
+	// TonConnectProof invokes tonConnectProof operation.
+	//
+	// Account verification and token issuance.
+	//
+	// POST /v2/wallet/auth/proof
+	TonConnectProof(ctx context.Context, request *TonConnectProofReq) (*TonConnectProofOK, error)
+}
 
 // Client implements OAS client.
 type Client struct {
@@ -71,13 +553,14 @@ func (c *Client) requestURL(ctx context.Context) *url.URL {
 // GET /v2/accounts/{account_id}/dns/backresolve
 func (c *Client) AccountDnsBackResolve(ctx context.Context, params AccountDnsBackResolveParams) (*DomainNames, error) {
 	res, err := c.sendAccountDnsBackResolve(ctx, params)
-	_ = res
 	return res, err
 }
 
 func (c *Client) sendAccountDnsBackResolve(ctx context.Context, params AccountDnsBackResolveParams) (res *DomainNames, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("accountDnsBackResolve"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/accounts/{account_id}/dns/backresolve"),
 	}
 
 	// Run stopwatch.
@@ -161,13 +644,14 @@ func (c *Client) sendAccountDnsBackResolve(ctx context.Context, params AccountDn
 // GET /v2/blockchain/accounts/{account_id}/inspect
 func (c *Client) BlockchainAccountInspect(ctx context.Context, params BlockchainAccountInspectParams) (*BlockchainAccountInspect, error) {
 	res, err := c.sendBlockchainAccountInspect(ctx, params)
-	_ = res
 	return res, err
 }
 
 func (c *Client) sendBlockchainAccountInspect(ctx context.Context, params BlockchainAccountInspectParams) (res *BlockchainAccountInspect, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("blockchainAccountInspect"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/blockchain/accounts/{account_id}/inspect"),
 	}
 
 	// Run stopwatch.
@@ -251,13 +735,14 @@ func (c *Client) sendBlockchainAccountInspect(ctx context.Context, params Blockc
 // GET /v2/dns/{domain_name}/resolve
 func (c *Client) DnsResolve(ctx context.Context, params DnsResolveParams) (*DnsRecord, error) {
 	res, err := c.sendDnsResolve(ctx, params)
-	_ = res
 	return res, err
 }
 
 func (c *Client) sendDnsResolve(ctx context.Context, params DnsResolveParams) (res *DnsRecord, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("dnsResolve"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/dns/{domain_name}/resolve"),
 	}
 
 	// Run stopwatch.
@@ -341,13 +826,14 @@ func (c *Client) sendDnsResolve(ctx context.Context, params DnsResolveParams) (r
 // POST /v2/accounts/{account_id}/events/emulate
 func (c *Client) EmulateMessageToAccountEvent(ctx context.Context, request *EmulateMessageToAccountEventReq, params EmulateMessageToAccountEventParams) (*AccountEvent, error) {
 	res, err := c.sendEmulateMessageToAccountEvent(ctx, request, params)
-	_ = res
 	return res, err
 }
 
 func (c *Client) sendEmulateMessageToAccountEvent(ctx context.Context, request *EmulateMessageToAccountEventReq, params EmulateMessageToAccountEventParams) (res *AccountEvent, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("emulateMessageToAccountEvent"),
+		semconv.HTTPMethodKey.String("POST"),
+		semconv.HTTPRouteKey.String("/v2/accounts/{account_id}/events/emulate"),
 	}
 
 	// Run stopwatch.
@@ -451,13 +937,14 @@ func (c *Client) sendEmulateMessageToAccountEvent(ctx context.Context, request *
 // POST /v2/events/emulate
 func (c *Client) EmulateMessageToEvent(ctx context.Context, request *EmulateMessageToEventReq, params EmulateMessageToEventParams) (*Event, error) {
 	res, err := c.sendEmulateMessageToEvent(ctx, request, params)
-	_ = res
 	return res, err
 }
 
 func (c *Client) sendEmulateMessageToEvent(ctx context.Context, request *EmulateMessageToEventReq, params EmulateMessageToEventParams) (res *Event, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("emulateMessageToEvent"),
+		semconv.HTTPMethodKey.String("POST"),
+		semconv.HTTPRouteKey.String("/v2/events/emulate"),
 	}
 
 	// Run stopwatch.
@@ -542,13 +1029,14 @@ func (c *Client) sendEmulateMessageToEvent(ctx context.Context, request *Emulate
 // POST /v2/traces/emulate
 func (c *Client) EmulateMessageToTrace(ctx context.Context, request *EmulateMessageToTraceReq) (*Trace, error) {
 	res, err := c.sendEmulateMessageToTrace(ctx, request)
-	_ = res
 	return res, err
 }
 
 func (c *Client) sendEmulateMessageToTrace(ctx context.Context, request *EmulateMessageToTraceReq) (res *Trace, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("emulateMessageToTrace"),
+		semconv.HTTPMethodKey.String("POST"),
+		semconv.HTTPRouteKey.String("/v2/traces/emulate"),
 	}
 
 	// Run stopwatch.
@@ -616,13 +1104,14 @@ func (c *Client) sendEmulateMessageToTrace(ctx context.Context, request *Emulate
 // POST /v2/wallet/emulate
 func (c *Client) EmulateMessageToWallet(ctx context.Context, request *EmulateMessageToWalletReq, params EmulateMessageToWalletParams) (*MessageConsequences, error) {
 	res, err := c.sendEmulateMessageToWallet(ctx, request, params)
-	_ = res
 	return res, err
 }
 
 func (c *Client) sendEmulateMessageToWallet(ctx context.Context, request *EmulateMessageToWalletReq, params EmulateMessageToWalletParams) (res *MessageConsequences, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("emulateMessageToWallet"),
+		semconv.HTTPMethodKey.String("POST"),
+		semconv.HTTPRouteKey.String("/v2/wallet/emulate"),
 	}
 
 	// Run stopwatch.
@@ -707,13 +1196,14 @@ func (c *Client) sendEmulateMessageToWallet(ctx context.Context, request *Emulat
 // GET /v2/blockchain/accounts/{account_id}/methods/{method_name}
 func (c *Client) ExecGetMethodForBlockchainAccount(ctx context.Context, params ExecGetMethodForBlockchainAccountParams) (*MethodExecutionResult, error) {
 	res, err := c.sendExecGetMethodForBlockchainAccount(ctx, params)
-	_ = res
 	return res, err
 }
 
 func (c *Client) sendExecGetMethodForBlockchainAccount(ctx context.Context, params ExecGetMethodForBlockchainAccountParams) (res *MethodExecutionResult, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("execGetMethodForBlockchainAccount"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/blockchain/accounts/{account_id}/methods/{method_name}"),
 	}
 
 	// Run stopwatch.
@@ -842,13 +1332,14 @@ func (c *Client) sendExecGetMethodForBlockchainAccount(ctx context.Context, para
 // GET /v2/accounts/{account_id}
 func (c *Client) GetAccount(ctx context.Context, params GetAccountParams) (*Account, error) {
 	res, err := c.sendGetAccount(ctx, params)
-	_ = res
 	return res, err
 }
 
 func (c *Client) sendGetAccount(ctx context.Context, params GetAccountParams) (res *Account, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getAccount"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/accounts/{account_id}"),
 	}
 
 	// Run stopwatch.
@@ -931,13 +1422,14 @@ func (c *Client) sendGetAccount(ctx context.Context, params GetAccountParams) (r
 // GET /v2/accounts/{account_id}/diff
 func (c *Client) GetAccountDiff(ctx context.Context, params GetAccountDiffParams) (*GetAccountDiffOK, error) {
 	res, err := c.sendGetAccountDiff(ctx, params)
-	_ = res
 	return res, err
 }
 
 func (c *Client) sendGetAccountDiff(ctx context.Context, params GetAccountDiffParams) (res *GetAccountDiffOK, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getAccountDiff"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/accounts/{account_id}/diff"),
 	}
 
 	// Run stopwatch.
@@ -1053,13 +1545,14 @@ func (c *Client) sendGetAccountDiff(ctx context.Context, params GetAccountDiffPa
 // GET /v2/accounts/{account_id}/dns/expiring
 func (c *Client) GetAccountDnsExpiring(ctx context.Context, params GetAccountDnsExpiringParams) (*DnsExpiring, error) {
 	res, err := c.sendGetAccountDnsExpiring(ctx, params)
-	_ = res
 	return res, err
 }
 
 func (c *Client) sendGetAccountDnsExpiring(ctx context.Context, params GetAccountDnsExpiringParams) (res *DnsExpiring, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getAccountDnsExpiring"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/accounts/{account_id}/dns/expiring"),
 	}
 
 	// Run stopwatch.
@@ -1164,13 +1657,14 @@ func (c *Client) sendGetAccountDnsExpiring(ctx context.Context, params GetAccoun
 // GET /v2/accounts/{account_id}/events/{event_id}
 func (c *Client) GetAccountEvent(ctx context.Context, params GetAccountEventParams) (*AccountEvent, error) {
 	res, err := c.sendGetAccountEvent(ctx, params)
-	_ = res
 	return res, err
 }
 
 func (c *Client) sendGetAccountEvent(ctx context.Context, params GetAccountEventParams) (res *AccountEvent, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getAccountEvent"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/accounts/{account_id}/events/{event_id}"),
 	}
 
 	// Run stopwatch.
@@ -1314,13 +1808,14 @@ func (c *Client) sendGetAccountEvent(ctx context.Context, params GetAccountEvent
 // GET /v2/accounts/{account_id}/events
 func (c *Client) GetAccountEvents(ctx context.Context, params GetAccountEventsParams) (*AccountEvents, error) {
 	res, err := c.sendGetAccountEvents(ctx, params)
-	_ = res
 	return res, err
 }
 
 func (c *Client) sendGetAccountEvents(ctx context.Context, params GetAccountEventsParams) (res *AccountEvents, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getAccountEvents"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/accounts/{account_id}/events"),
 	}
 
 	// Run stopwatch.
@@ -1524,13 +2019,14 @@ func (c *Client) sendGetAccountEvents(ctx context.Context, params GetAccountEven
 // POST /v2/tonconnect/stateinit
 func (c *Client) GetAccountInfoByStateInit(ctx context.Context, request *GetAccountInfoByStateInitReq) (*AccountInfoByStateInit, error) {
 	res, err := c.sendGetAccountInfoByStateInit(ctx, request)
-	_ = res
 	return res, err
 }
 
 func (c *Client) sendGetAccountInfoByStateInit(ctx context.Context, request *GetAccountInfoByStateInitReq) (res *AccountInfoByStateInit, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getAccountInfoByStateInit"),
+		semconv.HTTPMethodKey.String("POST"),
+		semconv.HTTPRouteKey.String("/v2/tonconnect/stateinit"),
 	}
 
 	// Run stopwatch.
@@ -1598,13 +2094,14 @@ func (c *Client) sendGetAccountInfoByStateInit(ctx context.Context, request *Get
 // GET /v2/accounts/{account_id}/jettons/{jetton_id}/history
 func (c *Client) GetAccountJettonHistoryByID(ctx context.Context, params GetAccountJettonHistoryByIDParams) (*AccountEvents, error) {
 	res, err := c.sendGetAccountJettonHistoryByID(ctx, params)
-	_ = res
 	return res, err
 }
 
 func (c *Client) sendGetAccountJettonHistoryByID(ctx context.Context, params GetAccountJettonHistoryByIDParams) (res *AccountEvents, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getAccountJettonHistoryByID"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/accounts/{account_id}/jettons/{jetton_id}/history"),
 	}
 
 	// Run stopwatch.
@@ -1793,13 +2290,14 @@ func (c *Client) sendGetAccountJettonHistoryByID(ctx context.Context, params Get
 // GET /v2/accounts/{account_id}/jettons
 func (c *Client) GetAccountJettonsBalances(ctx context.Context, params GetAccountJettonsBalancesParams) (*JettonsBalances, error) {
 	res, err := c.sendGetAccountJettonsBalances(ctx, params)
-	_ = res
 	return res, err
 }
 
 func (c *Client) sendGetAccountJettonsBalances(ctx context.Context, params GetAccountJettonsBalancesParams) (res *JettonsBalances, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getAccountJettonsBalances"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/accounts/{account_id}/jettons"),
 	}
 
 	// Run stopwatch.
@@ -1904,13 +2402,14 @@ func (c *Client) sendGetAccountJettonsBalances(ctx context.Context, params GetAc
 // GET /v2/accounts/{account_id}/jettons/history
 func (c *Client) GetAccountJettonsHistory(ctx context.Context, params GetAccountJettonsHistoryParams) (*AccountEvents, error) {
 	res, err := c.sendGetAccountJettonsHistory(ctx, params)
-	_ = res
 	return res, err
 }
 
 func (c *Client) sendGetAccountJettonsHistory(ctx context.Context, params GetAccountJettonsHistoryParams) (res *AccountEvents, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getAccountJettonsHistory"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/accounts/{account_id}/jettons/history"),
 	}
 
 	// Run stopwatch.
@@ -2080,13 +2579,14 @@ func (c *Client) sendGetAccountJettonsHistory(ctx context.Context, params GetAcc
 // GET /v2/accounts/{account_id}/nfts/history
 func (c *Client) GetAccountNftHistory(ctx context.Context, params GetAccountNftHistoryParams) (*AccountEvents, error) {
 	res, err := c.sendGetAccountNftHistory(ctx, params)
-	_ = res
 	return res, err
 }
 
 func (c *Client) sendGetAccountNftHistory(ctx context.Context, params GetAccountNftHistoryParams) (res *AccountEvents, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getAccountNftHistory"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/accounts/{account_id}/nfts/history"),
 	}
 
 	// Run stopwatch.
@@ -2256,13 +2756,14 @@ func (c *Client) sendGetAccountNftHistory(ctx context.Context, params GetAccount
 // GET /v2/accounts/{account_id}/nfts
 func (c *Client) GetAccountNftItems(ctx context.Context, params GetAccountNftItemsParams) (*NftItems, error) {
 	res, err := c.sendGetAccountNftItems(ctx, params)
-	_ = res
 	return res, err
 }
 
 func (c *Client) sendGetAccountNftItems(ctx context.Context, params GetAccountNftItemsParams) (res *NftItems, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getAccountNftItems"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/accounts/{account_id}/nfts"),
 	}
 
 	// Run stopwatch.
@@ -2418,13 +2919,14 @@ func (c *Client) sendGetAccountNftItems(ctx context.Context, params GetAccountNf
 // GET /v2/staking/nominator/{account_id}/pools
 func (c *Client) GetAccountNominatorsPools(ctx context.Context, params GetAccountNominatorsPoolsParams) (*AccountStaking, error) {
 	res, err := c.sendGetAccountNominatorsPools(ctx, params)
-	_ = res
 	return res, err
 }
 
 func (c *Client) sendGetAccountNominatorsPools(ctx context.Context, params GetAccountNominatorsPoolsParams) (res *AccountStaking, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getAccountNominatorsPools"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/staking/nominator/{account_id}/pools"),
 	}
 
 	// Run stopwatch.
@@ -2508,13 +3010,14 @@ func (c *Client) sendGetAccountNominatorsPools(ctx context.Context, params GetAc
 // GET /v2/accounts/{account_id}/publickey
 func (c *Client) GetAccountPublicKey(ctx context.Context, params GetAccountPublicKeyParams) (*GetAccountPublicKeyOK, error) {
 	res, err := c.sendGetAccountPublicKey(ctx, params)
-	_ = res
 	return res, err
 }
 
 func (c *Client) sendGetAccountPublicKey(ctx context.Context, params GetAccountPublicKeyParams) (res *GetAccountPublicKeyOK, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getAccountPublicKey"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/accounts/{account_id}/publickey"),
 	}
 
 	// Run stopwatch.
@@ -2598,13 +3101,14 @@ func (c *Client) sendGetAccountPublicKey(ctx context.Context, params GetAccountP
 // GET /v2/wallet/{account_id}/seqno
 func (c *Client) GetAccountSeqno(ctx context.Context, params GetAccountSeqnoParams) (*Seqno, error) {
 	res, err := c.sendGetAccountSeqno(ctx, params)
-	_ = res
 	return res, err
 }
 
 func (c *Client) sendGetAccountSeqno(ctx context.Context, params GetAccountSeqnoParams) (res *Seqno, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getAccountSeqno"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/wallet/{account_id}/seqno"),
 	}
 
 	// Run stopwatch.
@@ -2688,13 +3192,14 @@ func (c *Client) sendGetAccountSeqno(ctx context.Context, params GetAccountSeqno
 // GET /v2/accounts/{account_id}/subscriptions
 func (c *Client) GetAccountSubscriptions(ctx context.Context, params GetAccountSubscriptionsParams) (*Subscriptions, error) {
 	res, err := c.sendGetAccountSubscriptions(ctx, params)
-	_ = res
 	return res, err
 }
 
 func (c *Client) sendGetAccountSubscriptions(ctx context.Context, params GetAccountSubscriptionsParams) (res *Subscriptions, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getAccountSubscriptions"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/accounts/{account_id}/subscriptions"),
 	}
 
 	// Run stopwatch.
@@ -2778,13 +3283,14 @@ func (c *Client) sendGetAccountSubscriptions(ctx context.Context, params GetAcco
 // GET /v2/accounts/{account_id}/traces
 func (c *Client) GetAccountTraces(ctx context.Context, params GetAccountTracesParams) (*TraceIDs, error) {
 	res, err := c.sendGetAccountTraces(ctx, params)
-	_ = res
 	return res, err
 }
 
 func (c *Client) sendGetAccountTraces(ctx context.Context, params GetAccountTracesParams) (res *TraceIDs, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getAccountTraces"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/accounts/{account_id}/traces"),
 	}
 
 	// Run stopwatch.
@@ -2889,13 +3395,14 @@ func (c *Client) sendGetAccountTraces(ctx context.Context, params GetAccountTrac
 // POST /v2/accounts/_bulk
 func (c *Client) GetAccounts(ctx context.Context, request OptGetAccountsReq) (*Accounts, error) {
 	res, err := c.sendGetAccounts(ctx, request)
-	_ = res
 	return res, err
 }
 
 func (c *Client) sendGetAccounts(ctx context.Context, request OptGetAccountsReq) (res *Accounts, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getAccounts"),
+		semconv.HTTPMethodKey.String("POST"),
+		semconv.HTTPRouteKey.String("/v2/accounts/_bulk"),
 	}
 	// Validate request before sending.
 	if err := func() error {
@@ -2979,13 +3486,14 @@ func (c *Client) sendGetAccounts(ctx context.Context, request OptGetAccountsReq)
 // GET /v2/dns/auctions
 func (c *Client) GetAllAuctions(ctx context.Context, params GetAllAuctionsParams) (*Auctions, error) {
 	res, err := c.sendGetAllAuctions(ctx, params)
-	_ = res
 	return res, err
 }
 
 func (c *Client) sendGetAllAuctions(ctx context.Context, params GetAllAuctionsParams) (res *Auctions, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getAllAuctions"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/dns/auctions"),
 	}
 
 	// Run stopwatch.
@@ -3071,13 +3579,14 @@ func (c *Client) sendGetAllAuctions(ctx context.Context, params GetAllAuctionsPa
 // GET /v2/liteserver/get_all_shards_info/{block_id}
 func (c *Client) GetAllRawShardsInfo(ctx context.Context, params GetAllRawShardsInfoParams) (*GetAllRawShardsInfoOK, error) {
 	res, err := c.sendGetAllRawShardsInfo(ctx, params)
-	_ = res
 	return res, err
 }
 
 func (c *Client) sendGetAllRawShardsInfo(ctx context.Context, params GetAllRawShardsInfoParams) (res *GetAllRawShardsInfoOK, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getAllRawShardsInfo"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/liteserver/get_all_shards_info/{block_id}"),
 	}
 
 	// Run stopwatch.
@@ -3160,13 +3669,14 @@ func (c *Client) sendGetAllRawShardsInfo(ctx context.Context, params GetAllRawSh
 // GET /v2/blockchain/accounts/{account_id}/transactions
 func (c *Client) GetBlockchainAccountTransactions(ctx context.Context, params GetBlockchainAccountTransactionsParams) (*Transactions, error) {
 	res, err := c.sendGetBlockchainAccountTransactions(ctx, params)
-	_ = res
 	return res, err
 }
 
 func (c *Client) sendGetBlockchainAccountTransactions(ctx context.Context, params GetBlockchainAccountTransactionsParams) (res *Transactions, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getBlockchainAccountTransactions"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/blockchain/accounts/{account_id}/transactions"),
 	}
 
 	// Run stopwatch.
@@ -3305,13 +3815,14 @@ func (c *Client) sendGetBlockchainAccountTransactions(ctx context.Context, param
 // GET /v2/blockchain/blocks/{block_id}
 func (c *Client) GetBlockchainBlock(ctx context.Context, params GetBlockchainBlockParams) (*BlockchainBlock, error) {
 	res, err := c.sendGetBlockchainBlock(ctx, params)
-	_ = res
 	return res, err
 }
 
 func (c *Client) sendGetBlockchainBlock(ctx context.Context, params GetBlockchainBlockParams) (res *BlockchainBlock, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getBlockchainBlock"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/blockchain/blocks/{block_id}"),
 	}
 
 	// Run stopwatch.
@@ -3394,13 +3905,14 @@ func (c *Client) sendGetBlockchainBlock(ctx context.Context, params GetBlockchai
 // GET /v2/blockchain/blocks/{block_id}/transactions
 func (c *Client) GetBlockchainBlockTransactions(ctx context.Context, params GetBlockchainBlockTransactionsParams) (*Transactions, error) {
 	res, err := c.sendGetBlockchainBlockTransactions(ctx, params)
-	_ = res
 	return res, err
 }
 
 func (c *Client) sendGetBlockchainBlockTransactions(ctx context.Context, params GetBlockchainBlockTransactionsParams) (res *Transactions, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getBlockchainBlockTransactions"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/blockchain/blocks/{block_id}/transactions"),
 	}
 
 	// Run stopwatch.
@@ -3484,13 +3996,14 @@ func (c *Client) sendGetBlockchainBlockTransactions(ctx context.Context, params 
 // GET /v2/blockchain/config
 func (c *Client) GetBlockchainConfig(ctx context.Context) (*BlockchainConfig, error) {
 	res, err := c.sendGetBlockchainConfig(ctx)
-	_ = res
 	return res, err
 }
 
 func (c *Client) sendGetBlockchainConfig(ctx context.Context) (res *BlockchainConfig, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getBlockchainConfig"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/blockchain/config"),
 	}
 
 	// Run stopwatch.
@@ -3555,13 +4068,14 @@ func (c *Client) sendGetBlockchainConfig(ctx context.Context) (res *BlockchainCo
 // GET /v2/blockchain/masterchain-head
 func (c *Client) GetBlockchainMasterchainHead(ctx context.Context) (*BlockchainBlock, error) {
 	res, err := c.sendGetBlockchainMasterchainHead(ctx)
-	_ = res
 	return res, err
 }
 
 func (c *Client) sendGetBlockchainMasterchainHead(ctx context.Context) (res *BlockchainBlock, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getBlockchainMasterchainHead"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/blockchain/masterchain-head"),
 	}
 
 	// Run stopwatch.
@@ -3626,13 +4140,14 @@ func (c *Client) sendGetBlockchainMasterchainHead(ctx context.Context) (res *Blo
 // GET /v2/blockchain/accounts/{account_id}
 func (c *Client) GetBlockchainRawAccount(ctx context.Context, params GetBlockchainRawAccountParams) (*BlockchainRawAccount, error) {
 	res, err := c.sendGetBlockchainRawAccount(ctx, params)
-	_ = res
 	return res, err
 }
 
 func (c *Client) sendGetBlockchainRawAccount(ctx context.Context, params GetBlockchainRawAccountParams) (res *BlockchainRawAccount, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getBlockchainRawAccount"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/blockchain/accounts/{account_id}"),
 	}
 
 	// Run stopwatch.
@@ -3715,13 +4230,14 @@ func (c *Client) sendGetBlockchainRawAccount(ctx context.Context, params GetBloc
 // GET /v2/blockchain/transactions/{transaction_id}
 func (c *Client) GetBlockchainTransaction(ctx context.Context, params GetBlockchainTransactionParams) (*Transaction, error) {
 	res, err := c.sendGetBlockchainTransaction(ctx, params)
-	_ = res
 	return res, err
 }
 
 func (c *Client) sendGetBlockchainTransaction(ctx context.Context, params GetBlockchainTransactionParams) (res *Transaction, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getBlockchainTransaction"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/blockchain/transactions/{transaction_id}"),
 	}
 
 	// Run stopwatch.
@@ -3804,13 +4320,14 @@ func (c *Client) sendGetBlockchainTransaction(ctx context.Context, params GetBlo
 // GET /v2/blockchain/messages/{msg_id}/transaction
 func (c *Client) GetBlockchainTransactionByMessageHash(ctx context.Context, params GetBlockchainTransactionByMessageHashParams) (*Transaction, error) {
 	res, err := c.sendGetBlockchainTransactionByMessageHash(ctx, params)
-	_ = res
 	return res, err
 }
 
 func (c *Client) sendGetBlockchainTransactionByMessageHash(ctx context.Context, params GetBlockchainTransactionByMessageHashParams) (res *Transaction, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getBlockchainTransactionByMessageHash"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/blockchain/messages/{msg_id}/transaction"),
 	}
 
 	// Run stopwatch.
@@ -3894,13 +4411,14 @@ func (c *Client) sendGetBlockchainTransactionByMessageHash(ctx context.Context, 
 // GET /v2/blockchain/validators
 func (c *Client) GetBlockchainValidators(ctx context.Context) (*Validators, error) {
 	res, err := c.sendGetBlockchainValidators(ctx)
-	_ = res
 	return res, err
 }
 
 func (c *Client) sendGetBlockchainValidators(ctx context.Context) (res *Validators, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getBlockchainValidators"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/blockchain/validators"),
 	}
 
 	// Run stopwatch.
@@ -3965,13 +4483,14 @@ func (c *Client) sendGetBlockchainValidators(ctx context.Context) (res *Validato
 // GET /v2/rates/chart
 func (c *Client) GetChartRates(ctx context.Context, params GetChartRatesParams) (*GetChartRatesOK, error) {
 	res, err := c.sendGetChartRates(ctx, params)
-	_ = res
 	return res, err
 }
 
 func (c *Client) sendGetChartRates(ctx context.Context, params GetChartRatesParams) (res *GetChartRatesOK, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getChartRates"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/rates/chart"),
 	}
 
 	// Run stopwatch.
@@ -4105,13 +4624,14 @@ func (c *Client) sendGetChartRates(ctx context.Context, params GetChartRatesPara
 // GET /v2/dns/{domain_name}
 func (c *Client) GetDnsInfo(ctx context.Context, params GetDnsInfoParams) (*DomainInfo, error) {
 	res, err := c.sendGetDnsInfo(ctx, params)
-	_ = res
 	return res, err
 }
 
 func (c *Client) sendGetDnsInfo(ctx context.Context, params GetDnsInfoParams) (res *DomainInfo, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getDnsInfo"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/dns/{domain_name}"),
 	}
 
 	// Run stopwatch.
@@ -4194,13 +4714,14 @@ func (c *Client) sendGetDnsInfo(ctx context.Context, params GetDnsInfoParams) (r
 // GET /v2/dns/{domain_name}/bids
 func (c *Client) GetDomainBids(ctx context.Context, params GetDomainBidsParams) (*DomainBids, error) {
 	res, err := c.sendGetDomainBids(ctx, params)
-	_ = res
 	return res, err
 }
 
 func (c *Client) sendGetDomainBids(ctx context.Context, params GetDomainBidsParams) (res *DomainBids, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getDomainBids"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/dns/{domain_name}/bids"),
 	}
 
 	// Run stopwatch.
@@ -4289,13 +4810,14 @@ func (c *Client) sendGetDomainBids(ctx context.Context, params GetDomainBidsPara
 // GET /v2/events/{event_id}
 func (c *Client) GetEvent(ctx context.Context, params GetEventParams) (*Event, error) {
 	res, err := c.sendGetEvent(ctx, params)
-	_ = res
 	return res, err
 }
 
 func (c *Client) sendGetEvent(ctx context.Context, params GetEventParams) (res *Event, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getEvent"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/events/{event_id}"),
 	}
 
 	// Run stopwatch.
@@ -4395,13 +4917,14 @@ func (c *Client) sendGetEvent(ctx context.Context, params GetEventParams) (res *
 // GET /v2/nfts/collections/{account_id}/items
 func (c *Client) GetItemsFromCollection(ctx context.Context, params GetItemsFromCollectionParams) (*NftItems, error) {
 	res, err := c.sendGetItemsFromCollection(ctx, params)
-	_ = res
 	return res, err
 }
 
 func (c *Client) sendGetItemsFromCollection(ctx context.Context, params GetItemsFromCollectionParams) (res *NftItems, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getItemsFromCollection"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/nfts/collections/{account_id}/items"),
 	}
 
 	// Run stopwatch.
@@ -4523,13 +5046,14 @@ func (c *Client) sendGetItemsFromCollection(ctx context.Context, params GetItems
 // GET /v2/jettons/{account_id}/holders
 func (c *Client) GetJettonHolders(ctx context.Context, params GetJettonHoldersParams) (*JettonHolders, error) {
 	res, err := c.sendGetJettonHolders(ctx, params)
-	_ = res
 	return res, err
 }
 
 func (c *Client) sendGetJettonHolders(ctx context.Context, params GetJettonHoldersParams) (res *JettonHolders, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getJettonHolders"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/jettons/{account_id}/holders"),
 	}
 
 	// Run stopwatch.
@@ -4651,13 +5175,14 @@ func (c *Client) sendGetJettonHolders(ctx context.Context, params GetJettonHolde
 // GET /v2/jettons/{account_id}
 func (c *Client) GetJettonInfo(ctx context.Context, params GetJettonInfoParams) (*JettonInfo, error) {
 	res, err := c.sendGetJettonInfo(ctx, params)
-	_ = res
 	return res, err
 }
 
 func (c *Client) sendGetJettonInfo(ctx context.Context, params GetJettonInfoParams) (res *JettonInfo, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getJettonInfo"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/jettons/{account_id}"),
 	}
 
 	// Run stopwatch.
@@ -4740,13 +5265,14 @@ func (c *Client) sendGetJettonInfo(ctx context.Context, params GetJettonInfoPara
 // GET /v2/jettons
 func (c *Client) GetJettons(ctx context.Context, params GetJettonsParams) (*Jettons, error) {
 	res, err := c.sendGetJettons(ctx, params)
-	_ = res
 	return res, err
 }
 
 func (c *Client) sendGetJettons(ctx context.Context, params GetJettonsParams) (res *Jettons, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getJettons"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/jettons"),
 	}
 
 	// Run stopwatch.
@@ -4849,13 +5375,14 @@ func (c *Client) sendGetJettons(ctx context.Context, params GetJettonsParams) (r
 // GET /v2/events/{event_id}/jettons
 func (c *Client) GetJettonsEvents(ctx context.Context, params GetJettonsEventsParams) (*Event, error) {
 	res, err := c.sendGetJettonsEvents(ctx, params)
-	_ = res
 	return res, err
 }
 
 func (c *Client) sendGetJettonsEvents(ctx context.Context, params GetJettonsEventsParams) (res *Event, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getJettonsEvents"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/events/{event_id}/jettons"),
 	}
 
 	// Run stopwatch.
@@ -4956,13 +5483,14 @@ func (c *Client) sendGetJettonsEvents(ctx context.Context, params GetJettonsEven
 // GET /v2/nfts/collections/{account_id}
 func (c *Client) GetNftCollection(ctx context.Context, params GetNftCollectionParams) (*NftCollection, error) {
 	res, err := c.sendGetNftCollection(ctx, params)
-	_ = res
 	return res, err
 }
 
 func (c *Client) sendGetNftCollection(ctx context.Context, params GetNftCollectionParams) (res *NftCollection, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getNftCollection"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/nfts/collections/{account_id}"),
 	}
 
 	// Run stopwatch.
@@ -5045,13 +5573,14 @@ func (c *Client) sendGetNftCollection(ctx context.Context, params GetNftCollecti
 // GET /v2/nfts/collections
 func (c *Client) GetNftCollections(ctx context.Context, params GetNftCollectionsParams) (*NftCollections, error) {
 	res, err := c.sendGetNftCollections(ctx, params)
-	_ = res
 	return res, err
 }
 
 func (c *Client) sendGetNftCollections(ctx context.Context, params GetNftCollectionsParams) (res *NftCollections, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getNftCollections"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/nfts/collections"),
 	}
 
 	// Run stopwatch.
@@ -5154,13 +5683,14 @@ func (c *Client) sendGetNftCollections(ctx context.Context, params GetNftCollect
 // GET /v2/nfts/{account_id}/history
 func (c *Client) GetNftHistoryByID(ctx context.Context, params GetNftHistoryByIDParams) (*AccountEvents, error) {
 	res, err := c.sendGetNftHistoryByID(ctx, params)
-	_ = res
 	return res, err
 }
 
 func (c *Client) sendGetNftHistoryByID(ctx context.Context, params GetNftHistoryByIDParams) (res *AccountEvents, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getNftHistoryByID"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/nfts/{account_id}/history"),
 	}
 
 	// Run stopwatch.
@@ -5330,13 +5860,14 @@ func (c *Client) sendGetNftHistoryByID(ctx context.Context, params GetNftHistory
 // GET /v2/nfts/{account_id}
 func (c *Client) GetNftItemByAddress(ctx context.Context, params GetNftItemByAddressParams) (*NftItem, error) {
 	res, err := c.sendGetNftItemByAddress(ctx, params)
-	_ = res
 	return res, err
 }
 
 func (c *Client) sendGetNftItemByAddress(ctx context.Context, params GetNftItemByAddressParams) (res *NftItem, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getNftItemByAddress"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/nfts/{account_id}"),
 	}
 
 	// Run stopwatch.
@@ -5419,13 +5950,14 @@ func (c *Client) sendGetNftItemByAddress(ctx context.Context, params GetNftItemB
 // POST /v2/nfts/_bulk
 func (c *Client) GetNftItemsByAddresses(ctx context.Context, request OptGetNftItemsByAddressesReq) (*NftItems, error) {
 	res, err := c.sendGetNftItemsByAddresses(ctx, request)
-	_ = res
 	return res, err
 }
 
 func (c *Client) sendGetNftItemsByAddresses(ctx context.Context, request OptGetNftItemsByAddressesReq) (res *NftItems, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getNftItemsByAddresses"),
+		semconv.HTTPMethodKey.String("POST"),
+		semconv.HTTPRouteKey.String("/v2/nfts/_bulk"),
 	}
 	// Validate request before sending.
 	if err := func() error {
@@ -5509,13 +6041,14 @@ func (c *Client) sendGetNftItemsByAddresses(ctx context.Context, request OptGetN
 // GET /v2/rates
 func (c *Client) GetRates(ctx context.Context, params GetRatesParams) (*GetRatesOK, error) {
 	res, err := c.sendGetRates(ctx, params)
-	_ = res
 	return res, err
 }
 
 func (c *Client) sendGetRates(ctx context.Context, params GetRatesParams) (res *GetRatesOK, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getRates"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/rates"),
 	}
 
 	// Run stopwatch.
@@ -5612,13 +6145,14 @@ func (c *Client) sendGetRates(ctx context.Context, params GetRatesParams) (res *
 // GET /v2/liteserver/get_account_state/{account_id}
 func (c *Client) GetRawAccountState(ctx context.Context, params GetRawAccountStateParams) (*GetRawAccountStateOK, error) {
 	res, err := c.sendGetRawAccountState(ctx, params)
-	_ = res
 	return res, err
 }
 
 func (c *Client) sendGetRawAccountState(ctx context.Context, params GetRawAccountStateParams) (res *GetRawAccountStateOK, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getRawAccountState"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/liteserver/get_account_state/{account_id}"),
 	}
 
 	// Run stopwatch.
@@ -5701,13 +6235,14 @@ func (c *Client) sendGetRawAccountState(ctx context.Context, params GetRawAccoun
 // GET /v2/liteserver/get_block_proof
 func (c *Client) GetRawBlockProof(ctx context.Context, params GetRawBlockProofParams) (*GetRawBlockProofOK, error) {
 	res, err := c.sendGetRawBlockProof(ctx, params)
-	_ = res
 	return res, err
 }
 
 func (c *Client) sendGetRawBlockProof(ctx context.Context, params GetRawBlockProofParams) (res *GetRawBlockProofOK, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getRawBlockProof"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/liteserver/get_block_proof"),
 	}
 
 	// Run stopwatch.
@@ -5821,13 +6356,14 @@ func (c *Client) sendGetRawBlockProof(ctx context.Context, params GetRawBlockPro
 // GET /v2/liteserver/get_block/{block_id}
 func (c *Client) GetRawBlockchainBlock(ctx context.Context, params GetRawBlockchainBlockParams) (*GetRawBlockchainBlockOK, error) {
 	res, err := c.sendGetRawBlockchainBlock(ctx, params)
-	_ = res
 	return res, err
 }
 
 func (c *Client) sendGetRawBlockchainBlock(ctx context.Context, params GetRawBlockchainBlockParams) (res *GetRawBlockchainBlockOK, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getRawBlockchainBlock"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/liteserver/get_block/{block_id}"),
 	}
 
 	// Run stopwatch.
@@ -5910,13 +6446,14 @@ func (c *Client) sendGetRawBlockchainBlock(ctx context.Context, params GetRawBlo
 // GET /v2/liteserver/get_block_header/{block_id}
 func (c *Client) GetRawBlockchainBlockHeader(ctx context.Context, params GetRawBlockchainBlockHeaderParams) (*GetRawBlockchainBlockHeaderOK, error) {
 	res, err := c.sendGetRawBlockchainBlockHeader(ctx, params)
-	_ = res
 	return res, err
 }
 
 func (c *Client) sendGetRawBlockchainBlockHeader(ctx context.Context, params GetRawBlockchainBlockHeaderParams) (res *GetRawBlockchainBlockHeaderOK, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getRawBlockchainBlockHeader"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/liteserver/get_block_header/{block_id}"),
 	}
 
 	// Run stopwatch.
@@ -6017,13 +6554,14 @@ func (c *Client) sendGetRawBlockchainBlockHeader(ctx context.Context, params Get
 // GET /v2/liteserver/get_state/{block_id}
 func (c *Client) GetRawBlockchainBlockState(ctx context.Context, params GetRawBlockchainBlockStateParams) (*GetRawBlockchainBlockStateOK, error) {
 	res, err := c.sendGetRawBlockchainBlockState(ctx, params)
-	_ = res
 	return res, err
 }
 
 func (c *Client) sendGetRawBlockchainBlockState(ctx context.Context, params GetRawBlockchainBlockStateParams) (res *GetRawBlockchainBlockStateOK, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getRawBlockchainBlockState"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/liteserver/get_state/{block_id}"),
 	}
 
 	// Run stopwatch.
@@ -6106,13 +6644,14 @@ func (c *Client) sendGetRawBlockchainBlockState(ctx context.Context, params GetR
 // GET /v2/liteserver/get_config_all/{block_id}
 func (c *Client) GetRawConfig(ctx context.Context, params GetRawConfigParams) (*GetRawConfigOK, error) {
 	res, err := c.sendGetRawConfig(ctx, params)
-	_ = res
 	return res, err
 }
 
 func (c *Client) sendGetRawConfig(ctx context.Context, params GetRawConfigParams) (res *GetRawConfigOK, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getRawConfig"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/liteserver/get_config_all/{block_id}"),
 	}
 
 	// Run stopwatch.
@@ -6213,13 +6752,14 @@ func (c *Client) sendGetRawConfig(ctx context.Context, params GetRawConfigParams
 // GET /v2/liteserver/list_block_transactions/{block_id}
 func (c *Client) GetRawListBlockTransactions(ctx context.Context, params GetRawListBlockTransactionsParams) (*GetRawListBlockTransactionsOK, error) {
 	res, err := c.sendGetRawListBlockTransactions(ctx, params)
-	_ = res
 	return res, err
 }
 
 func (c *Client) sendGetRawListBlockTransactions(ctx context.Context, params GetRawListBlockTransactionsParams) (res *GetRawListBlockTransactionsOK, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getRawListBlockTransactions"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/liteserver/list_block_transactions/{block_id}"),
 	}
 
 	// Run stopwatch.
@@ -6368,13 +6908,14 @@ func (c *Client) sendGetRawListBlockTransactions(ctx context.Context, params Get
 // GET /v2/liteserver/get_masterchain_info
 func (c *Client) GetRawMasterchainInfo(ctx context.Context) (*GetRawMasterchainInfoOK, error) {
 	res, err := c.sendGetRawMasterchainInfo(ctx)
-	_ = res
 	return res, err
 }
 
 func (c *Client) sendGetRawMasterchainInfo(ctx context.Context) (res *GetRawMasterchainInfoOK, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getRawMasterchainInfo"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/liteserver/get_masterchain_info"),
 	}
 
 	// Run stopwatch.
@@ -6439,13 +6980,14 @@ func (c *Client) sendGetRawMasterchainInfo(ctx context.Context) (res *GetRawMast
 // GET /v2/liteserver/get_masterchain_info_ext
 func (c *Client) GetRawMasterchainInfoExt(ctx context.Context, params GetRawMasterchainInfoExtParams) (*GetRawMasterchainInfoExtOK, error) {
 	res, err := c.sendGetRawMasterchainInfoExt(ctx, params)
-	_ = res
 	return res, err
 }
 
 func (c *Client) sendGetRawMasterchainInfoExt(ctx context.Context, params GetRawMasterchainInfoExtParams) (res *GetRawMasterchainInfoExtOK, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getRawMasterchainInfoExt"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/liteserver/get_masterchain_info_ext"),
 	}
 
 	// Run stopwatch.
@@ -6528,13 +7070,14 @@ func (c *Client) sendGetRawMasterchainInfoExt(ctx context.Context, params GetRaw
 // GET /v2/liteserver/get_shard_block_proof/{block_id}
 func (c *Client) GetRawShardBlockProof(ctx context.Context, params GetRawShardBlockProofParams) (*GetRawShardBlockProofOK, error) {
 	res, err := c.sendGetRawShardBlockProof(ctx, params)
-	_ = res
 	return res, err
 }
 
 func (c *Client) sendGetRawShardBlockProof(ctx context.Context, params GetRawShardBlockProofParams) (res *GetRawShardBlockProofOK, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getRawShardBlockProof"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/liteserver/get_shard_block_proof/{block_id}"),
 	}
 
 	// Run stopwatch.
@@ -6617,13 +7160,14 @@ func (c *Client) sendGetRawShardBlockProof(ctx context.Context, params GetRawSha
 // GET /v2/liteserver/get_shard_info/{block_id}
 func (c *Client) GetRawShardInfo(ctx context.Context, params GetRawShardInfoParams) (*GetRawShardInfoOK, error) {
 	res, err := c.sendGetRawShardInfo(ctx, params)
-	_ = res
 	return res, err
 }
 
 func (c *Client) sendGetRawShardInfo(ctx context.Context, params GetRawShardInfoParams) (res *GetRawShardInfoOK, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getRawShardInfo"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/liteserver/get_shard_info/{block_id}"),
 	}
 
 	// Run stopwatch.
@@ -6752,13 +7296,14 @@ func (c *Client) sendGetRawShardInfo(ctx context.Context, params GetRawShardInfo
 // GET /v2/liteserver/get_time
 func (c *Client) GetRawTime(ctx context.Context) (*GetRawTimeOK, error) {
 	res, err := c.sendGetRawTime(ctx)
-	_ = res
 	return res, err
 }
 
 func (c *Client) sendGetRawTime(ctx context.Context) (res *GetRawTimeOK, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getRawTime"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/liteserver/get_time"),
 	}
 
 	// Run stopwatch.
@@ -6823,13 +7368,14 @@ func (c *Client) sendGetRawTime(ctx context.Context) (res *GetRawTimeOK, err err
 // GET /v2/liteserver/get_transactions/{account_id}
 func (c *Client) GetRawTransactions(ctx context.Context, params GetRawTransactionsParams) (*GetRawTransactionsOK, error) {
 	res, err := c.sendGetRawTransactions(ctx, params)
-	_ = res
 	return res, err
 }
 
 func (c *Client) sendGetRawTransactions(ctx context.Context, params GetRawTransactionsParams) (res *GetRawTransactionsOK, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getRawTransactions"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/liteserver/get_transactions/{account_id}"),
 	}
 
 	// Run stopwatch.
@@ -6958,13 +7504,14 @@ func (c *Client) sendGetRawTransactions(ctx context.Context, params GetRawTransa
 // GET /v2/staking/pool/{account_id}/history
 func (c *Client) GetStakingPoolHistory(ctx context.Context, params GetStakingPoolHistoryParams) (*GetStakingPoolHistoryOK, error) {
 	res, err := c.sendGetStakingPoolHistory(ctx, params)
-	_ = res
 	return res, err
 }
 
 func (c *Client) sendGetStakingPoolHistory(ctx context.Context, params GetStakingPoolHistoryParams) (res *GetStakingPoolHistoryOK, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getStakingPoolHistory"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/staking/pool/{account_id}/history"),
 	}
 
 	// Run stopwatch.
@@ -7048,13 +7595,14 @@ func (c *Client) sendGetStakingPoolHistory(ctx context.Context, params GetStakin
 // GET /v2/staking/pool/{account_id}
 func (c *Client) GetStakingPoolInfo(ctx context.Context, params GetStakingPoolInfoParams) (*GetStakingPoolInfoOK, error) {
 	res, err := c.sendGetStakingPoolInfo(ctx, params)
-	_ = res
 	return res, err
 }
 
 func (c *Client) sendGetStakingPoolInfo(ctx context.Context, params GetStakingPoolInfoParams) (res *GetStakingPoolInfoOK, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getStakingPoolInfo"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/staking/pool/{account_id}"),
 	}
 
 	// Run stopwatch.
@@ -7154,13 +7702,14 @@ func (c *Client) sendGetStakingPoolInfo(ctx context.Context, params GetStakingPo
 // GET /v2/staking/pools
 func (c *Client) GetStakingPools(ctx context.Context, params GetStakingPoolsParams) (*GetStakingPoolsOK, error) {
 	res, err := c.sendGetStakingPools(ctx, params)
-	_ = res
 	return res, err
 }
 
 func (c *Client) sendGetStakingPools(ctx context.Context, params GetStakingPoolsParams) (res *GetStakingPoolsOK, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getStakingPools"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/staking/pools"),
 	}
 
 	// Run stopwatch.
@@ -7280,13 +7829,14 @@ func (c *Client) sendGetStakingPools(ctx context.Context, params GetStakingPools
 // GET /v2/storage/providers
 func (c *Client) GetStorageProviders(ctx context.Context) (*GetStorageProvidersOK, error) {
 	res, err := c.sendGetStorageProviders(ctx)
-	_ = res
 	return res, err
 }
 
 func (c *Client) sendGetStorageProviders(ctx context.Context) (res *GetStorageProvidersOK, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getStorageProviders"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/storage/providers"),
 	}
 
 	// Run stopwatch.
@@ -7351,13 +7901,14 @@ func (c *Client) sendGetStorageProviders(ctx context.Context) (res *GetStoragePr
 // GET /v2/tonconnect/payload
 func (c *Client) GetTonConnectPayload(ctx context.Context) (*GetTonConnectPayloadOK, error) {
 	res, err := c.sendGetTonConnectPayload(ctx)
-	_ = res
 	return res, err
 }
 
 func (c *Client) sendGetTonConnectPayload(ctx context.Context) (res *GetTonConnectPayloadOK, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getTonConnectPayload"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/tonconnect/payload"),
 	}
 
 	// Run stopwatch.
@@ -7422,13 +7973,14 @@ func (c *Client) sendGetTonConnectPayload(ctx context.Context) (res *GetTonConne
 // GET /v2/traces/{trace_id}
 func (c *Client) GetTrace(ctx context.Context, params GetTraceParams) (*Trace, error) {
 	res, err := c.sendGetTrace(ctx, params)
-	_ = res
 	return res, err
 }
 
 func (c *Client) sendGetTrace(ctx context.Context, params GetTraceParams) (res *Trace, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getTrace"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/traces/{trace_id}"),
 	}
 
 	// Run stopwatch.
@@ -7511,13 +8063,14 @@ func (c *Client) sendGetTrace(ctx context.Context, params GetTraceParams) (res *
 // GET /v2/wallet/backup
 func (c *Client) GetWalletBackup(ctx context.Context, params GetWalletBackupParams) (*GetWalletBackupOK, error) {
 	res, err := c.sendGetWalletBackup(ctx, params)
-	_ = res
 	return res, err
 }
 
 func (c *Client) sendGetWalletBackup(ctx context.Context, params GetWalletBackupParams) (res *GetWalletBackupOK, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getWalletBackup"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/wallet/backup"),
 	}
 
 	// Run stopwatch.
@@ -7596,13 +8149,14 @@ func (c *Client) sendGetWalletBackup(ctx context.Context, params GetWalletBackup
 // GET /v2/pubkeys/{public_key}/wallets
 func (c *Client) GetWalletsByPublicKey(ctx context.Context, params GetWalletsByPublicKeyParams) (*Accounts, error) {
 	res, err := c.sendGetWalletsByPublicKey(ctx, params)
-	_ = res
 	return res, err
 }
 
 func (c *Client) sendGetWalletsByPublicKey(ctx context.Context, params GetWalletsByPublicKeyParams) (res *Accounts, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getWalletsByPublicKey"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/pubkeys/{public_key}/wallets"),
 	}
 
 	// Run stopwatch.
@@ -7685,14 +8239,15 @@ func (c *Client) sendGetWalletsByPublicKey(ctx context.Context, params GetWallet
 //
 // POST /v2/accounts/{account_id}/reindex
 func (c *Client) ReindexAccount(ctx context.Context, params ReindexAccountParams) error {
-	res, err := c.sendReindexAccount(ctx, params)
-	_ = res
+	_, err := c.sendReindexAccount(ctx, params)
 	return err
 }
 
 func (c *Client) sendReindexAccount(ctx context.Context, params ReindexAccountParams) (res *ReindexAccountOK, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("reindexAccount"),
+		semconv.HTTPMethodKey.String("POST"),
+		semconv.HTTPRouteKey.String("/v2/accounts/{account_id}/reindex"),
 	}
 
 	// Run stopwatch.
@@ -7776,13 +8331,14 @@ func (c *Client) sendReindexAccount(ctx context.Context, params ReindexAccountPa
 // GET /v2/accounts/search
 func (c *Client) SearchAccounts(ctx context.Context, params SearchAccountsParams) (*FoundAccounts, error) {
 	res, err := c.sendSearchAccounts(ctx, params)
-	_ = res
 	return res, err
 }
 
 func (c *Client) sendSearchAccounts(ctx context.Context, params SearchAccountsParams) (res *FoundAccounts, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("searchAccounts"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/accounts/search"),
 	}
 
 	// Run stopwatch.
@@ -7864,14 +8420,15 @@ func (c *Client) sendSearchAccounts(ctx context.Context, params SearchAccountsPa
 //
 // POST /v2/blockchain/message
 func (c *Client) SendBlockchainMessage(ctx context.Context, request *SendBlockchainMessageReq) error {
-	res, err := c.sendSendBlockchainMessage(ctx, request)
-	_ = res
+	_, err := c.sendSendBlockchainMessage(ctx, request)
 	return err
 }
 
 func (c *Client) sendSendBlockchainMessage(ctx context.Context, request *SendBlockchainMessageReq) (res *SendBlockchainMessageOK, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("sendBlockchainMessage"),
+		semconv.HTTPMethodKey.String("POST"),
+		semconv.HTTPRouteKey.String("/v2/blockchain/message"),
 	}
 	// Validate request before sending.
 	if err := func() error {
@@ -7948,13 +8505,14 @@ func (c *Client) sendSendBlockchainMessage(ctx context.Context, request *SendBlo
 // POST /v2/liteserver/send_message
 func (c *Client) SendRawMessage(ctx context.Context, request *SendRawMessageReq) (*SendRawMessageOK, error) {
 	res, err := c.sendSendRawMessage(ctx, request)
-	_ = res
 	return res, err
 }
 
 func (c *Client) sendSendRawMessage(ctx context.Context, request *SendRawMessageReq) (res *SendRawMessageOK, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("sendRawMessage"),
+		semconv.HTTPMethodKey.String("POST"),
+		semconv.HTTPRouteKey.String("/v2/liteserver/send_message"),
 	}
 
 	// Run stopwatch.
@@ -8021,14 +8579,15 @@ func (c *Client) sendSendRawMessage(ctx context.Context, request *SendRawMessage
 //
 // PUT /v2/wallet/backup
 func (c *Client) SetWalletBackup(ctx context.Context, request SetWalletBackupReq, params SetWalletBackupParams) error {
-	res, err := c.sendSetWalletBackup(ctx, request, params)
-	_ = res
+	_, err := c.sendSetWalletBackup(ctx, request, params)
 	return err
 }
 
 func (c *Client) sendSetWalletBackup(ctx context.Context, request SetWalletBackupReq, params SetWalletBackupParams) (res *SetWalletBackupOK, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("setWalletBackup"),
+		semconv.HTTPMethodKey.String("PUT"),
+		semconv.HTTPRouteKey.String("/v2/wallet/backup"),
 	}
 
 	// Run stopwatch.
@@ -8110,13 +8669,14 @@ func (c *Client) sendSetWalletBackup(ctx context.Context, request SetWalletBacku
 // POST /v2/wallet/auth/proof
 func (c *Client) TonConnectProof(ctx context.Context, request *TonConnectProofReq) (*TonConnectProofOK, error) {
 	res, err := c.sendTonConnectProof(ctx, request)
-	_ = res
 	return res, err
 }
 
 func (c *Client) sendTonConnectProof(ctx context.Context, request *TonConnectProofReq) (res *TonConnectProofOK, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("tonConnectProof"),
+		semconv.HTTPMethodKey.String("POST"),
+		semconv.HTTPRouteKey.String("/v2/wallet/auth/proof"),
 	}
 
 	// Run stopwatch.

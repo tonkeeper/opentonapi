@@ -2495,7 +2495,8 @@
     "required": [
      "address",
      "next_item_index",
-     "raw_collection_content"
+     "raw_collection_content",
+     "approved_by"
     ],
     "type": "object"
    },

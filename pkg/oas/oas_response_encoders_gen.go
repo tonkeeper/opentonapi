@@ -9,6 +9,8 @@ import (
 	"github.com/go-faster/jx"
 	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/trace"
+
+	ht "github.com/ogen-go/ogen/http"
 )
 
 func encodeAccountDnsBackResolveResponse(response *DomainNames, w http.ResponseWriter, span trace.Span) error {
@@ -21,6 +23,7 @@ func encodeAccountDnsBackResolveResponse(response *DomainNames, w http.ResponseW
 	if _, err := e.WriteTo(w); err != nil {
 		return errors.Wrap(err, "write")
 	}
+
 	return nil
 }
 
@@ -34,6 +37,7 @@ func encodeBlockchainAccountInspectResponse(response *BlockchainAccountInspect, 
 	if _, err := e.WriteTo(w); err != nil {
 		return errors.Wrap(err, "write")
 	}
+
 	return nil
 }
 
@@ -47,6 +51,7 @@ func encodeDnsResolveResponse(response *DnsRecord, w http.ResponseWriter, span t
 	if _, err := e.WriteTo(w); err != nil {
 		return errors.Wrap(err, "write")
 	}
+
 	return nil
 }
 
@@ -60,6 +65,7 @@ func encodeEmulateMessageToAccountEventResponse(response *AccountEvent, w http.R
 	if _, err := e.WriteTo(w); err != nil {
 		return errors.Wrap(err, "write")
 	}
+
 	return nil
 }
 
@@ -73,6 +79,7 @@ func encodeEmulateMessageToEventResponse(response *Event, w http.ResponseWriter,
 	if _, err := e.WriteTo(w); err != nil {
 		return errors.Wrap(err, "write")
 	}
+
 	return nil
 }
 
@@ -86,6 +93,7 @@ func encodeEmulateMessageToTraceResponse(response *Trace, w http.ResponseWriter,
 	if _, err := e.WriteTo(w); err != nil {
 		return errors.Wrap(err, "write")
 	}
+
 	return nil
 }
 
@@ -99,6 +107,7 @@ func encodeEmulateMessageToWalletResponse(response *MessageConsequences, w http.
 	if _, err := e.WriteTo(w); err != nil {
 		return errors.Wrap(err, "write")
 	}
+
 	return nil
 }
 
@@ -112,6 +121,7 @@ func encodeExecGetMethodForBlockchainAccountResponse(response *MethodExecutionRe
 	if _, err := e.WriteTo(w); err != nil {
 		return errors.Wrap(err, "write")
 	}
+
 	return nil
 }
 
@@ -125,6 +135,7 @@ func encodeGetAccountResponse(response *Account, w http.ResponseWriter, span tra
 	if _, err := e.WriteTo(w); err != nil {
 		return errors.Wrap(err, "write")
 	}
+
 	return nil
 }
 
@@ -138,6 +149,7 @@ func encodeGetAccountDiffResponse(response *GetAccountDiffOK, w http.ResponseWri
 	if _, err := e.WriteTo(w); err != nil {
 		return errors.Wrap(err, "write")
 	}
+
 	return nil
 }
 
@@ -151,6 +163,7 @@ func encodeGetAccountDnsExpiringResponse(response *DnsExpiring, w http.ResponseW
 	if _, err := e.WriteTo(w); err != nil {
 		return errors.Wrap(err, "write")
 	}
+
 	return nil
 }
 
@@ -164,6 +177,7 @@ func encodeGetAccountEventResponse(response *AccountEvent, w http.ResponseWriter
 	if _, err := e.WriteTo(w); err != nil {
 		return errors.Wrap(err, "write")
 	}
+
 	return nil
 }
 
@@ -177,6 +191,7 @@ func encodeGetAccountEventsResponse(response *AccountEvents, w http.ResponseWrit
 	if _, err := e.WriteTo(w); err != nil {
 		return errors.Wrap(err, "write")
 	}
+
 	return nil
 }
 
@@ -190,6 +205,7 @@ func encodeGetAccountInfoByStateInitResponse(response *AccountInfoByStateInit, w
 	if _, err := e.WriteTo(w); err != nil {
 		return errors.Wrap(err, "write")
 	}
+
 	return nil
 }
 
@@ -203,6 +219,7 @@ func encodeGetAccountJettonHistoryByIDResponse(response *AccountEvents, w http.R
 	if _, err := e.WriteTo(w); err != nil {
 		return errors.Wrap(err, "write")
 	}
+
 	return nil
 }
 
@@ -216,6 +233,7 @@ func encodeGetAccountJettonsBalancesResponse(response *JettonsBalances, w http.R
 	if _, err := e.WriteTo(w); err != nil {
 		return errors.Wrap(err, "write")
 	}
+
 	return nil
 }
 
@@ -229,6 +247,7 @@ func encodeGetAccountJettonsHistoryResponse(response *AccountEvents, w http.Resp
 	if _, err := e.WriteTo(w); err != nil {
 		return errors.Wrap(err, "write")
 	}
+
 	return nil
 }
 
@@ -242,6 +261,7 @@ func encodeGetAccountNftHistoryResponse(response *AccountEvents, w http.Response
 	if _, err := e.WriteTo(w); err != nil {
 		return errors.Wrap(err, "write")
 	}
+
 	return nil
 }
 
@@ -255,6 +275,7 @@ func encodeGetAccountNftItemsResponse(response *NftItems, w http.ResponseWriter,
 	if _, err := e.WriteTo(w); err != nil {
 		return errors.Wrap(err, "write")
 	}
+
 	return nil
 }
 
@@ -268,6 +289,7 @@ func encodeGetAccountNominatorsPoolsResponse(response *AccountStaking, w http.Re
 	if _, err := e.WriteTo(w); err != nil {
 		return errors.Wrap(err, "write")
 	}
+
 	return nil
 }
 
@@ -281,6 +303,7 @@ func encodeGetAccountPublicKeyResponse(response *GetAccountPublicKeyOK, w http.R
 	if _, err := e.WriteTo(w); err != nil {
 		return errors.Wrap(err, "write")
 	}
+
 	return nil
 }
 
@@ -294,6 +317,7 @@ func encodeGetAccountSeqnoResponse(response *Seqno, w http.ResponseWriter, span 
 	if _, err := e.WriteTo(w); err != nil {
 		return errors.Wrap(err, "write")
 	}
+
 	return nil
 }
 
@@ -307,6 +331,7 @@ func encodeGetAccountSubscriptionsResponse(response *Subscriptions, w http.Respo
 	if _, err := e.WriteTo(w); err != nil {
 		return errors.Wrap(err, "write")
 	}
+
 	return nil
 }
 
@@ -320,6 +345,7 @@ func encodeGetAccountTracesResponse(response *TraceIDs, w http.ResponseWriter, s
 	if _, err := e.WriteTo(w); err != nil {
 		return errors.Wrap(err, "write")
 	}
+
 	return nil
 }
 
@@ -333,6 +359,7 @@ func encodeGetAccountsResponse(response *Accounts, w http.ResponseWriter, span t
 	if _, err := e.WriteTo(w); err != nil {
 		return errors.Wrap(err, "write")
 	}
+
 	return nil
 }
 
@@ -346,6 +373,7 @@ func encodeGetAllAuctionsResponse(response *Auctions, w http.ResponseWriter, spa
 	if _, err := e.WriteTo(w); err != nil {
 		return errors.Wrap(err, "write")
 	}
+
 	return nil
 }
 
@@ -359,6 +387,7 @@ func encodeGetAllRawShardsInfoResponse(response *GetAllRawShardsInfoOK, w http.R
 	if _, err := e.WriteTo(w); err != nil {
 		return errors.Wrap(err, "write")
 	}
+
 	return nil
 }
 
@@ -372,6 +401,7 @@ func encodeGetBlockchainAccountTransactionsResponse(response *Transactions, w ht
 	if _, err := e.WriteTo(w); err != nil {
 		return errors.Wrap(err, "write")
 	}
+
 	return nil
 }
 
@@ -385,6 +415,7 @@ func encodeGetBlockchainBlockResponse(response *BlockchainBlock, w http.Response
 	if _, err := e.WriteTo(w); err != nil {
 		return errors.Wrap(err, "write")
 	}
+
 	return nil
 }
 
@@ -398,6 +429,7 @@ func encodeGetBlockchainBlockTransactionsResponse(response *Transactions, w http
 	if _, err := e.WriteTo(w); err != nil {
 		return errors.Wrap(err, "write")
 	}
+
 	return nil
 }
 
@@ -411,6 +443,7 @@ func encodeGetBlockchainConfigResponse(response *BlockchainConfig, w http.Respon
 	if _, err := e.WriteTo(w); err != nil {
 		return errors.Wrap(err, "write")
 	}
+
 	return nil
 }
 
@@ -424,6 +457,7 @@ func encodeGetBlockchainMasterchainHeadResponse(response *BlockchainBlock, w htt
 	if _, err := e.WriteTo(w); err != nil {
 		return errors.Wrap(err, "write")
 	}
+
 	return nil
 }
 
@@ -437,6 +471,7 @@ func encodeGetBlockchainRawAccountResponse(response *BlockchainRawAccount, w htt
 	if _, err := e.WriteTo(w); err != nil {
 		return errors.Wrap(err, "write")
 	}
+
 	return nil
 }
 
@@ -450,6 +485,7 @@ func encodeGetBlockchainTransactionResponse(response *Transaction, w http.Respon
 	if _, err := e.WriteTo(w); err != nil {
 		return errors.Wrap(err, "write")
 	}
+
 	return nil
 }
 
@@ -463,6 +499,7 @@ func encodeGetBlockchainTransactionByMessageHashResponse(response *Transaction, 
 	if _, err := e.WriteTo(w); err != nil {
 		return errors.Wrap(err, "write")
 	}
+
 	return nil
 }
 
@@ -476,6 +513,7 @@ func encodeGetBlockchainValidatorsResponse(response *Validators, w http.Response
 	if _, err := e.WriteTo(w); err != nil {
 		return errors.Wrap(err, "write")
 	}
+
 	return nil
 }
 
@@ -489,6 +527,7 @@ func encodeGetChartRatesResponse(response *GetChartRatesOK, w http.ResponseWrite
 	if _, err := e.WriteTo(w); err != nil {
 		return errors.Wrap(err, "write")
 	}
+
 	return nil
 }
 
@@ -502,6 +541,7 @@ func encodeGetDnsInfoResponse(response *DomainInfo, w http.ResponseWriter, span 
 	if _, err := e.WriteTo(w); err != nil {
 		return errors.Wrap(err, "write")
 	}
+
 	return nil
 }
 
@@ -515,6 +555,7 @@ func encodeGetDomainBidsResponse(response *DomainBids, w http.ResponseWriter, sp
 	if _, err := e.WriteTo(w); err != nil {
 		return errors.Wrap(err, "write")
 	}
+
 	return nil
 }
 
@@ -528,6 +569,7 @@ func encodeGetEventResponse(response *Event, w http.ResponseWriter, span trace.S
 	if _, err := e.WriteTo(w); err != nil {
 		return errors.Wrap(err, "write")
 	}
+
 	return nil
 }
 
@@ -541,6 +583,7 @@ func encodeGetItemsFromCollectionResponse(response *NftItems, w http.ResponseWri
 	if _, err := e.WriteTo(w); err != nil {
 		return errors.Wrap(err, "write")
 	}
+
 	return nil
 }
 
@@ -554,6 +597,7 @@ func encodeGetJettonHoldersResponse(response *JettonHolders, w http.ResponseWrit
 	if _, err := e.WriteTo(w); err != nil {
 		return errors.Wrap(err, "write")
 	}
+
 	return nil
 }
 
@@ -567,6 +611,7 @@ func encodeGetJettonInfoResponse(response *JettonInfo, w http.ResponseWriter, sp
 	if _, err := e.WriteTo(w); err != nil {
 		return errors.Wrap(err, "write")
 	}
+
 	return nil
 }
 
@@ -580,6 +625,7 @@ func encodeGetJettonsResponse(response *Jettons, w http.ResponseWriter, span tra
 	if _, err := e.WriteTo(w); err != nil {
 		return errors.Wrap(err, "write")
 	}
+
 	return nil
 }
 
@@ -593,6 +639,7 @@ func encodeGetJettonsEventsResponse(response *Event, w http.ResponseWriter, span
 	if _, err := e.WriteTo(w); err != nil {
 		return errors.Wrap(err, "write")
 	}
+
 	return nil
 }
 
@@ -606,6 +653,7 @@ func encodeGetNftCollectionResponse(response *NftCollection, w http.ResponseWrit
 	if _, err := e.WriteTo(w); err != nil {
 		return errors.Wrap(err, "write")
 	}
+
 	return nil
 }
 
@@ -619,6 +667,7 @@ func encodeGetNftCollectionsResponse(response *NftCollections, w http.ResponseWr
 	if _, err := e.WriteTo(w); err != nil {
 		return errors.Wrap(err, "write")
 	}
+
 	return nil
 }
 
@@ -632,6 +681,7 @@ func encodeGetNftHistoryByIDResponse(response *AccountEvents, w http.ResponseWri
 	if _, err := e.WriteTo(w); err != nil {
 		return errors.Wrap(err, "write")
 	}
+
 	return nil
 }
 
@@ -645,6 +695,7 @@ func encodeGetNftItemByAddressResponse(response *NftItem, w http.ResponseWriter,
 	if _, err := e.WriteTo(w); err != nil {
 		return errors.Wrap(err, "write")
 	}
+
 	return nil
 }
 
@@ -658,6 +709,7 @@ func encodeGetNftItemsByAddressesResponse(response *NftItems, w http.ResponseWri
 	if _, err := e.WriteTo(w); err != nil {
 		return errors.Wrap(err, "write")
 	}
+
 	return nil
 }
 
@@ -671,6 +723,7 @@ func encodeGetRatesResponse(response *GetRatesOK, w http.ResponseWriter, span tr
 	if _, err := e.WriteTo(w); err != nil {
 		return errors.Wrap(err, "write")
 	}
+
 	return nil
 }
 
@@ -684,6 +737,7 @@ func encodeGetRawAccountStateResponse(response *GetRawAccountStateOK, w http.Res
 	if _, err := e.WriteTo(w); err != nil {
 		return errors.Wrap(err, "write")
 	}
+
 	return nil
 }
 
@@ -697,6 +751,7 @@ func encodeGetRawBlockProofResponse(response *GetRawBlockProofOK, w http.Respons
 	if _, err := e.WriteTo(w); err != nil {
 		return errors.Wrap(err, "write")
 	}
+
 	return nil
 }
 
@@ -710,6 +765,7 @@ func encodeGetRawBlockchainBlockResponse(response *GetRawBlockchainBlockOK, w ht
 	if _, err := e.WriteTo(w); err != nil {
 		return errors.Wrap(err, "write")
 	}
+
 	return nil
 }
 
@@ -723,6 +779,7 @@ func encodeGetRawBlockchainBlockHeaderResponse(response *GetRawBlockchainBlockHe
 	if _, err := e.WriteTo(w); err != nil {
 		return errors.Wrap(err, "write")
 	}
+
 	return nil
 }
 
@@ -736,6 +793,7 @@ func encodeGetRawBlockchainBlockStateResponse(response *GetRawBlockchainBlockSta
 	if _, err := e.WriteTo(w); err != nil {
 		return errors.Wrap(err, "write")
 	}
+
 	return nil
 }
 
@@ -749,6 +807,7 @@ func encodeGetRawConfigResponse(response *GetRawConfigOK, w http.ResponseWriter,
 	if _, err := e.WriteTo(w); err != nil {
 		return errors.Wrap(err, "write")
 	}
+
 	return nil
 }
 
@@ -762,6 +821,7 @@ func encodeGetRawListBlockTransactionsResponse(response *GetRawListBlockTransact
 	if _, err := e.WriteTo(w); err != nil {
 		return errors.Wrap(err, "write")
 	}
+
 	return nil
 }
 
@@ -775,6 +835,7 @@ func encodeGetRawMasterchainInfoResponse(response *GetRawMasterchainInfoOK, w ht
 	if _, err := e.WriteTo(w); err != nil {
 		return errors.Wrap(err, "write")
 	}
+
 	return nil
 }
 
@@ -788,6 +849,7 @@ func encodeGetRawMasterchainInfoExtResponse(response *GetRawMasterchainInfoExtOK
 	if _, err := e.WriteTo(w); err != nil {
 		return errors.Wrap(err, "write")
 	}
+
 	return nil
 }
 
@@ -801,6 +863,7 @@ func encodeGetRawShardBlockProofResponse(response *GetRawShardBlockProofOK, w ht
 	if _, err := e.WriteTo(w); err != nil {
 		return errors.Wrap(err, "write")
 	}
+
 	return nil
 }
 
@@ -814,6 +877,7 @@ func encodeGetRawShardInfoResponse(response *GetRawShardInfoOK, w http.ResponseW
 	if _, err := e.WriteTo(w); err != nil {
 		return errors.Wrap(err, "write")
 	}
+
 	return nil
 }
 
@@ -827,6 +891,7 @@ func encodeGetRawTimeResponse(response *GetRawTimeOK, w http.ResponseWriter, spa
 	if _, err := e.WriteTo(w); err != nil {
 		return errors.Wrap(err, "write")
 	}
+
 	return nil
 }
 
@@ -840,6 +905,7 @@ func encodeGetRawTransactionsResponse(response *GetRawTransactionsOK, w http.Res
 	if _, err := e.WriteTo(w); err != nil {
 		return errors.Wrap(err, "write")
 	}
+
 	return nil
 }
 
@@ -853,6 +919,7 @@ func encodeGetStakingPoolHistoryResponse(response *GetStakingPoolHistoryOK, w ht
 	if _, err := e.WriteTo(w); err != nil {
 		return errors.Wrap(err, "write")
 	}
+
 	return nil
 }
 
@@ -866,6 +933,7 @@ func encodeGetStakingPoolInfoResponse(response *GetStakingPoolInfoOK, w http.Res
 	if _, err := e.WriteTo(w); err != nil {
 		return errors.Wrap(err, "write")
 	}
+
 	return nil
 }
 
@@ -879,6 +947,7 @@ func encodeGetStakingPoolsResponse(response *GetStakingPoolsOK, w http.ResponseW
 	if _, err := e.WriteTo(w); err != nil {
 		return errors.Wrap(err, "write")
 	}
+
 	return nil
 }
 
@@ -892,6 +961,7 @@ func encodeGetStorageProvidersResponse(response *GetStorageProvidersOK, w http.R
 	if _, err := e.WriteTo(w); err != nil {
 		return errors.Wrap(err, "write")
 	}
+
 	return nil
 }
 
@@ -905,6 +975,7 @@ func encodeGetTonConnectPayloadResponse(response *GetTonConnectPayloadOK, w http
 	if _, err := e.WriteTo(w); err != nil {
 		return errors.Wrap(err, "write")
 	}
+
 	return nil
 }
 
@@ -918,6 +989,7 @@ func encodeGetTraceResponse(response *Trace, w http.ResponseWriter, span trace.S
 	if _, err := e.WriteTo(w); err != nil {
 		return errors.Wrap(err, "write")
 	}
+
 	return nil
 }
 
@@ -931,6 +1003,7 @@ func encodeGetWalletBackupResponse(response *GetWalletBackupOK, w http.ResponseW
 	if _, err := e.WriteTo(w); err != nil {
 		return errors.Wrap(err, "write")
 	}
+
 	return nil
 }
 
@@ -944,6 +1017,7 @@ func encodeGetWalletsByPublicKeyResponse(response *Accounts, w http.ResponseWrit
 	if _, err := e.WriteTo(w); err != nil {
 		return errors.Wrap(err, "write")
 	}
+
 	return nil
 }
 
@@ -964,6 +1038,7 @@ func encodeSearchAccountsResponse(response *FoundAccounts, w http.ResponseWriter
 	if _, err := e.WriteTo(w); err != nil {
 		return errors.Wrap(err, "write")
 	}
+
 	return nil
 }
 
@@ -984,6 +1059,7 @@ func encodeSendRawMessageResponse(response *SendRawMessageOK, w http.ResponseWri
 	if _, err := e.WriteTo(w); err != nil {
 		return errors.Wrap(err, "write")
 	}
+
 	return nil
 }
 
@@ -1004,6 +1080,7 @@ func encodeTonConnectProofResponse(response *TonConnectProofOK, w http.ResponseW
 	if _, err := e.WriteTo(w); err != nil {
 		return errors.Wrap(err, "write")
 	}
+
 	return nil
 }
 
@@ -1026,6 +1103,10 @@ func encodeErrorResponse(response *ErrorStatusCode, w http.ResponseWriter, span 
 	response.Response.Encode(e)
 	if _, err := e.WriteTo(w); err != nil {
 		return errors.Wrap(err, "write")
+	}
+
+	if code >= http.StatusInternalServerError {
+		return errors.Wrapf(ht.ErrInternalServerErrorResponse, "code: %d, message: %s", code, http.StatusText(code))
 	}
 	return nil
 

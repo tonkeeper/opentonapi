@@ -76,10 +76,11 @@ func (s *Server) handleAccountDnsBackResolveRequest(args [1]string, argsEscaped 
 	var response *DomainNames
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
-			Context:       ctx,
-			OperationName: "AccountDnsBackResolve",
-			OperationID:   "accountDnsBackResolve",
-			Body:          nil,
+			Context:          ctx,
+			OperationName:    "AccountDnsBackResolve",
+			OperationSummary: "",
+			OperationID:      "accountDnsBackResolve",
+			Body:             nil,
 			Params: middleware.Parameters{
 				{
 					Name: "account_id",
@@ -111,22 +112,27 @@ func (s *Server) handleAccountDnsBackResolveRequest(args [1]string, argsEscaped 
 		response, err = s.h.AccountDnsBackResolve(ctx, params)
 	}
 	if err != nil {
-		recordError("Internal", err)
 		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			encodeErrorResponse(errRes, w, span)
+			if err := encodeErrorResponse(errRes, w, span); err != nil {
+				recordError("Internal", err)
+			}
 			return
 		}
 		if errors.Is(err, ht.ErrNotImplemented) {
 			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
-		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
+			recordError("Internal", err)
+		}
 		return
 	}
 
 	if err := encodeAccountDnsBackResolveResponse(response, w, span); err != nil {
 		recordError("EncodeResponse", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
 		return
 	}
 }
@@ -187,10 +193,11 @@ func (s *Server) handleBlockchainAccountInspectRequest(args [1]string, argsEscap
 	var response *BlockchainAccountInspect
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
-			Context:       ctx,
-			OperationName: "BlockchainAccountInspect",
-			OperationID:   "blockchainAccountInspect",
-			Body:          nil,
+			Context:          ctx,
+			OperationName:    "BlockchainAccountInspect",
+			OperationSummary: "",
+			OperationID:      "blockchainAccountInspect",
+			Body:             nil,
 			Params: middleware.Parameters{
 				{
 					Name: "account_id",
@@ -222,22 +229,27 @@ func (s *Server) handleBlockchainAccountInspectRequest(args [1]string, argsEscap
 		response, err = s.h.BlockchainAccountInspect(ctx, params)
 	}
 	if err != nil {
-		recordError("Internal", err)
 		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			encodeErrorResponse(errRes, w, span)
+			if err := encodeErrorResponse(errRes, w, span); err != nil {
+				recordError("Internal", err)
+			}
 			return
 		}
 		if errors.Is(err, ht.ErrNotImplemented) {
 			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
-		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
+			recordError("Internal", err)
+		}
 		return
 	}
 
 	if err := encodeBlockchainAccountInspectResponse(response, w, span); err != nil {
 		recordError("EncodeResponse", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
 		return
 	}
 }
@@ -298,10 +310,11 @@ func (s *Server) handleDnsResolveRequest(args [1]string, argsEscaped bool, w htt
 	var response *DnsRecord
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
-			Context:       ctx,
-			OperationName: "DnsResolve",
-			OperationID:   "dnsResolve",
-			Body:          nil,
+			Context:          ctx,
+			OperationName:    "DnsResolve",
+			OperationSummary: "",
+			OperationID:      "dnsResolve",
+			Body:             nil,
 			Params: middleware.Parameters{
 				{
 					Name: "domain_name",
@@ -333,22 +346,27 @@ func (s *Server) handleDnsResolveRequest(args [1]string, argsEscaped bool, w htt
 		response, err = s.h.DnsResolve(ctx, params)
 	}
 	if err != nil {
-		recordError("Internal", err)
 		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			encodeErrorResponse(errRes, w, span)
+			if err := encodeErrorResponse(errRes, w, span); err != nil {
+				recordError("Internal", err)
+			}
 			return
 		}
 		if errors.Is(err, ht.ErrNotImplemented) {
 			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
-		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
+			recordError("Internal", err)
+		}
 		return
 	}
 
 	if err := encodeDnsResolveResponse(response, w, span); err != nil {
 		recordError("EncodeResponse", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
 		return
 	}
 }
@@ -424,10 +442,11 @@ func (s *Server) handleEmulateMessageToAccountEventRequest(args [1]string, argsE
 	var response *AccountEvent
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
-			Context:       ctx,
-			OperationName: "EmulateMessageToAccountEvent",
-			OperationID:   "emulateMessageToAccountEvent",
-			Body:          request,
+			Context:          ctx,
+			OperationName:    "EmulateMessageToAccountEvent",
+			OperationSummary: "",
+			OperationID:      "emulateMessageToAccountEvent",
+			Body:             request,
 			Params: middleware.Parameters{
 				{
 					Name: "Accept-Language",
@@ -463,22 +482,27 @@ func (s *Server) handleEmulateMessageToAccountEventRequest(args [1]string, argsE
 		response, err = s.h.EmulateMessageToAccountEvent(ctx, request, params)
 	}
 	if err != nil {
-		recordError("Internal", err)
 		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			encodeErrorResponse(errRes, w, span)
+			if err := encodeErrorResponse(errRes, w, span); err != nil {
+				recordError("Internal", err)
+			}
 			return
 		}
 		if errors.Is(err, ht.ErrNotImplemented) {
 			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
-		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
+			recordError("Internal", err)
+		}
 		return
 	}
 
 	if err := encodeEmulateMessageToAccountEventResponse(response, w, span); err != nil {
 		recordError("EncodeResponse", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
 		return
 	}
 }
@@ -554,10 +578,11 @@ func (s *Server) handleEmulateMessageToEventRequest(args [0]string, argsEscaped 
 	var response *Event
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
-			Context:       ctx,
-			OperationName: "EmulateMessageToEvent",
-			OperationID:   "emulateMessageToEvent",
-			Body:          request,
+			Context:          ctx,
+			OperationName:    "EmulateMessageToEvent",
+			OperationSummary: "",
+			OperationID:      "emulateMessageToEvent",
+			Body:             request,
 			Params: middleware.Parameters{
 				{
 					Name: "Accept-Language",
@@ -589,22 +614,27 @@ func (s *Server) handleEmulateMessageToEventRequest(args [0]string, argsEscaped 
 		response, err = s.h.EmulateMessageToEvent(ctx, request, params)
 	}
 	if err != nil {
-		recordError("Internal", err)
 		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			encodeErrorResponse(errRes, w, span)
+			if err := encodeErrorResponse(errRes, w, span); err != nil {
+				recordError("Internal", err)
+			}
 			return
 		}
 		if errors.Is(err, ht.ErrNotImplemented) {
 			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
-		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
+			recordError("Internal", err)
+		}
 		return
 	}
 
 	if err := encodeEmulateMessageToEventResponse(response, w, span); err != nil {
 		recordError("EncodeResponse", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
 		return
 	}
 }
@@ -670,12 +700,13 @@ func (s *Server) handleEmulateMessageToTraceRequest(args [0]string, argsEscaped 
 	var response *Trace
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
-			Context:       ctx,
-			OperationName: "EmulateMessageToTrace",
-			OperationID:   "emulateMessageToTrace",
-			Body:          request,
-			Params:        middleware.Parameters{},
-			Raw:           r,
+			Context:          ctx,
+			OperationName:    "EmulateMessageToTrace",
+			OperationSummary: "",
+			OperationID:      "emulateMessageToTrace",
+			Body:             request,
+			Params:           middleware.Parameters{},
+			Raw:              r,
 		}
 
 		type (
@@ -700,22 +731,27 @@ func (s *Server) handleEmulateMessageToTraceRequest(args [0]string, argsEscaped 
 		response, err = s.h.EmulateMessageToTrace(ctx, request)
 	}
 	if err != nil {
-		recordError("Internal", err)
 		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			encodeErrorResponse(errRes, w, span)
+			if err := encodeErrorResponse(errRes, w, span); err != nil {
+				recordError("Internal", err)
+			}
 			return
 		}
 		if errors.Is(err, ht.ErrNotImplemented) {
 			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
-		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
+			recordError("Internal", err)
+		}
 		return
 	}
 
 	if err := encodeEmulateMessageToTraceResponse(response, w, span); err != nil {
 		recordError("EncodeResponse", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
 		return
 	}
 }
@@ -791,10 +827,11 @@ func (s *Server) handleEmulateMessageToWalletRequest(args [0]string, argsEscaped
 	var response *MessageConsequences
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
-			Context:       ctx,
-			OperationName: "EmulateMessageToWallet",
-			OperationID:   "emulateMessageToWallet",
-			Body:          request,
+			Context:          ctx,
+			OperationName:    "EmulateMessageToWallet",
+			OperationSummary: "",
+			OperationID:      "emulateMessageToWallet",
+			Body:             request,
 			Params: middleware.Parameters{
 				{
 					Name: "Accept-Language",
@@ -826,22 +863,27 @@ func (s *Server) handleEmulateMessageToWalletRequest(args [0]string, argsEscaped
 		response, err = s.h.EmulateMessageToWallet(ctx, request, params)
 	}
 	if err != nil {
-		recordError("Internal", err)
 		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			encodeErrorResponse(errRes, w, span)
+			if err := encodeErrorResponse(errRes, w, span); err != nil {
+				recordError("Internal", err)
+			}
 			return
 		}
 		if errors.Is(err, ht.ErrNotImplemented) {
 			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
-		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
+			recordError("Internal", err)
+		}
 		return
 	}
 
 	if err := encodeEmulateMessageToWalletResponse(response, w, span); err != nil {
 		recordError("EncodeResponse", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
 		return
 	}
 }
@@ -902,10 +944,11 @@ func (s *Server) handleExecGetMethodForBlockchainAccountRequest(args [2]string, 
 	var response *MethodExecutionResult
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
-			Context:       ctx,
-			OperationName: "ExecGetMethodForBlockchainAccount",
-			OperationID:   "execGetMethodForBlockchainAccount",
-			Body:          nil,
+			Context:          ctx,
+			OperationName:    "ExecGetMethodForBlockchainAccount",
+			OperationSummary: "",
+			OperationID:      "execGetMethodForBlockchainAccount",
+			Body:             nil,
 			Params: middleware.Parameters{
 				{
 					Name: "account_id",
@@ -945,22 +988,27 @@ func (s *Server) handleExecGetMethodForBlockchainAccountRequest(args [2]string, 
 		response, err = s.h.ExecGetMethodForBlockchainAccount(ctx, params)
 	}
 	if err != nil {
-		recordError("Internal", err)
 		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			encodeErrorResponse(errRes, w, span)
+			if err := encodeErrorResponse(errRes, w, span); err != nil {
+				recordError("Internal", err)
+			}
 			return
 		}
 		if errors.Is(err, ht.ErrNotImplemented) {
 			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
-		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
+			recordError("Internal", err)
+		}
 		return
 	}
 
 	if err := encodeExecGetMethodForBlockchainAccountResponse(response, w, span); err != nil {
 		recordError("EncodeResponse", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
 		return
 	}
 }
@@ -1021,10 +1069,11 @@ func (s *Server) handleGetAccountRequest(args [1]string, argsEscaped bool, w htt
 	var response *Account
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
-			Context:       ctx,
-			OperationName: "GetAccount",
-			OperationID:   "getAccount",
-			Body:          nil,
+			Context:          ctx,
+			OperationName:    "GetAccount",
+			OperationSummary: "",
+			OperationID:      "getAccount",
+			Body:             nil,
 			Params: middleware.Parameters{
 				{
 					Name: "account_id",
@@ -1056,22 +1105,27 @@ func (s *Server) handleGetAccountRequest(args [1]string, argsEscaped bool, w htt
 		response, err = s.h.GetAccount(ctx, params)
 	}
 	if err != nil {
-		recordError("Internal", err)
 		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			encodeErrorResponse(errRes, w, span)
+			if err := encodeErrorResponse(errRes, w, span); err != nil {
+				recordError("Internal", err)
+			}
 			return
 		}
 		if errors.Is(err, ht.ErrNotImplemented) {
 			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
-		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
+			recordError("Internal", err)
+		}
 		return
 	}
 
 	if err := encodeGetAccountResponse(response, w, span); err != nil {
 		recordError("EncodeResponse", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
 		return
 	}
 }
@@ -1132,10 +1186,11 @@ func (s *Server) handleGetAccountDiffRequest(args [1]string, argsEscaped bool, w
 	var response *GetAccountDiffOK
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
-			Context:       ctx,
-			OperationName: "GetAccountDiff",
-			OperationID:   "getAccountDiff",
-			Body:          nil,
+			Context:          ctx,
+			OperationName:    "GetAccountDiff",
+			OperationSummary: "",
+			OperationID:      "getAccountDiff",
+			Body:             nil,
 			Params: middleware.Parameters{
 				{
 					Name: "account_id",
@@ -1175,22 +1230,27 @@ func (s *Server) handleGetAccountDiffRequest(args [1]string, argsEscaped bool, w
 		response, err = s.h.GetAccountDiff(ctx, params)
 	}
 	if err != nil {
-		recordError("Internal", err)
 		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			encodeErrorResponse(errRes, w, span)
+			if err := encodeErrorResponse(errRes, w, span); err != nil {
+				recordError("Internal", err)
+			}
 			return
 		}
 		if errors.Is(err, ht.ErrNotImplemented) {
 			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
-		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
+			recordError("Internal", err)
+		}
 		return
 	}
 
 	if err := encodeGetAccountDiffResponse(response, w, span); err != nil {
 		recordError("EncodeResponse", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
 		return
 	}
 }
@@ -1251,10 +1311,11 @@ func (s *Server) handleGetAccountDnsExpiringRequest(args [1]string, argsEscaped 
 	var response *DnsExpiring
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
-			Context:       ctx,
-			OperationName: "GetAccountDnsExpiring",
-			OperationID:   "getAccountDnsExpiring",
-			Body:          nil,
+			Context:          ctx,
+			OperationName:    "GetAccountDnsExpiring",
+			OperationSummary: "",
+			OperationID:      "getAccountDnsExpiring",
+			Body:             nil,
 			Params: middleware.Parameters{
 				{
 					Name: "account_id",
@@ -1290,22 +1351,27 @@ func (s *Server) handleGetAccountDnsExpiringRequest(args [1]string, argsEscaped 
 		response, err = s.h.GetAccountDnsExpiring(ctx, params)
 	}
 	if err != nil {
-		recordError("Internal", err)
 		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			encodeErrorResponse(errRes, w, span)
+			if err := encodeErrorResponse(errRes, w, span); err != nil {
+				recordError("Internal", err)
+			}
 			return
 		}
 		if errors.Is(err, ht.ErrNotImplemented) {
 			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
-		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
+			recordError("Internal", err)
+		}
 		return
 	}
 
 	if err := encodeGetAccountDnsExpiringResponse(response, w, span); err != nil {
 		recordError("EncodeResponse", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
 		return
 	}
 }
@@ -1366,10 +1432,11 @@ func (s *Server) handleGetAccountEventRequest(args [2]string, argsEscaped bool, 
 	var response *AccountEvent
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
-			Context:       ctx,
-			OperationName: "GetAccountEvent",
-			OperationID:   "getAccountEvent",
-			Body:          nil,
+			Context:          ctx,
+			OperationName:    "GetAccountEvent",
+			OperationSummary: "",
+			OperationID:      "getAccountEvent",
+			Body:             nil,
 			Params: middleware.Parameters{
 				{
 					Name: "account_id",
@@ -1413,22 +1480,27 @@ func (s *Server) handleGetAccountEventRequest(args [2]string, argsEscaped bool, 
 		response, err = s.h.GetAccountEvent(ctx, params)
 	}
 	if err != nil {
-		recordError("Internal", err)
 		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			encodeErrorResponse(errRes, w, span)
+			if err := encodeErrorResponse(errRes, w, span); err != nil {
+				recordError("Internal", err)
+			}
 			return
 		}
 		if errors.Is(err, ht.ErrNotImplemented) {
 			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
-		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
+			recordError("Internal", err)
+		}
 		return
 	}
 
 	if err := encodeGetAccountEventResponse(response, w, span); err != nil {
 		recordError("EncodeResponse", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
 		return
 	}
 }
@@ -1493,10 +1565,11 @@ func (s *Server) handleGetAccountEventsRequest(args [1]string, argsEscaped bool,
 	var response *AccountEvents
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
-			Context:       ctx,
-			OperationName: "GetAccountEvents",
-			OperationID:   "getAccountEvents",
-			Body:          nil,
+			Context:          ctx,
+			OperationName:    "GetAccountEvents",
+			OperationSummary: "",
+			OperationID:      "getAccountEvents",
+			Body:             nil,
 			Params: middleware.Parameters{
 				{
 					Name: "account_id",
@@ -1556,22 +1629,27 @@ func (s *Server) handleGetAccountEventsRequest(args [1]string, argsEscaped bool,
 		response, err = s.h.GetAccountEvents(ctx, params)
 	}
 	if err != nil {
-		recordError("Internal", err)
 		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			encodeErrorResponse(errRes, w, span)
+			if err := encodeErrorResponse(errRes, w, span); err != nil {
+				recordError("Internal", err)
+			}
 			return
 		}
 		if errors.Is(err, ht.ErrNotImplemented) {
 			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
-		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
+			recordError("Internal", err)
+		}
 		return
 	}
 
 	if err := encodeGetAccountEventsResponse(response, w, span); err != nil {
 		recordError("EncodeResponse", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
 		return
 	}
 }
@@ -1637,12 +1715,13 @@ func (s *Server) handleGetAccountInfoByStateInitRequest(args [0]string, argsEsca
 	var response *AccountInfoByStateInit
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
-			Context:       ctx,
-			OperationName: "GetAccountInfoByStateInit",
-			OperationID:   "getAccountInfoByStateInit",
-			Body:          request,
-			Params:        middleware.Parameters{},
-			Raw:           r,
+			Context:          ctx,
+			OperationName:    "GetAccountInfoByStateInit",
+			OperationSummary: "",
+			OperationID:      "getAccountInfoByStateInit",
+			Body:             request,
+			Params:           middleware.Parameters{},
+			Raw:              r,
 		}
 
 		type (
@@ -1667,22 +1746,27 @@ func (s *Server) handleGetAccountInfoByStateInitRequest(args [0]string, argsEsca
 		response, err = s.h.GetAccountInfoByStateInit(ctx, request)
 	}
 	if err != nil {
-		recordError("Internal", err)
 		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			encodeErrorResponse(errRes, w, span)
+			if err := encodeErrorResponse(errRes, w, span); err != nil {
+				recordError("Internal", err)
+			}
 			return
 		}
 		if errors.Is(err, ht.ErrNotImplemented) {
 			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
-		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
+			recordError("Internal", err)
+		}
 		return
 	}
 
 	if err := encodeGetAccountInfoByStateInitResponse(response, w, span); err != nil {
 		recordError("EncodeResponse", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
 		return
 	}
 }
@@ -1743,10 +1827,11 @@ func (s *Server) handleGetAccountJettonHistoryByIDRequest(args [2]string, argsEs
 	var response *AccountEvents
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
-			Context:       ctx,
-			OperationName: "GetAccountJettonHistoryByID",
-			OperationID:   "getAccountJettonHistoryByID",
-			Body:          nil,
+			Context:          ctx,
+			OperationName:    "GetAccountJettonHistoryByID",
+			OperationSummary: "",
+			OperationID:      "getAccountJettonHistoryByID",
+			Body:             nil,
 			Params: middleware.Parameters{
 				{
 					Name: "account_id",
@@ -1802,22 +1887,27 @@ func (s *Server) handleGetAccountJettonHistoryByIDRequest(args [2]string, argsEs
 		response, err = s.h.GetAccountJettonHistoryByID(ctx, params)
 	}
 	if err != nil {
-		recordError("Internal", err)
 		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			encodeErrorResponse(errRes, w, span)
+			if err := encodeErrorResponse(errRes, w, span); err != nil {
+				recordError("Internal", err)
+			}
 			return
 		}
 		if errors.Is(err, ht.ErrNotImplemented) {
 			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
-		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
+			recordError("Internal", err)
+		}
 		return
 	}
 
 	if err := encodeGetAccountJettonHistoryByIDResponse(response, w, span); err != nil {
 		recordError("EncodeResponse", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
 		return
 	}
 }
@@ -1878,10 +1968,11 @@ func (s *Server) handleGetAccountJettonsBalancesRequest(args [1]string, argsEsca
 	var response *JettonsBalances
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
-			Context:       ctx,
-			OperationName: "GetAccountJettonsBalances",
-			OperationID:   "getAccountJettonsBalances",
-			Body:          nil,
+			Context:          ctx,
+			OperationName:    "GetAccountJettonsBalances",
+			OperationSummary: "",
+			OperationID:      "getAccountJettonsBalances",
+			Body:             nil,
 			Params: middleware.Parameters{
 				{
 					Name: "account_id",
@@ -1917,22 +2008,27 @@ func (s *Server) handleGetAccountJettonsBalancesRequest(args [1]string, argsEsca
 		response, err = s.h.GetAccountJettonsBalances(ctx, params)
 	}
 	if err != nil {
-		recordError("Internal", err)
 		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			encodeErrorResponse(errRes, w, span)
+			if err := encodeErrorResponse(errRes, w, span); err != nil {
+				recordError("Internal", err)
+			}
 			return
 		}
 		if errors.Is(err, ht.ErrNotImplemented) {
 			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
-		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
+			recordError("Internal", err)
+		}
 		return
 	}
 
 	if err := encodeGetAccountJettonsBalancesResponse(response, w, span); err != nil {
 		recordError("EncodeResponse", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
 		return
 	}
 }
@@ -1993,10 +2089,11 @@ func (s *Server) handleGetAccountJettonsHistoryRequest(args [1]string, argsEscap
 	var response *AccountEvents
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
-			Context:       ctx,
-			OperationName: "GetAccountJettonsHistory",
-			OperationID:   "getAccountJettonsHistory",
-			Body:          nil,
+			Context:          ctx,
+			OperationName:    "GetAccountJettonsHistory",
+			OperationSummary: "",
+			OperationID:      "getAccountJettonsHistory",
+			Body:             nil,
 			Params: middleware.Parameters{
 				{
 					Name: "account_id",
@@ -2048,22 +2145,27 @@ func (s *Server) handleGetAccountJettonsHistoryRequest(args [1]string, argsEscap
 		response, err = s.h.GetAccountJettonsHistory(ctx, params)
 	}
 	if err != nil {
-		recordError("Internal", err)
 		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			encodeErrorResponse(errRes, w, span)
+			if err := encodeErrorResponse(errRes, w, span); err != nil {
+				recordError("Internal", err)
+			}
 			return
 		}
 		if errors.Is(err, ht.ErrNotImplemented) {
 			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
-		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
+			recordError("Internal", err)
+		}
 		return
 	}
 
 	if err := encodeGetAccountJettonsHistoryResponse(response, w, span); err != nil {
 		recordError("EncodeResponse", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
 		return
 	}
 }
@@ -2124,10 +2226,11 @@ func (s *Server) handleGetAccountNftHistoryRequest(args [1]string, argsEscaped b
 	var response *AccountEvents
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
-			Context:       ctx,
-			OperationName: "GetAccountNftHistory",
-			OperationID:   "getAccountNftHistory",
-			Body:          nil,
+			Context:          ctx,
+			OperationName:    "GetAccountNftHistory",
+			OperationSummary: "",
+			OperationID:      "getAccountNftHistory",
+			Body:             nil,
 			Params: middleware.Parameters{
 				{
 					Name: "account_id",
@@ -2179,22 +2282,27 @@ func (s *Server) handleGetAccountNftHistoryRequest(args [1]string, argsEscaped b
 		response, err = s.h.GetAccountNftHistory(ctx, params)
 	}
 	if err != nil {
-		recordError("Internal", err)
 		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			encodeErrorResponse(errRes, w, span)
+			if err := encodeErrorResponse(errRes, w, span); err != nil {
+				recordError("Internal", err)
+			}
 			return
 		}
 		if errors.Is(err, ht.ErrNotImplemented) {
 			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
-		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
+			recordError("Internal", err)
+		}
 		return
 	}
 
 	if err := encodeGetAccountNftHistoryResponse(response, w, span); err != nil {
 		recordError("EncodeResponse", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
 		return
 	}
 }
@@ -2255,10 +2363,11 @@ func (s *Server) handleGetAccountNftItemsRequest(args [1]string, argsEscaped boo
 	var response *NftItems
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
-			Context:       ctx,
-			OperationName: "GetAccountNftItems",
-			OperationID:   "getAccountNftItems",
-			Body:          nil,
+			Context:          ctx,
+			OperationName:    "GetAccountNftItems",
+			OperationSummary: "",
+			OperationID:      "getAccountNftItems",
+			Body:             nil,
 			Params: middleware.Parameters{
 				{
 					Name: "account_id",
@@ -2306,22 +2415,27 @@ func (s *Server) handleGetAccountNftItemsRequest(args [1]string, argsEscaped boo
 		response, err = s.h.GetAccountNftItems(ctx, params)
 	}
 	if err != nil {
-		recordError("Internal", err)
 		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			encodeErrorResponse(errRes, w, span)
+			if err := encodeErrorResponse(errRes, w, span); err != nil {
+				recordError("Internal", err)
+			}
 			return
 		}
 		if errors.Is(err, ht.ErrNotImplemented) {
 			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
-		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
+			recordError("Internal", err)
+		}
 		return
 	}
 
 	if err := encodeGetAccountNftItemsResponse(response, w, span); err != nil {
 		recordError("EncodeResponse", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
 		return
 	}
 }
@@ -2382,10 +2496,11 @@ func (s *Server) handleGetAccountNominatorsPoolsRequest(args [1]string, argsEsca
 	var response *AccountStaking
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
-			Context:       ctx,
-			OperationName: "GetAccountNominatorsPools",
-			OperationID:   "getAccountNominatorsPools",
-			Body:          nil,
+			Context:          ctx,
+			OperationName:    "GetAccountNominatorsPools",
+			OperationSummary: "",
+			OperationID:      "getAccountNominatorsPools",
+			Body:             nil,
 			Params: middleware.Parameters{
 				{
 					Name: "account_id",
@@ -2417,22 +2532,27 @@ func (s *Server) handleGetAccountNominatorsPoolsRequest(args [1]string, argsEsca
 		response, err = s.h.GetAccountNominatorsPools(ctx, params)
 	}
 	if err != nil {
-		recordError("Internal", err)
 		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			encodeErrorResponse(errRes, w, span)
+			if err := encodeErrorResponse(errRes, w, span); err != nil {
+				recordError("Internal", err)
+			}
 			return
 		}
 		if errors.Is(err, ht.ErrNotImplemented) {
 			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
-		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
+			recordError("Internal", err)
+		}
 		return
 	}
 
 	if err := encodeGetAccountNominatorsPoolsResponse(response, w, span); err != nil {
 		recordError("EncodeResponse", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
 		return
 	}
 }
@@ -2493,10 +2613,11 @@ func (s *Server) handleGetAccountPublicKeyRequest(args [1]string, argsEscaped bo
 	var response *GetAccountPublicKeyOK
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
-			Context:       ctx,
-			OperationName: "GetAccountPublicKey",
-			OperationID:   "getAccountPublicKey",
-			Body:          nil,
+			Context:          ctx,
+			OperationName:    "GetAccountPublicKey",
+			OperationSummary: "",
+			OperationID:      "getAccountPublicKey",
+			Body:             nil,
 			Params: middleware.Parameters{
 				{
 					Name: "account_id",
@@ -2528,22 +2649,27 @@ func (s *Server) handleGetAccountPublicKeyRequest(args [1]string, argsEscaped bo
 		response, err = s.h.GetAccountPublicKey(ctx, params)
 	}
 	if err != nil {
-		recordError("Internal", err)
 		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			encodeErrorResponse(errRes, w, span)
+			if err := encodeErrorResponse(errRes, w, span); err != nil {
+				recordError("Internal", err)
+			}
 			return
 		}
 		if errors.Is(err, ht.ErrNotImplemented) {
 			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
-		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
+			recordError("Internal", err)
+		}
 		return
 	}
 
 	if err := encodeGetAccountPublicKeyResponse(response, w, span); err != nil {
 		recordError("EncodeResponse", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
 		return
 	}
 }
@@ -2604,10 +2730,11 @@ func (s *Server) handleGetAccountSeqnoRequest(args [1]string, argsEscaped bool, 
 	var response *Seqno
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
-			Context:       ctx,
-			OperationName: "GetAccountSeqno",
-			OperationID:   "getAccountSeqno",
-			Body:          nil,
+			Context:          ctx,
+			OperationName:    "GetAccountSeqno",
+			OperationSummary: "",
+			OperationID:      "getAccountSeqno",
+			Body:             nil,
 			Params: middleware.Parameters{
 				{
 					Name: "account_id",
@@ -2639,22 +2766,27 @@ func (s *Server) handleGetAccountSeqnoRequest(args [1]string, argsEscaped bool, 
 		response, err = s.h.GetAccountSeqno(ctx, params)
 	}
 	if err != nil {
-		recordError("Internal", err)
 		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			encodeErrorResponse(errRes, w, span)
+			if err := encodeErrorResponse(errRes, w, span); err != nil {
+				recordError("Internal", err)
+			}
 			return
 		}
 		if errors.Is(err, ht.ErrNotImplemented) {
 			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
-		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
+			recordError("Internal", err)
+		}
 		return
 	}
 
 	if err := encodeGetAccountSeqnoResponse(response, w, span); err != nil {
 		recordError("EncodeResponse", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
 		return
 	}
 }
@@ -2715,10 +2847,11 @@ func (s *Server) handleGetAccountSubscriptionsRequest(args [1]string, argsEscape
 	var response *Subscriptions
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
-			Context:       ctx,
-			OperationName: "GetAccountSubscriptions",
-			OperationID:   "getAccountSubscriptions",
-			Body:          nil,
+			Context:          ctx,
+			OperationName:    "GetAccountSubscriptions",
+			OperationSummary: "",
+			OperationID:      "getAccountSubscriptions",
+			Body:             nil,
 			Params: middleware.Parameters{
 				{
 					Name: "account_id",
@@ -2750,22 +2883,27 @@ func (s *Server) handleGetAccountSubscriptionsRequest(args [1]string, argsEscape
 		response, err = s.h.GetAccountSubscriptions(ctx, params)
 	}
 	if err != nil {
-		recordError("Internal", err)
 		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			encodeErrorResponse(errRes, w, span)
+			if err := encodeErrorResponse(errRes, w, span); err != nil {
+				recordError("Internal", err)
+			}
 			return
 		}
 		if errors.Is(err, ht.ErrNotImplemented) {
 			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
-		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
+			recordError("Internal", err)
+		}
 		return
 	}
 
 	if err := encodeGetAccountSubscriptionsResponse(response, w, span); err != nil {
 		recordError("EncodeResponse", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
 		return
 	}
 }
@@ -2826,10 +2964,11 @@ func (s *Server) handleGetAccountTracesRequest(args [1]string, argsEscaped bool,
 	var response *TraceIDs
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
-			Context:       ctx,
-			OperationName: "GetAccountTraces",
-			OperationID:   "getAccountTraces",
-			Body:          nil,
+			Context:          ctx,
+			OperationName:    "GetAccountTraces",
+			OperationSummary: "",
+			OperationID:      "getAccountTraces",
+			Body:             nil,
 			Params: middleware.Parameters{
 				{
 					Name: "account_id",
@@ -2865,22 +3004,27 @@ func (s *Server) handleGetAccountTracesRequest(args [1]string, argsEscaped bool,
 		response, err = s.h.GetAccountTraces(ctx, params)
 	}
 	if err != nil {
-		recordError("Internal", err)
 		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			encodeErrorResponse(errRes, w, span)
+			if err := encodeErrorResponse(errRes, w, span); err != nil {
+				recordError("Internal", err)
+			}
 			return
 		}
 		if errors.Is(err, ht.ErrNotImplemented) {
 			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
-		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
+			recordError("Internal", err)
+		}
 		return
 	}
 
 	if err := encodeGetAccountTracesResponse(response, w, span); err != nil {
 		recordError("EncodeResponse", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
 		return
 	}
 }
@@ -2946,12 +3090,13 @@ func (s *Server) handleGetAccountsRequest(args [0]string, argsEscaped bool, w ht
 	var response *Accounts
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
-			Context:       ctx,
-			OperationName: "GetAccounts",
-			OperationID:   "getAccounts",
-			Body:          request,
-			Params:        middleware.Parameters{},
-			Raw:           r,
+			Context:          ctx,
+			OperationName:    "GetAccounts",
+			OperationSummary: "",
+			OperationID:      "getAccounts",
+			Body:             request,
+			Params:           middleware.Parameters{},
+			Raw:              r,
 		}
 
 		type (
@@ -2976,22 +3121,27 @@ func (s *Server) handleGetAccountsRequest(args [0]string, argsEscaped bool, w ht
 		response, err = s.h.GetAccounts(ctx, request)
 	}
 	if err != nil {
-		recordError("Internal", err)
 		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			encodeErrorResponse(errRes, w, span)
+			if err := encodeErrorResponse(errRes, w, span); err != nil {
+				recordError("Internal", err)
+			}
 			return
 		}
 		if errors.Is(err, ht.ErrNotImplemented) {
 			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
-		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
+			recordError("Internal", err)
+		}
 		return
 	}
 
 	if err := encodeGetAccountsResponse(response, w, span); err != nil {
 		recordError("EncodeResponse", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
 		return
 	}
 }
@@ -3052,10 +3202,11 @@ func (s *Server) handleGetAllAuctionsRequest(args [0]string, argsEscaped bool, w
 	var response *Auctions
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
-			Context:       ctx,
-			OperationName: "GetAllAuctions",
-			OperationID:   "getAllAuctions",
-			Body:          nil,
+			Context:          ctx,
+			OperationName:    "GetAllAuctions",
+			OperationSummary: "",
+			OperationID:      "getAllAuctions",
+			Body:             nil,
 			Params: middleware.Parameters{
 				{
 					Name: "tld",
@@ -3087,22 +3238,27 @@ func (s *Server) handleGetAllAuctionsRequest(args [0]string, argsEscaped bool, w
 		response, err = s.h.GetAllAuctions(ctx, params)
 	}
 	if err != nil {
-		recordError("Internal", err)
 		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			encodeErrorResponse(errRes, w, span)
+			if err := encodeErrorResponse(errRes, w, span); err != nil {
+				recordError("Internal", err)
+			}
 			return
 		}
 		if errors.Is(err, ht.ErrNotImplemented) {
 			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
-		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
+			recordError("Internal", err)
+		}
 		return
 	}
 
 	if err := encodeGetAllAuctionsResponse(response, w, span); err != nil {
 		recordError("EncodeResponse", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
 		return
 	}
 }
@@ -3163,10 +3319,11 @@ func (s *Server) handleGetAllRawShardsInfoRequest(args [1]string, argsEscaped bo
 	var response *GetAllRawShardsInfoOK
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
-			Context:       ctx,
-			OperationName: "GetAllRawShardsInfo",
-			OperationID:   "getAllRawShardsInfo",
-			Body:          nil,
+			Context:          ctx,
+			OperationName:    "GetAllRawShardsInfo",
+			OperationSummary: "",
+			OperationID:      "getAllRawShardsInfo",
+			Body:             nil,
 			Params: middleware.Parameters{
 				{
 					Name: "block_id",
@@ -3198,22 +3355,27 @@ func (s *Server) handleGetAllRawShardsInfoRequest(args [1]string, argsEscaped bo
 		response, err = s.h.GetAllRawShardsInfo(ctx, params)
 	}
 	if err != nil {
-		recordError("Internal", err)
 		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			encodeErrorResponse(errRes, w, span)
+			if err := encodeErrorResponse(errRes, w, span); err != nil {
+				recordError("Internal", err)
+			}
 			return
 		}
 		if errors.Is(err, ht.ErrNotImplemented) {
 			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
-		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
+			recordError("Internal", err)
+		}
 		return
 	}
 
 	if err := encodeGetAllRawShardsInfoResponse(response, w, span); err != nil {
 		recordError("EncodeResponse", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
 		return
 	}
 }
@@ -3274,10 +3436,11 @@ func (s *Server) handleGetBlockchainAccountTransactionsRequest(args [1]string, a
 	var response *Transactions
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
-			Context:       ctx,
-			OperationName: "GetBlockchainAccountTransactions",
-			OperationID:   "getBlockchainAccountTransactions",
-			Body:          nil,
+			Context:          ctx,
+			OperationName:    "GetBlockchainAccountTransactions",
+			OperationSummary: "",
+			OperationID:      "getBlockchainAccountTransactions",
+			Body:             nil,
 			Params: middleware.Parameters{
 				{
 					Name: "account_id",
@@ -3321,22 +3484,27 @@ func (s *Server) handleGetBlockchainAccountTransactionsRequest(args [1]string, a
 		response, err = s.h.GetBlockchainAccountTransactions(ctx, params)
 	}
 	if err != nil {
-		recordError("Internal", err)
 		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			encodeErrorResponse(errRes, w, span)
+			if err := encodeErrorResponse(errRes, w, span); err != nil {
+				recordError("Internal", err)
+			}
 			return
 		}
 		if errors.Is(err, ht.ErrNotImplemented) {
 			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
-		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
+			recordError("Internal", err)
+		}
 		return
 	}
 
 	if err := encodeGetBlockchainAccountTransactionsResponse(response, w, span); err != nil {
 		recordError("EncodeResponse", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
 		return
 	}
 }
@@ -3397,10 +3565,11 @@ func (s *Server) handleGetBlockchainBlockRequest(args [1]string, argsEscaped boo
 	var response *BlockchainBlock
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
-			Context:       ctx,
-			OperationName: "GetBlockchainBlock",
-			OperationID:   "getBlockchainBlock",
-			Body:          nil,
+			Context:          ctx,
+			OperationName:    "GetBlockchainBlock",
+			OperationSummary: "",
+			OperationID:      "getBlockchainBlock",
+			Body:             nil,
 			Params: middleware.Parameters{
 				{
 					Name: "block_id",
@@ -3432,22 +3601,27 @@ func (s *Server) handleGetBlockchainBlockRequest(args [1]string, argsEscaped boo
 		response, err = s.h.GetBlockchainBlock(ctx, params)
 	}
 	if err != nil {
-		recordError("Internal", err)
 		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			encodeErrorResponse(errRes, w, span)
+			if err := encodeErrorResponse(errRes, w, span); err != nil {
+				recordError("Internal", err)
+			}
 			return
 		}
 		if errors.Is(err, ht.ErrNotImplemented) {
 			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
-		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
+			recordError("Internal", err)
+		}
 		return
 	}
 
 	if err := encodeGetBlockchainBlockResponse(response, w, span); err != nil {
 		recordError("EncodeResponse", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
 		return
 	}
 }
@@ -3508,10 +3682,11 @@ func (s *Server) handleGetBlockchainBlockTransactionsRequest(args [1]string, arg
 	var response *Transactions
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
-			Context:       ctx,
-			OperationName: "GetBlockchainBlockTransactions",
-			OperationID:   "getBlockchainBlockTransactions",
-			Body:          nil,
+			Context:          ctx,
+			OperationName:    "GetBlockchainBlockTransactions",
+			OperationSummary: "",
+			OperationID:      "getBlockchainBlockTransactions",
+			Body:             nil,
 			Params: middleware.Parameters{
 				{
 					Name: "block_id",
@@ -3543,22 +3718,27 @@ func (s *Server) handleGetBlockchainBlockTransactionsRequest(args [1]string, arg
 		response, err = s.h.GetBlockchainBlockTransactions(ctx, params)
 	}
 	if err != nil {
-		recordError("Internal", err)
 		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			encodeErrorResponse(errRes, w, span)
+			if err := encodeErrorResponse(errRes, w, span); err != nil {
+				recordError("Internal", err)
+			}
 			return
 		}
 		if errors.Is(err, ht.ErrNotImplemented) {
 			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
-		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
+			recordError("Internal", err)
+		}
 		return
 	}
 
 	if err := encodeGetBlockchainBlockTransactionsResponse(response, w, span); err != nil {
 		recordError("EncodeResponse", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
 		return
 	}
 }
@@ -3605,12 +3785,13 @@ func (s *Server) handleGetBlockchainConfigRequest(args [0]string, argsEscaped bo
 	var response *BlockchainConfig
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
-			Context:       ctx,
-			OperationName: "GetBlockchainConfig",
-			OperationID:   "getBlockchainConfig",
-			Body:          nil,
-			Params:        middleware.Parameters{},
-			Raw:           r,
+			Context:          ctx,
+			OperationName:    "GetBlockchainConfig",
+			OperationSummary: "",
+			OperationID:      "getBlockchainConfig",
+			Body:             nil,
+			Params:           middleware.Parameters{},
+			Raw:              r,
 		}
 
 		type (
@@ -3635,22 +3816,27 @@ func (s *Server) handleGetBlockchainConfigRequest(args [0]string, argsEscaped bo
 		response, err = s.h.GetBlockchainConfig(ctx)
 	}
 	if err != nil {
-		recordError("Internal", err)
 		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			encodeErrorResponse(errRes, w, span)
+			if err := encodeErrorResponse(errRes, w, span); err != nil {
+				recordError("Internal", err)
+			}
 			return
 		}
 		if errors.Is(err, ht.ErrNotImplemented) {
 			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
-		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
+			recordError("Internal", err)
+		}
 		return
 	}
 
 	if err := encodeGetBlockchainConfigResponse(response, w, span); err != nil {
 		recordError("EncodeResponse", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
 		return
 	}
 }
@@ -3697,12 +3883,13 @@ func (s *Server) handleGetBlockchainMasterchainHeadRequest(args [0]string, argsE
 	var response *BlockchainBlock
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
-			Context:       ctx,
-			OperationName: "GetBlockchainMasterchainHead",
-			OperationID:   "getBlockchainMasterchainHead",
-			Body:          nil,
-			Params:        middleware.Parameters{},
-			Raw:           r,
+			Context:          ctx,
+			OperationName:    "GetBlockchainMasterchainHead",
+			OperationSummary: "",
+			OperationID:      "getBlockchainMasterchainHead",
+			Body:             nil,
+			Params:           middleware.Parameters{},
+			Raw:              r,
 		}
 
 		type (
@@ -3727,22 +3914,27 @@ func (s *Server) handleGetBlockchainMasterchainHeadRequest(args [0]string, argsE
 		response, err = s.h.GetBlockchainMasterchainHead(ctx)
 	}
 	if err != nil {
-		recordError("Internal", err)
 		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			encodeErrorResponse(errRes, w, span)
+			if err := encodeErrorResponse(errRes, w, span); err != nil {
+				recordError("Internal", err)
+			}
 			return
 		}
 		if errors.Is(err, ht.ErrNotImplemented) {
 			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
-		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
+			recordError("Internal", err)
+		}
 		return
 	}
 
 	if err := encodeGetBlockchainMasterchainHeadResponse(response, w, span); err != nil {
 		recordError("EncodeResponse", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
 		return
 	}
 }
@@ -3803,10 +3995,11 @@ func (s *Server) handleGetBlockchainRawAccountRequest(args [1]string, argsEscape
 	var response *BlockchainRawAccount
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
-			Context:       ctx,
-			OperationName: "GetBlockchainRawAccount",
-			OperationID:   "getBlockchainRawAccount",
-			Body:          nil,
+			Context:          ctx,
+			OperationName:    "GetBlockchainRawAccount",
+			OperationSummary: "",
+			OperationID:      "getBlockchainRawAccount",
+			Body:             nil,
 			Params: middleware.Parameters{
 				{
 					Name: "account_id",
@@ -3838,22 +4031,27 @@ func (s *Server) handleGetBlockchainRawAccountRequest(args [1]string, argsEscape
 		response, err = s.h.GetBlockchainRawAccount(ctx, params)
 	}
 	if err != nil {
-		recordError("Internal", err)
 		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			encodeErrorResponse(errRes, w, span)
+			if err := encodeErrorResponse(errRes, w, span); err != nil {
+				recordError("Internal", err)
+			}
 			return
 		}
 		if errors.Is(err, ht.ErrNotImplemented) {
 			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
-		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
+			recordError("Internal", err)
+		}
 		return
 	}
 
 	if err := encodeGetBlockchainRawAccountResponse(response, w, span); err != nil {
 		recordError("EncodeResponse", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
 		return
 	}
 }
@@ -3914,10 +4112,11 @@ func (s *Server) handleGetBlockchainTransactionRequest(args [1]string, argsEscap
 	var response *Transaction
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
-			Context:       ctx,
-			OperationName: "GetBlockchainTransaction",
-			OperationID:   "getBlockchainTransaction",
-			Body:          nil,
+			Context:          ctx,
+			OperationName:    "GetBlockchainTransaction",
+			OperationSummary: "",
+			OperationID:      "getBlockchainTransaction",
+			Body:             nil,
 			Params: middleware.Parameters{
 				{
 					Name: "transaction_id",
@@ -3949,22 +4148,27 @@ func (s *Server) handleGetBlockchainTransactionRequest(args [1]string, argsEscap
 		response, err = s.h.GetBlockchainTransaction(ctx, params)
 	}
 	if err != nil {
-		recordError("Internal", err)
 		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			encodeErrorResponse(errRes, w, span)
+			if err := encodeErrorResponse(errRes, w, span); err != nil {
+				recordError("Internal", err)
+			}
 			return
 		}
 		if errors.Is(err, ht.ErrNotImplemented) {
 			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
-		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
+			recordError("Internal", err)
+		}
 		return
 	}
 
 	if err := encodeGetBlockchainTransactionResponse(response, w, span); err != nil {
 		recordError("EncodeResponse", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
 		return
 	}
 }
@@ -4025,10 +4229,11 @@ func (s *Server) handleGetBlockchainTransactionByMessageHashRequest(args [1]stri
 	var response *Transaction
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
-			Context:       ctx,
-			OperationName: "GetBlockchainTransactionByMessageHash",
-			OperationID:   "getBlockchainTransactionByMessageHash",
-			Body:          nil,
+			Context:          ctx,
+			OperationName:    "GetBlockchainTransactionByMessageHash",
+			OperationSummary: "",
+			OperationID:      "getBlockchainTransactionByMessageHash",
+			Body:             nil,
 			Params: middleware.Parameters{
 				{
 					Name: "msg_id",
@@ -4060,22 +4265,27 @@ func (s *Server) handleGetBlockchainTransactionByMessageHashRequest(args [1]stri
 		response, err = s.h.GetBlockchainTransactionByMessageHash(ctx, params)
 	}
 	if err != nil {
-		recordError("Internal", err)
 		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			encodeErrorResponse(errRes, w, span)
+			if err := encodeErrorResponse(errRes, w, span); err != nil {
+				recordError("Internal", err)
+			}
 			return
 		}
 		if errors.Is(err, ht.ErrNotImplemented) {
 			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
-		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
+			recordError("Internal", err)
+		}
 		return
 	}
 
 	if err := encodeGetBlockchainTransactionByMessageHashResponse(response, w, span); err != nil {
 		recordError("EncodeResponse", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
 		return
 	}
 }
@@ -4122,12 +4332,13 @@ func (s *Server) handleGetBlockchainValidatorsRequest(args [0]string, argsEscape
 	var response *Validators
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
-			Context:       ctx,
-			OperationName: "GetBlockchainValidators",
-			OperationID:   "getBlockchainValidators",
-			Body:          nil,
-			Params:        middleware.Parameters{},
-			Raw:           r,
+			Context:          ctx,
+			OperationName:    "GetBlockchainValidators",
+			OperationSummary: "",
+			OperationID:      "getBlockchainValidators",
+			Body:             nil,
+			Params:           middleware.Parameters{},
+			Raw:              r,
 		}
 
 		type (
@@ -4152,22 +4363,27 @@ func (s *Server) handleGetBlockchainValidatorsRequest(args [0]string, argsEscape
 		response, err = s.h.GetBlockchainValidators(ctx)
 	}
 	if err != nil {
-		recordError("Internal", err)
 		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			encodeErrorResponse(errRes, w, span)
+			if err := encodeErrorResponse(errRes, w, span); err != nil {
+				recordError("Internal", err)
+			}
 			return
 		}
 		if errors.Is(err, ht.ErrNotImplemented) {
 			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
-		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
+			recordError("Internal", err)
+		}
 		return
 	}
 
 	if err := encodeGetBlockchainValidatorsResponse(response, w, span); err != nil {
 		recordError("EncodeResponse", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
 		return
 	}
 }
@@ -4228,10 +4444,11 @@ func (s *Server) handleGetChartRatesRequest(args [0]string, argsEscaped bool, w 
 	var response *GetChartRatesOK
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
-			Context:       ctx,
-			OperationName: "GetChartRates",
-			OperationID:   "getChartRates",
-			Body:          nil,
+			Context:          ctx,
+			OperationName:    "GetChartRates",
+			OperationSummary: "",
+			OperationID:      "getChartRates",
+			Body:             nil,
 			Params: middleware.Parameters{
 				{
 					Name: "token",
@@ -4275,22 +4492,27 @@ func (s *Server) handleGetChartRatesRequest(args [0]string, argsEscaped bool, w 
 		response, err = s.h.GetChartRates(ctx, params)
 	}
 	if err != nil {
-		recordError("Internal", err)
 		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			encodeErrorResponse(errRes, w, span)
+			if err := encodeErrorResponse(errRes, w, span); err != nil {
+				recordError("Internal", err)
+			}
 			return
 		}
 		if errors.Is(err, ht.ErrNotImplemented) {
 			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
-		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
+			recordError("Internal", err)
+		}
 		return
 	}
 
 	if err := encodeGetChartRatesResponse(response, w, span); err != nil {
 		recordError("EncodeResponse", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
 		return
 	}
 }
@@ -4351,10 +4573,11 @@ func (s *Server) handleGetDnsInfoRequest(args [1]string, argsEscaped bool, w htt
 	var response *DomainInfo
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
-			Context:       ctx,
-			OperationName: "GetDnsInfo",
-			OperationID:   "getDnsInfo",
-			Body:          nil,
+			Context:          ctx,
+			OperationName:    "GetDnsInfo",
+			OperationSummary: "",
+			OperationID:      "getDnsInfo",
+			Body:             nil,
 			Params: middleware.Parameters{
 				{
 					Name: "domain_name",
@@ -4386,22 +4609,27 @@ func (s *Server) handleGetDnsInfoRequest(args [1]string, argsEscaped bool, w htt
 		response, err = s.h.GetDnsInfo(ctx, params)
 	}
 	if err != nil {
-		recordError("Internal", err)
 		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			encodeErrorResponse(errRes, w, span)
+			if err := encodeErrorResponse(errRes, w, span); err != nil {
+				recordError("Internal", err)
+			}
 			return
 		}
 		if errors.Is(err, ht.ErrNotImplemented) {
 			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
-		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
+			recordError("Internal", err)
+		}
 		return
 	}
 
 	if err := encodeGetDnsInfoResponse(response, w, span); err != nil {
 		recordError("EncodeResponse", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
 		return
 	}
 }
@@ -4462,10 +4690,11 @@ func (s *Server) handleGetDomainBidsRequest(args [1]string, argsEscaped bool, w 
 	var response *DomainBids
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
-			Context:       ctx,
-			OperationName: "GetDomainBids",
-			OperationID:   "getDomainBids",
-			Body:          nil,
+			Context:          ctx,
+			OperationName:    "GetDomainBids",
+			OperationSummary: "",
+			OperationID:      "getDomainBids",
+			Body:             nil,
 			Params: middleware.Parameters{
 				{
 					Name: "domain_name",
@@ -4497,22 +4726,27 @@ func (s *Server) handleGetDomainBidsRequest(args [1]string, argsEscaped bool, w 
 		response, err = s.h.GetDomainBids(ctx, params)
 	}
 	if err != nil {
-		recordError("Internal", err)
 		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			encodeErrorResponse(errRes, w, span)
+			if err := encodeErrorResponse(errRes, w, span); err != nil {
+				recordError("Internal", err)
+			}
 			return
 		}
 		if errors.Is(err, ht.ErrNotImplemented) {
 			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
-		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
+			recordError("Internal", err)
+		}
 		return
 	}
 
 	if err := encodeGetDomainBidsResponse(response, w, span); err != nil {
 		recordError("EncodeResponse", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
 		return
 	}
 }
@@ -4578,10 +4812,11 @@ func (s *Server) handleGetEventRequest(args [1]string, argsEscaped bool, w http.
 	var response *Event
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
-			Context:       ctx,
-			OperationName: "GetEvent",
-			OperationID:   "getEvent",
-			Body:          nil,
+			Context:          ctx,
+			OperationName:    "GetEvent",
+			OperationSummary: "",
+			OperationID:      "getEvent",
+			Body:             nil,
 			Params: middleware.Parameters{
 				{
 					Name: "event_id",
@@ -4617,22 +4852,27 @@ func (s *Server) handleGetEventRequest(args [1]string, argsEscaped bool, w http.
 		response, err = s.h.GetEvent(ctx, params)
 	}
 	if err != nil {
-		recordError("Internal", err)
 		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			encodeErrorResponse(errRes, w, span)
+			if err := encodeErrorResponse(errRes, w, span); err != nil {
+				recordError("Internal", err)
+			}
 			return
 		}
 		if errors.Is(err, ht.ErrNotImplemented) {
 			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
-		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
+			recordError("Internal", err)
+		}
 		return
 	}
 
 	if err := encodeGetEventResponse(response, w, span); err != nil {
 		recordError("EncodeResponse", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
 		return
 	}
 }
@@ -4693,10 +4933,11 @@ func (s *Server) handleGetItemsFromCollectionRequest(args [1]string, argsEscaped
 	var response *NftItems
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
-			Context:       ctx,
-			OperationName: "GetItemsFromCollection",
-			OperationID:   "getItemsFromCollection",
-			Body:          nil,
+			Context:          ctx,
+			OperationName:    "GetItemsFromCollection",
+			OperationSummary: "",
+			OperationID:      "getItemsFromCollection",
+			Body:             nil,
 			Params: middleware.Parameters{
 				{
 					Name: "account_id",
@@ -4736,22 +4977,27 @@ func (s *Server) handleGetItemsFromCollectionRequest(args [1]string, argsEscaped
 		response, err = s.h.GetItemsFromCollection(ctx, params)
 	}
 	if err != nil {
-		recordError("Internal", err)
 		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			encodeErrorResponse(errRes, w, span)
+			if err := encodeErrorResponse(errRes, w, span); err != nil {
+				recordError("Internal", err)
+			}
 			return
 		}
 		if errors.Is(err, ht.ErrNotImplemented) {
 			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
-		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
+			recordError("Internal", err)
+		}
 		return
 	}
 
 	if err := encodeGetItemsFromCollectionResponse(response, w, span); err != nil {
 		recordError("EncodeResponse", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
 		return
 	}
 }
@@ -4812,10 +5058,11 @@ func (s *Server) handleGetJettonHoldersRequest(args [1]string, argsEscaped bool,
 	var response *JettonHolders
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
-			Context:       ctx,
-			OperationName: "GetJettonHolders",
-			OperationID:   "getJettonHolders",
-			Body:          nil,
+			Context:          ctx,
+			OperationName:    "GetJettonHolders",
+			OperationSummary: "",
+			OperationID:      "getJettonHolders",
+			Body:             nil,
 			Params: middleware.Parameters{
 				{
 					Name: "account_id",
@@ -4855,22 +5102,27 @@ func (s *Server) handleGetJettonHoldersRequest(args [1]string, argsEscaped bool,
 		response, err = s.h.GetJettonHolders(ctx, params)
 	}
 	if err != nil {
-		recordError("Internal", err)
 		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			encodeErrorResponse(errRes, w, span)
+			if err := encodeErrorResponse(errRes, w, span); err != nil {
+				recordError("Internal", err)
+			}
 			return
 		}
 		if errors.Is(err, ht.ErrNotImplemented) {
 			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
-		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
+			recordError("Internal", err)
+		}
 		return
 	}
 
 	if err := encodeGetJettonHoldersResponse(response, w, span); err != nil {
 		recordError("EncodeResponse", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
 		return
 	}
 }
@@ -4931,10 +5183,11 @@ func (s *Server) handleGetJettonInfoRequest(args [1]string, argsEscaped bool, w 
 	var response *JettonInfo
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
-			Context:       ctx,
-			OperationName: "GetJettonInfo",
-			OperationID:   "getJettonInfo",
-			Body:          nil,
+			Context:          ctx,
+			OperationName:    "GetJettonInfo",
+			OperationSummary: "",
+			OperationID:      "getJettonInfo",
+			Body:             nil,
 			Params: middleware.Parameters{
 				{
 					Name: "account_id",
@@ -4966,22 +5219,27 @@ func (s *Server) handleGetJettonInfoRequest(args [1]string, argsEscaped bool, w 
 		response, err = s.h.GetJettonInfo(ctx, params)
 	}
 	if err != nil {
-		recordError("Internal", err)
 		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			encodeErrorResponse(errRes, w, span)
+			if err := encodeErrorResponse(errRes, w, span); err != nil {
+				recordError("Internal", err)
+			}
 			return
 		}
 		if errors.Is(err, ht.ErrNotImplemented) {
 			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
-		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
+			recordError("Internal", err)
+		}
 		return
 	}
 
 	if err := encodeGetJettonInfoResponse(response, w, span); err != nil {
 		recordError("EncodeResponse", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
 		return
 	}
 }
@@ -5042,10 +5300,11 @@ func (s *Server) handleGetJettonsRequest(args [0]string, argsEscaped bool, w htt
 	var response *Jettons
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
-			Context:       ctx,
-			OperationName: "GetJettons",
-			OperationID:   "getJettons",
-			Body:          nil,
+			Context:          ctx,
+			OperationName:    "GetJettons",
+			OperationSummary: "",
+			OperationID:      "getJettons",
+			Body:             nil,
 			Params: middleware.Parameters{
 				{
 					Name: "limit",
@@ -5081,22 +5340,27 @@ func (s *Server) handleGetJettonsRequest(args [0]string, argsEscaped bool, w htt
 		response, err = s.h.GetJettons(ctx, params)
 	}
 	if err != nil {
-		recordError("Internal", err)
 		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			encodeErrorResponse(errRes, w, span)
+			if err := encodeErrorResponse(errRes, w, span); err != nil {
+				recordError("Internal", err)
+			}
 			return
 		}
 		if errors.Is(err, ht.ErrNotImplemented) {
 			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
-		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
+			recordError("Internal", err)
+		}
 		return
 	}
 
 	if err := encodeGetJettonsResponse(response, w, span); err != nil {
 		recordError("EncodeResponse", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
 		return
 	}
 }
@@ -5157,10 +5421,11 @@ func (s *Server) handleGetJettonsEventsRequest(args [1]string, argsEscaped bool,
 	var response *Event
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
-			Context:       ctx,
-			OperationName: "GetJettonsEvents",
-			OperationID:   "getJettonsEvents",
-			Body:          nil,
+			Context:          ctx,
+			OperationName:    "GetJettonsEvents",
+			OperationSummary: "",
+			OperationID:      "getJettonsEvents",
+			Body:             nil,
 			Params: middleware.Parameters{
 				{
 					Name: "event_id",
@@ -5196,22 +5461,27 @@ func (s *Server) handleGetJettonsEventsRequest(args [1]string, argsEscaped bool,
 		response, err = s.h.GetJettonsEvents(ctx, params)
 	}
 	if err != nil {
-		recordError("Internal", err)
 		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			encodeErrorResponse(errRes, w, span)
+			if err := encodeErrorResponse(errRes, w, span); err != nil {
+				recordError("Internal", err)
+			}
 			return
 		}
 		if errors.Is(err, ht.ErrNotImplemented) {
 			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
-		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
+			recordError("Internal", err)
+		}
 		return
 	}
 
 	if err := encodeGetJettonsEventsResponse(response, w, span); err != nil {
 		recordError("EncodeResponse", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
 		return
 	}
 }
@@ -5272,10 +5542,11 @@ func (s *Server) handleGetNftCollectionRequest(args [1]string, argsEscaped bool,
 	var response *NftCollection
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
-			Context:       ctx,
-			OperationName: "GetNftCollection",
-			OperationID:   "getNftCollection",
-			Body:          nil,
+			Context:          ctx,
+			OperationName:    "GetNftCollection",
+			OperationSummary: "",
+			OperationID:      "getNftCollection",
+			Body:             nil,
 			Params: middleware.Parameters{
 				{
 					Name: "account_id",
@@ -5307,22 +5578,27 @@ func (s *Server) handleGetNftCollectionRequest(args [1]string, argsEscaped bool,
 		response, err = s.h.GetNftCollection(ctx, params)
 	}
 	if err != nil {
-		recordError("Internal", err)
 		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			encodeErrorResponse(errRes, w, span)
+			if err := encodeErrorResponse(errRes, w, span); err != nil {
+				recordError("Internal", err)
+			}
 			return
 		}
 		if errors.Is(err, ht.ErrNotImplemented) {
 			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
-		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
+			recordError("Internal", err)
+		}
 		return
 	}
 
 	if err := encodeGetNftCollectionResponse(response, w, span); err != nil {
 		recordError("EncodeResponse", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
 		return
 	}
 }
@@ -5383,10 +5659,11 @@ func (s *Server) handleGetNftCollectionsRequest(args [0]string, argsEscaped bool
 	var response *NftCollections
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
-			Context:       ctx,
-			OperationName: "GetNftCollections",
-			OperationID:   "getNftCollections",
-			Body:          nil,
+			Context:          ctx,
+			OperationName:    "GetNftCollections",
+			OperationSummary: "",
+			OperationID:      "getNftCollections",
+			Body:             nil,
 			Params: middleware.Parameters{
 				{
 					Name: "limit",
@@ -5422,22 +5699,27 @@ func (s *Server) handleGetNftCollectionsRequest(args [0]string, argsEscaped bool
 		response, err = s.h.GetNftCollections(ctx, params)
 	}
 	if err != nil {
-		recordError("Internal", err)
 		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			encodeErrorResponse(errRes, w, span)
+			if err := encodeErrorResponse(errRes, w, span); err != nil {
+				recordError("Internal", err)
+			}
 			return
 		}
 		if errors.Is(err, ht.ErrNotImplemented) {
 			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
-		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
+			recordError("Internal", err)
+		}
 		return
 	}
 
 	if err := encodeGetNftCollectionsResponse(response, w, span); err != nil {
 		recordError("EncodeResponse", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
 		return
 	}
 }
@@ -5498,10 +5780,11 @@ func (s *Server) handleGetNftHistoryByIDRequest(args [1]string, argsEscaped bool
 	var response *AccountEvents
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
-			Context:       ctx,
-			OperationName: "GetNftHistoryByID",
-			OperationID:   "getNftHistoryByID",
-			Body:          nil,
+			Context:          ctx,
+			OperationName:    "GetNftHistoryByID",
+			OperationSummary: "",
+			OperationID:      "getNftHistoryByID",
+			Body:             nil,
 			Params: middleware.Parameters{
 				{
 					Name: "account_id",
@@ -5553,22 +5836,27 @@ func (s *Server) handleGetNftHistoryByIDRequest(args [1]string, argsEscaped bool
 		response, err = s.h.GetNftHistoryByID(ctx, params)
 	}
 	if err != nil {
-		recordError("Internal", err)
 		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			encodeErrorResponse(errRes, w, span)
+			if err := encodeErrorResponse(errRes, w, span); err != nil {
+				recordError("Internal", err)
+			}
 			return
 		}
 		if errors.Is(err, ht.ErrNotImplemented) {
 			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
-		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
+			recordError("Internal", err)
+		}
 		return
 	}
 
 	if err := encodeGetNftHistoryByIDResponse(response, w, span); err != nil {
 		recordError("EncodeResponse", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
 		return
 	}
 }
@@ -5629,10 +5917,11 @@ func (s *Server) handleGetNftItemByAddressRequest(args [1]string, argsEscaped bo
 	var response *NftItem
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
-			Context:       ctx,
-			OperationName: "GetNftItemByAddress",
-			OperationID:   "getNftItemByAddress",
-			Body:          nil,
+			Context:          ctx,
+			OperationName:    "GetNftItemByAddress",
+			OperationSummary: "",
+			OperationID:      "getNftItemByAddress",
+			Body:             nil,
 			Params: middleware.Parameters{
 				{
 					Name: "account_id",
@@ -5664,22 +5953,27 @@ func (s *Server) handleGetNftItemByAddressRequest(args [1]string, argsEscaped bo
 		response, err = s.h.GetNftItemByAddress(ctx, params)
 	}
 	if err != nil {
-		recordError("Internal", err)
 		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			encodeErrorResponse(errRes, w, span)
+			if err := encodeErrorResponse(errRes, w, span); err != nil {
+				recordError("Internal", err)
+			}
 			return
 		}
 		if errors.Is(err, ht.ErrNotImplemented) {
 			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
-		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
+			recordError("Internal", err)
+		}
 		return
 	}
 
 	if err := encodeGetNftItemByAddressResponse(response, w, span); err != nil {
 		recordError("EncodeResponse", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
 		return
 	}
 }
@@ -5745,12 +6039,13 @@ func (s *Server) handleGetNftItemsByAddressesRequest(args [0]string, argsEscaped
 	var response *NftItems
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
-			Context:       ctx,
-			OperationName: "GetNftItemsByAddresses",
-			OperationID:   "getNftItemsByAddresses",
-			Body:          request,
-			Params:        middleware.Parameters{},
-			Raw:           r,
+			Context:          ctx,
+			OperationName:    "GetNftItemsByAddresses",
+			OperationSummary: "",
+			OperationID:      "getNftItemsByAddresses",
+			Body:             request,
+			Params:           middleware.Parameters{},
+			Raw:              r,
 		}
 
 		type (
@@ -5775,22 +6070,27 @@ func (s *Server) handleGetNftItemsByAddressesRequest(args [0]string, argsEscaped
 		response, err = s.h.GetNftItemsByAddresses(ctx, request)
 	}
 	if err != nil {
-		recordError("Internal", err)
 		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			encodeErrorResponse(errRes, w, span)
+			if err := encodeErrorResponse(errRes, w, span); err != nil {
+				recordError("Internal", err)
+			}
 			return
 		}
 		if errors.Is(err, ht.ErrNotImplemented) {
 			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
-		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
+			recordError("Internal", err)
+		}
 		return
 	}
 
 	if err := encodeGetNftItemsByAddressesResponse(response, w, span); err != nil {
 		recordError("EncodeResponse", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
 		return
 	}
 }
@@ -5851,10 +6151,11 @@ func (s *Server) handleGetRatesRequest(args [0]string, argsEscaped bool, w http.
 	var response *GetRatesOK
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
-			Context:       ctx,
-			OperationName: "GetRates",
-			OperationID:   "getRates",
-			Body:          nil,
+			Context:          ctx,
+			OperationName:    "GetRates",
+			OperationSummary: "",
+			OperationID:      "getRates",
+			Body:             nil,
 			Params: middleware.Parameters{
 				{
 					Name: "tokens",
@@ -5890,22 +6191,27 @@ func (s *Server) handleGetRatesRequest(args [0]string, argsEscaped bool, w http.
 		response, err = s.h.GetRates(ctx, params)
 	}
 	if err != nil {
-		recordError("Internal", err)
 		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			encodeErrorResponse(errRes, w, span)
+			if err := encodeErrorResponse(errRes, w, span); err != nil {
+				recordError("Internal", err)
+			}
 			return
 		}
 		if errors.Is(err, ht.ErrNotImplemented) {
 			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
-		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
+			recordError("Internal", err)
+		}
 		return
 	}
 
 	if err := encodeGetRatesResponse(response, w, span); err != nil {
 		recordError("EncodeResponse", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
 		return
 	}
 }
@@ -5966,10 +6272,11 @@ func (s *Server) handleGetRawAccountStateRequest(args [1]string, argsEscaped boo
 	var response *GetRawAccountStateOK
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
-			Context:       ctx,
-			OperationName: "GetRawAccountState",
-			OperationID:   "getRawAccountState",
-			Body:          nil,
+			Context:          ctx,
+			OperationName:    "GetRawAccountState",
+			OperationSummary: "",
+			OperationID:      "getRawAccountState",
+			Body:             nil,
 			Params: middleware.Parameters{
 				{
 					Name: "account_id",
@@ -6001,22 +6308,27 @@ func (s *Server) handleGetRawAccountStateRequest(args [1]string, argsEscaped boo
 		response, err = s.h.GetRawAccountState(ctx, params)
 	}
 	if err != nil {
-		recordError("Internal", err)
 		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			encodeErrorResponse(errRes, w, span)
+			if err := encodeErrorResponse(errRes, w, span); err != nil {
+				recordError("Internal", err)
+			}
 			return
 		}
 		if errors.Is(err, ht.ErrNotImplemented) {
 			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
-		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
+			recordError("Internal", err)
+		}
 		return
 	}
 
 	if err := encodeGetRawAccountStateResponse(response, w, span); err != nil {
 		recordError("EncodeResponse", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
 		return
 	}
 }
@@ -6077,10 +6389,11 @@ func (s *Server) handleGetRawBlockProofRequest(args [0]string, argsEscaped bool,
 	var response *GetRawBlockProofOK
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
-			Context:       ctx,
-			OperationName: "GetRawBlockProof",
-			OperationID:   "getRawBlockProof",
-			Body:          nil,
+			Context:          ctx,
+			OperationName:    "GetRawBlockProof",
+			OperationSummary: "",
+			OperationID:      "getRawBlockProof",
+			Body:             nil,
 			Params: middleware.Parameters{
 				{
 					Name: "known_block",
@@ -6120,22 +6433,27 @@ func (s *Server) handleGetRawBlockProofRequest(args [0]string, argsEscaped bool,
 		response, err = s.h.GetRawBlockProof(ctx, params)
 	}
 	if err != nil {
-		recordError("Internal", err)
 		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			encodeErrorResponse(errRes, w, span)
+			if err := encodeErrorResponse(errRes, w, span); err != nil {
+				recordError("Internal", err)
+			}
 			return
 		}
 		if errors.Is(err, ht.ErrNotImplemented) {
 			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
-		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
+			recordError("Internal", err)
+		}
 		return
 	}
 
 	if err := encodeGetRawBlockProofResponse(response, w, span); err != nil {
 		recordError("EncodeResponse", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
 		return
 	}
 }
@@ -6196,10 +6514,11 @@ func (s *Server) handleGetRawBlockchainBlockRequest(args [1]string, argsEscaped 
 	var response *GetRawBlockchainBlockOK
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
-			Context:       ctx,
-			OperationName: "GetRawBlockchainBlock",
-			OperationID:   "getRawBlockchainBlock",
-			Body:          nil,
+			Context:          ctx,
+			OperationName:    "GetRawBlockchainBlock",
+			OperationSummary: "",
+			OperationID:      "getRawBlockchainBlock",
+			Body:             nil,
 			Params: middleware.Parameters{
 				{
 					Name: "block_id",
@@ -6231,22 +6550,27 @@ func (s *Server) handleGetRawBlockchainBlockRequest(args [1]string, argsEscaped 
 		response, err = s.h.GetRawBlockchainBlock(ctx, params)
 	}
 	if err != nil {
-		recordError("Internal", err)
 		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			encodeErrorResponse(errRes, w, span)
+			if err := encodeErrorResponse(errRes, w, span); err != nil {
+				recordError("Internal", err)
+			}
 			return
 		}
 		if errors.Is(err, ht.ErrNotImplemented) {
 			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
-		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
+			recordError("Internal", err)
+		}
 		return
 	}
 
 	if err := encodeGetRawBlockchainBlockResponse(response, w, span); err != nil {
 		recordError("EncodeResponse", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
 		return
 	}
 }
@@ -6307,10 +6631,11 @@ func (s *Server) handleGetRawBlockchainBlockHeaderRequest(args [1]string, argsEs
 	var response *GetRawBlockchainBlockHeaderOK
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
-			Context:       ctx,
-			OperationName: "GetRawBlockchainBlockHeader",
-			OperationID:   "getRawBlockchainBlockHeader",
-			Body:          nil,
+			Context:          ctx,
+			OperationName:    "GetRawBlockchainBlockHeader",
+			OperationSummary: "",
+			OperationID:      "getRawBlockchainBlockHeader",
+			Body:             nil,
 			Params: middleware.Parameters{
 				{
 					Name: "block_id",
@@ -6346,22 +6671,27 @@ func (s *Server) handleGetRawBlockchainBlockHeaderRequest(args [1]string, argsEs
 		response, err = s.h.GetRawBlockchainBlockHeader(ctx, params)
 	}
 	if err != nil {
-		recordError("Internal", err)
 		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			encodeErrorResponse(errRes, w, span)
+			if err := encodeErrorResponse(errRes, w, span); err != nil {
+				recordError("Internal", err)
+			}
 			return
 		}
 		if errors.Is(err, ht.ErrNotImplemented) {
 			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
-		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
+			recordError("Internal", err)
+		}
 		return
 	}
 
 	if err := encodeGetRawBlockchainBlockHeaderResponse(response, w, span); err != nil {
 		recordError("EncodeResponse", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
 		return
 	}
 }
@@ -6422,10 +6752,11 @@ func (s *Server) handleGetRawBlockchainBlockStateRequest(args [1]string, argsEsc
 	var response *GetRawBlockchainBlockStateOK
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
-			Context:       ctx,
-			OperationName: "GetRawBlockchainBlockState",
-			OperationID:   "getRawBlockchainBlockState",
-			Body:          nil,
+			Context:          ctx,
+			OperationName:    "GetRawBlockchainBlockState",
+			OperationSummary: "",
+			OperationID:      "getRawBlockchainBlockState",
+			Body:             nil,
 			Params: middleware.Parameters{
 				{
 					Name: "block_id",
@@ -6457,22 +6788,27 @@ func (s *Server) handleGetRawBlockchainBlockStateRequest(args [1]string, argsEsc
 		response, err = s.h.GetRawBlockchainBlockState(ctx, params)
 	}
 	if err != nil {
-		recordError("Internal", err)
 		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			encodeErrorResponse(errRes, w, span)
+			if err := encodeErrorResponse(errRes, w, span); err != nil {
+				recordError("Internal", err)
+			}
 			return
 		}
 		if errors.Is(err, ht.ErrNotImplemented) {
 			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
-		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
+			recordError("Internal", err)
+		}
 		return
 	}
 
 	if err := encodeGetRawBlockchainBlockStateResponse(response, w, span); err != nil {
 		recordError("EncodeResponse", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
 		return
 	}
 }
@@ -6533,10 +6869,11 @@ func (s *Server) handleGetRawConfigRequest(args [1]string, argsEscaped bool, w h
 	var response *GetRawConfigOK
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
-			Context:       ctx,
-			OperationName: "GetRawConfig",
-			OperationID:   "getRawConfig",
-			Body:          nil,
+			Context:          ctx,
+			OperationName:    "GetRawConfig",
+			OperationSummary: "",
+			OperationID:      "getRawConfig",
+			Body:             nil,
 			Params: middleware.Parameters{
 				{
 					Name: "block_id",
@@ -6572,22 +6909,27 @@ func (s *Server) handleGetRawConfigRequest(args [1]string, argsEscaped bool, w h
 		response, err = s.h.GetRawConfig(ctx, params)
 	}
 	if err != nil {
-		recordError("Internal", err)
 		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			encodeErrorResponse(errRes, w, span)
+			if err := encodeErrorResponse(errRes, w, span); err != nil {
+				recordError("Internal", err)
+			}
 			return
 		}
 		if errors.Is(err, ht.ErrNotImplemented) {
 			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
-		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
+			recordError("Internal", err)
+		}
 		return
 	}
 
 	if err := encodeGetRawConfigResponse(response, w, span); err != nil {
 		recordError("EncodeResponse", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
 		return
 	}
 }
@@ -6648,10 +6990,11 @@ func (s *Server) handleGetRawListBlockTransactionsRequest(args [1]string, argsEs
 	var response *GetRawListBlockTransactionsOK
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
-			Context:       ctx,
-			OperationName: "GetRawListBlockTransactions",
-			OperationID:   "getRawListBlockTransactions",
-			Body:          nil,
+			Context:          ctx,
+			OperationName:    "GetRawListBlockTransactions",
+			OperationSummary: "",
+			OperationID:      "getRawListBlockTransactions",
+			Body:             nil,
 			Params: middleware.Parameters{
 				{
 					Name: "block_id",
@@ -6699,22 +7042,27 @@ func (s *Server) handleGetRawListBlockTransactionsRequest(args [1]string, argsEs
 		response, err = s.h.GetRawListBlockTransactions(ctx, params)
 	}
 	if err != nil {
-		recordError("Internal", err)
 		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			encodeErrorResponse(errRes, w, span)
+			if err := encodeErrorResponse(errRes, w, span); err != nil {
+				recordError("Internal", err)
+			}
 			return
 		}
 		if errors.Is(err, ht.ErrNotImplemented) {
 			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
-		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
+			recordError("Internal", err)
+		}
 		return
 	}
 
 	if err := encodeGetRawListBlockTransactionsResponse(response, w, span); err != nil {
 		recordError("EncodeResponse", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
 		return
 	}
 }
@@ -6761,12 +7109,13 @@ func (s *Server) handleGetRawMasterchainInfoRequest(args [0]string, argsEscaped 
 	var response *GetRawMasterchainInfoOK
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
-			Context:       ctx,
-			OperationName: "GetRawMasterchainInfo",
-			OperationID:   "getRawMasterchainInfo",
-			Body:          nil,
-			Params:        middleware.Parameters{},
-			Raw:           r,
+			Context:          ctx,
+			OperationName:    "GetRawMasterchainInfo",
+			OperationSummary: "",
+			OperationID:      "getRawMasterchainInfo",
+			Body:             nil,
+			Params:           middleware.Parameters{},
+			Raw:              r,
 		}
 
 		type (
@@ -6791,22 +7140,27 @@ func (s *Server) handleGetRawMasterchainInfoRequest(args [0]string, argsEscaped 
 		response, err = s.h.GetRawMasterchainInfo(ctx)
 	}
 	if err != nil {
-		recordError("Internal", err)
 		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			encodeErrorResponse(errRes, w, span)
+			if err := encodeErrorResponse(errRes, w, span); err != nil {
+				recordError("Internal", err)
+			}
 			return
 		}
 		if errors.Is(err, ht.ErrNotImplemented) {
 			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
-		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
+			recordError("Internal", err)
+		}
 		return
 	}
 
 	if err := encodeGetRawMasterchainInfoResponse(response, w, span); err != nil {
 		recordError("EncodeResponse", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
 		return
 	}
 }
@@ -6867,10 +7221,11 @@ func (s *Server) handleGetRawMasterchainInfoExtRequest(args [0]string, argsEscap
 	var response *GetRawMasterchainInfoExtOK
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
-			Context:       ctx,
-			OperationName: "GetRawMasterchainInfoExt",
-			OperationID:   "getRawMasterchainInfoExt",
-			Body:          nil,
+			Context:          ctx,
+			OperationName:    "GetRawMasterchainInfoExt",
+			OperationSummary: "",
+			OperationID:      "getRawMasterchainInfoExt",
+			Body:             nil,
 			Params: middleware.Parameters{
 				{
 					Name: "mode",
@@ -6902,22 +7257,27 @@ func (s *Server) handleGetRawMasterchainInfoExtRequest(args [0]string, argsEscap
 		response, err = s.h.GetRawMasterchainInfoExt(ctx, params)
 	}
 	if err != nil {
-		recordError("Internal", err)
 		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			encodeErrorResponse(errRes, w, span)
+			if err := encodeErrorResponse(errRes, w, span); err != nil {
+				recordError("Internal", err)
+			}
 			return
 		}
 		if errors.Is(err, ht.ErrNotImplemented) {
 			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
-		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
+			recordError("Internal", err)
+		}
 		return
 	}
 
 	if err := encodeGetRawMasterchainInfoExtResponse(response, w, span); err != nil {
 		recordError("EncodeResponse", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
 		return
 	}
 }
@@ -6978,10 +7338,11 @@ func (s *Server) handleGetRawShardBlockProofRequest(args [1]string, argsEscaped 
 	var response *GetRawShardBlockProofOK
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
-			Context:       ctx,
-			OperationName: "GetRawShardBlockProof",
-			OperationID:   "getRawShardBlockProof",
-			Body:          nil,
+			Context:          ctx,
+			OperationName:    "GetRawShardBlockProof",
+			OperationSummary: "",
+			OperationID:      "getRawShardBlockProof",
+			Body:             nil,
 			Params: middleware.Parameters{
 				{
 					Name: "block_id",
@@ -7013,22 +7374,27 @@ func (s *Server) handleGetRawShardBlockProofRequest(args [1]string, argsEscaped 
 		response, err = s.h.GetRawShardBlockProof(ctx, params)
 	}
 	if err != nil {
-		recordError("Internal", err)
 		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			encodeErrorResponse(errRes, w, span)
+			if err := encodeErrorResponse(errRes, w, span); err != nil {
+				recordError("Internal", err)
+			}
 			return
 		}
 		if errors.Is(err, ht.ErrNotImplemented) {
 			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
-		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
+			recordError("Internal", err)
+		}
 		return
 	}
 
 	if err := encodeGetRawShardBlockProofResponse(response, w, span); err != nil {
 		recordError("EncodeResponse", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
 		return
 	}
 }
@@ -7089,10 +7455,11 @@ func (s *Server) handleGetRawShardInfoRequest(args [1]string, argsEscaped bool, 
 	var response *GetRawShardInfoOK
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
-			Context:       ctx,
-			OperationName: "GetRawShardInfo",
-			OperationID:   "getRawShardInfo",
-			Body:          nil,
+			Context:          ctx,
+			OperationName:    "GetRawShardInfo",
+			OperationSummary: "",
+			OperationID:      "getRawShardInfo",
+			Body:             nil,
 			Params: middleware.Parameters{
 				{
 					Name: "block_id",
@@ -7136,22 +7503,27 @@ func (s *Server) handleGetRawShardInfoRequest(args [1]string, argsEscaped bool, 
 		response, err = s.h.GetRawShardInfo(ctx, params)
 	}
 	if err != nil {
-		recordError("Internal", err)
 		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			encodeErrorResponse(errRes, w, span)
+			if err := encodeErrorResponse(errRes, w, span); err != nil {
+				recordError("Internal", err)
+			}
 			return
 		}
 		if errors.Is(err, ht.ErrNotImplemented) {
 			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
-		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
+			recordError("Internal", err)
+		}
 		return
 	}
 
 	if err := encodeGetRawShardInfoResponse(response, w, span); err != nil {
 		recordError("EncodeResponse", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
 		return
 	}
 }
@@ -7198,12 +7570,13 @@ func (s *Server) handleGetRawTimeRequest(args [0]string, argsEscaped bool, w htt
 	var response *GetRawTimeOK
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
-			Context:       ctx,
-			OperationName: "GetRawTime",
-			OperationID:   "getRawTime",
-			Body:          nil,
-			Params:        middleware.Parameters{},
-			Raw:           r,
+			Context:          ctx,
+			OperationName:    "GetRawTime",
+			OperationSummary: "",
+			OperationID:      "getRawTime",
+			Body:             nil,
+			Params:           middleware.Parameters{},
+			Raw:              r,
 		}
 
 		type (
@@ -7228,22 +7601,27 @@ func (s *Server) handleGetRawTimeRequest(args [0]string, argsEscaped bool, w htt
 		response, err = s.h.GetRawTime(ctx)
 	}
 	if err != nil {
-		recordError("Internal", err)
 		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			encodeErrorResponse(errRes, w, span)
+			if err := encodeErrorResponse(errRes, w, span); err != nil {
+				recordError("Internal", err)
+			}
 			return
 		}
 		if errors.Is(err, ht.ErrNotImplemented) {
 			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
-		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
+			recordError("Internal", err)
+		}
 		return
 	}
 
 	if err := encodeGetRawTimeResponse(response, w, span); err != nil {
 		recordError("EncodeResponse", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
 		return
 	}
 }
@@ -7304,10 +7682,11 @@ func (s *Server) handleGetRawTransactionsRequest(args [1]string, argsEscaped boo
 	var response *GetRawTransactionsOK
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
-			Context:       ctx,
-			OperationName: "GetRawTransactions",
-			OperationID:   "getRawTransactions",
-			Body:          nil,
+			Context:          ctx,
+			OperationName:    "GetRawTransactions",
+			OperationSummary: "",
+			OperationID:      "getRawTransactions",
+			Body:             nil,
 			Params: middleware.Parameters{
 				{
 					Name: "account_id",
@@ -7351,22 +7730,27 @@ func (s *Server) handleGetRawTransactionsRequest(args [1]string, argsEscaped boo
 		response, err = s.h.GetRawTransactions(ctx, params)
 	}
 	if err != nil {
-		recordError("Internal", err)
 		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			encodeErrorResponse(errRes, w, span)
+			if err := encodeErrorResponse(errRes, w, span); err != nil {
+				recordError("Internal", err)
+			}
 			return
 		}
 		if errors.Is(err, ht.ErrNotImplemented) {
 			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
-		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
+			recordError("Internal", err)
+		}
 		return
 	}
 
 	if err := encodeGetRawTransactionsResponse(response, w, span); err != nil {
 		recordError("EncodeResponse", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
 		return
 	}
 }
@@ -7427,10 +7811,11 @@ func (s *Server) handleGetStakingPoolHistoryRequest(args [1]string, argsEscaped 
 	var response *GetStakingPoolHistoryOK
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
-			Context:       ctx,
-			OperationName: "GetStakingPoolHistory",
-			OperationID:   "getStakingPoolHistory",
-			Body:          nil,
+			Context:          ctx,
+			OperationName:    "GetStakingPoolHistory",
+			OperationSummary: "",
+			OperationID:      "getStakingPoolHistory",
+			Body:             nil,
 			Params: middleware.Parameters{
 				{
 					Name: "account_id",
@@ -7462,22 +7847,27 @@ func (s *Server) handleGetStakingPoolHistoryRequest(args [1]string, argsEscaped 
 		response, err = s.h.GetStakingPoolHistory(ctx, params)
 	}
 	if err != nil {
-		recordError("Internal", err)
 		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			encodeErrorResponse(errRes, w, span)
+			if err := encodeErrorResponse(errRes, w, span); err != nil {
+				recordError("Internal", err)
+			}
 			return
 		}
 		if errors.Is(err, ht.ErrNotImplemented) {
 			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
-		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
+			recordError("Internal", err)
+		}
 		return
 	}
 
 	if err := encodeGetStakingPoolHistoryResponse(response, w, span); err != nil {
 		recordError("EncodeResponse", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
 		return
 	}
 }
@@ -7538,10 +7928,11 @@ func (s *Server) handleGetStakingPoolInfoRequest(args [1]string, argsEscaped boo
 	var response *GetStakingPoolInfoOK
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
-			Context:       ctx,
-			OperationName: "GetStakingPoolInfo",
-			OperationID:   "getStakingPoolInfo",
-			Body:          nil,
+			Context:          ctx,
+			OperationName:    "GetStakingPoolInfo",
+			OperationSummary: "",
+			OperationID:      "getStakingPoolInfo",
+			Body:             nil,
 			Params: middleware.Parameters{
 				{
 					Name: "account_id",
@@ -7577,22 +7968,27 @@ func (s *Server) handleGetStakingPoolInfoRequest(args [1]string, argsEscaped boo
 		response, err = s.h.GetStakingPoolInfo(ctx, params)
 	}
 	if err != nil {
-		recordError("Internal", err)
 		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			encodeErrorResponse(errRes, w, span)
+			if err := encodeErrorResponse(errRes, w, span); err != nil {
+				recordError("Internal", err)
+			}
 			return
 		}
 		if errors.Is(err, ht.ErrNotImplemented) {
 			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
-		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
+			recordError("Internal", err)
+		}
 		return
 	}
 
 	if err := encodeGetStakingPoolInfoResponse(response, w, span); err != nil {
 		recordError("EncodeResponse", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
 		return
 	}
 }
@@ -7653,10 +8049,11 @@ func (s *Server) handleGetStakingPoolsRequest(args [0]string, argsEscaped bool, 
 	var response *GetStakingPoolsOK
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
-			Context:       ctx,
-			OperationName: "GetStakingPools",
-			OperationID:   "getStakingPools",
-			Body:          nil,
+			Context:          ctx,
+			OperationName:    "GetStakingPools",
+			OperationSummary: "",
+			OperationID:      "getStakingPools",
+			Body:             nil,
 			Params: middleware.Parameters{
 				{
 					Name: "available_for",
@@ -7696,22 +8093,27 @@ func (s *Server) handleGetStakingPoolsRequest(args [0]string, argsEscaped bool, 
 		response, err = s.h.GetStakingPools(ctx, params)
 	}
 	if err != nil {
-		recordError("Internal", err)
 		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			encodeErrorResponse(errRes, w, span)
+			if err := encodeErrorResponse(errRes, w, span); err != nil {
+				recordError("Internal", err)
+			}
 			return
 		}
 		if errors.Is(err, ht.ErrNotImplemented) {
 			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
-		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
+			recordError("Internal", err)
+		}
 		return
 	}
 
 	if err := encodeGetStakingPoolsResponse(response, w, span); err != nil {
 		recordError("EncodeResponse", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
 		return
 	}
 }
@@ -7758,12 +8160,13 @@ func (s *Server) handleGetStorageProvidersRequest(args [0]string, argsEscaped bo
 	var response *GetStorageProvidersOK
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
-			Context:       ctx,
-			OperationName: "GetStorageProviders",
-			OperationID:   "getStorageProviders",
-			Body:          nil,
-			Params:        middleware.Parameters{},
-			Raw:           r,
+			Context:          ctx,
+			OperationName:    "GetStorageProviders",
+			OperationSummary: "",
+			OperationID:      "getStorageProviders",
+			Body:             nil,
+			Params:           middleware.Parameters{},
+			Raw:              r,
 		}
 
 		type (
@@ -7788,22 +8191,27 @@ func (s *Server) handleGetStorageProvidersRequest(args [0]string, argsEscaped bo
 		response, err = s.h.GetStorageProviders(ctx)
 	}
 	if err != nil {
-		recordError("Internal", err)
 		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			encodeErrorResponse(errRes, w, span)
+			if err := encodeErrorResponse(errRes, w, span); err != nil {
+				recordError("Internal", err)
+			}
 			return
 		}
 		if errors.Is(err, ht.ErrNotImplemented) {
 			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
-		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
+			recordError("Internal", err)
+		}
 		return
 	}
 
 	if err := encodeGetStorageProvidersResponse(response, w, span); err != nil {
 		recordError("EncodeResponse", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
 		return
 	}
 }
@@ -7850,12 +8258,13 @@ func (s *Server) handleGetTonConnectPayloadRequest(args [0]string, argsEscaped b
 	var response *GetTonConnectPayloadOK
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
-			Context:       ctx,
-			OperationName: "GetTonConnectPayload",
-			OperationID:   "getTonConnectPayload",
-			Body:          nil,
-			Params:        middleware.Parameters{},
-			Raw:           r,
+			Context:          ctx,
+			OperationName:    "GetTonConnectPayload",
+			OperationSummary: "",
+			OperationID:      "getTonConnectPayload",
+			Body:             nil,
+			Params:           middleware.Parameters{},
+			Raw:              r,
 		}
 
 		type (
@@ -7880,22 +8289,27 @@ func (s *Server) handleGetTonConnectPayloadRequest(args [0]string, argsEscaped b
 		response, err = s.h.GetTonConnectPayload(ctx)
 	}
 	if err != nil {
-		recordError("Internal", err)
 		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			encodeErrorResponse(errRes, w, span)
+			if err := encodeErrorResponse(errRes, w, span); err != nil {
+				recordError("Internal", err)
+			}
 			return
 		}
 		if errors.Is(err, ht.ErrNotImplemented) {
 			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
-		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
+			recordError("Internal", err)
+		}
 		return
 	}
 
 	if err := encodeGetTonConnectPayloadResponse(response, w, span); err != nil {
 		recordError("EncodeResponse", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
 		return
 	}
 }
@@ -7956,10 +8370,11 @@ func (s *Server) handleGetTraceRequest(args [1]string, argsEscaped bool, w http.
 	var response *Trace
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
-			Context:       ctx,
-			OperationName: "GetTrace",
-			OperationID:   "getTrace",
-			Body:          nil,
+			Context:          ctx,
+			OperationName:    "GetTrace",
+			OperationSummary: "",
+			OperationID:      "getTrace",
+			Body:             nil,
 			Params: middleware.Parameters{
 				{
 					Name: "trace_id",
@@ -7991,22 +8406,27 @@ func (s *Server) handleGetTraceRequest(args [1]string, argsEscaped bool, w http.
 		response, err = s.h.GetTrace(ctx, params)
 	}
 	if err != nil {
-		recordError("Internal", err)
 		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			encodeErrorResponse(errRes, w, span)
+			if err := encodeErrorResponse(errRes, w, span); err != nil {
+				recordError("Internal", err)
+			}
 			return
 		}
 		if errors.Is(err, ht.ErrNotImplemented) {
 			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
-		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
+			recordError("Internal", err)
+		}
 		return
 	}
 
 	if err := encodeGetTraceResponse(response, w, span); err != nil {
 		recordError("EncodeResponse", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
 		return
 	}
 }
@@ -8067,10 +8487,11 @@ func (s *Server) handleGetWalletBackupRequest(args [0]string, argsEscaped bool, 
 	var response *GetWalletBackupOK
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
-			Context:       ctx,
-			OperationName: "GetWalletBackup",
-			OperationID:   "getWalletBackup",
-			Body:          nil,
+			Context:          ctx,
+			OperationName:    "GetWalletBackup",
+			OperationSummary: "",
+			OperationID:      "getWalletBackup",
+			Body:             nil,
 			Params: middleware.Parameters{
 				{
 					Name: "X-TonConnect-Auth",
@@ -8102,22 +8523,27 @@ func (s *Server) handleGetWalletBackupRequest(args [0]string, argsEscaped bool, 
 		response, err = s.h.GetWalletBackup(ctx, params)
 	}
 	if err != nil {
-		recordError("Internal", err)
 		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			encodeErrorResponse(errRes, w, span)
+			if err := encodeErrorResponse(errRes, w, span); err != nil {
+				recordError("Internal", err)
+			}
 			return
 		}
 		if errors.Is(err, ht.ErrNotImplemented) {
 			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
-		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
+			recordError("Internal", err)
+		}
 		return
 	}
 
 	if err := encodeGetWalletBackupResponse(response, w, span); err != nil {
 		recordError("EncodeResponse", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
 		return
 	}
 }
@@ -8178,10 +8604,11 @@ func (s *Server) handleGetWalletsByPublicKeyRequest(args [1]string, argsEscaped 
 	var response *Accounts
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
-			Context:       ctx,
-			OperationName: "GetWalletsByPublicKey",
-			OperationID:   "getWalletsByPublicKey",
-			Body:          nil,
+			Context:          ctx,
+			OperationName:    "GetWalletsByPublicKey",
+			OperationSummary: "",
+			OperationID:      "getWalletsByPublicKey",
+			Body:             nil,
 			Params: middleware.Parameters{
 				{
 					Name: "public_key",
@@ -8213,22 +8640,27 @@ func (s *Server) handleGetWalletsByPublicKeyRequest(args [1]string, argsEscaped 
 		response, err = s.h.GetWalletsByPublicKey(ctx, params)
 	}
 	if err != nil {
-		recordError("Internal", err)
 		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			encodeErrorResponse(errRes, w, span)
+			if err := encodeErrorResponse(errRes, w, span); err != nil {
+				recordError("Internal", err)
+			}
 			return
 		}
 		if errors.Is(err, ht.ErrNotImplemented) {
 			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
-		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
+			recordError("Internal", err)
+		}
 		return
 	}
 
 	if err := encodeGetWalletsByPublicKeyResponse(response, w, span); err != nil {
 		recordError("EncodeResponse", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
 		return
 	}
 }
@@ -8289,10 +8721,11 @@ func (s *Server) handleReindexAccountRequest(args [1]string, argsEscaped bool, w
 	var response *ReindexAccountOK
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
-			Context:       ctx,
-			OperationName: "ReindexAccount",
-			OperationID:   "reindexAccount",
-			Body:          nil,
+			Context:          ctx,
+			OperationName:    "ReindexAccount",
+			OperationSummary: "",
+			OperationID:      "reindexAccount",
+			Body:             nil,
 			Params: middleware.Parameters{
 				{
 					Name: "account_id",
@@ -8324,22 +8757,27 @@ func (s *Server) handleReindexAccountRequest(args [1]string, argsEscaped bool, w
 		err = s.h.ReindexAccount(ctx, params)
 	}
 	if err != nil {
-		recordError("Internal", err)
 		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			encodeErrorResponse(errRes, w, span)
+			if err := encodeErrorResponse(errRes, w, span); err != nil {
+				recordError("Internal", err)
+			}
 			return
 		}
 		if errors.Is(err, ht.ErrNotImplemented) {
 			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
-		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
+			recordError("Internal", err)
+		}
 		return
 	}
 
 	if err := encodeReindexAccountResponse(response, w, span); err != nil {
 		recordError("EncodeResponse", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
 		return
 	}
 }
@@ -8400,10 +8838,11 @@ func (s *Server) handleSearchAccountsRequest(args [0]string, argsEscaped bool, w
 	var response *FoundAccounts
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
-			Context:       ctx,
-			OperationName: "SearchAccounts",
-			OperationID:   "searchAccounts",
-			Body:          nil,
+			Context:          ctx,
+			OperationName:    "SearchAccounts",
+			OperationSummary: "",
+			OperationID:      "searchAccounts",
+			Body:             nil,
 			Params: middleware.Parameters{
 				{
 					Name: "name",
@@ -8435,22 +8874,27 @@ func (s *Server) handleSearchAccountsRequest(args [0]string, argsEscaped bool, w
 		response, err = s.h.SearchAccounts(ctx, params)
 	}
 	if err != nil {
-		recordError("Internal", err)
 		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			encodeErrorResponse(errRes, w, span)
+			if err := encodeErrorResponse(errRes, w, span); err != nil {
+				recordError("Internal", err)
+			}
 			return
 		}
 		if errors.Is(err, ht.ErrNotImplemented) {
 			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
-		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
+			recordError("Internal", err)
+		}
 		return
 	}
 
 	if err := encodeSearchAccountsResponse(response, w, span); err != nil {
 		recordError("EncodeResponse", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
 		return
 	}
 }
@@ -8516,12 +8960,13 @@ func (s *Server) handleSendBlockchainMessageRequest(args [0]string, argsEscaped 
 	var response *SendBlockchainMessageOK
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
-			Context:       ctx,
-			OperationName: "SendBlockchainMessage",
-			OperationID:   "sendBlockchainMessage",
-			Body:          request,
-			Params:        middleware.Parameters{},
-			Raw:           r,
+			Context:          ctx,
+			OperationName:    "SendBlockchainMessage",
+			OperationSummary: "",
+			OperationID:      "sendBlockchainMessage",
+			Body:             request,
+			Params:           middleware.Parameters{},
+			Raw:              r,
 		}
 
 		type (
@@ -8546,22 +8991,27 @@ func (s *Server) handleSendBlockchainMessageRequest(args [0]string, argsEscaped 
 		err = s.h.SendBlockchainMessage(ctx, request)
 	}
 	if err != nil {
-		recordError("Internal", err)
 		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			encodeErrorResponse(errRes, w, span)
+			if err := encodeErrorResponse(errRes, w, span); err != nil {
+				recordError("Internal", err)
+			}
 			return
 		}
 		if errors.Is(err, ht.ErrNotImplemented) {
 			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
-		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
+			recordError("Internal", err)
+		}
 		return
 	}
 
 	if err := encodeSendBlockchainMessageResponse(response, w, span); err != nil {
 		recordError("EncodeResponse", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
 		return
 	}
 }
@@ -8627,12 +9077,13 @@ func (s *Server) handleSendRawMessageRequest(args [0]string, argsEscaped bool, w
 	var response *SendRawMessageOK
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
-			Context:       ctx,
-			OperationName: "SendRawMessage",
-			OperationID:   "sendRawMessage",
-			Body:          request,
-			Params:        middleware.Parameters{},
-			Raw:           r,
+			Context:          ctx,
+			OperationName:    "SendRawMessage",
+			OperationSummary: "",
+			OperationID:      "sendRawMessage",
+			Body:             request,
+			Params:           middleware.Parameters{},
+			Raw:              r,
 		}
 
 		type (
@@ -8657,22 +9108,27 @@ func (s *Server) handleSendRawMessageRequest(args [0]string, argsEscaped bool, w
 		response, err = s.h.SendRawMessage(ctx, request)
 	}
 	if err != nil {
-		recordError("Internal", err)
 		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			encodeErrorResponse(errRes, w, span)
+			if err := encodeErrorResponse(errRes, w, span); err != nil {
+				recordError("Internal", err)
+			}
 			return
 		}
 		if errors.Is(err, ht.ErrNotImplemented) {
 			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
-		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
+			recordError("Internal", err)
+		}
 		return
 	}
 
 	if err := encodeSendRawMessageResponse(response, w, span); err != nil {
 		recordError("EncodeResponse", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
 		return
 	}
 }
@@ -8748,10 +9204,11 @@ func (s *Server) handleSetWalletBackupRequest(args [0]string, argsEscaped bool, 
 	var response *SetWalletBackupOK
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
-			Context:       ctx,
-			OperationName: "SetWalletBackup",
-			OperationID:   "setWalletBackup",
-			Body:          request,
+			Context:          ctx,
+			OperationName:    "SetWalletBackup",
+			OperationSummary: "",
+			OperationID:      "setWalletBackup",
+			Body:             request,
 			Params: middleware.Parameters{
 				{
 					Name: "X-TonConnect-Auth",
@@ -8783,22 +9240,27 @@ func (s *Server) handleSetWalletBackupRequest(args [0]string, argsEscaped bool, 
 		err = s.h.SetWalletBackup(ctx, request, params)
 	}
 	if err != nil {
-		recordError("Internal", err)
 		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			encodeErrorResponse(errRes, w, span)
+			if err := encodeErrorResponse(errRes, w, span); err != nil {
+				recordError("Internal", err)
+			}
 			return
 		}
 		if errors.Is(err, ht.ErrNotImplemented) {
 			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
-		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
+			recordError("Internal", err)
+		}
 		return
 	}
 
 	if err := encodeSetWalletBackupResponse(response, w, span); err != nil {
 		recordError("EncodeResponse", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
 		return
 	}
 }
@@ -8864,12 +9326,13 @@ func (s *Server) handleTonConnectProofRequest(args [0]string, argsEscaped bool, 
 	var response *TonConnectProofOK
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
-			Context:       ctx,
-			OperationName: "TonConnectProof",
-			OperationID:   "tonConnectProof",
-			Body:          request,
-			Params:        middleware.Parameters{},
-			Raw:           r,
+			Context:          ctx,
+			OperationName:    "TonConnectProof",
+			OperationSummary: "",
+			OperationID:      "tonConnectProof",
+			Body:             request,
+			Params:           middleware.Parameters{},
+			Raw:              r,
 		}
 
 		type (
@@ -8894,22 +9357,27 @@ func (s *Server) handleTonConnectProofRequest(args [0]string, argsEscaped bool, 
 		response, err = s.h.TonConnectProof(ctx, request)
 	}
 	if err != nil {
-		recordError("Internal", err)
 		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			encodeErrorResponse(errRes, w, span)
+			if err := encodeErrorResponse(errRes, w, span); err != nil {
+				recordError("Internal", err)
+			}
 			return
 		}
 		if errors.Is(err, ht.ErrNotImplemented) {
 			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
-		encodeErrorResponse(s.h.NewError(ctx, err), w, span)
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
+			recordError("Internal", err)
+		}
 		return
 	}
 
 	if err := encodeTonConnectProofResponse(response, w, span); err != nil {
 		recordError("EncodeResponse", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
 		return
 	}
 }

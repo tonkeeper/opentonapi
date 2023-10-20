@@ -171,8 +171,14 @@ func (h *Handler) GetStakingPools(ctx context.Context, params oas.GetStakingPool
 		result.Pools = append(result.Pools, convertLiquidStaking(p, cycleStart, cycleEnd))
 	}
 
-	slices.SortFunc(result.Pools, func(a, b oas.PoolInfo) bool {
-		return a.Apy > b.Apy
+	slices.SortFunc(result.Pools, func(a, b oas.PoolInfo) int {
+		if a.Apy == b.Apy {
+			return 0
+		}
+		if a.Apy < b.Apy {
+			return -1
+		}
+		return 1
 	})
 	result.SetImplementations(map[string]oas.PoolImplementation{
 		string(oas.PoolImplementationTypeWhales): {

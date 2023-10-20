@@ -10,6 +10,19 @@ import (
 	"github.com/ogen-go/ogen/uri"
 )
 
+func (s *Server) cutPrefix(path string) (string, bool) {
+	prefix := s.cfg.Prefix
+	if prefix == "" {
+		return path, true
+	}
+	if !strings.HasPrefix(path, prefix) {
+		// Prefix doesn't match.
+		return "", false
+	}
+	// Cut prefix from the path.
+	return strings.TrimPrefix(path, prefix), true
+}
+
 // ServeHTTP serves http request as defined by OpenAPI v3 specification,
 // calling handler that matches the path or returning not found error.
 func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -21,17 +34,9 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			elemIsEscaped = strings.ContainsRune(elem, '%')
 		}
 	}
-	if prefix := s.cfg.Prefix; len(prefix) > 0 {
-		if strings.HasPrefix(elem, prefix) {
-			// Cut prefix from the path.
-			elem = strings.TrimPrefix(elem, prefix)
-		} else {
-			// Prefix doesn't match.
-			s.notFound(w, r)
-			return
-		}
-	}
-	if len(elem) == 0 {
+
+	elem, ok := s.cutPrefix(elem)
+	if !ok || len(elem) == 0 {
 		s.notFound(w, r)
 		return
 	}
@@ -2110,6 +2115,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 // Route is route object.
 type Route struct {
 	name        string
+	summary     string
 	operationID string
 	pathPattern string
 	count       int
@@ -2121,6 +2127,11 @@ type Route struct {
 // It is guaranteed to be unique and not empty.
 func (r Route) Name() string {
 	return r.name
+}
+
+// Summary returns OpenAPI summary.
+func (r Route) Summary() string {
+	return r.summary
 }
 
 // OperationID returns OpenAPI operationId.
@@ -2164,6 +2175,11 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 		}()
 	}
 
+	elem, ok := s.cutPrefix(elem)
+	if !ok {
+		return r, false
+	}
+
 	// Static code generated router with unwrapped path search.
 	switch {
 	default:
@@ -2205,6 +2221,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 						case "POST":
 							// Leaf: GetAccounts
 							r.name = "GetAccounts"
+							r.summary = ""
 							r.operationID = "getAccounts"
 							r.pathPattern = "/v2/accounts/_bulk"
 							r.args = args
@@ -2226,6 +2243,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 						case "GET":
 							// Leaf: SearchAccounts
 							r.name = "SearchAccounts"
+							r.summary = ""
 							r.operationID = "searchAccounts"
 							r.pathPattern = "/v2/accounts/search"
 							r.args = args
@@ -2249,6 +2267,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 					switch method {
 					case "GET":
 						r.name = "GetAccount"
+						r.summary = ""
 						r.operationID = "getAccount"
 						r.pathPattern = "/v2/accounts/{account_id}"
 						r.args = args
@@ -2293,6 +2312,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 								case "GET":
 									// Leaf: GetAccountDiff
 									r.name = "GetAccountDiff"
+									r.summary = ""
 									r.operationID = "getAccountDiff"
 									r.pathPattern = "/v2/accounts/{account_id}/diff"
 									r.args = args
@@ -2325,6 +2345,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 									case "GET":
 										// Leaf: AccountDnsBackResolve
 										r.name = "AccountDnsBackResolve"
+										r.summary = ""
 										r.operationID = "accountDnsBackResolve"
 										r.pathPattern = "/v2/accounts/{account_id}/dns/backresolve"
 										r.args = args
@@ -2346,6 +2367,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 									case "GET":
 										// Leaf: GetAccountDnsExpiring
 										r.name = "GetAccountDnsExpiring"
+										r.summary = ""
 										r.operationID = "getAccountDnsExpiring"
 										r.pathPattern = "/v2/accounts/{account_id}/dns/expiring"
 										r.args = args
@@ -2368,6 +2390,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 							switch method {
 							case "GET":
 								r.name = "GetAccountEvents"
+								r.summary = ""
 								r.operationID = "getAccountEvents"
 								r.pathPattern = "/v2/accounts/{account_id}/events"
 								r.args = args
@@ -2401,6 +2424,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 									case "POST":
 										// Leaf: EmulateMessageToAccountEvent
 										r.name = "EmulateMessageToAccountEvent"
+										r.summary = ""
 										r.operationID = "emulateMessageToAccountEvent"
 										r.pathPattern = "/v2/accounts/{account_id}/events/emulate"
 										r.args = args
@@ -2421,6 +2445,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 								case "GET":
 									// Leaf: GetAccountEvent
 									r.name = "GetAccountEvent"
+									r.summary = ""
 									r.operationID = "getAccountEvent"
 									r.pathPattern = "/v2/accounts/{account_id}/events/{event_id}"
 									r.args = args
@@ -2442,6 +2467,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 							switch method {
 							case "GET":
 								r.name = "GetAccountJettonsBalances"
+								r.summary = ""
 								r.operationID = "getAccountJettonsBalances"
 								r.pathPattern = "/v2/accounts/{account_id}/jettons"
 								r.args = args
@@ -2475,6 +2501,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 									case "GET":
 										// Leaf: GetAccountJettonsHistory
 										r.name = "GetAccountJettonsHistory"
+										r.summary = ""
 										r.operationID = "getAccountJettonsHistory"
 										r.pathPattern = "/v2/accounts/{account_id}/jettons/history"
 										r.args = args
@@ -2510,6 +2537,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 									case "GET":
 										// Leaf: GetAccountJettonHistoryByID
 										r.name = "GetAccountJettonHistoryByID"
+										r.summary = ""
 										r.operationID = "getAccountJettonHistoryByID"
 										r.pathPattern = "/v2/accounts/{account_id}/jettons/{jetton_id}/history"
 										r.args = args
@@ -2532,6 +2560,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 							switch method {
 							case "GET":
 								r.name = "GetAccountNftItems"
+								r.summary = ""
 								r.operationID = "getAccountNftItems"
 								r.pathPattern = "/v2/accounts/{account_id}/nfts"
 								r.args = args
@@ -2554,6 +2583,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 								case "GET":
 									// Leaf: GetAccountNftHistory
 									r.name = "GetAccountNftHistory"
+									r.summary = ""
 									r.operationID = "getAccountNftHistory"
 									r.pathPattern = "/v2/accounts/{account_id}/nfts/history"
 									r.args = args
@@ -2576,6 +2606,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 							case "GET":
 								// Leaf: GetAccountPublicKey
 								r.name = "GetAccountPublicKey"
+								r.summary = ""
 								r.operationID = "getAccountPublicKey"
 								r.pathPattern = "/v2/accounts/{account_id}/publickey"
 								r.args = args
@@ -2597,6 +2628,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 							case "POST":
 								// Leaf: ReindexAccount
 								r.name = "ReindexAccount"
+								r.summary = ""
 								r.operationID = "reindexAccount"
 								r.pathPattern = "/v2/accounts/{account_id}/reindex"
 								r.args = args
@@ -2618,6 +2650,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 							case "GET":
 								// Leaf: GetAccountSubscriptions
 								r.name = "GetAccountSubscriptions"
+								r.summary = ""
 								r.operationID = "getAccountSubscriptions"
 								r.pathPattern = "/v2/accounts/{account_id}/subscriptions"
 								r.args = args
@@ -2639,6 +2672,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 							case "GET":
 								// Leaf: GetAccountTraces
 								r.name = "GetAccountTraces"
+								r.summary = ""
 								r.operationID = "getAccountTraces"
 								r.pathPattern = "/v2/accounts/{account_id}/traces"
 								r.args = args
@@ -2681,6 +2715,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 						switch method {
 						case "GET":
 							r.name = "GetBlockchainRawAccount"
+							r.summary = ""
 							r.operationID = "getBlockchainRawAccount"
 							r.pathPattern = "/v2/blockchain/accounts/{account_id}"
 							r.args = args
@@ -2714,6 +2749,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 								case "GET":
 									// Leaf: BlockchainAccountInspect
 									r.name = "BlockchainAccountInspect"
+									r.summary = ""
 									r.operationID = "blockchainAccountInspect"
 									r.pathPattern = "/v2/blockchain/accounts/{account_id}/inspect"
 									r.args = args
@@ -2740,6 +2776,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 								case "GET":
 									// Leaf: ExecGetMethodForBlockchainAccount
 									r.name = "ExecGetMethodForBlockchainAccount"
+									r.summary = ""
 									r.operationID = "execGetMethodForBlockchainAccount"
 									r.pathPattern = "/v2/blockchain/accounts/{account_id}/methods/{method_name}"
 									r.args = args
@@ -2761,6 +2798,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 								case "GET":
 									// Leaf: GetBlockchainAccountTransactions
 									r.name = "GetBlockchainAccountTransactions"
+									r.summary = ""
 									r.operationID = "getBlockchainAccountTransactions"
 									r.pathPattern = "/v2/blockchain/accounts/{account_id}/transactions"
 									r.args = args
@@ -2792,6 +2830,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 						switch method {
 						case "GET":
 							r.name = "GetBlockchainBlock"
+							r.summary = ""
 							r.operationID = "getBlockchainBlock"
 							r.pathPattern = "/v2/blockchain/blocks/{block_id}"
 							r.args = args
@@ -2814,6 +2853,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 							case "GET":
 								// Leaf: GetBlockchainBlockTransactions
 								r.name = "GetBlockchainBlockTransactions"
+								r.summary = ""
 								r.operationID = "getBlockchainBlockTransactions"
 								r.pathPattern = "/v2/blockchain/blocks/{block_id}/transactions"
 								r.args = args
@@ -2836,6 +2876,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 						case "GET":
 							// Leaf: GetBlockchainConfig
 							r.name = "GetBlockchainConfig"
+							r.summary = ""
 							r.operationID = "getBlockchainConfig"
 							r.pathPattern = "/v2/blockchain/config"
 							r.args = args
@@ -2868,6 +2909,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 							case "GET":
 								// Leaf: GetBlockchainMasterchainHead
 								r.name = "GetBlockchainMasterchainHead"
+								r.summary = ""
 								r.operationID = "getBlockchainMasterchainHead"
 								r.pathPattern = "/v2/blockchain/masterchain-head"
 								r.args = args
@@ -2888,6 +2930,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 							switch method {
 							case "POST":
 								r.name = "SendBlockchainMessage"
+								r.summary = ""
 								r.operationID = "sendBlockchainMessage"
 								r.pathPattern = "/v2/blockchain/message"
 								r.args = args
@@ -2930,6 +2973,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 									case "GET":
 										// Leaf: GetBlockchainTransactionByMessageHash
 										r.name = "GetBlockchainTransactionByMessageHash"
+										r.summary = ""
 										r.operationID = "getBlockchainTransactionByMessageHash"
 										r.pathPattern = "/v2/blockchain/messages/{msg_id}/transaction"
 										r.args = args
@@ -2959,6 +3003,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 						case "GET":
 							// Leaf: GetBlockchainTransaction
 							r.name = "GetBlockchainTransaction"
+							r.summary = ""
 							r.operationID = "getBlockchainTransaction"
 							r.pathPattern = "/v2/blockchain/transactions/{transaction_id}"
 							r.args = args
@@ -2980,6 +3025,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 						case "GET":
 							// Leaf: GetBlockchainValidators
 							r.name = "GetBlockchainValidators"
+							r.summary = ""
 							r.operationID = "getBlockchainValidators"
 							r.pathPattern = "/v2/blockchain/validators"
 							r.args = args
@@ -3013,6 +3059,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 						case "GET":
 							// Leaf: GetAllAuctions
 							r.name = "GetAllAuctions"
+							r.summary = ""
 							r.operationID = "getAllAuctions"
 							r.pathPattern = "/v2/dns/auctions"
 							r.args = args
@@ -3036,6 +3083,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 					switch method {
 					case "GET":
 						r.name = "GetDnsInfo"
+						r.summary = ""
 						r.operationID = "getDnsInfo"
 						r.pathPattern = "/v2/dns/{domain_name}"
 						r.args = args
@@ -3069,6 +3117,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 							case "GET":
 								// Leaf: GetDomainBids
 								r.name = "GetDomainBids"
+								r.summary = ""
 								r.operationID = "getDomainBids"
 								r.pathPattern = "/v2/dns/{domain_name}/bids"
 								r.args = args
@@ -3090,6 +3139,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 							case "GET":
 								// Leaf: DnsResolve
 								r.name = "DnsResolve"
+								r.summary = ""
 								r.operationID = "dnsResolve"
 								r.pathPattern = "/v2/dns/{domain_name}/resolve"
 								r.args = args
@@ -3124,6 +3174,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 						case "POST":
 							// Leaf: EmulateMessageToEvent
 							r.name = "EmulateMessageToEvent"
+							r.summary = ""
 							r.operationID = "emulateMessageToEvent"
 							r.pathPattern = "/v2/events/emulate"
 							r.args = args
@@ -3147,6 +3198,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 					switch method {
 					case "GET":
 						r.name = "GetEvent"
+						r.summary = ""
 						r.operationID = "getEvent"
 						r.pathPattern = "/v2/events/{event_id}"
 						r.args = args
@@ -3169,6 +3221,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 						case "GET":
 							// Leaf: GetJettonsEvents
 							r.name = "GetJettonsEvents"
+							r.summary = ""
 							r.operationID = "getJettonsEvents"
 							r.pathPattern = "/v2/events/{event_id}/jettons"
 							r.args = args
@@ -3190,6 +3243,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 					switch method {
 					case "GET":
 						r.name = "GetJettons"
+						r.summary = ""
 						r.operationID = "getJettons"
 						r.pathPattern = "/v2/jettons"
 						r.args = args
@@ -3220,6 +3274,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 						switch method {
 						case "GET":
 							r.name = "GetJettonInfo"
+							r.summary = ""
 							r.operationID = "getJettonInfo"
 							r.pathPattern = "/v2/jettons/{account_id}"
 							r.args = args
@@ -3242,6 +3297,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 							case "GET":
 								// Leaf: GetJettonHolders
 								r.name = "GetJettonHolders"
+								r.summary = ""
 								r.operationID = "getJettonHolders"
 								r.pathPattern = "/v2/jettons/{account_id}/holders"
 								r.args = args
@@ -3303,6 +3359,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 								case "GET":
 									// Leaf: GetRawAccountState
 									r.name = "GetRawAccountState"
+									r.summary = ""
 									r.operationID = "getRawAccountState"
 									r.pathPattern = "/v2/liteserver/get_account_state/{account_id}"
 									r.args = args
@@ -3329,6 +3386,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 								case "GET":
 									// Leaf: GetAllRawShardsInfo
 									r.name = "GetAllRawShardsInfo"
+									r.summary = ""
 									r.operationID = "getAllRawShardsInfo"
 									r.pathPattern = "/v2/liteserver/get_all_shards_info/{block_id}"
 									r.args = args
@@ -3367,6 +3425,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 								case "GET":
 									// Leaf: GetRawBlockchainBlock
 									r.name = "GetRawBlockchainBlock"
+									r.summary = ""
 									r.operationID = "getRawBlockchainBlock"
 									r.pathPattern = "/v2/liteserver/get_block/{block_id}"
 									r.args = args
@@ -3404,6 +3463,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 									case "GET":
 										// Leaf: GetRawBlockchainBlockHeader
 										r.name = "GetRawBlockchainBlockHeader"
+										r.summary = ""
 										r.operationID = "getRawBlockchainBlockHeader"
 										r.pathPattern = "/v2/liteserver/get_block_header/{block_id}"
 										r.args = args
@@ -3425,6 +3485,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 									case "GET":
 										// Leaf: GetRawBlockProof
 										r.name = "GetRawBlockProof"
+										r.summary = ""
 										r.operationID = "getRawBlockProof"
 										r.pathPattern = "/v2/liteserver/get_block_proof"
 										r.args = args
@@ -3453,6 +3514,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 							case "GET":
 								// Leaf: GetRawConfig
 								r.name = "GetRawConfig"
+								r.summary = ""
 								r.operationID = "getRawConfig"
 								r.pathPattern = "/v2/liteserver/get_config_all/{block_id}"
 								r.args = args
@@ -3473,6 +3535,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 							switch method {
 							case "GET":
 								r.name = "GetRawMasterchainInfo"
+								r.summary = ""
 								r.operationID = "getRawMasterchainInfo"
 								r.pathPattern = "/v2/liteserver/get_masterchain_info"
 								r.args = args
@@ -3495,6 +3558,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 								case "GET":
 									// Leaf: GetRawMasterchainInfoExt
 									r.name = "GetRawMasterchainInfoExt"
+									r.summary = ""
 									r.operationID = "getRawMasterchainInfoExt"
 									r.pathPattern = "/v2/liteserver/get_masterchain_info_ext"
 									r.args = args
@@ -3544,6 +3608,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 									case "GET":
 										// Leaf: GetRawShardBlockProof
 										r.name = "GetRawShardBlockProof"
+										r.summary = ""
 										r.operationID = "getRawShardBlockProof"
 										r.pathPattern = "/v2/liteserver/get_shard_block_proof/{block_id}"
 										r.args = args
@@ -3570,6 +3635,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 									case "GET":
 										// Leaf: GetRawShardInfo
 										r.name = "GetRawShardInfo"
+										r.summary = ""
 										r.operationID = "getRawShardInfo"
 										r.pathPattern = "/v2/liteserver/get_shard_info/{block_id}"
 										r.args = args
@@ -3597,6 +3663,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 								case "GET":
 									// Leaf: GetRawBlockchainBlockState
 									r.name = "GetRawBlockchainBlockState"
+									r.summary = ""
 									r.operationID = "getRawBlockchainBlockState"
 									r.pathPattern = "/v2/liteserver/get_state/{block_id}"
 									r.args = args
@@ -3630,6 +3697,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 								case "GET":
 									// Leaf: GetRawTime
 									r.name = "GetRawTime"
+									r.summary = ""
 									r.operationID = "getRawTime"
 									r.pathPattern = "/v2/liteserver/get_time"
 									r.args = args
@@ -3656,6 +3724,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 								case "GET":
 									// Leaf: GetRawTransactions
 									r.name = "GetRawTransactions"
+									r.summary = ""
 									r.operationID = "getRawTransactions"
 									r.pathPattern = "/v2/liteserver/get_transactions/{account_id}"
 									r.args = args
@@ -3684,6 +3753,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 						case "GET":
 							// Leaf: GetRawListBlockTransactions
 							r.name = "GetRawListBlockTransactions"
+							r.summary = ""
 							r.operationID = "getRawListBlockTransactions"
 							r.pathPattern = "/v2/liteserver/list_block_transactions/{block_id}"
 							r.args = args
@@ -3705,6 +3775,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 						case "POST":
 							// Leaf: SendRawMessage
 							r.name = "SendRawMessage"
+							r.summary = ""
 							r.operationID = "sendRawMessage"
 							r.pathPattern = "/v2/liteserver/send_message"
 							r.args = args
@@ -3738,6 +3809,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 						case "POST":
 							// Leaf: GetNftItemsByAddresses
 							r.name = "GetNftItemsByAddresses"
+							r.summary = ""
 							r.operationID = "getNftItemsByAddresses"
 							r.pathPattern = "/v2/nfts/_bulk"
 							r.args = args
@@ -3758,6 +3830,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 						switch method {
 						case "GET":
 							r.name = "GetNftCollections"
+							r.summary = ""
 							r.operationID = "getNftCollections"
 							r.pathPattern = "/v2/nfts/collections"
 							r.args = args
@@ -3788,6 +3861,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 							switch method {
 							case "GET":
 								r.name = "GetNftCollection"
+								r.summary = ""
 								r.operationID = "getNftCollection"
 								r.pathPattern = "/v2/nfts/collections/{account_id}"
 								r.args = args
@@ -3810,6 +3884,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 								case "GET":
 									// Leaf: GetItemsFromCollection
 									r.name = "GetItemsFromCollection"
+									r.summary = ""
 									r.operationID = "getItemsFromCollection"
 									r.pathPattern = "/v2/nfts/collections/{account_id}/items"
 									r.args = args
@@ -3835,6 +3910,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 					switch method {
 					case "GET":
 						r.name = "GetNftItemByAddress"
+						r.summary = ""
 						r.operationID = "getNftItemByAddress"
 						r.pathPattern = "/v2/nfts/{account_id}"
 						r.args = args
@@ -3857,6 +3933,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 						case "GET":
 							// Leaf: GetNftHistoryByID
 							r.name = "GetNftHistoryByID"
+							r.summary = ""
 							r.operationID = "getNftHistoryByID"
 							r.pathPattern = "/v2/nfts/{account_id}/history"
 							r.args = args
@@ -3899,6 +3976,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 						case "GET":
 							// Leaf: GetWalletsByPublicKey
 							r.name = "GetWalletsByPublicKey"
+							r.summary = ""
 							r.operationID = "getWalletsByPublicKey"
 							r.pathPattern = "/v2/pubkeys/{public_key}/wallets"
 							r.args = args
@@ -3920,6 +3998,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 					switch method {
 					case "GET":
 						r.name = "GetRates"
+						r.summary = ""
 						r.operationID = "getRates"
 						r.pathPattern = "/v2/rates"
 						r.args = args
@@ -3942,6 +4021,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 						case "GET":
 							// Leaf: GetChartRates
 							r.name = "GetChartRates"
+							r.summary = ""
 							r.operationID = "getChartRates"
 							r.pathPattern = "/v2/rates/chart"
 							r.args = args
@@ -4006,6 +4086,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 								case "GET":
 									// Leaf: GetAccountNominatorsPools
 									r.name = "GetAccountNominatorsPools"
+									r.summary = ""
 									r.operationID = "getAccountNominatorsPools"
 									r.pathPattern = "/v2/staking/nominator/{account_id}/pools"
 									r.args = args
@@ -4047,6 +4128,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 								switch method {
 								case "GET":
 									r.name = "GetStakingPoolInfo"
+									r.summary = ""
 									r.operationID = "getStakingPoolInfo"
 									r.pathPattern = "/v2/staking/pool/{account_id}"
 									r.args = args
@@ -4069,6 +4151,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 									case "GET":
 										// Leaf: GetStakingPoolHistory
 										r.name = "GetStakingPoolHistory"
+										r.summary = ""
 										r.operationID = "getStakingPoolHistory"
 										r.pathPattern = "/v2/staking/pool/{account_id}/history"
 										r.args = args
@@ -4091,6 +4174,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 								case "GET":
 									// Leaf: GetStakingPools
 									r.name = "GetStakingPools"
+									r.summary = ""
 									r.operationID = "getStakingPools"
 									r.pathPattern = "/v2/staking/pools"
 									r.args = args
@@ -4114,6 +4198,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 						case "GET":
 							// Leaf: GetStorageProviders
 							r.name = "GetStorageProviders"
+							r.summary = ""
 							r.operationID = "getStorageProviders"
 							r.pathPattern = "/v2/storage/providers"
 							r.args = args
@@ -4158,6 +4243,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 							case "GET":
 								// Leaf: GetTonConnectPayload
 								r.name = "GetTonConnectPayload"
+								r.summary = ""
 								r.operationID = "getTonConnectPayload"
 								r.pathPattern = "/v2/tonconnect/payload"
 								r.args = args
@@ -4179,6 +4265,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 							case "POST":
 								// Leaf: GetAccountInfoByStateInit
 								r.name = "GetAccountInfoByStateInit"
+								r.summary = ""
 								r.operationID = "getAccountInfoByStateInit"
 								r.pathPattern = "/v2/tonconnect/stateinit"
 								r.args = args
@@ -4212,6 +4299,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 							case "POST":
 								// Leaf: EmulateMessageToTrace
 								r.name = "EmulateMessageToTrace"
+								r.summary = ""
 								r.operationID = "emulateMessageToTrace"
 								r.pathPattern = "/v2/traces/emulate"
 								r.args = args
@@ -4232,6 +4320,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 						case "GET":
 							// Leaf: GetTrace
 							r.name = "GetTrace"
+							r.summary = ""
 							r.operationID = "getTrace"
 							r.pathPattern = "/v2/traces/{trace_id}"
 							r.args = args
@@ -4265,6 +4354,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 						case "POST":
 							// Leaf: TonConnectProof
 							r.name = "TonConnectProof"
+							r.summary = ""
 							r.operationID = "tonConnectProof"
 							r.pathPattern = "/v2/wallet/auth/proof"
 							r.args = args
@@ -4286,6 +4376,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 						case "GET":
 							// Leaf: GetWalletBackup
 							r.name = "GetWalletBackup"
+							r.summary = ""
 							r.operationID = "getWalletBackup"
 							r.pathPattern = "/v2/wallet/backup"
 							r.args = args
@@ -4294,6 +4385,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 						case "PUT":
 							// Leaf: SetWalletBackup
 							r.name = "SetWalletBackup"
+							r.summary = ""
 							r.operationID = "setWalletBackup"
 							r.pathPattern = "/v2/wallet/backup"
 							r.args = args
@@ -4315,6 +4407,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 						case "POST":
 							// Leaf: EmulateMessageToWallet
 							r.name = "EmulateMessageToWallet"
+							r.summary = ""
 							r.operationID = "emulateMessageToWallet"
 							r.pathPattern = "/v2/wallet/emulate"
 							r.args = args
@@ -4350,6 +4443,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 						case "GET":
 							// Leaf: GetAccountSeqno
 							r.name = "GetAccountSeqno"
+							r.summary = ""
 							r.operationID = "getAccountSeqno"
 							r.pathPattern = "/v2/wallet/{account_id}/seqno"
 							r.args = args
