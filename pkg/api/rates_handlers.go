@@ -10,16 +10,8 @@ import (
 	"time"
 
 	"github.com/tonkeeper/opentonapi/pkg/oas"
-	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/ton"
 )
-
-type TokenRates struct {
-	Prices  map[string]float64 `json:"prices"`
-	Diff24h map[string]string  `json:"diff_24h"`
-	Diff7d  map[string]string  `json:"diff_7d"`
-	Diff30d map[string]string  `json:"diff_30d"`
-}
 
 func (h *Handler) GetChartRates(ctx context.Context, params oas.GetChartRatesParams) (*oas.GetChartRatesOK, error) {
 	var (
@@ -29,7 +21,7 @@ func (h *Handler) GetChartRates(ctx context.Context, params oas.GetChartRatesPar
 	if strings.ToUpper(params.Token) == "TON" {
 		token = "TON"
 	} else {
-		accountID, err := tongo.ParseAccountID(params.Token)
+		accountID, err := ton.ParseAccountID(params.Token)
 		if err != nil {
 			return nil, toError(http.StatusBadRequest, err)
 		}
@@ -97,7 +89,7 @@ func (h *Handler) GetRates(ctx context.Context, params oas.GetRatesParams) (*oas
 		return nil, toError(http.StatusInternalServerError, err)
 	}
 
-	ratesRes := make(map[string]TokenRates)
+	ratesRes := make(oas.TokenRates)
 	for _, token := range convertedTokens {
 		for _, currency := range currencies {
 			if ratesRes, err = convertRates(ratesRes, token, currency, todayRates, yesterdayRates, weekRates, monthRates); err != nil {
@@ -106,7 +98,7 @@ func (h *Handler) GetRates(ctx context.Context, params oas.GetRatesParams) (*oas
 		}
 	}
 	if human { // temporary kludge for keeper
-		temp := make(map[string]TokenRates, len(ratesRes))
+		temp := make(oas.TokenRates, len(ratesRes))
 		for k, v := range ratesRes {
 			if len(k) > 48 {
 				k = ton.MustParseAccountID(k).ToHuman(true, false)
@@ -115,12 +107,8 @@ func (h *Handler) GetRates(ctx context.Context, params oas.GetRatesParams) (*oas
 		}
 		ratesRes = temp
 	}
-	bytesRatesRes, err := json.Marshal(ratesRes)
-	if err != nil {
-		return nil, toError(http.StatusInternalServerError, err)
-	}
 
-	return &oas.GetRatesOK{Rates: bytesRatesRes}, nil
+	return &oas.GetRatesOK{Rates: ratesRes}, nil
 }
 
 func calculateConvertedPrice(rates map[string]float64, currency, token string) (float64, error) {
@@ -163,23 +151,23 @@ func (h *Handler) getRates() (map[string]float64, map[string]float64, map[string
 	return todayRates, yesterdayRates, weekRates, monthRates, nil
 }
 
-func convertRates(rates map[string]TokenRates, token, currency string, todayRates, yesterdayRates, weekRates, monthRates map[string]float64) (map[string]TokenRates, error) {
+func convertRates(rates oas.TokenRates, token, currency string, todayRates, yesterdayRates, weekRates, monthRates map[string]float64) (oas.TokenRates, error) {
 	todayCurrencyPrice, ok := todayRates[currency]
 	if !ok {
 		return nil, toError(http.StatusBadRequest, fmt.Errorf("invalid currency: %v", currency))
 	}
 	rate, ok := rates[token]
 	if !ok {
-		rate = TokenRates{Prices: map[string]float64{}, Diff24h: map[string]string{}, Diff7d: map[string]string{}, Diff30d: map[string]string{}}
+		rate = oas.TokenRatesItem{Prices: oas.NewOptTokenRatesItemPrices(oas.TokenRatesItemPrices{}), Diff24h: oas.NewOptTokenRatesItemDiff24h(oas.TokenRatesItemDiff24h{}), Diff7d: oas.NewOptTokenRatesItemDiff7d(oas.TokenRatesItemDiff7d{}), Diff30d: oas.NewOptTokenRatesItemDiff30d(oas.TokenRatesItemDiff30d{})}
 		rates[token] = rate
 	}
 	todayTokenPrice, ok := todayRates[token]
 	if !ok {
-		rates[token] = TokenRates{Prices: map[string]float64{}, Diff24h: map[string]string{}, Diff7d: map[string]string{}, Diff30d: map[string]string{}}
+		rate = oas.TokenRatesItem{Prices: oas.NewOptTokenRatesItemPrices(oas.TokenRatesItemPrices{}), Diff24h: oas.NewOptTokenRatesItemDiff24h(oas.TokenRatesItemDiff24h{}), Diff7d: oas.NewOptTokenRatesItemDiff7d(oas.TokenRatesItemDiff7d{}), Diff30d: oas.NewOptTokenRatesItemDiff30d(oas.TokenRatesItemDiff30d{})}
 		return rates, nil
 	}
 	convertedTodayPrice := todayTokenPrice * (1 / todayCurrencyPrice)
-	rate.Prices[currency] = convertedTodayPrice
+	rate.Prices.Value[currency] = convertedTodayPrice
 
 	var diff24h, diff7w, diff1m float64
 	if convertedYesterdayPrice, _ := calculateConvertedPrice(yesterdayRates, currency, token); convertedYesterdayPrice != 0 {
@@ -198,29 +186,29 @@ func convertRates(rates map[string]TokenRates, token, currency string, todayRate
 
 	switch true {
 	case diff24h < 0:
-		rate.Diff24h[currency] = fmt.Sprintf("%.2f%%", diff24h)
+		rate.Diff24h.Value[currency] = fmt.Sprintf("%.2f%%", diff24h)
 	case diff24h > 0:
-		rate.Diff24h[currency] = fmt.Sprintf("+%.2f%%", diff24h)
+		rate.Diff24h.Value[currency] = fmt.Sprintf("+%.2f%%", diff24h)
 	default:
-		rate.Diff24h[currency] = "0"
+		rate.Diff24h.Value[currency] = "0"
 	}
 
 	switch true {
 	case diff7w < 0:
-		rate.Diff7d[currency] = fmt.Sprintf("%.2f%%", diff7w)
+		rate.Diff7d.Value[currency] = fmt.Sprintf("%.2f%%", diff7w)
 	case diff7w > 0:
-		rate.Diff7d[currency] = fmt.Sprintf("+%.2f%%", diff7w)
+		rate.Diff7d.Value[currency] = fmt.Sprintf("+%.2f%%", diff7w)
 	default:
-		rate.Diff7d[currency] = "0"
+		rate.Diff7d.Value[currency] = "0"
 	}
 
 	switch true {
 	case diff1m < 0:
-		rate.Diff30d[currency] = fmt.Sprintf("%.2f%%", diff1m)
+		rate.Diff30d.Value[currency] = fmt.Sprintf("%.2f%%", diff1m)
 	case diff1m > 0:
-		rate.Diff30d[currency] = fmt.Sprintf("+%.2f%%", diff1m)
+		rate.Diff30d.Value[currency] = fmt.Sprintf("+%.2f%%", diff1m)
 	default:
-		rate.Diff30d[currency] = "0"
+		rate.Diff30d.Value[currency] = "0"
 	}
 
 	return rates, nil

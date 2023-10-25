@@ -1296,8 +1296,7 @@ paths:
                   - rates
                 properties:
                   rates:
-                    additionalProperties: true
-                    example: { }
+                    $ref: '#/components/schemas/TokenRates'
         'default':
           $ref: '#/components/responses/Error'
   /v2/rates/chart:
@@ -3287,8 +3286,7 @@ components:
           type: string
           example: 597968399
         price:
-          additionalProperties: true
-          example: { }
+          $ref: '#/components/schemas/TokenRates'
         wallet_address:
           $ref: '#/components/schemas/AccountAddress'
         jetton:
@@ -4733,7 +4731,36 @@ components:
         - whales
         - tf
         - liquidTF
-  
+    TokenRates:
+      type: object
+      additionalProperties:
+        type: object
+        properties:
+          prices:
+            type: object
+            additionalProperties:
+              type: number
+            example:
+              TON: 1.3710752873163712
+          diff_24h:
+            type: object
+            additionalProperties:
+              type: string
+            example:
+              TON: "-1.28%"
+          diff_7d:
+            type: object
+            additionalProperties:
+              type: string
+            example:
+              TON: "-2.74%"
+          diff_30d:
+            type: object
+            additionalProperties:
+              type: string
+            example:
+              TON: "-0.56%"
+                  
   responses:
     Error:
       description: Some error during request processing

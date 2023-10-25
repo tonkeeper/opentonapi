@@ -2,7 +2,6 @@ package api
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"math/big"
@@ -54,18 +53,15 @@ func (h *Handler) GetAccountJettonsBalances(ctx context.Context, params oas.GetA
 			Balance:       wallet.Balance.String(),
 			WalletAddress: convertAccountAddress(wallet.Address, h.addressBook),
 		}
-		rates := make(map[string]TokenRates)
+		rates := make(oas.TokenRates)
 		for _, currency := range currencies {
 			if rates, err = convertRates(rates, wallet.JettonAddress.ToRaw(), currency, todayRates, yesterdayRates, weekRates, monthRates); err != nil {
 				continue
 			}
 		}
 		price := rates[wallet.JettonAddress.ToRaw()]
-		if len(rates) > 0 && len(price.Prices) > 0 {
-			jettonBalance.Price, err = json.Marshal(price)
-			if err != nil {
-				return nil, toError(http.StatusInternalServerError, err)
-			}
+		if len(rates) > 0 && len(price.Prices.Value) > 0 {
+			jettonBalance.Price.SetTo(oas.TokenRates{})
 		}
 		meta, err := h.storage.GetJettonMasterMetadata(ctx, wallet.JettonAddress)
 		if err != nil && err.Error() == "not enough refs" {
