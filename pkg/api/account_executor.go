@@ -4,11 +4,12 @@ import (
 	"context"
 	"errors"
 
-	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/boc"
 	"github.com/tonkeeper/tongo/tlb"
 	"github.com/tonkeeper/tongo/tvm"
+
+	"github.com/tonkeeper/opentonapi/pkg/core"
 )
 
 type shardsAccountExecutor struct {
