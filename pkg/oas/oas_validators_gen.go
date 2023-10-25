@@ -1207,6 +1207,25 @@ func (s *GetNftItemsByAddressesReq) Validate() error {
 	return nil
 }
 
+func (s *GetRatesOK) Validate() error {
+	var failures []validate.FieldError
+	if err := func() error {
+		if err := s.Rates.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "rates",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
 func (s *GetRawBlockProofOK) Validate() error {
 	var failures []validate.FieldError
 	if err := func() error {
@@ -1513,6 +1532,24 @@ func (s *GetStorageProvidersOK) Validate() error {
 
 func (s *JettonBalance) Validate() error {
 	var failures []validate.FieldError
+	if err := func() error {
+		if value, ok := s.Price.Get(); ok {
+			if err := func() error {
+				if err := value.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "price",
+			Error: err,
+		})
+	}
 	if err := func() error {
 		if err := s.Jetton.Validate(); err != nil {
 			return err
@@ -2368,6 +2405,76 @@ func (s *Subscriptions) Validate() error {
 			Error: err,
 		})
 	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s TokenRates) Validate() error {
+	var failures []validate.FieldError
+	for key, elem := range s {
+		if err := func() error {
+			if err := elem.Validate(); err != nil {
+				return err
+			}
+			return nil
+		}(); err != nil {
+			failures = append(failures, validate.FieldError{
+				Name:  key,
+				Error: err,
+			})
+		}
+	}
+
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s *TokenRatesItem) Validate() error {
+	var failures []validate.FieldError
+	if err := func() error {
+		if value, ok := s.Prices.Get(); ok {
+			if err := func() error {
+				if err := value.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "prices",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s TokenRatesItemPrices) Validate() error {
+	var failures []validate.FieldError
+	for key, elem := range s {
+		if err := func() error {
+			if err := (validate.Float{}).Validate(float64(elem)); err != nil {
+				return errors.Wrap(err, "float")
+			}
+			return nil
+		}(); err != nil {
+			failures = append(failures, validate.FieldError{
+				Name:  key,
+				Error: err,
+			})
+		}
+	}
+
 	if len(failures) > 0 {
 		return &validate.Error{Fields: failures}
 	}

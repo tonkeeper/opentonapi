@@ -3078,16 +3078,16 @@ func (s *GetNftItemsByAddressesReq) SetAccountIds(val []string) {
 }
 
 type GetRatesOK struct {
-	Rates jx.Raw `json:"rates"`
+	Rates TokenRates `json:"rates"`
 }
 
 // GetRates returns the value of Rates.
-func (s *GetRatesOK) GetRates() jx.Raw {
+func (s *GetRatesOK) GetRates() TokenRates {
 	return s.Rates
 }
 
 // SetRates sets the value of Rates.
-func (s *GetRatesOK) SetRates(val jx.Raw) {
+func (s *GetRatesOK) SetRates(val TokenRates) {
 	s.Rates = val
 }
 
@@ -4126,7 +4126,7 @@ func (s *InitStateRaw) SetFileHash(val string) {
 // Ref: #/components/schemas/JettonBalance
 type JettonBalance struct {
 	Balance       string         `json:"balance"`
-	Price         jx.Raw         `json:"price"`
+	Price         OptTokenRates  `json:"price"`
 	WalletAddress AccountAddress `json:"wallet_address"`
 	Jetton        JettonPreview  `json:"jetton"`
 }
@@ -4137,7 +4137,7 @@ func (s *JettonBalance) GetBalance() string {
 }
 
 // GetPrice returns the value of Price.
-func (s *JettonBalance) GetPrice() jx.Raw {
+func (s *JettonBalance) GetPrice() OptTokenRates {
 	return s.Price
 }
 
@@ -4157,7 +4157,7 @@ func (s *JettonBalance) SetBalance(val string) {
 }
 
 // SetPrice sets the value of Price.
-func (s *JettonBalance) SetPrice(val jx.Raw) {
+func (s *JettonBalance) SetPrice(val OptTokenRates) {
 	s.Price = val
 }
 
@@ -7460,6 +7460,236 @@ func (o OptSubscriptionAction) Or(d SubscriptionAction) SubscriptionAction {
 	return d
 }
 
+// NewOptTokenRates returns new OptTokenRates with value set to v.
+func NewOptTokenRates(v TokenRates) OptTokenRates {
+	return OptTokenRates{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptTokenRates is optional TokenRates.
+type OptTokenRates struct {
+	Value TokenRates
+	Set   bool
+}
+
+// IsSet returns true if OptTokenRates was set.
+func (o OptTokenRates) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptTokenRates) Reset() {
+	var v TokenRates
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptTokenRates) SetTo(v TokenRates) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptTokenRates) Get() (v TokenRates, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptTokenRates) Or(d TokenRates) TokenRates {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptTokenRatesItemDiff24h returns new OptTokenRatesItemDiff24h with value set to v.
+func NewOptTokenRatesItemDiff24h(v TokenRatesItemDiff24h) OptTokenRatesItemDiff24h {
+	return OptTokenRatesItemDiff24h{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptTokenRatesItemDiff24h is optional TokenRatesItemDiff24h.
+type OptTokenRatesItemDiff24h struct {
+	Value TokenRatesItemDiff24h
+	Set   bool
+}
+
+// IsSet returns true if OptTokenRatesItemDiff24h was set.
+func (o OptTokenRatesItemDiff24h) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptTokenRatesItemDiff24h) Reset() {
+	var v TokenRatesItemDiff24h
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptTokenRatesItemDiff24h) SetTo(v TokenRatesItemDiff24h) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptTokenRatesItemDiff24h) Get() (v TokenRatesItemDiff24h, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptTokenRatesItemDiff24h) Or(d TokenRatesItemDiff24h) TokenRatesItemDiff24h {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptTokenRatesItemDiff30d returns new OptTokenRatesItemDiff30d with value set to v.
+func NewOptTokenRatesItemDiff30d(v TokenRatesItemDiff30d) OptTokenRatesItemDiff30d {
+	return OptTokenRatesItemDiff30d{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptTokenRatesItemDiff30d is optional TokenRatesItemDiff30d.
+type OptTokenRatesItemDiff30d struct {
+	Value TokenRatesItemDiff30d
+	Set   bool
+}
+
+// IsSet returns true if OptTokenRatesItemDiff30d was set.
+func (o OptTokenRatesItemDiff30d) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptTokenRatesItemDiff30d) Reset() {
+	var v TokenRatesItemDiff30d
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptTokenRatesItemDiff30d) SetTo(v TokenRatesItemDiff30d) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptTokenRatesItemDiff30d) Get() (v TokenRatesItemDiff30d, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptTokenRatesItemDiff30d) Or(d TokenRatesItemDiff30d) TokenRatesItemDiff30d {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptTokenRatesItemDiff7d returns new OptTokenRatesItemDiff7d with value set to v.
+func NewOptTokenRatesItemDiff7d(v TokenRatesItemDiff7d) OptTokenRatesItemDiff7d {
+	return OptTokenRatesItemDiff7d{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptTokenRatesItemDiff7d is optional TokenRatesItemDiff7d.
+type OptTokenRatesItemDiff7d struct {
+	Value TokenRatesItemDiff7d
+	Set   bool
+}
+
+// IsSet returns true if OptTokenRatesItemDiff7d was set.
+func (o OptTokenRatesItemDiff7d) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptTokenRatesItemDiff7d) Reset() {
+	var v TokenRatesItemDiff7d
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptTokenRatesItemDiff7d) SetTo(v TokenRatesItemDiff7d) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptTokenRatesItemDiff7d) Get() (v TokenRatesItemDiff7d, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptTokenRatesItemDiff7d) Or(d TokenRatesItemDiff7d) TokenRatesItemDiff7d {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptTokenRatesItemPrices returns new OptTokenRatesItemPrices with value set to v.
+func NewOptTokenRatesItemPrices(v TokenRatesItemPrices) OptTokenRatesItemPrices {
+	return OptTokenRatesItemPrices{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptTokenRatesItemPrices is optional TokenRatesItemPrices.
+type OptTokenRatesItemPrices struct {
+	Value TokenRatesItemPrices
+	Set   bool
+}
+
+// IsSet returns true if OptTokenRatesItemPrices was set.
+func (o OptTokenRatesItemPrices) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptTokenRatesItemPrices) Reset() {
+	var v TokenRatesItemPrices
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptTokenRatesItemPrices) SetTo(v TokenRatesItemPrices) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptTokenRatesItemPrices) Get() (v TokenRatesItemPrices, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptTokenRatesItemPrices) Or(d TokenRatesItemPrices) TokenRatesItemPrices {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptTonTransferAction returns new OptTonTransferAction with value set to v.
 func NewOptTonTransferAction(v TonTransferAction) OptTonTransferAction {
 	return OptTonTransferAction{
@@ -8783,6 +9013,109 @@ func (s *Subscriptions) GetSubscriptions() []Subscription {
 // SetSubscriptions sets the value of Subscriptions.
 func (s *Subscriptions) SetSubscriptions(val []Subscription) {
 	s.Subscriptions = val
+}
+
+// Ref: #/components/schemas/TokenRates
+type TokenRates map[string]TokenRatesItem
+
+func (s *TokenRates) init() TokenRates {
+	m := *s
+	if m == nil {
+		m = map[string]TokenRatesItem{}
+		*s = m
+	}
+	return m
+}
+
+type TokenRatesItem struct {
+	Prices  OptTokenRatesItemPrices  `json:"prices"`
+	Diff24h OptTokenRatesItemDiff24h `json:"diff_24h"`
+	Diff7d  OptTokenRatesItemDiff7d  `json:"diff_7d"`
+	Diff30d OptTokenRatesItemDiff30d `json:"diff_30d"`
+}
+
+// GetPrices returns the value of Prices.
+func (s *TokenRatesItem) GetPrices() OptTokenRatesItemPrices {
+	return s.Prices
+}
+
+// GetDiff24h returns the value of Diff24h.
+func (s *TokenRatesItem) GetDiff24h() OptTokenRatesItemDiff24h {
+	return s.Diff24h
+}
+
+// GetDiff7d returns the value of Diff7d.
+func (s *TokenRatesItem) GetDiff7d() OptTokenRatesItemDiff7d {
+	return s.Diff7d
+}
+
+// GetDiff30d returns the value of Diff30d.
+func (s *TokenRatesItem) GetDiff30d() OptTokenRatesItemDiff30d {
+	return s.Diff30d
+}
+
+// SetPrices sets the value of Prices.
+func (s *TokenRatesItem) SetPrices(val OptTokenRatesItemPrices) {
+	s.Prices = val
+}
+
+// SetDiff24h sets the value of Diff24h.
+func (s *TokenRatesItem) SetDiff24h(val OptTokenRatesItemDiff24h) {
+	s.Diff24h = val
+}
+
+// SetDiff7d sets the value of Diff7d.
+func (s *TokenRatesItem) SetDiff7d(val OptTokenRatesItemDiff7d) {
+	s.Diff7d = val
+}
+
+// SetDiff30d sets the value of Diff30d.
+func (s *TokenRatesItem) SetDiff30d(val OptTokenRatesItemDiff30d) {
+	s.Diff30d = val
+}
+
+type TokenRatesItemDiff24h map[string]string
+
+func (s *TokenRatesItemDiff24h) init() TokenRatesItemDiff24h {
+	m := *s
+	if m == nil {
+		m = map[string]string{}
+		*s = m
+	}
+	return m
+}
+
+type TokenRatesItemDiff30d map[string]string
+
+func (s *TokenRatesItemDiff30d) init() TokenRatesItemDiff30d {
+	m := *s
+	if m == nil {
+		m = map[string]string{}
+		*s = m
+	}
+	return m
+}
+
+type TokenRatesItemDiff7d map[string]string
+
+func (s *TokenRatesItemDiff7d) init() TokenRatesItemDiff7d {
+	m := *s
+	if m == nil {
+		m = map[string]string{}
+		*s = m
+	}
+	return m
+}
+
+type TokenRatesItemPrices map[string]float64
+
+func (s *TokenRatesItemPrices) init() TokenRatesItemPrices {
+	m := *s
+	if m == nil {
+		m = map[string]float64{}
+		*s = m
+	}
+	return m
 }
 
 type TonConnectProofOK struct {

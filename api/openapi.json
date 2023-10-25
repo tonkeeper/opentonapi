@@ -1942,8 +1942,7 @@
       "$ref": "#/components/schemas/JettonPreview"
      },
      "price": {
-      "additionalProperties": true,
-      "example": {}
+      "$ref": "#/components/schemas/TokenRates"
      },
      "wallet_address": {
       "$ref": "#/components/schemas/AccountAddress"
@@ -3124,6 +3123,50 @@
     "required": [
      "subscriptions"
     ],
+    "type": "object"
+   },
+   "TokenRates": {
+    "additionalProperties": {
+     "properties": {
+      "diff_24h": {
+       "additionalProperties": {
+        "type": "string"
+       },
+       "example": {
+        "TON": "-1.28%"
+       },
+       "type": "object"
+      },
+      "diff_30d": {
+       "additionalProperties": {
+        "type": "string"
+       },
+       "example": {
+        "TON": "-0.56%"
+       },
+       "type": "object"
+      },
+      "diff_7d": {
+       "additionalProperties": {
+        "type": "string"
+       },
+       "example": {
+        "TON": "-2.74%"
+       },
+       "type": "object"
+      },
+      "prices": {
+       "additionalProperties": {
+        "type": "number"
+       },
+       "example": {
+        "TON": 1.3710752873163712
+       },
+       "type": "object"
+      }
+     },
+     "type": "object"
+    },
     "type": "object"
    },
    "TonTransferAction": {
@@ -6362,8 +6405,7 @@
         "schema": {
          "properties": {
           "rates": {
-           "additionalProperties": true,
-           "example": {}
+           "$ref": "#/components/schemas/TokenRates"
           }
          },
          "required": [

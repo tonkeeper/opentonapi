@@ -8342,10 +8342,8 @@ func (s *GetRatesOK) Encode(e *jx.Encoder) {
 // encodeFields encodes fields.
 func (s *GetRatesOK) encodeFields(e *jx.Encoder) {
 	{
-		if len(s.Rates) != 0 {
-			e.FieldStart("rates")
-			e.Raw(s.Rates)
-		}
+		e.FieldStart("rates")
+		s.Rates.Encode(e)
 	}
 }
 
@@ -8365,9 +8363,7 @@ func (s *GetRatesOK) Decode(d *jx.Decoder) error {
 		case "rates":
 			requiredBitSet[0] |= 1 << 0
 			if err := func() error {
-				v, err := d.RawAppend(nil)
-				s.Rates = jx.Raw(v)
-				if err != nil {
+				if err := s.Rates.Decode(d); err != nil {
 					return err
 				}
 				return nil
@@ -12181,9 +12177,9 @@ func (s *JettonBalance) encodeFields(e *jx.Encoder) {
 		e.Str(s.Balance)
 	}
 	{
-		if len(s.Price) != 0 {
+		if s.Price.Set {
 			e.FieldStart("price")
-			e.Raw(s.Price)
+			s.Price.Encode(e)
 		}
 	}
 	{
@@ -12226,9 +12222,8 @@ func (s *JettonBalance) Decode(d *jx.Decoder) error {
 			}
 		case "price":
 			if err := func() error {
-				v, err := d.RawAppend(nil)
-				s.Price = jx.Raw(v)
-				if err != nil {
+				s.Price.Reset()
+				if err := s.Price.Decode(d); err != nil {
 					return err
 				}
 				return nil
@@ -17631,6 +17626,176 @@ func (s *OptSubscriptionAction) UnmarshalJSON(data []byte) error {
 	return s.Decode(d)
 }
 
+// Encode encodes TokenRates as json.
+func (o OptTokenRates) Encode(e *jx.Encoder) {
+	if !o.Set {
+		return
+	}
+	o.Value.Encode(e)
+}
+
+// Decode decodes TokenRates from json.
+func (o *OptTokenRates) Decode(d *jx.Decoder) error {
+	if o == nil {
+		return errors.New("invalid: unable to decode OptTokenRates to nil")
+	}
+	o.Set = true
+	o.Value = make(TokenRates)
+	if err := o.Value.Decode(d); err != nil {
+		return err
+	}
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s OptTokenRates) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *OptTokenRates) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes TokenRatesItemDiff24h as json.
+func (o OptTokenRatesItemDiff24h) Encode(e *jx.Encoder) {
+	if !o.Set {
+		return
+	}
+	o.Value.Encode(e)
+}
+
+// Decode decodes TokenRatesItemDiff24h from json.
+func (o *OptTokenRatesItemDiff24h) Decode(d *jx.Decoder) error {
+	if o == nil {
+		return errors.New("invalid: unable to decode OptTokenRatesItemDiff24h to nil")
+	}
+	o.Set = true
+	o.Value = make(TokenRatesItemDiff24h)
+	if err := o.Value.Decode(d); err != nil {
+		return err
+	}
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s OptTokenRatesItemDiff24h) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *OptTokenRatesItemDiff24h) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes TokenRatesItemDiff30d as json.
+func (o OptTokenRatesItemDiff30d) Encode(e *jx.Encoder) {
+	if !o.Set {
+		return
+	}
+	o.Value.Encode(e)
+}
+
+// Decode decodes TokenRatesItemDiff30d from json.
+func (o *OptTokenRatesItemDiff30d) Decode(d *jx.Decoder) error {
+	if o == nil {
+		return errors.New("invalid: unable to decode OptTokenRatesItemDiff30d to nil")
+	}
+	o.Set = true
+	o.Value = make(TokenRatesItemDiff30d)
+	if err := o.Value.Decode(d); err != nil {
+		return err
+	}
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s OptTokenRatesItemDiff30d) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *OptTokenRatesItemDiff30d) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes TokenRatesItemDiff7d as json.
+func (o OptTokenRatesItemDiff7d) Encode(e *jx.Encoder) {
+	if !o.Set {
+		return
+	}
+	o.Value.Encode(e)
+}
+
+// Decode decodes TokenRatesItemDiff7d from json.
+func (o *OptTokenRatesItemDiff7d) Decode(d *jx.Decoder) error {
+	if o == nil {
+		return errors.New("invalid: unable to decode OptTokenRatesItemDiff7d to nil")
+	}
+	o.Set = true
+	o.Value = make(TokenRatesItemDiff7d)
+	if err := o.Value.Decode(d); err != nil {
+		return err
+	}
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s OptTokenRatesItemDiff7d) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *OptTokenRatesItemDiff7d) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes TokenRatesItemPrices as json.
+func (o OptTokenRatesItemPrices) Encode(e *jx.Encoder) {
+	if !o.Set {
+		return
+	}
+	o.Value.Encode(e)
+}
+
+// Decode decodes TokenRatesItemPrices from json.
+func (o *OptTokenRatesItemPrices) Decode(d *jx.Decoder) error {
+	if o == nil {
+		return errors.New("invalid: unable to decode OptTokenRatesItemPrices to nil")
+	}
+	o.Set = true
+	o.Value = make(TokenRatesItemPrices)
+	if err := o.Value.Decode(d); err != nil {
+		return err
+	}
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s OptTokenRatesItemPrices) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *OptTokenRatesItemPrices) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
 // Encode encodes TonTransferAction as json.
 func (o OptTonTransferAction) Encode(e *jx.Encoder) {
 	if !o.Set {
@@ -20501,6 +20666,398 @@ func (s *Subscriptions) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *Subscriptions) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s TokenRates) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields implements json.Marshaler.
+func (s TokenRates) encodeFields(e *jx.Encoder) {
+	for k, elem := range s {
+		e.FieldStart(k)
+
+		elem.Encode(e)
+	}
+}
+
+// Decode decodes TokenRates from json.
+func (s *TokenRates) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode TokenRates to nil")
+	}
+	m := s.init()
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		var elem TokenRatesItem
+		if err := func() error {
+			if err := elem.Decode(d); err != nil {
+				return err
+			}
+			return nil
+		}(); err != nil {
+			return errors.Wrapf(err, "decode field %q", k)
+		}
+		m[string(k)] = elem
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode TokenRates")
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s TokenRates) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *TokenRates) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *TokenRatesItem) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *TokenRatesItem) encodeFields(e *jx.Encoder) {
+	{
+		if s.Prices.Set {
+			e.FieldStart("prices")
+			s.Prices.Encode(e)
+		}
+	}
+	{
+		if s.Diff24h.Set {
+			e.FieldStart("diff_24h")
+			s.Diff24h.Encode(e)
+		}
+	}
+	{
+		if s.Diff7d.Set {
+			e.FieldStart("diff_7d")
+			s.Diff7d.Encode(e)
+		}
+	}
+	{
+		if s.Diff30d.Set {
+			e.FieldStart("diff_30d")
+			s.Diff30d.Encode(e)
+		}
+	}
+}
+
+var jsonFieldsNameOfTokenRatesItem = [4]string{
+	0: "prices",
+	1: "diff_24h",
+	2: "diff_7d",
+	3: "diff_30d",
+}
+
+// Decode decodes TokenRatesItem from json.
+func (s *TokenRatesItem) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode TokenRatesItem to nil")
+	}
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "prices":
+			if err := func() error {
+				s.Prices.Reset()
+				if err := s.Prices.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"prices\"")
+			}
+		case "diff_24h":
+			if err := func() error {
+				s.Diff24h.Reset()
+				if err := s.Diff24h.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"diff_24h\"")
+			}
+		case "diff_7d":
+			if err := func() error {
+				s.Diff7d.Reset()
+				if err := s.Diff7d.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"diff_7d\"")
+			}
+		case "diff_30d":
+			if err := func() error {
+				s.Diff30d.Reset()
+				if err := s.Diff30d.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"diff_30d\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode TokenRatesItem")
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *TokenRatesItem) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *TokenRatesItem) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s TokenRatesItemDiff24h) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields implements json.Marshaler.
+func (s TokenRatesItemDiff24h) encodeFields(e *jx.Encoder) {
+	for k, elem := range s {
+		e.FieldStart(k)
+
+		e.Str(elem)
+	}
+}
+
+// Decode decodes TokenRatesItemDiff24h from json.
+func (s *TokenRatesItemDiff24h) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode TokenRatesItemDiff24h to nil")
+	}
+	m := s.init()
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		var elem string
+		if err := func() error {
+			v, err := d.Str()
+			elem = string(v)
+			if err != nil {
+				return err
+			}
+			return nil
+		}(); err != nil {
+			return errors.Wrapf(err, "decode field %q", k)
+		}
+		m[string(k)] = elem
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode TokenRatesItemDiff24h")
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s TokenRatesItemDiff24h) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *TokenRatesItemDiff24h) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s TokenRatesItemDiff30d) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields implements json.Marshaler.
+func (s TokenRatesItemDiff30d) encodeFields(e *jx.Encoder) {
+	for k, elem := range s {
+		e.FieldStart(k)
+
+		e.Str(elem)
+	}
+}
+
+// Decode decodes TokenRatesItemDiff30d from json.
+func (s *TokenRatesItemDiff30d) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode TokenRatesItemDiff30d to nil")
+	}
+	m := s.init()
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		var elem string
+		if err := func() error {
+			v, err := d.Str()
+			elem = string(v)
+			if err != nil {
+				return err
+			}
+			return nil
+		}(); err != nil {
+			return errors.Wrapf(err, "decode field %q", k)
+		}
+		m[string(k)] = elem
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode TokenRatesItemDiff30d")
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s TokenRatesItemDiff30d) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *TokenRatesItemDiff30d) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s TokenRatesItemDiff7d) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields implements json.Marshaler.
+func (s TokenRatesItemDiff7d) encodeFields(e *jx.Encoder) {
+	for k, elem := range s {
+		e.FieldStart(k)
+
+		e.Str(elem)
+	}
+}
+
+// Decode decodes TokenRatesItemDiff7d from json.
+func (s *TokenRatesItemDiff7d) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode TokenRatesItemDiff7d to nil")
+	}
+	m := s.init()
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		var elem string
+		if err := func() error {
+			v, err := d.Str()
+			elem = string(v)
+			if err != nil {
+				return err
+			}
+			return nil
+		}(); err != nil {
+			return errors.Wrapf(err, "decode field %q", k)
+		}
+		m[string(k)] = elem
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode TokenRatesItemDiff7d")
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s TokenRatesItemDiff7d) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *TokenRatesItemDiff7d) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s TokenRatesItemPrices) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields implements json.Marshaler.
+func (s TokenRatesItemPrices) encodeFields(e *jx.Encoder) {
+	for k, elem := range s {
+		e.FieldStart(k)
+
+		e.Float64(elem)
+	}
+}
+
+// Decode decodes TokenRatesItemPrices from json.
+func (s *TokenRatesItemPrices) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode TokenRatesItemPrices to nil")
+	}
+	m := s.init()
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		var elem float64
+		if err := func() error {
+			v, err := d.Float64()
+			elem = float64(v)
+			if err != nil {
+				return err
+			}
+			return nil
+		}(); err != nil {
+			return errors.Wrapf(err, "decode field %q", k)
+		}
+		m[string(k)] = elem
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode TokenRatesItemPrices")
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s TokenRatesItemPrices) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *TokenRatesItemPrices) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
