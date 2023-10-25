@@ -581,7 +581,9 @@ func (h *Handler) convertAction(ctx context.Context, viewer *tongo.AccountID, a 
 			if err != nil {
 				return oas.Action{}, false, err
 			}
-			a.AuctionBid.Nft = &n[0]
+			if len(n) == 1 {
+				a.AuctionBid.Nft = &n[0]
+			}
 		}
 		if a.AuctionBid.Nft == nil {
 			return oas.Action{}, false, fmt.Errorf("nft is nil")

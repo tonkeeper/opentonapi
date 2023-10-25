@@ -3,6 +3,7 @@ package core
 import (
 	"context"
 
+	"github.com/shopspring/decimal"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
 )
@@ -25,6 +26,11 @@ type TraceAdditionalInfo struct {
 	NftSaleContract *NftSaleContract
 	// STONfiPool is set, if a transaction's account implements "get_pool_data" method and abi.StonfiPool interface.
 	STONfiPool *STONfiPool
+
+	// EmulatedTeleitemNFT is set, if this trace is a result of emulation.
+	// This field is required because when a new NFT is created during emulation,
+	// there is no way to get it from the blockchain, and we have to store it somewhere.
+	EmulatedTeleitemNFT *EmulatedTeleitemNFT
 }
 
 func (t *Trace) InProgress() bool {
@@ -41,6 +47,12 @@ func (t *Trace) countUncompleted() int {
 		c += st.countUncompleted()
 	}
 	return c
+}
+
+type EmulatedTeleitemNFT struct {
+	Index             decimal.Decimal
+	CollectionAddress *tongo.AccountID
+	Verified          bool
 }
 
 // NftSaleContract holds partial results of get_sale_data method.

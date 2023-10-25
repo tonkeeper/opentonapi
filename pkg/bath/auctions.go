@@ -1,6 +1,8 @@
 package bath
 
 import (
+	"fmt"
+
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
@@ -14,6 +16,7 @@ type AuctionBidBubble struct {
 	Bidder         tongo.AccountID
 	Auction        tongo.AccountID
 	PreviousBidder *tongo.AccountID //maybe don't requered
+	Username       string
 	Success        bool
 }
 
@@ -77,9 +80,11 @@ var TgAuctionV1InitialBidStraw = Straw[AuctionBidBubble]{
 	CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.TelemintDeployMsgOp)},
 	Builder: func(newAction *AuctionBidBubble, bubble *Bubble) error {
 		tx := bubble.Info.(BubbleTx)
+		body := tx.decodedBody.Value.(abi.TelemintDeployMsgBody)
 		newAction.Type = "tg"
 		newAction.Amount = tx.inputAmount
 		newAction.Bidder = tx.inputFrom.Address
+		newAction.Username = string(body.Msg.Username)
 		return nil
 	},
 	SingleChild: &Straw[AuctionBidBubble]{
@@ -87,8 +92,22 @@ var TgAuctionV1InitialBidStraw = Straw[AuctionBidBubble]{
 		Builder: func(newAction *AuctionBidBubble, bubble *Bubble) error {
 			tx := bubble.Info.(BubbleTx)
 			newAction.Success = tx.success
+
 			newAction.Auction = tx.account.Address
 			newAction.NftAddress = &tx.account.Address
+			if tx.additionalInfo.EmulatedTeleitemNFT != nil {
+				newAction.Nft = &core.NftItem{
+					Address:           tx.account.Address,
+					Index:             tx.additionalInfo.EmulatedTeleitemNFT.Index,
+					CollectionAddress: tx.additionalInfo.EmulatedTeleitemNFT.CollectionAddress,
+					Verified:          tx.additionalInfo.EmulatedTeleitemNFT.Verified,
+					Transferable:      false,
+					Metadata: map[string]interface{}{
+						"name":  newAction.Username,
+						"image": fmt.Sprintf("https://nft.fragment.com/username/%v.webp", newAction.Username),
+					},
+				}
+			}
 			return nil
 		},
 	},
