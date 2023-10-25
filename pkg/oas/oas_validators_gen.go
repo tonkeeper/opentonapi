@@ -1226,6 +1226,28 @@ func (s *GetRatesOK) Validate() error {
 	return nil
 }
 
+func (s GetRatesOKRates) Validate() error {
+	var failures []validate.FieldError
+	for key, elem := range s {
+		if err := func() error {
+			if err := elem.Validate(); err != nil {
+				return err
+			}
+			return nil
+		}(); err != nil {
+			failures = append(failures, validate.FieldError{
+				Name:  key,
+				Error: err,
+			})
+		}
+	}
+
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
 func (s *GetRawBlockProofOK) Validate() error {
 	var failures []validate.FieldError
 	if err := func() error {
@@ -2411,29 +2433,7 @@ func (s *Subscriptions) Validate() error {
 	return nil
 }
 
-func (s TokenRates) Validate() error {
-	var failures []validate.FieldError
-	for key, elem := range s {
-		if err := func() error {
-			if err := elem.Validate(); err != nil {
-				return err
-			}
-			return nil
-		}(); err != nil {
-			failures = append(failures, validate.FieldError{
-				Name:  key,
-				Error: err,
-			})
-		}
-	}
-
-	if len(failures) > 0 {
-		return &validate.Error{Fields: failures}
-	}
-	return nil
-}
-
-func (s *TokenRatesItem) Validate() error {
+func (s *TokenRates) Validate() error {
 	var failures []validate.FieldError
 	if err := func() error {
 		if value, ok := s.Prices.Get(); ok {
@@ -2459,7 +2459,7 @@ func (s *TokenRatesItem) Validate() error {
 	return nil
 }
 
-func (s TokenRatesItemPrices) Validate() error {
+func (s TokenRatesPrices) Validate() error {
 	var failures []validate.FieldError
 	for key, elem := range s {
 		if err := func() error {

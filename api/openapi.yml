@@ -1296,7 +1296,9 @@ paths:
                   - rates
                 properties:
                   rates:
-                    $ref: '#/components/schemas/TokenRates'
+                    type: object
+                    additionalProperties:
+                      $ref: '#/components/schemas/TokenRates'
         'default':
           $ref: '#/components/responses/Error'
   /v2/rates/chart:
@@ -4733,34 +4735,32 @@ components:
         - liquidTF
     TokenRates:
       type: object
-      additionalProperties:
-        type: object
-        properties:
-          prices:
-            type: object
-            additionalProperties:
-              type: number
-            example:
-              TON: 1.3710752873163712
-          diff_24h:
-            type: object
-            additionalProperties:
-              type: string
-            example:
-              TON: "-1.28%"
-          diff_7d:
-            type: object
-            additionalProperties:
-              type: string
-            example:
-              TON: "-2.74%"
-          diff_30d:
-            type: object
-            additionalProperties:
-              type: string
-            example:
-              TON: "-0.56%"
-                  
+      properties:
+        prices:
+          type: object
+          additionalProperties:
+            type: number
+          example:
+            TON: 1.3710752873163712
+        diff_24h:
+          type: object
+          additionalProperties:
+            type: string
+          example:
+            TON: "-1.28%"
+        diff_7d:
+          type: object
+          additionalProperties:
+            type: string
+          example:
+            TON: "-2.74%"
+        diff_30d:
+          type: object
+          additionalProperties:
+            type: string
+          example:
+            TON: "-0.56%"
+  
   responses:
     Error:
       description: Some error during request processing

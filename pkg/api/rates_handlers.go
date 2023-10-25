@@ -89,7 +89,7 @@ func (h *Handler) GetRates(ctx context.Context, params oas.GetRatesParams) (*oas
 		return nil, toError(http.StatusInternalServerError, err)
 	}
 
-	ratesRes := make(oas.TokenRates)
+	ratesRes := make(map[string]oas.TokenRates)
 	for _, token := range convertedTokens {
 		for _, currency := range currencies {
 			if ratesRes, err = convertRates(ratesRes, token, currency, todayRates, yesterdayRates, weekRates, monthRates); err != nil {
@@ -98,7 +98,7 @@ func (h *Handler) GetRates(ctx context.Context, params oas.GetRatesParams) (*oas
 		}
 	}
 	if human { // temporary kludge for keeper
-		temp := make(oas.TokenRates, len(ratesRes))
+		temp := make(map[string]oas.TokenRates, len(ratesRes))
 		for k, v := range ratesRes {
 			if len(k) > 48 {
 				k = ton.MustParseAccountID(k).ToHuman(true, false)
@@ -151,19 +151,19 @@ func (h *Handler) getRates() (map[string]float64, map[string]float64, map[string
 	return todayRates, yesterdayRates, weekRates, monthRates, nil
 }
 
-func convertRates(rates oas.TokenRates, token, currency string, todayRates, yesterdayRates, weekRates, monthRates map[string]float64) (oas.TokenRates, error) {
+func convertRates(rates map[string]oas.TokenRates, token, currency string, todayRates, yesterdayRates, weekRates, monthRates map[string]float64) (map[string]oas.TokenRates, error) {
 	todayCurrencyPrice, ok := todayRates[currency]
 	if !ok {
 		return nil, toError(http.StatusBadRequest, fmt.Errorf("invalid currency: %v", currency))
 	}
 	rate, ok := rates[token]
 	if !ok {
-		rate = oas.TokenRatesItem{Prices: oas.NewOptTokenRatesItemPrices(oas.TokenRatesItemPrices{}), Diff24h: oas.NewOptTokenRatesItemDiff24h(oas.TokenRatesItemDiff24h{}), Diff7d: oas.NewOptTokenRatesItemDiff7d(oas.TokenRatesItemDiff7d{}), Diff30d: oas.NewOptTokenRatesItemDiff30d(oas.TokenRatesItemDiff30d{})}
+		rate = oas.TokenRates{Prices: oas.NewOptTokenRatesPrices(oas.TokenRatesPrices{}), Diff24h: oas.NewOptTokenRatesDiff24h(oas.TokenRatesDiff24h{}), Diff7d: oas.NewOptTokenRatesDiff7d(oas.TokenRatesDiff7d{}), Diff30d: oas.NewOptTokenRatesDiff30d(oas.TokenRatesDiff30d{})}
 		rates[token] = rate
 	}
 	todayTokenPrice, ok := todayRates[token]
 	if !ok {
-		rate = oas.TokenRatesItem{Prices: oas.NewOptTokenRatesItemPrices(oas.TokenRatesItemPrices{}), Diff24h: oas.NewOptTokenRatesItemDiff24h(oas.TokenRatesItemDiff24h{}), Diff7d: oas.NewOptTokenRatesItemDiff7d(oas.TokenRatesItemDiff7d{}), Diff30d: oas.NewOptTokenRatesItemDiff30d(oas.TokenRatesItemDiff30d{})}
+		rate = oas.TokenRates{Prices: oas.NewOptTokenRatesPrices(oas.TokenRatesPrices{}), Diff24h: oas.NewOptTokenRatesDiff24h(oas.TokenRatesDiff24h{}), Diff7d: oas.NewOptTokenRatesDiff7d(oas.TokenRatesDiff7d{}), Diff30d: oas.NewOptTokenRatesDiff30d(oas.TokenRatesDiff30d{})}
 		return rates, nil
 	}
 	convertedTodayPrice := todayTokenPrice * (1 / todayCurrencyPrice)
