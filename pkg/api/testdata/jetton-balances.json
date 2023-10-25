@@ -42,10 +42,10 @@
        "jetton": {
          "address": "0:274b605badfcecca83130b27cd375e6a73233f6e15d782a31dd2a80aff097cc0",
          "name": "jUSCDT",
-         "symbol": "SCAM",
+         "symbol": "jUSDТ",
          "decimals": 9,
          "image": "https://raw.githubusercontent.com/tonkeeper/opentonapi/master/pkg/references/media/token_placeholder.png",
-         "verification": "blacklist"
+         "verification": "none"
        }
      }
    ]
