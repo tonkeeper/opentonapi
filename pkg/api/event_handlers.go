@@ -580,7 +580,7 @@ func emulatedTreeToTrace(ctx context.Context, executor executor, resolver core.L
 			t.AdditionalInfo.EmulatedTeleitemNFT = &core.EmulatedTeleitemNFT{
 				Index:             index,
 				CollectionAddress: collectionAddr,
-				Verified:          *nftAddr == k,
+				Verified:          *nftAddr == accountID,
 			}
 		case abi.GetWalletDataResult:
 			master, _ := tongo.AccountIDFromTlb(data.Jetton)
