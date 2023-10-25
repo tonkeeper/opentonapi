@@ -3078,17 +3078,28 @@ func (s *GetNftItemsByAddressesReq) SetAccountIds(val []string) {
 }
 
 type GetRatesOK struct {
-	Rates TokenRates `json:"rates"`
+	Rates GetRatesOKRates `json:"rates"`
 }
 
 // GetRates returns the value of Rates.
-func (s *GetRatesOK) GetRates() TokenRates {
+func (s *GetRatesOK) GetRates() GetRatesOKRates {
 	return s.Rates
 }
 
 // SetRates sets the value of Rates.
-func (s *GetRatesOK) SetRates(val TokenRates) {
+func (s *GetRatesOK) SetRates(val GetRatesOKRates) {
 	s.Rates = val
+}
+
+type GetRatesOKRates map[string]TokenRates
+
+func (s *GetRatesOKRates) init() GetRatesOKRates {
+	m := *s
+	if m == nil {
+		m = map[string]TokenRates{}
+		*s = m
+	}
+	return m
 }
 
 type GetRawAccountStateOK struct {
@@ -7506,38 +7517,38 @@ func (o OptTokenRates) Or(d TokenRates) TokenRates {
 	return d
 }
 
-// NewOptTokenRatesItemDiff24h returns new OptTokenRatesItemDiff24h with value set to v.
-func NewOptTokenRatesItemDiff24h(v TokenRatesItemDiff24h) OptTokenRatesItemDiff24h {
-	return OptTokenRatesItemDiff24h{
+// NewOptTokenRatesDiff24h returns new OptTokenRatesDiff24h with value set to v.
+func NewOptTokenRatesDiff24h(v TokenRatesDiff24h) OptTokenRatesDiff24h {
+	return OptTokenRatesDiff24h{
 		Value: v,
 		Set:   true,
 	}
 }
 
-// OptTokenRatesItemDiff24h is optional TokenRatesItemDiff24h.
-type OptTokenRatesItemDiff24h struct {
-	Value TokenRatesItemDiff24h
+// OptTokenRatesDiff24h is optional TokenRatesDiff24h.
+type OptTokenRatesDiff24h struct {
+	Value TokenRatesDiff24h
 	Set   bool
 }
 
-// IsSet returns true if OptTokenRatesItemDiff24h was set.
-func (o OptTokenRatesItemDiff24h) IsSet() bool { return o.Set }
+// IsSet returns true if OptTokenRatesDiff24h was set.
+func (o OptTokenRatesDiff24h) IsSet() bool { return o.Set }
 
 // Reset unsets value.
-func (o *OptTokenRatesItemDiff24h) Reset() {
-	var v TokenRatesItemDiff24h
+func (o *OptTokenRatesDiff24h) Reset() {
+	var v TokenRatesDiff24h
 	o.Value = v
 	o.Set = false
 }
 
 // SetTo sets value to v.
-func (o *OptTokenRatesItemDiff24h) SetTo(v TokenRatesItemDiff24h) {
+func (o *OptTokenRatesDiff24h) SetTo(v TokenRatesDiff24h) {
 	o.Set = true
 	o.Value = v
 }
 
 // Get returns value and boolean that denotes whether value was set.
-func (o OptTokenRatesItemDiff24h) Get() (v TokenRatesItemDiff24h, ok bool) {
+func (o OptTokenRatesDiff24h) Get() (v TokenRatesDiff24h, ok bool) {
 	if !o.Set {
 		return v, false
 	}
@@ -7545,45 +7556,45 @@ func (o OptTokenRatesItemDiff24h) Get() (v TokenRatesItemDiff24h, ok bool) {
 }
 
 // Or returns value if set, or given parameter if does not.
-func (o OptTokenRatesItemDiff24h) Or(d TokenRatesItemDiff24h) TokenRatesItemDiff24h {
+func (o OptTokenRatesDiff24h) Or(d TokenRatesDiff24h) TokenRatesDiff24h {
 	if v, ok := o.Get(); ok {
 		return v
 	}
 	return d
 }
 
-// NewOptTokenRatesItemDiff30d returns new OptTokenRatesItemDiff30d with value set to v.
-func NewOptTokenRatesItemDiff30d(v TokenRatesItemDiff30d) OptTokenRatesItemDiff30d {
-	return OptTokenRatesItemDiff30d{
+// NewOptTokenRatesDiff30d returns new OptTokenRatesDiff30d with value set to v.
+func NewOptTokenRatesDiff30d(v TokenRatesDiff30d) OptTokenRatesDiff30d {
+	return OptTokenRatesDiff30d{
 		Value: v,
 		Set:   true,
 	}
 }
 
-// OptTokenRatesItemDiff30d is optional TokenRatesItemDiff30d.
-type OptTokenRatesItemDiff30d struct {
-	Value TokenRatesItemDiff30d
+// OptTokenRatesDiff30d is optional TokenRatesDiff30d.
+type OptTokenRatesDiff30d struct {
+	Value TokenRatesDiff30d
 	Set   bool
 }
 
-// IsSet returns true if OptTokenRatesItemDiff30d was set.
-func (o OptTokenRatesItemDiff30d) IsSet() bool { return o.Set }
+// IsSet returns true if OptTokenRatesDiff30d was set.
+func (o OptTokenRatesDiff30d) IsSet() bool { return o.Set }
 
 // Reset unsets value.
-func (o *OptTokenRatesItemDiff30d) Reset() {
-	var v TokenRatesItemDiff30d
+func (o *OptTokenRatesDiff30d) Reset() {
+	var v TokenRatesDiff30d
 	o.Value = v
 	o.Set = false
 }
 
 // SetTo sets value to v.
-func (o *OptTokenRatesItemDiff30d) SetTo(v TokenRatesItemDiff30d) {
+func (o *OptTokenRatesDiff30d) SetTo(v TokenRatesDiff30d) {
 	o.Set = true
 	o.Value = v
 }
 
 // Get returns value and boolean that denotes whether value was set.
-func (o OptTokenRatesItemDiff30d) Get() (v TokenRatesItemDiff30d, ok bool) {
+func (o OptTokenRatesDiff30d) Get() (v TokenRatesDiff30d, ok bool) {
 	if !o.Set {
 		return v, false
 	}
@@ -7591,45 +7602,45 @@ func (o OptTokenRatesItemDiff30d) Get() (v TokenRatesItemDiff30d, ok bool) {
 }
 
 // Or returns value if set, or given parameter if does not.
-func (o OptTokenRatesItemDiff30d) Or(d TokenRatesItemDiff30d) TokenRatesItemDiff30d {
+func (o OptTokenRatesDiff30d) Or(d TokenRatesDiff30d) TokenRatesDiff30d {
 	if v, ok := o.Get(); ok {
 		return v
 	}
 	return d
 }
 
-// NewOptTokenRatesItemDiff7d returns new OptTokenRatesItemDiff7d with value set to v.
-func NewOptTokenRatesItemDiff7d(v TokenRatesItemDiff7d) OptTokenRatesItemDiff7d {
-	return OptTokenRatesItemDiff7d{
+// NewOptTokenRatesDiff7d returns new OptTokenRatesDiff7d with value set to v.
+func NewOptTokenRatesDiff7d(v TokenRatesDiff7d) OptTokenRatesDiff7d {
+	return OptTokenRatesDiff7d{
 		Value: v,
 		Set:   true,
 	}
 }
 
-// OptTokenRatesItemDiff7d is optional TokenRatesItemDiff7d.
-type OptTokenRatesItemDiff7d struct {
-	Value TokenRatesItemDiff7d
+// OptTokenRatesDiff7d is optional TokenRatesDiff7d.
+type OptTokenRatesDiff7d struct {
+	Value TokenRatesDiff7d
 	Set   bool
 }
 
-// IsSet returns true if OptTokenRatesItemDiff7d was set.
-func (o OptTokenRatesItemDiff7d) IsSet() bool { return o.Set }
+// IsSet returns true if OptTokenRatesDiff7d was set.
+func (o OptTokenRatesDiff7d) IsSet() bool { return o.Set }
 
 // Reset unsets value.
-func (o *OptTokenRatesItemDiff7d) Reset() {
-	var v TokenRatesItemDiff7d
+func (o *OptTokenRatesDiff7d) Reset() {
+	var v TokenRatesDiff7d
 	o.Value = v
 	o.Set = false
 }
 
 // SetTo sets value to v.
-func (o *OptTokenRatesItemDiff7d) SetTo(v TokenRatesItemDiff7d) {
+func (o *OptTokenRatesDiff7d) SetTo(v TokenRatesDiff7d) {
 	o.Set = true
 	o.Value = v
 }
 
 // Get returns value and boolean that denotes whether value was set.
-func (o OptTokenRatesItemDiff7d) Get() (v TokenRatesItemDiff7d, ok bool) {
+func (o OptTokenRatesDiff7d) Get() (v TokenRatesDiff7d, ok bool) {
 	if !o.Set {
 		return v, false
 	}
@@ -7637,45 +7648,45 @@ func (o OptTokenRatesItemDiff7d) Get() (v TokenRatesItemDiff7d, ok bool) {
 }
 
 // Or returns value if set, or given parameter if does not.
-func (o OptTokenRatesItemDiff7d) Or(d TokenRatesItemDiff7d) TokenRatesItemDiff7d {
+func (o OptTokenRatesDiff7d) Or(d TokenRatesDiff7d) TokenRatesDiff7d {
 	if v, ok := o.Get(); ok {
 		return v
 	}
 	return d
 }
 
-// NewOptTokenRatesItemPrices returns new OptTokenRatesItemPrices with value set to v.
-func NewOptTokenRatesItemPrices(v TokenRatesItemPrices) OptTokenRatesItemPrices {
-	return OptTokenRatesItemPrices{
+// NewOptTokenRatesPrices returns new OptTokenRatesPrices with value set to v.
+func NewOptTokenRatesPrices(v TokenRatesPrices) OptTokenRatesPrices {
+	return OptTokenRatesPrices{
 		Value: v,
 		Set:   true,
 	}
 }
 
-// OptTokenRatesItemPrices is optional TokenRatesItemPrices.
-type OptTokenRatesItemPrices struct {
-	Value TokenRatesItemPrices
+// OptTokenRatesPrices is optional TokenRatesPrices.
+type OptTokenRatesPrices struct {
+	Value TokenRatesPrices
 	Set   bool
 }
 
-// IsSet returns true if OptTokenRatesItemPrices was set.
-func (o OptTokenRatesItemPrices) IsSet() bool { return o.Set }
+// IsSet returns true if OptTokenRatesPrices was set.
+func (o OptTokenRatesPrices) IsSet() bool { return o.Set }
 
 // Reset unsets value.
-func (o *OptTokenRatesItemPrices) Reset() {
-	var v TokenRatesItemPrices
+func (o *OptTokenRatesPrices) Reset() {
+	var v TokenRatesPrices
 	o.Value = v
 	o.Set = false
 }
 
 // SetTo sets value to v.
-func (o *OptTokenRatesItemPrices) SetTo(v TokenRatesItemPrices) {
+func (o *OptTokenRatesPrices) SetTo(v TokenRatesPrices) {
 	o.Set = true
 	o.Value = v
 }
 
 // Get returns value and boolean that denotes whether value was set.
-func (o OptTokenRatesItemPrices) Get() (v TokenRatesItemPrices, ok bool) {
+func (o OptTokenRatesPrices) Get() (v TokenRatesPrices, ok bool) {
 	if !o.Set {
 		return v, false
 	}
@@ -7683,7 +7694,7 @@ func (o OptTokenRatesItemPrices) Get() (v TokenRatesItemPrices, ok bool) {
 }
 
 // Or returns value if set, or given parameter if does not.
-func (o OptTokenRatesItemPrices) Or(d TokenRatesItemPrices) TokenRatesItemPrices {
+func (o OptTokenRatesPrices) Or(d TokenRatesPrices) TokenRatesPrices {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -9016,67 +9027,56 @@ func (s *Subscriptions) SetSubscriptions(val []Subscription) {
 }
 
 // Ref: #/components/schemas/TokenRates
-type TokenRates map[string]TokenRatesItem
-
-func (s *TokenRates) init() TokenRates {
-	m := *s
-	if m == nil {
-		m = map[string]TokenRatesItem{}
-		*s = m
-	}
-	return m
-}
-
-type TokenRatesItem struct {
-	Prices  OptTokenRatesItemPrices  `json:"prices"`
-	Diff24h OptTokenRatesItemDiff24h `json:"diff_24h"`
-	Diff7d  OptTokenRatesItemDiff7d  `json:"diff_7d"`
-	Diff30d OptTokenRatesItemDiff30d `json:"diff_30d"`
+type TokenRates struct {
+	Prices  OptTokenRatesPrices  `json:"prices"`
+	Diff24h OptTokenRatesDiff24h `json:"diff_24h"`
+	Diff7d  OptTokenRatesDiff7d  `json:"diff_7d"`
+	Diff30d OptTokenRatesDiff30d `json:"diff_30d"`
 }
 
 // GetPrices returns the value of Prices.
-func (s *TokenRatesItem) GetPrices() OptTokenRatesItemPrices {
+func (s *TokenRates) GetPrices() OptTokenRatesPrices {
 	return s.Prices
 }
 
 // GetDiff24h returns the value of Diff24h.
-func (s *TokenRatesItem) GetDiff24h() OptTokenRatesItemDiff24h {
+func (s *TokenRates) GetDiff24h() OptTokenRatesDiff24h {
 	return s.Diff24h
 }
 
 // GetDiff7d returns the value of Diff7d.
-func (s *TokenRatesItem) GetDiff7d() OptTokenRatesItemDiff7d {
+func (s *TokenRates) GetDiff7d() OptTokenRatesDiff7d {
 	return s.Diff7d
 }
 
 // GetDiff30d returns the value of Diff30d.
-func (s *TokenRatesItem) GetDiff30d() OptTokenRatesItemDiff30d {
+func (s *TokenRates) GetDiff30d() OptTokenRatesDiff30d {
 	return s.Diff30d
 }
 
 // SetPrices sets the value of Prices.
-func (s *TokenRatesItem) SetPrices(val OptTokenRatesItemPrices) {
+func (s *TokenRates) SetPrices(val OptTokenRatesPrices) {
 	s.Prices = val
 }
 
 // SetDiff24h sets the value of Diff24h.
-func (s *TokenRatesItem) SetDiff24h(val OptTokenRatesItemDiff24h) {
+func (s *TokenRates) SetDiff24h(val OptTokenRatesDiff24h) {
 	s.Diff24h = val
 }
 
 // SetDiff7d sets the value of Diff7d.
-func (s *TokenRatesItem) SetDiff7d(val OptTokenRatesItemDiff7d) {
+func (s *TokenRates) SetDiff7d(val OptTokenRatesDiff7d) {
 	s.Diff7d = val
 }
 
 // SetDiff30d sets the value of Diff30d.
-func (s *TokenRatesItem) SetDiff30d(val OptTokenRatesItemDiff30d) {
+func (s *TokenRates) SetDiff30d(val OptTokenRatesDiff30d) {
 	s.Diff30d = val
 }
 
-type TokenRatesItemDiff24h map[string]string
+type TokenRatesDiff24h map[string]string
 
-func (s *TokenRatesItemDiff24h) init() TokenRatesItemDiff24h {
+func (s *TokenRatesDiff24h) init() TokenRatesDiff24h {
 	m := *s
 	if m == nil {
 		m = map[string]string{}
@@ -9085,9 +9085,9 @@ func (s *TokenRatesItemDiff24h) init() TokenRatesItemDiff24h {
 	return m
 }
 
-type TokenRatesItemDiff30d map[string]string
+type TokenRatesDiff30d map[string]string
 
-func (s *TokenRatesItemDiff30d) init() TokenRatesItemDiff30d {
+func (s *TokenRatesDiff30d) init() TokenRatesDiff30d {
 	m := *s
 	if m == nil {
 		m = map[string]string{}
@@ -9096,9 +9096,9 @@ func (s *TokenRatesItemDiff30d) init() TokenRatesItemDiff30d {
 	return m
 }
 
-type TokenRatesItemDiff7d map[string]string
+type TokenRatesDiff7d map[string]string
 
-func (s *TokenRatesItemDiff7d) init() TokenRatesItemDiff7d {
+func (s *TokenRatesDiff7d) init() TokenRatesDiff7d {
 	m := *s
 	if m == nil {
 		m = map[string]string{}
@@ -9107,9 +9107,9 @@ func (s *TokenRatesItemDiff7d) init() TokenRatesItemDiff7d {
 	return m
 }
 
-type TokenRatesItemPrices map[string]float64
+type TokenRatesPrices map[string]float64
 
-func (s *TokenRatesItemPrices) init() TokenRatesItemPrices {
+func (s *TokenRatesPrices) init() TokenRatesPrices {
 	m := *s
 	if m == nil {
 		m = map[string]float64{}
