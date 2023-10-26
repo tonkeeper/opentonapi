@@ -6,13 +6,13 @@ import (
 	"sync"
 
 	rules "github.com/tonkeeper/scam_backoffice_rules"
-	"github.com/tonkeeper/tongo/boc"
-
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
+	"github.com/tonkeeper/tongo/boc"
 	"github.com/tonkeeper/tongo/liteclient"
 	"github.com/tonkeeper/tongo/tep64"
 	"github.com/tonkeeper/tongo/tlb"
+	"github.com/tonkeeper/tongo/ton"
 
 	"github.com/tonkeeper/opentonapi/pkg/addressbook"
 	"github.com/tonkeeper/opentonapi/pkg/cache"
@@ -81,6 +81,7 @@ type storage interface {
 	GetJettonMasters(ctx context.Context, limit, offset int) ([]core.JettonMaster, error)
 
 	GetLastConfig(ctx context.Context) (tlb.ConfigParams, error)
+	GetConfigFromBlock(ctx context.Context, id ton.BlockID) (tlb.ConfigParams, error)
 
 	GetSeqno(ctx context.Context, account tongo.AccountID) (uint32, error)
 

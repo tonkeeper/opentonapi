@@ -656,25 +656,57 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 						return
 					}
 					switch elem[0] {
-					case '/': // Prefix: "/transactions"
-						if l := len("/transactions"); len(elem) >= l && elem[0:l] == "/transactions" {
+					case '/': // Prefix: "/"
+						if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
 							elem = elem[l:]
 						} else {
 							break
 						}
 
 						if len(elem) == 0 {
-							// Leaf node.
-							switch r.Method {
-							case "GET":
-								s.handleGetBlockchainBlockTransactionsRequest([1]string{
-									args[0],
-								}, elemIsEscaped, w, r)
-							default:
-								s.notAllowed(w, r, "GET")
+							break
+						}
+						switch elem[0] {
+						case 'c': // Prefix: "config/raw"
+							if l := len("config/raw"); len(elem) >= l && elem[0:l] == "config/raw" {
+								elem = elem[l:]
+							} else {
+								break
 							}
 
-							return
+							if len(elem) == 0 {
+								// Leaf node.
+								switch r.Method {
+								case "GET":
+									s.handleGetRawBlockchainConfigFromBlockRequest([1]string{
+										args[0],
+									}, elemIsEscaped, w, r)
+								default:
+									s.notAllowed(w, r, "GET")
+								}
+
+								return
+							}
+						case 't': // Prefix: "transactions"
+							if l := len("transactions"); len(elem) >= l && elem[0:l] == "transactions" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							if len(elem) == 0 {
+								// Leaf node.
+								switch r.Method {
+								case "GET":
+									s.handleGetBlockchainBlockTransactionsRequest([1]string{
+										args[0],
+									}, elemIsEscaped, w, r)
+								default:
+									s.notAllowed(w, r, "GET")
+								}
+
+								return
+							}
 						}
 					}
 				case 'c': // Prefix: "config"
@@ -685,7 +717,6 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 					}
 
 					if len(elem) == 0 {
-						// Leaf node.
 						switch r.Method {
 						case "GET":
 							s.handleGetBlockchainConfigRequest([0]string{}, elemIsEscaped, w, r)
@@ -694,6 +725,26 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 						}
 
 						return
+					}
+					switch elem[0] {
+					case '/': // Prefix: "/raw"
+						if l := len("/raw"); len(elem) >= l && elem[0:l] == "/raw" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						if len(elem) == 0 {
+							// Leaf node.
+							switch r.Method {
+							case "GET":
+								s.handleGetRawBlockchainConfigRequest([0]string{}, elemIsEscaped, w, r)
+							default:
+								s.notAllowed(w, r, "GET")
+							}
+
+							return
+						}
 					}
 				case 'm': // Prefix: "m"
 					if l := len("m"); len(elem) >= l && elem[0:l] == "m" {
@@ -2841,26 +2892,60 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 						}
 					}
 					switch elem[0] {
-					case '/': // Prefix: "/transactions"
-						if l := len("/transactions"); len(elem) >= l && elem[0:l] == "/transactions" {
+					case '/': // Prefix: "/"
+						if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
 							elem = elem[l:]
 						} else {
 							break
 						}
 
 						if len(elem) == 0 {
-							switch method {
-							case "GET":
-								// Leaf: GetBlockchainBlockTransactions
-								r.name = "GetBlockchainBlockTransactions"
-								r.summary = ""
-								r.operationID = "getBlockchainBlockTransactions"
-								r.pathPattern = "/v2/blockchain/blocks/{block_id}/transactions"
-								r.args = args
-								r.count = 1
-								return r, true
-							default:
-								return
+							break
+						}
+						switch elem[0] {
+						case 'c': // Prefix: "config/raw"
+							if l := len("config/raw"); len(elem) >= l && elem[0:l] == "config/raw" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							if len(elem) == 0 {
+								switch method {
+								case "GET":
+									// Leaf: GetRawBlockchainConfigFromBlock
+									r.name = "GetRawBlockchainConfigFromBlock"
+									r.summary = ""
+									r.operationID = "getRawBlockchainConfigFromBlock"
+									r.pathPattern = "/v2/blockchain/blocks/{block_id}/config/raw"
+									r.args = args
+									r.count = 1
+									return r, true
+								default:
+									return
+								}
+							}
+						case 't': // Prefix: "transactions"
+							if l := len("transactions"); len(elem) >= l && elem[0:l] == "transactions" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							if len(elem) == 0 {
+								switch method {
+								case "GET":
+									// Leaf: GetBlockchainBlockTransactions
+									r.name = "GetBlockchainBlockTransactions"
+									r.summary = ""
+									r.operationID = "getBlockchainBlockTransactions"
+									r.pathPattern = "/v2/blockchain/blocks/{block_id}/transactions"
+									r.args = args
+									r.count = 1
+									return r, true
+								default:
+									return
+								}
 							}
 						}
 					}
@@ -2874,7 +2959,6 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 					if len(elem) == 0 {
 						switch method {
 						case "GET":
-							// Leaf: GetBlockchainConfig
 							r.name = "GetBlockchainConfig"
 							r.summary = ""
 							r.operationID = "getBlockchainConfig"
@@ -2884,6 +2968,30 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 							return r, true
 						default:
 							return
+						}
+					}
+					switch elem[0] {
+					case '/': // Prefix: "/raw"
+						if l := len("/raw"); len(elem) >= l && elem[0:l] == "/raw" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						if len(elem) == 0 {
+							switch method {
+							case "GET":
+								// Leaf: GetRawBlockchainConfig
+								r.name = "GetRawBlockchainConfig"
+								r.summary = ""
+								r.operationID = "getRawBlockchainConfig"
+								r.pathPattern = "/v2/blockchain/config/raw"
+								r.args = args
+								r.count = 0
+								return r, true
+							default:
+								return
+							}
 						}
 					}
 				case 'm': // Prefix: "m"

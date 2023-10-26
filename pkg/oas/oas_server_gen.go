@@ -353,6 +353,18 @@ type Handler interface {
 	//
 	// GET /v2/liteserver/get_state/{block_id}
 	GetRawBlockchainBlockState(ctx context.Context, params GetRawBlockchainBlockStateParams) (*GetRawBlockchainBlockStateOK, error)
+	// GetRawBlockchainConfig implements getRawBlockchainConfig operation.
+	//
+	// Get raw blockchain config.
+	//
+	// GET /v2/blockchain/config/raw
+	GetRawBlockchainConfig(ctx context.Context) (*RawBlockchainConfig, error)
+	// GetRawBlockchainConfigFromBlock implements getRawBlockchainConfigFromBlock operation.
+	//
+	// Get raw blockchain config from a specific block, if present.
+	//
+	// GET /v2/blockchain/blocks/{block_id}/config/raw
+	GetRawBlockchainConfigFromBlock(ctx context.Context, params GetRawBlockchainConfigFromBlockParams) (*RawBlockchainConfig, error)
 	// GetRawConfig implements getRawConfig operation.
 	//
 	// Get raw config.
