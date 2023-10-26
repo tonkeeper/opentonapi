@@ -6,22 +6,15 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/tonkeeper/tongo/liteapi"
 	"github.com/tonkeeper/tongo/tlb"
+	"github.com/tonkeeper/tongo/ton"
 
 	"github.com/tonkeeper/opentonapi/internal/g"
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/opentonapi/pkg/oas"
 	"github.com/tonkeeper/tongo"
 )
-
-func blockIdFromString(s string) (tongo.BlockID, error) {
-	var id tongo.BlockID
-	_, err := fmt.Sscanf(s, "(%d,%x,%d)", &id.Workchain, &id.Shard, &id.Seqno)
-	if err != nil {
-		return tongo.BlockID{}, err
-	}
-	return id, nil
-}
 
 func blockIdExtFromString(s string) (tongo.BlockIDExt, error) {
 	var (
@@ -196,6 +189,10 @@ func convertMessage(m core.Message, book addressBook) oas.Message {
 
 func convertConfig(cfg tlb.ConfigParams) (*oas.BlockchainConfig, error) {
 	var config oas.BlockchainConfig
+	blockchainConfig, err := liteapi.ConvertBlockchainConfig(cfg)
+	if err != nil {
+		return nil, err
+	}
 	for _, a := range []struct {
 		index   tlb.Uint32
 		pointer *string
@@ -238,26 +235,17 @@ func convertConfig(cfg tlb.ConfigParams) (*oas.BlockchainConfig, error) {
 		}
 		*a.pointer = convertValidatorSet(set)
 	}
-	{
-		c, prs := cfg.Config.Get(44)
-		if !prs {
-			return nil, fmt.Errorf("config doesn't have %v param", 44)
-		}
-		var blockedAccounts struct {
-			Prefix         byte
-			Map            tlb.HashmapE[accID, struct{}]
-			SuspendedUntil uint32
-		}
-		err := tlb.Unmarshal(&c.Value, &blockedAccounts)
-		if err != nil {
-			return nil, err
-		}
-		config.R44.SetSuspendedUntil(int(blockedAccounts.SuspendedUntil))
-		for _, a := range blockedAccounts.Map.Items() {
-			config.R44.Accounts = append(config.R44.Accounts, tongo.AccountID(a.Key).String())
-		}
+	if blockchainConfig.ConfigParam44 == nil {
+		return nil, fmt.Errorf("config doesn't have %v param", 44)
 	}
-
+	for _, addr := range blockchainConfig.ConfigParam44.SuspendedAddressList.Addresses.Keys() {
+		accountID := ton.AccountID{
+			Workchain: int32(addr.Workchain),
+			Address:   addr.Address,
+		}
+		config.R44.Accounts = append(config.R44.Accounts, accountID.String())
+	}
+	config.R44.SetSuspendedUntil(int(blockchainConfig.ConfigParam44.SuspendedAddressList.SuspendedUntil))
 	return &config, nil
 }
 
@@ -277,10 +265,4 @@ func convertValidatorSet(set tlb.ValidatorsSet) oas.OptValidatorsSet {
 		s.List = append(s.List, oas.ValidatorsSetListItem{PublicKey: d.PubKey().Hex()})
 	}
 	return oas.NewOptValidatorsSet(s)
-}
-
-type accID tongo.AccountID
-
-func (a accID) FixedSize() int {
-	return 288 // (32+256) * 8
 }

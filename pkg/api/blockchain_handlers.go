@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
@@ -11,15 +12,17 @@ import (
 	"github.com/tonkeeper/opentonapi/pkg/oas"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/boc"
+	"github.com/tonkeeper/tongo/liteapi"
 	"github.com/tonkeeper/tongo/tlb"
+	"github.com/tonkeeper/tongo/ton"
 )
 
 func (h *Handler) GetBlockchainBlock(ctx context.Context, params oas.GetBlockchainBlockParams) (*oas.BlockchainBlock, error) {
-	id, err := blockIdFromString(params.BlockID)
+	blockID, err := ton.ParseBlockID(params.BlockID)
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
 	}
-	block, err := h.storage.GetBlockHeader(ctx, id)
+	block, err := h.storage.GetBlockHeader(ctx, blockID)
 	if errors.Is(err, core.ErrEntityNotFound) {
 		return nil, toError(http.StatusNotFound, err)
 	}
@@ -31,11 +34,11 @@ func (h *Handler) GetBlockchainBlock(ctx context.Context, params oas.GetBlockcha
 }
 
 func (h *Handler) GetBlockchainBlockTransactions(ctx context.Context, params oas.GetBlockchainBlockTransactionsParams) (*oas.Transactions, error) {
-	id, err := blockIdFromString(params.BlockID)
+	blockID, err := ton.ParseBlockID(params.BlockID)
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
 	}
-	transactions, err := h.storage.GetBlockTransactions(ctx, id)
+	transactions, err := h.storage.GetBlockTransactions(ctx, blockID)
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
@@ -121,4 +124,56 @@ func (h *Handler) GetBlockchainConfig(ctx context.Context) (*oas.BlockchainConfi
 	}
 	out.Raw = raw
 	return out, nil
+}
+
+func convertConfigToOasConfig(conf *liteapi.BlockchainConfig) (*oas.RawBlockchainConfig, error) {
+	// TODO: optimize this workflow
+	value, err := json.Marshal(*conf)
+	if err != nil {
+		return nil, err
+	}
+	m := make(map[string]interface{})
+	if err := json.Unmarshal(g.ChangeJsonKeys(value, g.CamelToSnake), &m); err != nil {
+		return nil, err
+	}
+	return &oas.RawBlockchainConfig{Config: anyToJSONRawMap(m)}, nil
+}
+
+func (h *Handler) GetRawBlockchainConfig(ctx context.Context) (r *oas.RawBlockchainConfig, _ error) {
+	cfg, err := h.storage.GetLastConfig(ctx)
+	if err != nil {
+		return nil, toError(http.StatusInternalServerError, err)
+	}
+	config, err := liteapi.ConvertBlockchainConfig(cfg)
+	if err != nil {
+		return nil, toError(http.StatusInternalServerError, err)
+	}
+	rawConfig, err := convertConfigToOasConfig(config)
+	if err != nil {
+		return nil, toError(http.StatusInternalServerError, err)
+	}
+	return rawConfig, nil
+}
+
+func (h *Handler) GetRawBlockchainConfigFromBlock(ctx context.Context, params oas.GetRawBlockchainConfigFromBlockParams) (r *oas.RawBlockchainConfig, _ error) {
+	blockID, err := ton.ParseBlockID(params.BlockID)
+	if err != nil {
+		return nil, toError(http.StatusBadRequest, err)
+	}
+	cfg, err := h.storage.GetConfigFromBlock(ctx, blockID)
+	if err != nil && errors.Is(err, core.ErrNotKeyBlock) {
+		return nil, toError(http.StatusNotFound, err)
+	}
+	if err != nil {
+		return nil, toError(http.StatusInternalServerError, err)
+	}
+	config, err := liteapi.ConvertBlockchainConfig(cfg)
+	if err != nil {
+		return nil, toError(http.StatusInternalServerError, err)
+	}
+	rawConfig, err := convertConfigToOasConfig(config)
+	if err != nil {
+		return nil, toError(http.StatusInternalServerError, err)
+	}
+	return rawConfig, nil
 }

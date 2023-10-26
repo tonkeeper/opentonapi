@@ -526,6 +526,24 @@ func (UnimplementedHandler) GetRawBlockchainBlockState(ctx context.Context, para
 	return r, ht.ErrNotImplemented
 }
 
+// GetRawBlockchainConfig implements getRawBlockchainConfig operation.
+//
+// Get raw blockchain config.
+//
+// GET /v2/blockchain/config/raw
+func (UnimplementedHandler) GetRawBlockchainConfig(ctx context.Context) (r *RawBlockchainConfig, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// GetRawBlockchainConfigFromBlock implements getRawBlockchainConfigFromBlock operation.
+//
+// Get raw blockchain config from a specific block, if present.
+//
+// GET /v2/blockchain/blocks/{block_id}/config/raw
+func (UnimplementedHandler) GetRawBlockchainConfigFromBlock(ctx context.Context, params GetRawBlockchainConfigFromBlockParams) (r *RawBlockchainConfig, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // GetRawConfig implements getRawConfig operation.
 //
 // Get raw config.

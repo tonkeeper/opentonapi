@@ -45,6 +45,23 @@ paths:
                 $ref: '#/components/schemas/Transactions'
         'default':
           $ref: '#/components/responses/Error'
+  /v2/blockchain/blocks/{block_id}/config/raw:
+    get:
+      description: Get raw blockchain config from a specific block, if present.
+      operationId: getRawBlockchainConfigFromBlock
+      tags:
+        - Blockchain
+      parameters:
+        - $ref: '#/components/parameters/blockchainBlockIDParameter'
+      responses:
+        '200':
+          description: blockchain config
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RawBlockchainConfig'
+        'default':
+          $ref: '#/components/responses/Error'
   /v2/blockchain/transactions/{transaction_id}:
     get:
       description: Get transaction data
@@ -218,6 +235,21 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/BlockchainConfig'
+        'default':
+          $ref: '#/components/responses/Error'
+  /v2/blockchain/config/raw:
+    get:
+      description: Get raw blockchain config
+      operationId: getRawBlockchainConfig
+      tags:
+        - Blockchain
+      responses:
+        '200':
+          description: blockchain config
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RawBlockchainConfig'
         'default':
           $ref: '#/components/responses/Error'
   /v2/blockchain/accounts/{account_id}/inspect:
@@ -3148,6 +3180,16 @@ components:
           example: [ ]
           items:
             $ref: '#/components/schemas/TvmStackRecord'
+    RawBlockchainConfig:
+      type: object
+      required:
+        - config
+      properties:
+        config:
+          type: object
+          additionalProperties: true
+          example: { }
+
     BlockchainConfig:
       type: object
       required:

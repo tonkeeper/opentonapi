@@ -13,7 +13,7 @@ func CamelToSnake(s string) string {
 	b := new(strings.Builder)
 	b.Grow(len(s) + 5)
 	for i, c := range s {
-		if ('a' <= c && c <= 'z') || ('0' <= c && c <= '9') || c == '_' { //todo: not skip lower case but replase upper case
+		if ('a' <= c && c <= 'z') || ('0' <= c && c <= '9') || c == '_' || c == '-' || c == ':' { //todo: not skip lower case but replace upper case
 			b.WriteRune(c)
 			continue
 		}
