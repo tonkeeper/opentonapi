@@ -61,7 +61,7 @@ func (h *Handler) GetAccountJettonsBalances(ctx context.Context, params oas.GetA
 		}
 		price := rates[wallet.JettonAddress.ToRaw()]
 		if len(rates) > 0 && len(price.Prices.Value) > 0 {
-			jettonBalance.Price.SetTo(oas.TokenRates{})
+			jettonBalance.Price.SetTo(price)
 		}
 		meta, err := h.storage.GetJettonMasterMetadata(ctx, wallet.JettonAddress)
 		if err != nil && err.Error() == "not enough refs" {
