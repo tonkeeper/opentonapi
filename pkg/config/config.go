@@ -50,11 +50,11 @@ func Load() Config {
 		reflect.TypeOf(accountsList{}): func(v string) (interface{}, error) {
 			var accs accountsList
 			for _, s := range strings.Split(v, ",") {
-				a, err := tongo.ParseAccountID(s)
+				account, err := tongo.ParseAddress(s)
 				if err != nil {
 					return nil, err
 				}
-				accs = append(accs, a)
+				accs = append(accs, account.ID)
 			}
 			return accs, nil
 		}}); err != nil {

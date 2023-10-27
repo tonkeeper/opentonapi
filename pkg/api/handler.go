@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"fmt"
+	"sync"
 
 	"github.com/go-faster/errors"
 	"github.com/tonkeeper/opentonapi/pkg/chainstate"
@@ -32,13 +33,16 @@ type Handler struct {
 	state          chainState
 	msgSender      messageSender
 	executor       executor
-	dns            *dns.DNS
 	limits         Limits
 	spamFilter     spamFilter
 	ratesSource    ratesSource
 	metaCache      metadataCache
 	mempoolEmulate mempoolEmulate
 	tonConnect     *tonconnect.Server
+
+	// mu protects "dns".
+	mu  sync.Mutex
+	dns *dns.DNS // todo: update when blockchain config changes
 }
 
 // Options configures behavior of a Handler instance.
@@ -123,7 +127,6 @@ func NewHandler(logger *zap.Logger, opts ...Option) (*Handler, error) {
 	if options.storage == nil {
 		return nil, errors.New("storage is not configured")
 	}
-
 	if options.chainState == nil {
 		options.chainState = chainstate.NewChainState(options.storage)
 	}
@@ -140,15 +143,12 @@ func NewHandler(logger *zap.Logger, opts ...Option) (*Handler, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to init tonconnect")
 	}
-	dnsClient := dns.NewDNS(tongo.MustParseAccountID("-1:e56754f83426f69b09267bd876ac97c44821345b7e266bd956a7bfbfb98df35c"), options.executor) //todo: move to chain config
-
 	return &Handler{
 		storage:     options.storage,
 		state:       options.chainState,
 		addressBook: options.addressBook,
 		msgSender:   options.msgSender,
 		executor:    options.executor,
-		dns:         dnsClient,
 		limits:      options.limits,
 		spamFilter:  options.spamFilter,
 		ratesSource: rates.InitCalculator(options.ratesSource),

@@ -375,6 +375,12 @@ type GetRawBlockchainBlockStateParams struct {
 	BlockID string
 }
 
+// GetRawBlockchainConfigFromBlockParams is parameters of getRawBlockchainConfigFromBlock operation.
+type GetRawBlockchainConfigFromBlockParams struct {
+	// Block ID.
+	BlockID string
+}
+
 // GetRawConfigParams is parameters of getRawConfig operation.
 type GetRawConfigParams struct {
 	// Block ID: (workchain,shard,seqno,root_hash,file_hash).

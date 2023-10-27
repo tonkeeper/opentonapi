@@ -2811,6 +2811,19 @@
     ],
     "type": "object"
    },
+   "RawBlockchainConfig": {
+    "properties": {
+     "config": {
+      "additionalProperties": true,
+      "example": {},
+      "type": "object"
+     }
+    },
+    "required": [
+     "config"
+    ],
+    "type": "object"
+   },
    "Refund": {
     "properties": {
      "origin": {
@@ -4672,6 +4685,35 @@
     ]
    }
   },
+  "/v2/blockchain/blocks/{block_id}/config/raw": {
+   "get": {
+    "description": "Get raw blockchain config from a specific block, if present.",
+    "operationId": "getRawBlockchainConfigFromBlock",
+    "parameters": [
+     {
+      "$ref": "#/components/parameters/blockchainBlockIDParameter"
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/RawBlockchainConfig"
+        }
+       }
+      },
+      "description": "blockchain config"
+     },
+     "default": {
+      "$ref": "#/components/responses/Error"
+     }
+    },
+    "tags": [
+     "Blockchain"
+    ]
+   }
+  },
   "/v2/blockchain/blocks/{block_id}/transactions": {
    "get": {
     "description": "Get transactions from block",
@@ -4711,6 +4753,30 @@
        "application/json": {
         "schema": {
          "$ref": "#/components/schemas/BlockchainConfig"
+        }
+       }
+      },
+      "description": "blockchain config"
+     },
+     "default": {
+      "$ref": "#/components/responses/Error"
+     }
+    },
+    "tags": [
+     "Blockchain"
+    ]
+   }
+  },
+  "/v2/blockchain/config/raw": {
+   "get": {
+    "description": "Get raw blockchain config",
+    "operationId": "getRawBlockchainConfig",
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/RawBlockchainConfig"
         }
        }
       },

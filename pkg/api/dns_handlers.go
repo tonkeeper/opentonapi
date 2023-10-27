@@ -15,18 +15,47 @@ import (
 	"github.com/tonkeeper/tongo/tlb"
 )
 
+// dnsResolver is a lazy initialization of DNS resolver.
+// Once initialized, it always returns the same cached instance.
+func (h *Handler) dnsResolver(ctx context.Context) (*dns.DNS, error) {
+	h.mu.Lock()
+	defer h.mu.Unlock()
+	if h.dns != nil {
+		return h.dns, nil
+	}
+	config, err := h.storage.GetLastConfig(ctx)
+	if err != nil {
+		return nil, err
+	}
+	dnsRoot, ok := config.Config.Get(4)
+	if !ok {
+		return nil, fmt.Errorf("no dns root in config")
+	}
+	var addr tlb.Bits256
+	if err := tlb.Unmarshal(&dnsRoot.Value, &addr); err != nil {
+		return nil, err
+	}
+	root := tongo.AccountID{Workchain: -1, Address: addr}
+	h.dns = dns.NewDNS(root, h.executor)
+	return h.dns, nil
+}
+
 func (h *Handler) AccountDnsBackResolve(ctx context.Context, params oas.AccountDnsBackResolveParams) (*oas.DomainNames, error) {
-	accountID, err := tongo.ParseAccountID(params.AccountID)
+	account, err := tongo.ParseAddress(params.AccountID)
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
 	}
-	domains, err := h.storage.FindAllDomainsResolvedToAddress(ctx, accountID, references.DomainSuffixes)
+	domains, err := h.storage.FindAllDomainsResolvedToAddress(ctx, account.ID, references.DomainSuffixes)
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
 	var result []string
+	dnsResolver, err := h.dnsResolver(ctx)
+	if err != nil {
+		return nil, toError(http.StatusInternalServerError, err)
+	}
 	for _, d := range domains {
-		records, err := h.dns.Resolve(ctx, d)
+		records, err := dnsResolver.Resolve(ctx, d)
 		if err != nil { //todo: check error type
 			continue
 		}
@@ -39,7 +68,7 @@ func (h *Handler) AccountDnsBackResolve(ctx context.Context, params oas.AccountD
 			if err != nil || w == nil {
 				break
 			}
-			if *w != accountID {
+			if *w != account.ID {
 				break
 			}
 			found = true
@@ -56,7 +85,11 @@ func (h *Handler) DnsResolve(ctx context.Context, params oas.DnsResolveParams) (
 	if len(params.DomainName) == 48 || len(params.DomainName) == 52 {
 		return nil, toError(http.StatusBadRequest, fmt.Errorf("domains with length 48 and 52 can't be resolved by security issues"))
 	}
-	records, err := h.dns.Resolve(ctx, params.DomainName)
+	dnsResolver, err := h.dnsResolver(ctx)
+	if err != nil {
+		return nil, toError(http.StatusInternalServerError, err)
+	}
+	records, err := dnsResolver.Resolve(ctx, params.DomainName)
 	if errors.Is(err, dns.ErrNotResolved) {
 		return nil, toError(http.StatusNotFound, err)
 	}

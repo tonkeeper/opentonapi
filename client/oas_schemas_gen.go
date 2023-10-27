@@ -8370,6 +8370,32 @@ func (s *Price) SetTokenName(val string) {
 	s.TokenName = val
 }
 
+// Ref: #/components/schemas/RawBlockchainConfig
+type RawBlockchainConfig struct {
+	Config RawBlockchainConfigConfig `json:"config"`
+}
+
+// GetConfig returns the value of Config.
+func (s *RawBlockchainConfig) GetConfig() RawBlockchainConfigConfig {
+	return s.Config
+}
+
+// SetConfig sets the value of Config.
+func (s *RawBlockchainConfig) SetConfig(val RawBlockchainConfigConfig) {
+	s.Config = val
+}
+
+type RawBlockchainConfigConfig map[string]jx.Raw
+
+func (s *RawBlockchainConfigConfig) init() RawBlockchainConfigConfig {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
 // Ref: #/components/schemas/Refund
 type Refund struct {
 	Type   RefundType `json:"type"`

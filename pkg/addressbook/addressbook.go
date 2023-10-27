@@ -15,7 +15,6 @@ import (
 	"github.com/tonkeeper/opentonapi/pkg/oas"
 	"github.com/tonkeeper/opentonapi/pkg/references"
 	"github.com/tonkeeper/tongo"
-	"github.com/tonkeeper/tongo/ton"
 	"go.uber.org/zap"
 	"golang.org/x/exp/maps"
 	"golang.org/x/exp/slices"
@@ -231,12 +230,12 @@ func (b *Book) refreshAddresses(logger *zap.Logger, addressPath string) {
 	b.mu.Lock()
 	defer b.mu.Unlock()
 	for _, item := range addresses {
-		accountID, err := tongo.ParseAccountID(item.Address)
+		account, err := tongo.ParseAddress(item.Address)
 		if err != nil {
 			continue
 		}
-		item.Address = accountID.ToRaw()
-		b.addresses[accountID] = item
+		item.Address = account.ID.ToRaw()
+		b.addresses[account.ID] = item
 	}
 }
 
@@ -249,12 +248,12 @@ func (b *Book) refreshJettons(logger *zap.Logger, jettonPath string) {
 	b.mu.Lock()
 	defer b.mu.Unlock()
 	for _, item := range jettons {
-		accountID, err := tongo.ParseAccountID(item.Address)
+		account, err := tongo.ParseAddress(item.Address)
 		if err != nil {
 			continue
 		}
-		item.Address = accountID.ToRaw()
-		b.jettons[accountID] = item
+		item.Address = account.ID.ToRaw()
+		b.jettons[account.ID] = item
 	}
 }
 
@@ -275,21 +274,21 @@ func (b *Book) refreshCollections(logger *zap.Logger, collectionPath string) {
 	defer b.mu.Unlock()
 	for _, item := range collections {
 		// TODO: remove items that were previously added but aren't present in the current list.
-		accountID, err := tongo.ParseAccountID(item.Address)
+		account, err := tongo.ParseAddress(item.Address)
 		if err != nil {
 			continue
 		}
-		currentCollection, ok := b.collections[accountID]
+		currentCollection, ok := b.collections[account.ID]
 		if !ok {
 			// this is a new item, so we only add tonkeeper as approver.
-			item.Address = accountID.ToRaw()
+			item.Address = account.ID.ToRaw()
 			item.Approvers = unique(append(item.Approvers, oas.NftApprovedByItemTonkeeper))
-			b.collections[accountID] = item
+			b.collections[account.ID] = item
 			continue
 		}
 		// this is an existing item, so we merge approvers and remove duplicates adding tonkeeper.
 		item.Approvers = unique(append(append(currentCollection.Approvers, item.Approvers...), oas.NftApprovedByItemTonkeeper))
-		b.collections[accountID] = item
+		b.collections[account.ID] = item
 	}
 }
 
@@ -298,13 +297,13 @@ func (b *Book) refreshTfPools(logger *zap.Logger) {
 	defer b.mu.Unlock()
 
 	for _, pool := range getPools(logger) {
-		accountID, err := tongo.ParseAccountID(pool.Address)
+		account, err := tongo.ParseAddress(pool.Address)
 		if err != nil {
 			logger.Error("failed to parse account in pools", zap.Error(err))
 			continue
 		}
-		pool.Address = accountID.ToRaw()
-		b.tfPools[accountID] = pool
+		pool.Address = account.ID.ToRaw()
+		b.tfPools[account.ID] = pool
 	}
 }
 
@@ -381,11 +380,11 @@ func FetchGetGemsVerifiedCollections() ([]tongo.AccountID, error) {
 	}
 	accountIDs := make([]tongo.AccountID, 0, len(q.GetAddressesOfVerifiedCollections))
 	for _, collection := range q.GetAddressesOfVerifiedCollections {
-		accountID, err := ton.ParseAccountID(string(collection))
+		account, err := tongo.ParseAddress(string(collection))
 		if err != nil {
 			return nil, err
 		}
-		accountIDs = append(accountIDs, accountID)
+		accountIDs = append(accountIDs, account.ID)
 	}
 	return accountIDs, nil
 }

@@ -9,7 +9,9 @@ import (
 	"time"
 
 	"github.com/tonkeeper/tongo"
+	"github.com/tonkeeper/tongo/liteapi"
 	"github.com/tonkeeper/tongo/tlb"
+	"github.com/tonkeeper/tongo/ton"
 )
 
 type ChainState struct {
@@ -59,21 +61,22 @@ func suspended(conf config) (map[tongo.AccountID]struct{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	c, prs := cfg.Config.Get(44)
-	if !prs {
-		return nil, fmt.Errorf("config doesn't have %v param", 44)
-	}
-	var blockedAccounts struct {
-		Prefix byte
-		Map    tlb.HashmapE[accID, struct{}]
-	}
-	err = tlb.Unmarshal(&c.Value, &blockedAccounts)
+	// optimization to avoid processing all config keys
+	cfg = cfg.CloneKeepingSubsetOfKeys([]uint32{44})
+	blockchainConfig, err := liteapi.ConvertBlockchainConfig(cfg)
 	if err != nil {
 		return nil, err
 	}
-	m := make(map[tongo.AccountID]struct{})
-	for _, a := range blockedAccounts.Map.Items() {
-		m[tongo.AccountID(a.Key)] = struct{}{}
+	if blockchainConfig.ConfigParam44 == nil {
+		return nil, fmt.Errorf("config doesn't have %v param", 44)
+	}
+	m := make(map[tongo.AccountID]struct{}, len(blockchainConfig.ConfigParam44.SuspendedAddressList.Addresses.Keys()))
+	for _, addr := range blockchainConfig.ConfigParam44.SuspendedAddressList.Addresses.Keys() {
+		accountID := ton.AccountID{
+			Workchain: int32(addr.Workchain),
+			Address:   addr.Address,
+		}
+		m[accountID] = struct{}{}
 	}
 	return m, nil
 }
@@ -102,10 +105,4 @@ func (s *ChainState) CheckIsSuspended(id tongo.AccountID) bool {
 	defer s.mu.RUnlock()
 	_, prs := s.banned[id]
 	return prs
-}
-
-type accID tongo.AccountID
-
-func (a accID) FixedSize() int {
-	return 288 // (32+256) * 8
 }
