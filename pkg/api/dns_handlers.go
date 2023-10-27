@@ -41,11 +41,11 @@ func (h *Handler) dnsResolver(ctx context.Context) (*dns.DNS, error) {
 }
 
 func (h *Handler) AccountDnsBackResolve(ctx context.Context, params oas.AccountDnsBackResolveParams) (*oas.DomainNames, error) {
-	accountID, err := tongo.ParseAccountID(params.AccountID)
+	account, err := tongo.ParseAddress(params.AccountID)
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
 	}
-	domains, err := h.storage.FindAllDomainsResolvedToAddress(ctx, accountID, references.DomainSuffixes)
+	domains, err := h.storage.FindAllDomainsResolvedToAddress(ctx, account.ID, references.DomainSuffixes)
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
@@ -68,7 +68,7 @@ func (h *Handler) AccountDnsBackResolve(ctx context.Context, params oas.AccountD
 			if err != nil || w == nil {
 				break
 			}
-			if *w != accountID {
+			if *w != account.ID {
 				break
 			}
 			found = true

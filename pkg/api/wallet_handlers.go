@@ -150,19 +150,19 @@ func (h *Handler) GetWalletsByPublicKey(ctx context.Context, params oas.GetWalle
 }
 
 func (h *Handler) GetAccountSeqno(ctx context.Context, params oas.GetAccountSeqnoParams) (*oas.Seqno, error) {
-	accountID, err := tongo.ParseAccountID(params.AccountID)
+	account, err := tongo.ParseAddress(params.AccountID)
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
 	}
-	account, err := h.storage.GetRawAccount(ctx, accountID)
+	rawAccount, err := h.storage.GetRawAccount(ctx, account.ID)
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
-	walletVersion, err := wallet.GetVersionByCode(account.Code)
+	walletVersion, err := wallet.GetVersionByCode(rawAccount.Code)
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
-	cells, err := boc.DeserializeBoc(account.Data)
+	cells, err := boc.DeserializeBoc(rawAccount.Data)
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
@@ -183,7 +183,7 @@ func (h *Handler) GetAccountSeqno(ctx context.Context, params oas.GetAccountSeqn
 		}
 		seqno = data.Seqno
 	default:
-		seqno, err = h.storage.GetSeqno(ctx, accountID)
+		seqno, err = h.storage.GetSeqno(ctx, account.ID)
 		if err != nil {
 			return nil, toError(http.StatusInternalServerError, err)
 		}

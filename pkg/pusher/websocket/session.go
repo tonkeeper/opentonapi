@@ -123,11 +123,11 @@ func (s *session) sendEvent(e event) {
 func (s *session) subscribeToTransactions(ctx context.Context, params []string) string {
 	accounts := make([]tongo.AccountID, 0, len(params))
 	for _, a := range params {
-		accountID, err := tongo.ParseAccountID(a)
+		account, err := tongo.ParseAddress(a)
 		if err != nil {
 			return fmt.Sprintf("failed to process '%v' account: %v", a, err)
 		}
-		accounts = append(accounts, accountID)
+		accounts = append(accounts, account.ID)
 	}
 	if len(s.txSubscriptions)+len(accounts) > s.subscriptionLimit {
 		return fmt.Sprintf("you have reached the limit of %v subscriptions", s.subscriptionLimit)
@@ -160,11 +160,11 @@ func (s *session) unsubscribe(params []string) string {
 func (s *session) subscribeToTraces(ctx context.Context, params []string) string {
 	accounts := make([]tongo.AccountID, 0, len(params))
 	for _, a := range params {
-		accountID, err := tongo.ParseAccountID(a)
+		account, err := tongo.ParseAddress(a)
 		if err != nil {
 			return fmt.Sprintf("failed to process '%v' account: %v", a, err)
 		}
-		accounts = append(accounts, accountID)
+		accounts = append(accounts, account.ID)
 	}
 	if len(s.traceSubscriptions)+len(accounts) > s.subscriptionLimit {
 		return fmt.Sprintf("you have reached the limit of %v subscriptions", s.subscriptionLimit)

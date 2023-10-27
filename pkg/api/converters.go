@@ -167,9 +167,9 @@ func stringToTVMStackRecord(s string) (tlb.VmStackValue, error) {
 	if s == "Null" {
 		return tlb.VmStackValue{SumType: "VmStkNull"}, nil
 	}
-	a, err := tongo.ParseAccountID(s)
+	account, err := tongo.ParseAddress(s)
 	if err == nil {
-		return tlb.TlbStructToVmCellSlice(a.ToMsgAddress())
+		return tlb.TlbStructToVmCellSlice(account.ID.ToMsgAddress())
 	}
 	if strings.HasPrefix(s, "0x") {
 		b, err := hex.DecodeString(s[2:])
