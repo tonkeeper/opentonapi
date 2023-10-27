@@ -1,6 +1,7 @@
 package core
 
 import (
+	"github.com/tonkeeper/tongo/abi"
 	"math/big"
 
 	"github.com/shopspring/decimal"
@@ -20,7 +21,7 @@ type Account struct {
 	Data              []byte
 	FrozenHash        *tongo.Bits256
 	Storage           StorageInfo
-	Interfaces        []string
+	Interfaces        []abi.ContractInterface
 	LastActivityTime  int64
 	GetMethods        []string
 	Libraries         map[tongo.Bits256]*boc.Cell
