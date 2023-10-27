@@ -28,6 +28,8 @@ var _ oas.Handler = (*Handler)(nil)
 type Handler struct {
 	oas.UnimplementedHandler // automatically implement all methods
 
+	logger *zap.Logger
+
 	addressBook    addressBook
 	storage        storage
 	state          chainState
@@ -144,6 +146,7 @@ func NewHandler(logger *zap.Logger, opts ...Option) (*Handler, error) {
 		return nil, fmt.Errorf("failed to init tonconnect")
 	}
 	return &Handler{
+		logger:      logger,
 		storage:     options.storage,
 		state:       options.chainState,
 		addressBook: options.addressBook,

@@ -2964,6 +2964,307 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Transaction'
+    ConfigProposalSetup:
+      type: object
+      required:
+        - min_tot_rounds
+        - max_tot_rounds
+        - min_wins
+        - max_losses
+        - min_store_sec
+        - max_store_sec
+        - bit_price
+        - cell_price
+      properties:
+        min_tot_rounds:
+          type: integer
+          example: 2
+        max_tot_rounds:
+          type: integer
+          example: 6
+        min_wins:
+          type: integer
+          example: 2
+        max_losses:
+          type: integer
+          example: 6
+        min_store_sec:
+          type: integer
+          format: int64
+          example: 1000000
+        max_store_sec:
+          type: integer
+          format: int64
+          example: 10000000
+        bit_price:
+          type: integer
+          format: int64
+          example: 1
+        cell_price:
+          type: integer
+          format: int64
+          example: 500
+    GasLimitPrices:
+      type: object
+      required:
+        - gas_price
+        - gas_limit
+        - gas_credit
+        - block_gas_limit
+        - freeze_due_limit
+        - delete_due_limit
+      properties:
+        special_gas_limit:
+          type: integer
+          format: int64
+        flat_gas_limit:
+          type: integer
+          format: int64
+        flat_gas_price:
+          type: integer
+          format: int64
+        gas_price:
+          type: integer
+          format: int64
+          example: 1
+        gas_limit:
+          type: integer
+          format: int64
+          example: 1000000
+        gas_credit:
+          type: integer
+          format: int64
+          example: 1000000
+        block_gas_limit:
+          type: integer
+          format: int64
+          example: 1000000
+        freeze_due_limit:
+          type: integer
+          format: int64
+          example: 1000000
+        delete_due_limit:
+          type: integer
+          format: int64
+          example: 1000000
+    BlockParamLimits:
+      type: object
+      required:
+        - underload
+        - soft_limit
+        - hard_limit
+      properties:
+        underload:
+          type: integer
+          format: int64
+          example: 1000000
+        soft_limit:
+          type: integer
+          format: int64
+          example: 1000000
+        hard_limit:
+          type: integer
+          format: int64
+          example: 1000000
+    BlockLimits:
+      type: object
+      required:
+        - bytes
+        - gas
+        - lt_delta
+      properties:
+        bytes:
+          $ref: '#/components/schemas/BlockParamLimits'
+        gas:
+          $ref: '#/components/schemas/BlockParamLimits'
+        lt_delta:
+          $ref: '#/components/schemas/BlockParamLimits'
+    MsgForwardPrices:
+      type: object
+      required:
+        - lump_price
+        - bit_price
+        - cell_price
+        - ihr_price_factor
+        - first_frac
+        - next_frac
+      properties:
+        lump_price:
+          type: integer
+          format: int64
+          example: 1000000
+        bit_price:
+          type: integer
+          format: int64
+          example: 1000000
+        cell_price:
+          type: integer
+          format: int64
+          example: 1000000
+        ihr_price_factor:
+          type: integer
+          format: int64
+          example: 1000000
+        first_frac:
+          type: integer
+          format: int64
+          example: 1000000
+        next_frac:
+          type: integer
+          format: int64
+          example: 1000000
+    WorkchainDescr:
+      type: object
+      required:
+        - workchain
+        - enabled_since
+        - actual_min_split
+        - min_split
+        - max_split
+        - basic
+        - active
+        - accept_msgs
+        - flags
+        - zerostate_root_hash
+        - zerostate_file_hash
+        - version
+      properties:
+        workchain:
+          type: integer
+          format: int
+          example: 0
+        enabled_since:
+          type: integer
+          format: int64
+          example: 1000000
+        actual_min_split:
+          type: integer
+          format: int
+          example: 1000000
+        min_split:
+          type: integer
+          format: int
+          example: 1000000
+        max_split:
+          type: integer
+          format: int
+          example: 1000000
+        basic:
+          type: integer
+          example: 1000000
+        active:
+          type: boolean
+          example: true
+        accept_msgs:
+          type: boolean
+          example: true
+        flags:
+          type: integer
+          format: int
+          example: 1000000
+        zerostate_root_hash:
+          type: string
+          example: 1000000
+        zerostate_file_hash:
+          type: string
+          example: 1000000
+        version:
+          type: integer
+          format: int64
+          example: 1000000
+    MisbehaviourPunishmentConfig:
+      type: object
+      required:
+        - default_flat_fine
+        - default_proportional_fine
+        - severity_flat_mult
+        - severity_proportional_mult
+        - unpunishable_interval
+        - long_interval
+        - long_flat_mult
+        - long_proportional_mult
+        - medium_interval
+        - medium_flat_mult
+        - medium_proportional_mult
+      properties:
+        default_flat_fine:
+          type: integer
+          format: int64
+          example: 1000000
+        default_proportional_fine:
+          type: integer
+          format: int64
+          example: 1000000
+        severity_flat_mult:
+          type: integer
+          example: 1000000
+        severity_proportional_mult:
+          type: integer
+          example: 1000000
+        unpunishable_interval:
+          type: integer
+          example: 1000000
+        long_interval:
+          type: integer
+          example: 1000000
+        long_flat_mult:
+          type: integer
+          example: 1000000
+        long_proportional_mult:
+          type: integer
+          example: 1000000
+        medium_interval:
+          type: integer
+          example: 1000000
+        medium_flat_mult:
+          type: integer
+          example: 1000000
+        medium_proportional_mult:
+          type: integer
+          example: 1000000
+
+    SizeLimitsConfig:
+      type: object
+      required:
+        - max_msg_bits
+        - max_msg_cells
+        - max_library_cells
+        - max_vm_data_depth
+        - max_ext_msg_size
+        - max_ext_msg_depth
+      properties:
+        max_msg_bits:
+          type: integer
+          format: int64
+          example: 1000000
+        max_msg_cells:
+          type: integer
+          format: int64
+          example: 1000000
+        max_library_cells:
+          type: integer
+          format: int64
+          example: 1000000
+        max_vm_data_depth:
+          type: integer
+          format: int
+          example: 1000000
+        max_ext_msg_size:
+          type: integer
+          format: int64
+          example: 1000000
+        max_ext_msg_depth:
+          type: integer
+          format: int
+          example: 1000000
+        max_acc_state_cells:
+          type: integer
+          format: int64
+          example: 1000000
+        max_acc_state_bits:
+          type: integer
+          format: int64
+          example: 1000000
     ValidatorsSet:
       type: object
       required:
@@ -2983,15 +3284,105 @@ components:
           type: integer
         total_weight:
           type: integer
+          format: int64
         list:
           type: array
           items:
             type: object
             required:
               - public_key
+              - weight
             properties:
               public_key:
                 type: string
+              weight:
+                type: integer
+                format: int64
+              adnl_addr:
+                type: string
+    Oracle:
+      type: object
+      required:
+        - address
+        - secp_pubkey
+      properties:
+        address:
+          type: string
+          example: 0:55e8809519cd3c49098c9ee45afdafcea7a894a74d0f628d94a115a50e045122
+        secp_pubkey:
+          type: string
+          example: 00000000000000000000000017dcab1b1481610f6c7a7a98cf0370dc0ec704a6
+    OracleBridgeParams:
+      type: object
+      required:
+        - bridge_addr
+        - oracle_multisig_address
+        - external_chain_address
+        - oracles
+      properties:
+        bridge_addr:
+          type: string
+        oracle_multisig_address:
+          type: string
+        external_chain_address:
+          type: string
+        oracles:
+          type: array
+          items:
+            $ref: '#/components/schemas/Oracle'
+    JettonBridgePrices:
+      type: object
+      required:
+        - bridge_burn_fee
+        - bridge_mint_fee
+        - wallet_min_tons_for_storage
+        - wallet_gas_consumption
+        - minter_min_tons_for_storage
+        - discover_gas_consumption
+      properties:
+        bridge_burn_fee:
+          type: integer
+          format: int64
+        bridge_mint_fee:
+          type: integer
+          format: int64
+        wallet_min_tons_for_storage:
+          type: integer
+          format: int64
+        wallet_gas_consumption:
+          type: integer
+          format: int64
+        minter_min_tons_for_storage:
+          type: integer
+          format: int64
+        discover_gas_consumption:
+          type: integer
+          format: int64
+    JettonBridgeParams:
+      type: object
+      required:
+        - bridge_address
+        - oracles_address
+        - state_flags
+        - oracles
+      properties:
+        bridge_address:
+          type: string
+        oracles_address:
+          type: string
+        state_flags:
+          type: integer
+        burn_bridge_fee:
+          type: integer
+          format: int64
+        oracles:
+          type: array
+          items:
+            $ref: '#/components/schemas/Oracle'
+        external_chain_address:
+          type: string
+        prices:
+          $ref: '#/components/schemas/JettonBridgePrices'
     Validator:
       type: object
       required:
@@ -3213,9 +3604,391 @@ components:
         "2":
           type: string
           description: "minter address"
+        "3":
+          type: string
+          description: "The address of the transaction fee collector."
         "4":
           type: string
           description: "dns root address"
+        "5":
+          type: object
+          required:
+            - fee_burn_nom
+            - fee_burn_denom
+          properties:
+            blackhole_addr:
+              type: string
+            fee_burn_nom:
+              type: integer
+              format: int64
+            fee_burn_denom:
+              type: integer
+              format: int64
+        "6":
+          type: object
+          description: Minting fees of new currencies.
+          required:
+            - mint_new_price
+            - mint_add_price
+          properties:
+            mint_new_price:
+              type: integer
+              format: int64
+            mint_add_price:
+              type: integer
+              format: int64
+        "7":
+          type: object
+          description: The volume of each of the additional currencies in circulation.
+          required:
+            - currencies
+          properties:
+            currencies:
+              type: array
+              items:
+                type: object
+                required:
+                  - currency_id
+                  - amount
+                properties:
+                  currency_id:
+                    type: integer
+                    format: int64
+                  amount:
+                    type: string
+        "8":
+          type: object
+          description: The network version and additional capabilities supported by the validators.
+          required:
+            - version
+            - capabilities
+          properties:
+            version:
+              type: integer
+              format: int64
+            capabilities:
+              type: integer
+              format: int64
+        "9":
+          type: object
+          description: List of mandatory parameters of the blockchain config.
+          required:
+            - mandatory_params
+          properties:
+            mandatory_params:
+              type: array
+              items:
+                type: integer
+                format: int32
+        "10":
+          type: object
+          description: List of critical TON parameters, the change of which significantly affects the network, so more voting rounds are held.
+          required:
+            - critical_params
+          properties:
+            critical_params:
+              type: array
+              items:
+                type: integer
+                format: int32
+        "11":
+          type: object
+          description: This parameter indicates under what conditions proposals to change the TON configuration are accepted.
+          required:
+            - normal_params
+            - critical_params
+          properties:
+            normal_params:
+              $ref: '#/components/schemas/ConfigProposalSetup'
+            critical_params:
+              $ref: '#/components/schemas/ConfigProposalSetup'
+        "12":
+          type: object
+          description: Workchains in the TON Blockchain
+          required:
+            - workchains
+          properties:
+            workchains:
+              type: array
+              items:
+                $ref: '#/components/schemas/WorkchainDescr'
+        "13":
+          type: object
+          description: The cost of filing complaints about incorrect operation of validators.
+          required:
+            - deposit
+            - bit_price
+            - cell_price
+          properties:
+            deposit:
+              type: integer
+              format: int64
+            bit_price:
+              type: integer
+              format: int64
+            cell_price:
+              type: integer
+              format: int64
+        "14":
+          type: object
+          description: The reward in nanoTons for block creation in the TON blockchain.
+          required:
+            - masterchain_block_fee
+            - basechain_block_fee
+          properties:
+            masterchain_block_fee:
+              type: integer
+              format: int64
+            basechain_block_fee:
+              type: integer
+              format: int64
+        "15":
+          type: object
+          description: The reward in nanoTons for block creation in the TON blockchain.
+          required:
+            - validators_elected_for
+            - elections_start_before
+            - elections_end_before
+            - stake_held_for
+          properties:
+            validators_elected_for:
+              type: integer
+              format: int64
+              example: 65536
+            elections_start_before:
+              type: integer
+              format: int64
+              example: 32768
+            elections_end_before:
+              type: integer
+              format: int64
+              example: 8192
+            stake_held_for:
+              type: integer
+              format: int64
+              example: 32768
+        "16":
+          type: object
+          description: The limits on the number of validators in the TON blockchain.
+          required:
+            - max_validators
+            - max_main_validators
+            - min_validators
+          properties:
+            max_validators:
+              type: integer
+              example: 400
+            max_main_validators:
+              type: integer
+              example: 100
+            min_validators:
+              type: integer
+              example: 75
+        "17":
+          type: object
+          description: The stake parameters configuration in the TON blockchain.
+          required:
+            - min_stake
+            - max_stake
+            - min_total_stake
+            - max_stake_factor
+          properties:
+            min_stake:
+              type: string
+            max_stake:
+              type: string
+            min_total_stake:
+              type: string
+            max_stake_factor:
+              type: integer
+              format: int64
+        "18":
+          type: object
+          description: The prices for data storage.
+          required:
+            - storage_prices
+          properties:
+            storage_prices:
+              type: array
+              items:
+                type: object
+                required:
+                  - utime_since
+                  - bit_price_ps
+                  - cell_price_ps
+                  - mc_bit_price_ps
+                  - mc_cell_price_ps
+                properties:
+                  utime_since:
+                    type: integer
+                    format: int64
+                    example: 0
+                  bit_price_ps:
+                    type: integer
+                    format: int64
+                    example: 1
+                  cell_price_ps:
+                    type: integer
+                    format: int64
+                    example: 500
+                  mc_bit_price_ps:
+                    type: integer
+                    format: int64
+                    example: 1000
+                  mc_cell_price_ps:
+                    type: integer
+                    format: int64
+                    example: 500000
+        "20":
+          type: object
+          description: The cost of computations in the masterchain. The complexity of any computation is estimated in gas units.
+          required:
+            - gas_limits_prices
+          properties:
+            gas_limits_prices:
+              $ref: '#/components/schemas/GasLimitPrices'
+        "21":
+          type: object
+          description: The cost of computations in the basechains. The complexity of any computation is estimated in gas units.
+          required:
+            - gas_limits_prices
+          properties:
+            gas_limits_prices:
+              $ref: '#/components/schemas/GasLimitPrices'
+        "22":
+          type: object
+          description: The limits on the block in the masterchain, upon reaching which the block is finalized and the callback of the remaining messages (if any) is carried over to the next block.
+          required:
+            - block_limits
+          properties:
+            block_limits:
+              $ref: '#/components/schemas/BlockLimits'
+        "23":
+          type: object
+          description: The limits on the block in the basechains, upon reaching which the block is finalized and the callback of the remaining messages (if any) is carried over to the next block.
+          required:
+            - block_limits
+          properties:
+            block_limits:
+              $ref: '#/components/schemas/BlockLimits'
+        "24":
+          type: object
+          description: The cost of sending messages in the masterchain of the TON blockchain.
+          required:
+            - msg_forward_prices
+          properties:
+            msg_forward_prices:
+              $ref: '#/components/schemas/MsgForwardPrices'
+        "25":
+          type: object
+          description: The cost of sending messages in the basechains of the TON blockchain.
+          required:
+            - msg_forward_prices
+          properties:
+            msg_forward_prices:
+              $ref: '#/components/schemas/MsgForwardPrices'
+        "28":
+          type: object
+          description: The configuration for the Catchain protocol.
+          required:
+            - mc_catchain_lifetime
+            - shard_catchain_lifetime
+            - shard_validators_lifetime
+            - shard_validators_num
+          properties:
+            mc_catchain_lifetime:
+              type: integer
+              format: int64
+              example: 1000000
+            shard_catchain_lifetime:
+              type: integer
+              format: int64
+              example: 1000000
+            shard_validators_lifetime:
+              type: integer
+              format: int64
+              example: 1000000
+            shard_validators_num:
+              type: integer
+              format: int64
+              example: 1000000
+            flags:
+              type: integer
+              format: int
+              example: 1000000
+            shuffle_mc_validators:
+              type: boolean
+        "29":
+          type: object
+          description: The configuration for the consensus protocol above catchain.
+          required:
+            - round_candidates
+            - next_candidate_delay_ms
+            - consensus_timeout_ms
+            - fast_attempts
+            - attempt_duration
+            - catchain_max_deps
+            - max_block_bytes
+            - max_collated_bytes
+          properties:
+            flags:
+              type: integer
+              format: int
+              example: 0
+            new_catchain_ids:
+              type: boolean
+              example: true
+            round_candidates:
+              type: integer
+              format: int64
+              example: 3
+            next_candidate_delay_ms:
+              type: integer
+              format: int64
+              example: 2000
+            consensus_timeout_ms:
+              type: integer
+              format: int64
+              example: 16000
+            fast_attempts:
+              type: integer
+              format: int64
+              example: 3
+            attempt_duration:
+              type: integer
+              format: int64
+              example: 8
+            catchain_max_deps:
+              type: integer
+              format: int64
+              example: 4
+            max_block_bytes:
+              type: integer
+              format: int64
+              example: 2097152
+            max_collated_bytes:
+              type: integer
+              format: int64
+              example: 2097152
+            proto_version:
+              type: integer
+              format: int64
+              example: 2
+            catchain_max_blocks_coeff:
+              type: integer
+              format: int64
+              example: 10000
+        "31":
+          type: object
+          description: The configuration for the consensus protocol above catchain.
+          required:
+            - fundamental_smc_addr
+          properties:
+            fundamental_smc_addr:
+              type: array
+              items:
+                type: string
+                example: -1:dd24c4a1f2b88f8b7053513b5cc6c5a31bc44b2a72dcb4d8c0338af0f0d37ec5
         "32":
           $ref: '#/components/schemas/ValidatorsSet'
         "33":
@@ -3228,6 +4001,22 @@ components:
           $ref: '#/components/schemas/ValidatorsSet'
         "37":
           $ref: '#/components/schemas/ValidatorsSet'
+        "40":
+          type: object
+          description: The configuration for punishment for improper behavior (non-validation). In the absence of the parameter, the default fine size is 101 TON
+          required:
+            - misbehaviour_punishment_config
+          properties:
+            misbehaviour_punishment_config:
+              $ref: '#/components/schemas/MisbehaviourPunishmentConfig'
+        "43":
+          type: object
+          description: The size limits and some other characteristics of accounts and messages.
+          required:
+            - size_limits_config
+          properties:
+            size_limits_config:
+              $ref: '#/components/schemas/SizeLimitsConfig'
         "44":
           type: object
           description: suspended accounts
@@ -3241,6 +4030,54 @@ components:
                 type: string
             suspended_until:
               type: integer
+        "71":
+          type: object
+          description: Bridge parameters for wrapping TON in other networks.
+          required:
+            - oracle_bridge_params
+          properties:
+            oracle_bridge_params:
+              $ref: '#/components/schemas/OracleBridgeParams'
+        "72":
+          type: object
+          description: Bridge parameters for wrapping TON in other networks.
+          required:
+            - oracle_bridge_params
+          properties:
+            oracle_bridge_params:
+              $ref: '#/components/schemas/OracleBridgeParams'
+        "73":
+          type: object
+          description: Bridge parameters for wrapping TON in other networks.
+          required:
+            - oracle_bridge_params
+          properties:
+            oracle_bridge_params:
+              $ref: '#/components/schemas/OracleBridgeParams'
+        "79":
+          type: object
+          description: Bridge parameters for wrapping tokens from other networks into tokens on the TON network.
+          required:
+            - jetton_bridge_params
+          properties:
+            jetton_bridge_params:
+              $ref: '#/components/schemas/JettonBridgeParams'
+        "81":
+          type: object
+          description: Bridge parameters for wrapping tokens from other networks into tokens on the TON network.
+          required:
+            - jetton_bridge_params
+          properties:
+            jetton_bridge_params:
+              $ref: '#/components/schemas/JettonBridgeParams'
+        "82":
+          type: object
+          description: Bridge parameters for wrapping tokens from other networks into tokens on the TON network.
+          required:
+            - jetton_bridge_params
+          properties:
+            jetton_bridge_params:
+              $ref: '#/components/schemas/JettonBridgeParams'
     DomainNames:
       type: object
       required:

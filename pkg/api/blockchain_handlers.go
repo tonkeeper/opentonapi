@@ -118,7 +118,7 @@ func (h *Handler) GetBlockchainConfig(ctx context.Context) (*oas.BlockchainConfi
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
-	out, err := convertConfig(cfg)
+	out, err := convertConfig(h.logger, cfg)
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
