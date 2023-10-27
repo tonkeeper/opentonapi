@@ -1393,6 +1393,80 @@ func (s *Auctions) SetTotal(val int64) {
 	s.Total = val
 }
 
+// Ref: #/components/schemas/BlockLimits
+type BlockLimits struct {
+	Bytes   BlockParamLimits `json:"bytes"`
+	Gas     BlockParamLimits `json:"gas"`
+	LtDelta BlockParamLimits `json:"lt_delta"`
+}
+
+// GetBytes returns the value of Bytes.
+func (s *BlockLimits) GetBytes() BlockParamLimits {
+	return s.Bytes
+}
+
+// GetGas returns the value of Gas.
+func (s *BlockLimits) GetGas() BlockParamLimits {
+	return s.Gas
+}
+
+// GetLtDelta returns the value of LtDelta.
+func (s *BlockLimits) GetLtDelta() BlockParamLimits {
+	return s.LtDelta
+}
+
+// SetBytes sets the value of Bytes.
+func (s *BlockLimits) SetBytes(val BlockParamLimits) {
+	s.Bytes = val
+}
+
+// SetGas sets the value of Gas.
+func (s *BlockLimits) SetGas(val BlockParamLimits) {
+	s.Gas = val
+}
+
+// SetLtDelta sets the value of LtDelta.
+func (s *BlockLimits) SetLtDelta(val BlockParamLimits) {
+	s.LtDelta = val
+}
+
+// Ref: #/components/schemas/BlockParamLimits
+type BlockParamLimits struct {
+	Underload int64 `json:"underload"`
+	SoftLimit int64 `json:"soft_limit"`
+	HardLimit int64 `json:"hard_limit"`
+}
+
+// GetUnderload returns the value of Underload.
+func (s *BlockParamLimits) GetUnderload() int64 {
+	return s.Underload
+}
+
+// GetSoftLimit returns the value of SoftLimit.
+func (s *BlockParamLimits) GetSoftLimit() int64 {
+	return s.SoftLimit
+}
+
+// GetHardLimit returns the value of HardLimit.
+func (s *BlockParamLimits) GetHardLimit() int64 {
+	return s.HardLimit
+}
+
+// SetUnderload sets the value of Underload.
+func (s *BlockParamLimits) SetUnderload(val int64) {
+	s.Underload = val
+}
+
+// SetSoftLimit sets the value of SoftLimit.
+func (s *BlockParamLimits) SetSoftLimit(val int64) {
+	s.SoftLimit = val
+}
+
+// SetHardLimit sets the value of HardLimit.
+func (s *BlockParamLimits) SetHardLimit(val int64) {
+	s.HardLimit = val
+}
+
 // Ref: #/components/schemas/BlockRaw
 type BlockRaw struct {
 	Workchain uint32 `json:"workchain"`
@@ -1881,16 +1955,86 @@ type BlockchainConfig struct {
 	R1 string `json:"1"`
 	// Minter address.
 	R2 string `json:"2"`
+	// The address of the transaction fee collector.
+	R3 OptString `json:"3"`
 	// Dns root address.
-	R4  string           `json:"4"`
-	R32 OptValidatorsSet `json:"32"`
-	R33 OptValidatorsSet `json:"33"`
-	R34 OptValidatorsSet `json:"34"`
-	R35 OptValidatorsSet `json:"35"`
-	R36 OptValidatorsSet `json:"36"`
-	R37 OptValidatorsSet `json:"37"`
+	R4 string               `json:"4"`
+	R5 OptBlockchainConfig5 `json:"5"`
+	// Minting fees of new currencies.
+	R6 OptBlockchainConfig6 `json:"6"`
+	// The volume of each of the additional currencies in circulation.
+	R7 OptBlockchainConfig7 `json:"7"`
+	// The network version and additional capabilities supported by the validators.
+	R8 OptBlockchainConfig8 `json:"8"`
+	// List of mandatory parameters of the blockchain config.
+	R9 OptBlockchainConfig9 `json:"9"`
+	// List of critical TON parameters, the change of which significantly affects the network, so more
+	// voting rounds are held.
+	R10 OptBlockchainConfig10 `json:"10"`
+	// This parameter indicates under what conditions proposals to change the TON configuration are
+	// accepted.
+	R11 OptBlockchainConfig11 `json:"11"`
+	// Workchains in the TON Blockchain.
+	R12 OptBlockchainConfig12 `json:"12"`
+	// The cost of filing complaints about incorrect operation of validators.
+	R13 OptBlockchainConfig13 `json:"13"`
+	// The reward in nanoTons for block creation in the TON blockchain.
+	R14 OptBlockchainConfig14 `json:"14"`
+	// The reward in nanoTons for block creation in the TON blockchain.
+	R15 OptBlockchainConfig15 `json:"15"`
+	// The limits on the number of validators in the TON blockchain.
+	R16 OptBlockchainConfig16 `json:"16"`
+	// The stake parameters configuration in the TON blockchain.
+	R17 OptBlockchainConfig17 `json:"17"`
+	// The prices for data storage.
+	R18 OptBlockchainConfig18 `json:"18"`
+	// The cost of computations in the masterchain. The complexity of any computation is estimated in gas
+	// units.
+	R20 OptBlockchainConfig20 `json:"20"`
+	// The cost of computations in the basechains. The complexity of any computation is estimated in gas
+	// units.
+	R21 OptBlockchainConfig21 `json:"21"`
+	// The limits on the block in the masterchain, upon reaching which the block is finalized and the
+	// callback of the remaining messages (if any) is carried over to the next block.
+	R22 OptBlockchainConfig22 `json:"22"`
+	// The limits on the block in the basechains, upon reaching which the block is finalized and the
+	// callback of the remaining messages (if any) is carried over to the next block.
+	R23 OptBlockchainConfig23 `json:"23"`
+	// The cost of sending messages in the masterchain of the TON blockchain.
+	R24 OptBlockchainConfig24 `json:"24"`
+	// The cost of sending messages in the basechains of the TON blockchain.
+	R25 OptBlockchainConfig25 `json:"25"`
+	// The configuration for the Catchain protocol.
+	R28 OptBlockchainConfig28 `json:"28"`
+	// The configuration for the consensus protocol above catchain.
+	R29 OptBlockchainConfig29 `json:"29"`
+	// The configuration for the consensus protocol above catchain.
+	R31 OptBlockchainConfig31 `json:"31"`
+	R32 OptValidatorsSet      `json:"32"`
+	R33 OptValidatorsSet      `json:"33"`
+	R34 OptValidatorsSet      `json:"34"`
+	R35 OptValidatorsSet      `json:"35"`
+	R36 OptValidatorsSet      `json:"36"`
+	R37 OptValidatorsSet      `json:"37"`
+	// The configuration for punishment for improper behavior (non-validation). In the absence of the
+	// parameter, the default fine size is 101 TON.
+	R40 OptBlockchainConfig40 `json:"40"`
+	// The size limits and some other characteristics of accounts and messages.
+	R43 OptBlockchainConfig43 `json:"43"`
 	// Suspended accounts.
 	R44 BlockchainConfig44 `json:"44"`
+	// Bridge parameters for wrapping TON in other networks.
+	R71 OptBlockchainConfig71 `json:"71"`
+	// Bridge parameters for wrapping TON in other networks.
+	R72 OptBlockchainConfig72 `json:"72"`
+	// Bridge parameters for wrapping TON in other networks.
+	R73 OptBlockchainConfig73 `json:"73"`
+	// Bridge parameters for wrapping tokens from other networks into tokens on the TON network.
+	R79 OptBlockchainConfig79 `json:"79"`
+	// Bridge parameters for wrapping tokens from other networks into tokens on the TON network.
+	R81 OptBlockchainConfig81 `json:"81"`
+	// Bridge parameters for wrapping tokens from other networks into tokens on the TON network.
+	R82 OptBlockchainConfig82 `json:"82"`
 }
 
 // GetRaw returns the value of Raw.
@@ -1913,9 +2057,129 @@ func (s *BlockchainConfig) GetR2() string {
 	return s.R2
 }
 
+// GetR3 returns the value of R3.
+func (s *BlockchainConfig) GetR3() OptString {
+	return s.R3
+}
+
 // GetR4 returns the value of R4.
 func (s *BlockchainConfig) GetR4() string {
 	return s.R4
+}
+
+// GetR5 returns the value of R5.
+func (s *BlockchainConfig) GetR5() OptBlockchainConfig5 {
+	return s.R5
+}
+
+// GetR6 returns the value of R6.
+func (s *BlockchainConfig) GetR6() OptBlockchainConfig6 {
+	return s.R6
+}
+
+// GetR7 returns the value of R7.
+func (s *BlockchainConfig) GetR7() OptBlockchainConfig7 {
+	return s.R7
+}
+
+// GetR8 returns the value of R8.
+func (s *BlockchainConfig) GetR8() OptBlockchainConfig8 {
+	return s.R8
+}
+
+// GetR9 returns the value of R9.
+func (s *BlockchainConfig) GetR9() OptBlockchainConfig9 {
+	return s.R9
+}
+
+// GetR10 returns the value of R10.
+func (s *BlockchainConfig) GetR10() OptBlockchainConfig10 {
+	return s.R10
+}
+
+// GetR11 returns the value of R11.
+func (s *BlockchainConfig) GetR11() OptBlockchainConfig11 {
+	return s.R11
+}
+
+// GetR12 returns the value of R12.
+func (s *BlockchainConfig) GetR12() OptBlockchainConfig12 {
+	return s.R12
+}
+
+// GetR13 returns the value of R13.
+func (s *BlockchainConfig) GetR13() OptBlockchainConfig13 {
+	return s.R13
+}
+
+// GetR14 returns the value of R14.
+func (s *BlockchainConfig) GetR14() OptBlockchainConfig14 {
+	return s.R14
+}
+
+// GetR15 returns the value of R15.
+func (s *BlockchainConfig) GetR15() OptBlockchainConfig15 {
+	return s.R15
+}
+
+// GetR16 returns the value of R16.
+func (s *BlockchainConfig) GetR16() OptBlockchainConfig16 {
+	return s.R16
+}
+
+// GetR17 returns the value of R17.
+func (s *BlockchainConfig) GetR17() OptBlockchainConfig17 {
+	return s.R17
+}
+
+// GetR18 returns the value of R18.
+func (s *BlockchainConfig) GetR18() OptBlockchainConfig18 {
+	return s.R18
+}
+
+// GetR20 returns the value of R20.
+func (s *BlockchainConfig) GetR20() OptBlockchainConfig20 {
+	return s.R20
+}
+
+// GetR21 returns the value of R21.
+func (s *BlockchainConfig) GetR21() OptBlockchainConfig21 {
+	return s.R21
+}
+
+// GetR22 returns the value of R22.
+func (s *BlockchainConfig) GetR22() OptBlockchainConfig22 {
+	return s.R22
+}
+
+// GetR23 returns the value of R23.
+func (s *BlockchainConfig) GetR23() OptBlockchainConfig23 {
+	return s.R23
+}
+
+// GetR24 returns the value of R24.
+func (s *BlockchainConfig) GetR24() OptBlockchainConfig24 {
+	return s.R24
+}
+
+// GetR25 returns the value of R25.
+func (s *BlockchainConfig) GetR25() OptBlockchainConfig25 {
+	return s.R25
+}
+
+// GetR28 returns the value of R28.
+func (s *BlockchainConfig) GetR28() OptBlockchainConfig28 {
+	return s.R28
+}
+
+// GetR29 returns the value of R29.
+func (s *BlockchainConfig) GetR29() OptBlockchainConfig29 {
+	return s.R29
+}
+
+// GetR31 returns the value of R31.
+func (s *BlockchainConfig) GetR31() OptBlockchainConfig31 {
+	return s.R31
 }
 
 // GetR32 returns the value of R32.
@@ -1948,9 +2212,49 @@ func (s *BlockchainConfig) GetR37() OptValidatorsSet {
 	return s.R37
 }
 
+// GetR40 returns the value of R40.
+func (s *BlockchainConfig) GetR40() OptBlockchainConfig40 {
+	return s.R40
+}
+
+// GetR43 returns the value of R43.
+func (s *BlockchainConfig) GetR43() OptBlockchainConfig43 {
+	return s.R43
+}
+
 // GetR44 returns the value of R44.
 func (s *BlockchainConfig) GetR44() BlockchainConfig44 {
 	return s.R44
+}
+
+// GetR71 returns the value of R71.
+func (s *BlockchainConfig) GetR71() OptBlockchainConfig71 {
+	return s.R71
+}
+
+// GetR72 returns the value of R72.
+func (s *BlockchainConfig) GetR72() OptBlockchainConfig72 {
+	return s.R72
+}
+
+// GetR73 returns the value of R73.
+func (s *BlockchainConfig) GetR73() OptBlockchainConfig73 {
+	return s.R73
+}
+
+// GetR79 returns the value of R79.
+func (s *BlockchainConfig) GetR79() OptBlockchainConfig79 {
+	return s.R79
+}
+
+// GetR81 returns the value of R81.
+func (s *BlockchainConfig) GetR81() OptBlockchainConfig81 {
+	return s.R81
+}
+
+// GetR82 returns the value of R82.
+func (s *BlockchainConfig) GetR82() OptBlockchainConfig82 {
+	return s.R82
 }
 
 // SetRaw sets the value of Raw.
@@ -1973,9 +2277,129 @@ func (s *BlockchainConfig) SetR2(val string) {
 	s.R2 = val
 }
 
+// SetR3 sets the value of R3.
+func (s *BlockchainConfig) SetR3(val OptString) {
+	s.R3 = val
+}
+
 // SetR4 sets the value of R4.
 func (s *BlockchainConfig) SetR4(val string) {
 	s.R4 = val
+}
+
+// SetR5 sets the value of R5.
+func (s *BlockchainConfig) SetR5(val OptBlockchainConfig5) {
+	s.R5 = val
+}
+
+// SetR6 sets the value of R6.
+func (s *BlockchainConfig) SetR6(val OptBlockchainConfig6) {
+	s.R6 = val
+}
+
+// SetR7 sets the value of R7.
+func (s *BlockchainConfig) SetR7(val OptBlockchainConfig7) {
+	s.R7 = val
+}
+
+// SetR8 sets the value of R8.
+func (s *BlockchainConfig) SetR8(val OptBlockchainConfig8) {
+	s.R8 = val
+}
+
+// SetR9 sets the value of R9.
+func (s *BlockchainConfig) SetR9(val OptBlockchainConfig9) {
+	s.R9 = val
+}
+
+// SetR10 sets the value of R10.
+func (s *BlockchainConfig) SetR10(val OptBlockchainConfig10) {
+	s.R10 = val
+}
+
+// SetR11 sets the value of R11.
+func (s *BlockchainConfig) SetR11(val OptBlockchainConfig11) {
+	s.R11 = val
+}
+
+// SetR12 sets the value of R12.
+func (s *BlockchainConfig) SetR12(val OptBlockchainConfig12) {
+	s.R12 = val
+}
+
+// SetR13 sets the value of R13.
+func (s *BlockchainConfig) SetR13(val OptBlockchainConfig13) {
+	s.R13 = val
+}
+
+// SetR14 sets the value of R14.
+func (s *BlockchainConfig) SetR14(val OptBlockchainConfig14) {
+	s.R14 = val
+}
+
+// SetR15 sets the value of R15.
+func (s *BlockchainConfig) SetR15(val OptBlockchainConfig15) {
+	s.R15 = val
+}
+
+// SetR16 sets the value of R16.
+func (s *BlockchainConfig) SetR16(val OptBlockchainConfig16) {
+	s.R16 = val
+}
+
+// SetR17 sets the value of R17.
+func (s *BlockchainConfig) SetR17(val OptBlockchainConfig17) {
+	s.R17 = val
+}
+
+// SetR18 sets the value of R18.
+func (s *BlockchainConfig) SetR18(val OptBlockchainConfig18) {
+	s.R18 = val
+}
+
+// SetR20 sets the value of R20.
+func (s *BlockchainConfig) SetR20(val OptBlockchainConfig20) {
+	s.R20 = val
+}
+
+// SetR21 sets the value of R21.
+func (s *BlockchainConfig) SetR21(val OptBlockchainConfig21) {
+	s.R21 = val
+}
+
+// SetR22 sets the value of R22.
+func (s *BlockchainConfig) SetR22(val OptBlockchainConfig22) {
+	s.R22 = val
+}
+
+// SetR23 sets the value of R23.
+func (s *BlockchainConfig) SetR23(val OptBlockchainConfig23) {
+	s.R23 = val
+}
+
+// SetR24 sets the value of R24.
+func (s *BlockchainConfig) SetR24(val OptBlockchainConfig24) {
+	s.R24 = val
+}
+
+// SetR25 sets the value of R25.
+func (s *BlockchainConfig) SetR25(val OptBlockchainConfig25) {
+	s.R25 = val
+}
+
+// SetR28 sets the value of R28.
+func (s *BlockchainConfig) SetR28(val OptBlockchainConfig28) {
+	s.R28 = val
+}
+
+// SetR29 sets the value of R29.
+func (s *BlockchainConfig) SetR29(val OptBlockchainConfig29) {
+	s.R29 = val
+}
+
+// SetR31 sets the value of R31.
+func (s *BlockchainConfig) SetR31(val OptBlockchainConfig31) {
+	s.R31 = val
 }
 
 // SetR32 sets the value of R32.
@@ -2008,9 +2432,722 @@ func (s *BlockchainConfig) SetR37(val OptValidatorsSet) {
 	s.R37 = val
 }
 
+// SetR40 sets the value of R40.
+func (s *BlockchainConfig) SetR40(val OptBlockchainConfig40) {
+	s.R40 = val
+}
+
+// SetR43 sets the value of R43.
+func (s *BlockchainConfig) SetR43(val OptBlockchainConfig43) {
+	s.R43 = val
+}
+
 // SetR44 sets the value of R44.
 func (s *BlockchainConfig) SetR44(val BlockchainConfig44) {
 	s.R44 = val
+}
+
+// SetR71 sets the value of R71.
+func (s *BlockchainConfig) SetR71(val OptBlockchainConfig71) {
+	s.R71 = val
+}
+
+// SetR72 sets the value of R72.
+func (s *BlockchainConfig) SetR72(val OptBlockchainConfig72) {
+	s.R72 = val
+}
+
+// SetR73 sets the value of R73.
+func (s *BlockchainConfig) SetR73(val OptBlockchainConfig73) {
+	s.R73 = val
+}
+
+// SetR79 sets the value of R79.
+func (s *BlockchainConfig) SetR79(val OptBlockchainConfig79) {
+	s.R79 = val
+}
+
+// SetR81 sets the value of R81.
+func (s *BlockchainConfig) SetR81(val OptBlockchainConfig81) {
+	s.R81 = val
+}
+
+// SetR82 sets the value of R82.
+func (s *BlockchainConfig) SetR82(val OptBlockchainConfig82) {
+	s.R82 = val
+}
+
+// List of critical TON parameters, the change of which significantly affects the network, so more
+// voting rounds are held.
+type BlockchainConfig10 struct {
+	CriticalParams []int32 `json:"critical_params"`
+}
+
+// GetCriticalParams returns the value of CriticalParams.
+func (s *BlockchainConfig10) GetCriticalParams() []int32 {
+	return s.CriticalParams
+}
+
+// SetCriticalParams sets the value of CriticalParams.
+func (s *BlockchainConfig10) SetCriticalParams(val []int32) {
+	s.CriticalParams = val
+}
+
+// This parameter indicates under what conditions proposals to change the TON configuration are
+// accepted.
+type BlockchainConfig11 struct {
+	NormalParams   ConfigProposalSetup `json:"normal_params"`
+	CriticalParams ConfigProposalSetup `json:"critical_params"`
+}
+
+// GetNormalParams returns the value of NormalParams.
+func (s *BlockchainConfig11) GetNormalParams() ConfigProposalSetup {
+	return s.NormalParams
+}
+
+// GetCriticalParams returns the value of CriticalParams.
+func (s *BlockchainConfig11) GetCriticalParams() ConfigProposalSetup {
+	return s.CriticalParams
+}
+
+// SetNormalParams sets the value of NormalParams.
+func (s *BlockchainConfig11) SetNormalParams(val ConfigProposalSetup) {
+	s.NormalParams = val
+}
+
+// SetCriticalParams sets the value of CriticalParams.
+func (s *BlockchainConfig11) SetCriticalParams(val ConfigProposalSetup) {
+	s.CriticalParams = val
+}
+
+// Workchains in the TON Blockchain.
+type BlockchainConfig12 struct {
+	Workchains []WorkchainDescr `json:"workchains"`
+}
+
+// GetWorkchains returns the value of Workchains.
+func (s *BlockchainConfig12) GetWorkchains() []WorkchainDescr {
+	return s.Workchains
+}
+
+// SetWorkchains sets the value of Workchains.
+func (s *BlockchainConfig12) SetWorkchains(val []WorkchainDescr) {
+	s.Workchains = val
+}
+
+// The cost of filing complaints about incorrect operation of validators.
+type BlockchainConfig13 struct {
+	Deposit   int64 `json:"deposit"`
+	BitPrice  int64 `json:"bit_price"`
+	CellPrice int64 `json:"cell_price"`
+}
+
+// GetDeposit returns the value of Deposit.
+func (s *BlockchainConfig13) GetDeposit() int64 {
+	return s.Deposit
+}
+
+// GetBitPrice returns the value of BitPrice.
+func (s *BlockchainConfig13) GetBitPrice() int64 {
+	return s.BitPrice
+}
+
+// GetCellPrice returns the value of CellPrice.
+func (s *BlockchainConfig13) GetCellPrice() int64 {
+	return s.CellPrice
+}
+
+// SetDeposit sets the value of Deposit.
+func (s *BlockchainConfig13) SetDeposit(val int64) {
+	s.Deposit = val
+}
+
+// SetBitPrice sets the value of BitPrice.
+func (s *BlockchainConfig13) SetBitPrice(val int64) {
+	s.BitPrice = val
+}
+
+// SetCellPrice sets the value of CellPrice.
+func (s *BlockchainConfig13) SetCellPrice(val int64) {
+	s.CellPrice = val
+}
+
+// The reward in nanoTons for block creation in the TON blockchain.
+type BlockchainConfig14 struct {
+	MasterchainBlockFee int64 `json:"masterchain_block_fee"`
+	BasechainBlockFee   int64 `json:"basechain_block_fee"`
+}
+
+// GetMasterchainBlockFee returns the value of MasterchainBlockFee.
+func (s *BlockchainConfig14) GetMasterchainBlockFee() int64 {
+	return s.MasterchainBlockFee
+}
+
+// GetBasechainBlockFee returns the value of BasechainBlockFee.
+func (s *BlockchainConfig14) GetBasechainBlockFee() int64 {
+	return s.BasechainBlockFee
+}
+
+// SetMasterchainBlockFee sets the value of MasterchainBlockFee.
+func (s *BlockchainConfig14) SetMasterchainBlockFee(val int64) {
+	s.MasterchainBlockFee = val
+}
+
+// SetBasechainBlockFee sets the value of BasechainBlockFee.
+func (s *BlockchainConfig14) SetBasechainBlockFee(val int64) {
+	s.BasechainBlockFee = val
+}
+
+// The reward in nanoTons for block creation in the TON blockchain.
+type BlockchainConfig15 struct {
+	ValidatorsElectedFor int64 `json:"validators_elected_for"`
+	ElectionsStartBefore int64 `json:"elections_start_before"`
+	ElectionsEndBefore   int64 `json:"elections_end_before"`
+	StakeHeldFor         int64 `json:"stake_held_for"`
+}
+
+// GetValidatorsElectedFor returns the value of ValidatorsElectedFor.
+func (s *BlockchainConfig15) GetValidatorsElectedFor() int64 {
+	return s.ValidatorsElectedFor
+}
+
+// GetElectionsStartBefore returns the value of ElectionsStartBefore.
+func (s *BlockchainConfig15) GetElectionsStartBefore() int64 {
+	return s.ElectionsStartBefore
+}
+
+// GetElectionsEndBefore returns the value of ElectionsEndBefore.
+func (s *BlockchainConfig15) GetElectionsEndBefore() int64 {
+	return s.ElectionsEndBefore
+}
+
+// GetStakeHeldFor returns the value of StakeHeldFor.
+func (s *BlockchainConfig15) GetStakeHeldFor() int64 {
+	return s.StakeHeldFor
+}
+
+// SetValidatorsElectedFor sets the value of ValidatorsElectedFor.
+func (s *BlockchainConfig15) SetValidatorsElectedFor(val int64) {
+	s.ValidatorsElectedFor = val
+}
+
+// SetElectionsStartBefore sets the value of ElectionsStartBefore.
+func (s *BlockchainConfig15) SetElectionsStartBefore(val int64) {
+	s.ElectionsStartBefore = val
+}
+
+// SetElectionsEndBefore sets the value of ElectionsEndBefore.
+func (s *BlockchainConfig15) SetElectionsEndBefore(val int64) {
+	s.ElectionsEndBefore = val
+}
+
+// SetStakeHeldFor sets the value of StakeHeldFor.
+func (s *BlockchainConfig15) SetStakeHeldFor(val int64) {
+	s.StakeHeldFor = val
+}
+
+// The limits on the number of validators in the TON blockchain.
+type BlockchainConfig16 struct {
+	MaxValidators     int `json:"max_validators"`
+	MaxMainValidators int `json:"max_main_validators"`
+	MinValidators     int `json:"min_validators"`
+}
+
+// GetMaxValidators returns the value of MaxValidators.
+func (s *BlockchainConfig16) GetMaxValidators() int {
+	return s.MaxValidators
+}
+
+// GetMaxMainValidators returns the value of MaxMainValidators.
+func (s *BlockchainConfig16) GetMaxMainValidators() int {
+	return s.MaxMainValidators
+}
+
+// GetMinValidators returns the value of MinValidators.
+func (s *BlockchainConfig16) GetMinValidators() int {
+	return s.MinValidators
+}
+
+// SetMaxValidators sets the value of MaxValidators.
+func (s *BlockchainConfig16) SetMaxValidators(val int) {
+	s.MaxValidators = val
+}
+
+// SetMaxMainValidators sets the value of MaxMainValidators.
+func (s *BlockchainConfig16) SetMaxMainValidators(val int) {
+	s.MaxMainValidators = val
+}
+
+// SetMinValidators sets the value of MinValidators.
+func (s *BlockchainConfig16) SetMinValidators(val int) {
+	s.MinValidators = val
+}
+
+// The stake parameters configuration in the TON blockchain.
+type BlockchainConfig17 struct {
+	MinStake       string `json:"min_stake"`
+	MaxStake       string `json:"max_stake"`
+	MinTotalStake  string `json:"min_total_stake"`
+	MaxStakeFactor int64  `json:"max_stake_factor"`
+}
+
+// GetMinStake returns the value of MinStake.
+func (s *BlockchainConfig17) GetMinStake() string {
+	return s.MinStake
+}
+
+// GetMaxStake returns the value of MaxStake.
+func (s *BlockchainConfig17) GetMaxStake() string {
+	return s.MaxStake
+}
+
+// GetMinTotalStake returns the value of MinTotalStake.
+func (s *BlockchainConfig17) GetMinTotalStake() string {
+	return s.MinTotalStake
+}
+
+// GetMaxStakeFactor returns the value of MaxStakeFactor.
+func (s *BlockchainConfig17) GetMaxStakeFactor() int64 {
+	return s.MaxStakeFactor
+}
+
+// SetMinStake sets the value of MinStake.
+func (s *BlockchainConfig17) SetMinStake(val string) {
+	s.MinStake = val
+}
+
+// SetMaxStake sets the value of MaxStake.
+func (s *BlockchainConfig17) SetMaxStake(val string) {
+	s.MaxStake = val
+}
+
+// SetMinTotalStake sets the value of MinTotalStake.
+func (s *BlockchainConfig17) SetMinTotalStake(val string) {
+	s.MinTotalStake = val
+}
+
+// SetMaxStakeFactor sets the value of MaxStakeFactor.
+func (s *BlockchainConfig17) SetMaxStakeFactor(val int64) {
+	s.MaxStakeFactor = val
+}
+
+// The prices for data storage.
+type BlockchainConfig18 struct {
+	StoragePrices []BlockchainConfig18StoragePricesItem `json:"storage_prices"`
+}
+
+// GetStoragePrices returns the value of StoragePrices.
+func (s *BlockchainConfig18) GetStoragePrices() []BlockchainConfig18StoragePricesItem {
+	return s.StoragePrices
+}
+
+// SetStoragePrices sets the value of StoragePrices.
+func (s *BlockchainConfig18) SetStoragePrices(val []BlockchainConfig18StoragePricesItem) {
+	s.StoragePrices = val
+}
+
+type BlockchainConfig18StoragePricesItem struct {
+	UtimeSince    int64 `json:"utime_since"`
+	BitPricePs    int64 `json:"bit_price_ps"`
+	CellPricePs   int64 `json:"cell_price_ps"`
+	McBitPricePs  int64 `json:"mc_bit_price_ps"`
+	McCellPricePs int64 `json:"mc_cell_price_ps"`
+}
+
+// GetUtimeSince returns the value of UtimeSince.
+func (s *BlockchainConfig18StoragePricesItem) GetUtimeSince() int64 {
+	return s.UtimeSince
+}
+
+// GetBitPricePs returns the value of BitPricePs.
+func (s *BlockchainConfig18StoragePricesItem) GetBitPricePs() int64 {
+	return s.BitPricePs
+}
+
+// GetCellPricePs returns the value of CellPricePs.
+func (s *BlockchainConfig18StoragePricesItem) GetCellPricePs() int64 {
+	return s.CellPricePs
+}
+
+// GetMcBitPricePs returns the value of McBitPricePs.
+func (s *BlockchainConfig18StoragePricesItem) GetMcBitPricePs() int64 {
+	return s.McBitPricePs
+}
+
+// GetMcCellPricePs returns the value of McCellPricePs.
+func (s *BlockchainConfig18StoragePricesItem) GetMcCellPricePs() int64 {
+	return s.McCellPricePs
+}
+
+// SetUtimeSince sets the value of UtimeSince.
+func (s *BlockchainConfig18StoragePricesItem) SetUtimeSince(val int64) {
+	s.UtimeSince = val
+}
+
+// SetBitPricePs sets the value of BitPricePs.
+func (s *BlockchainConfig18StoragePricesItem) SetBitPricePs(val int64) {
+	s.BitPricePs = val
+}
+
+// SetCellPricePs sets the value of CellPricePs.
+func (s *BlockchainConfig18StoragePricesItem) SetCellPricePs(val int64) {
+	s.CellPricePs = val
+}
+
+// SetMcBitPricePs sets the value of McBitPricePs.
+func (s *BlockchainConfig18StoragePricesItem) SetMcBitPricePs(val int64) {
+	s.McBitPricePs = val
+}
+
+// SetMcCellPricePs sets the value of McCellPricePs.
+func (s *BlockchainConfig18StoragePricesItem) SetMcCellPricePs(val int64) {
+	s.McCellPricePs = val
+}
+
+// The cost of computations in the masterchain. The complexity of any computation is estimated in gas
+// units.
+type BlockchainConfig20 struct {
+	GasLimitsPrices GasLimitPrices `json:"gas_limits_prices"`
+}
+
+// GetGasLimitsPrices returns the value of GasLimitsPrices.
+func (s *BlockchainConfig20) GetGasLimitsPrices() GasLimitPrices {
+	return s.GasLimitsPrices
+}
+
+// SetGasLimitsPrices sets the value of GasLimitsPrices.
+func (s *BlockchainConfig20) SetGasLimitsPrices(val GasLimitPrices) {
+	s.GasLimitsPrices = val
+}
+
+// The cost of computations in the basechains. The complexity of any computation is estimated in gas
+// units.
+type BlockchainConfig21 struct {
+	GasLimitsPrices GasLimitPrices `json:"gas_limits_prices"`
+}
+
+// GetGasLimitsPrices returns the value of GasLimitsPrices.
+func (s *BlockchainConfig21) GetGasLimitsPrices() GasLimitPrices {
+	return s.GasLimitsPrices
+}
+
+// SetGasLimitsPrices sets the value of GasLimitsPrices.
+func (s *BlockchainConfig21) SetGasLimitsPrices(val GasLimitPrices) {
+	s.GasLimitsPrices = val
+}
+
+// The limits on the block in the masterchain, upon reaching which the block is finalized and the
+// callback of the remaining messages (if any) is carried over to the next block.
+type BlockchainConfig22 struct {
+	BlockLimits BlockLimits `json:"block_limits"`
+}
+
+// GetBlockLimits returns the value of BlockLimits.
+func (s *BlockchainConfig22) GetBlockLimits() BlockLimits {
+	return s.BlockLimits
+}
+
+// SetBlockLimits sets the value of BlockLimits.
+func (s *BlockchainConfig22) SetBlockLimits(val BlockLimits) {
+	s.BlockLimits = val
+}
+
+// The limits on the block in the basechains, upon reaching which the block is finalized and the
+// callback of the remaining messages (if any) is carried over to the next block.
+type BlockchainConfig23 struct {
+	BlockLimits BlockLimits `json:"block_limits"`
+}
+
+// GetBlockLimits returns the value of BlockLimits.
+func (s *BlockchainConfig23) GetBlockLimits() BlockLimits {
+	return s.BlockLimits
+}
+
+// SetBlockLimits sets the value of BlockLimits.
+func (s *BlockchainConfig23) SetBlockLimits(val BlockLimits) {
+	s.BlockLimits = val
+}
+
+// The cost of sending messages in the masterchain of the TON blockchain.
+type BlockchainConfig24 struct {
+	MsgForwardPrices MsgForwardPrices `json:"msg_forward_prices"`
+}
+
+// GetMsgForwardPrices returns the value of MsgForwardPrices.
+func (s *BlockchainConfig24) GetMsgForwardPrices() MsgForwardPrices {
+	return s.MsgForwardPrices
+}
+
+// SetMsgForwardPrices sets the value of MsgForwardPrices.
+func (s *BlockchainConfig24) SetMsgForwardPrices(val MsgForwardPrices) {
+	s.MsgForwardPrices = val
+}
+
+// The cost of sending messages in the basechains of the TON blockchain.
+type BlockchainConfig25 struct {
+	MsgForwardPrices MsgForwardPrices `json:"msg_forward_prices"`
+}
+
+// GetMsgForwardPrices returns the value of MsgForwardPrices.
+func (s *BlockchainConfig25) GetMsgForwardPrices() MsgForwardPrices {
+	return s.MsgForwardPrices
+}
+
+// SetMsgForwardPrices sets the value of MsgForwardPrices.
+func (s *BlockchainConfig25) SetMsgForwardPrices(val MsgForwardPrices) {
+	s.MsgForwardPrices = val
+}
+
+// The configuration for the Catchain protocol.
+type BlockchainConfig28 struct {
+	McCatchainLifetime      int64   `json:"mc_catchain_lifetime"`
+	ShardCatchainLifetime   int64   `json:"shard_catchain_lifetime"`
+	ShardValidatorsLifetime int64   `json:"shard_validators_lifetime"`
+	ShardValidatorsNum      int64   `json:"shard_validators_num"`
+	Flags                   OptInt  `json:"flags"`
+	ShuffleMcValidators     OptBool `json:"shuffle_mc_validators"`
+}
+
+// GetMcCatchainLifetime returns the value of McCatchainLifetime.
+func (s *BlockchainConfig28) GetMcCatchainLifetime() int64 {
+	return s.McCatchainLifetime
+}
+
+// GetShardCatchainLifetime returns the value of ShardCatchainLifetime.
+func (s *BlockchainConfig28) GetShardCatchainLifetime() int64 {
+	return s.ShardCatchainLifetime
+}
+
+// GetShardValidatorsLifetime returns the value of ShardValidatorsLifetime.
+func (s *BlockchainConfig28) GetShardValidatorsLifetime() int64 {
+	return s.ShardValidatorsLifetime
+}
+
+// GetShardValidatorsNum returns the value of ShardValidatorsNum.
+func (s *BlockchainConfig28) GetShardValidatorsNum() int64 {
+	return s.ShardValidatorsNum
+}
+
+// GetFlags returns the value of Flags.
+func (s *BlockchainConfig28) GetFlags() OptInt {
+	return s.Flags
+}
+
+// GetShuffleMcValidators returns the value of ShuffleMcValidators.
+func (s *BlockchainConfig28) GetShuffleMcValidators() OptBool {
+	return s.ShuffleMcValidators
+}
+
+// SetMcCatchainLifetime sets the value of McCatchainLifetime.
+func (s *BlockchainConfig28) SetMcCatchainLifetime(val int64) {
+	s.McCatchainLifetime = val
+}
+
+// SetShardCatchainLifetime sets the value of ShardCatchainLifetime.
+func (s *BlockchainConfig28) SetShardCatchainLifetime(val int64) {
+	s.ShardCatchainLifetime = val
+}
+
+// SetShardValidatorsLifetime sets the value of ShardValidatorsLifetime.
+func (s *BlockchainConfig28) SetShardValidatorsLifetime(val int64) {
+	s.ShardValidatorsLifetime = val
+}
+
+// SetShardValidatorsNum sets the value of ShardValidatorsNum.
+func (s *BlockchainConfig28) SetShardValidatorsNum(val int64) {
+	s.ShardValidatorsNum = val
+}
+
+// SetFlags sets the value of Flags.
+func (s *BlockchainConfig28) SetFlags(val OptInt) {
+	s.Flags = val
+}
+
+// SetShuffleMcValidators sets the value of ShuffleMcValidators.
+func (s *BlockchainConfig28) SetShuffleMcValidators(val OptBool) {
+	s.ShuffleMcValidators = val
+}
+
+// The configuration for the consensus protocol above catchain.
+type BlockchainConfig29 struct {
+	Flags                  OptInt   `json:"flags"`
+	NewCatchainIds         OptBool  `json:"new_catchain_ids"`
+	RoundCandidates        int64    `json:"round_candidates"`
+	NextCandidateDelayMs   int64    `json:"next_candidate_delay_ms"`
+	ConsensusTimeoutMs     int64    `json:"consensus_timeout_ms"`
+	FastAttempts           int64    `json:"fast_attempts"`
+	AttemptDuration        int64    `json:"attempt_duration"`
+	CatchainMaxDeps        int64    `json:"catchain_max_deps"`
+	MaxBlockBytes          int64    `json:"max_block_bytes"`
+	MaxCollatedBytes       int64    `json:"max_collated_bytes"`
+	ProtoVersion           OptInt64 `json:"proto_version"`
+	CatchainMaxBlocksCoeff OptInt64 `json:"catchain_max_blocks_coeff"`
+}
+
+// GetFlags returns the value of Flags.
+func (s *BlockchainConfig29) GetFlags() OptInt {
+	return s.Flags
+}
+
+// GetNewCatchainIds returns the value of NewCatchainIds.
+func (s *BlockchainConfig29) GetNewCatchainIds() OptBool {
+	return s.NewCatchainIds
+}
+
+// GetRoundCandidates returns the value of RoundCandidates.
+func (s *BlockchainConfig29) GetRoundCandidates() int64 {
+	return s.RoundCandidates
+}
+
+// GetNextCandidateDelayMs returns the value of NextCandidateDelayMs.
+func (s *BlockchainConfig29) GetNextCandidateDelayMs() int64 {
+	return s.NextCandidateDelayMs
+}
+
+// GetConsensusTimeoutMs returns the value of ConsensusTimeoutMs.
+func (s *BlockchainConfig29) GetConsensusTimeoutMs() int64 {
+	return s.ConsensusTimeoutMs
+}
+
+// GetFastAttempts returns the value of FastAttempts.
+func (s *BlockchainConfig29) GetFastAttempts() int64 {
+	return s.FastAttempts
+}
+
+// GetAttemptDuration returns the value of AttemptDuration.
+func (s *BlockchainConfig29) GetAttemptDuration() int64 {
+	return s.AttemptDuration
+}
+
+// GetCatchainMaxDeps returns the value of CatchainMaxDeps.
+func (s *BlockchainConfig29) GetCatchainMaxDeps() int64 {
+	return s.CatchainMaxDeps
+}
+
+// GetMaxBlockBytes returns the value of MaxBlockBytes.
+func (s *BlockchainConfig29) GetMaxBlockBytes() int64 {
+	return s.MaxBlockBytes
+}
+
+// GetMaxCollatedBytes returns the value of MaxCollatedBytes.
+func (s *BlockchainConfig29) GetMaxCollatedBytes() int64 {
+	return s.MaxCollatedBytes
+}
+
+// GetProtoVersion returns the value of ProtoVersion.
+func (s *BlockchainConfig29) GetProtoVersion() OptInt64 {
+	return s.ProtoVersion
+}
+
+// GetCatchainMaxBlocksCoeff returns the value of CatchainMaxBlocksCoeff.
+func (s *BlockchainConfig29) GetCatchainMaxBlocksCoeff() OptInt64 {
+	return s.CatchainMaxBlocksCoeff
+}
+
+// SetFlags sets the value of Flags.
+func (s *BlockchainConfig29) SetFlags(val OptInt) {
+	s.Flags = val
+}
+
+// SetNewCatchainIds sets the value of NewCatchainIds.
+func (s *BlockchainConfig29) SetNewCatchainIds(val OptBool) {
+	s.NewCatchainIds = val
+}
+
+// SetRoundCandidates sets the value of RoundCandidates.
+func (s *BlockchainConfig29) SetRoundCandidates(val int64) {
+	s.RoundCandidates = val
+}
+
+// SetNextCandidateDelayMs sets the value of NextCandidateDelayMs.
+func (s *BlockchainConfig29) SetNextCandidateDelayMs(val int64) {
+	s.NextCandidateDelayMs = val
+}
+
+// SetConsensusTimeoutMs sets the value of ConsensusTimeoutMs.
+func (s *BlockchainConfig29) SetConsensusTimeoutMs(val int64) {
+	s.ConsensusTimeoutMs = val
+}
+
+// SetFastAttempts sets the value of FastAttempts.
+func (s *BlockchainConfig29) SetFastAttempts(val int64) {
+	s.FastAttempts = val
+}
+
+// SetAttemptDuration sets the value of AttemptDuration.
+func (s *BlockchainConfig29) SetAttemptDuration(val int64) {
+	s.AttemptDuration = val
+}
+
+// SetCatchainMaxDeps sets the value of CatchainMaxDeps.
+func (s *BlockchainConfig29) SetCatchainMaxDeps(val int64) {
+	s.CatchainMaxDeps = val
+}
+
+// SetMaxBlockBytes sets the value of MaxBlockBytes.
+func (s *BlockchainConfig29) SetMaxBlockBytes(val int64) {
+	s.MaxBlockBytes = val
+}
+
+// SetMaxCollatedBytes sets the value of MaxCollatedBytes.
+func (s *BlockchainConfig29) SetMaxCollatedBytes(val int64) {
+	s.MaxCollatedBytes = val
+}
+
+// SetProtoVersion sets the value of ProtoVersion.
+func (s *BlockchainConfig29) SetProtoVersion(val OptInt64) {
+	s.ProtoVersion = val
+}
+
+// SetCatchainMaxBlocksCoeff sets the value of CatchainMaxBlocksCoeff.
+func (s *BlockchainConfig29) SetCatchainMaxBlocksCoeff(val OptInt64) {
+	s.CatchainMaxBlocksCoeff = val
+}
+
+// The configuration for the consensus protocol above catchain.
+type BlockchainConfig31 struct {
+	FundamentalSmcAddr []string `json:"fundamental_smc_addr"`
+}
+
+// GetFundamentalSmcAddr returns the value of FundamentalSmcAddr.
+func (s *BlockchainConfig31) GetFundamentalSmcAddr() []string {
+	return s.FundamentalSmcAddr
+}
+
+// SetFundamentalSmcAddr sets the value of FundamentalSmcAddr.
+func (s *BlockchainConfig31) SetFundamentalSmcAddr(val []string) {
+	s.FundamentalSmcAddr = val
+}
+
+// The configuration for punishment for improper behavior (non-validation). In the absence of the
+// parameter, the default fine size is 101 TON.
+type BlockchainConfig40 struct {
+	MisbehaviourPunishmentConfig MisbehaviourPunishmentConfig `json:"misbehaviour_punishment_config"`
+}
+
+// GetMisbehaviourPunishmentConfig returns the value of MisbehaviourPunishmentConfig.
+func (s *BlockchainConfig40) GetMisbehaviourPunishmentConfig() MisbehaviourPunishmentConfig {
+	return s.MisbehaviourPunishmentConfig
+}
+
+// SetMisbehaviourPunishmentConfig sets the value of MisbehaviourPunishmentConfig.
+func (s *BlockchainConfig40) SetMisbehaviourPunishmentConfig(val MisbehaviourPunishmentConfig) {
+	s.MisbehaviourPunishmentConfig = val
+}
+
+// The size limits and some other characteristics of accounts and messages.
+type BlockchainConfig43 struct {
+	SizeLimitsConfig SizeLimitsConfig `json:"size_limits_config"`
+}
+
+// GetSizeLimitsConfig returns the value of SizeLimitsConfig.
+func (s *BlockchainConfig43) GetSizeLimitsConfig() SizeLimitsConfig {
+	return s.SizeLimitsConfig
+}
+
+// SetSizeLimitsConfig sets the value of SizeLimitsConfig.
+func (s *BlockchainConfig43) SetSizeLimitsConfig(val SizeLimitsConfig) {
+	s.SizeLimitsConfig = val
 }
 
 // Suspended accounts.
@@ -2037,6 +3174,239 @@ func (s *BlockchainConfig44) SetAccounts(val []string) {
 // SetSuspendedUntil sets the value of SuspendedUntil.
 func (s *BlockchainConfig44) SetSuspendedUntil(val int) {
 	s.SuspendedUntil = val
+}
+
+type BlockchainConfig5 struct {
+	BlackholeAddr OptString `json:"blackhole_addr"`
+	FeeBurnNom    int64     `json:"fee_burn_nom"`
+	FeeBurnDenom  int64     `json:"fee_burn_denom"`
+}
+
+// GetBlackholeAddr returns the value of BlackholeAddr.
+func (s *BlockchainConfig5) GetBlackholeAddr() OptString {
+	return s.BlackholeAddr
+}
+
+// GetFeeBurnNom returns the value of FeeBurnNom.
+func (s *BlockchainConfig5) GetFeeBurnNom() int64 {
+	return s.FeeBurnNom
+}
+
+// GetFeeBurnDenom returns the value of FeeBurnDenom.
+func (s *BlockchainConfig5) GetFeeBurnDenom() int64 {
+	return s.FeeBurnDenom
+}
+
+// SetBlackholeAddr sets the value of BlackholeAddr.
+func (s *BlockchainConfig5) SetBlackholeAddr(val OptString) {
+	s.BlackholeAddr = val
+}
+
+// SetFeeBurnNom sets the value of FeeBurnNom.
+func (s *BlockchainConfig5) SetFeeBurnNom(val int64) {
+	s.FeeBurnNom = val
+}
+
+// SetFeeBurnDenom sets the value of FeeBurnDenom.
+func (s *BlockchainConfig5) SetFeeBurnDenom(val int64) {
+	s.FeeBurnDenom = val
+}
+
+// Minting fees of new currencies.
+type BlockchainConfig6 struct {
+	MintNewPrice int64 `json:"mint_new_price"`
+	MintAddPrice int64 `json:"mint_add_price"`
+}
+
+// GetMintNewPrice returns the value of MintNewPrice.
+func (s *BlockchainConfig6) GetMintNewPrice() int64 {
+	return s.MintNewPrice
+}
+
+// GetMintAddPrice returns the value of MintAddPrice.
+func (s *BlockchainConfig6) GetMintAddPrice() int64 {
+	return s.MintAddPrice
+}
+
+// SetMintNewPrice sets the value of MintNewPrice.
+func (s *BlockchainConfig6) SetMintNewPrice(val int64) {
+	s.MintNewPrice = val
+}
+
+// SetMintAddPrice sets the value of MintAddPrice.
+func (s *BlockchainConfig6) SetMintAddPrice(val int64) {
+	s.MintAddPrice = val
+}
+
+// The volume of each of the additional currencies in circulation.
+type BlockchainConfig7 struct {
+	Currencies []BlockchainConfig7CurrenciesItem `json:"currencies"`
+}
+
+// GetCurrencies returns the value of Currencies.
+func (s *BlockchainConfig7) GetCurrencies() []BlockchainConfig7CurrenciesItem {
+	return s.Currencies
+}
+
+// SetCurrencies sets the value of Currencies.
+func (s *BlockchainConfig7) SetCurrencies(val []BlockchainConfig7CurrenciesItem) {
+	s.Currencies = val
+}
+
+// Bridge parameters for wrapping TON in other networks.
+type BlockchainConfig71 struct {
+	OracleBridgeParams OracleBridgeParams `json:"oracle_bridge_params"`
+}
+
+// GetOracleBridgeParams returns the value of OracleBridgeParams.
+func (s *BlockchainConfig71) GetOracleBridgeParams() OracleBridgeParams {
+	return s.OracleBridgeParams
+}
+
+// SetOracleBridgeParams sets the value of OracleBridgeParams.
+func (s *BlockchainConfig71) SetOracleBridgeParams(val OracleBridgeParams) {
+	s.OracleBridgeParams = val
+}
+
+// Bridge parameters for wrapping TON in other networks.
+type BlockchainConfig72 struct {
+	OracleBridgeParams OracleBridgeParams `json:"oracle_bridge_params"`
+}
+
+// GetOracleBridgeParams returns the value of OracleBridgeParams.
+func (s *BlockchainConfig72) GetOracleBridgeParams() OracleBridgeParams {
+	return s.OracleBridgeParams
+}
+
+// SetOracleBridgeParams sets the value of OracleBridgeParams.
+func (s *BlockchainConfig72) SetOracleBridgeParams(val OracleBridgeParams) {
+	s.OracleBridgeParams = val
+}
+
+// Bridge parameters for wrapping TON in other networks.
+type BlockchainConfig73 struct {
+	OracleBridgeParams OracleBridgeParams `json:"oracle_bridge_params"`
+}
+
+// GetOracleBridgeParams returns the value of OracleBridgeParams.
+func (s *BlockchainConfig73) GetOracleBridgeParams() OracleBridgeParams {
+	return s.OracleBridgeParams
+}
+
+// SetOracleBridgeParams sets the value of OracleBridgeParams.
+func (s *BlockchainConfig73) SetOracleBridgeParams(val OracleBridgeParams) {
+	s.OracleBridgeParams = val
+}
+
+// Bridge parameters for wrapping tokens from other networks into tokens on the TON network.
+type BlockchainConfig79 struct {
+	JettonBridgeParams JettonBridgeParams `json:"jetton_bridge_params"`
+}
+
+// GetJettonBridgeParams returns the value of JettonBridgeParams.
+func (s *BlockchainConfig79) GetJettonBridgeParams() JettonBridgeParams {
+	return s.JettonBridgeParams
+}
+
+// SetJettonBridgeParams sets the value of JettonBridgeParams.
+func (s *BlockchainConfig79) SetJettonBridgeParams(val JettonBridgeParams) {
+	s.JettonBridgeParams = val
+}
+
+type BlockchainConfig7CurrenciesItem struct {
+	CurrencyID int64  `json:"currency_id"`
+	Amount     string `json:"amount"`
+}
+
+// GetCurrencyID returns the value of CurrencyID.
+func (s *BlockchainConfig7CurrenciesItem) GetCurrencyID() int64 {
+	return s.CurrencyID
+}
+
+// GetAmount returns the value of Amount.
+func (s *BlockchainConfig7CurrenciesItem) GetAmount() string {
+	return s.Amount
+}
+
+// SetCurrencyID sets the value of CurrencyID.
+func (s *BlockchainConfig7CurrenciesItem) SetCurrencyID(val int64) {
+	s.CurrencyID = val
+}
+
+// SetAmount sets the value of Amount.
+func (s *BlockchainConfig7CurrenciesItem) SetAmount(val string) {
+	s.Amount = val
+}
+
+// The network version and additional capabilities supported by the validators.
+type BlockchainConfig8 struct {
+	Version      int64 `json:"version"`
+	Capabilities int64 `json:"capabilities"`
+}
+
+// GetVersion returns the value of Version.
+func (s *BlockchainConfig8) GetVersion() int64 {
+	return s.Version
+}
+
+// GetCapabilities returns the value of Capabilities.
+func (s *BlockchainConfig8) GetCapabilities() int64 {
+	return s.Capabilities
+}
+
+// SetVersion sets the value of Version.
+func (s *BlockchainConfig8) SetVersion(val int64) {
+	s.Version = val
+}
+
+// SetCapabilities sets the value of Capabilities.
+func (s *BlockchainConfig8) SetCapabilities(val int64) {
+	s.Capabilities = val
+}
+
+// Bridge parameters for wrapping tokens from other networks into tokens on the TON network.
+type BlockchainConfig81 struct {
+	JettonBridgeParams JettonBridgeParams `json:"jetton_bridge_params"`
+}
+
+// GetJettonBridgeParams returns the value of JettonBridgeParams.
+func (s *BlockchainConfig81) GetJettonBridgeParams() JettonBridgeParams {
+	return s.JettonBridgeParams
+}
+
+// SetJettonBridgeParams sets the value of JettonBridgeParams.
+func (s *BlockchainConfig81) SetJettonBridgeParams(val JettonBridgeParams) {
+	s.JettonBridgeParams = val
+}
+
+// Bridge parameters for wrapping tokens from other networks into tokens on the TON network.
+type BlockchainConfig82 struct {
+	JettonBridgeParams JettonBridgeParams `json:"jetton_bridge_params"`
+}
+
+// GetJettonBridgeParams returns the value of JettonBridgeParams.
+func (s *BlockchainConfig82) GetJettonBridgeParams() JettonBridgeParams {
+	return s.JettonBridgeParams
+}
+
+// SetJettonBridgeParams sets the value of JettonBridgeParams.
+func (s *BlockchainConfig82) SetJettonBridgeParams(val JettonBridgeParams) {
+	s.JettonBridgeParams = val
+}
+
+// List of mandatory parameters of the blockchain config.
+type BlockchainConfig9 struct {
+	MandatoryParams []int32 `json:"mandatory_params"`
+}
+
+// GetMandatoryParams returns the value of MandatoryParams.
+func (s *BlockchainConfig9) GetMandatoryParams() []int32 {
+	return s.MandatoryParams
+}
+
+// SetMandatoryParams sets the value of MandatoryParams.
+func (s *BlockchainConfig9) SetMandatoryParams(val []int32) {
+	s.MandatoryParams = val
 }
 
 // Ref: #/components/schemas/BlockchainRawAccount
@@ -2319,6 +3689,98 @@ func (s *ComputeSkipReason) UnmarshalText(data []byte) error {
 	default:
 		return errors.Errorf("invalid value: %q", data)
 	}
+}
+
+// Ref: #/components/schemas/ConfigProposalSetup
+type ConfigProposalSetup struct {
+	MinTotRounds int   `json:"min_tot_rounds"`
+	MaxTotRounds int   `json:"max_tot_rounds"`
+	MinWins      int   `json:"min_wins"`
+	MaxLosses    int   `json:"max_losses"`
+	MinStoreSec  int64 `json:"min_store_sec"`
+	MaxStoreSec  int64 `json:"max_store_sec"`
+	BitPrice     int64 `json:"bit_price"`
+	CellPrice    int64 `json:"cell_price"`
+}
+
+// GetMinTotRounds returns the value of MinTotRounds.
+func (s *ConfigProposalSetup) GetMinTotRounds() int {
+	return s.MinTotRounds
+}
+
+// GetMaxTotRounds returns the value of MaxTotRounds.
+func (s *ConfigProposalSetup) GetMaxTotRounds() int {
+	return s.MaxTotRounds
+}
+
+// GetMinWins returns the value of MinWins.
+func (s *ConfigProposalSetup) GetMinWins() int {
+	return s.MinWins
+}
+
+// GetMaxLosses returns the value of MaxLosses.
+func (s *ConfigProposalSetup) GetMaxLosses() int {
+	return s.MaxLosses
+}
+
+// GetMinStoreSec returns the value of MinStoreSec.
+func (s *ConfigProposalSetup) GetMinStoreSec() int64 {
+	return s.MinStoreSec
+}
+
+// GetMaxStoreSec returns the value of MaxStoreSec.
+func (s *ConfigProposalSetup) GetMaxStoreSec() int64 {
+	return s.MaxStoreSec
+}
+
+// GetBitPrice returns the value of BitPrice.
+func (s *ConfigProposalSetup) GetBitPrice() int64 {
+	return s.BitPrice
+}
+
+// GetCellPrice returns the value of CellPrice.
+func (s *ConfigProposalSetup) GetCellPrice() int64 {
+	return s.CellPrice
+}
+
+// SetMinTotRounds sets the value of MinTotRounds.
+func (s *ConfigProposalSetup) SetMinTotRounds(val int) {
+	s.MinTotRounds = val
+}
+
+// SetMaxTotRounds sets the value of MaxTotRounds.
+func (s *ConfigProposalSetup) SetMaxTotRounds(val int) {
+	s.MaxTotRounds = val
+}
+
+// SetMinWins sets the value of MinWins.
+func (s *ConfigProposalSetup) SetMinWins(val int) {
+	s.MinWins = val
+}
+
+// SetMaxLosses sets the value of MaxLosses.
+func (s *ConfigProposalSetup) SetMaxLosses(val int) {
+	s.MaxLosses = val
+}
+
+// SetMinStoreSec sets the value of MinStoreSec.
+func (s *ConfigProposalSetup) SetMinStoreSec(val int64) {
+	s.MinStoreSec = val
+}
+
+// SetMaxStoreSec sets the value of MaxStoreSec.
+func (s *ConfigProposalSetup) SetMaxStoreSec(val int64) {
+	s.MaxStoreSec = val
+}
+
+// SetBitPrice sets the value of BitPrice.
+func (s *ConfigProposalSetup) SetBitPrice(val int64) {
+	s.BitPrice = val
+}
+
+// SetCellPrice sets the value of CellPrice.
+func (s *ConfigProposalSetup) SetCellPrice(val int64) {
+	s.CellPrice = val
 }
 
 // Ref: #/components/schemas/ContractDeployAction
@@ -2955,6 +4417,109 @@ func (s *FoundAccountsAddressesItem) SetName(val string) {
 // SetPreview sets the value of Preview.
 func (s *FoundAccountsAddressesItem) SetPreview(val string) {
 	s.Preview = val
+}
+
+// Ref: #/components/schemas/GasLimitPrices
+type GasLimitPrices struct {
+	SpecialGasLimit OptInt64 `json:"special_gas_limit"`
+	FlatGasLimit    OptInt64 `json:"flat_gas_limit"`
+	FlatGasPrice    OptInt64 `json:"flat_gas_price"`
+	GasPrice        int64    `json:"gas_price"`
+	GasLimit        int64    `json:"gas_limit"`
+	GasCredit       int64    `json:"gas_credit"`
+	BlockGasLimit   int64    `json:"block_gas_limit"`
+	FreezeDueLimit  int64    `json:"freeze_due_limit"`
+	DeleteDueLimit  int64    `json:"delete_due_limit"`
+}
+
+// GetSpecialGasLimit returns the value of SpecialGasLimit.
+func (s *GasLimitPrices) GetSpecialGasLimit() OptInt64 {
+	return s.SpecialGasLimit
+}
+
+// GetFlatGasLimit returns the value of FlatGasLimit.
+func (s *GasLimitPrices) GetFlatGasLimit() OptInt64 {
+	return s.FlatGasLimit
+}
+
+// GetFlatGasPrice returns the value of FlatGasPrice.
+func (s *GasLimitPrices) GetFlatGasPrice() OptInt64 {
+	return s.FlatGasPrice
+}
+
+// GetGasPrice returns the value of GasPrice.
+func (s *GasLimitPrices) GetGasPrice() int64 {
+	return s.GasPrice
+}
+
+// GetGasLimit returns the value of GasLimit.
+func (s *GasLimitPrices) GetGasLimit() int64 {
+	return s.GasLimit
+}
+
+// GetGasCredit returns the value of GasCredit.
+func (s *GasLimitPrices) GetGasCredit() int64 {
+	return s.GasCredit
+}
+
+// GetBlockGasLimit returns the value of BlockGasLimit.
+func (s *GasLimitPrices) GetBlockGasLimit() int64 {
+	return s.BlockGasLimit
+}
+
+// GetFreezeDueLimit returns the value of FreezeDueLimit.
+func (s *GasLimitPrices) GetFreezeDueLimit() int64 {
+	return s.FreezeDueLimit
+}
+
+// GetDeleteDueLimit returns the value of DeleteDueLimit.
+func (s *GasLimitPrices) GetDeleteDueLimit() int64 {
+	return s.DeleteDueLimit
+}
+
+// SetSpecialGasLimit sets the value of SpecialGasLimit.
+func (s *GasLimitPrices) SetSpecialGasLimit(val OptInt64) {
+	s.SpecialGasLimit = val
+}
+
+// SetFlatGasLimit sets the value of FlatGasLimit.
+func (s *GasLimitPrices) SetFlatGasLimit(val OptInt64) {
+	s.FlatGasLimit = val
+}
+
+// SetFlatGasPrice sets the value of FlatGasPrice.
+func (s *GasLimitPrices) SetFlatGasPrice(val OptInt64) {
+	s.FlatGasPrice = val
+}
+
+// SetGasPrice sets the value of GasPrice.
+func (s *GasLimitPrices) SetGasPrice(val int64) {
+	s.GasPrice = val
+}
+
+// SetGasLimit sets the value of GasLimit.
+func (s *GasLimitPrices) SetGasLimit(val int64) {
+	s.GasLimit = val
+}
+
+// SetGasCredit sets the value of GasCredit.
+func (s *GasLimitPrices) SetGasCredit(val int64) {
+	s.GasCredit = val
+}
+
+// SetBlockGasLimit sets the value of BlockGasLimit.
+func (s *GasLimitPrices) SetBlockGasLimit(val int64) {
+	s.BlockGasLimit = val
+}
+
+// SetFreezeDueLimit sets the value of FreezeDueLimit.
+func (s *GasLimitPrices) SetFreezeDueLimit(val int64) {
+	s.FreezeDueLimit = val
+}
+
+// SetDeleteDueLimit sets the value of DeleteDueLimit.
+func (s *GasLimitPrices) SetDeleteDueLimit(val int64) {
+	s.DeleteDueLimit = val
 }
 
 type GetAccountDiffOK struct {
@@ -4182,6 +5747,157 @@ func (s *JettonBalance) SetJetton(val JettonPreview) {
 	s.Jetton = val
 }
 
+// Ref: #/components/schemas/JettonBridgeParams
+type JettonBridgeParams struct {
+	BridgeAddress        string                `json:"bridge_address"`
+	OraclesAddress       string                `json:"oracles_address"`
+	StateFlags           int                   `json:"state_flags"`
+	BurnBridgeFee        OptInt64              `json:"burn_bridge_fee"`
+	Oracles              []Oracle              `json:"oracles"`
+	ExternalChainAddress OptString             `json:"external_chain_address"`
+	Prices               OptJettonBridgePrices `json:"prices"`
+}
+
+// GetBridgeAddress returns the value of BridgeAddress.
+func (s *JettonBridgeParams) GetBridgeAddress() string {
+	return s.BridgeAddress
+}
+
+// GetOraclesAddress returns the value of OraclesAddress.
+func (s *JettonBridgeParams) GetOraclesAddress() string {
+	return s.OraclesAddress
+}
+
+// GetStateFlags returns the value of StateFlags.
+func (s *JettonBridgeParams) GetStateFlags() int {
+	return s.StateFlags
+}
+
+// GetBurnBridgeFee returns the value of BurnBridgeFee.
+func (s *JettonBridgeParams) GetBurnBridgeFee() OptInt64 {
+	return s.BurnBridgeFee
+}
+
+// GetOracles returns the value of Oracles.
+func (s *JettonBridgeParams) GetOracles() []Oracle {
+	return s.Oracles
+}
+
+// GetExternalChainAddress returns the value of ExternalChainAddress.
+func (s *JettonBridgeParams) GetExternalChainAddress() OptString {
+	return s.ExternalChainAddress
+}
+
+// GetPrices returns the value of Prices.
+func (s *JettonBridgeParams) GetPrices() OptJettonBridgePrices {
+	return s.Prices
+}
+
+// SetBridgeAddress sets the value of BridgeAddress.
+func (s *JettonBridgeParams) SetBridgeAddress(val string) {
+	s.BridgeAddress = val
+}
+
+// SetOraclesAddress sets the value of OraclesAddress.
+func (s *JettonBridgeParams) SetOraclesAddress(val string) {
+	s.OraclesAddress = val
+}
+
+// SetStateFlags sets the value of StateFlags.
+func (s *JettonBridgeParams) SetStateFlags(val int) {
+	s.StateFlags = val
+}
+
+// SetBurnBridgeFee sets the value of BurnBridgeFee.
+func (s *JettonBridgeParams) SetBurnBridgeFee(val OptInt64) {
+	s.BurnBridgeFee = val
+}
+
+// SetOracles sets the value of Oracles.
+func (s *JettonBridgeParams) SetOracles(val []Oracle) {
+	s.Oracles = val
+}
+
+// SetExternalChainAddress sets the value of ExternalChainAddress.
+func (s *JettonBridgeParams) SetExternalChainAddress(val OptString) {
+	s.ExternalChainAddress = val
+}
+
+// SetPrices sets the value of Prices.
+func (s *JettonBridgeParams) SetPrices(val OptJettonBridgePrices) {
+	s.Prices = val
+}
+
+// Ref: #/components/schemas/JettonBridgePrices
+type JettonBridgePrices struct {
+	BridgeBurnFee           int64 `json:"bridge_burn_fee"`
+	BridgeMintFee           int64 `json:"bridge_mint_fee"`
+	WalletMinTonsForStorage int64 `json:"wallet_min_tons_for_storage"`
+	WalletGasConsumption    int64 `json:"wallet_gas_consumption"`
+	MinterMinTonsForStorage int64 `json:"minter_min_tons_for_storage"`
+	DiscoverGasConsumption  int64 `json:"discover_gas_consumption"`
+}
+
+// GetBridgeBurnFee returns the value of BridgeBurnFee.
+func (s *JettonBridgePrices) GetBridgeBurnFee() int64 {
+	return s.BridgeBurnFee
+}
+
+// GetBridgeMintFee returns the value of BridgeMintFee.
+func (s *JettonBridgePrices) GetBridgeMintFee() int64 {
+	return s.BridgeMintFee
+}
+
+// GetWalletMinTonsForStorage returns the value of WalletMinTonsForStorage.
+func (s *JettonBridgePrices) GetWalletMinTonsForStorage() int64 {
+	return s.WalletMinTonsForStorage
+}
+
+// GetWalletGasConsumption returns the value of WalletGasConsumption.
+func (s *JettonBridgePrices) GetWalletGasConsumption() int64 {
+	return s.WalletGasConsumption
+}
+
+// GetMinterMinTonsForStorage returns the value of MinterMinTonsForStorage.
+func (s *JettonBridgePrices) GetMinterMinTonsForStorage() int64 {
+	return s.MinterMinTonsForStorage
+}
+
+// GetDiscoverGasConsumption returns the value of DiscoverGasConsumption.
+func (s *JettonBridgePrices) GetDiscoverGasConsumption() int64 {
+	return s.DiscoverGasConsumption
+}
+
+// SetBridgeBurnFee sets the value of BridgeBurnFee.
+func (s *JettonBridgePrices) SetBridgeBurnFee(val int64) {
+	s.BridgeBurnFee = val
+}
+
+// SetBridgeMintFee sets the value of BridgeMintFee.
+func (s *JettonBridgePrices) SetBridgeMintFee(val int64) {
+	s.BridgeMintFee = val
+}
+
+// SetWalletMinTonsForStorage sets the value of WalletMinTonsForStorage.
+func (s *JettonBridgePrices) SetWalletMinTonsForStorage(val int64) {
+	s.WalletMinTonsForStorage = val
+}
+
+// SetWalletGasConsumption sets the value of WalletGasConsumption.
+func (s *JettonBridgePrices) SetWalletGasConsumption(val int64) {
+	s.WalletGasConsumption = val
+}
+
+// SetMinterMinTonsForStorage sets the value of MinterMinTonsForStorage.
+func (s *JettonBridgePrices) SetMinterMinTonsForStorage(val int64) {
+	s.MinterMinTonsForStorage = val
+}
+
+// SetDiscoverGasConsumption sets the value of DiscoverGasConsumption.
+func (s *JettonBridgePrices) SetDiscoverGasConsumption(val int64) {
+	s.DiscoverGasConsumption = val
+}
+
 // Ref: #/components/schemas/JettonBurnAction
 type JettonBurnAction struct {
 	Sender        AccountAddress `json:"sender"`
@@ -5201,6 +6917,201 @@ func (s *MethodExecutionResult) SetDecoded(val jx.Raw) {
 	s.Decoded = val
 }
 
+// Ref: #/components/schemas/MisbehaviourPunishmentConfig
+type MisbehaviourPunishmentConfig struct {
+	DefaultFlatFine          int64 `json:"default_flat_fine"`
+	DefaultProportionalFine  int64 `json:"default_proportional_fine"`
+	SeverityFlatMult         int   `json:"severity_flat_mult"`
+	SeverityProportionalMult int   `json:"severity_proportional_mult"`
+	UnpunishableInterval     int   `json:"unpunishable_interval"`
+	LongInterval             int   `json:"long_interval"`
+	LongFlatMult             int   `json:"long_flat_mult"`
+	LongProportionalMult     int   `json:"long_proportional_mult"`
+	MediumInterval           int   `json:"medium_interval"`
+	MediumFlatMult           int   `json:"medium_flat_mult"`
+	MediumProportionalMult   int   `json:"medium_proportional_mult"`
+}
+
+// GetDefaultFlatFine returns the value of DefaultFlatFine.
+func (s *MisbehaviourPunishmentConfig) GetDefaultFlatFine() int64 {
+	return s.DefaultFlatFine
+}
+
+// GetDefaultProportionalFine returns the value of DefaultProportionalFine.
+func (s *MisbehaviourPunishmentConfig) GetDefaultProportionalFine() int64 {
+	return s.DefaultProportionalFine
+}
+
+// GetSeverityFlatMult returns the value of SeverityFlatMult.
+func (s *MisbehaviourPunishmentConfig) GetSeverityFlatMult() int {
+	return s.SeverityFlatMult
+}
+
+// GetSeverityProportionalMult returns the value of SeverityProportionalMult.
+func (s *MisbehaviourPunishmentConfig) GetSeverityProportionalMult() int {
+	return s.SeverityProportionalMult
+}
+
+// GetUnpunishableInterval returns the value of UnpunishableInterval.
+func (s *MisbehaviourPunishmentConfig) GetUnpunishableInterval() int {
+	return s.UnpunishableInterval
+}
+
+// GetLongInterval returns the value of LongInterval.
+func (s *MisbehaviourPunishmentConfig) GetLongInterval() int {
+	return s.LongInterval
+}
+
+// GetLongFlatMult returns the value of LongFlatMult.
+func (s *MisbehaviourPunishmentConfig) GetLongFlatMult() int {
+	return s.LongFlatMult
+}
+
+// GetLongProportionalMult returns the value of LongProportionalMult.
+func (s *MisbehaviourPunishmentConfig) GetLongProportionalMult() int {
+	return s.LongProportionalMult
+}
+
+// GetMediumInterval returns the value of MediumInterval.
+func (s *MisbehaviourPunishmentConfig) GetMediumInterval() int {
+	return s.MediumInterval
+}
+
+// GetMediumFlatMult returns the value of MediumFlatMult.
+func (s *MisbehaviourPunishmentConfig) GetMediumFlatMult() int {
+	return s.MediumFlatMult
+}
+
+// GetMediumProportionalMult returns the value of MediumProportionalMult.
+func (s *MisbehaviourPunishmentConfig) GetMediumProportionalMult() int {
+	return s.MediumProportionalMult
+}
+
+// SetDefaultFlatFine sets the value of DefaultFlatFine.
+func (s *MisbehaviourPunishmentConfig) SetDefaultFlatFine(val int64) {
+	s.DefaultFlatFine = val
+}
+
+// SetDefaultProportionalFine sets the value of DefaultProportionalFine.
+func (s *MisbehaviourPunishmentConfig) SetDefaultProportionalFine(val int64) {
+	s.DefaultProportionalFine = val
+}
+
+// SetSeverityFlatMult sets the value of SeverityFlatMult.
+func (s *MisbehaviourPunishmentConfig) SetSeverityFlatMult(val int) {
+	s.SeverityFlatMult = val
+}
+
+// SetSeverityProportionalMult sets the value of SeverityProportionalMult.
+func (s *MisbehaviourPunishmentConfig) SetSeverityProportionalMult(val int) {
+	s.SeverityProportionalMult = val
+}
+
+// SetUnpunishableInterval sets the value of UnpunishableInterval.
+func (s *MisbehaviourPunishmentConfig) SetUnpunishableInterval(val int) {
+	s.UnpunishableInterval = val
+}
+
+// SetLongInterval sets the value of LongInterval.
+func (s *MisbehaviourPunishmentConfig) SetLongInterval(val int) {
+	s.LongInterval = val
+}
+
+// SetLongFlatMult sets the value of LongFlatMult.
+func (s *MisbehaviourPunishmentConfig) SetLongFlatMult(val int) {
+	s.LongFlatMult = val
+}
+
+// SetLongProportionalMult sets the value of LongProportionalMult.
+func (s *MisbehaviourPunishmentConfig) SetLongProportionalMult(val int) {
+	s.LongProportionalMult = val
+}
+
+// SetMediumInterval sets the value of MediumInterval.
+func (s *MisbehaviourPunishmentConfig) SetMediumInterval(val int) {
+	s.MediumInterval = val
+}
+
+// SetMediumFlatMult sets the value of MediumFlatMult.
+func (s *MisbehaviourPunishmentConfig) SetMediumFlatMult(val int) {
+	s.MediumFlatMult = val
+}
+
+// SetMediumProportionalMult sets the value of MediumProportionalMult.
+func (s *MisbehaviourPunishmentConfig) SetMediumProportionalMult(val int) {
+	s.MediumProportionalMult = val
+}
+
+// Ref: #/components/schemas/MsgForwardPrices
+type MsgForwardPrices struct {
+	LumpPrice      int64 `json:"lump_price"`
+	BitPrice       int64 `json:"bit_price"`
+	CellPrice      int64 `json:"cell_price"`
+	IhrPriceFactor int64 `json:"ihr_price_factor"`
+	FirstFrac      int64 `json:"first_frac"`
+	NextFrac       int64 `json:"next_frac"`
+}
+
+// GetLumpPrice returns the value of LumpPrice.
+func (s *MsgForwardPrices) GetLumpPrice() int64 {
+	return s.LumpPrice
+}
+
+// GetBitPrice returns the value of BitPrice.
+func (s *MsgForwardPrices) GetBitPrice() int64 {
+	return s.BitPrice
+}
+
+// GetCellPrice returns the value of CellPrice.
+func (s *MsgForwardPrices) GetCellPrice() int64 {
+	return s.CellPrice
+}
+
+// GetIhrPriceFactor returns the value of IhrPriceFactor.
+func (s *MsgForwardPrices) GetIhrPriceFactor() int64 {
+	return s.IhrPriceFactor
+}
+
+// GetFirstFrac returns the value of FirstFrac.
+func (s *MsgForwardPrices) GetFirstFrac() int64 {
+	return s.FirstFrac
+}
+
+// GetNextFrac returns the value of NextFrac.
+func (s *MsgForwardPrices) GetNextFrac() int64 {
+	return s.NextFrac
+}
+
+// SetLumpPrice sets the value of LumpPrice.
+func (s *MsgForwardPrices) SetLumpPrice(val int64) {
+	s.LumpPrice = val
+}
+
+// SetBitPrice sets the value of BitPrice.
+func (s *MsgForwardPrices) SetBitPrice(val int64) {
+	s.BitPrice = val
+}
+
+// SetCellPrice sets the value of CellPrice.
+func (s *MsgForwardPrices) SetCellPrice(val int64) {
+	s.CellPrice = val
+}
+
+// SetIhrPriceFactor sets the value of IhrPriceFactor.
+func (s *MsgForwardPrices) SetIhrPriceFactor(val int64) {
+	s.IhrPriceFactor = val
+}
+
+// SetFirstFrac sets the value of FirstFrac.
+func (s *MsgForwardPrices) SetFirstFrac(val int64) {
+	s.FirstFrac = val
+}
+
+// SetNextFrac sets the value of NextFrac.
+func (s *MsgForwardPrices) SetNextFrac(val int64) {
+	s.NextFrac = val
+}
+
 type NftApprovedBy []NftApprovedByItem
 
 type NftApprovedByItem string
@@ -5901,6 +7812,1432 @@ func (o OptBlockchainAccountInspectCompiler) Get() (v BlockchainAccountInspectCo
 
 // Or returns value if set, or given parameter if does not.
 func (o OptBlockchainAccountInspectCompiler) Or(d BlockchainAccountInspectCompiler) BlockchainAccountInspectCompiler {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptBlockchainConfig10 returns new OptBlockchainConfig10 with value set to v.
+func NewOptBlockchainConfig10(v BlockchainConfig10) OptBlockchainConfig10 {
+	return OptBlockchainConfig10{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptBlockchainConfig10 is optional BlockchainConfig10.
+type OptBlockchainConfig10 struct {
+	Value BlockchainConfig10
+	Set   bool
+}
+
+// IsSet returns true if OptBlockchainConfig10 was set.
+func (o OptBlockchainConfig10) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptBlockchainConfig10) Reset() {
+	var v BlockchainConfig10
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptBlockchainConfig10) SetTo(v BlockchainConfig10) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptBlockchainConfig10) Get() (v BlockchainConfig10, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptBlockchainConfig10) Or(d BlockchainConfig10) BlockchainConfig10 {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptBlockchainConfig11 returns new OptBlockchainConfig11 with value set to v.
+func NewOptBlockchainConfig11(v BlockchainConfig11) OptBlockchainConfig11 {
+	return OptBlockchainConfig11{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptBlockchainConfig11 is optional BlockchainConfig11.
+type OptBlockchainConfig11 struct {
+	Value BlockchainConfig11
+	Set   bool
+}
+
+// IsSet returns true if OptBlockchainConfig11 was set.
+func (o OptBlockchainConfig11) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptBlockchainConfig11) Reset() {
+	var v BlockchainConfig11
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptBlockchainConfig11) SetTo(v BlockchainConfig11) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptBlockchainConfig11) Get() (v BlockchainConfig11, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptBlockchainConfig11) Or(d BlockchainConfig11) BlockchainConfig11 {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptBlockchainConfig12 returns new OptBlockchainConfig12 with value set to v.
+func NewOptBlockchainConfig12(v BlockchainConfig12) OptBlockchainConfig12 {
+	return OptBlockchainConfig12{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptBlockchainConfig12 is optional BlockchainConfig12.
+type OptBlockchainConfig12 struct {
+	Value BlockchainConfig12
+	Set   bool
+}
+
+// IsSet returns true if OptBlockchainConfig12 was set.
+func (o OptBlockchainConfig12) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptBlockchainConfig12) Reset() {
+	var v BlockchainConfig12
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptBlockchainConfig12) SetTo(v BlockchainConfig12) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptBlockchainConfig12) Get() (v BlockchainConfig12, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptBlockchainConfig12) Or(d BlockchainConfig12) BlockchainConfig12 {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptBlockchainConfig13 returns new OptBlockchainConfig13 with value set to v.
+func NewOptBlockchainConfig13(v BlockchainConfig13) OptBlockchainConfig13 {
+	return OptBlockchainConfig13{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptBlockchainConfig13 is optional BlockchainConfig13.
+type OptBlockchainConfig13 struct {
+	Value BlockchainConfig13
+	Set   bool
+}
+
+// IsSet returns true if OptBlockchainConfig13 was set.
+func (o OptBlockchainConfig13) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptBlockchainConfig13) Reset() {
+	var v BlockchainConfig13
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptBlockchainConfig13) SetTo(v BlockchainConfig13) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptBlockchainConfig13) Get() (v BlockchainConfig13, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptBlockchainConfig13) Or(d BlockchainConfig13) BlockchainConfig13 {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptBlockchainConfig14 returns new OptBlockchainConfig14 with value set to v.
+func NewOptBlockchainConfig14(v BlockchainConfig14) OptBlockchainConfig14 {
+	return OptBlockchainConfig14{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptBlockchainConfig14 is optional BlockchainConfig14.
+type OptBlockchainConfig14 struct {
+	Value BlockchainConfig14
+	Set   bool
+}
+
+// IsSet returns true if OptBlockchainConfig14 was set.
+func (o OptBlockchainConfig14) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptBlockchainConfig14) Reset() {
+	var v BlockchainConfig14
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptBlockchainConfig14) SetTo(v BlockchainConfig14) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptBlockchainConfig14) Get() (v BlockchainConfig14, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptBlockchainConfig14) Or(d BlockchainConfig14) BlockchainConfig14 {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptBlockchainConfig15 returns new OptBlockchainConfig15 with value set to v.
+func NewOptBlockchainConfig15(v BlockchainConfig15) OptBlockchainConfig15 {
+	return OptBlockchainConfig15{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptBlockchainConfig15 is optional BlockchainConfig15.
+type OptBlockchainConfig15 struct {
+	Value BlockchainConfig15
+	Set   bool
+}
+
+// IsSet returns true if OptBlockchainConfig15 was set.
+func (o OptBlockchainConfig15) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptBlockchainConfig15) Reset() {
+	var v BlockchainConfig15
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptBlockchainConfig15) SetTo(v BlockchainConfig15) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptBlockchainConfig15) Get() (v BlockchainConfig15, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptBlockchainConfig15) Or(d BlockchainConfig15) BlockchainConfig15 {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptBlockchainConfig16 returns new OptBlockchainConfig16 with value set to v.
+func NewOptBlockchainConfig16(v BlockchainConfig16) OptBlockchainConfig16 {
+	return OptBlockchainConfig16{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptBlockchainConfig16 is optional BlockchainConfig16.
+type OptBlockchainConfig16 struct {
+	Value BlockchainConfig16
+	Set   bool
+}
+
+// IsSet returns true if OptBlockchainConfig16 was set.
+func (o OptBlockchainConfig16) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptBlockchainConfig16) Reset() {
+	var v BlockchainConfig16
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptBlockchainConfig16) SetTo(v BlockchainConfig16) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptBlockchainConfig16) Get() (v BlockchainConfig16, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptBlockchainConfig16) Or(d BlockchainConfig16) BlockchainConfig16 {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptBlockchainConfig17 returns new OptBlockchainConfig17 with value set to v.
+func NewOptBlockchainConfig17(v BlockchainConfig17) OptBlockchainConfig17 {
+	return OptBlockchainConfig17{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptBlockchainConfig17 is optional BlockchainConfig17.
+type OptBlockchainConfig17 struct {
+	Value BlockchainConfig17
+	Set   bool
+}
+
+// IsSet returns true if OptBlockchainConfig17 was set.
+func (o OptBlockchainConfig17) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptBlockchainConfig17) Reset() {
+	var v BlockchainConfig17
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptBlockchainConfig17) SetTo(v BlockchainConfig17) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptBlockchainConfig17) Get() (v BlockchainConfig17, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptBlockchainConfig17) Or(d BlockchainConfig17) BlockchainConfig17 {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptBlockchainConfig18 returns new OptBlockchainConfig18 with value set to v.
+func NewOptBlockchainConfig18(v BlockchainConfig18) OptBlockchainConfig18 {
+	return OptBlockchainConfig18{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptBlockchainConfig18 is optional BlockchainConfig18.
+type OptBlockchainConfig18 struct {
+	Value BlockchainConfig18
+	Set   bool
+}
+
+// IsSet returns true if OptBlockchainConfig18 was set.
+func (o OptBlockchainConfig18) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptBlockchainConfig18) Reset() {
+	var v BlockchainConfig18
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptBlockchainConfig18) SetTo(v BlockchainConfig18) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptBlockchainConfig18) Get() (v BlockchainConfig18, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptBlockchainConfig18) Or(d BlockchainConfig18) BlockchainConfig18 {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptBlockchainConfig20 returns new OptBlockchainConfig20 with value set to v.
+func NewOptBlockchainConfig20(v BlockchainConfig20) OptBlockchainConfig20 {
+	return OptBlockchainConfig20{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptBlockchainConfig20 is optional BlockchainConfig20.
+type OptBlockchainConfig20 struct {
+	Value BlockchainConfig20
+	Set   bool
+}
+
+// IsSet returns true if OptBlockchainConfig20 was set.
+func (o OptBlockchainConfig20) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptBlockchainConfig20) Reset() {
+	var v BlockchainConfig20
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptBlockchainConfig20) SetTo(v BlockchainConfig20) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptBlockchainConfig20) Get() (v BlockchainConfig20, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptBlockchainConfig20) Or(d BlockchainConfig20) BlockchainConfig20 {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptBlockchainConfig21 returns new OptBlockchainConfig21 with value set to v.
+func NewOptBlockchainConfig21(v BlockchainConfig21) OptBlockchainConfig21 {
+	return OptBlockchainConfig21{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptBlockchainConfig21 is optional BlockchainConfig21.
+type OptBlockchainConfig21 struct {
+	Value BlockchainConfig21
+	Set   bool
+}
+
+// IsSet returns true if OptBlockchainConfig21 was set.
+func (o OptBlockchainConfig21) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptBlockchainConfig21) Reset() {
+	var v BlockchainConfig21
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptBlockchainConfig21) SetTo(v BlockchainConfig21) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptBlockchainConfig21) Get() (v BlockchainConfig21, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptBlockchainConfig21) Or(d BlockchainConfig21) BlockchainConfig21 {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptBlockchainConfig22 returns new OptBlockchainConfig22 with value set to v.
+func NewOptBlockchainConfig22(v BlockchainConfig22) OptBlockchainConfig22 {
+	return OptBlockchainConfig22{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptBlockchainConfig22 is optional BlockchainConfig22.
+type OptBlockchainConfig22 struct {
+	Value BlockchainConfig22
+	Set   bool
+}
+
+// IsSet returns true if OptBlockchainConfig22 was set.
+func (o OptBlockchainConfig22) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptBlockchainConfig22) Reset() {
+	var v BlockchainConfig22
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptBlockchainConfig22) SetTo(v BlockchainConfig22) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptBlockchainConfig22) Get() (v BlockchainConfig22, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptBlockchainConfig22) Or(d BlockchainConfig22) BlockchainConfig22 {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptBlockchainConfig23 returns new OptBlockchainConfig23 with value set to v.
+func NewOptBlockchainConfig23(v BlockchainConfig23) OptBlockchainConfig23 {
+	return OptBlockchainConfig23{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptBlockchainConfig23 is optional BlockchainConfig23.
+type OptBlockchainConfig23 struct {
+	Value BlockchainConfig23
+	Set   bool
+}
+
+// IsSet returns true if OptBlockchainConfig23 was set.
+func (o OptBlockchainConfig23) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptBlockchainConfig23) Reset() {
+	var v BlockchainConfig23
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptBlockchainConfig23) SetTo(v BlockchainConfig23) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptBlockchainConfig23) Get() (v BlockchainConfig23, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptBlockchainConfig23) Or(d BlockchainConfig23) BlockchainConfig23 {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptBlockchainConfig24 returns new OptBlockchainConfig24 with value set to v.
+func NewOptBlockchainConfig24(v BlockchainConfig24) OptBlockchainConfig24 {
+	return OptBlockchainConfig24{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptBlockchainConfig24 is optional BlockchainConfig24.
+type OptBlockchainConfig24 struct {
+	Value BlockchainConfig24
+	Set   bool
+}
+
+// IsSet returns true if OptBlockchainConfig24 was set.
+func (o OptBlockchainConfig24) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptBlockchainConfig24) Reset() {
+	var v BlockchainConfig24
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptBlockchainConfig24) SetTo(v BlockchainConfig24) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptBlockchainConfig24) Get() (v BlockchainConfig24, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptBlockchainConfig24) Or(d BlockchainConfig24) BlockchainConfig24 {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptBlockchainConfig25 returns new OptBlockchainConfig25 with value set to v.
+func NewOptBlockchainConfig25(v BlockchainConfig25) OptBlockchainConfig25 {
+	return OptBlockchainConfig25{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptBlockchainConfig25 is optional BlockchainConfig25.
+type OptBlockchainConfig25 struct {
+	Value BlockchainConfig25
+	Set   bool
+}
+
+// IsSet returns true if OptBlockchainConfig25 was set.
+func (o OptBlockchainConfig25) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptBlockchainConfig25) Reset() {
+	var v BlockchainConfig25
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptBlockchainConfig25) SetTo(v BlockchainConfig25) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptBlockchainConfig25) Get() (v BlockchainConfig25, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptBlockchainConfig25) Or(d BlockchainConfig25) BlockchainConfig25 {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptBlockchainConfig28 returns new OptBlockchainConfig28 with value set to v.
+func NewOptBlockchainConfig28(v BlockchainConfig28) OptBlockchainConfig28 {
+	return OptBlockchainConfig28{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptBlockchainConfig28 is optional BlockchainConfig28.
+type OptBlockchainConfig28 struct {
+	Value BlockchainConfig28
+	Set   bool
+}
+
+// IsSet returns true if OptBlockchainConfig28 was set.
+func (o OptBlockchainConfig28) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptBlockchainConfig28) Reset() {
+	var v BlockchainConfig28
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptBlockchainConfig28) SetTo(v BlockchainConfig28) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptBlockchainConfig28) Get() (v BlockchainConfig28, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptBlockchainConfig28) Or(d BlockchainConfig28) BlockchainConfig28 {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptBlockchainConfig29 returns new OptBlockchainConfig29 with value set to v.
+func NewOptBlockchainConfig29(v BlockchainConfig29) OptBlockchainConfig29 {
+	return OptBlockchainConfig29{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptBlockchainConfig29 is optional BlockchainConfig29.
+type OptBlockchainConfig29 struct {
+	Value BlockchainConfig29
+	Set   bool
+}
+
+// IsSet returns true if OptBlockchainConfig29 was set.
+func (o OptBlockchainConfig29) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptBlockchainConfig29) Reset() {
+	var v BlockchainConfig29
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptBlockchainConfig29) SetTo(v BlockchainConfig29) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptBlockchainConfig29) Get() (v BlockchainConfig29, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptBlockchainConfig29) Or(d BlockchainConfig29) BlockchainConfig29 {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptBlockchainConfig31 returns new OptBlockchainConfig31 with value set to v.
+func NewOptBlockchainConfig31(v BlockchainConfig31) OptBlockchainConfig31 {
+	return OptBlockchainConfig31{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptBlockchainConfig31 is optional BlockchainConfig31.
+type OptBlockchainConfig31 struct {
+	Value BlockchainConfig31
+	Set   bool
+}
+
+// IsSet returns true if OptBlockchainConfig31 was set.
+func (o OptBlockchainConfig31) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptBlockchainConfig31) Reset() {
+	var v BlockchainConfig31
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptBlockchainConfig31) SetTo(v BlockchainConfig31) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptBlockchainConfig31) Get() (v BlockchainConfig31, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptBlockchainConfig31) Or(d BlockchainConfig31) BlockchainConfig31 {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptBlockchainConfig40 returns new OptBlockchainConfig40 with value set to v.
+func NewOptBlockchainConfig40(v BlockchainConfig40) OptBlockchainConfig40 {
+	return OptBlockchainConfig40{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptBlockchainConfig40 is optional BlockchainConfig40.
+type OptBlockchainConfig40 struct {
+	Value BlockchainConfig40
+	Set   bool
+}
+
+// IsSet returns true if OptBlockchainConfig40 was set.
+func (o OptBlockchainConfig40) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptBlockchainConfig40) Reset() {
+	var v BlockchainConfig40
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptBlockchainConfig40) SetTo(v BlockchainConfig40) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptBlockchainConfig40) Get() (v BlockchainConfig40, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptBlockchainConfig40) Or(d BlockchainConfig40) BlockchainConfig40 {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptBlockchainConfig43 returns new OptBlockchainConfig43 with value set to v.
+func NewOptBlockchainConfig43(v BlockchainConfig43) OptBlockchainConfig43 {
+	return OptBlockchainConfig43{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptBlockchainConfig43 is optional BlockchainConfig43.
+type OptBlockchainConfig43 struct {
+	Value BlockchainConfig43
+	Set   bool
+}
+
+// IsSet returns true if OptBlockchainConfig43 was set.
+func (o OptBlockchainConfig43) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptBlockchainConfig43) Reset() {
+	var v BlockchainConfig43
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptBlockchainConfig43) SetTo(v BlockchainConfig43) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptBlockchainConfig43) Get() (v BlockchainConfig43, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptBlockchainConfig43) Or(d BlockchainConfig43) BlockchainConfig43 {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptBlockchainConfig5 returns new OptBlockchainConfig5 with value set to v.
+func NewOptBlockchainConfig5(v BlockchainConfig5) OptBlockchainConfig5 {
+	return OptBlockchainConfig5{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptBlockchainConfig5 is optional BlockchainConfig5.
+type OptBlockchainConfig5 struct {
+	Value BlockchainConfig5
+	Set   bool
+}
+
+// IsSet returns true if OptBlockchainConfig5 was set.
+func (o OptBlockchainConfig5) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptBlockchainConfig5) Reset() {
+	var v BlockchainConfig5
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptBlockchainConfig5) SetTo(v BlockchainConfig5) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptBlockchainConfig5) Get() (v BlockchainConfig5, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptBlockchainConfig5) Or(d BlockchainConfig5) BlockchainConfig5 {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptBlockchainConfig6 returns new OptBlockchainConfig6 with value set to v.
+func NewOptBlockchainConfig6(v BlockchainConfig6) OptBlockchainConfig6 {
+	return OptBlockchainConfig6{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptBlockchainConfig6 is optional BlockchainConfig6.
+type OptBlockchainConfig6 struct {
+	Value BlockchainConfig6
+	Set   bool
+}
+
+// IsSet returns true if OptBlockchainConfig6 was set.
+func (o OptBlockchainConfig6) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptBlockchainConfig6) Reset() {
+	var v BlockchainConfig6
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptBlockchainConfig6) SetTo(v BlockchainConfig6) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptBlockchainConfig6) Get() (v BlockchainConfig6, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptBlockchainConfig6) Or(d BlockchainConfig6) BlockchainConfig6 {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptBlockchainConfig7 returns new OptBlockchainConfig7 with value set to v.
+func NewOptBlockchainConfig7(v BlockchainConfig7) OptBlockchainConfig7 {
+	return OptBlockchainConfig7{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptBlockchainConfig7 is optional BlockchainConfig7.
+type OptBlockchainConfig7 struct {
+	Value BlockchainConfig7
+	Set   bool
+}
+
+// IsSet returns true if OptBlockchainConfig7 was set.
+func (o OptBlockchainConfig7) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptBlockchainConfig7) Reset() {
+	var v BlockchainConfig7
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptBlockchainConfig7) SetTo(v BlockchainConfig7) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptBlockchainConfig7) Get() (v BlockchainConfig7, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptBlockchainConfig7) Or(d BlockchainConfig7) BlockchainConfig7 {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptBlockchainConfig71 returns new OptBlockchainConfig71 with value set to v.
+func NewOptBlockchainConfig71(v BlockchainConfig71) OptBlockchainConfig71 {
+	return OptBlockchainConfig71{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptBlockchainConfig71 is optional BlockchainConfig71.
+type OptBlockchainConfig71 struct {
+	Value BlockchainConfig71
+	Set   bool
+}
+
+// IsSet returns true if OptBlockchainConfig71 was set.
+func (o OptBlockchainConfig71) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptBlockchainConfig71) Reset() {
+	var v BlockchainConfig71
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptBlockchainConfig71) SetTo(v BlockchainConfig71) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptBlockchainConfig71) Get() (v BlockchainConfig71, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptBlockchainConfig71) Or(d BlockchainConfig71) BlockchainConfig71 {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptBlockchainConfig72 returns new OptBlockchainConfig72 with value set to v.
+func NewOptBlockchainConfig72(v BlockchainConfig72) OptBlockchainConfig72 {
+	return OptBlockchainConfig72{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptBlockchainConfig72 is optional BlockchainConfig72.
+type OptBlockchainConfig72 struct {
+	Value BlockchainConfig72
+	Set   bool
+}
+
+// IsSet returns true if OptBlockchainConfig72 was set.
+func (o OptBlockchainConfig72) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptBlockchainConfig72) Reset() {
+	var v BlockchainConfig72
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptBlockchainConfig72) SetTo(v BlockchainConfig72) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptBlockchainConfig72) Get() (v BlockchainConfig72, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptBlockchainConfig72) Or(d BlockchainConfig72) BlockchainConfig72 {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptBlockchainConfig73 returns new OptBlockchainConfig73 with value set to v.
+func NewOptBlockchainConfig73(v BlockchainConfig73) OptBlockchainConfig73 {
+	return OptBlockchainConfig73{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptBlockchainConfig73 is optional BlockchainConfig73.
+type OptBlockchainConfig73 struct {
+	Value BlockchainConfig73
+	Set   bool
+}
+
+// IsSet returns true if OptBlockchainConfig73 was set.
+func (o OptBlockchainConfig73) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptBlockchainConfig73) Reset() {
+	var v BlockchainConfig73
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptBlockchainConfig73) SetTo(v BlockchainConfig73) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptBlockchainConfig73) Get() (v BlockchainConfig73, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptBlockchainConfig73) Or(d BlockchainConfig73) BlockchainConfig73 {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptBlockchainConfig79 returns new OptBlockchainConfig79 with value set to v.
+func NewOptBlockchainConfig79(v BlockchainConfig79) OptBlockchainConfig79 {
+	return OptBlockchainConfig79{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptBlockchainConfig79 is optional BlockchainConfig79.
+type OptBlockchainConfig79 struct {
+	Value BlockchainConfig79
+	Set   bool
+}
+
+// IsSet returns true if OptBlockchainConfig79 was set.
+func (o OptBlockchainConfig79) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptBlockchainConfig79) Reset() {
+	var v BlockchainConfig79
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptBlockchainConfig79) SetTo(v BlockchainConfig79) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptBlockchainConfig79) Get() (v BlockchainConfig79, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptBlockchainConfig79) Or(d BlockchainConfig79) BlockchainConfig79 {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptBlockchainConfig8 returns new OptBlockchainConfig8 with value set to v.
+func NewOptBlockchainConfig8(v BlockchainConfig8) OptBlockchainConfig8 {
+	return OptBlockchainConfig8{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptBlockchainConfig8 is optional BlockchainConfig8.
+type OptBlockchainConfig8 struct {
+	Value BlockchainConfig8
+	Set   bool
+}
+
+// IsSet returns true if OptBlockchainConfig8 was set.
+func (o OptBlockchainConfig8) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptBlockchainConfig8) Reset() {
+	var v BlockchainConfig8
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptBlockchainConfig8) SetTo(v BlockchainConfig8) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptBlockchainConfig8) Get() (v BlockchainConfig8, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptBlockchainConfig8) Or(d BlockchainConfig8) BlockchainConfig8 {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptBlockchainConfig81 returns new OptBlockchainConfig81 with value set to v.
+func NewOptBlockchainConfig81(v BlockchainConfig81) OptBlockchainConfig81 {
+	return OptBlockchainConfig81{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptBlockchainConfig81 is optional BlockchainConfig81.
+type OptBlockchainConfig81 struct {
+	Value BlockchainConfig81
+	Set   bool
+}
+
+// IsSet returns true if OptBlockchainConfig81 was set.
+func (o OptBlockchainConfig81) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptBlockchainConfig81) Reset() {
+	var v BlockchainConfig81
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptBlockchainConfig81) SetTo(v BlockchainConfig81) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptBlockchainConfig81) Get() (v BlockchainConfig81, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptBlockchainConfig81) Or(d BlockchainConfig81) BlockchainConfig81 {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptBlockchainConfig82 returns new OptBlockchainConfig82 with value set to v.
+func NewOptBlockchainConfig82(v BlockchainConfig82) OptBlockchainConfig82 {
+	return OptBlockchainConfig82{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptBlockchainConfig82 is optional BlockchainConfig82.
+type OptBlockchainConfig82 struct {
+	Value BlockchainConfig82
+	Set   bool
+}
+
+// IsSet returns true if OptBlockchainConfig82 was set.
+func (o OptBlockchainConfig82) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptBlockchainConfig82) Reset() {
+	var v BlockchainConfig82
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptBlockchainConfig82) SetTo(v BlockchainConfig82) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptBlockchainConfig82) Get() (v BlockchainConfig82, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptBlockchainConfig82) Or(d BlockchainConfig82) BlockchainConfig82 {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptBlockchainConfig9 returns new OptBlockchainConfig9 with value set to v.
+func NewOptBlockchainConfig9(v BlockchainConfig9) OptBlockchainConfig9 {
+	return OptBlockchainConfig9{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptBlockchainConfig9 is optional BlockchainConfig9.
+type OptBlockchainConfig9 struct {
+	Value BlockchainConfig9
+	Set   bool
+}
+
+// IsSet returns true if OptBlockchainConfig9 was set.
+func (o OptBlockchainConfig9) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptBlockchainConfig9) Reset() {
+	var v BlockchainConfig9
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptBlockchainConfig9) SetTo(v BlockchainConfig9) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptBlockchainConfig9) Get() (v BlockchainConfig9, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptBlockchainConfig9) Or(d BlockchainConfig9) BlockchainConfig9 {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -6637,6 +9974,52 @@ func (o OptInt64) Get() (v int64, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptInt64) Or(d int64) int64 {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptJettonBridgePrices returns new OptJettonBridgePrices with value set to v.
+func NewOptJettonBridgePrices(v JettonBridgePrices) OptJettonBridgePrices {
+	return OptJettonBridgePrices{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptJettonBridgePrices is optional JettonBridgePrices.
+type OptJettonBridgePrices struct {
+	Value JettonBridgePrices
+	Set   bool
+}
+
+// IsSet returns true if OptJettonBridgePrices was set.
+func (o OptJettonBridgePrices) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptJettonBridgePrices) Reset() {
+	var v JettonBridgePrices
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptJettonBridgePrices) SetTo(v JettonBridgePrices) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptJettonBridgePrices) Get() (v JettonBridgePrices, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptJettonBridgePrices) Or(d JettonBridgePrices) JettonBridgePrices {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -8069,6 +11452,80 @@ func (o OptWithdrawStakeRequestAction) Or(d WithdrawStakeRequestAction) Withdraw
 	return d
 }
 
+// Ref: #/components/schemas/Oracle
+type Oracle struct {
+	Address    string `json:"address"`
+	SecpPubkey string `json:"secp_pubkey"`
+}
+
+// GetAddress returns the value of Address.
+func (s *Oracle) GetAddress() string {
+	return s.Address
+}
+
+// GetSecpPubkey returns the value of SecpPubkey.
+func (s *Oracle) GetSecpPubkey() string {
+	return s.SecpPubkey
+}
+
+// SetAddress sets the value of Address.
+func (s *Oracle) SetAddress(val string) {
+	s.Address = val
+}
+
+// SetSecpPubkey sets the value of SecpPubkey.
+func (s *Oracle) SetSecpPubkey(val string) {
+	s.SecpPubkey = val
+}
+
+// Ref: #/components/schemas/OracleBridgeParams
+type OracleBridgeParams struct {
+	BridgeAddr            string   `json:"bridge_addr"`
+	OracleMultisigAddress string   `json:"oracle_multisig_address"`
+	ExternalChainAddress  string   `json:"external_chain_address"`
+	Oracles               []Oracle `json:"oracles"`
+}
+
+// GetBridgeAddr returns the value of BridgeAddr.
+func (s *OracleBridgeParams) GetBridgeAddr() string {
+	return s.BridgeAddr
+}
+
+// GetOracleMultisigAddress returns the value of OracleMultisigAddress.
+func (s *OracleBridgeParams) GetOracleMultisigAddress() string {
+	return s.OracleMultisigAddress
+}
+
+// GetExternalChainAddress returns the value of ExternalChainAddress.
+func (s *OracleBridgeParams) GetExternalChainAddress() string {
+	return s.ExternalChainAddress
+}
+
+// GetOracles returns the value of Oracles.
+func (s *OracleBridgeParams) GetOracles() []Oracle {
+	return s.Oracles
+}
+
+// SetBridgeAddr sets the value of BridgeAddr.
+func (s *OracleBridgeParams) SetBridgeAddr(val string) {
+	s.BridgeAddr = val
+}
+
+// SetOracleMultisigAddress sets the value of OracleMultisigAddress.
+func (s *OracleBridgeParams) SetOracleMultisigAddress(val string) {
+	s.OracleMultisigAddress = val
+}
+
+// SetExternalChainAddress sets the value of ExternalChainAddress.
+func (s *OracleBridgeParams) SetExternalChainAddress(val string) {
+	s.ExternalChainAddress = val
+}
+
+// SetOracles sets the value of Oracles.
+func (s *OracleBridgeParams) SetOracles(val []Oracle) {
+	s.Oracles = val
+}
+
 // Ref: #/components/schemas/PoolImplementation
 type PoolImplementation struct {
 	Name        string   `json:"name"`
@@ -8658,6 +12115,98 @@ func (s SetWalletBackupReq) Read(p []byte) (n int, err error) {
 		return 0, io.EOF
 	}
 	return s.Data.Read(p)
+}
+
+// Ref: #/components/schemas/SizeLimitsConfig
+type SizeLimitsConfig struct {
+	MaxMsgBits       int64    `json:"max_msg_bits"`
+	MaxMsgCells      int64    `json:"max_msg_cells"`
+	MaxLibraryCells  int64    `json:"max_library_cells"`
+	MaxVMDataDepth   int      `json:"max_vm_data_depth"`
+	MaxExtMsgSize    int64    `json:"max_ext_msg_size"`
+	MaxExtMsgDepth   int      `json:"max_ext_msg_depth"`
+	MaxAccStateCells OptInt64 `json:"max_acc_state_cells"`
+	MaxAccStateBits  OptInt64 `json:"max_acc_state_bits"`
+}
+
+// GetMaxMsgBits returns the value of MaxMsgBits.
+func (s *SizeLimitsConfig) GetMaxMsgBits() int64 {
+	return s.MaxMsgBits
+}
+
+// GetMaxMsgCells returns the value of MaxMsgCells.
+func (s *SizeLimitsConfig) GetMaxMsgCells() int64 {
+	return s.MaxMsgCells
+}
+
+// GetMaxLibraryCells returns the value of MaxLibraryCells.
+func (s *SizeLimitsConfig) GetMaxLibraryCells() int64 {
+	return s.MaxLibraryCells
+}
+
+// GetMaxVMDataDepth returns the value of MaxVMDataDepth.
+func (s *SizeLimitsConfig) GetMaxVMDataDepth() int {
+	return s.MaxVMDataDepth
+}
+
+// GetMaxExtMsgSize returns the value of MaxExtMsgSize.
+func (s *SizeLimitsConfig) GetMaxExtMsgSize() int64 {
+	return s.MaxExtMsgSize
+}
+
+// GetMaxExtMsgDepth returns the value of MaxExtMsgDepth.
+func (s *SizeLimitsConfig) GetMaxExtMsgDepth() int {
+	return s.MaxExtMsgDepth
+}
+
+// GetMaxAccStateCells returns the value of MaxAccStateCells.
+func (s *SizeLimitsConfig) GetMaxAccStateCells() OptInt64 {
+	return s.MaxAccStateCells
+}
+
+// GetMaxAccStateBits returns the value of MaxAccStateBits.
+func (s *SizeLimitsConfig) GetMaxAccStateBits() OptInt64 {
+	return s.MaxAccStateBits
+}
+
+// SetMaxMsgBits sets the value of MaxMsgBits.
+func (s *SizeLimitsConfig) SetMaxMsgBits(val int64) {
+	s.MaxMsgBits = val
+}
+
+// SetMaxMsgCells sets the value of MaxMsgCells.
+func (s *SizeLimitsConfig) SetMaxMsgCells(val int64) {
+	s.MaxMsgCells = val
+}
+
+// SetMaxLibraryCells sets the value of MaxLibraryCells.
+func (s *SizeLimitsConfig) SetMaxLibraryCells(val int64) {
+	s.MaxLibraryCells = val
+}
+
+// SetMaxVMDataDepth sets the value of MaxVMDataDepth.
+func (s *SizeLimitsConfig) SetMaxVMDataDepth(val int) {
+	s.MaxVMDataDepth = val
+}
+
+// SetMaxExtMsgSize sets the value of MaxExtMsgSize.
+func (s *SizeLimitsConfig) SetMaxExtMsgSize(val int64) {
+	s.MaxExtMsgSize = val
+}
+
+// SetMaxExtMsgDepth sets the value of MaxExtMsgDepth.
+func (s *SizeLimitsConfig) SetMaxExtMsgDepth(val int) {
+	s.MaxExtMsgDepth = val
+}
+
+// SetMaxAccStateCells sets the value of MaxAccStateCells.
+func (s *SizeLimitsConfig) SetMaxAccStateCells(val OptInt64) {
+	s.MaxAccStateCells = val
+}
+
+// SetMaxAccStateBits sets the value of MaxAccStateBits.
+func (s *SizeLimitsConfig) SetMaxAccStateBits(val OptInt64) {
+	s.MaxAccStateBits = val
 }
 
 // Ref: #/components/schemas/SmartContractAction
@@ -9969,7 +13518,7 @@ type ValidatorsSet struct {
 	UtimeUntil  int                     `json:"utime_until"`
 	Total       int                     `json:"total"`
 	Main        int                     `json:"main"`
-	TotalWeight OptInt                  `json:"total_weight"`
+	TotalWeight OptInt64                `json:"total_weight"`
 	List        []ValidatorsSetListItem `json:"list"`
 }
 
@@ -9994,7 +13543,7 @@ func (s *ValidatorsSet) GetMain() int {
 }
 
 // GetTotalWeight returns the value of TotalWeight.
-func (s *ValidatorsSet) GetTotalWeight() OptInt {
+func (s *ValidatorsSet) GetTotalWeight() OptInt64 {
 	return s.TotalWeight
 }
 
@@ -10024,7 +13573,7 @@ func (s *ValidatorsSet) SetMain(val int) {
 }
 
 // SetTotalWeight sets the value of TotalWeight.
-func (s *ValidatorsSet) SetTotalWeight(val OptInt) {
+func (s *ValidatorsSet) SetTotalWeight(val OptInt64) {
 	s.TotalWeight = val
 }
 
@@ -10034,7 +13583,9 @@ func (s *ValidatorsSet) SetList(val []ValidatorsSetListItem) {
 }
 
 type ValidatorsSetListItem struct {
-	PublicKey string `json:"public_key"`
+	PublicKey string    `json:"public_key"`
+	Weight    int64     `json:"weight"`
+	AdnlAddr  OptString `json:"adnl_addr"`
 }
 
 // GetPublicKey returns the value of PublicKey.
@@ -10042,9 +13593,29 @@ func (s *ValidatorsSetListItem) GetPublicKey() string {
 	return s.PublicKey
 }
 
+// GetWeight returns the value of Weight.
+func (s *ValidatorsSetListItem) GetWeight() int64 {
+	return s.Weight
+}
+
+// GetAdnlAddr returns the value of AdnlAddr.
+func (s *ValidatorsSetListItem) GetAdnlAddr() OptString {
+	return s.AdnlAddr
+}
+
 // SetPublicKey sets the value of PublicKey.
 func (s *ValidatorsSetListItem) SetPublicKey(val string) {
 	s.PublicKey = val
+}
+
+// SetWeight sets the value of Weight.
+func (s *ValidatorsSetListItem) SetWeight(val int64) {
+	s.Weight = val
+}
+
+// SetAdnlAddr sets the value of AdnlAddr.
+func (s *ValidatorsSetListItem) SetAdnlAddr(val OptString) {
+	s.AdnlAddr = val
 }
 
 // Ref: #/components/schemas/ValueFlow
@@ -10286,4 +13857,140 @@ func (s *WithdrawStakeRequestAction) SetPool(val AccountAddress) {
 // SetImplementation sets the value of Implementation.
 func (s *WithdrawStakeRequestAction) SetImplementation(val PoolImplementationType) {
 	s.Implementation = val
+}
+
+// Ref: #/components/schemas/WorkchainDescr
+type WorkchainDescr struct {
+	Workchain         int    `json:"workchain"`
+	EnabledSince      int64  `json:"enabled_since"`
+	ActualMinSplit    int    `json:"actual_min_split"`
+	MinSplit          int    `json:"min_split"`
+	MaxSplit          int    `json:"max_split"`
+	Basic             int    `json:"basic"`
+	Active            bool   `json:"active"`
+	AcceptMsgs        bool   `json:"accept_msgs"`
+	Flags             int    `json:"flags"`
+	ZerostateRootHash string `json:"zerostate_root_hash"`
+	ZerostateFileHash string `json:"zerostate_file_hash"`
+	Version           int64  `json:"version"`
+}
+
+// GetWorkchain returns the value of Workchain.
+func (s *WorkchainDescr) GetWorkchain() int {
+	return s.Workchain
+}
+
+// GetEnabledSince returns the value of EnabledSince.
+func (s *WorkchainDescr) GetEnabledSince() int64 {
+	return s.EnabledSince
+}
+
+// GetActualMinSplit returns the value of ActualMinSplit.
+func (s *WorkchainDescr) GetActualMinSplit() int {
+	return s.ActualMinSplit
+}
+
+// GetMinSplit returns the value of MinSplit.
+func (s *WorkchainDescr) GetMinSplit() int {
+	return s.MinSplit
+}
+
+// GetMaxSplit returns the value of MaxSplit.
+func (s *WorkchainDescr) GetMaxSplit() int {
+	return s.MaxSplit
+}
+
+// GetBasic returns the value of Basic.
+func (s *WorkchainDescr) GetBasic() int {
+	return s.Basic
+}
+
+// GetActive returns the value of Active.
+func (s *WorkchainDescr) GetActive() bool {
+	return s.Active
+}
+
+// GetAcceptMsgs returns the value of AcceptMsgs.
+func (s *WorkchainDescr) GetAcceptMsgs() bool {
+	return s.AcceptMsgs
+}
+
+// GetFlags returns the value of Flags.
+func (s *WorkchainDescr) GetFlags() int {
+	return s.Flags
+}
+
+// GetZerostateRootHash returns the value of ZerostateRootHash.
+func (s *WorkchainDescr) GetZerostateRootHash() string {
+	return s.ZerostateRootHash
+}
+
+// GetZerostateFileHash returns the value of ZerostateFileHash.
+func (s *WorkchainDescr) GetZerostateFileHash() string {
+	return s.ZerostateFileHash
+}
+
+// GetVersion returns the value of Version.
+func (s *WorkchainDescr) GetVersion() int64 {
+	return s.Version
+}
+
+// SetWorkchain sets the value of Workchain.
+func (s *WorkchainDescr) SetWorkchain(val int) {
+	s.Workchain = val
+}
+
+// SetEnabledSince sets the value of EnabledSince.
+func (s *WorkchainDescr) SetEnabledSince(val int64) {
+	s.EnabledSince = val
+}
+
+// SetActualMinSplit sets the value of ActualMinSplit.
+func (s *WorkchainDescr) SetActualMinSplit(val int) {
+	s.ActualMinSplit = val
+}
+
+// SetMinSplit sets the value of MinSplit.
+func (s *WorkchainDescr) SetMinSplit(val int) {
+	s.MinSplit = val
+}
+
+// SetMaxSplit sets the value of MaxSplit.
+func (s *WorkchainDescr) SetMaxSplit(val int) {
+	s.MaxSplit = val
+}
+
+// SetBasic sets the value of Basic.
+func (s *WorkchainDescr) SetBasic(val int) {
+	s.Basic = val
+}
+
+// SetActive sets the value of Active.
+func (s *WorkchainDescr) SetActive(val bool) {
+	s.Active = val
+}
+
+// SetAcceptMsgs sets the value of AcceptMsgs.
+func (s *WorkchainDescr) SetAcceptMsgs(val bool) {
+	s.AcceptMsgs = val
+}
+
+// SetFlags sets the value of Flags.
+func (s *WorkchainDescr) SetFlags(val int) {
+	s.Flags = val
+}
+
+// SetZerostateRootHash sets the value of ZerostateRootHash.
+func (s *WorkchainDescr) SetZerostateRootHash(val string) {
+	s.ZerostateRootHash = val
+}
+
+// SetZerostateFileHash sets the value of ZerostateFileHash.
+func (s *WorkchainDescr) SetZerostateFileHash(val string) {
+	s.ZerostateFileHash = val
+}
+
+// SetVersion sets the value of Version.
+func (s *WorkchainDescr) SetVersion(val int64) {
+	s.Version = val
 }

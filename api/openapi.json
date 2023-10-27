@@ -1118,6 +1118,50 @@
     ],
     "type": "object"
    },
+   "BlockLimits": {
+    "properties": {
+     "bytes": {
+      "$ref": "#/components/schemas/BlockParamLimits"
+     },
+     "gas": {
+      "$ref": "#/components/schemas/BlockParamLimits"
+     },
+     "lt_delta": {
+      "$ref": "#/components/schemas/BlockParamLimits"
+     }
+    },
+    "required": [
+     "bytes",
+     "gas",
+     "lt_delta"
+    ],
+    "type": "object"
+   },
+   "BlockParamLimits": {
+    "properties": {
+     "hard_limit": {
+      "example": 1000000,
+      "format": "int64",
+      "type": "integer"
+     },
+     "soft_limit": {
+      "example": 1000000,
+      "format": "int64",
+      "type": "integer"
+     },
+     "underload": {
+      "example": 1000000,
+      "format": "int64",
+      "type": "integer"
+     }
+    },
+    "required": [
+     "underload",
+     "soft_limit",
+     "hard_limit"
+    ],
+    "type": "object"
+   },
    "BlockRaw": {
     "properties": {
      "file_hash": {
@@ -1371,9 +1415,433 @@
       "description": "elector address",
       "type": "string"
      },
+     "10": {
+      "description": "List of critical TON parameters, the change of which significantly affects the network, so more voting rounds are held.",
+      "properties": {
+       "critical_params": {
+        "items": {
+         "format": "int32",
+         "type": "integer"
+        },
+        "type": "array"
+       }
+      },
+      "required": [
+       "critical_params"
+      ],
+      "type": "object"
+     },
+     "11": {
+      "description": "This parameter indicates under what conditions proposals to change the TON configuration are accepted.",
+      "properties": {
+       "critical_params": {
+        "$ref": "#/components/schemas/ConfigProposalSetup"
+       },
+       "normal_params": {
+        "$ref": "#/components/schemas/ConfigProposalSetup"
+       }
+      },
+      "required": [
+       "normal_params",
+       "critical_params"
+      ],
+      "type": "object"
+     },
+     "12": {
+      "description": "Workchains in the TON Blockchain",
+      "properties": {
+       "workchains": {
+        "items": {
+         "$ref": "#/components/schemas/WorkchainDescr"
+        },
+        "type": "array"
+       }
+      },
+      "required": [
+       "workchains"
+      ],
+      "type": "object"
+     },
+     "13": {
+      "description": "The cost of filing complaints about incorrect operation of validators.",
+      "properties": {
+       "bit_price": {
+        "format": "int64",
+        "type": "integer"
+       },
+       "cell_price": {
+        "format": "int64",
+        "type": "integer"
+       },
+       "deposit": {
+        "format": "int64",
+        "type": "integer"
+       }
+      },
+      "required": [
+       "deposit",
+       "bit_price",
+       "cell_price"
+      ],
+      "type": "object"
+     },
+     "14": {
+      "description": "The reward in nanoTons for block creation in the TON blockchain.",
+      "properties": {
+       "basechain_block_fee": {
+        "format": "int64",
+        "type": "integer"
+       },
+       "masterchain_block_fee": {
+        "format": "int64",
+        "type": "integer"
+       }
+      },
+      "required": [
+       "masterchain_block_fee",
+       "basechain_block_fee"
+      ],
+      "type": "object"
+     },
+     "15": {
+      "description": "The reward in nanoTons for block creation in the TON blockchain.",
+      "properties": {
+       "elections_end_before": {
+        "example": 8192,
+        "format": "int64",
+        "type": "integer"
+       },
+       "elections_start_before": {
+        "example": 32768,
+        "format": "int64",
+        "type": "integer"
+       },
+       "stake_held_for": {
+        "example": 32768,
+        "format": "int64",
+        "type": "integer"
+       },
+       "validators_elected_for": {
+        "example": 65536,
+        "format": "int64",
+        "type": "integer"
+       }
+      },
+      "required": [
+       "validators_elected_for",
+       "elections_start_before",
+       "elections_end_before",
+       "stake_held_for"
+      ],
+      "type": "object"
+     },
+     "16": {
+      "description": "The limits on the number of validators in the TON blockchain.",
+      "properties": {
+       "max_main_validators": {
+        "example": 100,
+        "type": "integer"
+       },
+       "max_validators": {
+        "example": 400,
+        "type": "integer"
+       },
+       "min_validators": {
+        "example": 75,
+        "type": "integer"
+       }
+      },
+      "required": [
+       "max_validators",
+       "max_main_validators",
+       "min_validators"
+      ],
+      "type": "object"
+     },
+     "17": {
+      "description": "The stake parameters configuration in the TON blockchain.",
+      "properties": {
+       "max_stake": {
+        "type": "string"
+       },
+       "max_stake_factor": {
+        "format": "int64",
+        "type": "integer"
+       },
+       "min_stake": {
+        "type": "string"
+       },
+       "min_total_stake": {
+        "type": "string"
+       }
+      },
+      "required": [
+       "min_stake",
+       "max_stake",
+       "min_total_stake",
+       "max_stake_factor"
+      ],
+      "type": "object"
+     },
+     "18": {
+      "description": "The prices for data storage.",
+      "properties": {
+       "storage_prices": {
+        "items": {
+         "properties": {
+          "bit_price_ps": {
+           "example": 1,
+           "format": "int64",
+           "type": "integer"
+          },
+          "cell_price_ps": {
+           "example": 500,
+           "format": "int64",
+           "type": "integer"
+          },
+          "mc_bit_price_ps": {
+           "example": 1000,
+           "format": "int64",
+           "type": "integer"
+          },
+          "mc_cell_price_ps": {
+           "example": 500000,
+           "format": "int64",
+           "type": "integer"
+          },
+          "utime_since": {
+           "example": 0,
+           "format": "int64",
+           "type": "integer"
+          }
+         },
+         "required": [
+          "utime_since",
+          "bit_price_ps",
+          "cell_price_ps",
+          "mc_bit_price_ps",
+          "mc_cell_price_ps"
+         ],
+         "type": "object"
+        },
+        "type": "array"
+       }
+      },
+      "required": [
+       "storage_prices"
+      ],
+      "type": "object"
+     },
      "2": {
       "description": "minter address",
       "type": "string"
+     },
+     "20": {
+      "description": "The cost of computations in the masterchain. The complexity of any computation is estimated in gas units.",
+      "properties": {
+       "gas_limits_prices": {
+        "$ref": "#/components/schemas/GasLimitPrices"
+       }
+      },
+      "required": [
+       "gas_limits_prices"
+      ],
+      "type": "object"
+     },
+     "21": {
+      "description": "The cost of computations in the basechains. The complexity of any computation is estimated in gas units.",
+      "properties": {
+       "gas_limits_prices": {
+        "$ref": "#/components/schemas/GasLimitPrices"
+       }
+      },
+      "required": [
+       "gas_limits_prices"
+      ],
+      "type": "object"
+     },
+     "22": {
+      "description": "The limits on the block in the masterchain, upon reaching which the block is finalized and the callback of the remaining messages (if any) is carried over to the next block.",
+      "properties": {
+       "block_limits": {
+        "$ref": "#/components/schemas/BlockLimits"
+       }
+      },
+      "required": [
+       "block_limits"
+      ],
+      "type": "object"
+     },
+     "23": {
+      "description": "The limits on the block in the basechains, upon reaching which the block is finalized and the callback of the remaining messages (if any) is carried over to the next block.",
+      "properties": {
+       "block_limits": {
+        "$ref": "#/components/schemas/BlockLimits"
+       }
+      },
+      "required": [
+       "block_limits"
+      ],
+      "type": "object"
+     },
+     "24": {
+      "description": "The cost of sending messages in the masterchain of the TON blockchain.",
+      "properties": {
+       "msg_forward_prices": {
+        "$ref": "#/components/schemas/MsgForwardPrices"
+       }
+      },
+      "required": [
+       "msg_forward_prices"
+      ],
+      "type": "object"
+     },
+     "25": {
+      "description": "The cost of sending messages in the basechains of the TON blockchain.",
+      "properties": {
+       "msg_forward_prices": {
+        "$ref": "#/components/schemas/MsgForwardPrices"
+       }
+      },
+      "required": [
+       "msg_forward_prices"
+      ],
+      "type": "object"
+     },
+     "28": {
+      "description": "The configuration for the Catchain protocol.",
+      "properties": {
+       "flags": {
+        "example": 1000000,
+        "format": "int",
+        "type": "integer"
+       },
+       "mc_catchain_lifetime": {
+        "example": 1000000,
+        "format": "int64",
+        "type": "integer"
+       },
+       "shard_catchain_lifetime": {
+        "example": 1000000,
+        "format": "int64",
+        "type": "integer"
+       },
+       "shard_validators_lifetime": {
+        "example": 1000000,
+        "format": "int64",
+        "type": "integer"
+       },
+       "shard_validators_num": {
+        "example": 1000000,
+        "format": "int64",
+        "type": "integer"
+       },
+       "shuffle_mc_validators": {
+        "type": "boolean"
+       }
+      },
+      "required": [
+       "mc_catchain_lifetime",
+       "shard_catchain_lifetime",
+       "shard_validators_lifetime",
+       "shard_validators_num"
+      ],
+      "type": "object"
+     },
+     "29": {
+      "description": "The configuration for the consensus protocol above catchain.",
+      "properties": {
+       "attempt_duration": {
+        "example": 8,
+        "format": "int64",
+        "type": "integer"
+       },
+       "catchain_max_blocks_coeff": {
+        "example": 10000,
+        "format": "int64",
+        "type": "integer"
+       },
+       "catchain_max_deps": {
+        "example": 4,
+        "format": "int64",
+        "type": "integer"
+       },
+       "consensus_timeout_ms": {
+        "example": 16000,
+        "format": "int64",
+        "type": "integer"
+       },
+       "fast_attempts": {
+        "example": 3,
+        "format": "int64",
+        "type": "integer"
+       },
+       "flags": {
+        "example": 0,
+        "format": "int",
+        "type": "integer"
+       },
+       "max_block_bytes": {
+        "example": 2097152,
+        "format": "int64",
+        "type": "integer"
+       },
+       "max_collated_bytes": {
+        "example": 2097152,
+        "format": "int64",
+        "type": "integer"
+       },
+       "new_catchain_ids": {
+        "example": true,
+        "type": "boolean"
+       },
+       "next_candidate_delay_ms": {
+        "example": 2000,
+        "format": "int64",
+        "type": "integer"
+       },
+       "proto_version": {
+        "example": 2,
+        "format": "int64",
+        "type": "integer"
+       },
+       "round_candidates": {
+        "example": 3,
+        "format": "int64",
+        "type": "integer"
+       }
+      },
+      "required": [
+       "round_candidates",
+       "next_candidate_delay_ms",
+       "consensus_timeout_ms",
+       "fast_attempts",
+       "attempt_duration",
+       "catchain_max_deps",
+       "max_block_bytes",
+       "max_collated_bytes"
+      ],
+      "type": "object"
+     },
+     "3": {
+      "description": "The address of the transaction fee collector.",
+      "type": "string"
+     },
+     "31": {
+      "description": "The configuration for the consensus protocol above catchain.",
+      "properties": {
+       "fundamental_smc_addr": {
+        "items": {
+         "example": "-1:dd24c4a1f2b88f8b7053513b5cc6c5a31bc44b2a72dcb4d8c0338af0f0d37ec5",
+         "type": "string"
+        },
+        "type": "array"
+       }
+      },
+      "required": [
+       "fundamental_smc_addr"
+      ],
+      "type": "object"
      },
      "32": {
       "$ref": "#/components/schemas/ValidatorsSet"
@@ -1397,6 +1865,30 @@
       "description": "dns root address",
       "type": "string"
      },
+     "40": {
+      "description": "The configuration for punishment for improper behavior (non-validation). In the absence of the parameter, the default fine size is 101 TON",
+      "properties": {
+       "misbehaviour_punishment_config": {
+        "$ref": "#/components/schemas/MisbehaviourPunishmentConfig"
+       }
+      },
+      "required": [
+       "misbehaviour_punishment_config"
+      ],
+      "type": "object"
+     },
+     "43": {
+      "description": "The size limits and some other characteristics of accounts and messages.",
+      "properties": {
+       "size_limits_config": {
+        "$ref": "#/components/schemas/SizeLimitsConfig"
+       }
+      },
+      "required": [
+       "size_limits_config"
+      ],
+      "type": "object"
+     },
      "44": {
       "description": "suspended accounts",
       "properties": {
@@ -1413,6 +1905,178 @@
       "required": [
        "accounts",
        "suspended_until"
+      ],
+      "type": "object"
+     },
+     "5": {
+      "properties": {
+       "blackhole_addr": {
+        "type": "string"
+       },
+       "fee_burn_denom": {
+        "format": "int64",
+        "type": "integer"
+       },
+       "fee_burn_nom": {
+        "format": "int64",
+        "type": "integer"
+       }
+      },
+      "required": [
+       "fee_burn_nom",
+       "fee_burn_denom"
+      ],
+      "type": "object"
+     },
+     "6": {
+      "description": "Minting fees of new currencies.",
+      "properties": {
+       "mint_add_price": {
+        "format": "int64",
+        "type": "integer"
+       },
+       "mint_new_price": {
+        "format": "int64",
+        "type": "integer"
+       }
+      },
+      "required": [
+       "mint_new_price",
+       "mint_add_price"
+      ],
+      "type": "object"
+     },
+     "7": {
+      "description": "The volume of each of the additional currencies in circulation.",
+      "properties": {
+       "currencies": {
+        "items": {
+         "properties": {
+          "amount": {
+           "type": "string"
+          },
+          "currency_id": {
+           "format": "int64",
+           "type": "integer"
+          }
+         },
+         "required": [
+          "currency_id",
+          "amount"
+         ],
+         "type": "object"
+        },
+        "type": "array"
+       }
+      },
+      "required": [
+       "currencies"
+      ],
+      "type": "object"
+     },
+     "71": {
+      "description": "Bridge parameters for wrapping TON in other networks.",
+      "properties": {
+       "oracle_bridge_params": {
+        "$ref": "#/components/schemas/OracleBridgeParams"
+       }
+      },
+      "required": [
+       "oracle_bridge_params"
+      ],
+      "type": "object"
+     },
+     "72": {
+      "description": "Bridge parameters for wrapping TON in other networks.",
+      "properties": {
+       "oracle_bridge_params": {
+        "$ref": "#/components/schemas/OracleBridgeParams"
+       }
+      },
+      "required": [
+       "oracle_bridge_params"
+      ],
+      "type": "object"
+     },
+     "73": {
+      "description": "Bridge parameters for wrapping TON in other networks.",
+      "properties": {
+       "oracle_bridge_params": {
+        "$ref": "#/components/schemas/OracleBridgeParams"
+       }
+      },
+      "required": [
+       "oracle_bridge_params"
+      ],
+      "type": "object"
+     },
+     "79": {
+      "description": "Bridge parameters for wrapping tokens from other networks into tokens on the TON network.",
+      "properties": {
+       "jetton_bridge_params": {
+        "$ref": "#/components/schemas/JettonBridgeParams"
+       }
+      },
+      "required": [
+       "jetton_bridge_params"
+      ],
+      "type": "object"
+     },
+     "8": {
+      "description": "The network version and additional capabilities supported by the validators.",
+      "properties": {
+       "capabilities": {
+        "format": "int64",
+        "type": "integer"
+       },
+       "version": {
+        "format": "int64",
+        "type": "integer"
+       }
+      },
+      "required": [
+       "version",
+       "capabilities"
+      ],
+      "type": "object"
+     },
+     "81": {
+      "description": "Bridge parameters for wrapping tokens from other networks into tokens on the TON network.",
+      "properties": {
+       "jetton_bridge_params": {
+        "$ref": "#/components/schemas/JettonBridgeParams"
+       }
+      },
+      "required": [
+       "jetton_bridge_params"
+      ],
+      "type": "object"
+     },
+     "82": {
+      "description": "Bridge parameters for wrapping tokens from other networks into tokens on the TON network.",
+      "properties": {
+       "jetton_bridge_params": {
+        "$ref": "#/components/schemas/JettonBridgeParams"
+       }
+      },
+      "required": [
+       "jetton_bridge_params"
+      ],
+      "type": "object"
+     },
+     "9": {
+      "description": "List of mandatory parameters of the blockchain config.",
+      "properties": {
+       "mandatory_params": {
+        "items": {
+         "format": "int32",
+         "type": "integer"
+        },
+        "type": "array"
+       }
+      },
+      "required": [
+       "mandatory_params"
       ],
       "type": "object"
      },
@@ -1535,6 +2199,57 @@
     ],
     "example": "cskip_no_state",
     "type": "string"
+   },
+   "ConfigProposalSetup": {
+    "properties": {
+     "bit_price": {
+      "example": 1,
+      "format": "int64",
+      "type": "integer"
+     },
+     "cell_price": {
+      "example": 500,
+      "format": "int64",
+      "type": "integer"
+     },
+     "max_losses": {
+      "example": 6,
+      "type": "integer"
+     },
+     "max_store_sec": {
+      "example": 10000000,
+      "format": "int64",
+      "type": "integer"
+     },
+     "max_tot_rounds": {
+      "example": 6,
+      "type": "integer"
+     },
+     "min_store_sec": {
+      "example": 1000000,
+      "format": "int64",
+      "type": "integer"
+     },
+     "min_tot_rounds": {
+      "example": 2,
+      "type": "integer"
+     },
+     "min_wins": {
+      "example": 2,
+      "type": "integer"
+     }
+    },
+    "required": [
+     "min_tot_rounds",
+     "max_tot_rounds",
+     "min_wins",
+     "max_losses",
+     "min_store_sec",
+     "max_store_sec",
+     "bit_price",
+     "cell_price"
+    ],
+    "type": "object"
    },
    "ContractDeployAction": {
     "properties": {
@@ -1892,6 +2607,61 @@
     ],
     "type": "object"
    },
+   "GasLimitPrices": {
+    "properties": {
+     "block_gas_limit": {
+      "example": 1000000,
+      "format": "int64",
+      "type": "integer"
+     },
+     "delete_due_limit": {
+      "example": 1000000,
+      "format": "int64",
+      "type": "integer"
+     },
+     "flat_gas_limit": {
+      "format": "int64",
+      "type": "integer"
+     },
+     "flat_gas_price": {
+      "format": "int64",
+      "type": "integer"
+     },
+     "freeze_due_limit": {
+      "example": 1000000,
+      "format": "int64",
+      "type": "integer"
+     },
+     "gas_credit": {
+      "example": 1000000,
+      "format": "int64",
+      "type": "integer"
+     },
+     "gas_limit": {
+      "example": 1000000,
+      "format": "int64",
+      "type": "integer"
+     },
+     "gas_price": {
+      "example": 1,
+      "format": "int64",
+      "type": "integer"
+     },
+     "special_gas_limit": {
+      "format": "int64",
+      "type": "integer"
+     }
+    },
+    "required": [
+     "gas_price",
+     "gas_limit",
+     "gas_credit",
+     "block_gas_limit",
+     "freeze_due_limit",
+     "delete_due_limit"
+    ],
+    "type": "object"
+   },
    "ImagePreview": {
     "properties": {
      "resolution": {
@@ -1952,6 +2722,79 @@
      "balance",
      "wallet_address",
      "jetton"
+    ],
+    "type": "object"
+   },
+   "JettonBridgeParams": {
+    "properties": {
+     "bridge_address": {
+      "type": "string"
+     },
+     "burn_bridge_fee": {
+      "format": "int64",
+      "type": "integer"
+     },
+     "external_chain_address": {
+      "type": "string"
+     },
+     "oracles": {
+      "items": {
+       "$ref": "#/components/schemas/Oracle"
+      },
+      "type": "array"
+     },
+     "oracles_address": {
+      "type": "string"
+     },
+     "prices": {
+      "$ref": "#/components/schemas/JettonBridgePrices"
+     },
+     "state_flags": {
+      "type": "integer"
+     }
+    },
+    "required": [
+     "bridge_address",
+     "oracles_address",
+     "state_flags",
+     "oracles"
+    ],
+    "type": "object"
+   },
+   "JettonBridgePrices": {
+    "properties": {
+     "bridge_burn_fee": {
+      "format": "int64",
+      "type": "integer"
+     },
+     "bridge_mint_fee": {
+      "format": "int64",
+      "type": "integer"
+     },
+     "discover_gas_consumption": {
+      "format": "int64",
+      "type": "integer"
+     },
+     "minter_min_tons_for_storage": {
+      "format": "int64",
+      "type": "integer"
+     },
+     "wallet_gas_consumption": {
+      "format": "int64",
+      "type": "integer"
+     },
+     "wallet_min_tons_for_storage": {
+      "format": "int64",
+      "type": "integer"
+     }
+    },
+    "required": [
+     "bridge_burn_fee",
+     "bridge_mint_fee",
+     "wallet_min_tons_for_storage",
+     "wallet_gas_consumption",
+     "minter_min_tons_for_storage",
+     "discover_gas_consumption"
     ],
     "type": "object"
    },
@@ -2446,6 +3289,113 @@
     ],
     "type": "object"
    },
+   "MisbehaviourPunishmentConfig": {
+    "properties": {
+     "default_flat_fine": {
+      "example": 1000000,
+      "format": "int64",
+      "type": "integer"
+     },
+     "default_proportional_fine": {
+      "example": 1000000,
+      "format": "int64",
+      "type": "integer"
+     },
+     "long_flat_mult": {
+      "example": 1000000,
+      "type": "integer"
+     },
+     "long_interval": {
+      "example": 1000000,
+      "type": "integer"
+     },
+     "long_proportional_mult": {
+      "example": 1000000,
+      "type": "integer"
+     },
+     "medium_flat_mult": {
+      "example": 1000000,
+      "type": "integer"
+     },
+     "medium_interval": {
+      "example": 1000000,
+      "type": "integer"
+     },
+     "medium_proportional_mult": {
+      "example": 1000000,
+      "type": "integer"
+     },
+     "severity_flat_mult": {
+      "example": 1000000,
+      "type": "integer"
+     },
+     "severity_proportional_mult": {
+      "example": 1000000,
+      "type": "integer"
+     },
+     "unpunishable_interval": {
+      "example": 1000000,
+      "type": "integer"
+     }
+    },
+    "required": [
+     "default_flat_fine",
+     "default_proportional_fine",
+     "severity_flat_mult",
+     "severity_proportional_mult",
+     "unpunishable_interval",
+     "long_interval",
+     "long_flat_mult",
+     "long_proportional_mult",
+     "medium_interval",
+     "medium_flat_mult",
+     "medium_proportional_mult"
+    ],
+    "type": "object"
+   },
+   "MsgForwardPrices": {
+    "properties": {
+     "bit_price": {
+      "example": 1000000,
+      "format": "int64",
+      "type": "integer"
+     },
+     "cell_price": {
+      "example": 1000000,
+      "format": "int64",
+      "type": "integer"
+     },
+     "first_frac": {
+      "example": 1000000,
+      "format": "int64",
+      "type": "integer"
+     },
+     "ihr_price_factor": {
+      "example": 1000000,
+      "format": "int64",
+      "type": "integer"
+     },
+     "lump_price": {
+      "example": 1000000,
+      "format": "int64",
+      "type": "integer"
+     },
+     "next_frac": {
+      "example": 1000000,
+      "format": "int64",
+      "type": "integer"
+     }
+    },
+    "required": [
+     "lump_price",
+     "bit_price",
+     "cell_price",
+     "ihr_price_factor",
+     "first_frac",
+     "next_frac"
+    ],
+    "type": "object"
+   },
    "NftApprovedBy": {
     "items": {
      "enum": [
@@ -2660,6 +3610,49 @@
      "buyer",
      "auction_type",
      "nft"
+    ],
+    "type": "object"
+   },
+   "Oracle": {
+    "properties": {
+     "address": {
+      "example": "0:55e8809519cd3c49098c9ee45afdafcea7a894a74d0f628d94a115a50e045122",
+      "type": "string"
+     },
+     "secp_pubkey": {
+      "example": "00000000000000000000000017dcab1b1481610f6c7a7a98cf0370dc0ec704a6",
+      "type": "string"
+     }
+    },
+    "required": [
+     "address",
+     "secp_pubkey"
+    ],
+    "type": "object"
+   },
+   "OracleBridgeParams": {
+    "properties": {
+     "bridge_addr": {
+      "type": "string"
+     },
+     "external_chain_address": {
+      "type": "string"
+     },
+     "oracle_multisig_address": {
+      "type": "string"
+     },
+     "oracles": {
+      "items": {
+       "$ref": "#/components/schemas/Oracle"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "bridge_addr",
+     "oracle_multisig_address",
+     "external_chain_address",
+     "oracles"
     ],
     "type": "object"
    },
@@ -2912,6 +3905,59 @@
     },
     "required": [
      "seqno"
+    ],
+    "type": "object"
+   },
+   "SizeLimitsConfig": {
+    "properties": {
+     "max_acc_state_bits": {
+      "example": 1000000,
+      "format": "int64",
+      "type": "integer"
+     },
+     "max_acc_state_cells": {
+      "example": 1000000,
+      "format": "int64",
+      "type": "integer"
+     },
+     "max_ext_msg_depth": {
+      "example": 1000000,
+      "format": "int",
+      "type": "integer"
+     },
+     "max_ext_msg_size": {
+      "example": 1000000,
+      "format": "int64",
+      "type": "integer"
+     },
+     "max_library_cells": {
+      "example": 1000000,
+      "format": "int64",
+      "type": "integer"
+     },
+     "max_msg_bits": {
+      "example": 1000000,
+      "format": "int64",
+      "type": "integer"
+     },
+     "max_msg_cells": {
+      "example": 1000000,
+      "format": "int64",
+      "type": "integer"
+     },
+     "max_vm_data_depth": {
+      "example": 1000000,
+      "format": "int",
+      "type": "integer"
+     }
+    },
+    "required": [
+     "max_msg_bits",
+     "max_msg_cells",
+     "max_library_cells",
+     "max_vm_data_depth",
+     "max_ext_msg_size",
+     "max_ext_msg_depth"
     ],
     "type": "object"
    },
@@ -3501,12 +4547,20 @@
      "list": {
       "items": {
        "properties": {
+        "adnl_addr": {
+         "type": "string"
+        },
         "public_key": {
          "type": "string"
+        },
+        "weight": {
+         "format": "int64",
+         "type": "integer"
         }
        },
        "required": [
-        "public_key"
+        "public_key",
+        "weight"
        ],
        "type": "object"
       },
@@ -3519,6 +4573,7 @@
       "type": "integer"
      },
      "total_weight": {
+      "format": "int64",
       "type": "integer"
      },
      "utime_since": {
@@ -3667,6 +4722,80 @@
      "staker",
      "pool",
      "implementation"
+    ],
+    "type": "object"
+   },
+   "WorkchainDescr": {
+    "properties": {
+     "accept_msgs": {
+      "example": true,
+      "type": "boolean"
+     },
+     "active": {
+      "example": true,
+      "type": "boolean"
+     },
+     "actual_min_split": {
+      "example": 1000000,
+      "format": "int",
+      "type": "integer"
+     },
+     "basic": {
+      "example": 1000000,
+      "type": "integer"
+     },
+     "enabled_since": {
+      "example": 1000000,
+      "format": "int64",
+      "type": "integer"
+     },
+     "flags": {
+      "example": 1000000,
+      "format": "int",
+      "type": "integer"
+     },
+     "max_split": {
+      "example": 1000000,
+      "format": "int",
+      "type": "integer"
+     },
+     "min_split": {
+      "example": 1000000,
+      "format": "int",
+      "type": "integer"
+     },
+     "version": {
+      "example": 1000000,
+      "format": "int64",
+      "type": "integer"
+     },
+     "workchain": {
+      "example": 0,
+      "format": "int",
+      "type": "integer"
+     },
+     "zerostate_file_hash": {
+      "example": 1000000,
+      "type": "string"
+     },
+     "zerostate_root_hash": {
+      "example": 1000000,
+      "type": "string"
+     }
+    },
+    "required": [
+     "workchain",
+     "enabled_since",
+     "actual_min_split",
+     "min_split",
+     "max_split",
+     "basic",
+     "active",
+     "accept_msgs",
+     "flags",
+     "zerostate_root_hash",
+     "zerostate_file_hash",
+     "version"
     ],
     "type": "object"
    }
