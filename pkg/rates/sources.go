@@ -92,11 +92,11 @@ func getMegatonPool(tonPrice float64) map[ton.AccountID]float64 {
 
 	mapOfPool := make(map[ton.AccountID]float64)
 	for _, pool := range respBody {
-		accountID, err := ton.ParseAccountID(pool.Address)
+		account, err := tongo.ParseAddress(pool.Address)
 		if err != nil {
 			continue
 		}
-		mapOfPool[accountID] = pool.Price / tonPrice
+		mapOfPool[account.ID] = pool.Price / tonPrice
 	}
 
 	return mapOfPool
@@ -126,12 +126,12 @@ func getStonFiPool(tonPrice float64) map[ton.AccountID]float64 {
 		if pool.DexUsdPrice == nil {
 			continue
 		}
-		accountID, err := ton.ParseAccountID(pool.ContractAddress)
+		account, err := tongo.ParseAddress(pool.ContractAddress)
 		if err != nil {
 			continue
 		}
 		if jettonPrice, err := strconv.ParseFloat(*pool.DexUsdPrice, 64); err == nil {
-			mapOfPool[accountID] = jettonPrice / tonPrice
+			mapOfPool[account.ID] = jettonPrice / tonPrice
 		}
 	}
 
@@ -189,8 +189,8 @@ func (m *Mock) getDedustPool() map[ton.AccountID]float64 {
 
 		secondReserveDecimals := float64(9)
 		if secondAsset.Metadata == nil || secondAsset.Metadata.Decimals != 0 {
-			accountID, _ := tongo.ParseAccountID(secondAsset.Address)
-			meta, err := m.Storage.GetJettonMasterMetadata(context.Background(), accountID)
+			account, _ := tongo.ParseAddress(secondAsset.Address)
+			meta, err := m.Storage.GetJettonMasterMetadata(context.Background(), account.ID)
 			if err == nil && meta.Decimals != "" {
 				decimals, err := strconv.Atoi(meta.Decimals)
 				if err == nil {
@@ -199,14 +199,14 @@ func (m *Mock) getDedustPool() map[ton.AccountID]float64 {
 			}
 		}
 
-		accountID, err := ton.ParseAccountID(secondAsset.Address)
+		account, err := tongo.ParseAddress(secondAsset.Address)
 		if err != nil {
 			continue
 		}
 
 		// TODO: change algorithm math price for other type pool (volatile/stable)
 		price := 1 / ((secondReserve / math.Pow(10, secondReserveDecimals)) / (firstReserve / math.Pow(10, 9)))
-		mapOfPool[accountID] = price
+		mapOfPool[account.ID] = price
 	}
 
 	return mapOfPool
@@ -368,11 +368,11 @@ func getTonstakersPrice(pool tongo.AccountID) (tongo.AccountID, float64, error) 
 	if respBody.Decoded.ProjectBalance == 0 || respBody.Decoded.ProjectedSupply == 0 {
 		return tongo.AccountID{}, 0, fmt.Errorf("empty balance")
 	}
-	accountJetton, err := tongo.ParseAccountID(respBody.Decoded.JettonMinter)
+	accountJetton, err := tongo.ParseAddress(respBody.Decoded.JettonMinter)
 	if err != nil {
 		return tongo.AccountID{}, 0, err
 	}
 	price := float64(respBody.Decoded.ProjectBalance) / float64(respBody.Decoded.ProjectedSupply)
 
-	return accountJetton, price, nil
+	return accountJetton.ID, price, nil
 }

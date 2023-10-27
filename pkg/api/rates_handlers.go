@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/tonkeeper/opentonapi/pkg/oas"
+	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/ton"
 )
 
@@ -21,11 +22,11 @@ func (h *Handler) GetChartRates(ctx context.Context, params oas.GetChartRatesPar
 	if strings.ToUpper(params.Token) == "TON" {
 		token = "TON"
 	} else {
-		accountID, err := ton.ParseAccountID(params.Token)
+		account, err := tongo.ParseAddress(params.Token)
 		if err != nil {
 			return nil, toError(http.StatusBadRequest, err)
 		}
-		token = accountID.ToRaw()
+		token = account.ID.ToRaw()
 	}
 	if params.Currency.Set {
 		params.Currency.Value = strings.ToUpper(params.Currency.Value)
@@ -59,8 +60,8 @@ func (h *Handler) GetRates(ctx context.Context, params oas.GetRatesParams) (*oas
 		if len(token) == 48 {
 			human = true
 		}
-		if accountID, err := ton.ParseAccountID(token); err == nil {
-			token = accountID.ToRaw()
+		if account, err := tongo.ParseAddress(token); err == nil {
+			token = account.ID.ToRaw()
 		} else {
 			token = strings.ToUpper(token)
 		}

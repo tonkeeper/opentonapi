@@ -103,11 +103,11 @@ func (h *Handler) SendRawMessage(ctx context.Context, request *oas.SendRawMessag
 }
 
 func (h *Handler) GetRawAccountState(ctx context.Context, params oas.GetRawAccountStateParams) (*oas.GetRawAccountStateOK, error) {
-	accountID, err := tongo.ParseAccountID(params.AccountID)
+	account, err := tongo.ParseAddress(params.AccountID)
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
 	}
-	accountState, err := h.storage.GetAccountStateRaw(ctx, accountID)
+	accountState, err := h.storage.GetAccountStateRaw(ctx, account.ID)
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
@@ -151,7 +151,7 @@ func (h *Handler) GetAllRawShardsInfo(ctx context.Context, params oas.GetAllRawS
 }
 
 func (h *Handler) GetRawTransactions(ctx context.Context, params oas.GetRawTransactionsParams) (*oas.GetRawTransactionsOK, error) {
-	accountID, err := tongo.ParseAccountID(params.AccountID)
+	account, err := tongo.ParseAddress(params.AccountID)
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
 	}
@@ -159,7 +159,7 @@ func (h *Handler) GetRawTransactions(ctx context.Context, params oas.GetRawTrans
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
 	}
-	txs, err := h.storage.GetTransactionsRaw(ctx, params.Count, accountID, params.Lt, hash)
+	txs, err := h.storage.GetTransactionsRaw(ctx, params.Count, account.ID, params.Lt, hash)
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
@@ -177,11 +177,11 @@ func (h *Handler) GetRawListBlockTransactions(ctx context.Context, params oas.Ge
 	}
 	var after *liteclient.LiteServerTransactionId3C
 	if params.AccountID.Value != "" && params.Lt.Value != 0 {
-		accountID, err := tongo.ParseAccountID(params.AccountID.Value)
+		account, err := tongo.ParseAddress(params.AccountID.Value)
 		if err != nil {
 			return nil, toError(http.StatusBadRequest, err)
 		}
-		after.Account = accountID.Address
+		after.Account = account.ID.Address
 		after.Lt = params.Lt.Value
 	}
 	listBlockTxs, err := h.storage.ListBlockTransactionsRaw(ctx, blockID, params.Mode, params.Count, after)

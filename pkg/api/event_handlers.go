@@ -135,11 +135,11 @@ func (h *Handler) GetEvent(ctx context.Context, params oas.GetEventParams) (*oas
 }
 
 func (h *Handler) GetAccountEvents(ctx context.Context, params oas.GetAccountEventsParams) (*oas.AccountEvents, error) {
-	accountID, err := tongo.ParseAccountID(params.AccountID)
+	account, err := tongo.ParseAddress(params.AccountID)
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
 	}
-	traceIDs, err := h.storage.SearchTraces(ctx, accountID, params.Limit, optIntToPointer(params.BeforeLt), optIntToPointer(params.StartDate), optIntToPointer(params.EndDate), params.Initiator.Value)
+	traceIDs, err := h.storage.SearchTraces(ctx, account.ID, params.Limit, optIntToPointer(params.BeforeLt), optIntToPointer(params.StartDate), optIntToPointer(params.EndDate), params.Initiator.Value)
 	if err != nil && !errors.Is(err, core.ErrEntityNotFound) {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
@@ -152,18 +152,18 @@ func (h *Handler) GetAccountEvents(ctx context.Context, params oas.GetAccountEve
 		if err != nil {
 			return nil, toError(http.StatusInternalServerError, err)
 		}
-		result, err := bath.FindActions(ctx, trace, bath.ForAccount(accountID), bath.WithInformationSource(h.storage))
+		result, err := bath.FindActions(ctx, trace, bath.ForAccount(account.ID), bath.WithInformationSource(h.storage))
 		if err != nil {
 			return nil, toError(http.StatusInternalServerError, err)
 		}
-		events[i], err = h.toAccountEvent(ctx, accountID, trace, result, params.AcceptLanguage, params.SubjectOnly.Value)
+		events[i], err = h.toAccountEvent(ctx, account.ID, trace, result, params.AcceptLanguage, params.SubjectOnly.Value)
 		if err != nil {
 			return nil, toError(http.StatusInternalServerError, err)
 		}
 		lastLT = trace.Lt
 	}
 	if !params.BeforeLt.IsSet() {
-		memHashTraces, _ := h.mempoolEmulate.accountsTraces.Get(accountID)
+		memHashTraces, _ := h.mempoolEmulate.accountsTraces.Get(account.ID)
 		parsedHashes := make(map[tongo.Bits256]bool)
 		for _, traceHash := range memHashTraces {
 			parsedHash, _ := tongo.ParseHash(traceHash)
@@ -180,11 +180,11 @@ func (h *Handler) GetAccountEvents(ctx context.Context, params oas.GetAccountEve
 			if !ok {
 				continue
 			}
-			result, err := bath.FindActions(ctx, trace, bath.ForAccount(accountID), bath.WithInformationSource(h.storage))
+			result, err := bath.FindActions(ctx, trace, bath.ForAccount(account.ID), bath.WithInformationSource(h.storage))
 			if err != nil {
 				return nil, toError(http.StatusInternalServerError, err)
 			}
-			event, err := h.toAccountEvent(ctx, accountID, trace, result, params.AcceptLanguage, params.SubjectOnly.Value)
+			event, err := h.toAccountEvent(ctx, account.ID, trace, result, params.AcceptLanguage, params.SubjectOnly.Value)
 			if err != nil {
 				return nil, toError(http.StatusInternalServerError, err)
 			}
@@ -202,7 +202,7 @@ func (h *Handler) GetAccountEvents(ctx context.Context, params oas.GetAccountEve
 }
 
 func (h *Handler) GetAccountEvent(ctx context.Context, params oas.GetAccountEventParams) (*oas.AccountEvent, error) {
-	accountID, err := tongo.ParseAccountID(params.AccountID)
+	account, err := tongo.ParseAddress(params.AccountID)
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
 	}
@@ -214,11 +214,11 @@ func (h *Handler) GetAccountEvent(ctx context.Context, params oas.GetAccountEven
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
-	result, err := bath.FindActions(ctx, trace, bath.ForAccount(accountID), bath.WithInformationSource(h.storage))
+	result, err := bath.FindActions(ctx, trace, bath.ForAccount(account.ID), bath.WithInformationSource(h.storage))
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
-	event, err := h.toAccountEvent(ctx, accountID, trace, result, params.AcceptLanguage, params.SubjectOnly.Value)
+	event, err := h.toAccountEvent(ctx, account.ID, trace, result, params.AcceptLanguage, params.SubjectOnly.Value)
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
@@ -238,7 +238,7 @@ func (h *Handler) EmulateMessageToAccountEvent(ctx context.Context, request *oas
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
-	account, err := tongo.ParseAccountID(params.AccountID)
+	account, err := tongo.ParseAddress(params.AccountID)
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
 	}
@@ -265,7 +265,7 @@ func (h *Handler) EmulateMessageToAccountEvent(ctx context.Context, request *oas
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
-	event, err := h.toAccountEvent(ctx, account, trace, result, params.AcceptLanguage, false)
+	event, err := h.toAccountEvent(ctx, account.ID, trace, result, params.AcceptLanguage, false)
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}

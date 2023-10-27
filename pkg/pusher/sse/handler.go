@@ -39,11 +39,11 @@ func parseAccounts(str string) (*sources.SubscribeToTransactionsOptions, error) 
 	accountStrings := strings.Split(str, ",")
 	accounts := make([]tongo.AccountID, 0, len(accountStrings))
 	for _, account := range accountStrings {
-		accountID, err := tongo.ParseAccountID(account)
+		accountID, err := tongo.ParseAddress(account)
 		if err != nil {
 			return nil, err
 		}
-		accounts = append(accounts, accountID)
+		accounts = append(accounts, accountID.ID)
 	}
 	return &sources.SubscribeToTransactionsOptions{Accounts: accounts}, nil
 }
@@ -89,11 +89,11 @@ func parseAccountsToTraceOptions(str string) (*sources.SubscribeToTraceOptions, 
 	accountStrings := strings.Split(str, ",")
 	accounts := make([]tongo.AccountID, 0, len(accountStrings))
 	for _, account := range accountStrings {
-		accountID, err := tongo.ParseAccountID(account)
+		accountID, err := tongo.ParseAddress(account)
 		if err != nil {
 			return nil, err
 		}
-		accounts = append(accounts, accountID)
+		accounts = append(accounts, accountID.ID)
 	}
 	return &sources.SubscribeToTraceOptions{Accounts: accounts}, nil
 }

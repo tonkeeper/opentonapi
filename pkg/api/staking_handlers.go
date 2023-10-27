@@ -4,10 +4,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/shopspring/decimal"
-	"github.com/tonkeeper/tongo/ton"
 	"math"
 	"net/http"
+
+	"github.com/shopspring/decimal"
+	"github.com/tonkeeper/tongo/ton"
 
 	"github.com/tonkeeper/opentonapi/internal/g"
 	"github.com/tonkeeper/tongo/boc"
@@ -23,12 +24,12 @@ import (
 )
 
 func (h *Handler) GetStakingPoolInfo(ctx context.Context, params oas.GetStakingPoolInfoParams) (*oas.GetStakingPoolInfoOK, error) {
-	poolID, err := tongo.ParseAccountID(params.AccountID)
+	pool, err := tongo.ParseAddress(params.AccountID)
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
 	}
-	if w, prs := references.WhalesPools[poolID]; prs {
-		poolConfig, poolStatus, nominators, err := h.storage.GetWhalesPoolInfo(ctx, poolID)
+	if w, prs := references.WhalesPools[pool.ID]; prs {
+		poolConfig, poolStatus, nominators, err := h.storage.GetWhalesPoolInfo(ctx, pool.ID)
 		if err != nil {
 			return nil, toError(http.StatusInternalServerError, err)
 		}
@@ -38,10 +39,10 @@ func (h *Handler) GetStakingPoolInfo(ctx context.Context, params oas.GetStakingP
 				Description: i18n.T(params.AcceptLanguage.Value, i18n.C{MessageID: "poolImplementationDescription", TemplateData: map[string]interface{}{"Deposit": poolConfig.MinStake / 1_000_000_000}}),
 				URL:         references.WhalesPoolImplementationsURL,
 			},
-			Pool: convertStakingWhalesPool(poolID, w, poolStatus, poolConfig, h.state.GetAPY(), true, nominators),
+			Pool: convertStakingWhalesPool(pool.ID, w, poolStatus, poolConfig, h.state.GetAPY(), true, nominators),
 		}, nil
 	}
-	lPool, err := h.storage.GetLiquidPool(ctx, poolID)
+	lPool, err := h.storage.GetLiquidPool(ctx, pool.ID)
 	if err == nil {
 		info, _ := h.addressBook.GetAddressInfoByAddress(lPool.Address)
 		lPool.Name = info.Name
@@ -69,7 +70,7 @@ func (h *Handler) GetStakingPoolInfo(ctx context.Context, params oas.GetStakingP
 			Pool: convertLiquidStaking(lPool, cycleStart, cycleEnd),
 		}, nil
 	}
-	p, err := h.storage.GetTFPool(ctx, poolID)
+	p, err := h.storage.GetTFPool(ctx, pool.ID)
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, fmt.Errorf("pool not found: %v", err.Error()))
 	}
@@ -96,12 +97,12 @@ func (h *Handler) GetStakingPools(ctx context.Context, params oas.GetStakingPool
 	var availableFor *tongo.AccountID
 	var participatePools []tongo.AccountID
 	if params.AvailableFor.IsSet() {
-		a, err := tongo.ParseAccountID(params.AvailableFor.Value)
+		account, err := tongo.ParseAddress(params.AvailableFor.Value)
 		if err != nil {
 			return nil, toError(http.StatusBadRequest, err)
 		}
-		availableFor = &a
-		pools, err := h.storage.GetParticipatingInTfPools(ctx, a)
+		availableFor = &account.ID
+		pools, err := h.storage.GetParticipatingInTfPools(ctx, account.ID)
 		if err != nil && !errors.Is(err, core.ErrEntityNotFound) {
 			return nil, toError(http.StatusInternalServerError, err)
 		}
@@ -206,25 +207,25 @@ func (h *Handler) GetStakingPools(ctx context.Context, params oas.GetStakingPool
 }
 
 func (h *Handler) GetAccountNominatorsPools(ctx context.Context, params oas.GetAccountNominatorsPoolsParams) (*oas.AccountStaking, error) {
-	accountID, err := tongo.ParseAccountID(params.AccountID)
+	account, err := tongo.ParseAddress(params.AccountID)
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
 	}
-	whalesPools, err := h.storage.GetParticipatingInWhalesPools(ctx, accountID)
+	whalesPools, err := h.storage.GetParticipatingInWhalesPools(ctx, account.ID)
 	if err != nil {
 		if errors.Is(err, core.ErrEntityNotFound) {
 			return nil, toError(http.StatusNotFound, err)
 		}
 		return nil, toError(http.StatusInternalServerError, err)
 	}
-	tfPools, err := h.storage.GetParticipatingInTfPools(ctx, accountID)
+	tfPools, err := h.storage.GetParticipatingInTfPools(ctx, account.ID)
 	if err != nil {
 		if errors.Is(err, core.ErrEntityNotFound) {
 			return nil, toError(http.StatusNotFound, err)
 		}
 		return nil, toError(http.StatusInternalServerError, err)
 	}
-	liquidPools, err := h.storage.GetParticipatingInLiquidPools(ctx, accountID)
+	liquidPools, err := h.storage.GetParticipatingInLiquidPools(ctx, account.ID)
 	if err != nil {
 		if errors.Is(err, core.ErrEntityNotFound) {
 			return nil, toError(http.StatusNotFound, err)
@@ -265,11 +266,11 @@ func roundTons(amount int64) int64 {
 }
 
 func (h *Handler) GetStakingPoolHistory(ctx context.Context, params oas.GetStakingPoolHistoryParams) (*oas.GetStakingPoolHistoryOK, error) {
-	poolID, err := tongo.ParseAccountID(params.AccountID)
+	pool, err := tongo.ParseAddress(params.AccountID)
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
 	}
-	_, err = h.storage.GetLiquidPool(ctx, poolID)
+	_, err = h.storage.GetLiquidPool(ctx, pool.ID)
 	if errors.Is(err, core.ErrEntityNotFound) {
 		return nil, toError(http.StatusNotFound, err)
 	}
@@ -278,7 +279,7 @@ func (h *Handler) GetStakingPoolHistory(ctx context.Context, params oas.GetStaki
 		Len             tlb.Uint9
 		ExternalAddress boc.BitString
 	}{Len: 256, ExternalAddress: g.Must(boc.BitStringFromFiftHex("0000000000000000000000000000000000000000000000000000000000000003"))}
-	logs, err := h.storage.GetLogs(ctx, poolID, &logAddress, 100, 0)
+	logs, err := h.storage.GetLogs(ctx, pool.ID, &logAddress, 100, 0)
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
