@@ -224,7 +224,7 @@ func (b *Book) refresh(logger *zap.Logger, addressPath, jettonPath, collectionPa
 func (b *Book) refreshAddresses(logger *zap.Logger, addressPath string) {
 	addresses, err := downloadJson[KnownAddress](addressPath)
 	if err != nil {
-		logger.Info("failed to load accounts.json")
+		logger.Warn("failed to load accounts.json")
 		return
 	}
 	b.mu.Lock()
@@ -242,7 +242,7 @@ func (b *Book) refreshAddresses(logger *zap.Logger, addressPath string) {
 func (b *Book) refreshJettons(logger *zap.Logger, jettonPath string) {
 	jettons, err := downloadJson[KnownJetton](jettonPath)
 	if err != nil {
-		logger.Info("failed to load jettons.json")
+		logger.Warn("failed to load jettons.json")
 		return
 	}
 	b.mu.Lock()
@@ -267,7 +267,7 @@ func unique(approvers []oas.NftApprovedByItem) []oas.NftApprovedByItem {
 func (b *Book) refreshCollections(logger *zap.Logger, collectionPath string) {
 	collections, err := downloadJson[KnownCollection](collectionPath)
 	if err != nil {
-		logger.Info("fail to load collections.json")
+		logger.Warn("fail to load collections.json")
 		return
 	}
 	b.mu.Lock()

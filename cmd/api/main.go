@@ -98,6 +98,6 @@ func main() {
 		}
 	}()
 
-	log.Info("start server", zap.Int("port", cfg.API.Port))
+	log.Warn("start server", zap.Int("port", cfg.API.Port))
 	server.Run()
 }

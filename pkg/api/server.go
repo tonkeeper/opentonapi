@@ -148,7 +148,7 @@ func (s *Server) RegisterAsyncHandler(pattern string, handler AsyncHandler, conn
 func (s *Server) Run() {
 	err := s.httpServer.ListenAndServe()
 	if errors.Is(err, http.ErrServerClosed) {
-		s.logger.Info("opentonapi quit")
+		s.logger.Warn("opentonapi quit")
 		return
 	}
 	s.logger.Fatal("ListedAndServe() failed", zap.Error(err))
