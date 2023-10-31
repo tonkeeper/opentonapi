@@ -21,3 +21,6 @@
 - Get detail DNS info, support .ton and t.me records `/v2/dns/{dns}`
 - Get the account traces `/v2/accounts/{account_id}/traces`
 - Support send batch from boc `/v2/blockchain/message`
+
+### 2023-10-01
+- Tonapi sdk
