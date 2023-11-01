@@ -148,7 +148,7 @@ func (h *Handler) GetStakingPools(ctx context.Context, params oas.GetStakingPool
 		result.Pools = append(result.Pools, pool)
 	}
 
-	liquidPools, err := h.storage.GetLiquidPools(ctx, false) //todo: return !params.IncludeUnverified.Value
+	liquidPools, err := h.storage.GetLiquidPools(ctx, !params.IncludeUnverified.Value)
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
