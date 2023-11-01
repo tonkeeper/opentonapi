@@ -39,35 +39,42 @@ type websocketConnection struct {
 }
 
 func (w *websocketConnection) SubscribeToTransactions(accounts []string) error {
-	request := JsonRPCRequest{
-		ID:      1,
-		JSONRPC: "2.0",
-		Method:  "subscribe_account",
-		Params:  accounts,
-	}
+	request := JsonRPCRequest{ID: 1, JSONRPC: "2.0", Method: "subscribe_account", Params: accounts}
+	w.mu.Lock()
+	defer w.mu.Unlock()
+	return w.conn.WriteJSON(request)
+}
+
+func (w *websocketConnection) UnsubscribeFromTransactions(accounts []string) error {
+	request := JsonRPCRequest{ID: 1, JSONRPC: "2.0", Method: "unsubscribe_account", Params: accounts}
 	w.mu.Lock()
 	defer w.mu.Unlock()
 	return w.conn.WriteJSON(request)
 }
 
 func (w *websocketConnection) SubscribeToTraces(accounts []string) error {
-	request := JsonRPCRequest{
-		ID:      1,
-		JSONRPC: "2.0",
-		Method:  "subscribe_trace",
-		Params:  accounts,
-	}
+	request := JsonRPCRequest{ID: 1, JSONRPC: "2.0", Method: "subscribe_trace", Params: accounts}
+	w.mu.Lock()
+	defer w.mu.Unlock()
+	return w.conn.WriteJSON(request)
+}
+
+func (w *websocketConnection) UnsubscribeFromTraces(accounts []string) error {
+	request := JsonRPCRequest{ID: 1, JSONRPC: "2.0", Method: "unsubscribe_trace", Params: accounts}
 	w.mu.Lock()
 	defer w.mu.Unlock()
 	return w.conn.WriteJSON(request)
 }
 
 func (w *websocketConnection) SubscribeToMempool() error {
-	request := JsonRPCRequest{
-		ID:      1,
-		JSONRPC: "2.0",
-		Method:  "subscribe_mempool",
-	}
+	request := JsonRPCRequest{ID: 1, JSONRPC: "2.0", Method: "subscribe_mempool"}
+	w.mu.Lock()
+	defer w.mu.Unlock()
+	return w.conn.WriteJSON(request)
+}
+
+func (w *websocketConnection) UnsubscribeFromMempool() error {
+	request := JsonRPCRequest{ID: 1, JSONRPC: "2.0", Method: "unsubscribe_mempool"}
 	w.mu.Lock()
 	defer w.mu.Unlock()
 	return w.conn.WriteJSON(request)
