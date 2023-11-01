@@ -214,6 +214,12 @@ type GetBlockchainBlockParams struct {
 	BlockID string
 }
 
+// GetBlockchainBlockShardsParams is parameters of getBlockchainBlockShards operation.
+type GetBlockchainBlockShardsParams struct {
+	// Block ID.
+	BlockID string
+}
+
 // GetBlockchainBlockTransactionsParams is parameters of getBlockchainBlockTransactions operation.
 type GetBlockchainBlockTransactionsParams struct {
 	// Block ID.

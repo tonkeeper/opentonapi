@@ -1945,6 +1945,35 @@ func (s *BlockchainBlock) SetCreatedBy(val string) {
 	s.CreatedBy = val
 }
 
+// Ref: #/components/schemas/BlockchainBlockShards
+type BlockchainBlockShards struct {
+	Shards []BlockchainBlockShardsShardsItem `json:"shards"`
+}
+
+// GetShards returns the value of Shards.
+func (s *BlockchainBlockShards) GetShards() []BlockchainBlockShardsShardsItem {
+	return s.Shards
+}
+
+// SetShards sets the value of Shards.
+func (s *BlockchainBlockShards) SetShards(val []BlockchainBlockShardsShardsItem) {
+	s.Shards = val
+}
+
+type BlockchainBlockShardsShardsItem struct {
+	LastKnownBlockID string `json:"last_known_block_id"`
+}
+
+// GetLastKnownBlockID returns the value of LastKnownBlockID.
+func (s *BlockchainBlockShardsShardsItem) GetLastKnownBlockID() string {
+	return s.LastKnownBlockID
+}
+
+// SetLastKnownBlockID sets the value of LastKnownBlockID.
+func (s *BlockchainBlockShardsShardsItem) SetLastKnownBlockID(val string) {
+	s.LastKnownBlockID = val
+}
+
 // Ref: #/components/schemas/BlockchainConfig
 type BlockchainConfig struct {
 	// Config boc in base64 format.

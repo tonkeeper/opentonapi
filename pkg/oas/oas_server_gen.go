@@ -186,6 +186,12 @@ type Handler interface {
 	//
 	// GET /v2/blockchain/blocks/{block_id}
 	GetBlockchainBlock(ctx context.Context, params GetBlockchainBlockParams) (*BlockchainBlock, error)
+	// GetBlockchainBlockShards implements getBlockchainBlockShards operation.
+	//
+	// Get blockchain block shards.
+	//
+	// GET /v2/blockchain/blocks/{block_id}/shards
+	GetBlockchainBlockShards(ctx context.Context, params GetBlockchainBlockShardsParams) (*BlockchainBlockShards, error)
 	// GetBlockchainBlockTransactions implements getBlockchainBlockTransactions operation.
 	//
 	// Get transactions from block.

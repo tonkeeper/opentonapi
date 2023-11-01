@@ -5,6 +5,7 @@ import (
 	"crypto/ed25519"
 	"errors"
 	"fmt"
+	"github.com/tonkeeper/tongo/ton"
 	"math/big"
 	"sync"
 	"time"
@@ -391,6 +392,26 @@ func (s *LiteStorage) GetBlockHeader(ctx context.Context, id tongo.BlockID) (*co
 		return nil, err
 	}
 	return header, nil
+}
+
+func (s *LiteStorage) GetBlockShards(ctx context.Context, id tongo.BlockID) ([]ton.BlockID, error) {
+	timer := prometheus.NewTimer(prometheus.ObserverFunc(func(v float64) {
+		storageTimeHistogramVec.WithLabelValues("get_block_shards").Observe(v)
+	}))
+	defer timer.ObserveDuration()
+	blockID, _, err := s.client.LookupBlock(ctx, id, 1, nil, nil)
+	if err != nil {
+		return nil, err
+	}
+	shards, err := s.client.GetAllShardsInfo(ctx, blockID)
+	if err != nil {
+		return nil, err
+	}
+	res := make([]ton.BlockID, len(shards))
+	for i, s := range shards {
+		res[i] = s.BlockID
+	}
+	return res, nil
 }
 
 func (s *LiteStorage) LastMasterchainBlockHeader(ctx context.Context) (*core.BlockHeader, error) {

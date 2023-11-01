@@ -28,6 +28,23 @@ paths:
                 $ref: '#/components/schemas/BlockchainBlock'
         'default':
           $ref: '#/components/responses/Error'
+  /v2/blockchain/blocks/{block_id}/shards:
+    get:
+      description: Get blockchain block shards
+      operationId: getBlockchainBlockShards
+      tags:
+          - Blockchain
+      parameters:
+          - $ref: '#/components/parameters/blockchainBlockIDParameter'
+      responses:
+          '200':
+            description: blockchain block shards
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/BlockchainBlockShards'
+          'default':
+            $ref: '#/components/responses/Error'
   /v2/blockchain/blocks/{block_id}/transactions:
     get:
       description: Get transactions from block
@@ -2675,6 +2692,21 @@ components:
         created_by:
           type: string
           example: A6A0BD6608672B11B79538A50B2204E748305C12AA0DED9C16CF0006CE3AF8DB
+    BlockchainBlockShards:
+      type: object
+      required:
+        - shards
+      properties:
+        shards:
+          type: array
+          items:
+            type: object
+            required:
+              - last_known_block_id
+            properties:
+              last_known_block_id:
+                type: string
+                example: (0,8000000000000000,4234234)
     AccountStatus:
       type: string
       example: active

@@ -687,6 +687,26 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 								return
 							}
+						case 's': // Prefix: "shards"
+							if l := len("shards"); len(elem) >= l && elem[0:l] == "shards" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							if len(elem) == 0 {
+								// Leaf node.
+								switch r.Method {
+								case "GET":
+									s.handleGetBlockchainBlockShardsRequest([1]string{
+										args[0],
+									}, elemIsEscaped, w, r)
+								default:
+									s.notAllowed(w, r, "GET")
+								}
+
+								return
+							}
 						case 't': // Prefix: "transactions"
 							if l := len("transactions"); len(elem) >= l && elem[0:l] == "transactions" {
 								elem = elem[l:]
@@ -2918,6 +2938,28 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 									r.summary = ""
 									r.operationID = "getRawBlockchainConfigFromBlock"
 									r.pathPattern = "/v2/blockchain/blocks/{block_id}/config/raw"
+									r.args = args
+									r.count = 1
+									return r, true
+								default:
+									return
+								}
+							}
+						case 's': // Prefix: "shards"
+							if l := len("shards"); len(elem) >= l && elem[0:l] == "shards" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							if len(elem) == 0 {
+								switch method {
+								case "GET":
+									// Leaf: GetBlockchainBlockShards
+									r.name = "GetBlockchainBlockShards"
+									r.summary = ""
+									r.operationID = "getBlockchainBlockShards"
+									r.pathPattern = "/v2/blockchain/blocks/{block_id}/shards"
 									r.args = args
 									r.count = 1
 									return r, true
