@@ -104,7 +104,7 @@ type liteStorageRaw interface {
 	GetStateRaw(ctx context.Context, id tongo.BlockIDExt) (liteclient.LiteServerBlockStateC, error)
 	GetBlockHeaderRaw(ctx context.Context, id tongo.BlockIDExt, mode uint32) (liteclient.LiteServerBlockHeaderC, error)
 	SendMessageRaw(ctx context.Context, payload []byte) (uint32, error)
-	GetAccountStateRaw(ctx context.Context, accountID tongo.AccountID) (liteclient.LiteServerAccountStateC, error)
+	GetAccountStateRaw(ctx context.Context, accountID tongo.AccountID, id *tongo.BlockIDExt) (liteclient.LiteServerAccountStateC, error)
 	GetShardInfoRaw(ctx context.Context, id tongo.BlockIDExt, workchain uint32, shard uint64, exact bool) (liteclient.LiteServerShardInfoC, error)
 	GetShardsAllInfo(ctx context.Context, id tongo.BlockIDExt) (liteclient.LiteServerAllShardsInfoC, error)
 	GetTransactionsRaw(ctx context.Context, count uint32, accountID tongo.AccountID, lt uint64, hash tongo.Bits256) (liteclient.LiteServerTransactionListC, error)

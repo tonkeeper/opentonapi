@@ -36,7 +36,10 @@ func (s *LiteStorage) SendMessageRaw(ctx context.Context, payload []byte) (uint3
 	return s.client.SendMessage(ctx, payload)
 }
 
-func (s *LiteStorage) GetAccountStateRaw(ctx context.Context, accountID tongo.AccountID) (liteclient.LiteServerAccountStateC, error) {
+func (s *LiteStorage) GetAccountStateRaw(ctx context.Context, accountID tongo.AccountID, id *tongo.BlockIDExt) (liteclient.LiteServerAccountStateC, error) {
+	if id != nil {
+		return s.client.WithBlock(*id).GetAccountStateRaw(ctx, accountID)
+	}
 	return s.client.GetAccountStateRaw(ctx, accountID)
 }
 
