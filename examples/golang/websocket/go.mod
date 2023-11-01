@@ -2,7 +2,7 @@ module github.com/tonkeeper/opentonapi/examples/golang/websocket
 
 go 1.21.3
 
-require github.com/tonkeeper/opentonapi/tonapi v0.0.0-00010101000000-000000000000
+require github.com/tonkeeper/opentonapi/tonapi v0.0.0-20231101150049-edaac1cf7e68
 
 require (
 	github.com/dlclark/regexp2 v1.10.0 // indirect
@@ -37,5 +37,3 @@ require (
 	gopkg.in/cenkalti/backoff.v1 v1.1.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
-
-replace github.com/tonkeeper/opentonapi/tonapi => ./../../../tonapi
