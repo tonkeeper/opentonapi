@@ -100,11 +100,26 @@ func NewStreamingAPI(opts ...StreamingOption) *StreamingAPI {
 // Websocket contains methods to configure a websocket connection to receive particular events from tonapi.io
 // happening in the TON blockchain.
 type Websocket interface {
+	// SubscribeToTransactions subscribes to notifications about new transactions for the specified accounts.
 	SubscribeToTransactions(accounts []string) error
+	// UnsubscribeFromTransactions unsubscribes from notifications about new transactions for the specified accounts.
+	UnsubscribeFromTransactions(accounts []string) error
+
+	// SubscribeToTraces subscribes to notifications about new traces for the specified accounts.
 	SubscribeToTraces(accounts []string) error
+	// UnsubscribeFromTraces unsubscribes from notifications about new traces for the specified accounts.
+	UnsubscribeFromTraces(accounts []string) error
+	// SubscribeToMempool subscribes to notifications about new messages in the TON network.
+
 	SubscribeToMempool() error
+	// UnsubscribeFromMempool unsubscribes from notifications about new messages in the TON network.
+	UnsubscribeFromMempool() error
+
+	// SetMempoolHandler defines a callback that will be called when a new mempool event is received.
 	SetMempoolHandler(handler MempoolHandler)
+	// SetTransactionHandler defines a callback that will be called when a new transaction event is received.
 	SetTransactionHandler(handler TransactionHandler)
+	// SetTraceHandler defines a callback that will be called when a new trace event is received.
 	SetTraceHandler(handler TraceHandler)
 }
 

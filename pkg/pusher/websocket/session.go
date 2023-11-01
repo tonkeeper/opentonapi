@@ -87,14 +87,23 @@ func (s *session) Run(ctx context.Context) chan JsonRPCRequest {
 			case request := <-requestCh:
 				var response string
 				switch request.Method {
+				// handle transaction subscriptions
 				case "subscribe_account":
 					response = s.subscribeToTransactions(ctx, request.Params)
+				case "unsubscribe_account":
+					response = s.unsubscribeFromTransactions(request.Params)
+
+				// handle mempool subscriptions
 				case "subscribe_mempool":
 					response = s.subscribeToMempool(ctx)
+				case "unsubscribe_mempool":
+					response = s.unsubscribeFromMempool()
+
+				// handle trace subscriptions
 				case "subscribe_trace":
 					response = s.subscribeToTraces(ctx, request.Params)
-				case "unsubscribe_account":
-					response = s.unsubscribe(request.Params)
+				case "unsubscribe_trace":
+					response = s.unsubscribeFromTraces(request.Params)
 				}
 				err = s.writeResponse(response, request)
 			case <-time.After(s.pingInterval):
@@ -153,8 +162,20 @@ func (s *session) subscribeToTransactions(ctx context.Context, params []string) 
 	return fmt.Sprintf("success! %v new subscriptions created", counter)
 }
 
-func (s *session) unsubscribe(params []string) string {
-	return "not supported yet"
+func (s *session) unsubscribeFromTransactions(params []string) string {
+	var counter int
+	for _, a := range params {
+		account, err := tongo.ParseAddress(a)
+		if err != nil {
+			return fmt.Sprintf("failed to process '%v' account: %v", a, err)
+		}
+		if cancelFn, ok := s.txSubscriptions[account.ID]; ok {
+			cancelFn()
+			delete(s.txSubscriptions, account.ID)
+			counter += 1
+		}
+	}
+	return fmt.Sprintf("success! %v subscription(s) removed", counter)
 }
 
 func (s *session) subscribeToTraces(ctx context.Context, params []string) string {
@@ -190,6 +211,22 @@ func (s *session) subscribeToTraces(ctx context.Context, params []string) string
 	return fmt.Sprintf("success! %v new subscriptions created", counter)
 }
 
+func (s *session) unsubscribeFromTraces(params []string) string {
+	var counter int
+	for _, a := range params {
+		account, err := tongo.ParseAddress(a)
+		if err != nil {
+			return fmt.Sprintf("failed to process '%v' account: %v", a, err)
+		}
+		if cancelFn, ok := s.traceSubscriptions[account.ID]; ok {
+			cancelFn()
+			delete(s.traceSubscriptions, account.ID)
+			counter += 1
+		}
+	}
+	return fmt.Sprintf("success! %v subscription(s) removed", counter)
+}
+
 func (s *session) subscribeToMempool(ctx context.Context) string {
 	if s.mempoolSubscription != nil {
 		return fmt.Sprintf("you are already subscribed to mempool")
@@ -202,6 +239,15 @@ func (s *session) subscribeToMempool(ctx context.Context) string {
 	}
 	s.mempoolSubscription = cancelFn
 	return fmt.Sprintf("success! you have subscribed to mempool")
+}
+
+func (s *session) unsubscribeFromMempool() string {
+	if s.mempoolSubscription == nil {
+		return fmt.Sprintf("you are not subscribed to mempool")
+	}
+	s.mempoolSubscription()
+	s.mempoolSubscription = nil
+	return fmt.Sprintf("success! you have unsubscribed from mempool")
 }
 
 func jsonRPCResponseMessage(message string, id uint64, jsonrpc, method string) (JsonRPCResponse, error) {
