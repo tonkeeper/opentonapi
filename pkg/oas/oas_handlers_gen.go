@@ -6282,6 +6282,10 @@ func (s *Server) handleGetRawAccountStateRequest(args [1]string, argsEscaped boo
 					Name: "account_id",
 					In:   "path",
 				}: params.AccountID,
+				{
+					Name: "target_block",
+					In:   "query",
+				}: params.TargetBlock,
 			},
 			Raw: r,
 		}

@@ -343,6 +343,8 @@ type GetRatesParams struct {
 type GetRawAccountStateParams struct {
 	// Account ID.
 	AccountID string
+	// Target block: (workchain,shard,seqno,root_hash,file_hash).
+	TargetBlock OptString
 }
 
 // GetRawBlockProofParams is parameters of getRawBlockProof operation.

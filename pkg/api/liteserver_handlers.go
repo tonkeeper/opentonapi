@@ -107,7 +107,15 @@ func (h *Handler) GetRawAccountState(ctx context.Context, params oas.GetRawAccou
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
 	}
-	accountState, err := h.storage.GetAccountStateRaw(ctx, account.ID)
+	var blockID *tongo.BlockIDExt
+	if params.TargetBlock.IsSet() {
+		id, err := blockIdExtFromString(params.TargetBlock.Value)
+		if err != nil {
+			return nil, toError(http.StatusBadRequest, err)
+		}
+		blockID = &id
+	}
+	accountState, err := h.storage.GetAccountStateRaw(ctx, account.ID, blockID)
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}

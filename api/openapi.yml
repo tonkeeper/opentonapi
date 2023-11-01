@@ -1750,6 +1750,7 @@ paths:
         - Lite Server
       parameters:
         - $ref: '#/components/parameters/accountIDParameter'
+        - $ref: '#/components/parameters/targetBlockIDExtQuery'
       responses:
         '200':
           description: raw account state

@@ -6241,6 +6241,8 @@ func decodeGetRatesParams(args [0]string, argsEscaped bool, r *http.Request) (pa
 type GetRawAccountStateParams struct {
 	// Account ID.
 	AccountID string
+	// Target block: (workchain,shard,seqno,root_hash,file_hash).
+	TargetBlock OptString
 }
 
 func unpackGetRawAccountStateParams(packed middleware.Parameters) (params GetRawAccountStateParams) {
@@ -6251,10 +6253,20 @@ func unpackGetRawAccountStateParams(packed middleware.Parameters) (params GetRaw
 		}
 		params.AccountID = packed[key].(string)
 	}
+	{
+		key := middleware.ParameterKey{
+			Name: "target_block",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.TargetBlock = v.(OptString)
+		}
+	}
 	return params
 }
 
 func decodeGetRawAccountStateParams(args [1]string, argsEscaped bool, r *http.Request) (params GetRawAccountStateParams, _ error) {
+	q := uri.NewQueryDecoder(r.URL.Query())
 	// Decode path: account_id.
 	if err := func() error {
 		param := args[0]
@@ -6297,6 +6309,47 @@ func decodeGetRawAccountStateParams(args [1]string, argsEscaped bool, r *http.Re
 		return params, &ogenerrors.DecodeParamError{
 			Name: "account_id",
 			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode query: target_block.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "target_block",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotTargetBlockVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotTargetBlockVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.TargetBlock.SetTo(paramsDotTargetBlockVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "target_block",
+			In:   "query",
 			Err:  err,
 		}
 	}
