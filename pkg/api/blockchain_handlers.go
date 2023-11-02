@@ -177,3 +177,30 @@ func (h *Handler) GetRawBlockchainConfigFromBlock(ctx context.Context, params oa
 	}
 	return rawConfig, nil
 }
+
+func (h *Handler) GetBlockchainValidators(ctx context.Context) (*oas.Validators, error) {
+	mcInfoExtra, err := h.storage.GetMasterchainInfoExtRaw(ctx, 0)
+	if err != nil {
+		return nil, toError(http.StatusInternalServerError, err)
+	}
+	blockHeader, err := h.storage.GetBlockHeader(ctx, ton.BlockID{
+		Workchain: int32(mcInfoExtra.Last.Workchain),
+		Shard:     mcInfoExtra.Last.Shard,
+		Seqno:     mcInfoExtra.Last.Seqno,
+	})
+	if err != nil {
+		return nil, toError(http.StatusInternalServerError, err)
+	}
+	fmt.Println(blockHeader, blockHeader.IsKeyBlock)
+	if blockHeader.IsKeyBlock {
+		blockConfig, err := h.storage.GetConfigFromBlock(ctx, blockHeader.BlockID)
+		if err != nil {
+			return nil, toError(http.StatusInternalServerError, err)
+		}
+		for key, value := range blockConfig.Config.Items() {
+			fmt.Println(key, value)
+		}
+	}
+
+	return &oas.Validators{}, nil
+}

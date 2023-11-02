@@ -96,7 +96,7 @@ paths:
                 $ref: '#/components/schemas/Transaction'
         'default':
           $ref: '#/components/responses/Error'
-  /v2/blockchain/validators: # not implemented in tonapi v2
+  /v2/blockchain/validators:
     get:
       description: Get blockchain validators
       operationId: getBlockchainValidators
@@ -3388,15 +3388,49 @@ components:
       type: object
       required:
         - address
+        - adnl_address
+        - stake
+        - max_factor
       properties:
         address:
           type: string
           example: 0:55e8809519cd3c49098c9ee45afdafcea7a894a74d0f628d94a115a50e045122
+        adnl_address:
+          type: string
+          example: 10C1073837B93FDAAD594284CE8B8EFF7B9CF25427440EB2FC682762E1471365
+        stake:
+          type: integer
+          format: int64
+          example: 123456789
+        max_factor:
+          type: integer
+          format: int64
+          example: 123456789
     Validators:
       type: object
       required:
         - validators
+        - elect_at
+        - elect_close
+        - min_stake
+        - total_stake
       properties:
+        elect_at:
+          type: integer
+          format: int64
+          example: 123456789
+        elect_close:
+          type: integer
+          format: int64
+          example: 123456789
+        min_stake:
+          type: integer
+          format: int64
+          example: 123456789
+        total_stake:
+          type: integer
+          format: int64
+          example: 123456789
         validators:
           type: array
           items:
