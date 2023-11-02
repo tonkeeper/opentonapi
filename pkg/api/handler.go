@@ -26,8 +26,6 @@ import (
 var _ oas.Handler = (*Handler)(nil)
 
 type Handler struct {
-	oas.UnimplementedHandler // automatically implement all methods
-
 	logger *zap.Logger
 
 	addressBook    addressBook
@@ -45,6 +43,10 @@ type Handler struct {
 	// mu protects "dns".
 	mu  sync.Mutex
 	dns *dns.DNS // todo: update when blockchain config changes
+}
+
+func (h *Handler) NewError(ctx context.Context, err error) *oas.ErrorStatusCode {
+	return new(oas.ErrorStatusCode)
 }
 
 // Options configures behavior of a Handler instance.

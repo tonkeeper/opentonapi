@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/tonkeeper/tongo/tvm"
 	"net/http"
 
 	"github.com/tonkeeper/opentonapi/internal/g"
@@ -12,7 +13,6 @@ import (
 	"github.com/tonkeeper/opentonapi/pkg/oas"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/boc"
-	"github.com/tonkeeper/tongo/liteapi"
 	"github.com/tonkeeper/tongo/tlb"
 	"github.com/tonkeeper/tongo/ton"
 )
@@ -146,7 +146,7 @@ func (h *Handler) GetBlockchainConfig(ctx context.Context) (*oas.BlockchainConfi
 	return out, nil
 }
 
-func convertConfigToOasConfig(conf *liteapi.BlockchainConfig) (*oas.RawBlockchainConfig, error) {
+func convertConfigToOasConfig(conf *ton.BlockchainConfig) (*oas.RawBlockchainConfig, error) {
 	// TODO: optimize this workflow
 	value, err := json.Marshal(*conf)
 	if err != nil {
@@ -164,7 +164,7 @@ func (h *Handler) GetRawBlockchainConfig(ctx context.Context) (r *oas.RawBlockch
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
-	config, err := liteapi.ConvertBlockchainConfig(cfg)
+	config, err := ton.ConvertBlockchainConfig(cfg)
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
@@ -187,7 +187,7 @@ func (h *Handler) GetRawBlockchainConfigFromBlock(ctx context.Context, params oa
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
-	config, err := liteapi.ConvertBlockchainConfig(cfg)
+	config, err := ton.ConvertBlockchainConfig(cfg)
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
@@ -199,6 +199,7 @@ func (h *Handler) GetRawBlockchainConfigFromBlock(ctx context.Context, params oa
 }
 
 func (h *Handler) GetBlockchainValidators(ctx context.Context) (*oas.Validators, error) {
+	return nil, toError(http.StatusNotImplemented, fmt.Errorf("not implemented"))
 	mcInfoExtra, err := h.storage.GetMasterchainInfoExtRaw(ctx, 0)
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
@@ -211,16 +212,83 @@ func (h *Handler) GetBlockchainValidators(ctx context.Context) (*oas.Validators,
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
-	fmt.Println(blockHeader, blockHeader.IsKeyBlock)
-	if blockHeader.IsKeyBlock {
-		blockConfig, err := h.storage.GetConfigFromBlock(ctx, blockHeader.BlockID)
+	if !blockHeader.IsKeyBlock {
+		blockHeader, err = h.storage.GetBlockHeader(ctx, ton.BlockID{
+			Workchain: int32(mcInfoExtra.Last.Workchain),
+			Shard:     mcInfoExtra.Last.Shard,
+			Seqno:     uint32(blockHeader.PrevKeyBlockSeqno),
+		})
+		if err != nil {
+			return nil, toError(http.StatusInternalServerError, err)
+		} //todo: fix this shit. find block by better algo
+		blockHeader, err = h.storage.GetBlockHeader(ctx, ton.BlockID{
+			Workchain: int32(mcInfoExtra.Last.Workchain),
+			Shard:     mcInfoExtra.Last.Shard,
+			Seqno:     uint32(blockHeader.PrevKeyBlockSeqno),
+		})
 		if err != nil {
 			return nil, toError(http.StatusInternalServerError, err)
 		}
-		for key, value := range blockConfig.Config.Items() {
-			fmt.Println(key, value)
-		}
+	}
+	rawConfig, err := h.storage.GetConfigFromBlock(ctx, blockHeader.BlockID)
+	if err != nil {
+		return nil, toError(http.StatusInternalServerError, err)
 	}
 
+	config, err := ton.ConvertBlockchainConfig(rawConfig)
+	if err != nil {
+		return nil, toError(http.StatusInternalServerError, err)
+	}
+	bConfig, _ := h.storage.TrimmedConfigBase64()
+	configCell, _ := boc.DeserializeSinglRootBase64(bConfig)
+
+	electorAddr, _ := config.ElectorAddr()
+	electorState, err := h.storage.GetAccountStateRaw(ctx, electorAddr, &blockHeader.BlockIDExt)
+	if err != nil {
+		return nil, toError(http.StatusInternalServerError, err)
+	}
+	electorStateCell, err := boc.DeserializeBoc(electorState.State)
+	if err != nil {
+		return nil, toError(http.StatusInternalServerError, err)
+	}
+
+	var acc tlb.Account
+	err = tlb.Unmarshal(electorStateCell[0], &acc)
+	if err != nil {
+		return nil, toError(http.StatusInternalServerError, err)
+	}
+	init := acc.Account.Storage.State.AccountActive.StateInit
+	code := init.Code.Value.Value
+	data := init.Data.Value.Value
+
+	emulator, err := tvm.NewEmulator(&code, &data, configCell)
+	if err != nil {
+		return nil, toError(http.StatusInternalServerError, err)
+	}
+	emulator.SetGasLimit(10_000_000)
+
+	status, result, err := emulator.RunSmcMethod(ctx, electorAddr, "participant_list_extended", nil)
+	if err != nil {
+		return nil, toError(http.StatusInternalServerError, err)
+	}
+	if status != 0 {
+		return nil, toError(http.StatusInternalServerError, fmt.Errorf("emulator status: %d", status))
+	}
+	var partList struct {
+		ElectAt    int64
+		ElectClose int64
+		MinStake   int64
+		TotalStake int64
+		Validators []struct {
+			Stake     int64
+			MaxFactor int64
+			Address   tlb.Int256
+			AdnlAddr  string
+		}
+	}
+	err = result.Unmarshal(&partList)
+	if err != nil {
+		return nil, toError(http.StatusInternalServerError, err)
+	}
 	return &oas.Validators{}, nil
 }

@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/tonkeeper/tongo"
-	"github.com/tonkeeper/tongo/liteapi"
 	"github.com/tonkeeper/tongo/tlb"
 	"github.com/tonkeeper/tongo/ton"
 )
@@ -63,7 +62,7 @@ func suspended(conf config) (map[tongo.AccountID]struct{}, error) {
 	}
 	// optimization to avoid processing all config keys
 	cfg = cfg.CloneKeepingSubsetOfKeys([]uint32{44})
-	blockchainConfig, err := liteapi.ConvertBlockchainConfig(cfg)
+	blockchainConfig, err := ton.ConvertBlockchainConfig(cfg)
 	if err != nil {
 		return nil, err
 	}
