@@ -30909,10 +30909,25 @@ func (s *Validator) encodeFields(e *jx.Encoder) {
 		e.FieldStart("address")
 		e.Str(s.Address)
 	}
+	{
+		e.FieldStart("adnl_address")
+		e.Str(s.AdnlAddress)
+	}
+	{
+		e.FieldStart("stake")
+		e.Int64(s.Stake)
+	}
+	{
+		e.FieldStart("max_factor")
+		e.Int64(s.MaxFactor)
+	}
 }
 
-var jsonFieldsNameOfValidator = [1]string{
+var jsonFieldsNameOfValidator = [4]string{
 	0: "address",
+	1: "adnl_address",
+	2: "stake",
+	3: "max_factor",
 }
 
 // Decode decodes Validator from json.
@@ -30936,6 +30951,42 @@ func (s *Validator) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"address\"")
 			}
+		case "adnl_address":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				v, err := d.Str()
+				s.AdnlAddress = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"adnl_address\"")
+			}
+		case "stake":
+			requiredBitSet[0] |= 1 << 2
+			if err := func() error {
+				v, err := d.Int64()
+				s.Stake = int64(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"stake\"")
+			}
+		case "max_factor":
+			requiredBitSet[0] |= 1 << 3
+			if err := func() error {
+				v, err := d.Int64()
+				s.MaxFactor = int64(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"max_factor\"")
+			}
 		default:
 			return d.Skip()
 		}
@@ -30946,7 +30997,7 @@ func (s *Validator) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b00000001,
+		0b00001111,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -31002,6 +31053,22 @@ func (s *Validators) Encode(e *jx.Encoder) {
 // encodeFields encodes fields.
 func (s *Validators) encodeFields(e *jx.Encoder) {
 	{
+		e.FieldStart("elect_at")
+		e.Int64(s.ElectAt)
+	}
+	{
+		e.FieldStart("elect_close")
+		e.Int64(s.ElectClose)
+	}
+	{
+		e.FieldStart("min_stake")
+		e.Int64(s.MinStake)
+	}
+	{
+		e.FieldStart("total_stake")
+		e.Int64(s.TotalStake)
+	}
+	{
 		e.FieldStart("validators")
 		e.ArrStart()
 		for _, elem := range s.Validators {
@@ -31011,8 +31078,12 @@ func (s *Validators) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfValidators = [1]string{
-	0: "validators",
+var jsonFieldsNameOfValidators = [5]string{
+	0: "elect_at",
+	1: "elect_close",
+	2: "min_stake",
+	3: "total_stake",
+	4: "validators",
 }
 
 // Decode decodes Validators from json.
@@ -31024,8 +31095,56 @@ func (s *Validators) Decode(d *jx.Decoder) error {
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
-		case "validators":
+		case "elect_at":
 			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				v, err := d.Int64()
+				s.ElectAt = int64(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"elect_at\"")
+			}
+		case "elect_close":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				v, err := d.Int64()
+				s.ElectClose = int64(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"elect_close\"")
+			}
+		case "min_stake":
+			requiredBitSet[0] |= 1 << 2
+			if err := func() error {
+				v, err := d.Int64()
+				s.MinStake = int64(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"min_stake\"")
+			}
+		case "total_stake":
+			requiredBitSet[0] |= 1 << 3
+			if err := func() error {
+				v, err := d.Int64()
+				s.TotalStake = int64(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"total_stake\"")
+			}
+		case "validators":
+			requiredBitSet[0] |= 1 << 4
 			if err := func() error {
 				s.Validators = make([]Validator, 0)
 				if err := d.Arr(func(d *jx.Decoder) error {
@@ -31052,7 +31171,7 @@ func (s *Validators) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b00000001,
+		0b00011111,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.

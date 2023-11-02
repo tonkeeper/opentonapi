@@ -13513,7 +13513,10 @@ func (s *UnSubscriptionAction) SetBeneficiary(val AccountAddress) {
 
 // Ref: #/components/schemas/Validator
 type Validator struct {
-	Address string `json:"address"`
+	Address     string `json:"address"`
+	AdnlAddress string `json:"adnl_address"`
+	Stake       int64  `json:"stake"`
+	MaxFactor   int64  `json:"max_factor"`
 }
 
 // GetAddress returns the value of Address.
@@ -13521,19 +13524,93 @@ func (s *Validator) GetAddress() string {
 	return s.Address
 }
 
+// GetAdnlAddress returns the value of AdnlAddress.
+func (s *Validator) GetAdnlAddress() string {
+	return s.AdnlAddress
+}
+
+// GetStake returns the value of Stake.
+func (s *Validator) GetStake() int64 {
+	return s.Stake
+}
+
+// GetMaxFactor returns the value of MaxFactor.
+func (s *Validator) GetMaxFactor() int64 {
+	return s.MaxFactor
+}
+
 // SetAddress sets the value of Address.
 func (s *Validator) SetAddress(val string) {
 	s.Address = val
 }
 
+// SetAdnlAddress sets the value of AdnlAddress.
+func (s *Validator) SetAdnlAddress(val string) {
+	s.AdnlAddress = val
+}
+
+// SetStake sets the value of Stake.
+func (s *Validator) SetStake(val int64) {
+	s.Stake = val
+}
+
+// SetMaxFactor sets the value of MaxFactor.
+func (s *Validator) SetMaxFactor(val int64) {
+	s.MaxFactor = val
+}
+
 // Ref: #/components/schemas/Validators
 type Validators struct {
+	ElectAt    int64       `json:"elect_at"`
+	ElectClose int64       `json:"elect_close"`
+	MinStake   int64       `json:"min_stake"`
+	TotalStake int64       `json:"total_stake"`
 	Validators []Validator `json:"validators"`
+}
+
+// GetElectAt returns the value of ElectAt.
+func (s *Validators) GetElectAt() int64 {
+	return s.ElectAt
+}
+
+// GetElectClose returns the value of ElectClose.
+func (s *Validators) GetElectClose() int64 {
+	return s.ElectClose
+}
+
+// GetMinStake returns the value of MinStake.
+func (s *Validators) GetMinStake() int64 {
+	return s.MinStake
+}
+
+// GetTotalStake returns the value of TotalStake.
+func (s *Validators) GetTotalStake() int64 {
+	return s.TotalStake
 }
 
 // GetValidators returns the value of Validators.
 func (s *Validators) GetValidators() []Validator {
 	return s.Validators
+}
+
+// SetElectAt sets the value of ElectAt.
+func (s *Validators) SetElectAt(val int64) {
+	s.ElectAt = val
+}
+
+// SetElectClose sets the value of ElectClose.
+func (s *Validators) SetElectClose(val int64) {
+	s.ElectClose = val
+}
+
+// SetMinStake sets the value of MinStake.
+func (s *Validators) SetMinStake(val int64) {
+	s.MinStake = val
+}
+
+// SetTotalStake sets the value of TotalStake.
+func (s *Validators) SetTotalStake(val int64) {
+	s.TotalStake = val
 }
 
 // SetValidators sets the value of Validators.

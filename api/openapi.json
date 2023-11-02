@@ -4544,15 +4544,52 @@
      "address": {
       "example": "0:55e8809519cd3c49098c9ee45afdafcea7a894a74d0f628d94a115a50e045122",
       "type": "string"
+     },
+     "adnl_address": {
+      "example": "10C1073837B93FDAAD594284CE8B8EFF7B9CF25427440EB2FC682762E1471365",
+      "type": "string"
+     },
+     "max_factor": {
+      "example": 123456789,
+      "format": "int64",
+      "type": "integer"
+     },
+     "stake": {
+      "example": 123456789,
+      "format": "int64",
+      "type": "integer"
      }
     },
     "required": [
-     "address"
+     "address",
+     "adnl_address",
+     "stake",
+     "max_factor"
     ],
     "type": "object"
    },
    "Validators": {
     "properties": {
+     "elect_at": {
+      "example": 123456789,
+      "format": "int64",
+      "type": "integer"
+     },
+     "elect_close": {
+      "example": 123456789,
+      "format": "int64",
+      "type": "integer"
+     },
+     "min_stake": {
+      "example": 123456789,
+      "format": "int64",
+      "type": "integer"
+     },
+     "total_stake": {
+      "example": 123456789,
+      "format": "int64",
+      "type": "integer"
+     },
      "validators": {
       "items": {
        "$ref": "#/components/schemas/Validator"
@@ -4561,7 +4598,11 @@
      }
     },
     "required": [
-     "validators"
+     "validators",
+     "elect_at",
+     "elect_close",
+     "min_stake",
+     "total_stake"
     ],
     "type": "object"
    },
