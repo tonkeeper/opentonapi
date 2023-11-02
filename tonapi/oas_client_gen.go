@@ -201,12 +201,6 @@ type Invoker interface {
 	//
 	// GET /v2/blockchain/blocks/{block_id}
 	GetBlockchainBlock(ctx context.Context, params GetBlockchainBlockParams) (*BlockchainBlock, error)
-	// GetBlockchainBlockShards invokes getBlockchainBlockShards operation.
-	//
-	// Get blockchain block shards.
-	//
-	// GET /v2/blockchain/blocks/{block_id}/shards
-	GetBlockchainBlockShards(ctx context.Context, params GetBlockchainBlockShardsParams) (*BlockchainBlockShards, error)
 	// GetBlockchainBlockTransactions invokes getBlockchainBlockTransactions operation.
 	//
 	// Get transactions from block.
@@ -225,6 +219,12 @@ type Invoker interface {
 	//
 	// GET /v2/blockchain/masterchain-head
 	GetBlockchainMasterchainHead(ctx context.Context) (*BlockchainBlock, error)
+	// GetBlockchainMasterchainShards invokes getBlockchainMasterchainShards operation.
+	//
+	// Get blockchain block shards.
+	//
+	// GET /v2/blockchain/masterchain/{masterchain_seqno}/shards
+	GetBlockchainMasterchainShards(ctx context.Context, params GetBlockchainMasterchainShardsParams) (*BlockchainBlockShards, error)
 	// GetBlockchainRawAccount invokes getBlockchainRawAccount operation.
 	//
 	// Get low-level information about an account taken directly from the blockchain.
@@ -3916,97 +3916,6 @@ func (c *Client) sendGetBlockchainBlock(ctx context.Context, params GetBlockchai
 	return result, nil
 }
 
-// GetBlockchainBlockShards invokes getBlockchainBlockShards operation.
-//
-// Get blockchain block shards.
-//
-// GET /v2/blockchain/blocks/{block_id}/shards
-func (c *Client) GetBlockchainBlockShards(ctx context.Context, params GetBlockchainBlockShardsParams) (*BlockchainBlockShards, error) {
-	res, err := c.sendGetBlockchainBlockShards(ctx, params)
-	return res, err
-}
-
-func (c *Client) sendGetBlockchainBlockShards(ctx context.Context, params GetBlockchainBlockShardsParams) (res *BlockchainBlockShards, err error) {
-	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("getBlockchainBlockShards"),
-		semconv.HTTPMethodKey.String("GET"),
-		semconv.HTTPRouteKey.String("/v2/blockchain/blocks/{block_id}/shards"),
-	}
-
-	// Run stopwatch.
-	startTime := time.Now()
-	defer func() {
-		// Use floating point division here for higher precision (instead of Millisecond method).
-		elapsedDuration := time.Since(startTime)
-		c.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
-	}()
-
-	// Increment request counter.
-	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
-
-	// Start a span for this request.
-	ctx, span := c.cfg.Tracer.Start(ctx, "GetBlockchainBlockShards",
-		trace.WithAttributes(otelAttrs...),
-		clientSpanKind,
-	)
-	// Track stage for error reporting.
-	var stage string
-	defer func() {
-		if err != nil {
-			span.RecordError(err)
-			span.SetStatus(codes.Error, stage)
-			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
-		}
-		span.End()
-	}()
-
-	stage = "BuildURL"
-	u := uri.Clone(c.requestURL(ctx))
-	var pathParts [3]string
-	pathParts[0] = "/v2/blockchain/blocks/"
-	{
-		// Encode "block_id" parameter.
-		e := uri.NewPathEncoder(uri.PathEncoderConfig{
-			Param:   "block_id",
-			Style:   uri.PathStyleSimple,
-			Explode: false,
-		})
-		if err := func() error {
-			return e.EncodeValue(conv.StringToString(params.BlockID))
-		}(); err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		encoded, err := e.Result()
-		if err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		pathParts[1] = encoded
-	}
-	pathParts[2] = "/shards"
-	uri.AddPathParts(u, pathParts[:]...)
-
-	stage = "EncodeRequest"
-	r, err := ht.NewRequest(ctx, "GET", u)
-	if err != nil {
-		return res, errors.Wrap(err, "create request")
-	}
-
-	stage = "SendRequest"
-	resp, err := c.cfg.Client.Do(r)
-	if err != nil {
-		return res, errors.Wrap(err, "do request")
-	}
-	defer resp.Body.Close()
-
-	stage = "DecodeResponse"
-	result, err := decodeGetBlockchainBlockShardsResponse(resp)
-	if err != nil {
-		return res, errors.Wrap(err, "decode response")
-	}
-
-	return result, nil
-}
-
 // GetBlockchainBlockTransactions invokes getBlockchainBlockTransactions operation.
 //
 // Get transactions from block.
@@ -4235,6 +4144,97 @@ func (c *Client) sendGetBlockchainMasterchainHead(ctx context.Context) (res *Blo
 
 	stage = "DecodeResponse"
 	result, err := decodeGetBlockchainMasterchainHeadResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// GetBlockchainMasterchainShards invokes getBlockchainMasterchainShards operation.
+//
+// Get blockchain block shards.
+//
+// GET /v2/blockchain/masterchain/{masterchain_seqno}/shards
+func (c *Client) GetBlockchainMasterchainShards(ctx context.Context, params GetBlockchainMasterchainShardsParams) (*BlockchainBlockShards, error) {
+	res, err := c.sendGetBlockchainMasterchainShards(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendGetBlockchainMasterchainShards(ctx context.Context, params GetBlockchainMasterchainShardsParams) (res *BlockchainBlockShards, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("getBlockchainMasterchainShards"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/blockchain/masterchain/{masterchain_seqno}/shards"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, "GetBlockchainMasterchainShards",
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [3]string
+	pathParts[0] = "/v2/blockchain/masterchain/"
+	{
+		// Encode "masterchain_seqno" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "masterchain_seqno",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.Int32ToString(params.MasterchainSeqno))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/shards"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeGetBlockchainMasterchainShardsResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}

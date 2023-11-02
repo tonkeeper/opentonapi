@@ -33,12 +33,8 @@ func (h *Handler) GetBlockchainBlock(ctx context.Context, params oas.GetBlockcha
 	return &res, nil
 }
 
-func (h *Handler) GetBlockchainBlockShards(ctx context.Context, params oas.GetBlockchainBlockShardsParams) (r *oas.BlockchainBlockShards, _ error) {
-	blockID, err := ton.ParseBlockID(params.BlockID)
-	if err != nil {
-		return nil, toError(http.StatusBadRequest, err)
-	}
-	shards, err := h.storage.GetBlockShards(ctx, blockID)
+func (h *Handler) GetBlockchainMasterchainShards(ctx context.Context, params oas.GetBlockchainMasterchainShardsParams) (r *oas.BlockchainBlockShards, _ error) {
+	shards, err := h.storage.GetBlockShards(ctx, ton.BlockID{Shard: 0x8000000000000000, Seqno: uint32(params.MasterchainSeqno), Workchain: -1})
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}

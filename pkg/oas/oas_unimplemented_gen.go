@@ -278,15 +278,6 @@ func (UnimplementedHandler) GetBlockchainBlock(ctx context.Context, params GetBl
 	return r, ht.ErrNotImplemented
 }
 
-// GetBlockchainBlockShards implements getBlockchainBlockShards operation.
-//
-// Get blockchain block shards.
-//
-// GET /v2/blockchain/blocks/{block_id}/shards
-func (UnimplementedHandler) GetBlockchainBlockShards(ctx context.Context, params GetBlockchainBlockShardsParams) (r *BlockchainBlockShards, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
 // GetBlockchainBlockTransactions implements getBlockchainBlockTransactions operation.
 //
 // Get transactions from block.
@@ -311,6 +302,15 @@ func (UnimplementedHandler) GetBlockchainConfig(ctx context.Context) (r *Blockch
 //
 // GET /v2/blockchain/masterchain-head
 func (UnimplementedHandler) GetBlockchainMasterchainHead(ctx context.Context) (r *BlockchainBlock, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// GetBlockchainMasterchainShards implements getBlockchainMasterchainShards operation.
+//
+// Get blockchain block shards.
+//
+// GET /v2/blockchain/masterchain/{masterchain_seqno}/shards
+func (UnimplementedHandler) GetBlockchainMasterchainShards(ctx context.Context, params GetBlockchainMasterchainShardsParams) (r *BlockchainBlockShards, _ error) {
 	return r, ht.ErrNotImplemented
 }
 

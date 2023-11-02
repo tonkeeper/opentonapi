@@ -28,14 +28,21 @@ paths:
                 $ref: '#/components/schemas/BlockchainBlock'
         'default':
           $ref: '#/components/responses/Error'
-  /v2/blockchain/blocks/{block_id}/shards:
+  /v2/blockchain/masterchain/{masterchain_seqno}/shards:
     get:
       description: Get blockchain block shards
-      operationId: getBlockchainBlockShards
+      operationId: getBlockchainMasterchainShards
       tags:
           - Blockchain
       parameters:
-          - $ref: '#/components/parameters/blockchainBlockIDParameter'
+        - name: masterchain_seqno
+          in: path
+          required: true
+          description: "masterchain block seqno"
+          schema:
+            type: integer
+            format: int32
+            example: 123456
       responses:
           '200':
             description: blockchain block shards

@@ -77,3 +77,6 @@ GET {{host}}/v2/blockchain/messages/81C7CC0C66452E5F1BC26A5D89B2B30AAB49B3B88EC9
 
 ###
 GET {{host}}/v2/staking/pools?available_for=0%3A366c84f5b37224e0220a1d05a620deca0197544e2c94a928181a38e5dbbd33f5
+
+###
+GET {{host}}/v2/blockchain/masterchain/27578880/shards

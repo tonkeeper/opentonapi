@@ -214,16 +214,16 @@ type GetBlockchainBlockParams struct {
 	BlockID string
 }
 
-// GetBlockchainBlockShardsParams is parameters of getBlockchainBlockShards operation.
-type GetBlockchainBlockShardsParams struct {
-	// Block ID.
-	BlockID string
-}
-
 // GetBlockchainBlockTransactionsParams is parameters of getBlockchainBlockTransactions operation.
 type GetBlockchainBlockTransactionsParams struct {
 	// Block ID.
 	BlockID string
+}
+
+// GetBlockchainMasterchainShardsParams is parameters of getBlockchainMasterchainShards operation.
+type GetBlockchainMasterchainShardsParams struct {
+	// Masterchain block seqno.
+	MasterchainSeqno int32
 }
 
 // GetBlockchainRawAccountParams is parameters of getBlockchainRawAccount operation.

@@ -186,12 +186,6 @@ type Handler interface {
 	//
 	// GET /v2/blockchain/blocks/{block_id}
 	GetBlockchainBlock(ctx context.Context, params GetBlockchainBlockParams) (*BlockchainBlock, error)
-	// GetBlockchainBlockShards implements getBlockchainBlockShards operation.
-	//
-	// Get blockchain block shards.
-	//
-	// GET /v2/blockchain/blocks/{block_id}/shards
-	GetBlockchainBlockShards(ctx context.Context, params GetBlockchainBlockShardsParams) (*BlockchainBlockShards, error)
 	// GetBlockchainBlockTransactions implements getBlockchainBlockTransactions operation.
 	//
 	// Get transactions from block.
@@ -210,6 +204,12 @@ type Handler interface {
 	//
 	// GET /v2/blockchain/masterchain-head
 	GetBlockchainMasterchainHead(ctx context.Context) (*BlockchainBlock, error)
+	// GetBlockchainMasterchainShards implements getBlockchainMasterchainShards operation.
+	//
+	// Get blockchain block shards.
+	//
+	// GET /v2/blockchain/masterchain/{masterchain_seqno}/shards
+	GetBlockchainMasterchainShards(ctx context.Context, params GetBlockchainMasterchainShardsParams) (*BlockchainBlockShards, error)
 	// GetBlockchainRawAccount implements getBlockchainRawAccount operation.
 	//
 	// Get low-level information about an account taken directly from the blockchain.
