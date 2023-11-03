@@ -5684,6 +5684,84 @@
     ]
    }
   },
+  "/v2/address/{account_id}/parse": {
+   "get": {
+    "description": "parse address and display in all formats",
+    "operationId": "addressParse",
+    "parameters": [
+     {
+      "$ref": "#/components/parameters/accountIDParameter"
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "bounceable": {
+           "properties": {
+            "b64": {
+             "type": "string"
+            },
+            "b64url": {
+             "type": "string"
+            }
+           },
+           "required": [
+            "b64",
+            "b64url"
+           ],
+           "type": "object"
+          },
+          "given_type": {
+           "type": "string"
+          },
+          "non_bounceable": {
+           "properties": {
+            "b64": {
+             "type": "string"
+            },
+            "b64url": {
+             "type": "string"
+            }
+           },
+           "required": [
+            "b64",
+            "b64url"
+           ],
+           "type": "object"
+          },
+          "raw_form": {
+           "example": "0:6e731f2e28b73539a7f85ac47ca104d5840b229351189977bb6151d36b5e3f5e",
+           "type": "string"
+          },
+          "test_only": {
+           "type": "boolean"
+          }
+         },
+         "required": [
+          "raw_form",
+          "bounceable",
+          "non_bounceable",
+          "given_type",
+          "test_only"
+         ],
+         "type": "object"
+        }
+       }
+      },
+      "description": "all forms and info"
+     },
+     "default": {
+      "$ref": "#/components/responses/Error"
+     }
+    },
+    "tags": [
+     "Accounts"
+    ]
+   }
+  },
   "/v2/blockchain/accounts/{account_id}": {
    "get": {
     "description": "Get low-level information about an account taken directly from the blockchain.",

@@ -293,7 +293,61 @@ paths:
                 $ref: '#/components/schemas/BlockchainAccountInspect'
         'default':
           $ref: '#/components/responses/Error'
-  
+  /v2/address/{account_id}/parse:
+    get:
+      description: parse address and display in all formats
+      operationId: addressParse
+      tags:
+        - Accounts
+      parameters:
+        - $ref: '#/components/parameters/accountIDParameter'
+      responses:
+        '200':
+          description: all forms and info
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - raw_form
+                  - bounceable
+                  - non_bounceable
+                  - given_type
+                  - test_only
+                properties:
+                  raw_form:
+                    type: string
+                    example: "0:6e731f2e28b73539a7f85ac47ca104d5840b229351189977bb6151d36b5e3f5e"
+                  bounceable:
+                    required:
+                      - b64
+                      - b64url
+                    type: object
+                    properties:
+                      b64:
+                        type: string
+                      b64url:
+                        type: string
+                  non_bounceable:
+                    required:
+                      - b64
+                      - b64url
+                    type: object
+                    properties:
+                      b64:
+                        type: string
+                      b64url:
+                        type: string
+                  given_type:
+                    type: string
+                  test_only:
+                    type: boolean
+
+        default:
+          $ref: '#/components/responses/Error'
+
+
+
   /v2/events/emulate:
     post:
       description: Emulate sending message to blockchain

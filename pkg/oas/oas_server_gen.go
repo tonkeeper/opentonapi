@@ -14,6 +14,12 @@ type Handler interface {
 	//
 	// GET /v2/accounts/{account_id}/dns/backresolve
 	AccountDnsBackResolve(ctx context.Context, params AccountDnsBackResolveParams) (*DomainNames, error)
+	// AddressParse implements addressParse operation.
+	//
+	// Parse address and display in all formats.
+	//
+	// GET /v2/address/{account_id}/parse
+	AddressParse(ctx context.Context, params AddressParseParams) (*AddressParseOK, error)
 	// BlockchainAccountInspect implements blockchainAccountInspect operation.
 	//
 	// Blockchain account inspect.

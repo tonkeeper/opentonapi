@@ -22,6 +22,15 @@ func (UnimplementedHandler) AccountDnsBackResolve(ctx context.Context, params Ac
 	return r, ht.ErrNotImplemented
 }
 
+// AddressParse implements addressParse operation.
+//
+// Parse address and display in all formats.
+//
+// GET /v2/address/{account_id}/parse
+func (UnimplementedHandler) AddressParse(ctx context.Context, params AddressParseParams) (r *AddressParseOK, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // BlockchainAccountInspect implements blockchainAccountInspect operation.
 //
 // Blockchain account inspect.

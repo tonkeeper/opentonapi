@@ -8,6 +8,12 @@ type AccountDnsBackResolveParams struct {
 	AccountID string
 }
 
+// AddressParseParams is parameters of addressParse operation.
+type AddressParseParams struct {
+	// Account ID.
+	AccountID string
+}
+
 // BlockchainAccountInspectParams is parameters of blockchainAccountInspect operation.
 type BlockchainAccountInspectParams struct {
 	// Account ID.

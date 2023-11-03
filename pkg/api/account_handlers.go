@@ -2,12 +2,14 @@ package api
 
 import (
 	"context"
+	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
 	"sort"
+	"strings"
 
 	"github.com/tonkeeper/opentonapi/internal/g"
 
@@ -438,4 +440,29 @@ func pubkeyFromCodeData(code, data []byte) ([]byte, error) {
 	default:
 		return nil, fmt.Errorf("unknown wallet version")
 	}
+}
+
+func (h *Handler) AddressParse(ctx context.Context, params oas.AddressParseParams) (*oas.AddressParseOK, error) {
+	address, err := tongo.ParseAddress(params.AccountID)
+	if err != nil {
+		return nil, toError(http.StatusBadRequest, err)
+	}
+	var res oas.AddressParseOK
+	res.RawForm = address.ID.ToRaw()
+	res.Bounceable.B64url = address.ID.ToHuman(true, false)
+	res.NonBounceable.B64url = address.ID.ToHuman(false, false)
+	b, _ := base64.URLEncoding.DecodeString(res.Bounceable.B64url)
+	res.Bounceable.B64 = base64.StdEncoding.EncodeToString(b)
+	b, _ = base64.URLEncoding.DecodeString(res.NonBounceable.B64url)
+	res.NonBounceable.B64 = base64.StdEncoding.EncodeToString(b)
+	if strings.Contains(params.AccountID, ":") {
+		res.GivenType = "raw_form"
+	} else if strings.Contains(params.AccountID, ".") {
+		res.GivenType = "dns"
+	} else if address.Bounce {
+		res.GivenType = "friendly_bounceable"
+	} else {
+		res.GivenType = "friendly_non_bounceable"
+	}
+	return &res, nil //todo: add testnet_only
 }

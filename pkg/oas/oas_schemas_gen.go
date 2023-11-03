@@ -1168,6 +1168,114 @@ func (s *ActionType) UnmarshalText(data []byte) error {
 	}
 }
 
+type AddressParseOK struct {
+	RawForm       string                      `json:"raw_form"`
+	Bounceable    AddressParseOKBounceable    `json:"bounceable"`
+	NonBounceable AddressParseOKNonBounceable `json:"non_bounceable"`
+	GivenType     string                      `json:"given_type"`
+	TestOnly      bool                        `json:"test_only"`
+}
+
+// GetRawForm returns the value of RawForm.
+func (s *AddressParseOK) GetRawForm() string {
+	return s.RawForm
+}
+
+// GetBounceable returns the value of Bounceable.
+func (s *AddressParseOK) GetBounceable() AddressParseOKBounceable {
+	return s.Bounceable
+}
+
+// GetNonBounceable returns the value of NonBounceable.
+func (s *AddressParseOK) GetNonBounceable() AddressParseOKNonBounceable {
+	return s.NonBounceable
+}
+
+// GetGivenType returns the value of GivenType.
+func (s *AddressParseOK) GetGivenType() string {
+	return s.GivenType
+}
+
+// GetTestOnly returns the value of TestOnly.
+func (s *AddressParseOK) GetTestOnly() bool {
+	return s.TestOnly
+}
+
+// SetRawForm sets the value of RawForm.
+func (s *AddressParseOK) SetRawForm(val string) {
+	s.RawForm = val
+}
+
+// SetBounceable sets the value of Bounceable.
+func (s *AddressParseOK) SetBounceable(val AddressParseOKBounceable) {
+	s.Bounceable = val
+}
+
+// SetNonBounceable sets the value of NonBounceable.
+func (s *AddressParseOK) SetNonBounceable(val AddressParseOKNonBounceable) {
+	s.NonBounceable = val
+}
+
+// SetGivenType sets the value of GivenType.
+func (s *AddressParseOK) SetGivenType(val string) {
+	s.GivenType = val
+}
+
+// SetTestOnly sets the value of TestOnly.
+func (s *AddressParseOK) SetTestOnly(val bool) {
+	s.TestOnly = val
+}
+
+type AddressParseOKBounceable struct {
+	B64    string `json:"b64"`
+	B64url string `json:"b64url"`
+}
+
+// GetB64 returns the value of B64.
+func (s *AddressParseOKBounceable) GetB64() string {
+	return s.B64
+}
+
+// GetB64url returns the value of B64url.
+func (s *AddressParseOKBounceable) GetB64url() string {
+	return s.B64url
+}
+
+// SetB64 sets the value of B64.
+func (s *AddressParseOKBounceable) SetB64(val string) {
+	s.B64 = val
+}
+
+// SetB64url sets the value of B64url.
+func (s *AddressParseOKBounceable) SetB64url(val string) {
+	s.B64url = val
+}
+
+type AddressParseOKNonBounceable struct {
+	B64    string `json:"b64"`
+	B64url string `json:"b64url"`
+}
+
+// GetB64 returns the value of B64.
+func (s *AddressParseOKNonBounceable) GetB64() string {
+	return s.B64
+}
+
+// GetB64url returns the value of B64url.
+func (s *AddressParseOKNonBounceable) GetB64url() string {
+	return s.B64url
+}
+
+// SetB64 sets the value of B64.
+func (s *AddressParseOKNonBounceable) SetB64(val string) {
+	s.B64 = val
+}
+
+// SetB64url sets the value of B64url.
+func (s *AddressParseOKNonBounceable) SetB64url(val string) {
+	s.B64url = val
+}
+
 // Ref: #/components/schemas/ApyHistory
 type ApyHistory struct {
 	Apy  float64 `json:"apy"`
