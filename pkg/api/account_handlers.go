@@ -232,6 +232,9 @@ func (h *Handler) GetAccountDnsExpiring(ctx context.Context, params oas.GetAccou
 		period = &params.Period.Value
 	}
 	dnsExpiring, err := h.storage.GetDnsExpiring(ctx, account.ID, period)
+	if errors.Is(err, core.ErrEntityNotFound) {
+		return &oas.DnsExpiring{}, nil
+	}
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
