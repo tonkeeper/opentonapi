@@ -4,9 +4,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promauto"
 	"math"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/labstack/gommon/log"
 	"github.com/tonkeeper/opentonapi/pkg/references"
@@ -14,6 +17,10 @@ import (
 	"github.com/tonkeeper/tongo/tep64"
 	"github.com/tonkeeper/tongo/ton"
 )
+
+var errorsCounter = promauto.NewCounterVec(prometheus.CounterOpts{
+	Name: "rates_getter_errors_total",
+}, []string{"source"})
 
 type storage interface {
 	GetJettonMasterMetadata(ctx context.Context, master tongo.AccountID) (tep64.Metadata, error)
@@ -31,18 +38,30 @@ func (m *Mock) GetCurrentRates() (map[string]float64, error) {
 	tonPriceOKX := getTonOKXPrice()
 	tonPriceHuobi := getTonHuobiPrice()
 	if tonPriceOKX == 0 && tonPriceHuobi == 0 {
+		errorsCounter.WithLabelValues("ton_price").Inc()
 		return nil, fmt.Errorf("failed to get ton price")
 	}
 	meanTonPriceToUSD := (tonPriceHuobi + tonPriceOKX) / 2
 
-	pools := m.getDedustPool()
+	pools, err := m.getDedustPool()
+	if err != nil {
+		log.Errorf("dedust pool %v", err)
+		errorsCounter.WithLabelValues("dedust").Inc()
+	}
+
 	stonfiPools := getStonFiPool(meanTonPriceToUSD)
+	if len(stonfiPools) == 0 {
+		errorsCounter.WithLabelValues("stonfi").Inc()
+	}
 	for address, price := range stonfiPools {
 		if _, ok := pools[address]; !ok {
 			pools[address] = price
 		}
 	}
 	megatonPool := getMegatonPool(meanTonPriceToUSD)
+	if len(megatonPool) == 0 {
+		errorsCounter.WithLabelValues("megaton").Inc()
+	}
 	for address, price := range megatonPool {
 		if _, ok := pools[address]; !ok {
 			pools[address] = price
@@ -51,6 +70,14 @@ func (m *Mock) GetCurrentRates() (map[string]float64, error) {
 	tonstakersJetton, tonstakersPrice, err := getTonstakersPrice(references.TonstakersAccountPool)
 	if err == nil {
 		pools[tonstakersJetton] = tonstakersPrice
+	} else {
+		log.Errorf("tonstakers price: %v", err)
+		errorsCounter.WithLabelValues("tonstakers").Inc()
+		time.Sleep(time.Second * 5)
+		tonstakersJetton, tonstakersPrice, err = getTonstakersPrice(references.TonstakersAccountPool)
+		if err == nil {
+			pools[tonstakersJetton] = tonstakersPrice
+		}
 	}
 
 	// All data is displayed to the ratio to TON
@@ -138,11 +165,11 @@ func getStonFiPool(tonPrice float64) map[ton.AccountID]float64 {
 	return mapOfPool
 }
 
-func (m *Mock) getDedustPool() map[ton.AccountID]float64 {
+func (m *Mock) getDedustPool() (map[ton.AccountID]float64, error) {
 	resp, err := http.Get("https://api.dedust.io/v2/pools")
 	if err != nil {
 		log.Errorf("failed to fetch dedust rates: %v", err)
-		return map[ton.AccountID]float64{}
+		return map[ton.AccountID]float64{}, err
 	}
 	defer resp.Body.Close()
 
@@ -161,7 +188,7 @@ func (m *Mock) getDedustPool() map[ton.AccountID]float64 {
 	var respBody []Pool
 	if err = json.NewDecoder(resp.Body).Decode(&respBody); err != nil {
 		log.Errorf("failed to decode response: %v", err)
-		return map[ton.AccountID]float64{}
+		return map[ton.AccountID]float64{}, err
 	}
 
 	mapOfPool := make(map[ton.AccountID]float64)
@@ -209,7 +236,7 @@ func (m *Mock) getDedustPool() map[ton.AccountID]float64 {
 		mapOfPool[account.ID] = price
 	}
 
-	return mapOfPool
+	return mapOfPool, nil
 }
 
 func getTonHuobiPrice() float64 {
