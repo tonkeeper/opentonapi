@@ -18,6 +18,11 @@ func (e HTTPError) Error() string {
 	return e.Message
 }
 
+func (e HTTPError) Is(err error) bool {
+	_, ok := err.(HTTPError)
+	return ok
+}
+
 func InternalServerError(msg string) HTTPError {
 	return HTTPError{
 		Code:    http.StatusInternalServerError,
