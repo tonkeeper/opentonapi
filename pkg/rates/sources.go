@@ -4,12 +4,13 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promauto"
 	"math"
 	"net/http"
 	"strconv"
 	"time"
+
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promauto"
 
 	"github.com/labstack/gommon/log"
 	"github.com/tonkeeper/opentonapi/pkg/references"
@@ -67,17 +68,14 @@ func (m *Mock) GetCurrentRates() (map[string]float64, error) {
 			pools[address] = price
 		}
 	}
-	tonstakersJetton, tonstakersPrice, err := getTonstakersPrice(references.TonstakersAccountPool)
-	if err == nil {
-		pools[tonstakersJetton] = tonstakersPrice
-	} else {
-		log.Errorf("tonstakers price: %v", err)
-		errorsCounter.WithLabelValues("tonstakers").Inc()
-		time.Sleep(time.Second * 5)
-		tonstakersJetton, tonstakersPrice, err = getTonstakersPrice(references.TonstakersAccountPool)
-		if err == nil {
+
+	for attempt := 0; attempt < 3; attempt++ {
+		if tonstakersJetton, tonstakersPrice, err := getTonstakersPrice(references.TonstakersAccountPool); err == nil {
 			pools[tonstakersJetton] = tonstakersPrice
+			break
 		}
+		errorsCounter.WithLabelValues("tonstakers").Inc()
+		time.Sleep(time.Second * 3)
 	}
 
 	// All data is displayed to the ratio to TON
