@@ -1,9 +1,6 @@
 name: Create a pull request to update TonAPI SDK
 
-on:
-  push:
-    branches:
-      - master
+on: workflow_dispatch
 
 jobs:
   update_sdk:
