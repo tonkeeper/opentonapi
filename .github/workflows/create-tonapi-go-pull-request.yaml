@@ -1,0 +1,16 @@
+name: Create a pull request to update TonAPI SDK
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  update_sdk:
+    name: Update TonAPI SDK
+    runs-on: ubuntu-latest
+    steps:
+       - name: create pull request
+         run: make update-sdk
+    env:
+      GH_TOKEN: ${{ github.token }}
