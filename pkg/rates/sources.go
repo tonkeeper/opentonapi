@@ -4,12 +4,13 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promauto"
 	"math"
 	"net/http"
 	"strconv"
 	"time"
+
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promauto"
 
 	"github.com/labstack/gommon/log"
 	"github.com/tonkeeper/opentonapi/pkg/references"
@@ -25,6 +26,8 @@ var errorsCounter = promauto.NewCounterVec(prometheus.CounterOpts{
 type storage interface {
 	GetJettonMasterMetadata(ctx context.Context, master tongo.AccountID) (tep64.Metadata, error)
 }
+
+var jUSDTJetton = ton.MustParseAccountID("EQBynBO23ywHy_CgarY9NK9FTz0yDsG82PtcbSTQgGoXwiuA")
 
 func (m *Mock) GetCurrentRates() (map[string]float64, error) {
 	rates := make(map[string]float64)
@@ -67,17 +70,14 @@ func (m *Mock) GetCurrentRates() (map[string]float64, error) {
 			pools[address] = price
 		}
 	}
-	tonstakersJetton, tonstakersPrice, err := getTonstakersPrice(references.TonstakersAccountPool)
-	if err == nil {
-		pools[tonstakersJetton] = tonstakersPrice
-	} else {
-		log.Errorf("tonstakers price: %v", err)
-		errorsCounter.WithLabelValues("tonstakers").Inc()
-		time.Sleep(time.Second * 5)
-		tonstakersJetton, tonstakersPrice, err = getTonstakersPrice(references.TonstakersAccountPool)
-		if err == nil {
+
+	for attempt := 0; attempt < 3; attempt++ {
+		if tonstakersJetton, tonstakersPrice, err := getTonstakersPrice(references.TonstakersAccountPool); err == nil {
 			pools[tonstakersJetton] = tonstakersPrice
+			break
 		}
+		errorsCounter.WithLabelValues("tonstakers").Inc()
+		time.Sleep(time.Second * 3)
 	}
 
 	// All data is displayed to the ratio to TON
@@ -158,6 +158,9 @@ func getStonFiPool(tonPrice float64) map[ton.AccountID]float64 {
 			continue
 		}
 		if jettonPrice, err := strconv.ParseFloat(*pool.DexUsdPrice, 64); err == nil {
+			if account.ID == jUSDTJetton {
+				log.Infof("[CHECK_STONFI_JETTON] USD_PRICE: %v, CONVERTED_PRICE: %v, RESULT: %v", *pool.DexUsdPrice, jettonPrice, jettonPrice/tonPrice)
+			}
 			mapOfPool[account.ID] = jettonPrice / tonPrice
 		}
 	}

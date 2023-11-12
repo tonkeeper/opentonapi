@@ -1,0 +1,18 @@
+name: Create a pull request to update TonAPI SDK
+
+on: workflow_dispatch
+
+jobs:
+  update_sdk:
+    name: Update TonAPI SDK
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Go Version
+        uses: actions/setup-go@v3
+        with:
+          go-version: '1.20'
+      - name: create pull request
+        run: make update-sdk
+    env:
+      GH_TOKEN: ${{ github.token }}
