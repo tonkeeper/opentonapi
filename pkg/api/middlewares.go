@@ -22,7 +22,7 @@ func ogenLoggingMiddleware(logger *zap.Logger) middleware.Middleware {
 		logger.Info("Handling request")
 		resp, err := next(req)
 		if err != nil {
-			logger.Error("Fail", zap.Error(err))
+			logger.Info("Fail", zap.Error(err))
 		} else {
 			var fields []zap.Field
 			if tresp, ok := resp.Type.(interface{ GetStatusCode() int }); ok {

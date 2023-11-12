@@ -72,7 +72,7 @@ func (UnimplementedHandler) EmulateMessageToEvent(ctx context.Context, req *Emul
 // Emulate sending message to blockchain.
 //
 // POST /v2/traces/emulate
-func (UnimplementedHandler) EmulateMessageToTrace(ctx context.Context, req *EmulateMessageToTraceReq) (r *Trace, _ error) {
+func (UnimplementedHandler) EmulateMessageToTrace(ctx context.Context, req *EmulateMessageToTraceReq, params EmulateMessageToTraceParams) (r *Trace, _ error) {
 	return r, ht.ErrNotImplemented
 }
 

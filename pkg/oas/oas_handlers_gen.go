@@ -705,6 +705,10 @@ func (s *Server) handleEmulateMessageToEventRequest(args [0]string, argsEscaped 
 					Name: "Accept-Language",
 					In:   "header",
 				}: params.AcceptLanguage,
+				{
+					Name: "ignore_signature_check",
+					In:   "query",
+				}: params.IgnoreSignatureCheck,
 			},
 			Raw: r,
 		}
@@ -798,6 +802,16 @@ func (s *Server) handleEmulateMessageToTraceRequest(args [0]string, argsEscaped 
 			ID:   "emulateMessageToTrace",
 		}
 	)
+	params, err := decodeEmulateMessageToTraceParams(args, argsEscaped, r)
+	if err != nil {
+		err = &ogenerrors.DecodeParamsError{
+			OperationContext: opErrContext,
+			Err:              err,
+		}
+		recordError("DecodeParams", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
 	request, close, err := s.decodeEmulateMessageToTraceRequest(r)
 	if err != nil {
 		err = &ogenerrors.DecodeRequestError{
@@ -822,13 +836,18 @@ func (s *Server) handleEmulateMessageToTraceRequest(args [0]string, argsEscaped 
 			OperationSummary: "",
 			OperationID:      "emulateMessageToTrace",
 			Body:             request,
-			Params:           middleware.Parameters{},
-			Raw:              r,
+			Params: middleware.Parameters{
+				{
+					Name: "ignore_signature_check",
+					In:   "query",
+				}: params.IgnoreSignatureCheck,
+			},
+			Raw: r,
 		}
 
 		type (
 			Request  = *EmulateMessageToTraceReq
-			Params   = struct{}
+			Params   = EmulateMessageToTraceParams
 			Response = *Trace
 		)
 		response, err = middleware.HookMiddleware[
@@ -838,14 +857,14 @@ func (s *Server) handleEmulateMessageToTraceRequest(args [0]string, argsEscaped 
 		](
 			m,
 			mreq,
-			nil,
+			unpackEmulateMessageToTraceParams,
 			func(ctx context.Context, request Request, params Params) (response Response, err error) {
-				response, err = s.h.EmulateMessageToTrace(ctx, request)
+				response, err = s.h.EmulateMessageToTrace(ctx, request, params)
 				return response, err
 			},
 		)
 	} else {
-		response, err = s.h.EmulateMessageToTrace(ctx, request)
+		response, err = s.h.EmulateMessageToTrace(ctx, request, params)
 	}
 	if err != nil {
 		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {

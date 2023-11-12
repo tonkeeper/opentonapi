@@ -356,6 +356,11 @@ paths:
         - Emulation
       parameters:
         - $ref: '#/components/parameters/i18n'
+        - name: ignore_signature_check
+          in: query
+          required: false
+          schema:
+            type: boolean
       requestBody:
         $ref: "#/components/requestBodies/Boc"
       responses:
@@ -373,6 +378,12 @@ paths:
       operationId: emulateMessageToTrace
       tags:
         - Emulation
+      parameters:
+        - name: ignore_signature_check
+          in: query
+          required: false
+          schema:
+            type: boolean
       requestBody:
         $ref: "#/components/requestBodies/Boc"
       responses:

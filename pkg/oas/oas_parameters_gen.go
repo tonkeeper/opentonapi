@@ -402,7 +402,8 @@ func decodeEmulateMessageToAccountEventParams(args [1]string, argsEscaped bool, 
 
 // EmulateMessageToEventParams is parameters of emulateMessageToEvent operation.
 type EmulateMessageToEventParams struct {
-	AcceptLanguage OptString
+	AcceptLanguage       OptString
+	IgnoreSignatureCheck OptBool
 }
 
 func unpackEmulateMessageToEventParams(packed middleware.Parameters) (params EmulateMessageToEventParams) {
@@ -415,10 +416,20 @@ func unpackEmulateMessageToEventParams(packed middleware.Parameters) (params Emu
 			params.AcceptLanguage = v.(OptString)
 		}
 	}
+	{
+		key := middleware.ParameterKey{
+			Name: "ignore_signature_check",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.IgnoreSignatureCheck = v.(OptBool)
+		}
+	}
 	return params
 }
 
 func decodeEmulateMessageToEventParams(args [0]string, argsEscaped bool, r *http.Request) (params EmulateMessageToEventParams, _ error) {
+	q := uri.NewQueryDecoder(r.URL.Query())
 	h := uri.NewHeaderDecoder(r.Header)
 	// Set default value for header: Accept-Language.
 	{
@@ -461,6 +472,111 @@ func decodeEmulateMessageToEventParams(args [0]string, argsEscaped bool, r *http
 		return params, &ogenerrors.DecodeParamError{
 			Name: "Accept-Language",
 			In:   "header",
+			Err:  err,
+		}
+	}
+	// Decode query: ignore_signature_check.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "ignore_signature_check",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotIgnoreSignatureCheckVal bool
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToBool(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotIgnoreSignatureCheckVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.IgnoreSignatureCheck.SetTo(paramsDotIgnoreSignatureCheckVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "ignore_signature_check",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// EmulateMessageToTraceParams is parameters of emulateMessageToTrace operation.
+type EmulateMessageToTraceParams struct {
+	IgnoreSignatureCheck OptBool
+}
+
+func unpackEmulateMessageToTraceParams(packed middleware.Parameters) (params EmulateMessageToTraceParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "ignore_signature_check",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.IgnoreSignatureCheck = v.(OptBool)
+		}
+	}
+	return params
+}
+
+func decodeEmulateMessageToTraceParams(args [0]string, argsEscaped bool, r *http.Request) (params EmulateMessageToTraceParams, _ error) {
+	q := uri.NewQueryDecoder(r.URL.Query())
+	// Decode query: ignore_signature_check.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "ignore_signature_check",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotIgnoreSignatureCheckVal bool
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToBool(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotIgnoreSignatureCheckVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.IgnoreSignatureCheck.SetTo(paramsDotIgnoreSignatureCheckVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "ignore_signature_check",
+			In:   "query",
 			Err:  err,
 		}
 	}

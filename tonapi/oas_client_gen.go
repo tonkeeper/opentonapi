@@ -64,7 +64,7 @@ type Invoker interface {
 	// Emulate sending message to blockchain.
 	//
 	// POST /v2/traces/emulate
-	EmulateMessageToTrace(ctx context.Context, request *EmulateMessageToTraceReq) (*Trace, error)
+	EmulateMessageToTrace(ctx context.Context, request *EmulateMessageToTraceReq, params EmulateMessageToTraceParams) (*Trace, error)
 	// EmulateMessageToWallet invokes emulateMessageToWallet operation.
 	//
 	// Emulate sending message to blockchain.
@@ -1095,6 +1095,27 @@ func (c *Client) sendEmulateMessageToEvent(ctx context.Context, request *Emulate
 	pathParts[0] = "/v2/events/emulate"
 	uri.AddPathParts(u, pathParts[:]...)
 
+	stage = "EncodeQueryParams"
+	q := uri.NewQueryEncoder()
+	{
+		// Encode "ignore_signature_check" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "ignore_signature_check",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.IgnoreSignatureCheck.Get(); ok {
+				return e.EncodeValue(conv.BoolToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	u.RawQuery = q.Values().Encode()
+
 	stage = "EncodeRequest"
 	r, err := ht.NewRequest(ctx, "POST", u)
 	if err != nil {
@@ -1142,12 +1163,12 @@ func (c *Client) sendEmulateMessageToEvent(ctx context.Context, request *Emulate
 // Emulate sending message to blockchain.
 //
 // POST /v2/traces/emulate
-func (c *Client) EmulateMessageToTrace(ctx context.Context, request *EmulateMessageToTraceReq) (*Trace, error) {
-	res, err := c.sendEmulateMessageToTrace(ctx, request)
+func (c *Client) EmulateMessageToTrace(ctx context.Context, request *EmulateMessageToTraceReq, params EmulateMessageToTraceParams) (*Trace, error) {
+	res, err := c.sendEmulateMessageToTrace(ctx, request, params)
 	return res, err
 }
 
-func (c *Client) sendEmulateMessageToTrace(ctx context.Context, request *EmulateMessageToTraceReq) (res *Trace, err error) {
+func (c *Client) sendEmulateMessageToTrace(ctx context.Context, request *EmulateMessageToTraceReq, params EmulateMessageToTraceParams) (res *Trace, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("emulateMessageToTrace"),
 		semconv.HTTPMethodKey.String("POST"),
@@ -1186,6 +1207,27 @@ func (c *Client) sendEmulateMessageToTrace(ctx context.Context, request *Emulate
 	var pathParts [1]string
 	pathParts[0] = "/v2/traces/emulate"
 	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeQueryParams"
+	q := uri.NewQueryEncoder()
+	{
+		// Encode "ignore_signature_check" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "ignore_signature_check",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.IgnoreSignatureCheck.Get(); ok {
+				return e.EncodeValue(conv.BoolToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	u.RawQuery = q.Values().Encode()
 
 	stage = "EncodeRequest"
 	r, err := ht.NewRequest(ctx, "POST", u)

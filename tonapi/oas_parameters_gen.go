@@ -35,7 +35,13 @@ type EmulateMessageToAccountEventParams struct {
 
 // EmulateMessageToEventParams is parameters of emulateMessageToEvent operation.
 type EmulateMessageToEventParams struct {
-	AcceptLanguage OptString
+	AcceptLanguage       OptString
+	IgnoreSignatureCheck OptBool
+}
+
+// EmulateMessageToTraceParams is parameters of emulateMessageToTrace operation.
+type EmulateMessageToTraceParams struct {
+	IgnoreSignatureCheck OptBool
 }
 
 // EmulateMessageToWalletParams is parameters of emulateMessageToWallet operation.

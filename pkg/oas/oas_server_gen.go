@@ -49,7 +49,7 @@ type Handler interface {
 	// Emulate sending message to blockchain.
 	//
 	// POST /v2/traces/emulate
-	EmulateMessageToTrace(ctx context.Context, req *EmulateMessageToTraceReq) (*Trace, error)
+	EmulateMessageToTrace(ctx context.Context, req *EmulateMessageToTraceReq, params EmulateMessageToTraceParams) (*Trace, error)
 	// EmulateMessageToWallet implements emulateMessageToWallet operation.
 	//
 	// Emulate sending message to blockchain.

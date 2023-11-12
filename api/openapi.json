@@ -6348,6 +6348,14 @@
     "parameters": [
      {
       "$ref": "#/components/parameters/i18n"
+     },
+     {
+      "in": "query",
+      "name": "ignore_signature_check",
+      "required": false,
+      "schema": {
+       "type": "boolean"
+      }
      }
     ],
     "requestBody": {
@@ -8155,6 +8163,16 @@
    "post": {
     "description": "Emulate sending message to blockchain",
     "operationId": "emulateMessageToTrace",
+    "parameters": [
+     {
+      "in": "query",
+      "name": "ignore_signature_check",
+      "required": false,
+      "schema": {
+       "type": "boolean"
+      }
+     }
+    ],
     "requestBody": {
      "$ref": "#/components/requestBodies/Boc"
     },
