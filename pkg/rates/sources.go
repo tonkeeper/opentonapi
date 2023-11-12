@@ -27,6 +27,8 @@ type storage interface {
 	GetJettonMasterMetadata(ctx context.Context, master tongo.AccountID) (tep64.Metadata, error)
 }
 
+var jUSDTJetton = ton.MustParseAccountID("EQBynBO23ywHy_CgarY9NK9FTz0yDsG82PtcbSTQgGoXwiuA")
+
 func (m *Mock) GetCurrentRates() (map[string]float64, error) {
 	rates := make(map[string]float64)
 
@@ -156,6 +158,9 @@ func getStonFiPool(tonPrice float64) map[ton.AccountID]float64 {
 			continue
 		}
 		if jettonPrice, err := strconv.ParseFloat(*pool.DexUsdPrice, 64); err == nil {
+			if account.ID == jUSDTJetton {
+				log.Infof("[CHECK_STONFI_JETTON] USD_PRICE: %v, CONVERTED_PRICE: %v, RESULT: %v", *pool.DexUsdPrice, jettonPrice, jettonPrice/tonPrice)
+			}
 			mapOfPool[account.ID] = jettonPrice / tonPrice
 		}
 	}
