@@ -12293,10 +12293,21 @@ func (s *EmulateMessageToWalletReq) encodeFields(e *jx.Encoder) {
 		e.FieldStart("boc")
 		e.Str(s.Boc)
 	}
+	{
+		if s.Params != nil {
+			e.FieldStart("params")
+			e.ArrStart()
+			for _, elem := range s.Params {
+				elem.Encode(e)
+			}
+			e.ArrEnd()
+		}
+	}
 }
 
-var jsonFieldsNameOfEmulateMessageToWalletReq = [1]string{
+var jsonFieldsNameOfEmulateMessageToWalletReq = [2]string{
 	0: "boc",
+	1: "params",
 }
 
 // Decode decodes EmulateMessageToWalletReq from json.
@@ -12319,6 +12330,23 @@ func (s *EmulateMessageToWalletReq) Decode(d *jx.Decoder) error {
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"boc\"")
+			}
+		case "params":
+			if err := func() error {
+				s.Params = make([]EmulateMessageToWalletReqParamsItem, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem EmulateMessageToWalletReqParamsItem
+					if err := elem.Decode(d); err != nil {
+						return err
+					}
+					s.Params = append(s.Params, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"params\"")
 			}
 		default:
 			return d.Skip()
@@ -12372,6 +12400,119 @@ func (s *EmulateMessageToWalletReq) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *EmulateMessageToWalletReq) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *EmulateMessageToWalletReqParamsItem) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *EmulateMessageToWalletReqParamsItem) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("address")
+		e.Str(s.Address)
+	}
+	{
+		if s.Balance.Set {
+			e.FieldStart("balance")
+			s.Balance.Encode(e)
+		}
+	}
+}
+
+var jsonFieldsNameOfEmulateMessageToWalletReqParamsItem = [2]string{
+	0: "address",
+	1: "balance",
+}
+
+// Decode decodes EmulateMessageToWalletReqParamsItem from json.
+func (s *EmulateMessageToWalletReqParamsItem) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode EmulateMessageToWalletReqParamsItem to nil")
+	}
+	var requiredBitSet [1]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "address":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				v, err := d.Str()
+				s.Address = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"address\"")
+			}
+		case "balance":
+			if err := func() error {
+				s.Balance.Reset()
+				if err := s.Balance.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"balance\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode EmulateMessageToWalletReqParamsItem")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00000001,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfEmulateMessageToWalletReqParamsItem) {
+					name = jsonFieldsNameOfEmulateMessageToWalletReqParamsItem[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *EmulateMessageToWalletReqParamsItem) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *EmulateMessageToWalletReqParamsItem) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }

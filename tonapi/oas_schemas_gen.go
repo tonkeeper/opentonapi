@@ -4344,6 +4344,8 @@ func (s *EmulateMessageToTraceReq) SetBoc(val string) {
 
 type EmulateMessageToWalletReq struct {
 	Boc string `json:"boc"`
+	// Additional per account configuration.
+	Params []EmulateMessageToWalletReqParamsItem `json:"params"`
 }
 
 // GetBoc returns the value of Boc.
@@ -4351,9 +4353,44 @@ func (s *EmulateMessageToWalletReq) GetBoc() string {
 	return s.Boc
 }
 
+// GetParams returns the value of Params.
+func (s *EmulateMessageToWalletReq) GetParams() []EmulateMessageToWalletReqParamsItem {
+	return s.Params
+}
+
 // SetBoc sets the value of Boc.
 func (s *EmulateMessageToWalletReq) SetBoc(val string) {
 	s.Boc = val
+}
+
+// SetParams sets the value of Params.
+func (s *EmulateMessageToWalletReq) SetParams(val []EmulateMessageToWalletReqParamsItem) {
+	s.Params = val
+}
+
+type EmulateMessageToWalletReqParamsItem struct {
+	Address string   `json:"address"`
+	Balance OptInt64 `json:"balance"`
+}
+
+// GetAddress returns the value of Address.
+func (s *EmulateMessageToWalletReqParamsItem) GetAddress() string {
+	return s.Address
+}
+
+// GetBalance returns the value of Balance.
+func (s *EmulateMessageToWalletReqParamsItem) GetBalance() OptInt64 {
+	return s.Balance
+}
+
+// SetAddress sets the value of Address.
+func (s *EmulateMessageToWalletReqParamsItem) SetAddress(val string) {
+	s.Address = val
+}
+
+// SetBalance sets the value of Balance.
+func (s *EmulateMessageToWalletReqParamsItem) SetBalance(val OptInt64) {
+	s.Balance = val
 }
 
 // Ref: #/components/schemas/EncryptedComment
