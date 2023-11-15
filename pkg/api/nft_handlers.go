@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"golang.org/x/exp/slices"
 	"net/http"
 
 	"github.com/tonkeeper/opentonapi/pkg/core"
@@ -136,6 +137,10 @@ func (h *Handler) GetItemsFromCollection(ctx context.Context, params oas.GetItem
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
+
+	slices.SortFunc(items, func(a, b core.NftItem) int {
+		return a.Index.Cmp(b.Index)
+	})
 	for _, i := range items {
 		result.NftItems = append(result.NftItems, convertNFT(ctx, i, h.addressBook, h.metaCache))
 	}
