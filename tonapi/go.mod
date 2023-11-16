@@ -1,6 +1,6 @@
 module github.com/tonkeeper/opentonapi/tonapi
 
-go 1.21.3
+go 1.21
 
 require (
 	github.com/go-faster/errors v0.6.1

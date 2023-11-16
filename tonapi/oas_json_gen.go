@@ -1690,12 +1690,18 @@ func (s *Action) encodeFields(e *jx.Encoder) {
 		}
 	}
 	{
+		if s.DomainRenew.Set {
+			e.FieldStart("DomainRenew")
+			s.DomainRenew.Encode(e)
+		}
+	}
+	{
 		e.FieldStart("simple_preview")
 		s.SimplePreview.Encode(e)
 	}
 }
 
-var jsonFieldsNameOfAction = [20]string{
+var jsonFieldsNameOfAction = [21]string{
 	0:  "type",
 	1:  "status",
 	2:  "TonTransfer",
@@ -1715,7 +1721,8 @@ var jsonFieldsNameOfAction = [20]string{
 	16: "ElectionsRecoverStake",
 	17: "JettonSwap",
 	18: "SmartContractExec",
-	19: "simple_preview",
+	19: "DomainRenew",
+	20: "simple_preview",
 }
 
 // Decode decodes Action from json.
@@ -1917,8 +1924,18 @@ func (s *Action) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"SmartContractExec\"")
 			}
+		case "DomainRenew":
+			if err := func() error {
+				s.DomainRenew.Reset()
+				if err := s.DomainRenew.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"DomainRenew\"")
+			}
 		case "simple_preview":
-			requiredBitSet[2] |= 1 << 3
+			requiredBitSet[2] |= 1 << 4
 			if err := func() error {
 				if err := s.SimplePreview.Decode(d); err != nil {
 					return err
@@ -1939,7 +1956,7 @@ func (s *Action) Decode(d *jx.Decoder) error {
 	for i, mask := range [3]uint8{
 		0b00000011,
 		0b00000000,
-		0b00001000,
+		0b00010000,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -2430,6 +2447,8 @@ func (s *ActionType) Decode(d *jx.Decoder) error {
 		*s = ActionTypeElectionsRecoverStake
 	case ActionTypeElectionsDepositStake:
 		*s = ActionTypeElectionsDepositStake
+	case ActionTypeDomainRenew:
+		*s = ActionTypeDomainRenew
 	case ActionTypeUnknown:
 		*s = ActionTypeUnknown
 	default:
@@ -11766,6 +11785,134 @@ func (s *DomainNames) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *DomainNames) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *DomainRenewAction) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *DomainRenewAction) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("domain")
+		e.Str(s.Domain)
+	}
+	{
+		e.FieldStart("contract_address")
+		e.Str(s.ContractAddress)
+	}
+	{
+		e.FieldStart("renewer")
+		s.Renewer.Encode(e)
+	}
+}
+
+var jsonFieldsNameOfDomainRenewAction = [3]string{
+	0: "domain",
+	1: "contract_address",
+	2: "renewer",
+}
+
+// Decode decodes DomainRenewAction from json.
+func (s *DomainRenewAction) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode DomainRenewAction to nil")
+	}
+	var requiredBitSet [1]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "domain":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				v, err := d.Str()
+				s.Domain = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"domain\"")
+			}
+		case "contract_address":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				v, err := d.Str()
+				s.ContractAddress = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"contract_address\"")
+			}
+		case "renewer":
+			requiredBitSet[0] |= 1 << 2
+			if err := func() error {
+				if err := s.Renewer.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"renewer\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode DomainRenewAction")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00000111,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfDomainRenewAction) {
+					name = jsonFieldsNameOfDomainRenewAction[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *DomainRenewAction) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *DomainRenewAction) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -24480,6 +24627,39 @@ func (s OptDepositStakeAction) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *OptDepositStakeAction) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes DomainRenewAction as json.
+func (o OptDomainRenewAction) Encode(e *jx.Encoder) {
+	if !o.Set {
+		return
+	}
+	o.Value.Encode(e)
+}
+
+// Decode decodes DomainRenewAction from json.
+func (o *OptDomainRenewAction) Decode(d *jx.Decoder) error {
+	if o == nil {
+		return errors.New("invalid: unable to decode OptDomainRenewAction to nil")
+	}
+	o.Set = true
+	if err := o.Value.Decode(d); err != nil {
+		return err
+	}
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s OptDomainRenewAction) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *OptDomainRenewAction) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }

@@ -639,6 +639,7 @@ type Action struct {
 	ElectionsRecoverStake OptElectionsRecoverStakeAction `json:"ElectionsRecoverStake"`
 	JettonSwap            OptJettonSwapAction            `json:"JettonSwap"`
 	SmartContractExec     OptSmartContractAction         `json:"SmartContractExec"`
+	DomainRenew           OptDomainRenewAction           `json:"DomainRenew"`
 	SimplePreview         ActionSimplePreview            `json:"simple_preview"`
 }
 
@@ -735,6 +736,11 @@ func (s *Action) GetJettonSwap() OptJettonSwapAction {
 // GetSmartContractExec returns the value of SmartContractExec.
 func (s *Action) GetSmartContractExec() OptSmartContractAction {
 	return s.SmartContractExec
+}
+
+// GetDomainRenew returns the value of DomainRenew.
+func (s *Action) GetDomainRenew() OptDomainRenewAction {
+	return s.DomainRenew
 }
 
 // GetSimplePreview returns the value of SimplePreview.
@@ -835,6 +841,11 @@ func (s *Action) SetJettonSwap(val OptJettonSwapAction) {
 // SetSmartContractExec sets the value of SmartContractExec.
 func (s *Action) SetSmartContractExec(val OptSmartContractAction) {
 	s.SmartContractExec = val
+}
+
+// SetDomainRenew sets the value of DomainRenew.
+func (s *Action) SetDomainRenew(val OptDomainRenewAction) {
+	s.DomainRenew = val
 }
 
 // SetSimplePreview sets the value of SimplePreview.
@@ -1035,6 +1046,7 @@ const (
 	ActionTypeSmartContractExec     ActionType = "SmartContractExec"
 	ActionTypeElectionsRecoverStake ActionType = "ElectionsRecoverStake"
 	ActionTypeElectionsDepositStake ActionType = "ElectionsDepositStake"
+	ActionTypeDomainRenew           ActionType = "DomainRenew"
 	ActionTypeUnknown               ActionType = "Unknown"
 )
 
@@ -1058,6 +1070,7 @@ func (ActionType) AllValues() []ActionType {
 		ActionTypeSmartContractExec,
 		ActionTypeElectionsRecoverStake,
 		ActionTypeElectionsDepositStake,
+		ActionTypeDomainRenew,
 		ActionTypeUnknown,
 	}
 }
@@ -1098,6 +1111,8 @@ func (s ActionType) MarshalText() ([]byte, error) {
 	case ActionTypeElectionsRecoverStake:
 		return []byte(s), nil
 	case ActionTypeElectionsDepositStake:
+		return []byte(s), nil
+	case ActionTypeDomainRenew:
 		return []byte(s), nil
 	case ActionTypeUnknown:
 		return []byte(s), nil
@@ -1159,6 +1174,9 @@ func (s *ActionType) UnmarshalText(data []byte) error {
 		return nil
 	case ActionTypeElectionsDepositStake:
 		*s = ActionTypeElectionsDepositStake
+		return nil
+	case ActionTypeDomainRenew:
+		*s = ActionTypeDomainRenew
 		return nil
 	case ActionTypeUnknown:
 		*s = ActionTypeUnknown
@@ -4246,6 +4264,43 @@ func (s *DomainNames) GetDomains() []string {
 // SetDomains sets the value of Domains.
 func (s *DomainNames) SetDomains(val []string) {
 	s.Domains = val
+}
+
+// Ref: #/components/schemas/DomainRenewAction
+type DomainRenewAction struct {
+	Domain          string         `json:"domain"`
+	ContractAddress string         `json:"contract_address"`
+	Renewer         AccountAddress `json:"renewer"`
+}
+
+// GetDomain returns the value of Domain.
+func (s *DomainRenewAction) GetDomain() string {
+	return s.Domain
+}
+
+// GetContractAddress returns the value of ContractAddress.
+func (s *DomainRenewAction) GetContractAddress() string {
+	return s.ContractAddress
+}
+
+// GetRenewer returns the value of Renewer.
+func (s *DomainRenewAction) GetRenewer() AccountAddress {
+	return s.Renewer
+}
+
+// SetDomain sets the value of Domain.
+func (s *DomainRenewAction) SetDomain(val string) {
+	s.Domain = val
+}
+
+// SetContractAddress sets the value of ContractAddress.
+func (s *DomainRenewAction) SetContractAddress(val string) {
+	s.ContractAddress = val
+}
+
+// SetRenewer sets the value of Renewer.
+func (s *DomainRenewAction) SetRenewer(val AccountAddress) {
+	s.Renewer = val
 }
 
 // Ref: #/components/schemas/ElectionsDepositStakeAction
@@ -9780,6 +9835,52 @@ func (o OptDepositStakeAction) Get() (v DepositStakeAction, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptDepositStakeAction) Or(d DepositStakeAction) DepositStakeAction {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptDomainRenewAction returns new OptDomainRenewAction with value set to v.
+func NewOptDomainRenewAction(v DomainRenewAction) OptDomainRenewAction {
+	return OptDomainRenewAction{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptDomainRenewAction is optional DomainRenewAction.
+type OptDomainRenewAction struct {
+	Value DomainRenewAction
+	Set   bool
+}
+
+// IsSet returns true if OptDomainRenewAction was set.
+func (o OptDomainRenewAction) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptDomainRenewAction) Reset() {
+	var v DomainRenewAction
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptDomainRenewAction) SetTo(v DomainRenewAction) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptDomainRenewAction) Get() (v DomainRenewAction, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptDomainRenewAction) Or(d DomainRenewAction) DomainRenewAction {
 	if v, ok := o.Get(); ok {
 		return v
 	}

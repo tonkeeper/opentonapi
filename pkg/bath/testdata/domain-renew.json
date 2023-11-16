@@ -1,0 +1,43 @@
+{
+   "Actions": [
+     {
+       "DnsRenew": {
+         "Item": "0:0100de01079eb32b1d469bf16be45d18084282f8f9fbfe01916978a9e45463d1",
+         "Renewer": "0:2cf3b5b8c891e517c9addbda1c0386a09ccacbb0e3faf630b51cfc8152325acb"
+       },
+       "Success": false,
+       "Type": "DnsRenew"
+     },
+     {
+       "SmartContractExec": {
+         "TonAttached": 160937090759,
+         "Executor": "0:0100de01079eb32b1d469bf16be45d18084282f8f9fbfe01916978a9e45463d1",
+         "Contract": "0:b774d95eb20543f186c06b371ab88ad704f7e256130caf96189368a7d0cb6ccf",
+         "Operation": "AuctionFillUp",
+         "Payload": "QueryId: 0\n"
+       },
+       "Success": true,
+       "Type": "SmartContractExec"
+     }
+   ],
+   "Accounts": [
+     {
+       "Account": "0:0100de01079eb32b1d469bf16be45d18084282f8f9fbfe01916978a9e45463d1",
+       "Ton": -160917090759,
+       "Fee": 27750008,
+       "Jettons": null
+     },
+     {
+       "Account": "0:2cf3b5b8c891e517c9addbda1c0386a09ccacbb0e3faf630b51cfc8152325acb",
+       "Ton": -20000000,
+       "Fee": 6628490,
+       "Jettons": null
+     },
+     {
+       "Account": "0:b774d95eb20543f186c06b371ab88ad704f7e256130caf96189368a7d0cb6ccf",
+       "Ton": 160937090759,
+       "Fee": 1404327,
+       "Jettons": null
+     }
+   ]
+ }

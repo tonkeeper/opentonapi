@@ -1,6 +1,6 @@
 module github.com/tonkeeper/opentonapi/examples/golang/websocket
 
-go 1.21.3
+go 1.21
 
 require github.com/tonkeeper/opentonapi/tonapi v0.0.0-20231101195704-1c8ad29379ba
 

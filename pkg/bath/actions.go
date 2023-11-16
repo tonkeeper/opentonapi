@@ -31,6 +31,7 @@ const (
 	WithdrawStakeRequest  ActionType = "WithdrawStakeRequest"
 	JettonSwap            ActionType = "JettonSwap"
 	AuctionBid            ActionType = "AuctionBid"
+	DnsRenew              ActionType = "DnsRenew"
 
 	RefundDnsTg   RefundType = "DNS.tg"
 	RefundDnsTon  RefundType = "DNS.ton"
@@ -76,6 +77,7 @@ type (
 		WithdrawStake         *WithdrawStakeAction         `json:",omitempty"`
 		WithdrawStakeRequest  *WithdrawStakeRequestAction  `json:",omitempty"`
 		JettonSwap            *JettonSwapAction            `json:",omitempty"`
+		DnsRenew              *DnsRenewAction              `json:",omitempty"`
 		Success               bool
 		Type                  ActionType
 	}
@@ -245,7 +247,7 @@ func (a Action) ContributeToExtra(account tongo.AccountID) int64 {
 		return 0
 	}
 	switch a.Type {
-	case NftItemTransfer, ContractDeploy, UnSubscription, JettonMint, JettonBurn, WithdrawStakeRequest: // actions without extra
+	case NftItemTransfer, ContractDeploy, UnSubscription, JettonMint, JettonBurn, WithdrawStakeRequest, DnsRenew: // actions without extra
 		return 0
 	case TonTransfer:
 		return detectDirection(account, a.TonTransfer.Sender, a.TonTransfer.Recipient, a.TonTransfer.Amount)
@@ -309,6 +311,7 @@ func (a Action) IsSubject(account tongo.AccountID) bool {
 		a.JettonSwap,
 		a.JettonMint,
 		a.JettonBurn,
+		a.DnsRenew,
 	} {
 		if i != nil && !reflect.ValueOf(i).IsNil() {
 			return slices.Contains(i.SubjectAccounts(), account)

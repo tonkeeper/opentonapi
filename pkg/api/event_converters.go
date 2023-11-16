@@ -337,6 +337,33 @@ func (h *Handler) convertWithdrawStake(d *bath.WithdrawStakeAction, acceptLangua
 	return action, simplePreview
 }
 
+func (h *Handler) convertDomainRenew(ctx context.Context, d *bath.DnsRenewAction, acceptLanguage string, viewer *tongo.AccountID) (oas.OptDomainRenewAction, oas.ActionSimplePreview) {
+	var action oas.OptDomainRenewAction
+	var domain = "unknown"
+	nfts, err := h.storage.GetNFTs(ctx, []ton.AccountID{d.Item})
+	if err == nil && len(nfts) == 1 && nfts[0].DNS != nil {
+		domain = *nfts[0].DNS
+	}
+	action.SetTo(oas.DomainRenewAction{
+		Domain:          domain,
+		ContractAddress: d.Item.String(),
+		Renewer:         convertAccountAddress(d.Renewer, h.addressBook),
+	})
+	simplePreview := oas.ActionSimplePreview{
+		Name: "Domain Renew",
+		Description: i18n.T(acceptLanguage, i18n.C{
+			DefaultMessage: &i18n.M{
+				ID:    "domainRenewAction",
+				Other: "Renew domain {{.Value}}",
+			},
+			TemplateData: i18n.Template{"Value": domain},
+		}),
+		Accounts: distinctAccounts(viewer, h.addressBook, &d.Renewer, &d.Item),
+		Value:    oas.NewOptString(domain),
+	}
+	return action, simplePreview
+}
+
 func (h *Handler) convertAction(ctx context.Context, viewer *tongo.AccountID, a bath.Action, acceptLanguage oas.OptString) (oas.Action, bool, error) {
 	action := oas.Action{
 		Type: oas.ActionType(a.Type),
@@ -657,6 +684,9 @@ func (h *Handler) convertAction(ctx context.Context, viewer *tongo.AccountID, a 
 		action.WithdrawStakeRequest, action.SimplePreview = h.convertWithdrawStakeRequest(a.WithdrawStakeRequest, acceptLanguage.Value, viewer)
 	case bath.WithdrawStake:
 		action.WithdrawStake, action.SimplePreview = h.convertWithdrawStake(a.WithdrawStake, acceptLanguage.Value, viewer)
+	case bath.DnsRenew:
+		action.DomainRenew, action.SimplePreview = h.convertDomainRenew(ctx, a.DnsRenew, acceptLanguage.Value, viewer)
+
 	}
 	return action, spamDetected, nil
 }

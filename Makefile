@@ -17,7 +17,7 @@ translate:
 
 install_i18n:
 	git clone https://github.com/mr-tron/go-i18n/
-	cd go-i18n/v2 && go build -o $GOPATH/bin/goi18n github.com/nicksnyder/go-i18n/v2/goi18n
+	cd go-i18n/v2 && go build -o $$GOPATH/bin/goi18n github.com/nicksnyder/go-i18n/v2/goi18n ;  cd ../.. ; rm -rf go-i18n
 run:
 	go run cmd/api/main.go
 

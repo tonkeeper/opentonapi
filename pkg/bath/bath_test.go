@@ -324,6 +324,11 @@ func TestFindActions(t *testing.T) {
 			hash:           "08013737ecc5796d635f5c439d6d6913b4e894a8cdd86fd329c09bc51ea55239",
 			filenamePrefix: "telemint-deploy",
 		},
+		{
+			name:           "domain renew",
+			hash:           "bcc48fcebc9635febcd1834ef40e1afab71c3ab46dd81ddf1d267474dae13923",
+			filenamePrefix: "domain-renew",
+		},
 	} {
 		t.Run(c.name, func(t *testing.T) {
 			trace, err := storage.GetTrace(context.Background(), tongo.MustParseHash(c.hash))

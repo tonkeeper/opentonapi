@@ -4536,6 +4536,7 @@ components:
             - SmartContractExec
             - ElectionsRecoverStake
             - ElectionsDepositStake
+            - DomainRenew
             - Unknown
         status:
           type: string
@@ -4577,6 +4578,8 @@ components:
           $ref: '#/components/schemas/JettonSwapAction'
         SmartContractExec:
           $ref: '#/components/schemas/SmartContractAction'
+        DomainRenew:
+          $ref: '#/components/schemas/DomainRenewAction'
         simple_preview:
           $ref: '#/components/schemas/ActionSimplePreview'
     TonTransferAction:
@@ -4626,6 +4629,21 @@ components:
           type: string
         refund:
           $ref: '#/components/schemas/Refund'
+    DomainRenewAction:
+      type: object
+      required:
+        - domain
+        - contract_address
+        - renewer
+      properties:
+        domain:
+          type: string
+          example: "vasya.ton"
+        contract_address:
+          type: string
+          example: "0:da6b1b6663a0e4d18cc8574ccd9db5296e367dd9324706f3bbd9eb1cd2caf0bf"
+        renewer:
+          $ref: '#/components/schemas/AccountAddress'
     NftItemTransferAction:
       type: object
       required:

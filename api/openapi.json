@@ -899,6 +899,9 @@
      "DepositStake": {
       "$ref": "#/components/schemas/DepositStakeAction"
      },
+     "DomainRenew": {
+      "$ref": "#/components/schemas/DomainRenewAction"
+     },
      "ElectionsDepositStake": {
       "$ref": "#/components/schemas/ElectionsDepositStakeAction"
      },
@@ -971,6 +974,7 @@
        "SmartContractExec",
        "ElectionsRecoverStake",
        "ElectionsDepositStake",
+       "DomainRenew",
        "Unknown"
       ],
       "example": "TonTransfer",
@@ -2521,6 +2525,27 @@
     },
     "required": [
      "domains"
+    ],
+    "type": "object"
+   },
+   "DomainRenewAction": {
+    "properties": {
+     "contract_address": {
+      "example": "0:da6b1b6663a0e4d18cc8574ccd9db5296e367dd9324706f3bbd9eb1cd2caf0bf",
+      "type": "string"
+     },
+     "domain": {
+      "example": "vasya.ton",
+      "type": "string"
+     },
+     "renewer": {
+      "$ref": "#/components/schemas/AccountAddress"
+     }
+    },
+    "required": [
+     "domain",
+     "contract_address",
+     "renewer"
     ],
     "type": "object"
    },
