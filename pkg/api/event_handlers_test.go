@@ -5,6 +5,9 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"github.com/tonkeeper/tongo/liteapi"
+	"github.com/tonkeeper/tongo/tlb"
+	"github.com/tonkeeper/tongo/ton"
 	"go.uber.org/zap"
 
 	"github.com/tonkeeper/opentonapi/pkg/litestorage"
@@ -71,6 +74,44 @@ func TestHandler_EmulateMessageToAccountEvent(t *testing.T) {
 				actions = append(actions, action.Type)
 			}
 			require.Equal(t, tt.wantActions, actions)
+		})
+	}
+}
+
+func Test_prepareAccountState(t *testing.T) {
+	cli, err := liteapi.NewClient(liteapi.Mainnet(), liteapi.FromEnvs())
+	require.Nil(t, err)
+
+	tests := []struct {
+		name         string
+		accountID    string
+		startBalance int64
+		wantStatus   tlb.AccountStatus
+	}{
+		{
+			name:         "uninit account",
+			accountID:    "EQBszTJahYw3lpP64ryqscKQaDGk4QpsO7RO6LYVvKHSIvT2",
+			startBalance: 100500,
+			wantStatus:   tlb.AccountUninit,
+		},
+		{
+			name:         "existing account",
+			accountID:    "0:6ccd325a858c379693fae2bcaab1c2906831a4e10a6c3bb44ee8b615bca1d220",
+			startBalance: 500_000,
+			wantStatus:   tlb.AccountActive,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			accountID, err := ton.ParseAccountID(tt.accountID)
+			require.Nil(t, err)
+			state, err := cli.GetAccountState(context.Background(), accountID)
+			require.Nil(t, err)
+			account, err := prepareAccountState(accountID, state, tt.startBalance)
+			require.Nil(t, err)
+			require.Equal(t, tt.wantStatus, account.Account.Status())
+			require.Equal(t, tlb.SumType("Account"), account.Account.SumType)
+			require.Equal(t, tt.startBalance, int64(account.Account.Account.Storage.Balance.Grams))
 		})
 	}
 }

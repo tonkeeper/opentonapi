@@ -16,6 +16,7 @@ import (
 	"github.com/tonkeeper/tongo/boc"
 	"github.com/tonkeeper/tongo/tlb"
 	"github.com/tonkeeper/tongo/ton"
+	"github.com/tonkeeper/tongo/tontest"
 	"github.com/tonkeeper/tongo/txemulator"
 	tongoWallet "github.com/tonkeeper/tongo/wallet"
 	"golang.org/x/exp/slices"
@@ -374,6 +375,37 @@ func extractDestinationWallet(message tlb.Message) (*tongo.AccountID, error) {
 	return accountID, nil
 }
 
+func prepareAccountState(accountID tongo.AccountID, state tlb.ShardAccount, startBalance int64) (tlb.ShardAccount, error) {
+	if state.Account.Status() == tlb.AccountActive {
+		state.Account.Account.Storage.Balance.Grams = tlb.Grams(startBalance)
+		return state, nil
+	}
+	return tontest.
+		Account().
+		Balance(tlb.Grams(startBalance)).
+		Address(accountID).
+		ShardAccount()
+}
+
+func convertEmulationParameters(params []oas.EmulateMessageToWalletReqParamsItem) (map[tongo.AccountID]int64, error) {
+	result := make(map[tongo.AccountID]int64, len(params))
+	for _, p := range params {
+		if !p.GetBalance().IsSet() {
+			continue
+		}
+		balance := p.GetBalance().Value
+		if balance < 0 {
+			return nil, fmt.Errorf("balance must be greater than 0")
+		}
+		addr, err := tongo.ParseAddress(p.Address)
+		if err != nil {
+			return nil, err
+		}
+		result[addr.ID] = balance
+	}
+	return result, nil
+}
+
 func (h *Handler) EmulateMessageToWallet(ctx context.Context, request *oas.EmulateMessageToWalletReq, params oas.EmulateMessageToWalletParams) (*oas.MessageConsequences, error) {
 	msgCell, err := boc.DeserializeSinglRootBase64(request.Boc)
 	if err != nil {
@@ -411,9 +443,29 @@ func (h *Handler) EmulateMessageToWallet(ctx context.Context, request *oas.Emula
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
-	emulator, err := txemulator.NewTraceBuilder(
+
+	options := []txemulator.TraceOption{
+		txemulator.WithConfigBase64(configBase64),
 		txemulator.WithAccountsSource(h.storage),
-		txemulator.WithConfigBase64(configBase64))
+	}
+	accounts, err := convertEmulationParameters(request.Params)
+	if err != nil {
+		return nil, toError(http.StatusBadRequest, err)
+	}
+	var states []tlb.ShardAccount
+	for accountID, balance := range accounts {
+		originalState, err := h.storage.GetAccountState(ctx, accountID)
+		if err != nil {
+			return nil, toError(http.StatusInternalServerError, err)
+		}
+		state, err := prepareAccountState(*walletAddress, originalState, balance)
+		if err != nil {
+			return nil, toError(http.StatusInternalServerError, err)
+		}
+		states = append(states, state)
+	}
+	options = append(options, txemulator.WithAccounts(states...))
+	emulator, err := txemulator.NewTraceBuilder(options...)
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}

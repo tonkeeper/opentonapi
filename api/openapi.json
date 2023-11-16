@@ -401,6 +401,47 @@
     "description": "bag-of-cells serialized to base64",
     "required": true
    },
+   "EmulationBoc": {
+    "content": {
+     "application/json": {
+      "schema": {
+       "properties": {
+        "boc": {
+         "example": "te6ccgECBQEAARUAAkWIAWTtae+KgtbrX26Bep8JSq8lFLfGOoyGR/xwdjfvpvEaHg",
+         "type": "string"
+        },
+        "params": {
+         "description": "additional per account configuration",
+         "items": {
+          "properties": {
+           "address": {
+            "example": "0:97146a46acc2654y27947f14c4a4b14273e954f78bc017790b41208b0043200b",
+            "type": "string"
+           },
+           "balance": {
+            "example": 10000000000,
+            "format": "int64",
+            "type": "integer"
+           }
+          },
+          "required": [
+           "address"
+          ],
+          "type": "object"
+         },
+         "type": "array"
+        }
+       },
+       "required": [
+        "boc"
+       ],
+       "type": "object"
+      }
+     }
+    },
+    "description": "bag-of-cells serialized to base64 and additional parameters to configure emulation",
+    "required": true
+   },
    "LiteServerSendMessageRequest": {
     "content": {
      "application/json": {
@@ -8341,7 +8382,7 @@
      }
     ],
     "requestBody": {
-     "$ref": "#/components/requestBodies/Boc"
+     "$ref": "#/components/requestBodies/EmulationBoc"
     },
     "responses": {
      "200": {
