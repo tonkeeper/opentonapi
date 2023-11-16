@@ -3,9 +3,11 @@ package sources
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"sync"
 
 	"github.com/tonkeeper/tongo"
+	"github.com/tonkeeper/tongo/abi"
 	"go.uber.org/zap"
 )
 
@@ -16,7 +18,13 @@ type TransactionEvent struct {
 	AccountID tongo.AccountID
 	Lt        uint64
 	TxHash    string
+	// MsgOpName is an operation name taken from the first 4 bytes of tx.InMsg.Body.
+	MsgOpName *abi.MsgOpName
+	// MsgOpCode is an operation code taken from the first 4 bytes of tx.InMsg.Body.
+	MsgOpCode *uint32
 }
+
+type deliveryFn func(eventData []byte, msgOpName *abi.MsgOpName, msgOpCode *uint32)
 
 // TransactionDispatcher implements the fan-out pattern reading a TransactionEvent from a single channel
 // and delivering it to multiple subscribers.
@@ -24,8 +32,8 @@ type TransactionDispatcher struct {
 	logger *zap.Logger
 
 	mu          sync.RWMutex
-	accounts    map[tongo.AccountID]map[subscriberID]DeliveryFn
-	allAccounts map[subscriberID]DeliveryFn
+	accounts    map[tongo.AccountID]map[subscriberID]deliveryFn
+	allAccounts map[subscriberID]deliveryFn
 	options     map[subscriberID]SubscribeToTransactionsOptions
 	currentID   subscriberID
 }
@@ -33,8 +41,8 @@ type TransactionDispatcher struct {
 func NewTransactionDispatcher(logger *zap.Logger) *TransactionDispatcher {
 	return &TransactionDispatcher{
 		logger:      logger,
-		accounts:    map[tongo.AccountID]map[subscriberID]DeliveryFn{},
-		allAccounts: map[subscriberID]DeliveryFn{},
+		accounts:    map[tongo.AccountID]map[subscriberID]deliveryFn{},
+		allAccounts: map[subscriberID]deliveryFn{},
 		options:     map[subscriberID]SubscribeToTransactionsOptions{},
 		currentID:   1,
 	}
@@ -57,14 +65,14 @@ func (disp *TransactionDispatcher) Run(ctx context.Context) chan TransactionEven
 					Lt:        event.Lt,
 					TxHash:    event.TxHash,
 				}
-				disp.dispatch(&tx)
+				disp.dispatch(&tx, event.MsgOpName, event.MsgOpCode)
 			}
 		}
 	}()
 	return ch
 }
 
-func (disp *TransactionDispatcher) dispatch(tx *TransactionEventData) {
+func (disp *TransactionDispatcher) dispatch(tx *TransactionEventData, msgOpName *abi.MsgOpName, msgOpCode *uint32) {
 	eventData, err := json.Marshal(tx)
 	if err != nil {
 		disp.logger.Error("json.Marshal() failed: %v", zap.Error(err))
@@ -74,11 +82,37 @@ func (disp *TransactionDispatcher) dispatch(tx *TransactionEventData) {
 	defer disp.mu.RUnlock()
 
 	for _, deliveryFn := range disp.allAccounts {
-		deliveryFn(eventData)
+		deliveryFn(eventData, msgOpName, msgOpCode)
 	}
 	subscribers := disp.accounts[tx.AccountID]
 	for _, deliveryFn := range subscribers {
-		deliveryFn(eventData)
+		deliveryFn(eventData, msgOpName, msgOpCode)
+	}
+}
+
+func createDeliveryFnBasedOnOptions(fn DeliveryFn, options SubscribeToTransactionsOptions) deliveryFn {
+	if options.AllOperations {
+		return func(eventData []byte, msgOpName *abi.MsgOpName, msgOpCode *uint32) {
+			fn(eventData)
+		}
+	}
+	ops := make(map[abi.MsgOpName]struct{}, len(options.Operations))
+	for _, op := range options.Operations {
+		ops[op] = struct{}{}
+	}
+	return func(eventData []byte, msgOpName *abi.MsgOpName, msgOpCode *uint32) {
+		if msgOpName != nil {
+			if _, ok := ops[*msgOpName]; ok {
+				fn(eventData)
+				return
+			}
+		}
+		if msgOpCode != nil {
+			if _, ok := ops[fmt.Sprintf("0x%08x", *msgOpCode)]; ok {
+				fn(eventData)
+				return
+			}
+		}
 	}
 }
 
@@ -91,19 +125,18 @@ func (disp *TransactionDispatcher) RegisterSubscriber(fn DeliveryFn, options Sub
 	disp.options[id] = options
 
 	if options.AllAccounts {
-		disp.allAccounts[id] = fn
+		disp.allAccounts[id] = createDeliveryFnBasedOnOptions(fn, options)
 		return func() { disp.unsubscribe(id) }
 	}
 
 	for _, account := range options.Accounts {
 		subscribers, ok := disp.accounts[account]
 		if !ok {
-			subscribers = map[subscriberID]DeliveryFn{id: fn}
+			subscribers = make(map[subscriberID]deliveryFn, 1)
 			disp.accounts[account] = subscribers
 		}
-		subscribers[id] = fn
+		subscribers[id] = createDeliveryFnBasedOnOptions(fn, options)
 	}
-
 	return func() { disp.unsubscribe(id) }
 }
 
