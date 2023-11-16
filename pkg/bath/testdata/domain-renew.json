@@ -5,7 +5,7 @@
          "Item": "0:0100de01079eb32b1d469bf16be45d18084282f8f9fbfe01916978a9e45463d1",
          "Renewer": "0:2cf3b5b8c891e517c9addbda1c0386a09ccacbb0e3faf630b51cfc8152325acb"
        },
-       "Success": false,
+       "Success": true,
        "Type": "DnsRenew"
      },
      {

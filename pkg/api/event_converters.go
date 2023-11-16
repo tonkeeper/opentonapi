@@ -354,7 +354,7 @@ func (h *Handler) convertDomainRenew(ctx context.Context, d *bath.DnsRenewAction
 		Description: i18n.T(acceptLanguage, i18n.C{
 			DefaultMessage: &i18n.M{
 				ID:    "domainRenewAction",
-				Other: "Renew domain {{.Value}}",
+				Other: "Update {{.Value}} expiring time",
 			},
 			TemplateData: i18n.Template{"Value": domain},
 		}),

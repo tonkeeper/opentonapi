@@ -32,6 +32,7 @@ var DNSRenewStraw = Straw[BubbleDnsItemRenew]{
 		tx := bubble.Info.(BubbleTx)
 		newAction.Renewer = tx.inputFrom.Address
 		newAction.Item = tx.account.Address
+		newAction.Success = tx.success
 		return nil
 	},
 	SingleChild: &Straw[BubbleDnsItemRenew]{
