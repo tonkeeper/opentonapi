@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/gorilla/websocket"
@@ -129,25 +130,72 @@ func (s *session) sendEvent(e event) {
 	}
 }
 
-func (s *session) subscribeToTransactions(ctx context.Context, params []string) string {
-	accounts := make([]tongo.AccountID, 0, len(params))
-	for _, a := range params {
-		account, err := tongo.ParseAddress(a)
+type accountOptions struct {
+	Account    tongo.AccountID
+	Operations []string
+}
+
+func (opts *accountOptions) AllOperations() bool {
+	return len(opts.Operations) == 0
+}
+
+func processParam(param string) (*accountOptions, error) {
+	parts := strings.Split(param, ";")
+	if len(parts) == 0 {
+		return nil, fmt.Errorf("invalid format: '%v'", param)
+	}
+	if len(parts) == 1 {
+		account, err := tongo.ParseAddress(param)
 		if err != nil {
-			return fmt.Sprintf("failed to process '%v' account: %v", a, err)
+			return nil, fmt.Errorf("failed to process '%v' account: %v", param, err)
 		}
-		accounts = append(accounts, account.ID)
+		return &accountOptions{Account: account.ID}, nil
+	}
+	if len(parts) > 2 {
+		return nil, fmt.Errorf("failed to process '%v' account: invalid format", param)
+	}
+	account, err := tongo.ParseAddress(parts[0])
+	if err != nil {
+		return nil, fmt.Errorf("failed to process '%v' account: %v", param, err)
+	}
+	opParts := strings.Split(parts[1], "=")
+	if len(opParts) != 2 {
+		return nil, fmt.Errorf("failed to process '%v' account: invalid format", param)
+	}
+	if strings.ToLower(opParts[0]) != "operations" {
+		return nil, fmt.Errorf("failed to process '%v' account: invalid format", param)
+	}
+	operations := strings.Split(opParts[1], ",")
+	if len(operations) == 0 || len(opParts[1]) == 0 {
+		return &accountOptions{Account: account.ID}, nil
+	}
+	return &accountOptions{Account: account.ID, Operations: operations}, nil
+}
+
+// subscribeToTransactions subscribes to transactions for the specified accounts.
+// Each param should be in the following format: "<accountID>;operations=<op1>,<op2>,..."
+// if there is no ";operations=" part, a given account will be subscribed to all operations.
+func (s *session) subscribeToTransactions(ctx context.Context, params []string) string {
+	accounts := make(map[tongo.AccountID]accountOptions, len(params))
+	for _, param := range params {
+		options, err := processParam(param)
+		if err != nil {
+			return err.Error()
+		}
+		accounts[options.Account] = *options
 	}
 	if len(s.txSubscriptions)+len(accounts) > s.subscriptionLimit {
 		return fmt.Sprintf("you have reached the limit of %v subscriptions", s.subscriptionLimit)
 	}
 	var counter int
-	for _, account := range accounts {
+	for account, accountOptions := range accounts {
 		if _, ok := s.txSubscriptions[account]; ok {
 			continue
 		}
 		options := sources.SubscribeToTransactionsOptions{
-			Accounts: []tongo.AccountID{account},
+			Accounts:      []tongo.AccountID{account},
+			Operations:    accountOptions.Operations,
+			AllOperations: accountOptions.AllOperations(),
 		}
 		cancel := s.txSource.SubscribeToTransactions(ctx, func(eventData []byte) {
 			s.sendEvent(event{

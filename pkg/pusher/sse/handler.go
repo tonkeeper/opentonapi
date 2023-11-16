@@ -1,6 +1,7 @@
 package sse
 
 import (
+	"fmt"
 	"net/http"
 	"strings"
 	"sync/atomic"
@@ -31,28 +32,42 @@ func NewHandler(txSource sources.TransactionSource, traceSource sources.TraceSou
 	}
 	return &h
 }
+func parseQueryStrings(accountsStr string, operationsStr string) (*sources.SubscribeToTransactionsOptions, error) {
+	allAccounts := false
+	var accounts []tongo.AccountID
 
-func parseAccounts(str string) (*sources.SubscribeToTransactionsOptions, error) {
-	if strings.ToUpper(str) == "ALL" {
-		return &sources.SubscribeToTransactionsOptions{AllAccounts: true}, nil
-	}
-	accountStrings := strings.Split(str, ",")
-	accounts := make([]tongo.AccountID, 0, len(accountStrings))
-	for _, account := range accountStrings {
-		accountID, err := tongo.ParseAddress(account)
-		if err != nil {
-			return nil, err
+	if strings.ToUpper(accountsStr) == "ALL" {
+		allAccounts = true
+	} else {
+		accountStrings := strings.Split(accountsStr, ",")
+		accounts = make([]tongo.AccountID, 0, len(accountStrings))
+		for _, account := range accountStrings {
+			accountID, err := tongo.ParseAddress(account)
+			if err != nil {
+				return nil, err
+			}
+			accounts = append(accounts, accountID.ID)
 		}
-		accounts = append(accounts, accountID.ID)
 	}
-	return &sources.SubscribeToTransactionsOptions{Accounts: accounts}, nil
+	allOps := len(operationsStr) == 0
+	var operations []string
+	if len(operationsStr) > 0 {
+		operations = strings.Split(operationsStr, ",")
+	}
+	options := sources.SubscribeToTransactionsOptions{
+		Accounts:      accounts,
+		AllAccounts:   allAccounts,
+		Operations:    operations,
+		AllOperations: allOps,
+	}
+	return &options, nil
 }
 
 func (h *Handler) SubscribeToTransactions(session *session, request *http.Request) error {
-	accounts := request.URL.Query().Get("accounts")
-	options, err := parseAccounts(accounts)
+	query := request.URL.Query()
+	options, err := parseQueryStrings(query.Get("accounts"), query.Get("operations"))
 	if err != nil {
-		return errors.BadRequest("failed to parse 'accounts' parameter in query")
+		return errors.BadRequest(fmt.Sprintf("failed to parse query parameters: %v", err))
 	}
 	cancelFn := h.txSource.SubscribeToTransactions(request.Context(), func(data []byte) {
 		event := Event{
