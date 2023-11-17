@@ -249,7 +249,7 @@ func (h *Handler) EmulateMessageToAccountEvent(ctx context.Context, request *oas
 	}
 	emulator, err := txemulator.NewTraceBuilder(
 		txemulator.WithAccountsSource(h.storage),
-		txemulator.WithSignatureCheck(),
+		//	txemulator.WithSignatureCheck(), todo: uncomment after @wallet stop using
 		txemulator.WithConfigBase64(configBase64))
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
