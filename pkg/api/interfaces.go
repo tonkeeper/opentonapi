@@ -69,7 +69,7 @@ type storage interface {
 	GetJettonsHoldersCount(ctx context.Context, accountIDs []tongo.AccountID) (map[tongo.AccountID]int32, error)
 	GetJettonHolders(ctx context.Context, jettonMaster tongo.AccountID, limit, offset int) ([]core.JettonHolder, error)
 	GetJettonMasterMetadata(ctx context.Context, master tongo.AccountID) (tongo.JettonMetadata, error)
-	GetJettonMasterData(ctx context.Context, master tongo.AccountID) (abi.GetJettonDataResult, error)
+	GetJettonMasterData(ctx context.Context, master tongo.AccountID) (core.JettonMaster, error)
 	GetAccountJettonsHistory(ctx context.Context, address tongo.AccountID, limit int, beforeLT, startTime, endTime *int64) ([]tongo.Bits256, error)
 	GetAccountJettonHistoryByID(ctx context.Context, address, jettonMaster tongo.AccountID, limit int, beforeLT, startTime, endTime *int64) ([]tongo.Bits256, error)
 

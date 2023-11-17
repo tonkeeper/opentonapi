@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"math/big"
 	"net/http"
 	"strings"
 
@@ -96,6 +95,9 @@ func (h *Handler) GetJettonInfo(ctx context.Context, params oas.GetJettonInfoPar
 	meta := h.GetJettonNormalizedMetadata(ctx, account.ID)
 	metadata := jettonMetadata(account.ID, meta)
 	data, err := h.storage.GetJettonMasterData(ctx, account.ID)
+	if errors.Is(err, core.ErrEntityNotFound) {
+		return nil, toError(http.StatusNotFound, err)
+	}
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
@@ -103,10 +105,9 @@ func (h *Handler) GetJettonInfo(ctx context.Context, params oas.GetJettonInfoPar
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
-	supply := big.Int(data.TotalSupply)
 	return &oas.JettonInfo{
-		Mintable:     data.Mintable != 0,
-		TotalSupply:  supply.String(),
+		Mintable:     data.Mintable,
+		TotalSupply:  data.TotalSupply.String(),
 		Metadata:     metadata,
 		Verification: oas.JettonVerificationType(meta.Verification),
 		HoldersCount: holdersCount[account.ID],

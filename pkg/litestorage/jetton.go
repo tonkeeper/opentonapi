@@ -94,20 +94,24 @@ func (s *LiteStorage) GetJettonMasterMetadata(ctx context.Context, master tongo.
 	return rawMeta, nil
 }
 
-func (s *LiteStorage) GetJettonMasterData(ctx context.Context, master tongo.AccountID) (abi.GetJettonDataResult, error) {
+func (s *LiteStorage) GetJettonMasterData(ctx context.Context, master tongo.AccountID) (core.JettonMaster, error) {
 	timer := prometheus.NewTimer(prometheus.ObserverFunc(func(v float64) {
 		storageTimeHistogramVec.WithLabelValues("get_jetton_master_data").Observe(v)
 	}))
 	defer timer.ObserveDuration()
 	_, value, err := abi.GetJettonData(ctx, s.executor, master)
 	if err != nil {
-		return abi.GetJettonDataResult{}, err
+		return core.JettonMaster{}, err
 	}
 	r, ok := value.(abi.GetJettonDataResult)
 	if !ok {
-		return abi.GetJettonDataResult{}, fmt.Errorf("invalid jetton data result")
+		return core.JettonMaster{}, fmt.Errorf("invalid jetton data result")
 	}
-	return r, nil
+	return core.JettonMaster{
+		Address:     master,
+		TotalSupply: big.Int(r.TotalSupply),
+		Mintable:    r.Mintable != 0,
+	}, nil
 }
 
 func (s *LiteStorage) GetAccountJettonsHistory(ctx context.Context, address tongo.AccountID, limit int, beforeLT, startTime, endTime *int64) ([]tongo.Bits256, error) {
