@@ -1,8 +1,9 @@
 package core
 
 import (
-	"github.com/tonkeeper/tongo/abi"
 	"math/big"
+
+	"github.com/tonkeeper/tongo/abi"
 
 	"github.com/shopspring/decimal"
 	"github.com/tonkeeper/tongo"
@@ -43,4 +44,12 @@ type AccountInfo struct {
 	Name         *string
 	Icon         *string
 	IsScam       *bool
+}
+
+// Contract represents an account but contains a few fields that are only relevant for smart contracts.
+type Contract struct {
+	Status    tlb.AccountStatus
+	Code      []byte
+	Data      []byte
+	Libraries map[tongo.Bits256]*boc.Cell
 }

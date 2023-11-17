@@ -5,7 +5,6 @@ import (
 	"crypto/ed25519"
 	"errors"
 	"fmt"
-	"github.com/tonkeeper/tongo/ton"
 	"math/big"
 	"sync"
 	"time"
@@ -15,7 +14,6 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/puzpuzpuz/xsync/v2"
 	"github.com/sourcegraph/conc/iter"
-	"github.com/tonkeeper/opentonapi/pkg/cache"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
 	"github.com/tonkeeper/tongo/boc"
@@ -23,9 +21,11 @@ import (
 	"github.com/tonkeeper/tongo/liteapi"
 	"github.com/tonkeeper/tongo/tep64"
 	"github.com/tonkeeper/tongo/tlb"
+	"github.com/tonkeeper/tongo/ton"
 	"go.uber.org/zap"
 
 	"github.com/tonkeeper/opentonapi/pkg/blockchain/indexer"
+	"github.com/tonkeeper/opentonapi/pkg/cache"
 	"github.com/tonkeeper/opentonapi/pkg/core"
 )
 
@@ -270,6 +270,19 @@ func (s *LiteStorage) run(ch <-chan indexer.IDandBlock) {
 			}
 		}
 	}
+}
+
+func (s *LiteStorage) GetContract(ctx context.Context, id tongo.AccountID) (*core.Contract, error) {
+	account, err := s.GetRawAccount(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	return &core.Contract{
+		Status:    account.Status,
+		Code:      account.Code,
+		Data:      account.Data,
+		Libraries: account.Libraries,
+	}, nil
 }
 
 // GetRawAccount returns low-level information about an account taken directly from the blockchain.
