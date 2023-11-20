@@ -6,7 +6,7 @@
          "Renewer": "0:2cf3b5b8c891e517c9addbda1c0386a09ccacbb0e3faf630b51cfc8152325acb"
        },
        "Success": true,
-       "Type": "DnsRenew"
+       "Type": "DomainRenew"
      },
      {
        "SmartContractExec": {
