@@ -230,7 +230,7 @@ func (h *Handler) GetAccountEvent(ctx context.Context, params oas.GetAccountEven
 }
 
 func (h *Handler) EmulateMessageToAccountEvent(ctx context.Context, request *oas.EmulateMessageToAccountEventReq, params oas.EmulateMessageToAccountEventParams) (*oas.AccountEvent, error) {
-	c, err := boc.DeserializeSinglRootBase64(request.Boc)
+	c, err := deserializeSingleBoc(request.Boc)
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
 	}
@@ -274,7 +274,7 @@ func (h *Handler) EmulateMessageToAccountEvent(ctx context.Context, request *oas
 }
 
 func (h *Handler) EmulateMessageToEvent(ctx context.Context, request *oas.EmulateMessageToEventReq, params oas.EmulateMessageToEventParams) (*oas.Event, error) {
-	c, err := boc.DeserializeSinglRootBase64(request.Boc)
+	c, err := deserializeSingleBoc(request.Boc)
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
 	}
@@ -322,7 +322,7 @@ func (h *Handler) EmulateMessageToEvent(ctx context.Context, request *oas.Emulat
 }
 
 func (h *Handler) EmulateMessageToTrace(ctx context.Context, request *oas.EmulateMessageToTraceReq, params oas.EmulateMessageToTraceParams) (*oas.Trace, error) {
-	c, err := boc.DeserializeSinglRootBase64(request.Boc)
+	c, err := deserializeSingleBoc(request.Boc)
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
 	}
@@ -407,7 +407,7 @@ func convertEmulationParameters(params []oas.EmulateMessageToWalletReqParamsItem
 }
 
 func (h *Handler) EmulateMessageToWallet(ctx context.Context, request *oas.EmulateMessageToWalletReq, params oas.EmulateMessageToWalletParams) (*oas.MessageConsequences, error) {
-	msgCell, err := boc.DeserializeSinglRootBase64(request.Boc)
+	msgCell, err := deserializeSingleBoc(request.Boc)
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
 	}
