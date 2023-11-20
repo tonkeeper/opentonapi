@@ -17,7 +17,7 @@ type DnsRenewAction struct {
 }
 
 func (b BubbleDnsItemRenew) ToAction() *Action {
-	return &Action{Success: b.Success, Type: DnsRenew, DnsRenew: &b.DnsRenewAction}
+	return &Action{Success: b.Success, Type: DomainRenew, DnsRenew: &b.DnsRenewAction}
 }
 
 func (a DnsRenewAction) SubjectAccounts() []ton.AccountID {

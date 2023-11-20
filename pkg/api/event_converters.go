@@ -684,7 +684,7 @@ func (h *Handler) convertAction(ctx context.Context, viewer *tongo.AccountID, a 
 		action.WithdrawStakeRequest, action.SimplePreview = h.convertWithdrawStakeRequest(a.WithdrawStakeRequest, acceptLanguage.Value, viewer)
 	case bath.WithdrawStake:
 		action.WithdrawStake, action.SimplePreview = h.convertWithdrawStake(a.WithdrawStake, acceptLanguage.Value, viewer)
-	case bath.DnsRenew:
+	case bath.DomainRenew:
 		action.DomainRenew, action.SimplePreview = h.convertDomainRenew(ctx, a.DnsRenew, acceptLanguage.Value, viewer)
 
 	}

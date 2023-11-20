@@ -31,7 +31,7 @@ const (
 	WithdrawStakeRequest  ActionType = "WithdrawStakeRequest"
 	JettonSwap            ActionType = "JettonSwap"
 	AuctionBid            ActionType = "AuctionBid"
-	DnsRenew              ActionType = "DnsRenew"
+	DomainRenew           ActionType = "DomainRenew"
 
 	RefundDnsTg   RefundType = "DNS.tg"
 	RefundDnsTon  RefundType = "DNS.ton"
@@ -247,7 +247,7 @@ func (a Action) ContributeToExtra(account tongo.AccountID) int64 {
 		return 0
 	}
 	switch a.Type {
-	case NftItemTransfer, ContractDeploy, UnSubscription, JettonMint, JettonBurn, WithdrawStakeRequest, DnsRenew: // actions without extra
+	case NftItemTransfer, ContractDeploy, UnSubscription, JettonMint, JettonBurn, WithdrawStakeRequest, DomainRenew: // actions without extra
 		return 0
 	case TonTransfer:
 		return detectDirection(account, a.TonTransfer.Sender, a.TonTransfer.Recipient, a.TonTransfer.Amount)
