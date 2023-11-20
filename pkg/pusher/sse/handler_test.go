@@ -9,6 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/tonkeeper/opentonapi/pkg/pusher/sources"
 	"github.com/tonkeeper/tongo"
+	"github.com/tonkeeper/tongo/ton"
 )
 
 type mockTxSource struct {
@@ -20,7 +21,17 @@ func (m *mockTxSource) SubscribeToTransactions(ctx context.Context, deliveryFn s
 	return nil
 }
 
+type mockMemPoolSource struct {
+	options sources.SubscribeToMempoolOptions
+}
+
+func (m *mockMemPoolSource) SubscribeToMessages(ctx context.Context, deliveryFn sources.DeliveryFn, opts sources.SubscribeToMempoolOptions) (sources.CancelFn, error) {
+	m.options = opts
+	return nil, nil
+}
+
 var _ sources.TransactionSource = (*mockTxSource)(nil)
+var _ sources.MemPoolSource = (*mockMemPoolSource)(nil)
 
 func TestHandler_SubscribeToTransactions(t *testing.T) {
 	tests := []struct {
@@ -63,6 +74,52 @@ func TestHandler_SubscribeToTransactions(t *testing.T) {
 			err := h.SubscribeToTransactions(&session{}, request)
 			require.Nil(t, err)
 			require.Equal(t, tt.wantOptions, source.options)
+		})
+	}
+}
+
+func TestHandler_SubscribeToMessages(t *testing.T) {
+	var testAccount1 = ton.MustParseAccountID("0:0a95e1d4ebe7860d051f8b861730dbdee1440fd11180211914e0089146580351")
+	var testAccount2 = ton.MustParseAccountID("0:0a95e1d4ebe7860d051f8b861730dbdee1440fd11180211914e0089146580352")
+	tests := []struct {
+		name        string
+		url         string
+		wantErr     string
+		wantOptions sources.SubscribeToMempoolOptions
+	}{
+		{
+			name:        "no accounts",
+			url:         "/mempool",
+			wantOptions: sources.SubscribeToMempoolOptions{Accounts: nil},
+		},
+		{
+			name: "emulation is on",
+			url:  "/mempool?accounts=0:0a95e1d4ebe7860d051f8b861730dbdee1440fd11180211914e0089146580351,0:0a95e1d4ebe7860d051f8b861730dbdee1440fd11180211914e0089146580352",
+			wantOptions: sources.SubscribeToMempoolOptions{
+				Accounts: []tongo.AccountID{testAccount1, testAccount2},
+			},
+		},
+		{
+			name:    "bad accounts parameter",
+			url:     "/mempool?accounts=xxx",
+			wantErr: `can't decode address xxx`,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			memPool := &mockMemPoolSource{}
+			h := &Handler{
+				memPool: memPool,
+			}
+			request := httptest.NewRequest(http.MethodGet, tt.url, nil)
+			err := h.SubscribeToMessages(&session{}, request)
+			if tt.wantErr != "" {
+				require.NotNil(t, err)
+				require.Equal(t, err.Error(), tt.wantErr)
+				return
+			}
+			require.Nil(t, err)
+			require.Equal(t, tt.wantOptions, memPool.options)
 		})
 	}
 }

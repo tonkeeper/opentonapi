@@ -8,6 +8,7 @@ import (
 	"github.com/go-faster/errors"
 	"github.com/tonkeeper/opentonapi/pkg/chainstate"
 	"github.com/tonkeeper/opentonapi/pkg/core"
+	"github.com/tonkeeper/opentonapi/pkg/pusher/sources"
 	"github.com/tonkeeper/opentonapi/pkg/rates"
 	"github.com/tonkeeper/opentonapi/pkg/spam"
 	"github.com/tonkeeper/tongo"
@@ -28,17 +29,21 @@ var _ oas.Handler = (*Handler)(nil)
 type Handler struct {
 	logger *zap.Logger
 
-	addressBook    addressBook
-	storage        storage
-	state          chainState
-	msgSender      messageSender
-	executor       executor
-	limits         Limits
-	spamFilter     spamFilter
-	ratesSource    ratesSource
-	metaCache      metadataCache
+	addressBook addressBook
+	storage     storage
+	state       chainState
+	msgSender   messageSender
+	executor    executor
+	limits      Limits
+	spamFilter  spamFilter
+	ratesSource ratesSource
+	metaCache   metadataCache
+	tonConnect  *tonconnect.Server
+
+	// mempoolEmulate contains results of emulation of messages that are in the mempool.
 	mempoolEmulate mempoolEmulate
-	tonConnect     *tonconnect.Server
+	// emulationCh is used to send emulation results to mempool subscribers.
+	emulationCh chan sources.PayloadAndEmulationResults
 
 	// mu protects "dns".
 	mu  sync.Mutex
@@ -60,6 +65,7 @@ type Options struct {
 	spamFilter       spamFilter
 	ratesSource      ratesSource
 	tonConnectSecret string
+	emulationCh      chan sources.PayloadAndEmulationResults
 }
 
 type Option func(o *Options)
@@ -78,6 +84,13 @@ func WithChainState(state chainState) Option {
 func WithAddressBook(book addressBook) Option {
 	return func(o *Options) {
 		o.addressBook = book
+	}
+}
+
+// WithEmulationChannel configures a channel that will be used to send emulation results to mempool subscribers.
+func WithEmulationChannel(ch chan sources.PayloadAndEmulationResults) Option {
+	return func(o *Options) {
+		o.emulationCh = ch
 	}
 }
 
@@ -143,6 +156,17 @@ func NewHandler(logger *zap.Logger, opts ...Option) (*Handler, error) {
 	if options.executor == nil {
 		return nil, fmt.Errorf("executor is not configured")
 	}
+	if options.emulationCh == nil {
+		options.emulationCh = make(chan sources.PayloadAndEmulationResults, 100)
+		go func() {
+			for {
+				select {
+				case <-options.emulationCh:
+					// drop it
+				}
+			}
+		}()
+	}
 	tonConnect, err := tonconnect.NewTonConnect(options.executor, options.tonConnectSecret)
 	if err != nil {
 		return nil, fmt.Errorf("failed to init tonconnect")
@@ -156,6 +180,7 @@ func NewHandler(logger *zap.Logger, opts ...Option) (*Handler, error) {
 		executor:    options.executor,
 		limits:      options.limits,
 		spamFilter:  options.spamFilter,
+		emulationCh: options.emulationCh,
 		ratesSource: rates.InitCalculator(options.ratesSource),
 		metaCache: metadataCache{
 			collectionsCache: cache.NewLRUCache[tongo.AccountID, tep64.Metadata](10000, "nft_metadata_cache"),

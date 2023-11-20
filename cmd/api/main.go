@@ -44,7 +44,7 @@ func main() {
 	}
 	mempool := sources.NewMemPool(log)
 	// mempoolChannel receives a copy of any payload that goes through our API method /v2/blockchain/message
-	mempoolChannel := mempool.Run(context.TODO())
+	mempoolChannel, emulationCh := mempool.Run(context.TODO())
 
 	msgSender, err := blockchain.NewMsgSender(cfg.App.LiteServers, []chan []byte{mempoolChannel})
 	if err != nil {
@@ -57,6 +57,7 @@ func main() {
 		api.WithExecutor(storage),
 		api.WithMessageSender(msgSender),
 		api.WithSpamFilter(spamFilter),
+		api.WithEmulationChannel(emulationCh),
 		api.WithTonConnectSecret(cfg.TonConnect.Secret),
 	)
 	if err != nil {

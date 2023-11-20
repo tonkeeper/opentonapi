@@ -94,10 +94,10 @@ func hasInterface(interfacesList []abi.ContractInterface, name abi.ContractInter
 	return false
 }
 
-func visit(trace *Trace, fn func(trace *Trace)) {
+func Visit(trace *Trace, fn func(trace *Trace)) {
 	fn(trace)
 	for _, child := range trace.Children {
-		visit(child, fn)
+		Visit(child, fn)
 	}
 }
 
@@ -112,7 +112,7 @@ func CollectAdditionalInfo(ctx context.Context, infoSource InformationSource, tr
 	var getGemsContracts []tongo.AccountID
 	var basicNftSale []tongo.AccountID
 	var stonfiPoolIDs []tongo.AccountID
-	visit(trace, func(trace *Trace) {
+	Visit(trace, func(trace *Trace) {
 		// when we emulate a trace,
 		// we construct "trace.AdditionalInfo" in emulatedTreeToTrace for all accounts the trace touches.
 		// moreover, some accounts change their states and some of them are not exist in the blockchain,
@@ -153,7 +153,7 @@ func CollectAdditionalInfo(ctx context.Context, infoSource InformationSource, tr
 	if err != nil {
 		return err
 	}
-	visit(trace, func(trace *Trace) {
+	Visit(trace, func(trace *Trace) {
 		// when we emulate a trace,
 		// we construct "trace.AdditionalInfo" in emulatedTreeToTrace for all accounts the trace touches.
 		// moreover, some accounts change their states and some of them are not exist in the blockchain,

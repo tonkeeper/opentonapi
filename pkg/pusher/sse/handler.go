@@ -82,6 +82,19 @@ func (h *Handler) SubscribeToTransactions(session *session, request *http.Reques
 }
 
 func (h *Handler) SubscribeToMessages(session *session, request *http.Request) error {
+	accountsStr := request.URL.Query().Get("accounts")
+	var accounts []tongo.AccountID
+	if len(accountsStr) > 0 {
+		accountStrings := strings.Split(accountsStr, ",")
+		accounts = make([]tongo.AccountID, 0, len(accountStrings))
+		for _, account := range accountStrings {
+			accountID, err := tongo.ParseAddress(account)
+			if err != nil {
+				return err
+			}
+			accounts = append(accounts, accountID.ID)
+		}
+	}
 	cancelFn, err := h.memPool.SubscribeToMessages(request.Context(), func(data []byte) {
 		event := Event{
 			Name:    events.MempoolEvent,
@@ -89,7 +102,7 @@ func (h *Handler) SubscribeToMessages(session *session, request *http.Request) e
 			Data:    data,
 		}
 		session.SendEvent(event)
-	})
+	}, sources.SubscribeToMempoolOptions{Accounts: accounts})
 	if err != nil {
 		return err
 	}

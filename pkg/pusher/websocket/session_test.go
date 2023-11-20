@@ -193,12 +193,56 @@ func Test_processParam(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			options, err := processParam(tt.param)
+			options, err := processAccountTxParam(tt.param)
 			if tt.wantErr {
 				require.Error(t, err)
 				return
 			}
 			require.NoError(t, err)
+			require.Equal(t, tt.want, options)
+		})
+	}
+}
+
+func Test_mempoolParamsToOptions(t *testing.T) {
+	var testAccount = ton.MustParseAccountID("0:0a95e1d4ebe7860d051f8b861730dbdee1440fd11180211914e0089146580351")
+	tests := []struct {
+		name    string
+		params  []string
+		wantErr string
+		want    *sources.SubscribeToMempoolOptions
+	}{
+		{
+			name:   "empty params",
+			params: []string{},
+			want:   &sources.SubscribeToMempoolOptions{Accounts: nil},
+		},
+		{
+			name: "accounts set",
+			params: []string{
+				"accounts=0:0a95e1d4ebe7860d051f8b861730dbdee1440fd11180211914e0089146580351",
+			},
+			want: &sources.SubscribeToMempoolOptions{
+				Accounts: []tongo.AccountID{testAccount},
+			},
+		},
+		{
+			name: "bad params",
+			params: []string{
+				"accounts=0:0a95e1d4ebe7860d051f8b861730dbdee1440fd11180211914e0089146580351",
+				"accounts=[]",
+			},
+			wantErr: `failed to process params: supported only one parameter`,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			options, err := mempoolParamsToOptions(tt.params)
+			if tt.wantErr != "" {
+				require.Equal(t, tt.wantErr, err.Error())
+				return
+			}
+			require.Nil(t, err)
 			require.Equal(t, tt.want, options)
 		})
 	}

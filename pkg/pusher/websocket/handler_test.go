@@ -25,11 +25,11 @@ func (m *mockTxSource) SubscribeToTransactions(ctx context.Context, deliveryFn s
 }
 
 type mockMemPool struct {
-	OnSubscribeToMessages func(ctx context.Context, deliveryFn sources.DeliveryFn) (sources.CancelFn, error)
+	OnSubscribeToMessages func(ctx context.Context, deliveryFn sources.DeliveryFn, opts sources.SubscribeToMempoolOptions) (sources.CancelFn, error)
 }
 
-func (m *mockMemPool) SubscribeToMessages(ctx context.Context, deliveryFn sources.DeliveryFn) (sources.CancelFn, error) {
-	return m.OnSubscribeToMessages(ctx, deliveryFn)
+func (m *mockMemPool) SubscribeToMessages(ctx context.Context, deliveryFn sources.DeliveryFn, opts sources.SubscribeToMempoolOptions) (sources.CancelFn, error) {
+	return m.OnSubscribeToMessages(ctx, deliveryFn, opts)
 }
 
 type mockTraceSource struct {
@@ -58,7 +58,7 @@ func TestHandler_UnsubscribeWhenConnectionIsClosed(t *testing.T) {
 	var memPoolSubscribed atomic.Bool   // to make "go test -race" happy
 	var memPoolUnsubscribed atomic.Bool // to make "go test -race" happy
 	mempool := &mockMemPool{
-		OnSubscribeToMessages: func(ctx context.Context, deliveryFn sources.DeliveryFn) (sources.CancelFn, error) {
+		OnSubscribeToMessages: func(ctx context.Context, deliveryFn sources.DeliveryFn, opts sources.SubscribeToMempoolOptions) (sources.CancelFn, error) {
 			memPoolSubscribed.Store(true)
 			return func() {
 				memPoolUnsubscribed.Store(true)
@@ -160,7 +160,7 @@ func TestHandler_UnsubscribeMethods(t *testing.T) {
 	var memPoolSubscribed atomic.Bool   // to make "go test -race" happy
 	var memPoolUnsubscribed atomic.Bool // to make "go test -race" happy
 	mempool := &mockMemPool{
-		OnSubscribeToMessages: func(ctx context.Context, deliveryFn sources.DeliveryFn) (sources.CancelFn, error) {
+		OnSubscribeToMessages: func(ctx context.Context, deliveryFn sources.DeliveryFn, opts sources.SubscribeToMempoolOptions) (sources.CancelFn, error) {
 			memPoolSubscribed.Store(true)
 			return func() {
 				memPoolUnsubscribed.Store(true)

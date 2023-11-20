@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/shopspring/decimal"
+	"github.com/tonkeeper/opentonapi/pkg/pusher/sources"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
 	"github.com/tonkeeper/tongo/boc"
@@ -520,7 +521,7 @@ func (h *Handler) addToMempool(bytesBoc []byte, shardAccount map[tongo.AccountID
 	}
 	config, err := h.storage.TrimmedConfigBase64()
 	if err != nil {
-		return nil, toError(http.StatusInternalServerError, err)
+		return shardAccount, err
 	}
 	emulator, err := txemulator.NewTraceBuilder(txemulator.WithAccountsSource(h.storage),
 		txemulator.WithAccountsMap(shardAccount),
@@ -538,14 +539,9 @@ func (h *Handler) addToMempool(bytesBoc []byte, shardAccount map[tongo.AccountID
 		return shardAccount, err
 	}
 	accounts := make(map[tongo.AccountID]struct{})
-	var traverse func(*core.Trace)
-	traverse = func(node *core.Trace) {
+	core.Visit(trace, func(node *core.Trace) {
 		accounts[node.Account] = struct{}{}
-		for _, child := range node.Children {
-			traverse(child)
-		}
-	}
-	traverse(trace)
+	})
 	hash, err := msgCell[0].Hash()
 	if err != nil {
 		return shardAccount, err
@@ -557,6 +553,10 @@ func (h *Handler) addToMempool(bytesBoc []byte, shardAccount map[tongo.AccountID
 		traces, _ := h.mempoolEmulate.accountsTraces.Get(account)
 		traces = slices.Insert(traces, 0, hex.EncodeToString(hash))
 		h.mempoolEmulate.accountsTraces.Set(account, traces, cache.WithExpiration(time.Second*time.Duration(ttl)))
+	}
+	h.emulationCh <- sources.PayloadAndEmulationResults{
+		Payload:  bytesBoc,
+		Accounts: accounts,
 	}
 	return newShardAccount, nil
 }
