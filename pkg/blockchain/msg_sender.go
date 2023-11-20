@@ -13,7 +13,7 @@ import (
 
 // MsgSender provides a method to send a message to the blockchain.
 type MsgSender struct {
-	mu     sync.RWMutex
+	mu     sync.Mutex
 	client *liteapi.Client
 	// channels is used to send a copy of payload before sending it to the blockchain.
 	channels []chan []byte
@@ -49,18 +49,27 @@ func NewMsgSender(servers []config.LiteServer, channels []chan []byte) (*MsgSend
 	return msgSender, nil
 }
 
-func (ms *MsgSender) sendMsgsFromMempool() {
+func (ms *MsgSender) payloadsFromTheQueue() [][]byte {
 	now := time.Now().Unix()
 
-	ms.mu.RLock()
-	defer ms.mu.RUnlock()
+	ms.mu.Lock()
+	defer ms.mu.Unlock()
 
+	var msgs [][]byte
 	for boc, createdTime := range ms.messages {
 		payload, err := base64.StdEncoding.DecodeString(boc)
 		if err != nil || now-createdTime > 5*60 { // ttl is 5 min
 			delete(ms.messages, boc)
 			continue
 		}
+		msgs = append(msgs, payload)
+	}
+	return msgs
+}
+
+func (ms *MsgSender) sendMsgsFromMempool() {
+	payloads := ms.payloadsFromTheQueue()
+	for _, payload := range payloads {
 		if err := ms.SendMessage(context.Background(), payload); err != nil {
 			continue
 		}
@@ -81,8 +90,8 @@ func (ms *MsgSender) SendMessage(ctx context.Context, payload []byte) error {
 
 func (ms *MsgSender) MsgsBocAddToMempool(bocMsgs []string) {
 	now := time.Now().Unix()
-	ms.mu.RLock()
-	defer ms.mu.RUnlock()
+	ms.mu.Lock()
+	defer ms.mu.Unlock()
 
 	for _, boc := range bocMsgs {
 		ms.messages[boc] = now
