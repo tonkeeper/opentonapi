@@ -7,8 +7,10 @@ import (
 )
 
 type SubscribeToTransactionsOptions struct {
-	AllAccounts bool
-	Accounts    []tongo.AccountID
+	Accounts      []tongo.AccountID
+	AllAccounts   bool
+	Operations    []string
+	AllOperations bool
 }
 
 // DeliveryFn describes a callback that will be triggered once an event happens.
