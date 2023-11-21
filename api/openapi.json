@@ -6022,6 +6022,35 @@
     ]
    }
   },
+  "/v2/blockchain/blocks/{block_id}/config": {
+   "get": {
+    "description": "Get blockchain config from a specific block, if present.",
+    "operationId": "getBlockchainConfigFromBlock",
+    "parameters": [
+     {
+      "$ref": "#/components/parameters/blockchainBlockIDParameter"
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/BlockchainConfig"
+        }
+       }
+      },
+      "description": "blockchain config"
+     },
+     "default": {
+      "$ref": "#/components/responses/Error"
+     }
+    },
+    "tags": [
+     "Blockchain"
+    ]
+   }
+  },
   "/v2/blockchain/blocks/{block_id}/config/raw": {
    "get": {
     "description": "Get raw blockchain config from a specific block, if present.",

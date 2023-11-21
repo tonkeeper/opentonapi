@@ -4294,6 +4294,72 @@ func decodeGetBlockchainBlockTransactionsParams(args [1]string, argsEscaped bool
 	return params, nil
 }
 
+// GetBlockchainConfigFromBlockParams is parameters of getBlockchainConfigFromBlock operation.
+type GetBlockchainConfigFromBlockParams struct {
+	// Block ID.
+	BlockID string
+}
+
+func unpackGetBlockchainConfigFromBlockParams(packed middleware.Parameters) (params GetBlockchainConfigFromBlockParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "block_id",
+			In:   "path",
+		}
+		params.BlockID = packed[key].(string)
+	}
+	return params
+}
+
+func decodeGetBlockchainConfigFromBlockParams(args [1]string, argsEscaped bool, r *http.Request) (params GetBlockchainConfigFromBlockParams, _ error) {
+	// Decode path: block_id.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "block_id",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.BlockID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "block_id",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
 // GetBlockchainMasterchainShardsParams is parameters of getBlockchainMasterchainShards operation.
 type GetBlockchainMasterchainShardsParams struct {
 	// Masterchain block seqno.

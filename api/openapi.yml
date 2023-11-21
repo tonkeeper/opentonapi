@@ -86,6 +86,23 @@ paths:
                 $ref: '#/components/schemas/RawBlockchainConfig'
         'default':
           $ref: '#/components/responses/Error'
+  /v2/blockchain/blocks/{block_id}/config:
+    get:
+      description: Get blockchain config from a specific block, if present.
+      operationId: getBlockchainConfigFromBlock
+      tags:
+        - Blockchain
+      parameters:
+        - $ref: '#/components/parameters/blockchainBlockIDParameter'
+      responses:
+        '200':
+          description: blockchain config
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BlockchainConfig'
+        'default':
+          $ref: '#/components/responses/Error'
   /v2/blockchain/transactions/{transaction_id}:
     get:
       description: Get transaction data

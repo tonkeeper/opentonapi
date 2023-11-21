@@ -5,8 +5,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/tonkeeper/tongo/tvm"
 	"net/http"
+
+	"github.com/tonkeeper/tongo/tvm"
 
 	"github.com/tonkeeper/opentonapi/internal/g"
 	"github.com/tonkeeper/opentonapi/pkg/core"
@@ -122,6 +123,35 @@ func (h *Handler) GetBlockchainMasterchainHead(ctx context.Context) (*oas.Blockc
 
 func (h *Handler) GetBlockchainConfig(ctx context.Context) (*oas.BlockchainConfig, error) {
 	cfg, err := h.storage.GetLastConfig(ctx)
+	if err != nil {
+		return nil, toError(http.StatusInternalServerError, err)
+	}
+	c := boc.NewCell()
+	err = tlb.Marshal(c, cfg)
+	if err != nil {
+		return nil, toError(http.StatusInternalServerError, err)
+	}
+	raw, err := c.ToBocString()
+	if err != nil {
+		return nil, toError(http.StatusInternalServerError, err)
+	}
+	out, err := convertConfig(h.logger, cfg)
+	if err != nil {
+		return nil, toError(http.StatusInternalServerError, err)
+	}
+	out.Raw = raw
+	return out, nil
+}
+
+func (h *Handler) GetBlockchainConfigFromBlock(ctx context.Context, params oas.GetBlockchainConfigFromBlockParams) (*oas.BlockchainConfig, error) {
+	blockID, err := ton.ParseBlockID(params.BlockID)
+	if err != nil {
+		return nil, toError(http.StatusBadRequest, err)
+	}
+	cfg, err := h.storage.GetConfigFromBlock(ctx, blockID)
+	if err != nil && errors.Is(err, core.ErrNotKeyBlock) {
+		return nil, toError(http.StatusNotFound, err)
+	}
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}

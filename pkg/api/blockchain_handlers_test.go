@@ -105,3 +105,51 @@ func TestHandler_GetRawBlockchainConfigFromBlock(t *testing.T) {
 		})
 	}
 }
+
+func TestHandler_GetBlockchainConfigFromBlock(t *testing.T) {
+	var servers []config.LiteServer
+	if env, ok := os.LookupEnv("LITE_SERVERS"); ok {
+		var err error
+		servers, err = config.ParseLiteServersEnvVar(env)
+		require.Nil(t, err)
+	}
+	tests := []struct {
+		name              string
+		params            oas.GetBlockchainConfigFromBlockParams
+		wantErr           string
+		wantErrStatusCode int
+	}{
+		{
+			name: "all good",
+			params: oas.GetBlockchainConfigFromBlockParams{
+				BlockID: "(-1,8000000000000000,34281411)",
+			},
+		},
+		{
+			name: "not a key block",
+			params: oas.GetBlockchainConfigFromBlockParams{
+				BlockID: "(-1,8000000000000000,34281410)",
+			},
+			wantErr:           "block must be a key block",
+			wantErrStatusCode: 404,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			logger := zap.L()
+			liteStorage, err := litestorage.NewLiteStorage(logger, litestorage.WithLiteServers(servers))
+			require.Nil(t, err)
+			h, err := NewHandler(logger, WithStorage(liteStorage), WithExecutor(liteStorage))
+			require.Nil(t, err)
+			_, err = h.GetBlockchainConfigFromBlock(context.Background(), tt.params)
+			if len(tt.wantErr) > 0 {
+				var oasErr *oas.ErrorStatusCode
+				errors.As(err, &oasErr)
+				require.Equal(t, oasErr.StatusCode, tt.wantErrStatusCode)
+				require.Equal(t, oasErr.Response.Error, tt.wantErr)
+				return
+			}
+			require.Nil(t, err)
+		})
+	}
+}

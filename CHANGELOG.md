@@ -24,3 +24,6 @@
 
 ### 2023-10-01
 - Tonapi sdk
+
+### 2023-10-21
+- Add `/v2/blockchain/blocks/{block_id}/config` method which returns a blockchain config for a specific block.

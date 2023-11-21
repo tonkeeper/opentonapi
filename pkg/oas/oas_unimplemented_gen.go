@@ -305,6 +305,15 @@ func (UnimplementedHandler) GetBlockchainConfig(ctx context.Context) (r *Blockch
 	return r, ht.ErrNotImplemented
 }
 
+// GetBlockchainConfigFromBlock implements getBlockchainConfigFromBlock operation.
+//
+// Get blockchain config from a specific block, if present.
+//
+// GET /v2/blockchain/blocks/{block_id}/config
+func (UnimplementedHandler) GetBlockchainConfigFromBlock(ctx context.Context, params GetBlockchainConfigFromBlockParams) (r *BlockchainConfig, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // GetBlockchainMasterchainHead implements getBlockchainMasterchainHead operation.
 //
 // Get last known masterchain block.
