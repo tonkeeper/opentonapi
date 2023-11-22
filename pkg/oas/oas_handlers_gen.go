@@ -3981,12 +3981,12 @@ func (s *Server) handleGetBlockchainConfigRequest(args [0]string, argsEscaped bo
 //
 // Get blockchain config from a specific block, if present.
 //
-// GET /v2/blockchain/blocks/{block_id}/config
+// GET /v2/blockchain/masterchain/{masterchain_seqno}/config
 func (s *Server) handleGetBlockchainConfigFromBlockRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getBlockchainConfigFromBlock"),
 		semconv.HTTPMethodKey.String("GET"),
-		semconv.HTTPRouteKey.String("/v2/blockchain/blocks/{block_id}/config"),
+		semconv.HTTPRouteKey.String("/v2/blockchain/masterchain/{masterchain_seqno}/config"),
 	}
 
 	// Start a span for this request.
@@ -4040,9 +4040,9 @@ func (s *Server) handleGetBlockchainConfigFromBlockRequest(args [1]string, argsE
 			Body:             nil,
 			Params: middleware.Parameters{
 				{
-					Name: "block_id",
+					Name: "masterchain_seqno",
 					In:   "path",
-				}: params.BlockID,
+				}: params.MasterchainSeqno,
 			},
 			Raw: r,
 		}
@@ -7289,12 +7289,12 @@ func (s *Server) handleGetRawBlockchainConfigRequest(args [0]string, argsEscaped
 //
 // Get raw blockchain config from a specific block, if present.
 //
-// GET /v2/blockchain/blocks/{block_id}/config/raw
+// GET /v2/blockchain/masterchain/{masterchain_seqno}/config/raw
 func (s *Server) handleGetRawBlockchainConfigFromBlockRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getRawBlockchainConfigFromBlock"),
 		semconv.HTTPMethodKey.String("GET"),
-		semconv.HTTPRouteKey.String("/v2/blockchain/blocks/{block_id}/config/raw"),
+		semconv.HTTPRouteKey.String("/v2/blockchain/masterchain/{masterchain_seqno}/config/raw"),
 	}
 
 	// Start a span for this request.
@@ -7348,9 +7348,9 @@ func (s *Server) handleGetRawBlockchainConfigFromBlockRequest(args [1]string, ar
 			Body:             nil,
 			Params: middleware.Parameters{
 				{
-					Name: "block_id",
+					Name: "masterchain_seqno",
 					In:   "path",
-				}: params.BlockID,
+				}: params.MasterchainSeqno,
 			},
 			Raw: r,
 		}

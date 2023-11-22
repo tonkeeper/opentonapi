@@ -223,7 +223,7 @@ type Invoker interface {
 	//
 	// Get blockchain config from a specific block, if present.
 	//
-	// GET /v2/blockchain/blocks/{block_id}/config
+	// GET /v2/blockchain/masterchain/{masterchain_seqno}/config
 	GetBlockchainConfigFromBlock(ctx context.Context, params GetBlockchainConfigFromBlockParams) (*BlockchainConfig, error)
 	// GetBlockchainMasterchainHead invokes getBlockchainMasterchainHead operation.
 	//
@@ -396,7 +396,7 @@ type Invoker interface {
 	//
 	// Get raw blockchain config from a specific block, if present.
 	//
-	// GET /v2/blockchain/blocks/{block_id}/config/raw
+	// GET /v2/blockchain/masterchain/{masterchain_seqno}/config/raw
 	GetRawBlockchainConfigFromBlock(ctx context.Context, params GetRawBlockchainConfigFromBlockParams) (*RawBlockchainConfig, error)
 	// GetRawConfig invokes getRawConfig operation.
 	//
@@ -4228,7 +4228,7 @@ func (c *Client) sendGetBlockchainConfig(ctx context.Context) (res *BlockchainCo
 //
 // Get blockchain config from a specific block, if present.
 //
-// GET /v2/blockchain/blocks/{block_id}/config
+// GET /v2/blockchain/masterchain/{masterchain_seqno}/config
 func (c *Client) GetBlockchainConfigFromBlock(ctx context.Context, params GetBlockchainConfigFromBlockParams) (*BlockchainConfig, error) {
 	res, err := c.sendGetBlockchainConfigFromBlock(ctx, params)
 	return res, err
@@ -4238,7 +4238,7 @@ func (c *Client) sendGetBlockchainConfigFromBlock(ctx context.Context, params Ge
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getBlockchainConfigFromBlock"),
 		semconv.HTTPMethodKey.String("GET"),
-		semconv.HTTPRouteKey.String("/v2/blockchain/blocks/{block_id}/config"),
+		semconv.HTTPRouteKey.String("/v2/blockchain/masterchain/{masterchain_seqno}/config"),
 	}
 
 	// Run stopwatch.
@@ -4271,16 +4271,16 @@ func (c *Client) sendGetBlockchainConfigFromBlock(ctx context.Context, params Ge
 	stage = "BuildURL"
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [3]string
-	pathParts[0] = "/v2/blockchain/blocks/"
+	pathParts[0] = "/v2/blockchain/masterchain/"
 	{
-		// Encode "block_id" parameter.
+		// Encode "masterchain_seqno" parameter.
 		e := uri.NewPathEncoder(uri.PathEncoderConfig{
-			Param:   "block_id",
+			Param:   "masterchain_seqno",
 			Style:   uri.PathStyleSimple,
 			Explode: false,
 		})
 		if err := func() error {
-			return e.EncodeValue(conv.StringToString(params.BlockID))
+			return e.EncodeValue(conv.Int32ToString(params.MasterchainSeqno))
 		}(); err != nil {
 			return res, errors.Wrap(err, "encode path")
 		}
@@ -7079,7 +7079,7 @@ func (c *Client) sendGetRawBlockchainConfig(ctx context.Context) (res *RawBlockc
 //
 // Get raw blockchain config from a specific block, if present.
 //
-// GET /v2/blockchain/blocks/{block_id}/config/raw
+// GET /v2/blockchain/masterchain/{masterchain_seqno}/config/raw
 func (c *Client) GetRawBlockchainConfigFromBlock(ctx context.Context, params GetRawBlockchainConfigFromBlockParams) (*RawBlockchainConfig, error) {
 	res, err := c.sendGetRawBlockchainConfigFromBlock(ctx, params)
 	return res, err
@@ -7089,7 +7089,7 @@ func (c *Client) sendGetRawBlockchainConfigFromBlock(ctx context.Context, params
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getRawBlockchainConfigFromBlock"),
 		semconv.HTTPMethodKey.String("GET"),
-		semconv.HTTPRouteKey.String("/v2/blockchain/blocks/{block_id}/config/raw"),
+		semconv.HTTPRouteKey.String("/v2/blockchain/masterchain/{masterchain_seqno}/config/raw"),
 	}
 
 	// Run stopwatch.
@@ -7122,16 +7122,16 @@ func (c *Client) sendGetRawBlockchainConfigFromBlock(ctx context.Context, params
 	stage = "BuildURL"
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [3]string
-	pathParts[0] = "/v2/blockchain/blocks/"
+	pathParts[0] = "/v2/blockchain/masterchain/"
 	{
-		// Encode "block_id" parameter.
+		// Encode "masterchain_seqno" parameter.
 		e := uri.NewPathEncoder(uri.PathEncoderConfig{
-			Param:   "block_id",
+			Param:   "masterchain_seqno",
 			Style:   uri.PathStyleSimple,
 			Explode: false,
 		})
 		if err := func() error {
-			return e.EncodeValue(conv.StringToString(params.BlockID))
+			return e.EncodeValue(conv.Int32ToString(params.MasterchainSeqno))
 		}(); err != nil {
 			return res, errors.Wrap(err, "encode path")
 		}

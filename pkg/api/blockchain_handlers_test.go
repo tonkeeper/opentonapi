@@ -41,7 +41,7 @@ func TestHandler_GetRawBlockchainConfigFromBlock(t *testing.T) {
 		{
 			name: "all good",
 			params: oas.GetRawBlockchainConfigFromBlockParams{
-				BlockID: "(-1,8000000000000000,4645003)",
+				MasterchainSeqno: 4645003,
 			},
 			wantKeys: map[string]struct{}{
 				"config_param0":  {},
@@ -75,7 +75,7 @@ func TestHandler_GetRawBlockchainConfigFromBlock(t *testing.T) {
 		{
 			name: "not a key block",
 			params: oas.GetRawBlockchainConfigFromBlockParams{
-				BlockID: "(-1,8000000000000000,4645004)",
+				MasterchainSeqno: 4645004,
 			},
 			wantErr:           "block must be a key block",
 			wantErrStatusCode: 404,
@@ -122,13 +122,13 @@ func TestHandler_GetBlockchainConfigFromBlock(t *testing.T) {
 		{
 			name: "all good",
 			params: oas.GetBlockchainConfigFromBlockParams{
-				BlockID: "(-1,8000000000000000,34281411)",
+				MasterchainSeqno: 34281411,
 			},
 		},
 		{
 			name: "not a key block",
 			params: oas.GetBlockchainConfigFromBlockParams{
-				BlockID: "(-1,8000000000000000,34281410)",
+				MasterchainSeqno: 34281410,
 			},
 			wantErr:           "block must be a key block",
 			wantErrStatusCode: 404,

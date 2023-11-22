@@ -144,9 +144,10 @@ func (h *Handler) GetBlockchainConfig(ctx context.Context) (*oas.BlockchainConfi
 }
 
 func (h *Handler) GetBlockchainConfigFromBlock(ctx context.Context, params oas.GetBlockchainConfigFromBlockParams) (*oas.BlockchainConfig, error) {
-	blockID, err := ton.ParseBlockID(params.BlockID)
-	if err != nil {
-		return nil, toError(http.StatusBadRequest, err)
+	blockID := ton.BlockID{
+		Workchain: -1,
+		Shard:     0x8000000000000000,
+		Seqno:     uint32(params.MasterchainSeqno),
 	}
 	cfg, err := h.storage.GetConfigFromBlock(ctx, blockID)
 	if err != nil && errors.Is(err, core.ErrNotKeyBlock) {
@@ -202,9 +203,10 @@ func (h *Handler) GetRawBlockchainConfig(ctx context.Context) (r *oas.RawBlockch
 }
 
 func (h *Handler) GetRawBlockchainConfigFromBlock(ctx context.Context, params oas.GetRawBlockchainConfigFromBlockParams) (r *oas.RawBlockchainConfig, _ error) {
-	blockID, err := ton.ParseBlockID(params.BlockID)
-	if err != nil {
-		return nil, toError(http.StatusBadRequest, err)
+	blockID := ton.BlockID{
+		Workchain: -1,
+		Shard:     0x8000000000000000,
+		Seqno:     uint32(params.MasterchainSeqno),
 	}
 	cfg, err := h.storage.GetConfigFromBlock(ctx, blockID)
 	if err != nil && errors.Is(err, core.ErrNotKeyBlock) {

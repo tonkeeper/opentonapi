@@ -309,7 +309,7 @@ func (UnimplementedHandler) GetBlockchainConfig(ctx context.Context) (r *Blockch
 //
 // Get blockchain config from a specific block, if present.
 //
-// GET /v2/blockchain/blocks/{block_id}/config
+// GET /v2/blockchain/masterchain/{masterchain_seqno}/config
 func (UnimplementedHandler) GetBlockchainConfigFromBlock(ctx context.Context, params GetBlockchainConfigFromBlockParams) (r *BlockchainConfig, _ error) {
 	return r, ht.ErrNotImplemented
 }
@@ -566,7 +566,7 @@ func (UnimplementedHandler) GetRawBlockchainConfig(ctx context.Context) (r *RawB
 //
 // Get raw blockchain config from a specific block, if present.
 //
-// GET /v2/blockchain/blocks/{block_id}/config/raw
+// GET /v2/blockchain/masterchain/{masterchain_seqno}/config/raw
 func (UnimplementedHandler) GetRawBlockchainConfigFromBlock(ctx context.Context, params GetRawBlockchainConfigFromBlockParams) (r *RawBlockchainConfig, _ error) {
 	return r, ht.ErrNotImplemented
 }

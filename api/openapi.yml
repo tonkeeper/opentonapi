@@ -35,14 +35,7 @@ paths:
       tags:
           - Blockchain
       parameters:
-        - name: masterchain_seqno
-          in: path
-          required: true
-          description: "masterchain block seqno"
-          schema:
-            type: integer
-            format: int32
-            example: 123456
+        - $ref: '#/components/parameters/masterchainSeqno'
       responses:
           '200':
             description: blockchain block shards
@@ -52,6 +45,40 @@ paths:
                   $ref: '#/components/schemas/BlockchainBlockShards'
           'default':
             $ref: '#/components/responses/Error'
+  /v2/blockchain/masterchain/{masterchain_seqno}/config:
+    get:
+      description: Get blockchain config from a specific block, if present.
+      operationId: getBlockchainConfigFromBlock
+      tags:
+        - Blockchain
+      parameters:
+        - $ref: '#/components/parameters/masterchainSeqno'
+      responses:
+        '200':
+          description: blockchain config
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BlockchainConfig'
+        'default':
+          $ref: '#/components/responses/Error'
+  /v2/blockchain/masterchain/{masterchain_seqno}/config/raw:
+    get:
+      description: Get raw blockchain config from a specific block, if present.
+      operationId: getRawBlockchainConfigFromBlock
+      tags:
+        - Blockchain
+      parameters:
+        - $ref: '#/components/parameters/masterchainSeqno'
+      responses:
+        '200':
+          description: blockchain config
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RawBlockchainConfig'
+        'default':
+          $ref: '#/components/responses/Error'
   /v2/blockchain/blocks/{block_id}/transactions:
     get:
       description: Get transactions from block
@@ -67,40 +94,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Transactions'
-        'default':
-          $ref: '#/components/responses/Error'
-  /v2/blockchain/blocks/{block_id}/config/raw:
-    get:
-      description: Get raw blockchain config from a specific block, if present.
-      operationId: getRawBlockchainConfigFromBlock
-      tags:
-        - Blockchain
-      parameters:
-        - $ref: '#/components/parameters/blockchainBlockIDParameter'
-      responses:
-        '200':
-          description: blockchain config
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RawBlockchainConfig'
-        'default':
-          $ref: '#/components/responses/Error'
-  /v2/blockchain/blocks/{block_id}/config:
-    get:
-      description: Get blockchain config from a specific block, if present.
-      operationId: getBlockchainConfigFromBlock
-      tags:
-        - Blockchain
-      parameters:
-        - $ref: '#/components/parameters/blockchainBlockIDParameter'
-      responses:
-        '200':
-          description: blockchain config
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/BlockchainConfig'
         'default':
           $ref: '#/components/responses/Error'
   /v2/blockchain/transactions/{transaction_id}:
@@ -2233,6 +2226,15 @@ paths:
           $ref: '#/components/responses/Error'
 components:
   parameters:
+    masterchainSeqno:
+      in: path
+      name: masterchain_seqno
+      required: true
+      description: "masterchain block seqno"
+      schema:
+        type: integer
+        format: int32
+        example: 123456
     blockchainBlockIDParameter:
       in: path
       name: block_id
