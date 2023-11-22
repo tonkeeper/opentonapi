@@ -204,6 +204,12 @@ type Handler interface {
 	//
 	// GET /v2/blockchain/config
 	GetBlockchainConfig(ctx context.Context) (*BlockchainConfig, error)
+	// GetBlockchainConfigFromBlock implements getBlockchainConfigFromBlock operation.
+	//
+	// Get blockchain config from a specific block, if present.
+	//
+	// GET /v2/blockchain/masterchain/{masterchain_seqno}/config
+	GetBlockchainConfigFromBlock(ctx context.Context, params GetBlockchainConfigFromBlockParams) (*BlockchainConfig, error)
 	// GetBlockchainMasterchainHead implements getBlockchainMasterchainHead operation.
 	//
 	// Get last known masterchain block.
@@ -375,7 +381,7 @@ type Handler interface {
 	//
 	// Get raw blockchain config from a specific block, if present.
 	//
-	// GET /v2/blockchain/blocks/{block_id}/config/raw
+	// GET /v2/blockchain/masterchain/{masterchain_seqno}/config/raw
 	GetRawBlockchainConfigFromBlock(ctx context.Context, params GetRawBlockchainConfigFromBlockParams) (*RawBlockchainConfig, error)
 	// GetRawConfig implements getRawConfig operation.
 	//

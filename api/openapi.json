@@ -208,6 +208,17 @@
      "type": "integer"
     }
    },
+   "masterchainSeqno": {
+    "description": "masterchain block seqno",
+    "in": "path",
+    "name": "masterchain_seqno",
+    "required": true,
+    "schema": {
+     "example": 123456,
+     "format": "int32",
+     "type": "integer"
+    }
+   },
    "messageIDParameter": {
     "description": "message ID",
     "in": "path",
@@ -6022,35 +6033,6 @@
     ]
    }
   },
-  "/v2/blockchain/blocks/{block_id}/config/raw": {
-   "get": {
-    "description": "Get raw blockchain config from a specific block, if present.",
-    "operationId": "getRawBlockchainConfigFromBlock",
-    "parameters": [
-     {
-      "$ref": "#/components/parameters/blockchainBlockIDParameter"
-     }
-    ],
-    "responses": {
-     "200": {
-      "content": {
-       "application/json": {
-        "schema": {
-         "$ref": "#/components/schemas/RawBlockchainConfig"
-        }
-       }
-      },
-      "description": "blockchain config"
-     },
-     "default": {
-      "$ref": "#/components/responses/Error"
-     }
-    },
-    "tags": [
-     "Blockchain"
-    ]
-   }
-  },
   "/v2/blockchain/blocks/{block_id}/transactions": {
    "get": {
     "description": "Get transactions from block",
@@ -6152,21 +6134,71 @@
     ]
    }
   },
+  "/v2/blockchain/masterchain/{masterchain_seqno}/config": {
+   "get": {
+    "description": "Get blockchain config from a specific block, if present.",
+    "operationId": "getBlockchainConfigFromBlock",
+    "parameters": [
+     {
+      "$ref": "#/components/parameters/masterchainSeqno"
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/BlockchainConfig"
+        }
+       }
+      },
+      "description": "blockchain config"
+     },
+     "default": {
+      "$ref": "#/components/responses/Error"
+     }
+    },
+    "tags": [
+     "Blockchain"
+    ]
+   }
+  },
+  "/v2/blockchain/masterchain/{masterchain_seqno}/config/raw": {
+   "get": {
+    "description": "Get raw blockchain config from a specific block, if present.",
+    "operationId": "getRawBlockchainConfigFromBlock",
+    "parameters": [
+     {
+      "$ref": "#/components/parameters/masterchainSeqno"
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/RawBlockchainConfig"
+        }
+       }
+      },
+      "description": "blockchain config"
+     },
+     "default": {
+      "$ref": "#/components/responses/Error"
+     }
+    },
+    "tags": [
+     "Blockchain"
+    ]
+   }
+  },
   "/v2/blockchain/masterchain/{masterchain_seqno}/shards": {
    "get": {
     "description": "Get blockchain block shards",
     "operationId": "getBlockchainMasterchainShards",
     "parameters": [
      {
-      "description": "masterchain block seqno",
-      "in": "path",
-      "name": "masterchain_seqno",
-      "required": true,
-      "schema": {
-       "example": 123456,
-       "format": "int32",
-       "type": "integer"
-      }
+      "$ref": "#/components/parameters/masterchainSeqno"
      }
     ],
     "responses": {

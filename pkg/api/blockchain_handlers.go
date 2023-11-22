@@ -5,8 +5,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/tonkeeper/tongo/tvm"
 	"net/http"
+
+	"github.com/tonkeeper/tongo/tvm"
 
 	"github.com/tonkeeper/opentonapi/internal/g"
 	"github.com/tonkeeper/opentonapi/pkg/core"
@@ -142,6 +143,36 @@ func (h *Handler) GetBlockchainConfig(ctx context.Context) (*oas.BlockchainConfi
 	return out, nil
 }
 
+func (h *Handler) GetBlockchainConfigFromBlock(ctx context.Context, params oas.GetBlockchainConfigFromBlockParams) (*oas.BlockchainConfig, error) {
+	blockID := ton.BlockID{
+		Workchain: -1,
+		Shard:     0x8000000000000000,
+		Seqno:     uint32(params.MasterchainSeqno),
+	}
+	cfg, err := h.storage.GetConfigFromBlock(ctx, blockID)
+	if err != nil && errors.Is(err, core.ErrNotKeyBlock) {
+		return nil, toError(http.StatusNotFound, err)
+	}
+	if err != nil {
+		return nil, toError(http.StatusInternalServerError, err)
+	}
+	c := boc.NewCell()
+	err = tlb.Marshal(c, cfg)
+	if err != nil {
+		return nil, toError(http.StatusInternalServerError, err)
+	}
+	raw, err := c.ToBocString()
+	if err != nil {
+		return nil, toError(http.StatusInternalServerError, err)
+	}
+	out, err := convertConfig(h.logger, cfg)
+	if err != nil {
+		return nil, toError(http.StatusInternalServerError, err)
+	}
+	out.Raw = raw
+	return out, nil
+}
+
 func convertConfigToOasConfig(conf *ton.BlockchainConfig) (*oas.RawBlockchainConfig, error) {
 	// TODO: optimize this workflow
 	value, err := json.Marshal(*conf)
@@ -172,9 +203,10 @@ func (h *Handler) GetRawBlockchainConfig(ctx context.Context) (r *oas.RawBlockch
 }
 
 func (h *Handler) GetRawBlockchainConfigFromBlock(ctx context.Context, params oas.GetRawBlockchainConfigFromBlockParams) (r *oas.RawBlockchainConfig, _ error) {
-	blockID, err := ton.ParseBlockID(params.BlockID)
-	if err != nil {
-		return nil, toError(http.StatusBadRequest, err)
+	blockID := ton.BlockID{
+		Workchain: -1,
+		Shard:     0x8000000000000000,
+		Seqno:     uint32(params.MasterchainSeqno),
 	}
 	cfg, err := h.storage.GetConfigFromBlock(ctx, blockID)
 	if err != nil && errors.Is(err, core.ErrNotKeyBlock) {
