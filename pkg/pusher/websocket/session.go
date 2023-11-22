@@ -96,7 +96,7 @@ func (s *session) Run(ctx context.Context) chan JsonRPCRequest {
 
 				// handle mempool subscriptions
 				case "subscribe_mempool":
-					response = s.subscribeToMempool(ctx)
+					response = s.subscribeToMempool(ctx, request.Params)
 				case "unsubscribe_mempool":
 					response = s.unsubscribeFromMempool()
 
@@ -139,7 +139,7 @@ func (opts *accountOptions) AllOperations() bool {
 	return len(opts.Operations) == 0
 }
 
-func processParam(param string) (*accountOptions, error) {
+func processAccountTxParam(param string) (*accountOptions, error) {
 	parts := strings.Split(param, ";")
 	if len(parts) == 0 {
 		return nil, fmt.Errorf("invalid format: '%v'", param)
@@ -178,7 +178,7 @@ func processParam(param string) (*accountOptions, error) {
 func (s *session) subscribeToTransactions(ctx context.Context, params []string) string {
 	accounts := make(map[tongo.AccountID]accountOptions, len(params))
 	for _, param := range params {
-		options, err := processParam(param)
+		options, err := processAccountTxParam(param)
 		if err != nil {
 			return err.Error()
 		}
@@ -275,13 +275,43 @@ func (s *session) unsubscribeFromTraces(params []string) string {
 	return fmt.Sprintf("success! %v subscription(s) removed", counter)
 }
 
-func (s *session) subscribeToMempool(ctx context.Context) string {
+func mempoolParamsToOptions(params []string) (*sources.SubscribeToMempoolOptions, error) {
+	if len(params) == 0 {
+		return &sources.SubscribeToMempoolOptions{}, nil
+	}
+	if len(params) > 1 {
+		return nil, fmt.Errorf("failed to process params: supported only one parameter")
+	}
+	parts := strings.Split(params[0], "=")
+	if len(parts) != 2 {
+		return nil, fmt.Errorf("failed to process params: invalid format")
+	}
+	if strings.ToLower(parts[0]) != "accounts" {
+		return nil, fmt.Errorf("failed to process params: invalid format")
+	}
+	accounts := strings.Split(parts[1], ",")
+	accountIDs := make([]tongo.AccountID, 0, len(accounts))
+	for _, accountStr := range accounts {
+		address, err := tongo.ParseAddress(accountStr)
+		if err != nil {
+			return nil, fmt.Errorf("failed to process params: %v", err)
+		}
+		accountIDs = append(accountIDs, address.ID)
+	}
+	return &sources.SubscribeToMempoolOptions{Accounts: accountIDs}, nil
+}
+
+func (s *session) subscribeToMempool(ctx context.Context, params []string) string {
 	if s.mempoolSubscription != nil {
 		return fmt.Sprintf("you are already subscribed to mempool")
 	}
+	options, err := mempoolParamsToOptions(params)
+	if err != nil {
+		return err.Error()
+	}
 	cancelFn, err := s.mempool.SubscribeToMessages(ctx, func(eventData []byte) {
 		s.sendEvent(event{Method: "mempool_message", Params: eventData, Name: events.MempoolEvent})
-	})
+	}, *options)
 	if err != nil {
 		return err.Error()
 	}
