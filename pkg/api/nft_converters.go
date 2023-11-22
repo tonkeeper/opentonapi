@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"github.com/tonkeeper/opentonapi/internal/g"
 	"github.com/tonkeeper/opentonapi/pkg/bath"
@@ -55,6 +56,12 @@ func convertNFT(ctx context.Context, item core.NftItem, book addressBook, metaCa
 			}
 		}
 		cInfo, _ := metaCache.getCollectionMeta(ctx, *item.CollectionAddress)
+
+		// TODO: REMOVE, FAST HACK
+		if strings.Contains(cInfo.Description, "ton-staker.com") {
+			cInfo.Description = "SCAM"
+		}
+
 		i.Collection.SetTo(oas.NftItemCollection{
 			Address:     item.CollectionAddress.ToRaw(),
 			Name:        cInfo.Name,
@@ -69,6 +76,12 @@ func convertNFT(ctx context.Context, item core.NftItem, book addressBook, metaCa
 	if item.Metadata != nil {
 		if imageI, prs := item.Metadata["image"]; prs {
 			image, _ = imageI.(string)
+		}
+		// TODO: REMOVE, FAST HACK
+		if description, ok := item.Metadata["description"]; ok {
+			if value, ok := description.(string); ok && strings.Contains(value, "ton-staker.com") {
+				i.Metadata["description"] = []byte(`"SCAM"`)
+			}
 		}
 	}
 	if image == "" {
@@ -97,6 +110,13 @@ func convertNftCollection(collection core.NftCollection, book addressBook) oas.N
 	metadata := map[string]jx.Raw{}
 	image := references.Placeholder
 	for k, v := range collection.Metadata {
+		// TODO: REMOVE, FAST HACK
+		if k == "description" {
+			if value, ok := v.(string); ok && strings.Contains(value, "ton-staker.com") {
+				v = "SCAM"
+			}
+		}
+
 		var err error
 		if k == "image" {
 			if i, ok := v.(string); ok && i != "" {
