@@ -7,12 +7,13 @@ COPY internal internal
 COPY cmd cmd
 COPY pkg pkg
 
+RUN apt-get update && \
+    apt-get install -y libsecp256k1-0 libsodium23
 RUN go build -o /tmp/opentonapi github.com/tonkeeper/opentonapi/cmd/api
-
 
 FROM ubuntu:20.04 as runner
 RUN apt-get update && \
-    apt-get install -y openssl ca-certificates libsecp256k1-dev && \
+    apt-get install -y openssl ca-certificates libsecp256k1-0 libsodium23 && \
     rm -rf /var/lib/apt/lists/*
 COPY --from=build /go/pkg/mod/github.com/tonkeeper/tongo*/lib/linux /app/lib/
 ENV LD_LIBRARY_PATH=/app/lib/
