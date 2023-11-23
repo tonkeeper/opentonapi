@@ -1174,6 +1174,41 @@
     ],
     "type": "object"
    },
+   "BlockCurrencyCollection": {
+    "properties": {
+     "grams": {
+      "example": 10000000000,
+      "format": "int64",
+      "type": "integer"
+     },
+     "other": {
+      "items": {
+       "properties": {
+        "id": {
+         "example": 13,
+         "format": "int64",
+         "type": "integer"
+        },
+        "value": {
+         "example": "10000000000",
+         "type": "string"
+        }
+       },
+       "required": [
+        "id",
+        "value"
+       ],
+       "type": "object"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "grams",
+     "other"
+    ],
+    "type": "object"
+   },
    "BlockLimits": {
     "properties": {
      "bytes": {
@@ -1250,6 +1285,52 @@
      "seqno",
      "root_hash",
      "file_hash"
+    ],
+    "type": "object"
+   },
+   "BlockValueFlow": {
+    "properties": {
+     "burned": {
+      "$ref": "#/components/schemas/BlockCurrencyCollection"
+     },
+     "created": {
+      "$ref": "#/components/schemas/BlockCurrencyCollection"
+     },
+     "exported": {
+      "$ref": "#/components/schemas/BlockCurrencyCollection"
+     },
+     "fees_collected": {
+      "$ref": "#/components/schemas/BlockCurrencyCollection"
+     },
+     "fees_imported": {
+      "$ref": "#/components/schemas/BlockCurrencyCollection"
+     },
+     "from_prev_blk": {
+      "$ref": "#/components/schemas/BlockCurrencyCollection"
+     },
+     "imported": {
+      "$ref": "#/components/schemas/BlockCurrencyCollection"
+     },
+     "minted": {
+      "$ref": "#/components/schemas/BlockCurrencyCollection"
+     },
+     "recovered": {
+      "$ref": "#/components/schemas/BlockCurrencyCollection"
+     },
+     "to_next_blk": {
+      "$ref": "#/components/schemas/BlockCurrencyCollection"
+     }
+    },
+    "required": [
+     "from_prev_blk",
+     "to_next_blk",
+     "imported",
+     "exported",
+     "fees_collected",
+     "fees_imported",
+     "recovered",
+     "created",
+     "minted"
     ],
     "type": "object"
    },
@@ -1408,6 +1489,9 @@
       "format": "int64",
       "type": "integer"
      },
+     "value_flow": {
+      "$ref": "#/components/schemas/BlockValueFlow"
+     },
      "version": {
       "example": 0,
       "format": "int32",
@@ -1439,6 +1523,7 @@
      "root_hash",
      "file_hash",
      "global_id",
+     "value_flow",
      "version",
      "after_merge",
      "before_split",

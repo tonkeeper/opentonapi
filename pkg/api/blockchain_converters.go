@@ -37,6 +37,19 @@ func blockIdExtFromString(s string) (tongo.BlockIDExt, error) {
 	return id, nil
 }
 
+func convertValueFlow(collection core.CurrencyCollection) oas.BlockCurrencyCollection {
+	res := oas.BlockCurrencyCollection{
+		Grams: int64(collection.Grams),
+		Other: make([]oas.BlockCurrencyCollectionOtherItem, 0, len(collection.Other)),
+	}
+	for _, c := range collection.Other {
+		res.Other = append(res.Other, oas.BlockCurrencyCollectionOtherItem{
+			ID:    c.ID,
+			Value: c.Value,
+		})
+	}
+	return res
+}
 func convertBlockHeader(b core.BlockHeader) oas.BlockchainBlock {
 	res := oas.BlockchainBlock{
 		WorkchainID:       b.Workchain,
@@ -63,6 +76,20 @@ func convertBlockHeader(b core.BlockHeader) oas.BlockchainBlock {
 		OutMsgDescrLength: int64(b.BlockExtra.OutMsgDescrLength),
 		RandSeed:          fmt.Sprintf("%x", b.BlockExtra.RandSeed),
 		CreatedBy:         fmt.Sprintf("%x", b.BlockExtra.CreatedBy),
+		ValueFlow: oas.BlockValueFlow{
+			FromPrevBlk:   convertValueFlow(b.ValueFlow.FromPrevBlk),
+			ToNextBlk:     convertValueFlow(b.ValueFlow.ToNextBlk),
+			Imported:      convertValueFlow(b.ValueFlow.Imported),
+			Exported:      convertValueFlow(b.ValueFlow.Exported),
+			FeesCollected: convertValueFlow(b.ValueFlow.FeesCollected),
+			FeesImported:  convertValueFlow(b.ValueFlow.FeesImported),
+			Recovered:     convertValueFlow(b.ValueFlow.Recovered),
+			Created:       convertValueFlow(b.ValueFlow.Created),
+			Minted:        convertValueFlow(b.ValueFlow.Minted),
+		},
+	}
+	if b.ValueFlow.Burned != nil {
+		res.ValueFlow.Burned = oas.NewOptBlockCurrencyCollection(convertValueFlow(*b.ValueFlow.Burned))
 	}
 	if b.GenSoftware != nil {
 		res.GenSoftwareVersion.SetTo(int32(b.GenSoftware.Version))

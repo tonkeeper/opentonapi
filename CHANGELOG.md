@@ -31,3 +31,6 @@
 
 ### 2023-10-22
 - `/v2/blockchain/validators` method which returns the current validators and theirs stakes.
+ 
+### 2023-10-23
+- `/v2/blockchain/blocks/{block_id}` returns a value flow from a block.

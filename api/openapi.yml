@@ -2680,6 +2680,65 @@ components:
         is_wallet:
           type: boolean
           example: true
+    BlockCurrencyCollection:
+      type: object
+      required:
+        - grams
+        - other
+      properties:
+        grams:
+          type: integer
+          format: int64
+          example: 10000000000
+        other:
+          type: array
+          items:
+            type: object
+            required:
+              - id
+              - value
+            properties:
+              id:
+                type: integer
+                format: int64
+                example: 13
+              value:
+                type: string
+                example: "10000000000"
+    BlockValueFlow:
+      type: object
+      required:
+        - from_prev_blk
+        - to_next_blk
+        - imported
+        - exported
+        - fees_collected
+        - fees_imported
+        - recovered
+        - created
+        - minted
+      properties:
+        from_prev_blk:
+          $ref: '#/components/schemas/BlockCurrencyCollection'
+        to_next_blk:
+          $ref: '#/components/schemas/BlockCurrencyCollection'
+        imported:
+          $ref: '#/components/schemas/BlockCurrencyCollection'
+        exported:
+          $ref: '#/components/schemas/BlockCurrencyCollection'
+        fees_collected:
+          $ref: '#/components/schemas/BlockCurrencyCollection'
+        burned:
+          $ref: '#/components/schemas/BlockCurrencyCollection'
+        fees_imported:
+          $ref: '#/components/schemas/BlockCurrencyCollection'
+        recovered:
+          $ref: '#/components/schemas/BlockCurrencyCollection'
+        created:
+          $ref: '#/components/schemas/BlockCurrencyCollection'
+        minted:
+          $ref: '#/components/schemas/BlockCurrencyCollection'
+
     BlockchainBlock:
       type: object
       required:
@@ -2689,7 +2748,7 @@ components:
         - root_hash
         - file_hash
         - global_id
-        # ValueFlow pgtype.JSONB
+        - value_flow
         - version
         - after_merge
         - before_split
@@ -2710,6 +2769,8 @@ components:
         - rand_seed
         - created_by
       properties:
+        value_flow:
+          $ref: '#/components/schemas/BlockValueFlow'
         workchain_id:
           type: integer
           example: 0

@@ -29,6 +29,7 @@ type BlockHeader struct {
 	// It is up to the software to include this piece of information.
 	GenSoftware *GenSoftware
 	BlockExtra  BlockExtra
+	ValueFlow   ValueFlow
 }
 
 // GenSoftware describes version and capabilities of software that created a blockchain block.
@@ -44,4 +45,27 @@ type BlockExtra struct {
 	InMsgDescrLength int
 	// OutMsgDescrLength is a length of the outbound message queue of a block.
 	OutMsgDescrLength int
+}
+
+type Currency struct {
+	ID    int64
+	Value string
+}
+
+type CurrencyCollection struct {
+	Grams uint64
+	Other []Currency
+}
+
+type ValueFlow struct {
+	FromPrevBlk   CurrencyCollection
+	ToNextBlk     CurrencyCollection
+	Imported      CurrencyCollection
+	Exported      CurrencyCollection
+	FeesCollected CurrencyCollection
+	Burned        *CurrencyCollection
+	FeesImported  CurrencyCollection
+	Recovered     CurrencyCollection
+	Created       CurrencyCollection
+	Minted        CurrencyCollection
 }
