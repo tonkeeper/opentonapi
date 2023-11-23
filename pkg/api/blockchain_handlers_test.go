@@ -10,6 +10,7 @@ import (
 	"github.com/tonkeeper/opentonapi/pkg/litestorage"
 	"github.com/tonkeeper/opentonapi/pkg/oas"
 	"github.com/tonkeeper/tongo/config"
+	"github.com/tonkeeper/tongo/ton"
 	"go.uber.org/zap"
 )
 
@@ -152,4 +153,38 @@ func TestHandler_GetBlockchainConfigFromBlock(t *testing.T) {
 			require.Nil(t, err)
 		})
 	}
+}
+
+func TestHandler_GetBlockchainValidators(t *testing.T) {
+	var servers []config.LiteServer
+	if env, ok := os.LookupEnv("LITE_SERVERS"); ok {
+		var err error
+		servers, err = config.ParseLiteServersEnvVar(env)
+		require.Nil(t, err)
+	}
+	logger := zap.L()
+	liteStorage, err := litestorage.NewLiteStorage(logger, litestorage.WithLiteServers(servers))
+	require.Nil(t, err)
+	h, err := NewHandler(logger, WithStorage(liteStorage), WithExecutor(liteStorage))
+	require.Nil(t, err)
+	validators, err := h.GetBlockchainValidators(context.Background())
+	require.Nil(t, err)
+
+	rawConfig, err := h.storage.GetLastConfig(context.Background())
+	require.Nil(t, err)
+	config, err := ton.ConvertBlockchainConfig(rawConfig)
+	require.Nil(t, err)
+
+	require.NotNil(t, config.ConfigParam34)
+	curValidators := config.ConfigParam34.CurValidators.ValidatorsExt
+	require.Equal(t, len(validators.Validators), len(curValidators.List.Items()))
+	inCurrentSet := make(map[string]struct{})
+	for _, item := range curValidators.List.Items() {
+		inCurrentSet[item.Value.ValidatorAddr.AdnlAddr.Hex()] = struct{}{}
+	}
+	for _, v := range validators.Validators {
+		_, ok := inCurrentSet[v.AdnlAddress]
+		require.True(t, ok)
+	}
+	require.Equal(t, validators.ElectAt, int64(curValidators.UtimeSince))
 }

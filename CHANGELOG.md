@@ -28,3 +28,6 @@
 ### 2023-10-21
 - `/v2/blockchain/masterchain/{masterchain_seqno}/config` method which returns a blockchain config for a specific block.
 - `/v2/blockchain/masterchain/{masterchain_seqno}/config/raw` method which returns a raw blockchain config for a specific block.
+
+### 2023-10-22
+- `/v2/blockchain/validators` method which returns the current validators and theirs stakes.
