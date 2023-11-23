@@ -624,6 +624,150 @@ func (s *Auctions) Validate() error {
 	return nil
 }
 
+func (s *BlockCurrencyCollection) Validate() error {
+	var failures []validate.FieldError
+	if err := func() error {
+		if s.Other == nil {
+			return errors.New("nil is invalid value")
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "other",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s *BlockValueFlow) Validate() error {
+	var failures []validate.FieldError
+	if err := func() error {
+		if err := s.FromPrevBlk.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "from_prev_blk",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if err := s.ToNextBlk.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "to_next_blk",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if err := s.Imported.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "imported",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if err := s.Exported.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "exported",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if err := s.FeesCollected.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "fees_collected",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if value, ok := s.Burned.Get(); ok {
+			if err := func() error {
+				if err := value.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "burned",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if err := s.FeesImported.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "fees_imported",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if err := s.Recovered.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "recovered",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if err := s.Created.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "created",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if err := s.Minted.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "minted",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
 func (s *BlockchainAccountInspect) Validate() error {
 	var failures []validate.FieldError
 	if err := func() error {
@@ -672,6 +816,17 @@ func (s BlockchainAccountInspectCompiler) Validate() error {
 
 func (s *BlockchainBlock) Validate() error {
 	var failures []validate.FieldError
+	if err := func() error {
+		if err := s.ValueFlow.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "value_flow",
+			Error: err,
+		})
+	}
 	if err := func() error {
 		if s.PrevRefs == nil {
 			return errors.New("nil is invalid value")

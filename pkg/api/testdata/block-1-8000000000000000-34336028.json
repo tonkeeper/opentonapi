@@ -1,0 +1,87 @@
+{
+   "value_flow": {
+     "from_prev_blk": {
+       "grams": 1917883300491494921,
+       "other": [
+         {
+           "id": 239,
+           "value": "664333333334"
+         },
+         {
+           "id": 4294967279,
+           "value": "998444444446"
+         }
+       ]
+     },
+     "to_next_blk": {
+       "grams": 1917883303191494921,
+       "other": [
+         {
+           "id": 239,
+           "value": "664333333334"
+         },
+         {
+           "id": 4294967279,
+           "value": "998444444446"
+         }
+       ]
+     },
+     "imported": {
+       "grams": 0,
+       "other": []
+     },
+     "exported": {
+       "grams": 0,
+       "other": []
+     },
+     "fees_collected": {
+       "grams": 2700000000,
+       "other": []
+     },
+     "fees_imported": {
+       "grams": 1000000000,
+       "other": []
+     },
+     "recovered": {
+       "grams": 2700000000,
+       "other": []
+     },
+     "created": {
+       "grams": 1700000000,
+       "other": []
+     },
+     "minted": {
+       "grams": 0,
+       "other": []
+     }
+   },
+   "workchain_id": -1,
+   "shard": "8000000000000000",
+   "seqno": 34336028,
+   "root_hash": "9933d579f836d4f0fd23cfd1e04baa476bcb15a7a6dd21ff9e198adf468199fb",
+   "file_hash": "04e5114839d6a2fd5ea239872b6a434f334998c3477b7837ad38994d32b64ed2",
+   "global_id": -239,
+   "version": 0,
+   "after_merge": false,
+   "before_split": false,
+   "after_split": false,
+   "want_split": false,
+   "want_merge": true,
+   "key_block": false,
+   "gen_utime": 1700756239,
+   "start_lt": 42747819000000,
+   "end_lt": 42747819000004,
+   "vert_seqno": 1,
+   "gen_catchain_seqno": 503952,
+   "min_ref_mc_seqno": 34336025,
+   "prev_key_block_seqno": 34333054,
+   "gen_software_version": 3,
+   "gen_software_capabilities": 46,
+   "prev_refs": [
+     "(-1,8000000000000000,34336027)"
+   ],
+   "in_msg_descr_length": 1,
+   "out_msg_descr_length": 0,
+   "rand_seed": "0000000000000000b10000000000000000aeb23a857f000020eafd767d7f0000",
+   "created_by": "9efb2f376248f8b880c8c90b502b7939df2f3a43788ffa1c3c83706e34a87c3f"
+ }

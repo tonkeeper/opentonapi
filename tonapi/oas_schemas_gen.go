@@ -1519,6 +1519,57 @@ func (s *Auctions) SetTotal(val int64) {
 	s.Total = val
 }
 
+// Ref: #/components/schemas/BlockCurrencyCollection
+type BlockCurrencyCollection struct {
+	Grams int64                              `json:"grams"`
+	Other []BlockCurrencyCollectionOtherItem `json:"other"`
+}
+
+// GetGrams returns the value of Grams.
+func (s *BlockCurrencyCollection) GetGrams() int64 {
+	return s.Grams
+}
+
+// GetOther returns the value of Other.
+func (s *BlockCurrencyCollection) GetOther() []BlockCurrencyCollectionOtherItem {
+	return s.Other
+}
+
+// SetGrams sets the value of Grams.
+func (s *BlockCurrencyCollection) SetGrams(val int64) {
+	s.Grams = val
+}
+
+// SetOther sets the value of Other.
+func (s *BlockCurrencyCollection) SetOther(val []BlockCurrencyCollectionOtherItem) {
+	s.Other = val
+}
+
+type BlockCurrencyCollectionOtherItem struct {
+	ID    int64  `json:"id"`
+	Value string `json:"value"`
+}
+
+// GetID returns the value of ID.
+func (s *BlockCurrencyCollectionOtherItem) GetID() int64 {
+	return s.ID
+}
+
+// GetValue returns the value of Value.
+func (s *BlockCurrencyCollectionOtherItem) GetValue() string {
+	return s.Value
+}
+
+// SetID sets the value of ID.
+func (s *BlockCurrencyCollectionOtherItem) SetID(val int64) {
+	s.ID = val
+}
+
+// SetValue sets the value of Value.
+func (s *BlockCurrencyCollectionOtherItem) SetValue(val string) {
+	s.Value = val
+}
+
 // Ref: #/components/schemas/BlockLimits
 type BlockLimits struct {
 	Bytes   BlockParamLimits `json:"bytes"`
@@ -1652,6 +1703,120 @@ func (s *BlockRaw) SetFileHash(val string) {
 	s.FileHash = val
 }
 
+// Ref: #/components/schemas/BlockValueFlow
+type BlockValueFlow struct {
+	FromPrevBlk   BlockCurrencyCollection    `json:"from_prev_blk"`
+	ToNextBlk     BlockCurrencyCollection    `json:"to_next_blk"`
+	Imported      BlockCurrencyCollection    `json:"imported"`
+	Exported      BlockCurrencyCollection    `json:"exported"`
+	FeesCollected BlockCurrencyCollection    `json:"fees_collected"`
+	Burned        OptBlockCurrencyCollection `json:"burned"`
+	FeesImported  BlockCurrencyCollection    `json:"fees_imported"`
+	Recovered     BlockCurrencyCollection    `json:"recovered"`
+	Created       BlockCurrencyCollection    `json:"created"`
+	Minted        BlockCurrencyCollection    `json:"minted"`
+}
+
+// GetFromPrevBlk returns the value of FromPrevBlk.
+func (s *BlockValueFlow) GetFromPrevBlk() BlockCurrencyCollection {
+	return s.FromPrevBlk
+}
+
+// GetToNextBlk returns the value of ToNextBlk.
+func (s *BlockValueFlow) GetToNextBlk() BlockCurrencyCollection {
+	return s.ToNextBlk
+}
+
+// GetImported returns the value of Imported.
+func (s *BlockValueFlow) GetImported() BlockCurrencyCollection {
+	return s.Imported
+}
+
+// GetExported returns the value of Exported.
+func (s *BlockValueFlow) GetExported() BlockCurrencyCollection {
+	return s.Exported
+}
+
+// GetFeesCollected returns the value of FeesCollected.
+func (s *BlockValueFlow) GetFeesCollected() BlockCurrencyCollection {
+	return s.FeesCollected
+}
+
+// GetBurned returns the value of Burned.
+func (s *BlockValueFlow) GetBurned() OptBlockCurrencyCollection {
+	return s.Burned
+}
+
+// GetFeesImported returns the value of FeesImported.
+func (s *BlockValueFlow) GetFeesImported() BlockCurrencyCollection {
+	return s.FeesImported
+}
+
+// GetRecovered returns the value of Recovered.
+func (s *BlockValueFlow) GetRecovered() BlockCurrencyCollection {
+	return s.Recovered
+}
+
+// GetCreated returns the value of Created.
+func (s *BlockValueFlow) GetCreated() BlockCurrencyCollection {
+	return s.Created
+}
+
+// GetMinted returns the value of Minted.
+func (s *BlockValueFlow) GetMinted() BlockCurrencyCollection {
+	return s.Minted
+}
+
+// SetFromPrevBlk sets the value of FromPrevBlk.
+func (s *BlockValueFlow) SetFromPrevBlk(val BlockCurrencyCollection) {
+	s.FromPrevBlk = val
+}
+
+// SetToNextBlk sets the value of ToNextBlk.
+func (s *BlockValueFlow) SetToNextBlk(val BlockCurrencyCollection) {
+	s.ToNextBlk = val
+}
+
+// SetImported sets the value of Imported.
+func (s *BlockValueFlow) SetImported(val BlockCurrencyCollection) {
+	s.Imported = val
+}
+
+// SetExported sets the value of Exported.
+func (s *BlockValueFlow) SetExported(val BlockCurrencyCollection) {
+	s.Exported = val
+}
+
+// SetFeesCollected sets the value of FeesCollected.
+func (s *BlockValueFlow) SetFeesCollected(val BlockCurrencyCollection) {
+	s.FeesCollected = val
+}
+
+// SetBurned sets the value of Burned.
+func (s *BlockValueFlow) SetBurned(val OptBlockCurrencyCollection) {
+	s.Burned = val
+}
+
+// SetFeesImported sets the value of FeesImported.
+func (s *BlockValueFlow) SetFeesImported(val BlockCurrencyCollection) {
+	s.FeesImported = val
+}
+
+// SetRecovered sets the value of Recovered.
+func (s *BlockValueFlow) SetRecovered(val BlockCurrencyCollection) {
+	s.Recovered = val
+}
+
+// SetCreated sets the value of Created.
+func (s *BlockValueFlow) SetCreated(val BlockCurrencyCollection) {
+	s.Created = val
+}
+
+// SetMinted sets the value of Minted.
+func (s *BlockValueFlow) SetMinted(val BlockCurrencyCollection) {
+	s.Minted = val
+}
+
 // Ref: #/components/schemas/BlockchainAccountInspect
 type BlockchainAccountInspect struct {
 	Code     string                                `json:"code"`
@@ -1761,34 +1926,40 @@ func (s *BlockchainAccountInspectMethodsItem) SetMethod(val string) {
 
 // Ref: #/components/schemas/BlockchainBlock
 type BlockchainBlock struct {
-	WorkchainID             int32     `json:"workchain_id"`
-	Shard                   string    `json:"shard"`
-	Seqno                   int32     `json:"seqno"`
-	RootHash                string    `json:"root_hash"`
-	FileHash                string    `json:"file_hash"`
-	GlobalID                int32     `json:"global_id"`
-	Version                 int32     `json:"version"`
-	AfterMerge              bool      `json:"after_merge"`
-	BeforeSplit             bool      `json:"before_split"`
-	AfterSplit              bool      `json:"after_split"`
-	WantSplit               bool      `json:"want_split"`
-	WantMerge               bool      `json:"want_merge"`
-	KeyBlock                bool      `json:"key_block"`
-	GenUtime                int64     `json:"gen_utime"`
-	StartLt                 int64     `json:"start_lt"`
-	EndLt                   int64     `json:"end_lt"`
-	VertSeqno               int32     `json:"vert_seqno"`
-	GenCatchainSeqno        int32     `json:"gen_catchain_seqno"`
-	MinRefMcSeqno           int32     `json:"min_ref_mc_seqno"`
-	PrevKeyBlockSeqno       int32     `json:"prev_key_block_seqno"`
-	GenSoftwareVersion      OptInt32  `json:"gen_software_version"`
-	GenSoftwareCapabilities OptInt64  `json:"gen_software_capabilities"`
-	MasterRef               OptString `json:"master_ref"`
-	PrevRefs                []string  `json:"prev_refs"`
-	InMsgDescrLength        int64     `json:"in_msg_descr_length"`
-	OutMsgDescrLength       int64     `json:"out_msg_descr_length"`
-	RandSeed                string    `json:"rand_seed"`
-	CreatedBy               string    `json:"created_by"`
+	ValueFlow               BlockValueFlow `json:"value_flow"`
+	WorkchainID             int32          `json:"workchain_id"`
+	Shard                   string         `json:"shard"`
+	Seqno                   int32          `json:"seqno"`
+	RootHash                string         `json:"root_hash"`
+	FileHash                string         `json:"file_hash"`
+	GlobalID                int32          `json:"global_id"`
+	Version                 int32          `json:"version"`
+	AfterMerge              bool           `json:"after_merge"`
+	BeforeSplit             bool           `json:"before_split"`
+	AfterSplit              bool           `json:"after_split"`
+	WantSplit               bool           `json:"want_split"`
+	WantMerge               bool           `json:"want_merge"`
+	KeyBlock                bool           `json:"key_block"`
+	GenUtime                int64          `json:"gen_utime"`
+	StartLt                 int64          `json:"start_lt"`
+	EndLt                   int64          `json:"end_lt"`
+	VertSeqno               int32          `json:"vert_seqno"`
+	GenCatchainSeqno        int32          `json:"gen_catchain_seqno"`
+	MinRefMcSeqno           int32          `json:"min_ref_mc_seqno"`
+	PrevKeyBlockSeqno       int32          `json:"prev_key_block_seqno"`
+	GenSoftwareVersion      OptInt32       `json:"gen_software_version"`
+	GenSoftwareCapabilities OptInt64       `json:"gen_software_capabilities"`
+	MasterRef               OptString      `json:"master_ref"`
+	PrevRefs                []string       `json:"prev_refs"`
+	InMsgDescrLength        int64          `json:"in_msg_descr_length"`
+	OutMsgDescrLength       int64          `json:"out_msg_descr_length"`
+	RandSeed                string         `json:"rand_seed"`
+	CreatedBy               string         `json:"created_by"`
+}
+
+// GetValueFlow returns the value of ValueFlow.
+func (s *BlockchainBlock) GetValueFlow() BlockValueFlow {
+	return s.ValueFlow
 }
 
 // GetWorkchainID returns the value of WorkchainID.
@@ -1929,6 +2100,11 @@ func (s *BlockchainBlock) GetRandSeed() string {
 // GetCreatedBy returns the value of CreatedBy.
 func (s *BlockchainBlock) GetCreatedBy() string {
 	return s.CreatedBy
+}
+
+// SetValueFlow sets the value of ValueFlow.
+func (s *BlockchainBlock) SetValueFlow(val BlockValueFlow) {
+	s.ValueFlow = val
 }
 
 // SetWorkchainID sets the value of WorkchainID.
@@ -7995,6 +8171,52 @@ func (o OptAuctionBidAction) Get() (v AuctionBidAction, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptAuctionBidAction) Or(d AuctionBidAction) AuctionBidAction {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptBlockCurrencyCollection returns new OptBlockCurrencyCollection with value set to v.
+func NewOptBlockCurrencyCollection(v BlockCurrencyCollection) OptBlockCurrencyCollection {
+	return OptBlockCurrencyCollection{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptBlockCurrencyCollection is optional BlockCurrencyCollection.
+type OptBlockCurrencyCollection struct {
+	Value BlockCurrencyCollection
+	Set   bool
+}
+
+// IsSet returns true if OptBlockCurrencyCollection was set.
+func (o OptBlockCurrencyCollection) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptBlockCurrencyCollection) Reset() {
+	var v BlockCurrencyCollection
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptBlockCurrencyCollection) SetTo(v BlockCurrencyCollection) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptBlockCurrencyCollection) Get() (v BlockCurrencyCollection, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptBlockCurrencyCollection) Or(d BlockCurrencyCollection) BlockCurrencyCollection {
 	if v, ok := o.Get(); ok {
 		return v
 	}

@@ -9,6 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/tonkeeper/opentonapi/pkg/litestorage"
 	"github.com/tonkeeper/opentonapi/pkg/oas"
+	pkgTesting "github.com/tonkeeper/opentonapi/pkg/testing"
 	"github.com/tonkeeper/tongo/config"
 	"github.com/tonkeeper/tongo/ton"
 	"go.uber.org/zap"
@@ -187,4 +188,42 @@ func TestHandler_GetBlockchainValidators(t *testing.T) {
 		require.True(t, ok)
 	}
 	require.Equal(t, validators.ElectAt, int64(curValidators.UtimeSince))
+}
+
+func TestHandler_GetBlockchainBlock(t *testing.T) {
+	var servers []config.LiteServer
+	if env, ok := os.LookupEnv("LITE_SERVERS"); ok {
+		var err error
+		servers, err = config.ParseLiteServersEnvVar(env)
+		require.Nil(t, err)
+	}
+	tests := []struct {
+		name           string
+		blockID        string
+		filenamePrefix string
+	}{
+		{
+			name:           "block from masterchain, no burned",
+			blockID:        "(-1,8000000000000000,34336028)",
+			filenamePrefix: "block-1-8000000000000000-34336028",
+		},
+		{
+			name:           "block from masterchain with value burned",
+			blockID:        "(-1,8000000000000000,34336196)",
+			filenamePrefix: "block-1-8000000000000000-34336196",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			logger := zap.L()
+			liteStorage, err := litestorage.NewLiteStorage(logger, litestorage.WithLiteServers(servers))
+			require.Nil(t, err)
+			h, err := NewHandler(logger, WithStorage(liteStorage), WithExecutor(liteStorage))
+			require.Nil(t, err)
+			params := oas.GetBlockchainBlockParams{BlockID: tt.blockID}
+			block, err := h.GetBlockchainBlock(context.Background(), params)
+			require.Nil(t, err)
+			pkgTesting.CompareResults(t, block, tt.filenamePrefix)
+		})
+	}
 }

@@ -3,6 +3,7 @@ package core
 import (
 	"fmt"
 	"math/big"
+	"sort"
 
 	"github.com/shopspring/decimal"
 	"github.com/tonkeeper/tongo"
@@ -39,6 +40,22 @@ func ConvertToBlockHeader(id tongo.BlockIDExt, block *tlb.Block) (*BlockHeader, 
 			InMsgDescrLength:  len(block.Extra.InMsgDescr.Keys()),
 			OutMsgDescrLength: len(block.Extra.OutMsgDescr.Keys()),
 		},
+		ValueFlow: ValueFlow{
+			FromPrevBlk:   ConvertToCurrencyCollection(block.ValueFlow.FromPrevBlk),
+			ToNextBlk:     ConvertToCurrencyCollection(block.ValueFlow.ToNextBlk),
+			Imported:      ConvertToCurrencyCollection(block.ValueFlow.Imported),
+			Exported:      ConvertToCurrencyCollection(block.ValueFlow.Exported),
+			FeesCollected: ConvertToCurrencyCollection(block.ValueFlow.FeesCollected),
+			Burned:        nil,
+			FeesImported:  ConvertToCurrencyCollection(block.ValueFlow.FeesImported),
+			Recovered:     ConvertToCurrencyCollection(block.ValueFlow.Recovered),
+			Created:       ConvertToCurrencyCollection(block.ValueFlow.Created),
+			Minted:        ConvertToCurrencyCollection(block.ValueFlow.Minted),
+		},
+	}
+	if block.ValueFlow.Burned != nil {
+		burned := ConvertToCurrencyCollection(*block.ValueFlow.Burned)
+		header.ValueFlow.Burned = &burned
 	}
 	if info.GenSoftware != nil {
 		header.GenSoftware = &GenSoftware{
@@ -426,4 +443,25 @@ func ExtractTransactions(id tongo.BlockIDExt, block *tlb.Block) ([]*Transaction,
 		transactions = append(transactions, tx)
 	}
 	return transactions, nil
+}
+
+func ConvertToCurrencyCollection(collection tlb.CurrencyCollection) CurrencyCollection {
+	var other []Currency
+	if len(collection.Other.Dict.Keys()) > 0 {
+		other = make([]Currency, 0, len(collection.Other.Dict.Items()))
+		for _, item := range collection.Other.Dict.Items() {
+			value := big.Int(item.Value)
+			other = append(other, Currency{
+				ID:    int64(item.Key),
+				Value: value.String(),
+			})
+		}
+		sort.Slice(other, func(i, j int) bool {
+			return other[i].ID < other[j].ID
+		})
+	}
+	return CurrencyCollection{
+		Grams: uint64(collection.Grams),
+		Other: other,
+	}
 }
