@@ -29,7 +29,7 @@ func (h *Handler) GetBlockchainBlock(ctx context.Context, params oas.GetBlockcha
 		return nil, toError(http.StatusNotFound, err)
 	}
 	if err != nil {
-		return nil, err
+		return nil, toError(http.StatusInternalServerError, err)
 	}
 	res := convertBlockHeader(*block)
 	return &res, nil
