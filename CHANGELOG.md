@@ -34,3 +34,6 @@
  
 ### 2023-10-23
 - `/v2/blockchain/blocks/{block_id}` returns a value flow from a block.
+- 
+### 2023-10-28
+- `/v2/message/decode` decodes an ext in message.

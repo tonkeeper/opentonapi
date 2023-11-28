@@ -1,0 +1,45 @@
+{
+   "destination": {
+     "address": "0:6ccd325a858c379693fae2bcaab1c2906831a4e10a6c3bb44ee8b615bca1d220",
+     "is_scam": false,
+     "is_wallet": false
+   },
+   "destination_wallet_version": "v4R2",
+   "ext_in_msg_decoded": {
+     "wallet_v4": {
+       "subwallet_id": 698983191,
+       "valid_until": 1700473714,
+       "seqno": 241,
+       "op": 0,
+       "raw_messages": [
+         {
+           "message": {
+             "boc": "b5ee9c720101020100980001d5620008a85a8c5931356a8c4cfcc443fc4125b8032a2b22afbff1409f80934cd2030fa1395eb650000000000000000000000000000f8a7ea5000bf365dda6a7ee4192a060a800ef3b9902a271b2a01c8938a523cfe24e71847aaeb6a620001ed44a77ac0e709c103807430301004ffcf9e58f80029580e58ac522465af9b27bbd824046b8bcb9ebc404fe93778b544edcba449b048efd",
+             "decoded_op_name": "JettonTransfer",
+             "op_code": "0x0f8a7ea5",
+             "decoded_body": {
+               "query_id": 3363843579750382,
+               "amount": "422184458",
+               "destination": "0:779dcc815138d9500e449c5291e7f12738c23d575b5310000f6a253bd607384e",
+               "response_destination": "",
+               "custom_payload": null,
+               "forward_ton_amount": "235000000",
+               "forward_payload": {
+                 "is_right": true,
+                 "value": {
+                   "sum_type": "StonfiProvideLiquidity",
+                   "op_code": 4244235663,
+                   "value": {
+                     "token_wallet": "0:14ac072c56291232d7cd93ddec120235c5e5cf5e2027f49bbc5aa276e5d224d8",
+                     "min_lp_out": "18302"
+                   }
+                 }
+               }
+             }
+           },
+           "mode": 3
+         }
+       ]
+     }
+   }
+ }

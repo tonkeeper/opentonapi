@@ -1524,6 +1524,151 @@ func (s *ContractDeployAction) Validate() error {
 	return nil
 }
 
+func (s *DecodedMessage) Validate() error {
+	var failures []validate.FieldError
+	if err := func() error {
+		if value, ok := s.ExtInMsgDecoded.Get(); ok {
+			if err := func() error {
+				if err := value.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "ext_in_msg_decoded",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s *DecodedMessageExtInMsgDecoded) Validate() error {
+	var failures []validate.FieldError
+	if err := func() error {
+		if value, ok := s.WalletV3.Get(); ok {
+			if err := func() error {
+				if err := value.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "wallet_v3",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if value, ok := s.WalletV4.Get(); ok {
+			if err := func() error {
+				if err := value.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "wallet_v4",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if value, ok := s.WalletHighloadV2.Get(); ok {
+			if err := func() error {
+				if err := value.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "wallet_highload_v2",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s *DecodedMessageExtInMsgDecodedWalletHighloadV2) Validate() error {
+	var failures []validate.FieldError
+	if err := func() error {
+		if s.RawMessages == nil {
+			return errors.New("nil is invalid value")
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "raw_messages",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s *DecodedMessageExtInMsgDecodedWalletV3) Validate() error {
+	var failures []validate.FieldError
+	if err := func() error {
+		if s.RawMessages == nil {
+			return errors.New("nil is invalid value")
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "raw_messages",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s *DecodedMessageExtInMsgDecodedWalletV4) Validate() error {
+	var failures []validate.FieldError
+	if err := func() error {
+		if s.RawMessages == nil {
+			return errors.New("nil is invalid value")
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "raw_messages",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
 func (s *DepositStakeAction) Validate() error {
 	var failures []validate.FieldError
 	if err := func() error {
