@@ -1691,6 +1691,24 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 						return
 					}
 				}
+			case 'm': // Prefix: "message/decode"
+				if l := len("message/decode"); len(elem) >= l && elem[0:l] == "message/decode" {
+					elem = elem[l:]
+				} else {
+					break
+				}
+
+				if len(elem) == 0 {
+					// Leaf node.
+					switch r.Method {
+					case "POST":
+						s.handleDecodeMessageRequest([0]string{}, elemIsEscaped, w, r)
+					default:
+						s.notAllowed(w, r, "POST")
+					}
+
+					return
+				}
 			case 'n': // Prefix: "nfts/"
 				if l := len("nfts/"); len(elem) >= l && elem[0:l] == "nfts/" {
 					elem = elem[l:]
@@ -4152,6 +4170,28 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 						default:
 							return
 						}
+					}
+				}
+			case 'm': // Prefix: "message/decode"
+				if l := len("message/decode"); len(elem) >= l && elem[0:l] == "message/decode" {
+					elem = elem[l:]
+				} else {
+					break
+				}
+
+				if len(elem) == 0 {
+					switch method {
+					case "POST":
+						// Leaf: DecodeMessage
+						r.name = "DecodeMessage"
+						r.summary = ""
+						r.operationID = "decodeMessage"
+						r.pathPattern = "/v2/message/decode"
+						r.args = args
+						r.count = 0
+						return r, true
+					default:
+						return
 					}
 				}
 			case 'n': // Prefix: "nfts/"

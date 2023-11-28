@@ -40,6 +40,15 @@ func (UnimplementedHandler) BlockchainAccountInspect(ctx context.Context, params
 	return r, ht.ErrNotImplemented
 }
 
+// DecodeMessage implements decodeMessage operation.
+//
+// Decode a given message. Only external incoming messages can be decoded currently.
+//
+// POST /v2/message/decode
+func (UnimplementedHandler) DecodeMessage(ctx context.Context, req *DecodeMessageReq) (r *DecodedMessage, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // DnsResolve implements dnsResolve operation.
 //
 // DNS resolve for domain name.

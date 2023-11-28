@@ -1,0 +1,38 @@
+{
+   "destination": {
+     "address": "0:dbc99ed1d090f0b4afa694aa0b53c831fb0bfc8d1cdd5c8803a317791f51309f",
+     "is_scam": false,
+     "is_wallet": false
+   },
+   "destination_wallet_version": "highload_v2R2",
+   "ext_in_msg_decoded": {
+     "wallet_highload_v2": {
+       "subwallet_id": 100500,
+       "bounded_query_id": "7260491231154908501",
+       "raw_messages": [
+         {
+           "message": {
+             "boc": "b5ee9c7201010201005e00016242003666992d42c61bcb49fd715e5558e1483418d27085361dda27745b0ade50e91008a0000000000000000000000000010100500000000037303330616334362d623935632d343463372d386437622d363132333236653665353132",
+             "decoded_op_name": "TextComment",
+             "op_code": "0x00000000",
+             "decoded_body": {
+               "text": "7030ac46-b95c-44c7-8d7b-612326e6e512"
+             }
+           },
+           "mode": 3
+         },
+         {
+           "message": {
+             "boc": "b5ee9c7201010201005e00016242003666992d42c61bcb49fd715e5558e1483418d27085361dda27745b0ade50e9100940000000000000000000000000010100500000000033623036393535612d376234632d343561612d393565372d303532386566616230323361",
+             "decoded_op_name": "TextComment",
+             "op_code": "0x00000000",
+             "decoded_body": {
+               "text": "3b06955a-7b4c-45aa-95e7-0528efab023a"
+             }
+           },
+           "mode": 3
+         }
+       ]
+     }
+   }
+ }

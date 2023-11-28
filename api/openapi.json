@@ -2457,6 +2457,157 @@
     ],
     "type": "object"
    },
+   "DecodedMessage": {
+    "properties": {
+     "destination": {
+      "$ref": "#/components/schemas/AccountAddress"
+     },
+     "destination_wallet_version": {
+      "example": "v3R2",
+      "type": "string"
+     },
+     "ext_in_msg_decoded": {
+      "properties": {
+       "wallet_highload_v2": {
+        "properties": {
+         "bounded_query_id": {
+          "example": "34254528475294857",
+          "type": "string"
+         },
+         "raw_messages": {
+          "items": {
+           "$ref": "#/components/schemas/DecodedRawMessage"
+          },
+          "type": "array"
+         },
+         "subwallet_id": {
+          "example": 1,
+          "format": "uint32",
+          "type": "integer"
+         }
+        },
+        "required": [
+         "subwallet_id",
+         "bounded_query_id",
+         "raw_messages"
+        ],
+        "type": "object"
+       },
+       "wallet_v3": {
+        "properties": {
+         "raw_messages": {
+          "items": {
+           "$ref": "#/components/schemas/DecodedRawMessage"
+          },
+          "type": "array"
+         },
+         "seqno": {
+          "example": 1,
+          "format": "uint32",
+          "type": "integer"
+         },
+         "subwallet_id": {
+          "example": 1,
+          "format": "uint32",
+          "type": "integer"
+         },
+         "valid_until": {
+          "example": 1,
+          "format": "uint32",
+          "type": "integer"
+         }
+        },
+        "required": [
+         "subwallet_id",
+         "valid_until",
+         "seqno",
+         "op",
+         "raw_messages"
+        ],
+        "type": "object"
+       },
+       "wallet_v4": {
+        "properties": {
+         "op": {
+          "example": 1,
+          "format": "int8",
+          "type": "integer"
+         },
+         "raw_messages": {
+          "items": {
+           "$ref": "#/components/schemas/DecodedRawMessage"
+          },
+          "type": "array"
+         },
+         "seqno": {
+          "example": 1,
+          "format": "uint32",
+          "type": "integer"
+         },
+         "subwallet_id": {
+          "example": 1,
+          "format": "uint32",
+          "type": "integer"
+         },
+         "valid_until": {
+          "example": 1,
+          "format": "uint32",
+          "type": "integer"
+         }
+        },
+        "required": [
+         "subwallet_id",
+         "valid_until",
+         "seqno",
+         "op",
+         "raw_messages"
+        ],
+        "type": "object"
+       }
+      },
+      "type": "object"
+     }
+    },
+    "required": [
+     "destination",
+     "destination_wallet_version"
+    ],
+    "type": "object"
+   },
+   "DecodedRawMessage": {
+    "properties": {
+     "message": {
+      "properties": {
+       "boc": {
+        "example": "te6ccgEBAQEABgAACCiAmCMBAgEABwA=",
+        "type": "string"
+       },
+       "decoded_body": {},
+       "decoded_op_name": {
+        "example": "nft_transfer",
+        "type": "string"
+       },
+       "op_code": {
+        "example": "0xdeadbeaf",
+        "type": "string"
+       }
+      },
+      "required": [
+       "boc"
+      ],
+      "type": "object"
+     },
+     "mode": {
+      "example": 2,
+      "type": "integer"
+     }
+    },
+    "required": [
+     "message",
+     "mode"
+    ],
+    "type": "object"
+   },
    "DepositStakeAction": {
     "description": "validator's participation in elections",
     "properties": {
@@ -7665,6 +7816,33 @@
     },
     "tags": [
      "Lite Server"
+    ]
+   }
+  },
+  "/v2/message/decode": {
+   "post": {
+    "description": "Decode a given message. Only external incoming messages can be decoded currently.",
+    "operationId": "decodeMessage",
+    "requestBody": {
+     "$ref": "#/components/requestBodies/Boc"
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/DecodedMessage"
+        }
+       }
+      },
+      "description": "decoded message"
+     },
+     "default": {
+      "$ref": "#/components/responses/Error"
+     }
+    },
+    "tags": [
+     "Emulation"
     ]
    }
   },

@@ -303,6 +303,23 @@ paths:
                 $ref: '#/components/schemas/BlockchainAccountInspect'
         'default':
           $ref: '#/components/responses/Error'
+  /v2/message/decode:
+    post:
+      description: Decode a given message. Only external incoming messages can be decoded currently.
+      operationId: decodeMessage
+      tags:
+        - Emulation
+      requestBody:
+        $ref: "#/components/requestBodies/Boc"
+      responses:
+        '200':
+          description: decoded message
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DecodedMessage'
+        'default':
+          $ref: '#/components/responses/Error'
   /v2/address/{account_id}/parse:
     get:
       description: parse address and display in all formats
@@ -5421,6 +5438,116 @@ components:
           $ref: '#/components/schemas/AccountAddress'
         jetton:
           $ref: '#/components/schemas/JettonPreview'
+    DecodedMessage:
+      type: object
+      required:
+        - destination
+        - destination_wallet_version
+      properties:
+        destination:
+          $ref: '#/components/schemas/AccountAddress'
+        destination_wallet_version:
+          type: string
+          example: "v3R2"
+        ext_in_msg_decoded:
+          type: object
+          properties:
+            wallet_v3:
+              type: object
+              required:
+                - subwallet_id
+                - valid_until
+                - seqno
+                - op
+                - raw_messages
+              properties:
+                subwallet_id:
+                  type: integer
+                  format: uint32
+                  example: 1
+                valid_until:
+                  type: integer
+                  format: uint32
+                  example: 1
+                seqno:
+                  type: integer
+                  format: uint32
+                  example: 1
+                raw_messages:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/DecodedRawMessage'
+            wallet_v4:
+              type: object
+              required:
+                - subwallet_id
+                - valid_until
+                - seqno
+                - op
+                - raw_messages
+              properties:
+                subwallet_id:
+                  type: integer
+                  format: uint32
+                  example: 1
+                valid_until:
+                  type: integer
+                  format: uint32
+                  example: 1
+                seqno:
+                  type: integer
+                  format: uint32
+                  example: 1
+                op:
+                  type: integer
+                  format: int8
+                  example: 1
+                raw_messages:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/DecodedRawMessage'
+            wallet_highload_v2:
+              type: object
+              required:
+                - subwallet_id
+                - bounded_query_id
+                - raw_messages
+              properties:
+                subwallet_id:
+                  type: integer
+                  format: uint32
+                  example: 1
+                bounded_query_id:
+                  type: string
+                  example: "34254528475294857"
+                raw_messages:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/DecodedRawMessage'
+    DecodedRawMessage:
+      type: object
+      required:
+        - message
+        - mode
+      properties:
+        message:
+          type: object
+          required:
+            - boc
+          properties:
+            boc:
+              type: string
+              example: "te6ccgEBAQEABgAACCiAmCMBAgEABwA="
+            decoded_op_name:
+              type: string
+              example: "nft_transfer"
+            op_code:
+              type: string
+              example: "0xdeadbeaf"
+            decoded_body: { } # Free-form JSON value
+        mode:
+          type: integer
+          example: 2
     Event:
       type: object
       required:

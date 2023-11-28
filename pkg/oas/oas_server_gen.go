@@ -26,6 +26,12 @@ type Handler interface {
 	//
 	// GET /v2/blockchain/accounts/{account_id}/inspect
 	BlockchainAccountInspect(ctx context.Context, params BlockchainAccountInspectParams) (*BlockchainAccountInspect, error)
+	// DecodeMessage implements decodeMessage operation.
+	//
+	// Decode a given message. Only external incoming messages can be decoded currently.
+	//
+	// POST /v2/message/decode
+	DecodeMessage(ctx context.Context, req *DecodeMessageReq) (*DecodedMessage, error)
 	// DnsResolve implements dnsResolve operation.
 	//
 	// DNS resolve for domain name.
