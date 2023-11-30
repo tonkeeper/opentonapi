@@ -2,26 +2,49 @@ package blockchain
 
 import (
 	"context"
-	"encoding/base64"
 	"fmt"
 	"sync"
 	"time"
 
+	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/config"
 	"github.com/tonkeeper/tongo/liteapi"
 )
+
+const ttl = 5 * 60 // in seconds
 
 // MsgSender provides a method to send a message to the blockchain.
 type MsgSender struct {
 	mu     sync.Mutex
 	client *liteapi.Client
-	// channels is used to send a copy of payload before sending it to the blockchain.
-	channels []chan []byte
-	// messages is used as a cache for boc multi-sending
-	messages map[string]int64 // base64, created unix time
+	// receivers get a copy of a message before sending it to the blockchain.
+	receivers []chan<- ExtInMsgCopy
+	// batches is used as a cache for boc multi-sending.
+	batches []batchOfMessages
 }
 
-func NewMsgSender(servers []config.LiteServer, channels []chan []byte) (*MsgSender, error) {
+type batchOfMessages struct {
+	Copies []ExtInMsgCopy
+	RecvAt int64
+}
+
+// ExtInMsgCopy represents an external message we receive on /v2/blockchain/message endpoint.
+type ExtInMsgCopy struct {
+	// MsgBoc is a base64 encoded message boc.
+	MsgBoc string
+	// Payload is a decoded message boc.
+	Payload []byte
+	// Details contains some optional details from a request context.
+	Details any
+	// Accounts is set when the message is emulated.
+	Accounts map[tongo.AccountID]struct{}
+}
+
+func (m *ExtInMsgCopy) IsEmulation() bool {
+	return len(m.Accounts) > 0
+}
+
+func NewMsgSender(servers []config.LiteServer, receivers []chan<- ExtInMsgCopy) (*MsgSender, error) {
 	var (
 		client *liteapi.Client
 		err    error
@@ -36,64 +59,83 @@ func NewMsgSender(servers []config.LiteServer, channels []chan []byte) (*MsgSend
 		return nil, err
 	}
 	msgSender := &MsgSender{
-		client:   client,
-		channels: channels,
-		messages: map[string]int64{},
+		client:    client,
+		receivers: receivers,
 	}
 	go func() {
 		for {
-			msgSender.sendMsgsFromMempool()
+			msgSender.dropExpiredBatches()
+			msgSender.sendBatches()
 			time.Sleep(time.Second * 5)
 		}
 	}()
 	return msgSender, nil
 }
 
-func (ms *MsgSender) payloadsFromTheQueue() [][]byte {
+func (ms *MsgSender) dropExpiredBatches() {
 	now := time.Now().Unix()
-
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
-
-	var msgs [][]byte
-	for boc, createdTime := range ms.messages {
-		payload, err := base64.StdEncoding.DecodeString(boc)
-		if err != nil || now-createdTime > 5*60 { // ttl is 5 min
-			delete(ms.messages, boc)
+	var batches []batchOfMessages
+	for _, batch := range ms.batches {
+		if now-batch.RecvAt > ttl {
 			continue
 		}
-		msgs = append(msgs, payload)
+		batches = append(batches, batch)
 	}
-	return msgs
+	ms.batches = batches
 }
 
-func (ms *MsgSender) sendMsgsFromMempool() {
-	payloads := ms.payloadsFromTheQueue()
-	for _, payload := range payloads {
-		if err := ms.SendMessage(context.Background(), payload); err != nil {
-			continue
+func (ms *MsgSender) batchesReadyForSending() []batchOfMessages {
+	ms.mu.Lock()
+	defer ms.mu.Unlock()
+	return ms.batches
+}
+
+func (ms *MsgSender) sendBatches() {
+	batches := ms.batchesReadyForSending()
+	for _, batch := range batches {
+		for _, msgCopy := range batch.Copies {
+			if err := ms.sendMessageFromBatch(msgCopy); err != nil {
+				// TODO: remove from the queue on success? log error?
+				continue
+			}
 		}
 	}
 }
 
-// SendMessage sends the given payload(a message) to the blockchain.
-func (ms *MsgSender) SendMessage(ctx context.Context, payload []byte) error {
-	if err := liteapi.VerifySendMessagePayload(payload); err != nil {
+// SendMessage sends the given a message to the blockchain.
+func (ms *MsgSender) SendMessage(ctx context.Context, msgCopy ExtInMsgCopy) error {
+	if err := liteapi.VerifySendMessagePayload(msgCopy.Payload); err != nil {
 		return err
 	}
-	for _, ch := range ms.channels {
-		ch <- payload
+	for _, ch := range ms.receivers {
+		ch <- msgCopy
 	}
-	_, err := ms.client.SendMessage(ctx, payload)
+	_, err := ms.client.SendMessage(ctx, msgCopy.Payload)
 	return err
 }
 
-func (ms *MsgSender) MsgsBocAddToMempool(bocMsgs []string) {
+func (ms *MsgSender) sendMessageFromBatch(msgCopy ExtInMsgCopy) error {
+	if err := liteapi.VerifySendMessagePayload(msgCopy.Payload); err != nil {
+		return err
+	}
+	for _, ch := range ms.receivers {
+		ch <- msgCopy
+	}
+	_, err := ms.client.SendMessage(context.TODO(), msgCopy.Payload)
+	return err
+}
+
+func (ms *MsgSender) SendMultipleMessages(ctx context.Context, copies []ExtInMsgCopy) {
+	if len(copies) == 0 {
+		return
+	}
 	now := time.Now().Unix()
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
-
-	for _, boc := range bocMsgs {
-		ms.messages[boc] = now
-	}
+	ms.batches = append(ms.batches, batchOfMessages{
+		Copies: copies,
+		RecvAt: now,
+	})
 }

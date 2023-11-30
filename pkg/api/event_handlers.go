@@ -11,7 +11,7 @@ import (
 	"time"
 
 	"github.com/shopspring/decimal"
-	"github.com/tonkeeper/opentonapi/pkg/pusher/sources"
+	"github.com/tonkeeper/opentonapi/pkg/blockchain"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
 	"github.com/tonkeeper/tongo/boc"
@@ -38,8 +38,16 @@ func (h *Handler) SendBlockchainMessage(ctx context.Context, request *oas.SendBl
 		return toError(http.StatusBadRequest, fmt.Errorf("boc not found"))
 	}
 	if request.Boc.IsSet() {
-		payload, err := sendMessage(ctx, request.Boc.Value, h.msgSender)
+		payload, err := base64.StdEncoding.DecodeString(request.Boc.Value)
 		if err != nil {
+			return toError(http.StatusBadRequest, fmt.Errorf("boc must be a base64 encoded string"))
+		}
+		msgCopy := blockchain.ExtInMsgCopy{
+			MsgBoc:  request.Boc.Value,
+			Payload: payload,
+			Details: h.ctxToDetails(ctx),
+		}
+		if err := h.msgSender.SendMessage(ctx, msgCopy); err != nil {
 			sentry.Send("sending message", sentry.SentryInfoData{"payload": request.Boc}, sentry.LevelError)
 			return toError(http.StatusInternalServerError, err)
 		}
@@ -49,11 +57,14 @@ func (h *Handler) SendBlockchainMessage(ctx context.Context, request *oas.SendBl
 					sentry.Send("addToMempool", sentry.SentryInfoData{"payload": request.Boc}, sentry.LevelError)
 				}
 			}()
-			h.addToMempool(payload, nil)
+			ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+			defer cancel()
+			h.addToMempool(ctx, payload, nil)
 		}()
+		return nil
 	}
 	var (
-		batchOfBoc   []string
+		copies       []blockchain.ExtInMsgCopy
 		shardAccount = map[tongo.AccountID]tlb.ShardAccount{}
 	)
 	for _, msgBoc := range request.Batch {
@@ -61,13 +72,18 @@ func (h *Handler) SendBlockchainMessage(ctx context.Context, request *oas.SendBl
 		if err != nil {
 			return toError(http.StatusBadRequest, err)
 		}
-		shardAccount, err = h.addToMempool(payload, shardAccount)
+		shardAccount, err = h.addToMempool(ctx, payload, shardAccount)
 		if err != nil {
 			continue
 		}
-		batchOfBoc = append(batchOfBoc, msgBoc)
+		msgCopy := blockchain.ExtInMsgCopy{
+			MsgBoc:  msgBoc,
+			Payload: payload,
+			Details: h.ctxToDetails(ctx),
+		}
+		copies = append(copies, msgCopy)
 	}
-	h.msgSender.MsgsBocAddToMempool(batchOfBoc)
+	h.msgSender.SendMultipleMessages(ctx, copies)
 	return nil
 }
 
@@ -499,9 +515,7 @@ func (h *Handler) EmulateMessageToWallet(ctx context.Context, request *oas.Emula
 	return &consequences, nil
 }
 
-func (h *Handler) addToMempool(bytesBoc []byte, shardAccount map[tongo.AccountID]tlb.ShardAccount) (map[tongo.AccountID]tlb.ShardAccount, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
-	defer cancel()
+func (h *Handler) addToMempool(ctx context.Context, bytesBoc []byte, shardAccount map[tongo.AccountID]tlb.ShardAccount) (map[tongo.AccountID]tlb.ShardAccount, error) {
 	if shardAccount == nil {
 		shardAccount = map[tongo.AccountID]tlb.ShardAccount{}
 	}
@@ -554,7 +568,9 @@ func (h *Handler) addToMempool(bytesBoc []byte, shardAccount map[tongo.AccountID
 		traces = slices.Insert(traces, 0, hex.EncodeToString(hash))
 		h.mempoolEmulate.accountsTraces.Set(account, traces, cache.WithExpiration(time.Second*time.Duration(ttl)))
 	}
-	h.emulationCh <- sources.PayloadAndEmulationResults{
+	h.emulationCh <- blockchain.ExtInMsgCopy{
+		MsgBoc:   base64.StdEncoding.EncodeToString(bytesBoc),
+		Details:  h.ctxToDetails(ctx),
 		Payload:  bytesBoc,
 		Accounts: accounts,
 	}
@@ -703,16 +719,4 @@ func emulatedTreeToTrace(ctx context.Context, executor executor, resolver core.L
 		}
 	}
 	return t, nil
-}
-
-func sendMessage(ctx context.Context, msgBoc string, msgSender messageSender) ([]byte, error) {
-	payload, err := base64.StdEncoding.DecodeString(msgBoc)
-	if err != nil {
-		return nil, err
-	}
-	err = msgSender.SendMessage(ctx, payload)
-	if err != nil {
-		return nil, err
-	}
-	return payload, nil
 }
