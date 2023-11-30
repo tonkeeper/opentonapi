@@ -2592,19 +2592,6 @@ func (s *JettonTransferAction) Validate() error {
 	return nil
 }
 
-func (s JettonVerificationType) Validate() error {
-	switch s {
-	case "whitelist":
-		return nil
-	case "blacklist":
-		return nil
-	case "none":
-		return nil
-	default:
-		return errors.Errorf("invalid value: %v", s)
-	}
-}
-
 func (s *Jettons) Validate() error {
 	var failures []validate.FieldError
 	if err := func() error {
@@ -2849,6 +2836,24 @@ func (s *NftCollections) Validate() error {
 
 func (s *NftItem) Validate() error {
 	var failures []validate.FieldError
+	if err := func() error {
+		if value, ok := s.Verification.Get(); ok {
+			if err := func() error {
+				if err := value.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "verification",
+			Error: err,
+		})
+	}
 	if err := func() error {
 		if err := s.ApprovedBy.Validate(); err != nil {
 			return err
@@ -3696,6 +3701,19 @@ func (s *ValueFlowJettonsItem) Validate() error {
 		return &validate.Error{Fields: failures}
 	}
 	return nil
+}
+
+func (s VerificationType) Validate() error {
+	switch s {
+	case "whitelist":
+		return nil
+	case "blacklist":
+		return nil
+	case "none":
+		return nil
+	default:
+		return errors.Errorf("invalid value: %v", s)
+	}
 }
 
 func (s *WalletDNS) Validate() error {

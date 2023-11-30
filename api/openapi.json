@@ -3211,7 +3211,7 @@
       "type": "string"
      },
      "verification": {
-      "$ref": "#/components/schemas/JettonVerificationType"
+      "$ref": "#/components/schemas/VerificationType"
      }
     },
     "required": [
@@ -3337,7 +3337,7 @@
       "type": "string"
      },
      "verification": {
-      "$ref": "#/components/schemas/JettonVerificationType"
+      "$ref": "#/components/schemas/VerificationType"
      }
     },
     "required": [
@@ -3462,14 +3462,6 @@
      "recipients_wallet"
     ],
     "type": "object"
-   },
-   "JettonVerificationType": {
-    "enum": [
-     "whitelist",
-     "blacklist",
-     "none"
-    ],
-    "type": "string"
    },
    "Jettons": {
     "properties": {
@@ -3855,6 +3847,9 @@
      },
      "sale": {
       "$ref": "#/components/schemas/Sale"
+     },
+     "verification": {
+      "$ref": "#/components/schemas/VerificationType"
      },
      "verified": {
       "example": true,
@@ -5015,6 +5010,14 @@
      "fees"
     ],
     "type": "object"
+   },
+   "VerificationType": {
+    "enum": [
+     "whitelist",
+     "blacklist",
+     "none"
+    ],
+    "type": "string"
    },
    "WalletDNS": {
     "properties": {

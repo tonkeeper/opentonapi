@@ -33,18 +33,18 @@ paths:
       description: Get blockchain block shards
       operationId: getBlockchainMasterchainShards
       tags:
-          - Blockchain
+        - Blockchain
       parameters:
         - $ref: '#/components/parameters/masterchainSeqno'
       responses:
-          '200':
-            description: blockchain block shards
-            content:
-              application/json:
-                schema:
-                  $ref: '#/components/schemas/BlockchainBlockShards'
-          'default':
-            $ref: '#/components/responses/Error'
+        '200':
+          description: blockchain block shards
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BlockchainBlockShards'
+        'default':
+          $ref: '#/components/responses/Error'
   /v2/blockchain/masterchain/{masterchain_seqno}/config:
     get:
       description: Get blockchain config from a specific block, if present.
@@ -2552,7 +2552,7 @@ components:
                 items:
                   type: object
                   required:
-                  - address
+                    - address
                   properties:
                     address:
                       type: string
@@ -4387,7 +4387,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/DomainBid'
-    JettonVerificationType:
+    VerificationType:
       type: string
       enum:
         - whitelist
@@ -4419,7 +4419,7 @@ components:
           type: string
           example: https://cache.tonapi.io/images/jetton.jpg
         verification:
-          $ref: '#/components/schemas/JettonVerificationType'
+          $ref: '#/components/schemas/VerificationType'
     JettonBalance:
       type: object
       required:
@@ -4531,6 +4531,8 @@ components:
         verified:
           type: boolean
           example: true
+        verification:
+          $ref: '#/components/schemas/VerificationType'
         metadata:
           type: object
           additionalProperties: true
@@ -5655,7 +5657,7 @@ components:
         metadata:
           $ref: '#/components/schemas/JettonMetadata'
         verification:
-          $ref: '#/components/schemas/JettonVerificationType'
+          $ref: '#/components/schemas/VerificationType'
         holders_count:
           type: integer
           format: int32

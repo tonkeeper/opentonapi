@@ -109,7 +109,7 @@ func (h *Handler) GetJettonInfo(ctx context.Context, params oas.GetJettonInfoPar
 		Mintable:     data.Mintable,
 		TotalSupply:  data.TotalSupply.String(),
 		Metadata:     metadata,
-		Verification: oas.JettonVerificationType(meta.Verification),
+		Verification: oas.VerificationType(meta.Verification),
 		HoldersCount: holdersCount[account.ID],
 	}, nil
 }
@@ -191,7 +191,7 @@ func (h *Handler) GetJettons(ctx context.Context, params oas.GetJettonsParams) (
 			Mintable:     master.Mintable,
 			TotalSupply:  master.TotalSupply.String(),
 			Metadata:     metadata,
-			Verification: oas.JettonVerificationType(meta.Verification),
+			Verification: oas.VerificationType(meta.Verification),
 			HoldersCount: jettonsHolders[master.Address],
 		}
 		results = append(results, info)

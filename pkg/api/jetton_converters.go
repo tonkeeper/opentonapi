@@ -14,7 +14,7 @@ func jettonPreview(master tongo.AccountID, meta NormalizedMetadata) oas.JettonPr
 		Address:      master.ToRaw(),
 		Name:         meta.Name,
 		Symbol:       meta.Symbol,
-		Verification: oas.JettonVerificationType(meta.Verification),
+		Verification: oas.VerificationType(meta.Verification),
 		Decimals:     meta.Decimals,
 		Image:        meta.Image,
 	}

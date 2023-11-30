@@ -21998,48 +21998,6 @@ func (s *JettonTransferAction) UnmarshalJSON(data []byte) error {
 	return s.Decode(d)
 }
 
-// Encode encodes JettonVerificationType as json.
-func (s JettonVerificationType) Encode(e *jx.Encoder) {
-	e.Str(string(s))
-}
-
-// Decode decodes JettonVerificationType from json.
-func (s *JettonVerificationType) Decode(d *jx.Decoder) error {
-	if s == nil {
-		return errors.New("invalid: unable to decode JettonVerificationType to nil")
-	}
-	v, err := d.StrBytes()
-	if err != nil {
-		return err
-	}
-	// Try to use constant string.
-	switch JettonVerificationType(v) {
-	case JettonVerificationTypeWhitelist:
-		*s = JettonVerificationTypeWhitelist
-	case JettonVerificationTypeBlacklist:
-		*s = JettonVerificationTypeBlacklist
-	case JettonVerificationTypeNone:
-		*s = JettonVerificationTypeNone
-	default:
-		*s = JettonVerificationType(v)
-	}
-
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s JettonVerificationType) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *JettonVerificationType) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
 // Encode implements json.Marshaler.
 func (s *Jettons) Encode(e *jx.Encoder) {
 	e.ObjStart()
@@ -23832,6 +23790,12 @@ func (s *NftItem) encodeFields(e *jx.Encoder) {
 		e.Bool(s.Verified)
 	}
 	{
+		if s.Verification.Set {
+			e.FieldStart("verification")
+			s.Verification.Encode(e)
+		}
+	}
+	{
 		e.FieldStart("metadata")
 		s.Metadata.Encode(e)
 	}
@@ -23863,17 +23827,18 @@ func (s *NftItem) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfNftItem = [10]string{
-	0: "address",
-	1: "index",
-	2: "owner",
-	3: "collection",
-	4: "verified",
-	5: "metadata",
-	6: "sale",
-	7: "previews",
-	8: "dns",
-	9: "approved_by",
+var jsonFieldsNameOfNftItem = [11]string{
+	0:  "address",
+	1:  "index",
+	2:  "owner",
+	3:  "collection",
+	4:  "verified",
+	5:  "verification",
+	6:  "metadata",
+	7:  "sale",
+	8:  "previews",
+	9:  "dns",
+	10: "approved_by",
 }
 
 // Decode decodes NftItem from json.
@@ -23941,8 +23906,18 @@ func (s *NftItem) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"verified\"")
 			}
+		case "verification":
+			if err := func() error {
+				s.Verification.Reset()
+				if err := s.Verification.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"verification\"")
+			}
 		case "metadata":
-			requiredBitSet[0] |= 1 << 5
+			requiredBitSet[0] |= 1 << 6
 			if err := func() error {
 				if err := s.Metadata.Decode(d); err != nil {
 					return err
@@ -23989,7 +23964,7 @@ func (s *NftItem) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"dns\"")
 			}
 		case "approved_by":
-			requiredBitSet[1] |= 1 << 1
+			requiredBitSet[1] |= 1 << 2
 			if err := func() error {
 				if err := s.ApprovedBy.Decode(d); err != nil {
 					return err
@@ -24008,8 +23983,8 @@ func (s *NftItem) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [2]uint8{
-		0b00110011,
-		0b00000010,
+		0b01010011,
+		0b00000100,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -27597,6 +27572,39 @@ func (s OptValidatorsSet) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *OptValidatorsSet) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes VerificationType as json.
+func (o OptVerificationType) Encode(e *jx.Encoder) {
+	if !o.Set {
+		return
+	}
+	e.Str(string(o.Value))
+}
+
+// Decode decodes VerificationType from json.
+func (o *OptVerificationType) Decode(d *jx.Decoder) error {
+	if o == nil {
+		return errors.New("invalid: unable to decode OptVerificationType to nil")
+	}
+	o.Set = true
+	if err := o.Value.Decode(d); err != nil {
+		return err
+	}
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s OptVerificationType) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *OptVerificationType) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -34222,6 +34230,48 @@ func (s *ValueFlowJettonsItem) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *ValueFlowJettonsItem) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes VerificationType as json.
+func (s VerificationType) Encode(e *jx.Encoder) {
+	e.Str(string(s))
+}
+
+// Decode decodes VerificationType from json.
+func (s *VerificationType) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode VerificationType to nil")
+	}
+	v, err := d.StrBytes()
+	if err != nil {
+		return err
+	}
+	// Try to use constant string.
+	switch VerificationType(v) {
+	case VerificationTypeWhitelist:
+		*s = VerificationTypeWhitelist
+	case VerificationTypeBlacklist:
+		*s = VerificationTypeBlacklist
+	case VerificationTypeNone:
+		*s = VerificationTypeNone
+	default:
+		*s = VerificationType(v)
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s VerificationType) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *VerificationType) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }

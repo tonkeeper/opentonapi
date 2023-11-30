@@ -6706,11 +6706,11 @@ func (s *JettonHoldersAddressesItem) SetBalance(val string) {
 
 // Ref: #/components/schemas/JettonInfo
 type JettonInfo struct {
-	Mintable     bool                   `json:"mintable"`
-	TotalSupply  string                 `json:"total_supply"`
-	Metadata     JettonMetadata         `json:"metadata"`
-	Verification JettonVerificationType `json:"verification"`
-	HoldersCount int32                  `json:"holders_count"`
+	Mintable     bool             `json:"mintable"`
+	TotalSupply  string           `json:"total_supply"`
+	Metadata     JettonMetadata   `json:"metadata"`
+	Verification VerificationType `json:"verification"`
+	HoldersCount int32            `json:"holders_count"`
 }
 
 // GetMintable returns the value of Mintable.
@@ -6729,7 +6729,7 @@ func (s *JettonInfo) GetMetadata() JettonMetadata {
 }
 
 // GetVerification returns the value of Verification.
-func (s *JettonInfo) GetVerification() JettonVerificationType {
+func (s *JettonInfo) GetVerification() VerificationType {
 	return s.Verification
 }
 
@@ -6754,7 +6754,7 @@ func (s *JettonInfo) SetMetadata(val JettonMetadata) {
 }
 
 // SetVerification sets the value of Verification.
-func (s *JettonInfo) SetVerification(val JettonVerificationType) {
+func (s *JettonInfo) SetVerification(val VerificationType) {
 	s.Verification = val
 }
 
@@ -6917,12 +6917,12 @@ func (s *JettonMintAction) SetJetton(val JettonPreview) {
 
 // Ref: #/components/schemas/JettonPreview
 type JettonPreview struct {
-	Address      string                 `json:"address"`
-	Name         string                 `json:"name"`
-	Symbol       string                 `json:"symbol"`
-	Decimals     int                    `json:"decimals"`
-	Image        string                 `json:"image"`
-	Verification JettonVerificationType `json:"verification"`
+	Address      string           `json:"address"`
+	Name         string           `json:"name"`
+	Symbol       string           `json:"symbol"`
+	Decimals     int              `json:"decimals"`
+	Image        string           `json:"image"`
+	Verification VerificationType `json:"verification"`
 }
 
 // GetAddress returns the value of Address.
@@ -6951,7 +6951,7 @@ func (s *JettonPreview) GetImage() string {
 }
 
 // GetVerification returns the value of Verification.
-func (s *JettonPreview) GetVerification() JettonVerificationType {
+func (s *JettonPreview) GetVerification() VerificationType {
 	return s.Verification
 }
 
@@ -6981,7 +6981,7 @@ func (s *JettonPreview) SetImage(val string) {
 }
 
 // SetVerification sets the value of Verification.
-func (s *JettonPreview) SetVerification(val JettonVerificationType) {
+func (s *JettonPreview) SetVerification(val VerificationType) {
 	s.Verification = val
 }
 
@@ -7275,55 +7275,6 @@ func (s *JettonTransferAction) SetRefund(val OptRefund) {
 // SetJetton sets the value of Jetton.
 func (s *JettonTransferAction) SetJetton(val JettonPreview) {
 	s.Jetton = val
-}
-
-// Ref: #/components/schemas/JettonVerificationType
-type JettonVerificationType string
-
-const (
-	JettonVerificationTypeWhitelist JettonVerificationType = "whitelist"
-	JettonVerificationTypeBlacklist JettonVerificationType = "blacklist"
-	JettonVerificationTypeNone      JettonVerificationType = "none"
-)
-
-// AllValues returns all JettonVerificationType values.
-func (JettonVerificationType) AllValues() []JettonVerificationType {
-	return []JettonVerificationType{
-		JettonVerificationTypeWhitelist,
-		JettonVerificationTypeBlacklist,
-		JettonVerificationTypeNone,
-	}
-}
-
-// MarshalText implements encoding.TextMarshaler.
-func (s JettonVerificationType) MarshalText() ([]byte, error) {
-	switch s {
-	case JettonVerificationTypeWhitelist:
-		return []byte(s), nil
-	case JettonVerificationTypeBlacklist:
-		return []byte(s), nil
-	case JettonVerificationTypeNone:
-		return []byte(s), nil
-	default:
-		return nil, errors.Errorf("invalid value: %q", s)
-	}
-}
-
-// UnmarshalText implements encoding.TextUnmarshaler.
-func (s *JettonVerificationType) UnmarshalText(data []byte) error {
-	switch JettonVerificationType(data) {
-	case JettonVerificationTypeWhitelist:
-		*s = JettonVerificationTypeWhitelist
-		return nil
-	case JettonVerificationTypeBlacklist:
-		*s = JettonVerificationTypeBlacklist
-		return nil
-	case JettonVerificationTypeNone:
-		*s = JettonVerificationTypeNone
-		return nil
-	default:
-		return errors.Errorf("invalid value: %q", data)
-	}
 }
 
 // Ref: #/components/schemas/Jettons
@@ -7977,16 +7928,17 @@ func (s *NftCollections) SetNftCollections(val []NftCollection) {
 
 // Ref: #/components/schemas/NftItem
 type NftItem struct {
-	Address    string               `json:"address"`
-	Index      int64                `json:"index"`
-	Owner      OptAccountAddress    `json:"owner"`
-	Collection OptNftItemCollection `json:"collection"`
-	Verified   bool                 `json:"verified"`
-	Metadata   NftItemMetadata      `json:"metadata"`
-	Sale       OptSale              `json:"sale"`
-	Previews   []ImagePreview       `json:"previews"`
-	DNS        OptString            `json:"dns"`
-	ApprovedBy NftApprovedBy        `json:"approved_by"`
+	Address      string               `json:"address"`
+	Index        int64                `json:"index"`
+	Owner        OptAccountAddress    `json:"owner"`
+	Collection   OptNftItemCollection `json:"collection"`
+	Verified     bool                 `json:"verified"`
+	Verification OptVerificationType  `json:"verification"`
+	Metadata     NftItemMetadata      `json:"metadata"`
+	Sale         OptSale              `json:"sale"`
+	Previews     []ImagePreview       `json:"previews"`
+	DNS          OptString            `json:"dns"`
+	ApprovedBy   NftApprovedBy        `json:"approved_by"`
 }
 
 // GetAddress returns the value of Address.
@@ -8012,6 +7964,11 @@ func (s *NftItem) GetCollection() OptNftItemCollection {
 // GetVerified returns the value of Verified.
 func (s *NftItem) GetVerified() bool {
 	return s.Verified
+}
+
+// GetVerification returns the value of Verification.
+func (s *NftItem) GetVerification() OptVerificationType {
+	return s.Verification
 }
 
 // GetMetadata returns the value of Metadata.
@@ -8062,6 +8019,11 @@ func (s *NftItem) SetCollection(val OptNftItemCollection) {
 // SetVerified sets the value of Verified.
 func (s *NftItem) SetVerified(val bool) {
 	s.Verified = val
+}
+
+// SetVerification sets the value of Verification.
+func (s *NftItem) SetVerification(val OptVerificationType) {
+	s.Verification = val
 }
 
 // SetMetadata sets the value of Metadata.
@@ -12296,6 +12258,52 @@ func (o OptValidatorsSet) Or(d ValidatorsSet) ValidatorsSet {
 	return d
 }
 
+// NewOptVerificationType returns new OptVerificationType with value set to v.
+func NewOptVerificationType(v VerificationType) OptVerificationType {
+	return OptVerificationType{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptVerificationType is optional VerificationType.
+type OptVerificationType struct {
+	Value VerificationType
+	Set   bool
+}
+
+// IsSet returns true if OptVerificationType was set.
+func (o OptVerificationType) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptVerificationType) Reset() {
+	var v VerificationType
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptVerificationType) SetTo(v VerificationType) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptVerificationType) Get() (v VerificationType, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptVerificationType) Or(d VerificationType) VerificationType {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptWalletDNS returns new OptWalletDNS with value set to v.
 func NewOptWalletDNS(v WalletDNS) OptWalletDNS {
 	return OptWalletDNS{
@@ -14759,6 +14767,55 @@ func (s *ValueFlowJettonsItem) SetJetton(val JettonPreview) {
 // SetQuantity sets the value of Quantity.
 func (s *ValueFlowJettonsItem) SetQuantity(val int64) {
 	s.Quantity = val
+}
+
+// Ref: #/components/schemas/VerificationType
+type VerificationType string
+
+const (
+	VerificationTypeWhitelist VerificationType = "whitelist"
+	VerificationTypeBlacklist VerificationType = "blacklist"
+	VerificationTypeNone      VerificationType = "none"
+)
+
+// AllValues returns all VerificationType values.
+func (VerificationType) AllValues() []VerificationType {
+	return []VerificationType{
+		VerificationTypeWhitelist,
+		VerificationTypeBlacklist,
+		VerificationTypeNone,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s VerificationType) MarshalText() ([]byte, error) {
+	switch s {
+	case VerificationTypeWhitelist:
+		return []byte(s), nil
+	case VerificationTypeBlacklist:
+		return []byte(s), nil
+	case VerificationTypeNone:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *VerificationType) UnmarshalText(data []byte) error {
+	switch VerificationType(data) {
+	case VerificationTypeWhitelist:
+		*s = VerificationTypeWhitelist
+		return nil
+	case VerificationTypeBlacklist:
+		*s = VerificationTypeBlacklist
+		return nil
+	case VerificationTypeNone:
+		*s = VerificationTypeNone
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
 }
 
 // Ref: #/components/schemas/WalletDNS
