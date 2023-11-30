@@ -8,6 +8,8 @@ import (
 
 	"github.com/tonkeeper/tongo"
 	"go.uber.org/zap"
+
+	"github.com/tonkeeper/opentonapi/pkg/blockchain"
 )
 
 // MemPool implements "MemPoolSource" interface
@@ -80,30 +82,25 @@ func (m *MemPool) SubscribeToMessages(ctx context.Context, deliveryFn DeliveryFn
 
 }
 
-// PayloadAndEmulationResults contains a message payload and a list of accounts that are involved in the corresponding trace.
-type PayloadAndEmulationResults struct {
-	Payload  []byte
-	Accounts map[tongo.AccountID]struct{}
-}
-
 // Run runs a goroutine with a fan-out event-loop that resends an incoming payload to all subscribers.
-func (m *MemPool) Run(ctx context.Context) (chan []byte, chan PayloadAndEmulationResults) {
+func (m *MemPool) Run(ctx context.Context) chan blockchain.ExtInMsgCopy {
 	// TODO: replace with elastic channel
-	ch := make(chan []byte, 100)
-	emulationCh := make(chan PayloadAndEmulationResults, 100)
+	ch := make(chan blockchain.ExtInMsgCopy, 100)
 	go func() {
 		for {
 			select {
 			case <-ctx.Done():
 				return
-			case payload := <-ch:
-				m.sendPayloadToSubscribers(payload)
-			case payload := <-emulationCh:
-				m.sendPayloadToEmulationSubscribers(payload)
+			case msgCopy := <-ch:
+				if msgCopy.IsEmulation() {
+					m.sendPayloadToEmulationSubscribers(msgCopy)
+					continue
+				}
+				m.sendPayloadToSubscribers(msgCopy.Payload)
 			}
 		}
 	}()
-	return ch, emulationCh
+	return ch
 }
 
 func (m *MemPool) sendPayloadToSubscribers(payload []byte) {
@@ -124,12 +121,12 @@ func (m *MemPool) sendPayloadToSubscribers(payload []byte) {
 	}
 }
 
-func (m *MemPool) sendPayloadToEmulationSubscribers(payload PayloadAndEmulationResults) {
+func (m *MemPool) sendPayloadToEmulationSubscribers(msgCopy blockchain.ExtInMsgCopy) {
 	msg := EmulationMessageEventData{
-		BOC:              payload.Payload,
-		InvolvedAccounts: make([]tongo.AccountID, 0, len(payload.Accounts)),
+		BOC:              msgCopy.Payload,
+		InvolvedAccounts: make([]tongo.AccountID, 0, len(msgCopy.Accounts)),
 	}
-	for account := range payload.Accounts {
+	for account := range msgCopy.Accounts {
 		msg.InvolvedAccounts = append(msg.InvolvedAccounts, account)
 	}
 	sort.Slice(msg.InvolvedAccounts, func(i, j int) bool {
@@ -145,6 +142,6 @@ func (m *MemPool) sendPayloadToEmulationSubscribers(payload PayloadAndEmulationR
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	for _, fn := range m.emulationSubscribers {
-		fn(eventData, payload.Accounts)
+		fn(eventData, msgCopy.Accounts)
 	}
 }

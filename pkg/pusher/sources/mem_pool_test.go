@@ -2,6 +2,7 @@ package sources
 
 import (
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"sort"
@@ -13,6 +14,8 @@ import (
 	"github.com/tonkeeper/tongo/ton"
 	"go.uber.org/zap"
 	"golang.org/x/exp/maps"
+
+	"github.com/tonkeeper/opentonapi/pkg/blockchain"
 )
 
 var testAccount1 = ton.MustParseAccountID("0:0a95e1d4ebe7860d051f8b861730dbdee1440fd11180211914e0089146580351")
@@ -24,14 +27,14 @@ func TestMemPool_Run(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	ch, emulationCh := mempool.Run(ctx)
+	ch := mempool.Run(ctx)
 	const eventsNumber = 10
 
 	var wg sync.WaitGroup
 	wg.Add(eventsNumber * 2)
 
 	// subscribe to mempool events
-	eventDataCh := make(chan []byte, eventsNumber)
+	eventDataCh := make(chan []byte, eventsNumber*2)
 	cancelFn, err := mempool.SubscribeToMessages(context.Background(), func(eventData []byte) {
 		eventDataCh <- eventData
 		wg.Done()
@@ -54,13 +57,20 @@ func TestMemPool_Run(t *testing.T) {
 
 	for i := 0; i < eventsNumber; i++ {
 		payload := []byte(fmt.Sprintf("payload-%d", i))
-		ch <- payload
+		ch <- blockchain.ExtInMsgCopy{
+			MsgBoc:  base64.StdEncoding.EncodeToString(payload),
+			Payload: payload,
+		}
 		eventData, err := json.Marshal(MessageEventData{BOC: payload})
 		require.Nil(t, err)
 		expected = append(expected, eventData)
 
 		emPayload := []byte(fmt.Sprintf("emulation-payload-%d", i))
-		emulationCh <- PayloadAndEmulationResults{Payload: emPayload, Accounts: map[tongo.AccountID]struct{}{testAccount1: {}}}
+		ch <- blockchain.ExtInMsgCopy{
+			MsgBoc:   base64.StdEncoding.EncodeToString(emPayload),
+			Payload:  emPayload,
+			Accounts: map[tongo.AccountID]struct{}{testAccount1: {}},
+		}
 		eventData, err = json.Marshal(EmulationMessageEventData{BOC: emPayload, InvolvedAccounts: []tongo.AccountID{testAccount1}})
 		require.Nil(t, err)
 		emulationExpected = append(emulationExpected, eventData)

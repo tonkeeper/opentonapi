@@ -42,11 +42,11 @@ func main() {
 	if err != nil {
 		log.Fatal("storage init", zap.Error(err))
 	}
+	// mempool receives a copy of any payload that goes through our API method /v2/blockchain/message
 	mempool := sources.NewMemPool(log)
-	// mempoolChannel receives a copy of any payload that goes through our API method /v2/blockchain/message
-	mempoolChannel, emulationCh := mempool.Run(context.TODO())
+	mempoolCh := mempool.Run(context.TODO())
 
-	msgSender, err := blockchain.NewMsgSender(cfg.App.LiteServers, []chan []byte{mempoolChannel})
+	msgSender, err := blockchain.NewMsgSender(cfg.App.LiteServers, []chan<- blockchain.ExtInMsgCopy{mempoolCh})
 	if err != nil {
 		log.Fatal("failed to create msg sender", zap.Error(err))
 	}
@@ -57,7 +57,7 @@ func main() {
 		api.WithExecutor(storage),
 		api.WithMessageSender(msgSender),
 		api.WithSpamFilter(spamFilter),
-		api.WithEmulationChannel(emulationCh),
+		api.WithEmulationChannel(mempoolCh),
 		api.WithTonConnectSecret(cfg.TonConnect.Secret),
 	)
 	if err != nil {

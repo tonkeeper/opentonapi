@@ -5,6 +5,7 @@ import (
 	"crypto/ed25519"
 	"sync"
 
+	"github.com/tonkeeper/opentonapi/pkg/blockchain"
 	rules "github.com/tonkeeper/scam_backoffice_rules"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
@@ -124,8 +125,10 @@ type chainState interface {
 
 // messageSender provides a method to send a raw message to the blockchain.
 type messageSender interface {
-	SendMessage(ctx context.Context, payload []byte) error // SendMessage sends the given payload(a message) to the blockchain.
-	MsgsBocAddToMempool(bocMsgs []string)                  // MsgsBocAddToMempool sends a list of boc to the cache for later sending
+	// SendMessage sends the given message to the blockchain.
+	SendMessage(ctx context.Context, msgCopy blockchain.ExtInMsgCopy) error
+	// SendMultipleMessages sends a list of messages to the cache for later sending.
+	SendMultipleMessages(ctx context.Context, copies []blockchain.ExtInMsgCopy)
 }
 
 // executor runs any get methods

@@ -2,7 +2,6 @@ package api
 
 import (
 	"context"
-	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -44,7 +43,6 @@ func TestHandler_DecodeMessage(t *testing.T) {
 				return
 			}
 			require.Nil(t, err)
-			fmt.Printf("response: %v\n", response)
 			pkgTesting.CompareResults(t, response, tt.filenamePrefix)
 		})
 	}

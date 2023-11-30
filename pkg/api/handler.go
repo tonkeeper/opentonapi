@@ -6,9 +6,9 @@ import (
 	"sync"
 
 	"github.com/go-faster/errors"
+	"github.com/tonkeeper/opentonapi/pkg/blockchain"
 	"github.com/tonkeeper/opentonapi/pkg/chainstate"
 	"github.com/tonkeeper/opentonapi/pkg/core"
-	"github.com/tonkeeper/opentonapi/pkg/pusher/sources"
 	"github.com/tonkeeper/opentonapi/pkg/rates"
 	"github.com/tonkeeper/opentonapi/pkg/spam"
 	"github.com/tonkeeper/tongo"
@@ -25,6 +25,9 @@ import (
 
 // Compile-time check for Handler.
 var _ oas.Handler = (*Handler)(nil)
+
+// ctxToDetails converts a request context to a details instance.
+type ctxToDetails func(ctx context.Context) any
 
 type Handler struct {
 	logger *zap.Logger
@@ -43,7 +46,9 @@ type Handler struct {
 	// mempoolEmulate contains results of emulation of messages that are in the mempool.
 	mempoolEmulate mempoolEmulate
 	// emulationCh is used to send emulation results to mempool subscribers.
-	emulationCh chan sources.PayloadAndEmulationResults
+	emulationCh chan<- blockchain.ExtInMsgCopy
+	// ctxToDetails converts a request context to a details instance.
+	ctxToDetails ctxToDetails
 
 	// mu protects "dns".
 	mu  sync.Mutex
@@ -65,7 +70,8 @@ type Options struct {
 	spamFilter       spamFilter
 	ratesSource      ratesSource
 	tonConnectSecret string
-	emulationCh      chan sources.PayloadAndEmulationResults
+	emulationCh      chan<- blockchain.ExtInMsgCopy
+	ctxToDetails     ctxToDetails
 }
 
 type Option func(o *Options)
@@ -88,7 +94,7 @@ func WithAddressBook(book addressBook) Option {
 }
 
 // WithEmulationChannel configures a channel that will be used to send emulation results to mempool subscribers.
-func WithEmulationChannel(ch chan sources.PayloadAndEmulationResults) Option {
+func WithEmulationChannel(ch chan<- blockchain.ExtInMsgCopy) Option {
 	return func(o *Options) {
 		o.emulationCh = ch
 	}
@@ -130,6 +136,12 @@ func WithTonConnectSecret(tonConnectSecret string) Option {
 	}
 }
 
+func WithContextToDetails(ctxToDetails ctxToDetails) Option {
+	return func(o *Options) {
+		o.ctxToDetails = ctxToDetails
+	}
+}
+
 func NewHandler(logger *zap.Logger, opts ...Option) (*Handler, error) {
 	options := &Options{}
 	for _, o := range opts {
@@ -157,31 +169,38 @@ func NewHandler(logger *zap.Logger, opts ...Option) (*Handler, error) {
 		return nil, fmt.Errorf("executor is not configured")
 	}
 	if options.emulationCh == nil {
-		options.emulationCh = make(chan sources.PayloadAndEmulationResults, 100)
+		emulationCh := make(chan blockchain.ExtInMsgCopy, 100)
+		options.emulationCh = emulationCh
 		go func() {
 			for {
 				select {
-				case <-options.emulationCh:
+				case <-emulationCh:
 					// drop it
 				}
 			}
 		}()
+	}
+	if options.ctxToDetails == nil {
+		options.ctxToDetails = func(ctx context.Context) any {
+			return nil
+		}
 	}
 	tonConnect, err := tonconnect.NewTonConnect(options.executor, options.tonConnectSecret)
 	if err != nil {
 		return nil, fmt.Errorf("failed to init tonconnect")
 	}
 	return &Handler{
-		logger:      logger,
-		storage:     options.storage,
-		state:       options.chainState,
-		addressBook: options.addressBook,
-		msgSender:   options.msgSender,
-		executor:    options.executor,
-		limits:      options.limits,
-		spamFilter:  options.spamFilter,
-		emulationCh: options.emulationCh,
-		ratesSource: rates.InitCalculator(options.ratesSource),
+		logger:       logger,
+		storage:      options.storage,
+		state:        options.chainState,
+		addressBook:  options.addressBook,
+		msgSender:    options.msgSender,
+		executor:     options.executor,
+		limits:       options.limits,
+		spamFilter:   options.spamFilter,
+		emulationCh:  options.emulationCh,
+		ctxToDetails: options.ctxToDetails,
+		ratesSource:  rates.InitCalculator(options.ratesSource),
 		metaCache: metadataCache{
 			collectionsCache: cache.NewLRUCache[tongo.AccountID, tep64.Metadata](10000, "nft_metadata_cache"),
 			jettonsCache:     cache.NewLRUCache[tongo.AccountID, tep64.Metadata](10000, "jetton_metadata_cache"),
