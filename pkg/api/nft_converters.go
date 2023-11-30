@@ -9,6 +9,7 @@ import (
 	"github.com/tonkeeper/opentonapi/internal/g"
 	"github.com/tonkeeper/opentonapi/pkg/bath"
 	imgGenerator "github.com/tonkeeper/opentonapi/pkg/image"
+	rules "github.com/tonkeeper/scam_backoffice_rules"
 	"github.com/tonkeeper/tongo"
 
 	"github.com/go-faster/jx"
@@ -17,14 +18,15 @@ import (
 	"github.com/tonkeeper/opentonapi/pkg/references"
 )
 
-func convertNFT(ctx context.Context, item core.NftItem, book addressBook, metaCache metadataCache) oas.NftItem {
+func (h *Handler) convertNFT(ctx context.Context, item core.NftItem, book addressBook, metaCache metadataCache) oas.NftItem {
 	i := oas.NftItem{
-		Address:  item.Address.ToRaw(),
-		Index:    item.Index.BigInt().Int64(),
-		Owner:    convertOptAccountAddress(item.OwnerAddress, book),
-		Verified: item.Verified,
-		Metadata: anyToJSONRawMap(item.Metadata),
-		DNS:      g.Opt(item.DNS),
+		Address:      item.Address.ToRaw(),
+		Index:        item.Index.BigInt().Int64(),
+		Owner:        convertOptAccountAddress(item.OwnerAddress, book),
+		Verified:     item.Verified,
+		Metadata:     anyToJSONRawMap(item.Metadata),
+		Verification: oas.NewOptVerificationType(oas.VerificationTypeNone),
+		DNS:          g.Opt(item.DNS),
 	}
 	if item.Sale != nil {
 		tokenName := "TON"
@@ -35,18 +37,15 @@ func convertNFT(ctx context.Context, item core.NftItem, book addressBook, metaCa
 				tokenName = UnknownJettonName
 			}
 		}
-		i.SetSale(oas.OptSale{
-			Value: oas.Sale{
-				Address: item.Sale.Contract.ToRaw(),
-				Market:  convertAccountAddress(item.Sale.Marketplace, book),
-				Owner:   convertOptAccountAddress(item.Sale.Seller, book),
-				Price: oas.Price{
-					Value:     fmt.Sprintf("%v", item.Sale.Price.Amount),
-					TokenName: tokenName,
-				},
-			},
-			Set: true,
-		})
+		i.SetSale(oas.NewOptSale(oas.Sale{
+			Address: item.Sale.Contract.ToRaw(),
+			Market:  convertAccountAddress(item.Sale.Marketplace, book),
+			Owner:   convertOptAccountAddress(item.Sale.Seller, book),
+			Price: oas.Price{
+				Value:     fmt.Sprintf("%v", item.Sale.Price.Amount),
+				TokenName: tokenName,
+			}},
+		))
 	}
 	var image string
 	if item.CollectionAddress != nil {
@@ -55,17 +54,12 @@ func convertNFT(ctx context.Context, item core.NftItem, book addressBook, metaCa
 				i.ApprovedBy = append(i.ApprovedBy, a)
 			}
 		}
-		cInfo, _ := metaCache.getCollectionMeta(ctx, *item.CollectionAddress)
-
-		// TODO: REMOVE, FAST HACK
-		if strings.Contains(cInfo.Description, "ton-staker.com") {
-			cInfo.Description = "SCAM"
-		}
-
+		collectionInfo, _ := metaCache.getCollectionMeta(ctx, *item.CollectionAddress)
+		collectionInfo.Description, _ = h.nftDescriptionSpamControl(collectionInfo.Description, i.ApprovedBy)
 		i.Collection.SetTo(oas.NftItemCollection{
 			Address:     item.CollectionAddress.ToRaw(),
-			Name:        cInfo.Name,
-			Description: cInfo.Description,
+			Name:        collectionInfo.Name,
+			Description: collectionInfo.Description,
 		})
 		if *item.CollectionAddress == references.RootDotTon && item.DNS != nil && item.Verified {
 			image = "https://cache.tonapi.io/dns/preview/" + *item.DNS + ".png"
@@ -77,11 +71,10 @@ func convertNFT(ctx context.Context, item core.NftItem, book addressBook, metaCa
 		if imageI, prs := item.Metadata["image"]; prs {
 			image, _ = imageI.(string)
 		}
-		// TODO: REMOVE, FAST HACK
-		if description, ok := item.Metadata["description"]; ok {
-			if value, ok := description.(string); ok && strings.Contains(value, "ton-staker.com") {
-				i.Metadata["description"] = []byte(`"SCAM"`)
-			}
+		if value, ok := item.Metadata["description"]; ok {
+			description, verificationType := h.nftDescriptionSpamControl(value.(string), i.ApprovedBy)
+			i.Verification = oas.NewOptVerificationType(oas.VerificationType(verificationType))
+			i.Metadata["description"] = []byte(description)
 		}
 	}
 	if image == "" {
@@ -97,7 +90,7 @@ func convertNFT(ctx context.Context, item core.NftItem, book addressBook, metaCa
 	return i
 }
 
-func convertNftCollection(collection core.NftCollection, book addressBook) oas.NftCollection {
+func (h *Handler) convertNftCollection(collection core.NftCollection, book addressBook) oas.NftCollection {
 	c := oas.NftCollection{
 		Address:              collection.Address.ToRaw(),
 		NextItemIndex:        int64(collection.NextItemIndex),
@@ -107,30 +100,25 @@ func convertNftCollection(collection core.NftCollection, book addressBook) oas.N
 	if len(collection.Metadata) == 0 {
 		return c
 	}
+	if known, ok := book.GetCollectionInfoByAddress(collection.Address); ok {
+		for _, a := range known.Approvers {
+			c.ApprovedBy = append(c.ApprovedBy, a)
+		}
+	}
 	metadata := map[string]jx.Raw{}
 	image := references.Placeholder
 	for k, v := range collection.Metadata {
-		// TODO: REMOVE, FAST HACK
 		if k == "description" {
-			if value, ok := v.(string); ok && strings.Contains(value, "ton-staker.com") {
-				v = "SCAM"
-			}
+			v, _ = h.nftDescriptionSpamControl(v.(string), c.ApprovedBy)
 		}
-
-		var err error
 		if k == "image" {
 			if i, ok := v.(string); ok && i != "" {
 				image = i
 			}
 		}
-		metadata[k], err = json.Marshal(v)
-		if err != nil {
+		var err error
+		if metadata[k], err = json.Marshal(v); err != nil {
 			continue
-		}
-	}
-	if known, ok := book.GetCollectionInfoByAddress(collection.Address); ok {
-		for _, a := range known.Approvers {
-			c.ApprovedBy = append(c.ApprovedBy, a)
 		}
 	}
 	c.Metadata.SetTo(metadata)
@@ -185,4 +173,19 @@ func (h *Handler) convertNftHistory(ctx context.Context, account tongo.AccountID
 	}
 
 	return events, int64(lastLT), nil
+}
+
+func (h *Handler) nftDescriptionSpamControl(description string, approvedBy oas.NftApprovedBy) (string, VerificationType) {
+	const scam = "SCAM"
+	if strings.Contains(description, "ton-staker.com") { // TODO: REMOVE, FAST HACK
+		return scam, VerificationBlacklist
+	}
+	if len(approvedBy) > 0 {
+		return description, VerificationWhitelist
+	} else {
+		if spamAction := rules.CheckAction(h.spamFilter.GetRules(), description); spamAction == rules.Drop {
+			return scam, VerificationBlacklist
+		}
+	}
+	return description, VerificationNone
 }
