@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"math"
 	"net/http"
+	"sort"
 	"strconv"
 	"time"
 
@@ -30,38 +31,43 @@ type storage interface {
 func (m *Mock) GetCurrentRates() (map[string]float64, error) {
 	rates := make(map[string]float64)
 
+	const (
+		dedust     string = "dedust"
+		stonfi     string = "stonfi"
+		megaton    string = "megaton"
+		tonstakers string = "tonstakers"
+	)
+
+	medianTonPriceToUsd, err := getMedianTonPrice()
+	if err != nil {
+		return rates, err
+	}
+
 	fiatPrices := getCoinbaseFiatPrices()
 	for currency, rate := range getExchangerateFiatPrices() {
 		if _, ok := fiatPrices[currency]; !ok {
 			fiatPrices[currency] = rate
 		}
 	}
-	tonPriceOKX := getTonOKXPrice()
-	tonPriceHuobi := getTonHuobiPrice()
-	if tonPriceOKX == 0 && tonPriceHuobi == 0 {
-		errorsCounter.WithLabelValues("ton_price").Inc()
-		return nil, fmt.Errorf("failed to get ton price")
-	}
-	meanTonPriceToUSD := (tonPriceHuobi + tonPriceOKX) / 2
 
-	pools, err := m.getDedustPool()
-	if err != nil {
-		log.Errorf("dedust pool %v", err)
-		errorsCounter.WithLabelValues("dedust").Inc()
+	pools := m.getDedustPool()
+	if len(pools) == 0 {
+		errorsCounter.WithLabelValues(dedust).Inc()
 	}
 
-	stonfiPools := getStonFiPool(meanTonPriceToUSD)
+	stonfiPools := getStonFiPool(medianTonPriceToUsd)
 	if len(stonfiPools) == 0 {
-		errorsCounter.WithLabelValues("stonfi").Inc()
+		errorsCounter.WithLabelValues(stonfi).Inc()
 	}
 	for address, price := range stonfiPools {
 		if _, ok := pools[address]; !ok {
 			pools[address] = price
 		}
 	}
-	megatonPool := getMegatonPool(meanTonPriceToUSD)
+
+	megatonPool := getMegatonPool(medianTonPriceToUsd)
 	if len(megatonPool) == 0 {
-		errorsCounter.WithLabelValues("megaton").Inc()
+		errorsCounter.WithLabelValues(megaton).Inc()
 	}
 	for address, price := range megatonPool {
 		if _, ok := pools[address]; !ok {
@@ -74,7 +80,7 @@ func (m *Mock) GetCurrentRates() (map[string]float64, error) {
 			pools[tonstakersJetton] = tonstakersPrice
 			break
 		}
-		errorsCounter.WithLabelValues("tonstakers").Inc()
+		errorsCounter.WithLabelValues(tonstakers).Inc()
 		time.Sleep(time.Second * 3)
 	}
 
@@ -82,10 +88,9 @@ func (m *Mock) GetCurrentRates() (map[string]float64, error) {
 	// For example: 1 Jetton = ... TON, 1 USD = ... TON
 	rates["TON"] = 1
 	for currency, price := range fiatPrices {
-		if price == 0 {
-			continue
+		if price != 0 {
+			rates[currency] = 1 / (price * medianTonPriceToUsd)
 		}
-		rates[currency] = 1 / (price * meanTonPriceToUSD)
 	}
 	for token, coinsCount := range pools {
 		rates[token.ToRaw()] = coinsCount
@@ -94,16 +99,40 @@ func (m *Mock) GetCurrentRates() (map[string]float64, error) {
 	return rates, nil
 }
 
+func getMedianTonPrice() (float64, error) {
+	tonPriceOKX := getTonOKXPrice()
+	tonPriceHuobi := getTonHuobiPrice()
+	tonPriceKucoin := getTonKucoinPrice()
+
+	if tonPriceOKX == 0 && tonPriceHuobi == 0 && tonPriceKucoin == 0 {
+		errorsCounter.WithLabelValues("ton_price").Inc()
+		return 0, fmt.Errorf("failed to get ton price")
+	}
+
+	prices := []float64{tonPriceOKX, tonPriceHuobi, tonPriceKucoin}
+	sort.Float64s(prices)
+
+	length := len(prices)
+	if length%2 == 0 { // if the length of the array is even, take the average of the two middle elements
+		middle1 := prices[length/2-1]
+		middle2 := prices[length/2]
+		return (middle1 + middle2) / 2, nil
+	}
+
+	// if the length of the array is odd, return the middle element.
+	return prices[length/2], nil
+}
+
 func getMegatonPool(tonPrice float64) map[ton.AccountID]float64 {
 	resp, err := http.Get("https://megaton.fi/api/token/infoList")
 	if err != nil {
-		log.Errorf("failed to fetch megaton rates: %v", err)
+		log.Errorf("[getMegatonPool] failed to fetch rates: %v", err)
 		return map[ton.AccountID]float64{}
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode >= 300 {
-		log.Errorf("invalid status code megaton rates: %v", resp.StatusCode)
+		log.Errorf("[getMegatonPool] bad status code: %v", resp.StatusCode)
 		return map[ton.AccountID]float64{}
 	}
 	var respBody []struct {
@@ -111,7 +140,7 @@ func getMegatonPool(tonPrice float64) map[ton.AccountID]float64 {
 		Price   float64 `json:"price"`
 	}
 	if err = json.NewDecoder(resp.Body).Decode(&respBody); err != nil {
-		log.Errorf("failed to decode response: %v", err)
+		log.Errorf("[getMegatonPool] failed to decode response: %v", err)
 		return map[ton.AccountID]float64{}
 	}
 
@@ -130,10 +159,15 @@ func getMegatonPool(tonPrice float64) map[ton.AccountID]float64 {
 func getStonFiPool(tonPrice float64) map[ton.AccountID]float64 {
 	resp, err := http.Get("https://api.ston.fi/v1/assets")
 	if err != nil {
-		log.Errorf("failed to fetch stonfi rates: %v", err)
+		log.Errorf("[getStonFiPool] failed to fetch rates: %v", err)
 		return map[ton.AccountID]float64{}
 	}
 	defer resp.Body.Close()
+
+	if resp.StatusCode >= 300 {
+		log.Errorf("[getStonFiPool] bad status code: %v", resp.StatusCode)
+		return map[ton.AccountID]float64{}
+	}
 
 	var respBody struct {
 		AssetList []struct {
@@ -142,7 +176,7 @@ func getStonFiPool(tonPrice float64) map[ton.AccountID]float64 {
 		} `json:"asset_list"`
 	}
 	if err = json.NewDecoder(resp.Body).Decode(&respBody); err != nil {
-		log.Errorf("failed to decode response: %v", err)
+		log.Errorf("[getStonFiPool] failed to decode response: %v", err)
 		return map[ton.AccountID]float64{}
 	}
 
@@ -163,13 +197,18 @@ func getStonFiPool(tonPrice float64) map[ton.AccountID]float64 {
 	return mapOfPool
 }
 
-func (m *Mock) getDedustPool() (map[ton.AccountID]float64, error) {
+func (m *Mock) getDedustPool() map[ton.AccountID]float64 {
 	resp, err := http.Get("https://api.dedust.io/v2/pools")
 	if err != nil {
-		log.Errorf("failed to fetch dedust rates: %v", err)
-		return map[ton.AccountID]float64{}, err
+		log.Errorf("[getDedustPool] failed to fetch rates: %v", err)
+		return map[ton.AccountID]float64{}
 	}
 	defer resp.Body.Close()
+
+	if resp.StatusCode >= 300 {
+		log.Errorf("[getDedustPool] bad status code: %v", resp.StatusCode)
+		return map[ton.AccountID]float64{}
+	}
 
 	type Pool struct {
 		TotalSupply string `json:"totalSupply"`
@@ -185,8 +224,8 @@ func (m *Mock) getDedustPool() (map[ton.AccountID]float64, error) {
 
 	var respBody []Pool
 	if err = json.NewDecoder(resp.Body).Decode(&respBody); err != nil {
-		log.Errorf("failed to decode response: %v", err)
-		return map[ton.AccountID]float64{}, err
+		log.Errorf("[getDedustPool] failed to decode response: %v", err)
+		return map[ton.AccountID]float64{}
 	}
 
 	mapOfPool := make(map[ton.AccountID]float64)
@@ -234,16 +273,21 @@ func (m *Mock) getDedustPool() (map[ton.AccountID]float64, error) {
 		mapOfPool[account.ID] = price
 	}
 
-	return mapOfPool, nil
+	return mapOfPool
 }
 
 func getTonHuobiPrice() float64 {
 	resp, err := http.Get("https://api.huobi.pro/market/trade?symbol=tonusdt")
 	if err != nil {
-		log.Errorf("can't load huobi price")
+		log.Errorf("[getTonHuobiPrice] can't load price")
 		return 0
 	}
 	defer resp.Body.Close()
+
+	if resp.StatusCode >= 300 {
+		log.Errorf("[getTonHuobiPrice] bad status code: %v", resp.StatusCode)
+		return 0
+	}
 
 	var respBody struct {
 		Status string `json:"status"`
@@ -257,28 +301,75 @@ func getTonHuobiPrice() float64 {
 	}
 
 	if err = json.NewDecoder(resp.Body).Decode(&respBody); err != nil {
-		log.Errorf("failed to decode response: %v", err)
+		log.Errorf("[getTonHuobiPrice] failed to decode response: %v", err)
 		return 0
 	}
 	if respBody.Status != "ok" {
-		log.Errorf("failed to get huobi price: %v", err)
+		log.Errorf("[getTonHuobiPrice] failed to get price: %v", err)
 		return 0
 	}
 	if len(respBody.Tick.Data) == 0 {
-		log.Errorf("invalid price")
+		log.Errorf("[getTonHuobiPrice] empty data")
 		return 0
 	}
 
 	return respBody.Tick.Data[0].Price
 }
 
-func getTonOKXPrice() float64 {
-	resp, err := http.Get("https://www.okx.com/api/v5/market/ticker?instId=TON-USDT")
+func getTonKucoinPrice() float64 {
+	resp, err := http.Get("https://www.kucoin.com/_api/trade-front/market/getSymbolTick?symbols=TON-USDT")
 	if err != nil {
-		log.Errorf("can't load okx price")
+		log.Errorf("[getTonKucoinPrice] can't load price")
 		return 0
 	}
 	defer resp.Body.Close()
+
+	if resp.StatusCode >= 300 {
+		log.Errorf("[getTonKucoinPrice] bad status code: %v", resp.StatusCode)
+		return 0
+	}
+
+	var respBody struct {
+		Success bool `json:"success"`
+		Data    []struct {
+			LastTradedPrice string `json:"lastTradedPrice"`
+		} `json:"data"`
+	}
+
+	if err = json.NewDecoder(resp.Body).Decode(&respBody); err != nil {
+		log.Errorf("[getTonKucoinPrice] failed to decode response: %v", err)
+		return 0
+	}
+	if !respBody.Success {
+		log.Errorf("[getTonKucoinPrice] unsuccess response")
+		return 0
+	}
+	if len(respBody.Data) == 0 {
+		log.Errorf("[getTonKucoinPrice] empty data")
+		return 0
+	}
+
+	price, err := strconv.ParseFloat(respBody.Data[0].LastTradedPrice, 64)
+	if err != nil {
+		log.Errorf("[getTonKucoinPrice] invalid price")
+		return 0
+	}
+
+	return price
+}
+
+func getTonOKXPrice() float64 {
+	resp, err := http.Get("https://www.okx.com/api/v5/market/ticker?instId=TON-USDT")
+	if err != nil {
+		log.Errorf("[getTonOKXPrice] can't load price")
+		return 0
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode >= 300 {
+		log.Errorf("[getTonOKXPrice] bad status code: %v", resp.StatusCode)
+		return 0
+	}
 
 	var respBody struct {
 		Code string `json:"code"`
@@ -288,21 +379,21 @@ func getTonOKXPrice() float64 {
 	}
 
 	if err = json.NewDecoder(resp.Body).Decode(&respBody); err != nil {
-		log.Errorf("failed to decode response: %v", err)
+		log.Errorf("[getTonOKXPrice] failed to decode response: %v", err)
 		return 0
 	}
 	if respBody.Code != "0" {
-		log.Errorf("failed to get okx price: %v", err)
+		log.Errorf("[getTonOKXPrice] failed to get price: %v", err)
 		return 0
 	}
 	if len(respBody.Data) == 0 {
-		log.Errorf("invalid price")
+		log.Errorf("[getTonOKXPrice] empty data")
 		return 0
 	}
 
 	price, err := strconv.ParseFloat(respBody.Data[0].Last, 64)
 	if err != nil {
-		log.Errorf("invalid price")
+		log.Errorf("[getTonOKXPrice] invalid price")
 		return 0
 	}
 
@@ -312,16 +403,21 @@ func getTonOKXPrice() float64 {
 func getExchangerateFiatPrices() map[string]float64 {
 	resp, err := http.Get("https://api.exchangerate.host/latest?base=USD")
 	if err != nil {
-		log.Errorf("can't load exchangerate prices")
+		log.Errorf("[getExchangerateFiatPrices] can't load prices")
 		return map[string]float64{}
 	}
 	defer resp.Body.Close()
+
+	if resp.StatusCode >= 300 {
+		log.Errorf("[getExchangerateFiatPrices] bad status code: %v", resp.StatusCode)
+		return map[string]float64{}
+	}
 
 	var respBody struct {
 		Rates map[string]float64 `json:"rates"`
 	}
 	if err = json.NewDecoder(resp.Body).Decode(&respBody); err != nil {
-		log.Errorf("failed to decode response: %v", err)
+		log.Errorf("[getExchangerateFiatPrices] failed to decode response: %v", err)
 		return map[string]float64{}
 	}
 
@@ -336,10 +432,15 @@ func getExchangerateFiatPrices() map[string]float64 {
 func getCoinbaseFiatPrices() map[string]float64 {
 	resp, err := http.Get("https://api.coinbase.com/v2/exchange-rates?currency=USD")
 	if err != nil {
-		log.Errorf("can't load coinbase prices")
+		log.Errorf("[getCoinbaseFiatPrices] can't load prices")
 		return map[string]float64{}
 	}
 	defer resp.Body.Close()
+
+	if resp.StatusCode >= 300 {
+		log.Errorf("[getCoinbaseFiatPrices] bad status code: %v", resp.StatusCode)
+		return map[string]float64{}
+	}
 
 	var respBody struct {
 		Data struct {
@@ -347,7 +448,7 @@ func getCoinbaseFiatPrices() map[string]float64 {
 		} `json:"data"`
 	}
 	if err = json.NewDecoder(resp.Body).Decode(&respBody); err != nil {
-		log.Errorf("failed to decode response: %v", err)
+		log.Errorf("[getCoinbaseFiatPrices] failed to decode response: %v", err)
 		return map[string]float64{}
 	}
 
@@ -366,7 +467,7 @@ func getCoinbaseFiatPrices() map[string]float64 {
 func getTonstakersPrice(pool tongo.AccountID) (tongo.AccountID, float64, error) {
 	resp, err := http.Get(fmt.Sprintf("https://tonapi.io/v2/blockchain/accounts/%v/methods/get_pool_full_data", pool.ToRaw()))
 	if err != nil {
-		log.Errorf("can't load tonstakers price")
+		log.Errorf("[getTonstakersPrice] can't load price")
 		return tongo.AccountID{}, 0, err
 	}
 	defer resp.Body.Close()
@@ -383,7 +484,7 @@ func getTonstakersPrice(pool tongo.AccountID) (tongo.AccountID, float64, error) 
 		}
 	}
 	if err = json.NewDecoder(resp.Body).Decode(&respBody); err != nil {
-		log.Errorf("failed to decode response: %v", err)
+		log.Errorf("[getTonstakersPrice] failed to decode response: %v", err)
 		return tongo.AccountID{}, 0, err
 	}
 
