@@ -110,7 +110,12 @@ func (ms *MsgSender) SendMessage(ctx context.Context, msgCopy ExtInMsgCopy) erro
 		return err
 	}
 	for _, ch := range ms.receivers {
-		ch <- msgCopy
+		select {
+		case ch <- msgCopy:
+		default:
+
+		}
+
 	}
 	_, err := ms.client.SendMessage(ctx, msgCopy.Payload)
 	return err
