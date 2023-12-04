@@ -194,6 +194,10 @@ func stringToTVMStackRecord(s string) (tlb.VmStackValue, error) {
 		}
 		return tlb.VmStackValue{SumType: "VmStkTinyInt", VmStkTinyInt: i}, nil
 	}
+	cells, err := boc.DeserializeBocHex(s)
+	if err == nil && len(cells) == 1 {
+		return tlb.CellToVmCellSlice(cells[0])
+	}
 	c, err := boc.DeserializeSinglRootBase64(s)
 	if err != nil {
 		return tlb.VmStackValue{}, err

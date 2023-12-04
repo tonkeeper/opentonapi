@@ -216,6 +216,14 @@ type Handler interface {
 	//
 	// GET /v2/blockchain/masterchain/{masterchain_seqno}/config
 	GetBlockchainConfigFromBlock(ctx context.Context, params GetBlockchainConfigFromBlockParams) (*BlockchainConfig, error)
+	// GetBlockchainMasterchainBlocks implements getBlockchainMasterchainBlocks operation.
+	//
+	// Get all blocks in all shards and workchains between target and previous masterchain block
+	// according to shards last blocks snapshot in masterchain.  We don't recommend to build your app
+	// around this method because it has problem with scalability and will work very slow in the future.
+	//
+	// GET /v2/blockchain/masterchain/{masterchain_seqno}/blocks
+	GetBlockchainMasterchainBlocks(ctx context.Context, params GetBlockchainMasterchainBlocksParams) (*BlockchainBlocks, error)
 	// GetBlockchainMasterchainHead implements getBlockchainMasterchainHead operation.
 	//
 	// Get last known masterchain block.
@@ -228,6 +236,14 @@ type Handler interface {
 	//
 	// GET /v2/blockchain/masterchain/{masterchain_seqno}/shards
 	GetBlockchainMasterchainShards(ctx context.Context, params GetBlockchainMasterchainShardsParams) (*BlockchainBlockShards, error)
+	// GetBlockchainMasterchainTransactions implements getBlockchainMasterchainTransactions operation.
+	//
+	// Get all transactions in all shards and workchains between target and previous masterchain block
+	// according to shards last blocks snapshot in masterchain. We don't recommend to build your app
+	// around this method because it has problem with scalability and will work very slow in the future.
+	//
+	// GET /v2/blockchain/masterchain/{masterchain_seqno}/transactions
+	GetBlockchainMasterchainTransactions(ctx context.Context, params GetBlockchainMasterchainTransactionsParams) (*Transactions, error)
 	// GetBlockchainRawAccount implements getBlockchainRawAccount operation.
 	//
 	// Get low-level information about an account taken directly from the blockchain.

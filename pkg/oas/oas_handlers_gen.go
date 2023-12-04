@@ -4211,6 +4211,125 @@ func (s *Server) handleGetBlockchainConfigFromBlockRequest(args [1]string, argsE
 	}
 }
 
+// handleGetBlockchainMasterchainBlocksRequest handles getBlockchainMasterchainBlocks operation.
+//
+// Get all blocks in all shards and workchains between target and previous masterchain block
+// according to shards last blocks snapshot in masterchain.  We don't recommend to build your app
+// around this method because it has problem with scalability and will work very slow in the future.
+//
+// GET /v2/blockchain/masterchain/{masterchain_seqno}/blocks
+func (s *Server) handleGetBlockchainMasterchainBlocksRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("getBlockchainMasterchainBlocks"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/blockchain/masterchain/{masterchain_seqno}/blocks"),
+	}
+
+	// Start a span for this request.
+	ctx, span := s.cfg.Tracer.Start(r.Context(), "GetBlockchainMasterchainBlocks",
+		trace.WithAttributes(otelAttrs...),
+		serverSpanKind,
+	)
+	defer span.End()
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		elapsedDuration := time.Since(startTime)
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		s.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	s.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	var (
+		recordError = func(stage string, err error) {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			s.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		err          error
+		opErrContext = ogenerrors.OperationContext{
+			Name: "GetBlockchainMasterchainBlocks",
+			ID:   "getBlockchainMasterchainBlocks",
+		}
+	)
+	params, err := decodeGetBlockchainMasterchainBlocksParams(args, argsEscaped, r)
+	if err != nil {
+		err = &ogenerrors.DecodeParamsError{
+			OperationContext: opErrContext,
+			Err:              err,
+		}
+		recordError("DecodeParams", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+
+	var response *BlockchainBlocks
+	if m := s.cfg.Middleware; m != nil {
+		mreq := middleware.Request{
+			Context:          ctx,
+			OperationName:    "GetBlockchainMasterchainBlocks",
+			OperationSummary: "",
+			OperationID:      "getBlockchainMasterchainBlocks",
+			Body:             nil,
+			Params: middleware.Parameters{
+				{
+					Name: "masterchain_seqno",
+					In:   "path",
+				}: params.MasterchainSeqno,
+			},
+			Raw: r,
+		}
+
+		type (
+			Request  = struct{}
+			Params   = GetBlockchainMasterchainBlocksParams
+			Response = *BlockchainBlocks
+		)
+		response, err = middleware.HookMiddleware[
+			Request,
+			Params,
+			Response,
+		](
+			m,
+			mreq,
+			unpackGetBlockchainMasterchainBlocksParams,
+			func(ctx context.Context, request Request, params Params) (response Response, err error) {
+				response, err = s.h.GetBlockchainMasterchainBlocks(ctx, params)
+				return response, err
+			},
+		)
+	} else {
+		response, err = s.h.GetBlockchainMasterchainBlocks(ctx, params)
+	}
+	if err != nil {
+		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
+			if err := encodeErrorResponse(errRes, w, span); err != nil {
+				recordError("Internal", err)
+			}
+			return
+		}
+		if errors.Is(err, ht.ErrNotImplemented) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
+			recordError("Internal", err)
+		}
+		return
+	}
+
+	if err := encodeGetBlockchainMasterchainBlocksResponse(response, w, span); err != nil {
+		recordError("EncodeResponse", err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
+		return
+	}
+}
+
 // handleGetBlockchainMasterchainHeadRequest handles getBlockchainMasterchainHead operation.
 //
 // Get last known masterchain block.
@@ -4418,6 +4537,125 @@ func (s *Server) handleGetBlockchainMasterchainShardsRequest(args [1]string, arg
 	}
 
 	if err := encodeGetBlockchainMasterchainShardsResponse(response, w, span); err != nil {
+		recordError("EncodeResponse", err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
+		return
+	}
+}
+
+// handleGetBlockchainMasterchainTransactionsRequest handles getBlockchainMasterchainTransactions operation.
+//
+// Get all transactions in all shards and workchains between target and previous masterchain block
+// according to shards last blocks snapshot in masterchain. We don't recommend to build your app
+// around this method because it has problem with scalability and will work very slow in the future.
+//
+// GET /v2/blockchain/masterchain/{masterchain_seqno}/transactions
+func (s *Server) handleGetBlockchainMasterchainTransactionsRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("getBlockchainMasterchainTransactions"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/blockchain/masterchain/{masterchain_seqno}/transactions"),
+	}
+
+	// Start a span for this request.
+	ctx, span := s.cfg.Tracer.Start(r.Context(), "GetBlockchainMasterchainTransactions",
+		trace.WithAttributes(otelAttrs...),
+		serverSpanKind,
+	)
+	defer span.End()
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		elapsedDuration := time.Since(startTime)
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		s.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	s.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	var (
+		recordError = func(stage string, err error) {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			s.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		err          error
+		opErrContext = ogenerrors.OperationContext{
+			Name: "GetBlockchainMasterchainTransactions",
+			ID:   "getBlockchainMasterchainTransactions",
+		}
+	)
+	params, err := decodeGetBlockchainMasterchainTransactionsParams(args, argsEscaped, r)
+	if err != nil {
+		err = &ogenerrors.DecodeParamsError{
+			OperationContext: opErrContext,
+			Err:              err,
+		}
+		recordError("DecodeParams", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+
+	var response *Transactions
+	if m := s.cfg.Middleware; m != nil {
+		mreq := middleware.Request{
+			Context:          ctx,
+			OperationName:    "GetBlockchainMasterchainTransactions",
+			OperationSummary: "",
+			OperationID:      "getBlockchainMasterchainTransactions",
+			Body:             nil,
+			Params: middleware.Parameters{
+				{
+					Name: "masterchain_seqno",
+					In:   "path",
+				}: params.MasterchainSeqno,
+			},
+			Raw: r,
+		}
+
+		type (
+			Request  = struct{}
+			Params   = GetBlockchainMasterchainTransactionsParams
+			Response = *Transactions
+		)
+		response, err = middleware.HookMiddleware[
+			Request,
+			Params,
+			Response,
+		](
+			m,
+			mreq,
+			unpackGetBlockchainMasterchainTransactionsParams,
+			func(ctx context.Context, request Request, params Params) (response Response, err error) {
+				response, err = s.h.GetBlockchainMasterchainTransactions(ctx, params)
+				return response, err
+			},
+		)
+	} else {
+		response, err = s.h.GetBlockchainMasterchainTransactions(ctx, params)
+	}
+	if err != nil {
+		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
+			if err := encodeErrorResponse(errRes, w, span); err != nil {
+				recordError("Internal", err)
+			}
+			return
+		}
+		if errors.Is(err, ht.ErrNotImplemented) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
+			recordError("Internal", err)
+		}
+		return
+	}
+
+	if err := encodeGetBlockchainMasterchainTransactionsResponse(response, w, span); err != nil {
 		recordError("EncodeResponse", err)
 		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
 			s.cfg.ErrorHandler(ctx, w, r, err)

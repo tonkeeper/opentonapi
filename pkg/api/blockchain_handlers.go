@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"golang.org/x/exp/maps"
 	"net/http"
 
 	"github.com/tonkeeper/tongo/contract/elector"
@@ -37,6 +38,9 @@ func (h *Handler) GetBlockchainBlock(ctx context.Context, params oas.GetBlockcha
 
 func (h *Handler) GetBlockchainMasterchainShards(ctx context.Context, params oas.GetBlockchainMasterchainShardsParams) (r *oas.BlockchainBlockShards, _ error) {
 	shards, err := h.storage.GetBlockShards(ctx, ton.BlockID{Shard: 0x8000000000000000, Seqno: uint32(params.MasterchainSeqno), Workchain: -1})
+	if errors.Is(err, core.ErrEntityNotFound) {
+		return nil, toError(http.StatusNotFound, err)
+	}
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
@@ -49,6 +53,102 @@ func (h *Handler) GetBlockchainMasterchainShards(ctx context.Context, params oas
 		}
 	}
 	return &res, nil
+}
+
+func (h *Handler) blocksDiff(ctx context.Context, masterchainSeqno int32) ([]ton.BlockID, error) {
+	shards, err := h.storage.GetBlockShards(ctx, ton.BlockID{Shard: 0x8000000000000000, Seqno: uint32(masterchainSeqno), Workchain: -1})
+	if errors.Is(err, core.ErrEntityNotFound) {
+		return nil, toError(http.StatusNotFound, err)
+	}
+	if err != nil {
+		return nil, toError(http.StatusInternalServerError, err)
+	}
+	prevShards, err := h.storage.GetBlockShards(ctx, ton.BlockID{Shard: 0x8000000000000000, Seqno: uint32(masterchainSeqno) - 1, Workchain: -1})
+	if errors.Is(err, core.ErrEntityNotFound) {
+		return nil, toError(http.StatusNotFound, err)
+	}
+	if err != nil {
+		return nil, toError(http.StatusInternalServerError, err)
+	}
+	blocks := []ton.BlockID{{Shard: 0x8000000000000000, Seqno: uint32(masterchainSeqno), Workchain: -1}}
+
+	for _, s := range shards {
+		missedBlocks, err := findMissedBlocks(ctx, h.storage, s, prevShards)
+		if err != nil {
+			return nil, err
+		}
+		blocks = append(blocks, missedBlocks...)
+	}
+
+	return blocks, nil
+}
+
+func findMissedBlocks(ctx context.Context, s storage, id ton.BlockID, prev []ton.BlockID) ([]ton.BlockID, error) {
+	for _, p := range prev {
+		if id.Shard == p.Shard && id.Workchain == p.Workchain {
+			blocks := make([]ton.BlockID, 0, int(id.Seqno-p.Seqno))
+			for i := p.Seqno; i < id.Seqno; i++ {
+				blocks = append(blocks, ton.BlockID{Workchain: p.Workchain, Shard: p.Shard, Seqno: i})
+			}
+			return blocks, nil
+		}
+	}
+	blocks := []ton.BlockID{id}
+	header, err := s.GetBlockHeader(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	for _, p := range header.PrevBlocks {
+		missed, err := findMissedBlocks(ctx, s, p.BlockID, prev)
+		if err != nil {
+			return nil, err
+		}
+		blocks = append(blocks, missed...)
+	}
+	uniq := make(map[ton.BlockID]struct{}, len(blocks))
+	for i := range blocks {
+		uniq[blocks[i]] = struct{}{}
+	}
+	if len(blocks) == len(uniq) {
+		return blocks, nil
+	}
+	return maps.Keys(uniq), nil
+}
+
+func (h *Handler) GetBlockchainMasterchainBlocks(ctx context.Context, params oas.GetBlockchainMasterchainBlocksParams) (*oas.BlockchainBlocks, error) {
+	blockIDs, err := h.blocksDiff(ctx, params.MasterchainSeqno)
+	if err != nil {
+		return nil, err
+	}
+	result := oas.BlockchainBlocks{
+		Blocks: make([]oas.BlockchainBlock, len(blockIDs)),
+	}
+	for i, id := range blockIDs {
+		block, err := h.storage.GetBlockHeader(ctx, id)
+		if err != nil {
+			return nil, toError(http.StatusInternalServerError, err) //block should be in db so we shouldn't check notFound error
+		}
+		result.Blocks[i] = convertBlockHeader(*block)
+	}
+	return &result, nil
+}
+
+func (h *Handler) GetBlockchainMasterchainTransactions(ctx context.Context, params oas.GetBlockchainMasterchainTransactionsParams) (*oas.Transactions, error) {
+	blockIDs, err := h.blocksDiff(ctx, params.MasterchainSeqno)
+	if err != nil {
+		return nil, err
+	}
+	var result oas.Transactions
+	for _, id := range blockIDs {
+		txs, err := h.storage.GetBlockTransactions(ctx, id)
+		if err != nil {
+			return nil, toError(http.StatusInternalServerError, err)
+		}
+		for _, tx := range txs {
+			result.Transactions = append(result.Transactions, convertTransaction(*tx, h.addressBook))
+		}
+	}
+	return &result, nil
 }
 
 func (h *Handler) GetBlockchainBlockTransactions(ctx context.Context, params oas.GetBlockchainBlockTransactionsParams) (*oas.Transactions, error) {

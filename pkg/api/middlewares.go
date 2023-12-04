@@ -4,13 +4,12 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"net/http"
-
 	"github.com/ogen-go/ogen/middleware"
 	"github.com/ogen-go/ogen/ogenerrors"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	"go.uber.org/zap"
+	"net/http"
 )
 
 func ogenLoggingMiddleware(logger *zap.Logger) middleware.Middleware {
@@ -24,13 +23,7 @@ func ogenLoggingMiddleware(logger *zap.Logger) middleware.Middleware {
 		if err != nil {
 			logger.Info("Fail", zap.Error(err))
 		} else {
-			var fields []zap.Field
-			if tresp, ok := resp.Type.(interface{ GetStatusCode() int }); ok {
-				fields = []zap.Field{
-					zap.Int("status_code", tresp.GetStatusCode()),
-				}
-			}
-			logger.Info("Success", fields...)
+			logger.Info("Success")
 		}
 		return resp, err
 	}

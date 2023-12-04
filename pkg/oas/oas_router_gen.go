@@ -838,6 +838,26 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 									break
 								}
 								switch elem[0] {
+								case 'b': // Prefix: "blocks"
+									if l := len("blocks"); len(elem) >= l && elem[0:l] == "blocks" {
+										elem = elem[l:]
+									} else {
+										break
+									}
+
+									if len(elem) == 0 {
+										// Leaf node.
+										switch r.Method {
+										case "GET":
+											s.handleGetBlockchainMasterchainBlocksRequest([1]string{
+												args[0],
+											}, elemIsEscaped, w, r)
+										default:
+											s.notAllowed(w, r, "GET")
+										}
+
+										return
+									}
 								case 'c': // Prefix: "config"
 									if l := len("config"); len(elem) >= l && elem[0:l] == "config" {
 										elem = elem[l:]
@@ -891,6 +911,26 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 										switch r.Method {
 										case "GET":
 											s.handleGetBlockchainMasterchainShardsRequest([1]string{
+												args[0],
+											}, elemIsEscaped, w, r)
+										default:
+											s.notAllowed(w, r, "GET")
+										}
+
+										return
+									}
+								case 't': // Prefix: "transactions"
+									if l := len("transactions"); len(elem) >= l && elem[0:l] == "transactions" {
+										elem = elem[l:]
+									} else {
+										break
+									}
+
+									if len(elem) == 0 {
+										// Leaf node.
+										switch r.Method {
+										case "GET":
+											s.handleGetBlockchainMasterchainTransactionsRequest([1]string{
 												args[0],
 											}, elemIsEscaped, w, r)
 										default:
@@ -3235,6 +3275,28 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 									break
 								}
 								switch elem[0] {
+								case 'b': // Prefix: "blocks"
+									if l := len("blocks"); len(elem) >= l && elem[0:l] == "blocks" {
+										elem = elem[l:]
+									} else {
+										break
+									}
+
+									if len(elem) == 0 {
+										switch method {
+										case "GET":
+											// Leaf: GetBlockchainMasterchainBlocks
+											r.name = "GetBlockchainMasterchainBlocks"
+											r.summary = ""
+											r.operationID = "getBlockchainMasterchainBlocks"
+											r.pathPattern = "/v2/blockchain/masterchain/{masterchain_seqno}/blocks"
+											r.args = args
+											r.count = 1
+											return r, true
+										default:
+											return
+										}
+									}
 								case 'c': // Prefix: "config"
 									if l := len("config"); len(elem) >= l && elem[0:l] == "config" {
 										elem = elem[l:]
@@ -3295,6 +3357,28 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 											r.summary = ""
 											r.operationID = "getBlockchainMasterchainShards"
 											r.pathPattern = "/v2/blockchain/masterchain/{masterchain_seqno}/shards"
+											r.args = args
+											r.count = 1
+											return r, true
+										default:
+											return
+										}
+									}
+								case 't': // Prefix: "transactions"
+									if l := len("transactions"); len(elem) >= l && elem[0:l] == "transactions" {
+										elem = elem[l:]
+									} else {
+										break
+									}
+
+									if len(elem) == 0 {
+										switch method {
+										case "GET":
+											// Leaf: GetBlockchainMasterchainTransactions
+											r.name = "GetBlockchainMasterchainTransactions"
+											r.summary = ""
+											r.operationID = "getBlockchainMasterchainTransactions"
+											r.pathPattern = "/v2/blockchain/masterchain/{masterchain_seqno}/transactions"
 											r.args = args
 											r.count = 1
 											return r, true

@@ -2276,6 +2276,21 @@ func (s *BlockchainBlockShardsShardsItem) SetLastKnownBlockID(val string) {
 	s.LastKnownBlockID = val
 }
 
+// Ref: #/components/schemas/BlockchainBlocks
+type BlockchainBlocks struct {
+	Blocks []BlockchainBlock `json:"blocks"`
+}
+
+// GetBlocks returns the value of Blocks.
+func (s *BlockchainBlocks) GetBlocks() []BlockchainBlock {
+	return s.Blocks
+}
+
+// SetBlocks sets the value of Blocks.
+func (s *BlockchainBlocks) SetBlocks(val []BlockchainBlock) {
+	s.Blocks = val
+}
+
 // Ref: #/components/schemas/BlockchainConfig
 type BlockchainConfig struct {
 	// Config boc in base64 format.

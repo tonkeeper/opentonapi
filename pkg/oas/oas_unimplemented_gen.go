@@ -323,6 +323,17 @@ func (UnimplementedHandler) GetBlockchainConfigFromBlock(ctx context.Context, pa
 	return r, ht.ErrNotImplemented
 }
 
+// GetBlockchainMasterchainBlocks implements getBlockchainMasterchainBlocks operation.
+//
+// Get all blocks in all shards and workchains between target and previous masterchain block
+// according to shards last blocks snapshot in masterchain.  We don't recommend to build your app
+// around this method because it has problem with scalability and will work very slow in the future.
+//
+// GET /v2/blockchain/masterchain/{masterchain_seqno}/blocks
+func (UnimplementedHandler) GetBlockchainMasterchainBlocks(ctx context.Context, params GetBlockchainMasterchainBlocksParams) (r *BlockchainBlocks, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // GetBlockchainMasterchainHead implements getBlockchainMasterchainHead operation.
 //
 // Get last known masterchain block.
@@ -338,6 +349,17 @@ func (UnimplementedHandler) GetBlockchainMasterchainHead(ctx context.Context) (r
 //
 // GET /v2/blockchain/masterchain/{masterchain_seqno}/shards
 func (UnimplementedHandler) GetBlockchainMasterchainShards(ctx context.Context, params GetBlockchainMasterchainShardsParams) (r *BlockchainBlockShards, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// GetBlockchainMasterchainTransactions implements getBlockchainMasterchainTransactions operation.
+//
+// Get all transactions in all shards and workchains between target and previous masterchain block
+// according to shards last blocks snapshot in masterchain. We don't recommend to build your app
+// around this method because it has problem with scalability and will work very slow in the future.
+//
+// GET /v2/blockchain/masterchain/{masterchain_seqno}/transactions
+func (UnimplementedHandler) GetBlockchainMasterchainTransactions(ctx context.Context, params GetBlockchainMasterchainTransactionsParams) (r *Transactions, _ error) {
 	return r, ht.ErrNotImplemented
 }
 

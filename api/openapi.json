@@ -1569,6 +1569,20 @@
     ],
     "type": "object"
    },
+   "BlockchainBlocks": {
+    "properties": {
+     "blocks": {
+      "items": {
+       "$ref": "#/components/schemas/BlockchainBlock"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "blocks"
+    ],
+    "type": "object"
+   },
    "BlockchainConfig": {
     "properties": {
      "0": {
@@ -6385,6 +6399,35 @@
     ]
    }
   },
+  "/v2/blockchain/masterchain/{masterchain_seqno}/blocks": {
+   "get": {
+    "description": "Get all blocks in all shards and workchains between target and previous masterchain block according to shards last blocks snapshot in masterchain.  We don't recommend to build your app around this method because it has problem with scalability and will work very slow in the future.",
+    "operationId": "getBlockchainMasterchainBlocks",
+    "parameters": [
+     {
+      "$ref": "#/components/parameters/masterchainSeqno"
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/BlockchainBlocks"
+        }
+       }
+      },
+      "description": "blockchain blocks"
+     },
+     "default": {
+      "$ref": "#/components/responses/Error"
+     }
+    },
+    "tags": [
+     "Blockchain"
+    ]
+   }
+  },
   "/v2/blockchain/masterchain/{masterchain_seqno}/config": {
    "get": {
     "description": "Get blockchain config from a specific block, if present.",
@@ -6462,6 +6505,35 @@
        }
       },
       "description": "blockchain block shards"
+     },
+     "default": {
+      "$ref": "#/components/responses/Error"
+     }
+    },
+    "tags": [
+     "Blockchain"
+    ]
+   }
+  },
+  "/v2/blockchain/masterchain/{masterchain_seqno}/transactions": {
+   "get": {
+    "description": "Get all transactions in all shards and workchains between target and previous masterchain block according to shards last blocks snapshot in masterchain. We don't recommend to build your app around this method because it has problem with scalability and will work very slow in the future.",
+    "operationId": "getBlockchainMasterchainTransactions",
+    "parameters": [
+     {
+      "$ref": "#/components/parameters/masterchainSeqno"
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Transactions"
+        }
+       }
+      },
+      "description": "blockchain transactions"
      },
      "default": {
       "$ref": "#/components/responses/Error"

@@ -45,6 +45,40 @@ paths:
                   $ref: '#/components/schemas/BlockchainBlockShards'
           'default':
             $ref: '#/components/responses/Error'
+  /v2/blockchain/masterchain/{masterchain_seqno}/blocks:
+    get:
+      description: Get all blocks in all shards and workchains between target and previous masterchain block according to shards last blocks snapshot in masterchain.  We don't recommend to build your app around this method because it has problem with scalability and will work very slow in the future.
+      operationId: getBlockchainMasterchainBlocks
+      tags:
+          - Blockchain
+      parameters:
+        - $ref: '#/components/parameters/masterchainSeqno'
+      responses:
+          '200':
+            description: blockchain blocks
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/BlockchainBlocks'
+          'default':
+            $ref: '#/components/responses/Error'
+  /v2/blockchain/masterchain/{masterchain_seqno}/transactions:
+    get:
+      description: Get all transactions in all shards and workchains between target and previous masterchain block according to shards last blocks snapshot in masterchain. We don't recommend to build your app around this method because it has problem with scalability and will work very slow in the future.
+      operationId: getBlockchainMasterchainTransactions
+      tags:
+          - Blockchain
+      parameters:
+        - $ref: '#/components/parameters/masterchainSeqno'
+      responses:
+          '200':
+            description: blockchain transactions
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Transactions'
+          'default':
+            $ref: '#/components/responses/Error'
   /v2/blockchain/masterchain/{masterchain_seqno}/config:
     get:
       description: Get blockchain config from a specific block, if present.
@@ -2889,6 +2923,15 @@ components:
         created_by:
           type: string
           example: A6A0BD6608672B11B79538A50B2204E748305C12AA0DED9C16CF0006CE3AF8DB
+    BlockchainBlocks:
+      type: object
+      required:
+        - blocks
+      properties:
+        blocks:
+          type: array
+          items:
+            $ref: '#/components/schemas/BlockchainBlock'
     BlockchainBlockShards:
       type: object
       required:
