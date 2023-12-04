@@ -2923,6 +2923,8 @@ components:
     Message:
       type: object
       required:
+        - msg_type
+        - hash
         - created_lt
         - ihr_disabled
         - bounce
@@ -2933,6 +2935,16 @@ components:
         - import_fee
         - created_at
       properties:
+        msg_type:
+          type: string
+          example: int_msg
+          enum:
+            - int_msg
+            - ext_in_msg
+            - ext_out_msg
+        hash:
+          type: string
+          example: 97264395BD65A255A429B11326C84128B7D70FFED7949ABAE3036D506BA38621
         created_lt:
           type: integer
           format: int64

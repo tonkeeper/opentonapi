@@ -22262,6 +22262,14 @@ func (s *Message) Encode(e *jx.Encoder) {
 // encodeFields encodes fields.
 func (s *Message) encodeFields(e *jx.Encoder) {
 	{
+		e.FieldStart("msg_type")
+		s.MsgType.Encode(e)
+	}
+	{
+		e.FieldStart("hash")
+		e.Str(s.Hash)
+	}
+	{
 		e.FieldStart("created_lt")
 		e.Int64(s.CreatedLt)
 	}
@@ -22341,23 +22349,25 @@ func (s *Message) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfMessage = [16]string{
-	0:  "created_lt",
-	1:  "ihr_disabled",
-	2:  "bounce",
-	3:  "bounced",
-	4:  "value",
-	5:  "fwd_fee",
-	6:  "ihr_fee",
-	7:  "destination",
-	8:  "source",
-	9:  "import_fee",
-	10: "created_at",
-	11: "op_code",
-	12: "init",
-	13: "raw_body",
-	14: "decoded_op_name",
-	15: "decoded_body",
+var jsonFieldsNameOfMessage = [18]string{
+	0:  "msg_type",
+	1:  "hash",
+	2:  "created_lt",
+	3:  "ihr_disabled",
+	4:  "bounce",
+	5:  "bounced",
+	6:  "value",
+	7:  "fwd_fee",
+	8:  "ihr_fee",
+	9:  "destination",
+	10: "source",
+	11: "import_fee",
+	12: "created_at",
+	13: "op_code",
+	14: "init",
+	15: "raw_body",
+	16: "decoded_op_name",
+	17: "decoded_body",
 }
 
 // Decode decodes Message from json.
@@ -22365,12 +22375,34 @@ func (s *Message) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode Message to nil")
 	}
-	var requiredBitSet [2]uint8
+	var requiredBitSet [3]uint8
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
-		case "created_lt":
+		case "msg_type":
 			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				if err := s.MsgType.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"msg_type\"")
+			}
+		case "hash":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				v, err := d.Str()
+				s.Hash = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"hash\"")
+			}
+		case "created_lt":
+			requiredBitSet[0] |= 1 << 2
 			if err := func() error {
 				v, err := d.Int64()
 				s.CreatedLt = int64(v)
@@ -22382,7 +22414,7 @@ func (s *Message) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"created_lt\"")
 			}
 		case "ihr_disabled":
-			requiredBitSet[0] |= 1 << 1
+			requiredBitSet[0] |= 1 << 3
 			if err := func() error {
 				v, err := d.Bool()
 				s.IhrDisabled = bool(v)
@@ -22394,7 +22426,7 @@ func (s *Message) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"ihr_disabled\"")
 			}
 		case "bounce":
-			requiredBitSet[0] |= 1 << 2
+			requiredBitSet[0] |= 1 << 4
 			if err := func() error {
 				v, err := d.Bool()
 				s.Bounce = bool(v)
@@ -22406,7 +22438,7 @@ func (s *Message) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"bounce\"")
 			}
 		case "bounced":
-			requiredBitSet[0] |= 1 << 3
+			requiredBitSet[0] |= 1 << 5
 			if err := func() error {
 				v, err := d.Bool()
 				s.Bounced = bool(v)
@@ -22418,7 +22450,7 @@ func (s *Message) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"bounced\"")
 			}
 		case "value":
-			requiredBitSet[0] |= 1 << 4
+			requiredBitSet[0] |= 1 << 6
 			if err := func() error {
 				v, err := d.Int64()
 				s.Value = int64(v)
@@ -22430,7 +22462,7 @@ func (s *Message) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"value\"")
 			}
 		case "fwd_fee":
-			requiredBitSet[0] |= 1 << 5
+			requiredBitSet[0] |= 1 << 7
 			if err := func() error {
 				v, err := d.Int64()
 				s.FwdFee = int64(v)
@@ -22442,7 +22474,7 @@ func (s *Message) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"fwd_fee\"")
 			}
 		case "ihr_fee":
-			requiredBitSet[0] |= 1 << 6
+			requiredBitSet[1] |= 1 << 0
 			if err := func() error {
 				v, err := d.Int64()
 				s.IhrFee = int64(v)
@@ -22474,7 +22506,7 @@ func (s *Message) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"source\"")
 			}
 		case "import_fee":
-			requiredBitSet[1] |= 1 << 1
+			requiredBitSet[1] |= 1 << 3
 			if err := func() error {
 				v, err := d.Int64()
 				s.ImportFee = int64(v)
@@ -22486,7 +22518,7 @@ func (s *Message) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"import_fee\"")
 			}
 		case "created_at":
-			requiredBitSet[1] |= 1 << 2
+			requiredBitSet[1] |= 1 << 4
 			if err := func() error {
 				v, err := d.Int64()
 				s.CreatedAt = int64(v)
@@ -22557,9 +22589,10 @@ func (s *Message) Decode(d *jx.Decoder) error {
 	}
 	// Validate required fields.
 	var failures []validate.FieldError
-	for i, mask := range [2]uint8{
-		0b01111111,
-		0b00000110,
+	for i, mask := range [3]uint8{
+		0b11111111,
+		0b00011001,
+		0b00000000,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -22725,6 +22758,48 @@ func (s *MessageConsequences) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *MessageConsequences) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes MessageMsgType as json.
+func (s MessageMsgType) Encode(e *jx.Encoder) {
+	e.Str(string(s))
+}
+
+// Decode decodes MessageMsgType from json.
+func (s *MessageMsgType) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode MessageMsgType to nil")
+	}
+	v, err := d.StrBytes()
+	if err != nil {
+		return err
+	}
+	// Try to use constant string.
+	switch MessageMsgType(v) {
+	case MessageMsgTypeIntMsg:
+		*s = MessageMsgTypeIntMsg
+	case MessageMsgTypeExtInMsg:
+		*s = MessageMsgTypeExtInMsg
+	case MessageMsgTypeExtOutMsg:
+		*s = MessageMsgTypeExtOutMsg
+	default:
+		*s = MessageMsgType(v)
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s MessageMsgType) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *MessageMsgType) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
