@@ -1,8 +1,9 @@
 package core
 
 import (
-	"github.com/tonkeeper/tongo/boc"
 	"math/big"
+
+	"github.com/tonkeeper/tongo/boc"
 
 	"github.com/tonkeeper/tongo/abi"
 	"github.com/tonkeeper/tongo/tlb"
@@ -122,8 +123,18 @@ func (m Message) IsEmission() bool {
 	return m.Source != nil && m.Source.IsZero() && m.Source.Workchain == -1 && m.Bounced == false
 }
 
+type MsgType string
+
+const (
+	IntMsg    MsgType = "IntMsg"
+	ExtInMsg  MsgType = "ExtInMsg"
+	ExtOutMsg MsgType = "ExtOutMsg"
+)
+
 type Message struct {
 	MessageID
+	MsgType           MsgType
+	Hash              tongo.Bits256
 	SourceExtern      *ExternalAddress
 	DestinationExtern *ExternalAddress
 	IhrDisabled       bool

@@ -181,19 +181,37 @@ func convertTransaction(t core.Transaction, book addressBook) oas.Transaction {
 	return tx
 }
 
+func convertMsgType(msgType core.MsgType) oas.MessageMsgType {
+	switch msgType {
+	case core.ExtInMsg:
+		return oas.MessageMsgTypeExtInMsg
+	case core.ExtOutMsg:
+		return oas.MessageMsgTypeExtOutMsg
+	default:
+		return oas.MessageMsgTypeIntMsg
+	}
+}
+
 func convertMessage(m core.Message, book addressBook) oas.Message {
 	msg := oas.Message{
-		CreatedLt:   int64(m.CreatedLt),
-		IhrDisabled: m.IhrDisabled,
-		Bounce:      m.Bounce,
-		Bounced:     m.Bounced,
-		Value:       m.Value,
-		FwdFee:      m.FwdFee,
-		IhrFee:      m.IhrFee,
-		Destination: convertOptAccountAddress(m.Destination, book),
-		Source:      convertOptAccountAddress(m.Source, book),
-		ImportFee:   m.ImportFee,
-		CreatedAt:   int64(m.CreatedAt),
+		MsgType:       convertMsgType(m.MsgType),
+		Hash:          m.Hash.Hex(),
+		CreatedLt:     int64(m.CreatedLt),
+		IhrDisabled:   m.IhrDisabled,
+		Bounce:        m.Bounce,
+		Bounced:       m.Bounced,
+		Value:         m.Value,
+		FwdFee:        m.FwdFee,
+		IhrFee:        m.IhrFee,
+		Destination:   convertOptAccountAddress(m.Destination, book),
+		Source:        convertOptAccountAddress(m.Source, book),
+		ImportFee:     m.ImportFee,
+		CreatedAt:     int64(m.CreatedAt),
+		OpCode:        oas.OptString{},
+		Init:          oas.OptStateInit{},
+		RawBody:       oas.OptString{},
+		DecodedOpName: oas.OptString{},
+		DecodedBody:   nil,
 	}
 	if len(m.Body) != 0 {
 		msg.RawBody.SetTo(hex.EncodeToString(m.Body))

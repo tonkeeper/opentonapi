@@ -7358,6 +7358,8 @@ func (s *JettonsBalances) SetBalances(val []JettonBalance) {
 
 // Ref: #/components/schemas/Message
 type Message struct {
+	MsgType     MessageMsgType    `json:"msg_type"`
+	Hash        string            `json:"hash"`
 	CreatedLt   int64             `json:"created_lt"`
 	IhrDisabled bool              `json:"ihr_disabled"`
 	Bounce      bool              `json:"bounce"`
@@ -7375,6 +7377,16 @@ type Message struct {
 	RawBody       OptString `json:"raw_body"`
 	DecodedOpName OptString `json:"decoded_op_name"`
 	DecodedBody   jx.Raw    `json:"decoded_body"`
+}
+
+// GetMsgType returns the value of MsgType.
+func (s *Message) GetMsgType() MessageMsgType {
+	return s.MsgType
+}
+
+// GetHash returns the value of Hash.
+func (s *Message) GetHash() string {
+	return s.Hash
 }
 
 // GetCreatedLt returns the value of CreatedLt.
@@ -7455,6 +7467,16 @@ func (s *Message) GetDecodedOpName() OptString {
 // GetDecodedBody returns the value of DecodedBody.
 func (s *Message) GetDecodedBody() jx.Raw {
 	return s.DecodedBody
+}
+
+// SetMsgType sets the value of MsgType.
+func (s *Message) SetMsgType(val MessageMsgType) {
+	s.MsgType = val
+}
+
+// SetHash sets the value of Hash.
+func (s *Message) SetHash(val string) {
+	s.Hash = val
 }
 
 // SetCreatedLt sets the value of CreatedLt.
@@ -7572,6 +7594,54 @@ func (s *MessageConsequences) SetRisk(val Risk) {
 // SetEvent sets the value of Event.
 func (s *MessageConsequences) SetEvent(val AccountEvent) {
 	s.Event = val
+}
+
+type MessageMsgType string
+
+const (
+	MessageMsgTypeIntMsg    MessageMsgType = "int_msg"
+	MessageMsgTypeExtInMsg  MessageMsgType = "ext_in_msg"
+	MessageMsgTypeExtOutMsg MessageMsgType = "ext_out_msg"
+)
+
+// AllValues returns all MessageMsgType values.
+func (MessageMsgType) AllValues() []MessageMsgType {
+	return []MessageMsgType{
+		MessageMsgTypeIntMsg,
+		MessageMsgTypeExtInMsg,
+		MessageMsgTypeExtOutMsg,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s MessageMsgType) MarshalText() ([]byte, error) {
+	switch s {
+	case MessageMsgTypeIntMsg:
+		return []byte(s), nil
+	case MessageMsgTypeExtInMsg:
+		return []byte(s), nil
+	case MessageMsgTypeExtOutMsg:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *MessageMsgType) UnmarshalText(data []byte) error {
+	switch MessageMsgType(data) {
+	case MessageMsgTypeIntMsg:
+		*s = MessageMsgTypeIntMsg
+		return nil
+	case MessageMsgTypeExtInMsg:
+		*s = MessageMsgTypeExtInMsg
+		return nil
+	case MessageMsgTypeExtOutMsg:
+		*s = MessageMsgTypeExtOutMsg
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
 }
 
 // Ref: #/components/schemas/MethodExecutionResult
