@@ -46,7 +46,9 @@ func main() {
 	mempool := sources.NewMemPool(log)
 	mempoolCh := mempool.Run(context.TODO())
 
-	msgSender, err := blockchain.NewMsgSender(cfg.App.LiteServers, []chan<- blockchain.ExtInMsgCopy{mempoolCh})
+	msgSender, err := blockchain.NewMsgSender(log, cfg.App.LiteServers, map[string]chan<- blockchain.ExtInMsgCopy{
+		"mempool": mempoolCh,
+	})
 	if err != nil {
 		log.Fatal("failed to create msg sender", zap.Error(err))
 	}
