@@ -134,7 +134,6 @@ const (
 type Message struct {
 	MessageID
 	MsgType           MsgType
-	Hash              tongo.Bits256
 	SourceExtern      *ExternalAddress
 	DestinationExtern *ExternalAddress
 	IhrDisabled       bool

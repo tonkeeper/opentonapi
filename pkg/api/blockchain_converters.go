@@ -195,7 +195,6 @@ func convertMsgType(msgType core.MsgType) oas.MessageMsgType {
 func convertMessage(m core.Message, book addressBook) oas.Message {
 	msg := oas.Message{
 		MsgType:       convertMsgType(m.MsgType),
-		Hash:          m.Hash.Hex(),
 		CreatedLt:     int64(m.CreatedLt),
 		IhrDisabled:   m.IhrDisabled,
 		Bounce:        m.Bounce,
