@@ -9,16 +9,21 @@ import (
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/config"
 	"github.com/tonkeeper/tongo/liteapi"
+	"go.uber.org/zap"
 )
 
 const ttl = 5 * 60 // in seconds
 
 // MsgSender provides a method to send a message to the blockchain.
 type MsgSender struct {
-	mu     sync.Mutex
+	logger *zap.Logger
 	client *liteapi.Client
 	// receivers get a copy of a message before sending it to the blockchain.
-	receivers []chan<- ExtInMsgCopy
+	// receivers is a read-only map/field.
+	receivers map[string]chan<- ExtInMsgCopy
+
+	// mu protects "batches".
+	mu sync.Mutex
 	// batches is used as a cache for boc multi-sending.
 	batches []batchOfMessages
 }
@@ -44,7 +49,7 @@ func (m *ExtInMsgCopy) IsEmulation() bool {
 	return len(m.Accounts) > 0
 }
 
-func NewMsgSender(servers []config.LiteServer, receivers []chan<- ExtInMsgCopy) (*MsgSender, error) {
+func NewMsgSender(logger *zap.Logger, servers []config.LiteServer, receivers map[string]chan<- ExtInMsgCopy) (*MsgSender, error) {
 	var (
 		client *liteapi.Client
 		err    error
@@ -60,6 +65,7 @@ func NewMsgSender(servers []config.LiteServer, receivers []chan<- ExtInMsgCopy) 
 	}
 	msgSender := &MsgSender{
 		client:    client,
+		logger:    logger,
 		receivers: receivers,
 	}
 	go func() {
@@ -109,11 +115,11 @@ func (ms *MsgSender) SendMessage(ctx context.Context, msgCopy ExtInMsgCopy) erro
 	if err := liteapi.VerifySendMessagePayload(msgCopy.Payload); err != nil {
 		return err
 	}
-	for _, ch := range ms.receivers {
+	for name, ch := range ms.receivers {
 		select {
 		case ch <- msgCopy:
 		default:
-
+			ms.logger.Warn("receiver is too slow", zap.String("name", name))
 		}
 
 	}
