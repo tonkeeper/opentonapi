@@ -3546,10 +3546,6 @@
       "format": "int64",
       "type": "integer"
      },
-     "hash": {
-      "example": "97264395BD65A255A429B11326C84128B7D70FFED7949ABAE3036D506BA38621",
-      "type": "string"
-     },
      "ihr_disabled": {
       "example": true,
       "type": "boolean"
@@ -3596,7 +3592,6 @@
     },
     "required": [
      "msg_type",
-     "hash",
      "created_lt",
      "ihr_disabled",
      "bounce",
