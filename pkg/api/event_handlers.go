@@ -589,6 +589,9 @@ func (h *Handler) addToMempool(ctx context.Context, bytesBoc []byte, shardAccoun
 	h.mempoolEmulate.mu.Lock()
 	defer h.mempoolEmulate.mu.Unlock()
 	for account := range accounts {
+		if _, ok := h.mempoolEmulateIgnoreAccounts[account]; ok {
+			continue
+		}
 		traces, _ := h.mempoolEmulate.accountsTraces.Get(account)
 		traces = slices.Insert(traces, 0, hex.EncodeToString(hash))
 		h.mempoolEmulate.accountsTraces.Set(account, traces, cache.WithExpiration(time.Second*time.Duration(ttl)))
