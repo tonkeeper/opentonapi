@@ -76,6 +76,7 @@ func convertBlockHeader(b core.BlockHeader) oas.BlockchainBlock {
 		OutMsgDescrLength: int64(b.BlockExtra.OutMsgDescrLength),
 		RandSeed:          fmt.Sprintf("%x", b.BlockExtra.RandSeed),
 		CreatedBy:         fmt.Sprintf("%x", b.BlockExtra.CreatedBy),
+		TxQuantity:        b.TxQuantity,
 		ValueFlow: oas.BlockValueFlow{
 			FromPrevBlk:   convertValueFlow(b.ValueFlow.FromPrevBlk),
 			ToNextBlk:     convertValueFlow(b.ValueFlow.ToNextBlk),

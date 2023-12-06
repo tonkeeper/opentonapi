@@ -2819,7 +2819,11 @@ components:
         - out_msg_descr_length
         - rand_seed
         - created_by
+        - tx_quantity
       properties:
+        tx_quantity:
+          type: integer
+          example: 130
         value_flow:
           $ref: '#/components/schemas/BlockValueFlow'
         workchain_id:
