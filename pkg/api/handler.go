@@ -50,6 +50,9 @@ type Handler struct {
 	// ctxToDetails converts a request context to a details instance.
 	ctxToDetails ctxToDetails
 
+	// mempoolEmulateIgnoreAccounts, we don't track pending transactions for this list of accounts.
+	mempoolEmulateIgnoreAccounts map[tongo.AccountID]struct{}
+
 	// mu protects "dns".
 	mu  sync.Mutex
 	dns *dns.DNS // todo: update when blockchain config changes
@@ -209,6 +212,9 @@ func NewHandler(logger *zap.Logger, opts ...Option) (*Handler, error) {
 		mempoolEmulate: mempoolEmulate{
 			traces:         cache.NewLRUCache[string, *core.Trace](10000, "mempool_traces_cache"),
 			accountsTraces: cache.NewLRUCache[tongo.AccountID, []string](10000, "accounts_traces_cache"),
+		},
+		mempoolEmulateIgnoreAccounts: map[tongo.AccountID]struct{}{
+			tongo.MustParseAddress("0:0000000000000000000000000000000000000000000000000000000000000000").ID: {},
 		},
 		tonConnect: tonConnect,
 	}, nil

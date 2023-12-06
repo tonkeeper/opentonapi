@@ -22372,10 +22372,6 @@ func (s *Message) encodeFields(e *jx.Encoder) {
 		s.MsgType.Encode(e)
 	}
 	{
-		e.FieldStart("hash")
-		e.Str(s.Hash)
-	}
-	{
 		e.FieldStart("created_lt")
 		e.Int64(s.CreatedLt)
 	}
@@ -22455,25 +22451,24 @@ func (s *Message) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfMessage = [18]string{
+var jsonFieldsNameOfMessage = [17]string{
 	0:  "msg_type",
-	1:  "hash",
-	2:  "created_lt",
-	3:  "ihr_disabled",
-	4:  "bounce",
-	5:  "bounced",
-	6:  "value",
-	7:  "fwd_fee",
-	8:  "ihr_fee",
-	9:  "destination",
-	10: "source",
-	11: "import_fee",
-	12: "created_at",
-	13: "op_code",
-	14: "init",
-	15: "raw_body",
-	16: "decoded_op_name",
-	17: "decoded_body",
+	1:  "created_lt",
+	2:  "ihr_disabled",
+	3:  "bounce",
+	4:  "bounced",
+	5:  "value",
+	6:  "fwd_fee",
+	7:  "ihr_fee",
+	8:  "destination",
+	9:  "source",
+	10: "import_fee",
+	11: "created_at",
+	12: "op_code",
+	13: "init",
+	14: "raw_body",
+	15: "decoded_op_name",
+	16: "decoded_body",
 }
 
 // Decode decodes Message from json.
@@ -22495,20 +22490,8 @@ func (s *Message) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"msg_type\"")
 			}
-		case "hash":
-			requiredBitSet[0] |= 1 << 1
-			if err := func() error {
-				v, err := d.Str()
-				s.Hash = string(v)
-				if err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"hash\"")
-			}
 		case "created_lt":
-			requiredBitSet[0] |= 1 << 2
+			requiredBitSet[0] |= 1 << 1
 			if err := func() error {
 				v, err := d.Int64()
 				s.CreatedLt = int64(v)
@@ -22520,7 +22503,7 @@ func (s *Message) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"created_lt\"")
 			}
 		case "ihr_disabled":
-			requiredBitSet[0] |= 1 << 3
+			requiredBitSet[0] |= 1 << 2
 			if err := func() error {
 				v, err := d.Bool()
 				s.IhrDisabled = bool(v)
@@ -22532,7 +22515,7 @@ func (s *Message) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"ihr_disabled\"")
 			}
 		case "bounce":
-			requiredBitSet[0] |= 1 << 4
+			requiredBitSet[0] |= 1 << 3
 			if err := func() error {
 				v, err := d.Bool()
 				s.Bounce = bool(v)
@@ -22544,7 +22527,7 @@ func (s *Message) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"bounce\"")
 			}
 		case "bounced":
-			requiredBitSet[0] |= 1 << 5
+			requiredBitSet[0] |= 1 << 4
 			if err := func() error {
 				v, err := d.Bool()
 				s.Bounced = bool(v)
@@ -22556,7 +22539,7 @@ func (s *Message) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"bounced\"")
 			}
 		case "value":
-			requiredBitSet[0] |= 1 << 6
+			requiredBitSet[0] |= 1 << 5
 			if err := func() error {
 				v, err := d.Int64()
 				s.Value = int64(v)
@@ -22568,7 +22551,7 @@ func (s *Message) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"value\"")
 			}
 		case "fwd_fee":
-			requiredBitSet[0] |= 1 << 7
+			requiredBitSet[0] |= 1 << 6
 			if err := func() error {
 				v, err := d.Int64()
 				s.FwdFee = int64(v)
@@ -22580,7 +22563,7 @@ func (s *Message) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"fwd_fee\"")
 			}
 		case "ihr_fee":
-			requiredBitSet[1] |= 1 << 0
+			requiredBitSet[0] |= 1 << 7
 			if err := func() error {
 				v, err := d.Int64()
 				s.IhrFee = int64(v)
@@ -22612,7 +22595,7 @@ func (s *Message) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"source\"")
 			}
 		case "import_fee":
-			requiredBitSet[1] |= 1 << 3
+			requiredBitSet[1] |= 1 << 2
 			if err := func() error {
 				v, err := d.Int64()
 				s.ImportFee = int64(v)
@@ -22624,7 +22607,7 @@ func (s *Message) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"import_fee\"")
 			}
 		case "created_at":
-			requiredBitSet[1] |= 1 << 4
+			requiredBitSet[1] |= 1 << 3
 			if err := func() error {
 				v, err := d.Int64()
 				s.CreatedAt = int64(v)
@@ -22697,7 +22680,7 @@ func (s *Message) Decode(d *jx.Decoder) error {
 	var failures []validate.FieldError
 	for i, mask := range [3]uint8{
 		0b11111111,
-		0b00011001,
+		0b00001100,
 		0b00000000,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {

@@ -7374,7 +7374,6 @@ func (s *JettonsBalances) SetBalances(val []JettonBalance) {
 // Ref: #/components/schemas/Message
 type Message struct {
 	MsgType     MessageMsgType    `json:"msg_type"`
-	Hash        string            `json:"hash"`
 	CreatedLt   int64             `json:"created_lt"`
 	IhrDisabled bool              `json:"ihr_disabled"`
 	Bounce      bool              `json:"bounce"`
@@ -7397,11 +7396,6 @@ type Message struct {
 // GetMsgType returns the value of MsgType.
 func (s *Message) GetMsgType() MessageMsgType {
 	return s.MsgType
-}
-
-// GetHash returns the value of Hash.
-func (s *Message) GetHash() string {
-	return s.Hash
 }
 
 // GetCreatedLt returns the value of CreatedLt.
@@ -7487,11 +7481,6 @@ func (s *Message) GetDecodedBody() jx.Raw {
 // SetMsgType sets the value of MsgType.
 func (s *Message) SetMsgType(val MessageMsgType) {
 	s.MsgType = val
-}
-
-// SetHash sets the value of Hash.
-func (s *Message) SetHash(val string) {
-	s.Hash = val
 }
 
 // SetCreatedLt sets the value of CreatedLt.

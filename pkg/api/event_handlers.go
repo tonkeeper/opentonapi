@@ -10,6 +10,8 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/shopspring/decimal"
 	"github.com/tonkeeper/opentonapi/pkg/blockchain"
 	"github.com/tonkeeper/tongo"
@@ -28,6 +30,20 @@ import (
 	"github.com/tonkeeper/opentonapi/pkg/oas"
 	"github.com/tonkeeper/opentonapi/pkg/sentry"
 	"github.com/tonkeeper/opentonapi/pkg/wallet"
+)
+
+const maxBatchSize = 5
+
+var (
+	mempoolBatchSize = promauto.NewHistogram(prometheus.HistogramOpts{
+		Name:    "mempool_messages_batch_size",
+		Help:    "Sizes of mempool batches",
+		Buckets: []float64{2, 3, 4, 5, 6, 7, 8, 9, 10},
+	})
+	mempoolMessageCounter = promauto.NewCounter(prometheus.CounterOpts{
+		Name: "mempool_messages_counter",
+		Help: "The total number of mempool messages",
+	})
 )
 
 func filterExternal(ctx context.Context, s interface {
@@ -95,6 +111,7 @@ func (h *Handler) SendBlockchainMessage(ctx context.Context, request *oas.SendBl
 		return toError(http.StatusBadRequest, fmt.Errorf("boc not found"))
 	}
 	if request.Boc.IsSet() {
+
 		payload, err := base64.StdEncoding.DecodeString(request.Boc.Value)
 		if err != nil {
 			return toError(http.StatusBadRequest, fmt.Errorf("boc must be a base64 encoded string"))
@@ -107,6 +124,7 @@ func (h *Handler) SendBlockchainMessage(ctx context.Context, request *oas.SendBl
 			Payload: payload,
 			Details: h.ctxToDetails(ctx),
 		}
+		mempoolMessageCounter.Inc()
 		if err := h.msgSender.SendMessage(ctx, msgCopy); err != nil {
 			sentry.Send("sending message", sentry.SentryInfoData{"payload": request.Boc}, sentry.LevelError)
 			return toError(http.StatusInternalServerError, err)
@@ -127,6 +145,9 @@ func (h *Handler) SendBlockchainMessage(ctx context.Context, request *oas.SendBl
 		copies       []blockchain.ExtInMsgCopy
 		shardAccount = map[tongo.AccountID]tlb.ShardAccount{}
 	)
+	if len(request.Batch) > maxBatchSize {
+		return toError(http.StatusBadRequest, fmt.Errorf("batch size must be less than %v", maxBatchSize))
+	}
 	for _, msgBoc := range request.Batch {
 		payload, err := base64.StdEncoding.DecodeString(msgBoc)
 		if err != nil {
@@ -143,6 +164,10 @@ func (h *Handler) SendBlockchainMessage(ctx context.Context, request *oas.SendBl
 		}
 		copies = append(copies, msgCopy)
 	}
+
+	mempoolMessageCounter.Add(float64(len(copies)))
+	mempoolBatchSize.Observe(float64(len(copies)))
+
 	h.msgSender.SendMultipleMessages(ctx, copies)
 	return nil
 }
@@ -624,6 +649,9 @@ func (h *Handler) addToMempool(ctx context.Context, bytesBoc []byte, shardAccoun
 	h.mempoolEmulate.mu.Lock()
 	defer h.mempoolEmulate.mu.Unlock()
 	for account := range accounts {
+		if _, ok := h.mempoolEmulateIgnoreAccounts[account]; ok {
+			continue
+		}
 		traces, _ := h.mempoolEmulate.accountsTraces.Get(account)
 		traces = slices.Insert(traces, 0, hex.EncodeToString(hash))
 		h.mempoolEmulate.accountsTraces.Set(account, traces, cache.WithExpiration(time.Second*time.Duration(ttl)))
