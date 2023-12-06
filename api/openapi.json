@@ -1489,6 +1489,10 @@
       "format": "int64",
       "type": "integer"
      },
+     "tx_quantity": {
+      "example": 130,
+      "type": "integer"
+     },
      "value_flow": {
       "$ref": "#/components/schemas/BlockValueFlow"
      },
@@ -1542,7 +1546,8 @@
      "in_msg_descr_length",
      "out_msg_descr_length",
      "rand_seed",
-     "created_by"
+     "created_by",
+     "tx_quantity"
     ],
     "type": "object"
    },

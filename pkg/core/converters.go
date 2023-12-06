@@ -34,6 +34,7 @@ func ConvertToBlockHeader(id tongo.BlockIDExt, block *tlb.Block) (*BlockHeader, 
 		AfterSplit:             info.AfterSplit,
 		BeforeSplit:            info.BeforeSplit,
 		IsKeyBlock:             info.KeyBlock,
+		TxQuantity:             block.TransactionsQuantity(),
 		BlockExtra: BlockExtra{
 			RandSeed:          tongo.Bits256(block.Extra.RandSeed),
 			CreatedBy:         tongo.Bits256(block.Extra.CreatedBy),
