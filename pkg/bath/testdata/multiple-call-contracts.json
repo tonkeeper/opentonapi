@@ -94,6 +94,10 @@
        "Fee": 9749064,
        "Jettons": [
          {
+           "Address": "0:9c2c05b9dfb2a7460fda48fae7409a32623399933a98a7a15599152f37572b49",
+           "Quantity": -16666723091
+         },
+         {
            "Address": "0:d0a1ce4cdc187c79615ea618bd6c29617af7a56d966f5a192a768f345ee63fd2",
            "Quantity": 2097920891
          }
@@ -118,6 +122,10 @@
          {
            "Address": "0:9c2c05b9dfb2a7460fda48fae7409a32623399933a98a7a15599152f37572b49",
            "Quantity": 16666723091
+         },
+         {
+           "Address": "0:d0a1ce4cdc187c79615ea618bd6c29617af7a56d966f5a192a768f345ee63fd2",
+           "Quantity": -2100023017
          }
        ]
      },

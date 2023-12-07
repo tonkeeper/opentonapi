@@ -49,6 +49,10 @@
          {
            "Address": "0:729c13b6df2c07cbf0a06ab63d34af454f3d320ec1bcd8fb5c6d24d0806a17c2",
            "Quantity": 1358766
+         },
+         {
+           "Address": "0:8cdc1d7640ad5ee326527fc1ad0514f468b30dc84b0173f0e155f451b4e11f7c",
+           "Quantity": -1000000000
          }
        ]
      },
@@ -57,6 +61,10 @@
        "Ton": 28373000,
        "Fee": 28373110,
        "Jettons": [
+         {
+           "Address": "0:729c13b6df2c07cbf0a06ab63d34af454f3d320ec1bcd8fb5c6d24d0806a17c2",
+           "Quantity": -1358766
+         },
          {
            "Address": "0:8cdc1d7640ad5ee326527fc1ad0514f468b30dc84b0173f0e155f451b4e11f7c",
            "Quantity": 1000000000
