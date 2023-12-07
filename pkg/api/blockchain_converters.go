@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"math/big"
+	"sort"
 
 	"github.com/tonkeeper/tongo/tlb"
 	"github.com/tonkeeper/tongo/ton"
@@ -48,6 +49,9 @@ func convertValueFlow(collection core.CurrencyCollection) oas.BlockCurrencyColle
 			Value: c.Value,
 		})
 	}
+	sort.Slice(res.Other, func(i, j int) bool {
+		return res.Other[i].ID < res.Other[j].ID
+	})
 	return res
 }
 func convertBlockHeader(b core.BlockHeader) oas.BlockchainBlock {
