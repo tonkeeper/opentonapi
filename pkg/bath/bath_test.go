@@ -139,6 +139,8 @@ func TestFindActions(t *testing.T) {
 			tongo.MustParseBlockID("(0,8000000000000000,38912382)"),
 			// telemint deploy
 			tongo.MustParseBlockID("(0,8000000000000000,38603492)"),
+			// jetton transfer to another person
+			tongo.MustParseBlockID("(0,8000000000000000,39685391)"),
 		}),
 	)
 
@@ -206,9 +208,14 @@ func TestFindActions(t *testing.T) {
 			filenamePrefix: "subscription-prolongation",
 		},
 		{
-			name:           "jetton transfer",
+			name:           "jetton transfer to myself",
 			hash:           "75a0c3eef9a40479f3dd1fc82ff3728b9547a89044adb72862384c01428553bc",
-			filenamePrefix: "jetton-transfer",
+			filenamePrefix: "jetton-transfer-to-myself",
+		},
+		{
+			name:           "jetton transfer to another person",
+			hash:           "e3d4dfb292db3bb612b7b9b1a0c6ae658a58a249b1152a4cd6bc1e4a60068e21",
+			filenamePrefix: "jetton-transfer-to-another-person",
 		},
 		{
 			name:           "tf nominator deposit",

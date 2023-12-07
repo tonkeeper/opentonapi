@@ -1,0 +1,33 @@
+{
+   "Actions": [
+     {
+       "JettonTransfer": {
+         "Comment": "",
+         "EncryptedComment": null,
+         "Jetton": "0:0871bd56a8daf413bace5e03b471b01942755b4b4ea6807daf801bed044ea9d1",
+         "Recipient": "0:2cf3b5b8c891e517c9addbda1c0386a09ccacbb0e3faf630b51cfc8152325acb",
+         "Sender": "0:2cf3b5b8c891e517c9addbda1c0386a09ccacbb0e3faf630b51cfc8152325acb",
+         "RecipientsWallet": "0:54d72ac7254c6e4b4a5a3066d41fc7f3f1f604fdf40d6784d6778f3b874e09da",
+         "SendersWallet": "0:54d72ac7254c6e4b4a5a3066d41fc7f3f1f604fdf40d6784d6778f3b874e09da",
+         "Amount": "1000000",
+         "Refund": null
+       },
+       "Success": true,
+       "Type": "JettonTransfer"
+     }
+   ],
+   "Accounts": [
+     {
+       "Account": "0:2cf3b5b8c891e517c9addbda1c0386a09ccacbb0e3faf630b51cfc8152325acb",
+       "Ton": -36830386,
+       "Fee": 8423384,
+       "Jettons": null
+     },
+     {
+       "Account": "0:54d72ac7254c6e4b4a5a3066d41fc7f3f1f604fdf40d6784d6778f3b874e09da",
+       "Ton": 18945000,
+       "Fee": 23948878,
+       "Jettons": null
+     }
+   ]
+ }

@@ -85,7 +85,9 @@ func FindJettonTransfer(bubble *Bubble) bool {
 		ValueFlow: bubble.ValueFlow,
 		Accounts:  bubble.Accounts,
 	}
+	// TODO: check they have the same master
 	newBubble.ValueFlow.AddJettons(*recipient, transfer.master, big.Int(intention.Amount))
+	newBubble.ValueFlow.SubJettons(transferBubbleInfo.inputFrom.Address, transfer.master, big.Int(intention.Amount))
 	if transferBubbleInfo.success {
 		newBubble.Children = ProcessChildren(bubble.Children,
 			func(notify *Bubble) *Merge {

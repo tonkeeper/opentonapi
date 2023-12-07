@@ -1,0 +1,57 @@
+{
+   "Actions": [
+     {
+       "JettonTransfer": {
+         "Comment": null,
+         "EncryptedComment": null,
+         "Jetton": "0:3690254dc15b2297610cda60744a45f2b710aa4234b89adb630e99d79b01bd4f",
+         "Recipient": "0:5c6e76bb5fc4686940c4df8e472ed318368570812283ae911e4118ee58d5b9ee",
+         "Sender": "0:6ccd325a858c379693fae2bcaab1c2906831a4e10a6c3bb44ee8b615bca1d220",
+         "RecipientsWallet": "0:60103d4ba5c362bc21ef2704996e2eb7d7fb02fa82ceed813df6a5c35976a7b1",
+         "SendersWallet": "0:d56f88e98b46d844642cab1e83833fa062a8ad6fdba62ae71c636f8f8802501d",
+         "Amount": "50000000",
+         "Refund": null
+       },
+       "Success": true,
+       "Type": "JettonTransfer"
+     },
+     {
+       "ContractDeploy": {
+         "Address": "0:60103d4ba5c362bc21ef2704996e2eb7d7fb02fa82ceed813df6a5c35976a7b1",
+         "Interfaces": null
+       },
+       "Success": true,
+       "Type": "ContractDeploy"
+     }
+   ],
+   "Accounts": [
+     {
+       "Account": "0:5c6e76bb5fc4686940c4df8e472ed318368570812283ae911e4118ee58d5b9ee",
+       "Ton": 1,
+       "Fee": 0,
+       "Jettons": [
+         {
+           "Address": "0:3690254dc15b2297610cda60744a45f2b710aa4234b89adb630e99d79b01bd4f",
+           "Quantity": 50000000
+         }
+       ]
+     },
+     {
+       "Account": "0:6ccd325a858c379693fae2bcaab1c2906831a4e10a6c3bb44ee8b615bca1d220",
+       "Ton": -55575080,
+       "Fee": 8441569,
+       "Jettons": [
+         {
+           "Address": "0:3690254dc15b2297610cda60744a45f2b710aa4234b89adb630e99d79b01bd4f",
+           "Quantity": -50000000
+         }
+       ]
+     },
+     {
+       "Account": "0:d56f88e98b46d844642cab1e83833fa062a8ad6fdba62ae71c636f8f8802501d",
+       "Ton": 19174000,
+       "Fee": 19660241,
+       "Jettons": null
+     }
+   ]
+ }

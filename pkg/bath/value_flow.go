@@ -6,6 +6,10 @@ import (
 	"github.com/tonkeeper/tongo"
 )
 
+var (
+	zero = big.NewInt(0)
+)
+
 // AccountValueFlow contains a change of assets for a particular account.
 type AccountValueFlow struct {
 	Ton     int64
@@ -39,6 +43,11 @@ func (flow *ValueFlow) AddFee(accountID tongo.AccountID, amount int64) {
 	}
 	flow.Accounts[accountID] = &AccountValueFlow{Fees: amount}
 }
+func (flow *ValueFlow) SubJettons(accountID tongo.AccountID, jettonMaster tongo.AccountID, value big.Int) {
+	var negative big.Int
+	negative.Neg(&value)
+	flow.AddJettons(accountID, jettonMaster, negative)
+}
 
 func (flow *ValueFlow) AddJettons(accountID tongo.AccountID, jettonMaster tongo.AccountID, value big.Int) {
 	accountFlow, ok := flow.Accounts[accountID]
@@ -53,6 +62,9 @@ func (flow *ValueFlow) AddJettons(accountID tongo.AccountID, jettonMaster tongo.
 	newValue := big.Int{}
 	newValue.Add(&current, &value)
 	accountFlow.Jettons[jettonMaster] = newValue
+	if newValue.Cmp(zero) == 0 {
+		delete(accountFlow.Jettons, jettonMaster)
+	}
 }
 
 func (flow *ValueFlow) Merge(other *ValueFlow) {

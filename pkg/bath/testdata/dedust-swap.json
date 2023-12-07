@@ -48,6 +48,10 @@
        "Fee": 8971252,
        "Jettons": [
          {
+           "Address": "0:65aac9b5e380eae928db3c8e238d9bc0d61a9320fdc2bc7a2f6c87d6fedf9208",
+           "Quantity": -1000000000
+         },
+         {
            "Address": "0:729c13b6df2c07cbf0a06ab63d34af454f3d320ec1bcd8fb5c6d24d0806a17c2",
            "Quantity": 532117
          }
@@ -69,7 +73,12 @@
        "Account": "0:b85285ecda009746e0382686838e658fb4df39cae9c730ce7095bae6515a3d34",
        "Ton": 11486000,
        "Fee": 11490058,
-       "Jettons": null
+       "Jettons": [
+         {
+           "Address": "0:729c13b6df2c07cbf0a06ab63d34af454f3d320ec1bcd8fb5c6d24d0806a17c2",
+           "Quantity": -532117
+         }
+       ]
      },
      {
        "Account": "0:e15febadc8f1dad4a0101b7edb99f2ee04b7a63b9d1946e99ac31927066da5e9",
