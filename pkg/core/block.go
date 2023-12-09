@@ -30,6 +30,8 @@ type BlockHeader struct {
 	GenSoftware *GenSoftware
 	BlockExtra  BlockExtra
 	ValueFlow   ValueFlow
+	// TxQuantity is the number of transactions in this block.
+	TxQuantity int
 }
 
 // GenSoftware describes version and capabilities of software that created a blockchain block.

@@ -1926,6 +1926,7 @@ func (s *BlockchainAccountInspectMethodsItem) SetMethod(val string) {
 
 // Ref: #/components/schemas/BlockchainBlock
 type BlockchainBlock struct {
+	TxQuantity              int            `json:"tx_quantity"`
 	ValueFlow               BlockValueFlow `json:"value_flow"`
 	WorkchainID             int32          `json:"workchain_id"`
 	Shard                   string         `json:"shard"`
@@ -1955,6 +1956,11 @@ type BlockchainBlock struct {
 	OutMsgDescrLength       int64          `json:"out_msg_descr_length"`
 	RandSeed                string         `json:"rand_seed"`
 	CreatedBy               string         `json:"created_by"`
+}
+
+// GetTxQuantity returns the value of TxQuantity.
+func (s *BlockchainBlock) GetTxQuantity() int {
+	return s.TxQuantity
 }
 
 // GetValueFlow returns the value of ValueFlow.
@@ -2100,6 +2106,11 @@ func (s *BlockchainBlock) GetRandSeed() string {
 // GetCreatedBy returns the value of CreatedBy.
 func (s *BlockchainBlock) GetCreatedBy() string {
 	return s.CreatedBy
+}
+
+// SetTxQuantity sets the value of TxQuantity.
+func (s *BlockchainBlock) SetTxQuantity(val int) {
+	s.TxQuantity = val
 }
 
 // SetValueFlow sets the value of ValueFlow.

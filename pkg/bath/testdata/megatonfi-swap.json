@@ -35,16 +35,7 @@
        "Account": "0:310b71b340182396f5ba08903081a1ef6ab4df571a3ca7b05effa44c4a3b0f92",
        "Ton": 27210000,
        "Fee": 27210263,
-       "Jettons": [
-         {
-           "Address": "0:9a8da514d575d20234c3fb1395ee9138f5f1ad838abc905dc42c2389b46bd015",
-           "Quantity": 100000000
-         },
-         {
-           "Address": "0:bad48411974fe56bde6ddbbc612298f166ddf6be5d504151765204cdbaf0f5f1",
-           "Quantity": 131164
-         }
-       ]
+       "Jettons": null
      },
      {
        "Account": "0:3cb432cdaedffa42888f5d461a21fc6571ee7ae4d566f44a311aca85e8fd3320",
@@ -63,6 +54,10 @@
        "Ton": -233151517,
        "Fee": 12920031,
        "Jettons": [
+         {
+           "Address": "0:9a8da514d575d20234c3fb1395ee9138f5f1ad838abc905dc42c2389b46bd015",
+           "Quantity": -100000000
+         },
          {
            "Address": "0:bad48411974fe56bde6ddbbc612298f166ddf6be5d504151765204cdbaf0f5f1",
            "Quantity": 131164
@@ -89,6 +84,10 @@
          {
            "Address": "0:9a8da514d575d20234c3fb1395ee9138f5f1ad838abc905dc42c2389b46bd015",
            "Quantity": 100000000
+         },
+         {
+           "Address": "0:bad48411974fe56bde6ddbbc612298f166ddf6be5d504151765204cdbaf0f5f1",
+           "Quantity": -131164
          }
        ]
      }

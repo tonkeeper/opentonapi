@@ -4661,6 +4661,10 @@ func (s *BlockchainBlock) Encode(e *jx.Encoder) {
 // encodeFields encodes fields.
 func (s *BlockchainBlock) encodeFields(e *jx.Encoder) {
 	{
+		e.FieldStart("tx_quantity")
+		e.Int(s.TxQuantity)
+	}
+	{
 		e.FieldStart("value_flow")
 		s.ValueFlow.Encode(e)
 	}
@@ -4788,36 +4792,37 @@ func (s *BlockchainBlock) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfBlockchainBlock = [29]string{
-	0:  "value_flow",
-	1:  "workchain_id",
-	2:  "shard",
-	3:  "seqno",
-	4:  "root_hash",
-	5:  "file_hash",
-	6:  "global_id",
-	7:  "version",
-	8:  "after_merge",
-	9:  "before_split",
-	10: "after_split",
-	11: "want_split",
-	12: "want_merge",
-	13: "key_block",
-	14: "gen_utime",
-	15: "start_lt",
-	16: "end_lt",
-	17: "vert_seqno",
-	18: "gen_catchain_seqno",
-	19: "min_ref_mc_seqno",
-	20: "prev_key_block_seqno",
-	21: "gen_software_version",
-	22: "gen_software_capabilities",
-	23: "master_ref",
-	24: "prev_refs",
-	25: "in_msg_descr_length",
-	26: "out_msg_descr_length",
-	27: "rand_seed",
-	28: "created_by",
+var jsonFieldsNameOfBlockchainBlock = [30]string{
+	0:  "tx_quantity",
+	1:  "value_flow",
+	2:  "workchain_id",
+	3:  "shard",
+	4:  "seqno",
+	5:  "root_hash",
+	6:  "file_hash",
+	7:  "global_id",
+	8:  "version",
+	9:  "after_merge",
+	10: "before_split",
+	11: "after_split",
+	12: "want_split",
+	13: "want_merge",
+	14: "key_block",
+	15: "gen_utime",
+	16: "start_lt",
+	17: "end_lt",
+	18: "vert_seqno",
+	19: "gen_catchain_seqno",
+	20: "min_ref_mc_seqno",
+	21: "prev_key_block_seqno",
+	22: "gen_software_version",
+	23: "gen_software_capabilities",
+	24: "master_ref",
+	25: "prev_refs",
+	26: "in_msg_descr_length",
+	27: "out_msg_descr_length",
+	28: "rand_seed",
+	29: "created_by",
 }
 
 // Decode decodes BlockchainBlock from json.
@@ -4829,8 +4834,20 @@ func (s *BlockchainBlock) Decode(d *jx.Decoder) error {
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
-		case "value_flow":
+		case "tx_quantity":
 			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				v, err := d.Int()
+				s.TxQuantity = int(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"tx_quantity\"")
+			}
+		case "value_flow":
+			requiredBitSet[0] |= 1 << 1
 			if err := func() error {
 				if err := s.ValueFlow.Decode(d); err != nil {
 					return err
@@ -4840,7 +4857,7 @@ func (s *BlockchainBlock) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"value_flow\"")
 			}
 		case "workchain_id":
-			requiredBitSet[0] |= 1 << 1
+			requiredBitSet[0] |= 1 << 2
 			if err := func() error {
 				v, err := d.Int32()
 				s.WorkchainID = int32(v)
@@ -4852,7 +4869,7 @@ func (s *BlockchainBlock) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"workchain_id\"")
 			}
 		case "shard":
-			requiredBitSet[0] |= 1 << 2
+			requiredBitSet[0] |= 1 << 3
 			if err := func() error {
 				v, err := d.Str()
 				s.Shard = string(v)
@@ -4864,7 +4881,7 @@ func (s *BlockchainBlock) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"shard\"")
 			}
 		case "seqno":
-			requiredBitSet[0] |= 1 << 3
+			requiredBitSet[0] |= 1 << 4
 			if err := func() error {
 				v, err := d.Int32()
 				s.Seqno = int32(v)
@@ -4876,7 +4893,7 @@ func (s *BlockchainBlock) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"seqno\"")
 			}
 		case "root_hash":
-			requiredBitSet[0] |= 1 << 4
+			requiredBitSet[0] |= 1 << 5
 			if err := func() error {
 				v, err := d.Str()
 				s.RootHash = string(v)
@@ -4888,7 +4905,7 @@ func (s *BlockchainBlock) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"root_hash\"")
 			}
 		case "file_hash":
-			requiredBitSet[0] |= 1 << 5
+			requiredBitSet[0] |= 1 << 6
 			if err := func() error {
 				v, err := d.Str()
 				s.FileHash = string(v)
@@ -4900,7 +4917,7 @@ func (s *BlockchainBlock) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"file_hash\"")
 			}
 		case "global_id":
-			requiredBitSet[0] |= 1 << 6
+			requiredBitSet[0] |= 1 << 7
 			if err := func() error {
 				v, err := d.Int32()
 				s.GlobalID = int32(v)
@@ -4912,7 +4929,7 @@ func (s *BlockchainBlock) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"global_id\"")
 			}
 		case "version":
-			requiredBitSet[0] |= 1 << 7
+			requiredBitSet[1] |= 1 << 0
 			if err := func() error {
 				v, err := d.Int32()
 				s.Version = int32(v)
@@ -4924,7 +4941,7 @@ func (s *BlockchainBlock) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"version\"")
 			}
 		case "after_merge":
-			requiredBitSet[1] |= 1 << 0
+			requiredBitSet[1] |= 1 << 1
 			if err := func() error {
 				v, err := d.Bool()
 				s.AfterMerge = bool(v)
@@ -4936,7 +4953,7 @@ func (s *BlockchainBlock) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"after_merge\"")
 			}
 		case "before_split":
-			requiredBitSet[1] |= 1 << 1
+			requiredBitSet[1] |= 1 << 2
 			if err := func() error {
 				v, err := d.Bool()
 				s.BeforeSplit = bool(v)
@@ -4948,7 +4965,7 @@ func (s *BlockchainBlock) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"before_split\"")
 			}
 		case "after_split":
-			requiredBitSet[1] |= 1 << 2
+			requiredBitSet[1] |= 1 << 3
 			if err := func() error {
 				v, err := d.Bool()
 				s.AfterSplit = bool(v)
@@ -4960,7 +4977,7 @@ func (s *BlockchainBlock) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"after_split\"")
 			}
 		case "want_split":
-			requiredBitSet[1] |= 1 << 3
+			requiredBitSet[1] |= 1 << 4
 			if err := func() error {
 				v, err := d.Bool()
 				s.WantSplit = bool(v)
@@ -4972,7 +4989,7 @@ func (s *BlockchainBlock) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"want_split\"")
 			}
 		case "want_merge":
-			requiredBitSet[1] |= 1 << 4
+			requiredBitSet[1] |= 1 << 5
 			if err := func() error {
 				v, err := d.Bool()
 				s.WantMerge = bool(v)
@@ -4984,7 +5001,7 @@ func (s *BlockchainBlock) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"want_merge\"")
 			}
 		case "key_block":
-			requiredBitSet[1] |= 1 << 5
+			requiredBitSet[1] |= 1 << 6
 			if err := func() error {
 				v, err := d.Bool()
 				s.KeyBlock = bool(v)
@@ -4996,7 +5013,7 @@ func (s *BlockchainBlock) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"key_block\"")
 			}
 		case "gen_utime":
-			requiredBitSet[1] |= 1 << 6
+			requiredBitSet[1] |= 1 << 7
 			if err := func() error {
 				v, err := d.Int64()
 				s.GenUtime = int64(v)
@@ -5008,7 +5025,7 @@ func (s *BlockchainBlock) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"gen_utime\"")
 			}
 		case "start_lt":
-			requiredBitSet[1] |= 1 << 7
+			requiredBitSet[2] |= 1 << 0
 			if err := func() error {
 				v, err := d.Int64()
 				s.StartLt = int64(v)
@@ -5020,7 +5037,7 @@ func (s *BlockchainBlock) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"start_lt\"")
 			}
 		case "end_lt":
-			requiredBitSet[2] |= 1 << 0
+			requiredBitSet[2] |= 1 << 1
 			if err := func() error {
 				v, err := d.Int64()
 				s.EndLt = int64(v)
@@ -5032,7 +5049,7 @@ func (s *BlockchainBlock) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"end_lt\"")
 			}
 		case "vert_seqno":
-			requiredBitSet[2] |= 1 << 1
+			requiredBitSet[2] |= 1 << 2
 			if err := func() error {
 				v, err := d.Int32()
 				s.VertSeqno = int32(v)
@@ -5044,7 +5061,7 @@ func (s *BlockchainBlock) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"vert_seqno\"")
 			}
 		case "gen_catchain_seqno":
-			requiredBitSet[2] |= 1 << 2
+			requiredBitSet[2] |= 1 << 3
 			if err := func() error {
 				v, err := d.Int32()
 				s.GenCatchainSeqno = int32(v)
@@ -5056,7 +5073,7 @@ func (s *BlockchainBlock) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"gen_catchain_seqno\"")
 			}
 		case "min_ref_mc_seqno":
-			requiredBitSet[2] |= 1 << 3
+			requiredBitSet[2] |= 1 << 4
 			if err := func() error {
 				v, err := d.Int32()
 				s.MinRefMcSeqno = int32(v)
@@ -5068,7 +5085,7 @@ func (s *BlockchainBlock) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"min_ref_mc_seqno\"")
 			}
 		case "prev_key_block_seqno":
-			requiredBitSet[2] |= 1 << 4
+			requiredBitSet[2] |= 1 << 5
 			if err := func() error {
 				v, err := d.Int32()
 				s.PrevKeyBlockSeqno = int32(v)
@@ -5110,7 +5127,7 @@ func (s *BlockchainBlock) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"master_ref\"")
 			}
 		case "prev_refs":
-			requiredBitSet[3] |= 1 << 0
+			requiredBitSet[3] |= 1 << 1
 			if err := func() error {
 				s.PrevRefs = make([]string, 0)
 				if err := d.Arr(func(d *jx.Decoder) error {
@@ -5130,7 +5147,7 @@ func (s *BlockchainBlock) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"prev_refs\"")
 			}
 		case "in_msg_descr_length":
-			requiredBitSet[3] |= 1 << 1
+			requiredBitSet[3] |= 1 << 2
 			if err := func() error {
 				v, err := d.Int64()
 				s.InMsgDescrLength = int64(v)
@@ -5142,7 +5159,7 @@ func (s *BlockchainBlock) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"in_msg_descr_length\"")
 			}
 		case "out_msg_descr_length":
-			requiredBitSet[3] |= 1 << 2
+			requiredBitSet[3] |= 1 << 3
 			if err := func() error {
 				v, err := d.Int64()
 				s.OutMsgDescrLength = int64(v)
@@ -5154,7 +5171,7 @@ func (s *BlockchainBlock) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"out_msg_descr_length\"")
 			}
 		case "rand_seed":
-			requiredBitSet[3] |= 1 << 3
+			requiredBitSet[3] |= 1 << 4
 			if err := func() error {
 				v, err := d.Str()
 				s.RandSeed = string(v)
@@ -5166,7 +5183,7 @@ func (s *BlockchainBlock) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"rand_seed\"")
 			}
 		case "created_by":
-			requiredBitSet[3] |= 1 << 4
+			requiredBitSet[3] |= 1 << 5
 			if err := func() error {
 				v, err := d.Str()
 				s.CreatedBy = string(v)
@@ -5189,8 +5206,8 @@ func (s *BlockchainBlock) Decode(d *jx.Decoder) error {
 	for i, mask := range [4]uint8{
 		0b11111111,
 		0b11111111,
-		0b00011111,
-		0b00011111,
+		0b00111111,
+		0b00111110,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.

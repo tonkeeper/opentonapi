@@ -118,9 +118,12 @@ func signedValue(value string, viewer *tongo.AccountID, source, destination tong
 func (h *Handler) convertActionTonTransfer(t *bath.TonTransferAction, acceptLanguage string, viewer *tongo.AccountID) (oas.OptTonTransferAction, oas.ActionSimplePreview, bool) {
 	var spamDetected bool
 	if t.Amount < int64(ton.OneTON) && t.Comment != nil {
-		if spamAction := rules.CheckAction(h.spamFilter.GetRules(), *t.Comment); spamAction == rules.Drop {
-			*t.Comment = ""
+		spamAction := rules.CheckAction(h.spamFilter.GetRules(), *t.Comment)
+		if spamAction != rules.UnKnown && spamAction != rules.Accept {
 			spamDetected = true
+			if spamAction == rules.Drop {
+				*t.Comment = ""
+			}
 		}
 	}
 	var action oas.OptTonTransferAction
