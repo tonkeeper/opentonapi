@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/tonkeeper/opentonapi/pkg/core"
 	"net/http"
 	"strings"
 
@@ -90,7 +91,7 @@ func (h *Handler) DnsResolve(ctx context.Context, params oas.DnsResolveParams) (
 		return nil, toError(http.StatusInternalServerError, err)
 	}
 	records, err := dnsResolver.Resolve(ctx, params.DomainName)
-	if errors.Is(err, dns.ErrNotResolved) {
+	if errors.Is(err, dns.ErrNotResolved) || errors.Is(err, core.ErrEntityNotFound) {
 		return nil, toError(http.StatusNotFound, err)
 	}
 	if err != nil {
