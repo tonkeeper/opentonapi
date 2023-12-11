@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"math/big"
+	"sort"
 	"sync"
 	"time"
 
@@ -424,6 +425,9 @@ func (s *LiteStorage) GetBlockShards(ctx context.Context, id tongo.BlockID) ([]t
 	for i, s := range shards {
 		res[i] = s.BlockID
 	}
+	sort.Slice(shards, func(i, j int) bool {
+		return shards[i].Shard < shards[j].Shard
+	})
 	return res, nil
 }
 
