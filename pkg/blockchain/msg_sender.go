@@ -50,7 +50,7 @@ type ExtInMsgCopy struct {
 
 var liteserverMessageSendMc = promauto.NewCounterVec(prometheus.CounterOpts{
 	Name: "liteserver_message_send",
-}, []string{"server", "result"})
+}, []string{"server", "result", "iteration"})
 
 func (m *ExtInMsgCopy) IsEmulation() bool {
 	return len(m.Accounts) > 0
@@ -151,10 +151,10 @@ func (ms *MsgSender) send(ctx context.Context, payload []byte) error {
 		c := ms.sendingClients[serverNumber]
 		_, err = c.SendMessage(ctx, payload)
 		if err == nil {
-			liteserverMessageSendMc.WithLabelValues(fmt.Sprintf("%d", serverNumber), "success").Inc()
+			liteserverMessageSendMc.WithLabelValues(fmt.Sprintf("%d", serverNumber), "success", fmt.Sprintf("%d", i)).Inc()
 			return nil
 		}
-		liteserverMessageSendMc.WithLabelValues(fmt.Sprintf("%d", serverNumber), "error").Inc()
+		liteserverMessageSendMc.WithLabelValues(fmt.Sprintf("%d", serverNumber), "error", fmt.Sprintf("%d", i)).Inc()
 	}
 	return err
 }
