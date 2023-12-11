@@ -3,6 +3,9 @@ package blockchain
 import (
 	"context"
 	"fmt"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promauto"
+	"math/rand"
 	"sync"
 	"time"
 
@@ -16,8 +19,8 @@ const ttl = 5 * 60 // in seconds
 
 // MsgSender provides a method to send a message to the blockchain.
 type MsgSender struct {
-	logger *zap.Logger
-	client *liteapi.Client
+	logger         *zap.Logger
+	sendingClients []*liteapi.Client
 	// receivers get a copy of a message before sending it to the blockchain.
 	// receivers is a read-only map/field.
 	receivers map[string]chan<- ExtInMsgCopy
@@ -45,28 +48,44 @@ type ExtInMsgCopy struct {
 	Accounts map[tongo.AccountID]struct{}
 }
 
+var liteserverMessageSendMc = promauto.NewCounterVec(prometheus.CounterOpts{
+	Name: "liteserver_message_send",
+}, []string{"server", "result"})
+
 func (m *ExtInMsgCopy) IsEmulation() bool {
 	return len(m.Accounts) > 0
 }
 
 func NewMsgSender(logger *zap.Logger, servers []config.LiteServer, receivers map[string]chan<- ExtInMsgCopy) (*MsgSender, error) {
 	var (
-		client *liteapi.Client
-		err    error
+		client  *liteapi.Client
+		clients []*liteapi.Client
+		err     error
 	)
 	if len(servers) == 0 {
 		fmt.Println("USING PUBLIC CONFIG for NewMsgSender! BE CAREFUL!")
 		client, err = liteapi.NewClientWithDefaultMainnet()
+		if err != nil {
+			return nil, err
+		}
+		clients = append(clients, client)
 	} else {
-		client, err = liteapi.NewClient(liteapi.WithLiteServers(servers))
+		for _, s := range servers {
+			c, err := liteapi.NewClient(liteapi.WithLiteServers([]config.LiteServer{s}))
+			if err != nil {
+				continue
+			}
+			clients = append(clients, c)
+		}
 	}
-	if err != nil {
-		return nil, err
+	if len(clients) == 0 {
+		return nil, fmt.Errorf("no lite clients available")
 	}
+
 	msgSender := &MsgSender{
-		client:    client,
-		logger:    logger,
-		receivers: receivers,
+		sendingClients: clients,
+		logger:         logger,
+		receivers:      receivers,
 	}
 	go func() {
 		for {
@@ -121,9 +140,22 @@ func (ms *MsgSender) SendMessage(ctx context.Context, msgCopy ExtInMsgCopy) erro
 		default:
 			ms.logger.Warn("receiver is too slow", zap.String("name", name))
 		}
-
 	}
-	_, err := ms.client.SendMessage(ctx, msgCopy.Payload)
+	return ms.send(ctx, msgCopy.Payload)
+}
+
+func (ms *MsgSender) send(ctx context.Context, payload []byte) error {
+	var err error
+	for i := 0; i < 3; i++ {
+		serverNumber := rand.Intn(len(ms.sendingClients))
+		c := ms.sendingClients[serverNumber]
+		_, err = c.SendMessage(ctx, payload)
+		if err == nil {
+			liteserverMessageSendMc.WithLabelValues(fmt.Sprintf("%d", serverNumber), "success").Inc()
+			return nil
+		}
+		liteserverMessageSendMc.WithLabelValues(fmt.Sprintf("%d", serverNumber), "error").Inc()
+	}
 	return err
 }
 
@@ -134,8 +166,9 @@ func (ms *MsgSender) sendMessageFromBatch(msgCopy ExtInMsgCopy) error {
 	for _, ch := range ms.receivers {
 		ch <- msgCopy
 	}
-	_, err := ms.client.SendMessage(context.TODO(), msgCopy.Payload)
-	return err
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*2)
+	defer cancel()
+	return ms.send(ctx, msgCopy.Payload)
 }
 
 func (ms *MsgSender) SendMultipleMessages(ctx context.Context, copies []ExtInMsgCopy) {
