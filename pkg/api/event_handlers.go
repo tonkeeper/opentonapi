@@ -530,10 +530,9 @@ func (h *Handler) EmulateMessageToWallet(ctx context.Context, request *oas.Emula
 		if err != nil {
 			return nil, toError(http.StatusBadRequest, err)
 		}
+	} else if err == nil {
+		return nil, toError(http.StatusBadRequest, fmt.Errorf("code not found and message doesn't have init"))
 	} else {
-		if err == nil {
-			err = fmt.Errorf("code not found and message doesn't have init")
-		}
 		return nil, toError(http.StatusInternalServerError, err)
 	}
 	walletVersion, err := wallet.GetVersionByCode(code)
