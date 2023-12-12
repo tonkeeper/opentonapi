@@ -4,10 +4,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strconv"
 	"strings"
 	"time"
 
 	"github.com/gorilla/websocket"
+	"github.com/tonkeeper/opentonapi/internal/g"
 	"github.com/tonkeeper/opentonapi/pkg/pusher/events"
 	"github.com/tonkeeper/opentonapi/pkg/pusher/metrics"
 	"github.com/tonkeeper/opentonapi/pkg/pusher/utils"
@@ -26,10 +28,12 @@ type session struct {
 	mempool             sources.MemPoolSource
 	txSource            sources.TransactionSource
 	traceSource         sources.TraceSource
+	blockSource         sources.BlockSource
 	eventCh             chan event
 	txSubscriptions     map[tongo.AccountID]sources.CancelFn
 	traceSubscriptions  map[tongo.AccountID]sources.CancelFn
 	mempoolSubscription sources.CancelFn
+	blockSubscription   sources.CancelFn
 	pingInterval        time.Duration
 	subscriptionLimit   int
 }
@@ -40,13 +44,14 @@ type event struct {
 	Params []byte
 }
 
-func newSession(logger *zap.Logger, txSource sources.TransactionSource, traceSource sources.TraceSource, mempool sources.MemPoolSource, conn *websocket.Conn) *session {
+func newSession(logger *zap.Logger, txSource sources.TransactionSource, traceSource sources.TraceSource, mempool sources.MemPoolSource, blockSource sources.BlockSource, conn *websocket.Conn) *session {
 	return &session{
 		logger:             logger,
 		eventCh:            make(chan event, 1000),
 		conn:               conn,
 		mempool:            mempool,
 		txSource:           txSource,
+		blockSource:        blockSource,
 		txSubscriptions:    map[tongo.AccountID]sources.CancelFn{},
 		traceSource:        traceSource,
 		traceSubscriptions: map[tongo.AccountID]sources.CancelFn{},
@@ -105,7 +110,14 @@ func (s *session) Run(ctx context.Context) chan JsonRPCRequest {
 					response = s.subscribeToTraces(ctx, request.Params)
 				case "unsubscribe_trace":
 					response = s.unsubscribeFromTraces(request.Params)
+
+				// handle block subscriptions
+				case "subscribe_block":
+					response = s.subscribeToBlocks(ctx, request.Params)
+				case "unsubscribe_block":
+					response = s.unsubscribeFromBlocks()
 				}
+
 				err = s.writeResponse(response, request)
 			case <-time.After(s.pingInterval):
 				metrics.WebsocketEventSent(events.PingEvent, utils.TokenNameFromContext(ctx))
@@ -176,6 +188,9 @@ func processAccountTxParam(param string) (*accountOptions, error) {
 // Each param should be in the following format: "<accountID>;operations=<op1>,<op2>,..."
 // if there is no ";operations=" part, a given account will be subscribed to all operations.
 func (s *session) subscribeToTransactions(ctx context.Context, params []string) string {
+	if s.txSource == nil {
+		return fmt.Sprintf("transactions source is not configured")
+	}
 	accounts := make(map[tongo.AccountID]accountOptions, len(params))
 	for _, param := range params {
 		options, err := processAccountTxParam(param)
@@ -227,6 +242,9 @@ func (s *session) unsubscribeFromTransactions(params []string) string {
 }
 
 func (s *session) subscribeToTraces(ctx context.Context, params []string) string {
+	if s.traceSource == nil {
+		return fmt.Sprintf("trace source is not configured")
+	}
 	accounts := make([]tongo.AccountID, 0, len(params))
 	for _, a := range params {
 		account, err := tongo.ParseAddress(a)
@@ -302,6 +320,9 @@ func mempoolParamsToOptions(params []string) (*sources.SubscribeToMempoolOptions
 }
 
 func (s *session) subscribeToMempool(ctx context.Context, params []string) string {
+	if s.mempool == nil {
+		return fmt.Sprintf("mempool source is not configured")
+	}
 	if s.mempoolSubscription != nil {
 		return fmt.Sprintf("you are already subscribed to mempool")
 	}
@@ -326,6 +347,60 @@ func (s *session) unsubscribeFromMempool() string {
 	s.mempoolSubscription()
 	s.mempoolSubscription = nil
 	return fmt.Sprintf("success! you have unsubscribed from mempool")
+}
+
+func blockParamsToOptions(params []string) (*sources.SubscribeToBlocksOptions, error) {
+	if len(params) == 0 {
+		return &sources.SubscribeToBlocksOptions{}, nil
+	}
+	if len(params) > 1 {
+		return nil, fmt.Errorf("failed to process params: supported only one parameter")
+	}
+	parts := strings.Split(params[0], "=")
+	if len(parts) != 2 {
+		return nil, fmt.Errorf("failed to process params: invalid format")
+	}
+	if strings.ToLower(parts[0]) != "workchain" {
+		return nil, fmt.Errorf("failed to process params: invalid format")
+	}
+	workchain, err := strconv.Atoi(parts[1])
+	if err != nil {
+		return nil, fmt.Errorf("failed to process params: invalid format")
+	}
+	if workchain != -1 && workchain != 0 {
+		return nil, fmt.Errorf("failed to process params: unknown workchain")
+	}
+	return &sources.SubscribeToBlocksOptions{Workchain: g.Pointer(workchain)}, nil
+}
+
+func (s *session) subscribeToBlocks(ctx context.Context, params []string) string {
+	if s.blockSource == nil {
+		return fmt.Sprintf("block source is not configured")
+	}
+	options, err := blockParamsToOptions(params)
+	if err != nil {
+		return err.Error()
+	}
+	if s.blockSubscription != nil {
+		s.blockSubscription()
+	}
+	s.blockSubscription = s.blockSource.SubscribeToBlocks(ctx, func(eventData []byte) {
+		s.sendEvent(event{
+			Name:   events.BlockEvent,
+			Method: "block",
+			Params: eventData,
+		})
+	}, *options)
+	return fmt.Sprintf("success! you have subscribed to blocks")
+}
+
+func (s *session) unsubscribeFromBlocks() string {
+	if s.blockSubscription == nil {
+		return fmt.Sprintf("you are not subscribed to blocks")
+	}
+	s.blockSubscription()
+	s.blockSubscription = nil
+	return fmt.Sprintf("success! you have unsubscribed from blocks")
 }
 
 func jsonRPCResponseMessage(message string, id uint64, jsonrpc, method string) (JsonRPCResponse, error) {

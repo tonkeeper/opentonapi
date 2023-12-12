@@ -24,7 +24,7 @@ type TransactionEvent struct {
 	MsgOpCode *uint32
 }
 
-type deliveryFn func(eventData []byte, msgOpName *abi.MsgOpName, msgOpCode *uint32)
+type txDeliveryFn func(eventData []byte, msgOpName *abi.MsgOpName, msgOpCode *uint32)
 
 // TransactionDispatcher implements the fan-out pattern reading a TransactionEvent from a single channel
 // and delivering it to multiple subscribers.
@@ -32,8 +32,8 @@ type TransactionDispatcher struct {
 	logger *zap.Logger
 
 	mu          sync.RWMutex
-	accounts    map[tongo.AccountID]map[subscriberID]deliveryFn
-	allAccounts map[subscriberID]deliveryFn
+	accounts    map[tongo.AccountID]map[subscriberID]txDeliveryFn
+	allAccounts map[subscriberID]txDeliveryFn
 	options     map[subscriberID]SubscribeToTransactionsOptions
 	currentID   subscriberID
 }
@@ -41,8 +41,8 @@ type TransactionDispatcher struct {
 func NewTransactionDispatcher(logger *zap.Logger) *TransactionDispatcher {
 	return &TransactionDispatcher{
 		logger:      logger,
-		accounts:    map[tongo.AccountID]map[subscriberID]deliveryFn{},
-		allAccounts: map[subscriberID]deliveryFn{},
+		accounts:    map[tongo.AccountID]map[subscriberID]txDeliveryFn{},
+		allAccounts: map[subscriberID]txDeliveryFn{},
 		options:     map[subscriberID]SubscribeToTransactionsOptions{},
 		currentID:   1,
 	}
@@ -90,7 +90,7 @@ func (disp *TransactionDispatcher) dispatch(tx *TransactionEventData, msgOpName 
 	}
 }
 
-func createDeliveryFnBasedOnOptions(fn DeliveryFn, options SubscribeToTransactionsOptions) deliveryFn {
+func createTxDeliveryFnBasedOnOptions(fn DeliveryFn, options SubscribeToTransactionsOptions) txDeliveryFn {
 	if options.AllOperations {
 		return func(eventData []byte, msgOpName *abi.MsgOpName, msgOpCode *uint32) {
 			fn(eventData)
@@ -125,17 +125,17 @@ func (disp *TransactionDispatcher) RegisterSubscriber(fn DeliveryFn, options Sub
 	disp.options[id] = options
 
 	if options.AllAccounts {
-		disp.allAccounts[id] = createDeliveryFnBasedOnOptions(fn, options)
+		disp.allAccounts[id] = createTxDeliveryFnBasedOnOptions(fn, options)
 		return func() { disp.unsubscribe(id) }
 	}
 
 	for _, account := range options.Accounts {
 		subscribers, ok := disp.accounts[account]
 		if !ok {
-			subscribers = make(map[subscriberID]deliveryFn, 1)
+			subscribers = make(map[subscriberID]txDeliveryFn, 1)
 			disp.accounts[account] = subscribers
 		}
-		subscribers[id] = createDeliveryFnBasedOnOptions(fn, options)
+		subscribers[id] = createTxDeliveryFnBasedOnOptions(fn, options)
 	}
 	return func() { disp.unsubscribe(id) }
 }

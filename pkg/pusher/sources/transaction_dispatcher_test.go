@@ -158,7 +158,7 @@ func Test_createDeliveryFnBasedOnOptions(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			isCalled := false
-			deliveryFn := createDeliveryFnBasedOnOptions(func(eventData []byte) {
+			deliveryFn := createTxDeliveryFnBasedOnOptions(func(eventData []byte) {
 				isCalled = true
 			}, tt.options)
 

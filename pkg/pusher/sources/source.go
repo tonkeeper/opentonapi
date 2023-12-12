@@ -2,6 +2,7 @@ package sources
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/tonkeeper/tongo"
 )
@@ -59,4 +60,29 @@ type EmulationMessageEventData struct {
 // MemPoolSource provides a method to subscribe to notifications about pending inbound messages.
 type MemPoolSource interface {
 	SubscribeToMessages(ctx context.Context, deliveryFn DeliveryFn, opts SubscribeToMempoolOptions) (CancelFn, error)
+}
+
+// SubscribeToBlocksOptions configures subscription to block events.
+type SubscribeToBlocksOptions struct {
+	// Workchain, if set, opentonapi will filter out blocks that are not from the specified workchain.
+	Workchain *int `json:"workchain,omitempty"`
+}
+
+// BlockEvent represents a notification about a new block.
+// This is part of our API contract with subscribers.
+type BlockEvent struct {
+	Workchain int32  `json:"workchain"`
+	Shard     string `json:"shard"`
+	Seqno     uint32 `json:"seqno"`
+	RootHash  string `json:"root_hash"`
+	FileHash  string `json:"file_hash"`
+}
+
+func (e BlockEvent) String() string {
+	return fmt.Sprintf("(%d,%x,%d)", e.Workchain, e.Shard, e.Seqno)
+}
+
+// BlockSource provides a method to subscribe to notifications about new blocks in the TON network.
+type BlockSource interface {
+	SubscribeToBlocks(ctx context.Context, deliveryFn DeliveryFn, opts SubscribeToBlocksOptions) CancelFn
 }

@@ -85,6 +85,7 @@ func main() {
 
 	server, err := api.NewServer(log, h, fmt.Sprintf(":%d", cfg.API.Port),
 		api.WithTransactionSource(source),
+		api.WithBlockSource(source),
 		api.WithTraceSource(tracer),
 		api.WithMemPool(mempool))
 	if err != nil {

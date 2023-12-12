@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"github.com/tonkeeper/opentonapi/internal/g"
 	"github.com/tonkeeper/opentonapi/pkg/pusher/sources"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/ton"
@@ -30,8 +31,18 @@ func (m *mockMemPoolSource) SubscribeToMessages(ctx context.Context, deliveryFn 
 	return nil, nil
 }
 
+type mockBlockSource struct {
+	options sources.SubscribeToBlocksOptions
+}
+
+func (m *mockBlockSource) SubscribeToBlocks(ctx context.Context, deliveryFn sources.DeliveryFn, opts sources.SubscribeToBlocksOptions) sources.CancelFn {
+	m.options = opts
+	return nil
+}
+
 var _ sources.TransactionSource = (*mockTxSource)(nil)
 var _ sources.MemPoolSource = (*mockMemPoolSource)(nil)
+var _ sources.BlockSource = (*mockBlockSource)(nil)
 
 func TestHandler_SubscribeToTransactions(t *testing.T) {
 	tests := []struct {
@@ -120,6 +131,57 @@ func TestHandler_SubscribeToMessages(t *testing.T) {
 			}
 			require.Nil(t, err)
 			require.Equal(t, tt.wantOptions, memPool.options)
+		})
+	}
+}
+
+func TestHandler_SubscribeToBlocks(t *testing.T) {
+	tests := []struct {
+		name        string
+		url         string
+		wantErr     string
+		wantOptions sources.SubscribeToBlocksOptions
+	}{
+		{
+			name: "subscribe to 0 workchain",
+			url:  "/blocks?workchain=0",
+			wantOptions: sources.SubscribeToBlocksOptions{
+				Workchain: g.Pointer(0),
+			},
+		},
+		{
+			name: "subscribe to -1 workchain",
+			url:  "/blocks?workchain=-1",
+			wantOptions: sources.SubscribeToBlocksOptions{
+				Workchain: g.Pointer(-1),
+			},
+		},
+		{
+			name:    "bad workchain parameter",
+			url:     "/blocks?workchain=xxx",
+			wantErr: `failed to parse 'workchain' parameter in query`,
+		},
+		{
+			name:        "subscribe to all workchains",
+			url:         "/blocks",
+			wantOptions: sources.SubscribeToBlocksOptions{},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			source := &mockBlockSource{}
+			h := &Handler{
+				blockSource: source,
+			}
+			request := httptest.NewRequest(http.MethodGet, tt.url, nil)
+			err := h.SubscribeToBlocks(&session{}, request)
+			if tt.wantErr != "" {
+				require.NotNil(t, err)
+				require.Equal(t, err.Error(), tt.wantErr)
+				return
+			}
+			require.Nil(t, err)
+			require.Equal(t, tt.wantOptions, source.options)
 		})
 	}
 }

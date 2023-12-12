@@ -3,6 +3,7 @@ package sse
 import (
 	"fmt"
 	"net/http"
+	"strconv"
 	"strings"
 	"sync/atomic"
 	"time"
@@ -16,6 +17,7 @@ import (
 // Handler handles http methods for sse.
 type Handler struct {
 	txSource       sources.TransactionSource
+	blockSource    sources.BlockSource
 	traceSource    sources.TraceSource
 	memPool        sources.MemPoolSource
 	currentEventID int64
@@ -23,9 +25,10 @@ type Handler struct {
 
 type handlerFunc func(session *session, request *http.Request) error
 
-func NewHandler(txSource sources.TransactionSource, traceSource sources.TraceSource, memPool sources.MemPoolSource) *Handler {
+func NewHandler(blockSource sources.BlockSource, txSource sources.TransactionSource, traceSource sources.TraceSource, memPool sources.MemPoolSource) *Handler {
 	h := Handler{
 		txSource:       txSource,
+		blockSource:    blockSource,
 		traceSource:    traceSource,
 		memPool:        memPool,
 		currentEventID: time.Now().UnixNano(),
@@ -64,6 +67,9 @@ func parseQueryStrings(accountsStr string, operationsStr string) (*sources.Subsc
 }
 
 func (h *Handler) SubscribeToTransactions(session *session, request *http.Request) error {
+	if h.traceSource == nil {
+		return errors.BadRequest("trace source is not configured")
+	}
 	query := request.URL.Query()
 	options, err := parseQueryStrings(query.Get("accounts"), query.Get("operations"))
 	if err != nil {
@@ -82,6 +88,9 @@ func (h *Handler) SubscribeToTransactions(session *session, request *http.Reques
 }
 
 func (h *Handler) SubscribeToMessages(session *session, request *http.Request) error {
+	if h.memPool == nil {
+		return errors.BadRequest("mempool source is not configured")
+	}
 	accountsStr := request.URL.Query().Get("accounts")
 	var accounts []tongo.AccountID
 	if len(accountsStr) > 0 {
@@ -127,6 +136,9 @@ func parseAccountsToTraceOptions(str string) (*sources.SubscribeToTraceOptions, 
 }
 
 func (h *Handler) SubscribeToTraces(session *session, request *http.Request) error {
+	if h.traceSource == nil {
+		return errors.BadRequest("trace source is not configured")
+	}
 	accounts := request.URL.Query().Get("accounts")
 	options, err := parseAccountsToTraceOptions(accounts)
 	if err != nil {
@@ -140,6 +152,34 @@ func (h *Handler) SubscribeToTraces(session *session, request *http.Request) err
 		}
 		session.SendEvent(event)
 	}, *options)
+	session.SetCancelFn(cancelFn)
+	return nil
+}
+
+func (h *Handler) SubscribeToBlocks(session *session, request *http.Request) error {
+	if h.blockSource == nil {
+		return errors.BadRequest("block source is not configured")
+	}
+	workchain := request.URL.Query().Get("workchain")
+	opts := sources.SubscribeToBlocksOptions{}
+	if len(workchain) > 0 {
+		value, err := strconv.Atoi(workchain)
+		if err != nil {
+			return errors.BadRequest("failed to parse 'workchain' parameter in query")
+		}
+		if value != -1 && value != 0 {
+			return errors.BadRequest("invalid 'workchain' parameter in query")
+		}
+		opts.Workchain = &value
+	}
+	cancelFn := h.blockSource.SubscribeToBlocks(request.Context(), func(data []byte) {
+		event := Event{
+			Name:    events.BlockEvent,
+			EventID: h.nextID(),
+			Data:    data,
+		}
+		session.SendEvent(event)
+	}, opts)
 	session.SetCancelFn(cancelFn)
 	return nil
 }

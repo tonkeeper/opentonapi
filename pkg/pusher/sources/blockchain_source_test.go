@@ -25,18 +25,37 @@ func (m *mockTxDispatcher) Run(ctx context.Context) chan TransactionEvent {
 	return m.ch
 }
 
+type mockBlockDispatcher struct {
+	ch chan BlockEvent
+}
+
+func (m *mockBlockDispatcher) RegisterSubscriber(fn DeliveryFn, options SubscribeToBlocksOptions) CancelFn {
+	panic("implement me")
+}
+func (m *mockBlockDispatcher) Run(ctx context.Context) chan BlockEvent {
+	return m.ch
+}
+
 func TestBlockchainSource_Run(t *testing.T) {
 	cli, err := liteapi.NewClient(liteapi.Mainnet(), liteapi.FromEnvs())
 	require.Nil(t, err)
 
 	tests := []struct {
-		name       string
-		blockID    string
-		wantEvents []TransactionEvent
+		name           string
+		blockID        string
+		wantTxEvents   []TransactionEvent
+		wantBlockEvent BlockEvent
 	}{
 		{
 			blockID: "(0,8000000000000000,40007846)",
-			wantEvents: []TransactionEvent{
+			wantBlockEvent: BlockEvent{
+				Workchain: 0,
+				Shard:     "8000000000000000",
+				Seqno:     40007846,
+				RootHash:  "7e1ff48976668e4841b02c4b034388941915b1ce99c51a5a6a93455248aac07f",
+				FileHash:  "2e8e0a874581df44e8ff47445172120dfd4ddbd96f4cff781f2573ef5c062a30",
+			},
+			wantTxEvents: []TransactionEvent{
 
 				{
 					AccountID: ton.MustParseAccountID("0:623d1fbe2220bb6e1076473d548ef250a1b6aaea35bce50f2fe99c31af6169a8"),
@@ -101,9 +120,13 @@ func TestBlockchainSource_Run(t *testing.T) {
 			mockDisp := &mockTxDispatcher{
 				ch: make(chan TransactionEvent),
 			}
+			blockDisp := &mockBlockDispatcher{
+				ch: make(chan BlockEvent, 10),
+			}
 			b := &BlockchainSource{
-				logger:     zap.L(),
-				dispatcher: mockDisp,
+				logger:          zap.L(),
+				txDispatcher:    mockDisp,
+				blockDispatcher: blockDisp,
 			}
 			blockCh := b.Run(context.Background())
 			extID, _, err := cli.LookupBlock(context.Background(), blockID, 1, nil, nil)
@@ -123,7 +146,10 @@ func TestBlockchainSource_Run(t *testing.T) {
 				event := <-mockDisp.ch
 				events = append(events, event)
 			}
-			require.Equal(t, tt.wantEvents, events)
+			require.Equal(t, tt.wantTxEvents, events)
+
+			event := <-blockDisp.ch
+			require.Equal(t, tt.wantBlockEvent, event)
 		})
 	}
 }
