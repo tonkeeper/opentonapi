@@ -40,9 +40,18 @@ func (m *mockTraceSource) SubscribeToTraces(ctx context.Context, deliveryFn sour
 	return m.OnSubscribeToTraces(ctx, deliveryFn, opts)
 }
 
+type mockBlockSource struct {
+	OnSubscribeToBlocks func(ctx context.Context, deliveryFn sources.DeliveryFn, opts sources.SubscribeToBlocksOptions) sources.CancelFn
+}
+
+func (m *mockBlockSource) SubscribeToBlocks(ctx context.Context, deliveryFn sources.DeliveryFn, opts sources.SubscribeToBlocksOptions) sources.CancelFn {
+	return m.OnSubscribeToBlocks(ctx, deliveryFn, opts)
+}
+
 var _ sources.TransactionSource = &mockTxSource{}
 var _ sources.MemPoolSource = &mockMemPool{}
 var _ sources.TraceSource = &mockTraceSource{}
+var _ sources.BlockSource = &mockBlockSource{}
 
 func TestHandler_UnsubscribeWhenConnectionIsClosed(t *testing.T) {
 	var txSubscribed atomic.Bool   // to make "go test -race" happy
@@ -77,7 +86,7 @@ func TestHandler_UnsubscribeWhenConnectionIsClosed(t *testing.T) {
 	}
 	logger, _ := zap.NewDevelopment()
 	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
-		handler := Handler(logger, source, traceSource, mempool)
+		handler := Handler(logger, source, traceSource, mempool, nil)
 		err := handler(writer, request, 0, false)
 		require.Nil(t, err)
 	}))
@@ -177,9 +186,19 @@ func TestHandler_UnsubscribeMethods(t *testing.T) {
 			}
 		},
 	}
+	var blockSubscribed atomic.Bool   // to make "go test -race" happy
+	var blockUnsubscribed atomic.Bool // to make "go test -race" happy
+	blockSource := &mockBlockSource{
+		OnSubscribeToBlocks: func(ctx context.Context, deliveryFn sources.DeliveryFn, opts sources.SubscribeToBlocksOptions) sources.CancelFn {
+			blockSubscribed.Store(true)
+			return func() {
+				blockUnsubscribed.Store(true)
+			}
+		},
+	}
 	logger, _ := zap.NewDevelopment()
 	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
-		handler := Handler(logger, source, traceSource, mempool)
+		handler := Handler(logger, source, traceSource, mempool, blockSource)
 		err := handler(writer, request, 0, false)
 		require.Nil(t, err)
 	}))
@@ -212,11 +231,20 @@ func TestHandler_UnsubscribeMethods(t *testing.T) {
 				"0:5555555555555555555555555555555555555555555555555555555555555555",
 			},
 		},
+		{
+			ID:      4,
+			JSONRPC: "2.0",
+			Method:  "subscribe_block",
+			Params: []string{
+				"workchain=-1",
+			},
+		},
 	}
 	expectedResponses := [][]byte{
 		[]byte(`{"id":1,"jsonrpc":"2.0","method":"subscribe_account","result":"success! 2 new subscriptions created"}` + "\n"),
 		[]byte(`{"id":2,"jsonrpc":"2.0","method":"subscribe_mempool","result":"success! you have subscribed to mempool"}` + "\n"),
 		[]byte(`{"id":3,"jsonrpc":"2.0","method":"subscribe_trace","result":"success! 1 new subscriptions created"}` + "\n"),
+		[]byte(`{"id":4,"jsonrpc":"2.0","method":"subscribe_block","result":"success! you have subscribed to blocks"}` + "\n"),
 	}
 
 	for i, request := range requests {
@@ -241,11 +269,14 @@ func TestHandler_UnsubscribeMethods(t *testing.T) {
 	require.True(t, traceSubscribed.Load())
 	require.False(t, traceUnsubscribed.Load())
 
+	require.True(t, blockSubscribed.Load())
+	require.False(t, blockUnsubscribed.Load())
+
 	time.Sleep(1 * time.Second)
 
 	requests = []JsonRPCRequest{
 		{
-			ID:      4,
+			ID:      10,
 			JSONRPC: "2.0",
 			Method:  "unsubscribe_account",
 			Params: []string{
@@ -254,12 +285,12 @@ func TestHandler_UnsubscribeMethods(t *testing.T) {
 			},
 		},
 		{
-			ID:      5,
+			ID:      11,
 			JSONRPC: "2.0",
 			Method:  "unsubscribe_mempool",
 		},
 		{
-			ID:      6,
+			ID:      12,
 			JSONRPC: "2.0",
 			Method:  "unsubscribe_trace",
 			Params: []string{
@@ -267,11 +298,18 @@ func TestHandler_UnsubscribeMethods(t *testing.T) {
 				"0:3333333333333333333333333333333333333333333333333333333333333333",
 			},
 		},
+		{
+			ID:      13,
+			JSONRPC: "2.0",
+			Method:  "unsubscribe_block",
+			Params:  []string{},
+		},
 	}
 	expectedResponses = [][]byte{
-		[]byte(`{"id":4,"jsonrpc":"2.0","method":"unsubscribe_account","result":"success! 1 subscription(s) removed"}` + "\n"),
-		[]byte(`{"id":5,"jsonrpc":"2.0","method":"unsubscribe_mempool","result":"success! you have unsubscribed from mempool"}` + "\n"),
-		[]byte(`{"id":6,"jsonrpc":"2.0","method":"unsubscribe_trace","result":"success! 1 subscription(s) removed"}` + "\n"),
+		[]byte(`{"id":10,"jsonrpc":"2.0","method":"unsubscribe_account","result":"success! 1 subscription(s) removed"}` + "\n"),
+		[]byte(`{"id":11,"jsonrpc":"2.0","method":"unsubscribe_mempool","result":"success! you have unsubscribed from mempool"}` + "\n"),
+		[]byte(`{"id":12,"jsonrpc":"2.0","method":"unsubscribe_trace","result":"success! 1 subscription(s) removed"}` + "\n"),
+		[]byte(`{"id":13,"jsonrpc":"2.0","method":"unsubscribe_block","result":"success! you have unsubscribed from blocks"}` + "\n"),
 	}
 
 	for i, request := range requests {
@@ -291,4 +329,5 @@ func TestHandler_UnsubscribeMethods(t *testing.T) {
 	require.True(t, txUnsubscribed.Load())
 	require.True(t, memPoolUnsubscribed.Load())
 	require.True(t, traceUnsubscribed.Load())
+	require.True(t, blockUnsubscribed.Load())
 }

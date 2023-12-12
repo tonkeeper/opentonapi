@@ -8,6 +8,7 @@ const (
 	PingEvent      Name = "ping"
 	AccountTxEvent Name = "account-tx"
 	TraceEvent     Name = "trace"
+	BlockEvent     Name = "block"
 	MempoolEvent   Name = "mempool"
 )
 

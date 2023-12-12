@@ -2,7 +2,6 @@ package api
 
 import (
 	"errors"
-	"fmt"
 	"net/http"
 
 	"github.com/tonkeeper/tongo/config"
@@ -43,6 +42,7 @@ type ServerOptions struct {
 	ogenMiddlewares  []oas.Middleware
 	asyncMiddlewares []AsyncMiddleware
 	txSource         sources.TransactionSource
+	blockSource      sources.BlockSource
 	traceSource      sources.TraceSource
 	memPool          sources.MemPoolSource
 	liteServers      []config.LiteServer
@@ -59,6 +59,12 @@ func WithOgenMiddleware(m ...oas.Middleware) ServerOption {
 func WithAsyncMiddleware(m ...AsyncMiddleware) ServerOption {
 	return func(options *ServerOptions) {
 		options.asyncMiddlewares = m
+	}
+}
+
+func WithBlockSource(blockSource sources.BlockSource) ServerOption {
+	return func(options *ServerOptions) {
+		options.blockSource = blockSource
 	}
 }
 
@@ -85,15 +91,6 @@ func NewServer(log *zap.Logger, handler *Handler, address string, opts ...Server
 	for _, o := range opts {
 		o(options)
 	}
-	if options.txSource == nil {
-		return nil, fmt.Errorf("transaction source is not set")
-	}
-	if options.memPool == nil {
-		return nil, fmt.Errorf("mempool is not set")
-	}
-	if options.traceSource == nil {
-		return nil, fmt.Errorf("trace source is not set")
-	}
 	ogenMiddlewares := []oas.Middleware{ogenLoggingMiddleware(log), ogenMetricsMiddleware}
 	ogenMiddlewares = append(ogenMiddlewares, options.ogenMiddlewares...)
 
@@ -107,12 +104,21 @@ func NewServer(log *zap.Logger, handler *Handler, address string, opts ...Server
 	asyncMiddlewares := []AsyncMiddleware{asyncLoggingMiddleware(log), asyncMetricsMiddleware}
 	asyncMiddlewares = append(asyncMiddlewares, options.asyncMiddlewares...)
 
-	sseHandler := sse.NewHandler(options.txSource, options.traceSource, options.memPool)
-	mux.Handle("/v2/sse/accounts/transactions", wrapAsync(LongLivedConnection, true, chainMiddlewares(sse.Stream(log, sseHandler.SubscribeToTransactions), asyncMiddlewares...)))
-	mux.Handle("/v2/sse/accounts/traces", wrapAsync(LongLivedConnection, true, chainMiddlewares(sse.Stream(log, sseHandler.SubscribeToTraces), asyncMiddlewares...)))
-	mux.Handle("/v2/sse/mempool", wrapAsync(LongLivedConnection, true, chainMiddlewares(sse.Stream(log, sseHandler.SubscribeToMessages), asyncMiddlewares...)))
+	sseHandler := sse.NewHandler(options.blockSource, options.txSource, options.traceSource, options.memPool)
+	if options.blockSource != nil {
+		mux.Handle("/v2/sse/blocks", wrapAsync(LongLivedConnection, true, chainMiddlewares(sse.Stream(log, sseHandler.SubscribeToBlocks), asyncMiddlewares...)))
+	}
+	if options.txSource != nil {
+		mux.Handle("/v2/sse/accounts/transactions", wrapAsync(LongLivedConnection, true, chainMiddlewares(sse.Stream(log, sseHandler.SubscribeToTransactions), asyncMiddlewares...)))
+	}
+	if options.traceSource != nil {
+		mux.Handle("/v2/sse/accounts/traces", wrapAsync(LongLivedConnection, true, chainMiddlewares(sse.Stream(log, sseHandler.SubscribeToTraces), asyncMiddlewares...)))
+	}
+	if options.memPool != nil {
+		mux.Handle("/v2/sse/mempool", wrapAsync(LongLivedConnection, true, chainMiddlewares(sse.Stream(log, sseHandler.SubscribeToMessages), asyncMiddlewares...)))
+	}
 
-	websocketHandler := websocket.Handler(log, options.txSource, options.traceSource, options.memPool)
+	websocketHandler := websocket.Handler(log, options.txSource, options.traceSource, options.memPool, options.blockSource)
 	mux.Handle("/v2/websocket", wrapAsync(LongLivedConnection, true, chainMiddlewares(websocketHandler, asyncMiddlewares...)))
 	mux.Handle("/", ogenServer)
 

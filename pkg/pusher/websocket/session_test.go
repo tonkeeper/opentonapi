@@ -247,3 +247,43 @@ func Test_mempoolParamsToOptions(t *testing.T) {
 		})
 	}
 }
+
+func Test_session_subscribeToBlocks(t *testing.T) {
+	tests := []struct {
+		name       string
+		params     []string
+		wantEvents int
+		want       string
+	}{
+		{
+			name:       "all good",
+			params:     []string{"workchain=-1"},
+			want:       `success! you have subscribed to blocks`,
+			wantEvents: 1,
+		},
+		{
+			name:   "bad params",
+			params: []string{"workchain=-1", "workchain=0"},
+			want:   `failed to process params: supported only one parameter`,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var options []sources.SubscribeToBlocksOptions
+			s := &session{
+				eventCh: make(chan event, 10),
+				blockSource: &mockBlockSource{
+					OnSubscribeToBlocks: func(ctx context.Context, deliveryFn sources.DeliveryFn, opts sources.SubscribeToBlocksOptions) sources.CancelFn {
+						options = append(options, opts)
+						deliveryFn([]byte("msg"))
+						return func() {}
+					},
+				},
+			}
+			msg := s.subscribeToBlocks(context.Background(), tt.params)
+			require.Equal(t, tt.want, msg)
+			close(s.eventCh)
+			require.Equal(t, tt.wantEvents, len(s.eventCh))
+		})
+	}
+}
