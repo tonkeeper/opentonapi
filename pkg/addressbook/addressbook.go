@@ -75,28 +75,29 @@ type KnownCollection struct {
 type Option func(o *Options)
 
 type Options struct {
-	addressers []addresser
+	knownAddresses knownAddresses
 }
 
-type addresser interface {
+type knownAddresses interface {
 	GetAddress(a tongo.AccountID) (KnownAddress, bool)
+	GetAttachedAccounts() []AttachedAccount
 	SearchAttachedAccounts(prefix string) []AttachedAccount
 }
 
-func WithAdditionalAddressesSource(a addresser) Option {
+func WithAdditionalAddressesSource(a knownAddresses) Option {
 	return func(o *Options) {
-		o.addressers = append(o.addressers, a)
+		o.knownAddresses = a
 	}
 }
 
 // Book holds information about known accounts, jettons, NFT collections manually crafted by the tonkeeper team and the community.
 type Book struct {
-	mu          sync.RWMutex
-	addresses   map[tongo.AccountID]KnownAddress
-	collections map[tongo.AccountID]KnownCollection
-	jettons     map[tongo.AccountID]KnownJetton
-	tfPools     map[tongo.AccountID]TFPoolInfo
-	addressers  []addresser
+	mu             sync.RWMutex
+	addresses      map[tongo.AccountID]KnownAddress
+	collections    map[tongo.AccountID]KnownCollection
+	jettons        map[tongo.AccountID]KnownJetton
+	tfPools        map[tongo.AccountID]TFPoolInfo
+	knownAddresses knownAddresses
 }
 
 type TFPoolInfo struct {
@@ -112,10 +113,8 @@ func (b *Book) GetAddressInfoByAddress(a tongo.AccountID) (KnownAddress, bool) {
 	if a1, ok := b.addresses[a]; ok {
 		return a1, ok
 	}
-	for i := range b.addressers {
-		if a1, ok := b.addressers[i].GetAddress(a); ok {
-			return a1, ok
-		}
+	if a1, ok := b.knownAddresses.GetAddress(a); ok {
+		return a1, ok
 	}
 	return KnownAddress{}, false
 }
@@ -123,14 +122,13 @@ func (b *Book) GetAddressInfoByAddress(a tongo.AccountID) (KnownAddress, bool) {
 func (b *Book) SearchAttachedAccountsByPrefix(prefix string) []AttachedAccount {
 	b.mu.RLock()
 	defer b.mu.RUnlock()
+	return b.knownAddresses.SearchAttachedAccounts(prefix)
+}
 
-	for i := range b.addressers {
-		foundAccounts := b.addressers[i].SearchAttachedAccounts(prefix)
-		if len(foundAccounts) > 0 {
-			return foundAccounts
-		}
-	}
-	return []AttachedAccount{}
+func (b *Book) GetAttachedAccounts() []AttachedAccount {
+	b.mu.RLock()
+	defer b.mu.RUnlock()
+	return b.knownAddresses.GetAttachedAccounts()
 }
 
 func (b *Book) GetTFPoolInfo(a tongo.AccountID) (TFPoolInfo, bool) {
@@ -194,11 +192,11 @@ func NewAddressBook(logger *zap.Logger, addressPath, jettonPath, collectionPath 
 	tfPools := make(map[tongo.AccountID]TFPoolInfo)
 
 	book := &Book{
-		addresses:   addresses,
-		collections: collections,
-		jettons:     jettons,
-		tfPools:     tfPools,
-		addressers:  options.addressers,
+		addresses:      addresses,
+		collections:    collections,
+		jettons:        jettons,
+		tfPools:        tfPools,
+		knownAddresses: options.knownAddresses,
 	}
 
 	go func() {

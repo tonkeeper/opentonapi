@@ -147,6 +147,7 @@ type addressBook interface {
 	GetTFPoolInfo(a tongo.AccountID) (addressbook.TFPoolInfo, bool)
 	GetKnownJettons() map[tongo.AccountID]addressbook.KnownJetton
 	GetKnownCollections() map[tongo.AccountID]addressbook.KnownCollection
+	GetAttachedAccounts() []addressbook.AttachedAccount
 	SearchAttachedAccountsByPrefix(prefix string) []addressbook.AttachedAccount
 }
 

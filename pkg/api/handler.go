@@ -2,7 +2,9 @@ package api
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"net/http"
 	"sync"
 
 	"github.com/go-faster/errors"
@@ -227,4 +229,18 @@ func (h *Handler) GetJettonNormalizedMetadata(ctx context.Context, master tongo.
 		return NormalizeMetadata(meta, &info, false)
 	}
 	return NormalizeMetadata(meta, nil, h.spamFilter.IsJettonBlacklisted(master, meta.Symbol))
+}
+
+func (h *Handler) KnownAccountsHandler(writer http.ResponseWriter, r *http.Request, connectionType int, allowTokenInQuery bool) error {
+	type knownAccount struct {
+		Name    string `json:"name"`
+		Address string `json:"address"`
+	}
+	var resp []knownAccount
+	accounts := h.addressBook.GetAttachedAccounts()
+	for _, account := range accounts {
+		resp = append(resp, knownAccount{Name: account.Name, Address: account.Wallet})
+	}
+	writer.Header().Set("Content-Type", "application/json")
+	return json.NewEncoder(writer).Encode(resp)
 }
