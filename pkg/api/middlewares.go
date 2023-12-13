@@ -8,6 +8,7 @@ import (
 	"github.com/ogen-go/ogen/ogenerrors"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
+	"github.com/tonkeeper/opentonapi/pkg/oas"
 	"go.uber.org/zap"
 	"net/http"
 )
@@ -21,7 +22,11 @@ func ogenLoggingMiddleware(logger *zap.Logger) middleware.Middleware {
 		logger.Info("Handling request")
 		resp, err := next(req)
 		if err != nil {
-			logger.Info("Fail", zap.Error(err))
+			if oasError, ok := err.(*oas.ErrorStatusCode); ok && oasError.StatusCode == http.StatusInternalServerError {
+				logger.Error("Fail", zap.Error(err))
+			} else {
+				logger.Info("Fail", zap.Error(err))
+			}
 		} else {
 			logger.Info("Success")
 		}
