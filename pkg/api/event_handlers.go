@@ -339,7 +339,7 @@ func (h *Handler) EmulateMessageToAccountEvent(ctx context.Context, request *oas
 	var m tlb.Message
 	err = tlb.Unmarshal(c, &m)
 	if err != nil {
-		return nil, toError(http.StatusInternalServerError, err)
+		return nil, toError(http.StatusBadRequest, err)
 	}
 	account, err := tongo.ParseAddress(params.AccountID)
 	if err != nil {
@@ -381,9 +381,8 @@ func (h *Handler) EmulateMessageToEvent(ctx context.Context, request *oas.Emulat
 		return nil, toError(http.StatusBadRequest, err)
 	}
 	var m tlb.Message
-	err = tlb.Unmarshal(c, &m)
-	if err != nil {
-		return nil, toError(http.StatusInternalServerError, err)
+	if err := tlb.Unmarshal(c, &m); err != nil {
+		return nil, toError(http.StatusBadRequest, err)
 	}
 	configBase64, err := h.storage.TrimmedConfigBase64()
 	if err != nil {
@@ -431,7 +430,7 @@ func (h *Handler) EmulateMessageToTrace(ctx context.Context, request *oas.Emulat
 	var m tlb.Message
 	err = tlb.Unmarshal(c, &m)
 	if err != nil {
-		return nil, toError(http.StatusInternalServerError, err)
+		return nil, toError(http.StatusBadRequest, err)
 	}
 	configBase64, err := h.storage.TrimmedConfigBase64()
 	if err != nil {
@@ -516,11 +515,11 @@ func (h *Handler) EmulateMessageToWallet(ctx context.Context, request *oas.Emula
 	var m tlb.Message
 	err = tlb.Unmarshal(msgCell, &m)
 	if err != nil {
-		return nil, toError(http.StatusInternalServerError, err)
+		return nil, toError(http.StatusBadRequest, err)
 	}
 	walletAddress, err := extractDestinationWallet(m)
 	if err != nil {
-		return nil, toError(http.StatusInternalServerError, err)
+		return nil, toError(http.StatusBadRequest, err)
 	}
 	var code []byte
 	if account, err := h.storage.GetRawAccount(ctx, *walletAddress); err == nil && len(account.Code) > 0 {
@@ -537,7 +536,7 @@ func (h *Handler) EmulateMessageToWallet(ctx context.Context, request *oas.Emula
 	}
 	walletVersion, err := wallet.GetVersionByCode(code)
 	if err != nil {
-		return nil, toError(http.StatusInternalServerError, err)
+		return nil, toError(http.StatusBadRequest, err)
 	}
 	risk, err := wallet.ExtractRisk(walletVersion, msgCell)
 	if err != nil {
