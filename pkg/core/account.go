@@ -7,7 +7,6 @@ import (
 
 	"github.com/shopspring/decimal"
 	"github.com/tonkeeper/tongo"
-	"github.com/tonkeeper/tongo/boc"
 	"github.com/tonkeeper/tongo/tlb"
 )
 
@@ -25,7 +24,7 @@ type Account struct {
 	Interfaces        []abi.ContractInterface
 	LastActivityTime  int64
 	GetMethods        []string
-	Libraries         map[tongo.Bits256]*boc.Cell
+	Libraries         map[tongo.Bits256]*SimpleLib
 }
 
 // StorageInfo is taken from TLB storage_stat:StorageInfo.
@@ -51,5 +50,5 @@ type Contract struct {
 	Status    tlb.AccountStatus
 	Code      []byte
 	Data      []byte
-	Libraries map[tongo.Bits256]*boc.Cell
+	Libraries map[tongo.Bits256]*SimpleLib
 }
