@@ -2,9 +2,12 @@ package api
 
 import (
 	"context"
+	"net/http"
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"github.com/tonkeeper/tongo/config"
 	"github.com/tonkeeper/tongo/liteapi"
 	"github.com/tonkeeper/tongo/tlb"
 	"github.com/tonkeeper/tongo/ton"
@@ -16,10 +19,11 @@ import (
 
 func TestHandler_EmulateMessageToAccountEvent(t *testing.T) {
 	tests := []struct {
-		name        string
-		request     oas.EmulateMessageToAccountEventReq
-		params      oas.EmulateMessageToAccountEventParams
-		wantActions []oas.ActionType
+		name          string
+		request       oas.EmulateMessageToAccountEventReq
+		params        oas.EmulateMessageToAccountEventParams
+		wantActions   []oas.ActionType
+		wantErrorCode int
 	}{
 		{
 			name: "all good",
@@ -57,16 +61,36 @@ func TestHandler_EmulateMessageToAccountEvent(t *testing.T) {
 				oas.ActionTypeJettonSwap,
 			},
 		},
+		{
+			name: "message is not accepted by account",
+			request: oas.EmulateMessageToAccountEventReq{
+				Boc: "te6ccgEBAwEAqwABRYgA2ZpktQsYby0n9cV5VWOFINBjScIU2HdondFsK3lDpEAMAQGcLYVC3cK/Ulyr7Sa1rxw0XGsG56ppG9v7XscYE8iFztO5+MzcdmMOjhSdgpIfA+6SZL5PTZiCof6dw8G4W049BCmpoxdlea4wAAABBwADAgBkQgAWedrcZEjyi+TW7e0OAcNQTmVl2HH9exhajn5AqRktZZAfQAAAAAAAAAAAAAAAAAA=",
+			},
+			params: oas.EmulateMessageToAccountEventParams{
+				AccountID: "0:6ccd325a858c379693fae2bcaab1c2906831a4e10a6c3bb44ee8b615bca1d220",
+			},
+			wantErrorCode: http.StatusNotAcceptable,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			logger, _ := zap.NewDevelopment()
-			liteStorage, err := litestorage.NewLiteStorage(logger)
+			var liteservers []config.LiteServer
+			if servers, ok := os.LookupEnv("LITE_SERVERS"); ok {
+				var err error
+				liteservers, err = config.ParseLiteServersEnvVar(servers)
+				require.Nil(t, err)
+			}
+			liteStorage, err := litestorage.NewLiteStorage(logger, litestorage.WithLiteServers(liteservers))
 			require.Nil(t, err)
 			h, err := NewHandler(logger, WithStorage(liteStorage), WithExecutor(liteStorage))
 			require.Nil(t, err)
 
 			got, err := h.EmulateMessageToAccountEvent(context.Background(), &tt.request, tt.params)
+			if tt.wantErrorCode != 0 {
+				require.Equal(t, tt.wantErrorCode, err.(*oas.ErrorStatusCode).StatusCode)
+				return
+			}
 			require.Nil(t, err)
 
 			var actions []oas.ActionType

@@ -331,6 +331,18 @@ func (h *Handler) GetAccountEvent(ctx context.Context, params oas.GetAccountEven
 	return &event, nil
 }
 
+func toProperEmulationError(err error) error {
+	if err != nil {
+		errWithCode, ok := err.(txemulator.ErrorWithExitCode)
+		if ok && errWithCode.Iteration == 0 {
+			// we want return Not Acceptable when the destination contract didn't accept a message.
+			return toError(http.StatusNotAcceptable, err)
+		}
+		return toError(http.StatusInternalServerError, err)
+	}
+	return nil
+}
+
 func (h *Handler) EmulateMessageToAccountEvent(ctx context.Context, request *oas.EmulateMessageToAccountEventReq, params oas.EmulateMessageToAccountEventParams) (*oas.AccountEvent, error) {
 	c, err := deserializeSingleBoc(request.Boc)
 	if err != nil {
@@ -358,7 +370,7 @@ func (h *Handler) EmulateMessageToAccountEvent(ctx context.Context, request *oas
 	}
 	tree, err := emulator.Run(ctx, m)
 	if err != nil {
-		return nil, toError(http.StatusInternalServerError, err)
+		return nil, toProperEmulationError(err)
 	}
 	trace, err := emulatedTreeToTrace(ctx, h.executor, h.storage, configBase64, tree, emulator.FinalStates())
 	if err != nil {
@@ -405,7 +417,7 @@ func (h *Handler) EmulateMessageToEvent(ctx context.Context, request *oas.Emulat
 	}
 	tree, err := emulator.Run(ctx, m)
 	if err != nil {
-		return nil, toError(http.StatusInternalServerError, err)
+		return nil, toProperEmulationError(err)
 	}
 	trace, err := emulatedTreeToTrace(ctx, h.executor, h.storage, configBase64, tree, emulator.FinalStates())
 	if err != nil {
@@ -452,7 +464,7 @@ func (h *Handler) EmulateMessageToTrace(ctx context.Context, request *oas.Emulat
 	}
 	tree, err := emulator.Run(ctx, m)
 	if err != nil {
-		return nil, toError(http.StatusInternalServerError, err)
+		return nil, toProperEmulationError(err)
 	}
 	trace, err := emulatedTreeToTrace(ctx, h.executor, h.storage, configBase64, tree, emulator.FinalStates())
 	if err != nil {
@@ -574,7 +586,7 @@ func (h *Handler) EmulateMessageToWallet(ctx context.Context, request *oas.Emula
 	}
 	tree, err := emulator.Run(ctx, m)
 	if err != nil {
-		return nil, toError(http.StatusInternalServerError, err)
+		return nil, toProperEmulationError(err)
 	}
 	trace, err := emulatedTreeToTrace(ctx, h.executor, h.storage, configBase64, tree, emulator.FinalStates())
 	if err != nil {
