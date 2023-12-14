@@ -6,6 +6,7 @@ import (
 	"github.com/shopspring/decimal"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
+	"golang.org/x/exp/maps"
 )
 
 type Trace struct {
@@ -99,6 +100,15 @@ func Visit(trace *Trace, fn func(trace *Trace)) {
 	for _, child := range trace.Children {
 		Visit(child, fn)
 	}
+}
+
+// DistinctAccounts returns a list of accounts that are involved in the given trace.
+func DistinctAccounts(trace *Trace) []tongo.AccountID {
+	accounts := make(map[tongo.AccountID]struct{})
+	Visit(trace, func(trace *Trace) {
+		accounts[trace.Account] = struct{}{}
+	})
+	return maps.Keys(accounts)
 }
 
 // CollectAdditionalInfo goes over the whole trace

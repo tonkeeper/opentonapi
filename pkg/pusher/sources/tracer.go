@@ -12,7 +12,6 @@ import (
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/tongo"
 	"go.uber.org/zap"
-	"golang.org/x/exp/maps"
 )
 
 var (
@@ -85,7 +84,7 @@ func (t *Tracer) Run(ctx context.Context) {
 			return
 		}
 		txCh <- tx
-	}, SubscribeToTransactionsOptions{AllAccounts: true})
+	}, SubscribeToTransactionsOptions{AllAccounts: true, AllOperations: true})
 
 	defer cancelFn()
 
@@ -128,29 +127,23 @@ func (t *Tracer) dispatch(trace *core.Trace) {
 	}
 	traceNumber.With(map[string]string{"completeness": "completed"}).Inc()
 
-	if !t.putTraceInCache(trace.Hash.Hex()) {
+	if success := t.putTraceInCache(trace.Hash.Hex()); !success {
+		// ok, this trace is already in cache meaning that we already sent it to subscribers.
+		// ignore it.
 		return
 	}
 
-	accounts := make(map[tongo.AccountID]struct{})
-	queue := []*core.Trace{trace}
-	for len(queue) > 0 {
-		current := queue[0]
-		queue = queue[1:]
-		accounts[current.Account] = struct{}{}
-		queue = append(queue, current.Children...)
-	}
-
-	accountIDs := maps.Keys(accounts)
+	accounts := core.DistinctAccounts(trace)
 	eventData := &TraceEventData{
-		AccountIDs: accountIDs,
+		AccountIDs: accounts,
 		Hash:       trace.Hash.Hex(),
 	}
+
 	eventJSON, err := json.Marshal(eventData)
 	if err != nil {
 		t.logger.Error("json.Marshal() failed: %v", zap.Error(err))
 		return
 	}
 
-	t.dispatcher.dispatch(accountIDs, eventJSON)
+	t.dispatcher.dispatch(accounts, eventJSON)
 }
