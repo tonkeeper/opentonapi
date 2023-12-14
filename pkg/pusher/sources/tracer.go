@@ -84,7 +84,7 @@ func (t *Tracer) Run(ctx context.Context) {
 			return
 		}
 		txCh <- tx
-	}, SubscribeToTransactionsOptions{AllAccounts: true})
+	}, SubscribeToTransactionsOptions{AllAccounts: true, AllOperations: true})
 
 	defer cancelFn()
 
