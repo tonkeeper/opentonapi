@@ -8,6 +8,7 @@ import (
 	"github.com/tonkeeper/opentonapi/pkg/litestorage"
 	"github.com/tonkeeper/opentonapi/pkg/oas"
 	pkgTesting "github.com/tonkeeper/opentonapi/pkg/testing"
+	"github.com/tonkeeper/tongo/liteapi"
 	"go.uber.org/zap"
 )
 
@@ -32,7 +33,9 @@ func TestHandler_DecodeMessage(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			logger, _ := zap.NewDevelopment()
-			liteStorage, err := litestorage.NewLiteStorage(logger)
+			cli, err := liteapi.NewClient(liteapi.FromEnvsOrMainnet())
+			require.Nil(t, err)
+			liteStorage, err := litestorage.NewLiteStorage(logger, cli)
 			require.Nil(t, err)
 			h, err := NewHandler(logger, WithStorage(liteStorage), WithExecutor(liteStorage))
 			require.Nil(t, err)

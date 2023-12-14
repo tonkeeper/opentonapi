@@ -18,7 +18,7 @@ import (
 )
 
 func TestLiteStorage_run(t *testing.T) {
-	cli, err := liteapi.NewClient(liteapi.Mainnet(), liteapi.FromEnvs())
+	cli, err := liteapi.NewClient(liteapi.FromEnvsOrMainnet())
 	require.Nil(t, err)
 
 	tests := []struct {
@@ -77,7 +77,7 @@ func TestLiteStorage_run(t *testing.T) {
 }
 
 func TestLiteStorage_runBlockchainConfigUpdate(t *testing.T) {
-	cli, err := liteapi.NewClient(liteapi.Mainnet(), liteapi.FromEnvs())
+	cli, err := liteapi.NewClient(liteapi.FromEnvsOrMainnet())
 	require.Nil(t, err)
 	s := &LiteStorage{
 		logger: zap.L(),
@@ -92,7 +92,7 @@ func TestLiteStorage_runBlockchainConfigUpdate(t *testing.T) {
 }
 
 func TestLiteStorage_TrimmedConfigBase64(t *testing.T) {
-	cli, err := liteapi.NewClient(liteapi.Mainnet(), liteapi.FromEnvs())
+	cli, err := liteapi.NewClient(liteapi.FromEnvsOrMainnet())
 	require.Nil(t, err)
 	s := &LiteStorage{
 		logger: zap.L(),

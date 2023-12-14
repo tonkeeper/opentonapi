@@ -101,30 +101,20 @@ func TestConvertTransaction(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			cli, err := liteapi.NewClient(liteapi.Mainnet(), liteapi.FromEnvs())
-			if err != nil {
-				t.Fatalf("NewClient() failed: %v", err)
-			}
+			cli, err := liteapi.NewClient(liteapi.FromEnvsOrMainnet())
+			require.Nil(t, err)
 			txs, err := cli.GetTransactions(context.Background(), 1, tt.accountID, tt.txLt, tt.txHash)
-			if err != nil {
-				t.Fatalf("GetOneTransactionFromB() failed: %v", err)
-			}
+			require.Nil(t, err)
 			tx, err := ConvertTransaction(0, txs[0])
-			if err != nil {
-				t.Fatalf("ConvertTransaction() failed: %v", err)
-			}
+			require.Nil(t, err)
 			bs, err := json.MarshalIndent(tx, " ", "  ")
-			if err != nil {
-				t.Fatalf("json.Marshal() failed: %v", err)
-			}
+			require.Nil(t, err)
 			outputName := fmt.Sprintf("testdata/%v.output.json", tt.filenamePrefix)
 			if err := os.WriteFile(outputName, bs, 0644); err != nil {
 				t.Fatalf("os.WriteFile() failed: %v", err)
 			}
 			expected, err := os.ReadFile(fmt.Sprintf("testdata/%v.json", tt.filenamePrefix))
-			if err != nil {
-				t.Fatalf("os.ReadFile() failed: %v", err)
-			}
+			require.Nil(t, err)
 			if bytes.Compare(bs, expected) != 0 {
 				t.Fatalf("dont match")
 			}

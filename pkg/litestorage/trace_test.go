@@ -12,7 +12,7 @@ import (
 )
 
 func TestLiteStorage_getAccountInterfaces(t *testing.T) {
-	cli, err := liteapi.NewClient(liteapi.Mainnet(), liteapi.FromEnvs())
+	cli, err := liteapi.NewClient(liteapi.FromEnvsOrMainnet())
 	require.Nil(t, err)
 	storage := LiteStorage{
 		client:                 cli,
