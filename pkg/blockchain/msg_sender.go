@@ -199,3 +199,7 @@ func (ms *MsgSender) SendMultipleMessages(ctx context.Context, copies []ExtInMsg
 		RecvAt: now,
 	})
 }
+
+func (ms *MsgSender) SendingClientsNumber() int {
+	return len(ms.sendingClients)
+}
