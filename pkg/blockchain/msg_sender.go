@@ -141,6 +141,12 @@ func (ms *MsgSender) SendMessage(ctx context.Context, msgCopy ExtInMsgCopy) erro
 			ms.logger.Warn("receiver is too slow", zap.String("name", name))
 		}
 	}
+	go func(p []byte) { //TODO: remove this. this is workaround for highload period
+		time.Sleep(time.Second * 30)
+		c, cancel := context.WithTimeout(context.Background(), time.Second*10)
+		defer cancel()
+		ms.send(c, p)
+	}(msgCopy.Payload)
 	return ms.send(ctx, msgCopy.Payload)
 }
 
