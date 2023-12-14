@@ -101,7 +101,6 @@ func (t *Tracer) Run(ctx context.Context) {
 			}
 			trace, err := t.storage.GetTrace(ctx, hash)
 			if err != nil {
-				t.logger.Error("storage.GetTrace() failed", zap.Error(err))
 				return
 			}
 			t.dispatch(trace)
