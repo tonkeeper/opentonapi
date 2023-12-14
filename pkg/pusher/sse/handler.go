@@ -67,7 +67,7 @@ func parseQueryStrings(accountsStr string, operationsStr string) (*sources.Subsc
 }
 
 func (h *Handler) SubscribeToTransactions(session *session, request *http.Request) error {
-	if h.traceSource == nil {
+	if h.txSource == nil {
 		return errors.BadRequest("trace source is not configured")
 	}
 	query := request.URL.Query()

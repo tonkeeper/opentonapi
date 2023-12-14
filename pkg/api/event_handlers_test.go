@@ -3,11 +3,9 @@ package api
 import (
 	"context"
 	"net/http"
-	"os"
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"github.com/tonkeeper/tongo/config"
 	"github.com/tonkeeper/tongo/liteapi"
 	"github.com/tonkeeper/tongo/tlb"
 	"github.com/tonkeeper/tongo/ton"
@@ -75,13 +73,9 @@ func TestHandler_EmulateMessageToAccountEvent(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			logger, _ := zap.NewDevelopment()
-			var liteservers []config.LiteServer
-			if servers, ok := os.LookupEnv("LITE_SERVERS"); ok {
-				var err error
-				liteservers, err = config.ParseLiteServersEnvVar(servers)
-				require.Nil(t, err)
-			}
-			liteStorage, err := litestorage.NewLiteStorage(logger, litestorage.WithLiteServers(liteservers))
+			cli, err := liteapi.NewClient(liteapi.FromEnvsOrMainnet())
+			require.Nil(t, err)
+			liteStorage, err := litestorage.NewLiteStorage(logger, cli)
 			require.Nil(t, err)
 			h, err := NewHandler(logger, WithStorage(liteStorage), WithExecutor(liteStorage))
 			require.Nil(t, err)
@@ -103,7 +97,7 @@ func TestHandler_EmulateMessageToAccountEvent(t *testing.T) {
 }
 
 func Test_prepareAccountState(t *testing.T) {
-	cli, err := liteapi.NewClient(liteapi.Mainnet(), liteapi.FromEnvs())
+	cli, err := liteapi.NewClient(liteapi.FromEnvsOrMainnet())
 	require.Nil(t, err)
 
 	tests := []struct {

@@ -9,6 +9,7 @@ import (
 	"github.com/tonkeeper/opentonapi/pkg/blockchain/indexer"
 	"github.com/tonkeeper/opentonapi/pkg/spam"
 	"github.com/tonkeeper/tongo"
+	"github.com/tonkeeper/tongo/liteapi"
 	"go.uber.org/zap"
 	"golang.org/x/exp/maps"
 
@@ -28,12 +29,25 @@ func main() {
 	book := addressbook.NewAddressBook(log, config.AddressPath, config.JettonPath, config.CollectionPath)
 
 	storageBlockCh := make(chan indexer.IDandBlock)
+
+	var err error
+	var client *liteapi.Client
+	if len(cfg.App.LiteServers) == 0 {
+		log.Warn("USING PUBLIC CONFIG for NewLiteStorage! BE CAREFUL!")
+		client, err = liteapi.NewClientWithDefaultMainnet()
+	} else {
+		client, err = liteapi.NewClient(liteapi.WithLiteServers(cfg.App.LiteServers))
+	}
+	if err != nil {
+		log.Fatal("failed to create liteapi client", zap.Error(err))
+	}
+
 	storage, err := litestorage.NewLiteStorage(
 		log,
+		client,
 		litestorage.WithPreloadAccounts(cfg.App.Accounts),
 		litestorage.WithTFPools(book.TFPools()),
 		litestorage.WithKnownJettons(maps.Keys(book.GetKnownJettons())),
-		litestorage.WithLiteServers(cfg.App.LiteServers),
 		litestorage.WithBlockChannel(storageBlockCh),
 	)
 	// The executor is used to resolve DNS records.
@@ -65,19 +79,13 @@ func main() {
 	if err != nil {
 		log.Fatal("failed to create api handler", zap.Error(err))
 	}
-	source, err := sources.NewBlockchainSource(log, cfg.App.LiteServers)
-	if err != nil {
-		log.Fatal("failed to create blockchain source", zap.Error(err))
-	}
+	source := sources.NewBlockchainSource(log, client)
 	pusherBlockCh := source.Run(context.TODO())
 
 	tracer := sources.NewTracer(log, storage, source)
 	go tracer.Run(context.TODO())
 
-	idx, err := indexer.New(log, cfg.App.LiteServers)
-	if err != nil {
-		log.Fatal("failed to create blockchain indexer", zap.Error(err))
-	}
+	idx := indexer.New(log, client)
 	go idx.Run(context.TODO(), []chan indexer.IDandBlock{
 		pusherBlockCh,
 		storageBlockCh,

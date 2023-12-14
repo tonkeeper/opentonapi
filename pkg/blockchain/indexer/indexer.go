@@ -8,7 +8,6 @@ import (
 
 	"github.com/sourcegraph/conc/iter"
 	"github.com/tonkeeper/tongo"
-	"github.com/tonkeeper/tongo/config"
 	"github.com/tonkeeper/tongo/liteapi"
 	"github.com/tonkeeper/tongo/tlb"
 	"go.uber.org/zap"
@@ -26,22 +25,11 @@ type Indexer struct {
 	cli    *liteapi.Client
 }
 
-func New(logger *zap.Logger, servers []config.LiteServer) (*Indexer, error) {
-	var err error
-	var client *liteapi.Client
-	if len(servers) == 0 {
-		logger.Warn("USING PUBLIC CONFIG for indexer.New! BE CAREFUL!")
-		client, err = liteapi.NewClientWithDefaultMainnet()
-	} else {
-		client, err = liteapi.NewClient(liteapi.WithLiteServers(servers))
-	}
-	if err != nil {
-		return nil, err
-	}
+func New(logger *zap.Logger, cli *liteapi.Client) *Indexer {
 	return &Indexer{
-		cli:    client,
+		cli:    cli,
 		logger: logger,
-	}, nil
+	}
 }
 
 type IDandBlock struct {

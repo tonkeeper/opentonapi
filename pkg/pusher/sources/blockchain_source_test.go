@@ -37,7 +37,7 @@ func (m *mockBlockDispatcher) Run(ctx context.Context) chan BlockEvent {
 }
 
 func TestBlockchainSource_Run(t *testing.T) {
-	cli, err := liteapi.NewClient(liteapi.Mainnet(), liteapi.FromEnvs())
+	cli, err := liteapi.NewClient(liteapi.FromEnvsOrMainnet())
 	require.Nil(t, err)
 
 	tests := []struct {

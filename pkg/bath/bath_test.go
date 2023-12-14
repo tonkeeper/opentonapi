@@ -13,7 +13,7 @@ import (
 	"github.com/tonkeeper/opentonapi/internal/g"
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/tongo"
-	"github.com/tonkeeper/tongo/config"
+	"github.com/tonkeeper/tongo/liteapi"
 	"go.uber.org/zap"
 
 	"github.com/tonkeeper/opentonapi/pkg/litestorage"
@@ -71,17 +71,11 @@ func (m *mockInfoSource) STONfiPools(ctx context.Context, pools []tongo.AccountI
 var _ core.InformationSource = &mockInfoSource{}
 
 func TestFindActions(t *testing.T) {
-	var servers []config.LiteServer
-	if env, ok := os.LookupEnv("LITE_SERVERS"); ok {
-		var err error
-		servers, err = config.ParseLiteServersEnvVar(env)
-		if err != nil {
-			t.Fatal(err)
-		}
-	}
+	cli, err := liteapi.NewClient(liteapi.FromEnvsOrMainnet())
+	require.Nil(t, err)
 
 	storage, err := litestorage.NewLiteStorage(zap.L(),
-		litestorage.WithLiteServers(servers),
+		cli,
 		litestorage.WithPreloadAccounts([]tongo.AccountID{
 			tongo.MustParseAccountID("EQAs87W4yJHlF8mt29ocA4agnMrLsOP69jC1HPyBUjJay-7l"),
 			tongo.MustParseAccountID("0:54887d7c01ead183691a703afff08adc7b653fba2022df3a4963dae5171aa2ca"),

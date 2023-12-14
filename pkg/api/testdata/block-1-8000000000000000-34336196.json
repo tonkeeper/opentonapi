@@ -1,4 +1,5 @@
 {
+   "tx_quantity": 3,
    "value_flow": {
      "from_prev_blk": {
        "grams": 1917883763660307228,

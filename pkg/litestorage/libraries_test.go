@@ -6,11 +6,15 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"github.com/tonkeeper/tongo"
+	"github.com/tonkeeper/tongo/liteapi"
 	"go.uber.org/zap"
 )
 
 func TestLiteStorage_GetLibraries(t *testing.T) {
-	storage, err := NewLiteStorage(zap.L())
+	cli, err := liteapi.NewClient(liteapi.FromEnvsOrMainnet())
+	require.Nil(t, err)
+
+	storage, err := NewLiteStorage(zap.L(), cli)
 	require.Nil(t, err)
 
 	libs := []tongo.Bits256{

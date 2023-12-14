@@ -18,7 +18,6 @@ import (
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
 	"github.com/tonkeeper/tongo/boc"
-	"github.com/tonkeeper/tongo/config"
 	"github.com/tonkeeper/tongo/liteapi"
 	"github.com/tonkeeper/tongo/tep64"
 	"github.com/tonkeeper/tongo/tlb"
@@ -102,7 +101,6 @@ type LiteStorage struct {
 type Options struct {
 	preloadAccounts []tongo.AccountID
 	preloadBlocks   []tongo.BlockID
-	servers         []config.LiteServer
 	tfPools         []tongo.AccountID
 	jettons         []tongo.AccountID
 	executor        abi.Executor
@@ -128,12 +126,6 @@ func WithKnownJettons(a []tongo.AccountID) Option {
 	}
 }
 
-func WithLiteServers(servers []config.LiteServer) Option {
-	return func(o *Options) {
-		o.servers = servers
-	}
-}
-
 func WithTFPools(pools []tongo.AccountID) Option {
 	return func(o *Options) {
 		o.tfPools = pools
@@ -149,30 +141,19 @@ func WithBlockChannel(ch <-chan indexer.IDandBlock) Option {
 
 type Option func(o *Options)
 
-func NewLiteStorage(log *zap.Logger, opts ...Option) (*LiteStorage, error) {
+func NewLiteStorage(log *zap.Logger, cli *liteapi.Client, opts ...Option) (*LiteStorage, error) {
 	o := &Options{}
 	for i := range opts {
 		opts[i](o)
 	}
-	var err error
-	var client *liteapi.Client
-	if len(o.servers) == 0 {
-		log.Warn("USING PUBLIC CONFIG for NewLiteStorage! BE CAREFUL!")
-		client, err = liteapi.NewClientWithDefaultMainnet()
-	} else {
-		client, err = liteapi.NewClient(liteapi.WithLiteServers(o.servers))
-	}
-	if err != nil {
-		return nil, err
-	}
 	if o.executor == nil {
-		o.executor = client
+		o.executor = cli
 	}
 	storage := &LiteStorage{
 		logger: log,
 		// TODO: introduce an env variable to configure this number
 		maxGoroutines: 5,
-		client:        client,
+		client:        cli,
 		executor:      o.executor,
 		stopCh:        make(chan struct{}),
 		// read-only data

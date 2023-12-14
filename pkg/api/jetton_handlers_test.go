@@ -6,6 +6,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"github.com/tonkeeper/tongo"
+	"github.com/tonkeeper/tongo/liteapi"
 	"go.uber.org/zap"
 
 	"github.com/tonkeeper/opentonapi/pkg/litestorage"
@@ -28,7 +29,9 @@ func TestHandler_GetJettonsBalances(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			logger, _ := zap.NewDevelopment()
-			liteStorage, err := litestorage.NewLiteStorage(logger, litestorage.WithKnownJettons([]tongo.AccountID{
+			cli, err := liteapi.NewClient(liteapi.FromEnvsOrMainnet())
+			require.Nil(t, err)
+			liteStorage, err := litestorage.NewLiteStorage(logger, cli, litestorage.WithKnownJettons([]tongo.AccountID{
 				tongo.MustParseAddress("0:beb5d4638e860ccf7317296e298fde5b35982f4725b0676dc98b1de987b82ebc").ID, // Jetton kingy
 				tongo.MustParseAddress("0:65de083a0007638233b6668354e50e44cd4225f1730d66b8b1f19e5d26690751").ID, // Lavandos
 				tongo.MustParseAddress("0:274b605badfcecca83130b27cd375e6a73233f6e15d782a31dd2a80aff097cc0").ID, // fake jUSDT (with cyrillic T)

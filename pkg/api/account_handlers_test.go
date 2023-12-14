@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/tonkeeper/opentonapi/pkg/chainstate"
+	"github.com/tonkeeper/tongo/liteapi"
 
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
@@ -32,7 +33,9 @@ func TestHandler_GetRawAccount(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			logger, _ := zap.NewDevelopment()
-			liteStorage, err := litestorage.NewLiteStorage(logger)
+			cli, err := liteapi.NewClient(liteapi.FromEnvsOrMainnet())
+			require.Nil(t, err)
+			liteStorage, err := litestorage.NewLiteStorage(logger, cli)
 			require.Nil(t, err)
 			h, err := NewHandler(logger, WithStorage(liteStorage), WithExecutor(liteStorage))
 			require.Nil(t, err)
@@ -61,8 +64,9 @@ func TestHandler_GetAccount(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			logger, _ := zap.NewDevelopment()
-
-			liteStorage, err := litestorage.NewLiteStorage(logger)
+			cli, err := liteapi.NewClient(liteapi.FromEnvsOrMainnet())
+			require.Nil(t, err)
+			liteStorage, err := litestorage.NewLiteStorage(logger, cli)
 			require.Nil(t, err)
 			h, err := NewHandler(logger, WithStorage(liteStorage), WithExecutor(liteStorage))
 			require.Nil(t, err)
@@ -124,8 +128,9 @@ func TestHandler_GetAccounts(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			logger, _ := zap.NewDevelopment()
-
-			liteStorage, err := litestorage.NewLiteStorage(logger)
+			cli, err := liteapi.NewClient(liteapi.FromEnvsOrMainnet())
+			require.Nil(t, err)
+			liteStorage, err := litestorage.NewLiteStorage(logger, cli)
 			require.Nil(t, err)
 			h := &Handler{
 				addressBook: addressbook.NewAddressBook(logger, config.AddressPath, config.JettonPath, config.CollectionPath),
@@ -157,7 +162,7 @@ func TestHandler_GetAccounts(t *testing.T) {
 }
 
 func TestHandler_GetTransactions(t *testing.T) {
-	t.Skip() //todo: find better way to test transaction because liteserver can drop old transactions
+	t.Skip()
 	tests := []struct {
 		name         string
 		params       oas.GetBlockchainBlockTransactionsParams
@@ -177,7 +182,9 @@ func TestHandler_GetTransactions(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			logger, _ := zap.NewDevelopment()
-			liteStorage, err := litestorage.NewLiteStorage(logger)
+			cli, err := liteapi.NewClient(liteapi.FromEnvsOrMainnet())
+			require.Nil(t, err)
+			liteStorage, err := litestorage.NewLiteStorage(logger, cli)
 			require.Nil(t, err)
 			h, err := NewHandler(logger, WithStorage(liteStorage), WithExecutor(liteStorage))
 			require.Nil(t, err)

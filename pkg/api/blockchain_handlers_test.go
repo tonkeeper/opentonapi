@@ -3,21 +3,22 @@ package api
 import (
 	"context"
 	"errors"
-	"os"
 	"testing"
 
 	"github.com/stretchr/testify/require"
 	"github.com/tonkeeper/opentonapi/pkg/litestorage"
 	"github.com/tonkeeper/opentonapi/pkg/oas"
 	pkgTesting "github.com/tonkeeper/opentonapi/pkg/testing"
-	"github.com/tonkeeper/tongo/config"
+	"github.com/tonkeeper/tongo/liteapi"
 	"github.com/tonkeeper/tongo/ton"
 	"go.uber.org/zap"
 )
 
 func TestHandler_GetRawBlockchainConfig(t *testing.T) {
 	logger := zap.L()
-	liteStorage, err := litestorage.NewLiteStorage(logger)
+	cli, err := liteapi.NewClient(liteapi.FromEnvsOrMainnet())
+	require.Nil(t, err)
+	liteStorage, err := litestorage.NewLiteStorage(logger, cli)
 	require.Nil(t, err)
 	h, err := NewHandler(logger, WithStorage(liteStorage), WithExecutor(liteStorage))
 	require.Nil(t, err)
@@ -27,12 +28,6 @@ func TestHandler_GetRawBlockchainConfig(t *testing.T) {
 }
 
 func TestHandler_GetRawBlockchainConfigFromBlock(t *testing.T) {
-	var servers []config.LiteServer
-	if env, ok := os.LookupEnv("LITE_SERVERS"); ok {
-		var err error
-		servers, err = config.ParseLiteServersEnvVar(env)
-		require.Nil(t, err)
-	}
 	tests := []struct {
 		name              string
 		params            oas.GetRawBlockchainConfigFromBlockParams
@@ -86,7 +81,9 @@ func TestHandler_GetRawBlockchainConfigFromBlock(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			logger := zap.L()
-			liteStorage, err := litestorage.NewLiteStorage(logger, litestorage.WithLiteServers(servers))
+			cli, err := liteapi.NewClient(liteapi.FromEnvsOrMainnet())
+			require.Nil(t, err)
+			liteStorage, err := litestorage.NewLiteStorage(logger, cli)
 			require.Nil(t, err)
 			h, err := NewHandler(logger, WithStorage(liteStorage), WithExecutor(liteStorage))
 			require.Nil(t, err)
@@ -109,12 +106,6 @@ func TestHandler_GetRawBlockchainConfigFromBlock(t *testing.T) {
 }
 
 func TestHandler_GetBlockchainConfigFromBlock(t *testing.T) {
-	var servers []config.LiteServer
-	if env, ok := os.LookupEnv("LITE_SERVERS"); ok {
-		var err error
-		servers, err = config.ParseLiteServersEnvVar(env)
-		require.Nil(t, err)
-	}
 	tests := []struct {
 		name              string
 		params            oas.GetBlockchainConfigFromBlockParams
@@ -139,7 +130,9 @@ func TestHandler_GetBlockchainConfigFromBlock(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			logger := zap.L()
-			liteStorage, err := litestorage.NewLiteStorage(logger, litestorage.WithLiteServers(servers))
+			cli, err := liteapi.NewClient(liteapi.FromEnvsOrMainnet())
+			require.Nil(t, err)
+			liteStorage, err := litestorage.NewLiteStorage(logger, cli)
 			require.Nil(t, err)
 			h, err := NewHandler(logger, WithStorage(liteStorage), WithExecutor(liteStorage))
 			require.Nil(t, err)
@@ -157,14 +150,10 @@ func TestHandler_GetBlockchainConfigFromBlock(t *testing.T) {
 }
 
 func TestHandler_GetBlockchainValidators(t *testing.T) {
-	var servers []config.LiteServer
-	if env, ok := os.LookupEnv("LITE_SERVERS"); ok {
-		var err error
-		servers, err = config.ParseLiteServersEnvVar(env)
-		require.Nil(t, err)
-	}
 	logger := zap.L()
-	liteStorage, err := litestorage.NewLiteStorage(logger, litestorage.WithLiteServers(servers))
+	cli, err := liteapi.NewClient(liteapi.FromEnvsOrMainnet())
+	require.Nil(t, err)
+	liteStorage, err := litestorage.NewLiteStorage(logger, cli)
 	require.Nil(t, err)
 	h, err := NewHandler(logger, WithStorage(liteStorage), WithExecutor(liteStorage))
 	require.Nil(t, err)
@@ -191,12 +180,6 @@ func TestHandler_GetBlockchainValidators(t *testing.T) {
 }
 
 func TestHandler_GetBlockchainBlock(t *testing.T) {
-	var servers []config.LiteServer
-	if env, ok := os.LookupEnv("LITE_SERVERS"); ok {
-		var err error
-		servers, err = config.ParseLiteServersEnvVar(env)
-		require.Nil(t, err)
-	}
 	tests := []struct {
 		name           string
 		blockID        string
@@ -216,7 +199,9 @@ func TestHandler_GetBlockchainBlock(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			logger := zap.L()
-			liteStorage, err := litestorage.NewLiteStorage(logger, litestorage.WithLiteServers(servers))
+			cli, err := liteapi.NewClient(liteapi.FromEnvsOrMainnet())
+			require.Nil(t, err)
+			liteStorage, err := litestorage.NewLiteStorage(logger, cli)
 			require.Nil(t, err)
 			h, err := NewHandler(logger, WithStorage(liteStorage), WithExecutor(liteStorage))
 			require.Nil(t, err)

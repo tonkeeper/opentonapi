@@ -9,7 +9,6 @@ import (
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
 	"github.com/tonkeeper/tongo/boc"
-	"github.com/tonkeeper/tongo/config"
 	"github.com/tonkeeper/tongo/liteapi"
 	"go.uber.org/zap"
 )
@@ -31,24 +30,13 @@ type blockDispatcher interface {
 	Run(ctx context.Context) chan BlockEvent
 }
 
-func NewBlockchainSource(logger *zap.Logger, servers []config.LiteServer) (*BlockchainSource, error) {
-	var err error
-	var client *liteapi.Client
-	if len(servers) == 0 {
-		logger.Warn("USING PUBLIC CONFIG for NewBlockchainSource! BE CAREFUL!")
-		client, err = liteapi.NewClientWithDefaultMainnet()
-	} else {
-		client, err = liteapi.NewClient(liteapi.WithLiteServers(servers))
-	}
-	if err != nil {
-		return nil, err
-	}
+func NewBlockchainSource(logger *zap.Logger, cli *liteapi.Client) *BlockchainSource {
 	return &BlockchainSource{
 		txDispatcher:    NewTransactionDispatcher(logger),
 		blockDispatcher: NewBlockDispatcher(logger),
-		client:          client,
+		client:          cli,
 		logger:          logger,
-	}, nil
+	}
 }
 
 var _ BlockSource = (*BlockchainSource)(nil)
