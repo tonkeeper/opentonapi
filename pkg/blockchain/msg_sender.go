@@ -3,11 +3,13 @@ package blockchain
 import (
 	"context"
 	"fmt"
-	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promauto"
 	"math/rand"
 	"sync"
 	"time"
+
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promauto"
+	"github.com/sourcegraph/conc/iter"
 
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/config"
@@ -70,12 +72,20 @@ func NewMsgSender(logger *zap.Logger, servers []config.LiteServer, receivers map
 		}
 		clients = append(clients, client)
 	} else {
-		for _, s := range servers {
-			c, err := liteapi.NewClient(liteapi.WithLiteServers([]config.LiteServer{s}))
+		ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
+		defer cancel()
+
+		tmpClients := iter.Map[config.LiteServer, *liteapi.Client](servers, func(s *config.LiteServer) *liteapi.Client {
+			c, err := liteapi.NewClient(liteapi.WithInitializationContext(ctx), liteapi.WithLiteServers([]config.LiteServer{*s}))
 			if err != nil {
-				continue
+				return nil
 			}
-			clients = append(clients, c)
+			return c
+		})
+		for _, cli := range tmpClients {
+			if cli != nil {
+				clients = append(clients, cli)
+			}
 		}
 	}
 	if len(clients) == 0 {
