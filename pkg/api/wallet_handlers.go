@@ -6,7 +6,9 @@ import (
 	"crypto/sha256"
 	"encoding/base64"
 	"encoding/hex"
+	"errors"
 	"fmt"
+	"github.com/tonkeeper/opentonapi/pkg/core"
 	"io"
 	"net/http"
 	"os"
@@ -154,7 +156,15 @@ func (h *Handler) GetAccountSeqno(ctx context.Context, params oas.GetAccountSeqn
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
 	}
+	var seqno uint32
+	seqno, err = h.storage.GetSeqno(ctx, account.ID)
+	if err == nil {
+		return &oas.Seqno{Seqno: seqno}, nil
+	}
 	rawAccount, err := h.storage.GetRawAccount(ctx, account.ID)
+	if errors.Is(err, core.ErrEntityNotFound) {
+		return &oas.Seqno{Seqno: seqno}, nil
+	}
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
@@ -166,7 +176,7 @@ func (h *Handler) GetAccountSeqno(ctx context.Context, params oas.GetAccountSeqn
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
-	var seqno uint32
+
 	switch walletVersion {
 	case tongoWallet.V1R1, tongoWallet.V1R2, tongoWallet.V1R3:
 		var data tongoWallet.DataV1V2
@@ -183,10 +193,7 @@ func (h *Handler) GetAccountSeqno(ctx context.Context, params oas.GetAccountSeqn
 		}
 		seqno = data.Seqno
 	default:
-		seqno, err = h.storage.GetSeqno(ctx, account.ID)
-		if err != nil {
-			return nil, toError(http.StatusInternalServerError, err)
-		}
+		return nil, toError(http.StatusBadRequest, fmt.Errorf("contract doesn't have a seqno"))
 	}
 	return &oas.Seqno{Seqno: seqno}, nil
 }
