@@ -168,6 +168,9 @@ func (h *Handler) GetAccountSeqno(ctx context.Context, params oas.GetAccountSeqn
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
+	if len(rawAccount.Code) == 0 {
+		return &oas.Seqno{Seqno: seqno}, nil
+	}
 	walletVersion, err := wallet.GetVersionByCode(rawAccount.Code)
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
