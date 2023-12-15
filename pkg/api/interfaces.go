@@ -6,6 +6,7 @@ import (
 	"sync"
 
 	"github.com/tonkeeper/opentonapi/pkg/blockchain"
+	"github.com/tonkeeper/opentonapi/pkg/rates"
 	rules "github.com/tonkeeper/scam_backoffice_rules"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
@@ -153,6 +154,7 @@ type addressBook interface {
 type ratesSource interface {
 	GetRates(date int64) (map[string]float64, error)
 	GetRatesChart(token string, currency string, startDate *int64, endDate *int64) ([][]any, error)
+	GetMarketsTonPrice() []rates.Market
 }
 
 type spamFilter interface {
