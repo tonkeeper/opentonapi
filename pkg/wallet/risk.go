@@ -22,7 +22,7 @@ type Risk struct {
 	Nfts    []tongo.AccountID
 }
 
-func ExtractRisk(version walletTongo.Version, msg *boc.Cell) (*Risk, error) {
+func ExtractRisk(version walletTongo.Version, msg *tlb.Message) (*Risk, error) {
 	rawMessages, err := walletTongo.ExtractRawMessages(version, msg)
 	if err != nil {
 		return nil, err

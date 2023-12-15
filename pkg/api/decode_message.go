@@ -2,7 +2,6 @@ package api
 
 import (
 	"context"
-	"encoding/base64"
 	"encoding/binary"
 	"encoding/hex"
 	"encoding/json"
@@ -10,6 +9,7 @@ import (
 	"net/http"
 
 	"github.com/tonkeeper/opentonapi/internal/g"
+	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
 	"github.com/tonkeeper/tongo/boc"
 	"github.com/tonkeeper/tongo/liteapi"
@@ -60,40 +60,35 @@ func convertToRawMessage(message tongoWallet.RawMessage) (oas.DecodedRawMessage,
 }
 
 func (h *Handler) DecodeMessage(ctx context.Context, req *oas.DecodeMessageReq) (*oas.DecodedMessage, error) {
-	payloadBytes, err := base64.StdEncoding.DecodeString(req.Boc)
+	message, err := tongo.ParseTlbMessage(req.Boc)
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
 	}
-	msg, err := liteapi.ConvertSendMessagePayloadToMessage(payloadBytes)
+	if err := liteapi.VerifySendMessage(message.TlbMsg); err != nil {
+		return nil, toError(http.StatusBadRequest, err)
+	}
+	accountID, err := message.DestinationAccountID()
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
 	}
-	accountID, err := extractDestinationWallet(*msg)
-	if err != nil {
-		return nil, toError(http.StatusBadRequest, err)
-	}
-	account, err := h.storage.GetAccountState(ctx, *accountID)
+	account, err := h.storage.GetAccountState(ctx, accountID)
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
-	ver, ok, err := tongoWallet.GetWalletVersion(account, *msg)
+	ver, ok, err := tongoWallet.GetWalletVersion(account, message.TlbMsg)
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
 	}
 	if !ok {
 		return nil, toError(http.StatusBadRequest, fmt.Errorf("not a wallet"))
 	}
-	msgCell := boc.NewCell()
-	if err := tlb.Marshal(msgCell, msg); err != nil {
-		return nil, toError(http.StatusInternalServerError, err)
-	}
 	decoded := oas.DecodedMessage{
-		Destination:              convertAccountAddress(*accountID, h.addressBook),
+		Destination:              convertAccountAddress(accountID, h.addressBook),
 		DestinationWalletVersion: ver.ToString(),
 	}
 	switch ver {
 	case tongoWallet.V4R1, tongoWallet.V4R2:
-		v4, err := tongoWallet.DecodeMessageV4(msgCell)
+		v4, err := tongoWallet.DecodeMessageV4(message.TlbMsg)
 		if err != nil {
 			return nil, err
 		}
@@ -116,7 +111,7 @@ func (h *Handler) DecodeMessage(ctx context.Context, req *oas.DecodeMessageReq) 
 		}
 		decoded.SetExtInMsgDecoded(oas.NewOptDecodedMessageExtInMsgDecoded(extIn))
 	case tongoWallet.V3R1, tongoWallet.V3R2:
-		v3, err := tongoWallet.DecodeMessageV3(msgCell)
+		v3, err := tongoWallet.DecodeMessageV3(message.TlbMsg)
 		if err != nil {
 			return nil, err
 		}
@@ -138,7 +133,7 @@ func (h *Handler) DecodeMessage(ctx context.Context, req *oas.DecodeMessageReq) 
 		}
 		decoded.SetExtInMsgDecoded(oas.NewOptDecodedMessageExtInMsgDecoded(extIn))
 	case tongoWallet.HighLoadV2R2, tongoWallet.HighLoadV2R1:
-		highload, err := tongoWallet.DecodeHighloadV2Message(msgCell)
+		highload, err := tongoWallet.DecodeHighloadV2Message(message.TlbMsg)
 		if err != nil {
 			return nil, err
 		}

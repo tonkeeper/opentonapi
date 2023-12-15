@@ -40,10 +40,10 @@ type batchOfMessages struct {
 
 // ExtInMsgCopy represents an external message we receive on /v2/blockchain/message endpoint.
 type ExtInMsgCopy struct {
-	// MsgBoc is a base64 encoded message boc.
-	MsgBoc string
-	// Payload is a decoded message boc.
-	Payload []byte
+	// EncodedBoc is a base64 encoded message boc.
+	EncodedBoc string
+	// Boc is a decoded message boc.
+	Boc []byte
 	// Details contains some optional details from a request context.
 	Details any
 	// Accounts is set when the message is emulated.
@@ -141,9 +141,6 @@ func (ms *MsgSender) sendBatches() {
 
 // SendMessage sends the given a message to the blockchain.
 func (ms *MsgSender) SendMessage(ctx context.Context, msgCopy ExtInMsgCopy) error {
-	if err := liteapi.VerifySendMessagePayload(msgCopy.Payload); err != nil {
-		return err
-	}
 	for name, ch := range ms.receivers {
 		select {
 		case ch <- msgCopy:
@@ -156,8 +153,8 @@ func (ms *MsgSender) SendMessage(ctx context.Context, msgCopy ExtInMsgCopy) erro
 		c, cancel := context.WithTimeout(context.Background(), time.Second*10)
 		defer cancel()
 		ms.send(c, p)
-	}(msgCopy.Payload)
-	return ms.send(ctx, msgCopy.Payload)
+	}(msgCopy.Boc)
+	return ms.send(ctx, msgCopy.Boc)
 }
 
 func (ms *MsgSender) send(ctx context.Context, payload []byte) error {
@@ -176,7 +173,7 @@ func (ms *MsgSender) send(ctx context.Context, payload []byte) error {
 }
 
 func (ms *MsgSender) sendMessageFromBatch(msgCopy ExtInMsgCopy) error {
-	if err := liteapi.VerifySendMessagePayload(msgCopy.Payload); err != nil {
+	if err := liteapi.VerifySendMessagePayload(msgCopy.Boc); err != nil {
 		return err
 	}
 	for _, ch := range ms.receivers {
@@ -184,7 +181,7 @@ func (ms *MsgSender) sendMessageFromBatch(msgCopy ExtInMsgCopy) error {
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*2)
 	defer cancel()
-	return ms.send(ctx, msgCopy.Payload)
+	return ms.send(ctx, msgCopy.Boc)
 }
 
 func (ms *MsgSender) SendMultipleMessages(ctx context.Context, copies []ExtInMsgCopy) {

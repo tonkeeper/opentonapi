@@ -18,21 +18,21 @@ func TestMsgSender_dropExpiredBatches(t *testing.T) {
 			batches: []batchOfMessages{
 				{
 					Copies: []ExtInMsgCopy{
-						{MsgBoc: "1"},
-						{MsgBoc: "2"},
+						{EncodedBoc: "1"},
+						{EncodedBoc: "2"},
 					},
 					RecvAt: time.Now().Unix(),
 				},
 				{
 					Copies: []ExtInMsgCopy{
-						{MsgBoc: "3"},
-						{MsgBoc: "4"},
+						{EncodedBoc: "3"},
+						{EncodedBoc: "4"},
 					},
 					RecvAt: time.Now().Add(-6 * time.Minute).Unix(),
 				},
 				{
 					Copies: []ExtInMsgCopy{
-						{MsgBoc: "5"},
+						{EncodedBoc: "5"},
 					},
 					RecvAt: time.Now().Add(-4 * time.Minute).Unix(),
 				},
@@ -50,7 +50,7 @@ func TestMsgSender_dropExpiredBatches(t *testing.T) {
 			var gotBocs []string
 			for _, b := range ms.batchesReadyForSending() {
 				for _, c := range b.Copies {
-					gotBocs = append(gotBocs, c.MsgBoc)
+					gotBocs = append(gotBocs, c.EncodedBoc)
 				}
 			}
 			require.Equal(t, tt.wantBocs, gotBocs)

@@ -3,7 +3,6 @@ package api
 import (
 	"context"
 	"encoding/base64"
-	"encoding/hex"
 	"errors"
 	"fmt"
 	"math/big"
@@ -16,7 +15,7 @@ import (
 	"github.com/tonkeeper/opentonapi/pkg/blockchain"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
-	"github.com/tonkeeper/tongo/boc"
+	"github.com/tonkeeper/tongo/liteapi"
 	"github.com/tonkeeper/tongo/tlb"
 	"github.com/tonkeeper/tongo/ton"
 	"github.com/tonkeeper/tongo/tontest"
@@ -46,19 +45,12 @@ var (
 	})
 )
 
-func filterExternal(ctx context.Context, s interface {
+type rawAccountGetter interface {
 	GetRawAccount(ctx context.Context, id tongo.AccountID) (*core.Account, error)
-}, messageBoc []byte) bool {
-	cells, err := boc.DeserializeBoc(messageBoc)
-	if err != nil || len(cells) != 1 {
-		return false
-	}
-	var m tlb.Message
-	err = tlb.Unmarshal(cells[0], &m)
-	if err != nil {
-		return false
-	}
-	walletAddress, err := extractDestinationWallet(m)
+}
+
+func filterExternal(ctx context.Context, s rawAccountGetter, m *tlb.Message) bool {
+	walletAddress, err := tongo.AccountIDFromTlb(m.Info.ExtInMsgInfo.Dest)
 	if err != nil || walletAddress == nil {
 		return false
 	}
@@ -73,26 +65,24 @@ func filterExternal(ctx context.Context, s interface {
 	} else {
 		return false
 	}
-
 	walletVersion, err := wallet.GetVersionByCode(code)
 	if err != nil {
 		return false
 	}
-	cells[0].ResetCounters()
-	rawMessages, err := tongoWallet.ExtractRawMessages(walletVersion, cells[0])
+	rawMessages, err := tongoWallet.ExtractRawMessages(walletVersion, m)
 	if err != nil {
 		return false
 	}
 	for _, rm := range rawMessages {
 		rm.Message.ResetCounters()
-		var m tlb.Message
-		if err = tlb.Unmarshal(rm.Message, &m); err != nil {
+		msg, err := rm.ToTlbMessage()
+		if err != nil {
 			continue
 		}
-		if m.Info.SumType != "IntMsgInfo" {
+		if msg.Info.SumType != "IntMsgInfo" {
 			continue
 		}
-		a, err := ton.AccountIDFromTlb(m.Info.IntMsgInfo.Dest)
+		a, err := tongo.AccountIDFromTlb(msg.Info.IntMsgInfo.Dest)
 		if err != nil || a == nil {
 			continue
 		}
@@ -111,18 +101,20 @@ func (h *Handler) SendBlockchainMessage(ctx context.Context, request *oas.SendBl
 		return toError(http.StatusBadRequest, fmt.Errorf("boc not found"))
 	}
 	if request.Boc.IsSet() {
-
-		payload, err := base64.StdEncoding.DecodeString(request.Boc.Value)
+		message, err := tongo.ParseTlbMessage(request.Boc.Value)
 		if err != nil {
 			return toError(http.StatusBadRequest, fmt.Errorf("boc must be a base64 encoded string"))
 		}
-		if filterExternal(ctx, h.storage, payload) {
+		if err := liteapi.VerifySendMessage(message.TlbMsg); err != nil {
+			return toError(http.StatusBadRequest, err)
+		}
+		if filterExternal(ctx, h.storage, message.TlbMsg) {
 			return toError(http.StatusForbidden, fmt.Errorf("you can't send to zero address"))
 		}
 		msgCopy := blockchain.ExtInMsgCopy{
-			MsgBoc:  request.Boc.Value,
-			Payload: payload,
-			Details: h.ctxToDetails(ctx),
+			EncodedBoc: request.Boc.Value,
+			Boc:        message.Boc,
+			Details:    h.ctxToDetails(ctx),
 		}
 		mempoolMessageCounter.Inc()
 		if err := h.msgSender.SendMessage(ctx, msgCopy); err != nil {
@@ -137,7 +129,7 @@ func (h *Handler) SendBlockchainMessage(ctx context.Context, request *oas.SendBl
 			}()
 			ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 			defer cancel()
-			h.addToMempool(ctx, payload, nil)
+			h.addToMempool(ctx, message, nil)
 		}()
 		return nil
 	}
@@ -149,18 +141,21 @@ func (h *Handler) SendBlockchainMessage(ctx context.Context, request *oas.SendBl
 		return toError(http.StatusBadRequest, fmt.Errorf("batch size must be less than %v", maxBatchSize))
 	}
 	for _, msgBoc := range request.Batch {
-		payload, err := base64.StdEncoding.DecodeString(msgBoc)
+		message, err := tongo.ParseTlbMessage(msgBoc)
 		if err != nil {
 			return toError(http.StatusBadRequest, err)
 		}
-		shardAccount, err = h.addToMempool(ctx, payload, shardAccount)
+		if err := liteapi.VerifySendMessage(message.TlbMsg); err != nil {
+			return toError(http.StatusBadRequest, err)
+		}
+		shardAccount, err = h.addToMempool(ctx, message, shardAccount)
 		if err != nil {
 			continue
 		}
 		msgCopy := blockchain.ExtInMsgCopy{
-			MsgBoc:  msgBoc,
-			Payload: payload,
-			Details: h.ctxToDetails(ctx),
+			EncodedBoc: msgBoc,
+			Boc:        message.Boc,
+			Details:    h.ctxToDetails(ctx),
 		}
 		copies = append(copies, msgCopy)
 	}
@@ -344,12 +339,7 @@ func toProperEmulationError(err error) error {
 }
 
 func (h *Handler) EmulateMessageToAccountEvent(ctx context.Context, request *oas.EmulateMessageToAccountEventReq, params oas.EmulateMessageToAccountEventParams) (*oas.AccountEvent, error) {
-	c, err := deserializeSingleBoc(request.Boc)
-	if err != nil {
-		return nil, toError(http.StatusBadRequest, err)
-	}
-	var m tlb.Message
-	err = tlb.Unmarshal(c, &m)
+	message, err := tongo.ParseTlbMessage(request.Boc)
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
 	}
@@ -368,7 +358,7 @@ func (h *Handler) EmulateMessageToAccountEvent(ctx context.Context, request *oas
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
-	tree, err := emulator.Run(ctx, m)
+	tree, err := emulator.Run(ctx, *message.TlbMsg)
 	if err != nil {
 		return nil, toProperEmulationError(err)
 	}
@@ -388,12 +378,8 @@ func (h *Handler) EmulateMessageToAccountEvent(ctx context.Context, request *oas
 }
 
 func (h *Handler) EmulateMessageToEvent(ctx context.Context, request *oas.EmulateMessageToEventReq, params oas.EmulateMessageToEventParams) (*oas.Event, error) {
-	c, err := deserializeSingleBoc(request.Boc)
+	message, err := tongo.ParseTlbMessage(request.Boc)
 	if err != nil {
-		return nil, toError(http.StatusBadRequest, err)
-	}
-	var m tlb.Message
-	if err := tlb.Unmarshal(c, &m); err != nil {
 		return nil, toError(http.StatusBadRequest, err)
 	}
 	configBase64, err := h.storage.TrimmedConfigBase64()
@@ -415,7 +401,7 @@ func (h *Handler) EmulateMessageToEvent(ctx context.Context, request *oas.Emulat
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
-	tree, err := emulator.Run(ctx, m)
+	tree, err := emulator.Run(ctx, *message.TlbMsg)
 	if err != nil {
 		return nil, toProperEmulationError(err)
 	}
@@ -435,12 +421,7 @@ func (h *Handler) EmulateMessageToEvent(ctx context.Context, request *oas.Emulat
 }
 
 func (h *Handler) EmulateMessageToTrace(ctx context.Context, request *oas.EmulateMessageToTraceReq, params oas.EmulateMessageToTraceParams) (*oas.Trace, error) {
-	c, err := deserializeSingleBoc(request.Boc)
-	if err != nil {
-		return nil, toError(http.StatusBadRequest, err)
-	}
-	var m tlb.Message
-	err = tlb.Unmarshal(c, &m)
+	message, err := tongo.ParseTlbMessage(request.Boc)
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
 	}
@@ -462,7 +443,7 @@ func (h *Handler) EmulateMessageToTrace(ctx context.Context, request *oas.Emulat
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
-	tree, err := emulator.Run(ctx, m)
+	tree, err := emulator.Run(ctx, *message.TlbMsg)
 	if err != nil {
 		return nil, toProperEmulationError(err)
 	}
@@ -472,20 +453,6 @@ func (h *Handler) EmulateMessageToTrace(ctx context.Context, request *oas.Emulat
 	}
 	t := convertTrace(*trace, h.addressBook)
 	return &t, nil
-}
-
-func extractDestinationWallet(message tlb.Message) (*tongo.AccountID, error) {
-	if message.Info.SumType != "ExtInMsgInfo" {
-		return nil, fmt.Errorf("unsupported message type: %v", message.Info.SumType)
-	}
-	accountID, err := tongo.AccountIDFromTlb(message.Info.ExtInMsgInfo.Dest)
-	if err != nil {
-		return nil, err
-	}
-	if accountID == nil {
-		return nil, fmt.Errorf("failed to extract the destination wallet")
-	}
-	return accountID, nil
 }
 
 func prepareAccountState(accountID tongo.AccountID, state tlb.ShardAccount, startBalance int64) (tlb.ShardAccount, error) {
@@ -520,24 +487,19 @@ func convertEmulationParameters(params []oas.EmulateMessageToWalletReqParamsItem
 }
 
 func (h *Handler) EmulateMessageToWallet(ctx context.Context, request *oas.EmulateMessageToWalletReq, params oas.EmulateMessageToWalletParams) (*oas.MessageConsequences, error) {
-	msgCell, err := deserializeSingleBoc(request.Boc)
+	message, err := tongo.ParseTlbMessage(request.Boc)
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
 	}
-	var m tlb.Message
-	err = tlb.Unmarshal(msgCell, &m)
-	if err != nil {
-		return nil, toError(http.StatusBadRequest, err)
-	}
-	walletAddress, err := extractDestinationWallet(m)
+	walletAddress, err := message.DestinationAccountID()
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
 	}
 	var code []byte
-	if account, err := h.storage.GetRawAccount(ctx, *walletAddress); err == nil && len(account.Code) > 0 {
+	if account, err := h.storage.GetRawAccount(ctx, walletAddress); err == nil && len(account.Code) > 0 {
 		code = account.Code
-	} else if m.Init.Exists && m.Init.Value.Value.Code.Exists {
-		code, err = m.Init.Value.Value.Code.Value.Value.ToBoc()
+	} else if message.TlbMsg.Init.Exists && message.TlbMsg.Init.Value.Value.Code.Exists {
+		code, err = message.TlbMsg.Init.Value.Value.Code.Value.Value.ToBoc()
 		if err != nil {
 			return nil, toError(http.StatusBadRequest, err)
 		}
@@ -550,7 +512,7 @@ func (h *Handler) EmulateMessageToWallet(ctx context.Context, request *oas.Emula
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
 	}
-	risk, err := wallet.ExtractRisk(walletVersion, msgCell)
+	risk, err := wallet.ExtractRisk(walletVersion, message.TlbMsg)
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
@@ -573,7 +535,7 @@ func (h *Handler) EmulateMessageToWallet(ctx context.Context, request *oas.Emula
 		if err != nil {
 			return nil, toError(http.StatusInternalServerError, err)
 		}
-		state, err := prepareAccountState(*walletAddress, originalState, balance)
+		state, err := prepareAccountState(walletAddress, originalState, balance)
 		if err != nil {
 			return nil, toError(http.StatusInternalServerError, err)
 		}
@@ -584,7 +546,7 @@ func (h *Handler) EmulateMessageToWallet(ctx context.Context, request *oas.Emula
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
-	tree, err := emulator.Run(ctx, m)
+	tree, err := emulator.Run(ctx, *message.TlbMsg)
 	if err != nil {
 		return nil, toProperEmulationError(err)
 	}
@@ -593,15 +555,15 @@ func (h *Handler) EmulateMessageToWallet(ctx context.Context, request *oas.Emula
 		return nil, toError(http.StatusInternalServerError, err)
 	}
 	t := convertTrace(*trace, h.addressBook)
-	result, err := bath.FindActions(ctx, trace, bath.ForAccount(*walletAddress), bath.WithInformationSource(h.storage))
+	result, err := bath.FindActions(ctx, trace, bath.ForAccount(walletAddress), bath.WithInformationSource(h.storage))
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
-	event, err := h.toAccountEvent(ctx, *walletAddress, trace, result, params.AcceptLanguage, true)
+	event, err := h.toAccountEvent(ctx, walletAddress, trace, result, params.AcceptLanguage, true)
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
-	oasRisk, err := h.convertRisk(ctx, *risk, *walletAddress)
+	oasRisk, err := h.convertRisk(ctx, *risk, walletAddress)
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
@@ -613,23 +575,14 @@ func (h *Handler) EmulateMessageToWallet(ctx context.Context, request *oas.Emula
 	return &consequences, nil
 }
 
-func (h *Handler) addToMempool(ctx context.Context, bytesBoc []byte, shardAccount map[tongo.AccountID]tlb.ShardAccount) (map[tongo.AccountID]tlb.ShardAccount, error) {
+func (h *Handler) addToMempool(ctx context.Context, msg *tongo.Message, shardAccount map[tongo.AccountID]tlb.ShardAccount) (map[tongo.AccountID]tlb.ShardAccount, error) {
 	if shardAccount == nil {
 		shardAccount = map[tongo.AccountID]tlb.ShardAccount{}
 	}
-	msgCell, err := boc.DeserializeBoc(bytesBoc)
-	if err != nil {
-		return shardAccount, err
-	}
 	ttl := int64(30)
-	msgV4, err := tongoWallet.DecodeMessageV4(msgCell[0])
+	msgV4, err := tongoWallet.DecodeMessageV4(msg.TlbMsg)
 	if err == nil {
 		ttl = int64(msgV4.ValidUntil) - time.Now().Unix()
-	}
-	var message tlb.Message
-	err = tlb.Unmarshal(msgCell[0], &message)
-	if err != nil {
-		return shardAccount, err
 	}
 	config, err := h.storage.TrimmedConfigBase64()
 	if err != nil {
@@ -641,7 +594,7 @@ func (h *Handler) addToMempool(ctx context.Context, bytesBoc []byte, shardAccoun
 	if err != nil {
 		return shardAccount, err
 	}
-	tree, err := emulator.Run(ctx, message)
+	tree, err := emulator.Run(ctx, *msg.TlbMsg)
 	if err != nil {
 		return shardAccount, err
 	}
@@ -654,11 +607,8 @@ func (h *Handler) addToMempool(ctx context.Context, bytesBoc []byte, shardAccoun
 	core.Visit(trace, func(node *core.Trace) {
 		accounts[node.Account] = struct{}{}
 	})
-	hash, err := msgCell[0].Hash()
-	if err != nil {
-		return shardAccount, err
-	}
-	h.mempoolEmulate.traces.Set(hex.EncodeToString(hash), trace, cache.WithExpiration(time.Second*time.Duration(ttl)))
+	hashHex := msg.TlbMsg.Hash().Hex()
+	h.mempoolEmulate.traces.Set(hashHex, trace, cache.WithExpiration(time.Second*time.Duration(ttl)))
 	h.mempoolEmulate.mu.Lock()
 	defer h.mempoolEmulate.mu.Unlock()
 	for account := range accounts {
@@ -666,14 +616,14 @@ func (h *Handler) addToMempool(ctx context.Context, bytesBoc []byte, shardAccoun
 			continue
 		}
 		traces, _ := h.mempoolEmulate.accountsTraces.Get(account)
-		traces = slices.Insert(traces, 0, hex.EncodeToString(hash))
+		traces = slices.Insert(traces, 0, hashHex)
 		h.mempoolEmulate.accountsTraces.Set(account, traces, cache.WithExpiration(time.Second*time.Duration(ttl)))
 	}
 	h.emulationCh <- blockchain.ExtInMsgCopy{
-		MsgBoc:   base64.StdEncoding.EncodeToString(bytesBoc),
-		Details:  h.ctxToDetails(ctx),
-		Payload:  bytesBoc,
-		Accounts: accounts,
+		EncodedBoc: base64.StdEncoding.EncodeToString(msg.Boc),
+		Details:    h.ctxToDetails(ctx),
+		Boc:        msg.Boc,
+		Accounts:   accounts,
 	}
 	return newShardAccount, nil
 }
