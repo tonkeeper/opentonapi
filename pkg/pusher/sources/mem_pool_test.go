@@ -58,8 +58,8 @@ func TestMemPool_Run(t *testing.T) {
 	for i := 0; i < eventsNumber; i++ {
 		payload := []byte(fmt.Sprintf("payload-%d", i))
 		ch <- blockchain.ExtInMsgCopy{
-			MsgBoc:  base64.StdEncoding.EncodeToString(payload),
-			Payload: payload,
+			EncodedBoc: base64.StdEncoding.EncodeToString(payload),
+			Boc:        payload,
 		}
 		eventData, err := json.Marshal(MessageEventData{BOC: payload})
 		require.Nil(t, err)
@@ -67,9 +67,9 @@ func TestMemPool_Run(t *testing.T) {
 
 		emPayload := []byte(fmt.Sprintf("emulation-payload-%d", i))
 		ch <- blockchain.ExtInMsgCopy{
-			MsgBoc:   base64.StdEncoding.EncodeToString(emPayload),
-			Payload:  emPayload,
-			Accounts: map[tongo.AccountID]struct{}{testAccount1: {}},
+			EncodedBoc: base64.StdEncoding.EncodeToString(emPayload),
+			Boc:        emPayload,
+			Accounts:   map[tongo.AccountID]struct{}{testAccount1: {}},
 		}
 		eventData, err = json.Marshal(EmulationMessageEventData{BOC: emPayload, InvolvedAccounts: []tongo.AccountID{testAccount1}})
 		require.Nil(t, err)

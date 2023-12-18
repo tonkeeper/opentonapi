@@ -6,7 +6,6 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"github.com/tonkeeper/tongo"
-	"github.com/tonkeeper/tongo/boc"
 	"github.com/tonkeeper/tongo/wallet"
 )
 
@@ -60,9 +59,9 @@ func TestExtractRisk(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			root, err := boc.DeserializeSinglRootBase64(tt.boc)
+			msg, err := tongo.ParseTlbMessage(tt.boc)
 			require.Nil(t, err)
-			risk, err := ExtractRisk(wallet.V4R1, root)
+			risk, err := ExtractRisk(wallet.V4R1, msg.TlbMsg)
 			if len(tt.wantErr) > 0 {
 				require.NotNil(t, err)
 				require.Equal(t, tt.wantErr, err.Error())

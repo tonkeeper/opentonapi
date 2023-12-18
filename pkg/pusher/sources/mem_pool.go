@@ -96,7 +96,7 @@ func (m *MemPool) Run(ctx context.Context) chan blockchain.ExtInMsgCopy {
 					m.sendPayloadToEmulationSubscribers(msgCopy)
 					continue
 				}
-				m.sendPayloadToSubscribers(msgCopy.Payload)
+				m.sendPayloadToSubscribers(msgCopy.Boc)
 			}
 		}
 	}()
@@ -123,7 +123,7 @@ func (m *MemPool) sendPayloadToSubscribers(payload []byte) {
 
 func (m *MemPool) sendPayloadToEmulationSubscribers(msgCopy blockchain.ExtInMsgCopy) {
 	msg := EmulationMessageEventData{
-		BOC:              msgCopy.Payload,
+		BOC:              msgCopy.Boc,
 		InvolvedAccounts: make([]tongo.AccountID, 0, len(msgCopy.Accounts)),
 	}
 	for account := range msgCopy.Accounts {
