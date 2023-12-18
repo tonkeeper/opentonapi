@@ -58,7 +58,7 @@ func convertNFT(ctx context.Context, item core.NftItem, book addressBook, metaCa
 		cInfo, _ := metaCache.getCollectionMeta(ctx, *item.CollectionAddress)
 
 		// TODO: REMOVE, FAST HACK
-		if strings.Contains(cInfo.Description, "ton-staker.com") {
+		if strings.Contains(cInfo.Description, "ton-staker.com") || strings.Contains(cInfo.Description, "scaleton.xyz") {
 			cInfo.Description = "SCAM"
 		}
 
