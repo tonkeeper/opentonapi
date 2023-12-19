@@ -3057,6 +3057,51 @@
     ],
     "type": "object"
    },
+   "InscriptionBalance": {
+    "properties": {
+     "balance": {
+      "example": "1000000000",
+      "type": "string"
+     },
+     "decimals": {
+      "example": 9,
+      "type": "integer"
+     },
+     "ticker": {
+      "example": "nano",
+      "type": "string"
+     },
+     "type": {
+      "enum": [
+       "ton20",
+       "gram20"
+      ],
+      "example": "ton20",
+      "type": "string"
+     }
+    },
+    "required": [
+     "type",
+     "ticker",
+     "balance",
+     "decimals"
+    ],
+    "type": "object"
+   },
+   "InscriptionBalances": {
+    "properties": {
+     "inscriptions": {
+      "items": {
+       "$ref": "#/components/schemas/InscriptionBalance"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "inscriptions"
+    ],
+    "type": "object"
+   },
    "JettonBalance": {
     "properties": {
      "balance": {
@@ -5596,6 +5641,41 @@
     ]
    }
   },
+  "/v2/accounts/{account_id}/inscriptions": {
+   "get": {
+    "description": "Get all inscriptions by owner address",
+    "operationId": "getAccountInscriptions",
+    "parameters": [
+     {
+      "$ref": "#/components/parameters/accountIDParameter"
+     },
+     {
+      "$ref": "#/components/parameters/limitQuery"
+     },
+     {
+      "$ref": "#/components/parameters/offsetQuery"
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/InscriptionBalances"
+        }
+       }
+      },
+      "description": "account inscriptions"
+     },
+     "default": {
+      "$ref": "#/components/responses/Error"
+     }
+    },
+    "tags": [
+     "Inscriptions"
+    ]
+   }
+  },
   "/v2/accounts/{account_id}/jettons": {
    "get": {
     "description": "Get all Jettons balances by owner address",
@@ -6863,6 +6943,114 @@
     },
     "tags": [
      "Jettons"
+    ]
+   }
+  },
+  "/v2/inscriptions/op-template": {
+   "get": {
+    "description": "return comment for making operation with instrospection. please don't use it if you don't know what you are doing",
+    "operationId": "getInscriptionOpTemplate",
+    "parameters": [
+     {
+      "in": "query",
+      "name": "type",
+      "required": true,
+      "schema": {
+       "enum": [
+        "ton20",
+        "gram20"
+       ],
+       "example": "ton20",
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "destination",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "comment",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "operation",
+      "required": true,
+      "schema": {
+       "enum": [
+        "transfer"
+       ],
+       "example": "transfer",
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "amount",
+      "required": true,
+      "schema": {
+       "example": "1000000000",
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "ticker",
+      "required": true,
+      "schema": {
+       "example": "nano",
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "who",
+      "required": true,
+      "schema": {
+       "example": "UQAs87W4yJHlF8mt29ocA4agnMrLsOP69jC1HPyBUjJay7Mg",
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "comment": {
+           "example": "comment",
+           "type": "string"
+          },
+          "destination": {
+           "example": "0:0000000000000",
+           "type": "string"
+          }
+         },
+         "required": [
+          "comment",
+          "destination"
+         ],
+         "type": "object"
+        }
+       }
+      },
+      "description": "inscription op template"
+     },
+     "default": {
+      "$ref": "#/components/responses/Error"
+     }
+    },
+    "tags": [
+     "Inscriptions"
     ]
    }
   },

@@ -308,6 +308,26 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 									return
 								}
 							}
+						case 'i': // Prefix: "inscriptions"
+							if l := len("inscriptions"); len(elem) >= l && elem[0:l] == "inscriptions" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							if len(elem) == 0 {
+								// Leaf node.
+								switch r.Method {
+								case "GET":
+									s.handleGetAccountInscriptionsRequest([1]string{
+										args[0],
+									}, elemIsEscaped, w, r)
+								default:
+									s.notAllowed(w, r, "GET")
+								}
+
+								return
+							}
 						case 'j': // Prefix: "jettons"
 							if l := len("jettons"); len(elem) >= l && elem[0:l] == "jettons" {
 								elem = elem[l:]
@@ -1224,6 +1244,24 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 						return
 					}
+				}
+			case 'i': // Prefix: "inscriptions/op-template"
+				if l := len("inscriptions/op-template"); len(elem) >= l && elem[0:l] == "inscriptions/op-template" {
+					elem = elem[l:]
+				} else {
+					break
+				}
+
+				if len(elem) == 0 {
+					// Leaf node.
+					switch r.Method {
+					case "GET":
+						s.handleGetInscriptionOpTemplateRequest([0]string{}, elemIsEscaped, w, r)
+					default:
+						s.notAllowed(w, r, "GET")
+					}
+
+					return
 				}
 			case 'j': // Prefix: "jettons"
 				if l := len("jettons"); len(elem) >= l && elem[0:l] == "jettons" {
@@ -2703,6 +2741,28 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 									}
 								}
 							}
+						case 'i': // Prefix: "inscriptions"
+							if l := len("inscriptions"); len(elem) >= l && elem[0:l] == "inscriptions" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							if len(elem) == 0 {
+								switch method {
+								case "GET":
+									// Leaf: GetAccountInscriptions
+									r.name = "GetAccountInscriptions"
+									r.summary = ""
+									r.operationID = "getAccountInscriptions"
+									r.pathPattern = "/v2/accounts/{account_id}/inscriptions"
+									r.args = args
+									r.count = 1
+									return r, true
+								default:
+									return
+								}
+							}
 						case 'j': // Prefix: "jettons"
 							if l := len("jettons"); len(elem) >= l && elem[0:l] == "jettons" {
 								elem = elem[l:]
@@ -3700,6 +3760,28 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 						default:
 							return
 						}
+					}
+				}
+			case 'i': // Prefix: "inscriptions/op-template"
+				if l := len("inscriptions/op-template"); len(elem) >= l && elem[0:l] == "inscriptions/op-template" {
+					elem = elem[l:]
+				} else {
+					break
+				}
+
+				if len(elem) == 0 {
+					switch method {
+					case "GET":
+						// Leaf: GetInscriptionOpTemplate
+						r.name = "GetInscriptionOpTemplate"
+						r.summary = ""
+						r.operationID = "getInscriptionOpTemplate"
+						r.pathPattern = "/v2/inscriptions/op-template"
+						r.args = args
+						r.count = 0
+						return r, true
+					default:
+						return
 					}
 				}
 			case 'j': // Prefix: "jettons"

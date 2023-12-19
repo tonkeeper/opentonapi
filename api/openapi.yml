@@ -1226,6 +1226,93 @@ paths:
         'default':
           $ref: '#/components/responses/Error'
 
+  /v2/accounts/{account_id}/inscriptions:
+    get:
+      description: Get all inscriptions by owner address
+      operationId: getAccountInscriptions
+      tags:
+        - Inscriptions
+      parameters:
+        - $ref: '#/components/parameters/accountIDParameter'
+        - $ref: '#/components/parameters/limitQuery'
+        - $ref: '#/components/parameters/offsetQuery'
+      responses:
+        '200':
+          description: account inscriptions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InscriptionBalances'
+        'default':
+          $ref: '#/components/responses/Error'
+  /v2/inscriptions/op-template:
+    get:
+      description: return comment for making operation with instrospection. please don't use it if you don't know what you are doing
+      operationId: getInscriptionOpTemplate
+      tags:
+        - Inscriptions
+      parameters:
+        - in: query
+          name: type
+          required: true
+          schema:
+            type: string
+            enum: [ "ton20", "gram20" ]
+            example: "ton20"
+        - in: query
+          name: destination
+          required: false
+          schema:
+            type: string
+        - in: query
+          name: comment
+          required: false
+          schema:
+            type: string
+        - in: query
+          name: operation
+          required: true
+          schema:
+            type: string
+            enum: [ "transfer" ]
+            example: "transfer"
+        - in: query
+          name: amount
+          required: true
+          schema:
+            type: string
+            example: "1000000000"
+        - in: query
+          name: ticker
+          required: true
+          schema:
+            type: string
+            example: "nano"
+        - in: query
+          name: who
+          required: true
+          schema:
+            type: string
+            example: UQAs87W4yJHlF8mt29ocA4agnMrLsOP69jC1HPyBUjJay7Mg
+      responses:
+        '200':
+          description: inscription op template
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - comment
+                  - destination
+                properties:
+                  comment:
+                    type: string
+                    example: "comment"
+                  destination:
+                    type: string
+                    example: "0:0000000000000"
+        'default':
+          $ref: '#/components/responses/Error'
   /v2/jettons:
     get:
       description: Get a list of all indexed jetton masters in the blockchain.
@@ -5683,6 +5770,39 @@ components:
           items:
             type: string
             example: [ "https://coinmarketcap.com/currencies/drv/", "https://www.coingecko.com/en/coins/durov" ]
+    InscriptionBalances:
+      type: object
+      required:
+        - inscriptions
+      properties:
+        inscriptions:
+          type: array
+          items:
+              $ref: '#/components/schemas/InscriptionBalance'
+    InscriptionBalance:
+      type: object
+      required:
+        - type
+        - ticker
+        - balance
+        - decimals
+      properties:
+        type:
+          type: string
+          enum:
+            - ton20
+            - gram20
+          example: "ton20"
+        ticker:
+          type: string
+          example: "nano"
+        balance:
+          type: string
+          example: "1000000000"
+        decimals:
+          type: integer
+          example: 9
+
     Jettons:
       type: object
       required:

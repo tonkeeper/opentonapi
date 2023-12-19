@@ -161,6 +161,15 @@ func (UnimplementedHandler) GetAccountInfoByStateInit(ctx context.Context, req *
 	return r, ht.ErrNotImplemented
 }
 
+// GetAccountInscriptions implements getAccountInscriptions operation.
+//
+// Get all inscriptions by owner address.
+//
+// GET /v2/accounts/{account_id}/inscriptions
+func (UnimplementedHandler) GetAccountInscriptions(ctx context.Context, params GetAccountInscriptionsParams) (r *InscriptionBalances, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // GetAccountJettonHistoryByID implements getAccountJettonHistoryByID operation.
 //
 // Get the transfer jetton history for account and jetton.
@@ -437,6 +446,16 @@ func (UnimplementedHandler) GetDomainBids(ctx context.Context, params GetDomainB
 //
 // GET /v2/events/{event_id}
 func (UnimplementedHandler) GetEvent(ctx context.Context, params GetEventParams) (r *Event, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// GetInscriptionOpTemplate implements getInscriptionOpTemplate operation.
+//
+// Return comment for making operation with instrospection. please don't use it if you don't know
+// what you are doing.
+//
+// GET /v2/inscriptions/op-template
+func (UnimplementedHandler) GetInscriptionOpTemplate(ctx context.Context, params GetInscriptionOpTemplateParams) (r *GetInscriptionOpTemplateOK, _ error) {
 	return r, ht.ErrNotImplemented
 }
 

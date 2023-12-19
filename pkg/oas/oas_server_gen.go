@@ -108,6 +108,12 @@ type Handler interface {
 	//
 	// POST /v2/tonconnect/stateinit
 	GetAccountInfoByStateInit(ctx context.Context, req *GetAccountInfoByStateInitReq) (*AccountInfoByStateInit, error)
+	// GetAccountInscriptions implements getAccountInscriptions operation.
+	//
+	// Get all inscriptions by owner address.
+	//
+	// GET /v2/accounts/{account_id}/inscriptions
+	GetAccountInscriptions(ctx context.Context, params GetAccountInscriptionsParams) (*InscriptionBalances, error)
 	// GetAccountJettonHistoryByID implements getAccountJettonHistoryByID operation.
 	//
 	// Get the transfer jetton history for account and jetton.
@@ -297,6 +303,13 @@ type Handler interface {
 	//
 	// GET /v2/events/{event_id}
 	GetEvent(ctx context.Context, params GetEventParams) (*Event, error)
+	// GetInscriptionOpTemplate implements getInscriptionOpTemplate operation.
+	//
+	// Return comment for making operation with instrospection. please don't use it if you don't know
+	// what you are doing.
+	//
+	// GET /v2/inscriptions/op-template
+	GetInscriptionOpTemplate(ctx context.Context, params GetInscriptionOpTemplateParams) (*GetInscriptionOpTemplateOK, error)
 	// GetItemsFromCollection implements getItemsFromCollection operation.
 	//
 	// Get NFT items from collection by collection address.
