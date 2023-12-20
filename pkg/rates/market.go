@@ -30,90 +30,69 @@ const (
 	exchangerate string = "Exchangerate"
 )
 
-type tonPriceConverter func(closer io.ReadCloser) (float64, error)
-
-var tonPriceConverters = map[string]tonPriceConverter{
-	bitfinex: convertedTonBitFinexResponse,
-	gateio:   convertedTonGateIOResponse,
-	bybit:    convertedTonBybitResponse,
-	kucoin:   convertedTonKuCoinResponse,
-	okx:      convertedTonOKXResponse,
-	huobi:    convertedTonHuobiResponse,
-}
-
-type fiatPriceConverter func(closer io.ReadCloser) map[string]float64
-
-var fiatPriceConverters = map[string]fiatPriceConverter{
-	coinbase:     convertedCoinBaseFiatPricesResponse,
-	exchangerate: convertedExchangerateFiatPricesResponse,
-}
-
-type poolResponseConverter func(storage storage, tonPrice float64, respBody io.ReadCloser) map[ton.AccountID]float64
-
-var poolConverters = map[string]poolResponseConverter{
-	dedust:  convertedDedustPoolResponse,
-	stonfi:  convertedStonFiPoolResponse,
-	megaton: convertedMegatonPoolResponse,
-}
-
 type Market struct {
-	ID         int64
-	Name       string
-	UsdPrice   float64
-	ApiURL     string
-	DateUpdate time.Time
+	ID                    int64
+	Name                  string
+	UsdPrice              float64
+	ApiURL                string
+	TonPriceConverter     func(closer io.ReadCloser) (float64, error)
+	FiatPriceConverter    func(closer io.ReadCloser) map[string]float64
+	PoolResponseConverter func(storage storage, tonPrice float64, respBody io.ReadCloser) map[ton.AccountID]float64
+	DateUpdate            time.Time
 }
 
 func (m *Mock) GetCurrentMarketsTonPrice() []Market {
 	now := time.Now()
 	markets := []Market{
 		{
-			ID:         1,
-			Name:       bitfinex,
-			ApiURL:     "https://api-pub.bitfinex.com/v2/ticker/tTONUSD",
-			DateUpdate: now,
+			ID:                1,
+			Name:              bitfinex,
+			ApiURL:            "https://api-pub.bitfinex.com/v2/ticker/tTONUSD",
+			TonPriceConverter: convertedTonBitFinexResponse,
+			DateUpdate:        now,
 		},
 		{
-			ID:         2,
-			Name:       gateio,
-			ApiURL:     "https://api.gateio.ws/api/v4/spot/tickers?currency_pair=TON_USDT",
-			DateUpdate: now,
+			ID:                2,
+			Name:              gateio,
+			ApiURL:            "https://api.gateio.ws/api/v4/spot/tickers?currency_pair=TON_USDT",
+			TonPriceConverter: convertedTonGateIOResponse,
+			DateUpdate:        now,
 		},
 		{
-			ID:         3,
-			Name:       bybit,
-			ApiURL:     "https://api.bybit.com/derivatives/v3/public/tickers?symbol=TONUSDT",
-			DateUpdate: now,
+			ID:                3,
+			Name:              bybit,
+			ApiURL:            "https://api.bybit.com/derivatives/v3/public/tickers?symbol=TONUSDT",
+			TonPriceConverter: convertedTonBybitResponse,
+			DateUpdate:        now,
 		},
 		{
-			ID:         4,
-			Name:       kucoin,
-			ApiURL:     "https://www.kucoin.com/_api/trade-front/market/getSymbolTick?symbols=TON-USDT",
-			DateUpdate: now,
+			ID:                4,
+			Name:              kucoin,
+			ApiURL:            "https://www.kucoin.com/_api/trade-front/market/getSymbolTick?symbols=TON-USDT",
+			TonPriceConverter: convertedTonKuCoinResponse,
+			DateUpdate:        now,
 		},
 		{
-			ID:         5,
-			Name:       okx,
-			ApiURL:     "https://www.okx.com/api/v5/market/ticker?instId=TON-USDT",
-			DateUpdate: now,
+			ID:                5,
+			Name:              okx,
+			ApiURL:            "https://www.okx.com/api/v5/market/ticker?instId=TON-USDT",
+			TonPriceConverter: convertedTonOKXResponse,
+			DateUpdate:        now,
 		},
 		{
-			ID:         6,
-			Name:       huobi,
-			ApiURL:     "https://api.huobi.pro/market/trade?symbol=tonusdt",
-			DateUpdate: now,
+			ID:                6,
+			Name:              huobi,
+			ApiURL:            "https://api.huobi.pro/market/trade?symbol=tonusdt",
+			TonPriceConverter: convertedTonHuobiResponse,
+			DateUpdate:        now,
 		},
 	}
 	for idx, market := range markets {
-		converter, exists := tonPriceConverters[market.Name]
-		if !exists {
-			continue
-		}
 		respBody, err := sendRequest(market.ApiURL)
 		if err != nil {
 			continue
 		}
-		market.UsdPrice, err = converter(respBody)
+		market.UsdPrice, err = market.TonPriceConverter(respBody)
 		if err != nil || market.UsdPrice == 0 {
 			continue
 		}
@@ -288,26 +267,24 @@ func convertedTonHuobiResponse(respBody io.ReadCloser) (float64, error) {
 func getFiatPrices() map[string]float64 {
 	markets := []Market{
 		{
-			Name:   coinbase,
-			ApiURL: "https://api.coinbase.com/v2/exchange-rates?currency=USD",
+			Name:               coinbase,
+			ApiURL:             "https://api.coinbase.com/v2/exchange-rates?currency=USD",
+			FiatPriceConverter: convertedCoinBaseFiatPricesResponse,
 		},
 		{
-			Name:   exchangerate,
-			ApiURL: "https://api.exchangerate.host/latest?base=USD",
+			Name:               exchangerate,
+			ApiURL:             "https://api.exchangerate.host/latest?base=USD",
+			FiatPriceConverter: convertedExchangerateFiatPricesResponse,
 		},
 	}
 	prices := make(map[string]float64)
 	for _, market := range markets {
-		converter, exists := fiatPriceConverters[market.Name]
-		if !exists {
-			continue
-		}
 		respBody, err := sendRequest(market.ApiURL)
 		if err != nil {
 			errorsCounter.WithLabelValues(market.Name).Inc()
 			continue
 		}
-		converted := converter(respBody)
+		converted := market.FiatPriceConverter(respBody)
 		for currency, rate := range converted {
 			if _, ok := prices[currency]; !ok {
 				prices[currency] = rate
@@ -354,30 +331,29 @@ func convertedCoinBaseFiatPricesResponse(respBody io.ReadCloser) map[string]floa
 func getPools(tonPrice float64, storage storage) map[ton.AccountID]float64 {
 	markets := []Market{
 		{
-			Name:   dedust,
-			ApiURL: "https://api.dedust.io/v2/pools",
+			Name:                  dedust,
+			ApiURL:                "https://api.dedust.io/v2/pools",
+			PoolResponseConverter: convertedDedustPoolResponse,
 		},
 		{
-			Name:   stonfi,
-			ApiURL: "https://api.ston.fi/v1/assets",
+			Name:                  stonfi,
+			ApiURL:                "https://api.ston.fi/v1/assets",
+			PoolResponseConverter: convertedStonFiPoolResponse,
 		},
 		{
-			Name:   megaton,
-			ApiURL: "https://megaton.fi/api/token/infoList",
+			Name:                  megaton,
+			ApiURL:                "https://megaton.fi/api/token/infoList",
+			PoolResponseConverter: convertedMegatonPoolResponse,
 		},
 	}
 	pools := make(map[ton.AccountID]float64)
 	for _, market := range markets {
-		converter, exists := poolConverters[market.Name]
-		if !exists {
-			continue
-		}
 		respBody, err := sendRequest(market.ApiURL)
 		if err != nil {
 			errorsCounter.WithLabelValues(market.Name).Inc()
 			continue
 		}
-		convertedPools := converter(storage, tonPrice, respBody)
+		convertedPools := market.PoolResponseConverter(storage, tonPrice, respBody)
 		for currency, rate := range convertedPools {
 			if _, ok := pools[currency]; !ok {
 				pools[currency] = rate
