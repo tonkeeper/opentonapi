@@ -7,15 +7,15 @@ import (
 	"net/http"
 
 	"github.com/tonkeeper/opentonapi/pkg/oas"
-	"github.com/tonkeeper/tongo/ton"
+	"github.com/tonkeeper/tongo"
 )
 
 func (h *Handler) GetAccountInscriptions(ctx context.Context, params oas.GetAccountInscriptionsParams) (*oas.InscriptionBalances, error) {
-	a, err := ton.ParseAccountID(params.AccountID)
+	a, err := tongo.ParseAddress(params.AccountID)
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
 	}
-	balances, err := h.storage.GetInscriptionBalancesByAccount(ctx, a)
+	balances, err := h.storage.GetInscriptionBalancesByAccount(ctx, a.ID)
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
