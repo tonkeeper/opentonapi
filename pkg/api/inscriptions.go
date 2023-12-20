@@ -7,13 +7,29 @@ import (
 	"net/http"
 
 	"github.com/tonkeeper/opentonapi/pkg/oas"
+	"github.com/tonkeeper/tongo/ton"
 )
 
 func (h *Handler) GetAccountInscriptions(ctx context.Context, params oas.GetAccountInscriptionsParams) (*oas.InscriptionBalances, error) {
+	a, err := ton.ParseAccountID(params.AccountID)
+	if err != nil {
+		return nil, toError(http.StatusBadRequest, err)
+	}
+	balances, err := h.storage.GetInscriptionBalancesByAccount(ctx, a)
+	if err != nil {
+		return nil, toError(http.StatusInternalServerError, err)
+	}
+	var inscriptions []oas.InscriptionBalance
+	for _, b := range balances {
+		inscriptions = append(inscriptions, oas.InscriptionBalance{
+			Type:     oas.InscriptionBalanceTypeTon20,
+			Ticker:   b.Ticker,
+			Balance:  b.Amount.String(),
+			Decimals: 9,
+		})
+	}
 	return &oas.InscriptionBalances{
-		Inscriptions: []oas.InscriptionBalance{
-			{Type: oas.InscriptionBalanceTypeTon20, Ticker: "debug", Balance: "1000000000000000000", Decimals: 9},
-		},
+		Inscriptions: inscriptions,
 	}, nil
 }
 

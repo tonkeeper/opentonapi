@@ -96,6 +96,8 @@ type storage interface {
 	// TrimmedConfigBase64 returns the current trimmed blockchain config in a base64 format.
 	TrimmedConfigBase64() (string, error)
 
+	GetInscriptionBalancesByAccount(ctx context.Context, a ton.AccountID) ([]core.InscriptionBalance, error)
+
 	liteStorageRaw
 }
 

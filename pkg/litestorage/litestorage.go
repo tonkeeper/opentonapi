@@ -609,3 +609,7 @@ func (c *LiteStorage) updateBlockchainConfig(params tlb.ConfigParams) (string, e
 	c.trimmedConfigBase64 = configBase64
 	return configBase64, nil
 }
+
+func (c *LiteStorage) GetInscriptionBalancesByAccount(ctx context.Context, a ton.AccountID) ([]core.InscriptionBalance, error) {
+	return nil, fmt.Errorf("not implemented") //and cannot be without full blockckchain index
+}
