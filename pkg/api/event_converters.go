@@ -628,8 +628,13 @@ func (h *Handler) convertAction(ctx context.Context, viewer *tongo.AccountID, a 
 			Bidder:  convertAccountAddress(a.AuctionBid.Bidder, h.addressBook),
 			Auction: convertAccountAddress(a.AuctionBid.Auction, h.addressBook),
 		})
-		if a.AuctionBid.Nft.CollectionAddress != nil && *a.AuctionBid.Nft.CollectionAddress == references.RootTelegram {
+		switch *a.AuctionBid.Nft.CollectionAddress {
+		case references.RootTelegram:
 			action.AuctionBid.Value.AuctionType = oas.AuctionBidActionAuctionTypeDNSTg
+		case references.TelegramNumbers:
+			action.AuctionBid.Value.AuctionType = oas.AuctionBidActionAuctionTypeNUMBERTg
+		case references.RootDotTon:
+			action.AuctionBid.Value.AuctionType = oas.AuctionBidActionAuctionTypeDNSTon
 		}
 		action.SimplePreview = oas.ActionSimplePreview{
 			Name: "Auction bid",
