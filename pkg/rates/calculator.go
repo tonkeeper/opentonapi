@@ -10,12 +10,14 @@ import (
 type ratesSource interface {
 	GetRates(date int64) (map[string]float64, error)
 	GetRatesChart(token string, currency string, startDate *int64, endDate *int64) ([][]any, error)
+	GetMarketsTonPrice() []Market
 }
 
 type calculator struct {
 	mu                                                sync.RWMutex
 	source                                            ratesSource
 	todayRates, yesterdayRates, weekRates, monthRates map[string]float64
+	marketsTonPrice                                   []Market
 }
 
 func InitCalculator(source ratesSource) *calculator {
@@ -24,11 +26,12 @@ func InitCalculator(source ratesSource) *calculator {
 	}
 
 	c := &calculator{
-		source:         source,
-		todayRates:     map[string]float64{},
-		yesterdayRates: map[string]float64{},
-		weekRates:      map[string]float64{},
-		monthRates:     map[string]float64{},
+		source:          source,
+		todayRates:      map[string]float64{},
+		yesterdayRates:  map[string]float64{},
+		weekRates:       map[string]float64{},
+		monthRates:      map[string]float64{},
+		marketsTonPrice: []Market{},
 	}
 
 	go func() {
@@ -46,6 +49,8 @@ func (c *calculator) refresh() {
 	yesterday := today.AddDate(0, 0, -1).Unix()
 	weekAgo := today.AddDate(0, 0, -7).Unix()
 	monthAgo := today.AddDate(0, 0, -30).Unix()
+
+	marketsTonPrice := c.source.GetMarketsTonPrice()
 
 	todayRates, err := c.source.GetRates(today.Unix())
 	if err != nil {
@@ -69,6 +74,7 @@ func (c *calculator) refresh() {
 	c.yesterdayRates = yesterdayRates
 	c.weekRates = weekRates
 	c.monthRates = monthRates
+	c.marketsTonPrice = marketsTonPrice
 	c.mu.RUnlock()
 }
 
@@ -101,12 +107,20 @@ func (c *calculator) GetRatesChart(token string, currency string, startDate *int
 	return c.source.GetRatesChart(token, currency, startDate, endDate)
 }
 
+func (c *calculator) GetMarketsTonPrice() []Market {
+	return c.source.GetMarketsTonPrice()
+}
+
 type Mock struct {
 	Storage storage
 }
 
 func (m Mock) GetRates(date int64) (map[string]float64, error) {
 	return m.GetCurrentRates()
+}
+
+func (m Mock) GetMarketsTonPrice() []Market {
+	return m.GetCurrentMarketsTonPrice()
 }
 
 func (m Mock) GetRatesChart(token string, currency string, startDate *int64, endDate *int64) ([][]any, error) {
