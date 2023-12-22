@@ -110,9 +110,9 @@ type Handler interface {
 	GetAccountInfoByStateInit(ctx context.Context, req *GetAccountInfoByStateInitReq) (*AccountInfoByStateInit, error)
 	// GetAccountInscriptions implements getAccountInscriptions operation.
 	//
-	// Get all inscriptions by owner address.
+	// Get all inscriptions by owner address. It's experimental API and can be dropped in the future.
 	//
-	// GET /v2/accounts/{account_id}/inscriptions
+	// GET /v2/experimental/accounts/{account_id}/inscriptions
 	GetAccountInscriptions(ctx context.Context, params GetAccountInscriptionsParams) (*InscriptionBalances, error)
 	// GetAccountJettonHistoryByID implements getAccountJettonHistoryByID operation.
 	//
@@ -308,7 +308,7 @@ type Handler interface {
 	// Return comment for making operation with instrospection. please don't use it if you don't know
 	// what you are doing.
 	//
-	// GET /v2/inscriptions/op-template
+	// GET /v2/experimental/inscriptions/op-template
 	GetInscriptionOpTemplate(ctx context.Context, params GetInscriptionOpTemplateParams) (*GetInscriptionOpTemplateOK, error)
 	// GetItemsFromCollection implements getItemsFromCollection operation.
 	//

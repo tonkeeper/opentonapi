@@ -308,26 +308,6 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 									return
 								}
 							}
-						case 'i': // Prefix: "inscriptions"
-							if l := len("inscriptions"); len(elem) >= l && elem[0:l] == "inscriptions" {
-								elem = elem[l:]
-							} else {
-								break
-							}
-
-							if len(elem) == 0 {
-								// Leaf node.
-								switch r.Method {
-								case "GET":
-									s.handleGetAccountInscriptionsRequest([1]string{
-										args[0],
-									}, elemIsEscaped, w, r)
-								default:
-									s.notAllowed(w, r, "GET")
-								}
-
-								return
-							}
 						case 'j': // Prefix: "jettons"
 							if l := len("jettons"); len(elem) >= l && elem[0:l] == "jettons" {
 								elem = elem[l:]
@@ -1172,8 +1152,8 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 						}
 					}
 				}
-			case 'e': // Prefix: "events/"
-				if l := len("events/"); len(elem) >= l && elem[0:l] == "events/" {
+			case 'e': // Prefix: "e"
+				if l := len("e"); len(elem) >= l && elem[0:l] == "e" {
 					elem = elem[l:]
 				} else {
 					break
@@ -1183,59 +1163,49 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 					break
 				}
 				switch elem[0] {
-				case 'e': // Prefix: "emulate"
-					if l := len("emulate"); len(elem) >= l && elem[0:l] == "emulate" {
+				case 'v': // Prefix: "vents/"
+					if l := len("vents/"); len(elem) >= l && elem[0:l] == "vents/" {
 						elem = elem[l:]
 					} else {
 						break
 					}
 
 					if len(elem) == 0 {
-						// Leaf node.
-						switch r.Method {
-						case "POST":
-							s.handleEmulateMessageToEventRequest([0]string{}, elemIsEscaped, w, r)
-						default:
-							s.notAllowed(w, r, "POST")
+						break
+					}
+					switch elem[0] {
+					case 'e': // Prefix: "emulate"
+						if l := len("emulate"); len(elem) >= l && elem[0:l] == "emulate" {
+							elem = elem[l:]
+						} else {
+							break
 						}
 
-						return
-					}
-				}
-				// Param: "event_id"
-				// Match until "/"
-				idx := strings.IndexByte(elem, '/')
-				if idx < 0 {
-					idx = len(elem)
-				}
-				args[0] = elem[:idx]
-				elem = elem[idx:]
+						if len(elem) == 0 {
+							// Leaf node.
+							switch r.Method {
+							case "POST":
+								s.handleEmulateMessageToEventRequest([0]string{}, elemIsEscaped, w, r)
+							default:
+								s.notAllowed(w, r, "POST")
+							}
 
-				if len(elem) == 0 {
-					switch r.Method {
-					case "GET":
-						s.handleGetEventRequest([1]string{
-							args[0],
-						}, elemIsEscaped, w, r)
-					default:
-						s.notAllowed(w, r, "GET")
+							return
+						}
 					}
-
-					return
-				}
-				switch elem[0] {
-				case '/': // Prefix: "/jettons"
-					if l := len("/jettons"); len(elem) >= l && elem[0:l] == "/jettons" {
-						elem = elem[l:]
-					} else {
-						break
+					// Param: "event_id"
+					// Match until "/"
+					idx := strings.IndexByte(elem, '/')
+					if idx < 0 {
+						idx = len(elem)
 					}
+					args[0] = elem[:idx]
+					elem = elem[idx:]
 
 					if len(elem) == 0 {
-						// Leaf node.
 						switch r.Method {
 						case "GET":
-							s.handleGetJettonsEventsRequest([1]string{
+							s.handleGetEventRequest([1]string{
 								args[0],
 							}, elemIsEscaped, w, r)
 						default:
@@ -1244,24 +1214,99 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 						return
 					}
-				}
-			case 'i': // Prefix: "inscriptions/op-template"
-				if l := len("inscriptions/op-template"); len(elem) >= l && elem[0:l] == "inscriptions/op-template" {
-					elem = elem[l:]
-				} else {
-					break
-				}
+					switch elem[0] {
+					case '/': // Prefix: "/jettons"
+						if l := len("/jettons"); len(elem) >= l && elem[0:l] == "/jettons" {
+							elem = elem[l:]
+						} else {
+							break
+						}
 
-				if len(elem) == 0 {
-					// Leaf node.
-					switch r.Method {
-					case "GET":
-						s.handleGetInscriptionOpTemplateRequest([0]string{}, elemIsEscaped, w, r)
-					default:
-						s.notAllowed(w, r, "GET")
+						if len(elem) == 0 {
+							// Leaf node.
+							switch r.Method {
+							case "GET":
+								s.handleGetJettonsEventsRequest([1]string{
+									args[0],
+								}, elemIsEscaped, w, r)
+							default:
+								s.notAllowed(w, r, "GET")
+							}
+
+							return
+						}
+					}
+				case 'x': // Prefix: "xperimental/"
+					if l := len("xperimental/"); len(elem) >= l && elem[0:l] == "xperimental/" {
+						elem = elem[l:]
+					} else {
+						break
 					}
 
-					return
+					if len(elem) == 0 {
+						break
+					}
+					switch elem[0] {
+					case 'a': // Prefix: "accounts/"
+						if l := len("accounts/"); len(elem) >= l && elem[0:l] == "accounts/" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						// Param: "account_id"
+						// Match until "/"
+						idx := strings.IndexByte(elem, '/')
+						if idx < 0 {
+							idx = len(elem)
+						}
+						args[0] = elem[:idx]
+						elem = elem[idx:]
+
+						if len(elem) == 0 {
+							break
+						}
+						switch elem[0] {
+						case '/': // Prefix: "/inscriptions"
+							if l := len("/inscriptions"); len(elem) >= l && elem[0:l] == "/inscriptions" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							if len(elem) == 0 {
+								// Leaf node.
+								switch r.Method {
+								case "GET":
+									s.handleGetAccountInscriptionsRequest([1]string{
+										args[0],
+									}, elemIsEscaped, w, r)
+								default:
+									s.notAllowed(w, r, "GET")
+								}
+
+								return
+							}
+						}
+					case 'i': // Prefix: "inscriptions/op-template"
+						if l := len("inscriptions/op-template"); len(elem) >= l && elem[0:l] == "inscriptions/op-template" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						if len(elem) == 0 {
+							// Leaf node.
+							switch r.Method {
+							case "GET":
+								s.handleGetInscriptionOpTemplateRequest([0]string{}, elemIsEscaped, w, r)
+							default:
+								s.notAllowed(w, r, "GET")
+							}
+
+							return
+						}
+					}
 				}
 			case 'j': // Prefix: "jettons"
 				if l := len("jettons"); len(elem) >= l && elem[0:l] == "jettons" {
@@ -2741,28 +2786,6 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 									}
 								}
 							}
-						case 'i': // Prefix: "inscriptions"
-							if l := len("inscriptions"); len(elem) >= l && elem[0:l] == "inscriptions" {
-								elem = elem[l:]
-							} else {
-								break
-							}
-
-							if len(elem) == 0 {
-								switch method {
-								case "GET":
-									// Leaf: GetAccountInscriptions
-									r.name = "GetAccountInscriptions"
-									r.summary = ""
-									r.operationID = "getAccountInscriptions"
-									r.pathPattern = "/v2/accounts/{account_id}/inscriptions"
-									r.args = args
-									r.count = 1
-									return r, true
-								default:
-									return
-								}
-							}
 						case 'j': // Prefix: "jettons"
 							if l := len("jettons"); len(elem) >= l && elem[0:l] == "jettons" {
 								elem = elem[l:]
@@ -3681,8 +3704,8 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 						}
 					}
 				}
-			case 'e': // Prefix: "events/"
-				if l := len("events/"); len(elem) >= l && elem[0:l] == "events/" {
+			case 'e': // Prefix: "e"
+				if l := len("e"); len(elem) >= l && elem[0:l] == "e" {
 					elem = elem[l:]
 				} else {
 					break
@@ -3692,68 +3715,56 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 					break
 				}
 				switch elem[0] {
-				case 'e': // Prefix: "emulate"
-					if l := len("emulate"); len(elem) >= l && elem[0:l] == "emulate" {
+				case 'v': // Prefix: "vents/"
+					if l := len("vents/"); len(elem) >= l && elem[0:l] == "vents/" {
 						elem = elem[l:]
 					} else {
 						break
 					}
 
 					if len(elem) == 0 {
-						switch method {
-						case "POST":
-							// Leaf: EmulateMessageToEvent
-							r.name = "EmulateMessageToEvent"
-							r.summary = ""
-							r.operationID = "emulateMessageToEvent"
-							r.pathPattern = "/v2/events/emulate"
-							r.args = args
-							r.count = 0
-							return r, true
-						default:
-							return
-						}
-					}
-				}
-				// Param: "event_id"
-				// Match until "/"
-				idx := strings.IndexByte(elem, '/')
-				if idx < 0 {
-					idx = len(elem)
-				}
-				args[0] = elem[:idx]
-				elem = elem[idx:]
-
-				if len(elem) == 0 {
-					switch method {
-					case "GET":
-						r.name = "GetEvent"
-						r.summary = ""
-						r.operationID = "getEvent"
-						r.pathPattern = "/v2/events/{event_id}"
-						r.args = args
-						r.count = 1
-						return r, true
-					default:
-						return
-					}
-				}
-				switch elem[0] {
-				case '/': // Prefix: "/jettons"
-					if l := len("/jettons"); len(elem) >= l && elem[0:l] == "/jettons" {
-						elem = elem[l:]
-					} else {
 						break
 					}
+					switch elem[0] {
+					case 'e': // Prefix: "emulate"
+						if l := len("emulate"); len(elem) >= l && elem[0:l] == "emulate" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						if len(elem) == 0 {
+							switch method {
+							case "POST":
+								// Leaf: EmulateMessageToEvent
+								r.name = "EmulateMessageToEvent"
+								r.summary = ""
+								r.operationID = "emulateMessageToEvent"
+								r.pathPattern = "/v2/events/emulate"
+								r.args = args
+								r.count = 0
+								return r, true
+							default:
+								return
+							}
+						}
+					}
+					// Param: "event_id"
+					// Match until "/"
+					idx := strings.IndexByte(elem, '/')
+					if idx < 0 {
+						idx = len(elem)
+					}
+					args[0] = elem[:idx]
+					elem = elem[idx:]
 
 					if len(elem) == 0 {
 						switch method {
 						case "GET":
-							// Leaf: GetJettonsEvents
-							r.name = "GetJettonsEvents"
+							r.name = "GetEvent"
 							r.summary = ""
-							r.operationID = "getJettonsEvents"
-							r.pathPattern = "/v2/events/{event_id}/jettons"
+							r.operationID = "getEvent"
+							r.pathPattern = "/v2/events/{event_id}"
 							r.args = args
 							r.count = 1
 							return r, true
@@ -3761,27 +3772,106 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 							return
 						}
 					}
-				}
-			case 'i': // Prefix: "inscriptions/op-template"
-				if l := len("inscriptions/op-template"); len(elem) >= l && elem[0:l] == "inscriptions/op-template" {
-					elem = elem[l:]
-				} else {
-					break
-				}
+					switch elem[0] {
+					case '/': // Prefix: "/jettons"
+						if l := len("/jettons"); len(elem) >= l && elem[0:l] == "/jettons" {
+							elem = elem[l:]
+						} else {
+							break
+						}
 
-				if len(elem) == 0 {
-					switch method {
-					case "GET":
-						// Leaf: GetInscriptionOpTemplate
-						r.name = "GetInscriptionOpTemplate"
-						r.summary = ""
-						r.operationID = "getInscriptionOpTemplate"
-						r.pathPattern = "/v2/inscriptions/op-template"
-						r.args = args
-						r.count = 0
-						return r, true
-					default:
-						return
+						if len(elem) == 0 {
+							switch method {
+							case "GET":
+								// Leaf: GetJettonsEvents
+								r.name = "GetJettonsEvents"
+								r.summary = ""
+								r.operationID = "getJettonsEvents"
+								r.pathPattern = "/v2/events/{event_id}/jettons"
+								r.args = args
+								r.count = 1
+								return r, true
+							default:
+								return
+							}
+						}
+					}
+				case 'x': // Prefix: "xperimental/"
+					if l := len("xperimental/"); len(elem) >= l && elem[0:l] == "xperimental/" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					if len(elem) == 0 {
+						break
+					}
+					switch elem[0] {
+					case 'a': // Prefix: "accounts/"
+						if l := len("accounts/"); len(elem) >= l && elem[0:l] == "accounts/" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						// Param: "account_id"
+						// Match until "/"
+						idx := strings.IndexByte(elem, '/')
+						if idx < 0 {
+							idx = len(elem)
+						}
+						args[0] = elem[:idx]
+						elem = elem[idx:]
+
+						if len(elem) == 0 {
+							break
+						}
+						switch elem[0] {
+						case '/': // Prefix: "/inscriptions"
+							if l := len("/inscriptions"); len(elem) >= l && elem[0:l] == "/inscriptions" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							if len(elem) == 0 {
+								switch method {
+								case "GET":
+									// Leaf: GetAccountInscriptions
+									r.name = "GetAccountInscriptions"
+									r.summary = ""
+									r.operationID = "getAccountInscriptions"
+									r.pathPattern = "/v2/experimental/accounts/{account_id}/inscriptions"
+									r.args = args
+									r.count = 1
+									return r, true
+								default:
+									return
+								}
+							}
+						}
+					case 'i': // Prefix: "inscriptions/op-template"
+						if l := len("inscriptions/op-template"); len(elem) >= l && elem[0:l] == "inscriptions/op-template" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						if len(elem) == 0 {
+							switch method {
+							case "GET":
+								// Leaf: GetInscriptionOpTemplate
+								r.name = "GetInscriptionOpTemplate"
+								r.summary = ""
+								r.operationID = "getInscriptionOpTemplate"
+								r.pathPattern = "/v2/experimental/inscriptions/op-template"
+								r.args = args
+								r.count = 0
+								return r, true
+							default:
+								return
+							}
+						}
 					}
 				}
 			case 'j': // Prefix: "jettons"

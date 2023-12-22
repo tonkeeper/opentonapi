@@ -5641,41 +5641,6 @@
     ]
    }
   },
-  "/v2/accounts/{account_id}/inscriptions": {
-   "get": {
-    "description": "Get all inscriptions by owner address",
-    "operationId": "getAccountInscriptions",
-    "parameters": [
-     {
-      "$ref": "#/components/parameters/accountIDParameter"
-     },
-     {
-      "$ref": "#/components/parameters/limitQuery"
-     },
-     {
-      "$ref": "#/components/parameters/offsetQuery"
-     }
-    ],
-    "responses": {
-     "200": {
-      "content": {
-       "application/json": {
-        "schema": {
-         "$ref": "#/components/schemas/InscriptionBalances"
-        }
-       }
-      },
-      "description": "account inscriptions"
-     },
-     "default": {
-      "$ref": "#/components/responses/Error"
-     }
-    },
-    "tags": [
-     "Inscriptions"
-    ]
-   }
-  },
   "/v2/accounts/{account_id}/jettons": {
    "get": {
     "description": "Get all Jettons balances by owner address",
@@ -6946,7 +6911,42 @@
     ]
    }
   },
-  "/v2/inscriptions/op-template": {
+  "/v2/experimental/accounts/{account_id}/inscriptions": {
+   "get": {
+    "description": "Get all inscriptions by owner address. It's experimental API and can be dropped in the future.",
+    "operationId": "getAccountInscriptions",
+    "parameters": [
+     {
+      "$ref": "#/components/parameters/accountIDParameter"
+     },
+     {
+      "$ref": "#/components/parameters/limitQuery"
+     },
+     {
+      "$ref": "#/components/parameters/offsetQuery"
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/InscriptionBalances"
+        }
+       }
+      },
+      "description": "account inscriptions"
+     },
+     "default": {
+      "$ref": "#/components/responses/Error"
+     }
+    },
+    "tags": [
+     "Inscriptions"
+    ]
+   }
+  },
+  "/v2/experimental/inscriptions/op-template": {
    "get": {
     "description": "return comment for making operation with instrospection. please don't use it if you don't know what you are doing",
     "operationId": "getInscriptionOpTemplate",

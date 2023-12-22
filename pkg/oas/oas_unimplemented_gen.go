@@ -163,9 +163,9 @@ func (UnimplementedHandler) GetAccountInfoByStateInit(ctx context.Context, req *
 
 // GetAccountInscriptions implements getAccountInscriptions operation.
 //
-// Get all inscriptions by owner address.
+// Get all inscriptions by owner address. It's experimental API and can be dropped in the future.
 //
-// GET /v2/accounts/{account_id}/inscriptions
+// GET /v2/experimental/accounts/{account_id}/inscriptions
 func (UnimplementedHandler) GetAccountInscriptions(ctx context.Context, params GetAccountInscriptionsParams) (r *InscriptionBalances, _ error) {
 	return r, ht.ErrNotImplemented
 }
@@ -454,7 +454,7 @@ func (UnimplementedHandler) GetEvent(ctx context.Context, params GetEventParams)
 // Return comment for making operation with instrospection. please don't use it if you don't know
 // what you are doing.
 //
-// GET /v2/inscriptions/op-template
+// GET /v2/experimental/inscriptions/op-template
 func (UnimplementedHandler) GetInscriptionOpTemplate(ctx context.Context, params GetInscriptionOpTemplateParams) (r *GetInscriptionOpTemplateOK, _ error) {
 	return r, ht.ErrNotImplemented
 }

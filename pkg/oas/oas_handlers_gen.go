@@ -2026,14 +2026,14 @@ func (s *Server) handleGetAccountInfoByStateInitRequest(args [0]string, argsEsca
 
 // handleGetAccountInscriptionsRequest handles getAccountInscriptions operation.
 //
-// Get all inscriptions by owner address.
+// Get all inscriptions by owner address. It's experimental API and can be dropped in the future.
 //
-// GET /v2/accounts/{account_id}/inscriptions
+// GET /v2/experimental/accounts/{account_id}/inscriptions
 func (s *Server) handleGetAccountInscriptionsRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getAccountInscriptions"),
 		semconv.HTTPMethodKey.String("GET"),
-		semconv.HTTPRouteKey.String("/v2/accounts/{account_id}/inscriptions"),
+		semconv.HTTPRouteKey.String("/v2/experimental/accounts/{account_id}/inscriptions"),
 	}
 
 	// Start a span for this request.
@@ -5732,12 +5732,12 @@ func (s *Server) handleGetEventRequest(args [1]string, argsEscaped bool, w http.
 // Return comment for making operation with instrospection. please don't use it if you don't know
 // what you are doing.
 //
-// GET /v2/inscriptions/op-template
+// GET /v2/experimental/inscriptions/op-template
 func (s *Server) handleGetInscriptionOpTemplateRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getInscriptionOpTemplate"),
 		semconv.HTTPMethodKey.String("GET"),
-		semconv.HTTPRouteKey.String("/v2/inscriptions/op-template"),
+		semconv.HTTPRouteKey.String("/v2/experimental/inscriptions/op-template"),
 	}
 
 	// Start a span for this request.

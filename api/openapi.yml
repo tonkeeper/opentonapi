@@ -1226,9 +1226,9 @@ paths:
         'default':
           $ref: '#/components/responses/Error'
 
-  /v2/accounts/{account_id}/inscriptions:
+  /v2/experimental/accounts/{account_id}/inscriptions:
     get:
-      description: Get all inscriptions by owner address
+      description: Get all inscriptions by owner address. It's experimental API and can be dropped in the future.
       operationId: getAccountInscriptions
       tags:
         - Inscriptions
@@ -1245,7 +1245,7 @@ paths:
                 $ref: '#/components/schemas/InscriptionBalances'
         'default':
           $ref: '#/components/responses/Error'
-  /v2/inscriptions/op-template:
+  /v2/experimental/inscriptions/op-template:
     get:
       description: return comment for making operation with instrospection. please don't use it if you don't know what you are doing
       operationId: getInscriptionOpTemplate
