@@ -69,18 +69,20 @@ func fromTrace(trace *core.Trace) *Bubble {
 		}
 		accounts = append(accounts, source.Address)
 	}
-	var inputAmount int64
 	var initInterfaces []abi.ContractInterface
 	if msg := trace.InMsg; msg != nil {
 		btx.bounce = msg.Bounce
 		btx.bounced = msg.Bounced
 		btx.inputAmount = msg.Value
-		inputAmount = msg.Value
 		btx.opCode = msg.OpCode
 		btx.decodedBody = msg.DecodedBody
 		btx.inputFrom = source
 		btx.init = msg.Init
 		initInterfaces = msg.InitInterfaces
+	}
+	var inputAmount int64
+	if trace.Transaction.CreditPhase != nil {
+		inputAmount = int64(trace.Transaction.CreditPhase.CreditGrams)
 	}
 	aggregatedFee := trace.TotalFee
 	b := Bubble{
@@ -95,10 +97,8 @@ func fromTrace(trace *core.Trace) *Bubble {
 			},
 		},
 	}
-
 	for _, outMsg := range trace.OutMsgs {
 		b.ValueFlow.AddTons(trace.Account, -outMsg.Value)
-		aggregatedFee += outMsg.FwdFee
 	}
 	for i, c := range trace.Children {
 		if c.InMsg != nil {
@@ -106,9 +106,12 @@ func fromTrace(trace *core.Trace) *Bubble {
 			// we have removed it from OutMsgs to avoid duplicates.
 			// That's why we add tons here
 			b.ValueFlow.AddTons(trace.Account, -c.InMsg.Value)
-			aggregatedFee += c.InMsg.FwdFee
 		}
 		b.Children[i] = fromTrace(c)
+	}
+	if actionPhase := trace.Transaction.ActionPhase; actionPhase != nil {
+		aggregatedFee += int64(actionPhase.FwdFees)
+		aggregatedFee -= int64(actionPhase.TotalFees)
 	}
 	contractDeployed := trace.EndStatus == tlb.AccountActive && trace.OrigStatus != tlb.AccountActive
 	if contractDeployed {

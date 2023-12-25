@@ -135,6 +135,8 @@ func TestFindActions(t *testing.T) {
 			tongo.MustParseBlockID("(0,8000000000000000,38603492)"),
 			// jetton transfer to another person
 			tongo.MustParseBlockID("(0,8000000000000000,39685391)"),
+			// ihr fee
+			tongo.MustParseBlockID("(0,8000000000000000,40834551)"),
 		}),
 	)
 
@@ -329,6 +331,11 @@ func TestFindActions(t *testing.T) {
 			name:           "domain renew",
 			hash:           "bcc48fcebc9635febcd1834ef40e1afab71c3ab46dd81ddf1d267474dae13923",
 			filenamePrefix: "domain-renew",
+		},
+		{
+			name:           "ihr fee",
+			hash:           "2da9737c4da572382f7a5abfdb923f223455280089f4b627c6cb028b2b8350d2",
+			filenamePrefix: "ihr-fee",
 		},
 	} {
 		t.Run(c.name, func(t *testing.T) {

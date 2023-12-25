@@ -154,10 +154,7 @@ func maybeRefInvoke[Result any, T any](fn func(t T) *Result, maybe tlb.Maybe[tlb
 }
 
 func ConvertTransaction(workchain int32, tx tongo.Transaction) (*Transaction, error) {
-	var (
-		aggregatedFee, storageFee int64
-		inMsg                     *Message
-	)
+	var inMsg *Message
 	if tx.Msgs.InMsg.Exists {
 		msg, err := ConvertMessage(tx.Msgs.InMsg.Value.Value, tx.Lt)
 		if err != nil {
@@ -172,7 +169,6 @@ func ConvertTransaction(workchain int32, tx tongo.Transaction) (*Transaction, er
 			return nil, err
 		}
 		outMessage = append(outMessage, m)
-		aggregatedFee += m.FwdFee
 	}
 	var computePhase *TxComputePhase
 	var storagePhase *TxStoragePhase
@@ -223,11 +219,15 @@ func ConvertTransaction(workchain int32, tx tongo.Transaction) (*Transaction, er
 		creditPhase = maybeInvoke(convertCreditPhase, tx.CreditPh)
 		actionPhase = maybeRefInvoke(convertActionPhase, tx.Action)
 	}
-	aggregatedFee += int64(tx.TotalFees.Grams)
+	aggregatedFee := int64(tx.TotalFees.Grams)
+	if actionPhase != nil {
+		aggregatedFee += int64(actionPhase.FwdFees)
+		aggregatedFee -= int64(actionPhase.TotalFees)
+	}
+	var storageFee int64
 	if storagePhase != nil {
 		storageFee = int64(storagePhase.StorageFeesCollected)
 	}
-
 	return &Transaction{
 		BlockID: tx.BlockID.BlockID,
 		TransactionID: TransactionID{
