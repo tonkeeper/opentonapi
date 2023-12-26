@@ -38,7 +38,9 @@ func Test_session_Stream(t *testing.T) {
 	}
 	time.Sleep(1 * time.Second)
 	require.True(t, cancelIsCalled.Load())
-	expectedBody := `event: message
+	expectedBody := `event: heartbeat
+
+event: message
 id: 1
 data: hello
 
