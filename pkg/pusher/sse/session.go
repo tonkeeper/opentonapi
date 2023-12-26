@@ -48,6 +48,12 @@ func (s *session) StreamEvents(ctx context.Context, writer http.ResponseWriter) 
 	defer s.cancel()
 
 	flusher := writer.(http.Flusher)
+	// sending this first event to quickly respond to the client with a 200 OK
+	metrics.SseEventSent(events.PingEvent, utils.TokenNameFromContext(ctx))
+	if _, err := fmt.Fprintf(writer, "event: heartbeat\n\n"); err != nil {
+		return err
+	}
+	flusher.Flush()
 	for {
 		var err error
 		select {
