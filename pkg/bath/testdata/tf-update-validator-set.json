@@ -15,13 +15,13 @@
    "Accounts": [
      {
        "Account": "-1:9af16c60bf0a73fc83d60e5d6b9225e692dda47148949670436c0f80af7f7646",
-       "Ton": -129200000,
+       "Ton": -183520284,
        "Fee": 54320284,
        "Jettons": null
      },
      {
        "Account": "-1:cc929d06da6e1b07de776d18cc75b1e2b36800d13958fd3ce585df044ed163d4",
-       "Ton": 129200000,
+       "Ton": -1522149,
        "Fee": 130722149,
        "Jettons": null
      }

@@ -90,7 +90,7 @@
    "Accounts": [
      {
        "Account": "0:2cf3b5b8c891e517c9addbda1c0386a09ccacbb0e3faf630b51cfc8152325acb",
-       "Ton": -251200000,
+       "Ton": -260949064,
        "Fee": 9749064,
        "Jettons": [
          {
@@ -105,7 +105,7 @@
      },
      {
        "Account": "0:6c8eef549f003f4f421d009aede507e3f7535667b639e98fd09b55c8fc0e23cb",
-       "Ton": 58824000,
+       "Ton": 58823997,
        "Fee": 3,
        "Jettons": [
          {
@@ -116,7 +116,7 @@
      },
      {
        "Account": "0:779dcc815138d9500e449c5291e7f12738c23d575b5310000f6a253bd607384e",
-       "Ton": 43796000,
+       "Ton": -10,
        "Fee": 43796010,
        "Jettons": [
          {
@@ -131,19 +131,19 @@
      },
      {
        "Account": "0:afe41587f4f404b99c567b9cacedd1381f5ff855ccdc112e0cf8291afa7f19f9",
-       "Ton": 29332000,
+       "Ton": 6022135,
        "Fee": 23309865,
        "Jettons": null
      },
      {
        "Account": "0:b90a4147ba83fea581fa8d73b1c92cf82dcc92b0c6df924c3c0553d713b35e6c",
-       "Ton": 37248000,
+       "Ton": -20488,
        "Fee": 37268488,
        "Jettons": null
      },
      {
        "Account": "0:efde81ab6cd63d8d96efe2ea7a7396066d2f396f19df4e4e03a7ed5f82d73754",
-       "Ton": 20167000,
+       "Ton": -68,
        "Fee": 20167068,
        "Jettons": null
      }
