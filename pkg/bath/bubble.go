@@ -125,6 +125,7 @@ func fromTrace(trace *core.Trace) *Bubble {
 			ValueFlow: &ValueFlow{},
 		})
 	}
+	b.ValueFlow.Accounts[trace.Account].Ton -= aggregatedFee
 	b.ValueFlow.Accounts[trace.Account].Fees = aggregatedFee
 	return &b
 }

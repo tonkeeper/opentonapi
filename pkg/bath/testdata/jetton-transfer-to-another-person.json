@@ -38,7 +38,7 @@
      },
      {
        "Account": "0:6ccd325a858c379693fae2bcaab1c2906831a4e10a6c3bb44ee8b615bca1d220",
-       "Ton": -55575080,
+       "Ton": -64016649,
        "Fee": 8441569,
        "Jettons": [
          {
@@ -49,7 +49,7 @@
      },
      {
        "Account": "0:d56f88e98b46d844642cab1e83833fa062a8ad6fdba62ae71c636f8f8802501d",
-       "Ton": 19174000,
+       "Ton": -486241,
        "Fee": 19660241,
        "Jettons": null
      }

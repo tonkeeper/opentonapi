@@ -39,9 +39,10 @@ func (flow *ValueFlow) AddTons(accountID tongo.AccountID, amount int64) {
 func (flow *ValueFlow) AddFee(accountID tongo.AccountID, amount int64) {
 	if accountFlow, ok := flow.Accounts[accountID]; ok {
 		accountFlow.Fees += amount
+		accountFlow.Ton -= amount
 		return
 	}
-	flow.Accounts[accountID] = &AccountValueFlow{Fees: amount}
+	flow.Accounts[accountID] = &AccountValueFlow{Fees: amount, Ton: -amount}
 }
 func (flow *ValueFlow) SubJettons(accountID tongo.AccountID, jettonMaster tongo.AccountID, value big.Int) {
 	var negative big.Int
@@ -69,8 +70,11 @@ func (flow *ValueFlow) AddJettons(accountID tongo.AccountID, jettonMaster tongo.
 
 func (flow *ValueFlow) Merge(other *ValueFlow) {
 	for accountID, af := range other.Accounts {
-		flow.AddTons(accountID, af.Ton)
-		flow.AddFee(accountID, af.Fees)
+		if _, ok := flow.Accounts[accountID]; !ok {
+			flow.Accounts[accountID] = &AccountValueFlow{}
+		}
+		flow.Accounts[accountID].Ton += af.Ton
+		flow.Accounts[accountID].Fees += af.Fees
 		for jetton, value := range af.Jettons {
 			flow.AddJettons(accountID, jetton, value)
 		}

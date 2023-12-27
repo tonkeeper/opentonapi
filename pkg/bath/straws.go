@@ -86,8 +86,7 @@ func FindJettonTransfer(bubble *Bubble) bool {
 		Accounts:  bubble.Accounts,
 	}
 	// TODO: check they have the same master
-	newBubble.ValueFlow.AddJettons(*recipient, transfer.master, big.Int(intention.Amount))
-	newBubble.ValueFlow.SubJettons(transferBubbleInfo.inputFrom.Address, transfer.master, big.Int(intention.Amount))
+
 	if transferBubbleInfo.success {
 		newBubble.Children = ProcessChildren(bubble.Children,
 			func(notify *Bubble) *Merge {
@@ -155,6 +154,10 @@ func FindJettonTransfer(bubble *Bubble) bool {
 		if transfer.recipient == nil {
 			transfer.recipient = parseAccount(intention.Destination)
 		}
+	}
+	if !transfer.isWrappedTon {
+		newBubble.ValueFlow.AddJettons(*recipient, transfer.master, big.Int(intention.Amount))
+		newBubble.ValueFlow.SubJettons(transferBubbleInfo.inputFrom.Address, transfer.master, big.Int(intention.Amount))
 	}
 	newBubble.Info = transfer
 	*bubble = newBubble
