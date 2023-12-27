@@ -110,8 +110,8 @@ func fromTrace(trace *core.Trace) *Bubble {
 		b.Children[i] = fromTrace(c)
 	}
 	if actionPhase := trace.Transaction.ActionPhase; actionPhase != nil {
-		aggregatedFee += int64(actionPhase.FwdFees)
-		aggregatedFee -= int64(actionPhase.TotalFees)
+		aggregatedFee += int64(actionPhase.TotalFwdFees)
+		aggregatedFee -= int64(actionPhase.TotalActionFees)
 	}
 	contractDeployed := trace.EndStatus == tlb.AccountActive && trace.OrigStatus != tlb.AccountActive
 	if contractDeployed {

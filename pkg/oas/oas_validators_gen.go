@@ -459,6 +459,25 @@ func (s *Action) Validate() error {
 	return nil
 }
 
+func (s *ActionPhase) Validate() error {
+	var failures []validate.FieldError
+	if err := func() error {
+		if err := s.StatusChange.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "status_change",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
 func (s *ActionSimplePreview) Validate() error {
 	var failures []validate.FieldError
 	if err := func() error {
@@ -1480,6 +1499,25 @@ func (s *BlockchainConfig9) Validate() error {
 	}(); err != nil {
 		failures = append(failures, validate.FieldError{
 			Name:  "mandatory_params",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s *BouncePhase) Validate() error {
+	var failures []validate.FieldError
+	if err := func() error {
+		if err := s.BounceType.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "bounce_type",
 			Error: err,
 		})
 	}
@@ -3656,6 +3694,24 @@ func (s *Transaction) Validate() error {
 		})
 	}
 	if err := func() error {
+		if value, ok := s.ActionPhase.Get(); ok {
+			if err := func() error {
+				if err := value.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "action_phase",
+			Error: err,
+		})
+	}
+	if err := func() error {
 		if value, ok := s.BouncePhase.Get(); ok {
 			if err := func() error {
 				if err := value.Validate(); err != nil {
@@ -3670,6 +3726,24 @@ func (s *Transaction) Validate() error {
 	}(); err != nil {
 		failures = append(failures, validate.FieldError{
 			Name:  "bounce_phase",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if value, ok := s.Bounce.Get(); ok {
+			if err := func() error {
+				if err := value.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "bounce",
 			Error: err,
 		})
 	}

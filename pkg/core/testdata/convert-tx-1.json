@@ -76,10 +76,16 @@
      "Skipped": false,
      "SkipReason": "",
      "Success": true,
+     "MsgStateUsed": false,
+     "AccountActivated": false,
      "GasFees": 6400000,
      "GasUsed": 6400,
-     "VmSteps": 116,
-     "ExitCode": 0
+     "GasLimit": 50000,
+     "GasCredit": 0,
+     "Mode": 0,
+     "ExitCode": 0,
+     "ExitArg": 0,
+     "VmSteps": 116
    },
    "StoragePhase": {
      "StorageFeesCollected": 126,
@@ -88,18 +94,31 @@
    },
    "CreditPhase": {
      "DueFeesCollected": 0,
-     "CreditGrams": 50000000
+     "CreditGrams": 50000000,
+     "CreditExtra": null
    },
    "ActionPhase": {
      "Success": true,
+     "Valid": true,
+     "NoFunds": false,
+     "StatusChange": "acst_unchanged",
+     "ResultCode": 0,
+     "ResultArg": 0,
      "TotalActions": 1,
+     "SpecActions": 0,
      "SkippedActions": 0,
-     "FwdFees": 10134000,
-     "TotalFees": 3377948
+     "TotalFwdFees": 10134000,
+     "TotalActionFees": 3377948,
+     "MsgsCreated": 1,
+     "TotMsgSize": {
+       "Cells": 22,
+       "Bits": 7740
+     }
    },
    "BouncePhase": null,
    "Aborted": false,
    "Destroyed": false,
    "StorageFee": 126,
-   "TotalFee": 9778074
+   "TotalFee": 9778074,
+   "TotalFeeExtra": null
  }

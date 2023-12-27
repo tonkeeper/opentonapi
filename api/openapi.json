@@ -1006,10 +1006,37 @@
       "format": "int64",
       "type": "integer"
      },
+     "msgs_created": {
+      "example": 1000,
+      "format": "int16",
+      "type": "integer"
+     },
+     "no_funds": {
+      "example": true,
+      "type": "boolean"
+     },
+     "result_arg": {
+      "example": 5,
+      "format": "int32",
+      "type": "integer"
+     },
+     "result_code": {
+      "example": 5,
+      "format": "int32",
+      "type": "integer"
+     },
      "skipped_actions": {
       "example": 5,
       "format": "int32",
       "type": "integer"
+     },
+     "spec_actions": {
+      "example": 5,
+      "format": "int32",
+      "type": "integer"
+     },
+     "status_change": {
+      "$ref": "#/components/schemas/AccStatusChange"
      },
      "success": {
       "example": true,
@@ -1024,14 +1051,37 @@
       "example": 1000,
       "format": "int64",
       "type": "integer"
+     },
+     "total_msg_size_bits": {
+      "example": 1000,
+      "format": "int64",
+      "type": "integer"
+     },
+     "total_msg_size_cells": {
+      "example": 3,
+      "format": "int64",
+      "type": "integer"
+     },
+     "valid": {
+      "example": true,
+      "type": "boolean"
      }
     },
     "required": [
      "success",
+     "valid",
+     "no_funds",
+     "status_change",
+     "result_code",
+     "result_arg",
      "total_actions",
+     "spec_actions",
      "skipped_actions",
      "fwd_fees",
-     "total_fees"
+     "total_fees",
+     "msgs_created",
+     "total_msg_size_cells",
+     "total_msg_size_bits"
     ],
     "type": "object"
    },
@@ -2326,6 +2376,37 @@
     ],
     "type": "object"
    },
+   "BouncePhase": {
+    "properties": {
+     "bounce_type": {
+      "$ref": "#/components/schemas/BouncePhaseType"
+     },
+     "fwd_fees": {
+      "format": "int64",
+      "type": "integer"
+     },
+     "msg_fees": {
+      "format": "int64",
+      "type": "integer"
+     },
+     "msg_size_bits": {
+      "format": "int64",
+      "type": "integer"
+     },
+     "msg_size_cells": {
+      "format": "int64",
+      "type": "integer"
+     },
+     "req_fwd_fees": {
+      "format": "int64",
+      "type": "integer"
+     }
+    },
+    "required": [
+     "bounce_type"
+    ],
+    "type": "object"
+   },
    "BouncePhaseType": {
     "enum": [
      "TrPhaseBounceNegfunds",
@@ -2337,9 +2418,23 @@
    },
    "ComputePhase": {
     "properties": {
+     "account_activated": {
+      "example": true,
+      "type": "boolean"
+     },
+     "exit_arg": {
+      "example": 0,
+      "format": "int32",
+      "type": "integer"
+     },
      "exit_code": {
       "example": 0,
       "format": "int32",
+      "type": "integer"
+     },
+     "gas_credit": {
+      "example": 10000,
+      "format": "int64",
       "type": "integer"
      },
      "gas_fees": {
@@ -2347,10 +2442,24 @@
       "format": "int64",
       "type": "integer"
      },
+     "gas_limit": {
+      "example": 10000,
+      "format": "int64",
+      "type": "integer"
+     },
      "gas_used": {
       "example": 10000,
       "format": "int64",
       "type": "integer"
+     },
+     "mode": {
+      "example": 0,
+      "format": "int8",
+      "type": "integer"
+     },
+     "msg_state_used": {
+      "example": true,
+      "type": "boolean"
      },
      "skip_reason": {
       "$ref": "#/components/schemas/ComputeSkipReason"
@@ -4747,8 +4856,12 @@
       "example": "(-1,4234234,8000000000000000)",
       "type": "string"
      },
+     "bounce": {
+      "$ref": "#/components/schemas/BouncePhase"
+     },
      "bounce_phase": {
-      "$ref": "#/components/schemas/BouncePhaseType"
+      "$ref": "#/components/schemas/BouncePhaseType",
+      "deprecated": true
      },
      "compute_phase": {
       "$ref": "#/components/schemas/ComputePhase"

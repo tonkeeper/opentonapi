@@ -855,11 +855,20 @@ func (s *Action) SetSimplePreview(val ActionSimplePreview) {
 
 // Ref: #/components/schemas/ActionPhase
 type ActionPhase struct {
-	Success        bool  `json:"success"`
-	TotalActions   int32 `json:"total_actions"`
-	SkippedActions int32 `json:"skipped_actions"`
-	FwdFees        int64 `json:"fwd_fees"`
-	TotalFees      int64 `json:"total_fees"`
+	Success           bool            `json:"success"`
+	Valid             bool            `json:"valid"`
+	NoFunds           bool            `json:"no_funds"`
+	StatusChange      AccStatusChange `json:"status_change"`
+	ResultCode        int32           `json:"result_code"`
+	ResultArg         int32           `json:"result_arg"`
+	TotalActions      int32           `json:"total_actions"`
+	SpecActions       int32           `json:"spec_actions"`
+	SkippedActions    int32           `json:"skipped_actions"`
+	FwdFees           int64           `json:"fwd_fees"`
+	TotalFees         int64           `json:"total_fees"`
+	MsgsCreated       int16           `json:"msgs_created"`
+	TotalMsgSizeCells int64           `json:"total_msg_size_cells"`
+	TotalMsgSizeBits  int64           `json:"total_msg_size_bits"`
 }
 
 // GetSuccess returns the value of Success.
@@ -867,9 +876,39 @@ func (s *ActionPhase) GetSuccess() bool {
 	return s.Success
 }
 
+// GetValid returns the value of Valid.
+func (s *ActionPhase) GetValid() bool {
+	return s.Valid
+}
+
+// GetNoFunds returns the value of NoFunds.
+func (s *ActionPhase) GetNoFunds() bool {
+	return s.NoFunds
+}
+
+// GetStatusChange returns the value of StatusChange.
+func (s *ActionPhase) GetStatusChange() AccStatusChange {
+	return s.StatusChange
+}
+
+// GetResultCode returns the value of ResultCode.
+func (s *ActionPhase) GetResultCode() int32 {
+	return s.ResultCode
+}
+
+// GetResultArg returns the value of ResultArg.
+func (s *ActionPhase) GetResultArg() int32 {
+	return s.ResultArg
+}
+
 // GetTotalActions returns the value of TotalActions.
 func (s *ActionPhase) GetTotalActions() int32 {
 	return s.TotalActions
+}
+
+// GetSpecActions returns the value of SpecActions.
+func (s *ActionPhase) GetSpecActions() int32 {
+	return s.SpecActions
 }
 
 // GetSkippedActions returns the value of SkippedActions.
@@ -887,14 +926,59 @@ func (s *ActionPhase) GetTotalFees() int64 {
 	return s.TotalFees
 }
 
+// GetMsgsCreated returns the value of MsgsCreated.
+func (s *ActionPhase) GetMsgsCreated() int16 {
+	return s.MsgsCreated
+}
+
+// GetTotalMsgSizeCells returns the value of TotalMsgSizeCells.
+func (s *ActionPhase) GetTotalMsgSizeCells() int64 {
+	return s.TotalMsgSizeCells
+}
+
+// GetTotalMsgSizeBits returns the value of TotalMsgSizeBits.
+func (s *ActionPhase) GetTotalMsgSizeBits() int64 {
+	return s.TotalMsgSizeBits
+}
+
 // SetSuccess sets the value of Success.
 func (s *ActionPhase) SetSuccess(val bool) {
 	s.Success = val
 }
 
+// SetValid sets the value of Valid.
+func (s *ActionPhase) SetValid(val bool) {
+	s.Valid = val
+}
+
+// SetNoFunds sets the value of NoFunds.
+func (s *ActionPhase) SetNoFunds(val bool) {
+	s.NoFunds = val
+}
+
+// SetStatusChange sets the value of StatusChange.
+func (s *ActionPhase) SetStatusChange(val AccStatusChange) {
+	s.StatusChange = val
+}
+
+// SetResultCode sets the value of ResultCode.
+func (s *ActionPhase) SetResultCode(val int32) {
+	s.ResultCode = val
+}
+
+// SetResultArg sets the value of ResultArg.
+func (s *ActionPhase) SetResultArg(val int32) {
+	s.ResultArg = val
+}
+
 // SetTotalActions sets the value of TotalActions.
 func (s *ActionPhase) SetTotalActions(val int32) {
 	s.TotalActions = val
+}
+
+// SetSpecActions sets the value of SpecActions.
+func (s *ActionPhase) SetSpecActions(val int32) {
+	s.SpecActions = val
 }
 
 // SetSkippedActions sets the value of SkippedActions.
@@ -910,6 +994,21 @@ func (s *ActionPhase) SetFwdFees(val int64) {
 // SetTotalFees sets the value of TotalFees.
 func (s *ActionPhase) SetTotalFees(val int64) {
 	s.TotalFees = val
+}
+
+// SetMsgsCreated sets the value of MsgsCreated.
+func (s *ActionPhase) SetMsgsCreated(val int16) {
+	s.MsgsCreated = val
+}
+
+// SetTotalMsgSizeCells sets the value of TotalMsgSizeCells.
+func (s *ActionPhase) SetTotalMsgSizeCells(val int64) {
+	s.TotalMsgSizeCells = val
+}
+
+// SetTotalMsgSizeBits sets the value of TotalMsgSizeBits.
+func (s *ActionPhase) SetTotalMsgSizeBits(val int64) {
+	s.TotalMsgSizeBits = val
 }
 
 // Shortly describes what this action is about.
@@ -3869,6 +3968,76 @@ func (s *BlockchainRawAccountExtraBalance) init() BlockchainRawAccountExtraBalan
 	return m
 }
 
+// Ref: #/components/schemas/BouncePhase
+type BouncePhase struct {
+	BounceType   BouncePhaseType `json:"bounce_type"`
+	MsgSizeCells OptInt64        `json:"msg_size_cells"`
+	MsgSizeBits  OptInt64        `json:"msg_size_bits"`
+	ReqFwdFees   OptInt64        `json:"req_fwd_fees"`
+	MsgFees      OptInt64        `json:"msg_fees"`
+	FwdFees      OptInt64        `json:"fwd_fees"`
+}
+
+// GetBounceType returns the value of BounceType.
+func (s *BouncePhase) GetBounceType() BouncePhaseType {
+	return s.BounceType
+}
+
+// GetMsgSizeCells returns the value of MsgSizeCells.
+func (s *BouncePhase) GetMsgSizeCells() OptInt64 {
+	return s.MsgSizeCells
+}
+
+// GetMsgSizeBits returns the value of MsgSizeBits.
+func (s *BouncePhase) GetMsgSizeBits() OptInt64 {
+	return s.MsgSizeBits
+}
+
+// GetReqFwdFees returns the value of ReqFwdFees.
+func (s *BouncePhase) GetReqFwdFees() OptInt64 {
+	return s.ReqFwdFees
+}
+
+// GetMsgFees returns the value of MsgFees.
+func (s *BouncePhase) GetMsgFees() OptInt64 {
+	return s.MsgFees
+}
+
+// GetFwdFees returns the value of FwdFees.
+func (s *BouncePhase) GetFwdFees() OptInt64 {
+	return s.FwdFees
+}
+
+// SetBounceType sets the value of BounceType.
+func (s *BouncePhase) SetBounceType(val BouncePhaseType) {
+	s.BounceType = val
+}
+
+// SetMsgSizeCells sets the value of MsgSizeCells.
+func (s *BouncePhase) SetMsgSizeCells(val OptInt64) {
+	s.MsgSizeCells = val
+}
+
+// SetMsgSizeBits sets the value of MsgSizeBits.
+func (s *BouncePhase) SetMsgSizeBits(val OptInt64) {
+	s.MsgSizeBits = val
+}
+
+// SetReqFwdFees sets the value of ReqFwdFees.
+func (s *BouncePhase) SetReqFwdFees(val OptInt64) {
+	s.ReqFwdFees = val
+}
+
+// SetMsgFees sets the value of MsgFees.
+func (s *BouncePhase) SetMsgFees(val OptInt64) {
+	s.MsgFees = val
+}
+
+// SetFwdFees sets the value of FwdFees.
+func (s *BouncePhase) SetFwdFees(val OptInt64) {
+	s.FwdFees = val
+}
+
 // Ref: #/components/schemas/BouncePhaseType
 type BouncePhaseType string
 
@@ -3920,13 +4089,19 @@ func (s *BouncePhaseType) UnmarshalText(data []byte) error {
 
 // Ref: #/components/schemas/ComputePhase
 type ComputePhase struct {
-	Skipped    bool                 `json:"skipped"`
-	SkipReason OptComputeSkipReason `json:"skip_reason"`
-	Success    OptBool              `json:"success"`
-	GasFees    OptInt64             `json:"gas_fees"`
-	GasUsed    OptInt64             `json:"gas_used"`
-	VMSteps    OptUint32            `json:"vm_steps"`
-	ExitCode   OptInt32             `json:"exit_code"`
+	Skipped          bool                 `json:"skipped"`
+	SkipReason       OptComputeSkipReason `json:"skip_reason"`
+	Success          OptBool              `json:"success"`
+	MsgStateUsed     OptBool              `json:"msg_state_used"`
+	AccountActivated OptBool              `json:"account_activated"`
+	GasFees          OptInt64             `json:"gas_fees"`
+	GasUsed          OptInt64             `json:"gas_used"`
+	GasCredit        OptInt64             `json:"gas_credit"`
+	GasLimit         OptInt64             `json:"gas_limit"`
+	VMSteps          OptUint32            `json:"vm_steps"`
+	ExitCode         OptInt32             `json:"exit_code"`
+	ExitArg          OptInt32             `json:"exit_arg"`
+	Mode             OptInt8              `json:"mode"`
 }
 
 // GetSkipped returns the value of Skipped.
@@ -3944,6 +4119,16 @@ func (s *ComputePhase) GetSuccess() OptBool {
 	return s.Success
 }
 
+// GetMsgStateUsed returns the value of MsgStateUsed.
+func (s *ComputePhase) GetMsgStateUsed() OptBool {
+	return s.MsgStateUsed
+}
+
+// GetAccountActivated returns the value of AccountActivated.
+func (s *ComputePhase) GetAccountActivated() OptBool {
+	return s.AccountActivated
+}
+
 // GetGasFees returns the value of GasFees.
 func (s *ComputePhase) GetGasFees() OptInt64 {
 	return s.GasFees
@@ -3954,6 +4139,16 @@ func (s *ComputePhase) GetGasUsed() OptInt64 {
 	return s.GasUsed
 }
 
+// GetGasCredit returns the value of GasCredit.
+func (s *ComputePhase) GetGasCredit() OptInt64 {
+	return s.GasCredit
+}
+
+// GetGasLimit returns the value of GasLimit.
+func (s *ComputePhase) GetGasLimit() OptInt64 {
+	return s.GasLimit
+}
+
 // GetVMSteps returns the value of VMSteps.
 func (s *ComputePhase) GetVMSteps() OptUint32 {
 	return s.VMSteps
@@ -3962,6 +4157,16 @@ func (s *ComputePhase) GetVMSteps() OptUint32 {
 // GetExitCode returns the value of ExitCode.
 func (s *ComputePhase) GetExitCode() OptInt32 {
 	return s.ExitCode
+}
+
+// GetExitArg returns the value of ExitArg.
+func (s *ComputePhase) GetExitArg() OptInt32 {
+	return s.ExitArg
+}
+
+// GetMode returns the value of Mode.
+func (s *ComputePhase) GetMode() OptInt8 {
+	return s.Mode
 }
 
 // SetSkipped sets the value of Skipped.
@@ -3979,6 +4184,16 @@ func (s *ComputePhase) SetSuccess(val OptBool) {
 	s.Success = val
 }
 
+// SetMsgStateUsed sets the value of MsgStateUsed.
+func (s *ComputePhase) SetMsgStateUsed(val OptBool) {
+	s.MsgStateUsed = val
+}
+
+// SetAccountActivated sets the value of AccountActivated.
+func (s *ComputePhase) SetAccountActivated(val OptBool) {
+	s.AccountActivated = val
+}
+
 // SetGasFees sets the value of GasFees.
 func (s *ComputePhase) SetGasFees(val OptInt64) {
 	s.GasFees = val
@@ -3989,6 +4204,16 @@ func (s *ComputePhase) SetGasUsed(val OptInt64) {
 	s.GasUsed = val
 }
 
+// SetGasCredit sets the value of GasCredit.
+func (s *ComputePhase) SetGasCredit(val OptInt64) {
+	s.GasCredit = val
+}
+
+// SetGasLimit sets the value of GasLimit.
+func (s *ComputePhase) SetGasLimit(val OptInt64) {
+	s.GasLimit = val
+}
+
 // SetVMSteps sets the value of VMSteps.
 func (s *ComputePhase) SetVMSteps(val OptUint32) {
 	s.VMSteps = val
@@ -3997,6 +4222,16 @@ func (s *ComputePhase) SetVMSteps(val OptUint32) {
 // SetExitCode sets the value of ExitCode.
 func (s *ComputePhase) SetExitCode(val OptInt32) {
 	s.ExitCode = val
+}
+
+// SetExitArg sets the value of ExitArg.
+func (s *ComputePhase) SetExitArg(val OptInt32) {
+	s.ExitArg = val
+}
+
+// SetMode sets the value of Mode.
+func (s *ComputePhase) SetMode(val OptInt8) {
+	s.Mode = val
 }
 
 // Ref: #/components/schemas/ComputeSkipReason
@@ -10377,6 +10612,52 @@ func (o OptBool) Or(d bool) bool {
 	return d
 }
 
+// NewOptBouncePhase returns new OptBouncePhase with value set to v.
+func NewOptBouncePhase(v BouncePhase) OptBouncePhase {
+	return OptBouncePhase{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptBouncePhase is optional BouncePhase.
+type OptBouncePhase struct {
+	Value BouncePhase
+	Set   bool
+}
+
+// IsSet returns true if OptBouncePhase was set.
+func (o OptBouncePhase) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptBouncePhase) Reset() {
+	var v BouncePhase
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptBouncePhase) SetTo(v BouncePhase) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptBouncePhase) Get() (v BouncePhase, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptBouncePhase) Or(d BouncePhase) BouncePhase {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptBouncePhaseType returns new OptBouncePhaseType with value set to v.
 func NewOptBouncePhaseType(v BouncePhaseType) OptBouncePhaseType {
 	return OptBouncePhaseType{
@@ -11245,6 +11526,52 @@ func (o OptInt64) Get() (v int64, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptInt64) Or(d int64) int64 {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptInt8 returns new OptInt8 with value set to v.
+func NewOptInt8(v int8) OptInt8 {
+	return OptInt8{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptInt8 is optional int8.
+type OptInt8 struct {
+	Value int8
+	Set   bool
+}
+
+// IsSet returns true if OptInt8 was set.
+func (o OptInt8) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptInt8) Reset() {
+	var v int8
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptInt8) SetTo(v int8) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptInt8) Get() (v int8, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptInt8) Or(d int8) int8 {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -14269,6 +14596,7 @@ type Transaction struct {
 	CreditPhase     OptCreditPhase     `json:"credit_phase"`
 	ActionPhase     OptActionPhase     `json:"action_phase"`
 	BouncePhase     OptBouncePhaseType `json:"bounce_phase"`
+	Bounce          OptBouncePhase     `json:"bounce"`
 	Aborted         bool               `json:"aborted"`
 	Destroyed       bool               `json:"destroyed"`
 }
@@ -14376,6 +14704,11 @@ func (s *Transaction) GetActionPhase() OptActionPhase {
 // GetBouncePhase returns the value of BouncePhase.
 func (s *Transaction) GetBouncePhase() OptBouncePhaseType {
 	return s.BouncePhase
+}
+
+// GetBounce returns the value of Bounce.
+func (s *Transaction) GetBounce() OptBouncePhase {
+	return s.Bounce
 }
 
 // GetAborted returns the value of Aborted.
@@ -14491,6 +14824,11 @@ func (s *Transaction) SetActionPhase(val OptActionPhase) {
 // SetBouncePhase sets the value of BouncePhase.
 func (s *Transaction) SetBouncePhase(val OptBouncePhaseType) {
 	s.BouncePhase = val
+}
+
+// SetBounce sets the value of Bounce.
+func (s *Transaction) SetBounce(val OptBouncePhase) {
+	s.Bounce = val
 }
 
 // SetAborted sets the value of Aborted.

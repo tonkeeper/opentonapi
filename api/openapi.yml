@@ -3157,6 +3157,29 @@ components:
         - TrPhaseBounceNegfunds
         - TrPhaseBounceNofunds
         - TrPhaseBounceOk
+    BouncePhase:
+      type: object
+      required:
+        - bounce_type
+      properties:
+        bounce_type:
+          $ref: '#/components/schemas/BouncePhaseType'
+        msg_size_cells:
+          type: integer
+          format: int64
+        msg_size_bits:
+          type: integer
+          format: int64
+        req_fwd_fees:
+          type: integer
+          format: int64
+        msg_fees:
+          type: integer
+          format: int64
+        fwd_fees:
+          type: integer
+          format: int64
+
     ComputePhase:
       type: object
       required:
@@ -3170,11 +3193,25 @@ components:
         success:
           type: boolean
           example: true
+        msg_state_used:
+          type: boolean
+          example: true
+        account_activated:
+          type: boolean
+          example: true
         gas_fees:
           type: integer
           format: int64
           example: 1000
         gas_used:
+          type: integer
+          format: int64
+          example: 10000
+        gas_credit:
+          type: integer
+          format: int64
+          example: 10000
+        gas_limit:
           type: integer
           format: int64
           example: 10000
@@ -3185,6 +3222,14 @@ components:
         exit_code:
           type: integer
           format: int32
+          example: 0
+        exit_arg:
+          type: integer
+          format: int32
+          example: 0
+        mode:
+          type: integer
+          format: int8
           example: 0
     StoragePhase:
       type: object
@@ -3220,15 +3265,44 @@ components:
       type: object
       required:
         - success
+        - valid
+        - no_funds
+        - status_change
+        - result_code
+        - result_arg
         - total_actions
+        - spec_actions
         - skipped_actions
         - fwd_fees
         - total_fees
+        - msgs_created
+        - total_msg_size_cells
+        - total_msg_size_bits
       properties:
         success:
           type: boolean
           example: true
+        valid:
+          type: boolean
+          example: true
+        no_funds:
+          type: boolean
+          example: true
+        status_change:
+          $ref: '#/components/schemas/AccStatusChange'
+        result_code:
+          type: integer
+          format: int32
+          example: 5
+        result_arg:
+          type: integer
+          format: int32
+          example: 5
         total_actions:
+          type: integer
+          format: int32
+          example: 5
+        spec_actions:
           type: integer
           format: int32
           example: 5
@@ -3241,6 +3315,18 @@ components:
           format: int64
           example: 1000
         total_fees:
+          type: integer
+          format: int64
+          example: 1000
+        msgs_created:
+          type: integer
+          format: int16
+          example: 1000
+        total_msg_size_cells:
+          type: integer
+          format: int64
+          example: 3
+        total_msg_size_bits:
           type: integer
           format: int64
           example: 1000
@@ -3320,7 +3406,10 @@ components:
         action_phase:
           $ref: '#/components/schemas/ActionPhase'
         bounce_phase:
+          deprecated: true
           $ref: '#/components/schemas/BouncePhaseType'
+        bounce:
+          $ref: '#/components/schemas/BouncePhase'
         aborted:
           type: boolean
           example: true
