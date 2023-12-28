@@ -822,7 +822,7 @@ func convertValidatorSet(set tlb.ValidatorsSet) oas.OptValidatorsSet {
 		l = set.Validators.List.Values()
 	} else {
 		l = set.ValidatorsExt.List.Values()
-		s.TotalWeight = oas.NewOptInt64(int64(set.ValidatorsExt.TotalWeight))
+		s.TotalWeight = oas.NewOptString(fmt.Sprintf("%d", int64(set.ValidatorsExt.TotalWeight)))
 	}
 	for _, d := range l {
 		item := oas.ValidatorsSetListItem{

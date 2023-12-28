@@ -3655,8 +3655,8 @@ components:
         main:
           type: integer
         total_weight:
-          type: integer
-          format: int64
+          type: string
+          example: "1152921504606846800"
         list:
           type: array
           items:

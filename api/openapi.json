@@ -5024,8 +5024,8 @@
       "type": "integer"
      },
      "total_weight": {
-      "format": "int64",
-      "type": "integer"
+      "example": "1152921504606846800",
+      "type": "string"
      },
      "utime_since": {
       "type": "integer"

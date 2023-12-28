@@ -14866,7 +14866,7 @@ type ValidatorsSet struct {
 	UtimeUntil  int                     `json:"utime_until"`
 	Total       int                     `json:"total"`
 	Main        int                     `json:"main"`
-	TotalWeight OptInt64                `json:"total_weight"`
+	TotalWeight OptString               `json:"total_weight"`
 	List        []ValidatorsSetListItem `json:"list"`
 }
 
@@ -14891,7 +14891,7 @@ func (s *ValidatorsSet) GetMain() int {
 }
 
 // GetTotalWeight returns the value of TotalWeight.
-func (s *ValidatorsSet) GetTotalWeight() OptInt64 {
+func (s *ValidatorsSet) GetTotalWeight() OptString {
 	return s.TotalWeight
 }
 
@@ -14921,7 +14921,7 @@ func (s *ValidatorsSet) SetMain(val int) {
 }
 
 // SetTotalWeight sets the value of TotalWeight.
-func (s *ValidatorsSet) SetTotalWeight(val OptInt64) {
+func (s *ValidatorsSet) SetTotalWeight(val OptString) {
 	s.TotalWeight = val
 }
 

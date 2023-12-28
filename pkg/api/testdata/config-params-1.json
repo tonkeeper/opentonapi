@@ -258,7 +258,7 @@
      "utime_until": 1698385672,
      "total": 322,
      "main": 100,
-     "total_weight": 1152921504606846813,
+     "total_weight": "1152921504606846813",
      "list": [
        {
          "public_key": "173dd51384ae444912382b94ad824596d36fc83788cc4f09d9f2f02eae5cc9ee",
@@ -1877,7 +1877,7 @@
      "utime_until": 1698451208,
      "total": 316,
      "main": 100,
-     "total_weight": 1152921504606846821,
+     "total_weight": "1152921504606846821",
      "list": [
        {
          "public_key": "71207e97efef4bf155b77795525636602d6fb31c2bdd0aec485200199db9a0df",
