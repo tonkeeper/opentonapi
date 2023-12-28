@@ -12,12 +12,14 @@ import (
 
 	"github.com/shopspring/decimal"
 	"github.com/shurcooL/graphql"
-	"github.com/tonkeeper/opentonapi/pkg/oas"
-	"github.com/tonkeeper/opentonapi/pkg/references"
 	"github.com/tonkeeper/tongo"
 	"go.uber.org/zap"
 	"golang.org/x/exp/maps"
 	"golang.org/x/exp/slices"
+
+	"github.com/tonkeeper/opentonapi/pkg/cache"
+	"github.com/tonkeeper/opentonapi/pkg/oas"
+	"github.com/tonkeeper/opentonapi/pkg/references"
 )
 
 // KnownAddress represents additional manually crafted information about a particular account in the blockchain.
@@ -79,6 +81,7 @@ type Options struct {
 }
 
 type addresser interface {
+	IsWallet(a tongo.AccountID) (bool, error)
 	GetAddress(a tongo.AccountID) (KnownAddress, bool)
 	SearchAttachedAccounts(prefix string) []AttachedAccount
 }
@@ -91,12 +94,14 @@ func WithAdditionalAddressesSource(a addresser) Option {
 
 // Book holds information about known accounts, jettons, NFT collections manually crafted by the tonkeeper team and the community.
 type Book struct {
-	mu          sync.RWMutex
-	addresses   map[tongo.AccountID]KnownAddress
-	collections map[tongo.AccountID]KnownCollection
-	jettons     map[tongo.AccountID]KnownJetton
-	tfPools     map[tongo.AccountID]TFPoolInfo
-	addressers  []addresser
+	addressers []addresser
+
+	mu              sync.RWMutex
+	addresses       map[tongo.AccountID]KnownAddress
+	collections     map[tongo.AccountID]KnownCollection
+	jettons         map[tongo.AccountID]KnownJetton
+	tfPools         map[tongo.AccountID]TFPoolInfo
+	walletsResolved cache.Cache[tongo.AccountID, bool]
 }
 
 type TFPoolInfo struct {
@@ -183,6 +188,22 @@ func (b *Book) TFPools() []tongo.AccountID {
 	return maps.Keys(b.tfPools)
 }
 
+// IsWallet returns true if the given address is a wallet.
+func (b *Book) IsWallet(addr tongo.AccountID) (bool, error) {
+	if wallet, ok := b.walletsResolved.Get(addr); ok {
+		return wallet, nil
+	}
+	for _, privateBook := range b.addressers {
+		isWallet, err := privateBook.IsWallet(addr)
+		if err != nil {
+			continue
+		}
+		b.walletsResolved.Set(addr, isWallet, cache.WithExpiration(time.Minute*15))
+		return isWallet, nil
+	}
+	return false, fmt.Errorf("failed to figure out if %v is a wallet", addr)
+}
+
 func NewAddressBook(logger *zap.Logger, addressPath, jettonPath, collectionPath string, opts ...Option) *Book {
 	var options Options
 	for _, opt := range opts {
@@ -194,11 +215,12 @@ func NewAddressBook(logger *zap.Logger, addressPath, jettonPath, collectionPath 
 	tfPools := make(map[tongo.AccountID]TFPoolInfo)
 
 	book := &Book{
-		addresses:   addresses,
-		collections: collections,
-		jettons:     jettons,
-		tfPools:     tfPools,
-		addressers:  options.addressers,
+		addresses:       addresses,
+		collections:     collections,
+		jettons:         jettons,
+		tfPools:         tfPools,
+		addressers:      options.addressers,
+		walletsResolved: cache.NewLRUCache[tongo.AccountID, bool](200_000, "is_wallet"),
 	}
 
 	go func() {
