@@ -5,8 +5,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"golang.org/x/exp/maps"
 	"net/http"
+
+	"golang.org/x/exp/maps"
 
 	"github.com/tonkeeper/tongo/contract/elector"
 	"github.com/tonkeeper/tongo/tvm"
@@ -412,12 +413,21 @@ func (h *Handler) GetBlockchainValidators(ctx context.Context) (*oas.Validators,
 		}
 
 		validatorSet := config.ConfigParam34.CurValidators
+		var pubKeys map[tlb.Bits256]struct{}
 		var utimeSince uint32
 		switch validatorSet.SumType {
 		case "Validators":
 			utimeSince = validatorSet.Validators.UtimeSince
+			pubKeys = make(map[tlb.Bits256]struct{}, len(validatorSet.Validators.List.Keys()))
+			for _, descr := range validatorSet.Validators.List.Values() {
+				pubKeys[descr.PubKey()] = struct{}{}
+			}
 		case "ValidatorsExt":
 			utimeSince = validatorSet.ValidatorsExt.UtimeSince
+			pubKeys = make(map[tlb.Bits256]struct{}, len(validatorSet.ValidatorsExt.List.Keys()))
+			for _, descr := range validatorSet.ValidatorsExt.List.Values() {
+				pubKeys[descr.PubKey()] = struct{}{}
+			}
 		default:
 			return nil, toError(http.StatusInternalServerError, fmt.Errorf("unknown validator set type %v", validatorSet.SumType))
 		}
@@ -434,6 +444,11 @@ func (h *Handler) GetBlockchainValidators(ctx context.Context) (*oas.Validators,
 			Validators: make([]oas.Validator, 0, len(list.Validators)),
 		}
 		for _, v := range list.Validators {
+			// sometimes, participant_list_extended returns validators that are not in the current validator set,
+			// so we need to filter them out.
+			if _, ok := pubKeys[v.Pubkey]; !ok {
+				continue
+			}
 			validators.Validators = append(validators.Validators, oas.Validator{
 				Stake:       int64(v.Stake),
 				MaxFactor:   int64(v.MaxFactor),

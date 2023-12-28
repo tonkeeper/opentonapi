@@ -22,7 +22,7 @@ require (
 	github.com/sourcegraph/conc v0.3.0
 	github.com/stretchr/testify v1.8.4
 	github.com/tonkeeper/scam_backoffice_rules v0.0.0-20231229114100-e5f223eff6e0
-	github.com/tonkeeper/tongo v1.4.3-0.20231228103052-574fa118b3f5
+	github.com/tonkeeper/tongo v1.4.3-0.20240111224308-6e99df0b7ea1
 	go.opentelemetry.io/otel v1.19.0
 	go.opentelemetry.io/otel/metric v1.19.0
 	go.opentelemetry.io/otel/trace v1.19.0
