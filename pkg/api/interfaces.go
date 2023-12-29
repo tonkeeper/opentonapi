@@ -144,6 +144,7 @@ type executor interface {
 // The information is stored in "https://github.com/tonkeeper/ton-assets/" and
 // is being maintained by the tonkeeper team and the community.
 type addressBook interface {
+	IsWallet(a tongo.AccountID) (bool, error)
 	GetAddressInfoByAddress(a tongo.AccountID) (addressbook.KnownAddress, bool) // todo: maybe rewrite to pointer
 	GetCollectionInfoByAddress(a tongo.AccountID) (addressbook.KnownCollection, bool)
 	GetJettonInfoByAddress(a tongo.AccountID) (addressbook.KnownJetton, bool)
