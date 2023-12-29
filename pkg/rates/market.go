@@ -176,8 +176,8 @@ func convertedTonBitFinexResponse(respBody io.ReadCloser) (float64, error) {
 		log.Errorf("[convertedTonBitFinexResponse] empty data")
 		return 0, fmt.Errorf("empty data")
 	}
-	if len(prices) >= 9 { // last market price
-		return prices[9], nil
+	if len(prices) >= 6 { // last market price
+		return prices[6], nil
 	}
 	return prices[0], nil
 }
