@@ -2,6 +2,7 @@ package api
 
 import (
 	"fmt"
+
 	"github.com/tonkeeper/tongo/abi"
 
 	"github.com/tonkeeper/opentonapi/pkg/addressbook"
@@ -54,18 +55,18 @@ func convertToAccount(account *core.Account, ab *addressbook.KnownAddress, state
 	if state.CheckIsSuspended(account.AccountAddress) {
 		acc.IsSuspended.SetTo(true)
 	}
+	for _, i := range account.Interfaces {
+		if i.Implements(abi.Wallet) {
+			acc.IsWallet = true
+			break
+		}
+	}
 	if ab == nil {
 		return acc
 	}
 	acc.IsScam = oas.NewOptBool(ab.IsScam)
 	if len(ab.Name) > 0 {
 		acc.Name = oas.NewOptString(ab.Name)
-	}
-	for _, i := range account.Interfaces {
-		if i.Implements(abi.Wallet) {
-			acc.IsWallet = true
-			break
-		}
 	}
 	if len(ab.Image) > 0 {
 		acc.Icon = oas.NewOptString(ab.Image)
