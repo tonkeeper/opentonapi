@@ -444,7 +444,7 @@ func convertedDedustPoolResponse(storage storage, tonPrice float64, respBody io.
 		if err != nil {
 			continue
 		}
-		if firstReserve < float64(100*ton.OneTON) || secondReserve < float64(100*ton.OneTON) {
+		if firstReserve < float64(100*ton.OneTON) {
 			continue
 		}
 		secondReserveDecimals := float64(9)
