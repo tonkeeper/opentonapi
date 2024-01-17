@@ -2,6 +2,7 @@ package bath
 
 import (
 	"fmt"
+
 	"github.com/tonkeeper/opentonapi/internal/g"
 	"github.com/tonkeeper/tongo/abi"
 )
@@ -26,7 +27,7 @@ var NftTransferNotifyStraw = Straw[BubbleNftTransfer]{
 }
 
 var NftTransferStraw = Straw[BubbleNftTransfer]{
-	CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.NftTransferMsgOp)},
+	CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.NftTransferMsgOp), HasInterface(abi.NftItem)},
 	Builder: func(newAction *BubbleNftTransfer, bubble *Bubble) error {
 		tx := bubble.Info.(BubbleTx)
 		transfer := tx.decodedBody.Value.(abi.NftTransferMsgBody)
