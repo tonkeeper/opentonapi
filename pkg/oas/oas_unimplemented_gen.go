@@ -170,6 +170,16 @@ func (UnimplementedHandler) GetAccountInscriptions(ctx context.Context, params G
 	return r, ht.ErrNotImplemented
 }
 
+// GetAccountInscriptionsHistory implements getAccountInscriptionsHistory operation.
+//
+// Get the transfer inscriptions history for account. It's experimental API and can be dropped in the
+// future.
+//
+// GET /v2/experimental/accounts/{account_id}/inscriptions/history
+func (UnimplementedHandler) GetAccountInscriptionsHistory(ctx context.Context, params GetAccountInscriptionsHistoryParams) (r *AccountEvents, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // GetAccountJettonHistoryByID implements getAccountJettonHistoryByID operation.
 //
 // Get the transfer jetton history for account and jetton.
@@ -451,8 +461,8 @@ func (UnimplementedHandler) GetEvent(ctx context.Context, params GetEventParams)
 
 // GetInscriptionOpTemplate implements getInscriptionOpTemplate operation.
 //
-// Return comment for making operation with instrospection. please don't use it if you don't know
-// what you are doing.
+// Return comment for making operation with inscription. please don't use it if you don't know what
+// you are doing.
 //
 // GET /v2/experimental/inscriptions/op-template
 func (UnimplementedHandler) GetInscriptionOpTemplate(ctx context.Context, params GetInscriptionOpTemplateParams) (r *GetInscriptionOpTemplateOK, _ error) {

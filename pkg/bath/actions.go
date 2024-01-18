@@ -3,9 +3,10 @@ package bath
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/tonkeeper/opentonapi/pkg/core"
 	"math/big"
 	"reflect"
+
+	"github.com/tonkeeper/opentonapi/pkg/core"
 
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
@@ -32,6 +33,8 @@ const (
 	JettonSwap            ActionType = "JettonSwap"
 	AuctionBid            ActionType = "AuctionBid"
 	DomainRenew           ActionType = "DomainRenew"
+	InscriptionMint       ActionType = "InscriptionMint"
+	InscriptionTransfer   ActionType = "InscriptionTransfer"
 
 	RefundDnsTg   RefundType = "DNS.tg"
 	RefundDnsTon  RefundType = "DNS.ton"
@@ -78,6 +81,8 @@ type (
 		WithdrawStakeRequest  *WithdrawStakeRequestAction  `json:",omitempty"`
 		JettonSwap            *JettonSwapAction            `json:",omitempty"`
 		DnsRenew              *DnsRenewAction              `json:",omitempty"`
+		InscriptionMint       *InscriptionMintAction       `json:",omitempty"`
+		InscriptionTransfer   *InscriptionTransferAction   `json:",omitempty"`
 		Success               bool
 		Type                  ActionType
 	}
@@ -247,7 +252,7 @@ func (a Action) ContributeToExtra(account tongo.AccountID) int64 {
 		return 0
 	}
 	switch a.Type {
-	case NftItemTransfer, ContractDeploy, UnSubscription, JettonMint, JettonBurn, WithdrawStakeRequest, DomainRenew: // actions without extra
+	case NftItemTransfer, ContractDeploy, UnSubscription, JettonMint, JettonBurn, WithdrawStakeRequest, DomainRenew, InscriptionMint, InscriptionTransfer: // actions without extra
 		return 0
 	case TonTransfer:
 		return detectDirection(account, a.TonTransfer.Sender, a.TonTransfer.Recipient, a.TonTransfer.Amount)

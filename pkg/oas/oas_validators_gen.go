@@ -443,6 +443,42 @@ func (s *Action) Validate() error {
 		})
 	}
 	if err := func() error {
+		if value, ok := s.InscriptionTransfer.Get(); ok {
+			if err := func() error {
+				if err := value.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "InscriptionTransfer",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if value, ok := s.InscriptionMint.Get(); ok {
+			if err := func() error {
+				if err := value.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "InscriptionMint",
+			Error: err,
+		})
+	}
+	if err := func() error {
 		if err := s.SimplePreview.Validate(); err != nil {
 			return err
 		}
@@ -526,6 +562,10 @@ func (s ActionType) Validate() error {
 	case "ElectionsDepositStake":
 		return nil
 	case "DomainRenew":
+		return nil
+	case "InscriptionTransfer":
+		return nil
+	case "InscriptionMint":
 		return nil
 	case "Unknown":
 		return nil
@@ -2437,6 +2477,66 @@ func (s *InscriptionBalances) Validate() error {
 		return &validate.Error{Fields: failures}
 	}
 	return nil
+}
+
+func (s *InscriptionMintAction) Validate() error {
+	var failures []validate.FieldError
+	if err := func() error {
+		if err := s.Type.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "type",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s InscriptionMintActionType) Validate() error {
+	switch s {
+	case "ton20":
+		return nil
+	case "gram20":
+		return nil
+	default:
+		return errors.Errorf("invalid value: %v", s)
+	}
+}
+
+func (s *InscriptionTransferAction) Validate() error {
+	var failures []validate.FieldError
+	if err := func() error {
+		if err := s.Type.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "type",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s InscriptionTransferActionType) Validate() error {
+	switch s {
+	case "ton20":
+		return nil
+	case "gram20":
+		return nil
+	default:
+		return errors.Errorf("invalid value: %v", s)
+	}
 }
 
 func (s *JettonBalance) Validate() error {

@@ -919,6 +919,12 @@
      "ElectionsRecoverStake": {
       "$ref": "#/components/schemas/ElectionsRecoverStakeAction"
      },
+     "InscriptionMint": {
+      "$ref": "#/components/schemas/InscriptionMintAction"
+     },
+     "InscriptionTransfer": {
+      "$ref": "#/components/schemas/InscriptionTransferAction"
+     },
      "JettonBurn": {
       "$ref": "#/components/schemas/JettonBurnAction"
      },
@@ -986,6 +992,8 @@
        "ElectionsRecoverStake",
        "ElectionsDepositStake",
        "DomainRenew",
+       "InscriptionTransfer",
+       "InscriptionMint",
        "Unknown"
       ],
       "example": "TonTransfer",
@@ -3099,6 +3107,86 @@
     },
     "required": [
      "inscriptions"
+    ],
+    "type": "object"
+   },
+   "InscriptionMintAction": {
+    "properties": {
+     "amount": {
+      "description": "amount in minimal particles",
+      "example": "123456789",
+      "type": "string"
+     },
+     "decimals": {
+      "example": 9,
+      "type": "integer"
+     },
+     "recipient": {
+      "$ref": "#/components/schemas/AccountAddress"
+     },
+     "ticker": {
+      "example": "nano",
+      "type": "string"
+     },
+     "type": {
+      "enum": [
+       "ton20",
+       "gram20"
+      ],
+      "example": "ton20",
+      "type": "string"
+     }
+    },
+    "required": [
+     "type",
+     "ticker",
+     "recipient",
+     "amount",
+     "decimals"
+    ],
+    "type": "object"
+   },
+   "InscriptionTransferAction": {
+    "properties": {
+     "amount": {
+      "description": "amount in minimal particles",
+      "example": "123456789",
+      "type": "string"
+     },
+     "comment": {
+      "example": "Hi! This is your salary. \nFrom accounting with love.",
+      "type": "string"
+     },
+     "decimals": {
+      "example": 9,
+      "type": "integer"
+     },
+     "recipient": {
+      "$ref": "#/components/schemas/AccountAddress"
+     },
+     "sender": {
+      "$ref": "#/components/schemas/AccountAddress"
+     },
+     "ticker": {
+      "example": "nano",
+      "type": "string"
+     },
+     "type": {
+      "enum": [
+       "ton20",
+       "gram20"
+      ],
+      "example": "ton20",
+      "type": "string"
+     }
+    },
+    "required": [
+     "sender",
+     "recipient",
+     "amount",
+     "type",
+     "ticker",
+     "decimals"
     ],
     "type": "object"
    },
@@ -6946,9 +7034,63 @@
     ]
    }
   },
+  "/v2/experimental/accounts/{account_id}/inscriptions/history": {
+   "get": {
+    "description": "Get the transfer inscriptions history for account. It's experimental API and can be dropped in the future.",
+    "operationId": "getAccountInscriptionsHistory",
+    "parameters": [
+     {
+      "$ref": "#/components/parameters/accountIDParameter"
+     },
+     {
+      "$ref": "#/components/parameters/i18n"
+     },
+     {
+      "description": "omit this parameter to get last events",
+      "in": "query",
+      "name": "before_lt",
+      "required": false,
+      "schema": {
+       "example": 25758317000002,
+       "format": "int64",
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "limit",
+      "required": false,
+      "schema": {
+       "default": 100,
+       "example": 100,
+       "maximum": 1000,
+       "type": "integer"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/AccountEvents"
+        }
+       }
+      },
+      "description": "account inscriptions history"
+     },
+     "default": {
+      "$ref": "#/components/responses/Error"
+     }
+    },
+    "tags": [
+     "Inscriptions"
+    ]
+   }
+  },
   "/v2/experimental/inscriptions/op-template": {
    "get": {
-    "description": "return comment for making operation with instrospection. please don't use it if you don't know what you are doing",
+    "description": "return comment for making operation with inscription. please don't use it if you don't know what you are doing",
     "operationId": "getInscriptionOpTemplate",
     "parameters": [
      {
