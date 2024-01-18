@@ -615,6 +615,6 @@ func (c *LiteStorage) GetInscriptionBalancesByAccount(ctx context.Context, a ton
 	return nil, fmt.Errorf("not implemented") //and cannot be without full blockckchain index
 }
 
-func (c *LiteStorage) GetInscriptionsHistoryByAccount(ctx context.Context, a ton.AccountID, beforeLt int64, limit int) (map[ton.Bits256][]bath.Action, error) {
+func (c *LiteStorage) GetInscriptionsHistoryByAccount(ctx context.Context, a ton.AccountID, ticker *string, beforeLt int64, limit int) (map[ton.Bits256][]bath.Action, error) {
 	return nil, fmt.Errorf("not implemented") //and cannot be without full blockckchain index
 }

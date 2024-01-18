@@ -1279,6 +1279,46 @@ paths:
                     $ref: '#/components/schemas/AccountEvents'
             'default':
               $ref: '#/components/responses/Error'
+  /v2/experimental/accounts/{account_id}/inscriptions/{ticker}/history:
+    get:
+        description: Get the transfer inscriptions history for account. It's experimental API and can be dropped in the future.
+        operationId: getAccountInscriptionsHistoryByTicker
+        tags:
+            - Inscriptions
+        parameters:
+            - $ref: '#/components/parameters/accountIDParameter'
+            - $ref: '#/components/parameters/i18n'
+            - name: ticker
+              in: path
+              required: true
+              schema:
+                type: string
+                example: "nano"
+            - name: before_lt
+              in: query
+              description: "omit this parameter to get last events"
+              required: false
+              schema:
+                type: integer
+                format: int64
+                example: 25758317000002
+            - name: limit
+              in: query
+              required: false
+              schema:
+                type: integer
+                example: 100
+                default: 100
+                maximum: 1000
+        responses:
+            '200':
+              description: account inscriptions history
+              content:
+                application/json:
+                  schema:
+                    $ref: '#/components/schemas/AccountEvents'
+            'default':
+              $ref: '#/components/responses/Error'
   /v2/experimental/inscriptions/op-template:
     get:
       description: return comment for making operation with inscription. please don't use it if you don't know what you are doing

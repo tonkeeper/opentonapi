@@ -7088,6 +7088,69 @@
     ]
    }
   },
+  "/v2/experimental/accounts/{account_id}/inscriptions/{ticker}/history": {
+   "get": {
+    "description": "Get the transfer inscriptions history for account. It's experimental API and can be dropped in the future.",
+    "operationId": "getAccountInscriptionsHistoryByTicker",
+    "parameters": [
+     {
+      "$ref": "#/components/parameters/accountIDParameter"
+     },
+     {
+      "$ref": "#/components/parameters/i18n"
+     },
+     {
+      "in": "path",
+      "name": "ticker",
+      "required": true,
+      "schema": {
+       "example": "nano",
+       "type": "string"
+      }
+     },
+     {
+      "description": "omit this parameter to get last events",
+      "in": "query",
+      "name": "before_lt",
+      "required": false,
+      "schema": {
+       "example": 25758317000002,
+       "format": "int64",
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "limit",
+      "required": false,
+      "schema": {
+       "default": 100,
+       "example": 100,
+       "maximum": 1000,
+       "type": "integer"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/AccountEvents"
+        }
+       }
+      },
+      "description": "account inscriptions history"
+     },
+     "default": {
+      "$ref": "#/components/responses/Error"
+     }
+    },
+    "tags": [
+     "Inscriptions"
+    ]
+   }
+  },
   "/v2/experimental/inscriptions/op-template": {
    "get": {
     "description": "return comment for making operation with inscription. please don't use it if you don't know what you are doing",

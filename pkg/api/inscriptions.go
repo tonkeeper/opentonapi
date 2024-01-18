@@ -78,7 +78,7 @@ func (h *Handler) GetAccountInscriptionsHistory(ctx context.Context, params oas.
 	if params.BeforeLt.Set {
 		beforeLT = params.BeforeLt.Value
 	}
-	events, err := h.storage.GetInscriptionsHistoryByAccount(ctx, account.ID, beforeLT, params.Limit.Value)
+	events, err := h.storage.GetInscriptionsHistoryByAccount(ctx, account.ID, nil, beforeLT, params.Limit.Value)
 	if errors.Is(err, core.ErrEntityNotFound) {
 		return &oas.AccountEvents{}, nil
 	}
@@ -86,7 +86,40 @@ func (h *Handler) GetAccountInscriptionsHistory(ctx context.Context, params oas.
 		return nil, toError(http.StatusInternalServerError, err)
 	}
 	var resp oas.AccountEvents
-	fmt.Println(events)
+	for hash, actions := range events {
+		event := oas.AccountEvent{
+			EventID: hash.Hex(),
+			Account: convertAccountAddress(account.ID, h.addressBook),
+		}
+		for _, a := range actions {
+			action, _, err := h.convertAction(ctx, &account.ID, a, params.AcceptLanguage)
+			if err != nil {
+				return nil, toError(http.StatusInternalServerError, err)
+			}
+			event.Actions = append(event.Actions, action)
+		}
+		resp.Events = append(resp.Events, event)
+	}
+	return &resp, nil
+}
+
+func (h *Handler) GetAccountInscriptionsHistoryByTicker(ctx context.Context, params oas.GetAccountInscriptionsHistoryByTickerParams) (*oas.AccountEvents, error) {
+	account, err := tongo.ParseAddress(params.AccountID)
+	if err != nil {
+		return nil, toError(http.StatusBadRequest, err)
+	}
+	beforeLT := int64(1 << 62)
+	if params.BeforeLt.Set {
+		beforeLT = params.BeforeLt.Value
+	}
+	events, err := h.storage.GetInscriptionsHistoryByAccount(ctx, account.ID, &params.Ticker, beforeLT, params.Limit.Value)
+	if errors.Is(err, core.ErrEntityNotFound) {
+		return &oas.AccountEvents{}, nil
+	}
+	if err != nil {
+		return nil, toError(http.StatusInternalServerError, err)
+	}
+	var resp oas.AccountEvents
 	for hash, actions := range events {
 		event := oas.AccountEvent{
 			EventID: hash.Hex(),

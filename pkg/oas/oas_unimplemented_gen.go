@@ -180,6 +180,16 @@ func (UnimplementedHandler) GetAccountInscriptionsHistory(ctx context.Context, p
 	return r, ht.ErrNotImplemented
 }
 
+// GetAccountInscriptionsHistoryByTicker implements getAccountInscriptionsHistoryByTicker operation.
+//
+// Get the transfer inscriptions history for account. It's experimental API and can be dropped in the
+// future.
+//
+// GET /v2/experimental/accounts/{account_id}/inscriptions/{ticker}/history
+func (UnimplementedHandler) GetAccountInscriptionsHistoryByTicker(ctx context.Context, params GetAccountInscriptionsHistoryByTickerParams) (r *AccountEvents, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // GetAccountJettonHistoryByID implements getAccountJettonHistoryByID operation.
 //
 // Get the transfer jetton history for account and jetton.

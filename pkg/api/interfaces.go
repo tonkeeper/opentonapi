@@ -99,7 +99,7 @@ type storage interface {
 	TrimmedConfigBase64() (string, error)
 
 	GetInscriptionBalancesByAccount(ctx context.Context, a ton.AccountID) ([]core.InscriptionBalance, error)
-	GetInscriptionsHistoryByAccount(ctx context.Context, a ton.AccountID, beforeLt int64, limit int) (map[ton.Bits256][]bath.Action, error)
+	GetInscriptionsHistoryByAccount(ctx context.Context, a ton.AccountID, ticker *string, beforeLt int64, limit int) (map[ton.Bits256][]bath.Action, error)
 
 	liteStorageRaw
 }

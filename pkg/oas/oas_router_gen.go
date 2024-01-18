@@ -1287,25 +1287,72 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 								return
 							}
 							switch elem[0] {
-							case '/': // Prefix: "/history"
-								if l := len("/history"); len(elem) >= l && elem[0:l] == "/history" {
+							case '/': // Prefix: "/"
+								if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
 									elem = elem[l:]
 								} else {
 									break
 								}
 
 								if len(elem) == 0 {
-									// Leaf node.
-									switch r.Method {
-									case "GET":
-										s.handleGetAccountInscriptionsHistoryRequest([1]string{
-											args[0],
-										}, elemIsEscaped, w, r)
-									default:
-										s.notAllowed(w, r, "GET")
+									break
+								}
+								switch elem[0] {
+								case 'h': // Prefix: "history"
+									if l := len("history"); len(elem) >= l && elem[0:l] == "history" {
+										elem = elem[l:]
+									} else {
+										break
 									}
 
-									return
+									if len(elem) == 0 {
+										// Leaf node.
+										switch r.Method {
+										case "GET":
+											s.handleGetAccountInscriptionsHistoryRequest([1]string{
+												args[0],
+											}, elemIsEscaped, w, r)
+										default:
+											s.notAllowed(w, r, "GET")
+										}
+
+										return
+									}
+								}
+								// Param: "ticker"
+								// Match until "/"
+								idx := strings.IndexByte(elem, '/')
+								if idx < 0 {
+									idx = len(elem)
+								}
+								args[1] = elem[:idx]
+								elem = elem[idx:]
+
+								if len(elem) == 0 {
+									break
+								}
+								switch elem[0] {
+								case '/': // Prefix: "/history"
+									if l := len("/history"); len(elem) >= l && elem[0:l] == "/history" {
+										elem = elem[l:]
+									} else {
+										break
+									}
+
+									if len(elem) == 0 {
+										// Leaf node.
+										switch r.Method {
+										case "GET":
+											s.handleGetAccountInscriptionsHistoryByTickerRequest([2]string{
+												args[0],
+												args[1],
+											}, elemIsEscaped, w, r)
+										default:
+											s.notAllowed(w, r, "GET")
+										}
+
+										return
+									}
 								}
 							}
 						}
@@ -3870,26 +3917,74 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 								}
 							}
 							switch elem[0] {
-							case '/': // Prefix: "/history"
-								if l := len("/history"); len(elem) >= l && elem[0:l] == "/history" {
+							case '/': // Prefix: "/"
+								if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
 									elem = elem[l:]
 								} else {
 									break
 								}
 
 								if len(elem) == 0 {
-									switch method {
-									case "GET":
-										// Leaf: GetAccountInscriptionsHistory
-										r.name = "GetAccountInscriptionsHistory"
-										r.summary = ""
-										r.operationID = "getAccountInscriptionsHistory"
-										r.pathPattern = "/v2/experimental/accounts/{account_id}/inscriptions/history"
-										r.args = args
-										r.count = 1
-										return r, true
-									default:
-										return
+									break
+								}
+								switch elem[0] {
+								case 'h': // Prefix: "history"
+									if l := len("history"); len(elem) >= l && elem[0:l] == "history" {
+										elem = elem[l:]
+									} else {
+										break
+									}
+
+									if len(elem) == 0 {
+										switch method {
+										case "GET":
+											// Leaf: GetAccountInscriptionsHistory
+											r.name = "GetAccountInscriptionsHistory"
+											r.summary = ""
+											r.operationID = "getAccountInscriptionsHistory"
+											r.pathPattern = "/v2/experimental/accounts/{account_id}/inscriptions/history"
+											r.args = args
+											r.count = 1
+											return r, true
+										default:
+											return
+										}
+									}
+								}
+								// Param: "ticker"
+								// Match until "/"
+								idx := strings.IndexByte(elem, '/')
+								if idx < 0 {
+									idx = len(elem)
+								}
+								args[1] = elem[:idx]
+								elem = elem[idx:]
+
+								if len(elem) == 0 {
+									break
+								}
+								switch elem[0] {
+								case '/': // Prefix: "/history"
+									if l := len("/history"); len(elem) >= l && elem[0:l] == "/history" {
+										elem = elem[l:]
+									} else {
+										break
+									}
+
+									if len(elem) == 0 {
+										switch method {
+										case "GET":
+											// Leaf: GetAccountInscriptionsHistoryByTicker
+											r.name = "GetAccountInscriptionsHistoryByTicker"
+											r.summary = ""
+											r.operationID = "getAccountInscriptionsHistoryByTicker"
+											r.pathPattern = "/v2/experimental/accounts/{account_id}/inscriptions/{ticker}/history"
+											r.args = args
+											r.count = 2
+											return r, true
+										default:
+											return
+										}
 									}
 								}
 							}

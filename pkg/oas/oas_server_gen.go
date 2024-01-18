@@ -121,6 +121,13 @@ type Handler interface {
 	//
 	// GET /v2/experimental/accounts/{account_id}/inscriptions/history
 	GetAccountInscriptionsHistory(ctx context.Context, params GetAccountInscriptionsHistoryParams) (*AccountEvents, error)
+	// GetAccountInscriptionsHistoryByTicker implements getAccountInscriptionsHistoryByTicker operation.
+	//
+	// Get the transfer inscriptions history for account. It's experimental API and can be dropped in the
+	// future.
+	//
+	// GET /v2/experimental/accounts/{account_id}/inscriptions/{ticker}/history
+	GetAccountInscriptionsHistoryByTicker(ctx context.Context, params GetAccountInscriptionsHistoryByTickerParams) (*AccountEvents, error)
 	// GetAccountJettonHistoryByID implements getAccountJettonHistoryByID operation.
 	//
 	// Get the transfer jetton history for account and jetton.
