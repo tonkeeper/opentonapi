@@ -166,7 +166,7 @@ func NewHandler(logger *zap.Logger, opts ...Option) (*Handler, error) {
 		options.spamFilter = spam.NewNoOpSpamFilter()
 	}
 	if options.ratesSource == nil {
-		options.ratesSource = rates.Mock{Storage: options.storage}
+		options.ratesSource = rates.Mock{}
 	}
 	if options.executor == nil {
 		return nil, fmt.Errorf("executor is not configured")

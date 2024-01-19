@@ -1,7 +1,6 @@
 package rates
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -37,7 +36,7 @@ type Market struct {
 	ApiURL                string
 	TonPriceConverter     func(closer io.ReadCloser) (float64, error)
 	FiatPriceConverter    func(closer io.ReadCloser) map[string]float64
-	PoolResponseConverter func(storage storage, tonPrice float64, respBody io.ReadCloser) map[ton.AccountID]float64
+	PoolResponseConverter func(tonApiToken string, tonPrice float64, respBody io.ReadCloser) map[ton.AccountID]float64
 	DateUpdate            time.Time
 }
 
@@ -88,7 +87,7 @@ func (m *Mock) GetCurrentMarketsTonPrice() []Market {
 		},
 	}
 	for idx, market := range markets {
-		respBody, err := sendRequest(market.ApiURL)
+		respBody, err := sendRequest(market.ApiURL, "")
 		if err != nil {
 			continue
 		}
@@ -104,20 +103,30 @@ func (m *Mock) GetCurrentMarketsTonPrice() []Market {
 	return markets
 }
 
-func sendRequest(url string) (io.ReadCloser, error) {
-	resp, err := http.Get(url)
+func sendRequest(url, token string) (io.ReadCloser, error) {
+	req, err := http.NewRequest(http.MethodGet, url, nil)
+	req.Header.Set("Content-Type", "application/json")
+	if token != "" {
+		req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", token))
+	}
 	if err != nil {
-		log.Errorf("[sendRequest] failed to get market price: %v", url)
+		log.Errorf("[sendRequest] failed to send request: %v", url)
+		return nil, err
+	}
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		log.Errorf("[sendRequest] failed to send request: %v", url)
 		return nil, err
 	}
 	if resp.StatusCode != http.StatusOK {
-		log.Errorf("[sendRequest] failed to get market price: %v, %v", resp.StatusCode, url)
+		log.Errorf("[sendRequest] bad status code: %v, %v", resp.StatusCode, url)
 		return nil, fmt.Errorf("bad status code: %v", resp.StatusCode)
 	}
 	return resp.Body, nil
 }
 
 func convertedTonGateIOResponse(respBody io.ReadCloser) (float64, error) {
+	defer respBody.Close()
 	var data []struct {
 		Last string `json:"last"`
 	}
@@ -138,6 +147,7 @@ func convertedTonGateIOResponse(respBody io.ReadCloser) (float64, error) {
 }
 
 func convertedTonBybitResponse(respBody io.ReadCloser) (float64, error) {
+	defer respBody.Close()
 	var data struct {
 		RetMsg string `json:"retMsg"`
 		Result struct {
@@ -167,6 +177,7 @@ func convertedTonBybitResponse(respBody io.ReadCloser) (float64, error) {
 }
 
 func convertedTonBitFinexResponse(respBody io.ReadCloser) (float64, error) {
+	defer respBody.Close()
 	var prices []float64
 	if err := json.NewDecoder(respBody).Decode(&prices); err != nil {
 		log.Errorf("[convertedTonBitFinexResponse] failed to decode response: %v", err)
@@ -183,6 +194,7 @@ func convertedTonBitFinexResponse(respBody io.ReadCloser) (float64, error) {
 }
 
 func convertedTonKuCoinResponse(respBody io.ReadCloser) (float64, error) {
+	defer respBody.Close()
 	var data struct {
 		Success bool `json:"success"`
 		Data    []struct {
@@ -210,6 +222,7 @@ func convertedTonKuCoinResponse(respBody io.ReadCloser) (float64, error) {
 }
 
 func convertedTonOKXResponse(respBody io.ReadCloser) (float64, error) {
+	defer respBody.Close()
 	var data struct {
 		Code string `json:"code"`
 		Data []struct {
@@ -238,6 +251,7 @@ func convertedTonOKXResponse(respBody io.ReadCloser) (float64, error) {
 }
 
 func convertedTonHuobiResponse(respBody io.ReadCloser) (float64, error) {
+	defer respBody.Close()
 	var data struct {
 		Status string `json:"status"`
 		Tick   struct {
@@ -279,7 +293,7 @@ func getFiatPrices() map[string]float64 {
 	}
 	prices := make(map[string]float64)
 	for _, market := range markets {
-		respBody, err := sendRequest(market.ApiURL)
+		respBody, err := sendRequest(market.ApiURL, "")
 		if err != nil {
 			errorsCounter.WithLabelValues(market.Name).Inc()
 			continue
@@ -295,6 +309,7 @@ func getFiatPrices() map[string]float64 {
 }
 
 func convertedExchangerateFiatPricesResponse(respBody io.ReadCloser) map[string]float64 {
+	defer respBody.Close()
 	var data struct {
 		Rates map[string]float64 `json:"rates"`
 	}
@@ -310,6 +325,7 @@ func convertedExchangerateFiatPricesResponse(respBody io.ReadCloser) map[string]
 }
 
 func convertedCoinBaseFiatPricesResponse(respBody io.ReadCloser) map[string]float64 {
+	defer respBody.Close()
 	var data struct {
 		Data struct {
 			Rates map[string]string `json:"rates"`
@@ -328,7 +344,7 @@ func convertedCoinBaseFiatPricesResponse(respBody io.ReadCloser) map[string]floa
 	return prices
 }
 
-func getPools(tonPrice float64, storage storage) map[ton.AccountID]float64 {
+func getPools(tonPrice float64, tonApiToken string) map[ton.AccountID]float64 {
 	markets := []Market{
 		{
 			Name:                  dedust,
@@ -348,12 +364,12 @@ func getPools(tonPrice float64, storage storage) map[ton.AccountID]float64 {
 	}
 	pools := make(map[ton.AccountID]float64)
 	for _, market := range markets {
-		respBody, err := sendRequest(market.ApiURL)
+		respBody, err := sendRequest(market.ApiURL, "")
 		if err != nil {
 			errorsCounter.WithLabelValues(market.Name).Inc()
 			continue
 		}
-		convertedPools := market.PoolResponseConverter(storage, tonPrice, respBody)
+		convertedPools := market.PoolResponseConverter(tonApiToken, tonPrice, respBody)
 		for currency, rate := range convertedPools {
 			if _, ok := pools[currency]; !ok {
 				pools[currency] = rate
@@ -363,7 +379,8 @@ func getPools(tonPrice float64, storage storage) map[ton.AccountID]float64 {
 	return pools
 }
 
-func convertedMegatonPoolResponse(storage storage, tonPrice float64, respBody io.ReadCloser) map[ton.AccountID]float64 {
+func convertedMegatonPoolResponse(tonApiToken string, tonPrice float64, respBody io.ReadCloser) map[ton.AccountID]float64 {
+	defer respBody.Close()
 	var data []struct {
 		Address string  `json:"address"`
 		Price   float64 `json:"price"`
@@ -383,7 +400,8 @@ func convertedMegatonPoolResponse(storage storage, tonPrice float64, respBody io
 	return pools
 }
 
-func convertedStonFiPoolResponse(storage storage, tonPrice float64, respBody io.ReadCloser) map[ton.AccountID]float64 {
+func convertedStonFiPoolResponse(tonApiToken string, tonPrice float64, respBody io.ReadCloser) map[ton.AccountID]float64 {
+	defer respBody.Close()
 	var data struct {
 		AssetList []struct {
 			ContractAddress string  `json:"contract_address"`
@@ -410,7 +428,8 @@ func convertedStonFiPoolResponse(storage storage, tonPrice float64, respBody io.
 	return pools
 }
 
-func convertedDedustPoolResponse(storage storage, tonPrice float64, respBody io.ReadCloser) map[ton.AccountID]float64 {
+func convertedDedustPoolResponse(tonApiToken string, tonPrice float64, respBody io.ReadCloser) map[ton.AccountID]float64 {
+	defer respBody.Close()
 	type Pool struct {
 		TotalSupply string `json:"totalSupply"`
 		Assets      []struct {
@@ -447,24 +466,37 @@ func convertedDedustPoolResponse(storage storage, tonPrice float64, respBody io.
 		if firstReserve < float64(100*ton.OneTON) {
 			continue
 		}
-		secondReserveDecimals := float64(9)
-		if secondAsset.Metadata == nil || secondAsset.Metadata.Decimals != 0 {
-			account, _ := tongo.ParseAddress(secondAsset.Address)
-			meta, err := storage.GetJettonMasterMetadata(context.Background(), account.ID)
-			if err == nil && meta.Decimals != "" {
-				decimals, err := strconv.Atoi(meta.Decimals)
-				if err == nil {
-					secondReserveDecimals = float64(decimals)
-				}
-			}
-		}
-		account, err := tongo.ParseAddress(secondAsset.Address)
+		account, err := ton.ParseAccountID(secondAsset.Address)
 		if err != nil {
 			continue
 		}
+		secondReserveDecimals := float64(9)
+		if secondAsset.Metadata == nil || secondAsset.Metadata.Decimals != 0 {
+			url := fmt.Sprintf("https://tonapi.io/v2/jettons/%v", account.ToRaw())
+			jettonInfoRespBody, err := sendRequest(url, tonApiToken)
+			if err != nil {
+				log.Errorf("[convertedDedustPoolResponse] failed to get jetton info: %v", err)
+				continue
+			}
+			defer jettonInfoRespBody.Close()
+			var jettonInfo struct {
+				Metadata struct {
+					Decimals string `json:"decimals"`
+				} `json:"metadata"`
+			}
+			if err = json.NewDecoder(jettonInfoRespBody).Decode(&jettonInfo); err != nil {
+				log.Errorf("[convertedDedustPoolResponse] failed to decode jetton info: %v", err)
+				continue
+			}
+			decimals, err := strconv.Atoi(jettonInfo.Metadata.Decimals)
+			if err != nil {
+				continue
+			}
+			secondReserveDecimals = float64(decimals)
+		}
 		// TODO: change algorithm math price for other type pool (volatile/stable)
 		price := 1 / ((secondReserve / math.Pow(10, secondReserveDecimals)) / (firstReserve / math.Pow(10, 9)))
-		pools[account.ID] = price
+		pools[account] = price
 	}
 	return pools
 }

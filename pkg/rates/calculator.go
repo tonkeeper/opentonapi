@@ -112,7 +112,7 @@ func (c *calculator) GetMarketsTonPrice() []Market {
 }
 
 type Mock struct {
-	Storage storage
+	TonApiToken string
 }
 
 func (m Mock) GetRates(date int64) (map[string]float64, error) {
