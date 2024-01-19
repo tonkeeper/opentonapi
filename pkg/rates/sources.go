@@ -1,7 +1,6 @@
 package rates
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -13,16 +12,11 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/tonkeeper/opentonapi/pkg/references"
 	"github.com/tonkeeper/tongo"
-	"github.com/tonkeeper/tongo/tep64"
 )
 
 var errorsCounter = promauto.NewCounterVec(prometheus.CounterOpts{
 	Name: "rates_getter_errors_total",
 }, []string{"source"})
-
-type storage interface {
-	GetJettonMasterMetadata(ctx context.Context, master tongo.AccountID) (tep64.Metadata, error)
-}
 
 func (m *Mock) GetCurrentRates() (map[string]float64, error) {
 	rates := make(map[string]float64)
@@ -35,7 +29,7 @@ func (m *Mock) GetCurrentRates() (map[string]float64, error) {
 	}
 
 	fiatPrices := getFiatPrices()
-	pools := getPools(medianTonPriceToUsd, m.TonApiClient)
+	pools := getPools(medianTonPriceToUsd, m.TonApiToken)
 
 	for attempt := 0; attempt < 3; attempt++ {
 		if tonstakersJetton, tonstakersPrice, err := getTonstakersPrice(references.TonstakersAccountPool); err == nil {
