@@ -11,6 +11,7 @@ import (
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/opentonapi/pkg/rates"
 	"github.com/tonkeeper/opentonapi/pkg/spam"
+	"github.com/tonkeeper/tonapi-go"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/contract/dns"
 	"github.com/tonkeeper/tongo/tep64"
@@ -166,7 +167,11 @@ func NewHandler(logger *zap.Logger, opts ...Option) (*Handler, error) {
 		options.spamFilter = spam.NewNoOpSpamFilter()
 	}
 	if options.ratesSource == nil {
-		options.ratesSource = rates.Mock{Storage: options.storage}
+		tonApiClient, err := tonapi.New()
+		if err != nil {
+			return nil, fmt.Errorf("failed to init tonapi client: %v", err)
+		}
+		options.ratesSource = rates.Mock{TonApiClient: tonApiClient}
 	}
 	if options.executor == nil {
 		return nil, fmt.Errorf("executor is not configured")

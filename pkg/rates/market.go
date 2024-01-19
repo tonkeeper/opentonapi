@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/labstack/gommon/log"
+	"github.com/tonkeeper/tonapi-go"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/ton"
 )
@@ -37,7 +38,7 @@ type Market struct {
 	ApiURL                string
 	TonPriceConverter     func(closer io.ReadCloser) (float64, error)
 	FiatPriceConverter    func(closer io.ReadCloser) map[string]float64
-	PoolResponseConverter func(storage storage, tonPrice float64, respBody io.ReadCloser) map[ton.AccountID]float64
+	PoolResponseConverter func(client *tonapi.Client, tonPrice float64, respBody io.ReadCloser) map[ton.AccountID]float64
 	DateUpdate            time.Time
 }
 
@@ -328,7 +329,7 @@ func convertedCoinBaseFiatPricesResponse(respBody io.ReadCloser) map[string]floa
 	return prices
 }
 
-func getPools(tonPrice float64, storage storage) map[ton.AccountID]float64 {
+func getPools(tonPrice float64, client *tonapi.Client) map[ton.AccountID]float64 {
 	markets := []Market{
 		{
 			Name:                  dedust,
@@ -353,7 +354,7 @@ func getPools(tonPrice float64, storage storage) map[ton.AccountID]float64 {
 			errorsCounter.WithLabelValues(market.Name).Inc()
 			continue
 		}
-		convertedPools := market.PoolResponseConverter(storage, tonPrice, respBody)
+		convertedPools := market.PoolResponseConverter(client, tonPrice, respBody)
 		for currency, rate := range convertedPools {
 			if _, ok := pools[currency]; !ok {
 				pools[currency] = rate
@@ -363,7 +364,7 @@ func getPools(tonPrice float64, storage storage) map[ton.AccountID]float64 {
 	return pools
 }
 
-func convertedMegatonPoolResponse(storage storage, tonPrice float64, respBody io.ReadCloser) map[ton.AccountID]float64 {
+func convertedMegatonPoolResponse(client *tonapi.Client, tonPrice float64, respBody io.ReadCloser) map[ton.AccountID]float64 {
 	var data []struct {
 		Address string  `json:"address"`
 		Price   float64 `json:"price"`
@@ -383,7 +384,7 @@ func convertedMegatonPoolResponse(storage storage, tonPrice float64, respBody io
 	return pools
 }
 
-func convertedStonFiPoolResponse(storage storage, tonPrice float64, respBody io.ReadCloser) map[ton.AccountID]float64 {
+func convertedStonFiPoolResponse(client *tonapi.Client, tonPrice float64, respBody io.ReadCloser) map[ton.AccountID]float64 {
 	var data struct {
 		AssetList []struct {
 			ContractAddress string  `json:"contract_address"`
@@ -410,7 +411,7 @@ func convertedStonFiPoolResponse(storage storage, tonPrice float64, respBody io.
 	return pools
 }
 
-func convertedDedustPoolResponse(storage storage, tonPrice float64, respBody io.ReadCloser) map[ton.AccountID]float64 {
+func convertedDedustPoolResponse(client *tonapi.Client, tonPrice float64, respBody io.ReadCloser) map[ton.AccountID]float64 {
 	type Pool struct {
 		TotalSupply string `json:"totalSupply"`
 		Assets      []struct {
@@ -447,24 +448,28 @@ func convertedDedustPoolResponse(storage storage, tonPrice float64, respBody io.
 		if firstReserve < float64(100*ton.OneTON) {
 			continue
 		}
-		secondReserveDecimals := float64(9)
-		if secondAsset.Metadata == nil || secondAsset.Metadata.Decimals != 0 {
-			account, _ := tongo.ParseAddress(secondAsset.Address)
-			meta, err := storage.GetJettonMasterMetadata(context.Background(), account.ID)
-			if err == nil && meta.Decimals != "" {
-				decimals, err := strconv.Atoi(meta.Decimals)
-				if err == nil {
-					secondReserveDecimals = float64(decimals)
-				}
-			}
-		}
-		account, err := tongo.ParseAddress(secondAsset.Address)
+		account, err := ton.ParseAccountID(secondAsset.Address)
 		if err != nil {
 			continue
 		}
+		secondReserveDecimals := float64(9)
+		if secondAsset.Metadata == nil || secondAsset.Metadata.Decimals != 0 {
+			ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
+			defer cancel()
+			jettonInfo, err := client.GetJettonInfo(ctx, tonapi.GetJettonInfoParams{AccountID: account.ToRaw()})
+			if err != nil {
+				log.Errorf("[convertedDedustPoolResponse] failed to get jetton info: %v", err)
+				continue
+			}
+			decimals, err := strconv.Atoi(jettonInfo.Metadata.Decimals)
+			if err != nil {
+				continue
+			}
+			secondReserveDecimals = float64(decimals)
+		}
 		// TODO: change algorithm math price for other type pool (volatile/stable)
 		price := 1 / ((secondReserve / math.Pow(10, secondReserveDecimals)) / (firstReserve / math.Pow(10, 9)))
-		pools[account.ID] = price
+		pools[account] = price
 	}
 	return pools
 }

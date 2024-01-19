@@ -8,10 +8,9 @@ import (
 	"sort"
 	"time"
 
+	"github.com/labstack/gommon/log"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
-
-	"github.com/labstack/gommon/log"
 	"github.com/tonkeeper/opentonapi/pkg/references"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/tep64"
@@ -36,7 +35,7 @@ func (m *Mock) GetCurrentRates() (map[string]float64, error) {
 	}
 
 	fiatPrices := getFiatPrices()
-	pools := getPools(medianTonPriceToUsd, m.Storage)
+	pools := getPools(medianTonPriceToUsd, m.TonApiClient)
 
 	for attempt := 0; attempt < 3; attempt++ {
 		if tonstakersJetton, tonstakersPrice, err := getTonstakersPrice(references.TonstakersAccountPool); err == nil {
@@ -55,8 +54,8 @@ func (m *Mock) GetCurrentRates() (map[string]float64, error) {
 			rates[currency] = 1 / (price * medianTonPriceToUsd)
 		}
 	}
-	for token, coinsCount := range pools {
-		rates[token.ToRaw()] = coinsCount
+	for token, price := range pools {
+		rates[token.ToRaw()] = price
 	}
 
 	return rates, nil

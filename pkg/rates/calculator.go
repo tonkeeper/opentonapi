@@ -5,6 +5,8 @@ import (
 	"log"
 	"sync"
 	"time"
+
+	"github.com/tonkeeper/tonapi-go"
 )
 
 type ratesSource interface {
@@ -112,7 +114,7 @@ func (c *calculator) GetMarketsTonPrice() []Market {
 }
 
 type Mock struct {
-	Storage storage
+	TonApiClient *tonapi.Client
 }
 
 func (m Mock) GetRates(date int64) (map[string]float64, error) {
