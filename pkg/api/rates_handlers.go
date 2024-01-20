@@ -98,7 +98,7 @@ func (h *Handler) GetRates(ctx context.Context, params oas.GetRatesParams) (*oas
 			}
 		}
 	}
-	if human { // temporary kludge for keeper
+	if human { // temporary kludge for keeper todo: remove
 		temp := make(map[string]oas.TokenRates, len(ratesRes))
 		for k, v := range ratesRes {
 			if len(k) > 48 {
@@ -164,7 +164,7 @@ func convertRates(rates map[string]oas.TokenRates, token, currency string, today
 	}
 	todayTokenPrice, ok := todayRates[token]
 	if !ok {
-		todayTokenPrice = 0.000000001
+		todayTokenPrice = 0.000000000000001
 		//rate = oas.TokenRates{Prices: oas.NewOptTokenRatesPrices(oas.TokenRatesPrices{}), Diff24h: oas.NewOptTokenRatesDiff24h(oas.TokenRatesDiff24h{}), Diff7d: oas.NewOptTokenRatesDiff7d(oas.TokenRatesDiff7d{}), Diff30d: oas.NewOptTokenRatesDiff30d(oas.TokenRatesDiff30d{})}
 		//return rates, nil
 	}
