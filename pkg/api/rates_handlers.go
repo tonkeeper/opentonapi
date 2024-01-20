@@ -164,8 +164,9 @@ func convertRates(rates map[string]oas.TokenRates, token, currency string, today
 	}
 	todayTokenPrice, ok := todayRates[token]
 	if !ok {
-		rate = oas.TokenRates{Prices: oas.NewOptTokenRatesPrices(oas.TokenRatesPrices{}), Diff24h: oas.NewOptTokenRatesDiff24h(oas.TokenRatesDiff24h{}), Diff7d: oas.NewOptTokenRatesDiff7d(oas.TokenRatesDiff7d{}), Diff30d: oas.NewOptTokenRatesDiff30d(oas.TokenRatesDiff30d{})}
-		return rates, nil
+		todayTokenPrice = 0.000000001
+		//rate = oas.TokenRates{Prices: oas.NewOptTokenRatesPrices(oas.TokenRatesPrices{}), Diff24h: oas.NewOptTokenRatesDiff24h(oas.TokenRatesDiff24h{}), Diff7d: oas.NewOptTokenRatesDiff7d(oas.TokenRatesDiff7d{}), Diff30d: oas.NewOptTokenRatesDiff30d(oas.TokenRatesDiff30d{})}
+		//return rates, nil
 	}
 	convertedTodayPrice := todayTokenPrice * (1 / todayCurrencyPrice)
 	rate.Prices.Value[currency] = convertedTodayPrice
