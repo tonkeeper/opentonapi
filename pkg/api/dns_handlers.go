@@ -4,9 +4,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/tonkeeper/opentonapi/pkg/core"
 	"net/http"
 	"strings"
+
+	"github.com/tonkeeper/opentonapi/pkg/core"
 
 	"github.com/tonkeeper/tongo/contract/dns"
 
@@ -47,6 +48,9 @@ func (h *Handler) AccountDnsBackResolve(ctx context.Context, params oas.AccountD
 		return nil, toError(http.StatusBadRequest, err)
 	}
 	domains, err := h.storage.FindAllDomainsResolvedToAddress(ctx, account.ID, references.DomainSuffixes)
+	if errors.Is(err, core.ErrEntityNotFound) {
+		return &oas.DomainNames{Domains: []string{}}, nil
+	}
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}

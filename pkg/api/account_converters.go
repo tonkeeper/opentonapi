@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/tonkeeper/tongo/abi"
+	"github.com/tonkeeper/tongo/tlb"
 
 	"github.com/tonkeeper/opentonapi/pkg/addressbook"
 	"github.com/tonkeeper/opentonapi/pkg/core"
@@ -54,6 +55,9 @@ func convertToAccount(account *core.Account, ab *addressbook.KnownAddress, state
 	}
 	if state.CheckIsSuspended(account.AccountAddress) {
 		acc.IsSuspended.SetTo(true)
+	}
+	if account.Status == tlb.AccountUninit || account.Status == tlb.AccountNone {
+		acc.IsWallet = true
 	}
 	for _, i := range account.Interfaces {
 		if i.Implements(abi.Wallet) {
