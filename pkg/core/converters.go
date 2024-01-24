@@ -127,6 +127,7 @@ func convertStoragePhase(phase tlb.TrStoragePhase) *TxStoragePhase {
 func convertActionPhase(phase tlb.TrActionPhase) *TxActionPhase {
 	return &TxActionPhase{
 		Success:        phase.Success,
+		ResultCode:     phase.ResultCode,
 		TotalActions:   phase.TotActions,
 		SkippedActions: phase.SkippedActions,
 		FwdFees:        uint64(phase.TotalFwdFees.Value),

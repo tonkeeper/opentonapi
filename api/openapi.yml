@@ -3294,6 +3294,7 @@ components:
       type: object
       required:
         - success
+        - result_code
         - total_actions
         - skipped_actions
         - fwd_fees
@@ -3302,6 +3303,10 @@ components:
         success:
           type: boolean
           example: true
+        result_code:
+          type: integer
+          format: int32
+          example: 5
         total_actions:
           type: integer
           format: int32

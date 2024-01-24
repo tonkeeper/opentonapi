@@ -2050,6 +2050,10 @@ func (s *ActionPhase) encodeFields(e *jx.Encoder) {
 		e.Bool(s.Success)
 	}
 	{
+		e.FieldStart("result_code")
+		e.Int32(s.ResultCode)
+	}
+	{
 		e.FieldStart("total_actions")
 		e.Int32(s.TotalActions)
 	}
@@ -2067,12 +2071,13 @@ func (s *ActionPhase) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfActionPhase = [5]string{
+var jsonFieldsNameOfActionPhase = [6]string{
 	0: "success",
-	1: "total_actions",
-	2: "skipped_actions",
-	3: "fwd_fees",
-	4: "total_fees",
+	1: "result_code",
+	2: "total_actions",
+	3: "skipped_actions",
+	4: "fwd_fees",
+	5: "total_fees",
 }
 
 // Decode decodes ActionPhase from json.
@@ -2096,8 +2101,20 @@ func (s *ActionPhase) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"success\"")
 			}
-		case "total_actions":
+		case "result_code":
 			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				v, err := d.Int32()
+				s.ResultCode = int32(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"result_code\"")
+			}
+		case "total_actions":
+			requiredBitSet[0] |= 1 << 2
 			if err := func() error {
 				v, err := d.Int32()
 				s.TotalActions = int32(v)
@@ -2109,7 +2126,7 @@ func (s *ActionPhase) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"total_actions\"")
 			}
 		case "skipped_actions":
-			requiredBitSet[0] |= 1 << 2
+			requiredBitSet[0] |= 1 << 3
 			if err := func() error {
 				v, err := d.Int32()
 				s.SkippedActions = int32(v)
@@ -2121,7 +2138,7 @@ func (s *ActionPhase) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"skipped_actions\"")
 			}
 		case "fwd_fees":
-			requiredBitSet[0] |= 1 << 3
+			requiredBitSet[0] |= 1 << 4
 			if err := func() error {
 				v, err := d.Int64()
 				s.FwdFees = int64(v)
@@ -2133,7 +2150,7 @@ func (s *ActionPhase) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"fwd_fees\"")
 			}
 		case "total_fees":
-			requiredBitSet[0] |= 1 << 4
+			requiredBitSet[0] |= 1 << 5
 			if err := func() error {
 				v, err := d.Int64()
 				s.TotalFees = int64(v)
@@ -2154,7 +2171,7 @@ func (s *ActionPhase) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b00011111,
+		0b00111111,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
