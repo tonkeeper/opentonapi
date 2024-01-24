@@ -15,7 +15,6 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/puzpuzpuz/xsync/v2"
 	"github.com/sourcegraph/conc/iter"
-	"github.com/tonkeeper/opentonapi/pkg/bath"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
 	"github.com/tonkeeper/tongo/boc"
@@ -615,6 +614,6 @@ func (c *LiteStorage) GetInscriptionBalancesByAccount(ctx context.Context, a ton
 	return nil, fmt.Errorf("not implemented") //and cannot be without full blockckchain index
 }
 
-func (c *LiteStorage) GetInscriptionsHistoryByAccount(ctx context.Context, a ton.AccountID, ticker *string, beforeLt int64, limit int) (map[ton.Bits256][]bath.Action, error) {
+func (c *LiteStorage) GetInscriptionsHistoryByAccount(ctx context.Context, a ton.AccountID, ticker *string, beforeLt int64, limit int) ([]core.InscriptionMessage, error) {
 	return nil, fmt.Errorf("not implemented") //and cannot be without full blockckchain index
 }
