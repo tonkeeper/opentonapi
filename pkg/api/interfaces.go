@@ -5,9 +5,6 @@ import (
 	"crypto/ed25519"
 	"sync"
 
-	"github.com/tonkeeper/opentonapi/pkg/bath"
-	"github.com/tonkeeper/opentonapi/pkg/blockchain"
-	"github.com/tonkeeper/opentonapi/pkg/rates"
 	rules "github.com/tonkeeper/scam_backoffice_rules"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
@@ -18,8 +15,10 @@ import (
 	"github.com/tonkeeper/tongo/ton"
 
 	"github.com/tonkeeper/opentonapi/pkg/addressbook"
+	"github.com/tonkeeper/opentonapi/pkg/blockchain"
 	"github.com/tonkeeper/opentonapi/pkg/cache"
 	"github.com/tonkeeper/opentonapi/pkg/core"
+	"github.com/tonkeeper/opentonapi/pkg/rates"
 )
 
 type storage interface {
@@ -99,7 +98,7 @@ type storage interface {
 	TrimmedConfigBase64() (string, error)
 
 	GetInscriptionBalancesByAccount(ctx context.Context, a ton.AccountID) ([]core.InscriptionBalance, error)
-	GetInscriptionsHistoryByAccount(ctx context.Context, a ton.AccountID, ticker *string, beforeLt int64, limit int) (map[ton.Bits256][]bath.Action, error)
+	GetInscriptionsHistoryByAccount(ctx context.Context, a ton.AccountID, ticker *string, beforeLt int64, limit int) ([]core.InscriptionMessage, error)
 
 	liteStorageRaw
 }

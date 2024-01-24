@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/tonkeeper/opentonapi/pkg/bath"
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/opentonapi/pkg/oas"
 	"github.com/tonkeeper/tongo"
@@ -78,13 +79,14 @@ func (h *Handler) GetAccountInscriptionsHistory(ctx context.Context, params oas.
 	if params.BeforeLt.Set {
 		beforeLT = params.BeforeLt.Value
 	}
-	events, err := h.storage.GetInscriptionsHistoryByAccount(ctx, account.ID, nil, beforeLT, params.Limit.Value)
+	msgs, err := h.storage.GetInscriptionsHistoryByAccount(ctx, account.ID, nil, beforeLT, params.Limit.Value)
 	if errors.Is(err, core.ErrEntityNotFound) {
 		return &oas.AccountEvents{}, nil
 	}
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
+	events := bath.ConvertToInscriptionActions(msgs)
 	var resp oas.AccountEvents
 	for hash, actions := range events {
 		event := oas.AccountEvent{
@@ -112,13 +114,14 @@ func (h *Handler) GetAccountInscriptionsHistoryByTicker(ctx context.Context, par
 	if params.BeforeLt.Set {
 		beforeLT = params.BeforeLt.Value
 	}
-	events, err := h.storage.GetInscriptionsHistoryByAccount(ctx, account.ID, &params.Ticker, beforeLT, params.Limit.Value)
+	msgs, err := h.storage.GetInscriptionsHistoryByAccount(ctx, account.ID, &params.Ticker, beforeLT, params.Limit.Value)
 	if errors.Is(err, core.ErrEntityNotFound) {
 		return &oas.AccountEvents{}, nil
 	}
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
+	events := bath.ConvertToInscriptionActions(msgs)
 	var resp oas.AccountEvents
 	for hash, actions := range events {
 		event := oas.AccountEvent{
