@@ -92,6 +92,7 @@
    },
    "ActionPhase": {
      "Success": true,
+     "ResultCode": 0,
      "TotalActions": 1,
      "SkippedActions": 0,
      "FwdFees": 10134000,

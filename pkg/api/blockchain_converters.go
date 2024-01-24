@@ -141,6 +141,7 @@ func convertTransaction(t core.Transaction, book addressBook) oas.Transaction {
 	if t.ActionPhase != nil {
 		phase := oas.ActionPhase{
 			Success:        t.ActionPhase.Success,
+			ResultCode:     t.ActionPhase.ResultCode,
 			TotalActions:   int32(t.ActionPhase.TotalActions),
 			SkippedActions: int32(t.ActionPhase.SkippedActions),
 			FwdFees:        int64(t.ActionPhase.FwdFees),

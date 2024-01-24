@@ -61,6 +61,7 @@ type TxCreditPhase struct {
 
 type TxActionPhase struct {
 	Success        bool
+	ResultCode     int32
 	TotalActions   uint16
 	SkippedActions uint16
 	FwdFees        uint64

@@ -1014,6 +1014,11 @@
       "format": "int64",
       "type": "integer"
      },
+     "result_code": {
+      "example": 5,
+      "format": "int32",
+      "type": "integer"
+     },
      "skipped_actions": {
       "example": 5,
       "format": "int32",
@@ -1036,6 +1041,7 @@
     },
     "required": [
      "success",
+     "result_code",
      "total_actions",
      "skipped_actions",
      "fwd_fees",

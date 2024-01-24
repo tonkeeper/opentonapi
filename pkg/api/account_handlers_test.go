@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/tonkeeper/opentonapi/pkg/chainstate"
+	pkgTesting "github.com/tonkeeper/opentonapi/pkg/testing"
 	"github.com/tonkeeper/tongo/liteapi"
 
 	"github.com/stretchr/testify/require"
@@ -162,21 +163,25 @@ func TestHandler_GetAccounts(t *testing.T) {
 }
 
 func TestHandler_GetTransactions(t *testing.T) {
-	t.Skip()
 	tests := []struct {
-		name         string
-		params       oas.GetBlockchainBlockTransactionsParams
-		wantTxCount  int
-		wantTxHashes map[string]struct{}
+		name           string
+		params         oas.GetBlockchainBlockTransactionsParams
+		filenamePrefix string
 	}{
 		{
-			params:      oas.GetBlockchainBlockTransactionsParams{BlockID: "(-1,8000000000000000,28741341)"},
-			wantTxCount: 3,
-			wantTxHashes: map[string]struct{}{
-				"fec4f77e8b72eec62d14944d9cf99171a32c03783c8e6e30590aabbe35236f9b": {},
-				"ed07582702c23aeaa6f1b7ce28def3a810399467a8e062ed1c67eed8c1abd2ad": {},
-				"6f268d1fcd0bd36021237bb2b1810a7a78cd1d3b5e96d826ffddbcc96b848523": {},
-			},
+			name:           "masterchain block",
+			params:         oas.GetBlockchainBlockTransactionsParams{BlockID: "(-1,8000000000000000,28741341)"},
+			filenamePrefix: "block-txs-1",
+		},
+		{
+			name:           "basechain block",
+			params:         oas.GetBlockchainBlockTransactionsParams{BlockID: "(0,8000000000000000,40834551)"},
+			filenamePrefix: "block-txs-2",
+		},
+		{
+			name:           "basechain block 2",
+			params:         oas.GetBlockchainBlockTransactionsParams{BlockID: "(0,8000000000000000,39478616)"},
+			filenamePrefix: "block-txs-3",
 		},
 	}
 	for _, tt := range tests {
@@ -186,18 +191,12 @@ func TestHandler_GetTransactions(t *testing.T) {
 			require.Nil(t, err)
 			liteStorage, err := litestorage.NewLiteStorage(logger, cli)
 			require.Nil(t, err)
-			h, err := NewHandler(logger, WithStorage(liteStorage), WithExecutor(liteStorage))
+			h, err := NewHandler(logger, WithStorage(liteStorage), WithExecutor(liteStorage), WithAddressBook(&mockAddressBook{}))
 			require.Nil(t, err)
 			res, err := h.GetBlockchainBlockTransactions(context.Background(), tt.params)
 			require.Nil(t, err)
 			fmt.Printf("%v\n", res)
-
-			require.Equal(t, tt.wantTxCount, len(res.Transactions))
-			txHashes := map[string]struct{}{}
-			for _, tx := range res.Transactions {
-				txHashes[tx.Hash] = struct{}{}
-			}
-			require.Equal(t, tt.wantTxHashes, txHashes)
+			pkgTesting.CompareResults(t, res, tt.filenamePrefix)
 		})
 	}
 }

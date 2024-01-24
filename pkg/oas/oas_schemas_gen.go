@@ -878,6 +878,7 @@ func (s *Action) SetSimplePreview(val ActionSimplePreview) {
 // Ref: #/components/schemas/ActionPhase
 type ActionPhase struct {
 	Success        bool  `json:"success"`
+	ResultCode     int32 `json:"result_code"`
 	TotalActions   int32 `json:"total_actions"`
 	SkippedActions int32 `json:"skipped_actions"`
 	FwdFees        int64 `json:"fwd_fees"`
@@ -887,6 +888,11 @@ type ActionPhase struct {
 // GetSuccess returns the value of Success.
 func (s *ActionPhase) GetSuccess() bool {
 	return s.Success
+}
+
+// GetResultCode returns the value of ResultCode.
+func (s *ActionPhase) GetResultCode() int32 {
+	return s.ResultCode
 }
 
 // GetTotalActions returns the value of TotalActions.
@@ -912,6 +918,11 @@ func (s *ActionPhase) GetTotalFees() int64 {
 // SetSuccess sets the value of Success.
 func (s *ActionPhase) SetSuccess(val bool) {
 	s.Success = val
+}
+
+// SetResultCode sets the value of ResultCode.
+func (s *ActionPhase) SetResultCode(val int32) {
+	s.ResultCode = val
 }
 
 // SetTotalActions sets the value of TotalActions.
