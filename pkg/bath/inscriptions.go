@@ -44,6 +44,7 @@ func ConvertToInscriptionActions(msgs []core.InscriptionMessage) map[ton.Bits256
 		default:
 			continue
 		}
+		action.Success = msg.Success
 		actions[msg.Hash] = append(actions[msg.Hash], action)
 	}
 	return actions
