@@ -92,19 +92,39 @@ func convertComputePhase(phase tlb.TrComputePhase) *TxComputePhase {
 			SkipReason: phase.TrPhaseComputeSkipped.Reason,
 		}
 	default:
-		return &TxComputePhase{
-			Success:  phase.TrPhaseComputeVm.Success,
-			GasFees:  uint64(phase.TrPhaseComputeVm.GasFees),
-			GasUsed:  big.Int(phase.TrPhaseComputeVm.Vm.GasUsed),
-			VmSteps:  phase.TrPhaseComputeVm.Vm.VmSteps,
-			ExitCode: phase.TrPhaseComputeVm.Vm.ExitCode,
+		gasUsed := big.Int(phase.TrPhaseComputeVm.Vm.GasUsed)
+		gasLimit := big.Int(phase.TrPhaseComputeVm.Vm.GasLimit)
+		ph := &TxComputePhase{
+			Success:          phase.TrPhaseComputeVm.Success,
+			MsgStateUsed:     phase.TrPhaseComputeVm.MsgStateUsed,
+			AccountActivated: phase.TrPhaseComputeVm.AccountActivated,
+			GasFees:          uint64(phase.TrPhaseComputeVm.GasFees),
+			GasUsed:          gasUsed.Uint64(),
+			GasLimit:         gasLimit.Uint64(),
+			Mode:             phase.TrPhaseComputeVm.Vm.Mode,
+			VmSteps:          phase.TrPhaseComputeVm.Vm.VmSteps,
+			ExitCode:         phase.TrPhaseComputeVm.Vm.ExitCode,
+			// gas credit and exit args are optional
+			// if not set, they are zero
+			// according to https://github.com/ton-blockchain/ton/blob/v2023.10/crypto/block/transaction.cpp#L2372
+			GasCredit: 0,
+			ExitArg:   0,
 		}
+		if phase.TrPhaseComputeVm.Vm.GasCredit.Exists {
+			credit := big.Int(phase.TrPhaseComputeVm.Vm.GasCredit.Value)
+			ph.GasCredit = credit.Uint64()
+		}
+		if phase.TrPhaseComputeVm.Vm.ExitArg.Exists {
+			ph.ExitArg = phase.TrPhaseComputeVm.Vm.ExitArg.Value
+		}
+		return ph
 	}
 }
 
 func convertCreditPhase(phase tlb.TrCreditPhase) *TxCreditPhase {
 	ph := TxCreditPhase{
 		CreditGrams: uint64(phase.Credit.Grams),
+		CreditExtra: ToExtraCurrency(phase.Credit.Other),
 	}
 	if phase.DueFeesCollected.Exists {
 		ph.DueFeesCollected = uint64(phase.DueFeesCollected.Value)
@@ -125,18 +145,58 @@ func convertStoragePhase(phase tlb.TrStoragePhase) *TxStoragePhase {
 }
 
 func convertActionPhase(phase tlb.TrActionPhase) *TxActionPhase {
+	cells := big.Int(phase.TotMsgSize.Cells)
+	bits := big.Int(phase.TotMsgSize.Bits)
 	return &TxActionPhase{
-		Success:        phase.Success,
-		TotalActions:   phase.TotActions,
-		SkippedActions: phase.SkippedActions,
-		FwdFees:        uint64(phase.TotalFwdFees.Value),
-		TotalFees:      uint64(phase.TotalActionFees.Value),
+		Success:         phase.Success,
+		Valid:           phase.Valid,
+		NoFunds:         phase.NoFunds,
+		StatusChange:    phase.StatusChange,
+		ResultCode:      phase.ResultCode,
+		ResultArg:       phase.ResultArg.Value, // zero is not serialized, so if it is not set, it is zero.
+		TotalActions:    phase.TotActions,
+		SpecActions:     phase.SpecActions,
+		SkippedActions:  phase.SkippedActions,
+		TotalFwdFees:    uint64(phase.TotalFwdFees.Value),
+		TotalActionFees: uint64(phase.TotalActionFees.Value),
+		MsgsCreated:     phase.MsgsCreated,
+		TotMsgSize: StorageUsedShort{
+			Cells: cells.Int64(),
+			Bits:  bits.Int64(),
+		},
 	}
 }
 func convertBouncePhase(phase tlb.TrBouncePhase) *TxBouncePhase {
-	return &TxBouncePhase{
-		Type: BouncePhaseType(phase.SumType),
+	switch phase.SumType {
+	case "TrPhaseBounceNegfunds":
+		return &TxBouncePhase{
+			Type: BounceNegFunds,
+		}
+	case "TrPhaseBounceNofunds":
+		cells := big.Int(phase.TrPhaseBounceNofunds.MsgSize.Cells)
+		bits := big.Int(phase.TrPhaseBounceNofunds.MsgSize.Bits)
+		return &TxBouncePhase{
+			Type:       BounceNoFunds,
+			ReqFwdFees: g.Pointer(uint64(phase.TrPhaseBounceNofunds.ReqFwdFees)),
+			MsgSize: &StorageUsedShort{
+				Cells: cells.Int64(),
+				Bits:  bits.Int64(),
+			},
+		}
+	case "TrPhaseBounceOk":
+		cells := big.Int(phase.TrPhaseBounceNofunds.MsgSize.Cells)
+		bits := big.Int(phase.TrPhaseBounceNofunds.MsgSize.Bits)
+		return &TxBouncePhase{
+			Type:    BounceOk,
+			MsgFees: g.Pointer(uint64(phase.TrPhaseBounceOk.MsgFees)),
+			FwdFees: g.Pointer(uint64(phase.TrPhaseBounceOk.FwdFees)),
+			MsgSize: &StorageUsedShort{
+				Cells: cells.Int64(),
+				Bits:  bits.Int64(),
+			},
+		}
 	}
+	panic("invalid bounce phase")
 }
 
 func maybeInvoke[Result any, T any](fn func(t T) *Result, maybe tlb.Maybe[T]) *Result {
@@ -221,8 +281,8 @@ func ConvertTransaction(workchain int32, tx tongo.Transaction) (*Transaction, er
 	}
 	aggregatedFee := int64(tx.TotalFees.Grams)
 	if actionPhase != nil {
-		aggregatedFee += int64(actionPhase.FwdFees)
-		aggregatedFee -= int64(actionPhase.TotalFees)
+		aggregatedFee += int64(actionPhase.TotalFwdFees)
+		aggregatedFee -= int64(actionPhase.TotalActionFees)
 	}
 	var storageFee int64
 	if storagePhase != nil {
@@ -239,6 +299,7 @@ func ConvertTransaction(workchain int32, tx tongo.Transaction) (*Transaction, er
 		Type:            TransactionType(desc.SumType),
 		StorageFee:      storageFee,
 		TotalFee:        int64(tx.TotalFees.Grams),
+		TotalFeeExtra:   ToExtraCurrency(tx.TotalFees.Other),
 		Utime:           int64(tx.Now),
 		InMsg:           inMsg,
 		OutMsgs:         outMessage,

@@ -140,11 +140,20 @@ func convertTransaction(t core.Transaction, book addressBook) oas.Transaction {
 	}
 	if t.ActionPhase != nil {
 		phase := oas.ActionPhase{
-			Success:        t.ActionPhase.Success,
-			TotalActions:   int32(t.ActionPhase.TotalActions),
-			SkippedActions: int32(t.ActionPhase.SkippedActions),
-			FwdFees:        int64(t.ActionPhase.FwdFees),
-			TotalFees:      int64(t.ActionPhase.TotalFees),
+			Success:           t.ActionPhase.Success,
+			Valid:             t.ActionPhase.Valid,
+			NoFunds:           t.ActionPhase.NoFunds,
+			StatusChange:      oas.AccStatusChange(t.ActionPhase.StatusChange),
+			ResultCode:        t.ActionPhase.ResultCode,
+			ResultArg:         t.ActionPhase.ResultArg,
+			TotalActions:      int32(t.ActionPhase.TotalActions),
+			SpecActions:       int32(t.ActionPhase.SpecActions),
+			SkippedActions:    int32(t.ActionPhase.SkippedActions),
+			FwdFees:           int64(t.ActionPhase.TotalFwdFees),
+			TotalFees:         int64(t.ActionPhase.TotalActionFees),
+			MsgsCreated:       int16(t.ActionPhase.MsgsCreated),
+			TotalMsgSizeCells: t.ActionPhase.TotMsgSize.Cells,
+			TotalMsgSizeBits:  t.ActionPhase.TotMsgSize.Bits,
 		}
 		tx.ActionPhase = oas.NewOptActionPhase(phase)
 	}
@@ -165,11 +174,17 @@ func convertTransaction(t core.Transaction, book addressBook) oas.Transaction {
 		if t.ComputePhase.Skipped {
 			phase.SkipReason = oas.NewOptComputeSkipReason(oas.ComputeSkipReason(t.ComputePhase.SkipReason))
 		} else {
+			phase.MsgStateUsed = oas.NewOptBool(t.ComputePhase.MsgStateUsed)
+			phase.AccountActivated = oas.NewOptBool(t.ComputePhase.AccountActivated)
 			phase.Success = oas.NewOptBool(t.ComputePhase.Success)
 			phase.GasFees = oas.NewOptInt64(int64(t.ComputePhase.GasFees))
-			phase.GasUsed = oas.NewOptInt64(t.ComputePhase.GasUsed.Int64())
+			phase.GasUsed = oas.NewOptInt64(int64(t.ComputePhase.GasUsed))
+			phase.GasLimit = oas.NewOptInt64(int64(t.ComputePhase.GasLimit))
+			phase.GasCredit = oas.NewOptInt64(int64(t.ComputePhase.GasCredit))
 			phase.VMSteps = oas.NewOptUint32(t.ComputePhase.VmSteps)
 			phase.ExitCode = oas.NewOptInt32(t.ComputePhase.ExitCode)
+			phase.ExitArg = oas.NewOptInt32(t.ComputePhase.ExitArg)
+			phase.Mode = oas.NewOptInt8(t.ComputePhase.Mode)
 		}
 		tx.ComputePhase = oas.NewOptComputePhase(phase)
 	}
@@ -180,8 +195,24 @@ func convertTransaction(t core.Transaction, book addressBook) oas.Transaction {
 		}
 		tx.CreditPhase = oas.NewOptCreditPhase(phase)
 	}
-	if t.BouncePhase != nil {
-		tx.BouncePhase = oas.NewOptBouncePhaseType(oas.BouncePhaseType(t.BouncePhase.Type))
+	if ph := t.BouncePhase; ph != nil {
+		tx.BouncePhase = oas.NewOptBouncePhaseType(oas.BouncePhaseType(ph.Type))
+		phase := oas.BouncePhase{
+			BounceType: oas.BouncePhaseType(ph.Type),
+		}
+		if ph.MsgSize != nil {
+			phase.MsgSizeCells = oas.NewOptInt64(ph.MsgSize.Cells)
+			phase.MsgSizeBits = oas.NewOptInt64(ph.MsgSize.Bits)
+		}
+		if ph.ReqFwdFees != nil {
+			phase.ReqFwdFees = oas.NewOptInt64(int64(*ph.ReqFwdFees))
+		}
+		if ph.FwdFees != nil {
+			phase.FwdFees = oas.NewOptInt64(int64(*ph.FwdFees))
+		}
+		if ph.MsgFees != nil {
+			phase.MsgFees = oas.NewOptInt64(int64(*ph.MsgFees))
+		}
 	}
 	return tx
 }

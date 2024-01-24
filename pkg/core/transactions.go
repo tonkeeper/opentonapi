@@ -1,8 +1,6 @@
 package core
 
 import (
-	"math/big"
-
 	"github.com/tonkeeper/tongo/boc"
 
 	"github.com/tonkeeper/tongo/abi"
@@ -39,13 +37,19 @@ type TxComputeSkipReason = tlb.ComputeSkipReason
 type TxAccStatusChange = tlb.AccStatusChange
 
 type TxComputePhase struct {
-	Skipped    bool
-	SkipReason TxComputeSkipReason
-	Success    bool
-	GasFees    uint64
-	GasUsed    big.Int
-	VmSteps    uint32
-	ExitCode   int32
+	Skipped          bool
+	SkipReason       TxComputeSkipReason
+	Success          bool
+	MsgStateUsed     bool
+	AccountActivated bool
+	GasFees          uint64
+	GasUsed          uint64
+	GasLimit         uint64
+	GasCredit        uint64
+	Mode             int8
+	ExitCode         int32
+	ExitArg          int32
+	VmSteps          uint32
 }
 
 type TxStoragePhase struct {
@@ -57,18 +61,36 @@ type TxStoragePhase struct {
 type TxCreditPhase struct {
 	DueFeesCollected uint64
 	CreditGrams      uint64
+	CreditExtra      ExtraCurrency
 }
 
 type TxActionPhase struct {
-	Success        bool
-	TotalActions   uint16
-	SkippedActions uint16
-	FwdFees        uint64
-	TotalFees      uint64
+	Success         bool
+	Valid           bool
+	NoFunds         bool
+	StatusChange    TxAccStatusChange
+	ResultCode      int32
+	ResultArg       int32
+	TotalActions    uint16
+	SpecActions     uint16
+	SkippedActions  uint16
+	TotalFwdFees    uint64
+	TotalActionFees uint64
+	MsgsCreated     uint16
+	TotMsgSize      StorageUsedShort
+}
+
+type StorageUsedShort struct {
+	Cells int64
+	Bits  int64
 }
 
 type TxBouncePhase struct {
-	Type BouncePhaseType
+	Type       BouncePhaseType
+	MsgSize    *StorageUsedShort // BounceNofunds + BounceOk
+	ReqFwdFees *uint64           // BounceNofunds
+	MsgFees    *uint64           // BounceOk
+	FwdFees    *uint64           // BounceOk
 }
 
 type BouncePhaseType string
@@ -106,7 +128,8 @@ type Transaction struct {
 	// StorageFee collected during the Storage Phase.
 	StorageFee int64
 	// TotalFee is the original total_fee of a transaction directly from the blockchain.
-	TotalFee int64
+	TotalFee      int64
+	TotalFeeExtra ExtraCurrency
 }
 
 type MessageID struct {
