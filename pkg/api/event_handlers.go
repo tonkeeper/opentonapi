@@ -707,9 +707,9 @@ func emulatedTreeToTrace(ctx context.Context, executor executor, resolver core.L
 		return nil, err
 	}
 	t := &core.Trace{
-		Transaction:    *transaction,
-		AdditionalInfo: &core.TraceAdditionalInfo{},
+		Transaction: *transaction,
 	}
+	additionalInfo := &core.TraceAdditionalInfo{}
 	for i := range tree.Children {
 		child, err := emulatedTreeToTrace(ctx, executor, resolver, configBase64, tree.Children[i], accounts)
 		if err != nil {
@@ -761,21 +761,21 @@ func emulatedTreeToTrace(ctx context.Context, executor executor, resolver core.L
 			if err != nil || nftAddr == nil {
 				continue
 			}
-			t.AdditionalInfo.EmulatedTeleitemNFT = &core.EmulatedTeleitemNFT{
+			additionalInfo.EmulatedTeleitemNFT = &core.EmulatedTeleitemNFT{
 				Index:             index,
 				CollectionAddress: collectionAddr,
 				Verified:          *nftAddr == accountID,
 			}
 		case abi.GetWalletDataResult:
 			master, _ := tongo.AccountIDFromTlb(data.Jetton)
-			t.AdditionalInfo.SetJettonMaster(accountID, *master)
+			additionalInfo.SetJettonMaster(accountID, *master)
 		case abi.GetSaleData_GetgemsResult:
 			price := big.Int(data.FullPrice)
 			owner, err := tongo.AccountIDFromTlb(data.Owner)
 			if err != nil {
 				continue
 			}
-			t.AdditionalInfo.NftSaleContract = &core.NftSaleContract{
+			additionalInfo.NftSaleContract = &core.NftSaleContract{
 				NftPrice: price.Int64(),
 				Owner:    owner,
 			}
@@ -785,7 +785,7 @@ func emulatedTreeToTrace(ctx context.Context, executor executor, resolver core.L
 			if err != nil {
 				continue
 			}
-			t.AdditionalInfo.NftSaleContract = &core.NftSaleContract{
+			additionalInfo.NftSaleContract = &core.NftSaleContract{
 				NftPrice: price.Int64(),
 				Owner:    owner,
 			}
@@ -794,7 +794,7 @@ func emulatedTreeToTrace(ctx context.Context, executor executor, resolver core.L
 			if err != nil {
 				continue
 			}
-			t.AdditionalInfo.NftSaleContract = &core.NftSaleContract{
+			additionalInfo.NftSaleContract = &core.NftSaleContract{
 				NftPrice: int64(data.MaxBid),
 				Owner:    owner,
 			}
@@ -804,7 +804,7 @@ func emulatedTreeToTrace(ctx context.Context, executor executor, resolver core.L
 			if err1 != nil || err0 != nil {
 				continue
 			}
-			t.AdditionalInfo.STONfiPool = &core.STONfiPool{
+			additionalInfo.STONfiPool = &core.STONfiPool{
 				Token0: *t0,
 				Token1: *t1,
 			}
@@ -815,9 +815,10 @@ func emulatedTreeToTrace(ctx context.Context, executor executor, resolver core.L
 				}
 				data := value.(abi.GetWalletDataResult)
 				master, _ := tongo.AccountIDFromTlb(data.Jetton)
-				t.AdditionalInfo.SetJettonMaster(accountID, *master)
+				additionalInfo.SetJettonMaster(accountID, *master)
 			}
 		}
 	}
+	t.SetAdditionalInfo(additionalInfo)
 	return t, nil
 }

@@ -58,7 +58,7 @@ func fromTrace(trace *core.Trace) *Bubble {
 		account:                         Account{Address: trace.Account, Interfaces: trace.AccountInterfaces},
 		external:                        trace.InMsg == nil || trace.InMsg.IsExternal(),
 		accountWasActiveAtComputingTime: trace.Type != core.OrdinaryTx || trace.ComputePhase == nil || trace.ComputePhase.SkipReason != tlb.ComputeSkipReasonNoState,
-		additionalInfo:                  trace.AdditionalInfo,
+		additionalInfo:                  trace.AdditionalInfo(),
 	}
 
 	accounts := []tongo.AccountID{trace.Account}
