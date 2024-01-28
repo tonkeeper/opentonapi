@@ -2,6 +2,7 @@ package core
 
 import (
 	"context"
+	"sync"
 
 	"github.com/shopspring/decimal"
 	"github.com/tonkeeper/tongo"
@@ -15,7 +16,13 @@ type Trace struct {
 	Transaction
 	AccountInterfaces []abi.ContractInterface
 	Children          []*Trace
-	AdditionalInfo    *TraceAdditionalInfo
+
+	// mu protects "additionalInfo" field.
+	mu sync.RWMutex
+	// additionalInfo holds information about this trace.
+	// It is protected by a mutex because we cache traces and set additionalInfo independently of the trace itself.
+	// so it happens that two different goroutines get a trace from the cache and attempt to set additionalInfo.
+	additionalInfo *TraceAdditionalInfo
 }
 
 // TraceAdditionalInfo holds information about a trace
@@ -32,6 +39,18 @@ type TraceAdditionalInfo struct {
 	// This field is required because when a new NFT is created during emulation,
 	// there is no way to get it from the blockchain, and we have to store it somewhere.
 	EmulatedTeleitemNFT *EmulatedTeleitemNFT
+}
+
+func (t *Trace) AdditionalInfo() *TraceAdditionalInfo {
+	t.mu.RLock()
+	defer t.mu.RUnlock()
+	return t.additionalInfo
+}
+
+func (t *Trace) SetAdditionalInfo(info *TraceAdditionalInfo) {
+	t.mu.Lock()
+	defer t.mu.Unlock()
+	t.additionalInfo = info
 }
 
 func (t *Trace) InProgress() bool {
@@ -127,7 +146,7 @@ func CollectAdditionalInfo(ctx context.Context, infoSource InformationSource, tr
 		// we construct "trace.AdditionalInfo" in emulatedTreeToTrace for all accounts the trace touches.
 		// moreover, some accounts change their states and some of them are not exist in the blockchain,
 		// so we must not inspect them again.
-		if trace.AdditionalInfo != nil {
+		if trace.AdditionalInfo() != nil {
 			return
 		}
 		if isDestinationJettonWallet(trace.InMsg) {
@@ -168,32 +187,33 @@ func CollectAdditionalInfo(ctx context.Context, infoSource InformationSource, tr
 		// we construct "trace.AdditionalInfo" in emulatedTreeToTrace for all accounts the trace touches.
 		// moreover, some accounts change their states and some of them are not exist in the blockchain,
 		// so we must not inspect them again.
-		if trace.AdditionalInfo != nil {
+		if trace.AdditionalInfo() != nil {
 			return
 		}
-		trace.AdditionalInfo = &TraceAdditionalInfo{}
+		additionalInfo := &TraceAdditionalInfo{}
 		if isDestinationJettonWallet(trace.InMsg) {
 			if master, ok := masters[*trace.InMsg.Destination]; ok {
-				trace.AdditionalInfo.SetJettonMaster(*trace.InMsg.Destination, master)
+				additionalInfo.SetJettonMaster(*trace.InMsg.Destination, master)
 			}
 		}
 		if hasInterface(trace.AccountInterfaces, abi.NftSaleV2) {
 			if getgems, ok := getGems[trace.Account]; ok {
-				trace.AdditionalInfo.NftSaleContract = &getgems
+				additionalInfo.NftSaleContract = &getgems
 			}
 		}
 		if hasInterface(trace.AccountInterfaces, abi.NftSaleV1) {
 			if sale, ok := basicNftSales[trace.Account]; ok {
-				trace.AdditionalInfo.NftSaleContract = &sale
+				additionalInfo.NftSaleContract = &sale
 			}
 		}
 		if hasInterface(trace.AccountInterfaces, abi.StonfiPool) {
 			if pool, ok := stonfiPools[trace.Account]; ok {
-				trace.AdditionalInfo.STONfiPool = &pool
-				trace.AdditionalInfo.SetJettonMaster(pool.Token0, masters[pool.Token0])
-				trace.AdditionalInfo.SetJettonMaster(pool.Token1, masters[pool.Token1])
+				additionalInfo.STONfiPool = &pool
+				additionalInfo.SetJettonMaster(pool.Token0, masters[pool.Token0])
+				additionalInfo.SetJettonMaster(pool.Token1, masters[pool.Token1])
 			}
 		}
+		trace.SetAdditionalInfo(additionalInfo)
 	})
 	return nil
 }
