@@ -6,8 +6,6 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/tonkeeper/opentonapi/pkg/oas"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/liteclient"
@@ -37,18 +35,8 @@ func (h *Handler) GetRawMasterchainInfoExt(ctx context.Context, params oas.GetRa
 	return resp, nil
 }
 
-var promautoTempMetricDiffTime = promauto.NewGauge(prometheus.GaugeOpts{
-	Name: "temp_metric_diff_time",
-})
-
 func (h *Handler) GetRawTime(ctx context.Context) (*oas.GetRawTimeOK, error) {
-	t, err := h.storage.GetTimeRaw(ctx)
-	if err != nil {
-		return nil, toError(http.StatusInternalServerError, err)
-	}
-	now := uint32(time.Now().Unix())
-	promautoTempMetricDiffTime.Set(float64(now - t))
-	return &oas.GetRawTimeOK{Time: t}, nil
+	return &oas.GetRawTimeOK{Time: uint32(time.Now().Unix())}, nil
 }
 
 func (h *Handler) GetRawBlockchainBlock(ctx context.Context, params oas.GetRawBlockchainBlockParams) (*oas.GetRawBlockchainBlockOK, error) {
