@@ -72,7 +72,7 @@ func (h *Handler) GetStakingPoolInfo(ctx context.Context, params oas.GetStakingP
 	}
 	p, err := h.storage.GetTFPool(ctx, pool.ID)
 	if err != nil {
-		return nil, toError(http.StatusInternalServerError, fmt.Errorf("pool not found: %v", err.Error()))
+		return nil, toError(http.StatusNotFound, fmt.Errorf("pool not found: %v", err.Error()))
 	}
 
 	info, _ := h.addressBook.GetTFPoolInfo(p.Address)
