@@ -77,7 +77,7 @@ func (s *Account) encodeFields(e *jx.Encoder) {
 	}
 	{
 		e.FieldStart("status")
-		e.Str(s.Status)
+		s.Status.Encode(e)
 	}
 	{
 		if s.Interfaces != nil {
@@ -196,9 +196,7 @@ func (s *Account) Decode(d *jx.Decoder) error {
 		case "status":
 			requiredBitSet[0] |= 1 << 3
 			if err := func() error {
-				v, err := d.Str()
-				s.Status = string(v)
-				if err != nil {
+				if err := s.Status.Decode(d); err != nil {
 					return err
 				}
 				return nil
@@ -10444,7 +10442,7 @@ func (s *BlockchainRawAccount) encodeFields(e *jx.Encoder) {
 	}
 	{
 		e.FieldStart("status")
-		e.Str(s.Status)
+		s.Status.Encode(e)
 	}
 	{
 		e.FieldStart("storage")
@@ -10541,9 +10539,7 @@ func (s *BlockchainRawAccount) Decode(d *jx.Decoder) error {
 		case "status":
 			requiredBitSet[0] |= 1 << 6
 			if err := func() error {
-				v, err := d.Str()
-				s.Status = string(v)
-				if err != nil {
+				if err := s.Status.Decode(d); err != nil {
 					return err
 				}
 				return nil

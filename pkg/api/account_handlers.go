@@ -51,7 +51,7 @@ func (h *Handler) GetAccount(ctx context.Context, params oas.GetAccountParams) (
 	if errors.Is(err, core.ErrEntityNotFound) {
 		return &oas.Account{
 			Address: account.ID.ToRaw(),
-			Status:  string(tlb.AccountNone),
+			Status:  oas.AccountStatusNonexist,
 		}, nil
 	}
 	if err != nil {
@@ -104,7 +104,7 @@ func (h *Handler) GetAccounts(ctx context.Context, request oas.OptGetAccountsReq
 	for accountID := range allAccountIDs {
 		account := oas.Account{
 			Address: accountID.ToRaw(),
-			Status:  string(tlb.AccountNone),
+			Status:  oas.AccountStatusNonexist,
 		}
 		results = append(results, account)
 	}

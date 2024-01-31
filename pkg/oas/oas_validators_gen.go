@@ -26,6 +26,17 @@ func (s AccStatusChange) Validate() error {
 func (s *Account) Validate() error {
 	var failures []validate.FieldError
 	if err := func() error {
+		if err := s.Status.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "status",
+			Error: err,
+		})
+	}
+	if err := func() error {
 		if s.GetMethods == nil {
 			return errors.New("nil is invalid value")
 		}
@@ -1520,6 +1531,25 @@ func (s *BlockchainConfig9) Validate() error {
 	}(); err != nil {
 		failures = append(failures, validate.FieldError{
 			Name:  "mandatory_params",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s *BlockchainRawAccount) Validate() error {
+	var failures []validate.FieldError
+	if err := func() error {
+		if err := s.Status.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "status",
 			Error: err,
 		})
 	}

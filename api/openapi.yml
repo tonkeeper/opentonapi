@@ -264,7 +264,15 @@ paths:
           required: false
           schema:
             type: array
-            description: "Supported values: NaN, Null, 10-base digits for tiny int, 0x-prefixed hex digits for int257, all forms of addresses for slice, single-root base64-encoded BOC for cell"
+            description: |- 
+              Supported values:
+              "NaN" for NaN type, 
+              "Null" for Null type, 
+              10-base digits for tiny int type (Example: 100500), 
+              0x-prefixed hex digits for int257 (Example: 0xfa01d78381ae32), 
+              all forms of addresses for slice type (Example: 0:6e731f2e28b73539a7f85ac47ca104d5840b229351189977bb6151d36b5e3f5e), 
+              single-root base64-encoded BOC for cell (Example: "te6ccgEBAQEAAgAAAA=="),
+              single-root hex-encoded BOC for slice (Example: b5ee9c72010101010002000000)
             items:
               type: string
             example: [ "0:9a33970f617bcd71acf2cd28357c067aa31859c02820d8f01d74c88063a8f4d8" ]
@@ -3945,8 +3953,7 @@ components:
           format: int64
           example: 123456789
         status:
-          type: string
-          example: active
+          '$ref': '#/components/schemas/AccountStatus'
         storage:
           $ref: '#/components/schemas/AccountStorageInfo'
     Account:
@@ -3972,8 +3979,7 @@ components:
           format: int64
           example: 123456789
         status:
-          type: string
-          example: active
+          '$ref': '#/components/schemas/AccountStatus'
         interfaces:
           type: array
           items:
