@@ -25,6 +25,9 @@ func convertToRawAccount(account *core.Account) oas.BlockchainRawAccount {
 			DuePayment:      account.Storage.DuePayment,
 		},
 	}
+	if account.LastTransactionHash != [32]byte{} {
+		rawAccount.LastTransactionHash = oas.NewOptString(account.LastTransactionHash.Hex())
+	}
 	if account.ExtraBalances != nil {
 		balances := make(map[string]string, len(account.ExtraBalances))
 		for key, value := range account.ExtraBalances {

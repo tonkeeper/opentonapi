@@ -274,13 +274,13 @@ func (s *LiteStorage) GetRawAccount(ctx context.Context, address tongo.AccountID
 		storageTimeHistogramVec.WithLabelValues("get_raw_account").Observe(v)
 	}))
 	defer timer.ObserveDuration()
-	var account tlb.Account
+	var account tlb.ShardAccount
 	err := retry.Do(func() error {
 		state, err := s.client.GetAccountState(ctx, address)
 		if err != nil {
 			return err
 		}
-		account = state.Account
+		account = state
 		return nil
 	}, retry.Attempts(10), retry.Delay(10*time.Millisecond))
 
@@ -298,13 +298,13 @@ func (s *LiteStorage) GetRawAccounts(ctx context.Context, ids []tongo.AccountID)
 	defer timer.ObserveDuration()
 	var accounts []*core.Account
 	for _, address := range ids {
-		var account tlb.Account
+		var account tlb.ShardAccount
 		err := retry.Do(func() error {
 			state, err := s.client.GetAccountState(ctx, address)
 			if err != nil {
 				return err
 			}
-			account = state.Account
+			account = state
 			return nil
 		}, retry.Attempts(10), retry.Delay(10*time.Millisecond))
 		if err != nil {

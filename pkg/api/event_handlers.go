@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"math/big"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
@@ -46,63 +47,6 @@ var (
 	})
 )
 
-func filterExternal(ctx context.Context, s interface {
-	GetRawAccount(ctx context.Context, id tongo.AccountID) (*core.Account, error)
-}, messageBoc []byte) bool {
-	cells, err := boc.DeserializeBoc(messageBoc)
-	if err != nil || len(cells) != 1 {
-		return false
-	}
-	var m tlb.Message
-	err = tlb.Unmarshal(cells[0], &m)
-	if err != nil {
-		return false
-	}
-	walletAddress, err := extractDestinationWallet(m)
-	if err != nil || walletAddress == nil {
-		return false
-	}
-	var code []byte
-	if account, err := s.GetRawAccount(ctx, *walletAddress); err == nil && len(account.Code) > 0 {
-		code = account.Code
-	} else if m.Init.Exists && m.Init.Value.Value.Code.Exists {
-		code, err = m.Init.Value.Value.Code.Value.Value.ToBoc()
-		if err != nil {
-			return false
-		}
-	} else {
-		return false
-	}
-
-	walletVersion, err := wallet.GetVersionByCode(code)
-	if err != nil {
-		return false
-	}
-	cells[0].ResetCounters()
-	rawMessages, err := tongoWallet.ExtractRawMessages(walletVersion, cells[0])
-	if err != nil {
-		return false
-	}
-	for _, rm := range rawMessages {
-		rm.Message.ResetCounters()
-		var m tlb.Message
-		if err = tlb.Unmarshal(rm.Message, &m); err != nil {
-			continue
-		}
-		if m.Info.SumType != "IntMsgInfo" {
-			continue
-		}
-		a, err := ton.AccountIDFromTlb(m.Info.IntMsgInfo.Dest)
-		if err != nil || a == nil {
-			continue
-		}
-		if a.IsZero() {
-			return true
-		}
-	}
-	return false
-}
-
 func (h *Handler) SendBlockchainMessage(ctx context.Context, request *oas.SendBlockchainMessageReq) error {
 	if h.msgSender == nil {
 		return toError(http.StatusBadRequest, fmt.Errorf("msg sender is not configured"))
@@ -111,13 +55,9 @@ func (h *Handler) SendBlockchainMessage(ctx context.Context, request *oas.SendBl
 		return toError(http.StatusBadRequest, fmt.Errorf("boc not found"))
 	}
 	if request.Boc.IsSet() {
-
 		payload, err := base64.StdEncoding.DecodeString(request.Boc.Value)
 		if err != nil {
 			return toError(http.StatusBadRequest, fmt.Errorf("boc must be a base64 encoded string"))
-		}
-		if filterExternal(ctx, h.storage, payload) {
-			return toError(http.StatusForbidden, fmt.Errorf("you can't send to zero address"))
 		}
 		msgCopy := blockchain.ExtInMsgCopy{
 			MsgBoc:  request.Boc.Value,
@@ -126,6 +66,9 @@ func (h *Handler) SendBlockchainMessage(ctx context.Context, request *oas.SendBl
 		}
 		mempoolMessageCounter.Inc()
 		if err := h.msgSender.SendMessage(ctx, msgCopy); err != nil {
+			if strings.Contains(err.Error(), "cannot apply external message to current state") {
+				return toError(http.StatusNotAcceptable, err)
+			}
 			sentry.Send("sending message", sentry.SentryInfoData{"payload": request.Boc}, sentry.LevelError)
 			return toError(http.StatusInternalServerError, err)
 		}

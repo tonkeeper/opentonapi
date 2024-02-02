@@ -280,6 +280,9 @@ func (h *Handler) GetAccountPublicKey(ctx context.Context, params oas.GetAccount
 		return nil, toError(http.StatusBadRequest, err)
 	}
 	pubKey, err := h.storage.GetWalletPubKey(ctx, account.ID)
+	if errors.Is(err, core.ErrEntityNotFound) {
+		return nil, toError(http.StatusNotFound, err)
+	}
 	if err != nil {
 		state, err := h.storage.GetRawAccount(ctx, account.ID)
 		if err != nil {

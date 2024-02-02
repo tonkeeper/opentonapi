@@ -3952,6 +3952,9 @@ components:
           type: integer
           format: int64
           example: 123456789
+        last_transaction_hash:
+          type: string
+          example: 088b436a846d92281734236967970612f87fbd64a2cd3573107948379e8e4161
         status:
           '$ref': '#/components/schemas/AccountStatus'
         storage:

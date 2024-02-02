@@ -3815,14 +3815,15 @@ func (s *BlockchainConfig9) SetMandatoryParams(val []int32) {
 
 // Ref: #/components/schemas/BlockchainRawAccount
 type BlockchainRawAccount struct {
-	Address           string                              `json:"address"`
-	Balance           int64                               `json:"balance"`
-	ExtraBalance      OptBlockchainRawAccountExtraBalance `json:"extra_balance"`
-	Code              OptString                           `json:"code"`
-	Data              OptString                           `json:"data"`
-	LastTransactionLt int64                               `json:"last_transaction_lt"`
-	Status            AccountStatus                       `json:"status"`
-	Storage           AccountStorageInfo                  `json:"storage"`
+	Address             string                              `json:"address"`
+	Balance             int64                               `json:"balance"`
+	ExtraBalance        OptBlockchainRawAccountExtraBalance `json:"extra_balance"`
+	Code                OptString                           `json:"code"`
+	Data                OptString                           `json:"data"`
+	LastTransactionLt   int64                               `json:"last_transaction_lt"`
+	LastTransactionHash OptString                           `json:"last_transaction_hash"`
+	Status              AccountStatus                       `json:"status"`
+	Storage             AccountStorageInfo                  `json:"storage"`
 }
 
 // GetAddress returns the value of Address.
@@ -3853,6 +3854,11 @@ func (s *BlockchainRawAccount) GetData() OptString {
 // GetLastTransactionLt returns the value of LastTransactionLt.
 func (s *BlockchainRawAccount) GetLastTransactionLt() int64 {
 	return s.LastTransactionLt
+}
+
+// GetLastTransactionHash returns the value of LastTransactionHash.
+func (s *BlockchainRawAccount) GetLastTransactionHash() OptString {
+	return s.LastTransactionHash
 }
 
 // GetStatus returns the value of Status.
@@ -3893,6 +3899,11 @@ func (s *BlockchainRawAccount) SetData(val OptString) {
 // SetLastTransactionLt sets the value of LastTransactionLt.
 func (s *BlockchainRawAccount) SetLastTransactionLt(val int64) {
 	s.LastTransactionLt = val
+}
+
+// SetLastTransactionHash sets the value of LastTransactionHash.
+func (s *BlockchainRawAccount) SetLastTransactionHash(val OptString) {
+	s.LastTransactionHash = val
 }
 
 // SetStatus sets the value of Status.

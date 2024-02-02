@@ -2317,6 +2317,10 @@
       },
       "type": "object"
      },
+     "last_transaction_hash": {
+      "example": "088b436a846d92281734236967970612f87fbd64a2cd3573107948379e8e4161",
+      "type": "string"
+     },
      "last_transaction_lt": {
       "example": 123456789,
       "format": "int64",

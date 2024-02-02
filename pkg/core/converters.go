@@ -380,11 +380,12 @@ func convertBodyCell(a tlb.Any) ([]byte, error) {
 	return c.ToBoc()
 }
 
-func ConvertToAccount(accountId tongo.AccountID, acc tlb.Account) (*Account, error) {
+func ConvertToAccount(accountId tongo.AccountID, shardAccount tlb.ShardAccount) (*Account, error) {
 	res := &Account{
 		AccountAddress: accountId,
 		Code:           []byte{},
 	}
+	acc := shardAccount.Account
 	if acc.SumType == "AccountNone" {
 		res.Status = tlb.AccountNone
 		return res, nil
@@ -400,7 +401,8 @@ func ConvertToAccount(accountId tongo.AccountID, acc tlb.Account) (*Account, err
 		}
 		res.ExtraBalances = otherBalances
 	}
-	res.LastTransactionLt = acc.Account.Storage.LastTransLt
+	res.LastTransactionLt = shardAccount.LastTransLt
+	res.LastTransactionHash = tongo.Bits256(shardAccount.LastTransHash)
 	if acc.Account.Storage.State.SumType == "AccountUninit" {
 		res.Status = tlb.AccountUninit
 		return res, nil

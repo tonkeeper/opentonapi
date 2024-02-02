@@ -12,19 +12,20 @@ import (
 
 // Account holds low-level details about a particular account taken directly from the blockchain.
 type Account struct {
-	AccountAddress    tongo.AccountID
-	Status            tlb.AccountStatus
-	TonBalance        int64
-	ExtraBalances     map[uint32]decimal.Decimal
-	LastTransactionLt uint64
-	Code              []byte
-	Data              []byte
-	FrozenHash        *tongo.Bits256
-	Storage           StorageInfo
-	Interfaces        []abi.ContractInterface
-	LastActivityTime  int64
-	GetMethods        []string
-	Libraries         map[tongo.Bits256]*SimpleLib
+	AccountAddress      tongo.AccountID
+	Status              tlb.AccountStatus
+	TonBalance          int64
+	ExtraBalances       map[uint32]decimal.Decimal
+	LastTransactionLt   uint64
+	LastTransactionHash tongo.Bits256
+	Code                []byte
+	Data                []byte
+	FrozenHash          *tongo.Bits256
+	Storage             StorageInfo
+	Interfaces          []abi.ContractInterface
+	LastActivityTime    int64
+	GetMethods          []string
+	Libraries           map[tongo.Bits256]*SimpleLib
 }
 
 // StorageInfo is taken from TLB storage_stat:StorageInfo.
