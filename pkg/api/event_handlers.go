@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"crypto/sha256"
 	"encoding/base64"
 	"encoding/hex"
 	"errors"
@@ -59,6 +60,10 @@ func (h *Handler) SendBlockchainMessage(ctx context.Context, request *oas.SendBl
 		if err != nil {
 			return toError(http.StatusBadRequest, fmt.Errorf("boc must be a base64 encoded string"))
 		}
+		checksum := sha256.Sum256(payload)
+		if _, prs := h.blacklistedBocCache.Get(checksum); prs {
+			return toError(http.StatusBadRequest, fmt.Errorf("duplicate message"))
+		}
 		msgCopy := blockchain.ExtInMsgCopy{
 			MsgBoc:  request.Boc.Value,
 			Payload: payload,
@@ -67,11 +72,13 @@ func (h *Handler) SendBlockchainMessage(ctx context.Context, request *oas.SendBl
 		mempoolMessageCounter.Inc()
 		if err := h.msgSender.SendMessage(ctx, msgCopy); err != nil {
 			if strings.Contains(err.Error(), "cannot apply external message to current state") {
+				h.blacklistedBocCache.Set(checksum, struct{}{}, cache.WithExpiration(time.Minute))
 				return toError(http.StatusNotAcceptable, err)
 			}
 			sentry.Send("sending message", sentry.SentryInfoData{"payload": request.Boc}, sentry.LevelError)
 			return toError(http.StatusInternalServerError, err)
 		}
+		h.blacklistedBocCache.Set(checksum, struct{}{}, cache.WithExpiration(time.Minute))
 		go func() {
 			defer func() {
 				if err := recover(); err != nil {

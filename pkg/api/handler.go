@@ -53,6 +53,9 @@ type Handler struct {
 	// mempoolEmulateIgnoreAccounts, we don't track pending transactions for this list of accounts.
 	mempoolEmulateIgnoreAccounts map[tongo.AccountID]struct{}
 
+	// need to blacklist BoCs for avoiding spamming
+	blacklistedBocCache cache.Cache[[32]byte, struct{}]
+
 	// mu protects "dns".
 	mu  sync.Mutex
 	dns *dns.DNS // todo: update when blockchain config changes
@@ -216,7 +219,8 @@ func NewHandler(logger *zap.Logger, opts ...Option) (*Handler, error) {
 		mempoolEmulateIgnoreAccounts: map[tongo.AccountID]struct{}{
 			tongo.MustParseAddress("0:0000000000000000000000000000000000000000000000000000000000000000").ID: {},
 		},
-		tonConnect: tonConnect,
+		blacklistedBocCache: cache.NewLRUCache[[32]byte, struct{}](100000, "blacklisted_boc_cache"),
+		tonConnect:          tonConnect,
 	}, nil
 }
 
