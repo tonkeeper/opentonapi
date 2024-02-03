@@ -184,6 +184,7 @@
     "schema": {
      "default": 1000,
      "maximum": 1000,
+     "minimum": 1,
      "type": "integer"
     }
    },
@@ -256,6 +257,7 @@
     "required": false,
     "schema": {
      "default": 0,
+     "minimum": 0,
      "type": "integer"
     }
    },
@@ -5613,6 +5615,7 @@
       "schema": {
        "example": 100,
        "maximum": 1000,
+       "minimum": 1,
        "type": "integer"
       }
      },
@@ -5798,6 +5801,7 @@
       "schema": {
        "example": 100,
        "maximum": 1000,
+       "minimum": 1,
        "type": "integer"
       }
      },
@@ -5874,6 +5878,7 @@
       "schema": {
        "example": 100,
        "maximum": 1000,
+       "minimum": 1,
        "type": "integer"
       }
      },
@@ -5995,6 +6000,7 @@
       "schema": {
        "example": 100,
        "maximum": 1000,
+       "minimum": 1,
        "type": "integer"
       }
      },
@@ -6143,6 +6149,7 @@
        "default": 100,
        "example": 100,
        "maximum": 1000,
+       "minimum": 1,
        "type": "integer"
       }
      }
@@ -6386,6 +6393,7 @@
        "example": 100,
        "format": "int32",
        "maximum": 1000,
+       "minimum": 1,
        "type": "integer"
       }
      }
@@ -7072,6 +7080,7 @@
        "default": 100,
        "example": 100,
        "maximum": 1000,
+       "minimum": 1,
        "type": "integer"
       }
      }
@@ -7135,6 +7144,7 @@
        "default": 100,
        "example": 100,
        "maximum": 1000,
+       "minimum": 1,
        "type": "integer"
       }
      }
@@ -7280,6 +7290,7 @@
        "example": 15,
        "format": "int32",
        "maximum": 1000,
+       "minimum": 1,
        "type": "integer"
       }
      },
@@ -7290,6 +7301,7 @@
        "default": 0,
        "example": 10,
        "format": "int32",
+       "minimum": 0,
        "type": "integer"
       }
      }
@@ -8374,6 +8386,7 @@
        "example": 15,
        "format": "int32",
        "maximum": 1000,
+       "minimum": 1,
        "type": "integer"
       }
      },
@@ -8384,6 +8397,7 @@
        "default": 0,
        "example": 10,
        "format": "int32",
+       "minimum": 0,
        "type": "integer"
       }
      }
@@ -8530,6 +8544,7 @@
       "schema": {
        "example": 100,
        "maximum": 1000,
+       "minimum": 1,
        "type": "integer"
       }
      },

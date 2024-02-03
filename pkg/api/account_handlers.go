@@ -285,6 +285,9 @@ func (h *Handler) GetAccountPublicKey(ctx context.Context, params oas.GetAccount
 	}
 	if err != nil {
 		state, err := h.storage.GetRawAccount(ctx, account.ID)
+		if errors.Is(err, core.ErrEntityNotFound) {
+			return nil, toError(http.StatusNotFound, err)
+		}
 		if err != nil {
 			return nil, toError(http.StatusInternalServerError, err)
 		}

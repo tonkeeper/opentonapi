@@ -241,6 +241,7 @@ paths:
             maximum: 1000
             default: 100
             example: 100
+            minimum: 1
       responses:
         '200':
           description: blockchain account transactions
@@ -597,6 +598,7 @@ paths:
             type: integer
             example: 100
             maximum: 1000
+            minimum: 1
         - name: start_date
           in: query
           required: false
@@ -645,6 +647,7 @@ paths:
             type: integer
             example: 100
             maximum: 1000
+            minimum: 1
         - name: start_date
           in: query
           required: false
@@ -719,6 +722,7 @@ paths:
             type: integer
             example: 100
             maximum: 1000
+            minimum: 1
         - name: start_date
           in: query
           required: false
@@ -774,6 +778,7 @@ paths:
             type: integer
             example: 100
             maximum: 1000
+            minimum: 1
         - name: start_date
           in: query
           required: false
@@ -838,6 +843,7 @@ paths:
             maximum: 1000
             default: 100
             example: 100
+            minimum: 1
       responses:
         '200':
           description: account's traces
@@ -1064,6 +1070,7 @@ paths:
             maximum: 1000
             default: 100
             example: 15
+            minimum: 1
         - name: offset
           in: query
           schema:
@@ -1071,6 +1078,7 @@ paths:
             format: int32
             default: 0
             example: 10
+            minimum: 0
       responses:
         '200':
           description: nft collections
@@ -1174,6 +1182,7 @@ paths:
             type: integer
             example: 100
             maximum: 1000
+            minimum: 1
         - name: start_date
           in: query
           required: false
@@ -1278,6 +1287,7 @@ paths:
                 example: 100
                 default: 100
                 maximum: 1000
+                minimum: 1
         responses:
             '200':
               description: account inscriptions history
@@ -1318,6 +1328,7 @@ paths:
                 example: 100
                 default: 100
                 maximum: 1000
+                minimum: 1
         responses:
             '200':
               description: account inscriptions history
@@ -1410,6 +1421,7 @@ paths:
             maximum: 1000
             default: 100
             example: 15
+            minimum: 1
         - name: offset
           in: query
           schema:
@@ -1417,6 +1429,7 @@ paths:
             format: int32
             default: 0
             example: 10
+            minimum: 0
       responses:
         '200':
           description: a list of jettons
@@ -2569,6 +2582,7 @@ components:
         type: integer
         default: 1000
         maximum: 1000
+        minimum: 1
     offsetQuery:
       in: query
       name: offset
@@ -2576,6 +2590,7 @@ components:
       schema:
         type: integer
         default: 0
+        minimum: 0
     domainFilterQuery:
       in: query
       name: tld

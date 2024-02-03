@@ -1761,8 +1761,8 @@ func decodeGetAccountEventsParams(args [1]string, argsEscaped bool, r *http.Requ
 			}
 			if err := func() error {
 				if err := (validate.Int{
-					MinSet:        false,
-					Min:           0,
+					MinSet:        true,
+					Min:           1,
 					MaxSet:        true,
 					Max:           1000,
 					MinExclusive:  false,
@@ -1997,8 +1997,8 @@ func decodeGetAccountInscriptionsParams(args [1]string, argsEscaped bool, r *htt
 				if value, ok := params.Limit.Get(); ok {
 					if err := func() error {
 						if err := (validate.Int{
-							MinSet:        false,
-							Min:           0,
+							MinSet:        true,
+							Min:           1,
 							MaxSet:        true,
 							Max:           1000,
 							MinExclusive:  false,
@@ -2061,6 +2061,30 @@ func decodeGetAccountInscriptionsParams(args [1]string, argsEscaped bool, r *htt
 				params.Offset.SetTo(paramsDotOffsetVal)
 				return nil
 			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if value, ok := params.Offset.Get(); ok {
+					if err := func() error {
+						if err := (validate.Int{
+							MinSet:        true,
+							Min:           0,
+							MaxSet:        false,
+							Max:           0,
+							MinExclusive:  false,
+							MaxExclusive:  false,
+							MultipleOfSet: false,
+							MultipleOf:    0,
+						}).Validate(int64(value)); err != nil {
+							return errors.Wrap(err, "int")
+						}
+						return nil
+					}(); err != nil {
+						return err
+					}
+				}
+				return nil
+			}(); err != nil {
 				return err
 			}
 		}
@@ -2297,8 +2321,8 @@ func decodeGetAccountInscriptionsHistoryParams(args [1]string, argsEscaped bool,
 				if value, ok := params.Limit.Get(); ok {
 					if err := func() error {
 						if err := (validate.Int{
-							MinSet:        false,
-							Min:           0,
+							MinSet:        true,
+							Min:           1,
 							MaxSet:        true,
 							Max:           1000,
 							MinExclusive:  false,
@@ -2604,8 +2628,8 @@ func decodeGetAccountInscriptionsHistoryByTickerParams(args [2]string, argsEscap
 				if value, ok := params.Limit.Get(); ok {
 					if err := func() error {
 						if err := (validate.Int{
-							MinSet:        false,
-							Min:           0,
+							MinSet:        true,
+							Min:           1,
 							MaxSet:        true,
 							Max:           1000,
 							MinExclusive:  false,
@@ -2916,8 +2940,8 @@ func decodeGetAccountJettonHistoryByIDParams(args [2]string, argsEscaped bool, r
 			}
 			if err := func() error {
 				if err := (validate.Int{
-					MinSet:        false,
-					Min:           0,
+					MinSet:        true,
+					Min:           1,
 					MaxSet:        true,
 					Max:           1000,
 					MinExclusive:  false,
@@ -3372,8 +3396,8 @@ func decodeGetAccountJettonsHistoryParams(args [1]string, argsEscaped bool, r *h
 			}
 			if err := func() error {
 				if err := (validate.Int{
-					MinSet:        false,
-					Min:           0,
+					MinSet:        true,
+					Min:           1,
 					MaxSet:        true,
 					Max:           1000,
 					MinExclusive:  false,
@@ -3709,8 +3733,8 @@ func decodeGetAccountNftHistoryParams(args [1]string, argsEscaped bool, r *http.
 			}
 			if err := func() error {
 				if err := (validate.Int{
-					MinSet:        false,
-					Min:           0,
+					MinSet:        true,
+					Min:           1,
 					MaxSet:        true,
 					Max:           1000,
 					MinExclusive:  false,
@@ -4009,8 +4033,8 @@ func decodeGetAccountNftItemsParams(args [1]string, argsEscaped bool, r *http.Re
 				if value, ok := params.Limit.Get(); ok {
 					if err := func() error {
 						if err := (validate.Int{
-							MinSet:        false,
-							Min:           0,
+							MinSet:        true,
+							Min:           1,
 							MaxSet:        true,
 							Max:           1000,
 							MinExclusive:  false,
@@ -4073,6 +4097,30 @@ func decodeGetAccountNftItemsParams(args [1]string, argsEscaped bool, r *http.Re
 				params.Offset.SetTo(paramsDotOffsetVal)
 				return nil
 			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if value, ok := params.Offset.Get(); ok {
+					if err := func() error {
+						if err := (validate.Int{
+							MinSet:        true,
+							Min:           0,
+							MaxSet:        false,
+							Max:           0,
+							MinExclusive:  false,
+							MaxExclusive:  false,
+							MultipleOfSet: false,
+							MultipleOf:    0,
+						}).Validate(int64(value)); err != nil {
+							return errors.Wrap(err, "int")
+						}
+						return nil
+					}(); err != nil {
+						return err
+					}
+				}
+				return nil
+			}(); err != nil {
 				return err
 			}
 		}
@@ -4512,8 +4560,8 @@ func decodeGetAccountTracesParams(args [1]string, argsEscaped bool, r *http.Requ
 				if value, ok := params.Limit.Get(); ok {
 					if err := func() error {
 						if err := (validate.Int{
-							MinSet:        false,
-							Min:           0,
+							MinSet:        true,
+							Min:           1,
 							MaxSet:        true,
 							Max:           1000,
 							MinExclusive:  false,
@@ -4894,8 +4942,8 @@ func decodeGetBlockchainAccountTransactionsParams(args [1]string, argsEscaped bo
 				if value, ok := params.Limit.Get(); ok {
 					if err := func() error {
 						if err := (validate.Int{
-							MinSet:        false,
-							Min:           0,
+							MinSet:        true,
+							Min:           1,
 							MaxSet:        true,
 							Max:           1000,
 							MinExclusive:  false,
@@ -6460,8 +6508,8 @@ func decodeGetItemsFromCollectionParams(args [1]string, argsEscaped bool, r *htt
 				if value, ok := params.Limit.Get(); ok {
 					if err := func() error {
 						if err := (validate.Int{
-							MinSet:        false,
-							Min:           0,
+							MinSet:        true,
+							Min:           1,
 							MaxSet:        true,
 							Max:           1000,
 							MinExclusive:  false,
@@ -6524,6 +6572,30 @@ func decodeGetItemsFromCollectionParams(args [1]string, argsEscaped bool, r *htt
 				params.Offset.SetTo(paramsDotOffsetVal)
 				return nil
 			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if value, ok := params.Offset.Get(); ok {
+					if err := func() error {
+						if err := (validate.Int{
+							MinSet:        true,
+							Min:           0,
+							MaxSet:        false,
+							Max:           0,
+							MinExclusive:  false,
+							MaxExclusive:  false,
+							MultipleOfSet: false,
+							MultipleOf:    0,
+						}).Validate(int64(value)); err != nil {
+							return errors.Wrap(err, "int")
+						}
+						return nil
+					}(); err != nil {
+						return err
+					}
+				}
+				return nil
+			}(); err != nil {
 				return err
 			}
 		}
@@ -6663,8 +6735,8 @@ func decodeGetJettonHoldersParams(args [1]string, argsEscaped bool, r *http.Requ
 				if value, ok := params.Limit.Get(); ok {
 					if err := func() error {
 						if err := (validate.Int{
-							MinSet:        false,
-							Min:           0,
+							MinSet:        true,
+							Min:           1,
 							MaxSet:        true,
 							Max:           1000,
 							MinExclusive:  false,
@@ -6727,6 +6799,30 @@ func decodeGetJettonHoldersParams(args [1]string, argsEscaped bool, r *http.Requ
 				params.Offset.SetTo(paramsDotOffsetVal)
 				return nil
 			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if value, ok := params.Offset.Get(); ok {
+					if err := func() error {
+						if err := (validate.Int{
+							MinSet:        true,
+							Min:           0,
+							MaxSet:        false,
+							Max:           0,
+							MinExclusive:  false,
+							MaxExclusive:  false,
+							MultipleOfSet: false,
+							MultipleOf:    0,
+						}).Validate(int64(value)); err != nil {
+							return errors.Wrap(err, "int")
+						}
+						return nil
+					}(); err != nil {
+						return err
+					}
+				}
+				return nil
+			}(); err != nil {
 				return err
 			}
 		}
@@ -6878,8 +6974,8 @@ func decodeGetJettonsParams(args [0]string, argsEscaped bool, r *http.Request) (
 				if value, ok := params.Limit.Get(); ok {
 					if err := func() error {
 						if err := (validate.Int{
-							MinSet:        false,
-							Min:           0,
+							MinSet:        true,
+							Min:           1,
 							MaxSet:        true,
 							Max:           1000,
 							MinExclusive:  false,
@@ -6942,6 +7038,30 @@ func decodeGetJettonsParams(args [0]string, argsEscaped bool, r *http.Request) (
 				params.Offset.SetTo(paramsDotOffsetVal)
 				return nil
 			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if value, ok := params.Offset.Get(); ok {
+					if err := func() error {
+						if err := (validate.Int{
+							MinSet:        true,
+							Min:           0,
+							MaxSet:        false,
+							Max:           0,
+							MinExclusive:  false,
+							MaxExclusive:  false,
+							MultipleOfSet: false,
+							MultipleOf:    0,
+						}).Validate(int64(value)); err != nil {
+							return errors.Wrap(err, "int")
+						}
+						return nil
+					}(); err != nil {
+						return err
+					}
+				}
+				return nil
+			}(); err != nil {
 				return err
 			}
 		}
@@ -7214,8 +7334,8 @@ func decodeGetNftCollectionsParams(args [0]string, argsEscaped bool, r *http.Req
 				if value, ok := params.Limit.Get(); ok {
 					if err := func() error {
 						if err := (validate.Int{
-							MinSet:        false,
-							Min:           0,
+							MinSet:        true,
+							Min:           1,
 							MaxSet:        true,
 							Max:           1000,
 							MinExclusive:  false,
@@ -7278,6 +7398,30 @@ func decodeGetNftCollectionsParams(args [0]string, argsEscaped bool, r *http.Req
 				params.Offset.SetTo(paramsDotOffsetVal)
 				return nil
 			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if value, ok := params.Offset.Get(); ok {
+					if err := func() error {
+						if err := (validate.Int{
+							MinSet:        true,
+							Min:           0,
+							MaxSet:        false,
+							Max:           0,
+							MinExclusive:  false,
+							MaxExclusive:  false,
+							MultipleOfSet: false,
+							MultipleOf:    0,
+						}).Validate(int64(value)); err != nil {
+							return errors.Wrap(err, "int")
+						}
+						return nil
+					}(); err != nil {
+						return err
+					}
+				}
+				return nil
+			}(); err != nil {
 				return err
 			}
 		}
@@ -7518,8 +7662,8 @@ func decodeGetNftHistoryByIDParams(args [1]string, argsEscaped bool, r *http.Req
 			}
 			if err := func() error {
 				if err := (validate.Int{
-					MinSet:        false,
-					Min:           0,
+					MinSet:        true,
+					Min:           1,
 					MaxSet:        true,
 					Max:           1000,
 					MinExclusive:  false,
