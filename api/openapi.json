@@ -8717,6 +8717,18 @@
        "format": "int64",
        "type": "integer"
       }
+     },
+     {
+      "in": "query",
+      "name": "points_count",
+      "required": false,
+      "schema": {
+       "default": 200,
+       "format": "int",
+       "maximum": 200,
+       "minimum": 0,
+       "type": "integer"
+      }
      }
     ],
     "responses": {

@@ -1698,6 +1698,15 @@ paths:
             type: integer
             format: int64
             example: 1668436763
+        - name: points_count
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int
+            maximum: 200
+            minimum: 0
+            default: 200
       responses:
         '200':
           description: token chart

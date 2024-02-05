@@ -5580,6 +5580,10 @@ func (s *Server) handleGetChartRatesRequest(args [0]string, argsEscaped bool, w 
 					Name: "end_date",
 					In:   "query",
 				}: params.EndDate,
+				{
+					Name: "points_count",
+					In:   "query",
+				}: params.PointsCount,
 			},
 			Raw: r,
 		}

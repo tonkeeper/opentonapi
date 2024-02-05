@@ -5571,10 +5571,11 @@ func decodeGetBlockchainTransactionByMessageHashParams(args [1]string, argsEscap
 // GetChartRatesParams is parameters of getChartRates operation.
 type GetChartRatesParams struct {
 	// Accept jetton master address.
-	Token     string
-	Currency  OptString
-	StartDate OptInt64
-	EndDate   OptInt64
+	Token       string
+	Currency    OptString
+	StartDate   OptInt64
+	EndDate     OptInt64
+	PointsCount OptInt
 }
 
 func unpackGetChartRatesParams(packed middleware.Parameters) (params GetChartRatesParams) {
@@ -5610,6 +5611,15 @@ func unpackGetChartRatesParams(packed middleware.Parameters) (params GetChartRat
 		}
 		if v, ok := packed[key]; ok {
 			params.EndDate = v.(OptInt64)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "points_count",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.PointsCount = v.(OptInt)
 		}
 	}
 	return params
@@ -5772,6 +5782,76 @@ func decodeGetChartRatesParams(args [0]string, argsEscaped bool, r *http.Request
 	}(); err != nil {
 		return params, &ogenerrors.DecodeParamError{
 			Name: "end_date",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Set default value for query: points_count.
+	{
+		val := int(200)
+		params.PointsCount.SetTo(val)
+	}
+	// Decode query: points_count.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "points_count",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotPointsCountVal int
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToInt(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotPointsCountVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.PointsCount.SetTo(paramsDotPointsCountVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if value, ok := params.PointsCount.Get(); ok {
+					if err := func() error {
+						if err := (validate.Int{
+							MinSet:        true,
+							Min:           0,
+							MaxSet:        true,
+							Max:           200,
+							MinExclusive:  false,
+							MaxExclusive:  false,
+							MultipleOfSet: false,
+							MultipleOf:    0,
+						}).Validate(int64(value)); err != nil {
+							return errors.Wrap(err, "int")
+						}
+						return nil
+					}(); err != nil {
+						return err
+					}
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "points_count",
 			In:   "query",
 			Err:  err,
 		}

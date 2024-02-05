@@ -157,7 +157,7 @@ type addressBook interface {
 
 type ratesSource interface {
 	GetRates(date int64) (map[string]float64, error)
-	GetRatesChart(token string, currency string, startDate *int64, endDate *int64) ([][]any, error)
+	GetRatesChart(token string, currency string, pointsCount int, startDate *int64, endDate *int64) ([][]any, error)
 	GetMarketsTonPrice() []rates.Market
 }
 

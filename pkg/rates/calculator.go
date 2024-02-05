@@ -9,7 +9,7 @@ import (
 
 type ratesSource interface {
 	GetRates(date int64) (map[string]float64, error)
-	GetRatesChart(token string, currency string, startDate *int64, endDate *int64) ([][]any, error)
+	GetRatesChart(token string, currency string, pointsCount int, startDate *int64, endDate *int64) ([][]any, error)
 	GetMarketsTonPrice() []Market
 }
 
@@ -103,8 +103,8 @@ func (c *calculator) GetRates(date int64) (map[string]float64, error) {
 	return nil, fmt.Errorf("invalid period")
 }
 
-func (c *calculator) GetRatesChart(token string, currency string, startDate *int64, endDate *int64) ([][]any, error) {
-	return c.source.GetRatesChart(token, currency, startDate, endDate)
+func (c *calculator) GetRatesChart(token string, currency string, pointsCount int, startDate *int64, endDate *int64) ([][]any, error) {
+	return c.source.GetRatesChart(token, currency, pointsCount, startDate, endDate)
 }
 
 func (c *calculator) GetMarketsTonPrice() []Market {
@@ -123,6 +123,6 @@ func (m Mock) GetMarketsTonPrice() []Market {
 	return m.GetCurrentMarketsTonPrice()
 }
 
-func (m Mock) GetRatesChart(token string, currency string, startDate *int64, endDate *int64) ([][]any, error) {
+func (m Mock) GetRatesChart(token string, currency string, pointsCount int, startDate *int64, endDate *int64) ([][]any, error) {
 	return [][]any{}, nil
 }

@@ -37,7 +37,15 @@ func (h *Handler) GetChartRates(ctx context.Context, params oas.GetChartRatesPar
 	if params.EndDate.Set {
 		endDate = &params.EndDate.Value
 	}
-	charts, err := h.ratesSource.GetRatesChart(token, params.Currency.Value, startDate, endDate)
+	var defaultPointsCount = 200
+	if params.PointsCount.Set {
+		if params.PointsCount.Value > defaultPointsCount {
+			return nil, toError(http.StatusBadRequest, fmt.Errorf("max points: %v", defaultPointsCount))
+		} else {
+			defaultPointsCount = params.PointsCount.Value
+		}
+	}
+	charts, err := h.ratesSource.GetRatesChart(token, params.Currency.Value, defaultPointsCount, startDate, endDate)
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
