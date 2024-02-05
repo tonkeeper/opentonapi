@@ -7,6 +7,7 @@ require (
 	github.com/Code-Hex/go-generics-cache v1.3.0
 	github.com/avast/retry-go v3.0.0+incompatible
 	github.com/caarlos0/env/v6 v6.10.1
+	github.com/cespare/xxhash/v2 v2.1.2
 	github.com/getsentry/sentry-go v0.24.1
 	github.com/ghodss/yaml v1.0.0
 	github.com/go-faster/errors v0.6.1
@@ -35,7 +36,6 @@ require (
 
 require (
 	github.com/beorn7/perks v1.0.1 // indirect
-	github.com/cespare/xxhash/v2 v2.1.2 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dlclark/regexp2 v1.10.0 // indirect
 	github.com/fatih/color v1.15.0 // indirect

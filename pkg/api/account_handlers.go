@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"encoding/base64"
+	"encoding/binary"
 	"encoding/hex"
 	"encoding/json"
 	"errors"
@@ -11,19 +12,20 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/tonkeeper/opentonapi/internal/g"
-
-	"github.com/tonkeeper/opentonapi/pkg/addressbook"
-	"github.com/tonkeeper/tongo/code"
-	"github.com/tonkeeper/tongo/utils"
-
-	"github.com/tonkeeper/opentonapi/pkg/core"
-	"github.com/tonkeeper/opentonapi/pkg/oas"
+	"github.com/cespare/xxhash/v2"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
 	"github.com/tonkeeper/tongo/boc"
+	"github.com/tonkeeper/tongo/code"
 	"github.com/tonkeeper/tongo/tlb"
+	"github.com/tonkeeper/tongo/ton"
+	"github.com/tonkeeper/tongo/utils"
 	walletTongo "github.com/tonkeeper/tongo/wallet"
+
+	"github.com/tonkeeper/opentonapi/internal/g"
+	"github.com/tonkeeper/opentonapi/pkg/addressbook"
+	"github.com/tonkeeper/opentonapi/pkg/core"
+	"github.com/tonkeeper/opentonapi/pkg/oas"
 )
 
 func (h *Handler) GetBlockchainRawAccount(ctx context.Context, params oas.GetBlockchainRawAccountParams) (*oas.BlockchainRawAccount, error) {
@@ -135,12 +137,44 @@ func (h *Handler) GetBlockchainAccountTransactions(ctx context.Context, params o
 	return &result, nil
 }
 
+func getMethodCacheKey(accountID ton.AccountID, methodName string, lt uint64, args []string) (string, error) {
+	d := xxhash.New()
+	var x [8]byte
+	binary.LittleEndian.PutUint64(x[:], lt)
+	if _, err := d.Write(x[:]); err != nil {
+		return "", err
+	}
+	if _, err := d.WriteString(methodName); err != nil {
+		return "", err
+	}
+	for _, arg := range args {
+		if _, err := d.WriteString(arg + "|"); err != nil {
+			return "", err
+		}
+	}
+	return fmt.Sprintf("%s-%d", accountID.ToRaw(), d.Sum64()), nil
+}
+
 func (h *Handler) ExecGetMethodForBlockchainAccount(ctx context.Context, params oas.ExecGetMethodForBlockchainAccountParams) (*oas.MethodExecutionResult, error) {
 	account, err := tongo.ParseAddress(params.AccountID)
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
 	}
-	var stack tlb.VmStack
+	contract, err := h.storage.GetContract(ctx, account.ID)
+	if err != nil {
+		if errors.Is(err, core.ErrEntityNotFound) {
+			return nil, toError(http.StatusNotFound, err)
+		}
+		return nil, toError(http.StatusInternalServerError, err)
+	}
+	key, err := getMethodCacheKey(account.ID, params.MethodName, contract.LastTransactionLt, params.Args)
+	if err != nil {
+		return nil, toError(http.StatusInternalServerError, err)
+	}
+	if result, ok := h.getMethodsCache.Get(key); ok {
+		return result, nil
+	}
+	stack := make([]tlb.VmStackValue, 0, len(params.Args))
 	for _, p := range params.Args {
 		r, err := stringToTVMStackRecord(p)
 		if err != nil {
@@ -148,6 +182,10 @@ func (h *Handler) ExecGetMethodForBlockchainAccount(ctx context.Context, params 
 		}
 		stack = append(stack, r)
 	}
+	// RunSmcMethodByID fetches the contract from the storage on its own,
+	// and it can happen that the contract has been changed and has another lt,
+	// in this case, we get a correct result from the executor,
+	// but we update a previous cache entry that won't be used anymore.
 	exitCode, stack, err := h.executor.RunSmcMethodByID(ctx, account.ID, utils.MethodIdFromName(params.MethodName), stack)
 	if err != nil {
 		if errors.Is(err, core.ErrEntityNotFound) {
@@ -178,6 +216,7 @@ func (h *Handler) ExecGetMethodForBlockchainAccount(ctx context.Context, params 
 			break
 		}
 	}
+	h.getMethodsCache.Set(key, &result)
 	return &result, nil
 }
 

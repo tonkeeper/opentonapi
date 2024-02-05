@@ -48,9 +48,10 @@ type AccountInfo struct {
 
 // Contract represents an account but contains a few fields that are only relevant for smart contracts.
 type Contract struct {
-	Status    tlb.AccountStatus
-	Balance   int64
-	Code      []byte
-	Data      []byte
-	Libraries map[tongo.Bits256]*SimpleLib
+	Status            tlb.AccountStatus
+	Balance           int64
+	Code              []byte
+	Data              []byte
+	Libraries         map[tongo.Bits256]*SimpleLib
+	LastTransactionLt uint64
 }

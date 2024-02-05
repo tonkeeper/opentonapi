@@ -37,6 +37,7 @@ type Handler struct {
 	state       chainState
 	msgSender   messageSender
 	executor    executor
+
 	limits      Limits
 	spamFilter  spamFilter
 	ratesSource ratesSource
@@ -55,6 +56,9 @@ type Handler struct {
 
 	// need to blacklist BoCs for avoiding spamming
 	blacklistedBocCache cache.Cache[[32]byte, struct{}]
+
+	// getMethodsCache contains results of methods.
+	getMethodsCache cache.Cache[string, *oas.MethodExecutionResult]
 
 	// mu protects "dns".
 	mu  sync.Mutex
@@ -220,6 +224,7 @@ func NewHandler(logger *zap.Logger, opts ...Option) (*Handler, error) {
 			tongo.MustParseAddress("0:0000000000000000000000000000000000000000000000000000000000000000").ID: {},
 		},
 		blacklistedBocCache: cache.NewLRUCache[[32]byte, struct{}](100000, "blacklisted_boc_cache"),
+		getMethodsCache:     cache.NewLRUCache[string, *oas.MethodExecutionResult](100000, "get_methods_cache"),
 		tonConnect:          tonConnect,
 	}, nil
 }
