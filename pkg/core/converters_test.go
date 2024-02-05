@@ -61,7 +61,7 @@ func TestConvertToAccount(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			account, err := readFile[tlb.Account](tt.filename)
+			account, err := readFile[tlb.ShardAccount](tt.filename)
 			require.Nil(t, err)
 			got, err := ConvertToAccount(tt.accountID, *account)
 			require.Nil(t, err)
