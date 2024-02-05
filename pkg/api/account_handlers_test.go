@@ -22,7 +22,7 @@ func TestHandler_GetRawAccount(t *testing.T) {
 	tests := []struct {
 		name        string
 		params      oas.GetBlockchainRawAccountParams
-		wantStatus  string
+		wantStatus  oas.AccountStatus
 		wantAddress string
 	}{
 		{
@@ -53,7 +53,7 @@ func TestHandler_GetAccount(t *testing.T) {
 	tests := []struct {
 		name        string
 		params      oas.GetAccountParams
-		wantStatus  string
+		wantStatus  oas.AccountStatus
 		wantAddress string
 	}{
 		{
@@ -153,7 +153,7 @@ func TestHandler_GetAccounts(t *testing.T) {
 			statuses := map[string]string{}
 			names := map[string]string{}
 			for _, account := range accountRes.Accounts {
-				statuses[account.Address] = account.Status
+				statuses[account.Address] = string(account.Status)
 				names[account.Address] = account.Name.Value
 			}
 			require.Equal(t, tt.wantStatuses, statuses)
