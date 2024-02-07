@@ -5613,8 +5613,8 @@
       "name": "limit",
       "required": true,
       "schema": {
-       "example": 100,
-       "maximum": 1000,
+       "example": 20,
+       "maximum": 100,
        "minimum": 1,
        "type": "integer"
       }

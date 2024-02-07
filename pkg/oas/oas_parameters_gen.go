@@ -1764,7 +1764,7 @@ func decodeGetAccountEventsParams(args [1]string, argsEscaped bool, r *http.Requ
 					MinSet:        true,
 					Min:           1,
 					MaxSet:        true,
-					Max:           1000,
+					Max:           100,
 					MinExclusive:  false,
 					MaxExclusive:  false,
 					MultipleOfSet: false,
