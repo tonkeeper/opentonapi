@@ -20,7 +20,11 @@ import (
 )
 
 func toError(code int, err error) *oas.ErrorStatusCode {
-	return &oas.ErrorStatusCode{StatusCode: code, Response: oas.Error{Error: err.Error()}}
+	msg := err.Error()
+	if strings.HasPrefix(err.Error(), "failed to connect to") {
+		msg = "unknown error"
+	}
+	return &oas.ErrorStatusCode{StatusCode: code, Response: oas.Error{Error: msg}}
 }
 
 func anyToJSONRawMap(a any) map[string]jx.Raw { //todo: переписать этот ужас
