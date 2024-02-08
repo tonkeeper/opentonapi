@@ -3,7 +3,6 @@ package api
 import (
 	"context"
 	"crypto/ed25519"
-	"sync"
 
 	rules "github.com/tonkeeper/scam_backoffice_rules"
 	"github.com/tonkeeper/tongo"
@@ -176,7 +175,6 @@ type metadataCache struct {
 }
 
 type mempoolEmulate struct {
-	mu             sync.RWMutex
 	traces         cache.Cache[string, *core.Trace]
 	accountsTraces cache.Cache[tongo.AccountID, []string]
 }

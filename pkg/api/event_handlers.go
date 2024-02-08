@@ -24,6 +24,7 @@ import (
 	"github.com/tonkeeper/tongo/tontest"
 	"github.com/tonkeeper/tongo/txemulator"
 	tongoWallet "github.com/tonkeeper/tongo/wallet"
+	"golang.org/x/exp/maps"
 	"golang.org/x/exp/slices"
 
 	"github.com/tonkeeper/opentonapi/pkg/bath"
@@ -216,20 +217,19 @@ func (h *Handler) GetAccountEvents(ctx context.Context, params oas.GetAccountEve
 		lastLT = trace.Lt
 	}
 	if !params.BeforeLt.IsSet() {
-		memHashTraces, _ := h.mempoolEmulate.accountsTraces.Get(account.ID)
-		parsedHashes := make(map[tongo.Bits256]bool)
-		for _, traceHash := range memHashTraces {
-			parsedHash, _ := tongo.ParseHash(traceHash)
-			parsedHashes[parsedHash] = true
-		}
-		for hash := range parsedHashes {
-			_, err = h.storage.SearchTransactionByMessageHash(ctx, hash)
-			if err == nil {
-				delete(parsedHashes, hash)
+		memTraces, _ := h.mempoolEmulate.accountsTraces.Get(account.ID)
+		processingTraces := make(map[tongo.Bits256]bool)
+		for _, trace := range memTraces {
+			hash, err := tongo.ParseHash(trace)
+			if err != nil {
+				continue
+			}
+			if _, err = h.storage.SearchTransactionByMessageHash(ctx, hash); err != nil {
+				processingTraces[hash] = true
 			}
 		}
-		for traceHash := range parsedHashes {
-			trace, ok := h.mempoolEmulate.traces.Get(traceHash.Hex())
+		for hash := range processingTraces {
+			trace, ok := h.mempoolEmulate.traces.Get(hash.Hex())
 			if !ok {
 				continue
 			}
@@ -242,7 +242,7 @@ func (h *Handler) GetAccountEvents(ctx context.Context, params oas.GetAccountEve
 				return nil, toError(http.StatusInternalServerError, err)
 			}
 			event.InProgress = true
-			event.EventID = traceHash.Hex()
+			event.EventID = hash.Hex()
 			events = slices.Insert(events, 0, event)
 			if len(events) > params.Limit {
 				events = events[:params.Limit]
@@ -609,15 +609,23 @@ func (h *Handler) addToMempool(ctx context.Context, bytesBoc []byte, shardAccoun
 		return shardAccount, err
 	}
 	h.mempoolEmulate.traces.Set(hex.EncodeToString(hash), trace, cache.WithExpiration(time.Second*time.Duration(ttl)))
-	h.mempoolEmulate.mu.Lock()
-	defer h.mempoolEmulate.mu.Unlock()
 	for account := range accounts {
-		if _, ok := h.mempoolEmulateIgnoreAccounts[account]; ok {
+		if _, ok := h.mempoolEmulateIgnoreAccounts[account]; ok { // the map is filled only once at the start
 			continue
 		}
-		traces, _ := h.mempoolEmulate.accountsTraces.Get(account)
-		traces = slices.Insert(traces, 0, hex.EncodeToString(hash))
-		h.mempoolEmulate.accountsTraces.Set(account, traces, cache.WithExpiration(time.Second*time.Duration(ttl)))
+		memTraces, _ := h.mempoolEmulate.accountsTraces.Get(account)
+		processingTraces := make(map[string]bool)
+		for _, memTrace := range memTraces {
+			parsedHash, err := tongo.ParseHash(memTrace)
+			if err != nil {
+				continue
+			}
+			if _, err = h.storage.SearchTransactionByMessageHash(ctx, parsedHash); err != nil {
+				processingTraces[memTrace] = true
+			}
+		}
+		processingTraces[hex.EncodeToString(hash)] = true
+		h.mempoolEmulate.accountsTraces.Set(account, maps.Keys(processingTraces), cache.WithExpiration(time.Second*time.Duration(ttl)))
 	}
 	h.emulationCh <- blockchain.ExtInMsgCopy{
 		MsgBoc:   base64.StdEncoding.EncodeToString(bytesBoc),
