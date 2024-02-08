@@ -605,7 +605,7 @@ func (h *Handler) addToMempool(ctx context.Context, bytesBoc []byte, shardAccoun
 			continue
 		}
 		oldMemHashes, _ := h.mempoolEmulate.accountsTraces.Get(account)
-		newMemHashes := []ton.Bits256{hash}
+		newMemHashes := make([]ton.Bits256, 0, len(oldMemHashes)+1)
 		for _, mHash := range oldMemHashes { //we need to filter messages which already created transactions
 			_, err = h.storage.SearchTransactionByMessageHash(ctx, mHash)
 			_, prs := h.mempoolEmulate.traces.Get(mHash)
@@ -613,6 +613,7 @@ func (h *Handler) addToMempool(ctx context.Context, bytesBoc []byte, shardAccoun
 				newMemHashes = append(newMemHashes, mHash)
 			}
 		}
+		newMemHashes = append(newMemHashes, hash) // it's important to make it las
 		h.mempoolEmulate.accountsTraces.Set(account, newMemHashes, cache.WithExpiration(time.Second*time.Duration(ttl)))
 	}
 	h.emulationCh <- blockchain.ExtInMsgCopy{
