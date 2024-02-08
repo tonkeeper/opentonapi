@@ -9,3 +9,11 @@ func (s *DomainBid) setDefaults() {
 		s.Success = val
 	}
 }
+
+// setDefaults set default value of fields.
+func (s *ServiceStatus) setDefaults() {
+	{
+		val := bool(true)
+		s.RestOnline = val
+	}
+}

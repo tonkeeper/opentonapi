@@ -4416,6 +4416,23 @@
     ],
     "type": "object"
    },
+   "ServiceStatus": {
+    "properties": {
+     "indexing_latency": {
+      "example": 100,
+      "type": "integer"
+     },
+     "rest_online": {
+      "default": true,
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "indexing_latency",
+     "rest_online"
+    ],
+    "type": "object"
+   },
    "SizeLimitsConfig": {
     "properties": {
      "max_acc_state_bits": {
@@ -8937,6 +8954,30 @@
     },
     "tags": [
      "Staking"
+    ]
+   }
+  },
+  "/v2/status": {
+   "get": {
+    "description": "Reduce indexing latency",
+    "operationId": "reduceIndexingLatency",
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ServiceStatus"
+        }
+       }
+      },
+      "description": "indexing latency"
+     },
+     "default": {
+      "$ref": "#/components/responses/Error"
+     }
+    },
+    "tags": [
+     "Blockchain"
     ]
    }
   },

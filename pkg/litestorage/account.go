@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/ed25519"
 	"errors"
+	"time"
 
 	"github.com/tonkeeper/tongo/tlb"
 	tongoWallet "github.com/tonkeeper/tongo/wallet"
@@ -45,4 +46,13 @@ func (s *LiteStorage) SearchAccountsByPubKey(pubKey ed25519.PublicKey) ([]tongo.
 
 func (s *LiteStorage) GetAccountDiff(ctx context.Context, account tongo.AccountID, startTime int64, endTime int64) (int64, error) {
 	return 0, errors.New("not implemented")
+}
+
+func (s *LiteStorage) ReduceIndexingLatency(ctx context.Context) (int64, error) {
+	blockHeader, err := s.LastMasterchainBlockHeader(ctx)
+	if err != nil {
+		return 0, err
+	}
+	latency := time.Now().Unix() - int64(blockHeader.GenUtime)
+	return latency, nil
 }

@@ -13745,6 +13745,32 @@ func (s *Seqno) SetSeqno(val uint32) {
 	s.Seqno = val
 }
 
+// Ref: #/components/schemas/ServiceStatus
+type ServiceStatus struct {
+	RestOnline      bool `json:"rest_online"`
+	IndexingLatency int  `json:"indexing_latency"`
+}
+
+// GetRestOnline returns the value of RestOnline.
+func (s *ServiceStatus) GetRestOnline() bool {
+	return s.RestOnline
+}
+
+// GetIndexingLatency returns the value of IndexingLatency.
+func (s *ServiceStatus) GetIndexingLatency() int {
+	return s.IndexingLatency
+}
+
+// SetRestOnline sets the value of RestOnline.
+func (s *ServiceStatus) SetRestOnline(val bool) {
+	s.RestOnline = val
+}
+
+// SetIndexingLatency sets the value of IndexingLatency.
+func (s *ServiceStatus) SetIndexingLatency(val int) {
+	s.IndexingLatency = val
+}
+
 // SetWalletBackupOK is response for SetWalletBackup operation.
 type SetWalletBackupOK struct{}
 
