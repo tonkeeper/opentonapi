@@ -214,9 +214,10 @@ func (h *Handler) GetAccountEvents(ctx context.Context, params oas.GetAccountEve
 		}
 		lastLT = trace.Lt
 	}
-	if !params.BeforeLt.IsSet() { //if we look into history we don't need to mix mempool
+	if !(params.BeforeLt.IsSet() || params.StartDate.IsSet() || params.EndDate.IsSet()) { //if we look into history we don't need to mix mempool
 		memTraces, _ := h.mempoolEmulate.accountsTraces.Get(account.ID)
-		for i, hash := range memTraces {
+		i := 0
+		for _, hash := range memTraces {
 			_, err = h.storage.SearchTransactionByMessageHash(ctx, hash)
 			trace, prs := h.mempoolEmulate.traces.Get(hash)
 			if err == nil || !prs { //if err is nil it's alredy proccessed. if !prs we can't do anything
@@ -225,6 +226,7 @@ func (h *Handler) GetAccountEvents(ctx context.Context, params oas.GetAccountEve
 			if i > params.Limit-2 { // we want always to save at least 1 real transaction
 				break
 			}
+			i++
 			result, err := bath.FindActions(ctx, trace, bath.ForAccount(account.ID), bath.WithInformationSource(h.storage))
 			if err != nil {
 				return nil, toError(http.StatusInternalServerError, err)
