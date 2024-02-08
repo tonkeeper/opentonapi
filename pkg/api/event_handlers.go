@@ -219,7 +219,7 @@ func (h *Handler) GetAccountEvents(ctx context.Context, params oas.GetAccountEve
 		for i, hash := range memTraces {
 			_, err = h.storage.SearchTransactionByMessageHash(ctx, hash)
 			trace, prs := h.mempoolEmulate.traces.Get(hash)
-			if err == nil && !prs { //if err is nil it's alredy proccessed. if !prs we can't do anything
+			if err == nil || !prs { //if err is nil it's alredy proccessed. if !prs we can't do anything
 				continue
 			}
 			if i > params.Limit-2 { // we want always to save at least 1 real transaction
@@ -609,7 +609,7 @@ func (h *Handler) addToMempool(ctx context.Context, bytesBoc []byte, shardAccoun
 		for _, mHash := range oldMemHashes { //we need to filter messages which already created transactions
 			_, err = h.storage.SearchTransactionByMessageHash(ctx, mHash)
 			_, prs := h.mempoolEmulate.traces.Get(mHash)
-			if err != nil && prs { //because if err is not null it already happened and if !prs it is not in mempool
+			if err != nil || prs { //because if err is not null it already happened and if !prs it is not in mempool
 				newMemHashes = append(newMemHashes, mHash)
 			}
 		}
