@@ -4,7 +4,6 @@ import (
 	"context"
 	"crypto/sha256"
 	"encoding/base64"
-	"encoding/hex"
 	"errors"
 	"fmt"
 	"math/big"
@@ -24,7 +23,6 @@ import (
 	"github.com/tonkeeper/tongo/tontest"
 	"github.com/tonkeeper/tongo/txemulator"
 	tongoWallet "github.com/tonkeeper/tongo/wallet"
-	"golang.org/x/exp/maps"
 	"golang.org/x/exp/slices"
 
 	"github.com/tonkeeper/opentonapi/pkg/bath"
@@ -136,7 +134,7 @@ func (h *Handler) getTraceByHash(ctx context.Context, hash tongo.Bits256) (*core
 		trace, err = h.storage.GetTrace(ctx, *txHash)
 		return trace, false, err
 	}
-	trace, ok := h.mempoolEmulate.traces.Get(hash.Hex())
+	trace, ok := h.mempoolEmulate.traces.Get(hash)
 	if ok {
 		return trace, true, nil
 	}
@@ -216,22 +214,16 @@ func (h *Handler) GetAccountEvents(ctx context.Context, params oas.GetAccountEve
 		}
 		lastLT = trace.Lt
 	}
-	if !params.BeforeLt.IsSet() {
+	if !params.BeforeLt.IsSet() { //if we look into history we don't need to mix mempool
 		memTraces, _ := h.mempoolEmulate.accountsTraces.Get(account.ID)
-		processingTraces := make(map[tongo.Bits256]bool)
-		for _, trace := range memTraces {
-			hash, err := tongo.ParseHash(trace)
-			if err != nil {
+		for i, hash := range memTraces {
+			_, err = h.storage.SearchTransactionByMessageHash(ctx, hash)
+			trace, prs := h.mempoolEmulate.traces.Get(hash)
+			if err == nil && !prs { //if err is nil it's alredy proccessed. if !prs we can't do anything
 				continue
 			}
-			if _, err = h.storage.SearchTransactionByMessageHash(ctx, hash); err != nil {
-				processingTraces[hash] = true
-			}
-		}
-		for hash := range processingTraces {
-			trace, ok := h.mempoolEmulate.traces.Get(hash.Hex())
-			if !ok {
-				continue
+			if i > params.Limit-2 { // we want always to save at least 1 real transaction
+				break
 			}
 			result, err := bath.FindActions(ctx, trace, bath.ForAccount(account.ID), bath.WithInformationSource(h.storage))
 			if err != nil {
@@ -250,7 +242,6 @@ func (h *Handler) GetAccountEvents(ctx context.Context, params oas.GetAccountEve
 			lastLT = uint64(events[len(events)-1].Lt)
 		}
 	}
-
 	return &oas.AccountEvents{Events: events, NextFrom: int64(lastLT)}, nil
 }
 
@@ -604,28 +595,25 @@ func (h *Handler) addToMempool(ctx context.Context, bytesBoc []byte, shardAccoun
 	core.Visit(trace, func(node *core.Trace) {
 		accounts[node.Account] = struct{}{}
 	})
-	hash, err := msgCell[0].Hash()
+	hash, err := msgCell[0].Hash256()
 	if err != nil {
 		return shardAccount, err
 	}
-	h.mempoolEmulate.traces.Set(hex.EncodeToString(hash), trace, cache.WithExpiration(time.Second*time.Duration(ttl)))
+	h.mempoolEmulate.traces.Set(hash, trace, cache.WithExpiration(time.Second*time.Duration(ttl)))
 	for account := range accounts {
 		if _, ok := h.mempoolEmulateIgnoreAccounts[account]; ok { // the map is filled only once at the start
 			continue
 		}
-		memTraces, _ := h.mempoolEmulate.accountsTraces.Get(account)
-		processingTraces := make(map[string]bool)
-		for _, memTrace := range memTraces {
-			parsedHash, err := tongo.ParseHash(memTrace)
-			if err != nil {
-				continue
-			}
-			if _, err = h.storage.SearchTransactionByMessageHash(ctx, parsedHash); err != nil {
-				processingTraces[memTrace] = true
+		oldMemHashes, _ := h.mempoolEmulate.accountsTraces.Get(account)
+		newMemHashes := []ton.Bits256{hash}
+		for _, mHash := range oldMemHashes { //we need to filter messages which already created transactions
+			_, err = h.storage.SearchTransactionByMessageHash(ctx, mHash)
+			_, prs := h.mempoolEmulate.traces.Get(mHash)
+			if err != nil && prs { //because if err is not null it already happened and if !prs it is not in mempool
+				newMemHashes = append(newMemHashes, mHash)
 			}
 		}
-		processingTraces[hex.EncodeToString(hash)] = true
-		h.mempoolEmulate.accountsTraces.Set(account, maps.Keys(processingTraces), cache.WithExpiration(time.Second*time.Duration(ttl)))
+		h.mempoolEmulate.accountsTraces.Set(account, newMemHashes, cache.WithExpiration(time.Second*time.Duration(ttl)))
 	}
 	h.emulationCh <- blockchain.ExtInMsgCopy{
 		MsgBoc:   base64.StdEncoding.EncodeToString(bytesBoc),

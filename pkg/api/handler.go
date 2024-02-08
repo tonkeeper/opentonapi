@@ -14,6 +14,7 @@ import (
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/contract/dns"
 	"github.com/tonkeeper/tongo/tep64"
+	"github.com/tonkeeper/tongo/ton"
 	"github.com/tonkeeper/tongo/tonconnect"
 	"go.uber.org/zap"
 
@@ -217,8 +218,8 @@ func NewHandler(logger *zap.Logger, opts ...Option) (*Handler, error) {
 			storage:          options.storage,
 		},
 		mempoolEmulate: mempoolEmulate{
-			traces:         cache.NewLRUCache[string, *core.Trace](10000, "mempool_traces_cache"),
-			accountsTraces: cache.NewLRUCache[tongo.AccountID, []string](10000, "accounts_traces_cache"),
+			traces:         cache.NewLRUCache[ton.Bits256, *core.Trace](10000, "mempool_traces_cache"),
+			accountsTraces: cache.NewLRUCache[tongo.AccountID, []ton.Bits256](10000, "accounts_traces_cache"),
 		},
 		mempoolEmulateIgnoreAccounts: map[tongo.AccountID]struct{}{
 			tongo.MustParseAddress("0:0000000000000000000000000000000000000000000000000000000000000000").ID: {},
