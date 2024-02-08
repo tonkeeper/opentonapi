@@ -21,12 +21,19 @@ import (
 	"github.com/tonkeeper/tongo/ton"
 )
 
-func (h *Handler) ReduceIndexingLatency(ctx context.Context) (*oas.IndexingLatency, error) {
+func (h *Handler) ReduceIndexingLatency(ctx context.Context) (*oas.ServiceStatus, error) {
 	indexingLatency, err := h.storage.ReduceIndexingLatency(ctx)
 	if errors.Is(err, core.ErrEntityNotFound) {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
-	return &oas.IndexingLatency{IndexingLatency: int(indexingLatency)}, nil
+	var restOnline = true
+	if err != nil {
+		restOnline = false
+	}
+	return &oas.ServiceStatus{
+		IndexingLatency: int(indexingLatency),
+		RestOnline:      restOnline,
+	}, nil
 }
 
 func (h *Handler) GetBlockchainBlock(ctx context.Context, params oas.GetBlockchainBlockParams) (*oas.BlockchainBlock, error) {

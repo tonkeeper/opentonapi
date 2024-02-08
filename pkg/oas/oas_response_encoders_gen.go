@@ -1189,7 +1189,7 @@ func encodeGetWalletsByPublicKeyResponse(response *Accounts, w http.ResponseWrit
 	return nil
 }
 
-func encodeReduceIndexingLatencyResponse(response *IndexingLatency, w http.ResponseWriter, span trace.Span) error {
+func encodeReduceIndexingLatencyResponse(response *ServiceStatus, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))

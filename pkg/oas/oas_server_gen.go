@@ -533,7 +533,7 @@ type Handler interface {
 	// Reduce indexing latency.
 	//
 	// GET /v2/status
-	ReduceIndexingLatency(ctx context.Context) (*IndexingLatency, error)
+	ReduceIndexingLatency(ctx context.Context) (*ServiceStatus, error)
 	// ReindexAccount implements reindexAccount operation.
 	//
 	// Update internal cache for a particular account.

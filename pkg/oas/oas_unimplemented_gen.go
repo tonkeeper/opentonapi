@@ -790,7 +790,7 @@ func (UnimplementedHandler) GetWalletsByPublicKey(ctx context.Context, params Ge
 // Reduce indexing latency.
 //
 // GET /v2/status
-func (UnimplementedHandler) ReduceIndexingLatency(ctx context.Context) (r *IndexingLatency, _ error) {
+func (UnimplementedHandler) ReduceIndexingLatency(ctx context.Context) (r *ServiceStatus, _ error) {
 	return r, ht.ErrNotImplemented
 }
 

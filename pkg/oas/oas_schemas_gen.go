@@ -6552,21 +6552,6 @@ func (s *ImagePreview) SetURL(val string) {
 	s.URL = val
 }
 
-// Ref: #/components/schemas/IndexingLatency
-type IndexingLatency struct {
-	IndexingLatency int `json:"indexing_latency"`
-}
-
-// GetIndexingLatency returns the value of IndexingLatency.
-func (s *IndexingLatency) GetIndexingLatency() int {
-	return s.IndexingLatency
-}
-
-// SetIndexingLatency sets the value of IndexingLatency.
-func (s *IndexingLatency) SetIndexingLatency(val int) {
-	s.IndexingLatency = val
-}
-
 // Ref: #/components/schemas/InitStateRaw
 type InitStateRaw struct {
 	Workchain uint32 `json:"workchain"`
@@ -13758,6 +13743,32 @@ func (s *Seqno) GetSeqno() uint32 {
 // SetSeqno sets the value of Seqno.
 func (s *Seqno) SetSeqno(val uint32) {
 	s.Seqno = val
+}
+
+// Ref: #/components/schemas/ServiceStatus
+type ServiceStatus struct {
+	RestOnline      bool `json:"rest_online"`
+	IndexingLatency int  `json:"indexing_latency"`
+}
+
+// GetRestOnline returns the value of RestOnline.
+func (s *ServiceStatus) GetRestOnline() bool {
+	return s.RestOnline
+}
+
+// GetIndexingLatency returns the value of IndexingLatency.
+func (s *ServiceStatus) GetIndexingLatency() int {
+	return s.IndexingLatency
+}
+
+// SetRestOnline sets the value of RestOnline.
+func (s *ServiceStatus) SetRestOnline(val bool) {
+	s.RestOnline = val
+}
+
+// SetIndexingLatency sets the value of IndexingLatency.
+func (s *ServiceStatus) SetIndexingLatency(val int) {
+	s.IndexingLatency = val
 }
 
 // SetWalletBackupOK is response for SetWalletBackup operation.

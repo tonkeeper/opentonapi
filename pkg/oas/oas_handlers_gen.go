@@ -10183,7 +10183,7 @@ func (s *Server) handleReduceIndexingLatencyRequest(args [0]string, argsEscaped 
 		err error
 	)
 
-	var response *IndexingLatency
+	var response *ServiceStatus
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:          ctx,
@@ -10198,7 +10198,7 @@ func (s *Server) handleReduceIndexingLatencyRequest(args [0]string, argsEscaped 
 		type (
 			Request  = struct{}
 			Params   = struct{}
-			Response = *IndexingLatency
+			Response = *ServiceStatus
 		)
 		response, err = middleware.HookMiddleware[
 			Request,

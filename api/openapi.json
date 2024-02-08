@@ -3052,18 +3052,6 @@
     ],
     "type": "object"
    },
-   "IndexingLatency": {
-    "properties": {
-     "indexing_latency": {
-      "example": 100,
-      "type": "integer"
-     }
-    },
-    "required": [
-     "indexing_latency"
-    ],
-    "type": "object"
-   },
    "InitStateRaw": {
     "properties": {
      "file_hash": {
@@ -4425,6 +4413,23 @@
     },
     "required": [
      "seqno"
+    ],
+    "type": "object"
+   },
+   "ServiceStatus": {
+    "properties": {
+     "indexing_latency": {
+      "example": 100,
+      "type": "integer"
+     },
+     "rest_online": {
+      "default": true,
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "indexing_latency",
+     "rest_online"
     ],
     "type": "object"
    },
@@ -8961,7 +8966,7 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/IndexingLatency"
+         "$ref": "#/components/schemas/ServiceStatus"
         }
        }
       },

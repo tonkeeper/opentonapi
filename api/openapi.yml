@@ -23,7 +23,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/IndexingLatency'
+                $ref: '#/components/schemas/ServiceStatus'
         'default':
           $ref: '#/components/responses/Error'
   /v2/blockchain/blocks/{block_id}:
@@ -2997,11 +2997,15 @@ components:
           $ref: '#/components/schemas/BlockCurrencyCollection'
         minted:
           $ref: '#/components/schemas/BlockCurrencyCollection'
-    IndexingLatency:
+    ServiceStatus:
       type: object
       required:
         - indexing_latency
+        - rest_online
       properties:
+        rest_online:
+          type: boolean
+          default: true
         indexing_latency:
           type: integer
           example: 100
