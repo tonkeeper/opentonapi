@@ -528,6 +528,12 @@ type Handler interface {
 	//
 	// GET /v2/pubkeys/{public_key}/wallets
 	GetWalletsByPublicKey(ctx context.Context, params GetWalletsByPublicKeyParams) (*Accounts, error)
+	// ReduceIndexingLatency implements reduceIndexingLatency operation.
+	//
+	// Reduce indexing latency.
+	//
+	// GET /v2/status
+	ReduceIndexingLatency(ctx context.Context) (*IndexingLatency, error)
 	// ReindexAccount implements reindexAccount operation.
 	//
 	// Update internal cache for a particular account.

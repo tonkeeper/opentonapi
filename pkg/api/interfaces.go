@@ -42,6 +42,7 @@ type storage interface {
 	GetDnsExpiring(ctx context.Context, id tongo.AccountID, period *int) ([]core.DnsExpiring, error)
 	GetLogs(ctx context.Context, account tongo.AccountID, destination *tlb.MsgAddress, limit int, beforeLT uint64) ([]core.Message, error)
 	GetAccountDiff(ctx context.Context, account tongo.AccountID, startTime int64, endTime int64) (int64, error)
+	ReduceIndexingLatency(ctx context.Context) (int64, error)
 
 	GetTrace(ctx context.Context, hash tongo.Bits256) (*core.Trace, error)
 	SearchTraces(ctx context.Context, a tongo.AccountID, limit int, beforeLT, startTime, endTime *int64, initiator bool) ([]tongo.Bits256, error)

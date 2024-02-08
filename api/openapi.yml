@@ -11,6 +11,21 @@ servers:
   - url: "https://testnet.tonapi.io"
   - url: "http://localhost:8081"
 paths:
+  /v2/status:
+    get:
+      description: Reduce indexing latency
+      operationId: reduceIndexingLatency
+      tags:
+        - Blockchain
+      responses:
+        '200':
+          description: indexing latency
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IndexingLatency'
+        'default':
+          $ref: '#/components/responses/Error'
   /v2/blockchain/blocks/{block_id}:
     get:
       description: Get blockchain block data
@@ -2982,7 +2997,14 @@ components:
           $ref: '#/components/schemas/BlockCurrencyCollection'
         minted:
           $ref: '#/components/schemas/BlockCurrencyCollection'
-
+    IndexingLatency:
+      type: object
+      required:
+        - indexing_latency
+      properties:
+        indexing_latency:
+          type: integer
+          example: 100
     BlockchainBlock:
       type: object
       required:

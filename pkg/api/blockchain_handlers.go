@@ -21,6 +21,14 @@ import (
 	"github.com/tonkeeper/tongo/ton"
 )
 
+func (h *Handler) ReduceIndexingLatency(ctx context.Context) (*oas.IndexingLatency, error) {
+	indexingLatency, err := h.storage.ReduceIndexingLatency(ctx)
+	if errors.Is(err, core.ErrEntityNotFound) {
+		return nil, toError(http.StatusInternalServerError, err)
+	}
+	return &oas.IndexingLatency{IndexingLatency: int(indexingLatency)}, nil
+}
+
 func (h *Handler) GetBlockchainBlock(ctx context.Context, params oas.GetBlockchainBlockParams) (*oas.BlockchainBlock, error) {
 	blockID, err := ton.ParseBlockID(params.BlockID)
 	if err != nil {

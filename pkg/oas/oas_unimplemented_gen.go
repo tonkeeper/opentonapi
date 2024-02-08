@@ -785,6 +785,15 @@ func (UnimplementedHandler) GetWalletsByPublicKey(ctx context.Context, params Ge
 	return r, ht.ErrNotImplemented
 }
 
+// ReduceIndexingLatency implements reduceIndexingLatency operation.
+//
+// Reduce indexing latency.
+//
+// GET /v2/status
+func (UnimplementedHandler) ReduceIndexingLatency(ctx context.Context) (r *IndexingLatency, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // ReindexAccount implements reindexAccount operation.
 //
 // Update internal cache for a particular account.

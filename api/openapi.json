@@ -3052,6 +3052,18 @@
     ],
     "type": "object"
    },
+   "IndexingLatency": {
+    "properties": {
+     "indexing_latency": {
+      "example": 100,
+      "type": "integer"
+     }
+    },
+    "required": [
+     "indexing_latency"
+    ],
+    "type": "object"
+   },
    "InitStateRaw": {
     "properties": {
      "file_hash": {
@@ -8937,6 +8949,30 @@
     },
     "tags": [
      "Staking"
+    ]
+   }
+  },
+  "/v2/status": {
+   "get": {
+    "description": "Reduce indexing latency",
+    "operationId": "reduceIndexingLatency",
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/IndexingLatency"
+        }
+       }
+      },
+      "description": "indexing latency"
+     },
+     "default": {
+      "$ref": "#/components/responses/Error"
+     }
+    },
+    "tags": [
+     "Blockchain"
     ]
    }
   },

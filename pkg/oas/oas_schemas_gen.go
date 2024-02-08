@@ -6552,6 +6552,21 @@ func (s *ImagePreview) SetURL(val string) {
 	s.URL = val
 }
 
+// Ref: #/components/schemas/IndexingLatency
+type IndexingLatency struct {
+	IndexingLatency int `json:"indexing_latency"`
+}
+
+// GetIndexingLatency returns the value of IndexingLatency.
+func (s *IndexingLatency) GetIndexingLatency() int {
+	return s.IndexingLatency
+}
+
+// SetIndexingLatency sets the value of IndexingLatency.
+func (s *IndexingLatency) SetIndexingLatency(val int) {
+	s.IndexingLatency = val
+}
+
 // Ref: #/components/schemas/InitStateRaw
 type InitStateRaw struct {
 	Workchain uint32 `json:"workchain"`
