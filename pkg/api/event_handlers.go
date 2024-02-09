@@ -594,7 +594,9 @@ func (h *Handler) addToMempool(ctx context.Context, bytesBoc []byte, shardAccoun
 	}
 	emulator, err := txemulator.NewTraceBuilder(txemulator.WithAccountsSource(h.storage),
 		txemulator.WithAccountsMap(shardAccount),
-		txemulator.WithConfigBase64(config))
+		txemulator.WithConfigBase64(config),
+		txemulator.WithSignatureCheck(),
+	)
 	if err != nil {
 		return shardAccount, err
 	}
