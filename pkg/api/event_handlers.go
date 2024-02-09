@@ -335,36 +335,43 @@ func (h *Handler) EmulateMessageToEvent(ctx context.Context, request *oas.Emulat
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
 	}
-	var m tlb.Message
-	if err := tlb.Unmarshal(c, &m); err != nil {
+	hash, err := c.Hash256()
+	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
 	}
-	configBase64, err := h.storage.TrimmedConfigBase64()
-	if err != nil {
-		return nil, toError(http.StatusInternalServerError, err)
-	}
-	var emulator *txemulator.Tracer
-	if params.IgnoreSignatureCheck.Value {
-		emulator, err = txemulator.NewTraceBuilder(
-			txemulator.WithAccountsSource(h.storage),
-			txemulator.WithConfigBase64(configBase64))
-	} else {
-		emulator, err = txemulator.NewTraceBuilder(
-			txemulator.WithAccountsSource(h.storage),
-			txemulator.WithSignatureCheck(),
-			txemulator.WithConfigBase64(configBase64))
-	}
+	trace, prs := h.mempoolEmulate.traces.Get(hash)
+	if !prs {
+		var m tlb.Message
+		if err := tlb.Unmarshal(c, &m); err != nil {
+			return nil, toError(http.StatusBadRequest, err)
+		}
+		configBase64, err := h.storage.TrimmedConfigBase64()
+		if err != nil {
+			return nil, toError(http.StatusInternalServerError, err)
+		}
+		var emulator *txemulator.Tracer
+		if params.IgnoreSignatureCheck.Value {
+			emulator, err = txemulator.NewTraceBuilder(
+				txemulator.WithAccountsSource(h.storage),
+				txemulator.WithConfigBase64(configBase64))
+		} else {
+			emulator, err = txemulator.NewTraceBuilder(
+				txemulator.WithAccountsSource(h.storage),
+				txemulator.WithSignatureCheck(),
+				txemulator.WithConfigBase64(configBase64))
+		}
 
-	if err != nil {
-		return nil, toError(http.StatusInternalServerError, err)
-	}
-	tree, err := emulator.Run(ctx, m)
-	if err != nil {
-		return nil, toProperEmulationError(err)
-	}
-	trace, err := emulatedTreeToTrace(ctx, h.executor, h.storage, configBase64, tree, emulator.FinalStates())
-	if err != nil {
-		return nil, toError(http.StatusInternalServerError, err)
+		if err != nil {
+			return nil, toError(http.StatusInternalServerError, err)
+		}
+		tree, err := emulator.Run(ctx, m)
+		if err != nil {
+			return nil, toProperEmulationError(err)
+		}
+		trace, err = emulatedTreeToTrace(ctx, h.executor, h.storage, configBase64, tree, emulator.FinalStates())
+		if err != nil {
+			return nil, toError(http.StatusInternalServerError, err)
+		}
 	}
 	result, err := bath.FindActions(ctx, trace, bath.WithInformationSource(h.storage))
 	if err != nil {
@@ -382,36 +389,43 @@ func (h *Handler) EmulateMessageToTrace(ctx context.Context, request *oas.Emulat
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
 	}
-	var m tlb.Message
-	err = tlb.Unmarshal(c, &m)
+	hash, err := c.Hash256()
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
 	}
-	configBase64, err := h.storage.TrimmedConfigBase64()
-	if err != nil {
-		return nil, toError(http.StatusInternalServerError, err)
-	}
-	var emulator *txemulator.Tracer
-	if params.IgnoreSignatureCheck.Value {
-		emulator, err = txemulator.NewTraceBuilder(
-			txemulator.WithAccountsSource(h.storage),
-			txemulator.WithConfigBase64(configBase64))
-	} else {
-		emulator, err = txemulator.NewTraceBuilder(
-			txemulator.WithAccountsSource(h.storage),
-			txemulator.WithSignatureCheck(),
-			txemulator.WithConfigBase64(configBase64))
-	}
-	if err != nil {
-		return nil, toError(http.StatusInternalServerError, err)
-	}
-	tree, err := emulator.Run(ctx, m)
-	if err != nil {
-		return nil, toProperEmulationError(err)
-	}
-	trace, err := emulatedTreeToTrace(ctx, h.executor, h.storage, configBase64, tree, emulator.FinalStates())
-	if err != nil {
-		return nil, toError(http.StatusInternalServerError, err)
+	trace, prs := h.mempoolEmulate.traces.Get(hash)
+	if !prs {
+		var m tlb.Message
+		err = tlb.Unmarshal(c, &m)
+		if err != nil {
+			return nil, toError(http.StatusBadRequest, err)
+		}
+		configBase64, err := h.storage.TrimmedConfigBase64()
+		if err != nil {
+			return nil, toError(http.StatusInternalServerError, err)
+		}
+		var emulator *txemulator.Tracer
+		if params.IgnoreSignatureCheck.Value {
+			emulator, err = txemulator.NewTraceBuilder(
+				txemulator.WithAccountsSource(h.storage),
+				txemulator.WithConfigBase64(configBase64))
+		} else {
+			emulator, err = txemulator.NewTraceBuilder(
+				txemulator.WithAccountsSource(h.storage),
+				txemulator.WithSignatureCheck(),
+				txemulator.WithConfigBase64(configBase64))
+		}
+		if err != nil {
+			return nil, toError(http.StatusInternalServerError, err)
+		}
+		tree, err := emulator.Run(ctx, m)
+		if err != nil {
+			return nil, toProperEmulationError(err)
+		}
+		trace, err = emulatedTreeToTrace(ctx, h.executor, h.storage, configBase64, tree, emulator.FinalStates())
+		if err != nil {
+			return nil, toError(http.StatusInternalServerError, err)
+		}
 	}
 	t := convertTrace(*trace, h.addressBook)
 	return &t, nil
