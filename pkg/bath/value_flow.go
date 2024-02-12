@@ -15,6 +15,7 @@ type AccountValueFlow struct {
 	Ton     int64
 	Fees    int64
 	Jettons map[tongo.AccountID]big.Int
+	NFTs    [2]int // 0 - added, 1 - removed
 }
 
 // ValueFlow contains a change of assets for each account involved in a trace.
@@ -75,6 +76,8 @@ func (flow *ValueFlow) Merge(other *ValueFlow) {
 		}
 		flow.Accounts[accountID].Ton += af.Ton
 		flow.Accounts[accountID].Fees += af.Fees
+		flow.Accounts[accountID].NFTs[0] += af.NFTs[0]
+		flow.Accounts[accountID].NFTs[1] += af.NFTs[1]
 		for jetton, value := range af.Jettons {
 			flow.AddJettons(accountID, jetton, value)
 		}

@@ -295,7 +295,8 @@ func TestFindActions(t *testing.T) {
 			straws: []StrawFunc{
 				NftTransferStraw.Merge,
 				NftTransferNotifyStraw.Merge,
-				FindJettonTransfer,
+				JettonTransferPTONStraw.Merge,
+				JettonTransferClassicStraw.Merge,
 			},
 		},
 		{
@@ -303,7 +304,8 @@ func TestFindActions(t *testing.T) {
 			hash:           "6a4c8e0dca5b052ab75f535df9d42ede949054f0004d3dd7aa6197af9dff0e1e",
 			filenamePrefix: "megatonfi-swap",
 			straws: []StrawFunc{
-				FindJettonTransfer,
+				JettonTransferPTONStraw.Merge,
+				JettonTransferClassicStraw.Merge,
 				MegatonFiJettonSwap.Merge,
 			},
 		},

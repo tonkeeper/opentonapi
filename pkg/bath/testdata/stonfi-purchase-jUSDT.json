@@ -62,6 +62,12 @@
            "Quantity": -1358766
          }
        ]
+     },
+     {
+       "Account": "0:96ac9b952d050f79c07a2e5e0b94872a5bc189f8633882ac33ea82f5f9670a38",
+       "Ton": 5095508,
+       "Fee": 10904492,
+       "Jettons": null
      }
    ]
  }

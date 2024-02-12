@@ -1,23 +1,23 @@
 package bath
 
 import (
+	"unsafe"
+
 	"github.com/tonkeeper/opentonapi/pkg/sentry"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
 	"golang.org/x/exp/slices"
-	"unsafe"
 )
 
 type bubbleCheck func(bubble *Bubble) bool
 type Straw[newBubbleT actioner] struct {
-	CheckFuncs  []bubbleCheck
-	Builder     func(newAction *newBubbleT, bubble *Bubble) error
-	SingleChild *Straw[newBubbleT]
-	Children    []Straw[newBubbleT]
-	Optional    bool
+	CheckFuncs       []bubbleCheck
+	Builder          func(newAction *newBubbleT, bubble *Bubble) error //uses to convert old bubble to new Bubble.Info
+	ValueFlowUpdater func(newAction *newBubbleT, flow *ValueFlow)
+	SingleChild      *Straw[newBubbleT]
+	Children         []Straw[newBubbleT]
+	Optional         bool
 }
-
-//todo: https://tonviewer.com/transaction/16462168398a5c6324602beb1da2e90ab5510aaf180ec00404620a33487fa180
 
 func (s Straw[newBubbleT]) match(bubble *Bubble) (mappings []struct {
 	s Straw[newBubbleT]
@@ -75,6 +75,7 @@ func (s Straw[newBubbleT]) Merge(bubble *Bubble) bool {
 	var newChildren []*Bubble
 	newAccounts := bubble.Accounts
 	nvf := newValueFlow()
+	var finalizer func(newAction *newBubbleT, flow *ValueFlow)
 	for i := len(mapping) - 1; i >= 0; i-- {
 		if mapping[i].s.Builder != nil {
 			err := mapping[i].s.Builder(&newBubble, mapping[i].b)
@@ -82,6 +83,9 @@ func (s Straw[newBubbleT]) Merge(bubble *Bubble) bool {
 				sentry.Send("Straw.Merge", sentry.SentryInfoData{"error": err.Error(), "bubble": mapping[i].b.String()}, sentry.LevelError)
 				return false
 			}
+		}
+		if mapping[i].s.ValueFlowUpdater != nil {
+			finalizer = mapping[i].s.ValueFlowUpdater
 		}
 		nvf.Merge(mapping[i].b.ValueFlow)
 		newAccounts = append(newAccounts, mapping[i].b.Accounts...)
@@ -96,6 +100,9 @@ func (s Straw[newBubbleT]) Merge(bubble *Bubble) bool {
 			}
 			newChildren = append(newChildren, child)
 		}
+	}
+	if finalizer != nil {
+		finalizer(&newBubble, nvf)
 	}
 	n := Bubble{
 		Info:      newBubble,

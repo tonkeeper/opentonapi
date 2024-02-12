@@ -3,8 +3,8 @@ package bath
 import (
 	"math/big"
 
-	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
+	"github.com/tonkeeper/tongo/ton"
 )
 
 // StrawFunc extracts information from the given bubble and its children and modifies the bubble if needed.
@@ -12,7 +12,8 @@ import (
 type StrawFunc func(bubble *Bubble) (success bool)
 
 var JettonTransfersBurnsMints = []StrawFunc{
-	FindJettonTransfer,
+	JettonTransferPTONStraw.Merge,
+	JettonTransferClassicStraw.Merge,
 	JettonBurnStraw.Merge,
 	DedustLPJettonMintStraw.Merge,
 	WtonMintStraw.Merge,
@@ -26,7 +27,8 @@ var NFTStraws = []StrawFunc{
 var DefaultStraws = []StrawFunc{
 	NftTransferStraw.Merge,
 	NftTransferNotifyStraw.Merge,
-	FindJettonTransfer,
+	JettonTransferPTONStraw.Merge,
+	JettonTransferClassicStraw.Merge,
 	JettonBurnStraw.Merge,
 	WtonMintStraw.Merge,
 	FindNftPurchase,
@@ -51,115 +53,106 @@ var DefaultStraws = []StrawFunc{
 	FindTFNominatorAction,
 }
 
-func FindJettonTransfer(bubble *Bubble) bool {
-	transferBubbleInfo, ok := bubble.Info.(BubbleTx)
-	if !ok {
-		return false
-	}
-	if !transferBubbleInfo.operation(abi.JettonTransferMsgOp) {
-		return false
-	}
-	intention := transferBubbleInfo.decodedBody.Value.(abi.JettonTransferMsgBody)
-	recipient, err := tongo.AccountIDFromTlb(intention.Destination)
-	if err != nil || recipient == nil {
-		return false
-	}
-
-	transfer := BubbleJettonTransfer{
-		sender:       transferBubbleInfo.inputFrom,
-		senderWallet: transferBubbleInfo.account.Address,
-		master:       tongo.AccountID{},
-		amount:       intention.Amount,
-		recipient: &Account{
-			Address: *recipient,
+var JettonTransferPTONStraw = Straw[BubbleJettonTransfer]{
+	CheckFuncs: []bubbleCheck{IsTx, HasInterface(abi.JettonWallet), HasOperation(abi.JettonTransferMsgOp)},
+	Builder: func(newAction *BubbleJettonTransfer, bubble *Bubble) error {
+		tx := bubble.Info.(BubbleTx)
+		newAction.master, _ = tx.additionalInfo.JettonMaster(tx.account.Address)
+		newAction.senderWallet = tx.account.Address
+		newAction.sender = tx.inputFrom
+		body := tx.decodedBody.Value.(abi.JettonTransferMsgBody)
+		newAction.amount = body.Amount
+		newAction.isWrappedTon = true
+		recipient, err := ton.AccountIDFromTlb(body.Destination)
+		if err == nil {
+			newAction.recipient = &Account{Address: *recipient}
+		}
+		return nil
+	},
+	SingleChild: &Straw[BubbleJettonTransfer]{
+		CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.JettonNotifyMsgOp)},
+		Builder: func(newAction *BubbleJettonTransfer, bubble *Bubble) error {
+			tx := bubble.Info.(BubbleTx)
+			newAction.success = true
+			body := tx.decodedBody.Value.(abi.JettonNotifyMsgBody)
+			newAction.amount = body.Amount
+			newAction.payload = body.ForwardPayload.Value
+			newAction.recipient = &tx.account
+			return nil
 		},
-		payload: intention.ForwardPayload.Value,
-	}
-	if transferBubbleInfo.additionalInfo != nil {
-		if master, ok := transferBubbleInfo.additionalInfo.JettonMaster(transferBubbleInfo.account.Address); ok {
-			transfer.master = master
-		}
-	}
-	newBubble := Bubble{
-		Children:  bubble.Children,
-		ValueFlow: bubble.ValueFlow,
-		Accounts:  bubble.Accounts,
-	}
-	// TODO: check they have the same master
+	},
+}
 
-	if transferBubbleInfo.success {
-		newBubble.Children = ProcessChildren(bubble.Children,
-			func(notify *Bubble) *Merge {
-				// pTON sends a jetton-notify msg just after a jetton-transfer operation.
-				notifyTx, ok := notify.Info.(BubbleTx)
-				if !ok {
-					return nil
-				}
-				if !notifyTx.operation(abi.JettonNotifyMsgOp) {
-					return nil
-				}
-				transfer.success = true
-				transfer.isWrappedTon = true
-				transfer.amount = notifyTx.decodedBody.Value.(abi.JettonNotifyMsgBody).Amount
-				newBubble.ValueFlow.Merge(notify.ValueFlow)
-				newBubble.Accounts = append(newBubble.Accounts, notify.Accounts...)
-				return &Merge{children: notify.Children}
-			},
-			func(child *Bubble) *Merge {
-				receiveBubbleInfo, ok := child.Info.(BubbleTx)
-				if !ok {
-					return nil
-				}
-				if !receiveBubbleInfo.operation(abi.JettonInternalTransferMsgOp) {
-					return nil
-				}
-				if receiveBubbleInfo.success {
-					transfer.success = true
-				}
-				transfer.recipientWallet = receiveBubbleInfo.account.Address
-				newBubble.Accounts = append(newBubble.Accounts, child.Accounts...)
-				children := ProcessChildren(child.Children,
-					func(excess *Bubble) *Merge {
-						tx, ok := excess.Info.(BubbleTx)
-						if !ok {
-							return nil
-						}
-						if !tx.operation(abi.ExcessMsgOp) {
-							return nil
-						}
-						newBubble.ValueFlow.Merge(excess.ValueFlow)
-						newBubble.Accounts = append(newBubble.Accounts, excess.Accounts...)
-						return &Merge{children: excess.Children}
-					},
-					func(notify *Bubble) *Merge {
-						tx, ok := notify.Info.(BubbleTx)
-						if !ok {
-							return nil
-						}
-						if !tx.operation(abi.JettonNotifyMsgOp) {
-							return nil
-						}
-						transfer.success = true
-						if transfer.recipient.Address != tx.account.Address {
-							transfer.success = false
-						}
-						transfer.recipient.Interfaces = tx.account.Interfaces
-						newBubble.ValueFlow.Merge(notify.ValueFlow)
-						newBubble.Accounts = append(newBubble.Accounts, notify.Accounts...)
-						return &Merge{children: notify.Children}
-					},
-				)
-				return &Merge{children: children}
-			})
-		if transfer.recipient == nil {
-			transfer.recipient = parseAccount(intention.Destination)
+var JettonTransferClassicStraw = Straw[BubbleJettonTransfer]{
+	CheckFuncs: []bubbleCheck{IsTx, HasInterface(abi.JettonWallet), HasOperation(abi.JettonTransferMsgOp)},
+	Builder: func(newAction *BubbleJettonTransfer, bubble *Bubble) error {
+		tx := bubble.Info.(BubbleTx)
+		newAction.master, _ = tx.additionalInfo.JettonMaster(tx.account.Address)
+		newAction.senderWallet = tx.account.Address
+		newAction.sender = tx.inputFrom
+		body := tx.decodedBody.Value.(abi.JettonTransferMsgBody)
+		newAction.amount = body.Amount
+		newAction.payload = body.ForwardPayload.Value
+		recipient, err := ton.AccountIDFromTlb(body.Destination)
+		if err == nil {
+			newAction.recipient = &Account{Address: *recipient}
 		}
-	}
-	if !transfer.isWrappedTon {
-		newBubble.ValueFlow.AddJettons(*recipient, transfer.master, big.Int(intention.Amount))
-		newBubble.ValueFlow.SubJettons(transferBubbleInfo.inputFrom.Address, transfer.master, big.Int(intention.Amount))
-	}
-	newBubble.Info = transfer
-	*bubble = newBubble
-	return true
+		return nil
+	},
+	SingleChild: &Straw[BubbleJettonTransfer]{
+		CheckFuncs: []bubbleCheck{IsTx, HasInterface(abi.JettonWallet), HasOperation(abi.JettonInternalTransferMsgOp)},
+		Optional:   true,
+		Builder: func(newAction *BubbleJettonTransfer, bubble *Bubble) error {
+			tx := bubble.Info.(BubbleTx)
+			newAction.recipientWallet = tx.account.Address
+			if newAction.master.IsZero() {
+				newAction.master, _ = tx.additionalInfo.JettonMaster(tx.account.Address)
+			}
+			newAction.success = tx.success
+			return nil
+		},
+		ValueFlowUpdater: func(newAction *BubbleJettonTransfer, flow *ValueFlow) {
+			if newAction.success {
+				if newAction.recipient != nil {
+					flow.AddJettons(newAction.recipient.Address, newAction.master, big.Int(newAction.amount))
+				}
+				if newAction.sender != nil {
+					flow.SubJettons(newAction.sender.Address, newAction.master, big.Int(newAction.amount))
+				}
+			}
+		},
+		Children: []Straw[BubbleJettonTransfer]{
+			{
+				CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.JettonNotifyMsgOp)},
+				Builder: func(newAction *BubbleJettonTransfer, bubble *Bubble) error {
+					tx := bubble.Info.(BubbleTx)
+					newAction.success = true
+					body := tx.decodedBody.Value.(abi.JettonNotifyMsgBody)
+					newAction.amount = body.Amount
+					newAction.payload = body.ForwardPayload.Value
+					newAction.recipient = &tx.account
+					if newAction.sender == nil {
+						sender, err := ton.AccountIDFromTlb(body.Sender)
+						if err == nil {
+							newAction.sender = &Account{Address: *sender}
+						}
+					}
+					return nil
+				},
+				ValueFlowUpdater: func(newAction *BubbleJettonTransfer, flow *ValueFlow) {
+					if newAction.recipient != nil {
+						flow.AddJettons(newAction.recipient.Address, newAction.master, big.Int(newAction.amount))
+					}
+					if newAction.sender != nil {
+						flow.SubJettons(newAction.sender.Address, newAction.master, big.Int(newAction.amount))
+					}
+				},
+				Optional: true,
+			},
+			{
+				CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.ExcessMsgOp)},
+				Optional:   true,
+			},
+		},
+	},
 }
