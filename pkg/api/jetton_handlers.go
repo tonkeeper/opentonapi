@@ -230,7 +230,7 @@ func (h *Handler) GetJettonsEvents(ctx context.Context, params oas.GetJettonsEve
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
-	result, err := bath.FindActions(ctx, trace, bath.WithInformationSource(h.storage), bath.WithStraws([]bath.StrawFunc{bath.FindJettonTransfer}))
+	result, err := bath.FindActions(ctx, trace, bath.WithInformationSource(h.storage), bath.WithStraws(bath.JettonTransfersBurnsMints))
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
