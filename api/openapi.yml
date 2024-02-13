@@ -1655,15 +1655,21 @@ paths:
           description: accept ton and jetton master addresses, separated by commas
           required: true
           schema:
-            type: string
-            example: ton
+            type: array
+            maxItems: 100
+            items:
+              type: string
+            example: ["ton"]
         - in: query
           name: currencies
           description: accept ton and all possible fiat currencies, separated by commas
           required: true
           schema:
-            type: string
-            example: ton,usd,rub
+            type: array
+            maxItems: 3
+            items:
+              type: string
+            example: ["ton","usd","rub"]
       responses:
         '200':
           description: tokens rates
@@ -2748,8 +2754,10 @@ components:
       description: accept ton and all possible fiat currencies, separated by commas
       required: false
       schema:
-        type: string
-        example: ton,usd,rub
+        type: array
+        items:
+          type: string
+        example: ["ton", "usd", "rub"]
 
   requestBodies:
     MethodParameters:

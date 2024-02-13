@@ -83,8 +83,15 @@
     "name": "currencies",
     "required": false,
     "schema": {
-     "example": "ton,usd,rub",
-     "type": "string"
+     "example": [
+      "ton",
+      "usd",
+      "rub"
+     ],
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
     }
    },
    "domainFilterQuery": {
@@ -8646,8 +8653,14 @@
       "name": "tokens",
       "required": true,
       "schema": {
-       "example": "ton",
-       "type": "string"
+       "example": [
+        "ton"
+       ],
+       "items": {
+        "type": "string"
+       },
+       "maxItems": 100,
+       "type": "array"
       }
      },
      {
@@ -8656,8 +8669,16 @@
       "name": "currencies",
       "required": true,
       "schema": {
-       "example": "ton,usd,rub",
-       "type": "string"
+       "example": [
+        "ton",
+        "usd",
+        "rub"
+       ],
+       "items": {
+        "type": "string"
+       },
+       "maxItems": 3,
+       "type": "array"
       }
      }
     ],

@@ -57,8 +57,7 @@ func (h *Handler) GetChartRates(ctx context.Context, params oas.GetChartRatesPar
 }
 
 func (h *Handler) GetRates(ctx context.Context, params oas.GetRatesParams) (*oas.GetRatesOK, error) {
-	params.Tokens = strings.TrimSpace(params.Tokens)
-	tokens := strings.Split(params.Tokens, ",")
+	tokens := params.Tokens
 	if len(tokens) == 0 {
 		return nil, toError(http.StatusBadRequest, fmt.Errorf("tokens is required param"))
 	}
@@ -76,8 +75,7 @@ func (h *Handler) GetRates(ctx context.Context, params oas.GetRatesParams) (*oas
 		convertedTokens = append(convertedTokens, token)
 	}
 
-	params.Currencies = strings.TrimSpace(params.Currencies)
-	currencies := strings.Split(params.Currencies, ",")
+	currencies := params.Currencies
 	if len(currencies) == 0 {
 		return nil, toError(http.StatusBadRequest, fmt.Errorf("currencies is required param"))
 	}

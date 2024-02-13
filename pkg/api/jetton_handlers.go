@@ -29,22 +29,17 @@ func (h *Handler) GetAccountJettonsBalances(ctx context.Context, params oas.GetA
 	var balances = oas.JettonsBalances{
 		Balances: make([]oas.JettonBalance, 0, len(wallets)),
 	}
-	var currencies []string
-	if params.Currencies.IsSet() {
-		params.Currencies.Value = strings.TrimSpace(params.Currencies.Value)
-		currencies = strings.Split(params.Currencies.Value, ",")
-		if len(currencies) > 100 {
-			return nil, toError(http.StatusBadRequest, fmt.Errorf("max params limit is 100 items"))
+
+	currencies := params.Currencies
+	for idx, currency := range currencies {
+		if jetton, err := tongo.ParseAddress(currency); err == nil {
+			currency = jetton.ID.ToRaw()
+		} else {
+			currency = strings.ToUpper(currency)
 		}
-		for idx, currency := range currencies {
-			if jetton, err := tongo.ParseAddress(currency); err == nil {
-				currency = jetton.ID.ToRaw()
-			} else {
-				currency = strings.ToUpper(currency)
-			}
-			currencies[idx] = currency
-		}
+		currencies[idx] = currency
 	}
+
 	todayRates, yesterdayRates, weekRates, monthRates, _ := h.getRates()
 	for _, wallet := range wallets {
 		jettonBalance := oas.JettonBalance{

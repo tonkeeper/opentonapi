@@ -3056,7 +3056,7 @@ type GetAccountJettonsBalancesParams struct {
 	// Account ID.
 	AccountID string
 	// Accept ton and all possible fiat currencies, separated by commas.
-	Currencies OptString
+	Currencies []string
 }
 
 func unpackGetAccountJettonsBalancesParams(packed middleware.Parameters) (params GetAccountJettonsBalancesParams) {
@@ -3073,7 +3073,7 @@ func unpackGetAccountJettonsBalancesParams(packed middleware.Parameters) (params
 			In:   "query",
 		}
 		if v, ok := packed[key]; ok {
-			params.Currencies = v.(OptString)
+			params.Currencies = v.([]string)
 		}
 	}
 	return params
@@ -3136,25 +3136,27 @@ func decodeGetAccountJettonsBalancesParams(args [1]string, argsEscaped bool, r *
 
 		if err := q.HasParam(cfg); err == nil {
 			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
-				var paramsDotCurrenciesVal string
-				if err := func() error {
-					val, err := d.DecodeValue()
-					if err != nil {
+				return d.DecodeArray(func(d uri.Decoder) error {
+					var paramsDotCurrenciesVal string
+					if err := func() error {
+						val, err := d.DecodeValue()
+						if err != nil {
+							return err
+						}
+
+						c, err := conv.ToString(val)
+						if err != nil {
+							return err
+						}
+
+						paramsDotCurrenciesVal = c
+						return nil
+					}(); err != nil {
 						return err
 					}
-
-					c, err := conv.ToString(val)
-					if err != nil {
-						return err
-					}
-
-					paramsDotCurrenciesVal = c
+					params.Currencies = append(params.Currencies, paramsDotCurrenciesVal)
 					return nil
-				}(); err != nil {
-					return err
-				}
-				params.Currencies.SetTo(paramsDotCurrenciesVal)
-				return nil
+				})
 			}); err != nil {
 				return err
 			}
@@ -7922,9 +7924,9 @@ func decodeGetNftItemByAddressParams(args [1]string, argsEscaped bool, r *http.R
 // GetRatesParams is parameters of getRates operation.
 type GetRatesParams struct {
 	// Accept ton and jetton master addresses, separated by commas.
-	Tokens string
+	Tokens []string
 	// Accept ton and all possible fiat currencies, separated by commas.
-	Currencies string
+	Currencies []string
 }
 
 func unpackGetRatesParams(packed middleware.Parameters) (params GetRatesParams) {
@@ -7933,14 +7935,14 @@ func unpackGetRatesParams(packed middleware.Parameters) (params GetRatesParams) 
 			Name: "tokens",
 			In:   "query",
 		}
-		params.Tokens = packed[key].(string)
+		params.Tokens = packed[key].([]string)
 	}
 	{
 		key := middleware.ParameterKey{
 			Name: "currencies",
 			In:   "query",
 		}
-		params.Currencies = packed[key].(string)
+		params.Currencies = packed[key].([]string)
 	}
 	return params
 }
@@ -7957,19 +7959,44 @@ func decodeGetRatesParams(args [0]string, argsEscaped bool, r *http.Request) (pa
 
 		if err := q.HasParam(cfg); err == nil {
 			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
-				val, err := d.DecodeValue()
-				if err != nil {
-					return err
-				}
+				return d.DecodeArray(func(d uri.Decoder) error {
+					var paramsDotTokensVal string
+					if err := func() error {
+						val, err := d.DecodeValue()
+						if err != nil {
+							return err
+						}
 
-				c, err := conv.ToString(val)
-				if err != nil {
-					return err
-				}
+						c, err := conv.ToString(val)
+						if err != nil {
+							return err
+						}
 
-				params.Tokens = c
-				return nil
+						paramsDotTokensVal = c
+						return nil
+					}(); err != nil {
+						return err
+					}
+					params.Tokens = append(params.Tokens, paramsDotTokensVal)
+					return nil
+				})
 			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if params.Tokens == nil {
+					return errors.New("nil is invalid value")
+				}
+				if err := (validate.Array{
+					MinLength:    0,
+					MinLengthSet: false,
+					MaxLength:    100,
+					MaxLengthSet: true,
+				}).ValidateLength(len(params.Tokens)); err != nil {
+					return errors.Wrap(err, "array")
+				}
+				return nil
+			}(); err != nil {
 				return err
 			}
 		} else {
@@ -7993,19 +8020,44 @@ func decodeGetRatesParams(args [0]string, argsEscaped bool, r *http.Request) (pa
 
 		if err := q.HasParam(cfg); err == nil {
 			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
-				val, err := d.DecodeValue()
-				if err != nil {
-					return err
-				}
+				return d.DecodeArray(func(d uri.Decoder) error {
+					var paramsDotCurrenciesVal string
+					if err := func() error {
+						val, err := d.DecodeValue()
+						if err != nil {
+							return err
+						}
 
-				c, err := conv.ToString(val)
-				if err != nil {
-					return err
-				}
+						c, err := conv.ToString(val)
+						if err != nil {
+							return err
+						}
 
-				params.Currencies = c
-				return nil
+						paramsDotCurrenciesVal = c
+						return nil
+					}(); err != nil {
+						return err
+					}
+					params.Currencies = append(params.Currencies, paramsDotCurrenciesVal)
+					return nil
+				})
 			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if params.Currencies == nil {
+					return errors.New("nil is invalid value")
+				}
+				if err := (validate.Array{
+					MinLength:    0,
+					MinLengthSet: false,
+					MaxLength:    3,
+					MaxLengthSet: true,
+				}).ValidateLength(len(params.Currencies)); err != nil {
+					return errors.Wrap(err, "array")
+				}
+				return nil
+			}(); err != nil {
 				return err
 			}
 		} else {
