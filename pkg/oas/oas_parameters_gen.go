@@ -3131,7 +3131,7 @@ func decodeGetAccountJettonsBalancesParams(args [1]string, argsEscaped bool, r *
 		cfg := uri.QueryParameterDecodingConfig{
 			Name:    "currencies",
 			Style:   uri.QueryStyleForm,
-			Explode: true,
+			Explode: false,
 		}
 
 		if err := q.HasParam(cfg); err == nil {
@@ -7954,7 +7954,7 @@ func decodeGetRatesParams(args [0]string, argsEscaped bool, r *http.Request) (pa
 		cfg := uri.QueryParameterDecodingConfig{
 			Name:    "tokens",
 			Style:   uri.QueryStyleForm,
-			Explode: true,
+			Explode: false,
 		}
 
 		if err := q.HasParam(cfg); err == nil {
@@ -8015,7 +8015,7 @@ func decodeGetRatesParams(args [0]string, argsEscaped bool, r *http.Request) (pa
 		cfg := uri.QueryParameterDecodingConfig{
 			Name:    "currencies",
 			Style:   uri.QueryStyleForm,
-			Explode: true,
+			Explode: false,
 		}
 
 		if err := q.HasParam(cfg); err == nil {

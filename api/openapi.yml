@@ -1654,6 +1654,7 @@ paths:
           name: tokens
           description: accept ton and jetton master addresses, separated by commas
           required: true
+          explode: false
           schema:
             type: array
             maxItems: 100
@@ -1664,6 +1665,7 @@ paths:
           name: currencies
           description: accept ton and all possible fiat currencies, separated by commas
           required: true
+          explode: false
           schema:
             type: array
             maxItems: 3
@@ -2753,6 +2755,7 @@ components:
       name: currencies
       description: accept ton and all possible fiat currencies, separated by commas
       required: false
+      explode: false
       schema:
         type: array
         items:

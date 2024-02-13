@@ -79,6 +79,7 @@
    },
    "currenciesQuery": {
     "description": "accept ton and all possible fiat currencies, separated by commas",
+    "explode": false,
     "in": "query",
     "name": "currencies",
     "required": false,
@@ -8649,6 +8650,7 @@
     "parameters": [
      {
       "description": "accept ton and jetton master addresses, separated by commas",
+      "explode": false,
       "in": "query",
       "name": "tokens",
       "required": true,
@@ -8665,6 +8667,7 @@
      },
      {
       "description": "accept ton and all possible fiat currencies, separated by commas",
+      "explode": false,
       "in": "query",
       "name": "currencies",
       "required": true,
