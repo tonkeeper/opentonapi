@@ -48,52 +48,52 @@ paths:
       description: Get blockchain block shards
       operationId: getBlockchainMasterchainShards
       tags:
-          - Blockchain
+        - Blockchain
       parameters:
         - $ref: '#/components/parameters/masterchainSeqno'
       responses:
-          '200':
-            description: blockchain block shards
-            content:
-              application/json:
-                schema:
-                  $ref: '#/components/schemas/BlockchainBlockShards'
-          'default':
-            $ref: '#/components/responses/Error'
+        '200':
+          description: blockchain block shards
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BlockchainBlockShards'
+        'default':
+          $ref: '#/components/responses/Error'
   /v2/blockchain/masterchain/{masterchain_seqno}/blocks:
     get:
       description: Get all blocks in all shards and workchains between target and previous masterchain block according to shards last blocks snapshot in masterchain.  We don't recommend to build your app around this method because it has problem with scalability and will work very slow in the future.
       operationId: getBlockchainMasterchainBlocks
       tags:
-          - Blockchain
+        - Blockchain
       parameters:
         - $ref: '#/components/parameters/masterchainSeqno'
       responses:
-          '200':
-            description: blockchain blocks
-            content:
-              application/json:
-                schema:
-                  $ref: '#/components/schemas/BlockchainBlocks'
-          'default':
-            $ref: '#/components/responses/Error'
+        '200':
+          description: blockchain blocks
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BlockchainBlocks'
+        'default':
+          $ref: '#/components/responses/Error'
   /v2/blockchain/masterchain/{masterchain_seqno}/transactions:
     get:
       description: Get all transactions in all shards and workchains between target and previous masterchain block according to shards last blocks snapshot in masterchain. We don't recommend to build your app around this method because it has problem with scalability and will work very slow in the future.
       operationId: getBlockchainMasterchainTransactions
       tags:
-          - Blockchain
+        - Blockchain
       parameters:
         - $ref: '#/components/parameters/masterchainSeqno'
       responses:
-          '200':
-            description: blockchain transactions
-            content:
-              application/json:
-                schema:
-                  $ref: '#/components/schemas/Transactions'
-          'default':
-            $ref: '#/components/responses/Error'
+        '200':
+          description: blockchain transactions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Transactions'
+        'default':
+          $ref: '#/components/responses/Error'
   /v2/blockchain/masterchain/{masterchain_seqno}/config:
     get:
       description: Get blockchain config from a specific block, if present.
@@ -280,7 +280,7 @@ paths:
           required: false
           schema:
             type: array
-            description: |- 
+            description: |-
               Supported values:
               "NaN" for NaN type, 
               "Null" for Null type, 
@@ -1279,80 +1279,80 @@ paths:
           $ref: '#/components/responses/Error'
   /v2/experimental/accounts/{account_id}/inscriptions/history:
     get:
-        description: Get the transfer inscriptions history for account. It's experimental API and can be dropped in the future.
-        operationId: getAccountInscriptionsHistory
-        tags:
-            - Inscriptions
-        parameters:
-            - $ref: '#/components/parameters/accountIDParameter'
-            - $ref: '#/components/parameters/i18n'
-            - name: before_lt
-              in: query
-              description: "omit this parameter to get last events"
-              required: false
+      description: Get the transfer inscriptions history for account. It's experimental API and can be dropped in the future.
+      operationId: getAccountInscriptionsHistory
+      tags:
+        - Inscriptions
+      parameters:
+        - $ref: '#/components/parameters/accountIDParameter'
+        - $ref: '#/components/parameters/i18n'
+        - name: before_lt
+          in: query
+          description: "omit this parameter to get last events"
+          required: false
+          schema:
+            type: integer
+            format: int64
+            example: 25758317000002
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            example: 100
+            default: 100
+            maximum: 1000
+            minimum: 1
+      responses:
+        '200':
+          description: account inscriptions history
+          content:
+            application/json:
               schema:
-                type: integer
-                format: int64
-                example: 25758317000002
-            - name: limit
-              in: query
-              required: false
-              schema:
-                type: integer
-                example: 100
-                default: 100
-                maximum: 1000
-                minimum: 1
-        responses:
-            '200':
-              description: account inscriptions history
-              content:
-                application/json:
-                  schema:
-                    $ref: '#/components/schemas/AccountEvents'
-            'default':
-              $ref: '#/components/responses/Error'
+                $ref: '#/components/schemas/AccountEvents'
+        'default':
+          $ref: '#/components/responses/Error'
   /v2/experimental/accounts/{account_id}/inscriptions/{ticker}/history:
     get:
-        description: Get the transfer inscriptions history for account. It's experimental API and can be dropped in the future.
-        operationId: getAccountInscriptionsHistoryByTicker
-        tags:
-            - Inscriptions
-        parameters:
-            - $ref: '#/components/parameters/accountIDParameter'
-            - $ref: '#/components/parameters/i18n'
-            - name: ticker
-              in: path
-              required: true
+      description: Get the transfer inscriptions history for account. It's experimental API and can be dropped in the future.
+      operationId: getAccountInscriptionsHistoryByTicker
+      tags:
+        - Inscriptions
+      parameters:
+        - $ref: '#/components/parameters/accountIDParameter'
+        - $ref: '#/components/parameters/i18n'
+        - name: ticker
+          in: path
+          required: true
+          schema:
+            type: string
+            example: "nano"
+        - name: before_lt
+          in: query
+          description: "omit this parameter to get last events"
+          required: false
+          schema:
+            type: integer
+            format: int64
+            example: 25758317000002
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            example: 100
+            default: 100
+            maximum: 1000
+            minimum: 1
+      responses:
+        '200':
+          description: account inscriptions history
+          content:
+            application/json:
               schema:
-                type: string
-                example: "nano"
-            - name: before_lt
-              in: query
-              description: "omit this parameter to get last events"
-              required: false
-              schema:
-                type: integer
-                format: int64
-                example: 25758317000002
-            - name: limit
-              in: query
-              required: false
-              schema:
-                type: integer
-                example: 100
-                default: 100
-                maximum: 1000
-                minimum: 1
-        responses:
-            '200':
-              description: account inscriptions history
-              content:
-                application/json:
-                  schema:
-                    $ref: '#/components/schemas/AccountEvents'
-            'default':
-              $ref: '#/components/responses/Error'
+                $ref: '#/components/schemas/AccountEvents'
+        'default':
+          $ref: '#/components/responses/Error'
   /v2/experimental/inscriptions/op-template:
     get:
       description: return comment for making operation with inscription. please don't use it if you don't know what you are doing
@@ -1660,7 +1660,7 @@ paths:
             maxItems: 100
             items:
               type: string
-            example: ["ton"]
+            example: [ "ton" ]
         - in: query
           name: currencies
           description: accept ton and all possible fiat currencies, separated by commas
@@ -1668,10 +1668,10 @@ paths:
           explode: false
           schema:
             type: array
-            maxItems: 3
+            maxItems: 50
             items:
               type: string
-            example: ["ton","usd","rub"]
+            example: [ "ton","usd","rub" ]
       responses:
         '200':
           description: tokens rates
@@ -2760,7 +2760,7 @@ components:
         type: array
         items:
           type: string
-        example: ["ton", "usd", "rub"]
+        example: [ "ton", "usd", "rub" ]
 
   requestBodies:
     MethodParameters:
@@ -2805,7 +2805,7 @@ components:
                 items:
                   type: object
                   required:
-                  - address
+                    - address
                   properties:
                     address:
                       type: string
@@ -5084,8 +5084,8 @@ components:
           description: amount in minimal particles
           example: "123456789"
         comment:
-            type: string
-            example: "Hi! This is your salary. \nFrom accounting with love."
+          type: string
+          example: "Hi! This is your salary. \nFrom accounting with love."
         type:
           type: string
           enum:
@@ -5993,7 +5993,7 @@ components:
         inscriptions:
           type: array
           items:
-              $ref: '#/components/schemas/InscriptionBalance'
+            $ref: '#/components/schemas/InscriptionBalance'
     InscriptionBalance:
       type: object
       required:

@@ -8051,7 +8051,7 @@ func decodeGetRatesParams(args [0]string, argsEscaped bool, r *http.Request) (pa
 				if err := (validate.Array{
 					MinLength:    0,
 					MinLengthSet: false,
-					MaxLength:    3,
+					MaxLength:    50,
 					MaxLengthSet: true,
 				}).ValidateLength(len(params.Currencies)); err != nil {
 					return errors.Wrap(err, "array")

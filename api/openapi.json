@@ -8680,7 +8680,7 @@
        "items": {
         "type": "string"
        },
-       "maxItems": 3,
+       "maxItems": 50,
        "type": "array"
       }
      }
