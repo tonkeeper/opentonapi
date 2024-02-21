@@ -6,11 +6,12 @@ import (
 	"net/http"
 	"time"
 
+	"go.uber.org/zap"
+
 	"github.com/tonkeeper/opentonapi/pkg/pusher/events"
 	"github.com/tonkeeper/opentonapi/pkg/pusher/metrics"
 	"github.com/tonkeeper/opentonapi/pkg/pusher/sources"
 	"github.com/tonkeeper/opentonapi/pkg/pusher/utils"
-	"go.uber.org/zap"
 )
 
 // session represents an HTTP connection from a client and
@@ -20,24 +21,29 @@ type session struct {
 	eventCh      chan Event
 	cancel       sources.CancelFn
 	pingInterval time.Duration
+
+	droppedEvents int
+	totalEvents   int
 }
 
 func newSession(logger *zap.Logger) *session {
 	return &session{
 		logger:       logger,
-		eventCh:      make(chan Event, 1000),
+		eventCh:      make(chan Event, 2000),
 		pingInterval: 5 * time.Second,
 	}
 }
 
 func (s *session) SendEvent(event Event) {
+	metrics.SseQueueLength(event.Name, len(s.eventCh))
 	select {
 	case s.eventCh <- event:
 	default:
 		// TODO: maybe we should either close the channel or let the user know that we have dropped an event
-		s.logger.Warn("event channel is full, dropping event",
-			zap.String("event", string(event.Name)))
+		s.droppedEvents++
 	}
+	s.totalEvents++
+	metrics.SseDroppedEvents(event.Name, float64(s.droppedEvents)/float64(s.totalEvents)*100)
 }
 
 func (s *session) SetCancelFn(cancel sources.CancelFn) {

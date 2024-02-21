@@ -9,14 +9,14 @@ import (
 	"time"
 
 	"github.com/gorilla/websocket"
-	"github.com/tonkeeper/opentonapi/internal/g"
-	"github.com/tonkeeper/opentonapi/pkg/pusher/events"
-	"github.com/tonkeeper/opentonapi/pkg/pusher/metrics"
-	"github.com/tonkeeper/opentonapi/pkg/pusher/utils"
 	"github.com/tonkeeper/tongo"
 	"go.uber.org/zap"
 
+	"github.com/tonkeeper/opentonapi/internal/g"
+	"github.com/tonkeeper/opentonapi/pkg/pusher/events"
+	"github.com/tonkeeper/opentonapi/pkg/pusher/metrics"
 	"github.com/tonkeeper/opentonapi/pkg/pusher/sources"
+	"github.com/tonkeeper/opentonapi/pkg/pusher/utils"
 )
 
 const subscriptionLimit = 10000 // limitation of subscription by connection
@@ -36,6 +36,9 @@ type session struct {
 	blockSubscription   sources.CancelFn
 	pingInterval        time.Duration
 	subscriptionLimit   int
+
+	droppedEvents int
+	totalEvents   int
 }
 
 type event struct {
@@ -47,7 +50,7 @@ type event struct {
 func newSession(logger *zap.Logger, txSource sources.TransactionSource, traceSource sources.TraceSource, mempool sources.MemPoolSource, blockSource sources.BlockSource, conn *websocket.Conn) *session {
 	return &session{
 		logger:             logger,
-		eventCh:            make(chan event, 1000),
+		eventCh:            make(chan event, 2000),
 		conn:               conn,
 		mempool:            mempool,
 		txSource:           txSource,
@@ -133,13 +136,15 @@ func (s *session) Run(ctx context.Context) chan JsonRPCRequest {
 }
 
 func (s *session) sendEvent(e event) {
+	metrics.WebsocketQueueLength(e.Name, len(s.eventCh))
 	select {
 	case s.eventCh <- e:
 	default:
 		// TODO: maybe we should either close the channel or let the user know that we have dropped an event
-		s.logger.Warn("event channel is full, dropping event",
-			zap.String("event", string(e.Name)))
+		s.droppedEvents++
 	}
+	s.totalEvents++
+	metrics.WebsocketDroppedEvents(e.Name, float64(s.droppedEvents)/float64(s.totalEvents)*100)
 }
 
 type accountOptions struct {
