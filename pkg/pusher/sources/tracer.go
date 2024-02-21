@@ -16,9 +16,9 @@ import (
 
 var (
 	traceNumber = promauto.NewCounterVec(prometheus.CounterOpts{
-		Name: "trace_number",
-		Help: "Number of processed traces",
-	}, []string{"completeness"})
+		Name: "streaming_api_trace_dispatch",
+		Help: "Number of traces",
+	}, []string{"type"})
 )
 
 type SubscribeToTraceOptions struct {
@@ -99,11 +99,16 @@ func (t *Tracer) Run(ctx context.Context) {
 				t.logger.Error("hash.FromHex() failed", zap.Error(err))
 				return
 			}
-			trace, err := t.storage.GetTrace(ctx, hash)
-			if err != nil {
+			for i := 0; i < 15; i++ {
+				trace, err := t.storage.GetTrace(ctx, hash)
+				if err != nil {
+					time.Sleep(1 * time.Second)
+					continue
+				}
+				t.dispatch(trace)
 				return
 			}
-			t.dispatch(trace)
+			traceNumber.With(map[string]string{"type": "failed-to-load"}).Inc()
 		}(txEvent)
 	}
 }
@@ -122,16 +127,17 @@ func (t *Tracer) putTraceInCache(hash string) (success bool) {
 
 func (t *Tracer) dispatch(trace *core.Trace) {
 	if trace.InProgress() {
-		traceNumber.With(map[string]string{"completeness": "inProgress"}).Inc()
+		traceNumber.With(map[string]string{"type": "dispatched-in-progress"}).Inc()
 		return
 	}
-	traceNumber.With(map[string]string{"completeness": "completed"}).Inc()
+	traceNumber.With(map[string]string{"type": "dispatched-completed"}).Inc()
 
 	if success := t.putTraceInCache(trace.Hash.Hex()); !success {
 		// ok, this trace is already in cache meaning that we already sent it to subscribers.
 		// ignore it.
 		return
 	}
+	traceNumber.With(map[string]string{"type": "converted-to-event"}).Inc()
 
 	accounts := core.DistinctAccounts(trace)
 	eventData := &TraceEventData{
