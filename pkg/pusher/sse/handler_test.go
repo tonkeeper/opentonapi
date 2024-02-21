@@ -32,17 +32,17 @@ func (m *mockMemPoolSource) SubscribeToMessages(ctx context.Context, deliveryFn 
 }
 
 type mockBlockSource struct {
-	options sources.SubscribeToBlocksOptions
+	options sources.SubscribeToBlockHeadersOptions
 }
 
-func (m *mockBlockSource) SubscribeToBlocks(ctx context.Context, deliveryFn sources.DeliveryFn, opts sources.SubscribeToBlocksOptions) sources.CancelFn {
+func (m *mockBlockSource) SubscribeToBlockHeaders(ctx context.Context, deliveryFn sources.DeliveryFn, opts sources.SubscribeToBlockHeadersOptions) sources.CancelFn {
 	m.options = opts
 	return nil
 }
 
 var _ sources.TransactionSource = (*mockTxSource)(nil)
 var _ sources.MemPoolSource = (*mockMemPoolSource)(nil)
-var _ sources.BlockSource = (*mockBlockSource)(nil)
+var _ sources.BlockHeadersSource = (*mockBlockSource)(nil)
 
 func TestHandler_SubscribeToTransactions(t *testing.T) {
 	tests := []struct {
@@ -140,19 +140,19 @@ func TestHandler_SubscribeToBlocks(t *testing.T) {
 		name        string
 		url         string
 		wantErr     string
-		wantOptions sources.SubscribeToBlocksOptions
+		wantOptions sources.SubscribeToBlockHeadersOptions
 	}{
 		{
 			name: "subscribe to 0 workchain",
 			url:  "/blocks?workchain=0",
-			wantOptions: sources.SubscribeToBlocksOptions{
+			wantOptions: sources.SubscribeToBlockHeadersOptions{
 				Workchain: g.Pointer(0),
 			},
 		},
 		{
 			name: "subscribe to -1 workchain",
 			url:  "/blocks?workchain=-1",
-			wantOptions: sources.SubscribeToBlocksOptions{
+			wantOptions: sources.SubscribeToBlockHeadersOptions{
 				Workchain: g.Pointer(-1),
 			},
 		},
@@ -164,17 +164,17 @@ func TestHandler_SubscribeToBlocks(t *testing.T) {
 		{
 			name:        "subscribe to all workchains",
 			url:         "/blocks",
-			wantOptions: sources.SubscribeToBlocksOptions{},
+			wantOptions: sources.SubscribeToBlockHeadersOptions{},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			source := &mockBlockSource{}
 			h := &Handler{
-				blockSource: source,
+				blockHeadersSource: source,
 			}
 			request := httptest.NewRequest(http.MethodGet, tt.url, nil)
-			err := h.SubscribeToBlocks(&session{}, request)
+			err := h.SubscribeToBlockHeaders(&session{}, request)
 			if tt.wantErr != "" {
 				require.NotNil(t, err)
 				require.Equal(t, err.Error(), tt.wantErr)

@@ -29,7 +29,7 @@ type mockBlockDispatcher struct {
 	ch chan BlockEvent
 }
 
-func (m *mockBlockDispatcher) RegisterSubscriber(fn DeliveryFn, options SubscribeToBlocksOptions) CancelFn {
+func (m *mockBlockDispatcher) RegisterSubscriber(fn DeliveryFn, options SubscribeToBlockHeadersOptions) CancelFn {
 	panic("implement me")
 }
 func (m *mockBlockDispatcher) Run(ctx context.Context) chan BlockEvent {

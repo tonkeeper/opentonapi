@@ -269,11 +269,11 @@ func Test_session_subscribeToBlocks(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			var options []sources.SubscribeToBlocksOptions
+			var options []sources.SubscribeToBlockHeadersOptions
 			s := &session{
 				eventCh: make(chan event, 10),
 				blockSource: &mockBlockSource{
-					OnSubscribeToBlocks: func(ctx context.Context, deliveryFn sources.DeliveryFn, opts sources.SubscribeToBlocksOptions) sources.CancelFn {
+					OnSubscribeToBlocks: func(ctx context.Context, deliveryFn sources.DeliveryFn, opts sources.SubscribeToBlockHeadersOptions) sources.CancelFn {
 						options = append(options, opts)
 						deliveryFn([]byte("msg"))
 						return func() {}

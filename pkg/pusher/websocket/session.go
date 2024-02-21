@@ -28,7 +28,7 @@ type session struct {
 	mempool             sources.MemPoolSource
 	txSource            sources.TransactionSource
 	traceSource         sources.TraceSource
-	blockSource         sources.BlockSource
+	blockSource         sources.BlockHeadersSource
 	eventCh             chan event
 	txSubscriptions     map[tongo.AccountID]sources.CancelFn
 	traceSubscriptions  map[tongo.AccountID]sources.CancelFn
@@ -47,7 +47,7 @@ type event struct {
 	Params []byte
 }
 
-func newSession(logger *zap.Logger, txSource sources.TransactionSource, traceSource sources.TraceSource, mempool sources.MemPoolSource, blockSource sources.BlockSource, conn *websocket.Conn) *session {
+func newSession(logger *zap.Logger, txSource sources.TransactionSource, traceSource sources.TraceSource, mempool sources.MemPoolSource, blockSource sources.BlockHeadersSource, conn *websocket.Conn) *session {
 	return &session{
 		logger:             logger,
 		eventCh:            make(chan event, 2000),
@@ -354,9 +354,9 @@ func (s *session) unsubscribeFromMempool() string {
 	return fmt.Sprintf("success! you have unsubscribed from mempool")
 }
 
-func blockParamsToOptions(params []string) (*sources.SubscribeToBlocksOptions, error) {
+func blockParamsToOptions(params []string) (*sources.SubscribeToBlockHeadersOptions, error) {
 	if len(params) == 0 {
-		return &sources.SubscribeToBlocksOptions{}, nil
+		return &sources.SubscribeToBlockHeadersOptions{}, nil
 	}
 	if len(params) > 1 {
 		return nil, fmt.Errorf("failed to process params: supported only one parameter")
@@ -375,7 +375,7 @@ func blockParamsToOptions(params []string) (*sources.SubscribeToBlocksOptions, e
 	if workchain != -1 && workchain != 0 {
 		return nil, fmt.Errorf("failed to process params: unknown workchain")
 	}
-	return &sources.SubscribeToBlocksOptions{Workchain: g.Pointer(workchain)}, nil
+	return &sources.SubscribeToBlockHeadersOptions{Workchain: g.Pointer(workchain)}, nil
 }
 
 func (s *session) subscribeToBlocks(ctx context.Context, params []string) string {
@@ -389,7 +389,7 @@ func (s *session) subscribeToBlocks(ctx context.Context, params []string) string
 	if s.blockSubscription != nil {
 		s.blockSubscription()
 	}
-	s.blockSubscription = s.blockSource.SubscribeToBlocks(ctx, func(eventData []byte) {
+	s.blockSubscription = s.blockSource.SubscribeToBlockHeaders(ctx, func(eventData []byte) {
 		s.sendEvent(event{
 			Name:   events.BlockEvent,
 			Method: "block",

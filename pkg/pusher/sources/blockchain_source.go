@@ -26,7 +26,7 @@ type txDispatcher interface {
 	Run(ctx context.Context) chan TransactionEvent
 }
 type blockDispatcher interface {
-	RegisterSubscriber(fn DeliveryFn, options SubscribeToBlocksOptions) CancelFn
+	RegisterSubscriber(fn DeliveryFn, options SubscribeToBlockHeadersOptions) CancelFn
 	Run(ctx context.Context) chan BlockEvent
 }
 
@@ -39,7 +39,7 @@ func NewBlockchainSource(logger *zap.Logger, cli *liteapi.Client) *BlockchainSou
 	}
 }
 
-var _ BlockSource = (*BlockchainSource)(nil)
+var _ BlockHeadersSource = (*BlockchainSource)(nil)
 var _ TransactionSource = (*BlockchainSource)(nil)
 
 func (b *BlockchainSource) SubscribeToTransactions(ctx context.Context, deliveryFn DeliveryFn, opts SubscribeToTransactionsOptions) CancelFn {
@@ -52,7 +52,7 @@ func (b *BlockchainSource) SubscribeToTransactions(ctx context.Context, delivery
 	return b.txDispatcher.RegisterSubscriber(deliveryFn, opts)
 }
 
-func (b *BlockchainSource) SubscribeToBlocks(ctx context.Context, deliveryFn DeliveryFn, opts SubscribeToBlocksOptions) CancelFn {
+func (b *BlockchainSource) SubscribeToBlockHeaders(ctx context.Context, deliveryFn DeliveryFn, opts SubscribeToBlockHeadersOptions) CancelFn {
 	b.logger.Debug("subscribe to blocks",
 		zap.Intp("workchain", opts.Workchain))
 

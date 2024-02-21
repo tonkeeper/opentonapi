@@ -41,17 +41,17 @@ func (m *mockTraceSource) SubscribeToTraces(ctx context.Context, deliveryFn sour
 }
 
 type mockBlockSource struct {
-	OnSubscribeToBlocks func(ctx context.Context, deliveryFn sources.DeliveryFn, opts sources.SubscribeToBlocksOptions) sources.CancelFn
+	OnSubscribeToBlocks func(ctx context.Context, deliveryFn sources.DeliveryFn, opts sources.SubscribeToBlockHeadersOptions) sources.CancelFn
 }
 
-func (m *mockBlockSource) SubscribeToBlocks(ctx context.Context, deliveryFn sources.DeliveryFn, opts sources.SubscribeToBlocksOptions) sources.CancelFn {
+func (m *mockBlockSource) SubscribeToBlockHeaders(ctx context.Context, deliveryFn sources.DeliveryFn, opts sources.SubscribeToBlockHeadersOptions) sources.CancelFn {
 	return m.OnSubscribeToBlocks(ctx, deliveryFn, opts)
 }
 
 var _ sources.TransactionSource = &mockTxSource{}
 var _ sources.MemPoolSource = &mockMemPool{}
 var _ sources.TraceSource = &mockTraceSource{}
-var _ sources.BlockSource = &mockBlockSource{}
+var _ sources.BlockHeadersSource = &mockBlockSource{}
 
 func TestHandler_UnsubscribeWhenConnectionIsClosed(t *testing.T) {
 	var txSubscribed atomic.Bool   // to make "go test -race" happy
@@ -189,7 +189,7 @@ func TestHandler_UnsubscribeMethods(t *testing.T) {
 	var blockSubscribed atomic.Bool   // to make "go test -race" happy
 	var blockUnsubscribed atomic.Bool // to make "go test -race" happy
 	blockSource := &mockBlockSource{
-		OnSubscribeToBlocks: func(ctx context.Context, deliveryFn sources.DeliveryFn, opts sources.SubscribeToBlocksOptions) sources.CancelFn {
+		OnSubscribeToBlocks: func(ctx context.Context, deliveryFn sources.DeliveryFn, opts sources.SubscribeToBlockHeadersOptions) sources.CancelFn {
 			blockSubscribed.Store(true)
 			return func() {
 				blockUnsubscribed.Store(true)

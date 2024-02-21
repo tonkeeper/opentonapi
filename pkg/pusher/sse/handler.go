@@ -16,22 +16,24 @@ import (
 
 // Handler handles http methods for sse.
 type Handler struct {
-	txSource       sources.TransactionSource
-	blockSource    sources.BlockSource
-	traceSource    sources.TraceSource
-	memPool        sources.MemPoolSource
-	currentEventID int64
+	txSource           sources.TransactionSource
+	blockSource        sources.BlockSource
+	blockHeadersSource sources.BlockHeadersSource
+	traceSource        sources.TraceSource
+	memPool            sources.MemPoolSource
+	currentEventID     int64
 }
 
 type handlerFunc func(session *session, request *http.Request) error
 
-func NewHandler(blockSource sources.BlockSource, txSource sources.TransactionSource, traceSource sources.TraceSource, memPool sources.MemPoolSource) *Handler {
+func NewHandler(blockSource sources.BlockSource, blockHeadersSource sources.BlockHeadersSource, txSource sources.TransactionSource, traceSource sources.TraceSource, memPool sources.MemPoolSource) *Handler {
 	h := Handler{
-		txSource:       txSource,
-		blockSource:    blockSource,
-		traceSource:    traceSource,
-		memPool:        memPool,
-		currentEventID: time.Now().UnixNano(),
+		txSource:           txSource,
+		blockSource:        blockSource,
+		blockHeadersSource: blockHeadersSource,
+		traceSource:        traceSource,
+		memPool:            memPool,
+		currentEventID:     time.Now().UnixNano(),
 	}
 	return &h
 }
@@ -156,12 +158,12 @@ func (h *Handler) SubscribeToTraces(session *session, request *http.Request) err
 	return nil
 }
 
-func (h *Handler) SubscribeToBlocks(session *session, request *http.Request) error {
-	if h.blockSource == nil {
-		return errors.BadRequest("block source is not configured")
+func (h *Handler) SubscribeToBlockHeaders(session *session, request *http.Request) error {
+	if h.blockHeadersSource == nil {
+		return errors.BadRequest("block headers source is not configured")
 	}
 	workchain := request.URL.Query().Get("workchain")
-	opts := sources.SubscribeToBlocksOptions{}
+	opts := sources.SubscribeToBlockHeadersOptions{}
 	if len(workchain) > 0 {
 		value, err := strconv.Atoi(workchain)
 		if err != nil {
@@ -172,9 +174,36 @@ func (h *Handler) SubscribeToBlocks(session *session, request *http.Request) err
 		}
 		opts.Workchain = &value
 	}
-	cancelFn := h.blockSource.SubscribeToBlocks(request.Context(), func(data []byte) {
+	cancelFn := h.blockHeadersSource.SubscribeToBlockHeaders(request.Context(), func(data []byte) {
 		event := Event{
 			Name:    events.BlockEvent,
+			EventID: h.nextID(),
+			Data:    data,
+		}
+		session.SendEvent(event)
+	}, opts)
+	session.SetCancelFn(cancelFn)
+	return nil
+}
+
+func (h *Handler) SubscribeToBlocks(session *session, request *http.Request) error {
+	if h.blockSource == nil {
+		return errors.BadRequest("block source is not configured")
+	}
+	opts := sources.SubscribeToBlocksOptions{}
+	if seqno := request.URL.Query().Get("masterchain_seqno"); len(seqno) > 0 {
+		value, err := strconv.ParseInt(seqno, 10, 32)
+		if err != nil {
+			return errors.BadRequest("failed to parse 'masterchain_seqno' parameter in query")
+		}
+		if value < 1 {
+			value = 1
+		}
+		opts.MasterchainSeqno = uint32(value)
+	}
+	cancelFn := h.blockSource.SubscribeToBlocks(request.Context(), func(data []byte) {
+		event := Event{
+			Name:    events.BlockchainEvent,
 			EventID: h.nextID(),
 			Data:    data,
 		}

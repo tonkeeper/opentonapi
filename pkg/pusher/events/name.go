@@ -5,11 +5,12 @@ package events
 type Name string
 
 const (
-	PingEvent      Name = "ping"
-	AccountTxEvent Name = "account-tx"
-	TraceEvent     Name = "trace"
-	BlockEvent     Name = "block"
-	MempoolEvent   Name = "mempool"
+	PingEvent       Name = "ping"
+	AccountTxEvent  Name = "account-tx"
+	TraceEvent      Name = "trace"
+	BlockEvent      Name = "block"
+	BlockchainEvent Name = "blockchain"
+	MempoolEvent    Name = "mempool"
 )
 
 func (n Name) String() string {

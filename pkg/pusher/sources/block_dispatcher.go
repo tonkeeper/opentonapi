@@ -60,7 +60,7 @@ func (disp *BlockDispatcher) dispatch(event *BlockEvent) {
 	}
 }
 
-func (disp *BlockDispatcher) RegisterSubscriber(fn DeliveryFn, opts SubscribeToBlocksOptions) CancelFn {
+func (disp *BlockDispatcher) RegisterSubscriber(fn DeliveryFn, opts SubscribeToBlockHeadersOptions) CancelFn {
 	disp.mu.Lock()
 	defer disp.mu.Unlock()
 
@@ -73,7 +73,7 @@ func (disp *BlockDispatcher) RegisterSubscriber(fn DeliveryFn, opts SubscribeToB
 	}
 }
 
-func createBlockDeliveryFnBasedOnOptions(fn DeliveryFn, options SubscribeToBlocksOptions) blockDeliveryFn {
+func createBlockDeliveryFnBasedOnOptions(fn DeliveryFn, options SubscribeToBlockHeadersOptions) blockDeliveryFn {
 	if options.Workchain == nil {
 		return func(eventData []byte, workchain int) {
 			fn(eventData)

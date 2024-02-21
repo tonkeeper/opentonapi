@@ -12,11 +12,11 @@ import (
 func TestBlockDispatcher_RegisterSubscriber(t *testing.T) {
 	tests := []struct {
 		name    string
-		options []SubscribeToBlocksOptions
+		options []SubscribeToBlockHeadersOptions
 	}{
 		{
 			name: "subscribe",
-			options: []SubscribeToBlocksOptions{
+			options: []SubscribeToBlockHeadersOptions{
 				{Workchain: g.Pointer(-1)},
 				{},
 			},
@@ -44,31 +44,31 @@ func TestBlockDispatcher_RegisterSubscriber(t *testing.T) {
 func Test_createBlockDeliveryFnBasedOnOptions(t *testing.T) {
 	tests := []struct {
 		name       string
-		options    SubscribeToBlocksOptions
+		options    SubscribeToBlockHeadersOptions
 		workchain  int
 		wantCalled bool
 	}{
 		{
 			name:       "subscribe to all workchains",
-			options:    SubscribeToBlocksOptions{},
+			options:    SubscribeToBlockHeadersOptions{},
 			workchain:  -1,
 			wantCalled: true,
 		},
 		{
 			name:       "subscribe to all workchains",
-			options:    SubscribeToBlocksOptions{},
+			options:    SubscribeToBlockHeadersOptions{},
 			workchain:  0,
 			wantCalled: true,
 		},
 		{
 			name:       "subscribe to masterchain",
-			options:    SubscribeToBlocksOptions{Workchain: g.Pointer(-1)},
+			options:    SubscribeToBlockHeadersOptions{Workchain: g.Pointer(-1)},
 			workchain:  -1,
 			wantCalled: true,
 		},
 		{
 			name:       "subscribe to basechain",
-			options:    SubscribeToBlocksOptions{Workchain: g.Pointer(0)},
+			options:    SubscribeToBlockHeadersOptions{Workchain: g.Pointer(0)},
 			workchain:  -1,
 			wantCalled: false,
 		},

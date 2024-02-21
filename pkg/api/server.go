@@ -39,13 +39,14 @@ type AsyncHandler func(w http.ResponseWriter, r *http.Request, connectionType in
 type AsyncMiddleware func(AsyncHandler) AsyncHandler
 
 type ServerOptions struct {
-	ogenMiddlewares  []oas.Middleware
-	asyncMiddlewares []AsyncMiddleware
-	txSource         sources.TransactionSource
-	blockSource      sources.BlockSource
-	traceSource      sources.TraceSource
-	memPool          sources.MemPoolSource
-	liteServers      []config.LiteServer
+	ogenMiddlewares    []oas.Middleware
+	asyncMiddlewares   []AsyncMiddleware
+	txSource           sources.TransactionSource
+	blockHeadersSource sources.BlockHeadersSource
+	blockSource        sources.BlockSource
+	traceSource        sources.TraceSource
+	memPool            sources.MemPoolSource
+	liteServers        []config.LiteServer
 }
 
 type ServerOption func(options *ServerOptions)
@@ -62,9 +63,15 @@ func WithAsyncMiddleware(m ...AsyncMiddleware) ServerOption {
 	}
 }
 
-func WithBlockSource(blockSource sources.BlockSource) ServerOption {
+func WithBlockHeadersSource(src sources.BlockHeadersSource) ServerOption {
 	return func(options *ServerOptions) {
-		options.blockSource = blockSource
+		options.blockHeadersSource = src
+	}
+}
+
+func WithBlockSource(src sources.BlockSource) ServerOption {
+	return func(options *ServerOptions) {
+		options.blockSource = src
 	}
 }
 
@@ -74,9 +81,9 @@ func WithTransactionSource(txSource sources.TransactionSource) ServerOption {
 	}
 }
 
-func WithTraceSource(tracer sources.TraceSource) ServerOption {
+func WithTraceSource(src sources.TraceSource) ServerOption {
 	return func(options *ServerOptions) {
-		options.traceSource = tracer
+		options.traceSource = src
 	}
 }
 
@@ -104,9 +111,12 @@ func NewServer(log *zap.Logger, handler *Handler, address string, opts ...Server
 	asyncMiddlewares := []AsyncMiddleware{asyncLoggingMiddleware(log), asyncMetricsMiddleware}
 	asyncMiddlewares = append(asyncMiddlewares, options.asyncMiddlewares...)
 
-	sseHandler := sse.NewHandler(options.blockSource, options.txSource, options.traceSource, options.memPool)
+	sseHandler := sse.NewHandler(options.blockSource, options.blockHeadersSource, options.txSource, options.traceSource, options.memPool)
 	if options.blockSource != nil {
-		mux.Handle("/v2/sse/blocks", wrapAsync(LongLivedConnection, true, chainMiddlewares(sse.Stream(log, sseHandler.SubscribeToBlocks), asyncMiddlewares...)))
+		mux.Handle("/v2/sse/blockchain/full", wrapAsync(LongLivedConnection, true, chainMiddlewares(sse.Stream(log, sseHandler.SubscribeToBlocks), asyncMiddlewares...)))
+	}
+	if options.blockHeadersSource != nil {
+		mux.Handle("/v2/sse/blocks", wrapAsync(LongLivedConnection, true, chainMiddlewares(sse.Stream(log, sseHandler.SubscribeToBlockHeaders), asyncMiddlewares...)))
 	}
 	if options.txSource != nil {
 		mux.Handle("/v2/sse/accounts/transactions", wrapAsync(LongLivedConnection, true, chainMiddlewares(sse.Stream(log, sseHandler.SubscribeToTransactions), asyncMiddlewares...)))
@@ -118,7 +128,7 @@ func NewServer(log *zap.Logger, handler *Handler, address string, opts ...Server
 		mux.Handle("/v2/sse/mempool", wrapAsync(LongLivedConnection, true, chainMiddlewares(sse.Stream(log, sseHandler.SubscribeToMessages), asyncMiddlewares...)))
 	}
 
-	websocketHandler := websocket.Handler(log, options.txSource, options.traceSource, options.memPool, options.blockSource)
+	websocketHandler := websocket.Handler(log, options.txSource, options.traceSource, options.memPool, options.blockHeadersSource)
 	mux.Handle("/v2/websocket", wrapAsync(LongLivedConnection, true, chainMiddlewares(websocketHandler, asyncMiddlewares...)))
 	mux.Handle("/", ogenServer)
 
