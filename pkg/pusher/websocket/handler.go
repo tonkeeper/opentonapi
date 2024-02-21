@@ -32,7 +32,7 @@ type JsonRPCResponse struct {
 	Params  json.RawMessage `json:"params,omitempty"`
 }
 
-func Handler(logger *zap.Logger, txSource sources.TransactionSource, traceSource sources.TraceSource, mempool sources.MemPoolSource, blockSource sources.BlockSource) func(http.ResponseWriter, *http.Request, int, bool) error {
+func Handler(logger *zap.Logger, txSource sources.TransactionSource, traceSource sources.TraceSource, mempool sources.MemPoolSource, blockSource sources.BlockHeadersSource) func(http.ResponseWriter, *http.Request, int, bool) error {
 	return func(w http.ResponseWriter, r *http.Request, connectionType int, allowTokenInQuery bool) error {
 		conn, err := upgrader.Upgrade(w, r, nil)
 		if err != nil {

@@ -62,8 +62,8 @@ type MemPoolSource interface {
 	SubscribeToMessages(ctx context.Context, deliveryFn DeliveryFn, opts SubscribeToMempoolOptions) (CancelFn, error)
 }
 
-// SubscribeToBlocksOptions configures subscription to block events.
-type SubscribeToBlocksOptions struct {
+// SubscribeToBlockHeadersOptions configures subscription to block events.
+type SubscribeToBlockHeadersOptions struct {
 	// Workchain, if set, opentonapi will filter out blocks that are not from the specified workchain.
 	Workchain *int `json:"workchain,omitempty"`
 }
@@ -82,7 +82,29 @@ func (e BlockEvent) String() string {
 	return fmt.Sprintf("(%d,%x,%d)", e.Workchain, e.Shard, e.Seqno)
 }
 
-// BlockSource provides a method to subscribe to notifications about new blocks in the TON network.
+// BlockHeadersSource provides a method to subscribe to notifications about new blocks in the TON network.
+type BlockHeadersSource interface {
+	SubscribeToBlockHeaders(ctx context.Context, deliveryFn DeliveryFn, opts SubscribeToBlockHeadersOptions) CancelFn
+}
+
+type SubscribeToBlocksOptions struct {
+	MasterchainSeqno uint32 `json:"masterchain_seqno,omitempty"`
+}
+
+type Block struct {
+	Workchain int32  `json:"workchain"`
+	Shard     string `json:"shard"`
+	Seqno     uint32 `json:"seqno"`
+	Raw       []byte `json:"raw"`
+}
+
+// BlockchainSliceEvent represents a notification about a new bunch of blocks in the blockchain.
+type BlockchainSliceEvent struct {
+	MasterchainSeqno uint32 `json:"masterchain_seqno"`
+	// Blocks contains one masterchain block and all blocks from the basechain created since the previous blockchain slice.
+	Blocks []Block `json:"blocks"`
+}
+
 type BlockSource interface {
 	SubscribeToBlocks(ctx context.Context, deliveryFn DeliveryFn, opts SubscribeToBlocksOptions) CancelFn
 }
