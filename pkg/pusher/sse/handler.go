@@ -201,7 +201,7 @@ func (h *Handler) SubscribeToBlocks(session *session, request *http.Request) err
 		}
 		opts.MasterchainSeqno = uint32(value)
 	}
-	cancelFn := h.blockSource.SubscribeToBlocks(request.Context(), func(data []byte) {
+	cancelFn, err := h.blockSource.SubscribeToBlocks(request.Context(), func(data []byte) {
 		event := Event{
 			Name:    events.BlockchainEvent,
 			EventID: h.nextID(),
@@ -209,6 +209,9 @@ func (h *Handler) SubscribeToBlocks(session *session, request *http.Request) err
 		}
 		session.SendEvent(event)
 	}, opts)
+	if err != nil {
+		return err
+	}
 	session.SetCancelFn(cancelFn)
 	return nil
 }
