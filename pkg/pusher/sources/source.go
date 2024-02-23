@@ -106,5 +106,5 @@ type BlockchainSliceEvent struct {
 }
 
 type BlockSource interface {
-	SubscribeToBlocks(ctx context.Context, deliveryFn DeliveryFn, opts SubscribeToBlocksOptions) CancelFn
+	SubscribeToBlocks(ctx context.Context, deliveryFn DeliveryFn, opts SubscribeToBlocksOptions) (CancelFn, error)
 }
