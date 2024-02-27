@@ -89,6 +89,8 @@ type BlockHeadersSource interface {
 
 type SubscribeToBlocksOptions struct {
 	MasterchainSeqno uint32 `json:"masterchain_seqno,omitempty"`
+	// RateLimit defines the rate limit (KB/sec) for the block streaming.
+	RateLimit int
 }
 
 type Block struct {
