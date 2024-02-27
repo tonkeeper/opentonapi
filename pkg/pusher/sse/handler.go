@@ -197,7 +197,7 @@ func (h *Handler) SubscribeToBlocks(session *session, request *http.Request) err
 			return errors.BadRequest("failed to parse 'masterchain_seqno' parameter in query")
 		}
 		if value < 1 {
-			value = 1
+			value = 0
 		}
 		opts.MasterchainSeqno = uint32(value)
 	}

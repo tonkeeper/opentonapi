@@ -32,17 +32,24 @@ func (m *mockMemPoolSource) SubscribeToMessages(ctx context.Context, deliveryFn 
 }
 
 type mockBlockSource struct {
-	options sources.SubscribeToBlockHeadersOptions
+	headersOptions sources.SubscribeToBlockHeadersOptions
+	blockOptions   sources.SubscribeToBlocksOptions
+}
+
+func (m *mockBlockSource) SubscribeToBlocks(ctx context.Context, deliveryFn sources.DeliveryFn, opts sources.SubscribeToBlocksOptions) (sources.CancelFn, error) {
+	m.blockOptions = opts
+	return nil, nil
 }
 
 func (m *mockBlockSource) SubscribeToBlockHeaders(ctx context.Context, deliveryFn sources.DeliveryFn, opts sources.SubscribeToBlockHeadersOptions) sources.CancelFn {
-	m.options = opts
+	m.headersOptions = opts
 	return nil
 }
 
 var _ sources.TransactionSource = (*mockTxSource)(nil)
 var _ sources.MemPoolSource = (*mockMemPoolSource)(nil)
 var _ sources.BlockHeadersSource = (*mockBlockSource)(nil)
+var _ sources.BlockSource = (*mockBlockSource)(nil)
 
 func TestHandler_SubscribeToTransactions(t *testing.T) {
 	tests := []struct {
@@ -135,7 +142,7 @@ func TestHandler_SubscribeToMessages(t *testing.T) {
 	}
 }
 
-func TestHandler_SubscribeToBlocks(t *testing.T) {
+func TestHandler_SubscribeToBlockHeaders(t *testing.T) {
 	tests := []struct {
 		name        string
 		url         string
@@ -181,7 +188,58 @@ func TestHandler_SubscribeToBlocks(t *testing.T) {
 				return
 			}
 			require.Nil(t, err)
-			require.Equal(t, tt.wantOptions, source.options)
+			require.Equal(t, tt.wantOptions, source.headersOptions)
+		})
+	}
+}
+
+func TestHandler_SubscribeToBlocks(t *testing.T) {
+	tests := []struct {
+		name        string
+		url         string
+		wantErr     string
+		wantOptions sources.SubscribeToBlocksOptions
+	}{
+		{
+			name:        "no parameters",
+			url:         "/blockchain/full",
+			wantOptions: sources.SubscribeToBlocksOptions{},
+		},
+		{
+			name: "masterchain_seqno defined",
+			url:  "/blockchain/full?masterchain_seqno=90123",
+			wantOptions: sources.SubscribeToBlocksOptions{
+				MasterchainSeqno: 90123,
+			},
+		},
+		{
+			name: "masterchain_seqno is negative",
+			url:  "/blockchain/full?masterchain_seqno=-900",
+			wantOptions: sources.SubscribeToBlocksOptions{
+				MasterchainSeqno: 0,
+			},
+		},
+		{
+			name:    "error - bad parameter",
+			url:     "/blockchain/full?masterchain_seqno=xxx",
+			wantErr: `failed to parse 'masterchain_seqno' parameter in query`,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			source := &mockBlockSource{}
+			h := &Handler{
+				blockSource: source,
+			}
+			request := httptest.NewRequest(http.MethodGet, tt.url, nil)
+			err := h.SubscribeToBlocks(&session{}, request)
+			if tt.wantErr != "" {
+				require.NotNil(t, err)
+				require.Equal(t, err.Error(), tt.wantErr)
+				return
+			}
+			require.Nil(t, err)
+			require.Equal(t, tt.wantOptions, source.blockOptions)
 		})
 	}
 }
