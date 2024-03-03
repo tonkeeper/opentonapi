@@ -12,6 +12,7 @@ import (
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/tongo"
 	"go.uber.org/zap"
+	"golang.org/x/time/rate"
 )
 
 var (
@@ -88,9 +89,13 @@ func (t *Tracer) Run(ctx context.Context) {
 
 	defer cancelFn()
 
+	limiter := rate.NewLimiter(30, 1)
 	for txEvent := range txCh {
 		if ctx.Err() != nil {
 			return
+		}
+		if !limiter.Allow() {
+			continue
 		}
 		go func(txEvent TransactionEventData) {
 			var hash tongo.Bits256
