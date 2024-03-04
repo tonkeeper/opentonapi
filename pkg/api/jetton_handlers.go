@@ -223,6 +223,9 @@ func (h *Handler) GetJettonsEvents(ctx context.Context, params oas.GetJettonsEve
 	}
 	trace, err := h.storage.GetTrace(ctx, traceID)
 	if err != nil {
+		if errors.Is(err, core.ErrTraceIsTooLong) {
+			return nil, toError(http.StatusRequestEntityTooLarge, err)
+		}
 		return nil, toError(http.StatusInternalServerError, err)
 	}
 	result, err := bath.FindActions(ctx, trace, bath.WithInformationSource(h.storage), bath.WithStraws(bath.JettonTransfersBurnsMints))
