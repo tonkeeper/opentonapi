@@ -150,6 +150,9 @@ func (h *Handler) GetTrace(ctx context.Context, params oas.GetTraceParams) (*oas
 	if errors.Is(err, core.ErrEntityNotFound) {
 		return nil, toError(http.StatusNotFound, err)
 	}
+	if errors.Is(err, core.ErrTraceIsTooLong) {
+		return nil, toError(http.StatusRequestEntityTooLarge, err)
+	}
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
@@ -168,6 +171,9 @@ func (h *Handler) GetEvent(ctx context.Context, params oas.GetEventParams) (*oas
 	trace, emulated, err := h.getTraceByHash(ctx, traceID)
 	if errors.Is(err, core.ErrEntityNotFound) {
 		return nil, toError(http.StatusNotFound, err)
+	}
+	if errors.Is(err, core.ErrTraceIsTooLong) {
+		return nil, toError(http.StatusRequestEntityTooLarge, err)
 	}
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
@@ -200,8 +206,13 @@ func (h *Handler) GetAccountEvents(ctx context.Context, params oas.GetAccountEve
 
 	var lastLT uint64
 	for i, traceID := range traceIDs {
-		trace, err := h.storage.GetTrace(ctx, traceID)
+		lastLT = traceID.Lt
+		trace, err := h.storage.GetTrace(ctx, traceID.Hash)
 		if err != nil {
+			if errors.Is(err, core.ErrTraceIsTooLong) {
+				events[i] = h.toAccountEventForLongTrace(account.ID, traceID)
+				continue
+			}
 			return nil, toError(http.StatusInternalServerError, err)
 		}
 		result, err := bath.FindActions(ctx, trace, bath.ForAccount(account.ID), bath.WithInformationSource(h.storage))
@@ -212,7 +223,6 @@ func (h *Handler) GetAccountEvents(ctx context.Context, params oas.GetAccountEve
 		if err != nil {
 			return nil, toError(http.StatusInternalServerError, err)
 		}
-		lastLT = trace.Lt
 	}
 	if !(params.BeforeLt.IsSet() || params.StartDate.IsSet() || params.EndDate.IsSet()) { //if we look into history we don't need to mix mempool
 		memTraces, _ := h.mempoolEmulate.accountsTraces.Get(account.ID)
@@ -220,7 +230,7 @@ func (h *Handler) GetAccountEvents(ctx context.Context, params oas.GetAccountEve
 		for _, hash := range memTraces {
 			_, err = h.storage.SearchTransactionByMessageHash(ctx, hash)
 			trace, prs := h.mempoolEmulate.traces.Get(hash)
-			if err == nil || !prs { //if err is nil it's alredy proccessed. if !prs we can't do anything
+			if err == nil || !prs { //if err is nil it's already processed. if !prs we can't do anything
 				continue
 			}
 			if i > params.Limit-2 { // we want always to save at least 1 real transaction
@@ -258,6 +268,9 @@ func (h *Handler) GetAccountEvent(ctx context.Context, params oas.GetAccountEven
 	}
 	trace, err := h.storage.GetTrace(ctx, traceID)
 	if err != nil {
+		if errors.Is(err, core.ErrTraceIsTooLong) {
+			return nil, toError(http.StatusRequestEntityTooLarge, err)
+		}
 		return nil, toError(http.StatusInternalServerError, err)
 	}
 	result, err := bath.FindActions(ctx, trace, bath.ForAccount(account.ID), bath.WithInformationSource(h.storage))

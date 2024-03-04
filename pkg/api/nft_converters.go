@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"strings"
 
@@ -146,10 +147,14 @@ func convertNftCollection(collection core.NftCollection, book addressBook) oas.N
 
 func (h *Handler) convertNftHistory(ctx context.Context, account tongo.AccountID, traceIDs []tongo.Bits256, acceptLanguage oas.OptString) ([]oas.AccountEvent, int64, error) {
 	var lastLT uint64
-	events := []oas.AccountEvent{}
+	events := make([]oas.AccountEvent, 0, len(traceIDs))
 	for _, traceID := range traceIDs {
 		trace, err := h.storage.GetTrace(ctx, traceID)
 		if err != nil {
+			if errors.Is(err, core.ErrTraceIsTooLong) {
+				// we ignore this for now, because we believe that this case is extremely rare.
+				continue
+			}
 			return nil, 0, err
 		}
 		result, err := bath.FindActions(ctx, trace, bath.WithInformationSource(h.storage), bath.WithStraws(bath.NFTStraws))

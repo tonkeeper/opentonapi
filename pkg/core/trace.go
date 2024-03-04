@@ -2,6 +2,7 @@ package core
 
 import (
 	"context"
+	"errors"
 	"sync"
 
 	"github.com/shopspring/decimal"
@@ -9,6 +10,16 @@ import (
 	"github.com/tonkeeper/tongo/abi"
 	"golang.org/x/exp/maps"
 )
+
+var (
+	ErrTraceIsTooLong = errors.New("trace is too long")
+)
+
+// TraceID identifies a trace by a hash of the transaction which created it and the logical time of the transaction.
+type TraceID struct {
+	Hash tongo.Bits256
+	Lt   uint64
+}
 
 type Trace struct {
 	// Transaction is slightly modified.

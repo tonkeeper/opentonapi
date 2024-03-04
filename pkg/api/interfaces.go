@@ -42,9 +42,8 @@ type storage interface {
 	GetLogs(ctx context.Context, account tongo.AccountID, destination *tlb.MsgAddress, limit int, beforeLT uint64) ([]core.Message, error)
 	GetAccountDiff(ctx context.Context, account tongo.AccountID, startTime int64, endTime int64) (int64, error)
 	ReduceIndexingLatency(ctx context.Context) (int64, error)
-
 	GetTrace(ctx context.Context, hash tongo.Bits256) (*core.Trace, error)
-	SearchTraces(ctx context.Context, a tongo.AccountID, limit int, beforeLT, startTime, endTime *int64, initiator bool) ([]tongo.Bits256, error)
+	SearchTraces(ctx context.Context, a tongo.AccountID, limit int, beforeLT, startTime, endTime *int64, initiator bool) ([]core.TraceID, error)
 
 	// GetStorageProviders returns a list of storage contracts deployed to the blockchain.
 	GetStorageProviders(ctx context.Context) ([]core.StorageProvider, error)

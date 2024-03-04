@@ -806,6 +806,34 @@ func (h *Handler) toEvent(ctx context.Context, trace *core.Trace, result *bath.A
 	return event, nil
 }
 
+func createUnknownAction(desc string, accounts []oas.AccountAddress) oas.Action {
+	return oas.Action{
+		Type:   oas.ActionTypeUnknown,
+		Status: oas.ActionStatusOk,
+		SimplePreview: oas.ActionSimplePreview{
+			Name:        "Unknown",
+			Description: desc,
+			Accounts:    accounts,
+		},
+	}
+}
+
+func (h *Handler) toAccountEventForLongTrace(account tongo.AccountID, traceID core.TraceID) oas.AccountEvent {
+	e := oas.AccountEvent{
+		EventID: traceID.Hash.Hex(),
+		Account: convertAccountAddress(account, h.addressBook),
+		//Timestamp:  trace.Utime,
+		IsScam: false,
+		Lt:     int64(traceID.Lt),
+		// TODO: we don't know it InProgress if trace is long.
+		InProgress: false,
+		Actions: []oas.Action{
+			createUnknownAction("Trace is too long.", []oas.AccountAddress{convertAccountAddress(account, h.addressBook)}),
+		},
+	}
+	return e
+}
+
 func (h *Handler) toAccountEvent(ctx context.Context, account tongo.AccountID, trace *core.Trace, result *bath.ActionsList, lang oas.OptString, subjectOnly bool) (oas.AccountEvent, error) {
 	e := oas.AccountEvent{
 		EventID:    trace.Hash.Hex(),
@@ -830,15 +858,9 @@ func (h *Handler) toAccountEvent(ctx context.Context, account tongo.AccountID, t
 		e.Actions = append(e.Actions, convertedAction)
 	}
 	if len(e.Actions) == 0 {
-		e.Actions = []oas.Action{{
-			Type:   oas.ActionTypeUnknown,
-			Status: oas.ActionStatusOk,
-			SimplePreview: oas.ActionSimplePreview{
-				Name:        "Unknown",
-				Description: "Something happened but we don't understand what.",
-				Accounts:    []oas.AccountAddress{convertAccountAddress(account, h.addressBook)},
-			},
-		}}
+		e.Actions = []oas.Action{
+			createUnknownAction("Something happened but we don't understand what.", []oas.AccountAddress{convertAccountAddress(account, h.addressBook)}),
+		}
 	}
 	return e, nil
 }

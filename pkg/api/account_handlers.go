@@ -375,15 +375,13 @@ func (h *Handler) GetAccountTraces(ctx context.Context, params oas.GetAccountTra
 	if err != nil && !errors.Is(err, core.ErrEntityNotFound) {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
-	var traces oas.TraceIDs
+	traces := oas.TraceIDs{
+		Traces: make([]oas.TraceID, 0, len(traceIDs)),
+	}
 	for _, traceID := range traceIDs {
-		trace, err := h.storage.GetTrace(ctx, traceID)
-		if err != nil {
-			return nil, toError(http.StatusInternalServerError, err)
-		}
 		traces.Traces = append(traces.Traces, oas.TraceID{
-			ID:    trace.Hash.Hex(),
-			Utime: trace.Lt,
+			ID:    traceID.Hash.Hex(),
+			Utime: traceID.Lt,
 		})
 	}
 	return &traces, nil
