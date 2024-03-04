@@ -820,11 +820,11 @@ func createUnknownAction(desc string, accounts []oas.AccountAddress) oas.Action 
 
 func (h *Handler) toAccountEventForLongTrace(account tongo.AccountID, traceID core.TraceID) oas.AccountEvent {
 	e := oas.AccountEvent{
-		EventID: traceID.Hash.Hex(),
-		Account: convertAccountAddress(account, h.addressBook),
-		//Timestamp:  trace.Utime,
-		IsScam: false,
-		Lt:     int64(traceID.Lt),
+		EventID:   traceID.Hash.Hex(),
+		Account:   convertAccountAddress(account, h.addressBook),
+		Timestamp: traceID.UTime,
+		IsScam:    false,
+		Lt:        int64(traceID.Lt),
 		// TODO: we don't know it InProgress if trace is long.
 		InProgress: false,
 		Actions: []oas.Action{
