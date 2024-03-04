@@ -1941,25 +1941,25 @@ paths:
                 properties:
                   mode:
                     type: integer
-                    format: uint32
+                    format: int32
                     example: 0
                   version:
                     type: integer
-                    format: uint32
+                    format: int32
                     example: 257
                   capabilities:
                     type: integer
-                    format: uint64
+                    format: int64
                     example: 7
                   last:
                     $ref: '#/components/schemas/BlockRaw'
                   last_utime:
                     type: integer
-                    format: uint32
+                    format: int32
                     example: 1687938199
                   now:
                     type: integer
-                    format: uint32
+                    format: int32
                     example: 1687938204
                   state_root_hash:
                     type: string
@@ -1986,7 +1986,7 @@ paths:
                 properties:
                   time:
                     type: integer
-                    format: uint32
+                    format: int32
                     example: 1687146728
         'default':
           $ref: '#/components/responses/Error'
@@ -2075,7 +2075,7 @@ paths:
                     $ref: '#/components/schemas/BlockRaw'
                   mode:
                     type: integer
-                    format: uint32
+                    format: int32
                     example: 0
                   header_proof:
                     type: string
@@ -2102,7 +2102,7 @@ paths:
                 properties:
                   code:
                     type: integer
-                    format: uint32
+                    format: int32
                     example: 200
         'default':
           $ref: '#/components/responses/Error'
@@ -2271,7 +2271,7 @@ paths:
                     $ref: '#/components/schemas/BlockRaw'
                   req_count:
                     type: integer
-                    format: uint32
+                    format: int32
                     example: 100
                   incomplete:
                     type: boolean
@@ -2285,14 +2285,14 @@ paths:
                       properties:
                         mode:
                           type: integer
-                          format: uint32
+                          format: int32
                           example: 0
                         account:
                           type: string
                           example: 131D0C65055F04E9C19D687B51BC70F952FD9CA6F02C2801D3B89964A779DF85
                         lt:
                           type: integer
-                          format: uint64
+                          format: int64
                         hash:
                           type: string
                           example: 131D0C65055F04E9C19D687B51BC70F952FD9CA6F02C2801D3B89964A779DF85
@@ -2397,10 +2397,10 @@ paths:
                               properties:
                                 validator_set_hash:
                                   type: integer
-                                  format: uint32
+                                  format: int64
                                 catchain_seqno:
                                   type: integer
-                                  format: uint32
+                                  format: int32
                                 signatures:
                                   type: array
                                   items:
@@ -2441,7 +2441,7 @@ paths:
                 properties:
                   mode:
                     type: integer
-                    format: uint32
+                    format: int32
                     example: 0
                   id:
                     $ref: '#/components/schemas/BlockRaw'
@@ -2655,7 +2655,7 @@ components:
       description: "mode"
       schema:
         type: integer
-        format: uint32
+        format: int32
         example: 0
     countQuery:
       in: query
@@ -2664,7 +2664,7 @@ components:
       description: "count"
       schema:
         type: integer
-        format: uint32
+        format: int32
         example: 100
     knownBlockIDExtQuery:
       in: query
@@ -2689,7 +2689,7 @@ components:
       description: "lt"
       schema:
         type: integer
-        format: uint64
+        format: int64
         example: 23814011000000
     ltQuery:
       in: query
@@ -2697,7 +2697,7 @@ components:
       description: "lt"
       schema:
         type: integer
-        format: uint64
+        format: int64
         example: 23814011000000
     hashQuery:
       in: query
@@ -2714,7 +2714,7 @@ components:
       description: "workchain"
       schema:
         type: integer
-        format: uint32
+        format: int32
         example: 1
     shardQuery:
       in: query
@@ -2723,7 +2723,7 @@ components:
       description: "shard"
       schema:
         type: integer
-        format: uint64
+        format: int64
         example: 1
     exactQuery:
       in: query
@@ -2874,7 +2874,7 @@ components:
                     properties:
                       length_bytes:
                         type: integer
-                        format: uint32
+                        format: int32
                       value:
                         type: string
                   signature:
@@ -3323,7 +3323,7 @@ components:
           example: 10000
         vm_steps:
           type: integer
-          format: uint32
+          format: int32
           example: 5
         exit_code:
           type: integer
@@ -5499,7 +5499,7 @@ components:
           example: 55e8809519cd3c49098c9ee45afdafcea7a894a74d0f628d94a115a50e045122
         utime:
           type: integer
-          format: uint64
+          format: int64
           example: 1645544908
     TraceIDs:
       type: object
@@ -5820,15 +5820,15 @@ components:
               properties:
                 subwallet_id:
                   type: integer
-                  format: uint32
+                  format: int64
                   example: 1
                 valid_until:
                   type: integer
-                  format: uint32
+                  format: int64
                   example: 1
                 seqno:
                   type: integer
-                  format: uint32
+                  format: int64
                   example: 1
                 raw_messages:
                   type: array
@@ -5845,19 +5845,19 @@ components:
               properties:
                 subwallet_id:
                   type: integer
-                  format: uint32
+                  format: int64
                   example: 1
                 valid_until:
                   type: integer
-                  format: uint32
+                  format: int64
                   example: 1
                 seqno:
                   type: integer
-                  format: uint32
+                  format: int64
                   example: 1
                 op:
                   type: integer
-                  format: int8
+                  format: int32
                   example: 1
                 raw_messages:
                   type: array
@@ -5872,7 +5872,7 @@ components:
               properties:
                 subwallet_id:
                   type: integer
-                  format: uint32
+                  format: int64
                   example: 1
                 bounded_query_id:
                   type: string
@@ -6302,7 +6302,7 @@ components:
       properties:
         seqno:
           type: integer
-          format: uint32
+          format: int32
     BlockRaw:
       type: object
       required:
@@ -6315,15 +6315,14 @@ components:
         workchain:
           type: integer
           example: 4294967295
-          format: uint32
+          format: int32
         shard:
-          type: integer
-          example: 9223372036854775808
-          format: uint64
+          type: string
+          example: 800000000000000
         seqno:
           type: integer
           example: 30699640
-          format: uint32
+          format: int32
         root_hash:
           type: string
           example: 131D0C65055F04E9C19D687B51BC70F952FD9CA6F02C2801D3B89964A779DF85
@@ -6340,7 +6339,7 @@ components:
         workchain:
           type: integer
           example: 4294967295
-          format: uint32
+          format: int32
         root_hash:
           type: string
           example: 131D0C65055F04E9C19D687B51BC70F952FD9CA6F02C2801D3B89964A779DF85

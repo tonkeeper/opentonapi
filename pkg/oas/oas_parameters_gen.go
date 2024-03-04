@@ -8200,7 +8200,7 @@ type GetRawBlockProofParams struct {
 	// Target block: (workchain,shard,seqno,root_hash,file_hash).
 	TargetBlock OptString
 	// Mode.
-	Mode uint32
+	Mode int32
 }
 
 func unpackGetRawBlockProofParams(packed middleware.Parameters) (params GetRawBlockProofParams) {
@@ -8225,7 +8225,7 @@ func unpackGetRawBlockProofParams(packed middleware.Parameters) (params GetRawBl
 			Name: "mode",
 			In:   "query",
 		}
-		params.Mode = packed[key].(uint32)
+		params.Mode = packed[key].(int32)
 	}
 	return params
 }
@@ -8324,7 +8324,7 @@ func decodeGetRawBlockProofParams(args [0]string, argsEscaped bool, r *http.Requ
 					return err
 				}
 
-				c, err := conv.ToUint32(val)
+				c, err := conv.ToInt32(val)
 				if err != nil {
 					return err
 				}
@@ -8419,7 +8419,7 @@ type GetRawBlockchainBlockHeaderParams struct {
 	// Block ID: (workchain,shard,seqno,root_hash,file_hash).
 	BlockID string
 	// Mode.
-	Mode uint32
+	Mode int32
 }
 
 func unpackGetRawBlockchainBlockHeaderParams(packed middleware.Parameters) (params GetRawBlockchainBlockHeaderParams) {
@@ -8435,7 +8435,7 @@ func unpackGetRawBlockchainBlockHeaderParams(packed middleware.Parameters) (para
 			Name: "mode",
 			In:   "query",
 		}
-		params.Mode = packed[key].(uint32)
+		params.Mode = packed[key].(int32)
 	}
 	return params
 }
@@ -8502,7 +8502,7 @@ func decodeGetRawBlockchainBlockHeaderParams(args [1]string, argsEscaped bool, r
 					return err
 				}
 
-				c, err := conv.ToUint32(val)
+				c, err := conv.ToInt32(val)
 				if err != nil {
 					return err
 				}
@@ -8663,7 +8663,7 @@ type GetRawConfigParams struct {
 	// Block ID: (workchain,shard,seqno,root_hash,file_hash).
 	BlockID string
 	// Mode.
-	Mode uint32
+	Mode int32
 }
 
 func unpackGetRawConfigParams(packed middleware.Parameters) (params GetRawConfigParams) {
@@ -8679,7 +8679,7 @@ func unpackGetRawConfigParams(packed middleware.Parameters) (params GetRawConfig
 			Name: "mode",
 			In:   "query",
 		}
-		params.Mode = packed[key].(uint32)
+		params.Mode = packed[key].(int32)
 	}
 	return params
 }
@@ -8746,7 +8746,7 @@ func decodeGetRawConfigParams(args [1]string, argsEscaped bool, r *http.Request)
 					return err
 				}
 
-				c, err := conv.ToUint32(val)
+				c, err := conv.ToInt32(val)
 				if err != nil {
 					return err
 				}
@@ -8775,13 +8775,13 @@ type GetRawListBlockTransactionsParams struct {
 	// Block ID: (workchain,shard,seqno,root_hash,file_hash).
 	BlockID string
 	// Mode.
-	Mode uint32
+	Mode int32
 	// Count.
-	Count uint32
+	Count int32
 	// Account ID.
 	AccountID OptString
 	// Lt.
-	Lt OptUint64
+	Lt OptInt64
 }
 
 func unpackGetRawListBlockTransactionsParams(packed middleware.Parameters) (params GetRawListBlockTransactionsParams) {
@@ -8797,14 +8797,14 @@ func unpackGetRawListBlockTransactionsParams(packed middleware.Parameters) (para
 			Name: "mode",
 			In:   "query",
 		}
-		params.Mode = packed[key].(uint32)
+		params.Mode = packed[key].(int32)
 	}
 	{
 		key := middleware.ParameterKey{
 			Name: "count",
 			In:   "query",
 		}
-		params.Count = packed[key].(uint32)
+		params.Count = packed[key].(int32)
 	}
 	{
 		key := middleware.ParameterKey{
@@ -8821,7 +8821,7 @@ func unpackGetRawListBlockTransactionsParams(packed middleware.Parameters) (para
 			In:   "query",
 		}
 		if v, ok := packed[key]; ok {
-			params.Lt = v.(OptUint64)
+			params.Lt = v.(OptInt64)
 		}
 	}
 	return params
@@ -8889,7 +8889,7 @@ func decodeGetRawListBlockTransactionsParams(args [1]string, argsEscaped bool, r
 					return err
 				}
 
-				c, err := conv.ToUint32(val)
+				c, err := conv.ToInt32(val)
 				if err != nil {
 					return err
 				}
@@ -8925,7 +8925,7 @@ func decodeGetRawListBlockTransactionsParams(args [1]string, argsEscaped bool, r
 					return err
 				}
 
-				c, err := conv.ToUint32(val)
+				c, err := conv.ToInt32(val)
 				if err != nil {
 					return err
 				}
@@ -8997,14 +8997,14 @@ func decodeGetRawListBlockTransactionsParams(args [1]string, argsEscaped bool, r
 
 		if err := q.HasParam(cfg); err == nil {
 			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
-				var paramsDotLtVal uint64
+				var paramsDotLtVal int64
 				if err := func() error {
 					val, err := d.DecodeValue()
 					if err != nil {
 						return err
 					}
 
-					c, err := conv.ToUint64(val)
+					c, err := conv.ToInt64(val)
 					if err != nil {
 						return err
 					}
@@ -9034,7 +9034,7 @@ func decodeGetRawListBlockTransactionsParams(args [1]string, argsEscaped bool, r
 // GetRawMasterchainInfoExtParams is parameters of getRawMasterchainInfoExt operation.
 type GetRawMasterchainInfoExtParams struct {
 	// Mode.
-	Mode uint32
+	Mode int32
 }
 
 func unpackGetRawMasterchainInfoExtParams(packed middleware.Parameters) (params GetRawMasterchainInfoExtParams) {
@@ -9043,7 +9043,7 @@ func unpackGetRawMasterchainInfoExtParams(packed middleware.Parameters) (params 
 			Name: "mode",
 			In:   "query",
 		}
-		params.Mode = packed[key].(uint32)
+		params.Mode = packed[key].(int32)
 	}
 	return params
 }
@@ -9065,7 +9065,7 @@ func decodeGetRawMasterchainInfoExtParams(args [0]string, argsEscaped bool, r *h
 					return err
 				}
 
-				c, err := conv.ToUint32(val)
+				c, err := conv.ToInt32(val)
 				if err != nil {
 					return err
 				}
@@ -9160,9 +9160,9 @@ type GetRawShardInfoParams struct {
 	// Block ID: (workchain,shard,seqno,root_hash,file_hash).
 	BlockID string
 	// Workchain.
-	Workchain uint32
+	Workchain int32
 	// Shard.
-	Shard uint64
+	Shard int64
 	// Exact.
 	Exact bool
 }
@@ -9180,14 +9180,14 @@ func unpackGetRawShardInfoParams(packed middleware.Parameters) (params GetRawSha
 			Name: "workchain",
 			In:   "query",
 		}
-		params.Workchain = packed[key].(uint32)
+		params.Workchain = packed[key].(int32)
 	}
 	{
 		key := middleware.ParameterKey{
 			Name: "shard",
 			In:   "query",
 		}
-		params.Shard = packed[key].(uint64)
+		params.Shard = packed[key].(int64)
 	}
 	{
 		key := middleware.ParameterKey{
@@ -9261,7 +9261,7 @@ func decodeGetRawShardInfoParams(args [1]string, argsEscaped bool, r *http.Reque
 					return err
 				}
 
-				c, err := conv.ToUint32(val)
+				c, err := conv.ToInt32(val)
 				if err != nil {
 					return err
 				}
@@ -9297,7 +9297,7 @@ func decodeGetRawShardInfoParams(args [1]string, argsEscaped bool, r *http.Reque
 					return err
 				}
 
-				c, err := conv.ToUint64(val)
+				c, err := conv.ToInt64(val)
 				if err != nil {
 					return err
 				}
@@ -9362,9 +9362,9 @@ type GetRawTransactionsParams struct {
 	// Account ID.
 	AccountID string
 	// Count.
-	Count uint32
+	Count int32
 	// Lt.
-	Lt uint64
+	Lt int64
 	// Hash.
 	Hash string
 }
@@ -9382,14 +9382,14 @@ func unpackGetRawTransactionsParams(packed middleware.Parameters) (params GetRaw
 			Name: "count",
 			In:   "query",
 		}
-		params.Count = packed[key].(uint32)
+		params.Count = packed[key].(int32)
 	}
 	{
 		key := middleware.ParameterKey{
 			Name: "lt",
 			In:   "query",
 		}
-		params.Lt = packed[key].(uint64)
+		params.Lt = packed[key].(int64)
 	}
 	{
 		key := middleware.ParameterKey{
@@ -9463,7 +9463,7 @@ func decodeGetRawTransactionsParams(args [1]string, argsEscaped bool, r *http.Re
 					return err
 				}
 
-				c, err := conv.ToUint32(val)
+				c, err := conv.ToInt32(val)
 				if err != nil {
 					return err
 				}
@@ -9499,7 +9499,7 @@ func decodeGetRawTransactionsParams(args [1]string, argsEscaped bool, r *http.Re
 					return err
 				}
 
-				c, err := conv.ToUint64(val)
+				c, err := conv.ToInt64(val)
 				if err != nil {
 					return err
 				}

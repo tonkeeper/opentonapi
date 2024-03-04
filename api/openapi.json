@@ -73,7 +73,7 @@
     "required": true,
     "schema": {
      "example": 100,
-     "format": "uint32",
+     "format": "int32",
      "type": "integer"
     }
    },
@@ -203,7 +203,7 @@
     "required": true,
     "schema": {
      "example": 23814011000000,
-     "format": "uint64",
+     "format": "int64",
      "type": "integer"
     }
    },
@@ -213,7 +213,7 @@
     "name": "lt",
     "schema": {
      "example": 23814011000000,
-     "format": "uint64",
+     "format": "int64",
      "type": "integer"
     }
    },
@@ -255,7 +255,7 @@
     "required": true,
     "schema": {
      "example": 0,
-     "format": "uint32",
+     "format": "int32",
      "type": "integer"
     }
    },
@@ -296,7 +296,7 @@
     "required": true,
     "schema": {
      "example": 1,
-     "format": "uint64",
+     "format": "int64",
      "type": "integer"
     }
    },
@@ -337,7 +337,7 @@
     "required": true,
     "schema": {
      "example": 1,
-     "format": "uint32",
+     "format": "int32",
      "type": "integer"
     }
    }
@@ -506,7 +506,7 @@
           "domain": {
            "properties": {
             "length_bytes": {
-             "format": "uint32",
+             "format": "int32",
              "type": "integer"
             },
             "value": {
@@ -1288,17 +1288,16 @@
      },
      "seqno": {
       "example": 30699640,
-      "format": "uint32",
+      "format": "int32",
       "type": "integer"
      },
      "shard": {
-      "example": 9223372036854775808,
-      "format": "uint64",
-      "type": "integer"
+      "example": 800000000000000,
+      "type": "string"
      },
      "workchain": {
       "example": 4294967295,
-      "format": "uint32",
+      "format": "int32",
       "type": "integer"
      }
     },
@@ -2391,7 +2390,7 @@
      },
      "vm_steps": {
       "example": 5,
-      "format": "uint32",
+      "format": "int32",
       "type": "integer"
      }
     },
@@ -2527,7 +2526,7 @@
          },
          "subwallet_id": {
           "example": 1,
-          "format": "uint32",
+          "format": "int64",
           "type": "integer"
          }
         },
@@ -2548,17 +2547,17 @@
          },
          "seqno": {
           "example": 1,
-          "format": "uint32",
+          "format": "int64",
           "type": "integer"
          },
          "subwallet_id": {
           "example": 1,
-          "format": "uint32",
+          "format": "int64",
           "type": "integer"
          },
          "valid_until": {
           "example": 1,
-          "format": "uint32",
+          "format": "int64",
           "type": "integer"
          }
         },
@@ -2575,7 +2574,7 @@
         "properties": {
          "op": {
           "example": 1,
-          "format": "int8",
+          "format": "int32",
           "type": "integer"
          },
          "raw_messages": {
@@ -2586,17 +2585,17 @@
          },
          "seqno": {
           "example": 1,
-          "format": "uint32",
+          "format": "int64",
           "type": "integer"
          },
          "subwallet_id": {
           "example": 1,
-          "format": "uint32",
+          "format": "int64",
           "type": "integer"
          },
          "valid_until": {
           "example": 1,
-          "format": "uint32",
+          "format": "int64",
           "type": "integer"
          }
         },
@@ -3072,7 +3071,7 @@
      },
      "workchain": {
       "example": 4294967295,
-      "format": "uint32",
+      "format": "int32",
       "type": "integer"
      }
     },
@@ -4415,7 +4414,7 @@
    "Seqno": {
     "properties": {
      "seqno": {
-      "format": "uint32",
+      "format": "int32",
       "type": "integer"
      }
     },
@@ -4830,7 +4829,7 @@
      },
      "utime": {
       "example": 1645544908,
-      "format": "uint64",
+      "format": "int64",
       "type": "integer"
      }
     },
@@ -7590,7 +7589,7 @@
           },
           "mode": {
            "example": 0,
-           "format": "uint32",
+           "format": "int32",
            "type": "integer"
           }
          },
@@ -7696,7 +7695,7 @@
                "signatures": {
                 "properties": {
                  "catchain_seqno": {
-                  "format": "uint32",
+                  "format": "int32",
                   "type": "integer"
                  },
                  "signatures": {
@@ -7720,7 +7719,7 @@
                   "type": "array"
                  },
                  "validator_set_hash": {
-                  "format": "uint32",
+                  "format": "int64",
                   "type": "integer"
                  }
                 },
@@ -7810,7 +7809,7 @@
           },
           "mode": {
            "example": 0,
-           "format": "uint32",
+           "format": "int32",
            "type": "integer"
           },
           "state_proof": {
@@ -7897,7 +7896,7 @@
          "properties": {
           "capabilities": {
            "example": 7,
-           "format": "uint64",
+           "format": "int64",
            "type": "integer"
           },
           "init": {
@@ -7908,17 +7907,17 @@
           },
           "last_utime": {
            "example": 1687938199,
-           "format": "uint32",
+           "format": "int32",
            "type": "integer"
           },
           "mode": {
            "example": 0,
-           "format": "uint32",
+           "format": "int32",
            "type": "integer"
           },
           "now": {
            "example": 1687938204,
-           "format": "uint32",
+           "format": "int32",
            "type": "integer"
           },
           "state_root_hash": {
@@ -7927,7 +7926,7 @@
           },
           "version": {
            "example": 257,
-           "format": "uint32",
+           "format": "int32",
            "type": "integer"
           }
          },
@@ -8137,7 +8136,7 @@
          "properties": {
           "time": {
            "example": 1687146728,
-           "format": "uint32",
+           "format": "int32",
            "type": "integer"
           }
          },
@@ -8255,12 +8254,12 @@
               "type": "string"
              },
              "lt": {
-              "format": "uint64",
+              "format": "int64",
               "type": "integer"
              },
              "mode": {
               "example": 0,
-              "format": "uint32",
+              "format": "int32",
               "type": "integer"
              }
             },
@@ -8281,7 +8280,7 @@
           },
           "req_count": {
            "example": 100,
-           "format": "uint32",
+           "format": "int32",
            "type": "integer"
           }
          },
@@ -8322,7 +8321,7 @@
          "properties": {
           "code": {
            "example": 200,
-           "format": "uint32",
+           "format": "int32",
            "type": "integer"
           }
          },

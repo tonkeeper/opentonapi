@@ -24,7 +24,7 @@ func (h *Handler) GetRawMasterchainInfo(ctx context.Context) (*oas.GetRawMasterc
 }
 
 func (h *Handler) GetRawMasterchainInfoExt(ctx context.Context, params oas.GetRawMasterchainInfoExtParams) (*oas.GetRawMasterchainInfoExtOK, error) {
-	info, err := h.storage.GetMasterchainInfoExtRaw(ctx, params.Mode)
+	info, err := h.storage.GetMasterchainInfoExtRaw(ctx, uint32(params.Mode))
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
 	}
@@ -36,7 +36,7 @@ func (h *Handler) GetRawMasterchainInfoExt(ctx context.Context, params oas.GetRa
 }
 
 func (h *Handler) GetRawTime(ctx context.Context) (*oas.GetRawTimeOK, error) {
-	return &oas.GetRawTimeOK{Time: uint32(time.Now().Unix())}, nil
+	return &oas.GetRawTimeOK{Time: int32(time.Now().Unix())}, nil
 }
 
 func (h *Handler) GetRawBlockchainBlock(ctx context.Context, params oas.GetRawBlockchainBlockParams) (*oas.GetRawBlockchainBlockOK, error) {
@@ -76,7 +76,7 @@ func (h *Handler) GetRawBlockchainBlockHeader(ctx context.Context, params oas.Ge
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
 	}
-	blockHeader, err := h.storage.GetBlockHeaderRaw(ctx, id, params.Mode)
+	blockHeader, err := h.storage.GetBlockHeaderRaw(ctx, id, uint32(params.Mode))
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
@@ -96,7 +96,7 @@ func (h *Handler) SendRawMessage(ctx context.Context, request *oas.SendRawMessag
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
-	return &oas.SendRawMessageOK{Code: code}, nil
+	return &oas.SendRawMessageOK{Code: int32(code)}, nil
 }
 
 func (h *Handler) GetRawAccountState(ctx context.Context, params oas.GetRawAccountStateParams) (*oas.GetRawAccountStateOK, error) {
@@ -128,7 +128,7 @@ func (h *Handler) GetRawShardInfo(ctx context.Context, params oas.GetRawShardInf
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
 	}
-	shardInfo, err := h.storage.GetShardInfoRaw(ctx, blockID, params.Workchain, params.Shard, params.Exact)
+	shardInfo, err := h.storage.GetShardInfoRaw(ctx, blockID, uint32(params.Workchain), uint64(params.Shard), params.Exact)
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
@@ -164,7 +164,7 @@ func (h *Handler) GetRawTransactions(ctx context.Context, params oas.GetRawTrans
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
 	}
-	txs, err := h.storage.GetTransactionsRaw(ctx, params.Count, account.ID, params.Lt, hash)
+	txs, err := h.storage.GetTransactionsRaw(ctx, uint32(params.Count), account.ID, uint64(params.Lt), hash)
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
@@ -187,9 +187,9 @@ func (h *Handler) GetRawListBlockTransactions(ctx context.Context, params oas.Ge
 			return nil, toError(http.StatusBadRequest, err)
 		}
 		after.Account = account.ID.Address
-		after.Lt = params.Lt.Value
+		after.Lt = uint64(params.Lt.Value)
 	}
-	listBlockTxs, err := h.storage.ListBlockTransactionsRaw(ctx, blockID, params.Mode, params.Count, after)
+	listBlockTxs, err := h.storage.ListBlockTransactionsRaw(ctx, blockID, uint32(params.Mode), uint32(params.Count), after)
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
@@ -229,7 +229,7 @@ func (h *Handler) GetRawConfig(ctx context.Context, params oas.GetRawConfigParam
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
 	}
-	config, err := h.storage.GetConfigAllRaw(ctx, params.Mode, blockID)
+	config, err := h.storage.GetConfigAllRaw(ctx, uint32(params.Mode), blockID)
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}

@@ -381,7 +381,7 @@ func (h *Handler) GetAccountTraces(ctx context.Context, params oas.GetAccountTra
 	for _, traceID := range traceIDs {
 		traces.Traces = append(traces.Traces, oas.TraceID{
 			ID:    traceID.Hash.Hex(),
-			Utime: traceID.Lt,
+			Utime: int64(traceID.Lt),
 		})
 	}
 	return &traces, nil

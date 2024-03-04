@@ -169,7 +169,7 @@ func convertTransaction(t core.Transaction, book addressBook) oas.Transaction {
 			phase.Success = oas.NewOptBool(t.ComputePhase.Success)
 			phase.GasFees = oas.NewOptInt64(int64(t.ComputePhase.GasFees))
 			phase.GasUsed = oas.NewOptInt64(t.ComputePhase.GasUsed.Int64())
-			phase.VMSteps = oas.NewOptUint32(t.ComputePhase.VmSteps)
+			phase.VMSteps = oas.NewOptInt32(int32(t.ComputePhase.VmSteps))
 			phase.ExitCode = oas.NewOptInt32(t.ComputePhase.ExitCode)
 		}
 		tx.ComputePhase = oas.NewOptComputePhase(phase)

@@ -107,10 +107,10 @@ func (h *Handler) DecodeMessage(ctx context.Context, req *oas.DecodeMessageReq) 
 		}
 		extIn := oas.DecodedMessageExtInMsgDecoded{
 			WalletV4: oas.NewOptDecodedMessageExtInMsgDecodedWalletV4(oas.DecodedMessageExtInMsgDecodedWalletV4{
-				SubwalletID: v4.SubWalletId,
-				ValidUntil:  v4.ValidUntil,
-				Seqno:       v4.Seqno,
-				Op:          v4.Op,
+				SubwalletID: int64(v4.SubWalletId),
+				ValidUntil:  int64(v4.ValidUntil),
+				Seqno:       int64(v4.Seqno),
+				Op:          int32(v4.Op),
 				RawMessages: rawMessages,
 			}),
 		}
@@ -130,9 +130,9 @@ func (h *Handler) DecodeMessage(ctx context.Context, req *oas.DecodeMessageReq) 
 		}
 		extIn := oas.DecodedMessageExtInMsgDecoded{
 			WalletV3: oas.NewOptDecodedMessageExtInMsgDecodedWalletV3(oas.DecodedMessageExtInMsgDecodedWalletV3{
-				SubwalletID: v3.SubWalletId,
-				ValidUntil:  v3.ValidUntil,
-				Seqno:       v3.Seqno,
+				SubwalletID: int64(v3.SubWalletId),
+				ValidUntil:  int64(v3.ValidUntil),
+				Seqno:       int64(v3.Seqno),
 				RawMessages: rawMessages,
 			}),
 		}
@@ -152,7 +152,7 @@ func (h *Handler) DecodeMessage(ctx context.Context, req *oas.DecodeMessageReq) 
 		}
 		extIn := oas.DecodedMessageExtInMsgDecoded{
 			WalletHighloadV2: oas.NewOptDecodedMessageExtInMsgDecodedWalletHighloadV2(oas.DecodedMessageExtInMsgDecodedWalletHighloadV2{
-				SubwalletID:    highload.SubWalletId,
+				SubwalletID:    int64(highload.SubWalletId),
 				BoundedQueryID: fmt.Sprintf("%d", highload.BoundedQueryID),
 				RawMessages:    rawMessages,
 			}),

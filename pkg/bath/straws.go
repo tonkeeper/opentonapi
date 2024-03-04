@@ -94,7 +94,7 @@ var JettonTransferClassicStraw = Straw[BubbleJettonTransfer]{
 		newAction.amount = body.Amount
 		newAction.payload = body.ForwardPayload.Value
 		recipient, err := ton.AccountIDFromTlb(body.Destination)
-		if err == nil {
+		if err == nil && recipient != nil {
 			newAction.recipient = &Account{Address: *recipient}
 		}
 		return nil

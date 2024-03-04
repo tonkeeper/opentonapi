@@ -4011,15 +4011,15 @@ func (s *BlockRaw) Encode(e *jx.Encoder) {
 func (s *BlockRaw) encodeFields(e *jx.Encoder) {
 	{
 		e.FieldStart("workchain")
-		e.UInt32(s.Workchain)
+		e.Int32(s.Workchain)
 	}
 	{
 		e.FieldStart("shard")
-		e.UInt64(s.Shard)
+		e.Str(s.Shard)
 	}
 	{
 		e.FieldStart("seqno")
-		e.UInt32(s.Seqno)
+		e.Int32(s.Seqno)
 	}
 	{
 		e.FieldStart("root_hash")
@@ -4051,8 +4051,8 @@ func (s *BlockRaw) Decode(d *jx.Decoder) error {
 		case "workchain":
 			requiredBitSet[0] |= 1 << 0
 			if err := func() error {
-				v, err := d.UInt32()
-				s.Workchain = uint32(v)
+				v, err := d.Int32()
+				s.Workchain = int32(v)
 				if err != nil {
 					return err
 				}
@@ -4063,8 +4063,8 @@ func (s *BlockRaw) Decode(d *jx.Decoder) error {
 		case "shard":
 			requiredBitSet[0] |= 1 << 1
 			if err := func() error {
-				v, err := d.UInt64()
-				s.Shard = uint64(v)
+				v, err := d.Str()
+				s.Shard = string(v)
 				if err != nil {
 					return err
 				}
@@ -4075,8 +4075,8 @@ func (s *BlockRaw) Decode(d *jx.Decoder) error {
 		case "seqno":
 			requiredBitSet[0] |= 1 << 2
 			if err := func() error {
-				v, err := d.UInt32()
-				s.Seqno = uint32(v)
+				v, err := d.Int32()
+				s.Seqno = int32(v)
 				if err != nil {
 					return err
 				}
@@ -11753,7 +11753,7 @@ func (s *DecodedMessageExtInMsgDecodedWalletHighloadV2) Encode(e *jx.Encoder) {
 func (s *DecodedMessageExtInMsgDecodedWalletHighloadV2) encodeFields(e *jx.Encoder) {
 	{
 		e.FieldStart("subwallet_id")
-		e.UInt32(s.SubwalletID)
+		e.Int64(s.SubwalletID)
 	}
 	{
 		e.FieldStart("bounded_query_id")
@@ -11787,8 +11787,8 @@ func (s *DecodedMessageExtInMsgDecodedWalletHighloadV2) Decode(d *jx.Decoder) er
 		case "subwallet_id":
 			requiredBitSet[0] |= 1 << 0
 			if err := func() error {
-				v, err := d.UInt32()
-				s.SubwalletID = uint32(v)
+				v, err := d.Int64()
+				s.SubwalletID = int64(v)
 				if err != nil {
 					return err
 				}
@@ -11893,15 +11893,15 @@ func (s *DecodedMessageExtInMsgDecodedWalletV3) Encode(e *jx.Encoder) {
 func (s *DecodedMessageExtInMsgDecodedWalletV3) encodeFields(e *jx.Encoder) {
 	{
 		e.FieldStart("subwallet_id")
-		e.UInt32(s.SubwalletID)
+		e.Int64(s.SubwalletID)
 	}
 	{
 		e.FieldStart("valid_until")
-		e.UInt32(s.ValidUntil)
+		e.Int64(s.ValidUntil)
 	}
 	{
 		e.FieldStart("seqno")
-		e.UInt32(s.Seqno)
+		e.Int64(s.Seqno)
 	}
 	{
 		e.FieldStart("raw_messages")
@@ -11932,8 +11932,8 @@ func (s *DecodedMessageExtInMsgDecodedWalletV3) Decode(d *jx.Decoder) error {
 		case "subwallet_id":
 			requiredBitSet[0] |= 1 << 0
 			if err := func() error {
-				v, err := d.UInt32()
-				s.SubwalletID = uint32(v)
+				v, err := d.Int64()
+				s.SubwalletID = int64(v)
 				if err != nil {
 					return err
 				}
@@ -11944,8 +11944,8 @@ func (s *DecodedMessageExtInMsgDecodedWalletV3) Decode(d *jx.Decoder) error {
 		case "valid_until":
 			requiredBitSet[0] |= 1 << 1
 			if err := func() error {
-				v, err := d.UInt32()
-				s.ValidUntil = uint32(v)
+				v, err := d.Int64()
+				s.ValidUntil = int64(v)
 				if err != nil {
 					return err
 				}
@@ -11956,8 +11956,8 @@ func (s *DecodedMessageExtInMsgDecodedWalletV3) Decode(d *jx.Decoder) error {
 		case "seqno":
 			requiredBitSet[0] |= 1 << 2
 			if err := func() error {
-				v, err := d.UInt32()
-				s.Seqno = uint32(v)
+				v, err := d.Int64()
+				s.Seqno = int64(v)
 				if err != nil {
 					return err
 				}
@@ -12050,19 +12050,19 @@ func (s *DecodedMessageExtInMsgDecodedWalletV4) Encode(e *jx.Encoder) {
 func (s *DecodedMessageExtInMsgDecodedWalletV4) encodeFields(e *jx.Encoder) {
 	{
 		e.FieldStart("subwallet_id")
-		e.UInt32(s.SubwalletID)
+		e.Int64(s.SubwalletID)
 	}
 	{
 		e.FieldStart("valid_until")
-		e.UInt32(s.ValidUntil)
+		e.Int64(s.ValidUntil)
 	}
 	{
 		e.FieldStart("seqno")
-		e.UInt32(s.Seqno)
+		e.Int64(s.Seqno)
 	}
 	{
 		e.FieldStart("op")
-		e.Int8(s.Op)
+		e.Int32(s.Op)
 	}
 	{
 		e.FieldStart("raw_messages")
@@ -12094,8 +12094,8 @@ func (s *DecodedMessageExtInMsgDecodedWalletV4) Decode(d *jx.Decoder) error {
 		case "subwallet_id":
 			requiredBitSet[0] |= 1 << 0
 			if err := func() error {
-				v, err := d.UInt32()
-				s.SubwalletID = uint32(v)
+				v, err := d.Int64()
+				s.SubwalletID = int64(v)
 				if err != nil {
 					return err
 				}
@@ -12106,8 +12106,8 @@ func (s *DecodedMessageExtInMsgDecodedWalletV4) Decode(d *jx.Decoder) error {
 		case "valid_until":
 			requiredBitSet[0] |= 1 << 1
 			if err := func() error {
-				v, err := d.UInt32()
-				s.ValidUntil = uint32(v)
+				v, err := d.Int64()
+				s.ValidUntil = int64(v)
 				if err != nil {
 					return err
 				}
@@ -12118,8 +12118,8 @@ func (s *DecodedMessageExtInMsgDecodedWalletV4) Decode(d *jx.Decoder) error {
 		case "seqno":
 			requiredBitSet[0] |= 1 << 2
 			if err := func() error {
-				v, err := d.UInt32()
-				s.Seqno = uint32(v)
+				v, err := d.Int64()
+				s.Seqno = int64(v)
 				if err != nil {
 					return err
 				}
@@ -12130,8 +12130,8 @@ func (s *DecodedMessageExtInMsgDecodedWalletV4) Decode(d *jx.Decoder) error {
 		case "op":
 			requiredBitSet[0] |= 1 << 3
 			if err := func() error {
-				v, err := d.Int8()
-				s.Op = int8(v)
+				v, err := d.Int32()
+				s.Op = int32(v)
 				if err != nil {
 					return err
 				}
@@ -17062,11 +17062,11 @@ func (s *GetRawBlockProofOKStepsItemLiteServerBlockLinkForwardSignatures) Encode
 func (s *GetRawBlockProofOKStepsItemLiteServerBlockLinkForwardSignatures) encodeFields(e *jx.Encoder) {
 	{
 		e.FieldStart("validator_set_hash")
-		e.UInt32(s.ValidatorSetHash)
+		e.Int64(s.ValidatorSetHash)
 	}
 	{
 		e.FieldStart("catchain_seqno")
-		e.UInt32(s.CatchainSeqno)
+		e.Int32(s.CatchainSeqno)
 	}
 	{
 		e.FieldStart("signatures")
@@ -17096,8 +17096,8 @@ func (s *GetRawBlockProofOKStepsItemLiteServerBlockLinkForwardSignatures) Decode
 		case "validator_set_hash":
 			requiredBitSet[0] |= 1 << 0
 			if err := func() error {
-				v, err := d.UInt32()
-				s.ValidatorSetHash = uint32(v)
+				v, err := d.Int64()
+				s.ValidatorSetHash = int64(v)
 				if err != nil {
 					return err
 				}
@@ -17108,8 +17108,8 @@ func (s *GetRawBlockProofOKStepsItemLiteServerBlockLinkForwardSignatures) Decode
 		case "catchain_seqno":
 			requiredBitSet[0] |= 1 << 1
 			if err := func() error {
-				v, err := d.UInt32()
-				s.CatchainSeqno = uint32(v)
+				v, err := d.Int32()
+				s.CatchainSeqno = int32(v)
 				if err != nil {
 					return err
 				}
@@ -17319,7 +17319,7 @@ func (s *GetRawBlockchainBlockHeaderOK) encodeFields(e *jx.Encoder) {
 	}
 	{
 		e.FieldStart("mode")
-		e.UInt32(s.Mode)
+		e.Int32(s.Mode)
 	}
 	{
 		e.FieldStart("header_proof")
@@ -17355,8 +17355,8 @@ func (s *GetRawBlockchainBlockHeaderOK) Decode(d *jx.Decoder) error {
 		case "mode":
 			requiredBitSet[0] |= 1 << 1
 			if err := func() error {
-				v, err := d.UInt32()
-				s.Mode = uint32(v)
+				v, err := d.Int32()
+				s.Mode = int32(v)
 				if err != nil {
 					return err
 				}
@@ -17699,7 +17699,7 @@ func (s *GetRawConfigOK) Encode(e *jx.Encoder) {
 func (s *GetRawConfigOK) encodeFields(e *jx.Encoder) {
 	{
 		e.FieldStart("mode")
-		e.UInt32(s.Mode)
+		e.Int32(s.Mode)
 	}
 	{
 		e.FieldStart("id")
@@ -17734,8 +17734,8 @@ func (s *GetRawConfigOK) Decode(d *jx.Decoder) error {
 		case "mode":
 			requiredBitSet[0] |= 1 << 0
 			if err := func() error {
-				v, err := d.UInt32()
-				s.Mode = uint32(v)
+				v, err := d.Int32()
+				s.Mode = int32(v)
 				if err != nil {
 					return err
 				}
@@ -17848,7 +17848,7 @@ func (s *GetRawListBlockTransactionsOK) encodeFields(e *jx.Encoder) {
 	}
 	{
 		e.FieldStart("req_count")
-		e.UInt32(s.ReqCount)
+		e.Int32(s.ReqCount)
 	}
 	{
 		e.FieldStart("incomplete")
@@ -17898,8 +17898,8 @@ func (s *GetRawListBlockTransactionsOK) Decode(d *jx.Decoder) error {
 		case "req_count":
 			requiredBitSet[0] |= 1 << 1
 			if err := func() error {
-				v, err := d.UInt32()
-				s.ReqCount = uint32(v)
+				v, err := d.Int32()
+				s.ReqCount = int32(v)
 				if err != nil {
 					return err
 				}
@@ -18016,7 +18016,7 @@ func (s *GetRawListBlockTransactionsOKIdsItem) Encode(e *jx.Encoder) {
 func (s *GetRawListBlockTransactionsOKIdsItem) encodeFields(e *jx.Encoder) {
 	{
 		e.FieldStart("mode")
-		e.UInt32(s.Mode)
+		e.Int32(s.Mode)
 	}
 	{
 		if s.Account.Set {
@@ -18057,8 +18057,8 @@ func (s *GetRawListBlockTransactionsOKIdsItem) Decode(d *jx.Decoder) error {
 		case "mode":
 			requiredBitSet[0] |= 1 << 0
 			if err := func() error {
-				v, err := d.UInt32()
-				s.Mode = uint32(v)
+				v, err := d.Int32()
+				s.Mode = int32(v)
 				if err != nil {
 					return err
 				}
@@ -18163,15 +18163,15 @@ func (s *GetRawMasterchainInfoExtOK) Encode(e *jx.Encoder) {
 func (s *GetRawMasterchainInfoExtOK) encodeFields(e *jx.Encoder) {
 	{
 		e.FieldStart("mode")
-		e.UInt32(s.Mode)
+		e.Int32(s.Mode)
 	}
 	{
 		e.FieldStart("version")
-		e.UInt32(s.Version)
+		e.Int32(s.Version)
 	}
 	{
 		e.FieldStart("capabilities")
-		e.UInt64(s.Capabilities)
+		e.Int64(s.Capabilities)
 	}
 	{
 		e.FieldStart("last")
@@ -18179,11 +18179,11 @@ func (s *GetRawMasterchainInfoExtOK) encodeFields(e *jx.Encoder) {
 	}
 	{
 		e.FieldStart("last_utime")
-		e.UInt32(s.LastUtime)
+		e.Int32(s.LastUtime)
 	}
 	{
 		e.FieldStart("now")
-		e.UInt32(s.Now)
+		e.Int32(s.Now)
 	}
 	{
 		e.FieldStart("state_root_hash")
@@ -18218,8 +18218,8 @@ func (s *GetRawMasterchainInfoExtOK) Decode(d *jx.Decoder) error {
 		case "mode":
 			requiredBitSet[0] |= 1 << 0
 			if err := func() error {
-				v, err := d.UInt32()
-				s.Mode = uint32(v)
+				v, err := d.Int32()
+				s.Mode = int32(v)
 				if err != nil {
 					return err
 				}
@@ -18230,8 +18230,8 @@ func (s *GetRawMasterchainInfoExtOK) Decode(d *jx.Decoder) error {
 		case "version":
 			requiredBitSet[0] |= 1 << 1
 			if err := func() error {
-				v, err := d.UInt32()
-				s.Version = uint32(v)
+				v, err := d.Int32()
+				s.Version = int32(v)
 				if err != nil {
 					return err
 				}
@@ -18242,8 +18242,8 @@ func (s *GetRawMasterchainInfoExtOK) Decode(d *jx.Decoder) error {
 		case "capabilities":
 			requiredBitSet[0] |= 1 << 2
 			if err := func() error {
-				v, err := d.UInt64()
-				s.Capabilities = uint64(v)
+				v, err := d.Int64()
+				s.Capabilities = int64(v)
 				if err != nil {
 					return err
 				}
@@ -18264,8 +18264,8 @@ func (s *GetRawMasterchainInfoExtOK) Decode(d *jx.Decoder) error {
 		case "last_utime":
 			requiredBitSet[0] |= 1 << 4
 			if err := func() error {
-				v, err := d.UInt32()
-				s.LastUtime = uint32(v)
+				v, err := d.Int32()
+				s.LastUtime = int32(v)
 				if err != nil {
 					return err
 				}
@@ -18276,8 +18276,8 @@ func (s *GetRawMasterchainInfoExtOK) Decode(d *jx.Decoder) error {
 		case "now":
 			requiredBitSet[0] |= 1 << 5
 			if err := func() error {
-				v, err := d.UInt32()
-				s.Now = uint32(v)
+				v, err := d.Int32()
+				s.Now = int32(v)
 				if err != nil {
 					return err
 				}
@@ -18875,7 +18875,7 @@ func (s *GetRawTimeOK) Encode(e *jx.Encoder) {
 func (s *GetRawTimeOK) encodeFields(e *jx.Encoder) {
 	{
 		e.FieldStart("time")
-		e.UInt32(s.Time)
+		e.Int32(s.Time)
 	}
 }
 
@@ -18895,8 +18895,8 @@ func (s *GetRawTimeOK) Decode(d *jx.Decoder) error {
 		case "time":
 			requiredBitSet[0] |= 1 << 0
 			if err := func() error {
-				v, err := d.UInt32()
-				s.Time = uint32(v)
+				v, err := d.Int32()
+				s.Time = int32(v)
 				if err != nil {
 					return err
 				}
@@ -19895,7 +19895,7 @@ func (s *InitStateRaw) Encode(e *jx.Encoder) {
 func (s *InitStateRaw) encodeFields(e *jx.Encoder) {
 	{
 		e.FieldStart("workchain")
-		e.UInt32(s.Workchain)
+		e.Int32(s.Workchain)
 	}
 	{
 		e.FieldStart("root_hash")
@@ -19925,8 +19925,8 @@ func (s *InitStateRaw) Decode(d *jx.Decoder) error {
 		case "workchain":
 			requiredBitSet[0] |= 1 << 0
 			if err := func() error {
-				v, err := d.UInt32()
-				s.Workchain = uint32(v)
+				v, err := d.Int32()
+				s.Workchain = int32(v)
 				if err != nil {
 					return err
 				}
@@ -28617,76 +28617,6 @@ func (s *OptTonTransferAction) UnmarshalJSON(data []byte) error {
 	return s.Decode(d)
 }
 
-// Encode encodes uint32 as json.
-func (o OptUint32) Encode(e *jx.Encoder) {
-	if !o.Set {
-		return
-	}
-	e.UInt32(uint32(o.Value))
-}
-
-// Decode decodes uint32 from json.
-func (o *OptUint32) Decode(d *jx.Decoder) error {
-	if o == nil {
-		return errors.New("invalid: unable to decode OptUint32 to nil")
-	}
-	o.Set = true
-	v, err := d.UInt32()
-	if err != nil {
-		return err
-	}
-	o.Value = uint32(v)
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s OptUint32) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *OptUint32) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
-// Encode encodes uint64 as json.
-func (o OptUint64) Encode(e *jx.Encoder) {
-	if !o.Set {
-		return
-	}
-	e.UInt64(uint64(o.Value))
-}
-
-// Decode decodes uint64 from json.
-func (o *OptUint64) Decode(d *jx.Decoder) error {
-	if o == nil {
-		return errors.New("invalid: unable to decode OptUint64 to nil")
-	}
-	o.Set = true
-	v, err := d.UInt64()
-	if err != nil {
-		return err
-	}
-	o.Value = uint64(v)
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s OptUint64) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *OptUint64) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
 // Encode encodes UnSubscriptionAction as json.
 func (o OptUnSubscriptionAction) Encode(e *jx.Encoder) {
 	if !o.Set {
@@ -30488,7 +30418,7 @@ func (s *SendRawMessageOK) Encode(e *jx.Encoder) {
 func (s *SendRawMessageOK) encodeFields(e *jx.Encoder) {
 	{
 		e.FieldStart("code")
-		e.UInt32(s.Code)
+		e.Int32(s.Code)
 	}
 }
 
@@ -30508,8 +30438,8 @@ func (s *SendRawMessageOK) Decode(d *jx.Decoder) error {
 		case "code":
 			requiredBitSet[0] |= 1 << 0
 			if err := func() error {
-				v, err := d.UInt32()
-				s.Code = uint32(v)
+				v, err := d.Int32()
+				s.Code = int32(v)
 				if err != nil {
 					return err
 				}
@@ -30680,7 +30610,7 @@ func (s *Seqno) Encode(e *jx.Encoder) {
 func (s *Seqno) encodeFields(e *jx.Encoder) {
 	{
 		e.FieldStart("seqno")
-		e.UInt32(s.Seqno)
+		e.Int32(s.Seqno)
 	}
 }
 
@@ -30700,8 +30630,8 @@ func (s *Seqno) Decode(d *jx.Decoder) error {
 		case "seqno":
 			requiredBitSet[0] |= 1 << 0
 			if err := func() error {
-				v, err := d.UInt32()
-				s.Seqno = uint32(v)
+				v, err := d.Int32()
+				s.Seqno = int32(v)
 				if err != nil {
 					return err
 				}
@@ -33389,7 +33319,7 @@ func (s *TraceID) encodeFields(e *jx.Encoder) {
 	}
 	{
 		e.FieldStart("utime")
-		e.UInt64(s.Utime)
+		e.Int64(s.Utime)
 	}
 }
 
@@ -33422,8 +33352,8 @@ func (s *TraceID) Decode(d *jx.Decoder) error {
 		case "utime":
 			requiredBitSet[0] |= 1 << 1
 			if err := func() error {
-				v, err := d.UInt64()
-				s.Utime = uint64(v)
+				v, err := d.Int64()
+				s.Utime = int64(v)
 				if err != nil {
 					return err
 				}

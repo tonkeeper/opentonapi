@@ -1693,25 +1693,25 @@ func (s *BlockParamLimits) SetHardLimit(val int64) {
 
 // Ref: #/components/schemas/BlockRaw
 type BlockRaw struct {
-	Workchain uint32 `json:"workchain"`
-	Shard     uint64 `json:"shard"`
-	Seqno     uint32 `json:"seqno"`
+	Workchain int32  `json:"workchain"`
+	Shard     string `json:"shard"`
+	Seqno     int32  `json:"seqno"`
 	RootHash  string `json:"root_hash"`
 	FileHash  string `json:"file_hash"`
 }
 
 // GetWorkchain returns the value of Workchain.
-func (s *BlockRaw) GetWorkchain() uint32 {
+func (s *BlockRaw) GetWorkchain() int32 {
 	return s.Workchain
 }
 
 // GetShard returns the value of Shard.
-func (s *BlockRaw) GetShard() uint64 {
+func (s *BlockRaw) GetShard() string {
 	return s.Shard
 }
 
 // GetSeqno returns the value of Seqno.
-func (s *BlockRaw) GetSeqno() uint32 {
+func (s *BlockRaw) GetSeqno() int32 {
 	return s.Seqno
 }
 
@@ -1726,17 +1726,17 @@ func (s *BlockRaw) GetFileHash() string {
 }
 
 // SetWorkchain sets the value of Workchain.
-func (s *BlockRaw) SetWorkchain(val uint32) {
+func (s *BlockRaw) SetWorkchain(val int32) {
 	s.Workchain = val
 }
 
 // SetShard sets the value of Shard.
-func (s *BlockRaw) SetShard(val uint64) {
+func (s *BlockRaw) SetShard(val string) {
 	s.Shard = val
 }
 
 // SetSeqno sets the value of Seqno.
-func (s *BlockRaw) SetSeqno(val uint32) {
+func (s *BlockRaw) SetSeqno(val int32) {
 	s.Seqno = val
 }
 
@@ -3983,7 +3983,7 @@ type ComputePhase struct {
 	Success    OptBool              `json:"success"`
 	GasFees    OptInt64             `json:"gas_fees"`
 	GasUsed    OptInt64             `json:"gas_used"`
-	VMSteps    OptUint32            `json:"vm_steps"`
+	VMSteps    OptInt32             `json:"vm_steps"`
 	ExitCode   OptInt32             `json:"exit_code"`
 }
 
@@ -4013,7 +4013,7 @@ func (s *ComputePhase) GetGasUsed() OptInt64 {
 }
 
 // GetVMSteps returns the value of VMSteps.
-func (s *ComputePhase) GetVMSteps() OptUint32 {
+func (s *ComputePhase) GetVMSteps() OptInt32 {
 	return s.VMSteps
 }
 
@@ -4048,7 +4048,7 @@ func (s *ComputePhase) SetGasUsed(val OptInt64) {
 }
 
 // SetVMSteps sets the value of VMSteps.
-func (s *ComputePhase) SetVMSteps(val OptUint32) {
+func (s *ComputePhase) SetVMSteps(val OptInt32) {
 	s.VMSteps = val
 }
 
@@ -4338,13 +4338,13 @@ func (s *DecodedMessageExtInMsgDecoded) SetWalletHighloadV2(val OptDecodedMessag
 }
 
 type DecodedMessageExtInMsgDecodedWalletHighloadV2 struct {
-	SubwalletID    uint32              `json:"subwallet_id"`
+	SubwalletID    int64               `json:"subwallet_id"`
 	BoundedQueryID string              `json:"bounded_query_id"`
 	RawMessages    []DecodedRawMessage `json:"raw_messages"`
 }
 
 // GetSubwalletID returns the value of SubwalletID.
-func (s *DecodedMessageExtInMsgDecodedWalletHighloadV2) GetSubwalletID() uint32 {
+func (s *DecodedMessageExtInMsgDecodedWalletHighloadV2) GetSubwalletID() int64 {
 	return s.SubwalletID
 }
 
@@ -4359,7 +4359,7 @@ func (s *DecodedMessageExtInMsgDecodedWalletHighloadV2) GetRawMessages() []Decod
 }
 
 // SetSubwalletID sets the value of SubwalletID.
-func (s *DecodedMessageExtInMsgDecodedWalletHighloadV2) SetSubwalletID(val uint32) {
+func (s *DecodedMessageExtInMsgDecodedWalletHighloadV2) SetSubwalletID(val int64) {
 	s.SubwalletID = val
 }
 
@@ -4374,24 +4374,24 @@ func (s *DecodedMessageExtInMsgDecodedWalletHighloadV2) SetRawMessages(val []Dec
 }
 
 type DecodedMessageExtInMsgDecodedWalletV3 struct {
-	SubwalletID uint32              `json:"subwallet_id"`
-	ValidUntil  uint32              `json:"valid_until"`
-	Seqno       uint32              `json:"seqno"`
+	SubwalletID int64               `json:"subwallet_id"`
+	ValidUntil  int64               `json:"valid_until"`
+	Seqno       int64               `json:"seqno"`
 	RawMessages []DecodedRawMessage `json:"raw_messages"`
 }
 
 // GetSubwalletID returns the value of SubwalletID.
-func (s *DecodedMessageExtInMsgDecodedWalletV3) GetSubwalletID() uint32 {
+func (s *DecodedMessageExtInMsgDecodedWalletV3) GetSubwalletID() int64 {
 	return s.SubwalletID
 }
 
 // GetValidUntil returns the value of ValidUntil.
-func (s *DecodedMessageExtInMsgDecodedWalletV3) GetValidUntil() uint32 {
+func (s *DecodedMessageExtInMsgDecodedWalletV3) GetValidUntil() int64 {
 	return s.ValidUntil
 }
 
 // GetSeqno returns the value of Seqno.
-func (s *DecodedMessageExtInMsgDecodedWalletV3) GetSeqno() uint32 {
+func (s *DecodedMessageExtInMsgDecodedWalletV3) GetSeqno() int64 {
 	return s.Seqno
 }
 
@@ -4401,17 +4401,17 @@ func (s *DecodedMessageExtInMsgDecodedWalletV3) GetRawMessages() []DecodedRawMes
 }
 
 // SetSubwalletID sets the value of SubwalletID.
-func (s *DecodedMessageExtInMsgDecodedWalletV3) SetSubwalletID(val uint32) {
+func (s *DecodedMessageExtInMsgDecodedWalletV3) SetSubwalletID(val int64) {
 	s.SubwalletID = val
 }
 
 // SetValidUntil sets the value of ValidUntil.
-func (s *DecodedMessageExtInMsgDecodedWalletV3) SetValidUntil(val uint32) {
+func (s *DecodedMessageExtInMsgDecodedWalletV3) SetValidUntil(val int64) {
 	s.ValidUntil = val
 }
 
 // SetSeqno sets the value of Seqno.
-func (s *DecodedMessageExtInMsgDecodedWalletV3) SetSeqno(val uint32) {
+func (s *DecodedMessageExtInMsgDecodedWalletV3) SetSeqno(val int64) {
 	s.Seqno = val
 }
 
@@ -4421,30 +4421,30 @@ func (s *DecodedMessageExtInMsgDecodedWalletV3) SetRawMessages(val []DecodedRawM
 }
 
 type DecodedMessageExtInMsgDecodedWalletV4 struct {
-	SubwalletID uint32              `json:"subwallet_id"`
-	ValidUntil  uint32              `json:"valid_until"`
-	Seqno       uint32              `json:"seqno"`
-	Op          int8                `json:"op"`
+	SubwalletID int64               `json:"subwallet_id"`
+	ValidUntil  int64               `json:"valid_until"`
+	Seqno       int64               `json:"seqno"`
+	Op          int32               `json:"op"`
 	RawMessages []DecodedRawMessage `json:"raw_messages"`
 }
 
 // GetSubwalletID returns the value of SubwalletID.
-func (s *DecodedMessageExtInMsgDecodedWalletV4) GetSubwalletID() uint32 {
+func (s *DecodedMessageExtInMsgDecodedWalletV4) GetSubwalletID() int64 {
 	return s.SubwalletID
 }
 
 // GetValidUntil returns the value of ValidUntil.
-func (s *DecodedMessageExtInMsgDecodedWalletV4) GetValidUntil() uint32 {
+func (s *DecodedMessageExtInMsgDecodedWalletV4) GetValidUntil() int64 {
 	return s.ValidUntil
 }
 
 // GetSeqno returns the value of Seqno.
-func (s *DecodedMessageExtInMsgDecodedWalletV4) GetSeqno() uint32 {
+func (s *DecodedMessageExtInMsgDecodedWalletV4) GetSeqno() int64 {
 	return s.Seqno
 }
 
 // GetOp returns the value of Op.
-func (s *DecodedMessageExtInMsgDecodedWalletV4) GetOp() int8 {
+func (s *DecodedMessageExtInMsgDecodedWalletV4) GetOp() int32 {
 	return s.Op
 }
 
@@ -4454,22 +4454,22 @@ func (s *DecodedMessageExtInMsgDecodedWalletV4) GetRawMessages() []DecodedRawMes
 }
 
 // SetSubwalletID sets the value of SubwalletID.
-func (s *DecodedMessageExtInMsgDecodedWalletV4) SetSubwalletID(val uint32) {
+func (s *DecodedMessageExtInMsgDecodedWalletV4) SetSubwalletID(val int64) {
 	s.SubwalletID = val
 }
 
 // SetValidUntil sets the value of ValidUntil.
-func (s *DecodedMessageExtInMsgDecodedWalletV4) SetValidUntil(val uint32) {
+func (s *DecodedMessageExtInMsgDecodedWalletV4) SetValidUntil(val int64) {
 	s.ValidUntil = val
 }
 
 // SetSeqno sets the value of Seqno.
-func (s *DecodedMessageExtInMsgDecodedWalletV4) SetSeqno(val uint32) {
+func (s *DecodedMessageExtInMsgDecodedWalletV4) SetSeqno(val int64) {
 	s.Seqno = val
 }
 
 // SetOp sets the value of Op.
-func (s *DecodedMessageExtInMsgDecodedWalletV4) SetOp(val int8) {
+func (s *DecodedMessageExtInMsgDecodedWalletV4) SetOp(val int32) {
 	s.Op = val
 }
 
@@ -5826,18 +5826,18 @@ func (s *GetRawBlockProofOKStepsItemLiteServerBlockLinkForward) SetSignatures(va
 }
 
 type GetRawBlockProofOKStepsItemLiteServerBlockLinkForwardSignatures struct {
-	ValidatorSetHash uint32                                                                          `json:"validator_set_hash"`
-	CatchainSeqno    uint32                                                                          `json:"catchain_seqno"`
+	ValidatorSetHash int64                                                                           `json:"validator_set_hash"`
+	CatchainSeqno    int32                                                                           `json:"catchain_seqno"`
 	Signatures       []GetRawBlockProofOKStepsItemLiteServerBlockLinkForwardSignaturesSignaturesItem `json:"signatures"`
 }
 
 // GetValidatorSetHash returns the value of ValidatorSetHash.
-func (s *GetRawBlockProofOKStepsItemLiteServerBlockLinkForwardSignatures) GetValidatorSetHash() uint32 {
+func (s *GetRawBlockProofOKStepsItemLiteServerBlockLinkForwardSignatures) GetValidatorSetHash() int64 {
 	return s.ValidatorSetHash
 }
 
 // GetCatchainSeqno returns the value of CatchainSeqno.
-func (s *GetRawBlockProofOKStepsItemLiteServerBlockLinkForwardSignatures) GetCatchainSeqno() uint32 {
+func (s *GetRawBlockProofOKStepsItemLiteServerBlockLinkForwardSignatures) GetCatchainSeqno() int32 {
 	return s.CatchainSeqno
 }
 
@@ -5847,12 +5847,12 @@ func (s *GetRawBlockProofOKStepsItemLiteServerBlockLinkForwardSignatures) GetSig
 }
 
 // SetValidatorSetHash sets the value of ValidatorSetHash.
-func (s *GetRawBlockProofOKStepsItemLiteServerBlockLinkForwardSignatures) SetValidatorSetHash(val uint32) {
+func (s *GetRawBlockProofOKStepsItemLiteServerBlockLinkForwardSignatures) SetValidatorSetHash(val int64) {
 	s.ValidatorSetHash = val
 }
 
 // SetCatchainSeqno sets the value of CatchainSeqno.
-func (s *GetRawBlockProofOKStepsItemLiteServerBlockLinkForwardSignatures) SetCatchainSeqno(val uint32) {
+func (s *GetRawBlockProofOKStepsItemLiteServerBlockLinkForwardSignatures) SetCatchainSeqno(val int32) {
 	s.CatchainSeqno = val
 }
 
@@ -5888,7 +5888,7 @@ func (s *GetRawBlockProofOKStepsItemLiteServerBlockLinkForwardSignaturesSignatur
 
 type GetRawBlockchainBlockHeaderOK struct {
 	ID          BlockRaw `json:"id"`
-	Mode        uint32   `json:"mode"`
+	Mode        int32    `json:"mode"`
 	HeaderProof string   `json:"header_proof"`
 }
 
@@ -5898,7 +5898,7 @@ func (s *GetRawBlockchainBlockHeaderOK) GetID() BlockRaw {
 }
 
 // GetMode returns the value of Mode.
-func (s *GetRawBlockchainBlockHeaderOK) GetMode() uint32 {
+func (s *GetRawBlockchainBlockHeaderOK) GetMode() int32 {
 	return s.Mode
 }
 
@@ -5913,7 +5913,7 @@ func (s *GetRawBlockchainBlockHeaderOK) SetID(val BlockRaw) {
 }
 
 // SetMode sets the value of Mode.
-func (s *GetRawBlockchainBlockHeaderOK) SetMode(val uint32) {
+func (s *GetRawBlockchainBlockHeaderOK) SetMode(val int32) {
 	s.Mode = val
 }
 
@@ -5995,14 +5995,14 @@ func (s *GetRawBlockchainBlockStateOK) SetData(val string) {
 }
 
 type GetRawConfigOK struct {
-	Mode        uint32   `json:"mode"`
+	Mode        int32    `json:"mode"`
 	ID          BlockRaw `json:"id"`
 	StateProof  string   `json:"state_proof"`
 	ConfigProof string   `json:"config_proof"`
 }
 
 // GetMode returns the value of Mode.
-func (s *GetRawConfigOK) GetMode() uint32 {
+func (s *GetRawConfigOK) GetMode() int32 {
 	return s.Mode
 }
 
@@ -6022,7 +6022,7 @@ func (s *GetRawConfigOK) GetConfigProof() string {
 }
 
 // SetMode sets the value of Mode.
-func (s *GetRawConfigOK) SetMode(val uint32) {
+func (s *GetRawConfigOK) SetMode(val int32) {
 	s.Mode = val
 }
 
@@ -6043,7 +6043,7 @@ func (s *GetRawConfigOK) SetConfigProof(val string) {
 
 type GetRawListBlockTransactionsOK struct {
 	ID         BlockRaw                               `json:"id"`
-	ReqCount   uint32                                 `json:"req_count"`
+	ReqCount   int32                                  `json:"req_count"`
 	Incomplete bool                                   `json:"incomplete"`
 	Ids        []GetRawListBlockTransactionsOKIdsItem `json:"ids"`
 	Proof      string                                 `json:"proof"`
@@ -6055,7 +6055,7 @@ func (s *GetRawListBlockTransactionsOK) GetID() BlockRaw {
 }
 
 // GetReqCount returns the value of ReqCount.
-func (s *GetRawListBlockTransactionsOK) GetReqCount() uint32 {
+func (s *GetRawListBlockTransactionsOK) GetReqCount() int32 {
 	return s.ReqCount
 }
 
@@ -6080,7 +6080,7 @@ func (s *GetRawListBlockTransactionsOK) SetID(val BlockRaw) {
 }
 
 // SetReqCount sets the value of ReqCount.
-func (s *GetRawListBlockTransactionsOK) SetReqCount(val uint32) {
+func (s *GetRawListBlockTransactionsOK) SetReqCount(val int32) {
 	s.ReqCount = val
 }
 
@@ -6100,14 +6100,14 @@ func (s *GetRawListBlockTransactionsOK) SetProof(val string) {
 }
 
 type GetRawListBlockTransactionsOKIdsItem struct {
-	Mode    uint32    `json:"mode"`
+	Mode    int32     `json:"mode"`
 	Account OptString `json:"account"`
-	Lt      OptUint64 `json:"lt"`
+	Lt      OptInt64  `json:"lt"`
 	Hash    OptString `json:"hash"`
 }
 
 // GetMode returns the value of Mode.
-func (s *GetRawListBlockTransactionsOKIdsItem) GetMode() uint32 {
+func (s *GetRawListBlockTransactionsOKIdsItem) GetMode() int32 {
 	return s.Mode
 }
 
@@ -6117,7 +6117,7 @@ func (s *GetRawListBlockTransactionsOKIdsItem) GetAccount() OptString {
 }
 
 // GetLt returns the value of Lt.
-func (s *GetRawListBlockTransactionsOKIdsItem) GetLt() OptUint64 {
+func (s *GetRawListBlockTransactionsOKIdsItem) GetLt() OptInt64 {
 	return s.Lt
 }
 
@@ -6127,7 +6127,7 @@ func (s *GetRawListBlockTransactionsOKIdsItem) GetHash() OptString {
 }
 
 // SetMode sets the value of Mode.
-func (s *GetRawListBlockTransactionsOKIdsItem) SetMode(val uint32) {
+func (s *GetRawListBlockTransactionsOKIdsItem) SetMode(val int32) {
 	s.Mode = val
 }
 
@@ -6137,7 +6137,7 @@ func (s *GetRawListBlockTransactionsOKIdsItem) SetAccount(val OptString) {
 }
 
 // SetLt sets the value of Lt.
-func (s *GetRawListBlockTransactionsOKIdsItem) SetLt(val OptUint64) {
+func (s *GetRawListBlockTransactionsOKIdsItem) SetLt(val OptInt64) {
 	s.Lt = val
 }
 
@@ -6147,28 +6147,28 @@ func (s *GetRawListBlockTransactionsOKIdsItem) SetHash(val OptString) {
 }
 
 type GetRawMasterchainInfoExtOK struct {
-	Mode          uint32       `json:"mode"`
-	Version       uint32       `json:"version"`
-	Capabilities  uint64       `json:"capabilities"`
+	Mode          int32        `json:"mode"`
+	Version       int32        `json:"version"`
+	Capabilities  int64        `json:"capabilities"`
 	Last          BlockRaw     `json:"last"`
-	LastUtime     uint32       `json:"last_utime"`
-	Now           uint32       `json:"now"`
+	LastUtime     int32        `json:"last_utime"`
+	Now           int32        `json:"now"`
 	StateRootHash string       `json:"state_root_hash"`
 	Init          InitStateRaw `json:"init"`
 }
 
 // GetMode returns the value of Mode.
-func (s *GetRawMasterchainInfoExtOK) GetMode() uint32 {
+func (s *GetRawMasterchainInfoExtOK) GetMode() int32 {
 	return s.Mode
 }
 
 // GetVersion returns the value of Version.
-func (s *GetRawMasterchainInfoExtOK) GetVersion() uint32 {
+func (s *GetRawMasterchainInfoExtOK) GetVersion() int32 {
 	return s.Version
 }
 
 // GetCapabilities returns the value of Capabilities.
-func (s *GetRawMasterchainInfoExtOK) GetCapabilities() uint64 {
+func (s *GetRawMasterchainInfoExtOK) GetCapabilities() int64 {
 	return s.Capabilities
 }
 
@@ -6178,12 +6178,12 @@ func (s *GetRawMasterchainInfoExtOK) GetLast() BlockRaw {
 }
 
 // GetLastUtime returns the value of LastUtime.
-func (s *GetRawMasterchainInfoExtOK) GetLastUtime() uint32 {
+func (s *GetRawMasterchainInfoExtOK) GetLastUtime() int32 {
 	return s.LastUtime
 }
 
 // GetNow returns the value of Now.
-func (s *GetRawMasterchainInfoExtOK) GetNow() uint32 {
+func (s *GetRawMasterchainInfoExtOK) GetNow() int32 {
 	return s.Now
 }
 
@@ -6198,17 +6198,17 @@ func (s *GetRawMasterchainInfoExtOK) GetInit() InitStateRaw {
 }
 
 // SetMode sets the value of Mode.
-func (s *GetRawMasterchainInfoExtOK) SetMode(val uint32) {
+func (s *GetRawMasterchainInfoExtOK) SetMode(val int32) {
 	s.Mode = val
 }
 
 // SetVersion sets the value of Version.
-func (s *GetRawMasterchainInfoExtOK) SetVersion(val uint32) {
+func (s *GetRawMasterchainInfoExtOK) SetVersion(val int32) {
 	s.Version = val
 }
 
 // SetCapabilities sets the value of Capabilities.
-func (s *GetRawMasterchainInfoExtOK) SetCapabilities(val uint64) {
+func (s *GetRawMasterchainInfoExtOK) SetCapabilities(val int64) {
 	s.Capabilities = val
 }
 
@@ -6218,12 +6218,12 @@ func (s *GetRawMasterchainInfoExtOK) SetLast(val BlockRaw) {
 }
 
 // SetLastUtime sets the value of LastUtime.
-func (s *GetRawMasterchainInfoExtOK) SetLastUtime(val uint32) {
+func (s *GetRawMasterchainInfoExtOK) SetLastUtime(val int32) {
 	s.LastUtime = val
 }
 
 // SetNow sets the value of Now.
-func (s *GetRawMasterchainInfoExtOK) SetNow(val uint32) {
+func (s *GetRawMasterchainInfoExtOK) SetNow(val int32) {
 	s.Now = val
 }
 
@@ -6371,16 +6371,16 @@ func (s *GetRawShardInfoOK) SetShardDescr(val string) {
 }
 
 type GetRawTimeOK struct {
-	Time uint32 `json:"time"`
+	Time int32 `json:"time"`
 }
 
 // GetTime returns the value of Time.
-func (s *GetRawTimeOK) GetTime() uint32 {
+func (s *GetRawTimeOK) GetTime() int32 {
 	return s.Time
 }
 
 // SetTime sets the value of Time.
-func (s *GetRawTimeOK) SetTime(val uint32) {
+func (s *GetRawTimeOK) SetTime(val int32) {
 	s.Time = val
 }
 
@@ -6554,13 +6554,13 @@ func (s *ImagePreview) SetURL(val string) {
 
 // Ref: #/components/schemas/InitStateRaw
 type InitStateRaw struct {
-	Workchain uint32 `json:"workchain"`
+	Workchain int32  `json:"workchain"`
 	RootHash  string `json:"root_hash"`
 	FileHash  string `json:"file_hash"`
 }
 
 // GetWorkchain returns the value of Workchain.
-func (s *InitStateRaw) GetWorkchain() uint32 {
+func (s *InitStateRaw) GetWorkchain() int32 {
 	return s.Workchain
 }
 
@@ -6575,7 +6575,7 @@ func (s *InitStateRaw) GetFileHash() string {
 }
 
 // SetWorkchain sets the value of Workchain.
-func (s *InitStateRaw) SetWorkchain(val uint32) {
+func (s *InitStateRaw) SetWorkchain(val int32) {
 	s.Workchain = val
 }
 
@@ -12775,98 +12775,6 @@ func (o OptTonTransferAction) Or(d TonTransferAction) TonTransferAction {
 	return d
 }
 
-// NewOptUint32 returns new OptUint32 with value set to v.
-func NewOptUint32(v uint32) OptUint32 {
-	return OptUint32{
-		Value: v,
-		Set:   true,
-	}
-}
-
-// OptUint32 is optional uint32.
-type OptUint32 struct {
-	Value uint32
-	Set   bool
-}
-
-// IsSet returns true if OptUint32 was set.
-func (o OptUint32) IsSet() bool { return o.Set }
-
-// Reset unsets value.
-func (o *OptUint32) Reset() {
-	var v uint32
-	o.Value = v
-	o.Set = false
-}
-
-// SetTo sets value to v.
-func (o *OptUint32) SetTo(v uint32) {
-	o.Set = true
-	o.Value = v
-}
-
-// Get returns value and boolean that denotes whether value was set.
-func (o OptUint32) Get() (v uint32, ok bool) {
-	if !o.Set {
-		return v, false
-	}
-	return o.Value, true
-}
-
-// Or returns value if set, or given parameter if does not.
-func (o OptUint32) Or(d uint32) uint32 {
-	if v, ok := o.Get(); ok {
-		return v
-	}
-	return d
-}
-
-// NewOptUint64 returns new OptUint64 with value set to v.
-func NewOptUint64(v uint64) OptUint64 {
-	return OptUint64{
-		Value: v,
-		Set:   true,
-	}
-}
-
-// OptUint64 is optional uint64.
-type OptUint64 struct {
-	Value uint64
-	Set   bool
-}
-
-// IsSet returns true if OptUint64 was set.
-func (o OptUint64) IsSet() bool { return o.Set }
-
-// Reset unsets value.
-func (o *OptUint64) Reset() {
-	var v uint64
-	o.Value = v
-	o.Set = false
-}
-
-// SetTo sets value to v.
-func (o *OptUint64) SetTo(v uint64) {
-	o.Set = true
-	o.Value = v
-}
-
-// Get returns value and boolean that denotes whether value was set.
-func (o OptUint64) Get() (v uint64, ok bool) {
-	if !o.Set {
-		return v, false
-	}
-	return o.Value, true
-}
-
-// Or returns value if set, or given parameter if does not.
-func (o OptUint64) Or(d uint64) uint64 {
-	if v, ok := o.Get(); ok {
-		return v
-	}
-	return d
-}
-
 // NewOptUnSubscriptionAction returns new OptUnSubscriptionAction with value set to v.
 func NewOptUnSubscriptionAction(v UnSubscriptionAction) OptUnSubscriptionAction {
 	return OptUnSubscriptionAction{
@@ -13703,16 +13611,16 @@ func (s *SendBlockchainMessageReq) SetBatch(val []string) {
 }
 
 type SendRawMessageOK struct {
-	Code uint32 `json:"code"`
+	Code int32 `json:"code"`
 }
 
 // GetCode returns the value of Code.
-func (s *SendRawMessageOK) GetCode() uint32 {
+func (s *SendRawMessageOK) GetCode() int32 {
 	return s.Code
 }
 
 // SetCode sets the value of Code.
-func (s *SendRawMessageOK) SetCode(val uint32) {
+func (s *SendRawMessageOK) SetCode(val int32) {
 	s.Code = val
 }
 
@@ -13732,16 +13640,16 @@ func (s *SendRawMessageReq) SetBody(val string) {
 
 // Ref: #/components/schemas/Seqno
 type Seqno struct {
-	Seqno uint32 `json:"seqno"`
+	Seqno int32 `json:"seqno"`
 }
 
 // GetSeqno returns the value of Seqno.
-func (s *Seqno) GetSeqno() uint32 {
+func (s *Seqno) GetSeqno() int32 {
 	return s.Seqno
 }
 
 // SetSeqno sets the value of Seqno.
-func (s *Seqno) SetSeqno(val uint32) {
+func (s *Seqno) SetSeqno(val int32) {
 	s.Seqno = val
 }
 
@@ -14462,12 +14370,12 @@ func (s *TonConnectProofReqProof) SetStateInit(val OptString) {
 }
 
 type TonConnectProofReqProofDomain struct {
-	LengthBytes OptUint32 `json:"length_bytes"`
-	Value       string    `json:"value"`
+	LengthBytes OptInt32 `json:"length_bytes"`
+	Value       string   `json:"value"`
 }
 
 // GetLengthBytes returns the value of LengthBytes.
-func (s *TonConnectProofReqProofDomain) GetLengthBytes() OptUint32 {
+func (s *TonConnectProofReqProofDomain) GetLengthBytes() OptInt32 {
 	return s.LengthBytes
 }
 
@@ -14477,7 +14385,7 @@ func (s *TonConnectProofReqProofDomain) GetValue() string {
 }
 
 // SetLengthBytes sets the value of LengthBytes.
-func (s *TonConnectProofReqProofDomain) SetLengthBytes(val OptUint32) {
+func (s *TonConnectProofReqProofDomain) SetLengthBytes(val OptInt32) {
 	s.LengthBytes = val
 }
 
@@ -14608,7 +14516,7 @@ func (s *Trace) SetEmulated(val OptBool) {
 // Ref: #/components/schemas/TraceID
 type TraceID struct {
 	ID    string `json:"id"`
-	Utime uint64 `json:"utime"`
+	Utime int64  `json:"utime"`
 }
 
 // GetID returns the value of ID.
@@ -14617,7 +14525,7 @@ func (s *TraceID) GetID() string {
 }
 
 // GetUtime returns the value of Utime.
-func (s *TraceID) GetUtime() uint64 {
+func (s *TraceID) GetUtime() int64 {
 	return s.Utime
 }
 
@@ -14627,7 +14535,7 @@ func (s *TraceID) SetID(val string) {
 }
 
 // SetUtime sets the value of Utime.
-func (s *TraceID) SetUtime(val uint64) {
+func (s *TraceID) SetUtime(val int64) {
 	s.Utime = val
 }
 

@@ -8,11 +8,12 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
-	"github.com/tonkeeper/opentonapi/pkg/core"
 	"io"
 	"net/http"
 	"os"
 	"time"
+
+	"github.com/tonkeeper/opentonapi/pkg/core"
 
 	"github.com/tonkeeper/tongo/ton"
 
@@ -159,17 +160,17 @@ func (h *Handler) GetAccountSeqno(ctx context.Context, params oas.GetAccountSeqn
 	var seqno uint32
 	seqno, err = h.storage.GetSeqno(ctx, account.ID)
 	if err == nil {
-		return &oas.Seqno{Seqno: seqno}, nil
+		return &oas.Seqno{Seqno: int32(seqno)}, nil
 	}
 	rawAccount, err := h.storage.GetRawAccount(ctx, account.ID)
 	if errors.Is(err, core.ErrEntityNotFound) {
-		return &oas.Seqno{Seqno: seqno}, nil
+		return &oas.Seqno{Seqno: int32(seqno)}, nil
 	}
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
 	if len(rawAccount.Code) == 0 {
-		return &oas.Seqno{Seqno: seqno}, nil
+		return &oas.Seqno{Seqno: int32(seqno)}, nil
 	}
 	walletVersion, err := wallet.GetVersionByCode(rawAccount.Code)
 	if err != nil {
@@ -198,5 +199,5 @@ func (h *Handler) GetAccountSeqno(ctx context.Context, params oas.GetAccountSeqn
 	default:
 		return nil, toError(http.StatusBadRequest, fmt.Errorf("contract doesn't have a seqno"))
 	}
-	return &oas.Seqno{Seqno: seqno}, nil
+	return &oas.Seqno{Seqno: int32(seqno)}, nil
 }
