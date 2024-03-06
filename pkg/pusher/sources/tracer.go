@@ -6,13 +6,13 @@ import (
 	"sync"
 	"time"
 
+	"github.com/Narasimha1997/ratelimiter"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/tonkeeper/opentonapi/pkg/cache"
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/tongo"
 	"go.uber.org/zap"
-	"golang.org/x/time/rate"
 )
 
 var (
@@ -89,12 +89,15 @@ func (t *Tracer) Run(ctx context.Context) {
 
 	defer cancelFn()
 
-	limiter := rate.NewLimiter(30, 1)
+	limiter := ratelimiter.NewDefaultLimiter(300, 10*time.Second)
+	defer limiter.Kill()
+
 	for txEvent := range txCh {
 		if ctx.Err() != nil {
 			return
 		}
-		if !limiter.Allow() {
+		if allow, _ := limiter.ShouldAllow(1); !allow {
+			traceNumber.With(map[string]string{"type": "dropped"}).Inc()
 			continue
 		}
 		go func(txEvent TransactionEventData) {
