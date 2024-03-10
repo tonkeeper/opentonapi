@@ -136,6 +136,10 @@ func Is(t actioner) bubbleCheck {
 	}
 }
 
+func IsNftTransfer(b *Bubble) bool {
+	_, ok := b.Info.(BubbleNftTransfer)
+	return ok
+}
 func IsJettonTransfer(b *Bubble) bool {
 	_, ok := b.Info.(BubbleJettonTransfer)
 	return ok
@@ -162,6 +166,10 @@ func HasOpcode(op uint32) bubbleCheck {
 		opCode := b.Info.(BubbleTx).opCode
 		return opCode != nil && *opCode == op
 	}
+}
+
+func HasEmptyBody(b *Bubble) bool {
+	return b.Info.(BubbleTx).decodedBody == nil && b.Info.(BubbleTx).opCode == nil
 }
 
 func HasOperation(name abi.MsgOpName) bubbleCheck {

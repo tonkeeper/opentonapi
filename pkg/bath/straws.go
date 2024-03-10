@@ -31,7 +31,7 @@ var DefaultStraws = []StrawFunc{
 	JettonTransferClassicStraw.Merge,
 	JettonBurnStraw.Merge,
 	WtonMintStraw.Merge,
-	FindNftPurchase,
+	NftPurchaseStraw.Merge,
 	StonfiSwapStraw.Merge,
 	DedustSwapStraw.Merge,
 	TgAuctionV1InitialBidStraw.Merge,

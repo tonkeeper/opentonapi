@@ -28,89 +28,40 @@ func (b BubbleNftPurchase) ToAction() *Action {
 	}
 }
 
-func auctionType(account *Account) NftAuctionType {
+func auctionType(account *Account) NftAuctionType { //todo: switch to new gg interfaces
 	if account.Is(abi.NftSaleV2) {
 		return GetGemsAuction
 	}
 	return BasicAuction
 }
 
-func getGemsOpCodeOK(opcode *uint32) bool {
-	if opcode == nil {
-		return true
-	}
-	// according to getgems source code
-	// 0 and 2 are OK
-	// https://github.com/getgems-io/nft-contracts/blob/debcd8516b91320fa9b23bff6636002d639e3f26/packages/contracts/sources/nft-fixprice-sale-v3.fc#L228-L249
-	return *opcode == 2 || *opcode == 0
-}
-
-func FindNftPurchase(bubble *Bubble) bool {
-	txBubble, ok := bubble.Info.(BubbleTx)
-	if !ok {
-		return false
-	}
-	if !txBubble.account.Is(abi.NftSale) {
-		return false
-	}
-	if txBubble.additionalInfo == nil || txBubble.additionalInfo.NftSaleContract == nil {
-		return false
-	}
-	saleContract := txBubble.additionalInfo.NftSaleContract
-	if saleContract.Owner == nil {
-		// TODO:
-		return false
-	}
-	transfers := 0
-	for _, child := range bubble.Children {
-		if transfer, ok := child.Info.(BubbleNftTransfer); ok {
-			// we don't want to merge a successful ton transfer with a failed nft transfer.
-			if !transfer.success {
-				return false
-			}
-			transfers += 1
-		}
-	}
-	if transfers != 1 {
-		return false
-	}
-	if txBubble.account.Is(abi.NftSaleV2) {
-		if !getGemsOpCodeOK(txBubble.opCode) {
-			return false
-		}
-	}
-	newBubble := Bubble{
-		Accounts:  bubble.Accounts,
-		ValueFlow: bubble.ValueFlow,
-	}
-	var nft tongo.AccountID
-	var buyer tongo.AccountID
-	newBubble.Children = ProcessChildren(bubble.Children,
-		func(child *Bubble) *Merge {
-			nftTransfer, ok := child.Info.(BubbleNftTransfer)
-			if !ok {
+var NftPurchaseStraw = Straw[BubbleNftPurchase]{
+	CheckFuncs: []bubbleCheck{
+		IsTx,
+		HasInterface(abi.NftSale),
+		HasEmptyBody,             //all buy transactions has empty body
+		AmountInterval(1, 1<<62), //externals has zero value
+		func(bubble *Bubble) bool {
+			tx := bubble.Info.(BubbleTx)
+			return tx.additionalInfo != nil && tx.additionalInfo.NftSaleContract != nil && tx.additionalInfo.NftSaleContract.Owner != nil
+		}},
+	Builder: func(newAction *BubbleNftPurchase, bubble *Bubble) error {
+		tx := bubble.Info.(BubbleTx)
+		sale := tx.additionalInfo.NftSaleContract //safe to use, because we checked it in CheckFuncs
+		newAction.Success = tx.success
+		newAction.Seller = *sale.Owner
+		newAction.AuctionType = auctionType(&tx.account)
+		newAction.Buyer = tx.inputFrom.Address //safe because we checked not external in CheckFuncs
+		newAction.Price = sale.NftPrice
+		return nil
+	},
+	Children: []Straw[BubbleNftPurchase]{
+		{
+			CheckFuncs: []bubbleCheck{IsNftTransfer},
+			Builder: func(newAction *BubbleNftPurchase, bubble *Bubble) error {
+				newAction.Nft = bubble.Info.(BubbleNftTransfer).account.Address
 				return nil
-			}
-			newBubble.ValueFlow.Merge(child.ValueFlow)
-			nft = nftTransfer.account.Address
-			newBubble.Accounts = append(newBubble.Accounts, nft)
-			if nftTransfer.sender != nil {
-				newBubble.Accounts = append(newBubble.Accounts, nftTransfer.sender.Address)
-			}
-			if nftTransfer.recipient != nil {
-				buyer = nftTransfer.recipient.Address
-				newBubble.Accounts = append(newBubble.Accounts, buyer)
-			}
-			return &Merge{children: child.Children}
-		})
-	newBubble.Info = BubbleNftPurchase{
-		Success:     true,
-		Nft:         nft,
-		Buyer:       buyer,
-		Seller:      *saleContract.Owner,
-		AuctionType: auctionType(&txBubble.account),
-		Price:       saleContract.NftPrice,
-	}
-	*bubble = newBubble
-	return true
+			},
+		},
+	},
 }
