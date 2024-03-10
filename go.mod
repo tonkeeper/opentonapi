@@ -5,6 +5,7 @@ go 1.20
 require (
 	github.com/BurntSushi/toml v1.2.1
 	github.com/Code-Hex/go-generics-cache v1.3.0
+	github.com/Narasimha1997/ratelimiter v1.1.1
 	github.com/avast/retry-go v3.0.0+incompatible
 	github.com/caarlos0/env/v6 v6.10.1
 	github.com/cespare/xxhash/v2 v2.1.2
@@ -31,7 +32,6 @@ require (
 	go.uber.org/zap v1.26.0
 	golang.org/x/exp v0.0.0-20230725093048-515e97ebf090
 	golang.org/x/text v0.14.0
-	golang.org/x/time v0.3.0
 	gopkg.in/yaml.v3 v3.0.1
 )
 
