@@ -390,6 +390,16 @@ func ConvertToAccount(accountId tongo.AccountID, shardAccount tlb.ShardAccount) 
 		res.Status = tlb.AccountNone
 		return res, nil
 	}
+	libs := acc.Account.Storage.State.AccountActive.StateInit.Library.Items()
+	if len(libs) > 0 {
+		res.Libraries = make(map[tongo.Bits256]*SimpleLib, len(libs))
+		for _, lib := range libs {
+			res.Libraries[tongo.Bits256(lib.Key)] = &SimpleLib{
+				Public: lib.Value.Public,
+				Root:   &lib.Value.Root,
+			}
+		}
+	}
 	balance := acc.Account.Storage.Balance
 	res.TonBalance = int64(balance.Grams)
 	items := balance.Other.Dict.Items()

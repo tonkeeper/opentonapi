@@ -3822,8 +3822,10 @@ type BlockchainRawAccount struct {
 	Data                OptString                           `json:"data"`
 	LastTransactionLt   int64                               `json:"last_transaction_lt"`
 	LastTransactionHash OptString                           `json:"last_transaction_hash"`
+	FrozenHash          OptString                           `json:"frozen_hash"`
 	Status              AccountStatus                       `json:"status"`
 	Storage             AccountStorageInfo                  `json:"storage"`
+	Libraries           []BlockchainRawAccountLibrariesItem `json:"libraries"`
 }
 
 // GetAddress returns the value of Address.
@@ -3861,6 +3863,11 @@ func (s *BlockchainRawAccount) GetLastTransactionHash() OptString {
 	return s.LastTransactionHash
 }
 
+// GetFrozenHash returns the value of FrozenHash.
+func (s *BlockchainRawAccount) GetFrozenHash() OptString {
+	return s.FrozenHash
+}
+
 // GetStatus returns the value of Status.
 func (s *BlockchainRawAccount) GetStatus() AccountStatus {
 	return s.Status
@@ -3869,6 +3876,11 @@ func (s *BlockchainRawAccount) GetStatus() AccountStatus {
 // GetStorage returns the value of Storage.
 func (s *BlockchainRawAccount) GetStorage() AccountStorageInfo {
 	return s.Storage
+}
+
+// GetLibraries returns the value of Libraries.
+func (s *BlockchainRawAccount) GetLibraries() []BlockchainRawAccountLibrariesItem {
+	return s.Libraries
 }
 
 // SetAddress sets the value of Address.
@@ -3906,6 +3918,11 @@ func (s *BlockchainRawAccount) SetLastTransactionHash(val OptString) {
 	s.LastTransactionHash = val
 }
 
+// SetFrozenHash sets the value of FrozenHash.
+func (s *BlockchainRawAccount) SetFrozenHash(val OptString) {
+	s.FrozenHash = val
+}
+
 // SetStatus sets the value of Status.
 func (s *BlockchainRawAccount) SetStatus(val AccountStatus) {
 	s.Status = val
@@ -3914,6 +3931,11 @@ func (s *BlockchainRawAccount) SetStatus(val AccountStatus) {
 // SetStorage sets the value of Storage.
 func (s *BlockchainRawAccount) SetStorage(val AccountStorageInfo) {
 	s.Storage = val
+}
+
+// SetLibraries sets the value of Libraries.
+func (s *BlockchainRawAccount) SetLibraries(val []BlockchainRawAccountLibrariesItem) {
+	s.Libraries = val
 }
 
 type BlockchainRawAccountExtraBalance map[string]string
@@ -3925,6 +3947,31 @@ func (s *BlockchainRawAccountExtraBalance) init() BlockchainRawAccountExtraBalan
 		*s = m
 	}
 	return m
+}
+
+type BlockchainRawAccountLibrariesItem struct {
+	Public bool   `json:"public"`
+	Root   string `json:"root"`
+}
+
+// GetPublic returns the value of Public.
+func (s *BlockchainRawAccountLibrariesItem) GetPublic() bool {
+	return s.Public
+}
+
+// GetRoot returns the value of Root.
+func (s *BlockchainRawAccountLibrariesItem) GetRoot() string {
+	return s.Root
+}
+
+// SetPublic sets the value of Public.
+func (s *BlockchainRawAccountLibrariesItem) SetPublic(val bool) {
+	s.Public = val
+}
+
+// SetRoot sets the value of Root.
+func (s *BlockchainRawAccountLibrariesItem) SetRoot(val string) {
+	s.Root = val
 }
 
 // Ref: #/components/schemas/BouncePhaseType

@@ -2326,6 +2326,10 @@
       },
       "type": "object"
      },
+     "frozen_hash": {
+      "example": "088b436a846d92281734236967970612f87fbd64a2cd3573107948379e8e4161",
+      "type": "string"
+     },
      "last_transaction_hash": {
       "example": "088b436a846d92281734236967970612f87fbd64a2cd3573107948379e8e4161",
       "type": "string"
@@ -2334,6 +2338,25 @@
       "example": 123456789,
       "format": "int64",
       "type": "integer"
+     },
+     "libraries": {
+      "items": {
+       "properties": {
+        "public": {
+         "example": true,
+         "type": "boolean"
+        },
+        "root": {
+         "type": "string"
+        }
+       },
+       "required": [
+        "public",
+        "root"
+       ],
+       "type": "object"
+      },
+      "type": "array"
      },
      "status": {
       "$ref": "#/components/schemas/AccountStatus"
