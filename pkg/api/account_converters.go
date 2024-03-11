@@ -2,6 +2,7 @@ package api
 
 import (
 	"fmt"
+	"sort"
 
 	"github.com/tonkeeper/tongo/abi"
 	"github.com/tonkeeper/tongo/tlb"
@@ -11,7 +12,7 @@ import (
 	"github.com/tonkeeper/opentonapi/pkg/oas"
 )
 
-func convertToRawAccount(account *core.Account) oas.BlockchainRawAccount {
+func convertToRawAccount(account *core.Account) (oas.BlockchainRawAccount, error) {
 	rawAccount := oas.BlockchainRawAccount{
 		Address:           account.AccountAddress.ToRaw(),
 		Balance:           account.TonBalance,
@@ -28,6 +29,32 @@ func convertToRawAccount(account *core.Account) oas.BlockchainRawAccount {
 	if account.LastTransactionHash != [32]byte{} {
 		rawAccount.LastTransactionHash = oas.NewOptString(account.LastTransactionHash.Hex())
 	}
+	if account.FrozenHash != nil {
+		rawAccount.FrozenHash = oas.NewOptString(account.FrozenHash.Hex())
+	}
+	if len(account.Libraries) > 0 {
+		rawAccount.Libraries = make([]oas.BlockchainRawAccountLibrariesItem, 0, len(account.Libraries))
+		keys := make([]string, 0, len(account.Libraries))
+		values := make(map[string]*core.SimpleLib, len(account.Libraries))
+		for key, value := range account.Libraries {
+			hex := key.Hex()
+			keys = append(keys, hex)
+			values[hex] = value
+		}
+		sort.Strings(keys)
+		for _, key := range keys {
+			value := values[key]
+			base64, err := value.Root.ToBocBase64()
+			if err != nil {
+				// this should never happen, but anyway
+				return oas.BlockchainRawAccount{}, err
+			}
+			rawAccount.Libraries = append(rawAccount.Libraries, oas.BlockchainRawAccountLibrariesItem{
+				Public: value.Public,
+				Root:   base64,
+			})
+		}
+	}
 	if account.ExtraBalances != nil {
 		balances := make(map[string]string, len(account.ExtraBalances))
 		for key, value := range account.ExtraBalances {
@@ -41,7 +68,7 @@ func convertToRawAccount(account *core.Account) oas.BlockchainRawAccount {
 	if account.Data != nil {
 		rawAccount.Data = oas.NewOptString(fmt.Sprintf("%x", account.Data[:]))
 	}
-	return rawAccount
+	return rawAccount, nil
 }
 
 func convertToAccount(account *core.Account, ab *addressbook.KnownAddress, state chainState) oas.Account {

@@ -40,7 +40,10 @@ func (h *Handler) GetBlockchainRawAccount(ctx context.Context, params oas.GetBlo
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
-	res := convertToRawAccount(rawAccount)
+	res, err := convertToRawAccount(rawAccount)
+	if err != nil {
+		return nil, toError(http.StatusInternalServerError, err)
+	}
 	return &res, nil
 }
 

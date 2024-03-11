@@ -4016,10 +4016,26 @@ components:
         last_transaction_hash:
           type: string
           example: 088b436a846d92281734236967970612f87fbd64a2cd3573107948379e8e4161
+        frozen_hash:
+          type: string
+          example: 088b436a846d92281734236967970612f87fbd64a2cd3573107948379e8e4161
         status:
           '$ref': '#/components/schemas/AccountStatus'
         storage:
           $ref: '#/components/schemas/AccountStorageInfo'
+        libraries:
+          type: array
+          items:
+            type: object
+            required:
+              - public
+              - root
+            properties:
+              public:
+                type: boolean
+                example: true
+              root:
+                type: string
     Account:
       type: object
       required:

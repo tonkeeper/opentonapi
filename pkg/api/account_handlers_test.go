@@ -20,15 +20,38 @@ import (
 
 func TestHandler_GetRawAccount(t *testing.T) {
 	tests := []struct {
-		name        string
-		params      oas.GetBlockchainRawAccountParams
-		wantStatus  oas.AccountStatus
-		wantAddress string
+		name           string
+		params         oas.GetBlockchainRawAccountParams
+		wantStatus     oas.AccountStatus
+		wantAddress    string
+		wantFrozenHash string
+		wantLibraries  []oas.BlockchainRawAccountLibrariesItem
 	}{
 		{
-			params:      oas.GetBlockchainRawAccountParams{AccountID: "EQDendoireMDFMufOUzkqNpFIay83GnjV2tgGMbA64wA3siV"},
-			wantAddress: "0:de9dda22ade30314cb9f394ce4a8da4521acbcdc69e3576b6018c6c0eb8c00de",
+			name:          "all good",
+			params:        oas.GetBlockchainRawAccountParams{AccountID: "EQDendoireMDFMufOUzkqNpFIay83GnjV2tgGMbA64wA3siV"},
+			wantAddress:   "0:de9dda22ade30314cb9f394ce4a8da4521acbcdc69e3576b6018c6c0eb8c00de",
+			wantStatus:    "active",
+			wantLibraries: nil,
+		},
+		{
+			name:        "with libraries",
+			params:      oas.GetBlockchainRawAccountParams{AccountID: "EQAYB7NnOFOm2X6bewRAv2zbbWBzdV13HXpgrrg4aH3M44Ei"},
+			wantAddress: "0:1807b3673853a6d97e9b7b0440bf6cdb6d6073755d771d7a60aeb838687dcce3",
 			wantStatus:  "active",
+			wantLibraries: []oas.BlockchainRawAccountLibrariesItem{
+				{
+					Public: true,
+					Root:   "te6ccgECCwEAAnQAART/APSkE/S88sgLAQIC0QIDAgEgBAUCASAICQHLDPQ0wMBcbAjxwCxkl8D4PpAMPht8AH4S/LiwwHTHyGCEExWtrW6jjsyghA3nvU7uo4u+E34SscF8uK++kAwcHMhgBjIywX4Rc8WIfoCy2rLH8s/Ac8WyYBA+wBw+GvwApEw4uMNgBgB1O1E0NP/Afhh0x8B+GL6AAH4Y9MfAfhk+kAB+GXTHwH4ZvQEAfhn0x8B+GjTHwH4afpAAfhq0gAw+GuAB/DH4I/hIvvgj+Em7sPLiwNMPgwjXGCD5AfhBQTD5EPLivdM/Afhs+kAw+E0hxwXy4r76RAHAAPLiwvhCUiC8lDH4QgHe+EdSEIMH9A5voXABlDDTHzCRMeL4RiGhUjC8ljL4RiKhAt4iwgDy4sGCEAcnDgAjgQD5oIEA+qkEqAcA7vhDggr68ICgUkCooFNAvvLiv/hCJKH4YlEToMjLH8nQ+EdBMIMH9Bb4ZyHwA1MgoYIJMS0AvI4WcIAYyMsF+E3PFlBCofoCEstqyXD7AJIwMeL4Q1IQqMIAjhdwgBjIywX4Ss8W+EMTqBL6AstqyXH7AJEw4vACAGE+Ev4SfhI+Ef4RvhE+EL4QcjL/8sf+EP6Assf+EXPFssf9ADLH8sf+ErPFsoAye1UgAQ8kyDCAIroMIAoA8G0hgQD6tgggjkPI+ERwAZ16qQymMAIQI6QBIMAA5jCSywfki1Lmpzb26M8Wycj4Tc8WzMnIggr68ID6AszJ0PhEVQKAQPQW+ESk+GQB5PhMcnCAGMjLBfhFzxaCC5OHAAWkFagU+gITy2oSyx/LP8zJcfsAgQD6oQ==",
+				},
+			},
+		},
+		{
+			name:           "frozen",
+			params:         oas.GetBlockchainRawAccountParams{AccountID: "Ef9ngXWkQ2fOYWOagoVqqDNYReae-J2-fRysgjsFzZkXa3aW"},
+			wantAddress:    "-1:678175a44367ce61639a82856aa8335845e69ef89dbe7d1cac823b05cd99176b",
+			wantStatus:     "frozen",
+			wantFrozenHash: "599ef5e8df99ae2fae1b23a292a091bb2cb489245bca2d50153928837d98dc49",
 		},
 	}
 	for _, tt := range tests {
@@ -45,6 +68,8 @@ func TestHandler_GetRawAccount(t *testing.T) {
 
 			require.Equal(t, tt.wantAddress, account.Address)
 			require.Equal(t, tt.wantStatus, account.Status)
+			require.Equal(t, tt.wantLibraries, account.Libraries)
+			require.Equal(t, tt.wantFrozenHash, account.FrozenHash.Value)
 		})
 	}
 }
