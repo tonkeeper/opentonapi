@@ -48,20 +48,19 @@ var NftPurchaseStraw = Straw[BubbleNftPurchase]{
 	Builder: func(newAction *BubbleNftPurchase, bubble *Bubble) error {
 		tx := bubble.Info.(BubbleTx)
 		sale := tx.additionalInfo.NftSaleContract //safe to use, because we checked it in CheckFuncs
-		newAction.Success = tx.success
 		newAction.Seller = *sale.Owner
 		newAction.AuctionType = auctionType(&tx.account)
 		newAction.Buyer = tx.inputFrom.Address //safe because we checked not external in CheckFuncs
 		newAction.Price = sale.NftPrice
 		return nil
 	},
-	Children: []Straw[BubbleNftPurchase]{
-		{
-			CheckFuncs: []bubbleCheck{IsNftTransfer},
-			Builder: func(newAction *BubbleNftPurchase, bubble *Bubble) error {
-				newAction.Nft = bubble.Info.(BubbleNftTransfer).account.Address
-				return nil
-			},
+	SingleChild: &Straw[BubbleNftPurchase]{
+		CheckFuncs: []bubbleCheck{IsNftTransfer},
+		Builder: func(newAction *BubbleNftPurchase, bubble *Bubble) error {
+			newAction.Success = bubble.Info.(BubbleNftTransfer).success
+			newAction.Nft = bubble.Info.(BubbleNftTransfer).account.Address
+			return nil
 		},
+		Optional: true,
 	},
 }
