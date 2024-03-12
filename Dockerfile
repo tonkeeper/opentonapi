@@ -15,7 +15,9 @@ FROM ubuntu:20.04 as runner
 RUN apt-get update && \
     apt-get install -y openssl ca-certificates libsecp256k1-0 libsodium23 && \
     rm -rf /var/lib/apt/lists/*
-COPY --from=build /go/pkg/mod/github.com/tonkeeper/tongo*/lib/linux /app/lib/
+#COPY --from=build /go/pkg/mod/github.com/tonkeeper/tongo*/lib/linux /app/lib/
+RUN mkdir -p /app/lib
+RUN wget -o /app/lib/libemulator.so https://github.com/ton-blockchain/ton/releases/download/v2024.02/libemulator-linux-x86-64.so
 ENV LD_LIBRARY_PATH=/app/lib/
 COPY --from=build /tmp/opentonapi /usr/bin/
 CMD ["/usr/bin/opentonapi"]
