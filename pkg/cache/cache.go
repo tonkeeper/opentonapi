@@ -46,6 +46,10 @@ func (c *Cache[K, V]) Set(key K, val V, opts ...cache.ItemOption) {
 	c.cache.Set(key, val, opts...)
 }
 
+func (c *Cache[K, V]) Delete(key K) {
+	c.cache.Delete(key)
+}
+
 // Keys returns the keys of the cache. the order is relied on algorithms.
 func (c *Cache[K, V]) Keys() []K {
 	return c.cache.Keys()

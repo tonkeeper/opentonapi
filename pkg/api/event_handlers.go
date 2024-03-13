@@ -254,7 +254,8 @@ func (h *Handler) GetAccountEvents(ctx context.Context, params oas.GetAccountEve
 		for _, hash := range memTraces {
 			_, err = h.storage.SearchTransactionByMessageHash(ctx, hash)
 			trace, prs := h.mempoolEmulate.traces.Get(hash)
-			if err == nil || !prs { //if err is nil it's already processed. if !prs we can't do anything
+			if err == nil || !prs { //if err is nil it's already processed. If !prs we can't do anything
+				h.mempoolEmulate.traces.Delete(hash)
 				continue
 			}
 			if i > params.Limit-2 { // we want always to save at least 1 real transaction
@@ -618,7 +619,10 @@ func (h *Handler) addToMempool(ctx context.Context, bytesBoc []byte, shardAccoun
 	ttl := int64(30)
 	msgV4, err := tongoWallet.DecodeMessageV4(msgCell[0])
 	if err == nil {
-		ttl = int64(msgV4.ValidUntil) - time.Now().Unix()
+		diff := int64(msgV4.ValidUntil) - time.Now().Unix()
+		if diff < 600 {
+			ttl = diff
+		}
 	}
 	var message tlb.Message
 	err = tlb.Unmarshal(msgCell[0], &message)
