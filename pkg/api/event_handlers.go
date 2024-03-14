@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/sha256"
 	"encoding/base64"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"math/big"
@@ -47,6 +48,29 @@ var (
 	})
 )
 
+type decodedMessage struct {
+	base64  string
+	payload []byte
+}
+
+func decodeMessage(s string) (*decodedMessage, error) {
+	payload, err := hex.DecodeString(s)
+	if err != nil {
+		payload, err := base64.StdEncoding.DecodeString(s)
+		if err != nil {
+			return nil, toError(http.StatusBadRequest, fmt.Errorf("boc must be a base64 encoded string or hex string"))
+		}
+		return &decodedMessage{
+			base64:  s,
+			payload: payload,
+		}, nil
+	}
+	return &decodedMessage{
+		base64:  base64.StdEncoding.EncodeToString(payload),
+		payload: payload,
+	}, nil
+}
+
 func (h *Handler) SendBlockchainMessage(ctx context.Context, request *oas.SendBlockchainMessageReq) error {
 	if h.msgSender == nil {
 		return toError(http.StatusBadRequest, fmt.Errorf("msg sender is not configured"))
@@ -55,17 +79,17 @@ func (h *Handler) SendBlockchainMessage(ctx context.Context, request *oas.SendBl
 		return toError(http.StatusBadRequest, fmt.Errorf("boc not found"))
 	}
 	if request.Boc.IsSet() {
-		payload, err := base64.StdEncoding.DecodeString(request.Boc.Value)
+		m, err := decodeMessage(request.Boc.Value)
 		if err != nil {
-			return toError(http.StatusBadRequest, fmt.Errorf("boc must be a base64 encoded string"))
+			return err
 		}
-		checksum := sha256.Sum256(payload)
+		checksum := sha256.Sum256(m.payload)
 		if _, prs := h.blacklistedBocCache.Get(checksum); prs {
 			return toError(http.StatusBadRequest, fmt.Errorf("duplicate message"))
 		}
 		msgCopy := blockchain.ExtInMsgCopy{
-			MsgBoc:  request.Boc.Value,
-			Payload: payload,
+			MsgBoc:  m.base64,
+			Payload: m.payload,
 			Details: h.ctxToDetails(ctx),
 		}
 		mempoolMessageCounter.Inc()
@@ -86,7 +110,7 @@ func (h *Handler) SendBlockchainMessage(ctx context.Context, request *oas.SendBl
 			}()
 			ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 			defer cancel()
-			h.addToMempool(ctx, payload, nil)
+			h.addToMempool(ctx, m.payload, nil)
 		}()
 		return nil
 	}
@@ -98,17 +122,17 @@ func (h *Handler) SendBlockchainMessage(ctx context.Context, request *oas.SendBl
 		return toError(http.StatusBadRequest, fmt.Errorf("batch size must be less than %v", maxBatchSize))
 	}
 	for _, msgBoc := range request.Batch {
-		payload, err := base64.StdEncoding.DecodeString(msgBoc)
+		m, err := decodeMessage(msgBoc)
 		if err != nil {
-			return toError(http.StatusBadRequest, err)
+			return err
 		}
-		shardAccount, err = h.addToMempool(ctx, payload, shardAccount)
+		shardAccount, err = h.addToMempool(ctx, m.payload, shardAccount)
 		if err != nil {
 			continue
 		}
 		msgCopy := blockchain.ExtInMsgCopy{
-			MsgBoc:  msgBoc,
-			Payload: payload,
+			MsgBoc:  m.base64,
+			Payload: m.payload,
 			Details: h.ctxToDetails(ctx),
 		}
 		copies = append(copies, msgCopy)
@@ -230,7 +254,8 @@ func (h *Handler) GetAccountEvents(ctx context.Context, params oas.GetAccountEve
 		for _, hash := range memTraces {
 			_, err = h.storage.SearchTransactionByMessageHash(ctx, hash)
 			trace, prs := h.mempoolEmulate.traces.Get(hash)
-			if err == nil || !prs { //if err is nil it's already processed. if !prs we can't do anything
+			if err == nil || !prs { //if err is nil it's already processed. If !prs we can't do anything
+				h.mempoolEmulate.traces.Delete(hash)
 				continue
 			}
 			if i > params.Limit-2 { // we want always to save at least 1 real transaction
@@ -594,7 +619,10 @@ func (h *Handler) addToMempool(ctx context.Context, bytesBoc []byte, shardAccoun
 	ttl := int64(30)
 	msgV4, err := tongoWallet.DecodeMessageV4(msgCell[0])
 	if err == nil {
-		ttl = int64(msgV4.ValidUntil) - time.Now().Unix()
+		diff := int64(msgV4.ValidUntil) - time.Now().Unix()
+		if diff < 600 {
+			ttl = diff
+		}
 	}
 	var message tlb.Message
 	err = tlb.Unmarshal(msgCell[0], &message)

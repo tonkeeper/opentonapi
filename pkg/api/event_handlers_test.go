@@ -2,6 +2,8 @@ package api
 
 import (
 	"context"
+	"encoding/hex"
+	"fmt"
 	"net/http"
 	"testing"
 
@@ -130,6 +132,48 @@ func Test_prepareAccountState(t *testing.T) {
 			require.Equal(t, tt.wantStatus, account.Account.Status())
 			require.Equal(t, tlb.SumType("Account"), account.Account.SumType)
 			require.Equal(t, tt.startBalance, int64(account.Account.Account.Storage.Balance.Grams))
+		})
+	}
+}
+
+func mustFromHex(s string) []byte {
+	value, err := hex.DecodeString(s)
+	if err != nil {
+		panic(err)
+	}
+	return value
+}
+
+func Test_decodeMessage(t *testing.T) {
+	tests := []struct {
+		name     string
+		msgValue string
+		want     *decodedMessage
+		wantErr  bool
+	}{
+		{
+			name:     "base64",
+			msgValue: "te6ccgEBAwEAqwABRYgA2ZpktQsYby0n9cV5VWOFINBjScIU2HdondFsK3lDpEAMAQGcLYVC3cK/Ulyr7Sa1rxw0XGsG56ppG9v7XscYE8iFztO5+MzcdmMOjhSdgpIfA+6SZL5PTZiCof6dw8G4W049BCmpoxdlea4wAAABBwADAgBkQgAWedrcZEjyi+TW7e0OAcNQTmVl2HH9exhajn5AqRktZZAfQAAAAAAAAAAAAAAAAAA=",
+			want: &decodedMessage{
+				base64:  "te6ccgEBAwEAqwABRYgA2ZpktQsYby0n9cV5VWOFINBjScIU2HdondFsK3lDpEAMAQGcLYVC3cK/Ulyr7Sa1rxw0XGsG56ppG9v7XscYE8iFztO5+MzcdmMOjhSdgpIfA+6SZL5PTZiCof6dw8G4W049BCmpoxdlea4wAAABBwADAgBkQgAWedrcZEjyi+TW7e0OAcNQTmVl2HH9exhajn5AqRktZZAfQAAAAAAAAAAAAAAAAAA=",
+				payload: mustFromHex("b5ee9c720101030100ab0001458800d99a64b50b186f2d27f5c57955638520d06349c214d877689dd16c2b7943a4400c01019c2d8542ddc2bf525cabed26b5af1c345c6b06e7aa691bdbfb5ec71813c885ced3b9f8ccdc76630e8e149d82921f03ee9264be4f4d9882a1fe9dc3c1b85b4e3d0429a9a3176579ae3000000107000302006442001679dadc6448f28be4d6eded0e01c3504e6565d871fd7b185a8e7e40a9192d65901f4000000000000000000000000000"),
+			},
+		},
+		{
+			name:     "hex",
+			msgValue: "b5ee9c720101030100ab0001458800d99a64b50b186f2d27f5c57955638520d06349c214d877689dd16c2b7943a4400c01019c2d8542ddc2bf525cabed26b5af1c345c6b06e7aa691bdbfb5ec71813c885ced3b9f8ccdc76630e8e149d82921f03ee9264be4f4d9882a1fe9dc3c1b85b4e3d0429a9a3176579ae3000000107000302006442001679dadc6448f28be4d6eded0e01c3504e6565d871fd7b185a8e7e40a9192d65901f4000000000000000000000000000",
+			want: &decodedMessage{
+				base64:  "te6ccgEBAwEAqwABRYgA2ZpktQsYby0n9cV5VWOFINBjScIU2HdondFsK3lDpEAMAQGcLYVC3cK/Ulyr7Sa1rxw0XGsG56ppG9v7XscYE8iFztO5+MzcdmMOjhSdgpIfA+6SZL5PTZiCof6dw8G4W049BCmpoxdlea4wAAABBwADAgBkQgAWedrcZEjyi+TW7e0OAcNQTmVl2HH9exhajn5AqRktZZAfQAAAAAAAAAAAAAAAAAA=",
+				payload: mustFromHex("b5ee9c720101030100ab0001458800d99a64b50b186f2d27f5c57955638520d06349c214d877689dd16c2b7943a4400c01019c2d8542ddc2bf525cabed26b5af1c345c6b06e7aa691bdbfb5ec71813c885ced3b9f8ccdc76630e8e149d82921f03ee9264be4f4d9882a1fe9dc3c1b85b4e3d0429a9a3176579ae3000000107000302006442001679dadc6448f28be4d6eded0e01c3504e6565d871fd7b185a8e7e40a9192d65901f4000000000000000000000000000"),
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := decodeMessage(tt.msgValue)
+			fmt.Printf("got: %x\n", got.payload)
+			require.Nil(t, err)
+			require.Equal(t, tt.want, got)
 		})
 	}
 }
