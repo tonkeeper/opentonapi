@@ -38,7 +38,7 @@ func auctionType(account *Account) NftAuctionType { //todo: switch to new gg int
 var NftPurchaseStraw = Straw[BubbleNftPurchase]{
 	CheckFuncs: []bubbleCheck{
 		IsTx,
-		HasInterface(abi.NftSale),
+		HasInterface(abi.NftSaleV2),
 		HasEmptyBody,             //all buy transactions has empty body
 		AmountInterval(1, 1<<62), //externals has zero value
 		func(bubble *Bubble) bool {
