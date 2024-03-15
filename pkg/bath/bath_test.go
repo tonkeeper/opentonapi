@@ -38,7 +38,6 @@ type result struct {
 
 type mockInfoSource struct {
 	OnJettonMastersForWallets func(ctx context.Context, wallets []tongo.AccountID) (map[tongo.AccountID]tongo.AccountID, error)
-	OnGetGemsContracts        func(ctx context.Context, getGems []tongo.AccountID) (map[tongo.AccountID]core.NftSaleContract, error)
 	OnNftSaleContracts        func(ctx context.Context, contracts []tongo.AccountID) (map[tongo.AccountID]core.NftSaleContract, error)
 }
 
@@ -55,13 +54,6 @@ func (m *mockInfoSource) JettonMastersForWallets(ctx context.Context, wallets []
 		return map[tongo.AccountID]tongo.AccountID{}, nil
 	}
 	return m.OnJettonMastersForWallets(ctx, wallets)
-}
-
-func (m *mockInfoSource) GetGemsContracts(ctx context.Context, getGems []tongo.AccountID) (map[tongo.AccountID]core.NftSaleContract, error) {
-	if m.OnGetGemsContracts == nil {
-		return map[tongo.AccountID]core.NftSaleContract{}, nil
-	}
-	return m.OnGetGemsContracts(ctx, getGems)
 }
 
 func (m *mockInfoSource) STONfiPools(ctx context.Context, pools []tongo.AccountID) (map[tongo.AccountID]core.STONfiPool, error) {
@@ -168,7 +160,7 @@ func TestFindActions(t *testing.T) {
 			hash:           "8feb00edd889f8a36fb8af5b4d5370190fcbe872088cd1247c445e3c3b39a795",
 			filenamePrefix: "getgems-nft-purchase",
 			source: &mockInfoSource{
-				OnGetGemsContracts: func(ctx context.Context, getGems []tongo.AccountID) (map[tongo.AccountID]core.NftSaleContract, error) {
+				OnNftSaleContracts: func(ctx context.Context, getGems []tongo.AccountID) (map[tongo.AccountID]core.NftSaleContract, error) {
 					return map[tongo.AccountID]core.NftSaleContract{
 						tongo.MustParseAccountID("0:4495a1921ab497b0eacee0d78838f8aeaba12481c29ec592c7fd5cbdd5b5ad0e"): {
 							NftPrice: 1_200_000_000,
@@ -278,7 +270,7 @@ func TestFindActions(t *testing.T) {
 			hash:           "9900285c0f5a7cc18bdb61564013452461ead3bba84c6feb5195921e443cd79e",
 			filenamePrefix: "getgetms-cancel-sale",
 			source: &mockInfoSource{
-				OnGetGemsContracts: func(ctx context.Context, getGems []tongo.AccountID) (map[tongo.AccountID]core.NftSaleContract, error) {
+				OnNftSaleContracts: func(ctx context.Context, getGems []tongo.AccountID) (map[tongo.AccountID]core.NftSaleContract, error) {
 					return map[tongo.AccountID]core.NftSaleContract{
 						tongo.MustParseAccountID("0:30635bdaa6736ad1ed89146b5a34e2cc21e9eca51031a463fe4c89a537304547"): {
 							NftPrice: 1_200_000_000_000,

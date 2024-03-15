@@ -87,11 +87,6 @@ func (s *LiteStorage) NftSaleContracts(ctx context.Context, contracts []tongo.Ac
 	return map[tongo.AccountID]core.NftSaleContract{}, nil
 }
 
-func (s *LiteStorage) GetGemsContracts(ctx context.Context, getGems []tongo.AccountID) (map[tongo.AccountID]core.NftSaleContract, error) {
-	//TODO implement
-	return map[tongo.AccountID]core.NftSaleContract{}, nil
-}
-
 func (s *LiteStorage) GetAccountNftsHistory(ctx context.Context, address tongo.AccountID, limit int, beforeLT *int64, startTime *int64, endTime *int64) ([]tongo.Bits256, error) {
 	return nil, nil
 }

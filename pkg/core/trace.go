@@ -104,7 +104,6 @@ type STONfiPool struct {
 // InformationSource provides methods to construct TraceAdditionalInfo.
 type InformationSource interface {
 	JettonMastersForWallets(ctx context.Context, wallets []tongo.AccountID) (map[tongo.AccountID]tongo.AccountID, error)
-	GetGemsContracts(ctx context.Context, getGems []tongo.AccountID) (map[tongo.AccountID]NftSaleContract, error)
 	NftSaleContracts(ctx context.Context, contracts []tongo.AccountID) (map[tongo.AccountID]NftSaleContract, error)
 	STONfiPools(ctx context.Context, poolIDs []tongo.AccountID) (map[tongo.AccountID]STONfiPool, error)
 }
@@ -151,8 +150,7 @@ func CollectAdditionalInfo(ctx context.Context, infoSource InformationSource, tr
 		return nil
 	}
 	var jettonWallets []tongo.AccountID
-	var getGemsContracts []tongo.AccountID
-	var basicNftSale []tongo.AccountID
+	var saleContracts []tongo.AccountID
 	var stonfiPoolIDs []tongo.AccountID
 	Visit(trace, func(trace *Trace) {
 		// when we emulate a trace,
@@ -165,11 +163,10 @@ func CollectAdditionalInfo(ctx context.Context, infoSource InformationSource, tr
 		if isDestinationJettonWallet(trace.InMsg) {
 			jettonWallets = append(jettonWallets, *trace.InMsg.Destination)
 		}
-		if hasInterface(trace.AccountInterfaces, abi.NftSaleV2) {
-			getGemsContracts = append(getGemsContracts, trace.Account)
-		}
-		if hasInterface(trace.AccountInterfaces, abi.NftSaleV1) {
-			basicNftSale = append(basicNftSale, trace.Account)
+		if hasInterface(trace.AccountInterfaces, abi.NftSaleV1) ||
+			hasInterface(trace.AccountInterfaces, abi.NftSaleV2) ||
+			hasInterface(trace.AccountInterfaces, abi.NftAuctionV1) {
+			saleContracts = append(saleContracts, trace.Account)
 		}
 		if hasInterface(trace.AccountInterfaces, abi.StonfiPool) {
 			stonfiPoolIDs = append(stonfiPoolIDs, trace.Account)
@@ -187,11 +184,7 @@ func CollectAdditionalInfo(ctx context.Context, infoSource InformationSource, tr
 	if err != nil {
 		return err
 	}
-	getGems, err := infoSource.GetGemsContracts(ctx, getGemsContracts)
-	if err != nil {
-		return err
-	}
-	basicNftSales, err := infoSource.NftSaleContracts(ctx, basicNftSale)
+	basicNftSales, err := infoSource.NftSaleContracts(ctx, saleContracts)
 	if err != nil {
 		return err
 	}
@@ -209,12 +202,9 @@ func CollectAdditionalInfo(ctx context.Context, infoSource InformationSource, tr
 				additionalInfo.SetJettonMaster(*trace.InMsg.Destination, master)
 			}
 		}
-		if hasInterface(trace.AccountInterfaces, abi.NftSaleV2) {
-			if getgems, ok := getGems[trace.Account]; ok {
-				additionalInfo.NftSaleContract = &getgems
-			}
-		}
-		if hasInterface(trace.AccountInterfaces, abi.NftSaleV1) {
+		if hasInterface(trace.AccountInterfaces, abi.NftSaleV1) ||
+			hasInterface(trace.AccountInterfaces, abi.NftSaleV2) ||
+			hasInterface(trace.AccountInterfaces, abi.NftAuctionV1) {
 			if sale, ok := basicNftSales[trace.Account]; ok {
 				additionalInfo.NftSaleContract = &sale
 			}
