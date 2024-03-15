@@ -334,6 +334,9 @@ func (h *Handler) GetAccountPublicKey(ctx context.Context, params oas.GetAccount
 			return nil, toError(http.StatusInternalServerError, err)
 		}
 		pubKey, err = pubkeyFromCodeData(state.Code, state.Data)
+		if errors.Is(err, unknownWalletVersionError) {
+			return nil, toError(http.StatusBadRequest, err)
+		}
 		if err != nil {
 			return nil, toError(http.StatusInternalServerError, err)
 		}
@@ -458,6 +461,8 @@ func (h *Handler) BlockchainAccountInspect(ctx context.Context, params oas.Block
 	return &resp, nil
 }
 
+var unknownWalletVersionError = fmt.Errorf("unknown wallet version")
+
 func pubkeyFromCodeData(code, data []byte) ([]byte, error) {
 	cells, err := boc.DeserializeBoc(code)
 	if err != nil {
@@ -472,7 +477,7 @@ func pubkeyFromCodeData(code, data []byte) ([]byte, error) {
 	}
 	ver, ok := walletTongo.GetVerByCodeHash([32]byte(codeHash))
 	if !ok {
-		return nil, fmt.Errorf("unknown wallet version")
+		return nil, unknownWalletVersionError
 	}
 	switch ver {
 	case walletTongo.V3R1:
@@ -487,7 +492,7 @@ func pubkeyFromCodeData(code, data []byte) ([]byte, error) {
 		}
 		return dataBody.PublicKey[:], nil
 	default:
-		return nil, fmt.Errorf("unknown wallet version")
+		return nil, unknownWalletVersionError
 	}
 }
 

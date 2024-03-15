@@ -90,6 +90,9 @@ func (h *Handler) DnsResolve(ctx context.Context, params oas.DnsResolveParams) (
 	if len(params.DomainName) == 48 || len(params.DomainName) == 52 {
 		return nil, toError(http.StatusBadRequest, fmt.Errorf("domains with length 48 and 52 can't be resolved by security issues"))
 	}
+	if len(params.DomainName) > 127 {
+		return nil, toError(http.StatusBadRequest, fmt.Errorf("domain name is too long"))
+	}
 	dnsResolver, err := h.dnsResolver(ctx)
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
