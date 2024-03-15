@@ -291,11 +291,14 @@ func (h *Handler) GetAccountEvent(ctx context.Context, params oas.GetAccountEven
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
 	}
-	trace, err := h.storage.GetTrace(ctx, traceID)
+	trace, emulated, err := h.getTraceByHash(ctx, traceID)
+	if errors.Is(err, core.ErrEntityNotFound) {
+		return nil, toError(http.StatusNotFound, err)
+	}
+	if errors.Is(err, core.ErrTraceIsTooLong) {
+		return nil, toError(http.StatusRequestEntityTooLarge, err)
+	}
 	if err != nil {
-		if errors.Is(err, core.ErrTraceIsTooLong) {
-			return nil, toError(http.StatusRequestEntityTooLarge, err)
-		}
 		return nil, toError(http.StatusInternalServerError, err)
 	}
 	result, err := bath.FindActions(ctx, trace, bath.ForAccount(account.ID), bath.WithInformationSource(h.storage))
@@ -308,6 +311,9 @@ func (h *Handler) GetAccountEvent(ctx context.Context, params oas.GetAccountEven
 	}
 	for i, j := 0, len(event.Actions)-1; i < j; i, j = i+1, j-1 {
 		event.Actions[i], event.Actions[j] = event.Actions[j], event.Actions[i]
+	}
+	if emulated {
+		event.InProgress = true
 	}
 	return &event, nil
 }
