@@ -4126,9 +4126,10 @@
      },
      "auction_type": {
       "enum": [
+       "DNS.ton",
        "DNS.tg",
-       "getgems",
-       "basic"
+       "NUMBER.tg",
+       "getgems"
       ],
       "type": "string"
      },

@@ -787,9 +787,14 @@ func emulatedTreeToTrace(ctx context.Context, executor executor, resolver core.L
 			if err != nil {
 				continue
 			}
+			item, err := tongo.AccountIDFromTlb(data.Nft)
+			if err != nil || item == nil {
+				continue
+			}
 			additionalInfo.NftSaleContract = &core.NftSaleContract{
 				NftPrice: price.Int64(),
 				Owner:    owner,
+				Item:     *item,
 			}
 		case abi.GetSaleData_BasicResult:
 			price := big.Int(data.FullPrice)
@@ -797,18 +802,28 @@ func emulatedTreeToTrace(ctx context.Context, executor executor, resolver core.L
 			if err != nil {
 				continue
 			}
+			item, err := tongo.AccountIDFromTlb(data.Nft)
+			if err != nil || item == nil {
+				continue
+			}
 			additionalInfo.NftSaleContract = &core.NftSaleContract{
 				NftPrice: price.Int64(),
 				Owner:    owner,
+				Item:     *item,
 			}
 		case abi.GetSaleData_GetgemsAuctionResult:
 			owner, err := tongo.AccountIDFromTlb(data.Owner)
 			if err != nil {
 				continue
 			}
+			item, err := tongo.AccountIDFromTlb(data.Nft)
+			if err != nil || item == nil {
+				continue
+			}
 			additionalInfo.NftSaleContract = &core.NftSaleContract{
 				NftPrice: int64(data.MaxBid),
 				Owner:    owner,
+				Item:     *item,
 			}
 		case abi.GetPoolData_StonfiResult:
 			t0, err0 := tongo.AccountIDFromTlb(data.Token0Address)

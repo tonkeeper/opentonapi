@@ -92,6 +92,7 @@ type NftSaleContract struct {
 	NftPrice int64
 	// Owner of an NFT according to a getgems/basic contract.
 	Owner *tongo.AccountID
+	Item  tongo.AccountID
 }
 
 // STONfiPool holds partial results of execution of STONfi's "get_pool_data" method.

@@ -5409,9 +5409,10 @@ components:
         auction_type:
           type: string
           enum:
+            - DNS.ton
             - DNS.tg
+            - NUMBER.tg
             - getgems
-            - basic
         amount:
           $ref: '#/components/schemas/Price'
         nft:

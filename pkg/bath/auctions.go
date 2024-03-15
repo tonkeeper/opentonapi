@@ -9,7 +9,7 @@ import (
 )
 
 type AuctionBidBubble struct {
-	Type           string
+	Type           NftAuctionType
 	Amount         int64
 	Nft            *core.NftItem
 	NftAddress     *tongo.AccountID
@@ -21,7 +21,7 @@ type AuctionBidBubble struct {
 }
 
 type AuctionBidAction struct {
-	Type       string
+	Type       NftAuctionType
 	Amount     int64
 	Nft        *core.NftItem
 	NftAddress *tongo.AccountID
@@ -44,36 +44,18 @@ func (a AuctionBidBubble) ToAction() *Action {
 	}
 }
 
-func FindAuctionBidFragmentSimple(bubble *Bubble) bool {
-	txBubble, ok := bubble.Info.(BubbleTx)
-	if !ok {
-		return false
-	}
-	if !txBubble.account.Is(abi.Teleitem) {
-		return false
-	}
-	if txBubble.opCode != nil {
-		return false
-	}
-	if txBubble.inputFrom == nil {
-		return false
-	}
-
-	newBubble := Bubble{
-		Info: AuctionBidBubble{
-			Type:       "tg",
-			Amount:     txBubble.inputAmount,
-			Auction:    txBubble.account.Address,
-			NftAddress: &txBubble.account.Address,
-			Bidder:     txBubble.inputFrom.Address,
-			Success:    txBubble.success,
-		},
-		Accounts:  bubble.Accounts,
-		Children:  bubble.Children,
-		ValueFlow: bubble.ValueFlow,
-	}
-	*bubble = newBubble
-	return true
+var StrawFindAuctionBidFragmentSimple = Straw[AuctionBidBubble]{
+	CheckFuncs: []bubbleCheck{IsTx, HasInterface(abi.Teleitem), HasEmptyBody, AmountInterval(1, 1<<62)},
+	Builder: func(newAction *AuctionBidBubble, bubble *Bubble) error {
+		tx := bubble.Info.(BubbleTx)
+		newAction.Type = DnsTgAuction
+		newAction.Amount = tx.inputAmount
+		newAction.Bidder = tx.inputFrom.Address
+		newAction.Success = tx.success
+		newAction.Auction = tx.account.Address
+		newAction.NftAddress = &tx.account.Address
+		return nil
+	},
 }
 
 var TgAuctionV1InitialBidStraw = Straw[AuctionBidBubble]{
@@ -81,7 +63,7 @@ var TgAuctionV1InitialBidStraw = Straw[AuctionBidBubble]{
 	Builder: func(newAction *AuctionBidBubble, bubble *Bubble) error {
 		tx := bubble.Info.(BubbleTx)
 		body := tx.decodedBody.Value.(abi.TelemintDeployMsgBody)
-		newAction.Type = "tg"
+		newAction.Type = DnsTgAuction
 		newAction.Amount = tx.inputAmount
 		newAction.Bidder = tx.inputFrom.Address
 		newAction.Username = string(body.Msg.Username)
@@ -110,5 +92,37 @@ var TgAuctionV1InitialBidStraw = Straw[AuctionBidBubble]{
 			}
 			return nil
 		},
+	},
+}
+
+var StrawAuctionBigGetgems = Straw[AuctionBidBubble]{
+	CheckFuncs: []bubbleCheck{IsTx, HasInterface(abi.NftAuctionV1), HasEmptyBody, AmountInterval(1, 1<<62)},
+	Builder: func(newAction *AuctionBidBubble, bubble *Bubble) error {
+		tx := bubble.Info.(BubbleTx)
+		newAction.Auction = tx.account.Address
+		newAction.Bidder = tx.inputFrom.Address
+		newAction.Amount = tx.inputAmount
+		newAction.Success = tx.success
+		newAction.Type = GetGemsAuction
+		if tx.additionalInfo != nil && tx.additionalInfo.NftSaleContract != nil {
+			newAction.NftAddress = &tx.additionalInfo.NftSaleContract.Item
+		}
+		return nil
+	},
+}
+
+var StrawAuctionBuyGetgems = Straw[BubbleNftPurchase]{
+	CheckFuncs: []bubbleCheck{Is(AuctionBidBubble{})},
+	Builder: func(newAction *BubbleNftPurchase, bubble *Bubble) error {
+		bid := bubble.Info.(AuctionBidBubble)
+		newAction.Buyer = bid.Bidder
+		newAction.Nft = *bid.NftAddress
+		newAction.Price = bid.Amount
+		newAction.AuctionType = bid.Type
+		newAction.Success = bid.Success
+		return nil
+	},
+	SingleChild: &Straw[BubbleNftPurchase]{
+		CheckFuncs: []bubbleCheck{IsNftTransfer},
 	},
 }

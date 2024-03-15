@@ -28,17 +28,10 @@ func (b BubbleNftPurchase) ToAction() *Action {
 	}
 }
 
-func auctionType(account *Account) NftAuctionType { //todo: switch to new gg interfaces
-	if account.Is(abi.NftSaleV2) {
-		return GetGemsAuction
-	}
-	return BasicAuction
-}
-
 var NftPurchaseStraw = Straw[BubbleNftPurchase]{
 	CheckFuncs: []bubbleCheck{
 		IsTx,
-		HasInterface(abi.NftSaleV2),
+		Or(HasInterface(abi.NftSaleV2), HasInterface(abi.NftSaleV1)),
 		HasEmptyBody,             //all buy transactions has empty body
 		AmountInterval(1, 1<<62), //externals has zero value
 		func(bubble *Bubble) bool {
@@ -49,7 +42,7 @@ var NftPurchaseStraw = Straw[BubbleNftPurchase]{
 		tx := bubble.Info.(BubbleTx)
 		sale := tx.additionalInfo.NftSaleContract //safe to use, because we checked it in CheckFuncs
 		newAction.Seller = *sale.Owner
-		newAction.AuctionType = auctionType(&tx.account)
+		newAction.AuctionType = GetGemsAuction
 		newAction.Buyer = tx.inputFrom.Address //safe because we checked not external in CheckFuncs
 		newAction.Price = sale.NftPrice
 		return nil

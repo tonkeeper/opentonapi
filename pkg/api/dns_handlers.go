@@ -140,6 +140,9 @@ func (h *Handler) GetDnsInfo(ctx context.Context, params oas.GetDnsInfoParams) (
 		return nil, toError(http.StatusBadRequest, err)
 	}
 	nft, expTime, err := h.storage.GetDomainInfo(ctx, name)
+	if errors.Is(err, core.ErrEntityNotFound) {
+		return nil, toError(http.StatusNotFound, err)
+	}
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}

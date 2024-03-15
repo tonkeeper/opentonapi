@@ -5,7 +5,7 @@
          "Nft": "0:e9e4f4862e0d51ca1fc454b89808ea45bf6ca34c0867375e8c070833f553a29e",
          "Buyer": "0:fe98106451d88f11b91d962dbaf032ac43134cc8f3470fb683312c258971b9ed",
          "Seller": "0:bbf8ca0967809097d1aa67afee9cb2db2b9aa5e5f66c50a5c92033dc57b1cc23",
-         "AuctionType": "basic",
+         "AuctionType": "getgems",
          "Price": 1200000000
        },
        "Success": true,

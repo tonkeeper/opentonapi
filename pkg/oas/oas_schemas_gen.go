@@ -8913,28 +8913,32 @@ func (s *NftPurchaseAction) SetBuyer(val AccountAddress) {
 type NftPurchaseActionAuctionType string
 
 const (
-	NftPurchaseActionAuctionTypeDNSTg   NftPurchaseActionAuctionType = "DNS.tg"
-	NftPurchaseActionAuctionTypeGetgems NftPurchaseActionAuctionType = "getgems"
-	NftPurchaseActionAuctionTypeBasic   NftPurchaseActionAuctionType = "basic"
+	NftPurchaseActionAuctionTypeDNSTon   NftPurchaseActionAuctionType = "DNS.ton"
+	NftPurchaseActionAuctionTypeDNSTg    NftPurchaseActionAuctionType = "DNS.tg"
+	NftPurchaseActionAuctionTypeNUMBERTg NftPurchaseActionAuctionType = "NUMBER.tg"
+	NftPurchaseActionAuctionTypeGetgems  NftPurchaseActionAuctionType = "getgems"
 )
 
 // AllValues returns all NftPurchaseActionAuctionType values.
 func (NftPurchaseActionAuctionType) AllValues() []NftPurchaseActionAuctionType {
 	return []NftPurchaseActionAuctionType{
+		NftPurchaseActionAuctionTypeDNSTon,
 		NftPurchaseActionAuctionTypeDNSTg,
+		NftPurchaseActionAuctionTypeNUMBERTg,
 		NftPurchaseActionAuctionTypeGetgems,
-		NftPurchaseActionAuctionTypeBasic,
 	}
 }
 
 // MarshalText implements encoding.TextMarshaler.
 func (s NftPurchaseActionAuctionType) MarshalText() ([]byte, error) {
 	switch s {
+	case NftPurchaseActionAuctionTypeDNSTon:
+		return []byte(s), nil
 	case NftPurchaseActionAuctionTypeDNSTg:
 		return []byte(s), nil
-	case NftPurchaseActionAuctionTypeGetgems:
+	case NftPurchaseActionAuctionTypeNUMBERTg:
 		return []byte(s), nil
-	case NftPurchaseActionAuctionTypeBasic:
+	case NftPurchaseActionAuctionTypeGetgems:
 		return []byte(s), nil
 	default:
 		return nil, errors.Errorf("invalid value: %q", s)
@@ -8944,14 +8948,17 @@ func (s NftPurchaseActionAuctionType) MarshalText() ([]byte, error) {
 // UnmarshalText implements encoding.TextUnmarshaler.
 func (s *NftPurchaseActionAuctionType) UnmarshalText(data []byte) error {
 	switch NftPurchaseActionAuctionType(data) {
+	case NftPurchaseActionAuctionTypeDNSTon:
+		*s = NftPurchaseActionAuctionTypeDNSTon
+		return nil
 	case NftPurchaseActionAuctionTypeDNSTg:
 		*s = NftPurchaseActionAuctionTypeDNSTg
 		return nil
+	case NftPurchaseActionAuctionTypeNUMBERTg:
+		*s = NftPurchaseActionAuctionTypeNUMBERTg
+		return nil
 	case NftPurchaseActionAuctionTypeGetgems:
 		*s = NftPurchaseActionAuctionTypeGetgems
-		return nil
-	case NftPurchaseActionAuctionTypeBasic:
-		*s = NftPurchaseActionAuctionTypeBasic
 		return nil
 	default:
 		return errors.Errorf("invalid value: %q", data)

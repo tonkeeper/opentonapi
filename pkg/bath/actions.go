@@ -48,8 +48,10 @@ type RefundType string
 type NftAuctionType string
 
 const (
-	GetGemsAuction NftAuctionType = "getgems"
-	BasicAuction   NftAuctionType = "basic"
+	GetGemsAuction  NftAuctionType = "getgems"
+	DnsTonAuction                  = "DNS.ton"
+	DnsTgAuction                   = "DNS.tg"
+	NumberTgAuction                = "NUMBER.tg"
 )
 
 type (

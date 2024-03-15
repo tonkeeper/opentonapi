@@ -3244,11 +3244,13 @@ func (s *NftPurchaseAction) Validate() error {
 
 func (s NftPurchaseActionAuctionType) Validate() error {
 	switch s {
+	case "DNS.ton":
+		return nil
 	case "DNS.tg":
 		return nil
-	case "getgems":
+	case "NUMBER.tg":
 		return nil
-	case "basic":
+	case "getgems":
 		return nil
 	default:
 		return errors.Errorf("invalid value: %v", s)

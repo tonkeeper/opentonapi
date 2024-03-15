@@ -25961,12 +25961,14 @@ func (s *NftPurchaseActionAuctionType) Decode(d *jx.Decoder) error {
 	}
 	// Try to use constant string.
 	switch NftPurchaseActionAuctionType(v) {
+	case NftPurchaseActionAuctionTypeDNSTon:
+		*s = NftPurchaseActionAuctionTypeDNSTon
 	case NftPurchaseActionAuctionTypeDNSTg:
 		*s = NftPurchaseActionAuctionTypeDNSTg
+	case NftPurchaseActionAuctionTypeNUMBERTg:
+		*s = NftPurchaseActionAuctionTypeNUMBERTg
 	case NftPurchaseActionAuctionTypeGetgems:
 		*s = NftPurchaseActionAuctionTypeGetgems
-	case NftPurchaseActionAuctionTypeBasic:
-		*s = NftPurchaseActionAuctionTypeBasic
 	default:
 		*s = NftPurchaseActionAuctionType(v)
 	}
