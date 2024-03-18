@@ -100,8 +100,6 @@ type Block struct {
 	RootHash  string `json:"root_hash"`
 	FileHash  string `json:"file_hash"`
 	Raw       []byte `json:"raw"`
-	RootHash  string `json:"root_hash"`
-	FileHash  string `json:"file_hash"`
 }
 
 // BlockchainSliceEvent represents a notification about a new bunch of blocks in the blockchain.
