@@ -464,6 +464,9 @@ func (h *Handler) BlockchainAccountInspect(ctx context.Context, params oas.Block
 var unknownWalletVersionError = fmt.Errorf("unknown wallet version")
 
 func pubkeyFromCodeData(code, data []byte) ([]byte, error) {
+	if len(code) == 0 {
+		return nil, unknownWalletVersionError
+	}
 	cells, err := boc.DeserializeBoc(code)
 	if err != nil {
 		return nil, err
