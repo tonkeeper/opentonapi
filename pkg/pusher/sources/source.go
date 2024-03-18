@@ -97,6 +97,8 @@ type Block struct {
 	Workchain int32  `json:"workchain"`
 	Shard     string `json:"shard"`
 	Seqno     uint32 `json:"seqno"`
+	RootHash  string `json:"root_hash"`
+	FileHash  string `json:"file_hash"`
 	Raw       []byte `json:"raw"`
 }
 
