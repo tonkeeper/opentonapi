@@ -1,0 +1,12 @@
+{
+   "Actions": null,
+   "Accounts": [
+     {
+       "Account": "0:a4a11a78384f92154a0c12761f2f7bc5e374f703335f5bc8f24c2e32ce4f1c26",
+       "Ton": -1001632000,
+       "Fee": 1001632000,
+       "Jettons": null
+     }
+   ],
+   "Extra": -1001632000
+ }

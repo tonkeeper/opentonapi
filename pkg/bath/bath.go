@@ -2,6 +2,7 @@ package bath
 
 import (
 	"context"
+
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/tongo"
 )
@@ -87,7 +88,6 @@ func (l *ActionsList) Extra(account tongo.AccountID) int64 {
 	extra := int64(0)
 	if flow, ok := l.ValueFlow.Accounts[account]; ok {
 		extra += flow.Ton
-		extra -= flow.Fees
 	}
 	for _, action := range l.Actions {
 		extra -= action.ContributeToExtra(account)

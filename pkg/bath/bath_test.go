@@ -34,6 +34,7 @@ type accountValueFlow struct {
 type result struct {
 	Actions  []Action
 	Accounts []accountValueFlow
+	Extra    *int64 `json:"Extra,omitempty"`
 }
 
 type mockInfoSource struct {
@@ -129,6 +130,8 @@ func TestFindActions(t *testing.T) {
 			tongo.MustParseBlockID("(0,8000000000000000,39685391)"),
 			// ihr fee
 			tongo.MustParseBlockID("(0,8000000000000000,40834551)"),
+			// failed transfer with gas fee 1 TON
+			tongo.MustParseBlockID("(0,a800000000000000,42491964)"),
 		}),
 	)
 
@@ -136,7 +139,8 @@ func TestFindActions(t *testing.T) {
 		t.Fatal(err)
 	}
 	type Case struct {
-		name           string
+		name string
+		// account is used to calculate extra, if set.
 		account        string
 		hash           string
 		filenamePrefix string
@@ -331,6 +335,12 @@ func TestFindActions(t *testing.T) {
 			hash:           "2da9737c4da572382f7a5abfdb923f223455280089f4b627c6cb028b2b8350d2",
 			filenamePrefix: "ihr-fee",
 		},
+		{
+			name:           "failed transfer with gas fee 1 TON",
+			account:        "0:a4a11a78384f92154a0c12761f2f7bc5e374f703335f5bc8f24c2e32ce4f1c26",
+			hash:           "cf2eb5eb694dc3134cfb10135807efe08b4183267564c1fd04906526297e8c7f",
+			filenamePrefix: "failed-transfer-with-gas-fee-1-TON",
+		},
 	} {
 		t.Run(c.name, func(t *testing.T) {
 			trace, err := storage.GetTrace(context.Background(), tongo.MustParseHash(c.hash))
@@ -370,6 +380,11 @@ func TestFindActions(t *testing.T) {
 			sort.Slice(results.Accounts, func(i, j int) bool {
 				return results.Accounts[i].Account < results.Accounts[j].Account
 			})
+			if len(c.account) > 0 {
+				accountID := tongo.MustParseAccountID(c.account)
+				extra := actionsList.Extra(accountID)
+				results.Extra = &extra
+			}
 			outputFilename := fmt.Sprintf("testdata/%v.output.json", c.filenamePrefix)
 			bs, err := json.MarshalIndent(results, " ", "  ")
 			require.Nil(t, err)
