@@ -348,10 +348,14 @@ func (h *Handler) EmulateMessageToAccountEvent(ctx context.Context, request *oas
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
-	emulator, err := txemulator.NewTraceBuilder(
+	options := []txemulator.TraceOption{
 		txemulator.WithAccountsSource(h.storage),
-		txemulator.WithSignatureCheck(),
-		txemulator.WithConfigBase64(configBase64))
+		txemulator.WithConfigBase64(configBase64),
+	}
+	if !params.IgnoreSignatureCheck.Value {
+		options = append(options, txemulator.WithSignatureCheck())
+	}
+	emulator, err := txemulator.NewTraceBuilder(options...)
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
@@ -393,18 +397,15 @@ func (h *Handler) EmulateMessageToEvent(ctx context.Context, request *oas.Emulat
 		if err != nil {
 			return nil, toError(http.StatusInternalServerError, err)
 		}
-		var emulator *txemulator.Tracer
-		if params.IgnoreSignatureCheck.Value {
-			emulator, err = txemulator.NewTraceBuilder(
-				txemulator.WithAccountsSource(h.storage),
-				txemulator.WithConfigBase64(configBase64))
-		} else {
-			emulator, err = txemulator.NewTraceBuilder(
-				txemulator.WithAccountsSource(h.storage),
-				txemulator.WithSignatureCheck(),
-				txemulator.WithConfigBase64(configBase64))
+		options := []txemulator.TraceOption{
+			txemulator.WithAccountsSource(h.storage),
+			txemulator.WithConfigBase64(configBase64),
+		}
+		if !params.IgnoreSignatureCheck.Value {
+			options = append(options, txemulator.WithSignatureCheck())
 		}
 
+		emulator, err := txemulator.NewTraceBuilder(options...)
 		if err != nil {
 			return nil, toError(http.StatusInternalServerError, err)
 		}
@@ -448,17 +449,15 @@ func (h *Handler) EmulateMessageToTrace(ctx context.Context, request *oas.Emulat
 		if err != nil {
 			return nil, toError(http.StatusInternalServerError, err)
 		}
-		var emulator *txemulator.Tracer
-		if params.IgnoreSignatureCheck.Value {
-			emulator, err = txemulator.NewTraceBuilder(
-				txemulator.WithAccountsSource(h.storage),
-				txemulator.WithConfigBase64(configBase64))
-		} else {
-			emulator, err = txemulator.NewTraceBuilder(
-				txemulator.WithAccountsSource(h.storage),
-				txemulator.WithSignatureCheck(),
-				txemulator.WithConfigBase64(configBase64))
+		options := []txemulator.TraceOption{
+			txemulator.WithAccountsSource(h.storage),
+			txemulator.WithConfigBase64(configBase64),
 		}
+		if !params.IgnoreSignatureCheck.Value {
+			options = append(options, txemulator.WithSignatureCheck())
+		}
+
+		emulator, err := txemulator.NewTraceBuilder(options...)
 		if err != nil {
 			return nil, toError(http.StatusInternalServerError, err)
 		}

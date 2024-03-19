@@ -283,7 +283,8 @@ func decodeDnsResolveParams(args [1]string, argsEscaped bool, r *http.Request) (
 type EmulateMessageToAccountEventParams struct {
 	AcceptLanguage OptString
 	// Account ID.
-	AccountID string
+	AccountID            string
+	IgnoreSignatureCheck OptBool
 }
 
 func unpackEmulateMessageToAccountEventParams(packed middleware.Parameters) (params EmulateMessageToAccountEventParams) {
@@ -303,10 +304,20 @@ func unpackEmulateMessageToAccountEventParams(packed middleware.Parameters) (par
 		}
 		params.AccountID = packed[key].(string)
 	}
+	{
+		key := middleware.ParameterKey{
+			Name: "ignore_signature_check",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.IgnoreSignatureCheck = v.(OptBool)
+		}
+	}
 	return params
 }
 
 func decodeEmulateMessageToAccountEventParams(args [1]string, argsEscaped bool, r *http.Request) (params EmulateMessageToAccountEventParams, _ error) {
+	q := uri.NewQueryDecoder(r.URL.Query())
 	h := uri.NewHeaderDecoder(r.Header)
 	// Set default value for header: Accept-Language.
 	{
@@ -394,6 +405,47 @@ func decodeEmulateMessageToAccountEventParams(args [1]string, argsEscaped bool, 
 		return params, &ogenerrors.DecodeParamError{
 			Name: "account_id",
 			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode query: ignore_signature_check.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "ignore_signature_check",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotIgnoreSignatureCheckVal bool
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToBool(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotIgnoreSignatureCheckVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.IgnoreSignatureCheck.SetTo(paramsDotIgnoreSignatureCheckVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "ignore_signature_check",
+			In:   "query",
 			Err:  err,
 		}
 	}

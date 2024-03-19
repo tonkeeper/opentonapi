@@ -508,6 +508,11 @@ paths:
       parameters:
         - $ref: '#/components/parameters/i18n'
         - $ref: '#/components/parameters/accountIDParameter'
+        - name: ignore_signature_check
+          in: query
+          required: false
+          schema:
+            type: boolean
       requestBody:
         $ref: "#/components/requestBodies/Boc"
       responses:

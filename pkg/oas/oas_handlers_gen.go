@@ -690,6 +690,10 @@ func (s *Server) handleEmulateMessageToAccountEventRequest(args [1]string, argsE
 					Name: "account_id",
 					In:   "path",
 				}: params.AccountID,
+				{
+					Name: "ignore_signature_check",
+					In:   "query",
+				}: params.IgnoreSignatureCheck,
 			},
 			Raw: r,
 		}

@@ -5718,6 +5718,14 @@
      },
      {
       "$ref": "#/components/parameters/accountIDParameter"
+     },
+     {
+      "in": "query",
+      "name": "ignore_signature_check",
+      "required": false,
+      "schema": {
+       "type": "boolean"
+      }
      }
     ],
     "requestBody": {
