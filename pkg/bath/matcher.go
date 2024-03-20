@@ -148,7 +148,7 @@ func IsJettonTransfer(b *Bubble) bool {
 func IsJettonReceiver(iface abi.ContractInterface) bubbleCheck {
 	return func(bubble *Bubble) bool {
 		t, ok := bubble.Info.(BubbleJettonTransfer)
-		if !ok {
+		if !ok || t.recipient == nil {
 			return false
 		}
 		return t.recipient.Is(iface)
