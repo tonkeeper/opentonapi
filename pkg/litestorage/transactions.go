@@ -2,7 +2,7 @@ package litestorage
 
 import (
 	"context"
-	"fmt"
+
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/tlb"
@@ -22,7 +22,6 @@ func (s *LiteStorage) GetLogs(ctx context.Context, account tongo.AccountID, dest
 		if len(txs) == 0 {
 			return messages, nil
 		}
-		fmt.Println(len(txs), txs[0].Lt, txs[1].Lt)
 		for _, tx := range txs {
 			txLt = tx.Lt
 			for _, m := range tx.OutMsgs {

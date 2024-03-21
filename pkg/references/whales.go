@@ -50,16 +50,16 @@ var WhalesPools = map[tongo.AccountID]WhalesPoolInfo{
 		Queue:        "Queue #2",
 		AvailableFor: closed,
 	},
-	tongo.MustParseAccountID("EQCOj4wEjXUR59Kq0KeXUJouY5iAcujkmwJGsYX7qPnITEAM"): {
-		Name:         "Whales Team",
-		Queue:        "Queue #1",
-		AvailableFor: closed,
-	},
-	tongo.MustParseAccountID("EQBI-wGVp_x0VFEjd7m9cEUD3tJ_bnxMSp0Tb9qz757ATEAM"): {
-		Name:         "Whales Team",
-		Queue:        "Queue #2",
-		AvailableFor: closed,
-	},
+	//tongo.MustParseAccountID("EQCOj4wEjXUR59Kq0KeXUJouY5iAcujkmwJGsYX7qPnITEAM"): {
+	//	Name:         "Whales Team",
+	//	Queue:        "Queue #1",
+	//	AvailableFor: closed,
+	//},
+	//tongo.MustParseAccountID("EQBI-wGVp_x0VFEjd7m9cEUD3tJ_bnxMSp0Tb9qz757ATEAM"): {
+	//	Name:         "Whales Team",
+	//	Queue:        "Queue #2",
+	//	AvailableFor: closed,
+	//},
 	tongo.MustParseAccountID("EQAA_5_dizuA1w6OpzTSYvXhvUwYTDNTW_MZDdZ0CGKeeper"): {
 		Name:         "Tonkeeper",
 		Queue:        "Queue #1",

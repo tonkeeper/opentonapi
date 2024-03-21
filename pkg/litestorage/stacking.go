@@ -64,7 +64,6 @@ func (s *LiteStorage) GetParticipatingInTfPools(ctx context.Context, member tong
 	}))
 	defer timer.ObserveDuration()
 	var result []core.Nominator
-	fmt.Println(len(s.knownAccounts["tf_pools"]))
 	for _, a := range s.knownAccounts["tf_pools"] {
 		var i big.Int
 		i.SetBytes(member.Address[:])
@@ -89,7 +88,7 @@ func (s *LiteStorage) GetParticipatingInTfPools(ctx context.Context, member tong
 	return result, nil
 }
 
-func (s *LiteStorage) GetWhalesPoolInfo(ctx context.Context, id tongo.AccountID) (abi.GetParams_WhalesNominatorResult, abi.GetStakingStatusResult, []core.Nominator, error) {
+func (s *LiteStorage) GetWhalesPoolInfo(ctx context.Context, id tongo.AccountID) (abi.GetParams_WhalesNominatorResult, abi.GetStakingStatusResult, int, uint64, error) {
 	timer := prometheus.NewTimer(prometheus.ObserverFunc(func(v float64) {
 		storageTimeHistogramVec.WithLabelValues("get_whales_pool_info").Observe(v)
 	}))
@@ -99,36 +98,30 @@ func (s *LiteStorage) GetWhalesPoolInfo(ctx context.Context, id tongo.AccountID)
 	var ok bool
 	method, value, err := abi.GetParams(ctx, s.executor, id)
 	if err != nil {
-		return params, status, nil, err
+		return params, status, 0, 0, err
 	}
 	params, ok = value.(abi.GetParams_WhalesNominatorResult)
 	if !ok {
-		return params, status, nil, fmt.Errorf("get_params returns type %v", method)
+		return params, status, 0, 0, fmt.Errorf("get_params returns type %v", method)
 	}
 	method, value, err = abi.GetStakingStatus(ctx, s.executor, id)
 	if err != nil {
-		return params, status, nil, err
+		return params, status, 0, 0, err
 	}
 	status, ok = value.(abi.GetStakingStatusResult)
 	if !ok {
-		return params, status, nil, fmt.Errorf("get_staking returns type %v", method)
+		return params, status, 0, 0, fmt.Errorf("get_staking returns type %v", method)
 	}
 	method, value, err = abi.GetMembersRaw(ctx, s.executor, id)
 	nominatorResult, ok := value.(abi.GetMembersRaw_WhalesNominatorResult)
 	if !ok {
-		return params, status, nil, fmt.Errorf("get_members returns type %v", method)
+		return params, status, 0, 0, fmt.Errorf("get_members returns type %v", method)
 	}
-	var nominators []core.Nominator
+	var stake uint64
 	for _, n := range nominatorResult.Members.List.Values() {
-		nominators = append(nominators, core.Nominator{
-			// TODO: fill in a nominator address
-			MemberBalance:         int64(n.Balance),
-			MemberPendingDeposit:  int64(n.PendingDeposit),
-			MemberPendingWithdraw: int64(n.PendingWithdraw),
-			MemberWithdraw:        int64(n.MemberWithdraw),
-		})
+		stake += uint64(n.Balance)
 	}
-	return params, status, nominators, nil
+	return params, status, len(nominatorResult.Members.List.Values()), stake, nil
 }
 
 func (s *LiteStorage) GetTFPool(ctx context.Context, pool tongo.AccountID) (core.TFPool, error) {
