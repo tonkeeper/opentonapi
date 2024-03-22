@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"math/big"
 	"strings"
+	"time"
 
 	"github.com/tonkeeper/tongo/ton"
 
@@ -117,7 +118,7 @@ func signedValue(value string, viewer *tongo.AccountID, source, destination tong
 
 func (h *Handler) convertActionTonTransfer(t *bath.TonTransferAction, acceptLanguage string, viewer *tongo.AccountID) (oas.OptTonTransferAction, oas.ActionSimplePreview, bool) {
 	var spamDetected bool
-	if t.Amount < int64(ton.OneTON) && t.Comment != nil {
+	if t.Amount < int64(ton.OneTON/10) && t.Comment != nil {
 		spamAction := rules.CheckAction(h.spamFilter.GetRules(), *t.Comment)
 		if spamAction != rules.UnKnown && spamAction != rules.Accept {
 			spamDetected = true
@@ -189,11 +190,6 @@ func (h *Handler) convertActionNftTransfer(t *bath.NftTransferAction, acceptLang
 
 func (h *Handler) convertActionJettonTransfer(ctx context.Context, t *bath.JettonTransferAction, acceptLanguage string, viewer *tongo.AccountID) (oas.OptJettonTransferAction, oas.ActionSimplePreview, bool) {
 	var spamDetected bool
-	if t.Comment != nil {
-		if spamAction := rules.CheckAction(h.spamFilter.GetRules(), *t.Comment); spamAction == rules.Drop {
-			spamDetected = true
-		}
-	}
 	meta := h.GetJettonNormalizedMetadata(ctx, t.Jetton)
 	preview := jettonPreview(t.Jetton, meta)
 	var action oas.OptJettonTransferAction
@@ -207,7 +203,16 @@ func (h *Handler) convertActionJettonTransfer(ctx context.Context, t *bath.Jetto
 		Comment:          g.Opt(t.Comment),
 		EncryptedComment: convertEncryptedComment(t.EncryptedComment),
 	})
-	amount := Scale(t.Amount, meta.Decimals).String()
+	amount := Scale(t.Amount, meta.Decimals)
+	amountString := amount.String()
+	amountFloat, _ := amount.Float64()
+	rates, err := h.ratesSource.GetRates(time.Now().Unix())
+	if t.Comment != nil && (err != nil && amountFloat*rates[t.Jetton.ToRaw()] < 1) {
+		if spamAction := rules.CheckAction(h.spamFilter.GetRules(), *t.Comment); spamAction == rules.Drop {
+			spamDetected = true
+		}
+	}
+
 	simplePreview := oas.ActionSimplePreview{
 		Name: "Jetton Transfer",
 		Description: i18n.T(acceptLanguage, i18n.C{
@@ -216,12 +221,12 @@ func (h *Handler) convertActionJettonTransfer(ctx context.Context, t *bath.Jetto
 				Other: "Transferring {{.Value}} {{.JettonName}}",
 			},
 			TemplateData: i18n.Template{
-				"Value":      amount,
+				"Value":      amountString,
 				"JettonName": meta.Name,
 			},
 		}),
 		Accounts: distinctAccounts(viewer, h.addressBook, t.Recipient, t.Sender, &t.Jetton),
-		Value:    oas.NewOptString(fmt.Sprintf("%v %v", amount, meta.Name)),
+		Value:    oas.NewOptString(fmt.Sprintf("%v %v", amountString, meta.Name)),
 	}
 	if len(preview.Image) > 0 {
 		simplePreview.ValueImage = oas.NewOptString(preview.Image)
