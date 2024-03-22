@@ -207,7 +207,7 @@ func (h *Handler) convertActionJettonTransfer(ctx context.Context, t *bath.Jetto
 	amountString := amount.String()
 	amountFloat, _ := amount.Float64()
 	rates, err := h.ratesSource.GetRates(time.Now().Unix())
-	if t.Comment != nil && (err != nil && amountFloat*rates[t.Jetton.ToRaw()] < 1) {
+	if t.Comment != nil && (err == nil && amountFloat*rates[t.Jetton.ToRaw()] < 1) {
 		if spamAction := rules.CheckAction(h.spamFilter.GetRules(), *t.Comment); spamAction == rules.Drop {
 			spamDetected = true
 		}
