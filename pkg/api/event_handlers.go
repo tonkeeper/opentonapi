@@ -226,43 +226,41 @@ func (h *Handler) GetAccountEvents(ctx context.Context, params oas.GetAccountEve
 		return nil, toError(http.StatusInternalServerError, err)
 	}
 
-	events := make([]oas.AccountEvent, len(traceIDs))
+	events := make([]oas.AccountEvent, 0, len(traceIDs))
 
 	var lastLT uint64
-	for i, traceID := range traceIDs {
+	for _, traceID := range traceIDs {
 		lastLT = traceID.Lt
 		trace, err := h.storage.GetTrace(ctx, traceID.Hash)
 		if err != nil {
 			if errors.Is(err, core.ErrTraceIsTooLong) {
-				events[i] = h.toAccountEventForLongTrace(account.ID, traceID)
+				events = append(events, h.toAccountEventForLongTrace(account.ID, traceID))
 				continue
 			}
 			return nil, toError(http.StatusInternalServerError, err)
+		}
+		if trace.InProgress() {
+			continue
 		}
 		result, err := bath.FindActions(ctx, trace, bath.ForAccount(account.ID), bath.WithInformationSource(h.storage))
 		if err != nil {
 			return nil, toError(http.StatusInternalServerError, err)
 		}
-		events[i], err = h.toAccountEvent(ctx, account.ID, trace, result, params.AcceptLanguage, params.SubjectOnly.Value)
+		e, err := h.toAccountEvent(ctx, account.ID, trace, result, params.AcceptLanguage, params.SubjectOnly.Value)
 		if err != nil {
 			return nil, toError(http.StatusInternalServerError, err)
 		}
+		events = append(events, e)
 	}
 	if !(params.BeforeLt.IsSet() || params.StartDate.IsSet() || params.EndDate.IsSet()) { //if we look into history we don't need to mix mempool
 		memTraces, _ := h.mempoolEmulate.accountsTraces.Get(account.ID)
 		i := 0
 		for _, hash := range memTraces {
-			traceID, err := h.storage.SearchTransactionByMessageHash(ctx, hash)
-			if err == nil { //if err is nil it's already processed.
-				dbTrace, err := h.storage.GetTrace(ctx, *traceID)
-				if err == nil && !dbTrace.InProgress() { //if trace unfinished we prefer to show emulated trace
-					h.mempoolEmulate.traces.Delete(hash)
-					continue
-				}
-			}
+			_, err = h.storage.SearchTransactionByMessageHash(ctx, hash)
 			trace, prs := h.mempoolEmulate.traces.Get(hash)
-			if !prs {
-				continue //If !prs we can't do anything
+			if err == nil || !prs { //if err is nil it's already processed. If !prs we can't do anything
+				h.mempoolEmulate.traces.Delete(hash)
+				continue
 			}
 			if i > params.Limit-2 { // we want always to save at least 1 real transaction
 				break
