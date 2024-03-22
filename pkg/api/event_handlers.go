@@ -252,11 +252,17 @@ func (h *Handler) GetAccountEvents(ctx context.Context, params oas.GetAccountEve
 		memTraces, _ := h.mempoolEmulate.accountsTraces.Get(account.ID)
 		i := 0
 		for _, hash := range memTraces {
-			_, err = h.storage.SearchTransactionByMessageHash(ctx, hash)
+			traceID, err := h.storage.SearchTransactionByMessageHash(ctx, hash)
+			if err == nil { //if err is nil it's already processed.
+				dbTrace, err := h.storage.GetTrace(ctx, *traceID)
+				if err == nil && !dbTrace.InProgress() { //if trace unfinished we prefer to show emulated trace
+					h.mempoolEmulate.traces.Delete(hash)
+					continue
+				}
+			}
 			trace, prs := h.mempoolEmulate.traces.Get(hash)
-			if err == nil || !prs { //if err is nil it's already processed. If !prs we can't do anything
-				h.mempoolEmulate.traces.Delete(hash)
-				continue
+			if !prs {
+				continue //If !prs we can't do anything
 			}
 			if i > params.Limit-2 { // we want always to save at least 1 real transaction
 				break
