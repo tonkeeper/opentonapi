@@ -88,6 +88,7 @@ type LiteStorage struct {
 	// trackingAccounts is a list of accounts we track. Defined with ACCOUNTS env variable.
 	trackingAccounts  map[tongo.AccountID]struct{}
 	pubKeyByAccountID *xsync.MapOf[tongo.AccountID, ed25519.PublicKey]
+	configCache       cache.Cache[int, tlb.ConfigParams]
 
 	stopCh chan struct{}
 	// mu protects trimmedConfigBase64.
@@ -168,6 +169,7 @@ func NewLiteStorage(log *zap.Logger, cli *liteapi.Client, opts ...Option) (*Lite
 		accountInterfacesCache:  xsync.NewTypedMapOf[tongo.AccountID, []abi.ContractInterface](hashAccountID),
 		pubKeyByAccountID:       xsync.NewTypedMapOf[tongo.AccountID, ed25519.PublicKey](hashAccountID),
 		tvmLibraryCache:         cache.NewLRUCache[string, boc.Cell](10000, "tvm_libraries"),
+		configCache:             cache.NewLRUCache[int, tlb.ConfigParams](4, "config"),
 	}
 	storage.knownAccounts["tf_pools"] = o.tfPools
 	storage.knownAccounts["jettons"] = o.jettons

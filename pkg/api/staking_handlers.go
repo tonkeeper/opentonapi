@@ -89,11 +89,6 @@ func (h *Handler) GetStakingPoolInfo(ctx context.Context, params oas.GetStakingP
 
 func (h *Handler) GetStakingPools(ctx context.Context, params oas.GetStakingPoolsParams) (*oas.GetStakingPoolsOK, error) {
 	var result oas.GetStakingPoolsOK
-	tfPools, err := h.storage.GetTFPools(ctx, !params.IncludeUnverified.Value)
-	if err != nil {
-		return nil, toError(http.StatusInternalServerError, err)
-	}
-	var minTF, minWhales int64
 	var availableFor *tongo.AccountID
 	var participatePools []tongo.AccountID
 	if params.AvailableFor.IsSet() {
@@ -110,13 +105,12 @@ func (h *Handler) GetStakingPools(ctx context.Context, params oas.GetStakingPool
 			participatePools = append(participatePools, p.Pool)
 		}
 	}
+	tfPools, err := h.storage.GetTFPools(ctx, !params.IncludeUnverified.Value, availableFor)
+	if err != nil {
+		return nil, toError(http.StatusInternalServerError, err)
+	}
+	var minTF, minWhales int64
 	for _, p := range tfPools {
-		if availableFor != nil && !slices.Contains(participatePools, p.Address) &&
-			(p.Nominators >= p.MaxNominators || //hide nominators without slots
-				p.ValidatorShare < 4000 || //hide validators which take less than 40%
-				p.MinNominatorStake < 10_000_000_000_000) { //hide nominators with unsafe minimal stake
-			continue
-		}
 		info, _ := h.addressBook.GetTFPoolInfo(p.Address)
 		pool := convertStakingTFPool(p, info, h.state.GetAPY())
 		if minTF == 0 || pool.MinStake < minTF {
@@ -147,7 +141,6 @@ func (h *Handler) GetStakingPools(ctx context.Context, params oas.GetStakingPool
 		}
 		result.Pools = append(result.Pools, pool)
 	}
-
 	liquidPools, err := h.storage.GetLiquidPools(ctx, !params.IncludeUnverified.Value)
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
@@ -171,7 +164,6 @@ func (h *Handler) GetStakingPools(ctx context.Context, params oas.GetStakingPool
 		p.Name = info.Name
 		result.Pools = append(result.Pools, convertLiquidStaking(p, cycleStart, cycleEnd))
 	}
-
 	slices.SortFunc(result.Pools, func(a, b oas.PoolInfo) int {
 		if a.Apy == b.Apy {
 			return 0
@@ -202,7 +194,6 @@ func (h *Handler) GetStakingPools(ctx context.Context, params oas.GetStakingPool
 			Socials:     references.TonstakersSocialLinks,
 		},
 	})
-
 	return &result, nil
 }
 

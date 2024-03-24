@@ -7,6 +7,7 @@ import (
 	"math/big"
 
 	"github.com/tonkeeper/tongo/tlb"
+	"github.com/tonkeeper/tongo/ton"
 
 	"github.com/prometheus/client_golang/prometheus"
 
@@ -159,12 +160,20 @@ func (s *LiteStorage) GetTFPool(ctx context.Context, pool tongo.AccountID) (core
 		VerifiedSources:   bytes.Equal(hash, references.TFPoolCodeHash[:]),
 	}, nil
 }
-func (s *LiteStorage) GetTFPools(ctx context.Context, onlyVerified bool) ([]core.TFPool, error) {
+func (s *LiteStorage) GetTFPools(ctx context.Context, onlyVerified bool, availableFor *ton.AccountID) ([]core.TFPool, error) {
 	var result []core.TFPool
 	for _, a := range s.knownAccounts["tf_pools"] {
 		p, err := s.GetTFPool(ctx, a)
 		if err != nil {
 			continue
+		}
+		if availableFor != nil {
+			var i big.Int
+			i.SetBytes(availableFor.Address[:])
+			_, _, err := abi.GetNominatorData(ctx, s.executor, a, tlb.Int257(i))
+			if err != nil && p.Nominators >= p.MaxNominators {
+				continue
+			}
 		}
 		result = append(result, p)
 	}

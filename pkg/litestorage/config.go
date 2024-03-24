@@ -2,7 +2,9 @@ package litestorage
 
 import (
 	"context"
+	"time"
 
+	cache "github.com/Code-Hex/go-generics-cache"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/tongo/tlb"
@@ -14,7 +16,17 @@ func (c *LiteStorage) GetLastConfig(ctx context.Context) (tlb.ConfigParams, erro
 		storageTimeHistogramVec.WithLabelValues("get_last_config").Observe(v)
 	}))
 	defer timer.ObserveDuration()
-	return c.client.GetConfigAll(ctx, 0)
+	config, prs := c.configCache.Get(1)
+	if prs {
+		return config, nil
+
+	}
+	config, err := c.client.GetConfigAll(ctx, 0)
+	if err != nil {
+		return tlb.ConfigParams{}, err
+	}
+	c.configCache.Set(1, config, cache.WithExpiration(time.Second*1)) //todo: remove
+	return config, err
 }
 
 func (c *LiteStorage) GetConfigFromBlock(ctx context.Context, id ton.BlockID) (tlb.ConfigParams, error) {
