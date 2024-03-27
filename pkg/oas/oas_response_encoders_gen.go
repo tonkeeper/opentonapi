@@ -14,7 +14,7 @@ import (
 )
 
 func encodeAccountDnsBackResolveResponse(response *DomainNames, w http.ResponseWriter, span trace.Span) error {
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
 
@@ -28,7 +28,7 @@ func encodeAccountDnsBackResolveResponse(response *DomainNames, w http.ResponseW
 }
 
 func encodeAddressParseResponse(response *AddressParseOK, w http.ResponseWriter, span trace.Span) error {
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
 
@@ -42,7 +42,7 @@ func encodeAddressParseResponse(response *AddressParseOK, w http.ResponseWriter,
 }
 
 func encodeBlockchainAccountInspectResponse(response *BlockchainAccountInspect, w http.ResponseWriter, span trace.Span) error {
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
 
@@ -56,7 +56,7 @@ func encodeBlockchainAccountInspectResponse(response *BlockchainAccountInspect, 
 }
 
 func encodeDecodeMessageResponse(response *DecodedMessage, w http.ResponseWriter, span trace.Span) error {
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
 
@@ -70,7 +70,7 @@ func encodeDecodeMessageResponse(response *DecodedMessage, w http.ResponseWriter
 }
 
 func encodeDnsResolveResponse(response *DnsRecord, w http.ResponseWriter, span trace.Span) error {
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
 
@@ -84,7 +84,7 @@ func encodeDnsResolveResponse(response *DnsRecord, w http.ResponseWriter, span t
 }
 
 func encodeEmulateMessageToAccountEventResponse(response *AccountEvent, w http.ResponseWriter, span trace.Span) error {
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
 
@@ -98,7 +98,7 @@ func encodeEmulateMessageToAccountEventResponse(response *AccountEvent, w http.R
 }
 
 func encodeEmulateMessageToEventResponse(response *Event, w http.ResponseWriter, span trace.Span) error {
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
 
@@ -112,7 +112,7 @@ func encodeEmulateMessageToEventResponse(response *Event, w http.ResponseWriter,
 }
 
 func encodeEmulateMessageToTraceResponse(response *Trace, w http.ResponseWriter, span trace.Span) error {
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
 
@@ -126,7 +126,7 @@ func encodeEmulateMessageToTraceResponse(response *Trace, w http.ResponseWriter,
 }
 
 func encodeEmulateMessageToWalletResponse(response *MessageConsequences, w http.ResponseWriter, span trace.Span) error {
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
 
@@ -140,7 +140,7 @@ func encodeEmulateMessageToWalletResponse(response *MessageConsequences, w http.
 }
 
 func encodeExecGetMethodForBlockchainAccountResponse(response *MethodExecutionResult, w http.ResponseWriter, span trace.Span) error {
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
 
@@ -154,7 +154,7 @@ func encodeExecGetMethodForBlockchainAccountResponse(response *MethodExecutionRe
 }
 
 func encodeGetAccountResponse(response *Account, w http.ResponseWriter, span trace.Span) error {
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
 
@@ -168,7 +168,7 @@ func encodeGetAccountResponse(response *Account, w http.ResponseWriter, span tra
 }
 
 func encodeGetAccountDiffResponse(response *GetAccountDiffOK, w http.ResponseWriter, span trace.Span) error {
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
 
@@ -182,7 +182,7 @@ func encodeGetAccountDiffResponse(response *GetAccountDiffOK, w http.ResponseWri
 }
 
 func encodeGetAccountDnsExpiringResponse(response *DnsExpiring, w http.ResponseWriter, span trace.Span) error {
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
 
@@ -196,7 +196,7 @@ func encodeGetAccountDnsExpiringResponse(response *DnsExpiring, w http.ResponseW
 }
 
 func encodeGetAccountEventResponse(response *AccountEvent, w http.ResponseWriter, span trace.Span) error {
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
 
@@ -210,7 +210,7 @@ func encodeGetAccountEventResponse(response *AccountEvent, w http.ResponseWriter
 }
 
 func encodeGetAccountEventsResponse(response *AccountEvents, w http.ResponseWriter, span trace.Span) error {
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
 
@@ -224,7 +224,7 @@ func encodeGetAccountEventsResponse(response *AccountEvents, w http.ResponseWrit
 }
 
 func encodeGetAccountInfoByStateInitResponse(response *AccountInfoByStateInit, w http.ResponseWriter, span trace.Span) error {
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
 
@@ -238,7 +238,7 @@ func encodeGetAccountInfoByStateInitResponse(response *AccountInfoByStateInit, w
 }
 
 func encodeGetAccountInscriptionsResponse(response *InscriptionBalances, w http.ResponseWriter, span trace.Span) error {
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
 
@@ -252,7 +252,7 @@ func encodeGetAccountInscriptionsResponse(response *InscriptionBalances, w http.
 }
 
 func encodeGetAccountInscriptionsHistoryResponse(response *AccountEvents, w http.ResponseWriter, span trace.Span) error {
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
 
@@ -266,7 +266,7 @@ func encodeGetAccountInscriptionsHistoryResponse(response *AccountEvents, w http
 }
 
 func encodeGetAccountInscriptionsHistoryByTickerResponse(response *AccountEvents, w http.ResponseWriter, span trace.Span) error {
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
 
@@ -280,7 +280,7 @@ func encodeGetAccountInscriptionsHistoryByTickerResponse(response *AccountEvents
 }
 
 func encodeGetAccountJettonHistoryByIDResponse(response *AccountEvents, w http.ResponseWriter, span trace.Span) error {
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
 
@@ -294,7 +294,7 @@ func encodeGetAccountJettonHistoryByIDResponse(response *AccountEvents, w http.R
 }
 
 func encodeGetAccountJettonsBalancesResponse(response *JettonsBalances, w http.ResponseWriter, span trace.Span) error {
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
 
@@ -308,7 +308,7 @@ func encodeGetAccountJettonsBalancesResponse(response *JettonsBalances, w http.R
 }
 
 func encodeGetAccountJettonsHistoryResponse(response *AccountEvents, w http.ResponseWriter, span trace.Span) error {
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
 
@@ -322,7 +322,7 @@ func encodeGetAccountJettonsHistoryResponse(response *AccountEvents, w http.Resp
 }
 
 func encodeGetAccountNftHistoryResponse(response *AccountEvents, w http.ResponseWriter, span trace.Span) error {
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
 
@@ -336,7 +336,7 @@ func encodeGetAccountNftHistoryResponse(response *AccountEvents, w http.Response
 }
 
 func encodeGetAccountNftItemsResponse(response *NftItems, w http.ResponseWriter, span trace.Span) error {
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
 
@@ -350,7 +350,7 @@ func encodeGetAccountNftItemsResponse(response *NftItems, w http.ResponseWriter,
 }
 
 func encodeGetAccountNominatorsPoolsResponse(response *AccountStaking, w http.ResponseWriter, span trace.Span) error {
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
 
@@ -364,7 +364,7 @@ func encodeGetAccountNominatorsPoolsResponse(response *AccountStaking, w http.Re
 }
 
 func encodeGetAccountPublicKeyResponse(response *GetAccountPublicKeyOK, w http.ResponseWriter, span trace.Span) error {
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
 
@@ -378,7 +378,7 @@ func encodeGetAccountPublicKeyResponse(response *GetAccountPublicKeyOK, w http.R
 }
 
 func encodeGetAccountSeqnoResponse(response *Seqno, w http.ResponseWriter, span trace.Span) error {
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
 
@@ -392,7 +392,7 @@ func encodeGetAccountSeqnoResponse(response *Seqno, w http.ResponseWriter, span 
 }
 
 func encodeGetAccountSubscriptionsResponse(response *Subscriptions, w http.ResponseWriter, span trace.Span) error {
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
 
@@ -406,7 +406,7 @@ func encodeGetAccountSubscriptionsResponse(response *Subscriptions, w http.Respo
 }
 
 func encodeGetAccountTracesResponse(response *TraceIDs, w http.ResponseWriter, span trace.Span) error {
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
 
@@ -420,7 +420,7 @@ func encodeGetAccountTracesResponse(response *TraceIDs, w http.ResponseWriter, s
 }
 
 func encodeGetAccountsResponse(response *Accounts, w http.ResponseWriter, span trace.Span) error {
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
 
@@ -434,7 +434,7 @@ func encodeGetAccountsResponse(response *Accounts, w http.ResponseWriter, span t
 }
 
 func encodeGetAllAuctionsResponse(response *Auctions, w http.ResponseWriter, span trace.Span) error {
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
 
@@ -448,7 +448,7 @@ func encodeGetAllAuctionsResponse(response *Auctions, w http.ResponseWriter, spa
 }
 
 func encodeGetAllRawShardsInfoResponse(response *GetAllRawShardsInfoOK, w http.ResponseWriter, span trace.Span) error {
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
 
@@ -462,7 +462,7 @@ func encodeGetAllRawShardsInfoResponse(response *GetAllRawShardsInfoOK, w http.R
 }
 
 func encodeGetBlockchainAccountTransactionsResponse(response *Transactions, w http.ResponseWriter, span trace.Span) error {
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
 
@@ -476,7 +476,7 @@ func encodeGetBlockchainAccountTransactionsResponse(response *Transactions, w ht
 }
 
 func encodeGetBlockchainBlockResponse(response *BlockchainBlock, w http.ResponseWriter, span trace.Span) error {
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
 
@@ -490,7 +490,7 @@ func encodeGetBlockchainBlockResponse(response *BlockchainBlock, w http.Response
 }
 
 func encodeGetBlockchainBlockTransactionsResponse(response *Transactions, w http.ResponseWriter, span trace.Span) error {
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
 
@@ -504,7 +504,7 @@ func encodeGetBlockchainBlockTransactionsResponse(response *Transactions, w http
 }
 
 func encodeGetBlockchainConfigResponse(response *BlockchainConfig, w http.ResponseWriter, span trace.Span) error {
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
 
@@ -518,7 +518,7 @@ func encodeGetBlockchainConfigResponse(response *BlockchainConfig, w http.Respon
 }
 
 func encodeGetBlockchainConfigFromBlockResponse(response *BlockchainConfig, w http.ResponseWriter, span trace.Span) error {
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
 
@@ -532,7 +532,7 @@ func encodeGetBlockchainConfigFromBlockResponse(response *BlockchainConfig, w ht
 }
 
 func encodeGetBlockchainMasterchainBlocksResponse(response *BlockchainBlocks, w http.ResponseWriter, span trace.Span) error {
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
 
@@ -546,7 +546,7 @@ func encodeGetBlockchainMasterchainBlocksResponse(response *BlockchainBlocks, w 
 }
 
 func encodeGetBlockchainMasterchainHeadResponse(response *BlockchainBlock, w http.ResponseWriter, span trace.Span) error {
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
 
@@ -560,7 +560,7 @@ func encodeGetBlockchainMasterchainHeadResponse(response *BlockchainBlock, w htt
 }
 
 func encodeGetBlockchainMasterchainShardsResponse(response *BlockchainBlockShards, w http.ResponseWriter, span trace.Span) error {
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
 
@@ -574,7 +574,7 @@ func encodeGetBlockchainMasterchainShardsResponse(response *BlockchainBlockShard
 }
 
 func encodeGetBlockchainMasterchainTransactionsResponse(response *Transactions, w http.ResponseWriter, span trace.Span) error {
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
 
@@ -588,7 +588,7 @@ func encodeGetBlockchainMasterchainTransactionsResponse(response *Transactions, 
 }
 
 func encodeGetBlockchainRawAccountResponse(response *BlockchainRawAccount, w http.ResponseWriter, span trace.Span) error {
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
 
@@ -602,7 +602,7 @@ func encodeGetBlockchainRawAccountResponse(response *BlockchainRawAccount, w htt
 }
 
 func encodeGetBlockchainTransactionResponse(response *Transaction, w http.ResponseWriter, span trace.Span) error {
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
 
@@ -616,7 +616,7 @@ func encodeGetBlockchainTransactionResponse(response *Transaction, w http.Respon
 }
 
 func encodeGetBlockchainTransactionByMessageHashResponse(response *Transaction, w http.ResponseWriter, span trace.Span) error {
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
 
@@ -630,7 +630,7 @@ func encodeGetBlockchainTransactionByMessageHashResponse(response *Transaction, 
 }
 
 func encodeGetBlockchainValidatorsResponse(response *Validators, w http.ResponseWriter, span trace.Span) error {
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
 
@@ -644,7 +644,7 @@ func encodeGetBlockchainValidatorsResponse(response *Validators, w http.Response
 }
 
 func encodeGetChartRatesResponse(response *GetChartRatesOK, w http.ResponseWriter, span trace.Span) error {
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
 
@@ -658,7 +658,7 @@ func encodeGetChartRatesResponse(response *GetChartRatesOK, w http.ResponseWrite
 }
 
 func encodeGetDnsInfoResponse(response *DomainInfo, w http.ResponseWriter, span trace.Span) error {
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
 
@@ -672,7 +672,7 @@ func encodeGetDnsInfoResponse(response *DomainInfo, w http.ResponseWriter, span 
 }
 
 func encodeGetDomainBidsResponse(response *DomainBids, w http.ResponseWriter, span trace.Span) error {
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
 
@@ -686,7 +686,7 @@ func encodeGetDomainBidsResponse(response *DomainBids, w http.ResponseWriter, sp
 }
 
 func encodeGetEventResponse(response *Event, w http.ResponseWriter, span trace.Span) error {
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
 
@@ -700,7 +700,7 @@ func encodeGetEventResponse(response *Event, w http.ResponseWriter, span trace.S
 }
 
 func encodeGetInscriptionOpTemplateResponse(response *GetInscriptionOpTemplateOK, w http.ResponseWriter, span trace.Span) error {
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
 
@@ -714,7 +714,7 @@ func encodeGetInscriptionOpTemplateResponse(response *GetInscriptionOpTemplateOK
 }
 
 func encodeGetItemsFromCollectionResponse(response *NftItems, w http.ResponseWriter, span trace.Span) error {
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
 
@@ -728,7 +728,7 @@ func encodeGetItemsFromCollectionResponse(response *NftItems, w http.ResponseWri
 }
 
 func encodeGetJettonHoldersResponse(response *JettonHolders, w http.ResponseWriter, span trace.Span) error {
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
 
@@ -742,7 +742,7 @@ func encodeGetJettonHoldersResponse(response *JettonHolders, w http.ResponseWrit
 }
 
 func encodeGetJettonInfoResponse(response *JettonInfo, w http.ResponseWriter, span trace.Span) error {
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
 
@@ -756,7 +756,7 @@ func encodeGetJettonInfoResponse(response *JettonInfo, w http.ResponseWriter, sp
 }
 
 func encodeGetJettonsResponse(response *Jettons, w http.ResponseWriter, span trace.Span) error {
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
 
@@ -770,7 +770,7 @@ func encodeGetJettonsResponse(response *Jettons, w http.ResponseWriter, span tra
 }
 
 func encodeGetJettonsEventsResponse(response *Event, w http.ResponseWriter, span trace.Span) error {
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
 
@@ -784,7 +784,7 @@ func encodeGetJettonsEventsResponse(response *Event, w http.ResponseWriter, span
 }
 
 func encodeGetNftCollectionResponse(response *NftCollection, w http.ResponseWriter, span trace.Span) error {
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
 
@@ -798,7 +798,7 @@ func encodeGetNftCollectionResponse(response *NftCollection, w http.ResponseWrit
 }
 
 func encodeGetNftCollectionsResponse(response *NftCollections, w http.ResponseWriter, span trace.Span) error {
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
 
@@ -812,7 +812,7 @@ func encodeGetNftCollectionsResponse(response *NftCollections, w http.ResponseWr
 }
 
 func encodeGetNftHistoryByIDResponse(response *AccountEvents, w http.ResponseWriter, span trace.Span) error {
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
 
@@ -826,7 +826,7 @@ func encodeGetNftHistoryByIDResponse(response *AccountEvents, w http.ResponseWri
 }
 
 func encodeGetNftItemByAddressResponse(response *NftItem, w http.ResponseWriter, span trace.Span) error {
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
 
@@ -840,7 +840,7 @@ func encodeGetNftItemByAddressResponse(response *NftItem, w http.ResponseWriter,
 }
 
 func encodeGetNftItemsByAddressesResponse(response *NftItems, w http.ResponseWriter, span trace.Span) error {
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
 
@@ -854,7 +854,7 @@ func encodeGetNftItemsByAddressesResponse(response *NftItems, w http.ResponseWri
 }
 
 func encodeGetRatesResponse(response *GetRatesOK, w http.ResponseWriter, span trace.Span) error {
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
 
@@ -868,7 +868,7 @@ func encodeGetRatesResponse(response *GetRatesOK, w http.ResponseWriter, span tr
 }
 
 func encodeGetRawAccountStateResponse(response *GetRawAccountStateOK, w http.ResponseWriter, span trace.Span) error {
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
 
@@ -882,7 +882,7 @@ func encodeGetRawAccountStateResponse(response *GetRawAccountStateOK, w http.Res
 }
 
 func encodeGetRawBlockProofResponse(response *GetRawBlockProofOK, w http.ResponseWriter, span trace.Span) error {
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
 
@@ -896,7 +896,7 @@ func encodeGetRawBlockProofResponse(response *GetRawBlockProofOK, w http.Respons
 }
 
 func encodeGetRawBlockchainBlockResponse(response *GetRawBlockchainBlockOK, w http.ResponseWriter, span trace.Span) error {
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
 
@@ -910,7 +910,7 @@ func encodeGetRawBlockchainBlockResponse(response *GetRawBlockchainBlockOK, w ht
 }
 
 func encodeGetRawBlockchainBlockHeaderResponse(response *GetRawBlockchainBlockHeaderOK, w http.ResponseWriter, span trace.Span) error {
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
 
@@ -924,7 +924,7 @@ func encodeGetRawBlockchainBlockHeaderResponse(response *GetRawBlockchainBlockHe
 }
 
 func encodeGetRawBlockchainBlockStateResponse(response *GetRawBlockchainBlockStateOK, w http.ResponseWriter, span trace.Span) error {
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
 
@@ -938,7 +938,7 @@ func encodeGetRawBlockchainBlockStateResponse(response *GetRawBlockchainBlockSta
 }
 
 func encodeGetRawBlockchainConfigResponse(response *RawBlockchainConfig, w http.ResponseWriter, span trace.Span) error {
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
 
@@ -952,7 +952,7 @@ func encodeGetRawBlockchainConfigResponse(response *RawBlockchainConfig, w http.
 }
 
 func encodeGetRawBlockchainConfigFromBlockResponse(response *RawBlockchainConfig, w http.ResponseWriter, span trace.Span) error {
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
 
@@ -966,7 +966,7 @@ func encodeGetRawBlockchainConfigFromBlockResponse(response *RawBlockchainConfig
 }
 
 func encodeGetRawConfigResponse(response *GetRawConfigOK, w http.ResponseWriter, span trace.Span) error {
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
 
@@ -980,7 +980,7 @@ func encodeGetRawConfigResponse(response *GetRawConfigOK, w http.ResponseWriter,
 }
 
 func encodeGetRawListBlockTransactionsResponse(response *GetRawListBlockTransactionsOK, w http.ResponseWriter, span trace.Span) error {
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
 
@@ -994,7 +994,7 @@ func encodeGetRawListBlockTransactionsResponse(response *GetRawListBlockTransact
 }
 
 func encodeGetRawMasterchainInfoResponse(response *GetRawMasterchainInfoOK, w http.ResponseWriter, span trace.Span) error {
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
 
@@ -1008,7 +1008,7 @@ func encodeGetRawMasterchainInfoResponse(response *GetRawMasterchainInfoOK, w ht
 }
 
 func encodeGetRawMasterchainInfoExtResponse(response *GetRawMasterchainInfoExtOK, w http.ResponseWriter, span trace.Span) error {
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
 
@@ -1022,7 +1022,7 @@ func encodeGetRawMasterchainInfoExtResponse(response *GetRawMasterchainInfoExtOK
 }
 
 func encodeGetRawShardBlockProofResponse(response *GetRawShardBlockProofOK, w http.ResponseWriter, span trace.Span) error {
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
 
@@ -1036,7 +1036,7 @@ func encodeGetRawShardBlockProofResponse(response *GetRawShardBlockProofOK, w ht
 }
 
 func encodeGetRawShardInfoResponse(response *GetRawShardInfoOK, w http.ResponseWriter, span trace.Span) error {
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
 
@@ -1050,7 +1050,7 @@ func encodeGetRawShardInfoResponse(response *GetRawShardInfoOK, w http.ResponseW
 }
 
 func encodeGetRawTimeResponse(response *GetRawTimeOK, w http.ResponseWriter, span trace.Span) error {
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
 
@@ -1064,7 +1064,7 @@ func encodeGetRawTimeResponse(response *GetRawTimeOK, w http.ResponseWriter, spa
 }
 
 func encodeGetRawTransactionsResponse(response *GetRawTransactionsOK, w http.ResponseWriter, span trace.Span) error {
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
 
@@ -1078,7 +1078,7 @@ func encodeGetRawTransactionsResponse(response *GetRawTransactionsOK, w http.Res
 }
 
 func encodeGetStakingPoolHistoryResponse(response *GetStakingPoolHistoryOK, w http.ResponseWriter, span trace.Span) error {
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
 
@@ -1092,7 +1092,7 @@ func encodeGetStakingPoolHistoryResponse(response *GetStakingPoolHistoryOK, w ht
 }
 
 func encodeGetStakingPoolInfoResponse(response *GetStakingPoolInfoOK, w http.ResponseWriter, span trace.Span) error {
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
 
@@ -1106,7 +1106,7 @@ func encodeGetStakingPoolInfoResponse(response *GetStakingPoolInfoOK, w http.Res
 }
 
 func encodeGetStakingPoolsResponse(response *GetStakingPoolsOK, w http.ResponseWriter, span trace.Span) error {
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
 
@@ -1120,7 +1120,7 @@ func encodeGetStakingPoolsResponse(response *GetStakingPoolsOK, w http.ResponseW
 }
 
 func encodeGetStorageProvidersResponse(response *GetStorageProvidersOK, w http.ResponseWriter, span trace.Span) error {
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
 
@@ -1134,7 +1134,7 @@ func encodeGetStorageProvidersResponse(response *GetStorageProvidersOK, w http.R
 }
 
 func encodeGetTonConnectPayloadResponse(response *GetTonConnectPayloadOK, w http.ResponseWriter, span trace.Span) error {
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
 
@@ -1148,7 +1148,7 @@ func encodeGetTonConnectPayloadResponse(response *GetTonConnectPayloadOK, w http
 }
 
 func encodeGetTraceResponse(response *Trace, w http.ResponseWriter, span trace.Span) error {
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
 
@@ -1162,7 +1162,7 @@ func encodeGetTraceResponse(response *Trace, w http.ResponseWriter, span trace.S
 }
 
 func encodeGetWalletBackupResponse(response *GetWalletBackupOK, w http.ResponseWriter, span trace.Span) error {
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
 
@@ -1176,7 +1176,7 @@ func encodeGetWalletBackupResponse(response *GetWalletBackupOK, w http.ResponseW
 }
 
 func encodeGetWalletsByPublicKeyResponse(response *Accounts, w http.ResponseWriter, span trace.Span) error {
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
 
@@ -1190,7 +1190,7 @@ func encodeGetWalletsByPublicKeyResponse(response *Accounts, w http.ResponseWrit
 }
 
 func encodeReduceIndexingLatencyResponse(response *ServiceStatus, w http.ResponseWriter, span trace.Span) error {
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
 
@@ -1211,7 +1211,7 @@ func encodeReindexAccountResponse(response *ReindexAccountOK, w http.ResponseWri
 }
 
 func encodeSearchAccountsResponse(response *FoundAccounts, w http.ResponseWriter, span trace.Span) error {
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
 
@@ -1232,7 +1232,7 @@ func encodeSendBlockchainMessageResponse(response *SendBlockchainMessageOK, w ht
 }
 
 func encodeSendRawMessageResponse(response *SendRawMessageOK, w http.ResponseWriter, span trace.Span) error {
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
 
@@ -1253,7 +1253,7 @@ func encodeSetWalletBackupResponse(response *SetWalletBackupOK, w http.ResponseW
 }
 
 func encodeTonConnectProofResponse(response *TonConnectProofOK, w http.ResponseWriter, span trace.Span) error {
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
 
@@ -1267,15 +1267,14 @@ func encodeTonConnectProofResponse(response *TonConnectProofOK, w http.ResponseW
 }
 
 func encodeErrorResponse(response *ErrorStatusCode, w http.ResponseWriter, span trace.Span) error {
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	code := response.StatusCode
 	if code == 0 {
 		// Set default status code.
 		code = http.StatusOK
 	}
 	w.WriteHeader(code)
-	st := http.StatusText(code)
-	if code >= http.StatusBadRequest {
+	if st := http.StatusText(code); code >= http.StatusBadRequest {
 		span.SetStatus(codes.Error, st)
 	} else {
 		span.SetStatus(codes.Ok, st)

@@ -1,0 +1,12 @@
+parser:
+generator:
+  features:
+    enable:
+      - paths/server
+    disable:
+      - server/response/validation
+      - debug/example_tests
+      - client/request/validation
+      - paths/client
+      - webhooks/client
+      - webhooks/server
