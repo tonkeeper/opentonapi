@@ -4,8 +4,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"golang.org/x/exp/slices"
 	"net/http"
+
+	"golang.org/x/exp/slices"
 
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/opentonapi/pkg/oas"
@@ -29,6 +30,9 @@ func (h *Handler) GetNftItemsByAddresses(ctx context.Context, request oas.OptGet
 		accounts[i] = account.ID
 	}
 	items, err := h.storage.GetNFTs(ctx, accounts)
+	if errors.Is(err, core.ErrEntityNotFound) {
+		return nil, toError(http.StatusNotFound, err)
+	}
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
