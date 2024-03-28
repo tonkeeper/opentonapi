@@ -6,6 +6,7 @@ import (
 	"errors"
 	"time"
 
+	"github.com/tonkeeper/tongo/abi"
 	"github.com/tonkeeper/tongo/tlb"
 	tongoWallet "github.com/tonkeeper/tongo/wallet"
 
@@ -55,4 +56,8 @@ func (s *LiteStorage) ReduceIndexingLatency(ctx context.Context) (int64, error) 
 	}
 	latency := time.Now().Unix() - int64(blockHeader.GenUtime)
 	return latency, nil
+}
+
+func (s *LiteStorage) GetAccountInterfaces(ctx context.Context, id tongo.AccountID) ([]abi.ContractInterface, error) {
+	return nil, errors.New("not implemented")
 }
