@@ -52,6 +52,22 @@ func (h *Handler) RunEmulation(ctx context.Context, msgCh <-chan blockchain.ExtI
 	}
 }
 
+func (h *Handler) isEmulationAllowed(ctx context.Context, accountID tongo.AccountID) (bool, error) {
+	interfaces, err := h.storage.GetAccountInterfaces(ctx, accountID)
+	if err != nil {
+		return false, err
+	}
+	for _, iface := range interfaces {
+		if iface.Implements(abi.WalletHighloadV2R1) || iface.Implements(abi.WalletHighloadV2R2) {
+			return false, nil
+		}
+		if iface.Implements(abi.WalletHighloadV1R1) || iface.Implements(abi.WalletHighloadV1R2) {
+			return false, nil
+		}
+	}
+	return true, nil
+}
+
 func (h *Handler) addToMempool(ctx context.Context, bytesBoc []byte, shardAccount map[tongo.AccountID]tlb.ShardAccount, emulationCh chan<- blockchain.ExtInMsgCopy) (map[tongo.AccountID]tlb.ShardAccount, error) {
 	if shardAccount == nil {
 		shardAccount = map[tongo.AccountID]tlb.ShardAccount{}
@@ -60,6 +76,7 @@ func (h *Handler) addToMempool(ctx context.Context, bytesBoc []byte, shardAccoun
 	if err != nil {
 		return shardAccount, err
 	}
+
 	ttl := int64(30)
 	msgV4, err := tongoWallet.DecodeMessageV4(msgCell[0])
 	if err == nil {
@@ -72,6 +89,17 @@ func (h *Handler) addToMempool(ctx context.Context, bytesBoc []byte, shardAccoun
 	err = tlb.Unmarshal(msgCell[0], &message)
 	if err != nil {
 		return shardAccount, err
+	}
+	walletAddress, err := extractDestinationWallet(message)
+	if err != nil {
+		return nil, err
+	}
+	allowed, err := h.isEmulationAllowed(ctx, *walletAddress)
+	if err != nil {
+		return shardAccount, err
+	}
+	if !allowed {
+		return shardAccount, nil
 	}
 	config, err := h.storage.TrimmedConfigBase64()
 	if err != nil {
