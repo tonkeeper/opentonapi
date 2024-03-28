@@ -6,7 +6,6 @@ import (
 	"sync"
 
 	"github.com/go-faster/errors"
-	"github.com/tonkeeper/opentonapi/pkg/blockchain"
 	"github.com/tonkeeper/opentonapi/pkg/chainstate"
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/opentonapi/pkg/rates"
@@ -47,8 +46,6 @@ type Handler struct {
 
 	// mempoolEmulate contains results of emulation of messages that are in the mempool.
 	mempoolEmulate mempoolEmulate
-	// emulationCh is used to send emulation results to mempool subscribers.
-	emulationCh chan<- blockchain.ExtInMsgCopy
 	// ctxToDetails converts a request context to a details instance.
 	ctxToDetails ctxToDetails
 
@@ -81,7 +78,6 @@ type Options struct {
 	spamFilter       spamFilter
 	ratesSource      ratesSource
 	tonConnectSecret string
-	emulationCh      chan<- blockchain.ExtInMsgCopy
 	ctxToDetails     ctxToDetails
 }
 
@@ -101,13 +97,6 @@ func WithChainState(state chainState) Option {
 func WithAddressBook(book addressBook) Option {
 	return func(o *Options) {
 		o.addressBook = book
-	}
-}
-
-// WithEmulationChannel configures a channel that will be used to send emulation results to mempool subscribers.
-func WithEmulationChannel(ch chan<- blockchain.ExtInMsgCopy) Option {
-	return func(o *Options) {
-		o.emulationCh = ch
 	}
 }
 
@@ -179,18 +168,6 @@ func NewHandler(logger *zap.Logger, opts ...Option) (*Handler, error) {
 	if options.executor == nil {
 		return nil, fmt.Errorf("executor is not configured")
 	}
-	if options.emulationCh == nil {
-		emulationCh := make(chan blockchain.ExtInMsgCopy, 100)
-		options.emulationCh = emulationCh
-		go func() {
-			for {
-				select {
-				case <-emulationCh:
-					// drop it
-				}
-			}
-		}()
-	}
 	if options.ctxToDetails == nil {
 		options.ctxToDetails = func(ctx context.Context) any {
 			return nil
@@ -209,7 +186,6 @@ func NewHandler(logger *zap.Logger, opts ...Option) (*Handler, error) {
 		executor:     options.executor,
 		limits:       options.limits,
 		spamFilter:   options.spamFilter,
-		emulationCh:  options.emulationCh,
 		ctxToDetails: options.ctxToDetails,
 		ratesSource:  rates.InitCalculator(options.ratesSource),
 		metaCache: metadataCache{

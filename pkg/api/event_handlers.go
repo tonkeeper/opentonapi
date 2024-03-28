@@ -7,23 +7,17 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
-	"math/big"
 	"net/http"
 	"strings"
 	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
-	"github.com/shopspring/decimal"
 	"github.com/tonkeeper/opentonapi/pkg/blockchain"
 	"github.com/tonkeeper/tongo"
-	"github.com/tonkeeper/tongo/abi"
-	"github.com/tonkeeper/tongo/boc"
 	"github.com/tonkeeper/tongo/tlb"
-	"github.com/tonkeeper/tongo/ton"
 	"github.com/tonkeeper/tongo/tontest"
 	"github.com/tonkeeper/tongo/txemulator"
-	tongoWallet "github.com/tonkeeper/tongo/wallet"
 	"golang.org/x/exp/slices"
 
 	"github.com/tonkeeper/opentonapi/pkg/bath"
@@ -42,9 +36,9 @@ var (
 		Help:    "Sizes of mempool batches",
 		Buckets: []float64{2, 3, 4, 5, 6, 7, 8, 9, 10},
 	})
-	mempoolMessageCounter = promauto.NewCounter(prometheus.CounterOpts{
-		Name: "mempool_messages_counter",
-		Help: "The total number of mempool messages",
+	sendMessageCounter = promauto.NewCounter(prometheus.CounterOpts{
+		Name: "tonapi_send_message_counter",
+		Help: "The total number of messages received by /v2/blockchain/message endpoint",
 	})
 )
 
@@ -92,7 +86,7 @@ func (h *Handler) SendBlockchainMessage(ctx context.Context, request *oas.SendBl
 			Payload: m.payload,
 			Details: h.ctxToDetails(ctx),
 		}
-		mempoolMessageCounter.Inc()
+		sendMessageCounter.Inc()
 		if err := h.msgSender.SendMessage(ctx, msgCopy); err != nil {
 			if strings.Contains(err.Error(), "cannot apply external message to current state") {
 				h.blacklistedBocCache.Set(checksum, struct{}{}, cache.WithExpiration(time.Minute))
@@ -102,21 +96,10 @@ func (h *Handler) SendBlockchainMessage(ctx context.Context, request *oas.SendBl
 			return toError(http.StatusInternalServerError, err)
 		}
 		h.blacklistedBocCache.Set(checksum, struct{}{}, cache.WithExpiration(time.Minute))
-		go func() {
-			defer func() {
-				if err := recover(); err != nil {
-					sentry.Send("addToMempool", sentry.SentryInfoData{"payload": request.Boc}, sentry.LevelError)
-				}
-			}()
-			ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
-			defer cancel()
-			h.addToMempool(ctx, m.payload, nil)
-		}()
 		return nil
 	}
 	var (
-		copies       []blockchain.ExtInMsgCopy
-		shardAccount = map[tongo.AccountID]tlb.ShardAccount{}
+		copies []blockchain.ExtInMsgCopy
 	)
 	if len(request.Batch) > maxBatchSize {
 		return toError(http.StatusBadRequest, fmt.Errorf("batch size must be less than %v", maxBatchSize))
@@ -126,10 +109,6 @@ func (h *Handler) SendBlockchainMessage(ctx context.Context, request *oas.SendBl
 		if err != nil {
 			return err
 		}
-		shardAccount, err = h.addToMempool(ctx, m.payload, shardAccount)
-		if err != nil {
-			continue
-		}
 		msgCopy := blockchain.ExtInMsgCopy{
 			MsgBoc:  m.base64,
 			Payload: m.payload,
@@ -138,7 +117,7 @@ func (h *Handler) SendBlockchainMessage(ctx context.Context, request *oas.SendBl
 		copies = append(copies, msgCopy)
 	}
 
-	mempoolMessageCounter.Add(float64(len(copies)))
+	sendMessageCounter.Add(float64(len(copies)))
 	mempoolBatchSize.Observe(float64(len(copies)))
 
 	h.msgSender.SendMultipleMessages(ctx, copies)
@@ -615,240 +594,4 @@ func (h *Handler) EmulateMessageToWallet(ctx context.Context, request *oas.Emula
 		Risk:  oasRisk,
 	}
 	return &consequences, nil
-}
-
-func (h *Handler) addToMempool(ctx context.Context, bytesBoc []byte, shardAccount map[tongo.AccountID]tlb.ShardAccount) (map[tongo.AccountID]tlb.ShardAccount, error) {
-	if shardAccount == nil {
-		shardAccount = map[tongo.AccountID]tlb.ShardAccount{}
-	}
-	msgCell, err := boc.DeserializeBoc(bytesBoc)
-	if err != nil {
-		return shardAccount, err
-	}
-	ttl := int64(30)
-	msgV4, err := tongoWallet.DecodeMessageV4(msgCell[0])
-	if err == nil {
-		diff := int64(msgV4.ValidUntil) - time.Now().Unix()
-		if diff < 600 {
-			ttl = diff
-		}
-	}
-	var message tlb.Message
-	err = tlb.Unmarshal(msgCell[0], &message)
-	if err != nil {
-		return shardAccount, err
-	}
-	config, err := h.storage.TrimmedConfigBase64()
-	if err != nil {
-		return shardAccount, err
-	}
-	emulator, err := txemulator.NewTraceBuilder(txemulator.WithAccountsSource(h.storage),
-		txemulator.WithAccountsMap(shardAccount),
-		txemulator.WithConfigBase64(config),
-		txemulator.WithSignatureCheck(),
-	)
-	if err != nil {
-		return shardAccount, err
-	}
-	tree, err := emulator.Run(ctx, message)
-	if err != nil {
-		return shardAccount, err
-	}
-	newShardAccount := emulator.FinalStates()
-	trace, err := emulatedTreeToTrace(ctx, h.executor, h.storage, config, tree, newShardAccount)
-	if err != nil {
-		return shardAccount, err
-	}
-	accounts := make(map[tongo.AccountID]struct{})
-	core.Visit(trace, func(node *core.Trace) {
-		accounts[node.Account] = struct{}{}
-	})
-	hash, err := msgCell[0].Hash256()
-	if err != nil {
-		return shardAccount, err
-	}
-	h.mempoolEmulate.traces.Set(hash, trace, cache.WithExpiration(time.Second*time.Duration(ttl)))
-	for account := range accounts {
-		if _, ok := h.mempoolEmulateIgnoreAccounts[account]; ok { // the map is filled only once at the start
-			continue
-		}
-		oldMemHashes, _ := h.mempoolEmulate.accountsTraces.Get(account)
-		newMemHashes := make([]ton.Bits256, 0, len(oldMemHashes)+1)
-		for _, mHash := range oldMemHashes { //we need to filter messages which already created transactions
-			_, err = h.storage.SearchTransactionByMessageHash(ctx, mHash)
-			_, prs := h.mempoolEmulate.traces.Get(mHash)
-			if err != nil || prs { //because if err is not null it already happened and if !prs it is not in mempool
-				newMemHashes = append(newMemHashes, mHash)
-			}
-		}
-		newMemHashes = append(newMemHashes, hash) // it's important to make it las
-		h.mempoolEmulate.accountsTraces.Set(account, newMemHashes, cache.WithExpiration(time.Second*time.Duration(ttl)))
-	}
-	h.emulationCh <- blockchain.ExtInMsgCopy{
-		MsgBoc:   base64.StdEncoding.EncodeToString(bytesBoc),
-		Details:  h.ctxToDetails(ctx),
-		Payload:  bytesBoc,
-		Accounts: accounts,
-	}
-	return newShardAccount, nil
-}
-
-func emulatedTreeToTrace(ctx context.Context, executor executor, resolver core.LibraryResolver, configBase64 string, tree *txemulator.TxTree, accounts map[tongo.AccountID]tlb.ShardAccount) (*core.Trace, error) {
-	if !tree.TX.Msgs.InMsg.Exists {
-		return nil, errors.New("there is no incoming message in emulation result")
-	}
-	m := tree.TX.Msgs.InMsg.Value.Value
-	var a tlb.MsgAddress
-	switch m.Info.SumType {
-	case "IntMsgInfo":
-		a = m.Info.IntMsgInfo.Dest
-	case "ExtInMsgInfo":
-		a = m.Info.ExtInMsgInfo.Dest
-	default:
-		return nil, errors.New("unknown message type in emulation result")
-	}
-	transaction, err := core.ConvertTransaction(int32(a.AddrStd.WorkchainId), tongo.Transaction{
-		Transaction: tree.TX,
-		BlockID:     tongo.BlockIDExt{BlockID: tongo.BlockID{Workchain: int32(a.AddrStd.WorkchainId)}},
-	})
-	filteredMsgs := make([]core.Message, 0, len(transaction.OutMsgs))
-	for _, msg := range transaction.OutMsgs {
-		if msg.Destination == nil {
-			filteredMsgs = append(filteredMsgs, msg)
-		}
-	}
-	transaction.OutMsgs = filteredMsgs //all internal messages in emulation result are delivered to another account and created transaction
-	if err != nil {
-		return nil, err
-	}
-	t := &core.Trace{
-		Transaction: *transaction,
-	}
-	additionalInfo := &core.TraceAdditionalInfo{}
-	for i := range tree.Children {
-		child, err := emulatedTreeToTrace(ctx, executor, resolver, configBase64, tree.Children[i], accounts)
-		if err != nil {
-			return nil, err
-		}
-		t.Children = append(t.Children, child)
-	}
-	accountID := t.Account
-	code := accountCode(accounts[accountID])
-	if code == nil {
-		return t, nil
-	}
-	b, err := code.ToBoc()
-	if err != nil {
-		return nil, err
-	}
-	sharedExecutor := newSharedAccountExecutor(accounts, executor, resolver, configBase64)
-	inspectionResult, err := abi.NewContractInspector().InspectContract(ctx, b, sharedExecutor, accountID)
-	if err != nil {
-		return nil, err
-	}
-	implemented := make(map[abi.ContractInterface]struct{}, len(inspectionResult.ContractInterfaces))
-	for _, iface := range inspectionResult.ContractInterfaces {
-		implemented[iface] = struct{}{}
-	}
-	// TODO: for all obtained Jetton Masters confirm that jetton wallets are valid
-	t.AccountInterfaces = inspectionResult.ContractInterfaces
-	for _, m := range inspectionResult.GetMethods {
-		switch data := m.Result.(type) {
-		case abi.GetNftDataResult:
-			if _, ok := implemented[abi.Teleitem]; !ok {
-				continue
-			}
-			value := big.Int(data.Index)
-			index := decimal.NewFromBigInt(&value, 0)
-			collectionAddr, err := tongo.AccountIDFromTlb(data.CollectionAddress)
-			if err != nil || collectionAddr == nil {
-				continue
-			}
-			_, nftByIndex, err := abi.GetNftAddressByIndex(ctx, sharedExecutor, *collectionAddr, data.Index)
-			if err != nil {
-				continue
-			}
-			indexResult, ok := nftByIndex.(abi.GetNftAddressByIndexResult)
-			if !ok {
-				continue
-			}
-			nftAddr, err := tongo.AccountIDFromTlb(indexResult.Address)
-			if err != nil || nftAddr == nil {
-				continue
-			}
-			additionalInfo.EmulatedTeleitemNFT = &core.EmulatedTeleitemNFT{
-				Index:             index,
-				CollectionAddress: collectionAddr,
-				Verified:          *nftAddr == accountID,
-			}
-		case abi.GetWalletDataResult:
-			master, _ := tongo.AccountIDFromTlb(data.Jetton)
-			additionalInfo.SetJettonMaster(accountID, *master)
-		case abi.GetSaleData_GetgemsResult:
-			price := big.Int(data.FullPrice)
-			owner, err := tongo.AccountIDFromTlb(data.Owner)
-			if err != nil {
-				continue
-			}
-			item, err := tongo.AccountIDFromTlb(data.Nft)
-			if err != nil || item == nil {
-				continue
-			}
-			additionalInfo.NftSaleContract = &core.NftSaleContract{
-				NftPrice: price.Int64(),
-				Owner:    owner,
-				Item:     *item,
-			}
-		case abi.GetSaleData_BasicResult:
-			price := big.Int(data.FullPrice)
-			owner, err := tongo.AccountIDFromTlb(data.Owner)
-			if err != nil {
-				continue
-			}
-			item, err := tongo.AccountIDFromTlb(data.Nft)
-			if err != nil || item == nil {
-				continue
-			}
-			additionalInfo.NftSaleContract = &core.NftSaleContract{
-				NftPrice: price.Int64(),
-				Owner:    owner,
-				Item:     *item,
-			}
-		case abi.GetSaleData_GetgemsAuctionResult:
-			owner, err := tongo.AccountIDFromTlb(data.Owner)
-			if err != nil {
-				continue
-			}
-			item, err := tongo.AccountIDFromTlb(data.Nft)
-			if err != nil || item == nil {
-				continue
-			}
-			additionalInfo.NftSaleContract = &core.NftSaleContract{
-				NftPrice: int64(data.MaxBid),
-				Owner:    owner,
-				Item:     *item,
-			}
-		case abi.GetPoolData_StonfiResult:
-			t0, err0 := tongo.AccountIDFromTlb(data.Token0Address)
-			t1, err1 := tongo.AccountIDFromTlb(data.Token1Address)
-			if err1 != nil || err0 != nil {
-				continue
-			}
-			additionalInfo.STONfiPool = &core.STONfiPool{
-				Token0: *t0,
-				Token1: *t1,
-			}
-			for _, accountID := range []ton.AccountID{*t0, *t1} {
-				_, value, err := abi.GetWalletData(ctx, sharedExecutor, accountID)
-				if err != nil {
-					return nil, err
-				}
-				data := value.(abi.GetWalletDataResult)
-				master, _ := tongo.AccountIDFromTlb(data.Jetton)
-				additionalInfo.SetJettonMaster(accountID, *master)
-			}
-		}
-	}
-	t.SetAdditionalInfo(additionalInfo)
-	return t, nil
 }

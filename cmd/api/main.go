@@ -73,7 +73,6 @@ func main() {
 		api.WithExecutor(storage),
 		api.WithMessageSender(msgSender),
 		api.WithSpamFilter(spamFilter),
-		api.WithEmulationChannel(mempoolCh),
 		api.WithTonConnectSecret(cfg.TonConnect.Secret),
 	)
 	if err != nil {
