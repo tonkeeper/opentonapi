@@ -34,6 +34,7 @@ func (h *Handler) GetNftItemsByAddresses(ctx context.Context, request oas.OptGet
 		return nil, toError(http.StatusNotFound, err)
 	}
 	if err != nil {
+		fmt.Println(err, accounts)
 		return nil, toError(http.StatusInternalServerError, err)
 	}
 	var result oas.NftItems
