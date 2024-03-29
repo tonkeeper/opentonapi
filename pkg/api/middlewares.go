@@ -4,13 +4,14 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"net/http"
+
 	"github.com/ogen-go/ogen/middleware"
 	"github.com/ogen-go/ogen/ogenerrors"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/tonkeeper/opentonapi/pkg/oas"
 	"go.uber.org/zap"
-	"net/http"
 )
 
 func ogenLoggingMiddleware(logger *zap.Logger) middleware.Middleware {
@@ -87,9 +88,7 @@ type errorJSON struct {
 func ogenErrorsHandler(ctx context.Context, w http.ResponseWriter, r *http.Request, err error) {
 	w.Header().Set("content-type", "application/json")
 	switch err.(type) {
-	case *ogenerrors.DecodeParamsError:
-		// a quick workaround on Sunday
-		// todo: fix it properly
+	case *ogenerrors.DecodeParamsError, *ogenerrors.DecodeBodyError, *ogenerrors.DecodeRequestError, *ogenerrors.DecodeParamError:
 		w.WriteHeader(http.StatusBadRequest)
 	default:
 		if errors.Is(err, ErrRateLimit) {
