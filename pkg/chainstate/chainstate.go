@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/tonkeeper/tongo"
-	"github.com/tonkeeper/tongo/tlb"
 	"github.com/tonkeeper/tongo/ton"
 )
 
@@ -21,7 +20,7 @@ type ChainState struct {
 }
 
 type config interface {
-	GetLastConfig(ctx context.Context) (tlb.ConfigParams, error)
+	GetLastConfig(ctx context.Context) (ton.BlockchainConfig, error)
 }
 
 func (s *ChainState) GetAPY() float64 {
@@ -61,16 +60,12 @@ func suspended(conf config) (map[tongo.AccountID]struct{}, error) {
 		return nil, err
 	}
 	// optimization to avoid processing all config keys
-	cfg = cfg.CloneKeepingSubsetOfKeys([]uint32{44})
-	blockchainConfig, err := ton.ConvertBlockchainConfig(cfg)
-	if err != nil {
-		return nil, err
-	}
-	if blockchainConfig.ConfigParam44 == nil {
+
+	if cfg.ConfigParam44 == nil {
 		return nil, fmt.Errorf("config doesn't have %v param", 44)
 	}
-	m := make(map[tongo.AccountID]struct{}, len(blockchainConfig.ConfigParam44.SuspendedAddressList.Addresses.Keys()))
-	for _, addr := range blockchainConfig.ConfigParam44.SuspendedAddressList.Addresses.Keys() {
+	m := make(map[tongo.AccountID]struct{}, len(cfg.ConfigParam44.SuspendedAddressList.Addresses.Keys()))
+	for _, addr := range cfg.ConfigParam44.SuspendedAddressList.Addresses.Keys() {
 		accountID := ton.AccountID{
 			Workchain: int32(addr.Workchain),
 			Address:   addr.Address,

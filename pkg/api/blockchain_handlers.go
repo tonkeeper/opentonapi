@@ -221,6 +221,8 @@ func (h *Handler) GetBlockchainTransactionByMessageHash(ctx context.Context, par
 		return nil, toError(http.StatusNotFound, fmt.Errorf("transaction not found"))
 	} else if errors.Is(err, core.ErrTooManyEntities) {
 		return nil, toError(http.StatusNotFound, fmt.Errorf("more than one transaction with messages hash"))
+	} else if err != nil {
+		return nil, toError(http.StatusInternalServerError, err)
 	}
 	txs, err := h.storage.GetTransaction(ctx, *txHash)
 	if err != nil {
@@ -239,12 +241,16 @@ func (h *Handler) GetBlockchainMasterchainHead(ctx context.Context) (*oas.Blockc
 }
 
 func (h *Handler) GetBlockchainConfig(ctx context.Context) (*oas.BlockchainConfig, error) {
-	cfg, err := h.storage.GetLastConfig(ctx)
+	rawCfg, err := h.storage.GetConfigRaw(ctx)
+	if err != nil {
+		return nil, toError(http.StatusInternalServerError, err)
+	}
+	cfg, err := ton.DecodeConfigParams(rawCfg)
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
 	c := boc.NewCell()
-	err = tlb.Marshal(c, cfg)
+	err = tlb.Marshal(c, cfg) //todo: optimize. we can not marshal but take config cell directly from boc
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
@@ -304,15 +310,11 @@ func convertConfigToOasConfig(conf *ton.BlockchainConfig) (*oas.RawBlockchainCon
 }
 
 func (h *Handler) GetRawBlockchainConfig(ctx context.Context) (r *oas.RawBlockchainConfig, _ error) {
-	cfg, err := h.storage.GetLastConfig(ctx)
+	config, err := h.storage.GetLastConfig(ctx)
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
-	config, err := ton.ConvertBlockchainConfig(cfg)
-	if err != nil {
-		return nil, toError(http.StatusInternalServerError, err)
-	}
-	rawConfig, err := convertConfigToOasConfig(config)
+	rawConfig, err := convertConfigToOasConfig(&config)
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}

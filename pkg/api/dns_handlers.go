@@ -29,15 +29,10 @@ func (h *Handler) dnsResolver(ctx context.Context) (*dns.DNS, error) {
 	if err != nil {
 		return nil, err
 	}
-	dnsRoot, ok := config.Config.Get(4)
+	root, ok := config.DnsRootAddr()
 	if !ok {
 		return nil, fmt.Errorf("no dns root in config")
 	}
-	var addr tlb.Bits256
-	if err := tlb.Unmarshal(&dnsRoot.Value, &addr); err != nil {
-		return nil, err
-	}
-	root := tongo.AccountID{Workchain: -1, Address: addr}
 	h.dns = dns.NewDNS(root, h.executor)
 	return h.dns, nil
 }

@@ -10,7 +10,6 @@ import (
 	"github.com/tonkeeper/opentonapi/pkg/oas"
 	pkgTesting "github.com/tonkeeper/opentonapi/pkg/testing"
 	"github.com/tonkeeper/tongo/liteapi"
-	"github.com/tonkeeper/tongo/ton"
 	"go.uber.org/zap"
 )
 
@@ -160,9 +159,7 @@ func TestHandler_GetBlockchainValidators(t *testing.T) {
 	validators, err := h.GetBlockchainValidators(context.Background())
 	require.Nil(t, err)
 
-	rawConfig, err := h.storage.GetLastConfig(context.Background())
-	require.Nil(t, err)
-	config, err := ton.ConvertBlockchainConfig(rawConfig)
+	config, err := h.storage.GetLastConfig(context.Background())
 	require.Nil(t, err)
 
 	require.NotNil(t, config.ConfigParam34)

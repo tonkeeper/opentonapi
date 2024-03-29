@@ -29,25 +29,6 @@ import (
 	"github.com/tonkeeper/opentonapi/pkg/core"
 )
 
-// allowedConfigKeys is a list of blockchain config keys
-// we keep in config to optimize the performance of tvm and tvemulator.
-var allowedConfigKeys = []uint32{
-	0, 1, 2, 3, 4, 5,
-	8,
-	9, 10,
-	12,
-	15,
-	17,
-	18,
-	20,
-	21,
-	24,
-	25,
-	32, // 32 + 34 together take up to 98% of the config size
-	34,
-	79, 80, 81, 82, // required by token bridge https://github.com/ton-blockchain/token-bridge-func/blob/3346a901e3e8e1a1e020fac564c845db3220c238/src/func/jetton-bridge/jetton-wallet.fc#L233
-}
-
 var storageTimeHistogramVec = promauto.NewHistogramVec(
 	prometheus.HistogramOpts{
 		Name:    "litestorage_functions_time",
@@ -88,7 +69,7 @@ type LiteStorage struct {
 	// trackingAccounts is a list of accounts we track. Defined with ACCOUNTS env variable.
 	trackingAccounts  map[tongo.AccountID]struct{}
 	pubKeyByAccountID *xsync.MapOf[tongo.AccountID, ed25519.PublicKey]
-	configCache       cache.Cache[int, tlb.ConfigParams]
+	configCache       cache.Cache[int, ton.BlockchainConfig]
 
 	stopCh chan struct{}
 	// mu protects trimmedConfigBase64.
@@ -169,7 +150,7 @@ func NewLiteStorage(log *zap.Logger, cli *liteapi.Client, opts ...Option) (*Lite
 		accountInterfacesCache:  xsync.NewTypedMapOf[tongo.AccountID, []abi.ContractInterface](hashAccountID),
 		pubKeyByAccountID:       xsync.NewTypedMapOf[tongo.AccountID, ed25519.PublicKey](hashAccountID),
 		tvmLibraryCache:         cache.NewLRUCache[string, boc.Cell](10000, "tvm_libraries"),
-		configCache:             cache.NewLRUCache[int, tlb.ConfigParams](4, "config"),
+		configCache:             cache.NewLRUCache[int, ton.BlockchainConfig](4, "config"),
 	}
 	storage.knownAccounts["tf_pools"] = o.tfPools
 	storage.knownAccounts["jettons"] = o.jettons
@@ -206,29 +187,6 @@ func (s *LiteStorage) SetExecutor(e abi.Executor) {
 // Shutdown stops all background goroutines.
 func (s *LiteStorage) Shutdown() {
 	s.stopCh <- struct{}{}
-}
-
-func (s *LiteStorage) runBlockchainConfigUpdate(updateInterval time.Duration) {
-	go func() {
-		for {
-			select {
-			case <-s.stopCh:
-				return
-			// TODO: find better way to update config.
-			// For example, we can update a config once a new key block is added to the blockchain.
-			case <-time.After(updateInterval):
-				params, err := s.client.GetConfigAll(context.TODO(), 0)
-				if err != nil {
-					s.logger.Error("failed to get blockchain config", zap.Error(err))
-					continue
-				}
-				if _, err := s.updateBlockchainConfig(params); err != nil {
-					s.logger.Error("failed to get blockchain config", zap.Error(err))
-					continue
-				}
-			}
-		}
-	}()
 }
 
 func (s *LiteStorage) run(ch <-chan indexer.IDandBlock) {
@@ -575,43 +533,6 @@ func (s *LiteStorage) GetDnsExpiring(ctx context.Context, id tongo.AccountID, pe
 	}))
 	defer timer.ObserveDuration()
 	return nil, nil
-}
-
-// TrimmedConfigBase64 returns the current trimmed blockchain config in a base64 format.
-func (c *LiteStorage) TrimmedConfigBase64() (string, error) {
-	conf := c.blockchainConfig()
-	if len(conf) > 0 {
-		return conf, nil
-	}
-	// we haven't updated the config yet, so let's do it now.
-	// this can happen at start up.
-	params, err := c.client.GetConfigAll(context.TODO(), 0)
-	if err != nil {
-		return "", err
-	}
-	return c.updateBlockchainConfig(params)
-}
-
-func (c *LiteStorage) blockchainConfig() string {
-	c.mu.RLock()
-	defer c.mu.RUnlock()
-	return c.trimmedConfigBase64
-}
-
-func (c *LiteStorage) updateBlockchainConfig(params tlb.ConfigParams) (string, error) {
-	params = params.CloneKeepingSubsetOfKeys(allowedConfigKeys)
-	cell := boc.NewCell()
-	if err := tlb.Marshal(cell, params.Config); err != nil {
-		return "", err
-	}
-	configBase64, err := cell.ToBocBase64()
-	if err != nil {
-		return "", err
-	}
-	c.mu.Lock()
-	defer c.mu.Unlock()
-	c.trimmedConfigBase64 = configBase64
-	return configBase64, nil
 }
 
 func (c *LiteStorage) GetInscriptionBalancesByAccount(ctx context.Context, a ton.AccountID) ([]core.InscriptionBalance, error) {

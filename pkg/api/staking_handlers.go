@@ -51,14 +51,15 @@ func (h *Handler) GetStakingPoolInfo(ctx context.Context, params oas.GetStakingP
 			return nil, toError(http.StatusInternalServerError, err)
 		}
 		var cycleStart, cycleEnd uint32
-		if c, prs := config.Config.Get(34); prs {
-			var set tlb.ValidatorsSet
-			err = tlb.Unmarshal(&c.Value, &set)
-			if err != nil {
-				return nil, toError(http.StatusInternalServerError, err)
+		if param34 := config.ConfigParam34; param34 != nil {
+			switch param34.CurValidators.SumType {
+			case "Validators":
+				cycleEnd = param34.CurValidators.Validators.UtimeUntil + 65536/2 + 600 //magic fron @rulon
+				cycleStart = param34.CurValidators.Validators.UtimeSince
+			case "ValidatorsExt":
+				cycleEnd = param34.CurValidators.ValidatorsExt.UtimeUntil + 65536/2 + 600 //magic fron @rulon
+				cycleStart = param34.CurValidators.ValidatorsExt.UtimeSince
 			}
-			cycleEnd = set.Common().UtimeUntil + 65536/2 + 600 //magic fron @rulon
-			cycleStart = set.Common().UtimeSince
 		}
 		return &oas.GetStakingPoolInfoOK{
 			Implementation: oas.PoolImplementation{
@@ -150,14 +151,15 @@ func (h *Handler) GetStakingPools(ctx context.Context, params oas.GetStakingPool
 		return nil, toError(http.StatusInternalServerError, err)
 	}
 	var cycleStart, cycleEnd uint32
-	if c, prs := config.Config.Get(34); prs {
-		var set tlb.ValidatorsSet
-		err = tlb.Unmarshal(&c.Value, &set)
-		if err != nil {
-			return nil, toError(http.StatusInternalServerError, err)
+	if param34 := config.ConfigParam34; param34 != nil {
+		switch param34.CurValidators.SumType {
+		case "Validators":
+			cycleEnd = param34.CurValidators.Validators.UtimeUntil + 65536/2 + 600 //magic fron @rulon
+			cycleStart = param34.CurValidators.Validators.UtimeSince
+		case "ValidatorsExt":
+			cycleEnd = param34.CurValidators.ValidatorsExt.UtimeUntil + 65536/2 + 600 //magic fron @rulon
+			cycleStart = param34.CurValidators.ValidatorsExt.UtimeSince
 		}
-		cycleEnd = set.Common().UtimeUntil + 65536/2 + 600 //magic fron @rulon
-		cycleStart = set.Common().UtimeSince
 	}
 	for _, p := range liquidPools {
 		info, _ := h.addressBook.GetAddressInfoByAddress(p.Address)
