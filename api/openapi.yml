@@ -1750,6 +1750,28 @@ paths:
                     example: { }
         'default':
           $ref: '#/components/responses/Error'
+  /v2/rates/markets:
+    get:
+      description: Get the TON price from markets
+      operationId: getMarketsRates
+      tags:
+        - Rates
+      responses:
+        '200':
+          description: markets rates
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - markets
+                properties:
+                  markets:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/MarketTonRates'
+        'default':
+          $ref: '#/components/responses/Error'
   
   /v2/tonconnect/payload:
     get:
@@ -6442,6 +6464,23 @@ components:
             type: string
           example:
             TON: "-0.56%"
+    MarketTonRates:
+      type: object
+      required:
+        - market
+        - usd_price
+        - last_date_update
+      properties:
+        market:
+          type: string
+          example: "OKX"
+        usd_price:
+          type: number
+          example: 5.20
+        last_date_update:
+          type: integer
+          format: int64
+          example: 1668436763
   
   responses:
     Error:

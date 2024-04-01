@@ -354,6 +354,12 @@ type Handler interface {
 	//
 	// GET /v2/events/{event_id}/jettons
 	GetJettonsEvents(ctx context.Context, params GetJettonsEventsParams) (*Event, error)
+	// GetMarketsRates implements getMarketsRates operation.
+	//
+	// Get the TON price from markets.
+	//
+	// GET /v2/rates/markets
+	GetMarketsRates(ctx context.Context) (*GetMarketsRatesOK, error)
 	// GetNftCollection implements getNftCollection operation.
 	//
 	// Get NFT collection by collection address.

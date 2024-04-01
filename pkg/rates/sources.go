@@ -26,7 +26,10 @@ func (m *Mock) GetCurrentRates() (map[string]float64, error) {
 		bemo       string = "bemo"
 	)
 
-	marketsPrice := m.GetCurrentMarketsTonPrice()
+	marketsPrice, err := m.GetCurrentMarketsTonPrice()
+	if err != nil {
+		return rates, err
+	}
 	medianTonPriceToUsd, err := getMedianTonPrice(marketsPrice)
 	if err != nil {
 		return rates, err

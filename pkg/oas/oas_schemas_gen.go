@@ -5565,6 +5565,20 @@ func (s *GetInscriptionOpTemplateType) UnmarshalText(data []byte) error {
 	}
 }
 
+type GetMarketsRatesOK struct {
+	Markets []MarketTonRates `json:"markets"`
+}
+
+// GetMarkets returns the value of Markets.
+func (s *GetMarketsRatesOK) GetMarkets() []MarketTonRates {
+	return s.Markets
+}
+
+// SetMarkets sets the value of Markets.
+func (s *GetMarketsRatesOK) SetMarkets(val []MarketTonRates) {
+	s.Markets = val
+}
+
 type GetNftItemsByAddressesReq struct {
 	AccountIds []string `json:"account_ids"`
 }
@@ -7913,6 +7927,43 @@ func (s *JettonsBalances) GetBalances() []JettonBalance {
 // SetBalances sets the value of Balances.
 func (s *JettonsBalances) SetBalances(val []JettonBalance) {
 	s.Balances = val
+}
+
+// Ref: #/components/schemas/MarketTonRates
+type MarketTonRates struct {
+	Market         string  `json:"market"`
+	UsdPrice       float64 `json:"usd_price"`
+	LastDateUpdate int64   `json:"last_date_update"`
+}
+
+// GetMarket returns the value of Market.
+func (s *MarketTonRates) GetMarket() string {
+	return s.Market
+}
+
+// GetUsdPrice returns the value of UsdPrice.
+func (s *MarketTonRates) GetUsdPrice() float64 {
+	return s.UsdPrice
+}
+
+// GetLastDateUpdate returns the value of LastDateUpdate.
+func (s *MarketTonRates) GetLastDateUpdate() int64 {
+	return s.LastDateUpdate
+}
+
+// SetMarket sets the value of Market.
+func (s *MarketTonRates) SetMarket(val string) {
+	s.Market = val
+}
+
+// SetUsdPrice sets the value of UsdPrice.
+func (s *MarketTonRates) SetUsdPrice(val float64) {
+	s.UsdPrice = val
+}
+
+// SetLastDateUpdate sets the value of LastDateUpdate.
+func (s *MarketTonRates) SetLastDateUpdate(val int64) {
+	s.LastDateUpdate = val
 }
 
 // Ref: #/components/schemas/Message

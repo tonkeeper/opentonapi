@@ -10,7 +10,7 @@ import (
 type ratesSource interface {
 	GetRates(date int64) (map[string]float64, error)
 	GetRatesChart(token string, currency string, pointsCount int, startDate *int64, endDate *int64) ([][]any, error)
-	GetMarketsTonPrice() []Market
+	GetMarketsTonPrice() ([]Market, error)
 }
 
 type calculator struct {
@@ -50,7 +50,10 @@ func (c *calculator) refresh() {
 	weekAgo := today.AddDate(0, 0, -7).Unix()
 	monthAgo := today.AddDate(0, 0, -30).Unix()
 
-	marketsTonPrice := c.source.GetMarketsTonPrice()
+	marketsTonPrice, err := c.source.GetMarketsTonPrice()
+	if err != nil {
+		return
+	}
 
 	todayRates, err := c.source.GetRates(today.Unix())
 	if err != nil {
@@ -107,7 +110,7 @@ func (c *calculator) GetRatesChart(token string, currency string, pointsCount in
 	return c.source.GetRatesChart(token, currency, pointsCount, startDate, endDate)
 }
 
-func (c *calculator) GetMarketsTonPrice() []Market {
+func (c *calculator) GetMarketsTonPrice() ([]Market, error) {
 	return c.source.GetMarketsTonPrice()
 }
 
@@ -119,7 +122,7 @@ func (m Mock) GetRates(date int64) (map[string]float64, error) {
 	return m.GetCurrentRates()
 }
 
-func (m Mock) GetMarketsTonPrice() []Market {
+func (m Mock) GetMarketsTonPrice() ([]Market, error) {
 	return m.GetCurrentMarketsTonPrice()
 }
 
