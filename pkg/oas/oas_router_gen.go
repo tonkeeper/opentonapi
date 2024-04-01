@@ -2406,24 +2406,60 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 					return
 				}
 				switch elem[0] {
-				case '/': // Prefix: "/chart"
+				case '/': // Prefix: "/"
 					origElem := elem
-					if l := len("/chart"); len(elem) >= l && elem[0:l] == "/chart" {
+					if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
 						elem = elem[l:]
 					} else {
 						break
 					}
 
 					if len(elem) == 0 {
-						// Leaf node.
-						switch r.Method {
-						case "GET":
-							s.handleGetChartRatesRequest([0]string{}, elemIsEscaped, w, r)
-						default:
-							s.notAllowed(w, r, "GET")
+						break
+					}
+					switch elem[0] {
+					case 'c': // Prefix: "chart"
+						origElem := elem
+						if l := len("chart"); len(elem) >= l && elem[0:l] == "chart" {
+							elem = elem[l:]
+						} else {
+							break
 						}
 
-						return
+						if len(elem) == 0 {
+							// Leaf node.
+							switch r.Method {
+							case "GET":
+								s.handleGetChartRatesRequest([0]string{}, elemIsEscaped, w, r)
+							default:
+								s.notAllowed(w, r, "GET")
+							}
+
+							return
+						}
+
+						elem = origElem
+					case 'm': // Prefix: "markets"
+						origElem := elem
+						if l := len("markets"); len(elem) >= l && elem[0:l] == "markets" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						if len(elem) == 0 {
+							// Leaf node.
+							switch r.Method {
+							case "GET":
+								s.handleGetMarketsRatesRequest([0]string{}, elemIsEscaped, w, r)
+							default:
+								s.notAllowed(w, r, "GET")
+							}
+
+							return
+						}
+
+						elem = origElem
 					}
 
 					elem = origElem
@@ -5525,28 +5561,68 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 					}
 				}
 				switch elem[0] {
-				case '/': // Prefix: "/chart"
+				case '/': // Prefix: "/"
 					origElem := elem
-					if l := len("/chart"); len(elem) >= l && elem[0:l] == "/chart" {
+					if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
 						elem = elem[l:]
 					} else {
 						break
 					}
 
 					if len(elem) == 0 {
-						switch method {
-						case "GET":
-							// Leaf: GetChartRates
-							r.name = "GetChartRates"
-							r.summary = ""
-							r.operationID = "getChartRates"
-							r.pathPattern = "/v2/rates/chart"
-							r.args = args
-							r.count = 0
-							return r, true
-						default:
-							return
+						break
+					}
+					switch elem[0] {
+					case 'c': // Prefix: "chart"
+						origElem := elem
+						if l := len("chart"); len(elem) >= l && elem[0:l] == "chart" {
+							elem = elem[l:]
+						} else {
+							break
 						}
+
+						if len(elem) == 0 {
+							switch method {
+							case "GET":
+								// Leaf: GetChartRates
+								r.name = "GetChartRates"
+								r.summary = ""
+								r.operationID = "getChartRates"
+								r.pathPattern = "/v2/rates/chart"
+								r.args = args
+								r.count = 0
+								return r, true
+							default:
+								return
+							}
+						}
+
+						elem = origElem
+					case 'm': // Prefix: "markets"
+						origElem := elem
+						if l := len("markets"); len(elem) >= l && elem[0:l] == "markets" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						if len(elem) == 0 {
+							switch method {
+							case "GET":
+								// Leaf: GetMarketsRates
+								r.name = "GetMarketsRates"
+								r.summary = ""
+								r.operationID = "getMarketsRates"
+								r.pathPattern = "/v2/rates/markets"
+								r.args = args
+								r.count = 0
+								return r, true
+							default:
+								return
+							}
+						}
+
+						elem = origElem
 					}
 
 					elem = origElem

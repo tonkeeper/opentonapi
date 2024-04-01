@@ -14,6 +14,22 @@ import (
 	"github.com/tonkeeper/tongo/ton"
 )
 
+func (h *Handler) GetMarketsRates(ctx context.Context) (*oas.GetMarketsRatesOK, error) {
+	markets, err := h.ratesSource.GetMarketsTonPrice()
+	if err != nil {
+		return nil, toError(http.StatusBadRequest, err)
+	}
+	var converted []oas.MarketTonRates
+	for _, market := range markets {
+		converted = append(converted, oas.MarketTonRates{
+			Market:         market.Name,
+			UsdPrice:       market.UsdPrice,
+			LastDateUpdate: market.DateUpdate.Unix(),
+		})
+	}
+	return &oas.GetMarketsRatesOK{Markets: converted}, nil
+}
+
 func (h *Handler) GetChartRates(ctx context.Context, params oas.GetChartRatesParams) (*oas.GetChartRatesOK, error) {
 	var (
 		token              string

@@ -524,6 +524,15 @@ func (UnimplementedHandler) GetJettonsEvents(ctx context.Context, params GetJett
 	return r, ht.ErrNotImplemented
 }
 
+// GetMarketsRates implements getMarketsRates operation.
+//
+// Get the TON price from markets.
+//
+// GET /v2/rates/markets
+func (UnimplementedHandler) GetMarketsRates(ctx context.Context) (r *GetMarketsRatesOK, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // GetNftCollection implements getNftCollection operation.
 //
 // Get NFT collection by collection address.

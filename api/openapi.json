@@ -3691,6 +3691,29 @@
     ],
     "type": "object"
    },
+   "MarketTonRates": {
+    "properties": {
+     "last_date_update": {
+      "example": 1668436763,
+      "format": "int64",
+      "type": "integer"
+     },
+     "market": {
+      "example": "OKX",
+      "type": "string"
+     },
+     "usd_price": {
+      "example": 5.2,
+      "type": "number"
+     }
+    },
+    "required": [
+     "market",
+     "usd_price",
+     "last_date_update"
+    ],
+    "type": "object"
+   },
    "Message": {
     "properties": {
      "bounce": {
@@ -8822,6 +8845,41 @@
        }
       },
       "description": "token chart"
+     },
+     "default": {
+      "$ref": "#/components/responses/Error"
+     }
+    },
+    "tags": [
+     "Rates"
+    ]
+   }
+  },
+  "/v2/rates/markets": {
+   "get": {
+    "description": "Get the TON price from markets",
+    "operationId": "getMarketsRates",
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "markets": {
+           "items": {
+            "$ref": "#/components/schemas/MarketTonRates"
+           },
+           "type": "array"
+          }
+         },
+         "required": [
+          "markets"
+         ],
+         "type": "object"
+        }
+       }
+      },
+      "description": "markets rates"
      },
      "default": {
       "$ref": "#/components/responses/Error"

@@ -40,7 +40,7 @@ type Market struct {
 	DateUpdate            time.Time
 }
 
-func (m *Mock) GetCurrentMarketsTonPrice() []Market {
+func (m *Mock) GetCurrentMarketsTonPrice() ([]Market, error) {
 	now := time.Now()
 	markets := []Market{
 		{
@@ -100,7 +100,7 @@ func (m *Mock) GetCurrentMarketsTonPrice() []Market {
 	sort.Slice(markets, func(i, j int) bool {
 		return markets[i].ID > markets[j].ID
 	})
-	return markets
+	return markets, nil
 }
 
 func sendRequest(url, token string) (io.ReadCloser, error) {
