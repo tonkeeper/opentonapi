@@ -79,6 +79,10 @@ func fromTrace(trace *core.Trace) *Bubble {
 		btx.inputFrom = source
 		btx.init = msg.Init
 		initInterfaces = msg.InitInterfaces
+		if msg.IhrFee > 0 {
+			// we want to show this credit amount in TON Transfer action.
+			btx.inputAmount += msg.IhrFee
+		}
 	}
 	var inputAmount int64
 	if trace.Transaction.CreditPhase != nil {

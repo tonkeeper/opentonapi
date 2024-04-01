@@ -2,7 +2,7 @@
    "Actions": [
      {
        "TonTransfer": {
-         "Amount": 0,
+         "Amount": 3000000,
          "Comment": null,
          "EncryptedComment": null,
          "Recipient": "0:2cf3b5b8c891e517c9addbda1c0386a09ccacbb0e3faf630b51cfc8152325abb",
