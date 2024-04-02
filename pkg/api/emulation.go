@@ -52,18 +52,21 @@ func (h *Handler) RunEmulation(ctx context.Context, msgCh <-chan blockchain.ExtI
 	}
 }
 
-func (h *Handler) isEmulationAllowed(ctx context.Context, accountID tongo.AccountID) (bool, error) {
-	interfaces, err := h.storage.GetAccountInterfaces(ctx, accountID)
+func isHighload(version tongoWallet.Version) bool {
+	return version == tongoWallet.HighLoadV1R1 ||
+		version == tongoWallet.HighLoadV1R2 ||
+		version == tongoWallet.HighLoadV2R1 ||
+		version == tongoWallet.HighLoadV2R2 ||
+		version == tongoWallet.HighLoadV2
+}
+
+func (h *Handler) isEmulationAllowed(state tlb.ShardAccount, m tlb.Message) (bool, error) {
+	version, ok, err := tongoWallet.GetWalletVersion(state, m)
 	if err != nil {
 		return false, err
 	}
-	for _, iface := range interfaces {
-		if iface.Implements(abi.WalletHighloadV2R1) || iface.Implements(abi.WalletHighloadV2R2) {
-			return false, nil
-		}
-		if iface.Implements(abi.WalletHighloadV1R1) || iface.Implements(abi.WalletHighloadV1R2) {
-			return false, nil
-		}
+	if ok && isHighload(version) {
+		return false, nil
 	}
 	return true, nil
 }
@@ -94,7 +97,11 @@ func (h *Handler) addToMempool(ctx context.Context, bytesBoc []byte, shardAccoun
 	if err != nil {
 		return nil, err
 	}
-	allowed, err := h.isEmulationAllowed(ctx, *walletAddress)
+	state, err := h.storage.GetAccountState(ctx, *walletAddress)
+	if err != nil {
+		return nil, err
+	}
+	allowed, err := h.isEmulationAllowed(state, message)
 	if err != nil {
 		return shardAccount, err
 	}

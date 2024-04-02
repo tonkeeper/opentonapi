@@ -25,7 +25,6 @@ type storage interface {
 
 	// GetRawAccount returns low-level information about an account taken directly from the blockchain.
 	GetRawAccount(ctx context.Context, id tongo.AccountID) (*core.Account, error)
-	GetAccountInterfaces(ctx context.Context, id tongo.AccountID) ([]abi.ContractInterface, error)
 	GetContract(ctx context.Context, id tongo.AccountID) (*core.Contract, error)
 	// GetRawAccounts returns low-level information about several accounts taken directly from the blockchain.
 	GetRawAccounts(ctx context.Context, ids []tongo.AccountID) ([]*core.Account, error)
