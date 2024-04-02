@@ -4770,6 +4770,20 @@ components:
           $ref: '#/components/schemas/AccountAddress'
         jetton:
           $ref: '#/components/schemas/JettonPreview'
+        lock:
+          type: object
+          required:
+            - amount
+            - till
+          properties:
+            amount:
+              type: integer
+              format: int64
+              example: 1000000000
+            till:
+              type: integer
+              format: int64
+              example: 1678223064
     JettonsBalances:
       type: object
       required:
@@ -6090,20 +6104,6 @@ components:
           $ref: '#/components/schemas/JettonMetadata'
         verification:
           $ref: '#/components/schemas/JettonVerificationType'
-        lock:
-          type: object
-          required:
-            - amount
-            - till
-          properties:
-            amount:
-              type: integer
-              format: int64
-              example: 1000000000
-            till:
-              type: integer
-              format: int64
-              example: 1678223064
         holders_count:
           type: integer
           format: int32
