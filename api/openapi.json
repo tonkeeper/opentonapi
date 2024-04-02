@@ -3391,6 +3391,25 @@
       "format": "int32",
       "type": "integer"
      },
+     "lock": {
+      "properties": {
+       "amount": {
+        "example": 1000000000,
+        "format": "int64",
+        "type": "integer"
+       },
+       "till": {
+        "example": 1678223064,
+        "format": "int64",
+        "type": "integer"
+       }
+      },
+      "required": [
+       "amount",
+       "till"
+      ],
+      "type": "object"
+     },
      "metadata": {
       "$ref": "#/components/schemas/JettonMetadata"
      },

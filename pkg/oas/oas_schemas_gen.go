@@ -7283,6 +7283,7 @@ type JettonInfo struct {
 	TotalSupply  string                 `json:"total_supply"`
 	Metadata     JettonMetadata         `json:"metadata"`
 	Verification JettonVerificationType `json:"verification"`
+	Lock         OptJettonInfoLock      `json:"lock"`
 	HoldersCount int32                  `json:"holders_count"`
 }
 
@@ -7304,6 +7305,11 @@ func (s *JettonInfo) GetMetadata() JettonMetadata {
 // GetVerification returns the value of Verification.
 func (s *JettonInfo) GetVerification() JettonVerificationType {
 	return s.Verification
+}
+
+// GetLock returns the value of Lock.
+func (s *JettonInfo) GetLock() OptJettonInfoLock {
+	return s.Lock
 }
 
 // GetHoldersCount returns the value of HoldersCount.
@@ -7331,9 +7337,39 @@ func (s *JettonInfo) SetVerification(val JettonVerificationType) {
 	s.Verification = val
 }
 
+// SetLock sets the value of Lock.
+func (s *JettonInfo) SetLock(val OptJettonInfoLock) {
+	s.Lock = val
+}
+
 // SetHoldersCount sets the value of HoldersCount.
 func (s *JettonInfo) SetHoldersCount(val int32) {
 	s.HoldersCount = val
+}
+
+type JettonInfoLock struct {
+	Amount int64 `json:"amount"`
+	Till   int64 `json:"till"`
+}
+
+// GetAmount returns the value of Amount.
+func (s *JettonInfoLock) GetAmount() int64 {
+	return s.Amount
+}
+
+// GetTill returns the value of Till.
+func (s *JettonInfoLock) GetTill() int64 {
+	return s.Till
+}
+
+// SetAmount sets the value of Amount.
+func (s *JettonInfoLock) SetAmount(val int64) {
+	s.Amount = val
+}
+
+// SetTill sets the value of Till.
+func (s *JettonInfoLock) SetTill(val int64) {
+	s.Till = val
 }
 
 // Ref: #/components/schemas/JettonMetadata
@@ -11816,6 +11852,52 @@ func (o OptJettonBurnAction) Get() (v JettonBurnAction, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptJettonBurnAction) Or(d JettonBurnAction) JettonBurnAction {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptJettonInfoLock returns new OptJettonInfoLock with value set to v.
+func NewOptJettonInfoLock(v JettonInfoLock) OptJettonInfoLock {
+	return OptJettonInfoLock{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptJettonInfoLock is optional JettonInfoLock.
+type OptJettonInfoLock struct {
+	Value JettonInfoLock
+	Set   bool
+}
+
+// IsSet returns true if OptJettonInfoLock was set.
+func (o OptJettonInfoLock) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptJettonInfoLock) Reset() {
+	var v JettonInfoLock
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptJettonInfoLock) SetTo(v JettonInfoLock) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptJettonInfoLock) Get() (v JettonInfoLock, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptJettonInfoLock) Or(d JettonInfoLock) JettonInfoLock {
 	if v, ok := o.Get(); ok {
 		return v
 	}
