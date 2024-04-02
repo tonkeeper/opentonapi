@@ -334,6 +334,7 @@ func TestFindActions(t *testing.T) {
 			name:           "ihr fee",
 			hash:           "2da9737c4da572382f7a5abfdb923f223455280089f4b627c6cb028b2b8350d2",
 			filenamePrefix: "ihr-fee",
+			account:        "0:6ccd325a858c379693fae2bcaab1c2906831a4e10a6c3bb44ee8b615bca1d220",
 		},
 		{
 			name:           "failed transfer with gas fee 1 TON",

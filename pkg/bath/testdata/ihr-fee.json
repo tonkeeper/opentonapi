@@ -23,8 +23,9 @@
      {
        "Account": "0:6ccd325a858c379693fae2bcaab1c2906831a4e10a6c3bb44ee8b615bca1d220",
        "Ton": -9540202,
-       "Fee": 9540202,
+       "Fee": 6540202,
        "Jettons": null
      }
-   ]
+   ],
+   "Extra": -6540202
  }
