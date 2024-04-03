@@ -48,7 +48,7 @@ func (h *Handler) GetAccountJettonsBalances(ctx context.Context, params oas.GetA
 		}
 		if wallet.Lock != nil {
 			jettonBalance.Lock = oas.NewOptJettonBalanceLock(oas.JettonBalanceLock{
-				Amount: wallet.Balance.String(),
+				Amount: wallet.Lock.FullBalance.String(),
 				Till:   wallet.Lock.UnlockTime,
 			})
 		}
