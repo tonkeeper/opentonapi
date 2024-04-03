@@ -21,7 +21,7 @@ import (
 
 func toError(code int, err error) *oas.ErrorStatusCode {
 	msg := err.Error()
-	if strings.HasPrefix(err.Error(), "failed to connect to") {
+	if strings.HasPrefix(err.Error(), "failed to connect to") || strings.Contains(err.Error(), "host=") {
 		msg = "unknown error"
 	}
 	return &oas.ErrorStatusCode{StatusCode: code, Response: oas.Error{Error: msg}}

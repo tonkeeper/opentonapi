@@ -71,13 +71,10 @@ func fromTrace(trace *core.Trace) *Bubble {
 	}
 	var initInterfaces []abi.ContractInterface
 	if msg := trace.InMsg; msg != nil {
-		if msg.IhrFee > 0 {
-			// We want to include ihr_fee into msg.Value
-			msg.Value += msg.IhrFee
-		}
 		btx.bounce = msg.Bounce
 		btx.bounced = msg.Bounced
-		btx.inputAmount = msg.Value
+		btx.inputAmount += msg.Value
+		btx.inputAmount += msg.IhrFee
 		btx.opCode = msg.OpCode
 		btx.decodedBody = msg.DecodedBody
 		btx.inputFrom = source
@@ -111,11 +108,11 @@ func fromTrace(trace *core.Trace) *Bubble {
 			// That's why we add tons here
 			b.ValueFlow.AddTons(trace.Account, -c.InMsg.Value)
 		}
-		if c.InMsg.IhrFee > 0 {
-			// We want to include ihr_fee into msg.Value
-			aggregatedFee -= c.InMsg.IhrFee
-			b.ValueFlow.Accounts[trace.Account].Ton -= c.InMsg.IhrFee
-		}
+
+		// We want to include ihr_fee into msg.Value
+		aggregatedFee -= c.InMsg.IhrFee
+		b.ValueFlow.Accounts[trace.Account].Ton -= c.InMsg.IhrFee
+
 		b.Children[i] = fromTrace(c)
 	}
 	if actionPhase := trace.Transaction.ActionPhase; actionPhase != nil {
