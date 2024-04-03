@@ -46,6 +46,12 @@ func (h *Handler) GetAccountJettonsBalances(ctx context.Context, params oas.GetA
 			Balance:       wallet.Balance.String(),
 			WalletAddress: convertAccountAddress(wallet.Address, h.addressBook),
 		}
+		if wallet.Lock != nil {
+			jettonBalance.Lock = oas.NewOptJettonBalanceLock(oas.JettonBalanceLock{
+				Amount: wallet.Balance.String(),
+				Till:   wallet.Lock.UnlockTime,
+			})
+		}
 		rates := make(map[string]oas.TokenRates)
 		for _, currency := range currencies {
 			if rates, err = convertRates(rates, wallet.JettonAddress.ToRaw(), currency, todayRates, yesterdayRates, weekRates, monthRates); err != nil {

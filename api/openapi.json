@@ -3242,9 +3242,8 @@
      "lock": {
       "properties": {
        "amount": {
-        "example": 1000000000,
-        "format": "int64",
-        "type": "integer"
+        "example": 597968399,
+        "type": "string"
        },
        "till": {
         "example": 1678223064,

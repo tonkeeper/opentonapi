@@ -7038,12 +7038,12 @@ func (s *JettonBalance) SetLock(val OptJettonBalanceLock) {
 }
 
 type JettonBalanceLock struct {
-	Amount int64 `json:"amount"`
-	Till   int64 `json:"till"`
+	Amount string `json:"amount"`
+	Till   int64  `json:"till"`
 }
 
 // GetAmount returns the value of Amount.
-func (s *JettonBalanceLock) GetAmount() int64 {
+func (s *JettonBalanceLock) GetAmount() string {
 	return s.Amount
 }
 
@@ -7053,7 +7053,7 @@ func (s *JettonBalanceLock) GetTill() int64 {
 }
 
 // SetAmount sets the value of Amount.
-func (s *JettonBalanceLock) SetAmount(val int64) {
+func (s *JettonBalanceLock) SetAmount(val string) {
 	s.Amount = val
 }
 

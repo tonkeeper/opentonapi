@@ -21172,7 +21172,7 @@ func (s *JettonBalanceLock) Encode(e *jx.Encoder) {
 func (s *JettonBalanceLock) encodeFields(e *jx.Encoder) {
 	{
 		e.FieldStart("amount")
-		e.Int64(s.Amount)
+		e.Str(s.Amount)
 	}
 	{
 		e.FieldStart("till")
@@ -21197,8 +21197,8 @@ func (s *JettonBalanceLock) Decode(d *jx.Decoder) error {
 		case "amount":
 			requiredBitSet[0] |= 1 << 0
 			if err := func() error {
-				v, err := d.Int64()
-				s.Amount = int64(v)
+				v, err := d.Str()
+				s.Amount = string(v)
 				if err != nil {
 					return err
 				}

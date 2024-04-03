@@ -4777,9 +4777,8 @@ components:
             - till
           properties:
             amount:
-              type: integer
-              format: int64
-              example: 1000000000
+              type: string
+              example: 597968399
             till:
               type: integer
               format: int64

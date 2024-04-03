@@ -15,6 +15,7 @@ type JettonWallet struct {
 	// JettonAddress of a jetton master.
 	JettonAddress tongo.AccountID
 	Code          []byte
+	Lock          *JettonWalletLockData
 }
 
 type JettonHolder struct {
@@ -29,4 +30,9 @@ type JettonMaster struct {
 	Address     tongo.AccountID
 	TotalSupply big.Int
 	Mintable    bool
+}
+
+type JettonWalletLockData struct {
+	FullBalance decimal.Decimal
+	UnlockTime  int64
 }
