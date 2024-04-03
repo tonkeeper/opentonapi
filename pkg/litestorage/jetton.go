@@ -110,7 +110,7 @@ func (s *LiteStorage) GetJettonMasterData(ctx context.Context, master tongo.Acco
 	return core.JettonMaster{
 		Address:     master,
 		TotalSupply: big.Int(r.TotalSupply),
-		Mintable:    r.Mintable != 0,
+		Mintable:    r.Mintable,
 	}, nil
 }
 

@@ -7,6 +7,7 @@ import (
 	"github.com/tonkeeper/tongo/abi"
 	"github.com/tonkeeper/tongo/boc"
 	"github.com/tonkeeper/tongo/tlb"
+	"github.com/tonkeeper/tongo/ton"
 	walletTongo "github.com/tonkeeper/tongo/wallet"
 )
 
@@ -43,14 +44,14 @@ func ExtractRisk(version walletTongo.Version, msg *boc.Cell) (*Risk, error) {
 		var destination *tongo.AccountID
 		if m.Info.IntMsgInfo != nil {
 			tonValue = uint64(m.Info.IntMsgInfo.Value.Grams)
-			destination, err = tongo.AccountIDFromTlb(m.Info.IntMsgInfo.Dest)
+			destination, err = ton.AccountIDFromTlb(m.Info.IntMsgInfo.Dest)
 			if err != nil {
 				return nil, err
 			}
 		}
 		risk.Ton += tonValue
 		body := boc.Cell(m.Body.Value)
-		_, msgBody, err := abi.MessageDecoder(&body)
+		_, _, msgBody, err := abi.InternalMessageDecoder(&body, nil)
 		if err != nil {
 			continue
 		}

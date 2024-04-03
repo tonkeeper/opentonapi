@@ -195,7 +195,7 @@ func (s *LiteStorage) run(ch <-chan indexer.IDandBlock) {
 	}
 	for block := range ch {
 		for _, tx := range block.Block.AllTransactions() {
-			accountID := *tongo.NewAccountId(block.ID.Workchain, tx.AccountAddr)
+			accountID := *ton.NewAccountID(block.ID.Workchain, tx.AccountAddr)
 			if _, ok := s.trackingAccounts[accountID]; ok {
 				hash := tongo.Bits256(tx.Hash())
 				transaction, err := core.ConvertTransaction(accountID.Workchain, tongo.Transaction{Transaction: *tx, BlockID: block.ID})
