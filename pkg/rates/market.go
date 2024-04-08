@@ -119,7 +119,11 @@ func sendRequest(url, token string) (io.ReadCloser, error) {
 		return nil, err
 	}
 	if resp.StatusCode != http.StatusOK {
-		log.Errorf("[sendRequest] bad status code: %v, %v", resp.StatusCode, url)
+		var errRespBody string
+		if respBody, err := io.ReadAll(resp.Body); err == nil {
+			errRespBody = string(respBody)
+		}
+		log.Errorf("[sendRequest] bad status code: %v, %v, %v", resp.StatusCode, url, errRespBody)
 		return nil, fmt.Errorf("bad status code: %v", resp.StatusCode)
 	}
 	return resp.Body, nil
