@@ -140,12 +140,13 @@ func convertTransaction(t core.Transaction, book addressBook) oas.Transaction {
 	}
 	if t.ActionPhase != nil {
 		phase := oas.ActionPhase{
-			Success:        t.ActionPhase.Success,
-			ResultCode:     t.ActionPhase.ResultCode,
-			TotalActions:   int32(t.ActionPhase.TotalActions),
-			SkippedActions: int32(t.ActionPhase.SkippedActions),
-			FwdFees:        int64(t.ActionPhase.FwdFees),
-			TotalFees:      int64(t.ActionPhase.TotalFees),
+			Success:             t.ActionPhase.Success,
+			ResultCode:          t.ActionPhase.ResultCode,
+			TotalActions:        int32(t.ActionPhase.TotalActions),
+			SkippedActions:      int32(t.ActionPhase.SkippedActions),
+			FwdFees:             int64(t.ActionPhase.FwdFees),
+			TotalFees:           int64(t.ActionPhase.TotalFees),
+			ExitCodeDescription: g.Opt(convertExitCode(t.ActionPhase.ResultCode)),
 		}
 		tx.ActionPhase = oas.NewOptActionPhase(phase)
 	}
@@ -839,4 +840,28 @@ func convertValidatorSet(set tlb.ValidatorsSet) oas.OptValidatorsSet {
 		s.List = append(s.List, item)
 	}
 	return oas.NewOptValidatorsSet(s)
+}
+
+func convertExitCode(code int32) *string {
+	exitCodes := map[int32]string{
+		0:   "Ok",
+		1:   "Ok",
+		2:   "Stack underflow",
+		3:   "Stack overflow",
+		4:   "Integer overflow or division by zero",
+		5:   "Integer out of expected range",
+		6:   "Invalid opcode",
+		7:   "Type check error",
+		8:   "Cell overflow",
+		9:   "Cell underflow",
+		10:  "Dictionary error",
+		11:  "Unknown error",
+		12:  "Impossible situation error",
+		13:  "Out of gas error",
+		-14: "Out of gas error",
+	}
+	if msg, ok := exitCodes[code]; ok {
+		return &msg
+	}
+	return nil
 }
