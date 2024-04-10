@@ -1018,9 +1018,6 @@
    },
    "ActionPhase": {
     "properties": {
-     "exit_code_description": {
-      "type": "string"
-     },
      "fwd_fees": {
       "example": 1000,
       "format": "int64",
@@ -2392,6 +2389,9 @@
       "example": 0,
       "format": "int32",
       "type": "integer"
+     },
+     "exit_code_description": {
+      "type": "string"
      },
      "gas_fees": {
       "example": 1000,

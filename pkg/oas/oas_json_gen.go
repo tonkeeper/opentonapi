@@ -2067,22 +2067,15 @@ func (s *ActionPhase) encodeFields(e *jx.Encoder) {
 		e.FieldStart("total_fees")
 		e.Int64(s.TotalFees)
 	}
-	{
-		if s.ExitCodeDescription.Set {
-			e.FieldStart("exit_code_description")
-			s.ExitCodeDescription.Encode(e)
-		}
-	}
 }
 
-var jsonFieldsNameOfActionPhase = [7]string{
+var jsonFieldsNameOfActionPhase = [6]string{
 	0: "success",
 	1: "result_code",
 	2: "total_actions",
 	3: "skipped_actions",
 	4: "fwd_fees",
 	5: "total_fees",
-	6: "exit_code_description",
 }
 
 // Decode decodes ActionPhase from json.
@@ -2165,16 +2158,6 @@ func (s *ActionPhase) Decode(d *jx.Decoder) error {
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"total_fees\"")
-			}
-		case "exit_code_description":
-			if err := func() error {
-				s.ExitCodeDescription.Reset()
-				if err := s.ExitCodeDescription.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"exit_code_description\"")
 			}
 		default:
 			return d.Skip()
@@ -10952,9 +10935,15 @@ func (s *ComputePhase) encodeFields(e *jx.Encoder) {
 			s.ExitCode.Encode(e)
 		}
 	}
+	{
+		if s.ExitCodeDescription.Set {
+			e.FieldStart("exit_code_description")
+			s.ExitCodeDescription.Encode(e)
+		}
+	}
 }
 
-var jsonFieldsNameOfComputePhase = [7]string{
+var jsonFieldsNameOfComputePhase = [8]string{
 	0: "skipped",
 	1: "skip_reason",
 	2: "success",
@@ -10962,6 +10951,7 @@ var jsonFieldsNameOfComputePhase = [7]string{
 	4: "gas_used",
 	5: "vm_steps",
 	6: "exit_code",
+	7: "exit_code_description",
 }
 
 // Decode decodes ComputePhase from json.
@@ -11044,6 +11034,16 @@ func (s *ComputePhase) Decode(d *jx.Decoder) error {
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"exit_code\"")
+			}
+		case "exit_code_description":
+			if err := func() error {
+				s.ExitCodeDescription.Reset()
+				if err := s.ExitCodeDescription.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"exit_code_description\"")
 			}
 		default:
 			return d.Skip()

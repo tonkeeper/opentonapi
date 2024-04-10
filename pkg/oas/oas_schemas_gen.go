@@ -877,13 +877,12 @@ func (s *Action) SetSimplePreview(val ActionSimplePreview) {
 
 // Ref: #/components/schemas/ActionPhase
 type ActionPhase struct {
-	Success             bool      `json:"success"`
-	ResultCode          int32     `json:"result_code"`
-	TotalActions        int32     `json:"total_actions"`
-	SkippedActions      int32     `json:"skipped_actions"`
-	FwdFees             int64     `json:"fwd_fees"`
-	TotalFees           int64     `json:"total_fees"`
-	ExitCodeDescription OptString `json:"exit_code_description"`
+	Success        bool  `json:"success"`
+	ResultCode     int32 `json:"result_code"`
+	TotalActions   int32 `json:"total_actions"`
+	SkippedActions int32 `json:"skipped_actions"`
+	FwdFees        int64 `json:"fwd_fees"`
+	TotalFees      int64 `json:"total_fees"`
 }
 
 // GetSuccess returns the value of Success.
@@ -916,11 +915,6 @@ func (s *ActionPhase) GetTotalFees() int64 {
 	return s.TotalFees
 }
 
-// GetExitCodeDescription returns the value of ExitCodeDescription.
-func (s *ActionPhase) GetExitCodeDescription() OptString {
-	return s.ExitCodeDescription
-}
-
 // SetSuccess sets the value of Success.
 func (s *ActionPhase) SetSuccess(val bool) {
 	s.Success = val
@@ -949,11 +943,6 @@ func (s *ActionPhase) SetFwdFees(val int64) {
 // SetTotalFees sets the value of TotalFees.
 func (s *ActionPhase) SetTotalFees(val int64) {
 	s.TotalFees = val
-}
-
-// SetExitCodeDescription sets the value of ExitCodeDescription.
-func (s *ActionPhase) SetExitCodeDescription(val OptString) {
-	s.ExitCodeDescription = val
 }
 
 // Shortly describes what this action is about.
@@ -4036,13 +4025,14 @@ func (s *BouncePhaseType) UnmarshalText(data []byte) error {
 
 // Ref: #/components/schemas/ComputePhase
 type ComputePhase struct {
-	Skipped    bool                 `json:"skipped"`
-	SkipReason OptComputeSkipReason `json:"skip_reason"`
-	Success    OptBool              `json:"success"`
-	GasFees    OptInt64             `json:"gas_fees"`
-	GasUsed    OptInt64             `json:"gas_used"`
-	VMSteps    OptInt32             `json:"vm_steps"`
-	ExitCode   OptInt32             `json:"exit_code"`
+	Skipped             bool                 `json:"skipped"`
+	SkipReason          OptComputeSkipReason `json:"skip_reason"`
+	Success             OptBool              `json:"success"`
+	GasFees             OptInt64             `json:"gas_fees"`
+	GasUsed             OptInt64             `json:"gas_used"`
+	VMSteps             OptInt32             `json:"vm_steps"`
+	ExitCode            OptInt32             `json:"exit_code"`
+	ExitCodeDescription OptString            `json:"exit_code_description"`
 }
 
 // GetSkipped returns the value of Skipped.
@@ -4080,6 +4070,11 @@ func (s *ComputePhase) GetExitCode() OptInt32 {
 	return s.ExitCode
 }
 
+// GetExitCodeDescription returns the value of ExitCodeDescription.
+func (s *ComputePhase) GetExitCodeDescription() OptString {
+	return s.ExitCodeDescription
+}
+
 // SetSkipped sets the value of Skipped.
 func (s *ComputePhase) SetSkipped(val bool) {
 	s.Skipped = val
@@ -4113,6 +4108,11 @@ func (s *ComputePhase) SetVMSteps(val OptInt32) {
 // SetExitCode sets the value of ExitCode.
 func (s *ComputePhase) SetExitCode(val OptInt32) {
 	s.ExitCode = val
+}
+
+// SetExitCodeDescription sets the value of ExitCodeDescription.
+func (s *ComputePhase) SetExitCodeDescription(val OptString) {
+	s.ExitCodeDescription = val
 }
 
 // Ref: #/components/schemas/ComputeSkipReason

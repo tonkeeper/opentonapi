@@ -140,13 +140,12 @@ func convertTransaction(t core.Transaction, book addressBook) oas.Transaction {
 	}
 	if t.ActionPhase != nil {
 		phase := oas.ActionPhase{
-			Success:             t.ActionPhase.Success,
-			ResultCode:          t.ActionPhase.ResultCode,
-			TotalActions:        int32(t.ActionPhase.TotalActions),
-			SkippedActions:      int32(t.ActionPhase.SkippedActions),
-			FwdFees:             int64(t.ActionPhase.FwdFees),
-			TotalFees:           int64(t.ActionPhase.TotalFees),
-			ExitCodeDescription: g.Opt(convertExitCode(t.ActionPhase.ResultCode)),
+			Success:        t.ActionPhase.Success,
+			ResultCode:     t.ActionPhase.ResultCode,
+			TotalActions:   int32(t.ActionPhase.TotalActions),
+			SkippedActions: int32(t.ActionPhase.SkippedActions),
+			FwdFees:        int64(t.ActionPhase.FwdFees),
+			TotalFees:      int64(t.ActionPhase.TotalFees),
 		}
 		tx.ActionPhase = oas.NewOptActionPhase(phase)
 	}
@@ -172,6 +171,7 @@ func convertTransaction(t core.Transaction, book addressBook) oas.Transaction {
 			phase.GasUsed = oas.NewOptInt64(t.ComputePhase.GasUsed.Int64())
 			phase.VMSteps = oas.NewOptInt32(int32(t.ComputePhase.VmSteps))
 			phase.ExitCode = oas.NewOptInt32(t.ComputePhase.ExitCode)
+			phase.ExitCodeDescription = g.Opt(convertExitCode(t.ComputePhase.ExitCode))
 		}
 		tx.ComputePhase = oas.NewOptComputePhase(phase)
 	}

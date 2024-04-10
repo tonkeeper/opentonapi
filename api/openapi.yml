@@ -3356,6 +3356,8 @@ components:
           type: integer
           format: int32
           example: 0
+        exit_code_description:
+          type: string
     StoragePhase:
       type: object
       required:
@@ -3419,8 +3421,6 @@ components:
           type: integer
           format: int64
           example: 1000
-        exit_code_description:
-          type: string
     Transaction:
       type: object
       required:
