@@ -877,12 +877,13 @@ func (s *Action) SetSimplePreview(val ActionSimplePreview) {
 
 // Ref: #/components/schemas/ActionPhase
 type ActionPhase struct {
-	Success        bool  `json:"success"`
-	ResultCode     int32 `json:"result_code"`
-	TotalActions   int32 `json:"total_actions"`
-	SkippedActions int32 `json:"skipped_actions"`
-	FwdFees        int64 `json:"fwd_fees"`
-	TotalFees      int64 `json:"total_fees"`
+	Success             bool      `json:"success"`
+	ResultCode          int32     `json:"result_code"`
+	TotalActions        int32     `json:"total_actions"`
+	SkippedActions      int32     `json:"skipped_actions"`
+	FwdFees             int64     `json:"fwd_fees"`
+	TotalFees           int64     `json:"total_fees"`
+	ExitCodeDescription OptString `json:"exit_code_description"`
 }
 
 // GetSuccess returns the value of Success.
@@ -915,6 +916,11 @@ func (s *ActionPhase) GetTotalFees() int64 {
 	return s.TotalFees
 }
 
+// GetExitCodeDescription returns the value of ExitCodeDescription.
+func (s *ActionPhase) GetExitCodeDescription() OptString {
+	return s.ExitCodeDescription
+}
+
 // SetSuccess sets the value of Success.
 func (s *ActionPhase) SetSuccess(val bool) {
 	s.Success = val
@@ -943,6 +949,11 @@ func (s *ActionPhase) SetFwdFees(val int64) {
 // SetTotalFees sets the value of TotalFees.
 func (s *ActionPhase) SetTotalFees(val int64) {
 	s.TotalFees = val
+}
+
+// SetExitCodeDescription sets the value of ExitCodeDescription.
+func (s *ActionPhase) SetExitCodeDescription(val OptString) {
+	s.ExitCodeDescription = val
 }
 
 // Shortly describes what this action is about.

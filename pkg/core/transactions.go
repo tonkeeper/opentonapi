@@ -60,12 +60,13 @@ type TxCreditPhase struct {
 }
 
 type TxActionPhase struct {
-	Success        bool
-	ResultCode     int32
-	TotalActions   uint16
-	SkippedActions uint16
-	FwdFees        uint64
-	TotalFees      uint64
+	Success             bool
+	ResultCode          int32
+	TotalActions        uint16
+	SkippedActions      uint16
+	FwdFees             uint64
+	TotalFees           uint64
+	ExitCodeDescription string
 }
 
 type TxBouncePhase struct {

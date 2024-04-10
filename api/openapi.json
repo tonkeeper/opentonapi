@@ -1018,6 +1018,9 @@
    },
    "ActionPhase": {
     "properties": {
+     "exit_code_description": {
+      "type": "string"
+     },
      "fwd_fees": {
       "example": 1000,
       "format": "int64",

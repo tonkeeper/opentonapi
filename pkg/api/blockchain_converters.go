@@ -147,6 +147,9 @@ func convertTransaction(t core.Transaction, book addressBook) oas.Transaction {
 			FwdFees:        int64(t.ActionPhase.FwdFees),
 			TotalFees:      int64(t.ActionPhase.TotalFees),
 		}
+		if t.ActionPhase.ExitCodeDescription != "" {
+			phase.ExitCodeDescription = oas.NewOptString(t.ActionPhase.ExitCodeDescription)
+		}
 		tx.ActionPhase = oas.NewOptActionPhase(phase)
 	}
 	if t.StoragePhase != nil {
