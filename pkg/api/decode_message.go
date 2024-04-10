@@ -46,11 +46,13 @@ func convertToRawMessage(message tongoWallet.RawMessage) (oas.DecodedRawMessage,
 		payload.Message.SetOpCode(opcodeStr)
 	}
 	msgBody.ResetCounters()
-	opname, value, err := abi.MessageDecoder(&msgBody)
+	_, opname, value, err := abi.InternalMessageDecoder(&msgBody, nil)
 	if err != nil {
 		return payload, nil
 	}
-	payload.Message.SetDecodedOpName(oas.NewOptString(opname))
+	if opname != nil {
+		payload.Message.SetDecodedOpName(oas.NewOptString(*opname))
+	}
 	body, err := json.Marshal(value)
 	if err != nil {
 		return oas.DecodedRawMessage{}, err
