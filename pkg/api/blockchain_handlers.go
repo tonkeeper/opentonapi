@@ -161,7 +161,7 @@ func (h *Handler) GetBlockchainMasterchainTransactions(ctx context.Context, para
 			return nil, toError(http.StatusInternalServerError, err)
 		}
 		for _, tx := range txs {
-			result.Transactions = append(result.Transactions, convertTransaction(*tx, h.addressBook))
+			result.Transactions = append(result.Transactions, convertTransaction(*tx, nil, h.addressBook))
 		}
 	}
 	return &result, nil
@@ -180,7 +180,7 @@ func (h *Handler) GetBlockchainBlockTransactions(ctx context.Context, params oas
 		Transactions: make([]oas.Transaction, 0, len(transactions)),
 	}
 	for _, tx := range transactions {
-		res.Transactions = append(res.Transactions, convertTransaction(*tx, h.addressBook))
+		res.Transactions = append(res.Transactions, convertTransaction(*tx, nil, h.addressBook))
 	}
 	return &res, nil
 }
@@ -207,7 +207,7 @@ func (h *Handler) GetBlockchainTransaction(ctx context.Context, params oas.GetBl
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
-	transaction := convertTransaction(*txs, h.addressBook)
+	transaction := convertTransaction(*txs, nil, h.addressBook)
 	return &transaction, nil
 }
 
@@ -228,7 +228,7 @@ func (h *Handler) GetBlockchainTransactionByMessageHash(ctx context.Context, par
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
-	transaction := convertTransaction(*txs, h.addressBook)
+	transaction := convertTransaction(*txs, nil, h.addressBook)
 	return &transaction, nil
 }
 

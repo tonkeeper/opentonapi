@@ -8,6 +8,7 @@ import (
 	"math/big"
 	"sort"
 
+	"github.com/tonkeeper/tongo/abi"
 	"github.com/tonkeeper/tongo/tlb"
 	"github.com/tonkeeper/tongo/ton"
 	"go.uber.org/zap"
@@ -109,7 +110,7 @@ func convertBlockHeader(b core.BlockHeader) oas.BlockchainBlock {
 	return res
 }
 
-func convertTransaction(t core.Transaction, book addressBook) oas.Transaction {
+func convertTransaction(t core.Transaction, accountInterfaces []abi.ContractInterface, book addressBook) oas.Transaction {
 	tx := oas.Transaction{
 		Hash:            t.Hash.Hex(),
 		Lt:              int64(t.Lt),
@@ -171,7 +172,7 @@ func convertTransaction(t core.Transaction, book addressBook) oas.Transaction {
 			phase.GasUsed = oas.NewOptInt64(t.ComputePhase.GasUsed.Int64())
 			phase.VMSteps = oas.NewOptInt32(int32(t.ComputePhase.VmSteps))
 			phase.ExitCode = oas.NewOptInt32(t.ComputePhase.ExitCode)
-			phase.ExitCodeDescription = g.Opt(convertExitCode(t.ComputePhase.ExitCode))
+			phase.ExitCodeDescription = g.Opt(abi.GetContractError(nil, t.ComputePhase.ExitCode))
 		}
 		tx.ComputePhase = oas.NewOptComputePhase(phase)
 	}
@@ -840,28 +841,4 @@ func convertValidatorSet(set tlb.ValidatorsSet) oas.OptValidatorsSet {
 		s.List = append(s.List, item)
 	}
 	return oas.NewOptValidatorsSet(s)
-}
-
-func convertExitCode(code int32) *string {
-	exitCodes := map[int32]string{
-		0:   "Ok",
-		1:   "Ok",
-		2:   "Stack underflow",
-		3:   "Stack overflow",
-		4:   "Integer overflow or division by zero",
-		5:   "Integer out of expected range",
-		6:   "Invalid opcode",
-		7:   "Type check error",
-		8:   "Cell overflow",
-		9:   "Cell underflow",
-		10:  "Dictionary error",
-		11:  "Unknown error",
-		12:  "Impossible situation error",
-		13:  "Out of gas error",
-		-14: "Out of gas error",
-	}
-	if msg, ok := exitCodes[code]; ok {
-		return &msg
-	}
-	return nil
 }

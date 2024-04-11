@@ -46,7 +46,7 @@ func distinctAccounts(skip *tongo.AccountID, book addressBook, accounts ...*tong
 }
 
 func convertTrace(t *core.Trace, book addressBook) oas.Trace {
-	trace := oas.Trace{Transaction: convertTransaction(t.Transaction, book), Interfaces: g.ToStrings(t.AccountInterfaces)}
+	trace := oas.Trace{Transaction: convertTransaction(t.Transaction, t.AccountInterfaces, book), Interfaces: g.ToStrings(t.AccountInterfaces)}
 	for _, c := range t.Children {
 		trace.Children = append(trace.Children, convertTrace(c, book))
 	}

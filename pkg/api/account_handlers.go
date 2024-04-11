@@ -134,8 +134,12 @@ func (h *Handler) GetBlockchainAccountTransactions(ctx context.Context, params o
 	result := oas.Transactions{
 		Transactions: make([]oas.Transaction, len(txs)),
 	}
+	accountObject, err := h.storage.GetRawAccount(ctx, account.ID)
+	if err != nil {
+		return nil, err
+	}
 	for i, tx := range txs {
-		result.Transactions[i] = convertTransaction(*tx, h.addressBook)
+		result.Transactions[i] = convertTransaction(*tx, accountObject.Interfaces, h.addressBook)
 	}
 	return &result, nil
 }
