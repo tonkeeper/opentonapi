@@ -172,7 +172,7 @@ func convertTransaction(t core.Transaction, accountInterfaces []abi.ContractInte
 			phase.GasUsed = oas.NewOptInt64(t.ComputePhase.GasUsed.Int64())
 			phase.VMSteps = oas.NewOptInt32(int32(t.ComputePhase.VmSteps))
 			phase.ExitCode = oas.NewOptInt32(t.ComputePhase.ExitCode)
-			phase.ExitCodeDescription = g.Opt(abi.GetContractError(nil, t.ComputePhase.ExitCode))
+			phase.ExitCodeDescription = g.Opt(abi.GetContractError(accountInterfaces, t.ComputePhase.ExitCode))
 		}
 		tx.ComputePhase = oas.NewOptComputePhase(phase)
 	}
