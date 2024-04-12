@@ -6101,6 +6101,8 @@ components:
         total_supply:
           type: string
           example: 311500000000000
+        admin:
+          $ref: '#/components/schemas/AccountAddress'
         metadata:
           $ref: '#/components/schemas/JettonMetadata'
         verification:

@@ -30,6 +30,7 @@ type JettonMaster struct {
 	Address     tongo.AccountID
 	TotalSupply big.Int
 	Mintable    bool
+	Admin       *tongo.AccountID
 }
 
 type JettonWalletLockData struct {

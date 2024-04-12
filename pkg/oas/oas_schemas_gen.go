@@ -7328,6 +7328,7 @@ func (s *JettonHoldersAddressesItem) SetBalance(val string) {
 type JettonInfo struct {
 	Mintable     bool                   `json:"mintable"`
 	TotalSupply  string                 `json:"total_supply"`
+	Admin        OptAccountAddress      `json:"admin"`
 	Metadata     JettonMetadata         `json:"metadata"`
 	Verification JettonVerificationType `json:"verification"`
 	HoldersCount int32                  `json:"holders_count"`
@@ -7341,6 +7342,11 @@ func (s *JettonInfo) GetMintable() bool {
 // GetTotalSupply returns the value of TotalSupply.
 func (s *JettonInfo) GetTotalSupply() string {
 	return s.TotalSupply
+}
+
+// GetAdmin returns the value of Admin.
+func (s *JettonInfo) GetAdmin() OptAccountAddress {
+	return s.Admin
 }
 
 // GetMetadata returns the value of Metadata.
@@ -7366,6 +7372,11 @@ func (s *JettonInfo) SetMintable(val bool) {
 // SetTotalSupply sets the value of TotalSupply.
 func (s *JettonInfo) SetTotalSupply(val string) {
 	s.TotalSupply = val
+}
+
+// SetAdmin sets the value of Admin.
+func (s *JettonInfo) SetAdmin(val OptAccountAddress) {
+	s.Admin = val
 }
 
 // SetMetadata sets the value of Metadata.

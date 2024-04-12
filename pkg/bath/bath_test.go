@@ -132,6 +132,13 @@ func TestFindActions(t *testing.T) {
 			tongo.MustParseBlockID("(0,8000000000000000,40834551)"),
 			// failed transfer with gas fee 1 TON
 			tongo.MustParseBlockID("(0,a800000000000000,42491964)"),
+			// jetton mint
+			tongo.MustParseBlockID("(0,4000000000000000,42924030)"),
+			tongo.MustParseBlockID("(0,4000000000000000,42924031)"),
+			tongo.MustParseBlockID("(0,c000000000000000,42921231)"),
+			tongo.MustParseBlockID("(0,4000000000000000,42924037)"),
+			tongo.MustParseBlockID("(0,c000000000000000,42921237)"),
+			tongo.MustParseBlockID("(0,4000000000000000,42924043)"),
 		}),
 	)
 
@@ -341,6 +348,11 @@ func TestFindActions(t *testing.T) {
 			account:        "0:a4a11a78384f92154a0c12761f2f7bc5e374f703335f5bc8f24c2e32ce4f1c26",
 			hash:           "cf2eb5eb694dc3134cfb10135807efe08b4183267564c1fd04906526297e8c7f",
 			filenamePrefix: "failed-transfer-with-gas-fee-1-TON",
+		},
+		{
+			name:           "governance jetton mint",
+			hash:           "e27cdf1d6987a3e74dc8d9c4a52a5b22112fe3946d0dceadf8160b74f80b9d46",
+			filenamePrefix: "governance_jetton_mint",
 		},
 	} {
 		t.Run(c.name, func(t *testing.T) {

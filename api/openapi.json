@@ -3407,6 +3407,9 @@
    },
    "JettonInfo": {
     "properties": {
+     "admin": {
+      "$ref": "#/components/schemas/AccountAddress"
+     },
      "holders_count": {
       "example": 2000,
       "format": "int32",

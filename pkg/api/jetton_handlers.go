@@ -112,6 +112,7 @@ func (h *Handler) GetJettonInfo(ctx context.Context, params oas.GetJettonInfoPar
 		Metadata:     metadata,
 		Verification: oas.JettonVerificationType(meta.Verification),
 		HoldersCount: holdersCount[account.ID],
+		Admin:        convertOptAccountAddress(data.Admin, h.addressBook),
 	}, nil
 }
 
@@ -194,6 +195,7 @@ func (h *Handler) GetJettons(ctx context.Context, params oas.GetJettonsParams) (
 			Metadata:     metadata,
 			Verification: oas.JettonVerificationType(meta.Verification),
 			HoldersCount: jettonsHolders[master.Address],
+			Admin:        convertOptAccountAddress(master.Admin, h.addressBook),
 		}
 		results = append(results, info)
 	}

@@ -158,3 +158,32 @@ var JettonBurnStraw = Straw[BubbleJettonBurn]{
 		Optional: true,
 	},
 }
+
+var JettonMintStrawGovernance = Straw[BubbleJettonMint]{
+	CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.JettonMintMsgOp), HasInterface(abi.JettonMaster)},
+	Builder: func(newAction *BubbleJettonMint, bubble *Bubble) error {
+		tx := bubble.Info.(BubbleTx)
+		msg := tx.decodedBody.Value.(abi.JettonMintMsgBody)
+		dest, err := tongo.AccountIDFromTlb(msg.ToAddress)
+		if err == nil && dest != nil {
+			newAction.recipient = Account{Address: *dest}
+		}
+		return nil
+	},
+	SingleChild: &Straw[BubbleJettonMint]{
+		CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.JettonInternalTransferMsgOp), HasInterface(abi.JettonWallet)},
+		Builder: func(newAction *BubbleJettonMint, bubble *Bubble) error {
+			tx := bubble.Info.(BubbleTx)
+			msg := tx.decodedBody.Value.(abi.JettonInternalTransferMsgBody)
+			newAction.amount = msg.Amount
+			newAction.recipientWallet = tx.account.Address
+			newAction.master = tx.inputFrom.Address
+			newAction.success = tx.success
+			return nil
+		},
+		SingleChild: &Straw[BubbleJettonMint]{
+			Optional:   true,
+			CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.ExcessMsgOp)},
+		},
+	},
+}

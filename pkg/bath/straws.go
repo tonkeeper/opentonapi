@@ -16,6 +16,7 @@ var JettonTransfersBurnsMints = []StrawFunc{
 	JettonTransferClassicStraw.Merge,
 	JettonBurnStraw.Merge,
 	DedustLPJettonMintStraw.Merge,
+	JettonMintStrawGovernance.Merge,
 	WtonMintStraw.Merge,
 }
 
@@ -39,6 +40,7 @@ var DefaultStraws = []StrawFunc{
 	StrawAuctionBigGetgems.Merge,
 	StrawAuctionBuyGetgems.Merge,
 	DedustLPJettonMintStraw.Merge,
+	JettonMintStrawGovernance.Merge,
 	MegatonFiJettonSwap.Merge,
 	FindInitialSubscription,
 	FindExtendedSubscription,

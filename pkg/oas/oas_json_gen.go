@@ -22075,6 +22075,12 @@ func (s *JettonInfo) encodeFields(e *jx.Encoder) {
 		e.Str(s.TotalSupply)
 	}
 	{
+		if s.Admin.Set {
+			e.FieldStart("admin")
+			s.Admin.Encode(e)
+		}
+	}
+	{
 		e.FieldStart("metadata")
 		s.Metadata.Encode(e)
 	}
@@ -22088,12 +22094,13 @@ func (s *JettonInfo) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfJettonInfo = [5]string{
+var jsonFieldsNameOfJettonInfo = [6]string{
 	0: "mintable",
 	1: "total_supply",
-	2: "metadata",
-	3: "verification",
-	4: "holders_count",
+	2: "admin",
+	3: "metadata",
+	4: "verification",
+	5: "holders_count",
 }
 
 // Decode decodes JettonInfo from json.
@@ -22129,8 +22136,18 @@ func (s *JettonInfo) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"total_supply\"")
 			}
+		case "admin":
+			if err := func() error {
+				s.Admin.Reset()
+				if err := s.Admin.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"admin\"")
+			}
 		case "metadata":
-			requiredBitSet[0] |= 1 << 2
+			requiredBitSet[0] |= 1 << 3
 			if err := func() error {
 				if err := s.Metadata.Decode(d); err != nil {
 					return err
@@ -22140,7 +22157,7 @@ func (s *JettonInfo) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"metadata\"")
 			}
 		case "verification":
-			requiredBitSet[0] |= 1 << 3
+			requiredBitSet[0] |= 1 << 4
 			if err := func() error {
 				if err := s.Verification.Decode(d); err != nil {
 					return err
@@ -22150,7 +22167,7 @@ func (s *JettonInfo) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"verification\"")
 			}
 		case "holders_count":
-			requiredBitSet[0] |= 1 << 4
+			requiredBitSet[0] |= 1 << 5
 			if err := func() error {
 				v, err := d.Int32()
 				s.HoldersCount = int32(v)
@@ -22171,7 +22188,7 @@ func (s *JettonInfo) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b00011111,
+		0b00111011,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
