@@ -718,6 +718,9 @@ func (h *Handler) convertAction(ctx context.Context, viewer *tongo.AccountID, a 
 		if a.SmartContractExec.Operation != "" {
 			op = a.SmartContractExec.Operation
 		}
+		if op == "JettonCallTo" { //todo: remove after end of april 2024
+			op = "JettonAdminAction"
+		}
 		switch a.SmartContractExec.Operation {
 		case string(bath.TfUpdateValidatorSet):
 			op = "Update validator set"
