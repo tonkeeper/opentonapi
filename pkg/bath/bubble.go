@@ -8,16 +8,18 @@ import (
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
 	"github.com/tonkeeper/tongo/tlb"
+	"github.com/tonkeeper/tongo/ton"
 )
 
 // Bubble represents a transaction in the beginning.
 // But we can merge neighbour bubbles together
 // if we find a known action pattern like an NFT Transfer or a SmartContractExecution in a trace.
 type Bubble struct {
-	Info      actioner
-	Accounts  []tongo.AccountID
-	Children  []*Bubble
-	ValueFlow *ValueFlow
+	Info        actioner
+	Accounts    []tongo.AccountID
+	Children    []*Bubble
+	ValueFlow   *ValueFlow
+	Transaction []ton.Bits256
 }
 
 // ContractDeployment holds information about initialization of a contract.
@@ -97,6 +99,7 @@ func fromTrace(trace *core.Trace) *Bubble {
 				},
 			},
 		},
+		Transaction: []ton.Bits256{trace.Hash},
 	}
 	for _, outMsg := range trace.OutMsgs {
 		b.ValueFlow.AddTons(trace.Account, -outMsg.Value)
@@ -127,8 +130,9 @@ func fromTrace(trace *core.Trace) *Bubble {
 				Success:               true,
 				AccountInitInterfaces: initInterfaces,
 			},
-			Accounts:  []tongo.AccountID{trace.Account},
-			ValueFlow: &ValueFlow{},
+			Accounts:    []tongo.AccountID{trace.Account},
+			ValueFlow:   &ValueFlow{},
+			Transaction: []ton.Bits256{trace.Hash},
 		})
 	}
 	b.ValueFlow.Accounts[trace.Account].Ton -= aggregatedFee

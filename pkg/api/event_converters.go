@@ -431,7 +431,11 @@ func (h *Handler) convertDomainRenew(ctx context.Context, d *bath.DnsRenewAction
 
 func (h *Handler) convertAction(ctx context.Context, viewer *tongo.AccountID, a bath.Action, acceptLanguage oas.OptString) (oas.Action, bool, error) {
 	action := oas.Action{
-		Type: oas.ActionType(a.Type),
+		Type:             oas.ActionType(a.Type),
+		BaseTransactions: make([]string, len(a.BaseTransactions)),
+	}
+	for i, t := range a.BaseTransactions {
+		action.BaseTransactions[i] = t.Hex()
 	}
 	var spamDetected bool
 	if a.Success {

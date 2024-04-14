@@ -643,6 +643,7 @@ type Action struct {
 	InscriptionTransfer   OptInscriptionTransferAction   `json:"InscriptionTransfer"`
 	InscriptionMint       OptInscriptionMintAction       `json:"InscriptionMint"`
 	SimplePreview         ActionSimplePreview            `json:"simple_preview"`
+	BaseTransactions      []string                       `json:"base_transactions"`
 }
 
 // GetType returns the value of Type.
@@ -760,6 +761,11 @@ func (s *Action) GetSimplePreview() ActionSimplePreview {
 	return s.SimplePreview
 }
 
+// GetBaseTransactions returns the value of BaseTransactions.
+func (s *Action) GetBaseTransactions() []string {
+	return s.BaseTransactions
+}
+
 // SetType sets the value of Type.
 func (s *Action) SetType(val ActionType) {
 	s.Type = val
@@ -873,6 +879,11 @@ func (s *Action) SetInscriptionMint(val OptInscriptionMintAction) {
 // SetSimplePreview sets the value of SimplePreview.
 func (s *Action) SetSimplePreview(val ActionSimplePreview) {
 	s.SimplePreview = val
+}
+
+// SetBaseTransactions sets the value of BaseTransactions.
+func (s *Action) SetBaseTransactions(val []string) {
+	s.BaseTransactions = val
 }
 
 // Ref: #/components/schemas/ActionPhase

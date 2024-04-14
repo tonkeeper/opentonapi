@@ -4960,6 +4960,7 @@ components:
         - type
         - status
         - simple_preview
+        - base_transactions
       properties:
         type:
           type: string
@@ -5034,6 +5035,11 @@ components:
           $ref: '#/components/schemas/InscriptionMintAction'
         simple_preview:
           $ref: '#/components/schemas/ActionSimplePreview'
+        base_transactions:
+          type: array
+          items:
+            type: string
+            example: e8b0e3fee4a26bd2317ac1f9952fcdc87dc08fdb617656b5202416323337372e
     TonTransferAction:
       type: object
       required:

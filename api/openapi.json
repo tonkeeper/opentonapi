@@ -970,6 +970,13 @@
      "WithdrawStakeRequest": {
       "$ref": "#/components/schemas/WithdrawStakeRequestAction"
      },
+     "base_transactions": {
+      "items": {
+       "example": "e8b0e3fee4a26bd2317ac1f9952fcdc87dc08fdb617656b5202416323337372e",
+       "type": "string"
+      },
+      "type": "array"
+     },
      "simple_preview": {
       "$ref": "#/components/schemas/ActionSimplePreview"
      },
@@ -1012,7 +1019,8 @@
     "required": [
      "type",
      "status",
-     "simple_preview"
+     "simple_preview",
+     "base_transactions"
     ],
     "type": "object"
    },

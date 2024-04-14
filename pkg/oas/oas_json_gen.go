@@ -1709,9 +1709,17 @@ func (s *Action) encodeFields(e *jx.Encoder) {
 		e.FieldStart("simple_preview")
 		s.SimplePreview.Encode(e)
 	}
+	{
+		e.FieldStart("base_transactions")
+		e.ArrStart()
+		for _, elem := range s.BaseTransactions {
+			e.Str(elem)
+		}
+		e.ArrEnd()
+	}
 }
 
-var jsonFieldsNameOfAction = [23]string{
+var jsonFieldsNameOfAction = [24]string{
 	0:  "type",
 	1:  "status",
 	2:  "TonTransfer",
@@ -1735,6 +1743,7 @@ var jsonFieldsNameOfAction = [23]string{
 	20: "InscriptionTransfer",
 	21: "InscriptionMint",
 	22: "simple_preview",
+	23: "base_transactions",
 }
 
 // Decode decodes Action from json.
@@ -1976,6 +1985,26 @@ func (s *Action) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"simple_preview\"")
 			}
+		case "base_transactions":
+			requiredBitSet[2] |= 1 << 7
+			if err := func() error {
+				s.BaseTransactions = make([]string, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem string
+					v, err := d.Str()
+					elem = string(v)
+					if err != nil {
+						return err
+					}
+					s.BaseTransactions = append(s.BaseTransactions, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"base_transactions\"")
+			}
 		default:
 			return d.Skip()
 		}
@@ -1988,7 +2017,7 @@ func (s *Action) Decode(d *jx.Decoder) error {
 	for i, mask := range [3]uint8{
 		0b00000011,
 		0b00000000,
-		0b01000000,
+		0b11000000,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
