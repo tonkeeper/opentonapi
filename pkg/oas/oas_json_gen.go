@@ -34158,6 +34158,10 @@ func (s *Transaction) encodeFields(e *jx.Encoder) {
 		e.Int64(s.TotalFees)
 	}
 	{
+		e.FieldStart("end_balance")
+		e.Int64(s.EndBalance)
+	}
+	{
 		e.FieldStart("transaction_type")
 		s.TransactionType.Encode(e)
 	}
@@ -34239,7 +34243,7 @@ func (s *Transaction) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfTransaction = [23]string{
+var jsonFieldsNameOfTransaction = [24]string{
 	0:  "hash",
 	1:  "lt",
 	2:  "account",
@@ -34248,21 +34252,22 @@ var jsonFieldsNameOfTransaction = [23]string{
 	5:  "orig_status",
 	6:  "end_status",
 	7:  "total_fees",
-	8:  "transaction_type",
-	9:  "state_update_old",
-	10: "state_update_new",
-	11: "in_msg",
-	12: "out_msgs",
-	13: "block",
-	14: "prev_trans_hash",
-	15: "prev_trans_lt",
-	16: "compute_phase",
-	17: "storage_phase",
-	18: "credit_phase",
-	19: "action_phase",
-	20: "bounce_phase",
-	21: "aborted",
-	22: "destroyed",
+	8:  "end_balance",
+	9:  "transaction_type",
+	10: "state_update_old",
+	11: "state_update_new",
+	12: "in_msg",
+	13: "out_msgs",
+	14: "block",
+	15: "prev_trans_hash",
+	16: "prev_trans_lt",
+	17: "compute_phase",
+	18: "storage_phase",
+	19: "credit_phase",
+	20: "action_phase",
+	21: "bounce_phase",
+	22: "aborted",
+	23: "destroyed",
 }
 
 // Decode decodes Transaction from json.
@@ -34364,8 +34369,20 @@ func (s *Transaction) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"total_fees\"")
 			}
-		case "transaction_type":
+		case "end_balance":
 			requiredBitSet[1] |= 1 << 0
+			if err := func() error {
+				v, err := d.Int64()
+				s.EndBalance = int64(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"end_balance\"")
+			}
+		case "transaction_type":
+			requiredBitSet[1] |= 1 << 1
 			if err := func() error {
 				if err := s.TransactionType.Decode(d); err != nil {
 					return err
@@ -34375,7 +34392,7 @@ func (s *Transaction) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"transaction_type\"")
 			}
 		case "state_update_old":
-			requiredBitSet[1] |= 1 << 1
+			requiredBitSet[1] |= 1 << 2
 			if err := func() error {
 				v, err := d.Str()
 				s.StateUpdateOld = string(v)
@@ -34387,7 +34404,7 @@ func (s *Transaction) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"state_update_old\"")
 			}
 		case "state_update_new":
-			requiredBitSet[1] |= 1 << 2
+			requiredBitSet[1] |= 1 << 3
 			if err := func() error {
 				v, err := d.Str()
 				s.StateUpdateNew = string(v)
@@ -34409,7 +34426,7 @@ func (s *Transaction) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"in_msg\"")
 			}
 		case "out_msgs":
-			requiredBitSet[1] |= 1 << 4
+			requiredBitSet[1] |= 1 << 5
 			if err := func() error {
 				s.OutMsgs = make([]Message, 0)
 				if err := d.Arr(func(d *jx.Decoder) error {
@@ -34427,7 +34444,7 @@ func (s *Transaction) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"out_msgs\"")
 			}
 		case "block":
-			requiredBitSet[1] |= 1 << 5
+			requiredBitSet[1] |= 1 << 6
 			if err := func() error {
 				v, err := d.Str()
 				s.Block = string(v)
@@ -34509,7 +34526,7 @@ func (s *Transaction) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"bounce_phase\"")
 			}
 		case "aborted":
-			requiredBitSet[2] |= 1 << 5
+			requiredBitSet[2] |= 1 << 6
 			if err := func() error {
 				v, err := d.Bool()
 				s.Aborted = bool(v)
@@ -34521,7 +34538,7 @@ func (s *Transaction) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"aborted\"")
 			}
 		case "destroyed":
-			requiredBitSet[2] |= 1 << 6
+			requiredBitSet[2] |= 1 << 7
 			if err := func() error {
 				v, err := d.Bool()
 				s.Destroyed = bool(v)
@@ -34543,8 +34560,8 @@ func (s *Transaction) Decode(d *jx.Decoder) error {
 	var failures []validate.FieldError
 	for i, mask := range [3]uint8{
 		0b11111111,
-		0b00110111,
-		0b01100000,
+		0b01101111,
+		0b11000000,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
