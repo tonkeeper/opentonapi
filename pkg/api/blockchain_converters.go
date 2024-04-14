@@ -120,6 +120,7 @@ func convertTransaction(t core.Transaction, accountInterfaces []abi.ContractInte
 		OrigStatus:      oas.AccountStatus(t.OrigStatus),
 		EndStatus:       oas.AccountStatus(t.EndStatus),
 		TotalFees:       t.TotalFee,
+		EndBalance:      t.EndBalance,
 		TransactionType: oas.TransactionType(t.Type),
 		StateUpdateOld:  t.StateHashUpdate.OldHash.Hex(),
 		StateUpdateNew:  t.StateHashUpdate.NewHash.Hex(),

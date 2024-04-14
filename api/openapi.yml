@@ -3427,6 +3427,7 @@ components:
         - hash
         - lt
         - account
+        - end_balance
         - success
         - utime
         - orig_status
@@ -3461,6 +3462,10 @@ components:
         end_status:
           $ref: '#/components/schemas/AccountStatus'
         total_fees:
+          type: integer
+          format: int64
+          example: 25713146000001
+        end_balance:
           type: integer
           format: int64
           example: 25713146000001

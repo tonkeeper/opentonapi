@@ -4961,6 +4961,11 @@
       "example": true,
       "type": "boolean"
      },
+     "end_balance": {
+      "example": 25713146000001,
+      "format": "int64",
+      "type": "integer"
+     },
      "end_status": {
       "$ref": "#/components/schemas/AccountStatus"
      },
@@ -5027,6 +5032,7 @@
      "hash",
      "lt",
      "account",
+     "end_balance",
      "success",
      "utime",
      "orig_status",

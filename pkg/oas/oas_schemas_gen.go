@@ -14784,6 +14784,7 @@ type Transaction struct {
 	OrigStatus      AccountStatus      `json:"orig_status"`
 	EndStatus       AccountStatus      `json:"end_status"`
 	TotalFees       int64              `json:"total_fees"`
+	EndBalance      int64              `json:"end_balance"`
 	TransactionType TransactionType    `json:"transaction_type"`
 	StateUpdateOld  string             `json:"state_update_old"`
 	StateUpdateNew  string             `json:"state_update_new"`
@@ -14839,6 +14840,11 @@ func (s *Transaction) GetEndStatus() AccountStatus {
 // GetTotalFees returns the value of TotalFees.
 func (s *Transaction) GetTotalFees() int64 {
 	return s.TotalFees
+}
+
+// GetEndBalance returns the value of EndBalance.
+func (s *Transaction) GetEndBalance() int64 {
+	return s.EndBalance
 }
 
 // GetTransactionType returns the value of TransactionType.
@@ -14954,6 +14960,11 @@ func (s *Transaction) SetEndStatus(val AccountStatus) {
 // SetTotalFees sets the value of TotalFees.
 func (s *Transaction) SetTotalFees(val int64) {
 	s.TotalFees = val
+}
+
+// SetEndBalance sets the value of EndBalance.
+func (s *Transaction) SetEndBalance(val int64) {
+	s.EndBalance = val
 }
 
 // SetTransactionType sets the value of TransactionType.

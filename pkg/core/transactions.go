@@ -92,6 +92,8 @@ type Transaction struct {
 	OrigStatus tlb.AccountStatus
 	EndStatus  tlb.AccountStatus
 
+	EndBalance int64
+
 	PrevTransHash tongo.Bits256
 	PrevTransLt   uint64
 
