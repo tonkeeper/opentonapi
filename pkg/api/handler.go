@@ -51,6 +51,8 @@ type Handler struct {
 
 	// mempoolEmulateIgnoreAccounts, we don't track pending transactions for this list of accounts.
 	mempoolEmulateIgnoreAccounts map[tongo.AccountID]struct{}
+	// mempoolEmulationAllowedAccounts, we allow emulation for some highload wallets.
+	mempoolEmulationAllowedAccounts map[tongo.AccountID]struct{}
 
 	// need to blacklist BoCs for avoiding spamming
 	blacklistedBocCache cache.Cache[[32]byte, struct{}]
@@ -69,16 +71,17 @@ func (h *Handler) NewError(ctx context.Context, err error) *oas.ErrorStatusCode 
 
 // Options configures behavior of a Handler instance.
 type Options struct {
-	storage          storage
-	chainState       chainState
-	addressBook      addressBook
-	msgSender        messageSender
-	executor         executor
-	limits           Limits
-	spamFilter       spamFilter
-	ratesSource      ratesSource
-	tonConnectSecret string
-	ctxToDetails     ctxToDetails
+	storage                  storage
+	chainState               chainState
+	addressBook              addressBook
+	msgSender                messageSender
+	executor                 executor
+	limits                   Limits
+	spamFilter               spamFilter
+	ratesSource              ratesSource
+	tonConnectSecret         string
+	ctxToDetails             ctxToDetails
+	emulationAllowedAccounts map[ton.AccountID]struct{}
 }
 
 type Option func(o *Options)
@@ -86,6 +89,11 @@ type Option func(o *Options)
 func WithStorage(s storage) Option {
 	return func(o *Options) {
 		o.storage = s
+	}
+}
+func WithEmulationAllowedAccounts(accounts map[ton.AccountID]struct{}) Option {
+	return func(o *Options) {
+		o.emulationAllowedAccounts = accounts
 	}
 }
 func WithChainState(state chainState) Option {
@@ -143,7 +151,9 @@ func WithContextToDetails(ctxToDetails ctxToDetails) Option {
 }
 
 func NewHandler(logger *zap.Logger, opts ...Option) (*Handler, error) {
-	options := &Options{}
+	options := &Options{
+		emulationAllowedAccounts: map[ton.AccountID]struct{}{},
+	}
 	for _, o := range opts {
 		o(options)
 	}
@@ -200,9 +210,10 @@ func NewHandler(logger *zap.Logger, opts ...Option) (*Handler, error) {
 		mempoolEmulateIgnoreAccounts: map[tongo.AccountID]struct{}{
 			tongo.MustParseAddress("0:0000000000000000000000000000000000000000000000000000000000000000").ID: {},
 		},
-		blacklistedBocCache: cache.NewLRUCache[[32]byte, struct{}](100000, "blacklisted_boc_cache"),
-		getMethodsCache:     cache.NewLRUCache[string, *oas.MethodExecutionResult](100000, "get_methods_cache"),
-		tonConnect:          tonConnect,
+		mempoolEmulationAllowedAccounts: options.emulationAllowedAccounts,
+		blacklistedBocCache:             cache.NewLRUCache[[32]byte, struct{}](100000, "blacklisted_boc_cache"),
+		getMethodsCache:                 cache.NewLRUCache[string, *oas.MethodExecutionResult](100000, "get_methods_cache"),
+		tonConnect:                      tonConnect,
 	}, nil
 }
 
