@@ -7,6 +7,7 @@ import (
 
 	"github.com/tonkeeper/opentonapi/pkg/chainstate"
 	pkgTesting "github.com/tonkeeper/opentonapi/pkg/testing"
+	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/liteapi"
 
 	"github.com/stretchr/testify/require"
@@ -216,7 +217,12 @@ func TestHandler_GetTransactions(t *testing.T) {
 			require.Nil(t, err)
 			liteStorage, err := litestorage.NewLiteStorage(logger, cli)
 			require.Nil(t, err)
-			h, err := NewHandler(logger, WithStorage(liteStorage), WithExecutor(liteStorage), WithAddressBook(&mockAddressBook{}))
+			book := &mockAddressBook{
+				OnGetAddressInfoByAddress: func(a tongo.AccountID) (addressbook.KnownAddress, bool) {
+					return addressbook.KnownAddress{}, false
+				},
+			}
+			h, err := NewHandler(logger, WithStorage(liteStorage), WithExecutor(liteStorage), WithAddressBook(book))
 			require.Nil(t, err)
 			res, err := h.GetBlockchainBlockTransactions(context.Background(), tt.params)
 			require.Nil(t, err)
