@@ -60,7 +60,10 @@ func isHighload(version tongoWallet.Version) bool {
 		version == tongoWallet.HighLoadV2
 }
 
-func (h *Handler) isEmulationAllowed(state tlb.ShardAccount, m tlb.Message) (bool, error) {
+func (h *Handler) isEmulationAllowed(accountID ton.AccountID, state tlb.ShardAccount, m tlb.Message) (bool, error) {
+	if _, ok := h.addressBook.GetAddressInfoByAddress(accountID); ok {
+		return true, nil
+	}
 	version, ok, err := tongoWallet.GetWalletVersion(state, m)
 	if err != nil {
 		return false, err
@@ -101,7 +104,7 @@ func (h *Handler) addToMempool(ctx context.Context, bytesBoc []byte, shardAccoun
 	if err != nil {
 		return nil, err
 	}
-	allowed, err := h.isEmulationAllowed(state, message)
+	allowed, err := h.isEmulationAllowed(*walletAddress, state, message)
 	if err != nil {
 		return shardAccount, err
 	}
