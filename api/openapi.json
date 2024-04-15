@@ -1036,6 +1036,9 @@
       "format": "int32",
       "type": "integer"
      },
+     "result_code_description": {
+      "type": "string"
+     },
      "skipped_actions": {
       "example": 5,
       "format": "int32",

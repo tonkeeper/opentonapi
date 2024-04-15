@@ -142,12 +142,13 @@ func convertTransaction(t core.Transaction, accountInterfaces []abi.ContractInte
 	}
 	if t.ActionPhase != nil {
 		phase := oas.ActionPhase{
-			Success:        t.ActionPhase.Success,
-			ResultCode:     t.ActionPhase.ResultCode,
-			TotalActions:   int32(t.ActionPhase.TotalActions),
-			SkippedActions: int32(t.ActionPhase.SkippedActions),
-			FwdFees:        int64(t.ActionPhase.FwdFees),
-			TotalFees:      int64(t.ActionPhase.TotalFees),
+			Success:               t.ActionPhase.Success,
+			ResultCode:            t.ActionPhase.ResultCode,
+			TotalActions:          int32(t.ActionPhase.TotalActions),
+			SkippedActions:        int32(t.ActionPhase.SkippedActions),
+			FwdFees:               int64(t.ActionPhase.FwdFees),
+			TotalFees:             int64(t.ActionPhase.TotalFees),
+			ResultCodeDescription: g.Opt(convertActionPhaseResultCode(t.ActionPhase.ResultCode)),
 		}
 		tx.ActionPhase = oas.NewOptActionPhase(phase)
 	}
@@ -842,4 +843,23 @@ func convertValidatorSet(set tlb.ValidatorsSet) oas.OptValidatorsSet {
 		s.List = append(s.List, item)
 	}
 	return oas.NewOptValidatorsSet(s)
+}
+
+func convertActionPhaseResultCode(code int32) *string {
+	resultCodes := map[int32]string{
+		32:  "Invalid action list format",
+		-32: "Method ID not found",
+		33:  "Action list too long",
+		34:  "Unsupported action",
+		35:  "Invalid Source address",
+		36:  "Invalid Destination address",
+		37:  "Insufficient TON",
+		38:  "Insufficient extra-currencies",
+		40:  "Insufficient funds",
+		43:  "Maximum cells/tree depth exceeded",
+	}
+	if msg, ok := resultCodes[code]; ok {
+		return &msg
+	}
+	return nil
 }
