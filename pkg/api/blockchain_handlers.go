@@ -24,7 +24,7 @@ import (
 func (h *Handler) ReduceIndexingLatency(ctx context.Context) (*oas.ServiceStatus, error) {
 	indexingLatency, err := h.storage.ReduceIndexingLatency(ctx)
 	if errors.Is(err, core.ErrEntityNotFound) {
-		return nil, toError(http.StatusInternalServerError, err)
+		return nil, toError(http.StatusNotFound, err)
 	}
 	var restOnline = true
 	if err != nil {
@@ -141,8 +141,11 @@ func (h *Handler) GetBlockchainMasterchainBlocks(ctx context.Context, params oas
 	}
 	for i, id := range blockIDs {
 		block, err := h.storage.GetBlockHeader(ctx, id)
+		if errors.Is(err, core.ErrEntityNotFound) {
+			return nil, toError(http.StatusNotFound, err)
+		}
 		if err != nil {
-			return nil, toError(http.StatusInternalServerError, err) //block should be in db so we shouldn't check notFound error
+			return nil, toError(http.StatusInternalServerError, err)
 		}
 		result.Blocks[i] = convertBlockHeader(*block)
 	}
@@ -157,6 +160,9 @@ func (h *Handler) GetBlockchainMasterchainTransactions(ctx context.Context, para
 	var result oas.Transactions
 	for _, id := range blockIDs {
 		txs, err := h.storage.GetBlockTransactions(ctx, id)
+		if errors.Is(err, core.ErrEntityNotFound) {
+			return nil, toError(http.StatusNotFound, err)
+		}
 		if err != nil {
 			return nil, toError(http.StatusInternalServerError, err)
 		}
@@ -173,6 +179,9 @@ func (h *Handler) GetBlockchainBlockTransactions(ctx context.Context, params oas
 		return nil, toError(http.StatusBadRequest, err)
 	}
 	transactions, err := h.storage.GetBlockTransactions(ctx, blockID)
+	if errors.Is(err, core.ErrEntityNotFound) {
+		return nil, toError(http.StatusNotFound, err)
+	}
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
@@ -467,8 +476,8 @@ func (h *Handler) GetBlockchainValidators(ctx context.Context) (*oas.Validators,
 				continue
 			}
 			validators.Validators = append(validators.Validators, oas.Validator{
-				Stake:       int64(v.Stake),
-				MaxFactor:   int64(v.MaxFactor),
+				Stake:       v.Stake,
+				MaxFactor:   v.MaxFactor,
 				Address:     v.Address.ToRaw(),
 				AdnlAddress: v.AdnlAddr,
 			})
