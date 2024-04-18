@@ -196,6 +196,15 @@ func (h *Handler) GetEvent(ctx context.Context, params oas.GetEventParams) (*oas
 	return &event, nil
 }
 
+func contains[T comparable](sl []T, s T) bool {
+	for i := range sl {
+		if sl[i] == s {
+			return true
+		}
+	}
+	return false
+}
+
 func (h *Handler) GetAccountEvents(ctx context.Context, params oas.GetAccountEventsParams) (*oas.AccountEvents, error) {
 	account, err := tongo.ParseAddress(params.AccountID)
 	if err != nil {
@@ -238,9 +247,9 @@ func (h *Handler) GetAccountEvents(ctx context.Context, params oas.GetAccountEve
 		memTraces, _ := h.mempoolEmulate.accountsTraces.Get(account.ID)
 		i := 0
 		for _, hash := range memTraces {
-			tx, err := h.storage.SearchTransactionByMessageHash(ctx, hash)
+			tx, _ := h.storage.SearchTransactionByMessageHash(ctx, hash)
 			trace, prs := h.mempoolEmulate.traces.Get(hash)
-			if (err == nil && !slices.Contains(skippedInProgress, tx)) || !prs { //if err is nil it's already processed. If !prs we can't do anything
+			if (tx != nil && !contains(skippedInProgress, *tx)) || !prs { //if err is nil it's already processed. If !prs we can't do anything
 				h.mempoolEmulate.traces.Delete(hash)
 				continue
 			}
