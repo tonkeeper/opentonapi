@@ -16,6 +16,7 @@ import (
 	"github.com/tonkeeper/opentonapi/pkg/blockchain"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/tlb"
+	"github.com/tonkeeper/tongo/ton"
 	"github.com/tonkeeper/tongo/tontest"
 	"github.com/tonkeeper/tongo/txemulator"
 	"golang.org/x/exp/slices"
@@ -208,6 +209,7 @@ func (h *Handler) GetAccountEvents(ctx context.Context, params oas.GetAccountEve
 	events := make([]oas.AccountEvent, 0, len(traceIDs))
 
 	var lastLT uint64
+	var skippedInProgress []ton.Bits256
 	for _, traceID := range traceIDs {
 		lastLT = traceID.Lt
 		trace, err := h.storage.GetTrace(ctx, traceID.Hash)
@@ -219,6 +221,7 @@ func (h *Handler) GetAccountEvents(ctx context.Context, params oas.GetAccountEve
 			return nil, toError(http.StatusInternalServerError, err)
 		}
 		if trace.InProgress() {
+			skippedInProgress = append(skippedInProgress, traceID.Hash)
 			continue
 		}
 		result, err := bath.FindActions(ctx, trace, bath.ForAccount(account.ID), bath.WithInformationSource(h.storage))
@@ -235,9 +238,9 @@ func (h *Handler) GetAccountEvents(ctx context.Context, params oas.GetAccountEve
 		memTraces, _ := h.mempoolEmulate.accountsTraces.Get(account.ID)
 		i := 0
 		for _, hash := range memTraces {
-			_, err = h.storage.SearchTransactionByMessageHash(ctx, hash)
+			tx, err := h.storage.SearchTransactionByMessageHash(ctx, hash)
 			trace, prs := h.mempoolEmulate.traces.Get(hash)
-			if err == nil || !prs { //if err is nil it's already processed. If !prs we can't do anything
+			if (err == nil && !slices.Contains(skippedInProgress, tx)) || !prs { //if err is nil it's already processed. If !prs we can't do anything
 				h.mempoolEmulate.traces.Delete(hash)
 				continue
 			}
