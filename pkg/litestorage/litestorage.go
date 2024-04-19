@@ -199,21 +199,21 @@ func (s *LiteStorage) run(ch <-chan indexer.IDandBlock) {
 		for _, tx := range block.Block.AllTransactions() {
 			accountID := *tongo.NewAccountId(block.ID.Workchain, tx.AccountAddr)
 			// s.logger.Info("Storing tx run -> NewAccountId")
-			// if _, ok := s.trackingAccounts[accountID]; ok {
-			hash := tongo.Bits256(tx.Hash())
-			transaction, err := core.ConvertTransaction(accountID.Workchain, tongo.Transaction{Transaction: *tx, BlockID: block.ID})
-			if err != nil {
-				s.logger.Error("failed to process tx",
-					zap.String("tx-hash", hash.Hex()),
-					zap.Error(err))
-				continue
+			if _, ok := s.trackingAccounts[accountID]; ok {
+				hash := tongo.Bits256(tx.Hash())
+				transaction, err := core.ConvertTransaction(accountID.Workchain, tongo.Transaction{Transaction: *tx, BlockID: block.ID})
+				if err != nil {
+					s.logger.Error("failed to process tx",
+						zap.String("tx-hash", hash.Hex()),
+						zap.Error(err))
+					continue
+				}
+				s.logger.Info("Storing transaction", zap.String("tx-hash", hash.Hex()))
+				s.transactionsIndexByHash.Store(hash, transaction)
+				if createLT, ok := extractInMsgCreatedLT(accountID, tx); ok {
+					s.transactionsByInMsgLT.Store(createLT, hash)
+				}
 			}
-			s.logger.Info("Storing transaction", zap.String("tx-hash", hash.Hex()))
-			s.transactionsIndexByHash.Store(hash, transaction)
-			if createLT, ok := extractInMsgCreatedLT(accountID, tx); ok {
-				s.transactionsByInMsgLT.Store(createLT, hash)
-			}
-			// }
 		}
 	}
 }
