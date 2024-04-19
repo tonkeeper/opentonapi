@@ -1,0 +1,16 @@
+version: "3"
+services:
+  opentonapi_service:
+    image: opentonapi_service
+    build:
+      network: host
+      context: .
+      dockerfile: Dockerfile
+    container_name: opentonapi-service
+    restart: always
+    network_mode: host
+    ports:
+      - 8081:8081
+      - 9010:9010
+    env_file:
+      - path: ./.env

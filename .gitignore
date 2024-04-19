@@ -1,3 +1,4 @@
 cover.out
 *.output.json
 scripts/
+.env
