@@ -161,6 +161,7 @@ func NewLiteStorage(log *zap.Logger, cli *liteapi.Client, opts ...Option) (*Lite
 
 	blockIterator := iter.Iterator[tongo.BlockID]{MaxGoroutines: storage.maxGoroutines}
 	blockIterator.ForEach(o.preloadBlocks, func(id *tongo.BlockID) {
+		log.Info("NewLiteStorage -> storage.preloadBlock")
 		if err := storage.preloadBlock(*id); err != nil {
 			log.Error("failed to preload block",
 				zap.String("blockID", id.String()),
@@ -169,6 +170,7 @@ func NewLiteStorage(log *zap.Logger, cli *liteapi.Client, opts ...Option) (*Lite
 	})
 	iterator := iter.Iterator[tongo.AccountID]{MaxGoroutines: storage.maxGoroutines}
 	iterator.ForEach(o.preloadAccounts, func(accountID *tongo.AccountID) {
+		log.Info("NewLiteStorage -> storage.preloadAccount")
 		if err := storage.preloadAccount(*accountID); err != nil {
 			log.Error("failed to preload account",
 				zap.String("accountID", accountID.String()),
@@ -196,20 +198,22 @@ func (s *LiteStorage) run(ch <-chan indexer.IDandBlock) {
 	for block := range ch {
 		for _, tx := range block.Block.AllTransactions() {
 			accountID := *tongo.NewAccountId(block.ID.Workchain, tx.AccountAddr)
-			if _, ok := s.trackingAccounts[accountID]; ok {
-				hash := tongo.Bits256(tx.Hash())
-				transaction, err := core.ConvertTransaction(accountID.Workchain, tongo.Transaction{Transaction: *tx, BlockID: block.ID})
-				if err != nil {
-					s.logger.Error("failed to process tx",
-						zap.String("tx-hash", hash.Hex()),
-						zap.Error(err))
-					continue
-				}
-				s.transactionsIndexByHash.Store(hash, transaction)
-				if createLT, ok := extractInMsgCreatedLT(accountID, tx); ok {
-					s.transactionsByInMsgLT.Store(createLT, hash)
-				}
+			// s.logger.Info("Storing tx run -> NewAccountId")
+			// if _, ok := s.trackingAccounts[accountID]; ok {
+			hash := tongo.Bits256(tx.Hash())
+			transaction, err := core.ConvertTransaction(accountID.Workchain, tongo.Transaction{Transaction: *tx, BlockID: block.ID})
+			if err != nil {
+				s.logger.Error("failed to process tx",
+					zap.String("tx-hash", hash.Hex()),
+					zap.Error(err))
+				continue
 			}
+			s.logger.Info("Storing transaction", zap.String("tx-hash", hash.Hex()))
+			s.transactionsIndexByHash.Store(hash, transaction)
+			if createLT, ok := extractInMsgCreatedLT(accountID, tx); ok {
+				s.transactionsByInMsgLT.Store(createLT, hash)
+			}
+			// }
 		}
 	}
 }
@@ -292,6 +296,7 @@ func (s *LiteStorage) preloadAccount(a tongo.AccountID) error {
 			return err
 		}
 		hash := tongo.Bits256(tx.Hash())
+		s.logger.Info("Storing tx [preloadAccount]", zap.String("tx-hash", hash.Hex()))
 		s.transactionsIndexByHash.Store(hash, t)
 		if createLT, ok := extractInMsgCreatedLT(a, &tx.Transaction); ok {
 			s.transactionsByInMsgLT.Store(createLT, hash)
@@ -321,6 +326,7 @@ func (s *LiteStorage) preloadBlock(id tongo.BlockID) error {
 			return err
 		}
 		hash := tongo.Bits256(tx.Hash())
+		s.logger.Info("Storing tx [preloadBlock]", zap.String("tx-hash", hash.Hex()))
 		s.transactionsIndexByHash.Store(hash, t)
 		if createLT, ok := extractInMsgCreatedLT(accountID, tx); ok {
 			s.transactionsByInMsgLT.Store(createLT, hash)
