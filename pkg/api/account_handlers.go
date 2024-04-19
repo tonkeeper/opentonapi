@@ -13,6 +13,7 @@ import (
 	"strings"
 
 	"github.com/cespare/xxhash/v2"
+	"github.com/tonkeeper/opentonapi/pkg/references"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
 	"github.com/tonkeeper/tongo/boc"
@@ -248,6 +249,10 @@ func (h *Handler) SearchAccounts(ctx context.Context, params oas.SearchAccountsP
 			Preview: account.Preview,
 		})
 	}
+
+	sort.Slice(response.Addresses, func(i, j int) bool {
+		return response.Addresses[i].Address == references.USDT.ToRaw()
+	})
 
 	return &response, nil
 }
