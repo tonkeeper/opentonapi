@@ -478,7 +478,7 @@ func convertedDedustPoolResponse(tonApiToken string, tonPrice float64, respBody 
 		if secondAsset.Metadata != nil {
 			secondReserveDecimals = secondAsset.Metadata.Decimals
 		} else {
-			url := fmt.Sprintf("https://tonapi.io/v2/jettons/%v", account.ToRaw())
+			url := fmt.Sprintf("http://127.0.0.1:8081/v2/jettons/%v", account.ToRaw())
 			jettonInfoRespBody, err := sendRequest(url, tonApiToken)
 			if err != nil {
 				log.Errorf("[convertedDedustPoolResponse] failed to get jetton info: %v", err)

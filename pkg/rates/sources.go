@@ -91,7 +91,7 @@ func getMedianTonPrice(marketsPrice []Market) (float64, error) {
 // getBemoPrice it is used to get the price of the Bemo jetton from the contract.
 // We are using the TonApi, because the standard liteserver executor is incapable of invoking methods on the account
 func getBemoPrice(account tongo.AccountID) (tongo.AccountID, float64, error) {
-	resp, err := http.Get(fmt.Sprintf("https://tonapi.io/v2/blockchain/accounts/%v/methods/get_full_data", account.ToRaw()))
+	resp, err := http.Get(fmt.Sprintf("hhttp://127.0.0.1:8081/v2/blockchain/accounts/%v/methods/get_full_data", account.ToRaw()))
 	if err != nil {
 		log.Errorf("[getBemoPrice] can't load price")
 		return tongo.AccountID{}, 0, err
@@ -135,7 +135,7 @@ func getBemoPrice(account tongo.AccountID) (tongo.AccountID, float64, error) {
 // getTonstakersPrice is used to retrieve the price and token address of an account on the Tonstakers pool.
 // We are using the TonApi, because the standard liteserver executor is incapable of invoking methods on the account
 func getTonstakersPrice(pool tongo.AccountID) (tongo.AccountID, float64, error) {
-	resp, err := http.Get(fmt.Sprintf("https://tonapi.io/v2/blockchain/accounts/%v/methods/get_pool_full_data", pool.ToRaw()))
+	resp, err := http.Get(fmt.Sprintf("hhttp://127.0.0.1:8081/v2/blockchain/accounts/%v/methods/get_pool_full_data", pool.ToRaw()))
 	if err != nil {
 		log.Errorf("[getTonstakersPrice] can't load price")
 		return tongo.AccountID{}, 0, err
