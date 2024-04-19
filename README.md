@@ -35,5 +35,14 @@ ACCOUNTS="comma-separated-list-of-raw-account-addresses" make run
 ```
 
 ## Docker
-
-docker run -d -p8081:8081 tonkeeper/opentonapi 
+Create an .env file in the directory and use enviroment variables listed above, example:
+```
+PORT=8081
+LOG_LEVEL=INFO
+LITE_SERVERS=127.0.0.1:8431:your-public-key-here
+```
+Run with docker compose:
+```sh
+docker compose up -d --build
+```
+This will build an image named `opentonapi_service` and run it in the `opentonapi-service` container.
