@@ -40,6 +40,9 @@ type IDandBlock struct {
 func (idx *Indexer) Run(ctx context.Context, channels []chan IDandBlock) {
 	var chunk *chunk
 	for {
+		// indexer loop
+		// indexer watch
+		// watch new block
 		time.Sleep(200 * time.Millisecond)
 		info, err := idx.cli.GetMasterchainInfo(ctx)
 		if err != nil {
