@@ -16,79 +16,55 @@ type BubbleUnSubscription struct {
 	Success                               bool
 }
 
-func FindInitialSubscription(bubble *Bubble) bool {
-	txBubble, ok := bubble.Info.(BubbleTx)
-	if !ok {
-		return false
-	}
-	if !txBubble.operation(abi.PaymentRequestResponseMsgOp) {
-		return false
-	}
-	newBubble := Bubble{
-		Accounts:  append(bubble.Accounts, txBubble.account.Address),
-		ValueFlow: bubble.ValueFlow,
-	}
-	var beneficiary, subscriber Account
-	if txBubble.inputFrom != nil {
-		subscriber = *txBubble.inputFrom
-	}
-	var success bool
-	newBubble.Children = ProcessChildren(bubble.Children,
-		func(child *Bubble) *Merge {
-			tx, ok := child.Info.(BubbleTx)
-			if !ok {
-				return nil
-			}
-			if !tx.operation(abi.SubscriptionPaymentMsgOp) {
-				return nil
-			}
-			success = true
-			beneficiary = tx.account
-			newBubble.ValueFlow.Merge(child.ValueFlow)
-			newBubble.Accounts = append(newBubble.Accounts, tx.account.Address)
-			return &Merge{children: child.Children}
-		})
-	newBubble.Info = BubbleSubscription{
-		Subscriber:   subscriber,
-		Subscription: txBubble.account,
-		Beneficiary:  beneficiary,
-		Amount:       txBubble.inputAmount,
-		Success:      success,
-		First:        len(txBubble.init) != 0,
-	}
-	*bubble = newBubble
-	return true
+var InitialSubscriptionStraw = Straw[BubbleSubscription]{
+	CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.PaymentRequestResponseMsgOp), AmountInterval(1, 1<<62)},
+	Builder: func(newAction *BubbleSubscription, bubble *Bubble) error {
+		tx := bubble.Info.(BubbleTx)
+		newAction.Subscriber = *tx.inputFrom
+		newAction.Subscription = tx.account
+		newAction.Amount = tx.inputAmount
+		newAction.First = len(tx.init) != 0
+		return nil
+	},
+	SingleChild: &Straw[BubbleSubscription]{
+		CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.SubscriptionPaymentMsgOp)},
+		Builder: func(newAction *BubbleSubscription, bubble *Bubble) error {
+			newAction.Success = true
+			newAction.Beneficiary = bubble.Info.(BubbleTx).account
+			return nil
+		},
+	},
 }
 
-func FindExtendedSubscription(bubble *Bubble) bool {
-	txBubble, ok := bubble.Info.(BubbleTx)
-	if !ok ||
-		!txBubble.account.Is(abi.SubscriptionV1) ||
-		len(bubble.Children) != 1 ||
-		len(bubble.Children[0].Children) != 1 {
-		return false
-	}
-	commandBubble := bubble.Children[0]
-	command, ok := commandBubble.Info.(BubbleTx)
-	if !ok {
-		return false
-	}
-	subscriptionBubble := commandBubble.Children[0]
-	subscription, ok := subscriptionBubble.Info.(BubbleSubscription)
-	if !ok {
-		return false
-	}
-	if !command.operation(abi.PaymentRequestMsgOp) {
-		return false
-	}
-	request := command.decodedBody.Value.(abi.PaymentRequestMsgBody)
-	subscription.Amount = int64(request.Amount.Grams)
-	subscription.First = false
-	subscriptionBubble.ValueFlow.Merge(bubble.ValueFlow)
-	subscriptionBubble.ValueFlow.Merge(commandBubble.ValueFlow)
-	subscriptionBubble.Info = subscription
-	*bubble = *subscriptionBubble
-	return false
+var ExtendedSubscriptionStraw = Straw[BubbleSubscription]{
+	CheckFuncs: []bubbleCheck{IsTx, HasInterface(abi.SubscriptionV1)},
+	Builder: func(newAction *BubbleSubscription, bubble *Bubble) error {
+		tx := bubble.Info.(BubbleTx)
+		newAction.Subscription = tx.account
+		return nil
+	},
+	SingleChild: &Straw[BubbleSubscription]{
+		CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.PaymentRequestMsgOp)},
+		Builder: func(newAction *BubbleSubscription, bubble *Bubble) error {
+			tx := bubble.Info.(BubbleTx)
+			request := tx.decodedBody.Value.(abi.PaymentRequestMsgBody)
+			newAction.Subscriber = tx.account
+			newAction.Success = tx.success
+			newAction.Amount = int64(request.Amount.Grams)
+			return nil
+		},
+		SingleChild: &Straw[BubbleSubscription]{
+			Optional:   true,
+			CheckFuncs: []bubbleCheck{Is(BubbleSubscription{})},
+			Builder: func(newAction *BubbleSubscription, bubble *Bubble) error {
+				sub := bubble.Info.(BubbleSubscription)
+				newAction.First = false
+				newAction.Beneficiary = sub.Beneficiary
+				newAction.Success = true
+				return nil
+			},
+		},
+	},
 }
 
 func (b BubbleSubscription) ToAction() (action *Action) {
@@ -105,39 +81,29 @@ func (b BubbleSubscription) ToAction() (action *Action) {
 	}
 }
 
-func FindUnSubscription(bubble *Bubble) bool {
-	if len(bubble.Children) != 1 ||
-		len(bubble.Children[0].Children) != 1 {
-		return false
-	}
-	secondBubble := bubble.Children[0]
-	thirdBubble := bubble.Children[0].Children[0]
-	firstTX, ok1 := bubble.Info.(BubbleTx)
-	secondTX, ok2 := secondBubble.Info.(BubbleTx)
-	thirdTX, ok3 := thirdBubble.Info.(BubbleTx)
-	if !(ok1 && ok2 && ok3) {
-		return false
-	}
-	if !(secondTX.operation(abi.WalletPluginDestructMsgOp) && thirdTX.operation(abi.WalletPluginDestructMsgOp)) {
-		return false
-	}
-	newBubble := Bubble{
-		Accounts:  append(bubble.Accounts, firstTX.account.Address, secondTX.account.Address, thirdTX.account.Address),
-		ValueFlow: bubble.ValueFlow,
-	}
-	var success bool
-	newBubble.Children = thirdBubble.Children
-	newBubble.ValueFlow.Merge(bubble.ValueFlow)
-	newBubble.ValueFlow.Merge(secondBubble.ValueFlow)
-	newBubble.ValueFlow.Merge(thirdBubble.ValueFlow)
-	newBubble.Info = BubbleUnSubscription{
-		Subscriber:   firstTX.account,
-		Subscription: secondTX.account,
-		Beneficiary:  thirdTX.account,
-		Success:      success,
-	}
-	*bubble = newBubble
-	return true
+var UnSubscriptionStraw = Straw[BubbleUnSubscription]{
+	CheckFuncs: []bubbleCheck{IsTx},
+	Builder: func(newAction *BubbleUnSubscription, bubble *Bubble) error {
+		newAction.Subscriber = bubble.Info.(BubbleTx).account
+		return nil
+	},
+	SingleChild: &Straw[BubbleUnSubscription]{
+		CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.WalletPluginDestructMsgOp)},
+		Builder: func(newAction *BubbleUnSubscription, bubble *Bubble) error {
+			tx := bubble.Info.(BubbleTx)
+			newAction.Subscription = tx.account
+			newAction.Success = tx.success
+			return nil
+		},
+		SingleChild: &Straw[BubbleUnSubscription]{
+			Optional:   true,
+			CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.WalletPluginDestructMsgOp)},
+			Builder: func(newAction *BubbleUnSubscription, bubble *Bubble) error {
+				newAction.Beneficiary = bubble.Info.(BubbleTx).account
+				return nil
+			},
+		},
+	},
 }
 
 func (b BubbleUnSubscription) ToAction() (action *Action) {

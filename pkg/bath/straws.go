@@ -7,54 +7,61 @@ import (
 	"github.com/tonkeeper/tongo/ton"
 )
 
-// StrawFunc extracts information from the given bubble and its children and modifies the bubble if needed.
-// If the bubble is modified this function return true.
-type StrawFunc func(bubble *Bubble) (success bool)
-
-var JettonTransfersBurnsMints = []StrawFunc{
-	JettonTransferPTONStraw.Merge,
-	JettonTransferClassicStraw.Merge,
-	JettonBurnStraw.Merge,
-	DedustLPJettonMintStraw.Merge,
-	JettonMintStrawGovernance.Merge,
-	WtonMintStraw.Merge,
+type Merger interface {
+	// Merge extracts information from the given bubble and its children and modifies the bubble if needed.
+	// If the bubble is modified this function return true.
+	Merge(bubble *Bubble) (success bool)
 }
 
-var NFTStraws = []StrawFunc{
-	NftTransferStraw.Merge,
-	NftTransferNotifyStraw.Merge,
+var JettonTransfersBurnsMints = []Merger{
+	JettonTransferPTONStraw,
+	JettonTransferClassicStraw,
+	JettonBurnStraw,
+	DedustLPJettonMintStraw,
+	JettonMintStrawGovernance,
+	WtonMintStraw,
 }
 
-var DefaultStraws = []StrawFunc{
-	NftTransferStraw.Merge,
-	NftTransferNotifyStraw.Merge,
-	JettonTransferPTONStraw.Merge,
-	JettonTransferClassicStraw.Merge,
-	JettonBurnStraw.Merge,
-	WtonMintStraw.Merge,
-	NftPurchaseStraw.Merge,
-	StonfiSwapStraw.Merge,
-	DedustSwapStraw.Merge,
-	TgAuctionV1InitialBidStraw.Merge,
-	StrawFindAuctionBidFragmentSimple.Merge,
-	StrawAuctionBigGetgems.Merge,
-	StrawAuctionBuyGetgems.Merge,
-	DedustLPJettonMintStraw.Merge,
-	JettonMintStrawGovernance.Merge,
-	MegatonFiJettonSwap.Merge,
-	FindInitialSubscription,
-	FindExtendedSubscription,
-	FindUnSubscription,
-	DepositLiquidStakeStraw.Merge,
-	PendingWithdrawRequestLiquidStraw.Merge,
-	ElectionsDepositStakeStraw.Merge,
-	ElectionsRecoverStakeStraw.Merge,
-	DepositTFStakeStraw.Merge,
-	WithdrawTFStakeRequestStraw.Merge,
-	WithdrawStakeImmediatelyStraw.Merge,
-	WithdrawLiquidStake.Merge,
-	DNSRenewStraw.Merge,
-	FindTFNominatorAction,
+var NFTStraws = []Merger{
+	NftTransferStraw,
+	NftTransferNotifyStraw,
+}
+
+var SubscriptionStraws = []Merger{
+	InitialSubscriptionStraw,
+	ExtendedSubscriptionStraw,
+	UnSubscriptionStraw,
+}
+
+var DefaultStraws = []Merger{
+	NftTransferStraw,
+	NftTransferNotifyStraw,
+	JettonTransferPTONStraw,
+	JettonTransferClassicStraw,
+	JettonBurnStraw,
+	WtonMintStraw,
+	NftPurchaseStraw,
+	StonfiSwapStraw,
+	DedustSwapStraw,
+	TgAuctionV1InitialBidStraw,
+	StrawFindAuctionBidFragmentSimple,
+	StrawAuctionBigGetgems,
+	StrawAuctionBuyGetgems,
+	DedustLPJettonMintStraw,
+	JettonMintStrawGovernance,
+	MegatonFiJettonSwap,
+	InitialSubscriptionStraw,
+	ExtendedSubscriptionStraw,
+	UnSubscriptionStraw,
+	DepositLiquidStakeStraw,
+	PendingWithdrawRequestLiquidStraw,
+	ElectionsDepositStakeStraw,
+	ElectionsRecoverStakeStraw,
+	DepositTFStakeStraw,
+	WithdrawTFStakeRequestStraw,
+	WithdrawStakeImmediatelyStraw,
+	WithdrawLiquidStake,
+	DNSRenewStraw,
 }
 
 var JettonTransferPTONStraw = Straw[BubbleJettonTransfer]{

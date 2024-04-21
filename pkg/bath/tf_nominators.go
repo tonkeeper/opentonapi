@@ -7,6 +7,7 @@ import (
 
 type TFCommand string
 
+// todo: move to tongo
 const (
 	TfDepositStakeRequest            TFCommand = "TfDepositStakeRequest"
 	TfRecoverStakeRequest            TFCommand = "TfRecoverStakeRequest"

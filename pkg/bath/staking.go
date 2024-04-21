@@ -238,6 +238,10 @@ var WithdrawLiquidStake = Straw[BubbleWithdrawStake]{
 		},
 		SingleChild: &Straw[BubbleWithdrawStake]{
 			CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.TonstakePoolWithdrawalMsgOp)},
+			Builder: func(newAction *BubbleWithdrawStake, bubble *Bubble) error {
+				newAction.Amount = bubble.Info.(BubbleTx).inputAmount
+				return nil
+			},
 		},
 	},
 }
