@@ -9,7 +9,13 @@
          "Price": 1200000000
        },
        "Success": true,
-       "Type": "NftPurchase"
+       "Type": "NftPurchase",
+       "BaseTransactions": [
+         "5bf0cbc13d3079056cf300c80ab1cebf2e7e3ba20d0cef31678f0575fecb8beb",
+         "dec6e1b8984a00114f6c0763ae1a5b2db5f9b82d57932554727a4f2c33498a9b",
+         "f6fefbee332285a4689e76bab55389656774649ac67a72074c240c7c7d315654",
+         "f59f9bccba8956b374162090bab013e31dd951602d84f23278d28f9b99f3dd39"
+       ]
      },
      {
        "TonTransfer": {
@@ -21,7 +27,10 @@
          "Refund": null
        },
        "Success": true,
-       "Type": "TonTransfer"
+       "Type": "TonTransfer",
+       "BaseTransactions": [
+         "4a38cfbe295cdb38b98d010975372aeb96ebd700682132f641bcadc4de230a60"
+       ]
      },
      {
        "TonTransfer": {
@@ -33,7 +42,10 @@
          "Refund": null
        },
        "Success": true,
-       "Type": "TonTransfer"
+       "Type": "TonTransfer",
+       "BaseTransactions": [
+         "95e7869735d43d858c82356f2475a52e7682b7ed9718e55d07296f9ed0a3396c"
+       ]
      },
      {
        "TonTransfer": {
@@ -45,7 +57,10 @@
          "Refund": null
        },
        "Success": true,
-       "Type": "TonTransfer"
+       "Type": "TonTransfer",
+       "BaseTransactions": [
+         "0dd50bfaeb46c13bc7919612cde6034e8a9a4d79ee23fc64a7570d739da601f9"
+       ]
      },
      {
        "ContractDeploy": {
@@ -53,7 +68,10 @@
          "Interfaces": null
        },
        "Success": true,
-       "Type": "ContractDeploy"
+       "Type": "ContractDeploy",
+       "BaseTransactions": [
+         "8feb00edd889f8a36fb8af5b4d5370190fcbe872088cd1247c445e3c3b39a795"
+       ]
      }
    ],
    "Accounts": [

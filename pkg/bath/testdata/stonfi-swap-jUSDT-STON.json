@@ -19,7 +19,17 @@
          }
        },
        "Success": true,
-       "Type": "JettonSwap"
+       "Type": "JettonSwap",
+       "BaseTransactions": [
+         "e8933ed0b2086b312f89a3ae5f597666493ca747b69cea9ef9a79c1e641e763f",
+         "cdc129c36ad3c345459ed5d0c1ffad145134e6ce96b8a4ed8201909def33de2a",
+         "972434b47a68685e3620fd1cb8c5dbf7d8dc0e150249b5d267f8a0c485c03a59",
+         "18dc039c2d7f08640720cdbd13f33fb4068058f1d88fae97ec002cb626986263",
+         "7366062cbfe3bf74e08e85bb8be07f921e06b26e828cbad9d5b5d90872088670",
+         "82c4aafcfd8045937e52e4beefbda4647f06405d6e7465da3e16a49ba94f72bc",
+         "9809a999b20e8bae123c21f229abb4de7b00b03c754eb692b23a8662f5445c19",
+         "7615bd58658229affa162100537559c0da20edad88fc3af23b83f2a70e6f25d6"
+       ]
      },
      {
        "ContractDeploy": {
@@ -27,7 +37,10 @@
          "Interfaces": null
        },
        "Success": true,
-       "Type": "ContractDeploy"
+       "Type": "ContractDeploy",
+       "BaseTransactions": [
+         "9809a999b20e8bae123c21f229abb4de7b00b03c754eb692b23a8662f5445c19"
+       ]
      }
    ],
    "Accounts": [

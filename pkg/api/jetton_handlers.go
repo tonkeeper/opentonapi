@@ -213,7 +213,17 @@ func (h *Handler) GetJettonHolders(ctx context.Context, params oas.GetJettonHold
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
-	var results oas.JettonHolders
+	holderCounts, err := h.storage.GetJettonsHoldersCount(ctx, []tongo.AccountID{account.ID})
+	if errors.Is(err, core.ErrEntityNotFound) {
+		return &oas.JettonHolders{}, nil
+	}
+	if err != nil {
+		return nil, toError(http.StatusInternalServerError, err)
+	}
+	results := oas.JettonHolders{
+		Addresses: make([]oas.JettonHoldersAddressesItem, 0, len(holders)),
+		Total:     int64(holderCounts[account.ID]),
+	}
 	for _, holder := range holders {
 		results.Addresses = append(results.Addresses, oas.JettonHoldersAddressesItem{
 			Address: holder.Address.ToRaw(),

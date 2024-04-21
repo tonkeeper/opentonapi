@@ -10,7 +10,11 @@
          "Auction": "0:1dd2c293effd99bd4dbba5e2235cb5c19794e2a2f2d4d5d2116c88a7ecd5278a"
        },
        "Success": true,
-       "Type": "AuctionBid"
+       "Type": "AuctionBid",
+       "BaseTransactions": [
+         "17d25b9f2dae646c63f005abcdc6e2778f7fb9511015f2eafbd3f46c33276198",
+         "9e979adabf0853c34a675d635a8ff7dae24f6c980780a7e5c4e21f4b6e29f575"
+       ]
      },
      {
        "ContractDeploy": {
@@ -18,7 +22,10 @@
          "Interfaces": null
        },
        "Success": true,
-       "Type": "ContractDeploy"
+       "Type": "ContractDeploy",
+       "BaseTransactions": [
+         "17d25b9f2dae646c63f005abcdc6e2778f7fb9511015f2eafbd3f46c33276198"
+       ]
      }
    ],
    "Accounts": [

@@ -8,7 +8,10 @@
          "Implementation": "tf"
        },
        "Success": true,
-       "Type": "DepositStake"
+       "Type": "DepositStake",
+       "BaseTransactions": [
+         "1e941df6eff142f1b6e11d984e695ff90a1b975e73640f4b3a9781f5fd6a5d71"
+       ]
      }
    ],
    "Accounts": [

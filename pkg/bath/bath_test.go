@@ -139,6 +139,8 @@ func TestFindActions(t *testing.T) {
 			tongo.MustParseBlockID("(0,4000000000000000,42924037)"),
 			tongo.MustParseBlockID("(0,c000000000000000,42921237)"),
 			tongo.MustParseBlockID("(0,4000000000000000,42924043)"),
+			// disintar purchase
+			tongo.MustParseBlockID("(0,8000000000000000,35667628)"),
 		}),
 	)
 

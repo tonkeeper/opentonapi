@@ -3409,10 +3409,16 @@
        "type": "object"
       },
       "type": "array"
+     },
+     "total": {
+      "example": 2000,
+      "format": "int64",
+      "type": "integer"
      }
     },
     "required": [
-     "addresses"
+     "addresses",
+     "total"
     ],
     "type": "object"
    },

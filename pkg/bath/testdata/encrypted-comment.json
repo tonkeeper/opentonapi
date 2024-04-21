@@ -13,7 +13,10 @@
          "Refund": null
        },
        "Success": true,
-       "Type": "TonTransfer"
+       "Type": "TonTransfer",
+       "BaseTransactions": [
+         "c1d98ee34e88a912d7eefd7d1401d612d33c74835343814ca99a318fb7138ea8"
+       ]
      },
      {
        "ContractDeploy": {
@@ -21,7 +24,10 @@
          "Interfaces": null
        },
        "Success": true,
-       "Type": "ContractDeploy"
+       "Type": "ContractDeploy",
+       "BaseTransactions": [
+         "6f3e1f2c05df05345198a9d26456dcb51d4c78ce64ced56fb9976e92941211d3"
+       ]
      }
    ],
    "Accounts": [

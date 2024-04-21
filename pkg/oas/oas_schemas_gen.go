@@ -7298,6 +7298,7 @@ func (s *JettonBurnAction) SetJetton(val JettonPreview) {
 // Ref: #/components/schemas/JettonHolders
 type JettonHolders struct {
 	Addresses []JettonHoldersAddressesItem `json:"addresses"`
+	Total     int64                        `json:"total"`
 }
 
 // GetAddresses returns the value of Addresses.
@@ -7305,9 +7306,19 @@ func (s *JettonHolders) GetAddresses() []JettonHoldersAddressesItem {
 	return s.Addresses
 }
 
+// GetTotal returns the value of Total.
+func (s *JettonHolders) GetTotal() int64 {
+	return s.Total
+}
+
 // SetAddresses sets the value of Addresses.
 func (s *JettonHolders) SetAddresses(val []JettonHoldersAddressesItem) {
 	s.Addresses = val
+}
+
+// SetTotal sets the value of Total.
+func (s *JettonHolders) SetTotal(val int64) {
+	s.Total = val
 }
 
 type JettonHoldersAddressesItem struct {

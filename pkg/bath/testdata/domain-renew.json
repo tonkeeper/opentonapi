@@ -6,7 +6,10 @@
          "Renewer": "0:2cf3b5b8c891e517c9addbda1c0386a09ccacbb0e3faf630b51cfc8152325acb"
        },
        "Success": true,
-       "Type": "DomainRenew"
+       "Type": "DomainRenew",
+       "BaseTransactions": [
+         "bf33c4ee09a872f0831935adec38a0e411c6be83b87e47bb7bf7a843d5e06047"
+       ]
      },
      {
        "SmartContractExec": {
@@ -17,7 +20,10 @@
          "Payload": "QueryId: 0\n"
        },
        "Success": true,
-       "Type": "SmartContractExec"
+       "Type": "SmartContractExec",
+       "BaseTransactions": [
+         "5123850dca7109412f695435a9a75618c001b70fad98d34d950b860116f37785"
+       ]
      }
    ],
    "Accounts": [

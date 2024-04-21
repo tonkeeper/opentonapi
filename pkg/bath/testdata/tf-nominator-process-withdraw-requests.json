@@ -2,14 +2,17 @@
    "Actions": [
      {
        "SmartContractExec": {
-         "TonAttached": 183890000,
+         "TonAttached": 10000000000,
          "Executor": "-1:9af16c60bf0a73fc83d60e5d6b9225e692dda47148949670436c0f80af7f7646",
          "Contract": "-1:be0454b023bb0d84ba3bf0f874b4da9d77af1d146a2aa467492bf3d05d22d434",
-         "Operation": "TfProcessPendingWithdrawRequests",
+         "Operation": "0x00000002",
          "Payload": ""
        },
        "Success": true,
-       "Type": "SmartContractExec"
+       "Type": "SmartContractExec",
+       "BaseTransactions": [
+         "d6760dc8f3cbc37003f76b3e78b55613a8d81b5354cedf7ce6b2149e0e4cad85"
+       ]
      },
      {
        "TonTransfer": {
@@ -21,7 +24,25 @@
          "Refund": null
        },
        "Success": true,
-       "Type": "TonTransfer"
+       "Type": "TonTransfer",
+       "BaseTransactions": [
+         "42233d9a77a59c9909fad1ccf76655efa46f60412de37cfa36dd5dd98cdb7eba"
+       ]
+     },
+     {
+       "TonTransfer": {
+         "Amount": 9816110000,
+         "Comment": null,
+         "EncryptedComment": null,
+         "Recipient": "-1:9af16c60bf0a73fc83d60e5d6b9225e692dda47148949670436c0f80af7f7646",
+         "Sender": "-1:be0454b023bb0d84ba3bf0f874b4da9d77af1d146a2aa467492bf3d05d22d434",
+         "Refund": null
+       },
+       "Success": true,
+       "Type": "TonTransfer",
+       "BaseTransactions": [
+         "1984eefa9f92e1137c442153295c61160ac5990606065285590bac249aa54775"
+       ]
      }
    ],
    "Accounts": [

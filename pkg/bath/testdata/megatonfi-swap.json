@@ -19,7 +19,24 @@
          }
        },
        "Success": true,
-       "Type": "JettonSwap"
+       "Type": "JettonSwap",
+       "BaseTransactions": [
+         "e5d8031bb6e6001342fae861e94761658a96d4e6bd8ed26814ff2746ed3c38a6",
+         "b7be28c8fcba9e2a4e07d7f6a11c30ad3a3e4e07181717cf2372be88069d4815",
+         "d49ff349f340fc595804da447a7864276a3617f335f0b80a2b9882db52596501",
+         "18bba20d522f916a0ef69825ed4a5af51e965d36003e666ab311db49bf700a48",
+         "72be94d817698878c5d9a2b0ea1da6eb718771cc82a91c64634b6bdc6a483806",
+         "ff3af64fe8f5447aba56e63f5f9e9fe427761098728ea9192d1e7059b6123848",
+         "f40d673de37e9a7ea81a346ee4b6b1371fa0c456ddcf15b48e6e6d67e3b02071",
+         "7e8a58f7eca3b2894f6613c2dba434b5d6df85759319ddce98456751676a6b1c",
+         "6dea43c77b20b3921951f52c5cd991315a97f22857efbb2772aa42f5d3ab8689",
+         "095368af0067cda82cbb8e93979172182d60aea4e2b540b12f7c88dee972d0db",
+         "32058a29571947d41925256c954fae4abf75e60fdff773b5e7b31c45d9bbfd0b",
+         "bc3074b0802279d5b4965993e2ffd19087dd297f3f67ca073bd6fc562d54b21b",
+         "a64a2c3bb29f89e0f0e94a5cafef6914f7463399aa700a73303bc14d39244732",
+         "27751de7e2014ae3d74c1812d292e87de736d1ee4f68db598f68d7b85ec8fd81",
+         "134126e72a9d9ef365fdac6fe8f629ebdeabe41a27e087acf0310753da496603"
+       ]
      },
      {
        "ContractDeploy": {
@@ -27,7 +44,10 @@
          "Interfaces": null
        },
        "Success": true,
-       "Type": "ContractDeploy"
+       "Type": "ContractDeploy",
+       "BaseTransactions": [
+         "f40d673de37e9a7ea81a346ee4b6b1371fa0c456ddcf15b48e6e6d67e3b02071"
+       ]
      }
    ],
    "Accounts": [

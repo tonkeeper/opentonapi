@@ -8,7 +8,10 @@
          "Implementation": "liquidTF"
        },
        "Success": true,
-       "Type": "DepositStake"
+       "Type": "DepositStake",
+       "BaseTransactions": [
+         "20bee52141d1af08d3631baba8e598518a5a98e7b7d82e6960c79cb4001ec910"
+       ]
      },
      {
        "JettonMint": {
@@ -18,7 +21,13 @@
          "Amount": "9990926232"
        },
        "Success": true,
-       "Type": "JettonMint"
+       "Type": "JettonMint",
+       "BaseTransactions": [
+         "2d77c21a86e5189a6b44bfed0c8c588505f770ff8bdcdfe1a3528512f330d9b1",
+         "242f3560ec3274abf5046ed7a867dfb7b37a97d86abb244f06211e809a27e6de",
+         "a72afd496b1dd9ce5a3b628f53fbc6215b24cda424df2a39283d5570d0ac9462",
+         "db76f803d4c1c8ddcfe1a3a3121225311fa8daa97526ef4cfadcdc40debfe891"
+       ]
      },
      {
        "ContractDeploy": {
@@ -26,7 +35,10 @@
          "Interfaces": null
        },
        "Success": true,
-       "Type": "ContractDeploy"
+       "Type": "ContractDeploy",
+       "BaseTransactions": [
+         "2d77c21a86e5189a6b44bfed0c8c588505f770ff8bdcdfe1a3528512f330d9b1"
+       ]
      }
    ],
    "Accounts": [

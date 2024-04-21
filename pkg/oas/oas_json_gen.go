@@ -21886,10 +21886,15 @@ func (s *JettonHolders) encodeFields(e *jx.Encoder) {
 		}
 		e.ArrEnd()
 	}
+	{
+		e.FieldStart("total")
+		e.Int64(s.Total)
+	}
 }
 
-var jsonFieldsNameOfJettonHolders = [1]string{
+var jsonFieldsNameOfJettonHolders = [2]string{
 	0: "addresses",
+	1: "total",
 }
 
 // Decode decodes JettonHolders from json.
@@ -21919,6 +21924,18 @@ func (s *JettonHolders) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"addresses\"")
 			}
+		case "total":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				v, err := d.Int64()
+				s.Total = int64(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"total\"")
+			}
 		default:
 			return d.Skip()
 		}
@@ -21929,7 +21946,7 @@ func (s *JettonHolders) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b00000001,
+		0b00000011,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.

@@ -6128,6 +6128,7 @@ components:
       type: object
       required:
         - addresses
+        - total
       properties:
         addresses:
           type: array
@@ -6146,6 +6147,10 @@ components:
               balance:
                 type: string
                 example: 1000000000
+        total:
+          type: integer
+          format: int64
+          example: 2000
     AccountStaking:
       type: object
       required:
