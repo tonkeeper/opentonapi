@@ -13,6 +13,7 @@
        "orig_status": "active",
        "end_status": "active",
        "total_fees": 5757994,
+       "end_balance": 0,
        "transaction_type": "TransOrd",
        "state_update_old": "e5a404db4e4bfeddf57af9cd3af0d83d8e60524d70975b8c5d6ee8ca04aac778",
        "state_update_new": "101e80d30fa6d0991dbf9ca63f1b6212b689e5a6cff232090d24affa92bb94fc",
@@ -70,7 +71,8 @@
          "gas_fees": 2994000,
          "gas_used": 2994,
          "vm_steps": 66,
-         "exit_code": 0
+         "exit_code": 0,
+         "exit_code_description": "Ok"
        },
        "storage_phase": {
          "fees_collected": 2,
@@ -100,6 +102,7 @@
        "orig_status": "active",
        "end_status": "active",
        "total_fees": 12626001,
+       "end_balance": 0,
        "transaction_type": "TransOrd",
        "state_update_old": "47fa7b1b2a1b37d573d3af9eb190c1e5305598b16009bb0d4d2bfe5349b2468b",
        "state_update_new": "d375d9db33676912e932555f457cdfe5e747d7498bfeb8ef3862035a60ff7734",
@@ -135,7 +138,8 @@
          "gas_fees": 3308000,
          "gas_used": 3308,
          "vm_steps": 68,
-         "exit_code": 0
+         "exit_code": 0,
+         "exit_code_description": "Ok"
        },
        "storage_phase": {
          "fees_collected": 1,
@@ -147,7 +151,8 @@
          "total_actions": 1,
          "skipped_actions": 0,
          "fwd_fees": 0,
-         "total_fees": 0
+         "total_fees": 0,
+         "result_code_description": "Insufficient TON"
        },
        "aborted": true,
        "destroyed": false
@@ -165,6 +170,7 @@
        "orig_status": "active",
        "end_status": "active",
        "total_fees": 9498977,
+       "end_balance": 0,
        "transaction_type": "TransOrd",
        "state_update_old": "6a0a4dd16b9c26f4956304555d7cfb7d70f32ce06d43d8ed33d707abf8857c78",
        "state_update_new": "5c1a0a42f376ec9d282e950e81c291a5daa5185339942e2fa15a63cb502dd2b3",
@@ -230,7 +236,8 @@
          "gas_fees": 7251000,
          "gas_used": 7251,
          "vm_steps": 131,
-         "exit_code": 0
+         "exit_code": 0,
+         "exit_code_description": "Ok"
        },
        "storage_phase": {
          "fees_collected": 12,
@@ -264,6 +271,7 @@
        "orig_status": "nonexist",
        "end_status": "active",
        "total_fees": 3166000,
+       "end_balance": 0,
        "transaction_type": "TransOrd",
        "state_update_old": "90aec8965afabb16ebc3cb9b408ebae71b618d78788bc80d09843593cac98da4",
        "state_update_new": "f2e5d58dfbcf06e51c48a9b909727fba3a634b59f32fd8c3e1d3e30cfb0d0ee8",
@@ -302,7 +310,8 @@
          "gas_fees": 3166000,
          "gas_used": 3166,
          "vm_steps": 76,
-         "exit_code": 0
+         "exit_code": 0,
+         "exit_code_description": "Ok"
        },
        "storage_phase": {
          "fees_collected": 0,

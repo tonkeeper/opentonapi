@@ -13,6 +13,7 @@
        "orig_status": "active",
        "end_status": "active",
        "total_fees": 15433995,
+       "end_balance": 0,
        "transaction_type": "TransOrd",
        "state_update_old": "fb4e010c29319feb7d9b134b0f3c8f15f4165dd92b152af62fec19af62bd4f99",
        "state_update_new": "fc8edeeed5c1d972bbb6ba546b404d398b25088583cd3e4e21b78ced4b5e0b61",
@@ -70,7 +71,8 @@
          "gas_fees": 12046000,
          "gas_used": 12046,
          "vm_steps": 138,
-         "exit_code": 0
+         "exit_code": 0,
+         "exit_code_description": "Ok"
        },
        "storage_phase": {
          "fees_collected": 5,
@@ -100,6 +102,7 @@
        "orig_status": "active",
        "end_status": "active",
        "total_fees": 5873530,
+       "end_balance": 0,
        "transaction_type": "TransOrd",
        "state_update_old": "69f854c6e3d695caa467e94773931cc6a5e777fb3b4cb035929348e216d5bcfd",
        "state_update_new": "1ce0f4a3b70ca63490bb94c2cfc608b33e4649613927a24353753b0b9473e20f",
@@ -155,7 +158,8 @@
          "gas_fees": 3308000,
          "gas_used": 3308,
          "vm_steps": 68,
-         "exit_code": 0
+         "exit_code": 0,
+         "exit_code_description": "Ok"
        },
        "storage_phase": {
          "fees_collected": 202,
@@ -185,6 +189,7 @@
        "orig_status": "active",
        "end_status": "active",
        "total_fees": 9908633,
+       "end_balance": 0,
        "transaction_type": "TransOrd",
        "state_update_old": "20ee1816b96d2b0265ae29e6951ed38211152e69ad8cb193c7a4925a326a628f",
        "state_update_new": "6d50a0d77efd01cfe6c7e270da992bb2b26465072082a780e6d4d869d51bd85e",
@@ -330,7 +335,8 @@
          "gas_fees": 5234000,
          "gas_used": 5234,
          "vm_steps": 92,
-         "exit_code": 0
+         "exit_code": 0,
+         "exit_code_description": "Ok"
        },
        "storage_phase": {
          "fees_collected": 5,
@@ -360,6 +366,7 @@
        "orig_status": "active",
        "end_status": "active",
        "total_fees": 5844004,
+       "end_balance": 0,
        "transaction_type": "TransOrd",
        "state_update_old": "1dfabc37b6c750b787128457f28c91b00a8635e5cd860d24f0886365eca48b6d",
        "state_update_new": "ed8de1c20ef85845443f10b43b0b13c03bec82a5b730cf7c95a29d884e6da78a",
@@ -421,7 +428,8 @@
          "gas_fees": 3308000,
          "gas_used": 3308,
          "vm_steps": 68,
-         "exit_code": 0
+         "exit_code": 0,
+         "exit_code_description": "Ok"
        },
        "storage_phase": {
          "fees_collected": 13,
@@ -451,6 +459,7 @@
        "orig_status": "uninit",
        "end_status": "uninit",
        "total_fees": 8,
+       "end_balance": 0,
        "transaction_type": "TransOrd",
        "state_update_old": "270708db7a57598af7d4cf4a2d31a2880da5bc759b4616b25ee8a02cf4b04d51",
        "state_update_new": "6ad4ecea2541a238b59266ca9a6f638cdbb36f7898aeed59224ebd5230312953",
@@ -508,6 +517,7 @@
        "orig_status": "active",
        "end_status": "active",
        "total_fees": 100002,
+       "end_balance": 0,
        "transaction_type": "TransOrd",
        "state_update_old": "8bd59004e47c7d1d9605c098e41101607cc4a817c8862c7030751705a008e200",
        "state_update_new": "84487059fe162eeb85175326dfb891fa194937a76c50589df3c93d3da13f32e0",
@@ -549,7 +559,8 @@
          "gas_fees": 100000,
          "gas_used": 62,
          "vm_steps": 3,
-         "exit_code": 0
+         "exit_code": 0,
+         "exit_code_description": "Ok"
        },
        "storage_phase": {
          "fees_collected": 2,
@@ -583,6 +594,7 @@
        "orig_status": "active",
        "end_status": "active",
        "total_fees": 10038288,
+       "end_balance": 0,
        "transaction_type": "TransOrd",
        "state_update_old": "27687753f081608ed0090fd422e67bea61a937759a23156c064e85abdfc2e7f7",
        "state_update_new": "1af62b8b7e5b657afdad1e4d0ef332b693b2dcf91c09979df12a9c99f1582f5c",
@@ -648,7 +660,8 @@
          "gas_fees": 6537000,
          "gas_used": 6537,
          "vm_steps": 120,
-         "exit_code": 0
+         "exit_code": 0,
+         "exit_code_description": "Ok"
        },
        "storage_phase": {
          "fees_collected": 9,
@@ -682,6 +695,7 @@
        "orig_status": "nonexist",
        "end_status": "active",
        "total_fees": 3611000,
+       "end_balance": 0,
        "transaction_type": "TransOrd",
        "state_update_old": "90aec8965afabb16ebc3cb9b408ebae71b618d78788bc80d09843593cac98da4",
        "state_update_new": "02e2f6aa564f87d333e2cc90bcc581780fa81f4791ff01717a622b85b957b7e1",
@@ -720,7 +734,8 @@
          "gas_fees": 3611000,
          "gas_used": 3611,
          "vm_steps": 91,
-         "exit_code": 0
+         "exit_code": 0,
+         "exit_code_description": "Ok"
        },
        "storage_phase": {
          "fees_collected": 0,
@@ -754,6 +769,7 @@
        "orig_status": "active",
        "end_status": "active",
        "total_fees": 0,
+       "end_balance": 0,
        "transaction_type": "TransOrd",
        "state_update_old": "6d50a0d77efd01cfe6c7e270da992bb2b26465072082a780e6d4d869d51bd85e",
        "state_update_new": "789fc030d759313852cf231e36d8f4a5ec30f86a13e614edc31bb68aa6bd25cb",
@@ -817,6 +833,7 @@
        "orig_status": "active",
        "end_status": "active",
        "total_fees": 0,
+       "end_balance": 0,
        "transaction_type": "TransOrd",
        "state_update_old": "789fc030d759313852cf231e36d8f4a5ec30f86a13e614edc31bb68aa6bd25cb",
        "state_update_new": "5a39dc058823ed42f16c61a7235a300ab210187f722f24ae39143128063fca7d",
@@ -880,6 +897,7 @@
        "orig_status": "active",
        "end_status": "active",
        "total_fees": 0,
+       "end_balance": 0,
        "transaction_type": "TransOrd",
        "state_update_old": "5a39dc058823ed42f16c61a7235a300ab210187f722f24ae39143128063fca7d",
        "state_update_new": "5ca05f8920b19ad50138336ef45af6f7659962dc9b95915d9efa47993ba8d096",
@@ -943,6 +961,7 @@
        "orig_status": "active",
        "end_status": "active",
        "total_fees": 0,
+       "end_balance": 0,
        "transaction_type": "TransOrd",
        "state_update_old": "5ca05f8920b19ad50138336ef45af6f7659962dc9b95915d9efa47993ba8d096",
        "state_update_new": "c6ea24370ff04f875b7dcca18b4a3936a1747a2ae053c466bcbba16e22539c01",

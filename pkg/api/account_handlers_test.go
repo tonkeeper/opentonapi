@@ -2,7 +2,6 @@ package api
 
 import (
 	"context"
-	"fmt"
 	"testing"
 
 	"github.com/tonkeeper/opentonapi/pkg/chainstate"
@@ -226,7 +225,7 @@ func TestHandler_GetTransactions(t *testing.T) {
 			require.Nil(t, err)
 			res, err := h.GetBlockchainBlockTransactions(context.Background(), tt.params)
 			require.Nil(t, err)
-			fmt.Printf("%v\n", res)
+
 			pkgTesting.CompareResults(t, res, tt.filenamePrefix)
 		})
 	}
