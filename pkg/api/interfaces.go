@@ -68,7 +68,7 @@ type storage interface {
 	FindAllDomainsResolvedToAddress(ctx context.Context, a tongo.AccountID, collections map[tongo.AccountID]string) ([]string, error)
 
 	GetJettonWalletsByOwnerAddress(ctx context.Context, address tongo.AccountID) ([]core.JettonWallet, error)
-	GetJettonsHoldersCount(ctx context.Context, accountIDs []tongo.AccountID) (map[tongo.AccountID]int32, error)
+	GetJettonsHoldersCount(ctx context.Context, accounts []tongo.AccountID) (map[tongo.AccountID]int32, error)
 	GetJettonHolders(ctx context.Context, jettonMaster tongo.AccountID, limit, offset int) ([]core.JettonHolder, error)
 	GetJettonMasterMetadata(ctx context.Context, master tongo.AccountID) (tongo.JettonMetadata, error)
 	GetJettonMasterData(ctx context.Context, master tongo.AccountID) (core.JettonMaster, error)
