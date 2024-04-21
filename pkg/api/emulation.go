@@ -150,7 +150,7 @@ func (h *Handler) addToMempool(ctx context.Context, bytesBoc []byte, shardAccoun
 		for _, mHash := range oldMemHashes { //we need to filter messages which already created transactions
 			_, err = h.storage.SearchTransactionByMessageHash(ctx, mHash)
 			_, prs := h.mempoolEmulate.traces.Get(mHash)
-			if err != nil || prs { //because if err is not null it already happened and if !prs it is not in mempool
+			if err != nil && prs { //because if err is not null it already happened and if !prs it is not in mempool
 				newMemHashes = append(newMemHashes, mHash)
 			}
 		}
