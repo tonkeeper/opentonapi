@@ -74,6 +74,7 @@ func (s Straw[newBubbleT]) Merge(bubble *Bubble) bool {
 	var newBubble newBubbleT
 	var newChildren []*Bubble
 	newAccounts := bubble.Accounts
+	newTransaction := bubble.Transaction
 	nvf := newValueFlow()
 	var finalizer func(newAction *newBubbleT, flow *ValueFlow)
 	for i := len(mapping) - 1; i >= 0; i-- {
@@ -89,6 +90,7 @@ func (s Straw[newBubbleT]) Merge(bubble *Bubble) bool {
 		}
 		nvf.Merge(mapping[i].b.ValueFlow)
 		newAccounts = append(newAccounts, mapping[i].b.Accounts...)
+		newTransaction = append(newTransaction, mapping[i].b.Transaction...)
 		for _, child := range mapping[i].b.Children {
 			if slices.ContainsFunc(mapping, func(s struct {
 				s Straw[newBubbleT]
@@ -105,10 +107,11 @@ func (s Straw[newBubbleT]) Merge(bubble *Bubble) bool {
 		finalizer(&newBubble, nvf)
 	}
 	n := Bubble{
-		Info:      newBubble,
-		Accounts:  newAccounts,
-		Children:  newChildren,
-		ValueFlow: nvf,
+		Info:        newBubble,
+		Accounts:    newAccounts,
+		Children:    newChildren,
+		ValueFlow:   nvf,
+		Transaction: newTransaction,
 	}
 	*bubble = n
 	return true

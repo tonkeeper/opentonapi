@@ -643,6 +643,7 @@ type Action struct {
 	InscriptionTransfer   OptInscriptionTransferAction   `json:"InscriptionTransfer"`
 	InscriptionMint       OptInscriptionMintAction       `json:"InscriptionMint"`
 	SimplePreview         ActionSimplePreview            `json:"simple_preview"`
+	BaseTransactions      []string                       `json:"base_transactions"`
 }
 
 // GetType returns the value of Type.
@@ -760,6 +761,11 @@ func (s *Action) GetSimplePreview() ActionSimplePreview {
 	return s.SimplePreview
 }
 
+// GetBaseTransactions returns the value of BaseTransactions.
+func (s *Action) GetBaseTransactions() []string {
+	return s.BaseTransactions
+}
+
 // SetType sets the value of Type.
 func (s *Action) SetType(val ActionType) {
 	s.Type = val
@@ -875,14 +881,20 @@ func (s *Action) SetSimplePreview(val ActionSimplePreview) {
 	s.SimplePreview = val
 }
 
+// SetBaseTransactions sets the value of BaseTransactions.
+func (s *Action) SetBaseTransactions(val []string) {
+	s.BaseTransactions = val
+}
+
 // Ref: #/components/schemas/ActionPhase
 type ActionPhase struct {
-	Success        bool  `json:"success"`
-	ResultCode     int32 `json:"result_code"`
-	TotalActions   int32 `json:"total_actions"`
-	SkippedActions int32 `json:"skipped_actions"`
-	FwdFees        int64 `json:"fwd_fees"`
-	TotalFees      int64 `json:"total_fees"`
+	Success               bool      `json:"success"`
+	ResultCode            int32     `json:"result_code"`
+	TotalActions          int32     `json:"total_actions"`
+	SkippedActions        int32     `json:"skipped_actions"`
+	FwdFees               int64     `json:"fwd_fees"`
+	TotalFees             int64     `json:"total_fees"`
+	ResultCodeDescription OptString `json:"result_code_description"`
 }
 
 // GetSuccess returns the value of Success.
@@ -915,6 +927,11 @@ func (s *ActionPhase) GetTotalFees() int64 {
 	return s.TotalFees
 }
 
+// GetResultCodeDescription returns the value of ResultCodeDescription.
+func (s *ActionPhase) GetResultCodeDescription() OptString {
+	return s.ResultCodeDescription
+}
+
 // SetSuccess sets the value of Success.
 func (s *ActionPhase) SetSuccess(val bool) {
 	s.Success = val
@@ -943,6 +960,11 @@ func (s *ActionPhase) SetFwdFees(val int64) {
 // SetTotalFees sets the value of TotalFees.
 func (s *ActionPhase) SetTotalFees(val int64) {
 	s.TotalFees = val
+}
+
+// SetResultCodeDescription sets the value of ResultCodeDescription.
+func (s *ActionPhase) SetResultCodeDescription(val OptString) {
+	s.ResultCodeDescription = val
 }
 
 // Shortly describes what this action is about.
@@ -7276,6 +7298,7 @@ func (s *JettonBurnAction) SetJetton(val JettonPreview) {
 // Ref: #/components/schemas/JettonHolders
 type JettonHolders struct {
 	Addresses []JettonHoldersAddressesItem `json:"addresses"`
+	Total     int64                        `json:"total"`
 }
 
 // GetAddresses returns the value of Addresses.
@@ -7283,9 +7306,19 @@ func (s *JettonHolders) GetAddresses() []JettonHoldersAddressesItem {
 	return s.Addresses
 }
 
+// GetTotal returns the value of Total.
+func (s *JettonHolders) GetTotal() int64 {
+	return s.Total
+}
+
 // SetAddresses sets the value of Addresses.
 func (s *JettonHolders) SetAddresses(val []JettonHoldersAddressesItem) {
 	s.Addresses = val
+}
+
+// SetTotal sets the value of Total.
+func (s *JettonHolders) SetTotal(val int64) {
+	s.Total = val
 }
 
 type JettonHoldersAddressesItem struct {
@@ -7328,6 +7361,7 @@ func (s *JettonHoldersAddressesItem) SetBalance(val string) {
 type JettonInfo struct {
 	Mintable     bool                   `json:"mintable"`
 	TotalSupply  string                 `json:"total_supply"`
+	Admin        OptAccountAddress      `json:"admin"`
 	Metadata     JettonMetadata         `json:"metadata"`
 	Verification JettonVerificationType `json:"verification"`
 	HoldersCount int32                  `json:"holders_count"`
@@ -7341,6 +7375,11 @@ func (s *JettonInfo) GetMintable() bool {
 // GetTotalSupply returns the value of TotalSupply.
 func (s *JettonInfo) GetTotalSupply() string {
 	return s.TotalSupply
+}
+
+// GetAdmin returns the value of Admin.
+func (s *JettonInfo) GetAdmin() OptAccountAddress {
+	return s.Admin
 }
 
 // GetMetadata returns the value of Metadata.
@@ -7366,6 +7405,11 @@ func (s *JettonInfo) SetMintable(val bool) {
 // SetTotalSupply sets the value of TotalSupply.
 func (s *JettonInfo) SetTotalSupply(val string) {
 	s.TotalSupply = val
+}
+
+// SetAdmin sets the value of Admin.
+func (s *JettonInfo) SetAdmin(val OptAccountAddress) {
+	s.Admin = val
 }
 
 // SetMetadata sets the value of Metadata.
@@ -14762,6 +14806,7 @@ type Transaction struct {
 	OrigStatus      AccountStatus      `json:"orig_status"`
 	EndStatus       AccountStatus      `json:"end_status"`
 	TotalFees       int64              `json:"total_fees"`
+	EndBalance      int64              `json:"end_balance"`
 	TransactionType TransactionType    `json:"transaction_type"`
 	StateUpdateOld  string             `json:"state_update_old"`
 	StateUpdateNew  string             `json:"state_update_new"`
@@ -14817,6 +14862,11 @@ func (s *Transaction) GetEndStatus() AccountStatus {
 // GetTotalFees returns the value of TotalFees.
 func (s *Transaction) GetTotalFees() int64 {
 	return s.TotalFees
+}
+
+// GetEndBalance returns the value of EndBalance.
+func (s *Transaction) GetEndBalance() int64 {
+	return s.EndBalance
 }
 
 // GetTransactionType returns the value of TransactionType.
@@ -14932,6 +14982,11 @@ func (s *Transaction) SetEndStatus(val AccountStatus) {
 // SetTotalFees sets the value of TotalFees.
 func (s *Transaction) SetTotalFees(val int64) {
 	s.TotalFees = val
+}
+
+// SetEndBalance sets the value of EndBalance.
+func (s *Transaction) SetEndBalance(val int64) {
+	s.EndBalance = val
 }
 
 // SetTransactionType sets the value of TransactionType.
@@ -15558,16 +15613,22 @@ func (s *ValueFlowJettonsItem) SetQuantity(val int64) {
 
 // Ref: #/components/schemas/WalletDNS
 type WalletDNS struct {
-	Address         string   `json:"address"`
-	IsWallet        bool     `json:"is_wallet"`
-	HasMethodPubkey bool     `json:"has_method_pubkey"`
-	HasMethodSeqno  bool     `json:"has_method_seqno"`
-	Names           []string `json:"names"`
+	Address         string         `json:"address"`
+	Account         AccountAddress `json:"account"`
+	IsWallet        bool           `json:"is_wallet"`
+	HasMethodPubkey bool           `json:"has_method_pubkey"`
+	HasMethodSeqno  bool           `json:"has_method_seqno"`
+	Names           []string       `json:"names"`
 }
 
 // GetAddress returns the value of Address.
 func (s *WalletDNS) GetAddress() string {
 	return s.Address
+}
+
+// GetAccount returns the value of Account.
+func (s *WalletDNS) GetAccount() AccountAddress {
+	return s.Account
 }
 
 // GetIsWallet returns the value of IsWallet.
@@ -15593,6 +15654,11 @@ func (s *WalletDNS) GetNames() []string {
 // SetAddress sets the value of Address.
 func (s *WalletDNS) SetAddress(val string) {
 	s.Address = val
+}
+
+// SetAccount sets the value of Account.
+func (s *WalletDNS) SetAccount(val AccountAddress) {
+	s.Account = val
 }
 
 // SetIsWallet sets the value of IsWallet.

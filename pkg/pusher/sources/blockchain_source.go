@@ -4,12 +4,12 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/tonkeeper/opentonapi/internal/g"
 	"github.com/tonkeeper/opentonapi/pkg/blockchain/indexer"
-	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
 	"github.com/tonkeeper/tongo/boc"
 	"github.com/tonkeeper/tongo/liteapi"
+	"github.com/tonkeeper/tongo/tlb"
+	"github.com/tonkeeper/tongo/ton"
 	"go.uber.org/zap"
 )
 
@@ -59,22 +59,20 @@ func (b *BlockchainSource) SubscribeToBlockHeaders(ctx context.Context, delivery
 	return b.blockDispatcher.RegisterSubscriber(deliveryFn, opts)
 }
 
-func msgOpCodeAndName(cell *boc.Cell) (opCode *uint32, opName *abi.MsgOpName) {
-	if cell.BitsAvailableForRead() < 32 {
-		return nil, nil
+func msgOpCodeAndName(msg tlb.Message, cell *boc.Cell) (opCode *uint32, opName *abi.MsgOpName) {
+	if msg.Info.IntMsgInfo != nil {
+		tag, name, _, _ := abi.InternalMessageDecoder(cell, nil)
+		return tag, name
 	}
-	opcode, err := cell.ReadUint(32)
-	if err != nil {
-		return nil, nil
+	if msg.Info.ExtInMsgInfo != nil {
+		tag, name, _, _ := abi.ExtInMessageDecoder(cell, nil)
+		return tag, name
 	}
-	msgOpCode := g.Pointer(uint32(opcode))
-
-	cell.ResetCounters()
-	name, _, err := abi.MessageDecoder(cell)
-	if err != nil {
-		return msgOpCode, nil
+	if msg.Info.ExtOutMsgInfo != nil {
+		tag, name, _, _ := abi.ExtOutMessageDecoder(cell, nil, msg.Info.ExtOutMsgInfo.Dest)
+		return tag, name
 	}
-	return msgOpCode, &name
+	return nil, nil
 }
 
 func (b *BlockchainSource) Run(ctx context.Context) chan indexer.IDandBlock {
@@ -101,10 +99,10 @@ func (b *BlockchainSource) Run(ctx context.Context) chan indexer.IDandBlock {
 					var msgOpName *abi.MsgOpName
 					if tx.Msgs.InMsg.Exists {
 						cell := boc.Cell(tx.Msgs.InMsg.Value.Value.Body.Value)
-						msgOpCode, msgOpName = msgOpCodeAndName(&cell)
+						msgOpCode, msgOpName = msgOpCodeAndName(tx.Msgs.InMsg.Value.Value, &cell)
 					}
 					ch <- TransactionEvent{
-						AccountID: *tongo.NewAccountId(block.ID.Workchain, tx.AccountAddr),
+						AccountID: *ton.NewAccountID(block.ID.Workchain, tx.AccountAddr),
 						Lt:        tx.Lt,
 						TxHash:    tx.Hash().Hex(),
 						MsgOpName: msgOpName,

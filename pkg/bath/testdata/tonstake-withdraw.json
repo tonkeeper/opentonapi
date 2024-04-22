@@ -3,12 +3,18 @@
      {
        "WithdrawStake": {
          "Staker": "0:2cf3b5b8c891e517c9addbda1c0386a09ccacbb0e3faf630b51cfc8152325acb",
-         "Amount": 10000000000,
+         "Amount": 9997290191,
          "Pool": "0:a45b17f28409229b78360e3290420f13e4fe20f90d7e2bf8c4ac6703259e22fa",
          "Implementation": "liquidTF"
        },
        "Success": true,
-       "Type": "WithdrawStake"
+       "Type": "WithdrawStake",
+       "BaseTransactions": [
+         "708fc31d9355864979a2c4237adb6541fd87b4fa58f553c1ae8f286dc14e1672",
+         "fd93c25d37d1ba7033a337a12663a2a24907e6f7442463b4b97f4fda7d3422df",
+         "2374469514487ba5a2a6d0519a5e45641ea832b17a7e2a3739699464ba0e156c",
+         "06f9f0088bd63ddbcc755c0f3fd2d40fd049933b8c8f235a98c7af849952dbae"
+       ]
      }
    ],
    "Accounts": [

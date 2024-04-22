@@ -9,7 +9,11 @@
          "First": true
        },
        "Success": true,
-       "Type": "Subscribe"
+       "Type": "Subscribe",
+       "BaseTransactions": [
+         "a9d02569af93f8ec85ea9c322690e5ba561783dcb02f000698af9b2f334ae9c4",
+         "ccf8675254a925f516ee7facaaf7a71d166e6ac99fc71ce9f6f4129ea9ee3130"
+       ]
      },
      {
        "ContractDeploy": {
@@ -17,7 +21,10 @@
          "Interfaces": null
        },
        "Success": true,
-       "Type": "ContractDeploy"
+       "Type": "ContractDeploy",
+       "BaseTransactions": [
+         "a9d02569af93f8ec85ea9c322690e5ba561783dcb02f000698af9b2f334ae9c4"
+       ]
      }
    ],
    "Accounts": [

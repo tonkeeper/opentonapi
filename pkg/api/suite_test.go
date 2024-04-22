@@ -6,6 +6,7 @@ import (
 )
 
 type mockAddressBook struct {
+	OnGetAddressInfoByAddress func(a tongo.AccountID) (addressbook.KnownAddress, bool)
 }
 
 func (m mockAddressBook) IsWallet(a tongo.AccountID) (bool, error) {
@@ -13,7 +14,7 @@ func (m mockAddressBook) IsWallet(a tongo.AccountID) (bool, error) {
 }
 
 func (m mockAddressBook) GetAddressInfoByAddress(a tongo.AccountID) (addressbook.KnownAddress, bool) {
-	return addressbook.KnownAddress{}, false
+	return m.OnGetAddressInfoByAddress(a)
 }
 
 func (m mockAddressBook) GetCollectionInfoByAddress(a tongo.AccountID) (addressbook.KnownCollection, bool) {

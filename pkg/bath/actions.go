@@ -1,12 +1,15 @@
 package bath
 
 import (
+	"cmp"
+	"encoding/binary"
 	"encoding/json"
 	"fmt"
 	"math/big"
 	"reflect"
 
 	"github.com/tonkeeper/opentonapi/pkg/core"
+	"github.com/tonkeeper/tongo/ton"
 
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
@@ -87,6 +90,7 @@ type (
 		InscriptionTransfer   *InscriptionTransferAction   `json:",omitempty"`
 		Success               bool
 		Type                  ActionType
+		BaseTransactions      []ton.Bits256
 	}
 	TonTransferAction struct {
 		Amount           int64
@@ -225,6 +229,10 @@ func CollectActionsAndValueFlow(bubble *Bubble, forAccount *tongo.AccountID) ([]
 	if forAccount == nil || slices.Contains(bubble.Accounts, *forAccount) {
 		a := bubble.Info.ToAction()
 		if a != nil {
+			slices.SortFunc(bubble.Transaction, func(a, b ton.Bits256) int {
+				return cmp.Compare(binary.NativeEndian.Uint64(a[:8]), binary.NativeEndian.Uint64(b[:8])) //just for compact
+			})
+			a.BaseTransactions = slices.Compact(bubble.Transaction)
 			actions = append(actions, *a)
 		}
 	}

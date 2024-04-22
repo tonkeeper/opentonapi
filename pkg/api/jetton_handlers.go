@@ -112,6 +112,7 @@ func (h *Handler) GetJettonInfo(ctx context.Context, params oas.GetJettonInfoPar
 		Metadata:     metadata,
 		Verification: oas.JettonVerificationType(meta.Verification),
 		HoldersCount: holdersCount[account.ID],
+		Admin:        convertOptAccountAddress(data.Admin, h.addressBook),
 	}, nil
 }
 
@@ -194,6 +195,7 @@ func (h *Handler) GetJettons(ctx context.Context, params oas.GetJettonsParams) (
 			Metadata:     metadata,
 			Verification: oas.JettonVerificationType(meta.Verification),
 			HoldersCount: jettonsHolders[master.Address],
+			Admin:        convertOptAccountAddress(master.Admin, h.addressBook),
 		}
 		results = append(results, info)
 	}
@@ -211,7 +213,17 @@ func (h *Handler) GetJettonHolders(ctx context.Context, params oas.GetJettonHold
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
-	var results oas.JettonHolders
+	holderCounts, err := h.storage.GetJettonsHoldersCount(ctx, []tongo.AccountID{account.ID})
+	if errors.Is(err, core.ErrEntityNotFound) {
+		return &oas.JettonHolders{}, nil
+	}
+	if err != nil {
+		return nil, toError(http.StatusInternalServerError, err)
+	}
+	results := oas.JettonHolders{
+		Addresses: make([]oas.JettonHoldersAddressesItem, 0, len(holders)),
+		Total:     int64(holderCounts[account.ID]),
+	}
 	for _, holder := range holders {
 		results.Addresses = append(results.Addresses, oas.JettonHoldersAddressesItem{
 			Address: holder.Address.ToRaw(),
@@ -228,10 +240,13 @@ func (h *Handler) GetJettonsEvents(ctx context.Context, params oas.GetJettonsEve
 		return nil, toError(http.StatusBadRequest, err)
 	}
 	trace, err := h.storage.GetTrace(ctx, traceID)
+	if errors.Is(err, core.ErrEntityNotFound) {
+		return nil, toError(http.StatusNotFound, err)
+	}
+	if errors.Is(err, core.ErrTraceIsTooLong) {
+		return nil, toError(http.StatusRequestEntityTooLarge, err)
+	}
 	if err != nil {
-		if errors.Is(err, core.ErrTraceIsTooLong) {
-			return nil, toError(http.StatusRequestEntityTooLarge, err)
-		}
 		return nil, toError(http.StatusInternalServerError, err)
 	}
 	result, err := bath.FindActions(ctx, trace, bath.WithInformationSource(h.storage), bath.WithStraws(bath.JettonTransfersBurnsMints))

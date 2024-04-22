@@ -45,10 +45,10 @@ func distinctAccounts(skip *tongo.AccountID, book addressBook, accounts ...*tong
 	return result
 }
 
-func convertTrace(t core.Trace, book addressBook) oas.Trace {
-	trace := oas.Trace{Transaction: convertTransaction(t.Transaction, book), Interfaces: g.ToStrings(t.AccountInterfaces)}
+func convertTrace(t *core.Trace, book addressBook) oas.Trace {
+	trace := oas.Trace{Transaction: convertTransaction(t.Transaction, t.AccountInterfaces, book), Interfaces: g.ToStrings(t.AccountInterfaces)}
 	for _, c := range t.Children {
-		trace.Children = append(trace.Children, convertTrace(*c, book))
+		trace.Children = append(trace.Children, convertTrace(c, book))
 	}
 	return trace
 }
@@ -431,7 +431,11 @@ func (h *Handler) convertDomainRenew(ctx context.Context, d *bath.DnsRenewAction
 
 func (h *Handler) convertAction(ctx context.Context, viewer *tongo.AccountID, a bath.Action, acceptLanguage oas.OptString) (oas.Action, bool, error) {
 	action := oas.Action{
-		Type: oas.ActionType(a.Type),
+		Type:             oas.ActionType(a.Type),
+		BaseTransactions: make([]string, len(a.BaseTransactions)),
+	}
+	for i, t := range a.BaseTransactions {
+		action.BaseTransactions[i] = t.Hex()
 	}
 	var spamDetected bool
 	if a.Success {
@@ -717,6 +721,9 @@ func (h *Handler) convertAction(ctx context.Context, viewer *tongo.AccountID, a 
 		op := "Call"
 		if a.SmartContractExec.Operation != "" {
 			op = a.SmartContractExec.Operation
+		}
+		if op == "JettonCallTo" { //todo: remove after end of april 2024
+			op = "JettonAdminAction"
 		}
 		switch a.SmartContractExec.Operation {
 		case string(bath.TfUpdateValidatorSet):

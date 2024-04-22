@@ -16,7 +16,6 @@ require (
 	github.com/go-faster/errors v0.7.1
 	github.com/go-faster/jx v1.1.0
 	github.com/gorilla/websocket v1.5.1
-	github.com/labstack/gommon v0.4.0
 	github.com/nicksnyder/go-i18n/v2 v2.2.1
 	github.com/ogen-go/ogen v1.0.0
 	github.com/prometheus/client_golang v1.14.0
@@ -26,7 +25,7 @@ require (
 	github.com/sourcegraph/conc v0.3.0
 	github.com/stretchr/testify v1.9.0
 	github.com/tonkeeper/scam_backoffice_rules v0.0.0-20240412152144-9fb01586a942
-	github.com/tonkeeper/tongo v1.4.3-0.20240111224308-6e99df0b7ea1
+	github.com/tonkeeper/tongo v1.6.5
 	go.opentelemetry.io/otel v1.24.0
 	go.opentelemetry.io/otel/metric v1.24.0
 	go.opentelemetry.io/otel/trace v1.24.0

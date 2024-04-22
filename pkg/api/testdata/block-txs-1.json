@@ -13,6 +13,7 @@
        "orig_status": "active",
        "end_status": "active",
        "total_fees": 0,
+       "end_balance": 0,
        "transaction_type": "TransTickTock",
        "state_update_old": "728283e3b716f098ed0779fffa2b380ecf007db9b9658b9eef3ed30dbb54a4c6",
        "state_update_new": "895c7f301fd8726e006e2ececb743903a6ca030dd882935bb2569f911c32a3a7",
@@ -26,7 +27,8 @@
          "gas_fees": 0,
          "gas_used": 6464,
          "vm_steps": 150,
-         "exit_code": 0
+         "exit_code": 0,
+         "exit_code_description": "Ok"
        },
        "storage_phase": {
          "fees_collected": 0,
@@ -56,6 +58,7 @@
        "orig_status": "active",
        "end_status": "active",
        "total_fees": 0,
+       "end_balance": 0,
        "transaction_type": "TransOrd",
        "state_update_old": "895c7f301fd8726e006e2ececb743903a6ca030dd882935bb2569f911c32a3a7",
        "state_update_new": "04b2f9070b4bf54debc1f1524ff2b14e7ff8736235fbc2f8ebc886db37d325aa",
@@ -91,7 +94,8 @@
          "gas_fees": 0,
          "gas_used": 4874,
          "vm_steps": 100,
-         "exit_code": 0
+         "exit_code": 0,
+         "exit_code_description": "Ok"
        },
        "storage_phase": {
          "fees_collected": 0,
@@ -125,6 +129,7 @@
        "orig_status": "active",
        "end_status": "active",
        "total_fees": 0,
+       "end_balance": 0,
        "transaction_type": "TransTickTock",
        "state_update_old": "70e0a74209500c5c3bdf816b6c09aa510ab8cdfd8878e4c2c47c64654f5d0aa3",
        "state_update_new": "0cccc8fd653c124fb45be1def0d7e38c961021173b66cf4e7a460e72bdc63e78",
@@ -138,7 +143,8 @@
          "gas_fees": 0,
          "gas_used": 2479,
          "vm_steps": 46,
-         "exit_code": 0
+         "exit_code": 0,
+         "exit_code_description": "Ok"
        },
        "storage_phase": {
          "fees_collected": 0,

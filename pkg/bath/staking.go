@@ -1,12 +1,13 @@
 package bath
 
 import (
+	"math/big"
+
 	"github.com/tonkeeper/opentonapi/pkg/blockchain/config"
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
 	"github.com/tonkeeper/tongo/ton"
-	"math/big"
 )
 
 type BubbleElectionsDepositStake struct {
@@ -222,22 +223,20 @@ var DepositLiquidStakeStraw = Straw[BubbleDepositStake]{
 }
 
 var WithdrawLiquidStake = Straw[BubbleWithdrawStake]{
-	CheckFuncs: []bubbleCheck{Is(BubbleJettonBurn{})},
+	CheckFuncs: []bubbleCheck{Is(BubbleWithdrawStakeRequest{})},
 	Builder: func(newAction *BubbleWithdrawStake, bubble *Bubble) error {
-		newAction.Staker = bubble.Info.(BubbleJettonBurn).sender.Address
-		newAction.Implementation = core.StakingImplementationLiquidTF
-		amount := big.Int(bubble.Info.(BubbleJettonBurn).amount)
-		newAction.Amount = amount.Int64()
+		request := bubble.Info.(BubbleWithdrawStakeRequest)
+		newAction.Amount -= request.attachedAmount
+		newAction.Pool = request.Pool
+		newAction.Staker = request.Staker
+		newAction.Implementation = request.Implementation
 		return nil
 	},
 	SingleChild: &Straw[BubbleWithdrawStake]{
-		CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.TonstakePoolWithdrawMsgOp)},
+		CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.TonstakePoolWithdrawalMsgOp)},
 		Builder: func(newAction *BubbleWithdrawStake, bubble *Bubble) error {
-			newAction.Pool = bubble.Info.(BubbleTx).account.Address
+			newAction.Amount += bubble.Info.(BubbleTx).inputAmount
 			return nil
-		},
-		SingleChild: &Straw[BubbleWithdrawStake]{
-			CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.TonstakePoolWithdrawalMsgOp)},
 		},
 	},
 }
@@ -256,9 +255,11 @@ var PendingWithdrawRequestLiquidStraw = Straw[BubbleWithdrawStakeRequest]{
 		CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.TonstakePoolWithdrawMsgOp)},
 		Builder: func(newAction *BubbleWithdrawStakeRequest, bubble *Bubble) error {
 			newAction.Pool = bubble.Info.(BubbleTx).account.Address
+			newAction.attachedAmount = bubble.Info.(BubbleTx).inputAmount
 			return nil
 		},
 		SingleChild: &Straw[BubbleWithdrawStakeRequest]{
+			Optional:   true,
 			CheckFuncs: []bubbleCheck{IsTx, HasOpcode(0x1674b0a0)},
 			SingleChild: &Straw[BubbleWithdrawStakeRequest]{
 				CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.TonstakeNftInitMsgOp)},

@@ -8,6 +8,7 @@ import (
 	"math/big"
 	"sort"
 
+	"github.com/tonkeeper/tongo/abi"
 	"github.com/tonkeeper/tongo/tlb"
 	"github.com/tonkeeper/tongo/ton"
 	"go.uber.org/zap"
@@ -109,7 +110,7 @@ func convertBlockHeader(b core.BlockHeader) oas.BlockchainBlock {
 	return res
 }
 
-func convertTransaction(t core.Transaction, book addressBook) oas.Transaction {
+func convertTransaction(t core.Transaction, accountInterfaces []abi.ContractInterface, book addressBook) oas.Transaction {
 	tx := oas.Transaction{
 		Hash:            t.Hash.Hex(),
 		Lt:              int64(t.Lt),
@@ -119,6 +120,7 @@ func convertTransaction(t core.Transaction, book addressBook) oas.Transaction {
 		OrigStatus:      oas.AccountStatus(t.OrigStatus),
 		EndStatus:       oas.AccountStatus(t.EndStatus),
 		TotalFees:       t.TotalFee,
+		EndBalance:      t.EndBalance,
 		TransactionType: oas.TransactionType(t.Type),
 		StateUpdateOld:  t.StateHashUpdate.OldHash.Hex(),
 		StateUpdateNew:  t.StateHashUpdate.NewHash.Hex(),
@@ -140,12 +142,13 @@ func convertTransaction(t core.Transaction, book addressBook) oas.Transaction {
 	}
 	if t.ActionPhase != nil {
 		phase := oas.ActionPhase{
-			Success:        t.ActionPhase.Success,
-			ResultCode:     t.ActionPhase.ResultCode,
-			TotalActions:   int32(t.ActionPhase.TotalActions),
-			SkippedActions: int32(t.ActionPhase.SkippedActions),
-			FwdFees:        int64(t.ActionPhase.FwdFees),
-			TotalFees:      int64(t.ActionPhase.TotalFees),
+			Success:               t.ActionPhase.Success,
+			ResultCode:            t.ActionPhase.ResultCode,
+			TotalActions:          int32(t.ActionPhase.TotalActions),
+			SkippedActions:        int32(t.ActionPhase.SkippedActions),
+			FwdFees:               int64(t.ActionPhase.FwdFees),
+			TotalFees:             int64(t.ActionPhase.TotalFees),
+			ResultCodeDescription: g.Opt(convertActionPhaseResultCode(t.ActionPhase.ResultCode)),
 		}
 		tx.ActionPhase = oas.NewOptActionPhase(phase)
 	}
@@ -171,7 +174,7 @@ func convertTransaction(t core.Transaction, book addressBook) oas.Transaction {
 			phase.GasUsed = oas.NewOptInt64(t.ComputePhase.GasUsed.Int64())
 			phase.VMSteps = oas.NewOptInt32(int32(t.ComputePhase.VmSteps))
 			phase.ExitCode = oas.NewOptInt32(t.ComputePhase.ExitCode)
-			phase.ExitCodeDescription = g.Opt(convertExitCode(t.ComputePhase.ExitCode))
+			phase.ExitCodeDescription = g.Opt(abi.GetContractError(accountInterfaces, t.ComputePhase.ExitCode))
 		}
 		tx.ComputePhase = oas.NewOptComputePhase(phase)
 	}
@@ -842,25 +845,20 @@ func convertValidatorSet(set tlb.ValidatorsSet) oas.OptValidatorsSet {
 	return oas.NewOptValidatorsSet(s)
 }
 
-func convertExitCode(code int32) *string {
-	exitCodes := map[int32]string{
-		0:   "Ok",
-		1:   "Ok",
-		2:   "Stack underflow",
-		3:   "Stack overflow",
-		4:   "Integer overflow or division by zero",
-		5:   "Integer out of expected range",
-		6:   "Invalid opcode",
-		7:   "Type check error",
-		8:   "Cell overflow",
-		9:   "Cell underflow",
-		10:  "Dictionary error",
-		11:  "Unknown error",
-		12:  "Impossible situation error",
-		13:  "Out of gas error",
-		-14: "Out of gas error",
+func convertActionPhaseResultCode(code int32) *string {
+	resultCodes := map[int32]string{
+		32:  "Invalid action list format",
+		-32: "Method ID not found",
+		33:  "Action list too long",
+		34:  "Unsupported action",
+		35:  "Invalid Source address",
+		36:  "Invalid Destination address",
+		37:  "Insufficient TON",
+		38:  "Insufficient extra-currencies",
+		40:  "Insufficient funds",
+		43:  "Maximum cells/tree depth exceeded",
 	}
-	if msg, ok := exitCodes[code]; ok {
+	if msg, ok := resultCodes[code]; ok {
 		return &msg
 	}
 	return nil

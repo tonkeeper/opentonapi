@@ -13,7 +13,13 @@
          "Refund": null
        },
        "Success": true,
-       "Type": "JettonTransfer"
+       "Type": "JettonTransfer",
+       "BaseTransactions": [
+         "e7befadce3fc7a1f15f7119beb23a8e056c3e8db5fc807c72c488a740a08614b",
+         "d1e9668698b01c839bfa12be742d6c88ffe703a0790099bfbbb844c4d7edbdf0",
+         "ce8f1a1671581fa4a0c361cf3f58245b2978d10cef275b5179d7664b4bb0f4d3",
+         "fdf6c87af3c658bc5ce0eb8538c39ea7e204843a303ee1632e8eba88a807c5c9"
+       ]
      }
    ],
    "Accounts": [

@@ -9,7 +9,11 @@
          "Price": 4500000000000
        },
        "Success": true,
-       "Type": "NftPurchase"
+       "Type": "NftPurchase",
+       "BaseTransactions": [
+         "268f46a593b64400a93eb17a0945629647fdd662fb00ff69b58327d10336022b",
+         "29c039520eeef18295d428e919b7b33bd472f50ab3e9713b767a4f5e5c55181e"
+       ]
      },
      {
        "TonTransfer": {
@@ -21,7 +25,10 @@
          "Refund": null
        },
        "Success": true,
-       "Type": "TonTransfer"
+       "Type": "TonTransfer",
+       "BaseTransactions": [
+         "9fc8546b6f866685908c18b91e14d0fbafb39d6389403831b3ba63c3e60399e5"
+       ]
      },
      {
        "TonTransfer": {
@@ -33,7 +40,10 @@
          "Refund": null
        },
        "Success": true,
-       "Type": "TonTransfer"
+       "Type": "TonTransfer",
+       "BaseTransactions": [
+         "fa4c9108bebce63aff79570fceccf99126996b1e8793fcbdcd56a0b8752a2ee1"
+       ]
      }
    ],
    "Accounts": [

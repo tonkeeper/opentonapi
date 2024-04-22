@@ -970,6 +970,13 @@
      "WithdrawStakeRequest": {
       "$ref": "#/components/schemas/WithdrawStakeRequestAction"
      },
+     "base_transactions": {
+      "items": {
+       "example": "e8b0e3fee4a26bd2317ac1f9952fcdc87dc08fdb617656b5202416323337372e",
+       "type": "string"
+      },
+      "type": "array"
+     },
      "simple_preview": {
       "$ref": "#/components/schemas/ActionSimplePreview"
      },
@@ -1012,7 +1019,8 @@
     "required": [
      "type",
      "status",
-     "simple_preview"
+     "simple_preview",
+     "base_transactions"
     ],
     "type": "object"
    },
@@ -1027,6 +1035,9 @@
       "example": 5,
       "format": "int32",
       "type": "integer"
+     },
+     "result_code_description": {
+      "type": "string"
      },
      "skipped_actions": {
       "example": 5,
@@ -3398,15 +3409,24 @@
        "type": "object"
       },
       "type": "array"
+     },
+     "total": {
+      "example": 2000,
+      "format": "int64",
+      "type": "integer"
      }
     },
     "required": [
-     "addresses"
+     "addresses",
+     "total"
     ],
     "type": "object"
    },
    "JettonInfo": {
     "properties": {
+     "admin": {
+      "$ref": "#/components/schemas/AccountAddress"
+     },
      "holders_count": {
       "example": 2000,
       "format": "int32",
@@ -4950,6 +4970,11 @@
       "example": true,
       "type": "boolean"
      },
+     "end_balance": {
+      "example": 25713146000001,
+      "format": "int64",
+      "type": "integer"
+     },
      "end_status": {
       "$ref": "#/components/schemas/AccountStatus"
      },
@@ -5016,6 +5041,7 @@
      "hash",
      "lt",
      "account",
+     "end_balance",
      "success",
      "utime",
      "orig_status",
@@ -5282,6 +5308,9 @@
    },
    "WalletDNS": {
     "properties": {
+     "account": {
+      "$ref": "#/components/schemas/AccountAddress"
+     },
      "address": {
       "example": "0:da6b1b6663a0e4d18cc8574ccd9db5296e367dd9324706f3bbd9eb1cd2caf0bf",
       "type": "string"
@@ -5311,7 +5340,8 @@
      "is_wallet",
      "has_method_pubkey",
      "has_method_seqno",
-     "names"
+     "names",
+     "account"
     ],
     "type": "object"
    },

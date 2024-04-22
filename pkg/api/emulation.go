@@ -60,7 +60,10 @@ func isHighload(version tongoWallet.Version) bool {
 		version == tongoWallet.HighLoadV2
 }
 
-func (h *Handler) isEmulationAllowed(state tlb.ShardAccount, m tlb.Message) (bool, error) {
+func (h *Handler) isEmulationAllowed(accountID ton.AccountID, state tlb.ShardAccount, m tlb.Message) (bool, error) {
+	if _, ok := h.addressBook.GetAddressInfoByAddress(accountID); ok {
+		return true, nil
+	}
 	version, ok, err := tongoWallet.GetWalletVersion(state, m)
 	if err != nil {
 		return false, err
@@ -101,7 +104,7 @@ func (h *Handler) addToMempool(ctx context.Context, bytesBoc []byte, shardAccoun
 	if err != nil {
 		return nil, err
 	}
-	allowed, err := h.isEmulationAllowed(state, message)
+	allowed, err := h.isEmulationAllowed(*walletAddress, state, message)
 	if err != nil {
 		return shardAccount, err
 	}
@@ -147,7 +150,7 @@ func (h *Handler) addToMempool(ctx context.Context, bytesBoc []byte, shardAccoun
 		for _, mHash := range oldMemHashes { //we need to filter messages which already created transactions
 			_, err = h.storage.SearchTransactionByMessageHash(ctx, mHash)
 			_, prs := h.mempoolEmulate.traces.Get(mHash)
-			if err != nil || prs { //because if err is not null it already happened and if !prs it is not in mempool
+			if err != nil && prs { //because if err is not null it already happened and if !prs it is not in mempool
 				newMemHashes = append(newMemHashes, mHash)
 			}
 		}
@@ -230,7 +233,7 @@ func emulatedTreeToTrace(ctx context.Context, executor executor, resolver core.L
 			}
 			value := big.Int(data.Index)
 			index := decimal.NewFromBigInt(&value, 0)
-			collectionAddr, err := tongo.AccountIDFromTlb(data.CollectionAddress)
+			collectionAddr, err := ton.AccountIDFromTlb(data.CollectionAddress)
 			if err != nil || collectionAddr == nil {
 				continue
 			}
@@ -242,7 +245,7 @@ func emulatedTreeToTrace(ctx context.Context, executor executor, resolver core.L
 			if !ok {
 				continue
 			}
-			nftAddr, err := tongo.AccountIDFromTlb(indexResult.Address)
+			nftAddr, err := ton.AccountIDFromTlb(indexResult.Address)
 			if err != nil || nftAddr == nil {
 				continue
 			}
@@ -252,15 +255,15 @@ func emulatedTreeToTrace(ctx context.Context, executor executor, resolver core.L
 				Verified:          *nftAddr == accountID,
 			}
 		case abi.GetWalletDataResult:
-			master, _ := tongo.AccountIDFromTlb(data.Jetton)
+			master, _ := ton.AccountIDFromTlb(data.Jetton)
 			additionalInfo.SetJettonMaster(accountID, *master)
 		case abi.GetSaleData_GetgemsResult:
 			price := big.Int(data.FullPrice)
-			owner, err := tongo.AccountIDFromTlb(data.Owner)
+			owner, err := ton.AccountIDFromTlb(data.Owner)
 			if err != nil {
 				continue
 			}
-			item, err := tongo.AccountIDFromTlb(data.Nft)
+			item, err := ton.AccountIDFromTlb(data.Nft)
 			if err != nil || item == nil {
 				continue
 			}
@@ -271,11 +274,11 @@ func emulatedTreeToTrace(ctx context.Context, executor executor, resolver core.L
 			}
 		case abi.GetSaleData_BasicResult:
 			price := big.Int(data.FullPrice)
-			owner, err := tongo.AccountIDFromTlb(data.Owner)
+			owner, err := ton.AccountIDFromTlb(data.Owner)
 			if err != nil {
 				continue
 			}
-			item, err := tongo.AccountIDFromTlb(data.Nft)
+			item, err := ton.AccountIDFromTlb(data.Nft)
 			if err != nil || item == nil {
 				continue
 			}
@@ -285,11 +288,11 @@ func emulatedTreeToTrace(ctx context.Context, executor executor, resolver core.L
 				Item:     *item,
 			}
 		case abi.GetSaleData_GetgemsAuctionResult:
-			owner, err := tongo.AccountIDFromTlb(data.Owner)
+			owner, err := ton.AccountIDFromTlb(data.Owner)
 			if err != nil {
 				continue
 			}
-			item, err := tongo.AccountIDFromTlb(data.Nft)
+			item, err := ton.AccountIDFromTlb(data.Nft)
 			if err != nil || item == nil {
 				continue
 			}
@@ -299,8 +302,8 @@ func emulatedTreeToTrace(ctx context.Context, executor executor, resolver core.L
 				Item:     *item,
 			}
 		case abi.GetPoolData_StonfiResult:
-			t0, err0 := tongo.AccountIDFromTlb(data.Token0Address)
-			t1, err1 := tongo.AccountIDFromTlb(data.Token1Address)
+			t0, err0 := ton.AccountIDFromTlb(data.Token0Address)
+			t1, err1 := ton.AccountIDFromTlb(data.Token1Address)
 			if err1 != nil || err0 != nil {
 				continue
 			}
@@ -314,7 +317,7 @@ func emulatedTreeToTrace(ctx context.Context, executor executor, resolver core.L
 					return nil, err
 				}
 				data := value.(abi.GetWalletDataResult)
-				master, _ := tongo.AccountIDFromTlb(data.Jetton)
+				master, _ := ton.AccountIDFromTlb(data.Jetton)
 				additionalInfo.SetJettonMaster(accountID, *master)
 			}
 		}

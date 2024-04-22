@@ -8,11 +8,11 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/labstack/gommon/log"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/tonkeeper/opentonapi/pkg/references"
 	"github.com/tonkeeper/tongo"
+	"go.uber.org/zap"
 )
 
 var errorsCounter = promauto.NewCounterVec(prometheus.CounterOpts{
@@ -42,6 +42,8 @@ func (m *Mock) GetCurrentRates() (map[string]float64, error) {
 		if tonstakersJetton, tonstakersPrice, err := getTonstakersPrice(references.TonstakersAccountPool); err == nil {
 			pools[tonstakersJetton] = tonstakersPrice
 			break
+		} else {
+			zap.Error(err)
 		}
 		errorsCounter.WithLabelValues(tonstakers).Inc()
 		time.Sleep(time.Second * 3)
@@ -50,6 +52,8 @@ func (m *Mock) GetCurrentRates() (map[string]float64, error) {
 		if bemoJetton, bemoPrice, err := getBemoPrice(references.BemoAccount); err == nil {
 			pools[bemoJetton] = bemoPrice
 			break
+		} else {
+			zap.Error(err)
 		}
 		errorsCounter.WithLabelValues(bemo).Inc()
 		time.Sleep(time.Second * 3)
@@ -93,8 +97,7 @@ func getMedianTonPrice(marketsPrice []Market) (float64, error) {
 func getBemoPrice(account tongo.AccountID) (tongo.AccountID, float64, error) {
 	resp, err := http.Get(fmt.Sprintf("https://tonapi.io/v2/blockchain/accounts/%v/methods/get_full_data", account.ToRaw()))
 	if err != nil {
-		log.Errorf("[getBemoPrice] can't load price")
-		return tongo.AccountID{}, 0, err
+		return tongo.AccountID{}, 0, fmt.Errorf("[getBemoPrice] can't load price: %v", err)
 	}
 	defer resp.Body.Close()
 
@@ -108,8 +111,7 @@ func getBemoPrice(account tongo.AccountID) (tongo.AccountID, float64, error) {
 		}
 	}
 	if err = json.NewDecoder(resp.Body).Decode(&respBody); err != nil {
-		log.Errorf("[getBemoPrice] failed to decode response: %v", err)
-		return tongo.AccountID{}, 0, err
+		return tongo.AccountID{}, 0, fmt.Errorf("[getBemoPrice] failed to decode response: %v", err)
 	}
 	if !respBody.Success {
 		return tongo.AccountID{}, 0, fmt.Errorf("failed success")
@@ -137,8 +139,7 @@ func getBemoPrice(account tongo.AccountID) (tongo.AccountID, float64, error) {
 func getTonstakersPrice(pool tongo.AccountID) (tongo.AccountID, float64, error) {
 	resp, err := http.Get(fmt.Sprintf("https://tonapi.io/v2/blockchain/accounts/%v/methods/get_pool_full_data", pool.ToRaw()))
 	if err != nil {
-		log.Errorf("[getTonstakersPrice] can't load price")
-		return tongo.AccountID{}, 0, err
+		return tongo.AccountID{}, 0, fmt.Errorf("[getTonstakersPrice] can't load price")
 	}
 	defer resp.Body.Close()
 
@@ -154,8 +155,7 @@ func getTonstakersPrice(pool tongo.AccountID) (tongo.AccountID, float64, error) 
 		}
 	}
 	if err = json.NewDecoder(resp.Body).Decode(&respBody); err != nil {
-		log.Errorf("[getTonstakersPrice] failed to decode response: %v", err)
-		return tongo.AccountID{}, 0, err
+		return tongo.AccountID{}, 0, fmt.Errorf("[getTonstakersPrice] failed to decode response: %v", err)
 	}
 
 	if !respBody.Success {

@@ -13,7 +13,13 @@
          "Refund": null
        },
        "Success": true,
-       "Type": "JettonTransfer"
+       "Type": "JettonTransfer",
+       "BaseTransactions": [
+         "d7c56c9c08a0b83d0486a993f248aa61b62504bb7cb8223c5705cb8ee4882d17",
+         "61f2a240452c334febc1f20df9c468c4bb13f396fd08929537409dd47c1f5261",
+         "ca3ee9fa7e59ab581930bf9bad8fe5ad9a33fa8ff4b8e9db2e811f28d8a1d5d3",
+         "ef19ff3f09f465dfeefa61190131fe817313ea234b2abd4734b797d045eec8cf"
+       ]
      },
      {
        "ContractDeploy": {
@@ -21,7 +27,10 @@
          "Interfaces": null
        },
        "Success": true,
-       "Type": "ContractDeploy"
+       "Type": "ContractDeploy",
+       "BaseTransactions": [
+         "61f2a240452c334febc1f20df9c468c4bb13f396fd08929537409dd47c1f5261"
+       ]
      }
    ],
    "Accounts": [

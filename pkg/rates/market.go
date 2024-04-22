@@ -10,9 +10,9 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/labstack/gommon/log"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/ton"
+	"go.uber.org/zap"
 )
 
 const (
@@ -89,10 +89,15 @@ func (m *Mock) GetCurrentMarketsTonPrice() ([]Market, error) {
 	for idx, market := range markets {
 		respBody, err := sendRequest(market.ApiURL, "")
 		if err != nil {
+			zap.Error(err)
 			continue
 		}
 		market.UsdPrice, err = market.TonPriceConverter(respBody)
-		if err != nil || market.UsdPrice == 0 {
+		if err != nil {
+			zap.Error(err)
+			continue
+		}
+		if market.UsdPrice == 0 {
 			continue
 		}
 		markets[idx] = market
@@ -105,17 +110,15 @@ func (m *Mock) GetCurrentMarketsTonPrice() ([]Market, error) {
 
 func sendRequest(url, token string) (io.ReadCloser, error) {
 	req, err := http.NewRequest(http.MethodGet, url, nil)
+	if err != nil {
+		return nil, err
+	}
 	req.Header.Set("Content-Type", "application/json")
 	if token != "" {
 		req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", token))
 	}
-	if err != nil {
-		log.Errorf("[sendRequest] failed to send request: %v", url)
-		return nil, err
-	}
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		log.Errorf("[sendRequest] failed to send request: %v", url)
 		return nil, err
 	}
 	if resp.StatusCode != http.StatusOK {
@@ -123,8 +126,7 @@ func sendRequest(url, token string) (io.ReadCloser, error) {
 		if respBody, err := io.ReadAll(resp.Body); err == nil {
 			errRespBody = string(respBody)
 		}
-		log.Errorf("[sendRequest] bad status code: %v, %v, %v", resp.StatusCode, url, errRespBody)
-		return nil, fmt.Errorf("bad status code: %v", resp.StatusCode)
+		return nil, fmt.Errorf("bad status code: %v %v %v", resp.StatusCode, url, errRespBody)
 	}
 	return resp.Body, nil
 }
@@ -135,17 +137,14 @@ func convertedTonGateIOResponse(respBody io.ReadCloser) (float64, error) {
 		Last string `json:"last"`
 	}
 	if err := json.NewDecoder(respBody).Decode(&data); err != nil {
-		log.Errorf("[convertedTonGateIOResponse] failed to decode response: %v", err)
-		return 0, err
+		return 0, fmt.Errorf("[convertedTonGateIOResponse] failed to decode response: %v", err)
 	}
 	if len(data) == 0 {
-		log.Errorf("[convertedTonGateIOResponse] empty data")
-		return 0, fmt.Errorf("empty data")
+		return 0, fmt.Errorf("[convertedTonGateIOResponse] empty data")
 	}
 	price, err := strconv.ParseFloat(data[0].Last, 64)
 	if err != nil {
-		log.Errorf("[convertedTonGateIOResponse] failed to parse price: %v", err)
-		return 0, fmt.Errorf("failed to parse price")
+		return 0, fmt.Errorf("[convertedTonGateIOResponse] failed to parse price: %v", err)
 	}
 	return price, nil
 }
@@ -161,21 +160,17 @@ func convertedTonBybitResponse(respBody io.ReadCloser) (float64, error) {
 		} `json:"result"`
 	}
 	if err := json.NewDecoder(respBody).Decode(&data); err != nil {
-		log.Errorf("[convertedTonBybitResponse] failed to decode response: %v", err)
-		return 0, err
+		return 0, fmt.Errorf("[convertedTonBybitResponse] failed to decode response: %v", err)
 	}
 	if data.RetMsg != "OK" {
-		log.Errorf("[convertedTonBybitResponse] unsuccessful response")
-		return 0, fmt.Errorf("unsuccessful response")
+		return 0, fmt.Errorf("[convertedTonBybitResponse] unsuccessful response")
 	}
 	if len(data.Result.List) == 0 {
-		log.Errorf("[convertedTonBybitResponse] empty data")
-		return 0, fmt.Errorf("empty data")
+		return 0, fmt.Errorf("[convertedTonBybitResponse] empty data")
 	}
 	price, err := strconv.ParseFloat(data.Result.List[0].LastPrice, 64)
 	if err != nil {
-		log.Errorf("[convertedTonBybitResponse] failed to parse price: %v", err)
-		return 0, fmt.Errorf("failed to parse price")
+		return 0, fmt.Errorf("[convertedTonBybitResponse] failed to parse price: %v", err)
 	}
 	return price, nil
 }
@@ -184,12 +179,11 @@ func convertedTonBitFinexResponse(respBody io.ReadCloser) (float64, error) {
 	defer respBody.Close()
 	var prices []float64
 	if err := json.NewDecoder(respBody).Decode(&prices); err != nil {
-		log.Errorf("[convertedTonBitFinexResponse] failed to decode response: %v", err)
-		return 0, err
+		return 0, fmt.Errorf("[convertedTonBitFinexResponse] failed to decode response: %v", err)
 	}
 	if len(prices) == 0 {
-		log.Errorf("[convertedTonBitFinexResponse] empty data")
-		return 0, fmt.Errorf("empty data")
+
+		return 0, fmt.Errorf("[convertedTonBitFinexResponse] empty data")
 	}
 	if len(prices) >= 6 { // last market price
 		return prices[6], nil
@@ -206,21 +200,18 @@ func convertedTonKuCoinResponse(respBody io.ReadCloser) (float64, error) {
 		} `json:"data"`
 	}
 	if err := json.NewDecoder(respBody).Decode(&data); err != nil {
-		log.Errorf("[convertedTonKuCoinResponse] failed to decode response: %v", err)
-		return 0, err
+
+		return 0, fmt.Errorf("[convertedTonKuCoinResponse] failed to decode response: %v", err)
 	}
 	if !data.Success {
-		log.Errorf("[convertedTonKuCoinResponse] unsuccessful response")
-		return 0, fmt.Errorf("unsuccessful response")
+		return 0, fmt.Errorf("[convertedTonKuCoinResponse] unsuccessful response")
 	}
 	if len(data.Data) == 0 {
-		log.Errorf("[convertedTonKuCoinResponse] empty data")
-		return 0, fmt.Errorf("empty data")
+		return 0, fmt.Errorf("[convertedTonKuCoinResponse] empty data")
 	}
 	price, err := strconv.ParseFloat(data.Data[0].LastTradedPrice, 64)
 	if err != nil {
-		log.Errorf("[convertedTonKuCoinResponse] failed to parse price: %v", err)
-		return 0, fmt.Errorf("failed to parse price")
+		return 0, fmt.Errorf("[convertedTonKuCoinResponse] failed to parse price: %v", err)
 	}
 	return price, nil
 }
@@ -234,20 +225,18 @@ func convertedTonOKXResponse(respBody io.ReadCloser) (float64, error) {
 		} `json:"data"`
 	}
 	if err := json.NewDecoder(respBody).Decode(&data); err != nil {
-		log.Errorf("[convertedTonOKXResponse] failed to decode response: %v", err)
-		return 0, err
+
+		return 0, fmt.Errorf("[convertedTonOKXResponse] failed to decode response: %v", err)
 	}
 	if data.Code != "0" {
-		log.Errorf("[convertedTonOKXResponse] unsuccessful response")
-		return 0, fmt.Errorf("unsuccessful response")
+		return 0, fmt.Errorf("[convertedTonOKXResponse] unsuccessful response")
 	}
 	if len(data.Data) == 0 {
-		log.Errorf("[convertedTonOKXResponse] empty data")
-		return 0, fmt.Errorf("empty data")
+		return 0, fmt.Errorf("[convertedTonOKXResponse] empty data")
 	}
 	price, err := strconv.ParseFloat(data.Data[0].Last, 64)
 	if err != nil {
-		log.Errorf("[convertedTonOKXResponse] failed to parse price: %v", err)
+		zap.Error(fmt.Errorf("[convertedTonOKXResponse] failed to parse price: %v", err))
 		return 0, fmt.Errorf("failed to parse price")
 	}
 
@@ -267,16 +256,13 @@ func convertedTonHuobiResponse(respBody io.ReadCloser) (float64, error) {
 		} `json:"tick"`
 	}
 	if err := json.NewDecoder(respBody).Decode(&data); err != nil {
-		log.Errorf("[convertedTonHuobiResponse] failed to decode response: %v", err)
-		return 0, err
+		return 0, fmt.Errorf("[convertedTonHuobiResponse] failed to decode response: %v", err)
 	}
 	if data.Status != "ok" {
-		log.Errorf("[convertedTonHuobiResponse] unsuccessful response")
-		return 0, fmt.Errorf("unsuccessful response")
+		return 0, fmt.Errorf("[convertedTonHuobiResponse] unsuccessful response")
 	}
 	if len(data.Tick.Data) == 0 {
-		log.Errorf("[convertedTonHuobiResponse] empty data")
-		return 0, fmt.Errorf("empty data")
+		return 0, fmt.Errorf("[convertedTonHuobiResponse] empty data")
 	}
 
 	return data.Tick.Data[0].Price, nil
@@ -318,7 +304,7 @@ func convertedExchangerateFiatPricesResponse(respBody io.ReadCloser) map[string]
 		Rates map[string]float64 `json:"rates"`
 	}
 	if err := json.NewDecoder(respBody).Decode(&data); err != nil {
-		log.Errorf("[convertedExchangerateFiatPricesResponse] failed to decode response: %v", err)
+		//todo: return err
 		return map[string]float64{}
 	}
 	prices := make(map[string]float64)
@@ -336,7 +322,7 @@ func convertedCoinBaseFiatPricesResponse(respBody io.ReadCloser) map[string]floa
 		} `json:"data"`
 	}
 	if err := json.NewDecoder(respBody).Decode(&data); err != nil {
-		log.Errorf("[convertedCoinBaseFiatPricesResponse] failed to decode response: %v", err)
+		//todo: return err
 		return map[string]float64{}
 	}
 	prices := make(map[string]float64)
@@ -390,7 +376,7 @@ func convertedMegatonPoolResponse(tonApiToken string, tonPrice float64, respBody
 		Price   float64 `json:"price"`
 	}
 	if err := json.NewDecoder(respBody).Decode(&data); err != nil {
-		log.Errorf("[convertedMegatonPoolResponse] failed to decode response: %v", err)
+		//todo: return error
 		return map[ton.AccountID]float64{}
 	}
 	pools := make(map[ton.AccountID]float64)
@@ -413,7 +399,7 @@ func convertedStonFiPoolResponse(tonApiToken string, tonPrice float64, respBody 
 		} `json:"asset_list"`
 	}
 	if err := json.NewDecoder(respBody).Decode(&data); err != nil {
-		log.Errorf("[convertedStonFiPoolResponse] failed to decode response: %v", err)
+		//todo: return error
 		return map[ton.AccountID]float64{}
 	}
 	pools := make(map[ton.AccountID]float64)
@@ -447,7 +433,7 @@ func convertedDedustPoolResponse(tonApiToken string, tonPrice float64, respBody 
 	}
 	var data []Pool
 	if err := json.NewDecoder(respBody).Decode(&data); err != nil {
-		log.Errorf("[convertedDedustPoolResponse] failed to decode response: %v", err)
+		//todo: return error
 		return map[ton.AccountID]float64{}
 	}
 	pools := make(map[ton.AccountID]float64)
@@ -481,7 +467,7 @@ func convertedDedustPoolResponse(tonApiToken string, tonPrice float64, respBody 
 			url := fmt.Sprintf("https://tonapi.io/v2/jettons/%v", account.ToRaw())
 			jettonInfoRespBody, err := sendRequest(url, tonApiToken)
 			if err != nil {
-				log.Errorf("[convertedDedustPoolResponse] failed to get jetton info: %v", err)
+				zap.Error(err)
 				continue
 			}
 			defer jettonInfoRespBody.Close()
@@ -491,7 +477,7 @@ func convertedDedustPoolResponse(tonApiToken string, tonPrice float64, respBody 
 				} `json:"metadata"`
 			}
 			if err = json.NewDecoder(jettonInfoRespBody).Decode(&jettonInfo); err != nil {
-				log.Errorf("[convertedDedustPoolResponse] failed to decode jetton info: %v", err)
+				zap.Error(err)
 				continue
 			}
 			decimals, err := strconv.Atoi(jettonInfo.Metadata.Decimals)
