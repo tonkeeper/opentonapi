@@ -36109,6 +36109,10 @@ func (s *WalletDNS) encodeFields(e *jx.Encoder) {
 		e.Str(s.Address)
 	}
 	{
+		e.FieldStart("account")
+		s.Account.Encode(e)
+	}
+	{
 		e.FieldStart("is_wallet")
 		e.Bool(s.IsWallet)
 	}
@@ -36130,12 +36134,13 @@ func (s *WalletDNS) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfWalletDNS = [5]string{
+var jsonFieldsNameOfWalletDNS = [6]string{
 	0: "address",
-	1: "is_wallet",
-	2: "has_method_pubkey",
-	3: "has_method_seqno",
-	4: "names",
+	1: "account",
+	2: "is_wallet",
+	3: "has_method_pubkey",
+	4: "has_method_seqno",
+	5: "names",
 }
 
 // Decode decodes WalletDNS from json.
@@ -36159,8 +36164,18 @@ func (s *WalletDNS) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"address\"")
 			}
-		case "is_wallet":
+		case "account":
 			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				if err := s.Account.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"account\"")
+			}
+		case "is_wallet":
+			requiredBitSet[0] |= 1 << 2
 			if err := func() error {
 				v, err := d.Bool()
 				s.IsWallet = bool(v)
@@ -36172,7 +36187,7 @@ func (s *WalletDNS) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"is_wallet\"")
 			}
 		case "has_method_pubkey":
-			requiredBitSet[0] |= 1 << 2
+			requiredBitSet[0] |= 1 << 3
 			if err := func() error {
 				v, err := d.Bool()
 				s.HasMethodPubkey = bool(v)
@@ -36184,7 +36199,7 @@ func (s *WalletDNS) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"has_method_pubkey\"")
 			}
 		case "has_method_seqno":
-			requiredBitSet[0] |= 1 << 3
+			requiredBitSet[0] |= 1 << 4
 			if err := func() error {
 				v, err := d.Bool()
 				s.HasMethodSeqno = bool(v)
@@ -36196,7 +36211,7 @@ func (s *WalletDNS) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"has_method_seqno\"")
 			}
 		case "names":
-			requiredBitSet[0] |= 1 << 4
+			requiredBitSet[0] |= 1 << 5
 			if err := func() error {
 				s.Names = make([]string, 0)
 				if err := d.Arr(func(d *jx.Decoder) error {
@@ -36225,7 +36240,7 @@ func (s *WalletDNS) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b00011111,
+		0b00111111,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
