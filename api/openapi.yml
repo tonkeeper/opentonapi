@@ -5706,10 +5706,13 @@ components:
         - has_method_pubkey
         - has_method_seqno
         - names
+        - account
       properties:
         address:
           type: string
           example: "0:da6b1b6663a0e4d18cc8574ccd9db5296e367dd9324706f3bbd9eb1cd2caf0bf"
+        account:
+          $ref: '#/components/schemas/AccountAddress'
         is_wallet:
           type: boolean
           example: true

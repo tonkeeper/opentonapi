@@ -15613,16 +15613,22 @@ func (s *ValueFlowJettonsItem) SetQuantity(val int64) {
 
 // Ref: #/components/schemas/WalletDNS
 type WalletDNS struct {
-	Address         string   `json:"address"`
-	IsWallet        bool     `json:"is_wallet"`
-	HasMethodPubkey bool     `json:"has_method_pubkey"`
-	HasMethodSeqno  bool     `json:"has_method_seqno"`
-	Names           []string `json:"names"`
+	Address         string         `json:"address"`
+	Account         AccountAddress `json:"account"`
+	IsWallet        bool           `json:"is_wallet"`
+	HasMethodPubkey bool           `json:"has_method_pubkey"`
+	HasMethodSeqno  bool           `json:"has_method_seqno"`
+	Names           []string       `json:"names"`
 }
 
 // GetAddress returns the value of Address.
 func (s *WalletDNS) GetAddress() string {
 	return s.Address
+}
+
+// GetAccount returns the value of Account.
+func (s *WalletDNS) GetAccount() AccountAddress {
+	return s.Account
 }
 
 // GetIsWallet returns the value of IsWallet.
@@ -15648,6 +15654,11 @@ func (s *WalletDNS) GetNames() []string {
 // SetAddress sets the value of Address.
 func (s *WalletDNS) SetAddress(val string) {
 	s.Address = val
+}
+
+// SetAccount sets the value of Account.
+func (s *WalletDNS) SetAccount(val AccountAddress) {
+	s.Account = val
 }
 
 // SetIsWallet sets the value of IsWallet.

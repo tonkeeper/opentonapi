@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/tonkeeper/opentonapi/pkg/core"
+	"github.com/tonkeeper/tongo/ton"
 
 	"github.com/tonkeeper/tongo/contract/dns"
 
@@ -109,6 +110,7 @@ func (h *Handler) DnsResolve(ctx context.Context, params oas.DnsResolveParams) (
 				Address: convertMsgAddress(r.DNSSmcAddress.Address),
 				Names:   r.DNSSmcAddress.SmcCapability.Name,
 			}
+			w.Account = convertAccountAddress(ton.MustParseAccountID(w.Address), h.addressBook)
 			for _, c := range r.DNSSmcAddress.SmcCapability.Interfaces {
 				switch c {
 				case "seqno":
