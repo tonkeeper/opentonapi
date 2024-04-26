@@ -355,19 +355,11 @@ func (h *Handler) GetRawBlockchainConfigFromBlock(ctx context.Context, params oa
 }
 
 func (h *Handler) GetBlockchainValidators(ctx context.Context) (*oas.Validators, error) {
-	mcInfoExtra, err := h.storage.GetMasterchainInfoExtRaw(ctx, 0)
+	blockHeader, err := h.storage.LastMasterchainBlockHeader(ctx)
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
-	next := ton.BlockID{
-		Workchain: int32(mcInfoExtra.Last.Workchain),
-		Shard:     mcInfoExtra.Last.Shard,
-		Seqno:     mcInfoExtra.Last.Seqno,
-	}
-	blockHeader, err := h.storage.GetBlockHeader(ctx, next)
-	if err != nil {
-		return nil, toError(http.StatusInternalServerError, err)
-	}
+	next := blockHeader.BlockID
 	configBlockID := next
 	if !blockHeader.IsKeyBlock {
 		configBlockID.Seqno = uint32(blockHeader.PrevKeyBlockSeqno)
