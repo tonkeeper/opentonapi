@@ -9123,8 +9123,8 @@
   },
   "/v2/status": {
    "get": {
-    "description": "Reduce indexing latency",
-    "operationId": "reduceIndexingLatency",
+    "description": "Status",
+    "operationId": "status",
     "responses": {
      "200": {
       "content": {
@@ -9134,7 +9134,7 @@
         }
        }
       },
-      "description": "indexing latency"
+      "description": "status"
      },
      "default": {
       "$ref": "#/components/responses/Error"

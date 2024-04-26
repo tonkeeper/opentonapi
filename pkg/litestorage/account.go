@@ -48,7 +48,7 @@ func (s *LiteStorage) GetAccountDiff(ctx context.Context, account tongo.AccountI
 	return 0, errors.New("not implemented")
 }
 
-func (s *LiteStorage) ReduceIndexingLatency(ctx context.Context) (int64, error) {
+func (s *LiteStorage) GetLatency(ctx context.Context) (int64, error) {
 	blockHeader, err := s.LastMasterchainBlockHeader(ctx)
 	if err != nil {
 		return 0, err

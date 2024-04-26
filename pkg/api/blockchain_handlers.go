@@ -21,8 +21,8 @@ import (
 	"github.com/tonkeeper/tongo/ton"
 )
 
-func (h *Handler) ReduceIndexingLatency(ctx context.Context) (*oas.ServiceStatus, error) {
-	indexingLatency, err := h.storage.ReduceIndexingLatency(ctx)
+func (h *Handler) Status(ctx context.Context) (*oas.ServiceStatus, error) {
+	latency, err := h.storage.GetLatency(ctx)
 	if errors.Is(err, core.ErrEntityNotFound) {
 		return nil, toError(http.StatusNotFound, err)
 	}
@@ -31,7 +31,7 @@ func (h *Handler) ReduceIndexingLatency(ctx context.Context) (*oas.ServiceStatus
 		restOnline = false
 	}
 	return &oas.ServiceStatus{
-		IndexingLatency: int(indexingLatency),
+		IndexingLatency: int(latency),
 		RestOnline:      restOnline,
 	}, nil
 }

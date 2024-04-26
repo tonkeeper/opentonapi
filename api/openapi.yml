@@ -13,13 +13,13 @@ servers:
 paths:
   /v2/status:
     get:
-      description: Reduce indexing latency
-      operationId: reduceIndexingLatency
+      description: Status
+      operationId: status
       tags:
         - Blockchain
       responses:
         '200':
-          description: indexing latency
+          description: status
           content:
             application/json:
               schema:
