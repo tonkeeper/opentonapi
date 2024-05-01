@@ -60,12 +60,18 @@ func (h *Handler) GetBlockchainMasterchainShards(ctx context.Context, params oas
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
+
 	res := oas.BlockchainBlockShards{
 		Shards: make([]oas.BlockchainBlockShardsShardsItem, len(shards)),
 	}
 	for i, shard := range shards {
+		block, err := h.storage.GetBlockHeader(ctx, shard)
+		if err != nil {
+			return nil, toError(http.StatusInternalServerError, err)
+		}
 		res.Shards[i] = oas.BlockchainBlockShardsShardsItem{
 			LastKnownBlockID: shard.String(),
+			LastKnownBlock:   convertBlockHeader(*block),
 		}
 	}
 	return &res, nil

@@ -1589,13 +1589,17 @@
      "shards": {
       "items": {
        "properties": {
+        "last_known_block": {
+         "$ref": "#/components/schemas/BlockchainBlock"
+        },
         "last_known_block_id": {
          "example": "(0,8000000000000000,4234234)",
          "type": "string"
         }
        },
        "required": [
-        "last_known_block_id"
+        "last_known_block_id",
+        "last_known_block"
        ],
        "type": "object"
       },

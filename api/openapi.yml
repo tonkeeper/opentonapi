@@ -3204,10 +3204,13 @@ components:
             type: object
             required:
               - last_known_block_id
+              - last_known_block
             properties:
               last_known_block_id:
                 type: string
                 example: (0,8000000000000000,4234234)
+              last_known_block:
+                $ref: '#/components/schemas/BlockchainBlock'
     AccountStatus:
       type: string
       example: active

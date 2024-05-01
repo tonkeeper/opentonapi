@@ -5471,10 +5471,15 @@ func (s *BlockchainBlockShardsShardsItem) encodeFields(e *jx.Encoder) {
 		e.FieldStart("last_known_block_id")
 		e.Str(s.LastKnownBlockID)
 	}
+	{
+		e.FieldStart("last_known_block")
+		s.LastKnownBlock.Encode(e)
+	}
 }
 
-var jsonFieldsNameOfBlockchainBlockShardsShardsItem = [1]string{
+var jsonFieldsNameOfBlockchainBlockShardsShardsItem = [2]string{
 	0: "last_known_block_id",
+	1: "last_known_block",
 }
 
 // Decode decodes BlockchainBlockShardsShardsItem from json.
@@ -5498,6 +5503,16 @@ func (s *BlockchainBlockShardsShardsItem) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"last_known_block_id\"")
 			}
+		case "last_known_block":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				if err := s.LastKnownBlock.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"last_known_block\"")
+			}
 		default:
 			return d.Skip()
 		}
@@ -5508,7 +5523,7 @@ func (s *BlockchainBlockShardsShardsItem) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b00000001,
+		0b00000011,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.

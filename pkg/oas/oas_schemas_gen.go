@@ -2343,7 +2343,8 @@ func (s *BlockchainBlockShards) SetShards(val []BlockchainBlockShardsShardsItem)
 }
 
 type BlockchainBlockShardsShardsItem struct {
-	LastKnownBlockID string `json:"last_known_block_id"`
+	LastKnownBlockID string          `json:"last_known_block_id"`
+	LastKnownBlock   BlockchainBlock `json:"last_known_block"`
 }
 
 // GetLastKnownBlockID returns the value of LastKnownBlockID.
@@ -2351,9 +2352,19 @@ func (s *BlockchainBlockShardsShardsItem) GetLastKnownBlockID() string {
 	return s.LastKnownBlockID
 }
 
+// GetLastKnownBlock returns the value of LastKnownBlock.
+func (s *BlockchainBlockShardsShardsItem) GetLastKnownBlock() BlockchainBlock {
+	return s.LastKnownBlock
+}
+
 // SetLastKnownBlockID sets the value of LastKnownBlockID.
 func (s *BlockchainBlockShardsShardsItem) SetLastKnownBlockID(val string) {
 	s.LastKnownBlockID = val
+}
+
+// SetLastKnownBlock sets the value of LastKnownBlock.
+func (s *BlockchainBlockShardsShardsItem) SetLastKnownBlock(val BlockchainBlock) {
+	s.LastKnownBlock = val
 }
 
 // Ref: #/components/schemas/BlockchainBlocks
