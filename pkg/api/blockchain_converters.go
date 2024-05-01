@@ -140,6 +140,9 @@ func convertTransaction(t core.Transaction, accountInterfaces []abi.ContractInte
 	for _, m := range t.OutMsgs {
 		tx.OutMsgs = append(tx.OutMsgs, convertMessage(m, book))
 	}
+	sort.Slice(tx.OutMsgs, func(i, j int) bool {
+		return tx.OutMsgs[i].CreatedLt < tx.OutMsgs[j].CreatedLt
+	})
 	if t.ActionPhase != nil {
 		phase := oas.ActionPhase{
 			Success:               t.ActionPhase.Success,

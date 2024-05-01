@@ -4100,6 +4100,10 @@
       "example": "crypto.ton",
       "type": "string"
      },
+     "include_compressed": {
+      "example": false,
+      "type": "boolean"
+     },
      "index": {
       "example": 58,
       "format": "int64",

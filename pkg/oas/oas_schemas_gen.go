@@ -8737,16 +8737,17 @@ func (s *NftCollections) SetNftCollections(val []NftCollection) {
 
 // Ref: #/components/schemas/NftItem
 type NftItem struct {
-	Address    string               `json:"address"`
-	Index      int64                `json:"index"`
-	Owner      OptAccountAddress    `json:"owner"`
-	Collection OptNftItemCollection `json:"collection"`
-	Verified   bool                 `json:"verified"`
-	Metadata   NftItemMetadata      `json:"metadata"`
-	Sale       OptSale              `json:"sale"`
-	Previews   []ImagePreview       `json:"previews"`
-	DNS        OptString            `json:"dns"`
-	ApprovedBy NftApprovedBy        `json:"approved_by"`
+	Address           string               `json:"address"`
+	Index             int64                `json:"index"`
+	Owner             OptAccountAddress    `json:"owner"`
+	Collection        OptNftItemCollection `json:"collection"`
+	Verified          bool                 `json:"verified"`
+	Metadata          NftItemMetadata      `json:"metadata"`
+	Sale              OptSale              `json:"sale"`
+	Previews          []ImagePreview       `json:"previews"`
+	DNS               OptString            `json:"dns"`
+	ApprovedBy        NftApprovedBy        `json:"approved_by"`
+	IncludeCompressed OptBool              `json:"include_compressed"`
 }
 
 // GetAddress returns the value of Address.
@@ -8799,6 +8800,11 @@ func (s *NftItem) GetApprovedBy() NftApprovedBy {
 	return s.ApprovedBy
 }
 
+// GetIncludeCompressed returns the value of IncludeCompressed.
+func (s *NftItem) GetIncludeCompressed() OptBool {
+	return s.IncludeCompressed
+}
+
 // SetAddress sets the value of Address.
 func (s *NftItem) SetAddress(val string) {
 	s.Address = val
@@ -8847,6 +8853,11 @@ func (s *NftItem) SetDNS(val OptString) {
 // SetApprovedBy sets the value of ApprovedBy.
 func (s *NftItem) SetApprovedBy(val NftApprovedBy) {
 	s.ApprovedBy = val
+}
+
+// SetIncludeCompressed sets the value of IncludeCompressed.
+func (s *NftItem) SetIncludeCompressed(val OptBool) {
+	s.IncludeCompressed = val
 }
 
 type NftItemCollection struct {

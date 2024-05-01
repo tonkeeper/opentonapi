@@ -4902,6 +4902,9 @@ components:
           example: crypto.ton
         approved_by:
           $ref: '#/components/schemas/NftApprovedBy'
+        include_compressed:
+          type: boolean
+          example: false
     NftItems:
       type: object
       required:
