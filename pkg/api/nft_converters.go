@@ -71,6 +71,13 @@ func convertNFT(ctx context.Context, item core.NftItem, book addressBook, metaCa
 		if *item.CollectionAddress == references.RootDotTon && item.DNS != nil && item.Verified {
 			image = "https://cache.tonapi.io/dns/preview/" + *item.DNS + ".png"
 			i.Metadata["name"] = []byte(fmt.Sprintf(`"%v"`, *item.DNS))
+			buttons, _ := json.Marshal([]map[string]string{
+				{
+					"label": "Manage",
+					"uri":   fmt.Sprintf("https://dns.tonkeeper.com/manage?v=%v", item.Address.ToRaw()),
+				},
+			})
+			i.Metadata["buttons"] = buttons
 		}
 	}
 
