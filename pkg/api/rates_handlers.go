@@ -210,29 +210,29 @@ func convertRates(rates map[string]oas.TokenRates, token, currency string, today
 
 	switch true {
 	case diff24h < 0:
-		rate.Diff24h.Value[currency] = fmt.Sprintf("%.2f%%", diff24h)
+		rate.Diff24h.Value[currency] = fmt.Sprintf("−%.2f%%", math.Abs(diff24h))
 	case diff24h > 0:
 		rate.Diff24h.Value[currency] = fmt.Sprintf("+%.2f%%", diff24h)
 	default:
-		rate.Diff24h.Value[currency] = "0"
+		rate.Diff24h.Value[currency] = "0.00%"
 	}
 
 	switch true {
 	case diff7w < 0:
-		rate.Diff7d.Value[currency] = fmt.Sprintf("%.2f%%", diff7w)
+		rate.Diff7d.Value[currency] = fmt.Sprintf("−%.2f%%", math.Abs(diff7w))
 	case diff7w > 0:
 		rate.Diff7d.Value[currency] = fmt.Sprintf("+%.2f%%", diff7w)
 	default:
-		rate.Diff7d.Value[currency] = "0"
+		rate.Diff7d.Value[currency] = "0.00%"
 	}
 
 	switch true {
 	case diff1m < 0:
-		rate.Diff30d.Value[currency] = fmt.Sprintf("%.2f%%", diff1m)
+		rate.Diff30d.Value[currency] = fmt.Sprintf("−%.2f%%", math.Abs(diff1m))
 	case diff1m > 0:
 		rate.Diff30d.Value[currency] = fmt.Sprintf("+%.2f%%", diff1m)
 	default:
-		rate.Diff30d.Value[currency] = "0"
+		rate.Diff30d.Value[currency] = "0.00%"
 	}
 
 	return rates, nil

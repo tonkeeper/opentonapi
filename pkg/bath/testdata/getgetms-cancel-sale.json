@@ -9,7 +9,10 @@
          "Payload": ""
        },
        "Success": true,
-       "Type": "SmartContractExec"
+       "Type": "SmartContractExec",
+       "BaseTransactions": [
+         "dd73b0fbd2f8ddb788802e999afb4e27a931492036f9038a9f0b773caf96e923"
+       ]
      },
      {
        "NftItemTransfer": {
@@ -21,7 +24,11 @@
          "Refund": null
        },
        "Success": true,
-       "Type": "NftItemTransfer"
+       "Type": "NftItemTransfer",
+       "BaseTransactions": [
+         "e4717dd6a13f472299757879cf46480e07ea64fae7a5bccbc4a0766ba71b6f4e",
+         "af9603b51ea224f718d884d977b85ac9f46ead2c9fe2b424412dade6a8305e1a"
+       ]
      }
    ],
    "Accounts": [

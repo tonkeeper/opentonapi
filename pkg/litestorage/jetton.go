@@ -107,11 +107,13 @@ func (s *LiteStorage) GetJettonMasterData(ctx context.Context, master tongo.Acco
 	if !ok {
 		return core.JettonMaster{}, fmt.Errorf("invalid jetton data result")
 	}
-	return core.JettonMaster{
+	jettonMaster := core.JettonMaster{
 		Address:     master,
 		TotalSupply: big.Int(r.TotalSupply),
-		Mintable:    r.Mintable != 0,
-	}, nil
+		Mintable:    r.Mintable,
+	}
+	jettonMaster.Admin, _ = tongo.AccountIDFromTlb(r.AdminAddress)
+	return jettonMaster, nil
 }
 
 func (s *LiteStorage) GetAccountJettonsHistory(ctx context.Context, address tongo.AccountID, limit int, beforeLT, startTime, endTime *int64) ([]tongo.Bits256, error) {

@@ -794,15 +794,6 @@ func (UnimplementedHandler) GetWalletsByPublicKey(ctx context.Context, params Ge
 	return r, ht.ErrNotImplemented
 }
 
-// ReduceIndexingLatency implements reduceIndexingLatency operation.
-//
-// Reduce indexing latency.
-//
-// GET /v2/status
-func (UnimplementedHandler) ReduceIndexingLatency(ctx context.Context) (r *ServiceStatus, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
 // ReindexAccount implements reindexAccount operation.
 //
 // Update internal cache for a particular account.
@@ -846,6 +837,15 @@ func (UnimplementedHandler) SendRawMessage(ctx context.Context, req *SendRawMess
 // PUT /v2/wallet/backup
 func (UnimplementedHandler) SetWalletBackup(ctx context.Context, req SetWalletBackupReq, params SetWalletBackupParams) error {
 	return ht.ErrNotImplemented
+}
+
+// Status implements status operation.
+//
+// Status.
+//
+// GET /v2/status
+func (UnimplementedHandler) Status(ctx context.Context) (r *ServiceStatus, _ error) {
+	return r, ht.ErrNotImplemented
 }
 
 // TonConnectProof implements tonConnectProof operation.

@@ -13,7 +13,12 @@
          "Refund": null
        },
        "Success": true,
-       "Type": "JettonTransfer"
+       "Type": "JettonTransfer",
+       "BaseTransactions": [
+         "a47be2c95381c33a3efd100aaff86f9bb415bc21d3f2b7a751872ea7631012f1",
+         "7309e9a76410ed7d8d4147790dea40c3cbbbe325946b6af36bcf30ae86048d67",
+         "4b303c2c98fa0eba8412908c420cbe09a00b2d8db725b1f17569a4a84a044e85"
+       ]
      },
      {
        "SmartContractExec": {
@@ -24,7 +29,10 @@
          "Payload": "Addrs:\n  FromUser: 0:2cf3b5b8c891e517c9addbda1c0386a09ccacbb0e3faf630b51cfc8152325acb\nHasRefAddress: true\nJettonAmount: \"16666723091\"\nMinOut: \"2087431288\"\nQueryId: 1763571776588606\nSenderAddress: 0:755f21900374af9b39f25e90276caed94409194cad6c32cd12abf336c0df9eb7\nToAddress: 0:2cf3b5b8c891e517c9addbda1c0386a09ccacbb0e3faf630b51cfc8152325acb\n"
        },
        "Success": true,
-       "Type": "SmartContractExec"
+       "Type": "SmartContractExec",
+       "BaseTransactions": [
+         "52d18ed6ff9de1724d30a7bc7347680b37a6205736c74f09495e5a482e3196e6"
+       ]
      },
      {
        "SmartContractExec": {
@@ -35,7 +43,10 @@
          "Payload": "ExitCode: 1158120768\nOwner: 0:6c8eef549f003f4f421d009aede507e3f7535667b639e98fd09b55c8fc0e23cb\nParams:\n  IsRight: true\n  Value:\n    Amount0Out: \"2102126\"\n    Amount1Out: \"0\"\n    Token0Address: 0:b90a4147ba83fea581fa8d73b1c92cf82dcc92b0c6df924c3c0553d713b35e6c\n    Token1Address: 0:755f21900374af9b39f25e90276caed94409194cad6c32cd12abf336c0df9eb7\nQueryId: 1763571776588606\n"
        },
        "Success": true,
-       "Type": "SmartContractExec"
+       "Type": "SmartContractExec",
+       "BaseTransactions": [
+         "e9b362ae466b18a53a8bb658e14511787699d14428c753b94ffcfe34262ff92d"
+       ]
      },
      {
        "JettonTransfer": {
@@ -50,7 +61,12 @@
          "Refund": null
        },
        "Success": true,
-       "Type": "JettonTransfer"
+       "Type": "JettonTransfer",
+       "BaseTransactions": [
+         "1c0e8d968434981c8d380453bc55c31984ae50c7068ebc9262610c798dbcbfb4",
+         "3cf5c2370fa0677f13b4629758942c0a309be33d878b796a4c8ad1ad7297fd48",
+         "70083eb5101b03fb73dc7558d2f8afc784d6c00d199f636ccb8bc72be34f791d"
+       ]
      },
      {
        "SmartContractExec": {
@@ -61,7 +77,10 @@
          "Payload": "ExitCode: 3326308581\nOwner: 0:2cf3b5b8c891e517c9addbda1c0386a09ccacbb0e3faf630b51cfc8152325acb\nParams:\n  IsRight: true\n  Value:\n    Amount0Out: \"2097920891\"\n    Amount1Out: \"0\"\n    Token0Address: 0:b90a4147ba83fea581fa8d73b1c92cf82dcc92b0c6df924c3c0553d713b35e6c\n    Token1Address: 0:755f21900374af9b39f25e90276caed94409194cad6c32cd12abf336c0df9eb7\nQueryId: 1763571776588606\n"
        },
        "Success": true,
-       "Type": "SmartContractExec"
+       "Type": "SmartContractExec",
+       "BaseTransactions": [
+         "2ba854a4642c1523aa1e6a91f61f3e9d7f8c2963787b6c9c8f5695f0720d3383"
+       ]
      },
      {
        "JettonTransfer": {
@@ -76,7 +95,12 @@
          "Refund": null
        },
        "Success": true,
-       "Type": "JettonTransfer"
+       "Type": "JettonTransfer",
+       "BaseTransactions": [
+         "be8c3f1bba22515a8efbe43cbbf195476f43ad7c75fc772dc636ffddf51f2304",
+         "34fa15497ceebed556dcdde456d5a232d4194b57f1ba403aebce0a838b77f8dc",
+         "60dda2b2fdc5fde5fa1710c28aa11cdca34226559d435b6ebe1040ac46432e34"
+       ]
      },
      {
        "ContractDeploy": {
@@ -84,7 +108,10 @@
          "Interfaces": null
        },
        "Success": true,
-       "Type": "ContractDeploy"
+       "Type": "ContractDeploy",
+       "BaseTransactions": [
+         "34fa15497ceebed556dcdde456d5a232d4194b57f1ba403aebce0a838b77f8dc"
+       ]
      }
    ],
    "Accounts": [

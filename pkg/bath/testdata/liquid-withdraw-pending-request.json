@@ -8,7 +8,15 @@
          "Implementation": "liquidTF"
        },
        "Success": true,
-       "Type": "WithdrawStakeRequest"
+       "Type": "WithdrawStakeRequest",
+       "BaseTransactions": [
+         "32a649c3f4c5cd15cda3678bba67f2a1ccd6cd554249a726e760cfe389226008",
+         "1cb338e71299a927fb4f3ed26d87b141df6d5996b31c01bde8494c0ee2b4ec8d",
+         "075bfecbaae2f45c6e0d5c3125e41a0d1f123ef9ba0638c7701e3b4e36472d0d",
+         "9457cb4c0f334a7fa211ccd9810cf42bf53e20a9330de722d762c5bdbf4f43a5",
+         "bf5aa80a0ff4b48f0324929ea054bb1df62456f7b2aeccd6e0613a9aafccdd6a",
+         "64754a421b17e6cbf781302005bfa0a128ca2b4adac7b0e62a3bc05730a66948"
+       ]
      },
      {
        "ContractDeploy": {
@@ -16,7 +24,10 @@
          "Interfaces": null
        },
        "Success": true,
-       "Type": "ContractDeploy"
+       "Type": "ContractDeploy",
+       "BaseTransactions": [
+         "075bfecbaae2f45c6e0d5c3125e41a0d1f123ef9ba0638c7701e3b4e36472d0d"
+       ]
      }
    ],
    "Accounts": [

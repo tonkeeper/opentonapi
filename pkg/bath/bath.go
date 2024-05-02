@@ -13,7 +13,7 @@ type ActionsList struct {
 }
 
 type Options struct {
-	straws            []StrawFunc
+	straws            []Merger
 	account           *tongo.AccountID
 	informationSource core.InformationSource
 }
@@ -21,7 +21,7 @@ type Options struct {
 type Option func(*Options)
 
 // WithStraws provides functions to find actions in a trace.
-func WithStraws(straws []StrawFunc) Option {
+func WithStraws(straws []Merger) Option {
 	return func(options *Options) {
 		options.straws = straws
 	}
@@ -60,7 +60,7 @@ func FindActions(ctx context.Context, trace *core.Trace, opts ...Option) (*Actio
 	}, nil
 }
 
-func MergeAllBubbles(bubble *Bubble, straws []StrawFunc) {
+func MergeAllBubbles(bubble *Bubble, straws []Merger) {
 	for _, s := range straws {
 		for {
 			success := recursiveMerge(bubble, s)
@@ -72,8 +72,8 @@ func MergeAllBubbles(bubble *Bubble, straws []StrawFunc) {
 	}
 }
 
-func recursiveMerge(bubble *Bubble, s StrawFunc) bool {
-	if s(bubble) {
+func recursiveMerge(bubble *Bubble, s Merger) bool {
+	if s.Merge(bubble) {
 		return true
 	}
 	for _, b := range bubble.Children {

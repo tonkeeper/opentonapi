@@ -21,17 +21,17 @@ import (
 	"github.com/tonkeeper/tongo/ton"
 )
 
-func (h *Handler) ReduceIndexingLatency(ctx context.Context) (*oas.ServiceStatus, error) {
-	indexingLatency, err := h.storage.ReduceIndexingLatency(ctx)
+func (h *Handler) Status(ctx context.Context) (*oas.ServiceStatus, error) {
+	latency, err := h.storage.GetLatency(ctx)
 	if errors.Is(err, core.ErrEntityNotFound) {
-		return nil, toError(http.StatusInternalServerError, err)
+		return nil, toError(http.StatusNotFound, err)
 	}
 	var restOnline = true
 	if err != nil {
 		restOnline = false
 	}
 	return &oas.ServiceStatus{
-		IndexingLatency: int(indexingLatency),
+		IndexingLatency: int(latency),
 		RestOnline:      restOnline,
 	}, nil
 }
@@ -60,12 +60,18 @@ func (h *Handler) GetBlockchainMasterchainShards(ctx context.Context, params oas
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
+
 	res := oas.BlockchainBlockShards{
 		Shards: make([]oas.BlockchainBlockShardsShardsItem, len(shards)),
 	}
 	for i, shard := range shards {
+		block, err := h.storage.GetBlockHeader(ctx, shard)
+		if err != nil {
+			return nil, toError(http.StatusInternalServerError, err)
+		}
 		res.Shards[i] = oas.BlockchainBlockShardsShardsItem{
 			LastKnownBlockID: shard.String(),
+			LastKnownBlock:   convertBlockHeader(*block),
 		}
 	}
 	return &res, nil
@@ -141,8 +147,11 @@ func (h *Handler) GetBlockchainMasterchainBlocks(ctx context.Context, params oas
 	}
 	for i, id := range blockIDs {
 		block, err := h.storage.GetBlockHeader(ctx, id)
+		if errors.Is(err, core.ErrEntityNotFound) {
+			return nil, toError(http.StatusNotFound, err)
+		}
 		if err != nil {
-			return nil, toError(http.StatusInternalServerError, err) //block should be in db so we shouldn't check notFound error
+			return nil, toError(http.StatusInternalServerError, err)
 		}
 		result.Blocks[i] = convertBlockHeader(*block)
 	}
@@ -157,11 +166,14 @@ func (h *Handler) GetBlockchainMasterchainTransactions(ctx context.Context, para
 	var result oas.Transactions
 	for _, id := range blockIDs {
 		txs, err := h.storage.GetBlockTransactions(ctx, id)
+		if errors.Is(err, core.ErrEntityNotFound) {
+			return nil, toError(http.StatusNotFound, err)
+		}
 		if err != nil {
 			return nil, toError(http.StatusInternalServerError, err)
 		}
 		for _, tx := range txs {
-			result.Transactions = append(result.Transactions, convertTransaction(*tx, h.addressBook))
+			result.Transactions = append(result.Transactions, convertTransaction(*tx, nil, h.addressBook))
 		}
 	}
 	return &result, nil
@@ -173,6 +185,9 @@ func (h *Handler) GetBlockchainBlockTransactions(ctx context.Context, params oas
 		return nil, toError(http.StatusBadRequest, err)
 	}
 	transactions, err := h.storage.GetBlockTransactions(ctx, blockID)
+	if errors.Is(err, core.ErrEntityNotFound) {
+		return nil, toError(http.StatusNotFound, err)
+	}
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
@@ -180,7 +195,7 @@ func (h *Handler) GetBlockchainBlockTransactions(ctx context.Context, params oas
 		Transactions: make([]oas.Transaction, 0, len(transactions)),
 	}
 	for _, tx := range transactions {
-		res.Transactions = append(res.Transactions, convertTransaction(*tx, h.addressBook))
+		res.Transactions = append(res.Transactions, convertTransaction(*tx, nil, h.addressBook))
 	}
 	return &res, nil
 }
@@ -207,7 +222,7 @@ func (h *Handler) GetBlockchainTransaction(ctx context.Context, params oas.GetBl
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
-	transaction := convertTransaction(*txs, h.addressBook)
+	transaction := convertTransaction(*txs, nil, h.addressBook)
 	return &transaction, nil
 }
 
@@ -228,7 +243,7 @@ func (h *Handler) GetBlockchainTransactionByMessageHash(ctx context.Context, par
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
-	transaction := convertTransaction(*txs, h.addressBook)
+	transaction := convertTransaction(*txs, nil, h.addressBook)
 	return &transaction, nil
 }
 
@@ -346,19 +361,11 @@ func (h *Handler) GetRawBlockchainConfigFromBlock(ctx context.Context, params oa
 }
 
 func (h *Handler) GetBlockchainValidators(ctx context.Context) (*oas.Validators, error) {
-	mcInfoExtra, err := h.storage.GetMasterchainInfoExtRaw(ctx, 0)
+	blockHeader, err := h.storage.LastMasterchainBlockHeader(ctx)
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
-	next := ton.BlockID{
-		Workchain: int32(mcInfoExtra.Last.Workchain),
-		Shard:     mcInfoExtra.Last.Shard,
-		Seqno:     mcInfoExtra.Last.Seqno,
-	}
-	blockHeader, err := h.storage.GetBlockHeader(ctx, next)
-	if err != nil {
-		return nil, toError(http.StatusInternalServerError, err)
-	}
+	next := blockHeader.BlockID
 	configBlockID := next
 	if !blockHeader.IsKeyBlock {
 		configBlockID.Seqno = uint32(blockHeader.PrevKeyBlockSeqno)
@@ -467,8 +474,8 @@ func (h *Handler) GetBlockchainValidators(ctx context.Context) (*oas.Validators,
 				continue
 			}
 			validators.Validators = append(validators.Validators, oas.Validator{
-				Stake:       int64(v.Stake),
-				MaxFactor:   int64(v.MaxFactor),
+				Stake:       v.Stake,
+				MaxFactor:   v.MaxFactor,
 				Address:     v.Address.ToRaw(),
 				AdnlAddress: v.AdnlAddr,
 			})

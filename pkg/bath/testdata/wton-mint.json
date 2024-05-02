@@ -8,7 +8,12 @@
          "Amount": "1000000000"
        },
        "Success": true,
-       "Type": "JettonMint"
+       "Type": "JettonMint",
+       "BaseTransactions": [
+         "85f69a391a9f79a7b30f4d50371ab96f6aae9e2d30ad25eabb97e0350c1ae54a",
+         "e8999c9ce8e675bef70edb66b69755223436e3c6c86424a20b62ca61411c87fe",
+         "1b1b38b7dcfd94d20dc9ebd92af60f3048b9b9ed756325330d71aacf79ca5584"
+       ]
      }
    ],
    "Accounts": [

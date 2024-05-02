@@ -19,7 +19,15 @@
          }
        },
        "Success": false,
-       "Type": "JettonSwap"
+       "Type": "JettonSwap",
+       "BaseTransactions": [
+         "ea39b268e9771623b9c4991ae6fd607b1faa0518c1ca8fa7adbdfbb5ee26314e",
+         "ff27078f163f27a2b9d579da2e15b4d2d59de7e9806d64e8d511bd98d449e7a0",
+         "c5fd07241705bdb548046de89a9f7de2e9500da6084740b9bdd5ed340754e267",
+         "a1bd81bcc1dae6d55a4fc720b0e42bfa5b91451a624f5a8c4d14f1001e71b618",
+         "e034c298bad4b8dae1f3fd03e0d1fbb15c590ecc863ca77a9d64adb5321c899d",
+         "77f5acb88fd863e9c00a164eb551ef83c17088d1f603bf463f64f952b93406b0"
+       ]
      }
    ],
    "Accounts": [

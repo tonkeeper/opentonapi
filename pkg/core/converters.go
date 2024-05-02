@@ -10,12 +10,21 @@ import (
 	"github.com/tonkeeper/tongo/abi"
 	"github.com/tonkeeper/tongo/boc"
 	"github.com/tonkeeper/tongo/tlb"
+	"github.com/tonkeeper/tongo/ton"
 
 	"github.com/tonkeeper/opentonapi/internal/g"
 )
 
 func ConvertToBlockHeader(id tongo.BlockIDExt, block *tlb.Block) (*BlockHeader, error) {
 	info := block.Info
+	inMsgLen, err := block.Extra.InMsgDescrLength()
+	if err != nil {
+		return nil, err
+	}
+	outMsgLen, err := block.Extra.OutMsgDescrLength()
+	if err != nil {
+		return nil, err
+	}
 	header := &BlockHeader{
 		BlockIDExt:             id,
 		StartLt:                int64(info.StartLt),
@@ -38,8 +47,8 @@ func ConvertToBlockHeader(id tongo.BlockIDExt, block *tlb.Block) (*BlockHeader, 
 		BlockExtra: BlockExtra{
 			RandSeed:          tongo.Bits256(block.Extra.RandSeed),
 			CreatedBy:         tongo.Bits256(block.Extra.CreatedBy),
-			InMsgDescrLength:  len(block.Extra.InMsgDescr.Keys()),
-			OutMsgDescrLength: len(block.Extra.OutMsgDescr.Keys()),
+			InMsgDescrLength:  inMsgLen,
+			OutMsgDescrLength: outMsgLen,
 		},
 		ValueFlow: ValueFlow{
 			FromPrevBlk:   ConvertToCurrencyCollection(block.ValueFlow.FromPrevBlk),
@@ -234,7 +243,7 @@ func ConvertTransaction(workchain int32, tx tongo.Transaction) (*Transaction, er
 		TransactionID: TransactionID{
 			Hash:    tongo.Bits256(tx.Hash()),
 			Lt:      tx.Lt,
-			Account: *tongo.NewAccountId(workchain, tx.AccountAddr),
+			Account: *ton.NewAccountID(workchain, tx.AccountAddr),
 		},
 		StateHashUpdate: tx.StateUpdate,
 		Type:            TransactionType(desc.SumType),
@@ -271,31 +280,27 @@ func ConvertMessage(message tlb.Message, txLT uint64) (Message, error) {
 			return Message{}, err
 		}
 	}
-	cell := boc.Cell(message.Body.Value)
-	var decodedBody *DecodedMessageBody
-	if op, value, err := abi.MessageDecoder(&cell); err == nil {
-		decodedBody = &DecodedMessageBody{
-			Operation: op,
-			Value:     value,
-		}
-	}
-	cell.ResetCounters()
-	var opCode *uint32
-	if code, err := cell.PickUint(32); err == nil {
-		opCode = g.Pointer(uint32(code))
-	}
 	body, err := convertBodyCell(message.Body.Value)
 	if err != nil {
 		return Message{}, err
 	}
+	cell := boc.Cell(message.Body.Value)
 	switch message.Info.SumType {
 	case "IntMsgInfo":
+		var decodedBody *DecodedMessageBody
+		tag, op, value, err := abi.InternalMessageDecoder(&cell, nil)
+		if err == nil && op != nil {
+			decodedBody = &DecodedMessageBody{
+				Operation: *op,
+				Value:     value,
+			}
+		}
 		info := message.Info.IntMsgInfo
-		source, err := tongo.AccountIDFromTlb(info.Src)
+		source, err := ton.AccountIDFromTlb(info.Src)
 		if err != nil {
 			return Message{}, err
 		}
-		dest, err := tongo.AccountIDFromTlb(info.Dest)
+		dest, err := ton.AccountIDFromTlb(info.Dest)
 		if err != nil {
 			return Message{}, err
 		}
@@ -315,13 +320,21 @@ func ConvertMessage(message tlb.Message, txLT uint64) (Message, error) {
 			ImportFee:   0,
 			Init:        init,
 			Body:        body,
-			OpCode:      opCode,
+			OpCode:      tag,
 			DecodedBody: decodedBody,
 			CreatedAt:   info.CreatedAt,
 		}, nil
 	case "ExtInMsgInfo":
+		var decodedBody *DecodedMessageBody
 		info := message.Info.ExtInMsgInfo
-		dest, err := tongo.AccountIDFromTlb(info.Dest)
+		tag, op, value, err := abi.ExtInMessageDecoder(&cell, nil)
+		if err == nil && op != nil {
+			decodedBody = &DecodedMessageBody{
+				Operation: *op,
+				Value:     value,
+			}
+		}
+		dest, err := ton.AccountIDFromTlb(info.Dest)
 		if err != nil {
 			return Message{}, err
 		}
@@ -334,13 +347,21 @@ func ConvertMessage(message tlb.Message, txLT uint64) (Message, error) {
 			SourceExtern: externalAddressFromTlb(info.Src),
 			ImportFee:    int64(info.ImportFee),
 			Body:         body,
-			OpCode:       opCode,
+			OpCode:       tag,
 			DecodedBody:  decodedBody,
 			Init:         init,
 		}, nil
 	case "ExtOutMsgInfo":
+		var decodedBody *DecodedMessageBody
 		info := message.Info.ExtOutMsgInfo
-		source, err := tongo.AccountIDFromTlb(info.Src)
+		tag, op, value, err := abi.ExtOutMessageDecoder(&cell, nil, info.Dest)
+		if err == nil && op != nil {
+			decodedBody = &DecodedMessageBody{
+				Operation: *op,
+				Value:     value,
+			}
+		}
+		source, err := ton.AccountIDFromTlb(info.Src)
 		if err != nil {
 			return Message{}, err
 		}
@@ -354,7 +375,7 @@ func ConvertMessage(message tlb.Message, txLT uint64) (Message, error) {
 			Body:              body,
 			DecodedBody:       decodedBody,
 			CreatedAt:         info.CreatedAt,
-			OpCode:            opCode,
+			OpCode:            tag,
 			Init:              []byte{},
 		}, nil
 	}

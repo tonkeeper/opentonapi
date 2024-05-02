@@ -160,7 +160,7 @@ func (h *Handler) GetTrace(ctx context.Context, params oas.GetTraceParams) (*oas
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
-	convertedTrace := convertTrace(*trace, h.addressBook)
+	convertedTrace := convertTrace(trace, h.addressBook)
 	if emulated {
 		convertedTrace.Emulated.SetTo(true)
 	}
@@ -465,11 +465,11 @@ func (h *Handler) EmulateMessageToTrace(ctx context.Context, request *oas.Emulat
 			return nil, toError(http.StatusInternalServerError, err)
 		}
 	}
-	t := convertTrace(*trace, h.addressBook)
+	t := convertTrace(trace, h.addressBook)
 	return &t, nil
 }
 
-func extractDestinationWallet(message tlb.Message) (*tongo.AccountID, error) {
+func extractDestinationWallet(message tlb.Message) (*ton.AccountID, error) {
 	if message.Info.SumType != "ExtInMsgInfo" {
 		return nil, fmt.Errorf("unsupported message type: %v", message.Info.SumType)
 	}
@@ -587,7 +587,7 @@ func (h *Handler) EmulateMessageToWallet(ctx context.Context, request *oas.Emula
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
-	t := convertTrace(*trace, h.addressBook)
+	t := convertTrace(trace, h.addressBook)
 	result, err := bath.FindActions(ctx, trace, bath.ForAccount(*walletAddress), bath.WithInformationSource(h.storage))
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)

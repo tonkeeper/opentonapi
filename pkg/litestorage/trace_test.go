@@ -28,12 +28,12 @@ func TestLiteStorage_getAccountInterfaces(t *testing.T) {
 		{
 			name:      "tep62_item",
 			accountID: tongo.MustParseAccountID("0:16b94207124b1613aadd084b65fc2c67bc33e62fbbdd83beef4b194ca2ff5fe7"),
-			want:      []abi.ContractInterface{abi.NftItem},
+			want:      []abi.ContractInterface{abi.NftItemSimple},
 		},
 		{
 			name:      "get gems",
 			accountID: tongo.MustParseAccountID("0:7e809e6484f6af180b18f6760bff96d87c8f27f1fe84e0acb0b48fb86714ed8f"),
-			want:      []abi.ContractInterface{abi.NftSaleV2},
+			want:      []abi.ContractInterface{abi.NftSaleGetgemsV3},
 		},
 	}
 	for _, tt := range tests {

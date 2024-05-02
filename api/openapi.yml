@@ -13,13 +13,13 @@ servers:
 paths:
   /v2/status:
     get:
-      description: Reduce indexing latency
-      operationId: reduceIndexingLatency
+      description: Status
+      operationId: status
       tags:
         - Blockchain
       responses:
         '200':
-          description: indexing latency
+          description: status
           content:
             application/json:
               schema:
@@ -3204,10 +3204,13 @@ components:
             type: object
             required:
               - last_known_block_id
+              - last_known_block
             properties:
               last_known_block_id:
                 type: string
                 example: (0,8000000000000000,4234234)
+              last_known_block:
+                $ref: '#/components/schemas/BlockchainBlock'
     AccountStatus:
       type: string
       example: active
@@ -3421,12 +3424,15 @@ components:
           type: integer
           format: int64
           example: 1000
+        result_code_description:
+          type: string
     Transaction:
       type: object
       required:
         - hash
         - lt
         - account
+        - end_balance
         - success
         - utime
         - orig_status
@@ -3461,6 +3467,10 @@ components:
         end_status:
           $ref: '#/components/schemas/AccountStatus'
         total_fees:
+          type: integer
+          format: int64
+          example: 25713146000001
+        end_balance:
           type: integer
           format: int64
           example: 25713146000001
@@ -4895,6 +4905,9 @@ components:
           example: crypto.ton
         approved_by:
           $ref: '#/components/schemas/NftApprovedBy'
+        include_compressed:
+          type: boolean
+          example: false
     NftItems:
       type: object
       required:
@@ -4960,6 +4973,7 @@ components:
         - type
         - status
         - simple_preview
+        - base_transactions
       properties:
         type:
           type: string
@@ -5034,6 +5048,11 @@ components:
           $ref: '#/components/schemas/InscriptionMintAction'
         simple_preview:
           $ref: '#/components/schemas/ActionSimplePreview'
+        base_transactions:
+          type: array
+          items:
+            type: string
+            example: e8b0e3fee4a26bd2317ac1f9952fcdc87dc08fdb617656b5202416323337372e
     TonTransferAction:
       type: object
       required:
@@ -5693,10 +5712,13 @@ components:
         - has_method_pubkey
         - has_method_seqno
         - names
+        - account
       properties:
         address:
           type: string
           example: "0:da6b1b6663a0e4d18cc8574ccd9db5296e367dd9324706f3bbd9eb1cd2caf0bf"
+        account:
+          $ref: '#/components/schemas/AccountAddress'
         is_wallet:
           type: boolean
           example: true
@@ -6101,6 +6123,8 @@ components:
         total_supply:
           type: string
           example: 311500000000000
+        admin:
+          $ref: '#/components/schemas/AccountAddress'
         metadata:
           $ref: '#/components/schemas/JettonMetadata'
         verification:
@@ -6113,6 +6137,7 @@ components:
       type: object
       required:
         - addresses
+        - total
       properties:
         addresses:
           type: array
@@ -6131,6 +6156,10 @@ components:
               balance:
                 type: string
                 example: 1000000000
+        total:
+          type: integer
+          format: int64
+          example: 2000
     AccountStaking:
       type: object
       required:

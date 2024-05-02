@@ -2,14 +2,32 @@
    "Actions": [
      {
        "SmartContractExec": {
-         "TonAttached": 129200000,
+         "TonAttached": 1100000000,
          "Executor": "-1:9af16c60bf0a73fc83d60e5d6b9225e692dda47148949670436c0f80af7f7646",
          "Contract": "-1:cc929d06da6e1b07de776d18cc75b1e2b36800d13958fd3ce585df044ed163d4",
-         "Operation": "TfUpdateValidatorSet",
+         "Operation": "0x00000006",
          "Payload": ""
        },
        "Success": true,
-       "Type": "SmartContractExec"
+       "Type": "SmartContractExec",
+       "BaseTransactions": [
+         "0143cff500c883ccfd40a1a873a45a6f6168f4b0b2a9f2c9a81d6d5e8be1c41d"
+       ]
+     },
+     {
+       "TonTransfer": {
+         "Amount": 970800000,
+         "Comment": null,
+         "EncryptedComment": null,
+         "Recipient": "-1:9af16c60bf0a73fc83d60e5d6b9225e692dda47148949670436c0f80af7f7646",
+         "Sender": "-1:cc929d06da6e1b07de776d18cc75b1e2b36800d13958fd3ce585df044ed163d4",
+         "Refund": null
+       },
+       "Success": true,
+       "Type": "TonTransfer",
+       "BaseTransactions": [
+         "890ccbb2740d15ada498270a12508afe448d64f08385b7b2d14eaca566802814"
+       ]
      }
    ],
    "Accounts": [

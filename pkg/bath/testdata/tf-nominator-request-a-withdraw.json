@@ -8,7 +8,11 @@
          "Implementation": "tf"
        },
        "Success": true,
-       "Type": "WithdrawStakeRequest"
+       "Type": "WithdrawStakeRequest",
+       "BaseTransactions": [
+         "64e3d3c5020beebbf423654c305996909e89df21339a41b2f37fd40183a67205",
+         "6eee762f4db52fcd5e797f86436cbf940c0d9b4759603be95a5fd24f145cbe22"
+       ]
      }
    ],
    "Accounts": [

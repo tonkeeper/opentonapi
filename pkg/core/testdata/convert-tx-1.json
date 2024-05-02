@@ -65,6 +65,7 @@
    },
    "OrigStatus": "active",
    "EndStatus": "active",
+   "EndBalance": 0,
    "PrevTransHash": "ec81d97a4a66e762122b44a822dfce0e51f7761cdef1841dda66ae30ce961496",
    "PrevTransLt": 37362731000003,
    "StateHashUpdate": {

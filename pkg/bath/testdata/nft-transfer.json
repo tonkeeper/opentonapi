@@ -10,7 +10,12 @@
          "Refund": null
        },
        "Success": true,
-       "Type": "NftItemTransfer"
+       "Type": "NftItemTransfer",
+       "BaseTransactions": [
+         "18122fb128076d62f3ad1b45619ac929eb308d757690a6ab9832d977e8214859",
+         "648b9fb6f0781778b5128efcffd306545695e019795ca35e4a7ff981c544f0ea",
+         "2da968914cff46edf47b3b385638a356384c8c4c0218ed3698e6391f99d770d3"
+       ]
      }
    ],
    "Accounts": [

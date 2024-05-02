@@ -1,11 +1,12 @@
 package core
 
 import (
+	"fmt"
 	"math/big"
-
-	"github.com/tonkeeper/tongo/boc"
+	"strings"
 
 	"github.com/tonkeeper/tongo/abi"
+	"github.com/tonkeeper/tongo/boc"
 	"github.com/tonkeeper/tongo/tlb"
 
 	"github.com/tonkeeper/tongo"
@@ -91,6 +92,8 @@ type Transaction struct {
 	OrigStatus tlb.AccountStatus
 	EndStatus  tlb.AccountStatus
 
+	EndBalance int64
+
 	PrevTransHash tongo.Bits256
 	PrevTransLt   uint64
 
@@ -114,6 +117,22 @@ type MessageID struct {
 	CreatedLt   uint64
 	Source      *tongo.AccountID
 	Destination *tongo.AccountID
+}
+
+func (m MessageID) String() string {
+	builder := strings.Builder{}
+	builder.Write([]byte(fmt.Sprintf("%d/", m.CreatedLt)))
+	if m.Source != nil {
+		builder.Write([]byte(m.Source.ToRaw()))
+	} else {
+		builder.Write([]byte("x"))
+	}
+	if m.Destination != nil {
+		builder.Write([]byte("/" + m.Destination.ToRaw()))
+	} else {
+		builder.Write([]byte("/x"))
+	}
+	return builder.String()
 }
 
 func (m MessageID) IsExternal() bool {
