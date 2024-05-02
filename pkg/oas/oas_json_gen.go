@@ -25803,9 +25803,9 @@ func (s *NftItem) encodeFields(e *jx.Encoder) {
 		s.ApprovedBy.Encode(e)
 	}
 	{
-		if s.IncludeCompressed.Set {
-			e.FieldStart("include_compressed")
-			s.IncludeCompressed.Encode(e)
+		if s.IncludeCnft.Set {
+			e.FieldStart("include_cnft")
+			s.IncludeCnft.Encode(e)
 		}
 	}
 }
@@ -25821,7 +25821,7 @@ var jsonFieldsNameOfNftItem = [11]string{
 	7:  "previews",
 	8:  "dns",
 	9:  "approved_by",
-	10: "include_compressed",
+	10: "include_cnft",
 }
 
 // Decode decodes NftItem from json.
@@ -25946,15 +25946,15 @@ func (s *NftItem) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"approved_by\"")
 			}
-		case "include_compressed":
+		case "include_cnft":
 			if err := func() error {
-				s.IncludeCompressed.Reset()
-				if err := s.IncludeCompressed.Decode(d); err != nil {
+				s.IncludeCnft.Reset()
+				if err := s.IncludeCnft.Decode(d); err != nil {
 					return err
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"include_compressed\"")
+				return errors.Wrap(err, "decode field \"include_cnft\"")
 			}
 		default:
 			return d.Skip()

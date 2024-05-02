@@ -4100,7 +4100,7 @@
       "example": "crypto.ton",
       "type": "string"
      },
-     "include_compressed": {
+     "include_cnft": {
       "example": false,
       "type": "boolean"
      },
