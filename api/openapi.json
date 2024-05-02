@@ -8065,6 +8065,59 @@
     ]
    }
   },
+  "/v2/liteserver/get_out_msg_queue_sizes": {
+   "get": {
+    "description": "Get out msg queue sizes",
+    "operationId": "getOutMsgQueueSizes",
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "ext_msg_queue_size_limit": {
+           "format": "uint32",
+           "type": "integer"
+          },
+          "shards": {
+           "items": {
+            "properties": {
+             "id": {
+              "$ref": "#/components/schemas/BlockRaw"
+             },
+             "size": {
+              "format": "uint32",
+              "type": "integer"
+             }
+            },
+            "required": [
+             "id",
+             "size"
+            ],
+            "type": "object"
+           },
+           "type": "array"
+          }
+         },
+         "required": [
+          "ext_msg_queue_size_limit",
+          "shards"
+         ],
+         "type": "object"
+        }
+       }
+      },
+      "description": "out msg queue sizes"
+     },
+     "default": {
+      "$ref": "#/components/responses/Error"
+     }
+    },
+    "tags": [
+     "Lite Server"
+    ]
+   }
+  },
   "/v2/liteserver/get_shard_block_proof/{block_id}": {
    "get": {
     "description": "Get raw shard block proof",

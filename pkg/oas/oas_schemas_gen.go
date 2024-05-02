@@ -5626,6 +5626,56 @@ func (s *GetNftItemsByAddressesReq) SetAccountIds(val []string) {
 	s.AccountIds = val
 }
 
+type GetOutMsgQueueSizesOK struct {
+	ExtMsgQueueSizeLimit uint32                            `json:"ext_msg_queue_size_limit"`
+	Shards               []GetOutMsgQueueSizesOKShardsItem `json:"shards"`
+}
+
+// GetExtMsgQueueSizeLimit returns the value of ExtMsgQueueSizeLimit.
+func (s *GetOutMsgQueueSizesOK) GetExtMsgQueueSizeLimit() uint32 {
+	return s.ExtMsgQueueSizeLimit
+}
+
+// GetShards returns the value of Shards.
+func (s *GetOutMsgQueueSizesOK) GetShards() []GetOutMsgQueueSizesOKShardsItem {
+	return s.Shards
+}
+
+// SetExtMsgQueueSizeLimit sets the value of ExtMsgQueueSizeLimit.
+func (s *GetOutMsgQueueSizesOK) SetExtMsgQueueSizeLimit(val uint32) {
+	s.ExtMsgQueueSizeLimit = val
+}
+
+// SetShards sets the value of Shards.
+func (s *GetOutMsgQueueSizesOK) SetShards(val []GetOutMsgQueueSizesOKShardsItem) {
+	s.Shards = val
+}
+
+type GetOutMsgQueueSizesOKShardsItem struct {
+	ID   BlockRaw `json:"id"`
+	Size uint32   `json:"size"`
+}
+
+// GetID returns the value of ID.
+func (s *GetOutMsgQueueSizesOKShardsItem) GetID() BlockRaw {
+	return s.ID
+}
+
+// GetSize returns the value of Size.
+func (s *GetOutMsgQueueSizesOKShardsItem) GetSize() uint32 {
+	return s.Size
+}
+
+// SetID sets the value of ID.
+func (s *GetOutMsgQueueSizesOKShardsItem) SetID(val BlockRaw) {
+	s.ID = val
+}
+
+// SetSize sets the value of Size.
+func (s *GetOutMsgQueueSizesOKShardsItem) SetSize(val uint32) {
+	s.Size = val
+}
+
 type GetRatesOK struct {
 	Rates GetRatesOKRates `json:"rates"`
 }

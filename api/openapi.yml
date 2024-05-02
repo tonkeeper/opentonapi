@@ -2516,6 +2516,42 @@ paths:
                           example: 131D0C65055F04E9C19D687B51BC70F952FD9CA6F02C2801D3B89964A779DF85
         'default':
           $ref: '#/components/responses/Error'
+  /v2/liteserver/get_out_msg_queue_sizes:
+    get:
+      description: Get out msg queue sizes
+      operationId: getOutMsgQueueSizes
+      tags:
+        - Lite Server
+      responses:
+        '200':
+          description: out msg queue sizes
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - ext_msg_queue_size_limit
+                  - shards
+                properties:
+                  ext_msg_queue_size_limit:
+                    type: integer
+                    format: uint32
+                  shards:
+                    type: array
+                    items:
+                      type: object
+                      required:
+                        - id
+                        - size
+                      properties:
+                        id:
+                          $ref: '#/components/schemas/BlockRaw'
+                        size:
+                          type: integer
+                          format: uint32
+        'default':
+          $ref: '#/components/responses/Error'
+
 components:
   parameters:
     masterchainSeqno:

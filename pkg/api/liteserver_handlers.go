@@ -255,3 +255,21 @@ func (h *Handler) GetRawShardBlockProof(ctx context.Context, params oas.GetRawSh
 	}
 	return resp, nil
 }
+
+func (h *Handler) GetOutMsgQueueSizes(ctx context.Context) (*oas.GetOutMsgQueueSizesOK, error) {
+	outMsgQueueSizes, err := h.storage.GetOutMsgQueueSizes(ctx)
+	if err != nil {
+		return nil, toError(http.StatusInternalServerError, err)
+	}
+	var convertedShards []oas.GetOutMsgQueueSizesOKShardsItem
+	for _, shard := range outMsgQueueSizes.Shards {
+		convertedShards = append(convertedShards, oas.GetOutMsgQueueSizesOKShardsItem{
+			ID:   convertBlockIDRaw(shard.Id),
+			Size: shard.Size,
+		})
+	}
+	return &oas.GetOutMsgQueueSizesOK{
+		ExtMsgQueueSizeLimit: outMsgQueueSizes.ExtMsgQueueSizeLimit,
+		Shards:               convertedShards,
+	}, nil
+}
