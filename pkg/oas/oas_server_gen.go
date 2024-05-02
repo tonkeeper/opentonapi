@@ -390,6 +390,12 @@ type Handler interface {
 	//
 	// POST /v2/nfts/_bulk
 	GetNftItemsByAddresses(ctx context.Context, req OptGetNftItemsByAddressesReq) (*NftItems, error)
+	// GetOutMsgQueueSizes implements getOutMsgQueueSizes operation.
+	//
+	// Get out msg queue sizes.
+	//
+	// GET /v2/liteserver/get_out_msg_queue_sizes
+	GetOutMsgQueueSizes(ctx context.Context) (*GetOutMsgQueueSizesOK, error)
 	// GetRates implements getRates operation.
 	//
 	// Get the token price to the currency.

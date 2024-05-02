@@ -16472,6 +16472,240 @@ func (s *GetNftItemsByAddressesReq) UnmarshalJSON(data []byte) error {
 }
 
 // Encode implements json.Marshaler.
+func (s *GetOutMsgQueueSizesOK) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *GetOutMsgQueueSizesOK) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("ext_msg_queue_size_limit")
+		e.UInt32(s.ExtMsgQueueSizeLimit)
+	}
+	{
+		e.FieldStart("shards")
+		e.ArrStart()
+		for _, elem := range s.Shards {
+			elem.Encode(e)
+		}
+		e.ArrEnd()
+	}
+}
+
+var jsonFieldsNameOfGetOutMsgQueueSizesOK = [2]string{
+	0: "ext_msg_queue_size_limit",
+	1: "shards",
+}
+
+// Decode decodes GetOutMsgQueueSizesOK from json.
+func (s *GetOutMsgQueueSizesOK) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode GetOutMsgQueueSizesOK to nil")
+	}
+	var requiredBitSet [1]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "ext_msg_queue_size_limit":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				v, err := d.UInt32()
+				s.ExtMsgQueueSizeLimit = uint32(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"ext_msg_queue_size_limit\"")
+			}
+		case "shards":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				s.Shards = make([]GetOutMsgQueueSizesOKShardsItem, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem GetOutMsgQueueSizesOKShardsItem
+					if err := elem.Decode(d); err != nil {
+						return err
+					}
+					s.Shards = append(s.Shards, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"shards\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode GetOutMsgQueueSizesOK")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00000011,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfGetOutMsgQueueSizesOK) {
+					name = jsonFieldsNameOfGetOutMsgQueueSizesOK[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *GetOutMsgQueueSizesOK) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *GetOutMsgQueueSizesOK) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *GetOutMsgQueueSizesOKShardsItem) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *GetOutMsgQueueSizesOKShardsItem) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("id")
+		s.ID.Encode(e)
+	}
+	{
+		e.FieldStart("size")
+		e.UInt32(s.Size)
+	}
+}
+
+var jsonFieldsNameOfGetOutMsgQueueSizesOKShardsItem = [2]string{
+	0: "id",
+	1: "size",
+}
+
+// Decode decodes GetOutMsgQueueSizesOKShardsItem from json.
+func (s *GetOutMsgQueueSizesOKShardsItem) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode GetOutMsgQueueSizesOKShardsItem to nil")
+	}
+	var requiredBitSet [1]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "id":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				if err := s.ID.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"id\"")
+			}
+		case "size":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				v, err := d.UInt32()
+				s.Size = uint32(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"size\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode GetOutMsgQueueSizesOKShardsItem")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00000011,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfGetOutMsgQueueSizesOKShardsItem) {
+					name = jsonFieldsNameOfGetOutMsgQueueSizesOKShardsItem[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *GetOutMsgQueueSizesOKShardsItem) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *GetOutMsgQueueSizesOKShardsItem) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
 func (s *GetRatesOK) Encode(e *jx.Encoder) {
 	e.ObjStart()
 	s.encodeFields(e)
@@ -25584,9 +25818,9 @@ func (s *NftItem) encodeFields(e *jx.Encoder) {
 		s.ApprovedBy.Encode(e)
 	}
 	{
-		if s.IncludeCompressed.Set {
-			e.FieldStart("include_compressed")
-			s.IncludeCompressed.Encode(e)
+		if s.IncludeCnft.Set {
+			e.FieldStart("include_cnft")
+			s.IncludeCnft.Encode(e)
 		}
 	}
 }
@@ -25602,7 +25836,7 @@ var jsonFieldsNameOfNftItem = [11]string{
 	7:  "previews",
 	8:  "dns",
 	9:  "approved_by",
-	10: "include_compressed",
+	10: "include_cnft",
 }
 
 // Decode decodes NftItem from json.
@@ -25727,15 +25961,15 @@ func (s *NftItem) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"approved_by\"")
 			}
-		case "include_compressed":
+		case "include_cnft":
 			if err := func() error {
-				s.IncludeCompressed.Reset()
-				if err := s.IncludeCompressed.Decode(d); err != nil {
+				s.IncludeCnft.Reset()
+				if err := s.IncludeCnft.Decode(d); err != nil {
 					return err
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"include_compressed\"")
+				return errors.Wrap(err, "decode field \"include_cnft\"")
 			}
 		default:
 			return d.Skip()
