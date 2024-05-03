@@ -46,7 +46,7 @@ func (c *LiteStorage) GetLastConfig(ctx context.Context) (ton.BlockchainConfig, 
 	if err != nil {
 		return ton.BlockchainConfig{}, err
 	}
-	configP, err := ton.ConvertBlockchainConfig(rawConfig)
+	configP, err := ton.ConvertBlockchainConfigStrict(rawConfig)
 	if err != nil {
 		return ton.BlockchainConfig{}, err
 	}
