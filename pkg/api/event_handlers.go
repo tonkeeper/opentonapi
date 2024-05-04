@@ -346,6 +346,7 @@ func (h *Handler) EmulateMessageToAccountEvent(ctx context.Context, request *oas
 	options := []txemulator.TraceOption{
 		txemulator.WithAccountsSource(h.storage),
 		txemulator.WithConfigBase64(configBase64),
+		txemulator.WithLimit(1100),
 	}
 	if !params.IgnoreSignatureCheck.Value {
 		options = append(options, txemulator.WithSignatureCheck())
