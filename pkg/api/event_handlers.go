@@ -557,6 +557,7 @@ func (h *Handler) EmulateMessageToWallet(ctx context.Context, request *oas.Emula
 	options := []txemulator.TraceOption{
 		txemulator.WithConfigBase64(configBase64),
 		txemulator.WithAccountsSource(h.storage),
+		txemulator.WithLimit(1100),
 	}
 	accounts, err := convertEmulationParameters(request.Params)
 	if err != nil {
