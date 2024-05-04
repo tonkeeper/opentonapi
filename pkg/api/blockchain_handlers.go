@@ -349,7 +349,7 @@ func (h *Handler) GetRawBlockchainConfigFromBlock(ctx context.Context, params oa
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
-	config, err := ton.ConvertBlockchainConfig(cfg)
+	config, err := ton.ConvertBlockchainConfigStrict(cfg)
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
@@ -374,7 +374,7 @@ func (h *Handler) GetBlockchainValidators(ctx context.Context) (*oas.Validators,
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
-	config, err := ton.ConvertBlockchainConfig(rawConfig)
+	config, err := ton.ConvertBlockchainConfigStrict(rawConfig)
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}

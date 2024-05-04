@@ -70,3 +70,7 @@ func (s *LiteStorage) GetConfigAllRaw(ctx context.Context, mode uint32, id tongo
 func (s *LiteStorage) GetShardBlockProofRaw(ctx context.Context, id tongo.BlockIDExt) (liteclient.LiteServerShardBlockProofC, error) {
 	return s.client.WithBlock(id).GetShardBlockProofRaw(ctx)
 }
+
+func (s *LiteStorage) GetOutMsgQueueSizes(ctx context.Context) (liteclient.LiteServerOutMsgQueueSizesC, error) {
+	return s.client.GetOutMsgQueueSizes(ctx)
+}

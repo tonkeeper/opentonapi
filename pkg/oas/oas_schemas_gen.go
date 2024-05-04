@@ -5637,6 +5637,56 @@ func (s *GetNftItemsByAddressesReq) SetAccountIds(val []string) {
 	s.AccountIds = val
 }
 
+type GetOutMsgQueueSizesOK struct {
+	ExtMsgQueueSizeLimit uint32                            `json:"ext_msg_queue_size_limit"`
+	Shards               []GetOutMsgQueueSizesOKShardsItem `json:"shards"`
+}
+
+// GetExtMsgQueueSizeLimit returns the value of ExtMsgQueueSizeLimit.
+func (s *GetOutMsgQueueSizesOK) GetExtMsgQueueSizeLimit() uint32 {
+	return s.ExtMsgQueueSizeLimit
+}
+
+// GetShards returns the value of Shards.
+func (s *GetOutMsgQueueSizesOK) GetShards() []GetOutMsgQueueSizesOKShardsItem {
+	return s.Shards
+}
+
+// SetExtMsgQueueSizeLimit sets the value of ExtMsgQueueSizeLimit.
+func (s *GetOutMsgQueueSizesOK) SetExtMsgQueueSizeLimit(val uint32) {
+	s.ExtMsgQueueSizeLimit = val
+}
+
+// SetShards sets the value of Shards.
+func (s *GetOutMsgQueueSizesOK) SetShards(val []GetOutMsgQueueSizesOKShardsItem) {
+	s.Shards = val
+}
+
+type GetOutMsgQueueSizesOKShardsItem struct {
+	ID   BlockRaw `json:"id"`
+	Size uint32   `json:"size"`
+}
+
+// GetID returns the value of ID.
+func (s *GetOutMsgQueueSizesOKShardsItem) GetID() BlockRaw {
+	return s.ID
+}
+
+// GetSize returns the value of Size.
+func (s *GetOutMsgQueueSizesOKShardsItem) GetSize() uint32 {
+	return s.Size
+}
+
+// SetID sets the value of ID.
+func (s *GetOutMsgQueueSizesOKShardsItem) SetID(val BlockRaw) {
+	s.ID = val
+}
+
+// SetSize sets the value of Size.
+func (s *GetOutMsgQueueSizesOKShardsItem) SetSize(val uint32) {
+	s.Size = val
+}
+
 type GetRatesOK struct {
 	Rates GetRatesOKRates `json:"rates"`
 }
@@ -8748,17 +8798,17 @@ func (s *NftCollections) SetNftCollections(val []NftCollection) {
 
 // Ref: #/components/schemas/NftItem
 type NftItem struct {
-	Address           string               `json:"address"`
-	Index             int64                `json:"index"`
-	Owner             OptAccountAddress    `json:"owner"`
-	Collection        OptNftItemCollection `json:"collection"`
-	Verified          bool                 `json:"verified"`
-	Metadata          NftItemMetadata      `json:"metadata"`
-	Sale              OptSale              `json:"sale"`
-	Previews          []ImagePreview       `json:"previews"`
-	DNS               OptString            `json:"dns"`
-	ApprovedBy        NftApprovedBy        `json:"approved_by"`
-	IncludeCompressed OptBool              `json:"include_compressed"`
+	Address     string               `json:"address"`
+	Index       int64                `json:"index"`
+	Owner       OptAccountAddress    `json:"owner"`
+	Collection  OptNftItemCollection `json:"collection"`
+	Verified    bool                 `json:"verified"`
+	Metadata    NftItemMetadata      `json:"metadata"`
+	Sale        OptSale              `json:"sale"`
+	Previews    []ImagePreview       `json:"previews"`
+	DNS         OptString            `json:"dns"`
+	ApprovedBy  NftApprovedBy        `json:"approved_by"`
+	IncludeCnft OptBool              `json:"include_cnft"`
 }
 
 // GetAddress returns the value of Address.
@@ -8811,9 +8861,9 @@ func (s *NftItem) GetApprovedBy() NftApprovedBy {
 	return s.ApprovedBy
 }
 
-// GetIncludeCompressed returns the value of IncludeCompressed.
-func (s *NftItem) GetIncludeCompressed() OptBool {
-	return s.IncludeCompressed
+// GetIncludeCnft returns the value of IncludeCnft.
+func (s *NftItem) GetIncludeCnft() OptBool {
+	return s.IncludeCnft
 }
 
 // SetAddress sets the value of Address.
@@ -8866,9 +8916,9 @@ func (s *NftItem) SetApprovedBy(val NftApprovedBy) {
 	s.ApprovedBy = val
 }
 
-// SetIncludeCompressed sets the value of IncludeCompressed.
-func (s *NftItem) SetIncludeCompressed(val OptBool) {
-	s.IncludeCompressed = val
+// SetIncludeCnft sets the value of IncludeCnft.
+func (s *NftItem) SetIncludeCnft(val OptBool) {
+	s.IncludeCnft = val
 }
 
 type NftItemCollection struct {

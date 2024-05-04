@@ -578,6 +578,15 @@ func (UnimplementedHandler) GetNftItemsByAddresses(ctx context.Context, req OptG
 	return r, ht.ErrNotImplemented
 }
 
+// GetOutMsgQueueSizes implements getOutMsgQueueSizes operation.
+//
+// Get out msg queue sizes.
+//
+// GET /v2/liteserver/get_out_msg_queue_sizes
+func (UnimplementedHandler) GetOutMsgQueueSizes(ctx context.Context) (r *GetOutMsgQueueSizesOK, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // GetRates implements getRates operation.
 //
 // Get the token price to the currency.
