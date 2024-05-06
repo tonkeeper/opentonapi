@@ -94,7 +94,7 @@ func (h *Handler) GetAccounts(ctx context.Context, request oas.OptGetAccountsReq
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
-	results := make([]oas.Account, 0, len(accounts))
+	results := make(map[ton.AccountID]oas.Account, len(accounts))
 	for _, account := range accounts {
 		delete(allAccountIDs, account.AccountAddress)
 		ab, found := h.addressBook.GetAddressInfoByAddress(account.AccountAddress)
@@ -104,17 +104,22 @@ func (h *Handler) GetAccounts(ctx context.Context, request oas.OptGetAccountsReq
 		} else {
 			res = convertToAccount(account, nil, h.state)
 		}
-		results = append(results, res)
+		results[account.AccountAddress] = res
 	}
 	// if we don't find an account, we return it with "nonexist" status
 	for accountID := range allAccountIDs {
 		account := oas.Account{
-			Address: accountID.ToRaw(),
-			Status:  oas.AccountStatusNonexist,
+			Address:  accountID.ToRaw(),
+			Status:   oas.AccountStatusNonexist,
+			IsWallet: true,
 		}
-		results = append(results, account)
+		results[accountID] = account
 	}
-	return &oas.Accounts{Accounts: results}, nil
+	resp := &oas.Accounts{}
+	for _, i := range ids {
+		resp.Accounts = append(resp.Accounts, results[i])
+	}
+	return resp, nil
 }
 
 func (h *Handler) GetBlockchainAccountTransactions(ctx context.Context, params oas.GetBlockchainAccountTransactionsParams) (*oas.Transactions, error) {
