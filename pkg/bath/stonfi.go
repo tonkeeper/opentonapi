@@ -1,6 +1,7 @@
 package bath
 
 import (
+	"github.com/tonkeeper/tongo/ton"
 	"math/big"
 
 	"github.com/tonkeeper/tongo"
@@ -40,7 +41,30 @@ func (b BubbleJettonSwap) ToAction() *Action {
 }
 
 var StonfiSwapStraw = Straw[BubbleJettonSwap]{
-	CheckFuncs: []bubbleCheck{Is(BubbleJettonTransfer{})},
+	CheckFuncs: []bubbleCheck{func(bubble *Bubble) bool {
+		jettonTx, ok := bubble.Info.(BubbleJettonTransfer)
+		if !ok {
+			return false
+		}
+		if jettonTx.sender == nil {
+			return false
+		}
+		if jettonTx.payload.SumType != abi.StonfiSwapJettonOp {
+			return false
+		}
+		swap, ok := jettonTx.payload.Value.(abi.StonfiSwapJettonPayload)
+		if !ok {
+			return false
+		}
+		to, err := ton.AccountIDFromTlb(swap.ToAddress)
+		if err != nil || to == nil {
+			return false
+		}
+		if jettonTx.sender.Address != *to { //protection against invalid swaps
+			return false
+		}
+		return true
+	}},
 	Builder: func(newAction *BubbleJettonSwap, bubble *Bubble) error {
 		newAction.Dex = Stonfi
 		jettonTx := bubble.Info.(BubbleJettonTransfer)

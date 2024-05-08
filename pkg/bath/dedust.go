@@ -3,11 +3,26 @@ package bath
 import (
 	"errors"
 	"github.com/tonkeeper/tongo/abi"
+	"github.com/tonkeeper/tongo/ton"
 	"math/big"
 )
 
 var DedustSwapStraw = Straw[BubbleJettonSwap]{
-	CheckFuncs: []bubbleCheck{IsJettonTransfer, JettonTransferOperation(abi.DedustSwapJettonOp)},
+	CheckFuncs: []bubbleCheck{IsJettonTransfer, JettonTransferOperation(abi.DedustSwapJettonOp), func(bubble *Bubble) bool {
+		transfer := bubble.Info.(BubbleJettonTransfer)
+		swap, ok := transfer.payload.Value.(abi.DedustSwapJettonPayload)
+		if !ok {
+			return false
+		}
+		to, err := ton.AccountIDFromTlb(swap.SwapParams.RecipientAddr)
+		if err != nil || to == nil {
+			return false
+		}
+		if transfer.sender == nil || transfer.sender.Address != *to {
+			return false
+		}
+		return true
+	}},
 	Builder: func(newAction *BubbleJettonSwap, bubble *Bubble) error {
 		transfer := bubble.Info.(BubbleJettonTransfer)
 		newAction.Dex = Dedust
