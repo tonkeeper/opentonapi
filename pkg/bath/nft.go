@@ -17,9 +17,6 @@ var NftTransferNotifyStraw = Straw[BubbleNftTransfer]{
 			return fmt.Errorf("nft transfer notify without sender")
 		}
 		newAction.account = *receiverTx.inputFrom
-		if newAction.sender == nil {
-			newAction.sender = parseAccount(transfer.PrevOwner)
-		}
 		newAction.recipient = &receiverTx.account
 		newAction.payload = transfer.ForwardPayload.Value
 		return nil
