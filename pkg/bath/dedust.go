@@ -2,9 +2,10 @@ package bath
 
 import (
 	"errors"
+	"math/big"
+
 	"github.com/tonkeeper/tongo/abi"
 	"github.com/tonkeeper/tongo/ton"
-	"math/big"
 )
 
 var DedustSwapStraw = Straw[BubbleJettonSwap]{
@@ -15,8 +16,11 @@ var DedustSwapStraw = Straw[BubbleJettonSwap]{
 			return false
 		}
 		to, err := ton.AccountIDFromTlb(swap.SwapParams.RecipientAddr)
-		if err != nil || to == nil {
+		if err != nil {
 			return false
+		}
+		if to == nil {
+			return true
 		}
 		if transfer.sender == nil || transfer.sender.Address != *to {
 			return false
