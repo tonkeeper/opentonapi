@@ -38,7 +38,7 @@ type storage interface {
 	SearchTransactionByMessageHash(ctx context.Context, hash tongo.Bits256) (*tongo.Bits256, error)
 	// GetBlockTransactions returns low-level information about transactions in a particular block.
 	GetBlockTransactions(ctx context.Context, id tongo.BlockID) ([]*core.Transaction, error)
-	GetAccountTransactions(ctx context.Context, id tongo.AccountID, limit int, beforeLt, afterLt uint64) ([]*core.Transaction, error)
+	GetAccountTransactions(ctx context.Context, id tongo.AccountID, limit int, beforeLt, afterLt uint64, descendingOrder bool) ([]*core.Transaction, error)
 	GetDnsExpiring(ctx context.Context, id tongo.AccountID, period *int) ([]core.DnsExpiring, error)
 	GetLogs(ctx context.Context, account tongo.AccountID, destination *tlb.MsgAddress, limit int, beforeLT uint64) ([]core.Message, error)
 	GetAccountDiff(ctx context.Context, account tongo.AccountID, startTime int64, endTime int64) (int64, error)

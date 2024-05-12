@@ -5495,6 +5495,48 @@ func (s *GetAllRawShardsInfoOK) SetData(val string) {
 	s.Data = val
 }
 
+// Used to sort the result-set in ascending or descending order by lt.
+type GetBlockchainAccountTransactionsSortOrder string
+
+const (
+	GetBlockchainAccountTransactionsSortOrderDesc GetBlockchainAccountTransactionsSortOrder = "desc"
+	GetBlockchainAccountTransactionsSortOrderAsc  GetBlockchainAccountTransactionsSortOrder = "asc"
+)
+
+// AllValues returns all GetBlockchainAccountTransactionsSortOrder values.
+func (GetBlockchainAccountTransactionsSortOrder) AllValues() []GetBlockchainAccountTransactionsSortOrder {
+	return []GetBlockchainAccountTransactionsSortOrder{
+		GetBlockchainAccountTransactionsSortOrderDesc,
+		GetBlockchainAccountTransactionsSortOrderAsc,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s GetBlockchainAccountTransactionsSortOrder) MarshalText() ([]byte, error) {
+	switch s {
+	case GetBlockchainAccountTransactionsSortOrderDesc:
+		return []byte(s), nil
+	case GetBlockchainAccountTransactionsSortOrderAsc:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *GetBlockchainAccountTransactionsSortOrder) UnmarshalText(data []byte) error {
+	switch GetBlockchainAccountTransactionsSortOrder(data) {
+	case GetBlockchainAccountTransactionsSortOrderDesc:
+		*s = GetBlockchainAccountTransactionsSortOrderDesc
+		return nil
+	case GetBlockchainAccountTransactionsSortOrderAsc:
+		*s = GetBlockchainAccountTransactionsSortOrderAsc
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
 type GetChartRatesOK struct {
 	Points jx.Raw `json:"points"`
 }
@@ -11611,6 +11653,52 @@ func (o OptGetAccountsReq) Get() (v GetAccountsReq, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptGetAccountsReq) Or(d GetAccountsReq) GetAccountsReq {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptGetBlockchainAccountTransactionsSortOrder returns new OptGetBlockchainAccountTransactionsSortOrder with value set to v.
+func NewOptGetBlockchainAccountTransactionsSortOrder(v GetBlockchainAccountTransactionsSortOrder) OptGetBlockchainAccountTransactionsSortOrder {
+	return OptGetBlockchainAccountTransactionsSortOrder{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptGetBlockchainAccountTransactionsSortOrder is optional GetBlockchainAccountTransactionsSortOrder.
+type OptGetBlockchainAccountTransactionsSortOrder struct {
+	Value GetBlockchainAccountTransactionsSortOrder
+	Set   bool
+}
+
+// IsSet returns true if OptGetBlockchainAccountTransactionsSortOrder was set.
+func (o OptGetBlockchainAccountTransactionsSortOrder) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptGetBlockchainAccountTransactionsSortOrder) Reset() {
+	var v GetBlockchainAccountTransactionsSortOrder
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptGetBlockchainAccountTransactionsSortOrder) SetTo(v GetBlockchainAccountTransactionsSortOrder) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptGetBlockchainAccountTransactionsSortOrder) Get() (v GetBlockchainAccountTransactionsSortOrder, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptGetBlockchainAccountTransactionsSortOrder) Or(d GetBlockchainAccountTransactionsSortOrder) GetBlockchainAccountTransactionsSortOrder {
 	if v, ok := o.Get(); ok {
 		return v
 	}

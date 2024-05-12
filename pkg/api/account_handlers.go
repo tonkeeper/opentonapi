@@ -130,7 +130,12 @@ func (h *Handler) GetBlockchainAccountTransactions(ctx context.Context, params o
 	if params.BeforeLt.Value == 0 {
 		params.BeforeLt.Value = 1 << 62
 	}
-	txs, err := h.storage.GetAccountTransactions(ctx, account.ID, int(params.Limit.Value), uint64(params.BeforeLt.Value), uint64(params.AfterLt.Value))
+	descendingOrder := true
+	if params.SortOrder.Value == oas.GetBlockchainAccountTransactionsSortOrderAsc {
+		descendingOrder = false
+	}
+	txs, err := h.storage.GetAccountTransactions(ctx, account.ID, int(params.Limit.Value),
+		uint64(params.BeforeLt.Value), uint64(params.AfterLt.Value), descendingOrder)
 	if errors.Is(err, core.ErrEntityNotFound) {
 		return &oas.Transactions{}, nil
 	}

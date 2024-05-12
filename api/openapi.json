@@ -6534,6 +6534,19 @@
        "minimum": 1,
        "type": "integer"
       }
+     },
+     {
+      "in": "query",
+      "name": "sort_order",
+      "schema": {
+       "default": "desc",
+       "description": "used to sort the result-set in ascending or descending order by lt.",
+       "enum": [
+        "desc",
+        "asc"
+       ],
+       "type": "string"
+      }
      }
     ],
     "responses": {

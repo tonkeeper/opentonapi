@@ -15,7 +15,7 @@ func (s *LiteStorage) GetLogs(ctx context.Context, account tongo.AccountID, dest
 	}
 	txLt := beforeLT
 	for {
-		txs, err := s.GetAccountTransactions(ctx, account, limit, txLt, 0)
+		txs, err := s.GetAccountTransactions(ctx, account, limit, txLt, 0, true)
 		if err != nil {
 			return nil, err
 		}

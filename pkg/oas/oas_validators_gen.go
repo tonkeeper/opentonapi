@@ -2302,6 +2302,17 @@ func (s *GetAccountsReq) Validate() error {
 	return nil
 }
 
+func (s GetBlockchainAccountTransactionsSortOrder) Validate() error {
+	switch s {
+	case "desc":
+		return nil
+	case "asc":
+		return nil
+	default:
+		return errors.Errorf("invalid value: %v", s)
+	}
+}
+
 func (s GetInscriptionOpTemplateOperation) Validate() error {
 	switch s {
 	case "transfer":

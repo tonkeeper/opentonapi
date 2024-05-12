@@ -4104,6 +4104,10 @@ func (s *Server) handleGetBlockchainAccountTransactionsRequest(args [1]string, a
 					Name: "limit",
 					In:   "query",
 				}: params.Limit,
+				{
+					Name: "sort_order",
+					In:   "query",
+				}: params.SortOrder,
 			},
 			Raw: r,
 		}
