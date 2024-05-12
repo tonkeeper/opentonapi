@@ -468,12 +468,12 @@ func (s *LiteStorage) RunSmcMethodByID(ctx context.Context, id tongo.AccountID, 
 	return s.client.RunSmcMethodByID(ctx, id, method, stack)
 }
 
-func (s *LiteStorage) GetAccountTransactions(ctx context.Context, id tongo.AccountID, limit int, beforeLt, afterLt uint64) ([]*core.Transaction, error) {
+func (s *LiteStorage) GetAccountTransactions(ctx context.Context, id tongo.AccountID, limit int, beforeLt, afterLt uint64, descendingOrder bool) ([]*core.Transaction, error) {
 	timer := prometheus.NewTimer(prometheus.ObserverFunc(func(v float64) {
 		storageTimeHistogramVec.WithLabelValues("get_account_transactions").Observe(v)
 	}))
 	defer timer.ObserveDuration()
-	txs, err := s.client.GetLastTransactions(ctx, id, limit) //todo: custom with beforeLt and afterLt
+	txs, err := s.client.GetLastTransactions(ctx, id, limit) //todo: custom with beforeLt, afterLt and descendingOrder
 	if err != nil {
 		return nil, err
 	}
