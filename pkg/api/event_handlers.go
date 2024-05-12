@@ -274,6 +274,14 @@ func (h *Handler) GetAccountEvents(ctx context.Context, params oas.GetAccountEve
 			lastLT = uint64(events[len(events)-1].Lt)
 		}
 	}
+	if len(events) < params.Limit {
+		missedLimit := params.Limit - len(events)
+		missedEvents, _ := h.storage.GetMissedEvents(ctx, account.ID, lastLT, missedLimit)
+		events = append(events, missedEvents...)
+		if len(events) > 0 {
+			lastLT = uint64(events[len(events)-1].Lt)
+		}
+	}
 	return &oas.AccountEvents{Events: events, NextFrom: int64(lastLT)}, nil
 }
 
