@@ -141,6 +141,8 @@ func TestFindActions(t *testing.T) {
 			tongo.MustParseBlockID("(0,4000000000000000,42924043)"),
 			// disintar purchase
 			tongo.MustParseBlockID("(0,8000000000000000,35667628)"),
+			//cut jetton transfer
+			tongo.MustParseBlockID("(0,8000000000000000,43480182)"),
 		}),
 	)
 
@@ -217,6 +219,11 @@ func TestFindActions(t *testing.T) {
 			name:           "jetton transfer to another person",
 			hash:           "e3d4dfb292db3bb612b7b9b1a0c6ae658a58a249b1152a4cd6bc1e4a60068e21",
 			filenamePrefix: "jetton-transfer-to-another-person",
+		},
+		{
+			name:           "cut jetton transfer",
+			hash:           "36eabfbae72435be9bb60a0e79dfb9846509b40c4848516ca73edcfae1b97dfe",
+			filenamePrefix: "cut-jetton-transfer",
 		},
 		{
 			name:           "tf nominator deposit",

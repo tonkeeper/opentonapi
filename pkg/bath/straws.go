@@ -16,6 +16,7 @@ type Merger interface {
 var JettonTransfersBurnsMints = []Merger{
 	JettonTransferPTONStraw,
 	JettonTransferClassicStraw,
+	JettonTransferMinimalStraw,
 	JettonBurnStraw,
 	DedustLPJettonMintStraw,
 	JettonMintStrawGovernance,
@@ -38,6 +39,7 @@ var DefaultStraws = []Merger{
 	NftTransferNotifyStraw,
 	JettonTransferPTONStraw,
 	JettonTransferClassicStraw,
+	JettonTransferMinimalStraw,
 	JettonBurnStraw,
 	WtonMintStraw,
 	NftPurchaseStraw,
