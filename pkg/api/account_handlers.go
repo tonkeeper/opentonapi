@@ -396,7 +396,7 @@ func (h *Handler) GetAccountTraces(ctx context.Context, params oas.GetAccountTra
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
 	}
-	traceIDs, err := h.storage.SearchTraces(ctx, account.ID, params.Limit.Value, nil, nil, nil, false)
+	traceIDs, err := h.storage.SearchTraces(ctx, account.ID, params.Limit.Value, optIntToPointer(params.BeforeLt), nil, nil, false)
 	if err != nil && !errors.Is(err, core.ErrEntityNotFound) {
 		return nil, toError(http.StatusInternalServerError, err)
 	}

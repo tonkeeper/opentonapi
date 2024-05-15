@@ -6281,6 +6281,17 @@
       "$ref": "#/components/parameters/accountIDParameter"
      },
      {
+      "description": "omit this parameter to get last events",
+      "in": "query",
+      "name": "before_lt",
+      "required": false,
+      "schema": {
+       "example": 25758317000002,
+       "format": "int64",
+       "type": "integer"
+      }
+     },
+     {
       "in": "query",
       "name": "limit",
       "schema": {

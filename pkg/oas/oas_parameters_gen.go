@@ -4503,7 +4503,9 @@ func decodeGetAccountSubscriptionsParams(args [1]string, argsEscaped bool, r *ht
 type GetAccountTracesParams struct {
 	// Account ID.
 	AccountID string
-	Limit     OptInt
+	// Omit this parameter to get last events.
+	BeforeLt OptInt64
+	Limit    OptInt
 }
 
 func unpackGetAccountTracesParams(packed middleware.Parameters) (params GetAccountTracesParams) {
@@ -4513,6 +4515,15 @@ func unpackGetAccountTracesParams(packed middleware.Parameters) (params GetAccou
 			In:   "path",
 		}
 		params.AccountID = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "before_lt",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.BeforeLt = v.(OptInt64)
+		}
 	}
 	{
 		key := middleware.ParameterKey{
@@ -4570,6 +4581,47 @@ func decodeGetAccountTracesParams(args [1]string, argsEscaped bool, r *http.Requ
 		return params, &ogenerrors.DecodeParamError{
 			Name: "account_id",
 			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode query: before_lt.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "before_lt",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotBeforeLtVal int64
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToInt64(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotBeforeLtVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.BeforeLt.SetTo(paramsDotBeforeLtVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "before_lt",
+			In:   "query",
 			Err:  err,
 		}
 	}

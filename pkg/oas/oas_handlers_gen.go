@@ -3621,6 +3621,10 @@ func (s *Server) handleGetAccountTracesRequest(args [1]string, argsEscaped bool,
 					In:   "path",
 				}: params.AccountID,
 				{
+					Name: "before_lt",
+					In:   "query",
+				}: params.BeforeLt,
+				{
 					Name: "limit",
 					In:   "query",
 				}: params.Limit,

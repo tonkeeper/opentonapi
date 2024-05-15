@@ -865,6 +865,14 @@ paths:
         - Accounts
       parameters:
         - $ref: '#/components/parameters/accountIDParameter'
+        - name: before_lt
+          in: query
+          description: "omit this parameter to get last events"
+          required: false
+          schema:
+            type: integer
+            format: int64
+            example: 25758317000002
         - name: limit
           in: query
           schema:
