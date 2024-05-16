@@ -30,6 +30,9 @@ var DedustSwapStraw = Straw[BubbleJettonSwap]{
 	Builder: func(newAction *BubbleJettonSwap, bubble *Bubble) error {
 		transfer := bubble.Info.(BubbleJettonTransfer)
 		newAction.Dex = Dedust
+		if transfer.sender != nil {
+			newAction.UserWallet = transfer.sender.Address
+		}
 		newAction.In.JettonMaster = transfer.master
 		newAction.In.JettonWallet = transfer.senderWallet
 		newAction.In.Amount = big.Int(transfer.amount)
