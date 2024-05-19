@@ -321,7 +321,8 @@ func (h *Handler) GetAccountDnsExpiring(ctx context.Context, params oas.GetAccou
 		if dns.DnsItem != nil {
 			for _, n := range nfts {
 				if n.Address == dns.DnsItem.Address {
-					dei.DNSItem = oas.NewOptNftItem(convertNFT(ctx, n, h.addressBook, h.metaCache))
+					nftTrustType := h.convertNftTrustType(n.CollectionAddress)
+					dei.DNSItem = oas.NewOptNftItem(convertNFT(ctx, n, h.addressBook, h.metaCache, nftTrustType))
 					break
 				}
 			}

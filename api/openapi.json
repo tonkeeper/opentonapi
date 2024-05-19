@@ -4130,6 +4130,9 @@
      "sale": {
       "$ref": "#/components/schemas/Sale"
      },
+     "trust": {
+      "$ref": "#/components/schemas/TrustType"
+     },
      "verified": {
       "example": true,
       "type": "boolean"
@@ -4140,7 +4143,8 @@
      "index",
      "verified",
      "metadata",
-     "approved_by"
+     "approved_by",
+     "trust"
     ],
     "type": "object"
    },
@@ -5091,6 +5095,15 @@
      "transactions"
     ],
     "type": "object"
+   },
+   "TrustType": {
+    "enum": [
+     "whitelist",
+     "blacklist",
+     "none"
+    ],
+    "example": "whitelist",
+    "type": "string"
    },
    "TvmStackRecord": {
     "properties": {

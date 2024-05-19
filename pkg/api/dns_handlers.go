@@ -149,7 +149,8 @@ func (h *Handler) GetDnsInfo(ctx context.Context, params oas.GetDnsInfoParams) (
 	convertedDomainInfo := oas.DomainInfo{
 		Name: params.DomainName,
 	}
-	convertedDomainInfo.Item.SetTo(convertNFT(ctx, nft, h.addressBook, h.metaCache))
+	nftTrustType := h.convertNftTrustType(nft.CollectionAddress)
+	convertedDomainInfo.Item.SetTo(convertNFT(ctx, nft, h.addressBook, h.metaCache, nftTrustType))
 	if expTime != 0 {
 		convertedDomainInfo.ExpiringAt.SetTo(expTime)
 	}

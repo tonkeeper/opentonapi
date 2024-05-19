@@ -4890,6 +4890,13 @@ components:
           - getgems
           - tonkeeper
           - ton.diamonds
+    TrustType:
+      type: string
+      example: whitelist
+      enum:
+        - whitelist
+        - blacklist
+        - none
     Sale:
       type: object
       required:
@@ -4914,6 +4921,7 @@ components:
         - verified
         - metadata
         - approved_by
+        - trust
       properties:
         address:
           type: string
@@ -4961,6 +4969,8 @@ components:
         include_cnft:
           type: boolean
           example: false
+        trust:
+          $ref: '#/components/schemas/TrustType'
     NftItems:
       type: object
       required:

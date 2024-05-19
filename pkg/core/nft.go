@@ -2,12 +2,13 @@ package core
 
 import (
 	"fmt"
-	"github.com/shopspring/decimal"
-	"github.com/tonkeeper/tongo"
 	"io"
 	"net/http"
 	"strings"
 	"time"
+
+	"github.com/shopspring/decimal"
+	"github.com/tonkeeper/tongo"
 )
 
 type NftItem struct {
@@ -28,6 +29,7 @@ type NftCollection struct {
 	OwnerAddress      *tongo.AccountID
 	ContentLayout     int
 	CollectionContent []byte
+	InWhitelist       bool
 	Metadata          map[string]interface{}
 }
 
