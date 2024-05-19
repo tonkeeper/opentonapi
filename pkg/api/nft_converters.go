@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"strings"
-	"time"
 
 	"github.com/tonkeeper/opentonapi/internal/g"
 	"github.com/tonkeeper/opentonapi/pkg/bath"
@@ -19,7 +18,7 @@ import (
 	"github.com/tonkeeper/opentonapi/pkg/references"
 )
 
-func convertNFT(ctx context.Context, item core.NftItem, book addressBook, metaCache metadataCache, trust oas.TrustType) oas.NftItem {
+func (h *Handler) convertNFT(ctx context.Context, item core.NftItem, book addressBook, metaCache metadataCache) oas.NftItem {
 	i := oas.NftItem{
 		Address:  item.Address.ToRaw(),
 		Index:    item.Index.BigInt().Int64(),
@@ -27,7 +26,7 @@ func convertNFT(ctx context.Context, item core.NftItem, book addressBook, metaCa
 		Verified: item.Verified,
 		Metadata: anyToJSONRawMap(item.Metadata),
 		DNS:      g.Opt(item.DNS),
-		Trust:    trust,
+		Trust:    oas.TrustTypeNone,
 	}
 	if item.Sale != nil {
 		tokenName := "TON"
@@ -57,6 +56,10 @@ func convertNFT(ctx context.Context, item core.NftItem, book addressBook, metaCa
 			for _, a := range cc.Approvers {
 				i.ApprovedBy = append(i.ApprovedBy, a)
 			}
+		}
+		collection, err := h.storage.GetNftCollectionByCollectionAddress(ctx, *item.CollectionAddress)
+		if err == nil && collection.InWhitelist {
+			i.Trust = oas.TrustTypeWhitelist
 		}
 		cInfo, _ := metaCache.getCollectionMeta(ctx, *item.CollectionAddress)
 
@@ -199,21 +202,4 @@ func (h *Handler) convertNftHistory(ctx context.Context, account tongo.AccountID
 	}
 
 	return events, int64(lastLT), nil
-}
-
-func (h *Handler) convertNftTrustType(collectionAccountID *tongo.AccountID) oas.TrustType {
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-	var nftTrustType = oas.TrustTypeNone
-	if collectionAccountID == nil {
-		return nftTrustType
-	}
-	collection, err := h.storage.GetNftCollectionByCollectionAddress(ctx, *collectionAccountID)
-	if err != nil {
-		return nftTrustType
-	}
-	if collection.InWhitelist {
-		nftTrustType = oas.TrustTypeWhitelist
-	}
-	return nftTrustType
 }

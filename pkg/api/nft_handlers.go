@@ -38,8 +38,7 @@ func (h *Handler) GetNftItemsByAddresses(ctx context.Context, request oas.OptGet
 	}
 	var result oas.NftItems
 	for _, i := range items {
-		nftTrustType := h.convertNftTrustType(i.CollectionAddress)
-		result.NftItems = append(result.NftItems, convertNFT(ctx, i, h.addressBook, h.metaCache, nftTrustType))
+		result.NftItems = append(result.NftItems, h.convertNFT(ctx, i, h.addressBook, h.metaCache))
 	}
 	return &result, nil
 }
@@ -56,8 +55,7 @@ func (h *Handler) GetNftItemByAddress(ctx context.Context, params oas.GetNftItem
 	if len(items) != 1 {
 		return nil, toError(http.StatusNotFound, fmt.Errorf("item not found"))
 	}
-	nftTrustType := h.convertNftTrustType(items[0].CollectionAddress)
-	result := convertNFT(ctx, items[0], h.addressBook, h.metaCache, nftTrustType)
+	result := h.convertNFT(ctx, items[0], h.addressBook, h.metaCache)
 	return &result, nil
 }
 
@@ -93,8 +91,7 @@ func (h *Handler) GetAccountNftItems(ctx context.Context, params oas.GetAccountN
 		return nil, toError(http.StatusInternalServerError, err)
 	}
 	for _, i := range items {
-		nftTrustType := h.convertNftTrustType(i.CollectionAddress)
-		result.NftItems = append(result.NftItems, convertNFT(ctx, i, h.addressBook, h.metaCache, nftTrustType))
+		result.NftItems = append(result.NftItems, h.convertNFT(ctx, i, h.addressBook, h.metaCache))
 	}
 	return &result, nil
 }
@@ -149,8 +146,7 @@ func (h *Handler) GetItemsFromCollection(ctx context.Context, params oas.GetItem
 		return a.Index.Cmp(b.Index)
 	})
 	for _, i := range items {
-		nftTrustType := h.convertNftTrustType(i.CollectionAddress)
-		result.NftItems = append(result.NftItems, convertNFT(ctx, i, h.addressBook, h.metaCache, nftTrustType))
+		result.NftItems = append(result.NftItems, h.convertNFT(ctx, i, h.addressBook, h.metaCache))
 	}
 	return &result, nil
 }
