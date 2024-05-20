@@ -3624,6 +3624,17 @@ func (s *NftItem) Validate() error {
 			Error: err,
 		})
 	}
+	if err := func() error {
+		if err := s.Trust.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "trust",
+			Error: err,
+		})
+	}
 	if len(failures) > 0 {
 		return &validate.Error{Fields: failures}
 	}
@@ -4418,6 +4429,19 @@ func (s *Transactions) Validate() error {
 		return &validate.Error{Fields: failures}
 	}
 	return nil
+}
+
+func (s TrustType) Validate() error {
+	switch s {
+	case "whitelist":
+		return nil
+	case "blacklist":
+		return nil
+	case "none":
+		return nil
+	default:
+		return errors.Errorf("invalid value: %v", s)
+	}
 }
 
 func (s *TvmStackRecord) Validate() error {

@@ -87,7 +87,7 @@ func (h *Handler) convertRisk(ctx context.Context, risk wallet.Risk, walletAddre
 			return oas.Risk{}, err
 		}
 		for _, item := range items {
-			nft := convertNFT(ctx, item, h.addressBook, h.metaCache)
+			nft := h.convertNFT(ctx, item, h.addressBook, h.metaCache)
 			oasRisk.Nfts = append(oasRisk.Nfts, nft)
 		}
 	}
@@ -552,7 +552,7 @@ func (h *Handler) convertAction(ctx context.Context, viewer *tongo.AccountID, a 
 		var name string
 		if len(items) == 1 {
 			// opentonapi doesn't implement GetNFTs() now
-			nft = convertNFT(ctx, items[0], h.addressBook, h.metaCache)
+			nft = h.convertNFT(ctx, items[0], h.addressBook, h.metaCache)
 			if len(nft.Previews) > 0 {
 				nftImage = nft.Previews[0].URL
 			}
@@ -688,7 +688,7 @@ func (h *Handler) convertAction(ctx context.Context, viewer *tongo.AccountID, a 
 		if a.AuctionBid.Nft == nil {
 			return oas.Action{}, false, fmt.Errorf("nft is nil")
 		}
-		nft.SetTo(convertNFT(ctx, *a.AuctionBid.Nft, h.addressBook, h.metaCache))
+		nft.SetTo(h.convertNFT(ctx, *a.AuctionBid.Nft, h.addressBook, h.metaCache))
 		action.AuctionBid.SetTo(oas.AuctionBidAction{
 			Amount: oas.Price{
 				Value:     fmt.Sprintf("%v", a.AuctionBid.Amount),

@@ -8851,6 +8851,7 @@ type NftItem struct {
 	DNS         OptString            `json:"dns"`
 	ApprovedBy  NftApprovedBy        `json:"approved_by"`
 	IncludeCnft OptBool              `json:"include_cnft"`
+	Trust       TrustType            `json:"trust"`
 }
 
 // GetAddress returns the value of Address.
@@ -8908,6 +8909,11 @@ func (s *NftItem) GetIncludeCnft() OptBool {
 	return s.IncludeCnft
 }
 
+// GetTrust returns the value of Trust.
+func (s *NftItem) GetTrust() TrustType {
+	return s.Trust
+}
+
 // SetAddress sets the value of Address.
 func (s *NftItem) SetAddress(val string) {
 	s.Address = val
@@ -8961,6 +8967,11 @@ func (s *NftItem) SetApprovedBy(val NftApprovedBy) {
 // SetIncludeCnft sets the value of IncludeCnft.
 func (s *NftItem) SetIncludeCnft(val OptBool) {
 	s.IncludeCnft = val
+}
+
+// SetTrust sets the value of Trust.
+func (s *NftItem) SetTrust(val TrustType) {
+	s.Trust = val
 }
 
 type NftItemCollection struct {
@@ -15314,6 +15325,55 @@ func (s *Transactions) GetTransactions() []Transaction {
 // SetTransactions sets the value of Transactions.
 func (s *Transactions) SetTransactions(val []Transaction) {
 	s.Transactions = val
+}
+
+// Ref: #/components/schemas/TrustType
+type TrustType string
+
+const (
+	TrustTypeWhitelist TrustType = "whitelist"
+	TrustTypeBlacklist TrustType = "blacklist"
+	TrustTypeNone      TrustType = "none"
+)
+
+// AllValues returns all TrustType values.
+func (TrustType) AllValues() []TrustType {
+	return []TrustType{
+		TrustTypeWhitelist,
+		TrustTypeBlacklist,
+		TrustTypeNone,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s TrustType) MarshalText() ([]byte, error) {
+	switch s {
+	case TrustTypeWhitelist:
+		return []byte(s), nil
+	case TrustTypeBlacklist:
+		return []byte(s), nil
+	case TrustTypeNone:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *TrustType) UnmarshalText(data []byte) error {
+	switch TrustType(data) {
+	case TrustTypeWhitelist:
+		*s = TrustTypeWhitelist
+		return nil
+	case TrustTypeBlacklist:
+		*s = TrustTypeBlacklist
+		return nil
+	case TrustTypeNone:
+		*s = TrustTypeNone
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
 }
 
 // Ref: #/components/schemas/TvmStackRecord

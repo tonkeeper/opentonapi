@@ -18,7 +18,7 @@ import (
 	"github.com/tonkeeper/opentonapi/pkg/references"
 )
 
-func convertNFT(ctx context.Context, item core.NftItem, book addressBook, metaCache metadataCache) oas.NftItem {
+func (h *Handler) convertNFT(ctx context.Context, item core.NftItem, book addressBook, metaCache metadataCache) oas.NftItem {
 	i := oas.NftItem{
 		Address:  item.Address.ToRaw(),
 		Index:    item.Index.BigInt().Int64(),
@@ -26,6 +26,7 @@ func convertNFT(ctx context.Context, item core.NftItem, book addressBook, metaCa
 		Verified: item.Verified,
 		Metadata: anyToJSONRawMap(item.Metadata),
 		DNS:      g.Opt(item.DNS),
+		Trust:    oas.TrustTypeNone,
 	}
 	if item.Sale != nil {
 		tokenName := "TON"
@@ -55,6 +56,10 @@ func convertNFT(ctx context.Context, item core.NftItem, book addressBook, metaCa
 			for _, a := range cc.Approvers {
 				i.ApprovedBy = append(i.ApprovedBy, a)
 			}
+		}
+		collection, err := h.storage.GetNftCollectionByCollectionAddress(ctx, *item.CollectionAddress)
+		if err == nil && collection.InWhitelist {
+			i.Trust = oas.TrustTypeWhitelist
 		}
 		cInfo, _ := metaCache.getCollectionMeta(ctx, *item.CollectionAddress)
 
