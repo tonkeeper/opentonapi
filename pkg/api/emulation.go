@@ -29,6 +29,9 @@ var (
 		Name: "tonapi_emulated_messages_counter",
 		Help: "The total number of emulated messages",
 	})
+	emulatedAccountCode = promauto.NewCounterVec(prometheus.CounterOpts{
+		Name: "tonapi_emulated_account_code_counter",
+	}, []string{"code_hash"})
 )
 
 func (h *Handler) RunEmulation(ctx context.Context, msgCh <-chan blockchain.ExtInMsgCopy, emulationCh chan<- blockchain.ExtInMsgCopy) {
@@ -214,6 +217,12 @@ func emulatedTreeToTrace(ctx context.Context, executor executor, resolver core.L
 	if err != nil {
 		return nil, err
 	}
+	codeHash, err := code.HashString()
+	if err != nil {
+		return nil, err
+	}
+	emulatedAccountCode.WithLabelValues(codeHash).Inc()
+
 	sharedExecutor := newSharedAccountExecutor(accounts, executor, resolver, configBase64)
 	inspectionResult, err := abi.NewContractInspector().InspectContract(ctx, b, sharedExecutor, accountID)
 	if err != nil {

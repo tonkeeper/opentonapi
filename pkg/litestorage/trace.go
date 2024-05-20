@@ -5,14 +5,22 @@ import (
 	"fmt"
 
 	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
+	"github.com/tonkeeper/tongo/boc"
 
 	"github.com/tonkeeper/opentonapi/pkg/core"
 )
 
 const (
 	maxDepthLimit = 1024
+)
+
+var (
+	emulatedAccountCode = promauto.NewCounterVec(prometheus.CounterOpts{
+		Name: "tonapi_emulated_account_code_litestorage_counter",
+	}, []string{"code_hash"})
 )
 
 func (s *LiteStorage) GetTrace(ctx context.Context, hash tongo.Bits256) (*core.Trace, error) {
@@ -144,6 +152,20 @@ func (s *LiteStorage) getAccountInterfaces(ctx context.Context, id tongo.Account
 	account, err := s.GetRawAccount(ctx, id)
 	if err != nil {
 		return nil, err
+	}
+	if len(account.Code) > 0 {
+		cells, err := boc.DeserializeBoc(account.Code)
+		if err != nil {
+			return nil, err
+		}
+		if len(cells) == 0 {
+			return nil, fmt.Errorf("failed to find a root cell")
+		}
+		h, err := cells[0].HashString()
+		if err != nil {
+			return nil, err
+		}
+		emulatedAccountCode.WithLabelValues(h).Inc()
 	}
 	inspector := abi.NewContractInspector()
 	cd, err := inspector.InspectContract(ctx, account.Code, s.executor, id)
