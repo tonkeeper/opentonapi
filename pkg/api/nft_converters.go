@@ -18,6 +18,17 @@ import (
 	"github.com/tonkeeper/opentonapi/pkg/references"
 )
 
+var scamUrls = []string{"://not.cash", "://ton-staker.com", "://scaleton.xyz"}
+
+func isScam(description string) bool {
+	for _, scam := range scamUrls {
+		if strings.Contains(description, scam) {
+			return true
+		}
+	}
+	return false
+}
+
 func (h *Handler) convertNFT(ctx context.Context, item core.NftItem, book addressBook, metaCache metadataCache) oas.NftItem {
 	i := oas.NftItem{
 		Address:  item.Address.ToRaw(),
@@ -52,6 +63,7 @@ func (h *Handler) convertNFT(ctx context.Context, item core.NftItem, book addres
 	}
 	var image string
 	if item.CollectionAddress != nil {
+		cInfo, _ := metaCache.getCollectionMeta(ctx, *item.CollectionAddress)
 		if cc, prs := book.GetCollectionInfoByAddress(*item.CollectionAddress); prs {
 			for _, a := range cc.Approvers {
 				i.ApprovedBy = append(i.ApprovedBy, a)
@@ -60,13 +72,9 @@ func (h *Handler) convertNFT(ctx context.Context, item core.NftItem, book addres
 		if len(i.ApprovedBy) > 0 {
 			i.Trust = oas.TrustTypeWhitelist
 		}
-		cInfo, _ := metaCache.getCollectionMeta(ctx, *item.CollectionAddress)
-
-		// TODO: REMOVE, FAST HACK
-		if strings.Contains(cInfo.Description, "ton-staker.com") || strings.Contains(cInfo.Description, "scaleton.xyz") {
-			cInfo.Description = "SCAM"
+		if isScam(cInfo.Description) {
+			i.Trust = oas.TrustTypeBlacklist
 		}
-
 		i.Collection.SetTo(oas.NftItemCollection{
 			Address:     item.CollectionAddress.ToRaw(),
 			Name:        cInfo.Name,
@@ -88,12 +96,6 @@ func (h *Handler) convertNFT(ctx context.Context, item core.NftItem, book addres
 	if item.Metadata != nil {
 		if imageI, prs := item.Metadata["image"]; prs {
 			image, _ = imageI.(string)
-		}
-		// TODO: REMOVE, FAST HACK
-		if description, ok := item.Metadata["description"]; ok {
-			if value, ok := description.(string); ok && strings.Contains(value, "ton-staker.com") {
-				i.Metadata["description"] = []byte(`"SCAM"`)
-			}
 		}
 	}
 	if image == "" {
@@ -122,13 +124,6 @@ func convertNftCollection(collection core.NftCollection, book addressBook) oas.N
 	metadata := map[string]jx.Raw{}
 	image := references.Placeholder
 	for k, v := range collection.Metadata {
-		// TODO: REMOVE, FAST HACK
-		if k == "description" {
-			if value, ok := v.(string); ok && strings.Contains(value, "ton-staker.com") {
-				v = "SCAM"
-			}
-		}
-
 		var err error
 		if k == "image" {
 			if i, ok := v.(string); ok && i != "" {
