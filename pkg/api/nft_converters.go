@@ -57,8 +57,7 @@ func (h *Handler) convertNFT(ctx context.Context, item core.NftItem, book addres
 				i.ApprovedBy = append(i.ApprovedBy, a)
 			}
 		}
-		collection, err := h.storage.GetNftCollectionByCollectionAddress(ctx, *item.CollectionAddress)
-		if err == nil && collection.InWhitelist {
+		if len(i.ApprovedBy) > 0 {
 			i.Trust = oas.TrustTypeWhitelist
 		}
 		cInfo, _ := metaCache.getCollectionMeta(ctx, *item.CollectionAddress)
