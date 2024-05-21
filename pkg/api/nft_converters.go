@@ -18,7 +18,45 @@ import (
 	"github.com/tonkeeper/opentonapi/pkg/references"
 )
 
-var scamUrls = []string{"://not.cash", "://ton-staker.com", "://scaleton.xyz"}
+var scamUrls = []string{
+	"://raff.cash",
+	"://notc.app",
+	"://not.cash",
+	"://wnot.app",
+	"://wnot.top",
+	"://stonfi.us",
+	"://tonlayer.com",
+	"://notdrops.com",
+	"://fragment.global",
+	"://ton-usd.com",
+	"://tondrop.app",
+	"mysboxs.com",
+	"://notstake.io",
+	"://wnotcoin.com",
+	"://StonFi.app/",
+	"://redo-ton.com",
+	"://TETHER-TON.COM",
+	"://tonkeeper.link",
+	"://tonbounty.com",
+	"://ton-usd.net",
+	"://stondrop.net",
+	"://notcoin-v2.com",
+	"://stonfi.finance",
+	"://keepton.com",
+	"://notdrops.com",
+	"jusdt.org",
+	"jusdt.net",
+	"://ton-stake.org",
+	"://ton-staking.com",
+	"://shardify.net",
+	"://shardify.org",
+	"://tonkeeper.is",
+	"://staketon.net",
+	"://tsTON.app",
+	"://tston.cc",
+	"://tston.app",
+	"://tonfrom.com",
+}
 
 func isScam(description string) bool {
 	for _, scam := range scamUrls {
@@ -96,6 +134,12 @@ func (h *Handler) convertNFT(ctx context.Context, item core.NftItem, book addres
 	if item.Metadata != nil {
 		if imageI, prs := item.Metadata["image"]; prs {
 			image, _ = imageI.(string)
+		}
+		if descriptionI, prs := item.Metadata["description"]; prs {
+			description, _ := descriptionI.(string)
+			if isScam(description) {
+				i.Trust = oas.TrustTypeBlacklist
+			}
 		}
 	}
 	if image == "" {
