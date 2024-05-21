@@ -106,10 +106,11 @@ func getTotalBalances(ctx context.Context, storage storage, pubKey []byte) (int6
 		tongoWallet.V2R1, tongoWallet.V2R2,
 		tongoWallet.V3R1, tongoWallet.V3R2,
 		tongoWallet.V4R1, tongoWallet.V4R2,
+		tongoWallet.V5R1,
 	}
 	var walletAddresses []tongo.AccountID
 	for _, version := range versions {
-		walletAddress, err := tongoWallet.GenerateWalletAddress(pubKey, version, 0, nil)
+		walletAddress, err := tongoWallet.GenerateWalletAddress(pubKey, version, nil, 0, nil)
 		if err != nil {
 			continue
 		}
