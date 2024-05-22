@@ -272,6 +272,8 @@ github.com/stretchr/testify v1.9.0 h1:HtqpIVDClZ4nwg75+f6Lvsy/wHu+3BoSGCbBAcpTsT
 github.com/stretchr/testify v1.9.0/go.mod h1:r2ic/lqez/lEtzL7wO/rwa5dbSLXVDPFyf8C91i36aY=
 github.com/tonkeeper/scam_backoffice_rules v0.0.0-20240412152144-9fb01586a942 h1:5yExly0WuV9P0e2nHWeDV86qQ+7zKeNTWqIpoIJ+g9M=
 github.com/tonkeeper/scam_backoffice_rules v0.0.0-20240412152144-9fb01586a942/go.mod h1:SqZXYO9vbID8ku+xnnaKXeNGmehxigODGrk5V1KqbRA=
+github.com/tonkeeper/scam_backoffice_rules v0.0.0-20240522102801-ac5f863d8f14 h1:09T5ALZw2OOuxJmUGnK1saTBv/+wPGyBL7b4rRDGsk0=
+github.com/tonkeeper/scam_backoffice_rules v0.0.0-20240522102801-ac5f863d8f14/go.mod h1:SqZXYO9vbID8ku+xnnaKXeNGmehxigODGrk5V1KqbRA=
 github.com/tonkeeper/tongo v1.7.2 h1:v5Tmmqn4oNUlLTB+ASAZNuBXtBqqFhS6Nd5D4ie99J0=
 github.com/tonkeeper/tongo v1.7.2/go.mod h1:MjgIgAytFarjCoVjMLjYEtpZNN1f2G/pnZhKjr28cWs=
 github.com/tonkeeper/tongo v1.8.0 h1:vYFm1xzEnuVsNRHTAghVB9bujc49i+9ovjGTHWxaQ0w=
