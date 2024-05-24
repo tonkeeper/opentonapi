@@ -275,6 +275,10 @@ func (b *Book) refreshJettons(logger *zap.Logger, jettonPath string) {
 			continue
 		}
 		item.Address = account.ID.ToRaw()
+		b.addresses[account.ID] = KnownAddress{
+			Name:    item.Symbol + " master",
+			Address: account.ID.ToRaw(),
+		}
 		b.jettons[account.ID] = item
 	}
 }
