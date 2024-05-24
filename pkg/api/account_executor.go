@@ -7,11 +7,11 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
-	"github.com/tonkeeper/opentonapi/pkg/precompiled"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/boc"
 	"github.com/tonkeeper/tongo/tlb"
 	"github.com/tonkeeper/tongo/tvm"
+	"github.com/tonkeeper/tongo/tvm/precompiled"
 
 	"github.com/tonkeeper/opentonapi/pkg/core"
 )

@@ -278,6 +278,10 @@ github.com/tonkeeper/tongo v1.7.2 h1:v5Tmmqn4oNUlLTB+ASAZNuBXtBqqFhS6Nd5D4ie99J0
 github.com/tonkeeper/tongo v1.7.2/go.mod h1:MjgIgAytFarjCoVjMLjYEtpZNN1f2G/pnZhKjr28cWs=
 github.com/tonkeeper/tongo v1.8.0 h1:vYFm1xzEnuVsNRHTAghVB9bujc49i+9ovjGTHWxaQ0w=
 github.com/tonkeeper/tongo v1.8.0/go.mod h1:MjgIgAytFarjCoVjMLjYEtpZNN1f2G/pnZhKjr28cWs=
+github.com/tonkeeper/tongo v1.8.1 h1:1cix2RL2+Oifbr2jaVCTehJBmS9DACxMnstx7050F+U=
+github.com/tonkeeper/tongo v1.8.1/go.mod h1:MjgIgAytFarjCoVjMLjYEtpZNN1f2G/pnZhKjr28cWs=
+github.com/tonkeeper/tongo v1.8.2 h1:zu3jteP87OtYhP7gDKv9643qaDwm6NF3lDCQgEy72jc=
+github.com/tonkeeper/tongo v1.8.2/go.mod h1:MjgIgAytFarjCoVjMLjYEtpZNN1f2G/pnZhKjr28cWs=
 github.com/valyala/bytebufferpool v1.0.0 h1:GqA5TC/0021Y/b9FG4Oi9Mr3q7XYx6KllzawFIhcdPw=
 github.com/valyala/bytebufferpool v1.0.0/go.mod h1:6bBcMArwyJ5K/AmCkWv1jt77kVWyCJ6HpOuEn7z0Csc=
 github.com/valyala/fasttemplate v1.2.1/go.mod h1:KHLXt3tVN2HBp8eijSv/kGJopbvo7S+qRAEEKiv+SiQ=
