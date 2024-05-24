@@ -2,8 +2,11 @@ package api
 
 import (
 	"context"
+	"encoding/hex"
 	"errors"
 
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/tonkeeper/opentonapi/pkg/precompiled"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/boc"
 	"github.com/tonkeeper/tongo/tlb"
@@ -11,6 +14,10 @@ import (
 
 	"github.com/tonkeeper/opentonapi/pkg/core"
 )
+
+var precompileUsageMc = prometheus.NewCounterVec(prometheus.CounterOpts{
+	Name: "precompile_usage",
+}, []string{"status", "hash"})
 
 type shardsAccountExecutor struct {
 	accounts     map[tongo.AccountID]tlb.ShardAccount
@@ -36,6 +43,21 @@ func (s shardsAccountExecutor) RunSmcMethodByID(ctx context.Context, accountID t
 	code, data := accountCode(account), accountData(account)
 	if code == nil || data == nil {
 		return 0, nil, errors.New("account not found")
+	}
+	codeHash, err := code.Hash()
+	if err != nil {
+		return 0, nil, err
+	}
+	precompile := precompiled.KnownMethods[precompiled.MethodCode{MethodID: methodID, CodeHash: [32]byte(codeHash)}]
+	if precompile != nil {
+		stack, err := precompile(data, params)
+		if err == nil {
+			precompileUsageMc.WithLabelValues("success", hex.EncodeToString(codeHash)).Inc()
+			return 0, stack, nil
+		}
+		precompileUsageMc.WithLabelValues("unsuccess", hex.EncodeToString(codeHash)).Inc()
+	} else {
+		precompileUsageMc.WithLabelValues("not_found", hex.EncodeToString(codeHash)).Inc()
 	}
 	codeBoc, err := code.ToBocBase64()
 	if err != nil {
