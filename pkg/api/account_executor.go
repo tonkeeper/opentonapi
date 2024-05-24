@@ -6,6 +6,7 @@ import (
 	"errors"
 
 	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/tonkeeper/opentonapi/pkg/precompiled"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/boc"
@@ -15,8 +16,8 @@ import (
 	"github.com/tonkeeper/opentonapi/pkg/core"
 )
 
-var precompileUsageMc = prometheus.NewCounterVec(prometheus.CounterOpts{
-	Name: "precompile_usage",
+var precompileUsageMc = promauto.NewCounterVec(prometheus.CounterOpts{
+	Name: "emulation_precompile_usage",
 }, []string{"status", "hash"})
 
 type shardsAccountExecutor struct {
