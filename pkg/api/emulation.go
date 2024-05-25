@@ -131,8 +131,7 @@ func (h *Handler) addToMempool(ctx context.Context, bytesBoc []byte, shardAccoun
 		return shardAccount, err
 	}
 	newShardAccount := emulator.FinalStates()
-	trace, err := emulatedTreeToTrace(ctx, h.executor, h.storage, config, tree, newShardAccount,
-		cache.NewLRUCache[ton.AccountID, *abi.ContractDescription](100, "account_inspection_mem"))
+	trace, err := emulatedTreeToTrace(ctx, h.executor, h.storage, config, tree, newShardAccount, nil)
 	if err != nil {
 		return shardAccount, err
 	}
@@ -177,9 +176,13 @@ func emulatedTreeToTrace(
 	configBase64 string,
 	tree *txemulator.TxTree,
 	accounts map[tongo.AccountID]tlb.ShardAccount,
-	inspectionCache cache.Cache[ton.AccountID, *abi.ContractDescription]) (*core.Trace, error) {
+	inspectionCache map[ton.AccountID]*abi.ContractDescription,
+) (*core.Trace, error) {
 	if !tree.TX.Msgs.InMsg.Exists {
 		return nil, errors.New("there is no incoming message in emulation result")
+	}
+	if inspectionCache == nil {
+		inspectionCache = make(map[ton.AccountID]*abi.ContractDescription)
 	}
 	m := tree.TX.Msgs.InMsg.Value.Value
 	var a tlb.MsgAddress
@@ -231,13 +234,13 @@ func emulatedTreeToTrace(
 	}
 	emulatedAccountCode.WithLabelValues(codeHash).Inc()
 	sharedExecutor := newSharedAccountExecutor(accounts, executor, resolver, configBase64)
-	inspectionResult, ok := inspectionCache.Get(accountID)
+	inspectionResult, ok := inspectionCache[accountID]
 	if !ok {
 		inspectionResult, err = abi.NewContractInspector().InspectContract(ctx, b, sharedExecutor, accountID)
 		if err != nil {
 			return nil, err
 		}
-		inspectionCache.Set(accountID, inspectionResult)
+		inspectionCache[accountID] = inspectionResult
 	}
 
 	implemented := make(map[abi.ContractInterface]struct{}, len(inspectionResult.ContractInterfaces))
