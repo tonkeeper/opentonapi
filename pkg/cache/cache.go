@@ -21,14 +21,12 @@ var cacheMetrics = promauto.NewGaugeVec(
 type Cache[K comparable, V any] struct {
 	cache      *cache.Cache[K, V]
 	metricName string
-	size       int
 }
 
 func NewLRUCache[K comparable, V any](size int, metricName string) Cache[K, V] {
 	return Cache[K, V]{
 		cache:      cache.New(cache.AsLRU[K, V](lru.WithCapacity(size))),
 		metricName: metricName,
-		size:       size,
 	}
 }
 
