@@ -225,9 +225,10 @@ func (h *Handler) GetAccountEvents(ctx context.Context, params oas.GetAccountEve
 		if err != nil {
 			if errors.Is(err, core.ErrTraceIsTooLong) {
 				events = append(events, h.toAccountEventForLongTrace(account.ID, traceID))
-				continue
+			} else {
+				events = append(events, h.toUnknownAccountEvent(account.ID, traceID))
 			}
-			return nil, toError(http.StatusInternalServerError, err)
+			continue
 		}
 		if trace.InProgress() {
 			skippedInProgress = append(skippedInProgress, traceID.Hash)

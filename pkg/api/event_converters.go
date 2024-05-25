@@ -842,7 +842,21 @@ func (h *Handler) toAccountEventForLongTrace(account tongo.AccountID, traceID co
 		// TODO: we don't know it InProgress if trace is long.
 		InProgress: false,
 		Actions: []oas.Action{
-			createUnknownAction("Trace is too long.", []oas.AccountAddress{convertAccountAddress(account, h.addressBook)}),
+			createUnknownAction("Event is too big.", []oas.AccountAddress{convertAccountAddress(account, h.addressBook)}),
+		},
+	}
+	return e
+}
+func (h *Handler) toUnknownAccountEvent(account tongo.AccountID, traceID core.TraceID) oas.AccountEvent {
+	e := oas.AccountEvent{
+		EventID:    traceID.Hash.Hex(),
+		Account:    convertAccountAddress(account, h.addressBook),
+		Timestamp:  traceID.UTime,
+		IsScam:     false,
+		Lt:         int64(traceID.Lt),
+		InProgress: false,
+		Actions: []oas.Action{
+			createUnknownAction("Some error in indexer", []oas.AccountAddress{convertAccountAddress(account, h.addressBook)}),
 		},
 	}
 	return e
