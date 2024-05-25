@@ -7,6 +7,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"github.com/tonkeeper/tongo/abi"
 	"net/http"
 	"strings"
 	"time"
@@ -367,7 +368,8 @@ func (h *Handler) EmulateMessageToAccountEvent(ctx context.Context, request *oas
 	if err != nil {
 		return nil, toProperEmulationError(err)
 	}
-	trace, err := emulatedTreeToTrace(ctx, h.executor, h.storage, configBase64, tree, emulator.FinalStates())
+	trace, err := emulatedTreeToTrace(ctx, h.executor, h.storage, configBase64, tree, emulator.FinalStates(),
+		cache.NewLRUCache[ton.AccountID, *abi.ContractDescription](100, "account_inspection_emae"))
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
@@ -417,7 +419,8 @@ func (h *Handler) EmulateMessageToEvent(ctx context.Context, request *oas.Emulat
 		if err != nil {
 			return nil, toProperEmulationError(err)
 		}
-		trace, err = emulatedTreeToTrace(ctx, h.executor, h.storage, configBase64, tree, emulator.FinalStates())
+		trace, err = emulatedTreeToTrace(ctx, h.executor, h.storage, configBase64, tree, emulator.FinalStates(),
+			cache.NewLRUCache[ton.AccountID, *abi.ContractDescription](100, "account_inspection_eme"))
 		if err != nil {
 			return nil, toError(http.StatusInternalServerError, err)
 		}
@@ -469,7 +472,8 @@ func (h *Handler) EmulateMessageToTrace(ctx context.Context, request *oas.Emulat
 		if err != nil {
 			return nil, toProperEmulationError(err)
 		}
-		trace, err = emulatedTreeToTrace(ctx, h.executor, h.storage, configBase64, tree, emulator.FinalStates())
+		trace, err = emulatedTreeToTrace(ctx, h.executor, h.storage, configBase64, tree, emulator.FinalStates(),
+			cache.NewLRUCache[ton.AccountID, *abi.ContractDescription](100, "account_inspection_emt"))
 		if err != nil {
 			return nil, toError(http.StatusInternalServerError, err)
 		}
@@ -593,7 +597,8 @@ func (h *Handler) EmulateMessageToWallet(ctx context.Context, request *oas.Emula
 	if err != nil {
 		return nil, toProperEmulationError(err)
 	}
-	trace, err := emulatedTreeToTrace(ctx, h.executor, h.storage, configBase64, tree, emulator.FinalStates())
+	trace, err := emulatedTreeToTrace(ctx, h.executor, h.storage, configBase64, tree, emulator.FinalStates(),
+		cache.NewLRUCache[ton.AccountID, *abi.ContractDescription](100, "account_inspection_emw"))
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}

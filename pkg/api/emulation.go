@@ -131,7 +131,8 @@ func (h *Handler) addToMempool(ctx context.Context, bytesBoc []byte, shardAccoun
 		return shardAccount, err
 	}
 	newShardAccount := emulator.FinalStates()
-	trace, err := emulatedTreeToTrace(ctx, h.executor, h.storage, config, tree, newShardAccount)
+	trace, err := emulatedTreeToTrace(ctx, h.executor, h.storage, config, tree, newShardAccount,
+		cache.NewLRUCache[ton.AccountID, *abi.ContractDescription](100, "account_inspection_mem"))
 	if err != nil {
 		return shardAccount, err
 	}
@@ -169,7 +170,14 @@ func (h *Handler) addToMempool(ctx context.Context, bytesBoc []byte, shardAccoun
 	return newShardAccount, nil
 }
 
-func emulatedTreeToTrace(ctx context.Context, executor executor, resolver core.LibraryResolver, configBase64 string, tree *txemulator.TxTree, accounts map[tongo.AccountID]tlb.ShardAccount) (*core.Trace, error) {
+func emulatedTreeToTrace(
+	ctx context.Context,
+	executor executor,
+	resolver core.LibraryResolver,
+	configBase64 string,
+	tree *txemulator.TxTree,
+	accounts map[tongo.AccountID]tlb.ShardAccount,
+	inspectionCache cache.Cache[ton.AccountID, *abi.ContractDescription]) (*core.Trace, error) {
 	if !tree.TX.Msgs.InMsg.Exists {
 		return nil, errors.New("there is no incoming message in emulation result")
 	}
@@ -202,7 +210,7 @@ func emulatedTreeToTrace(ctx context.Context, executor executor, resolver core.L
 	}
 	additionalInfo := &core.TraceAdditionalInfo{}
 	for i := range tree.Children {
-		child, err := emulatedTreeToTrace(ctx, executor, resolver, configBase64, tree.Children[i], accounts)
+		child, err := emulatedTreeToTrace(ctx, executor, resolver, configBase64, tree.Children[i], accounts, inspectionCache)
 		if err != nil {
 			return nil, err
 		}
@@ -222,12 +230,16 @@ func emulatedTreeToTrace(ctx context.Context, executor executor, resolver core.L
 		return nil, err
 	}
 	emulatedAccountCode.WithLabelValues(codeHash).Inc()
-
 	sharedExecutor := newSharedAccountExecutor(accounts, executor, resolver, configBase64)
-	inspectionResult, err := abi.NewContractInspector().InspectContract(ctx, b, sharedExecutor, accountID)
-	if err != nil {
-		return nil, err
+	inspectionResult, ok := inspectionCache.Get(accountID)
+	if !ok {
+		inspectionResult, err = abi.NewContractInspector().InspectContract(ctx, b, sharedExecutor, accountID)
+		if err != nil {
+			return nil, err
+		}
+		inspectionCache.Set(accountID, inspectionResult)
 	}
+
 	implemented := make(map[abi.ContractInterface]struct{}, len(inspectionResult.ContractInterfaces))
 	for _, iface := range inspectionResult.ContractInterfaces {
 		implemented[iface] = struct{}{}
