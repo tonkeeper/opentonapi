@@ -113,6 +113,9 @@ func (h *Handler) convertNFT(ctx context.Context, item core.NftItem, book addres
 		if isScam(cInfo.Description) {
 			i.Trust = oas.TrustTypeBlacklist
 		}
+		if ok := h.spamFilter.IsCollectionBlacklisted(*item.CollectionAddress); ok {
+			i.Trust = oas.TrustTypeBlacklist
+		}
 		i.Collection.SetTo(oas.NftItemCollection{
 			Address:     item.CollectionAddress.ToRaw(),
 			Name:        cInfo.Name,

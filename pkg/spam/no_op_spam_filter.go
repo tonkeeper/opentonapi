@@ -14,9 +14,17 @@ func NewNoOpSpamFilter() *NoOpSpamFilter {
 }
 
 func (s *NoOpSpamFilter) GetRules() rules.Rules {
-	return nil
+	return rules.Rules{}
+}
+
+func (s *NoOpSpamFilter) GetBlacklistedCollections() map[tongo.AccountID]bool {
+	return map[tongo.AccountID]bool{}
 }
 
 func (s *NoOpSpamFilter) IsJettonBlacklisted(address tongo.AccountID, symbol string) bool {
+	return false
+}
+
+func (s *NoOpSpamFilter) IsCollectionBlacklisted(address tongo.AccountID) bool {
 	return false
 }
