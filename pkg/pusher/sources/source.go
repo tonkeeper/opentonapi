@@ -3,6 +3,7 @@ package sources
 import (
 	"context"
 	"fmt"
+	"github.com/tonkeeper/tongo/ton"
 
 	"github.com/tonkeeper/tongo"
 )
@@ -111,4 +112,13 @@ type BlockchainSliceEvent struct {
 
 type BlockSource interface {
 	SubscribeToBlocks(ctx context.Context, deliveryFn DeliveryFn, opts SubscribeToBlocksOptions) (CancelFn, error)
+}
+
+type TraceEvent struct {
+	ID                   ton.Bits256
+	UniqueAccounts       []ton.AccountID
+	FirstLt, LastLt      uint64
+	StartUtime, EndUtime int64
+	LastBlock            string
+	TotalTransactions    int
 }

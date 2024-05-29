@@ -60,7 +60,7 @@ func (disp *TraceDispatcher) dispatch(accountIDs []tongo.AccountID, event []byte
 	}
 }
 
-func (disp *TraceDispatcher) registerSubscriber(fn DeliveryFn, options SubscribeToTraceOptions) CancelFn {
+func (disp *TraceDispatcher) RegisterSubscriber(fn DeliveryFn, options SubscribeToTraceOptions) CancelFn {
 	disp.mu.Lock()
 	defer disp.mu.Unlock()
 
