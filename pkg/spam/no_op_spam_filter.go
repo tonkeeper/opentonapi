@@ -2,7 +2,7 @@ package spam
 
 import (
 	rules "github.com/tonkeeper/scam_backoffice_rules"
-	"github.com/tonkeeper/tongo"
+	"github.com/tonkeeper/tongo/ton"
 )
 
 // NoOpSpamFilter is a spam filter that does nothing and pretends there is no spam in the TON blockchain.
@@ -17,14 +17,10 @@ func (s *NoOpSpamFilter) GetRules() rules.Rules {
 	return rules.Rules{}
 }
 
-func (s *NoOpSpamFilter) GetBlacklistedCollections() map[tongo.AccountID]bool {
-	return map[tongo.AccountID]bool{}
-}
-
-func (s *NoOpSpamFilter) IsJettonBlacklisted(address tongo.AccountID, symbol string) bool {
+func (s *NoOpSpamFilter) IsJettonBlacklisted(address ton.AccountID, symbol string) bool {
 	return false
 }
 
-func (s *NoOpSpamFilter) IsCollectionBlacklisted(address tongo.AccountID) bool {
+func (s *NoOpSpamFilter) IsCollectionBlacklisted(address ton.AccountID) bool {
 	return false
 }
