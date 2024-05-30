@@ -15332,6 +15332,7 @@ type TrustType string
 
 const (
 	TrustTypeWhitelist TrustType = "whitelist"
+	TrustTypeGraylist  TrustType = "graylist"
 	TrustTypeBlacklist TrustType = "blacklist"
 	TrustTypeNone      TrustType = "none"
 )
@@ -15340,6 +15341,7 @@ const (
 func (TrustType) AllValues() []TrustType {
 	return []TrustType{
 		TrustTypeWhitelist,
+		TrustTypeGraylist,
 		TrustTypeBlacklist,
 		TrustTypeNone,
 	}
@@ -15349,6 +15351,8 @@ func (TrustType) AllValues() []TrustType {
 func (s TrustType) MarshalText() ([]byte, error) {
 	switch s {
 	case TrustTypeWhitelist:
+		return []byte(s), nil
+	case TrustTypeGraylist:
 		return []byte(s), nil
 	case TrustTypeBlacklist:
 		return []byte(s), nil
@@ -15364,6 +15368,9 @@ func (s *TrustType) UnmarshalText(data []byte) error {
 	switch TrustType(data) {
 	case TrustTypeWhitelist:
 		*s = TrustTypeWhitelist
+		return nil
+	case TrustTypeGraylist:
+		*s = TrustTypeGraylist
 		return nil
 	case TrustTypeBlacklist:
 		*s = TrustTypeBlacklist

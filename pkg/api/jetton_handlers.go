@@ -5,13 +5,11 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"strings"
 
 	"github.com/tonkeeper/opentonapi/pkg/bath"
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/opentonapi/pkg/oas"
 	"github.com/tonkeeper/tongo"
-	"github.com/tonkeeper/tongo/liteapi"
 )
 
 func (h *Handler) GetAccountJettonsBalances(ctx context.Context, params oas.GetAccountJettonsBalancesParams) (*oas.JettonsBalances, error) {
@@ -19,7 +17,7 @@ func (h *Handler) GetAccountJettonsBalances(ctx context.Context, params oas.GetA
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
 	}
-	wallets, err := h.storage.GetJettonWalletsByOwnerAddress(ctx, account.ID)
+	wallets, err := h.storage.GetJettonWalletsByOwnerAddress(ctx, account.ID, nil)
 	if errors.Is(err, core.ErrEntityNotFound) {
 		return &oas.JettonsBalances{}, nil
 	}
@@ -29,63 +27,40 @@ func (h *Handler) GetAccountJettonsBalances(ctx context.Context, params oas.GetA
 	var balances = oas.JettonsBalances{
 		Balances: make([]oas.JettonBalance, 0, len(wallets)),
 	}
-
-	currencies := params.Currencies
-	for idx, currency := range currencies {
-		if jetton, err := tongo.ParseAddress(currency); err == nil {
-			currency = jetton.ID.ToRaw()
-		} else {
-			currency = strings.ToUpper(currency)
-		}
-		currencies[idx] = currency
-	}
-
-	todayRates, yesterdayRates, weekRates, monthRates, _ := h.getRates()
 	for _, wallet := range wallets {
-		jettonBalance := oas.JettonBalance{
-			Balance:       wallet.Balance.String(),
-			WalletAddress: convertAccountAddress(wallet.Address, h.addressBook),
-		}
-		if wallet.Lock != nil {
-			jettonBalance.Lock = oas.NewOptJettonBalanceLock(oas.JettonBalanceLock{
-				Amount: wallet.Lock.FullBalance.String(),
-				Till:   wallet.Lock.UnlockTime,
-			})
-		}
-		rates := make(map[string]oas.TokenRates)
-		for _, currency := range currencies {
-			if rates, err = convertRates(rates, wallet.JettonAddress.ToRaw(), currency, todayRates, yesterdayRates, weekRates, monthRates); err != nil {
-				continue
-			}
-		}
-		price := rates[wallet.JettonAddress.ToRaw()]
-		if len(rates) > 0 && len(price.Prices.Value) > 0 {
-			jettonBalance.Price.SetTo(price)
-		}
-		meta, err := h.storage.GetJettonMasterMetadata(ctx, wallet.JettonAddress)
-		if err != nil && err.Error() == "not enough refs" {
-			// happens when metadata is broken, for example.
+		jettonBalance, err := h.convertJettonBalance(ctx, wallet, params.Currencies)
+		if err != nil {
 			continue
 		}
-		if err != nil && errors.Is(err, liteapi.ErrOnchainContentOnly) {
-			// we don't support such jettons
-			continue
-		}
-		if err != nil && !errors.Is(err, core.ErrEntityNotFound) {
-			return nil, toError(http.StatusNotFound, err)
-		}
-		var normalizedMetadata NormalizedMetadata
-		info, ok := h.addressBook.GetJettonInfoByAddress(wallet.JettonAddress)
-		if ok {
-			normalizedMetadata = NormalizeMetadata(meta, &info, false)
-		} else {
-			normalizedMetadata = NormalizeMetadata(meta, nil, h.spamFilter.IsJettonBlacklisted(wallet.JettonAddress, meta.Symbol))
-		}
-		jettonBalance.Jetton = jettonPreview(wallet.JettonAddress, normalizedMetadata)
 		balances.Balances = append(balances.Balances, jettonBalance)
 	}
-
 	return &balances, nil
+}
+
+func (h *Handler) GetAccountJettonBalance(ctx context.Context, params oas.GetAccountJettonBalanceParams) (*oas.JettonBalance, error) {
+	account, err := tongo.ParseAddress(params.AccountID)
+	if err != nil {
+		return nil, toError(http.StatusBadRequest, err)
+	}
+	jettonAccount, err := tongo.ParseAddress(params.JettonID)
+	if err != nil {
+		return nil, toError(http.StatusBadRequest, err)
+	}
+	wallets, err := h.storage.GetJettonWalletsByOwnerAddress(ctx, account.ID, &jettonAccount.ID)
+	if errors.Is(err, core.ErrEntityNotFound) {
+		return &oas.JettonBalance{}, nil
+	}
+	if err != nil {
+		return nil, toError(http.StatusInternalServerError, err)
+	}
+	if len(wallets) == 0 {
+		return &oas.JettonBalance{}, nil
+	}
+	jettonBalance, err := h.convertJettonBalance(ctx, wallets[0], params.Currencies)
+	if err != nil {
+		return nil, err
+	}
+	return &jettonBalance, nil
 }
 
 func (h *Handler) GetJettonInfo(ctx context.Context, params oas.GetJettonInfoParams) (*oas.JettonInfo, error) {

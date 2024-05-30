@@ -190,6 +190,15 @@ func (UnimplementedHandler) GetAccountInscriptionsHistoryByTicker(ctx context.Co
 	return r, ht.ErrNotImplemented
 }
 
+// GetAccountJettonBalance implements getAccountJettonBalance operation.
+//
+// Get Jetton balance by owner address.
+//
+// GET /v2/accounts/{account_id}/jettons/{jetton_id}
+func (UnimplementedHandler) GetAccountJettonBalance(ctx context.Context, params GetAccountJettonBalanceParams) (r *JettonBalance, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // GetAccountJettonHistoryByID implements getAccountJettonHistoryByID operation.
 //
 // Get the transfer jetton history for account and jetton.

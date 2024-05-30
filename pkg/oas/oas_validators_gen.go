@@ -4435,6 +4435,8 @@ func (s TrustType) Validate() error {
 	switch s {
 	case "whitelist":
 		return nil
+	case "graylist":
+		return nil
 	case "blacklist":
 		return nil
 	case "none":
