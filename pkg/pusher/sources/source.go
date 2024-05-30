@@ -3,7 +3,6 @@ package sources
 import (
 	"context"
 	"fmt"
-	"github.com/tonkeeper/tongo/ton"
 
 	"github.com/tonkeeper/tongo"
 )
@@ -114,11 +113,9 @@ type BlockSource interface {
 	SubscribeToBlocks(ctx context.Context, deliveryFn DeliveryFn, opts SubscribeToBlocksOptions) (CancelFn, error)
 }
 
-type TraceEvent struct {
-	ID                   ton.Bits256
-	UniqueAccounts       []ton.AccountID
-	FirstLt, LastLt      uint64
-	StartUtime, EndUtime int64
-	LastBlock            string
-	TotalTransactions    int
+// TraceEventData represents a notification about a completed trace.
+// This is part of our API contract with subscribers.
+type TraceEventData struct {
+	AccountIDs []tongo.AccountID `json:"accounts"`
+	Hash       string            `json:"hash"`
 }
