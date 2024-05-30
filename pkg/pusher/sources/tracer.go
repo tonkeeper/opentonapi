@@ -36,8 +36,8 @@ type storage interface {
 }
 
 type dispatcher interface {
-	dispatch(accountIDs []tongo.AccountID, event []byte)
-	registerSubscriber(fn DeliveryFn, options SubscribeToTraceOptions) CancelFn
+	Dispatch(accountIDs []tongo.AccountID, event []byte)
+	RegisterSubscriber(fn DeliveryFn, options SubscribeToTraceOptions) CancelFn
 }
 
 type Tracer struct {
@@ -73,7 +73,7 @@ func (t *Tracer) SubscribeToTraces(ctx context.Context, deliveryFn DeliveryFn, o
 		zap.Bool("all-accounts", opts.AllAccounts),
 		zap.Stringers("accounts", opts.Accounts))
 
-	return t.dispatcher.registerSubscriber(deliveryFn, opts)
+	return t.dispatcher.RegisterSubscriber(deliveryFn, opts)
 }
 
 func (t *Tracer) Run(ctx context.Context) {
@@ -159,5 +159,5 @@ func (t *Tracer) dispatch(trace *core.Trace) {
 		return
 	}
 
-	t.dispatcher.dispatch(accounts, eventJSON)
+	t.dispatcher.Dispatch(accounts, eventJSON)
 }

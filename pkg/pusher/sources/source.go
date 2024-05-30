@@ -112,3 +112,10 @@ type BlockchainSliceEvent struct {
 type BlockSource interface {
 	SubscribeToBlocks(ctx context.Context, deliveryFn DeliveryFn, opts SubscribeToBlocksOptions) (CancelFn, error)
 }
+
+// TraceEventData represents a notification about a completed trace.
+// This is part of our API contract with subscribers.
+type TraceEventData struct {
+	AccountIDs []tongo.AccountID `json:"accounts"`
+	Hash       string            `json:"hash"`
+}

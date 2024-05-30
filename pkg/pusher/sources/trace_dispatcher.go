@@ -19,13 +19,6 @@ type TraceDispatcher struct {
 	currentID   subscriberID
 }
 
-// TraceEventData represents a notification about a completed trace.
-// This is part of our API contract with subscribers.
-type TraceEventData struct {
-	AccountIDs []tongo.AccountID `json:"accounts"`
-	Hash       string            `json:"hash"`
-}
-
 // NewTraceDispatcher creates a new instance of TraceDispatcher.
 func NewTraceDispatcher(logger *zap.Logger) *TraceDispatcher {
 	return &TraceDispatcher{
@@ -37,7 +30,7 @@ func NewTraceDispatcher(logger *zap.Logger) *TraceDispatcher {
 	}
 }
 
-func (disp *TraceDispatcher) dispatch(accountIDs []tongo.AccountID, event []byte) {
+func (disp *TraceDispatcher) Dispatch(accountIDs []tongo.AccountID, event []byte) {
 	disp.mu.RLock()
 	defer disp.mu.RUnlock()
 
@@ -60,7 +53,7 @@ func (disp *TraceDispatcher) dispatch(accountIDs []tongo.AccountID, event []byte
 	}
 }
 
-func (disp *TraceDispatcher) registerSubscriber(fn DeliveryFn, options SubscribeToTraceOptions) CancelFn {
+func (disp *TraceDispatcher) RegisterSubscriber(fn DeliveryFn, options SubscribeToTraceOptions) CancelFn {
 	disp.mu.Lock()
 	defer disp.mu.Unlock()
 

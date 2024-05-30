@@ -62,11 +62,11 @@ type mockDispatcher struct {
 	OnDispatch func(accountIDs []tongo.AccountID, event []byte)
 }
 
-func (m *mockDispatcher) dispatch(accountIDs []tongo.AccountID, event []byte) {
+func (m *mockDispatcher) Dispatch(accountIDs []tongo.AccountID, event []byte) {
 	m.OnDispatch(accountIDs, event)
 }
 
-func (m *mockDispatcher) registerSubscriber(fn DeliveryFn, options SubscribeToTraceOptions) CancelFn {
+func (m *mockDispatcher) RegisterSubscriber(fn DeliveryFn, options SubscribeToTraceOptions) CancelFn {
 	panic("implement me")
 }
 
