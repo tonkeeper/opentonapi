@@ -128,6 +128,12 @@ type Handler interface {
 	//
 	// GET /v2/experimental/accounts/{account_id}/inscriptions/{ticker}/history
 	GetAccountInscriptionsHistoryByTicker(ctx context.Context, params GetAccountInscriptionsHistoryByTickerParams) (*AccountEvents, error)
+	// GetAccountJettonBalance implements getAccountJettonBalance operation.
+	//
+	// Get Jetton balance by owner address.
+	//
+	// GET /v2/accounts/{account_id}/jettons/{jetton_id}
+	GetAccountJettonBalance(ctx context.Context, params GetAccountJettonBalanceParams) (*JettonBalance, error)
 	// GetAccountJettonHistoryByID implements getAccountJettonHistoryByID operation.
 	//
 	// Get the transfer jetton history for account and jetton.

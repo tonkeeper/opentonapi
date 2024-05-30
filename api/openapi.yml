@@ -603,6 +603,25 @@ paths:
                 $ref: '#/components/schemas/JettonsBalances'
         'default':
           $ref: '#/components/responses/Error'
+  /v2/accounts/{account_id}/jettons/{jetton_id}:
+    get:
+      description: Get Jetton balance by owner address
+      operationId: getAccountJettonBalance
+      tags:
+        - Accounts
+      parameters:
+        - $ref: '#/components/parameters/accountIDParameter'
+        - $ref: '#/components/parameters/jettonIDParameter'
+        - $ref: '#/components/parameters/currenciesQuery'
+      responses:
+        '200':
+          description: account jetton balance
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JettonBalance'
+        'default':
+          $ref: '#/components/responses/Error'
   /v2/accounts/{account_id}/jettons/history:
     get:
       description: Get the transfer jettons history for account

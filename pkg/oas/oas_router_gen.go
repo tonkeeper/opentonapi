@@ -409,7 +409,17 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 								elem = elem[idx:]
 
 								if len(elem) == 0 {
-									break
+									switch r.Method {
+									case "GET":
+										s.handleGetAccountJettonBalanceRequest([2]string{
+											args[0],
+											args[1],
+										}, elemIsEscaped, w, r)
+									default:
+										s.notAllowed(w, r, "GET")
+									}
+
+									return
 								}
 								switch elem[0] {
 								case '/': // Prefix: "/history"
@@ -3424,7 +3434,18 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 								elem = elem[idx:]
 
 								if len(elem) == 0 {
-									break
+									switch method {
+									case "GET":
+										r.name = "GetAccountJettonBalance"
+										r.summary = ""
+										r.operationID = "getAccountJettonBalance"
+										r.pathPattern = "/v2/accounts/{account_id}/jettons/{jetton_id}"
+										r.args = args
+										r.count = 2
+										return r, true
+									default:
+										return
+									}
 								}
 								switch elem[0] {
 								case '/': // Prefix: "/history"

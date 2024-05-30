@@ -5099,6 +5099,7 @@
    "TrustType": {
     "enum": [
      "whitelist",
+     "graylist",
      "blacklist",
      "none"
     ],
@@ -5987,6 +5988,41 @@
        }
       },
       "description": "account jettons history"
+     },
+     "default": {
+      "$ref": "#/components/responses/Error"
+     }
+    },
+    "tags": [
+     "Accounts"
+    ]
+   }
+  },
+  "/v2/accounts/{account_id}/jettons/{jetton_id}": {
+   "get": {
+    "description": "Get Jetton balance by owner address",
+    "operationId": "getAccountJettonBalance",
+    "parameters": [
+     {
+      "$ref": "#/components/parameters/accountIDParameter"
+     },
+     {
+      "$ref": "#/components/parameters/jettonIDParameter"
+     },
+     {
+      "$ref": "#/components/parameters/currenciesQuery"
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/JettonBalance"
+        }
+       }
+      },
+      "description": "account jetton balance"
      },
      "default": {
       "$ref": "#/components/responses/Error"

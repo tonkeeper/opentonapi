@@ -35125,6 +35125,8 @@ func (s *TrustType) Decode(d *jx.Decoder) error {
 	switch TrustType(v) {
 	case TrustTypeWhitelist:
 		*s = TrustTypeWhitelist
+	case TrustTypeGraylist:
+		*s = TrustTypeGraylist
 	case TrustTypeBlacklist:
 		*s = TrustTypeBlacklist
 	case TrustTypeNone:
