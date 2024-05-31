@@ -144,6 +144,7 @@ func (h *Handler) addToMempool(ctx context.Context, bytesBoc []byte, shardAccoun
 		return shardAccount, err
 	}
 	h.mempoolEmulate.traces.Set(hash, trace, cache.WithExpiration(time.Second*time.Duration(ttl)))
+	var localMessageHashCache = make(map[ton.Bits256]bool)
 	for account := range accounts {
 		if _, ok := h.mempoolEmulateIgnoreAccounts[account]; ok { // the map is filled only once at the start
 			continue
@@ -151,13 +152,18 @@ func (h *Handler) addToMempool(ctx context.Context, bytesBoc []byte, shardAccoun
 		oldMemHashes, _ := h.mempoolEmulate.accountsTraces.Get(account)
 		newMemHashes := make([]ton.Bits256, 0, len(oldMemHashes)+1)
 		for _, mHash := range oldMemHashes { //we need to filter messages which already created transactions
-			_, err = h.storage.SearchTransactionByMessageHash(ctx, mHash)
-			_, prs := h.mempoolEmulate.traces.Get(mHash)
-			if err != nil && prs { //because if err is not null it already happened and if !prs it is not in mempool
+			includedToDB, prs := localMessageHashCache[mHash]
+			if !prs {
+				_, err = h.storage.SearchTransactionByMessageHash(ctx, mHash)
+				includedToDB = err == nil
+				localMessageHashCache[mHash] = includedToDB
+			}
+			_, existsInCache := h.mempoolEmulate.traces.Get(mHash)
+			if !includedToDB && existsInCache { //because if err is not null it already happened and if !prs it is not in mempool
 				newMemHashes = append(newMemHashes, mHash)
 			}
 		}
-		newMemHashes = append(newMemHashes, hash) // it's important to make it las
+		newMemHashes = append(newMemHashes, hash) // it's important to make it last
 		h.mempoolEmulate.accountsTraces.Set(account, newMemHashes, cache.WithExpiration(time.Second*time.Duration(ttl)))
 	}
 	emulationCh <- blockchain.ExtInMsgCopy{

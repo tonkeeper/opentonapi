@@ -221,6 +221,7 @@ func (h *Handler) GetAccountEvents(ctx context.Context, params oas.GetAccountEve
 	var skippedInProgress []ton.Bits256
 	for _, traceID := range traceIDs {
 		lastLT = traceID.Lt
+		fmt.Println("traceID", traceID.Hash.Hex())
 		trace, err := h.storage.GetTrace(ctx, traceID.Hash)
 		if err != nil {
 			if errors.Is(err, core.ErrTraceIsTooLong) {
@@ -236,11 +237,15 @@ func (h *Handler) GetAccountEvents(ctx context.Context, params oas.GetAccountEve
 		}
 		result, err := bath.FindActions(ctx, trace, bath.ForAccount(account.ID), bath.WithInformationSource(h.storage))
 		if err != nil {
-			return nil, toError(http.StatusInternalServerError, err)
+			events = append(events, h.toUnknownAccountEvent(account.ID, traceID))
+			continue
+			//return nil, toError(http.StatusInternalServerError, err)
 		}
 		e, err := h.toAccountEvent(ctx, account.ID, trace, result, params.AcceptLanguage, params.SubjectOnly.Value)
 		if err != nil {
-			return nil, toError(http.StatusInternalServerError, err)
+			events = append(events, h.toUnknownAccountEvent(account.ID, traceID))
+			continue
+			//return nil, toError(http.StatusInternalServerError, err)
 		}
 		events = append(events, e)
 	}
