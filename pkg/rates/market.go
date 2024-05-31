@@ -422,6 +422,7 @@ func convertedDedustPoolResponse(tonApiToken string, tonPrice float64, respBody 
 	defer respBody.Close()
 	type Pool struct {
 		TotalSupply string `json:"totalSupply"`
+		Type        string `json:"type"`
 		Assets      []struct {
 			Address  string `json:"address"`
 			Metadata *struct {
@@ -486,9 +487,16 @@ func convertedDedustPoolResponse(tonApiToken string, tonPrice float64, respBody 
 			}
 			secondReserveDecimals = float64(decimals)
 		}
-		// TODO: change algorithm math price for other type pool (volatile/stable)
-		price := 1 / ((secondReserve / math.Pow(10, secondReserveDecimals)) / (firstReserve / math.Pow(10, 9)))
-		pools[account] = price
+		switch pool.Type {
+		case "volatile":
+			pools[account] = (firstReserve / secondReserve) * math.Pow(10, secondReserveDecimals-9)
+		case "stable":
+			x := secondReserve / math.Pow(10, secondReserveDecimals)
+			y := firstReserve / math.Pow(10, 9)
+			pools[account] = (3*x*x*y + y*y*y) / (x*x*x + 3*y*y*x)
+		default:
+			continue
+		}
 	}
 	return pools
 }
