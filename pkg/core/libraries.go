@@ -5,8 +5,8 @@ import (
 
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/boc"
+	tcode "github.com/tonkeeper/tongo/code"
 	"github.com/tonkeeper/tongo/tlb"
-	"github.com/tonkeeper/tongo/txemulator"
 )
 
 // LibraryResolver provides a method to resolve libraries by their hashes.
@@ -55,7 +55,7 @@ func PrepareLibraries(ctx context.Context, code *boc.Cell, accountLibraries map[
 	if code == nil {
 		return "", nil
 	}
-	hashes, err := txemulator.FindLibraries(code)
+	hashes, err := tcode.FindLibraries(code)
 	if err != nil {
 		return "", err
 	}
@@ -73,7 +73,7 @@ func PrepareLibraries(ctx context.Context, code *boc.Cell, accountLibraries map[
 	for hash, lib := range publicLibs {
 		libs[hash] = lib
 	}
-	base64libs, err := txemulator.LibrariesToBase64(libs)
+	base64libs, err := tcode.LibrariesToBase64(libs)
 	if err != nil {
 		return "", err
 	}
