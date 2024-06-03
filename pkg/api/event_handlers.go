@@ -221,7 +221,6 @@ func (h *Handler) GetAccountEvents(ctx context.Context, params oas.GetAccountEve
 	var skippedInProgress []ton.Bits256
 	for _, traceID := range traceIDs {
 		lastLT = traceID.Lt
-		fmt.Println("traceID", traceID.Hash.Hex())
 		trace, err := h.storage.GetTrace(ctx, traceID.Hash)
 		if err != nil {
 			if errors.Is(err, core.ErrTraceIsTooLong) {

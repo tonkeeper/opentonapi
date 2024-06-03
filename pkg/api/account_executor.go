@@ -73,7 +73,7 @@ func (s shardsAccountExecutor) RunSmcMethodByID(ctx context.Context, accountID t
 	if err != nil {
 		return 0, nil, err
 	}
-	e, err := tvm.NewEmulatorFromBOCsBase64(codeBoc, dataBoc, s.configBase64, tvm.WithLibrariesBase64(librariesBase64))
+	e, err := tvm.NewEmulatorFromBOCsBase64(codeBoc, dataBoc, s.configBase64, tvm.WithLibrariesBase64(librariesBase64), tvm.WithLibraryResolver(s.resolver))
 	if err != nil {
 		return 0, nil, err
 	}
