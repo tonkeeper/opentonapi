@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/ed25519"
 
+	"github.com/tonkeeper/opentonapi/pkg/gasless"
 	"github.com/tonkeeper/opentonapi/pkg/oas"
 	rules "github.com/tonkeeper/scam_backoffice_rules"
 	"github.com/tonkeeper/tongo"
@@ -157,6 +158,12 @@ type addressBook interface {
 	GetKnownJettons() map[tongo.AccountID]addressbook.KnownJetton
 	GetKnownCollections() map[tongo.AccountID]addressbook.KnownCollection
 	SearchAttachedAccountsByPrefix(prefix string) []addressbook.AttachedAccount
+}
+
+type Gasless interface {
+	Config(ctx context.Context) (gasless.Config, error)
+	Estimate(ctx context.Context, masterID ton.AccountID, walletAddress ton.AccountID, walletPubkey []byte, messages []string) (gasless.SignRawParams, error)
+	Send(ctx context.Context, walletPublicKey ed25519.PublicKey, payload []byte) error
 }
 
 type ratesSource interface {

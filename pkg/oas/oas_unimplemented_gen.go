@@ -103,6 +103,31 @@ func (UnimplementedHandler) ExecGetMethodForBlockchainAccount(ctx context.Contex
 	return r, ht.ErrNotImplemented
 }
 
+// GaslessConfig implements gaslessConfig operation.
+//
+// Returns configuration of gasless transfers.
+//
+// GET /v2/gasless/config
+func (UnimplementedHandler) GaslessConfig(ctx context.Context) (r *GaslessConfig, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// GaslessEstimate implements gaslessEstimate operation.
+//
+// Estimates the cost of the given messages and returns a payload to sign.
+//
+// POST /v2/gasless/estimate/{master_id}
+func (UnimplementedHandler) GaslessEstimate(ctx context.Context, req *GaslessEstimateReq, params GaslessEstimateParams) (r *SignRawParams, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// GaslessSend implements gaslessSend operation.
+//
+// POST /v2/gasless/send
+func (UnimplementedHandler) GaslessSend(ctx context.Context, req *GaslessSendReq) error {
+	return ht.ErrNotImplemented
+}
+
 // GetAccount implements getAccount operation.
 //
 // Get human-friendly information about an account without low-level details.

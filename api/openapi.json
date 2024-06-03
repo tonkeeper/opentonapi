@@ -463,6 +463,70 @@
     "description": "bag-of-cells serialized to base64 and additional parameters to configure emulation",
     "required": true
    },
+   "GaslessSend": {
+    "content": {
+     "application/json": {
+      "schema": {
+       "properties": {
+        "boc": {
+         "example": "te6ccgECBQEAARUAAkWIAWTtae+KgtbrX26Bep8JSq8lFLfGOoyGR/xwdjfvpvEaHg",
+         "type": "string"
+        },
+        "wallet_public_key": {
+         "description": "hex encoded public key",
+         "type": "string"
+        }
+       },
+       "required": [
+        "boc",
+        "wallet_public_key"
+       ],
+       "type": "object"
+      }
+     }
+    },
+    "description": "bag-of-cells serialized to base64",
+    "required": true
+   },
+   "InternalMessages": {
+    "content": {
+     "application/json": {
+      "schema": {
+       "properties": {
+        "messages": {
+         "items": {
+          "properties": {
+           "boc": {
+            "example": "B5EE9C7201010101001100001D00048656C6C6F2C20776F726C64218",
+            "type": "string"
+           }
+          },
+          "required": [
+           "boc"
+          ],
+          "type": "object"
+         },
+         "type": "array"
+        },
+        "wallet_address": {
+         "type": "string"
+        },
+        "wallet_public_key": {
+         "type": "string"
+        }
+       },
+       "required": [
+        "messages",
+        "wallet_address",
+        "wallet_public_key"
+       ],
+       "type": "object"
+      }
+     }
+    },
+    "description": "bag-of-cells serialized to base64",
+    "required": true
+   },
    "LiteServerSendMessageRequest": {
     "content": {
      "application/json": {
@@ -3083,6 +3147,35 @@
     ],
     "type": "object"
    },
+   "GaslessConfig": {
+    "properties": {
+     "gas_jettons": {
+      "description": "list of jettons, any of them can be used to pay for gas",
+      "items": {
+       "properties": {
+        "master_id": {
+         "type": "string"
+        }
+       },
+       "required": [
+        "master_id"
+       ],
+       "type": "object"
+      },
+      "type": "array"
+     },
+     "relay_address": {
+      "description": "sending excess to this address decreases the commission of a gasless transfer",
+      "example": "0:dfbd5be8497fdc0c9fcbdfc676864840ddf8ad6423d6d5657d9b0e8270d6c8ac",
+      "type": "string"
+     }
+    },
+    "required": [
+     "gas_jettons",
+     "relay_address"
+    ],
+    "type": "object"
+   },
    "ImagePreview": {
     "properties": {
      "resolution": {
@@ -4537,6 +4630,67 @@
     "required": [
      "indexing_latency",
      "rest_online"
+    ],
+    "type": "object"
+   },
+   "SignRawMessage": {
+    "properties": {
+     "address": {
+      "example": "0:da6b1b6663a0e4d18cc8574ccd9db5296e367dd9324706f3bbd9eb1cd2caf0bf",
+      "type": "string"
+     },
+     "amount": {
+      "description": "Number of nanocoins to send. Decimal string.",
+      "type": "string"
+     },
+     "payload": {
+      "description": "Raw one-cell BoC encoded in Base64.",
+      "type": "string"
+     },
+     "stateInit": {
+      "description": "Raw once-cell BoC encoded in Base64.",
+      "type": "string"
+     }
+    },
+    "required": [
+     "address",
+     "amount"
+    ],
+    "type": "object"
+   },
+   "SignRawParams": {
+    "properties": {
+     "commission": {
+      "description": "Commission for the transaction. In nanocoins.",
+      "example": "1000000",
+      "type": "string"
+     },
+     "from": {
+      "example": "0:da6b1b6663a0e4d18cc8574ccd9db5296e367dd9324706f3bbd9eb1cd2caf0bf",
+      "type": "string"
+     },
+     "messages": {
+      "items": {
+       "$ref": "#/components/schemas/SignRawMessage"
+      },
+      "type": "array"
+     },
+     "relay_address": {
+      "example": "0:da6b1b6663a0e4d18cc8574ccd9db5296e367dd9324706f3bbd9eb1cd2caf0bf",
+      "type": "string"
+     },
+     "valid_until": {
+      "example": 1717397217,
+      "format": "int64",
+      "type": "integer"
+     }
+    },
+    "required": [
+     "messages",
+     "relay_address",
+     "commission",
+     "from",
+     "valid_until"
     ],
     "type": "object"
    },
@@ -7485,6 +7639,88 @@
     },
     "tags": [
      "Inscriptions"
+    ]
+   }
+  },
+  "/v2/gasless/config": {
+   "get": {
+    "description": "Returns configuration of gasless transfers",
+    "operationId": "gaslessConfig",
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/GaslessConfig"
+        }
+       }
+      },
+      "description": "gasless config"
+     },
+     "default": {
+      "$ref": "#/components/responses/Error"
+     }
+    },
+    "tags": [
+     "Gasless"
+    ]
+   }
+  },
+  "/v2/gasless/estimate/{master_id}": {
+   "post": {
+    "description": "Estimates the cost of the given messages and returns a payload to sign.",
+    "operationId": "gaslessEstimate",
+    "parameters": [
+     {
+      "description": "jetton to pay commission",
+      "in": "path",
+      "name": "master_id",
+      "required": true,
+      "schema": {
+       "example": "0:97264395BD65A255A429B11326C84128B7D70FFED7949ABAE3036D506BA38621",
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "$ref": "#/components/requestBodies/InternalMessages"
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/SignRawParams"
+        }
+       }
+      },
+      "description": "payload to sign"
+     },
+     "default": {
+      "$ref": "#/components/responses/Error"
+     }
+    },
+    "tags": [
+     "Gasless"
+    ]
+   }
+  },
+  "/v2/gasless/send": {
+   "post": {
+    "operationId": "gaslessSend",
+    "requestBody": {
+     "$ref": "#/components/requestBodies/GaslessSend"
+    },
+    "responses": {
+     "200": {
+      "description": "the message has been sent"
+     },
+     "default": {
+      "$ref": "#/components/responses/Error"
+     }
+    },
+    "tags": [
+     "Gasless"
     ]
    }
   },

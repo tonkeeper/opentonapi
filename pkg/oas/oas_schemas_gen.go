@@ -5403,6 +5403,127 @@ func (s *GasLimitPrices) SetDeleteDueLimit(val int64) {
 	s.DeleteDueLimit = val
 }
 
+// Ref: #/components/schemas/GaslessConfig
+type GaslessConfig struct {
+	// Sending excess to this address decreases the commission of a gasless transfer.
+	RelayAddress string `json:"relay_address"`
+	// List of jettons, any of them can be used to pay for gas.
+	GasJettons []GaslessConfigGasJettonsItem `json:"gas_jettons"`
+}
+
+// GetRelayAddress returns the value of RelayAddress.
+func (s *GaslessConfig) GetRelayAddress() string {
+	return s.RelayAddress
+}
+
+// GetGasJettons returns the value of GasJettons.
+func (s *GaslessConfig) GetGasJettons() []GaslessConfigGasJettonsItem {
+	return s.GasJettons
+}
+
+// SetRelayAddress sets the value of RelayAddress.
+func (s *GaslessConfig) SetRelayAddress(val string) {
+	s.RelayAddress = val
+}
+
+// SetGasJettons sets the value of GasJettons.
+func (s *GaslessConfig) SetGasJettons(val []GaslessConfigGasJettonsItem) {
+	s.GasJettons = val
+}
+
+type GaslessConfigGasJettonsItem struct {
+	MasterID string `json:"master_id"`
+}
+
+// GetMasterID returns the value of MasterID.
+func (s *GaslessConfigGasJettonsItem) GetMasterID() string {
+	return s.MasterID
+}
+
+// SetMasterID sets the value of MasterID.
+func (s *GaslessConfigGasJettonsItem) SetMasterID(val string) {
+	s.MasterID = val
+}
+
+type GaslessEstimateReq struct {
+	WalletAddress   string                           `json:"wallet_address"`
+	WalletPublicKey string                           `json:"wallet_public_key"`
+	Messages        []GaslessEstimateReqMessagesItem `json:"messages"`
+}
+
+// GetWalletAddress returns the value of WalletAddress.
+func (s *GaslessEstimateReq) GetWalletAddress() string {
+	return s.WalletAddress
+}
+
+// GetWalletPublicKey returns the value of WalletPublicKey.
+func (s *GaslessEstimateReq) GetWalletPublicKey() string {
+	return s.WalletPublicKey
+}
+
+// GetMessages returns the value of Messages.
+func (s *GaslessEstimateReq) GetMessages() []GaslessEstimateReqMessagesItem {
+	return s.Messages
+}
+
+// SetWalletAddress sets the value of WalletAddress.
+func (s *GaslessEstimateReq) SetWalletAddress(val string) {
+	s.WalletAddress = val
+}
+
+// SetWalletPublicKey sets the value of WalletPublicKey.
+func (s *GaslessEstimateReq) SetWalletPublicKey(val string) {
+	s.WalletPublicKey = val
+}
+
+// SetMessages sets the value of Messages.
+func (s *GaslessEstimateReq) SetMessages(val []GaslessEstimateReqMessagesItem) {
+	s.Messages = val
+}
+
+type GaslessEstimateReqMessagesItem struct {
+	Boc string `json:"boc"`
+}
+
+// GetBoc returns the value of Boc.
+func (s *GaslessEstimateReqMessagesItem) GetBoc() string {
+	return s.Boc
+}
+
+// SetBoc sets the value of Boc.
+func (s *GaslessEstimateReqMessagesItem) SetBoc(val string) {
+	s.Boc = val
+}
+
+// GaslessSendOK is response for GaslessSend operation.
+type GaslessSendOK struct{}
+
+type GaslessSendReq struct {
+	// Hex encoded public key.
+	WalletPublicKey string `json:"wallet_public_key"`
+	Boc             string `json:"boc"`
+}
+
+// GetWalletPublicKey returns the value of WalletPublicKey.
+func (s *GaslessSendReq) GetWalletPublicKey() string {
+	return s.WalletPublicKey
+}
+
+// GetBoc returns the value of Boc.
+func (s *GaslessSendReq) GetBoc() string {
+	return s.Boc
+}
+
+// SetWalletPublicKey sets the value of WalletPublicKey.
+func (s *GaslessSendReq) SetWalletPublicKey(val string) {
+	s.WalletPublicKey = val
+}
+
+// SetBoc sets the value of Boc.
+func (s *GaslessSendReq) SetBoc(val string) {
+	s.Boc = val
+}
+
 type GetAccountDiffOK struct {
 	BalanceChange int64 `json:"balance_change"`
 }
@@ -14107,6 +14228,117 @@ func (s SetWalletBackupReq) Read(p []byte) (n int, err error) {
 		return 0, io.EOF
 	}
 	return s.Data.Read(p)
+}
+
+// Ref: #/components/schemas/SignRawMessage
+type SignRawMessage struct {
+	Address string `json:"address"`
+	// Number of nanocoins to send. Decimal string.
+	Amount string `json:"amount"`
+	// Raw one-cell BoC encoded in Base64.
+	Payload OptString `json:"payload"`
+	// Raw once-cell BoC encoded in Base64.
+	StateInit OptString `json:"stateInit"`
+}
+
+// GetAddress returns the value of Address.
+func (s *SignRawMessage) GetAddress() string {
+	return s.Address
+}
+
+// GetAmount returns the value of Amount.
+func (s *SignRawMessage) GetAmount() string {
+	return s.Amount
+}
+
+// GetPayload returns the value of Payload.
+func (s *SignRawMessage) GetPayload() OptString {
+	return s.Payload
+}
+
+// GetStateInit returns the value of StateInit.
+func (s *SignRawMessage) GetStateInit() OptString {
+	return s.StateInit
+}
+
+// SetAddress sets the value of Address.
+func (s *SignRawMessage) SetAddress(val string) {
+	s.Address = val
+}
+
+// SetAmount sets the value of Amount.
+func (s *SignRawMessage) SetAmount(val string) {
+	s.Amount = val
+}
+
+// SetPayload sets the value of Payload.
+func (s *SignRawMessage) SetPayload(val OptString) {
+	s.Payload = val
+}
+
+// SetStateInit sets the value of StateInit.
+func (s *SignRawMessage) SetStateInit(val OptString) {
+	s.StateInit = val
+}
+
+// Ref: #/components/schemas/SignRawParams
+type SignRawParams struct {
+	RelayAddress string `json:"relay_address"`
+	// Commission for the transaction. In nanocoins.
+	Commission string           `json:"commission"`
+	From       string           `json:"from"`
+	ValidUntil int64            `json:"valid_until"`
+	Messages   []SignRawMessage `json:"messages"`
+}
+
+// GetRelayAddress returns the value of RelayAddress.
+func (s *SignRawParams) GetRelayAddress() string {
+	return s.RelayAddress
+}
+
+// GetCommission returns the value of Commission.
+func (s *SignRawParams) GetCommission() string {
+	return s.Commission
+}
+
+// GetFrom returns the value of From.
+func (s *SignRawParams) GetFrom() string {
+	return s.From
+}
+
+// GetValidUntil returns the value of ValidUntil.
+func (s *SignRawParams) GetValidUntil() int64 {
+	return s.ValidUntil
+}
+
+// GetMessages returns the value of Messages.
+func (s *SignRawParams) GetMessages() []SignRawMessage {
+	return s.Messages
+}
+
+// SetRelayAddress sets the value of RelayAddress.
+func (s *SignRawParams) SetRelayAddress(val string) {
+	s.RelayAddress = val
+}
+
+// SetCommission sets the value of Commission.
+func (s *SignRawParams) SetCommission(val string) {
+	s.Commission = val
+}
+
+// SetFrom sets the value of From.
+func (s *SignRawParams) SetFrom(val string) {
+	s.From = val
+}
+
+// SetValidUntil sets the value of ValidUntil.
+func (s *SignRawParams) SetValidUntil(val int64) {
+	s.ValidUntil = val
+}
+
+// SetMessages sets the value of Messages.
+func (s *SignRawParams) SetMessages(val []SignRawMessage) {
+	s.Messages = val
 }
 
 // Ref: #/components/schemas/SizeLimitsConfig

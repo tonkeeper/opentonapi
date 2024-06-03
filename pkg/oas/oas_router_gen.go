@@ -1585,6 +1585,91 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				}
 
 				elem = origElem
+			case 'g': // Prefix: "gasless/"
+				origElem := elem
+				if l := len("gasless/"); len(elem) >= l && elem[0:l] == "gasless/" {
+					elem = elem[l:]
+				} else {
+					break
+				}
+
+				if len(elem) == 0 {
+					break
+				}
+				switch elem[0] {
+				case 'c': // Prefix: "config"
+					origElem := elem
+					if l := len("config"); len(elem) >= l && elem[0:l] == "config" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					if len(elem) == 0 {
+						// Leaf node.
+						switch r.Method {
+						case "GET":
+							s.handleGaslessConfigRequest([0]string{}, elemIsEscaped, w, r)
+						default:
+							s.notAllowed(w, r, "GET")
+						}
+
+						return
+					}
+
+					elem = origElem
+				case 'e': // Prefix: "estimate/"
+					origElem := elem
+					if l := len("estimate/"); len(elem) >= l && elem[0:l] == "estimate/" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					// Param: "master_id"
+					// Leaf parameter
+					args[0] = elem
+					elem = ""
+
+					if len(elem) == 0 {
+						// Leaf node.
+						switch r.Method {
+						case "POST":
+							s.handleGaslessEstimateRequest([1]string{
+								args[0],
+							}, elemIsEscaped, w, r)
+						default:
+							s.notAllowed(w, r, "POST")
+						}
+
+						return
+					}
+
+					elem = origElem
+				case 's': // Prefix: "send"
+					origElem := elem
+					if l := len("send"); len(elem) >= l && elem[0:l] == "send" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					if len(elem) == 0 {
+						// Leaf node.
+						switch r.Method {
+						case "POST":
+							s.handleGaslessSendRequest([0]string{}, elemIsEscaped, w, r)
+						default:
+							s.notAllowed(w, r, "POST")
+						}
+
+						return
+					}
+
+					elem = origElem
+				}
+
+				elem = origElem
 			case 'j': // Prefix: "jettons"
 				origElem := elem
 				if l := len("jettons"); len(elem) >= l && elem[0:l] == "jettons" {
@@ -4692,6 +4777,101 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 						}
 
 						elem = origElem
+					}
+
+					elem = origElem
+				}
+
+				elem = origElem
+			case 'g': // Prefix: "gasless/"
+				origElem := elem
+				if l := len("gasless/"); len(elem) >= l && elem[0:l] == "gasless/" {
+					elem = elem[l:]
+				} else {
+					break
+				}
+
+				if len(elem) == 0 {
+					break
+				}
+				switch elem[0] {
+				case 'c': // Prefix: "config"
+					origElem := elem
+					if l := len("config"); len(elem) >= l && elem[0:l] == "config" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					if len(elem) == 0 {
+						switch method {
+						case "GET":
+							// Leaf: GaslessConfig
+							r.name = "GaslessConfig"
+							r.summary = ""
+							r.operationID = "gaslessConfig"
+							r.pathPattern = "/v2/gasless/config"
+							r.args = args
+							r.count = 0
+							return r, true
+						default:
+							return
+						}
+					}
+
+					elem = origElem
+				case 'e': // Prefix: "estimate/"
+					origElem := elem
+					if l := len("estimate/"); len(elem) >= l && elem[0:l] == "estimate/" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					// Param: "master_id"
+					// Leaf parameter
+					args[0] = elem
+					elem = ""
+
+					if len(elem) == 0 {
+						switch method {
+						case "POST":
+							// Leaf: GaslessEstimate
+							r.name = "GaslessEstimate"
+							r.summary = ""
+							r.operationID = "gaslessEstimate"
+							r.pathPattern = "/v2/gasless/estimate/{master_id}"
+							r.args = args
+							r.count = 1
+							return r, true
+						default:
+							return
+						}
+					}
+
+					elem = origElem
+				case 's': // Prefix: "send"
+					origElem := elem
+					if l := len("send"); len(elem) >= l && elem[0:l] == "send" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					if len(elem) == 0 {
+						switch method {
+						case "POST":
+							// Leaf: GaslessSend
+							r.name = "GaslessSend"
+							r.summary = ""
+							r.operationID = "gaslessSend"
+							r.pathPattern = "/v2/gasless/send"
+							r.args = args
+							r.count = 0
+							return r, true
+						default:
+							return
+						}
 					}
 
 					elem = origElem

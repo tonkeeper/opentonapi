@@ -1915,6 +1915,58 @@ paths:
                     example: "NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2ODQ3..."
         'default':
           $ref: '#/components/responses/Error'
+  /v2/gasless/config:
+    get:
+      description: "Returns configuration of gasless transfers"
+      operationId: gaslessConfig
+      tags:
+        - Gasless
+      responses:
+        '200':
+          description: "gasless config"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GaslessConfig'
+        'default':
+          $ref: '#/components/responses/Error'
+  /v2/gasless/estimate/{master_id}:
+    post:
+      description: "Estimates the cost of the given messages and returns a payload to sign."
+      operationId: gaslessEstimate
+      parameters:
+      - name: master_id
+        in: path
+        required: true
+        description: jetton to pay commission
+        schema:
+          type: string
+          example: 0:97264395BD65A255A429B11326C84128B7D70FFED7949ABAE3036D506BA38621
+      tags:
+        - Gasless
+      requestBody:
+        $ref: "#/components/requestBodies/InternalMessages"
+      responses:
+        '200':
+          description: "payload to sign"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SignRawParams'
+        'default':
+          $ref: '#/components/responses/Error'
+  /v2/gasless/send:
+    post:
+      operationId: gaslessSend
+      tags:
+        - Gasless
+      requestBody:
+        $ref: "#/components/requestBodies/GaslessSend"
+      responses:
+        '200':
+          description: the message has been sent
+        'default':
+          $ref: '#/components/responses/Error'
   /v2/pubkeys/{public_key}/wallets:
     get:
       description: Get wallets by public key
@@ -2913,6 +2965,49 @@ components:
                       type: integer
                       format: int64
                       example: 10000000000
+    InternalMessages:
+      description: bag-of-cells serialized to base64
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - messages
+              - wallet_address
+              - wallet_public_key
+            properties:
+              wallet_address:
+                type: string
+              wallet_public_key:
+                type: string
+              messages:
+                type: array
+                items:
+                  type: object
+                  required:
+                    - boc
+                  properties:
+                    boc:
+                      type: string
+                      example: "B5EE9C7201010101001100001D00048656C6C6F2C20776F726C64218"
+    GaslessSend:
+      description: bag-of-cells serialized to base64
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - boc
+              - wallet_public_key
+            properties:
+              wallet_public_key:
+                description: hex encoded public key
+                type: string
+              boc:
+                type: string
+                example: te6ccgECBQEAARUAAkWIAWTtae+KgtbrX26Bep8JSq8lFLfGOoyGR/xwdjfvpvEaHg
     Boc:
       description: bag-of-cells serialized to base64
       required: true
@@ -4206,6 +4301,71 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Account'
+    GaslessConfig:
+      type: object
+      required:
+        - gas_jettons
+        - relay_address
+      properties:
+        relay_address:
+          type: string
+          description: "sending excess to this address decreases the commission of a gasless transfer"
+          example: 0:dfbd5be8497fdc0c9fcbdfc676864840ddf8ad6423d6d5657d9b0e8270d6c8ac
+        gas_jettons:
+          type: array
+          description: "list of jettons, any of them can be used to pay for gas"
+          items:
+            type: object
+            required:
+              - master_id
+            properties:
+              master_id:
+                type: string
+    SignRawMessage:
+      type: object
+      required:
+        - address
+        - amount
+      properties:
+        address:
+          type: string
+          example: 0:da6b1b6663a0e4d18cc8574ccd9db5296e367dd9324706f3bbd9eb1cd2caf0bf
+        amount:
+          type: string
+          description: "Number of nanocoins to send. Decimal string."
+        payload:
+          type: string
+          description: "Raw one-cell BoC encoded in Base64."
+        stateInit:
+          type: string
+          description: "Raw once-cell BoC encoded in Base64."
+    SignRawParams:
+      type: object
+      required:
+        - messages
+        - relay_address
+        - commission
+        - from
+        - valid_until
+      properties:
+        relay_address:
+          type: string
+          example: 0:da6b1b6663a0e4d18cc8574ccd9db5296e367dd9324706f3bbd9eb1cd2caf0bf
+        commission:
+          type: string
+          description: "Commission for the transaction. In nanocoins."
+          example: "1000000"
+        from:
+          type: string
+          example: 0:da6b1b6663a0e4d18cc8574ccd9db5296e367dd9324706f3bbd9eb1cd2caf0bf
+        valid_until:
+          type: integer
+          format: int64
+          example: 1717397217
+        messages:
+          type: array
+          items:
+            $ref: '#/components/schemas/SignRawMessage'
     MethodExecutionResult:
       type: object
       required:
