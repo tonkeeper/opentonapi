@@ -35,3 +35,10 @@ func BadRequest(msg string) HTTPError {
 		Message: msg,
 	}
 }
+
+func NotImplemented() HTTPError {
+	return HTTPError{
+		Code:    http.StatusNotImplemented,
+		Message: "method not implemented",
+	}
+}

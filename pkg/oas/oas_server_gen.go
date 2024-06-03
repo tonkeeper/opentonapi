@@ -68,6 +68,22 @@ type Handler interface {
 	//
 	// GET /v2/blockchain/accounts/{account_id}/methods/{method_name}
 	ExecGetMethodForBlockchainAccount(ctx context.Context, params ExecGetMethodForBlockchainAccountParams) (*MethodExecutionResult, error)
+	// GaslessConfig implements gaslessConfig operation.
+	//
+	// Returns configuration of gasless transfers.
+	//
+	// GET /v2/gasless/config
+	GaslessConfig(ctx context.Context) (*GaslessConfig, error)
+	// GaslessEstimate implements gaslessEstimate operation.
+	//
+	// Estimates the cost of the given messages and returns a payload to sign.
+	//
+	// POST /v2/gasless/estimate/{master_id}
+	GaslessEstimate(ctx context.Context, req *GaslessEstimateReq, params GaslessEstimateParams) (*SignRawParams, error)
+	// GaslessSend implements gaslessSend operation.
+	//
+	// POST /v2/gasless/send
+	GaslessSend(ctx context.Context, req *GaslessSendReq) error
 	// GetAccount implements getAccount operation.
 	//
 	// Get human-friendly information about an account without low-level details.

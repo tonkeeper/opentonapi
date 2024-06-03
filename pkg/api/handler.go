@@ -36,6 +36,7 @@ type Handler struct {
 	state       chainState
 	msgSender   messageSender
 	executor    executor
+	gasless     Gasless
 
 	limits      Limits
 	spamFilter  SpamFilter
@@ -78,6 +79,7 @@ type Options struct {
 	ratesSource      ratesSource
 	tonConnectSecret string
 	ctxToDetails     ctxToDetails
+	gasless          Gasless
 }
 
 type Option func(o *Options)
@@ -141,6 +143,12 @@ func WithContextToDetails(ctxToDetails ctxToDetails) Option {
 	}
 }
 
+func WithGasless(gasless Gasless) Option {
+	return func(o *Options) {
+		o.gasless = gasless
+	}
+}
+
 func NewHandler(logger *zap.Logger, opts ...Option) (*Handler, error) {
 	options := &Options{}
 	for _, o := range opts {
@@ -183,6 +191,7 @@ func NewHandler(logger *zap.Logger, opts ...Option) (*Handler, error) {
 		limits:       options.limits,
 		spamFilter:   options.spamFilter,
 		ctxToDetails: options.ctxToDetails,
+		gasless:      options.gasless,
 		ratesSource:  rates.InitCalculator(options.ratesSource),
 		metaCache: metadataCache{
 			collectionsCache: cache.NewLRUCache[tongo.AccountID, tep64.Metadata](10000, "nft_metadata_cache"),
