@@ -9,7 +9,6 @@ import (
 	"github.com/tonkeeper/opentonapi/pkg/chainstate"
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/opentonapi/pkg/rates"
-	"github.com/tonkeeper/opentonapi/pkg/spam"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/contract/dns"
 	"github.com/tonkeeper/tongo/tep64"
@@ -158,9 +157,6 @@ func NewHandler(logger *zap.Logger, opts ...Option) (*Handler, error) {
 	}
 	if options.chainState == nil {
 		options.chainState = chainstate.NewChainState(options.storage)
-	}
-	if options.spamFilter == nil {
-		options.spamFilter = spam.NewNoOpSpamFilter()
 	}
 	if options.ratesSource == nil {
 		options.ratesSource = rates.Mock{}
