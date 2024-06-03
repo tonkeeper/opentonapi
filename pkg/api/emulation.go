@@ -242,7 +242,7 @@ func emulatedTreeToTrace(
 	sharedExecutor := newSharedAccountExecutor(accounts, executor, resolver, configBase64)
 	inspectionResult, ok := inspectionCache[accountID]
 	if !ok {
-		inspectionResult, err = abi.NewContractInspector().InspectContract(ctx, b, sharedExecutor, accountID)
+		inspectionResult, err = abi.NewContractInspector(abi.InspectWithLibraryResolver(resolver)).InspectContract(ctx, b, sharedExecutor, accountID)
 		if err != nil {
 			return nil, err
 		}
