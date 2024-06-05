@@ -260,12 +260,16 @@ func (h *Handler) SearchAccounts(ctx context.Context, params oas.SearchAccountsP
 		response.Addresses = append(response.Addresses, oas.FoundAccountsAddressesItem{
 			Address: account.Wallet,
 			Name:    account.Name,
+			Type:    oas.FoundAccountsAddressesItemType(account.AccountType),
 			Preview: account.Preview,
 		})
 	}
 
 	sort.Slice(response.Addresses, func(i, j int) bool {
-		return response.Addresses[i].Address == references.USDT.ToRaw()
+		if response.Addresses[i].Address == references.USDT.ToRaw() {
+			return true
+		}
+		return response.Addresses[i].Type == oas.FoundAccountsAddressesItemTypeWallet
 	})
 
 	return &response, nil

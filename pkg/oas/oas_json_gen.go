@@ -15180,12 +15180,17 @@ func (s *FoundAccountsAddressesItem) encodeFields(e *jx.Encoder) {
 		e.FieldStart("preview")
 		e.Str(s.Preview)
 	}
+	{
+		e.FieldStart("type")
+		s.Type.Encode(e)
+	}
 }
 
-var jsonFieldsNameOfFoundAccountsAddressesItem = [3]string{
+var jsonFieldsNameOfFoundAccountsAddressesItem = [4]string{
 	0: "address",
 	1: "name",
 	2: "preview",
+	3: "type",
 }
 
 // Decode decodes FoundAccountsAddressesItem from json.
@@ -15233,6 +15238,16 @@ func (s *FoundAccountsAddressesItem) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"preview\"")
 			}
+		case "type":
+			requiredBitSet[0] |= 1 << 3
+			if err := func() error {
+				if err := s.Type.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"type\"")
+			}
 		default:
 			return d.Skip()
 		}
@@ -15243,7 +15258,7 @@ func (s *FoundAccountsAddressesItem) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b00000111,
+		0b00001111,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -15285,6 +15300,48 @@ func (s *FoundAccountsAddressesItem) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *FoundAccountsAddressesItem) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes FoundAccountsAddressesItemType as json.
+func (s FoundAccountsAddressesItemType) Encode(e *jx.Encoder) {
+	e.Str(string(s))
+}
+
+// Decode decodes FoundAccountsAddressesItemType from json.
+func (s *FoundAccountsAddressesItemType) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode FoundAccountsAddressesItemType to nil")
+	}
+	v, err := d.StrBytes()
+	if err != nil {
+		return err
+	}
+	// Try to use constant string.
+	switch FoundAccountsAddressesItemType(v) {
+	case FoundAccountsAddressesItemTypeJetton:
+		*s = FoundAccountsAddressesItemTypeJetton
+	case FoundAccountsAddressesItemTypeNft:
+		*s = FoundAccountsAddressesItemTypeNft
+	case FoundAccountsAddressesItemTypeWallet:
+		*s = FoundAccountsAddressesItemTypeWallet
+	default:
+		*s = FoundAccountsAddressesItemType(v)
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s FoundAccountsAddressesItemType) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *FoundAccountsAddressesItemType) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }

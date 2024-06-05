@@ -5265,9 +5265,10 @@ func (s *FoundAccounts) SetAddresses(val []FoundAccountsAddressesItem) {
 }
 
 type FoundAccountsAddressesItem struct {
-	Address string `json:"address"`
-	Name    string `json:"name"`
-	Preview string `json:"preview"`
+	Address string                         `json:"address"`
+	Name    string                         `json:"name"`
+	Preview string                         `json:"preview"`
+	Type    FoundAccountsAddressesItemType `json:"type"`
 }
 
 // GetAddress returns the value of Address.
@@ -5285,6 +5286,11 @@ func (s *FoundAccountsAddressesItem) GetPreview() string {
 	return s.Preview
 }
 
+// GetType returns the value of Type.
+func (s *FoundAccountsAddressesItem) GetType() FoundAccountsAddressesItemType {
+	return s.Type
+}
+
 // SetAddress sets the value of Address.
 func (s *FoundAccountsAddressesItem) SetAddress(val string) {
 	s.Address = val
@@ -5298,6 +5304,59 @@ func (s *FoundAccountsAddressesItem) SetName(val string) {
 // SetPreview sets the value of Preview.
 func (s *FoundAccountsAddressesItem) SetPreview(val string) {
 	s.Preview = val
+}
+
+// SetType sets the value of Type.
+func (s *FoundAccountsAddressesItem) SetType(val FoundAccountsAddressesItemType) {
+	s.Type = val
+}
+
+type FoundAccountsAddressesItemType string
+
+const (
+	FoundAccountsAddressesItemTypeJetton FoundAccountsAddressesItemType = "jetton"
+	FoundAccountsAddressesItemTypeNft    FoundAccountsAddressesItemType = "nft"
+	FoundAccountsAddressesItemTypeWallet FoundAccountsAddressesItemType = "wallet"
+)
+
+// AllValues returns all FoundAccountsAddressesItemType values.
+func (FoundAccountsAddressesItemType) AllValues() []FoundAccountsAddressesItemType {
+	return []FoundAccountsAddressesItemType{
+		FoundAccountsAddressesItemTypeJetton,
+		FoundAccountsAddressesItemTypeNft,
+		FoundAccountsAddressesItemTypeWallet,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s FoundAccountsAddressesItemType) MarshalText() ([]byte, error) {
+	switch s {
+	case FoundAccountsAddressesItemTypeJetton:
+		return []byte(s), nil
+	case FoundAccountsAddressesItemTypeNft:
+		return []byte(s), nil
+	case FoundAccountsAddressesItemTypeWallet:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *FoundAccountsAddressesItemType) UnmarshalText(data []byte) error {
+	switch FoundAccountsAddressesItemType(data) {
+	case FoundAccountsAddressesItemTypeJetton:
+		*s = FoundAccountsAddressesItemTypeJetton
+		return nil
+	case FoundAccountsAddressesItemTypeNft:
+		*s = FoundAccountsAddressesItemTypeNft
+		return nil
+	case FoundAccountsAddressesItemTypeWallet:
+		*s = FoundAccountsAddressesItemTypeWallet
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
 }
 
 // Ref: #/components/schemas/GasLimitPrices

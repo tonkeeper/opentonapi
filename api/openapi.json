@@ -3011,11 +3011,20 @@
         "preview": {
          "example": "https://cache.tonapi.io/images/media.jpg",
          "type": "string"
+        },
+        "type": {
+         "enum": [
+          "jetton",
+          "nft",
+          "wallet"
+         ],
+         "type": "string"
         }
        },
        "required": [
         "address",
         "name",
+        "type",
         "preview"
        ],
        "type": "object"
