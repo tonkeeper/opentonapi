@@ -38,7 +38,7 @@ type Handler struct {
 	executor    executor
 
 	limits      Limits
-	spamFilter  spamFilter
+	spamFilter  SpamFilter
 	ratesSource ratesSource
 	metaCache   metadataCache
 	tonConnect  *tonconnect.Server
@@ -74,7 +74,7 @@ type Options struct {
 	msgSender        messageSender
 	executor         executor
 	limits           Limits
-	spamFilter       spamFilter
+	spamFilter       SpamFilter
 	ratesSource      ratesSource
 	tonConnectSecret string
 	ctxToDetails     ctxToDetails
@@ -117,7 +117,7 @@ func WithLimits(limits Limits) Option {
 	}
 }
 
-func WithSpamFilter(spamFilter spamFilter) Option {
+func WithSpamFilter(spamFilter SpamFilter) Option {
 	return func(o *Options) {
 		o.spamFilter = spamFilter
 	}

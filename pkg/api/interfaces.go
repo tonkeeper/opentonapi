@@ -165,7 +165,7 @@ type ratesSource interface {
 	GetMarketsTonPrice() ([]rates.Market, error)
 }
 
-type spamFilter interface {
+type SpamFilter interface {
 	GetRules() rules.Rules
 	IsJettonBlacklisted(address tongo.AccountID, symbol string) bool
 	IsCollectionBlacklisted(address tongo.AccountID) bool

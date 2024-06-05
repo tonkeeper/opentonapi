@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/base64"
 	"errors"
+	"golang.org/x/exp/slices"
 	"math/big"
 	"time"
 
@@ -249,16 +250,12 @@ func emulatedTreeToTrace(
 		inspectionCache[accountID] = inspectionResult
 	}
 
-	implemented := make(map[abi.ContractInterface]struct{}, len(inspectionResult.ContractInterfaces))
-	for _, iface := range inspectionResult.ContractInterfaces {
-		implemented[iface] = struct{}{}
-	}
 	// TODO: for all obtained Jetton Masters confirm that jetton wallets are valid
 	t.AccountInterfaces = inspectionResult.ContractInterfaces
 	for _, m := range inspectionResult.GetMethods {
 		switch data := m.Result.(type) {
 		case abi.GetNftDataResult:
-			if _, ok := implemented[abi.Teleitem]; !ok {
+			if !slices.Contains(inspectionResult.ContractInterfaces, abi.Teleitem) {
 				continue
 			}
 			value := big.Int(data.Index)

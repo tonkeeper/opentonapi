@@ -21,6 +21,7 @@ type Config struct {
 		Accounts           accountsList        `env:"ACCOUNTS"`
 		LiteServers        []config.LiteServer `env:"LITE_SERVERS"`
 		SendingLiteservers []config.LiteServer `env:"SENDING_LITE_SERVERS"`
+		IsTestnet          bool                `env:"IS_TESTNET" envDefault:"false"`
 	}
 	TonConnect struct {
 		Secret string `env:"TON_CONNECT_SECRET"`
