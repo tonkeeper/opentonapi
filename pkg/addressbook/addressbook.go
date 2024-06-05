@@ -31,13 +31,22 @@ type KnownAddress struct {
 	Image       string `json:"image,omitempty"`
 }
 
+type AccountType string
+
+const (
+	Jetton AccountType = "jetton"
+	Nft    AccountType = "nft"
+	Wallet AccountType = "wallet"
+)
+
 // AttachedAccount represents domains, nft collections for quick search by name are presented
 type AttachedAccount struct {
-	Name       string `json:"name"`
-	Preview    string `json:"preview"`
-	Wallet     string `json:"wallet"`
-	Symbol     string `json:"-"`
-	Normalized string `json:"-"`
+	Name        string      `json:"name"`
+	Preview     string      `json:"preview"`
+	Wallet      string      `json:"wallet"`
+	AccountType AccountType `json:"-"`
+	Symbol      string      `json:"-"`
+	Normalized  string      `json:"-"`
 }
 
 type JettonVerificationType string
