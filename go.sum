@@ -274,6 +274,8 @@ github.com/tonkeeper/scam_backoffice_rules v0.0.0-20240412152144-9fb01586a942 h1
 github.com/tonkeeper/scam_backoffice_rules v0.0.0-20240412152144-9fb01586a942/go.mod h1:SqZXYO9vbID8ku+xnnaKXeNGmehxigODGrk5V1KqbRA=
 github.com/tonkeeper/scam_backoffice_rules v0.0.0-20240522102801-ac5f863d8f14 h1:09T5ALZw2OOuxJmUGnK1saTBv/+wPGyBL7b4rRDGsk0=
 github.com/tonkeeper/scam_backoffice_rules v0.0.0-20240522102801-ac5f863d8f14/go.mod h1:SqZXYO9vbID8ku+xnnaKXeNGmehxigODGrk5V1KqbRA=
+github.com/tonkeeper/scam_backoffice_rules v0.0.0-20240606040945-382d2b4edb98 h1:lpzXxMZktaBS5YouFNGIv6haEbsYtDA/gaCPAspWKLI=
+github.com/tonkeeper/scam_backoffice_rules v0.0.0-20240606040945-382d2b4edb98/go.mod h1:SqZXYO9vbID8ku+xnnaKXeNGmehxigODGrk5V1KqbRA=
 github.com/tonkeeper/tongo v1.7.2 h1:v5Tmmqn4oNUlLTB+ASAZNuBXtBqqFhS6Nd5D4ie99J0=
 github.com/tonkeeper/tongo v1.7.2/go.mod h1:MjgIgAytFarjCoVjMLjYEtpZNN1f2G/pnZhKjr28cWs=
 github.com/tonkeeper/tongo v1.8.0 h1:vYFm1xzEnuVsNRHTAghVB9bujc49i+9ovjGTHWxaQ0w=
