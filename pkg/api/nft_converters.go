@@ -18,49 +18,10 @@ import (
 	"github.com/tonkeeper/opentonapi/pkg/references"
 )
 
-var scamUrls = []string{
-	"://raff.cash",
-	"://notc.app",
-	"://not.cash",
-	"://wnot.app",
-	"://wnot.top",
-	"://stonfi.us",
-	"://tonlayer.com",
-	"://notdrops.com",
-	"://fragment.global",
-	"://ton-usd.com",
-	"://tondrop.app",
-	"mysboxs.com",
-	"://notstake.io",
-	"://wnotcoin.com",
-	"://StonFi.app/",
-	"://redo-ton.com",
-	"://TETHER-TON.COM",
-	"://tonkeeper.link",
-	"://tonbounty.com",
-	"://ton-usd.net",
-	"://stondrop.net",
-	"://notcoin-v2.com",
-	"://stonfi.finance",
-	"://keepton.com",
-	"://notdrops.com",
-	"jusdt.org",
-	"jusdt.net",
-	"://ton-stake.org",
-	"://ton-staking.com",
-	"://shardify.net",
-	"://shardify.org",
-	"://tonkeeper.is",
-	"://staketon.net",
-	"://tsTON.app",
-	"://tston.cc",
-	"://tston.app",
-	"://tonfrom.com",
-}
-
-func isScam(description string) bool {
-	for _, scam := range scamUrls {
-		if strings.Contains(description, scam) {
+func (h *Handler) isScam(description string) bool {
+	domains := h.spamFilter.GetBlacklistedDomains()
+	for _, domain := range domains {
+		if strings.Contains(description, domain) {
 			return true
 		}
 	}
@@ -68,7 +29,7 @@ func isScam(description string) bool {
 }
 
 func (h *Handler) convertNFT(ctx context.Context, item core.NftItem, book addressBook, metaCache metadataCache) oas.NftItem {
-	i := oas.NftItem{
+	nftItem := oas.NftItem{
 		Address:  item.Address.ToRaw(),
 		Index:    item.Index.BigInt().Int64(),
 		Owner:    convertOptAccountAddress(item.OwnerAddress, book),
@@ -80,57 +41,49 @@ func (h *Handler) convertNFT(ctx context.Context, item core.NftItem, book addres
 	if item.Sale != nil {
 		tokenName := "TON"
 		if item.Sale.Price.Token != nil {
-			m, _ := metaCache.getJettonMeta(ctx, *item.Sale.Price.Token)
-			tokenName = m.Name
+			meta, _ := metaCache.getJettonMeta(ctx, *item.Sale.Price.Token)
+			tokenName = meta.Name
 			if tokenName == "" {
 				tokenName = UnknownJettonName
 			}
 		}
-		i.SetSale(oas.OptSale{
-			Value: oas.Sale{
-				Address: item.Sale.Contract.ToRaw(),
-				Market:  convertAccountAddress(item.Sale.Marketplace, book),
-				Owner:   convertOptAccountAddress(item.Sale.Seller, book),
-				Price: oas.Price{
-					Value:     fmt.Sprintf("%v", item.Sale.Price.Amount),
-					TokenName: tokenName,
-				},
+		nftItem.SetSale(oas.NewOptSale(oas.Sale{
+			Address: item.Sale.Contract.ToRaw(),
+			Market:  convertAccountAddress(item.Sale.Marketplace, book),
+			Owner:   convertOptAccountAddress(item.Sale.Seller, book),
+			Price: oas.Price{
+				Value:     fmt.Sprintf("%v", item.Sale.Price.Amount),
+				TokenName: tokenName,
 			},
-			Set: true,
-		})
+		}))
 	}
+
 	var image string
 	if item.CollectionAddress != nil {
 		cInfo, _ := metaCache.getCollectionMeta(ctx, *item.CollectionAddress)
 		if cc, prs := book.GetCollectionInfoByAddress(*item.CollectionAddress); prs {
-			for _, a := range cc.Approvers {
-				i.ApprovedBy = append(i.ApprovedBy, a)
-			}
+			nftItem.ApprovedBy = append(nftItem.ApprovedBy, cc.Approvers...)
 		}
-		if len(i.ApprovedBy) > 0 {
-			i.Trust = oas.TrustTypeWhitelist
+		nftItem.Trust = oas.TrustType(h.spamFilter.GetCollectionVerificationType(*item.CollectionAddress))
+		if len(nftItem.ApprovedBy) > 0 {
+			nftItem.Trust = oas.TrustTypeWhitelist
 		}
-		if isScam(cInfo.Description) {
-			i.Trust = oas.TrustTypeBlacklist
+		if h.isScam(cInfo.Description) {
+			nftItem.Trust = oas.TrustTypeBlacklist
 		}
-		if ok := h.spamFilter.IsCollectionBlacklisted(*item.CollectionAddress); ok {
-			i.Trust = oas.TrustTypeBlacklist
-		}
-		i.Collection.SetTo(oas.NftItemCollection{
+		nftItem.Collection.SetTo(oas.NftItemCollection{
 			Address:     item.CollectionAddress.ToRaw(),
 			Name:        cInfo.Name,
 			Description: cInfo.Description,
 		})
 		if *item.CollectionAddress == references.RootDotTon && item.DNS != nil && item.Verified {
 			image = "https://cache.tonapi.io/dns/preview/" + *item.DNS + ".png"
-			i.Metadata["name"] = []byte(fmt.Sprintf(`"%v"`, *item.DNS))
-			buttons, _ := json.Marshal([]map[string]string{
-				{
-					"label": "Manage",
-					"uri":   fmt.Sprintf("https://dns.tonkeeper.com/manage?v=%v", item.Address.ToRaw()),
-				},
+			nftItem.Metadata["name"] = []byte(fmt.Sprintf(`"%v"`, *item.DNS))
+			buttons, _ := json.Marshal([]map[string]string{{
+				"label": "Manage",
+				"uri":   fmt.Sprintf("https://dns.tonkeeper.com/manage?v=%v", item.Address.ToRaw())},
 			})
-			i.Metadata["buttons"] = buttons
+			nftItem.Metadata["buttons"] = buttons
 		}
 	}
 
@@ -139,9 +92,8 @@ func (h *Handler) convertNFT(ctx context.Context, item core.NftItem, book addres
 			image, _ = imageI.(string)
 		}
 		if descriptionI, prs := item.Metadata["description"]; prs {
-			description, _ := descriptionI.(string)
-			if isScam(description) {
-				i.Trust = oas.TrustTypeBlacklist
+			if description, ok := descriptionI.(string); ok && h.isScam(description) {
+				nftItem.Trust = oas.TrustTypeBlacklist
 			}
 		}
 	}
@@ -150,52 +102,49 @@ func (h *Handler) convertNFT(ctx context.Context, item core.NftItem, book addres
 	}
 	for _, size := range []int{5, 100, 500, 1500} {
 		url := imgGenerator.DefaultGenerator.GenerateImageUrl(image, size, size)
-		i.Previews = append(i.Previews, oas.ImagePreview{
+		nftItem.Previews = append(nftItem.Previews, oas.ImagePreview{
 			Resolution: fmt.Sprintf("%vx%v", size, size),
 			URL:        url,
 		})
 	}
-	return i
+
+	return nftItem
 }
 
 func convertNftCollection(collection core.NftCollection, book addressBook) oas.NftCollection {
-	c := oas.NftCollection{
+	nftCollection := oas.NftCollection{
 		Address:              collection.Address.ToRaw(),
 		NextItemIndex:        int64(collection.NextItemIndex),
 		RawCollectionContent: fmt.Sprintf("%x", collection.CollectionContent[:]),
 		Owner:                convertOptAccountAddress(collection.OwnerAddress, book),
 	}
 	if len(collection.Metadata) == 0 {
-		return c
+		return nftCollection
 	}
-	metadata := map[string]jx.Raw{}
+	metadata := make(map[string]jx.Raw)
 	image := references.Placeholder
 	for k, v := range collection.Metadata {
-		var err error
 		if k == "image" {
-			if i, ok := v.(string); ok && i != "" {
-				image = i
+			if img, ok := v.(string); ok && img != "" {
+				image = img
 			}
 		}
-		metadata[k], err = json.Marshal(v)
-		if err != nil {
-			continue
+		if raw, err := json.Marshal(v); err == nil {
+			metadata[k] = raw
 		}
 	}
 	if known, ok := book.GetCollectionInfoByAddress(collection.Address); ok {
-		for _, a := range known.Approvers {
-			c.ApprovedBy = append(c.ApprovedBy, a)
-		}
+		nftCollection.ApprovedBy = append(nftCollection.ApprovedBy, known.Approvers...)
 	}
-	c.Metadata.SetTo(metadata)
+	nftCollection.Metadata.SetTo(metadata)
 	for _, size := range []int{5, 100, 500, 1500} {
 		url := imgGenerator.DefaultGenerator.GenerateImageUrl(image, size, size)
-		c.Previews = append(c.Previews, oas.ImagePreview{
+		nftCollection.Previews = append(nftCollection.Previews, oas.ImagePreview{
 			Resolution: fmt.Sprintf("%vx%v", size, size),
 			URL:        url,
 		})
 	}
-	return c
+	return nftCollection
 }
 
 func (h *Handler) convertNftHistory(ctx context.Context, account tongo.AccountID, traceIDs []tongo.Bits256, acceptLanguage oas.OptString) ([]oas.AccountEvent, int64, error) {
@@ -210,7 +159,7 @@ func (h *Handler) convertNftHistory(ctx context.Context, account tongo.AccountID
 			}
 			return nil, 0, err
 		}
-		result, err := bath.FindActions(ctx, trace, bath.WithInformationSource(h.storage), bath.WithStraws(bath.NFTStraws))
+		actions, err := bath.FindActions(ctx, trace, bath.WithInformationSource(h.storage), bath.WithStraws(bath.NFTStraws))
 		if err != nil {
 			return nil, 0, err
 		}
@@ -222,7 +171,7 @@ func (h *Handler) convertNftHistory(ctx context.Context, account tongo.AccountID
 			Lt:         int64(trace.Lt),
 			InProgress: trace.InProgress(),
 		}
-		for _, action := range result.Actions {
+		for _, action := range actions.Actions {
 			if action.Type != bath.NftItemTransfer {
 				continue
 			}
@@ -230,16 +179,15 @@ func (h *Handler) convertNftHistory(ctx context.Context, account tongo.AccountID
 			if err != nil {
 				return nil, 0, err
 			}
-			if !event.IsScam && spamDetected {
+			if spamDetected {
 				event.IsScam = true
 			}
 			event.Actions = append(event.Actions, convertedAction)
 		}
-		if len(event.Actions) == 0 {
-			continue
+		if len(event.Actions) > 0 {
+			events = append(events, event)
+			lastLT = trace.Lt
 		}
-		events = append(events, event)
-		lastLT = trace.Lt
 	}
 
 	return events, int64(lastLT), nil

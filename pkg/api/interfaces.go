@@ -5,6 +5,7 @@ import (
 	"crypto/ed25519"
 
 	"github.com/tonkeeper/opentonapi/pkg/oas"
+	"github.com/tonkeeper/opentonapi/pkg/spam"
 	rules "github.com/tonkeeper/scam_backoffice_rules"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
@@ -167,8 +168,9 @@ type ratesSource interface {
 
 type SpamFilter interface {
 	GetRules() rules.Rules
+	GetBlacklistedDomains() []string
 	IsJettonBlacklisted(address tongo.AccountID, symbol string) bool
-	IsCollectionBlacklisted(address tongo.AccountID) bool
+	GetCollectionVerificationType(address tongo.AccountID) spam.CollectionVerificationType
 }
 
 type metadataCache struct {

@@ -2,7 +2,15 @@ package spam
 
 import (
 	rules "github.com/tonkeeper/scam_backoffice_rules"
-	"github.com/tonkeeper/tongo"
+	"github.com/tonkeeper/tongo/ton"
+)
+
+type CollectionVerificationType string
+
+const (
+	CollectionVerificationTypeBlacklist CollectionVerificationType = "blacklist"
+	CollectionVerificationTypeGraylist  CollectionVerificationType = "graylist"
+	CollectionVerificationTypeNone      CollectionVerificationType = "none"
 )
 
 type SpamFilter struct {
@@ -19,10 +27,14 @@ func (s *SpamFilter) GetRules() rules.Rules {
 	return s.Rules
 }
 
-func (s *SpamFilter) IsJettonBlacklisted(address tongo.AccountID, symbol string) bool {
+func (s *SpamFilter) IsJettonBlacklisted(address ton.AccountID, symbol string) bool {
 	return false
 }
 
-func (s *SpamFilter) IsCollectionBlacklisted(address tongo.AccountID) bool {
-	return false
+func (s *SpamFilter) GetBlacklistedDomains() []string {
+	return []string{}
+}
+
+func (s *SpamFilter) GetCollectionVerificationType(address ton.AccountID) CollectionVerificationType {
+	return CollectionVerificationTypeNone
 }
