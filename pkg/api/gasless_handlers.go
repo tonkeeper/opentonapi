@@ -17,7 +17,7 @@ func (h *Handler) GaslessConfig(ctx context.Context) (*oas.GaslessConfig, error)
 	}
 	config, err := h.gasless.Config(ctx)
 	if err != nil {
-		return nil, err
+		return nil, errors.InternalServerError("failed to get gasless config")
 	}
 	o := &oas.GaslessConfig{
 		GasJettons:   make([]oas.GaslessConfigGasJettonsItem, 0, len(config.SupportedJettons)),
