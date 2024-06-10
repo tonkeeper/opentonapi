@@ -26,3 +26,7 @@ func (s *SpamFilter) IsJettonBlacklisted(address tongo.AccountID, symbol string)
 func (s *SpamFilter) IsCollectionBlacklisted(address tongo.AccountID) bool {
 	return false
 }
+
+func (s *SpamFilter) SpamDetector(amount int64, comment string) bool {
+	return false
+}
