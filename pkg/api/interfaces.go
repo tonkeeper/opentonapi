@@ -176,6 +176,7 @@ type SpamFilter interface {
 	GetRules() rules.Rules
 	IsJettonBlacklisted(address tongo.AccountID, symbol string) bool
 	IsCollectionBlacklisted(address tongo.AccountID) bool
+	SpamDetector(amount int64, comment string) bool
 }
 
 type metadataCache struct {
