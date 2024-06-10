@@ -4,20 +4,21 @@ import (
 	"context"
 	"crypto/ed25519"
 	"encoding/hex"
+	"fmt"
+	"net/http"
 	"time"
 
 	"github.com/tonkeeper/opentonapi/pkg/oas"
-	"github.com/tonkeeper/opentonapi/pkg/pusher/errors"
 	"github.com/tonkeeper/tongo/ton"
 )
 
 func (h *Handler) GaslessConfig(ctx context.Context) (*oas.GaslessConfig, error) {
 	if h.gasless == nil {
-		return nil, errors.NotImplemented()
+		return nil, toError(http.StatusNotImplemented, fmt.Errorf("not implemented"))
 	}
 	config, err := h.gasless.Config(ctx)
 	if err != nil {
-		return nil, errors.InternalServerError("failed to get gasless config")
+		return nil, toError(http.StatusInternalServerError, fmt.Errorf("failed to get gasless config"))
 	}
 	o := &oas.GaslessConfig{
 		GasJettons:   make([]oas.GaslessConfigGasJettonsItem, 0, len(config.SupportedJettons)),
@@ -31,19 +32,19 @@ func (h *Handler) GaslessConfig(ctx context.Context) (*oas.GaslessConfig, error)
 
 func (h *Handler) GaslessEstimate(ctx context.Context, req *oas.GaslessEstimateReq, params oas.GaslessEstimateParams) (*oas.SignRawParams, error) {
 	if h.gasless == nil {
-		return nil, errors.NotImplemented()
+		return nil, toError(http.StatusNotImplemented, fmt.Errorf("not implemented"))
 	}
 	masterID, err := ton.ParseAccountID(params.MasterID)
 	if err != nil {
-		return nil, errors.BadRequest("invalid master_id")
+		return nil, toError(http.StatusBadRequest, fmt.Errorf("invalid master_id"))
 	}
 	walletAddress, err := ton.ParseAccountID(req.WalletAddress)
 	if err != nil {
-		return nil, errors.BadRequest("invalid wallet address")
+		return nil, toError(http.StatusBadRequest, fmt.Errorf("invalid wallet address"))
 	}
 	publicKey, err := hex.DecodeString(req.WalletPublicKey)
 	if err != nil {
-		return nil, errors.BadRequest("invalid public key")
+		return nil, toError(http.StatusBadRequest, fmt.Errorf("invalid public key"))
 	}
 	messages := make([]string, 0, len(req.Messages))
 	for _, msg := range req.Messages {
@@ -51,7 +52,7 @@ func (h *Handler) GaslessEstimate(ctx context.Context, req *oas.GaslessEstimateR
 	}
 	signParams, err := h.gasless.Estimate(ctx, masterID, walletAddress, publicKey, messages)
 	if err != nil {
-		return nil, err
+		return nil, toError(http.StatusBadRequest, err)
 	}
 	o := &oas.SignRawParams{
 		RelayAddress: signParams.RelayAddress,
@@ -78,18 +79,21 @@ func (h *Handler) GaslessEstimate(ctx context.Context, req *oas.GaslessEstimateR
 
 func (h *Handler) GaslessSend(ctx context.Context, req *oas.GaslessSendReq) error {
 	if h.gasless == nil {
-		return errors.NotImplemented()
+		return toError(http.StatusNotImplemented, fmt.Errorf("not implemented"))
 	}
 	msg, err := decodeMessage(req.Boc)
 	if err != nil {
-		return err
+		return toError(http.StatusBadRequest, err)
 	}
 	pubkey, err := hex.DecodeString(req.WalletPublicKey)
 	if err != nil {
-		return err
+		return toError(http.StatusBadRequest, err)
 	}
 	if len(pubkey) != ed25519.PublicKeySize {
-		return errors.BadRequest("invalid public key")
+		return toError(http.StatusBadRequest, fmt.Errorf("invalid public key"))
 	}
-	return h.gasless.Send(ctx, pubkey, msg.payload)
+	if err := h.gasless.Send(ctx, pubkey, msg.payload); err != nil {
+		return toError(http.StatusInternalServerError, err)
+	}
+	return nil
 }
