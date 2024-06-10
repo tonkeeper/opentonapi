@@ -39,6 +39,6 @@ func (s *Filter) GetVerificationType(address ton.AccountID) VerificationType {
 	return VerificationTypeNone
 }
 
-func (s *SpamFilter) SpamDetector(amount int64, comment string) bool {
+func (s *Filter) SpamDetector(amount int64, comment string) bool {
 	return false
 }
