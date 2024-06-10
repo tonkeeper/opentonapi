@@ -126,6 +126,9 @@ func (h *Handler) convertActionTonTransfer(t *bath.TonTransferAction, acceptLang
 				*t.Comment = ""
 			}
 		}
+		if !spamDetected {
+			spamDetected = h.spamFilter.SpamDetector(t.Amount, *t.Comment)
+		}
 	}
 	var action oas.OptTonTransferAction
 	action.SetTo(oas.TonTransferAction{

@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/ed25519"
 
+	"github.com/tonkeeper/opentonapi/pkg/gasless"
 	"github.com/tonkeeper/opentonapi/pkg/oas"
 	"github.com/tonkeeper/opentonapi/pkg/spam"
 	rules "github.com/tonkeeper/scam_backoffice_rules"
@@ -160,6 +161,12 @@ type addressBook interface {
 	SearchAttachedAccountsByPrefix(prefix string) []addressbook.AttachedAccount
 }
 
+type Gasless interface {
+	Config(ctx context.Context) (gasless.Config, error)
+	Estimate(ctx context.Context, masterID ton.AccountID, walletAddress ton.AccountID, walletPubkey []byte, messages []string) (gasless.SignRawParams, error)
+	Send(ctx context.Context, walletPublicKey ed25519.PublicKey, payload []byte) error
+}
+
 type ratesSource interface {
 	GetRates(date int64) (map[string]float64, error)
 	GetRatesChart(token string, currency string, pointsCount int, startDate *int64, endDate *int64) ([][]any, error)
@@ -170,7 +177,8 @@ type SpamFilter interface {
 	GetRules() rules.Rules
 	GetBlacklistedDomains() []string
 	IsJettonBlacklisted(address tongo.AccountID, symbol string) bool
-	GetVerificationType(address tongo.AccountID) spam.VerificationType
+  GetVerificationType(address tongo.AccountID) spam.VerificationType
+  SpamDetector(amount int64, comment string) bool
 }
 
 type metadataCache struct {

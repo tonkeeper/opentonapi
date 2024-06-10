@@ -876,6 +876,72 @@ func decodeExecGetMethodForBlockchainAccountParams(args [2]string, argsEscaped b
 	return params, nil
 }
 
+// GaslessEstimateParams is parameters of gaslessEstimate operation.
+type GaslessEstimateParams struct {
+	// Jetton to pay commission.
+	MasterID string
+}
+
+func unpackGaslessEstimateParams(packed middleware.Parameters) (params GaslessEstimateParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "master_id",
+			In:   "path",
+		}
+		params.MasterID = packed[key].(string)
+	}
+	return params
+}
+
+func decodeGaslessEstimateParams(args [1]string, argsEscaped bool, r *http.Request) (params GaslessEstimateParams, _ error) {
+	// Decode path: master_id.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "master_id",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.MasterID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "master_id",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
 // GetAccountParams is parameters of getAccount operation.
 type GetAccountParams struct {
 	// Account ID.

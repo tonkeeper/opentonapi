@@ -38,3 +38,7 @@ func (s *Filter) GetBlacklistedDomains() []string {
 func (s *Filter) GetVerificationType(address ton.AccountID) VerificationType {
 	return VerificationTypeNone
 }
+
+func (s *SpamFilter) SpamDetector(amount int64, comment string) bool {
+	return false
+}
