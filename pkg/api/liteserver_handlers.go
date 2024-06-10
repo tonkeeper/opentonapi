@@ -2,7 +2,7 @@ package api
 
 import (
 	"context"
-	"encoding/json"
+	"encoding/base64"
 	"net/http"
 	"time"
 
@@ -88,7 +88,7 @@ func (h *Handler) GetRawBlockchainBlockHeader(ctx context.Context, params oas.Ge
 }
 
 func (h *Handler) SendRawMessage(ctx context.Context, request *oas.SendRawMessageReq) (*oas.SendRawMessageOK, error) {
-	payload, err := json.Marshal(request.Body)
+	payload, err := base64.StdEncoding.DecodeString(request.Body)
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
 	}
