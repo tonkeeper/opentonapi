@@ -46,7 +46,6 @@ func NormalizeMetadata(meta tep64.Metadata, info *addressbook.KnownJetton, isBla
 	verification := VerificationNone
 	if isBlacklisted {
 		verification = VerificationBlacklist
-		symbol = "SCAM"
 	}
 	name := meta.Name
 	if name == "" {
