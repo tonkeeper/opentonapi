@@ -6,6 +6,7 @@ import (
 
 	"github.com/tonkeeper/opentonapi/pkg/gasless"
 	"github.com/tonkeeper/opentonapi/pkg/oas"
+	"github.com/tonkeeper/opentonapi/pkg/spam"
 	rules "github.com/tonkeeper/scam_backoffice_rules"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
@@ -174,9 +175,10 @@ type ratesSource interface {
 
 type SpamFilter interface {
 	GetRules() rules.Rules
+	GetBlacklistedDomains() []string
 	IsJettonBlacklisted(address tongo.AccountID, symbol string) bool
-	IsCollectionBlacklisted(address tongo.AccountID) bool
-	SpamDetector(amount int64, comment string) bool
+  GetVerificationType(address tongo.AccountID) spam.VerificationType
+  SpamDetector(amount int64, comment string) bool
 }
 
 type metadataCache struct {
