@@ -36,7 +36,7 @@ func (h *Handler) convertNFT(ctx context.Context, item core.NftItem, book addres
 		Verified: item.Verified,
 		Metadata: anyToJSONRawMap(item.Metadata),
 		DNS:      g.Opt(item.DNS),
-		Trust:    oas.TrustTypeNone,
+		Trust:    oas.TrustType(h.spamFilter.GetVerificationType(item.Address)),
 	}
 	if item.Sale != nil {
 		tokenName := "TON"
@@ -64,7 +64,7 @@ func (h *Handler) convertNFT(ctx context.Context, item core.NftItem, book addres
 		if cc, prs := book.GetCollectionInfoByAddress(*item.CollectionAddress); prs {
 			nftItem.ApprovedBy = append(nftItem.ApprovedBy, cc.Approvers...)
 		}
-		nftItem.Trust = oas.TrustType(h.spamFilter.GetCollectionVerificationType(*item.CollectionAddress))
+		nftItem.Trust = oas.TrustType(h.spamFilter.GetVerificationType(*item.CollectionAddress))
 		if len(nftItem.ApprovedBy) > 0 {
 			nftItem.Trust = oas.TrustTypeWhitelist
 		}

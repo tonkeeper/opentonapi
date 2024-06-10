@@ -170,7 +170,7 @@ type SpamFilter interface {
 	GetRules() rules.Rules
 	GetBlacklistedDomains() []string
 	IsJettonBlacklisted(address tongo.AccountID, symbol string) bool
-	GetCollectionVerificationType(address tongo.AccountID) spam.CollectionVerificationType
+	GetVerificationType(address tongo.AccountID) spam.VerificationType
 }
 
 type metadataCache struct {

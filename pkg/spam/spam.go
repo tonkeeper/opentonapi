@@ -5,36 +5,36 @@ import (
 	"github.com/tonkeeper/tongo/ton"
 )
 
-type CollectionVerificationType string
+type VerificationType string
 
 const (
-	CollectionVerificationTypeBlacklist CollectionVerificationType = "blacklist"
-	CollectionVerificationTypeGraylist  CollectionVerificationType = "graylist"
-	CollectionVerificationTypeNone      CollectionVerificationType = "none"
+	VerificationTypeBlacklist VerificationType = "blacklist"
+	VerificationTypeGraylist  VerificationType = "graylist"
+	VerificationTypeNone      VerificationType = "none"
 )
 
-type SpamFilter struct {
+type Filter struct {
 	Rules rules.Rules
 }
 
-func NewSpamFilter() *SpamFilter {
-	return &SpamFilter{
+func NewSpamFilter() *Filter {
+	return &Filter{
 		Rules: rules.GetDefaultRules(),
 	}
 }
 
-func (s *SpamFilter) GetRules() rules.Rules {
+func (s *Filter) GetRules() rules.Rules {
 	return s.Rules
 }
 
-func (s *SpamFilter) IsJettonBlacklisted(address ton.AccountID, symbol string) bool {
+func (s *Filter) IsJettonBlacklisted(address ton.AccountID, symbol string) bool {
 	return false
 }
 
-func (s *SpamFilter) GetBlacklistedDomains() []string {
+func (s *Filter) GetBlacklistedDomains() []string {
 	return []string{}
 }
 
-func (s *SpamFilter) GetCollectionVerificationType(address ton.AccountID) CollectionVerificationType {
-	return CollectionVerificationTypeNone
+func (s *Filter) GetVerificationType(address ton.AccountID) VerificationType {
+	return VerificationTypeNone
 }
