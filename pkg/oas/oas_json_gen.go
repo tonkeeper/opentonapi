@@ -24792,6 +24792,10 @@ func (s *Message) encodeFields(e *jx.Encoder) {
 		}
 	}
 	{
+		e.FieldStart("hash")
+		e.Str(s.Hash)
+	}
+	{
 		if s.RawBody.Set {
 			e.FieldStart("raw_body")
 			s.RawBody.Encode(e)
@@ -24811,7 +24815,7 @@ func (s *Message) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfMessage = [17]string{
+var jsonFieldsNameOfMessage = [18]string{
 	0:  "msg_type",
 	1:  "created_lt",
 	2:  "ihr_disabled",
@@ -24826,9 +24830,10 @@ var jsonFieldsNameOfMessage = [17]string{
 	11: "created_at",
 	12: "op_code",
 	13: "init",
-	14: "raw_body",
-	15: "decoded_op_name",
-	16: "decoded_body",
+	14: "hash",
+	15: "raw_body",
+	16: "decoded_op_name",
+	17: "decoded_body",
 }
 
 // Decode decodes Message from json.
@@ -24998,6 +25003,18 @@ func (s *Message) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"init\"")
 			}
+		case "hash":
+			requiredBitSet[1] |= 1 << 6
+			if err := func() error {
+				v, err := d.Str()
+				s.Hash = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"hash\"")
+			}
 		case "raw_body":
 			if err := func() error {
 				s.RawBody.Reset()
@@ -25040,7 +25057,7 @@ func (s *Message) Decode(d *jx.Decoder) error {
 	var failures []validate.FieldError
 	for i, mask := range [3]uint8{
 		0b11111111,
-		0b00001100,
+		0b01001100,
 		0b00000000,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
@@ -35474,9 +35491,13 @@ func (s *Transaction) encodeFields(e *jx.Encoder) {
 		e.FieldStart("destroyed")
 		e.Bool(s.Destroyed)
 	}
+	{
+		e.FieldStart("raw")
+		e.Str(s.Raw)
+	}
 }
 
-var jsonFieldsNameOfTransaction = [24]string{
+var jsonFieldsNameOfTransaction = [25]string{
 	0:  "hash",
 	1:  "lt",
 	2:  "account",
@@ -35501,6 +35522,7 @@ var jsonFieldsNameOfTransaction = [24]string{
 	21: "bounce_phase",
 	22: "aborted",
 	23: "destroyed",
+	24: "raw",
 }
 
 // Decode decodes Transaction from json.
@@ -35508,7 +35530,7 @@ func (s *Transaction) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode Transaction to nil")
 	}
-	var requiredBitSet [3]uint8
+	var requiredBitSet [4]uint8
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
@@ -35782,6 +35804,18 @@ func (s *Transaction) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"destroyed\"")
 			}
+		case "raw":
+			requiredBitSet[3] |= 1 << 0
+			if err := func() error {
+				v, err := d.Str()
+				s.Raw = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"raw\"")
+			}
 		default:
 			return d.Skip()
 		}
@@ -35791,10 +35825,11 @@ func (s *Transaction) Decode(d *jx.Decoder) error {
 	}
 	// Validate required fields.
 	var failures []validate.FieldError
-	for i, mask := range [3]uint8{
+	for i, mask := range [4]uint8{
 		0b11111111,
 		0b01101111,
 		0b11000000,
+		0b00000001,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.

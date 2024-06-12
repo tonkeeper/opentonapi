@@ -238,6 +238,10 @@ func ConvertTransaction(workchain int32, tx tongo.Transaction) (*Transaction, er
 	if storagePhase != nil {
 		storageFee = int64(storagePhase.StorageFeesCollected)
 	}
+	sBoc, err := tx.SourceBoc()
+	if err != nil {
+		return nil, err
+	}
 	return &Transaction{
 		BlockID: tx.BlockID.BlockID,
 		TransactionID: TransactionID{
@@ -264,6 +268,7 @@ func ConvertTransaction(workchain int32, tx tongo.Transaction) (*Transaction, er
 		CreditPhase:     creditPhase,
 		ActionPhase:     actionPhase,
 		BouncePhase:     bouncePhase,
+		Raw:             sBoc,
 	}, nil
 }
 
@@ -343,6 +348,7 @@ func ConvertMessage(message tlb.Message, txLT uint64) (Message, error) {
 				CreatedLt:   txLT,
 				Destination: dest,
 			},
+			Hash:         ton.Bits256(message.Hash()),
 			MsgType:      ExtInMsg,
 			SourceExtern: externalAddressFromTlb(info.Src),
 			ImportFee:    int64(info.ImportFee),

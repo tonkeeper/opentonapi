@@ -127,6 +127,7 @@ func convertTransaction(t core.Transaction, accountInterfaces []abi.ContractInte
 		Block:           t.BlockID.String(),
 		Aborted:         t.Aborted,
 		Destroyed:       t.Destroyed,
+		Raw:             hex.EncodeToString(t.Raw),
 	}
 	if t.PrevTransLt != 0 {
 		tx.PrevTransLt.Value = int64(t.PrevTransLt)
@@ -224,6 +225,7 @@ func convertMessage(m core.Message, book addressBook) oas.Message {
 		RawBody:       oas.OptString{},
 		DecodedOpName: oas.OptString{},
 		DecodedBody:   nil,
+		Hash:          m.Hash.Hex(),
 	}
 	if len(m.Body) != 0 {
 		msg.RawBody.SetTo(hex.EncodeToString(m.Body))

@@ -8297,6 +8297,7 @@ type Message struct {
 	CreatedAt   int64             `json:"created_at"`
 	OpCode      OptString         `json:"op_code"`
 	Init        OptStateInit      `json:"init"`
+	Hash        string            `json:"hash"`
 	// Hex-encoded BoC with raw message body.
 	RawBody       OptString `json:"raw_body"`
 	DecodedOpName OptString `json:"decoded_op_name"`
@@ -8371,6 +8372,11 @@ func (s *Message) GetOpCode() OptString {
 // GetInit returns the value of Init.
 func (s *Message) GetInit() OptStateInit {
 	return s.Init
+}
+
+// GetHash returns the value of Hash.
+func (s *Message) GetHash() string {
+	return s.Hash
 }
 
 // GetRawBody returns the value of RawBody.
@@ -8456,6 +8462,11 @@ func (s *Message) SetOpCode(val OptString) {
 // SetInit sets the value of Init.
 func (s *Message) SetInit(val OptStateInit) {
 	s.Init = val
+}
+
+// SetHash sets the value of Hash.
+func (s *Message) SetHash(val string) {
+	s.Hash = val
 }
 
 // SetRawBody sets the value of RawBody.
@@ -15225,6 +15236,8 @@ type Transaction struct {
 	BouncePhase     OptBouncePhaseType `json:"bounce_phase"`
 	Aborted         bool               `json:"aborted"`
 	Destroyed       bool               `json:"destroyed"`
+	// Hex encoded boc with raw transaction.
+	Raw string `json:"raw"`
 }
 
 // GetHash returns the value of Hash.
@@ -15347,6 +15360,11 @@ func (s *Transaction) GetDestroyed() bool {
 	return s.Destroyed
 }
 
+// GetRaw returns the value of Raw.
+func (s *Transaction) GetRaw() string {
+	return s.Raw
+}
+
 // SetHash sets the value of Hash.
 func (s *Transaction) SetHash(val string) {
 	s.Hash = val
@@ -15465,6 +15483,11 @@ func (s *Transaction) SetAborted(val bool) {
 // SetDestroyed sets the value of Destroyed.
 func (s *Transaction) SetDestroyed(val bool) {
 	s.Destroyed = val
+}
+
+// SetRaw sets the value of Raw.
+func (s *Transaction) SetRaw(val string) {
+	s.Raw = val
 }
 
 // Ref: #/components/schemas/TransactionType

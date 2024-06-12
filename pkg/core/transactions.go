@@ -2,6 +2,7 @@ package core
 
 import (
 	"fmt"
+	"github.com/tonkeeper/tongo/ton"
 	"math/big"
 	"strings"
 
@@ -111,6 +112,7 @@ type Transaction struct {
 	StorageFee int64
 	// TotalFee is the original total_fee of a transaction directly from the blockchain.
 	TotalFee int64
+	Raw      []byte
 }
 
 type MessageID struct {
@@ -154,6 +156,7 @@ const (
 type Message struct {
 	MessageID
 	MsgType           MsgType
+	Hash              ton.Bits256
 	SourceExtern      *ExternalAddress
 	DestinationExtern *ExternalAddress
 	IhrDisabled       bool
