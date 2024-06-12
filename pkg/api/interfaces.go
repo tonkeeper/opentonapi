@@ -4,10 +4,9 @@ import (
 	"context"
 	"crypto/ed25519"
 
+	"github.com/tonkeeper/opentonapi/pkg/bath"
 	"github.com/tonkeeper/opentonapi/pkg/gasless"
 	"github.com/tonkeeper/opentonapi/pkg/oas"
-	"github.com/tonkeeper/opentonapi/pkg/spam"
-	rules "github.com/tonkeeper/scam_backoffice_rules"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
 	"github.com/tonkeeper/tongo/boc"
@@ -174,11 +173,9 @@ type ratesSource interface {
 }
 
 type SpamFilter interface {
-	GetRules() rules.Rules
-	GetBlacklistedDomains() []string
-	IsJettonBlacklisted(address tongo.AccountID, symbol string) bool
-  GetVerificationType(address tongo.AccountID) spam.VerificationType
-  SpamDetector(amount int64, comment string) bool
+	CheckActions(actions []bath.Action) bool
+	JettonTrust(address tongo.AccountID, symbol, name, image string) core.TrustType
+	NftTrust(address tongo.AccountID, collection *ton.AccountID, description, image string) core.TrustType
 }
 
 type metadataCache struct {

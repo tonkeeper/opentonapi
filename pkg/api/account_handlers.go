@@ -250,7 +250,7 @@ func (h *Handler) SearchAccounts(ctx context.Context, params oas.SearchAccountsP
 			continue
 		}
 		if account.Symbol != "" {
-			if h.spamFilter.IsJettonBlacklisted(accountID.ID, account.Symbol) {
+			if h.spamFilter.JettonTrust(accountID.ID, account.Symbol, account.Name, account.Preview) == core.TrustBlacklist {
 				continue
 			}
 		}

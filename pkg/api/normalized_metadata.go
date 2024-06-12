@@ -6,6 +6,7 @@ import (
 
 	"github.com/shopspring/decimal"
 	"github.com/tonkeeper/opentonapi/pkg/addressbook"
+	"github.com/tonkeeper/opentonapi/pkg/core"
 	imgGenerator "github.com/tonkeeper/opentonapi/pkg/image"
 	"github.com/tonkeeper/opentonapi/pkg/references"
 	"github.com/tonkeeper/tongo/tep64"
@@ -13,14 +14,6 @@ import (
 )
 
 const UnknownJettonName = "UKWN"
-
-type VerificationType string
-
-const (
-	VerificationWhitelist VerificationType = "whitelist"
-	VerificationBlacklist VerificationType = "blacklist"
-	VerificationNone      VerificationType = "none"
-)
 
 // NormalizedMetadata is a special version of jetton metadata ready to be shown to the users.
 // It contains a mix of information from two sources:
@@ -33,19 +26,15 @@ type NormalizedMetadata struct {
 	Image        string
 	Symbol       string
 	Decimals     int
-	Verification VerificationType
+	Verification core.TrustType
 	Social       []string
 	Websites     []string
 }
 
-func NormalizeMetadata(meta tep64.Metadata, info *addressbook.KnownJetton, isBlacklisted bool) NormalizedMetadata {
+func NormalizeMetadata(meta tep64.Metadata, info *addressbook.KnownJetton, trust core.TrustType) NormalizedMetadata {
 	symbol := meta.Symbol
 	if symbol == "" {
 		symbol = UnknownJettonName
-	}
-	verification := VerificationNone
-	if isBlacklisted {
-		verification = VerificationBlacklist
 	}
 	name := meta.Name
 	if name == "" {
@@ -65,7 +54,6 @@ func NormalizeMetadata(meta tep64.Metadata, info *addressbook.KnownJetton, isBla
 		symbol = rewriteIfNotEmpty(symbol, info.Symbol)
 		social = info.Social
 		websites = info.Websites
-		verification = VerificationWhitelist
 	}
 
 	image = imgGenerator.DefaultGenerator.GenerateImageUrl(image, 200, 200)
@@ -76,7 +64,7 @@ func NormalizeMetadata(meta tep64.Metadata, info *addressbook.KnownJetton, isBla
 		Image:        image,
 		Symbol:       symbol,
 		Decimals:     convertJettonDecimals(meta.Decimals),
-		Verification: verification,
+		Verification: trust,
 		Social:       social,
 		Websites:     websites,
 	}

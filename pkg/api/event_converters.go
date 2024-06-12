@@ -6,13 +6,11 @@ import (
 	"fmt"
 	"math/big"
 	"strings"
-	"time"
 
 	"github.com/tonkeeper/tongo/ton"
 
 	"github.com/tonkeeper/opentonapi/pkg/references"
 
-	rules "github.com/tonkeeper/scam_backoffice_rules"
 	"github.com/tonkeeper/tongo"
 	"golang.org/x/exp/slices"
 
@@ -116,20 +114,8 @@ func signedValue(value string, viewer *tongo.AccountID, source, destination tong
 	return value
 }
 
-func (h *Handler) convertActionTonTransfer(t *bath.TonTransferAction, acceptLanguage string, viewer *tongo.AccountID) (oas.OptTonTransferAction, oas.ActionSimplePreview, bool) {
-	var spamDetected bool
-	if t.Amount < int64(ton.OneTON/10) && t.Comment != nil {
-		spamAction := rules.CheckAction(h.spamFilter.GetRules(), *t.Comment)
-		if spamAction != rules.UnKnown && spamAction != rules.Accept {
-			spamDetected = true
-			if spamAction == rules.Drop {
-				*t.Comment = ""
-			}
-		}
-		if !spamDetected {
-			spamDetected = h.spamFilter.SpamDetector(t.Amount, *t.Comment)
-		}
-	}
+func (h *Handler) convertActionTonTransfer(t *bath.TonTransferAction, acceptLanguage string, viewer *tongo.AccountID) (oas.OptTonTransferAction, oas.ActionSimplePreview) {
+
 	var action oas.OptTonTransferAction
 	action.SetTo(oas.TonTransferAction{
 		Amount:           t.Amount,
@@ -159,16 +145,10 @@ func (h *Handler) convertActionTonTransfer(t *bath.TonTransferAction, acceptLang
 		Accounts: distinctAccounts(viewer, h.addressBook, &t.Sender, &t.Recipient),
 		Value:    oas.NewOptString(value),
 	}
-	return action, simplePreview, spamDetected
+	return action, simplePreview
 }
 
-func (h *Handler) convertActionNftTransfer(t *bath.NftTransferAction, acceptLanguage string, viewer *tongo.AccountID) (oas.OptNftItemTransferAction, oas.ActionSimplePreview, bool) {
-	var spamDetected bool
-	if t.Comment != nil {
-		if spamAction := rules.CheckAction(h.spamFilter.GetRules(), *t.Comment); spamAction == rules.Drop {
-			spamDetected = true
-		}
-	}
+func (h *Handler) convertActionNftTransfer(t *bath.NftTransferAction, acceptLanguage string, viewer *tongo.AccountID) (oas.OptNftItemTransferAction, oas.ActionSimplePreview) {
 	var action oas.OptNftItemTransferAction
 	action.SetTo(oas.NftItemTransferAction{
 		Nft:              t.Nft.ToRaw(),
@@ -188,11 +168,10 @@ func (h *Handler) convertActionNftTransfer(t *bath.NftTransferAction, acceptLang
 		Accounts: distinctAccounts(viewer, h.addressBook, t.Recipient, t.Sender, &t.Nft),
 		Value:    oas.NewOptString(fmt.Sprintf("1 NFT")),
 	}
-	return action, simplePreview, spamDetected
+	return action, simplePreview
 }
 
-func (h *Handler) convertActionJettonTransfer(ctx context.Context, t *bath.JettonTransferAction, acceptLanguage string, viewer *tongo.AccountID) (oas.OptJettonTransferAction, oas.ActionSimplePreview, bool) {
-	var spamDetected bool
+func (h *Handler) convertActionJettonTransfer(ctx context.Context, t *bath.JettonTransferAction, acceptLanguage string, viewer *tongo.AccountID) (oas.OptJettonTransferAction, oas.ActionSimplePreview) {
 	meta := h.GetJettonNormalizedMetadata(ctx, t.Jetton)
 	preview := jettonPreview(t.Jetton, meta)
 	var action oas.OptJettonTransferAction
@@ -208,13 +187,6 @@ func (h *Handler) convertActionJettonTransfer(ctx context.Context, t *bath.Jetto
 	})
 	amount := Scale(t.Amount, meta.Decimals)
 	amountString := amount.String()
-	amountFloat, _ := amount.Float64()
-	rates, err := h.ratesSource.GetRates(time.Now().Unix())
-	if t.Comment != nil && (err == nil && amountFloat*rates[t.Jetton.ToRaw()] < 1) {
-		if spamAction := rules.CheckAction(h.spamFilter.GetRules(), *t.Comment); spamAction == rules.Drop {
-			spamDetected = true
-		}
-	}
 
 	simplePreview := oas.ActionSimplePreview{
 		Name: "Jetton Transfer",
@@ -234,7 +206,7 @@ func (h *Handler) convertActionJettonTransfer(ctx context.Context, t *bath.Jetto
 	if len(preview.Image) > 0 {
 		simplePreview.ValueImage = oas.NewOptString(preview.Image)
 	}
-	return action, simplePreview, spamDetected
+	return action, simplePreview
 }
 
 func (h *Handler) convertActionJettonMint(ctx context.Context, m *bath.JettonMintAction, acceptLanguage string, viewer *tongo.AccountID) (oas.OptJettonMintAction, oas.ActionSimplePreview) {
@@ -432,7 +404,7 @@ func (h *Handler) convertDomainRenew(ctx context.Context, d *bath.DnsRenewAction
 	return action, simplePreview
 }
 
-func (h *Handler) convertAction(ctx context.Context, viewer *tongo.AccountID, a bath.Action, acceptLanguage oas.OptString) (oas.Action, bool, error) {
+func (h *Handler) convertAction(ctx context.Context, viewer *tongo.AccountID, a bath.Action, acceptLanguage oas.OptString) (oas.Action, error) {
 	action := oas.Action{
 		Type:             oas.ActionType(a.Type),
 		BaseTransactions: make([]string, len(a.BaseTransactions)),
@@ -440,7 +412,6 @@ func (h *Handler) convertAction(ctx context.Context, viewer *tongo.AccountID, a 
 	for i, t := range a.BaseTransactions {
 		action.BaseTransactions[i] = t.Hex()
 	}
-	var spamDetected bool
 	if a.Success {
 		action.Status = oas.ActionStatusOk
 	} else {
@@ -453,11 +424,11 @@ func (h *Handler) convertAction(ctx context.Context, viewer *tongo.AccountID, a 
 	}
 	switch a.Type {
 	case bath.TonTransfer:
-		action.TonTransfer, action.SimplePreview, spamDetected = h.convertActionTonTransfer(a.TonTransfer, acceptLanguage.Value, viewer)
+		action.TonTransfer, action.SimplePreview = h.convertActionTonTransfer(a.TonTransfer, acceptLanguage.Value, viewer)
 	case bath.NftItemTransfer:
-		action.NftItemTransfer, action.SimplePreview, spamDetected = h.convertActionNftTransfer(a.NftItemTransfer, acceptLanguage.Value, viewer)
+		action.NftItemTransfer, action.SimplePreview = h.convertActionNftTransfer(a.NftItemTransfer, acceptLanguage.Value, viewer)
 	case bath.JettonTransfer:
-		action.JettonTransfer, action.SimplePreview, spamDetected = h.convertActionJettonTransfer(ctx, a.JettonTransfer, acceptLanguage.Value, viewer)
+		action.JettonTransfer, action.SimplePreview = h.convertActionJettonTransfer(ctx, a.JettonTransfer, acceptLanguage.Value, viewer)
 	case bath.JettonMint:
 		action.JettonMint, action.SimplePreview = h.convertActionJettonMint(ctx, a.JettonMint, acceptLanguage.Value, viewer)
 	case bath.JettonBurn:
@@ -548,7 +519,7 @@ func (h *Handler) convertAction(ctx context.Context, viewer *tongo.AccountID, a 
 		value := i18n.FormatTONs(price)
 		items, err := h.storage.GetNFTs(ctx, []tongo.AccountID{a.NftPurchase.Nft})
 		if err != nil {
-			return oas.Action{}, false, err
+			return oas.Action{}, err
 		}
 		var nft oas.NftItem
 		var nftImage string
@@ -682,14 +653,14 @@ func (h *Handler) convertAction(ctx context.Context, viewer *tongo.AccountID, a 
 		if a.AuctionBid.Nft == nil && a.AuctionBid.NftAddress != nil {
 			n, err := h.storage.GetNFTs(ctx, []tongo.AccountID{*a.AuctionBid.NftAddress})
 			if err != nil {
-				return oas.Action{}, false, err
+				return oas.Action{}, err
 			}
 			if len(n) == 1 {
 				a.AuctionBid.Nft = &n[0]
 			}
 		}
 		if a.AuctionBid.Nft == nil {
-			return oas.Action{}, false, fmt.Errorf("nft is nil")
+			return oas.Action{}, fmt.Errorf("nft is nil")
 		}
 		nft.SetTo(h.convertNFT(ctx, *a.AuctionBid.Nft, h.addressBook, h.metaCache))
 		action.AuctionBid.SetTo(oas.AuctionBidAction{
@@ -769,7 +740,7 @@ func (h *Handler) convertAction(ctx context.Context, viewer *tongo.AccountID, a 
 		action.DomainRenew, action.SimplePreview = h.convertDomainRenew(ctx, a.DnsRenew, acceptLanguage.Value, viewer)
 
 	}
-	return action, spamDetected, nil
+	return action, nil
 }
 
 func convertAccountValueFlow(accountID tongo.AccountID, flow *bath.AccountValueFlow, book addressBook, previews map[tongo.AccountID]oas.JettonPreview) oas.ValueFlow {
@@ -799,14 +770,13 @@ func (h *Handler) toEvent(ctx context.Context, trace *core.Trace, result *bath.A
 		InProgress: trace.InProgress(),
 	}
 	for i, a := range result.Actions {
-		convertedAction, spamDetected, err := h.convertAction(ctx, nil, a, lang)
+		convertedAction, err := h.convertAction(ctx, nil, a, lang)
 		if err != nil {
 			return oas.Event{}, err
 		}
-		event.IsScam = event.IsScam || spamDetected
 		event.Actions[i] = convertedAction
 	}
-
+	event.IsScam = h.spamFilter.CheckActions(result.Actions)
 	previews := make(map[tongo.AccountID]oas.JettonPreview)
 	for _, flow := range result.ValueFlow.Accounts {
 		for jettonMaster := range flow.Jettons {
@@ -876,18 +846,16 @@ func (h *Handler) toAccountEvent(ctx context.Context, account tongo.AccountID, t
 		Extra:      result.Extra(account),
 	}
 	for _, a := range result.Actions {
-		convertedAction, spamDetected, err := h.convertAction(ctx, &account, a, lang)
-		if err != nil {
-			return oas.AccountEvent{}, err
-		}
-		if !e.IsScam && spamDetected {
-			e.IsScam = true
-		}
 		if subjectOnly && !a.IsSubject(account) {
 			continue
 		}
+		convertedAction, err := h.convertAction(ctx, &account, a, lang)
+		if err != nil {
+			return oas.AccountEvent{}, err
+		}
 		e.Actions = append(e.Actions, convertedAction)
 	}
+	e.IsScam = h.spamFilter.CheckActions(result.Actions)
 	if len(e.Actions) == 0 {
 		e.Actions = []oas.Action{
 			createUnknownAction("Something happened but we don't understand what.", []oas.AccountAddress{convertAccountAddress(account, h.addressBook)}),

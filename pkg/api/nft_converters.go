@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"strings"
 
 	"github.com/tonkeeper/opentonapi/internal/g"
 	"github.com/tonkeeper/opentonapi/pkg/bath"
@@ -18,16 +17,6 @@ import (
 	"github.com/tonkeeper/opentonapi/pkg/references"
 )
 
-func (h *Handler) isScam(description string) bool {
-	domains := h.spamFilter.GetBlacklistedDomains()
-	for _, domain := range domains {
-		if strings.Contains(description, domain) {
-			return true
-		}
-	}
-	return false
-}
-
 func (h *Handler) convertNFT(ctx context.Context, item core.NftItem, book addressBook, metaCache metadataCache) oas.NftItem {
 	nftItem := oas.NftItem{
 		Address:  item.Address.ToRaw(),
@@ -36,7 +25,6 @@ func (h *Handler) convertNFT(ctx context.Context, item core.NftItem, book addres
 		Verified: item.Verified,
 		Metadata: anyToJSONRawMap(item.Metadata),
 		DNS:      g.Opt(item.DNS),
-		Trust:    oas.TrustType(h.spamFilter.GetVerificationType(item.Address)),
 	}
 	if item.Sale != nil {
 		tokenName := "TON"
@@ -57,19 +45,14 @@ func (h *Handler) convertNFT(ctx context.Context, item core.NftItem, book addres
 			},
 		}))
 	}
-
-	var image string
+	var image, description string
 	if item.CollectionAddress != nil {
 		cInfo, _ := metaCache.getCollectionMeta(ctx, *item.CollectionAddress)
 		if cc, prs := book.GetCollectionInfoByAddress(*item.CollectionAddress); prs {
 			nftItem.ApprovedBy = append(nftItem.ApprovedBy, cc.Approvers...)
 		}
-		nftItem.Trust = oas.TrustType(h.spamFilter.GetVerificationType(*item.CollectionAddress))
 		if len(nftItem.ApprovedBy) > 0 {
 			nftItem.Trust = oas.TrustTypeWhitelist
-		}
-		if h.isScam(cInfo.Description) {
-			nftItem.Trust = oas.TrustTypeBlacklist
 		}
 		nftItem.Collection.SetTo(oas.NftItemCollection{
 			Address:     item.CollectionAddress.ToRaw(),
@@ -92,11 +75,11 @@ func (h *Handler) convertNFT(ctx context.Context, item core.NftItem, book addres
 			image, _ = imageI.(string)
 		}
 		if descriptionI, prs := item.Metadata["description"]; prs {
-			if description, ok := descriptionI.(string); ok && h.isScam(description) {
-				nftItem.Trust = oas.TrustTypeBlacklist
-			}
+			description, _ = descriptionI.(string)
 		}
 	}
+	nftItem.Trust = oas.TrustType(h.spamFilter.NftTrust(item.Address, item.CollectionAddress, description, image))
+
 	if image == "" {
 		image = references.Placeholder
 	}
@@ -175,15 +158,13 @@ func (h *Handler) convertNftHistory(ctx context.Context, account tongo.AccountID
 			if action.Type != bath.NftItemTransfer {
 				continue
 			}
-			convertedAction, spamDetected, err := h.convertAction(ctx, &account, action, acceptLanguage)
+			convertedAction, err := h.convertAction(ctx, &account, action, acceptLanguage)
 			if err != nil {
 				return nil, 0, err
 			}
-			if spamDetected {
-				event.IsScam = true
-			}
 			event.Actions = append(event.Actions, convertedAction)
 		}
+		event.IsScam = h.spamFilter.CheckActions(actions.Actions)
 		if len(event.Actions) > 0 {
 			events = append(events, event)
 			lastLT = trace.Lt

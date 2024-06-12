@@ -84,15 +84,13 @@ func (h *Handler) convertJettonHistory(ctx context.Context, account ton.AccountI
 			if !action.IsSubject(account) {
 				continue
 			}
-			convertedAction, spamDetected, err := h.convertAction(ctx, &account, action, acceptLanguage)
+			convertedAction, err := h.convertAction(ctx, &account, action, acceptLanguage)
 			if err != nil {
 				return nil, 0, err
 			}
-			if !event.IsScam && spamDetected {
-				event.IsScam = true
-			}
 			event.Actions = append(event.Actions, convertedAction)
 		}
+		event.IsScam = h.spamFilter.CheckActions(result.Actions)
 		if len(event.Actions) == 0 {
 			continue
 		}
@@ -150,9 +148,9 @@ func (h *Handler) convertJettonBalance(ctx context.Context, wallet core.JettonWa
 	var normalizedMetadata NormalizedMetadata
 	info, ok := h.addressBook.GetJettonInfoByAddress(wallet.JettonAddress)
 	if ok {
-		normalizedMetadata = NormalizeMetadata(meta, &info, false)
+		normalizedMetadata = NormalizeMetadata(meta, &info, core.TrustNone)
 	} else {
-		normalizedMetadata = NormalizeMetadata(meta, nil, h.spamFilter.IsJettonBlacklisted(wallet.JettonAddress, meta.Symbol))
+		normalizedMetadata = NormalizeMetadata(meta, nil, h.spamFilter.JettonTrust(wallet.JettonAddress, meta.Symbol, meta.Name, meta.Image))
 	}
 	jettonBalance.Jetton = jettonPreview(wallet.JettonAddress, normalizedMetadata)
 

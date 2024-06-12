@@ -94,7 +94,7 @@ func (h *Handler) GetAccountInscriptionsHistory(ctx context.Context, params oas.
 			Account: convertAccountAddress(account.ID, h.addressBook),
 		}
 		for _, a := range actions {
-			action, _, err := h.convertAction(ctx, &account.ID, a, params.AcceptLanguage)
+			action, err := h.convertAction(ctx, &account.ID, a, params.AcceptLanguage)
 			if err != nil {
 				return nil, toError(http.StatusInternalServerError, err)
 			}
@@ -129,7 +129,7 @@ func (h *Handler) GetAccountInscriptionsHistoryByTicker(ctx context.Context, par
 			Account: convertAccountAddress(account.ID, h.addressBook),
 		}
 		for _, a := range actions {
-			action, _, err := h.convertAction(ctx, &account.ID, a, params.AcceptLanguage)
+			action, err := h.convertAction(ctx, &account.ID, a, params.AcceptLanguage)
 			if err != nil {
 				return nil, toError(http.StatusInternalServerError, err)
 			}

@@ -215,7 +215,7 @@ func (h *Handler) GetJettonNormalizedMetadata(ctx context.Context, master tongo.
 	meta, _ := h.metaCache.getJettonMeta(ctx, master)
 	// TODO: should we ignore the second returned value?
 	if info, ok := h.addressBook.GetJettonInfoByAddress(master); ok {
-		return NormalizeMetadata(meta, &info, false)
+		return NormalizeMetadata(meta, &info, core.TrustNone)
 	}
-	return NormalizeMetadata(meta, nil, h.spamFilter.IsJettonBlacklisted(master, meta.Symbol))
+	return NormalizeMetadata(meta, nil, h.spamFilter.JettonTrust(master, meta.Symbol, meta.Name, meta.Image))
 }
