@@ -54,6 +54,7 @@ func NormalizeMetadata(meta tep64.Metadata, info *addressbook.KnownJetton, trust
 		symbol = rewriteIfNotEmpty(symbol, info.Symbol)
 		social = info.Social
 		websites = info.Websites
+		trust = core.TrustWhitelist
 	}
 
 	image = imgGenerator.DefaultGenerator.GenerateImageUrl(image, 200, 200)
