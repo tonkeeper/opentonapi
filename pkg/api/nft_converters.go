@@ -51,9 +51,6 @@ func (h *Handler) convertNFT(ctx context.Context, item core.NftItem, book addres
 		if cc, prs := book.GetCollectionInfoByAddress(*item.CollectionAddress); prs {
 			nftItem.ApprovedBy = append(nftItem.ApprovedBy, cc.Approvers...)
 		}
-		if len(nftItem.ApprovedBy) > 0 {
-			nftItem.Trust = oas.TrustTypeWhitelist
-		}
 		nftItem.Collection.SetTo(oas.NftItemCollection{
 			Address:     item.CollectionAddress.ToRaw(),
 			Name:        cInfo.Name,
@@ -78,7 +75,8 @@ func (h *Handler) convertNFT(ctx context.Context, item core.NftItem, book addres
 			description, _ = descriptionI.(string)
 		}
 	}
-	nftItem.Trust = oas.TrustType(h.spamFilter.NftTrust(item.Address, item.CollectionAddress, description, image))
+	approved := len(nftItem.ApprovedBy) > 0
+	nftItem.Trust = oas.TrustType(h.spamFilter.NftTrust(item.Address, item.CollectionAddress, description, image, approved))
 
 	if image == "" {
 		image = references.Placeholder
