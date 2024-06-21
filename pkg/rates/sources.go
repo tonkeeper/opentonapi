@@ -205,12 +205,15 @@ func (m *Mock) getSlpTokensPrice(tonPrice float64) (map[tongo.AccountID]float64,
 			return nil, fmt.Errorf("unknown price")
 		}
 		switch slpType {
-		case references.JUsdtSlp, references.UsdtSlp:
+		case references.JUsdtSlpType:
 			usdPrice := float64(multiplier) / float64(ton.OneTON)
-			accountsPrice[account] = 1 / (usdPrice * tonPrice)
-		case references.TonSlp:
-			usdPrice := tonPrice * float64(multiplier) / float64(ton.OneTON)
-			accountsPrice[account] = 1 / (usdPrice * tonPrice)
+			accountsPrice[references.JUsdtSlp] = usdPrice / tonPrice
+		case references.UsdtSlpType:
+			usdPrice := float64(multiplier) / float64(ton.OneTON)
+			accountsPrice[references.UsdtSlp] = usdPrice / tonPrice
+		case references.TonSlpType:
+			usdPrice := tonPrice * (float64(multiplier) / float64(ton.OneTON))
+			accountsPrice[references.TonSlp] = usdPrice / tonPrice
 		}
 	}
 
