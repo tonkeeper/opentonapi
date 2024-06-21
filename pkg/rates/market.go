@@ -89,12 +89,12 @@ func (m *Mock) GetCurrentMarketsTonPrice() ([]Market, error) {
 	for idx, market := range markets {
 		respBody, err := sendRequest(market.ApiURL, "")
 		if err != nil {
-			zap.Error(err)
+			zap.Error(fmt.Errorf("[GetCurrentMarketsTonPrice] failed to send request: %v", err))
 			continue
 		}
 		market.UsdPrice, err = market.TonPriceConverter(respBody)
 		if err != nil {
-			zap.Error(err)
+			zap.Error(fmt.Errorf("[GetCurrentMarketsTonPrice] failed to convert ton price: %v", err))
 			continue
 		}
 		if market.UsdPrice == 0 {
@@ -268,7 +268,7 @@ func convertedTonHuobiResponse(respBody io.ReadCloser) (float64, error) {
 	return data.Tick.Data[0].Price, nil
 }
 
-func getFiatPrices() map[string]float64 {
+func getFiatPrices(tonPrice float64) map[string]float64 {
 	markets := []Market{
 		{
 			Name:               coinbase,
@@ -285,13 +285,14 @@ func getFiatPrices() map[string]float64 {
 	for _, market := range markets {
 		respBody, err := sendRequest(market.ApiURL, "")
 		if err != nil {
+			zap.Error(fmt.Errorf("[getFiatPrices] failed to send request: %v", err))
 			errorsCounter.WithLabelValues(market.Name).Inc()
 			continue
 		}
 		converted := market.FiatPriceConverter(respBody)
 		for currency, rate := range converted {
-			if _, ok := prices[currency]; !ok {
-				prices[currency] = rate
+			if _, ok := prices[currency]; !ok && rate != 0 {
+				prices[currency] = 1 / (rate * tonPrice)
 			}
 		}
 	}
@@ -356,6 +357,7 @@ func getPools(tonPrice float64, tonApiToken string) map[ton.AccountID]float64 {
 	for _, market := range markets {
 		respBody, err := sendRequest(market.ApiURL, "")
 		if err != nil {
+			zap.Error(fmt.Errorf("[getPools] failed to send request: %v", err))
 			errorsCounter.WithLabelValues(market.Name).Inc()
 			continue
 		}

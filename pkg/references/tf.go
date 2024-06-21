@@ -16,6 +16,20 @@ var BemoAccount = ton.MustParseAccountID("EQDNhy-nxYFgUqzfUzImBEP67JqsyMIcyk2S5_
 const TonstakersImplementationsName = "Tonstakers"
 const LiquidImplementationsUrl = "https://tonstakers.com/"
 
+type SlpType string
+
+const (
+	JUsdtSlp SlpType = "jUSDT"
+	TonSlp   SlpType = "TON"
+	UsdtSlp  SlpType = "USDT"
+)
+
+var SlpAccounts = map[SlpType]ton.AccountID{
+	JUsdtSlp: ton.MustParseAccountID("EQDynReiCeK8xlKRbYArpp4jyzZuF6-tYfhFM0O5ulOs5H0L"),
+	TonSlp:   ton.MustParseAccountID("EQDpJnZP89Jyxz3euDaXXFUhwCWtaOeRmiUJTi3jGYgF8fnj"),
+	UsdtSlp:  ton.MustParseAccountID("EQAz6ehNfL7_8NI7OVh1Qg46HsuC4kFpK-icfqK9J3Frd6CJ"),
+}
+
 var TonstakersSocialLinks = []string{"https://t.me/thetonstakers", "https://twitter.com/tonstakers"}
 var TonstakersAccountPool = ton.MustParseAccountID("EQCkWxfyhAkim3g2DjKQQg8T5P4g-Q1-K_jErGcDJZ4i-vqR")
 

@@ -3,7 +3,6 @@ package rates
 import (
 	"encoding/json"
 	"fmt"
-	"net/http"
 	"sort"
 	"strconv"
 	"time"
@@ -12,6 +11,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/tonkeeper/opentonapi/pkg/references"
 	"github.com/tonkeeper/tongo"
+	"github.com/tonkeeper/tongo/ton"
 	"go.uber.org/zap"
 )
 
@@ -20,55 +20,60 @@ var errorsCounter = promauto.NewCounterVec(prometheus.CounterOpts{
 }, []string{"source"})
 
 func (m *Mock) GetCurrentRates() (map[string]float64, error) {
-	rates := make(map[string]float64)
 	const (
 		tonstakers string = "tonstakers"
 		bemo       string = "bemo"
+		slpTokens  string = "slp_tokens"
 	)
 
 	marketsPrice, err := m.GetCurrentMarketsTonPrice()
 	if err != nil {
-		return rates, err
+		return map[string]float64{}, err
 	}
 	medianTonPriceToUsd, err := getMedianTonPrice(marketsPrice)
 	if err != nil {
-		return rates, err
+		return map[string]float64{}, err
 	}
-
-	fiatPrices := getFiatPrices()
 	pools := getPools(medianTonPriceToUsd, m.TonApiToken)
+	fiatPrices := getFiatPrices(medianTonPriceToUsd)
 
-	for attempt := 0; attempt < 3; attempt++ {
-		if tonstakersJetton, tonstakersPrice, err := getTonstakersPrice(references.TonstakersAccountPool); err == nil {
-			pools[tonstakersJetton] = tonstakersPrice
-			break
-		} else {
-			zap.Error(err)
+	retry := func(label string, tonPrice float64, task func(tonPrice float64) (map[ton.AccountID]float64, error)) (map[ton.AccountID]float64, error) {
+		for attempt := 0; attempt < 3; attempt++ {
+			accountsPrice, err := task(tonPrice)
+			if err != nil {
+				zap.Error(fmt.Errorf("label %v, attempt %v, failed to get account price: %v", label, attempt+1, err))
+				errorsCounter.WithLabelValues(label).Inc()
+				time.Sleep(time.Second * 1)
+				continue
+			}
+			return accountsPrice, nil
 		}
-		errorsCounter.WithLabelValues(tonstakers).Inc()
-		time.Sleep(time.Second * 3)
-	}
-	for attempt := 0; attempt < 3; attempt++ {
-		if bemoJetton, bemoPrice, err := getBemoPrice(references.BemoAccount); err == nil {
-			pools[bemoJetton] = bemoPrice
-			break
-		} else {
-			zap.Error(err)
-		}
-		errorsCounter.WithLabelValues(bemo).Inc()
-		time.Sleep(time.Second * 3)
+		return nil, fmt.Errorf("attempts failed")
 	}
 
-	// All data is displayed to the ratio to TON
-	// For example: 1 Jetton = ... TON, 1 USD = ... TON
+	if tonstakersPrice, err := retry(tonstakers, medianTonPriceToUsd, m.getTonstakersPrice); err == nil {
+		for account, price := range tonstakersPrice {
+			pools[account] = price
+		}
+	}
+	if bemoPrice, err := retry(bemo, medianTonPriceToUsd, m.getBemoPrice); err == nil {
+		for account, price := range bemoPrice {
+			pools[account] = price
+		}
+	}
+	if slpTokensPrice, err := retry(slpTokens, medianTonPriceToUsd, m.getSlpTokensPrice); err == nil {
+		for account, price := range slpTokensPrice {
+			pools[account] = price
+		}
+	}
+
+	rates := make(map[string]float64)
 	rates["TON"] = 1
 	for currency, price := range fiatPrices {
-		if price != 0 {
-			rates[currency] = 1 / (price * medianTonPriceToUsd)
-		}
+		rates[currency] = price
 	}
-	for token, price := range pools {
-		rates[token.ToRaw()] = price
+	for account, price := range pools {
+		rates[account.ToRaw()] = price
 	}
 
 	return rates, nil
@@ -94,59 +99,52 @@ func getMedianTonPrice(marketsPrice []Market) (float64, error) {
 
 // getBemoPrice it is used to get the price of the Bemo jetton from the contract.
 // We are using the TonApi, because the standard liteserver executor is incapable of invoking methods on the account
-func getBemoPrice(account tongo.AccountID) (tongo.AccountID, float64, error) {
-	resp, err := http.Get(fmt.Sprintf("https://tonapi.io/v2/blockchain/accounts/%v/methods/get_full_data", account.ToRaw()))
+func (m *Mock) getBemoPrice(tonPrice float64) (map[ton.AccountID]float64, error) {
+	url := fmt.Sprintf("https://tonapi.io/v2/blockchain/accounts/%v/methods/get_full_data", references.BemoAccount.ToRaw())
+	respBody, err := sendRequest(url, m.TonApiToken)
 	if err != nil {
-		return tongo.AccountID{}, 0, fmt.Errorf("[getBemoPrice] can't load price: %v", err)
+		return map[ton.AccountID]float64{}, err
 	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		return tongo.AccountID{}, 0, fmt.Errorf("bad status code: %v", resp.StatusCode)
-	}
-	var respBody struct {
+	type fullData struct {
 		Success bool `json:"success"`
 		Stack   []struct {
 			Num string `json:"num"`
 		}
 	}
-	if err = json.NewDecoder(resp.Body).Decode(&respBody); err != nil {
-		return tongo.AccountID{}, 0, fmt.Errorf("[getBemoPrice] failed to decode response: %v", err)
+	var result fullData
+	if err = json.NewDecoder(respBody).Decode(&result); err != nil {
+		respBody.Close()
+		return map[ton.AccountID]float64{}, fmt.Errorf("[getBemoPrice] failed to decode response: %v", err)
 	}
-	if !respBody.Success {
-		return tongo.AccountID{}, 0, fmt.Errorf("failed success")
+	respBody.Close()
+	if !result.Success {
+		return map[ton.AccountID]float64{}, fmt.Errorf("not success")
 	}
-	if len(respBody.Stack) < 2 {
-		return tongo.AccountID{}, 0, fmt.Errorf("empty stack")
+	if len(result.Stack) < 2 {
+		return map[ton.AccountID]float64{}, fmt.Errorf("empty stack")
 	}
-
-	firstParam, err := strconv.ParseInt(respBody.Stack[0].Num, 0, 64)
+	firstParam, err := strconv.ParseInt(result.Stack[0].Num, 0, 64)
 	if err != nil {
-		return tongo.AccountID{}, 0, err
+		return map[ton.AccountID]float64{}, err
 	}
-	secondParam, err := strconv.ParseInt(respBody.Stack[1].Num, 0, 64)
+	secondParam, err := strconv.ParseInt(result.Stack[1].Num, 0, 64)
 	if err != nil {
-		return tongo.AccountID{}, 0, err
+		return map[ton.AccountID]float64{}, err
 	}
-
 	price := float64(secondParam) / float64(firstParam)
 
-	return account, price, nil
+	return map[ton.AccountID]float64{references.BemoAccount: price}, nil
 }
 
 // getTonstakersPrice is used to retrieve the price and token address of an account on the Tonstakers pool.
 // We are using the TonApi, because the standard liteserver executor is incapable of invoking methods on the account
-func getTonstakersPrice(pool tongo.AccountID) (tongo.AccountID, float64, error) {
-	resp, err := http.Get(fmt.Sprintf("https://tonapi.io/v2/blockchain/accounts/%v/methods/get_pool_full_data", pool.ToRaw()))
+func (m *Mock) getTonstakersPrice(tonPrice float64) (map[ton.AccountID]float64, error) {
+	url := fmt.Sprintf("https://tonapi.io/v2/blockchain/accounts/%v/methods/get_pool_full_data", references.TonstakersAccountPool.ToRaw())
+	respBody, err := sendRequest(url, m.TonApiToken)
 	if err != nil {
-		return tongo.AccountID{}, 0, fmt.Errorf("[getTonstakersPrice] can't load price")
+		return map[ton.AccountID]float64{}, err
 	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		return tongo.AccountID{}, 0, fmt.Errorf("bad status code: %v", resp.StatusCode)
-	}
-	var respBody struct {
+	type poolFullData struct {
 		Success bool `json:"success"`
 		Decoded struct {
 			JettonMinter    string `json:"jetton_minter"`
@@ -154,21 +152,67 @@ func getTonstakersPrice(pool tongo.AccountID) (tongo.AccountID, float64, error) 
 			ProjectedSupply int64  `json:"projected_supply"`
 		}
 	}
-	if err = json.NewDecoder(resp.Body).Decode(&respBody); err != nil {
-		return tongo.AccountID{}, 0, fmt.Errorf("[getTonstakersPrice] failed to decode response: %v", err)
+	var result poolFullData
+	if err = json.NewDecoder(respBody).Decode(&result); err != nil {
+		respBody.Close()
+		return map[ton.AccountID]float64{}, fmt.Errorf("[getTonstakersPrice] failed to decode response: %v", err)
 	}
-
-	if !respBody.Success {
-		return tongo.AccountID{}, 0, fmt.Errorf("failed success")
+	respBody.Close()
+	if !result.Success {
+		return map[ton.AccountID]float64{}, fmt.Errorf("not success")
 	}
-	if respBody.Decoded.ProjectBalance == 0 || respBody.Decoded.ProjectedSupply == 0 {
-		return tongo.AccountID{}, 0, fmt.Errorf("empty balance")
+	if result.Decoded.ProjectBalance == 0 || result.Decoded.ProjectedSupply == 0 {
+		return map[ton.AccountID]float64{}, fmt.Errorf("empty balance")
 	}
-	accountJetton, err := tongo.ParseAddress(respBody.Decoded.JettonMinter)
+	account, err := ton.ParseAccountID(result.Decoded.JettonMinter)
 	if err != nil {
-		return tongo.AccountID{}, 0, err
+		return map[ton.AccountID]float64{}, err
 	}
-	price := float64(respBody.Decoded.ProjectBalance) / float64(respBody.Decoded.ProjectedSupply)
+	price := float64(result.Decoded.ProjectBalance) / float64(result.Decoded.ProjectedSupply)
 
-	return accountJetton.ID, price, nil
+	return map[ton.AccountID]float64{account: price}, nil
+}
+
+func (m *Mock) getSlpTokensPrice(tonPrice float64) (map[tongo.AccountID]float64, error) {
+	type vaultData struct {
+		Success bool `json:"success"`
+		Stack   []struct {
+			Type string `json:"type"`
+			Num  string `json:"num"`
+		} `json:"stack"`
+	}
+	accountsPrice := make(map[tongo.AccountID]float64)
+	for slpType, account := range references.SlpAccounts {
+		url := fmt.Sprintf("https://tonapi.io/v2/blockchain/accounts/%v/methods/get_vault_data", account.ToRaw())
+		respBody, err := sendRequest(url, m.TonApiToken)
+		if err != nil {
+			continue
+		}
+		var result vaultData
+		if err = json.NewDecoder(respBody).Decode(&result); err != nil {
+			respBody.Close()
+			return nil, err
+		}
+		respBody.Close()
+		if !result.Success {
+			return nil, fmt.Errorf("not success")
+		}
+		multiplier, err := strconv.ParseInt(result.Stack[1].Num, 0, 64)
+		if err != nil {
+			return nil, err
+		}
+		if multiplier == 0 {
+			return nil, fmt.Errorf("unknown price")
+		}
+		switch slpType {
+		case references.JUsdtSlp, references.UsdtSlp:
+			usdPrice := float64(multiplier) / float64(ton.OneTON)
+			accountsPrice[account] = 1 / (usdPrice * tonPrice)
+		case references.TonSlp:
+			usdPrice := tonPrice * float64(multiplier) / float64(ton.OneTON)
+			accountsPrice[account] = 1 / (usdPrice * tonPrice)
+		}
+	}
+
+	return accountsPrice, nil
 }
