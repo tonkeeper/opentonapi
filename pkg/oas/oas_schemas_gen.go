@@ -13951,6 +13951,102 @@ func (s *RawBlockchainConfigConfig) init() RawBlockchainConfigConfig {
 	return m
 }
 
+// Ref: #/components/schemas/ReducedBlock
+type ReducedBlock struct {
+	WorkchainID  int32     `json:"workchain_id"`
+	Shard        string    `json:"shard"`
+	Seqno        int32     `json:"seqno"`
+	MasterRef    OptString `json:"master_ref"`
+	TxQuantity   int       `json:"tx_quantity"`
+	Utime        int64     `json:"utime"`
+	ShardsBlocks []string  `json:"shards_blocks"`
+}
+
+// GetWorkchainID returns the value of WorkchainID.
+func (s *ReducedBlock) GetWorkchainID() int32 {
+	return s.WorkchainID
+}
+
+// GetShard returns the value of Shard.
+func (s *ReducedBlock) GetShard() string {
+	return s.Shard
+}
+
+// GetSeqno returns the value of Seqno.
+func (s *ReducedBlock) GetSeqno() int32 {
+	return s.Seqno
+}
+
+// GetMasterRef returns the value of MasterRef.
+func (s *ReducedBlock) GetMasterRef() OptString {
+	return s.MasterRef
+}
+
+// GetTxQuantity returns the value of TxQuantity.
+func (s *ReducedBlock) GetTxQuantity() int {
+	return s.TxQuantity
+}
+
+// GetUtime returns the value of Utime.
+func (s *ReducedBlock) GetUtime() int64 {
+	return s.Utime
+}
+
+// GetShardsBlocks returns the value of ShardsBlocks.
+func (s *ReducedBlock) GetShardsBlocks() []string {
+	return s.ShardsBlocks
+}
+
+// SetWorkchainID sets the value of WorkchainID.
+func (s *ReducedBlock) SetWorkchainID(val int32) {
+	s.WorkchainID = val
+}
+
+// SetShard sets the value of Shard.
+func (s *ReducedBlock) SetShard(val string) {
+	s.Shard = val
+}
+
+// SetSeqno sets the value of Seqno.
+func (s *ReducedBlock) SetSeqno(val int32) {
+	s.Seqno = val
+}
+
+// SetMasterRef sets the value of MasterRef.
+func (s *ReducedBlock) SetMasterRef(val OptString) {
+	s.MasterRef = val
+}
+
+// SetTxQuantity sets the value of TxQuantity.
+func (s *ReducedBlock) SetTxQuantity(val int) {
+	s.TxQuantity = val
+}
+
+// SetUtime sets the value of Utime.
+func (s *ReducedBlock) SetUtime(val int64) {
+	s.Utime = val
+}
+
+// SetShardsBlocks sets the value of ShardsBlocks.
+func (s *ReducedBlock) SetShardsBlocks(val []string) {
+	s.ShardsBlocks = val
+}
+
+// Ref: #/components/schemas/ReducedBlocks
+type ReducedBlocks struct {
+	Blocks []ReducedBlock `json:"blocks"`
+}
+
+// GetBlocks returns the value of Blocks.
+func (s *ReducedBlocks) GetBlocks() []ReducedBlock {
+	return s.Blocks
+}
+
+// SetBlocks sets the value of Blocks.
+func (s *ReducedBlocks) SetBlocks(val []ReducedBlock) {
+	s.Blocks = val
+}
+
 // Ref: #/components/schemas/Refund
 type Refund struct {
 	Type   RefundType `json:"type"`

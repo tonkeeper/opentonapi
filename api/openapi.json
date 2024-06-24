@@ -135,6 +135,15 @@
      "type": "boolean"
     }
    },
+   "fromQuery": {
+    "in": "query",
+    "name": "from",
+    "required": true,
+    "schema": {
+     "format": "int64",
+     "type": "integer"
+    }
+   },
    "hashQuery": {
     "description": "hash",
     "in": "query",
@@ -308,6 +317,15 @@
     "schema": {
      "example": "(-1,8000000000000000,4234234,3E575DAB1D25...90D8,47192E5C46C...BB29)",
      "type": "string"
+    }
+   },
+   "toQuery": {
+    "in": "query",
+    "name": "to",
+    "required": true,
+    "schema": {
+     "format": "int64",
+     "type": "integer"
     }
    },
    "traceIDParameter": {
@@ -4530,6 +4548,71 @@
     ],
     "type": "object"
    },
+   "ReducedBlock": {
+    "properties": {
+     "master_ref": {
+      "example": "(-1,4234234,8000000000000000)",
+      "type": "string"
+     },
+     "seqno": {
+      "example": 21734019,
+      "format": "int32",
+      "type": "integer"
+     },
+     "shard": {
+      "example": 8000000000000000,
+      "type": "string"
+     },
+     "shards_blocks": {
+      "items": {
+       "example": [
+        "(-1",
+        4234235,
+        "8000000000000000)"
+       ],
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "tx_quantity": {
+      "example": 130,
+      "type": "integer"
+     },
+     "utime": {
+      "example": 23814011000000,
+      "format": "int64",
+      "type": "integer"
+     },
+     "workchain_id": {
+      "example": 0,
+      "format": "int32",
+      "type": "integer"
+     }
+    },
+    "required": [
+     "workchain_id",
+     "shard",
+     "seqno",
+     "tx_quantity",
+     "utime",
+     "shards_blocks"
+    ],
+    "type": "object"
+   },
+   "ReducedBlocks": {
+    "properties": {
+     "blocks": {
+      "items": {
+       "$ref": "#/components/schemas/ReducedBlock"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "blocks"
+    ],
+    "type": "object"
+   },
    "Refund": {
     "properties": {
      "origin": {
@@ -7108,6 +7191,38 @@
        }
       },
       "description": "transaction by message hash"
+     },
+     "default": {
+      "$ref": "#/components/responses/Error"
+     }
+    },
+    "tags": [
+     "Blockchain"
+    ]
+   }
+  },
+  "/v2/blockchain/reduced/blocks": {
+   "get": {
+    "description": "Get reduced blockchain blocks data",
+    "operationId": "getReducedBlockchainBlocks",
+    "parameters": [
+     {
+      "$ref": "#/components/parameters/fromQuery"
+     },
+     {
+      "$ref": "#/components/parameters/toQuery"
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ReducedBlocks"
+        }
+       }
+      },
+      "description": "blockchain reduced blocks"
      },
      "default": {
       "$ref": "#/components/responses/Error"

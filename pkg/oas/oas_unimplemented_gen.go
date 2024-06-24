@@ -765,6 +765,15 @@ func (UnimplementedHandler) GetRawTransactions(ctx context.Context, params GetRa
 	return r, ht.ErrNotImplemented
 }
 
+// GetReducedBlockchainBlocks implements getReducedBlockchainBlocks operation.
+//
+// Get reduced blockchain blocks data.
+//
+// GET /v2/blockchain/reduced/blocks
+func (UnimplementedHandler) GetReducedBlockchainBlocks(ctx context.Context, params GetReducedBlockchainBlocksParams) (r *ReducedBlocks, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // GetStakingPoolHistory implements getStakingPoolHistory operation.
 //
 // Pool history.

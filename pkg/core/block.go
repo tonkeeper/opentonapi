@@ -34,6 +34,14 @@ type BlockHeader struct {
 	TxQuantity int
 }
 
+type ReducedBlock struct {
+	tongo.BlockIDExt
+	MasterRef    *tongo.BlockIDExt
+	Utime        int64
+	ShardsBlocks []tongo.BlockIDExt
+	TxQuantity   int
+}
+
 // GenSoftware describes version and capabilities of software that created a blockchain block.
 type GenSoftware struct {
 	Version      uint32
