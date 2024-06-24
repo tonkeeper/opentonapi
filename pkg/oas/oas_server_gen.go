@@ -514,6 +514,12 @@ type Handler interface {
 	//
 	// GET /v2/liteserver/get_transactions/{account_id}
 	GetRawTransactions(ctx context.Context, params GetRawTransactionsParams) (*GetRawTransactionsOK, error)
+	// GetReducedBlockchainBlocks implements getReducedBlockchainBlocks operation.
+	//
+	// Get reduced blockchain blocks data.
+	//
+	// GET /v2/blockchain/reduced/blocks
+	GetReducedBlockchainBlocks(ctx context.Context, params GetReducedBlockchainBlocksParams) (*ReducedBlocks, error)
 	// GetStakingPoolHistory implements getStakingPoolHistory operation.
 	//
 	// Pool history.

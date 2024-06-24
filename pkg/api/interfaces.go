@@ -33,6 +33,7 @@ type storage interface {
 	// ReindexAccount updates internal cache used to store the account's state.
 	ReindexAccount(ctx context.Context, accountID tongo.AccountID) error
 	GetBlockHeader(ctx context.Context, id tongo.BlockID) (*core.BlockHeader, error)
+	GetReducedBlocks(ctx context.Context, from, to int64) ([]core.ReducedBlock, error)
 	GetBlockShards(ctx context.Context, id tongo.BlockID) ([]ton.BlockID, error)
 	LastMasterchainBlockHeader(ctx context.Context) (*core.BlockHeader, error)
 	GetTransaction(ctx context.Context, hash tongo.Bits256) (*core.Transaction, error)

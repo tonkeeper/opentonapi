@@ -110,6 +110,23 @@ func convertBlockHeader(b core.BlockHeader) oas.BlockchainBlock {
 	return res
 }
 
+func convertReducedBlock(block core.ReducedBlock) oas.ReducedBlock {
+	converted := oas.ReducedBlock{
+		WorkchainID: block.Workchain,
+		Shard:       fmt.Sprintf("%x", block.Shard),
+		Seqno:       int32(block.Seqno),
+		Utime:       block.Utime,
+		TxQuantity:  block.TxQuantity,
+	}
+	if block.MasterRef != nil {
+		converted.MasterRef.SetTo(block.MasterRef.BlockID.String())
+	}
+	for _, s := range block.ShardsBlocks {
+		converted.ShardsBlocks = append(converted.ShardsBlocks, s.BlockID.String())
+	}
+	return converted
+}
+
 func convertTransaction(t core.Transaction, accountInterfaces []abi.ContractInterface, book addressBook) oas.Transaction {
 	tx := oas.Transaction{
 		Hash:            t.Hash.Hex(),

@@ -26,6 +26,24 @@ paths:
                 $ref: '#/components/schemas/ServiceStatus'
         'default':
           $ref: '#/components/responses/Error'
+  /v2/blockchain/reduced/blocks:
+    get:
+      description: Get reduced blockchain blocks data
+      operationId: getReducedBlockchainBlocks
+      tags:
+        - Blockchain
+      parameters:
+        - $ref: '#/components/parameters/fromQuery'
+        - $ref: '#/components/parameters/toQuery'
+      responses:
+        '200':
+          description: blockchain reduced blocks
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReducedBlocks'
+        'default':
+          $ref: '#/components/responses/Error'
   /v2/blockchain/blocks/{block_id}:
     get:
       description: Get blockchain block data
@@ -436,11 +454,8 @@ paths:
                     type: string
                   test_only:
                     type: boolean
-
         default:
           $ref: '#/components/responses/Error'
-
-
 
   /v2/events/emulate:
     post:
@@ -1935,13 +1950,13 @@ paths:
       description: "Estimates the cost of the given messages and returns a payload to sign."
       operationId: gaslessEstimate
       parameters:
-      - name: master_id
-        in: path
-        required: true
-        description: jetton to pay commission
-        schema:
-          type: string
-          example: 0:97264395BD65A255A429B11326C84128B7D70FFED7949ABAE3036D506BA38621
+        - name: master_id
+          in: path
+          required: true
+          description: jetton to pay commission
+          schema:
+            type: string
+            example: 0:97264395BD65A255A429B11326C84128B7D70FFED7949ABAE3036D506BA38621
       tags:
         - Gasless
       requestBody:
@@ -2912,6 +2927,20 @@ components:
         items:
           type: string
         example: [ "ton", "usd", "rub" ]
+    fromQuery:
+      in: query
+      name: from
+      required: true
+      schema:
+        type: integer
+        format: int64
+    toQuery:
+      in: query
+      name: to
+      required: true
+      schema:
+        type: integer
+        format: int64
 
   requestBodies:
     MethodParameters:
@@ -3214,6 +3243,42 @@ components:
         indexing_latency:
           type: integer
           example: 100
+    ReducedBlock:
+      type: object
+      required:
+        - workchain_id
+        - shard
+        - seqno
+        - tx_quantity
+        - utime
+        - shards_blocks
+      properties:
+        workchain_id:
+          type: integer
+          example: 0
+          format: int32
+        shard:
+          type: string
+          example: 8000000000000000
+        seqno:
+          type: integer
+          example: 21734019
+          format: int32
+        master_ref:
+          type: string
+          example: (-1,4234234,8000000000000000)
+        tx_quantity:
+          type: integer
+          example: 130
+        utime:
+          type: integer
+          format: int64
+          example: 23814011000000
+        shards_blocks:
+          type: array
+          items:
+            type: string
+            example: [ (-1,4234235,8000000000000000) ]
     BlockchainBlock:
       type: object
       required:
@@ -3360,6 +3425,15 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/BlockchainBlock'
+    ReducedBlocks:
+      type: object
+      required:
+        - blocks
+      properties:
+        blocks:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReducedBlock'
     BlockchainBlockShards:
       type: object
       required:

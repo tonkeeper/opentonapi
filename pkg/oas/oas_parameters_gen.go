@@ -9975,6 +9975,107 @@ func decodeGetRawTransactionsParams(args [1]string, argsEscaped bool, r *http.Re
 	return params, nil
 }
 
+// GetReducedBlockchainBlocksParams is parameters of getReducedBlockchainBlocks operation.
+type GetReducedBlockchainBlocksParams struct {
+	From int64
+	To   int64
+}
+
+func unpackGetReducedBlockchainBlocksParams(packed middleware.Parameters) (params GetReducedBlockchainBlocksParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "from",
+			In:   "query",
+		}
+		params.From = packed[key].(int64)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "to",
+			In:   "query",
+		}
+		params.To = packed[key].(int64)
+	}
+	return params
+}
+
+func decodeGetReducedBlockchainBlocksParams(args [0]string, argsEscaped bool, r *http.Request) (params GetReducedBlockchainBlocksParams, _ error) {
+	q := uri.NewQueryDecoder(r.URL.Query())
+	// Decode query: from.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "from",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToInt64(val)
+				if err != nil {
+					return err
+				}
+
+				params.From = c
+				return nil
+			}); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "from",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Decode query: to.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "to",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToInt64(val)
+				if err != nil {
+					return err
+				}
+
+				params.To = c
+				return nil
+			}); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "to",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
 // GetStakingPoolHistoryParams is parameters of getStakingPoolHistory operation.
 type GetStakingPoolHistoryParams struct {
 	// Account ID.

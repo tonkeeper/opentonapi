@@ -1156,6 +1156,27 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 					}
 
 					elem = origElem
+				case 'r': // Prefix: "reduced/blocks"
+					origElem := elem
+					if l := len("reduced/blocks"); len(elem) >= l && elem[0:l] == "reduced/blocks" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					if len(elem) == 0 {
+						// Leaf node.
+						switch r.Method {
+						case "GET":
+							s.handleGetReducedBlockchainBlocksRequest([0]string{}, elemIsEscaped, w, r)
+						default:
+							s.notAllowed(w, r, "GET")
+						}
+
+						return
+					}
+
+					elem = origElem
 				case 't': // Prefix: "transactions/"
 					origElem := elem
 					if l := len("transactions/"); len(elem) >= l && elem[0:l] == "transactions/" {
@@ -4318,6 +4339,31 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 						}
 
 						elem = origElem
+					}
+
+					elem = origElem
+				case 'r': // Prefix: "reduced/blocks"
+					origElem := elem
+					if l := len("reduced/blocks"); len(elem) >= l && elem[0:l] == "reduced/blocks" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					if len(elem) == 0 {
+						switch method {
+						case "GET":
+							// Leaf: GetReducedBlockchainBlocks
+							r.name = "GetReducedBlockchainBlocks"
+							r.summary = ""
+							r.operationID = "getReducedBlockchainBlocks"
+							r.pathPattern = "/v2/blockchain/reduced/blocks"
+							r.args = args
+							r.count = 0
+							return r, true
+						default:
+							return
+						}
 					}
 
 					elem = origElem
