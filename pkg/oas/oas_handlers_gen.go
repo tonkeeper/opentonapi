@@ -3286,20 +3286,20 @@ func (s *Server) handleGetAccountJettonsHistoryRequest(args [1]string, argsEscap
 	}
 }
 
-// handleGetAccountMultisigRequest handles getAccountMultisig operation.
+// handleGetAccountMultisigsRequest handles getAccountMultisigs operation.
 //
-// Get account's multisig.
+// Get account's multisigs.
 //
-// GET /v2/accounts/{account_id}/multisig
-func (s *Server) handleGetAccountMultisigRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
+// GET /v2/accounts/{account_id}/multisigs
+func (s *Server) handleGetAccountMultisigsRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("getAccountMultisig"),
+		otelogen.OperationID("getAccountMultisigs"),
 		semconv.HTTPMethodKey.String("GET"),
-		semconv.HTTPRouteKey.String("/v2/accounts/{account_id}/multisig"),
+		semconv.HTTPRouteKey.String("/v2/accounts/{account_id}/multisigs"),
 	}
 
 	// Start a span for this request.
-	ctx, span := s.cfg.Tracer.Start(r.Context(), "GetAccountMultisig",
+	ctx, span := s.cfg.Tracer.Start(r.Context(), "GetAccountMultisigs",
 		trace.WithAttributes(otelAttrs...),
 		serverSpanKind,
 	)
@@ -3324,11 +3324,11 @@ func (s *Server) handleGetAccountMultisigRequest(args [1]string, argsEscaped boo
 		}
 		err          error
 		opErrContext = ogenerrors.OperationContext{
-			Name: "GetAccountMultisig",
-			ID:   "getAccountMultisig",
+			Name: "GetAccountMultisigs",
+			ID:   "getAccountMultisigs",
 		}
 	)
-	params, err := decodeGetAccountMultisigParams(args, argsEscaped, r)
+	params, err := decodeGetAccountMultisigsParams(args, argsEscaped, r)
 	if err != nil {
 		err = &ogenerrors.DecodeParamsError{
 			OperationContext: opErrContext,
@@ -3339,13 +3339,13 @@ func (s *Server) handleGetAccountMultisigRequest(args [1]string, argsEscaped boo
 		return
 	}
 
-	var response *AccountsMultisig
+	var response *Multisigs
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:          ctx,
-			OperationName:    "GetAccountMultisig",
+			OperationName:    "GetAccountMultisigs",
 			OperationSummary: "",
-			OperationID:      "getAccountMultisig",
+			OperationID:      "getAccountMultisigs",
 			Body:             nil,
 			Params: middleware.Parameters{
 				{
@@ -3358,8 +3358,8 @@ func (s *Server) handleGetAccountMultisigRequest(args [1]string, argsEscaped boo
 
 		type (
 			Request  = struct{}
-			Params   = GetAccountMultisigParams
-			Response = *AccountsMultisig
+			Params   = GetAccountMultisigsParams
+			Response = *Multisigs
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -3368,14 +3368,14 @@ func (s *Server) handleGetAccountMultisigRequest(args [1]string, argsEscaped boo
 		](
 			m,
 			mreq,
-			unpackGetAccountMultisigParams,
+			unpackGetAccountMultisigsParams,
 			func(ctx context.Context, request Request, params Params) (response Response, err error) {
-				response, err = s.h.GetAccountMultisig(ctx, params)
+				response, err = s.h.GetAccountMultisigs(ctx, params)
 				return response, err
 			},
 		)
 	} else {
-		response, err = s.h.GetAccountMultisig(ctx, params)
+		response, err = s.h.GetAccountMultisigs(ctx, params)
 	}
 	if err != nil {
 		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
@@ -3394,7 +3394,7 @@ func (s *Server) handleGetAccountMultisigRequest(args [1]string, argsEscaped boo
 		return
 	}
 
-	if err := encodeGetAccountMultisigResponse(response, w, span); err != nil {
+	if err := encodeGetAccountMultisigsResponse(response, w, span); err != nil {
 		recordError("EncodeResponse", err)
 		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
 			s.cfg.ErrorHandler(ctx, w, r, err)

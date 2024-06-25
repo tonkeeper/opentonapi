@@ -168,12 +168,12 @@ type Handler interface {
 	//
 	// GET /v2/accounts/{account_id}/jettons/history
 	GetAccountJettonsHistory(ctx context.Context, params GetAccountJettonsHistoryParams) (*AccountEvents, error)
-	// GetAccountMultisig implements getAccountMultisig operation.
+	// GetAccountMultisigs implements getAccountMultisigs operation.
 	//
-	// Get account's multisig.
+	// Get account's multisigs.
 	//
-	// GET /v2/accounts/{account_id}/multisig
-	GetAccountMultisig(ctx context.Context, params GetAccountMultisigParams) (*AccountsMultisig, error)
+	// GET /v2/accounts/{account_id}/multisigs
+	GetAccountMultisigs(ctx context.Context, params GetAccountMultisigsParams) (*Multisigs, error)
 	// GetAccountNftHistory implements getAccountNftHistory operation.
 	//
 	// Get the transfer nft history.

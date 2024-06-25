@@ -972,20 +972,6 @@
     ],
     "type": "object"
    },
-   "AccountsMultisig": {
-    "properties": {
-     "multisig_items": {
-      "items": {
-       "$ref": "#/components/schemas/Multisig"
-      },
-      "type": "array"
-     }
-    },
-    "required": [
-     "multisig_items"
-    ],
-    "type": "object"
-   },
    "Action": {
     "properties": {
      "AuctionBid": {
@@ -4206,6 +4192,20 @@
     ],
     "type": "object"
    },
+   "Multisigs": {
+    "properties": {
+     "multisigs": {
+      "items": {
+       "$ref": "#/components/schemas/Multisig"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "multisigs"
+    ],
+    "type": "object"
+   },
    "NftApprovedBy": {
     "items": {
      "enum": [
@@ -6381,10 +6381,10 @@
     ]
    }
   },
-  "/v2/accounts/{account_id}/multisig": {
+  "/v2/accounts/{account_id}/multisigs": {
    "get": {
-    "description": "Get account's multisig",
-    "operationId": "getAccountMultisig",
+    "description": "Get account's multisigs",
+    "operationId": "getAccountMultisigs",
     "parameters": [
      {
       "$ref": "#/components/parameters/accountIDParameter"
@@ -6395,11 +6395,11 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/AccountsMultisig"
+         "$ref": "#/components/schemas/Multisigs"
         }
        }
       },
-      "description": "account's multisig"
+      "description": "account's multisigs"
      },
      "default": {
       "$ref": "#/components/responses/Error"

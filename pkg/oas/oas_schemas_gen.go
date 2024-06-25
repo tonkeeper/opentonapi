@@ -618,21 +618,6 @@ func (s *Accounts) SetAccounts(val []Account) {
 	s.Accounts = val
 }
 
-// Ref: #/components/schemas/AccountsMultisig
-type AccountsMultisig struct {
-	MultisigItems []Multisig `json:"multisig_items"`
-}
-
-// GetMultisigItems returns the value of MultisigItems.
-func (s *AccountsMultisig) GetMultisigItems() []Multisig {
-	return s.MultisigItems
-}
-
-// SetMultisigItems sets the value of MultisigItems.
-func (s *AccountsMultisig) SetMultisigItems(val []Multisig) {
-	s.MultisigItems = val
-}
-
 // Ref: #/components/schemas/Action
 type Action struct {
 	Type                  ActionType                     `json:"type"`
@@ -8977,6 +8962,21 @@ func (s *MultisigOrder) SetApprovalsNum(val int32) {
 // SetExpirationDate sets the value of ExpirationDate.
 func (s *MultisigOrder) SetExpirationDate(val int64) {
 	s.ExpirationDate = val
+}
+
+// Ref: #/components/schemas/Multisigs
+type Multisigs struct {
+	Multisigs []Multisig `json:"multisigs"`
+}
+
+// GetMultisigs returns the value of Multisigs.
+func (s *Multisigs) GetMultisigs() []Multisig {
+	return s.Multisigs
+}
+
+// SetMultisigs sets the value of Multisigs.
+func (s *Multisigs) SetMultisigs(val []Multisig) {
+	s.Multisigs = val
 }
 
 type NftApprovedBy []NftApprovedByItem

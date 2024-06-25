@@ -452,9 +452,9 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 							}
 
 							elem = origElem
-						case 'm': // Prefix: "multisig"
+						case 'm': // Prefix: "multisigs"
 							origElem := elem
-							if l := len("multisig"); len(elem) >= l && elem[0:l] == "multisig" {
+							if l := len("multisigs"); len(elem) >= l && elem[0:l] == "multisigs" {
 								elem = elem[l:]
 							} else {
 								break
@@ -464,7 +464,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 								// Leaf node.
 								switch r.Method {
 								case "GET":
-									s.handleGetAccountMultisigRequest([1]string{
+									s.handleGetAccountMultisigsRequest([1]string{
 										args[0],
 									}, elemIsEscaped, w, r)
 								default:
@@ -3630,9 +3630,9 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 							}
 
 							elem = origElem
-						case 'm': // Prefix: "multisig"
+						case 'm': // Prefix: "multisigs"
 							origElem := elem
-							if l := len("multisig"); len(elem) >= l && elem[0:l] == "multisig" {
+							if l := len("multisigs"); len(elem) >= l && elem[0:l] == "multisigs" {
 								elem = elem[l:]
 							} else {
 								break
@@ -3641,11 +3641,11 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 							if len(elem) == 0 {
 								switch method {
 								case "GET":
-									// Leaf: GetAccountMultisig
-									r.name = "GetAccountMultisig"
+									// Leaf: GetAccountMultisigs
+									r.name = "GetAccountMultisigs"
 									r.summary = ""
-									r.operationID = "getAccountMultisig"
-									r.pathPattern = "/v2/accounts/{account_id}/multisig"
+									r.operationID = "getAccountMultisigs"
+									r.pathPattern = "/v2/accounts/{account_id}/multisigs"
 									r.args = args
 									r.count = 1
 									return r, true

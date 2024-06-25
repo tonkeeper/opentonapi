@@ -1003,21 +1003,21 @@ paths:
                     example: "NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2ODQ3..."
         'default':
           $ref: '#/components/responses/Error'
-  /v2/accounts/{account_id}/multisig:
+  /v2/accounts/{account_id}/multisigs:
     get:
-      description: Get account's multisig
-      operationId: getAccountMultisig
+      description: Get account's multisigs
+      operationId: getAccountMultisigs
       tags:
         - Accounts
       parameters:
         - $ref: '#/components/parameters/accountIDParameter'
       responses:
         '200':
-          description: account's multisig
+          description: account's multisigs
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AccountsMultisig'
+                $ref: '#/components/schemas/Multisigs'
         'default':
           $ref: '#/components/responses/Error'
   
@@ -5205,12 +5205,12 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/NftItem'
-    AccountsMultisig:
+    Multisigs:
       type: object
       required:
-        - multisig_items
+        - multisigs
       properties:
-        multisig_items:
+        multisigs:
           type: array
           items:
             $ref: '#/components/schemas/Multisig'

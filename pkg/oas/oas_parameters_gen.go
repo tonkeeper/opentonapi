@@ -3802,13 +3802,13 @@ func decodeGetAccountJettonsHistoryParams(args [1]string, argsEscaped bool, r *h
 	return params, nil
 }
 
-// GetAccountMultisigParams is parameters of getAccountMultisig operation.
-type GetAccountMultisigParams struct {
+// GetAccountMultisigsParams is parameters of getAccountMultisigs operation.
+type GetAccountMultisigsParams struct {
 	// Account ID.
 	AccountID string
 }
 
-func unpackGetAccountMultisigParams(packed middleware.Parameters) (params GetAccountMultisigParams) {
+func unpackGetAccountMultisigsParams(packed middleware.Parameters) (params GetAccountMultisigsParams) {
 	{
 		key := middleware.ParameterKey{
 			Name: "account_id",
@@ -3819,7 +3819,7 @@ func unpackGetAccountMultisigParams(packed middleware.Parameters) (params GetAcc
 	return params
 }
 
-func decodeGetAccountMultisigParams(args [1]string, argsEscaped bool, r *http.Request) (params GetAccountMultisigParams, _ error) {
+func decodeGetAccountMultisigsParams(args [1]string, argsEscaped bool, r *http.Request) (params GetAccountMultisigsParams, _ error) {
 	// Decode path: account_id.
 	if err := func() error {
 		param := args[0]

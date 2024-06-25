@@ -251,12 +251,12 @@ func (UnimplementedHandler) GetAccountJettonsHistory(ctx context.Context, params
 	return r, ht.ErrNotImplemented
 }
 
-// GetAccountMultisig implements getAccountMultisig operation.
+// GetAccountMultisigs implements getAccountMultisigs operation.
 //
-// Get account's multisig.
+// Get account's multisigs.
 //
-// GET /v2/accounts/{account_id}/multisig
-func (UnimplementedHandler) GetAccountMultisig(ctx context.Context, params GetAccountMultisigParams) (r *AccountsMultisig, _ error) {
+// GET /v2/accounts/{account_id}/multisigs
+func (UnimplementedHandler) GetAccountMultisigs(ctx context.Context, params GetAccountMultisigsParams) (r *Multisigs, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
