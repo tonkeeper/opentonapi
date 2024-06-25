@@ -452,6 +452,29 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 							}
 
 							elem = origElem
+						case 'm': // Prefix: "multisig"
+							origElem := elem
+							if l := len("multisig"); len(elem) >= l && elem[0:l] == "multisig" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							if len(elem) == 0 {
+								// Leaf node.
+								switch r.Method {
+								case "GET":
+									s.handleGetAccountMultisigRequest([1]string{
+										args[0],
+									}, elemIsEscaped, w, r)
+								default:
+									s.notAllowed(w, r, "GET")
+								}
+
+								return
+							}
+
+							elem = origElem
 						case 'n': // Prefix: "nfts"
 							origElem := elem
 							if l := len("nfts"); len(elem) >= l && elem[0:l] == "nfts" {
@@ -2275,24 +2298,67 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				}
 
 				elem = origElem
-			case 'm': // Prefix: "message/decode"
+			case 'm': // Prefix: "m"
 				origElem := elem
-				if l := len("message/decode"); len(elem) >= l && elem[0:l] == "message/decode" {
+				if l := len("m"); len(elem) >= l && elem[0:l] == "m" {
 					elem = elem[l:]
 				} else {
 					break
 				}
 
 				if len(elem) == 0 {
-					// Leaf node.
-					switch r.Method {
-					case "POST":
-						s.handleDecodeMessageRequest([0]string{}, elemIsEscaped, w, r)
-					default:
-						s.notAllowed(w, r, "POST")
+					break
+				}
+				switch elem[0] {
+				case 'e': // Prefix: "essage/decode"
+					origElem := elem
+					if l := len("essage/decode"); len(elem) >= l && elem[0:l] == "essage/decode" {
+						elem = elem[l:]
+					} else {
+						break
 					}
 
-					return
+					if len(elem) == 0 {
+						// Leaf node.
+						switch r.Method {
+						case "POST":
+							s.handleDecodeMessageRequest([0]string{}, elemIsEscaped, w, r)
+						default:
+							s.notAllowed(w, r, "POST")
+						}
+
+						return
+					}
+
+					elem = origElem
+				case 'u': // Prefix: "ultisig/"
+					origElem := elem
+					if l := len("ultisig/"); len(elem) >= l && elem[0:l] == "ultisig/" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					// Param: "account_id"
+					// Leaf parameter
+					args[0] = elem
+					elem = ""
+
+					if len(elem) == 0 {
+						// Leaf node.
+						switch r.Method {
+						case "GET":
+							s.handleGetMultisigAccountRequest([1]string{
+								args[0],
+							}, elemIsEscaped, w, r)
+						default:
+							s.notAllowed(w, r, "GET")
+						}
+
+						return
+					}
+
+					elem = origElem
 				}
 
 				elem = origElem
@@ -3561,6 +3627,31 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 								}
 
 								elem = origElem
+							}
+
+							elem = origElem
+						case 'm': // Prefix: "multisig"
+							origElem := elem
+							if l := len("multisig"); len(elem) >= l && elem[0:l] == "multisig" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							if len(elem) == 0 {
+								switch method {
+								case "GET":
+									// Leaf: GetAccountMultisig
+									r.name = "GetAccountMultisig"
+									r.summary = ""
+									r.operationID = "getAccountMultisig"
+									r.pathPattern = "/v2/accounts/{account_id}/multisig"
+									r.args = args
+									r.count = 1
+									return r, true
+								default:
+									return
+								}
 							}
 
 							elem = origElem
@@ -5535,28 +5626,73 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 				}
 
 				elem = origElem
-			case 'm': // Prefix: "message/decode"
+			case 'm': // Prefix: "m"
 				origElem := elem
-				if l := len("message/decode"); len(elem) >= l && elem[0:l] == "message/decode" {
+				if l := len("m"); len(elem) >= l && elem[0:l] == "m" {
 					elem = elem[l:]
 				} else {
 					break
 				}
 
 				if len(elem) == 0 {
-					switch method {
-					case "POST":
-						// Leaf: DecodeMessage
-						r.name = "DecodeMessage"
-						r.summary = ""
-						r.operationID = "decodeMessage"
-						r.pathPattern = "/v2/message/decode"
-						r.args = args
-						r.count = 0
-						return r, true
-					default:
-						return
+					break
+				}
+				switch elem[0] {
+				case 'e': // Prefix: "essage/decode"
+					origElem := elem
+					if l := len("essage/decode"); len(elem) >= l && elem[0:l] == "essage/decode" {
+						elem = elem[l:]
+					} else {
+						break
 					}
+
+					if len(elem) == 0 {
+						switch method {
+						case "POST":
+							// Leaf: DecodeMessage
+							r.name = "DecodeMessage"
+							r.summary = ""
+							r.operationID = "decodeMessage"
+							r.pathPattern = "/v2/message/decode"
+							r.args = args
+							r.count = 0
+							return r, true
+						default:
+							return
+						}
+					}
+
+					elem = origElem
+				case 'u': // Prefix: "ultisig/"
+					origElem := elem
+					if l := len("ultisig/"); len(elem) >= l && elem[0:l] == "ultisig/" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					// Param: "account_id"
+					// Leaf parameter
+					args[0] = elem
+					elem = ""
+
+					if len(elem) == 0 {
+						switch method {
+						case "GET":
+							// Leaf: GetMultisigAccount
+							r.name = "GetMultisigAccount"
+							r.summary = ""
+							r.operationID = "getMultisigAccount"
+							r.pathPattern = "/v2/multisig/{account_id}"
+							r.args = args
+							r.count = 1
+							return r, true
+						default:
+							return
+						}
+					}
+
+					elem = origElem
 				}
 
 				elem = origElem

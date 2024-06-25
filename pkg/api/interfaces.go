@@ -104,6 +104,9 @@ type storage interface {
 
 	GetMissedEvents(ctx context.Context, account ton.AccountID, lt uint64, limit int) ([]oas.AccountEvent, error)
 
+	GetAccountMultisig(ctx context.Context, accountID ton.AccountID) ([]core.Multisig, error)
+	GetMultisigByID(ctx context.Context, accountID ton.AccountID) (*core.Multisig, error)
+
 	liteStorageRaw
 }
 

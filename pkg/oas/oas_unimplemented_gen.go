@@ -251,6 +251,15 @@ func (UnimplementedHandler) GetAccountJettonsHistory(ctx context.Context, params
 	return r, ht.ErrNotImplemented
 }
 
+// GetAccountMultisig implements getAccountMultisig operation.
+//
+// Get account's multisig.
+//
+// GET /v2/accounts/{account_id}/multisig
+func (UnimplementedHandler) GetAccountMultisig(ctx context.Context, params GetAccountMultisigParams) (r *AccountsMultisig, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // GetAccountNftHistory implements getAccountNftHistory operation.
 //
 // Get the transfer nft history.
@@ -564,6 +573,15 @@ func (UnimplementedHandler) GetJettonsEvents(ctx context.Context, params GetJett
 //
 // GET /v2/rates/markets
 func (UnimplementedHandler) GetMarketsRates(ctx context.Context) (r *GetMarketsRatesOK, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// GetMultisigAccount implements getMultisigAccount operation.
+//
+// Get multisig account info.
+//
+// GET /v2/multisig/{account_id}
+func (UnimplementedHandler) GetMultisigAccount(ctx context.Context, params GetMultisigAccountParams) (r *Multisig, _ error) {
 	return r, ht.ErrNotImplemented
 }
 

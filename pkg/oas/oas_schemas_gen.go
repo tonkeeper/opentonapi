@@ -618,6 +618,21 @@ func (s *Accounts) SetAccounts(val []Account) {
 	s.Accounts = val
 }
 
+// Ref: #/components/schemas/AccountsMultisig
+type AccountsMultisig struct {
+	MultisigItems []Multisig `json:"multisig_items"`
+}
+
+// GetMultisigItems returns the value of MultisigItems.
+func (s *AccountsMultisig) GetMultisigItems() []Multisig {
+	return s.MultisigItems
+}
+
+// SetMultisigItems sets the value of MultisigItems.
+func (s *AccountsMultisig) SetMultisigItems(val []Multisig) {
+	s.MultisigItems = val
+}
+
 // Ref: #/components/schemas/Action
 type Action struct {
 	Type                  ActionType                     `json:"type"`
@@ -8811,6 +8826,157 @@ func (s *MsgForwardPrices) SetFirstFrac(val int64) {
 // SetNextFrac sets the value of NextFrac.
 func (s *MsgForwardPrices) SetNextFrac(val int64) {
 	s.NextFrac = val
+}
+
+// Ref: #/components/schemas/Multisig
+type Multisig struct {
+	Address   string          `json:"address"`
+	Seqno     int64           `json:"seqno"`
+	Threshold int32           `json:"threshold"`
+	Signers   []string        `json:"signers"`
+	Proposers []string        `json:"proposers"`
+	Orders    []MultisigOrder `json:"orders"`
+}
+
+// GetAddress returns the value of Address.
+func (s *Multisig) GetAddress() string {
+	return s.Address
+}
+
+// GetSeqno returns the value of Seqno.
+func (s *Multisig) GetSeqno() int64 {
+	return s.Seqno
+}
+
+// GetThreshold returns the value of Threshold.
+func (s *Multisig) GetThreshold() int32 {
+	return s.Threshold
+}
+
+// GetSigners returns the value of Signers.
+func (s *Multisig) GetSigners() []string {
+	return s.Signers
+}
+
+// GetProposers returns the value of Proposers.
+func (s *Multisig) GetProposers() []string {
+	return s.Proposers
+}
+
+// GetOrders returns the value of Orders.
+func (s *Multisig) GetOrders() []MultisigOrder {
+	return s.Orders
+}
+
+// SetAddress sets the value of Address.
+func (s *Multisig) SetAddress(val string) {
+	s.Address = val
+}
+
+// SetSeqno sets the value of Seqno.
+func (s *Multisig) SetSeqno(val int64) {
+	s.Seqno = val
+}
+
+// SetThreshold sets the value of Threshold.
+func (s *Multisig) SetThreshold(val int32) {
+	s.Threshold = val
+}
+
+// SetSigners sets the value of Signers.
+func (s *Multisig) SetSigners(val []string) {
+	s.Signers = val
+}
+
+// SetProposers sets the value of Proposers.
+func (s *Multisig) SetProposers(val []string) {
+	s.Proposers = val
+}
+
+// SetOrders sets the value of Orders.
+func (s *Multisig) SetOrders(val []MultisigOrder) {
+	s.Orders = val
+}
+
+// Ref: #/components/schemas/MultisigOrder
+type MultisigOrder struct {
+	Address          string   `json:"address"`
+	OrderSeqno       int64    `json:"order_seqno"`
+	Threshold        int32    `json:"threshold"`
+	SentForExecution bool     `json:"sent_for_execution"`
+	Signers          []string `json:"signers"`
+	ApprovalsNum     int32    `json:"approvals_num"`
+	ExpirationDate   int64    `json:"expiration_date"`
+}
+
+// GetAddress returns the value of Address.
+func (s *MultisigOrder) GetAddress() string {
+	return s.Address
+}
+
+// GetOrderSeqno returns the value of OrderSeqno.
+func (s *MultisigOrder) GetOrderSeqno() int64 {
+	return s.OrderSeqno
+}
+
+// GetThreshold returns the value of Threshold.
+func (s *MultisigOrder) GetThreshold() int32 {
+	return s.Threshold
+}
+
+// GetSentForExecution returns the value of SentForExecution.
+func (s *MultisigOrder) GetSentForExecution() bool {
+	return s.SentForExecution
+}
+
+// GetSigners returns the value of Signers.
+func (s *MultisigOrder) GetSigners() []string {
+	return s.Signers
+}
+
+// GetApprovalsNum returns the value of ApprovalsNum.
+func (s *MultisigOrder) GetApprovalsNum() int32 {
+	return s.ApprovalsNum
+}
+
+// GetExpirationDate returns the value of ExpirationDate.
+func (s *MultisigOrder) GetExpirationDate() int64 {
+	return s.ExpirationDate
+}
+
+// SetAddress sets the value of Address.
+func (s *MultisigOrder) SetAddress(val string) {
+	s.Address = val
+}
+
+// SetOrderSeqno sets the value of OrderSeqno.
+func (s *MultisigOrder) SetOrderSeqno(val int64) {
+	s.OrderSeqno = val
+}
+
+// SetThreshold sets the value of Threshold.
+func (s *MultisigOrder) SetThreshold(val int32) {
+	s.Threshold = val
+}
+
+// SetSentForExecution sets the value of SentForExecution.
+func (s *MultisigOrder) SetSentForExecution(val bool) {
+	s.SentForExecution = val
+}
+
+// SetSigners sets the value of Signers.
+func (s *MultisigOrder) SetSigners(val []string) {
+	s.Signers = val
+}
+
+// SetApprovalsNum sets the value of ApprovalsNum.
+func (s *MultisigOrder) SetApprovalsNum(val int32) {
+	s.ApprovalsNum = val
+}
+
+// SetExpirationDate sets the value of ExpirationDate.
+func (s *MultisigOrder) SetExpirationDate(val int64) {
+	s.ExpirationDate = val
 }
 
 type NftApprovedBy []NftApprovedByItem
