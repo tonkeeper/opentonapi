@@ -4118,6 +4118,112 @@
     ],
     "type": "object"
    },
+   "Multisig": {
+    "properties": {
+     "address": {
+      "example": "0:da6b1b6663a0e4d18cc8574ccd9db5296e367dd9324706f3bbd9eb1cd2caf0bf",
+      "type": "string"
+     },
+     "orders": {
+      "items": {
+       "$ref": "#/components/schemas/MultisigOrder"
+      },
+      "type": "array"
+     },
+     "proposers": {
+      "items": {
+       "example": "0:da6b1b6663a0e4d18cc8574ccd9db5296e367dd9324706f3bbd9eb1cd2caf0bf",
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "seqno": {
+      "example": 1,
+      "format": "int64",
+      "type": "integer"
+     },
+     "signers": {
+      "items": {
+       "example": "0:da6b1b6663a0e4d18cc8574ccd9db5296e367dd9324706f3bbd9eb1cd2caf0bf",
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "threshold": {
+      "format": "int32",
+      "type": "integer"
+     }
+    },
+    "required": [
+     "address",
+     "seqno",
+     "threshold",
+     "signers",
+     "proposers",
+     "orders"
+    ],
+    "type": "object"
+   },
+   "MultisigOrder": {
+    "properties": {
+     "address": {
+      "example": "0:da6b1b6663a0e4d18cc8574ccd9db5296e367dd9324706f3bbd9eb1cd2caf0bf",
+      "type": "string"
+     },
+     "approvals_num": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "expiration_date": {
+      "format": "int64",
+      "type": "integer"
+     },
+     "order_seqno": {
+      "example": 1,
+      "format": "int64",
+      "type": "integer"
+     },
+     "sent_for_execution": {
+      "example": false,
+      "type": "boolean"
+     },
+     "signers": {
+      "items": {
+       "example": "0:da6b1b6663a0e4d18cc8574ccd9db5296e367dd9324706f3bbd9eb1cd2caf0bf",
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "threshold": {
+      "format": "int32",
+      "type": "integer"
+     }
+    },
+    "required": [
+     "address",
+     "order_seqno",
+     "threshold",
+     "sent_for_execution",
+     "signers",
+     "approvals_num",
+     "expiration_date"
+    ],
+    "type": "object"
+   },
+   "Multisigs": {
+    "properties": {
+     "multisigs": {
+      "items": {
+       "$ref": "#/components/schemas/Multisig"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "multisigs"
+    ],
+    "type": "object"
+   },
    "NftApprovedBy": {
     "items": {
      "enum": [
@@ -6348,6 +6454,35 @@
        }
       },
       "description": "account jetton history"
+     },
+     "default": {
+      "$ref": "#/components/responses/Error"
+     }
+    },
+    "tags": [
+     "Accounts"
+    ]
+   }
+  },
+  "/v2/accounts/{account_id}/multisigs": {
+   "get": {
+    "description": "Get account's multisigs",
+    "operationId": "getAccountMultisigs",
+    "parameters": [
+     {
+      "$ref": "#/components/parameters/accountIDParameter"
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Multisigs"
+        }
+       }
+      },
+      "description": "account's multisigs"
      },
      "default": {
       "$ref": "#/components/responses/Error"
@@ -8969,6 +9104,35 @@
     },
     "tags": [
      "Emulation"
+    ]
+   }
+  },
+  "/v2/multisig/{account_id}": {
+   "get": {
+    "description": "Get multisig account info",
+    "operationId": "getMultisigAccount",
+    "parameters": [
+     {
+      "$ref": "#/components/parameters/accountIDParameter"
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Multisig"
+        }
+       }
+      },
+      "description": "multisig account"
+     },
+     "default": {
+      "$ref": "#/components/responses/Error"
+     }
+    },
+    "tags": [
+     "Multisig"
     ]
    }
   },

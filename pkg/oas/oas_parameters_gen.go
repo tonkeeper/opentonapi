@@ -3802,6 +3802,72 @@ func decodeGetAccountJettonsHistoryParams(args [1]string, argsEscaped bool, r *h
 	return params, nil
 }
 
+// GetAccountMultisigsParams is parameters of getAccountMultisigs operation.
+type GetAccountMultisigsParams struct {
+	// Account ID.
+	AccountID string
+}
+
+func unpackGetAccountMultisigsParams(packed middleware.Parameters) (params GetAccountMultisigsParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "account_id",
+			In:   "path",
+		}
+		params.AccountID = packed[key].(string)
+	}
+	return params
+}
+
+func decodeGetAccountMultisigsParams(args [1]string, argsEscaped bool, r *http.Request) (params GetAccountMultisigsParams, _ error) {
+	// Decode path: account_id.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "account_id",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.AccountID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account_id",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
 // GetAccountNftHistoryParams is parameters of getAccountNftHistory operation.
 type GetAccountNftHistoryParams struct {
 	// Account ID.
@@ -7689,6 +7755,72 @@ func decodeGetJettonsEventsParams(args [1]string, argsEscaped bool, r *http.Requ
 		return params, &ogenerrors.DecodeParamError{
 			Name: "Accept-Language",
 			In:   "header",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// GetMultisigAccountParams is parameters of getMultisigAccount operation.
+type GetMultisigAccountParams struct {
+	// Account ID.
+	AccountID string
+}
+
+func unpackGetMultisigAccountParams(packed middleware.Parameters) (params GetMultisigAccountParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "account_id",
+			In:   "path",
+		}
+		params.AccountID = packed[key].(string)
+	}
+	return params
+}
+
+func decodeGetMultisigAccountParams(args [1]string, argsEscaped bool, r *http.Request) (params GetMultisigAccountParams, _ error) {
+	// Decode path: account_id.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "account_id",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.AccountID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account_id",
+			In:   "path",
 			Err:  err,
 		}
 	}

@@ -10,6 +10,7 @@ import (
 	"strings"
 	"unicode"
 
+	"github.com/tonkeeper/opentonapi/pkg/core"
 	imgGenerator "github.com/tonkeeper/opentonapi/pkg/image"
 	"github.com/tonkeeper/tongo/boc"
 	"github.com/tonkeeper/tongo/tlb"
@@ -209,4 +210,34 @@ func stringToTVMStackRecord(s string) (tlb.VmStackValue, error) {
 		return tlb.VmStackValue{}, err
 	}
 	return tlb.VmStackValue{SumType: "VmStkCell", VmStkCell: tlb.Ref[boc.Cell]{Value: *c}}, nil
+}
+
+func convertMultisig(item core.Multisig) oas.Multisig {
+	converted := oas.Multisig{
+		Address:   item.AccountID.ToRaw(),
+		Seqno:     item.Seqno,
+		Threshold: item.Threshold,
+	}
+	for _, account := range item.Signers {
+		converted.Signers = append(converted.Signers, account.ToRaw())
+	}
+	for _, account := range item.Proposers {
+		converted.Proposers = append(converted.Proposers, account.ToRaw())
+	}
+	for _, order := range item.Orders {
+		var signers []string
+		for _, account := range order.Signers {
+			signers = append(signers, account.ToRaw())
+		}
+		converted.Orders = append(converted.Orders, oas.MultisigOrder{
+			Address:          order.AccountID.ToRaw(),
+			OrderSeqno:       order.OrderSeqno,
+			Threshold:        order.Threshold,
+			SentForExecution: order.SentForExecution,
+			Signers:          signers,
+			ApprovalsNum:     order.ApprovalsNum,
+			ExpirationDate:   order.ExpirationDate,
+		})
+	}
+	return converted
 }

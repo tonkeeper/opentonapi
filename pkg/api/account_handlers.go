@@ -480,6 +480,25 @@ func (h *Handler) BlockchainAccountInspect(ctx context.Context, params oas.Block
 	return &resp, nil
 }
 
+func (h *Handler) GetAccountMultisigs(ctx context.Context, params oas.GetAccountMultisigsParams) (*oas.Multisigs, error) {
+	accountID, err := ton.ParseAccountID(params.AccountID)
+	if err != nil {
+		return nil, toError(http.StatusBadRequest, err)
+	}
+	multisigs, err := h.storage.GetAccountMultisigs(ctx, accountID)
+	if errors.Is(err, core.ErrEntityNotFound) {
+		return nil, toError(http.StatusNotFound, err)
+	}
+	if err != nil {
+		return nil, toError(http.StatusInternalServerError, err)
+	}
+	var converted []oas.Multisig
+	for _, multisig := range multisigs {
+		converted = append(converted, convertMultisig(multisig))
+	}
+	return &oas.Multisigs{Multisigs: converted}, nil
+}
+
 var unknownWalletVersionError = fmt.Errorf("unknown wallet version")
 
 func pubkeyFromCodeData(code, data []byte) ([]byte, error) {
