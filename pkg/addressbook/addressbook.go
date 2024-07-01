@@ -31,13 +31,27 @@ type KnownAddress struct {
 	Image       string `json:"image,omitempty"`
 }
 
+type AttachedAccountType string
+
+const (
+	ManualAccountType        AttachedAccountType = "manual"
+	NftCollectionAccountType AttachedAccountType = "nft_collection"
+	TonDomainAccountType     AttachedAccountType = "ton_domain"
+	TgDomainAccountType      AttachedAccountType = "tg_domain"
+	JettonSymbolAccountType  AttachedAccountType = "jetton_symbol"
+	JettonNameAccountType    AttachedAccountType = "jetton_name"
+)
+
 // AttachedAccount represents domains, nft collections for quick search by name are presented
 type AttachedAccount struct {
-	Name       string `json:"name"`
-	Preview    string `json:"preview"`
-	Wallet     string `json:"wallet"`
-	Symbol     string `json:"-"`
-	Normalized string `json:"-"`
+	Name       string              `json:"name"`
+	Preview    string              `json:"preview"`
+	Wallet     string              `json:"wallet"`
+	Symbol     string              `json:"-"`
+	Type       AttachedAccountType `json:"-"`
+	Weight     int32               `json:"-"`
+	Popular    int32               `json:"-"`
+	Normalized string              `json:"-"`
 }
 
 type JettonVerificationType string
