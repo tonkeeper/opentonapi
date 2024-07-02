@@ -430,6 +430,7 @@ paths:
                   raw_form:
                     type: string
                     example: "0:6e731f2e28b73539a7f85ac47ca104d5840b229351189977bb6151d36b5e3f5e"
+                    format: address
                   bounceable:
                     required:
                       - b64
@@ -2742,6 +2743,7 @@ components:
       schema:
         type: string
         example: 0:97264395BD65A255A429B11326C84128B7D70FFED7949ABAE3036D506BA38621
+        format: address
     accountIDParameters:
       in: path
       name: account_ids
@@ -4331,6 +4333,7 @@ components:
         code:
           type: string
           example: b5ee9c72410104010087000114ff00f4a413f4a0f2c80b0102012002030002d200dfa5ffff76a268698fe9ffe8e42c5267858f90e785ffe4f6aa6467c444ffb365ffc10802faf0807d014035e7a064b87d804077e7857fc10803dfd2407d014035e7a064b86467cd8903a32b9ba4410803ade68afd014035e7a045ea432b6363796103bb7b9363210c678b64b87d807d8040c249b3e4
+          format: cell
         data:
           type: string
           example: b5ee9c7241010101002600004811fd096c0000000000000000000000000000000000000000000000000000000000000000cb78264d
@@ -4506,6 +4509,7 @@ components:
         decoded: { } # Free-form JSON value
     TvmStackRecord:
       type: object
+      format: tuple-item
       required:
         - type
       properties:
@@ -6782,7 +6786,8 @@ components:
             properties:
               address:
                 type: string
-                example: "0:010cеeac44fad23417a5c55e4071796868771082с9a61e8c195a8d57508b8471"
+                example: "0:010ceeac44fad23417a5c55e4071796868771082c9a61e8c195a8d57508b8471"
+                format: address
               name:
                 type: string
                 example: "blah_blah.ton"
