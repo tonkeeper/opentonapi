@@ -67,6 +67,8 @@ func (s *AccStatusChange) UnmarshalText(data []byte) error {
 type Account struct {
 	Address string `json:"address"`
 	Balance int64  `json:"balance"`
+	// {'USD': 1, 'IDR': 1000}.
+	CurrenciesBalance OptAccountCurrenciesBalance `json:"currencies_balance"`
 	// Unix timestamp.
 	LastActivity int64         `json:"last_activity"`
 	Status       AccountStatus `json:"status"`
@@ -88,6 +90,11 @@ func (s *Account) GetAddress() string {
 // GetBalance returns the value of Balance.
 func (s *Account) GetBalance() int64 {
 	return s.Balance
+}
+
+// GetCurrenciesBalance returns the value of CurrenciesBalance.
+func (s *Account) GetCurrenciesBalance() OptAccountCurrenciesBalance {
+	return s.CurrenciesBalance
 }
 
 // GetLastActivity returns the value of LastActivity.
@@ -148,6 +155,11 @@ func (s *Account) SetAddress(val string) {
 // SetBalance sets the value of Balance.
 func (s *Account) SetBalance(val int64) {
 	s.Balance = val
+}
+
+// SetCurrenciesBalance sets the value of CurrenciesBalance.
+func (s *Account) SetCurrenciesBalance(val OptAccountCurrenciesBalance) {
+	s.CurrenciesBalance = val
 }
 
 // SetLastActivity sets the value of LastActivity.
@@ -260,6 +272,18 @@ func (s *AccountAddress) SetIcon(val OptString) {
 // SetIsWallet sets the value of IsWallet.
 func (s *AccountAddress) SetIsWallet(val bool) {
 	s.IsWallet = val
+}
+
+// {'USD': 1, 'IDR': 1000}.
+type AccountCurrenciesBalance map[string]jx.Raw
+
+func (s *AccountCurrenciesBalance) init() AccountCurrenciesBalance {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
 }
 
 // An event is built on top of a trace which is a series of transactions caused by one inbound
@@ -9570,6 +9594,52 @@ func (o OptAccountAddress) Get() (v AccountAddress, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptAccountAddress) Or(d AccountAddress) AccountAddress {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptAccountCurrenciesBalance returns new OptAccountCurrenciesBalance with value set to v.
+func NewOptAccountCurrenciesBalance(v AccountCurrenciesBalance) OptAccountCurrenciesBalance {
+	return OptAccountCurrenciesBalance{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptAccountCurrenciesBalance is optional AccountCurrenciesBalance.
+type OptAccountCurrenciesBalance struct {
+	Value AccountCurrenciesBalance
+	Set   bool
+}
+
+// IsSet returns true if OptAccountCurrenciesBalance was set.
+func (o OptAccountCurrenciesBalance) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptAccountCurrenciesBalance) Reset() {
+	var v AccountCurrenciesBalance
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptAccountCurrenciesBalance) SetTo(v AccountCurrenciesBalance) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptAccountCurrenciesBalance) Get() (v AccountCurrenciesBalance, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptAccountCurrenciesBalance) Or(d AccountCurrenciesBalance) AccountCurrenciesBalance {
 	if v, ok := o.Get(); ok {
 		return v
 	}

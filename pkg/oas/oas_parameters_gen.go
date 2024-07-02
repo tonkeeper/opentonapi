@@ -5005,6 +5005,70 @@ func decodeGetAccountTracesParams(args [1]string, argsEscaped bool, r *http.Requ
 	return params, nil
 }
 
+// GetAccountsParams is parameters of getAccounts operation.
+type GetAccountsParams struct {
+	Currency OptString
+}
+
+func unpackGetAccountsParams(packed middleware.Parameters) (params GetAccountsParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "currency",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.Currency = v.(OptString)
+		}
+	}
+	return params
+}
+
+func decodeGetAccountsParams(args [0]string, argsEscaped bool, r *http.Request) (params GetAccountsParams, _ error) {
+	q := uri.NewQueryDecoder(r.URL.Query())
+	// Decode query: currency.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "currency",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotCurrencyVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotCurrencyVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.Currency.SetTo(paramsDotCurrencyVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "currency",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
 // GetAllAuctionsParams is parameters of getAllAuctions operation.
 type GetAllAuctionsParams struct {
 	// Domain filter for current auctions "ton" or "t.me".
