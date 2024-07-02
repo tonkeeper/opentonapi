@@ -555,6 +555,8 @@ paths:
       operationId: getAccounts
       tags:
         - Accounts
+      parameters:
+        - $ref: "#/components/parameters/currencyQuery"
       requestBody:
         $ref: "#/components/requestBodies/AccountIDs"
       responses:
@@ -2963,6 +2965,13 @@ components:
         items:
           type: string
         example: [ "ton", "usd", "rub" ]
+    currencyQuery:
+      in: query
+      name: currency
+      required: false
+      schema:
+        type: string
+        example: "usd"
     fromQuery:
       in: query
       name: from
@@ -4378,6 +4387,11 @@ components:
           type: integer
           format: int64
           example: 123456789
+        currencies_balance:
+          description: "{'USD': 1, 'IDR': 1000}"
+          type: object
+          additionalProperties: true
+          example: { }
         last_activity:
           type: integer
           description: unix timestamp

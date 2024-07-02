@@ -221,7 +221,7 @@ type Handler interface {
 	// Get human-friendly information about several accounts without low-level details.
 	//
 	// POST /v2/accounts/_bulk
-	GetAccounts(ctx context.Context, req OptGetAccountsReq) (*Accounts, error)
+	GetAccounts(ctx context.Context, req OptGetAccountsReq, params GetAccountsParams) (*Accounts, error)
 	// GetAllAuctions implements getAllAuctions operation.
 	//
 	// Get all auctions.

@@ -4308,6 +4308,16 @@ func (s *Server) handleGetAccountsRequest(args [0]string, argsEscaped bool, w ht
 			ID:   "getAccounts",
 		}
 	)
+	params, err := decodeGetAccountsParams(args, argsEscaped, r)
+	if err != nil {
+		err = &ogenerrors.DecodeParamsError{
+			OperationContext: opErrContext,
+			Err:              err,
+		}
+		recordError("DecodeParams", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
 	request, close, err := s.decodeGetAccountsRequest(r)
 	if err != nil {
 		err = &ogenerrors.DecodeRequestError{
@@ -4332,13 +4342,18 @@ func (s *Server) handleGetAccountsRequest(args [0]string, argsEscaped bool, w ht
 			OperationSummary: "",
 			OperationID:      "getAccounts",
 			Body:             request,
-			Params:           middleware.Parameters{},
-			Raw:              r,
+			Params: middleware.Parameters{
+				{
+					Name: "currency",
+					In:   "query",
+				}: params.Currency,
+			},
+			Raw: r,
 		}
 
 		type (
 			Request  = OptGetAccountsReq
-			Params   = struct{}
+			Params   = GetAccountsParams
 			Response = *Accounts
 		)
 		response, err = middleware.HookMiddleware[
@@ -4348,14 +4363,14 @@ func (s *Server) handleGetAccountsRequest(args [0]string, argsEscaped bool, w ht
 		](
 			m,
 			mreq,
-			nil,
+			unpackGetAccountsParams,
 			func(ctx context.Context, request Request, params Params) (response Response, err error) {
-				response, err = s.h.GetAccounts(ctx, request)
+				response, err = s.h.GetAccounts(ctx, request, params)
 				return response, err
 			},
 		)
 	} else {
-		response, err = s.h.GetAccounts(ctx, request)
+		response, err = s.h.GetAccounts(ctx, request, params)
 	}
 	if err != nil {
 		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
