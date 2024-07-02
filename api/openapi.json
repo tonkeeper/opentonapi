@@ -95,6 +95,15 @@
      "type": "array"
     }
    },
+   "currencyQuery": {
+    "in": "query",
+    "name": "currency",
+    "required": false,
+    "schema": {
+     "example": "usd",
+     "type": "string"
+    }
+   },
    "domainFilterQuery": {
     "description": "domain filter for current auctions \"ton\" or \"t.me\"",
     "in": "query",
@@ -696,6 +705,12 @@
       "example": 123456789,
       "format": "int64",
       "type": "integer"
+     },
+     "currencies_balance": {
+      "additionalProperties": true,
+      "description": "{'USD': 1, 'IDR': 1000}",
+      "example": {},
+      "type": "object"
      },
      "get_methods": {
       "example": [
@@ -5863,6 +5878,11 @@
    "post": {
     "description": "Get human-friendly information about several accounts without low-level details.",
     "operationId": "getAccounts",
+    "parameters": [
+     {
+      "$ref": "#/components/parameters/currencyQuery"
+     }
+    ],
     "requestBody": {
      "$ref": "#/components/requestBodies/AccountIDs"
     },

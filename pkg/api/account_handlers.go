@@ -11,8 +11,10 @@ import (
 	"net/http"
 	"sort"
 	"strings"
+	"time"
 
 	"github.com/cespare/xxhash/v2"
+	"github.com/go-faster/jx"
 	"github.com/tonkeeper/opentonapi/pkg/references"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
@@ -73,12 +75,20 @@ func (h *Handler) GetAccount(ctx context.Context, params oas.GetAccountParams) (
 	return &res, nil
 }
 
-func (h *Handler) GetAccounts(ctx context.Context, request oas.OptGetAccountsReq) (*oas.Accounts, error) {
+func (h *Handler) GetAccounts(ctx context.Context, request oas.OptGetAccountsReq, params oas.GetAccountsParams) (*oas.Accounts, error) {
 	if len(request.Value.AccountIds) == 0 {
 		return nil, toError(http.StatusBadRequest, fmt.Errorf("empty list of ids"))
 	}
 	if !h.limits.isBulkQuantityAllowed(len(request.Value.AccountIds)) {
 		return nil, toError(http.StatusBadRequest, fmt.Errorf("the maximum number of accounts to request at once: %v", h.limits.BulkLimits))
+	}
+	var currencyPrice float64
+	currency := strings.ToUpper(params.Currency.Value)
+	if currency != "" {
+		rates, err := h.ratesSource.GetRates(time.Now().Unix())
+		if err == nil {
+			currencyPrice = rates[currency]
+		}
 	}
 	var ids []tongo.AccountID
 	allAccountIDs := make(map[tongo.AccountID]struct{}, len(request.Value.AccountIds))
@@ -117,7 +127,13 @@ func (h *Handler) GetAccounts(ctx context.Context, request oas.OptGetAccountsReq
 	}
 	resp := &oas.Accounts{}
 	for _, i := range ids {
-		resp.Accounts = append(resp.Accounts, results[i])
+		account := results[i]
+		if currencyPrice != 0 {
+			convertedAmount := float64(account.Balance/int64(ton.OneTON)) / currencyPrice
+			currenciesBalance := map[string]jx.Raw{currency: jx.Raw(fmt.Sprintf("%f", convertedAmount))}
+			account.CurrenciesBalance.SetTo(currenciesBalance)
+		}
+		resp.Accounts = append(resp.Accounts, account)
 	}
 	return resp, nil
 }

@@ -328,7 +328,7 @@ func (UnimplementedHandler) GetAccountTraces(ctx context.Context, params GetAcco
 // Get human-friendly information about several accounts without low-level details.
 //
 // POST /v2/accounts/_bulk
-func (UnimplementedHandler) GetAccounts(ctx context.Context, req OptGetAccountsReq) (r *Accounts, _ error) {
+func (UnimplementedHandler) GetAccounts(ctx context.Context, req OptGetAccountsReq, params GetAccountsParams) (r *Accounts, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
