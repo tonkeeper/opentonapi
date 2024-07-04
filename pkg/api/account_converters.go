@@ -44,14 +44,14 @@ func convertToRawAccount(account *core.Account) (oas.BlockchainRawAccount, error
 		sort.Strings(keys)
 		for _, key := range keys {
 			value := values[key]
-			base64, err := value.Root.ToBocBase64()
+			bocHex, err := value.Root.ToBocString()
 			if err != nil {
 				// this should never happen, but anyway
 				return oas.BlockchainRawAccount{}, err
 			}
 			rawAccount.Libraries = append(rawAccount.Libraries, oas.BlockchainRawAccountLibrariesItem{
 				Public: value.Public,
-				Root:   base64,
+				Root:   bocHex,
 			})
 		}
 	}
