@@ -417,14 +417,14 @@
        "properties": {
         "batch": {
          "items": {
-          "format": "cell-hex",
+          "format": "cell",
           "type": "string"
          },
          "maxItems": 10,
          "type": "array"
         },
         "boc": {
-         "format": "cell-hex",
+         "format": "cell",
          "type": "string"
         }
        },
@@ -441,7 +441,7 @@
       "schema": {
        "properties": {
         "boc": {
-         "format": "cell-hex",
+         "format": "cell",
          "type": "string"
         }
        },
@@ -461,7 +461,7 @@
       "schema": {
        "properties": {
         "boc": {
-         "format": "cell-hex",
+         "format": "cell",
          "type": "string"
         },
         "params": {
@@ -503,7 +503,7 @@
       "schema": {
        "properties": {
         "boc": {
-         "format": "cell-hex",
+         "format": "cell",
          "type": "string"
         },
         "wallet_public_key": {
@@ -531,7 +531,7 @@
          "items": {
           "properties": {
            "boc": {
-            "format": "cell-hex",
+            "format": "cell",
             "type": "string"
            }
           },
@@ -1484,7 +1484,7 @@
    "BlockchainAccountInspect": {
     "properties": {
      "code": {
-      "format": "cell-hex",
+      "format": "cell",
       "type": "string"
      },
      "code_hash": {
@@ -2426,7 +2426,7 @@
      },
      "raw": {
       "description": "config boc in hex format",
-      "format": "cell-hex",
+      "format": "cell",
       "type": "string"
      }
     },
@@ -2454,12 +2454,12 @@
      },
      "code": {
       "example": "b5ee9c72410104010087000114ff00f4a413f4a0f2c80b0102012002030002d200dfa5ffff76a268698fe9ffe8e42c5267858f90e785ffe4f6aa6467c444ffb365ffc10802faf0807d014035e7a064b87d804077e7857fc10803dfd2407d014035e7a064b86467cd8903a32b9ba4410803ade68afd014035e7a045ea432b6363796103bb7b9363210c678b64b87d807d8040c249b3e4",
-      "format": "cell-hex",
+      "format": "cell",
       "type": "string"
      },
      "data": {
       "example": "b5ee9c7241010101002600004811fd096c0000000000000000000000000000000000000000000000000000000000000000cb78264d",
-      "format": "cell-hex",
+      "format": "cell",
       "type": "string"
      },
      "extra_balance": {
@@ -2489,7 +2489,7 @@
          "type": "boolean"
         },
         "root": {
-         "format": "cell-base64",
+         "format": "cell",
          "type": "string"
         }
        },
@@ -2793,7 +2793,7 @@
      "message": {
       "properties": {
        "boc": {
-        "format": "cell-hex",
+        "format": "cell",
         "type": "string"
        },
        "decoded_body": {},
@@ -4001,7 +4001,7 @@
      "raw_body": {
       "description": "hex-encoded BoC with raw message body",
       "example": "B5EE9C7201010101001100001D00048656C6C6F2C20776F726C64218",
-      "format": "cell-hex",
+      "format": "cell",
       "type": "string"
      },
      "source": {
@@ -4333,7 +4333,7 @@
       "type": "array"
      },
      "raw_collection_content": {
-      "format": "cell-hex",
+      "format": "cell",
       "type": "string"
      }
     },
@@ -4928,12 +4928,12 @@
      },
      "payload": {
       "description": "Raw one-cell BoC encoded in hex.",
-      "format": "cell-hex",
+      "format": "cell",
       "type": "string"
      },
      "stateInit": {
       "description": "Raw once-cell BoC encoded in hex.",
-      "format": "cell-hex",
+      "format": "cell",
       "type": "string"
      }
     },
@@ -5071,7 +5071,7 @@
     "properties": {
      "boc": {
       "example": "b5ee9c72010106010044000114ff00f4a413f4bcf2c80b01020120020302014804050004f2300038d06c21d31f30ed44d0d33f3001c00197a4c8cb3fc9ed549330f206e20011a13431da89a1a67e61",
-      "format": "cell-hex",
+      "format": "cell",
       "type": "string"
      },
      "interfaces": {
@@ -5477,7 +5477,7 @@
      "raw": {
       "description": "hex encoded boc with raw transaction",
       "example": "b5ee9c72410206010001380003b372cf3b5b8c891e517c9addbda1c0386a09ccacbb0e3faf630b51cfc8152325acb00002ac5795c0e41fdf79135cb7da03cc623b165d614b562a51eeccd8a5e097f405abf6b37f4e73000002ac5629732c1666887ed000144030480102030101a004008272abc8f2971aa4404ac6da1597720f348b2e1247b1ad9f55cbd3b6812f0a5f08b269bb65039fb1f6074d00f794e857f6dfd01131d299df456af10a8a4943d4d165000d0c80608840492001ab48015581f575c3b8c6ab3d6",
-      "format": "cell-hex",
+      "format": "cell",
       "type": "string"
      },
      "state_update_new": {
@@ -5580,7 +5580,7 @@
      },
      "slice": {
       "example": "",
-      "format": "cell-hex",
+      "format": "cell",
       "type": "string"
      },
      "tuple": {
