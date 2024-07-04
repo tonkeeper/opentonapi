@@ -15,6 +15,10 @@ import (
 
 	"github.com/cespare/xxhash/v2"
 	"github.com/go-faster/jx"
+	"github.com/tonkeeper/opentonapi/internal/g"
+	"github.com/tonkeeper/opentonapi/pkg/addressbook"
+	"github.com/tonkeeper/opentonapi/pkg/core"
+	"github.com/tonkeeper/opentonapi/pkg/oas"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
 	"github.com/tonkeeper/tongo/boc"
@@ -23,11 +27,7 @@ import (
 	"github.com/tonkeeper/tongo/ton"
 	"github.com/tonkeeper/tongo/utils"
 	walletTongo "github.com/tonkeeper/tongo/wallet"
-
-	"github.com/tonkeeper/opentonapi/internal/g"
-	"github.com/tonkeeper/opentonapi/pkg/addressbook"
-	"github.com/tonkeeper/opentonapi/pkg/core"
-	"github.com/tonkeeper/opentonapi/pkg/oas"
+	"golang.org/x/exp/maps"
 )
 
 func (h *Handler) GetBlockchainRawAccount(ctx context.Context, params oas.GetBlockchainRawAccountParams) (*oas.BlockchainRawAccount, error) {
@@ -254,32 +254,34 @@ func (h *Handler) ExecGetMethodForBlockchainAccount(ctx context.Context, params 
 }
 
 func (h *Handler) SearchAccounts(ctx context.Context, params oas.SearchAccountsParams) (*oas.FoundAccounts, error) {
-	accounts := h.addressBook.SearchAttachedAccountsByPrefix(params.Name)
-	var (
-		response           oas.FoundAccounts
-		mapOfFoundAccounts = make(map[tongo.AccountID]addressbook.AttachedAccount)
-	)
-	for _, account := range accounts {
-		accountID, err := tongo.ParseAddress(account.Wallet)
+	attachedAccounts := h.addressBook.SearchAttachedAccountsByPrefix(params.Name)
+	parsedAccounts := make(map[tongo.AccountID]addressbook.AttachedAccount)
+	for _, account := range attachedAccounts {
+		parsed, err := tongo.ParseAddress(account.Wallet)
 		if err != nil {
 			continue
 		}
 		if account.Symbol != "" {
-			if h.spamFilter.JettonTrust(accountID.ID, account.Symbol, account.Name, account.Preview) == core.TrustBlacklist {
+			trust := h.spamFilter.JettonTrust(parsed.ID, account.Symbol, account.Name, account.Preview)
+			if trust == core.TrustBlacklist {
 				continue
 			}
 		}
-		mapOfFoundAccounts[accountID.ID] = account
+		parsedAccounts[parsed.ID] = account
 	}
-	for _, account := range mapOfFoundAccounts {
-		response.Addresses = append(response.Addresses, oas.FoundAccountsAddressesItem{
+	accounts := maps.Values(parsedAccounts)
+	sort.Slice(accounts, func(i, j int) bool {
+		return accounts[i].Weight > accounts[j].Weight
+	})
+	converted := make([]oas.FoundAccountsAddressesItem, len(accounts))
+	for idx, account := range accounts {
+		converted[idx] = oas.FoundAccountsAddressesItem{
 			Address: account.Wallet,
 			Name:    account.Name,
 			Preview: account.Preview,
-		})
+		}
 	}
-
-	return &response, nil
+	return &oas.FoundAccounts{Addresses: converted}, nil
 }
 
 // ReindexAccount updates internal cache for a particular account.
