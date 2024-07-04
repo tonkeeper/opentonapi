@@ -776,7 +776,7 @@ func (h *Handler) toEvent(ctx context.Context, trace *core.Trace, result *bath.A
 		}
 		event.Actions[i] = convertedAction
 	}
-	event.IsScam = h.spamFilter.CheckActions(result.Actions)
+	event.IsScam = h.spamFilter.CheckActions(result.Actions, nil)
 	previews := make(map[tongo.AccountID]oas.JettonPreview)
 	for _, flow := range result.ValueFlow.Accounts {
 		for jettonMaster := range flow.Jettons {
@@ -855,7 +855,7 @@ func (h *Handler) toAccountEvent(ctx context.Context, account tongo.AccountID, t
 		}
 		e.Actions = append(e.Actions, convertedAction)
 	}
-	e.IsScam = h.spamFilter.CheckActions(result.Actions)
+	e.IsScam = h.spamFilter.CheckActions(result.Actions, &account)
 	if len(e.Actions) == 0 {
 		e.Actions = []oas.Action{
 			createUnknownAction("Something happened but we don't understand what.", []oas.AccountAddress{convertAccountAddress(account, h.addressBook)}),

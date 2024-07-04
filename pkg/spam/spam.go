@@ -12,7 +12,7 @@ type Filter struct {
 	Rules rules.Rules
 }
 
-func (f Filter) CheckActions(actions []bath.Action) bool {
+func (f Filter) CheckActions(actions []bath.Action, viewer *ton.AccountID) bool {
 	var comment string
 	for _, action := range actions {
 		switch {

@@ -162,7 +162,7 @@ func (h *Handler) convertNftHistory(ctx context.Context, account tongo.AccountID
 			}
 			event.Actions = append(event.Actions, convertedAction)
 		}
-		event.IsScam = h.spamFilter.CheckActions(actions.Actions)
+		event.IsScam = h.spamFilter.CheckActions(actions.Actions, &account)
 		if len(event.Actions) > 0 {
 			events = append(events, event)
 			lastLT = trace.Lt
