@@ -42,7 +42,7 @@ func TestHandler_GetRawAccount(t *testing.T) {
 			wantLibraries: []oas.BlockchainRawAccountLibrariesItem{
 				{
 					Public: true,
-					Root:   "te6ccgECCwEAAnQAART/APSkE/S88sgLAQIC0QIDAgEgBAUCASAICQHLDPQ0wMBcbAjxwCxkl8D4PpAMPht8AH4S/LiwwHTHyGCEExWtrW6jjsyghA3nvU7uo4u+E34SscF8uK++kAwcHMhgBjIywX4Rc8WIfoCy2rLH8s/Ac8WyYBA+wBw+GvwApEw4uMNgBgB1O1E0NP/Afhh0x8B+GL6AAH4Y9MfAfhk+kAB+GXTHwH4ZvQEAfhn0x8B+GjTHwH4afpAAfhq0gAw+GuAB/DH4I/hIvvgj+Em7sPLiwNMPgwjXGCD5AfhBQTD5EPLivdM/Afhs+kAw+E0hxwXy4r76RAHAAPLiwvhCUiC8lDH4QgHe+EdSEIMH9A5voXABlDDTHzCRMeL4RiGhUjC8ljL4RiKhAt4iwgDy4sGCEAcnDgAjgQD5oIEA+qkEqAcA7vhDggr68ICgUkCooFNAvvLiv/hCJKH4YlEToMjLH8nQ+EdBMIMH9Bb4ZyHwA1MgoYIJMS0AvI4WcIAYyMsF+E3PFlBCofoCEstqyXD7AJIwMeL4Q1IQqMIAjhdwgBjIywX4Ss8W+EMTqBL6AstqyXH7AJEw4vACAGE+Ev4SfhI+Ef4RvhE+EL4QcjL/8sf+EP6Assf+EXPFssf9ADLH8sf+ErPFsoAye1UgAQ8kyDCAIroMIAoA8G0hgQD6tgggjkPI+ERwAZ16qQymMAIQI6QBIMAA5jCSywfki1Lmpzb26M8Wycj4Tc8WzMnIggr68ID6AszJ0PhEVQKAQPQW+ESk+GQB5PhMcnCAGMjLBfhFzxaCC5OHAAWkFagU+gITy2oSyx/LP8zJcfsAgQD6oQ==",
+					Root:   "b5ee9c7201020b01000274000114ff00f4a413f4bcf2c80b010202d102030201200405020120080901cb0cf434c0c05c6c08f1c02c6497c0f83e900c3e1b7c007e12fcb8b0c074c7c860841315adad6ea38ecca0840de7bd4eeea38bbe137e12b1c17cb8afbe900c1c1cc860063232c17e1173c5887e80b2dab2c7f2cfc073c5b260103ec01c3e1afc00a44c38b8c3600600753b513434ffc07e1874c7c07e18be80007e18f4c7c07e193e90007e1974c7c07e19bd01007e19f4c7c07e1a34c7c07e1a7e90007e1ab4800c3e1ae001fc31f823f848bef823f849bbb0f2e2c0d30f8308d71820f901f8414130f910f2e2bdd33f01f86cfa4030f84d21c705f2e2befa4401c000f2e2c2f8425220bc9431f84201def84752108307f40e6fa170019430d31f309131e2f84621a15230bc9632f84622a102de22c200f2e2c1821007270e00238100f9a08100faa904a80700eef843820afaf080a05240a8a05340bef2e2bff84224a1f8625113a0c8cb1fc9d0f84741308307f416f86721f0035320a18209312d00bc8e16708018c8cb05f84dcf165042a1fa0212cb6ac970fb00923031e2f8435210a8c2008e17708018c8cb05f84acf16f84313a812fa02cb6ac971fb009130e2f00200613e12fe127e123e11fe11be113e10be107232fff2c7fe10fe80b2c7fe1173c5b2c7fd0032c7f2c7fe12b3c5b280327b5520010f24c8308022ba0c200a00f06d218100fab608208e43c8f84470019d7aa90ca630021023a40120c000e63092cb07e48b52e6a736f6e8cf16c9c8f84dcf16ccc9c8820afaf080fa02ccc9d0f84455028040f416f844a4f86401e4f84c72708018c8cb05f845cf16820b93870005a415a814fa0213cb6a12cb1fcb3fccc971fb008100faa1",
 				},
 			},
 		},
@@ -107,13 +107,13 @@ func TestHandler_GetAccount(t *testing.T) {
 func TestHandler_GetAccounts(t *testing.T) {
 	tests := []struct {
 		name                string
-		params              oas.OptGetAccountsReq
+		req                 oas.OptGetAccountsReq
 		wantStatuses        map[string]string
 		wantNames           map[string]string
 		wantBadRequestError string
 	}{
 		{
-			params: oas.OptGetAccountsReq{
+			req: oas.OptGetAccountsReq{
 				Value: oas.GetAccountsReq{
 					AccountIds: []string{
 						"-1:3333333333333333333333333333333333333333333333333333333333333333",
@@ -137,7 +137,7 @@ func TestHandler_GetAccounts(t *testing.T) {
 			},
 		},
 		{
-			params: oas.OptGetAccountsReq{
+			req: oas.OptGetAccountsReq{
 				Value: oas.GetAccountsReq{
 					AccountIds: []string{
 						"-1:3333333333333333333333333333333333333333333333333333333333333333",
@@ -166,7 +166,7 @@ func TestHandler_GetAccounts(t *testing.T) {
 					BulkLimits: 4,
 				},
 			}
-			accountRes, err := h.GetAccounts(context.Background(), tt.params)
+			accountRes, err := h.GetAccounts(context.Background(), tt.req, oas.GetAccountsParams{})
 			if len(tt.wantBadRequestError) > 0 {
 				badRequest, ok := err.(*oas.ErrorStatusCode)
 				require.True(t, ok)

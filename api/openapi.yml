@@ -4397,7 +4397,7 @@ components:
                 example: true
               root:
                 type: string
-                format: cell-base64
+                format: cell-hex
     Account:
       type: object
       required:
