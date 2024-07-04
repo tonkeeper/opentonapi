@@ -429,6 +429,7 @@ paths:
                 properties:
                   raw_form:
                     type: string
+                    format: address
                     example: "0:6e731f2e28b73539a7f85ac47ca104d5840b229351189977bb6151d36b5e3f5e"
                   bounceable:
                     required:
@@ -1665,6 +1666,7 @@ paths:
           description: account ID
           schema:
             type: string
+            format: address
             example: 0:97264395BD65A255A429B11326C84128B7D70FFED7949ABAE3036D506BA38621
         - in: query
           name: include_unverified
@@ -1976,6 +1978,7 @@ paths:
           description: jetton to pay commission
           schema:
             type: string
+            format: address
             example: 0:97264395BD65A255A429B11326C84128B7D70FFED7949ABAE3036D506BA38621
       tags:
         - Gasless
@@ -2743,6 +2746,7 @@ components:
       description: account ID
       schema:
         type: string
+        format: address
         example: 0:97264395BD65A255A429B11326C84128B7D70FFED7949ABAE3036D506BA38621
     accountIDParameters:
       in: path
@@ -2754,6 +2758,7 @@ components:
         type: array
         items:
           type: string
+          format: address
           example: 0:97264395BD65A255A429B11326C84128B7D70FFED7949ABAE3036D506BA38621
     jettonIDParameter:
       in: path
@@ -2762,6 +2767,7 @@ components:
       description: jetton ID
       schema:
         type: string
+        format: address
         example: 0:97264395BD65A255A429B11326C84128B7D70FFED7949ABAE3036D506BA38621
     methodNameParameter:
       in: path
@@ -2851,6 +2857,7 @@ components:
       description: "nft collection"
       schema:
         type: string
+        format: address
         example: "0:06d811f426598591b32b2c49f29f66c821368e4acb1de16762b04e0174532465"
     modeQuery:
       in: query
@@ -2945,6 +2952,7 @@ components:
       explode: false
       schema:
         type: string
+        format: address
         example: 0:97264395BD65A255A429B11326C84128B7D70FFED7949ABAE3036D506BA38621
     initiatorQuery:
       in: query
@@ -2995,7 +3003,7 @@ components:
           schema:
             type: object
     BatchBoc:
-      description: both a single boc and a batch of boc serialized in base64 are accepted
+      description: both a single boc and a batch of boc serialized in base64/hex are accepted
       required: true
       content:
         application/json:
@@ -3004,15 +3012,15 @@ components:
             properties:
               boc:
                 type: string
-                example: te6ccgECBQEAARUAAkWIAWTtae+KgtbrX26Bep8JSq8lFLfGOoyGR/xwdjfvpvEaHg
+                format: cell-hex
               batch:
                 type: array
                 maxItems: 10
                 items:
                   type: string
-                  example: te6ccgECBQEAARUAAkWIAWTtae+KgtbrX26Bep8JSq8lFLfGOoyGR/xwdjfvpvEaHg
+                  format: cell-hex
     EmulationBoc:
-      description: bag-of-cells serialized to base64 and additional parameters to configure emulation
+      description: bag-of-cells serialized to base64/hex and additional parameters to configure emulation
       required: true
       content:
         application/json:
@@ -3023,7 +3031,7 @@ components:
             properties:
               boc:
                 type: string
-                example: te6ccgECBQEAARUAAkWIAWTtae+KgtbrX26Bep8JSq8lFLfGOoyGR/xwdjfvpvEaHg
+                format: cell-hex
               params:
                 type: array
                 description: additional per account configuration
@@ -3034,13 +3042,14 @@ components:
                   properties:
                     address:
                       type: string
+                      format: address
                       example: "0:97146a46acc2654y27947f14c4a4b14273e954f78bc017790b41208b0043200b"
                     balance:
                       type: integer
                       format: int64
                       example: 10000000000
     InternalMessages:
-      description: bag-of-cells serialized to base64
+      description: bag-of-cells serialized to hex
       required: true
       content:
         application/json:
@@ -3053,6 +3062,7 @@ components:
             properties:
               wallet_address:
                 type: string
+                format: address
               wallet_public_key:
                 type: string
               messages:
@@ -3064,9 +3074,9 @@ components:
                   properties:
                     boc:
                       type: string
-                      example: "B5EE9C7201010101001100001D00048656C6C6F2C20776F726C64218"
+                      format: cell-hex
     GaslessSend:
-      description: bag-of-cells serialized to base64
+      description: bag-of-cells serialized to hex
       required: true
       content:
         application/json:
@@ -3077,13 +3087,13 @@ components:
               - wallet_public_key
             properties:
               wallet_public_key:
-                description: hex encoded public key
                 type: string
+                description: hex encoded public key
               boc:
                 type: string
-                example: te6ccgECBQEAARUAAkWIAWTtae+KgtbrX26Bep8JSq8lFLfGOoyGR/xwdjfvpvEaHg
+                format: cell-hex
     Boc:
-      description: bag-of-cells serialized to base64
+      description: bag-of-cells serialized to hex
       required: true
       content:
         application/json:
@@ -3094,7 +3104,7 @@ components:
             properties:
               boc:
                 type: string
-                example: te6ccgECBQEAARUAAkWIAWTtae+KgtbrX26Bep8JSq8lFLfGOoyGR/xwdjfvpvEaHg
+                format: cell-hex
     AccountIDs:
       description: a list of account ids
       content:
@@ -3108,6 +3118,7 @@ components:
                 type: array
                 items:
                   type: string
+                  format: address
                   example: 0:97264395BD65A255A429B11326C84128B7D70FFED7949ABAE3036D506BA38621
     TonConnectProof:
       description: "Data that is expected from TON Connect"
@@ -3122,6 +3133,7 @@ components:
             properties:
               address:
                 type: string
+                format: address
                 example: "0:97146a46acc2654y27947f14c4a4b14273e954f78bc017790b41208b0043200b"
               proof:
                 type: object
@@ -3152,6 +3164,7 @@ components:
                     example: "84jHVNLQmZsAAAAAZB0Zryi2wqVJI-KaKNXOvCijEi46YyYzkaSHyJrMPBMOkVZa"
                   state_init:
                     type: string
+                    format: cell-base64
     Backup:
       description: "Information for saving backup"
       required: true
@@ -3172,6 +3185,7 @@ components:
             properties:
               state_init:
                 type: string
+                format: cell-base64
     LiteServerSendMessageRequest:
       description: "Data that is expected"
       required: true
@@ -3184,6 +3198,7 @@ components:
             properties:
               body:
                 type: string
+                format: cell-base64
 
   schemas:
     Error:
@@ -3203,6 +3218,7 @@ components:
       properties:
         address:
           type: string
+          format: address
           example: 0:10C1073837B93FDAAD594284CE8B8EFF7B9CF25427440EB2FC682762E1471365
         name:
           type: string
@@ -3512,7 +3528,7 @@ components:
       properties:
         boc:
           type: string
-          example: te6ccgEBBgEARAABFP8A9KQT9LzyyAsBAgEgAgMCAUgEBQAE8jAAONBsIdMfMO1E0NM/MAHAAZekyMs/ye1UkzDyBuIAEaE0MdqJoaZ+YQ==
+          format: cell-hex
     Message:
       type: object
       required:
@@ -3582,6 +3598,7 @@ components:
           example: "1219de582369ac80ee1afe12147930f458a54ff1eea612611a8bc6bd31581a6c"
         raw_body:
           type: string
+          format: cell-hex
           description: hex-encoded BoC with raw message body
           example: "B5EE9C7201010101001100001D00048656C6C6F2C20776F726C64218"
         decoded_op_name:
@@ -3807,6 +3824,7 @@ components:
           example: true
         raw:
           type: string
+          format: cell-hex
           description: "hex encoded boc with raw transaction"
           example: "b5ee9c72410206010001380003b372cf3b5b8c891e517c9addbda1c0386a09ccacbb0e3faf630b51cfc8152325acb00002ac5795c0e41fdf79135cb7da03cc623b165d614b562a51eeccd8a5e097f405abf6b37f4e73000002ac5629732c1666887ed000144030480102030101a004008272abc8f2971aa4404ac6da1597720f348b2e1247b1ad9f55cbd3b6812f0a5f08b269bb65039fb1f6074d00f794e857f6dfd01131d299df456af10a8a4943d4d165000d0c80608840492001ab48015581f575c3b8c6ab3d6"
     Transactions:
@@ -4162,6 +4180,7 @@ components:
       properties:
         address:
           type: string
+          format: address
           example: 0:55e8809519cd3c49098c9ee45afdafcea7a894a74d0f628d94a115a50e045122
         secp_pubkey:
           type: string
@@ -4176,8 +4195,10 @@ components:
       properties:
         bridge_addr:
           type: string
+          format: address
         oracle_multisig_address:
           type: string
+          format: address
         external_chain_address:
           type: string
         oracles:
@@ -4222,8 +4243,10 @@ components:
       properties:
         bridge_address:
           type: string
+          format: address
         oracles_address:
           type: string
+          format: address
         state_flags:
           type: integer
         burn_bridge_fee:
@@ -4247,6 +4270,7 @@ components:
       properties:
         address:
           type: string
+          format: address
           example: 0:55e8809519cd3c49098c9ee45afdafcea7a894a74d0f628d94a115a50e045122
         adnl_address:
           type: string
@@ -4328,6 +4352,7 @@ components:
       properties:
         address:
           type: string
+          format: address
           example: 0:da6b1b6663a0e4d18cc8574ccd9db5296e367dd9324706f3bbd9eb1cd2caf0bf
         balance:
           type: integer
@@ -4339,9 +4364,11 @@ components:
             type: string
         code:
           type: string
+          format: cell-hex
           example: b5ee9c72410104010087000114ff00f4a413f4a0f2c80b0102012002030002d200dfa5ffff76a268698fe9ffe8e42c5267858f90e785ffe4f6aa6467c444ffb365ffc10802faf0807d014035e7a064b87d804077e7857fc10803dfd2407d014035e7a064b86467cd8903a32b9ba4410803ade68afd014035e7a045ea432b6363796103bb7b9363210c678b64b87d807d8040c249b3e4
         data:
           type: string
+          format: cell-hex
           example: b5ee9c7241010101002600004811fd096c0000000000000000000000000000000000000000000000000000000000000000cb78264d
         last_transaction_lt:
           type: integer
@@ -4370,6 +4397,7 @@ components:
                 example: true
               root:
                 type: string
+                format: cell-base64
     Account:
       type: object
       required:
@@ -4382,6 +4410,7 @@ components:
       properties:
         address:
           type: string
+          format: address
           example: 0:da6b1b6663a0e4d18cc8574ccd9db5296e367dd9324706f3bbd9eb1cd2caf0bf
         balance:
           type: integer
@@ -4442,6 +4471,7 @@ components:
       properties:
         relay_address:
           type: string
+          format: address
           description: "sending excess to this address decreases the commission of a gasless transfer"
           example: 0:dfbd5be8497fdc0c9fcbdfc676864840ddf8ad6423d6d5657d9b0e8270d6c8ac
         gas_jettons:
@@ -4454,6 +4484,7 @@ components:
             properties:
               master_id:
                 type: string
+                format: address
     SignRawMessage:
       type: object
       required:
@@ -4462,16 +4493,19 @@ components:
       properties:
         address:
           type: string
+          format: address
           example: 0:da6b1b6663a0e4d18cc8574ccd9db5296e367dd9324706f3bbd9eb1cd2caf0bf
         amount:
           type: string
           description: "Number of nanocoins to send. Decimal string."
         payload:
           type: string
-          description: "Raw one-cell BoC encoded in Base64."
+          format: cell-hex
+          description: "Raw one-cell BoC encoded in hex."
         stateInit:
           type: string
-          description: "Raw once-cell BoC encoded in Base64."
+          format: cell-hex
+          description: "Raw once-cell BoC encoded in hex."
     SignRawParams:
       type: object
       required:
@@ -4483,6 +4517,7 @@ components:
       properties:
         relay_address:
           type: string
+          format: address
           example: 0:da6b1b6663a0e4d18cc8574ccd9db5296e367dd9324706f3bbd9eb1cd2caf0bf
         commission:
           type: string
@@ -4490,6 +4525,7 @@ components:
           example: "1000000"
         from:
           type: string
+          format: address
           example: 0:da6b1b6663a0e4d18cc8574ccd9db5296e367dd9324706f3bbd9eb1cd2caf0bf
         valid_until:
           type: integer
@@ -4520,6 +4556,7 @@ components:
         decoded: { } # Free-form JSON value
     TvmStackRecord:
       type: object
+      format: tuple-item
       required:
         - type
       properties:
@@ -4534,9 +4571,10 @@ components:
             - tuple
         cell:
           type: string
-          example: "te6cckEBAQEAJAAAQ4ARPeUceMlv4l12d6jdLpIzzbAV6amYXNZeZK2aicQdC/Apj8aJ"
+          format: cell-base64
         slice:
           type: string
+          format: cell-hex
           example: ""
         num:
           type: string
@@ -4568,22 +4606,27 @@ components:
       properties:
         raw:
           type: string
-          description: config boc in base64 format
-          example: te6ccgEBBgEARAABFP8A9KQT9LzyyAsBAgEgAgMCAUgEBQAE8jAAONBsIdMfMO1E0NM/MAHAAZekyMs/ye1UkzDyBuIAEaE0MdqJoaZ+YQ==
+          format: cell-hex
+          description: config boc in hex format
         "0":
           type: string
+          format: address
           description: "config address"
         "1":
           type: string
+          format: address
           description: "elector address"
         "2":
           type: string
+          format: address
           description: "minter address"
         "3":
           type: string
+          format: address
           description: "The address of the transaction fee collector."
         "4":
           type: string
+          format: address
           description: "dns root address"
         "5":
           type: object
@@ -4593,6 +4636,7 @@ components:
           properties:
             blackhole_addr:
               type: string
+              format: address
             fee_burn_nom:
               type: integer
               format: int64
@@ -4963,6 +5007,7 @@ components:
               type: array
               items:
                 type: string
+                format: address
                 example: -1:dd24c4a1f2b88f8b7053513b5cc6c5a31bc44b2a72dcb4d8c0338af0f0d37ec5
         "32":
           $ref: '#/components/schemas/ValidatorsSet'
@@ -5003,6 +5048,8 @@ components:
               type: array
               items:
                 type: string
+                format: address
+                example: 0:0000000000000000000000000000000000000000000000000000000000000000
             suspended_until:
               type: integer
         "71":
@@ -5116,6 +5163,7 @@ components:
       properties:
         address:
           type: string
+          format: address
           example: 0:0BB5A9F69043EEBDDA5AD2E946EB953242BD8F603FE795D90698CEEC6BFC60A0
         name:
           type: string
@@ -5219,6 +5267,7 @@ components:
       properties:
         address:
           type: string
+          format: address
           example: 0:10C1073837B93FDAAD594284CE8B8EFF7B9CF25427440EB2FC682762E1471365
         market:
           $ref: '#/components/schemas/AccountAddress'
@@ -5238,6 +5287,7 @@ components:
       properties:
         address:
           type: string
+          format: address
           example: 0:E93E7D444180608B8520C00DC664383A387356FB6E16FDDF99DBE5E1415A574B
         index:
           type: integer
@@ -5254,6 +5304,7 @@ components:
           properties:
             address:
               type: string
+              format: address
               example: 0:E93E7D444180608B8520C00DC664383A387356FB6E16FDDF99DBE5E1415A574B
             name:
               type: string
@@ -5314,6 +5365,7 @@ components:
       properties:
         address:
           type: string
+          format: address
           example: "0:da6b1b6663a0e4d18cc8574ccd9db5296e367dd9324706f3bbd9eb1cd2caf0bf"
         seqno:
           type: integer
@@ -5326,11 +5378,13 @@ components:
           type: array
           items:
             type: string
+            format: address
             example: "0:da6b1b6663a0e4d18cc8574ccd9db5296e367dd9324706f3bbd9eb1cd2caf0bf"
         proposers:
           type: array
           items:
             type: string
+            format: address
             example: "0:da6b1b6663a0e4d18cc8574ccd9db5296e367dd9324706f3bbd9eb1cd2caf0bf"
         orders:
           type: array
@@ -5349,6 +5403,7 @@ components:
       properties:
         address:
           type: string
+          format: address
           example: "0:da6b1b6663a0e4d18cc8574ccd9db5296e367dd9324706f3bbd9eb1cd2caf0bf"
         order_seqno:
           type: integer
@@ -5364,6 +5419,7 @@ components:
           type: array
           items:
             type: string
+            format: address
             example: "0:da6b1b6663a0e4d18cc8574ccd9db5296e367dd9324706f3bbd9eb1cd2caf0bf"
         approvals_num:
           type: integer
@@ -5506,6 +5562,7 @@ components:
           type: array
           items:
             type: string
+            description: "transaction hash"
             example: e8b0e3fee4a26bd2317ac1f9952fcdc87dc08fdb617656b5202416323337372e
     TonTransferAction:
       type: object
@@ -5566,6 +5623,7 @@ components:
           example: "vasya.ton"
         contract_address:
           type: string
+          format: address
           example: "0:da6b1b6663a0e4d18cc8574ccd9db5296e367dd9324706f3bbd9eb1cd2caf0bf"
         renewer:
           $ref: '#/components/schemas/AccountAddress'
@@ -5666,9 +5724,11 @@ components:
           $ref: '#/components/schemas/AccountAddress'
         senders_wallet:
           type: string
+          format: address
           example: 0:E93E7D444180608B8520C00DC664383A387356FB6E16FDDF99DBE5E1415A574B
         recipients_wallet:
           type: string
+          format: address
           example: 0:E93E7D444180608B8520C00DC664383A387356FB6E16FDDF99DBE5E1415A574B
         amount:
           type: string
@@ -5695,6 +5755,7 @@ components:
           $ref: '#/components/schemas/AccountAddress'
         senders_wallet:
           type: string
+          format: address
           example: 0:E93E7D444180608B8520C00DC664383A387356FB6E16FDDF99DBE5E1415A574B
         amount:
           type: string
@@ -5714,6 +5775,7 @@ components:
           $ref: '#/components/schemas/AccountAddress'
         recipients_wallet:
           type: string
+          format: address
           example: 0:E93E7D444180608B8520C00DC664383A387356FB6E16FDDF99DBE5E1415A574B
         amount:
           type: string
@@ -5729,6 +5791,7 @@ components:
       properties:
         address:
           type: string
+          format: address
           example: "0:da6b1b6663a0e4d18cc8574ccd9db5296e367dd9324706f3bbd9eb1cd2caf0bf"
         interfaces:
           type: array
@@ -5748,6 +5811,7 @@ components:
           $ref: '#/components/schemas/AccountAddress'
         subscription:
           type: string
+          format: address
           example: "0:da6b1b6663a0e4d18cc8574ccd9db5296e367dd9324706f3bbd9eb1cd2caf0bf"
         beneficiary:
           $ref: '#/components/schemas/AccountAddress'
@@ -5769,6 +5833,7 @@ components:
           $ref: '#/components/schemas/AccountAddress'
         subscription:
           type: string
+          format: address
           example: "0:da6b1b6663a0e4d18cc8574ccd9db5296e367dd9324706f3bbd9eb1cd2caf0bf"
         beneficiary:
           $ref: '#/components/schemas/AccountAddress'
@@ -6069,12 +6134,15 @@ components:
       properties:
         address:
           type: string
+          format: address
           example: 0:dea8f638b789172ce36d10a20318125e52c649aa84893cd77858224fe2b9b0ee
         wallet_address:
           type: string
+          format: address
           example: 0:567DE86AF2B6A557D7085807CF7C26338124987A5179344F0D0FA2657EB710F1
         beneficiary_address:
           type: string
+          format: address
           example: 0:c704dadfabac88eab58e340de03080df81ff76636431f48624ad6e26fb2da0a4
         amount:
           type: integer
@@ -6131,7 +6199,8 @@ components:
           example: wallet.ton
         owner:
           type: string
-          example: owner
+          format: address
+          example: 0:c704dadfabac88eab58e340de03080df81ff76636431f48624ad6e26fb2da0a4
         price:
           type: integer
           format: int64
@@ -6170,6 +6239,7 @@ components:
       properties:
         address:
           type: string
+          format: address
           example: "0:da6b1b6663a0e4d18cc8574ccd9db5296e367dd9324706f3bbd9eb1cd2caf0bf"
         account:
           $ref: '#/components/schemas/AccountAddress'
@@ -6209,6 +6279,7 @@ components:
           $ref: '#/components/schemas/WalletDNS'
         next_resolver:
           type: string
+          format: address
           example: "0:da6b1b6663a0e4d18cc8574ccd9db5296e367dd9324706f3bbd9eb1cd2caf0bf"
         sites:
           type: array
@@ -6229,6 +6300,7 @@ components:
       properties:
         address:
           type: string
+          format: address
           example: 0:FD595F36B4C1535BEC8461490D38EBB9AE3C38DD6ACE17CA63ABE2C6608BE159
         next_item_index:
           type: integer
@@ -6238,7 +6310,7 @@ components:
           $ref: '#/components/schemas/AccountAddress'
         raw_collection_content:
           type: string
-          example: 697066733a2f2f516d596e437861746f5178433571584b79773971656768415853626f3544644e6a32387631487669437a47355359
+          format: cell-hex
         metadata:
           type: object
           additionalProperties: true
@@ -6429,7 +6501,7 @@ components:
           properties:
             boc:
               type: string
-              example: "te6ccgEBAQEABgAACCiAmCMBAgEABwA="
+              format: cell-hex
             decoded_op_name:
               type: string
               example: "nft_transfer"
@@ -6489,6 +6561,7 @@ components:
       properties:
         address:
           type: string
+          format: address
           example: 0:0BB5A9F69043EEBDDA5AD2E946EB953242BD8F603FE795D90698CEEC6BFC60A0
         name:
           type: string
@@ -6604,6 +6677,7 @@ components:
             properties:
               address:
                 type: string
+                format: address
                 example: 0:10C1073837B93FDAAD594284CE8B8EFF7B9CF25427440EB2FC682762E1471365
               owner:
                 $ref: '#/components/schemas/AccountAddress'
@@ -6670,6 +6744,7 @@ components:
       properties:
         address:
           type: string
+          format: address
           example: "0:48fb0195a7fc7454512377b9bd704503ded27f6e7c4c4a9d136fdab3ef9ec04c"
         name:
           type: string
@@ -6711,6 +6786,7 @@ components:
           description: maximum number of nominators
         liquid_jetton_master:
           type: string
+          format: address
           example: "0:4a91d32d0289bda9813ae00ff7640e6c38fdce76e4583dd6afc463b70c7d767c"
           description: "for liquid staking master account of jetton"
         nominators_stake:
@@ -6760,6 +6836,7 @@ components:
       properties:
         address:
           type: string
+          format: address
           example: 0:FD595F36B4C1535BEC8461490D38EBB9AE3C38DD6ACE17CA63ABE2C6608BE159
         accept_new_contracts:
           type: boolean
@@ -6796,6 +6873,7 @@ components:
             properties:
               address:
                 type: string
+                format: address
                 example: "0:010cеeac44fad23417a5c55e4071796868771082с9a61e8c195a8d57508b8471"
               name:
                 type: string
@@ -6836,6 +6914,7 @@ components:
           example: "NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2ODQ3..."
         address:
           type: string
+          format: address
           example: "0:97146a46acc2654y27947f14c4a4b14273e954f78bc017790b41208b0043200b"
     Seqno:
       type: object
@@ -6909,6 +6988,7 @@ components:
       properties:
         code:
           type: string
+          format: cell-hex
         code_hash:
           type: string
         methods:
