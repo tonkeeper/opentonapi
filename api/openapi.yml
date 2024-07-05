@@ -4583,7 +4583,7 @@ components:
             - tuple
         cell:
           type: string
-          format: cell-base64
+          format: cell
         slice:
           type: string
           format: cell
