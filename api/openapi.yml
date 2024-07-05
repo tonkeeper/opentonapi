@@ -4587,7 +4587,6 @@ components:
         slice:
           type: string
           format: cell
-          example: ""
         num:
           type: string
           example: ""
@@ -6886,7 +6885,6 @@ components:
               address:
                 type: string
                 format: address
-                example: "0:010cеeac44fad23417a5c55e4071796868771082с9a61e8c195a8d57508b8471"
               name:
                 type: string
                 example: "blah_blah.ton"
