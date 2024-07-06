@@ -19,5 +19,5 @@ RUN apt-get update && \
 RUN mkdir -p /app/lib
 RUN wget -O /app/lib/libemulator.so https://github.com/ton-blockchain/ton/releases/download/v2024.02/libemulator-linux-x86-64.so
 ENV LD_LIBRARY_PATH=/app/lib/
-COPY --from=build /tmp/opentonapi /usr/bin/
+COPY --from=gobuild /tmp/opentonapi /usr/bin/
 CMD ["/usr/bin/opentonapi"]
