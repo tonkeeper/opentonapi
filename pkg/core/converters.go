@@ -343,6 +343,7 @@ func ConvertMessage(message tlb.Message, txLT uint64) (Message, error) {
 		if err != nil {
 			return Message{}, err
 		}
+		importFee := big.Int(info.ImportFee)
 		return Message{
 			MessageID: MessageID{
 				CreatedLt:   txLT,
@@ -351,7 +352,7 @@ func ConvertMessage(message tlb.Message, txLT uint64) (Message, error) {
 			Hash:         ton.Bits256(message.Hash()),
 			MsgType:      ExtInMsg,
 			SourceExtern: externalAddressFromTlb(info.Src),
-			ImportFee:    int64(info.ImportFee),
+			ImportFee:    importFee.Int64(),
 			Body:         body,
 			OpCode:       tag,
 			DecodedBody:  decodedBody,
