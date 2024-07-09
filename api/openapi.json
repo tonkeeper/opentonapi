@@ -476,7 +476,8 @@
            "balance": {
             "example": 10000000000,
             "format": "int64",
-            "type": "integer"
+            "type": "integer",
+            "x-js-format": "bigint"
            }
           },
           "required": [
@@ -717,7 +718,8 @@
      "balance": {
       "example": 123456789,
       "format": "int64",
-      "type": "integer"
+      "type": "integer",
+      "x-js-format": "bigint"
      },
      "currencies_balance": {
       "additionalProperties": true,
@@ -851,7 +853,8 @@
      "lt": {
       "example": 25713146000001,
       "format": "int64",
-      "type": "integer"
+      "type": "integer",
+      "x-js-format": "bigint"
      },
      "timestamp": {
       "example": 1234567890,
@@ -1169,7 +1172,8 @@
      "total_fees": {
       "example": 1000,
       "format": "int64",
-      "type": "integer"
+      "type": "integer",
+      "x-js-format": "bigint"
      }
     },
     "required": [
@@ -1545,7 +1549,8 @@
      "end_lt": {
       "example": 23814011000001,
       "format": "int64",
-      "type": "integer"
+      "type": "integer",
+      "x-js-format": "bigint"
      },
      "file_hash": {
       "example": "A6A0BD6608672B11B79538A50B2204E748305C12AA0DED9C16CF0006CE3AF8DB",
@@ -1635,7 +1640,8 @@
      "start_lt": {
       "example": 23814011000000,
       "format": "int64",
-      "type": "integer"
+      "type": "integer",
+      "x-js-format": "bigint"
      },
      "tx_quantity": {
       "example": 130,
@@ -2450,7 +2456,8 @@
      "balance": {
       "example": 123456789,
       "format": "int64",
-      "type": "integer"
+      "type": "integer",
+      "x-js-format": "bigint"
      },
      "code": {
       "example": "b5ee9c72410104010087000114ff00f4a413f4a0f2c80b0102012002030002d200dfa5ffff76a268698fe9ffe8e42c5267858f90e785ffe4f6aa6467c444ffb365ffc10802faf0807d014035e7a064b87d804077e7857fc10803dfd2407d014035e7a064b86467cd8903a32b9ba4410803ade68afd014035e7a045ea432b6363796103bb7b9363210c678b64b87d807d8040c249b3e4",
@@ -2479,7 +2486,8 @@
      "last_transaction_lt": {
       "example": 123456789,
       "format": "int64",
-      "type": "integer"
+      "type": "integer",
+      "x-js-format": "bigint"
      },
      "libraries": {
       "items": {
@@ -3100,7 +3108,8 @@
      "lt": {
       "example": 25713146000001,
       "format": "int64",
-      "type": "integer"
+      "type": "integer",
+      "x-js-format": "bigint"
      },
      "timestamp": {
       "example": 1234567890,
@@ -3132,7 +3141,6 @@
       "items": {
        "properties": {
         "address": {
-         "example": "0:010cеeac44fad23417a5c55e4071796868771082с9a61e8c195a8d57508b8471",
          "format": "address",
          "type": "string"
         },
@@ -3949,7 +3957,8 @@
      "created_lt": {
       "example": 25713146000001,
       "format": "int64",
-      "type": "integer"
+      "type": "integer",
+      "x-js-format": "bigint"
      },
      "decoded_body": {},
      "decoded_op_name": {
@@ -5439,7 +5448,8 @@
      "end_balance": {
       "example": 25713146000001,
       "format": "int64",
-      "type": "integer"
+      "type": "integer",
+      "x-js-format": "bigint"
      },
      "end_status": {
       "$ref": "#/components/schemas/AccountStatus"
@@ -5454,7 +5464,8 @@
      "lt": {
       "example": 25713146000001,
       "format": "int64",
-      "type": "integer"
+      "type": "integer",
+      "x-js-format": "bigint"
      },
      "orig_status": {
       "$ref": "#/components/schemas/AccountStatus"
@@ -5472,7 +5483,8 @@
      "prev_trans_lt": {
       "example": 25713146000001,
       "format": "int64",
-      "type": "integer"
+      "type": "integer",
+      "x-js-format": "bigint"
      },
      "raw": {
       "description": "hex encoded boc with raw transaction",
@@ -5498,7 +5510,8 @@
      "total_fees": {
       "example": 25713146000001,
       "format": "int64",
-      "type": "integer"
+      "type": "integer",
+      "x-js-format": "bigint"
      },
      "transaction_type": {
       "$ref": "#/components/schemas/TransactionType"
@@ -5571,7 +5584,7 @@
     "format": "tuple-item",
     "properties": {
      "cell": {
-      "format": "cell-base64",
+      "format": "cell",
       "type": "string"
      },
      "num": {
@@ -5579,7 +5592,6 @@
       "type": "string"
      },
      "slice": {
-      "example": "",
       "format": "cell",
       "type": "string"
      },
@@ -6220,7 +6232,8 @@
       "schema": {
        "example": 25758317000002,
        "format": "int64",
-       "type": "integer"
+       "type": "integer",
+       "x-js-format": "bigint"
       }
      },
      {
@@ -6414,7 +6427,8 @@
       "schema": {
        "example": 25758317000002,
        "format": "int64",
-       "type": "integer"
+       "type": "integer",
+       "x-js-format": "bigint"
       }
      },
      {
@@ -6526,7 +6540,8 @@
       "schema": {
        "example": 25758317000002,
        "format": "int64",
-       "type": "integer"
+       "type": "integer",
+       "x-js-format": "bigint"
       }
      },
      {
@@ -6677,7 +6692,8 @@
       "schema": {
        "example": 25758317000002,
        "format": "int64",
-       "type": "integer"
+       "type": "integer",
+       "x-js-format": "bigint"
       }
      },
      {
@@ -6837,7 +6853,8 @@
       "schema": {
        "example": 25758317000002,
        "format": "int64",
-       "type": "integer"
+       "type": "integer",
+       "x-js-format": "bigint"
       }
      },
      {
@@ -7071,7 +7088,8 @@
       "schema": {
        "example": 39787624000003,
        "format": "int64",
-       "type": "integer"
+       "type": "integer",
+       "x-js-format": "bigint"
       }
      },
      {
@@ -7081,7 +7099,8 @@
       "schema": {
        "example": 39787624000003,
        "format": "int64",
-       "type": "integer"
+       "type": "integer",
+       "x-js-format": "bigint"
       }
      },
      {
@@ -7813,7 +7832,8 @@
       "schema": {
        "example": 25758317000002,
        "format": "int64",
-       "type": "integer"
+       "type": "integer",
+       "x-js-format": "bigint"
       }
      },
      {
@@ -7877,7 +7897,8 @@
       "schema": {
        "example": 25758317000002,
        "format": "int64",
-       "type": "integer"
+       "type": "integer",
+       "x-js-format": "bigint"
       }
      },
      {
@@ -9111,7 +9132,8 @@
              },
              "lt": {
               "format": "int64",
-              "type": "integer"
+              "type": "integer",
+              "x-js-format": "bigint"
              },
              "mode": {
               "example": 0,
@@ -9443,7 +9465,8 @@
       "schema": {
        "example": 25758317000002,
        "format": "int64",
-       "type": "integer"
+       "type": "integer",
+       "x-js-format": "bigint"
       }
      },
      {
