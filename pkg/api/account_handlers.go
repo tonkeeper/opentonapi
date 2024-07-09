@@ -271,6 +271,9 @@ func (h *Handler) SearchAccounts(ctx context.Context, params oas.SearchAccountsP
 	}
 	accounts := maps.Values(parsedAccounts)
 	sort.Slice(accounts, func(i, j int) bool {
+		if accounts[i].Weight == accounts[j].Weight {
+			return len(accounts[i].Name) < len(accounts[j].Name)
+		}
 		return accounts[i].Weight > accounts[j].Weight
 	})
 	converted := make([]oas.FoundAccountsAddressesItem, len(accounts))
