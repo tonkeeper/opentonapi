@@ -225,7 +225,8 @@ func (h *Handler) GetBlockchainTransaction(ctx context.Context, params oas.GetBl
 	}
 	txs, err := h.storage.GetTransaction(ctx, hash)
 	if errors.Is(err, core.ErrEntityNotFound) {
-		txHash, err := h.storage.SearchTransactionByMessageHash(ctx, hash)
+		var txHash *tongo.Bits256
+		txHash, err = h.storage.SearchTransactionByMessageHash(ctx, hash)
 		if errors.Is(err, core.ErrEntityNotFound) {
 			return nil, toError(http.StatusNotFound, err)
 		}
