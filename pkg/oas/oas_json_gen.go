@@ -32056,9 +32056,17 @@ func (s *ReducedBlock) encodeFields(e *jx.Encoder) {
 		}
 		e.ArrEnd()
 	}
+	{
+		e.FieldStart("parent")
+		e.ArrStart()
+		for _, elem := range s.Parent {
+			e.Str(elem)
+		}
+		e.ArrEnd()
+	}
 }
 
-var jsonFieldsNameOfReducedBlock = [7]string{
+var jsonFieldsNameOfReducedBlock = [8]string{
 	0: "workchain_id",
 	1: "shard",
 	2: "seqno",
@@ -32066,6 +32074,7 @@ var jsonFieldsNameOfReducedBlock = [7]string{
 	4: "tx_quantity",
 	5: "utime",
 	6: "shards_blocks",
+	7: "parent",
 }
 
 // Decode decodes ReducedBlock from json.
@@ -32167,6 +32176,26 @@ func (s *ReducedBlock) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"shards_blocks\"")
 			}
+		case "parent":
+			requiredBitSet[0] |= 1 << 7
+			if err := func() error {
+				s.Parent = make([]string, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem string
+					v, err := d.Str()
+					elem = string(v)
+					if err != nil {
+						return err
+					}
+					s.Parent = append(s.Parent, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"parent\"")
+			}
 		default:
 			return d.Skip()
 		}
@@ -32177,7 +32206,7 @@ func (s *ReducedBlock) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b01110111,
+		0b11110111,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -34013,10 +34042,19 @@ func (s *StateInit) encodeFields(e *jx.Encoder) {
 		e.FieldStart("boc")
 		e.Str(s.Boc)
 	}
+	{
+		e.FieldStart("interfaces")
+		e.ArrStart()
+		for _, elem := range s.Interfaces {
+			e.Str(elem)
+		}
+		e.ArrEnd()
+	}
 }
 
-var jsonFieldsNameOfStateInit = [1]string{
+var jsonFieldsNameOfStateInit = [2]string{
 	0: "boc",
+	1: "interfaces",
 }
 
 // Decode decodes StateInit from json.
@@ -34040,6 +34078,26 @@ func (s *StateInit) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"boc\"")
 			}
+		case "interfaces":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				s.Interfaces = make([]string, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem string
+					v, err := d.Str()
+					elem = string(v)
+					if err != nil {
+						return err
+					}
+					s.Interfaces = append(s.Interfaces, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"interfaces\"")
+			}
 		default:
 			return d.Skip()
 		}
@@ -34050,7 +34108,7 @@ func (s *StateInit) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b00000001,
+		0b00000011,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.

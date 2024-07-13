@@ -113,16 +113,19 @@ func convertBlockHeader(b core.BlockHeader) oas.BlockchainBlock {
 func convertReducedBlock(block core.ReducedBlock) oas.ReducedBlock {
 	converted := oas.ReducedBlock{
 		WorkchainID: block.Workchain,
-		Shard:       fmt.Sprintf("%x", block.Shard),
+		Shard:       fmt.Sprintf("%016x", block.Shard),
 		Seqno:       int32(block.Seqno),
 		Utime:       block.Utime,
 		TxQuantity:  block.TxQuantity,
 	}
 	if block.MasterRef != nil {
-		converted.MasterRef.SetTo(block.MasterRef.BlockID.String())
+		converted.MasterRef.SetTo(block.MasterRef.String())
 	}
 	for _, s := range block.ShardsBlocks {
-		converted.ShardsBlocks = append(converted.ShardsBlocks, s.BlockID.String())
+		converted.ShardsBlocks = append(converted.ShardsBlocks, s.String())
+	}
+	for _, s := range block.ParentBlocks {
+		converted.Parent = append(converted.Parent, s.String())
 	}
 	return converted
 }
@@ -251,8 +254,13 @@ func convertMessage(m core.Message, book addressBook) oas.Message {
 		msg.OpCode = oas.NewOptString("0x" + hex.EncodeToString(binary.BigEndian.AppendUint32(nil, *m.OpCode)))
 	}
 	if len(m.Init) != 0 {
+		interfaces := make([]string, len(m.InitInterfaces))
+		for i, iface := range m.InitInterfaces {
+			interfaces[i] = iface.String()
+		}
 		msg.Init.SetTo(oas.StateInit{
-			Boc: hex.EncodeToString(m.Init),
+			Boc:        hex.EncodeToString(m.Init),
+			Interfaces: interfaces,
 		})
 	}
 	if m.DecodedBody != nil {

@@ -38,10 +38,10 @@ func (h *Handler) Status(ctx context.Context) (*oas.ServiceStatus, error) {
 
 func (h *Handler) GetReducedBlockchainBlocks(ctx context.Context, params oas.GetReducedBlockchainBlocksParams) (*oas.ReducedBlocks, error) {
 	if params.From > params.To {
-		return nil, toError(http.StatusBadRequest, fmt.Errorf("from must be less than to"))
+		return nil, toError(http.StatusBadRequest, fmt.Errorf("from must be less (or equal) than to"))
 	}
-	if params.To-params.From > 3600 {
-		return nil, toError(http.StatusBadRequest, fmt.Errorf("max diapason is 1 hour"))
+	if params.To-params.From > 600 {
+		return nil, toError(http.StatusBadRequest, fmt.Errorf("max diapason is 10 minutes"))
 	}
 	blocks, err := h.storage.GetReducedBlocks(ctx, params.From, params.To)
 	if err != nil {

@@ -14196,6 +14196,7 @@ type ReducedBlock struct {
 	TxQuantity   int       `json:"tx_quantity"`
 	Utime        int64     `json:"utime"`
 	ShardsBlocks []string  `json:"shards_blocks"`
+	Parent       []string  `json:"parent"`
 }
 
 // GetWorkchainID returns the value of WorkchainID.
@@ -14233,6 +14234,11 @@ func (s *ReducedBlock) GetShardsBlocks() []string {
 	return s.ShardsBlocks
 }
 
+// GetParent returns the value of Parent.
+func (s *ReducedBlock) GetParent() []string {
+	return s.Parent
+}
+
 // SetWorkchainID sets the value of WorkchainID.
 func (s *ReducedBlock) SetWorkchainID(val int32) {
 	s.WorkchainID = val
@@ -14266,6 +14272,11 @@ func (s *ReducedBlock) SetUtime(val int64) {
 // SetShardsBlocks sets the value of ShardsBlocks.
 func (s *ReducedBlock) SetShardsBlocks(val []string) {
 	s.ShardsBlocks = val
+}
+
+// SetParent sets the value of Parent.
+func (s *ReducedBlock) SetParent(val []string) {
+	s.Parent = val
 }
 
 // Ref: #/components/schemas/ReducedBlocks
@@ -14849,7 +14860,8 @@ func (s *SmartContractAction) SetRefund(val OptRefund) {
 
 // Ref: #/components/schemas/StateInit
 type StateInit struct {
-	Boc string `json:"boc"`
+	Boc        string   `json:"boc"`
+	Interfaces []string `json:"interfaces"`
 }
 
 // GetBoc returns the value of Boc.
@@ -14857,9 +14869,19 @@ func (s *StateInit) GetBoc() string {
 	return s.Boc
 }
 
+// GetInterfaces returns the value of Interfaces.
+func (s *StateInit) GetInterfaces() []string {
+	return s.Interfaces
+}
+
 // SetBoc sets the value of Boc.
 func (s *StateInit) SetBoc(val string) {
 	s.Boc = val
+}
+
+// SetInterfaces sets the value of Interfaces.
+func (s *StateInit) SetInterfaces(val []string) {
+	s.Interfaces = val
 }
 
 // Ref: #/components/schemas/StoragePhase

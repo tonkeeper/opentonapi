@@ -4675,6 +4675,17 @@
       "example": "(-1,4234234,8000000000000000)",
       "type": "string"
      },
+     "parent": {
+      "items": {
+       "example": [
+        "(0",
+        21734018,
+        "8000000000000000)"
+       ],
+       "type": "string"
+      },
+      "type": "array"
+     },
      "seqno": {
       "example": 21734019,
       "format": "int32",
@@ -4687,7 +4698,7 @@
      "shards_blocks": {
       "items": {
        "example": [
-        "(-1",
+        "(0",
         4234235,
         "8000000000000000)"
        ],
@@ -4716,7 +4727,8 @@
      "seqno",
      "tx_quantity",
      "utime",
-     "shards_blocks"
+     "shards_blocks",
+     "parent"
     ],
     "type": "object"
    },
@@ -4992,12 +5004,19 @@
    "StateInit": {
     "properties": {
      "boc": {
-      "example": "te6ccgEBBgEARAABFP8A9KQT9LzyyAsBAgEgAgMCAUgEBQAE8jAAONBsIdMfMO1E0NM/MAHAAZekyMs/ye1UkzDyBuIAEaE0MdqJoaZ+YQ==",
+      "example": "b5ee9c72010106010044000114ff00f4a413f4bcf2c80b01020120020302014804050004f2300038d06c21d31f30ed44d0d33f3001c00197a4c8cb3fc9ed549330f206e20011a13431da89a1a67e61",
       "type": "string"
+     },
+     "interfaces": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
      }
     },
     "required": [
-     "boc"
+     "boc",
+     "interfaces"
     ],
     "type": "object"
    },

@@ -252,14 +252,14 @@ func (h *Handler) GetAccountEvents(ctx context.Context, params oas.GetAccountEve
 		memTraces, _ := h.mempoolEmulate.accountsTraces.Get(account.ID)
 		i := 0
 		for _, hash := range memTraces {
+			if i > params.Limit-10 { // we want always to save at least 1 real transaction
+				break
+			}
 			tx, _ := h.storage.SearchTransactionByMessageHash(ctx, hash)
 			trace, prs := h.mempoolEmulate.traces.Get(hash)
 			if (tx != nil && !contains(skippedInProgress, *tx)) || !prs { //if err is nil it's already processed. If !prs we can't do anything
 				h.mempoolEmulate.traces.Delete(hash)
 				continue
-			}
-			if i > params.Limit-2 { // we want always to save at least 1 real transaction
-				break
 			}
 			i++
 			result, err := bath.FindActions(ctx, trace, bath.ForAccount(account.ID), bath.WithInformationSource(h.storage))
@@ -280,12 +280,15 @@ func (h *Handler) GetAccountEvents(ctx context.Context, params oas.GetAccountEve
 		}
 	}
 	if len(events) < params.Limit {
-		missedLimit := params.Limit - len(events)
-		missedEvents, _ := h.storage.GetMissedEvents(ctx, account.ID, lastLT, missedLimit)
-		events = append(events, missedEvents...)
-		if len(events) > 0 {
-			lastLT = uint64(events[len(events)-1].Lt)
-		}
+		lastLT = 0 // dirty hack
+
+		////toncenter fallback. don't require now
+		//missedLimit := params.Limit - len(events)
+		//missedEvents, _ := h.storage.GetMissedEvents(ctx, account.ID, lastLT, missedLimit)
+		//events = append(events, missedEvents...)
+		//if len(events) > 0 {
+		//	lastLT = uint64(events[len(events)-1].Lt)
+		//}
 	}
 	return &oas.AccountEvents{Events: events, NextFrom: int64(lastLT)}, nil
 }

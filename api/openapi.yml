@@ -3297,6 +3297,7 @@ components:
         - tx_quantity
         - utime
         - shards_blocks
+        - parent
       properties:
         workchain_id:
           type: integer
@@ -3323,7 +3324,12 @@ components:
           type: array
           items:
             type: string
-            example: [ (-1,4234235,8000000000000000) ]
+            example: [ (0,4234235,8000000000000000) ]
+        parent:
+          type: array
+          items:
+            type: string
+            example: [ (0,21734018,8000000000000000) ]
     BlockchainBlock:
       type: object
       required:
@@ -3509,10 +3515,15 @@ components:
       type: object
       required:
         - boc
+        - interfaces
       properties:
         boc:
           type: string
-          example: te6ccgEBBgEARAABFP8A9KQT9LzyyAsBAgEgAgMCAUgEBQAE8jAAONBsIdMfMO1E0NM/MAHAAZekyMs/ye1UkzDyBuIAEaE0MdqJoaZ+YQ==
+          example: b5ee9c72010106010044000114ff00f4a413f4bcf2c80b01020120020302014804050004f2300038d06c21d31f30ed44d0d33f3001c00197a4c8cb3fc9ed549330f206e20011a13431da89a1a67e61
+        interfaces:
+            type: array
+            items:
+                type: string
     Message:
       type: object
       required:

@@ -36,9 +36,10 @@ type BlockHeader struct {
 
 type ReducedBlock struct {
 	tongo.BlockIDExt
-	MasterRef    *tongo.BlockIDExt
+	MasterRef    *tongo.BlockID
 	Utime        int64
-	ShardsBlocks []tongo.BlockIDExt
+	ParentBlocks []tongo.BlockID
+	ShardsBlocks []tongo.BlockID
 	TxQuantity   int
 }
 
