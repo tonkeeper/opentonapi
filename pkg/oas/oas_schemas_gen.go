@@ -2408,7 +2408,7 @@ func (s *BlockchainBlocks) SetBlocks(val []BlockchainBlock) {
 
 // Ref: #/components/schemas/BlockchainConfig
 type BlockchainConfig struct {
-	// Config boc in base64 format.
+	// Config boc in hex format.
 	Raw string `json:"raw"`
 	// Config address.
 	R0 string `json:"0"`
@@ -14589,9 +14589,9 @@ type SignRawMessage struct {
 	Address string `json:"address"`
 	// Number of nanocoins to send. Decimal string.
 	Amount string `json:"amount"`
-	// Raw one-cell BoC encoded in Base64.
+	// Raw one-cell BoC encoded in hex.
 	Payload OptString `json:"payload"`
-	// Raw once-cell BoC encoded in Base64.
+	// Raw once-cell BoC encoded in hex.
 	StateInit OptString `json:"stateInit"`
 }
 

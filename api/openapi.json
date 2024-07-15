@@ -8,6 +8,7 @@
     "required": true,
     "schema": {
      "example": "0:97264395BD65A255A429B11326C84128B7D70FFED7949ABAE3036D506BA38621",
+     "format": "address",
      "type": "string"
     }
    },
@@ -20,6 +21,7 @@
     "schema": {
      "items": {
       "example": "0:97264395BD65A255A429B11326C84128B7D70FFED7949ABAE3036D506BA38621",
+      "format": "address",
       "type": "string"
      },
      "type": "array"
@@ -33,6 +35,7 @@
     "required": false,
     "schema": {
      "example": "0:97264395BD65A255A429B11326C84128B7D70FFED7949ABAE3036D506BA38621",
+     "format": "address",
      "type": "string"
     }
    },
@@ -63,6 +66,7 @@
     "required": false,
     "schema": {
      "example": "0:06d811f426598591b32b2c49f29f66c821368e4acb1de16762b04e0174532465",
+     "format": "address",
      "type": "string"
     }
    },
@@ -190,6 +194,7 @@
     "required": true,
     "schema": {
      "example": "0:97264395BD65A255A429B11326C84128B7D70FFED7949ABAE3036D506BA38621",
+     "format": "address",
      "type": "string"
     }
    },
@@ -378,6 +383,7 @@
         "account_ids": {
          "items": {
           "example": "0:97264395BD65A255A429B11326C84128B7D70FFED7949ABAE3036D506BA38621",
+          "format": "address",
           "type": "string"
          },
          "type": "array"
@@ -411,14 +417,14 @@
        "properties": {
         "batch": {
          "items": {
-          "example": "te6ccgECBQEAARUAAkWIAWTtae+KgtbrX26Bep8JSq8lFLfGOoyGR/xwdjfvpvEaHg",
+          "format": "cell",
           "type": "string"
          },
          "maxItems": 10,
          "type": "array"
         },
         "boc": {
-         "example": "te6ccgECBQEAARUAAkWIAWTtae+KgtbrX26Bep8JSq8lFLfGOoyGR/xwdjfvpvEaHg",
+         "format": "cell",
          "type": "string"
         }
        },
@@ -426,7 +432,7 @@
       }
      }
     },
-    "description": "both a single boc and a batch of boc serialized in base64 are accepted",
+    "description": "both a single boc and a batch of boc serialized in base64/hex are accepted",
     "required": true
    },
    "Boc": {
@@ -435,7 +441,7 @@
       "schema": {
        "properties": {
         "boc": {
-         "example": "te6ccgECBQEAARUAAkWIAWTtae+KgtbrX26Bep8JSq8lFLfGOoyGR/xwdjfvpvEaHg",
+         "format": "cell",
          "type": "string"
         }
        },
@@ -446,7 +452,7 @@
       }
      }
     },
-    "description": "bag-of-cells serialized to base64",
+    "description": "bag-of-cells serialized to hex",
     "required": true
    },
    "EmulationBoc": {
@@ -455,7 +461,7 @@
       "schema": {
        "properties": {
         "boc": {
-         "example": "te6ccgECBQEAARUAAkWIAWTtae+KgtbrX26Bep8JSq8lFLfGOoyGR/xwdjfvpvEaHg",
+         "format": "cell",
          "type": "string"
         },
         "params": {
@@ -464,6 +470,7 @@
           "properties": {
            "address": {
             "example": "0:97146a46acc2654y27947f14c4a4b14273e954f78bc017790b41208b0043200b",
+            "format": "address",
             "type": "string"
            },
            "balance": {
@@ -487,7 +494,7 @@
       }
      }
     },
-    "description": "bag-of-cells serialized to base64 and additional parameters to configure emulation",
+    "description": "bag-of-cells serialized to base64/hex and additional parameters to configure emulation",
     "required": true
    },
    "GaslessSend": {
@@ -496,7 +503,7 @@
       "schema": {
        "properties": {
         "boc": {
-         "example": "te6ccgECBQEAARUAAkWIAWTtae+KgtbrX26Bep8JSq8lFLfGOoyGR/xwdjfvpvEaHg",
+         "format": "cell",
          "type": "string"
         },
         "wallet_public_key": {
@@ -512,7 +519,7 @@
       }
      }
     },
-    "description": "bag-of-cells serialized to base64",
+    "description": "bag-of-cells serialized to hex",
     "required": true
    },
    "InternalMessages": {
@@ -524,7 +531,7 @@
          "items": {
           "properties": {
            "boc": {
-            "example": "B5EE9C7201010101001100001D00048656C6C6F2C20776F726C64218",
+            "format": "cell",
             "type": "string"
            }
           },
@@ -536,6 +543,7 @@
          "type": "array"
         },
         "wallet_address": {
+         "format": "address",
          "type": "string"
         },
         "wallet_public_key": {
@@ -551,7 +559,7 @@
       }
      }
     },
-    "description": "bag-of-cells serialized to base64",
+    "description": "bag-of-cells serialized to hex",
     "required": true
    },
    "LiteServerSendMessageRequest": {
@@ -560,6 +568,7 @@
       "schema": {
        "properties": {
         "body": {
+         "format": "cell-base64",
          "type": "string"
         }
        },
@@ -590,6 +599,7 @@
        "properties": {
         "address": {
          "example": "0:97146a46acc2654y27947f14c4a4b14273e954f78bc017790b41208b0043200b",
+         "format": "address",
          "type": "string"
         },
         "proof": {
@@ -617,6 +627,7 @@
            "type": "string"
           },
           "state_init": {
+           "format": "cell-base64",
            "type": "string"
           },
           "timestamp": {
@@ -651,6 +662,7 @@
       "schema": {
        "properties": {
         "state_init": {
+         "format": "cell-base64",
          "type": "string"
         }
        },
@@ -699,6 +711,7 @@
     "properties": {
      "address": {
       "example": "0:da6b1b6663a0e4d18cc8574ccd9db5296e367dd9324706f3bbd9eb1cd2caf0bf",
+      "format": "address",
       "type": "string"
      },
      "balance": {
@@ -774,6 +787,7 @@
     "properties": {
      "address": {
       "example": "0:10C1073837B93FDAAD594284CE8B8EFF7B9CF25427440EB2FC682762E1471365",
+      "format": "address",
       "type": "string"
      },
      "icon": {
@@ -881,6 +895,7 @@
     "properties": {
      "address": {
       "example": "0:97146a46acc2654y27947f14c4a4b14273e954f78bc017790b41208b0043200b",
+      "format": "address",
       "type": "string"
      },
      "public_key": {
@@ -1069,6 +1084,7 @@
      },
      "base_transactions": {
       "items": {
+       "description": "transaction hash",
        "example": "e8b0e3fee4a26bd2317ac1f9952fcdc87dc08fdb617656b5202416323337372e",
        "type": "string"
       },
@@ -1235,7 +1251,8 @@
       "type": "string"
      },
      "owner": {
-      "example": "owner",
+      "example": "0:c704dadfabac88eab58e340de03080df81ff76636431f48624ad6e26fb2da0a4",
+      "format": "address",
       "type": "string"
      },
      "price": {
@@ -1467,6 +1484,7 @@
    "BlockchainAccountInspect": {
     "properties": {
      "code": {
+      "format": "cell",
       "type": "string"
      },
      "code_hash": {
@@ -1726,10 +1744,12 @@
     "properties": {
      "0": {
       "description": "config address",
+      "format": "address",
       "type": "string"
      },
      "1": {
       "description": "elector address",
+      "format": "address",
       "type": "string"
      },
      "10": {
@@ -1951,6 +1971,7 @@
      },
      "2": {
       "description": "minter address",
+      "format": "address",
       "type": "string"
      },
      "20": {
@@ -2142,6 +2163,7 @@
      },
      "3": {
       "description": "The address of the transaction fee collector.",
+      "format": "address",
       "type": "string"
      },
      "31": {
@@ -2150,6 +2172,7 @@
        "fundamental_smc_addr": {
         "items": {
          "example": "-1:dd24c4a1f2b88f8b7053513b5cc6c5a31bc44b2a72dcb4d8c0338af0f0d37ec5",
+         "format": "address",
          "type": "string"
         },
         "type": "array"
@@ -2180,6 +2203,7 @@
      },
      "4": {
       "description": "dns root address",
+      "format": "address",
       "type": "string"
      },
      "40": {
@@ -2211,6 +2235,8 @@
       "properties": {
        "accounts": {
         "items": {
+         "example": "0:0000000000000000000000000000000000000000000000000000000000000000",
+         "format": "address",
          "type": "string"
         },
         "type": "array"
@@ -2228,6 +2254,7 @@
      "5": {
       "properties": {
        "blackhole_addr": {
+        "format": "address",
         "type": "string"
        },
        "fee_burn_denom": {
@@ -2398,8 +2425,8 @@
       "type": "object"
      },
      "raw": {
-      "description": "config boc in base64 format",
-      "example": "te6ccgEBBgEARAABFP8A9KQT9LzyyAsBAgEgAgMCAUgEBQAE8jAAONBsIdMfMO1E0NM/MAHAAZekyMs/ye1UkzDyBuIAEaE0MdqJoaZ+YQ==",
+      "description": "config boc in hex format",
+      "format": "cell",
       "type": "string"
      }
     },
@@ -2417,6 +2444,7 @@
     "properties": {
      "address": {
       "example": "0:da6b1b6663a0e4d18cc8574ccd9db5296e367dd9324706f3bbd9eb1cd2caf0bf",
+      "format": "address",
       "type": "string"
      },
      "balance": {
@@ -2426,10 +2454,12 @@
      },
      "code": {
       "example": "b5ee9c72410104010087000114ff00f4a413f4a0f2c80b0102012002030002d200dfa5ffff76a268698fe9ffe8e42c5267858f90e785ffe4f6aa6467c444ffb365ffc10802faf0807d014035e7a064b87d804077e7857fc10803dfd2407d014035e7a064b86467cd8903a32b9ba4410803ade68afd014035e7a045ea432b6363796103bb7b9363210c678b64b87d807d8040c249b3e4",
+      "format": "cell",
       "type": "string"
      },
      "data": {
       "example": "b5ee9c7241010101002600004811fd096c0000000000000000000000000000000000000000000000000000000000000000cb78264d",
+      "format": "cell",
       "type": "string"
      },
      "extra_balance": {
@@ -2459,6 +2489,7 @@
          "type": "boolean"
         },
         "root": {
+         "format": "cell",
          "type": "string"
         }
        },
@@ -2601,6 +2632,7 @@
     "properties": {
      "address": {
       "example": "0:da6b1b6663a0e4d18cc8574ccd9db5296e367dd9324706f3bbd9eb1cd2caf0bf",
+      "format": "address",
       "type": "string"
      },
      "interfaces": {
@@ -2761,7 +2793,7 @@
      "message": {
       "properties": {
        "boc": {
-        "example": "te6ccgEBAQEABgAACCiAmCMBAgEABwA=",
+        "format": "cell",
         "type": "string"
        },
        "decoded_body": {},
@@ -2852,6 +2884,7 @@
     "properties": {
      "next_resolver": {
       "example": "0:da6b1b6663a0e4d18cc8574ccd9db5296e367dd9324706f3bbd9eb1cd2caf0bf",
+      "format": "address",
       "type": "string"
      },
      "sites": {
@@ -2961,6 +2994,7 @@
     "properties": {
      "contract_address": {
       "example": "0:da6b1b6663a0e4d18cc8574ccd9db5296e367dd9324706f3bbd9eb1cd2caf0bf",
+      "format": "address",
       "type": "string"
      },
      "domain": {
@@ -3099,6 +3133,7 @@
        "properties": {
         "address": {
          "example": "0:010cеeac44fad23417a5c55e4071796868771082с9a61e8c195a8d57508b8471",
+         "format": "address",
          "type": "string"
         },
         "name": {
@@ -3187,6 +3222,7 @@
       "items": {
        "properties": {
         "master_id": {
+         "format": "address",
          "type": "string"
         }
        },
@@ -3200,6 +3236,7 @@
      "relay_address": {
       "description": "sending excess to this address decreases the commission of a gasless transfer",
       "example": "0:dfbd5be8497fdc0c9fcbdfc676864840ddf8ad6423d6d5657d9b0e8270d6c8ac",
+      "format": "address",
       "type": "string"
      }
     },
@@ -3418,6 +3455,7 @@
    "JettonBridgeParams": {
     "properties": {
      "bridge_address": {
+      "format": "address",
       "type": "string"
      },
      "burn_bridge_fee": {
@@ -3434,6 +3472,7 @@
       "type": "array"
      },
      "oracles_address": {
+      "format": "address",
       "type": "string"
      },
      "prices": {
@@ -3503,6 +3542,7 @@
      },
      "senders_wallet": {
       "example": "0:E93E7D444180608B8520C00DC664383A387356FB6E16FDDF99DBE5E1415A574B",
+      "format": "address",
       "type": "string"
      }
     },
@@ -3521,6 +3561,7 @@
        "properties": {
         "address": {
          "example": "0:10C1073837B93FDAAD594284CE8B8EFF7B9CF25427440EB2FC682762E1471365",
+         "format": "address",
          "type": "string"
         },
         "balance": {
@@ -3590,6 +3631,7 @@
     "properties": {
      "address": {
       "example": "0:0BB5A9F69043EEBDDA5AD2E946EB953242BD8F603FE795D90698CEEC6BFC60A0",
+      "format": "address",
       "type": "string"
      },
      "catalogs": {
@@ -3666,6 +3708,7 @@
      },
      "recipients_wallet": {
       "example": "0:E93E7D444180608B8520C00DC664383A387356FB6E16FDDF99DBE5E1415A574B",
+      "format": "address",
       "type": "string"
      }
     },
@@ -3681,6 +3724,7 @@
     "properties": {
      "address": {
       "example": "0:0BB5A9F69043EEBDDA5AD2E946EB953242BD8F603FE795D90698CEEC6BFC60A0",
+      "format": "address",
       "type": "string"
      },
      "decimals": {
@@ -3805,6 +3849,7 @@
      },
      "recipients_wallet": {
       "example": "0:E93E7D444180608B8520C00DC664383A387356FB6E16FDDF99DBE5E1415A574B",
+      "format": "address",
       "type": "string"
      },
      "refund": {
@@ -3815,6 +3860,7 @@
      },
      "senders_wallet": {
       "example": "0:E93E7D444180608B8520C00DC664383A387356FB6E16FDDF99DBE5E1415A574B",
+      "format": "address",
       "type": "string"
      }
     },
@@ -3955,6 +4001,7 @@
      "raw_body": {
       "description": "hex-encoded BoC with raw message body",
       "example": "B5EE9C7201010101001100001D00048656C6C6F2C20776F726C64218",
+      "format": "cell",
       "type": "string"
      },
      "source": {
@@ -4137,6 +4184,7 @@
     "properties": {
      "address": {
       "example": "0:da6b1b6663a0e4d18cc8574ccd9db5296e367dd9324706f3bbd9eb1cd2caf0bf",
+      "format": "address",
       "type": "string"
      },
      "orders": {
@@ -4148,6 +4196,7 @@
      "proposers": {
       "items": {
        "example": "0:da6b1b6663a0e4d18cc8574ccd9db5296e367dd9324706f3bbd9eb1cd2caf0bf",
+       "format": "address",
        "type": "string"
       },
       "type": "array"
@@ -4160,6 +4209,7 @@
      "signers": {
       "items": {
        "example": "0:da6b1b6663a0e4d18cc8574ccd9db5296e367dd9324706f3bbd9eb1cd2caf0bf",
+       "format": "address",
        "type": "string"
       },
       "type": "array"
@@ -4183,6 +4233,7 @@
     "properties": {
      "address": {
       "example": "0:da6b1b6663a0e4d18cc8574ccd9db5296e367dd9324706f3bbd9eb1cd2caf0bf",
+      "format": "address",
       "type": "string"
      },
      "approvals_num": {
@@ -4205,6 +4256,7 @@
      "signers": {
       "items": {
        "example": "0:da6b1b6663a0e4d18cc8574ccd9db5296e367dd9324706f3bbd9eb1cd2caf0bf",
+       "format": "address",
        "type": "string"
       },
       "type": "array"
@@ -4255,6 +4307,7 @@
     "properties": {
      "address": {
       "example": "0:FD595F36B4C1535BEC8461490D38EBB9AE3C38DD6ACE17CA63ABE2C6608BE159",
+      "format": "address",
       "type": "string"
      },
      "approved_by": {
@@ -4280,7 +4333,7 @@
       "type": "array"
      },
      "raw_collection_content": {
-      "example": "697066733a2f2f516d596e437861746f5178433571584b79773971656768415853626f3544644e6a32387631487669437a47355359",
+      "format": "cell",
       "type": "string"
      }
     },
@@ -4310,6 +4363,7 @@
     "properties": {
      "address": {
       "example": "0:E93E7D444180608B8520C00DC664383A387356FB6E16FDDF99DBE5E1415A574B",
+      "format": "address",
       "type": "string"
      },
      "approved_by": {
@@ -4319,6 +4373,7 @@
       "properties": {
        "address": {
         "example": "0:E93E7D444180608B8520C00DC664383A387356FB6E16FDDF99DBE5E1415A574B",
+        "format": "address",
         "type": "string"
        },
        "description": {
@@ -4469,6 +4524,7 @@
     "properties": {
      "address": {
       "example": "0:55e8809519cd3c49098c9ee45afdafcea7a894a74d0f628d94a115a50e045122",
+      "format": "address",
       "type": "string"
      },
      "secp_pubkey": {
@@ -4485,12 +4541,14 @@
    "OracleBridgeParams": {
     "properties": {
      "bridge_addr": {
+      "format": "address",
       "type": "string"
      },
      "external_chain_address": {
       "type": "string"
      },
      "oracle_multisig_address": {
+      "format": "address",
       "type": "string"
      },
      "oracles": {
@@ -4550,6 +4608,7 @@
     "properties": {
      "address": {
       "example": "0:48fb0195a7fc7454512377b9bd704503ded27f6e7c4c4a9d136fdab3ef9ec04c",
+      "format": "address",
       "type": "string"
      },
      "apy": {
@@ -4584,6 +4643,7 @@
      "liquid_jetton_master": {
       "description": "for liquid staking master account of jetton",
       "example": "0:4a91d32d0289bda9813ae00ff7640e6c38fdce76e4583dd6afc463b70c7d767c",
+      "format": "address",
       "type": "string"
      },
      "max_nominators": {
@@ -4806,6 +4866,7 @@
     "properties": {
      "address": {
       "example": "0:10C1073837B93FDAAD594284CE8B8EFF7B9CF25427440EB2FC682762E1471365",
+      "format": "address",
       "type": "string"
      },
      "market": {
@@ -4858,6 +4919,7 @@
     "properties": {
      "address": {
       "example": "0:da6b1b6663a0e4d18cc8574ccd9db5296e367dd9324706f3bbd9eb1cd2caf0bf",
+      "format": "address",
       "type": "string"
      },
      "amount": {
@@ -4865,11 +4927,13 @@
       "type": "string"
      },
      "payload": {
-      "description": "Raw one-cell BoC encoded in Base64.",
+      "description": "Raw one-cell BoC encoded in hex.",
+      "format": "cell",
       "type": "string"
      },
      "stateInit": {
-      "description": "Raw once-cell BoC encoded in Base64.",
+      "description": "Raw once-cell BoC encoded in hex.",
+      "format": "cell",
       "type": "string"
      }
     },
@@ -4888,6 +4952,7 @@
      },
      "from": {
       "example": "0:da6b1b6663a0e4d18cc8574ccd9db5296e367dd9324706f3bbd9eb1cd2caf0bf",
+      "format": "address",
       "type": "string"
      },
      "messages": {
@@ -4898,6 +4963,7 @@
      },
      "relay_address": {
       "example": "0:da6b1b6663a0e4d18cc8574ccd9db5296e367dd9324706f3bbd9eb1cd2caf0bf",
+      "format": "address",
       "type": "string"
      },
      "valid_until": {
@@ -5005,6 +5071,7 @@
     "properties": {
      "boc": {
       "example": "b5ee9c72010106010044000114ff00f4a413f4bcf2c80b01020120020302014804050004f2300038d06c21d31f30ed44d0d33f3001c00197a4c8cb3fc9ed549330f206e20011a13431da89a1a67e61",
+      "format": "cell",
       "type": "string"
      },
      "interfaces": {
@@ -5050,6 +5117,7 @@
      },
      "address": {
       "example": "0:FD595F36B4C1535BEC8461490D38EBB9AE3C38DD6ACE17CA63ABE2C6608BE159",
+      "format": "address",
       "type": "string"
      },
      "max_span": {
@@ -5087,6 +5155,7 @@
     "properties": {
      "address": {
       "example": "0:dea8f638b789172ce36d10a20318125e52c649aa84893cd77858224fe2b9b0ee",
+      "format": "address",
       "type": "string"
      },
      "amount": {
@@ -5096,6 +5165,7 @@
      },
      "beneficiary_address": {
       "example": "0:c704dadfabac88eab58e340de03080df81ff76636431f48624ad6e26fb2da0a4",
+      "format": "address",
       "type": "string"
      },
      "failed_attempts": {
@@ -5135,6 +5205,7 @@
      },
      "wallet_address": {
       "example": "0:567DE86AF2B6A557D7085807CF7C26338124987A5179344F0D0FA2657EB710F1",
+      "format": "address",
       "type": "string"
      }
     },
@@ -5172,6 +5243,7 @@
      },
      "subscription": {
       "example": "0:da6b1b6663a0e4d18cc8574ccd9db5296e367dd9324706f3bbd9eb1cd2caf0bf",
+      "format": "address",
       "type": "string"
      }
     },
@@ -5405,6 +5477,7 @@
      "raw": {
       "description": "hex encoded boc with raw transaction",
       "example": "b5ee9c72410206010001380003b372cf3b5b8c891e517c9addbda1c0386a09ccacbb0e3faf630b51cfc8152325acb00002ac5795c0e41fdf79135cb7da03cc623b165d614b562a51eeccd8a5e097f405abf6b37f4e73000002ac5629732c1666887ed000144030480102030101a004008272abc8f2971aa4404ac6da1597720f348b2e1247b1ad9f55cbd3b6812f0a5f08b269bb65039fb1f6074d00f794e857f6dfd01131d299df456af10a8a4943d4d165000d0c80608840492001ab48015581f575c3b8c6ab3d6",
+      "format": "cell",
       "type": "string"
      },
      "state_update_new": {
@@ -5495,9 +5568,10 @@
     "type": "string"
    },
    "TvmStackRecord": {
+    "format": "tuple-item",
     "properties": {
      "cell": {
-      "example": "te6cckEBAQEAJAAAQ4ARPeUceMlv4l12d6jdLpIzzbAV6amYXNZeZK2aicQdC/Apj8aJ",
+      "format": "cell-base64",
       "type": "string"
      },
      "num": {
@@ -5506,6 +5580,7 @@
      },
      "slice": {
       "example": "",
+      "format": "cell",
       "type": "string"
      },
      "tuple": {
@@ -5542,6 +5617,7 @@
      },
      "subscription": {
       "example": "0:da6b1b6663a0e4d18cc8574ccd9db5296e367dd9324706f3bbd9eb1cd2caf0bf",
+      "format": "address",
       "type": "string"
      }
     },
@@ -5556,6 +5632,7 @@
     "properties": {
      "address": {
       "example": "0:55e8809519cd3c49098c9ee45afdafcea7a894a74d0f628d94a115a50e045122",
+      "format": "address",
       "type": "string"
      },
      "adnl_address": {
@@ -5723,6 +5800,7 @@
      },
      "address": {
       "example": "0:da6b1b6663a0e4d18cc8574ccd9db5296e367dd9324706f3bbd9eb1cd2caf0bf",
+      "format": "address",
       "type": "string"
      },
      "has_method_pubkey": {
@@ -6844,6 +6922,7 @@
           },
           "raw_form": {
            "example": "0:6e731f2e28b73539a7f85ac47ca104d5840b229351189977bb6151d36b5e3f5e",
+           "format": "address",
            "type": "string"
           },
           "test_only": {
@@ -7978,6 +8057,7 @@
       "required": true,
       "schema": {
        "example": "0:97264395BD65A255A429B11326C84128B7D70FFED7949ABAE3036D506BA38621",
+       "format": "address",
        "type": "string"
       }
      }
@@ -9765,6 +9845,7 @@
       "required": false,
       "schema": {
        "example": "0:97264395BD65A255A429B11326C84128B7D70FFED7949ABAE3036D506BA38621",
+       "format": "address",
        "type": "string"
       }
      },
