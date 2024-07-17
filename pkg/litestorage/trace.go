@@ -167,7 +167,7 @@ func (s *LiteStorage) getAccountInterfaces(ctx context.Context, id tongo.Account
 		}
 		emulatedAccountCode.WithLabelValues(h).Inc()
 	}
-	inspector := abi.NewContractInspector()
+	inspector := abi.NewContractInspector(abi.InspectWithLibraryResolver(s))
 	cd, err := inspector.InspectContract(ctx, account.Code, s.executor, id)
 	if err != nil {
 		return nil, err

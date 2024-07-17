@@ -13,7 +13,7 @@
          "symbol": "KINGY",
          "decimals": 9,
          "image": "https://i.ibb.co/FbTCKRP/logotokenkingy.png",
-         "verification": "whitelist"
+         "verification": "none"
        }
      },
      {
@@ -29,7 +29,7 @@
          "symbol": "LAVE",
          "decimals": 9,
          "image": "https://i.ibb.co/Bj5KqK4/IMG-20221213-115545-207.png",
-         "verification": "whitelist"
+         "verification": "none"
        }
      },
      {

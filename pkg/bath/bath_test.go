@@ -143,6 +143,12 @@ func TestFindActions(t *testing.T) {
 			tongo.MustParseBlockID("(0,8000000000000000,35667628)"),
 			//cut jetton transfer
 			tongo.MustParseBlockID("(0,8000000000000000,43480182)"),
+			// jetton transfer to myself
+			tongo.MustParseBlockID("(0,8000000000000000,34392947)"),
+			// simple transfer
+			tongo.MustParseBlockID("(0,8000000000000000,34021598)"),
+			// nft transfer
+			tongo.MustParseBlockID("(0,8000000000000000,33600829)"),
 		}),
 	)
 
