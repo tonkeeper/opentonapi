@@ -3,7 +3,7 @@
      {
        "JettonSwap": {
          "Dex": "dedust",
-         "UserWallet": "0:0000000000000000000000000000000000000000000000000000000000000000",
+         "UserWallet": "0:2cf3b5b8c891e517c9addbda1c0386a09ccacbb0e3faf630b51cfc8152325acb",
          "Router": "0:e15febadc8f1dad4a0101b7edb99f2ee04b7a63b9d1946e99ac31927066da5e9",
          "In": {
            "Amount": 1000000000,
