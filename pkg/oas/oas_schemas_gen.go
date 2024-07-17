@@ -573,8 +573,9 @@ type AccountStorageInfo struct {
 	UsedCells       int64 `json:"used_cells"`
 	UsedBits        int64 `json:"used_bits"`
 	UsedPublicCells int64 `json:"used_public_cells"`
-	LastPaid        int64 `json:"last_paid"`
-	DuePayment      int64 `json:"due_payment"`
+	// Time of the last payment.
+	LastPaid   int64 `json:"last_paid"`
+	DuePayment int64 `json:"due_payment"`
 }
 
 // GetUsedCells returns the value of UsedCells.
@@ -7546,7 +7547,8 @@ func (s *JettonBurnAction) SetJetton(val JettonPreview) {
 // Ref: #/components/schemas/JettonHolders
 type JettonHolders struct {
 	Addresses []JettonHoldersAddressesItem `json:"addresses"`
-	Total     int64                        `json:"total"`
+	// Total number of holders.
+	Total int64 `json:"total"`
 }
 
 // GetAddresses returns the value of Addresses.
@@ -7572,7 +7574,8 @@ func (s *JettonHolders) SetTotal(val int64) {
 type JettonHoldersAddressesItem struct {
 	Address string         `json:"address"`
 	Owner   AccountAddress `json:"owner"`
-	Balance string         `json:"balance"`
+	// Balance in the smallest jetton's units.
+	Balance string `json:"balance"`
 }
 
 // GetAddress returns the value of Address.
