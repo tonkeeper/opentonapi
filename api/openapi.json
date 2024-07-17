@@ -759,7 +759,7 @@
      },
      "last_activity": {
       "description": "unix timestamp",
-      "example": 123456789,
+      "example": 1720860269,
       "format": "int64",
       "type": "integer"
      },
@@ -931,17 +931,20 @@
      "amount": {
       "example": 10050000000000,
       "format": "int64",
-      "type": "integer"
+      "type": "integer",
+      "x-js-format": "bigint"
      },
      "pending_deposit": {
       "example": 500000000000,
       "format": "int64",
-      "type": "integer"
+      "type": "integer",
+      "x-js-format": "bigint"
      },
      "pending_withdraw": {
       "example": 500000000000,
       "format": "int64",
-      "type": "integer"
+      "type": "integer",
+      "x-js-format": "bigint"
      },
      "pool": {
       "example": "EQBI-wGVp_x0VFEjd7m9cEUD3tJ_bnxMSp0Tb9qz757ATEAM",
@@ -950,7 +953,8 @@
      "ready_withdraw": {
       "example": 500000000000,
       "format": "int64",
-      "type": "integer"
+      "type": "integer",
+      "x-js-format": "bigint"
      }
     },
     "required": [
@@ -977,10 +981,12 @@
      "due_payment": {
       "example": 567,
       "format": "int64",
-      "type": "integer"
+      "type": "integer",
+      "x-js-format": "bigint"
      },
      "last_paid": {
-      "example": 567,
+      "description": "time of the last payment",
+      "example": 1720860269,
       "format": "int64",
       "type": "integer"
      },
@@ -1145,7 +1151,8 @@
      "fwd_fees": {
       "example": 1000,
       "format": "int64",
-      "type": "integer"
+      "type": "integer",
+      "x-js-format": "bigint"
      },
      "result_code": {
       "example": 5,
@@ -1243,7 +1250,8 @@
      "bids": {
       "example": 1660050553,
       "format": "int64",
-      "type": "integer"
+      "type": "integer",
+      "x-js-format": "bigint"
      },
      "date": {
       "example": 1660050553,
@@ -1262,7 +1270,8 @@
      "price": {
       "example": 1660050553,
       "format": "int64",
-      "type": "integer"
+      "type": "integer",
+      "x-js-format": "bigint"
      }
     },
     "required": [
@@ -1331,7 +1340,8 @@
      "grams": {
       "example": 10000000000,
       "format": "int64",
-      "type": "integer"
+      "type": "integer",
+      "x-js-format": "bigint"
      },
      "other": {
       "items": {
@@ -2547,12 +2557,14 @@
      "gas_fees": {
       "example": 1000,
       "format": "int64",
-      "type": "integer"
+      "type": "integer",
+      "x-js-format": "bigint"
      },
      "gas_used": {
       "example": 10000,
       "format": "int64",
-      "type": "integer"
+      "type": "integer",
+      "x-js-format": "bigint"
      },
      "skip_reason": {
       "$ref": "#/components/schemas/ComputeSkipReason"
@@ -2665,12 +2677,14 @@
      "credit": {
       "example": 1000,
       "format": "int64",
-      "type": "integer"
+      "type": "integer",
+      "x-js-format": "bigint"
      },
      "fees_collected": {
       "example": 100,
       "format": "int64",
-      "type": "integer"
+      "type": "integer",
+      "x-js-format": "bigint"
      }
     },
     "required": [
@@ -2836,7 +2850,8 @@
      "amount": {
       "example": 1660050553,
       "format": "int64",
-      "type": "integer"
+      "type": "integer",
+      "x-js-format": "bigint"
      },
      "implementation": {
       "$ref": "#/components/schemas/PoolImplementationType"
@@ -2865,7 +2880,7 @@
          "$ref": "#/components/schemas/NftItem"
         },
         "expiring_at": {
-         "example": "1678275313",
+         "example": 1678275313,
          "format": "int64",
          "type": "integer"
         },
@@ -3025,7 +3040,8 @@
      "amount": {
       "example": 1660050553,
       "format": "int64",
-      "type": "integer"
+      "type": "integer",
+      "x-js-format": "bigint"
      },
      "staker": {
       "$ref": "#/components/schemas/AccountAddress"
@@ -3042,7 +3058,8 @@
      "amount": {
       "example": 1660050553,
       "format": "int64",
-      "type": "integer"
+      "type": "integer",
+      "x-js-format": "bigint"
      },
      "staker": {
       "$ref": "#/components/schemas/AccountAddress"
@@ -3127,7 +3144,6 @@
      "event_id",
      "timestamp",
      "actions",
-     "fees",
      "value_flow",
      "is_scam",
      "lt",
@@ -3573,7 +3589,8 @@
          "type": "string"
         },
         "balance": {
-         "example": 1000000000,
+         "description": "balance in the smallest jetton's units",
+         "example": "168856200518084",
          "type": "string"
         },
         "owner": {
@@ -3590,6 +3607,7 @@
       "type": "array"
      },
      "total": {
+      "description": "total number of holders",
       "example": 2000,
       "format": "int64",
       "type": "integer"
@@ -3619,7 +3637,7 @@
       "type": "boolean"
      },
      "total_supply": {
-      "example": 311500000000000,
+      "example": "5887105890579978",
       "type": "string"
      },
      "verification": {
@@ -3771,7 +3789,7 @@
       "$ref": "#/components/schemas/JettonPreview"
      },
      "quantity": {
-      "example": 597968399,
+      "example": "597968399",
       "type": "string"
      },
      "wallet_address": {
@@ -3815,12 +3833,14 @@
      "ton_in": {
       "example": 1000000000,
       "format": "int64",
-      "type": "integer"
+      "type": "integer",
+      "x-js-format": "bigint"
      },
      "ton_out": {
       "example": 2000000000,
       "format": "int64",
-      "type": "integer"
+      "type": "integer",
+      "x-js-format": "bigint"
      },
      "user_wallet": {
       "$ref": "#/components/schemas/AccountAddress"
@@ -3971,7 +3991,8 @@
      "fwd_fee": {
       "example": 5681002,
       "format": "int64",
-      "type": "integer"
+      "type": "integer",
+      "x-js-format": "bigint"
      },
      "hash": {
       "example": "1219de582369ac80ee1afe12147930f458a54ff1eea612611a8bc6bd31581a6c",
@@ -3984,12 +4005,14 @@
      "ihr_fee": {
       "example": 5681002,
       "format": "int64",
-      "type": "integer"
+      "type": "integer",
+      "x-js-format": "bigint"
      },
      "import_fee": {
       "example": 5681002,
       "format": "int64",
-      "type": "integer"
+      "type": "integer",
+      "x-js-format": "bigint"
      },
      "init": {
       "$ref": "#/components/schemas/StateInit"
@@ -4019,7 +4042,8 @@
      "value": {
       "example": 60000000,
       "format": "int64",
-      "type": "integer"
+      "type": "integer",
+      "x-js-format": "bigint"
      }
     },
     "required": [
@@ -4663,7 +4687,8 @@
      "min_stake": {
       "example": 5000000000,
       "format": "int64",
-      "type": "integer"
+      "type": "integer",
+      "x-js-format": "bigint"
      },
      "name": {
       "example": "Tonkeeper pool",
@@ -4673,17 +4698,20 @@
       "description": "total stake of all nominators",
       "example": 5000000000,
       "format": "int64",
-      "type": "integer"
+      "type": "integer",
+      "x-js-format": "bigint"
      },
      "total_amount": {
       "format": "int64",
-      "type": "integer"
+      "type": "integer",
+      "x-js-format": "bigint"
      },
      "validator_stake": {
       "description": "stake of validator",
       "example": 5000000000,
       "format": "int64",
-      "type": "integer"
+      "type": "integer",
+      "x-js-format": "bigint"
      },
      "verified": {
       "description": "this pool has verified source code or managed by trusted company",
@@ -4715,7 +4743,7 @@
       "type": "string"
      },
      "value": {
-      "example": 123000000000,
+      "example": "123000000000",
       "type": "string"
      }
     },
@@ -4855,7 +4883,8 @@
      "ton": {
       "example": 500,
       "format": "int64",
-      "type": "integer"
+      "type": "integer",
+      "x-js-format": "bigint"
      },
      "transfer_all_remaining_balance": {
       "description": "transfer all the remaining balance of the wallet.",
@@ -5065,7 +5094,8 @@
       "description": "amount in nanotons",
       "example": 123456789,
       "format": "int64",
-      "type": "integer"
+      "type": "integer",
+      "x-js-format": "bigint"
      }
     },
     "required": [
@@ -5101,12 +5131,14 @@
      "fees_collected": {
       "example": 25713146000001,
       "format": "int64",
-      "type": "integer"
+      "type": "integer",
+      "x-js-format": "bigint"
      },
      "fees_due": {
       "example": 25713146000001,
       "format": "int64",
-      "type": "integer"
+      "type": "integer",
+      "x-js-format": "bigint"
      },
      "status_change": {
       "$ref": "#/components/schemas/AccStatusChange"
@@ -5147,7 +5179,8 @@
      "rate_per_mb_day": {
       "example": 50000000,
       "format": "int64",
-      "type": "integer"
+      "type": "integer",
+      "x-js-format": "bigint"
      }
     },
     "required": [
@@ -5238,7 +5271,8 @@
      "amount": {
       "example": 1000000000,
       "format": "int64",
-      "type": "integer"
+      "type": "integer",
+      "x-js-format": "bigint"
      },
      "beneficiary": {
       "$ref": "#/components/schemas/AccountAddress"
@@ -5326,7 +5360,8 @@
       "description": "amount in nanotons",
       "example": 123456789,
       "format": "int64",
-      "type": "integer"
+      "type": "integer",
+      "x-js-format": "bigint"
      },
      "comment": {
       "example": "Hi! This is your salary. \nFrom accounting with love.",
@@ -5659,7 +5694,8 @@
      "stake": {
       "example": 123456789,
       "format": "int64",
-      "type": "integer"
+      "type": "integer",
+      "x-js-format": "bigint"
      }
     },
     "required": [
@@ -5685,12 +5721,14 @@
      "min_stake": {
       "example": 123456789,
       "format": "int64",
-      "type": "integer"
+      "type": "integer",
+      "x-js-format": "bigint"
      },
      "total_stake": {
       "example": 123456789,
       "format": "int64",
-      "type": "integer"
+      "type": "integer",
+      "x-js-format": "bigint"
      },
      "validators": {
       "items": {
@@ -5721,7 +5759,8 @@
         },
         "weight": {
          "format": "int64",
-         "type": "integer"
+         "type": "integer",
+         "x-js-format": "bigint"
         }
        },
        "required": [
@@ -5766,7 +5805,8 @@
      "fees": {
       "example": 10,
       "format": "int64",
-      "type": "integer"
+      "type": "integer",
+      "x-js-format": "bigint"
      },
      "jettons": {
       "items": {
@@ -5780,7 +5820,8 @@
         "quantity": {
          "example": 10,
          "format": "int64",
-         "type": "integer"
+         "type": "integer",
+         "x-js-format": "bigint"
         }
        },
        "required": [
@@ -5795,7 +5836,8 @@
      "ton": {
       "example": 80,
       "format": "int64",
-      "type": "integer"
+      "type": "integer",
+      "x-js-format": "bigint"
      }
     },
     "required": [
@@ -5851,7 +5893,8 @@
      "amount": {
       "example": 1660050553,
       "format": "int64",
-      "type": "integer"
+      "type": "integer",
+      "x-js-format": "bigint"
      },
      "implementation": {
       "$ref": "#/components/schemas/PoolImplementationType"
@@ -5877,7 +5920,8 @@
      "amount": {
       "example": 1660050553,
       "format": "int64",
-      "type": "integer"
+      "type": "integer",
+      "x-js-format": "bigint"
      },
      "implementation": {
       "$ref": "#/components/schemas/PoolImplementationType"

@@ -3256,6 +3256,7 @@ components:
           type: integer
           format: int64
           example: 10000000000
+          x-js-format: bigint
         other:
           type: array
           items:
@@ -3594,14 +3595,17 @@ components:
         value:
           type: integer
           format: int64
+          x-js-format: bigint
           example: 60000000
         fwd_fee:
           type: integer
           format: int64
+          x-js-format: bigint
           example: 5681002
         ihr_fee:
           type: integer
           format: int64
+          x-js-format: bigint
           example: 5681002
         destination:
           $ref: '#/components/schemas/AccountAddress'
@@ -3610,6 +3614,7 @@ components:
         import_fee:
           type: integer
           format: int64
+          x-js-format: bigint
           example: 5681002
         created_at:
           type: integer
@@ -3680,10 +3685,12 @@ components:
         gas_fees:
           type: integer
           format: int64
+          x-js-format: bigint
           example: 1000
         gas_used:
           type: integer
           format: int64
+          x-js-format: bigint
           example: 10000
         vm_steps:
           type: integer
@@ -3704,10 +3711,12 @@ components:
         fees_collected:
           type: integer
           format: int64
+          x-js-format: bigint
           example: 25713146000001
         fees_due:
           type: integer
           format: int64
+          x-js-format: bigint
           example: 25713146000001
         status_change:
           $ref: '#/components/schemas/AccStatusChange'
@@ -3720,10 +3729,12 @@ components:
         fees_collected:
           type: integer
           format: int64
+          x-js-format: bigint
           example: 100
         credit:
           type: integer
           format: int64
+          x-js-format: bigint
           example: 1000
     ActionPhase:
       type: object
@@ -3753,12 +3764,13 @@ components:
         fwd_fees:
           type: integer
           format: int64
+          x-js-format: bigint
           example: 1000
         total_fees:
           type: integer
           format: int64
-          example: 1000
           x-js-format: bigint
+          example: 1000
         result_code_description:
           type: string
     Transaction:
@@ -3806,13 +3818,13 @@ components:
         total_fees:
           type: integer
           format: int64
-          example: 25713146000001
           x-js-format: bigint
+          example: 25713146000001
         end_balance:
           type: integer
           format: int64
-          example: 25713146000001
           x-js-format: bigint
+          example: 25713146000001
         transaction_type:
           $ref: '#/components/schemas/TransactionType'
         state_update_old:
@@ -3836,8 +3848,8 @@ components:
         prev_trans_lt:
           type: integer
           format: int64
-          example: 25713146000001
           x-js-format: bigint
+          example: 25713146000001
         compute_phase:
           $ref: '#/components/schemas/ComputePhase'
         storage_phase:
@@ -4202,6 +4214,7 @@ components:
               weight:
                 type: integer
                 format: int64
+                x-js-format: bigint
               adnl_addr:
                 type: string
     Oracle:
@@ -4311,6 +4324,7 @@ components:
           type: integer
           format: int64
           example: 123456789
+          x-js-format: bigint
         max_factor:
           type: integer
           format: int64
@@ -4335,10 +4349,12 @@ components:
         min_stake:
           type: integer
           format: int64
+          x-js-format: bigint
           example: 123456789
         total_stake:
           type: integer
           format: int64
+          x-js-format: bigint
           example: 123456789
         validators:
           type: array
@@ -4368,10 +4384,12 @@ components:
         last_paid:
           type: integer
           format: int64
-          example: 567
+          description: time of the last payment
+          example: 1720860269
         due_payment:
           type: integer
           format: int64
+          x-js-format: bigint
           example: 567
     BlockchainRawAccount:
       type: object
@@ -4389,8 +4407,8 @@ components:
         balance:
           type: integer
           format: int64
-          example: 123456789
           x-js-format: bigint
+          example: 123456789
         extra_balance:
           type: object
           additionalProperties:
@@ -4406,8 +4424,8 @@ components:
         last_transaction_lt:
           type: integer
           format: int64
-          example: 123456789
           x-js-format: bigint
+          example: 123456789
         last_transaction_hash:
           type: string
           example: 088b436a846d92281734236967970612f87fbd64a2cd3573107948379e8e4161
@@ -4460,7 +4478,7 @@ components:
           type: integer
           description: unix timestamp
           format: int64
-          example: 123456789
+          example: 1720860269
         status:
           '$ref': '#/components/schemas/AccountStatus'
         interfaces:
@@ -5259,7 +5277,7 @@ components:
       properties:
         value:
           type: string
-          example: 123000000000
+          example: "123000000000"
         token_name:
           type: string
           example: TON
@@ -5489,10 +5507,12 @@ components:
         ton:
           type: integer
           format: int64
+          x-js-format: bigint
           example: 80
         fees:
           type: integer
           format: int64
+          x-js-format: bigint
           example: 10
         jettons:
           type: array
@@ -5510,6 +5530,7 @@ components:
               quantity:
                 type: integer
                 format: int64
+                x-js-format: bigint
                 example: 10
     Action:
       type: object
@@ -5614,6 +5635,7 @@ components:
           description: amount in nanotons
           format: int64
           example: 123456789
+          x-js-format: bigint
         comment:
           type: string
           example: "Hi! This is your salary. \nFrom accounting with love."
@@ -5638,6 +5660,7 @@ components:
           description: amount in nanotons
           format: int64
           example: 123456789
+          x-js-format: bigint
         operation:
           type: string
           example: "NftTransfer or 0x35d95a12"
@@ -5853,6 +5876,7 @@ components:
           type: integer
           format: int64
           example: 1000000000
+          x-js-format: bigint
         initial:
           type: boolean
           example: false
@@ -5906,6 +5930,7 @@ components:
         amount:
           type: integer
           format: int64
+          x-js-format: bigint
           example: 1660050553
         staker:
           $ref: '#/components/schemas/AccountAddress'
@@ -5926,6 +5951,7 @@ components:
           type: integer
           format: int64
           example: 1660050553
+          x-js-format: bigint
         staker:
           $ref: '#/components/schemas/AccountAddress'
         pool:
@@ -5944,6 +5970,7 @@ components:
           type: integer
           format: int64
           example: 1660050553
+          x-js-format: bigint
         staker:
           $ref: '#/components/schemas/AccountAddress'
         pool:
@@ -5960,6 +5987,7 @@ components:
           type: integer
           format: int64
           example: 1660050553
+          x-js-format: bigint
         staker:
           $ref: '#/components/schemas/AccountAddress'
     ElectionsDepositStakeAction:
@@ -5972,6 +6000,7 @@ components:
           type: integer
           format: int64
           example: 1660050553
+          x-js-format: bigint
         staker:
           $ref: '#/components/schemas/AccountAddress'
     JettonSwapAction:
@@ -5999,10 +6028,12 @@ components:
           type: integer
           example: 1000000000
           format: int64
+          x-js-format: bigint
         ton_out:
           type: integer
           example: 2000000000
           format: int64
+          x-js-format: bigint
         user_wallet:
           $ref: '#/components/schemas/AccountAddress'
         router:
@@ -6240,10 +6271,12 @@ components:
           type: integer
           format: int64
           example: 1660050553
+          x-js-format: bigint
         bids:
           type: integer
           format: int64
           example: 1660050553
+          x-js-format: bigint
         date:
           type: integer
           format: int64
@@ -6415,6 +6448,7 @@ components:
           type: integer
           format: int64
           example: 500
+          x-js-format: bigint
         jettons:
           type: array
           items:
@@ -6432,7 +6466,7 @@ components:
       properties:
         quantity:
           type: string
-          example: 597968399
+          example: "597968399"
         wallet_address:
           $ref: '#/components/schemas/AccountAddress'
         jetton:
@@ -6553,7 +6587,6 @@ components:
         - event_id
         - timestamp
         - actions
-        - fees
         - value_flow
         - is_scam
         - lt
@@ -6685,7 +6718,7 @@ components:
           example: true
         total_supply:
           type: string
-          example: 311500000000000
+          example: "5887105890579978"
         admin:
           $ref: '#/components/schemas/AccountAddress'
         metadata:
@@ -6719,10 +6752,12 @@ components:
                 $ref: '#/components/schemas/AccountAddress'
               balance:
                 type: string
-                example: 1000000000 # need fix type or example
+                example: "168856200518084"
+                description: balance in the smallest jetton's units
         total:
           type: integer
           format: int64
+          description: total number of holders
           example: 2000
     AccountStaking:
       type: object
@@ -6749,18 +6784,22 @@ components:
           type: integer
           format: int64
           example: 10050000000000
+          x-js-format: bigint
         pending_deposit:
           type: integer
           format: int64
           example: 500000000000
+          x-js-format: bigint
         pending_withdraw:
           type: integer
           format: int64
           example: 500000000000
+          x-js-format: bigint
         ready_withdraw:
           type: integer
           format: int64
           example: 500000000000
+          x-js-format: bigint
     PoolInfo:
       type: object
       required:
@@ -6788,6 +6827,7 @@ components:
         total_amount:
           type: integer
           format: int64
+          x-js-format: bigint
         implementation:
           $ref: '#/components/schemas/PoolImplementationType'
         apy:
@@ -6797,6 +6837,7 @@ components:
         min_stake:
           type: integer
           format: int64
+          x-js-format: bigint
           example: 5000000000
         cycle_start:
           type: integer
@@ -6828,11 +6869,13 @@ components:
         nominators_stake:
           type: integer
           format: int64
+          x-js-format: bigint
           example: 5000000000
           description: "total stake of all nominators"
         validator_stake:
           type: integer
           format: int64
+          x-js-format: bigint
           example: 5000000000
           description: "stake of validator"
         cycle_length:
@@ -6880,6 +6923,7 @@ components:
         rate_per_mb_day:
           type: integer
           format: int64
+          x-js-format: bigint
           example: 50000000
         max_span:
           type: integer
@@ -6932,7 +6976,7 @@ components:
               expiring_at:
                 type: integer
                 format: int64
-                example: "1678275313"
+                example: 1678275313
               name:
                 type: string
                 example: "blah_blah.ton"
