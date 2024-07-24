@@ -8,18 +8,27 @@ import (
 )
 
 var NftTransferNotifyStraw = Straw[BubbleNftTransfer]{
-	CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.NftOwnershipAssignedMsgOp)},
-	Builder: func(newAction *BubbleNftTransfer, bubble *Bubble) error {
-		receiverTx := bubble.Info.(BubbleTx)
-		transfer := receiverTx.decodedBody.Value.(abi.NftOwnershipAssignedMsgBody)
-		newAction.success = true
-		if receiverTx.inputFrom == nil {
-			return fmt.Errorf("nft transfer notify without sender")
-		}
-		newAction.account = *receiverTx.inputFrom
-		newAction.recipient = &receiverTx.account
-		newAction.payload = transfer.ForwardPayload.Value
-		return nil
+	CheckFuncs: []bubbleCheck{IsTx, HasInterface(abi.NftItem)},
+	Children: []Straw[BubbleNftTransfer]{
+		{
+			CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.NftOwnershipAssignedMsgOp)},
+			Builder: func(newAction *BubbleNftTransfer, bubble *Bubble) error {
+				receiverTx := bubble.Info.(BubbleTx)
+				transfer := receiverTx.decodedBody.Value.(abi.NftOwnershipAssignedMsgBody)
+				newAction.success = true
+				if receiverTx.inputFrom == nil {
+					return fmt.Errorf("nft transfer notify without sender")
+				}
+				newAction.account = *receiverTx.inputFrom
+				newAction.recipient = &receiverTx.account
+				newAction.payload = transfer.ForwardPayload.Value
+				return nil
+			},
+		},
+		{
+			CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.ExcessMsgOp)},
+			Optional:   true,
+		},
 	},
 }
 
@@ -38,7 +47,17 @@ var NftTransferStraw = Straw[BubbleNftTransfer]{
 		return nil
 	},
 	Children: []Straw[BubbleNftTransfer]{
-		Optional(NftTransferNotifyStraw),
+		{
+			CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.NftOwnershipAssignedMsgOp)},
+			Optional:   true,
+			Builder: func(newAction *BubbleNftTransfer, bubble *Bubble) error {
+				receiverTx := bubble.Info.(BubbleTx)
+				transfer := receiverTx.decodedBody.Value.(abi.NftOwnershipAssignedMsgBody)
+				newAction.success = true
+				newAction.payload = transfer.ForwardPayload.Value
+				return nil
+			},
+		},
 		{
 			CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.ExcessMsgOp)},
 			Optional:   true,

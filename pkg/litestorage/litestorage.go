@@ -282,7 +282,7 @@ func (s *LiteStorage) GetRawAccounts(ctx context.Context, ids []tongo.AccountID)
 
 func (s *LiteStorage) preloadAccount(a tongo.AccountID) error {
 	ctx := context.Background()
-	accountTxs, err := s.client.GetLastTransactions(ctx, a, 1000)
+	accountTxs, err := s.client.GetLastTransactions(ctx, a, 2000)
 	if err != nil {
 		return err
 	}
