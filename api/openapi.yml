@@ -113,7 +113,6 @@ paths:
         'default':
           $ref: '#/components/responses/Error'
   /v2/blockchain/masterchain/{masterchain_seqno}/config:
-    get:
       description: Get blockchain config from a specific block, if present.
       operationId: getBlockchainConfigFromBlock
       tags:
@@ -1575,6 +1574,24 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/JettonHolders'
+        'default':
+          $ref: '#/components/responses/Error'
+  /v2/jettons/{jetton_id}/transfer/{account_id}/payload:
+    get:
+      description: Get jetton's custom payload and state init required for transfer
+      operationId: getJettonTransferPayload
+      tags:
+        - Jettons
+      parameters:
+        - $ref: '#/components/parameters/accountIDParameter'
+        - $ref: '#/components/parameters/jettonIDParameter'
+      responses:
+        '200':
+          description: jetton's custom payload
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JettonTransferPayload'
         'default':
           $ref: '#/components/responses/Error'
   /v2/events/{event_id}/jettons:
@@ -5247,6 +5264,13 @@ components:
           $ref: '#/components/schemas/AccountAddress'
         jetton:
           $ref: '#/components/schemas/JettonPreview'
+        extensions:
+          type: array
+          items:
+            type: string
+          example:
+            - custom_payload
+            - non_transferable
         lock:
           type: object
           required:
@@ -6759,6 +6783,19 @@ components:
           format: int64
           description: total number of holders
           example: 2000
+    JettonTransferPayload:
+      type: object
+      required:
+          - payload
+      properties:
+        custom_payload:
+          type: string
+          description: "hex-encoded BoC"
+          example: "b5ee9c72410212010001b40009460395b521c9251151ae7987e03c544bd275d6cd42c2d157f840beb14d5454b96718000d012205817002020328480101fd7f6a648d4f771d7f0abc1707e4e806b19de1801f65eb8c133a4cfb0c33d847000b22012004052848010147da975b922d89192f4c9b68a640daa6764ec398c93cec025e17f0c1852a711a0009220120061122012007082848010170d9fb0423cbef6c2cf1f3811a2f640daf8c9a326b6f8816c1b993e90d88e2100006220120090a28480101f6df1d75f6b9e45f224b2cb4fc2286d927d47b468b6dbf1fedc4316290ec2ae900042201200b102201200c0f2201200d"
+        state_init:
+          type: string
+          description: "hex-encoded BoC"
+          example: "b5ee9c72410212010001b40009460395b521c9251151ae7987e03c544bd275d6cd42c2d157f840beb14d5454b96718000d012205817002020328480101fd7f6a648d4f771d7f0abc1707e4e806b19de1801f65eb8c133a4cfb0c33d847000b22012004052848010147da975b922d89192f4c9b68a640daa6764ec398c93cec025e17f0c1852a711a0009220120061122012007082848010170d9fb0423cbef6c2cf1f3811a2f640daf8c9a326b6f8816c1b993e90d88e2100006220120090a28480101f6df1d75f6b9e45f224b2cb4fc2286d927d47b468b6dbf1fedc4316290ec2ae900042201200b102201200c0f2201200d"
     AccountStaking:
       type: object
       required:

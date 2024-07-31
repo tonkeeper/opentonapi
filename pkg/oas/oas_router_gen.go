@@ -1005,18 +1005,19 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 									}
 
 									elem = origElem
-								case 'c': // Prefix: "config"
+								case 'c': // Prefix: "config/raw"
 									origElem := elem
-									if l := len("config"); len(elem) >= l && elem[0:l] == "config" {
+									if l := len("config/raw"); len(elem) >= l && elem[0:l] == "config/raw" {
 										elem = elem[l:]
 									} else {
 										break
 									}
 
 									if len(elem) == 0 {
+										// Leaf node.
 										switch r.Method {
 										case "GET":
-											s.handleGetBlockchainConfigFromBlockRequest([1]string{
+											s.handleGetRawBlockchainConfigFromBlockRequest([1]string{
 												args[0],
 											}, elemIsEscaped, w, r)
 										default:
@@ -1024,31 +1025,6 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 										}
 
 										return
-									}
-									switch elem[0] {
-									case '/': // Prefix: "/raw"
-										origElem := elem
-										if l := len("/raw"); len(elem) >= l && elem[0:l] == "/raw" {
-											elem = elem[l:]
-										} else {
-											break
-										}
-
-										if len(elem) == 0 {
-											// Leaf node.
-											switch r.Method {
-											case "GET":
-												s.handleGetRawBlockchainConfigFromBlockRequest([1]string{
-													args[0],
-												}, elemIsEscaped, w, r)
-											default:
-												s.notAllowed(w, r, "GET")
-											}
-
-											return
-										}
-
-										elem = origElem
 									}
 
 									elem = origElem
@@ -1763,26 +1739,89 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 						return
 					}
 					switch elem[0] {
-					case '/': // Prefix: "/holders"
+					case '/': // Prefix: "/"
 						origElem := elem
-						if l := len("/holders"); len(elem) >= l && elem[0:l] == "/holders" {
+						if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
 							elem = elem[l:]
 						} else {
 							break
 						}
 
 						if len(elem) == 0 {
-							// Leaf node.
-							switch r.Method {
-							case "GET":
-								s.handleGetJettonHoldersRequest([1]string{
-									args[0],
-								}, elemIsEscaped, w, r)
-							default:
-								s.notAllowed(w, r, "GET")
+							break
+						}
+						switch elem[0] {
+						case 'h': // Prefix: "holders"
+							origElem := elem
+							if l := len("holders"); len(elem) >= l && elem[0:l] == "holders" {
+								elem = elem[l:]
+							} else {
+								break
 							}
 
-							return
+							if len(elem) == 0 {
+								// Leaf node.
+								switch r.Method {
+								case "GET":
+									s.handleGetJettonHoldersRequest([1]string{
+										args[0],
+									}, elemIsEscaped, w, r)
+								default:
+									s.notAllowed(w, r, "GET")
+								}
+
+								return
+							}
+
+							elem = origElem
+						case 't': // Prefix: "transfer/"
+							origElem := elem
+							if l := len("transfer/"); len(elem) >= l && elem[0:l] == "transfer/" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							// Param: "account_id"
+							// Match until "/"
+							idx := strings.IndexByte(elem, '/')
+							if idx < 0 {
+								idx = len(elem)
+							}
+							args[1] = elem[:idx]
+							elem = elem[idx:]
+
+							if len(elem) == 0 {
+								break
+							}
+							switch elem[0] {
+							case '/': // Prefix: "/payload"
+								origElem := elem
+								if l := len("/payload"); len(elem) >= l && elem[0:l] == "/payload" {
+									elem = elem[l:]
+								} else {
+									break
+								}
+
+								if len(elem) == 0 {
+									// Leaf node.
+									switch r.Method {
+									case "GET":
+										s.handleGetJettonTransferPayloadRequest([2]string{
+											args[0],
+											args[1],
+										}, elemIsEscaped, w, r)
+									default:
+										s.notAllowed(w, r, "GET")
+									}
+
+									return
+								}
+
+								elem = origElem
+							}
+
+							elem = origElem
 						}
 
 						elem = origElem
@@ -4245,9 +4284,9 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 									}
 
 									elem = origElem
-								case 'c': // Prefix: "config"
+								case 'c': // Prefix: "config/raw"
 									origElem := elem
-									if l := len("config"); len(elem) >= l && elem[0:l] == "config" {
+									if l := len("config/raw"); len(elem) >= l && elem[0:l] == "config/raw" {
 										elem = elem[l:]
 									} else {
 										break
@@ -4256,43 +4295,17 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 									if len(elem) == 0 {
 										switch method {
 										case "GET":
-											r.name = "GetBlockchainConfigFromBlock"
+											// Leaf: GetRawBlockchainConfigFromBlock
+											r.name = "GetRawBlockchainConfigFromBlock"
 											r.summary = ""
-											r.operationID = "getBlockchainConfigFromBlock"
-											r.pathPattern = "/v2/blockchain/masterchain/{masterchain_seqno}/config"
+											r.operationID = "getRawBlockchainConfigFromBlock"
+											r.pathPattern = "/v2/blockchain/masterchain/{masterchain_seqno}/config/raw"
 											r.args = args
 											r.count = 1
 											return r, true
 										default:
 											return
 										}
-									}
-									switch elem[0] {
-									case '/': // Prefix: "/raw"
-										origElem := elem
-										if l := len("/raw"); len(elem) >= l && elem[0:l] == "/raw" {
-											elem = elem[l:]
-										} else {
-											break
-										}
-
-										if len(elem) == 0 {
-											switch method {
-											case "GET":
-												// Leaf: GetRawBlockchainConfigFromBlock
-												r.name = "GetRawBlockchainConfigFromBlock"
-												r.summary = ""
-												r.operationID = "getRawBlockchainConfigFromBlock"
-												r.pathPattern = "/v2/blockchain/masterchain/{masterchain_seqno}/config/raw"
-												r.args = args
-												r.count = 1
-												return r, true
-											default:
-												return
-											}
-										}
-
-										elem = origElem
 									}
 
 									elem = origElem
@@ -5070,28 +5083,92 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 						}
 					}
 					switch elem[0] {
-					case '/': // Prefix: "/holders"
+					case '/': // Prefix: "/"
 						origElem := elem
-						if l := len("/holders"); len(elem) >= l && elem[0:l] == "/holders" {
+						if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
 							elem = elem[l:]
 						} else {
 							break
 						}
 
 						if len(elem) == 0 {
-							switch method {
-							case "GET":
-								// Leaf: GetJettonHolders
-								r.name = "GetJettonHolders"
-								r.summary = ""
-								r.operationID = "getJettonHolders"
-								r.pathPattern = "/v2/jettons/{account_id}/holders"
-								r.args = args
-								r.count = 1
-								return r, true
-							default:
-								return
+							break
+						}
+						switch elem[0] {
+						case 'h': // Prefix: "holders"
+							origElem := elem
+							if l := len("holders"); len(elem) >= l && elem[0:l] == "holders" {
+								elem = elem[l:]
+							} else {
+								break
 							}
+
+							if len(elem) == 0 {
+								switch method {
+								case "GET":
+									// Leaf: GetJettonHolders
+									r.name = "GetJettonHolders"
+									r.summary = ""
+									r.operationID = "getJettonHolders"
+									r.pathPattern = "/v2/jettons/{account_id}/holders"
+									r.args = args
+									r.count = 1
+									return r, true
+								default:
+									return
+								}
+							}
+
+							elem = origElem
+						case 't': // Prefix: "transfer/"
+							origElem := elem
+							if l := len("transfer/"); len(elem) >= l && elem[0:l] == "transfer/" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							// Param: "account_id"
+							// Match until "/"
+							idx := strings.IndexByte(elem, '/')
+							if idx < 0 {
+								idx = len(elem)
+							}
+							args[1] = elem[:idx]
+							elem = elem[idx:]
+
+							if len(elem) == 0 {
+								break
+							}
+							switch elem[0] {
+							case '/': // Prefix: "/payload"
+								origElem := elem
+								if l := len("/payload"); len(elem) >= l && elem[0:l] == "/payload" {
+									elem = elem[l:]
+								} else {
+									break
+								}
+
+								if len(elem) == 0 {
+									switch method {
+									case "GET":
+										// Leaf: GetJettonTransferPayload
+										r.name = "GetJettonTransferPayload"
+										r.summary = ""
+										r.operationID = "getJettonTransferPayload"
+										r.pathPattern = "/v2/jettons/{jetton_id}/transfer/{account_id}/payload"
+										r.args = args
+										r.count = 2
+										return r, true
+									default:
+										return
+									}
+								}
+
+								elem = origElem
+							}
+
+							elem = origElem
 						}
 
 						elem = origElem

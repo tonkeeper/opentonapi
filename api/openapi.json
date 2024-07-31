@@ -3441,6 +3441,16 @@
       "example": 597968399,
       "type": "string"
      },
+     "extensions": {
+      "example": [
+       "custom_payload",
+       "non_transferable"
+      ],
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
      "jetton": {
       "$ref": "#/components/schemas/JettonPreview"
      },
@@ -3897,6 +3907,24 @@
      "jetton",
      "senders_wallet",
      "recipients_wallet"
+    ],
+    "type": "object"
+   },
+   "JettonTransferPayload": {
+    "properties": {
+     "custom_payload": {
+      "description": "hex-encoded BoC",
+      "example": "b5ee9c72410212010001b40009460395b521c9251151ae7987e03c544bd275d6cd42c2d157f840beb14d5454b96718000d012205817002020328480101fd7f6a648d4f771d7f0abc1707e4e806b19de1801f65eb8c133a4cfb0c33d847000b22012004052848010147da975b922d89192f4c9b68a640daa6764ec398c93cec025e17f0c1852a711a0009220120061122012007082848010170d9fb0423cbef6c2cf1f3811a2f640daf8c9a326b6f8816c1b993e90d88e2100006220120090a28480101f6df1d75f6b9e45f224b2cb4fc2286d927d47b468b6dbf1fedc4316290ec2ae900042201200b102201200c0f2201200d",
+      "type": "string"
+     },
+     "state_init": {
+      "description": "hex-encoded BoC",
+      "example": "b5ee9c72410212010001b40009460395b521c9251151ae7987e03c544bd275d6cd42c2d157f840beb14d5454b96718000d012205817002020328480101fd7f6a648d4f771d7f0abc1707e4e806b19de1801f65eb8c133a4cfb0c33d847000b22012004052848010147da975b922d89192f4c9b68a640daa6764ec398c93cec025e17f0c1852a711a0009220120061122012007082848010170d9fb0423cbef6c2cf1f3811a2f640daf8c9a326b6f8816c1b993e90d88e2100006220120090a28480101f6df1d75f6b9e45f224b2cb4fc2286d927d47b468b6dbf1fedc4316290ec2ae900042201200b102201200c0f2201200d",
+      "type": "string"
+     }
+    },
+    "required": [
+     "payload"
     ],
     "type": "object"
    },
@@ -7353,33 +7381,31 @@
    }
   },
   "/v2/blockchain/masterchain/{masterchain_seqno}/config": {
-   "get": {
-    "description": "Get blockchain config from a specific block, if present.",
-    "operationId": "getBlockchainConfigFromBlock",
-    "parameters": [
-     {
-      "$ref": "#/components/parameters/masterchainSeqno"
-     }
-    ],
-    "responses": {
-     "200": {
-      "content": {
-       "application/json": {
-        "schema": {
-         "$ref": "#/components/schemas/BlockchainConfig"
-        }
+   "description": "Get blockchain config from a specific block, if present.",
+   "operationId": "getBlockchainConfigFromBlock",
+   "parameters": [
+    {
+     "$ref": "#/components/parameters/masterchainSeqno"
+    }
+   ],
+   "responses": {
+    "200": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/BlockchainConfig"
        }
-      },
-      "description": "blockchain config"
+      }
      },
-     "default": {
-      "$ref": "#/components/responses/Error"
-     }
+     "description": "blockchain config"
     },
-    "tags": [
-     "Blockchain"
-    ]
-   }
+    "default": {
+     "$ref": "#/components/responses/Error"
+    }
+   },
+   "tags": [
+    "Blockchain"
+   ]
   },
   "/v2/blockchain/masterchain/{masterchain_seqno}/config/raw": {
    "get": {
@@ -8272,6 +8298,38 @@
        }
       },
       "description": "jetton's holders"
+     },
+     "default": {
+      "$ref": "#/components/responses/Error"
+     }
+    },
+    "tags": [
+     "Jettons"
+    ]
+   }
+  },
+  "/v2/jettons/{jetton_id}/transfer/{account_id}/payload": {
+   "get": {
+    "description": "Get jetton's custom payload and state init required for transfer",
+    "operationId": "getJettonTransferPayload",
+    "parameters": [
+     {
+      "$ref": "#/components/parameters/accountIDParameter"
+     },
+     {
+      "$ref": "#/components/parameters/jettonIDParameter"
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/JettonTransferPayload"
+        }
+       }
+      },
+      "description": "jetton's custom payload"
      },
      "default": {
       "$ref": "#/components/responses/Error"

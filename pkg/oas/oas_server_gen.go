@@ -258,12 +258,6 @@ type Handler interface {
 	//
 	// GET /v2/blockchain/config
 	GetBlockchainConfig(ctx context.Context) (*BlockchainConfig, error)
-	// GetBlockchainConfigFromBlock implements getBlockchainConfigFromBlock operation.
-	//
-	// Get blockchain config from a specific block, if present.
-	//
-	// GET /v2/blockchain/masterchain/{masterchain_seqno}/config
-	GetBlockchainConfigFromBlock(ctx context.Context, params GetBlockchainConfigFromBlockParams) (*BlockchainConfig, error)
 	// GetBlockchainMasterchainBlocks implements getBlockchainMasterchainBlocks operation.
 	//
 	// Get all blocks in all shards and workchains between target and previous masterchain block
@@ -370,6 +364,12 @@ type Handler interface {
 	//
 	// GET /v2/jettons/{account_id}
 	GetJettonInfo(ctx context.Context, params GetJettonInfoParams) (*JettonInfo, error)
+	// GetJettonTransferPayload implements getJettonTransferPayload operation.
+	//
+	// Get jetton's custom payload and state init required for transfer.
+	//
+	// GET /v2/jettons/{jetton_id}/transfer/{account_id}/payload
+	GetJettonTransferPayload(ctx context.Context, params GetJettonTransferPayloadParams) (*JettonTransferPayload, error)
 	// GetJettons implements getJettons operation.
 	//
 	// Get a list of all indexed jetton masters in the blockchain.

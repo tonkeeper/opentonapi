@@ -21984,6 +21984,16 @@ func (s *JettonBalance) encodeFields(e *jx.Encoder) {
 		s.Jetton.Encode(e)
 	}
 	{
+		if s.Extensions != nil {
+			e.FieldStart("extensions")
+			e.ArrStart()
+			for _, elem := range s.Extensions {
+				e.Str(elem)
+			}
+			e.ArrEnd()
+		}
+	}
+	{
 		if s.Lock.Set {
 			e.FieldStart("lock")
 			s.Lock.Encode(e)
@@ -21991,12 +22001,13 @@ func (s *JettonBalance) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfJettonBalance = [5]string{
+var jsonFieldsNameOfJettonBalance = [6]string{
 	0: "balance",
 	1: "price",
 	2: "wallet_address",
 	3: "jetton",
-	4: "lock",
+	4: "extensions",
+	5: "lock",
 }
 
 // Decode decodes JettonBalance from json.
@@ -22049,6 +22060,25 @@ func (s *JettonBalance) Decode(d *jx.Decoder) error {
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"jetton\"")
+			}
+		case "extensions":
+			if err := func() error {
+				s.Extensions = make([]string, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem string
+					v, err := d.Str()
+					elem = string(v)
+					if err != nil {
+						return err
+					}
+					s.Extensions = append(s.Extensions, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"extensions\"")
 			}
 		case "lock":
 			if err := func() error {
@@ -24405,6 +24435,86 @@ func (s *JettonTransferAction) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *JettonTransferAction) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *JettonTransferPayload) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *JettonTransferPayload) encodeFields(e *jx.Encoder) {
+	{
+		if s.CustomPayload.Set {
+			e.FieldStart("custom_payload")
+			s.CustomPayload.Encode(e)
+		}
+	}
+	{
+		if s.StateInit.Set {
+			e.FieldStart("state_init")
+			s.StateInit.Encode(e)
+		}
+	}
+}
+
+var jsonFieldsNameOfJettonTransferPayload = [2]string{
+	0: "custom_payload",
+	1: "state_init",
+}
+
+// Decode decodes JettonTransferPayload from json.
+func (s *JettonTransferPayload) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode JettonTransferPayload to nil")
+	}
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "custom_payload":
+			if err := func() error {
+				s.CustomPayload.Reset()
+				if err := s.CustomPayload.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"custom_payload\"")
+			}
+		case "state_init":
+			if err := func() error {
+				s.StateInit.Reset()
+				if err := s.StateInit.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"state_init\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode JettonTransferPayload")
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *JettonTransferPayload) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *JettonTransferPayload) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }

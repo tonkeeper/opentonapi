@@ -386,15 +386,6 @@ func (UnimplementedHandler) GetBlockchainConfig(ctx context.Context) (r *Blockch
 	return r, ht.ErrNotImplemented
 }
 
-// GetBlockchainConfigFromBlock implements getBlockchainConfigFromBlock operation.
-//
-// Get blockchain config from a specific block, if present.
-//
-// GET /v2/blockchain/masterchain/{masterchain_seqno}/config
-func (UnimplementedHandler) GetBlockchainConfigFromBlock(ctx context.Context, params GetBlockchainConfigFromBlockParams) (r *BlockchainConfig, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
 // GetBlockchainMasterchainBlocks implements getBlockchainMasterchainBlocks operation.
 //
 // Get all blocks in all shards and workchains between target and previous masterchain block
@@ -546,6 +537,15 @@ func (UnimplementedHandler) GetJettonHolders(ctx context.Context, params GetJett
 //
 // GET /v2/jettons/{account_id}
 func (UnimplementedHandler) GetJettonInfo(ctx context.Context, params GetJettonInfoParams) (r *JettonInfo, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// GetJettonTransferPayload implements getJettonTransferPayload operation.
+//
+// Get jetton's custom payload and state init required for transfer.
+//
+// GET /v2/jettons/{jetton_id}/transfer/{account_id}/payload
+func (UnimplementedHandler) GetJettonTransferPayload(ctx context.Context, params GetJettonTransferPayloadParams) (r *JettonTransferPayload, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
