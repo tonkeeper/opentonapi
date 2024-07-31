@@ -436,69 +436,120 @@ func convertedDedustPoolResponse(tonApiToken string, tonPrice float64, respBody 
 	}
 	var data []Pool
 	if err := json.NewDecoder(respBody).Decode(&data); err != nil {
-		//todo: return error
 		return map[ton.AccountID]float64{}
 	}
+	jettonDecimalsCache := make(map[ton.AccountID]float64)
+	getJettonDecimals := func(address ton.AccountID) (float64, error) {
+		if decimals, ok := jettonDecimalsCache[address]; ok {
+			return decimals, nil
+		}
+		infoRespBody, err := sendRequest(fmt.Sprintf("https://tonapi.io/v2/jettons/%v", address), tonApiToken)
+		if err != nil {
+			return 0, err
+		}
+		defer infoRespBody.Close()
+		var info struct {
+			Metadata struct {
+				Decimals string `json:"decimals"`
+			} `json:"metadata"`
+		}
+		if err = json.NewDecoder(infoRespBody).Decode(&info); err != nil {
+			return 0, err
+		}
+		decimals, err := strconv.Atoi(info.Metadata.Decimals)
+		if err != nil {
+			return 0, err
+		}
+		jettonDecimalsCache[address] = float64(decimals)
+		return float64(decimals), nil
+	}
+
 	pools := make(map[ton.AccountID]float64)
-	for _, pool := range data {
-		if len(pool.Assets) != 2 || len(pool.Reserves) != 2 {
-			continue
-		}
-		firstAsset, secondAsset := pool.Assets[0], pool.Assets[1]
-		if firstAsset.Metadata == nil || firstAsset.Metadata.Symbol != "TON" {
-			continue
-		}
-		firstReserve, err := strconv.ParseFloat(pool.Reserves[0], 64)
-		if err != nil {
-			continue
-		}
-		secondReserve, err := strconv.ParseFloat(pool.Reserves[1], 64)
-		if err != nil {
-			continue
-		}
-		if firstReserve < float64(100*ton.OneTON) {
-			continue
-		}
-		account, err := ton.ParseAccountID(secondAsset.Address)
-		if err != nil {
-			continue
-		}
-		secondReserveDecimals := float64(9)
-		if secondAsset.Metadata != nil {
-			secondReserveDecimals = secondAsset.Metadata.Decimals
-		} else {
-			url := fmt.Sprintf("https://tonapi.io/v2/jettons/%v", account.ToRaw())
-			jettonInfoRespBody, err := sendRequest(url, tonApiToken)
-			if err != nil {
-				zap.Error(err)
+	for attempt := 0; attempt < 2; attempt++ {
+		for _, pool := range data {
+			if len(pool.Assets) != 2 || len(pool.Reserves) != 2 {
 				continue
 			}
-			defer jettonInfoRespBody.Close()
-			var jettonInfo struct {
-				Metadata struct {
-					Decimals string `json:"decimals"`
-				} `json:"metadata"`
-			}
-			if err = json.NewDecoder(jettonInfoRespBody).Decode(&jettonInfo); err != nil {
-				zap.Error(err)
+			firstAsset, secondAsset := pool.Assets[0], pool.Assets[1]
+			if firstAsset.Metadata == nil {
 				continue
 			}
-			decimals, err := strconv.Atoi(jettonInfo.Metadata.Decimals)
+			firstReserve, err := strconv.ParseFloat(pool.Reserves[0], 64)
 			if err != nil {
 				continue
 			}
-			secondReserveDecimals = float64(decimals)
-		}
-		switch pool.Type {
-		case "volatile":
-			pools[account] = (firstReserve / secondReserve) * math.Pow(10, secondReserveDecimals-9)
-		case "stable":
-			x := secondReserve / math.Pow(10, secondReserveDecimals)
-			y := firstReserve / math.Pow(10, 9)
-			pools[account] = (3*x*x*y + y*y*y) / (x*x*x + 3*y*y*x)
-		default:
-			continue
+			secondReserve, err := strconv.ParseFloat(pool.Reserves[1], 64)
+			if err != nil {
+				continue
+			}
+			secondAccount, err := ton.ParseAccountID(secondAsset.Address)
+			if err != nil {
+				continue
+			}
+			var calculatedAccount ton.AccountID
+			var additionalPrice float64
+			if attempt == 0 { // in the first iteration, we calculate the price for only TON pools
+				if firstAsset.Metadata.Symbol != "TON" || firstReserve < float64(100*ton.OneTON) {
+					continue
+				}
+				calculatedAccount = secondAccount
+			} else {
+				if firstAsset.Metadata.Symbol == "TON" {
+					continue
+				}
+				firstAccount, err := ton.ParseAccountID(firstAsset.Address)
+				if err != nil {
+					continue
+				}
+				priceFirstAccount, okFirst := pools[firstAccount]
+				priceSecondAccount, okSecond := pools[secondAccount]
+				if (okFirst && okSecond) || (!okFirst && !okSecond) {
+					continue
+				}
+				if okFirst { // knowing the first account's price, we seek the second account's price
+					if firstReserve*priceFirstAccount*float64(ton.OneTON) < float64(100*ton.OneTON) {
+						continue
+					}
+					calculatedAccount = secondAccount
+					additionalPrice = priceFirstAccount
+
+				} else { // knowing the second account's price, we seek the first account's price
+					if secondReserve*priceSecondAccount*float64(ton.OneTON) < float64(100*ton.OneTON) {
+						continue
+					}
+					calculatedAccount = firstAccount
+					additionalPrice = priceSecondAccount
+				}
+			}
+			secondReserveDecimals := float64(9)
+			if secondAsset.Metadata != nil {
+				secondReserveDecimals = secondAsset.Metadata.Decimals
+			} else {
+				secondReserveDecimals, err = getJettonDecimals(calculatedAccount)
+				if err != nil {
+					continue
+				}
+			}
+			var price float64
+			switch pool.Type {
+			case "volatile":
+				price = (firstReserve / secondReserve) * math.Pow(10, secondReserveDecimals-9)
+			case "stable":
+				x := secondReserve / math.Pow(10, secondReserveDecimals)
+				y := firstReserve / math.Pow(10, 9)
+				price = (3*x*x*y + y*y*y) / (x*x*x + 3*y*y*x)
+			default:
+				continue
+			}
+			if price == 0 {
+				continue
+			}
+			if additionalPrice != 0 {
+				price = additionalPrice / price
+			}
+			pools[calculatedAccount] = price
 		}
 	}
+
 	return pools
 }
