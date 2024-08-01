@@ -5097,6 +5097,123 @@ func (s *Server) handleGetBlockchainConfigRequest(args [0]string, argsEscaped bo
 	}
 }
 
+// handleGetBlockchainConfigFromBlockRequest handles getBlockchainConfigFromBlock operation.
+//
+// Get blockchain config from a specific block, if present.
+//
+// GET /v2/blockchain/masterchain/{masterchain_seqno}/config
+func (s *Server) handleGetBlockchainConfigFromBlockRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("getBlockchainConfigFromBlock"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/blockchain/masterchain/{masterchain_seqno}/config"),
+	}
+
+	// Start a span for this request.
+	ctx, span := s.cfg.Tracer.Start(r.Context(), "GetBlockchainConfigFromBlock",
+		trace.WithAttributes(otelAttrs...),
+		serverSpanKind,
+	)
+	defer span.End()
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		elapsedDuration := time.Since(startTime)
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		s.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	s.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	var (
+		recordError = func(stage string, err error) {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			s.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		err          error
+		opErrContext = ogenerrors.OperationContext{
+			Name: "GetBlockchainConfigFromBlock",
+			ID:   "getBlockchainConfigFromBlock",
+		}
+	)
+	params, err := decodeGetBlockchainConfigFromBlockParams(args, argsEscaped, r)
+	if err != nil {
+		err = &ogenerrors.DecodeParamsError{
+			OperationContext: opErrContext,
+			Err:              err,
+		}
+		recordError("DecodeParams", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+
+	var response *BlockchainConfig
+	if m := s.cfg.Middleware; m != nil {
+		mreq := middleware.Request{
+			Context:          ctx,
+			OperationName:    "GetBlockchainConfigFromBlock",
+			OperationSummary: "",
+			OperationID:      "getBlockchainConfigFromBlock",
+			Body:             nil,
+			Params: middleware.Parameters{
+				{
+					Name: "masterchain_seqno",
+					In:   "path",
+				}: params.MasterchainSeqno,
+			},
+			Raw: r,
+		}
+
+		type (
+			Request  = struct{}
+			Params   = GetBlockchainConfigFromBlockParams
+			Response = *BlockchainConfig
+		)
+		response, err = middleware.HookMiddleware[
+			Request,
+			Params,
+			Response,
+		](
+			m,
+			mreq,
+			unpackGetBlockchainConfigFromBlockParams,
+			func(ctx context.Context, request Request, params Params) (response Response, err error) {
+				response, err = s.h.GetBlockchainConfigFromBlock(ctx, params)
+				return response, err
+			},
+		)
+	} else {
+		response, err = s.h.GetBlockchainConfigFromBlock(ctx, params)
+	}
+	if err != nil {
+		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
+			if err := encodeErrorResponse(errRes, w, span); err != nil {
+				recordError("Internal", err)
+			}
+			return
+		}
+		if errors.Is(err, ht.ErrNotImplemented) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
+			recordError("Internal", err)
+		}
+		return
+	}
+
+	if err := encodeGetBlockchainConfigFromBlockResponse(response, w, span); err != nil {
+		recordError("EncodeResponse", err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
+		return
+	}
+}
+
 // handleGetBlockchainMasterchainBlocksRequest handles getBlockchainMasterchainBlocks operation.
 //
 // Get all blocks in all shards and workchains between target and previous masterchain block

@@ -7381,31 +7381,33 @@
    }
   },
   "/v2/blockchain/masterchain/{masterchain_seqno}/config": {
-   "description": "Get blockchain config from a specific block, if present.",
-   "operationId": "getBlockchainConfigFromBlock",
-   "parameters": [
-    {
-     "$ref": "#/components/parameters/masterchainSeqno"
-    }
-   ],
-   "responses": {
-    "200": {
-     "content": {
-      "application/json": {
-       "schema": {
-        "$ref": "#/components/schemas/BlockchainConfig"
+   "get": {
+    "description": "Get blockchain config from a specific block, if present.",
+    "operationId": "getBlockchainConfigFromBlock",
+    "parameters": [
+     {
+      "$ref": "#/components/parameters/masterchainSeqno"
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/BlockchainConfig"
+        }
        }
-      }
+      },
+      "description": "blockchain config"
      },
-     "description": "blockchain config"
+     "default": {
+      "$ref": "#/components/responses/Error"
+     }
     },
-    "default": {
-     "$ref": "#/components/responses/Error"
-    }
-   },
-   "tags": [
-    "Blockchain"
-   ]
+    "tags": [
+     "Blockchain"
+    ]
+   }
   },
   "/v2/blockchain/masterchain/{masterchain_seqno}/config/raw": {
    "get": {

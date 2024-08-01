@@ -113,6 +113,7 @@ paths:
         'default':
           $ref: '#/components/responses/Error'
   /v2/blockchain/masterchain/{masterchain_seqno}/config:
+    get:
       description: Get blockchain config from a specific block, if present.
       operationId: getBlockchainConfigFromBlock
       tags:

@@ -386,6 +386,15 @@ func (UnimplementedHandler) GetBlockchainConfig(ctx context.Context) (r *Blockch
 	return r, ht.ErrNotImplemented
 }
 
+// GetBlockchainConfigFromBlock implements getBlockchainConfigFromBlock operation.
+//
+// Get blockchain config from a specific block, if present.
+//
+// GET /v2/blockchain/masterchain/{masterchain_seqno}/config
+func (UnimplementedHandler) GetBlockchainConfigFromBlock(ctx context.Context, params GetBlockchainConfigFromBlockParams) (r *BlockchainConfig, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // GetBlockchainMasterchainBlocks implements getBlockchainMasterchainBlocks operation.
 //
 // Get all blocks in all shards and workchains between target and previous masterchain block
