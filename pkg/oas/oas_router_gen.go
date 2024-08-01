@@ -1005,19 +1005,18 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 									}
 
 									elem = origElem
-								case 'c': // Prefix: "config/raw"
+								case 'c': // Prefix: "config"
 									origElem := elem
-									if l := len("config/raw"); len(elem) >= l && elem[0:l] == "config/raw" {
+									if l := len("config"); len(elem) >= l && elem[0:l] == "config" {
 										elem = elem[l:]
 									} else {
 										break
 									}
 
 									if len(elem) == 0 {
-										// Leaf node.
 										switch r.Method {
 										case "GET":
-											s.handleGetRawBlockchainConfigFromBlockRequest([1]string{
+											s.handleGetBlockchainConfigFromBlockRequest([1]string{
 												args[0],
 											}, elemIsEscaped, w, r)
 										default:
@@ -1025,6 +1024,31 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 										}
 
 										return
+									}
+									switch elem[0] {
+									case '/': // Prefix: "/raw"
+										origElem := elem
+										if l := len("/raw"); len(elem) >= l && elem[0:l] == "/raw" {
+											elem = elem[l:]
+										} else {
+											break
+										}
+
+										if len(elem) == 0 {
+											// Leaf node.
+											switch r.Method {
+											case "GET":
+												s.handleGetRawBlockchainConfigFromBlockRequest([1]string{
+													args[0],
+												}, elemIsEscaped, w, r)
+											default:
+												s.notAllowed(w, r, "GET")
+											}
+
+											return
+										}
+
+										elem = origElem
 									}
 
 									elem = origElem
@@ -4284,9 +4308,9 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 									}
 
 									elem = origElem
-								case 'c': // Prefix: "config/raw"
+								case 'c': // Prefix: "config"
 									origElem := elem
-									if l := len("config/raw"); len(elem) >= l && elem[0:l] == "config/raw" {
+									if l := len("config"); len(elem) >= l && elem[0:l] == "config" {
 										elem = elem[l:]
 									} else {
 										break
@@ -4295,17 +4319,43 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 									if len(elem) == 0 {
 										switch method {
 										case "GET":
-											// Leaf: GetRawBlockchainConfigFromBlock
-											r.name = "GetRawBlockchainConfigFromBlock"
+											r.name = "GetBlockchainConfigFromBlock"
 											r.summary = ""
-											r.operationID = "getRawBlockchainConfigFromBlock"
-											r.pathPattern = "/v2/blockchain/masterchain/{masterchain_seqno}/config/raw"
+											r.operationID = "getBlockchainConfigFromBlock"
+											r.pathPattern = "/v2/blockchain/masterchain/{masterchain_seqno}/config"
 											r.args = args
 											r.count = 1
 											return r, true
 										default:
 											return
 										}
+									}
+									switch elem[0] {
+									case '/': // Prefix: "/raw"
+										origElem := elem
+										if l := len("/raw"); len(elem) >= l && elem[0:l] == "/raw" {
+											elem = elem[l:]
+										} else {
+											break
+										}
+
+										if len(elem) == 0 {
+											switch method {
+											case "GET":
+												// Leaf: GetRawBlockchainConfigFromBlock
+												r.name = "GetRawBlockchainConfigFromBlock"
+												r.summary = ""
+												r.operationID = "getRawBlockchainConfigFromBlock"
+												r.pathPattern = "/v2/blockchain/masterchain/{masterchain_seqno}/config/raw"
+												r.args = args
+												r.count = 1
+												return r, true
+											default:
+												return
+											}
+										}
+
+										elem = origElem
 									}
 
 									elem = origElem

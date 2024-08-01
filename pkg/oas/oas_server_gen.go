@@ -258,6 +258,12 @@ type Handler interface {
 	//
 	// GET /v2/blockchain/config
 	GetBlockchainConfig(ctx context.Context) (*BlockchainConfig, error)
+	// GetBlockchainConfigFromBlock implements getBlockchainConfigFromBlock operation.
+	//
+	// Get blockchain config from a specific block, if present.
+	//
+	// GET /v2/blockchain/masterchain/{masterchain_seqno}/config
+	GetBlockchainConfigFromBlock(ctx context.Context, params GetBlockchainConfigFromBlockParams) (*BlockchainConfig, error)
 	// GetBlockchainMasterchainBlocks implements getBlockchainMasterchainBlocks operation.
 	//
 	// Get all blocks in all shards and workchains between target and previous masterchain block
