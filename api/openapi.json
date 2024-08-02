@@ -4970,6 +4970,11 @@
       "example": 100,
       "type": "integer"
      },
+     "last_known_masterchain_seqno": {
+      "example": 123456,
+      "format": "int32",
+      "type": "integer"
+     },
      "rest_online": {
       "default": true,
       "type": "boolean"
@@ -4977,7 +4982,8 @@
     },
     "required": [
      "indexing_latency",
-     "rest_online"
+     "rest_online",
+     "last_known_masterchain_seqno"
     ],
     "type": "object"
    },

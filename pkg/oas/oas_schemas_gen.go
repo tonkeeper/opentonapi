@@ -14585,8 +14585,9 @@ func (s *Seqno) SetSeqno(val int32) {
 
 // Ref: #/components/schemas/ServiceStatus
 type ServiceStatus struct {
-	RestOnline      bool `json:"rest_online"`
-	IndexingLatency int  `json:"indexing_latency"`
+	RestOnline                bool  `json:"rest_online"`
+	IndexingLatency           int   `json:"indexing_latency"`
+	LastKnownMasterchainSeqno int32 `json:"last_known_masterchain_seqno"`
 }
 
 // GetRestOnline returns the value of RestOnline.
@@ -14599,6 +14600,11 @@ func (s *ServiceStatus) GetIndexingLatency() int {
 	return s.IndexingLatency
 }
 
+// GetLastKnownMasterchainSeqno returns the value of LastKnownMasterchainSeqno.
+func (s *ServiceStatus) GetLastKnownMasterchainSeqno() int32 {
+	return s.LastKnownMasterchainSeqno
+}
+
 // SetRestOnline sets the value of RestOnline.
 func (s *ServiceStatus) SetRestOnline(val bool) {
 	s.RestOnline = val
@@ -14607,6 +14613,11 @@ func (s *ServiceStatus) SetRestOnline(val bool) {
 // SetIndexingLatency sets the value of IndexingLatency.
 func (s *ServiceStatus) SetIndexingLatency(val int) {
 	s.IndexingLatency = val
+}
+
+// SetLastKnownMasterchainSeqno sets the value of LastKnownMasterchainSeqno.
+func (s *ServiceStatus) SetLastKnownMasterchainSeqno(val int32) {
+	s.LastKnownMasterchainSeqno = val
 }
 
 // SetWalletBackupOK is response for SetWalletBackup operation.

@@ -3328,6 +3328,7 @@ components:
       required:
         - indexing_latency
         - rest_online
+        - last_known_masterchain_seqno
       properties:
         rest_online:
           type: boolean
@@ -3335,6 +3336,10 @@ components:
         indexing_latency:
           type: integer
           example: 100
+        last_known_masterchain_seqno:
+          type: integer
+          example: 123456
+          format: int32
     ReducedBlock:
       type: object
       required:

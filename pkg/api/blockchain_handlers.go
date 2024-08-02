@@ -22,7 +22,7 @@ import (
 )
 
 func (h *Handler) Status(ctx context.Context) (*oas.ServiceStatus, error) {
-	latency, err := h.storage.GetLatency(ctx)
+	latency, seqno, err := h.storage.GetLatencyAndLastMasterchainSeqno(ctx)
 	if errors.Is(err, core.ErrEntityNotFound) {
 		return nil, toError(http.StatusNotFound, err)
 	}
@@ -31,8 +31,9 @@ func (h *Handler) Status(ctx context.Context) (*oas.ServiceStatus, error) {
 		restOnline = false
 	}
 	return &oas.ServiceStatus{
-		IndexingLatency: int(latency),
-		RestOnline:      restOnline,
+		IndexingLatency:           int(latency),
+		RestOnline:                restOnline,
+		LastKnownMasterchainSeqno: int32(seqno),
 	}, nil
 }
 
