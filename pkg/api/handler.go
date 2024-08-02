@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"sync"
 
 	"github.com/go-faster/errors"
@@ -218,4 +219,8 @@ func (h *Handler) GetJettonNormalizedMetadata(ctx context.Context, master tongo.
 		return NormalizeMetadata(meta, &info, core.TrustNone)
 	}
 	return NormalizeMetadata(meta, nil, h.spamFilter.JettonTrust(master, meta.Symbol, meta.Name, meta.Image))
+}
+
+func (h *Handler) GetJettonTransferPayload(ctx context.Context, params oas.GetJettonTransferPayloadParams) (*oas.JettonTransferPayload, error) {
+	return nil, toError(http.StatusNotImplemented, errors.New("not implemented"))
 }
