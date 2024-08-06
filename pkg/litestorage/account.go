@@ -49,11 +49,11 @@ func (s *LiteStorage) GetAccountDiff(ctx context.Context, account tongo.AccountI
 	return 0, errors.New("not implemented")
 }
 
-func (s *LiteStorage) GetLatency(ctx context.Context) (int64, error) {
+func (s *LiteStorage) GetLatencyAndLastMasterchainSeqno(ctx context.Context) (int64, uint32, error) {
 	blockHeader, err := s.LastMasterchainBlockHeader(ctx)
 	if err != nil {
-		return 0, err
+		return 0, 0, err
 	}
 	latency := time.Now().Unix() - int64(blockHeader.GenUtime)
-	return latency, nil
+	return latency, blockHeader.Seqno, nil
 }
