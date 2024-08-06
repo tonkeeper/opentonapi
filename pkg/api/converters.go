@@ -1,7 +1,6 @@
 package api
 
 import (
-	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"math/big"
@@ -179,12 +178,11 @@ func stringToTVMStackRecord(s string) (tlb.VmStackValue, error) {
 		return tlb.TlbStructToVmCellSlice(account.ID.ToMsgAddress())
 	}
 	if strings.HasPrefix(s, "0x") {
-		b, err := hex.DecodeString(s[2:])
-		if err != nil {
-			return tlb.VmStackValue{}, err
-		}
 		i := big.Int{}
-		i.SetBytes(b)
+		_, ok := i.SetString(s[2:], 16)
+		if !ok {
+			return tlb.VmStackValue{}, fmt.Errorf("invalid hex %v", s)
+		}
 		return tlb.VmStackValue{SumType: "VmStkInt", VmStkInt: tlb.Int257(i)}, nil
 	}
 	isDigit := true
