@@ -8,6 +8,8 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/tonkeeper/opentonapi/pkg/pusher/errors"
 	"github.com/tonkeeper/opentonapi/pkg/pusher/events"
 	"github.com/tonkeeper/opentonapi/pkg/pusher/sources"
@@ -23,6 +25,14 @@ type Handler struct {
 	memPool            sources.MemPoolSource
 	currentEventID     int64
 }
+
+var accountsPerRequestHistogramVec = promauto.NewHistogramVec(
+	prometheus.HistogramOpts{
+		Name:    "sse_accounts_per_request",
+		Buckets: []float64{1, 2, 3, 4, 5, 10, 20, 30, 40, 50, 100, 1000},
+	},
+	[]string{"method"},
+)
 
 type handlerFunc func(session *session, request *http.Request) error
 
@@ -76,6 +86,9 @@ func (h *Handler) SubscribeToTransactions(session *session, request *http.Reques
 	options, err := parseQueryStrings(query.Get("accounts"), query.Get("operations"))
 	if err != nil {
 		return errors.BadRequest(fmt.Sprintf("failed to parse query parameters: %v", err))
+	}
+	if !options.AllAccounts {
+		accountsPerRequestHistogramVec.WithLabelValues("transactions").Observe(float64(len(options.Accounts)))
 	}
 	cancelFn := h.txSource.SubscribeToTransactions(request.Context(), func(data []byte) {
 		event := Event{
