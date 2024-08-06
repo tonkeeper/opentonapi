@@ -128,7 +128,7 @@ func findMissedBlocks(ctx context.Context, s storage, id ton.BlockID, prev []ton
 	for _, p := range prev {
 		if id.Shard == p.Shard && id.Workchain == p.Workchain {
 			blocks := make([]ton.BlockID, 0, int(id.Seqno-p.Seqno))
-			for i := p.Seqno; i < id.Seqno; i++ {
+			for i := p.Seqno + 1; i <= id.Seqno; i++ {
 				blocks = append(blocks, ton.BlockID{Workchain: p.Workchain, Shard: p.Shard, Seqno: i})
 			}
 			return blocks, nil

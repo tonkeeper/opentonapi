@@ -28,7 +28,7 @@ func (s *ChainState) GetAPY() float64 {
 }
 
 func NewChainState(c config) *ChainState {
-	chain := &ChainState{apy: 5.4, banned: map[tongo.AccountID]struct{}{}, config: c}
+	chain := &ChainState{apy: 3.3, banned: map[tongo.AccountID]struct{}{}, config: c}
 
 	go func() {
 		for {
