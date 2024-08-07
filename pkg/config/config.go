@@ -19,6 +19,7 @@ type Config struct {
 		LogLevel           string              `env:"LOG_LEVEL" envDefault:"INFO"`
 		MetricsPort        int                 `env:"METRICS_PORT" envDefault:"9010"`
 		Accounts           accountsList        `env:"ACCOUNTS"`
+		TrackAllAccounts   bool                `env:"TRACK_ALL_ACCOUNTS" envDefault:"false"`
 		LiteServers        []config.LiteServer `env:"LITE_SERVERS"`
 		SendingLiteservers []config.LiteServer `env:"SENDING_LITE_SERVERS"`
 		IsTestnet          bool                `env:"IS_TESTNET" envDefault:"false"`
