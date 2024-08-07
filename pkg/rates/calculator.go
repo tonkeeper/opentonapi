@@ -115,7 +115,9 @@ func (c *calculator) GetMarketsTonPrice() ([]Market, error) {
 }
 
 type Mock struct {
-	TonApiToken string
+	TonApiToken     string
+	StonFiResultUrl string
+	DedustResultUrl string
 }
 
 func (m Mock) GetRates(date int64) (map[string]float64, error) {
