@@ -1,7 +1,7 @@
 GET {{host}}/v2/blockchain/blocks/(-1,8000000000000000,120014)
 
 ###
-GET {{host}}/v2/blockchain/transactions/2B7E6A0661AB41822E3F515F3A3D2E89643999CDC9CD7ADE9577957A71D73F04
+GET {{host}}/v2/blockchain/masterchain/39370361/blocks
 
 
 ###
