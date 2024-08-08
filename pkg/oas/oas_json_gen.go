@@ -26317,9 +26317,13 @@ func (s *MultisigOrder) encodeFields(e *jx.Encoder) {
 		e.FieldStart("expiration_date")
 		e.Int64(s.ExpirationDate)
 	}
+	{
+		e.FieldStart("risk")
+		s.Risk.Encode(e)
+	}
 }
 
-var jsonFieldsNameOfMultisigOrder = [7]string{
+var jsonFieldsNameOfMultisigOrder = [8]string{
 	0: "address",
 	1: "order_seqno",
 	2: "threshold",
@@ -26327,6 +26331,7 @@ var jsonFieldsNameOfMultisigOrder = [7]string{
 	4: "signers",
 	5: "approvals_num",
 	6: "expiration_date",
+	7: "risk",
 }
 
 // Decode decodes MultisigOrder from json.
@@ -26430,6 +26435,16 @@ func (s *MultisigOrder) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"expiration_date\"")
 			}
+		case "risk":
+			requiredBitSet[0] |= 1 << 7
+			if err := func() error {
+				if err := s.Risk.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"risk\"")
+			}
 		default:
 			return d.Skip()
 		}
@@ -26440,7 +26455,7 @@ func (s *MultisigOrder) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b01111111,
+		0b11111111,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.

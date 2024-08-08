@@ -3649,6 +3649,17 @@ func (s *MultisigOrder) Validate() error {
 			Error: err,
 		})
 	}
+	if err := func() error {
+		if err := s.Risk.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "risk",
+			Error: err,
+		})
+	}
 	if len(failures) > 0 {
 		return &validate.Error{Fields: failures}
 	}

@@ -1,6 +1,7 @@
 package core
 
 import (
+	"github.com/tonkeeper/tongo/abi"
 	"github.com/tonkeeper/tongo/ton"
 )
 
@@ -22,4 +23,5 @@ type MultisigOrder struct {
 	ApprovalsMask    []byte
 	ApprovalsNum     int32
 	ExpirationDate   int64
+	Actions          []abi.MultisigSendMessageAction
 }

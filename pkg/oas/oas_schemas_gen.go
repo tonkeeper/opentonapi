@@ -8958,6 +8958,7 @@ type MultisigOrder struct {
 	Signers          []string `json:"signers"`
 	ApprovalsNum     int32    `json:"approvals_num"`
 	ExpirationDate   int64    `json:"expiration_date"`
+	Risk             Risk     `json:"risk"`
 }
 
 // GetAddress returns the value of Address.
@@ -8995,6 +8996,11 @@ func (s *MultisigOrder) GetExpirationDate() int64 {
 	return s.ExpirationDate
 }
 
+// GetRisk returns the value of Risk.
+func (s *MultisigOrder) GetRisk() Risk {
+	return s.Risk
+}
+
 // SetAddress sets the value of Address.
 func (s *MultisigOrder) SetAddress(val string) {
 	s.Address = val
@@ -9028,6 +9034,11 @@ func (s *MultisigOrder) SetApprovalsNum(val int32) {
 // SetExpirationDate sets the value of ExpirationDate.
 func (s *MultisigOrder) SetExpirationDate(val int64) {
 	s.ExpirationDate = val
+}
+
+// SetRisk sets the value of Risk.
+func (s *MultisigOrder) SetRisk(val Risk) {
+	s.Risk = val
 }
 
 // Ref: #/components/schemas/Multisigs

@@ -5482,6 +5482,7 @@ components:
         - signers
         - approvals_num
         - expiration_date
+        - risk
       properties:
         address:
           type: string
@@ -5509,6 +5510,8 @@ components:
         expiration_date:
           type: integer
           format: int64
+        risk:
+          $ref: '#/components/schemas/Risk'
     Refund:
       type: object
       required:
