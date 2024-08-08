@@ -1,6 +1,7 @@
 package api
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"math/big"
@@ -11,6 +12,7 @@ import (
 
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	imgGenerator "github.com/tonkeeper/opentonapi/pkg/image"
+	walletPkg "github.com/tonkeeper/opentonapi/pkg/wallet"
 	"github.com/tonkeeper/tongo/boc"
 	"github.com/tonkeeper/tongo/tlb"
 
@@ -210,7 +212,7 @@ func stringToTVMStackRecord(s string) (tlb.VmStackValue, error) {
 	return tlb.VmStackValue{SumType: "VmStkCell", VmStkCell: tlb.Ref[boc.Cell]{Value: *c}}, nil
 }
 
-func convertMultisig(item core.Multisig) oas.Multisig {
+func (h *Handler) convertMultisig(ctx context.Context, item core.Multisig) (*oas.Multisig, error) {
 	converted := oas.Multisig{
 		Address:   item.AccountID.ToRaw(),
 		Seqno:     item.Seqno,
@@ -227,6 +229,18 @@ func convertMultisig(item core.Multisig) oas.Multisig {
 		for _, account := range order.Signers {
 			signers = append(signers, account.ToRaw())
 		}
+		messages, err := convertMultisigActionsToRawMessages(order.Actions)
+		if err != nil {
+			return nil, err
+		}
+		risk, err := walletPkg.ExtractRiskFromRawMessages(messages)
+		if err != nil {
+			return nil, err
+		}
+		oasRisk, err := h.convertRisk(ctx, *risk, item.AccountID)
+		if err != nil {
+			return nil, err
+		}
 		converted.Orders = append(converted.Orders, oas.MultisigOrder{
 			Address:          order.AccountID.ToRaw(),
 			OrderSeqno:       order.OrderSeqno,
@@ -235,7 +249,8 @@ func convertMultisig(item core.Multisig) oas.Multisig {
 			Signers:          signers,
 			ApprovalsNum:     order.ApprovalsNum,
 			ExpirationDate:   order.ExpirationDate,
+			Risk:             oasRisk,
 		})
 	}
-	return converted
+	return &converted, nil
 }

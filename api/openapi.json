@@ -4310,6 +4310,9 @@
       "format": "int64",
       "type": "integer"
      },
+     "risk": {
+      "$ref": "#/components/schemas/Risk"
+     },
      "sent_for_execution": {
       "example": false,
       "type": "boolean"
@@ -4334,7 +4337,8 @@
      "sent_for_execution",
      "signers",
      "approvals_num",
-     "expiration_date"
+     "expiration_date",
+     "risk"
     ],
     "type": "object"
    },
