@@ -200,7 +200,7 @@ var JettonTransferMinimalStraw = Straw[BubbleJettonTransfer]{
 		return nil
 	},
 	SingleChild: &Straw[BubbleJettonTransfer]{
-		CheckFuncs: []bubbleCheck{IsTx, Or(HasInterface(abi.JettonWallet), HasOperation(abi.JettonInternalTransferMsgOp))}, //todo: remove Or(). both should be in new indexer
+		CheckFuncs: []bubbleCheck{IsTx, HasInterface(abi.JettonWallet), HasOperation(abi.JettonInternalTransferMsgOp)}, //todo: remove Or(). both should be in new indexer
 		Optional:   true,
 		Builder: func(newAction *BubbleJettonTransfer, bubble *Bubble) error {
 			tx := bubble.Info.(BubbleTx)
