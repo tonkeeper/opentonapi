@@ -67,7 +67,9 @@ type LiteStorage struct {
 	// maxGoroutines specifies a number of goroutines used to perform some time-consuming operations.
 	maxGoroutines int
 	// trackingAccounts is a list of accounts we track. Defined with ACCOUNTS env variable.
-	trackingAccounts  map[tongo.AccountID]struct{}
+	trackingAccounts map[tongo.AccountID]struct{}
+	// trackAllAccounts can be configure with TRACK_ALL_ACCOUNTS env variable, to track all accounts instead of specific ones.
+	trackAllAccounts  bool
 	pubKeyByAccountID *xsync.MapOf[tongo.AccountID, ed25519.PublicKey]
 	configCache       cache.Cache[int, ton.BlockchainConfig]
 
@@ -81,11 +83,12 @@ type LiteStorage struct {
 }
 
 type Options struct {
-	preloadAccounts []tongo.AccountID
-	preloadBlocks   []tongo.BlockID
-	tfPools         []tongo.AccountID
-	jettons         []tongo.AccountID
-	executor        abi.Executor
+	preloadAccounts  []tongo.AccountID
+	trackAllAccounts bool
+	preloadBlocks    []tongo.BlockID
+	tfPools          []tongo.AccountID
+	jettons          []tongo.AccountID
+	executor         abi.Executor
 	// blockCh is used to receive new blocks in the blockchain, if set.
 	blockCh <-chan indexer.IDandBlock
 }
@@ -93,6 +96,12 @@ type Options struct {
 func WithPreloadAccounts(a []tongo.AccountID) Option {
 	return func(o *Options) {
 		o.preloadAccounts = a
+	}
+}
+
+func WithTrackAllAccounts(trackAllAccounts bool) Option {
+	return func(o *Options) {
+		o.trackAllAccounts = trackAllAccounts
 	}
 }
 
@@ -141,6 +150,7 @@ func NewLiteStorage(log *zap.Logger, cli *liteapi.Client, opts ...Option) (*Lite
 		// read-only data
 		knownAccounts:    make(map[string][]tongo.AccountID),
 		trackingAccounts: map[tongo.AccountID]struct{}{},
+		trackAllAccounts: o.trackAllAccounts,
 		// data for concurrent access
 		// TODO: implement expiration logic for the caches below.
 		jettonMetaCache:         xsync.NewMapOf[tep64.Metadata](),
@@ -196,7 +206,7 @@ func (s *LiteStorage) run(ch <-chan indexer.IDandBlock) {
 	for block := range ch {
 		for _, tx := range block.Block.AllTransactions() {
 			accountID := *ton.NewAccountID(block.ID.Workchain, tx.AccountAddr)
-			if _, ok := s.trackingAccounts[accountID]; ok {
+			if _, ok := s.trackingAccounts[accountID]; ok || s.trackAllAccounts {
 				hash := tongo.Bits256(tx.Hash())
 				transaction, err := core.ConvertTransaction(accountID.Workchain, tongo.Transaction{Transaction: *tx, BlockID: block.ID})
 				if err != nil {
