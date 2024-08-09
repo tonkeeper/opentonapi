@@ -510,7 +510,11 @@ func (h *Handler) GetAccountMultisigs(ctx context.Context, params oas.GetAccount
 	}
 	var converted []oas.Multisig
 	for _, multisig := range multisigs {
-		converted = append(converted, convertMultisig(multisig))
+		oasMultisig, err := h.convertMultisig(ctx, multisig)
+		if err != nil {
+			return nil, toError(http.StatusInternalServerError, err)
+		}
+		converted = append(converted, *oasMultisig)
 	}
 	return &oas.Multisigs{Multisigs: converted}, nil
 }

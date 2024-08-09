@@ -8,7 +8,7 @@ import (
 	"github.com/tonkeeper/tongo/boc"
 	"github.com/tonkeeper/tongo/tlb"
 	"github.com/tonkeeper/tongo/ton"
-	walletTongo "github.com/tonkeeper/tongo/wallet"
+	tongoWallet "github.com/tonkeeper/tongo/wallet"
 )
 
 // Risk specifies assets that could be lost
@@ -23,23 +23,28 @@ type Risk struct {
 	Nfts    []tongo.AccountID
 }
 
-func ExtractRisk(version walletTongo.Version, msg *boc.Cell) (*Risk, error) {
-	rawMessages, err := walletTongo.ExtractRawMessages(version, msg)
+func ExtractRisk(version tongoWallet.Version, msg *boc.Cell) (*Risk, error) {
+	rawMessages, err := tongoWallet.ExtractRawMessages(version, msg)
 	if err != nil {
 		return nil, err
 	}
+	return ExtractRiskFromRawMessages(rawMessages)
+}
+
+func ExtractRiskFromRawMessages(rawMessages []tongoWallet.RawMessage) (*Risk, error) {
 	risk := Risk{
 		TransferAllRemainingBalance: false,
 		Jettons:                     map[tongo.AccountID]big.Int{},
 	}
 	for _, rawMsg := range rawMessages {
-		if walletTongo.IsMessageModeSet(int(rawMsg.Mode), walletTongo.AttachAllRemainingBalance) {
+		if tongoWallet.IsMessageModeSet(int(rawMsg.Mode), tongoWallet.AttachAllRemainingBalance) {
 			risk.TransferAllRemainingBalance = true
 		}
 		var m tlb.Message
 		if err := tlb.Unmarshal(rawMsg.Message, &m); err != nil {
 			return nil, err
 		}
+		var err error
 		var tonValue uint64
 		var destination *tongo.AccountID
 		if m.Info.IntMsgInfo != nil {
