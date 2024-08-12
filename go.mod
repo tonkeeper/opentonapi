@@ -24,7 +24,7 @@ require (
 	github.com/shurcooL/graphql v0.0.0-20220606043923-3cf50f8a0a29
 	github.com/sourcegraph/conc v0.3.0
 	github.com/stretchr/testify v1.9.0
-	github.com/tonkeeper/scam_backoffice_rules v0.0.0-20240606040945-382d2b4edb98
+	github.com/tonkeeper/scam_backoffice_rules v0.0.0-20240812140315-a2b21a866ae6
 	github.com/tonkeeper/tongo v1.9.1
 	go.opentelemetry.io/otel v1.24.0
 	go.opentelemetry.io/otel/metric v1.24.0
