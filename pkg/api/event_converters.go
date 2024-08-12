@@ -699,16 +699,6 @@ func (h *Handler) convertAction(ctx context.Context, viewer *tongo.AccountID, a 
 		if op == "JettonCallTo" { //todo: remove after end of april 2024
 			op = "JettonAdminAction"
 		}
-		switch a.SmartContractExec.Operation {
-		case string(bath.TfUpdateValidatorSet):
-			op = "Update validator set"
-		case string(bath.TfProcessPendingWithdrawRequests):
-			op = "Process pending withdraw requests"
-		case string(bath.TfDepositStakeRequest):
-			op = "Request sending stake to Elector"
-		case string(bath.TfRecoverStakeRequest):
-			op = "Request Elector to recover stake"
-		}
 		contractAction := oas.SmartContractAction{
 			Executor:    convertAccountAddress(a.SmartContractExec.Executor, h.addressBook),
 			Contract:    convertAccountAddress(a.SmartContractExec.Contract, h.addressBook),
