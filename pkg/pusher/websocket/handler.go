@@ -37,8 +37,7 @@ func Handler(logger *zap.Logger, txSource sources.TransactionSource, traceSource
 		conn, err := upgrader.Upgrade(w, r, nil)
 		if err != nil {
 			logger.Error("failed to upgrade HTTP connection to websocket protocol",
-				zap.Error(err),
-				zap.String("remoteAddr", conn.RemoteAddr().String()))
+				zap.Error(err))
 			return err
 		}
 		ctx, cancel := context.WithCancel(r.Context())
