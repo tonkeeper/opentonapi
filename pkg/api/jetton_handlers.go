@@ -5,11 +5,13 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/tonkeeper/opentonapi/pkg/bath"
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/opentonapi/pkg/oas"
 	"github.com/tonkeeper/tongo"
+	"github.com/tonkeeper/tongo/ton"
 )
 
 func (h *Handler) GetAccountJettonsBalances(ctx context.Context, params oas.GetAccountJettonsBalancesParams) (*oas.JettonsBalances, error) {
@@ -246,4 +248,31 @@ func (h *Handler) GetJettonsEvents(ctx context.Context, params oas.GetJettonsEve
 		return nil, toError(http.StatusInternalServerError, err)
 	}
 	return &response, nil
+}
+
+func (h *Handler) GetJettonTransferPayload(ctx context.Context, params oas.GetJettonTransferPayloadParams) (*oas.JettonTransferPayload, error) {
+	accountID, err := ton.ParseAccountID(params.AccountID)
+	if err != nil {
+		return nil, toError(http.StatusBadRequest, err)
+	}
+	jettonMaster, err := ton.ParseAccountID(params.JettonID)
+	if err != nil {
+		return nil, toError(http.StatusBadRequest, err)
+	}
+	payload, err := h.storage.GetJettonTransferPayload(ctx, accountID, jettonMaster)
+	if err != nil {
+		if strings.Contains(err.Error(), "not implemented") {
+			return nil, toError(http.StatusNotImplemented, err)
+		}
+		return nil, toError(http.StatusInternalServerError, err)
+	}
+
+	res := oas.JettonTransferPayload{}
+	if payload.CustomPayload != nil {
+		res.CustomPayload = oas.NewOptString(*payload.CustomPayload)
+	}
+	if payload.StateInit != nil {
+		res.StateInit = oas.NewOptString(*payload.StateInit)
+	}
+	return &res, nil
 }
