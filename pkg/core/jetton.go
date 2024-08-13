@@ -14,8 +14,8 @@ type JettonWallet struct {
 	OwnerAddress *tongo.AccountID
 	// JettonAddress of a jetton master.
 	JettonAddress tongo.AccountID
-	Code          []byte
 	Lock          *JettonWalletLockData
+	Extensions    []string
 }
 
 type JettonHolder struct {

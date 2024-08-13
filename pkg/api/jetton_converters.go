@@ -114,6 +114,7 @@ func (h *Handler) convertJettonBalance(ctx context.Context, wallet core.JettonWa
 	jettonBalance := oas.JettonBalance{
 		Balance:       wallet.Balance.String(),
 		WalletAddress: convertAccountAddress(wallet.Address, h.addressBook),
+		Extensions:    wallet.Extensions,
 	}
 	if wallet.Lock != nil {
 		jettonBalance.Lock = oas.NewOptJettonBalanceLock(oas.JettonBalanceLock{
