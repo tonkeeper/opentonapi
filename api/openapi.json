@@ -323,6 +323,22 @@
      "type": "integer"
     }
    },
+   "supportedExtensions": {
+    "description": "comma separated list supported extensions",
+    "explode": false,
+    "in": "query",
+    "name": "supported_extensions",
+    "required": false,
+    "schema": {
+     "example": [
+      "custom_payload"
+     ],
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    }
+   },
    "targetBlockIDExtQuery": {
     "description": "target block: (workchain,shard,seqno,root_hash,file_hash)",
     "in": "query",
@@ -6468,6 +6484,9 @@
      },
      {
       "$ref": "#/components/parameters/currenciesQuery"
+     },
+     {
+      "$ref": "#/components/parameters/supportedExtensions"
      }
     ],
     "responses": {

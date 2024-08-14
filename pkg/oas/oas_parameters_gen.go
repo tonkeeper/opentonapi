@@ -3350,6 +3350,8 @@ type GetAccountJettonsBalancesParams struct {
 	AccountID string
 	// Accept ton and all possible fiat currencies, separated by commas.
 	Currencies []string
+	// Comma separated list supported extensions.
+	SupportedExtensions []string
 }
 
 func unpackGetAccountJettonsBalancesParams(packed middleware.Parameters) (params GetAccountJettonsBalancesParams) {
@@ -3367,6 +3369,15 @@ func unpackGetAccountJettonsBalancesParams(packed middleware.Parameters) (params
 		}
 		if v, ok := packed[key]; ok {
 			params.Currencies = v.([]string)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "supported_extensions",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.SupportedExtensions = v.([]string)
 		}
 	}
 	return params
@@ -3458,6 +3469,49 @@ func decodeGetAccountJettonsBalancesParams(args [1]string, argsEscaped bool, r *
 	}(); err != nil {
 		return params, &ogenerrors.DecodeParamError{
 			Name: "currencies",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Decode query: supported_extensions.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "supported_extensions",
+			Style:   uri.QueryStyleForm,
+			Explode: false,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				return d.DecodeArray(func(d uri.Decoder) error {
+					var paramsDotSupportedExtensionsVal string
+					if err := func() error {
+						val, err := d.DecodeValue()
+						if err != nil {
+							return err
+						}
+
+						c, err := conv.ToString(val)
+						if err != nil {
+							return err
+						}
+
+						paramsDotSupportedExtensionsVal = c
+						return nil
+					}(); err != nil {
+						return err
+					}
+					params.SupportedExtensions = append(params.SupportedExtensions, paramsDotSupportedExtensionsVal)
+					return nil
+				})
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "supported_extensions",
 			In:   "query",
 			Err:  err,
 		}

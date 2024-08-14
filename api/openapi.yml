@@ -614,6 +614,7 @@ paths:
       parameters:
         - $ref: '#/components/parameters/accountIDParameter'
         - $ref: '#/components/parameters/currenciesQuery'
+        - $ref: '#/components/parameters/supportedExtensions'
       responses:
         '200':
           description: account jettons balances
@@ -3002,6 +3003,17 @@ components:
         items:
           type: string
         example: [ "ton", "usd", "rub" ]
+    supportedExtensions:
+      in: query
+      name: supported_extensions
+      description: "comma separated list supported extensions"
+      explode: false
+      required: false
+      schema:
+        type: array
+        items:
+          type: string
+        example: ["custom_payload"]
     currencyQuery:
       in: query
       name: currency

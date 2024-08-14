@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"slices"
 	"strings"
 
 	"github.com/tonkeeper/opentonapi/pkg/bath"
@@ -30,6 +31,9 @@ func (h *Handler) GetAccountJettonsBalances(ctx context.Context, params oas.GetA
 		Balances: make([]oas.JettonBalance, 0, len(wallets)),
 	}
 	for _, wallet := range wallets {
+		if slices.Contains(wallet.Extensions, "custom_payload") && !slices.Contains(params.SupportedExtensions, "custom_payload") {
+			continue
+		}
 		jettonBalance, err := h.convertJettonBalance(ctx, wallet, params.Currencies)
 		if err != nil {
 			continue

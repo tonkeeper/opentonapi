@@ -3098,6 +3098,10 @@ func (s *Server) handleGetAccountJettonsBalancesRequest(args [1]string, argsEsca
 					Name: "currencies",
 					In:   "query",
 				}: params.Currencies,
+				{
+					Name: "supported_extensions",
+					In:   "query",
+				}: params.SupportedExtensions,
 			},
 			Raw: r,
 		}
