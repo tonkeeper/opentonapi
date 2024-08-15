@@ -10,22 +10,26 @@ import (
 	"strings"
 	"unicode"
 
-	"github.com/tonkeeper/opentonapi/pkg/core"
-	imgGenerator "github.com/tonkeeper/opentonapi/pkg/image"
-	walletPkg "github.com/tonkeeper/opentonapi/pkg/wallet"
+	"github.com/go-faster/jx"
+	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/boc"
 	"github.com/tonkeeper/tongo/tlb"
+	"google.golang.org/grpc/status"
 
-	"github.com/go-faster/jx"
+	"github.com/tonkeeper/opentonapi/pkg/core"
+	imgGenerator "github.com/tonkeeper/opentonapi/pkg/image"
 	"github.com/tonkeeper/opentonapi/pkg/oas"
-	"github.com/tonkeeper/tongo"
+	walletPkg "github.com/tonkeeper/opentonapi/pkg/wallet"
 )
 
 func toError(code int, err error) *oas.ErrorStatusCode {
-	msg := err.Error()
 	if strings.HasPrefix(err.Error(), "failed to connect to") || strings.Contains(err.Error(), "host=") {
-		msg = "unknown error"
+		return &oas.ErrorStatusCode{StatusCode: code, Response: oas.Error{Error: "unknown error"}}
 	}
+	if s, ok := status.FromError(err); ok {
+		return &oas.ErrorStatusCode{StatusCode: code, Response: oas.Error{Error: s.Message()}}
+	}
+	msg := err.Error()
 	return &oas.ErrorStatusCode{StatusCode: code, Response: oas.Error{Error: msg}}
 }
 
