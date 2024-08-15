@@ -34,7 +34,7 @@ func (m *Mock) GetCurrentRates() (map[string]float64, error) {
 	if err != nil {
 		return map[string]float64{}, err
 	}
-	pools := getPools(medianTonPriceToUsd, m.TonApiToken)
+	pools := m.getPools()
 	fiatPrices := getFiatPrices(medianTonPriceToUsd)
 
 	retry := func(label string, tonPrice float64, task func(tonPrice float64) (map[ton.AccountID]float64, error)) (map[ton.AccountID]float64, error) {
