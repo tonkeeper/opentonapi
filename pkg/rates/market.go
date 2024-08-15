@@ -492,9 +492,9 @@ func convertedDedustPoolResponse(pools map[ton.AccountID]float64, respBody io.Re
 			return ton.AccountID{}, 0, err
 		}
 		var isStable bool
-		//if record[8] == "true" { // TODO: waiting db update
-		//	isStable = true
-		//}
+		if record[8] == "true" {
+			isStable = true
+		}
 		calculatedAccount, price := calculatePoolPrice(firstAsset, secondAsset, firstReserve, secondReserve, firstDecimals, secondDecimals, pools, isStable)
 
 		return calculatedAccount, price, nil
