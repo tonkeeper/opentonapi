@@ -123,6 +123,8 @@ func (UnimplementedHandler) GaslessEstimate(ctx context.Context, req *GaslessEst
 
 // GaslessSend implements gaslessSend operation.
 //
+// Submits the signed gasless transaction message to the network.
+//
 // POST /v2/gasless/send
 func (UnimplementedHandler) GaslessSend(ctx context.Context, req *GaslessSendReq) error {
 	return ht.ErrNotImplemented

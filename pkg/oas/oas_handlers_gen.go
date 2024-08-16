@@ -1502,6 +1502,8 @@ func (s *Server) handleGaslessEstimateRequest(args [1]string, argsEscaped bool, 
 
 // handleGaslessSendRequest handles gaslessSend operation.
 //
+// Submits the signed gasless transaction message to the network.
+//
 // POST /v2/gasless/send
 func (s *Server) handleGaslessSendRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	otelAttrs := []attribute.KeyValue{
