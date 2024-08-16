@@ -398,14 +398,6 @@ func (h *Handler) GetBlockchainValidators(ctx context.Context) (*oas.Validators,
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
-	bConfig, err := h.storage.TrimmedConfigBase64()
-	if err != nil {
-		return nil, toError(http.StatusInternalServerError, err)
-	}
-	configCell, err := boc.DeserializeSinglRootBase64(bConfig)
-	if err != nil {
-		return nil, toError(http.StatusInternalServerError, err)
-	}
 	electorAddr, ok := config.ElectorAddr()
 	if !ok {
 		return nil, toError(http.StatusInternalServerError, fmt.Errorf("can't get elector address"))
@@ -441,7 +433,13 @@ func (h *Handler) GetBlockchainValidators(ctx context.Context) (*oas.Validators,
 		code := init.Code.Value.Value
 		data := init.Data.Value.Value
 
-		emulator, err := tvm.NewEmulator(&code, &data, configCell)
+		configObject := h.configPool.Get().(*tvm.Config)
+		defer h.configPool.Put(configObject)
+		if configObject == nil {
+			return nil, toError(http.StatusInternalServerError, fmt.Errorf("error getting BlockchainConfig from the pool"))
+		}
+
+		emulator, err := tvm.NewEmulator(&code, &data, nil, tvm.WithConfig(configObject))
 		if err != nil {
 			return nil, toError(http.StatusInternalServerError, err)
 		}

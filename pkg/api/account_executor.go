@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/hex"
 	"errors"
+	"sync"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
@@ -21,18 +22,18 @@ var precompileUsageMc = promauto.NewCounterVec(prometheus.CounterOpts{
 }, []string{"status", "hash"})
 
 type shardsAccountExecutor struct {
-	accounts     map[tongo.AccountID]tlb.ShardAccount
-	configBase64 string
-	resolver     core.LibraryResolver
-	executor     executor
+	accounts   map[tongo.AccountID]tlb.ShardAccount
+	resolver   core.LibraryResolver
+	executor   executor
+	configPool *sync.Pool
 }
 
-func newSharedAccountExecutor(accounts map[tongo.AccountID]tlb.ShardAccount, executor executor, resolver core.LibraryResolver, configBase64 string) *shardsAccountExecutor {
+func newSharedAccountExecutor(accounts map[tongo.AccountID]tlb.ShardAccount, executor executor, resolver core.LibraryResolver, configPool *sync.Pool) *shardsAccountExecutor {
 	return &shardsAccountExecutor{
-		accounts:     accounts,
-		configBase64: configBase64,
-		resolver:     resolver,
-		executor:     executor,
+		accounts:   accounts,
+		resolver:   resolver,
+		executor:   executor,
+		configPool: configPool,
 	}
 }
 
@@ -73,7 +74,17 @@ func (s shardsAccountExecutor) RunSmcMethodByID(ctx context.Context, accountID t
 	if err != nil {
 		return 0, nil, err
 	}
-	e, err := tvm.NewEmulatorFromBOCsBase64(codeBoc, dataBoc, s.configBase64, tvm.WithLibrariesBase64(librariesBase64), tvm.WithLibraryResolver(s.resolver))
+	configObject := s.configPool.Get().(*tvm.Config)
+	defer s.configPool.Put(configObject)
+
+	if configObject == nil {
+		return 0, nil, errors.New("error getting BlockchainConfig from the pool")
+	}
+
+	e, err := tvm.NewEmulatorFromBOCsBase64(codeBoc, dataBoc, "",
+		tvm.WithLibrariesBase64(librariesBase64),
+		tvm.WithLibraryResolver(s.resolver),
+		tvm.WithConfig(configObject))
 	if err != nil {
 		return 0, nil, err
 	}
