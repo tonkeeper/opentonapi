@@ -82,6 +82,8 @@ type Handler interface {
 	GaslessEstimate(ctx context.Context, req *GaslessEstimateReq, params GaslessEstimateParams) (*SignRawParams, error)
 	// GaslessSend implements gaslessSend operation.
 	//
+	// Submits the signed gasless transaction message to the network.
+	//
 	// POST /v2/gasless/send
 	GaslessSend(ctx context.Context, req *GaslessSendReq) error
 	// GetAccount implements getAccount operation.
