@@ -17,7 +17,7 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 #COPY --from=build /go/pkg/mod/github.com/tonkeeper/tongo*/lib/linux /app/lib/
 RUN mkdir -p /app/lib
-RUN wget -O /app/lib/libemulator.so https://github.com/ton-blockchain/ton/releases/download/v2024.02/libemulator-linux-x86-64.so
+RUN wget -O /app/lib/libemulator.so https://github.com/ton-blockchain/ton/releases/download/v2024.08/libemulator-linux-x86_64.so
 ENV LD_LIBRARY_PATH=/app/lib/
 COPY --from=gobuild /tmp/opentonapi /usr/bin/
 CMD ["/usr/bin/opentonapi"]
