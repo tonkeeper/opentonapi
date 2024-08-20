@@ -650,7 +650,8 @@ func (UnimplementedHandler) GetOutMsgQueueSizes(ctx context.Context) (r *GetOutM
 
 // GetRates implements getRates operation.
 //
-// Get the token price to the currency.
+// Get the token price in the chosen currency for display only. Don’t use this for financial
+// transactions.
 //
 // GET /v2/rates
 func (UnimplementedHandler) GetRates(ctx context.Context, params GetRatesParams) (r *GetRatesOK, _ error) {

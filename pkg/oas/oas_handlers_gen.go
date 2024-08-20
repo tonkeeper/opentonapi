@@ -8409,7 +8409,8 @@ func (s *Server) handleGetOutMsgQueueSizesRequest(args [0]string, argsEscaped bo
 
 // handleGetRatesRequest handles getRates operation.
 //
-// Get the token price to the currency.
+// Get the token price in the chosen currency for display only. Don’t use this for financial
+// transactions.
 //
 // GET /v2/rates
 func (s *Server) handleGetRatesRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
