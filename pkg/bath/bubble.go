@@ -2,6 +2,7 @@ package bath
 
 import (
 	"fmt"
+	"sort"
 	"strings"
 
 	"github.com/tonkeeper/opentonapi/pkg/core"
@@ -104,6 +105,9 @@ func fromTrace(trace *core.Trace) *Bubble {
 	for _, outMsg := range trace.OutMsgs {
 		b.ValueFlow.AddTons(trace.Account, -outMsg.Value)
 	}
+	sort.Slice(trace.Children, func(i, j int) bool {
+		return trace.Children[i].InMsg.CreatedLt < trace.Children[j].InMsg.CreatedLt
+	})
 	for i, c := range trace.Children {
 		if c.InMsg != nil {
 			// If an outbound message has a corresponding InMsg,
