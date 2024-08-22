@@ -106,6 +106,9 @@ func fromTrace(trace *core.Trace) *Bubble {
 		b.ValueFlow.AddTons(trace.Account, -outMsg.Value)
 	}
 	sort.Slice(trace.Children, func(i, j int) bool {
+		if trace.Children[i].InMsg == nil || trace.Children[j].InMsg == nil {
+			return false
+		}
 		return trace.Children[i].InMsg.CreatedLt < trace.Children[j].InMsg.CreatedLt
 	})
 	for i, c := range trace.Children {
