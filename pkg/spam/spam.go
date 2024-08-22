@@ -1,8 +1,8 @@
 package spam
 
 import (
-	"github.com/tonkeeper/opentonapi/pkg/bath"
 	"github.com/tonkeeper/opentonapi/pkg/core"
+	"github.com/tonkeeper/opentonapi/pkg/oas"
 	rules "github.com/tonkeeper/scam_backoffice_rules"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/ton"
@@ -12,16 +12,16 @@ type Filter struct {
 	Rules rules.Rules
 }
 
-func (f Filter) CheckActions(actions []bath.Action, viewer *ton.AccountID) bool {
+func (f Filter) CheckActions(actions []oas.Action, viewer *ton.AccountID) bool {
 	var comment string
 	for _, action := range actions {
 		switch {
-		case action.TonTransfer != nil && action.TonTransfer.Comment != nil:
-			comment = *action.TonTransfer.Comment
-		case action.JettonTransfer != nil && action.JettonTransfer.Comment != nil:
-			comment = *action.JettonTransfer.Comment
-		case action.NftItemTransfer != nil && action.NftItemTransfer.Comment != nil:
-			comment = *action.NftItemTransfer.Comment
+		case action.TonTransfer.IsSet():
+			comment = action.TonTransfer.Value.Comment.Value
+		case action.JettonTransfer.IsSet():
+			comment = action.JettonTransfer.Value.Comment.Value
+		case action.NftItemTransfer.IsSet():
+			comment = action.NftItemTransfer.Value.Comment.Value
 		default:
 			continue
 		}
@@ -40,7 +40,7 @@ func (f Filter) JettonTrust(address tongo.AccountID, symbol, name, image string)
 	return core.TrustNone
 }
 
-func (f Filter) NftTrust(address tongo.AccountID, collection *ton.AccountID, description, image string, isApproved bool) core.TrustType {
+func (f Filter) NftTrust(address tongo.AccountID, collection *ton.AccountID, description, image string) core.TrustType {
 	return core.TrustNone
 }
 
