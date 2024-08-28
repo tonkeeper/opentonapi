@@ -274,6 +274,8 @@ github.com/tonkeeper/scam_backoffice_rules v0.0.0-20240812140315-a2b21a866ae6 h1
 github.com/tonkeeper/scam_backoffice_rules v0.0.0-20240812140315-a2b21a866ae6/go.mod h1:SqZXYO9vbID8ku+xnnaKXeNGmehxigODGrk5V1KqbRA=
 github.com/tonkeeper/tongo v1.9.1 h1:RaTHi7zvAhclv9EU9/9HLdGUZwq9iUc8EO9xtpuPwus=
 github.com/tonkeeper/tongo v1.9.1/go.mod h1:MjgIgAytFarjCoVjMLjYEtpZNN1f2G/pnZhKjr28cWs=
+github.com/tonkeeper/tongo v1.9.3 h1:VNIZIuPeMw0+KZPvP57+EbgRwGZocN2v5CulRxba20A=
+github.com/tonkeeper/tongo v1.9.3/go.mod h1:MjgIgAytFarjCoVjMLjYEtpZNN1f2G/pnZhKjr28cWs=
 github.com/valyala/bytebufferpool v1.0.0 h1:GqA5TC/0021Y/b9FG4Oi9Mr3q7XYx6KllzawFIhcdPw=
 github.com/valyala/bytebufferpool v1.0.0/go.mod h1:6bBcMArwyJ5K/AmCkWv1jt77kVWyCJ6HpOuEn7z0Csc=
 github.com/valyala/fasttemplate v1.2.1/go.mod h1:KHLXt3tVN2HBp8eijSv/kGJopbvo7S+qRAEEKiv+SiQ=
