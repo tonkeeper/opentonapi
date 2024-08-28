@@ -44,6 +44,10 @@ type inMsgCreatedLT struct {
 	lt      uint64
 }
 
+func (m inMsgCreatedLT) String() string {
+	return fmt.Sprintf("%s_%d", m.account.String(), m.lt)
+}
+
 func extractInMsgCreatedLT(accountID tongo.AccountID, tx *tlb.Transaction) (inMsgCreatedLT, bool) {
 	if tx.Msgs.InMsg.Exists && tx.Msgs.InMsg.Value.Value.Info.IntMsgInfo != nil {
 		return inMsgCreatedLT{account: accountID, lt: tx.Msgs.InMsg.Value.Value.Info.IntMsgInfo.CreatedLt}, true
@@ -56,8 +60,9 @@ type LiteStorage struct {
 	client                  *liteapi.Client
 	executor                abi.Executor
 	jettonMetaCache         *xsync.MapOf[string, tep64.Metadata]
-	transactionsIndexByHash *xsync.MapOf[tongo.Bits256, *core.Transaction]
-	transactionsByInMsgLT   *xsync.MapOf[inMsgCreatedLT, tongo.Bits256]
+	transactionsIndexByHash ICache[core.Transaction]
+	transactionsByInMsgLT   ICache[string]
+	cacheExpiration         time.Duration
 	blockCache              *xsync.MapOf[tongo.BlockIDExt, *tlb.Block]
 	accountInterfacesCache  *xsync.MapOf[tongo.AccountID, []abi.ContractInterface]
 	// tvmLibraryCache contains public tvm libraries.
@@ -68,6 +73,7 @@ type LiteStorage struct {
 	maxGoroutines int
 	// trackingAccounts is a list of accounts we track. Defined with ACCOUNTS env variable.
 	trackingAccounts  map[tongo.AccountID]struct{}
+	trackAllAccounts  bool
 	pubKeyByAccountID *xsync.MapOf[tongo.AccountID, ed25519.PublicKey]
 	configCache       cache.Cache[int, ton.BlockchainConfig]
 
@@ -81,18 +87,29 @@ type LiteStorage struct {
 }
 
 type Options struct {
-	preloadAccounts []tongo.AccountID
-	preloadBlocks   []tongo.BlockID
-	tfPools         []tongo.AccountID
-	jettons         []tongo.AccountID
-	executor        abi.Executor
+	preloadAccounts  []tongo.AccountID
+	trackAllAccounts bool
+	preloadBlocks    []tongo.BlockID
+	tfPools          []tongo.AccountID
+	jettons          []tongo.AccountID
+	executor         abi.Executor
 	// blockCh is used to receive new blocks in the blockchain, if set.
 	blockCh <-chan indexer.IDandBlock
+
+	transactionsIndexByHash ICache[core.Transaction]
+	transactionsByInMsgLT   ICache[string]
+	cacheExpiration         time.Duration
 }
 
 func WithPreloadAccounts(a []tongo.AccountID) Option {
 	return func(o *Options) {
 		o.preloadAccounts = a
+	}
+}
+
+func WithTrackAllAccounts() Option {
+	return func(o *Options) {
+		o.trackAllAccounts = true
 	}
 }
 
@@ -121,6 +138,24 @@ func WithBlockChannel(ch <-chan indexer.IDandBlock) Option {
 	}
 }
 
+func WithTransactionsIndexByHash(cache ICache[core.Transaction]) Option {
+	return func(o *Options) {
+		o.transactionsIndexByHash = cache
+	}
+}
+
+func WithTransactionsByInMsgLT(cache ICache[string]) Option {
+	return func(o *Options) {
+		o.transactionsByInMsgLT = cache
+	}
+}
+
+func WithCacheExpiration(d time.Duration) Option {
+	return func(o *Options) {
+		o.cacheExpiration = d
+	}
+}
+
 type Option func(o *Options)
 
 func NewLiteStorage(log *zap.Logger, cli *liteapi.Client, opts ...Option) (*LiteStorage, error) {
@@ -141,11 +176,13 @@ func NewLiteStorage(log *zap.Logger, cli *liteapi.Client, opts ...Option) (*Lite
 		// read-only data
 		knownAccounts:    make(map[string][]tongo.AccountID),
 		trackingAccounts: map[tongo.AccountID]struct{}{},
+		trackAllAccounts: o.trackAllAccounts,
 		// data for concurrent access
 		// TODO: implement expiration logic for the caches below.
 		jettonMetaCache:         xsync.NewMapOf[tep64.Metadata](),
-		transactionsIndexByHash: xsync.NewTypedMapOf[tongo.Bits256, *core.Transaction](hashBits256),
-		transactionsByInMsgLT:   xsync.NewTypedMapOf[inMsgCreatedLT, tongo.Bits256](hashInMsgCreatedLT),
+		transactionsIndexByHash: o.transactionsIndexByHash,
+		transactionsByInMsgLT:   o.transactionsByInMsgLT,
+		cacheExpiration:         o.cacheExpiration,
 		blockCache:              xsync.NewTypedMapOf[tongo.BlockIDExt, *tlb.Block](hashBlockIDExt),
 		accountInterfacesCache:  xsync.NewTypedMapOf[tongo.AccountID, []abi.ContractInterface](hashAccountID),
 		pubKeyByAccountID:       xsync.NewTypedMapOf[tongo.AccountID, ed25519.PublicKey](hashAccountID),
@@ -189,28 +226,37 @@ func (s *LiteStorage) Shutdown() {
 	s.stopCh <- struct{}{}
 }
 
+func (s *LiteStorage) ParseBlock(ctx context.Context, block indexer.IDandBlock) {
+	transactionsIndexByHash := map[string]core.Transaction{}
+	transactionsByInMsgLT := map[string]string{}
+	for _, tx := range block.Block.AllTransactions() {
+		accountID := *ton.NewAccountID(block.ID.Workchain, tx.AccountAddr)
+		_, trackSpecificAccount := s.trackingAccounts[accountID]
+		if trackSpecificAccount || s.trackAllAccounts {
+			hash := tongo.Bits256(tx.Hash())
+			transaction, err := core.ConvertTransaction(accountID.Workchain, tongo.Transaction{Transaction: *tx, BlockID: block.ID})
+			if err != nil {
+				s.logger.Error("failed to process tx",
+					zap.String("tx-hash", hash.Hex()),
+					zap.Error(err))
+				continue
+			}
+			transactionsIndexByHash[tx.Hash().Hex()] = *transaction
+			if createLT, ok := extractInMsgCreatedLT(accountID, tx); ok {
+				transactionsByInMsgLT[createLT.String()] = hash.Hex()
+			}
+		}
+	}
+	s.transactionsIndexByHash.SetMany(ctx, transactionsIndexByHash, s.cacheExpiration)
+	s.transactionsByInMsgLT.SetMany(ctx, transactionsByInMsgLT, s.cacheExpiration)
+}
+
 func (s *LiteStorage) run(ch <-chan indexer.IDandBlock) {
 	if ch == nil {
 		return
 	}
 	for block := range ch {
-		for _, tx := range block.Block.AllTransactions() {
-			accountID := *ton.NewAccountID(block.ID.Workchain, tx.AccountAddr)
-			if _, ok := s.trackingAccounts[accountID]; ok {
-				hash := tongo.Bits256(tx.Hash())
-				transaction, err := core.ConvertTransaction(accountID.Workchain, tongo.Transaction{Transaction: *tx, BlockID: block.ID})
-				if err != nil {
-					s.logger.Error("failed to process tx",
-						zap.String("tx-hash", hash.Hex()),
-						zap.Error(err))
-					continue
-				}
-				s.transactionsIndexByHash.Store(hash, transaction)
-				if createLT, ok := extractInMsgCreatedLT(accountID, tx); ok {
-					s.transactionsByInMsgLT.Store(createLT, hash)
-				}
-			}
-		}
+		s.ParseBlock(context.Background(), block)
 	}
 }
 
@@ -292,9 +338,9 @@ func (s *LiteStorage) preloadAccount(a tongo.AccountID) error {
 			return err
 		}
 		hash := tongo.Bits256(tx.Hash())
-		s.transactionsIndexByHash.Store(hash, t)
+		s.transactionsIndexByHash.Set(context.Background(), hash.Hex(), *t, s.cacheExpiration)
 		if createLT, ok := extractInMsgCreatedLT(a, &tx.Transaction); ok {
-			s.transactionsByInMsgLT.Store(createLT, hash)
+			s.transactionsByInMsgLT.Set(context.Background(), createLT.String(), hash.Hex(), s.cacheExpiration)
 		}
 	}
 	return nil
@@ -321,9 +367,9 @@ func (s *LiteStorage) preloadBlock(id tongo.BlockID) error {
 			return err
 		}
 		hash := tongo.Bits256(tx.Hash())
-		s.transactionsIndexByHash.Store(hash, t)
+		s.transactionsIndexByHash.Set(ctx, hash.Hex(), *t, s.cacheExpiration)
 		if createLT, ok := extractInMsgCreatedLT(accountID, tx); ok {
-			s.transactionsByInMsgLT.Store(createLT, hash)
+			s.transactionsByInMsgLT.Set(ctx, createLT.String(), hash.Hex(), s.cacheExpiration)
 		}
 	}
 	return nil
@@ -391,11 +437,11 @@ func (s *LiteStorage) GetTransaction(ctx context.Context, hash tongo.Bits256) (*
 		storageTimeHistogramVec.WithLabelValues("get_transaction").Observe(v)
 	}))
 	defer timer.ObserveDuration()
-	tx, prs := s.transactionsIndexByHash.Load(hash)
-	if prs {
-		return tx, nil
+	tx, err := s.transactionsIndexByHash.Get(ctx, hash.Hex())
+	if err != nil {
+		return nil, fmt.Errorf("not found tx %x", hash)
 	}
-	return nil, fmt.Errorf("not found tx %x", hash)
+	return &tx, nil
 }
 
 func (s *LiteStorage) SearchTransactionByMessageHash(ctx context.Context, hash tongo.Bits256) (*tongo.Bits256, error) {
@@ -432,15 +478,15 @@ func (s *LiteStorage) GetBlockTransactions(ctx context.Context, id tongo.BlockID
 }
 
 func (s *LiteStorage) searchTxInCache(a tongo.AccountID, lt uint64) *core.Transaction {
-	hash, ok := s.transactionsByInMsgLT.Load(inMsgCreatedLT{account: a, lt: lt})
-	if !ok {
+	hash, err := s.transactionsByInMsgLT.Get(context.Background(), inMsgCreatedLT{account: a, lt: lt}.String())
+	if err != nil {
 		return nil
 	}
-	tx, ok := s.transactionsIndexByHash.Load(hash)
-	if !ok {
+	tx, err := s.transactionsIndexByHash.Get(context.Background(), hash)
+	if err != nil {
 		return nil
 	}
-	return tx
+	return &tx
 }
 
 func (s *LiteStorage) GetStorageProviders(ctx context.Context) ([]core.StorageProvider, error) {

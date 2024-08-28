@@ -2,6 +2,7 @@ package indexer
 
 import (
 	"context"
+	"errors"
 	"sort"
 	"strings"
 	"time"
@@ -72,6 +73,20 @@ func (idx *Indexer) Run(ctx context.Context, channels []chan IDandBlock) {
 		chunk = next
 	}
 
+}
+
+func (idx *Indexer) GetBlocksFromMasterBlock(masterBlockNumber uint32) ([]IDandBlock, error) {
+	prevChunk, err := idx.initChunk(masterBlockNumber)
+	if err != nil {
+		idx.logger.Error("failed to get init chunk", zap.Error(err))
+		return nil, errors.New("failed to get init chunk")
+	}
+	currentChunk, err := idx.next(prevChunk)
+	if err != nil {
+		idx.logger.Error("failed to get next chunk", zap.Error(err))
+		return nil, errors.New("failed to get next chunk")
+	}
+	return currentChunk.blocks, nil
 }
 
 func (idx *Indexer) next(prevChunk *chunk) (*chunk, error) {

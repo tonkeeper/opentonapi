@@ -196,6 +196,11 @@ func (h *Handler) GetEvent(ctx context.Context, params oas.GetEventParams) (*oas
 	return &event, nil
 }
 
+func (h *Handler) GetEventByHash(ctx context.Context, transactionHash string) (*oas.Event, error) {
+	eventParams := oas.GetEventParams{EventID: transactionHash}
+	return h.GetEvent(ctx, eventParams)
+}
+
 func contains[T comparable](sl []T, s T) bool {
 	for i := range sl {
 		if sl[i] == s {
