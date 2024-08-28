@@ -1,4 +1,4 @@
-module github.com/tonkeeper/opentonapi
+module github.com/arnac-io/opentonapi
 
 go 1.21.0
 
