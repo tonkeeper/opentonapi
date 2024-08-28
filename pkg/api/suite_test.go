@@ -1,7 +1,7 @@
 package api
 
 import (
-	"github.com/tonkeeper/opentonapi/pkg/addressbook"
+	"github.com/arnac-io/opentonapi/pkg/addressbook"
 	"github.com/tonkeeper/tongo"
 )
 

@@ -7,8 +7,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"github.com/tonkeeper/opentonapi/internal/g"
-	"github.com/tonkeeper/opentonapi/pkg/pusher/sources"
+	"github.com/arnac-io/opentonapi/internal/g"
+	"github.com/arnac-io/opentonapi/pkg/pusher/sources"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/ton"
 )

@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
 
-	"github.com/tonkeeper/opentonapi/internal/g"
+	"github.com/arnac-io/opentonapi/internal/g"
 )
 
 func TestBlockDispatcher_RegisterSubscriber(t *testing.T) {

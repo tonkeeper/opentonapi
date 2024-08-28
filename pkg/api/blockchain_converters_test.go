@@ -9,7 +9,7 @@ import (
 	"github.com/tonkeeper/tongo/tlb"
 	"go.uber.org/zap"
 
-	pkgTesting "github.com/tonkeeper/opentonapi/pkg/testing"
+	pkgTesting "github.com/arnac-io/opentonapi/pkg/testing"
 )
 
 func Test_convertConfig(t *testing.T) {

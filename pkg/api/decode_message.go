@@ -9,14 +9,14 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/tonkeeper/opentonapi/internal/g"
+	"github.com/arnac-io/opentonapi/internal/g"
 	"github.com/tonkeeper/tongo/abi"
 	"github.com/tonkeeper/tongo/boc"
 	"github.com/tonkeeper/tongo/liteapi"
 	"github.com/tonkeeper/tongo/tlb"
 	tongoWallet "github.com/tonkeeper/tongo/wallet"
 
-	"github.com/tonkeeper/opentonapi/pkg/oas"
+	"github.com/arnac-io/opentonapi/pkg/oas"
 )
 
 func convertToRawMessage(message tongoWallet.RawMessage) (oas.DecodedRawMessage, error) {

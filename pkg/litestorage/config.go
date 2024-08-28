@@ -6,7 +6,7 @@ import (
 
 	cache "github.com/Code-Hex/go-generics-cache"
 	"github.com/prometheus/client_golang/prometheus"
-	"github.com/tonkeeper/opentonapi/pkg/core"
+	"github.com/arnac-io/opentonapi/pkg/core"
 	"github.com/tonkeeper/tongo/boc"
 	"github.com/tonkeeper/tongo/tlb"
 	"github.com/tonkeeper/tongo/ton"

@@ -24,9 +24,9 @@ import (
 	"github.com/tonkeeper/tongo/ton"
 	"go.uber.org/zap"
 
-	"github.com/tonkeeper/opentonapi/pkg/blockchain/indexer"
-	"github.com/tonkeeper/opentonapi/pkg/cache"
-	"github.com/tonkeeper/opentonapi/pkg/core"
+	"github.com/arnac-io/opentonapi/pkg/blockchain/indexer"
+	"github.com/arnac-io/opentonapi/pkg/cache"
+	"github.com/arnac-io/opentonapi/pkg/core"
 )
 
 var storageTimeHistogramVec = promauto.NewHistogramVec(

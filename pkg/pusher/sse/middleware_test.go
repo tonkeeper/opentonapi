@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"github.com/tonkeeper/opentonapi/pkg/pusher/errors"
+	"github.com/arnac-io/opentonapi/pkg/pusher/errors"
 )
 
 func Test_writeError(t *testing.T) {

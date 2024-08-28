@@ -3,7 +3,7 @@ package metrics
 import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
-	"github.com/tonkeeper/opentonapi/pkg/pusher/events"
+	"github.com/arnac-io/opentonapi/pkg/pusher/events"
 )
 
 var (

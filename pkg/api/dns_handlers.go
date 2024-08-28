@@ -7,13 +7,13 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/tonkeeper/opentonapi/pkg/core"
+	"github.com/arnac-io/opentonapi/pkg/core"
 	"github.com/tonkeeper/tongo/ton"
 
 	"github.com/tonkeeper/tongo/contract/dns"
 
-	"github.com/tonkeeper/opentonapi/pkg/oas"
-	"github.com/tonkeeper/opentonapi/pkg/references"
+	"github.com/arnac-io/opentonapi/pkg/oas"
+	"github.com/arnac-io/opentonapi/pkg/references"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/tlb"
 )

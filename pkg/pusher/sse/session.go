@@ -8,10 +8,10 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/tonkeeper/opentonapi/pkg/pusher/events"
-	"github.com/tonkeeper/opentonapi/pkg/pusher/metrics"
-	"github.com/tonkeeper/opentonapi/pkg/pusher/sources"
-	"github.com/tonkeeper/opentonapi/pkg/pusher/utils"
+	"github.com/arnac-io/opentonapi/pkg/pusher/events"
+	"github.com/arnac-io/opentonapi/pkg/pusher/metrics"
+	"github.com/arnac-io/opentonapi/pkg/pusher/sources"
+	"github.com/arnac-io/opentonapi/pkg/pusher/utils"
 )
 
 // session represents an HTTP connection from a client and

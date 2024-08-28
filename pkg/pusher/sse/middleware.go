@@ -3,9 +3,9 @@ package sse
 import (
 	"net/http"
 
-	"github.com/tonkeeper/opentonapi/pkg/pusher/errors"
-	"github.com/tonkeeper/opentonapi/pkg/pusher/metrics"
-	"github.com/tonkeeper/opentonapi/pkg/pusher/utils"
+	"github.com/arnac-io/opentonapi/pkg/pusher/errors"
+	"github.com/arnac-io/opentonapi/pkg/pusher/metrics"
+	"github.com/arnac-io/opentonapi/pkg/pusher/utils"
 	"go.uber.org/zap"
 )
 

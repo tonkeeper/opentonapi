@@ -10,13 +10,13 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"github.com/tonkeeper/opentonapi/internal/g"
-	"github.com/tonkeeper/opentonapi/pkg/core"
+	"github.com/arnac-io/opentonapi/internal/g"
+	"github.com/arnac-io/opentonapi/pkg/core"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/liteapi"
 	"go.uber.org/zap"
 
-	"github.com/tonkeeper/opentonapi/pkg/litestorage"
+	"github.com/arnac-io/opentonapi/pkg/litestorage"
 )
 
 type jettonItem struct {

@@ -3,7 +3,7 @@ package litestorage
 import (
 	"context"
 
-	"github.com/tonkeeper/opentonapi/pkg/core"
+	"github.com/arnac-io/opentonapi/pkg/core"
 )
 
 func (s *LiteStorage) GetAllAuctions(ctx context.Context) ([]core.Auction, error) {

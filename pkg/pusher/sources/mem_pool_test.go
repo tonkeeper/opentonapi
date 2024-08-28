@@ -15,7 +15,7 @@ import (
 	"go.uber.org/zap"
 	"golang.org/x/exp/maps"
 
-	"github.com/tonkeeper/opentonapi/pkg/blockchain"
+	"github.com/arnac-io/opentonapi/pkg/blockchain"
 )
 
 var testAccount1 = ton.MustParseAccountID("0:0a95e1d4ebe7860d051f8b861730dbdee1440fd11180211914e0089146580351")

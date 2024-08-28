@@ -4,18 +4,18 @@ import (
 	"context"
 	"testing"
 
-	"github.com/tonkeeper/opentonapi/pkg/chainstate"
-	pkgTesting "github.com/tonkeeper/opentonapi/pkg/testing"
+	"github.com/arnac-io/opentonapi/pkg/chainstate"
+	pkgTesting "github.com/arnac-io/opentonapi/pkg/testing"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/liteapi"
 
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
 
-	"github.com/tonkeeper/opentonapi/pkg/addressbook"
-	"github.com/tonkeeper/opentonapi/pkg/config"
-	"github.com/tonkeeper/opentonapi/pkg/litestorage"
-	"github.com/tonkeeper/opentonapi/pkg/oas"
+	"github.com/arnac-io/opentonapi/pkg/addressbook"
+	"github.com/arnac-io/opentonapi/pkg/config"
+	"github.com/arnac-io/opentonapi/pkg/litestorage"
+	"github.com/arnac-io/opentonapi/pkg/oas"
 )
 
 func TestHandler_GetRawAccount(t *testing.T) {
