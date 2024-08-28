@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/tonkeeper/opentonapi/pkg/blockchain/indexer"
+	"github.com/arnac-io/opentonapi/pkg/blockchain/indexer"
 	"github.com/tonkeeper/tongo/abi"
 	"github.com/tonkeeper/tongo/boc"
 	"github.com/tonkeeper/tongo/liteapi"

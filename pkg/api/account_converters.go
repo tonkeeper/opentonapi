@@ -7,9 +7,9 @@ import (
 	"github.com/tonkeeper/tongo/abi"
 	"github.com/tonkeeper/tongo/tlb"
 
-	"github.com/tonkeeper/opentonapi/pkg/addressbook"
-	"github.com/tonkeeper/opentonapi/pkg/core"
-	"github.com/tonkeeper/opentonapi/pkg/oas"
+	"github.com/arnac-io/opentonapi/pkg/addressbook"
+	"github.com/arnac-io/opentonapi/pkg/core"
+	"github.com/arnac-io/opentonapi/pkg/oas"
 )
 
 func convertToRawAccount(account *core.Account) (oas.BlockchainRawAccount, error) {

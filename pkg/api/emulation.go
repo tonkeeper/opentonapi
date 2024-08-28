@@ -21,10 +21,10 @@ import (
 	"github.com/tonkeeper/tongo/txemulator"
 	tongoWallet "github.com/tonkeeper/tongo/wallet"
 
-	"github.com/tonkeeper/opentonapi/pkg/blockchain"
-	"github.com/tonkeeper/opentonapi/pkg/cache"
-	"github.com/tonkeeper/opentonapi/pkg/core"
-	"github.com/tonkeeper/opentonapi/pkg/sentry"
+	"github.com/arnac-io/opentonapi/pkg/blockchain"
+	"github.com/arnac-io/opentonapi/pkg/cache"
+	"github.com/arnac-io/opentonapi/pkg/core"
+	"github.com/arnac-io/opentonapi/pkg/sentry"
 )
 
 var (

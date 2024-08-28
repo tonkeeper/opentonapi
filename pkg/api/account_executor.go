@@ -14,7 +14,7 @@ import (
 	"github.com/tonkeeper/tongo/tvm"
 	"github.com/tonkeeper/tongo/tvm/precompiled"
 
-	"github.com/tonkeeper/opentonapi/pkg/core"
+	"github.com/arnac-io/opentonapi/pkg/core"
 )
 
 var precompileUsageMc = promauto.NewCounterVec(prometheus.CounterOpts{

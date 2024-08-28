@@ -9,7 +9,7 @@ import (
 	"github.com/tonkeeper/tongo"
 	"go.uber.org/zap"
 
-	"github.com/tonkeeper/opentonapi/pkg/blockchain"
+	"github.com/arnac-io/opentonapi/pkg/blockchain"
 )
 
 // MemPool implements "MemPoolSource" interface

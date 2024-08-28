@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/tonkeeper/opentonapi/pkg/oas"
+	"github.com/arnac-io/opentonapi/pkg/oas"
 )
 
 func (h *Handler) GetAllAuctions(ctx context.Context, params oas.GetAllAuctionsParams) (*oas.Auctions, error) {

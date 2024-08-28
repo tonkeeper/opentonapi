@@ -10,17 +10,17 @@ import (
 	"github.com/shopspring/decimal"
 	"github.com/tonkeeper/tongo/ton"
 
-	"github.com/tonkeeper/opentonapi/internal/g"
+	"github.com/arnac-io/opentonapi/internal/g"
 	"github.com/tonkeeper/tongo/boc"
 	"github.com/tonkeeper/tongo/tlb"
 
 	"github.com/tonkeeper/tongo"
 	"golang.org/x/exp/slices"
 
-	"github.com/tonkeeper/opentonapi/pkg/api/i18n"
-	"github.com/tonkeeper/opentonapi/pkg/core"
-	"github.com/tonkeeper/opentonapi/pkg/oas"
-	"github.com/tonkeeper/opentonapi/pkg/references"
+	"github.com/arnac-io/opentonapi/pkg/api/i18n"
+	"github.com/arnac-io/opentonapi/pkg/core"
+	"github.com/arnac-io/opentonapi/pkg/oas"
+	"github.com/arnac-io/opentonapi/pkg/references"
 )
 
 func (h *Handler) GetStakingPoolInfo(ctx context.Context, params oas.GetStakingPoolInfoParams) (*oas.GetStakingPoolInfoOK, error) {

@@ -16,10 +16,10 @@ import (
 	"github.com/tonkeeper/tongo/tlb"
 	"google.golang.org/grpc/status"
 
-	"github.com/tonkeeper/opentonapi/pkg/core"
-	imgGenerator "github.com/tonkeeper/opentonapi/pkg/image"
-	"github.com/tonkeeper/opentonapi/pkg/oas"
-	walletPkg "github.com/tonkeeper/opentonapi/pkg/wallet"
+	"github.com/arnac-io/opentonapi/pkg/core"
+	imgGenerator "github.com/arnac-io/opentonapi/pkg/image"
+	"github.com/arnac-io/opentonapi/pkg/oas"
+	walletPkg "github.com/arnac-io/opentonapi/pkg/wallet"
 )
 
 func toError(code int, err error) *oas.ErrorStatusCode {

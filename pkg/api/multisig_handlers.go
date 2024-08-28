@@ -5,8 +5,8 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/tonkeeper/opentonapi/pkg/core"
-	"github.com/tonkeeper/opentonapi/pkg/oas"
+	"github.com/arnac-io/opentonapi/pkg/core"
+	"github.com/arnac-io/opentonapi/pkg/oas"
 	"github.com/tonkeeper/tongo/abi"
 	"github.com/tonkeeper/tongo/boc"
 	"github.com/tonkeeper/tongo/tlb"

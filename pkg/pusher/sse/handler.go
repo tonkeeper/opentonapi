@@ -10,9 +10,9 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
-	"github.com/tonkeeper/opentonapi/pkg/pusher/errors"
-	"github.com/tonkeeper/opentonapi/pkg/pusher/events"
-	"github.com/tonkeeper/opentonapi/pkg/pusher/sources"
+	"github.com/arnac-io/opentonapi/pkg/pusher/errors"
+	"github.com/arnac-io/opentonapi/pkg/pusher/events"
+	"github.com/arnac-io/opentonapi/pkg/pusher/sources"
 	"github.com/tonkeeper/tongo"
 )
 

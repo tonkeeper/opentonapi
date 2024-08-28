@@ -13,8 +13,8 @@ import (
 	"github.com/tonkeeper/tongo/tlb"
 	"go.uber.org/zap"
 
-	"github.com/tonkeeper/opentonapi/pkg/blockchain/indexer"
-	"github.com/tonkeeper/opentonapi/pkg/core"
+	"github.com/arnac-io/opentonapi/pkg/blockchain/indexer"
+	"github.com/arnac-io/opentonapi/pkg/core"
 )
 
 func TestLiteStorage_run(t *testing.T) {

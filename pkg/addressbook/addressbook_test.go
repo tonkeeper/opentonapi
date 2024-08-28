@@ -5,8 +5,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"github.com/tonkeeper/opentonapi/pkg/cache"
-	"github.com/tonkeeper/opentonapi/pkg/oas"
+	"github.com/arnac-io/opentonapi/pkg/cache"
+	"github.com/arnac-io/opentonapi/pkg/oas"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/ton"
 )

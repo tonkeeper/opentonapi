@@ -3,7 +3,7 @@ package bath
 import (
 	"fmt"
 
-	"github.com/tonkeeper/opentonapi/pkg/core"
+	"github.com/arnac-io/opentonapi/pkg/core"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
 )

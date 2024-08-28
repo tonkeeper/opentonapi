@@ -9,7 +9,7 @@ import (
 	"github.com/tonkeeper/tongo/tlb"
 	tongoWallet "github.com/tonkeeper/tongo/wallet"
 
-	"github.com/tonkeeper/opentonapi/pkg/core"
+	"github.com/arnac-io/opentonapi/pkg/core"
 	"github.com/tonkeeper/tongo"
 )
 

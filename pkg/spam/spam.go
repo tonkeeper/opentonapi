@@ -1,8 +1,8 @@
 package spam
 
 import (
-	"github.com/tonkeeper/opentonapi/pkg/core"
-	"github.com/tonkeeper/opentonapi/pkg/oas"
+	"github.com/arnac-io/opentonapi/pkg/core"
+	"github.com/arnac-io/opentonapi/pkg/oas"
 	rules "github.com/tonkeeper/scam_backoffice_rules"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/ton"

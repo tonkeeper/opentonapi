@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"github.com/tonkeeper/opentonapi/pkg/pusher/sources"
+	"github.com/arnac-io/opentonapi/pkg/pusher/sources"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/ton"
 	"go.uber.org/zap"

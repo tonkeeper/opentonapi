@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/tonkeeper/opentonapi/pkg/core"
+	"github.com/arnac-io/opentonapi/pkg/core"
 	"github.com/tonkeeper/tongo/ton"
 )
 

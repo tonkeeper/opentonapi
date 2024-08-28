@@ -3,8 +3,8 @@ package bath
 import (
 	"math/big"
 
-	"github.com/tonkeeper/opentonapi/pkg/blockchain/config"
-	"github.com/tonkeeper/opentonapi/pkg/core"
+	"github.com/arnac-io/opentonapi/pkg/blockchain/config"
+	"github.com/arnac-io/opentonapi/pkg/core"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
 	"github.com/tonkeeper/tongo/ton"

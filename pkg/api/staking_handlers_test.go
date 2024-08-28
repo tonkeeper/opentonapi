@@ -5,8 +5,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"github.com/tonkeeper/opentonapi/pkg/litestorage"
-	"github.com/tonkeeper/opentonapi/pkg/oas"
+	"github.com/arnac-io/opentonapi/pkg/litestorage"
+	"github.com/arnac-io/opentonapi/pkg/oas"
 	"github.com/tonkeeper/tongo/liteapi"
 	"go.uber.org/zap"
 )

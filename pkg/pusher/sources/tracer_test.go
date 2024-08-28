@@ -7,8 +7,8 @@ import (
 	"github.com/tonkeeper/tongo"
 	"go.uber.org/zap"
 
-	"github.com/tonkeeper/opentonapi/pkg/cache"
-	"github.com/tonkeeper/opentonapi/pkg/core"
+	"github.com/arnac-io/opentonapi/pkg/cache"
+	"github.com/arnac-io/opentonapi/pkg/core"
 )
 
 func TestTracer_putTraceInCache(t1 *testing.T) {

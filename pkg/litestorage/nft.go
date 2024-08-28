@@ -7,8 +7,8 @@ import (
 	"math/big"
 
 	"github.com/prometheus/client_golang/prometheus"
-	"github.com/tonkeeper/opentonapi/internal/g"
-	"github.com/tonkeeper/opentonapi/pkg/core"
+	"github.com/arnac-io/opentonapi/internal/g"
+	"github.com/arnac-io/opentonapi/pkg/core"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
 	"github.com/tonkeeper/tongo/boc"

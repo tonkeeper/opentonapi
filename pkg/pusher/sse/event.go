@@ -1,7 +1,7 @@
 package sse
 
 import (
-	"github.com/tonkeeper/opentonapi/pkg/pusher/events"
+	"github.com/arnac-io/opentonapi/pkg/pusher/events"
 )
 
 type Event struct {

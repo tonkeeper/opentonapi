@@ -6,9 +6,9 @@ import (
 	"sync"
 
 	"github.com/go-faster/errors"
-	"github.com/tonkeeper/opentonapi/pkg/chainstate"
-	"github.com/tonkeeper/opentonapi/pkg/core"
-	"github.com/tonkeeper/opentonapi/pkg/rates"
+	"github.com/arnac-io/opentonapi/pkg/chainstate"
+	"github.com/arnac-io/opentonapi/pkg/core"
+	"github.com/arnac-io/opentonapi/pkg/rates"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/contract/dns"
 	"github.com/tonkeeper/tongo/tep64"
@@ -17,10 +17,10 @@ import (
 	"github.com/tonkeeper/tongo/tvm"
 	"go.uber.org/zap"
 
-	"github.com/tonkeeper/opentonapi/pkg/addressbook"
-	"github.com/tonkeeper/opentonapi/pkg/cache"
-	"github.com/tonkeeper/opentonapi/pkg/config"
-	"github.com/tonkeeper/opentonapi/pkg/oas"
+	"github.com/arnac-io/opentonapi/pkg/addressbook"
+	"github.com/arnac-io/opentonapi/pkg/cache"
+	"github.com/arnac-io/opentonapi/pkg/config"
+	"github.com/arnac-io/opentonapi/pkg/oas"
 )
 
 // Compile-time check for Handler.

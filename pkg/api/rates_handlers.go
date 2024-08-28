@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/tonkeeper/opentonapi/pkg/oas"
+	"github.com/arnac-io/opentonapi/pkg/oas"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/ton"
 )

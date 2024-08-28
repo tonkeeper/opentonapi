@@ -13,12 +13,12 @@ import (
 	"os"
 	"time"
 
-	"github.com/tonkeeper/opentonapi/pkg/core"
+	"github.com/arnac-io/opentonapi/pkg/core"
 
 	"github.com/tonkeeper/tongo/ton"
 
-	"github.com/tonkeeper/opentonapi/pkg/oas"
-	"github.com/tonkeeper/opentonapi/pkg/wallet"
+	"github.com/arnac-io/opentonapi/pkg/oas"
+	"github.com/arnac-io/opentonapi/pkg/wallet"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/boc"
 	"github.com/tonkeeper/tongo/tlb"

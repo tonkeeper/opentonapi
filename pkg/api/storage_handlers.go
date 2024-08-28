@@ -4,7 +4,7 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/tonkeeper/opentonapi/pkg/oas"
+	"github.com/arnac-io/opentonapi/pkg/oas"
 )
 
 func (h *Handler) GetStorageProviders(ctx context.Context) (*oas.GetStorageProvidersOK, error) {

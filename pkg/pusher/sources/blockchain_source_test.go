@@ -5,13 +5,13 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"github.com/tonkeeper/opentonapi/internal/g"
+	"github.com/arnac-io/opentonapi/internal/g"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/liteapi"
 	"github.com/tonkeeper/tongo/ton"
 	"go.uber.org/zap"
 
-	"github.com/tonkeeper/opentonapi/pkg/blockchain/indexer"
+	"github.com/arnac-io/opentonapi/pkg/blockchain/indexer"
 )
 
 type mockTxDispatcher struct {

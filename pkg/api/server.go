@@ -7,10 +7,10 @@ import (
 	"github.com/tonkeeper/tongo/config"
 	"go.uber.org/zap"
 
-	"github.com/tonkeeper/opentonapi/pkg/oas"
-	"github.com/tonkeeper/opentonapi/pkg/pusher/sources"
-	"github.com/tonkeeper/opentonapi/pkg/pusher/sse"
-	"github.com/tonkeeper/opentonapi/pkg/pusher/websocket"
+	"github.com/arnac-io/opentonapi/pkg/oas"
+	"github.com/arnac-io/opentonapi/pkg/pusher/sources"
+	"github.com/arnac-io/opentonapi/pkg/pusher/sse"
+	"github.com/arnac-io/opentonapi/pkg/pusher/websocket"
 )
 
 // Server opens a port and exposes REST-ish API.

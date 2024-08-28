@@ -12,7 +12,7 @@ import (
 	"github.com/tonkeeper/tongo/tlb"
 	"github.com/tonkeeper/tongo/ton"
 
-	"github.com/tonkeeper/opentonapi/internal/g"
+	"github.com/arnac-io/opentonapi/internal/g"
 )
 
 func ConvertToBlockHeader(id tongo.BlockIDExt, block *tlb.Block) (*BlockHeader, error) {
