@@ -82,6 +82,8 @@ type Handler interface {
 	GaslessEstimate(ctx context.Context, req *GaslessEstimateReq, params GaslessEstimateParams) (*SignRawParams, error)
 	// GaslessSend implements gaslessSend operation.
 	//
+	// Submits the signed gasless transaction message to the network.
+	//
 	// POST /v2/gasless/send
 	GaslessSend(ctx context.Context, req *GaslessSendReq) error
 	// GetAccount implements getAccount operation.
@@ -438,7 +440,8 @@ type Handler interface {
 	GetOutMsgQueueSizes(ctx context.Context) (*GetOutMsgQueueSizesOK, error)
 	// GetRates implements getRates operation.
 	//
-	// Get the token price to the currency.
+	// Get the token price in the chosen currency for display only. Don’t use this for financial
+	// transactions.
 	//
 	// GET /v2/rates
 	GetRates(ctx context.Context, params GetRatesParams) (*GetRatesOK, error)

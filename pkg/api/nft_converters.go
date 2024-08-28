@@ -66,7 +66,6 @@ func (h *Handler) convertNFT(ctx context.Context, item core.NftItem, book addres
 			nftItem.Metadata["buttons"] = buttons
 		}
 	}
-
 	if item.Metadata != nil {
 		if imageI, prs := item.Metadata["image"]; prs {
 			image, _ = imageI.(string)
@@ -75,9 +74,11 @@ func (h *Handler) convertNFT(ctx context.Context, item core.NftItem, book addres
 			description, _ = descriptionI.(string)
 		}
 	}
-	approved := len(nftItem.ApprovedBy) > 0
-	nftItem.Trust = oas.TrustType(h.spamFilter.NftTrust(item.Address, item.CollectionAddress, description, image, approved))
-
+	if len(nftItem.ApprovedBy) > 0 && nftItem.Verified {
+		nftItem.Trust = oas.TrustType(core.TrustWhitelist)
+	} else {
+		nftItem.Trust = oas.TrustType(h.spamFilter.NftTrust(item.Address, item.CollectionAddress, description, image))
+	}
 	if image == "" {
 		image = references.Placeholder
 	}
@@ -162,7 +163,7 @@ func (h *Handler) convertNftHistory(ctx context.Context, account tongo.AccountID
 			}
 			event.Actions = append(event.Actions, convertedAction)
 		}
-		event.IsScam = h.spamFilter.CheckActions(actions.Actions, &account)
+		event.IsScam = h.spamFilter.CheckActions(event.Actions, &account)
 		if len(event.Actions) > 0 {
 			events = append(events, event)
 			lastLT = trace.Lt

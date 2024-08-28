@@ -4,9 +4,11 @@ import (
 	"context"
 	"encoding/base64"
 	"errors"
-	"golang.org/x/exp/slices"
 	"math/big"
+	"sync"
 	"time"
+
+	"golang.org/x/exp/slices"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
@@ -132,7 +134,7 @@ func (h *Handler) addToMempool(ctx context.Context, bytesBoc []byte, shardAccoun
 		return shardAccount, err
 	}
 	newShardAccount := emulator.FinalStates()
-	trace, err := emulatedTreeToTrace(ctx, h.executor, h.storage, config, tree, newShardAccount, nil)
+	trace, err := emulatedTreeToTrace(ctx, h.executor, h.storage, tree, newShardAccount, nil, h.configPool)
 	if err != nil {
 		return shardAccount, err
 	}
@@ -180,10 +182,10 @@ func emulatedTreeToTrace(
 	ctx context.Context,
 	executor executor,
 	resolver core.LibraryResolver,
-	configBase64 string,
 	tree *txemulator.TxTree,
 	accounts map[tongo.AccountID]tlb.ShardAccount,
 	inspectionCache map[ton.AccountID]*abi.ContractDescription,
+	configPool *sync.Pool,
 ) (*core.Trace, error) {
 	if !tree.TX.Msgs.InMsg.Exists {
 		return nil, errors.New("there is no incoming message in emulation result")
@@ -220,7 +222,7 @@ func emulatedTreeToTrace(
 	}
 	additionalInfo := &core.TraceAdditionalInfo{}
 	for i := range tree.Children {
-		child, err := emulatedTreeToTrace(ctx, executor, resolver, configBase64, tree.Children[i], accounts, inspectionCache)
+		child, err := emulatedTreeToTrace(ctx, executor, resolver, tree.Children[i], accounts, inspectionCache, configPool)
 		if err != nil {
 			return nil, err
 		}
@@ -240,7 +242,7 @@ func emulatedTreeToTrace(
 		return nil, err
 	}
 	emulatedAccountCode.WithLabelValues(codeHash).Inc()
-	sharedExecutor := newSharedAccountExecutor(accounts, executor, resolver, configBase64)
+	sharedExecutor := newSharedAccountExecutor(accounts, executor, resolver, configPool)
 	inspectionResult, ok := inspectionCache[accountID]
 	if !ok {
 		inspectionResult, err = abi.NewContractInspector(abi.InspectWithLibraryResolver(resolver)).InspectContract(ctx, b, sharedExecutor, accountID)

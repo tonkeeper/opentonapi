@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"math/big"
+	"sort"
 	"strings"
 
 	"github.com/tonkeeper/tongo/ton"
@@ -45,6 +46,13 @@ func distinctAccounts(skip *tongo.AccountID, book addressBook, accounts ...*tong
 
 func convertTrace(t *core.Trace, book addressBook) oas.Trace {
 	trace := oas.Trace{Transaction: convertTransaction(t.Transaction, t.AccountInterfaces, book), Interfaces: g.ToStrings(t.AccountInterfaces)}
+
+	sort.Slice(t.Children, func(i, j int) bool {
+		if t.Children[i].InMsg == nil || t.Children[j].InMsg == nil {
+			return false
+		}
+		return t.Children[i].InMsg.CreatedLt < t.Children[j].InMsg.CreatedLt
+	})
 	for _, c := range t.Children {
 		trace.Children = append(trace.Children, convertTrace(c, book))
 	}
@@ -766,7 +774,7 @@ func (h *Handler) toEvent(ctx context.Context, trace *core.Trace, result *bath.A
 		}
 		event.Actions[i] = convertedAction
 	}
-	event.IsScam = h.spamFilter.CheckActions(result.Actions, nil)
+	event.IsScam = h.spamFilter.CheckActions(event.Actions, nil)
 	previews := make(map[tongo.AccountID]oas.JettonPreview)
 	for _, flow := range result.ValueFlow.Accounts {
 		for jettonMaster := range flow.Jettons {
@@ -846,7 +854,7 @@ func (h *Handler) toAccountEvent(ctx context.Context, account tongo.AccountID, t
 		e.Actions = append(e.Actions, convertedAction)
 	}
 	if h.spamFilter != nil {
-		e.IsScam = h.spamFilter.CheckActions(result.Actions, &account)
+		e.IsScam = h.spamFilter.CheckActions(e.Actions, &account)
 	}
 	if len(e.Actions) == 0 {
 		e.Actions = []oas.Action{

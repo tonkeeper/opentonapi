@@ -6425,7 +6425,8 @@
      }
     },
     "tags": [
-     "Emulation"
+     "Emulation",
+     "Accounts"
     ]
    }
   },
@@ -6846,7 +6847,8 @@
     },
     "tags": [
      "NFT"
-    ]
+    ],
+    "x-question": "duplicate of getNftHistoryByID ?"
    }
   },
   "/v2/accounts/{account_id}/publickey": {
@@ -7065,7 +7067,7 @@
      }
     },
     "tags": [
-     "Accounts"
+     "Utilities"
     ]
    }
   },
@@ -7811,7 +7813,8 @@
      }
     },
     "tags": [
-     "Emulation"
+     "Emulation",
+     "Events"
     ]
    }
   },
@@ -8169,7 +8172,7 @@
   },
   "/v2/gasless/estimate/{master_id}": {
    "post": {
-    "description": "Estimates the cost of the given messages and returns a payload to sign.",
+    "description": "Estimates the cost of the given messages and returns a payload to sign",
     "operationId": "gaslessEstimate",
     "parameters": [
      {
@@ -8209,6 +8212,7 @@
   },
   "/v2/gasless/send": {
    "post": {
+    "description": "Submits the signed gasless transaction message to the network",
     "operationId": "gaslessSend",
     "requestBody": {
      "$ref": "#/components/requestBodies/GaslessSend"
@@ -9685,7 +9689,7 @@
   },
   "/v2/rates": {
    "get": {
-    "description": "Get the token price to the currency",
+    "description": "Get the token price in the chosen currency for display only. Don’t use this for financial transactions.",
     "operationId": "getRates",
     "parameters": [
      {
@@ -10077,7 +10081,7 @@
      }
     },
     "tags": [
-     "Blockchain"
+     "Utilities"
     ]
    }
   },
@@ -10209,7 +10213,8 @@
      }
     },
     "tags": [
-     "Emulation"
+     "Emulation",
+     "Traces"
     ]
    }
   },
@@ -10376,6 +10381,7 @@
      }
     },
     "tags": [
+     "Wallet",
      "Emulation"
     ]
    }
@@ -10419,6 +10425,134 @@
   },
   {
    "url": "http://localhost:8081"
+  }
+ ],
+ "tags": [
+  {
+   "externalDocs": {
+    "description": "Additional documentation",
+    "url": "https://docs.tonconsole.com/tonapi/rest-api/accounts"
+   },
+   "name": "Accounts"
+  },
+  {
+   "externalDocs": {
+    "description": "Additional documentation",
+    "url": "https://docs.tonconsole.com/tonapi/rest-api/nft"
+   },
+   "name": "NFT"
+  },
+  {
+   "externalDocs": {
+    "description": "Additional documentation",
+    "url": "https://docs.tonconsole.com/tonapi/rest-api/jettons"
+   },
+   "name": "Jettons"
+  },
+  {
+   "externalDocs": {
+    "description": "Additional documentation",
+    "url": "https://docs.tonconsole.com/tonapi/rest-api/dns"
+   },
+   "name": "DNS"
+  },
+  {
+   "externalDocs": {
+    "description": "Additional documentation",
+    "url": "https://docs.tonconsole.com/tonapi/rest-api/wallet"
+   },
+   "name": "Wallet"
+  },
+  {
+   "externalDocs": {
+    "description": "Additional documentation",
+    "url": "https://docs.tonconsole.com/tonapi/rest-api/rates"
+   },
+   "name": "Rates"
+  },
+  {
+   "externalDocs": {
+    "description": "Additional documentation",
+    "url": "https://docs.tonconsole.com/tonapi/rest-api/staking"
+   },
+   "name": "Staking"
+  },
+  {
+   "externalDocs": {
+    "description": "Additional documentation",
+    "url": "https://docs.tonconsole.com/tonapi/rest-api/traces"
+   },
+   "name": "Traces"
+  },
+  {
+   "externalDocs": {
+    "description": "Additional documentation",
+    "url": "https://docs.tonconsole.com/tonapi/rest-api/events"
+   },
+   "name": "Events"
+  },
+  {
+   "externalDocs": {
+    "description": "Additional documentation",
+    "url": "https://docs.tonconsole.com/tonapi/rest-api/storage"
+   },
+   "name": "Storage"
+  },
+  {
+   "externalDocs": {
+    "description": "Additional documentation",
+    "url": "https://docs.tonconsole.com/tonapi/rest-api/connect"
+   },
+   "name": "Connect"
+  },
+  {
+   "externalDocs": {
+    "description": "Additional documentation",
+    "url": "https://docs.tonconsole.com/tonapi/rest-api/gasless"
+   },
+   "name": "Gasless"
+  },
+  {
+   "externalDocs": {
+    "description": "Additional documentation",
+    "url": "https://docs.tonconsole.com/tonapi/rest-api/multisig"
+   },
+   "name": "Multisig"
+  },
+  {
+   "externalDocs": {
+    "description": "Additional documentation",
+    "url": "https://docs.tonconsole.com/tonapi/rest-api/blockchain"
+   },
+   "name": "Blockchain"
+  },
+  {
+   "externalDocs": {
+    "description": "Additional documentation",
+    "url": "https://docs.tonconsole.com/tonapi/rest-api/liteserver"
+   },
+   "name": "Lite Server"
+  },
+  {
+   "externalDocs": {
+    "description": "Additional documentation",
+    "url": "https://docs.tonconsole.com/tonapi/rest-api/emulation"
+   },
+   "name": "Emulation"
+  },
+  {
+   "externalDocs": {
+    "description": "Additional documentation",
+    "url": "https://docs.tonconsole.com/tonapi/rest-api/inscriptions"
+   },
+   "name": "Inscriptions"
+  },
+  {
+   "externalDocs": {
+    "description": "Additional documentation",
+    "url": "https://docs.tonconsole.com/tonapi/rest-api/utilities"
+   },
+   "name": "Utilities"
   }
  ]
 }

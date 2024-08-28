@@ -10,13 +10,88 @@ servers:
   - url: "https://tonapi.io"
   - url: "https://testnet.tonapi.io"
   - url: "http://localhost:8081"
+
+tags:
+  - name: Accounts
+    externalDocs:
+      description: Additional documentation
+      url: https://docs.tonconsole.com/tonapi/rest-api/accounts
+  - name: NFT
+    externalDocs:
+      description: Additional documentation
+      url: https://docs.tonconsole.com/tonapi/rest-api/nft
+  - name: Jettons
+    externalDocs:
+      description: Additional documentation
+      url: https://docs.tonconsole.com/tonapi/rest-api/jettons
+  - name: DNS
+    externalDocs:
+      description: Additional documentation
+      url: https://docs.tonconsole.com/tonapi/rest-api/dns
+  - name: Wallet
+    externalDocs:
+      description: Additional documentation
+      url: https://docs.tonconsole.com/tonapi/rest-api/wallet
+  - name: Rates
+    externalDocs:
+      description: Additional documentation
+      url: https://docs.tonconsole.com/tonapi/rest-api/rates
+  - name: Staking
+    externalDocs:
+      description: Additional documentation
+      url: https://docs.tonconsole.com/tonapi/rest-api/staking
+  - name: Traces
+    externalDocs:
+      description: Additional documentation
+      url: https://docs.tonconsole.com/tonapi/rest-api/traces
+  - name: Events
+    externalDocs:
+      description: Additional documentation
+      url: https://docs.tonconsole.com/tonapi/rest-api/events
+  - name: Storage
+    externalDocs:
+      description: Additional documentation
+      url: https://docs.tonconsole.com/tonapi/rest-api/storage
+  - name: Connect
+    externalDocs:
+      description: Additional documentation
+      url: https://docs.tonconsole.com/tonapi/rest-api/connect
+  - name: Gasless
+    externalDocs:
+      description: Additional documentation
+      url: https://docs.tonconsole.com/tonapi/rest-api/gasless
+  - name: Multisig
+    externalDocs:
+      description: Additional documentation
+      url: https://docs.tonconsole.com/tonapi/rest-api/multisig
+  - name: Blockchain
+    externalDocs:
+      description: Additional documentation
+      url: https://docs.tonconsole.com/tonapi/rest-api/blockchain
+  - name: Lite Server
+    externalDocs:
+      description: Additional documentation
+      url: https://docs.tonconsole.com/tonapi/rest-api/liteserver
+  - name: Emulation
+    externalDocs:
+      description: Additional documentation
+      url: https://docs.tonconsole.com/tonapi/rest-api/emulation
+  - name: Inscriptions
+    externalDocs:
+      description: Additional documentation
+      url: https://docs.tonconsole.com/tonapi/rest-api/inscriptions
+  - name: Utilities
+    externalDocs:
+      description: Additional documentation
+      url: https://docs.tonconsole.com/tonapi/rest-api/utilities
+
 paths:
   /v2/status:
     get:
       description: Status
       operationId: status
       tags:
-        - Blockchain
+        - Utilities
       responses:
         '200':
           description: status
@@ -390,29 +465,12 @@ paths:
                 $ref: '#/components/schemas/BlockchainAccountInspect'
         'default':
           $ref: '#/components/responses/Error'
-  /v2/message/decode:
-    post:
-      description: Decode a given message. Only external incoming messages can be decoded currently.
-      operationId: decodeMessage
-      tags:
-        - Emulation
-      requestBody:
-        $ref: "#/components/requestBodies/Boc"
-      responses:
-        '200':
-          description: decoded message
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DecodedMessage'
-        'default':
-          $ref: '#/components/responses/Error'
   /v2/address/{account_id}/parse:
     get:
       description: parse address and display in all formats
       operationId: addressParse
       tags:
-        - Accounts
+        - Utilities
       parameters:
         - $ref: '#/components/parameters/accountIDParameter'
       responses:
@@ -459,99 +517,6 @@ paths:
                     type: boolean
         default:
           $ref: '#/components/responses/Error'
-
-  /v2/events/emulate:
-    post:
-      description: Emulate sending message to blockchain
-      operationId: emulateMessageToEvent
-      tags:
-        - Emulation
-      parameters:
-        - $ref: '#/components/parameters/i18n'
-        - name: ignore_signature_check
-          in: query
-          required: false
-          schema:
-            type: boolean
-      requestBody:
-        $ref: "#/components/requestBodies/Boc"
-      responses:
-        '200':
-          description: emulated event
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Event'
-        'default':
-          $ref: '#/components/responses/Error'
-  /v2/traces/emulate:
-    post:
-      description: Emulate sending message to blockchain
-      operationId: emulateMessageToTrace
-      tags:
-        - Emulation
-      parameters:
-        - name: ignore_signature_check
-          in: query
-          required: false
-          schema:
-            type: boolean
-      requestBody:
-        $ref: "#/components/requestBodies/Boc"
-      responses:
-        '200':
-          description: emulated trace
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Trace'
-        'default':
-          $ref: '#/components/responses/Error'
-  /v2/wallet/emulate:
-    post:
-      description: Emulate sending message to blockchain
-      operationId: emulateMessageToWallet
-      tags:
-        - Emulation
-      parameters:
-        - $ref: '#/components/parameters/i18n'
-      requestBody:
-        $ref: "#/components/requestBodies/EmulationBoc"
-      responses:
-        '200':
-          description: emulated message
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/MessageConsequences'
-        'default':
-          $ref: '#/components/responses/Error'
-  /v2/accounts/{account_id}/events/emulate:
-    post:
-      description: Emulate sending message to blockchain
-      operationId: emulateMessageToAccountEvent
-      tags:
-        - Emulation
-      parameters:
-        - $ref: '#/components/parameters/i18n'
-        - $ref: '#/components/parameters/accountIDParameter'
-        - name: ignore_signature_check
-          in: query
-          required: false
-          schema:
-            type: boolean
-      requestBody:
-        $ref: "#/components/requestBodies/Boc"
-      responses:
-        '200':
-          description: emulated message to account
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/AccountEvent'
-        'default':
-          $ref: '#/components/responses/Error'
-
   /v2/accounts/_bulk:
     post:
       description: Get human-friendly information about several accounts without low-level details.
@@ -771,6 +736,7 @@ paths:
           $ref: '#/components/responses/Error'
   /v2/accounts/{account_id}/nfts/history:
     get:
+      x-question: duplicate of getNftHistoryByID ?
       description: Get the transfer nft history
       operationId: getAccountNftHistory
       tags:
@@ -1752,7 +1718,7 @@ paths:
   
   /v2/rates:
     get:
-      description: Get the token price to the currency
+      description: Get the token price in the chosen currency for display only. Don’t use this for financial transactions.
       operationId: getRates
       tags:
         - Rates
@@ -1981,9 +1947,26 @@ paths:
                     example: "NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2ODQ3..."
         'default':
           $ref: '#/components/responses/Error'
+  /v2/wallet/{account_id}/seqno:
+    get:
+      description: Get account seqno
+      operationId: getAccountSeqno
+      tags:
+        - Wallet
+      parameters:
+        - $ref: '#/components/parameters/accountIDParameter'
+      responses:
+        '200':
+          description: account seqno
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Seqno'
+        'default':
+          $ref: '#/components/responses/Error'
   /v2/gasless/config:
     get:
-      description: "Returns configuration of gasless transfers"
+      description: Returns configuration of gasless transfers
       operationId: gaslessConfig
       tags:
         - Gasless
@@ -1998,7 +1981,7 @@ paths:
           $ref: '#/components/responses/Error'
   /v2/gasless/estimate/{master_id}:
     post:
-      description: "Estimates the cost of the given messages and returns a payload to sign."
+      description: Estimates the cost of the given messages and returns a payload to sign
       operationId: gaslessEstimate
       parameters:
         - name: master_id
@@ -2024,6 +2007,7 @@ paths:
           $ref: '#/components/responses/Error'
   /v2/gasless/send:
     post:
+      description: Submits the signed gasless transaction message to the network
       operationId: gaslessSend
       tags:
         - Gasless
@@ -2049,23 +2033,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Accounts'
-        'default':
-          $ref: '#/components/responses/Error'
-  /v2/wallet/{account_id}/seqno:
-    get:
-      description: Get account seqno
-      operationId: getAccountSeqno
-      tags:
-        - Wallet
-      parameters:
-        - $ref: '#/components/parameters/accountIDParameter'
-      responses:
-        '200':
-          description: account seqno
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Seqno'
         'default':
           $ref: '#/components/responses/Error'
 
@@ -2725,7 +2692,118 @@ paths:
                 $ref: '#/components/schemas/Multisig'
         'default':
           $ref: '#/components/responses/Error'
-
+  /v2/message/decode:
+    post:
+      description: Decode a given message. Only external incoming messages can be decoded currently.
+      operationId: decodeMessage
+      tags:
+        - Emulation
+      requestBody:
+        $ref: "#/components/requestBodies/Boc"
+      responses:
+        '200':
+          description: decoded message
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DecodedMessage'
+        'default':
+          $ref: '#/components/responses/Error'
+  /v2/events/emulate:
+    post:
+      description: Emulate sending message to blockchain
+      operationId: emulateMessageToEvent
+      tags:
+        - Emulation
+        - Events
+      parameters:
+        - $ref: '#/components/parameters/i18n'
+        - name: ignore_signature_check
+          in: query
+          required: false
+          schema:
+            type: boolean
+      requestBody:
+        $ref: "#/components/requestBodies/Boc"
+      responses:
+        '200':
+          description: emulated event
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Event'
+        'default':
+          $ref: '#/components/responses/Error'
+  /v2/traces/emulate:
+    post:
+      description: Emulate sending message to blockchain
+      operationId: emulateMessageToTrace
+      tags:
+        - Emulation
+        - Traces
+      parameters:
+        - name: ignore_signature_check
+          in: query
+          required: false
+          schema:
+            type: boolean
+      requestBody:
+        $ref: "#/components/requestBodies/Boc"
+      responses:
+        '200':
+          description: emulated trace
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Trace'
+        'default':
+          $ref: '#/components/responses/Error'
+  /v2/wallet/emulate:
+    post:
+      description: Emulate sending message to blockchain
+      operationId: emulateMessageToWallet
+      tags:
+        - Wallet
+        - Emulation
+      parameters:
+        - $ref: '#/components/parameters/i18n'
+      requestBody:
+        $ref: "#/components/requestBodies/EmulationBoc"
+      responses:
+        '200':
+          description: emulated message
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageConsequences'
+        'default':
+          $ref: '#/components/responses/Error'
+  /v2/accounts/{account_id}/events/emulate:
+    post:
+      description: Emulate sending message to blockchain
+      operationId: emulateMessageToAccountEvent
+      tags:
+        - Emulation
+        - Accounts
+      parameters:
+        - $ref: '#/components/parameters/i18n'
+        - $ref: '#/components/parameters/accountIDParameter'
+        - name: ignore_signature_check
+          in: query
+          required: false
+          schema:
+            type: boolean
+      requestBody:
+        $ref: "#/components/requestBodies/Boc"
+      responses:
+        '200':
+          description: emulated message to account
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountEvent'
+        'default':
+          $ref: '#/components/responses/Error'
 components:
   parameters:
     masterchainSeqno:

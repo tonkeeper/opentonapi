@@ -245,6 +245,7 @@ var PendingWithdrawRequestLiquidStraw = Straw[BubbleWithdrawStakeRequest]{
 	CheckFuncs: []bubbleCheck{Is(BubbleJettonBurn{})},
 	Builder: func(newAction *BubbleWithdrawStakeRequest, bubble *Bubble) error {
 		newAction.Staker = bubble.Info.(BubbleJettonBurn).sender.Address
+		newAction.Success = true
 		newAction.Implementation = core.StakingImplementationLiquidTF
 		amount := big.Int(bubble.Info.(BubbleJettonBurn).amount)
 		i := amount.Int64()
@@ -255,6 +256,7 @@ var PendingWithdrawRequestLiquidStraw = Straw[BubbleWithdrawStakeRequest]{
 		CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.TonstakePoolWithdrawMsgOp)},
 		Builder: func(newAction *BubbleWithdrawStakeRequest, bubble *Bubble) error {
 			newAction.Pool = bubble.Info.(BubbleTx).account.Address
+			newAction.Success = true
 			newAction.attachedAmount = bubble.Info.(BubbleTx).inputAmount
 			return nil
 		},

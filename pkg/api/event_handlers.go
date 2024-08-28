@@ -375,7 +375,7 @@ func (h *Handler) EmulateMessageToAccountEvent(ctx context.Context, request *oas
 	if err != nil {
 		return nil, toProperEmulationError(err)
 	}
-	trace, err := emulatedTreeToTrace(ctx, h.executor, h.storage, configBase64, tree, emulator.FinalStates(), nil)
+	trace, err := emulatedTreeToTrace(ctx, h.executor, h.storage, tree, emulator.FinalStates(), nil, h.configPool)
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
@@ -425,7 +425,7 @@ func (h *Handler) EmulateMessageToEvent(ctx context.Context, request *oas.Emulat
 		if err != nil {
 			return nil, toProperEmulationError(err)
 		}
-		trace, err = emulatedTreeToTrace(ctx, h.executor, h.storage, configBase64, tree, emulator.FinalStates(), nil)
+		trace, err = emulatedTreeToTrace(ctx, h.executor, h.storage, tree, emulator.FinalStates(), nil, h.configPool)
 		if err != nil {
 			return nil, toError(http.StatusInternalServerError, err)
 		}
@@ -477,7 +477,7 @@ func (h *Handler) EmulateMessageToTrace(ctx context.Context, request *oas.Emulat
 		if err != nil {
 			return nil, toProperEmulationError(err)
 		}
-		trace, err = emulatedTreeToTrace(ctx, h.executor, h.storage, configBase64, tree, emulator.FinalStates(), nil)
+		trace, err = emulatedTreeToTrace(ctx, h.executor, h.storage, tree, emulator.FinalStates(), nil, h.configPool)
 		if err != nil {
 			return nil, toError(http.StatusInternalServerError, err)
 		}
@@ -601,7 +601,7 @@ func (h *Handler) EmulateMessageToWallet(ctx context.Context, request *oas.Emula
 	if err != nil {
 		return nil, toProperEmulationError(err)
 	}
-	trace, err := emulatedTreeToTrace(ctx, h.executor, h.storage, configBase64, tree, emulator.FinalStates(), nil)
+	trace, err := emulatedTreeToTrace(ctx, h.executor, h.storage, tree, emulator.FinalStates(), nil, h.configPool)
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
