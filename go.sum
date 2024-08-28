@@ -272,8 +272,8 @@ github.com/stretchr/testify v1.9.0 h1:HtqpIVDClZ4nwg75+f6Lvsy/wHu+3BoSGCbBAcpTsT
 github.com/stretchr/testify v1.9.0/go.mod h1:r2ic/lqez/lEtzL7wO/rwa5dbSLXVDPFyf8C91i36aY=
 github.com/tonkeeper/scam_backoffice_rules v0.0.0-20240822052421-6e4f645f0bc7 h1:VqaRW2kQejlVbDSELpux57NSrdFzOBNvyEb3kaDWnsY=
 github.com/tonkeeper/scam_backoffice_rules v0.0.0-20240822052421-6e4f645f0bc7/go.mod h1:m8OU6RRwyWQxvEgSDNnXuGPEbKxtneeJ6nIxsEMAvBU=
-github.com/tonkeeper/tongo v1.9.2 h1:nObxrR77V1CIajfoHenKgN11edhfmLqyAiXTBvaNXEU=
-github.com/tonkeeper/tongo v1.9.2/go.mod h1:MjgIgAytFarjCoVjMLjYEtpZNN1f2G/pnZhKjr28cWs=
+github.com/tonkeeper/tongo v1.9.3 h1:VNIZIuPeMw0+KZPvP57+EbgRwGZocN2v5CulRxba20A=
+github.com/tonkeeper/tongo v1.9.3/go.mod h1:MjgIgAytFarjCoVjMLjYEtpZNN1f2G/pnZhKjr28cWs=
 github.com/valyala/bytebufferpool v1.0.0 h1:GqA5TC/0021Y/b9FG4Oi9Mr3q7XYx6KllzawFIhcdPw=
 github.com/valyala/bytebufferpool v1.0.0/go.mod h1:6bBcMArwyJ5K/AmCkWv1jt77kVWyCJ6HpOuEn7z0Csc=
 github.com/valyala/fasttemplate v1.2.1/go.mod h1:KHLXt3tVN2HBp8eijSv/kGJopbvo7S+qRAEEKiv+SiQ=
