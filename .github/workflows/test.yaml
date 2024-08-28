@@ -11,7 +11,6 @@ on:
 jobs:
   unit-tests:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v3
       - name: Go Version
@@ -21,9 +20,8 @@ jobs:
       - name: test
         env:
           LD_LIBRARY_PATH: ${{ github.workspace }}/libs
-          LITE_SERVERS: ${{ secrets.LITE_SERVERS }}
         run: |
           sudo apt-get install -y libsecp256k1-0
           mkdir -p ${{ env.LD_LIBRARY_PATH}}
           wget https://github.com/tonkeeper/tongo/raw/master/lib/linux/libemulator.so -O ${{ env.LD_LIBRARY_PATH}}/libemulator.so
-          make test
+          go test pkg/fordefi_test.go -race -coverprofile cover.out
