@@ -13,7 +13,8 @@ import (
 
 type Config struct {
 	API struct {
-		Port int `env:"PORT" envDefault:"8081"`
+		Port        int      `env:"PORT" envDefault:"8081"`
+		UnixSockets []string `env:"UNIX_SOCKETS" envSeparator:","`
 	}
 	App struct {
 		LogLevel           string              `env:"LOG_LEVEL" envDefault:"INFO"`

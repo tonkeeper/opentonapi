@@ -2,7 +2,10 @@ package api
 
 import (
 	"errors"
+	"fmt"
+	"net"
 	"net/http"
+	"os"
 
 	"github.com/tonkeeper/tongo/config"
 	"go.uber.org/zap"
@@ -93,7 +96,7 @@ func WithMemPool(memPool sources.MemPoolSource) ServerOption {
 	}
 }
 
-func NewServer(log *zap.Logger, handler *Handler, address string, opts ...ServerOption) (*Server, error) {
+func NewServer(log *zap.Logger, handler *Handler, opts ...ServerOption) (*Server, error) {
 	options := &ServerOptions{}
 	for _, o := range opts {
 		o(options)
@@ -137,7 +140,6 @@ func NewServer(log *zap.Logger, handler *Handler, address string, opts ...Server
 		mux:              mux,
 		asyncMiddlewares: asyncMiddlewares,
 		httpServer: &http.Server{
-			Addr:    address,
 			Handler: mux,
 		},
 	}
@@ -161,11 +163,39 @@ func (s *Server) RegisterAsyncHandler(pattern string, handler AsyncHandler, conn
 	s.mux.Handle(pattern, wrapAsync(connectionType, allowTokenInQuery, chainMiddlewares(handler, s.asyncMiddlewares...)))
 }
 
-func (s *Server) Run() {
-	err := s.httpServer.ListenAndServe()
-	if errors.Is(err, http.ErrServerClosed) {
-		s.logger.Warn("opentonapi quit")
-		return
+func (s *Server) Run(address string, unixSockets []string) {
+	go func() {
+		tcpListener, err := net.Listen("tcp", address)
+		if err != nil {
+			s.logger.Fatal("Failed to listen on tcp address", zap.Error(err))
+		}
+		err = s.httpServer.Serve(tcpListener)
+
+		if errors.Is(err, http.ErrServerClosed) {
+			s.logger.Warn("opentonapi quit")
+			return
+		}
+		s.logger.Fatal("ListenAndServe() failed", zap.Error(err))
+	}()
+
+	for _, socketPath := range unixSockets {
+		go func(socketPath string) {
+			if _, err := os.Stat(socketPath); err == nil {
+				os.Remove(socketPath)
+			}
+
+			unixListener, err := net.Listen("unix", socketPath)
+			if err != nil {
+				s.logger.Fatal(fmt.Sprintf("Failed to listen on Unix socket %v", socketPath), zap.Error(err))
+			}
+
+			err = s.httpServer.Serve(unixListener)
+			if errors.Is(err, http.ErrServerClosed) {
+				s.logger.Warn("opentonapi quit")
+				return
+			}
+			s.logger.Fatal(fmt.Sprintf("ListenAndServe() failed for %v", socketPath), zap.Error(err))
+		}(socketPath)
 	}
-	s.logger.Fatal("ListedAndServe() failed", zap.Error(err))
+	<-make(chan struct{})
 }
