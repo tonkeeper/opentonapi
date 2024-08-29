@@ -16,32 +16,45 @@ import (
 	"go.uber.org/zap"
 )
 
+// List of services used to calculate various prices
 const (
-	bitfinex     string = "Bitfinex"
-	gateio       string = "Gate.io"
-	bybit        string = "Bybit"
-	kucoin       string = "KuCoin"
-	okx          string = "OKX"
-	huobi        string = "Huobi"
-	dedust       string = "DeDust"
-	stonfi       string = "STON.fi"
-	coinbase     string = "Coinbase"
-	exchangerate string = "Exchangerate"
+	bitfinex string = "Bitfinex"
+	gateio   string = "Gate.io"
+	bybit    string = "Bybit"
+	kucoin   string = "KuCoin"
+	okx      string = "OKX"
+	huobi    string = "Huobi"
+	dedust   string = "DeDust"
+	stonfi   string = "STON.fi"
+	coinbase string = "Coinbase"
 )
 
+// minReserve specifies the minimum jetton reserves (equivalent to TON) for which prices can be determined
 const minReserve = float64(100 * ton.OneTON)
 
+// Asset represents an asset used in jetton price calculations within pools
+type Asset struct {
+	Account      ton.AccountID
+	Decimals     int
+	Reserve      float64
+	HoldersCount int
+}
+
 type Market struct {
-	ID                    int64
-	Name                  string
-	UsdPrice              float64
-	URL                   string
-	TonPriceConverter     func(closer io.ReadCloser) (float64, error)
-	FiatPriceConverter    func(closer io.ReadCloser) map[string]float64
-	PoolResponseConverter func(pools map[ton.AccountID]float64, respBody io.ReadCloser) (map[ton.AccountID]float64, error)
+	ID       int64
+	Name     string // Name of the service used for price calculation
+	UsdPrice float64
+	URL      string
+	// Converter for calculating the TON to USD price
+	TonPriceConverter func(closer io.ReadCloser) (float64, error)
+	// Converter for calculating fiat prices
+	FiatPriceConverter func(closer io.ReadCloser) (map[string]float64, error)
+	// Converter for calculating jetton prices within pools
+	PoolResponseConverter func(pools map[ton.AccountID]float64, closer io.ReadCloser) (map[ton.AccountID]float64, error)
 	DateUpdate            time.Time
 }
 
+// GetCurrentMarketsTonPrice shows the TON to USD price on different markets
 func (m *Mock) GetCurrentMarketsTonPrice() ([]Market, error) {
 	now := time.Now()
 	markets := []Market{
@@ -92,11 +105,13 @@ func (m *Mock) GetCurrentMarketsTonPrice() ([]Market, error) {
 		respBody, err := sendRequest(market.URL, "")
 		if err != nil {
 			zap.Error(fmt.Errorf("[GetCurrentMarketsTonPrice] failed to send request: %v", err))
+			errorsCounter.WithLabelValues(market.Name).Inc()
 			continue
 		}
 		market.UsdPrice, err = market.TonPriceConverter(respBody)
 		if err != nil {
-			zap.Error(fmt.Errorf("[GetCurrentMarketsTonPrice] failed to convert ton price: %v", err))
+			zap.Error(fmt.Errorf("[GetCurrentMarketsTonPrice] failed to convert response: %v", err))
+			errorsCounter.WithLabelValues(market.Name).Inc()
 			continue
 		}
 		if market.UsdPrice == 0 {
@@ -108,29 +123,6 @@ func (m *Mock) GetCurrentMarketsTonPrice() ([]Market, error) {
 		return markets[i].ID > markets[j].ID
 	})
 	return markets, nil
-}
-
-func sendRequest(url, token string) (io.ReadCloser, error) {
-	req, err := http.NewRequest(http.MethodGet, url, nil)
-	if err != nil {
-		return nil, err
-	}
-	req.Header.Set("Content-Type", "application/json")
-	if token != "" {
-		req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", token))
-	}
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	if resp.StatusCode != http.StatusOK {
-		var errRespBody string
-		if respBody, err := io.ReadAll(resp.Body); err == nil {
-			errRespBody = string(respBody)
-		}
-		return nil, fmt.Errorf("bad status code: %v %v %v", resp.StatusCode, url, errRespBody)
-	}
-	return resp.Body, nil
 }
 
 func convertedTonGateIOResponse(respBody io.ReadCloser) (float64, error) {
@@ -184,12 +176,12 @@ func convertedTonBitFinexResponse(respBody io.ReadCloser) (float64, error) {
 		return 0, fmt.Errorf("[convertedTonBitFinexResponse] failed to decode response: %v", err)
 	}
 	if len(prices) == 0 {
-
 		return 0, fmt.Errorf("[convertedTonBitFinexResponse] empty data")
 	}
-	if len(prices) >= 6 { // last market price
+	if len(prices) >= 6 { // Price of the last trade
 		return prices[6], nil
 	}
+	// Price of last highest bid
 	return prices[0], nil
 }
 
@@ -202,7 +194,6 @@ func convertedTonKuCoinResponse(respBody io.ReadCloser) (float64, error) {
 		} `json:"data"`
 	}
 	if err := json.NewDecoder(respBody).Decode(&data); err != nil {
-
 		return 0, fmt.Errorf("[convertedTonKuCoinResponse] failed to decode response: %v", err)
 	}
 	if !data.Success {
@@ -227,7 +218,6 @@ func convertedTonOKXResponse(respBody io.ReadCloser) (float64, error) {
 		} `json:"data"`
 	}
 	if err := json.NewDecoder(respBody).Decode(&data); err != nil {
-
 		return 0, fmt.Errorf("[convertedTonOKXResponse] failed to decode response: %v", err)
 	}
 	if data.Code != "0" {
@@ -270,17 +260,13 @@ func convertedTonHuobiResponse(respBody io.ReadCloser) (float64, error) {
 	return data.Tick.Data[0].Price, nil
 }
 
+// getFiatPrices shows the exchange rates of various fiats to USD on different markets
 func getFiatPrices(tonPrice float64) map[string]float64 {
 	markets := []Market{
 		{
 			Name:               coinbase,
 			URL:                "https://api.coinbase.com/v2/exchange-rates?currency=USD",
 			FiatPriceConverter: convertedCoinBaseFiatPricesResponse,
-		},
-		{
-			Name:               exchangerate,
-			URL:                "https://api.exchangerate.host/latest?base=USD",
-			FiatPriceConverter: convertedExchangerateFiatPricesResponse,
 		},
 	}
 	prices := make(map[string]float64)
@@ -291,7 +277,12 @@ func getFiatPrices(tonPrice float64) map[string]float64 {
 			errorsCounter.WithLabelValues(market.Name).Inc()
 			continue
 		}
-		converted := market.FiatPriceConverter(respBody)
+		converted, err := market.FiatPriceConverter(respBody)
+		if err != nil {
+			zap.Error(fmt.Errorf("[getFiatPrices] failed to convert response: %v", err))
+			errorsCounter.WithLabelValues(market.Name).Inc()
+			continue
+		}
 		for currency, rate := range converted {
 			if _, ok := prices[currency]; !ok && rate != 0 {
 				prices[currency] = 1 / (rate * tonPrice)
@@ -301,23 +292,7 @@ func getFiatPrices(tonPrice float64) map[string]float64 {
 	return prices
 }
 
-func convertedExchangerateFiatPricesResponse(respBody io.ReadCloser) map[string]float64 {
-	defer respBody.Close()
-	var data struct {
-		Rates map[string]float64 `json:"rates"`
-	}
-	if err := json.NewDecoder(respBody).Decode(&data); err != nil {
-		//todo: return err
-		return map[string]float64{}
-	}
-	prices := make(map[string]float64)
-	for currency, rate := range data.Rates {
-		prices[currency] = rate
-	}
-	return prices
-}
-
-func convertedCoinBaseFiatPricesResponse(respBody io.ReadCloser) map[string]float64 {
+func convertedCoinBaseFiatPricesResponse(respBody io.ReadCloser) (map[string]float64, error) {
 	defer respBody.Close()
 	var data struct {
 		Data struct {
@@ -325,8 +300,7 @@ func convertedCoinBaseFiatPricesResponse(respBody io.ReadCloser) map[string]floa
 		} `json:"data"`
 	}
 	if err := json.NewDecoder(respBody).Decode(&data); err != nil {
-		//todo: return err
-		return map[string]float64{}
+		return map[string]float64{}, fmt.Errorf("[convertedCoinBaseFiatPricesResponse] failed to decode response: %v", err)
 	}
 	prices := make(map[string]float64)
 	for currency, rate := range data.Data.Rates {
@@ -334,15 +308,16 @@ func convertedCoinBaseFiatPricesResponse(respBody io.ReadCloser) map[string]floa
 			prices[currency] = rateConverted
 		}
 	}
-	return prices
+	return prices, nil
 }
 
+// getPools calculates the price of jettons relative to TON based on liquidity pools
 func (m *Mock) getPools() map[ton.AccountID]float64 {
 	markets := []Market{
 		{
 			Name:                  dedust,
 			URL:                   m.DedustResultUrl,
-			PoolResponseConverter: convertedDedustPoolResponse,
+			PoolResponseConverter: convertedDeDustPoolResponse,
 		},
 		{
 			Name:                  stonfi,
@@ -361,6 +336,8 @@ func (m *Mock) getPools() map[ton.AccountID]float64 {
 			}
 			updatedPools, err := market.PoolResponseConverter(pools, respBody)
 			if err != nil {
+				zap.Error(fmt.Errorf("[getPools] failed to convert response: %v", err))
+				errorsCounter.WithLabelValues(market.Name).Inc()
 				continue
 			}
 			for currency, rate := range updatedPools {
@@ -381,49 +358,81 @@ func convertedStonFiPoolResponse(pools map[ton.AccountID]float64, respBody io.Re
 	if err != nil {
 		return map[ton.AccountID]float64{}, err
 	}
-	calculate := func(record []string) (ton.AccountID, float64, error) {
-		firstAsset, err := ton.ParseAccountID(record[0])
+	parseAssets := func(record []string) (Asset, Asset, error) {
+		var firstAsset, secondAsset Asset
+		firstAsset.Account, err = ton.ParseAccountID(record[0])
 		if err != nil {
-			return ton.AccountID{}, 0, err
+			return Asset{}, Asset{}, err
 		}
-		secondAsset, err := ton.ParseAccountID(record[1])
+		secondAsset.Account, err = ton.ParseAccountID(record[1])
 		if err != nil {
-			return ton.AccountID{}, 0, err
+			return Asset{}, Asset{}, err
 		}
-		firstReserve, err := strconv.ParseFloat(record[2], 64)
+		firstAsset.Reserve, err = strconv.ParseFloat(record[2], 64)
 		if err != nil {
-			return ton.AccountID{}, 0, err
+			return Asset{}, Asset{}, err
 		}
-		secondReserve, err := strconv.ParseFloat(record[3], 64)
+		secondAsset.Reserve, err = strconv.ParseFloat(record[3], 64)
 		if err != nil {
-			return ton.AccountID{}, 0, err
+			return Asset{}, Asset{}, err
 		}
-		firstMeta := make(map[string]string)
+		firstMeta := make(map[string]any)
 		if err = json.Unmarshal([]byte(record[4]), &firstMeta); err != nil {
-			return ton.AccountID{}, 0, err
+			return Asset{}, Asset{}, err
 		}
-		firstDecimals, err := strconv.Atoi(firstMeta["decimals"])
+		value, ok := firstMeta["decimals"]
+		if !ok {
+			value = "9"
+		}
+		firstAsset.Decimals, err = strconv.Atoi(value.(string))
 		if err != nil {
-			return ton.AccountID{}, 0, err
+			return Asset{}, Asset{}, err
 		}
-		secondMeta := make(map[string]string)
+		secondMeta := make(map[string]any)
 		if err = json.Unmarshal([]byte(record[5]), &secondMeta); err != nil {
-			return ton.AccountID{}, 0, err
+			return Asset{}, Asset{}, err
 		}
-		secondDecimals, err := strconv.Atoi(secondMeta["decimals"])
+		value, ok = secondMeta["decimals"]
+		if !ok {
+			value = "9"
+		}
+		secondAsset.Decimals, err = strconv.Atoi(value.(string))
 		if err != nil {
-			return ton.AccountID{}, 0, err
+			return Asset{}, Asset{}, err
 		}
-		calculatedAccount, price := calculatePoolPrice(firstAsset, secondAsset, firstReserve, secondReserve, firstDecimals, secondDecimals, pools, false)
-
-		return calculatedAccount, price, nil
+		firstAsset.HoldersCount, err = strconv.Atoi(record[6])
+		if err != nil {
+			return Asset{}, Asset{}, err
+		}
+		secondAsset.HoldersCount, err = strconv.Atoi(record[7])
+		if err != nil {
+			return Asset{}, Asset{}, err
+		}
+		return firstAsset, secondAsset, nil
 	}
+
+	actualAssets := make(map[ton.AccountID][]Asset)
 	for idx, record := range records {
-		if idx == 0 || len(record) < 6 { // skip headers
+		if idx == 0 || len(record) < 8 { // skip headers
 			continue
 		}
-		accountID, price, err := calculate(record)
-		if price == 0 || err != nil {
+		firstAsset, secondAsset, err := parseAssets(record)
+		if err != nil {
+			zap.Error(fmt.Errorf("[convertedStonFiPoolResponse] failed to parse assets: %v", err))
+			continue
+		}
+		assets, ok := actualAssets[firstAsset.Account]
+		if !ok || assets[0].Reserve < firstAsset.Reserve {
+			actualAssets[firstAsset.Account] = []Asset{firstAsset, secondAsset}
+		}
+		assets, ok = actualAssets[secondAsset.Account]
+		if !ok || assets[1].Reserve < secondAsset.Reserve {
+			actualAssets[secondAsset.Account] = []Asset{firstAsset, secondAsset}
+		}
+	}
+	for _, assets := range actualAssets {
+		accountID, price := calculatePoolPrice(assets[0], assets[1], pools, false)
+		if price == 0 {
 			continue
 		}
 		if _, ok := pools[accountID]; !ok {
@@ -433,7 +442,7 @@ func convertedStonFiPoolResponse(pools map[ton.AccountID]float64, respBody io.Re
 	return pools, nil
 }
 
-func convertedDedustPoolResponse(pools map[ton.AccountID]float64, respBody io.ReadCloser) (map[ton.AccountID]float64, error) {
+func convertedDeDustPoolResponse(pools map[ton.AccountID]float64, respBody io.ReadCloser) (map[ton.AccountID]float64, error) {
 	defer respBody.Close()
 	reader := csv.NewReader(respBody)
 	records, err := reader.ReadAll()
@@ -447,65 +456,97 @@ func convertedDedustPoolResponse(pools map[ton.AccountID]float64, respBody io.Re
 		if meta == "NULL" {
 			return defaultDecimals, nil
 		}
-		converted := make(map[string]string)
+		converted := make(map[string]any)
 		if err = json.Unmarshal([]byte(meta), &converted); err != nil {
 			return 0, err
 		}
-		decimals, err := strconv.Atoi(converted["decimals"])
+		value, ok := converted["decimals"]
+		if !ok {
+			value = "9"
+		}
+		decimals, err := strconv.Atoi(value.(string))
 		if err != nil {
 			return 0, err
 		}
 		return decimals, nil
 	}
-	calculate := func(record []string) (ton.AccountID, float64, error) {
-		var firstAsset, secondAsset ton.AccountID
+	parseAssets := func(record []string) (Asset, Asset, bool, error) {
+		var firstAsset, secondAsset Asset
 		switch {
+		// If the column first_asset has no address and the column first_asset_native contains true,
+		// then we consider this token as a pool to TON
 		case record[0] == "NULL" && record[2] == "true":
-			firstAsset = zeroAddress
-			secondAsset, err = ton.ParseAccountID(record[1])
-		case record[1] == "NULL" && record[3] != "true":
-			firstAsset, err = ton.ParseAccountID(record[0])
-			secondAsset = zeroAddress
-		default:
-			firstAsset, err = ton.ParseAccountID(record[0])
-			if err == nil {
-				secondAsset, err = ton.ParseAccountID(record[1])
+			firstAsset = Asset{Account: zeroAddress}
+			secondAccountID, err := ton.ParseAccountID(record[1])
+			if err != nil {
+				return Asset{}, Asset{}, false, err
 			}
+			secondAsset = Asset{Account: secondAccountID}
+		// If the column second_asset has no address and the column second_asset_native contains true,
+		// then we consider this token as a pool to TON
+		case record[1] == "NULL" && record[3] != "true":
+			firstAccountID, err := ton.ParseAccountID(record[0])
+			if err != nil {
+				return Asset{}, Asset{}, false, err
+			}
+			firstAsset = Asset{Account: firstAccountID}
+			secondAsset = Asset{Account: zeroAddress}
+		default:
+			// By default, we assume that the two assets are not paired with TON.
+			// This could be a pair like a jetton to USDT or to other jettons
+			firstAccountID, err := ton.ParseAccountID(record[0])
+			if err != nil {
+				return Asset{}, Asset{}, false, err
+			}
+			firstAsset = Asset{Account: firstAccountID}
+			secondAccountID, err := ton.ParseAccountID(record[1])
+			if err != nil {
+				return Asset{}, Asset{}, false, err
+			}
+			secondAsset = Asset{Account: secondAccountID}
 		}
+		firstAsset.Reserve, err = strconv.ParseFloat(record[4], 64)
 		if err != nil {
-			return ton.AccountID{}, 0, err
+			return Asset{}, Asset{}, false, err
 		}
-		firstReserve, err := strconv.ParseFloat(record[4], 64)
+		secondAsset.Reserve, err = strconv.ParseFloat(record[5], 64)
 		if err != nil {
-			return ton.AccountID{}, 0, err
+			return Asset{}, Asset{}, false, err
 		}
-		secondReserve, err := strconv.ParseFloat(record[5], 64)
+		firstAsset.Decimals, err = parseDecimals(record[6])
 		if err != nil {
-			return ton.AccountID{}, 0, err
+			return Asset{}, Asset{}, false, err
 		}
-		firstDecimals, err := parseDecimals(record[6])
+		secondAsset.Decimals, err = parseDecimals(record[7])
 		if err != nil {
-			return ton.AccountID{}, 0, err
-		}
-		secondDecimals, err := parseDecimals(record[7])
-		if err != nil {
-			return ton.AccountID{}, 0, err
+			return Asset{}, Asset{}, false, err
 		}
 		var isStable bool
 		if record[8] == "true" {
 			isStable = true
 		}
-		calculatedAccount, price := calculatePoolPrice(firstAsset, secondAsset, firstReserve, secondReserve, firstDecimals, secondDecimals, pools, isStable)
-
-		return calculatedAccount, price, nil
+		firstAsset.HoldersCount, err = strconv.Atoi(record[9])
+		if err != nil {
+			return Asset{}, Asset{}, false, err
+		}
+		secondAsset.HoldersCount, err = strconv.Atoi(record[10])
+		if err != nil {
+			return Asset{}, Asset{}, false, err
+		}
+		return firstAsset, secondAsset, isStable, nil
 	}
 
 	for idx, record := range records {
-		if idx == 0 || len(record) < 8 { // skip headers
+		if idx == 0 || len(record) < 10 { // skip headers
 			continue
 		}
-		accountID, price, err := calculate(record)
-		if price == 0 || err != nil {
+		firstAsset, secondAsset, isStable, err := parseAssets(record)
+		if err != nil {
+			zap.Error(fmt.Errorf("[convertedDedustPoolResponse] failed to parse assets: %v", err))
+			continue
+		}
+		accountID, price := calculatePoolPrice(firstAsset, secondAsset, pools, isStable)
+		if price == 0 {
 			continue
 		}
 		if _, ok := pools[accountID]; !ok {
@@ -516,41 +557,73 @@ func convertedDedustPoolResponse(pools map[ton.AccountID]float64, respBody io.Re
 	return pools, nil
 }
 
-func calculatePoolPrice(firstAsset, secondAsset ton.AccountID, firstReserve, secondReserve float64, firstDecimals, secondDecimals int, pools map[ton.AccountID]float64, isStable bool) (ton.AccountID, float64) {
-	priceFirst, okFirst := pools[firstAsset]
-	priceSecond, okSecond := pools[secondAsset]
+func calculatePoolPrice(firstAsset, secondAsset Asset, pools map[ton.AccountID]float64, isStable bool) (ton.AccountID, float64) {
+	const minHoldersCount = 200 // Minimum number of holders threshold for jettons
+	priceFirst, okFirst := pools[firstAsset.Account]
+	priceSecond, okSecond := pools[secondAsset.Account]
 	if (okFirst && okSecond) || (!okFirst && !okSecond) {
 		return ton.AccountID{}, 0
 	}
-	var calculatedAccount ton.AccountID
+	var calculatedAccount ton.AccountID // The account for which we will find the price
 	var decimals int
-	if okFirst { // knowing the first account's price, we seek the second account's price
-		firstReserve *= priceFirst
-		if firstReserve < minReserve {
+	if okFirst { // Knowing the first asset's price, we determine the second asset's price
+		firstAsset.Reserve *= priceFirst // Converting reserve prices to TON
+		if firstAsset.Reserve < minReserve {
 			return ton.AccountID{}, 0
 		}
-		calculatedAccount = secondAsset
-		decimals = secondDecimals
+		if secondAsset.HoldersCount < minHoldersCount {
+			return ton.AccountID{}, 0
+		}
+		calculatedAccount = secondAsset.Account
+		decimals = secondAsset.Decimals
 	}
-	if okSecond { // knowing the second account's price, we seek the first account's price
-		secondReserve *= priceSecond
-		if secondReserve < minReserve {
+	if okSecond { // Knowing the second asset's price, we determine the first asset's price
+		secondAsset.Reserve *= priceSecond // Converting reserve prices to TON
+		if secondAsset.Reserve < minReserve {
 			return ton.AccountID{}, 0
 		}
-		calculatedAccount = firstAsset
-		decimals = firstDecimals
-		firstReserve, secondReserve = secondReserve, firstReserve
+		if firstAsset.HoldersCount < minHoldersCount {
+			return ton.AccountID{}, 0
+		}
+		calculatedAccount = firstAsset.Account
+		decimals = firstAsset.Decimals
+		firstAsset, secondAsset = secondAsset, firstAsset
 	}
 	if decimals == 0 {
 		return ton.AccountID{}, 0
 	}
 	var price float64
 	if isStable {
-		x := secondReserve / math.Pow(10, float64(decimals))
-		y := firstReserve / math.Pow(10, 9)
+		x := secondAsset.Reserve / math.Pow(10, float64(decimals))
+		y := firstAsset.Reserve / math.Pow(10, 9)
 		price = (3*x*x*y + y*y*y) / (x*x*x + 3*y*y*x)
 	} else {
-		price = (firstReserve / secondReserve) * math.Pow(10, float64(decimals)-9)
+		price = (firstAsset.Reserve / secondAsset.Reserve) * math.Pow(10, float64(decimals)-9)
 	}
 	return calculatedAccount, price
+}
+
+// Note: You must close resp.Body in the handler function; here, it is closed ONLY in case of a bad status_code
+func sendRequest(url, token string) (io.ReadCloser, error) {
+	req, err := http.NewRequest(http.MethodGet, url, nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	if token != "" {
+		req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", token))
+	}
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	if resp.StatusCode != http.StatusOK {
+		var errRespBody string
+		if respBody, err := io.ReadAll(resp.Body); err == nil {
+			errRespBody = string(respBody)
+		}
+		resp.Body.Close()
+		return nil, fmt.Errorf("bad status code: %v %v %v", resp.StatusCode, url, errRespBody)
+	}
+	return resp.Body, nil
 }

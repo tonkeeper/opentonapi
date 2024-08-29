@@ -14,7 +14,9 @@ type ratesSource interface {
 }
 
 type calculator struct {
-	mu                                                sync.RWMutex
+	mu sync.RWMutex
+	// The source contains complex logic hidden in the ratesSource interface, which is not available in the open source version
+	// See the Mock description for details
 	source                                            ratesSource
 	todayRates, yesterdayRates, weekRates, monthRates map[string]float64
 	marketsTonPrice                                   []Market
@@ -54,7 +56,6 @@ func (c *calculator) refresh() {
 	if err != nil {
 		return
 	}
-
 	todayRates, err := c.source.GetRates(today.Unix())
 	if err != nil {
 		return
@@ -72,13 +73,13 @@ func (c *calculator) refresh() {
 		return
 	}
 
-	c.mu.RLock()
+	c.mu.Lock()
 	c.todayRates = todayRates
 	c.yesterdayRates = yesterdayRates
 	c.weekRates = weekRates
 	c.monthRates = monthRates
 	c.marketsTonPrice = marketsTonPrice
-	c.mu.RUnlock()
+	c.mu.Unlock()
 }
 
 func (c *calculator) GetRates(date int64) (map[string]float64, error) {
@@ -115,11 +116,16 @@ func (c *calculator) GetMarketsTonPrice() ([]Market, error) {
 }
 
 type Mock struct {
-	TonApiToken     string
+	// TonApiToken the token for TonApi to increase HTTP limits is obtained from https://tonconsole.com/tonapi
+	TonApiToken string
+	// URL to the CSV file from the analytics service https://tonconsole.com/analytics (data is sourced from the TonApi analytics database)
 	StonFiResultUrl string
+	// URL to the CSV file from the analytics service https://tonconsole.com/analytics (data is sourced from the TonApi analytics database)
 	DedustResultUrl string
 }
 
+// GetRates cannot request data for a specific date in the open source version
+// It will always return data for the current day
 func (m Mock) GetRates(date int64) (map[string]float64, error) {
 	return m.GetCurrentRates()
 }
@@ -128,6 +134,8 @@ func (m Mock) GetMarketsTonPrice() ([]Market, error) {
 	return m.GetCurrentMarketsTonPrice()
 }
 
+// GetRatesChart cannot be used to request charts for jettons in the open source version
+// To use this method, you must save today's data from GetRates and then override the method
 func (m Mock) GetRatesChart(token string, currency string, pointsCount int, startDate *int64, endDate *int64) ([][]any, error) {
 	return [][]any{}, nil
 }
