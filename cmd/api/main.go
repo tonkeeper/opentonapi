@@ -90,7 +90,7 @@ func main() {
 		storageBlockCh,
 	})
 
-	server, err := api.NewServer(log, h, fmt.Sprintf(":%d", cfg.API.Port),
+	server, err := api.NewServer(log, h,
 		api.WithTransactionSource(source),
 		api.WithBlockHeadersSource(source),
 		api.WithTraceSource(tracer),
@@ -110,5 +110,5 @@ func main() {
 	}()
 
 	log.Warn("start server", zap.Int("port", cfg.API.Port))
-	server.Run()
+	server.Run(fmt.Sprintf(":%d", cfg.API.Port), cfg.API.UnixSockets)
 }
