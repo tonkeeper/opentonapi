@@ -11,9 +11,9 @@ import (
 	"strings"
 	"time"
 
+	"github.com/arnac-io/opentonapi/pkg/blockchain"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
-	"github.com/arnac-io/opentonapi/pkg/blockchain"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/tlb"
 	"github.com/tonkeeper/tongo/ton"
@@ -194,6 +194,22 @@ func (h *Handler) GetEvent(ctx context.Context, params oas.GetEventParams) (*oas
 		event.InProgress = true
 	}
 	return &event, nil
+}
+
+func (h *Handler) GetEventByHash(ctx context.Context, transactionHash string) (oas.Event, bool, error) {
+	eventParams := oas.GetEventParams{EventID: transactionHash}
+	event, err := h.GetEvent(ctx, eventParams)
+	if err != nil {
+		errStatusCode, ok := err.(*oas.ErrorStatusCode)
+		if ok && errStatusCode.StatusCode == http.StatusNotFound {
+			return oas.Event{}, false, nil
+		}
+		return oas.Event{}, false, err
+	}
+	if event == nil {
+		return oas.Event{}, false, nil
+	}
+	return *event, true, nil
 }
 
 func contains[T comparable](sl []T, s T) bool {

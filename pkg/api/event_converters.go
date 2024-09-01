@@ -774,7 +774,9 @@ func (h *Handler) toEvent(ctx context.Context, trace *core.Trace, result *bath.A
 		}
 		event.Actions[i] = convertedAction
 	}
-	event.IsScam = h.spamFilter.CheckActions(event.Actions, nil)
+	if h.spamFilter != nil {
+		event.IsScam = h.spamFilter.CheckActions(event.Actions, nil)
+	}
 	previews := make(map[tongo.AccountID]oas.JettonPreview)
 	for _, flow := range result.ValueFlow.Accounts {
 		for jettonMaster := range flow.Jettons {

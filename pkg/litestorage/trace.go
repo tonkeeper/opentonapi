@@ -52,9 +52,9 @@ func (s *LiteStorage) recursiveGetChildren(ctx context.Context, tx core.Transact
 			externalMessages = append(externalMessages, m)
 			continue
 		}
-		tx, err := s.searchTransactionNearBlock(ctx, *m.Destination, m.CreatedLt, tx.BlockID, false, depth+1)
-		if err != nil {
-			return core.Trace{}, err
+		tx := s.searchTxInCache(*m.Destination, m.CreatedLt)
+		if tx == nil {
+			return core.Trace{}, core.ErrEntityNotFound
 		}
 		child, err := s.recursiveGetChildren(ctx, *tx, depth+1)
 		if err != nil {
@@ -78,12 +78,10 @@ func (s *LiteStorage) findRoot(ctx context.Context, tx *core.Transaction, depth 
 	if tx.InMsg == nil || tx.InMsg.IsExternal() || tx.InMsg.IsEmission() {
 		return tx, nil
 	}
-	var err error
-	tx, err = s.searchTransactionNearBlock(ctx, *tx.InMsg.Source, tx.InMsg.CreatedLt, tx.BlockID, true, depth)
-	if err != nil {
-		return nil, err
+	tx = s.searchTxInCache(*tx.InMsg.Source, tx.InMsg.CreatedLt)
+	if tx == nil {
+		return nil, core.ErrEntityNotFound
 	}
-
 	return s.findRoot(ctx, tx, depth+1)
 }
 
@@ -106,8 +104,8 @@ func (s *LiteStorage) searchTransactionNearBlock(ctx context.Context, a tongo.Ac
 		if err != nil {
 			return nil, err
 		}
-
 	}
+
 	return tx, nil
 }
 

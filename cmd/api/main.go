@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/arnac-io/opentonapi/pkg/blockchain/indexer"
 	"github.com/arnac-io/opentonapi/pkg/spam"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/liteapi"
 	"go.uber.org/zap"
