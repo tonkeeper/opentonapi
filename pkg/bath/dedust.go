@@ -51,7 +51,7 @@ var DedustSwapJettonsStraw = Straw[BubbleJettonSwap]{
 			return nil
 		},
 		SingleChild: &Straw[BubbleJettonSwap]{
-			CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.DedustPayoutFromPoolMsgOp)},
+			CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.DedustPayoutFromPoolMsgOp), HasInterface(abi.DedustVault)},
 			SingleChild: &Straw[BubbleJettonSwap]{
 				CheckFuncs: []bubbleCheck{IsJettonTransfer},
 				Builder: func(newAction *BubbleJettonSwap, bubble *Bubble) error {
@@ -110,7 +110,7 @@ var DedustSwapToTONStraw = Straw[BubbleJettonSwap]{
 			return nil
 		},
 		SingleChild: &Straw[BubbleJettonSwap]{
-			CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.DedustPayoutFromPoolMsgOp)},
+			CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.DedustPayoutFromPoolMsgOp), HasInterface(abi.DedustVault)},
 			SingleChild: &Straw[BubbleJettonSwap]{
 				CheckFuncs: []bubbleCheck{IsTx, HasOperation("DedustPayout")},
 				Builder: func(newAction *BubbleJettonSwap, bubble *Bubble) error {
@@ -126,24 +126,7 @@ var DedustSwapToTONStraw = Straw[BubbleJettonSwap]{
 }
 
 var DedustSwapFromTONStraw = Straw[BubbleJettonSwap]{
-	CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.DedustSwapJettonOp), func(bubble *Bubble) bool {
-		//transfer := bubble.Info.(BubbleJettonTransfer)
-		//swap, ok := transfer.payload.Value.(abi.DedustSwapJettonPayload)
-		//if !ok {
-		//	return false
-		//}
-		//to, err := ton.AccountIDFromTlb(swap.SwapParams.RecipientAddr)
-		//if err != nil {
-		//	return false
-		//}
-		//if to == nil {
-		//	return true
-		//}
-		//if transfer.sender == nil || transfer.sender.Address != *to {
-		//	return false
-		//}
-		return true
-	}},
+	CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.DedustSwapJettonOp)},
 	Builder: func(newAction *BubbleJettonSwap, bubble *Bubble) error {
 		transfer := bubble.Info.(BubbleTx)
 		newAction.Success = true
@@ -156,13 +139,13 @@ var DedustSwapFromTONStraw = Straw[BubbleJettonSwap]{
 		return nil
 	},
 	SingleChild: &Straw[BubbleJettonSwap]{
-		CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.DedustSwapExternalMsgOp)},
+		CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.DedustSwapExternalMsgOp), HasInterface(abi.DedustPool)},
 		Builder: func(newAction *BubbleJettonSwap, bubble *Bubble) error {
 			newAction.Router = bubble.Info.(BubbleTx).account.Address
 			return nil
 		},
 		SingleChild: &Straw[BubbleJettonSwap]{
-			CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.DedustPayoutFromPoolMsgOp)},
+			CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.DedustPayoutFromPoolMsgOp), HasInterface(abi.DedustVault)},
 			SingleChild: &Straw[BubbleJettonSwap]{
 				CheckFuncs: []bubbleCheck{Or(IsJettonTransfer, IsTx)},
 				Builder: func(newAction *BubbleJettonSwap, bubble *Bubble) error {
