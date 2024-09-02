@@ -167,16 +167,3 @@ var DedustSwapFromTONStraw = Straw[BubbleJettonSwap]{
 		},
 	},
 }
-
-var DedustSwapPeerStraw = Straw[BubbleTx]{
-	CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.DedustSwapExternalMsgOp)},
-	Builder: func(newAction *BubbleTx, bubble *Bubble) error {
-		tx := bubble.Info.(BubbleTx)
-		newAction.decodedBody = tx.decodedBody
-		newAction.account.Address = tx.account.Address
-		return nil
-	},
-	SingleChild: &Straw[BubbleTx]{
-		CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.DedustSwapPeerMsgOp)},
-	},
-}

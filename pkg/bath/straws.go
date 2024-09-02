@@ -44,7 +44,6 @@ var DefaultStraws = []Merger{
 	WtonMintStraw,
 	NftPurchaseStraw,
 	StonfiSwapStraw,
-	DedustSwapPeerStraw,
 	DedustSwapJettonsStraw,
 	DedustSwapToTONStraw,
 	DedustSwapFromTONStraw,
