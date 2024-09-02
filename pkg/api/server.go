@@ -3,6 +3,7 @@ package api
 import (
 	"errors"
 	"fmt"
+	"io/fs"
 	"net"
 	"net/http"
 	"os"
@@ -187,6 +188,10 @@ func (s *Server) Run(address string, unixSockets []string) {
 			unixListener, err := net.Listen("unix", socketPath)
 			if err != nil {
 				s.logger.Fatal(fmt.Sprintf("Failed to listen on Unix socket %v", socketPath), zap.Error(err))
+			}
+
+			if err := os.Chmod(socketPath, fs.ModePerm); err != nil {
+				s.logger.Fatal(fmt.Sprintf("Failed to set permissions on Unix socket %v", socketPath), zap.Error(err))
 			}
 
 			err = s.httpServer.Serve(unixListener)
