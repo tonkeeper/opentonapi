@@ -565,7 +565,7 @@ func calculatePoolPrice(firstAsset, secondAsset Asset, pools map[ton.AccountID]f
 		return ton.AccountID{}, 0
 	}
 	var calculatedAccount ton.AccountID // The account for which we will find the price
-	var decimals int
+	var firstAssetDecimals, secondAssetDecimals int
 	if okFirst { // Knowing the first asset's price, we determine the second asset's price
 		firstAsset.Reserve *= priceFirst // Converting reserve prices to TON
 		if firstAsset.Reserve < minReserve {
@@ -575,7 +575,7 @@ func calculatePoolPrice(firstAsset, secondAsset Asset, pools map[ton.AccountID]f
 			return ton.AccountID{}, 0
 		}
 		calculatedAccount = secondAsset.Account
-		decimals = secondAsset.Decimals
+		firstAssetDecimals, secondAssetDecimals = firstAsset.Decimals, secondAsset.Decimals
 	}
 	if okSecond { // Knowing the second asset's price, we determine the first asset's price
 		secondAsset.Reserve *= priceSecond // Converting reserve prices to TON
@@ -586,19 +586,19 @@ func calculatePoolPrice(firstAsset, secondAsset Asset, pools map[ton.AccountID]f
 			return ton.AccountID{}, 0
 		}
 		calculatedAccount = firstAsset.Account
-		decimals = firstAsset.Decimals
 		firstAsset, secondAsset = secondAsset, firstAsset
+		firstAssetDecimals, secondAssetDecimals = firstAsset.Decimals, secondAsset.Decimals
 	}
-	if decimals == 0 {
+	if firstAssetDecimals == 0 || secondAssetDecimals == 0 {
 		return ton.AccountID{}, 0
 	}
 	var price float64
 	if isStable {
-		x := secondAsset.Reserve / math.Pow(10, float64(decimals))
-		y := firstAsset.Reserve / math.Pow(10, 9)
+		x := secondAsset.Reserve / math.Pow(10, float64(secondAssetDecimals))
+		y := firstAsset.Reserve / math.Pow(10, float64(firstAssetDecimals))
 		price = (3*x*x*y + y*y*y) / (x*x*x + 3*y*y*x)
 	} else {
-		price = (firstAsset.Reserve / secondAsset.Reserve) * math.Pow(10, float64(decimals)-9)
+		price = (firstAsset.Reserve / secondAsset.Reserve) * math.Pow(10, float64(secondAssetDecimals)-float64(firstAssetDecimals))
 	}
 	return calculatedAccount, price
 }
