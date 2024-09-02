@@ -9,9 +9,6 @@ import (
 
 	"golang.org/x/exp/maps"
 
-	"github.com/tonkeeper/tongo/contract/elector"
-	"github.com/tonkeeper/tongo/tvm"
-
 	"github.com/arnac-io/opentonapi/internal/g"
 	"github.com/arnac-io/opentonapi/pkg/core"
 	"github.com/arnac-io/opentonapi/pkg/oas"
@@ -380,124 +377,124 @@ func (h *Handler) GetRawBlockchainConfigFromBlock(ctx context.Context, params oa
 	return rawConfig, nil
 }
 
-func (h *Handler) GetBlockchainValidators(ctx context.Context) (*oas.Validators, error) {
-	blockHeader, err := h.storage.LastMasterchainBlockHeader(ctx)
-	if err != nil {
-		return nil, toError(http.StatusInternalServerError, err)
-	}
-	next := blockHeader.BlockID
-	configBlockID := next
-	if !blockHeader.IsKeyBlock {
-		configBlockID.Seqno = uint32(blockHeader.PrevKeyBlockSeqno)
-	}
-	rawConfig, err := h.storage.GetConfigFromBlock(ctx, configBlockID)
-	if err != nil {
-		return nil, toError(http.StatusInternalServerError, err)
-	}
-	config, err := ton.ConvertBlockchainConfigStrict(rawConfig)
-	if err != nil {
-		return nil, toError(http.StatusInternalServerError, err)
-	}
-	electorAddr, ok := config.ElectorAddr()
-	if !ok {
-		return nil, toError(http.StatusInternalServerError, fmt.Errorf("can't get elector address"))
-	}
-	iterations := 0
-	for {
-		iterations += 1
-		if iterations > 100 {
-			return nil, toError(http.StatusInternalServerError, fmt.Errorf("can't find block with elections"))
-		}
-		blockHeader, err := h.storage.GetBlockHeader(ctx, next)
-		if err != nil {
-			return nil, toError(http.StatusInternalServerError, err)
-		}
-		next.Seqno = uint32(blockHeader.PrevKeyBlockSeqno)
-		if !blockHeader.IsKeyBlock {
-			continue
-		}
-		electorState, err := h.storage.GetAccountStateRaw(ctx, electorAddr, &blockHeader.BlockIDExt)
-		if err != nil {
-			return nil, toError(http.StatusInternalServerError, err)
-		}
-		electorStateCell, err := boc.DeserializeBoc(electorState.State)
-		if err != nil {
-			return nil, toError(http.StatusInternalServerError, err)
-		}
-		var acc tlb.Account
-		err = tlb.Unmarshal(electorStateCell[0], &acc)
-		if err != nil {
-			return nil, toError(http.StatusInternalServerError, err)
-		}
-		init := acc.Account.Storage.State.AccountActive.StateInit
-		code := init.Code.Value.Value
-		data := init.Data.Value.Value
+// func (h *Handler) GetBlockchainValidators(ctx context.Context) (*oas.Validators, error) {
+// 	blockHeader, err := h.storage.LastMasterchainBlockHeader(ctx)
+// 	if err != nil {
+// 		return nil, toError(http.StatusInternalServerError, err)
+// 	}
+// 	next := blockHeader.BlockID
+// 	configBlockID := next
+// 	if !blockHeader.IsKeyBlock {
+// 		configBlockID.Seqno = uint32(blockHeader.PrevKeyBlockSeqno)
+// 	}
+// 	rawConfig, err := h.storage.GetConfigFromBlock(ctx, configBlockID)
+// 	if err != nil {
+// 		return nil, toError(http.StatusInternalServerError, err)
+// 	}
+// 	config, err := ton.ConvertBlockchainConfigStrict(rawConfig)
+// 	if err != nil {
+// 		return nil, toError(http.StatusInternalServerError, err)
+// 	}
+// 	electorAddr, ok := config.ElectorAddr()
+// 	if !ok {
+// 		return nil, toError(http.StatusInternalServerError, fmt.Errorf("can't get elector address"))
+// 	}
+// 	iterations := 0
+// 	for {
+// 		iterations += 1
+// 		if iterations > 100 {
+// 			return nil, toError(http.StatusInternalServerError, fmt.Errorf("can't find block with elections"))
+// 		}
+// 		blockHeader, err := h.storage.GetBlockHeader(ctx, next)
+// 		if err != nil {
+// 			return nil, toError(http.StatusInternalServerError, err)
+// 		}
+// 		next.Seqno = uint32(blockHeader.PrevKeyBlockSeqno)
+// 		if !blockHeader.IsKeyBlock {
+// 			continue
+// 		}
+// 		electorState, err := h.storage.GetAccountStateRaw(ctx, electorAddr, &blockHeader.BlockIDExt)
+// 		if err != nil {
+// 			return nil, toError(http.StatusInternalServerError, err)
+// 		}
+// 		electorStateCell, err := boc.DeserializeBoc(electorState.State)
+// 		if err != nil {
+// 			return nil, toError(http.StatusInternalServerError, err)
+// 		}
+// 		var acc tlb.Account
+// 		err = tlb.Unmarshal(electorStateCell[0], &acc)
+// 		if err != nil {
+// 			return nil, toError(http.StatusInternalServerError, err)
+// 		}
+// 		init := acc.Account.Storage.State.AccountActive.StateInit
+// 		code := init.Code.Value.Value
+// 		data := init.Data.Value.Value
 
-		configObject := h.configPool.Get().(*tvm.Config)
-		defer h.configPool.Put(configObject)
-		if configObject == nil {
-			return nil, toError(http.StatusInternalServerError, fmt.Errorf("error getting BlockchainConfig from the pool"))
-		}
+// 		configObject := h.configPool.Get().(*tvm.Config)
+// 		defer h.configPool.Put(configObject)
+// 		if configObject == nil {
+// 			return nil, toError(http.StatusInternalServerError, fmt.Errorf("error getting BlockchainConfig from the pool"))
+// 		}
 
-		emulator, err := tvm.NewEmulator(&code, &data, nil, tvm.WithConfig(configObject))
-		if err != nil {
-			return nil, toError(http.StatusInternalServerError, err)
-		}
-		if err := emulator.SetGasLimit(10_000_000); err != nil {
-			return nil, toError(http.StatusInternalServerError, err)
-		}
-		list, err := elector.GetParticipantListExtended(ctx, electorAddr, emulator)
-		if err != nil {
-			return nil, toError(http.StatusInternalServerError, err)
-		}
-		if config.ConfigParam34 == nil {
-			return nil, toError(http.StatusInternalServerError, fmt.Errorf("there is no current validators set in blockchain config"))
-		}
+// 		emulator, err := tvm.NewEmulator(&code, &data, nil, tvm.WithConfig(configObject))
+// 		if err != nil {
+// 			return nil, toError(http.StatusInternalServerError, err)
+// 		}
+// 		if err := emulator.SetGasLimit(10_000_000); err != nil {
+// 			return nil, toError(http.StatusInternalServerError, err)
+// 		}
+// 		list, err := elector.GetParticipantListExtended(ctx, electorAddr, emulator)
+// 		if err != nil {
+// 			return nil, toError(http.StatusInternalServerError, err)
+// 		}
+// 		if config.ConfigParam34 == nil {
+// 			return nil, toError(http.StatusInternalServerError, fmt.Errorf("there is no current validators set in blockchain config"))
+// 		}
 
-		validatorSet := config.ConfigParam34.CurValidators
-		var pubKeys map[tlb.Bits256]struct{}
-		var utimeSince uint32
-		switch validatorSet.SumType {
-		case "Validators":
-			utimeSince = validatorSet.Validators.UtimeSince
-			pubKeys = make(map[tlb.Bits256]struct{}, len(validatorSet.Validators.List.Keys()))
-			for _, descr := range validatorSet.Validators.List.Values() {
-				pubKeys[descr.PubKey()] = struct{}{}
-			}
-		case "ValidatorsExt":
-			utimeSince = validatorSet.ValidatorsExt.UtimeSince
-			pubKeys = make(map[tlb.Bits256]struct{}, len(validatorSet.ValidatorsExt.List.Keys()))
-			for _, descr := range validatorSet.ValidatorsExt.List.Values() {
-				pubKeys[descr.PubKey()] = struct{}{}
-			}
-		default:
-			return nil, toError(http.StatusInternalServerError, fmt.Errorf("unknown validator set type %v", validatorSet.SumType))
-		}
-		if list.ElectAt != int64(utimeSince) {
-			// this election is for the next validator set,
-			// let's take travel back in time to the current validator set
-			continue
-		}
-		validators := &oas.Validators{
-			ElectAt:    list.ElectAt,
-			ElectClose: list.ElectClose,
-			MinStake:   list.MinStake,
-			TotalStake: list.TotalStake,
-			Validators: make([]oas.Validator, 0, len(list.Validators)),
-		}
-		for _, v := range list.Validators {
-			// sometimes, participant_list_extended returns validators that are not in the current validator set,
-			// so we need to filter them out.
-			if _, ok := pubKeys[v.Pubkey]; !ok {
-				continue
-			}
-			validators.Validators = append(validators.Validators, oas.Validator{
-				Stake:       v.Stake,
-				MaxFactor:   v.MaxFactor,
-				Address:     v.Address.ToRaw(),
-				AdnlAddress: v.AdnlAddr,
-			})
-		}
-		return validators, nil
-	}
-}
+// 		validatorSet := config.ConfigParam34.CurValidators
+// 		var pubKeys map[tlb.Bits256]struct{}
+// 		var utimeSince uint32
+// 		switch validatorSet.SumType {
+// 		case "Validators":
+// 			utimeSince = validatorSet.Validators.UtimeSince
+// 			pubKeys = make(map[tlb.Bits256]struct{}, len(validatorSet.Validators.List.Keys()))
+// 			for _, descr := range validatorSet.Validators.List.Values() {
+// 				pubKeys[descr.PubKey()] = struct{}{}
+// 			}
+// 		case "ValidatorsExt":
+// 			utimeSince = validatorSet.ValidatorsExt.UtimeSince
+// 			pubKeys = make(map[tlb.Bits256]struct{}, len(validatorSet.ValidatorsExt.List.Keys()))
+// 			for _, descr := range validatorSet.ValidatorsExt.List.Values() {
+// 				pubKeys[descr.PubKey()] = struct{}{}
+// 			}
+// 		default:
+// 			return nil, toError(http.StatusInternalServerError, fmt.Errorf("unknown validator set type %v", validatorSet.SumType))
+// 		}
+// 		if list.ElectAt != int64(utimeSince) {
+// 			// this election is for the next validator set,
+// 			// let's take travel back in time to the current validator set
+// 			continue
+// 		}
+// 		validators := &oas.Validators{
+// 			ElectAt:    list.ElectAt,
+// 			ElectClose: list.ElectClose,
+// 			MinStake:   list.MinStake,
+// 			TotalStake: list.TotalStake,
+// 			Validators: make([]oas.Validator, 0, len(list.Validators)),
+// 		}
+// 		for _, v := range list.Validators {
+// 			// sometimes, participant_list_extended returns validators that are not in the current validator set,
+// 			// so we need to filter them out.
+// 			if _, ok := pubKeys[v.Pubkey]; !ok {
+// 				continue
+// 			}
+// 			validators.Validators = append(validators.Validators, oas.Validator{
+// 				Stake:       v.Stake,
+// 				MaxFactor:   v.MaxFactor,
+// 				Address:     v.Address.ToRaw(),
+// 				AdnlAddress: v.AdnlAddr,
+// 			})
+// 		}
+// 		return validators, nil
+// 	}
+// }

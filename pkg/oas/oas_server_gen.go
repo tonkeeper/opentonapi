@@ -38,30 +38,6 @@ type Handler interface {
 	//
 	// GET /v2/dns/{domain_name}/resolve
 	DnsResolve(ctx context.Context, params DnsResolveParams) (*DnsRecord, error)
-	// EmulateMessageToAccountEvent implements emulateMessageToAccountEvent operation.
-	//
-	// Emulate sending message to blockchain.
-	//
-	// POST /v2/accounts/{account_id}/events/emulate
-	EmulateMessageToAccountEvent(ctx context.Context, req *EmulateMessageToAccountEventReq, params EmulateMessageToAccountEventParams) (*AccountEvent, error)
-	// EmulateMessageToEvent implements emulateMessageToEvent operation.
-	//
-	// Emulate sending message to blockchain.
-	//
-	// POST /v2/events/emulate
-	EmulateMessageToEvent(ctx context.Context, req *EmulateMessageToEventReq, params EmulateMessageToEventParams) (*Event, error)
-	// EmulateMessageToTrace implements emulateMessageToTrace operation.
-	//
-	// Emulate sending message to blockchain.
-	//
-	// POST /v2/traces/emulate
-	EmulateMessageToTrace(ctx context.Context, req *EmulateMessageToTraceReq, params EmulateMessageToTraceParams) (*Trace, error)
-	// EmulateMessageToWallet implements emulateMessageToWallet operation.
-	//
-	// Emulate sending message to blockchain.
-	//
-	// POST /v2/wallet/emulate
-	EmulateMessageToWallet(ctx context.Context, req *EmulateMessageToWalletReq, params EmulateMessageToWalletParams) (*MessageConsequences, error)
 	// ExecGetMethodForBlockchainAccount implements execGetMethodForBlockchainAccount operation.
 	//
 	// Execute get method for account.
@@ -312,12 +288,6 @@ type Handler interface {
 	//
 	// GET /v2/blockchain/messages/{msg_id}/transaction
 	GetBlockchainTransactionByMessageHash(ctx context.Context, params GetBlockchainTransactionByMessageHashParams) (*Transaction, error)
-	// GetBlockchainValidators implements getBlockchainValidators operation.
-	//
-	// Get blockchain validators.
-	//
-	// GET /v2/blockchain/validators
-	GetBlockchainValidators(ctx context.Context) (*Validators, error)
 	// GetChartRates implements getChartRates operation.
 	//
 	// Get chart by token.

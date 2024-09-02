@@ -5,16 +5,15 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/go-faster/errors"
 	"github.com/arnac-io/opentonapi/pkg/chainstate"
 	"github.com/arnac-io/opentonapi/pkg/core"
 	"github.com/arnac-io/opentonapi/pkg/rates"
+	"github.com/go-faster/errors"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/contract/dns"
 	"github.com/tonkeeper/tongo/tep64"
 	"github.com/tonkeeper/tongo/ton"
 	"github.com/tonkeeper/tongo/tonconnect"
-	"github.com/tonkeeper/tongo/tvm"
 	"go.uber.org/zap"
 
 	"github.com/arnac-io/opentonapi/pkg/addressbook"
@@ -179,19 +178,19 @@ func NewHandler(logger *zap.Logger, opts ...Option) (*Handler, error) {
 			return nil
 		}
 	}
-	configBase64, err := options.storage.TrimmedConfigBase64()
-	if err != nil {
-		return nil, err
-	}
-	configPool := &sync.Pool{
-		New: func() interface{} {
-			config, err := tvm.CreateConfig(configBase64)
-			if err != nil {
-				return nil
-			}
-			return config
-		},
-	}
+	// configBase64, err := options.storage.TrimmedConfigBase64()
+	// if err != nil {
+	// 	return nil, err
+	// }
+	// configPool := &sync.Pool{
+	// 	New: func() interface{} {
+	// 		config, err := tvm.CreateConfig(configBase64)
+	// 		if err != nil {
+	// 			return nil
+	// 		}
+	// 		return config
+	// 	},
+	// }
 	tonConnect, err := tonconnect.NewTonConnect(options.executor, options.tonConnectSecret)
 	if err != nil {
 		return nil, fmt.Errorf("failed to init tonconnect")
@@ -223,7 +222,7 @@ func NewHandler(logger *zap.Logger, opts ...Option) (*Handler, error) {
 		blacklistedBocCache: cache.NewLRUCache[[32]byte, struct{}](100000, "blacklisted_boc_cache"),
 		getMethodsCache:     cache.NewLRUCache[string, *oas.MethodExecutionResult](100000, "get_methods_cache"),
 		tonConnect:          tonConnect,
-		configPool:          configPool,
+		configPool:          nil,
 	}, nil
 }
 

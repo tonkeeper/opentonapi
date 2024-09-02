@@ -5,10 +5,10 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/stretchr/testify/require"
 	"github.com/arnac-io/opentonapi/pkg/litestorage"
 	"github.com/arnac-io/opentonapi/pkg/oas"
 	pkgTesting "github.com/arnac-io/opentonapi/pkg/testing"
+	"github.com/stretchr/testify/require"
 	"github.com/tonkeeper/tongo/liteapi"
 	"go.uber.org/zap"
 )
@@ -148,33 +148,33 @@ func TestHandler_GetBlockchainConfigFromBlock(t *testing.T) {
 	}
 }
 
-func TestHandler_GetBlockchainValidators(t *testing.T) {
-	logger := zap.L()
-	cli, err := liteapi.NewClient(liteapi.FromEnvsOrMainnet())
-	require.Nil(t, err)
-	liteStorage, err := litestorage.NewLiteStorage(logger, cli)
-	require.Nil(t, err)
-	h, err := NewHandler(logger, WithStorage(liteStorage), WithExecutor(liteStorage))
-	require.Nil(t, err)
-	validators, err := h.GetBlockchainValidators(context.Background())
-	require.Nil(t, err)
+// func TestHandler_GetBlockchainValidators(t *testing.T) {
+// 	logger := zap.L()
+// 	cli, err := liteapi.NewClient(liteapi.FromEnvsOrMainnet())
+// 	require.Nil(t, err)
+// 	liteStorage, err := litestorage.NewLiteStorage(logger, cli)
+// 	require.Nil(t, err)
+// 	h, err := NewHandler(logger, WithStorage(liteStorage), WithExecutor(liteStorage))
+// 	require.Nil(t, err)
+// 	validators, err := h.GetBlockchainValidators(context.Background())
+// 	require.Nil(t, err)
 
-	config, err := h.storage.GetLastConfig(context.Background())
-	require.Nil(t, err)
+// 	config, err := h.storage.GetLastConfig(context.Background())
+// 	require.Nil(t, err)
 
-	require.NotNil(t, config.ConfigParam34)
-	curValidators := config.ConfigParam34.CurValidators.ValidatorsExt
-	require.Equal(t, len(validators.Validators), len(curValidators.List.Items()))
-	inCurrentSet := make(map[string]struct{})
-	for _, item := range curValidators.List.Items() {
-		inCurrentSet[item.Value.ValidatorAddr.AdnlAddr.Hex()] = struct{}{}
-	}
-	for _, v := range validators.Validators {
-		_, ok := inCurrentSet[v.AdnlAddress]
-		require.True(t, ok)
-	}
-	require.Equal(t, validators.ElectAt, int64(curValidators.UtimeSince))
-}
+// 	require.NotNil(t, config.ConfigParam34)
+// 	curValidators := config.ConfigParam34.CurValidators.ValidatorsExt
+// 	require.Equal(t, len(validators.Validators), len(curValidators.List.Items()))
+// 	inCurrentSet := make(map[string]struct{})
+// 	for _, item := range curValidators.List.Items() {
+// 		inCurrentSet[item.Value.ValidatorAddr.AdnlAddr.Hex()] = struct{}{}
+// 	}
+// 	for _, v := range validators.Validators {
+// 		_, ok := inCurrentSet[v.AdnlAddress]
+// 		require.True(t, ok)
+// 	}
+// 	require.Equal(t, validators.ElectAt, int64(curValidators.UtimeSince))
+// }
 
 func TestHandler_GetBlockchainBlock(t *testing.T) {
 	tests := []struct {

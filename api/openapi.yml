@@ -272,21 +272,6 @@ paths:
                 $ref: '#/components/schemas/Transaction'
         'default':
           $ref: '#/components/responses/Error'
-  /v2/blockchain/validators:
-    get:
-      description: Get blockchain validators
-      operationId: getBlockchainValidators
-      tags:
-        - Blockchain
-      responses:
-        '200':
-          description: blockchain validators
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Validators'
-        'default':
-          $ref: '#/components/responses/Error'
   /v2/blockchain/masterchain-head:
     get:
       description: Get last known masterchain block
@@ -2707,101 +2692,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/DecodedMessage'
-        'default':
-          $ref: '#/components/responses/Error'
-  /v2/events/emulate:
-    post:
-      description: Emulate sending message to blockchain
-      operationId: emulateMessageToEvent
-      tags:
-        - Emulation
-        - Events
-      parameters:
-        - $ref: '#/components/parameters/i18n'
-        - name: ignore_signature_check
-          in: query
-          required: false
-          schema:
-            type: boolean
-      requestBody:
-        $ref: "#/components/requestBodies/Boc"
-      responses:
-        '200':
-          description: emulated event
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Event'
-        'default':
-          $ref: '#/components/responses/Error'
-  /v2/traces/emulate:
-    post:
-      description: Emulate sending message to blockchain
-      operationId: emulateMessageToTrace
-      tags:
-        - Emulation
-        - Traces
-      parameters:
-        - name: ignore_signature_check
-          in: query
-          required: false
-          schema:
-            type: boolean
-      requestBody:
-        $ref: "#/components/requestBodies/Boc"
-      responses:
-        '200':
-          description: emulated trace
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Trace'
-        'default':
-          $ref: '#/components/responses/Error'
-  /v2/wallet/emulate:
-    post:
-      description: Emulate sending message to blockchain
-      operationId: emulateMessageToWallet
-      tags:
-        - Wallet
-        - Emulation
-      parameters:
-        - $ref: '#/components/parameters/i18n'
-      requestBody:
-        $ref: "#/components/requestBodies/EmulationBoc"
-      responses:
-        '200':
-          description: emulated message
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/MessageConsequences'
-        'default':
-          $ref: '#/components/responses/Error'
-  /v2/accounts/{account_id}/events/emulate:
-    post:
-      description: Emulate sending message to blockchain
-      operationId: emulateMessageToAccountEvent
-      tags:
-        - Emulation
-        - Accounts
-      parameters:
-        - $ref: '#/components/parameters/i18n'
-        - $ref: '#/components/parameters/accountIDParameter'
-        - name: ignore_signature_check
-          in: query
-          required: false
-          schema:
-            type: boolean
-      requestBody:
-        $ref: "#/components/requestBodies/Boc"
-      responses:
-        '200':
-          description: emulated message to account
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/AccountEvent'
         'default':
           $ref: '#/components/responses/Error'
 components:
