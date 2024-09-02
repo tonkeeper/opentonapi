@@ -22,6 +22,7 @@ var DedustSwapJettonsStraw = Straw[BubbleJettonSwap]{
 		if to == nil {
 			return true
 		}
+		// A Dedust user may specify different address to receive resulting jettons. In that case it is not a swap.
 		if transfer.sender == nil || transfer.sender.Address != *to {
 			return false
 		}
@@ -82,6 +83,7 @@ var DedustSwapToTONStraw = Straw[BubbleJettonSwap]{
 		if to == nil {
 			return true
 		}
+		// A Dedust user may specify different address to receive resulting TON. In that case it is not a swap.
 		if transfer.sender == nil || transfer.sender.Address != *to {
 			return false
 		}
