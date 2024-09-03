@@ -165,49 +165,54 @@ func (h *Handler) GetTrace(ctx context.Context, params oas.GetTraceParams) (*oas
 	return &convertedTrace, nil
 }
 
-func (h *Handler) GetEvent(ctx context.Context, params oas.GetEventParams) (*oas.Event, error) {
+func (h *Handler) getEventAndTrace(ctx context.Context, params oas.GetEventParams) (*core.Trace, *oas.Event, error) {
 	traceID, err := tongo.ParseHash(params.EventID)
 	if err != nil {
-		return nil, toError(http.StatusBadRequest, err)
+		return nil, nil, toError(http.StatusBadRequest, err)
 	}
 	trace, emulated, err := h.getTraceByHash(ctx, traceID)
 	if errors.Is(err, core.ErrEntityNotFound) {
-		return nil, toError(http.StatusNotFound, err)
+		return nil, nil, toError(http.StatusNotFound, err)
 	}
 	if errors.Is(err, core.ErrTraceIsTooLong) {
-		return nil, toError(http.StatusRequestEntityTooLarge, err)
+		return nil, nil, toError(http.StatusRequestEntityTooLarge, err)
 	}
 	if err != nil {
-		return nil, toError(http.StatusInternalServerError, err)
+		return nil, nil, toError(http.StatusInternalServerError, err)
 	}
 	result, err := bath.FindActions(ctx, trace, bath.WithInformationSource(h.storage))
 	if err != nil {
-		return nil, toError(http.StatusInternalServerError, err)
+		return nil, nil, toError(http.StatusInternalServerError, err)
 	}
 	event, err := h.toEvent(ctx, trace, result, params.AcceptLanguage)
 	if err != nil {
-		return nil, toError(http.StatusInternalServerError, err)
+		return nil, nil, toError(http.StatusInternalServerError, err)
 	}
 	if emulated {
 		event.InProgress = true
 	}
-	return &event, nil
+	return trace, &event, nil
 }
 
-func (h *Handler) GetEventByHash(ctx context.Context, transactionHash string) (oas.Event, bool, error) {
+func (h *Handler) GetEvent(ctx context.Context, params oas.GetEventParams) (*oas.Event, error) {
+	_, event, err := h.getEventAndTrace(ctx, params)
+	return event, err
+}
+
+func (h *Handler) GetEventAndTraceByHash(ctx context.Context, transactionHash string) (*core.Trace, oas.Event, bool, error) {
 	eventParams := oas.GetEventParams{EventID: transactionHash}
-	event, err := h.GetEvent(ctx, eventParams)
+	trace, event, err := h.getEventAndTrace(ctx, eventParams)
 	if err != nil {
 		errStatusCode, ok := err.(*oas.ErrorStatusCode)
 		if ok && errStatusCode.StatusCode == http.StatusNotFound {
-			return oas.Event{}, false, nil
+			return nil, oas.Event{}, false, nil
 		}
-		return oas.Event{}, false, err
+		return nil, oas.Event{}, false, err
 	}
 	if event == nil {
-		return oas.Event{}, false, nil
+		return nil, oas.Event{}, false, nil
 	}
-	return *event, true, nil
+	return trace, *event, true, nil
 }
 
 func contains[T comparable](sl []T, s T) bool {

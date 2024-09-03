@@ -203,7 +203,7 @@ func TestHandler(t *testing.T) {
 			handler, err := api.NewHandler(zap.L(), api.WithStorage(liteStorage), api.WithExecutor(liteStorage))
 			require.NoError(t, err)
 
-			_, found, err := handler.GetEventByHash(ctx, test.transactionHash)
+			_, _, found, err := handler.GetEventAndTraceByHash(ctx, test.transactionHash)
 			require.NoError(t, err)
 			if test.isTraceInProgress {
 				require.False(t, found)
