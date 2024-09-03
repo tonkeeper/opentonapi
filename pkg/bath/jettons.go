@@ -115,16 +115,23 @@ var DedustLPJettonMintStraw = Straw[BubbleJettonMint]{
 				newAction.amount = msg.Amount
 				newAction.recipientWallet = tx.account.Address
 				newAction.success = tx.success
+				newAction.recipient = *parseAccount(msg.ResponseAddress)
 				return nil
 			},
 			Children: []Straw[BubbleJettonMint]{
 				{
-					CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.JettonNotifyMsgOp)},
+					CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.JettonNotifyMsgOp), func(bubble *Bubble) bool {
+						if len(bubble.Children) > 0 {
+							return false
+						}
+						return true
+					}},
 					Builder: func(newAction *BubbleJettonMint, bubble *Bubble) error {
 						tx := bubble.Info.(BubbleTx)
 						newAction.recipient = tx.account
 						return nil
 					},
+					Optional: true,
 				},
 				{CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.ExcessMsgOp)}, Optional: true},
 			},
@@ -162,13 +169,17 @@ var JettonBurnStraw = Straw[BubbleJettonBurn]{
 }
 
 var JettonMintStrawGovernance = Straw[BubbleJettonMint]{
-	CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.JettonMintMsgOp), HasInterface(abi.JettonMaster)},
+	CheckFuncs: []bubbleCheck{IsTx, Or(HasOperation(abi.JettonMintMsgOp), HasOpcode(0x7362d09c)), HasInterface(abi.JettonMaster)},
 	Builder: func(newAction *BubbleJettonMint, bubble *Bubble) error {
 		tx := bubble.Info.(BubbleTx)
-		msg := tx.decodedBody.Value.(abi.JettonMintMsgBody)
-		dest, err := tongo.AccountIDFromTlb(msg.ToAddress)
-		if err == nil && dest != nil {
-			newAction.recipient = Account{Address: *dest}
+		msg, ok := tx.decodedBody.Value.(abi.JettonMintMsgBody)
+		if ok {
+			dest, err := tongo.AccountIDFromTlb(msg.ToAddress)
+			if err == nil && dest != nil {
+				newAction.recipient = Account{Address: *dest}
+			}
+		} else {
+			newAction.master = tx.account.Address
 		}
 		return nil
 	},
@@ -181,11 +192,25 @@ var JettonMintStrawGovernance = Straw[BubbleJettonMint]{
 			newAction.recipientWallet = tx.account.Address
 			newAction.master = tx.inputFrom.Address
 			newAction.success = tx.success
+			newAction.recipient = *parseAccount(msg.ResponseAddress)
 			return nil
 		},
-		SingleChild: &Straw[BubbleJettonMint]{
-			Optional:   true,
-			CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.ExcessMsgOp)},
+		Children: []Straw[BubbleJettonMint]{
+			{
+				CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.JettonNotifyMsgOp), func(bubble *Bubble) bool {
+					if len(bubble.Children) > 0 {
+						return false
+					}
+					return true
+				}},
+				Builder: func(newAction *BubbleJettonMint, bubble *Bubble) error {
+					tx := bubble.Info.(BubbleTx)
+					newAction.recipient = tx.account
+					return nil
+				},
+				Optional: true,
+			},
+			{CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.ExcessMsgOp)}, Optional: true},
 		},
 	},
 }
