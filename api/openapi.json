@@ -6386,50 +6386,6 @@
     ]
    }
   },
-  "/v2/accounts/{account_id}/events/emulate": {
-   "post": {
-    "description": "Emulate sending message to blockchain",
-    "operationId": "emulateMessageToAccountEvent",
-    "parameters": [
-     {
-      "$ref": "#/components/parameters/i18n"
-     },
-     {
-      "$ref": "#/components/parameters/accountIDParameter"
-     },
-     {
-      "in": "query",
-      "name": "ignore_signature_check",
-      "required": false,
-      "schema": {
-       "type": "boolean"
-      }
-     }
-    ],
-    "requestBody": {
-     "$ref": "#/components/requestBodies/Boc"
-    },
-    "responses": {
-     "200": {
-      "content": {
-       "application/json": {
-        "schema": {
-         "$ref": "#/components/schemas/AccountEvent"
-        }
-       }
-      },
-      "description": "emulated message to account"
-     },
-     "default": {
-      "$ref": "#/components/responses/Error"
-     }
-    },
-    "tags": [
-     "Emulation",
-     "Accounts"
-    ]
-   }
-  },
   "/v2/accounts/{account_id}/events/{event_id}": {
    "get": {
     "description": "Get event for an account by event_id",
@@ -7637,30 +7593,6 @@
     ]
    }
   },
-  "/v2/blockchain/validators": {
-   "get": {
-    "description": "Get blockchain validators",
-    "operationId": "getBlockchainValidators",
-    "responses": {
-     "200": {
-      "content": {
-       "application/json": {
-        "schema": {
-         "$ref": "#/components/schemas/Validators"
-        }
-       }
-      },
-      "description": "blockchain validators"
-     },
-     "default": {
-      "$ref": "#/components/responses/Error"
-     }
-    },
-    "tags": [
-     "Blockchain"
-    ]
-   }
-  },
   "/v2/dns/auctions": {
    "get": {
     "description": "Get all auctions",
@@ -7774,47 +7706,6 @@
     },
     "tags": [
      "DNS"
-    ]
-   }
-  },
-  "/v2/events/emulate": {
-   "post": {
-    "description": "Emulate sending message to blockchain",
-    "operationId": "emulateMessageToEvent",
-    "parameters": [
-     {
-      "$ref": "#/components/parameters/i18n"
-     },
-     {
-      "in": "query",
-      "name": "ignore_signature_check",
-      "required": false,
-      "schema": {
-       "type": "boolean"
-      }
-     }
-    ],
-    "requestBody": {
-     "$ref": "#/components/requestBodies/Boc"
-    },
-    "responses": {
-     "200": {
-      "content": {
-       "application/json": {
-        "schema": {
-         "$ref": "#/components/schemas/Event"
-        }
-       }
-      },
-      "description": "emulated event"
-     },
-     "default": {
-      "$ref": "#/components/responses/Error"
-     }
-    },
-    "tags": [
-     "Emulation",
-     "Events"
     ]
    }
   },
@@ -10180,44 +10071,6 @@
     ]
    }
   },
-  "/v2/traces/emulate": {
-   "post": {
-    "description": "Emulate sending message to blockchain",
-    "operationId": "emulateMessageToTrace",
-    "parameters": [
-     {
-      "in": "query",
-      "name": "ignore_signature_check",
-      "required": false,
-      "schema": {
-       "type": "boolean"
-      }
-     }
-    ],
-    "requestBody": {
-     "$ref": "#/components/requestBodies/Boc"
-    },
-    "responses": {
-     "200": {
-      "content": {
-       "application/json": {
-        "schema": {
-         "$ref": "#/components/schemas/Trace"
-        }
-       }
-      },
-      "description": "emulated trace"
-     },
-     "default": {
-      "$ref": "#/components/responses/Error"
-     }
-    },
-    "tags": [
-     "Emulation",
-     "Traces"
-    ]
-   }
-  },
   "/v2/traces/{trace_id}": {
    "get": {
     "description": "Get the trace by trace ID or hash of any transaction in trace",
@@ -10350,39 +10203,6 @@
     },
     "tags": [
      "Wallet"
-    ]
-   }
-  },
-  "/v2/wallet/emulate": {
-   "post": {
-    "description": "Emulate sending message to blockchain",
-    "operationId": "emulateMessageToWallet",
-    "parameters": [
-     {
-      "$ref": "#/components/parameters/i18n"
-     }
-    ],
-    "requestBody": {
-     "$ref": "#/components/requestBodies/EmulationBoc"
-    },
-    "responses": {
-     "200": {
-      "content": {
-       "application/json": {
-        "schema": {
-         "$ref": "#/components/schemas/MessageConsequences"
-        }
-       }
-      },
-      "description": "emulated message"
-     },
-     "default": {
-      "$ref": "#/components/responses/Error"
-     }
-    },
-    "tags": [
-     "Wallet",
-     "Emulation"
     ]
    }
   },

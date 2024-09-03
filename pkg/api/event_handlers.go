@@ -18,7 +18,6 @@ import (
 	"github.com/tonkeeper/tongo/tlb"
 	"github.com/tonkeeper/tongo/ton"
 	"github.com/tonkeeper/tongo/tontest"
-	"github.com/tonkeeper/tongo/txemulator"
 	"golang.org/x/exp/slices"
 
 	"github.com/arnac-io/opentonapi/pkg/bath"
@@ -26,7 +25,6 @@ import (
 	"github.com/arnac-io/opentonapi/pkg/core"
 	"github.com/arnac-io/opentonapi/pkg/oas"
 	"github.com/arnac-io/opentonapi/pkg/sentry"
-	"github.com/arnac-io/opentonapi/pkg/wallet"
 )
 
 const maxBatchSize = 5
@@ -345,162 +343,162 @@ func (h *Handler) GetAccountEvent(ctx context.Context, params oas.GetAccountEven
 	return &event, nil
 }
 
-func toProperEmulationError(err error) error {
-	if err != nil {
-		errWithCode, ok := err.(txemulator.ErrorWithExitCode)
-		if ok && errWithCode.Iteration == 0 {
-			// we want return Not Acceptable when the destination contract didn't accept a message.
-			return toError(http.StatusNotAcceptable, err)
-		}
-		return toError(http.StatusInternalServerError, err)
-	}
-	return nil
-}
+// func toProperEmulationError(err error) error {
+// 	if err != nil {
+// 		errWithCode, ok := err.(txemulator.ErrorWithExitCode)
+// 		if ok && errWithCode.Iteration == 0 {
+// 			// we want return Not Acceptable when the destination contract didn't accept a message.
+// 			return toError(http.StatusNotAcceptable, err)
+// 		}
+// 		return toError(http.StatusInternalServerError, err)
+// 	}
+// 	return nil
+// }
 
-func (h *Handler) EmulateMessageToAccountEvent(ctx context.Context, request *oas.EmulateMessageToAccountEventReq, params oas.EmulateMessageToAccountEventParams) (*oas.AccountEvent, error) {
-	c, err := deserializeSingleBoc(request.Boc)
-	if err != nil {
-		return nil, toError(http.StatusBadRequest, err)
-	}
-	var m tlb.Message
-	err = tlb.Unmarshal(c, &m)
-	if err != nil {
-		return nil, toError(http.StatusBadRequest, err)
-	}
-	account, err := tongo.ParseAddress(params.AccountID)
-	if err != nil {
-		return nil, toError(http.StatusBadRequest, err)
-	}
-	configBase64, err := h.storage.TrimmedConfigBase64()
-	if err != nil {
-		return nil, toError(http.StatusInternalServerError, err)
-	}
-	options := []txemulator.TraceOption{
-		txemulator.WithAccountsSource(h.storage),
-		txemulator.WithConfigBase64(configBase64),
-		txemulator.WithLimit(1100),
-	}
-	if !params.IgnoreSignatureCheck.Value {
-		options = append(options, txemulator.WithSignatureCheck())
-	}
-	emulator, err := txemulator.NewTraceBuilder(options...)
-	if err != nil {
-		return nil, toError(http.StatusInternalServerError, err)
-	}
-	tree, err := emulator.Run(ctx, m)
-	if err != nil {
-		return nil, toProperEmulationError(err)
-	}
-	trace, err := emulatedTreeToTrace(ctx, h.executor, h.storage, tree, emulator.FinalStates(), nil, h.configPool)
-	if err != nil {
-		return nil, toError(http.StatusInternalServerError, err)
-	}
-	result, err := bath.FindActions(ctx, trace, bath.WithInformationSource(h.storage))
-	if err != nil {
-		return nil, toError(http.StatusInternalServerError, err)
-	}
-	event, err := h.toAccountEvent(ctx, account.ID, trace, result, params.AcceptLanguage, false)
-	if err != nil {
-		return nil, toError(http.StatusInternalServerError, err)
-	}
-	return &event, nil
-}
+// func (h *Handler) EmulateMessageToAccountEvent(ctx context.Context, request *oas.EmulateMessageToAccountEventReq, params oas.EmulateMessageToAccountEventParams) (*oas.AccountEvent, error) {
+// 	c, err := deserializeSingleBoc(request.Boc)
+// 	if err != nil {
+// 		return nil, toError(http.StatusBadRequest, err)
+// 	}
+// 	var m tlb.Message
+// 	err = tlb.Unmarshal(c, &m)
+// 	if err != nil {
+// 		return nil, toError(http.StatusBadRequest, err)
+// 	}
+// 	account, err := tongo.ParseAddress(params.AccountID)
+// 	if err != nil {
+// 		return nil, toError(http.StatusBadRequest, err)
+// 	}
+// 	configBase64, err := h.storage.TrimmedConfigBase64()
+// 	if err != nil {
+// 		return nil, toError(http.StatusInternalServerError, err)
+// 	}
+// 	options := []txemulator.TraceOption{
+// 		txemulator.WithAccountsSource(h.storage),
+// 		txemulator.WithConfigBase64(configBase64),
+// 		txemulator.WithLimit(1100),
+// 	}
+// 	if !params.IgnoreSignatureCheck.Value {
+// 		options = append(options, txemulator.WithSignatureCheck())
+// 	}
+// 	emulator, err := txemulator.NewTraceBuilder(options...)
+// 	if err != nil {
+// 		return nil, toError(http.StatusInternalServerError, err)
+// 	}
+// 	tree, err := emulator.Run(ctx, m)
+// 	if err != nil {
+// 		return nil, toProperEmulationError(err)
+// 	}
+// 	trace, err := emulatedTreeToTrace(ctx, h.executor, h.storage, tree, emulator.FinalStates(), nil, h.configPool)
+// 	if err != nil {
+// 		return nil, toError(http.StatusInternalServerError, err)
+// 	}
+// 	result, err := bath.FindActions(ctx, trace, bath.WithInformationSource(h.storage))
+// 	if err != nil {
+// 		return nil, toError(http.StatusInternalServerError, err)
+// 	}
+// 	event, err := h.toAccountEvent(ctx, account.ID, trace, result, params.AcceptLanguage, false)
+// 	if err != nil {
+// 		return nil, toError(http.StatusInternalServerError, err)
+// 	}
+// 	return &event, nil
+// }
 
-func (h *Handler) EmulateMessageToEvent(ctx context.Context, request *oas.EmulateMessageToEventReq, params oas.EmulateMessageToEventParams) (*oas.Event, error) {
-	c, err := deserializeSingleBoc(request.Boc)
-	if err != nil {
-		return nil, toError(http.StatusBadRequest, err)
-	}
-	hash, err := c.Hash256()
-	if err != nil {
-		return nil, toError(http.StatusBadRequest, err)
-	}
-	trace, prs := h.mempoolEmulate.traces.Get(hash)
-	if !prs {
-		var m tlb.Message
-		if err := tlb.Unmarshal(c, &m); err != nil {
-			return nil, toError(http.StatusBadRequest, err)
-		}
-		configBase64, err := h.storage.TrimmedConfigBase64()
-		if err != nil {
-			return nil, toError(http.StatusInternalServerError, err)
-		}
-		options := []txemulator.TraceOption{
-			txemulator.WithAccountsSource(h.storage),
-			txemulator.WithConfigBase64(configBase64),
-		}
-		if !params.IgnoreSignatureCheck.Value {
-			options = append(options, txemulator.WithSignatureCheck())
-		}
+// func (h *Handler) EmulateMessageToEvent(ctx context.Context, request *oas.EmulateMessageToEventReq, params oas.EmulateMessageToEventParams) (*oas.Event, error) {
+// 	c, err := deserializeSingleBoc(request.Boc)
+// 	if err != nil {
+// 		return nil, toError(http.StatusBadRequest, err)
+// 	}
+// 	hash, err := c.Hash256()
+// 	if err != nil {
+// 		return nil, toError(http.StatusBadRequest, err)
+// 	}
+// 	trace, prs := h.mempoolEmulate.traces.Get(hash)
+// 	if !prs {
+// 		var m tlb.Message
+// 		if err := tlb.Unmarshal(c, &m); err != nil {
+// 			return nil, toError(http.StatusBadRequest, err)
+// 		}
+// 		configBase64, err := h.storage.TrimmedConfigBase64()
+// 		if err != nil {
+// 			return nil, toError(http.StatusInternalServerError, err)
+// 		}
+// 		options := []txemulator.TraceOption{
+// 			txemulator.WithAccountsSource(h.storage),
+// 			txemulator.WithConfigBase64(configBase64),
+// 		}
+// 		if !params.IgnoreSignatureCheck.Value {
+// 			options = append(options, txemulator.WithSignatureCheck())
+// 		}
 
-		emulator, err := txemulator.NewTraceBuilder(options...)
-		if err != nil {
-			return nil, toError(http.StatusInternalServerError, err)
-		}
-		tree, err := emulator.Run(ctx, m)
-		if err != nil {
-			return nil, toProperEmulationError(err)
-		}
-		trace, err = emulatedTreeToTrace(ctx, h.executor, h.storage, tree, emulator.FinalStates(), nil, h.configPool)
-		if err != nil {
-			return nil, toError(http.StatusInternalServerError, err)
-		}
-	}
-	result, err := bath.FindActions(ctx, trace, bath.WithInformationSource(h.storage))
-	if err != nil {
-		return nil, toError(http.StatusInternalServerError, err)
-	}
-	event, err := h.toEvent(ctx, trace, result, params.AcceptLanguage)
-	if err != nil {
-		return nil, toError(http.StatusInternalServerError, err)
-	}
-	return &event, nil
-}
+// 		emulator, err := txemulator.NewTraceBuilder(options...)
+// 		if err != nil {
+// 			return nil, toError(http.StatusInternalServerError, err)
+// 		}
+// 		tree, err := emulator.Run(ctx, m)
+// 		if err != nil {
+// 			return nil, toProperEmulationError(err)
+// 		}
+// 		trace, err = emulatedTreeToTrace(ctx, h.executor, h.storage, tree, emulator.FinalStates(), nil, h.configPool)
+// 		if err != nil {
+// 			return nil, toError(http.StatusInternalServerError, err)
+// 		}
+// 	}
+// 	result, err := bath.FindActions(ctx, trace, bath.WithInformationSource(h.storage))
+// 	if err != nil {
+// 		return nil, toError(http.StatusInternalServerError, err)
+// 	}
+// 	event, err := h.toEvent(ctx, trace, result, params.AcceptLanguage)
+// 	if err != nil {
+// 		return nil, toError(http.StatusInternalServerError, err)
+// 	}
+// 	return &event, nil
+// }
 
-func (h *Handler) EmulateMessageToTrace(ctx context.Context, request *oas.EmulateMessageToTraceReq, params oas.EmulateMessageToTraceParams) (*oas.Trace, error) {
-	c, err := deserializeSingleBoc(request.Boc)
-	if err != nil {
-		return nil, toError(http.StatusBadRequest, err)
-	}
-	hash, err := c.Hash256()
-	if err != nil {
-		return nil, toError(http.StatusBadRequest, err)
-	}
-	trace, prs := h.mempoolEmulate.traces.Get(hash)
-	if !prs {
-		var m tlb.Message
-		err = tlb.Unmarshal(c, &m)
-		if err != nil {
-			return nil, toError(http.StatusBadRequest, err)
-		}
-		configBase64, err := h.storage.TrimmedConfigBase64()
-		if err != nil {
-			return nil, toError(http.StatusInternalServerError, err)
-		}
-		options := []txemulator.TraceOption{
-			txemulator.WithAccountsSource(h.storage),
-			txemulator.WithConfigBase64(configBase64),
-		}
-		if !params.IgnoreSignatureCheck.Value {
-			options = append(options, txemulator.WithSignatureCheck())
-		}
+// func (h *Handler) EmulateMessageToTrace(ctx context.Context, request *oas.EmulateMessageToTraceReq, params oas.EmulateMessageToTraceParams) (*oas.Trace, error) {
+// 	c, err := deserializeSingleBoc(request.Boc)
+// 	if err != nil {
+// 		return nil, toError(http.StatusBadRequest, err)
+// 	}
+// 	hash, err := c.Hash256()
+// 	if err != nil {
+// 		return nil, toError(http.StatusBadRequest, err)
+// 	}
+// 	trace, prs := h.mempoolEmulate.traces.Get(hash)
+// 	if !prs {
+// 		var m tlb.Message
+// 		err = tlb.Unmarshal(c, &m)
+// 		if err != nil {
+// 			return nil, toError(http.StatusBadRequest, err)
+// 		}
+// 		configBase64, err := h.storage.TrimmedConfigBase64()
+// 		if err != nil {
+// 			return nil, toError(http.StatusInternalServerError, err)
+// 		}
+// 		options := []txemulator.TraceOption{
+// 			txemulator.WithAccountsSource(h.storage),
+// 			txemulator.WithConfigBase64(configBase64),
+// 		}
+// 		if !params.IgnoreSignatureCheck.Value {
+// 			options = append(options, txemulator.WithSignatureCheck())
+// 		}
 
-		emulator, err := txemulator.NewTraceBuilder(options...)
-		if err != nil {
-			return nil, toError(http.StatusInternalServerError, err)
-		}
-		tree, err := emulator.Run(ctx, m)
-		if err != nil {
-			return nil, toProperEmulationError(err)
-		}
-		trace, err = emulatedTreeToTrace(ctx, h.executor, h.storage, tree, emulator.FinalStates(), nil, h.configPool)
-		if err != nil {
-			return nil, toError(http.StatusInternalServerError, err)
-		}
-	}
-	t := convertTrace(trace, h.addressBook)
-	return &t, nil
-}
+// 		emulator, err := txemulator.NewTraceBuilder(options...)
+// 		if err != nil {
+// 			return nil, toError(http.StatusInternalServerError, err)
+// 		}
+// 		tree, err := emulator.Run(ctx, m)
+// 		if err != nil {
+// 			return nil, toProperEmulationError(err)
+// 		}
+// 		trace, err = emulatedTreeToTrace(ctx, h.executor, h.storage, tree, emulator.FinalStates(), nil, h.configPool)
+// 		if err != nil {
+// 			return nil, toError(http.StatusInternalServerError, err)
+// 		}
+// 	}
+// 	t := convertTrace(trace, h.addressBook)
+// 	return &t, nil
+// }
 
 func extractDestinationWallet(message tlb.Message) (*ton.AccountID, error) {
 	if message.Info.SumType != "ExtInMsgInfo" {
@@ -528,116 +526,116 @@ func prepareAccountState(accountID tongo.AccountID, state tlb.ShardAccount, star
 		ShardAccount()
 }
 
-func convertEmulationParameters(params []oas.EmulateMessageToWalletReqParamsItem) (map[tongo.AccountID]int64, error) {
-	result := make(map[tongo.AccountID]int64, len(params))
-	for _, p := range params {
-		if !p.GetBalance().IsSet() {
-			continue
-		}
-		balance := p.GetBalance().Value
-		if balance < 0 {
-			return nil, fmt.Errorf("balance must be greater than 0")
-		}
-		addr, err := tongo.ParseAddress(p.Address)
-		if err != nil {
-			return nil, err
-		}
-		result[addr.ID] = balance
-	}
-	return result, nil
-}
+// func convertEmulationParameters(params []oas.EmulateMessageToWalletReqParamsItem) (map[tongo.AccountID]int64, error) {
+// 	result := make(map[tongo.AccountID]int64, len(params))
+// 	for _, p := range params {
+// 		if !p.GetBalance().IsSet() {
+// 			continue
+// 		}
+// 		balance := p.GetBalance().Value
+// 		if balance < 0 {
+// 			return nil, fmt.Errorf("balance must be greater than 0")
+// 		}
+// 		addr, err := tongo.ParseAddress(p.Address)
+// 		if err != nil {
+// 			return nil, err
+// 		}
+// 		result[addr.ID] = balance
+// 	}
+// 	return result, nil
+// }
 
-func (h *Handler) EmulateMessageToWallet(ctx context.Context, request *oas.EmulateMessageToWalletReq, params oas.EmulateMessageToWalletParams) (*oas.MessageConsequences, error) {
-	msgCell, err := deserializeSingleBoc(request.Boc)
-	if err != nil {
-		return nil, toError(http.StatusBadRequest, err)
-	}
-	var m tlb.Message
-	err = tlb.Unmarshal(msgCell, &m)
-	if err != nil {
-		return nil, toError(http.StatusBadRequest, err)
-	}
-	walletAddress, err := extractDestinationWallet(m)
-	if err != nil {
-		return nil, toError(http.StatusBadRequest, err)
-	}
-	var code []byte
-	if account, err := h.storage.GetRawAccount(ctx, *walletAddress); err == nil && len(account.Code) > 0 {
-		code = account.Code
-	} else if m.Init.Exists && m.Init.Value.Value.Code.Exists {
-		code, err = m.Init.Value.Value.Code.Value.Value.ToBoc()
-		if err != nil {
-			return nil, toError(http.StatusBadRequest, err)
-		}
-	} else if err == nil {
-		return nil, toError(http.StatusBadRequest, fmt.Errorf("code not found and message doesn't have init"))
-	} else {
-		return nil, toError(http.StatusInternalServerError, err)
-	}
-	walletVersion, err := wallet.GetVersionByCode(code)
-	if err != nil {
-		return nil, toError(http.StatusBadRequest, err)
-	}
-	risk, err := wallet.ExtractRisk(walletVersion, msgCell)
-	if err != nil {
-		return nil, toError(http.StatusInternalServerError, err)
-	}
-	configBase64, err := h.storage.TrimmedConfigBase64()
-	if err != nil {
-		return nil, toError(http.StatusInternalServerError, err)
-	}
+// func (h *Handler) EmulateMessageToWallet(ctx context.Context, request *oas.EmulateMessageToWalletReq, params oas.EmulateMessageToWalletParams) (*oas.MessageConsequences, error) {
+// 	msgCell, err := deserializeSingleBoc(request.Boc)
+// 	if err != nil {
+// 		return nil, toError(http.StatusBadRequest, err)
+// 	}
+// 	var m tlb.Message
+// 	err = tlb.Unmarshal(msgCell, &m)
+// 	if err != nil {
+// 		return nil, toError(http.StatusBadRequest, err)
+// 	}
+// 	walletAddress, err := extractDestinationWallet(m)
+// 	if err != nil {
+// 		return nil, toError(http.StatusBadRequest, err)
+// 	}
+// 	var code []byte
+// 	if account, err := h.storage.GetRawAccount(ctx, *walletAddress); err == nil && len(account.Code) > 0 {
+// 		code = account.Code
+// 	} else if m.Init.Exists && m.Init.Value.Value.Code.Exists {
+// 		code, err = m.Init.Value.Value.Code.Value.Value.ToBoc()
+// 		if err != nil {
+// 			return nil, toError(http.StatusBadRequest, err)
+// 		}
+// 	} else if err == nil {
+// 		return nil, toError(http.StatusBadRequest, fmt.Errorf("code not found and message doesn't have init"))
+// 	} else {
+// 		return nil, toError(http.StatusInternalServerError, err)
+// 	}
+// 	walletVersion, err := wallet.GetVersionByCode(code)
+// 	if err != nil {
+// 		return nil, toError(http.StatusBadRequest, err)
+// 	}
+// 	risk, err := wallet.ExtractRisk(walletVersion, msgCell)
+// 	if err != nil {
+// 		return nil, toError(http.StatusInternalServerError, err)
+// 	}
+// 	configBase64, err := h.storage.TrimmedConfigBase64()
+// 	if err != nil {
+// 		return nil, toError(http.StatusInternalServerError, err)
+// 	}
 
-	options := []txemulator.TraceOption{
-		txemulator.WithConfigBase64(configBase64),
-		txemulator.WithAccountsSource(h.storage),
-		txemulator.WithLimit(1100),
-	}
-	accounts, err := convertEmulationParameters(request.Params)
-	if err != nil {
-		return nil, toError(http.StatusBadRequest, err)
-	}
-	var states []tlb.ShardAccount
-	for accountID, balance := range accounts {
-		originalState, err := h.storage.GetAccountState(ctx, accountID)
-		if err != nil {
-			return nil, toError(http.StatusInternalServerError, err)
-		}
-		state, err := prepareAccountState(*walletAddress, originalState, balance)
-		if err != nil {
-			return nil, toError(http.StatusInternalServerError, err)
-		}
-		states = append(states, state)
-	}
-	options = append(options, txemulator.WithAccounts(states...))
-	emulator, err := txemulator.NewTraceBuilder(options...)
-	if err != nil {
-		return nil, toError(http.StatusInternalServerError, err)
-	}
-	tree, err := emulator.Run(ctx, m)
-	if err != nil {
-		return nil, toProperEmulationError(err)
-	}
-	trace, err := emulatedTreeToTrace(ctx, h.executor, h.storage, tree, emulator.FinalStates(), nil, h.configPool)
-	if err != nil {
-		return nil, toError(http.StatusInternalServerError, err)
-	}
-	t := convertTrace(trace, h.addressBook)
-	result, err := bath.FindActions(ctx, trace, bath.ForAccount(*walletAddress), bath.WithInformationSource(h.storage))
-	if err != nil {
-		return nil, toError(http.StatusInternalServerError, err)
-	}
-	event, err := h.toAccountEvent(ctx, *walletAddress, trace, result, params.AcceptLanguage, true)
-	if err != nil {
-		return nil, toError(http.StatusInternalServerError, err)
-	}
-	oasRisk, err := h.convertRisk(ctx, *risk, *walletAddress)
-	if err != nil {
-		return nil, toError(http.StatusInternalServerError, err)
-	}
-	consequences := oas.MessageConsequences{
-		Trace: t,
-		Event: event,
-		Risk:  oasRisk,
-	}
-	return &consequences, nil
-}
+// 	options := []txemulator.TraceOption{
+// 		txemulator.WithConfigBase64(configBase64),
+// 		txemulator.WithAccountsSource(h.storage),
+// 		txemulator.WithLimit(1100),
+// 	}
+// 	accounts, err := convertEmulationParameters(request.Params)
+// 	if err != nil {
+// 		return nil, toError(http.StatusBadRequest, err)
+// 	}
+// 	var states []tlb.ShardAccount
+// 	for accountID, balance := range accounts {
+// 		originalState, err := h.storage.GetAccountState(ctx, accountID)
+// 		if err != nil {
+// 			return nil, toError(http.StatusInternalServerError, err)
+// 		}
+// 		state, err := prepareAccountState(*walletAddress, originalState, balance)
+// 		if err != nil {
+// 			return nil, toError(http.StatusInternalServerError, err)
+// 		}
+// 		states = append(states, state)
+// 	}
+// 	options = append(options, txemulator.WithAccounts(states...))
+// 	emulator, err := txemulator.NewTraceBuilder(options...)
+// 	if err != nil {
+// 		return nil, toError(http.StatusInternalServerError, err)
+// 	}
+// 	tree, err := emulator.Run(ctx, m)
+// 	if err != nil {
+// 		return nil, toProperEmulationError(err)
+// 	}
+// 	trace, err := emulatedTreeToTrace(ctx, h.executor, h.storage, tree, emulator.FinalStates(), nil, h.configPool)
+// 	if err != nil {
+// 		return nil, toError(http.StatusInternalServerError, err)
+// 	}
+// 	t := convertTrace(trace, h.addressBook)
+// 	result, err := bath.FindActions(ctx, trace, bath.ForAccount(*walletAddress), bath.WithInformationSource(h.storage))
+// 	if err != nil {
+// 		return nil, toError(http.StatusInternalServerError, err)
+// 	}
+// 	event, err := h.toAccountEvent(ctx, *walletAddress, trace, result, params.AcceptLanguage, true)
+// 	if err != nil {
+// 		return nil, toError(http.StatusInternalServerError, err)
+// 	}
+// 	oasRisk, err := h.convertRisk(ctx, *risk, *walletAddress)
+// 	if err != nil {
+// 		return nil, toError(http.StatusInternalServerError, err)
+// 	}
+// 	consequences := oas.MessageConsequences{
+// 		Trace: t,
+// 		Event: event,
+// 		Risk:  oasRisk,
+// 	}
+// 	return &consequences, nil
+// }

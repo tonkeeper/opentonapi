@@ -58,42 +58,6 @@ func (UnimplementedHandler) DnsResolve(ctx context.Context, params DnsResolvePar
 	return r, ht.ErrNotImplemented
 }
 
-// EmulateMessageToAccountEvent implements emulateMessageToAccountEvent operation.
-//
-// Emulate sending message to blockchain.
-//
-// POST /v2/accounts/{account_id}/events/emulate
-func (UnimplementedHandler) EmulateMessageToAccountEvent(ctx context.Context, req *EmulateMessageToAccountEventReq, params EmulateMessageToAccountEventParams) (r *AccountEvent, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
-// EmulateMessageToEvent implements emulateMessageToEvent operation.
-//
-// Emulate sending message to blockchain.
-//
-// POST /v2/events/emulate
-func (UnimplementedHandler) EmulateMessageToEvent(ctx context.Context, req *EmulateMessageToEventReq, params EmulateMessageToEventParams) (r *Event, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
-// EmulateMessageToTrace implements emulateMessageToTrace operation.
-//
-// Emulate sending message to blockchain.
-//
-// POST /v2/traces/emulate
-func (UnimplementedHandler) EmulateMessageToTrace(ctx context.Context, req *EmulateMessageToTraceReq, params EmulateMessageToTraceParams) (r *Trace, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
-// EmulateMessageToWallet implements emulateMessageToWallet operation.
-//
-// Emulate sending message to blockchain.
-//
-// POST /v2/wallet/emulate
-func (UnimplementedHandler) EmulateMessageToWallet(ctx context.Context, req *EmulateMessageToWalletReq, params EmulateMessageToWalletParams) (r *MessageConsequences, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
 // ExecGetMethodForBlockchainAccount implements execGetMethodForBlockchainAccount operation.
 //
 // Execute get method for account.
@@ -461,15 +425,6 @@ func (UnimplementedHandler) GetBlockchainTransaction(ctx context.Context, params
 //
 // GET /v2/blockchain/messages/{msg_id}/transaction
 func (UnimplementedHandler) GetBlockchainTransactionByMessageHash(ctx context.Context, params GetBlockchainTransactionByMessageHashParams) (r *Transaction, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
-// GetBlockchainValidators implements getBlockchainValidators operation.
-//
-// Get blockchain validators.
-//
-// GET /v2/blockchain/validators
-func (UnimplementedHandler) GetBlockchainValidators(ctx context.Context) (r *Validators, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
