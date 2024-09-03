@@ -192,7 +192,10 @@ var JettonMintStrawGovernance = Straw[BubbleJettonMint]{
 			newAction.recipientWallet = tx.account.Address
 			newAction.master = tx.inputFrom.Address
 			newAction.success = tx.success
-			newAction.recipient = *parseAccount(msg.ResponseAddress)
+			recipient := parseAccount(msg.ResponseAddress)
+			if recipient != nil {
+				newAction.recipient = *recipient
+			}
 			return nil
 		},
 		Children: []Straw[BubbleJettonMint]{
