@@ -32,6 +32,17 @@ const (
 // minReserve specifies the minimum jetton reserves (equivalent to TON) for which prices can be determined
 const minReserve = float64(100 * ton.OneTON)
 
+// minHoldersCount minimum number of holders threshold for jettons
+const minHoldersCount = 200
+
+// defaultDecimals sets the default number of decimals to 9, similar to TON
+const defaultDecimals = 9
+
+// verifiedJettons map of jettons that skip the holder count check
+var verifiedJettons = map[ton.AccountID]struct{}{
+	ton.MustParseAccountID("EQDptzse--Atn4hDt2dGl3TxAN0Ak6taYXEiNKOg7EAibChH"): {},
+}
+
 // Asset represents an asset used in jetton price calculations within pools
 type Asset struct {
 	Account      ton.AccountID
@@ -382,7 +393,7 @@ func convertedStonFiPoolResponse(pools map[ton.AccountID]float64, respBody io.Re
 		}
 		value, ok := firstMeta["decimals"]
 		if !ok {
-			value = "9"
+			value = fmt.Sprintf("%d", defaultDecimals)
 		}
 		firstAsset.Decimals, err = strconv.Atoi(value.(string))
 		if err != nil {
@@ -394,7 +405,7 @@ func convertedStonFiPoolResponse(pools map[ton.AccountID]float64, respBody io.Re
 		}
 		value, ok = secondMeta["decimals"]
 		if !ok {
-			value = "9"
+			value = fmt.Sprintf("%d", defaultDecimals)
 		}
 		secondAsset.Decimals, err = strconv.Atoi(value.(string))
 		if err != nil {
@@ -419,6 +430,14 @@ func convertedStonFiPoolResponse(pools map[ton.AccountID]float64, respBody io.Re
 		firstAsset, secondAsset, err := parseAssets(record)
 		if err != nil {
 			zap.Error(fmt.Errorf("[convertedStonFiPoolResponse] failed to parse assets: %v", err))
+			continue
+		}
+		if firstAsset.Reserve == 0 || secondAsset.Reserve == 0 {
+			continue
+		}
+		// PTon is the primary token on StonFi, but it has only 50 holders.
+		// To avoid missing tokens, we check for pTON
+		if (firstAsset.Account != references.PTon && firstAsset.HoldersCount < minHoldersCount) || (secondAsset.Account != references.PTon && secondAsset.HoldersCount < minHoldersCount) {
 			continue
 		}
 		assets, ok := actualAssets[firstAsset.Account]
@@ -452,7 +471,6 @@ func convertedDeDustPoolResponse(pools map[ton.AccountID]float64, respBody io.Re
 	var zeroAddress = ton.MustParseAccountID("UQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJKZ")
 	pools[zeroAddress] = 1
 	parseDecimals := func(meta string) (int, error) {
-		const defaultDecimals = 9
 		if meta == "NULL" {
 			return defaultDecimals, nil
 		}
@@ -535,7 +553,10 @@ func convertedDeDustPoolResponse(pools map[ton.AccountID]float64, respBody io.Re
 		}
 		return firstAsset, secondAsset, isStable, nil
 	}
-
+	actualAssets := make(map[ton.AccountID]struct {
+		Assets   []Asset
+		IsStable bool
+	})
 	for idx, record := range records {
 		if idx == 0 || len(record) < 10 { // skip headers
 			continue
@@ -545,7 +566,26 @@ func convertedDeDustPoolResponse(pools map[ton.AccountID]float64, respBody io.Re
 			zap.Error(fmt.Errorf("[convertedDedustPoolResponse] failed to parse assets: %v", err))
 			continue
 		}
-		accountID, price := calculatePoolPrice(firstAsset, secondAsset, pools, isStable)
+		if firstAsset.Reserve == 0 || secondAsset.Reserve == 0 {
+			continue
+		}
+		pool, ok := actualAssets[firstAsset.Account]
+		if !ok || pool.Assets[0].Reserve < firstAsset.Reserve {
+			actualAssets[firstAsset.Account] = struct {
+				Assets   []Asset
+				IsStable bool
+			}{Assets: []Asset{firstAsset, secondAsset}, IsStable: isStable}
+		}
+		pool, ok = actualAssets[secondAsset.Account]
+		if !ok || pool.Assets[1].Reserve < secondAsset.Reserve {
+			actualAssets[secondAsset.Account] = struct {
+				Assets   []Asset
+				IsStable bool
+			}{Assets: []Asset{firstAsset, secondAsset}, IsStable: isStable}
+		}
+	}
+	for _, pool := range actualAssets {
+		accountID, price := calculatePoolPrice(pool.Assets[0], pool.Assets[1], pools, pool.IsStable)
 		if price == 0 {
 			continue
 		}
@@ -558,7 +598,6 @@ func convertedDeDustPoolResponse(pools map[ton.AccountID]float64, respBody io.Re
 }
 
 func calculatePoolPrice(firstAsset, secondAsset Asset, pools map[ton.AccountID]float64, isStable bool) (ton.AccountID, float64) {
-	const minHoldersCount = 200 // Minimum number of holders threshold for jettons
 	priceFirst, okFirst := pools[firstAsset.Account]
 	priceSecond, okSecond := pools[secondAsset.Account]
 	if (okFirst && okSecond) || (!okFirst && !okSecond) {
@@ -567,23 +606,41 @@ func calculatePoolPrice(firstAsset, secondAsset Asset, pools map[ton.AccountID]f
 	var calculatedAccount ton.AccountID // The account for which we will find the price
 	var firstAssetDecimals, secondAssetDecimals int
 	if okFirst { // Knowing the first asset's price, we determine the second asset's price
-		firstAsset.Reserve *= priceFirst // Converting reserve prices to TON
-		if firstAsset.Reserve < minReserve {
+		// Converting reserve prices to TON
+		var updatedFirstAssetReserve float64
+		if firstAsset.Decimals != defaultDecimals {
+			updatedFirstAssetReserve = firstAsset.Reserve * math.Pow(10, float64(secondAsset.Decimals)-float64(firstAsset.Decimals)) * priceFirst
+		} else {
+			firstAsset.Reserve *= priceFirst
+			updatedFirstAssetReserve = firstAsset.Reserve
+		}
+		if updatedFirstAssetReserve < minReserve {
 			return ton.AccountID{}, 0
 		}
-		if secondAsset.HoldersCount < minHoldersCount {
-			return ton.AccountID{}, 0
+		if _, ok := verifiedJettons[secondAsset.Account]; !ok {
+			if secondAsset.HoldersCount < minHoldersCount {
+				return ton.AccountID{}, 0
+			}
 		}
 		calculatedAccount = secondAsset.Account
 		firstAssetDecimals, secondAssetDecimals = firstAsset.Decimals, secondAsset.Decimals
 	}
 	if okSecond { // Knowing the second asset's price, we determine the first asset's price
-		secondAsset.Reserve *= priceSecond // Converting reserve prices to TON
-		if secondAsset.Reserve < minReserve {
+		// Converting reserve prices to TON
+		var updatedSecondAssetReserve float64
+		if secondAsset.Decimals != defaultDecimals {
+			updatedSecondAssetReserve = secondAsset.Reserve * math.Pow(10, float64(firstAsset.Decimals)-float64(secondAsset.Decimals)) * priceSecond
+		} else {
+			secondAsset.Reserve *= priceSecond
+			updatedSecondAssetReserve = secondAsset.Reserve
+		}
+		if updatedSecondAssetReserve < minReserve {
 			return ton.AccountID{}, 0
 		}
-		if firstAsset.HoldersCount < minHoldersCount {
-			return ton.AccountID{}, 0
+		if _, ok := verifiedJettons[firstAsset.Account]; !ok {
+			if firstAsset.HoldersCount < minHoldersCount {
+				return ton.AccountID{}, 0
+			}
 		}
 		calculatedAccount = firstAsset.Account
 		firstAsset, secondAsset = secondAsset, firstAsset
@@ -600,6 +657,14 @@ func calculatePoolPrice(firstAsset, secondAsset Asset, pools map[ton.AccountID]f
 	} else {
 		price = (firstAsset.Reserve / secondAsset.Reserve) * math.Pow(10, float64(secondAssetDecimals)-float64(firstAssetDecimals))
 	}
+	if okFirst && firstAsset.Decimals != defaultDecimals {
+		price *= priceFirst
+	}
+	// Use firstAsset because after the revert, firstAsset equals secondAsset
+	if okSecond && firstAsset.Decimals != defaultDecimals {
+		price *= priceSecond
+	}
+
 	return calculatedAccount, price
 }
 
