@@ -242,8 +242,18 @@ func (s *LiteStorage) ParseBlock(ctx context.Context, block indexer.IDandBlock) 
 				continue
 			}
 			transactionsIndexByHash[tx.Hash().Hex()] = *transaction
+
+			// We save in cache for each transaction:
+			// 1. A map from the incoming message to the transaction hash (used when looking a transaction children)
+			// 2. A map from each outgoing message to the transaction hash (used when looking a transaction parent)
 			if createLT, ok := extractInMsgCreatedLT(accountID, tx); ok {
 				transactionsByInMsgLT[createLT.String()] = hash.Hex()
+			}
+			for _, outMsg := range tx.Msgs.OutMsgs.Values() {
+				if outMsg.Value.Info.IntMsgInfo != nil {
+					createLT := inMsgCreatedLT{account: accountID, lt: outMsg.Value.Info.IntMsgInfo.CreatedLt}
+					transactionsByInMsgLT[createLT.String()] = hash.Hex()
+				}
 			}
 		}
 	}
@@ -439,7 +449,7 @@ func (s *LiteStorage) GetTransaction(ctx context.Context, hash tongo.Bits256) (*
 	defer timer.ObserveDuration()
 	tx, err := s.transactionsIndexByHash.Get(ctx, hash.Hex())
 	if err != nil {
-		return nil, fmt.Errorf("not found tx %x", hash)
+		return nil, core.ErrEntityNotFound
 	}
 	return &tx, nil
 }
