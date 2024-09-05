@@ -68,7 +68,7 @@ func (h *Handler) convertRisk(ctx context.Context, risk wallet.Risk, walletAddre
 		Nfts:    nil,
 	}
 	if len(risk.Jettons) > 0 {
-		wallets, err := h.storage.GetJettonWalletsByOwnerAddress(ctx, walletAddress, nil)
+		wallets, err := h.storage.GetJettonWalletsByOwnerAddress(ctx, walletAddress, nil, true)
 		if err != nil {
 			return oas.Risk{}, err
 		}

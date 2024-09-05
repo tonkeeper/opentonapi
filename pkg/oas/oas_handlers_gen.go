@@ -2838,6 +2838,10 @@ func (s *Server) handleGetAccountJettonBalanceRequest(args [2]string, argsEscape
 					Name: "currencies",
 					In:   "query",
 				}: params.Currencies,
+				{
+					Name: "supported_extensions",
+					In:   "query",
+				}: params.SupportedExtensions,
 			},
 			Raw: r,
 		}

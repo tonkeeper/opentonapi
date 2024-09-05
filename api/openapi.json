@@ -6598,6 +6598,9 @@
      },
      {
       "$ref": "#/components/parameters/currenciesQuery"
+     },
+     {
+      "$ref": "#/components/parameters/supportedExtensions"
      }
     ],
     "responses": {

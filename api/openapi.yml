@@ -599,6 +599,7 @@ paths:
         - $ref: '#/components/parameters/accountIDParameter'
         - $ref: '#/components/parameters/jettonIDParameter'
         - $ref: '#/components/parameters/currenciesQuery'
+        - $ref: '#/components/parameters/supportedExtensions'
       responses:
         '200':
           description: account jetton balance
