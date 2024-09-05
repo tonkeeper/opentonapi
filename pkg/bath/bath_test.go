@@ -118,6 +118,21 @@ func TestFindActions(t *testing.T) {
 			tongo.MustParseBlockID("(0,8000000000000000,38474426)"),
 			// dedust swap
 			tongo.MustParseBlockID("(0,8000000000000000,38293409)"),
+			// dedust swap from TON
+			tongo.MustParseBlockID("(0,a000000000000000,45489132)"),
+			tongo.MustParseBlockID("(0,d000000000000000,45499358)"),
+			tongo.MustParseBlockID("(0,a000000000000000,45489138)"),
+			tongo.MustParseBlockID("(0,6000000000000000,45501242)"),
+			tongo.MustParseBlockID("(0,f000000000000000,45499384)"),
+			tongo.MustParseBlockID("(0,2000000000000000,45500261)"),
+			tongo.MustParseBlockID("(0,a000000000000000,45489148)"),
+			// dedust swap to TON
+			tongo.MustParseBlockID("(0,2000000000000000,45500987)"),
+			tongo.MustParseBlockID("(0,d000000000000000,45500297)"),
+			tongo.MustParseBlockID("(0,2000000000000000,45500992)"),
+			tongo.MustParseBlockID("(0,9000000000000000,45489907)"),
+			tongo.MustParseBlockID("(0,d000000000000000,45500305)"),
+			tongo.MustParseBlockID("(0,2000000000000000,45500998)"),
 			// wton mint
 			tongo.MustParseBlockID("(0,8000000000000000,38493203)"),
 			// buy nft on fragment
@@ -282,9 +297,19 @@ func TestFindActions(t *testing.T) {
 			filenamePrefix: "tonstake-withdraw",
 		},
 		{
-			name:           "dedust swap",
+			name:           "dedust swap jettons",
 			hash:           "831c7f1efaef9ac58fd39981468cea2bbd9c86a1bb72fc425cfc7734ae4a282f",
-			filenamePrefix: "dedust-swap",
+			filenamePrefix: "dedust-swap-jettons",
+		},
+		{
+			name:           "dedust swap from TON",
+			hash:           "05536d0c200ac0d02f93e369fe29571c13b734b7f741c9fb366786d8144f1430",
+			filenamePrefix: "dedust-swap-from-ton",
+		},
+		{
+			name:           "dedust swap to TON",
+			hash:           "d2249d07091e57c43bcc6978db643dc6af14755e115ac48f6630a315b5e53498",
+			filenamePrefix: "dedust-swap-to-ton",
 		},
 		{
 			name:           "wton mint",
