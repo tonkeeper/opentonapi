@@ -30,7 +30,7 @@ asset_0_account_id,asset_1_account_id,asset_0_reserve,asset_1_reserve,asset_0_me
 				ton.MustParseAccountID("0:8cdc1d7640ad5ee326527fc1ad0514f468b30dc84b0173f0e155f451b4e11f7c"): 1, // Default pTon price
 				ton.MustParseAccountID("0:65aac9b5e380eae928db3c8e238d9bc0d61a9320fdc2bc7a2f6c87d6fedf9208"): 0.6236390657633181,
 				ton.MustParseAccountID("0:b113a994b5024a16719f69139328eb759596c38a25f59028b146fecdc3621dfe"): 0.17854661661707652,
-				ton.MustParseAccountID("0:afc49cb8786f21c87045b19ede78fc6b46c51048513f8e9a6d44060199c1bf0c"): 0.00019291189444059387,
+				ton.MustParseAccountID("0:afc49cb8786f21c87045b19ede78fc6b46c51048513f8e9a6d44060199c1bf0c"): 0.00019291189444059384,
 			},
 		},
 		// To display more accurate prices, the default minimum number of holders is set to 200
@@ -84,14 +84,14 @@ func TestCalculateJettonPriceFromDeDustPool(t *testing.T) {
 			csv: `
 asset_0_account_id,asset_1_account_id,asset_0_native,asset_1_native,asset_0_reserve,asset_1_reserve,asset_0_metadata,asset_1_metadata,is_stable,asset_0_holders,asset_1_holders
 NULL,0:022d70f08add35b2d8aa2bd16f622268d7996e5737c3e7353cbb00d2aba257c5,true,false,100171974809,1787220634679,NULL,"{""decimals"":""8"",""name"":""Spintria"",""symbol"":""SP""}",false,0,3084
-NULL,0:48cef1de34697508200b8026bf882f8e88aff894586cfd304ab513633fa7e2d3,true,false,458457277157,4171862045823,NULL,"{""decimals"":""9"",""name"":""AI Coin"",""symbol"":""AIC""}",false,0,1239
-0:48cef1de34697508200b8026bf882f8e88aff894586cfd304ab513633fa7e2d3,0:b113a994b5024a16719f69139328eb759596c38a25f59028b146fecdc3621dfe,false,false,22004762576054,13287924673,"{""decimals"":""9"",""name"":""AI Coin"",""symbol"":""AIC""}","{""decimals"":""6"",""name"":""Tether USD"",""symbol"":""USD₮""}",false,1239,1039987
+NULL,0:48cef1de34697508200b8026bf882f8e88aff894586cfd304ab513633fa7e2d3,true,false,22004762576054,4171862045823,NULL,"{""decimals"":""9"",""name"":""AI Coin"",""symbol"":""AIC""}",false,0,1239
+0:48cef1de34697508200b8026bf882f8e88aff894586cfd304ab513633fa7e2d3,0:b113a994b5024a16719f69139328eb759596c38a25f59028b146fecdc3621dfe,false,false,468457277157,13287924673,"{""decimals"":""9"",""name"":""AI Coin"",""symbol"":""AIC""}","{""decimals"":""6"",""name"":""Tether USD"",""symbol"":""USD₮""}",false,1239,1039987
 NULL,0:cf76af318c0872b58a9f1925fc29c156211782b9fb01f56760d292e56123bf87,true,false,5406255533839,3293533372962,NULL,"{""decimals"":""9"",""name"":""Hipo Staked TON"",""symbol"":""hTON""}",true,0,2181`,
 			expected: map[ton.AccountID]float64{
 				ton.MustParseAccountID("0:0000000000000000000000000000000000000000000000000000000000000000"): 1, // Default TON price
 				ton.MustParseAccountID("0:022d70f08add35b2d8aa2bd16f622268d7996e5737c3e7353cbb00d2aba257c5"): 0.005604902543383612,
-				ton.MustParseAccountID("0:48cef1de34697508200b8026bf882f8e88aff894586cfd304ab513633fa7e2d3"): 0.1098927222715866,
-				ton.MustParseAccountID("0:b113a994b5024a16719f69139328eb759596c38a25f59028b146fecdc3621dfe"): 0.18198201163316488,
+				ton.MustParseAccountID("0:48cef1de34697508200b8026bf882f8e88aff894586cfd304ab513633fa7e2d3"): 5.274566209130971,
+				ton.MustParseAccountID("0:b113a994b5024a16719f69139328eb759596c38a25f59028b146fecdc3621dfe"): 0.1859514548223248,
 				ton.MustParseAccountID("0:cf76af318c0872b58a9f1925fc29c156211782b9fb01f56760d292e56123bf87"): 1.0290600202253966, // Stable pool
 			},
 		},
