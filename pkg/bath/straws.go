@@ -35,6 +35,7 @@ var SubscriptionStraws = []Merger{
 }
 
 var DefaultStraws = []Merger{
+	StrawFindAuctionBidFragmentSimple,
 	NftTransferStraw,
 	NftTransferNotifyStraw,
 	JettonTransferPTONStraw,
@@ -48,9 +49,9 @@ var DefaultStraws = []Merger{
 	DedustSwapToTONStraw,
 	DedustSwapFromTONStraw,
 	TgAuctionV1InitialBidStraw,
-	StrawFindAuctionBidFragmentSimple,
 	StrawAuctionBigGetgems,
 	StrawAuctionBuyGetgems,
+	StrawAuctionBuyFragments,
 	DedustLPJettonMintStraw,
 	JettonMintStrawGovernance,
 	MegatonFiJettonSwap,

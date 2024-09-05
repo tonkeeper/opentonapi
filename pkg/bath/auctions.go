@@ -126,3 +126,23 @@ var StrawAuctionBuyGetgems = Straw[BubbleNftPurchase]{
 		CheckFuncs: []bubbleCheck{IsNftTransfer},
 	},
 }
+
+var StrawAuctionBuyFragments = Straw[BubbleNftPurchase]{
+	CheckFuncs: []bubbleCheck{Is(AuctionBidBubble{})},
+	Builder: func(newAction *BubbleNftPurchase, bubble *Bubble) error {
+		bid := bubble.Info.(AuctionBidBubble)
+		newAction.Buyer = bid.Bidder
+		newAction.Nft = *bid.NftAddress
+		newAction.Price = bid.Amount
+		newAction.AuctionType = bid.Type
+		newAction.Success = bid.Success
+		return nil
+	},
+	SingleChild: &Straw[BubbleNftPurchase]{
+		CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.NftOwnershipAssignedMsgOp)},
+		Builder: func(newAction *BubbleNftPurchase, bubble *Bubble) error {
+			newAction.Seller = parseAccount(bubble.Info.(BubbleTx).decodedBody.Value.(abi.NftOwnershipAssignedMsgBody).PrevOwner).Address
+			return nil
+		},
+	},
+}
