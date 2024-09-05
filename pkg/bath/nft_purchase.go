@@ -45,6 +45,9 @@ var NftPurchaseStraw = Straw[BubbleNftPurchase]{
 		newAction.AuctionType = GetGemsAuction
 		newAction.Buyer = tx.inputFrom.Address //safe because we checked not external in CheckFuncs
 		newAction.Price = sale.NftPrice
+		if tx.additionalInfo.NftSaleContract != nil {
+			newAction.Nft = tx.additionalInfo.NftSaleContract.Item
+		}
 		return nil
 	},
 	SingleChild: &Straw[BubbleNftPurchase]{
