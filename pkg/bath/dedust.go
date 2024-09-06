@@ -155,12 +155,14 @@ var DedustSwapFromTONStraw = Straw[BubbleJettonSwap]{
 						newAction.Out.JettonMaster = transfer.master
 						newAction.Out.Amount = big.Int(transfer.amount)
 						newAction.Out.JettonWallet = transfer.recipientWallet
+						newAction.UserWallet = transfer.recipient.Address
 					} else {
 						transfer := bubble.Info.(BubbleTx)
 						newAction.Success = false
 						newAction.Out.IsTon = true
 						newAction.Out.Amount.SetInt64(transfer.inputAmount)
 						newAction.Out.JettonWallet = transfer.inputFrom.Address
+						newAction.UserWallet = transfer.account.Address
 					}
 					return nil
 				},
