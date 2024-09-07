@@ -147,7 +147,7 @@ func TestHandler(t *testing.T) {
 	type handlerTest struct {
 		name              string
 		blockNumbers      []uint32
-		transactionHash   string
+		transactionHashes []string
 		isTraceInProgress bool
 	}
 
@@ -155,31 +155,31 @@ func TestHandler(t *testing.T) {
 		{
 			name:              "Simple Ton transfer, 2 transaction in same block",
 			blockNumbers:      []uint32{39955819},
-			transactionHash:   "7QN3fYcRckwh0IOcJFT/FSb2UbUDHdl3GZ1IYmJIa6s=",
+			transactionHashes: []string{"7QN3fYcRckwh0IOcJFT/FSb2UbUDHdl3GZ1IYmJIa6s=", "BNGho3lsRUwIfre5S4Cwtp+DOD5wMBUmQ8q4r4oevok="},
 			isTraceInProgress: false,
 		},
 		{
 			name:              "Simple Ton transfer, 2 transactions in different blocks",
 			blockNumbers:      []uint32{39957151, 39957156},
-			transactionHash:   "irv3D7NwfqUnMZBHTQUkmspVJU5qSQnikwpNoq7BGxE=",
+			transactionHashes: []string{"irv3D7NwfqUnMZBHTQUkmspVJU5qSQnikwpNoq7BGxE=", "uUS+L16jLV6ooTjDoSOYJXkUW9QhWS332TPOnb7Mc60="},
 			isTraceInProgress: false,
 		},
 		{
 			name:              "Simple Ton transfer, in progress",
 			blockNumbers:      []uint32{39957151},
-			transactionHash:   "irv3D7NwfqUnMZBHTQUkmspVJU5qSQnikwpNoq7BGxE=",
+			transactionHashes: []string{"irv3D7NwfqUnMZBHTQUkmspVJU5qSQnikwpNoq7BGxE=", "uUS+L16jLV6ooTjDoSOYJXkUW9QhWS332TPOnb7Mc60="},
 			isTraceInProgress: true,
 		},
 		{
 			name:              "Jetton transfer",
 			blockNumbers:      []uint32{39991652, 39991666, 39991669, 39991672, 39991679},
-			transactionHash:   "p00rAG3PvR8pXJAifzI4g8nCoi5JiFuad4XIJLrtYYc=",
+			transactionHashes: []string{"p00rAG3PvR8pXJAifzI4g8nCoi5JiFuad4XIJLrtYYc=", "N5C3R6OKKjNFriAn382CEiuc0gzKvjDy1W6bYJCUZJI=", "sqmpBcrAiiYtntlA3Vb3wbOU8SCmY7ke//uE/S6bHiQ=", "ZyESzfANa4hD2vT+hQefGN764eXkp/NLpKSWeUW5Nw0=", "up7LCt2BwthFXBNZW6gUHX5qjXn4qqMM8hwAGqhm8WU="},
 			isTraceInProgress: false,
 		},
 		{
 			name:              "Jetton transfer in progress",
 			blockNumbers:      []uint32{39991652, 39991666},
-			transactionHash:   "p00rAG3PvR8pXJAifzI4g8nCoi5JiFuad4XIJLrtYYc=",
+			transactionHashes: []string{"p00rAG3PvR8pXJAifzI4g8nCoi5JiFuad4XIJLrtYYc=", "N5C3R6OKKjNFriAn382CEiuc0gzKvjDy1W6bYJCUZJI=", "sqmpBcrAiiYtntlA3Vb3wbOU8SCmY7ke//uE/S6bHiQ=", "ZyESzfANa4hD2vT+hQefGN764eXkp/NLpKSWeUW5Nw0=", "up7LCt2BwthFXBNZW6gUHX5qjXn4qqMM8hwAGqhm8WU="},
 			isTraceInProgress: true,
 		},
 	}
@@ -203,12 +203,14 @@ func TestHandler(t *testing.T) {
 			handler, err := api.NewHandler(zap.L(), api.WithStorage(liteStorage), api.WithExecutor(liteStorage))
 			require.NoError(t, err)
 
-			_, _, found, err := handler.GetEventAndTraceByHash(ctx, test.transactionHash)
-			require.NoError(t, err)
-			if test.isTraceInProgress {
-				require.False(t, found)
-			} else {
-				require.True(t, found)
+			for _, transactionHash := range test.transactionHashes {
+				_, _, found, err := handler.GetEventAndTraceByHash(ctx, transactionHash)
+				require.NoError(t, err)
+				if test.isTraceInProgress {
+					require.False(t, found)
+				} else {
+					require.True(t, found)
+				}
 			}
 		})
 	}
