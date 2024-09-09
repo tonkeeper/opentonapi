@@ -3696,6 +3696,10 @@
       },
       "type": "array"
      },
+     "custom_payload_api_uri": {
+      "example": "https://claim-api.tonapi.io/jettons/TESTMINT",
+      "type": "string"
+     },
      "decimals": {
       "example": "9",
       "type": "string"

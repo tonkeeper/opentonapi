@@ -21,14 +21,15 @@ const UnknownJettonName = "UKWN"
 // 2. a jetton description taken from the community git https://github.com/tonkeeper/ton-assets.
 // It additionally rewrites some fields if necessary.
 type NormalizedMetadata struct {
-	Name         string
-	Description  string
-	Image        string
-	Symbol       string
-	Decimals     int
-	Verification core.TrustType
-	Social       []string
-	Websites     []string
+	Name                string
+	Description         string
+	Image               string
+	Symbol              string
+	Decimals            int
+	Verification        core.TrustType
+	Social              []string
+	Websites            []string
+	CustomPayloadApiUri string
 }
 
 func NormalizeMetadata(meta tep64.Metadata, info *addressbook.KnownJetton, trust core.TrustType) NormalizedMetadata {
@@ -60,14 +61,15 @@ func NormalizeMetadata(meta tep64.Metadata, info *addressbook.KnownJetton, trust
 	image = imgGenerator.DefaultGenerator.GenerateImageUrl(image, 200, 200)
 
 	return NormalizedMetadata{
-		Name:         name,
-		Description:  description,
-		Image:        image,
-		Symbol:       symbol,
-		Decimals:     convertJettonDecimals(meta.Decimals),
-		Verification: trust,
-		Social:       social,
-		Websites:     websites,
+		Name:                name,
+		Description:         description,
+		Image:               image,
+		Symbol:              symbol,
+		Decimals:            convertJettonDecimals(meta.Decimals),
+		Verification:        trust,
+		Social:              social,
+		Websites:            websites,
+		CustomPayloadApiUri: meta.CustomPayloadAPIURL,
 	}
 }
 

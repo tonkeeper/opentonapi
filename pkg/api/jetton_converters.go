@@ -42,6 +42,9 @@ func jettonMetadata(account ton.AccountID, meta NormalizedMetadata) oas.JettonMe
 	if meta.Image != "" {
 		metadata.Image.SetTo(meta.Image)
 	}
+	if meta.CustomPayloadApiUri != "" {
+		metadata.CustomPayloadAPIURI.SetTo(meta.CustomPayloadApiUri)
+	}
 	return metadata
 }
 

@@ -41,6 +41,8 @@ const defaultDecimals = 9
 // verifiedJettons map of jettons that skip the holder count check
 var verifiedJettons = map[ton.AccountID]struct{}{
 	ton.MustParseAccountID("EQDptzse--Atn4hDt2dGl3TxAN0Ak6taYXEiNKOg7EAibChH"): {},
+	ton.MustParseAccountID("EQBeaBmWEkb4-DMBrCHD9ixqz15X79umAHjpQb6fHD1rn5gD"): {},
+	ton.MustParseAccountID("EQA6_hsN-J3MmLaoJPMUN-g2iN4fG7SHsTQDlpuJ7yJkCgyC"): {},
 }
 
 // Asset represents an asset used in jetton price calculations within pools

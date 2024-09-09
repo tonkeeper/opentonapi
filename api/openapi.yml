@@ -3092,7 +3092,7 @@ components:
         type: array
         items:
           type: string
-        example: ["custom_payload"]
+        example: [ "custom_payload" ]
     currencyQuery:
       in: query
       name: currency
@@ -3667,9 +3667,9 @@ components:
           format: cell
           example: b5ee9c72010106010044000114ff00f4a413f4bcf2c80b01020120020302014804050004f2300038d06c21d31f30ed44d0d33f3001c00197a4c8cb3fc9ed549330f206e20011a13431da89a1a67e61
         interfaces:
-            type: array
-            items:
-                type: string
+          type: array
+          items:
+            type: string
     Message:
       type: object
       required:
@@ -6786,6 +6786,9 @@ components:
           items:
             type: string
             example: [ "https://coinmarketcap.com/currencies/drv/", "https://www.coingecko.com/en/coins/durov" ]
+        custom_payload_api_uri:
+          type: string
+          example: "https://claim-api.tonapi.io/jettons/TESTMINT"
     InscriptionBalances:
       type: object
       required:
@@ -6886,7 +6889,7 @@ components:
     JettonTransferPayload:
       type: object
       required:
-          - payload
+        - payload
       properties:
         custom_payload:
           type: string

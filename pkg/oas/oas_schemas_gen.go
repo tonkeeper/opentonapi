@@ -7691,15 +7691,16 @@ func (s *JettonInfo) SetHoldersCount(val int32) {
 
 // Ref: #/components/schemas/JettonMetadata
 type JettonMetadata struct {
-	Address     string    `json:"address"`
-	Name        string    `json:"name"`
-	Symbol      string    `json:"symbol"`
-	Decimals    string    `json:"decimals"`
-	Image       OptString `json:"image"`
-	Description OptString `json:"description"`
-	Social      []string  `json:"social"`
-	Websites    []string  `json:"websites"`
-	Catalogs    []string  `json:"catalogs"`
+	Address             string    `json:"address"`
+	Name                string    `json:"name"`
+	Symbol              string    `json:"symbol"`
+	Decimals            string    `json:"decimals"`
+	Image               OptString `json:"image"`
+	Description         OptString `json:"description"`
+	Social              []string  `json:"social"`
+	Websites            []string  `json:"websites"`
+	Catalogs            []string  `json:"catalogs"`
+	CustomPayloadAPIURI OptString `json:"custom_payload_api_uri"`
 }
 
 // GetAddress returns the value of Address.
@@ -7747,6 +7748,11 @@ func (s *JettonMetadata) GetCatalogs() []string {
 	return s.Catalogs
 }
 
+// GetCustomPayloadAPIURI returns the value of CustomPayloadAPIURI.
+func (s *JettonMetadata) GetCustomPayloadAPIURI() OptString {
+	return s.CustomPayloadAPIURI
+}
+
 // SetAddress sets the value of Address.
 func (s *JettonMetadata) SetAddress(val string) {
 	s.Address = val
@@ -7790,6 +7796,11 @@ func (s *JettonMetadata) SetWebsites(val []string) {
 // SetCatalogs sets the value of Catalogs.
 func (s *JettonMetadata) SetCatalogs(val []string) {
 	s.Catalogs = val
+}
+
+// SetCustomPayloadAPIURI sets the value of CustomPayloadAPIURI.
+func (s *JettonMetadata) SetCustomPayloadAPIURI(val OptString) {
+	s.CustomPayloadAPIURI = val
 }
 
 // Ref: #/components/schemas/JettonMintAction

@@ -23286,9 +23286,15 @@ func (s *JettonMetadata) encodeFields(e *jx.Encoder) {
 			e.ArrEnd()
 		}
 	}
+	{
+		if s.CustomPayloadAPIURI.Set {
+			e.FieldStart("custom_payload_api_uri")
+			s.CustomPayloadAPIURI.Encode(e)
+		}
+	}
 }
 
-var jsonFieldsNameOfJettonMetadata = [9]string{
+var jsonFieldsNameOfJettonMetadata = [10]string{
 	0: "address",
 	1: "name",
 	2: "symbol",
@@ -23298,6 +23304,7 @@ var jsonFieldsNameOfJettonMetadata = [9]string{
 	6: "social",
 	7: "websites",
 	8: "catalogs",
+	9: "custom_payload_api_uri",
 }
 
 // Decode decodes JettonMetadata from json.
@@ -23433,6 +23440,16 @@ func (s *JettonMetadata) Decode(d *jx.Decoder) error {
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"catalogs\"")
+			}
+		case "custom_payload_api_uri":
+			if err := func() error {
+				s.CustomPayloadAPIURI.Reset()
+				if err := s.CustomPayloadAPIURI.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"custom_payload_api_uri\"")
 			}
 		default:
 			return d.Skip()
