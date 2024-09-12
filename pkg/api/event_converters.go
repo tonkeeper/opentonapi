@@ -45,7 +45,11 @@ func distinctAccounts(skip *tongo.AccountID, book addressBook, accounts ...*tong
 }
 
 func convertTrace(t *core.Trace, book addressBook) oas.Trace {
-	trace := oas.Trace{Transaction: convertTransaction(t.Transaction, t.AccountInterfaces, book), Interfaces: g.ToStrings(t.AccountInterfaces)}
+	trace := oas.Trace{
+		Transaction: convertTransaction(t.Transaction, t.AccountInterfaces, book),
+		Interfaces:  g.ToStrings(t.AccountInterfaces),
+		InProgress:  t.InProgress(),
+	}
 
 	sort.Slice(t.Children, func(i, j int) bool {
 		if t.Children[i].InMsg == nil || t.Children[j].InMsg == nil {

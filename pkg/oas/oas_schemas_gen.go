@@ -15554,8 +15554,10 @@ func (s *TonTransferAction) SetRefund(val OptRefund) {
 type Trace struct {
 	Transaction Transaction `json:"transaction"`
 	Interfaces  []string    `json:"interfaces"`
-	Children    []Trace     `json:"children"`
-	Emulated    OptBool     `json:"emulated"`
+	// Trace is not finished yet. Transactions still happening.
+	InProgress bool    `json:"in_progress"`
+	Children   []Trace `json:"children"`
+	Emulated   OptBool `json:"emulated"`
 }
 
 // GetTransaction returns the value of Transaction.
@@ -15566,6 +15568,11 @@ func (s *Trace) GetTransaction() Transaction {
 // GetInterfaces returns the value of Interfaces.
 func (s *Trace) GetInterfaces() []string {
 	return s.Interfaces
+}
+
+// GetInProgress returns the value of InProgress.
+func (s *Trace) GetInProgress() bool {
+	return s.InProgress
 }
 
 // GetChildren returns the value of Children.
@@ -15586,6 +15593,11 @@ func (s *Trace) SetTransaction(val Transaction) {
 // SetInterfaces sets the value of Interfaces.
 func (s *Trace) SetInterfaces(val []string) {
 	s.Interfaces = val
+}
+
+// SetInProgress sets the value of InProgress.
+func (s *Trace) SetInProgress(val bool) {
+	s.InProgress = val
 }
 
 // SetChildren sets the value of Children.

@@ -5457,6 +5457,11 @@
       "example": false,
       "type": "boolean"
      },
+     "in_progress": {
+      "description": "Trace is not finished yet. Transactions still happening",
+      "example": false,
+      "type": "boolean"
+     },
      "interfaces": {
       "example": [
        "wallet",
@@ -5473,7 +5478,8 @@
     },
     "required": [
      "transaction",
-     "interfaces"
+     "interfaces",
+     "in_progress"
     ],
     "type": "object"
    },

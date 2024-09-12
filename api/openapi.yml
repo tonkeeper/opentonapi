@@ -6527,6 +6527,7 @@ components:
       required:
         - transaction
         - interfaces
+        - in_progress
       properties:
         transaction:
           $ref: '#/components/schemas/Transaction'
@@ -6535,6 +6536,10 @@ components:
           items:
             type: string
           example: [ "wallet", "tep62_item" ]
+        in_progress:
+          type: boolean
+          example: false
+          description: Trace is not finished yet. Transactions still happening
         children:
           type: array
           items:

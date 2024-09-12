@@ -36174,6 +36174,10 @@ func (s *Trace) encodeFields(e *jx.Encoder) {
 		e.ArrEnd()
 	}
 	{
+		e.FieldStart("in_progress")
+		e.Bool(s.InProgress)
+	}
+	{
 		if s.Children != nil {
 			e.FieldStart("children")
 			e.ArrStart()
@@ -36191,11 +36195,12 @@ func (s *Trace) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfTrace = [4]string{
+var jsonFieldsNameOfTrace = [5]string{
 	0: "transaction",
 	1: "interfaces",
-	2: "children",
-	3: "emulated",
+	2: "in_progress",
+	3: "children",
+	4: "emulated",
 }
 
 // Decode decodes Trace from json.
@@ -36237,6 +36242,18 @@ func (s *Trace) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"interfaces\"")
 			}
+		case "in_progress":
+			requiredBitSet[0] |= 1 << 2
+			if err := func() error {
+				v, err := d.Bool()
+				s.InProgress = bool(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"in_progress\"")
+			}
 		case "children":
 			if err := func() error {
 				s.Children = make([]Trace, 0)
@@ -36274,7 +36291,7 @@ func (s *Trace) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b00000011,
+		0b00000111,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
