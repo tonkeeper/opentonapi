@@ -64,7 +64,7 @@ func (s *LiteStorage) GetNftCollectionByCollectionAddress(ctx context.Context, a
 		OwnerAddress:      accountID,
 		CollectionContent: rawContent,
 		ContentLayout:     int(fullContent.Layout),
-		NextItemIndex:     g.Pointer(big.Int(source.NextItemIndex)).Uint64(),
+		NextItemIndex:     g.Pointer(big.Int(source.NextItemIndex)).Int64(),
 	}
 	if fullContent.Layout == tep64.OffChain {
 		meta, err := core.GetNftMetaData(string(fullContent.Data))

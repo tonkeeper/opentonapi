@@ -25,7 +25,7 @@ type NftItem struct {
 
 type NftCollection struct {
 	Address           tongo.AccountID
-	NextItemIndex     uint64
+	NextItemIndex     int64
 	OwnerAddress      *tongo.AccountID
 	ContentLayout     int
 	CollectionContent []byte
