@@ -320,9 +320,6 @@ func (h *Handler) GetAccountEvent(ctx context.Context, params oas.GetAccountEven
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
-	for i, j := 0, len(event.Actions)-1; i < j; i, j = i+1, j-1 {
-		event.Actions[i], event.Actions[j] = event.Actions[j], event.Actions[i]
-	}
 	if emulated {
 		event.InProgress = true
 	}
