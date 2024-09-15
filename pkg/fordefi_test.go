@@ -12,8 +12,8 @@ import (
 	"github.com/arnac-io/opentonapi/pkg/core"
 	"github.com/arnac-io/opentonapi/pkg/litestorage"
 	"github.com/stretchr/testify/require"
+	"github.com/tonkeeper/tonapi-go"
 	"github.com/tonkeeper/tongo"
-	"github.com/tonkeeper/tongo/liteapi"
 )
 
 func mustNewCache[T any](t *testing.T) litestorage.ICache[T] {
@@ -23,14 +23,16 @@ func mustNewCache[T any](t *testing.T) litestorage.ICache[T] {
 }
 
 func mustNewLiteStorage(t *testing.T) *litestorage.LiteStorage {
-	client, err := liteapi.NewClientWithDefaultMainnet()
+	tonapi, err := tonapi.New(tonapi.WithToken("AGKK3WIHTERSIGYAAAAFKMOJOFT7IGZJRMQDAHGG5UTVRFBUAR5TUC2MJ4U45BC7OFPQZAI"))
 	require.NoError(t, err)
+
 	storage, err := litestorage.NewLiteStorage(
 		zap.L(),
-		client,
+		nil,
 		litestorage.WithTrackAllAccounts(),
 		litestorage.WithTransactionsIndexByHash(mustNewCache[core.Transaction](t)),
 		litestorage.WithTransactionsByInMsgLT(mustNewCache[string](t)),
+		litestorage.WithTonApiClient(tonapi),
 	)
 	require.NoError(t, err)
 	return storage
@@ -93,9 +95,10 @@ func TestIndexer(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			client, err := liteapi.NewClientWithDefaultMainnet()
+			tonapi, err := tonapi.New(tonapi.WithToken("AGKK3WIHTERSIGYAAAAFKMOJOFT7IGZJRMQDAHGG5UTVRFBUAR5TUC2MJ4U45BC7OFPQZAI"))
 			require.NoError(t, err)
-			opentonIndexer := indexer.New(zap.L(), client)
+
+			opentonIndexer := indexer.New(zap.L(), nil, tonapi)
 			masterBlock, blocks, err := opentonIndexer.GetBlocksFromMasterBlock(test.blockNumber)
 			require.NoError(t, err)
 			require.Len(t, blocks, test.expectedBlocks)
@@ -123,9 +126,10 @@ func TestLiteStorage(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			client, err := liteapi.NewClientWithDefaultMainnet()
+			tonapi, err := tonapi.New(tonapi.WithToken("AGKK3WIHTERSIGYAAAAFKMOJOFT7IGZJRMQDAHGG5UTVRFBUAR5TUC2MJ4U45BC7OFPQZAI"))
 			require.NoError(t, err)
-			opentonIndexer := indexer.New(zap.L(), client)
+
+			opentonIndexer := indexer.New(zap.L(), nil, tonapi)
 			_, blocks, err := opentonIndexer.GetBlocksFromMasterBlock(test.blockNumber)
 			require.NoError(t, err)
 
@@ -186,9 +190,10 @@ func TestHandler(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			client, err := liteapi.NewClientWithDefaultMainnet()
+			tonapi, err := tonapi.New(tonapi.WithToken("AGKK3WIHTERSIGYAAAAFKMOJOFT7IGZJRMQDAHGG5UTVRFBUAR5TUC2MJ4U45BC7OFPQZAI"))
 			require.NoError(t, err)
-			opentonIndexer := indexer.New(zap.L(), client)
+
+			opentonIndexer := indexer.New(zap.L(), nil, tonapi)
 			liteStorage := mustNewLiteStorage(t)
 
 			for _, blockNumber := range test.blockNumbers {

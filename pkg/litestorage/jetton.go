@@ -2,14 +2,16 @@ package litestorage
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"math/big"
 
+	"github.com/arnac-io/opentonapi/pkg/core"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/shopspring/decimal"
 	"github.com/sourcegraph/conc/iter"
-	"github.com/arnac-io/opentonapi/pkg/core"
+	"github.com/tonkeeper/tonapi-go"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
 	"github.com/tonkeeper/tongo/liteapi"
@@ -87,10 +89,17 @@ func (s *LiteStorage) GetJettonMasterMetadata(ctx context.Context, master tongo.
 	if ok {
 		return meta, nil
 	}
-	rawMeta, err := s.client.GetJettonData(ctx, master)
+	jettonInfo, err := s.tonapiClient.GetJettonInfo(ctx, tonapi.GetJettonInfoParams{AccountID: master.ToRaw()})
 	if err != nil {
 		return tongo.JettonMetadata{}, err
 	}
+	rawMeta := tongo.JettonMetadata{
+		Decimals: jettonInfo.Metadata.Decimals,
+		Name:     jettonInfo.Metadata.Name,
+		Symbol:   jettonInfo.Metadata.Symbol,
+		Image:    jettonInfo.Metadata.Image.Value,
+	}
+
 	s.jettonMetaCache.Store(master.ToRaw(), rawMeta)
 	return rawMeta, nil
 }
@@ -128,21 +137,23 @@ func (s *LiteStorage) GetAccountJettonHistoryByID(ctx context.Context, address, 
 func (s *LiteStorage) JettonMastersForWallets(ctx context.Context, wallets []tongo.AccountID) (map[tongo.AccountID]tongo.AccountID, error) {
 	masters := make(map[tongo.AccountID]tongo.AccountID)
 	for _, wallet := range wallets {
-		_, value, err := abi.GetWalletData(ctx, s.executor, wallet)
+		res, err := s.tonapiClient.ExecGetMethodForBlockchainAccount(ctx, tonapi.ExecGetMethodForBlockchainAccountParams{AccountID: wallet.ToRaw(), MethodName: "get_wallet_data"})
 		if err != nil {
 			return nil, err
 		}
-		data, ok := value.(abi.GetWalletDataResult)
+
+		decodeMap := map[string]string{}
+		err = json.Unmarshal(res.Decoded, &decodeMap)
+		if err != nil {
+			return nil, err
+		}
+
+		jettonAddress, ok := decodeMap["jetton"]
 		if !ok {
 			continue
 		}
-		master, err := tongo.AccountIDFromTlb(data.Jetton)
-		if err != nil {
-			return nil, err
-		}
-		if master != nil {
-			masters[wallet] = *master
-		}
+		master := tongo.MustParseAddress(jettonAddress).ID
+		masters[wallet] = master
 	}
 	return masters, nil
 }

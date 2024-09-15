@@ -3,6 +3,8 @@ package litestorage
 import (
 	"context"
 	"crypto/ed25519"
+	"encoding/binary"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"math/big"
@@ -15,6 +17,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/puzpuzpuz/xsync/v2"
 	"github.com/sourcegraph/conc/iter"
+	"github.com/tonkeeper/tonapi-go"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
 	"github.com/tonkeeper/tongo/boc"
@@ -48,16 +51,18 @@ func (m inMsgCreatedLT) String() string {
 	return fmt.Sprintf("%s_%d", m.account.String(), m.lt)
 }
 
-func extractInMsgCreatedLT(accountID tongo.AccountID, tx *tlb.Transaction) (inMsgCreatedLT, bool) {
-	if tx.Msgs.InMsg.Exists && tx.Msgs.InMsg.Value.Value.Info.IntMsgInfo != nil {
-		return inMsgCreatedLT{account: accountID, lt: tx.Msgs.InMsg.Value.Value.Info.IntMsgInfo.CreatedLt}, true
+func extractInMsgCreatedLT(accountID tongo.AccountID, tx core.Transaction) (inMsgCreatedLT, bool) {
+	if tx.InMsg != nil {
+		return inMsgCreatedLT{account: accountID, lt: tx.InMsg.CreatedLt}, true
 	}
 	return inMsgCreatedLT{}, false
 }
 
 type LiteStorage struct {
-	logger                  *zap.Logger
-	client                  *liteapi.Client
+	logger       *zap.Logger
+	client       *liteapi.Client
+	tonapiClient *tonapi.Client
+
 	executor                abi.Executor
 	jettonMetaCache         *xsync.MapOf[string, tep64.Metadata]
 	transactionsIndexByHash ICache[core.Transaction]
@@ -99,6 +104,7 @@ type Options struct {
 	transactionsIndexByHash ICache[core.Transaction]
 	transactionsByInMsgLT   ICache[string]
 	cacheExpiration         time.Duration
+	tonApiClient            *tonapi.Client
 }
 
 func WithPreloadAccounts(a []tongo.AccountID) Option {
@@ -156,6 +162,12 @@ func WithCacheExpiration(d time.Duration) Option {
 	}
 }
 
+func WithTonApiClient(c *tonapi.Client) Option {
+	return func(o *Options) {
+		o.tonApiClient = c
+	}
+}
+
 type Option func(o *Options)
 
 func NewLiteStorage(log *zap.Logger, cli *liteapi.Client, opts ...Option) (*LiteStorage, error) {
@@ -171,6 +183,7 @@ func NewLiteStorage(log *zap.Logger, cli *liteapi.Client, opts ...Option) (*Lite
 		// TODO: introduce an env variable to configure this number
 		maxGoroutines: 5,
 		client:        cli,
+		tonapiClient:  o.tonApiClient,
 		executor:      o.executor,
 		stopCh:        make(chan struct{}),
 		// read-only data
@@ -213,7 +226,6 @@ func NewLiteStorage(log *zap.Logger, cli *liteapi.Client, opts ...Option) (*Lite
 		}
 	})
 	go storage.run(o.blockCh)
-	go storage.runBlockchainConfigUpdate(5 * time.Second)
 	return storage, nil
 }
 
@@ -229,31 +241,29 @@ func (s *LiteStorage) Shutdown() {
 func (s *LiteStorage) ParseBlock(ctx context.Context, block indexer.IDandBlock) {
 	transactionsIndexByHash := map[string]core.Transaction{}
 	transactionsByInMsgLT := map[string]string{}
-	for _, tx := range block.Block.AllTransactions() {
-		accountID := *ton.NewAccountID(block.ID.Workchain, tx.AccountAddr)
+	for _, tx := range block.Transactions {
+		accountID := ton.MustParseAccountID(tx.Account.Address)
 		_, trackSpecificAccount := s.trackingAccounts[accountID]
 		if trackSpecificAccount || s.trackAllAccounts {
-			hash := tongo.Bits256(tx.Hash())
-			transaction, err := core.ConvertTransaction(accountID.Workchain, tongo.Transaction{Transaction: *tx, BlockID: block.ID})
+			transaction, err := OasTransactionToCoreTransaction(tx)
 			if err != nil {
 				s.logger.Error("failed to process tx",
-					zap.String("tx-hash", hash.Hex()),
+					zap.String("tx-hash", tx.Hash),
 					zap.Error(err))
 				continue
 			}
-			transactionsIndexByHash[tx.Hash().Hex()] = *transaction
+			hash := tongo.Bits256(transaction.Hash)
+			transactionsIndexByHash[hash.Hex()] = transaction
 
 			// We save in cache for each transaction:
 			// 1. A map from the incoming message to the transaction hash (used when looking a transaction children)
 			// 2. A map from each outgoing message to the transaction hash (used when looking a transaction parent)
-			if createLT, ok := extractInMsgCreatedLT(accountID, tx); ok {
+			if createLT, ok := extractInMsgCreatedLT(accountID, transaction); ok {
 				transactionsByInMsgLT[createLT.String()] = hash.Hex()
 			}
-			for _, outMsg := range tx.Msgs.OutMsgs.Values() {
-				if outMsg.Value.Info.IntMsgInfo != nil {
-					createLT := inMsgCreatedLT{account: accountID, lt: outMsg.Value.Info.IntMsgInfo.CreatedLt}
-					transactionsByInMsgLT[createLT.String()] = hash.Hex()
-				}
+			for _, outMsg := range transaction.OutMsgs {
+				createLT := inMsgCreatedLT{account: accountID, lt: outMsg.CreatedLt}
+				transactionsByInMsgLT[createLT.String()] = hash.Hex()
 			}
 		}
 	}
@@ -291,20 +301,16 @@ func (s *LiteStorage) GetRawAccount(ctx context.Context, address tongo.AccountID
 		storageTimeHistogramVec.WithLabelValues("get_raw_account").Observe(v)
 	}))
 	defer timer.ObserveDuration()
-	var account tlb.ShardAccount
-	err := retry.Do(func() error {
-		state, err := s.client.GetAccountState(ctx, address)
-		if err != nil {
-			return err
-		}
-		account = state
-		return nil
-	}, retry.Attempts(10), retry.Delay(10*time.Millisecond))
 
+	rawAccount, err := s.tonapiClient.GetBlockchainRawAccount(ctx, tonapi.GetBlockchainRawAccountParams{AccountID: address.ToRaw()})
 	if err != nil {
 		return nil, err
 	}
-	return core.ConvertToAccount(address, account)
+	coreAccount, err := oasAccountToCoreAccount(*rawAccount)
+	if err != nil {
+		return nil, err
+	}
+	return &coreAccount, nil
 }
 
 // GetRawAccounts returns low-level information about several accounts taken directly from the blockchain.
@@ -349,9 +355,9 @@ func (s *LiteStorage) preloadAccount(a tongo.AccountID) error {
 		}
 		hash := tongo.Bits256(tx.Hash())
 		s.transactionsIndexByHash.Set(context.Background(), hash.Hex(), *t, s.cacheExpiration)
-		if createLT, ok := extractInMsgCreatedLT(a, &tx.Transaction); ok {
-			s.transactionsByInMsgLT.Set(context.Background(), createLT.String(), hash.Hex(), s.cacheExpiration)
-		}
+		// if createLT, ok := extractInMsgCreatedLT(a, &tx.Transaction); ok {
+		// 	s.transactionsByInMsgLT.Set(context.Background(), createLT.String(), hash.Hex(), s.cacheExpiration)
+		// }
 	}
 	return nil
 }
@@ -368,19 +374,19 @@ func (s *LiteStorage) preloadBlock(id tongo.BlockID) error {
 	}
 	s.blockCache.Store(extID, &block)
 	for _, tx := range block.AllTransactions() {
-		accountID := tongo.AccountID{
-			Workchain: extID.Workchain,
-			Address:   tx.AccountAddr,
-		}
+		// accountID := tongo.AccountID{
+		// 	Workchain: extID.Workchain,
+		// 	Address:   tx.AccountAddr,
+		// }
 		t, err := core.ConvertTransaction(extID.Workchain, tongo.Transaction{Transaction: *tx, BlockID: extID})
 		if err != nil {
 			return err
 		}
 		hash := tongo.Bits256(tx.Hash())
 		s.transactionsIndexByHash.Set(ctx, hash.Hex(), *t, s.cacheExpiration)
-		if createLT, ok := extractInMsgCreatedLT(accountID, tx); ok {
-			s.transactionsByInMsgLT.Set(ctx, createLT.String(), hash.Hex(), s.cacheExpiration)
-		}
+		// if createLT, ok := extractInMsgCreatedLT(accountID, tx); ok {
+		// 	s.transactionsByInMsgLT.Set(ctx, createLT.String(), hash.Hex(), s.cacheExpiration)
+		// }
 	}
 	return nil
 }
@@ -447,11 +453,11 @@ func (s *LiteStorage) GetTransaction(ctx context.Context, hash tongo.Bits256) (*
 		storageTimeHistogramVec.WithLabelValues("get_transaction").Observe(v)
 	}))
 	defer timer.ObserveDuration()
-	tx, err := s.transactionsIndexByHash.Get(ctx, hash.Hex())
+	tx, err := s.getTxFromCacheByHash(hash.Hex())
 	if err != nil {
-		return nil, core.ErrEntityNotFound
+		return nil, err
 	}
-	return &tx, nil
+	return tx, nil
 }
 
 func (s *LiteStorage) SearchTransactionByMessageHash(ctx context.Context, hash tongo.Bits256) (*tongo.Bits256, error) {
@@ -487,16 +493,44 @@ func (s *LiteStorage) GetBlockTransactions(ctx context.Context, id tongo.BlockID
 	return core.ExtractTransactions(blockID, &block)
 }
 
+func (s *LiteStorage) getTxFromCacheByHash(hash string) (*core.Transaction, error) {
+	tx, err := s.transactionsIndexByHash.Get(context.Background(), hash)
+	if err != nil {
+		return nil, core.ErrEntityNotFound
+	}
+
+	// Message contain decoded message body which are of type Any
+	// This means that after we saved them to the cache, and reread them, we get them back as a map
+	// we re parse them here to get their actual type back
+	if tx.InMsg != nil {
+		rawBody := hex.EncodeToString(tx.InMsg.Body)
+		decodeMessageBody, err := decodeMessageBody(rawBody, tx.InMsg.MsgType)
+		if err != nil {
+			return nil, err
+		}
+		tx.InMsg.DecodedBody = decodeMessageBody
+	}
+	for i := range tx.OutMsgs {
+		rawBody := hex.EncodeToString(tx.OutMsgs[i].Body)
+		decodeMessageBody, err := decodeMessageBody(rawBody, tx.OutMsgs[i].MsgType)
+		if err != nil {
+			return nil, err
+		}
+		tx.OutMsgs[i].DecodedBody = decodeMessageBody
+	}
+	return &tx, nil
+}
+
 func (s *LiteStorage) searchTxInCache(a tongo.AccountID, lt uint64) *core.Transaction {
 	hash, err := s.transactionsByInMsgLT.Get(context.Background(), inMsgCreatedLT{account: a, lt: lt}.String())
 	if err != nil {
 		return nil
 	}
-	tx, err := s.transactionsIndexByHash.Get(context.Background(), hash)
+	tx, err := s.getTxFromCacheByHash(hash)
 	if err != nil {
 		return nil
 	}
-	return &tx
+	return tx
 }
 
 func (s *LiteStorage) GetStorageProviders(ctx context.Context) ([]core.StorageProvider, error) {
@@ -609,4 +643,249 @@ func (s *LiteStorage) GetAccountMultisigs(ctx context.Context, accountID ton.Acc
 
 func (s *LiteStorage) GetMultisigByID(ctx context.Context, accountID ton.AccountID) (*core.Multisig, error) {
 	return nil, fmt.Errorf("not implemented")
+}
+
+func OasTransactionToCoreTransaction(oasTransaction tonapi.Transaction) (core.Transaction, error) {
+	transactionId := core.TransactionID{
+		Hash:    tongo.MustParseHash(oasTransaction.Hash),
+		Lt:      uint64(oasTransaction.Lt),
+		Account: tongo.MustParseAddress(oasTransaction.Account.GetAddress()).ID,
+	}
+
+	coreTransaction := core.Transaction{
+		TransactionID: transactionId,
+		Type:          core.TransactionType(oasTransaction.TransactionType),
+		Success:       oasTransaction.Success,
+		Utime:         oasTransaction.Utime,
+		OrigStatus:    tlb.AccountStatus(oasTransaction.OrigStatus),
+		EndStatus:     tlb.AccountStatus(oasTransaction.EndStatus),
+		BlockID:       tongo.MustParseBlockID(oasTransaction.Block),
+		EndBalance:    oasTransaction.EndBalance,
+		Aborted:       oasTransaction.Aborted,
+		Destroyed:     oasTransaction.Destroyed,
+		TotalFee:      oasTransaction.TotalFees,
+	}
+
+	oldHash := tlb.Bits256{}
+	bytes, err := hex.DecodeString(oasTransaction.StateUpdateOld)
+	if err != nil {
+		return core.Transaction{}, err
+	}
+	copy(oldHash[:], bytes)
+
+	newHash := tlb.Bits256{}
+	bytes, err = hex.DecodeString(oasTransaction.StateUpdateNew)
+	if err != nil {
+		return core.Transaction{}, err
+	}
+	copy(newHash[:], bytes)
+
+	coreTransaction.StateHashUpdate = tlb.HashUpdate{
+		OldHash: oldHash,
+		NewHash: newHash,
+	}
+
+	coreTransaction.Raw, err = hex.DecodeString(oasTransaction.Raw)
+	if err != nil {
+		return core.Transaction{}, err
+	}
+
+	if oasTransaction.InMsg.Set {
+		coreMessage, err := oasMessageToCoreMessage(oasTransaction.InMsg.Value)
+		if err != nil {
+			return core.Transaction{}, err
+		}
+		coreTransaction.InMsg = &coreMessage
+	}
+	for _, outMessage := range oasTransaction.OutMsgs {
+		coreMessage, err := oasMessageToCoreMessage(outMessage)
+		if err != nil {
+			return core.Transaction{}, err
+		}
+		coreTransaction.OutMsgs = append(coreTransaction.OutMsgs, coreMessage)
+	}
+
+	if oasTransaction.PrevTransLt.Set && oasTransaction.PrevTransHash.Set {
+		coreTransaction.PrevTransLt = uint64(oasTransaction.PrevTransLt.Value)
+		coreTransaction.PrevTransHash = tongo.MustParseHash(oasTransaction.PrevTransHash.Value)
+	}
+
+	if oasTransaction.ComputePhase.Set {
+		oasComputePhase := oasTransaction.ComputePhase.Value
+		computePhase := core.TxComputePhase{
+			Skipped: oasComputePhase.Skipped,
+		}
+		if oasComputePhase.Skipped {
+			computePhase.SkipReason = tlb.ComputeSkipReason(oasComputePhase.SkipReason.Value)
+		} else {
+			computePhase.Success = oasComputePhase.Success.Value
+			computePhase.GasFees = uint64(oasComputePhase.GasFees.Value)
+			computePhase.GasUsed = *big.NewInt(oasComputePhase.GasUsed.Value)
+			computePhase.VmSteps = uint32(oasComputePhase.VMSteps.Value)
+			computePhase.ExitCode = int32(oasComputePhase.ExitCode.Value)
+		}
+		coreTransaction.ComputePhase = &computePhase
+	}
+
+	if oasTransaction.StoragePhase.Set {
+		oasStoragePhase := oasTransaction.StoragePhase.Value
+		storagePhase := core.TxStoragePhase{
+			StorageFeesCollected: uint64(oasStoragePhase.FeesCollected),
+			StatusChange:         tlb.AccStatusChange(oasStoragePhase.StatusChange),
+		}
+		if oasStoragePhase.FeesDue.Set {
+			storageFeesDue := uint64(oasStoragePhase.FeesDue.Value)
+			storagePhase.StorageFeesDue = &storageFeesDue
+		}
+		coreTransaction.StoragePhase = &storagePhase
+	}
+
+	if oasTransaction.CreditPhase.Set {
+		oasCreditPhase := oasTransaction.CreditPhase.Value
+		creditPhase := core.TxCreditPhase{
+			DueFeesCollected: uint64(oasCreditPhase.FeesCollected),
+			CreditGrams:      uint64(oasCreditPhase.Credit),
+		}
+		coreTransaction.CreditPhase = &creditPhase
+	}
+
+	if oasTransaction.ActionPhase.Set {
+		oasActionPhase := oasTransaction.ActionPhase.Value
+		actionPhase := core.TxActionPhase{
+			Success:        oasActionPhase.Success,
+			ResultCode:     int32(oasActionPhase.ResultCode),
+			TotalActions:   uint16(oasActionPhase.TotalActions),
+			SkippedActions: uint16(oasActionPhase.SkippedActions),
+			FwdFees:        uint64(oasActionPhase.FwdFees),
+			TotalFees:      uint64(oasActionPhase.TotalFees),
+		}
+		coreTransaction.ActionPhase = &actionPhase
+	}
+
+	if oasTransaction.BouncePhase.Set {
+		oasBouncePhase := oasTransaction.BouncePhase.Value
+		bouncePhase := core.TxBouncePhase{
+			Type: core.BouncePhaseType(oasBouncePhase),
+		}
+		coreTransaction.BouncePhase = &bouncePhase
+	}
+	return coreTransaction, nil
+}
+
+func oasMessageToCoreMessage(oasMessage tonapi.Message) (core.Message, error) {
+	messageId := core.MessageID{
+		CreatedLt: uint64(oasMessage.CreatedLt),
+	}
+	if oasMessage.Source.Set {
+		accountId := tongo.MustParseAddress(oasMessage.Source.Value.Address).ID
+		messageId.Source = &accountId
+	}
+	if oasMessage.Destination.Set {
+		accountId := tongo.MustParseAddress(oasMessage.Destination.Value.Address).ID
+		messageId.Destination = &accountId
+	}
+
+	coreMessage := core.Message{
+		MessageID:   messageId,
+		Hash:        tongo.MustParseHash(oasMessage.Hash),
+		IhrDisabled: oasMessage.IhrDisabled,
+		Bounce:      oasMessage.Bounce,
+		Bounced:     oasMessage.Bounced,
+		Value:       oasMessage.Value,
+		FwdFee:      oasMessage.FwdFee,
+		IhrFee:      oasMessage.IhrFee,
+		ImportFee:   oasMessage.ImportFee,
+		CreatedAt:   uint32(oasMessage.CreatedAt),
+	}
+
+	if oasMessage.MsgType == tonapi.MessageMsgTypeExtInMsg {
+		coreMessage.MsgType = core.ExtInMsg
+	} else if oasMessage.MsgType == tonapi.MessageMsgTypeExtOutMsg {
+		coreMessage.MsgType = core.ExtOutMsg
+	} else {
+		coreMessage.MsgType = core.IntMsg
+	}
+
+	if oasMessage.RawBody.Set {
+		decodedMessageBody, err := decodeMessageBody(oasMessage.RawBody.Value, coreMessage.MsgType)
+		if err != nil {
+			return core.Message{}, err
+		}
+		coreMessage.DecodedBody = decodedMessageBody
+	}
+
+	if oasMessage.Init.Set {
+		coreMessage.Init, _ = hex.DecodeString(oasMessage.Init.Value.Boc)
+		for _, iface := range oasMessage.Init.Value.Interfaces {
+			coreMessage.InitInterfaces = append(coreMessage.InitInterfaces, abi.ContractInterfaceFromString(iface))
+		}
+	}
+
+	if oasMessage.RawBody.Set {
+		var err error
+		coreMessage.Body, err = hex.DecodeString(oasMessage.RawBody.Value)
+		if err != nil {
+			return core.Message{}, err
+		}
+	}
+
+	if oasMessage.OpCode.Set {
+		bytes, err := hex.DecodeString(oasMessage.OpCode.Value[2:])
+		if err != nil {
+			return core.Message{}, err
+		}
+		opCode := binary.BigEndian.Uint32(bytes)
+		coreMessage.OpCode = &opCode
+	}
+	return coreMessage, nil
+}
+
+func oasAccountToCoreAccount(oasAccount tonapi.BlockchainRawAccount) (core.Account, error) {
+	coreAccount := core.Account{
+		AccountAddress:    tongo.MustParseAddress(oasAccount.Address).ID,
+		Status:            tlb.AccountStatus(oasAccount.Status),
+		TonBalance:        oasAccount.Balance,
+		LastTransactionLt: uint64(oasAccount.LastTransactionLt),
+	}
+	if oasAccount.Code.Set {
+		var err error
+		coreAccount.Code, err = hex.DecodeString(oasAccount.Code.Value)
+		if err != nil {
+			return core.Account{}, err
+		}
+	}
+	return coreAccount, nil
+}
+
+func decodeMessageBody(rawBody string, msgType core.MsgType) (*core.DecodedMessageBody, error) {
+	if rawBody == "" {
+		return nil, nil
+	}
+
+	cells, err := boc.DeserializeBocHex(rawBody)
+	if err != nil {
+		return nil, err
+	}
+	if len(cells) != 1 {
+		return nil, errors.New("multiple cells not supported")
+	}
+	cell := cells[0]
+
+	var op *string
+	var value any
+	switch msgType {
+	case "IntMsg":
+		_, op, value, err = abi.InternalMessageDecoder(cell, nil)
+	case "ExtInMsg":
+		_, op, value, err = abi.ExtInMessageDecoder(cell, nil)
+	case "ExtOutMsg":
+		_, op, value, err = abi.ExtOutMessageDecoder(cell, nil, tlb.MsgAddress{})
+	}
+	if err != nil {
+		return nil, err
+	}
+	if op != nil {
+		return &core.DecodedMessageBody{Operation: *op, Value: value}, nil
+	}
+	return nil, nil
 }
