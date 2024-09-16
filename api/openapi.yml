@@ -5345,6 +5345,8 @@ components:
           example: https://cache.tonapi.io/images/jetton.jpg
         verification:
           $ref: '#/components/schemas/JettonVerificationType'
+        custom_payload_api_uri:  # todo: maybe remove
+          type: string
     JettonBalance:
       type: object
       required:
@@ -5574,6 +5576,8 @@ components:
         - approvals_num
         - expiration_date
         - risk
+        - creation_date
+        - signed_by
       properties:
         address:
           type: string
@@ -5603,6 +5607,15 @@ components:
           format: int64
         risk:
           $ref: '#/components/schemas/Risk'
+        creation_date:
+          type: integer
+          format: int64
+        signed_by:
+          type: array
+          items:
+            type: string
+            format: address
+            example: "0:da6b1b6663a0e4d18cc8574ccd9db5296e367dd9324706f3bbd9eb1cd2caf0bf"
     Refund:
       type: object
       required:

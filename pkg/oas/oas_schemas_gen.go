@@ -7854,12 +7854,13 @@ func (s *JettonMintAction) SetJetton(val JettonPreview) {
 
 // Ref: #/components/schemas/JettonPreview
 type JettonPreview struct {
-	Address      string                 `json:"address"`
-	Name         string                 `json:"name"`
-	Symbol       string                 `json:"symbol"`
-	Decimals     int                    `json:"decimals"`
-	Image        string                 `json:"image"`
-	Verification JettonVerificationType `json:"verification"`
+	Address             string                 `json:"address"`
+	Name                string                 `json:"name"`
+	Symbol              string                 `json:"symbol"`
+	Decimals            int                    `json:"decimals"`
+	Image               string                 `json:"image"`
+	Verification        JettonVerificationType `json:"verification"`
+	CustomPayloadAPIURI OptString              `json:"custom_payload_api_uri"`
 }
 
 // GetAddress returns the value of Address.
@@ -7892,6 +7893,11 @@ func (s *JettonPreview) GetVerification() JettonVerificationType {
 	return s.Verification
 }
 
+// GetCustomPayloadAPIURI returns the value of CustomPayloadAPIURI.
+func (s *JettonPreview) GetCustomPayloadAPIURI() OptString {
+	return s.CustomPayloadAPIURI
+}
+
 // SetAddress sets the value of Address.
 func (s *JettonPreview) SetAddress(val string) {
 	s.Address = val
@@ -7920,6 +7926,11 @@ func (s *JettonPreview) SetImage(val string) {
 // SetVerification sets the value of Verification.
 func (s *JettonPreview) SetVerification(val JettonVerificationType) {
 	s.Verification = val
+}
+
+// SetCustomPayloadAPIURI sets the value of CustomPayloadAPIURI.
+func (s *JettonPreview) SetCustomPayloadAPIURI(val OptString) {
+	s.CustomPayloadAPIURI = val
 }
 
 // Ref: #/components/schemas/JettonQuantity
@@ -8970,6 +8981,8 @@ type MultisigOrder struct {
 	ApprovalsNum     int32    `json:"approvals_num"`
 	ExpirationDate   int64    `json:"expiration_date"`
 	Risk             Risk     `json:"risk"`
+	CreationDate     int64    `json:"creation_date"`
+	SignedBy         []string `json:"signed_by"`
 }
 
 // GetAddress returns the value of Address.
@@ -9012,6 +9025,16 @@ func (s *MultisigOrder) GetRisk() Risk {
 	return s.Risk
 }
 
+// GetCreationDate returns the value of CreationDate.
+func (s *MultisigOrder) GetCreationDate() int64 {
+	return s.CreationDate
+}
+
+// GetSignedBy returns the value of SignedBy.
+func (s *MultisigOrder) GetSignedBy() []string {
+	return s.SignedBy
+}
+
 // SetAddress sets the value of Address.
 func (s *MultisigOrder) SetAddress(val string) {
 	s.Address = val
@@ -9050,6 +9073,16 @@ func (s *MultisigOrder) SetExpirationDate(val int64) {
 // SetRisk sets the value of Risk.
 func (s *MultisigOrder) SetRisk(val Risk) {
 	s.Risk = val
+}
+
+// SetCreationDate sets the value of CreationDate.
+func (s *MultisigOrder) SetCreationDate(val int64) {
+	s.CreationDate = val
+}
+
+// SetSignedBy sets the value of SignedBy.
+func (s *MultisigOrder) SetSignedBy(val []string) {
+	s.SignedBy = val
 }
 
 // Ref: #/components/schemas/Multisigs

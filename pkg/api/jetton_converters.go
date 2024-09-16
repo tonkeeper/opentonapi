@@ -24,6 +24,9 @@ func jettonPreview(master ton.AccountID, meta NormalizedMetadata) oas.JettonPrev
 		Decimals:     meta.Decimals,
 		Image:        meta.Image,
 	}
+	if meta.CustomPayloadApiUri != "" {
+		preview.CustomPayloadAPIURI = oas.NewOptString(meta.CustomPayloadApiUri)
+	}
 	return preview
 }
 

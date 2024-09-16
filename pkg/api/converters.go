@@ -253,6 +253,7 @@ func (h *Handler) convertMultisig(ctx context.Context, item core.Multisig) (*oas
 			Signers:          signers,
 			ApprovalsNum:     order.ApprovalsNum,
 			ExpirationDate:   order.ExpirationDate,
+			CreationDate:     order.CreationDate,
 			Risk:             oasRisk,
 		})
 	}

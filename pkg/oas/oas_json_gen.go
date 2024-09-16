@@ -23684,15 +23684,22 @@ func (s *JettonPreview) encodeFields(e *jx.Encoder) {
 		e.FieldStart("verification")
 		s.Verification.Encode(e)
 	}
+	{
+		if s.CustomPayloadAPIURI.Set {
+			e.FieldStart("custom_payload_api_uri")
+			s.CustomPayloadAPIURI.Encode(e)
+		}
+	}
 }
 
-var jsonFieldsNameOfJettonPreview = [6]string{
+var jsonFieldsNameOfJettonPreview = [7]string{
 	0: "address",
 	1: "name",
 	2: "symbol",
 	3: "decimals",
 	4: "image",
 	5: "verification",
+	6: "custom_payload_api_uri",
 }
 
 // Decode decodes JettonPreview from json.
@@ -23773,6 +23780,16 @@ func (s *JettonPreview) Decode(d *jx.Decoder) error {
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"verification\"")
+			}
+		case "custom_payload_api_uri":
+			if err := func() error {
+				s.CustomPayloadAPIURI.Reset()
+				if err := s.CustomPayloadAPIURI.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"custom_payload_api_uri\"")
 			}
 		default:
 			return d.Skip()
@@ -26338,9 +26355,21 @@ func (s *MultisigOrder) encodeFields(e *jx.Encoder) {
 		e.FieldStart("risk")
 		s.Risk.Encode(e)
 	}
+	{
+		e.FieldStart("creation_date")
+		e.Int64(s.CreationDate)
+	}
+	{
+		e.FieldStart("signed_by")
+		e.ArrStart()
+		for _, elem := range s.SignedBy {
+			e.Str(elem)
+		}
+		e.ArrEnd()
+	}
 }
 
-var jsonFieldsNameOfMultisigOrder = [8]string{
+var jsonFieldsNameOfMultisigOrder = [10]string{
 	0: "address",
 	1: "order_seqno",
 	2: "threshold",
@@ -26349,6 +26378,8 @@ var jsonFieldsNameOfMultisigOrder = [8]string{
 	5: "approvals_num",
 	6: "expiration_date",
 	7: "risk",
+	8: "creation_date",
+	9: "signed_by",
 }
 
 // Decode decodes MultisigOrder from json.
@@ -26356,7 +26387,7 @@ func (s *MultisigOrder) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode MultisigOrder to nil")
 	}
-	var requiredBitSet [1]uint8
+	var requiredBitSet [2]uint8
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
@@ -26462,6 +26493,38 @@ func (s *MultisigOrder) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"risk\"")
 			}
+		case "creation_date":
+			requiredBitSet[1] |= 1 << 0
+			if err := func() error {
+				v, err := d.Int64()
+				s.CreationDate = int64(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"creation_date\"")
+			}
+		case "signed_by":
+			requiredBitSet[1] |= 1 << 1
+			if err := func() error {
+				s.SignedBy = make([]string, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem string
+					v, err := d.Str()
+					elem = string(v)
+					if err != nil {
+						return err
+					}
+					s.SignedBy = append(s.SignedBy, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"signed_by\"")
+			}
 		default:
 			return d.Skip()
 		}
@@ -26471,8 +26534,9 @@ func (s *MultisigOrder) Decode(d *jx.Decoder) error {
 	}
 	// Validate required fields.
 	var failures []validate.FieldError
-	for i, mask := range [1]uint8{
+	for i, mask := range [2]uint8{
 		0b11111111,
+		0b00000011,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.

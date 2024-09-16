@@ -3783,6 +3783,9 @@
       "format": "address",
       "type": "string"
      },
+     "custom_payload_api_uri": {
+      "type": "string"
+     },
      "decimals": {
       "example": 9,
       "type": "integer"
@@ -4321,6 +4324,10 @@
       "format": "int32",
       "type": "integer"
      },
+     "creation_date": {
+      "format": "int64",
+      "type": "integer"
+     },
      "expiration_date": {
       "format": "int64",
       "type": "integer"
@@ -4336,6 +4343,14 @@
      "sent_for_execution": {
       "example": false,
       "type": "boolean"
+     },
+     "signed_by": {
+      "items": {
+       "example": "0:da6b1b6663a0e4d18cc8574ccd9db5296e367dd9324706f3bbd9eb1cd2caf0bf",
+       "format": "address",
+       "type": "string"
+      },
+      "type": "array"
      },
      "signers": {
       "items": {
@@ -4358,7 +4373,9 @@
      "signers",
      "approvals_num",
      "expiration_date",
-     "risk"
+     "risk",
+     "creation_date",
+     "signed_by"
     ],
     "type": "object"
    },
