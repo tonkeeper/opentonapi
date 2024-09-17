@@ -44,6 +44,7 @@ var verifiedJettons = map[ton.AccountID]struct{}{
 	ton.MustParseAccountID("EQBeaBmWEkb4-DMBrCHD9ixqz15X79umAHjpQb6fHD1rn5gD"): {},
 	ton.MustParseAccountID("EQA6_hsN-J3MmLaoJPMUN-g2iN4fG7SHsTQDlpuJ7yJkCgyC"): {},
 	ton.MustParseAccountID("EQDIq-S2SqvytT9tv71lhFZ_0rw9OkXLeiAhmhmr3UqJxVow"): {},
+	ton.MustParseAccountID("EQBnjc9l5PJ0HnU6auEsqpo9N2WMnifSuFMCbAKipTbzKt48"): {},
 }
 
 // Asset represents an asset used in jetton price calculations within pools
