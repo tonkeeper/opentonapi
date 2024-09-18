@@ -808,10 +808,9 @@ func oasMessageToCoreMessage(oasMessage tonapi.Message) (core.Message, error) {
 
 	if oasMessage.RawBody.Set {
 		decodedMessageBody, err := decodeMessageBody(oasMessage.RawBody.Value, coreMessage.MsgType)
-		if err != nil {
-			return core.Message{}, err
+		if err == nil {
+			coreMessage.DecodedBody = decodedMessageBody
 		}
-		coreMessage.DecodedBody = decodedMessageBody
 	}
 
 	if oasMessage.Init.Set {
