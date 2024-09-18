@@ -10,6 +10,7 @@
        },
        "Success": true,
        "Type": "NftPurchase",
+       "Error": null,
        "BaseTransactions": [
          "bccf47a1994af80196b94000b1d3a7bd92a046ca0a8a26db690802457da1d5cf",
          "3a30ad237eedde236d8aad4e1506e249d70fb6eb245c4d776ecb24df38d628d9",
@@ -27,6 +28,7 @@
        },
        "Success": true,
        "Type": "TonTransfer",
+       "Error": null,
        "BaseTransactions": [
          "5191af8acbf473017d2df1b164fd686f0d107278104597d89040104a7c63b9e7"
        ]
@@ -42,6 +44,7 @@
        },
        "Success": true,
        "Type": "TonTransfer",
+       "Error": null,
        "BaseTransactions": [
          "6f7fa225314b344d390ef9c1a451ea4c01b32528bf3341f215ad7787b6bc9694"
        ]
@@ -57,6 +60,7 @@
        },
        "Success": true,
        "Type": "TonTransfer",
+       "Error": null,
        "BaseTransactions": [
          "ec4e20e6047390f1202af08d2c4df336d8e843ea015d488832404898c54ffda2"
        ]

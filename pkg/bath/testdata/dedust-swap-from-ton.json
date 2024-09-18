@@ -20,6 +20,7 @@
        },
        "Success": true,
        "Type": "JettonSwap",
+       "Error": null,
        "BaseTransactions": [
          "c85ebd3043603612af808ab874ac1d19d1a68725afc3c4a78589ed5e88372b21",
          "bdef4c941f1f311c7de9badebc71464752c6599ae7cdcf514cd449726d750dd6",

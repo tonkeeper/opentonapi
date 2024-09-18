@@ -14,6 +14,7 @@
        },
        "Success": true,
        "Type": "JettonTransfer",
+       "Error": null,
        "BaseTransactions": [
          "a47be2c95381c33a3efd100aaff86f9bb415bc21d3f2b7a751872ea7631012f1",
          "7309e9a76410ed7d8d4147790dea40c3cbbbe325946b6af36bcf30ae86048d67",
@@ -30,6 +31,7 @@
        },
        "Success": true,
        "Type": "SmartContractExec",
+       "Error": null,
        "BaseTransactions": [
          "52d18ed6ff9de1724d30a7bc7347680b37a6205736c74f09495e5a482e3196e6"
        ]
@@ -44,6 +46,7 @@
        },
        "Success": true,
        "Type": "SmartContractExec",
+       "Error": null,
        "BaseTransactions": [
          "e9b362ae466b18a53a8bb658e14511787699d14428c753b94ffcfe34262ff92d"
        ]
@@ -62,6 +65,7 @@
        },
        "Success": true,
        "Type": "JettonTransfer",
+       "Error": null,
        "BaseTransactions": [
          "1c0e8d968434981c8d380453bc55c31984ae50c7068ebc9262610c798dbcbfb4",
          "3cf5c2370fa0677f13b4629758942c0a309be33d878b796a4c8ad1ad7297fd48",
@@ -78,6 +82,7 @@
        },
        "Success": true,
        "Type": "SmartContractExec",
+       "Error": null,
        "BaseTransactions": [
          "2ba854a4642c1523aa1e6a91f61f3e9d7f8c2963787b6c9c8f5695f0720d3383"
        ]
@@ -96,6 +101,7 @@
        },
        "Success": true,
        "Type": "JettonTransfer",
+       "Error": null,
        "BaseTransactions": [
          "be8c3f1bba22515a8efbe43cbbf195476f43ad7c75fc772dc636ffddf51f2304",
          "34fa15497ceebed556dcdde456d5a232d4194b57f1ba403aebce0a838b77f8dc",
@@ -109,6 +115,7 @@
        },
        "Success": true,
        "Type": "ContractDeploy",
+       "Error": null,
        "BaseTransactions": [
          "34fa15497ceebed556dcdde456d5a232d4194b57f1ba403aebce0a838b77f8dc"
        ]

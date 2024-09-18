@@ -20,6 +20,7 @@
        },
        "Success": true,
        "Type": "JettonSwap",
+       "Error": null,
        "BaseTransactions": [
          "e8933ed0b2086b312f89a3ae5f597666493ca747b69cea9ef9a79c1e641e763f",
          "cdc129c36ad3c345459ed5d0c1ffad145134e6ce96b8a4ed8201909def33de2a",
@@ -38,6 +39,7 @@
        },
        "Success": true,
        "Type": "ContractDeploy",
+       "Error": null,
        "BaseTransactions": [
          "9809a999b20e8bae123c21f229abb4de7b00b03c754eb692b23a8662f5445c19"
        ]

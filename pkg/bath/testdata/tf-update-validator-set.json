@@ -10,6 +10,7 @@
        },
        "Success": true,
        "Type": "SmartContractExec",
+       "Error": null,
        "BaseTransactions": [
          "0143cff500c883ccfd40a1a873a45a6f6168f4b0b2a9f2c9a81d6d5e8be1c41d"
        ]
@@ -25,6 +26,7 @@
        },
        "Success": true,
        "Type": "TonTransfer",
+       "Error": null,
        "BaseTransactions": [
          "890ccbb2740d15ada498270a12508afe448d64f08385b7b2d14eaca566802814"
        ]

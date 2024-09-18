@@ -14,6 +14,7 @@
        },
        "Success": true,
        "Type": "JettonTransfer",
+       "Error": null,
        "BaseTransactions": [
          "e7befadce3fc7a1f15f7119beb23a8e056c3e8db5fc807c72c488a740a08614b",
          "d1e9668698b01c839bfa12be742d6c88ffe703a0790099bfbbb844c4d7edbdf0",

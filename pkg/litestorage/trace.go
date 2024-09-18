@@ -131,12 +131,12 @@ func (s *LiteStorage) searchTransactionInBlock(ctx context.Context, a tongo.Acco
 		}
 		inMsg := tx.Msgs.InMsg
 		if !back && inMsg.Exists && inMsg.Value.Value.Info.IntMsgInfo != nil && inMsg.Value.Value.Info.IntMsgInfo.CreatedLt == lt {
-			return core.ConvertTransaction(a.Workchain, tongo.Transaction{BlockID: blockIDExt, Transaction: *tx})
+			return core.ConvertTransaction(a.Workchain, tongo.Transaction{BlockID: blockIDExt, Transaction: *tx}, nil)
 		}
 		if back {
 			for _, m := range tx.Msgs.OutMsgs.Values() {
 				if m.Value.Info.IntMsgInfo != nil && m.Value.Info.IntMsgInfo.CreatedLt == lt {
-					return core.ConvertTransaction(a.Workchain, tongo.Transaction{BlockID: blockIDExt, Transaction: *tx})
+					return core.ConvertTransaction(a.Workchain, tongo.Transaction{BlockID: blockIDExt, Transaction: *tx}, nil)
 				}
 			}
 		}

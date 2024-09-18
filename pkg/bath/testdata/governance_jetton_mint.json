@@ -10,6 +10,7 @@
        },
        "Success": true,
        "Type": "SmartContractExec",
+       "Error": null,
        "BaseTransactions": [
          "6ea51bde0e6471ef5a7d06209f7b4cef6e2e175ad36d3cd00e8b5fa23c174dfd"
        ]
@@ -24,6 +25,7 @@
        },
        "Success": true,
        "Type": "SmartContractExec",
+       "Error": null,
        "BaseTransactions": [
          "da099f32c4504fdcec2e5ee93f5dbc958b79e5c82a3fff25545738ec8b91cb34"
        ]
@@ -38,6 +40,7 @@
        },
        "Success": true,
        "Type": "SmartContractExec",
+       "Error": null,
        "BaseTransactions": [
          "86697608f8a1a352d1b83fbb295890236f306ec2e56ac80e55510573b34251f0"
        ]
@@ -51,6 +54,7 @@
        },
        "Success": true,
        "Type": "JettonMint",
+       "Error": null,
        "BaseTransactions": [
          "aa939cbcd55cd707175d71d55136e101d8ad1e4b4339bd56e23d0492c5e15ac1",
          "50877f2d76ad0c3b5e079b9fa0c75ebb04fd8ef4905e439f52e608259357ce62",
@@ -64,6 +68,7 @@
        },
        "Success": true,
        "Type": "ContractDeploy",
+       "Error": null,
        "BaseTransactions": [
          "50877f2d76ad0c3b5e079b9fa0c75ebb04fd8ef4905e439f52e608259357ce62"
        ]
@@ -75,6 +80,7 @@
        },
        "Success": true,
        "Type": "ContractDeploy",
+       "Error": null,
        "BaseTransactions": [
          "da099f32c4504fdcec2e5ee93f5dbc958b79e5c82a3fff25545738ec8b91cb34"
        ]

@@ -105,7 +105,7 @@ func TestConvertTransaction(t *testing.T) {
 			require.Nil(t, err)
 			txs, err := cli.GetTransactions(context.Background(), 1, tt.accountID, tt.txLt, tt.txHash)
 			require.Nil(t, err)
-			tx, err := ConvertTransaction(0, txs[0])
+			tx, err := ConvertTransaction(0, txs[0], nil)
 			require.Nil(t, err)
 			bs, err := json.MarshalIndent(tx, " ", "  ")
 			require.Nil(t, err)

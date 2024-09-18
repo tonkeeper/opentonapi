@@ -9,6 +9,7 @@
        },
        "Success": true,
        "Type": "WithdrawStakeRequest",
+       "Error": null,
        "BaseTransactions": [
          "32a649c3f4c5cd15cda3678bba67f2a1ccd6cd554249a726e760cfe389226008",
          "1cb338e71299a927fb4f3ed26d87b141df6d5996b31c01bde8494c0ee2b4ec8d",
@@ -25,6 +26,7 @@
        },
        "Success": true,
        "Type": "ContractDeploy",
+       "Error": null,
        "BaseTransactions": [
          "075bfecbaae2f45c6e0d5c3125e41a0d1f123ef9ba0638c7701e3b4e36472d0d"
        ]
