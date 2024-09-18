@@ -84,7 +84,7 @@ func main() {
 	tracer := sources.NewTracer(log, storage, source)
 	go tracer.Run(context.TODO())
 
-	idx := indexer.New(log, client)
+	idx := indexer.New(log, client, nil)
 	go idx.Run(context.TODO(), []chan indexer.IDandBlock{
 		pusherBlockCh,
 		storageBlockCh,

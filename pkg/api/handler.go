@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/arnac-io/opentonapi/pkg/chainstate"
 	"github.com/arnac-io/opentonapi/pkg/core"
 	"github.com/arnac-io/opentonapi/pkg/rates"
 	"github.com/go-faster/errors"
@@ -164,9 +163,7 @@ func NewHandler(logger *zap.Logger, opts ...Option) (*Handler, error) {
 	if options.storage == nil {
 		return nil, errors.New("storage is not configured")
 	}
-	if options.chainState == nil {
-		options.chainState = chainstate.NewChainState(options.storage)
-	}
+
 	if options.ratesSource == nil {
 		options.ratesSource = rates.Mock{}
 	}

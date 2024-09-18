@@ -1,8 +1,8 @@
 module github.com/arnac-io/opentonapi
 
-go 1.21.0
+go 1.21.3
 
-toolchain go1.22.0
+toolchain go1.22.1
 
 require (
 	github.com/BurntSushi/toml v1.2.1
@@ -69,10 +69,12 @@ require (
 	github.com/prometheus/client_model v0.3.0 // indirect
 	github.com/prometheus/common v0.37.0 // indirect
 	github.com/prometheus/procfs v0.8.0 // indirect
+	github.com/r3labs/sse/v2 v2.10.0 // indirect
 	github.com/segmentio/asm v1.2.0 // indirect
 	github.com/sirupsen/logrus v1.9.0 // indirect
 	github.com/snksoft/crc v1.1.0 // indirect
 	github.com/spf13/cast v1.5.0 // indirect
+	github.com/tonkeeper/tonapi-go v0.0.7 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasttemplate v1.2.2 // indirect
 	golang.org/x/crypto v0.26.0 // indirect
@@ -82,6 +84,7 @@ require (
 	golang.org/x/tools v0.24.0 // indirect
 	google.golang.org/genproto v0.0.0-20200825200019-8632dd797987 // indirect
 	google.golang.org/protobuf v1.33.0 // indirect
+	gopkg.in/cenkalti/backoff.v1 v1.1.0 // indirect
 	gopkg.in/natefinch/lumberjack.v2 v2.0.0 // indirect
 	gopkg.in/tomb.v2 v2.0.0-20161208151619-d5d1b5820637 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect

@@ -2,15 +2,19 @@ package indexer
 
 import (
 	"context"
+	"encoding/hex"
 	"errors"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 
 	"github.com/sourcegraph/conc/iter"
+	"github.com/tonkeeper/tonapi-go"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/liteapi"
 	"github.com/tonkeeper/tongo/tlb"
+	"github.com/tonkeeper/tongo/ton"
 	"go.uber.org/zap"
 )
 
@@ -22,20 +26,24 @@ type chunk struct {
 
 // Indexer tracks the blockchain and notifies subscribers about new blocks.
 type Indexer struct {
-	logger *zap.Logger
-	cli    *liteapi.Client
+	logger       *zap.Logger
+	cli          *liteapi.Client
+	tonapiClient *tonapi.Client
 }
 
-func New(logger *zap.Logger, cli *liteapi.Client) *Indexer {
+func New(logger *zap.Logger, cli *liteapi.Client, tonapiClient *tonapi.Client) *Indexer {
 	return &Indexer{
-		cli:    cli,
-		logger: logger,
+		cli:          cli,
+		logger:       logger,
+		tonapiClient: tonapiClient,
 	}
 }
 
 type IDandBlock struct {
-	ID    tongo.BlockIDExt
-	Block *tlb.Block
+	ID             tongo.BlockIDExt
+	Block          *tlb.Block
+	BlockTimestamp int64
+	Transactions   []tonapi.Transaction
 }
 
 func (idx *Indexer) Run(ctx context.Context, channels []chan IDandBlock) {
@@ -76,26 +84,21 @@ func (idx *Indexer) Run(ctx context.Context, channels []chan IDandBlock) {
 }
 
 func (idx *Indexer) GetBlocksFromMasterBlock(masterBlockNumber uint32) (IDandBlock, []IDandBlock, error) {
-	prevChunk, err := idx.initChunk(masterBlockNumber)
+	chunk, err := idx.initChunk(masterBlockNumber)
 	if err != nil {
 		idx.logger.Error("failed to get init chunk", zap.Error(err))
-		return IDandBlock{}, nil, errors.New("failed to get init chunk")
-	}
-	currentChunk, err := idx.next(prevChunk)
-	if err != nil {
-		idx.logger.Error("failed to get next chunk", zap.Error(err))
-		return IDandBlock{}, nil, errors.New("failed to get next chunk")
+		return IDandBlock{}, nil, err
 	}
 	workChainBlocks := []IDandBlock{}
 	var masterBlock *IDandBlock
-	for _, block := range currentChunk.blocks {
+	for i, block := range chunk.blocks {
 		if block.ID.BlockID.Workchain != -1 {
 			workChainBlocks = append(workChainBlocks, block)
 		} else if block.ID.BlockID.Workchain == -1 {
 			if masterBlock != nil {
 				return IDandBlock{}, nil, errors.New("more than one master block")
 			}
-			masterBlock = &block
+			masterBlock = &chunk.blocks[i]
 		}
 	}
 	if masterBlock == nil {
@@ -187,27 +190,55 @@ func (idx *Indexer) initChunk(seqno uint32) (*chunk, error) {
 	init := tongo.BlockID{
 		Workchain: -1,
 		Shard:     9223372036854775808,
-		Seqno:     seqno - 1,
+		Seqno:     seqno,
 	}
-	id, _, err := idx.cli.LookupBlock(context.Background(), init, 1, nil, nil)
+	blocks, err := idx.tonapiClient.GetBlockchainMasterchainBlocks(context.Background(), tonapi.GetBlockchainMasterchainBlocksParams{int32(seqno)})
 	if err != nil {
 		return nil, err
 	}
-	block, err := idx.cli.GetBlock(context.Background(), id)
-	if err != nil {
-		return nil, err
-	}
+
 	ch := &chunk{
 		masterID: init,
-		ids: map[tongo.BlockIDExt]struct{}{
-			id: {},
-		},
-		blocks: []IDandBlock{
-			{ID: id, Block: &block},
-		},
+		ids:      map[tongo.BlockIDExt]struct{}{},
+		blocks:   []IDandBlock{},
 	}
-	for _, shard := range tongo.ShardIDs(&block) {
-		ch.ids[shard] = struct{}{}
+
+	for _, block := range blocks.Blocks {
+		shardNumber, err := strconv.ParseUint(block.Shard, 16, 64)
+		if err != nil {
+			return nil, err
+		}
+		blockID := tongo.BlockID{
+			Workchain: block.WorkchainID,
+			Shard:     shardNumber,
+			Seqno:     uint32(block.Seqno),
+		}
+		rootHash := ton.Bits256{}
+		bytes, err := hex.DecodeString(block.RootHash)
+		if err != nil {
+			return nil, err
+		}
+		copy(rootHash[:], bytes)
+
+		fileHash := ton.Bits256{}
+		bytes, err = hex.DecodeString(block.FileHash)
+		if err != nil {
+			return nil, err
+		}
+		copy(fileHash[:], bytes)
+
+		id := tongo.BlockIDExt{
+			BlockID:  blockID,
+			RootHash: rootHash,
+			FileHash: fileHash,
+		}
+		ch.ids[id] = struct{}{}
+
+		blockTransactions, err := idx.tonapiClient.GetBlockchainBlockTransactions(context.Background(), tonapi.GetBlockchainBlockTransactionsParams{id.BlockID.String()})
+		if err != nil {
+			return nil, err
+		}
+		ch.blocks = append(ch.blocks, IDandBlock{ID: id, Transactions: blockTransactions.Transactions, BlockTimestamp: block.GenUtime})
 	}
 	return ch, nil
 }
