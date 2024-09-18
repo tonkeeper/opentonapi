@@ -7,6 +7,7 @@
        },
        "Success": true,
        "Type": "DomainRenew",
+       "Error": null,
        "BaseTransactions": [
          "bf33c4ee09a872f0831935adec38a0e411c6be83b87e47bb7bf7a843d5e06047"
        ]
@@ -21,6 +22,7 @@
        },
        "Success": true,
        "Type": "SmartContractExec",
+       "Error": null,
        "BaseTransactions": [
          "5123850dca7109412f695435a9a75618c001b70fad98d34d950b860116f37785"
        ]
