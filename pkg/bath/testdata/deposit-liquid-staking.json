@@ -9,7 +9,6 @@
        },
        "Success": true,
        "Type": "DepositStake",
-       "Error": null,
        "BaseTransactions": [
          "20bee52141d1af08d3631baba8e598518a5a98e7b7d82e6960c79cb4001ec910"
        ]
@@ -23,7 +22,6 @@
        },
        "Success": true,
        "Type": "JettonMint",
-       "Error": null,
        "BaseTransactions": [
          "2d77c21a86e5189a6b44bfed0c8c588505f770ff8bdcdfe1a3528512f330d9b1",
          "242f3560ec3274abf5046ed7a867dfb7b37a97d86abb244f06211e809a27e6de",
@@ -38,7 +36,6 @@
        },
        "Success": true,
        "Type": "ContractDeploy",
-       "Error": null,
        "BaseTransactions": [
          "2d77c21a86e5189a6b44bfed0c8c588505f770ff8bdcdfe1a3528512f330d9b1"
        ]

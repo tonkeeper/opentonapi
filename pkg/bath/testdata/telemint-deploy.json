@@ -11,7 +11,6 @@
        },
        "Success": true,
        "Type": "AuctionBid",
-       "Error": null,
        "BaseTransactions": [
          "17d25b9f2dae646c63f005abcdc6e2778f7fb9511015f2eafbd3f46c33276198",
          "9e979adabf0853c34a675d635a8ff7dae24f6c980780a7e5c4e21f4b6e29f575"
@@ -24,7 +23,6 @@
        },
        "Success": true,
        "Type": "ContractDeploy",
-       "Error": null,
        "BaseTransactions": [
          "17d25b9f2dae646c63f005abcdc6e2778f7fb9511015f2eafbd3f46c33276198"
        ]

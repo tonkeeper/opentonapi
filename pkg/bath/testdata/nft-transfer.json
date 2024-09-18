@@ -11,7 +11,6 @@
        },
        "Success": true,
        "Type": "NftItemTransfer",
-       "Error": null,
        "BaseTransactions": [
          "18122fb128076d62f3ad1b45619ac929eb308d757690a6ab9832d977e8214859",
          "648b9fb6f0781778b5128efcffd306545695e019795ca35e4a7ff981c544f0ea",

@@ -10,7 +10,6 @@
        },
        "Success": true,
        "Type": "Subscribe",
-       "Error": null,
        "BaseTransactions": [
          "d5cf39c85392e40a7f5b0e706c4df56ad89cb214e4c5b5206fbe82c6d71a09cf",
          "0869aca7038f732a29e89fc9ce1990afecc99106d8ab07d967a2e0950faf6580",

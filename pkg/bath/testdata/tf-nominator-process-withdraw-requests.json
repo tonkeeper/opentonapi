@@ -10,7 +10,6 @@
        },
        "Success": true,
        "Type": "SmartContractExec",
-       "Error": null,
        "BaseTransactions": [
          "d6760dc8f3cbc37003f76b3e78b55613a8d81b5354cedf7ce6b2149e0e4cad85"
        ]
@@ -26,7 +25,6 @@
        },
        "Success": true,
        "Type": "TonTransfer",
-       "Error": null,
        "BaseTransactions": [
          "42233d9a77a59c9909fad1ccf76655efa46f60412de37cfa36dd5dd98cdb7eba"
        ]
@@ -42,7 +40,6 @@
        },
        "Success": true,
        "Type": "TonTransfer",
-       "Error": null,
        "BaseTransactions": [
          "1984eefa9f92e1137c442153295c61160ac5990606065285590bac249aa54775"
        ]
