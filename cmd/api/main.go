@@ -62,7 +62,7 @@ func main() {
 
 	msgSender, err := blockchain.NewMsgSender(log, cfg.App.LiteServers, map[string]chan<- blockchain.ExtInMsgCopy{
 		"mempool": mempoolCh,
-	})
+	}, nil)
 	if err != nil {
 		log.Fatal("failed to create msg sender", zap.Error(err))
 	}
