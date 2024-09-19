@@ -137,7 +137,7 @@ func compareMessageFields(msgOut OutMessage, msgIn *core.Message) bool {
 }
 
 func getOutMessages(transaction *core.Transaction) []OutMessage {
-	if transaction.InMsg.DecodedBody == nil {
+	if transaction == nil || transaction.InMsg == nil || transaction.InMsg.DecodedBody == nil {
 		return []OutMessage{}
 	}
 
