@@ -641,6 +641,7 @@ paths:
           schema:
             type: integer
             format: int64
+            maximum: 2114380800
             example: 1668436763
         - name: end_date
           in: query
@@ -648,6 +649,7 @@ paths:
           schema:
             type: integer
             format: int64
+            maximum: 2114380800
             example: 1668436763
       responses:
         '200':
@@ -691,6 +693,7 @@ paths:
           schema:
             type: integer
             format: int64
+            maximum: 2114380800
             example: 1668436763
         - name: end_date
           in: query
@@ -698,6 +701,7 @@ paths:
           schema:
             type: integer
             format: int64
+            maximum: 2114380800
             example: 1668436763
       responses:
         '200':
@@ -768,6 +772,7 @@ paths:
           schema:
             type: integer
             format: int64
+            maximum: 2114380800
             example: 1668436763
         - name: end_date
           in: query
@@ -775,6 +780,7 @@ paths:
           schema:
             type: integer
             format: int64
+            maximum: 2114380800
             example: 1668436763
       responses:
         '200':
@@ -825,6 +831,7 @@ paths:
           schema:
             type: integer
             format: int64
+            maximum: 2114380800
             example: 1668436763
         - name: end_date
           in: query
@@ -832,6 +839,7 @@ paths:
           schema:
             type: integer
             format: int64
+            maximum: 2114380800
             example: 1668436763
       responses:
         '200':
@@ -1028,6 +1036,7 @@ paths:
           schema:
             type: integer
             format: int64
+            maximum: 2114380800
             example: 1668436763
         - name: end_date
           in: query
@@ -1035,6 +1044,7 @@ paths:
           schema:
             type: integer
             format: int64
+            maximum: 2114380800
             example: 1668436763
       responses:
         '200':
@@ -1257,6 +1267,7 @@ paths:
           schema:
             type: integer
             format: int64
+            maximum: 2114380800
             example: 1668436763
         - name: end_date
           in: query
@@ -1264,6 +1275,7 @@ paths:
           schema:
             type: integer
             format: int64
+            maximum: 2114380800
             example: 1668436763
       responses:
         '200':
@@ -1787,6 +1799,7 @@ paths:
           schema:
             type: integer
             format: int64
+            maximum: 2114380800
             example: 1668436763
         - name: end_date
           in: query
@@ -1794,6 +1807,7 @@ paths:
           schema:
             type: integer
             format: int64
+            maximum: 2114380800
             example: 1668436763
         - name: points_count
           in: query
