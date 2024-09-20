@@ -28,8 +28,6 @@ type MsgSender struct {
 	mu sync.Mutex
 	// batches is used as a cache for boc multi-sending.
 	batches []batchOfMessages
-
-	send func(ctx context.Context, payload []byte, clients []*liteapi.Client) error
 }
 
 type batchOfMessages struct {
@@ -53,7 +51,7 @@ func (m *ExtInMsgCopy) IsEmulation() bool {
 	return len(m.Accounts) > 0
 }
 
-func NewMsgSender(logger *zap.Logger, servers []config.LiteServer, receivers map[string]chan<- ExtInMsgCopy, send func(ctx context.Context, payload []byte, clients []*liteapi.Client) error) (*MsgSender, error) {
+func NewMsgSender(logger *zap.Logger, servers []config.LiteServer, receivers map[string]chan<- ExtInMsgCopy) (*MsgSender, error) {
 	var (
 		client  *liteapi.Client
 		clients []*liteapi.Client
@@ -86,14 +84,10 @@ func NewMsgSender(logger *zap.Logger, servers []config.LiteServer, receivers map
 	if len(clients) == 0 {
 		return nil, fmt.Errorf("no lite clients available")
 	}
-	if send == nil {
-		send = simpleSend
-	}
 	msgSender := &MsgSender{
 		sendingClients: clients,
 		logger:         logger,
 		receivers:      receivers,
-		send:           send,
 	}
 	go func() {
 		for {
@@ -149,14 +143,14 @@ func (ms *MsgSender) SendMessage(ctx context.Context, msgCopy ExtInMsgCopy) erro
 			ms.logger.Warn("receiver is too slow", zap.String("name", name))
 		}
 	}
-	return ms.send(ctx, msgCopy.Payload, ms.sendingClients)
+	return ms.send(ctx, msgCopy.Payload)
 }
 
-func simpleSend(ctx context.Context, payload []byte, clients []*liteapi.Client) error {
+func (ms *MsgSender) send(ctx context.Context, payload []byte) error {
 	var err error
 	for i := 0; i < 3; i++ {
-		serverNumber := rand.Intn(len(clients))
-		c := clients[serverNumber]
+		serverNumber := rand.Intn(len(ms.sendingClients))
+		c := ms.sendingClients[serverNumber]
 		_, err = c.SendMessage(ctx, payload)
 		if err == nil {
 			return nil
@@ -174,7 +168,7 @@ func (ms *MsgSender) sendMessageFromBatch(msgCopy ExtInMsgCopy) error {
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*2)
 	defer cancel()
-	return ms.send(ctx, msgCopy.Payload, ms.sendingClients)
+	return ms.send(ctx, msgCopy.Payload)
 }
 
 func (ms *MsgSender) SendMultipleMessages(ctx context.Context, copies []ExtInMsgCopy) {
@@ -192,4 +186,12 @@ func (ms *MsgSender) SendMultipleMessages(ctx context.Context, copies []ExtInMsg
 
 func (ms *MsgSender) SendingClientsNumber() int {
 	return len(ms.sendingClients)
+}
+
+func (ms *MsgSender) GetReceivers() map[string]chan<- ExtInMsgCopy {
+	return ms.receivers
+}
+
+func (ms *MsgSender) GetClients() []*liteapi.Client {
+	return ms.sendingClients
 }
