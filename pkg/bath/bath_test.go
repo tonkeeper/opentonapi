@@ -164,6 +164,8 @@ func TestFindActions(t *testing.T) {
 			tongo.MustParseBlockID("(0,8000000000000000,34021598)"),
 			// nft transfer
 			tongo.MustParseBlockID("(0,8000000000000000,33600829)"),
+			// failed dedust swap
+			tongo.MustParseBlockID("(0,7000000000000000,45592983)"),
 		}),
 	)
 
@@ -394,6 +396,21 @@ func TestFindActions(t *testing.T) {
 			hash:           "e27cdf1d6987a3e74dc8d9c4a52a5b22112fe3946d0dceadf8160b74f80b9d46",
 			filenamePrefix: "governance_jetton_mint",
 		},
+		{
+			name:           "failed simple transfer",
+			hash:           "63d358331c0154ade48ab92b4634c3fff004f42ce7201a37973938862d232c0f",
+			filenamePrefix: "failed-simple-transfer",
+		},
+		{
+			name:           "simple transfers, one of two failed",
+			hash:           "ac0b8bf04949cb72759832ec6c123b3677b8ca140899ac859aa66a558e4f4c11",
+			filenamePrefix: "simple-transfers-one-failed",
+		},
+		{
+			name:           "failed dedust swap",
+			hash:           "887c7763f41ca4a4b9de28900ab514caabc0c27ed5b41d9918d60f5e7f4a9d96",
+			filenamePrefix: "failed-dedust-swap",
+		},
 	} {
 		t.Run(c.name, func(t *testing.T) {
 			trace, err := storage.GetTrace(context.Background(), tongo.MustParseHash(c.hash))
@@ -411,6 +428,7 @@ func TestFindActions(t *testing.T) {
 				WithStraws(straws),
 				WithInformationSource(source))
 			require.Nil(t, err)
+			actionsList = EnrichWithIntentions(trace, actionsList)
 			results := result{
 				Actions: actionsList.Actions,
 			}

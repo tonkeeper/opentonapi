@@ -33,21 +33,10 @@ const (
 const minReserve = float64(100 * ton.OneTON)
 
 // minHoldersCount minimum number of holders threshold for jettons
-const minHoldersCount = 200
+const minHoldersCount = 100
 
 // defaultDecimals sets the default number of decimals to 9, similar to TON
 const defaultDecimals = 9
-
-// verifiedJettons map of jettons that skip the holder count check
-var verifiedJettons = map[ton.AccountID]struct{}{
-	ton.MustParseAccountID("EQDptzse--Atn4hDt2dGl3TxAN0Ak6taYXEiNKOg7EAibChH"): {},
-	ton.MustParseAccountID("EQBeaBmWEkb4-DMBrCHD9ixqz15X79umAHjpQb6fHD1rn5gD"): {},
-	ton.MustParseAccountID("EQA6_hsN-J3MmLaoJPMUN-g2iN4fG7SHsTQDlpuJ7yJkCgyC"): {},
-	ton.MustParseAccountID("EQDIq-S2SqvytT9tv71lhFZ_0rw9OkXLeiAhmhmr3UqJxVow"): {},
-	ton.MustParseAccountID("EQBnjc9l5PJ0HnU6auEsqpo9N2WMnifSuFMCbAKipTbzKt48"): {},
-	ton.MustParseAccountID("EQCM1wgeX_1gVYw1I7YEcTMqGIhqpg1q2lHOQGPzCIif2hkR"): {},
-	ton.MustParseAccountID("EQAJ29WkjjLqu-ucmAj9A0rRm86U6OvNRz46iqd1XVy8Pryq"): {},
-}
 
 // Asset represents an asset used in jetton price calculations within pools
 type Asset struct {
@@ -644,10 +633,8 @@ func calculatePoolPrice(firstAsset, secondAsset Asset, pools map[ton.AccountID]f
 		if updatedFirstAssetReserve < minReserve {
 			return ton.AccountID{}, 0
 		}
-		if _, ok := verifiedJettons[secondAsset.Account]; !ok {
-			if secondAsset.HoldersCount < minHoldersCount {
-				return ton.AccountID{}, 0
-			}
+		if secondAsset.HoldersCount < minHoldersCount {
+			return ton.AccountID{}, 0
 		}
 		calculatedAccount = secondAsset.Account
 		firstAssetDecimals, secondAssetDecimals = firstAsset.Decimals, secondAsset.Decimals
@@ -664,10 +651,8 @@ func calculatePoolPrice(firstAsset, secondAsset Asset, pools map[ton.AccountID]f
 		if updatedSecondAssetReserve < minReserve {
 			return ton.AccountID{}, 0
 		}
-		if _, ok := verifiedJettons[firstAsset.Account]; !ok {
-			if firstAsset.HoldersCount < minHoldersCount {
-				return ton.AccountID{}, 0
-			}
+		if firstAsset.HoldersCount < minHoldersCount {
+			return ton.AccountID{}, 0
 		}
 		calculatedAccount = firstAsset.Account
 		firstAsset, secondAsset = secondAsset, firstAsset
