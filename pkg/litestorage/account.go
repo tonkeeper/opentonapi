@@ -31,7 +31,7 @@ func (s *LiteStorage) SearchAccountsByPubKey(pubKey ed25519.PublicKey) ([]tongo.
 		tongoWallet.V2R1, tongoWallet.V2R2,
 		tongoWallet.V3R1, tongoWallet.V3R2,
 		tongoWallet.V4R1, tongoWallet.V4R2,
-		tongoWallet.V5Beta,
+		tongoWallet.V5Beta, tongoWallet.V5R1,
 	}
 	var walletAddresses []tongo.AccountID
 	for _, version := range versions {
