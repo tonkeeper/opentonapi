@@ -63,6 +63,7 @@ func extractIntentions(trace *core.Trace) ([]OutMessage, int) {
 
 func removeMatchedIntentions(trace *core.Trace, intentions *[]OutMessage) []OutMessage {
 	var matchAndRemove func(*core.Trace)
+	removed := 0
 	matchAndRemove = func(trace *core.Trace) {
 		if trace == nil {
 			return
@@ -71,7 +72,8 @@ func removeMatchedIntentions(trace *core.Trace, intentions *[]OutMessage) []OutM
 			for i, outMsg := range *intentions {
 				if isMatch(outMsg, child.Transaction.InMsg) {
 					// remove this outgoing message
-					*intentions = append((*intentions)[:i], (*intentions)[i+1:]...)
+					*intentions = append((*intentions)[:i-removed], (*intentions)[i+1-removed:]...)
+					removed++
 				}
 			}
 			matchAndRemove(child)
