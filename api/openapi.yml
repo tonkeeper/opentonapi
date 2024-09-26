@@ -5360,6 +5360,8 @@ components:
         verification:
           $ref: '#/components/schemas/JettonVerificationType'
         custom_payload_api_uri:  # todo: maybe remove
+          description: "Experimental: This property is subject to change or removal in future versions"
+          deprecated: true
           type: string
     JettonBalance:
       type: object

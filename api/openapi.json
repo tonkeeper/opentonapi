@@ -3784,6 +3784,8 @@
       "type": "string"
      },
      "custom_payload_api_uri": {
+      "deprecated": true,
+      "description": "Experimental: This property is subject to change or removal in future versions",
       "type": "string"
      },
      "decimals": {

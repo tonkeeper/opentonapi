@@ -7854,13 +7854,16 @@ func (s *JettonMintAction) SetJetton(val JettonPreview) {
 
 // Ref: #/components/schemas/JettonPreview
 type JettonPreview struct {
-	Address             string                 `json:"address"`
-	Name                string                 `json:"name"`
-	Symbol              string                 `json:"symbol"`
-	Decimals            int                    `json:"decimals"`
-	Image               string                 `json:"image"`
-	Verification        JettonVerificationType `json:"verification"`
-	CustomPayloadAPIURI OptString              `json:"custom_payload_api_uri"`
+	Address      string                 `json:"address"`
+	Name         string                 `json:"name"`
+	Symbol       string                 `json:"symbol"`
+	Decimals     int                    `json:"decimals"`
+	Image        string                 `json:"image"`
+	Verification JettonVerificationType `json:"verification"`
+	// Experimental: This property is subject to change or removal in future versions.
+	//
+	// Deprecated: schema marks this property as deprecated.
+	CustomPayloadAPIURI OptString `json:"custom_payload_api_uri"`
 }
 
 // GetAddress returns the value of Address.
