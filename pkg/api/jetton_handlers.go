@@ -57,7 +57,7 @@ func (h *Handler) GetAccountJettonBalance(ctx context.Context, params oas.GetAcc
 		return nil, toError(http.StatusInternalServerError, err)
 	}
 	if len(wallets) == 0 {
-		return &oas.JettonBalance{}, nil
+		return &oas.JettonBalance{}, toError(http.StatusNotFound, fmt.Errorf("account %v has no jetton wallet %v", account.ID, jettonAccount.ID))
 	}
 	jettonBalance, err := h.convertJettonBalance(ctx, wallets[0], params.Currencies)
 	if err != nil {
