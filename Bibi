@@ -1,0 +1,85 @@
+{
+  "event_id": "42bf278505cc89fc99f5862774cea63e6e168d2698f0ee6bf2bf6a8216daa5f3",
+  "timestamp": 1727711334,
+  "actions": [
+    {
+      "type": "JettonTransfer",
+      "status": "failed",
+      "JettonTransfer": {
+        "sender": {
+          "address": "0:cf282f75cb5c003774621eb19f67836ee5a83bd3ac930891828862cc05ea5a6a",
+          "is_scam": false,
+          "is_wallet": true
+        },
+        "recipient": {
+          "address": "0:8f2d840ec05d118f98459a057b1fcab535c57b9371222be15667fee932ceaf53",
+          "name": "battery.ton",
+          "is_scam": false,
+          "is_wallet": true
+        },
+        "senders_wallet": "0:5e5e23e19ab61e7f718331ed70377fdbc48458436d86f0ea4ecf97e5424ce456",
+        "recipients_wallet": "0:0000000000000000000000000000000000000000000000000000000000000000",
+        "amount": "5831840000000",
+        "jetton": {
+          "address": "0:afc49cb8786f21c87045b19ede78fc6b46c51048513f8e9a6d44060199c1bf0c",
+          "name": "Dogs",
+          "symbol": "DOGS",
+          "decimals": 9,
+          "image": "https://cache.tonapi.io/imgproxy/6Pb0sBFy_AzW6l39EIHGs-Iz4eLbbZUh8AYY_Xq-rcg/rs:fill:200:200:1/g:no/aHR0cHM6Ly9jZG4uZG9ncy5kZXYvZG9ncy5wbmc.webp",
+          "verification": "whitelist"
+        }
+      },
+      "simple_preview": {
+        "name": "Jetton Transfer",
+        "description": "Transferring 5831.84 Dogs",
+        "value": "5831.84 Dogs",
+        "value_image": "https://cache.tonapi.io/imgproxy/6Pb0sBFy_AzW6l39EIHGs-Iz4eLbbZUh8AYY_Xq-rcg/rs:fill:200:200:1/g:no/aHR0cHM6Ly9jZG4uZG9ncy5kZXYvZG9ncy5wbmc.webp",
+        "accounts": [
+          {
+            "address": "0:8f2d840ec05d118f98459a057b1fcab535c57b9371222be15667fee932ceaf53",
+            "name": "battery.ton",
+            "is_scam": false,
+            "is_wallet": true
+          },
+          {
+            "address": "0:cf282f75cb5c003774621eb19f67836ee5a83bd3ac930891828862cc05ea5a6a",
+            "is_scam": false,
+            "is_wallet": true
+          },
+          {
+            "address": "0:afc49cb8786f21c87045b19ede78fc6b46c51048513f8e9a6d44060199c1bf0c",
+            "name": "DOGS master",
+            "is_scam": false,
+            "is_wallet": false
+          }
+        ]
+      },
+      "base_transactions": [
+        "eaa994ee361ccf071dcce613dec7ba42ae9037a0f657f93b604465c1e4f01102"
+      ]
+    }
+  ],
+  "value_flow": [
+    {
+      "account": {
+        "address": "0:5e5e23e19ab61e7f718331ed70377fdbc48458436d86f0ea4ecf97e5424ce456",
+        "is_scam": false,
+        "is_wallet": false
+      },
+      "ton": -99821,
+      "fees": 4820221
+    },
+    {
+      "account": {
+        "address": "0:cf282f75cb5c003774621eb19f67836ee5a83bd3ac930891828862cc05ea5a6a",
+        "is_scam": false,
+        "is_wallet": true
+      },
+      "ton": -102966406,
+      "fees": 2966406
+    }
+  ],
+  "is_scam": false,
+  "lt": 49560756000001,
+  "in_progress": true
+}
