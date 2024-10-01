@@ -135,39 +135,36 @@ func (h *Handler) GetAccountJettonHistoryByID(ctx context.Context, params oas.Ge
 
 func (h *Handler) GetJettons(ctx context.Context, params oas.GetJettonsParams) (*oas.Jettons, error) {
 	limit := 1000
-	offset := 0
 	if params.Limit.IsSet() {
 		limit = int(params.Limit.Value)
+		if limit > 1000 || limit < 0 {
+			limit = 1000
+		}
 	}
-	if limit > 1000 {
-		limit = 1000
-	}
-	if limit < 0 {
-		limit = 1000
-	}
+	offset := 0
 	if params.Offset.IsSet() {
 		offset = int(params.Offset.Value)
-	}
-	if offset < 0 {
-		offset = 0
+		if offset < 0 {
+			offset = 0
+		}
 	}
 	jettons, err := h.storage.GetJettonMasters(ctx, limit, offset)
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
-	results := make([]oas.JettonInfo, 0, len(jettons))
-	var addresses []tongo.AccountID
-	for _, jetton := range jettons {
-		addresses = append(addresses, jetton.Address)
+	addresses := make([]tongo.AccountID, len(jettons))
+	for idx, jetton := range jettons {
+		addresses[idx] = jetton.Address
 	}
 	jettonsHolders, err := h.storage.GetJettonsHoldersCount(ctx, addresses)
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
-	for _, master := range jettons {
+	results := make([]oas.JettonInfo, len(jettons))
+	for idx, master := range jettons {
 		meta := h.GetJettonNormalizedMetadata(ctx, master.Address)
 		metadata := jettonMetadata(master.Address, meta)
-		info := oas.JettonInfo{
+		results[idx] = oas.JettonInfo{
 			Mintable:     master.Mintable,
 			TotalSupply:  master.TotalSupply.String(),
 			Metadata:     metadata,
@@ -175,11 +172,8 @@ func (h *Handler) GetJettons(ctx context.Context, params oas.GetJettonsParams) (
 			HoldersCount: jettonsHolders[master.Address],
 			Admin:        convertOptAccountAddress(master.Admin, h.addressBook),
 		}
-		results = append(results, info)
 	}
-	return &oas.Jettons{
-		Jettons: results,
-	}, nil
+	return &oas.Jettons{Jettons: results}, nil
 }
 
 func (h *Handler) GetJettonHolders(ctx context.Context, params oas.GetJettonHoldersParams) (*oas.JettonHolders, error) {
