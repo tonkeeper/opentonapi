@@ -96,6 +96,9 @@ func ExtractRiskFromActions(actions []abi.MultisigSendMessageAction) (*Risk, err
 		Jettons:                     map[tongo.AccountID]big.Int{},
 	}
 	for _, action := range actions {
+		if action.SumType != "SendMessage" {
+			continue
+		}
 		if tongoWallet.IsMessageModeSet(int(action.SendMessage.Field0.Mode), tongoWallet.AttachAllRemainingBalance) {
 			risk.TransferAllRemainingBalance = true
 		}
