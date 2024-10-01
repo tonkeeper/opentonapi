@@ -233,7 +233,11 @@ func (h *Handler) convertMultisig(ctx context.Context, item core.Multisig) (*oas
 		for _, account := range order.Signers {
 			signers = append(signers, account.ToRaw())
 		}
-		risk, err := walletPkg.ExtractRiskFromActions(order.Actions)
+		messages, err := convertMultisigActionsToRawMessages(order.Actions)
+		if err != nil {
+			return nil, err
+		}
+		risk, err := walletPkg.ExtractRiskFromRawMessages(messages)
 		if err != nil {
 			return nil, err
 		}
