@@ -89,3 +89,53 @@ func ExtractRiskFromRawMessages(rawMessages []tongoWallet.RawMessage) (*Risk, er
 	}
 	return &risk, nil
 }
+
+func ExtractRiskFromActions(actions []abi.MultisigSendMessageAction) (*Risk, error) {
+	risk := Risk{
+		TransferAllRemainingBalance: false,
+		Jettons:                     map[tongo.AccountID]big.Int{},
+	}
+	for _, action := range actions {
+		if tongoWallet.IsMessageModeSet(int(action.SendMessage.Field0.Mode), tongoWallet.AttachAllRemainingBalance) {
+			risk.TransferAllRemainingBalance = true
+		}
+		m := action.SendMessage.Field0.Message
+		tonValue := uint64(m.MessageInternal.Value.Grams)
+		destination, err := ton.AccountIDFromTlb(m.MessageInternal.Dest)
+		if err != nil {
+			return nil, err
+		}
+		risk.Ton += tonValue
+		msgBody := m.MessageInternal.Body.Value.Value
+		if err != nil {
+			continue
+		}
+		switch x := msgBody.(type) {
+		case abi.NftTransferMsgBody:
+			if destination == nil {
+				continue
+			}
+			// here, destination is an NFT
+			risk.Nfts = append(risk.Nfts, *destination)
+		case abi.JettonBurnMsgBody:
+			if destination == nil {
+				continue
+			}
+			// here, destination is a jetton wallet
+			amount := big.Int(x.Amount)
+			currentJettons := risk.Jettons[*destination]
+			var total big.Int
+			risk.Jettons[*destination] = *total.Add(&currentJettons, &amount)
+		case abi.JettonTransferMsgBody:
+			if destination == nil {
+				continue
+			}
+			// here, destination is a jetton wallet
+			amount := big.Int(x.Amount)
+			currentJettons := risk.Jettons[*destination]
+			var total big.Int
+			risk.Jettons[*destination] = *total.Add(&currentJettons, &amount)
+		}
+	}
+	return &risk, nil
+}
