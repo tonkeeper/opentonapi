@@ -208,8 +208,13 @@ func createActionFromMessage(msgOut OutMessage) Action {
 		if msgOut.tx != nil {
 			sender = msgOut.tx.Account
 		}
+		dest := parseAccount(msgOut.messageRelaxed.MessageInternal.Dest)
+		var recipient tongo.AccountID
+		if dest != nil {
+			recipient = dest.Address
+		}
 		action = Action{Type: TonTransfer, TonTransfer: &TonTransferAction{
-			Recipient: parseAccount(msgOut.messageRelaxed.MessageInternal.Dest).Address,
+			Recipient: recipient,
 			Sender:    sender,
 			Comment:   g.Pointer(string(body.Text))}}
 		if msgOut.mode < 128 && msgOut.tx != nil {
