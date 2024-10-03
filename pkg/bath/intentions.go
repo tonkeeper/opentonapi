@@ -3,6 +3,7 @@ package bath
 import (
 	"github.com/tonkeeper/opentonapi/internal/g"
 	"github.com/tonkeeper/opentonapi/pkg/core"
+	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
 	"github.com/tonkeeper/tongo/boc"
 	"golang.org/x/exp/slices"
@@ -203,34 +204,75 @@ func createActionFromMessage(msgOut OutMessage) Action {
 	var action Action
 	switch body := msgOut.body.(type) {
 	case abi.TextCommentMsgBody:
+		var sender tongo.AccountID
+		if msgOut.tx != nil {
+			sender = msgOut.tx.Account
+		}
 		action = Action{Type: TonTransfer, TonTransfer: &TonTransferAction{
 			Recipient: parseAccount(msgOut.messageRelaxed.MessageInternal.Dest).Address,
-			Sender:    msgOut.tx.Account,
+			Sender:    sender,
 			Comment:   g.Pointer(string(body.Text))}}
-		if msgOut.mode < 128 {
+		if msgOut.mode < 128 && msgOut.tx != nil {
 			action.TonTransfer.Amount = int64(msgOut.messageRelaxed.MessageInternal.Value.Grams)
 			if msgOut.tx.EndBalance < action.TonTransfer.Amount {
 				action.Error = g.Pointer("Not enough balance")
 			}
 		}
 	case abi.NftTransferMsgBody:
+		bodyNewOwner := parseAccount(body.NewOwner)
+		var recipient *tongo.AccountID
+		if bodyNewOwner != nil {
+			recipient = &bodyNewOwner.Address
+		}
+		var sender *tongo.AccountID
+		if msgOut.tx != nil {
+			sender = &msgOut.tx.Account
+		}
+		dest := parseAccount(msgOut.messageRelaxed.MessageInternal.Dest)
+		var nft tongo.AccountID
+		if dest != nil {
+			nft = dest.Address
+		}
 		action = Action{Type: NftItemTransfer, NftItemTransfer: &NftTransferAction{
-			Recipient: &parseAccount(body.NewOwner).Address,
-			Sender:    &msgOut.tx.Account,
-			Nft:       parseAccount(msgOut.messageRelaxed.MessageInternal.Dest).Address,
+			Recipient: recipient,
+			Sender:    sender,
+			Nft:       nft,
 		}}
 	case abi.JettonTransferMsgBody:
+		bodyDest := parseAccount(body.Destination)
+		var recipient *tongo.AccountID
+		if bodyDest != nil {
+			recipient = &bodyDest.Address
+		}
+		dest := parseAccount(msgOut.messageRelaxed.MessageInternal.Dest)
+		var sendersWallet tongo.AccountID
+		if dest != nil {
+			sendersWallet = dest.Address
+		}
+		var sender *tongo.AccountID
+		if msgOut.tx != nil {
+			sender = &msgOut.tx.Account
+		}
 		action = Action{Type: JettonTransfer, JettonTransfer: &JettonTransferAction{
-			Recipient:     &parseAccount(body.Destination).Address,
-			Sender:        &msgOut.tx.Account,
+			Recipient:     recipient,
+			Sender:        sender,
 			Amount:        body.Amount,
-			SendersWallet: parseAccount(msgOut.messageRelaxed.MessageInternal.Dest).Address,
+			SendersWallet: sendersWallet,
 		}}
 	default:
+		dest := parseAccount(msgOut.messageRelaxed.MessageInternal.Dest)
+		var recipient tongo.AccountID
+		if dest != nil {
+			recipient = dest.Address
+		}
+		var sender tongo.AccountID
+		if msgOut.tx != nil {
+			sender = msgOut.tx.Account
+		}
 		action = Action{Type: TonTransfer, TonTransfer: &TonTransferAction{
-			Recipient: parseAccount(msgOut.messageRelaxed.MessageInternal.Dest).Address,
-			Sender:    msgOut.tx.Account}}
-		if msgOut.mode < 128 {
+			Recipient: recipient,
+			Sender:    sender}}
+		if msgOut.mode < 128 && msgOut.tx != nil {
 			action.TonTransfer.Amount = int64(msgOut.messageRelaxed.MessageInternal.Value.Grams)
 			if msgOut.tx.EndBalance < action.TonTransfer.Amount {
 				action.Error = g.Pointer("Not enough balance")
