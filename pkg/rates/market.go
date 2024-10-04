@@ -25,7 +25,8 @@ const (
 	okx      string = "OKX"
 	huobi    string = "Huobi"
 	dedust   string = "DeDust"
-	stonfi   string = "STON.fi"
+	stonfiV1 string = "STON.fi v1"
+	stonfiV2 string = "STON.fi v2"
 	coinbase string = "Coinbase"
 )
 
@@ -332,8 +333,13 @@ func (m *Mock) getPools() map[ton.AccountID]float64 {
 			PoolResponseConverter: convertedDeDustPoolResponse,
 		},
 		{
-			Name:                  stonfi,
-			URL:                   m.StonFiResultUrl,
+			Name:                  stonfiV1,
+			URL:                   m.StonV1FiResultUrl,
+			PoolResponseConverter: convertedStonFiPoolResponse,
+		},
+		{
+			Name:                  stonfiV2,
+			URL:                   m.StonV2FiResultUrl,
 			PoolResponseConverter: convertedStonFiPoolResponse,
 		},
 	}
@@ -364,7 +370,8 @@ func (m *Mock) getPools() map[ton.AccountID]float64 {
 
 func convertedStonFiPoolResponse(pools map[ton.AccountID]float64, respBody io.ReadCloser) (map[ton.AccountID]float64, error) {
 	defer respBody.Close()
-	pools[references.PTon] = 1 // pTon = TON
+	pools[references.PTonV1] = 1 // pTonV1 = TON
+	pools[references.PTonV2] = 1 // pTonV2 = TON
 	reader := csv.NewReader(respBody)
 	records, err := reader.ReadAll()
 	if err != nil {
@@ -455,7 +462,11 @@ func convertedStonFiPoolResponse(pools map[ton.AccountID]float64, respBody io.Re
 		}
 		// PTon is the primary token on StonFi, but it has only 50 holders.
 		// To avoid missing tokens, we check for pTON
-		if (firstAsset.Account != references.PTon && firstAsset.HoldersCount < minHoldersCount) || (secondAsset.Account != references.PTon && secondAsset.HoldersCount < minHoldersCount) {
+		isNotPTon := func(account ton.AccountID) bool {
+			return account != references.PTonV1 && account != references.PTonV2
+		}
+		if (isNotPTon(firstAsset.Account) && firstAsset.HoldersCount < minHoldersCount) ||
+			(isNotPTon(secondAsset.Account) && secondAsset.HoldersCount < minHoldersCount) {
 			continue
 		}
 		updateActualAssets(firstAsset, firstAsset, secondAsset)
