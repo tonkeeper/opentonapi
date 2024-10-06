@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"go.uber.org/zap"
 	"net/http"
 
 	"golang.org/x/exp/slices"
@@ -82,6 +83,10 @@ func (h *Handler) GetAccountNftItems(ctx context.Context, params oas.GetAccountN
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
+	h.logger.Debug("search account nft items", zap.String("collection_id", params.AccountID),
+		zap.Int("limit", params.Limit.Value),
+		zap.Int("offset", params.Offset.Value),
+		zap.Int("rows", len(ids)))
 	var result oas.NftItems
 	if len(ids) == 0 {
 		return &result, nil
@@ -90,6 +95,10 @@ func (h *Handler) GetAccountNftItems(ctx context.Context, params oas.GetAccountN
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
+	h.logger.Debug("get nft items", zap.String("collection_id", params.AccountID),
+		zap.Int("limit", params.Limit.Value),
+		zap.Int("offset", params.Offset.Value),
+		zap.Int("rows", len(ids)))
 	for _, i := range items {
 		result.NftItems = append(result.NftItems, h.convertNFT(ctx, i, h.addressBook, h.metaCache))
 	}
