@@ -63,6 +63,7 @@ type storage interface {
 	GetNFTs(ctx context.Context, accounts []tongo.AccountID) ([]core.NftItem, error)
 	SearchNFTs(ctx context.Context, collection *core.Filter[tongo.AccountID], owner *core.Filter[tongo.AccountID], includeOnSale bool, onlyVerified bool, limit, offset int) ([]tongo.AccountID, error)
 	GetNftCollections(ctx context.Context, limit, offset *int32) ([]core.NftCollection, error)
+	GetNftCollectionsByAddresses(ctx context.Context, addresses []ton.AccountID) ([]core.NftCollection, error)
 	GetNftCollectionByCollectionAddress(ctx context.Context, address tongo.AccountID) (core.NftCollection, error)
 	GetAccountNftsHistory(ctx context.Context, address tongo.AccountID, limit int, beforeLT *int64, startTime *int64, endTime *int64) ([]tongo.Bits256, error)
 	GetNftHistory(ctx context.Context, address tongo.AccountID, limit int, beforeLT *int64, startTime *int64, endTime *int64) ([]tongo.Bits256, error)
@@ -85,6 +86,7 @@ type storage interface {
 	GetWalletPubKey(ctx context.Context, address tongo.AccountID) (ed25519.PublicKey, error)
 	GetSubscriptions(ctx context.Context, address tongo.AccountID) ([]core.Subscription, error)
 	GetJettonMasters(ctx context.Context, limit, offset int) ([]core.JettonMaster, error)
+	GetJettonMastersByAddresses(ctx context.Context, addresses []ton.AccountID) ([]core.JettonMaster, error)
 
 	GetLastConfig(ctx context.Context) (ton.BlockchainConfig, error)
 	GetConfigRaw(ctx context.Context) ([]byte, error)

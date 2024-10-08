@@ -156,22 +156,13 @@ func (h *Handler) GetJettons(ctx context.Context, params oas.GetJettonsParams) (
 	for idx, jetton := range jettons {
 		addresses[idx] = jetton.Address
 	}
-	jettonsHolders, err := h.storage.GetJettonsHoldersCount(ctx, addresses)
+	holders, err := h.storage.GetJettonsHoldersCount(ctx, addresses)
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
 	results := make([]oas.JettonInfo, len(jettons))
 	for idx, master := range jettons {
-		meta := h.GetJettonNormalizedMetadata(ctx, master.Address)
-		metadata := jettonMetadata(master.Address, meta)
-		results[idx] = oas.JettonInfo{
-			Mintable:     master.Mintable,
-			TotalSupply:  master.TotalSupply.String(),
-			Metadata:     metadata,
-			Verification: oas.JettonVerificationType(meta.Verification),
-			HoldersCount: jettonsHolders[master.Address],
-			Admin:        convertOptAccountAddress(master.Admin, h.addressBook),
-		}
+		results[idx] = h.convertJettonInfo(ctx, master, holders)
 	}
 	return &oas.Jettons{Jettons: results}, nil
 }
@@ -270,4 +261,40 @@ func (h *Handler) GetJettonTransferPayload(ctx context.Context, params oas.GetJe
 		res.StateInit = oas.NewOptString(*payload.StateInit)
 	}
 	return &res, nil
+}
+
+func (h Handler) GetJettonInfosByAddresses(ctx context.Context, request oas.OptGetJettonInfosByAddressesReq) (*oas.Jettons, error) {
+	if len(request.Value.AccountIds) == 0 {
+		return nil, toError(http.StatusBadRequest, fmt.Errorf("empty list of ids"))
+	}
+	if !h.limits.isBulkQuantityAllowed(len(request.Value.AccountIds)) {
+		return nil, toError(http.StatusBadRequest, fmt.Errorf("the maximum number of addresses to request at once: %v", h.limits.BulkLimits))
+	}
+	accounts := make([]ton.AccountID, len(request.Value.AccountIds))
+	var err error
+	for i := range request.Value.AccountIds {
+		account, err := tongo.ParseAddress(request.Value.AccountIds[i])
+		if err != nil {
+			return nil, toError(http.StatusBadRequest, err)
+		}
+		accounts[i] = account.ID
+	}
+	jettons, err := h.storage.GetJettonMastersByAddresses(ctx, accounts)
+	if err != nil {
+		return nil, toError(http.StatusInternalServerError, err)
+	}
+	addresses := make([]tongo.AccountID, len(jettons))
+	for idx, jetton := range jettons {
+		addresses[idx] = jetton.Address
+	}
+	jettonsHolders, err := h.storage.GetJettonsHoldersCount(ctx, addresses)
+	if err != nil {
+		return nil, toError(http.StatusInternalServerError, err)
+	}
+	results := make([]oas.JettonInfo, len(jettons))
+	for idx, master := range jettons {
+		results[idx] = h.convertJettonInfo(ctx, master, jettonsHolders)
+	}
+
+	return &oas.Jettons{Jettons: results}, nil
 }

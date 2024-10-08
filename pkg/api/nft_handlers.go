@@ -4,8 +4,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"go.uber.org/zap"
 	"net/http"
+
+	"go.uber.org/zap"
 
 	"golang.org/x/exp/slices"
 
@@ -174,4 +175,34 @@ func (h *Handler) GetNftHistoryByID(ctx context.Context, params oas.GetNftHistor
 		return nil, toError(http.StatusInternalServerError, err)
 	}
 	return &oas.AccountEvents{Events: events, NextFrom: lastLT}, nil
+}
+
+func (h *Handler) GetNftCollectionItemsByAddresses(ctx context.Context, request oas.OptGetNftCollectionItemsByAddressesReq) (*oas.NftCollections, error) {
+	if len(request.Value.AccountIds) == 0 {
+		return nil, toError(http.StatusBadRequest, fmt.Errorf("empty list of ids"))
+	}
+	if !h.limits.isBulkQuantityAllowed(len(request.Value.AccountIds)) {
+		return nil, toError(http.StatusBadRequest, fmt.Errorf("the maximum number of addresses to request at once: %v", h.limits.BulkLimits))
+	}
+	accounts := make([]tongo.AccountID, len(request.Value.AccountIds))
+	var err error
+	for i := range request.Value.AccountIds {
+		account, err := tongo.ParseAddress(request.Value.AccountIds[i])
+		if err != nil {
+			return nil, toError(http.StatusBadRequest, err)
+		}
+		accounts[i] = account.ID
+	}
+	collections, err := h.storage.GetNftCollectionsByAddresses(ctx, accounts)
+	if errors.Is(err, core.ErrEntityNotFound) {
+		return nil, toError(http.StatusNotFound, err)
+	}
+	if err != nil {
+		return nil, toError(http.StatusInternalServerError, err)
+	}
+	var result oas.NftCollections
+	for _, i := range collections {
+		result.NftCollections = append(result.NftCollections, convertNftCollection(i, h.addressBook))
+	}
+	return &result, nil
 }
