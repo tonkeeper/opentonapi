@@ -1182,6 +1182,23 @@ paths:
                 $ref: '#/components/schemas/NftCollection'
         'default':
           $ref: '#/components/responses/Error'
+  /v2/nfts/collections/_bulk:
+    post:
+      description: Get NFT collection items by their addresses
+      operationId: getNftCollectionItemsByAddresses
+      tags:
+        - NFT
+      requestBody:
+        $ref: "#/components/requestBodies/AccountIDs"
+      responses:
+        '200':
+          description: nft collections
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NftCollections'
+        'default':
+          $ref: '#/components/responses/Error'
   /v2/nfts/collections/{account_id}/items:
     get:
       description: Get NFT items from collection by collection address
@@ -1536,6 +1553,23 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/JettonInfo'
+        'default':
+          $ref: '#/components/responses/Error'
+  /v2/jettons/_bulk:
+    post:
+      description: Get jetton metadata items by jetton master addresses
+      operationId: getJettonInfosByAddresses
+      tags:
+        - Jettons
+      requestBody:
+        $ref: "#/components/requestBodies/AccountIDs"
+      responses:
+        '200':
+          description: a list of jettons
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Jettons'
         'default':
           $ref: '#/components/responses/Error'
   /v2/jettons/{account_id}/holders:
@@ -6848,7 +6882,6 @@ components:
         decimals:
           type: integer
           example: 9
-
     Jettons:
       type: object
       required:

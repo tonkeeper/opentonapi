@@ -551,6 +551,15 @@ func (UnimplementedHandler) GetJettonInfo(ctx context.Context, params GetJettonI
 	return r, ht.ErrNotImplemented
 }
 
+// GetJettonInfosByAddresses implements getJettonInfosByAddresses operation.
+//
+// Get jetton metadata items by jetton master addresses.
+//
+// POST /v2/jettons/_bulk
+func (UnimplementedHandler) GetJettonInfosByAddresses(ctx context.Context, req OptGetJettonInfosByAddressesReq) (r *Jettons, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // GetJettonTransferPayload implements getJettonTransferPayload operation.
 //
 // Get jetton's custom payload and state init required for transfer.
@@ -602,6 +611,15 @@ func (UnimplementedHandler) GetMultisigAccount(ctx context.Context, params GetMu
 //
 // GET /v2/nfts/collections/{account_id}
 func (UnimplementedHandler) GetNftCollection(ctx context.Context, params GetNftCollectionParams) (r *NftCollection, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// GetNftCollectionItemsByAddresses implements getNftCollectionItemsByAddresses operation.
+//
+// Get NFT collection items by their addresses.
+//
+// POST /v2/nfts/collections/_bulk
+func (UnimplementedHandler) GetNftCollectionItemsByAddresses(ctx context.Context, req OptGetNftCollectionItemsByAddressesReq) (r *NftCollections, _ error) {
 	return r, ht.ErrNotImplemented
 }
 

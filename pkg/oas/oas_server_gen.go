@@ -372,6 +372,12 @@ type Handler interface {
 	//
 	// GET /v2/jettons/{account_id}
 	GetJettonInfo(ctx context.Context, params GetJettonInfoParams) (*JettonInfo, error)
+	// GetJettonInfosByAddresses implements getJettonInfosByAddresses operation.
+	//
+	// Get jetton metadata items by jetton master addresses.
+	//
+	// POST /v2/jettons/_bulk
+	GetJettonInfosByAddresses(ctx context.Context, req OptGetJettonInfosByAddressesReq) (*Jettons, error)
 	// GetJettonTransferPayload implements getJettonTransferPayload operation.
 	//
 	// Get jetton's custom payload and state init required for transfer.
@@ -408,6 +414,12 @@ type Handler interface {
 	//
 	// GET /v2/nfts/collections/{account_id}
 	GetNftCollection(ctx context.Context, params GetNftCollectionParams) (*NftCollection, error)
+	// GetNftCollectionItemsByAddresses implements getNftCollectionItemsByAddresses operation.
+	//
+	// Get NFT collection items by their addresses.
+	//
+	// POST /v2/nfts/collections/_bulk
+	GetNftCollectionItemsByAddresses(ctx context.Context, req OptGetNftCollectionItemsByAddressesReq) (*NftCollections, error)
 	// GetNftCollections implements getNftCollections operation.
 	//
 	// Get NFT collections.

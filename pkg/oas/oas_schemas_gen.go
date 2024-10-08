@@ -5797,6 +5797,20 @@ func (s *GetInscriptionOpTemplateType) UnmarshalText(data []byte) error {
 	}
 }
 
+type GetJettonInfosByAddressesReq struct {
+	AccountIds []string `json:"account_ids"`
+}
+
+// GetAccountIds returns the value of AccountIds.
+func (s *GetJettonInfosByAddressesReq) GetAccountIds() []string {
+	return s.AccountIds
+}
+
+// SetAccountIds sets the value of AccountIds.
+func (s *GetJettonInfosByAddressesReq) SetAccountIds(val []string) {
+	s.AccountIds = val
+}
+
 type GetMarketsRatesOK struct {
 	Markets []MarketTonRates `json:"markets"`
 }
@@ -5809,6 +5823,20 @@ func (s *GetMarketsRatesOK) GetMarkets() []MarketTonRates {
 // SetMarkets sets the value of Markets.
 func (s *GetMarketsRatesOK) SetMarkets(val []MarketTonRates) {
 	s.Markets = val
+}
+
+type GetNftCollectionItemsByAddressesReq struct {
+	AccountIds []string `json:"account_ids"`
+}
+
+// GetAccountIds returns the value of AccountIds.
+func (s *GetNftCollectionItemsByAddressesReq) GetAccountIds() []string {
+	return s.AccountIds
+}
+
+// SetAccountIds sets the value of AccountIds.
+func (s *GetNftCollectionItemsByAddressesReq) SetAccountIds(val []string) {
+	s.AccountIds = val
 }
 
 type GetNftItemsByAddressesReq struct {
@@ -12175,6 +12203,98 @@ func (o OptGetBlockchainAccountTransactionsSortOrder) Get() (v GetBlockchainAcco
 
 // Or returns value if set, or given parameter if does not.
 func (o OptGetBlockchainAccountTransactionsSortOrder) Or(d GetBlockchainAccountTransactionsSortOrder) GetBlockchainAccountTransactionsSortOrder {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptGetJettonInfosByAddressesReq returns new OptGetJettonInfosByAddressesReq with value set to v.
+func NewOptGetJettonInfosByAddressesReq(v GetJettonInfosByAddressesReq) OptGetJettonInfosByAddressesReq {
+	return OptGetJettonInfosByAddressesReq{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptGetJettonInfosByAddressesReq is optional GetJettonInfosByAddressesReq.
+type OptGetJettonInfosByAddressesReq struct {
+	Value GetJettonInfosByAddressesReq
+	Set   bool
+}
+
+// IsSet returns true if OptGetJettonInfosByAddressesReq was set.
+func (o OptGetJettonInfosByAddressesReq) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptGetJettonInfosByAddressesReq) Reset() {
+	var v GetJettonInfosByAddressesReq
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptGetJettonInfosByAddressesReq) SetTo(v GetJettonInfosByAddressesReq) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptGetJettonInfosByAddressesReq) Get() (v GetJettonInfosByAddressesReq, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptGetJettonInfosByAddressesReq) Or(d GetJettonInfosByAddressesReq) GetJettonInfosByAddressesReq {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptGetNftCollectionItemsByAddressesReq returns new OptGetNftCollectionItemsByAddressesReq with value set to v.
+func NewOptGetNftCollectionItemsByAddressesReq(v GetNftCollectionItemsByAddressesReq) OptGetNftCollectionItemsByAddressesReq {
+	return OptGetNftCollectionItemsByAddressesReq{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptGetNftCollectionItemsByAddressesReq is optional GetNftCollectionItemsByAddressesReq.
+type OptGetNftCollectionItemsByAddressesReq struct {
+	Value GetNftCollectionItemsByAddressesReq
+	Set   bool
+}
+
+// IsSet returns true if OptGetNftCollectionItemsByAddressesReq was set.
+func (o OptGetNftCollectionItemsByAddressesReq) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptGetNftCollectionItemsByAddressesReq) Reset() {
+	var v GetNftCollectionItemsByAddressesReq
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptGetNftCollectionItemsByAddressesReq) SetTo(v GetNftCollectionItemsByAddressesReq) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptGetNftCollectionItemsByAddressesReq) Get() (v GetNftCollectionItemsByAddressesReq, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptGetNftCollectionItemsByAddressesReq) Or(d GetNftCollectionItemsByAddressesReq) GetNftCollectionItemsByAddressesReq {
 	if v, ok := o.Get(); ok {
 		return v
 	}
