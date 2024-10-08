@@ -263,7 +263,7 @@ func (h *Handler) GetJettonTransferPayload(ctx context.Context, params oas.GetJe
 	return &res, nil
 }
 
-func (h Handler) GetJettonInfosByAddresses(ctx context.Context, request oas.OptGetJettonInfosByAddressesReq) (*oas.Jettons, error) {
+func (h *Handler) GetJettonInfosByAddresses(ctx context.Context, request oas.OptGetJettonInfosByAddressesReq) (*oas.Jettons, error) {
 	if len(request.Value.AccountIds) == 0 {
 		return nil, toError(http.StatusBadRequest, fmt.Errorf("empty list of ids"))
 	}
