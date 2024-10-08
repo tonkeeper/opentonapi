@@ -69,11 +69,16 @@ func (s *LiteStorage) GetTrace(ctx context.Context, hash tongo.Bits256) (*core.T
 	if err != nil {
 		return nil, err
 	}
+	s.logger.Info(fmt.Sprintf("Found transaction hash %s in cache", hash.Hex()))
 	root, err := s.findRoot(ctx, tx, 0)
 	if err != nil {
 		return nil, err
 	}
+	s.logger.Info(fmt.Sprintf("Found transaction root %s", root.Hash.Hex()))
 	trace, err := s.recursiveGetChildren(ctx, *root, 0)
+	if err != nil {
+		s.logger.Info(fmt.Sprintf("Didn't find all children of transaction: %s root: %s", hash.Hex(), root.Hash.Hex()))
+	}
 	return &trace, err
 }
 
@@ -113,10 +118,18 @@ func (s *LiteStorage) findRoot(ctx context.Context, tx *core.Transaction, depth 
 		return nil, fmt.Errorf("can't find root of nil transaction")
 	}
 	if tx.InMsg == nil || tx.InMsg.IsExternal() || tx.InMsg.IsEmission() {
+		if tx.InMsg == nil {
+			s.logger.Info("transaction is root InMsg is nil")
+		} else {
+			s.logger.Info(fmt.Sprintf("transaction is root isExternal: %t isEmission: %t", tx.InMsg.IsExternal(), tx.InMsg.IsEmission()))
+		}
 		return tx, nil
 	}
-	tx = s.searchTxInCache(*tx.InMsg.Source, tx.InMsg.CreatedLt)
+	source := *tx.InMsg.Source
+	createdLt := tx.InMsg.CreatedLt
+	tx = s.searchTxInCache(source, createdLt)
 	if tx == nil {
+		s.logger.Info(fmt.Sprintf("Didn't find transaction parent accountId: %s, createdLt: %d", source.String(), createdLt))
 		return nil, core.ErrEntityNotFound
 	}
 	return s.findRoot(ctx, tx, depth+1)

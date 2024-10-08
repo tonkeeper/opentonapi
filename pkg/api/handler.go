@@ -154,9 +154,7 @@ func NewHandler(logger *zap.Logger, opts ...Option) (*Handler, error) {
 	for _, o := range opts {
 		o(options)
 	}
-	if options.msgSender == nil {
-		logger.Warn("message sender is not configured, you can't send messages to the blockchain")
-	}
+
 	if options.addressBook == nil {
 		options.addressBook = addressbook.NewAddressBook(logger, config.AddressPath, config.JettonPath, config.CollectionPath)
 	}
