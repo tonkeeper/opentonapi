@@ -5537,6 +5537,7 @@ components:
               example: "Best collection in TON network"
         verified:
           type: boolean
+          description: "Collection master contract confirmed that this item is part of collection"
           example: true
         metadata:
           type: object
@@ -5552,6 +5553,8 @@ components:
           type: string
           example: crypto.ton
         approved_by:
+          deprecated: true
+          description: "please use trust field"
           $ref: '#/components/schemas/NftApprovedBy'
         include_cnft:
           type: boolean
