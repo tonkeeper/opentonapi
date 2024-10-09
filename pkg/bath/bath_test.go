@@ -5,12 +5,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/tonkeeper/opentonapi/internal/g"
 	"os"
 	"sort"
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"github.com/tonkeeper/opentonapi/internal/g"
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/liteapi"
@@ -57,7 +57,7 @@ func (m *mockInfoSource) JettonMastersForWallets(ctx context.Context, wallets []
 	return m.OnJettonMastersForWallets(ctx, wallets)
 }
 
-func (m *mockInfoSource) STONfiPools(ctx context.Context, pools []tongo.AccountID) (map[tongo.AccountID]core.STONfiPool, error) {
+func (m *mockInfoSource) STONfiPools(ctx context.Context, pools []core.STONfiPoolID) (map[tongo.AccountID]core.STONfiPool, error) {
 	return map[tongo.AccountID]core.STONfiPool{}, nil
 }
 
@@ -166,6 +166,16 @@ func TestFindActions(t *testing.T) {
 			tongo.MustParseBlockID("(0,8000000000000000,33600829)"),
 			// failed dedust swap
 			tongo.MustParseBlockID("(0,7000000000000000,45592983)"),
+			// stonfi v2 swap simple
+			tongo.MustParseBlockID("(0,6000000000000000,46034062)"),
+			tongo.MustParseBlockID("(0,e000000000000000,46027828)"),
+			tongo.MustParseBlockID("(0,9000000000000000,45998794)"),
+			tongo.MustParseBlockID("(0,6000000000000000,46034070)"),
+			tongo.MustParseBlockID("(0,6000000000000000,46034067)"),
+			// stonfi v2 swap with ref
+			tongo.MustParseBlockID("(0,2000000000000000,46145069)"),
+			tongo.MustParseBlockID("(0,6000000000000000,46151880)"),
+			tongo.MustParseBlockID("(0,2000000000000000,46145074)"),
 		}),
 	)
 
@@ -410,6 +420,16 @@ func TestFindActions(t *testing.T) {
 			name:           "failed dedust swap",
 			hash:           "887c7763f41ca4a4b9de28900ab514caabc0c27ed5b41d9918d60f5e7f4a9d96",
 			filenamePrefix: "failed-dedust-swap",
+		},
+		{
+			name:           "stonfi v2 swap simple",
+			hash:           "3fa256638e5f6cd356afa70eb37c89de80846973dea0c9c46adf4df5cca39a68",
+			filenamePrefix: "stonfi-v2-swap-simple",
+		},
+		{
+			name:           "stonfi v2 swap with ref",
+			hash:           "d70fddb4786c04932669bf589ee73c16293115a1927dfbee5b719304232e2e1b",
+			filenamePrefix: "stonfi-v2-swap-ref",
 		},
 	} {
 		t.Run(c.name, func(t *testing.T) {
