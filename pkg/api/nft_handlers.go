@@ -87,7 +87,7 @@ func (h *Handler) GetAccountNftItems(ctx context.Context, params oas.GetAccountN
 	h.logger.Debug("search account nft items", zap.String("collection_id", params.AccountID),
 		zap.Int("limit", params.Limit.Value),
 		zap.Int("offset", params.Offset.Value),
-		zap.Int("rows", len(ids)))
+		zap.Int("ids", len(ids)))
 	var result oas.NftItems
 	if len(ids) == 0 {
 		return &result, nil
@@ -99,7 +99,7 @@ func (h *Handler) GetAccountNftItems(ctx context.Context, params oas.GetAccountN
 	h.logger.Debug("get nft items", zap.String("collection_id", params.AccountID),
 		zap.Int("limit", params.Limit.Value),
 		zap.Int("offset", params.Offset.Value),
-		zap.Int("rows", len(ids)))
+		zap.Int("items", len(items)))
 	for _, i := range items {
 		result.NftItems = append(result.NftItems, h.convertNFT(ctx, i, h.addressBook, h.metaCache))
 	}
