@@ -101,6 +101,18 @@ type STONfiPool struct {
 	Token1 tongo.AccountID
 }
 
+type STONfiVersion string
+
+const (
+	STONfiPoolV1 STONfiVersion = "v1"
+	STONfiPoolV2 STONfiVersion = "v2"
+)
+
+type STONfiPoolID struct {
+	ID      tongo.AccountID
+	Version STONfiVersion
+}
+
 // InformationSource provides methods to construct TraceAdditionalInfo.
 type InformationSource interface {
 	JettonMastersForWallets(ctx context.Context, wallets []tongo.AccountID) (map[tongo.AccountID]tongo.AccountID, error)
@@ -151,7 +163,7 @@ func CollectAdditionalInfo(ctx context.Context, infoSource InformationSource, tr
 	}
 	var jettonWallets []tongo.AccountID
 	var saleContracts []tongo.AccountID
-	var stonfiPoolIDs []tongo.AccountID
+	var stonfiPoolIDs []STONfiPoolID
 	Visit(trace, func(trace *Trace) {
 		// when we emulate a trace,
 		// we construct "trace.AdditionalInfo" in emulatedTreeToTrace for all accounts the trace touches.
@@ -169,7 +181,10 @@ func CollectAdditionalInfo(ctx context.Context, infoSource InformationSource, tr
 			saleContracts = append(saleContracts, trace.Account)
 		}
 		if hasInterface(trace.AccountInterfaces, abi.StonfiPool) {
-			stonfiPoolIDs = append(stonfiPoolIDs, trace.Account)
+			stonfiPoolIDs = append(stonfiPoolIDs, STONfiPoolID{ID: trace.Account, Version: STONfiPoolV1})
+		}
+		if hasInterface(trace.AccountInterfaces, abi.StonfiPoolV2) {
+			stonfiPoolIDs = append(stonfiPoolIDs, STONfiPoolID{ID: trace.Account, Version: STONfiPoolV2})
 		}
 	})
 	stonfiPools, err := infoSource.STONfiPools(ctx, stonfiPoolIDs)
