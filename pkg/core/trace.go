@@ -117,7 +117,7 @@ type STONfiPoolID struct {
 type InformationSource interface {
 	JettonMastersForWallets(ctx context.Context, wallets []tongo.AccountID) (map[tongo.AccountID]tongo.AccountID, error)
 	NftSaleContracts(ctx context.Context, contracts []tongo.AccountID) (map[tongo.AccountID]NftSaleContract, error)
-	STONfiPools(ctx context.Context, poolIDs []tongo.AccountID) (map[tongo.AccountID]STONfiPool, error)
+	STONfiPools(ctx context.Context, poolIDs []STONfiPoolID) (map[tongo.AccountID]STONfiPool, error)
 }
 
 func isDestinationJettonWallet(inMsg *Message) bool {

@@ -195,20 +195,20 @@ var StonfiSwapV2Straw = Straw[BubbleJettonSwap]{
 			if body.QueryId > 0 && a.IsZero() && b.IsZero() {
 				return nil
 			}
-			//newAction.Out.Amount = big.Int(body.MinOut)
-			//s, err := tongo.AccountIDFromTlb(body.SenderAddress)
-			//if err != nil {
-			//	return err
-			//}
-			//if s != nil && *s == b {
-			//	a, b = b, a
-			//}
-			//newAction.In.JettonWallet = a
-			//newAction.Out.JettonWallet = b
-			//if tx.additionalInfo != nil {
-			//	newAction.In.JettonMaster, _ = tx.additionalInfo.JettonMaster(a)
-			//	newAction.Out.JettonMaster, _ = tx.additionalInfo.JettonMaster(b)
-			//}
+			newAction.Out.Amount = big.Int(body.DexPayload.SwapBody.MinOut)
+			s, err := tongo.AccountIDFromTlb(body.FromUser)
+			if err != nil {
+				return err
+			}
+			if s != nil && *s == b {
+				a, b = b, a
+			}
+			newAction.In.JettonWallet = a
+			newAction.Out.JettonWallet = b
+			if tx.additionalInfo != nil {
+				newAction.In.JettonMaster, _ = tx.additionalInfo.JettonMaster(a)
+				newAction.Out.JettonMaster, _ = tx.additionalInfo.JettonMaster(b)
+			}
 			return nil
 		},
 		SingleChild: &Straw[BubbleJettonSwap]{
