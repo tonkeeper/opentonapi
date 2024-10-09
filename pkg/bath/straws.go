@@ -39,6 +39,7 @@ var DefaultStraws = []Merger{
 	NftTransferStraw,
 	NftTransferNotifyStraw,
 	JettonTransferPTONStraw,
+	StonfiV2PTONStraw,
 	JettonTransferClassicStraw,
 	JettonTransferMinimalStraw,
 	JettonBurnStraw,

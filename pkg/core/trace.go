@@ -224,7 +224,7 @@ func CollectAdditionalInfo(ctx context.Context, infoSource InformationSource, tr
 				additionalInfo.NftSaleContract = &sale
 			}
 		}
-		if hasInterface(trace.AccountInterfaces, abi.StonfiPool) {
+		if hasInterface(trace.AccountInterfaces, abi.StonfiPool) || hasInterface(trace.AccountInterfaces, abi.StonfiPoolV2) {
 			if pool, ok := stonfiPools[trace.Account]; ok {
 				additionalInfo.STONfiPool = &pool
 				additionalInfo.SetJettonMaster(pool.Token0, masters[pool.Token0])

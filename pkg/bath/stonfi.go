@@ -1,6 +1,7 @@
 package bath
 
 import (
+	"github.com/tonkeeper/tongo/tlb"
 	"github.com/tonkeeper/tongo/ton"
 	"math/big"
 
@@ -123,16 +124,16 @@ var StonfiSwapStraw = Straw[BubbleJettonSwap]{
 }
 
 var StonfiV2PTONStraw = Straw[BubbleJettonTransfer]{
-	CheckFuncs: []bubbleCheck{IsTx, HasInterface(abi.JettonWallet), HasOperation(abi.JettonTransferMsgOp)},
+	CheckFuncs: []bubbleCheck{IsTx, HasInterface(abi.JettonWallet), HasOperation(abi.PtonTonTransferMsgOp)},
 	Builder: func(newAction *BubbleJettonTransfer, bubble *Bubble) error {
 		tx := bubble.Info.(BubbleTx)
 		newAction.master, _ = tx.additionalInfo.JettonMaster(tx.account.Address)
 		newAction.senderWallet = tx.account.Address
 		newAction.sender = tx.inputFrom
-		body := tx.decodedBody.Value.(abi.JettonTransferMsgBody)
-		newAction.amount = body.Amount
+		body := tx.decodedBody.Value.(abi.PtonTonTransferMsgBody)
+		newAction.amount = tlb.VarUInteger16(*big.NewInt(int64(body.TonAmount)))
 		newAction.isWrappedTon = true
-		recipient, err := ton.AccountIDFromTlb(body.Destination)
+		recipient, err := ton.AccountIDFromTlb(body.RefundAddress)
 		if err == nil {
 			newAction.recipient = &Account{Address: *recipient}
 		}
@@ -195,14 +196,14 @@ var StonfiSwapV2Straw = Straw[BubbleJettonSwap]{
 			if body.QueryId > 0 && a.IsZero() && b.IsZero() {
 				return nil
 			}
-			newAction.Out.Amount = big.Int(body.DexPayload.SwapBody.MinOut)
-			s, err := tongo.AccountIDFromTlb(body.FromUser)
+			s, err := tongo.AccountIDFromTlb(body.DexPayload.TokenWallet1)
 			if err != nil {
 				return err
 			}
-			if s != nil && *s == b {
+			if s != nil && *s == a {
 				a, b = b, a
 			}
+			newAction.In.Amount = big.Int(body.RightAmount)
 			newAction.In.JettonWallet = a
 			newAction.Out.JettonWallet = b
 			if tx.additionalInfo != nil {
