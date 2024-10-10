@@ -188,7 +188,16 @@ var StonfiSwapV2Straw = Straw[BubbleJettonSwap]{
 		return nil
 	},
 	SingleChild: &Straw[BubbleJettonSwap]{
-		CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.StonfiSwapV2MsgOp), HasInterface(abi.StonfiPoolV2)},
+		CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.StonfiSwapV2MsgOp), HasInterface(abi.StonfiPoolV2), func(bubble *Bubble) bool {
+			tx, ok := bubble.Info.(BubbleTx)
+			if !ok {
+				return false
+			}
+			if tx.additionalInfo.STONfiPool == nil {
+				return false
+			}
+			return true
+		}},
 		Builder: func(newAction *BubbleJettonSwap, bubble *Bubble) error {
 			tx := bubble.Info.(BubbleTx)
 			a, b := tx.additionalInfo.STONfiPool.Token0, tx.additionalInfo.STONfiPool.Token1
