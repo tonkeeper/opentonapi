@@ -285,6 +285,16 @@ func emulatedTreeToTrace(
 			}
 		case abi.GetWalletDataResult:
 			master, _ := ton.AccountIDFromTlb(data.Jetton)
+			if master == nil {
+				continue
+			}
+			_, r, err := abi.GetWalletAddress(ctx, executor, *master, data.Owner)
+			if err != nil {
+				continue
+			}
+			if wa, ok := r.(abi.GetWalletAddressResult); !ok || wa.JettonWalletAddress.AddrStd.Address != t.Account.Address {
+				continue
+			}
 			additionalInfo.SetJettonMaster(accountID, *master)
 		case abi.GetSaleData_GetgemsResult:
 			price := big.Int(data.FullPrice)
