@@ -212,7 +212,6 @@ var StonfiSwapV2Straw = Straw[BubbleJettonSwap]{
 			if s != nil && *s == a {
 				a, b = b, a
 			}
-			newAction.In.Amount = big.Int(body.RightAmount)
 			newAction.In.JettonWallet = a
 			newAction.Out.JettonWallet = b
 			if tx.additionalInfo != nil {
