@@ -6831,7 +6831,7 @@ components:
           example: "9"
         image:
           type: string
-          example: "https://cache.tonapi.io/images/jetton.jpg"
+          example: "https://cache.tonapi.io/images/jetton.jpg" # change to real image
         description:
           type: string
           example: Wrapped Toncoin
@@ -6913,6 +6913,10 @@ components:
           $ref: '#/components/schemas/AccountAddress'
         metadata:
           $ref: '#/components/schemas/JettonMetadata'
+        preview:
+          type: string
+          description: Cached image from metadata
+          example: "https://cache.tonapi.io/images/jetton.jpg"
         verification:
           $ref: '#/components/schemas/JettonVerificationType'
         holders_count:
