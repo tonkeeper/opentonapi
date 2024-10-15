@@ -359,6 +359,25 @@ func emulatedTreeToTrace(
 				master, _ := ton.AccountIDFromTlb(data.Jetton)
 				additionalInfo.SetJettonMaster(accountID, *master)
 			}
+		case abi.GetPoolData_StonfiV2Result:
+			t0, err0 := ton.AccountIDFromTlb(data.Token0WalletAddress)
+			t1, err1 := ton.AccountIDFromTlb(data.Token1WalletAddress)
+			if err1 != nil || err0 != nil {
+				continue
+			}
+			additionalInfo.STONfiPool = &core.STONfiPool{
+				Token0: *t0,
+				Token1: *t1,
+			}
+			for _, accountID := range []ton.AccountID{*t0, *t1} {
+				_, value, err := abi.GetWalletData(ctx, sharedExecutor, accountID)
+				if err != nil {
+					return nil, err
+				}
+				data := value.(abi.GetWalletDataResult)
+				master, _ := ton.AccountIDFromTlb(data.Jetton)
+				additionalInfo.SetJettonMaster(accountID, *master)
+			}
 		}
 	}
 	t.SetAdditionalInfo(additionalInfo)
