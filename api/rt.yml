@@ -1,0 +1,276 @@
+openapi: 3.0.2
+info:
+  title: Realtime API.
+  version: 0.0.1
+  contact:
+    name: Support
+    email: support@tonkeeper.com
+servers:
+  - url: "https://rt.tonapi.io"
+paths:
+  /webhooks:
+    get:
+      description: "Get list of webhooks"
+      operationId: getWebhooks
+      parameters:
+        - $ref: '#/components/parameters/tokenQuery'
+      responses:
+        '200':
+          description: "list of webhooks"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WebhookList'
+        'default':
+          $ref: '#/components/responses/Error'
+    post:
+      operationId: createWebhook
+      parameters:
+        - $ref: '#/components/parameters/tokenQuery'
+      requestBody:
+        $ref: "#/components/requestBodies/WebhookConfiguration"
+      responses:
+        '200':
+          description: "information about created webhook"
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - webhook_id
+                properties:
+                  webhook_id:
+                    type: integer
+                    format: int64
+        'default':
+          $ref: '#/components/responses/Error'
+  /webhooks/{webhook_id}:
+    delete:
+      description: "remove webhook and its subscriptions"
+      operationId: deleteWebhook
+      parameters:
+        - $ref: '#/components/parameters/tokenQuery'
+        - $ref: '#/components/parameters/webhookId'
+      responses:
+        '200':
+          description: ""
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                example: { }
+        'default':
+          $ref: '#/components/responses/Error'
+  /webhooks/{webhook_id}/account-tx/subscribe:
+    post:
+      description: "subscribe to notifications for a particular set of accounts"
+      operationId: webhookAccountTxSubscribe
+      parameters:
+        - $ref: '#/components/parameters/tokenQuery'
+        - $ref: '#/components/parameters/webhookId'
+      requestBody:
+        $ref: "#/components/requestBodies/WebhookAccountTxSubscribeRequest"
+      responses:
+        '200':
+          description: ""
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                example: { }
+        'default':
+          $ref: '#/components/responses/Error'
+
+  /webhooks/{webhook_id}/account-tx/unsubscribe:
+    post:
+      operationId: webhookAccountTxUnsubscribe
+      parameters:
+        - $ref: '#/components/parameters/tokenQuery'
+        - $ref: '#/components/parameters/webhookId'
+      requestBody:
+        $ref: "#/components/requestBodies/WebhookAccountTxUnsubscribeRequest"
+      responses:
+        '200':
+          description: ""
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                example: { }
+        'default':
+          $ref: '#/components/responses/Error'
+  /webhooks/{webhook_id}/account-tx/subscriptions:
+    get:
+      operationId: webhookAccountTxSubscriptions
+      parameters:
+        - $ref: '#/components/parameters/tokenQuery'
+        - $ref: '#/components/parameters/webhookId'
+        - $ref: '#/components/parameters/offsetQuery'
+        - $ref: '#/components/parameters/limitQuery'
+      responses:
+        '200':
+          description: "subscriptions"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WebhookAccountTxSubscriptions'
+        'default':
+          $ref: '#/components/responses/Error'
+
+components:
+  parameters:
+    token:
+      in: header
+      name: X-TonConnect-Auth
+      schema:
+        type: string
+        example: NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2ODQ3...
+      required: true
+    tokenQuery:
+      in: query
+      name: token
+      required: true
+      schema:
+        type: string
+        example: NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2ODQ3...
+    webhookId:
+      in: path
+      name: webhook_id
+      required: true
+      schema:
+        type: integer
+        format: int64
+    limitQuery:
+      in: query
+      name: limit
+      required: false
+      schema:
+        type: integer
+        default: 1000
+        maximum: 1000
+    offsetQuery:
+      in: query
+      name: offset
+      required: false
+      schema:
+        type: integer
+        default: 0
+    i18n:
+      in: header
+      name: Accept-Language
+      required: false
+      schema:
+        type: string
+        example: "ru-RU,ru;q=0.5"
+        default: "en"
+  requestBodies:
+    WebhookConfiguration:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - endpoint
+            properties:
+              endpoint:
+                type: string
+    WebhookAccountTxSubscribeRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - accounts
+            properties:
+              accounts:
+                type: array
+                items:
+                  type: object
+                  required:
+                    - account_id
+                  properties:
+                    account_id:
+                      type: string
+    WebhookAccountTxUnsubscribeRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - accounts
+            properties:
+              accounts:
+                type: array
+                items:
+                  type: string
+  schemas:
+    Error:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: string
+          example: error description
+    WebhookList:
+      type: object
+      required:
+        - webhooks
+      properties:
+        webhooks:
+          type: array
+          items:
+            type: object
+            required:
+            - id
+            - endpoint
+            properties:
+              id:
+                type: integer
+                format: int64
+              endpoint:
+                type: string
+    WebhookAccountTxSubscriptions:
+      type: object
+      required:
+        - account_tx_subscriptions
+      properties:
+        account_tx_subscriptions:
+          type: array
+          items:
+            type: object
+            required:
+              - account_id
+              - last_delivered_lt
+            properties:
+              account_id:
+                type: string
+              last_delivered_lt:
+                type: integer
+                format: int64
+              failed_at:
+                type: string
+                format: date-time
+              failed_lt:
+                type: integer
+                format: int64
+              failed_attempts:
+                type: integer
+                format: int64
+
+
+  responses:
+    Error:
+      description: Some error during request processing
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - error
+            properties:
+              error:
+                type: string
