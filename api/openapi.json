@@ -8313,6 +8313,33 @@
     ]
    }
   },
+  "/v2/jettons/_bulk": {
+   "post": {
+    "description": "Get jetton metadata items by jetton master addresses",
+    "operationId": "getJettonInfosByAddresses",
+    "requestBody": {
+     "$ref": "#/components/requestBodies/AccountIDs"
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Jettons"
+        }
+       }
+      },
+      "description": "a list of jettons"
+     },
+     "default": {
+      "$ref": "#/components/responses/Error"
+     }
+    },
+    "tags": [
+     "Jettons"
+    ]
+   }
+  },
   "/v2/jettons/{account_id}": {
    "get": {
     "description": "Get jetton metadata by jetton master address",
@@ -9504,6 +9531,33 @@
       }
      }
     ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/NftCollections"
+        }
+       }
+      },
+      "description": "nft collections"
+     },
+     "default": {
+      "$ref": "#/components/responses/Error"
+     }
+    },
+    "tags": [
+     "NFT"
+    ]
+   }
+  },
+  "/v2/nfts/collections/_bulk": {
+   "post": {
+    "description": "Get NFT collection items by their addresses",
+    "operationId": "getNftCollectionItemsByAddresses",
+    "requestBody": {
+     "$ref": "#/components/requestBodies/AccountIDs"
+    },
     "responses": {
      "200": {
       "content": {

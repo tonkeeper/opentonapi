@@ -27,7 +27,8 @@ asset_0_account_id,asset_1_account_id,asset_0_reserve,asset_1_reserve,asset_0_me
 0:b113a994b5024a16719f69139328eb759596c38a25f59028b146fecdc3621dfe,0:8cdc1d7640ad5ee326527fc1ad0514f468b30dc84b0173f0e155f451b4e11f7c,54581198678395,9745288354931876,"{""decimals"":""6"",""name"":""Tether USD"",""symbol"":""USD₮""}","{""decimals"":""9"",""name"":""Proxy TON"",""symbol"":""pTON""}",1038000,52
 0:b113a994b5024a16719f69139328eb759596c38a25f59028b146fecdc3621dfe,0:afc49cb8786f21c87045b19ede78fc6b46c51048513f8e9a6d44060199c1bf0c,996119000168,921942515487299500,"{""decimals"":""6"",""name"":""Tether USD"",""symbol"":""USD₮""}","{""decimals"":""9"",""name"":""Dogs"",""symbol"":""DOGS""}",1050066,881834`,
 			expected: map[ton.AccountID]float64{
-				ton.MustParseAccountID("0:8cdc1d7640ad5ee326527fc1ad0514f468b30dc84b0173f0e155f451b4e11f7c"): 1, // Default pTon price
+				ton.MustParseAccountID("0:8cdc1d7640ad5ee326527fc1ad0514f468b30dc84b0173f0e155f451b4e11f7c"): 1, // Default pTonV1 price
+				ton.MustParseAccountID("0:671963027f7f85659ab55b821671688601cdcf1ee674fc7fbbb1a776a18d34a3"): 1, // Default pTonV2 price
 				ton.MustParseAccountID("0:65aac9b5e380eae928db3c8e238d9bc0d61a9320fdc2bc7a2f6c87d6fedf9208"): 0.6236390657633181,
 				ton.MustParseAccountID("0:b113a994b5024a16719f69139328eb759596c38a25f59028b146fecdc3621dfe"): 0.17854661661707652,
 				ton.MustParseAccountID("0:afc49cb8786f21c87045b19ede78fc6b46c51048513f8e9a6d44060199c1bf0c"): 0.00019291189444059384,
@@ -42,8 +43,8 @@ asset_0_account_id,asset_1_account_id,asset_0_reserve,asset_1_reserve,asset_0_me
 0:8cdc1d7640ad5ee326527fc1ad0514f468b30dc84b0173f0e155f451b4e11f7c,0:65aac9b5e380eae928db3c8e238d9bc0d61a9320fdc2bc7a2f6c87d6fedf9208,356773586306,572083446808,"{""decimals"":""9"",""name"":""Proxy TON"",""symbol"":""pTON""}","{""name"":""Scaleton"",""symbol"":""SCALE""}",52,10
 `,
 			expected: map[ton.AccountID]float64{
-				// Default pTon price
-				ton.MustParseAccountID("0:8cdc1d7640ad5ee326527fc1ad0514f468b30dc84b0173f0e155f451b4e11f7c"): 1,
+				ton.MustParseAccountID("0:8cdc1d7640ad5ee326527fc1ad0514f468b30dc84b0173f0e155f451b4e11f7c"): 1, // Default pTonV1 price
+				ton.MustParseAccountID("0:671963027f7f85659ab55b821671688601cdcf1ee674fc7fbbb1a776a18d34a3"): 1, // Default pTonV2 price
 			},
 		},
 	}
