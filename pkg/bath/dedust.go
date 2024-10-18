@@ -127,7 +127,25 @@ var DedustSwapToTONStraw = Straw[BubbleJettonSwap]{
 }
 
 var DedustSwapFromTONStraw = Straw[BubbleJettonSwap]{
-	CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.DedustSwapJettonOp)},
+	CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.DedustSwapJettonOp), func(bubble *Bubble) bool {
+		tx := bubble.Info.(BubbleTx)
+		swap, ok := tx.decodedBody.Value.(abi.DedustSwapMsgBody)
+		if !ok {
+			return false
+		}
+		to, err := ton.AccountIDFromTlb(swap.SwapParams.RecipientAddr)
+		if err != nil {
+			return false
+		}
+		if to == nil {
+			return true
+		}
+		// A Dedust user may specify different address to receive resulting jettons. In that case it is not a swap.
+		if tx.inputFrom == nil || tx.inputFrom.Address != *to {
+			return false
+		}
+		return true
+	}},
 	Builder: func(newAction *BubbleJettonSwap, bubble *Bubble) error {
 		transfer := bubble.Info.(BubbleTx)
 		newAction.Success = true
