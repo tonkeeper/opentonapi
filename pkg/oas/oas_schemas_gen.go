@@ -4081,6 +4081,32 @@ func (s *BouncePhaseType) UnmarshalText(data []byte) error {
 	}
 }
 
+// Ref: #/components/schemas/ChartPoints
+type ChartPoints struct {
+	V0 int64
+	V1 float64
+}
+
+// GetV0 returns the value of V0.
+func (s *ChartPoints) GetV0() int64 {
+	return s.V0
+}
+
+// GetV1 returns the value of V1.
+func (s *ChartPoints) GetV1() float64 {
+	return s.V1
+}
+
+// SetV0 sets the value of V0.
+func (s *ChartPoints) SetV0(val int64) {
+	s.V0 = val
+}
+
+// SetV1 sets the value of V1.
+func (s *ChartPoints) SetV1(val float64) {
+	s.V1 = val
+}
+
 // Ref: #/components/schemas/ComputePhase
 type ComputePhase struct {
 	Skipped             bool                 `json:"skipped"`
@@ -5684,42 +5710,17 @@ func (s *GetBlockchainAccountTransactionsSortOrder) UnmarshalText(data []byte) e
 }
 
 type GetChartRatesOK struct {
-	Points []GetChartRatesOKPointsItem `json:"points"`
+	Points []ChartPoints `json:"points"`
 }
 
 // GetPoints returns the value of Points.
-func (s *GetChartRatesOK) GetPoints() []GetChartRatesOKPointsItem {
+func (s *GetChartRatesOK) GetPoints() []ChartPoints {
 	return s.Points
 }
 
 // SetPoints sets the value of Points.
-func (s *GetChartRatesOK) SetPoints(val []GetChartRatesOKPointsItem) {
+func (s *GetChartRatesOK) SetPoints(val []ChartPoints) {
 	s.Points = val
-}
-
-type GetChartRatesOKPointsItem struct {
-	V0 int
-	V1 float64
-}
-
-// GetV0 returns the value of V0.
-func (s *GetChartRatesOKPointsItem) GetV0() int {
-	return s.V0
-}
-
-// GetV1 returns the value of V1.
-func (s *GetChartRatesOKPointsItem) GetV1() float64 {
-	return s.V1
-}
-
-// SetV0 sets the value of V0.
-func (s *GetChartRatesOKPointsItem) SetV0(val int) {
-	s.V0 = val
-}
-
-// SetV1 sets the value of V1.
-func (s *GetChartRatesOKPointsItem) SetV1(val float64) {
-	s.V1 = val
 }
 
 type GetInscriptionOpTemplateOK struct {

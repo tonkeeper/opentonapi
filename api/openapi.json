@@ -2561,6 +2561,25 @@
     "example": "cskip_no_state",
     "type": "string"
    },
+   "ChartPoints": {
+    "additionalItems": false,
+    "example": [
+     1668436763,
+     97.21323234
+    ],
+    "items": [
+     {
+      "description": "Unix timestamp of the data point",
+      "format": "int64",
+      "type": "integer"
+     },
+     {
+      "description": "Decimal price of the token in the requested currency",
+      "type": "number"
+     }
+    ],
+    "type": "array"
+   },
    "ComputePhase": {
     "properties": {
      "exit_code": {
@@ -9933,22 +9952,7 @@
          "properties": {
           "points": {
            "items": {
-            "additionalItems": false,
-            "example": [
-             1668436763,
-             97.21323234
-            ],
-            "items": [
-             {
-              "description": "Unix timestamp of the data point",
-              "type": "integer"
-             },
-             {
-              "description": "Decimal price of the token in the requested currency",
-              "type": "number"
-             }
-            ],
-            "type": "array"
+            "$ref": "#/components/schemas/ChartPoints"
            },
            "type": "array"
           }
