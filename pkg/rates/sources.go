@@ -32,9 +32,9 @@ func (m *Mock) GetCurrentRates() (map[string]float64, error) {
 	pools := m.getPools()
 	fiatPrices := getFiatPrices(medianTonPriceToUsd)
 
-	retry := func(label string, tonPrice float64, task func(tonPrice float64) (map[ton.AccountID]float64, error)) (map[ton.AccountID]float64, error) {
+	retry := func(label string, tonPrice float64, pools map[ton.AccountID]float64, task func(tonPrice float64, pools map[ton.AccountID]float64) (map[ton.AccountID]float64, error)) (map[ton.AccountID]float64, error) {
 		for attempt := 0; attempt < 3; attempt++ {
-			accountsPrice, err := task(tonPrice)
+			accountsPrice, err := task(tonPrice, pools)
 			if err != nil {
 				zap.Error(fmt.Errorf("label %v, attempt %v, failed to get account price: %v", label, attempt+1, err))
 				errorsCounter.WithLabelValues(label).Inc()
@@ -46,17 +46,17 @@ func (m *Mock) GetCurrentRates() (map[string]float64, error) {
 		return nil, fmt.Errorf("attempts failed")
 	}
 
-	if tonstakersPrice, err := retry(tonstakers, medianTonPriceToUsd, m.getTonstakersPrice); err == nil {
+	if tonstakersPrice, err := retry(tonstakers, medianTonPriceToUsd, pools, m.getTonstakersPrice); err == nil {
 		for account, price := range tonstakersPrice {
 			pools[account] = price
 		}
 	}
-	if bemoPrice, err := retry(bemo, medianTonPriceToUsd, m.getBemoPrice); err == nil {
+	if bemoPrice, err := retry(bemo, medianTonPriceToUsd, pools, m.getBemoPrice); err == nil {
 		for account, price := range bemoPrice {
 			pools[account] = price
 		}
 	}
-	if slpTokensPrice, err := retry(slpTokens, medianTonPriceToUsd, m.getSlpTokensPrice); err == nil {
+	if slpTokensPrice, err := retry(slpTokens, medianTonPriceToUsd, pools, m.getSlpTokensPrice); err == nil {
 		for account, price := range slpTokensPrice {
 			pools[account] = price
 		}
@@ -91,7 +91,7 @@ func getMedianTonPrice(marketsPrice []Market) (float64, error) {
 
 // getBemoPrice retrieves the price of the Bemo jetton from the contract
 // TonApi is used because the standard liteserver executor cannot invoke methods on the account
-func (m *Mock) getBemoPrice(tonPrice float64) (map[ton.AccountID]float64, error) {
+func (m *Mock) getBemoPrice(tonPrice float64, pools map[ton.AccountID]float64) (map[ton.AccountID]float64, error) {
 	url := fmt.Sprintf("https://tonapi.io/v2/blockchain/accounts/%v/methods/get_full_data", references.BemoAccount.ToRaw())
 	respBody, err := sendRequest(url, m.TonApiToken)
 	if err != nil {
@@ -129,7 +129,7 @@ func (m *Mock) getBemoPrice(tonPrice float64) (map[ton.AccountID]float64, error)
 
 // getTonstakersPrice retrieves the price and token address of an account in the Tonstakers pool
 // TonApi is used because the standard liteserver executor cannot invoke methods on the account
-func (m *Mock) getTonstakersPrice(tonPrice float64) (map[ton.AccountID]float64, error) {
+func (m *Mock) getTonstakersPrice(tonPrice float64, pools map[ton.AccountID]float64) (map[ton.AccountID]float64, error) {
 	url := fmt.Sprintf("https://tonapi.io/v2/blockchain/accounts/%v/methods/get_pool_full_data", references.TonstakersAccountPool.ToRaw())
 	respBody, err := sendRequest(url, m.TonApiToken)
 	if err != nil {
@@ -165,7 +165,7 @@ func (m *Mock) getTonstakersPrice(tonPrice float64) (map[ton.AccountID]float64, 
 
 // getSlpTokensPrice retrieves the price of SLP jettons from the contract
 // TonApi is used because the standard liteserver executor cannot invoke methods on the account
-func (m *Mock) getSlpTokensPrice(tonPrice float64) (map[tongo.AccountID]float64, error) {
+func (m *Mock) getSlpTokensPrice(tonPrice float64, pools map[ton.AccountID]float64) (map[tongo.AccountID]float64, error) {
 	type vaultData struct {
 		Success bool `json:"success"`
 		Stack   []struct {
@@ -206,6 +206,12 @@ func (m *Mock) getSlpTokensPrice(tonPrice float64) (map[tongo.AccountID]float64,
 		case references.TonSlpType:
 			usdPrice := tonPrice * (float64(multiplier) / float64(ton.OneTON))
 			accountsPrice[references.TonSlp] = usdPrice / tonPrice
+		case references.NotSlpType:
+			notAccountID := ton.MustParseAccountID("EQAvlWFDxGF2lXm67y4yzC17wYKD9A0guwPkMs1gOsM__NOT")
+			notPrice, ok := pools[notAccountID]
+			if ok {
+				accountsPrice[references.NotSlp] = notPrice * (float64(multiplier) / float64(ton.OneTON))
+			}
 		}
 	}
 
