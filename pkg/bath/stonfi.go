@@ -220,26 +220,39 @@ var StonfiSwapV2Straw = Straw[BubbleJettonSwap]{
 			}
 			return nil
 		},
-		SingleChild: &Straw[BubbleJettonSwap]{
-			CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.StonfiPayToV2MsgOp)},
-			Builder: func(newAction *BubbleJettonSwap, bubble *Bubble) error {
-				tx := bubble.Info.(BubbleTx)
-				newAction.Router = tx.account.Address
-				return nil
-			},
-			SingleChild: &Straw[BubbleJettonSwap]{
-				CheckFuncs: []bubbleCheck{Is(BubbleJettonTransfer{})},
+		Children: []Straw[BubbleJettonSwap]{
+			{
+				CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.StonfiPayToV2MsgOp)},
 				Builder: func(newAction *BubbleJettonSwap, bubble *Bubble) error {
-					jettonTx := bubble.Info.(BubbleJettonTransfer)
-					if jettonTx.senderWallet != newAction.Out.JettonWallet {
-						// operation has failed,
-						// stonfi's sent jettons back to the user
-						return nil
-					}
-					newAction.Out.Amount = big.Int(jettonTx.amount)
-					newAction.Out.IsTon = jettonTx.isWrappedTon
-					newAction.Success = true
+					tx := bubble.Info.(BubbleTx)
+					newAction.Router = tx.account.Address
 					return nil
+				},
+				SingleChild: &Straw[BubbleJettonSwap]{
+					CheckFuncs: []bubbleCheck{Is(BubbleJettonTransfer{})},
+					Builder: func(newAction *BubbleJettonSwap, bubble *Bubble) error {
+						jettonTx := bubble.Info.(BubbleJettonTransfer)
+						if jettonTx.senderWallet != newAction.Out.JettonWallet {
+							// operation has failed,
+							// stonfi's sent jettons back to the user
+							return nil
+						}
+						newAction.Out.Amount = big.Int(jettonTx.amount)
+						newAction.Out.IsTon = jettonTx.isWrappedTon
+						newAction.Success = true
+						return nil
+					},
+				},
+			},
+			{
+				CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.StonfiPayVaultV2MsgOp)},
+				Optional:   true,
+				SingleChild: &Straw[BubbleJettonSwap]{
+					CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.StonfiDepositRefFeeV2MsgOp)},
+					SingleChild: &Straw[BubbleJettonSwap]{
+						CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.ExcessMsgOp)},
+						Optional:   true,
+					},
 				},
 			},
 		},
