@@ -9,7 +9,7 @@ import (
 
 type ratesSource interface {
 	GetRates(date int64) (map[string]float64, error)
-	GetRatesChart(token string, currency string, pointsCount int, startDate *int64, endDate *int64) ([][]any, error)
+	GetRatesChart(token string, currency string, pointsCount int, startDate *int64, endDate *int64) ([]Point, error)
 	GetMarketsTonPrice() ([]Market, error)
 }
 
@@ -20,6 +20,11 @@ type calculator struct {
 	source                                            ratesSource
 	todayRates, yesterdayRates, weekRates, monthRates map[string]float64
 	marketsTonPrice                                   []Market
+}
+
+type Point struct {
+	Timestamp int64
+	Price     float64
 }
 
 func InitCalculator(source ratesSource) *calculator {
@@ -107,7 +112,7 @@ func (c *calculator) GetRates(date int64) (map[string]float64, error) {
 	return nil, fmt.Errorf("invalid period")
 }
 
-func (c *calculator) GetRatesChart(token string, currency string, pointsCount int, startDate *int64, endDate *int64) ([][]any, error) {
+func (c *calculator) GetRatesChart(token string, currency string, pointsCount int, startDate *int64, endDate *int64) ([]Point, error) {
 	return c.source.GetRatesChart(token, currency, pointsCount, startDate, endDate)
 }
 
@@ -136,6 +141,6 @@ func (m Mock) GetMarketsTonPrice() ([]Market, error) {
 
 // GetRatesChart cannot be used to request charts for jettons in the open source version
 // To use this method, you must save today's data from GetRates and then override the method
-func (m Mock) GetRatesChart(token string, currency string, pointsCount int, startDate *int64, endDate *int64) ([][]any, error) {
-	return [][]any{}, nil
+func (m Mock) GetRatesChart(token string, currency string, pointsCount int, startDate *int64, endDate *int64) ([]Point, error) {
+	return []Point{}, nil
 }

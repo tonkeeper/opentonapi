@@ -1,4 +1,4 @@
-openapi: 3.0.2
+openapi: 3.1.0
 info:
   title: REST api to TON blockchain explorer
   version: 2.0.0
@@ -1822,6 +1822,7 @@ paths:
           required: true
           schema:
             type: string
+            format: address
         - in: query
           name: currency
           required: false
@@ -1864,8 +1865,9 @@ paths:
                   - points
                 properties:
                   points:
-                    additionalProperties: true
-                    example: { }
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ChartPoints'
         'default':
           $ref: '#/components/responses/Error'
   /v2/rates/markets:
@@ -3499,7 +3501,7 @@ components:
         shard:
           type: string
           # x-js-format: bigint ???
-          example: "8000000000000000" 
+          example: "8000000000000000"
         seqno:
           type: integer
           example: 21734019
@@ -5413,7 +5415,7 @@ components:
           example: https://cache.tonapi.io/images/jetton.jpg
         verification:
           $ref: '#/components/schemas/JettonVerificationType'
-        custom_payload_api_uri:  # todo: maybe remove
+        custom_payload_api_uri: # todo: maybe remove
           type: string
     JettonBalance:
       type: object
@@ -7223,6 +7225,16 @@ components:
                 example: "blah_blah.ton"
               dns_item:
                 $ref: '#/components/schemas/NftItem'
+    ChartPoints:
+      type: array
+      items:
+        - type: integer
+          format: int64
+          description: Unix timestamp of the data point
+        - type: number
+          description: Decimal price of the token in the requested currency
+      additionalItems: false
+      example: [ 1668436763, 97.21323234 ]
     AccountInfoByStateInit:
       type: object
       required:

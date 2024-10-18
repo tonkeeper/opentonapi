@@ -11023,6 +11023,74 @@ func (s *BouncePhaseType) UnmarshalJSON(data []byte) error {
 }
 
 // Encode implements json.Marshaler.
+func (s *ChartPoints) Encode(e *jx.Encoder) {
+	e.ArrStart()
+	s.encodeTuple(e)
+	e.ArrEnd()
+}
+
+// encodeTuple encodes fields.
+func (s *ChartPoints) encodeTuple(e *jx.Encoder) {
+	{
+		elem := s.V0
+		e.Int64(elem)
+	}
+	{
+		elem := s.V1
+		e.Float64(elem)
+	}
+}
+
+// Decode decodes ChartPoints from json.
+func (s *ChartPoints) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode ChartPoints to nil")
+	}
+	n := 0
+	if err := d.Arr(func(d *jx.Decoder) error {
+		switch n {
+		case 0:
+			n++
+			v, err := d.Int64()
+			s.V0 = int64(v)
+			if err != nil {
+				return err
+			}
+			return nil
+		case 1:
+			n++
+			v, err := d.Float64()
+			s.V1 = float64(v)
+			if err != nil {
+				return err
+			}
+			return nil
+		default:
+			return errors.Errorf("expected 2 elements, got %d", n)
+		}
+	}); err != nil {
+		return err
+	}
+	if n == 0 {
+		return errors.Errorf("expected 2 elements, got %d", n)
+	}
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *ChartPoints) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *ChartPoints) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
 func (s *ComputePhase) Encode(e *jx.Encoder) {
 	e.ObjStart()
 	s.encodeFields(e)
@@ -16699,10 +16767,12 @@ func (s *GetChartRatesOK) Encode(e *jx.Encoder) {
 // encodeFields encodes fields.
 func (s *GetChartRatesOK) encodeFields(e *jx.Encoder) {
 	{
-		if len(s.Points) != 0 {
-			e.FieldStart("points")
-			e.Raw(s.Points)
+		e.FieldStart("points")
+		e.ArrStart()
+		for _, elem := range s.Points {
+			elem.Encode(e)
 		}
+		e.ArrEnd()
 	}
 }
 
@@ -16722,9 +16792,15 @@ func (s *GetChartRatesOK) Decode(d *jx.Decoder) error {
 		case "points":
 			requiredBitSet[0] |= 1 << 0
 			if err := func() error {
-				v, err := d.RawAppend(nil)
-				s.Points = jx.Raw(v)
-				if err != nil {
+				s.Points = make([]ChartPoints, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem ChartPoints
+					if err := elem.Decode(d); err != nil {
+						return err
+					}
+					s.Points = append(s.Points, elem)
+					return nil
+				}); err != nil {
 					return err
 				}
 				return nil

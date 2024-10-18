@@ -4081,6 +4081,32 @@ func (s *BouncePhaseType) UnmarshalText(data []byte) error {
 	}
 }
 
+// Ref: #/components/schemas/ChartPoints
+type ChartPoints struct {
+	V0 int64
+	V1 float64
+}
+
+// GetV0 returns the value of V0.
+func (s *ChartPoints) GetV0() int64 {
+	return s.V0
+}
+
+// GetV1 returns the value of V1.
+func (s *ChartPoints) GetV1() float64 {
+	return s.V1
+}
+
+// SetV0 sets the value of V0.
+func (s *ChartPoints) SetV0(val int64) {
+	s.V0 = val
+}
+
+// SetV1 sets the value of V1.
+func (s *ChartPoints) SetV1(val float64) {
+	s.V1 = val
+}
+
 // Ref: #/components/schemas/ComputePhase
 type ComputePhase struct {
 	Skipped             bool                 `json:"skipped"`
@@ -5684,16 +5710,16 @@ func (s *GetBlockchainAccountTransactionsSortOrder) UnmarshalText(data []byte) e
 }
 
 type GetChartRatesOK struct {
-	Points jx.Raw `json:"points"`
+	Points []ChartPoints `json:"points"`
 }
 
 // GetPoints returns the value of Points.
-func (s *GetChartRatesOK) GetPoints() jx.Raw {
+func (s *GetChartRatesOK) GetPoints() []ChartPoints {
 	return s.Points
 }
 
 // SetPoints sets the value of Points.
-func (s *GetChartRatesOK) SetPoints(val jx.Raw) {
+func (s *GetChartRatesOK) SetPoints(val []ChartPoints) {
 	s.Points = val
 }
 
@@ -9287,18 +9313,20 @@ func (s *NftCollections) SetNftCollections(val []NftCollection) {
 
 // Ref: #/components/schemas/NftItem
 type NftItem struct {
-	Address     string               `json:"address"`
-	Index       int64                `json:"index"`
-	Owner       OptAccountAddress    `json:"owner"`
-	Collection  OptNftItemCollection `json:"collection"`
-	Verified    bool                 `json:"verified"`
-	Metadata    NftItemMetadata      `json:"metadata"`
-	Sale        OptSale              `json:"sale"`
-	Previews    []ImagePreview       `json:"previews"`
-	DNS         OptString            `json:"dns"`
-	ApprovedBy  NftApprovedBy        `json:"approved_by"`
-	IncludeCnft OptBool              `json:"include_cnft"`
-	Trust       TrustType            `json:"trust"`
+	Address    string               `json:"address"`
+	Index      int64                `json:"index"`
+	Owner      OptAccountAddress    `json:"owner"`
+	Collection OptNftItemCollection `json:"collection"`
+	// Collection master contract confirmed that this item is part of collection.
+	Verified bool            `json:"verified"`
+	Metadata NftItemMetadata `json:"metadata"`
+	Sale     OptSale         `json:"sale"`
+	Previews []ImagePreview  `json:"previews"`
+	DNS      OptString       `json:"dns"`
+	// Please use trust field.
+	ApprovedBy  NftApprovedBy `json:"approved_by"`
+	IncludeCnft OptBool       `json:"include_cnft"`
+	Trust       TrustType     `json:"trust"`
 }
 
 // GetAddress returns the value of Address.
