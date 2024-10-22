@@ -29,7 +29,7 @@ type NftCollection struct {
 	OwnerAddress      *tongo.AccountID
 	ContentLayout     int
 	CollectionContent []byte
-	InWhitelist       bool
+	InWhitelist       bool //todo: remove
 	Metadata          map[string]interface{}
 }
 

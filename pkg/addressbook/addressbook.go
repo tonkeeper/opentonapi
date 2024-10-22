@@ -212,7 +212,7 @@ func (b *Book) IsWallet(addr tongo.AccountID) (bool, error) {
 		if err != nil {
 			continue
 		}
-		b.walletsResolved.Set(addr, isWallet, cache.WithExpiration(time.Minute*15))
+		b.walletsResolved.Set(addr, isWallet, cache.WithExpiration(time.Minute))
 		return isWallet, nil
 	}
 	return false, fmt.Errorf("failed to figure out if %v is a wallet", addr)
@@ -234,7 +234,7 @@ func NewAddressBook(logger *zap.Logger, addressPath, jettonPath, collectionPath 
 		jettons:         jettons,
 		tfPools:         tfPools,
 		addressers:      options.addressers,
-		walletsResolved: cache.NewLRUCache[tongo.AccountID, bool](200_000, "is_wallet"),
+		walletsResolved: cache.NewLRUCache[tongo.AccountID, bool](1_000_000, "is_wallet"),
 	}
 
 	go func() {
