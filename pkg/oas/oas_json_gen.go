@@ -12046,6 +12046,12 @@ func (s *DecodedMessageExtInMsgDecoded) encodeFields(e *jx.Encoder) {
 		}
 	}
 	{
+		if s.WalletV5.Set {
+			e.FieldStart("wallet_v5")
+			s.WalletV5.Encode(e)
+		}
+	}
+	{
 		if s.WalletHighloadV2.Set {
 			e.FieldStart("wallet_highload_v2")
 			s.WalletHighloadV2.Encode(e)
@@ -12053,10 +12059,11 @@ func (s *DecodedMessageExtInMsgDecoded) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfDecodedMessageExtInMsgDecoded = [3]string{
+var jsonFieldsNameOfDecodedMessageExtInMsgDecoded = [4]string{
 	0: "wallet_v3",
 	1: "wallet_v4",
-	2: "wallet_highload_v2",
+	2: "wallet_v5",
+	3: "wallet_highload_v2",
 }
 
 // Decode decodes DecodedMessageExtInMsgDecoded from json.
@@ -12086,6 +12093,16 @@ func (s *DecodedMessageExtInMsgDecoded) Decode(d *jx.Decoder) error {
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"wallet_v4\"")
+			}
+		case "wallet_v5":
+			if err := func() error {
+				s.WalletV5.Reset()
+				if err := s.WalletV5.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"wallet_v5\"")
 			}
 		case "wallet_highload_v2":
 			if err := func() error {
@@ -12588,6 +12605,112 @@ func (s *DecodedMessageExtInMsgDecodedWalletV4) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *DecodedMessageExtInMsgDecodedWalletV4) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *DecodedMessageExtInMsgDecodedWalletV5) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *DecodedMessageExtInMsgDecodedWalletV5) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("raw_messages")
+		e.ArrStart()
+		for _, elem := range s.RawMessages {
+			elem.Encode(e)
+		}
+		e.ArrEnd()
+	}
+}
+
+var jsonFieldsNameOfDecodedMessageExtInMsgDecodedWalletV5 = [1]string{
+	0: "raw_messages",
+}
+
+// Decode decodes DecodedMessageExtInMsgDecodedWalletV5 from json.
+func (s *DecodedMessageExtInMsgDecodedWalletV5) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode DecodedMessageExtInMsgDecodedWalletV5 to nil")
+	}
+	var requiredBitSet [1]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "raw_messages":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				s.RawMessages = make([]DecodedRawMessage, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem DecodedRawMessage
+					if err := elem.Decode(d); err != nil {
+						return err
+					}
+					s.RawMessages = append(s.RawMessages, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"raw_messages\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode DecodedMessageExtInMsgDecodedWalletV5")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00000001,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfDecodedMessageExtInMsgDecodedWalletV5) {
+					name = jsonFieldsNameOfDecodedMessageExtInMsgDecodedWalletV5[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *DecodedMessageExtInMsgDecodedWalletV5) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *DecodedMessageExtInMsgDecodedWalletV5) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -30006,6 +30129,39 @@ func (s OptDecodedMessageExtInMsgDecodedWalletV4) MarshalJSON() ([]byte, error) 
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *OptDecodedMessageExtInMsgDecodedWalletV4) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes DecodedMessageExtInMsgDecodedWalletV5 as json.
+func (o OptDecodedMessageExtInMsgDecodedWalletV5) Encode(e *jx.Encoder) {
+	if !o.Set {
+		return
+	}
+	o.Value.Encode(e)
+}
+
+// Decode decodes DecodedMessageExtInMsgDecodedWalletV5 from json.
+func (o *OptDecodedMessageExtInMsgDecodedWalletV5) Decode(d *jx.Decoder) error {
+	if o == nil {
+		return errors.New("invalid: unable to decode OptDecodedMessageExtInMsgDecodedWalletV5 to nil")
+	}
+	o.Set = true
+	if err := o.Value.Decode(d); err != nil {
+		return err
+	}
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s OptDecodedMessageExtInMsgDecodedWalletV5) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *OptDecodedMessageExtInMsgDecodedWalletV5) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }

@@ -6761,6 +6761,15 @@ components:
                   type: array
                   items:
                     $ref: '#/components/schemas/DecodedRawMessage'
+            wallet_v5:
+              type: object
+              required:
+                - raw_messages
+              properties:
+                raw_messages:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/DecodedRawMessage'
             wallet_highload_v2:
               type: object
               required:

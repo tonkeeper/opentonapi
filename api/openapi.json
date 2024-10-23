@@ -2835,6 +2835,20 @@
          "raw_messages"
         ],
         "type": "object"
+       },
+       "wallet_v5": {
+        "properties": {
+         "raw_messages": {
+          "items": {
+           "$ref": "#/components/schemas/DecodedRawMessage"
+          },
+          "type": "array"
+         }
+        },
+        "required": [
+         "raw_messages"
+        ],
+        "type": "object"
        }
       },
       "type": "object"
