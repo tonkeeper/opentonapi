@@ -6,27 +6,24 @@ import (
 	"net/http"
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"github.com/tonkeeper/opentonapi/pkg/blockchain/indexer"
-	"github.com/tonkeeper/opentonapi/pkg/spam"
-	"github.com/tonkeeper/tongo"
-	"github.com/tonkeeper/tongo/liteapi"
-	"go.uber.org/zap"
-	"golang.org/x/exp/maps"
-
 	"github.com/tonkeeper/opentonapi/pkg/addressbook"
 	"github.com/tonkeeper/opentonapi/pkg/api"
 	"github.com/tonkeeper/opentonapi/pkg/app"
 	"github.com/tonkeeper/opentonapi/pkg/blockchain"
+	"github.com/tonkeeper/opentonapi/pkg/blockchain/indexer"
 	"github.com/tonkeeper/opentonapi/pkg/config"
 	"github.com/tonkeeper/opentonapi/pkg/litestorage"
 	"github.com/tonkeeper/opentonapi/pkg/pusher/sources"
+	"github.com/tonkeeper/opentonapi/pkg/spam"
+	"github.com/tonkeeper/tongo"
+	"github.com/tonkeeper/tongo/liteapi"
+	"go.uber.org/zap"
 )
 
 func main() {
 
 	cfg := config.Load()
 	log := app.Logger(cfg.App.LogLevel)
-	book := addressbook.NewAddressBook(log, config.AddressPath, config.JettonPath, config.CollectionPath)
 
 	storageBlockCh := make(chan indexer.IDandBlock)
 
@@ -46,10 +43,9 @@ func main() {
 		log,
 		client,
 		litestorage.WithPreloadAccounts(cfg.App.Accounts),
-		litestorage.WithTFPools(book.TFPools()),
-		litestorage.WithKnownJettons(maps.Keys(book.GetKnownJettons())),
 		litestorage.WithBlockChannel(storageBlockCh),
 	)
+	book := addressbook.NewAddressBook(log, config.AddressPath, config.JettonPath, config.CollectionPath, storage)
 	// The executor is used to resolve DNS records.
 	tongo.SetDefaultExecutor(storage)
 

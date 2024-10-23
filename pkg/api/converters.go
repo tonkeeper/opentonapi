@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	imgGenerator "github.com/tonkeeper/opentonapi/pkg/image"
 	"math/big"
 	"reflect"
 	"strconv"
@@ -17,7 +18,6 @@ import (
 	"google.golang.org/grpc/status"
 
 	"github.com/tonkeeper/opentonapi/pkg/core"
-	imgGenerator "github.com/tonkeeper/opentonapi/pkg/image"
 	"github.com/tonkeeper/opentonapi/pkg/oas"
 	walletPkg "github.com/tonkeeper/opentonapi/pkg/wallet"
 )

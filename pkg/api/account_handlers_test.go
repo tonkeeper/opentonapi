@@ -159,7 +159,7 @@ func TestHandler_GetAccounts(t *testing.T) {
 			liteStorage, err := litestorage.NewLiteStorage(logger, cli)
 			require.Nil(t, err)
 			h := &Handler{
-				addressBook: addressbook.NewAddressBook(logger, config.AddressPath, config.JettonPath, config.CollectionPath),
+				addressBook: addressbook.NewAddressBook(logger, config.AddressPath, config.JettonPath, config.CollectionPath, liteStorage),
 				storage:     liteStorage,
 				state:       chainstate.NewChainState(liteStorage),
 				limits: Limits{

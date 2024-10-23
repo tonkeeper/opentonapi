@@ -27173,8 +27173,6 @@ func (s *NftApprovedByItem) Decode(d *jx.Decoder) error {
 		*s = NftApprovedByItemGetgems
 	case NftApprovedByItemTonkeeper:
 		*s = NftApprovedByItemTonkeeper
-	case NftApprovedByItemTonDiamonds:
-		*s = NftApprovedByItemTonDiamonds
 	default:
 		*s = NftApprovedByItem(v)
 	}

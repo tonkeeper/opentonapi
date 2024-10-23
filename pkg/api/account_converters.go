@@ -2,6 +2,7 @@ package api
 
 import (
 	"fmt"
+	imgGenerator "github.com/tonkeeper/opentonapi/pkg/image"
 	"sort"
 
 	"github.com/tonkeeper/tongo/abi"
@@ -103,7 +104,7 @@ func convertToAccount(account *core.Account, ab *addressbook.KnownAddress, state
 		acc.Name = oas.NewOptString(ab.Name)
 	}
 	if len(ab.Image) > 0 {
-		acc.Icon = oas.NewOptString(ab.Image)
+		acc.Icon = oas.NewOptString(imgGenerator.DefaultGenerator.GenerateImageUrl(ab.Image, 200, 200))
 	}
 	acc.MemoRequired = oas.NewOptBool(ab.RequireMemo)
 	return acc

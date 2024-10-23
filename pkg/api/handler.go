@@ -17,9 +17,7 @@ import (
 	"github.com/tonkeeper/tongo/tvm"
 	"go.uber.org/zap"
 
-	"github.com/tonkeeper/opentonapi/pkg/addressbook"
 	"github.com/tonkeeper/opentonapi/pkg/cache"
-	"github.com/tonkeeper/opentonapi/pkg/config"
 	"github.com/tonkeeper/opentonapi/pkg/oas"
 )
 
@@ -159,11 +157,11 @@ func NewHandler(logger *zap.Logger, opts ...Option) (*Handler, error) {
 	if options.msgSender == nil {
 		logger.Warn("message sender is not configured, you can't send messages to the blockchain")
 	}
-	if options.addressBook == nil {
-		options.addressBook = addressbook.NewAddressBook(logger, config.AddressPath, config.JettonPath, config.CollectionPath)
-	}
 	if options.storage == nil {
 		return nil, errors.New("storage is not configured")
+	}
+	if options.addressBook == nil {
+		return nil, errors.New("address book is not configured")
 	}
 	if options.chainState == nil {
 		options.chainState = chainstate.NewChainState(options.storage)

@@ -9184,9 +9184,8 @@ type NftApprovedBy []NftApprovedByItem
 type NftApprovedByItem string
 
 const (
-	NftApprovedByItemGetgems     NftApprovedByItem = "getgems"
-	NftApprovedByItemTonkeeper   NftApprovedByItem = "tonkeeper"
-	NftApprovedByItemTonDiamonds NftApprovedByItem = "ton.diamonds"
+	NftApprovedByItemGetgems   NftApprovedByItem = "getgems"
+	NftApprovedByItemTonkeeper NftApprovedByItem = "tonkeeper"
 )
 
 // AllValues returns all NftApprovedByItem values.
@@ -9194,7 +9193,6 @@ func (NftApprovedByItem) AllValues() []NftApprovedByItem {
 	return []NftApprovedByItem{
 		NftApprovedByItemGetgems,
 		NftApprovedByItemTonkeeper,
-		NftApprovedByItemTonDiamonds,
 	}
 }
 
@@ -9204,8 +9202,6 @@ func (s NftApprovedByItem) MarshalText() ([]byte, error) {
 	case NftApprovedByItemGetgems:
 		return []byte(s), nil
 	case NftApprovedByItemTonkeeper:
-		return []byte(s), nil
-	case NftApprovedByItemTonDiamonds:
 		return []byte(s), nil
 	default:
 		return nil, errors.Errorf("invalid value: %q", s)
@@ -9220,9 +9216,6 @@ func (s *NftApprovedByItem) UnmarshalText(data []byte) error {
 		return nil
 	case NftApprovedByItemTonkeeper:
 		*s = NftApprovedByItemTonkeeper
-		return nil
-	case NftApprovedByItemTonDiamonds:
-		*s = NftApprovedByItemTonDiamonds
 		return nil
 	default:
 		return errors.Errorf("invalid value: %q", data)

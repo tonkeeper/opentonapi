@@ -5497,7 +5497,6 @@ components:
         enum:
           - getgems
           - tonkeeper
-          - ton.diamonds
     TrustType:
       type: string
       example: whitelist

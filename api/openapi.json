@@ -4446,8 +4446,7 @@
     "items": {
      "enum": [
       "getgems",
-      "tonkeeper",
-      "ton.diamonds"
+      "tonkeeper"
      ],
      "example": "getgems",
      "type": "string"

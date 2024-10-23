@@ -3898,8 +3898,6 @@ func (s NftApprovedByItem) Validate() error {
 		return nil
 	case "tonkeeper":
 		return nil
-	case "ton.diamonds":
-		return nil
 	default:
 		return errors.Errorf("invalid value: %v", s)
 	}
