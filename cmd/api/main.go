@@ -46,6 +46,7 @@ func main() {
 		log,
 		client,
 		litestorage.WithPreloadAccounts(cfg.App.Accounts),
+		litestorage.WithTrackAllAccounts(cfg.App.TrackAllAccounts),
 		litestorage.WithTFPools(book.TFPools()),
 		litestorage.WithKnownJettons(maps.Keys(book.GetKnownJettons())),
 		litestorage.WithBlockChannel(storageBlockCh),
