@@ -227,12 +227,15 @@ components:
             required:
             - id
             - endpoint
+            - subscribed_accounts
             properties:
               id:
                 type: integer
                 format: int64
               endpoint:
                 type: string
+              subscribed_accounts:
+                type: integer
     WebhookAccountTxSubscriptions:
       type: object
       required:
