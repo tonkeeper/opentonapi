@@ -5,12 +5,16 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/tonkeeper/opentonapi/pkg/core"
+	imgGenerator "github.com/tonkeeper/opentonapi/pkg/image"
 	"github.com/tonkeeper/tongo/abi"
 	"github.com/tonkeeper/tongo/tlb"
 	"github.com/tonkeeper/tongo/ton"
 	"io"
 	"math/rand"
 	"net/http"
+	"regexp"
+	"sort"
+	"strings"
 	"sync"
 	"time"
 
@@ -128,12 +132,30 @@ func (b *Book) GetAddressInfoByAddress(a tongo.AccountID) (KnownAddress, bool) {
 }
 
 func (b *Book) SearchAttachedAccountsByPrefix(prefix string) []AttachedAccount {
+	prefix = strings.ToLower(normalizeReg.ReplaceAllString(prefix, ""))
 	var accounts []AttachedAccount
 	for i := range b.addressers {
 		foundAccounts := b.addressers[i].SearchAttachedAccounts(prefix)
 		if len(foundAccounts) > 0 {
 			accounts = append(accounts, foundAccounts...)
 		}
+	}
+	tonDomainPrefix := prefix + "ton"
+	tgDomainPrefix := prefix + "tme"
+
+	for i := range accounts {
+		if accounts[i].Normalized == prefix || accounts[i].Normalized == tonDomainPrefix || accounts[i].Normalized == tgDomainPrefix {
+			accounts[i].Weight *= 100 // full match
+		}
+	}
+	sort.Slice(accounts, func(i, j int) bool {
+		if accounts[i].Weight == accounts[j].Weight {
+			return len(accounts[i].Name) < len(accounts[j].Name)
+		}
+		return accounts[i].Weight > accounts[j].Weight
+	})
+	if len(accounts) > 50 {
+		accounts = accounts[:50]
 	}
 	return accounts
 }
@@ -226,19 +248,96 @@ func (m *manyalAddresser) GetAddress(a tongo.AccountID) (KnownAddress, bool) {
 }
 
 func (m *manyalAddresser) SearchAttachedAccounts(prefix string) []AttachedAccount {
-	//TODO implement me
-	//	if account.Name == "The Locker" {
-	//			attachedAccount.Normalized = "locker"
-	//			result = append(result, attachedAccount)
-	//		}
-	//		if account.Name == "The Open Network Foundation" {
-	//			foundationNamings := []string{"foundation", "ton foundation"}
-	//			for _, name := range foundationNamings {
-	//				attachedAccount.Normalized = strings.ToLower(normalizeReg.ReplaceAllString(name, ""))
-	//				result = append(result, attachedAccount)
-	//			}
-	//		}
+	m.mu.RLock()
+	sortedList := m.sorted
+	m.mu.RUnlock()
+	startIdx, endIdx := findIndexes(sortedList, prefix)
+	if startIdx == -1 || endIdx == -1 {
+		return nil
+	}
+	foundAccounts := make([]AttachedAccount, endIdx-startIdx+1)
+	copy(foundAccounts, sortedList[startIdx:endIdx+1])
+	return foundAccounts
+}
+
+var normalizeReg = regexp.MustCompile("[^\\p{L}\\p{N}]")
+
+func (m *manyalAddresser) refreshAddresses(addressPath string) error {
+	addresses, err := downloadJson[KnownAddress](addressPath)
+	if err != nil {
+		return err
+	}
+	newAddresses := make(map[tongo.AccountID]KnownAddress, len(addresses))
+	newSorted := []AttachedAccount{
+		{Name: "The Locker", Wallet: ton.MustParseAccountID("EQDtFpEwcFAEcRe5mLVh2N6C0x-_hJEM7W61_JLnSF74p4q2"), Normalized: "locker", Weight: 1000},
+		{Name: "The Locker", Wallet: ton.MustParseAccountID("EQDtFpEwcFAEcRe5mLVh2N6C0x-_hJEM7W61_JLnSF74p4q2"), Normalized: "thelocker", Weight: 10000},
+		{Name: "Ton Foundation", Wallet: ton.MustParseAccountID("EQCLyZHP4Xe8fpchQz76O-_RmUhaVc_9BAoGyJrwJrcbz2eZ"), Normalized: "foundation", Weight: 1000},
+	}
+	for _, item := range addresses {
+		account, err := tongo.ParseAddress(item.Address)
+		if err != nil {
+			continue
+		}
+		item.Address = account.ID.ToRaw()
+		newAddresses[account.ID] = item
+		var preview string
+		if item.Image != "" {
+			preview = imgGenerator.DefaultGenerator.GenerateImageUrl(item.Image, 200, 200)
+		}
+		newSorted = append(newSorted, AttachedAccount{
+			Name:       item.Name,
+			Preview:    preview,
+			Wallet:     account.ID,
+			Type:       ManualAccountType,
+			Weight:     1000,
+			Popular:    1,
+			Normalized: strings.ToLower(normalizeReg.ReplaceAllString(item.Name, "")),
+		})
+	}
+	sort.Slice(newSorted, func(i, j int) bool {
+		return newSorted[i].Normalized < newSorted[j].Normalized
+	})
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	m.addresses = newAddresses
+	m.sorted = newSorted
 	return nil
+}
+
+func findIndexes(sortedList []AttachedAccount, prefix string) (int, int) {
+	low := 0
+	high := len(sortedList) - 1
+	startIdx := -1
+	for low <= high { // Find the starting index
+		med := (low + high) / 2
+		if strings.HasPrefix(sortedList[med].Normalized, prefix) {
+			startIdx = med
+			high = med - 1
+		} else if sortedList[med].Normalized < prefix {
+			low = med + 1
+		} else {
+			high = med - 1
+		}
+	}
+
+	if startIdx == -1 { // Prefix not found
+		return -1, -1
+	}
+
+	low = startIdx
+	high = len(sortedList) - 1
+	endIdx := -1
+	for low <= high { // Find the ending index
+		med := (low + high) / 2
+		if strings.HasPrefix(sortedList[med].Normalized, prefix) {
+			endIdx = med
+			low = med + 1
+		} else {
+			high = med - 1
+		}
+	}
+
+	return startIdx, endIdx
 }
 
 func NewAddressBook(logger *zap.Logger, addressPath, jettonPath, collectionPath string, storage accountsStatesSource, opts ...Option) *Book {
@@ -281,24 +380,6 @@ func refresher(name string, interval, errorInterval time.Duration, logger *zap.L
 		}
 		time.Sleep(interval + time.Duration(rand.Intn(10))*time.Second)
 	}
-}
-
-func (m *manyalAddresser) refreshAddresses(addressPath string) error {
-	addresses, err := downloadJson[KnownAddress](addressPath)
-	if err != nil {
-		return err
-	}
-	m.mu.Lock()
-	defer m.mu.Unlock()
-	for _, item := range addresses {
-		account, err := tongo.ParseAddress(item.Address)
-		if err != nil {
-			continue
-		}
-		item.Address = account.ID.ToRaw()
-		m.addresses[account.ID] = item
-	}
-	return nil
 }
 
 func (b *Book) refreshJettons(jettonPath string) error {
