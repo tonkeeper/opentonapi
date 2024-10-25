@@ -1,6 +1,6 @@
 module github.com/tonkeeper/opentonapi
 
-go 1.21.0
+go 1.22
 
 toolchain go1.22.0
 
