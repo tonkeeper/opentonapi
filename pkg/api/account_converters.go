@@ -89,11 +89,12 @@ func convertToAccount(account *core.Account, ab *addressbook.KnownAddress, state
 	}
 	if account.Status == tlb.AccountUninit || account.Status == tlb.AccountNone {
 		acc.IsWallet = true
-	}
-	for _, i := range account.Interfaces {
-		if i.Implements(abi.Wallet) {
-			acc.IsWallet = true
-			break
+	} else {
+		for _, i := range account.Interfaces {
+			if i.Implements(abi.Wallet) {
+				acc.IsWallet = true
+				break
+			}
 		}
 	}
 	if ab == nil {
