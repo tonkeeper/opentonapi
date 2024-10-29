@@ -450,9 +450,6 @@ func convertedStonFiPoolResponse(pools map[ton.AccountID]float64, respBody io.Re
 		if !ok {
 			return LpAsset{}, fmt.Errorf("failed to parse total supply")
 		}
-		if totalSupply.Cmp(big.NewInt(int64(defaultMinReserve))) < 0 {
-			return LpAsset{}, fmt.Errorf("the total supply is less than the minimum value")
-		}
 		decimals, err := strconv.Atoi(record[10])
 		if err != nil {
 			return LpAsset{}, err
@@ -643,9 +640,6 @@ func convertedDeDustPoolResponse(pools map[ton.AccountID]float64, respBody io.Re
 		totalSupply, ok := new(big.Int).SetString(record[12], 10)
 		if !ok {
 			return LpAsset{}, fmt.Errorf("failed to parse total supply")
-		}
-		if totalSupply.Cmp(big.NewInt(int64(defaultMinReserve))) < 0 {
-			return LpAsset{}, fmt.Errorf("the total supply is less than the minimum value")
 		}
 		decimals, err := strconv.Atoi(record[13])
 		if err != nil {
