@@ -116,6 +116,88 @@ paths:
                 $ref: '#/components/schemas/WebhookAccountTxSubscriptions'
         'default':
           $ref: '#/components/responses/Error'
+  /webhooks/{webhook_id}/subscribe-new-contracts:
+    post:
+      description: "receive a notification when a new contract is deployed to the blockchain"
+      operationId: webhookNewContractSubscribe
+      parameters:
+        - $ref: '#/components/parameters/tokenQuery'
+        - $ref: '#/components/parameters/webhookId'
+      responses:
+        '200':
+          description: ""
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                example: { }
+        'default':
+          $ref: '#/components/responses/Error'
+  /webhooks/{webhook_id}/unsubscribe-new-contracts:
+    post:
+      description: "receive a notification when a new contract is deployed to the blockchain"
+      operationId: webhookNewContractUnsubscribe
+      parameters:
+        - $ref: '#/components/parameters/tokenQuery'
+        - $ref: '#/components/parameters/webhookId'
+      responses:
+        '200':
+          description: ""
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                example: { }
+        'default':
+          $ref: '#/components/responses/Error'
+  /webhooks/{webhook_id}/subscribe-msg-opcode/{opcode}:
+    post:
+      description: "receive a notification when there is a new message with a given opcode"
+      operationId: webhookMsgOpcodeSubscribe
+      parameters:
+        - $ref: '#/components/parameters/tokenQuery'
+        - $ref: '#/components/parameters/webhookId'
+        - name: opcode
+          in: path
+          required: true
+          schema:
+            type: string
+            description: "hex string starting with 0x"
+            example: 0x123456
+      responses:
+        '200':
+          description: ""
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                example: { }
+        'default':
+          $ref: '#/components/responses/Error'
+  /webhooks/{webhook_id}/unsubscribe-msg-opcode/{opcode}:
+    post:
+      description: "stop receiving a notification about a new message with a given opcode"
+      operationId: webhookMsgOpcodeUnsubscribe
+      parameters:
+        - $ref: '#/components/parameters/tokenQuery'
+        - $ref: '#/components/parameters/webhookId'
+        - name: opcode
+          in: path
+          required: true
+          schema:
+            type: string
+            description: "hex string starting with 0x"
+            example: 0x123456
+      responses:
+        '200':
+          description: ""
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                example: { }
+        'default':
+          $ref: '#/components/responses/Error'
 
 components:
   parameters:
