@@ -77,7 +77,13 @@ func (s *LiteStorage) GetTrace(ctx context.Context, hash tongo.Bits256) (*core.T
 	s.logger.Info(fmt.Sprintf("Found transaction root %s", root.Hash.Hex()))
 	trace, err := s.recursiveGetChildren(ctx, *root, 0)
 	if err != nil {
+		foundHashes := []string{}
+		core.Visit(&trace, func(trace *core.Trace) {
+			foundHashes = append(foundHashes, trace.Transaction.Hash.Hex())
+		})
+
 		s.logger.Info(fmt.Sprintf("Didn't find all children of transaction: %s root: %s", hash.Hex(), root.Hash.Hex()))
+		s.logger.Info(fmt.Sprintf("Hashes found %s", foundHashes))
 	}
 	return &trace, err
 }

@@ -267,6 +267,9 @@ func (s *LiteStorage) ParseBlock(ctx context.Context, block indexer.IDandBlock) 
 			}
 		}
 	}
+	s.logger.Info(fmt.Sprintf("Parsed block %s that contained %d transactions", block.ID.BlockID.String(), len(block.Transactions)))
+	s.logger.Info(fmt.Sprintf("transactionsIndexByHash: %+v", transactionsIndexByHash))
+	s.logger.Info(fmt.Sprintf("transactionsByInMsgLT: %s", transactionsByInMsgLT))
 	s.transactionsIndexByHash.SetMany(ctx, transactionsIndexByHash, s.cacheExpiration)
 	s.transactionsByInMsgLT.SetMany(ctx, transactionsByInMsgLT, s.cacheExpiration)
 }
