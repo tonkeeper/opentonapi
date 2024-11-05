@@ -66,7 +66,8 @@ type LiteStorage struct {
 	executor                abi.Executor
 	jettonMetaCache         *xsync.MapOf[string, tep64.Metadata]
 	transactionsIndexByHash ICache[core.Transaction]
-	transactionsByInMsgLT   ICache[string]
+	transactionsByInMsg     ICache[string]
+	transactionsByOutMsg    ICache[string]
 	cacheExpiration         time.Duration
 	blockCache              *xsync.MapOf[tongo.BlockIDExt, *tlb.Block]
 	accountInterfacesCache  *xsync.MapOf[tongo.AccountID, []abi.ContractInterface]
@@ -102,7 +103,8 @@ type Options struct {
 	blockCh <-chan indexer.IDandBlock
 
 	transactionsIndexByHash ICache[core.Transaction]
-	transactionsByInMsgLT   ICache[string]
+	transactionsByInMsg     ICache[string]
+	transactionsByOutMsg    ICache[string]
 	cacheExpiration         time.Duration
 	tonApiClient            *tonapi.Client
 }
@@ -150,9 +152,15 @@ func WithTransactionsIndexByHash(cache ICache[core.Transaction]) Option {
 	}
 }
 
-func WithTransactionsByInMsgLT(cache ICache[string]) Option {
+func WithTransactionsByInMsg(cache ICache[string]) Option {
 	return func(o *Options) {
-		o.transactionsByInMsgLT = cache
+		o.transactionsByInMsg = cache
+	}
+}
+
+func WithTransactionsByOutMsg(cache ICache[string]) Option {
+	return func(o *Options) {
+		o.transactionsByOutMsg = cache
 	}
 }
 
@@ -194,7 +202,8 @@ func NewLiteStorage(log *zap.Logger, cli *liteapi.Client, opts ...Option) (*Lite
 		// TODO: implement expiration logic for the caches below.
 		jettonMetaCache:         xsync.NewMapOf[tep64.Metadata](),
 		transactionsIndexByHash: o.transactionsIndexByHash,
-		transactionsByInMsgLT:   o.transactionsByInMsgLT,
+		transactionsByInMsg:     o.transactionsByInMsg,
+		transactionsByOutMsg:    o.transactionsByOutMsg,
 		cacheExpiration:         o.cacheExpiration,
 		blockCache:              xsync.NewTypedMapOf[tongo.BlockIDExt, *tlb.Block](hashBlockIDExt),
 		accountInterfacesCache:  xsync.NewTypedMapOf[tongo.AccountID, []abi.ContractInterface](hashAccountID),
@@ -238,13 +247,30 @@ func (s *LiteStorage) Shutdown() {
 	s.stopCh <- struct{}{}
 }
 
+func getKeyFromMessage(msg core.Message) string {
+	// Note, we use as a key a combination of all attributes (hash, createdLt, source, destination)
+	// Previously, only source\destination + createdLt were used, but that is not unique enough.
+	// Hash is unique enough, but can't be used on it's own, since in the settings of localenv hash is something empty
+	// (This is due to a limitation of using the opentonapi open source version on the node).
+	key := fmt.Sprintf("%s:%d", msg.Hash.Hex(), msg.CreatedLt)
+	if msg.Source != nil {
+		key = fmt.Sprintf("%s:%s", key, msg.Source.String())
+	}
+	if msg.Destination != nil {
+		key = fmt.Sprintf("%s:%s", key, msg.Destination.String())
+	}
+	return key
+}
+
 func (s *LiteStorage) ParseBlock(ctx context.Context, block indexer.IDandBlock) {
 	transactionsIndexByHash := map[string]core.Transaction{}
-	transactionsByInMsgLT := map[string]string{}
+	transactionsByInMsg := map[string]string{}
+	transactionsByOutMsg := map[string]string{}
 	for _, tx := range block.Transactions {
 		accountID := ton.MustParseAccountID(tx.Account.Address)
 		_, trackSpecificAccount := s.trackingAccounts[accountID]
 		if trackSpecificAccount || s.trackAllAccounts {
+			s.logger.Info(fmt.Sprintf("txHash: %s, InMsg hash: %s", tx.Hash, tx.InMsg.Value.Hash))
 			transaction, err := OasTransactionToCoreTransaction(tx)
 			if err != nil {
 				s.logger.Error("failed to process tx",
@@ -258,20 +284,27 @@ func (s *LiteStorage) ParseBlock(ctx context.Context, block indexer.IDandBlock) 
 			// We save in cache for each transaction:
 			// 1. A map from the incoming message to the transaction hash (used when looking a transaction children)
 			// 2. A map from each outgoing message to the transaction hash (used when looking a transaction parent)
-			if createLT, ok := extractInMsgCreatedLT(accountID, transaction); ok {
-				transactionsByInMsgLT[createLT.String()] = hash.Hex()
+			if transaction.InMsg != nil {
+				s.logger.Info(fmt.Sprintf("txHash: %s, InMsg hash: %s", hash.Hex(), transaction.InMsg.Hash.Hex()))
+				transactionsByInMsg[getKeyFromMessage(*transaction.InMsg)] = hash.Hex()
 			}
+
 			for _, outMsg := range transaction.OutMsgs {
-				createLT := inMsgCreatedLT{account: accountID, lt: outMsg.CreatedLt}
-				transactionsByInMsgLT[createLT.String()] = hash.Hex()
+				s.logger.Info(fmt.Sprintf("txHash: %s, outMsg hash: %s", hash.Hex(), outMsg.Hash.Hex()))
+				transactionsByOutMsg[getKeyFromMessage(outMsg)] = hash.Hex()
+				// if outMsg.Hash.Hex() != "0000000000000000000000000000000000000000000000000000000000000000" {
+				// 	transactionsByOutMsg[outMsg.Hash.Hex()] = hash.Hex()
+				// }
 			}
 		}
 	}
 	s.logger.Info(fmt.Sprintf("Parsed block %s that contained %d transactions", block.ID.BlockID.String(), len(block.Transactions)))
 	s.logger.Info(fmt.Sprintf("transactionsIndexByHash: %+v", transactionsIndexByHash))
-	s.logger.Info(fmt.Sprintf("transactionsByInMsgLT: %s", transactionsByInMsgLT))
+	s.logger.Info(fmt.Sprintf("transactionsByInMsg: %s", transactionsByInMsg))
+	s.logger.Info(fmt.Sprintf("transactionsByOutMsg: %s", transactionsByOutMsg))
 	s.transactionsIndexByHash.SetMany(ctx, transactionsIndexByHash, s.cacheExpiration)
-	s.transactionsByInMsgLT.SetMany(ctx, transactionsByInMsgLT, s.cacheExpiration)
+	s.transactionsByInMsg.SetMany(ctx, transactionsByInMsg, s.cacheExpiration)
+	s.transactionsByOutMsg.SetMany(ctx, transactionsByOutMsg, s.cacheExpiration)
 }
 
 func (s *LiteStorage) run(ch <-chan indexer.IDandBlock) {
@@ -524,8 +557,20 @@ func (s *LiteStorage) getTxFromCacheByHash(hash string) (*core.Transaction, erro
 	return &tx, nil
 }
 
-func (s *LiteStorage) searchTxInCache(a tongo.AccountID, lt uint64) *core.Transaction {
-	hash, err := s.transactionsByInMsgLT.Get(context.Background(), inMsgCreatedLT{account: a, lt: lt}.String())
+func (s *LiteStorage) searchParentTxInCache(message core.Message) *core.Transaction {
+	hash, err := s.transactionsByOutMsg.Get(context.Background(), getKeyFromMessage(message))
+	if err != nil {
+		return nil
+	}
+	tx, err := s.getTxFromCacheByHash(hash)
+	if err != nil {
+		return nil
+	}
+	return tx
+}
+
+func (s *LiteStorage) searchChildTxInCache(message core.Message) *core.Transaction {
+	hash, err := s.transactionsByInMsg.Get(context.Background(), getKeyFromMessage(message))
 	if err != nil {
 		return nil
 	}
