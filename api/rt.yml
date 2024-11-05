@@ -38,10 +38,15 @@ paths:
                 type: object
                 required:
                   - webhook_id
+                  - token
                 properties:
                   webhook_id:
                     type: integer
                     format: int64
+                  token:
+                    description: "secret token which will be used by TONAPI to authenticate itself when sending notifications to the webhook endpoint"
+                    type: string
+
         'default':
           $ref: '#/components/responses/Error'
   /webhooks/{webhook_id}:
@@ -59,6 +64,27 @@ paths:
               schema:
                 additionalProperties: true
                 example: { }
+        'default':
+          $ref: '#/components/responses/Error'
+  /webhooks/{webhook_id}/generate-new-token:
+    post:
+      description: "generate a new secret token which will be used by TONAPI to authenticate itself when sending notifications to the webhook endpoint. The old token will be invalidated."
+      operationId: webhookGenerateNewToken
+      parameters:
+        - $ref: '#/components/parameters/tokenQuery'
+        - $ref: '#/components/parameters/webhookId'
+      responses:
+        '200':
+          description: ""
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - token
+                properties:
+                  token:
+                    type: string
         'default':
           $ref: '#/components/responses/Error'
   /webhooks/{webhook_id}/account-tx/subscribe:
@@ -309,12 +335,15 @@ components:
             required:
             - id
             - endpoint
+            - token
             - subscribed_accounts
             properties:
               id:
                 type: integer
                 format: int64
               endpoint:
+                type: string
+              token:
                 type: string
               subscribed_accounts:
                 type: integer
