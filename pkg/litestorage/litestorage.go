@@ -270,7 +270,6 @@ func (s *LiteStorage) ParseBlock(ctx context.Context, block indexer.IDandBlock) 
 		accountID := ton.MustParseAccountID(tx.Account.Address)
 		_, trackSpecificAccount := s.trackingAccounts[accountID]
 		if trackSpecificAccount || s.trackAllAccounts {
-			s.logger.Info(fmt.Sprintf("txHash: %s, InMsg hash: %s", tx.Hash, tx.InMsg.Value.Hash))
 			transaction, err := OasTransactionToCoreTransaction(tx)
 			if err != nil {
 				s.logger.Error("failed to process tx",
@@ -285,16 +284,11 @@ func (s *LiteStorage) ParseBlock(ctx context.Context, block indexer.IDandBlock) 
 			// 1. A map from the incoming message to the transaction hash (used when looking a transaction children)
 			// 2. A map from each outgoing message to the transaction hash (used when looking a transaction parent)
 			if transaction.InMsg != nil {
-				s.logger.Info(fmt.Sprintf("txHash: %s, InMsg hash: %s", hash.Hex(), transaction.InMsg.Hash.Hex()))
 				transactionsByInMsg[getKeyFromMessage(*transaction.InMsg)] = hash.Hex()
 			}
 
 			for _, outMsg := range transaction.OutMsgs {
-				s.logger.Info(fmt.Sprintf("txHash: %s, outMsg hash: %s", hash.Hex(), outMsg.Hash.Hex()))
 				transactionsByOutMsg[getKeyFromMessage(outMsg)] = hash.Hex()
-				// if outMsg.Hash.Hex() != "0000000000000000000000000000000000000000000000000000000000000000" {
-				// 	transactionsByOutMsg[outMsg.Hash.Hex()] = hash.Hex()
-				// }
 			}
 		}
 	}
