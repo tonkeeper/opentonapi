@@ -163,10 +163,10 @@ func maybeRefInvoke[Result any, T any](fn func(t T) *Result, maybe tlb.Maybe[tlb
 	return fn(maybe.Value.Value)
 }
 
-func ConvertTransaction(workchain int32, tx tongo.Transaction) (*Transaction, error) {
+func ConvertTransaction(workchain int32, tx tongo.Transaction, cd *abi.ContractDescription) (*Transaction, error) {
 	var inMsg *Message
 	if tx.Msgs.InMsg.Exists {
-		msg, err := ConvertMessage(tx.Msgs.InMsg.Value.Value, tx.Lt)
+		msg, err := ConvertMessage(tx.Msgs.InMsg.Value.Value, tx.Lt, cd)
 		if err != nil {
 			return nil, err
 		}
@@ -174,7 +174,7 @@ func ConvertTransaction(workchain int32, tx tongo.Transaction) (*Transaction, er
 	}
 	var outMessage []Message
 	for _, msg := range tx.Msgs.OutMsgs.Values() {
-		m, err := ConvertMessage(msg.Value, tx.Lt)
+		m, err := ConvertMessage(msg.Value, tx.Lt, cd)
 		if err != nil {
 			return nil, err
 		}
@@ -272,7 +272,7 @@ func ConvertTransaction(workchain int32, tx tongo.Transaction) (*Transaction, er
 	}, nil
 }
 
-func ConvertMessage(message tlb.Message, txLT uint64) (Message, error) {
+func ConvertMessage(message tlb.Message, txLT uint64, cd *abi.ContractDescription) (Message, error) {
 	init := make([]byte, 0)
 	if message.Init.Exists {
 		initCell := boc.NewCell()
@@ -289,11 +289,15 @@ func ConvertMessage(message tlb.Message, txLT uint64) (Message, error) {
 	if err != nil {
 		return Message{}, err
 	}
+	var ci []abi.ContractInterface
+	if cd != nil {
+		ci = cd.ContractInterfaces
+	}
 	cell := boc.Cell(message.Body.Value)
 	switch message.Info.SumType {
 	case "IntMsgInfo":
 		var decodedBody *DecodedMessageBody
-		tag, op, value, err := abi.InternalMessageDecoder(&cell, nil)
+		tag, op, value, err := abi.InternalMessageDecoder(&cell, ci)
 		if err == nil && op != nil {
 			decodedBody = &DecodedMessageBody{
 				Operation: *op,
@@ -332,7 +336,7 @@ func ConvertMessage(message tlb.Message, txLT uint64) (Message, error) {
 	case "ExtInMsgInfo":
 		var decodedBody *DecodedMessageBody
 		info := message.Info.ExtInMsgInfo
-		tag, op, value, err := abi.ExtInMessageDecoder(&cell, nil)
+		tag, op, value, err := abi.ExtInMessageDecoder(&cell, ci)
 		if err == nil && op != nil {
 			decodedBody = &DecodedMessageBody{
 				Operation: *op,
@@ -361,7 +365,7 @@ func ConvertMessage(message tlb.Message, txLT uint64) (Message, error) {
 	case "ExtOutMsgInfo":
 		var decodedBody *DecodedMessageBody
 		info := message.Info.ExtOutMsgInfo
-		tag, op, value, err := abi.ExtOutMessageDecoder(&cell, nil, info.Dest)
+		tag, op, value, err := abi.ExtOutMessageDecoder(&cell, ci, info.Dest)
 		if err == nil && op != nil {
 			decodedBody = &DecodedMessageBody{
 				Operation: *op,
@@ -481,7 +485,7 @@ func ExtractTransactions(id tongo.BlockIDExt, block *tlb.Block) ([]*Transaction,
 	rawTransactions := block.AllTransactions()
 	transactions := make([]*Transaction, 0, len(rawTransactions))
 	for _, rawTx := range rawTransactions {
-		tx, err := ConvertTransaction(id.Workchain, tongo.Transaction{Transaction: *rawTx, BlockID: id})
+		tx, err := ConvertTransaction(id.Workchain, tongo.Transaction{Transaction: *rawTx, BlockID: id}, nil)
 		if err != nil {
 			return nil, err
 		}

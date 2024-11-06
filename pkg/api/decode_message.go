@@ -160,6 +160,25 @@ func (h *Handler) DecodeMessage(ctx context.Context, req *oas.DecodeMessageReq) 
 			}),
 		}
 		decoded.SetExtInMsgDecoded(oas.NewOptDecodedMessageExtInMsgDecoded(extIn))
+	case tongoWallet.V5R1:
+		v5, err := tongoWallet.DecodeMessageV5(msgCell)
+		if err != nil {
+			return nil, err
+		}
+		rawMessages := make([]oas.DecodedRawMessage, 0, len(v5.RawMessages()))
+		for _, msg := range v5.RawMessages() {
+			rawMsg, err := convertToRawMessage(msg)
+			if err != nil {
+				return nil, toError(http.StatusInternalServerError, err)
+			}
+			rawMessages = append(rawMessages, rawMsg)
+		}
+		extIn := oas.DecodedMessageExtInMsgDecoded{
+			WalletV5: oas.NewOptDecodedMessageExtInMsgDecodedWalletV5(oas.DecodedMessageExtInMsgDecodedWalletV5{
+				RawMessages: rawMessages,
+			}),
+		}
+		decoded.SetExtInMsgDecoded(oas.NewOptDecodedMessageExtInMsgDecoded(extIn))
 	default:
 		return nil, toError(http.StatusBadRequest, fmt.Errorf("wallet version '%v' is not supported", ver))
 	}

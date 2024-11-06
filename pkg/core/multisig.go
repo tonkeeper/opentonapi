@@ -23,5 +23,6 @@ type MultisigOrder struct {
 	ApprovalsMask    []byte
 	ApprovalsNum     int32
 	ExpirationDate   int64
+	CreationDate     int64
 	Actions          []abi.MultisigSendMessageAction
 }

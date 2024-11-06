@@ -40,23 +40,17 @@ func ExtractRiskFromRawMessages(rawMessages []tongoWallet.RawMessage) (*Risk, er
 		if tongoWallet.IsMessageModeSet(int(rawMsg.Mode), tongoWallet.AttachAllRemainingBalance) {
 			risk.TransferAllRemainingBalance = true
 		}
-		var m tlb.Message
+		var m abi.MessageRelaxed
 		if err := tlb.Unmarshal(rawMsg.Message, &m); err != nil {
 			return nil, err
 		}
-		var err error
-		var tonValue uint64
-		var destination *tongo.AccountID
-		if m.Info.IntMsgInfo != nil {
-			tonValue = uint64(m.Info.IntMsgInfo.Value.Grams)
-			destination, err = ton.AccountIDFromTlb(m.Info.IntMsgInfo.Dest)
-			if err != nil {
-				return nil, err
-			}
+		tonValue := uint64(m.MessageInternal.Value.Grams)
+		destination, err := ton.AccountIDFromTlb(m.MessageInternal.Dest)
+		if err != nil {
+			return nil, err
 		}
 		risk.Ton += tonValue
-		body := boc.Cell(m.Body.Value)
-		_, _, msgBody, err := abi.InternalMessageDecoder(&body, nil)
+		msgBody := m.MessageInternal.Body.Value.Value
 		if err != nil {
 			continue
 		}

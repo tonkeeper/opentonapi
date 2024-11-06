@@ -1,0 +1,26 @@
+{
+   "Actions": [
+     {
+       "TonTransfer": {
+         "Amount": 189417707456,
+         "Comment": null,
+         "EncryptedComment": null,
+         "Recipient": "0:dae153a74d894bbc32748198cd626e4f5df4a69ad2fa56ce80fc2644b5708d20",
+         "Sender": "0:7be3026a154d127ea897871c06d4356474162f96caa3122d1adc81981ebcfccf",
+         "Refund": null
+       },
+       "Success": false,
+       "Type": "TonTransfer",
+       "Error": "Not enough balance",
+       "BaseTransactions": null
+     }
+   ],
+   "Accounts": [
+     {
+       "Account": "0:7be3026a154d127ea897871c06d4356474162f96caa3122d1adc81981ebcfccf",
+       "Ton": -2914445,
+       "Fee": 2914445,
+       "Jettons": null
+     }
+   ]
+ }

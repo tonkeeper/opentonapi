@@ -13,6 +13,7 @@ import (
 	"github.com/tonkeeper/tongo/abi"
 	"github.com/tonkeeper/tongo/boc"
 	"github.com/tonkeeper/tongo/tep64"
+	"github.com/tonkeeper/tongo/ton"
 )
 
 func (s *LiteStorage) GetNFTs(ctx context.Context, accounts []tongo.AccountID) ([]core.NftItem, error) {
@@ -30,7 +31,11 @@ func (s *LiteStorage) SearchNFTs(ctx context.Context,
 }
 
 func (s *LiteStorage) GetNftCollections(ctx context.Context, limit, offset *int32) ([]core.NftCollection, error) {
-	return nil, nil
+	return []core.NftCollection{}, nil
+}
+
+func (s *LiteStorage) GetNftCollectionsByAddresses(ctx context.Context, addresses []ton.AccountID) ([]core.NftCollection, error) {
+	return []core.NftCollection{}, nil
 }
 
 func (s *LiteStorage) GetNftCollectionByCollectionAddress(ctx context.Context, address tongo.AccountID) (core.NftCollection, error) {
@@ -64,7 +69,7 @@ func (s *LiteStorage) GetNftCollectionByCollectionAddress(ctx context.Context, a
 		OwnerAddress:      accountID,
 		CollectionContent: rawContent,
 		ContentLayout:     int(fullContent.Layout),
-		NextItemIndex:     g.Pointer(big.Int(source.NextItemIndex)).Uint64(),
+		NextItemIndex:     g.Pointer(big.Int(source.NextItemIndex)).Int64(),
 	}
 	if fullContent.Layout == tep64.OffChain {
 		meta, err := core.GetNftMetaData(string(fullContent.Data))

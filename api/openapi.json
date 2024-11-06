@@ -1369,7 +1369,8 @@
         },
         "value": {
          "example": "10000000000",
-         "type": "string"
+         "type": "string",
+         "x-js-format": "bigint"
         }
        },
        "required": [
@@ -1447,7 +1448,7 @@
       "type": "integer"
      },
      "shard": {
-      "example": 800000000000000,
+      "example": "800000000000000",
       "type": "string"
      },
      "workchain": {
@@ -1660,7 +1661,7 @@
       "type": "integer"
      },
      "shard": {
-      "example": 8000000000000000,
+      "example": "8000000000000000",
       "type": "string"
      },
      "start_lt": {
@@ -2560,6 +2561,25 @@
     "example": "cskip_no_state",
     "type": "string"
    },
+   "ChartPoints": {
+    "additionalItems": false,
+    "example": [
+     1668436763,
+     97.21323234
+    ],
+    "items": [
+     {
+      "description": "Unix timestamp of the data point",
+      "format": "int64",
+      "type": "integer"
+     },
+     {
+      "description": "Decimal price of the token in the requested currency",
+      "type": "number"
+     }
+    ],
+    "type": "array"
+   },
    "ComputePhase": {
     "properties": {
      "exit_code": {
@@ -2815,6 +2835,20 @@
          "raw_messages"
         ],
         "type": "object"
+       },
+       "wallet_v5": {
+        "properties": {
+         "raw_messages": {
+          "items": {
+           "$ref": "#/components/schemas/DecodedRawMessage"
+          },
+          "type": "array"
+         }
+        },
+        "required": [
+         "raw_messages"
+        ],
+        "type": "object"
        }
       },
       "type": "object"
@@ -2841,7 +2875,8 @@
        },
        "op_code": {
         "example": "0xdeadbeaf",
-        "type": "string"
+        "type": "string",
+        "x-js-format": "bigint"
        }
       },
       "required": [
@@ -3330,7 +3365,8 @@
     "properties": {
      "balance": {
       "example": "1000000000",
-      "type": "string"
+      "type": "string",
+      "x-js-format": "bigint"
      },
      "decimals": {
       "example": 9,
@@ -3376,7 +3412,8 @@
      "amount": {
       "description": "amount in minimal particles",
       "example": "123456789",
-      "type": "string"
+      "type": "string",
+      "x-js-format": "bigint"
      },
      "decimals": {
       "example": 9,
@@ -3412,7 +3449,8 @@
      "amount": {
       "description": "amount in minimal particles",
       "example": "123456789",
-      "type": "string"
+      "type": "string",
+      "x-js-format": "bigint"
      },
      "comment": {
       "example": "Hi! This is your salary. \nFrom accounting with love.",
@@ -3454,8 +3492,9 @@
    "JettonBalance": {
     "properties": {
      "balance": {
-      "example": 597968399,
-      "type": "string"
+      "example": "597968399",
+      "type": "string",
+      "x-js-format": "bigint"
      },
      "extensions": {
       "example": [
@@ -3473,8 +3512,9 @@
      "lock": {
       "properties": {
        "amount": {
-        "example": 597968399,
-        "type": "string"
+        "example": "597968399",
+        "type": "string",
+        "x-js-format": "bigint"
        },
        "till": {
         "example": 1678223064,
@@ -3581,8 +3621,9 @@
     "properties": {
      "amount": {
       "description": "amount in quanta of tokens",
-      "example": 1000000000,
-      "type": "string"
+      "example": "1000000000",
+      "type": "string",
+      "x-js-format": "bigint"
      },
      "jetton": {
       "$ref": "#/components/schemas/JettonPreview"
@@ -3617,7 +3658,8 @@
         "balance": {
          "description": "balance in the smallest jetton's units",
          "example": "168856200518084",
-         "type": "string"
+         "type": "string",
+         "x-js-format": "bigint"
         },
         "owner": {
          "$ref": "#/components/schemas/AccountAddress"
@@ -3664,7 +3706,8 @@
      },
      "total_supply": {
       "example": "5887105890579978",
-      "type": "string"
+      "type": "string",
+      "x-js-format": "bigint"
      },
      "verification": {
       "$ref": "#/components/schemas/JettonVerificationType"
@@ -3695,6 +3738,10 @@
        "type": "string"
       },
       "type": "array"
+     },
+     "custom_payload_api_uri": {
+      "example": "https://claim-api.tonapi.io/jettons/TESTMINT",
+      "type": "string"
      },
      "decimals": {
       "example": "9",
@@ -3749,8 +3796,9 @@
     "properties": {
      "amount": {
       "description": "amount in quanta of tokens",
-      "example": 1000000000,
-      "type": "string"
+      "example": "1000000000",
+      "type": "string",
+      "x-js-format": "bigint"
      },
      "jetton": {
       "$ref": "#/components/schemas/JettonPreview"
@@ -3777,6 +3825,9 @@
      "address": {
       "example": "0:0BB5A9F69043EEBDDA5AD2E946EB953242BD8F603FE795D90698CEEC6BFC60A0",
       "format": "address",
+      "type": "string"
+     },
+     "custom_payload_api_uri": {
       "type": "string"
      },
      "decimals": {
@@ -3816,7 +3867,8 @@
      },
      "quantity": {
       "example": "597968399",
-      "type": "string"
+      "type": "string",
+      "x-js-format": "bigint"
      },
      "wallet_address": {
       "$ref": "#/components/schemas/AccountAddress"
@@ -3833,11 +3885,13 @@
     "properties": {
      "amount_in": {
       "example": "1660050553",
-      "type": "string"
+      "type": "string",
+      "x-js-format": "bigint"
      },
      "amount_out": {
       "example": "1660050553",
-      "type": "string"
+      "type": "string",
+      "x-js-format": "bigint"
      },
      "dex": {
       "enum": [
@@ -3885,8 +3939,9 @@
     "properties": {
      "amount": {
       "description": "amount in quanta of tokens",
-      "example": 1000000000,
-      "type": "string"
+      "example": "1000000000",
+      "type": "string",
+      "x-js-format": "bigint"
      },
      "comment": {
       "example": "Hi! This is your salary. \nFrom accounting with love.",
@@ -4072,7 +4127,8 @@
      },
      "op_code": {
       "example": "0xdeadbeaf",
-      "type": "string"
+      "type": "string",
+      "x-js-format": "bigint"
      },
      "raw_body": {
       "description": "hex-encoded BoC with raw message body",
@@ -4317,6 +4373,10 @@
       "format": "int32",
       "type": "integer"
      },
+     "creation_date": {
+      "format": "int64",
+      "type": "integer"
+     },
      "expiration_date": {
       "format": "int64",
       "type": "integer"
@@ -4332,6 +4392,14 @@
      "sent_for_execution": {
       "example": false,
       "type": "boolean"
+     },
+     "signed_by": {
+      "items": {
+       "example": "0:da6b1b6663a0e4d18cc8574ccd9db5296e367dd9324706f3bbd9eb1cd2caf0bf",
+       "format": "address",
+       "type": "string"
+      },
+      "type": "array"
      },
      "signers": {
       "items": {
@@ -4354,7 +4422,9 @@
      "signers",
      "approvals_num",
      "expiration_date",
-     "risk"
+     "risk",
+     "creation_date",
+     "signed_by"
     ],
     "type": "object"
    },
@@ -4376,8 +4446,7 @@
     "items": {
      "enum": [
       "getgems",
-      "tonkeeper",
-      "ton.diamonds"
+      "tonkeeper"
      ],
      "example": "getgems",
      "type": "string"
@@ -4448,7 +4517,9 @@
       "type": "string"
      },
      "approved_by": {
-      "$ref": "#/components/schemas/NftApprovedBy"
+      "$ref": "#/components/schemas/NftApprovedBy",
+      "deprecated": true,
+      "description": "please use trust field"
      },
      "collection": {
       "properties": {
@@ -4507,6 +4578,7 @@
       "$ref": "#/components/schemas/TrustType"
      },
      "verified": {
+      "description": "Collection master contract confirmed that this item is part of collection",
       "example": true,
       "type": "boolean"
      }
@@ -4792,7 +4864,8 @@
      },
      "value": {
       "example": "123000000000",
-      "type": "string"
+      "type": "string",
+      "x-js-format": "bigint"
      }
     },
     "required": [
@@ -4822,11 +4895,7 @@
      },
      "parent": {
       "items": {
-       "example": [
-        "(0",
-        21734018,
-        "8000000000000000)"
-       ],
+       "example": "[ (0,21734018,8000000000000000) ]",
        "type": "string"
       },
       "type": "array"
@@ -4837,16 +4906,12 @@
       "type": "integer"
      },
      "shard": {
-      "example": 8000000000000000,
+      "example": "8000000000000000",
       "type": "string"
      },
      "shards_blocks": {
       "items": {
-       "example": [
-        "(0",
-        4234235,
-        "8000000000000000)"
-       ],
+       "example": "[ (0,4234235,8000000000000000) ]",
        "type": "string"
       },
       "type": "array"
@@ -5040,7 +5105,8 @@
      "commission": {
       "description": "Commission for the transaction. In nanocoins.",
       "example": "1000000",
-      "type": "string"
+      "type": "string",
+      "x-js-format": "bigint"
      },
      "from": {
       "example": "0:da6b1b6663a0e4d18cc8574ccd9db5296e367dd9324706f3bbd9eb1cd2caf0bf",
@@ -5806,6 +5872,7 @@
       "items": {
        "properties": {
         "adnl_addr": {
+         "example": "45061C1D4EC44A937D0318589E13C73D151D1CEF5D3C0E53AFBCF56A6C2FE2BD",
          "type": "string"
         },
         "public_key": {
@@ -5833,7 +5900,8 @@
      },
      "total_weight": {
       "example": "1152921504606846800",
-      "type": "string"
+      "type": "string",
+      "x-js-format": "bigint"
      },
      "utime_since": {
       "type": "integer"
@@ -6044,11 +6112,11 @@
       "type": "integer"
      },
      "zerostate_file_hash": {
-      "example": 1000000,
+      "example": "A6A0BD6608672B11B79538A50B2204E748305C12AA0DED9C16CF0006CE3AF8DB",
       "type": "string"
      },
      "zerostate_root_hash": {
-      "example": 1000000,
+      "example": "131D0C65055F04E9C19D687B51BC70F952FD9CA6F02C2801D3B89964A779DF85",
       "type": "string"
      }
     },
@@ -6079,7 +6147,7 @@
   "title": "REST api to TON blockchain explorer",
   "version": "2.0.0"
  },
- "openapi": "3.0.2",
+ "openapi": "3.1.0",
  "paths": {
   "/v2/accounts/_bulk": {
    "post": {
@@ -6193,6 +6261,7 @@
       "schema": {
        "example": 1668436763,
        "format": "int64",
+       "maximum": 2114380800,
        "type": "integer"
       }
      },
@@ -6203,6 +6272,7 @@
       "schema": {
        "example": 1668436763,
        "format": "int64",
+       "maximum": 2114380800,
        "type": "integer"
       }
      }
@@ -6352,6 +6422,7 @@
       "schema": {
        "example": 1668436763,
        "format": "int64",
+       "maximum": 2114380800,
        "type": "integer"
       }
      },
@@ -6362,6 +6433,7 @@
       "schema": {
        "example": 1668436763,
        "format": "int64",
+       "maximum": 2114380800,
        "type": "integer"
       }
      }
@@ -6507,6 +6579,7 @@
       "schema": {
        "example": 1668436763,
        "format": "int64",
+       "maximum": 2114380800,
        "type": "integer"
       }
      },
@@ -6517,6 +6590,7 @@
       "schema": {
        "example": 1668436763,
        "format": "int64",
+       "maximum": 2114380800,
        "type": "integer"
       }
      }
@@ -6554,6 +6628,9 @@
      },
      {
       "$ref": "#/components/parameters/currenciesQuery"
+     },
+     {
+      "$ref": "#/components/parameters/supportedExtensions"
      }
     ],
     "responses": {
@@ -6620,6 +6697,7 @@
       "schema": {
        "example": 1668436763,
        "format": "int64",
+       "maximum": 2114380800,
        "type": "integer"
       }
      },
@@ -6630,6 +6708,7 @@
       "schema": {
        "example": 1668436763,
        "format": "int64",
+       "maximum": 2114380800,
        "type": "integer"
       }
      }
@@ -6772,6 +6851,7 @@
       "schema": {
        "example": 1668436763,
        "format": "int64",
+       "maximum": 2114380800,
        "type": "integer"
       }
      },
@@ -6782,6 +6862,7 @@
       "schema": {
        "example": 1668436763,
        "format": "int64",
+       "maximum": 2114380800,
        "type": "integer"
       }
      }
@@ -7981,7 +8062,8 @@
       "required": true,
       "schema": {
        "example": "1000000000",
-       "type": "string"
+       "type": "string",
+       "x-js-format": "bigint"
       }
      },
      {
@@ -8150,6 +8232,33 @@
       }
      }
     ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Jettons"
+        }
+       }
+      },
+      "description": "a list of jettons"
+     },
+     "default": {
+      "$ref": "#/components/responses/Error"
+     }
+    },
+    "tags": [
+     "Jettons"
+    ]
+   }
+  },
+  "/v2/jettons/_bulk": {
+   "post": {
+    "description": "Get jetton metadata items by jetton master addresses",
+    "operationId": "getJettonInfosByAddresses",
+    "requestBody": {
+     "$ref": "#/components/requestBodies/AccountIDs"
+    },
     "responses": {
      "200": {
       "content": {
@@ -9381,6 +9490,33 @@
     ]
    }
   },
+  "/v2/nfts/collections/_bulk": {
+   "post": {
+    "description": "Get NFT collection items by their addresses",
+    "operationId": "getNftCollectionItemsByAddresses",
+    "requestBody": {
+     "$ref": "#/components/requestBodies/AccountIDs"
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/NftCollections"
+        }
+       }
+      },
+      "description": "nft collections"
+     },
+     "default": {
+      "$ref": "#/components/responses/Error"
+     }
+    },
+    "tags": [
+     "NFT"
+    ]
+   }
+  },
   "/v2/nfts/collections/{account_id}": {
    "get": {
     "description": "Get NFT collection by collection address",
@@ -9515,6 +9651,7 @@
       "schema": {
        "example": 1668436763,
        "format": "int64",
+       "maximum": 2114380800,
        "type": "integer"
       }
      },
@@ -9525,6 +9662,7 @@
       "schema": {
        "example": 1668436763,
        "format": "int64",
+       "maximum": 2114380800,
        "type": "integer"
       }
      }
@@ -9662,6 +9800,7 @@
       "name": "token",
       "required": true,
       "schema": {
+       "format": "address",
        "type": "string"
       }
      },
@@ -9681,6 +9820,7 @@
       "schema": {
        "example": 1668436763,
        "format": "int64",
+       "maximum": 2114380800,
        "type": "integer"
       }
      },
@@ -9691,6 +9831,7 @@
       "schema": {
        "example": 1668436763,
        "format": "int64",
+       "maximum": 2114380800,
        "type": "integer"
       }
      },
@@ -9714,8 +9855,10 @@
         "schema": {
          "properties": {
           "points": {
-           "additionalProperties": true,
-           "example": {}
+           "items": {
+            "$ref": "#/components/schemas/ChartPoints"
+           },
+           "type": "array"
           }
          },
          "required": [
@@ -10202,6 +10345,39 @@
      }
     },
     "tags": [
+     "Wallet"
+    ]
+   }
+  },
+  "/v2/wallet/emulate": {
+   "post": {
+    "description": "Emulate sending message to blockchain",
+    "operationId": "emulateMessageToWallet",
+    "parameters": [
+     {
+      "$ref": "#/components/parameters/i18n"
+     }
+    ],
+    "requestBody": {
+     "$ref": "#/components/requestBodies/EmulationBoc"
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/MessageConsequences"
+        }
+       }
+      },
+      "description": "emulated message"
+     },
+     "default": {
+      "$ref": "#/components/responses/Error"
+     }
+    },
+    "tags": [
+     "Emulation",
      "Wallet"
     ]
    }

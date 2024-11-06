@@ -1,6 +1,6 @@
 module github.com/arnac-io/opentonapi
 
-go 1.21.3
+go 1.22
 
 toolchain go1.22.1
 
@@ -26,8 +26,10 @@ require (
 	github.com/shurcooL/graphql v0.0.0-20220606043923-3cf50f8a0a29
 	github.com/sourcegraph/conc v0.3.0
 	github.com/stretchr/testify v1.9.0
-	github.com/tonkeeper/scam_backoffice_rules v0.0.0-20240822052421-6e4f645f0bc7
-	github.com/tonkeeper/tongo v1.9.2
+	github.com/tonkeeper/opentonapi v1.2.2
+	github.com/tonkeeper/scam_backoffice_rules v0.0.0-20241106130559-c44de2d4177b
+	github.com/tonkeeper/tonapi-go v0.0.7
+	github.com/tonkeeper/tongo v1.10.3
 	go.opentelemetry.io/otel v1.24.0
 	go.opentelemetry.io/otel/metric v1.24.0
 	go.opentelemetry.io/otel/trace v1.24.0
@@ -74,7 +76,6 @@ require (
 	github.com/sirupsen/logrus v1.9.0 // indirect
 	github.com/snksoft/crc v1.1.0 // indirect
 	github.com/spf13/cast v1.5.0 // indirect
-	github.com/tonkeeper/tonapi-go v0.0.7 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasttemplate v1.2.2 // indirect
 	golang.org/x/crypto v0.26.0 // indirect

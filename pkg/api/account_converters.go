@@ -2,6 +2,7 @@ package api
 
 import (
 	"fmt"
+	imgGenerator "github.com/tonkeeper/opentonapi/pkg/image"
 	"sort"
 
 	"github.com/tonkeeper/tongo/abi"
@@ -88,11 +89,12 @@ func convertToAccount(account *core.Account, ab *addressbook.KnownAddress, state
 	}
 	if account.Status == tlb.AccountUninit || account.Status == tlb.AccountNone {
 		acc.IsWallet = true
-	}
-	for _, i := range account.Interfaces {
-		if i.Implements(abi.Wallet) {
-			acc.IsWallet = true
-			break
+	} else {
+		for _, i := range account.Interfaces {
+			if i.Implements(abi.Wallet) {
+				acc.IsWallet = true
+				break
+			}
 		}
 	}
 	if ab == nil {
@@ -103,7 +105,7 @@ func convertToAccount(account *core.Account, ab *addressbook.KnownAddress, state
 		acc.Name = oas.NewOptString(ab.Name)
 	}
 	if len(ab.Image) > 0 {
-		acc.Icon = oas.NewOptString(ab.Image)
+		acc.Icon = oas.NewOptString(imgGenerator.DefaultGenerator.GenerateImageUrl(ab.Image, 200, 200))
 	}
 	acc.MemoRequired = oas.NewOptBool(ab.RequireMemo)
 	return acc

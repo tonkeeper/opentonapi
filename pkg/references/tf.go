@@ -22,12 +22,14 @@ const (
 	JUsdtSlpType SlpType = "jUSDT"
 	TonSlpType   SlpType = "TON"
 	UsdtSlpType  SlpType = "USDT"
+	NotSlpType   SlpType = "NOT"
 )
 
 var SlpAccounts = map[SlpType]ton.AccountID{
 	JUsdtSlpType: ton.MustParseAccountID("EQDynReiCeK8xlKRbYArpp4jyzZuF6-tYfhFM0O5ulOs5H0L"),
 	TonSlpType:   ton.MustParseAccountID("EQDpJnZP89Jyxz3euDaXXFUhwCWtaOeRmiUJTi3jGYgF8fnj"),
 	UsdtSlpType:  ton.MustParseAccountID("EQAz6ehNfL7_8NI7OVh1Qg46HsuC4kFpK-icfqK9J3Frd6CJ"),
+	NotSlpType:   ton.MustParseAccountID("EQAG8_BzwlWkmqb9zImr9RJjjgZZCLMOQXP9PR0B1PYHvfSS"),
 }
 
 var TonstakersSocialLinks = []string{"https://t.me/thetonstakers", "https://twitter.com/tonstakers"}

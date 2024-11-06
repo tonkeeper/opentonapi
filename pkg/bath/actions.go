@@ -90,6 +90,7 @@ type (
 		InscriptionTransfer   *InscriptionTransferAction   `json:",omitempty"`
 		Success               bool
 		Type                  ActionType
+		Error                 *string `json:",omitempty"`
 		BaseTransactions      []ton.Bits256
 	}
 	TonTransferAction struct {

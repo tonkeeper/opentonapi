@@ -11,7 +11,6 @@ import (
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/liteapi"
 	"go.uber.org/zap"
-	"golang.org/x/exp/maps"
 
 	"github.com/arnac-io/opentonapi/pkg/addressbook"
 	"github.com/arnac-io/opentonapi/pkg/api"
@@ -26,7 +25,6 @@ func main() {
 
 	cfg := config.Load()
 	log := app.Logger(cfg.App.LogLevel)
-	book := addressbook.NewAddressBook(log, config.AddressPath, config.JettonPath, config.CollectionPath)
 
 	storageBlockCh := make(chan indexer.IDandBlock)
 
@@ -46,10 +44,9 @@ func main() {
 		log,
 		client,
 		litestorage.WithPreloadAccounts(cfg.App.Accounts),
-		litestorage.WithTFPools(book.TFPools()),
-		litestorage.WithKnownJettons(maps.Keys(book.GetKnownJettons())),
 		litestorage.WithBlockChannel(storageBlockCh),
 	)
+	book := addressbook.NewAddressBook(log, config.AddressPath, config.JettonPath, config.CollectionPath, storage)
 	// The executor is used to resolve DNS records.
 	tongo.SetDefaultExecutor(storage)
 
@@ -90,7 +87,7 @@ func main() {
 		storageBlockCh,
 	})
 
-	server, err := api.NewServer(log, h, fmt.Sprintf(":%d", cfg.API.Port),
+	server, err := api.NewServer(log, h,
 		api.WithTransactionSource(source),
 		api.WithBlockHeadersSource(source),
 		api.WithTraceSource(tracer),
@@ -110,5 +107,5 @@ func main() {
 	}()
 
 	log.Warn("start server", zap.Int("port", cfg.API.Port))
-	server.Run()
+	server.Run(fmt.Sprintf(":%d", cfg.API.Port), cfg.API.UnixSockets)
 }

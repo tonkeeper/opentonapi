@@ -18,7 +18,7 @@ import (
 	"github.com/tonkeeper/tongo/ton"
 )
 
-func (s *LiteStorage) GetJettonWalletsByOwnerAddress(ctx context.Context, address ton.AccountID, jetton *ton.AccountID) ([]core.JettonWallet, error) {
+func (s *LiteStorage) GetJettonWalletsByOwnerAddress(ctx context.Context, address ton.AccountID, jetton *ton.AccountID, isJettonMaster bool, mintless bool) ([]core.JettonWallet, error) {
 	timer := prometheus.NewTimer(prometheus.ObserverFunc(func(v float64) {
 		storageTimeHistogramVec.WithLabelValues("get_jetton_wallets_by_owner").Observe(v)
 	}))
@@ -160,7 +160,11 @@ func (s *LiteStorage) JettonMastersForWallets(ctx context.Context, wallets []ton
 
 func (s *LiteStorage) GetJettonMasters(ctx context.Context, limit, offset int) ([]core.JettonMaster, error) {
 	// TODO: implement
-	return nil, nil
+	return []core.JettonMaster{}, nil
+}
+
+func (s *LiteStorage) GetJettonMastersByAddresses(ctx context.Context, addresses []ton.AccountID) ([]core.JettonMaster, error) {
+	return []core.JettonMaster{}, nil
 }
 
 func (s *LiteStorage) GetJettonsHoldersCount(ctx context.Context, accountIDs []tongo.AccountID) (map[tongo.AccountID]int32, error) {
