@@ -20,7 +20,7 @@ func (h *Handler) GetAccountJettonsBalances(ctx context.Context, params oas.GetA
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
 	}
-	wallets, err := h.storage.GetJettonWalletsByOwnerAddress(ctx, account.ID, nil, slices.Contains(params.SupportedExtensions, "custom_payload"))
+	wallets, err := h.storage.GetJettonWalletsByOwnerAddress(ctx, account.ID, nil, true, slices.Contains(params.SupportedExtensions, "custom_payload"))
 	if errors.Is(err, core.ErrEntityNotFound) {
 		return &oas.JettonsBalances{}, nil
 	}
@@ -49,7 +49,7 @@ func (h *Handler) GetAccountJettonBalance(ctx context.Context, params oas.GetAcc
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
 	}
-	wallets, err := h.storage.GetJettonWalletsByOwnerAddress(ctx, account.ID, &jettonAccount.ID, slices.Contains(params.SupportedExtensions, "custom_payload"))
+	wallets, err := h.storage.GetJettonWalletsByOwnerAddress(ctx, account.ID, &jettonAccount.ID, true, slices.Contains(params.SupportedExtensions, "custom_payload"))
 	if errors.Is(err, core.ErrEntityNotFound) {
 		return nil, toError(http.StatusNotFound, err)
 	}
