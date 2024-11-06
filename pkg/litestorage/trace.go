@@ -72,6 +72,7 @@ func (s *LiteStorage) GetTrace(ctx context.Context, hash tongo.Bits256) (*core.T
 	s.logger.Info(fmt.Sprintf("Found transaction hash %s in cache", hash.Hex()))
 	root, err := s.findRoot(ctx, tx, 0)
 	if err != nil {
+		s.logger.Info(fmt.Sprintf("Transaction root not found: %s", err.Error()))
 		return nil, err
 	}
 	s.logger.Info(fmt.Sprintf("Found transaction root %s", root.Hash.Hex()))
@@ -100,7 +101,7 @@ func (s *LiteStorage) recursiveGetChildren(ctx context.Context, tx core.Transact
 			externalMessages = append(externalMessages, m)
 			continue
 		}
-		tx := s.searchTxInCache(*m.Destination, m.CreatedLt)
+		tx := s.searchChildTxInCache(m)
 		if tx == nil {
 			return core.Trace{}, core.ErrEntityNotFound
 		}
@@ -131,39 +132,39 @@ func (s *LiteStorage) findRoot(ctx context.Context, tx *core.Transaction, depth 
 		}
 		return tx, nil
 	}
-	source := *tx.InMsg.Source
-	createdLt := tx.InMsg.CreatedLt
-	tx = s.searchTxInCache(source, createdLt)
-	if tx == nil {
-		s.logger.Info(fmt.Sprintf("Didn't find transaction parent accountId: %s, createdLt: %d", source.String(), createdLt))
+	s.logger.Info(fmt.Sprintf("transaction is not root, Hash: %s, InMsgHash: %s, InMsgSource: %+s, InMsgDestination", tx.Hash.Hex(), tx.InMsg.Hash.Hex(), tx.InMsg.Source, tx.InMsg.Destination))
+	parentTx := s.searchParentTxInCache(*tx.InMsg)
+	if parentTx == nil {
+		s.logger.Info("Didn't find transaction parent")
 		return nil, core.ErrEntityNotFound
 	}
-	return s.findRoot(ctx, tx, depth+1)
+	s.logger.Info(fmt.Sprintf("Found transaction parent: %s", parentTx.Hash.Hex()))
+	return s.findRoot(ctx, parentTx, depth+1)
 }
 
-func (s *LiteStorage) searchTransactionNearBlock(ctx context.Context, a tongo.AccountID, lt uint64, blockID tongo.BlockID, back bool, depth int) (*core.Transaction, error) {
-	if depth > maxDepthLimit {
-		return nil, fmt.Errorf("can't find tx because of depth limit")
-	}
-	tx := s.searchTxInCache(a, lt)
-	if tx != nil {
-		return tx, nil
-	}
-	tx, err := s.searchTransactionInBlock(ctx, a, lt, blockID, back)
-	if err != nil {
-		if back {
-			blockID.Seqno--
-		} else {
-			blockID.Seqno++
-		}
-		tx, err = s.searchTransactionInBlock(ctx, a, lt, blockID, back)
-		if err != nil {
-			return nil, err
-		}
-	}
+// func (s *LiteStorage) searchTransactionNearBlock(ctx context.Context, a tongo.AccountID, lt uint64, blockID tongo.BlockID, back bool, depth int) (*core.Transaction, error) {
+// 	if depth > maxDepthLimit {
+// 		return nil, fmt.Errorf("can't find tx because of depth limit")
+// 	}
+// 	tx := s.searchTxInCache(a, lt)
+// 	if tx != nil {
+// 		return tx, nil
+// 	}
+// 	tx, err := s.searchTransactionInBlock(ctx, a, lt, blockID, back)
+// 	if err != nil {
+// 		if back {
+// 			blockID.Seqno--
+// 		} else {
+// 			blockID.Seqno++
+// 		}
+// 		tx, err = s.searchTransactionInBlock(ctx, a, lt, blockID, back)
+// 		if err != nil {
+// 			return nil, err
+// 		}
+// 	}
 
-	return tx, nil
-}
+// 	return tx, nil
+// }
 
 func (s *LiteStorage) searchTransactionInBlock(ctx context.Context, a tongo.AccountID, lt uint64, blockID tongo.BlockID, back bool) (*core.Transaction, error) {
 	blockIDExt, _, err := s.client.LookupBlock(ctx, blockID, 1, nil, nil)
