@@ -48,6 +48,7 @@ var knownContracts = map[ton.Bits256]abi.ContractInterface{
 	ton.MustParseHash("f3d7ca53493deedac28b381986a849403cbac3d2c584779af081065af0ac4b93"): abi.WalletV5Beta,
 	ton.MustParseHash("fe9530d3243853083ef2ef0b4c2908c0abf6fa1c31ea243aacaa5bf8c7d753f1"): abi.WalletV2R2,
 	ton.MustParseHash("feb5ff6820e2ff0d9483e7e0d62c817d846789fb4ae580c878866d959dabd5c0"): abi.WalletV4R2,
+	ton.MustParseHash("a760d629d5343e76d045017d9dc216fc8a307a8377815feb2b0a5c490e733486"): abi.JettonWallet,
 }
 
 const (
