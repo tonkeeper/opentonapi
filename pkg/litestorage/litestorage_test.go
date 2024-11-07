@@ -47,14 +47,14 @@ func TestLiteStorage_run(t *testing.T) {
 	for _, tt := range tests {
 		transactionsIndexByHashCache, err := NewCache[core.Transaction](10000)
 		require.NoError(t, err)
-		transactionsByInMsgLTCache, err := NewCache[string](10000)
+		// transactionsByInMsgLTCache, err := NewCache[string](10000)
 		require.NoError(t, err)
 		t.Run(tt.name, func(t *testing.T) {
 			s := &LiteStorage{
 				logger:                  zap.L(),
 				transactionsIndexByHash: transactionsIndexByHashCache,
-				transactionsByInMsgLT:   transactionsByInMsgLTCache,
-				trackingAccounts:        tt.trackingAccounts,
+				// transactionsByInMsgLT:   transactionsByInMsgLTCache,
+				trackingAccounts: tt.trackingAccounts,
 			}
 			ch := make(chan indexer.IDandBlock)
 			go s.run(ch)

@@ -12,6 +12,12 @@ type Filter struct {
 	Rules rules.Rules
 }
 
+func NewSpamFilter() *Filter {
+	return &Filter{
+		Rules: rules.GetDefaultRules(),
+	}
+}
+
 func (f Filter) CheckActions(actions []oas.Action, viewer *ton.AccountID) bool {
 	var comment string
 	for _, action := range actions {
@@ -42,10 +48,4 @@ func (f Filter) JettonTrust(address tongo.AccountID, symbol, name, image string)
 
 func (f Filter) NftTrust(address tongo.AccountID, collection *ton.AccountID, description, image string) core.TrustType {
 	return core.TrustNone
-}
-
-func NewSpamFilter() *Filter {
-	return &Filter{
-		Rules: rules.GetDefaultRules(),
-	}
 }

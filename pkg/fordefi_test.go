@@ -31,7 +31,7 @@ func mustNewLiteStorage(t *testing.T) *litestorage.LiteStorage {
 		nil,
 		litestorage.WithTrackAllAccounts(),
 		litestorage.WithTransactionsIndexByHash(mustNewCache[core.Transaction](t)),
-		litestorage.WithTransactionsByInMsgLT(mustNewCache[string](t)),
+		// litestorage.WithTransactionsByInMsgLT(mustNewCache[string](t)),
 		litestorage.WithTonApiClient(tonapi),
 	)
 	require.NoError(t, err)

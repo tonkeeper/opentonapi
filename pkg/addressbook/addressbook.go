@@ -5,10 +5,19 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"math/rand"
 	"net/http"
+	"regexp"
 	"sort"
+	"strings"
 	"sync"
 	"time"
+
+	"github.com/arnac-io/opentonapi/pkg/core"
+	imgGenerator "github.com/tonkeeper/opentonapi/pkg/image"
+	"github.com/tonkeeper/tongo/abi"
+	"github.com/tonkeeper/tongo/tlb"
+	"github.com/tonkeeper/tongo/ton"
 
 	"github.com/shopspring/decimal"
 	"github.com/shurcooL/graphql"
@@ -19,7 +28,6 @@ import (
 
 	"github.com/arnac-io/opentonapi/pkg/cache"
 	"github.com/arnac-io/opentonapi/pkg/oas"
-	"github.com/arnac-io/opentonapi/pkg/references"
 )
 
 // KnownAddress represents additional manually crafted information about a particular account in the blockchain.
@@ -35,7 +43,8 @@ type AttachedAccountType string
 
 const (
 	ManualAccountType        AttachedAccountType = "manual"
-	NftCollectionAccountType AttachedAccountType = "nft_collection"
+	NftCollectionAccountType AttachedAccountType = "collection"
+	NftItemAccountType       AttachedAccountType = "nft"
 	TonDomainAccountType     AttachedAccountType = "ton_domain"
 	TgDomainAccountType      AttachedAccountType = "tg_domain"
 	JettonSymbolAccountType  AttachedAccountType = "jetton_symbol"
@@ -46,7 +55,7 @@ const (
 type AttachedAccount struct {
 	Name       string              `json:"name"`
 	Preview    string              `json:"preview"`
-	Wallet     string              `json:"wallet"`
+	Wallet     ton.AccountID       `json:"wallet"`
 	Symbol     string              `json:"-"`
 	Type       AttachedAccountType `json:"-"`
 	Weight     int32               `json:"-"`
@@ -54,38 +63,25 @@ type AttachedAccount struct {
 	Normalized string              `json:"-"`
 }
 
-type JettonVerificationType string
-
-const (
-	Whitelist JettonVerificationType = "whitelist"
-	Blacklist JettonVerificationType = "blacklist"
-	None      JettonVerificationType = "none"
-)
-
 // KnownJetton represents additional manually crafted information about a particular jetton in the blockchain.
 type KnownJetton struct {
-	Name          string                 `json:"name"`
-	Verification  JettonVerificationType `json:"verification"`
-	Description   string                 `json:"description"`
-	Image         string                 `json:"image"`
-	Address       string                 `json:"address"`
-	Symbol        string                 `json:"symbol"`
-	MaxSupply     decimal.Decimal        `json:"max_supply"`
-	Websites      []string               `json:"websites,omitempty"`
-	Social        []string               `json:"social,omitempty"`
-	Coinmarketcap string                 `json:"coinmarketcap,omitempty"`
-	Coingecko     string                 `json:"coingecko,omitempty"`
+	Name          string          `json:"name"`
+	Verification  core.TrustType  `json:"verification"`
+	Description   string          `json:"description"`
+	Image         string          `json:"image"`
+	Address       string          `json:"address"`
+	Symbol        string          `json:"symbol"`
+	MaxSupply     decimal.Decimal `json:"max_supply"`
+	Websites      []string        `json:"websites,omitempty"`
+	Social        []string        `json:"social,omitempty"`
+	Coinmarketcap string          `json:"coinmarketcap,omitempty"`
+	Coingecko     string          `json:"coingecko,omitempty"`
 }
 
 // KnownCollection represents additional manually crafted information about a particular NFT collection in the blockchain.
 type KnownCollection struct {
-	Name        string   `json:"name"`
-	Description string   `json:"description"`
-	Address     string   `json:"address"`
-	MaxItems    int64    `json:"max_items"`
-	Websites    []string `json:"websites,omitempty"`
-	Social      []string `json:"social,omitempty"`
-	Approvers   []oas.NftApprovedByItem
+	Address   string `json:"address"`
+	Approvers []oas.NftApprovedByItem
 }
 
 type Option func(o *Options)
@@ -95,9 +91,12 @@ type Options struct {
 }
 
 type addresser interface {
-	IsWallet(a tongo.AccountID) (bool, error)
 	GetAddress(a tongo.AccountID) (KnownAddress, bool)
 	SearchAttachedAccounts(prefix string) []AttachedAccount
+}
+
+type accountsStatesSource interface {
+	AccountStatusAndInterfaces(a tongo.AccountID) (tlb.AccountStatus, []abi.ContractInterface, error)
 }
 
 func WithAdditionalAddressesSource(a addresser) Option {
@@ -110,8 +109,8 @@ func WithAdditionalAddressesSource(a addresser) Option {
 type Book struct {
 	addressers []addresser
 
+	states          accountsStatesSource
 	mu              sync.RWMutex
-	addresses       map[tongo.AccountID]KnownAddress
 	collections     map[tongo.AccountID]KnownCollection
 	jettons         map[tongo.AccountID]KnownJetton
 	tfPools         map[tongo.AccountID]TFPoolInfo
@@ -125,12 +124,6 @@ type TFPoolInfo struct {
 }
 
 func (b *Book) GetAddressInfoByAddress(a tongo.AccountID) (KnownAddress, bool) {
-	b.mu.RLock()
-	defer b.mu.RUnlock()
-
-	if a1, ok := b.addresses[a]; ok {
-		return a1, ok
-	}
 	for i := range b.addressers {
 		if a1, ok := b.addressers[i].GetAddress(a); ok {
 			return a1, ok
@@ -140,16 +133,32 @@ func (b *Book) GetAddressInfoByAddress(a tongo.AccountID) (KnownAddress, bool) {
 }
 
 func (b *Book) SearchAttachedAccountsByPrefix(prefix string) []AttachedAccount {
-	b.mu.RLock()
-	defer b.mu.RUnlock()
-
+	prefix = strings.ToLower(normalizeReg.ReplaceAllString(prefix, ""))
+	var accounts []AttachedAccount
 	for i := range b.addressers {
 		foundAccounts := b.addressers[i].SearchAttachedAccounts(prefix)
 		if len(foundAccounts) > 0 {
-			return foundAccounts
+			accounts = append(accounts, foundAccounts...)
 		}
 	}
-	return []AttachedAccount{}
+	tonDomainPrefix := prefix + "ton"
+	tgDomainPrefix := prefix + "tme"
+
+	for i := range accounts {
+		if accounts[i].Normalized == prefix || accounts[i].Normalized == tonDomainPrefix || accounts[i].Normalized == tgDomainPrefix {
+			accounts[i].Weight *= 100 // full match
+		}
+	}
+	sort.Slice(accounts, func(i, j int) bool {
+		if accounts[i].Weight == accounts[j].Weight {
+			return len(accounts[i].Name) < len(accounts[j].Name)
+		}
+		return accounts[i].Weight > accounts[j].Weight
+	})
+	if len(accounts) > 50 {
+		accounts = accounts[:50]
+	}
+	return accounts
 }
 
 func (b *Book) GetTFPoolInfo(a tongo.AccountID) (TFPoolInfo, bool) {
@@ -189,9 +198,9 @@ func (b *Book) GetJettonInfoByAddress(a tongo.AccountID) (KnownJetton, bool) {
 
 	j, ok := b.jettons[a]
 	if ok {
-		j.Verification = Whitelist
+		j.Verification = core.TrustWhitelist
 	} else {
-		j.Verification = None
+		j.Verification = core.TrustNone
 	}
 	return j, ok
 }
@@ -207,79 +216,177 @@ func (b *Book) IsWallet(addr tongo.AccountID) (bool, error) {
 	if wallet, ok := b.walletsResolved.Get(addr); ok {
 		return wallet, nil
 	}
-	for _, privateBook := range b.addressers {
-		isWallet, err := privateBook.IsWallet(addr)
-		if err != nil {
-			continue
+	status, interfaces, err := b.states.AccountStatusAndInterfaces(addr)
+	if err != nil {
+		return false, fmt.Errorf("failed to figure out if %v is a wallet %w", addr, err)
+	}
+	if status == tlb.AccountNone || status == tlb.AccountUninit {
+		b.walletsResolved.Set(addr, true, cache.WithExpiration(time.Minute)) //shorter period for non-existing accounts
+		return true, nil
+	}
+	isWallet := false
+	for _, i := range interfaces {
+		if i.Implements(abi.Wallet) {
+			isWallet = true
+			break
 		}
-		b.walletsResolved.Set(addr, isWallet, cache.WithExpiration(time.Minute*15))
-		return isWallet, nil
 	}
-	return false, fmt.Errorf("failed to figure out if %v is a wallet", addr)
+	b.walletsResolved.Set(addr, isWallet, cache.WithExpiration(time.Hour))
+	return isWallet, nil
 }
 
-func NewAddressBook(logger *zap.Logger, addressPath, jettonPath, collectionPath string, opts ...Option) *Book {
-	var options Options
-	for _, opt := range opts {
-		opt(&options)
-	}
-	addresses := make(map[tongo.AccountID]KnownAddress)
-	collections := make(map[tongo.AccountID]KnownCollection)
-	jettons := make(map[tongo.AccountID]KnownJetton)
-	tfPools := make(map[tongo.AccountID]TFPoolInfo)
-
-	book := &Book{
-		addresses:       addresses,
-		collections:     collections,
-		jettons:         jettons,
-		tfPools:         tfPools,
-		addressers:      options.addressers,
-		walletsResolved: cache.NewLRUCache[tongo.AccountID, bool](200_000, "is_wallet"),
-	}
-
-	go func() {
-		for {
-			book.refresh(logger, addressPath, jettonPath, collectionPath)
-			time.Sleep(time.Minute * 10)
-		}
-	}()
-
-	go book.getGGWhitelist(logger)
-	go book.getTonDiamondsWhitelist()
-
-	return book
+type manyalAddresser struct {
+	mu        sync.RWMutex
+	addresses map[tongo.AccountID]KnownAddress
+	sorted    []AttachedAccount
 }
 
-func (b *Book) refresh(logger *zap.Logger, addressPath, jettonPath, collectionPath string) {
-	go b.refreshAddresses(logger, addressPath)
-	go b.refreshJettons(logger, jettonPath)
-	go b.refreshCollections(logger, collectionPath)
-	go b.refreshTfPools(logger)
+func (m *manyalAddresser) GetAddress(a tongo.AccountID) (KnownAddress, bool) {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+	addr, ok := m.addresses[a]
+	return addr, ok
 }
 
-func (b *Book) refreshAddresses(logger *zap.Logger, addressPath string) {
+func (m *manyalAddresser) SearchAttachedAccounts(prefix string) []AttachedAccount {
+	m.mu.RLock()
+	sortedList := m.sorted
+	m.mu.RUnlock()
+	startIdx, endIdx := findIndexes(sortedList, prefix)
+	if startIdx == -1 || endIdx == -1 {
+		return nil
+	}
+	foundAccounts := make([]AttachedAccount, endIdx-startIdx+1)
+	copy(foundAccounts, sortedList[startIdx:endIdx+1])
+	return foundAccounts
+}
+
+var normalizeReg = regexp.MustCompile("[^\\p{L}\\p{N}]")
+
+func (m *manyalAddresser) refreshAddresses(addressPath string) error {
 	addresses, err := downloadJson[KnownAddress](addressPath)
 	if err != nil {
-		logger.Warn("failed to load accounts.json")
-		return
+		return err
 	}
-	b.mu.Lock()
-	defer b.mu.Unlock()
+	newAddresses := make(map[tongo.AccountID]KnownAddress, len(addresses))
+	newSorted := []AttachedAccount{
+		{Name: "The Locker", Wallet: ton.MustParseAccountID("EQDtFpEwcFAEcRe5mLVh2N6C0x-_hJEM7W61_JLnSF74p4q2"), Normalized: "locker", Weight: 1000},
+		{Name: "The Locker", Wallet: ton.MustParseAccountID("EQDtFpEwcFAEcRe5mLVh2N6C0x-_hJEM7W61_JLnSF74p4q2"), Normalized: "thelocker", Weight: 10000},
+		{Name: "Ton Foundation", Wallet: ton.MustParseAccountID("EQCLyZHP4Xe8fpchQz76O-_RmUhaVc_9BAoGyJrwJrcbz2eZ"), Normalized: "foundation", Weight: 1000},
+	}
 	for _, item := range addresses {
 		account, err := tongo.ParseAddress(item.Address)
 		if err != nil {
 			continue
 		}
 		item.Address = account.ID.ToRaw()
-		b.addresses[account.ID] = item
+		newAddresses[account.ID] = item
+		var preview string
+		if item.Image != "" {
+			preview = imgGenerator.DefaultGenerator.GenerateImageUrl(item.Image, 200, 200)
+		}
+		newSorted = append(newSorted, AttachedAccount{
+			Name:       item.Name,
+			Preview:    preview,
+			Wallet:     account.ID,
+			Type:       ManualAccountType,
+			Weight:     1000,
+			Popular:    1,
+			Normalized: strings.ToLower(normalizeReg.ReplaceAllString(item.Name, "")),
+		})
+	}
+	sort.Slice(newSorted, func(i, j int) bool {
+		return newSorted[i].Normalized < newSorted[j].Normalized
+	})
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	m.addresses = newAddresses
+	m.sorted = newSorted
+	return nil
+}
+
+func findIndexes(sortedList []AttachedAccount, prefix string) (int, int) {
+	low := 0
+	high := len(sortedList) - 1
+	startIdx := -1
+	for low <= high { // Find the starting index
+		med := (low + high) / 2
+		if strings.HasPrefix(sortedList[med].Normalized, prefix) {
+			startIdx = med
+			high = med - 1
+		} else if sortedList[med].Normalized < prefix {
+			low = med + 1
+		} else {
+			high = med - 1
+		}
+	}
+
+	if startIdx == -1 { // Prefix not found
+		return -1, -1
+	}
+
+	low = startIdx
+	high = len(sortedList) - 1
+	endIdx := -1
+	for low <= high { // Find the ending index
+		med := (low + high) / 2
+		if strings.HasPrefix(sortedList[med].Normalized, prefix) {
+			endIdx = med
+			low = med + 1
+		} else {
+			high = med - 1
+		}
+	}
+
+	return startIdx, endIdx
+}
+
+func NewAddressBook(logger *zap.Logger, addressPath, jettonPath, collectionPath string, storage accountsStatesSource, opts ...Option) *Book {
+	var manual = &manyalAddresser{
+		addresses: make(map[tongo.AccountID]KnownAddress),
+	}
+	options := Options{addressers: []addresser{manual}}
+	for _, opt := range opts {
+		opt(&options)
+	}
+	collections := make(map[tongo.AccountID]KnownCollection)
+	jettons := make(map[tongo.AccountID]KnownJetton)
+	tfPools := make(map[tongo.AccountID]TFPoolInfo)
+
+	book := &Book{
+		states:          storage,
+		collections:     collections,
+		jettons:         jettons,
+		tfPools:         tfPools,
+		addressers:      options.addressers,
+		walletsResolved: cache.NewLRUCache[tongo.AccountID, bool](1_000_000, "is_wallet"),
+	}
+
+	go refresher("gg whitelist", time.Hour, 5*time.Minute, logger, book.getGGWhitelist)
+	go refresher("addresses", time.Minute*15, 5*time.Minute, logger, func() error { return manual.refreshAddresses(addressPath) })
+	go refresher("jettons", time.Minute*15, 5*time.Minute, logger, func() error { return book.refreshJettons(jettonPath) })
+	go refresher("collections", time.Minute*15, 5*time.Minute, logger, func() error { return book.refreshCollections(collectionPath) })
+	book.refreshTfPools(logger) //hardcoded so don't need to be refreshed
+
+	return book
+}
+
+func refresher(name string, interval, errorInterval time.Duration, logger *zap.Logger, f func() error) {
+	for {
+		err := f()
+		if err != nil {
+			logger.Error("refresh "+name, zap.Error(err))
+			time.Sleep(errorInterval + time.Duration(rand.Intn(10))*time.Second)
+			continue
+		}
+		time.Sleep(interval + time.Duration(rand.Intn(10))*time.Second)
 	}
 }
 
-func (b *Book) refreshJettons(logger *zap.Logger, jettonPath string) {
+func (b *Book) refreshJettons(jettonPath string) error {
 	jettons, err := downloadJson[KnownJetton](jettonPath)
 	if err != nil {
-		logger.Warn("failed to load jettons.json")
-		return
+		return err
 	}
 	b.mu.Lock()
 	defer b.mu.Unlock()
@@ -289,26 +396,15 @@ func (b *Book) refreshJettons(logger *zap.Logger, jettonPath string) {
 			continue
 		}
 		item.Address = account.ID.ToRaw()
-		b.addresses[account.ID] = KnownAddress{
-			Name:    item.Symbol + " master",
-			Address: account.ID.ToRaw(),
-		}
 		b.jettons[account.ID] = item
 	}
+	return nil
 }
 
-func unique(approvers []oas.NftApprovedByItem) []oas.NftApprovedByItem {
-	sort.Slice(approvers, func(i, j int) bool {
-		return approvers[i] < approvers[j]
-	})
-	return slices.Compact(approvers)
-}
-
-func (b *Book) refreshCollections(logger *zap.Logger, collectionPath string) {
+func (b *Book) refreshCollections(collectionPath string) error {
 	collections, err := downloadJson[KnownCollection](collectionPath)
 	if err != nil {
-		logger.Warn("fail to load collections.json")
-		return
+		return err
 	}
 	b.mu.Lock()
 	defer b.mu.Unlock()
@@ -321,15 +417,18 @@ func (b *Book) refreshCollections(logger *zap.Logger, collectionPath string) {
 		currentCollection, ok := b.collections[account.ID]
 		if !ok {
 			// this is a new item, so we only add tonkeeper as approver.
-			item.Address = account.ID.ToRaw()
-			item.Approvers = unique(append(item.Approvers, oas.NftApprovedByItemTonkeeper))
-			b.collections[account.ID] = item
+			currentCollection.Address = account.ID.ToRaw()
+			currentCollection.Approvers = []oas.NftApprovedByItem{oas.NftApprovedByItemTonkeeper}
+			b.collections[account.ID] = currentCollection
 			continue
 		}
 		// this is an existing item, so we merge approvers and remove duplicates adding tonkeeper.
-		item.Approvers = unique(append(append(currentCollection.Approvers, item.Approvers...), oas.NftApprovedByItemTonkeeper))
-		b.collections[account.ID] = item
+		if !slices.Contains(currentCollection.Approvers, oas.NftApprovedByItemTonkeeper) {
+			currentCollection.Approvers = append(item.Approvers, oas.NftApprovedByItemTonkeeper)
+			b.collections[account.ID] = currentCollection
+		}
 	}
+	return nil
 }
 
 func (b *Book) refreshTfPools(logger *zap.Logger) {
@@ -367,47 +466,30 @@ func downloadJson[T any](url string) ([]T, error) {
 	return data, nil
 }
 
-func (b *Book) getGGWhitelist(logger *zap.Logger) {
-	for {
-		if len(b.GetKnownCollections()) == 0 {
-			time.Sleep(time.Second * 10)
+func (b *Book) getGGWhitelist() error {
+	addresses, err := fetchGetGemsVerifiedCollections()
+	if err != nil {
+		return err
+	}
+	b.mu.Lock()
+	defer b.mu.Unlock()
+	for _, account := range addresses {
+		collection, ok := b.collections[account]
+		if !ok {
+			collection.Address = account.ToRaw()
+			collection.Approvers = []oas.NftApprovedByItem{oas.NftApprovedByItemGetgems}
+			b.collections[account] = collection
 			continue
 		}
-		addresses, err := FetchGetGemsVerifiedCollections()
-		if err != nil {
-			logger.Warn(fmt.Sprintf("get nft collection whitelist: %v", err))
-			time.Sleep(time.Minute * 3)
-			continue
-		}
-		b.mu.Lock()
-		for _, account := range addresses {
-			collection := b.collections[account]
-			collection.Approvers = unique(append(collection.Approvers, oas.NftApprovedByItemGetgems))
+		if !slices.Contains(collection.Approvers, oas.NftApprovedByItemGetgems) {
+			collection.Approvers = append(collection.Approvers, oas.NftApprovedByItemGetgems)
 			b.collections[account] = collection
 		}
-		b.mu.Unlock()
-		return
 	}
+	return nil
 }
 
-func (b *Book) getTonDiamondsWhitelist() {
-	for {
-		if len(b.GetKnownCollections()) == 0 {
-			time.Sleep(time.Second * 10)
-			continue
-		}
-		b.mu.Lock()
-		for _, account := range references.TonDiamondsCollections {
-			collection := b.collections[account]
-			collection.Approvers = unique(append(collection.Approvers, oas.NftApprovedByItemTonDiamonds))
-			b.collections[account] = collection
-		}
-		b.mu.Unlock()
-		return
-	}
-}
-
-func FetchGetGemsVerifiedCollections() ([]tongo.AccountID, error) {
+func fetchGetGemsVerifiedCollections() ([]tongo.AccountID, error) {
 	client := graphql.NewClient("https://api.getgems.io/graphql", nil)
 	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
 	defer cancel()

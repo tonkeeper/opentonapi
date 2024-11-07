@@ -4,7 +4,7 @@
        "NftPurchase": {
          "Nft": "0:62abd9cb04accd71441a61ceb6d48d62c3323f4aa2aed89caf3e3ffaff6c9829",
          "Buyer": "0:d8cd999fb2b1b384e6ca254c3883375e23111a8b78c015b886286c31bf11e29d",
-         "Seller": "0:0000000000000000000000000000000000000000000000000000000000000000",
+         "Seller": "0:6e9ae2fdb2c10e52b6711a64e0798e6a6c7187d42c1e1fbfdb2b2e9d1173e0c1",
          "AuctionType": "DNS.tg",
          "Price": 4500000000000
        },

@@ -690,6 +690,23 @@ func decodeGetAccountDiffParams(args [1]string, argsEscaped bool, r *http.Reques
 			}); err != nil {
 				return err
 			}
+			if err := func() error {
+				if err := (validate.Int{
+					MinSet:        false,
+					Min:           0,
+					MaxSet:        true,
+					Max:           2114380800,
+					MinExclusive:  false,
+					MaxExclusive:  false,
+					MultipleOfSet: false,
+					MultipleOf:    0,
+				}).Validate(int64(params.StartDate)); err != nil {
+					return errors.Wrap(err, "int")
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
 		} else {
 			return validate.ErrFieldRequired
 		}
@@ -724,6 +741,23 @@ func decodeGetAccountDiffParams(args [1]string, argsEscaped bool, r *http.Reques
 				params.EndDate = c
 				return nil
 			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if err := (validate.Int{
+					MinSet:        false,
+					Min:           0,
+					MaxSet:        true,
+					Max:           2114380800,
+					MinExclusive:  false,
+					MaxExclusive:  false,
+					MultipleOfSet: false,
+					MultipleOf:    0,
+				}).Validate(int64(params.EndDate)); err != nil {
+					return errors.Wrap(err, "int")
+				}
+				return nil
+			}(); err != nil {
 				return err
 			}
 		} else {
@@ -1514,6 +1548,30 @@ func decodeGetAccountEventsParams(args [1]string, argsEscaped bool, r *http.Requ
 			}); err != nil {
 				return err
 			}
+			if err := func() error {
+				if value, ok := params.StartDate.Get(); ok {
+					if err := func() error {
+						if err := (validate.Int{
+							MinSet:        false,
+							Min:           0,
+							MaxSet:        true,
+							Max:           2114380800,
+							MinExclusive:  false,
+							MaxExclusive:  false,
+							MultipleOfSet: false,
+							MultipleOf:    0,
+						}).Validate(int64(value)); err != nil {
+							return errors.Wrap(err, "int")
+						}
+						return nil
+					}(); err != nil {
+						return err
+					}
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
 		}
 		return nil
 	}(); err != nil {
@@ -1553,6 +1611,30 @@ func decodeGetAccountEventsParams(args [1]string, argsEscaped bool, r *http.Requ
 				params.EndDate.SetTo(paramsDotEndDateVal)
 				return nil
 			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if value, ok := params.EndDate.Get(); ok {
+					if err := func() error {
+						if err := (validate.Int{
+							MinSet:        false,
+							Min:           0,
+							MaxSet:        true,
+							Max:           2114380800,
+							MinExclusive:  false,
+							MaxExclusive:  false,
+							MultipleOfSet: false,
+							MultipleOf:    0,
+						}).Validate(int64(value)); err != nil {
+							return errors.Wrap(err, "int")
+						}
+						return nil
+					}(); err != nil {
+						return err
+					}
+				}
+				return nil
+			}(); err != nil {
 				return err
 			}
 		}
@@ -2363,6 +2445,8 @@ type GetAccountJettonBalanceParams struct {
 	JettonID string
 	// Accept ton and all possible fiat currencies, separated by commas.
 	Currencies []string
+	// Comma separated list supported extensions.
+	SupportedExtensions []string
 }
 
 func unpackGetAccountJettonBalanceParams(packed middleware.Parameters) (params GetAccountJettonBalanceParams) {
@@ -2387,6 +2471,15 @@ func unpackGetAccountJettonBalanceParams(packed middleware.Parameters) (params G
 		}
 		if v, ok := packed[key]; ok {
 			params.Currencies = v.([]string)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "supported_extensions",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.SupportedExtensions = v.([]string)
 		}
 	}
 	return params
@@ -2523,6 +2616,49 @@ func decodeGetAccountJettonBalanceParams(args [2]string, argsEscaped bool, r *ht
 	}(); err != nil {
 		return params, &ogenerrors.DecodeParamError{
 			Name: "currencies",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Decode query: supported_extensions.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "supported_extensions",
+			Style:   uri.QueryStyleForm,
+			Explode: false,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				return d.DecodeArray(func(d uri.Decoder) error {
+					var paramsDotSupportedExtensionsVal string
+					if err := func() error {
+						val, err := d.DecodeValue()
+						if err != nil {
+							return err
+						}
+
+						c, err := conv.ToString(val)
+						if err != nil {
+							return err
+						}
+
+						paramsDotSupportedExtensionsVal = c
+						return nil
+					}(); err != nil {
+						return err
+					}
+					params.SupportedExtensions = append(params.SupportedExtensions, paramsDotSupportedExtensionsVal)
+					return nil
+				})
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "supported_extensions",
 			In:   "query",
 			Err:  err,
 		}
@@ -2868,6 +3004,30 @@ func decodeGetAccountJettonHistoryByIDParams(args [2]string, argsEscaped bool, r
 			}); err != nil {
 				return err
 			}
+			if err := func() error {
+				if value, ok := params.StartDate.Get(); ok {
+					if err := func() error {
+						if err := (validate.Int{
+							MinSet:        false,
+							Min:           0,
+							MaxSet:        true,
+							Max:           2114380800,
+							MinExclusive:  false,
+							MaxExclusive:  false,
+							MultipleOfSet: false,
+							MultipleOf:    0,
+						}).Validate(int64(value)); err != nil {
+							return errors.Wrap(err, "int")
+						}
+						return nil
+					}(); err != nil {
+						return err
+					}
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
 		}
 		return nil
 	}(); err != nil {
@@ -2907,6 +3067,30 @@ func decodeGetAccountJettonHistoryByIDParams(args [2]string, argsEscaped bool, r
 				params.EndDate.SetTo(paramsDotEndDateVal)
 				return nil
 			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if value, ok := params.EndDate.Get(); ok {
+					if err := func() error {
+						if err := (validate.Int{
+							MinSet:        false,
+							Min:           0,
+							MaxSet:        true,
+							Max:           2114380800,
+							MinExclusive:  false,
+							MaxExclusive:  false,
+							MultipleOfSet: false,
+							MultipleOf:    0,
+						}).Validate(int64(value)); err != nil {
+							return errors.Wrap(err, "int")
+						}
+						return nil
+					}(); err != nil {
+						return err
+					}
+				}
+				return nil
+			}(); err != nil {
 				return err
 			}
 		}
@@ -3380,6 +3564,30 @@ func decodeGetAccountJettonsHistoryParams(args [1]string, argsEscaped bool, r *h
 			}); err != nil {
 				return err
 			}
+			if err := func() error {
+				if value, ok := params.StartDate.Get(); ok {
+					if err := func() error {
+						if err := (validate.Int{
+							MinSet:        false,
+							Min:           0,
+							MaxSet:        true,
+							Max:           2114380800,
+							MinExclusive:  false,
+							MaxExclusive:  false,
+							MultipleOfSet: false,
+							MultipleOf:    0,
+						}).Validate(int64(value)); err != nil {
+							return errors.Wrap(err, "int")
+						}
+						return nil
+					}(); err != nil {
+						return err
+					}
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
 		}
 		return nil
 	}(); err != nil {
@@ -3419,6 +3627,30 @@ func decodeGetAccountJettonsHistoryParams(args [1]string, argsEscaped bool, r *h
 				params.EndDate.SetTo(paramsDotEndDateVal)
 				return nil
 			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if value, ok := params.EndDate.Get(); ok {
+					if err := func() error {
+						if err := (validate.Int{
+							MinSet:        false,
+							Min:           0,
+							MaxSet:        true,
+							Max:           2114380800,
+							MinExclusive:  false,
+							MaxExclusive:  false,
+							MultipleOfSet: false,
+							MultipleOf:    0,
+						}).Validate(int64(value)); err != nil {
+							return errors.Wrap(err, "int")
+						}
+						return nil
+					}(); err != nil {
+						return err
+					}
+				}
+				return nil
+			}(); err != nil {
 				return err
 			}
 		}
@@ -3783,6 +4015,30 @@ func decodeGetAccountNftHistoryParams(args [1]string, argsEscaped bool, r *http.
 			}); err != nil {
 				return err
 			}
+			if err := func() error {
+				if value, ok := params.StartDate.Get(); ok {
+					if err := func() error {
+						if err := (validate.Int{
+							MinSet:        false,
+							Min:           0,
+							MaxSet:        true,
+							Max:           2114380800,
+							MinExclusive:  false,
+							MaxExclusive:  false,
+							MultipleOfSet: false,
+							MultipleOf:    0,
+						}).Validate(int64(value)); err != nil {
+							return errors.Wrap(err, "int")
+						}
+						return nil
+					}(); err != nil {
+						return err
+					}
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
 		}
 		return nil
 	}(); err != nil {
@@ -3822,6 +4078,30 @@ func decodeGetAccountNftHistoryParams(args [1]string, argsEscaped bool, r *http.
 				params.EndDate.SetTo(paramsDotEndDateVal)
 				return nil
 			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if value, ok := params.EndDate.Get(); ok {
+					if err := func() error {
+						if err := (validate.Int{
+							MinSet:        false,
+							Min:           0,
+							MaxSet:        true,
+							Max:           2114380800,
+							MinExclusive:  false,
+							MaxExclusive:  false,
+							MultipleOfSet: false,
+							MultipleOf:    0,
+						}).Validate(int64(value)); err != nil {
+							return errors.Wrap(err, "int")
+						}
+						return nil
+					}(); err != nil {
+						return err
+					}
+				}
+				return nil
+			}(); err != nil {
 				return err
 			}
 		}
@@ -5915,6 +6195,30 @@ func decodeGetChartRatesParams(args [0]string, argsEscaped bool, r *http.Request
 			}); err != nil {
 				return err
 			}
+			if err := func() error {
+				if value, ok := params.StartDate.Get(); ok {
+					if err := func() error {
+						if err := (validate.Int{
+							MinSet:        false,
+							Min:           0,
+							MaxSet:        true,
+							Max:           2114380800,
+							MinExclusive:  false,
+							MaxExclusive:  false,
+							MultipleOfSet: false,
+							MultipleOf:    0,
+						}).Validate(int64(value)); err != nil {
+							return errors.Wrap(err, "int")
+						}
+						return nil
+					}(); err != nil {
+						return err
+					}
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
 		}
 		return nil
 	}(); err != nil {
@@ -5954,6 +6258,30 @@ func decodeGetChartRatesParams(args [0]string, argsEscaped bool, r *http.Request
 				params.EndDate.SetTo(paramsDotEndDateVal)
 				return nil
 			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if value, ok := params.EndDate.Get(); ok {
+					if err := func() error {
+						if err := (validate.Int{
+							MinSet:        false,
+							Min:           0,
+							MaxSet:        true,
+							Max:           2114380800,
+							MinExclusive:  false,
+							MaxExclusive:  false,
+							MultipleOfSet: false,
+							MultipleOf:    0,
+						}).Validate(int64(value)); err != nil {
+							return errors.Wrap(err, "int")
+						}
+						return nil
+					}(); err != nil {
+						return err
+					}
+				}
+				return nil
+			}(); err != nil {
 				return err
 			}
 		}
@@ -8165,6 +8493,30 @@ func decodeGetNftHistoryByIDParams(args [1]string, argsEscaped bool, r *http.Req
 			}); err != nil {
 				return err
 			}
+			if err := func() error {
+				if value, ok := params.StartDate.Get(); ok {
+					if err := func() error {
+						if err := (validate.Int{
+							MinSet:        false,
+							Min:           0,
+							MaxSet:        true,
+							Max:           2114380800,
+							MinExclusive:  false,
+							MaxExclusive:  false,
+							MultipleOfSet: false,
+							MultipleOf:    0,
+						}).Validate(int64(value)); err != nil {
+							return errors.Wrap(err, "int")
+						}
+						return nil
+					}(); err != nil {
+						return err
+					}
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
 		}
 		return nil
 	}(); err != nil {
@@ -8204,6 +8556,30 @@ func decodeGetNftHistoryByIDParams(args [1]string, argsEscaped bool, r *http.Req
 				params.EndDate.SetTo(paramsDotEndDateVal)
 				return nil
 			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if value, ok := params.EndDate.Get(); ok {
+					if err := func() error {
+						if err := (validate.Int{
+							MinSet:        false,
+							Min:           0,
+							MaxSet:        true,
+							Max:           2114380800,
+							MinExclusive:  false,
+							MaxExclusive:  false,
+							MultipleOfSet: false,
+							MultipleOf:    0,
+						}).Validate(int64(value)); err != nil {
+							return errors.Wrap(err, "int")
+						}
+						return nil
+					}(); err != nil {
+						return err
+					}
+				}
+				return nil
+			}(); err != nil {
 				return err
 			}
 		}

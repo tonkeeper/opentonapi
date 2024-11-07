@@ -2,7 +2,6 @@ package api
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"math"
 	"net/http"
@@ -65,11 +64,11 @@ func (h *Handler) GetChartRates(ctx context.Context, params oas.GetChartRatesPar
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
-	bytesResp, err := json.Marshal(charts)
-	if err != nil {
-		return nil, toError(http.StatusInternalServerError, err)
+	points := make([]oas.ChartPoints, 0, len(charts))
+	for _, chart := range charts {
+		points = append(points, oas.ChartPoints{V0: chart.Timestamp, V1: chart.Price})
 	}
-	return &oas.GetChartRatesOK{Points: bytesResp}, nil
+	return &oas.GetChartRatesOK{Points: points}, nil
 }
 
 func (h *Handler) GetRates(ctx context.Context, params oas.GetRatesParams) (*oas.GetRatesOK, error) {

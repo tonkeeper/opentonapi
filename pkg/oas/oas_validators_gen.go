@@ -1747,6 +1747,29 @@ func (s BouncePhaseType) Validate() error {
 	}
 }
 
+func (s *ChartPoints) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if err := (validate.Float{}).Validate(float64(s.V1)); err != nil {
+			return errors.Wrap(err, "float")
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "V1",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
 func (s *ComputePhase) Validate() error {
 	if s == nil {
 		return validate.ErrNilPointer
@@ -1886,6 +1909,24 @@ func (s *DecodedMessageExtInMsgDecoded) Validate() error {
 		})
 	}
 	if err := func() error {
+		if value, ok := s.WalletV5.Get(); ok {
+			if err := func() error {
+				if err := value.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "wallet_v5",
+			Error: err,
+		})
+	}
+	if err := func() error {
 		if value, ok := s.WalletHighloadV2.Get(); ok {
 			if err := func() error {
 				if err := value.Validate(); err != nil {
@@ -1956,6 +1997,29 @@ func (s *DecodedMessageExtInMsgDecodedWalletV3) Validate() error {
 }
 
 func (s *DecodedMessageExtInMsgDecodedWalletV4) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if s.RawMessages == nil {
+			return errors.New("nil is invalid value")
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "raw_messages",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s *DecodedMessageExtInMsgDecodedWalletV5) Validate() error {
 	if s == nil {
 		return validate.ErrNilPointer
 	}
@@ -2359,6 +2423,46 @@ func (s GetBlockchainAccountTransactionsSortOrder) Validate() error {
 	}
 }
 
+func (s *GetChartRatesOK) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if s.Points == nil {
+			return errors.New("nil is invalid value")
+		}
+		var failures []validate.FieldError
+		for i, elem := range s.Points {
+			if err := func() error {
+				if err := elem.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				failures = append(failures, validate.FieldError{
+					Name:  fmt.Sprintf("[%d]", i),
+					Error: err,
+				})
+			}
+		}
+		if len(failures) > 0 {
+			return &validate.Error{Fields: failures}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "points",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
 func (s GetInscriptionOpTemplateOperation) Validate() error {
 	switch s {
 	case "transfer":
@@ -2377,6 +2481,29 @@ func (s GetInscriptionOpTemplateType) Validate() error {
 	default:
 		return errors.Errorf("invalid value: %v", s)
 	}
+}
+
+func (s *GetJettonInfosByAddressesReq) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if s.AccountIds == nil {
+			return errors.New("nil is invalid value")
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "account_ids",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
 }
 
 func (s *GetMarketsRatesOK) Validate() error {
@@ -2410,6 +2537,29 @@ func (s *GetMarketsRatesOK) Validate() error {
 	}(); err != nil {
 		failures = append(failures, validate.FieldError{
 			Name:  "markets",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s *GetNftCollectionItemsByAddressesReq) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if s.AccountIds == nil {
+			return errors.New("nil is invalid value")
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "account_ids",
 			Error: err,
 		})
 	}
@@ -3615,6 +3765,17 @@ func (s *MultisigOrder) Validate() error {
 			Error: err,
 		})
 	}
+	if err := func() error {
+		if s.SignedBy == nil {
+			return errors.New("nil is invalid value")
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "signed_by",
+			Error: err,
+		})
+	}
 	if len(failures) > 0 {
 		return &validate.Error{Fields: failures}
 	}
@@ -3691,8 +3852,6 @@ func (s NftApprovedByItem) Validate() error {
 	case "getgems":
 		return nil
 	case "tonkeeper":
-		return nil
-	case "ton.diamonds":
 		return nil
 	default:
 		return errors.Errorf("invalid value: %v", s)

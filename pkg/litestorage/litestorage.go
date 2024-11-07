@@ -379,7 +379,13 @@ func (s *LiteStorage) preloadAccount(a tongo.AccountID) error {
 		return err
 	}
 	for _, tx := range accountTxs {
-		t, err := core.ConvertTransaction(a.Workchain, tx)
+		inspector := abi.NewContractInspector(abi.InspectWithLibraryResolver(s))
+		account, err := s.GetRawAccount(ctx, a)
+		if err != nil {
+			return err
+		}
+		cd, err := inspector.InspectContract(ctx, account.Code, s.executor, a)
+		t, err := core.ConvertTransaction(a.Workchain, tx, cd)
 		if err != nil {
 			return err
 		}
@@ -408,7 +414,7 @@ func (s *LiteStorage) preloadBlock(id tongo.BlockID) error {
 		// 	Workchain: extID.Workchain,
 		// 	Address:   tx.AccountAddr,
 		// }
-		t, err := core.ConvertTransaction(extID.Workchain, tongo.Transaction{Transaction: *tx, BlockID: extID})
+		t, err := core.ConvertTransaction(extID.Workchain, tongo.Transaction{Transaction: *tx, BlockID: extID}, nil)
 		if err != nil {
 			return err
 		}
@@ -611,7 +617,7 @@ func (s *LiteStorage) GetAccountTransactions(ctx context.Context, id tongo.Accou
 	}
 	result := make([]*core.Transaction, len(txs))
 	for i := range txs {
-		tx, err := core.ConvertTransaction(id.Workchain, txs[i])
+		tx, err := core.ConvertTransaction(id.Workchain, txs[i], nil)
 		if err != nil {
 			return nil, err
 		}
