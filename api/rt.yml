@@ -87,6 +87,23 @@ paths:
                     type: string
         'default':
           $ref: '#/components/responses/Error'
+  /webhooks/{webhook_id}/back-online:
+    post:
+      description: "Let TONAPI know that webhook is ready to receive notifications after it has been unavailable"
+      operationId: webhookBackOnline
+      parameters:
+        - $ref: '#/components/parameters/tokenQuery'
+        - $ref: '#/components/parameters/webhookId'
+      responses:
+        '200':
+          description: ""
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                example: { }
+        'default':
+          $ref: '#/components/responses/Error'
   /webhooks/{webhook_id}/account-tx/subscribe:
     post:
       description: "subscribe to notifications for a particular set of accounts"
