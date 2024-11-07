@@ -336,7 +336,12 @@ components:
             - id
             - endpoint
             - token
+            - status
+            - status_updated_at
+            - last_online_at
+            - status_failed_attempts
             - subscribed_accounts
+            - subscribed_to_mempool
             properties:
               id:
                 type: integer
@@ -346,6 +351,21 @@ components:
               token:
                 type: string
               subscribed_accounts:
+                type: integer
+              subscribed_to_mempool:
+                type: boolean
+              status:
+                type: string
+                enum:
+                  - online
+                  - offline
+              status_updated_at:
+                type: string
+                format: date-time
+              last_online_at:
+                type: string
+                format: date-time
+              status_failed_attempts:
                 type: integer
     WebhookAccountTxSubscriptions:
       type: object
