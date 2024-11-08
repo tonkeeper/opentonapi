@@ -219,7 +219,6 @@ func (h *Handler) GetAccountEvents(ctx context.Context, params oas.GetAccountEve
 	events := make([]oas.AccountEvent, 0, len(traceIDs))
 
 	var lastLT uint64
-	var skippedInProgress []ton.Bits256
 	for _, traceID := range traceIDs {
 		lastLT = traceID.Lt
 		trace, err := h.storage.GetTrace(ctx, traceID.Hash)
@@ -229,10 +228,6 @@ func (h *Handler) GetAccountEvents(ctx context.Context, params oas.GetAccountEve
 			} else {
 				events = append(events, h.toUnknownAccountEvent(account.ID, traceID))
 			}
-			continue
-		}
-		if trace.InProgress() {
-			skippedInProgress = append(skippedInProgress, traceID.Hash)
 			continue
 		}
 		actions, err := bath.FindActions(ctx, trace, bath.ForAccount(account.ID), bath.WithInformationSource(h.storage))
@@ -250,7 +245,7 @@ func (h *Handler) GetAccountEvents(ctx context.Context, params oas.GetAccountEve
 		}
 		events = append(events, e)
 	}
-	if !(params.BeforeLt.IsSet() || params.StartDate.IsSet() || params.EndDate.IsSet()) { //if we look into history we don't need to mix mempool
+	if !(params.BeforeLt.IsSet() || params.StartDate.IsSet() || params.EndDate.IsSet() || (len(events) > 0 && events[0].InProgress)) { //if we look into history we don't need to mix mempool
 		memTraces, _ := h.mempoolEmulate.accountsTraces.Get(account.ID)
 		i := 0
 		for _, hash := range memTraces {
@@ -259,7 +254,7 @@ func (h *Handler) GetAccountEvents(ctx context.Context, params oas.GetAccountEve
 			}
 			tx, _ := h.storage.SearchTransactionByMessageHash(ctx, hash)
 			trace, prs := h.mempoolEmulate.traces.Get(hash)
-			if (tx != nil && !contains(skippedInProgress, *tx)) || !prs { //if err is nil it's already processed. If !prs we can't do anything
+			if tx != nil || !prs { //if err is nil it's already processed. If !prs we can't do anything
 				h.mempoolEmulate.traces.Delete(hash)
 				continue
 			}
