@@ -104,6 +104,20 @@ paths:
                 example: { }
         'default':
           $ref: '#/components/responses/Error'
+  /usage-stats:
+    get:
+      operationId: getUsageStats
+      parameters:
+        - $ref: '#/components/parameters/tokenQuery'
+      responses:
+        '200':
+          description: "usage stats"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UsageStats'
+        'default':
+          $ref: '#/components/responses/Error'
   /webhooks/{webhook_id}/account-tx/subscribe:
     post:
       description: "subscribe to notifications for a particular set of accounts"
@@ -373,6 +387,29 @@ components:
         error:
           type: string
           example: error description
+    UsageStats:
+      type: object
+      required:
+        - period_started_at
+        - account_subscriptions
+        - webhooks_delivered
+        - webhooks_failed
+      properties:
+        period_started_at:
+          type: string
+          format: date-time
+        period_ended_at:
+          type: string
+          format: date-time
+        account_subscriptions:
+          type: integer
+          format: int64
+        webhooks_delivered:
+          type: integer
+          format: int64
+        webhooks_failed:
+          type: integer
+          format: int64
     WebhookList:
       type: object
       required:
