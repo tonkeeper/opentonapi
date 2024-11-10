@@ -4632,12 +4632,23 @@ func (s *DecodedMessageExtInMsgDecodedWalletV4) SetRawMessages(val []DecodedRawM
 }
 
 type DecodedMessageExtInMsgDecodedWalletV5 struct {
+	ValidUntil  int64               `json:"valid_until"`
 	RawMessages []DecodedRawMessage `json:"raw_messages"`
+}
+
+// GetValidUntil returns the value of ValidUntil.
+func (s *DecodedMessageExtInMsgDecodedWalletV5) GetValidUntil() int64 {
+	return s.ValidUntil
 }
 
 // GetRawMessages returns the value of RawMessages.
 func (s *DecodedMessageExtInMsgDecodedWalletV5) GetRawMessages() []DecodedRawMessage {
 	return s.RawMessages
+}
+
+// SetValidUntil sets the value of ValidUntil.
+func (s *DecodedMessageExtInMsgDecodedWalletV5) SetValidUntil(val int64) {
+	s.ValidUntil = val
 }
 
 // SetRawMessages sets the value of RawMessages.

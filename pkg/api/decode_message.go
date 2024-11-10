@@ -176,6 +176,7 @@ func (h *Handler) DecodeMessage(ctx context.Context, req *oas.DecodeMessageReq) 
 		extIn := oas.DecodedMessageExtInMsgDecoded{
 			WalletV5: oas.NewOptDecodedMessageExtInMsgDecodedWalletV5(oas.DecodedMessageExtInMsgDecodedWalletV5{
 				RawMessages: rawMessages,
+				ValidUntil:  int64(v5.SignedExternal.ValidUntil),
 			}),
 		}
 		decoded.SetExtInMsgDecoded(oas.NewOptDecodedMessageExtInMsgDecoded(extIn))

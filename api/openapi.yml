@@ -6764,7 +6764,12 @@ components:
               type: object
               required:
                 - raw_messages
+                - valid_until
               properties:
+                valid_until:
+                  type: integer
+                  format: int64
+                  example: 1
                 raw_messages:
                   type: array
                   items:

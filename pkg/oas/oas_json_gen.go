@@ -12619,6 +12619,10 @@ func (s *DecodedMessageExtInMsgDecodedWalletV5) Encode(e *jx.Encoder) {
 // encodeFields encodes fields.
 func (s *DecodedMessageExtInMsgDecodedWalletV5) encodeFields(e *jx.Encoder) {
 	{
+		e.FieldStart("valid_until")
+		e.Int64(s.ValidUntil)
+	}
+	{
 		e.FieldStart("raw_messages")
 		e.ArrStart()
 		for _, elem := range s.RawMessages {
@@ -12628,8 +12632,9 @@ func (s *DecodedMessageExtInMsgDecodedWalletV5) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfDecodedMessageExtInMsgDecodedWalletV5 = [1]string{
-	0: "raw_messages",
+var jsonFieldsNameOfDecodedMessageExtInMsgDecodedWalletV5 = [2]string{
+	0: "valid_until",
+	1: "raw_messages",
 }
 
 // Decode decodes DecodedMessageExtInMsgDecodedWalletV5 from json.
@@ -12641,8 +12646,20 @@ func (s *DecodedMessageExtInMsgDecodedWalletV5) Decode(d *jx.Decoder) error {
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
-		case "raw_messages":
+		case "valid_until":
 			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				v, err := d.Int64()
+				s.ValidUntil = int64(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"valid_until\"")
+			}
+		case "raw_messages":
+			requiredBitSet[0] |= 1 << 1
 			if err := func() error {
 				s.RawMessages = make([]DecodedRawMessage, 0)
 				if err := d.Arr(func(d *jx.Decoder) error {
@@ -12669,7 +12686,7 @@ func (s *DecodedMessageExtInMsgDecodedWalletV5) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b00000001,
+		0b00000011,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.

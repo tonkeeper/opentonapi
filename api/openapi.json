@@ -2843,10 +2843,16 @@
            "$ref": "#/components/schemas/DecodedRawMessage"
           },
           "type": "array"
+         },
+         "valid_until": {
+          "example": 1,
+          "format": "int64",
+          "type": "integer"
          }
         },
         "required": [
-         "raw_messages"
+         "raw_messages",
+         "valid_until"
         ],
         "type": "object"
        }

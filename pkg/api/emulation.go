@@ -93,7 +93,7 @@ func (h *Handler) addToMempool(ctx context.Context, bytesBoc []byte, shardAccoun
 	msgV4, err := tongoWallet.DecodeMessageV4(msgCell[0])
 	if err == nil {
 		diff := int64(msgV4.ValidUntil) - time.Now().Unix()
-		if diff < 600 {
+		if diff < 300 {
 			ttl = diff
 		}
 	}
