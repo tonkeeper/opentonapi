@@ -147,16 +147,16 @@ func (ms *MsgSender) SendMessage(ctx context.Context, msgCopy ExtInMsgCopy) erro
 		return err
 	}
 	err := ms.send(ctx, msgCopy.Payload)
-	msgCopy.SendFailed = err != nil
-
-	for name, ch := range ms.receivers {
-		select {
-		case ch <- msgCopy:
-		default:
-			ms.logger.Warn("receiver is too slow", zap.String("name", name))
+	if err == nil {
+		for name, ch := range ms.receivers {
+			select {
+			case ch <- msgCopy:
+			default:
+				ms.logger.Warn("receiver is too slow", zap.String("name", name))
+			}
 		}
 	}
-	return nil
+	return err
 }
 
 func (ms *MsgSender) send(ctx context.Context, payload []byte) error {
