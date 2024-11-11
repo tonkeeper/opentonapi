@@ -48,6 +48,8 @@ type ExtInMsgCopy struct {
 	Details any
 	// Accounts is set when the message is emulated.
 	Accounts map[tongo.AccountID]struct{}
+
+	SendFailed bool // default is false, so we are good with backward compatibility.
 }
 
 var liteserverMessageSendMc = promauto.NewCounterVec(prometheus.CounterOpts{
@@ -144,6 +146,9 @@ func (ms *MsgSender) SendMessage(ctx context.Context, msgCopy ExtInMsgCopy) erro
 	if err := liteapi.VerifySendMessagePayload(msgCopy.Payload); err != nil {
 		return err
 	}
+	err := ms.send(ctx, msgCopy.Payload)
+	msgCopy.SendFailed = err != nil
+
 	for name, ch := range ms.receivers {
 		select {
 		case ch <- msgCopy:
@@ -151,7 +156,7 @@ func (ms *MsgSender) SendMessage(ctx context.Context, msgCopy ExtInMsgCopy) erro
 			ms.logger.Warn("receiver is too slow", zap.String("name", name))
 		}
 	}
-	return ms.send(ctx, msgCopy.Payload)
+	return nil
 }
 
 func (ms *MsgSender) send(ctx context.Context, payload []byte) error {
