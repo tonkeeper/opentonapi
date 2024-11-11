@@ -3710,6 +3710,10 @@
       "example": true,
       "type": "boolean"
      },
+     "score": {
+      "format": "int32",
+      "type": "integer"
+     },
      "total_supply": {
       "example": "5887105890579978",
       "type": "string",
@@ -3847,6 +3851,10 @@
      "name": {
       "example": "Wrapped TON",
       "type": "string"
+     },
+     "score": {
+      "format": "int32",
+      "type": "integer"
      },
      "symbol": {
       "example": "WTON",

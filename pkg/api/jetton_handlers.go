@@ -162,7 +162,8 @@ func (h *Handler) GetJettons(ctx context.Context, params oas.GetJettonsParams) (
 	}
 	results := make([]oas.JettonInfo, len(jettons))
 	for idx, master := range jettons {
-		results[idx] = h.convertJettonInfo(ctx, master, holders)
+		score, _ := h.score.GetJettonScore(master.Address)
+		results[idx] = h.convertJettonInfo(ctx, master, holders, score)
 	}
 	return &oas.Jettons{Jettons: results}, nil
 }
@@ -293,7 +294,8 @@ func (h *Handler) GetJettonInfosByAddresses(ctx context.Context, request oas.Opt
 	}
 	results := make([]oas.JettonInfo, len(jettons))
 	for idx, master := range jettons {
-		results[idx] = h.convertJettonInfo(ctx, master, jettonsHolders)
+		score, _ := h.score.GetJettonScore(master.Address)
+		results[idx] = h.convertJettonInfo(ctx, master, jettonsHolders, score)
 	}
 
 	return &oas.Jettons{Jettons: results}, nil

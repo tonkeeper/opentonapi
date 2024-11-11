@@ -9,6 +9,7 @@ import (
 	"github.com/tonkeeper/opentonapi/pkg/chainstate"
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/opentonapi/pkg/rates"
+	"github.com/tonkeeper/opentonapi/pkg/score"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/contract/dns"
 	"github.com/tonkeeper/tongo/tep64"
@@ -40,6 +41,7 @@ type Handler struct {
 	limits      Limits
 	spamFilter  SpamFilter
 	ratesSource ratesSource
+	score       scoreSource
 	metaCache   metadataCache
 	tonConnect  *tonconnect.Server
 
@@ -80,6 +82,7 @@ type Options struct {
 	tonConnectSecret string
 	ctxToDetails     ctxToDetails
 	gasless          Gasless
+	score            scoreSource
 }
 
 type Option func(o *Options)
@@ -149,6 +152,12 @@ func WithGasless(gasless Gasless) Option {
 	}
 }
 
+func WithScore(score scoreSource) Option {
+	return func(o *Options) {
+		o.score = score
+	}
+}
+
 func NewHandler(logger *zap.Logger, opts ...Option) (*Handler, error) {
 	options := &Options{}
 	for _, o := range opts {
@@ -194,6 +203,9 @@ func NewHandler(logger *zap.Logger, opts ...Option) (*Handler, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to init tonconnect")
 	}
+	if options.score == nil {
+		options.score = score.NewScore()
+	}
 	return &Handler{
 		logger:       logger,
 		storage:      options.storage,
@@ -205,6 +217,7 @@ func NewHandler(logger *zap.Logger, opts ...Option) (*Handler, error) {
 		spamFilter:   options.spamFilter,
 		ctxToDetails: options.ctxToDetails,
 		gasless:      options.gasless,
+		score:        options.score,
 		ratesSource:  rates.InitCalculator(options.ratesSource),
 		metaCache: metadataCache{
 			collectionsCache: cache.NewLRUCache[tongo.AccountID, tep64.Metadata](10000, "nft_metadata_cache"),

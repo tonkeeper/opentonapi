@@ -7717,6 +7717,7 @@ type JettonInfo struct {
 	Metadata     JettonMetadata         `json:"metadata"`
 	Verification JettonVerificationType `json:"verification"`
 	HoldersCount int32                  `json:"holders_count"`
+	Score        OptInt32               `json:"score"`
 }
 
 // GetMintable returns the value of Mintable.
@@ -7749,6 +7750,11 @@ func (s *JettonInfo) GetHoldersCount() int32 {
 	return s.HoldersCount
 }
 
+// GetScore returns the value of Score.
+func (s *JettonInfo) GetScore() OptInt32 {
+	return s.Score
+}
+
 // SetMintable sets the value of Mintable.
 func (s *JettonInfo) SetMintable(val bool) {
 	s.Mintable = val
@@ -7777,6 +7783,11 @@ func (s *JettonInfo) SetVerification(val JettonVerificationType) {
 // SetHoldersCount sets the value of HoldersCount.
 func (s *JettonInfo) SetHoldersCount(val int32) {
 	s.HoldersCount = val
+}
+
+// SetScore sets the value of Score.
+func (s *JettonInfo) SetScore(val OptInt32) {
+	s.Score = val
 }
 
 // Ref: #/components/schemas/JettonMetadata
@@ -7951,6 +7962,7 @@ type JettonPreview struct {
 	Image               string                 `json:"image"`
 	Verification        JettonVerificationType `json:"verification"`
 	CustomPayloadAPIURI OptString              `json:"custom_payload_api_uri"`
+	Score               OptInt32               `json:"score"`
 }
 
 // GetAddress returns the value of Address.
@@ -7988,6 +8000,11 @@ func (s *JettonPreview) GetCustomPayloadAPIURI() OptString {
 	return s.CustomPayloadAPIURI
 }
 
+// GetScore returns the value of Score.
+func (s *JettonPreview) GetScore() OptInt32 {
+	return s.Score
+}
+
 // SetAddress sets the value of Address.
 func (s *JettonPreview) SetAddress(val string) {
 	s.Address = val
@@ -8021,6 +8038,11 @@ func (s *JettonPreview) SetVerification(val JettonVerificationType) {
 // SetCustomPayloadAPIURI sets the value of CustomPayloadAPIURI.
 func (s *JettonPreview) SetCustomPayloadAPIURI(val OptString) {
 	s.CustomPayloadAPIURI = val
+}
+
+// SetScore sets the value of Score.
+func (s *JettonPreview) SetScore(val OptInt32) {
+	s.Score = val
 }
 
 // Ref: #/components/schemas/JettonQuantity
