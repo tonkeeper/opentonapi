@@ -2,10 +2,12 @@ package litestorage
 
 import (
 	"context"
+	"encoding/hex"
 	"fmt"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
+	"github.com/tonkeeper/tonapi-go"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
 	"github.com/tonkeeper/tongo/boc"
@@ -50,6 +52,8 @@ var knownContracts = map[ton.Bits256]abi.ContractInterface{
 	ton.MustParseHash("feb5ff6820e2ff0d9483e7e0d62c817d846789fb4ae580c878866d959dabd5c0"): abi.WalletV4R2,
 	ton.MustParseHash("a760d629d5343e76d045017d9dc216fc8a307a8377815feb2b0a5c490e733486"): abi.JettonWallet,
 }
+
+var checkedContracts = make(map[ton.Bits256][]abi.ContractInterface)
 
 const (
 	maxDepthLimit = 1024
@@ -223,19 +227,14 @@ func (s *LiteStorage) getAccountInterfaces(ctx context.Context, id tongo.Account
 		}
 		emulatedAccountCode.WithLabelValues(h).Inc()
 	}
-	contractInterface, err := InspectContract(account.Code)
+	contractInterfaces, err := s.InspectContract(ctx, *account)
 	if err != nil {
 		return nil, err
 	}
-	if contractInterface == nil {
-		return nil, nil
-	}
-	interfaces = []abi.ContractInterface{*contractInterface}
-	s.accountInterfacesCache.Store(id, interfaces)
-	return interfaces, nil
+	return contractInterfaces, nil
 }
 
-func InspectContract(code []byte) (*abi.ContractInterface, error) {
+func (s *LiteStorage) InspectContract(ctx context.Context, account core.Account) ([]abi.ContractInterface, error) {
 	// Originally the code was:
 	// inspector := abi.NewContractInspector(abi.InspectWithLibraryResolver(s))
 	// cd, err := inspector.InspectContract(ctx, account.Code, s.executor, id)
@@ -243,6 +242,7 @@ func InspectContract(code []byte) (*abi.ContractInterface, error) {
 	// and by manually inspecting and trying all known methods, of the contract
 	// This also contained more complext logic for getting extra data that isn't really needed,
 	// so we can simplify it to comparing to the known contract hashes
+	code := account.Code
 	if len(code) == 0 {
 		return nil, nil
 	}
@@ -260,7 +260,94 @@ func InspectContract(code []byte) (*abi.ContractInterface, error) {
 	}
 
 	if contractInterface, ok := knownContracts[codeHash]; ok {
-		return &contractInterface, nil
+		return []abi.ContractInterface{contractInterface}, nil
 	}
-	return nil, nil
+
+	if contractInterfaces, ok := checkedContracts[codeHash]; ok {
+		return contractInterfaces, nil
+	}
+
+	// If it's not a known contract, check explicitly for some interfaces that effect event building.
+	contractInterfaces := []abi.ContractInterface{}
+	if s.isJettonWallet(ctx, account) {
+		contractInterfaces = append(contractInterfaces, abi.JettonWallet)
+	}
+	if s.isDedustVault(ctx, account) {
+		contractInterfaces = append(contractInterfaces, abi.DedustVault)
+	}
+	if s.isDedustPool(ctx, account) {
+		contractInterfaces = append(contractInterfaces, abi.DedustPool)
+	}
+	if s.isMegatonfiExchange(ctx, account) {
+		contractInterfaces = append(contractInterfaces, abi.MegatonfiExchange)
+	}
+	if s.isMegatonfiRouter(ctx, account) {
+		contractInterfaces = append(contractInterfaces, abi.MegatonfiRouter)
+	}
+	if s.isStonfiPool(ctx, account) {
+		// Note - both stonfi pool and stonfi pool v2 implement the same get method, but the result is different
+		// We don't currently differentiate them.
+		contractInterfaces = append(contractInterfaces, abi.StonfiPool)
+		contractInterfaces = append(contractInterfaces, abi.StonfiPoolV2)
+	}
+	if s.isStonfiRouter(ctx, account) {
+		contractInterfaces = append(contractInterfaces, abi.StonfiRouter)
+	}
+	if s.isStonfiRouterV2(ctx, account) {
+		contractInterfaces = append(contractInterfaces, abi.StonfiRouterV2)
+	}
+
+	s.logger.Info(fmt.Sprintf("Found contract interfaces: %v for address: %v with codeHash: %v", contractInterfaces, account.AccountAddress.ToHuman(true, false), hex.EncodeToString(codeHash[:])))
+	checkedContracts[codeHash] = contractInterfaces
+	return contractInterfaces, nil
+}
+
+func (s *LiteStorage) checkMethod(ctx context.Context, account core.Account, methodName string) bool {
+	params := tonapi.ExecGetMethodForBlockchainAccountParams{
+		AccountID:  account.AccountAddress.String(),
+		MethodName: methodName,
+	}
+	res, err := s.tonapiClient.ExecGetMethodForBlockchainAccount(ctx, params)
+	return err == nil && res.Success && res.ExitCode == 0
+}
+
+func (s *LiteStorage) checkMethods(ctx context.Context, account core.Account, methodName []string) bool {
+	for _, method := range methodName {
+		if !s.checkMethod(ctx, account, method) {
+			return false
+		}
+	}
+	return true
+}
+
+func (s *LiteStorage) isJettonWallet(ctx context.Context, account core.Account) bool {
+	return s.checkMethod(ctx, account, "get_wallet_data")
+}
+
+func (s *LiteStorage) isDedustVault(ctx context.Context, account core.Account) bool {
+	return s.checkMethod(ctx, account, "get_asset")
+}
+
+func (s *LiteStorage) isDedustPool(ctx context.Context, account core.Account) bool {
+	return s.checkMethods(ctx, account, []string{"get_assets", "get_jetton_data", "get_reserves", "is_stable"})
+}
+
+func (s *LiteStorage) isMegatonfiExchange(ctx context.Context, account core.Account) bool {
+	return s.checkMethods(ctx, account, []string{"get_lp_data", "get_mining_data"})
+}
+
+func (s *LiteStorage) isMegatonfiRouter(ctx context.Context, account core.Account) bool {
+	return s.checkMethods(ctx, account, []string{"get_lp_mining_data", "get_lp_swap_data"})
+}
+
+func (s *LiteStorage) isStonfiPool(ctx context.Context, account core.Account) bool {
+	return s.checkMethod(ctx, account, "get_pool_data")
+}
+
+func (s *LiteStorage) isStonfiRouter(ctx context.Context, account core.Account) bool {
+	return s.checkMethod(ctx, account, "get_router_data")
+}
+
+func (s *LiteStorage) isStonfiRouterV2(ctx context.Context, account core.Account) bool {
+	return s.checkMethods(ctx, account, []string{"get_router_data", "get_router_version"})
 }
