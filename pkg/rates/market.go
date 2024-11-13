@@ -97,7 +97,7 @@ func (m *Mock) GetCurrentMarketsTonPrice() ([]Market, error) {
 		{
 			ID:                3,
 			Name:              bybit,
-			URL:               "https://api.bybit.com/derivatives/v3/public/tickers?symbol=TONUSDT",
+			URL:               "https://api.bybit.com/v5/market/tickers?category=spot&symbol=TONUSDT",
 			TonPriceConverter: convertedTonBybitResponse,
 			DateUpdate:        now,
 		},
