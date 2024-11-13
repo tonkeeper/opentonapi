@@ -96,7 +96,7 @@ func (h *Handler) convertJettonHistory(ctx context.Context, account ton.AccountI
 			}
 			event.Actions = append(event.Actions, convertedAction)
 		}
-		event.IsScam = h.spamFilter.CheckActions(event.Actions, &account)
+		event.IsScam = h.spamFilter.CheckActions(event.Actions, &account, trace.Account)
 		if len(event.Actions) == 0 {
 			continue
 		}
