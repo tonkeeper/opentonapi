@@ -97,7 +97,7 @@ type storage interface {
 	GetAccountState(ctx context.Context, a tongo.AccountID) (tlb.ShardAccount, error)
 	GetLibraries(ctx context.Context, libraries []tongo.Bits256) (map[tongo.Bits256]*boc.Cell, error)
 
-	SearchAccountsByPubKey(pubKey ed25519.PublicKey) ([]tongo.AccountID, error)
+	SearchAccountsByPubKey(ctx context.Context, pubKey ed25519.PublicKey) ([]tongo.AccountID, error)
 
 	// TrimmedConfigBase64 returns the current trimmed blockchain config in a base64 format.
 	TrimmedConfigBase64() (string, error)
