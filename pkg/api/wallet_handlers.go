@@ -131,7 +131,7 @@ func (h *Handler) GetWalletsByPublicKey(ctx context.Context, params oas.GetWalle
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
 	}
-	walletAddresses, err := h.storage.SearchAccountsByPubKey(publicKey)
+	walletAddresses, err := h.storage.SearchAccountsByPubKey(ctx, publicKey)
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
 	}

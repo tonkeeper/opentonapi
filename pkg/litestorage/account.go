@@ -36,7 +36,7 @@ func (s *LiteStorage) AccountStatusAndInterfaces(addr tongo.AccountID) (tlb.Acco
 	return account.Status, account.Interfaces, err
 }
 
-func (s *LiteStorage) SearchAccountsByPubKey(pubKey ed25519.PublicKey) ([]tongo.AccountID, error) {
+func (s *LiteStorage) SearchAccountsByPubKey(ctx context.Context, pubKey ed25519.PublicKey) ([]tongo.AccountID, error) {
 	versions := []tongoWallet.Version{
 		tongoWallet.V1R1, tongoWallet.V1R2, tongoWallet.V1R3,
 		tongoWallet.V2R1, tongoWallet.V2R2,
