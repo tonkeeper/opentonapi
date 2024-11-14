@@ -239,9 +239,10 @@ func (s *LiteStorage) InspectContract(ctx context.Context, account core.Account)
 	// inspector := abi.NewContractInspector(abi.InspectWithLibraryResolver(s))
 	// cd, err := inspector.InspectContract(ctx, account.Code, s.executor, id)
 	// That contains a more complex logic, for finding the interface using both hardcoded known contracts hashes,
-	// and by manually inspecting and trying all known methods, of the contract
-	// This also contained more complext logic for getting extra data that isn't really needed,
-	// so we can simplify it to comparing to the known contract hashes
+	// and by manually inspecting and trying all known methods of the contract, and examining the results.
+	// This also contained more complex logic for getting extra data that isn't really needed,
+	// so we can simplify it to comparing to the known contract hashes, and having a few specific fallbacks
+	// I.e. we check for a few specific getter methods existence for a few selected interfaces that are important for event building.
 	code := account.Code
 	if len(code) == 0 {
 		return nil, nil
