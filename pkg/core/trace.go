@@ -187,14 +187,19 @@ func CollectAdditionalInfo(ctx context.Context, infoSource InformationSource, tr
 			stonfiPoolIDs = append(stonfiPoolIDs, STONfiPoolID{ID: trace.Account, Version: STONfiPoolV2})
 		}
 	})
-	stonfiPools, err := infoSource.STONfiPools(ctx, stonfiPoolIDs)
-	if err != nil {
-		return err
+	stonfiPools := map[tongo.AccountID]STONfiPool{}
+	if len(stonfiPoolIDs) > 0 {
+		var err error
+		stonfiPools, err = infoSource.STONfiPools(ctx, stonfiPoolIDs)
+		if err != nil {
+			return err
+		}
+		for _, pool := range stonfiPools {
+			jettonWallets = append(jettonWallets, pool.Token0)
+			jettonWallets = append(jettonWallets, pool.Token1)
+		}
 	}
-	for _, pool := range stonfiPools {
-		jettonWallets = append(jettonWallets, pool.Token0)
-		jettonWallets = append(jettonWallets, pool.Token1)
-	}
+
 	masters, err := infoSource.JettonMastersForWallets(ctx, jettonWallets)
 	if err != nil {
 		return err
