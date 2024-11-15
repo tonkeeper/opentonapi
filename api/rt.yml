@@ -173,6 +173,23 @@ paths:
                 $ref: '#/components/schemas/WebhookAccountTxSubscriptions'
         'default':
           $ref: '#/components/responses/Error'
+  /webhooks/{webhook_id}/msg-opcode/subscriptions:
+    get:
+      operationId: webhookNewContractsSubscriptions
+      parameters:
+        - $ref: '#/components/parameters/tokenQuery'
+        - $ref: '#/components/parameters/webhookId'
+        - $ref: '#/components/parameters/offsetQuery'
+        - $ref: '#/components/parameters/limitQuery'
+      responses:
+        '200':
+          description: "subscriptions"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WebhookMsgOpcodeSubscriptions'
+        'default':
+          $ref: '#/components/responses/Error'
   /webhooks/{webhook_id}/subscribe-new-contracts:
     post:
       description: "receive a notification when a new contract is deployed to the blockchain"
@@ -484,7 +501,20 @@ components:
               failed_attempts:
                 type: integer
                 format: int64
-
+    WebhookMsgOpcodeSubscriptions:
+      type: object
+      required:
+        - subscriptions
+      properties:
+        subscriptions:
+          type: array
+          items:
+            type: object
+            required:
+              - opcode
+            properties:
+              opcode:
+                type: string
 
   responses:
     Error:
