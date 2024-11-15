@@ -447,6 +447,7 @@ components:
             - subscribed_accounts
             - subscribed_to_mempool
             - subscribed_to_new_contracts
+            - subscribed_msg_opcodes
             properties:
               id:
                 type: integer
@@ -456,6 +457,8 @@ components:
               token:
                 type: string
               subscribed_accounts:
+                type: integer
+              subscribed_msg_opcodes:
                 type: integer
               subscribed_to_mempool:
                 type: boolean
