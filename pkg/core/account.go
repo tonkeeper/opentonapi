@@ -56,7 +56,8 @@ type Contract struct {
 	LastTransactionLt uint64
 }
 
-type AccountStats struct {
+type AccountStat struct {
+	TonBalance    int64
 	AccountID     ton.AccountID
 	NftsCount     int32
 	JettonsCount  int32

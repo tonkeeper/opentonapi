@@ -310,10 +310,11 @@ func (h *Handler) GetAccountEvent(ctx context.Context, params oas.GetAccountEven
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
-	result, err := bath.FindActions(ctx, trace, bath.ForAccount(account.ID), bath.WithInformationSource(h.storage))
+	actions, err := bath.FindActions(ctx, trace, bath.ForAccount(account.ID), bath.WithInformationSource(h.storage))
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
+	result := bath.EnrichWithIntentions(trace, actions)
 	event, err := h.toAccountEvent(ctx, account.ID, trace, result, params.AcceptLanguage, params.SubjectOnly.Value)
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
@@ -374,10 +375,11 @@ func (h *Handler) EmulateMessageToAccountEvent(ctx context.Context, request *oas
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
-	result, err := bath.FindActions(ctx, trace, bath.WithInformationSource(h.storage))
+	actions, err := bath.FindActions(ctx, trace, bath.WithInformationSource(h.storage))
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
+	result := bath.EnrichWithIntentions(trace, actions)
 	event, err := h.toAccountEvent(ctx, account.ID, trace, result, params.AcceptLanguage, false)
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
@@ -425,10 +427,11 @@ func (h *Handler) EmulateMessageToEvent(ctx context.Context, request *oas.Emulat
 			return nil, toError(http.StatusInternalServerError, err)
 		}
 	}
-	result, err := bath.FindActions(ctx, trace, bath.WithInformationSource(h.storage))
+	actions, err := bath.FindActions(ctx, trace, bath.WithInformationSource(h.storage))
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
+	result := bath.EnrichWithIntentions(trace, actions)
 	event, err := h.toEvent(ctx, trace, result, params.AcceptLanguage)
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
@@ -601,10 +604,11 @@ func (h *Handler) EmulateMessageToWallet(ctx context.Context, request *oas.Emula
 		return nil, toError(http.StatusInternalServerError, err)
 	}
 	t := convertTrace(trace, h.addressBook)
-	result, err := bath.FindActions(ctx, trace, bath.ForAccount(*walletAddress), bath.WithInformationSource(h.storage))
+	actions, err := bath.FindActions(ctx, trace, bath.ForAccount(*walletAddress), bath.WithInformationSource(h.storage))
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
+	result := bath.EnrichWithIntentions(trace, actions)
 	event, err := h.toAccountEvent(ctx, *walletAddress, trace, result, params.AcceptLanguage, true)
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
