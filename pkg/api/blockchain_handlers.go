@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"sort"
 
 	"golang.org/x/exp/maps"
 
@@ -195,6 +196,9 @@ func (h *Handler) GetBlockchainMasterchainTransactions(ctx context.Context, para
 			result.Transactions = append(result.Transactions, convertTransaction(*tx, nil, h.addressBook))
 		}
 	}
+	sort.Slice(result.Transactions, func(i, j int) bool {
+		return result.Transactions[i].Lt < result.Transactions[j].Lt
+	})
 	return &result, nil
 }
 
@@ -216,6 +220,9 @@ func (h *Handler) GetBlockchainBlockTransactions(ctx context.Context, params oas
 	for _, tx := range transactions {
 		res.Transactions = append(res.Transactions, convertTransaction(*tx, nil, h.addressBook))
 	}
+	sort.Slice(res.Transactions, func(i, j int) bool {
+		return res.Transactions[i].Lt < res.Transactions[j].Lt
+	})
 	return &res, nil
 }
 
