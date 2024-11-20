@@ -2485,6 +2485,8 @@ type BlockchainConfig struct {
 	R43 OptBlockchainConfig43 `json:"43"`
 	// Suspended accounts.
 	R44 BlockchainConfig44 `json:"44"`
+	// Precompiled contracts.
+	R45 OptBlockchainConfig45 `json:"45"`
 	// Bridge parameters for wrapping TON in other networks.
 	R71 OptBlockchainConfig71 `json:"71"`
 	// Bridge parameters for wrapping TON in other networks.
@@ -2687,6 +2689,11 @@ func (s *BlockchainConfig) GetR43() OptBlockchainConfig43 {
 // GetR44 returns the value of R44.
 func (s *BlockchainConfig) GetR44() BlockchainConfig44 {
 	return s.R44
+}
+
+// GetR45 returns the value of R45.
+func (s *BlockchainConfig) GetR45() OptBlockchainConfig45 {
+	return s.R45
 }
 
 // GetR71 returns the value of R71.
@@ -2907,6 +2914,11 @@ func (s *BlockchainConfig) SetR43(val OptBlockchainConfig43) {
 // SetR44 sets the value of R44.
 func (s *BlockchainConfig) SetR44(val BlockchainConfig44) {
 	s.R44 = val
+}
+
+// SetR45 sets the value of R45.
+func (s *BlockchainConfig) SetR45(val OptBlockchainConfig45) {
+	s.R45 = val
 }
 
 // SetR71 sets the value of R71.
@@ -3636,6 +3648,46 @@ func (s *BlockchainConfig44) SetAccounts(val []string) {
 // SetSuspendedUntil sets the value of SuspendedUntil.
 func (s *BlockchainConfig44) SetSuspendedUntil(val int) {
 	s.SuspendedUntil = val
+}
+
+// Precompiled contracts.
+type BlockchainConfig45 struct {
+	Contracts []BlockchainConfig45ContractsItem `json:"contracts"`
+}
+
+// GetContracts returns the value of Contracts.
+func (s *BlockchainConfig45) GetContracts() []BlockchainConfig45ContractsItem {
+	return s.Contracts
+}
+
+// SetContracts sets the value of Contracts.
+func (s *BlockchainConfig45) SetContracts(val []BlockchainConfig45ContractsItem) {
+	s.Contracts = val
+}
+
+type BlockchainConfig45ContractsItem struct {
+	CodeHash string `json:"code_hash"`
+	GasUsage int64  `json:"gas_usage"`
+}
+
+// GetCodeHash returns the value of CodeHash.
+func (s *BlockchainConfig45ContractsItem) GetCodeHash() string {
+	return s.CodeHash
+}
+
+// GetGasUsage returns the value of GasUsage.
+func (s *BlockchainConfig45ContractsItem) GetGasUsage() int64 {
+	return s.GasUsage
+}
+
+// SetCodeHash sets the value of CodeHash.
+func (s *BlockchainConfig45ContractsItem) SetCodeHash(val string) {
+	s.CodeHash = val
+}
+
+// SetGasUsage sets the value of GasUsage.
+func (s *BlockchainConfig45ContractsItem) SetGasUsage(val int64) {
+	s.GasUsage = val
 }
 
 type BlockchainConfig5 struct {
@@ -10926,6 +10978,52 @@ func (o OptBlockchainConfig43) Get() (v BlockchainConfig43, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptBlockchainConfig43) Or(d BlockchainConfig43) BlockchainConfig43 {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptBlockchainConfig45 returns new OptBlockchainConfig45 with value set to v.
+func NewOptBlockchainConfig45(v BlockchainConfig45) OptBlockchainConfig45 {
+	return OptBlockchainConfig45{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptBlockchainConfig45 is optional BlockchainConfig45.
+type OptBlockchainConfig45 struct {
+	Value BlockchainConfig45
+	Set   bool
+}
+
+// IsSet returns true if OptBlockchainConfig45 was set.
+func (o OptBlockchainConfig45) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptBlockchainConfig45) Reset() {
+	var v BlockchainConfig45
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptBlockchainConfig45) SetTo(v BlockchainConfig45) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptBlockchainConfig45) Get() (v BlockchainConfig45, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptBlockchainConfig45) Or(d BlockchainConfig45) BlockchainConfig45 {
 	if v, ok := o.Get(); ok {
 		return v
 	}

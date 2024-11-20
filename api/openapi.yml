@@ -5288,6 +5288,27 @@ components:
                 example: 0:0000000000000000000000000000000000000000000000000000000000000000
             suspended_until:
               type: integer
+
+        "45":
+          type: object
+          description: precompiled contracts
+          required:
+            - contracts
+          properties:
+            contracts:
+              type: array
+              items:
+                type: object
+                required:
+                  - code_hash
+                  - gas_usage
+                properties:
+                  code_hash:
+                    type: string
+                    format: address
+                  gas_usage:
+                    type: integer
+                    format: int64
         "71":
           type: object
           description: Bridge parameters for wrapping TON in other networks.

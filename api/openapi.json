@@ -2284,6 +2284,35 @@
       ],
       "type": "object"
      },
+     "45": {
+      "description": "precompiled contracts",
+      "properties": {
+       "contracts": {
+        "items": {
+         "properties": {
+          "code_hash": {
+           "format": "address",
+           "type": "string"
+          },
+          "gas_usage": {
+           "format": "int64",
+           "type": "integer"
+          }
+         },
+         "required": [
+          "code_hash",
+          "gas_usage"
+         ],
+         "type": "object"
+        },
+        "type": "array"
+       }
+      },
+      "required": [
+       "contracts"
+      ],
+      "type": "object"
+     },
      "5": {
       "properties": {
        "blackhole_addr": {

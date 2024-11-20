@@ -532,6 +532,17 @@ func convertConfig(logger *zap.Logger, cfg tlb.ConfigParams) (*oas.BlockchainCon
 		config.R44.Accounts = append(config.R44.Accounts, accountID.String())
 	}
 	config.R44.SetSuspendedUntil(int(blockchainConfig.ConfigParam44.SuspendedAddressList.SuspendedUntil))
+	if p45 := blockchainConfig.ConfigParam45; p45 != nil {
+		var param45 oas.BlockchainConfig45
+		for _, item := range p45.PrecompiledContractsConfig.List.Items() {
+			param45.Contracts = append(param45.Contracts, oas.BlockchainConfig45ContractsItem{
+				CodeHash: item.Key.Hex(),
+				GasUsage: int64(item.Value.GasUsage),
+			})
+		}
+		config.R45 = oas.NewOptBlockchainConfig45(param45)
+	}
+
 	if p71 := blockchainConfig.ConfigParam71; p71 != nil {
 		param71 := oas.BlockchainConfig71{
 			OracleBridgeParams: convertOracleBridgeParams(p71.OracleBridgeParams),
