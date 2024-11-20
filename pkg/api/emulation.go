@@ -142,11 +142,7 @@ func (h *Handler) addToMempool(ctx context.Context, bytesBoc []byte, shardAccoun
 	core.Visit(trace, func(node *core.Trace) {
 		accounts[node.Account] = struct{}{}
 	})
-	hash, err := msgCell[0].Hash256()
-	if err != nil {
-		return shardAccount, err
-	}
-	h.mempoolEmulate.traces.Set(hash, trace, cache.WithExpiration(time.Second*time.Duration(ttl)))
+	h.mempoolEmulate.traces.Set(ton.Bits256(message.Hash()), trace, cache.WithExpiration(time.Second*time.Duration(ttl)))
 	var localMessageHashCache = make(map[ton.Bits256]bool)
 	for account := range accounts {
 		if _, ok := h.mempoolEmulateIgnoreAccounts[account]; ok { // the map is filled only once at the start
@@ -166,7 +162,7 @@ func (h *Handler) addToMempool(ctx context.Context, bytesBoc []byte, shardAccoun
 				newMemHashes = append(newMemHashes, mHash)
 			}
 		}
-		newMemHashes = append(newMemHashes, hash) // it's important to make it last
+		newMemHashes = append(newMemHashes, ton.Bits256(message.Hash())) // it's important to make it last
 		h.mempoolEmulate.accountsTraces.Set(account, newMemHashes, cache.WithExpiration(time.Second*time.Duration(ttl)))
 	}
 	emulationCh <- blockchain.ExtInMsgCopy{
