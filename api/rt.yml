@@ -314,11 +314,9 @@ components:
       schema:
         type: string
         example: NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2ODQ3...
-      required: true
     tokenQuery:
       in: query
       name: token
-      required: true
       schema:
         type: string
         example: NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2ODQ3...
