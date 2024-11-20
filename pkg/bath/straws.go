@@ -18,7 +18,7 @@ var JettonTransfersBurnsMints = []Merger{
 	JettonTransferClassicStraw,
 	JettonTransferMinimalStraw,
 	JettonBurnStraw,
-	DedustLPJettonMintStraw,
+	JettonMintFromMasterStraw,
 	JettonMintStrawGovernance,
 	WtonMintStraw,
 }
@@ -54,7 +54,7 @@ var DefaultStraws = []Merger{
 	StrawAuctionBigGetgems,
 	StrawAuctionBuyGetgems,
 	StrawAuctionBuyFragments,
-	DedustLPJettonMintStraw,
+	JettonMintFromMasterStraw,
 	JettonMintStrawGovernance,
 	MegatonFiJettonSwap,
 	InitialSubscriptionStraw,
