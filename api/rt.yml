@@ -513,10 +513,20 @@ components:
             type: object
             required:
               - opcode
+              - status
             properties:
               opcode:
                 type: string
-
+              status:
+                type: string
+                enum:
+                  - active
+                  - disabled
+              disabled_at:
+                type: string
+                format: date-time
+              disabled_reason:
+                type: string
   responses:
     Error:
       description: Some error during request processing
