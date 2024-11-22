@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"crypto/ed25519"
+	"time"
 
 	"github.com/tonkeeper/opentonapi/pkg/gasless"
 	"github.com/tonkeeper/opentonapi/pkg/oas"
@@ -110,6 +111,9 @@ type storage interface {
 
 	GetAccountMultisigs(ctx context.Context, accountID ton.AccountID) ([]core.Multisig, error)
 	GetMultisigByID(ctx context.Context, accountID ton.AccountID) (*core.Multisig, error)
+
+	SaveTraceWithState(msgHash string, trace *core.Trace, getMethods []abi.MethodInvocation, ttl time.Duration) error
+	GetTraceWithState(ctx context.Context, msgHash string) (*core.Trace, []abi.MethodInvocation, error)
 
 	liteStorageRaw
 }
