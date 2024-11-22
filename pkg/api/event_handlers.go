@@ -420,7 +420,7 @@ func (h *Handler) EmulateMessageToAccountEvent(ctx context.Context, request *oas
 		}
 		err = h.storage.SaveTraceWithState(hash, trace, []abi.MethodInvocation{}, 24*time.Hour)
 		if err != nil {
-			fmt.Println("not saved to scylla: ", err)
+			fmt.Println("trace not saved: ", err)
 		}
 	}
 	actions, err := bath.FindActions(ctx, trace, bath.WithInformationSource(h.storage))
@@ -479,7 +479,7 @@ func (h *Handler) EmulateMessageToEvent(ctx context.Context, request *oas.Emulat
 			}
 			err = h.storage.SaveTraceWithState(hs, trace, []abi.MethodInvocation{}, 24*time.Hour)
 			if err != nil {
-				fmt.Println("not saved to scylla: ", err)
+				fmt.Println("trace not saved: ", err)
 			}
 		}
 	}
@@ -540,7 +540,7 @@ func (h *Handler) EmulateMessageToTrace(ctx context.Context, request *oas.Emulat
 			}
 			err = h.storage.SaveTraceWithState(hs, trace, []abi.MethodInvocation{}, 24*time.Hour)
 			if err != nil {
-				fmt.Println("not saved to scylla: ", err)
+				fmt.Println("trace not saved: ", err)
 			}
 		}
 	}
@@ -674,7 +674,7 @@ func (h *Handler) EmulateMessageToWallet(ctx context.Context, request *oas.Emula
 		}
 		err = h.storage.SaveTraceWithState(hash, trace, []abi.MethodInvocation{}, 24*time.Hour)
 		if err != nil {
-			fmt.Println("not saved to scylla: ", err)
+			fmt.Println("trace not saved: ", err)
 		}
 	}
 	t := convertTrace(trace, h.addressBook)
