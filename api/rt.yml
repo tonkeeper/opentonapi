@@ -104,6 +104,29 @@ paths:
                 example: { }
         'default':
           $ref: '#/components/responses/Error'
+  /webhooks/{webhook_id}/failure-logs:
+    get:
+      description: "Get logs of failed attempts to deliver notifications to the webhook"
+      operationId: getFailureLogs
+      parameters:
+        - $ref: '#/components/parameters/tokenQuery'
+        - $ref: '#/components/parameters/webhookId'
+        - in: query
+          name: offset
+          required: false
+          schema:
+            type: integer
+            default: 0
+            minimum: 0
+      responses:
+        '200':
+          description: "list of webhooks"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WebhookLogs'
+        'default':
+          $ref: '#/components/responses/Error'
   /usage-stats:
     get:
       operationId: getUsageStats
@@ -425,6 +448,27 @@ components:
         webhooks_failed:
           type: integer
           format: int64
+    WebhookLogs:
+      type: object
+      required:
+        - logs
+      properties:
+        next_offset:
+          type: integer
+          format: int64
+        logs:
+          type: array
+          items:
+            type: object
+            required:
+              - timestamp
+              - message
+            properties:
+              message:
+                type: string
+              timestamp:
+                type: string
+                format: date-time
     WebhookList:
       type: object
       required:
