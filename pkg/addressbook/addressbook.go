@@ -1,7 +1,6 @@
 package addressbook
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"github.com/tonkeeper/opentonapi/pkg/core"
@@ -19,7 +18,6 @@ import (
 	"time"
 
 	"github.com/shopspring/decimal"
-	"github.com/shurcooL/graphql"
 	"github.com/tonkeeper/tongo"
 	"go.uber.org/zap"
 	"golang.org/x/exp/maps"
@@ -489,19 +487,13 @@ func (b *Book) getGGWhitelist() error {
 }
 
 func fetchGetGemsVerifiedCollections() ([]tongo.AccountID, error) {
-	client := graphql.NewClient("https://api.getgems.io/graphql", nil)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
-	defer cancel()
-	var q struct {
-		GetAddressesOfVerifiedCollections []graphql.String `graphql:"getAddressesOfVerifiedCollections"`
-	}
-	err := client.Query(ctx, &q, nil)
+	res, err := downloadJson[string]("https://api.getgems.io/public/api/verified-collections")
 	if err != nil {
 		return nil, err
 	}
-	accountIDs := make([]tongo.AccountID, 0, len(q.GetAddressesOfVerifiedCollections))
-	for _, collection := range q.GetAddressesOfVerifiedCollections {
-		account, err := tongo.ParseAddress(string(collection))
+	accountIDs := make([]tongo.AccountID, 0, len(res))
+	for _, collection := range res {
+		account, err := tongo.ParseAddress(collection)
 		if err != nil {
 			return nil, err
 		}
