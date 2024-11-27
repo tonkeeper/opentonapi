@@ -15,7 +15,7 @@ import (
 	"github.com/tonkeeper/tongo/ton"
 )
 
-func jettonPreview(master ton.AccountID, meta NormalizedMetadata) oas.JettonPreview {
+func jettonPreview(master ton.AccountID, meta NormalizedMetadata, score int32) oas.JettonPreview {
 	preview := oas.JettonPreview{
 		Address:      master.ToRaw(),
 		Name:         meta.Name,
@@ -26,6 +26,9 @@ func jettonPreview(master ton.AccountID, meta NormalizedMetadata) oas.JettonPrev
 	}
 	if meta.CustomPayloadApiUri != "" {
 		preview.CustomPayloadAPIURI = oas.NewOptString(meta.CustomPayloadApiUri)
+	}
+	if score != 0 {
+		preview.Score = oas.NewOptInt32(score)
 	}
 	return preview
 }
@@ -163,15 +166,16 @@ func (h *Handler) convertJettonBalance(ctx context.Context, wallet core.JettonWa
 		}
 		normalizedMetadata = NormalizeMetadata(meta, nil, trust)
 	}
-	jettonBalance.Jetton = jettonPreview(wallet.JettonAddress, normalizedMetadata)
+	score, _ := h.score.GetJettonScore(wallet.JettonAddress)
+	jettonBalance.Jetton = jettonPreview(wallet.JettonAddress, normalizedMetadata, score)
 
 	return jettonBalance, nil
 }
 
-func (h *Handler) convertJettonInfo(ctx context.Context, master core.JettonMaster, holders map[tongo.AccountID]int32) oas.JettonInfo {
+func (h *Handler) convertJettonInfo(ctx context.Context, master core.JettonMaster, holders map[tongo.AccountID]int32, score int32) oas.JettonInfo {
 	meta := h.GetJettonNormalizedMetadata(ctx, master.Address)
 	metadata := jettonMetadata(master.Address, meta)
-	return oas.JettonInfo{
+	info := oas.JettonInfo{
 		Mintable:     master.Mintable,
 		TotalSupply:  master.TotalSupply.String(),
 		Metadata:     metadata,
@@ -179,4 +183,8 @@ func (h *Handler) convertJettonInfo(ctx context.Context, master core.JettonMaste
 		HoldersCount: holders[master.Address],
 		Admin:        convertOptAccountAddress(master.Admin, h.addressBook),
 	}
+	if score != 0 {
+		info.Score = oas.NewOptInt32(score)
+	}
+	return info
 }
