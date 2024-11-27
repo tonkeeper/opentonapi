@@ -3757,7 +3757,8 @@
      "total_supply",
      "metadata",
      "verification",
-     "holders_count"
+     "holders_count",
+     "preview"
     ],
     "type": "object"
    },

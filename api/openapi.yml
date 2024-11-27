@@ -6973,6 +6973,7 @@ components:
         - metadata
         - verification
         - holders_count
+        - preview
       properties:
         mintable:
           type: boolean

@@ -7767,7 +7767,7 @@ type JettonInfo struct {
 	TotalSupply  string                 `json:"total_supply"`
 	Admin        OptAccountAddress      `json:"admin"`
 	Metadata     JettonMetadata         `json:"metadata"`
-	Preview      OptString              `json:"preview"`
+	Preview      string                 `json:"preview"`
 	Verification JettonVerificationType `json:"verification"`
 	HoldersCount int32                  `json:"holders_count"`
 }
@@ -7793,7 +7793,7 @@ func (s *JettonInfo) GetMetadata() JettonMetadata {
 }
 
 // GetPreview returns the value of Preview.
-func (s *JettonInfo) GetPreview() OptString {
+func (s *JettonInfo) GetPreview() string {
 	return s.Preview
 }
 
@@ -7828,7 +7828,7 @@ func (s *JettonInfo) SetMetadata(val JettonMetadata) {
 }
 
 // SetPreview sets the value of Preview.
-func (s *JettonInfo) SetPreview(val OptString) {
+func (s *JettonInfo) SetPreview(val string) {
 	s.Preview = val
 }
 

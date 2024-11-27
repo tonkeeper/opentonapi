@@ -171,16 +171,13 @@ func (h *Handler) convertJettonBalance(ctx context.Context, wallet core.JettonWa
 func (h *Handler) convertJettonInfo(ctx context.Context, master core.JettonMaster, holders map[tongo.AccountID]int32) oas.JettonInfo {
 	meta := h.GetJettonNormalizedMetadata(ctx, master.Address)
 	metadata := jettonMetadata(master.Address, meta)
-	info := oas.JettonInfo{
+	return oas.JettonInfo{
 		Mintable:     master.Mintable,
 		TotalSupply:  master.TotalSupply.String(),
 		Metadata:     metadata,
 		Verification: oas.JettonVerificationType(meta.Verification),
 		HoldersCount: holders[master.Address],
 		Admin:        convertOptAccountAddress(master.Admin, h.addressBook),
+		Preview:      meta.PreviewImage,
 	}
-	if meta.PreviewImage != "" {
-		info.Preview.SetTo(meta.PreviewImage)
-	}
-	return info
 }

@@ -23738,10 +23738,8 @@ func (s *JettonInfo) encodeFields(e *jx.Encoder) {
 		s.Metadata.Encode(e)
 	}
 	{
-		if s.Preview.Set {
-			e.FieldStart("preview")
-			s.Preview.Encode(e)
-		}
+		e.FieldStart("preview")
+		e.Str(s.Preview)
 	}
 	{
 		e.FieldStart("verification")
@@ -23817,9 +23815,11 @@ func (s *JettonInfo) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"metadata\"")
 			}
 		case "preview":
+			requiredBitSet[0] |= 1 << 4
 			if err := func() error {
-				s.Preview.Reset()
-				if err := s.Preview.Decode(d); err != nil {
+				v, err := d.Str()
+				s.Preview = string(v)
+				if err != nil {
 					return err
 				}
 				return nil
@@ -23858,7 +23858,7 @@ func (s *JettonInfo) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b01101011,
+		0b01111011,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
