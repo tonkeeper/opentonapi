@@ -46,6 +46,14 @@ func (h *Handler) convertNFT(ctx context.Context, item core.NftItem, book addres
 		}))
 	}
 	var image, description string
+	if item.Metadata != nil {
+		if imageI, prs := item.Metadata["image"]; prs {
+			image, _ = imageI.(string)
+		}
+		if descriptionI, prs := item.Metadata["description"]; prs {
+			description, _ = descriptionI.(string)
+		}
+	}
 	if item.CollectionAddress != nil {
 		cInfo, _ := metaCache.getCollectionMeta(ctx, *item.CollectionAddress)
 		if cc, prs := book.GetCollectionInfoByAddress(*item.CollectionAddress); prs {
@@ -64,14 +72,6 @@ func (h *Handler) convertNFT(ctx context.Context, item core.NftItem, book addres
 				"uri":   fmt.Sprintf("https://dns.tonkeeper.com/manage?v=%v", item.Address.ToRaw())},
 			})
 			nftItem.Metadata["buttons"] = buttons
-		}
-	}
-	if item.Metadata != nil {
-		if imageI, prs := item.Metadata["image"]; prs {
-			image, _ = imageI.(string)
-		}
-		if descriptionI, prs := item.Metadata["description"]; prs {
-			description, _ = descriptionI.(string)
 		}
 	}
 	if len(nftItem.ApprovedBy) > 0 && nftItem.Verified {
