@@ -414,18 +414,6 @@
     },
     "description": "a list of account ids"
    },
-   "Backup": {
-    "content": {
-     "application/octet-stream": {
-      "schema": {
-       "format": "binary",
-       "type": "string"
-      }
-     }
-    },
-    "description": "Information for saving backup",
-    "required": true
-   },
    "BatchBoc": {
     "content": {
      "application/json": {
@@ -10457,76 +10445,6 @@
        }
       },
       "description": "auth token"
-     },
-     "default": {
-      "$ref": "#/components/responses/Error"
-     }
-    },
-    "tags": [
-     "Wallet"
-    ]
-   }
-  },
-  "/v2/wallet/backup": {
-   "get": {
-    "description": "Get backup info",
-    "operationId": "getWalletBackup",
-    "parameters": [
-     {
-      "in": "header",
-      "name": "X-TonConnect-Auth",
-      "required": true,
-      "schema": {
-       "type": "string"
-      }
-     }
-    ],
-    "responses": {
-     "200": {
-      "content": {
-       "application/json": {
-        "schema": {
-         "properties": {
-          "dump": {
-           "type": "string"
-          }
-         },
-         "required": [
-          "dump"
-         ],
-         "type": "object"
-        }
-       }
-      },
-      "description": "get wallet dump"
-     },
-     "default": {
-      "$ref": "#/components/responses/Error"
-     }
-    },
-    "tags": [
-     "Wallet"
-    ]
-   },
-   "put": {
-    "description": "Set backup info",
-    "operationId": "setWalletBackup",
-    "parameters": [
-     {
-      "in": "header",
-      "name": "X-TonConnect-Auth",
-      "required": true,
-      "schema": {
-       "type": "string"
-      }
-     }
-    ],
-    "requestBody": {
-     "$ref": "#/components/requestBodies/Backup"
-    },
-    "responses": {
-     "200": {
-      "description": "success"
      },
      "default": {
       "$ref": "#/components/responses/Error"

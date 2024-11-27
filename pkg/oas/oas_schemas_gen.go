@@ -4,7 +4,6 @@ package oas
 
 import (
 	"fmt"
-	"io"
 
 	"github.com/go-faster/errors"
 	"github.com/go-faster/jx"
@@ -6995,20 +6994,6 @@ func (s *GetTonConnectPayloadOK) GetPayload() string {
 // SetPayload sets the value of Payload.
 func (s *GetTonConnectPayloadOK) SetPayload(val string) {
 	s.Payload = val
-}
-
-type GetWalletBackupOK struct {
-	Dump string `json:"dump"`
-}
-
-// GetDump returns the value of Dump.
-func (s *GetWalletBackupOK) GetDump() string {
-	return s.Dump
-}
-
-// SetDump sets the value of Dump.
-func (s *GetWalletBackupOK) SetDump(val string) {
-	s.Dump = val
 }
 
 // Ref: #/components/schemas/ImagePreview
@@ -15008,23 +14993,6 @@ func (s *ServiceStatus) SetIndexingLatency(val int) {
 // SetLastKnownMasterchainSeqno sets the value of LastKnownMasterchainSeqno.
 func (s *ServiceStatus) SetLastKnownMasterchainSeqno(val int32) {
 	s.LastKnownMasterchainSeqno = val
-}
-
-// SetWalletBackupOK is response for SetWalletBackup operation.
-type SetWalletBackupOK struct{}
-
-type SetWalletBackupReq struct {
-	Data io.Reader
-}
-
-// Read reads data from the Data reader.
-//
-// Kept to satisfy the io.Reader interface.
-func (s SetWalletBackupReq) Read(p []byte) (n int, err error) {
-	if s.Data == nil {
-		return 0, io.EOF
-	}
-	return s.Data.Read(p)
 }
 
 // Ref: #/components/schemas/SignRawMessage

@@ -11247,61 +11247,6 @@ func decodeGetTraceParams(args [1]string, argsEscaped bool, r *http.Request) (pa
 	return params, nil
 }
 
-// GetWalletBackupParams is parameters of getWalletBackup operation.
-type GetWalletBackupParams struct {
-	XTonConnectAuth string
-}
-
-func unpackGetWalletBackupParams(packed middleware.Parameters) (params GetWalletBackupParams) {
-	{
-		key := middleware.ParameterKey{
-			Name: "X-TonConnect-Auth",
-			In:   "header",
-		}
-		params.XTonConnectAuth = packed[key].(string)
-	}
-	return params
-}
-
-func decodeGetWalletBackupParams(args [0]string, argsEscaped bool, r *http.Request) (params GetWalletBackupParams, _ error) {
-	h := uri.NewHeaderDecoder(r.Header)
-	// Decode header: X-TonConnect-Auth.
-	if err := func() error {
-		cfg := uri.HeaderParameterDecodingConfig{
-			Name:    "X-TonConnect-Auth",
-			Explode: false,
-		}
-		if err := h.HasParam(cfg); err == nil {
-			if err := h.DecodeParam(cfg, func(d uri.Decoder) error {
-				val, err := d.DecodeValue()
-				if err != nil {
-					return err
-				}
-
-				c, err := conv.ToString(val)
-				if err != nil {
-					return err
-				}
-
-				params.XTonConnectAuth = c
-				return nil
-			}); err != nil {
-				return err
-			}
-		} else {
-			return validate.ErrFieldRequired
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "X-TonConnect-Auth",
-			In:   "header",
-			Err:  err,
-		}
-	}
-	return params, nil
-}
-
 // GetWalletsByPublicKeyParams is parameters of getWalletsByPublicKey operation.
 type GetWalletsByPublicKeyParams struct {
 	PublicKey string
@@ -11500,61 +11445,6 @@ func decodeSearchAccountsParams(args [0]string, argsEscaped bool, r *http.Reques
 		return params, &ogenerrors.DecodeParamError{
 			Name: "name",
 			In:   "query",
-			Err:  err,
-		}
-	}
-	return params, nil
-}
-
-// SetWalletBackupParams is parameters of setWalletBackup operation.
-type SetWalletBackupParams struct {
-	XTonConnectAuth string
-}
-
-func unpackSetWalletBackupParams(packed middleware.Parameters) (params SetWalletBackupParams) {
-	{
-		key := middleware.ParameterKey{
-			Name: "X-TonConnect-Auth",
-			In:   "header",
-		}
-		params.XTonConnectAuth = packed[key].(string)
-	}
-	return params
-}
-
-func decodeSetWalletBackupParams(args [0]string, argsEscaped bool, r *http.Request) (params SetWalletBackupParams, _ error) {
-	h := uri.NewHeaderDecoder(r.Header)
-	// Decode header: X-TonConnect-Auth.
-	if err := func() error {
-		cfg := uri.HeaderParameterDecodingConfig{
-			Name:    "X-TonConnect-Auth",
-			Explode: false,
-		}
-		if err := h.HasParam(cfg); err == nil {
-			if err := h.DecodeParam(cfg, func(d uri.Decoder) error {
-				val, err := d.DecodeValue()
-				if err != nil {
-					return err
-				}
-
-				c, err := conv.ToString(val)
-				if err != nil {
-					return err
-				}
-
-				params.XTonConnectAuth = c
-				return nil
-			}); err != nil {
-				return err
-			}
-		} else {
-			return validate.ErrFieldRequired
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "X-TonConnect-Auth",
-			In:   "header",
 			Err:  err,
 		}
 	}
