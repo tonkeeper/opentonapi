@@ -3739,6 +3739,10 @@
       "example": true,
       "type": "boolean"
      },
+     "preview": {
+      "example": "https://cache.tonapi.io/images/jetton.jpg",
+      "type": "string"
+     },
      "total_supply": {
       "example": "5887105890579978",
       "type": "string",
@@ -3753,7 +3757,8 @@
      "total_supply",
      "metadata",
      "verification",
-     "holders_count"
+     "holders_count",
+     "preview"
     ],
     "type": "object"
    },
@@ -3787,7 +3792,8 @@
       "type": "string"
      },
      "image": {
-      "example": "https://cache.tonapi.io/images/jetton.jpg",
+      "description": "this field currently returns a cached image URL (e.g., \"https://cache.tonapi.io/images/jetton.jpg\"). In the future, this will be replaced with the original URL from the metadata. The cached image is already available in the `preview` field of `JettonInfo` and will remain there.",
+      "example": "https://bitcoincash-example.github.io/website/logo.png",
       "type": "string"
      },
      "name": {

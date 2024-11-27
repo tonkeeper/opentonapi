@@ -6900,7 +6900,8 @@ components:
           example: "9"
         image:
           type: string
-          example: "https://cache.tonapi.io/images/jetton.jpg"
+          example: "https://bitcoincash-example.github.io/website/logo.png"
+          description: this field currently returns a cached image URL (e.g., "https://cache.tonapi.io/images/jetton.jpg"). In the future, this will be replaced with the original URL from the metadata. The cached image is already available in the `preview` field of `JettonInfo` and will remain there.
         description:
           type: string
           example: Wrapped Toncoin
@@ -6972,6 +6973,7 @@ components:
         - metadata
         - verification
         - holders_count
+        - preview
       properties:
         mintable:
           type: boolean
@@ -6984,6 +6986,9 @@ components:
           $ref: '#/components/schemas/AccountAddress'
         metadata:
           $ref: '#/components/schemas/JettonMetadata'
+        preview:
+          type: string
+          example: "https://cache.tonapi.io/images/jetton.jpg"
         verification:
           $ref: '#/components/schemas/JettonVerificationType'
         holders_count:

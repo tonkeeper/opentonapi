@@ -22,7 +22,7 @@ func jettonPreview(master ton.AccountID, meta NormalizedMetadata) oas.JettonPrev
 		Symbol:       meta.Symbol,
 		Verification: oas.JettonVerificationType(meta.Verification),
 		Decimals:     meta.Decimals,
-		Image:        meta.Image,
+		Image:        meta.PreviewImage,
 	}
 	if meta.CustomPayloadApiUri != "" {
 		preview.CustomPayloadAPIURI = oas.NewOptString(meta.CustomPayloadApiUri)
@@ -178,5 +178,6 @@ func (h *Handler) convertJettonInfo(ctx context.Context, master core.JettonMaste
 		Verification: oas.JettonVerificationType(meta.Verification),
 		HoldersCount: holders[master.Address],
 		Admin:        convertOptAccountAddress(master.Admin, h.addressBook),
+		Preview:      meta.PreviewImage,
 	}
 }
