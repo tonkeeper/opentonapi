@@ -41,6 +41,7 @@ func ExtractRiskFromRawMessages(rawMessages []tongoWallet.RawMessage) (*Risk, er
 			risk.TransferAllRemainingBalance = true
 		}
 		var m abi.MessageRelaxed
+		rawMsg.Message.ResetCounters() // to avoid the case when several messages are taken from the same cell
 		if err := tlb.Unmarshal(rawMsg.Message, &m); err != nil {
 			return nil, err
 		}
