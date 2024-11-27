@@ -30,6 +30,7 @@ type NormalizedMetadata struct {
 	Social              []string
 	Websites            []string
 	CustomPayloadApiUri string
+	PreviewImage        string // path to the converted image
 }
 
 func NormalizeMetadata(meta tep64.Metadata, info *addressbook.KnownJetton, trust core.TrustType) NormalizedMetadata {
@@ -41,7 +42,7 @@ func NormalizeMetadata(meta tep64.Metadata, info *addressbook.KnownJetton, trust
 	if name == "" {
 		name = "Unknown Token"
 	}
-	image := references.Placeholder
+	var image string
 	if meta.Image != "" {
 		image = meta.Image
 	}
@@ -57,19 +58,21 @@ func NormalizeMetadata(meta tep64.Metadata, info *addressbook.KnownJetton, trust
 		websites = info.Websites
 		trust = core.TrustWhitelist
 	}
-
-	image = imgGenerator.DefaultGenerator.GenerateImageUrl(image, 200, 200)
+	previewImage := references.Placeholder
+	previewImage = rewriteIfNotEmpty(previewImage, image)
+	previewImage = imgGenerator.DefaultGenerator.GenerateImageUrl(previewImage, 200, 200)
 
 	return NormalizedMetadata{
 		Name:                name,
 		Description:         description,
-		Image:               image,
+		Image:               previewImage, // TODO: replace with `image` after migration to `previewImage`
 		Symbol:              symbol,
 		Decimals:            convertJettonDecimals(meta.Decimals),
 		Verification:        trust,
 		Social:              social,
 		Websites:            websites,
 		CustomPayloadApiUri: meta.CustomPayloadAPIURL,
+		PreviewImage:        previewImage,
 	}
 }
 

@@ -84,14 +84,18 @@ func (h *Handler) GetJettonInfo(ctx context.Context, params oas.GetJettonInfoPar
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
-	return &oas.JettonInfo{
+	info := oas.JettonInfo{
 		Mintable:     data.Mintable,
 		TotalSupply:  data.TotalSupply.String(),
 		Metadata:     metadata,
 		Verification: oas.JettonVerificationType(meta.Verification),
 		HoldersCount: holdersCount[account.ID],
 		Admin:        convertOptAccountAddress(data.Admin, h.addressBook),
-	}, nil
+	}
+	if meta.PreviewImage != "" {
+		info.Preview.SetTo(meta.PreviewImage)
+	}
+	return &info, nil
 }
 
 func (h *Handler) GetAccountJettonsHistory(ctx context.Context, params oas.GetAccountJettonsHistoryParams) (*oas.AccountEvents, error) {

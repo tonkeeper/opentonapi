@@ -23738,6 +23738,12 @@ func (s *JettonInfo) encodeFields(e *jx.Encoder) {
 		s.Metadata.Encode(e)
 	}
 	{
+		if s.Preview.Set {
+			e.FieldStart("preview")
+			s.Preview.Encode(e)
+		}
+	}
+	{
 		e.FieldStart("verification")
 		s.Verification.Encode(e)
 	}
@@ -23747,13 +23753,14 @@ func (s *JettonInfo) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfJettonInfo = [6]string{
+var jsonFieldsNameOfJettonInfo = [7]string{
 	0: "mintable",
 	1: "total_supply",
 	2: "admin",
 	3: "metadata",
-	4: "verification",
-	5: "holders_count",
+	4: "preview",
+	5: "verification",
+	6: "holders_count",
 }
 
 // Decode decodes JettonInfo from json.
@@ -23809,8 +23816,18 @@ func (s *JettonInfo) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"metadata\"")
 			}
+		case "preview":
+			if err := func() error {
+				s.Preview.Reset()
+				if err := s.Preview.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"preview\"")
+			}
 		case "verification":
-			requiredBitSet[0] |= 1 << 4
+			requiredBitSet[0] |= 1 << 5
 			if err := func() error {
 				if err := s.Verification.Decode(d); err != nil {
 					return err
@@ -23820,7 +23837,7 @@ func (s *JettonInfo) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"verification\"")
 			}
 		case "holders_count":
-			requiredBitSet[0] |= 1 << 5
+			requiredBitSet[0] |= 1 << 6
 			if err := func() error {
 				v, err := d.Int32()
 				s.HoldersCount = int32(v)
@@ -23841,7 +23858,7 @@ func (s *JettonInfo) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b00111011,
+		0b01101011,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.

@@ -22,7 +22,7 @@ func jettonPreview(master ton.AccountID, meta NormalizedMetadata) oas.JettonPrev
 		Symbol:       meta.Symbol,
 		Verification: oas.JettonVerificationType(meta.Verification),
 		Decimals:     meta.Decimals,
-		Image:        meta.Image,
+		Image:        meta.PreviewImage,
 	}
 	if meta.CustomPayloadApiUri != "" {
 		preview.CustomPayloadAPIURI = oas.NewOptString(meta.CustomPayloadApiUri)
@@ -171,7 +171,7 @@ func (h *Handler) convertJettonBalance(ctx context.Context, wallet core.JettonWa
 func (h *Handler) convertJettonInfo(ctx context.Context, master core.JettonMaster, holders map[tongo.AccountID]int32) oas.JettonInfo {
 	meta := h.GetJettonNormalizedMetadata(ctx, master.Address)
 	metadata := jettonMetadata(master.Address, meta)
-	return oas.JettonInfo{
+	info := oas.JettonInfo{
 		Mintable:     master.Mintable,
 		TotalSupply:  master.TotalSupply.String(),
 		Metadata:     metadata,
@@ -179,4 +179,8 @@ func (h *Handler) convertJettonInfo(ctx context.Context, master core.JettonMaste
 		HoldersCount: holders[master.Address],
 		Admin:        convertOptAccountAddress(master.Admin, h.addressBook),
 	}
+	if meta.PreviewImage != "" {
+		info.Preview.SetTo(meta.PreviewImage)
+	}
+	return info
 }
