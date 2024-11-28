@@ -104,7 +104,7 @@ paths:
                 example: { }
         'default':
           $ref: '#/components/responses/Error'
-  /webhooks/{webhook_id}/failure-logs:
+  /webhooks/{webhook_id}/logs:
     get:
       description: "Get logs of failed attempts to deliver notifications to the webhook"
       operationId: getFailureLogs
@@ -463,8 +463,11 @@ components:
             required:
               - timestamp
               - message
+              - event_type
             properties:
               message:
+                type: string
+              event_type:
                 type: string
               timestamp:
                 type: string
