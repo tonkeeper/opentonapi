@@ -589,12 +589,6 @@ type Handler interface {
 	//
 	// GET /v2/traces/{trace_id}
 	GetTrace(ctx context.Context, params GetTraceParams) (*Trace, error)
-	// GetWalletBackup implements getWalletBackup operation.
-	//
-	// Get backup info.
-	//
-	// GET /v2/wallet/backup
-	GetWalletBackup(ctx context.Context, params GetWalletBackupParams) (*GetWalletBackupOK, error)
 	// GetWalletsByPublicKey implements getWalletsByPublicKey operation.
 	//
 	// Get wallets by public key.
@@ -625,12 +619,6 @@ type Handler interface {
 	//
 	// POST /v2/liteserver/send_message
 	SendRawMessage(ctx context.Context, req *SendRawMessageReq) (*SendRawMessageOK, error)
-	// SetWalletBackup implements setWalletBackup operation.
-	//
-	// Set backup info.
-	//
-	// PUT /v2/wallet/backup
-	SetWalletBackup(ctx context.Context, req SetWalletBackupReq, params SetWalletBackupParams) error
 	// Status implements status operation.
 	//
 	// Status.

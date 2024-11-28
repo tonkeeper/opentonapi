@@ -3169,29 +3169,6 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 					}
 
 					elem = origElem
-				case 'b': // Prefix: "backup"
-					origElem := elem
-					if l := len("backup"); len(elem) >= l && elem[0:l] == "backup" {
-						elem = elem[l:]
-					} else {
-						break
-					}
-
-					if len(elem) == 0 {
-						// Leaf node.
-						switch r.Method {
-						case "GET":
-							s.handleGetWalletBackupRequest([0]string{}, elemIsEscaped, w, r)
-						case "PUT":
-							s.handleSetWalletBackupRequest([0]string{}, elemIsEscaped, w, r)
-						default:
-							s.notAllowed(w, r, "GET,PUT")
-						}
-
-						return
-					}
-
-					elem = origElem
 				case 'e': // Prefix: "emulate"
 					origElem := elem
 					if l := len("emulate"); len(elem) >= l && elem[0:l] == "emulate" {
@@ -6709,40 +6686,6 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 							r.summary = ""
 							r.operationID = "tonConnectProof"
 							r.pathPattern = "/v2/wallet/auth/proof"
-							r.args = args
-							r.count = 0
-							return r, true
-						default:
-							return
-						}
-					}
-
-					elem = origElem
-				case 'b': // Prefix: "backup"
-					origElem := elem
-					if l := len("backup"); len(elem) >= l && elem[0:l] == "backup" {
-						elem = elem[l:]
-					} else {
-						break
-					}
-
-					if len(elem) == 0 {
-						switch method {
-						case "GET":
-							// Leaf: GetWalletBackup
-							r.name = "GetWalletBackup"
-							r.summary = ""
-							r.operationID = "getWalletBackup"
-							r.pathPattern = "/v2/wallet/backup"
-							r.args = args
-							r.count = 0
-							return r, true
-						case "PUT":
-							// Leaf: SetWalletBackup
-							r.name = "SetWalletBackup"
-							r.summary = ""
-							r.operationID = "setWalletBackup"
-							r.pathPattern = "/v2/wallet/backup"
 							r.args = args
 							r.count = 0
 							return r, true

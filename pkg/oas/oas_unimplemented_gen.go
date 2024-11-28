@@ -876,15 +876,6 @@ func (UnimplementedHandler) GetTrace(ctx context.Context, params GetTraceParams)
 	return r, ht.ErrNotImplemented
 }
 
-// GetWalletBackup implements getWalletBackup operation.
-//
-// Get backup info.
-//
-// GET /v2/wallet/backup
-func (UnimplementedHandler) GetWalletBackup(ctx context.Context, params GetWalletBackupParams) (r *GetWalletBackupOK, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
 // GetWalletsByPublicKey implements getWalletsByPublicKey operation.
 //
 // Get wallets by public key.
@@ -928,15 +919,6 @@ func (UnimplementedHandler) SendBlockchainMessage(ctx context.Context, req *Send
 // POST /v2/liteserver/send_message
 func (UnimplementedHandler) SendRawMessage(ctx context.Context, req *SendRawMessageReq) (r *SendRawMessageOK, _ error) {
 	return r, ht.ErrNotImplemented
-}
-
-// SetWalletBackup implements setWalletBackup operation.
-//
-// Set backup info.
-//
-// PUT /v2/wallet/backup
-func (UnimplementedHandler) SetWalletBackup(ctx context.Context, req SetWalletBackupReq, params SetWalletBackupParams) error {
-	return ht.ErrNotImplemented
 }
 
 // Status implements status operation.

@@ -1931,51 +1931,6 @@ paths:
                 $ref: '#/components/schemas/AccountInfoByStateInit'
         'default':
           $ref: '#/components/responses/Error'
-  
-  /v2/wallet/backup:
-    get:
-      description: Get backup info
-      operationId: getWalletBackup
-      tags:
-        - Wallet
-      parameters:
-        - in: header
-          name: X-TonConnect-Auth
-          schema:
-            type: string
-          required: true
-      responses:
-        '200':
-          description: get wallet dump
-          content:
-            application/json:
-              schema:
-                type: object
-                required:
-                  - dump
-                properties:
-                  dump:
-                    type: string
-        'default':
-          $ref: '#/components/responses/Error'
-    put:
-      description: Set backup info
-      operationId: setWalletBackup
-      tags:
-        - Wallet
-      parameters:
-        - in: header
-          name: X-TonConnect-Auth
-          schema:
-            type: string
-          required: true
-      requestBody:
-        $ref: "#/components/requestBodies/Backup"
-      responses:
-        '200':
-          description: success
-        'default':
-          $ref: '#/components/responses/Error'
   /v2/wallet/auth/proof:
     post:
       description: Account verification and token issuance
@@ -3337,14 +3292,6 @@ components:
                   state_init:
                     type: string
                     format: cell-base64
-    Backup:
-      description: "Information for saving backup"
-      required: true
-      content:
-        application/octet-stream:
-          schema:
-            type: string
-            format: binary
     TonConnectStateInit:
       description: "Data that is expected"
       required: true
