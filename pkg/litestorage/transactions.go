@@ -35,7 +35,7 @@ func (s *LiteStorage) GetLogs(ctx context.Context, account tongo.AccountID, dest
 					if destination.SumType == "AddrNone" && m.DestinationExtern != nil {
 						continue
 					}
-					if destination.SumType == "AddrExtern" && (m.DestinationExtern == nil || m.DestinationExtern.ToFiftHex() != destination.AddrExtern.ExternalAddress.ToFiftHex()) {
+					if destination.SumType == "AddrExtern" && (m.DestinationExtern == nil || m.DestinationExtern.ToFiftHex() != destination.AddrExtern.ToFiftHex()) {
 						continue
 					}
 				}
