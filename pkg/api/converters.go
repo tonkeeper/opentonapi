@@ -3,13 +3,16 @@ package api
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
-	imgGenerator "github.com/tonkeeper/opentonapi/pkg/image"
 	"math/big"
 	"reflect"
 	"strconv"
 	"strings"
 	"unicode"
+
+	imgGenerator "github.com/tonkeeper/opentonapi/pkg/image"
+	"github.com/tonkeeper/opentonapi/pkg/references"
 
 	"github.com/go-faster/jx"
 	"github.com/tonkeeper/tongo"
@@ -22,15 +25,47 @@ import (
 	walletPkg "github.com/tonkeeper/opentonapi/pkg/wallet"
 )
 
-func toError(code int, err error) *oas.ErrorStatusCode {
-	if strings.HasPrefix(err.Error(), "failed to connect to") || strings.Contains(err.Error(), "host=") {
-		return &oas.ErrorStatusCode{StatusCode: code, Response: oas.Error{Error: "unknown error"}}
+// ErrorWithExtendedCode helps to pass additional information about an error.
+type ErrorWithExtendedCode struct {
+	Code         int
+	Message      string
+	ExtendedCode references.ExtendedCode
+}
+
+func (e ErrorWithExtendedCode) Error() string {
+	return e.Message
+}
+
+// censor removes sensitive information from the error message.
+func censor(msg string) string {
+	if strings.HasPrefix(msg, "failed to connect to") || strings.Contains(msg, "host=") {
+		return "unknown error"
+	}
+	return msg
+}
+
+func extendedCode(code references.ExtendedCode) oas.OptInt64 {
+	if code == 0 {
+		return oas.OptInt64{}
+	}
+	return oas.NewOptInt64(int64(code))
+}
+
+func toError(defaultCode int, err error) *oas.ErrorStatusCode {
+	var e ErrorWithExtendedCode
+	if errors.As(err, &e) {
+		return &oas.ErrorStatusCode{
+			StatusCode: e.Code,
+			Response: oas.Error{
+				Error:     censor(e.Message),
+				ErrorCode: extendedCode(e.ExtendedCode),
+			},
+		}
 	}
 	if s, ok := status.FromError(err); ok {
-		return &oas.ErrorStatusCode{StatusCode: code, Response: oas.Error{Error: s.Message()}}
+		return &oas.ErrorStatusCode{StatusCode: defaultCode, Response: oas.Error{Error: censor(s.Message())}}
 	}
-	msg := err.Error()
-	return &oas.ErrorStatusCode{StatusCode: code, Response: oas.Error{Error: msg}}
+	return &oas.ErrorStatusCode{StatusCode: defaultCode, Response: oas.Error{Error: censor(err.Error())}}
 }
 
 func anyToJSONRawMap(a any) map[string]jx.Raw { //todo: переписать этот ужас
