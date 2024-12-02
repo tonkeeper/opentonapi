@@ -15271,10 +15271,17 @@ func (s *Error) encodeFields(e *jx.Encoder) {
 		e.FieldStart("error")
 		e.Str(s.Error)
 	}
+	{
+		if s.ErrorCode.Set {
+			e.FieldStart("error_code")
+			s.ErrorCode.Encode(e)
+		}
+	}
 }
 
-var jsonFieldsNameOfError = [1]string{
+var jsonFieldsNameOfError = [2]string{
 	0: "error",
+	1: "error_code",
 }
 
 // Decode decodes Error from json.
@@ -15297,6 +15304,16 @@ func (s *Error) Decode(d *jx.Decoder) error {
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"error\"")
+			}
+		case "error_code":
+			if err := func() error {
+				s.ErrorCode.Reset()
+				if err := s.ErrorCode.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"error_code\"")
 			}
 		default:
 			return d.Skip()

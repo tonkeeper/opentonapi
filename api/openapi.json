@@ -690,6 +690,10 @@
        "properties": {
         "error": {
          "type": "string"
+        },
+        "error_code": {
+         "format": "int64",
+         "type": "integer"
         }
        },
        "required": [

@@ -5265,7 +5265,8 @@ func (s *EncryptedComment) SetCipherText(val string) {
 }
 
 type Error struct {
-	Error string `json:"error"`
+	Error     string   `json:"error"`
+	ErrorCode OptInt64 `json:"error_code"`
 }
 
 // GetError returns the value of Error.
@@ -5273,9 +5274,19 @@ func (s *Error) GetError() string {
 	return s.Error
 }
 
+// GetErrorCode returns the value of ErrorCode.
+func (s *Error) GetErrorCode() OptInt64 {
+	return s.ErrorCode
+}
+
 // SetError sets the value of Error.
 func (s *Error) SetError(val string) {
 	s.Error = val
+}
+
+// SetErrorCode sets the value of ErrorCode.
+func (s *Error) SetErrorCode(val OptInt64) {
+	s.ErrorCode = val
 }
 
 // ErrorStatusCode wraps Error with StatusCode.

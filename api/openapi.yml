@@ -7391,3 +7391,6 @@ components:
             properties:
               error:
                 type: string
+              error_code:
+                type: integer
+                format: int64
