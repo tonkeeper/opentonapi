@@ -1219,6 +1219,10 @@ func (s *Server) handleExecGetMethodForBlockchainAccountRequest(args [2]string, 
 					Name: "args",
 					In:   "query",
 				}: params.Args,
+				{
+					Name: "fix_order",
+					In:   "query",
+				}: params.FixOrder,
 			},
 			Raw: r,
 		}
