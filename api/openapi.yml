@@ -405,7 +405,7 @@ paths:
               A temporary fix to switch to a scheme with direct ordering of arguments. 
               If equal to false, then the method takes arguments in direct order,
               e.g. for get_nft_content(int index, cell individual_content) we pass a list of arguments [index, individual_content].
-              If equal is true, then the method takes arguments in reverse order, e.g. [individual_content, index].
+              If equal to true, then the method takes arguments in reverse order, e.g. [individual_content, index].
             default: true
       responses:
         '200':
