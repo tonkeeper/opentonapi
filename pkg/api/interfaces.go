@@ -112,7 +112,7 @@ type storage interface {
 	GetAccountMultisigs(ctx context.Context, accountID ton.AccountID) ([]core.Multisig, error)
 	GetMultisigByID(ctx context.Context, accountID ton.AccountID) (*core.Multisig, error)
 
-	SaveTraceWithState(msgHash string, trace *core.Trace, getMethods []abi.MethodInvocation, ttl time.Duration) error
+	SaveTraceWithState(ctx context.Context, msgHash string, trace *core.Trace, getMethods []abi.MethodInvocation, ttl time.Duration) error
 	GetTraceWithState(ctx context.Context, msgHash string) (*core.Trace, []abi.MethodInvocation, error)
 
 	liteStorageRaw
