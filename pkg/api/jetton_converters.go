@@ -8,6 +8,7 @@ import (
 	"github.com/tonkeeper/tongo/abi"
 	"github.com/tonkeeper/tongo/tlb"
 	"net/http"
+	"sort"
 	"strings"
 
 	"github.com/tonkeeper/opentonapi/pkg/bath"
@@ -54,85 +55,83 @@ func jettonMetadata(account ton.AccountID, meta NormalizedMetadata) oas.JettonMe
 	return metadata
 }
 
-func (h *Handler) convertJettonHistory(ctx context.Context, account ton.AccountID, master *ton.AccountID, history []core.JettonOperation, acceptLanguage oas.OptString) ([]oas.AccountEvent, int64, error) {
+func (h *Handler) convertJettonHistory(ctx context.Context, account ton.AccountID, master *ton.AccountID, history map[core.TraceID][]core.JettonOperation, acceptLanguage oas.OptString) ([]oas.AccountEvent, int64, error) {
 	var lastLT uint64
 	var events []oas.AccountEvent
-	res := make(map[core.TraceID]oas.AccountEvent)
 
-	for _, op := range history {
-		event, ok := res[op.TraceID]
-		if !ok {
-			event = oas.AccountEvent{
-				EventID:   op.TraceID.Hash.Hex(),
-				Account:   convertAccountAddress(account, h.addressBook),
-				Timestamp: op.TraceID.UTime,
-				IsScam:    false,
-				Lt:        int64(op.TraceID.Lt),
-				Extra:     0,
-			}
+	for id, ops := range history {
+		event := oas.AccountEvent{
+			EventID:   id.Hash.Hex(),
+			Account:   convertAccountAddress(account, h.addressBook),
+			Timestamp: id.UTime, // TODO: or first/last op Utime
+			IsScam:    false,
+			Lt:        int64(id.Lt), // TODO: or first/last op Lt
+			Extra:     0,
 		}
-
-		var action bath.Action
-		switch op.Operation {
-		case core.TransferJettonOperation:
-			transferAction := bath.JettonTransferAction{
-				Jetton:    op.JettonMaster,
-				Recipient: op.Destination,
-				Sender:    op.Source,
-				Amount:    tlb.VarUInteger16(*op.Amount.BigInt()),
+		for _, op := range ops {
+			var action bath.Action
+			switch op.Operation {
+			case core.TransferJettonOperation:
+				transferAction := bath.JettonTransferAction{
+					Jetton:    op.JettonMaster,
+					Recipient: op.Destination,
+					Sender:    op.Source,
+					Amount:    tlb.VarUInteger16(*op.Amount.BigInt()),
+				}
+				action.Type = "JettonTransfer"
+				action.JettonTransfer = &transferAction
+				var payload abi.JettonPayload
+				err := json.Unmarshal([]byte(op.ForwardPayload), &payload)
+				if err != nil {
+					break
+				}
+				switch p := payload.Value.(type) {
+				case abi.TextCommentJettonPayload:
+					comment := string(p.Text)
+					action.JettonTransfer.Comment = &comment
+				case abi.EncryptedTextCommentJettonPayload:
+					action.JettonTransfer.EncryptedComment = &bath.EncryptedComment{EncryptionType: "simple", CipherText: p.CipherText}
+				}
+			case core.MintJettonOperation:
+				mintAction := bath.JettonMintAction{
+					Jetton:    op.JettonMaster,
+					Recipient: *op.Destination,
+					Amount:    tlb.VarUInteger16(*op.Amount.BigInt()),
+				}
+				action.Type = "JettonMint"
+				action.JettonMint = &mintAction
+			case core.BurnJettonOperation:
+				burnAction := bath.JettonBurnAction{
+					Jetton: op.JettonMaster,
+					Sender: *op.Source,
+					Amount: tlb.VarUInteger16(*op.Amount.BigInt()),
+				}
+				action.Type = "JettonTransfer"
+				action.JettonBurn = &burnAction
+			default:
+				continue
 			}
-			action.Type = "JettonTransfer"
-			action.JettonTransfer = &transferAction
-			var payload abi.JettonPayload
-			err := json.Unmarshal([]byte(op.ForwardPayload), &payload)
+			convertedAction, err := h.convertAction(ctx, &account, action, acceptLanguage)
 			if err != nil {
-				break
+				return nil, 0, err
 			}
-			switch p := payload.Value.(type) {
-			case abi.TextCommentJettonPayload:
-				comment := string(p.Text)
-				action.JettonTransfer.Comment = &comment
-			case abi.EncryptedTextCommentJettonPayload:
-				action.JettonTransfer.EncryptedComment = &bath.EncryptedComment{EncryptionType: "simple", CipherText: p.CipherText}
+			event.Actions = append(event.Actions, convertedAction)
+			if lastLT == 0 {
+				lastLT = op.Lt
 			}
-		case core.MintJettonOperation:
-			mintAction := bath.JettonMintAction{
-				Jetton:    op.JettonMaster,
-				Recipient: *op.Destination,
-				Amount:    tlb.VarUInteger16(*op.Amount.BigInt()),
+			if op.Lt < lastLT {
+				lastLT = op.Lt
 			}
-			action.Type = "JettonMint"
-			action.JettonMint = &mintAction
-		case core.BurnJettonOperation:
-			burnAction := bath.JettonBurnAction{
-				Jetton: op.JettonMaster,
-				Sender: *op.Source,
-				Amount: tlb.VarUInteger16(*op.Amount.BigInt()),
-			}
-			action.Type = "JettonTransfer"
-			action.JettonBurn = &burnAction
-		default:
-			continue
 		}
-		convertedAction, err := h.convertAction(ctx, &account, action, acceptLanguage)
-		if err != nil {
-			return nil, 0, err
-		}
-		event.Actions = append(event.Actions, convertedAction)
-		if op.Lt > lastLT {
-			lastLT = op.Lt
-		}
-		res[op.TraceID] = event
-	}
-
-	for _, event := range res {
-		event.IsScam = h.spamFilter.CheckActions(event.Actions, &account, nil)
 		if len(event.Actions) == 0 {
 			continue
 		}
+		event.IsScam = h.spamFilter.CheckActions(event.Actions, &account, nil)
 		events = append(events, event)
 	}
-
+	sort.Slice(events, func(i, j int) bool {
+		return events[i].Lt > events[j].Lt
+	})
 	return events, int64(lastLT), nil
 }
 
