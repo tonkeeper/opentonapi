@@ -84,6 +84,7 @@ tags:
     externalDocs:
       description: Additional documentation
       url: https://docs.tonconsole.com/tonapi/rest-api/utilities
+  - name: Webhooks
 
 paths:
   /v2/status:
@@ -2811,8 +2812,426 @@ paths:
                 $ref: '#/components/schemas/AccountEvent'
         'default':
           $ref: '#/components/responses/Error'
+  /webhooks:
+    get:
+      description: "Get list of webhooks"
+      operationId: getWebhooks
+      tags:
+        - Webhooks
+      servers:
+        - url: https://rt.tonapi.io
+        - url: https://rt-testnet.tonapi.io
+      parameters:
+        - $ref: '#/components/parameters/tokenQuery'
+      responses:
+        '200':
+          description: "list of webhooks"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WebhookList'
+        'default':
+          $ref: '#/components/responses/Error'
+    post:
+      operationId: createWebhook
+      tags:
+        - Webhooks
+      servers:
+        - url: https://rt.tonapi.io
+        - url: https://rt-testnet.tonapi.io
+      parameters:
+        - $ref: '#/components/parameters/tokenQuery'
+      requestBody:
+        $ref: "#/components/requestBodies/WebhookConfiguration"
+      responses:
+        '200':
+          description: "information about created webhook"
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - webhook_id
+                  - token
+                properties:
+                  webhook_id:
+                    type: integer
+                    format: int64
+                  token:
+                    description: "secret token which will be used by TONAPI to authenticate itself when sending notifications to the webhook endpoint"
+                    type: string
+
+        'default':
+          $ref: '#/components/responses/Error'
+  /webhooks/{webhook_id}:
+    delete:
+      description: "remove webhook and its subscriptions"
+      operationId: deleteWebhook
+      tags:
+        - Webhooks
+      servers:
+        - url: https://rt.tonapi.io
+        - url: https://rt-testnet.tonapi.io
+      parameters:
+        - $ref: '#/components/parameters/tokenQuery'
+        - $ref: '#/components/parameters/webhookId'
+      responses:
+        '200':
+          description: ""
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                example: { }
+        'default':
+          $ref: '#/components/responses/Error'
+  /webhooks/{webhook_id}/generate-new-token:
+    post:
+      description: "generate a new secret token which will be used by TONAPI to authenticate itself when sending notifications to the webhook endpoint. The old token will be invalidated."
+      operationId: webhookGenerateNewToken
+      tags:
+        - Webhooks
+      servers:
+        - url: https://rt.tonapi.io
+        - url: https://rt-testnet.tonapi.io
+      parameters:
+        - $ref: '#/components/parameters/tokenQuery'
+        - $ref: '#/components/parameters/webhookId'
+      responses:
+        '200':
+          description: ""
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - token
+                properties:
+                  token:
+                    type: string
+        'default':
+          $ref: '#/components/responses/Error'
+  /webhooks/{webhook_id}/back-online:
+    post:
+      description: "Let TONAPI know that webhook is ready to receive notifications after it has been unavailable"
+      operationId: webhookBackOnline
+      tags:
+        - Webhooks
+      servers:
+        - url: https://rt.tonapi.io
+        - url: https://rt-testnet.tonapi.io
+      parameters:
+        - $ref: '#/components/parameters/tokenQuery'
+        - $ref: '#/components/parameters/webhookId'
+      responses:
+        '200':
+          description: ""
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                example: { }
+        'default':
+          $ref: '#/components/responses/Error'
+  /webhooks/{webhook_id}/logs:
+    get:
+      description: "Get logs of failed attempts to deliver notifications to the webhook"
+      operationId: getFailureLogs
+      tags:
+        - Webhooks
+      servers:
+        - url: https://rt.tonapi.io
+        - url: https://rt-testnet.tonapi.io
+      parameters:
+        - $ref: '#/components/parameters/tokenQuery'
+        - $ref: '#/components/parameters/webhookId'
+        - in: query
+          name: offset
+          required: false
+          schema:
+            type: integer
+            default: 0
+            minimum: 0
+      responses:
+        '200':
+          description: "list of webhooks"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WebhookLogs'
+        'default':
+          $ref: '#/components/responses/Error'
+  /usage-stats:
+    get:
+      operationId: getUsageStats
+      tags:
+        - Webhooks
+      servers:
+        - url: https://rt.tonapi.io
+        - url: https://rt-testnet.tonapi.io
+      parameters:
+        - $ref: '#/components/parameters/tokenQuery'
+      responses:
+        '200':
+          description: "usage stats"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UsageStats'
+        'default':
+          $ref: '#/components/responses/Error'
+  /webhooks/{webhook_id}/account-tx/subscribe:
+    post:
+      description: "subscribe to notifications for a particular set of accounts"
+      operationId: webhookAccountTxSubscribe
+      tags:
+        - Webhooks
+      servers:
+        - url: https://rt.tonapi.io
+        - url: https://rt-testnet.tonapi.io
+      parameters:
+        - $ref: '#/components/parameters/tokenQuery'
+        - $ref: '#/components/parameters/webhookId'
+      requestBody:
+        $ref: "#/components/requestBodies/WebhookAccountTxSubscribeRequest"
+      responses:
+        '200':
+          description: ""
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                example: { }
+        'default':
+          $ref: '#/components/responses/Error'
+
+  /webhooks/{webhook_id}/account-tx/unsubscribe:
+    post:
+      operationId: webhookAccountTxUnsubscribe
+      tags:
+        - Webhooks
+      servers:
+        - url: https://rt.tonapi.io
+        - url: https://rt-testnet.tonapi.io
+      parameters:
+        - $ref: '#/components/parameters/tokenQuery'
+        - $ref: '#/components/parameters/webhookId'
+      requestBody:
+        $ref: "#/components/requestBodies/WebhookAccountTxUnsubscribeRequest"
+      responses:
+        '200':
+          description: ""
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                example: { }
+        'default':
+          $ref: '#/components/responses/Error'
+  /webhooks/{webhook_id}/account-tx/subscriptions:
+    get:
+      operationId: webhookAccountTxSubscriptions
+      tags:
+        - Webhooks
+      servers:
+        - url: https://rt.tonapi.io
+        - url: https://rt-testnet.tonapi.io
+      parameters:
+        - $ref: '#/components/parameters/tokenQuery'
+        - $ref: '#/components/parameters/webhookId'
+        - $ref: '#/components/parameters/offsetQuery'
+        - $ref: '#/components/parameters/limitQuery'
+      responses:
+        '200':
+          description: "subscriptions"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WebhookAccountTxSubscriptions'
+        'default':
+          $ref: '#/components/responses/Error'
+  /webhooks/{webhook_id}/msg-opcode/subscriptions:
+    get:
+      operationId: webhookNewContractsSubscriptions
+      tags:
+        - Webhooks
+      servers:
+        - url: https://rt.tonapi.io
+        - url: https://rt-testnet.tonapi.io
+      parameters:
+        - $ref: '#/components/parameters/tokenQuery'
+        - $ref: '#/components/parameters/webhookId'
+        - $ref: '#/components/parameters/offsetQuery'
+        - $ref: '#/components/parameters/limitQuery'
+      responses:
+        '200':
+          description: "subscriptions"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WebhookMsgOpcodeSubscriptions'
+        'default':
+          $ref: '#/components/responses/Error'
+  /webhooks/{webhook_id}/subscribe-new-contracts:
+    post:
+      description: "receive a notification when a new contract is deployed to the blockchain"
+      operationId: webhookNewContractSubscribe
+      tags:
+        - Webhooks
+      servers:
+        - url: https://rt.tonapi.io
+        - url: https://rt-testnet.tonapi.io
+      parameters:
+        - $ref: '#/components/parameters/tokenQuery'
+        - $ref: '#/components/parameters/webhookId'
+      responses:
+        '200':
+          description: ""
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                example: { }
+        'default':
+          $ref: '#/components/responses/Error'
+  /webhooks/{webhook_id}/unsubscribe-new-contracts:
+    post:
+      description: "receive a notification when a new contract is deployed to the blockchain"
+      operationId: webhookNewContractUnsubscribe
+      tags:
+        - Webhooks
+      servers:
+        - url: https://rt.tonapi.io
+        - url: https://rt-testnet.tonapi.io
+      parameters:
+        - $ref: '#/components/parameters/tokenQuery'
+        - $ref: '#/components/parameters/webhookId'
+      responses:
+        '200':
+          description: ""
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                example: { }
+        'default':
+          $ref: '#/components/responses/Error'
+  /webhooks/{webhook_id}/subscribe-msg-opcode/{opcode}:
+    post:
+      description: "receive a notification when there is a new message with a given opcode"
+      operationId: webhookMsgOpcodeSubscribe
+      tags:
+        - Webhooks
+      servers:
+        - url: https://rt.tonapi.io
+        - url: https://rt-testnet.tonapi.io
+      parameters:
+        - $ref: '#/components/parameters/tokenQuery'
+        - $ref: '#/components/parameters/webhookId'
+        - name: opcode
+          in: path
+          required: true
+          schema:
+            type: string
+            description: "hex string starting with 0x"
+            example: 0x123456
+      responses:
+        '200':
+          description: ""
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                example: { }
+        'default':
+          $ref: '#/components/responses/Error'
+  /webhooks/{webhook_id}/unsubscribe-msg-opcode/{opcode}:
+    post:
+      description: "stop receiving a notification about a new message with a given opcode"
+      operationId: webhookMsgOpcodeUnsubscribe
+      tags:
+        - Webhooks
+      servers:
+        - url: https://rt.tonapi.io
+        - url: https://rt-testnet.tonapi.io
+      parameters:
+        - $ref: '#/components/parameters/tokenQuery'
+        - $ref: '#/components/parameters/webhookId'
+        - name: opcode
+          in: path
+          required: true
+          schema:
+            type: string
+            description: "hex string starting with 0x"
+            example: 0x123456
+      responses:
+        '200':
+          description: ""
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                example: { }
+        'default':
+          $ref: '#/components/responses/Error'
+  /webhooks/{webhook_id}/mempool/subscribe:
+    post:
+      description: "subscribe to notifications for mempool messages"
+      operationId: webhookMempoolSubscribe
+      tags:
+        - Webhooks
+      servers:
+        - url: https://rt.tonapi.io
+        - url: https://rt-testnet.tonapi.io
+      parameters:
+        - $ref: '#/components/parameters/tokenQuery'
+        - $ref: '#/components/parameters/webhookId'
+      responses:
+        '200':
+          description: ""
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                example: { }
+        'default':
+          $ref: '#/components/responses/Error'
+  /webhooks/{webhook_id}/mempool/unsubscribe:
+    post:
+      operationId: webhookMempoolUnsubscribe
+      tags:
+        - Webhooks
+      servers:
+        - url: https://rt.tonapi.io
+        - url: https://rt-testnet.tonapi.io
+      parameters:
+        - $ref: '#/components/parameters/tokenQuery'
+        - $ref: '#/components/parameters/webhookId'
+      responses:
+        '200':
+          description: ""
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                example: { }
+        'default':
+          $ref: '#/components/responses/Error'
 components:
   parameters:
+    tokenQuery:
+      in: query
+      name: token
+      schema:
+        type: string
+        example: NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2ODQ3...
+    webhookId:
+      in: path
+      name: webhook_id
+      required: true
+      schema:
+        type: integer
+        format: int64
     masterchainSeqno:
       in: path
       name: masterchain_seqno
@@ -3318,6 +3737,48 @@ components:
               body:
                 type: string
                 format: cell-base64
+    WebhookConfiguration:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - endpoint
+            properties:
+              endpoint:
+                type: string
+    WebhookAccountTxSubscribeRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - accounts
+            properties:
+              accounts:
+                type: array
+                items:
+                  type: object
+                  required:
+                    - account_id
+                  properties:
+                    account_id:
+                      type: string
+    WebhookAccountTxUnsubscribeRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - accounts
+            properties:
+              accounts:
+                type: array
+                items:
+                  type: string
 
   schemas:
     Error:
@@ -7378,7 +7839,155 @@ components:
           type: integer
           format: int64
           example: 1668436763
-  
+    UsageStats:
+      type: object
+      required:
+        - period_started_at
+        - account_subscriptions
+        - webhooks_delivered
+        - webhooks_failed
+      properties:
+        period_started_at:
+          type: string
+          format: date-time
+        period_ended_at:
+          type: string
+          format: date-time
+        account_subscriptions:
+          type: integer
+          format: int64
+        webhooks_delivered:
+          type: integer
+          format: int64
+        webhooks_failed:
+          type: integer
+          format: int64
+    WebhookLogs:
+      type: object
+      required:
+        - logs
+      properties:
+        next_offset:
+          type: integer
+          format: int64
+        logs:
+          type: array
+          items:
+            type: object
+            required:
+              - timestamp
+              - message
+              - event_type
+            properties:
+              message:
+                type: string
+              event_type:
+                type: string
+              timestamp:
+                type: string
+                format: date-time
+    WebhookList:
+      type: object
+      required:
+        - webhooks
+      properties:
+        webhooks:
+          type: array
+          items:
+            type: object
+            required:
+              - id
+              - endpoint
+              - token
+              - status
+              - status_updated_at
+              - last_online_at
+              - status_failed_attempts
+              - subscribed_accounts
+              - subscribed_to_mempool
+              - subscribed_to_new_contracts
+              - subscribed_msg_opcodes
+            properties:
+              id:
+                type: integer
+                format: int64
+              endpoint:
+                type: string
+              token:
+                type: string
+              subscribed_accounts:
+                type: integer
+              subscribed_msg_opcodes:
+                type: integer
+              subscribed_to_mempool:
+                type: boolean
+              subscribed_to_new_contracts:
+                type: boolean
+              status:
+                type: string
+                enum:
+                  - online
+                  - offline
+              status_updated_at:
+                type: string
+                format: date-time
+              last_online_at:
+                type: string
+                format: date-time
+              status_failed_attempts:
+                type: integer
+    WebhookAccountTxSubscriptions:
+      type: object
+      required:
+        - account_tx_subscriptions
+      properties:
+        account_tx_subscriptions:
+          type: array
+          items:
+            type: object
+            required:
+              - account_id
+              - last_delivered_lt
+            properties:
+              account_id:
+                type: string
+              last_delivered_lt:
+                type: integer
+                format: int64
+              failed_at:
+                type: string
+                format: date-time
+              failed_lt:
+                type: integer
+                format: int64
+              failed_attempts:
+                type: integer
+                format: int64
+    WebhookMsgOpcodeSubscriptions:
+      type: object
+      required:
+        - subscriptions
+      properties:
+        subscriptions:
+          type: array
+          items:
+            type: object
+            required:
+              - opcode
+              - status
+            properties:
+              opcode:
+                type: string
+              status:
+                type: string
+                enum:
+                  - active
+                  - disabled
+              disabled_at:
+                type: string
+                format: date-time
+              disabled_reason:
+                type: string
   responses:
     Error:
       description: Some error during request processing
