@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/tonkeeper/tongo/tlb"
 	"net/http"
 	"strings"
 
@@ -51,57 +52,80 @@ func jettonMetadata(account ton.AccountID, meta NormalizedMetadata) oas.JettonMe
 	return metadata
 }
 
-func (h *Handler) convertJettonHistory(ctx context.Context, account ton.AccountID, master *ton.AccountID, traceIDs []ton.Bits256, acceptLanguage oas.OptString) ([]oas.AccountEvent, int64, error) {
+func (h *Handler) convertJettonHistory(ctx context.Context, account ton.AccountID, master *ton.AccountID, history []core.JettonOperation, acceptLanguage oas.OptString) ([]oas.AccountEvent, int64, error) {
 	var lastLT uint64
-	events := make([]oas.AccountEvent, 0, len(traceIDs))
-	for _, traceID := range traceIDs {
-		trace, err := h.storage.GetTrace(ctx, traceID)
-		if err != nil {
-			if errors.Is(err, core.ErrTraceIsTooLong) {
-				// we ignore this for now, because we believe that this case is extremely rare.
-				continue
+	var events []oas.AccountEvent
+	res := make(map[core.TraceID]oas.AccountEvent)
+
+	for _, op := range history {
+		event, ok := res[op.TraceID]
+		if !ok {
+			event = oas.AccountEvent{
+				EventID:   op.TraceID.Hash.Hex(),
+				Account:   convertAccountAddress(account, h.addressBook),
+				Timestamp: op.TraceID.UTime,
+				IsScam:    false,
+				Lt:        int64(op.TraceID.Lt),
+				//InProgress: trace.InProgress(), // TODO: always false?
+				//Extra: result.Extra(account),  // TODO: extra?
 			}
+		}
+
+		var action bath.Action
+		switch op.Operation {
+		case core.TransferJettonOperation:
+			transferAction := bath.JettonTransferAction{
+				//Comment:          *string,
+				//EncryptedComment: *EncryptedComment,
+				Jetton:    op.JettonMaster,
+				Recipient: op.Destination,
+				Sender:    op.Source,
+				//RecipientsWallet: tongo.AccountID,
+				//SendersWallet:    tongo.AccountID,
+				Amount: tlb.VarUInteger16(*op.Amount.BigInt()),
+				//Refund:       *Refund,
+				//isWrappedTon: bool,
+			}
+			action.Type = "JettonTransfer"
+			action.JettonTransfer = &transferAction
+		case core.MintJettonOperation:
+			mintAction := bath.JettonMintAction{
+				Jetton:    op.JettonMaster,
+				Recipient: *op.Destination,
+				//RecipientsWallet: tongo.AccountID,
+				Amount: tlb.VarUInteger16(*op.Amount.BigInt()),
+			}
+			action.Type = "JettonMint"
+			action.JettonMint = &mintAction
+		case core.BurnJettonOperation:
+			burnAction := bath.JettonBurnAction{
+				Jetton: op.JettonMaster,
+				Sender: *op.Source,
+				//SendersWallet: tongo.AccountID,
+				Amount: tlb.VarUInteger16(*op.Amount.BigInt()),
+			}
+			action.Type = "JettonTransfer"
+			action.JettonBurn = &burnAction
+		default:
+			continue
+		}
+		convertedAction, err := h.convertAction(ctx, &account, action, acceptLanguage)
+		if err != nil {
 			return nil, 0, err
 		}
-		result, err := bath.FindActions(ctx, trace,
-			bath.WithStraws(bath.JettonTransfersBurnsMints),
-			bath.WithInformationSource(h.storage))
-		if err != nil {
-			return nil, 0, err
-		}
-		event := oas.AccountEvent{
-			EventID:    trace.Hash.Hex(),
-			Account:    convertAccountAddress(account, h.addressBook),
-			Timestamp:  trace.Utime,
-			IsScam:     false,
-			Lt:         int64(trace.Lt),
-			InProgress: trace.InProgress(),
-			Extra:      result.Extra(account),
-		}
-		for _, action := range result.Actions {
-			if action.Type != bath.JettonTransfer && action.Type != bath.JettonBurn && action.Type != bath.JettonMint {
-				continue
-			}
-			if master != nil && ((action.JettonTransfer != nil && action.JettonTransfer.Jetton != *master) ||
-				(action.JettonMint != nil && action.JettonMint.Jetton != *master) ||
-				(action.JettonBurn != nil && action.JettonBurn.Jetton != *master)) {
-				continue
-			}
-			if !action.IsSubject(account) {
-				continue
-			}
-			convertedAction, err := h.convertAction(ctx, &account, action, acceptLanguage)
-			if err != nil {
-				return nil, 0, err
-			}
-			event.Actions = append(event.Actions, convertedAction)
-		}
-		event.IsScam = h.spamFilter.CheckActions(event.Actions, &account, trace.Account)
+		event.Actions = append(event.Actions, convertedAction)
+		res[op.TraceID] = event
+	}
+
+	for id, event := range res {
+		// event.IsScam = h.spamFilter.CheckActions(event.Actions, &account, trace.Account) TODO: trace.Account? we do not know initiator
 		if len(event.Actions) == 0 {
 			continue
 		}
 		events = append(events, event)
-		lastLT = trace.Lt
+		if id.Lt > lastLT {
+			lastLT = id.Lt
+		}
 	}
 
 	return events, int64(lastLT), nil
