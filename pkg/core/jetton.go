@@ -48,12 +48,11 @@ const (
 )
 
 type JettonOperation struct {
-	Operation    JettonOperationType
-	Source       *tongo.AccountID
-	Destination  *tongo.AccountID
-	JettonMaster tongo.AccountID
-	TraceID      TraceID
-	//TxID           TxID
+	Operation      JettonOperationType
+	Source         *tongo.AccountID
+	Destination    *tongo.AccountID
+	JettonMaster   tongo.AccountID
+	TraceID        TraceID
 	DestEndBalance decimal.Decimal
 	Amount         decimal.Decimal
 	QueryID        uint64

@@ -179,7 +179,7 @@ type ratesSource interface {
 }
 
 type SpamFilter interface {
-	CheckActions(actions []oas.Action, viewer *ton.AccountID, initiator ton.AccountID) bool
+	CheckActions(actions []oas.Action, viewer *ton.AccountID, initiator *ton.AccountID) bool
 	JettonTrust(address tongo.AccountID, symbol, name, image string) core.TrustType
 	NftTrust(address tongo.AccountID, collection *ton.AccountID, description, image string) core.TrustType
 }

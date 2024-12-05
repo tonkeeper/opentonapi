@@ -2,8 +2,10 @@ package api
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/tonkeeper/tongo/abi"
 	"github.com/tonkeeper/tongo/tlb"
 	"net/http"
 	"strings"
@@ -66,8 +68,7 @@ func (h *Handler) convertJettonHistory(ctx context.Context, account ton.AccountI
 				Timestamp: op.TraceID.UTime,
 				IsScam:    false,
 				Lt:        int64(op.TraceID.Lt),
-				//InProgress: trace.InProgress(), // TODO: always false?
-				//Extra: result.Extra(account),  // TODO: extra?
+				Extra:     0,
 			}
 		}
 
@@ -75,25 +76,30 @@ func (h *Handler) convertJettonHistory(ctx context.Context, account ton.AccountI
 		switch op.Operation {
 		case core.TransferJettonOperation:
 			transferAction := bath.JettonTransferAction{
-				//Comment:          *string,
-				//EncryptedComment: *EncryptedComment,
 				Jetton:    op.JettonMaster,
 				Recipient: op.Destination,
 				Sender:    op.Source,
-				//RecipientsWallet: tongo.AccountID,
-				//SendersWallet:    tongo.AccountID,
-				Amount: tlb.VarUInteger16(*op.Amount.BigInt()),
-				//Refund:       *Refund,
-				//isWrappedTon: bool,
+				Amount:    tlb.VarUInteger16(*op.Amount.BigInt()),
 			}
 			action.Type = "JettonTransfer"
 			action.JettonTransfer = &transferAction
+			var payload abi.JettonPayload
+			err := json.Unmarshal([]byte(op.ForwardPayload), &payload)
+			if err != nil {
+				break
+			}
+			switch p := payload.Value.(type) {
+			case abi.TextCommentJettonPayload:
+				comment := string(p.Text)
+				action.JettonTransfer.Comment = &comment
+			case abi.EncryptedTextCommentJettonPayload:
+				action.JettonTransfer.EncryptedComment = &bath.EncryptedComment{EncryptionType: "simple", CipherText: p.CipherText}
+			}
 		case core.MintJettonOperation:
 			mintAction := bath.JettonMintAction{
 				Jetton:    op.JettonMaster,
 				Recipient: *op.Destination,
-				//RecipientsWallet: tongo.AccountID,
-				Amount: tlb.VarUInteger16(*op.Amount.BigInt()),
+				Amount:    tlb.VarUInteger16(*op.Amount.BigInt()),
 			}
 			action.Type = "JettonMint"
 			action.JettonMint = &mintAction
@@ -101,7 +107,6 @@ func (h *Handler) convertJettonHistory(ctx context.Context, account ton.AccountI
 			burnAction := bath.JettonBurnAction{
 				Jetton: op.JettonMaster,
 				Sender: *op.Source,
-				//SendersWallet: tongo.AccountID,
 				Amount: tlb.VarUInteger16(*op.Amount.BigInt()),
 			}
 			action.Type = "JettonTransfer"
@@ -114,18 +119,18 @@ func (h *Handler) convertJettonHistory(ctx context.Context, account ton.AccountI
 			return nil, 0, err
 		}
 		event.Actions = append(event.Actions, convertedAction)
+		if op.Lt > lastLT {
+			lastLT = op.Lt
+		}
 		res[op.TraceID] = event
 	}
 
-	for id, event := range res {
-		// event.IsScam = h.spamFilter.CheckActions(event.Actions, &account, trace.Account) TODO: trace.Account? we do not know initiator
+	for _, event := range res {
+		event.IsScam = h.spamFilter.CheckActions(event.Actions, &account, nil)
 		if len(event.Actions) == 0 {
 			continue
 		}
 		events = append(events, event)
-		if id.Lt > lastLT {
-			lastLT = id.Lt
-		}
 	}
 
 	return events, int64(lastLT), nil
