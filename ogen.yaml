@@ -10,3 +10,5 @@ generator:
       - paths/client
       - webhooks/client
       - webhooks/server
+  filters:
+    path_regex: "^/v2/.*"
