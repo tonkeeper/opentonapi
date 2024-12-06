@@ -5,17 +5,12 @@ import (
 	"context"
 	"github.com/go-faster/jx"
 	"github.com/tonkeeper/opentonapi/pkg/oas"
-	"io/fs"
 	"net/http"
+	"os"
 )
 
-import "embed"
-
-//go:embed openapi/openapi.yml openapi/openapi.json
-var OpenapiFiles embed.FS
-
 func (h *Handler) GetOpenapiJson(ctx context.Context) (jx.Raw, error) {
-	file, err := fs.ReadFile(OpenapiFiles, "openapi/openapi.json")
+	file, err := os.ReadFile("openapi/openapi.json")
 	if err != nil {
 		return jx.Raw{}, toError(http.StatusInternalServerError, err)
 	}
@@ -28,7 +23,7 @@ func (h *Handler) GetOpenapiJson(ctx context.Context) (jx.Raw, error) {
 }
 
 func (h *Handler) GetOpenapiYml(ctx context.Context) (oas.GetOpenapiYmlOK, error) {
-	file, err := fs.ReadFile(OpenapiFiles, "openapi/openapi.yml")
+	file, err := os.ReadFile("openapi/openapi.yml")
 	if err != nil {
 		return oas.GetOpenapiYmlOK{}, toError(http.StatusInternalServerError, err)
 	}
