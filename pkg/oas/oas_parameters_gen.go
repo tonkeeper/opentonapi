@@ -709,6 +709,7 @@ type ExecGetMethodForBlockchainAccountParams struct {
 	// Contract get method name.
 	MethodName string
 	Args       []string
+	FixOrder   OptBool
 }
 
 func unpackExecGetMethodForBlockchainAccountParams(packed middleware.Parameters) (params ExecGetMethodForBlockchainAccountParams) {
@@ -733,6 +734,15 @@ func unpackExecGetMethodForBlockchainAccountParams(packed middleware.Parameters)
 		}
 		if v, ok := packed[key]; ok {
 			params.Args = v.([]string)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "fix_order",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.FixOrder = v.(OptBool)
 		}
 	}
 	return params
@@ -869,6 +879,52 @@ func decodeExecGetMethodForBlockchainAccountParams(args [2]string, argsEscaped b
 	}(); err != nil {
 		return params, &ogenerrors.DecodeParamError{
 			Name: "args",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Set default value for query: fix_order.
+	{
+		val := bool(true)
+		params.FixOrder.SetTo(val)
+	}
+	// Decode query: fix_order.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "fix_order",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotFixOrderVal bool
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToBool(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotFixOrderVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.FixOrder.SetTo(paramsDotFixOrderVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "fix_order",
 			In:   "query",
 			Err:  err,
 		}
