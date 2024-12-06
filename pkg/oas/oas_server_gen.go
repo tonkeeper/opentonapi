@@ -4,6 +4,8 @@ package oas
 
 import (
 	"context"
+
+	"github.com/go-faster/jx"
 )
 
 // Handler handles operations described by OpenAPI v3 specification.
@@ -444,6 +446,18 @@ type Handler interface {
 	//
 	// POST /v2/nfts/_bulk
 	GetNftItemsByAddresses(ctx context.Context, req OptGetNftItemsByAddressesReq) (*NftItems, error)
+	// GetOpenapiJson implements getOpenapiJson operation.
+	//
+	// Get the openapi.json file.
+	//
+	// GET /v2/openapi.json
+	GetOpenapiJson(ctx context.Context) (jx.Raw, error)
+	// GetOpenapiYml implements getOpenapiYml operation.
+	//
+	// Get the openapi.yml file.
+	//
+	// GET /v2/openapi.yml
+	GetOpenapiYml(ctx context.Context) (GetOpenapiYmlOK, error)
 	// GetOutMsgQueueSizes implements getOutMsgQueueSizes operation.
 	//
 	// Get out msg queue sizes.

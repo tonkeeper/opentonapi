@@ -6,6 +6,9 @@ RUN go mod download
 COPY internal internal
 COPY cmd cmd
 COPY pkg pkg
+RUN mkdir -p /tmp/openapi
+COPY api/openapi.json /tmp/openapi/openapi.json
+COPY api/openapi.yml /tmp/openapi/openapi.yml
 
 RUN apt-get update && \
     apt-get install -y libsecp256k1-0 libsodium23
@@ -20,4 +23,6 @@ RUN mkdir -p /app/lib
 RUN wget -O /app/lib/libemulator.so https://github.com/ton-blockchain/ton/releases/download/v2024.08/libemulator-linux-x86_64.so
 ENV LD_LIBRARY_PATH=/app/lib/
 COPY --from=gobuild /tmp/opentonapi /usr/bin/
+COPY --from=gobuild /tmp/openapi /app/openapi
+WORKDIR /app
 CMD ["/usr/bin/opentonapi"]

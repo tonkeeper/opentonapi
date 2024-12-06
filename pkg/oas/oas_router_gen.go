@@ -2658,6 +2658,63 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				}
 
 				elem = origElem
+			case 'o': // Prefix: "openapi."
+				origElem := elem
+				if l := len("openapi."); len(elem) >= l && elem[0:l] == "openapi." {
+					elem = elem[l:]
+				} else {
+					break
+				}
+
+				if len(elem) == 0 {
+					break
+				}
+				switch elem[0] {
+				case 'j': // Prefix: "json"
+					origElem := elem
+					if l := len("json"); len(elem) >= l && elem[0:l] == "json" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					if len(elem) == 0 {
+						// Leaf node.
+						switch r.Method {
+						case "GET":
+							s.handleGetOpenapiJsonRequest([0]string{}, elemIsEscaped, w, r)
+						default:
+							s.notAllowed(w, r, "GET")
+						}
+
+						return
+					}
+
+					elem = origElem
+				case 'y': // Prefix: "yml"
+					origElem := elem
+					if l := len("yml"); len(elem) >= l && elem[0:l] == "yml" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					if len(elem) == 0 {
+						// Leaf node.
+						switch r.Method {
+						case "GET":
+							s.handleGetOpenapiYmlRequest([0]string{}, elemIsEscaped, w, r)
+						default:
+							s.notAllowed(w, r, "GET")
+						}
+
+						return
+					}
+
+					elem = origElem
+				}
+
+				elem = origElem
 			case 'p': // Prefix: "pubkeys/"
 				origElem := elem
 				if l := len("pubkeys/"); len(elem) >= l && elem[0:l] == "pubkeys/" {
@@ -6124,6 +6181,71 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 							r.pathPattern = "/v2/nfts/{account_id}/history"
 							r.args = args
 							r.count = 1
+							return r, true
+						default:
+							return
+						}
+					}
+
+					elem = origElem
+				}
+
+				elem = origElem
+			case 'o': // Prefix: "openapi."
+				origElem := elem
+				if l := len("openapi."); len(elem) >= l && elem[0:l] == "openapi." {
+					elem = elem[l:]
+				} else {
+					break
+				}
+
+				if len(elem) == 0 {
+					break
+				}
+				switch elem[0] {
+				case 'j': // Prefix: "json"
+					origElem := elem
+					if l := len("json"); len(elem) >= l && elem[0:l] == "json" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					if len(elem) == 0 {
+						switch method {
+						case "GET":
+							// Leaf: GetOpenapiJson
+							r.name = "GetOpenapiJson"
+							r.summary = ""
+							r.operationID = "getOpenapiJson"
+							r.pathPattern = "/v2/openapi.json"
+							r.args = args
+							r.count = 0
+							return r, true
+						default:
+							return
+						}
+					}
+
+					elem = origElem
+				case 'y': // Prefix: "yml"
+					origElem := elem
+					if l := len("yml"); len(elem) >= l && elem[0:l] == "yml" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					if len(elem) == 0 {
+						switch method {
+						case "GET":
+							// Leaf: GetOpenapiYml
+							r.name = "GetOpenapiYml"
+							r.summary = ""
+							r.operationID = "getOpenapiYml"
+							r.pathPattern = "/v2/openapi.yml"
+							r.args = args
+							r.count = 0
 							return r, true
 						default:
 							return

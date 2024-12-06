@@ -5,6 +5,8 @@ package oas
 import (
 	"context"
 
+	"github.com/go-faster/jx"
+
 	ht "github.com/ogen-go/ogen/http"
 )
 
@@ -656,6 +658,24 @@ func (UnimplementedHandler) GetNftItemByAddress(ctx context.Context, params GetN
 //
 // POST /v2/nfts/_bulk
 func (UnimplementedHandler) GetNftItemsByAddresses(ctx context.Context, req OptGetNftItemsByAddressesReq) (r *NftItems, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// GetOpenapiJson implements getOpenapiJson operation.
+//
+// Get the openapi.json file.
+//
+// GET /v2/openapi.json
+func (UnimplementedHandler) GetOpenapiJson(ctx context.Context) (r jx.Raw, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// GetOpenapiYml implements getOpenapiYml operation.
+//
+// Get the openapi.yml file.
+//
+// GET /v2/openapi.yml
+func (UnimplementedHandler) GetOpenapiYml(ctx context.Context) (r GetOpenapiYmlOK, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
