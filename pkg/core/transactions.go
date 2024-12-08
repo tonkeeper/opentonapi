@@ -1,9 +1,11 @@
 package core
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/tonkeeper/tongo/ton"
 	"math/big"
+	"reflect"
 	"strings"
 
 	"github.com/tonkeeper/tongo/abi"
@@ -173,6 +175,43 @@ type Message struct {
 	// OpCode is the first 32 bits of a message body indicating a possible operation.
 	OpCode      *uint32
 	DecodedBody *DecodedMessageBody
+}
+
+func (m *Message) UnmarshalJSON(data []byte) error {
+	type Alias Message
+	r := struct {
+		*Alias
+		DecodedBody struct {
+			Operation string
+			Value     json.RawMessage
+		}
+	}{
+		Alias: (*Alias)(m),
+	}
+	if err := json.Unmarshal(data, &r); err != nil {
+		return err
+	}
+	var msgTypes map[string]any
+	switch r.MsgType {
+	case IntMsg:
+		msgTypes = abi.KnownMsgInTypes
+	case ExtOutMsg:
+		msgTypes = abi.KnownMsgExtOutTypes
+	case ExtInMsg:
+		msgTypes = abi.KnownMsgExtInTypes
+	}
+	if v, present := msgTypes[r.DecodedBody.Operation]; present {
+		p := reflect.New(reflect.TypeOf(v))
+		if err := json.Unmarshal(r.DecodedBody.Value, p.Interface()); err != nil {
+			return err
+		}
+		m.DecodedBody = &DecodedMessageBody{
+			Operation: r.DecodedBody.Operation,
+			Value:     p.Elem().Interface(),
+		}
+		return nil
+	}
+	return nil
 }
 
 // DecodedMessageBody contains a message body decoded by tongo.abi package.
