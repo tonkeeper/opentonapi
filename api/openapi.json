@@ -735,6 +735,12 @@
       "example": {},
       "type": "object"
      },
+     "extra_balance": {
+      "items": {
+       "$ref": "#/components/schemas/ExtraCurrency"
+      },
+      "type": "array"
+     },
      "get_methods": {
       "example": [
        "get_item_data"
@@ -3226,6 +3232,34 @@
      "is_scam",
      "lt",
      "in_progress"
+    ],
+    "type": "object"
+   },
+   "ExtraCurrency": {
+    "properties": {
+     "amount": {
+      "example": "1000000000",
+      "type": "string",
+      "x-js-format": "bigint"
+     },
+     "decimals": {
+      "example": 5,
+      "type": "integer"
+     },
+     "id": {
+      "example": 239,
+      "format": "int32",
+      "type": "integer"
+     },
+     "name": {
+      "example": "FMS",
+      "type": "string"
+     }
+    },
+    "required": [
+     "id",
+     "amount",
+     "decimals"
     ],
     "type": "object"
    },

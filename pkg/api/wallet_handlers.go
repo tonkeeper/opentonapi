@@ -38,6 +38,9 @@ func (h *Handler) GetWalletsByPublicKey(ctx context.Context, params oas.GetWalle
 		} else {
 			res = convertToAccount(account, nil, h.state)
 		}
+		if account.ExtraBalances != nil {
+			res.ExtraBalance = convertExtraCurrencies(account.ExtraBalances)
+		}
 		results = append(results, res)
 	}
 	return &oas.Accounts{Accounts: results}, nil

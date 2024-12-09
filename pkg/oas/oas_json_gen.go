@@ -72,6 +72,16 @@ func (s *Account) encodeFields(e *jx.Encoder) {
 		e.Int64(s.Balance)
 	}
 	{
+		if s.ExtraBalance != nil {
+			e.FieldStart("extra_balance")
+			e.ArrStart()
+			for _, elem := range s.ExtraBalance {
+				elem.Encode(e)
+			}
+			e.ArrEnd()
+		}
+	}
+	{
 		if s.CurrenciesBalance.Set {
 			e.FieldStart("currencies_balance")
 			s.CurrenciesBalance.Encode(e)
@@ -139,20 +149,21 @@ func (s *Account) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfAccount = [13]string{
+var jsonFieldsNameOfAccount = [14]string{
 	0:  "address",
 	1:  "balance",
-	2:  "currencies_balance",
-	3:  "last_activity",
-	4:  "status",
-	5:  "interfaces",
-	6:  "name",
-	7:  "is_scam",
-	8:  "icon",
-	9:  "memo_required",
-	10: "get_methods",
-	11: "is_suspended",
-	12: "is_wallet",
+	2:  "extra_balance",
+	3:  "currencies_balance",
+	4:  "last_activity",
+	5:  "status",
+	6:  "interfaces",
+	7:  "name",
+	8:  "is_scam",
+	9:  "icon",
+	10: "memo_required",
+	11: "get_methods",
+	12: "is_suspended",
+	13: "is_wallet",
 }
 
 // Decode decodes Account from json.
@@ -188,6 +199,23 @@ func (s *Account) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"balance\"")
 			}
+		case "extra_balance":
+			if err := func() error {
+				s.ExtraBalance = make([]ExtraCurrency, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem ExtraCurrency
+					if err := elem.Decode(d); err != nil {
+						return err
+					}
+					s.ExtraBalance = append(s.ExtraBalance, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"extra_balance\"")
+			}
 		case "currencies_balance":
 			if err := func() error {
 				s.CurrenciesBalance.Reset()
@@ -199,7 +227,7 @@ func (s *Account) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"currencies_balance\"")
 			}
 		case "last_activity":
-			requiredBitSet[0] |= 1 << 3
+			requiredBitSet[0] |= 1 << 4
 			if err := func() error {
 				v, err := d.Int64()
 				s.LastActivity = int64(v)
@@ -211,7 +239,7 @@ func (s *Account) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"last_activity\"")
 			}
 		case "status":
-			requiredBitSet[0] |= 1 << 4
+			requiredBitSet[0] |= 1 << 5
 			if err := func() error {
 				if err := s.Status.Decode(d); err != nil {
 					return err
@@ -280,7 +308,7 @@ func (s *Account) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"memo_required\"")
 			}
 		case "get_methods":
-			requiredBitSet[1] |= 1 << 2
+			requiredBitSet[1] |= 1 << 3
 			if err := func() error {
 				s.GetMethods = make([]string, 0)
 				if err := d.Arr(func(d *jx.Decoder) error {
@@ -310,7 +338,7 @@ func (s *Account) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"is_suspended\"")
 			}
 		case "is_wallet":
-			requiredBitSet[1] |= 1 << 4
+			requiredBitSet[1] |= 1 << 5
 			if err := func() error {
 				v, err := d.Bool()
 				s.IsWallet = bool(v)
@@ -331,8 +359,8 @@ func (s *Account) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [2]uint8{
-		0b00011011,
-		0b00010100,
+		0b00110011,
+		0b00101000,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -15585,6 +15613,153 @@ func (s *Event) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *Event) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *ExtraCurrency) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *ExtraCurrency) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("id")
+		e.Int32(s.ID)
+	}
+	{
+		e.FieldStart("amount")
+		e.Str(s.Amount)
+	}
+	{
+		if s.Name.Set {
+			e.FieldStart("name")
+			s.Name.Encode(e)
+		}
+	}
+	{
+		e.FieldStart("decimals")
+		e.Int(s.Decimals)
+	}
+}
+
+var jsonFieldsNameOfExtraCurrency = [4]string{
+	0: "id",
+	1: "amount",
+	2: "name",
+	3: "decimals",
+}
+
+// Decode decodes ExtraCurrency from json.
+func (s *ExtraCurrency) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode ExtraCurrency to nil")
+	}
+	var requiredBitSet [1]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "id":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				v, err := d.Int32()
+				s.ID = int32(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"id\"")
+			}
+		case "amount":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				v, err := d.Str()
+				s.Amount = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"amount\"")
+			}
+		case "name":
+			if err := func() error {
+				s.Name.Reset()
+				if err := s.Name.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"name\"")
+			}
+		case "decimals":
+			requiredBitSet[0] |= 1 << 3
+			if err := func() error {
+				v, err := d.Int()
+				s.Decimals = int(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"decimals\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode ExtraCurrency")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00001011,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfExtraCurrency) {
+					name = jsonFieldsNameOfExtraCurrency[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *ExtraCurrency) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *ExtraCurrency) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }

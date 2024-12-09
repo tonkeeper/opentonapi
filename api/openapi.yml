@@ -4600,6 +4600,10 @@ components:
           format: int64
           example: 123456789
           x-js-format: bigint
+        extra_balance:
+          type: array
+          items:
+            $ref: '#/components/schemas/ExtraCurrency'
         currencies_balance:
           description: "{'USD': 1, 'IDR': 1000}"
           type: object
@@ -7389,6 +7393,27 @@ components:
           type: integer
           format: int64
           example: 1668436763
+    ExtraCurrency:
+          type: object
+          required:
+            - id
+            - amount
+            - decimals
+          properties:
+            id:
+              type: integer
+              example: 239
+              format: int32
+            amount:
+              type: string
+              x-js-format: bigint
+              example: "1000000000"
+            name:
+              type: string
+              example: FMS
+            decimals:
+              type: integer
+              example: 5
   
   responses:
     Error:
