@@ -3723,6 +3723,10 @@ components:
           format: int64
           x-js-format: bigint
           example: 60000000
+        value_extra:
+          type: array
+          items:
+            $ref: '#/components/schemas/ExtraCurrency'
         fwd_fee:
           type: integer
           format: int64

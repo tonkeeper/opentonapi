@@ -2,7 +2,6 @@ package api
 
 import (
 	"fmt"
-	"github.com/shopspring/decimal"
 	imgGenerator "github.com/tonkeeper/opentonapi/pkg/image"
 	"github.com/tonkeeper/opentonapi/pkg/references"
 	"sort"
@@ -75,7 +74,7 @@ func convertToRawAccount(account *core.Account) (oas.BlockchainRawAccount, error
 	return rawAccount, nil
 }
 
-func convertExtraCurrencies(extraBalances map[uint32]decimal.Decimal) []oas.ExtraCurrency {
+func convertExtraCurrencies(extraBalances core.ExtraCurrencies) []oas.ExtraCurrency {
 	res := make([]oas.ExtraCurrency, 0, len(extraBalances))
 	for k, v := range extraBalances {
 		cur := oas.ExtraCurrency{

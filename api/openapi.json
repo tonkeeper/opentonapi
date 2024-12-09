@@ -4211,6 +4211,12 @@
       "format": "int64",
       "type": "integer",
       "x-js-format": "bigint"
+     },
+     "value_extra": {
+      "items": {
+       "$ref": "#/components/schemas/ExtraCurrency"
+      },
+      "type": "array"
      }
     },
     "required": [
