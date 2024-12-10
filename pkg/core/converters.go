@@ -5,7 +5,6 @@ import (
 	"math/big"
 	"sort"
 
-	"github.com/shopspring/decimal"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
 	"github.com/tonkeeper/tongo/boc"
@@ -478,14 +477,13 @@ func ConvertToAccount(accountId tongo.AccountID, shardAccount tlb.ShardAccount) 
 func extractExtraCurrencies(extraCurrencyCollection tlb.ExtraCurrencyCollection) ExtraCurrencies {
 	items := extraCurrencyCollection.Dict.Items()
 	if len(items) > 0 {
-		res := make(map[uint32]decimal.Decimal, len(items))
+		res := make(map[int32]tlb.VarUInteger32, len(items))
 		for _, item := range items {
-			value := big.Int(item.Value)
-			res[uint32(item.Key)] = decimal.NewFromBigInt(&value, 0)
+			res[int32(item.Key)] = item.Value
 		}
 		return res
 	}
-	return nil // TODO: or return empty map
+	return nil
 }
 
 func ExtractTransactions(id tongo.BlockIDExt, block *tlb.Block) ([]*Transaction, error) {

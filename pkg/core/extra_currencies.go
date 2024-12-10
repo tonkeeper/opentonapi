@@ -1,5 +1,7 @@
 package core
 
-import "github.com/shopspring/decimal"
+import (
+	"github.com/tonkeeper/tongo/tlb"
+)
 
-type ExtraCurrencies map[uint32]decimal.Decimal
+type ExtraCurrencies map[int32]tlb.VarUInteger32

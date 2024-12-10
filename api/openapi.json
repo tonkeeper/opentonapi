@@ -1063,6 +1063,9 @@
      "ElectionsRecoverStake": {
       "$ref": "#/components/schemas/ElectionsRecoverStakeAction"
      },
+     "ExtraCurrencyTransfer": {
+      "$ref": "#/components/schemas/ExtraCurrencyTransferAction"
+     },
      "InscriptionMint": {
       "$ref": "#/components/schemas/InscriptionMintAction"
      },
@@ -1127,6 +1130,7 @@
      "type": {
       "enum": [
        "TonTransfer",
+       "ExtraCurrencyTransfer",
        "JettonTransfer",
        "JettonBurn",
        "JettonMint",
@@ -3119,6 +3123,33 @@
     ],
     "type": "object"
    },
+   "EcPreview": {
+    "properties": {
+     "decimals": {
+      "example": 5,
+      "type": "integer"
+     },
+     "image": {
+      "example": "https://cache.tonapi.io/images/extra.jpg",
+      "type": "string"
+     },
+     "name": {
+      "example": "FMS",
+      "type": "string"
+     },
+     "symbol": {
+      "example": "FMS",
+      "type": "string"
+     }
+    },
+    "required": [
+     "name",
+     "symbol",
+     "decimals",
+     "image"
+    ],
+    "type": "object"
+   },
    "ElectionsDepositStakeAction": {
     "properties": {
      "amount": {
@@ -3260,6 +3291,42 @@
      "id",
      "amount",
      "decimals"
+    ],
+    "type": "object"
+   },
+   "ExtraCurrencyTransferAction": {
+    "properties": {
+     "amount": {
+      "description": "amount in quanta of tokens",
+      "example": "1000000000",
+      "type": "string",
+      "x-js-format": "bigint"
+     },
+     "comment": {
+      "example": "Hi! This is your salary. \nFrom accounting with love.",
+      "type": "string"
+     },
+     "currency": {
+      "$ref": "#/components/schemas/EcPreview"
+     },
+     "encrypted_comment": {
+      "$ref": "#/components/schemas/EncryptedComment"
+     },
+     "recipient": {
+      "$ref": "#/components/schemas/AccountAddress"
+     },
+     "refund": {
+      "$ref": "#/components/schemas/Refund"
+     },
+     "sender": {
+      "$ref": "#/components/schemas/AccountAddress"
+     }
+    },
+    "required": [
+     "sender",
+     "recipient",
+     "amount",
+     "currency"
     ],
     "type": "object"
    },

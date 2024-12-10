@@ -4,6 +4,7 @@ import (
 	"fmt"
 	imgGenerator "github.com/tonkeeper/opentonapi/pkg/image"
 	"github.com/tonkeeper/opentonapi/pkg/references"
+	"math/big"
 	"sort"
 
 	"github.com/tonkeeper/tongo/abi"
@@ -60,7 +61,8 @@ func convertToRawAccount(account *core.Account) (oas.BlockchainRawAccount, error
 	if account.ExtraBalances != nil {
 		balances := make(map[string]string, len(account.ExtraBalances))
 		for key, value := range account.ExtraBalances {
-			balances[fmt.Sprintf("%v", int32(key))] = fmt.Sprintf("%v", value)
+			v := big.Int(value)
+			balances[fmt.Sprintf("%v", key)] = fmt.Sprintf("%v", v.String())
 		}
 		rawAccount.ExtraBalance = oas.NewOptBlockchainRawAccountExtraBalance(balances)
 	}
@@ -76,15 +78,15 @@ func convertToRawAccount(account *core.Account) (oas.BlockchainRawAccount, error
 func convertExtraCurrencies(extraBalances core.ExtraCurrencies) []oas.ExtraCurrency {
 	res := make([]oas.ExtraCurrency, 0, len(extraBalances))
 	for k, v := range extraBalances {
+		amount := big.Int(v)
+		meta := references.GetExtraCurrencyMeta(k)
 		cur := oas.ExtraCurrency{
-			ID:       int32(k),
-			Amount:   v.String(),
-			Decimals: 9, // TODO: or replace with default const
+			ID:       k,
+			Amount:   amount.String(),
+			Decimals: meta.Decimals,
 		}
-		meta, ok := references.ExtraCurrencies[int32(k)]
-		if ok {
+		if meta.Name != "" {
 			cur.Name.SetTo(meta.Name)
-			cur.Decimals = meta.Decimals
 		}
 		res = append(res, cur)
 	}

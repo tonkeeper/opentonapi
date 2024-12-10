@@ -19,6 +19,7 @@ import (
 
 const (
 	TonTransfer           ActionType = "TonTransfer"
+	ExtraCurrencyTransfer ActionType = "ExtraCurrencyTransfer"
 	SmartContractExec     ActionType = "SmartContractExec"
 	NftItemTransfer       ActionType = "NftItemTransfer"
 	NftPurchase           ActionType = "NftPurchase"
@@ -69,6 +70,7 @@ type (
 
 	Action struct {
 		TonTransfer           *TonTransferAction           `json:",omitempty"`
+		ExtraCurrencyTransfer *ExtraCurrencyTransferAction `json:",omitempty"`
 		SmartContractExec     *SmartContractAction         `json:",omitempty"`
 		NftItemTransfer       *NftTransferAction           `json:",omitempty"`
 		NftPurchase           *NftPurchaseAction           `json:",omitempty"`
@@ -95,6 +97,15 @@ type (
 	}
 	TonTransferAction struct {
 		Amount           int64
+		Comment          *string
+		EncryptedComment *EncryptedComment
+		Recipient        tongo.AccountID
+		Sender           tongo.AccountID
+		Refund           *Refund
+	}
+	ExtraCurrencyTransferAction struct {
+		CurrencyID       int32
+		Amount           tlb.VarUInteger32
 		Comment          *string
 		EncryptedComment *EncryptedComment
 		Recipient        tongo.AccountID

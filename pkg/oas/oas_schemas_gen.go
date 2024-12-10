@@ -658,6 +658,7 @@ type Action struct {
 	Type                  ActionType                     `json:"type"`
 	Status                ActionStatus                   `json:"status"`
 	TonTransfer           OptTonTransferAction           `json:"TonTransfer"`
+	ExtraCurrencyTransfer OptExtraCurrencyTransferAction `json:"ExtraCurrencyTransfer"`
 	ContractDeploy        OptContractDeployAction        `json:"ContractDeploy"`
 	JettonTransfer        OptJettonTransferAction        `json:"JettonTransfer"`
 	JettonBurn            OptJettonBurnAction            `json:"JettonBurn"`
@@ -694,6 +695,11 @@ func (s *Action) GetStatus() ActionStatus {
 // GetTonTransfer returns the value of TonTransfer.
 func (s *Action) GetTonTransfer() OptTonTransferAction {
 	return s.TonTransfer
+}
+
+// GetExtraCurrencyTransfer returns the value of ExtraCurrencyTransfer.
+func (s *Action) GetExtraCurrencyTransfer() OptExtraCurrencyTransferAction {
+	return s.ExtraCurrencyTransfer
 }
 
 // GetContractDeploy returns the value of ContractDeploy.
@@ -814,6 +820,11 @@ func (s *Action) SetStatus(val ActionStatus) {
 // SetTonTransfer sets the value of TonTransfer.
 func (s *Action) SetTonTransfer(val OptTonTransferAction) {
 	s.TonTransfer = val
+}
+
+// SetExtraCurrencyTransfer sets the value of ExtraCurrencyTransfer.
+func (s *Action) SetExtraCurrencyTransfer(val OptExtraCurrencyTransferAction) {
+	s.ExtraCurrencyTransfer = val
 }
 
 // SetContractDeploy sets the value of ContractDeploy.
@@ -1120,6 +1131,7 @@ type ActionType string
 
 const (
 	ActionTypeTonTransfer           ActionType = "TonTransfer"
+	ActionTypeExtraCurrencyTransfer ActionType = "ExtraCurrencyTransfer"
 	ActionTypeJettonTransfer        ActionType = "JettonTransfer"
 	ActionTypeJettonBurn            ActionType = "JettonBurn"
 	ActionTypeJettonMint            ActionType = "JettonMint"
@@ -1146,6 +1158,7 @@ const (
 func (ActionType) AllValues() []ActionType {
 	return []ActionType{
 		ActionTypeTonTransfer,
+		ActionTypeExtraCurrencyTransfer,
 		ActionTypeJettonTransfer,
 		ActionTypeJettonBurn,
 		ActionTypeJettonMint,
@@ -1173,6 +1186,8 @@ func (ActionType) AllValues() []ActionType {
 func (s ActionType) MarshalText() ([]byte, error) {
 	switch s {
 	case ActionTypeTonTransfer:
+		return []byte(s), nil
+	case ActionTypeExtraCurrencyTransfer:
 		return []byte(s), nil
 	case ActionTypeJettonTransfer:
 		return []byte(s), nil
@@ -1224,6 +1239,9 @@ func (s *ActionType) UnmarshalText(data []byte) error {
 	switch ActionType(data) {
 	case ActionTypeTonTransfer:
 		*s = ActionTypeTonTransfer
+		return nil
+	case ActionTypeExtraCurrencyTransfer:
+		*s = ActionTypeExtraCurrencyTransfer
 		return nil
 	case ActionTypeJettonTransfer:
 		*s = ActionTypeJettonTransfer
@@ -5104,6 +5122,54 @@ func (s *DomainRenewAction) SetRenewer(val AccountAddress) {
 	s.Renewer = val
 }
 
+// Ref: #/components/schemas/EcPreview
+type EcPreview struct {
+	Name     string `json:"name"`
+	Symbol   string `json:"symbol"`
+	Decimals int    `json:"decimals"`
+	Image    string `json:"image"`
+}
+
+// GetName returns the value of Name.
+func (s *EcPreview) GetName() string {
+	return s.Name
+}
+
+// GetSymbol returns the value of Symbol.
+func (s *EcPreview) GetSymbol() string {
+	return s.Symbol
+}
+
+// GetDecimals returns the value of Decimals.
+func (s *EcPreview) GetDecimals() int {
+	return s.Decimals
+}
+
+// GetImage returns the value of Image.
+func (s *EcPreview) GetImage() string {
+	return s.Image
+}
+
+// SetName sets the value of Name.
+func (s *EcPreview) SetName(val string) {
+	s.Name = val
+}
+
+// SetSymbol sets the value of Symbol.
+func (s *EcPreview) SetSymbol(val string) {
+	s.Symbol = val
+}
+
+// SetDecimals sets the value of Decimals.
+func (s *EcPreview) SetDecimals(val int) {
+	s.Decimals = val
+}
+
+// SetImage sets the value of Image.
+func (s *EcPreview) SetImage(val string) {
+	s.Image = val
+}
+
 // Ref: #/components/schemas/ElectionsDepositStakeAction
 type ElectionsDepositStakeAction struct {
 	Amount int64          `json:"amount"`
@@ -5455,6 +5521,88 @@ func (s *ExtraCurrency) SetName(val OptString) {
 // SetDecimals sets the value of Decimals.
 func (s *ExtraCurrency) SetDecimals(val int) {
 	s.Decimals = val
+}
+
+// Ref: #/components/schemas/ExtraCurrencyTransferAction
+type ExtraCurrencyTransferAction struct {
+	Sender    AccountAddress `json:"sender"`
+	Recipient AccountAddress `json:"recipient"`
+	// Amount in quanta of tokens.
+	Amount           string              `json:"amount"`
+	Comment          OptString           `json:"comment"`
+	EncryptedComment OptEncryptedComment `json:"encrypted_comment"`
+	Refund           OptRefund           `json:"refund"`
+	Currency         EcPreview           `json:"currency"`
+}
+
+// GetSender returns the value of Sender.
+func (s *ExtraCurrencyTransferAction) GetSender() AccountAddress {
+	return s.Sender
+}
+
+// GetRecipient returns the value of Recipient.
+func (s *ExtraCurrencyTransferAction) GetRecipient() AccountAddress {
+	return s.Recipient
+}
+
+// GetAmount returns the value of Amount.
+func (s *ExtraCurrencyTransferAction) GetAmount() string {
+	return s.Amount
+}
+
+// GetComment returns the value of Comment.
+func (s *ExtraCurrencyTransferAction) GetComment() OptString {
+	return s.Comment
+}
+
+// GetEncryptedComment returns the value of EncryptedComment.
+func (s *ExtraCurrencyTransferAction) GetEncryptedComment() OptEncryptedComment {
+	return s.EncryptedComment
+}
+
+// GetRefund returns the value of Refund.
+func (s *ExtraCurrencyTransferAction) GetRefund() OptRefund {
+	return s.Refund
+}
+
+// GetCurrency returns the value of Currency.
+func (s *ExtraCurrencyTransferAction) GetCurrency() EcPreview {
+	return s.Currency
+}
+
+// SetSender sets the value of Sender.
+func (s *ExtraCurrencyTransferAction) SetSender(val AccountAddress) {
+	s.Sender = val
+}
+
+// SetRecipient sets the value of Recipient.
+func (s *ExtraCurrencyTransferAction) SetRecipient(val AccountAddress) {
+	s.Recipient = val
+}
+
+// SetAmount sets the value of Amount.
+func (s *ExtraCurrencyTransferAction) SetAmount(val string) {
+	s.Amount = val
+}
+
+// SetComment sets the value of Comment.
+func (s *ExtraCurrencyTransferAction) SetComment(val OptString) {
+	s.Comment = val
+}
+
+// SetEncryptedComment sets the value of EncryptedComment.
+func (s *ExtraCurrencyTransferAction) SetEncryptedComment(val OptEncryptedComment) {
+	s.EncryptedComment = val
+}
+
+// SetRefund sets the value of Refund.
+func (s *ExtraCurrencyTransferAction) SetRefund(val OptRefund) {
+	s.Refund = val
+}
+
+// SetCurrency sets the value of Currency.
+func (s *ExtraCurrencyTransferAction) SetCurrency(val EcPreview) {
+	s.Currency = val
 }
 
 // Ref: #/components/schemas/FoundAccounts
@@ -12392,6 +12540,52 @@ func (o OptEncryptedComment) Get() (v EncryptedComment, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptEncryptedComment) Or(d EncryptedComment) EncryptedComment {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptExtraCurrencyTransferAction returns new OptExtraCurrencyTransferAction with value set to v.
+func NewOptExtraCurrencyTransferAction(v ExtraCurrencyTransferAction) OptExtraCurrencyTransferAction {
+	return OptExtraCurrencyTransferAction{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptExtraCurrencyTransferAction is optional ExtraCurrencyTransferAction.
+type OptExtraCurrencyTransferAction struct {
+	Value ExtraCurrencyTransferAction
+	Set   bool
+}
+
+// IsSet returns true if OptExtraCurrencyTransferAction was set.
+func (o OptExtraCurrencyTransferAction) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptExtraCurrencyTransferAction) Reset() {
+	var v ExtraCurrencyTransferAction
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptExtraCurrencyTransferAction) SetTo(v ExtraCurrencyTransferAction) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptExtraCurrencyTransferAction) Get() (v ExtraCurrencyTransferAction, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptExtraCurrencyTransferAction) Or(d ExtraCurrencyTransferAction) ExtraCurrencyTransferAction {
 	if v, ok := o.Get(); ok {
 		return v
 	}

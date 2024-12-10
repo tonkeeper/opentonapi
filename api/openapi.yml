@@ -5744,6 +5744,7 @@ components:
           example: "TonTransfer"
           enum:
             - TonTransfer
+            - ExtraCurrencyTransfer
             - JettonTransfer
             - JettonBurn
             - JettonMint
@@ -5772,6 +5773,8 @@ components:
             - failed
         TonTransfer:
           $ref: '#/components/schemas/TonTransferAction'
+        ExtraCurrencyTransfer:
+          $ref: '#/components/schemas/ExtraCurrencyTransferAction'
         ContractDeploy:
           $ref: '#/components/schemas/ContractDeployAction'
         JettonTransfer:
@@ -5842,6 +5845,52 @@ components:
           $ref: '#/components/schemas/EncryptedComment'
         refund:
           $ref: '#/components/schemas/Refund'
+    EcPreview:
+      type: object
+      required:
+        - name
+        - symbol
+        - decimals
+        - image
+      properties:
+        name:
+          type: string
+          example: FMS
+        symbol:
+          type: string
+          example: FMS
+        decimals:
+          type: integer
+          example: 5
+        image:
+          type: string
+          example: https://cache.tonapi.io/images/extra.jpg
+    ExtraCurrencyTransferAction:
+      type: object
+      required:
+        - sender
+        - recipient
+        - amount
+        - currency
+      properties:
+        sender:
+          $ref: '#/components/schemas/AccountAddress'
+        recipient:
+          $ref: '#/components/schemas/AccountAddress'
+        amount:
+          type: string
+          x-js-format: bigint
+          example: "1000000000"
+          description: amount in quanta of tokens
+        comment:
+          type: string
+          example: "Hi! This is your salary. \nFrom accounting with love."
+        encrypted_comment:
+          $ref: '#/components/schemas/EncryptedComment'
+        refund:
+          $ref: '#/components/schemas/Refund'
+        currency:
+          $ref: '#/components/schemas/EcPreview'
     SmartContractAction:
       type: object
       required:
