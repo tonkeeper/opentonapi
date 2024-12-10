@@ -162,18 +162,11 @@ func (h *Handler) convertActionExtraCurrencyTransfer(t *bath.ExtraCurrencyTransf
 		Sender:           convertAccountAddress(t.Sender, h.addressBook),
 		EncryptedComment: convertEncryptedComment(t.EncryptedComment),
 		Currency: oas.EcPreview{
-			Name:     meta.Name,
 			Symbol:   meta.Symbol,
 			Decimals: meta.Decimals,
 			Image:    meta.Image,
 		},
 	})
-	if t.Refund != nil {
-		action.Value.Refund.SetTo(oas.Refund{
-			Type:   oas.RefundType(t.Refund.Type),
-			Origin: t.Refund.Origin,
-		})
-	}
 	simplePreview := oas.ActionSimplePreview{
 		Name:        "Extra Currency Transfer",
 		Description: "", // TODO: add description

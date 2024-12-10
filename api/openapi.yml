@@ -5848,14 +5848,10 @@ components:
     EcPreview:
       type: object
       required:
-        - name
         - symbol
         - decimals
         - image
       properties:
-        name:
-          type: string
-          example: FMS
         symbol:
           type: string
           example: FMS
@@ -5887,8 +5883,6 @@ components:
           example: "Hi! This is your salary. \nFrom accounting with love."
         encrypted_comment:
           $ref: '#/components/schemas/EncryptedComment'
-        refund:
-          $ref: '#/components/schemas/Refund'
         currency:
           $ref: '#/components/schemas/EcPreview'
     SmartContractAction:

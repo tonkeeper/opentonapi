@@ -110,7 +110,6 @@ type (
 		EncryptedComment *EncryptedComment
 		Recipient        tongo.AccountID
 		Sender           tongo.AccountID
-		Refund           *Refund
 	}
 	SmartContractAction struct {
 		TonAttached int64
@@ -274,7 +273,7 @@ func (a Action) ContributeToExtra(account tongo.AccountID) int64 {
 		return 0
 	}
 	switch a.Type {
-	case NftItemTransfer, ContractDeploy, UnSubscription, JettonMint, JettonBurn, WithdrawStakeRequest, DomainRenew, InscriptionMint, InscriptionTransfer: // actions without extra
+	case NftItemTransfer, ContractDeploy, UnSubscription, JettonMint, JettonBurn, WithdrawStakeRequest, DomainRenew, InscriptionMint, InscriptionTransfer, ExtraCurrencyTransfer: // actions without extra
 		return 0
 	case TonTransfer:
 		return detectDirection(account, a.TonTransfer.Sender, a.TonTransfer.Recipient, a.TonTransfer.Amount)
@@ -348,6 +347,10 @@ func (a Action) IsSubject(account tongo.AccountID) bool {
 }
 
 func (a *TonTransferAction) SubjectAccounts() []tongo.AccountID {
+	return []tongo.AccountID{a.Sender, a.Recipient}
+}
+
+func (a *ExtraCurrencyTransferAction) SubjectAccounts() []tongo.AccountID {
 	return []tongo.AccountID{a.Sender, a.Recipient}
 }
 

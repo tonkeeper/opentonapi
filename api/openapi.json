@@ -3133,17 +3133,12 @@
       "example": "https://cache.tonapi.io/images/extra.jpg",
       "type": "string"
      },
-     "name": {
-      "example": "FMS",
-      "type": "string"
-     },
      "symbol": {
       "example": "FMS",
       "type": "string"
      }
     },
     "required": [
-     "name",
      "symbol",
      "decimals",
      "image"
@@ -3314,9 +3309,6 @@
      },
      "recipient": {
       "$ref": "#/components/schemas/AccountAddress"
-     },
-     "refund": {
-      "$ref": "#/components/schemas/Refund"
      },
      "sender": {
       "$ref": "#/components/schemas/AccountAddress"
