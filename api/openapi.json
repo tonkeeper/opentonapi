@@ -358,6 +358,14 @@
      "type": "integer"
     }
    },
+   "tokenQuery": {
+    "in": "query",
+    "name": "token",
+    "schema": {
+     "example": "NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2ODQ3...",
+     "type": "string"
+    }
+   },
    "traceIDParameter": {
     "description": "trace ID or transaction hash in hex (without 0x) or base64url format",
     "in": "path",
@@ -376,6 +384,15 @@
     "schema": {
      "example": "97264395BD65A255A429B11326C84128B7D70FFED7949ABAE3036D506BA38621",
      "type": "string"
+    }
+   },
+   "webhookId": {
+    "in": "path",
+    "name": "webhook_id",
+    "required": true,
+    "schema": {
+     "format": "int64",
+     "type": "integer"
     }
    },
    "workchainQuery": {
@@ -679,6 +696,74 @@
      }
     },
     "description": "Data that is expected",
+    "required": true
+   },
+   "WebhookAccountTxSubscribeRequest": {
+    "content": {
+     "application/json": {
+      "schema": {
+       "properties": {
+        "accounts": {
+         "items": {
+          "properties": {
+           "account_id": {
+            "type": "string"
+           }
+          },
+          "required": [
+           "account_id"
+          ],
+          "type": "object"
+         },
+         "type": "array"
+        }
+       },
+       "required": [
+        "accounts"
+       ],
+       "type": "object"
+      }
+     }
+    },
+    "required": true
+   },
+   "WebhookAccountTxUnsubscribeRequest": {
+    "content": {
+     "application/json": {
+      "schema": {
+       "properties": {
+        "accounts": {
+         "items": {
+          "type": "string"
+         },
+         "type": "array"
+        }
+       },
+       "required": [
+        "accounts"
+       ],
+       "type": "object"
+      }
+     }
+    },
+    "required": true
+   },
+   "WebhookConfiguration": {
+    "content": {
+     "application/json": {
+      "schema": {
+       "properties": {
+        "endpoint": {
+         "type": "string"
+        }
+       },
+       "required": [
+        "endpoint"
+       ],
+       "type": "object"
+      }
+     }
+    },
     "required": true
    }
   },
@@ -5828,6 +5913,37 @@
     ],
     "type": "object"
    },
+   "UsageStats": {
+    "properties": {
+     "account_subscriptions": {
+      "format": "int64",
+      "type": "integer"
+     },
+     "period_ended_at": {
+      "format": "date-time",
+      "type": "string"
+     },
+     "period_started_at": {
+      "format": "date-time",
+      "type": "string"
+     },
+     "webhooks_delivered": {
+      "format": "int64",
+      "type": "integer"
+     },
+     "webhooks_failed": {
+      "format": "int64",
+      "type": "integer"
+     }
+    },
+    "required": [
+     "period_started_at",
+     "account_subscriptions",
+     "webhooks_delivered",
+     "webhooks_failed"
+    ],
+    "type": "object"
+   },
    "Validator": {
     "properties": {
      "address": {
@@ -6042,6 +6158,186 @@
     ],
     "type": "object"
    },
+   "WebhookAccountTxSubscriptions": {
+    "properties": {
+     "account_tx_subscriptions": {
+      "items": {
+       "properties": {
+        "account_id": {
+         "type": "string"
+        },
+        "failed_at": {
+         "format": "date-time",
+         "type": "string"
+        },
+        "failed_attempts": {
+         "format": "int64",
+         "type": "integer"
+        },
+        "failed_lt": {
+         "format": "int64",
+         "type": "integer"
+        },
+        "last_delivered_lt": {
+         "format": "int64",
+         "type": "integer"
+        }
+       },
+       "required": [
+        "account_id",
+        "last_delivered_lt"
+       ],
+       "type": "object"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "account_tx_subscriptions"
+    ],
+    "type": "object"
+   },
+   "WebhookList": {
+    "properties": {
+     "webhooks": {
+      "items": {
+       "properties": {
+        "endpoint": {
+         "type": "string"
+        },
+        "id": {
+         "format": "int64",
+         "type": "integer"
+        },
+        "last_online_at": {
+         "format": "date-time",
+         "type": "string"
+        },
+        "status": {
+         "enum": [
+          "online",
+          "offline"
+         ],
+         "type": "string"
+        },
+        "status_failed_attempts": {
+         "type": "integer"
+        },
+        "status_updated_at": {
+         "format": "date-time",
+         "type": "string"
+        },
+        "subscribed_accounts": {
+         "type": "integer"
+        },
+        "subscribed_msg_opcodes": {
+         "type": "integer"
+        },
+        "subscribed_to_mempool": {
+         "type": "boolean"
+        },
+        "subscribed_to_new_contracts": {
+         "type": "boolean"
+        },
+        "token": {
+         "type": "string"
+        }
+       },
+       "required": [
+        "id",
+        "endpoint",
+        "token",
+        "status",
+        "status_updated_at",
+        "last_online_at",
+        "status_failed_attempts",
+        "subscribed_accounts",
+        "subscribed_to_mempool",
+        "subscribed_to_new_contracts",
+        "subscribed_msg_opcodes"
+       ],
+       "type": "object"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "webhooks"
+    ],
+    "type": "object"
+   },
+   "WebhookLogs": {
+    "properties": {
+     "logs": {
+      "items": {
+       "properties": {
+        "event_type": {
+         "type": "string"
+        },
+        "message": {
+         "type": "string"
+        },
+        "timestamp": {
+         "format": "date-time",
+         "type": "string"
+        }
+       },
+       "required": [
+        "timestamp",
+        "message",
+        "event_type"
+       ],
+       "type": "object"
+      },
+      "type": "array"
+     },
+     "next_offset": {
+      "format": "int64",
+      "type": "integer"
+     }
+    },
+    "required": [
+     "logs"
+    ],
+    "type": "object"
+   },
+   "WebhookMsgOpcodeSubscriptions": {
+    "properties": {
+     "subscriptions": {
+      "items": {
+       "properties": {
+        "disabled_at": {
+         "format": "date-time",
+         "type": "string"
+        },
+        "disabled_reason": {
+         "type": "string"
+        },
+        "opcode": {
+         "type": "string"
+        },
+        "status": {
+         "enum": [
+          "active",
+          "disabled"
+         ],
+         "type": "string"
+        }
+       },
+       "required": [
+        "opcode",
+        "status"
+       ],
+       "type": "object"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "subscriptions"
+    ],
+    "type": "object"
+   },
    "WithdrawStakeAction": {
     "description": "validator's participation in elections",
     "properties": {
@@ -6182,6 +6478,42 @@
  },
  "openapi": "3.1.0",
  "paths": {
+  "/usage-stats": {
+   "get": {
+    "operationId": "getUsageStats",
+    "parameters": [
+     {
+      "$ref": "#/components/parameters/tokenQuery"
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/UsageStats"
+        }
+       }
+      },
+      "description": "usage stats"
+     },
+     "default": {
+      "$ref": "#/components/responses/Error"
+     }
+    },
+    "servers": [
+     {
+      "url": "https://rt.tonapi.io"
+     },
+     {
+      "url": "https://rt-testnet.tonapi.io"
+     }
+    ],
+    "tags": [
+     "Webhooks"
+    ]
+   }
+  },
   "/v2/accounts/_bulk": {
    "post": {
     "description": "Get human-friendly information about several accounts without low-level details.",
@@ -10530,6 +10862,716 @@
      "Wallet"
     ]
    }
+  },
+  "/webhooks": {
+   "get": {
+    "description": "Get list of webhooks",
+    "operationId": "getWebhooks",
+    "parameters": [
+     {
+      "$ref": "#/components/parameters/tokenQuery"
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/WebhookList"
+        }
+       }
+      },
+      "description": "list of webhooks"
+     },
+     "default": {
+      "$ref": "#/components/responses/Error"
+     }
+    },
+    "servers": [
+     {
+      "url": "https://rt.tonapi.io"
+     },
+     {
+      "url": "https://rt-testnet.tonapi.io"
+     }
+    ],
+    "tags": [
+     "Webhooks"
+    ]
+   },
+   "post": {
+    "operationId": "createWebhook",
+    "parameters": [
+     {
+      "$ref": "#/components/parameters/tokenQuery"
+     }
+    ],
+    "requestBody": {
+     "$ref": "#/components/requestBodies/WebhookConfiguration"
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "token": {
+           "description": "secret token which will be used by TONAPI to authenticate itself when sending notifications to the webhook endpoint",
+           "type": "string"
+          },
+          "webhook_id": {
+           "format": "int64",
+           "type": "integer"
+          }
+         },
+         "required": [
+          "webhook_id",
+          "token"
+         ],
+         "type": "object"
+        }
+       }
+      },
+      "description": "information about created webhook"
+     },
+     "default": {
+      "$ref": "#/components/responses/Error"
+     }
+    },
+    "servers": [
+     {
+      "url": "https://rt.tonapi.io"
+     },
+     {
+      "url": "https://rt-testnet.tonapi.io"
+     }
+    ],
+    "tags": [
+     "Webhooks"
+    ]
+   }
+  },
+  "/webhooks/{webhook_id}": {
+   "delete": {
+    "description": "remove webhook and its subscriptions",
+    "operationId": "deleteWebhook",
+    "parameters": [
+     {
+      "$ref": "#/components/parameters/tokenQuery"
+     },
+     {
+      "$ref": "#/components/parameters/webhookId"
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "additionalProperties": true,
+         "example": {}
+        }
+       }
+      },
+      "description": ""
+     },
+     "default": {
+      "$ref": "#/components/responses/Error"
+     }
+    },
+    "servers": [
+     {
+      "url": "https://rt.tonapi.io"
+     },
+     {
+      "url": "https://rt-testnet.tonapi.io"
+     }
+    ],
+    "tags": [
+     "Webhooks"
+    ]
+   }
+  },
+  "/webhooks/{webhook_id}/account-tx/subscribe": {
+   "post": {
+    "description": "subscribe to notifications for a particular set of accounts",
+    "operationId": "webhookAccountTxSubscribe",
+    "parameters": [
+     {
+      "$ref": "#/components/parameters/tokenQuery"
+     },
+     {
+      "$ref": "#/components/parameters/webhookId"
+     }
+    ],
+    "requestBody": {
+     "$ref": "#/components/requestBodies/WebhookAccountTxSubscribeRequest"
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "additionalProperties": true,
+         "example": {}
+        }
+       }
+      },
+      "description": ""
+     },
+     "default": {
+      "$ref": "#/components/responses/Error"
+     }
+    },
+    "servers": [
+     {
+      "url": "https://rt.tonapi.io"
+     },
+     {
+      "url": "https://rt-testnet.tonapi.io"
+     }
+    ],
+    "tags": [
+     "Webhooks"
+    ]
+   }
+  },
+  "/webhooks/{webhook_id}/account-tx/subscriptions": {
+   "get": {
+    "operationId": "webhookAccountTxSubscriptions",
+    "parameters": [
+     {
+      "$ref": "#/components/parameters/tokenQuery"
+     },
+     {
+      "$ref": "#/components/parameters/webhookId"
+     },
+     {
+      "$ref": "#/components/parameters/offsetQuery"
+     },
+     {
+      "$ref": "#/components/parameters/limitQuery"
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/WebhookAccountTxSubscriptions"
+        }
+       }
+      },
+      "description": "subscriptions"
+     },
+     "default": {
+      "$ref": "#/components/responses/Error"
+     }
+    },
+    "servers": [
+     {
+      "url": "https://rt.tonapi.io"
+     },
+     {
+      "url": "https://rt-testnet.tonapi.io"
+     }
+    ],
+    "tags": [
+     "Webhooks"
+    ]
+   }
+  },
+  "/webhooks/{webhook_id}/account-tx/unsubscribe": {
+   "post": {
+    "operationId": "webhookAccountTxUnsubscribe",
+    "parameters": [
+     {
+      "$ref": "#/components/parameters/tokenQuery"
+     },
+     {
+      "$ref": "#/components/parameters/webhookId"
+     }
+    ],
+    "requestBody": {
+     "$ref": "#/components/requestBodies/WebhookAccountTxUnsubscribeRequest"
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "additionalProperties": true,
+         "example": {}
+        }
+       }
+      },
+      "description": ""
+     },
+     "default": {
+      "$ref": "#/components/responses/Error"
+     }
+    },
+    "servers": [
+     {
+      "url": "https://rt.tonapi.io"
+     },
+     {
+      "url": "https://rt-testnet.tonapi.io"
+     }
+    ],
+    "tags": [
+     "Webhooks"
+    ]
+   }
+  },
+  "/webhooks/{webhook_id}/back-online": {
+   "post": {
+    "description": "Let TONAPI know that webhook is ready to receive notifications after it has been unavailable",
+    "operationId": "webhookBackOnline",
+    "parameters": [
+     {
+      "$ref": "#/components/parameters/tokenQuery"
+     },
+     {
+      "$ref": "#/components/parameters/webhookId"
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "additionalProperties": true,
+         "example": {}
+        }
+       }
+      },
+      "description": ""
+     },
+     "default": {
+      "$ref": "#/components/responses/Error"
+     }
+    },
+    "servers": [
+     {
+      "url": "https://rt.tonapi.io"
+     },
+     {
+      "url": "https://rt-testnet.tonapi.io"
+     }
+    ],
+    "tags": [
+     "Webhooks"
+    ]
+   }
+  },
+  "/webhooks/{webhook_id}/generate-new-token": {
+   "post": {
+    "description": "generate a new secret token which will be used by TONAPI to authenticate itself when sending notifications to the webhook endpoint. The old token will be invalidated.",
+    "operationId": "webhookGenerateNewToken",
+    "parameters": [
+     {
+      "$ref": "#/components/parameters/tokenQuery"
+     },
+     {
+      "$ref": "#/components/parameters/webhookId"
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "token": {
+           "type": "string"
+          }
+         },
+         "required": [
+          "token"
+         ],
+         "type": "object"
+        }
+       }
+      },
+      "description": ""
+     },
+     "default": {
+      "$ref": "#/components/responses/Error"
+     }
+    },
+    "servers": [
+     {
+      "url": "https://rt.tonapi.io"
+     },
+     {
+      "url": "https://rt-testnet.tonapi.io"
+     }
+    ],
+    "tags": [
+     "Webhooks"
+    ]
+   }
+  },
+  "/webhooks/{webhook_id}/logs": {
+   "get": {
+    "description": "Get logs of failed attempts to deliver notifications to the webhook",
+    "operationId": "getFailureLogs",
+    "parameters": [
+     {
+      "$ref": "#/components/parameters/tokenQuery"
+     },
+     {
+      "$ref": "#/components/parameters/webhookId"
+     },
+     {
+      "in": "query",
+      "name": "offset",
+      "required": false,
+      "schema": {
+       "default": 0,
+       "minimum": 0,
+       "type": "integer"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/WebhookLogs"
+        }
+       }
+      },
+      "description": "list of webhooks"
+     },
+     "default": {
+      "$ref": "#/components/responses/Error"
+     }
+    },
+    "servers": [
+     {
+      "url": "https://rt.tonapi.io"
+     },
+     {
+      "url": "https://rt-testnet.tonapi.io"
+     }
+    ],
+    "tags": [
+     "Webhooks"
+    ]
+   }
+  },
+  "/webhooks/{webhook_id}/mempool/subscribe": {
+   "post": {
+    "description": "subscribe to notifications for mempool messages",
+    "operationId": "webhookMempoolSubscribe",
+    "parameters": [
+     {
+      "$ref": "#/components/parameters/tokenQuery"
+     },
+     {
+      "$ref": "#/components/parameters/webhookId"
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "additionalProperties": true,
+         "example": {}
+        }
+       }
+      },
+      "description": ""
+     },
+     "default": {
+      "$ref": "#/components/responses/Error"
+     }
+    },
+    "servers": [
+     {
+      "url": "https://rt.tonapi.io"
+     },
+     {
+      "url": "https://rt-testnet.tonapi.io"
+     }
+    ],
+    "tags": [
+     "Webhooks"
+    ]
+   }
+  },
+  "/webhooks/{webhook_id}/mempool/unsubscribe": {
+   "post": {
+    "operationId": "webhookMempoolUnsubscribe",
+    "parameters": [
+     {
+      "$ref": "#/components/parameters/tokenQuery"
+     },
+     {
+      "$ref": "#/components/parameters/webhookId"
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "additionalProperties": true,
+         "example": {}
+        }
+       }
+      },
+      "description": ""
+     },
+     "default": {
+      "$ref": "#/components/responses/Error"
+     }
+    },
+    "servers": [
+     {
+      "url": "https://rt.tonapi.io"
+     },
+     {
+      "url": "https://rt-testnet.tonapi.io"
+     }
+    ],
+    "tags": [
+     "Webhooks"
+    ]
+   }
+  },
+  "/webhooks/{webhook_id}/msg-opcode/subscriptions": {
+   "get": {
+    "operationId": "webhookNewContractsSubscriptions",
+    "parameters": [
+     {
+      "$ref": "#/components/parameters/tokenQuery"
+     },
+     {
+      "$ref": "#/components/parameters/webhookId"
+     },
+     {
+      "$ref": "#/components/parameters/offsetQuery"
+     },
+     {
+      "$ref": "#/components/parameters/limitQuery"
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/WebhookMsgOpcodeSubscriptions"
+        }
+       }
+      },
+      "description": "subscriptions"
+     },
+     "default": {
+      "$ref": "#/components/responses/Error"
+     }
+    },
+    "servers": [
+     {
+      "url": "https://rt.tonapi.io"
+     },
+     {
+      "url": "https://rt-testnet.tonapi.io"
+     }
+    ],
+    "tags": [
+     "Webhooks"
+    ]
+   }
+  },
+  "/webhooks/{webhook_id}/subscribe-msg-opcode/{opcode}": {
+   "post": {
+    "description": "receive a notification when there is a new message with a given opcode",
+    "operationId": "webhookMsgOpcodeSubscribe",
+    "parameters": [
+     {
+      "$ref": "#/components/parameters/tokenQuery"
+     },
+     {
+      "$ref": "#/components/parameters/webhookId"
+     },
+     {
+      "in": "path",
+      "name": "opcode",
+      "required": true,
+      "schema": {
+       "description": "hex string starting with 0x",
+       "example": 1193046,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "additionalProperties": true,
+         "example": {}
+        }
+       }
+      },
+      "description": ""
+     },
+     "default": {
+      "$ref": "#/components/responses/Error"
+     }
+    },
+    "servers": [
+     {
+      "url": "https://rt.tonapi.io"
+     },
+     {
+      "url": "https://rt-testnet.tonapi.io"
+     }
+    ],
+    "tags": [
+     "Webhooks"
+    ]
+   }
+  },
+  "/webhooks/{webhook_id}/subscribe-new-contracts": {
+   "post": {
+    "description": "receive a notification when a new contract is deployed to the blockchain",
+    "operationId": "webhookNewContractSubscribe",
+    "parameters": [
+     {
+      "$ref": "#/components/parameters/tokenQuery"
+     },
+     {
+      "$ref": "#/components/parameters/webhookId"
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "additionalProperties": true,
+         "example": {}
+        }
+       }
+      },
+      "description": ""
+     },
+     "default": {
+      "$ref": "#/components/responses/Error"
+     }
+    },
+    "servers": [
+     {
+      "url": "https://rt.tonapi.io"
+     },
+     {
+      "url": "https://rt-testnet.tonapi.io"
+     }
+    ],
+    "tags": [
+     "Webhooks"
+    ]
+   }
+  },
+  "/webhooks/{webhook_id}/unsubscribe-msg-opcode/{opcode}": {
+   "post": {
+    "description": "stop receiving a notification about a new message with a given opcode",
+    "operationId": "webhookMsgOpcodeUnsubscribe",
+    "parameters": [
+     {
+      "$ref": "#/components/parameters/tokenQuery"
+     },
+     {
+      "$ref": "#/components/parameters/webhookId"
+     },
+     {
+      "in": "path",
+      "name": "opcode",
+      "required": true,
+      "schema": {
+       "description": "hex string starting with 0x",
+       "example": 1193046,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "additionalProperties": true,
+         "example": {}
+        }
+       }
+      },
+      "description": ""
+     },
+     "default": {
+      "$ref": "#/components/responses/Error"
+     }
+    },
+    "servers": [
+     {
+      "url": "https://rt.tonapi.io"
+     },
+     {
+      "url": "https://rt-testnet.tonapi.io"
+     }
+    ],
+    "tags": [
+     "Webhooks"
+    ]
+   }
+  },
+  "/webhooks/{webhook_id}/unsubscribe-new-contracts": {
+   "post": {
+    "description": "receive a notification when a new contract is deployed to the blockchain",
+    "operationId": "webhookNewContractUnsubscribe",
+    "parameters": [
+     {
+      "$ref": "#/components/parameters/tokenQuery"
+     },
+     {
+      "$ref": "#/components/parameters/webhookId"
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "additionalProperties": true,
+         "example": {}
+        }
+       }
+      },
+      "description": ""
+     },
+     "default": {
+      "$ref": "#/components/responses/Error"
+     }
+    },
+    "servers": [
+     {
+      "url": "https://rt.tonapi.io"
+     },
+     {
+      "url": "https://rt-testnet.tonapi.io"
+     }
+    ],
+    "tags": [
+     "Webhooks"
+    ]
+   }
   }
  },
  "servers": [
@@ -10669,6 +11711,9 @@
     "url": "https://docs.tonconsole.com/tonapi/rest-api/utilities"
    },
    "name": "Utilities"
+  },
+  {
+   "name": "Webhooks"
   }
  ]
 }
