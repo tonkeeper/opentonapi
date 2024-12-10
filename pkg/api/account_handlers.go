@@ -72,6 +72,9 @@ func (h *Handler) GetAccount(ctx context.Context, params oas.GetAccountParams) (
 	} else {
 		res = convertToAccount(rawAccount, nil, h.state)
 	}
+	if rawAccount.ExtraBalances != nil {
+		res.ExtraBalance = convertExtraCurrencies(rawAccount.ExtraBalances)
+	}
 	return &res, nil
 }
 
@@ -113,6 +116,9 @@ func (h *Handler) GetAccounts(ctx context.Context, request oas.OptGetAccountsReq
 			res = convertToAccount(account, &ab, h.state)
 		} else {
 			res = convertToAccount(account, nil, h.state)
+		}
+		if account.ExtraBalances != nil {
+			res.ExtraBalance = convertExtraCurrencies(account.ExtraBalances)
 		}
 		results[account.AccountAddress] = res
 	}

@@ -5,7 +5,6 @@ import (
 	"math/big"
 	"sort"
 
-	"github.com/shopspring/decimal"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
 	"github.com/tonkeeper/tongo/boc"
@@ -313,6 +312,7 @@ func ConvertMessage(message tlb.Message, txLT uint64, cd *abi.ContractDescriptio
 		if err != nil {
 			return Message{}, err
 		}
+
 		return Message{
 			MessageID: MessageID{
 				CreatedLt:   info.CreatedLt,
@@ -324,6 +324,7 @@ func ConvertMessage(message tlb.Message, txLT uint64, cd *abi.ContractDescriptio
 			Bounce:      info.Bounce,
 			Bounced:     info.Bounced,
 			Value:       int64(info.Value.Grams),
+			ValueExtra:  extractExtraCurrencies(info.Value.Other),
 			FwdFee:      int64(info.FwdFee),
 			IhrFee:      int64(info.IhrFee),
 			ImportFee:   0,
@@ -434,15 +435,7 @@ func ConvertToAccount(accountId tongo.AccountID, shardAccount tlb.ShardAccount) 
 	}
 	balance := acc.Account.Storage.Balance
 	res.TonBalance = int64(balance.Grams)
-	items := balance.Other.Dict.Items()
-	if len(items) > 0 {
-		otherBalances := make(map[uint32]decimal.Decimal, len(items))
-		for _, item := range items {
-			value := big.Int(item.Value)
-			otherBalances[uint32(item.Key)] = decimal.NewFromBigInt(&value, 0)
-		}
-		res.ExtraBalances = otherBalances
-	}
+	res.ExtraBalances = extractExtraCurrencies(balance.Other)
 	res.LastTransactionLt = shardAccount.LastTransLt
 	res.LastTransactionHash = tongo.Bits256(shardAccount.LastTransHash)
 	if acc.Account.Storage.State.SumType == "AccountUninit" {
@@ -479,6 +472,18 @@ func ConvertToAccount(accountId tongo.AccountID, shardAccount tlb.ShardAccount) 
 		res.Storage.DuePayment = int64(acc.Account.StorageStat.DuePayment.Value)
 	}
 	return res, nil
+}
+
+func extractExtraCurrencies(extraCurrencyCollection tlb.ExtraCurrencyCollection) ExtraCurrencies {
+	items := extraCurrencyCollection.Dict.Items()
+	if len(items) > 0 {
+		res := make(map[int32]tlb.VarUInteger32, len(items))
+		for _, item := range items {
+			res[int32(item.Key)] = item.Value
+		}
+		return res
+	}
+	return nil
 }
 
 func ExtractTransactions(id tongo.BlockIDExt, block *tlb.Block) ([]*Transaction, error) {

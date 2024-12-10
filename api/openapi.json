@@ -735,6 +735,12 @@
       "example": {},
       "type": "object"
      },
+     "extra_balance": {
+      "items": {
+       "$ref": "#/components/schemas/ExtraCurrency"
+      },
+      "type": "array"
+     },
      "get_methods": {
       "example": [
        "get_item_data"
@@ -1057,6 +1063,9 @@
      "ElectionsRecoverStake": {
       "$ref": "#/components/schemas/ElectionsRecoverStakeAction"
      },
+     "ExtraCurrencyTransfer": {
+      "$ref": "#/components/schemas/ExtraCurrencyTransferAction"
+     },
      "InscriptionMint": {
       "$ref": "#/components/schemas/InscriptionMintAction"
      },
@@ -1121,6 +1130,7 @@
      "type": {
       "enum": [
        "TonTransfer",
+       "ExtraCurrencyTransfer",
        "JettonTransfer",
        "JettonBurn",
        "JettonMint",
@@ -3113,6 +3123,28 @@
     ],
     "type": "object"
    },
+   "EcPreview": {
+    "properties": {
+     "decimals": {
+      "example": 5,
+      "type": "integer"
+     },
+     "image": {
+      "example": "https://cache.tonapi.io/images/extra.jpg",
+      "type": "string"
+     },
+     "symbol": {
+      "example": "FMS",
+      "type": "string"
+     }
+    },
+    "required": [
+     "symbol",
+     "decimals",
+     "image"
+    ],
+    "type": "object"
+   },
    "ElectionsDepositStakeAction": {
     "properties": {
      "amount": {
@@ -3226,6 +3258,67 @@
      "is_scam",
      "lt",
      "in_progress"
+    ],
+    "type": "object"
+   },
+   "ExtraCurrency": {
+    "properties": {
+     "amount": {
+      "example": "1000000000",
+      "type": "string",
+      "x-js-format": "bigint"
+     },
+     "decimals": {
+      "example": 5,
+      "type": "integer"
+     },
+     "id": {
+      "example": 239,
+      "format": "int32",
+      "type": "integer"
+     },
+     "name": {
+      "example": "FMS",
+      "type": "string"
+     }
+    },
+    "required": [
+     "id",
+     "amount",
+     "decimals"
+    ],
+    "type": "object"
+   },
+   "ExtraCurrencyTransferAction": {
+    "properties": {
+     "amount": {
+      "description": "amount in quanta of tokens",
+      "example": "1000000000",
+      "type": "string",
+      "x-js-format": "bigint"
+     },
+     "comment": {
+      "example": "Hi! This is your salary. \nFrom accounting with love.",
+      "type": "string"
+     },
+     "currency": {
+      "$ref": "#/components/schemas/EcPreview"
+     },
+     "encrypted_comment": {
+      "$ref": "#/components/schemas/EncryptedComment"
+     },
+     "recipient": {
+      "$ref": "#/components/schemas/AccountAddress"
+     },
+     "sender": {
+      "$ref": "#/components/schemas/AccountAddress"
+     }
+    },
+    "required": [
+     "sender",
+     "recipient",
+     "amount",
+     "currency"
     ],
     "type": "object"
    },
@@ -4177,6 +4270,12 @@
       "format": "int64",
       "type": "integer",
       "x-js-format": "bigint"
+     },
+     "value_extra": {
+      "items": {
+       "$ref": "#/components/schemas/ExtraCurrency"
+      },
+      "type": "array"
      }
     },
     "required": [

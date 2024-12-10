@@ -78,6 +78,7 @@ func fromTrace(trace *core.Trace) *Bubble {
 		btx.bounced = msg.Bounced
 		btx.inputAmount += msg.Value
 		btx.inputAmount += msg.IhrFee
+		btx.inputExtraAmount = msg.ValueExtra
 		btx.opCode = msg.OpCode
 		btx.decodedBody = msg.DecodedBody
 		btx.inputFrom = source
@@ -95,6 +96,7 @@ func fromTrace(trace *core.Trace) *Bubble {
 		Children: make([]*Bubble, len(trace.Children)),
 		ValueFlow: &ValueFlow{
 			Accounts: map[tongo.AccountID]*AccountValueFlow{
+				// TODO: add extra currency
 				trace.Account: {
 					Ton: inputAmount,
 				},

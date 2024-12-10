@@ -3,6 +3,8 @@ package api
 import (
 	"fmt"
 	imgGenerator "github.com/tonkeeper/opentonapi/pkg/image"
+	"github.com/tonkeeper/opentonapi/pkg/references"
+	"math/big"
 	"sort"
 
 	"github.com/tonkeeper/tongo/abi"
@@ -59,7 +61,8 @@ func convertToRawAccount(account *core.Account) (oas.BlockchainRawAccount, error
 	if account.ExtraBalances != nil {
 		balances := make(map[string]string, len(account.ExtraBalances))
 		for key, value := range account.ExtraBalances {
-			balances[fmt.Sprintf("%v", key)] = fmt.Sprintf("%v", value)
+			v := big.Int(value)
+			balances[fmt.Sprintf("%v", key)] = fmt.Sprintf("%v", v.String())
 		}
 		rawAccount.ExtraBalance = oas.NewOptBlockchainRawAccountExtraBalance(balances)
 	}
@@ -70,6 +73,24 @@ func convertToRawAccount(account *core.Account) (oas.BlockchainRawAccount, error
 		rawAccount.Data = oas.NewOptString(fmt.Sprintf("%x", account.Data[:]))
 	}
 	return rawAccount, nil
+}
+
+func convertExtraCurrencies(extraBalances core.ExtraCurrencies) []oas.ExtraCurrency {
+	res := make([]oas.ExtraCurrency, 0, len(extraBalances))
+	for k, v := range extraBalances {
+		amount := big.Int(v)
+		meta := references.GetExtraCurrencyMeta(k)
+		cur := oas.ExtraCurrency{
+			ID:       k,
+			Amount:   amount.String(),
+			Decimals: meta.Decimals,
+		}
+		if meta.Name != "" {
+			cur.Name.SetTo(meta.Name)
+		}
+		res = append(res, cur)
+	}
+	return res
 }
 
 func convertToAccount(account *core.Account, ab *addressbook.KnownAddress, state chainState) oas.Account {

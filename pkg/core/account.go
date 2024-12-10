@@ -6,7 +6,6 @@ import (
 	"github.com/tonkeeper/tongo/abi"
 	"github.com/tonkeeper/tongo/ton"
 
-	"github.com/shopspring/decimal"
 	"github.com/tonkeeper/tongo/tlb"
 )
 
@@ -15,7 +14,7 @@ type Account struct {
 	AccountAddress      ton.AccountID
 	Status              tlb.AccountStatus
 	TonBalance          int64
-	ExtraBalances       map[uint32]decimal.Decimal
+	ExtraBalances       ExtraCurrencies
 	LastTransactionLt   uint64
 	LastTransactionHash ton.Bits256
 	Code                []byte
