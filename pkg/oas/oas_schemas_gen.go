@@ -5124,15 +5124,9 @@ func (s *DomainRenewAction) SetRenewer(val AccountAddress) {
 
 // Ref: #/components/schemas/EcPreview
 type EcPreview struct {
-	Name     string `json:"name"`
 	Symbol   string `json:"symbol"`
 	Decimals int    `json:"decimals"`
 	Image    string `json:"image"`
-}
-
-// GetName returns the value of Name.
-func (s *EcPreview) GetName() string {
-	return s.Name
 }
 
 // GetSymbol returns the value of Symbol.
@@ -5148,11 +5142,6 @@ func (s *EcPreview) GetDecimals() int {
 // GetImage returns the value of Image.
 func (s *EcPreview) GetImage() string {
 	return s.Image
-}
-
-// SetName sets the value of Name.
-func (s *EcPreview) SetName(val string) {
-	s.Name = val
 }
 
 // SetSymbol sets the value of Symbol.
@@ -5531,7 +5520,6 @@ type ExtraCurrencyTransferAction struct {
 	Amount           string              `json:"amount"`
 	Comment          OptString           `json:"comment"`
 	EncryptedComment OptEncryptedComment `json:"encrypted_comment"`
-	Refund           OptRefund           `json:"refund"`
 	Currency         EcPreview           `json:"currency"`
 }
 
@@ -5558,11 +5546,6 @@ func (s *ExtraCurrencyTransferAction) GetComment() OptString {
 // GetEncryptedComment returns the value of EncryptedComment.
 func (s *ExtraCurrencyTransferAction) GetEncryptedComment() OptEncryptedComment {
 	return s.EncryptedComment
-}
-
-// GetRefund returns the value of Refund.
-func (s *ExtraCurrencyTransferAction) GetRefund() OptRefund {
-	return s.Refund
 }
 
 // GetCurrency returns the value of Currency.
@@ -5593,11 +5576,6 @@ func (s *ExtraCurrencyTransferAction) SetComment(val OptString) {
 // SetEncryptedComment sets the value of EncryptedComment.
 func (s *ExtraCurrencyTransferAction) SetEncryptedComment(val OptEncryptedComment) {
 	s.EncryptedComment = val
-}
-
-// SetRefund sets the value of Refund.
-func (s *ExtraCurrencyTransferAction) SetRefund(val OptRefund) {
-	s.Refund = val
 }
 
 // SetCurrency sets the value of Currency.

@@ -14456,10 +14456,6 @@ func (s *EcPreview) Encode(e *jx.Encoder) {
 // encodeFields encodes fields.
 func (s *EcPreview) encodeFields(e *jx.Encoder) {
 	{
-		e.FieldStart("name")
-		e.Str(s.Name)
-	}
-	{
 		e.FieldStart("symbol")
 		e.Str(s.Symbol)
 	}
@@ -14473,11 +14469,10 @@ func (s *EcPreview) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfEcPreview = [4]string{
-	0: "name",
-	1: "symbol",
-	2: "decimals",
-	3: "image",
+var jsonFieldsNameOfEcPreview = [3]string{
+	0: "symbol",
+	1: "decimals",
+	2: "image",
 }
 
 // Decode decodes EcPreview from json.
@@ -14489,20 +14484,8 @@ func (s *EcPreview) Decode(d *jx.Decoder) error {
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
-		case "name":
-			requiredBitSet[0] |= 1 << 0
-			if err := func() error {
-				v, err := d.Str()
-				s.Name = string(v)
-				if err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"name\"")
-			}
 		case "symbol":
-			requiredBitSet[0] |= 1 << 1
+			requiredBitSet[0] |= 1 << 0
 			if err := func() error {
 				v, err := d.Str()
 				s.Symbol = string(v)
@@ -14514,7 +14497,7 @@ func (s *EcPreview) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"symbol\"")
 			}
 		case "decimals":
-			requiredBitSet[0] |= 1 << 2
+			requiredBitSet[0] |= 1 << 1
 			if err := func() error {
 				v, err := d.Int()
 				s.Decimals = int(v)
@@ -14526,7 +14509,7 @@ func (s *EcPreview) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"decimals\"")
 			}
 		case "image":
-			requiredBitSet[0] |= 1 << 3
+			requiredBitSet[0] |= 1 << 2
 			if err := func() error {
 				v, err := d.Str()
 				s.Image = string(v)
@@ -14547,7 +14530,7 @@ func (s *EcPreview) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b00001111,
+		0b00000111,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -15965,25 +15948,18 @@ func (s *ExtraCurrencyTransferAction) encodeFields(e *jx.Encoder) {
 		}
 	}
 	{
-		if s.Refund.Set {
-			e.FieldStart("refund")
-			s.Refund.Encode(e)
-		}
-	}
-	{
 		e.FieldStart("currency")
 		s.Currency.Encode(e)
 	}
 }
 
-var jsonFieldsNameOfExtraCurrencyTransferAction = [7]string{
+var jsonFieldsNameOfExtraCurrencyTransferAction = [6]string{
 	0: "sender",
 	1: "recipient",
 	2: "amount",
 	3: "comment",
 	4: "encrypted_comment",
-	5: "refund",
-	6: "currency",
+	5: "currency",
 }
 
 // Decode decodes ExtraCurrencyTransferAction from json.
@@ -16047,18 +16023,8 @@ func (s *ExtraCurrencyTransferAction) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"encrypted_comment\"")
 			}
-		case "refund":
-			if err := func() error {
-				s.Refund.Reset()
-				if err := s.Refund.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"refund\"")
-			}
 		case "currency":
-			requiredBitSet[0] |= 1 << 6
+			requiredBitSet[0] |= 1 << 5
 			if err := func() error {
 				if err := s.Currency.Decode(d); err != nil {
 					return err
@@ -16077,7 +16043,7 @@ func (s *ExtraCurrencyTransferAction) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b01000111,
+		0b00100111,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
