@@ -151,6 +151,31 @@ func (h *Handler) convertActionTonTransfer(t *bath.TonTransferAction, acceptLang
 	return action, simplePreview
 }
 
+func (h *Handler) convertActionExtraCurrencyTransfer(t *bath.ExtraCurrencyTransferAction, acceptLanguage string, viewer *tongo.AccountID) (oas.OptExtraCurrencyTransferAction, oas.ActionSimplePreview) {
+	var action oas.OptExtraCurrencyTransferAction
+	amount := big.Int(t.Amount)
+	meta := references.GetExtraCurrencyMeta(t.CurrencyID)
+	action.SetTo(oas.ExtraCurrencyTransferAction{
+		Amount:           amount.String(),
+		Comment:          g.Opt(t.Comment),
+		Recipient:        convertAccountAddress(t.Recipient, h.addressBook),
+		Sender:           convertAccountAddress(t.Sender, h.addressBook),
+		EncryptedComment: convertEncryptedComment(t.EncryptedComment),
+		Currency: oas.EcPreview{
+			Symbol:   meta.Symbol,
+			Decimals: meta.Decimals,
+			Image:    meta.Image,
+		},
+	})
+	simplePreview := oas.ActionSimplePreview{
+		Name:        "Extra Currency Transfer",
+		Description: "", // TODO: add description
+		Accounts:    distinctAccounts(viewer, h.addressBook, &t.Sender, &t.Recipient),
+		// TODO: add value
+	}
+	return action, simplePreview
+}
+
 func (h *Handler) convertActionNftTransfer(t *bath.NftTransferAction, acceptLanguage string, viewer *tongo.AccountID) (oas.OptNftItemTransferAction, oas.ActionSimplePreview) {
 	var action oas.OptNftItemTransferAction
 	action.SetTo(oas.NftItemTransferAction{
@@ -428,6 +453,8 @@ func (h *Handler) convertAction(ctx context.Context, viewer *tongo.AccountID, a 
 	switch a.Type {
 	case bath.TonTransfer:
 		action.TonTransfer, action.SimplePreview = h.convertActionTonTransfer(a.TonTransfer, acceptLanguage.Value, viewer)
+	case bath.ExtraCurrencyTransfer:
+		action.ExtraCurrencyTransfer, action.SimplePreview = h.convertActionExtraCurrencyTransfer(a.ExtraCurrencyTransfer, acceptLanguage.Value, viewer)
 	case bath.NftItemTransfer:
 		action.NftItemTransfer, action.SimplePreview = h.convertActionNftTransfer(a.NftItemTransfer, acceptLanguage.Value, viewer)
 	case bath.JettonTransfer:

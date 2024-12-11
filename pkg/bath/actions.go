@@ -19,6 +19,7 @@ import (
 
 const (
 	TonTransfer           ActionType = "TonTransfer"
+	ExtraCurrencyTransfer ActionType = "ExtraCurrencyTransfer"
 	SmartContractExec     ActionType = "SmartContractExec"
 	NftItemTransfer       ActionType = "NftItemTransfer"
 	NftPurchase           ActionType = "NftPurchase"
@@ -69,6 +70,7 @@ type (
 
 	Action struct {
 		TonTransfer           *TonTransferAction           `json:",omitempty"`
+		ExtraCurrencyTransfer *ExtraCurrencyTransferAction `json:",omitempty"`
 		SmartContractExec     *SmartContractAction         `json:",omitempty"`
 		NftItemTransfer       *NftTransferAction           `json:",omitempty"`
 		NftPurchase           *NftPurchaseAction           `json:",omitempty"`
@@ -100,6 +102,14 @@ type (
 		Recipient        tongo.AccountID
 		Sender           tongo.AccountID
 		Refund           *Refund
+	}
+	ExtraCurrencyTransferAction struct {
+		CurrencyID       int32
+		Amount           tlb.VarUInteger32
+		Comment          *string
+		EncryptedComment *EncryptedComment
+		Recipient        tongo.AccountID
+		Sender           tongo.AccountID
 	}
 	SmartContractAction struct {
 		TonAttached int64
@@ -263,7 +273,7 @@ func (a Action) ContributeToExtra(account tongo.AccountID) int64 {
 		return 0
 	}
 	switch a.Type {
-	case NftItemTransfer, ContractDeploy, UnSubscription, JettonMint, JettonBurn, WithdrawStakeRequest, DomainRenew, InscriptionMint, InscriptionTransfer: // actions without extra
+	case NftItemTransfer, ContractDeploy, UnSubscription, JettonMint, JettonBurn, WithdrawStakeRequest, DomainRenew, InscriptionMint, InscriptionTransfer, ExtraCurrencyTransfer: // actions without extra
 		return 0
 	case TonTransfer:
 		return detectDirection(account, a.TonTransfer.Sender, a.TonTransfer.Recipient, a.TonTransfer.Amount)
@@ -337,6 +347,10 @@ func (a Action) IsSubject(account tongo.AccountID) bool {
 }
 
 func (a *TonTransferAction) SubjectAccounts() []tongo.AccountID {
+	return []tongo.AccountID{a.Sender, a.Recipient}
+}
+
+func (a *ExtraCurrencyTransferAction) SubjectAccounts() []tongo.AccountID {
 	return []tongo.AccountID{a.Sender, a.Recipient}
 }
 

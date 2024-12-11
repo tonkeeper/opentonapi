@@ -579,6 +579,8 @@ func (s ActionType) Validate() error {
 	switch s {
 	case "TonTransfer":
 		return nil
+	case "ExtraCurrencyTransfer":
+		return nil
 	case "JettonTransfer":
 		return nil
 	case "JettonBurn":

@@ -269,6 +269,9 @@ func convertMessage(m core.Message, book addressBook) oas.Message {
 		value, _ := json.Marshal(m.DecodedBody.Value)
 		msg.DecodedBody = g.ChangeJsonKeys(value, g.CamelToSnake)
 	}
+	if m.ValueExtra != nil {
+		msg.ValueExtra = convertExtraCurrencies(m.ValueExtra)
+	}
 	return msg
 }
 

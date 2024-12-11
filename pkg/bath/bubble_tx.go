@@ -2,24 +2,24 @@ package bath
 
 import (
 	"fmt"
-
 	"github.com/ghodss/yaml"
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/tongo/abi"
 )
 
 type BubbleTx struct {
-	success         bool
-	transactionType core.TransactionType
-	inputAmount     int64
-	inputFrom       *Account
-	bounce          bool
-	bounced         bool
-	external        bool
-	account         Account
-	opCode          *uint32
-	decodedBody     *core.DecodedMessageBody
-	init            []byte
+	success          bool
+	transactionType  core.TransactionType
+	inputAmount      int64
+	inputExtraAmount core.ExtraCurrencies
+	inputFrom        *Account
+	bounce           bool
+	bounced          bool
+	external         bool
+	account          Account
+	opCode           *uint32
+	decodedBody      *core.DecodedMessageBody
+	init             []byte
 
 	additionalInfo                  *core.TraceAdditionalInfo
 	accountWasActiveAtComputingTime bool
@@ -52,7 +52,7 @@ func (b BubbleTx) ToAction() *Action {
 		}
 		return nil
 	}
-	if b.opCode != nil && (*b.opCode != 0 && !b.operation(abi.EncryptedTextCommentMsgOp)) && b.accountWasActiveAtComputingTime && !b.account.Is(abi.Wallet) {
+	if b.opCode != nil && (*b.opCode != 0 && !b.operation(abi.EncryptedTextCommentMsgOp)) && b.accountWasActiveAtComputingTime && !b.account.Is(abi.Wallet) && len(b.inputExtraAmount) == 0 {
 		operation := fmt.Sprintf("0x%08x", *b.opCode)
 		payload := ""
 		if b.decodedBody != nil {
@@ -71,25 +71,48 @@ func (b BubbleTx) ToAction() *Action {
 			Type:    SmartContractExec,
 		}
 	}
-	a := &Action{
-		TonTransfer: &TonTransferAction{
-			Amount:    b.inputAmount,
-			Recipient: b.account.Address,
-			Sender:    b.inputFrom.Address, //can't be null because we check IsExternal
-		},
-		Success: true,
-		Type:    TonTransfer,
-	}
+	var (
+		comment          *string
+		encryptedComment *EncryptedComment
+	)
 	if b.decodedBody != nil {
 		switch s := b.decodedBody.Value.(type) {
 		case abi.TextCommentMsgBody:
 			converted := string(s.Text)
-			a.TonTransfer.Comment = &converted
+			comment = &converted
 		case abi.EncryptedTextCommentMsgBody:
-			a.TonTransfer.EncryptedComment = &EncryptedComment{EncryptionType: "simple", CipherText: s.CipherText}
+			encryptedComment = &EncryptedComment{EncryptionType: "simple", CipherText: s.CipherText}
 		}
 	}
-	return a
+	if len(b.inputExtraAmount) > 0 {
+		action := Action{
+			ExtraCurrencyTransfer: &ExtraCurrencyTransferAction{
+				Recipient:        b.account.Address,
+				Sender:           b.inputFrom.Address, //can't be null because we check IsExternal
+				Comment:          comment,
+				EncryptedComment: encryptedComment,
+			},
+			Success: true,
+			Type:    ExtraCurrencyTransfer,
+		}
+		for id, amount := range b.inputExtraAmount {
+			action.ExtraCurrencyTransfer.CurrencyID = id
+			action.ExtraCurrencyTransfer.Amount = amount
+			break // TODO: extract more than one currency
+		}
+		return &action
+	}
+	return &Action{
+		TonTransfer: &TonTransferAction{
+			Amount:           b.inputAmount,
+			Recipient:        b.account.Address,
+			Sender:           b.inputFrom.Address, //can't be null because we check IsExternal
+			Comment:          comment,
+			EncryptedComment: encryptedComment,
+		},
+		Success: true,
+		Type:    TonTransfer,
+	}
 }
 
 func (b BubbleTx) operation(name string) bool {
