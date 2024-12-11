@@ -45,42 +45,51 @@ func ExtractRiskFromRawMessages(rawMessages []tongoWallet.RawMessage) (*Risk, er
 		if err := tlb.Unmarshal(rawMsg.Message, &m); err != nil {
 			return nil, err
 		}
-		tonValue := uint64(m.MessageInternal.Value.Grams)
-		destination, err := ton.AccountIDFromTlb(m.MessageInternal.Dest)
+		var err error
+		risk, err = ExtractRiskFromMessage(m, risk, rawMsg.Mode)
 		if err != nil {
 			return nil, err
 		}
-		risk.Ton += tonValue
-		msgBody := m.MessageInternal.Body.Value.Value
-		if err != nil {
-			continue
-		}
-		switch x := msgBody.(type) {
-		case abi.NftTransferMsgBody:
-			if destination == nil {
-				continue
-			}
-			// here, destination is an NFT
-			risk.Nfts = append(risk.Nfts, *destination)
-		case abi.JettonBurnMsgBody:
-			if destination == nil {
-				continue
-			}
-			// here, destination is a jetton wallet
-			amount := big.Int(x.Amount)
-			currentJettons := risk.Jettons[*destination]
-			var total big.Int
-			risk.Jettons[*destination] = *total.Add(&currentJettons, &amount)
-		case abi.JettonTransferMsgBody:
-			if destination == nil {
-				continue
-			}
-			// here, destination is a jetton wallet
-			amount := big.Int(x.Amount)
-			currentJettons := risk.Jettons[*destination]
-			var total big.Int
-			risk.Jettons[*destination] = *total.Add(&currentJettons, &amount)
-		}
 	}
 	return &risk, nil
+}
+
+func ExtractRiskFromMessage(m abi.MessageRelaxed, risk Risk, mode byte) (Risk, error) {
+	if tongoWallet.IsMessageModeSet(int(mode), tongoWallet.AttachAllRemainingBalance) {
+		risk.TransferAllRemainingBalance = true
+	}
+	tonValue := uint64(m.MessageInternal.Value.Grams)
+	destination, err := ton.AccountIDFromTlb(m.MessageInternal.Dest)
+	if err != nil {
+		return Risk{}, err
+	}
+	risk.Ton += tonValue
+	msgBody := m.MessageInternal.Body.Value.Value
+	switch x := msgBody.(type) {
+	case abi.NftTransferMsgBody:
+		if destination == nil {
+			return risk, err
+		}
+		// here, destination is an NFT
+		risk.Nfts = append(risk.Nfts, *destination)
+	case abi.JettonBurnMsgBody:
+		if destination == nil {
+			return risk, err
+		}
+		// here, destination is a jetton wallet
+		amount := big.Int(x.Amount)
+		currentJettons := risk.Jettons[*destination]
+		var total big.Int
+		risk.Jettons[*destination] = *total.Add(&currentJettons, &amount)
+	case abi.JettonTransferMsgBody:
+		if destination == nil {
+			return risk, err
+		}
+		// here, destination is a jetton wallet
+		amount := big.Int(x.Amount)
+		currentJettons := risk.Jettons[*destination]
+		var total big.Int
+		risk.Jettons[*destination] = *total.Add(&currentJettons, &amount)
+	}
+	return risk, err
 }

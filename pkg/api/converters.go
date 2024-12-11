@@ -268,15 +268,21 @@ func (h *Handler) convertMultisig(ctx context.Context, item core.Multisig) (*oas
 		for _, account := range order.Signers {
 			signers = append(signers, account.ToRaw())
 		}
-		messages, err := convertMultisigActionsToRawMessages(order.Actions)
-		if err != nil {
-			return nil, err
+		risk := walletPkg.Risk{
+			TransferAllRemainingBalance: false,
+			Jettons:                     map[tongo.AccountID]big.Int{},
 		}
-		risk, err := walletPkg.ExtractRiskFromRawMessages(messages)
-		if err != nil {
-			return nil, err
+		for _, action := range order.Actions {
+			switch action.SumType {
+			case "SendMessage":
+				var err error
+				risk, err = walletPkg.ExtractRiskFromMessage(action.SendMessage.Field0.Message, risk, action.SendMessage.Field0.Mode)
+				if err != nil {
+					return nil, err
+				}
+			}
 		}
-		oasRisk, err := h.convertRisk(ctx, *risk, item.AccountID)
+		oasRisk, err := h.convertRisk(ctx, risk, item.AccountID)
 		if err != nil {
 			return nil, err
 		}
