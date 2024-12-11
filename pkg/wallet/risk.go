@@ -32,7 +32,7 @@ func ExtractRisk(version tongoWallet.Version, msg *boc.Cell) (*Risk, error) {
 }
 
 func ExtractRiskFromRawMessages(rawMessages []tongoWallet.RawMessage) (*Risk, error) {
-	risk := &Risk{
+	risk := Risk{
 		TransferAllRemainingBalance: false,
 		Jettons:                     map[tongo.AccountID]big.Int{},
 	}
@@ -51,23 +51,20 @@ func ExtractRiskFromRawMessages(rawMessages []tongoWallet.RawMessage) (*Risk, er
 			return nil, err
 		}
 	}
-	return risk, nil
+	return &risk, nil
 }
 
-func ExtractRiskFromMessage(m abi.MessageRelaxed, risk *Risk, mode byte) (*Risk, error) {
+func ExtractRiskFromMessage(m abi.MessageRelaxed, risk Risk, mode byte) (Risk, error) {
 	if tongoWallet.IsMessageModeSet(int(mode), tongoWallet.AttachAllRemainingBalance) {
 		risk.TransferAllRemainingBalance = true
 	}
 	tonValue := uint64(m.MessageInternal.Value.Grams)
 	destination, err := ton.AccountIDFromTlb(m.MessageInternal.Dest)
 	if err != nil {
-		return nil, err
+		return Risk{}, err
 	}
 	risk.Ton += tonValue
 	msgBody := m.MessageInternal.Body.Value.Value
-	if err != nil {
-		return risk, err
-	}
 	switch x := msgBody.(type) {
 	case abi.NftTransferMsgBody:
 		if destination == nil {
