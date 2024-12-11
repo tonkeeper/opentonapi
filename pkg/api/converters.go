@@ -268,7 +268,7 @@ func (h *Handler) convertMultisig(ctx context.Context, item core.Multisig) (*oas
 		for _, account := range order.Signers {
 			signers = append(signers, account.ToRaw())
 		}
-		risk := &walletPkg.Risk{
+		risk := walletPkg.Risk{
 			TransferAllRemainingBalance: false,
 			Jettons:                     map[tongo.AccountID]big.Int{},
 		}
@@ -282,7 +282,7 @@ func (h *Handler) convertMultisig(ctx context.Context, item core.Multisig) (*oas
 				}
 			}
 		}
-		oasRisk, err := h.convertRisk(ctx, *risk, item.AccountID)
+		oasRisk, err := h.convertRisk(ctx, risk, item.AccountID)
 		if err != nil {
 			return nil, err
 		}
