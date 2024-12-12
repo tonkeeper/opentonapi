@@ -86,6 +86,34 @@ tags:
       url: https://docs.tonconsole.com/tonapi/rest-api/utilities
 
 paths:
+  /v2/openapi.json:
+    get:
+      description: Get the openapi.json file
+      operationId: getOpenapiJson
+      tags:
+        - Openapi
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: { } # Free-form JSON value
+        'default':
+          $ref: '#/components/responses/Error'
+  /v2/openapi.yml:
+    get:
+      description: Get the openapi.yml file
+      operationId: getOpenapiYml
+      tags:
+        - Openapi
+      responses:
+        '200':
+          content:
+            application/x-yaml:
+              schema:
+                type: string
+                format: binary
+        'default':
+          $ref: '#/components/responses/Error'
   /v2/status:
     get:
       description: Status

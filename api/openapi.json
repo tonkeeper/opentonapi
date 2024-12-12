@@ -9944,6 +9944,51 @@
     ]
    }
   },
+  "/v2/openapi.json": {
+   "get": {
+    "description": "Get the openapi.json file",
+    "operationId": "getOpenapiJson",
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     },
+     "default": {
+      "$ref": "#/components/responses/Error"
+     }
+    },
+    "tags": [
+     "Openapi"
+    ]
+   }
+  },
+  "/v2/openapi.yml": {
+   "get": {
+    "description": "Get the openapi.yml file",
+    "operationId": "getOpenapiYml",
+    "responses": {
+     "200": {
+      "content": {
+       "application/x-yaml": {
+        "schema": {
+         "format": "binary",
+         "type": "string"
+        }
+       }
+      }
+     },
+     "default": {
+      "$ref": "#/components/responses/Error"
+     }
+    },
+    "tags": [
+     "Openapi"
+    ]
+   }
+  },
   "/v2/pubkeys/{public_key}/wallets": {
    "get": {
     "description": "Get wallets by public key",

@@ -4,6 +4,7 @@ package oas
 
 import (
 	"fmt"
+	"io"
 
 	"github.com/go-faster/errors"
 	"github.com/go-faster/jx"
@@ -6160,6 +6161,20 @@ func (s *GetNftItemsByAddressesReq) GetAccountIds() []string {
 // SetAccountIds sets the value of AccountIds.
 func (s *GetNftItemsByAddressesReq) SetAccountIds(val []string) {
 	s.AccountIds = val
+}
+
+type GetOpenapiYmlOK struct {
+	Data io.Reader
+}
+
+// Read reads data from the Data reader.
+//
+// Kept to satisfy the io.Reader interface.
+func (s GetOpenapiYmlOK) Read(p []byte) (n int, err error) {
+	if s.Data == nil {
+		return 0, io.EOF
+	}
+	return s.Data.Read(p)
 }
 
 type GetOutMsgQueueSizesOK struct {
