@@ -442,6 +442,12 @@
         "boc": {
          "format": "cell",
          "type": "string"
+        },
+        "meta": {
+         "additionalProperties": {
+          "type": "string"
+         },
+         "type": "object"
         }
        },
        "type": "object"

@@ -49,6 +49,8 @@ type ExtInMsgCopy struct {
 	// Accounts is set when the message is emulated.
 	Accounts map[tongo.AccountID]struct{}
 
+	Meta map[string]string
+
 	SendFailed bool // default is false, so we are good with backward compatibility.
 }
 
