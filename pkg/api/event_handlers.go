@@ -73,6 +73,10 @@ func (h *Handler) SendBlockchainMessage(ctx context.Context, request *oas.SendBl
 	if !request.Boc.IsSet() && len(request.Batch) == 0 {
 		return toError(http.StatusBadRequest, fmt.Errorf("boc not found"))
 	}
+	var meta map[string]string
+	if request.Meta.IsSet() {
+		meta = request.Meta.Value
+	}
 	if request.Boc.IsSet() {
 		m, err := decodeMessage(request.Boc.Value)
 		if err != nil {
@@ -86,6 +90,7 @@ func (h *Handler) SendBlockchainMessage(ctx context.Context, request *oas.SendBl
 			MsgBoc:  m.base64,
 			Payload: m.payload,
 			Details: h.ctxToDetails(ctx),
+			Meta:    meta,
 		}
 		sendMessageCounter.Inc()
 		if err := h.msgSender.SendMessage(ctx, msgCopy); err != nil {
@@ -114,6 +119,7 @@ func (h *Handler) SendBlockchainMessage(ctx context.Context, request *oas.SendBl
 			MsgBoc:  m.base64,
 			Payload: m.payload,
 			Details: h.ctxToDetails(ctx),
+			Meta:    meta,
 		}
 		copies = append(copies, msgCopy)
 	}

@@ -13720,6 +13720,52 @@ func (o OptSale) Or(d Sale) Sale {
 	return d
 }
 
+// NewOptSendBlockchainMessageReqMeta returns new OptSendBlockchainMessageReqMeta with value set to v.
+func NewOptSendBlockchainMessageReqMeta(v SendBlockchainMessageReqMeta) OptSendBlockchainMessageReqMeta {
+	return OptSendBlockchainMessageReqMeta{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptSendBlockchainMessageReqMeta is optional SendBlockchainMessageReqMeta.
+type OptSendBlockchainMessageReqMeta struct {
+	Value SendBlockchainMessageReqMeta
+	Set   bool
+}
+
+// IsSet returns true if OptSendBlockchainMessageReqMeta was set.
+func (o OptSendBlockchainMessageReqMeta) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptSendBlockchainMessageReqMeta) Reset() {
+	var v SendBlockchainMessageReqMeta
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptSendBlockchainMessageReqMeta) SetTo(v SendBlockchainMessageReqMeta) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptSendBlockchainMessageReqMeta) Get() (v SendBlockchainMessageReqMeta, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptSendBlockchainMessageReqMeta) Or(d SendBlockchainMessageReqMeta) SendBlockchainMessageReqMeta {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptSmartContractAction returns new OptSmartContractAction with value set to v.
 func NewOptSmartContractAction(v SmartContractAction) OptSmartContractAction {
 	return OptSmartContractAction{
@@ -15144,8 +15190,9 @@ func (s *Sale) SetPrice(val Price) {
 type SendBlockchainMessageOK struct{}
 
 type SendBlockchainMessageReq struct {
-	Boc   OptString `json:"boc"`
-	Batch []string  `json:"batch"`
+	Boc   OptString                       `json:"boc"`
+	Batch []string                        `json:"batch"`
+	Meta  OptSendBlockchainMessageReqMeta `json:"meta"`
 }
 
 // GetBoc returns the value of Boc.
@@ -15158,6 +15205,11 @@ func (s *SendBlockchainMessageReq) GetBatch() []string {
 	return s.Batch
 }
 
+// GetMeta returns the value of Meta.
+func (s *SendBlockchainMessageReq) GetMeta() OptSendBlockchainMessageReqMeta {
+	return s.Meta
+}
+
 // SetBoc sets the value of Boc.
 func (s *SendBlockchainMessageReq) SetBoc(val OptString) {
 	s.Boc = val
@@ -15166,6 +15218,22 @@ func (s *SendBlockchainMessageReq) SetBoc(val OptString) {
 // SetBatch sets the value of Batch.
 func (s *SendBlockchainMessageReq) SetBatch(val []string) {
 	s.Batch = val
+}
+
+// SetMeta sets the value of Meta.
+func (s *SendBlockchainMessageReq) SetMeta(val OptSendBlockchainMessageReqMeta) {
+	s.Meta = val
+}
+
+type SendBlockchainMessageReqMeta map[string]string
+
+func (s *SendBlockchainMessageReqMeta) init() SendBlockchainMessageReqMeta {
+	m := *s
+	if m == nil {
+		m = map[string]string{}
+		*s = m
+	}
+	return m
 }
 
 type SendRawMessageOK struct {
