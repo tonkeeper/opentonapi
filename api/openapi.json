@@ -3128,6 +3128,11 @@
       "example": 5,
       "type": "integer"
      },
+     "id": {
+      "example": 239,
+      "format": "int32",
+      "type": "integer"
+     },
      "image": {
       "example": "https://cache.tonapi.io/images/extra.jpg",
       "type": "string"
@@ -3138,6 +3143,7 @@
      }
     },
     "required": [
+     "id",
      "symbol",
      "decimals",
      "image"
@@ -3267,24 +3273,13 @@
       "type": "string",
       "x-js-format": "bigint"
      },
-     "decimals": {
-      "example": 5,
-      "type": "integer"
-     },
-     "id": {
-      "example": 239,
-      "format": "int32",
-      "type": "integer"
-     },
-     "name": {
-      "example": "FMS",
-      "type": "string"
+     "preview": {
+      "$ref": "#/components/schemas/EcPreview"
      }
     },
     "required": [
-     "id",
      "amount",
-     "decimals"
+     "preview"
     ],
     "type": "object"
    },

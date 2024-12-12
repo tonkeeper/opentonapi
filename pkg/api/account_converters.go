@@ -81,12 +81,13 @@ func convertExtraCurrencies(extraBalances core.ExtraCurrencies) []oas.ExtraCurre
 		amount := big.Int(v)
 		meta := references.GetExtraCurrencyMeta(k)
 		cur := oas.ExtraCurrency{
-			ID:       k,
-			Amount:   amount.String(),
-			Decimals: meta.Decimals,
-		}
-		if meta.Name != "" {
-			cur.Name.SetTo(meta.Name)
+			Amount: amount.String(),
+			Preview: oas.EcPreview{
+				ID:       k,
+				Symbol:   meta.Symbol,
+				Decimals: meta.Decimals,
+				Image:    meta.Image,
+			},
 		}
 		res = append(res, cur)
 	}

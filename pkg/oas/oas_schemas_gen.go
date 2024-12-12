@@ -5125,9 +5125,15 @@ func (s *DomainRenewAction) SetRenewer(val AccountAddress) {
 
 // Ref: #/components/schemas/EcPreview
 type EcPreview struct {
+	ID       int32  `json:"id"`
 	Symbol   string `json:"symbol"`
 	Decimals int    `json:"decimals"`
 	Image    string `json:"image"`
+}
+
+// GetID returns the value of ID.
+func (s *EcPreview) GetID() int32 {
+	return s.ID
 }
 
 // GetSymbol returns the value of Symbol.
@@ -5143,6 +5149,11 @@ func (s *EcPreview) GetDecimals() int {
 // GetImage returns the value of Image.
 func (s *EcPreview) GetImage() string {
 	return s.Image
+}
+
+// SetID sets the value of ID.
+func (s *EcPreview) SetID(val int32) {
+	s.ID = val
 }
 
 // SetSymbol sets the value of Symbol.
@@ -5467,15 +5478,8 @@ func (s *Event) SetInProgress(val bool) {
 
 // Ref: #/components/schemas/ExtraCurrency
 type ExtraCurrency struct {
-	ID       int32     `json:"id"`
-	Amount   string    `json:"amount"`
-	Name     OptString `json:"name"`
-	Decimals int       `json:"decimals"`
-}
-
-// GetID returns the value of ID.
-func (s *ExtraCurrency) GetID() int32 {
-	return s.ID
+	Amount  string    `json:"amount"`
+	Preview EcPreview `json:"preview"`
 }
 
 // GetAmount returns the value of Amount.
@@ -5483,19 +5487,9 @@ func (s *ExtraCurrency) GetAmount() string {
 	return s.Amount
 }
 
-// GetName returns the value of Name.
-func (s *ExtraCurrency) GetName() OptString {
-	return s.Name
-}
-
-// GetDecimals returns the value of Decimals.
-func (s *ExtraCurrency) GetDecimals() int {
-	return s.Decimals
-}
-
-// SetID sets the value of ID.
-func (s *ExtraCurrency) SetID(val int32) {
-	s.ID = val
+// GetPreview returns the value of Preview.
+func (s *ExtraCurrency) GetPreview() EcPreview {
+	return s.Preview
 }
 
 // SetAmount sets the value of Amount.
@@ -5503,14 +5497,9 @@ func (s *ExtraCurrency) SetAmount(val string) {
 	s.Amount = val
 }
 
-// SetName sets the value of Name.
-func (s *ExtraCurrency) SetName(val OptString) {
-	s.Name = val
-}
-
-// SetDecimals sets the value of Decimals.
-func (s *ExtraCurrency) SetDecimals(val int) {
-	s.Decimals = val
+// SetPreview sets the value of Preview.
+func (s *ExtraCurrency) SetPreview(val EcPreview) {
+	s.Preview = val
 }
 
 // Ref: #/components/schemas/ExtraCurrencyTransferAction
