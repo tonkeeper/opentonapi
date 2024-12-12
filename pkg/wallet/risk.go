@@ -68,13 +68,13 @@ func ExtractRiskFromMessage(m abi.MessageRelaxed, risk Risk, mode byte) (Risk, e
 	switch x := msgBody.(type) {
 	case abi.NftTransferMsgBody:
 		if destination == nil {
-			return risk, err
+			return risk, nil
 		}
 		// here, destination is an NFT
 		risk.Nfts = append(risk.Nfts, *destination)
 	case abi.JettonBurnMsgBody:
 		if destination == nil {
-			return risk, err
+			return risk, nil
 		}
 		// here, destination is a jetton wallet
 		amount := big.Int(x.Amount)
@@ -83,7 +83,7 @@ func ExtractRiskFromMessage(m abi.MessageRelaxed, risk Risk, mode byte) (Risk, e
 		risk.Jettons[*destination] = *total.Add(&currentJettons, &amount)
 	case abi.JettonTransferMsgBody:
 		if destination == nil {
-			return risk, err
+			return risk, nil
 		}
 		// here, destination is a jetton wallet
 		amount := big.Int(x.Amount)
@@ -91,5 +91,5 @@ func ExtractRiskFromMessage(m abi.MessageRelaxed, risk Risk, mode byte) (Risk, e
 		var total big.Int
 		risk.Jettons[*destination] = *total.Add(&currentJettons, &amount)
 	}
-	return risk, err
+	return risk, nil
 }
