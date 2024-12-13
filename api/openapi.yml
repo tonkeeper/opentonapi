@@ -7398,6 +7398,8 @@ components:
         - code
         - code_hash
         - methods
+        - compiler
+        - source
       properties:
         code:
           type: string
@@ -7407,21 +7409,15 @@ components:
         methods:
           type: array
           items:
-            type: object
-            required:
-              - id
-              - method
-            properties:
-              id:
-                type: integer
-                format: int64
-              method:
-                type: string
-                example: "get_something"
+            $ref: '#/components/schemas/Method'
         compiler:
           type: string
           enum:
             - func
+            - fift
+            - tact
+        source:
+          $ref: '#/components/schemas/Source'
     PoolImplementationType:
       type: string
       enum:
@@ -7473,26 +7469,69 @@ components:
           format: int64
           example: 1668436763
     ExtraCurrency:
-          type: object
-          required:
-            - id
-            - amount
-            - decimals
-          properties:
-            id:
-              type: integer
-              example: 239
-              format: int32
-            amount:
-              type: string
-              x-js-format: bigint
-              example: "1000000000"
-            name:
-              type: string
-              example: FMS
-            decimals:
-              type: integer
-              example: 5
+      type: object
+      required:
+        - id
+        - amount
+        - decimals
+      properties:
+        id:
+          type: integer
+          example: 239
+          format: int32
+        amount:
+          type: string
+          x-js-format: bigint
+          example: "1000000000"
+        name:
+          type: string
+          example: FMS
+        decimals:
+          type: integer
+          example: 5
+    SourceFile:
+      type: object
+      required:
+        - name
+        - content
+        - is_entrypoint
+        - is_std_lib
+        - include_in_command
+      properties:
+        name:
+          type: string
+        content:
+          type: string
+        is_entrypoint:
+          type: boolean
+          example: false
+        is_std_lib:
+          type: boolean
+          example: false
+        include_in_command:
+          type: boolean
+          example: false
+    Source:
+      type: object
+      required:
+        - files
+      properties:
+        files:
+          type: array
+          items:
+            $ref: '#/components/schemas/SourceFile'
+    Method:
+      type: object
+      required:
+        - id
+        - method
+      properties:
+        id:
+          type: integer
+          format: int64
+        method:
+          type: string
+          example: "get_something"
   
   responses:
     Error:

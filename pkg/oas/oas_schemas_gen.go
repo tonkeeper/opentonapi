@@ -1942,10 +1942,11 @@ func (s *BlockValueFlow) SetMinted(val BlockCurrencyCollection) {
 
 // Ref: #/components/schemas/BlockchainAccountInspect
 type BlockchainAccountInspect struct {
-	Code     string                                `json:"code"`
-	CodeHash string                                `json:"code_hash"`
-	Methods  []BlockchainAccountInspectMethodsItem `json:"methods"`
-	Compiler OptBlockchainAccountInspectCompiler   `json:"compiler"`
+	Code     string                           `json:"code"`
+	CodeHash string                           `json:"code_hash"`
+	Methods  []Method                         `json:"methods"`
+	Compiler BlockchainAccountInspectCompiler `json:"compiler"`
+	Source   Source                           `json:"source"`
 }
 
 // GetCode returns the value of Code.
@@ -1959,13 +1960,18 @@ func (s *BlockchainAccountInspect) GetCodeHash() string {
 }
 
 // GetMethods returns the value of Methods.
-func (s *BlockchainAccountInspect) GetMethods() []BlockchainAccountInspectMethodsItem {
+func (s *BlockchainAccountInspect) GetMethods() []Method {
 	return s.Methods
 }
 
 // GetCompiler returns the value of Compiler.
-func (s *BlockchainAccountInspect) GetCompiler() OptBlockchainAccountInspectCompiler {
+func (s *BlockchainAccountInspect) GetCompiler() BlockchainAccountInspectCompiler {
 	return s.Compiler
+}
+
+// GetSource returns the value of Source.
+func (s *BlockchainAccountInspect) GetSource() Source {
+	return s.Source
 }
 
 // SetCode sets the value of Code.
@@ -1979,25 +1985,34 @@ func (s *BlockchainAccountInspect) SetCodeHash(val string) {
 }
 
 // SetMethods sets the value of Methods.
-func (s *BlockchainAccountInspect) SetMethods(val []BlockchainAccountInspectMethodsItem) {
+func (s *BlockchainAccountInspect) SetMethods(val []Method) {
 	s.Methods = val
 }
 
 // SetCompiler sets the value of Compiler.
-func (s *BlockchainAccountInspect) SetCompiler(val OptBlockchainAccountInspectCompiler) {
+func (s *BlockchainAccountInspect) SetCompiler(val BlockchainAccountInspectCompiler) {
 	s.Compiler = val
+}
+
+// SetSource sets the value of Source.
+func (s *BlockchainAccountInspect) SetSource(val Source) {
+	s.Source = val
 }
 
 type BlockchainAccountInspectCompiler string
 
 const (
 	BlockchainAccountInspectCompilerFunc BlockchainAccountInspectCompiler = "func"
+	BlockchainAccountInspectCompilerFift BlockchainAccountInspectCompiler = "fift"
+	BlockchainAccountInspectCompilerTact BlockchainAccountInspectCompiler = "tact"
 )
 
 // AllValues returns all BlockchainAccountInspectCompiler values.
 func (BlockchainAccountInspectCompiler) AllValues() []BlockchainAccountInspectCompiler {
 	return []BlockchainAccountInspectCompiler{
 		BlockchainAccountInspectCompilerFunc,
+		BlockchainAccountInspectCompilerFift,
+		BlockchainAccountInspectCompilerTact,
 	}
 }
 
@@ -2005,6 +2020,10 @@ func (BlockchainAccountInspectCompiler) AllValues() []BlockchainAccountInspectCo
 func (s BlockchainAccountInspectCompiler) MarshalText() ([]byte, error) {
 	switch s {
 	case BlockchainAccountInspectCompilerFunc:
+		return []byte(s), nil
+	case BlockchainAccountInspectCompilerFift:
+		return []byte(s), nil
+	case BlockchainAccountInspectCompilerTact:
 		return []byte(s), nil
 	default:
 		return nil, errors.Errorf("invalid value: %q", s)
@@ -2017,34 +2036,15 @@ func (s *BlockchainAccountInspectCompiler) UnmarshalText(data []byte) error {
 	case BlockchainAccountInspectCompilerFunc:
 		*s = BlockchainAccountInspectCompilerFunc
 		return nil
+	case BlockchainAccountInspectCompilerFift:
+		*s = BlockchainAccountInspectCompilerFift
+		return nil
+	case BlockchainAccountInspectCompilerTact:
+		*s = BlockchainAccountInspectCompilerTact
+		return nil
 	default:
 		return errors.Errorf("invalid value: %q", data)
 	}
-}
-
-type BlockchainAccountInspectMethodsItem struct {
-	ID     int64  `json:"id"`
-	Method string `json:"method"`
-}
-
-// GetID returns the value of ID.
-func (s *BlockchainAccountInspectMethodsItem) GetID() int64 {
-	return s.ID
-}
-
-// GetMethod returns the value of Method.
-func (s *BlockchainAccountInspectMethodsItem) GetMethod() string {
-	return s.Method
-}
-
-// SetID sets the value of ID.
-func (s *BlockchainAccountInspectMethodsItem) SetID(val int64) {
-	s.ID = val
-}
-
-// SetMethod sets the value of Method.
-func (s *BlockchainAccountInspectMethodsItem) SetMethod(val string) {
-	s.Method = val
 }
 
 // Ref: #/components/schemas/BlockchainBlock
@@ -9020,6 +9020,32 @@ func (s *MessageMsgType) UnmarshalText(data []byte) error {
 	}
 }
 
+// Ref: #/components/schemas/Method
+type Method struct {
+	ID     int64  `json:"id"`
+	Method string `json:"method"`
+}
+
+// GetID returns the value of ID.
+func (s *Method) GetID() int64 {
+	return s.ID
+}
+
+// GetMethod returns the value of Method.
+func (s *Method) GetMethod() string {
+	return s.Method
+}
+
+// SetID sets the value of ID.
+func (s *Method) SetID(val int64) {
+	s.ID = val
+}
+
+// SetMethod sets the value of Method.
+func (s *Method) SetMethod(val string) {
+	s.Method = val
+}
+
 // Ref: #/components/schemas/MethodExecutionResult
 type MethodExecutionResult struct {
 	Success bool `json:"success"`
@@ -10233,52 +10259,6 @@ func (o OptBlockCurrencyCollection) Get() (v BlockCurrencyCollection, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptBlockCurrencyCollection) Or(d BlockCurrencyCollection) BlockCurrencyCollection {
-	if v, ok := o.Get(); ok {
-		return v
-	}
-	return d
-}
-
-// NewOptBlockchainAccountInspectCompiler returns new OptBlockchainAccountInspectCompiler with value set to v.
-func NewOptBlockchainAccountInspectCompiler(v BlockchainAccountInspectCompiler) OptBlockchainAccountInspectCompiler {
-	return OptBlockchainAccountInspectCompiler{
-		Value: v,
-		Set:   true,
-	}
-}
-
-// OptBlockchainAccountInspectCompiler is optional BlockchainAccountInspectCompiler.
-type OptBlockchainAccountInspectCompiler struct {
-	Value BlockchainAccountInspectCompiler
-	Set   bool
-}
-
-// IsSet returns true if OptBlockchainAccountInspectCompiler was set.
-func (o OptBlockchainAccountInspectCompiler) IsSet() bool { return o.Set }
-
-// Reset unsets value.
-func (o *OptBlockchainAccountInspectCompiler) Reset() {
-	var v BlockchainAccountInspectCompiler
-	o.Value = v
-	o.Set = false
-}
-
-// SetTo sets value to v.
-func (o *OptBlockchainAccountInspectCompiler) SetTo(v BlockchainAccountInspectCompiler) {
-	o.Set = true
-	o.Value = v
-}
-
-// Get returns value and boolean that denotes whether value was set.
-func (o OptBlockchainAccountInspectCompiler) Get() (v BlockchainAccountInspectCompiler, ok bool) {
-	if !o.Set {
-		return v, false
-	}
-	return o.Value, true
-}
-
-// Or returns value if set, or given parameter if does not.
-func (o OptBlockchainAccountInspectCompiler) Or(d BlockchainAccountInspectCompiler) BlockchainAccountInspectCompiler {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -15603,6 +15583,80 @@ func (s *SmartContractAction) SetPayload(val OptString) {
 // SetRefund sets the value of Refund.
 func (s *SmartContractAction) SetRefund(val OptRefund) {
 	s.Refund = val
+}
+
+// Ref: #/components/schemas/Source
+type Source struct {
+	Files []SourceFile `json:"files"`
+}
+
+// GetFiles returns the value of Files.
+func (s *Source) GetFiles() []SourceFile {
+	return s.Files
+}
+
+// SetFiles sets the value of Files.
+func (s *Source) SetFiles(val []SourceFile) {
+	s.Files = val
+}
+
+// Ref: #/components/schemas/SourceFile
+type SourceFile struct {
+	Name             string `json:"name"`
+	Content          string `json:"content"`
+	IsEntrypoint     bool   `json:"is_entrypoint"`
+	IsStdLib         bool   `json:"is_std_lib"`
+	IncludeInCommand bool   `json:"include_in_command"`
+}
+
+// GetName returns the value of Name.
+func (s *SourceFile) GetName() string {
+	return s.Name
+}
+
+// GetContent returns the value of Content.
+func (s *SourceFile) GetContent() string {
+	return s.Content
+}
+
+// GetIsEntrypoint returns the value of IsEntrypoint.
+func (s *SourceFile) GetIsEntrypoint() bool {
+	return s.IsEntrypoint
+}
+
+// GetIsStdLib returns the value of IsStdLib.
+func (s *SourceFile) GetIsStdLib() bool {
+	return s.IsStdLib
+}
+
+// GetIncludeInCommand returns the value of IncludeInCommand.
+func (s *SourceFile) GetIncludeInCommand() bool {
+	return s.IncludeInCommand
+}
+
+// SetName sets the value of Name.
+func (s *SourceFile) SetName(val string) {
+	s.Name = val
+}
+
+// SetContent sets the value of Content.
+func (s *SourceFile) SetContent(val string) {
+	s.Content = val
+}
+
+// SetIsEntrypoint sets the value of IsEntrypoint.
+func (s *SourceFile) SetIsEntrypoint(val bool) {
+	s.IsEntrypoint = val
+}
+
+// SetIsStdLib sets the value of IsStdLib.
+func (s *SourceFile) SetIsStdLib(val bool) {
+	s.IsStdLib = val
+}
+
+// SetIncludeInCommand sets the value of IncludeInCommand.
+func (s *SourceFile) SetIncludeInCommand(val bool) {
+	s.IncludeInCommand = val
 }
 
 // Ref: #/components/schemas/StateInit

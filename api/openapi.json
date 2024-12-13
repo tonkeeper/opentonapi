@@ -1531,35 +1531,28 @@
      },
      "compiler": {
       "enum": [
-       "func"
+       "func",
+       "fift",
+       "tact"
       ],
       "type": "string"
      },
      "methods": {
       "items": {
-       "properties": {
-        "id": {
-         "format": "int64",
-         "type": "integer"
-        },
-        "method": {
-         "example": "get_something",
-         "type": "string"
-        }
-       },
-       "required": [
-        "id",
-        "method"
-       ],
-       "type": "object"
+       "$ref": "#/components/schemas/Method"
       },
       "type": "array"
+     },
+     "source": {
+      "$ref": "#/components/schemas/Source"
      }
     },
     "required": [
      "code",
      "code_hash",
-     "methods"
+     "methods",
+     "compiler",
+     "source"
     ],
     "type": "object"
    },
@@ -4318,6 +4311,23 @@
     ],
     "type": "object"
    },
+   "Method": {
+    "properties": {
+     "id": {
+      "format": "int64",
+      "type": "integer"
+     },
+     "method": {
+      "example": "get_something",
+      "type": "string"
+     }
+    },
+    "required": [
+     "id",
+     "method"
+    ],
+    "type": "object"
+   },
    "MethodExecutionResult": {
     "properties": {
      "decoded": {},
@@ -5361,6 +5371,50 @@
      "contract",
      "ton_attached",
      "operation"
+    ],
+    "type": "object"
+   },
+   "Source": {
+    "properties": {
+     "files": {
+      "items": {
+       "$ref": "#/components/schemas/SourceFile"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "files"
+    ],
+    "type": "object"
+   },
+   "SourceFile": {
+    "properties": {
+     "content": {
+      "type": "string"
+     },
+     "include_in_command": {
+      "example": false,
+      "type": "boolean"
+     },
+     "is_entrypoint": {
+      "example": false,
+      "type": "boolean"
+     },
+     "is_std_lib": {
+      "example": false,
+      "type": "boolean"
+     },
+     "name": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "name",
+     "content",
+     "is_entrypoint",
+     "is_std_lib",
+     "include_in_command"
     ],
     "type": "object"
    },
