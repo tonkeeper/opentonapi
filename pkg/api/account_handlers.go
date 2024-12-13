@@ -8,11 +8,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"golang.org/x/exp/slices"
 	"net/http"
 	"sort"
 	"strings"
 	"time"
+
+	"golang.org/x/exp/slices"
 
 	"github.com/cespare/xxhash/v2"
 	"github.com/go-faster/jx"
@@ -487,14 +488,29 @@ func (h *Handler) BlockchainAccountInspect(ctx context.Context, params oas.Block
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
+	source, err := h.verifierSource.GetAccountSource(account.ID)
+	if err != nil {
+		return nil, toError(http.StatusInternalServerError, err)
+	}
+	sourceFiles := make([]oas.SourceFile, len(source.Files))
+	for idx, file := range source.Files {
+		sourceFiles[idx] = oas.SourceFile{
+			Name:             file.Name,
+			Content:          file.Content,
+			IsEntrypoint:     file.IsEntrypoint,
+			IsStdLib:         file.IsStdLib,
+			IncludeInCommand: file.IncludeInCommand,
+		}
+	}
 	resp := oas.BlockchainAccountInspect{
 		Code:     hex.EncodeToString(rawAccount.Code),
 		CodeHash: hex.EncodeToString(codeHash),
-		Compiler: oas.NewOptBlockchainAccountInspectCompiler(oas.BlockchainAccountInspectCompilerFunc),
+		Compiler: oas.BlockchainAccountInspectCompiler(source.Compiler),
+		Source:   oas.Source{Files: sourceFiles},
 	}
 	for _, methodID := range methods {
 		if method, ok := code.Methods[methodID]; ok {
-			resp.Methods = append(resp.Methods, oas.BlockchainAccountInspectMethodsItem{
+			resp.Methods = append(resp.Methods, oas.Method{
 				ID:     methodID,
 				Method: string(method),
 			})
