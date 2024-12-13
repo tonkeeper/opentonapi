@@ -71,27 +71,20 @@ func (h *Handler) GetJettonInfo(ctx context.Context, params oas.GetJettonInfoPar
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
 	}
-	meta := h.GetJettonNormalizedMetadata(ctx, account.ID)
-	metadata := jettonMetadata(account.ID, meta)
-	data, err := h.storage.GetJettonMasterData(ctx, account.ID)
+	master, err := h.storage.GetJettonMasterData(ctx, account.ID)
 	if errors.Is(err, core.ErrEntityNotFound) {
 		return nil, toError(http.StatusNotFound, err)
 	}
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
-	holdersCount, err := h.storage.GetJettonsHoldersCount(ctx, []tongo.AccountID{account.ID})
+	holders, err := h.storage.GetJettonsHoldersCount(ctx, []tongo.AccountID{account.ID})
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
-	return &oas.JettonInfo{
-		Mintable:     data.Mintable,
-		TotalSupply:  data.TotalSupply.String(),
-		Metadata:     metadata,
-		Verification: oas.JettonVerificationType(meta.Verification),
-		HoldersCount: holdersCount[account.ID],
-		Admin:        convertOptAccountAddress(data.Admin, h.addressBook),
-	}, nil
+	score, _ := h.score.GetJettonScore(account.ID)
+	converted := h.convertJettonInfo(ctx, master, holders, score)
+	return &converted, nil
 }
 
 func (h *Handler) GetAccountJettonsHistory(ctx context.Context, params oas.GetAccountJettonsHistoryParams) (*oas.AccountEvents, error) {
