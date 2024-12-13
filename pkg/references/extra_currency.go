@@ -1,29 +1,40 @@
 package references
 
+import "fmt"
+
 const DefaultExtraCurrencyDecimals = 9
 
 type ExtraCurrencyMeta struct {
-	Name     string
+	Decimals int
 	Symbol   string
 	Image    string
-	Decimals int
 }
 
 var extraCurrencies = map[int32]ExtraCurrencyMeta{
 	239: {
-		Name:     "FMS",
 		Decimals: 5,
 		Symbol:   "FMS",
 	},
 }
 
 func GetExtraCurrencyMeta(id int32) ExtraCurrencyMeta {
-	meta, ok := extraCurrencies[id]
-	if ok {
-		return meta
-	}
-	return ExtraCurrencyMeta{
+	res := ExtraCurrencyMeta{
 		Decimals: DefaultExtraCurrencyDecimals,
-		// TODO: add default placeholders
+		Symbol:   fmt.Sprintf("$%d", id),
+		Image:    Placeholder,
 	}
+	meta, ok := extraCurrencies[id]
+	if !ok {
+		return res
+	}
+	if meta.Decimals > 0 {
+		res.Decimals = meta.Decimals
+	}
+	if meta.Image != "" {
+		res.Image = meta.Image
+	}
+	if meta.Symbol != "" {
+		res.Symbol = meta.Symbol
+	}
+	return res
 }

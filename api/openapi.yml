@@ -5880,10 +5880,15 @@ components:
     EcPreview:
       type: object
       required:
+        - id
         - symbol
         - decimals
         - image
       properties:
+        id:
+          type: integer
+          example: 239
+          format: int32
         symbol:
           type: string
           example: FMS
@@ -7469,26 +7474,17 @@ components:
           format: int64
           example: 1668436763
     ExtraCurrency:
-      type: object
-      required:
-        - id
-        - amount
-        - decimals
-      properties:
-        id:
-          type: integer
-          example: 239
-          format: int32
-        amount:
-          type: string
-          x-js-format: bigint
-          example: "1000000000"
-        name:
-          type: string
-          example: FMS
-        decimals:
-          type: integer
-          example: 5
+          type: object
+          required:
+            - amount
+            - preview
+          properties:
+            amount:
+              type: string
+              x-js-format: bigint
+              example: "1000000000"
+            preview:
+              $ref: '#/components/schemas/EcPreview'
     SourceFile:
       type: object
       required:

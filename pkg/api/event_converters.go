@@ -162,16 +162,18 @@ func (h *Handler) convertActionExtraCurrencyTransfer(t *bath.ExtraCurrencyTransf
 		Sender:           convertAccountAddress(t.Sender, h.addressBook),
 		EncryptedComment: convertEncryptedComment(t.EncryptedComment),
 		Currency: oas.EcPreview{
+			ID:       t.CurrencyID,
 			Symbol:   meta.Symbol,
 			Decimals: meta.Decimals,
 			Image:    meta.Image,
 		},
 	})
+	value := ScaleJettons(big.Int(t.Amount), meta.Decimals)
 	simplePreview := oas.ActionSimplePreview{
 		Name:        "Extra Currency Transfer",
 		Description: "", // TODO: add description
 		Accounts:    distinctAccounts(viewer, h.addressBook, &t.Sender, &t.Recipient),
-		// TODO: add value
+		Value:       oas.NewOptString(fmt.Sprintf("%v %v", value.String(), meta.Symbol)),
 	}
 	return action, simplePreview
 }
