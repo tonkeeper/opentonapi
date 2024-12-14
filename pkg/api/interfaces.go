@@ -179,6 +179,10 @@ type ratesSource interface {
 	GetMarketsTonPrice() ([]rates.Market, error)
 }
 
+type scoreSource interface {
+	GetJettonScore(masterID ton.AccountID) (int32, error)
+}
+
 type SpamFilter interface {
 	CheckActions(actions []oas.Action, viewer *ton.AccountID, initiator ton.AccountID) bool
 	JettonTrust(address tongo.AccountID, symbol, name, image string) core.TrustType

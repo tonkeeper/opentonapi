@@ -5436,6 +5436,9 @@ components:
           $ref: '#/components/schemas/JettonVerificationType'
         custom_payload_api_uri: # todo: maybe remove
           type: string
+        score:
+          type: integer
+          format: int32
     JettonBalance:
       type: object
       required:
@@ -7041,6 +7044,9 @@ components:
           type: integer
           format: int32
           example: 2000
+        score:
+          type: integer
+          format: int32
     JettonHolders:
       type: object
       required:

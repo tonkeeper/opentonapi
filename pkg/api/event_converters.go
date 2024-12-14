@@ -74,7 +74,8 @@ func (h *Handler) convertRisk(ctx context.Context, risk wallet.Risk, walletAddre
 		}
 		jettonWallet := jettonWallets[0]
 		meta := h.GetJettonNormalizedMetadata(ctx, jettonWallet.JettonAddress)
-		preview := jettonPreview(jettonWallet.JettonAddress, meta)
+		score, _ := h.score.GetJettonScore(jettonWallet.JettonAddress)
+		preview := jettonPreview(jettonWallet.JettonAddress, meta, score)
 		jettonQuantity := oas.JettonQuantity{
 			Quantity:      quantity.String(),
 			WalletAddress: convertAccountAddress(jettonWallet.Address, h.addressBook),
@@ -203,7 +204,8 @@ func (h *Handler) convertActionNftTransfer(t *bath.NftTransferAction, acceptLang
 
 func (h *Handler) convertActionJettonTransfer(ctx context.Context, t *bath.JettonTransferAction, acceptLanguage string, viewer *tongo.AccountID) (oas.OptJettonTransferAction, oas.ActionSimplePreview) {
 	meta := h.GetJettonNormalizedMetadata(ctx, t.Jetton)
-	preview := jettonPreview(t.Jetton, meta)
+	score, _ := h.score.GetJettonScore(t.Jetton)
+	preview := jettonPreview(t.Jetton, meta, score)
 	var action oas.OptJettonTransferAction
 	action.SetTo(oas.JettonTransferAction{
 		Amount:           g.Pointer(big.Int(t.Amount)).String(),
@@ -241,7 +243,8 @@ func (h *Handler) convertActionJettonTransfer(ctx context.Context, t *bath.Jetto
 
 func (h *Handler) convertActionJettonMint(ctx context.Context, m *bath.JettonMintAction, acceptLanguage string, viewer *tongo.AccountID) (oas.OptJettonMintAction, oas.ActionSimplePreview) {
 	meta := h.GetJettonNormalizedMetadata(ctx, m.Jetton)
-	preview := jettonPreview(m.Jetton, meta)
+	score, _ := h.score.GetJettonScore(m.Jetton)
+	preview := jettonPreview(m.Jetton, meta, score)
 	var action oas.OptJettonMintAction
 	action.SetTo(oas.JettonMintAction{
 		Amount:           g.Pointer(big.Int(m.Amount)).String(),
@@ -465,7 +468,8 @@ func (h *Handler) convertAction(ctx context.Context, viewer *tongo.AccountID, a 
 		action.JettonMint, action.SimplePreview = h.convertActionJettonMint(ctx, a.JettonMint, acceptLanguage.Value, viewer)
 	case bath.JettonBurn:
 		meta := h.GetJettonNormalizedMetadata(ctx, a.JettonBurn.Jetton)
-		preview := jettonPreview(a.JettonBurn.Jetton, meta)
+		score, _ := h.score.GetJettonScore(a.JettonBurn.Jetton)
+		preview := jettonPreview(a.JettonBurn.Jetton, meta, score)
 		action.JettonBurn.SetTo(oas.JettonBurnAction{
 			Amount:        g.Pointer(big.Int(a.JettonBurn.Amount)).String(),
 			Sender:        convertAccountAddress(a.JettonBurn.Sender, h.addressBook),
@@ -640,7 +644,8 @@ func (h *Handler) convertAction(ctx context.Context, viewer *tongo.AccountID, a 
 		} else {
 			swapAction.AmountIn = a.JettonSwap.In.Amount.String()
 			jettonInMeta := h.GetJettonNormalizedMetadata(ctx, a.JettonSwap.In.JettonMaster)
-			preview := jettonPreview(a.JettonSwap.In.JettonMaster, jettonInMeta)
+			score, _ := h.score.GetJettonScore(a.JettonSwap.In.JettonMaster)
+			preview := jettonPreview(a.JettonSwap.In.JettonMaster, jettonInMeta, score)
 			swapAction.JettonMasterIn.SetTo(preview)
 			simplePreviewData["JettonIn"] = preview.GetSymbol()
 			simplePreviewData["AmountIn"] = ScaleJettons(a.JettonSwap.In.Amount, jettonInMeta.Decimals).String()
@@ -652,7 +657,8 @@ func (h *Handler) convertAction(ctx context.Context, viewer *tongo.AccountID, a 
 		} else {
 			swapAction.AmountOut = a.JettonSwap.Out.Amount.String()
 			jettonOutMeta := h.GetJettonNormalizedMetadata(ctx, a.JettonSwap.Out.JettonMaster)
-			preview := jettonPreview(a.JettonSwap.Out.JettonMaster, jettonOutMeta)
+			score, _ := h.score.GetJettonScore(a.JettonSwap.Out.JettonMaster)
+			preview := jettonPreview(a.JettonSwap.Out.JettonMaster, jettonOutMeta, score)
 			swapAction.JettonMasterOut.SetTo(preview)
 			simplePreviewData["JettonOut"] = preview.GetSymbol()
 			simplePreviewData["AmountOut"] = ScaleJettons(a.JettonSwap.Out.Amount, jettonOutMeta.Decimals).String()
@@ -806,7 +812,8 @@ func (h *Handler) toEvent(ctx context.Context, trace *core.Trace, result *bath.A
 				continue
 			}
 			meta := h.GetJettonNormalizedMetadata(ctx, jettonMaster)
-			previews[jettonMaster] = jettonPreview(jettonMaster, meta)
+			score, _ := h.score.GetJettonScore(jettonMaster)
+			previews[jettonMaster] = jettonPreview(jettonMaster, meta, score)
 		}
 	}
 	for accountID, flow := range result.ValueFlow.Accounts {
