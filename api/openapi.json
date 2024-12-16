@@ -10018,7 +10018,7 @@
      }
     },
     "tags": [
-     "Openapi"
+     "Utilities"
     ]
    }
   },
@@ -10029,7 +10029,7 @@
     "responses": {
      "200": {
       "content": {
-       "application/x-yaml": {
+       "application/yaml": {
         "schema": {
          "format": "binary",
          "type": "string"
@@ -10042,7 +10042,7 @@
      }
     },
     "tags": [
-     "Openapi"
+     "Utilities"
     ]
    }
   },

@@ -91,7 +91,7 @@ paths:
       description: Get the openapi.json file
       operationId: getOpenapiJson
       tags:
-        - Openapi
+        - Utilities
       responses:
         '200':
           content:
@@ -104,11 +104,11 @@ paths:
       description: Get the openapi.yml file
       operationId: getOpenapiYml
       tags:
-        - Openapi
+        - Utilities
       responses:
         '200':
           content:
-            application/x-yaml:
+            application/yaml:
               schema:
                 type: string
                 format: binary
@@ -7480,17 +7480,17 @@ components:
           format: int64
           example: 1668436763
     ExtraCurrency:
-          type: object
-          required:
-            - amount
-            - preview
-          properties:
-            amount:
-              type: string
-              x-js-format: bigint
-              example: "1000000000"
-            preview:
-              $ref: '#/components/schemas/EcPreview'
+      type: object
+      required:
+        - amount
+        - preview
+      properties:
+        amount:
+          type: string
+          x-js-format: bigint
+          example: "1000000000"
+        preview:
+          $ref: '#/components/schemas/EcPreview'
     SourceFile:
       type: object
       required:
