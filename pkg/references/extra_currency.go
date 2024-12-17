@@ -15,6 +15,10 @@ var extraCurrencies = map[int32]ExtraCurrencyMeta{
 		Decimals: 5,
 		Symbol:   "FMS",
 	},
+	100: {
+		Decimals: 8,
+		Symbol:   "ECHIDNA",
+	},
 }
 
 func GetExtraCurrencyMeta(id int32) ExtraCurrencyMeta {
