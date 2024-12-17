@@ -909,8 +909,15 @@ func (s *BlockchainAccountInspect) Validate() error {
 		})
 	}
 	if err := func() error {
-		if err := s.Source.Validate(); err != nil {
-			return err
+		if value, ok := s.Source.Get(); ok {
+			if err := func() error {
+				if err := value.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
 		}
 		return nil
 	}(); err != nil {
