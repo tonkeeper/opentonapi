@@ -91,7 +91,7 @@ paths:
       description: Get the openapi.json file
       operationId: getOpenapiJson
       tags:
-        - Openapi
+        - Utilities
       responses:
         '200':
           content:
@@ -104,11 +104,11 @@ paths:
       description: Get the openapi.yml file
       operationId: getOpenapiYml
       tags:
-        - Openapi
+        - Utilities
       responses:
         '200':
           content:
-            application/x-yaml:
+            application/yaml:
               schema:
                 type: string
                 format: binary

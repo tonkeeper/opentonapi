@@ -1004,7 +1004,7 @@ func encodeGetOpenapiJsonResponse(response jx.Raw, w http.ResponseWriter, span t
 }
 
 func encodeGetOpenapiYmlResponse(response GetOpenapiYmlOK, w http.ResponseWriter, span trace.Span) error {
-	w.Header().Set("Content-Type", "application/x-yaml")
+	w.Header().Set("Content-Type", "application/yaml")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
 
