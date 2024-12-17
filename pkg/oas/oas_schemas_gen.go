@@ -1946,7 +1946,7 @@ type BlockchainAccountInspect struct {
 	CodeHash string                           `json:"code_hash"`
 	Methods  []Method                         `json:"methods"`
 	Compiler BlockchainAccountInspectCompiler `json:"compiler"`
-	Source   Source                           `json:"source"`
+	Source   OptSource                        `json:"source"`
 }
 
 // GetCode returns the value of Code.
@@ -1970,7 +1970,7 @@ func (s *BlockchainAccountInspect) GetCompiler() BlockchainAccountInspectCompile
 }
 
 // GetSource returns the value of Source.
-func (s *BlockchainAccountInspect) GetSource() Source {
+func (s *BlockchainAccountInspect) GetSource() OptSource {
 	return s.Source
 }
 
@@ -1995,7 +1995,7 @@ func (s *BlockchainAccountInspect) SetCompiler(val BlockchainAccountInspectCompi
 }
 
 // SetSource sets the value of Source.
-func (s *BlockchainAccountInspect) SetSource(val Source) {
+func (s *BlockchainAccountInspect) SetSource(val OptSource) {
 	s.Source = val
 }
 
@@ -13812,6 +13812,52 @@ func (o OptSmartContractAction) Get() (v SmartContractAction, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptSmartContractAction) Or(d SmartContractAction) SmartContractAction {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptSource returns new OptSource with value set to v.
+func NewOptSource(v Source) OptSource {
+	return OptSource{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptSource is optional Source.
+type OptSource struct {
+	Value Source
+	Set   bool
+}
+
+// IsSet returns true if OptSource was set.
+func (o OptSource) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptSource) Reset() {
+	var v Source
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptSource) SetTo(v Source) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptSource) Get() (v Source, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptSource) Or(d Source) Source {
 	if v, ok := o.Get(); ok {
 		return v
 	}

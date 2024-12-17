@@ -1551,8 +1551,7 @@
      "code",
      "code_hash",
      "methods",
-     "compiler",
-     "source"
+     "compiler"
     ],
     "type": "object"
    },

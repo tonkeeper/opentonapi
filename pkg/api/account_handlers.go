@@ -488,10 +488,7 @@ func (h *Handler) BlockchainAccountInspect(ctx context.Context, params oas.Block
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
-	source, err := h.verifierSource.GetAccountSource(account.ID)
-	if err != nil {
-		return nil, toError(http.StatusInternalServerError, err)
-	}
+	source, _ := h.verifierSource.GetAccountSource(account.ID)
 	sourceFiles := make([]oas.SourceFile, len(source.Files))
 	for idx, file := range source.Files {
 		sourceFiles[idx] = oas.SourceFile{
@@ -502,11 +499,17 @@ func (h *Handler) BlockchainAccountInspect(ctx context.Context, params oas.Block
 			IncludeInCommand: file.IncludeInCommand,
 		}
 	}
+	compiler := oas.BlockchainAccountInspectCompilerFunc
+	if source.Compiler != "" {
+		compiler = oas.BlockchainAccountInspectCompiler(source.Compiler)
+	}
 	resp := oas.BlockchainAccountInspect{
 		Code:     hex.EncodeToString(rawAccount.Code),
 		CodeHash: hex.EncodeToString(codeHash),
-		Compiler: oas.BlockchainAccountInspectCompiler(source.Compiler),
-		Source:   oas.Source{Files: sourceFiles},
+		Compiler: compiler,
+	}
+	if len(sourceFiles) > 0 {
+		resp.Source = oas.NewOptSource(oas.Source{Files: sourceFiles})
 	}
 	for _, methodID := range methods {
 		if method, ok := code.Methods[methodID]; ok {
