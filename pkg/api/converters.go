@@ -186,6 +186,9 @@ func convertTuple(v tlb.VmStkTuple) (oas.TvmStackRecord, error) {
 	var records []tlb.VmStackValue
 	var err error
 	r := oas.TvmStackRecord{Type: oas.TvmStackRecordTypeTuple}
+	if v.Len == 0 {
+		return r, nil
+	}
 	if v.Len == 2 && (v.Data.Tail.SumType == "VmStkTuple" || v.Data.Tail.SumType == "VmStkNull") {
 		records, err = v.RecursiveToSlice()
 	} else {
