@@ -398,16 +398,12 @@ func (h *Handler) EmulateMessageToEvent(ctx context.Context, request *oas.Emulat
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
 	}
-	hash, err := c.Hash256()
-	if err != nil {
+	var message tlb.Message
+	if err = tlb.Unmarshal(c, &message); err != nil {
 		return nil, toError(http.StatusBadRequest, err)
 	}
-	trace, prs := h.mempoolEmulate.traces.Get(hash)
+	trace, prs := h.mempoolEmulate.traces.Get(ton.Bits256(message.Hash()))
 	if !prs {
-		var m tlb.Message
-		if err := tlb.Unmarshal(c, &m); err != nil {
-			return nil, toError(http.StatusBadRequest, err)
-		}
 		configBase64, err := h.storage.TrimmedConfigBase64()
 		if err != nil {
 			return nil, toError(http.StatusInternalServerError, err)
@@ -424,7 +420,7 @@ func (h *Handler) EmulateMessageToEvent(ctx context.Context, request *oas.Emulat
 		if err != nil {
 			return nil, toError(http.StatusInternalServerError, err)
 		}
-		tree, err := emulator.Run(ctx, m)
+		tree, err := emulator.Run(ctx, message)
 		if err != nil {
 			return nil, toProperEmulationError(err)
 		}
@@ -450,17 +446,12 @@ func (h *Handler) EmulateMessageToTrace(ctx context.Context, request *oas.Emulat
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
 	}
-	hash, err := c.Hash256()
-	if err != nil {
+	var message tlb.Message
+	if err = tlb.Unmarshal(c, &message); err != nil {
 		return nil, toError(http.StatusBadRequest, err)
 	}
-	trace, prs := h.mempoolEmulate.traces.Get(hash)
+	trace, prs := h.mempoolEmulate.traces.Get(ton.Bits256(message.Hash()))
 	if !prs {
-		var m tlb.Message
-		err = tlb.Unmarshal(c, &m)
-		if err != nil {
-			return nil, toError(http.StatusBadRequest, err)
-		}
 		configBase64, err := h.storage.TrimmedConfigBase64()
 		if err != nil {
 			return nil, toError(http.StatusInternalServerError, err)
@@ -472,12 +463,11 @@ func (h *Handler) EmulateMessageToTrace(ctx context.Context, request *oas.Emulat
 		if !params.IgnoreSignatureCheck.Value {
 			options = append(options, txemulator.WithSignatureCheck())
 		}
-
 		emulator, err := txemulator.NewTraceBuilder(options...)
 		if err != nil {
 			return nil, toError(http.StatusInternalServerError, err)
 		}
-		tree, err := emulator.Run(ctx, m)
+		tree, err := emulator.Run(ctx, message)
 		if err != nil {
 			return nil, toProperEmulationError(err)
 		}
