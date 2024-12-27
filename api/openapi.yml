@@ -5754,6 +5754,7 @@ components:
             type: object
             required:
               - account
+              - qty
               - quantity
               - jetton
             properties:
@@ -5761,8 +5762,13 @@ components:
                 $ref: '#/components/schemas/AccountAddress'
               jetton:
                 $ref: '#/components/schemas/JettonPreview'
+              qty:
+                type: string
+                x-js-format: bigint
+                example: "200"
               quantity:
                 type: integer
+                deprecated: true
                 format: int64
                 x-js-format: bigint
                 example: 10
