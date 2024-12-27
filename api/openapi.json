@@ -5939,7 +5939,13 @@
         "jetton": {
          "$ref": "#/components/schemas/JettonPreview"
         },
+        "qty": {
+         "example": "200",
+         "type": "string",
+         "x-js-format": "bigint"
+        },
         "quantity": {
+         "deprecated": true,
          "example": 10,
          "format": "int64",
          "type": "integer",
@@ -5948,6 +5954,7 @@
        },
        "required": [
         "account",
+        "qty",
         "quantity",
         "jetton"
        ],
