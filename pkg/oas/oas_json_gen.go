@@ -40181,15 +40181,20 @@ func (s *ValueFlowJettonsItem) encodeFields(e *jx.Encoder) {
 		s.Jetton.Encode(e)
 	}
 	{
+		e.FieldStart("qty")
+		e.Str(s.Qty)
+	}
+	{
 		e.FieldStart("quantity")
 		e.Int64(s.Quantity)
 	}
 }
 
-var jsonFieldsNameOfValueFlowJettonsItem = [3]string{
+var jsonFieldsNameOfValueFlowJettonsItem = [4]string{
 	0: "account",
 	1: "jetton",
-	2: "quantity",
+	2: "qty",
+	3: "quantity",
 }
 
 // Decode decodes ValueFlowJettonsItem from json.
@@ -40221,8 +40226,20 @@ func (s *ValueFlowJettonsItem) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"jetton\"")
 			}
-		case "quantity":
+		case "qty":
 			requiredBitSet[0] |= 1 << 2
+			if err := func() error {
+				v, err := d.Str()
+				s.Qty = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"qty\"")
+			}
+		case "quantity":
+			requiredBitSet[0] |= 1 << 3
 			if err := func() error {
 				v, err := d.Int64()
 				s.Quantity = int64(v)
@@ -40243,7 +40260,7 @@ func (s *ValueFlowJettonsItem) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b00000111,
+		0b00001111,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
