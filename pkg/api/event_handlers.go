@@ -294,6 +294,13 @@ func (h *Handler) GetAccountEvents(ctx context.Context, params oas.GetAccountEve
 		//	lastLT = uint64(events[len(events)-1].Lt)
 		//}
 	}
+	for i, e := range events {
+		if e.InProgress {
+			for j, _ := range e.Actions {
+				events[i].Actions[j].Status = oas.ActionStatusOk
+			}
+		}
+	}
 	return &oas.AccountEvents{Events: events, NextFrom: int64(lastLT)}, nil
 }
 
