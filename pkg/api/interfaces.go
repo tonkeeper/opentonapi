@@ -76,8 +76,8 @@ type storage interface {
 	GetJettonHolders(ctx context.Context, jettonMaster tongo.AccountID, limit, offset int) ([]core.JettonHolder, error)
 	GetJettonMasterMetadata(ctx context.Context, master tongo.AccountID) (tongo.JettonMetadata, error)
 	GetJettonMasterData(ctx context.Context, master tongo.AccountID) (core.JettonMaster, error)
-	GetAccountJettonsHistory(ctx context.Context, address tongo.AccountID, limit int, beforeLT, startTime, endTime *int64) ([]tongo.Bits256, error)
-	GetAccountJettonHistoryByID(ctx context.Context, address, jettonMaster tongo.AccountID, limit int, beforeLT, startTime, endTime *int64) ([]tongo.Bits256, error)
+	GetAccountJettonsHistory(ctx context.Context, address tongo.AccountID, limit int, beforeLT, startTime, endTime *int64) (map[core.TraceID][]core.JettonOperation, error)
+	GetAccountJettonHistoryByID(ctx context.Context, address, jettonMaster tongo.AccountID, limit int, beforeLT, startTime, endTime *int64) (map[core.TraceID][]core.JettonOperation, error)
 	GetJettonTransferPayload(ctx context.Context, accountID, jettonMaster ton.AccountID) (*core.JettonTransferPayload, error)
 
 	GetAllAuctions(ctx context.Context) ([]core.Auction, error)
@@ -184,7 +184,7 @@ type scoreSource interface {
 }
 
 type SpamFilter interface {
-	CheckActions(actions []oas.Action, viewer *ton.AccountID, initiator ton.AccountID) bool
+	CheckActions(actions []oas.Action, viewer *ton.AccountID, initiator *ton.AccountID) bool
 	JettonTrust(address tongo.AccountID, symbol, name, image string) core.TrustType
 	NftTrust(address tongo.AccountID, collection *ton.AccountID, description, image string) core.TrustType
 }
