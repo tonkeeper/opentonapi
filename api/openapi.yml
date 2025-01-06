@@ -7533,13 +7533,17 @@ components:
     ChartPoints:
       type: array
       items:
-        - type: integer
-          format: int64
-          description: Unix timestamp of the data point
-        - type: number
-          description: Decimal price of the token in the requested currency
-      additionalItems: false
-      example: [ 1668436763, 97.21323234 ]
+        type: array
+        minItems: 2
+        maxItems: 2
+        items:
+          type: number
+      description: |
+        Each inner array is a pair [timestamp, price]:
+          • index 0 — Unix timestamp (int64)  
+          • index 1 — token price (decimal) in the requested currency.
+      example:
+        - [1668436763, 97.21323234]
     AccountInfoByStateInit:
       type: object
       required:
