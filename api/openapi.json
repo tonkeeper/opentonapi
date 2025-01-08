@@ -3331,12 +3331,17 @@
         "preview": {
          "example": "https://cache.tonapi.io/images/media.jpg",
          "type": "string"
+        },
+        "verified": {
+         "example": true,
+         "type": "boolean"
         }
        },
        "required": [
         "address",
         "name",
-        "preview"
+        "preview",
+        "verified"
        ],
        "type": "object"
       },

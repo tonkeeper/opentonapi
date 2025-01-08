@@ -12,14 +12,11 @@ import (
 	"sync"
 	"time"
 
+	"github.com/shopspring/decimal"
 	"github.com/tonkeeper/opentonapi/pkg/core"
-	imgGenerator "github.com/tonkeeper/opentonapi/pkg/image"
+	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
 	"github.com/tonkeeper/tongo/tlb"
-	"github.com/tonkeeper/tongo/ton"
-
-	"github.com/shopspring/decimal"
-	"github.com/tonkeeper/tongo"
 	"go.uber.org/zap"
 	"golang.org/x/exp/maps"
 	"golang.org/x/exp/slices"
@@ -28,6 +25,7 @@ import (
 	"github.com/tonkeeper/opentonapi/pkg/oas"
 )
 
+// NormalizeReg is a regular expression to remove all non-letter and non-number characters
 var NormalizeReg = regexp.MustCompile("[^\\p{L}\\p{N}]")
 
 // KnownAddress represents additional manually crafted information about a particular account in the blockchain
@@ -51,19 +49,6 @@ const (
 	JettonSymbolAccountType  AttachedAccountType = "jetton_symbol"
 	JettonNameAccountType    AttachedAccountType = "jetton_name"
 )
-
-// AttachedAccount represents domains, nft collections for quick search by name are presented
-type AttachedAccount struct {
-	Name       string              `json:"name"`
-	Preview    string              `json:"preview"`
-	Wallet     ton.AccountID       `json:"wallet"`
-	Slug       string              `json:"-"`
-	Symbol     string              `json:"-"`
-	Type       AttachedAccountType `json:"-"`
-	Weight     int32               `json:"-"`
-	Popular    int32               `json:"-"`
-	Normalized string              `json:"-"`
-}
 
 // KnownJetton represents additional manually crafted information about a particular jetton in the blockchain
 type KnownJetton struct {
@@ -138,29 +123,43 @@ func (b *Book) GetAddressInfoByAddress(a tongo.AccountID) (KnownAddress, bool) {
 
 // SearchAttachedAccountsByPrefix searches for accounts by prefix
 func (b *Book) SearchAttachedAccountsByPrefix(prefix string) []AttachedAccount {
+	if prefix == "" {
+		return []AttachedAccount{}
+	}
 	prefix = strings.ToLower(NormalizeReg.ReplaceAllString(prefix, ""))
-	var accounts []AttachedAccount
+	exclusiveAccounts := make(map[string]AttachedAccount)
 	for i := range b.addressers {
 		foundAccounts := b.addressers[i].SearchAttachedAccounts(prefix)
-		if len(foundAccounts) > 0 {
-			accounts = append(accounts, foundAccounts...)
+		for _, account := range foundAccounts {
+			key := fmt.Sprintf("%v:%v", account.Wallet.ToRaw(), account.Normalized)
+			existing, ok := exclusiveAccounts[key]
+			// Ensure only one account per wallet is included
+			if !ok || (!existing.Verified && account.Verified) {
+				exclusiveAccounts[key] = account
+			}
 		}
 	}
+	accounts := maps.Values(exclusiveAccounts)
 	tonDomainPrefix := prefix + "ton"
 	tgDomainPrefix := prefix + "tme"
-	// Adjust weight for full matches
+	// Boost weight for accounts that match the prefix
 	for i := range accounts {
-		if accounts[i].Normalized == prefix || accounts[i].Normalized == tonDomainPrefix || accounts[i].Normalized == tgDomainPrefix {
-			accounts[i].Weight *= 100
+		normalized := accounts[i].Normalized
+		if normalized == prefix || normalized == tonDomainPrefix || normalized == tgDomainPrefix {
+			accounts[i].Weight *= BoostForFullMatch
+		}
+		if accounts[i].Verified {
+			accounts[i].Weight *= BoostForVerified
 		}
 	}
-	// Sort and limit the result
+	// Sort accounts by weight and name length
 	sort.Slice(accounts, func(i, j int) bool {
 		if accounts[i].Weight == accounts[j].Weight {
 			return len(accounts[i].Name) < len(accounts[j].Name)
 		}
 		return accounts[i].Weight > accounts[j].Weight
 	})
+	// Limit the result to 50 accounts
 	if len(accounts) > 50 {
 		accounts = accounts[:50]
 	}
@@ -288,92 +287,42 @@ func (m *manualAddresser) refreshAddresses(addressPath string) error {
 	if err != nil {
 		return err
 	}
-	newAddresses := make(map[tongo.AccountID]KnownAddress, len(addresses))
-	var newSorted []AttachedAccount
+	knownAccounts := make(map[tongo.AccountID]KnownAddress, len(addresses))
+	attachedAccounts := make([]AttachedAccount, 0, len(addresses)*3)
 	for _, item := range addresses {
 		account, err := tongo.ParseAddress(item.Address)
 		if err != nil {
 			continue
 		}
 		item.Address = account.ID.ToRaw()
-		newAddresses[account.ID] = item
-		var preview string
-		if item.Image != "" {
-			preview = imgGenerator.DefaultGenerator.GenerateImageUrl(item.Image, 200, 200)
-		}
+		knownAccounts[account.ID] = item
+		// Generate name variants for the account
 		names := GenerateNameVariants(item.Name)
 		for idx, name := range names {
-			// Assign initial weight, give extra weight to the first name for priority
-			weight := int32(1000)
-			if idx == 0 {
-				weight *= 10 // Boost weight for the first name
+			weight := KnownAccountWeight
+			if idx == 0 { // Boost weight for the first name
+				weight *= BoostForOriginalName
 			}
-			newSorted = append(newSorted, AttachedAccount{
-				Name:       item.Name,
-				Preview:    preview,
-				Wallet:     account.ID,
-				Type:       ManualAccountType,
-				Weight:     weight,
-				Popular:    1,
-				Normalized: strings.ToLower(NormalizeReg.ReplaceAllString(name, "")),
-			})
+			// Convert known account to attached account
+			attachedAccount, err := ConvertAttachedAccount(name, item.Image, account.ID, weight, true, ManualAccountType)
+			if err != nil {
+				continue
+			}
+			attachedAccounts = append(attachedAccounts, attachedAccount)
 		}
 	}
-	sort.Slice(newSorted, func(i, j int) bool {
-		return newSorted[i].Normalized < newSorted[j].Normalized
-	})
 
 	m.mu.Lock()
-	m.addresses = newAddresses
-	m.sorted = newSorted
-	m.mu.Unlock()
+	defer m.mu.Unlock()
+	m.addresses = knownAccounts
+	sorted := m.sorted
+	sorted = append(sorted, attachedAccounts...)
+	sort.Slice(sorted, func(i, j int) bool {
+		return sorted[i].Normalized < sorted[j].Normalized
+	})
+	m.sorted = sorted
 
 	return nil
-}
-
-func GenerateNameVariants(name string) []string {
-	words := strings.Fields(name) // Split the name into words
-	var variants []string
-	// Generate up to 3 variants by rotating the words
-	for i := 0; i < len(words) && i < 3; i++ {
-		variant := append(words[i:], words[:i]...) // Rotate the words
-		variants = append(variants, strings.Join(variant, " "))
-	}
-	return variants
-}
-
-func FindIndexes(sortedList []AttachedAccount, prefix string) (int, int) {
-	low, high := 0, len(sortedList)-1
-	startIdx := -1
-	// Find starting index for the prefix
-	for low <= high {
-		med := (low + high) / 2
-		if strings.HasPrefix(sortedList[med].Normalized, prefix) {
-			startIdx = med
-			high = med - 1
-		} else if sortedList[med].Normalized < prefix {
-			low = med + 1
-		} else {
-			high = med - 1
-		}
-	}
-	if startIdx == -1 { // No prefix match
-		return -1, -1
-	}
-	low, high = startIdx, len(sortedList)-1
-	endIdx := -1
-	// Find ending index for the prefix
-	for low <= high {
-		med := (low + high) / 2
-		if strings.HasPrefix(sortedList[med].Normalized, prefix) {
-			endIdx = med
-			low = med + 1
-		} else {
-			high = med - 1
-		}
-	}
-
-	return startIdx, endIdx
 }
 
 // NewAddressBook initializes a Book and starts background refreshers tasks
@@ -401,7 +350,7 @@ func NewAddressBook(logger *zap.Logger, addressPath, jettonPath, collectionPath 
 	// Start background refreshers
 	go Refresher("gg whitelist", time.Hour, 5*time.Minute, logger, book.getGGWhitelist)
 	go Refresher("addresses", time.Minute*15, 5*time.Minute, logger, func() error { return manual.refreshAddresses(addressPath) })
-	go Refresher("jettons", time.Minute*15, 5*time.Minute, logger, func() error { return book.refreshJettons(jettonPath) })
+	go Refresher("jettons", time.Minute*15, 5*time.Minute, logger, func() error { return book.refreshJettons(manual, jettonPath) })
 	go Refresher("collections", time.Minute*15, 5*time.Minute, logger, func() error { return book.refreshCollections(collectionPath) })
 	book.refreshTfPools(logger) // Refresh tfPools once on initialization as it doesn't need periodic updates
 
@@ -423,22 +372,50 @@ func Refresher(name string, interval, errorInterval time.Duration, logger *zap.L
 }
 
 // refreshJettons fetches and updates the jetton data from the provided URL
-func (b *Book) refreshJettons(jettonPath string) error {
+func (b *Book) refreshJettons(addresser *manualAddresser, jettonPath string) error {
+	// Download jettons data
 	jettons, err := downloadJson[KnownJetton](jettonPath)
 	if err != nil {
 		return err
 	}
-	b.mu.Lock()
-	defer b.mu.Unlock()
-	// Update jettons map with the fetched data
+	knownJettons := make(map[tongo.AccountID]KnownJetton, len(jettons))
+	var attachedAccounts []AttachedAccount
 	for _, item := range jettons {
 		account, err := tongo.ParseAddress(item.Address)
 		if err != nil {
 			continue
 		}
 		item.Address = account.ID.ToRaw()
-		b.jettons[account.ID] = item
+		knownJettons[account.ID] = item
+		// Generate name variants for the jetton
+		names := GenerateNameVariants(item.Name)
+		for idx, name := range names {
+			weight := KnownAccountWeight
+			if idx == 0 { // Boost weight for the first name
+				weight *= BoostForOriginalName
+			}
+			// Convert known account to attached account
+			attachedAccount, err := ConvertAttachedAccount(name, item.Image, account.ID, weight, true, JettonNameAccountType)
+			if err != nil {
+				continue
+			}
+			attachedAccounts = append(attachedAccounts, attachedAccount)
+		}
 	}
+
+	b.mu.Lock()
+	b.jettons = knownJettons
+	b.mu.Unlock()
+
+	addresser.mu.Lock()
+	defer addresser.mu.Unlock()
+	sorted := addresser.sorted
+	sorted = append(sorted, attachedAccounts...)
+	sort.Slice(sorted, func(i, j int) bool {
+		return sorted[i].Normalized < sorted[j].Normalized
+	})
+	addresser.sorted = sorted
+
 	return nil
 }
 

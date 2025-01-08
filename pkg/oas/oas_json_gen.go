@@ -16103,12 +16103,17 @@ func (s *FoundAccountsAddressesItem) encodeFields(e *jx.Encoder) {
 		e.FieldStart("preview")
 		e.Str(s.Preview)
 	}
+	{
+		e.FieldStart("verified")
+		e.Bool(s.Verified)
+	}
 }
 
-var jsonFieldsNameOfFoundAccountsAddressesItem = [3]string{
+var jsonFieldsNameOfFoundAccountsAddressesItem = [4]string{
 	0: "address",
 	1: "name",
 	2: "preview",
+	3: "verified",
 }
 
 // Decode decodes FoundAccountsAddressesItem from json.
@@ -16156,6 +16161,18 @@ func (s *FoundAccountsAddressesItem) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"preview\"")
 			}
+		case "verified":
+			requiredBitSet[0] |= 1 << 3
+			if err := func() error {
+				v, err := d.Bool()
+				s.Verified = bool(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"verified\"")
+			}
 		default:
 			return d.Skip()
 		}
@@ -16166,7 +16183,7 @@ func (s *FoundAccountsAddressesItem) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b00000111,
+		0b00001111,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
