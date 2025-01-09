@@ -141,7 +141,10 @@ var StrawAuctionBuyFragments = Straw[BubbleNftPurchase]{
 	SingleChild: &Straw[BubbleNftPurchase]{
 		CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.NftOwnershipAssignedMsgOp)},
 		Builder: func(newAction *BubbleNftPurchase, bubble *Bubble) error {
-			newAction.Seller = parseAccount(bubble.Info.(BubbleTx).decodedBody.Value.(abi.NftOwnershipAssignedMsgBody).PrevOwner).Address
+			seller := parseAccount(bubble.Info.(BubbleTx).decodedBody.Value.(abi.NftOwnershipAssignedMsgBody).PrevOwner)
+			if seller != nil {
+				newAction.Seller = seller.Address
+			}
 			return nil
 		},
 	},
