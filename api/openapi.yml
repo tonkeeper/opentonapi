@@ -5415,6 +5415,7 @@ components:
         - decimals
         - verification
         - image
+        - score
       properties:
         address:
           type: string
@@ -7050,9 +7051,6 @@ components:
           type: integer
           format: int32
           example: 2000
-        score:
-          type: integer
-          format: int32
     JettonHolders:
       type: object
       required:
