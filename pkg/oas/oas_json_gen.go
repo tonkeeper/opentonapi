@@ -24057,15 +24057,9 @@ func (s *JettonInfo) encodeFields(e *jx.Encoder) {
 		e.FieldStart("holders_count")
 		e.Int32(s.HoldersCount)
 	}
-	{
-		if s.Score.Set {
-			e.FieldStart("score")
-			s.Score.Encode(e)
-		}
-	}
 }
 
-var jsonFieldsNameOfJettonInfo = [8]string{
+var jsonFieldsNameOfJettonInfo = [7]string{
 	0: "mintable",
 	1: "total_supply",
 	2: "admin",
@@ -24073,7 +24067,6 @@ var jsonFieldsNameOfJettonInfo = [8]string{
 	4: "preview",
 	5: "verification",
 	6: "holders_count",
-	7: "score",
 }
 
 // Decode decodes JettonInfo from json.
@@ -24162,16 +24155,6 @@ func (s *JettonInfo) Decode(d *jx.Decoder) error {
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"holders_count\"")
-			}
-		case "score":
-			if err := func() error {
-				s.Score.Reset()
-				if err := s.Score.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"score\"")
 			}
 		default:
 			return d.Skip()
@@ -24701,10 +24684,8 @@ func (s *JettonPreview) encodeFields(e *jx.Encoder) {
 		}
 	}
 	{
-		if s.Score.Set {
-			e.FieldStart("score")
-			s.Score.Encode(e)
-		}
+		e.FieldStart("score")
+		e.Int32(s.Score)
 	}
 }
 
@@ -24809,9 +24790,11 @@ func (s *JettonPreview) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"custom_payload_api_uri\"")
 			}
 		case "score":
+			requiredBitSet[0] |= 1 << 7
 			if err := func() error {
-				s.Score.Reset()
-				if err := s.Score.Decode(d); err != nil {
+				v, err := d.Int32()
+				s.Score = int32(v)
+				if err != nil {
 					return err
 				}
 				return nil
@@ -24828,7 +24811,7 @@ func (s *JettonPreview) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b00111111,
+		0b10111111,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
