@@ -2,10 +2,11 @@ package api
 
 import (
 	"fmt"
-	imgGenerator "github.com/tonkeeper/opentonapi/pkg/image"
-	"github.com/tonkeeper/opentonapi/pkg/references"
 	"math/big"
 	"sort"
+
+	imgGenerator "github.com/tonkeeper/opentonapi/pkg/image"
+	"github.com/tonkeeper/opentonapi/pkg/references"
 
 	"github.com/tonkeeper/tongo/abi"
 	"github.com/tonkeeper/tongo/tlb"
@@ -94,7 +95,7 @@ func convertExtraCurrencies(extraBalances core.ExtraCurrencies) []oas.ExtraCurre
 	return res
 }
 
-func convertToAccount(account *core.Account, ab *addressbook.KnownAddress, state chainState) oas.Account {
+func convertToAccount(account *core.Account, ab *addressbook.KnownAddress, state chainState, spamFilter SpamFilter) oas.Account {
 	acc := oas.Account{
 		Address:      account.AccountAddress.ToRaw(),
 		Balance:      account.TonBalance,
@@ -119,10 +120,16 @@ func convertToAccount(account *core.Account, ab *addressbook.KnownAddress, state
 			}
 		}
 	}
+	trust := spamFilter.AccountTrust(account.AccountAddress)
+	if trust == core.TrustBlacklist {
+		acc.IsScam = oas.NewOptBool(true)
+	}
 	if ab == nil {
 		return acc
 	}
-	acc.IsScam = oas.NewOptBool(ab.IsScam)
+	if !acc.IsScam.Value {
+		acc.IsScam = oas.NewOptBool(ab.IsScam)
+	}
 	if len(ab.Name) > 0 {
 		acc.Name = oas.NewOptString(ab.Name)
 	}

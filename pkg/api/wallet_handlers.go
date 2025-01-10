@@ -5,8 +5,9 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
-	"github.com/tonkeeper/opentonapi/pkg/core"
 	"net/http"
+
+	"github.com/tonkeeper/opentonapi/pkg/core"
 
 	"github.com/tonkeeper/opentonapi/pkg/oas"
 	"github.com/tonkeeper/opentonapi/pkg/wallet"
@@ -34,9 +35,9 @@ func (h *Handler) GetWalletsByPublicKey(ctx context.Context, params oas.GetWalle
 		ab, found := h.addressBook.GetAddressInfoByAddress(account.AccountAddress)
 		var res oas.Account
 		if found {
-			res = convertToAccount(account, &ab, h.state)
+			res = convertToAccount(account, &ab, h.state, h.spamFilter)
 		} else {
-			res = convertToAccount(account, nil, h.state)
+			res = convertToAccount(account, nil, h.state, h.spamFilter)
 		}
 		if account.ExtraBalances != nil {
 			res.ExtraBalance = convertExtraCurrencies(account.ExtraBalances)

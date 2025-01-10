@@ -69,9 +69,9 @@ func (h *Handler) GetAccount(ctx context.Context, params oas.GetAccountParams) (
 	ab, found := h.addressBook.GetAddressInfoByAddress(account.ID)
 	var res oas.Account
 	if found {
-		res = convertToAccount(rawAccount, &ab, h.state)
+		res = convertToAccount(rawAccount, &ab, h.state, h.spamFilter)
 	} else {
-		res = convertToAccount(rawAccount, nil, h.state)
+		res = convertToAccount(rawAccount, nil, h.state, h.spamFilter)
 	}
 	if rawAccount.ExtraBalances != nil {
 		res.ExtraBalance = convertExtraCurrencies(rawAccount.ExtraBalances)
@@ -114,9 +114,9 @@ func (h *Handler) GetAccounts(ctx context.Context, request oas.OptGetAccountsReq
 		ab, found := h.addressBook.GetAddressInfoByAddress(account.AccountAddress)
 		var res oas.Account
 		if found {
-			res = convertToAccount(account, &ab, h.state)
+			res = convertToAccount(account, &ab, h.state, h.spamFilter)
 		} else {
-			res = convertToAccount(account, nil, h.state)
+			res = convertToAccount(account, nil, h.state, h.spamFilter)
 		}
 		if account.ExtraBalances != nil {
 			res.ExtraBalance = convertExtraCurrencies(account.ExtraBalances)
@@ -274,6 +274,10 @@ func (h *Handler) SearchAccounts(ctx context.Context, params oas.SearchAccountsP
 			if trust == core.TrustBlacklist {
 				continue
 			}
+		}
+		trust := h.spamFilter.AccountTrust(account.Wallet)
+		if trust == core.TrustBlacklist {
+			continue
 		}
 		parsedAccounts[account.Wallet] = account
 	}
