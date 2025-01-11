@@ -2832,7 +2832,7 @@ paths:
           $ref: '#/components/responses/Error'
   /v2/events/emulate:
     post:
-      description: Emulate sending message to blockchain
+      description: Emulate sending message to retrieve general blockchain events
       operationId: emulateMessageToEvent
       tags:
         - Emulation
@@ -2857,7 +2857,7 @@ paths:
           $ref: '#/components/responses/Error'
   /v2/traces/emulate:
     post:
-      description: Emulate sending message to blockchain
+      description: Emulate sending message to retrieve with a detailed execution trace
       operationId: emulateMessageToTrace
       tags:
         - Emulation
@@ -2881,7 +2881,7 @@ paths:
           $ref: '#/components/responses/Error'
   /v2/wallet/emulate:
     post:
-      description: Emulate sending message to blockchain
+      description: Emulate sending message to retrieve the resulting wallet state
       operationId: emulateMessageToWallet
       tags:
         - Emulation
@@ -2901,7 +2901,7 @@ paths:
           $ref: '#/components/responses/Error'
   /v2/accounts/{account_id}/events/emulate:
     post:
-      description: Emulate sending message to blockchain
+      description: Emulate sending message to retrieve account-specific events
       operationId: emulateMessageToAccountEvent
       tags:
         - Emulation
