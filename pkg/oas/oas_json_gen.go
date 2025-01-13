@@ -16104,8 +16104,8 @@ func (s *FoundAccountsAddressesItem) encodeFields(e *jx.Encoder) {
 		e.Str(s.Preview)
 	}
 	{
-		e.FieldStart("verified")
-		e.Bool(s.Verified)
+		e.FieldStart("trust")
+		s.Trust.Encode(e)
 	}
 }
 
@@ -16113,7 +16113,7 @@ var jsonFieldsNameOfFoundAccountsAddressesItem = [4]string{
 	0: "address",
 	1: "name",
 	2: "preview",
-	3: "verified",
+	3: "trust",
 }
 
 // Decode decodes FoundAccountsAddressesItem from json.
@@ -16161,17 +16161,15 @@ func (s *FoundAccountsAddressesItem) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"preview\"")
 			}
-		case "verified":
+		case "trust":
 			requiredBitSet[0] |= 1 << 3
 			if err := func() error {
-				v, err := d.Bool()
-				s.Verified = bool(v)
-				if err != nil {
+				if err := s.Trust.Decode(d); err != nil {
 					return err
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"verified\"")
+				return errors.Wrap(err, "decode field \"trust\"")
 			}
 		default:
 			return d.Skip()

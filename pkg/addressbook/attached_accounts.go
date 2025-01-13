@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/tonkeeper/opentonapi/pkg/core"
 	imgGenerator "github.com/tonkeeper/opentonapi/pkg/image"
 	"github.com/tonkeeper/opentonapi/pkg/references"
 	rules "github.com/tonkeeper/scam_backoffice_rules"
@@ -28,12 +29,12 @@ type AttachedAccount struct {
 	Type       AttachedAccountType `json:"-"`
 	Weight     int64               `json:"-"`
 	Popular    int64               `json:"-"`
-	Verified   bool                `json:"-"`
+	Trust      core.TrustType      `json:"-"`
 	Normalized string              `json:"-"`
 }
 
 // ConvertAttachedAccount converts a known account to an attached account
-func ConvertAttachedAccount(slug, image string, account ton.AccountID, weight int, verified bool, accountType AttachedAccountType) (AttachedAccount, error) {
+func ConvertAttachedAccount(slug, image string, account ton.AccountID, weight int, trust core.TrustType, accountType AttachedAccountType) (AttachedAccount, error) {
 	var name string
 	// Handle different account types and assign appropriate values
 	switch accountType {
@@ -75,7 +76,7 @@ func ConvertAttachedAccount(slug, image string, account ton.AccountID, weight in
 		Type:       accountType,
 		Weight:     int64(weight),
 		Popular:    int64(weight),
-		Verified:   verified,
+		Trust:      trust,
 		Normalized: rules.NormalizeJettonSymbol(slug),
 	}, nil
 }

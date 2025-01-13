@@ -279,10 +279,10 @@ func (h *Handler) SearchAccounts(ctx context.Context, params oas.SearchAccountsP
 	converted := make([]oas.FoundAccountsAddressesItem, len(accounts))
 	for idx, account := range accounts {
 		converted[idx] = oas.FoundAccountsAddressesItem{
-			Address:  account.Wallet.ToRaw(),
-			Name:     account.Name,
-			Preview:  account.Preview,
-			Verified: account.Verified,
+			Address: account.Wallet.ToRaw(),
+			Name:    account.Name,
+			Preview: account.Preview,
+			Trust:   oas.TrustType(account.Trust),
 		}
 	}
 	return &oas.FoundAccounts{Addresses: converted}, nil

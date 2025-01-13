@@ -134,7 +134,7 @@ func (b *Book) SearchAttachedAccountsByPrefix(prefix string) []AttachedAccount {
 			key := fmt.Sprintf("%v:%v", account.Wallet.ToRaw(), account.Normalized)
 			existing, ok := exclusiveAccounts[key]
 			// Ensure only one account per wallet is included
-			if !ok || (!existing.Verified && account.Verified) {
+			if !ok || (existing.Trust != core.TrustWhitelist && account.Trust == core.TrustWhitelist) {
 				exclusiveAccounts[key] = account
 			}
 		}
@@ -148,7 +148,7 @@ func (b *Book) SearchAttachedAccountsByPrefix(prefix string) []AttachedAccount {
 		if normalized == prefix || normalized == tonDomainPrefix || normalized == tgDomainPrefix {
 			accounts[i].Weight *= BoostForFullMatch
 		}
-		if accounts[i].Verified {
+		if accounts[i].Trust == core.TrustWhitelist {
 			accounts[i].Weight *= BoostForVerified
 		}
 	}
@@ -304,7 +304,7 @@ func (m *manualAddresser) refreshAddresses(addressPath string) error {
 				weight *= BoostForOriginalName
 			}
 			// Convert known account to attached account
-			attachedAccount, err := ConvertAttachedAccount(name, item.Image, account.ID, weight, true, ManualAccountType)
+			attachedAccount, err := ConvertAttachedAccount(name, item.Image, account.ID, weight, core.TrustWhitelist, ManualAccountType)
 			if err != nil {
 				continue
 			}
@@ -395,7 +395,7 @@ func (b *Book) refreshJettons(addresser *manualAddresser, jettonPath string) err
 				weight *= BoostForOriginalName
 			}
 			// Convert known account to attached account
-			attachedAccount, err := ConvertAttachedAccount(name, item.Image, account.ID, weight, true, JettonNameAccountType)
+			attachedAccount, err := ConvertAttachedAccount(name, item.Image, account.ID, weight, core.TrustWhitelist, JettonNameAccountType)
 			if err != nil {
 				continue
 			}
