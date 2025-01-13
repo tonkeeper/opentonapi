@@ -424,7 +424,7 @@
           "format": "cell",
           "type": "string"
          },
-         "maxItems": 10,
+         "maxItems": 5,
          "type": "array"
         },
         "boc": {

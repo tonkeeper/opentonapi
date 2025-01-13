@@ -4498,7 +4498,7 @@ func (s *SendBlockchainMessageReq) Validate() error {
 		if err := (validate.Array{
 			MinLength:    0,
 			MinLengthSet: false,
-			MaxLength:    10,
+			MaxLength:    5,
 			MaxLengthSet: true,
 		}).ValidateLength(len(s.Batch)); err != nil {
 			return errors.Wrap(err, "array")

@@ -29,8 +29,6 @@ import (
 	"github.com/tonkeeper/opentonapi/pkg/wallet"
 )
 
-const maxBatchSize = 5
-
 var (
 	mempoolBatchSize = promauto.NewHistogram(prometheus.HistogramOpts{
 		Name:    "mempool_messages_batch_size",
@@ -104,12 +102,7 @@ func (h *Handler) SendBlockchainMessage(ctx context.Context, request *oas.SendBl
 		h.blacklistedBocCache.Set(checksum, struct{}{}, cache.WithExpiration(time.Minute))
 		return nil
 	}
-	var (
-		copies []blockchain.ExtInMsgCopy
-	)
-	if len(request.Batch) > maxBatchSize {
-		return toError(http.StatusBadRequest, fmt.Errorf("batch size must be less than %v", maxBatchSize))
-	}
+	copies := make([]blockchain.ExtInMsgCopy, 0, len(request.Batch))
 	for _, msgBoc := range request.Batch {
 		m, err := decodeMessage(msgBoc)
 		if err != nil {
