@@ -5589,9 +5589,10 @@ func (s *FoundAccounts) SetAddresses(val []FoundAccountsAddressesItem) {
 }
 
 type FoundAccountsAddressesItem struct {
-	Address string `json:"address"`
-	Name    string `json:"name"`
-	Preview string `json:"preview"`
+	Address string    `json:"address"`
+	Name    string    `json:"name"`
+	Preview string    `json:"preview"`
+	Trust   TrustType `json:"trust"`
 }
 
 // GetAddress returns the value of Address.
@@ -5609,6 +5610,11 @@ func (s *FoundAccountsAddressesItem) GetPreview() string {
 	return s.Preview
 }
 
+// GetTrust returns the value of Trust.
+func (s *FoundAccountsAddressesItem) GetTrust() TrustType {
+	return s.Trust
+}
+
 // SetAddress sets the value of Address.
 func (s *FoundAccountsAddressesItem) SetAddress(val string) {
 	s.Address = val
@@ -5622,6 +5628,11 @@ func (s *FoundAccountsAddressesItem) SetName(val string) {
 // SetPreview sets the value of Preview.
 func (s *FoundAccountsAddressesItem) SetPreview(val string) {
 	s.Preview = val
+}
+
+// SetTrust sets the value of Trust.
+func (s *FoundAccountsAddressesItem) SetTrust(val TrustType) {
+	s.Trust = val
 }
 
 // Ref: #/components/schemas/GasLimitPrices

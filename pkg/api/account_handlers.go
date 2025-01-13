@@ -13,12 +13,12 @@ import (
 	"strings"
 	"time"
 
+	"github.com/tonkeeper/opentonapi/pkg/addressbook"
 	"golang.org/x/exp/slices"
 
 	"github.com/cespare/xxhash/v2"
 	"github.com/go-faster/jx"
 	"github.com/tonkeeper/opentonapi/internal/g"
-	"github.com/tonkeeper/opentonapi/pkg/addressbook"
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/opentonapi/pkg/oas"
 	"github.com/tonkeeper/tongo"
@@ -29,7 +29,6 @@ import (
 	"github.com/tonkeeper/tongo/ton"
 	"github.com/tonkeeper/tongo/utils"
 	walletTongo "github.com/tonkeeper/tongo/wallet"
-	"golang.org/x/exp/maps"
 )
 
 func (h *Handler) GetBlockchainRawAccount(ctx context.Context, params oas.GetBlockchainRawAccountParams) (*oas.BlockchainRawAccount, error) {
@@ -267,7 +266,7 @@ func (h *Handler) ExecGetMethodForBlockchainAccount(ctx context.Context, params 
 
 func (h *Handler) SearchAccounts(ctx context.Context, params oas.SearchAccountsParams) (*oas.FoundAccounts, error) {
 	attachedAccounts := h.addressBook.SearchAttachedAccountsByPrefix(params.Name)
-	parsedAccounts := make(map[tongo.AccountID]addressbook.AttachedAccount)
+	accounts := make([]addressbook.AttachedAccount, 0, len(attachedAccounts))
 	for _, account := range attachedAccounts {
 		if account.Symbol != "" {
 			trust := h.spamFilter.JettonTrust(account.Wallet, account.Symbol, account.Name, account.Preview)
@@ -279,21 +278,15 @@ func (h *Handler) SearchAccounts(ctx context.Context, params oas.SearchAccountsP
 		if trust == core.TrustBlacklist {
 			continue
 		}
-		parsedAccounts[account.Wallet] = account
+		accounts = append(accounts, account)
 	}
-	accounts := maps.Values(parsedAccounts)
-	sort.Slice(accounts, func(i, j int) bool {
-		if accounts[i].Weight == accounts[j].Weight {
-			return len(accounts[i].Name) < len(accounts[j].Name)
-		}
-		return accounts[i].Weight > accounts[j].Weight
-	})
 	converted := make([]oas.FoundAccountsAddressesItem, len(accounts))
 	for idx, account := range accounts {
 		converted[idx] = oas.FoundAccountsAddressesItem{
 			Address: account.Wallet.ToRaw(),
 			Name:    account.Name,
 			Preview: account.Preview,
+			Trust:   oas.TrustType(account.Trust),
 		}
 	}
 	return &oas.FoundAccounts{Addresses: converted}, nil

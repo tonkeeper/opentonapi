@@ -3331,12 +3331,16 @@
         "preview": {
          "example": "https://cache.tonapi.io/images/media.jpg",
          "type": "string"
+        },
+        "trust": {
+         "$ref": "#/components/schemas/TrustType"
         }
        },
        "required": [
         "address",
         "name",
-        "preview"
+        "preview",
+        "trust"
        ],
        "type": "object"
       },
