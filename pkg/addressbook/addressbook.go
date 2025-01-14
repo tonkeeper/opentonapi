@@ -297,14 +297,11 @@ func (m *manualAddresser) refreshAddresses(addressPath string) error {
 		item.Address = account.ID.ToRaw()
 		knownAccounts[account.ID] = item
 		// Generate name variants for the account
-		names := GenerateNameVariants(item.Name)
-		for idx, name := range names {
+		slugs := GenerateSlugVariants(item.Name)
+		for _, slug := range slugs {
 			weight := KnownAccountWeight
-			if idx == 0 { // Boost weight for the first name
-				weight *= BoostForOriginalName
-			}
 			// Convert known account to attached account
-			attachedAccount, err := ConvertAttachedAccount(name, item.Image, account.ID, weight, core.TrustWhitelist, ManualAccountType)
+			attachedAccount, err := ConvertAttachedAccount(item.Name, slug, item.Image, account.ID, weight, core.TrustWhitelist, ManualAccountType)
 			if err != nil {
 				continue
 			}
@@ -388,14 +385,11 @@ func (b *Book) refreshJettons(addresser *manualAddresser, jettonPath string) err
 		item.Address = account.ID.ToRaw()
 		knownJettons[account.ID] = item
 		// Generate name variants for the jetton
-		names := GenerateNameVariants(item.Name)
-		for idx, name := range names {
+		slugs := GenerateSlugVariants(item.Name)
+		for _, slug := range slugs {
 			weight := KnownAccountWeight
-			if idx == 0 { // Boost weight for the first name
-				weight *= BoostForOriginalName
-			}
 			// Convert known account to attached account
-			attachedAccount, err := ConvertAttachedAccount(name, item.Image, account.ID, weight, core.TrustWhitelist, JettonNameAccountType)
+			attachedAccount, err := ConvertAttachedAccount(item.Name, slug, item.Image, account.ID, weight, core.TrustWhitelist, JettonNameAccountType)
 			if err != nil {
 				continue
 			}

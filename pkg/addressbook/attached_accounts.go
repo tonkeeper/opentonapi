@@ -13,10 +13,9 @@ import (
 
 // AttachedAccountType represents the type of the attached account
 const (
-	KnownAccountWeight   = 1000
-	BoostForFullMatch    = 100
-	BoostForOriginalName = 50
-	BoostForVerified     = 5
+	KnownAccountWeight = 1000
+	BoostForFullMatch  = 100
+	BoostForVerified   = 10
 )
 
 // AttachedAccount represents domains, nft collections for quick search by name are presented
@@ -34,31 +33,31 @@ type AttachedAccount struct {
 }
 
 // ConvertAttachedAccount converts a known account to an attached account
-func ConvertAttachedAccount(slug, image string, account ton.AccountID, weight int, trust core.TrustType, accountType AttachedAccountType) (AttachedAccount, error) {
-	var name string
+func ConvertAttachedAccount(name, slug, image string, account ton.AccountID, weight int, trust core.TrustType, accountType AttachedAccountType) (AttachedAccount, error) {
+	var convertedName string
 	// Handle different account types and assign appropriate values
 	switch accountType {
 	case TonDomainAccountType, TgDomainAccountType:
 		weight = 1000
-		name = fmt.Sprintf("%v · account", slug)
+		convertedName = fmt.Sprintf("%v · account", name)
 		// Generate image URL for "t.me" subdomains
-		if strings.HasSuffix(slug, "t.me") && strings.Count(slug, ".") == 2 {
-			image = fmt.Sprintf("https://t.me/i/userpic/320/%v.jpg", strings.TrimSuffix(slug, ".t.me"))
+		if strings.HasSuffix(name, "t.me") && strings.Count(name, ".") == 2 {
+			image = fmt.Sprintf("https://t.me/i/userpic/320/%v.jpg", strings.TrimSuffix(name, ".t.me"))
 		} else {
 			image = references.PlugAutoCompleteDomain
 		}
 	case JettonSymbolAccountType, JettonNameAccountType:
-		name = fmt.Sprintf("%v · jetton", slug)
+		convertedName = fmt.Sprintf("%v · jetton", name)
 		if image == "" {
 			image = references.PlugAutoCompleteJetton
 		}
 	case NftCollectionAccountType:
-		name = fmt.Sprintf("%v · collection", slug)
+		convertedName = fmt.Sprintf("%v · collection", name)
 		if image == "" {
 			image = references.PlugAutoCompleteCollection
 		}
 	case ManualAccountType:
-		name = fmt.Sprintf("%v · account", slug)
+		convertedName = fmt.Sprintf("%v · account", name)
 		if image == "" {
 			image = references.PlugAutoCompleteAccount
 		}
@@ -69,7 +68,7 @@ func ConvertAttachedAccount(slug, image string, account ton.AccountID, weight in
 		image = imgGenerator.DefaultGenerator.GenerateImageUrl(image, 200, 200)
 	}
 	return AttachedAccount{
-		Name:       name,
+		Name:       convertedName,
 		Slug:       slug,
 		Preview:    image,
 		Wallet:     account,
@@ -77,12 +76,12 @@ func ConvertAttachedAccount(slug, image string, account ton.AccountID, weight in
 		Weight:     int64(weight),
 		Popular:    int64(weight),
 		Trust:      trust,
-		Normalized: rules.NormalizeJettonSymbol(slug),
+		Normalized: rules.NormalizeString(slug),
 	}, nil
 }
 
-// GenerateNameVariants generates name variants by rotating the words
-func GenerateNameVariants(name string) []string {
+// GenerateSlugVariants generates name variants by rotating the words
+func GenerateSlugVariants(name string) []string {
 	words := strings.Fields(name) // Split the name into words
 	var variants []string
 	// Generate up to 3 variants by rotating the words
