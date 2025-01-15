@@ -13,9 +13,9 @@ import (
 
 // AttachedAccountType represents the type of the attached account
 const (
-	KnownAccountWeight = 1000
+	KnownAccountWeight = 5000
 	BoostForFullMatch  = 100
-	BoostForVerified   = 10
+	BoostForVerified   = 50
 )
 
 // AttachedAccount represents domains, nft collections for quick search by name are presented
