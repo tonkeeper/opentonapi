@@ -326,6 +326,7 @@ func (a Action) IsSubject(account tongo.AccountID) bool {
 		a.NftPurchase,
 		a.JettonTransfer,
 		a.ContractDeploy,
+		a.ExtraCurrencyTransfer,
 		a.Subscription,
 		a.UnSubscription,
 		a.AuctionBid,
