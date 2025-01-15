@@ -1,6 +1,7 @@
 package spam
 
 import (
+	"context"
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/opentonapi/pkg/oas"
 	rules "github.com/tonkeeper/scam_backoffice_rules"
@@ -46,7 +47,7 @@ func (f Filter) JettonTrust(address tongo.AccountID, symbol, name, image string)
 	return core.TrustNone
 }
 
-func (f Filter) NftTrust(address tongo.AccountID, collection *ton.AccountID, description, image string) core.TrustType {
+func (f Filter) NftTrust(ctx context.Context, address tongo.AccountID, collection *ton.AccountID, description, image string) core.TrustType {
 	return core.TrustNone
 }
 
