@@ -187,7 +187,7 @@ type SpamFilter interface {
 	CheckActions(actions []oas.Action, viewer *ton.AccountID, initiator ton.AccountID) bool
 	JettonTrust(address tongo.AccountID, symbol, name, image string) core.TrustType
 	AccountTrust(address tongo.AccountID) core.TrustType
-	NftTrust(address tongo.AccountID, collection *ton.AccountID, description, image string) core.TrustType
+	NftTrust(ctx context.Context, address tongo.AccountID, collection *ton.AccountID, description, image string) core.TrustType
 }
 
 type verifierSource interface {

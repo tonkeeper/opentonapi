@@ -77,7 +77,7 @@ func (h *Handler) convertNFT(ctx context.Context, item core.NftItem, book addres
 	if len(nftItem.ApprovedBy) > 0 && nftItem.Verified {
 		nftItem.Trust = oas.TrustType(core.TrustWhitelist)
 	} else {
-		nftItem.Trust = oas.TrustType(h.spamFilter.NftTrust(item.Address, item.CollectionAddress, description, image))
+		nftItem.Trust = oas.TrustType(h.spamFilter.NftTrust(ctx, item.Address, item.CollectionAddress, description, image))
 	}
 	if image == "" {
 		image = references.Placeholder
