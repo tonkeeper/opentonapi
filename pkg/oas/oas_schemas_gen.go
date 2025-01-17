@@ -5476,6 +5476,21 @@ func (s *Event) SetInProgress(val bool) {
 	s.InProgress = val
 }
 
+// Ref: #/components/schemas/ExtraCurrencies
+type ExtraCurrencies struct {
+	ExtraCurrencies []EcPreview `json:"extra_currencies"`
+}
+
+// GetExtraCurrencies returns the value of ExtraCurrencies.
+func (s *ExtraCurrencies) GetExtraCurrencies() []EcPreview {
+	return s.ExtraCurrencies
+}
+
+// SetExtraCurrencies sets the value of ExtraCurrencies.
+func (s *ExtraCurrencies) SetExtraCurrencies(val []EcPreview) {
+	s.ExtraCurrencies = val
+}
+
 // Ref: #/components/schemas/ExtraCurrency
 type ExtraCurrency struct {
 	Amount  string    `json:"amount"`

@@ -181,6 +181,15 @@ func (UnimplementedHandler) GetAccountEvents(ctx context.Context, params GetAcco
 	return r, ht.ErrNotImplemented
 }
 
+// GetAccountExtraCurrencyHistoryByID implements getAccountExtraCurrencyHistoryByID operation.
+//
+// Get the transfer history of extra currencies for an account.
+//
+// GET /v2/accounts/{account_id}/extra-currency/{id}/history
+func (UnimplementedHandler) GetAccountExtraCurrencyHistoryByID(ctx context.Context, params GetAccountExtraCurrencyHistoryByIDParams) (r *AccountEvents, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // GetAccountInfoByStateInit implements getAccountInfoByStateInit operation.
 //
 // Get account info by state init.
@@ -513,6 +522,24 @@ func (UnimplementedHandler) GetDomainBids(ctx context.Context, params GetDomainB
 //
 // GET /v2/events/{event_id}
 func (UnimplementedHandler) GetEvent(ctx context.Context, params GetEventParams) (r *Event, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// GetExtraCurrencies implements getExtraCurrencies operation.
+//
+// Get a list of all extra currencies in the blockchain.
+//
+// GET /v2/extra-currencies
+func (UnimplementedHandler) GetExtraCurrencies(ctx context.Context, params GetExtraCurrenciesParams) (r *ExtraCurrencies, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// GetExtraCurrencyInfo implements getExtraCurrencyInfo operation.
+//
+// Get extra currency info by id.
+//
+// GET /v2/extra-currency/{id}
+func (UnimplementedHandler) GetExtraCurrencyInfo(ctx context.Context, params GetExtraCurrencyInfoParams) (r *EcPreview, _ error) {
 	return r, ht.ErrNotImplemented
 }
 

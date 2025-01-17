@@ -122,6 +122,12 @@ type Handler interface {
 	//
 	// GET /v2/accounts/{account_id}/events
 	GetAccountEvents(ctx context.Context, params GetAccountEventsParams) (*AccountEvents, error)
+	// GetAccountExtraCurrencyHistoryByID implements getAccountExtraCurrencyHistoryByID operation.
+	//
+	// Get the transfer history of extra currencies for an account.
+	//
+	// GET /v2/accounts/{account_id}/extra-currency/{id}/history
+	GetAccountExtraCurrencyHistoryByID(ctx context.Context, params GetAccountExtraCurrencyHistoryByIDParams) (*AccountEvents, error)
 	// GetAccountInfoByStateInit implements getAccountInfoByStateInit operation.
 	//
 	// Get account info by state init.
@@ -349,6 +355,18 @@ type Handler interface {
 	//
 	// GET /v2/events/{event_id}
 	GetEvent(ctx context.Context, params GetEventParams) (*Event, error)
+	// GetExtraCurrencies implements getExtraCurrencies operation.
+	//
+	// Get a list of all extra currencies in the blockchain.
+	//
+	// GET /v2/extra-currencies
+	GetExtraCurrencies(ctx context.Context, params GetExtraCurrenciesParams) (*ExtraCurrencies, error)
+	// GetExtraCurrencyInfo implements getExtraCurrencyInfo operation.
+	//
+	// Get extra currency info by id.
+	//
+	// GET /v2/extra-currency/{id}
+	GetExtraCurrencyInfo(ctx context.Context, params GetExtraCurrencyInfoParams) (*EcPreview, error)
 	// GetInscriptionOpTemplate implements getInscriptionOpTemplate operation.
 	//
 	// Return comment for making operation with inscription. please don't use it if you don't know what
