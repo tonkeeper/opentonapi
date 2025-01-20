@@ -1701,67 +1701,31 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 						}
 
 						elem = origElem
-					case 't': // Prefix: "tra-currenc"
+					case 't': // Prefix: "tra-currency/"
 						origElem := elem
-						if l := len("tra-currenc"); len(elem) >= l && elem[0:l] == "tra-currenc" {
+						if l := len("tra-currency/"); len(elem) >= l && elem[0:l] == "tra-currency/" {
 							elem = elem[l:]
 						} else {
 							break
 						}
 
+						// Param: "id"
+						// Leaf parameter
+						args[0] = elem
+						elem = ""
+
 						if len(elem) == 0 {
-							break
-						}
-						switch elem[0] {
-						case 'i': // Prefix: "ies"
-							origElem := elem
-							if l := len("ies"); len(elem) >= l && elem[0:l] == "ies" {
-								elem = elem[l:]
-							} else {
-								break
+							// Leaf node.
+							switch r.Method {
+							case "GET":
+								s.handleGetExtraCurrencyInfoRequest([1]string{
+									args[0],
+								}, elemIsEscaped, w, r)
+							default:
+								s.notAllowed(w, r, "GET")
 							}
 
-							if len(elem) == 0 {
-								// Leaf node.
-								switch r.Method {
-								case "GET":
-									s.handleGetExtraCurrenciesRequest([0]string{}, elemIsEscaped, w, r)
-								default:
-									s.notAllowed(w, r, "GET")
-								}
-
-								return
-							}
-
-							elem = origElem
-						case 'y': // Prefix: "y/"
-							origElem := elem
-							if l := len("y/"); len(elem) >= l && elem[0:l] == "y/" {
-								elem = elem[l:]
-							} else {
-								break
-							}
-
-							// Param: "id"
-							// Leaf parameter
-							args[0] = elem
-							elem = ""
-
-							if len(elem) == 0 {
-								// Leaf node.
-								switch r.Method {
-								case "GET":
-									s.handleGetExtraCurrencyInfoRequest([1]string{
-										args[0],
-									}, elemIsEscaped, w, r)
-								default:
-									s.notAllowed(w, r, "GET")
-								}
-
-								return
-							}
-
-							elem = origElem
+							return
 						}
 
 						elem = origElem
@@ -5284,73 +5248,33 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 						}
 
 						elem = origElem
-					case 't': // Prefix: "tra-currenc"
+					case 't': // Prefix: "tra-currency/"
 						origElem := elem
-						if l := len("tra-currenc"); len(elem) >= l && elem[0:l] == "tra-currenc" {
+						if l := len("tra-currency/"); len(elem) >= l && elem[0:l] == "tra-currency/" {
 							elem = elem[l:]
 						} else {
 							break
 						}
 
+						// Param: "id"
+						// Leaf parameter
+						args[0] = elem
+						elem = ""
+
 						if len(elem) == 0 {
-							break
-						}
-						switch elem[0] {
-						case 'i': // Prefix: "ies"
-							origElem := elem
-							if l := len("ies"); len(elem) >= l && elem[0:l] == "ies" {
-								elem = elem[l:]
-							} else {
-								break
+							switch method {
+							case "GET":
+								// Leaf: GetExtraCurrencyInfo
+								r.name = "GetExtraCurrencyInfo"
+								r.summary = ""
+								r.operationID = "getExtraCurrencyInfo"
+								r.pathPattern = "/v2/extra-currency/{id}"
+								r.args = args
+								r.count = 1
+								return r, true
+							default:
+								return
 							}
-
-							if len(elem) == 0 {
-								switch method {
-								case "GET":
-									// Leaf: GetExtraCurrencies
-									r.name = "GetExtraCurrencies"
-									r.summary = ""
-									r.operationID = "getExtraCurrencies"
-									r.pathPattern = "/v2/extra-currencies"
-									r.args = args
-									r.count = 0
-									return r, true
-								default:
-									return
-								}
-							}
-
-							elem = origElem
-						case 'y': // Prefix: "y/"
-							origElem := elem
-							if l := len("y/"); len(elem) >= l && elem[0:l] == "y/" {
-								elem = elem[l:]
-							} else {
-								break
-							}
-
-							// Param: "id"
-							// Leaf parameter
-							args[0] = elem
-							elem = ""
-
-							if len(elem) == 0 {
-								switch method {
-								case "GET":
-									// Leaf: GetExtraCurrencyInfo
-									r.name = "GetExtraCurrencyInfo"
-									r.summary = ""
-									r.operationID = "getExtraCurrencyInfo"
-									r.pathPattern = "/v2/extra-currency/{id}"
-									r.args = args
-									r.count = 1
-									return r, true
-								default:
-									return
-								}
-							}
-
-							elem = origElem
 						}
 
 						elem = origElem

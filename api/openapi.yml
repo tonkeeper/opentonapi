@@ -1742,24 +1742,6 @@ paths:
                 $ref: '#/components/schemas/EcPreview'
         'default':
           $ref: '#/components/responses/Error'
-  /v2/extra-currencies:
-    get:
-      description: Get a list of all extra currencies in the blockchain.
-      operationId: getExtraCurrencies
-      tags:
-        - ExtraCurrency
-      parameters:
-        - $ref: '#/components/parameters/limitQuery'
-        - $ref: '#/components/parameters/offsetQuery'
-      responses:
-        '200':
-          description: a list of extra currencies
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ExtraCurrencies'
-        'default':
-          $ref: '#/components/responses/Error'
 
   /v2/staking/nominator/{account_id}/pools:
     get:

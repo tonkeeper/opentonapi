@@ -2378,29 +2378,6 @@ func (s *Event) Validate() error {
 	return nil
 }
 
-func (s *ExtraCurrencies) Validate() error {
-	if s == nil {
-		return validate.ErrNilPointer
-	}
-
-	var failures []validate.FieldError
-	if err := func() error {
-		if s.ExtraCurrencies == nil {
-			return errors.New("nil is invalid value")
-		}
-		return nil
-	}(); err != nil {
-		failures = append(failures, validate.FieldError{
-			Name:  "extra_currencies",
-			Error: err,
-		})
-	}
-	if len(failures) > 0 {
-		return &validate.Error{Fields: failures}
-	}
-	return nil
-}
-
 func (s *FoundAccounts) Validate() error {
 	if s == nil {
 		return validate.ErrNilPointer

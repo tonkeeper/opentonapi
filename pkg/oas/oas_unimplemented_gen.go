@@ -525,15 +525,6 @@ func (UnimplementedHandler) GetEvent(ctx context.Context, params GetEventParams)
 	return r, ht.ErrNotImplemented
 }
 
-// GetExtraCurrencies implements getExtraCurrencies operation.
-//
-// Get a list of all extra currencies in the blockchain.
-//
-// GET /v2/extra-currencies
-func (UnimplementedHandler) GetExtraCurrencies(ctx context.Context, params GetExtraCurrenciesParams) (r *ExtraCurrencies, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
 // GetExtraCurrencyInfo implements getExtraCurrencyInfo operation.
 //
 // Get extra currency info by id.

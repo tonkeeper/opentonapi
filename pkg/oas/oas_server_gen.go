@@ -355,12 +355,6 @@ type Handler interface {
 	//
 	// GET /v2/events/{event_id}
 	GetEvent(ctx context.Context, params GetEventParams) (*Event, error)
-	// GetExtraCurrencies implements getExtraCurrencies operation.
-	//
-	// Get a list of all extra currencies in the blockchain.
-	//
-	// GET /v2/extra-currencies
-	GetExtraCurrencies(ctx context.Context, params GetExtraCurrenciesParams) (*ExtraCurrencies, error)
 	// GetExtraCurrencyInfo implements getExtraCurrencyInfo operation.
 	//
 	// Get extra currency info by id.

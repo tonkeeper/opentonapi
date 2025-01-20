@@ -8545,38 +8545,6 @@
     ]
    }
   },
-  "/v2/extra-currencies": {
-   "get": {
-    "description": "Get a list of all extra currencies in the blockchain.",
-    "operationId": "getExtraCurrencies",
-    "parameters": [
-     {
-      "$ref": "#/components/parameters/limitQuery"
-     },
-     {
-      "$ref": "#/components/parameters/offsetQuery"
-     }
-    ],
-    "responses": {
-     "200": {
-      "content": {
-       "application/json": {
-        "schema": {
-         "$ref": "#/components/schemas/ExtraCurrencies"
-        }
-       }
-      },
-      "description": "a list of extra currencies"
-     },
-     "default": {
-      "$ref": "#/components/responses/Error"
-     }
-    },
-    "tags": [
-     "ExtraCurrency"
-    ]
-   }
-  },
   "/v2/extra-currency/{id}": {
    "get": {
     "description": "Get extra currency info by id",
