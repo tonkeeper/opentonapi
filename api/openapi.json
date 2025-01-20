@@ -128,6 +128,17 @@
      "type": "string"
     }
    },
+   "ecIDParameter": {
+    "description": "extra currency id",
+    "in": "path",
+    "name": "id",
+    "required": true,
+    "schema": {
+     "example": 239,
+     "format": "int32",
+     "type": "integer"
+    }
+   },
    "eventIDParameter": {
     "description": "event ID or transaction hash in hex (without 0x) or base64url format",
     "in": "path",
@@ -3262,6 +3273,20 @@
      "is_scam",
      "lt",
      "in_progress"
+    ],
+    "type": "object"
+   },
+   "ExtraCurrencies": {
+    "properties": {
+     "extra_currencies": {
+      "items": {
+       "$ref": "#/components/schemas/EcPreview"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "extra_currencies"
     ],
     "type": "object"
    },
@@ -6749,6 +6774,86 @@
     ]
    }
   },
+  "/v2/accounts/{account_id}/extra-currency/{id}/history": {
+   "get": {
+    "description": "Get the transfer history of extra currencies for an account.",
+    "operationId": "getAccountExtraCurrencyHistoryByID",
+    "parameters": [
+     {
+      "$ref": "#/components/parameters/accountIDParameter"
+     },
+     {
+      "$ref": "#/components/parameters/ecIDParameter"
+     },
+     {
+      "$ref": "#/components/parameters/i18n"
+     },
+     {
+      "description": "omit this parameter to get last events",
+      "in": "query",
+      "name": "before_lt",
+      "required": false,
+      "schema": {
+       "example": 25758317000002,
+       "format": "int64",
+       "type": "integer",
+       "x-js-format": "bigint"
+      }
+     },
+     {
+      "in": "query",
+      "name": "limit",
+      "required": true,
+      "schema": {
+       "example": 100,
+       "maximum": 1000,
+       "minimum": 1,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "start_date",
+      "required": false,
+      "schema": {
+       "example": 1668436763,
+       "format": "int64",
+       "maximum": 2114380800,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "end_date",
+      "required": false,
+      "schema": {
+       "example": 1668436763,
+       "format": "int64",
+       "maximum": 2114380800,
+       "type": "integer"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/AccountEvents"
+        }
+       }
+      },
+      "description": "account extra currency history"
+     },
+     "default": {
+      "$ref": "#/components/responses/Error"
+     }
+    },
+    "tags": [
+     "Accounts"
+    ]
+   }
+  },
   "/v2/accounts/{account_id}/jettons": {
    "get": {
     "description": "Get all Jettons balances by owner address",
@@ -8437,6 +8542,35 @@
     },
     "tags": [
      "Inscriptions"
+    ]
+   }
+  },
+  "/v2/extra-currency/{id}": {
+   "get": {
+    "description": "Get extra currency info by id",
+    "operationId": "getExtraCurrencyInfo",
+    "parameters": [
+     {
+      "$ref": "#/components/parameters/ecIDParameter"
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/EcPreview"
+        }
+       }
+      },
+      "description": "extra currency info"
+     },
+     "default": {
+      "$ref": "#/components/responses/Error"
+     }
+    },
+    "tags": [
+     "ExtraCurrency"
     ]
    }
   },
@@ -10883,6 +11017,13 @@
     "url": "https://docs.tonconsole.com/tonapi/rest-api/utilities"
    },
    "name": "Utilities"
+  },
+  {
+   "externalDocs": {
+    "description": "Additional documentation",
+    "url": "https://docs.tonconsole.com/tonapi/rest-api/extra-currency"
+   },
+   "name": "ExtraCurrency"
   }
  ]
 }

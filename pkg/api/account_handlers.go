@@ -604,3 +604,7 @@ func (h *Handler) AddressParse(ctx context.Context, params oas.AddressParseParam
 	}
 	return &res, nil //todo: add testnet_only
 }
+
+func (h *Handler) GetAccountExtraCurrencyHistoryByID(ctx context.Context, params oas.GetAccountExtraCurrencyHistoryByIDParams) (*oas.AccountEvents, error) {
+	return &oas.AccountEvents{}, nil
+}
