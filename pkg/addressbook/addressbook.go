@@ -17,6 +17,7 @@ import (
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
 	"github.com/tonkeeper/tongo/tlb"
+	"github.com/tonkeeper/tongo/ton"
 	"go.uber.org/zap"
 	"golang.org/x/exp/maps"
 	"golang.org/x/exp/slices"
@@ -282,42 +283,62 @@ func (m *manualAddresser) SearchAttachedAccounts(prefix string) []AttachedAccoun
 }
 
 // refreshAddresses updates the list of known addresses
-func (m *manualAddresser) refreshAddresses(addressPath string) error {
+func (m *manualAddresser) refreshAddresses(addressPath, jettonPath string) error {
 	addresses, err := downloadJson[KnownAddress](addressPath)
 	if err != nil {
 		return err
 	}
-	knownAccounts := make(map[tongo.AccountID]KnownAddress, len(addresses))
-	attachedAccounts := make([]AttachedAccount, 0, len(addresses)*3)
-	for _, item := range addresses {
-		account, err := tongo.ParseAddress(item.Address)
-		if err != nil {
-			continue
-		}
-		item.Address = account.ID.ToRaw()
-		knownAccounts[account.ID] = item
+	jettons, err := downloadJson[KnownJetton](jettonPath)
+	if err != nil {
+		return err
+	}
+	knownAccounts := make(map[tongo.AccountID]KnownAddress)
+	var attachedAccounts []AttachedAccount
+	process := func(accountID tongo.AccountID, name, image string, accountType AttachedAccountType) error {
 		// Generate name variants for the account
-		slugs := GenerateSlugVariants(item.Name)
+		slugs := GenerateSlugVariants(name)
 		for _, slug := range slugs {
 			weight := KnownAccountWeight
 			// Convert known account to attached account
-			attachedAccount, err := ConvertAttachedAccount(item.Name, slug, item.Image, account.ID, weight, core.TrustWhitelist, ManualAccountType)
+			attachedAccount, err := ConvertAttachedAccount(name, slug, image, accountID, weight, core.TrustWhitelist, accountType)
 			if err != nil {
 				continue
 			}
 			attachedAccounts = append(attachedAccounts, attachedAccount)
 		}
+		return nil
 	}
+	for _, item := range addresses {
+		accountID, err := ton.ParseAccountID(item.Address)
+		if err != nil {
+			return err
+		}
+		item.Address = accountID.ToRaw()
+		knownAccounts[accountID] = item
+		err = process(accountID, item.Name, item.Image, ManualAccountType)
+		if err != nil {
+			continue
+		}
+	}
+	for _, jetton := range jettons {
+		accountID, err := ton.ParseAccountID(jetton.Address)
+		if err != nil {
+			return err
+		}
+		err = process(accountID, jetton.Name, jetton.Image, JettonNameAccountType)
+		if err != nil {
+			continue
+		}
+	}
+	// Sort the attached accounts by their normalized names
+	sort.Slice(attachedAccounts, func(i, j int) bool {
+		return attachedAccounts[i].Normalized < attachedAccounts[j].Normalized
+	})
 
 	m.mu.Lock()
-	defer m.mu.Unlock()
 	m.addresses = knownAccounts
-	sorted := m.sorted
-	sorted = append(sorted, attachedAccounts...)
-	sort.Slice(sorted, func(i, j int) bool {
-		return sorted[i].Normalized < sorted[j].Normalized
-	})
-	m.sorted = sorted
+	m.sorted = attachedAccounts
+	m.mu.Unlock()
 
 	return nil
 }
@@ -346,8 +367,8 @@ func NewAddressBook(logger *zap.Logger, addressPath, jettonPath, collectionPath 
 	}
 	// Start background refreshers
 	go Refresher("gg whitelist", time.Hour, 5*time.Minute, logger, book.getGGWhitelist)
-	go Refresher("addresses", time.Minute*15, 5*time.Minute, logger, func() error { return manual.refreshAddresses(addressPath) })
-	go Refresher("jettons", time.Minute*15, 5*time.Minute, logger, func() error { return book.refreshJettons(manual, jettonPath) })
+	go Refresher("addresses", time.Minute*15, 5*time.Minute, logger, func() error { return manual.refreshAddresses(addressPath, jettonPath) })
+	go Refresher("jettons", time.Minute*15, 5*time.Minute, logger, func() error { return book.refreshJettons(jettonPath) })
 	go Refresher("collections", time.Minute*15, 5*time.Minute, logger, func() error { return book.refreshCollections(collectionPath) })
 	book.refreshTfPools(logger) // Refresh tfPools once on initialization as it doesn't need periodic updates
 
@@ -369,46 +390,25 @@ func Refresher(name string, interval, errorInterval time.Duration, logger *zap.L
 }
 
 // refreshJettons fetches and updates the jetton data from the provided URL
-func (b *Book) refreshJettons(addresser *manualAddresser, jettonPath string) error {
+func (b *Book) refreshJettons(jettonPath string) error {
 	// Download jettons data
 	jettons, err := downloadJson[KnownJetton](jettonPath)
 	if err != nil {
 		return err
 	}
 	knownJettons := make(map[tongo.AccountID]KnownJetton, len(jettons))
-	var attachedAccounts []AttachedAccount
 	for _, item := range jettons {
-		account, err := tongo.ParseAddress(item.Address)
+		accountID, err := ton.ParseAccountID(item.Address)
 		if err != nil {
 			continue
 		}
-		item.Address = account.ID.ToRaw()
-		knownJettons[account.ID] = item
-		// Generate name variants for the jetton
-		slugs := GenerateSlugVariants(item.Name)
-		for _, slug := range slugs {
-			weight := KnownAccountWeight
-			// Convert known account to attached account
-			attachedAccount, err := ConvertAttachedAccount(item.Name, slug, item.Image, account.ID, weight, core.TrustWhitelist, JettonNameAccountType)
-			if err != nil {
-				continue
-			}
-			attachedAccounts = append(attachedAccounts, attachedAccount)
-		}
+		item.Address = accountID.ToRaw()
+		knownJettons[accountID] = item
 	}
 
 	b.mu.Lock()
 	b.jettons = knownJettons
 	b.mu.Unlock()
-
-	addresser.mu.Lock()
-	defer addresser.mu.Unlock()
-	sorted := addresser.sorted
-	sorted = append(sorted, attachedAccounts...)
-	sort.Slice(sorted, func(i, j int) bool {
-		return sorted[i].Normalized < sorted[j].Normalized
-	})
-	addresser.sorted = sorted
 
 	return nil
 }
