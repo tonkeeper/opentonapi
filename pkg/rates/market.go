@@ -353,7 +353,7 @@ func (m *Mock) getPools() map[ton.AccountID]float64 {
 		},
 	}
 	pools := make(map[ton.AccountID]float64)
-	for attempt := 0; attempt < 2; attempt++ {
+	for attempt := 0; attempt < 3; attempt++ {
 		for _, market := range markets {
 			respBody, err := sendRequest(market.URL, "")
 			if err != nil {
@@ -652,30 +652,38 @@ func convertedDeDustPoolResponse(pools map[ton.AccountID]float64, respBody io.Re
 			Assets:      []Asset{firstAsset, secondAsset},
 		}, nil
 	}
+	normalizeReserve := func(firstReserve, secondReserve float64, firstDecimals, secondDecimals int) (float64, float64) {
+		decimalDiff := firstDecimals - secondDecimals
+		if decimalDiff > 0 {
+			secondReserve *= math.Pow10(decimalDiff)
+		} else if decimalDiff < 0 {
+			firstReserve *= math.Pow10(-decimalDiff)
+		}
+		return firstReserve, secondReserve
+	}
 	actualAssets := make(map[ton.AccountID]DeDustAssets)
 	// Update the assets with the largest reserves
 	updateActualAssets := func(mainAsset Asset, deDustAssets DeDustAssets) {
 		firstAsset, secondAsset := deDustAssets.Assets[0], deDustAssets.Assets[1]
-		assets, ok := actualAssets[mainAsset.Account]
+		existingAssets, ok := actualAssets[mainAsset.Account]
 		if !ok {
 			actualAssets[mainAsset.Account] = DeDustAssets{Assets: []Asset{firstAsset, secondAsset}, IsStable: deDustAssets.IsStable}
 			return
 		}
-		for idx, asset := range assets.Assets {
-			assetReserveNormalised := asset.Reserve
-			mainAssetReserveNormalised := mainAsset.Reserve
-			// Adjust the reserves of assets considering their decimal places
-			if asset.Decimals != mainAsset.Decimals {
-				assetReserveNormalised = asset.Reserve / math.Pow10(asset.Decimals)
-				mainAssetReserveNormalised = mainAsset.Reserve / math.Pow10(mainAsset.Decimals)
-			}
-			if asset.Account == mainAsset.Account && assetReserveNormalised < mainAssetReserveNormalised {
-				if idx == 0 {
-					actualAssets[mainAsset.Account] = DeDustAssets{Assets: []Asset{firstAsset, secondAsset}, IsStable: deDustAssets.IsStable}
-				} else {
-					actualAssets[mainAsset.Account] = DeDustAssets{Assets: []Asset{secondAsset, firstAsset}, IsStable: deDustAssets.IsStable}
-				}
-			}
+		// Adjust the reserves of assets considering their decimal places
+		firstAssetReserve, secondAssetReserve := normalizeReserve(
+			firstAsset.Reserve, secondAsset.Reserve,
+			firstAsset.Decimals, secondAsset.Decimals,
+		)
+		existingFirstReserve, existingSecondReserve := normalizeReserve(
+			existingAssets.Assets[0].Reserve, existingAssets.Assets[1].Reserve,
+			existingAssets.Assets[0].Decimals, existingAssets.Assets[1].Decimals,
+		)
+		// Calculate the total liquidity of the pool
+		currentLiquidity := firstAssetReserve + secondAssetReserve
+		existingLiquidity := existingFirstReserve + existingSecondReserve
+		if currentLiquidity > existingLiquidity {
+			actualAssets[mainAsset.Account] = DeDustAssets{Assets: []Asset{firstAsset, secondAsset}, IsStable: deDustAssets.IsStable}
 		}
 	}
 	actualLpAssets := make(map[ton.AccountID]LpAsset)
