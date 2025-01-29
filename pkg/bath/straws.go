@@ -84,6 +84,7 @@ var JettonTransferPTONStraw = Straw[BubbleJettonTransfer]{
 		recipient, err := ton.AccountIDFromTlb(body.Destination)
 		if err == nil {
 			newAction.recipient = &Account{Address: *recipient}
+			bubble.Accounts = append(bubble.Accounts, *recipient)
 		}
 		return nil
 	},
@@ -114,6 +115,7 @@ var JettonTransferClassicStraw = Straw[BubbleJettonTransfer]{
 		recipient, err := ton.AccountIDFromTlb(body.Destination)
 		if err == nil && recipient != nil {
 			newAction.recipient = &Account{Address: *recipient}
+			bubble.Accounts = append(bubble.Accounts, *recipient)
 		}
 		return nil
 	},
