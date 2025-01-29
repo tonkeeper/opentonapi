@@ -19,7 +19,7 @@ func NewSpamFilter() *Filter {
 	}
 }
 
-func (f Filter) CheckActions(actions []oas.Action, viewer *ton.AccountID, initiator ton.AccountID) bool {
+func (f Filter) CheckEvent(eventId string, actions []oas.Action, viewer *ton.AccountID, initiator ton.AccountID) bool {
 	var comment string
 	for _, action := range actions {
 		switch {
