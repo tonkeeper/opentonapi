@@ -19,6 +19,10 @@ func NewSpamFilter() *Filter {
 	}
 }
 
+func (f *Filter) GetNftsScamData(ctx context.Context, addresses []ton.AccountID) (map[ton.AccountID]core.TrustType, error) {
+	return nil, nil
+}
+
 func (f *Filter) GetEventsScamData(ctx context.Context, ids []string) (map[string]bool, error) {
 	return nil, nil
 }
@@ -54,7 +58,7 @@ func (f Filter) JettonTrust(address tongo.AccountID, symbol, name, image string)
 	return core.TrustNone
 }
 
-func (f Filter) NftTrust(ctx context.Context, address tongo.AccountID, collection *ton.AccountID, description, image string) core.TrustType {
+func (f Filter) NftTrust(address tongo.AccountID, collection *ton.AccountID, description, image string) core.TrustType {
 	return core.TrustNone
 }
 

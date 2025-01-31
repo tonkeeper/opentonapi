@@ -17,7 +17,7 @@ import (
 	"github.com/tonkeeper/opentonapi/pkg/references"
 )
 
-func (h *Handler) convertNFT(ctx context.Context, item core.NftItem, book addressBook, metaCache metadataCache) oas.NftItem {
+func (h *Handler) convertNFT(ctx context.Context, item core.NftItem, book addressBook, metaCache metadataCache, trustType core.TrustType) oas.NftItem {
 	nftItem := oas.NftItem{
 		Address:  item.Address.ToRaw(),
 		Index:    item.Index.BigInt().Int64(),
@@ -77,7 +77,11 @@ func (h *Handler) convertNFT(ctx context.Context, item core.NftItem, book addres
 	if len(nftItem.ApprovedBy) > 0 && nftItem.Verified {
 		nftItem.Trust = oas.TrustType(core.TrustWhitelist)
 	} else {
-		nftItem.Trust = oas.TrustType(h.spamFilter.NftTrust(ctx, item.Address, item.CollectionAddress, description, image))
+		nftTrust := h.spamFilter.NftTrust(item.Address, item.CollectionAddress, description, image)
+		if nftTrust == core.TrustNone && trustType != "" {
+			nftTrust = trustType
+		}
+		nftItem.Trust = oas.TrustType(nftTrust)
 	}
 	if image == "" {
 		image = references.Placeholder

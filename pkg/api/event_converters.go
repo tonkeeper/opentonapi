@@ -4,9 +4,12 @@ import (
 	"context"
 	"encoding/hex"
 	"fmt"
+	"github.com/labstack/gommon/log"
+	"go.uber.org/zap"
 	"math/big"
 	"sort"
 	"strings"
+	"sync"
 
 	"github.com/tonkeeper/tongo/ton"
 
@@ -84,12 +87,24 @@ func (h *Handler) convertRisk(ctx context.Context, risk wallet.Risk, walletAddre
 		oasRisk.Jettons = append(oasRisk.Jettons, jettonQuantity)
 	}
 	if len(risk.Nfts) > 0 {
+		var wg sync.WaitGroup
+		wg.Add(1)
+		var nftsScamData map[ton.AccountID]core.TrustType
+		var err error
+		go func() {
+			defer wg.Done()
+			nftsScamData, err = h.spamFilter.GetNftsScamData(ctx, risk.Nfts)
+			if err != nil {
+				log.Warn("error getting nft scam data", zap.Error(err))
+			}
+		}()
 		items, err := h.storage.GetNFTs(ctx, risk.Nfts)
+		wg.Wait()
 		if err != nil {
 			return oas.Risk{}, err
 		}
 		for _, item := range items {
-			nft := h.convertNFT(ctx, item, h.addressBook, h.metaCache)
+			nft := h.convertNFT(ctx, item, h.addressBook, h.metaCache, nftsScamData[item.Address])
 			oasRisk.Nfts = append(oasRisk.Nfts, nft)
 		}
 	}
@@ -562,7 +577,7 @@ func (h *Handler) convertAction(ctx context.Context, viewer *tongo.AccountID, a 
 		var name string
 		if len(items) == 1 {
 			// opentonapi doesn't implement GetNFTs() now
-			nft = h.convertNFT(ctx, items[0], h.addressBook, h.metaCache)
+			nft = h.convertNFT(ctx, items[0], h.addressBook, h.metaCache, "")
 			if len(nft.Previews) > 0 {
 				nftImage = nft.Previews[0].URL
 			}
@@ -700,7 +715,7 @@ func (h *Handler) convertAction(ctx context.Context, viewer *tongo.AccountID, a 
 		if a.AuctionBid.Nft == nil {
 			return oas.Action{}, fmt.Errorf("nft is nil")
 		}
-		nft.SetTo(h.convertNFT(ctx, *a.AuctionBid.Nft, h.addressBook, h.metaCache))
+		nft.SetTo(h.convertNFT(ctx, *a.AuctionBid.Nft, h.addressBook, h.metaCache, ""))
 		action.AuctionBid.SetTo(oas.AuctionBidAction{
 			Amount: oas.Price{
 				Value:     fmt.Sprintf("%v", a.AuctionBid.Amount),
