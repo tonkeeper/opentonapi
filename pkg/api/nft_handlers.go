@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/labstack/gommon/log"
 	"github.com/tonkeeper/tongo/ton"
 	"net/http"
 	"sync"
@@ -42,7 +41,7 @@ func (h *Handler) GetNftItemsByAddresses(ctx context.Context, request oas.OptGet
 		var err error
 		nftsScamData, err = h.spamFilter.GetNftsScamData(ctx, accounts)
 		if err != nil {
-			log.Warn("error getting nft scam data", zap.Error(err))
+			h.logger.Warn("error getting nft scam data", zap.Error(err))
 		}
 	}()
 	items, err := h.storage.GetNFTs(ctx, accounts)
@@ -116,7 +115,7 @@ func (h *Handler) GetAccountNftItems(ctx context.Context, params oas.GetAccountN
 		var err error
 		nftsScamData, err = h.spamFilter.GetNftsScamData(ctx, ids)
 		if err != nil {
-			log.Warn("error getting nft scam data", zap.Error(err))
+			h.logger.Warn("error getting nft scam data", zap.Error(err))
 		}
 	}()
 	items, err := h.storage.GetNFTs(ctx, ids)
@@ -183,7 +182,7 @@ func (h *Handler) GetItemsFromCollection(ctx context.Context, params oas.GetItem
 		var err error
 		nftsScamData, err = h.spamFilter.GetNftsScamData(ctx, ids)
 		if err != nil {
-			log.Warn("error getting nft scam data", zap.Error(err))
+			h.logger.Warn("error getting nft scam data", zap.Error(err))
 		}
 	}()
 	items, err := h.storage.GetNFTs(ctx, ids)

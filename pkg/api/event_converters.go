@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/hex"
 	"fmt"
-	"github.com/labstack/gommon/log"
 	"go.uber.org/zap"
 	"math/big"
 	"sort"
@@ -95,7 +94,7 @@ func (h *Handler) convertRisk(ctx context.Context, risk wallet.Risk, walletAddre
 			defer wg.Done()
 			nftsScamData, err = h.spamFilter.GetNftsScamData(ctx, risk.Nfts)
 			if err != nil {
-				log.Warn("error getting nft scam data", zap.Error(err))
+				h.logger.Warn("error getting nft scam data", zap.Error(err))
 			}
 		}()
 		items, err := h.storage.GetNFTs(ctx, risk.Nfts)
