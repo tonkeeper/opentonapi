@@ -238,7 +238,6 @@ func (h *Handler) GetAccountEvents(ctx context.Context, params oas.GetAccountEve
 	}()
 
 	var lastLT uint64
-
 	for _, traceID := range traceIDs {
 		lastLT = traceID.Lt
 		trace, err := h.storage.GetTrace(ctx, traceID.Hash)
