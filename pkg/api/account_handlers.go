@@ -8,7 +8,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/labstack/gommon/log"
 	"go.uber.org/zap"
 	"net/http"
 	"sort"
@@ -340,7 +339,7 @@ func (h *Handler) GetAccountDnsExpiring(ctx context.Context, params oas.GetAccou
 		defer wg.Done()
 		nftsScamData, err = h.spamFilter.GetNftsScamData(ctx, accounts)
 		if err != nil {
-			log.Warn("error getting nft scam data", zap.Error(err))
+			h.logger.Warn("error getting nft scam data", zap.Error(err))
 		}
 	}()
 	nfts, err := h.storage.GetNFTs(ctx, accounts)
