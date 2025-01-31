@@ -184,7 +184,8 @@ type scoreSource interface {
 }
 
 type SpamFilter interface {
-	IsScamEvent(eventId string, actions []oas.Action, viewer *ton.AccountID, initiator ton.AccountID) bool
+	IsScamEvent(actions []oas.Action, viewer *ton.AccountID, initiator ton.AccountID, markedAsScam bool) bool
+	GetEventsScamData(ctx context.Context, ids []string) (map[string]bool, error)
 	JettonTrust(address tongo.AccountID, symbol, name, image string) core.TrustType
 	AccountTrust(address tongo.AccountID) core.TrustType
 	NftTrust(ctx context.Context, address tongo.AccountID, collection *ton.AccountID, description, image string) core.TrustType

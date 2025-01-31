@@ -7,26 +7,28 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"github.com/labstack/gommon/log"
+	"go.uber.org/zap"
+	"golang.org/x/exp/slices"
 	"net/http"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
-	"github.com/tonkeeper/opentonapi/pkg/blockchain"
-	"github.com/tonkeeper/tongo"
-	"github.com/tonkeeper/tongo/tlb"
-	"github.com/tonkeeper/tongo/ton"
-	"github.com/tonkeeper/tongo/tontest"
-	"github.com/tonkeeper/tongo/txemulator"
-	"golang.org/x/exp/slices"
-
 	"github.com/tonkeeper/opentonapi/pkg/bath"
+	"github.com/tonkeeper/opentonapi/pkg/blockchain"
 	"github.com/tonkeeper/opentonapi/pkg/cache"
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/opentonapi/pkg/oas"
 	"github.com/tonkeeper/opentonapi/pkg/sentry"
 	"github.com/tonkeeper/opentonapi/pkg/wallet"
+	"github.com/tonkeeper/tongo"
+	"github.com/tonkeeper/tongo/tlb"
+	"github.com/tonkeeper/tongo/ton"
+	"github.com/tonkeeper/tongo/tontest"
+	"github.com/tonkeeper/tongo/txemulator"
 )
 
 var (
@@ -190,6 +192,8 @@ func (h *Handler) GetEvent(ctx context.Context, params oas.GetEventParams) (*oas
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
+	isBannedTraces, err := h.spamFilter.GetEventsScamData(ctx, []string{traceID.Hex()})
+	event.IsScam = event.IsScam || isBannedTraces[traceID.Hex()]
 	if emulated {
 		event.InProgress = true
 	}
@@ -217,7 +221,24 @@ func (h *Handler) GetAccountEvents(ctx context.Context, params oas.GetAccountEve
 
 	events := make([]oas.AccountEvent, 0, len(traceIDs))
 
+	var wg sync.WaitGroup
+	wg.Add(1)
+
+	var isBannedTraces map[string]bool
+	go func() {
+		defer wg.Done()
+		var eventIDs []string
+		for _, traceID := range traceIDs {
+			eventIDs = append(eventIDs, traceID.Hash.Hex())
+		}
+		isBannedTraces, err = h.spamFilter.GetEventsScamData(ctx, eventIDs)
+		if err != nil {
+			log.Warn("error getting events spam data", zap.Error(err))
+		}
+	}()
+
 	var lastLT uint64
+
 	for _, traceID := range traceIDs {
 		lastLT = traceID.Lt
 		trace, err := h.storage.GetTrace(ctx, traceID.Hash)
@@ -276,6 +297,9 @@ func (h *Handler) GetAccountEvents(ctx context.Context, params oas.GetAccountEve
 			lastLT = uint64(events[len(events)-1].Lt)
 		}
 	}
+
+	wg.Wait()
+
 	if len(events) < params.Limit {
 		lastLT = 0 // dirty hack
 
@@ -293,6 +317,9 @@ func (h *Handler) GetAccountEvents(ctx context.Context, params oas.GetAccountEve
 				events[i].Actions[j].Status = oas.ActionStatusOk
 			}
 		}
+	}
+	for i := range events {
+		events[i].IsScam = events[i].IsScam || isBannedTraces[events[i].EventID]
 	}
 	return &oas.AccountEvents{Events: events, NextFrom: int64(lastLT)}, nil
 }
@@ -325,6 +352,8 @@ func (h *Handler) GetAccountEvent(ctx context.Context, params oas.GetAccountEven
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
+	isBannedTraces, err := h.spamFilter.GetEventsScamData(ctx, []string{traceID.Hex()})
+	event.IsScam = event.IsScam || isBannedTraces[traceID.Hex()]
 	if emulated {
 		event.InProgress = true
 	}

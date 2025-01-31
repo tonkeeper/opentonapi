@@ -170,7 +170,12 @@ func (h *Handler) GetNftHistoryByID(ctx context.Context, params oas.GetNftHistor
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
-	events, lastLT, err := h.convertNftHistory(ctx, account.ID, traceIDs, params.AcceptLanguage)
+	var eventIDs []string
+	for _, traceID := range traceIDs {
+		eventIDs = append(eventIDs, traceID.Hex())
+	}
+	isBannedTraces, err := h.spamFilter.GetEventsScamData(ctx, eventIDs)
+	events, lastLT, err := h.convertNftHistory(ctx, account.ID, traceIDs, isBannedTraces, params.AcceptLanguage)
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}

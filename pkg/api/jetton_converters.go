@@ -52,7 +52,7 @@ func jettonMetadata(account ton.AccountID, meta NormalizedMetadata) oas.JettonMe
 	return metadata
 }
 
-func (h *Handler) convertJettonHistory(ctx context.Context, account ton.AccountID, master *ton.AccountID, traceIDs []ton.Bits256, acceptLanguage oas.OptString) ([]oas.AccountEvent, int64, error) {
+func (h *Handler) convertJettonHistory(ctx context.Context, account ton.AccountID, master *ton.AccountID, traceIDs []ton.Bits256, isBannedTraces map[string]bool, acceptLanguage oas.OptString) ([]oas.AccountEvent, int64, error) {
 	var lastLT uint64
 	events := make([]oas.AccountEvent, 0, len(traceIDs))
 	for _, traceID := range traceIDs {
@@ -97,7 +97,7 @@ func (h *Handler) convertJettonHistory(ctx context.Context, account ton.AccountI
 			}
 			event.Actions = append(event.Actions, convertedAction)
 		}
-		event.IsScam = h.spamFilter.IsScamEvent(event.EventID, event.Actions, &account, trace.Account)
+		event.IsScam = h.spamFilter.IsScamEvent(event.Actions, &account, trace.Account, isBannedTraces[event.EventID])
 		if len(event.Actions) == 0 {
 			continue
 		}

@@ -19,7 +19,14 @@ func NewSpamFilter() *Filter {
 	}
 }
 
-func (f Filter) IsScamEvent(eventId string, actions []oas.Action, viewer *ton.AccountID, initiator ton.AccountID) bool {
+func (f *Filter) GetEventsScamData(ctx context.Context, ids []string) (map[string]bool, error) {
+	return nil, nil
+}
+
+func (f Filter) IsScamEvent(actions []oas.Action, viewer *ton.AccountID, initiator ton.AccountID, markedAsScam bool) bool {
+	if markedAsScam {
+		return true
+	}
 	var comment string
 	for _, action := range actions {
 		switch {
