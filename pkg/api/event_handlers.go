@@ -7,7 +7,6 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
-	"github.com/labstack/gommon/log"
 	"go.uber.org/zap"
 	"golang.org/x/exp/slices"
 	"net/http"
@@ -233,7 +232,7 @@ func (h *Handler) GetAccountEvents(ctx context.Context, params oas.GetAccountEve
 		}
 		isBannedTraces, err = h.spamFilter.GetEventsScamData(ctx, eventIDs)
 		if err != nil {
-			log.Warn("error getting events spam data", zap.Error(err))
+			h.logger.Warn("error getting events spam data", zap.Error(err))
 		}
 	}()
 
