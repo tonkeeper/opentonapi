@@ -82,7 +82,7 @@ var JettonTransferPTONStraw = Straw[BubbleJettonTransfer]{
 		newAction.amount = body.Amount
 		newAction.isWrappedTon = true
 		recipient, err := ton.AccountIDFromTlb(body.Destination)
-		if err == nil {
+		if err == nil && recipient != nil {
 			newAction.recipient = &Account{Address: *recipient}
 			bubble.Accounts = append(bubble.Accounts, *recipient)
 		}
