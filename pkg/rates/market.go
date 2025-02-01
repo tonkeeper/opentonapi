@@ -679,10 +679,11 @@ func convertedDeDustPoolResponse(pools map[ton.AccountID]float64, respBody io.Re
 			existingAssets.Assets[0].Reserve, existingAssets.Assets[1].Reserve,
 			existingAssets.Assets[0].Decimals, existingAssets.Assets[1].Decimals,
 		)
-		// Calculate the total liquidity of the pool
-		currentLiquidity := firstAssetReserve + secondAssetReserve
-		existingLiquidity := existingFirstReserve + existingSecondReserve
-		if currentLiquidity > existingLiquidity {
+		// Check if the current reserve is greater than the existing reserve
+		if firstAsset.Account == mainAsset.Account && firstAssetReserve > existingFirstReserve {
+			actualAssets[mainAsset.Account] = DeDustAssets{Assets: []Asset{firstAsset, secondAsset}, IsStable: deDustAssets.IsStable}
+		}
+		if secondAsset.Account == mainAsset.Account && secondAssetReserve > existingSecondReserve {
 			actualAssets[mainAsset.Account] = DeDustAssets{Assets: []Asset{firstAsset, secondAsset}, IsStable: deDustAssets.IsStable}
 		}
 	}
