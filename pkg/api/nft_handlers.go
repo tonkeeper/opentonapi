@@ -72,6 +72,9 @@ func (h *Handler) GetNftItemByAddress(ctx context.Context, params oas.GetNftItem
 		return nil, toError(http.StatusNotFound, fmt.Errorf("item not found"))
 	}
 	nftScamData, err := h.spamFilter.GetNftsScamData(ctx, []ton.AccountID{account.ID})
+	if err != nil {
+		h.logger.Warn("error getting nft scam data", zap.Error(err))
+	}
 	result := h.convertNFT(ctx, items[0], h.addressBook, h.metaCache, nftScamData[account.ID])
 	return &result, nil
 }

@@ -192,6 +192,9 @@ func (h *Handler) GetEvent(ctx context.Context, params oas.GetEventParams) (*oas
 		return nil, toError(http.StatusInternalServerError, err)
 	}
 	isBannedTraces, err := h.spamFilter.GetEventsScamData(ctx, []string{traceID.Hex()})
+	if err != nil {
+		h.logger.Warn("error getting events spam data", zap.Error(err))
+	}
 	event.IsScam = event.IsScam || isBannedTraces[traceID.Hex()]
 	if emulated {
 		event.InProgress = true
@@ -351,6 +354,9 @@ func (h *Handler) GetAccountEvent(ctx context.Context, params oas.GetAccountEven
 		return nil, toError(http.StatusInternalServerError, err)
 	}
 	isBannedTraces, err := h.spamFilter.GetEventsScamData(ctx, []string{traceID.Hex()})
+	if err != nil {
+		h.logger.Warn("error getting events spam data", zap.Error(err))
+	}
 	event.IsScam = event.IsScam || isBannedTraces[traceID.Hex()]
 	if emulated {
 		event.InProgress = true

@@ -473,6 +473,9 @@ func (h *Handler) GetAccountNftHistory(ctx context.Context, params oas.GetAccoun
 		eventIDs = append(eventIDs, traceID.Hex())
 	}
 	isBannedTraces, err := h.spamFilter.GetEventsScamData(ctx, eventIDs)
+	if err != nil {
+		h.logger.Warn("error getting events spam data", zap.Error(err))
+	}
 	events, lastLT, err := h.convertNftHistory(ctx, account.ID, traceIDs, isBannedTraces, params.AcceptLanguage)
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
