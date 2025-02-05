@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"go.uber.org/zap"
 	"net/http"
 	"slices"
 	"strings"
@@ -95,7 +96,15 @@ func (h *Handler) GetAccountJettonsHistory(ctx context.Context, params oas.GetAc
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
-	events, lastLT, err := h.convertJettonHistory(ctx, account.ID, nil, traceIDs, params.AcceptLanguage)
+	var eventIDs []string
+	for _, traceID := range traceIDs {
+		eventIDs = append(eventIDs, traceID.Hex())
+	}
+	isBannedTraces, err := h.spamFilter.GetEventsScamData(ctx, eventIDs)
+	if err != nil {
+		h.logger.Warn("error getting events spam data", zap.Error(err))
+	}
+	events, lastLT, err := h.convertJettonHistory(ctx, account.ID, nil, traceIDs, isBannedTraces, params.AcceptLanguage)
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
@@ -118,7 +127,15 @@ func (h *Handler) GetAccountJettonHistoryByID(ctx context.Context, params oas.Ge
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
-	events, lastLT, err := h.convertJettonHistory(ctx, account.ID, &jettonMasterAccount.ID, traceIDs, params.AcceptLanguage)
+	var eventIDs []string
+	for _, traceID := range traceIDs {
+		eventIDs = append(eventIDs, traceID.Hex())
+	}
+	isBannedTraces, err := h.spamFilter.GetEventsScamData(ctx, eventIDs)
+	if err != nil {
+		h.logger.Warn("error getting events spam data", zap.Error(err))
+	}
+	events, lastLT, err := h.convertJettonHistory(ctx, account.ID, &jettonMasterAccount.ID, traceIDs, isBannedTraces, params.AcceptLanguage)
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
@@ -225,6 +242,11 @@ func (h *Handler) GetJettonsEvents(ctx context.Context, params oas.GetJettonsEve
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
+	isBannedTraces, err := h.spamFilter.GetEventsScamData(ctx, []string{traceID.Hex()})
+	if err != nil {
+		h.logger.Warn("error getting events spam data", zap.Error(err))
+	}
+	response.IsScam = response.IsScam || isBannedTraces[traceID.Hex()]
 	return &response, nil
 }
 

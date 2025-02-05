@@ -4,7 +4,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/tonkeeper/tongo/ton"
 	"net/http"
+	"sync"
 
 	"go.uber.org/zap"
 
@@ -31,7 +33,19 @@ func (h *Handler) GetNftItemsByAddresses(ctx context.Context, request oas.OptGet
 		}
 		accounts[i] = account.ID
 	}
+	var wg sync.WaitGroup
+	wg.Add(1)
+	var nftsScamData map[ton.AccountID]core.TrustType
+	go func() {
+		defer wg.Done()
+		var err error
+		nftsScamData, err = h.spamFilter.GetNftsScamData(ctx, accounts)
+		if err != nil {
+			h.logger.Warn("error getting nft scam data", zap.Error(err))
+		}
+	}()
 	items, err := h.storage.GetNFTs(ctx, accounts)
+	wg.Wait()
 	if errors.Is(err, core.ErrEntityNotFound) {
 		return nil, toError(http.StatusNotFound, err)
 	}
@@ -40,7 +54,7 @@ func (h *Handler) GetNftItemsByAddresses(ctx context.Context, request oas.OptGet
 	}
 	var result oas.NftItems
 	for _, i := range items {
-		result.NftItems = append(result.NftItems, h.convertNFT(ctx, i, h.addressBook, h.metaCache))
+		result.NftItems = append(result.NftItems, h.convertNFT(ctx, i, h.addressBook, h.metaCache, nftsScamData[i.Address]))
 	}
 	return &result, nil
 }
@@ -57,7 +71,11 @@ func (h *Handler) GetNftItemByAddress(ctx context.Context, params oas.GetNftItem
 	if len(items) != 1 {
 		return nil, toError(http.StatusNotFound, fmt.Errorf("item not found"))
 	}
-	result := h.convertNFT(ctx, items[0], h.addressBook, h.metaCache)
+	nftScamData, err := h.spamFilter.GetNftsScamData(ctx, []ton.AccountID{account.ID})
+	if err != nil {
+		h.logger.Warn("error getting nft scam data", zap.Error(err))
+	}
+	result := h.convertNFT(ctx, items[0], h.addressBook, h.metaCache, nftScamData[account.ID])
 	return &result, nil
 }
 
@@ -92,7 +110,19 @@ func (h *Handler) GetAccountNftItems(ctx context.Context, params oas.GetAccountN
 	if len(ids) == 0 {
 		return &result, nil
 	}
+	var wg sync.WaitGroup
+	wg.Add(1)
+	var nftsScamData map[ton.AccountID]core.TrustType
+	go func() {
+		defer wg.Done()
+		var err error
+		nftsScamData, err = h.spamFilter.GetNftsScamData(ctx, ids)
+		if err != nil {
+			h.logger.Warn("error getting nft scam data", zap.Error(err))
+		}
+	}()
 	items, err := h.storage.GetNFTs(ctx, ids)
+	wg.Wait()
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
@@ -101,7 +131,7 @@ func (h *Handler) GetAccountNftItems(ctx context.Context, params oas.GetAccountN
 		zap.Int("offset", params.Offset.Value),
 		zap.Int("items", len(items)))
 	for _, i := range items {
-		result.NftItems = append(result.NftItems, h.convertNFT(ctx, i, h.addressBook, h.metaCache))
+		result.NftItems = append(result.NftItems, h.convertNFT(ctx, i, h.addressBook, h.metaCache, nftsScamData[i.Address]))
 	}
 	return &result, nil
 }
@@ -147,7 +177,19 @@ func (h *Handler) GetItemsFromCollection(ctx context.Context, params oas.GetItem
 	if len(ids) == 0 {
 		return &result, nil
 	}
+	var wg sync.WaitGroup
+	wg.Add(1)
+	var nftsScamData map[ton.AccountID]core.TrustType
+	go func() {
+		defer wg.Done()
+		var err error
+		nftsScamData, err = h.spamFilter.GetNftsScamData(ctx, ids)
+		if err != nil {
+			h.logger.Warn("error getting nft scam data", zap.Error(err))
+		}
+	}()
 	items, err := h.storage.GetNFTs(ctx, ids)
+	wg.Wait()
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
@@ -156,7 +198,7 @@ func (h *Handler) GetItemsFromCollection(ctx context.Context, params oas.GetItem
 		return a.Index.Cmp(b.Index)
 	})
 	for _, i := range items {
-		result.NftItems = append(result.NftItems, h.convertNFT(ctx, i, h.addressBook, h.metaCache))
+		result.NftItems = append(result.NftItems, h.convertNFT(ctx, i, h.addressBook, h.metaCache, nftsScamData[i.Address]))
 	}
 	return &result, nil
 }
@@ -170,7 +212,12 @@ func (h *Handler) GetNftHistoryByID(ctx context.Context, params oas.GetNftHistor
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
-	events, lastLT, err := h.convertNftHistory(ctx, account.ID, traceIDs, params.AcceptLanguage)
+	var eventIDs []string
+	for _, traceID := range traceIDs {
+		eventIDs = append(eventIDs, traceID.Hex())
+	}
+	isBannedTraces, err := h.spamFilter.GetEventsScamData(ctx, eventIDs)
+	events, lastLT, err := h.convertNftHistory(ctx, account.ID, traceIDs, isBannedTraces, params.AcceptLanguage)
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}

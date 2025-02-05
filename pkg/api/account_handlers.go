@@ -8,9 +8,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"go.uber.org/zap"
 	"net/http"
 	"sort"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/tonkeeper/opentonapi/pkg/addressbook"
@@ -330,10 +332,22 @@ func (h *Handler) GetAccountDnsExpiring(ctx context.Context, params oas.GetAccou
 			accounts = append(accounts, dns.DnsItem.Address)
 		}
 	}
+	var wg sync.WaitGroup
+	wg.Add(1)
+	var nftsScamData map[ton.AccountID]core.TrustType
+	go func() {
+		defer wg.Done()
+		nftsScamData, err = h.spamFilter.GetNftsScamData(ctx, accounts)
+		if err != nil {
+			h.logger.Warn("error getting nft scam data", zap.Error(err))
+		}
+	}()
 	nfts, err := h.storage.GetNFTs(ctx, accounts)
+	wg.Wait()
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
+
 	for _, dns := range dnsExpiring {
 		dei := oas.DnsExpiringItemsItem{
 			Name:       dns.Name,
@@ -342,7 +356,7 @@ func (h *Handler) GetAccountDnsExpiring(ctx context.Context, params oas.GetAccou
 		if dns.DnsItem != nil {
 			for _, n := range nfts {
 				if n.Address == dns.DnsItem.Address {
-					dei.DNSItem = oas.NewOptNftItem(h.convertNFT(ctx, n, h.addressBook, h.metaCache))
+					dei.DNSItem = oas.NewOptNftItem(h.convertNFT(ctx, n, h.addressBook, h.metaCache, nftsScamData[n.Address]))
 					break
 				}
 			}
@@ -454,7 +468,15 @@ func (h *Handler) GetAccountNftHistory(ctx context.Context, params oas.GetAccoun
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
-	events, lastLT, err := h.convertNftHistory(ctx, account.ID, traceIDs, params.AcceptLanguage)
+	var eventIDs []string
+	for _, traceID := range traceIDs {
+		eventIDs = append(eventIDs, traceID.Hex())
+	}
+	isBannedTraces, err := h.spamFilter.GetEventsScamData(ctx, eventIDs)
+	if err != nil {
+		h.logger.Warn("error getting events spam data", zap.Error(err))
+	}
+	events, lastLT, err := h.convertNftHistory(ctx, account.ID, traceIDs, isBannedTraces, params.AcceptLanguage)
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}

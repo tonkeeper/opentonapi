@@ -19,7 +19,18 @@ func NewSpamFilter() *Filter {
 	}
 }
 
-func (f Filter) IsScamEvent(eventId string, actions []oas.Action, viewer *ton.AccountID, initiator ton.AccountID) bool {
+func (f *Filter) GetNftsScamData(ctx context.Context, addresses []ton.AccountID) (map[ton.AccountID]core.TrustType, error) {
+	return nil, nil
+}
+
+func (f *Filter) GetEventsScamData(ctx context.Context, ids []string) (map[string]bool, error) {
+	return nil, nil
+}
+
+func (f Filter) IsScamEvent(actions []oas.Action, viewer *ton.AccountID, initiator ton.AccountID, markedAsScam bool) bool {
+	if markedAsScam {
+		return true
+	}
 	var comment string
 	for _, action := range actions {
 		switch {
@@ -47,7 +58,7 @@ func (f Filter) JettonTrust(address tongo.AccountID, symbol, name, image string)
 	return core.TrustNone
 }
 
-func (f Filter) NftTrust(ctx context.Context, address tongo.AccountID, collection *ton.AccountID, description, image string) core.TrustType {
+func (f Filter) NftTrust(address tongo.AccountID, collection *ton.AccountID, description, image string) core.TrustType {
 	return core.TrustNone
 }
 

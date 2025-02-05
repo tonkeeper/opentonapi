@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"go.uber.org/zap"
 	"net/http"
 	"strings"
 
@@ -149,7 +150,11 @@ func (h *Handler) GetDnsInfo(ctx context.Context, params oas.GetDnsInfoParams) (
 	convertedDomainInfo := oas.DomainInfo{
 		Name: params.DomainName,
 	}
-	convertedDomainInfo.Item.SetTo(h.convertNFT(ctx, nft, h.addressBook, h.metaCache))
+	nftScamData, err := h.spamFilter.GetNftsScamData(ctx, []ton.AccountID{nft.Address})
+	if err != nil {
+		h.logger.Warn("error getting nft scam data", zap.Error(err))
+	}
+	convertedDomainInfo.Item.SetTo(h.convertNFT(ctx, nft, h.addressBook, h.metaCache, nftScamData[nft.Address]))
 	if expTime != 0 {
 		convertedDomainInfo.ExpiringAt.SetTo(expTime)
 	}
