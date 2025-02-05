@@ -29,8 +29,6 @@ func (m *Mock) GetCurrentRates() (map[string]float64, error) {
 	if err != nil {
 		return map[string]float64{}, err
 	}
-	pools := m.getPools()
-	fiatPrices := getFiatPrices(medianTonPriceToUsd)
 
 	retry := func(label string, tonPrice float64, pools map[ton.AccountID]float64, task func(tonPrice float64, pools map[ton.AccountID]float64) (map[ton.AccountID]float64, error)) (map[ton.AccountID]float64, error) {
 		for attempt := 0; attempt < 3; attempt++ {
@@ -46,6 +44,10 @@ func (m *Mock) GetCurrentRates() (map[string]float64, error) {
 		return nil, fmt.Errorf("attempts failed")
 	}
 
+	pools := map[ton.AccountID]float64{
+		references.PTonV1: 1,
+		references.PTonV2: 1,
+	}
 	if tonstakersPrice, err := retry(tonstakers, medianTonPriceToUsd, pools, m.getTonstakersPrice); err == nil {
 		for account, price := range tonstakersPrice {
 			pools[account] = price
@@ -61,6 +63,8 @@ func (m *Mock) GetCurrentRates() (map[string]float64, error) {
 			pools[account] = price
 		}
 	}
+	pools = m.updatePools(pools)
+	fiatPrices := getFiatPrices(medianTonPriceToUsd)
 	rates := make(map[string]float64) // Includes prices for jettons as well as for fiat currencies
 	rates["TON"] = 1
 	for currency, price := range fiatPrices {
