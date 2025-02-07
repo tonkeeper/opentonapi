@@ -3,116 +3,212 @@ package rates
 import (
 	"bytes"
 	"io"
+	"reflect"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/tonkeeper/opentonapi/pkg/references"
 	"github.com/tonkeeper/tongo/ton"
 )
 
-func TestCalculateJettonPriceFromStonFiPool(t *testing.T) {
-	tests := []struct {
-		name     string
-		csv      string
-		expected map[ton.AccountID]float64
-	}{
-		// StonFi pools operate with tokens through their pTon token (0:8cdc...4e11f7c)
-		// The price of pTon to TON is known and equals 1
-		// Knowing the price of pTon, we can calculate the price of the Scaleton token (0:65aa...d6fedf920) using the XY pool formula
-		// We can also calculate the price of USD₮ (0:b113...c3621dfe)
-		{
-			name: "Successful calculate Scaleton and USD₮ jettons",
-			csv: `
-asset_0_account_id,asset_1_account_id,asset_0_reserve,asset_1_reserve,asset_0_metadata,asset_1_metadata,asset_0_holders,asset_1_holders,lp_jetton,total_supply,lp_jetton_decimals
-0:8cdc1d7640ad5ee326527fc1ad0514f468b30dc84b0173f0e155f451b4e11f7c,0:65aac9b5e380eae928db3c8e238d9bc0d61a9320fdc2bc7a2f6c87d6fedf9208,356773586306,572083446808,"{""decimals"":""9"",""name"":""Proxy TON"",""symbol"":""pTON""}","{""name"":""Scaleton"",""symbol"":""SCALE""}",52,17245,0:4d70707f7f62d432157dd8f1a90ce7421b34bcb2ecc4390469181bc575e4739f,0,9
-0:b113a994b5024a16719f69139328eb759596c38a25f59028b146fecdc3621dfe,0:8cdc1d7640ad5ee326527fc1ad0514f468b30dc84b0173f0e155f451b4e11f7c,54581198678395,9745288354931876,"{""decimals"":""6"",""name"":""Tether USD"",""symbol"":""USD₮""}","{""decimals"":""9"",""name"":""Proxy TON"",""symbol"":""pTON""}",1038000,52,0:4d70707f7f62d432157dd8f1a90ce7421b34bcb2ecc4390469181bc575e4739f,0,9
-0:b113a994b5024a16719f69139328eb759596c38a25f59028b146fecdc3621dfe,0:afc49cb8786f21c87045b19ede78fc6b46c51048513f8e9a6d44060199c1bf0c,996119000168,921942515487299500,"{""decimals"":""6"",""name"":""Tether USD"",""symbol"":""USD₮""}","{""decimals"":""9"",""name"":""Dogs"",""symbol"":""DOGS""}",1050066,881834,0:4d70707f7f62d432157dd8f1a90ce7421b34bcb2ecc4390469181bc575e4739f,0,9`,
-			expected: map[ton.AccountID]float64{
-				ton.MustParseAccountID("0:8cdc1d7640ad5ee326527fc1ad0514f468b30dc84b0173f0e155f451b4e11f7c"): 1, // Default pTonV1 price
-				ton.MustParseAccountID("0:671963027f7f85659ab55b821671688601cdcf1ee674fc7fbbb1a776a18d34a3"): 1, // Default pTonV2 price
-				ton.MustParseAccountID("0:65aac9b5e380eae928db3c8e238d9bc0d61a9320fdc2bc7a2f6c87d6fedf9208"): 0.6236390657633181,
-				ton.MustParseAccountID("0:b113a994b5024a16719f69139328eb759596c38a25f59028b146fecdc3621dfe"): 0.17854661661707652,
-				ton.MustParseAccountID("0:afc49cb8786f21c87045b19ede78fc6b46c51048513f8e9a6d44060199c1bf0c"): 0.00019291189444059384,
+func TestSortReserveAndAssetPairs(t *testing.T) {
+	usdt := ton.MustParseAccountID("EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs")
+	pTon := ton.MustParseAccountID("EQCM3B12QK1e4yZSf8GtBRT0aLMNyEsBc_DhVfRRtOEffLez")
+	notcoin := ton.MustParseAccountID("EQAvlWFDxGF2lXm67y4yzC17wYKD9A0guwPkMs1gOsM__NOT")
+	bolt := ton.MustParseAccountID("EQD0vdSA_NedR9uvbgN9EikRX-suesDxGeFg69XQMavfLqIw")
+
+	assetPairs := map[ton.AccountID][]Assets{
+		notcoin: {
+			{Assets: []Asset{{Account: notcoin, Reserve: 40}, {Account: usdt, Reserve: 50}}},
+			{Assets: []Asset{{Account: pTon, Reserve: 90}, {Account: notcoin, Reserve: 100}}},
+			{Assets: []Asset{{Account: bolt, Reserve: 1000}, {Account: notcoin, Reserve: 25}}},
+		},
+		bolt: {
+			{Assets: []Asset{{Account: pTon, Reserve: 20}, {Account: bolt, Reserve: 30}}},
+			{Assets: []Asset{{Account: bolt, Reserve: 60}, {Account: notcoin, Reserve: 50}}},
+			{Assets: []Asset{{Account: usdt, Reserve: 100}, {Account: bolt, Reserve: 100}}},
+		},
+	}
+
+	expected := map[ton.AccountID][]Assets{
+		notcoin: {
+			{Assets: []Asset{{Account: pTon, Reserve: 90}, {Account: notcoin, Reserve: 100}}},
+			{Assets: []Asset{{Account: notcoin, Reserve: 40}, {Account: usdt, Reserve: 50}}},
+			{Assets: []Asset{{Account: bolt, Reserve: 1000}, {Account: notcoin, Reserve: 25}}},
+		},
+		bolt: {
+			{Assets: []Asset{{Account: usdt, Reserve: 100}, {Account: bolt, Reserve: 100}}},
+			{Assets: []Asset{{Account: bolt, Reserve: 60}, {Account: notcoin, Reserve: 50}}},
+			{Assets: []Asset{{Account: pTon, Reserve: 20}, {Account: bolt, Reserve: 30}}},
+		},
+	}
+
+	assetPairs = sortAssetPairs(assetPairs)
+
+	for accountID, sortedAssets := range assetPairs {
+		expectedAssets := expected[accountID]
+		for i, asset := range sortedAssets[0].Assets {
+			if asset != expectedAssets[0].Assets[i] {
+				t.Errorf("Mismatch for account %v: expected %v, got %v\n", accountID, expectedAssets, sortedAssets)
+			}
+		}
+	}
+}
+
+func TestCalculatePoolPrice(t *testing.T) {
+	pools := map[ton.AccountID]float64{
+		references.PTonV1: 1,
+		references.PTonV2: 1,
+	}
+
+	notcoin := ton.MustParseAccountID("EQAvlWFDxGF2lXm67y4yzC17wYKD9A0guwPkMs1gOsM__NOT")
+	bolt := ton.MustParseAccountID("EQD0vdSA_NedR9uvbgN9EikRX-suesDxGeFg69XQMavfLqIw")
+	usdt := ton.MustParseAccountID("EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs")
+
+	assetPairs := map[ton.AccountID][]Assets{
+		usdt: {
+			{Assets: []Asset{
+				{Account: usdt, Decimals: 6, Reserve: 1.2723222601996e+13, HoldersCount: 2649800},
+				{Account: ton.MustParseAccountID("0:671963027f7f85659ab55b821671688601cdcf1ee674fc7fbbb1a776a18d34a3"), Decimals: 9, Reserve: 3.379910335458364e+15, HoldersCount: 39}},
 			},
 		},
-		// To display more accurate prices, the default minimum number of holders is set to 200
-		// In this test, Scaleton only has 50 holders, so we do not calculate the token price
-		{
-			name: "Failed calculate Scaleton (insufficient holders)",
-			csv: `
-asset_0_account_id,asset_1_account_id,asset_0_reserve,asset_1_reserve,asset_0_metadata,asset_1_metadata,asset_0_holders,asset_1_holders,lp_jetton,total_supply,lp_jetton_decimals
-0:8cdc1d7640ad5ee326527fc1ad0514f468b30dc84b0173f0e155f451b4e11f7c,0:65aac9b5e380eae928db3c8e238d9bc0d61a9320fdc2bc7a2f6c87d6fedf9208,356773586306,572083446808,"{""decimals"":""9"",""name"":""Proxy TON"",""symbol"":""pTON""}","{""name"":""Scaleton"",""symbol"":""SCALE""}",52,10,0:4d70707f7f62d432157dd8f1a90ce7421b34bcb2ecc4390469181bc575e4739f,0,9
-`,
-			expected: map[ton.AccountID]float64{
-				ton.MustParseAccountID("0:8cdc1d7640ad5ee326527fc1ad0514f468b30dc84b0173f0e155f451b4e11f7c"): 1, // Default pTonV1 price
-				ton.MustParseAccountID("0:671963027f7f85659ab55b821671688601cdcf1ee674fc7fbbb1a776a18d34a3"): 1, // Default pTonV2 price
+		bolt: {
+			{Assets: []Asset{
+				{Account: ton.MustParseAccountID("0:8cdc1d7640ad5ee326527fc1ad0514f468b30dc84b0173f0e155f451b4e11f7c"), Decimals: 9, Reserve: 2.120750126788e+12, HoldersCount: 0},
+				{Account: bolt, Decimals: 9, Reserve: 1.24636479861718e+14, HoldersCount: 22384}},
+			},
+		},
+		notcoin: {
+			{Assets: []Asset{
+				{Account: notcoin, Decimals: 9, Reserve: 1.8417267910171e+17, HoldersCount: 2865084},
+				{Account: ton.MustParseAccountID("0:8cdc1d7640ad5ee326527fc1ad0514f468b30dc84b0173f0e155f451b4e11f7c"), Decimals: 9, Reserve: 1.25593435171918e+14, HoldersCount: 82}},
 			},
 		},
 	}
-	var err error
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			pools := make(map[ton.AccountID]float64)
-			for attempt := 0; attempt < 2; attempt++ {
-				respBody := io.NopCloser(bytes.NewReader([]byte(tt.csv)))
-				pools, err = convertedStonFiPoolResponse(pools, respBody)
-				if err != nil {
-					t.Fatalf("[TestCalculateJettonPriceFromStonFiPool] failed to calculate jetton price: %v", err)
+
+	assetPairs = sortAssetPairs(assetPairs)
+	for attempt := 0; attempt < 3; attempt++ {
+		for _, assets := range assetPairs {
+			for _, asset := range assets {
+				accountID, price := calculatePoolPrice(asset.Assets[0], asset.Assets[1], pools, asset.IsStable)
+				if price == 0 {
+					continue
+				}
+				if _, ok := pools[accountID]; !ok {
+					pools[accountID] = price
+					break
 				}
 			}
-			if err != nil {
-				t.Fatalf("[TestCalculateJettonPriceFromStonFiPool] failed to calculate jetton price: %v", err)
+		}
+	}
+
+	expectedPrices := map[ton.AccountID]float64{
+		notcoin: 0.0006819330412333231,
+		bolt:    0.017015484785360878,
+		usdt:    0.26564891939626434,
+	}
+
+	for accountID, expectedPrice := range expectedPrices {
+		if actualPrice, ok := pools[accountID]; ok {
+			if actualPrice != expectedPrice {
+				t.Errorf("Unexpected price for account %v: got %v, want %v\n", accountID, actualPrice, expectedPrice)
 			}
-			if !assert.Equal(t, tt.expected, pools) {
-				t.Errorf("expected %v, got %v", tt.expected, pools)
+		} else {
+			t.Errorf("Missing price for account %v\n", accountID)
+		}
+	}
+}
+
+func TestParseStonFiJettonsAssets(t *testing.T) {
+	tests := []struct {
+		name     string
+		csv      string
+		expected []Assets
+	}{
+		{
+			name: "Successful parsing of Scaleton and USD₮ jettons",
+			csv: `
+asset_0_account_id,asset_1_account_id,asset_0_reserve,asset_1_reserve,asset_0_metadata,asset_1_metadata,asset_0_holders,asset_1_holders,lp_jetton,total_supply,lp_jetton_decimals
+0:8cdc1d7640ad5ee326527fc1ad0514f468b30dc84b0173f0e155f451b4e11f7c,0:65aac9b5e380eae928db3c8e238d9bc0d61a9320fdc2bc7a2f6c87d6fedf9208,356773586306,572083446808,"{""decimals"":""9"",""name"":""Proxy TON"",""symbol"":""pTON""}","{""name"":""Scaleton"",""symbol"":""SCALE""}",52,17245,0:4d70707f7f62d432157dd8f1a90ce7421b34bcb2ecc4390469181bc575e4739f,1000000000000000,9
+0:b113a994b5024a16719f69139328eb759596c38a25f59028b146fecdc3621dfe,0:8cdc1d7640ad5ee326527fc1ad0514f468b30dc84b0173f0e155f451b4e11f7c,54581198678395,9745288354931876,"{""decimals"":""6"",""name"":""Tether USD"",""symbol"":""USD₮""}","{""decimals"":""9"",""name"":""Proxy TON"",""symbol"":""pTON""}",1038000,52,0:4d70707f7f62d432157dd8f1a90ce7421b34bcb2ecc4390469181bc575e4739f,2000000000000000,9
+`,
+			expected: []Assets{
+				{
+					Assets: []Asset{
+						{Account: ton.MustParseAccountID("0:8cdc1d7640ad5ee326527fc1ad0514f468b30dc84b0173f0e155f451b4e11f7c"), Decimals: 9, Reserve: 356773586306, HoldersCount: 52},
+						{Account: ton.MustParseAccountID("0:65aac9b5e380eae928db3c8e238d9bc0d61a9320fdc2bc7a2f6c87d6fedf9208"), Decimals: 9, Reserve: 572083446808, HoldersCount: 17245},
+					},
+				},
+				{
+					Assets: []Asset{
+						{Account: ton.MustParseAccountID("0:b113a994b5024a16719f69139328eb759596c38a25f59028b146fecdc3621dfe"), Decimals: 6, Reserve: 54581198678395, HoldersCount: 1038000},
+						{Account: ton.MustParseAccountID("0:8cdc1d7640ad5ee326527fc1ad0514f468b30dc84b0173f0e155f451b4e11f7c"), Decimals: 9, Reserve: 9745288354931876, HoldersCount: 52},
+					},
+				},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			respBody := io.NopCloser(bytes.NewReader([]byte(tt.csv)))
+			assets, _, err := convertedStonFiPoolResponse(respBody)
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+			if !reflect.DeepEqual(assets, tt.expected) {
+				t.Errorf("expected %v, got %v", tt.expected, assets)
 			}
 		})
 	}
 }
 
-func TestCalculateJettonPriceFromDeDustPool(t *testing.T) {
+func TestParseDeDustJettonsAssets(t *testing.T) {
 	tests := []struct {
 		name     string
 		csv      string
-		expected map[ton.AccountID]float64
+		expected []Assets
 	}{
-		// In the DeDust pools, if an asset has a NULL value, it means that this asset is TON. For simplicity,
-		// we treat this asset as the zero address and assign it a price of 1 relative to TON
-		//
-		// In this test, we are calculating the prices of Spintria tokens (0:022d70...2aba257c5) and AI Coin (0:48cef1...33fa7e2d3) relative to TON
-		// We are also calculating the price of USD₮ (0:b113a9...fecdc3621dfe) relative to AI Coin (0:48cef1...33fa7e2d3)
 		{
-			name: "Successful calculate",
+			name: "Successful parsing of Spintria and AI Coin jettons",
 			csv: `
 asset_0_account_id,asset_1_account_id,asset_0_native,asset_1_native,asset_0_reserve,asset_1_reserve,asset_0_metadata,asset_1_metadata,is_stable,asset_0_holders,asset_1_holders,lp_jetton,total_supply,lp_jetton_decimals
 NULL,0:022d70f08add35b2d8aa2bd16f622268d7996e5737c3e7353cbb00d2aba257c5,true,false,100171974809,1787220634679,NULL,"{""decimals"":""8"",""name"":""Spintria"",""symbol"":""SP""}",false,0,3084,0:4d70707f7f62d432157dd8f1a90ce7421b34bcb2ecc4390469181bc575e4739f,0,9
 NULL,0:48cef1de34697508200b8026bf882f8e88aff894586cfd304ab513633fa7e2d3,true,false,22004762576054,4171862045823,NULL,"{""decimals"":""9"",""name"":""AI Coin"",""symbol"":""AIC""}",false,0,1239,0:4d70707f7f62d432157dd8f1a90ce7421b34bcb2ecc4390469181bc575e4739f,0,9
-0:48cef1de34697508200b8026bf882f8e88aff894586cfd304ab513633fa7e2d3,0:b113a994b5024a16719f69139328eb759596c38a25f59028b146fecdc3621dfe,false,false,468457277157,13287924673,"{""decimals"":""9"",""name"":""AI Coin"",""symbol"":""AIC""}","{""decimals"":""6"",""name"":""Tether USD"",""symbol"":""USD₮""}",false,1239,1039987,0:4d70707f7f62d432157dd8f1a90ce7421b34bcb2ecc4390469181bc575e4739f,0,9
-NULL,0:cf76af318c0872b58a9f1925fc29c156211782b9fb01f56760d292e56123bf87,true,false,5406255533839,3293533372962,NULL,"{""decimals"":""9"",""name"":""Hipo Staked TON"",""symbol"":""hTON""}",true,0,2181,0:4d70707f7f62d432157dd8f1a90ce7421b34bcb2ecc4390469181bc575e4739f,0,9`,
-			expected: map[ton.AccountID]float64{
-				ton.MustParseAccountID("0:0000000000000000000000000000000000000000000000000000000000000000"): 1, // Default TON price
-				ton.MustParseAccountID("0:022d70f08add35b2d8aa2bd16f622268d7996e5737c3e7353cbb00d2aba257c5"): 0.005604902543383612,
-				ton.MustParseAccountID("0:48cef1de34697508200b8026bf882f8e88aff894586cfd304ab513633fa7e2d3"): 5.274566209130971,
-				ton.MustParseAccountID("0:b113a994b5024a16719f69139328eb759596c38a25f59028b146fecdc3621dfe"): 0.1859514548223248,
-				ton.MustParseAccountID("0:cf76af318c0872b58a9f1925fc29c156211782b9fb01f56760d292e56123bf87"): 1.0290600202253966, // Stable pool
+0:48cef1de34697508200b8026bf882f8e88aff894586cfd304ab513633fa7e2d3,0:b113a994b5024a16719f69139328eb759596c38a25f59028b146fecdc3621dfe,false,false,468457277157,13287924673,"{""decimals"":""9"",""name"":""AI Coin"",""symbol"":""AIC""}","{""decimals"":""6"",""name"":""Tether USD"",""symbol"":""USD₮""}",false,1239,1039987,0:4d70707f7f62d432157dd8f1a90ce7421b34bcb2ecc4390469181bc575e4739f,0,9`,
+			expected: []Assets{
+				{
+					Assets: []Asset{
+						{Account: references.PTonV1, Decimals: 9, Reserve: 100171974809, HoldersCount: 0},
+						{Account: ton.MustParseAccountID("0:022d70f08add35b2d8aa2bd16f622268d7996e5737c3e7353cbb00d2aba257c5"), Decimals: 8, Reserve: 1787220634679, HoldersCount: 3084},
+					},
+					IsStable: false,
+				},
+				{
+					Assets: []Asset{
+						{Account: references.PTonV1, Decimals: 9, Reserve: 22004762576054, HoldersCount: 0},
+						{Account: ton.MustParseAccountID("0:48cef1de34697508200b8026bf882f8e88aff894586cfd304ab513633fa7e2d3"), Decimals: 9, Reserve: 4171862045823, HoldersCount: 1239},
+					},
+					IsStable: false,
+				},
+				{
+					Assets: []Asset{
+						{Account: ton.MustParseAccountID("0:48cef1de34697508200b8026bf882f8e88aff894586cfd304ab513633fa7e2d3"), Decimals: 9, Reserve: 468457277157, HoldersCount: 1239},
+						{Account: ton.MustParseAccountID("0:b113a994b5024a16719f69139328eb759596c38a25f59028b146fecdc3621dfe"), Decimals: 6, Reserve: 13287924673, HoldersCount: 1039987},
+					},
+					IsStable: false,
+				},
 			},
 		},
 	}
-	var err error
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			pools := make(map[ton.AccountID]float64)
-			for attempt := 0; attempt < 2; attempt++ {
-				respBody := io.NopCloser(bytes.NewReader([]byte(tt.csv)))
-				pools, err = convertedDeDustPoolResponse(pools, respBody)
-				if err != nil {
-					t.Fatalf("[TestCalculateJettonPriceFromDeDustPool] failed to calculate jetton price: %v", err)
-				}
-			}
+			respBody := io.NopCloser(bytes.NewReader([]byte(tt.csv)))
+			assets, _, err := convertedDeDustPoolResponse(respBody)
 			if err != nil {
-				t.Fatalf("[TestCalculateJettonPriceFromDeDustPool] failed to calculate jetton price: %v", err)
+				t.Fatalf("unexpected error: %v", err)
 			}
-			if !assert.Equal(t, tt.expected, pools) {
-				t.Errorf("expected %v, got %v", tt.expected, pools)
+			if !reflect.DeepEqual(assets, tt.expected) {
+				t.Errorf("expected %v, got %v", tt.expected, assets)
 			}
 		})
 	}

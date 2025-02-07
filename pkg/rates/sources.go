@@ -58,12 +58,12 @@ func (m *Mock) GetCurrentRates() (map[string]float64, error) {
 			pools[account] = price
 		}
 	}
+	pools = m.updatePools(pools)
 	if slpTokensPrice, err := retry(slpTokens, medianTonPriceToUsd, pools, m.getSlpTokensPrice); err == nil {
 		for account, price := range slpTokensPrice {
 			pools[account] = price
 		}
 	}
-	pools = m.updatePools(pools)
 	fiatPrices := getFiatPrices(medianTonPriceToUsd)
 	rates := make(map[string]float64) // Includes prices for jettons as well as for fiat currencies
 	rates["TON"] = 1

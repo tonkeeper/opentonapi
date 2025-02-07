@@ -334,6 +334,25 @@ func convertedCoinBaseFiatPricesResponse(respBody io.ReadCloser) (map[string]flo
 	return prices, nil
 }
 
+// sortAssetPairs sorts asset pairs by reserve for a given account.
+func sortAssetPairs(assetPairs map[ton.AccountID][]Assets) map[ton.AccountID][]Assets {
+	sortReserve := func(accountID ton.AccountID, item Assets) float64 {
+		for _, asset := range item.Assets {
+			if asset.Account == accountID {
+				return asset.Reserve
+			}
+		}
+		return 0.0
+	}
+	for account, pairs := range assetPairs {
+		sort.Slice(pairs, func(i, j int) bool {
+			return sortReserve(account, pairs[i]) > sortReserve(account, pairs[j])
+		})
+		assetPairs[account] = pairs
+	}
+	return assetPairs
+}
+
 // updatePools calculates the price of jettons relative to TON based on liquidity pools
 func (m *Mock) updatePools(pools map[ton.AccountID]float64) map[ton.AccountID]float64 {
 	// Define markets to fetch pool data from, each with a corresponding response converter
@@ -380,21 +399,8 @@ func (m *Mock) updatePools(pools map[ton.AccountID]float64) map[ton.AccountID]fl
 		assetPairs[firstAsset.Account] = append(assetPairs[firstAsset.Account], assets)
 		assetPairs[secondAsset.Account] = append(assetPairs[secondAsset.Account], assets)
 	}
-	sortReserve := func(accountID ton.AccountID, item Assets) float64 {
-		for _, asset := range item.Assets {
-			if asset.Account == accountID {
-				return asset.Reserve
-			}
-		}
-		return 0.0
-	}
 	// Sort assets by reserve amount for each account in descending order
-	for account, pairs := range assetPairs {
-		sort.Slice(pairs, func(i, j int) bool {
-			return sortReserve(account, pairs[i]) > sortReserve(account, pairs[j])
-		})
-		assetPairs[account] = pairs
-	}
+	assetPairs = sortAssetPairs(assetPairs)
 	// Calculate and update prices for assets
 	for attempt := 0; attempt < 3; attempt++ {
 		for _, assets := range assetPairs {
