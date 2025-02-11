@@ -52,7 +52,7 @@ func (b BubbleTx) ToAction() *Action {
 		}
 		return nil
 	}
-	if b.opCode != nil && (*b.opCode != 0 && !b.operation(abi.EncryptedTextCommentMsgOp)) && b.accountWasActiveAtComputingTime && !b.account.Is(abi.Wallet) && len(b.inputExtraAmount) == 0 {
+	if b.opCode != nil && (*b.opCode != 0 && !b.operation(abi.EncryptedTextCommentMsgOp)) && b.accountWasActiveAtComputingTime && !b.account.Is(abi.Wallet) && b.inputAmount != 0 {
 		operation := fmt.Sprintf("0x%08x", *b.opCode)
 		payload := ""
 		if b.decodedBody != nil {
