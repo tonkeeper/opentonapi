@@ -1548,6 +1548,10 @@
       ],
       "type": "string"
      },
+     "disassemble_code": {
+      "format": "cell",
+      "type": "string"
+     },
      "methods": {
       "items": {
        "$ref": "#/components/schemas/Method"
@@ -2668,7 +2672,8 @@
     "enum": [
      "cskip_no_state",
      "cskip_bad_state",
-     "cskip_no_gas"
+     "cskip_no_gas",
+     "cskip_suspended"
     ],
     "example": "cskip_no_state",
     "type": "string"

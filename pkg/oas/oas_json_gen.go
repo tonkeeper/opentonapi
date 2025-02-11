@@ -4579,6 +4579,12 @@ func (s *BlockchainAccountInspect) encodeFields(e *jx.Encoder) {
 		e.Str(s.Code)
 	}
 	{
+		if s.DisassembleCode.Set {
+			e.FieldStart("disassemble_code")
+			s.DisassembleCode.Encode(e)
+		}
+	}
+	{
 		e.FieldStart("code_hash")
 		e.Str(s.CodeHash)
 	}
@@ -4602,12 +4608,13 @@ func (s *BlockchainAccountInspect) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfBlockchainAccountInspect = [5]string{
+var jsonFieldsNameOfBlockchainAccountInspect = [6]string{
 	0: "code",
-	1: "code_hash",
-	2: "methods",
-	3: "compiler",
-	4: "source",
+	1: "disassemble_code",
+	2: "code_hash",
+	3: "methods",
+	4: "compiler",
+	5: "source",
 }
 
 // Decode decodes BlockchainAccountInspect from json.
@@ -4631,8 +4638,18 @@ func (s *BlockchainAccountInspect) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"code\"")
 			}
+		case "disassemble_code":
+			if err := func() error {
+				s.DisassembleCode.Reset()
+				if err := s.DisassembleCode.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"disassemble_code\"")
+			}
 		case "code_hash":
-			requiredBitSet[0] |= 1 << 1
+			requiredBitSet[0] |= 1 << 2
 			if err := func() error {
 				v, err := d.Str()
 				s.CodeHash = string(v)
@@ -4644,7 +4661,7 @@ func (s *BlockchainAccountInspect) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"code_hash\"")
 			}
 		case "methods":
-			requiredBitSet[0] |= 1 << 2
+			requiredBitSet[0] |= 1 << 3
 			if err := func() error {
 				s.Methods = make([]Method, 0)
 				if err := d.Arr(func(d *jx.Decoder) error {
@@ -4662,7 +4679,7 @@ func (s *BlockchainAccountInspect) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"methods\"")
 			}
 		case "compiler":
-			requiredBitSet[0] |= 1 << 3
+			requiredBitSet[0] |= 1 << 4
 			if err := func() error {
 				if err := s.Compiler.Decode(d); err != nil {
 					return err
@@ -4691,7 +4708,7 @@ func (s *BlockchainAccountInspect) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b00001111,
+		0b00011101,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -11517,6 +11534,8 @@ func (s *ComputeSkipReason) Decode(d *jx.Decoder) error {
 		*s = ComputeSkipReasonCskipBadState
 	case ComputeSkipReasonCskipNoGas:
 		*s = ComputeSkipReasonCskipNoGas
+	case ComputeSkipReasonCskipSuspended:
+		*s = ComputeSkipReasonCskipSuspended
 	default:
 		*s = ComputeSkipReason(v)
 	}

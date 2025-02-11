@@ -1942,16 +1942,22 @@ func (s *BlockValueFlow) SetMinted(val BlockCurrencyCollection) {
 
 // Ref: #/components/schemas/BlockchainAccountInspect
 type BlockchainAccountInspect struct {
-	Code     string                           `json:"code"`
-	CodeHash string                           `json:"code_hash"`
-	Methods  []Method                         `json:"methods"`
-	Compiler BlockchainAccountInspectCompiler `json:"compiler"`
-	Source   OptSource                        `json:"source"`
+	Code            string                           `json:"code"`
+	DisassembleCode OptString                        `json:"disassemble_code"`
+	CodeHash        string                           `json:"code_hash"`
+	Methods         []Method                         `json:"methods"`
+	Compiler        BlockchainAccountInspectCompiler `json:"compiler"`
+	Source          OptSource                        `json:"source"`
 }
 
 // GetCode returns the value of Code.
 func (s *BlockchainAccountInspect) GetCode() string {
 	return s.Code
+}
+
+// GetDisassembleCode returns the value of DisassembleCode.
+func (s *BlockchainAccountInspect) GetDisassembleCode() OptString {
+	return s.DisassembleCode
 }
 
 // GetCodeHash returns the value of CodeHash.
@@ -1977,6 +1983,11 @@ func (s *BlockchainAccountInspect) GetSource() OptSource {
 // SetCode sets the value of Code.
 func (s *BlockchainAccountInspect) SetCode(val string) {
 	s.Code = val
+}
+
+// SetDisassembleCode sets the value of DisassembleCode.
+func (s *BlockchainAccountInspect) SetDisassembleCode(val OptString) {
+	s.DisassembleCode = val
 }
 
 // SetCodeHash sets the value of CodeHash.
@@ -4284,9 +4295,10 @@ func (s *ComputePhase) SetExitCodeDescription(val OptString) {
 type ComputeSkipReason string
 
 const (
-	ComputeSkipReasonCskipNoState  ComputeSkipReason = "cskip_no_state"
-	ComputeSkipReasonCskipBadState ComputeSkipReason = "cskip_bad_state"
-	ComputeSkipReasonCskipNoGas    ComputeSkipReason = "cskip_no_gas"
+	ComputeSkipReasonCskipNoState   ComputeSkipReason = "cskip_no_state"
+	ComputeSkipReasonCskipBadState  ComputeSkipReason = "cskip_bad_state"
+	ComputeSkipReasonCskipNoGas     ComputeSkipReason = "cskip_no_gas"
+	ComputeSkipReasonCskipSuspended ComputeSkipReason = "cskip_suspended"
 )
 
 // AllValues returns all ComputeSkipReason values.
@@ -4295,6 +4307,7 @@ func (ComputeSkipReason) AllValues() []ComputeSkipReason {
 		ComputeSkipReasonCskipNoState,
 		ComputeSkipReasonCskipBadState,
 		ComputeSkipReasonCskipNoGas,
+		ComputeSkipReasonCskipSuspended,
 	}
 }
 
@@ -4306,6 +4319,8 @@ func (s ComputeSkipReason) MarshalText() ([]byte, error) {
 	case ComputeSkipReasonCskipBadState:
 		return []byte(s), nil
 	case ComputeSkipReasonCskipNoGas:
+		return []byte(s), nil
+	case ComputeSkipReasonCskipSuspended:
 		return []byte(s), nil
 	default:
 		return nil, errors.Errorf("invalid value: %q", s)
@@ -4323,6 +4338,9 @@ func (s *ComputeSkipReason) UnmarshalText(data []byte) error {
 		return nil
 	case ComputeSkipReasonCskipNoGas:
 		*s = ComputeSkipReasonCskipNoGas
+		return nil
+	case ComputeSkipReasonCskipSuspended:
+		*s = ComputeSkipReasonCskipSuspended
 		return nil
 	default:
 		return errors.Errorf("invalid value: %q", data)

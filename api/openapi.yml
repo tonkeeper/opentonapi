@@ -1105,7 +1105,7 @@ paths:
                     example: 1000000000
         'default':
           $ref: '#/components/responses/Error'
-          
+  
   /v2/accounts/{account_id}/extra-currency/{id}/history:
     get:
       description: Get the transfer history of extra currencies for an account.
@@ -7513,6 +7513,9 @@ components:
         - compiler
       properties:
         code:
+          type: string
+          format: cell
+        disassemble_code:
           type: string
           format: cell
         code_hash:

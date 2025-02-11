@@ -8,12 +8,13 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"go.uber.org/zap"
 	"net/http"
 	"sort"
 	"strings"
 	"sync"
 	"time"
+
+	"go.uber.org/zap"
 
 	"github.com/tonkeeper/opentonapi/pkg/addressbook"
 	"golang.org/x/exp/slices"
@@ -526,6 +527,9 @@ func (h *Handler) BlockchainAccountInspect(ctx context.Context, params oas.Block
 		Code:     hex.EncodeToString(rawAccount.Code),
 		CodeHash: hex.EncodeToString(codeHash),
 		Compiler: compiler,
+	}
+	if source.DisassembleCode != "" {
+		resp.DisassembleCode = oas.NewOptString(source.DisassembleCode)
 	}
 	if len(sourceFiles) > 0 {
 		resp.Source = oas.NewOptSource(oas.Source{Files: sourceFiles})
