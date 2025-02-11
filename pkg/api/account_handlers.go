@@ -528,8 +528,8 @@ func (h *Handler) BlockchainAccountInspect(ctx context.Context, params oas.Block
 		CodeHash: hex.EncodeToString(codeHash),
 		Compiler: compiler,
 	}
-	if source.DisassembleCode != "" {
-		resp.DisassembleCode = oas.NewOptString(source.DisassembleCode)
+	if source.DisassembledCode != "" {
+		resp.DisassembledCode = oas.NewOptString(source.DisassembledCode)
 	}
 	if len(sourceFiles) > 0 {
 		resp.Source = oas.NewOptSource(oas.Source{Files: sourceFiles})

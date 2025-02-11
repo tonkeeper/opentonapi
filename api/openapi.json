@@ -1548,8 +1548,7 @@
       ],
       "type": "string"
      },
-     "disassemble_code": {
-      "format": "cell",
+     "disassembled_code": {
       "type": "string"
      },
      "methods": {

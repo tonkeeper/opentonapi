@@ -1942,12 +1942,12 @@ func (s *BlockValueFlow) SetMinted(val BlockCurrencyCollection) {
 
 // Ref: #/components/schemas/BlockchainAccountInspect
 type BlockchainAccountInspect struct {
-	Code            string                           `json:"code"`
-	DisassembleCode OptString                        `json:"disassemble_code"`
-	CodeHash        string                           `json:"code_hash"`
-	Methods         []Method                         `json:"methods"`
-	Compiler        BlockchainAccountInspectCompiler `json:"compiler"`
-	Source          OptSource                        `json:"source"`
+	Code             string                           `json:"code"`
+	DisassembledCode OptString                        `json:"disassembled_code"`
+	CodeHash         string                           `json:"code_hash"`
+	Methods          []Method                         `json:"methods"`
+	Compiler         BlockchainAccountInspectCompiler `json:"compiler"`
+	Source           OptSource                        `json:"source"`
 }
 
 // GetCode returns the value of Code.
@@ -1955,9 +1955,9 @@ func (s *BlockchainAccountInspect) GetCode() string {
 	return s.Code
 }
 
-// GetDisassembleCode returns the value of DisassembleCode.
-func (s *BlockchainAccountInspect) GetDisassembleCode() OptString {
-	return s.DisassembleCode
+// GetDisassembledCode returns the value of DisassembledCode.
+func (s *BlockchainAccountInspect) GetDisassembledCode() OptString {
+	return s.DisassembledCode
 }
 
 // GetCodeHash returns the value of CodeHash.
@@ -1985,9 +1985,9 @@ func (s *BlockchainAccountInspect) SetCode(val string) {
 	s.Code = val
 }
 
-// SetDisassembleCode sets the value of DisassembleCode.
-func (s *BlockchainAccountInspect) SetDisassembleCode(val OptString) {
-	s.DisassembleCode = val
+// SetDisassembledCode sets the value of DisassembledCode.
+func (s *BlockchainAccountInspect) SetDisassembledCode(val OptString) {
+	s.DisassembledCode = val
 }
 
 // SetCodeHash sets the value of CodeHash.

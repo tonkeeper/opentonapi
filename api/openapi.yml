@@ -7515,9 +7515,8 @@ components:
         code:
           type: string
           format: cell
-        disassemble_code:
+        disassembled_code:
           type: string
-          format: cell
         code_hash:
           type: string
         methods:

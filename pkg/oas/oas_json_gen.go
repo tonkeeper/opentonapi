@@ -4579,9 +4579,9 @@ func (s *BlockchainAccountInspect) encodeFields(e *jx.Encoder) {
 		e.Str(s.Code)
 	}
 	{
-		if s.DisassembleCode.Set {
-			e.FieldStart("disassemble_code")
-			s.DisassembleCode.Encode(e)
+		if s.DisassembledCode.Set {
+			e.FieldStart("disassembled_code")
+			s.DisassembledCode.Encode(e)
 		}
 	}
 	{
@@ -4610,7 +4610,7 @@ func (s *BlockchainAccountInspect) encodeFields(e *jx.Encoder) {
 
 var jsonFieldsNameOfBlockchainAccountInspect = [6]string{
 	0: "code",
-	1: "disassemble_code",
+	1: "disassembled_code",
 	2: "code_hash",
 	3: "methods",
 	4: "compiler",
@@ -4638,15 +4638,15 @@ func (s *BlockchainAccountInspect) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"code\"")
 			}
-		case "disassemble_code":
+		case "disassembled_code":
 			if err := func() error {
-				s.DisassembleCode.Reset()
-				if err := s.DisassembleCode.Decode(d); err != nil {
+				s.DisassembledCode.Reset()
+				if err := s.DisassembledCode.Decode(d); err != nil {
 					return err
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"disassemble_code\"")
+				return errors.Wrap(err, "decode field \"disassembled_code\"")
 			}
 		case "code_hash":
 			requiredBitSet[0] |= 1 << 2

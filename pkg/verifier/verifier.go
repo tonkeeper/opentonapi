@@ -22,7 +22,7 @@ type File struct {
 
 type Source struct {
 	Code             string         `json:"code"`
-	DisassembleCode  string         `json:"disassemble_code"`
+	DisassembledCode string         `json:"disassembled_code"`
 	Files            []File         `json:"files"`
 	Compiler         SourceCompiler `json:"compiler"`
 	DateVerification int64          `json:"date_verification"`
