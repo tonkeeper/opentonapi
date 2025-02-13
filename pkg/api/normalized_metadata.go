@@ -65,7 +65,7 @@ func NormalizeMetadata(meta tep64.Metadata, info *addressbook.KnownJetton, trust
 	return NormalizedMetadata{
 		Name:                name,
 		Description:         description,
-		Image:               previewImage, // TODO: replace with `image` after migration to `previewImage`
+		Image:               image,
 		Symbol:              symbol,
 		Decimals:            convertJettonDecimals(meta.Decimals),
 		Verification:        trust,
