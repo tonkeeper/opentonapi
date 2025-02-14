@@ -354,7 +354,7 @@ func ConvertMessage(message tlb.Message, txLT uint64, cd *abi.ContractDescriptio
 				CreatedLt:   txLT,
 				Destination: dest,
 			},
-			Hash:         ton.Bits256(message.Hash()),
+			Hash:         ton.Bits256(message.Hash(false)),
 			MsgType:      ExtInMsg,
 			SourceExtern: externalAddressFromTlb(info.Src),
 			ImportFee:    importFee.Int64(),
