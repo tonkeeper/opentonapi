@@ -15,6 +15,7 @@ import (
 	"time"
 
 	"go.uber.org/zap"
+	"golang.org/x/exp/maps"
 
 	"github.com/tonkeeper/opentonapi/pkg/addressbook"
 	"golang.org/x/exp/slices"
@@ -27,7 +28,6 @@ import (
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
 	"github.com/tonkeeper/tongo/boc"
-	"github.com/tonkeeper/tongo/code"
 	"github.com/tonkeeper/tongo/tlb"
 	"github.com/tonkeeper/tongo/ton"
 	"github.com/tonkeeper/tongo/utils"
@@ -504,7 +504,7 @@ func (h *Handler) BlockchainAccountInspect(ctx context.Context, params oas.Block
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
-	methods, err := code.ParseContractMethods(rawAccount.Code)
+	info, err := abi.GetCodeInfo(ctx, rawAccount.Code, h.storage)
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
@@ -534,11 +534,15 @@ func (h *Handler) BlockchainAccountInspect(ctx context.Context, params oas.Block
 	if len(sourceFiles) > 0 {
 		resp.Source = oas.NewOptSource(oas.Source{Files: sourceFiles})
 	}
-	for _, methodID := range methods {
-		if method, ok := code.Methods[methodID]; ok {
+	knownMethods := make(map[int64]string)
+	for _, name := range maps.Keys(abi.KnownGetMethodsDecoder) {
+		knownMethods[int64(utils.MethodIdFromName(name))] = name
+	}
+	for _, methodID := range maps.Keys(info.Methods) {
+		if method, ok := knownMethods[methodID]; ok {
 			resp.Methods = append(resp.Methods, oas.Method{
 				ID:     methodID,
-				Method: string(method),
+				Method: method,
 			})
 		}
 	}
