@@ -72,7 +72,24 @@ var DefaultStraws = []Merger{
 }
 
 var JettonTransferPTONStraw = Straw[BubbleJettonTransfer]{
-	CheckFuncs: []bubbleCheck{IsTx, HasInterface(abi.JettonWallet), HasOperation(abi.JettonTransferMsgOp)},
+	CheckFuncs: []bubbleCheck{IsTx, HasInterface(abi.JettonWallet), HasOperation(abi.JettonTransferMsgOp), func(bubble *Bubble) bool {
+		if len(bubble.Children) != 1 {
+			return false
+		}
+		tx, ok := bubble.Children[0].Info.(BubbleTx)
+		if !ok {
+			return false
+		}
+		_, ok = tx.decodedBody.Value.(abi.JettonNotifyMsgBody)
+		if !ok {
+			_, ok = tx.decodedBody.Value.(abi.PtonTonTransferMsgBody)
+			if !ok {
+				return false
+			}
+			return true
+		}
+		return true
+	}},
 	Builder: func(newAction *BubbleJettonTransfer, bubble *Bubble) error {
 		tx := bubble.Info.(BubbleTx)
 		newAction.master, _ = tx.additionalInfo.JettonMaster(tx.account.Address)
@@ -86,9 +103,11 @@ var JettonTransferPTONStraw = Straw[BubbleJettonTransfer]{
 			newAction.recipient = &Account{Address: *recipient}
 			bubble.Accounts = append(bubble.Accounts, *recipient)
 		}
+		newAction.success = true
 		return nil
 	},
 	SingleChild: &Straw[BubbleJettonTransfer]{
+		Optional:   true,
 		CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.JettonNotifyMsgOp)},
 		Builder: func(newAction *BubbleJettonTransfer, bubble *Bubble) error {
 			tx := bubble.Info.(BubbleTx)
