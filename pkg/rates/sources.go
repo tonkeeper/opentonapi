@@ -18,6 +18,7 @@ func (m *Mock) GetCurrentRates() (map[string]float64, error) {
 	const (
 		tonstakers string = "tonstakers"
 		bemo       string = "bemo"
+		beetroot   string = "beetroot"
 		slpTokens  string = "slp_tokens"
 	)
 
@@ -55,6 +56,11 @@ func (m *Mock) GetCurrentRates() (map[string]float64, error) {
 	}
 	if bemoPrice, err := retry(bemo, medianTonPriceToUsd, pools, m.getBemoPrice); err == nil {
 		for account, price := range bemoPrice {
+			pools[account] = price
+		}
+	}
+	if beetRootPrice, err := retry(beetroot, medianTonPriceToUsd, pools, m.getBeetrootPrice); err == nil {
+		for account, price := range beetRootPrice {
 			pools[account] = price
 		}
 	}
@@ -220,4 +226,41 @@ func (m *Mock) getSlpTokensPrice(tonPrice float64, pools map[ton.AccountID]float
 	}
 
 	return accountsPrice, nil
+}
+
+func (m *Mock) getBeetrootPrice(tonPrice float64, pools map[ton.AccountID]float64) (map[tongo.AccountID]float64, error) {
+	if tonPrice == 0 {
+		return map[ton.AccountID]float64{}, fmt.Errorf("unknown TON price")
+	}
+	var beetRootContract = ton.MustParseAccountID("EQDC8MY5tY5rPM6KFFxz58fMUES6qSsFxi_Pbaig1QuO3F7y")
+	var beetRootAccount = ton.MustParseAccountID("EQAFGhmx199oH6kmL78PGBHyAx4d5CiJdfXwSjDK5F5IFyfC")
+	url := fmt.Sprintf("https://tonapi.io/v2/blockchain/accounts/%v/methods/get_price_data", beetRootContract)
+	respBody, err := sendRequest(url, m.TonApiToken)
+	if err != nil {
+		return map[ton.AccountID]float64{}, err
+	}
+	defer respBody.Close()
+	type data struct {
+		Success bool `json:"success"`
+		Stack   []struct {
+			Num string `json:"num"`
+		} `json:"stack"`
+	}
+	var result data
+	if err = json.NewDecoder(respBody).Decode(&result); err != nil {
+		return map[ton.AccountID]float64{}, fmt.Errorf("[getBeetrootPrice] failed to decode response: %v", err)
+	}
+	if !result.Success {
+		return map[ton.AccountID]float64{}, fmt.Errorf("not success")
+	}
+	if len(result.Stack) == 0 {
+		return map[ton.AccountID]float64{}, fmt.Errorf("empty stack")
+	}
+	num, err := strconv.ParseInt(result.Stack[0].Num, 0, 64)
+	if err != nil {
+		return map[tongo.AccountID]float64{}, err
+	}
+	usdPrice := float64(num) / 100
+	price := usdPrice / tonPrice
+	return map[ton.AccountID]float64{beetRootAccount: price}, nil
 }
