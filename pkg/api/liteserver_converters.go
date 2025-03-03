@@ -23,31 +23,26 @@ func errChain(mappings ...error) error {
 	return nil
 }
 
-func convertMasterchainInfo(info liteclient.LiteServerMasterchainInfoC) (*oas.GetRawMasterchainInfoOK, error) {
+func convertMasterchainInfo(info liteclient.LiteServerMasterchainInfoC) *oas.GetRawMasterchainInfoOK {
 	convertedInfo := oas.GetRawMasterchainInfoOK{
 		Last: oas.BlockRaw{
 			Workchain: int32(info.Last.Workchain),
 			Shard:     fmt.Sprintf("%016x", info.Last.Shard),
 			Seqno:     int32(info.Last.Seqno),
+			RootHash:  fmt.Sprintf("%x", info.Last.RootHash),
+			FileHash:  fmt.Sprintf("%x", info.Last.FileHash),
 		},
 		Init: oas.InitStateRaw{
 			Workchain: int32(info.Init.Workchain),
+			RootHash:  fmt.Sprintf("%x", info.Init.RootHash),
+			FileHash:  fmt.Sprintf("%x", info.Init.FileHash),
 		},
+		StateRootHash: fmt.Sprintf("%x", info.StateRootHash),
 	}
-	err := errChain(
-		toJson(&convertedInfo.Last.RootHash, info.Last.RootHash),
-		toJson(&convertedInfo.Last.FileHash, info.Last.FileHash),
-		toJson(&convertedInfo.StateRootHash, info.StateRootHash),
-		toJson(&convertedInfo.Init.RootHash, info.Init.RootHash),
-		toJson(&convertedInfo.Init.FileHash, info.Init.FileHash),
-	)
-	if err != nil {
-		return nil, err
-	}
-	return &convertedInfo, nil
+	return &convertedInfo
 }
 
-func convertMasterchainInfoExt(info liteclient.LiteServerMasterchainInfoExtC) (*oas.GetRawMasterchainInfoExtOK, error) {
+func convertMasterchainInfoExt(info liteclient.LiteServerMasterchainInfoExtC) *oas.GetRawMasterchainInfoExtOK {
 	convertedInfo := oas.GetRawMasterchainInfoExtOK{
 		Mode:         int32(info.Mode),
 		Version:      int32(info.Version),
@@ -56,24 +51,19 @@ func convertMasterchainInfoExt(info liteclient.LiteServerMasterchainInfoExtC) (*
 			Workchain: int32(info.Last.Workchain),
 			Shard:     fmt.Sprintf("%016x", info.Last.Shard),
 			Seqno:     int32(info.Last.Seqno),
+			RootHash:  fmt.Sprintf("%x", info.Last.RootHash),
+			FileHash:  fmt.Sprintf("%x", info.Last.FileHash),
 		},
 		LastUtime: int32(info.LastUtime),
 		Now:       int32(info.Now),
 		Init: oas.InitStateRaw{
 			Workchain: int32(info.Init.Workchain),
+			RootHash:  fmt.Sprintf("%x", info.Init.RootHash),
+			FileHash:  fmt.Sprintf("%x", info.Init.FileHash),
 		},
+		StateRootHash: fmt.Sprintf("%x", info.StateRootHash),
 	}
-	err := errChain(
-		toJson(&convertedInfo.Last.RootHash, info.Last.RootHash),
-		toJson(&convertedInfo.Last.FileHash, info.Last.FileHash),
-		toJson(&convertedInfo.StateRootHash, info.StateRootHash),
-		toJson(&convertedInfo.Init.RootHash, info.Init.RootHash),
-		toJson(&convertedInfo.Init.FileHash, info.Init.FileHash),
-	)
-	if err != nil {
-		return nil, err
-	}
-	return &convertedInfo, nil
+	return &convertedInfo
 }
 
 func convertBlock(block liteclient.LiteServerBlockDataC) (*oas.GetRawBlockchainBlockOK, error) {

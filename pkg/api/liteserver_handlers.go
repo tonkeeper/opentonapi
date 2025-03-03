@@ -16,10 +16,7 @@ func (h *Handler) GetRawMasterchainInfo(ctx context.Context) (*oas.GetRawMasterc
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
-	resp, err := convertMasterchainInfo(info)
-	if err != nil {
-		return nil, toError(http.StatusInternalServerError, err)
-	}
+	resp := convertMasterchainInfo(info)
 	return resp, nil
 }
 
@@ -28,10 +25,7 @@ func (h *Handler) GetRawMasterchainInfoExt(ctx context.Context, params oas.GetRa
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
 	}
-	resp, err := convertMasterchainInfoExt(info)
-	if err != nil {
-		return nil, toError(http.StatusInternalServerError, err)
-	}
+	resp := convertMasterchainInfoExt(info)
 	return resp, nil
 }
 
