@@ -14,7 +14,9 @@ type Merger interface {
 }
 
 var JettonTransfersBurnsMints = []Merger{
-	JettonTransferPTONStraw,
+	StonfiV1PTONStraw,
+	StonfiV2PTONStrawReverse,
+	StonfiV2PTONStraw,
 	JettonTransferClassicStraw,
 	JettonTransferMinimalStraw,
 	JettonBurnStraw,
@@ -38,7 +40,8 @@ var DefaultStraws = []Merger{
 	StrawFindAuctionBidFragmentSimple,
 	NftTransferStraw,
 	NftTransferNotifyStraw,
-	JettonTransferPTONStraw,
+	StonfiV1PTONStraw,
+	StonfiV2PTONStrawReverse,
 	StonfiV2PTONStraw,
 	JettonTransferClassicStraw,
 	JettonTransferMinimalStraw,
@@ -69,37 +72,6 @@ var DefaultStraws = []Merger{
 	WithdrawStakeImmediatelyStraw,
 	WithdrawLiquidStake,
 	DNSRenewStraw,
-}
-
-var JettonTransferPTONStraw = Straw[BubbleJettonTransfer]{
-	CheckFuncs: []bubbleCheck{IsTx, HasInterface(abi.JettonWallet), HasOperation(abi.JettonTransferMsgOp)},
-	Builder: func(newAction *BubbleJettonTransfer, bubble *Bubble) error {
-		tx := bubble.Info.(BubbleTx)
-		newAction.master, _ = tx.additionalInfo.JettonMaster(tx.account.Address)
-		newAction.senderWallet = tx.account.Address
-		newAction.sender = tx.inputFrom
-		body := tx.decodedBody.Value.(abi.JettonTransferMsgBody)
-		newAction.amount = body.Amount
-		newAction.isWrappedTon = true
-		recipient, err := ton.AccountIDFromTlb(body.Destination)
-		if err == nil && recipient != nil {
-			newAction.recipient = &Account{Address: *recipient}
-			bubble.Accounts = append(bubble.Accounts, *recipient)
-		}
-		return nil
-	},
-	SingleChild: &Straw[BubbleJettonTransfer]{
-		CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.JettonNotifyMsgOp)},
-		Builder: func(newAction *BubbleJettonTransfer, bubble *Bubble) error {
-			tx := bubble.Info.(BubbleTx)
-			newAction.success = true
-			body := tx.decodedBody.Value.(abi.JettonNotifyMsgBody)
-			newAction.amount = body.Amount
-			newAction.payload = body.ForwardPayload.Value
-			newAction.recipient = &tx.account
-			return nil
-		},
-	},
 }
 
 var JettonTransferClassicStraw = Straw[BubbleJettonTransfer]{

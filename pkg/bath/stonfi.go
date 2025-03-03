@@ -123,6 +123,37 @@ var StonfiSwapStraw = Straw[BubbleJettonSwap]{
 	},
 }
 
+var StonfiV1PTONStraw = Straw[BubbleJettonTransfer]{
+	CheckFuncs: []bubbleCheck{IsTx, HasInterface(abi.JettonWallet), HasOperation(abi.JettonTransferMsgOp)},
+	Builder: func(newAction *BubbleJettonTransfer, bubble *Bubble) error {
+		tx := bubble.Info.(BubbleTx)
+		newAction.master, _ = tx.additionalInfo.JettonMaster(tx.account.Address)
+		newAction.senderWallet = tx.account.Address
+		newAction.sender = tx.inputFrom
+		body := tx.decodedBody.Value.(abi.JettonTransferMsgBody)
+		newAction.amount = body.Amount
+		newAction.isWrappedTon = true
+		recipient, err := ton.AccountIDFromTlb(body.Destination)
+		if err == nil && recipient != nil {
+			newAction.recipient = &Account{Address: *recipient}
+			bubble.Accounts = append(bubble.Accounts, *recipient)
+		}
+		return nil
+	},
+	SingleChild: &Straw[BubbleJettonTransfer]{
+		CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.JettonNotifyMsgOp)},
+		Builder: func(newAction *BubbleJettonTransfer, bubble *Bubble) error {
+			tx := bubble.Info.(BubbleTx)
+			newAction.success = true
+			body := tx.decodedBody.Value.(abi.JettonNotifyMsgBody)
+			newAction.amount = body.Amount
+			newAction.payload = body.ForwardPayload.Value
+			newAction.recipient = &tx.account
+			return nil
+		},
+	},
+}
+
 var StonfiV2PTONStraw = Straw[BubbleJettonTransfer]{
 	CheckFuncs: []bubbleCheck{IsTx, HasInterface(abi.JettonWallet), HasOperation(abi.PtonTonTransferMsgOp)},
 	Builder: func(newAction *BubbleJettonTransfer, bubble *Bubble) error {
@@ -147,6 +178,34 @@ var StonfiV2PTONStraw = Straw[BubbleJettonTransfer]{
 			body := tx.decodedBody.Value.(abi.JettonNotifyMsgBody)
 			newAction.amount = body.Amount
 			newAction.payload = body.ForwardPayload.Value
+			newAction.recipient = &tx.account
+			return nil
+		},
+	},
+}
+
+var StonfiV2PTONStrawReverse = Straw[BubbleJettonTransfer]{
+	CheckFuncs: []bubbleCheck{IsTx, HasInterface(abi.JettonWallet), HasOperation(abi.JettonTransferMsgOp)},
+	Builder: func(newAction *BubbleJettonTransfer, bubble *Bubble) error {
+		tx := bubble.Info.(BubbleTx)
+		newAction.master, _ = tx.additionalInfo.JettonMaster(tx.account.Address)
+		newAction.senderWallet = tx.account.Address
+		newAction.sender = tx.inputFrom
+		body := tx.decodedBody.Value.(abi.JettonTransferMsgBody)
+		newAction.amount = body.Amount
+		newAction.isWrappedTon = true
+		newAction.payload = body.ForwardPayload.Value
+		recipient, err := ton.AccountIDFromTlb(body.Destination)
+		if err == nil {
+			newAction.recipient = &Account{Address: *recipient}
+		}
+		return nil
+	},
+	SingleChild: &Straw[BubbleJettonTransfer]{
+		CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.PtonTonTransferMsgOp)},
+		Builder: func(newAction *BubbleJettonTransfer, bubble *Bubble) error {
+			tx := bubble.Info.(BubbleTx)
+			newAction.success = true
 			newAction.recipient = &tx.account
 			return nil
 		},
