@@ -69,7 +69,6 @@ var DefaultStraws = []Merger{
 	ElectionsRecoverStakeStraw,
 	DepositTFStakeStraw,
 	WithdrawTFStakeRequestStraw,
-	WithdrawStakeImmediatelyStraw,
 	WithdrawLiquidStake,
 	DNSRenewStraw,
 }
