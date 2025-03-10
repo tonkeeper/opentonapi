@@ -395,11 +395,11 @@ func (h *Handler) EmulateMessageToAccountEvent(ctx context.Context, request *oas
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
 	}
-	trace, _, err := h.storage.GetTraceWithState(ctx, hash)
+	trace, version, _, err := h.storage.GetTraceWithState(ctx, hash)
 	if err != nil {
 		h.logger.Warn("get trace from storage: ", zap.Error(err))
 	}
-	if trace == nil {
+	if trace == nil || h.tongoVersion == 0 || version > h.tongoVersion {
 		configBase64, err := h.storage.TrimmedConfigBase64()
 		if err != nil {
 			return nil, toError(http.StatusInternalServerError, err)
@@ -424,7 +424,7 @@ func (h *Handler) EmulateMessageToAccountEvent(ctx context.Context, request *oas
 		if err != nil {
 			return nil, toError(http.StatusInternalServerError, err)
 		}
-		err = h.storage.SaveTraceWithState(ctx, hash, trace, []abi.MethodInvocation{}, 24*time.Hour)
+		err = h.storage.SaveTraceWithState(ctx, hash, trace, h.tongoVersion, []abi.MethodInvocation{}, 24*time.Hour)
 		if err != nil {
 			fmt.Println("trace not saved: ", err)
 		}
@@ -456,11 +456,11 @@ func (h *Handler) EmulateMessageToEvent(ctx context.Context, request *oas.Emulat
 		if err != nil {
 			return nil, toError(http.StatusBadRequest, err)
 		}
-		trace, _, err = h.storage.GetTraceWithState(ctx, hs)
+		trace, version, _, err := h.storage.GetTraceWithState(ctx, hs)
 		if err != nil {
 			h.logger.Warn("get trace from storage: ", zap.Error(err))
 		}
-		if trace == nil {
+		if trace == nil || h.tongoVersion == 0 || version > h.tongoVersion {
 			var m tlb.Message
 			if err := tlb.Unmarshal(c, &m); err != nil {
 				return nil, toError(http.StatusBadRequest, err)
@@ -489,7 +489,7 @@ func (h *Handler) EmulateMessageToEvent(ctx context.Context, request *oas.Emulat
 			if err != nil {
 				return nil, toError(http.StatusInternalServerError, err)
 			}
-			err = h.storage.SaveTraceWithState(ctx, hs, trace, []abi.MethodInvocation{}, 24*time.Hour)
+			err = h.storage.SaveTraceWithState(ctx, hs, trace, h.tongoVersion, []abi.MethodInvocation{}, 24*time.Hour)
 			if err != nil {
 				fmt.Println("trace not saved: ", err)
 			}
@@ -522,11 +522,11 @@ func (h *Handler) EmulateMessageToTrace(ctx context.Context, request *oas.Emulat
 		if err != nil {
 			return nil, toError(http.StatusBadRequest, err)
 		}
-		trace, _, err = h.storage.GetTraceWithState(ctx, hs)
+		trace, version, _, err := h.storage.GetTraceWithState(ctx, hs)
 		if err != nil {
 			h.logger.Warn("get trace from storage: ", zap.Error(err))
 		}
-		if trace == nil {
+		if trace == nil || h.tongoVersion == 0 || version > h.tongoVersion {
 			var m tlb.Message
 			err = tlb.Unmarshal(c, &m)
 			if err != nil {
@@ -556,7 +556,7 @@ func (h *Handler) EmulateMessageToTrace(ctx context.Context, request *oas.Emulat
 			if err != nil {
 				return nil, toError(http.StatusInternalServerError, err)
 			}
-			err = h.storage.SaveTraceWithState(ctx, hs, trace, []abi.MethodInvocation{}, 24*time.Hour)
+			err = h.storage.SaveTraceWithState(ctx, hs, trace, h.tongoVersion, []abi.MethodInvocation{}, 24*time.Hour)
 			if err != nil {
 				fmt.Println("trace not saved: ", err)
 			}
@@ -651,11 +651,11 @@ func (h *Handler) EmulateMessageToWallet(ctx context.Context, request *oas.Emula
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
 	}
-	trace, _, err := h.storage.GetTraceWithState(ctx, hash)
+	trace, version, _, err := h.storage.GetTraceWithState(ctx, hash)
 	if err != nil {
 		h.logger.Warn("get trace from storage: ", zap.Error(err))
 	}
-	if trace == nil {
+	if trace == nil || h.tongoVersion == 0 || version > h.tongoVersion {
 		configBase64, err := h.storage.TrimmedConfigBase64()
 		if err != nil {
 			return nil, toError(http.StatusInternalServerError, err)
@@ -696,7 +696,7 @@ func (h *Handler) EmulateMessageToWallet(ctx context.Context, request *oas.Emula
 		if err != nil {
 			return nil, toError(http.StatusInternalServerError, err)
 		}
-		err = h.storage.SaveTraceWithState(ctx, hash, trace, []abi.MethodInvocation{}, 24*time.Hour)
+		err = h.storage.SaveTraceWithState(ctx, hash, trace, h.tongoVersion, []abi.MethodInvocation{}, 24*time.Hour)
 		if err != nil {
 			fmt.Println("trace not saved: ", err)
 		}
