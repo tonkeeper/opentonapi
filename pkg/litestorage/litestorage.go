@@ -566,3 +566,11 @@ func (s *LiteStorage) GetAccountMultisigs(ctx context.Context, accountID ton.Acc
 func (s *LiteStorage) GetMultisigByID(ctx context.Context, accountID ton.AccountID) (*core.Multisig, error) {
 	return nil, fmt.Errorf("not implemented")
 }
+
+func (s *LiteStorage) SaveTraceWithState(ctx context.Context, msgHash string, trace *core.Trace, version int, getMethods []abi.MethodInvocation, ttl time.Duration) error {
+	return fmt.Errorf("not implemented")
+}
+
+func (s *LiteStorage) GetTraceWithState(ctx context.Context, msgHash string) (*core.Trace, int, []abi.MethodInvocation, error) {
+	return nil, 0, nil, fmt.Errorf("not implemented")
+}

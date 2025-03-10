@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"fmt"
+	"golang.org/x/exp/slog"
 	"sync"
 
 	"github.com/go-faster/errors"
@@ -51,6 +52,7 @@ type Handler struct {
 	mempoolEmulate mempoolEmulate
 	// ctxToDetails converts a request context to a details instance.
 	ctxToDetails ctxToDetails
+	tongoVersion int
 
 	// mempoolEmulateIgnoreAccounts, we don't track pending transactions for this list of accounts.
 	mempoolEmulateIgnoreAccounts map[tongo.AccountID]struct{}
@@ -218,6 +220,10 @@ func NewHandler(logger *zap.Logger, opts ...Option) (*Handler, error) {
 	if options.score == nil {
 		options.score = score.NewScore()
 	}
+	tongoVersion, err := GetPackageVersionInt("tongo")
+	if err != nil {
+		slog.Warn("unable to detect tongo version", "err", err)
+	}
 	return &Handler{
 		logger:         logger,
 		storage:        options.storage,
@@ -244,6 +250,7 @@ func NewHandler(logger *zap.Logger, opts ...Option) (*Handler, error) {
 		mempoolEmulateIgnoreAccounts: map[tongo.AccountID]struct{}{
 			tongo.MustParseAddress("0:0000000000000000000000000000000000000000000000000000000000000000").ID: {},
 		},
+		tongoVersion:        tongoVersion,
 		blacklistedBocCache: cache.NewLRUCache[[32]byte, struct{}](100000, "blacklisted_boc_cache"),
 		getMethodsCache:     cache.NewLRUCache[string, *oas.MethodExecutionResult](100000, "get_methods_cache"),
 		tonConnect:          tonConnect,
