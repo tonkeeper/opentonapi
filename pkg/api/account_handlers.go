@@ -17,12 +17,10 @@ import (
 	"go.uber.org/zap"
 	"golang.org/x/exp/maps"
 
-	"github.com/tonkeeper/opentonapi/pkg/addressbook"
-	"golang.org/x/exp/slices"
-
 	"github.com/cespare/xxhash/v2"
 	"github.com/go-faster/jx"
 	"github.com/tonkeeper/opentonapi/internal/g"
+	"github.com/tonkeeper/opentonapi/pkg/addressbook"
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/opentonapi/pkg/oas"
 	"github.com/tonkeeper/tongo"
@@ -209,10 +207,6 @@ func (h *Handler) ExecGetMethodForBlockchainAccount(ctx context.Context, params 
 			return nil, toError(http.StatusNotFound, err)
 		}
 		return nil, toError(http.StatusInternalServerError, err)
-	}
-	// TODO: remove parameter after user migration
-	if params.FixOrder.IsSet() && params.FixOrder.Value == true && len(params.Args) > 1 {
-		slices.Reverse(params.Args)
 	}
 	key, err := getMethodCacheKey(account.ID, params.MethodName, contract.LastTransactionLt, params.Args)
 	if err != nil {
