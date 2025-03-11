@@ -467,7 +467,8 @@ func (h *Handler) EmulateMessageToEvent(ctx context.Context, request *oas.Emulat
 		if err != nil {
 			return nil, toError(http.StatusBadRequest, err)
 		}
-		trace, version, _, err := h.storage.GetTraceWithState(ctx, hs)
+		var version int
+		trace, version, _, err = h.storage.GetTraceWithState(ctx, hs)
 		if err != nil {
 			h.logger.Warn("get trace from storage: ", zap.Error(err))
 			savedEmulatedTraces.WithLabelValues("error_restore").Inc()
@@ -541,7 +542,8 @@ func (h *Handler) EmulateMessageToTrace(ctx context.Context, request *oas.Emulat
 		if err != nil {
 			return nil, toError(http.StatusBadRequest, err)
 		}
-		trace, version, _, err := h.storage.GetTraceWithState(ctx, hs)
+		var version int
+		trace, version, _, err = h.storage.GetTraceWithState(ctx, hs)
 		if err != nil {
 			h.logger.Warn("get trace from storage: ", zap.Error(err))
 			savedEmulatedTraces.WithLabelValues("error_restore").Inc()
