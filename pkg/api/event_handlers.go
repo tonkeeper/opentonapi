@@ -41,6 +41,9 @@ var (
 		Name: "tonapi_send_message_counter",
 		Help: "The total number of messages received by /v2/blockchain/message endpoint",
 	})
+	savedEmulatedTraces = promauto.NewCounterVec(prometheus.CounterOpts{
+		Name: "saved_emulated_traces",
+	}, []string{"status"})
 )
 
 type decodedMessage struct {
@@ -398,8 +401,12 @@ func (h *Handler) EmulateMessageToAccountEvent(ctx context.Context, request *oas
 	trace, version, _, err := h.storage.GetTraceWithState(ctx, hash)
 	if err != nil {
 		h.logger.Warn("get trace from storage: ", zap.Error(err))
+		savedEmulatedTraces.WithLabelValues("error_restore").Inc()
 	}
 	if trace == nil || h.tongoVersion == 0 || version > h.tongoVersion {
+		if version > h.tongoVersion {
+			savedEmulatedTraces.WithLabelValues("expired").Inc()
+		}
 		configBase64, err := h.storage.TrimmedConfigBase64()
 		if err != nil {
 			return nil, toError(http.StatusInternalServerError, err)
@@ -426,8 +433,12 @@ func (h *Handler) EmulateMessageToAccountEvent(ctx context.Context, request *oas
 		}
 		err = h.storage.SaveTraceWithState(ctx, hash, trace, h.tongoVersion, []abi.MethodInvocation{}, 24*time.Hour)
 		if err != nil {
-			fmt.Println("trace not saved: ", err)
+			h.logger.Warn("trace not saved: ", zap.Error(err))
+			savedEmulatedTraces.WithLabelValues("error_save").Inc()
 		}
+		savedEmulatedTraces.WithLabelValues("success").Inc()
+	} else {
+		savedEmulatedTraces.WithLabelValues("restored").Inc()
 	}
 	actions, err := bath.FindActions(ctx, trace, bath.WithInformationSource(h.storage))
 	if err != nil {
@@ -459,8 +470,12 @@ func (h *Handler) EmulateMessageToEvent(ctx context.Context, request *oas.Emulat
 		trace, version, _, err := h.storage.GetTraceWithState(ctx, hs)
 		if err != nil {
 			h.logger.Warn("get trace from storage: ", zap.Error(err))
+			savedEmulatedTraces.WithLabelValues("error_restore").Inc()
 		}
 		if trace == nil || h.tongoVersion == 0 || version > h.tongoVersion {
+			if version > h.tongoVersion {
+				savedEmulatedTraces.WithLabelValues("expired").Inc()
+			}
 			var m tlb.Message
 			if err := tlb.Unmarshal(c, &m); err != nil {
 				return nil, toError(http.StatusBadRequest, err)
@@ -491,8 +506,12 @@ func (h *Handler) EmulateMessageToEvent(ctx context.Context, request *oas.Emulat
 			}
 			err = h.storage.SaveTraceWithState(ctx, hs, trace, h.tongoVersion, []abi.MethodInvocation{}, 24*time.Hour)
 			if err != nil {
-				fmt.Println("trace not saved: ", err)
+				h.logger.Warn("trace not saved: ", zap.Error(err))
+				savedEmulatedTraces.WithLabelValues("error_save").Inc()
 			}
+			savedEmulatedTraces.WithLabelValues("success").Inc()
+		} else {
+			savedEmulatedTraces.WithLabelValues("restored").Inc()
 		}
 	}
 	actions, err := bath.FindActions(ctx, trace, bath.WithInformationSource(h.storage))
@@ -525,8 +544,12 @@ func (h *Handler) EmulateMessageToTrace(ctx context.Context, request *oas.Emulat
 		trace, version, _, err := h.storage.GetTraceWithState(ctx, hs)
 		if err != nil {
 			h.logger.Warn("get trace from storage: ", zap.Error(err))
+			savedEmulatedTraces.WithLabelValues("error_restore").Inc()
 		}
 		if trace == nil || h.tongoVersion == 0 || version > h.tongoVersion {
+			if version > h.tongoVersion {
+				savedEmulatedTraces.WithLabelValues("expired").Inc()
+			}
 			var m tlb.Message
 			err = tlb.Unmarshal(c, &m)
 			if err != nil {
@@ -558,8 +581,12 @@ func (h *Handler) EmulateMessageToTrace(ctx context.Context, request *oas.Emulat
 			}
 			err = h.storage.SaveTraceWithState(ctx, hs, trace, h.tongoVersion, []abi.MethodInvocation{}, 24*time.Hour)
 			if err != nil {
-				fmt.Println("trace not saved: ", err)
+				h.logger.Warn("trace not saved: ", zap.Error(err))
+				savedEmulatedTraces.WithLabelValues("error_save").Inc()
 			}
+			savedEmulatedTraces.WithLabelValues("success").Inc()
+		} else {
+			savedEmulatedTraces.WithLabelValues("restored").Inc()
 		}
 	}
 	t := convertTrace(trace, h.addressBook)
@@ -654,8 +681,12 @@ func (h *Handler) EmulateMessageToWallet(ctx context.Context, request *oas.Emula
 	trace, version, _, err := h.storage.GetTraceWithState(ctx, hash)
 	if err != nil {
 		h.logger.Warn("get trace from storage: ", zap.Error(err))
+		savedEmulatedTraces.WithLabelValues("error_restore").Inc()
 	}
 	if trace == nil || h.tongoVersion == 0 || version > h.tongoVersion {
+		if version > h.tongoVersion {
+			savedEmulatedTraces.WithLabelValues("expired").Inc()
+		}
 		configBase64, err := h.storage.TrimmedConfigBase64()
 		if err != nil {
 			return nil, toError(http.StatusInternalServerError, err)
@@ -698,8 +729,12 @@ func (h *Handler) EmulateMessageToWallet(ctx context.Context, request *oas.Emula
 		}
 		err = h.storage.SaveTraceWithState(ctx, hash, trace, h.tongoVersion, []abi.MethodInvocation{}, 24*time.Hour)
 		if err != nil {
-			fmt.Println("trace not saved: ", err)
+			h.logger.Warn("trace not saved: ", zap.Error(err))
+			savedEmulatedTraces.WithLabelValues("error_save").Inc()
 		}
+		savedEmulatedTraces.WithLabelValues("success").Inc()
+	} else {
+		savedEmulatedTraces.WithLabelValues("restored").Inc()
 	}
 	t := convertTrace(trace, h.addressBook)
 	actions, err := bath.FindActions(ctx, trace, bath.ForAccount(*walletAddress), bath.WithInformationSource(h.storage))
