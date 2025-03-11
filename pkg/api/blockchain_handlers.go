@@ -1,6 +1,7 @@
 package api
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
@@ -70,6 +71,25 @@ func (h *Handler) GetBlockchainBlock(ctx context.Context, params oas.GetBlockcha
 	}
 	res := convertBlockHeader(*block)
 	return &res, nil
+}
+
+func (h *Handler) DownloadBlockchainBlockBoc(ctx context.Context, params oas.DownloadBlockchainBlockBocParams) (*oas.DownloadBlockchainBlockBocOKHeaders, error) {
+	blockID, err := ton.ParseBlockID(params.BlockID)
+	if err != nil {
+		return nil, toError(http.StatusBadRequest, err)
+	}
+
+	bocBytes, err := h.blockSource.GetBlockchainBlock(ctx, blockID.Workchain, blockID.Shard, blockID.Seqno)
+	if err != nil {
+		return nil, toError(http.StatusInternalServerError, err)
+	}
+
+	return &oas.DownloadBlockchainBlockBocOKHeaders{
+		ContentDisposition: oas.NewOptString(fmt.Sprintf(`attachment; filename="block_%s.boc"`, params.BlockID)),
+		Response: oas.DownloadBlockchainBlockBocOK{
+			Data: bytes.NewReader(bocBytes),
+		},
+	}, nil
 }
 
 func (h *Handler) GetBlockchainMasterchainShards(ctx context.Context, params oas.GetBlockchainMasterchainShardsParams) (r *oas.BlockchainBlockShards, _ error) {

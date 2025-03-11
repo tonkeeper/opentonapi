@@ -606,9 +606,126 @@ func (s *Server) handleDnsResolveRequest(args [1]string, argsEscaped bool, w htt
 	}
 }
 
+// handleDownloadBlockchainBlockBocRequest handles downloadBlockchainBlockBoc operation.
+//
+// Download blockchain block BOC.
+//
+// GET /v2/blockchain/blocks/{block_id}/boc
+func (s *Server) handleDownloadBlockchainBlockBocRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("downloadBlockchainBlockBoc"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/blockchain/blocks/{block_id}/boc"),
+	}
+
+	// Start a span for this request.
+	ctx, span := s.cfg.Tracer.Start(r.Context(), "DownloadBlockchainBlockBoc",
+		trace.WithAttributes(otelAttrs...),
+		serverSpanKind,
+	)
+	defer span.End()
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		elapsedDuration := time.Since(startTime)
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		s.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	s.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	var (
+		recordError = func(stage string, err error) {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			s.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		err          error
+		opErrContext = ogenerrors.OperationContext{
+			Name: "DownloadBlockchainBlockBoc",
+			ID:   "downloadBlockchainBlockBoc",
+		}
+	)
+	params, err := decodeDownloadBlockchainBlockBocParams(args, argsEscaped, r)
+	if err != nil {
+		err = &ogenerrors.DecodeParamsError{
+			OperationContext: opErrContext,
+			Err:              err,
+		}
+		recordError("DecodeParams", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+
+	var response *DownloadBlockchainBlockBocOKHeaders
+	if m := s.cfg.Middleware; m != nil {
+		mreq := middleware.Request{
+			Context:          ctx,
+			OperationName:    "DownloadBlockchainBlockBoc",
+			OperationSummary: "",
+			OperationID:      "downloadBlockchainBlockBoc",
+			Body:             nil,
+			Params: middleware.Parameters{
+				{
+					Name: "block_id",
+					In:   "path",
+				}: params.BlockID,
+			},
+			Raw: r,
+		}
+
+		type (
+			Request  = struct{}
+			Params   = DownloadBlockchainBlockBocParams
+			Response = *DownloadBlockchainBlockBocOKHeaders
+		)
+		response, err = middleware.HookMiddleware[
+			Request,
+			Params,
+			Response,
+		](
+			m,
+			mreq,
+			unpackDownloadBlockchainBlockBocParams,
+			func(ctx context.Context, request Request, params Params) (response Response, err error) {
+				response, err = s.h.DownloadBlockchainBlockBoc(ctx, params)
+				return response, err
+			},
+		)
+	} else {
+		response, err = s.h.DownloadBlockchainBlockBoc(ctx, params)
+	}
+	if err != nil {
+		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
+			if err := encodeErrorResponse(errRes, w, span); err != nil {
+				recordError("Internal", err)
+			}
+			return
+		}
+		if errors.Is(err, ht.ErrNotImplemented) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
+			recordError("Internal", err)
+		}
+		return
+	}
+
+	if err := encodeDownloadBlockchainBlockBocResponse(response, w, span); err != nil {
+		recordError("EncodeResponse", err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
+		return
+	}
+}
+
 // handleEmulateMessageToAccountEventRequest handles emulateMessageToAccountEvent operation.
 //
-// Emulate sending message to blockchain.
+// Emulate sending message to retrieve account-specific events.
 //
 // POST /v2/accounts/{account_id}/events/emulate
 func (s *Server) handleEmulateMessageToAccountEventRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -748,7 +865,7 @@ func (s *Server) handleEmulateMessageToAccountEventRequest(args [1]string, argsE
 
 // handleEmulateMessageToEventRequest handles emulateMessageToEvent operation.
 //
-// Emulate sending message to blockchain.
+// Emulate sending message to retrieve general blockchain events.
 //
 // POST /v2/events/emulate
 func (s *Server) handleEmulateMessageToEventRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -884,7 +1001,7 @@ func (s *Server) handleEmulateMessageToEventRequest(args [0]string, argsEscaped 
 
 // handleEmulateMessageToTraceRequest handles emulateMessageToTrace operation.
 //
-// Emulate sending message to blockchain.
+// Emulate sending message to retrieve with a detailed execution trace.
 //
 // POST /v2/traces/emulate
 func (s *Server) handleEmulateMessageToTraceRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -1016,7 +1133,7 @@ func (s *Server) handleEmulateMessageToTraceRequest(args [0]string, argsEscaped 
 
 // handleEmulateMessageToWalletRequest handles emulateMessageToWallet operation.
 //
-// Emulate sending message to blockchain.
+// Emulate sending message to retrieve the resulting wallet state.
 //
 // POST /v2/wallet/emulate
 func (s *Server) handleEmulateMessageToWalletRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {

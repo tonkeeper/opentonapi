@@ -5141,6 +5141,46 @@ func (s *DomainRenewAction) SetRenewer(val AccountAddress) {
 	s.Renewer = val
 }
 
+type DownloadBlockchainBlockBocOK struct {
+	Data io.Reader
+}
+
+// Read reads data from the Data reader.
+//
+// Kept to satisfy the io.Reader interface.
+func (s DownloadBlockchainBlockBocOK) Read(p []byte) (n int, err error) {
+	if s.Data == nil {
+		return 0, io.EOF
+	}
+	return s.Data.Read(p)
+}
+
+// DownloadBlockchainBlockBocOKHeaders wraps DownloadBlockchainBlockBocOK with response headers.
+type DownloadBlockchainBlockBocOKHeaders struct {
+	ContentDisposition OptString
+	Response           DownloadBlockchainBlockBocOK
+}
+
+// GetContentDisposition returns the value of ContentDisposition.
+func (s *DownloadBlockchainBlockBocOKHeaders) GetContentDisposition() OptString {
+	return s.ContentDisposition
+}
+
+// GetResponse returns the value of Response.
+func (s *DownloadBlockchainBlockBocOKHeaders) GetResponse() DownloadBlockchainBlockBocOK {
+	return s.Response
+}
+
+// SetContentDisposition sets the value of ContentDisposition.
+func (s *DownloadBlockchainBlockBocOKHeaders) SetContentDisposition(val OptString) {
+	s.ContentDisposition = val
+}
+
+// SetResponse sets the value of Response.
+func (s *DownloadBlockchainBlockBocOKHeaders) SetResponse(val DownloadBlockchainBlockBocOK) {
+	s.Response = val
+}
+
 // Ref: #/components/schemas/EcPreview
 type EcPreview struct {
 	ID       int32  `json:"id"`

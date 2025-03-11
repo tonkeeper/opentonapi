@@ -213,3 +213,7 @@ type mempoolEmulate struct {
 	traces         cache.Cache[ton.Bits256, *core.Trace]
 	accountsTraces cache.Cache[tongo.AccountID, []ton.Bits256]
 }
+
+type blockSource interface {
+	GetBlockchainBlock(ctx context.Context, workchain int32, shard uint64, seqno uint32) ([]byte, error)
+}

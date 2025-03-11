@@ -40,27 +40,33 @@ type Handler interface {
 	//
 	// GET /v2/dns/{domain_name}/resolve
 	DnsResolve(ctx context.Context, params DnsResolveParams) (*DnsRecord, error)
+	// DownloadBlockchainBlockBoc implements downloadBlockchainBlockBoc operation.
+	//
+	// Download blockchain block BOC.
+	//
+	// GET /v2/blockchain/blocks/{block_id}/boc
+	DownloadBlockchainBlockBoc(ctx context.Context, params DownloadBlockchainBlockBocParams) (*DownloadBlockchainBlockBocOKHeaders, error)
 	// EmulateMessageToAccountEvent implements emulateMessageToAccountEvent operation.
 	//
-	// Emulate sending message to blockchain.
+	// Emulate sending message to retrieve account-specific events.
 	//
 	// POST /v2/accounts/{account_id}/events/emulate
 	EmulateMessageToAccountEvent(ctx context.Context, req *EmulateMessageToAccountEventReq, params EmulateMessageToAccountEventParams) (*AccountEvent, error)
 	// EmulateMessageToEvent implements emulateMessageToEvent operation.
 	//
-	// Emulate sending message to blockchain.
+	// Emulate sending message to retrieve general blockchain events.
 	//
 	// POST /v2/events/emulate
 	EmulateMessageToEvent(ctx context.Context, req *EmulateMessageToEventReq, params EmulateMessageToEventParams) (*Event, error)
 	// EmulateMessageToTrace implements emulateMessageToTrace operation.
 	//
-	// Emulate sending message to blockchain.
+	// Emulate sending message to retrieve with a detailed execution trace.
 	//
 	// POST /v2/traces/emulate
 	EmulateMessageToTrace(ctx context.Context, req *EmulateMessageToTraceReq, params EmulateMessageToTraceParams) (*Trace, error)
 	// EmulateMessageToWallet implements emulateMessageToWallet operation.
 	//
-	// Emulate sending message to blockchain.
+	// Emulate sending message to retrieve the resulting wallet state.
 	//
 	// POST /v2/wallet/emulate
 	EmulateMessageToWallet(ctx context.Context, req *EmulateMessageToWalletReq, params EmulateMessageToWalletParams) (*MessageConsequences, error)
