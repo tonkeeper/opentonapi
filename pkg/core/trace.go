@@ -2,7 +2,9 @@ package core
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
+	"github.com/tonkeeper/tongo/ton"
 	"sync"
 
 	"github.com/shopspring/decimal"
@@ -63,6 +65,58 @@ func (t *Trace) SetAdditionalInfo(info *TraceAdditionalInfo) {
 	t.mu.Lock()
 	defer t.mu.Unlock()
 	t.additionalInfo = info
+}
+
+func (t *TraceAdditionalInfo) MarshalJSON() ([]byte, error) {
+	type Alias struct {
+		JettonMasters       map[string]string    `json:",omitempty"`
+		NftSaleContract     *NftSaleContract     `json:",omitempty"`
+		STONfiPool          *STONfiPool          `json:",omitempty"`
+		EmulatedTeleitemNFT *EmulatedTeleitemNFT `json:",omitempty"`
+	}
+
+	masters := make(map[string]string)
+	if t.JettonMasters != nil {
+		for k, v := range t.JettonMasters {
+			masters[k.String()] = v.String()
+		}
+	}
+
+	return json.Marshal(&Alias{
+		JettonMasters:       masters,
+		NftSaleContract:     t.NftSaleContract,
+		STONfiPool:          t.STONfiPool,
+		EmulatedTeleitemNFT: t.EmulatedTeleitemNFT,
+	})
+}
+
+func (t *TraceAdditionalInfo) UnmarshalJSON(data []byte) error {
+	type Alias struct {
+		JettonMasters       map[string]string    `json:",omitempty"`
+		NftSaleContract     *NftSaleContract     `json:",omitempty"`
+		STONfiPool          *STONfiPool          `json:",omitempty"`
+		EmulatedTeleitemNFT *EmulatedTeleitemNFT `json:",omitempty"`
+	}
+
+	aux := &Alias{}
+	if err := json.Unmarshal(data, aux); err != nil {
+		return err
+	}
+
+	if aux.JettonMasters != nil {
+		t.JettonMasters = make(map[tongo.AccountID]tongo.AccountID)
+		for kStr, vStr := range aux.JettonMasters {
+			key := ton.MustParseAccountID(kStr)
+			val := ton.MustParseAccountID(vStr)
+			t.JettonMasters[key] = val
+		}
+	}
+
+	t.NftSaleContract = aux.NftSaleContract
+	t.STONfiPool = aux.STONfiPool
+	t.EmulatedTeleitemNFT = aux.EmulatedTeleitemNFT
+
+	return nil
 }
 
 func (t *Trace) InProgress() bool {
