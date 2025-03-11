@@ -193,9 +193,6 @@ func hasInterface(interfacesList []abi.ContractInterface, name abi.ContractInter
 }
 
 func Visit(trace *Trace, fn func(trace *Trace)) {
-	if trace == nil {
-		return
-	}
 	fn(trace)
 	for _, child := range trace.Children {
 		Visit(child, fn)
