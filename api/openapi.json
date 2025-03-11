@@ -6691,7 +6691,7 @@
   },
   "/v2/accounts/{account_id}/events/emulate": {
    "post": {
-    "description": "Emulate sending message to blockchain",
+    "description": "Emulate sending message to retrieve account-specific events",
     "operationId": "emulateMessageToAccountEvent",
     "parameters": [
      {
@@ -7546,16 +7546,6 @@
        },
        "type": "array"
       }
-     },
-     {
-      "in": "query",
-      "name": "fix_order",
-      "required": false,
-      "schema": {
-       "default": true,
-       "description": "A temporary fix to switch to a scheme with direct ordering of arguments. \nIf equal to false, then the method takes arguments in direct order,\ne.g. for get_nft_content(int index, cell individual_content) we pass a list of arguments [index, individual_content].\nIf equal to true, then the method takes arguments in reverse order, e.g. [individual_content, index].",
-       "type": "boolean"
-      }
      }
     ],
     "responses": {
@@ -8181,7 +8171,7 @@
   },
   "/v2/events/emulate": {
    "post": {
-    "description": "Emulate sending message to blockchain",
+    "description": "Emulate sending message to retrieve general blockchain events",
     "operationId": "emulateMessageToEvent",
     "parameters": [
      {
@@ -10720,7 +10710,7 @@
   },
   "/v2/traces/emulate": {
    "post": {
-    "description": "Emulate sending message to blockchain",
+    "description": "Emulate sending message to retrieve with a detailed execution trace",
     "operationId": "emulateMessageToTrace",
     "parameters": [
      {
@@ -10823,7 +10813,7 @@
   },
   "/v2/wallet/emulate": {
    "post": {
-    "description": "Emulate sending message to blockchain",
+    "description": "Emulate sending message to retrieve the resulting wallet state",
     "operationId": "emulateMessageToWallet",
     "parameters": [
      {

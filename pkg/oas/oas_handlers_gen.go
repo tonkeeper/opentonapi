@@ -608,7 +608,7 @@ func (s *Server) handleDnsResolveRequest(args [1]string, argsEscaped bool, w htt
 
 // handleEmulateMessageToAccountEventRequest handles emulateMessageToAccountEvent operation.
 //
-// Emulate sending message to blockchain.
+// Emulate sending message to retrieve account-specific events.
 //
 // POST /v2/accounts/{account_id}/events/emulate
 func (s *Server) handleEmulateMessageToAccountEventRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -748,7 +748,7 @@ func (s *Server) handleEmulateMessageToAccountEventRequest(args [1]string, argsE
 
 // handleEmulateMessageToEventRequest handles emulateMessageToEvent operation.
 //
-// Emulate sending message to blockchain.
+// Emulate sending message to retrieve general blockchain events.
 //
 // POST /v2/events/emulate
 func (s *Server) handleEmulateMessageToEventRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -884,7 +884,7 @@ func (s *Server) handleEmulateMessageToEventRequest(args [0]string, argsEscaped 
 
 // handleEmulateMessageToTraceRequest handles emulateMessageToTrace operation.
 //
-// Emulate sending message to blockchain.
+// Emulate sending message to retrieve with a detailed execution trace.
 //
 // POST /v2/traces/emulate
 func (s *Server) handleEmulateMessageToTraceRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -1016,7 +1016,7 @@ func (s *Server) handleEmulateMessageToTraceRequest(args [0]string, argsEscaped 
 
 // handleEmulateMessageToWalletRequest handles emulateMessageToWallet operation.
 //
-// Emulate sending message to blockchain.
+// Emulate sending message to retrieve the resulting wallet state.
 //
 // POST /v2/wallet/emulate
 func (s *Server) handleEmulateMessageToWalletRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -1220,10 +1220,6 @@ func (s *Server) handleExecGetMethodForBlockchainAccountRequest(args [2]string, 
 					Name: "args",
 					In:   "query",
 				}: params.Args,
-				{
-					Name: "fix_order",
-					In:   "query",
-				}: params.FixOrder,
 			},
 			Raw: r,
 		}
