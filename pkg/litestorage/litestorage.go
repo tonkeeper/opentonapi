@@ -574,3 +574,15 @@ func (s *LiteStorage) SaveTraceWithState(ctx context.Context, msgHash string, tr
 func (s *LiteStorage) GetTraceWithState(ctx context.Context, msgHash string) (*core.Trace, int, []abi.MethodInvocation, error) {
 	return nil, 0, nil, fmt.Errorf("not implemented")
 }
+
+func (s *LiteStorage) GetBlockchainBlock(ctx context.Context, id tongo.BlockID) ([]byte, error) {
+	idExt, _, err := s.client.LookupBlock(ctx, id, 1, nil, nil)
+	if err != nil {
+		return nil, err
+	}
+	block, err := s.client.GetBlockRaw(ctx, idExt)
+	if err != nil {
+		return nil, err
+	}
+	return block.Data, nil
+}

@@ -215,5 +215,5 @@ type mempoolEmulate struct {
 }
 
 type blockSource interface {
-	GetBlockchainBlock(ctx context.Context, workchain int32, shard uint64, seqno uint32) ([]byte, error)
+	GetBlockchainBlock(ctx context.Context, id tongo.BlockID) ([]byte, error)
 }
