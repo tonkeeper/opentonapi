@@ -59,6 +59,7 @@ func (h *Handler) GaslessEstimate(ctx context.Context, req *oas.GaslessEstimateR
 		Commission:   signParams.Commission,
 		From:         walletAddress.ToRaw(),
 		ValidUntil:   time.Now().UTC().Add(4 * time.Minute).Unix(),
+		ProtocolName: signParams.ProtocolName,
 	}
 	o.Messages = make([]oas.SignRawMessage, 0, len(signParams.Messages))
 	for _, msg := range signParams.Messages {
@@ -77,23 +78,24 @@ func (h *Handler) GaslessEstimate(ctx context.Context, req *oas.GaslessEstimateR
 	return o, nil
 }
 
-func (h *Handler) GaslessSend(ctx context.Context, req *oas.GaslessSendReq) error {
+func (h *Handler) GaslessSend(ctx context.Context, req *oas.GaslessSendReq) (*oas.GaslessTx, error) {
 	if h.gasless == nil {
-		return toError(http.StatusNotImplemented, fmt.Errorf("not implemented"))
+		return nil, toError(http.StatusNotImplemented, fmt.Errorf("not implemented"))
 	}
 	msg, err := decodeMessage(req.Boc)
 	if err != nil {
-		return toError(http.StatusBadRequest, err)
+		return nil, toError(http.StatusBadRequest, err)
 	}
 	pubkey, err := hex.DecodeString(req.WalletPublicKey)
 	if err != nil {
-		return toError(http.StatusBadRequest, err)
+		return nil, toError(http.StatusBadRequest, err)
 	}
 	if len(pubkey) != ed25519.PublicKeySize {
-		return toError(http.StatusBadRequest, fmt.Errorf("invalid public key"))
+		return nil, toError(http.StatusBadRequest, fmt.Errorf("invalid public key"))
 	}
-	if err := h.gasless.Send(ctx, pubkey, msg.payload); err != nil {
-		return toError(http.StatusInternalServerError, err)
+	results, err := h.gasless.Send(ctx, pubkey, msg.payload)
+	if err != nil {
+		return nil, toError(http.StatusInternalServerError, err)
 	}
-	return nil
+	return &oas.GaslessTx{ProtocolName: results.ProtocolName}, nil
 }

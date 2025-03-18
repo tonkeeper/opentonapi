@@ -174,7 +174,7 @@ type addressBook interface {
 type Gasless interface {
 	Config(ctx context.Context) (gasless.Config, error)
 	Estimate(ctx context.Context, masterID ton.AccountID, walletAddress ton.AccountID, walletPubkey []byte, messages []string) (gasless.SignRawParams, error)
-	Send(ctx context.Context, walletPublicKey ed25519.PublicKey, payload []byte) error
+	Send(ctx context.Context, walletPublicKey ed25519.PublicKey, payload []byte) (*gasless.TxSendingResults, error)
 }
 
 type ratesSource interface {

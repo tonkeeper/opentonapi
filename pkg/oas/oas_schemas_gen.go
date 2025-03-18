@@ -5848,9 +5848,6 @@ func (s *GaslessEstimateReqMessagesItem) SetBoc(val string) {
 	s.Boc = val
 }
 
-// GaslessSendOK is response for GaslessSend operation.
-type GaslessSendOK struct{}
-
 type GaslessSendReq struct {
 	// Hex encoded public key.
 	WalletPublicKey string `json:"wallet_public_key"`
@@ -5875,6 +5872,21 @@ func (s *GaslessSendReq) SetWalletPublicKey(val string) {
 // SetBoc sets the value of Boc.
 func (s *GaslessSendReq) SetBoc(val string) {
 	s.Boc = val
+}
+
+// Ref: #/components/schemas/GaslessTx
+type GaslessTx struct {
+	ProtocolName string `json:"protocol_name"`
+}
+
+// GetProtocolName returns the value of ProtocolName.
+func (s *GaslessTx) GetProtocolName() string {
+	return s.ProtocolName
+}
+
+// SetProtocolName sets the value of ProtocolName.
+func (s *GaslessTx) SetProtocolName(val string) {
+	s.ProtocolName = val
 }
 
 type GetAccountDiffOK struct {
@@ -15439,12 +15451,18 @@ func (s *SignRawMessage) SetStateInit(val OptString) {
 
 // Ref: #/components/schemas/SignRawParams
 type SignRawParams struct {
+	ProtocolName string `json:"protocol_name"`
 	RelayAddress string `json:"relay_address"`
 	// Commission for the transaction. In nanocoins.
 	Commission string           `json:"commission"`
 	From       string           `json:"from"`
 	ValidUntil int64            `json:"valid_until"`
 	Messages   []SignRawMessage `json:"messages"`
+}
+
+// GetProtocolName returns the value of ProtocolName.
+func (s *SignRawParams) GetProtocolName() string {
+	return s.ProtocolName
 }
 
 // GetRelayAddress returns the value of RelayAddress.
@@ -15470,6 +15488,11 @@ func (s *SignRawParams) GetValidUntil() int64 {
 // GetMessages returns the value of Messages.
 func (s *SignRawParams) GetMessages() []SignRawMessage {
 	return s.Messages
+}
+
+// SetProtocolName sets the value of ProtocolName.
+func (s *SignRawParams) SetProtocolName(val string) {
+	s.ProtocolName = val
 }
 
 // SetRelayAddress sets the value of RelayAddress.

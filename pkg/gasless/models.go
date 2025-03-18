@@ -16,4 +16,9 @@ type SignRawParams struct {
 	RelayAddress string
 	Commission   string
 	Messages     []Message
+	ProtocolName string
+}
+
+type TxSendingResults struct {
+	ProtocolName string
 }
