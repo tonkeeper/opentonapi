@@ -2126,6 +2126,10 @@ paths:
       responses:
         '200':
           description: the message has been sent
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GaslessTx'
         'default':
           $ref: '#/components/responses/Error'
   /v2/pubkeys/{public_key}/wallets:
@@ -4806,6 +4810,13 @@ components:
           type: string
           format: cell
           description: "Raw once-cell BoC encoded in hex."
+    GaslessTx:
+      type: object
+      required:
+        - protocol_name
+      properties:
+        protocol_name:
+          type: string
     SignRawParams:
       type: object
       required:
@@ -4814,7 +4825,10 @@ components:
         - commission
         - from
         - valid_until
+        - protocol_name
       properties:
+        protocol_name:
+          type: string
         relay_address:
           type: string
           format: address

@@ -3467,6 +3467,17 @@
     ],
     "type": "object"
    },
+   "GaslessTx": {
+    "properties": {
+     "protocol_name": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "protocol_name"
+    ],
+    "type": "object"
+   },
    "ImagePreview": {
     "properties": {
      "resolution": {
@@ -5299,6 +5310,9 @@
       },
       "type": "array"
      },
+     "protocol_name": {
+      "type": "string"
+     },
      "relay_address": {
       "example": "0:da6b1b6663a0e4d18cc8574ccd9db5296e367dd9324706f3bbd9eb1cd2caf0bf",
       "format": "address",
@@ -5315,7 +5329,8 @@
      "relay_address",
      "commission",
      "from",
-     "valid_until"
+     "valid_until",
+     "protocol_name"
     ],
     "type": "object"
    },
@@ -8641,6 +8656,13 @@
     },
     "responses": {
      "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/GaslessTx"
+        }
+       }
+      },
       "description": "the message has been sent"
      },
      "default": {

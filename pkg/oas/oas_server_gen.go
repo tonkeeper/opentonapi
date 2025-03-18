@@ -87,7 +87,7 @@ type Handler interface {
 	// Submits the signed gasless transaction message to the network.
 	//
 	// POST /v2/gasless/send
-	GaslessSend(ctx context.Context, req *GaslessSendReq) error
+	GaslessSend(ctx context.Context, req *GaslessSendReq) (*GaslessTx, error)
 	// GetAccount implements getAccount operation.
 	//
 	// Get human-friendly information about an account without low-level details.

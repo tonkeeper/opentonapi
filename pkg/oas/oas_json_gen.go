@@ -17048,6 +17048,102 @@ func (s *GaslessSendReq) UnmarshalJSON(data []byte) error {
 }
 
 // Encode implements json.Marshaler.
+func (s *GaslessTx) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *GaslessTx) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("protocol_name")
+		e.Str(s.ProtocolName)
+	}
+}
+
+var jsonFieldsNameOfGaslessTx = [1]string{
+	0: "protocol_name",
+}
+
+// Decode decodes GaslessTx from json.
+func (s *GaslessTx) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode GaslessTx to nil")
+	}
+	var requiredBitSet [1]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "protocol_name":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				v, err := d.Str()
+				s.ProtocolName = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"protocol_name\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode GaslessTx")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00000001,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfGaslessTx) {
+					name = jsonFieldsNameOfGaslessTx[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *GaslessTx) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *GaslessTx) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
 func (s *GetAccountDiffOK) Encode(e *jx.Encoder) {
 	e.ObjStart()
 	s.encodeFields(e)
@@ -35151,6 +35247,10 @@ func (s *SignRawParams) Encode(e *jx.Encoder) {
 // encodeFields encodes fields.
 func (s *SignRawParams) encodeFields(e *jx.Encoder) {
 	{
+		e.FieldStart("protocol_name")
+		e.Str(s.ProtocolName)
+	}
+	{
 		e.FieldStart("relay_address")
 		e.Str(s.RelayAddress)
 	}
@@ -35176,12 +35276,13 @@ func (s *SignRawParams) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfSignRawParams = [5]string{
-	0: "relay_address",
-	1: "commission",
-	2: "from",
-	3: "valid_until",
-	4: "messages",
+var jsonFieldsNameOfSignRawParams = [6]string{
+	0: "protocol_name",
+	1: "relay_address",
+	2: "commission",
+	3: "from",
+	4: "valid_until",
+	5: "messages",
 }
 
 // Decode decodes SignRawParams from json.
@@ -35193,8 +35294,20 @@ func (s *SignRawParams) Decode(d *jx.Decoder) error {
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
-		case "relay_address":
+		case "protocol_name":
 			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				v, err := d.Str()
+				s.ProtocolName = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"protocol_name\"")
+			}
+		case "relay_address":
+			requiredBitSet[0] |= 1 << 1
 			if err := func() error {
 				v, err := d.Str()
 				s.RelayAddress = string(v)
@@ -35206,7 +35319,7 @@ func (s *SignRawParams) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"relay_address\"")
 			}
 		case "commission":
-			requiredBitSet[0] |= 1 << 1
+			requiredBitSet[0] |= 1 << 2
 			if err := func() error {
 				v, err := d.Str()
 				s.Commission = string(v)
@@ -35218,7 +35331,7 @@ func (s *SignRawParams) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"commission\"")
 			}
 		case "from":
-			requiredBitSet[0] |= 1 << 2
+			requiredBitSet[0] |= 1 << 3
 			if err := func() error {
 				v, err := d.Str()
 				s.From = string(v)
@@ -35230,7 +35343,7 @@ func (s *SignRawParams) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"from\"")
 			}
 		case "valid_until":
-			requiredBitSet[0] |= 1 << 3
+			requiredBitSet[0] |= 1 << 4
 			if err := func() error {
 				v, err := d.Int64()
 				s.ValidUntil = int64(v)
@@ -35242,7 +35355,7 @@ func (s *SignRawParams) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"valid_until\"")
 			}
 		case "messages":
-			requiredBitSet[0] |= 1 << 4
+			requiredBitSet[0] |= 1 << 5
 			if err := func() error {
 				s.Messages = make([]SignRawMessage, 0)
 				if err := d.Arr(func(d *jx.Decoder) error {
@@ -35269,7 +35382,7 @@ func (s *SignRawParams) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b00011111,
+		0b00111111,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.

@@ -1559,7 +1559,7 @@ func (s *Server) handleGaslessSendRequest(args [0]string, argsEscaped bool, w ht
 		}
 	}()
 
-	var response *GaslessSendOK
+	var response *GaslessTx
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:          ctx,
@@ -1574,7 +1574,7 @@ func (s *Server) handleGaslessSendRequest(args [0]string, argsEscaped bool, w ht
 		type (
 			Request  = *GaslessSendReq
 			Params   = struct{}
-			Response = *GaslessSendOK
+			Response = *GaslessTx
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -1585,12 +1585,12 @@ func (s *Server) handleGaslessSendRequest(args [0]string, argsEscaped bool, w ht
 			mreq,
 			nil,
 			func(ctx context.Context, request Request, params Params) (response Response, err error) {
-				err = s.h.GaslessSend(ctx, request)
+				response, err = s.h.GaslessSend(ctx, request)
 				return response, err
 			},
 		)
 	} else {
-		err = s.h.GaslessSend(ctx, request)
+		response, err = s.h.GaslessSend(ctx, request)
 	}
 	if err != nil {
 		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
