@@ -1,4 +1,4 @@
-module github.com/tonkeeper/opentonapi
+module github.com/tonkeeper/opentonapi/v2
 
 go 1.22
 toolchain go1.24.1
