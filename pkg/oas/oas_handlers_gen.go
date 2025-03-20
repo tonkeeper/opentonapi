@@ -6946,6 +6946,10 @@ func (s *Server) handleGetInscriptionOpTemplateRequest(args [0]string, argsEscap
 			Body:             nil,
 			Params: middleware.Parameters{
 				{
+					Name: "operation",
+					In:   "query",
+				}: params.Operation,
+				{
 					Name: "type",
 					In:   "query",
 				}: params.Type,
@@ -6957,10 +6961,6 @@ func (s *Server) handleGetInscriptionOpTemplateRequest(args [0]string, argsEscap
 					Name: "comment",
 					In:   "query",
 				}: params.Comment,
-				{
-					Name: "operation",
-					In:   "query",
-				}: params.Operation,
 				{
 					Name: "amount",
 					In:   "query",

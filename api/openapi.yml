@@ -1529,6 +1529,7 @@ paths:
       tags:
         - Inscriptions
       parameters:
+        - $ref: '#/components/parameters/inscription_operation'
         - in: query
           name: type
           required: true
@@ -1546,13 +1547,6 @@ paths:
           required: false
           schema:
             type: string
-        - in: query
-          name: operation
-          required: true
-          schema:
-            type: string
-            enum: [ "transfer" ]
-            example: "transfer"
         - in: query
           name: amount
           required: true
@@ -2921,6 +2915,14 @@ paths:
           $ref: '#/components/responses/Error'
 components:
   parameters:
+    inscription_operation:
+      in: query
+      name: operation
+      required: true
+      schema:
+        type: string
+        enum: [ "transfer" ]
+        example: "transfer"
     masterchainSeqno:
       in: path
       name: masterchain_seqno
