@@ -134,26 +134,6 @@ type Handler interface {
 	//
 	// POST /v2/tonconnect/stateinit
 	GetAccountInfoByStateInit(ctx context.Context, req *GetAccountInfoByStateInitReq) (*AccountInfoByStateInit, error)
-	// GetAccountInscriptions implements getAccountInscriptions operation.
-	//
-	// Get all inscriptions by owner address. It's experimental API and can be dropped in the future.
-	//
-	// GET /v2/experimental/accounts/{account_id}/inscriptions
-	GetAccountInscriptions(ctx context.Context, params GetAccountInscriptionsParams) (*InscriptionBalances, error)
-	// GetAccountInscriptionsHistory implements getAccountInscriptionsHistory operation.
-	//
-	// Get the transfer inscriptions history for account. It's experimental API and can be dropped in the
-	// future.
-	//
-	// GET /v2/experimental/accounts/{account_id}/inscriptions/history
-	GetAccountInscriptionsHistory(ctx context.Context, params GetAccountInscriptionsHistoryParams) (*AccountEvents, error)
-	// GetAccountInscriptionsHistoryByTicker implements getAccountInscriptionsHistoryByTicker operation.
-	//
-	// Get the transfer inscriptions history for account. It's experimental API and can be dropped in the
-	// future.
-	//
-	// GET /v2/experimental/accounts/{account_id}/inscriptions/{ticker}/history
-	GetAccountInscriptionsHistoryByTicker(ctx context.Context, params GetAccountInscriptionsHistoryByTickerParams) (*AccountEvents, error)
 	// GetAccountJettonBalance implements getAccountJettonBalance operation.
 	//
 	// Get Jetton balance by owner address.
@@ -361,13 +341,6 @@ type Handler interface {
 	//
 	// GET /v2/extra-currency/{id}
 	GetExtraCurrencyInfo(ctx context.Context, params GetExtraCurrencyInfoParams) (*EcPreview, error)
-	// GetInscriptionOpTemplate implements getInscriptionOpTemplate operation.
-	//
-	// Return comment for making operation with inscription. please don't use it if you don't know what
-	// you are doing.
-	//
-	// GET /v2/experimental/inscriptions/op-template
-	GetInscriptionOpTemplate(ctx context.Context, params GetInscriptionOpTemplateParams) (*GetInscriptionOpTemplateOK, error)
 	// GetItemsFromCollection implements getItemsFromCollection operation.
 	//
 	// Get NFT items from collection by collection address.

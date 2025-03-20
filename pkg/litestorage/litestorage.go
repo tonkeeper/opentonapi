@@ -547,14 +547,6 @@ func (s *LiteStorage) GetDnsExpiring(ctx context.Context, id tongo.AccountID, pe
 	return nil, nil
 }
 
-func (c *LiteStorage) GetInscriptionBalancesByAccount(ctx context.Context, a ton.AccountID) ([]core.InscriptionBalance, error) {
-	return nil, fmt.Errorf("not implemented") //and cannot be without full blockckchain index
-}
-
-func (c *LiteStorage) GetInscriptionsHistoryByAccount(ctx context.Context, a ton.AccountID, ticker *string, beforeLt int64, limit int) ([]core.InscriptionMessage, error) {
-	return nil, fmt.Errorf("not implemented") //and cannot be without full blockckchain index
-}
-
 func (s *LiteStorage) GetReducedBlocks(ctx context.Context, from, to int64) ([]core.ReducedBlock, error) {
 	return nil, fmt.Errorf("not implemented")
 }

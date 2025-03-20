@@ -199,35 +199,6 @@ func (UnimplementedHandler) GetAccountInfoByStateInit(ctx context.Context, req *
 	return r, ht.ErrNotImplemented
 }
 
-// GetAccountInscriptions implements getAccountInscriptions operation.
-//
-// Get all inscriptions by owner address. It's experimental API and can be dropped in the future.
-//
-// GET /v2/experimental/accounts/{account_id}/inscriptions
-func (UnimplementedHandler) GetAccountInscriptions(ctx context.Context, params GetAccountInscriptionsParams) (r *InscriptionBalances, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
-// GetAccountInscriptionsHistory implements getAccountInscriptionsHistory operation.
-//
-// Get the transfer inscriptions history for account. It's experimental API and can be dropped in the
-// future.
-//
-// GET /v2/experimental/accounts/{account_id}/inscriptions/history
-func (UnimplementedHandler) GetAccountInscriptionsHistory(ctx context.Context, params GetAccountInscriptionsHistoryParams) (r *AccountEvents, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
-// GetAccountInscriptionsHistoryByTicker implements getAccountInscriptionsHistoryByTicker operation.
-//
-// Get the transfer inscriptions history for account. It's experimental API and can be dropped in the
-// future.
-//
-// GET /v2/experimental/accounts/{account_id}/inscriptions/{ticker}/history
-func (UnimplementedHandler) GetAccountInscriptionsHistoryByTicker(ctx context.Context, params GetAccountInscriptionsHistoryByTickerParams) (r *AccountEvents, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
 // GetAccountJettonBalance implements getAccountJettonBalance operation.
 //
 // Get Jetton balance by owner address.
@@ -531,16 +502,6 @@ func (UnimplementedHandler) GetEvent(ctx context.Context, params GetEventParams)
 //
 // GET /v2/extra-currency/{id}
 func (UnimplementedHandler) GetExtraCurrencyInfo(ctx context.Context, params GetExtraCurrencyInfoParams) (r *EcPreview, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
-// GetInscriptionOpTemplate implements getInscriptionOpTemplate operation.
-//
-// Return comment for making operation with inscription. please don't use it if you don't know what
-// you are doing.
-//
-// GET /v2/experimental/inscriptions/op-template
-func (UnimplementedHandler) GetInscriptionOpTemplate(ctx context.Context, params GetInscriptionOpTemplateParams) (r *GetInscriptionOpTemplateOK, _ error) {
 	return r, ht.ErrNotImplemented
 }
 

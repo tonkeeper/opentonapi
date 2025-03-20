@@ -1529,206 +1529,31 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 					}
 
 					elem = origElem
-				case 'x': // Prefix: "x"
+				case 'x': // Prefix: "xtra-currency/"
 					origElem := elem
-					if l := len("x"); len(elem) >= l && elem[0:l] == "x" {
+					if l := len("xtra-currency/"); len(elem) >= l && elem[0:l] == "xtra-currency/" {
 						elem = elem[l:]
 					} else {
 						break
 					}
 
+					// Param: "id"
+					// Leaf parameter
+					args[0] = elem
+					elem = ""
+
 					if len(elem) == 0 {
-						break
-					}
-					switch elem[0] {
-					case 'p': // Prefix: "perimental/"
-						origElem := elem
-						if l := len("perimental/"); len(elem) >= l && elem[0:l] == "perimental/" {
-							elem = elem[l:]
-						} else {
-							break
+						// Leaf node.
+						switch r.Method {
+						case "GET":
+							s.handleGetExtraCurrencyInfoRequest([1]string{
+								args[0],
+							}, elemIsEscaped, w, r)
+						default:
+							s.notAllowed(w, r, "GET")
 						}
 
-						if len(elem) == 0 {
-							break
-						}
-						switch elem[0] {
-						case 'a': // Prefix: "accounts/"
-							origElem := elem
-							if l := len("accounts/"); len(elem) >= l && elem[0:l] == "accounts/" {
-								elem = elem[l:]
-							} else {
-								break
-							}
-
-							// Param: "account_id"
-							// Match until "/"
-							idx := strings.IndexByte(elem, '/')
-							if idx < 0 {
-								idx = len(elem)
-							}
-							args[0] = elem[:idx]
-							elem = elem[idx:]
-
-							if len(elem) == 0 {
-								break
-							}
-							switch elem[0] {
-							case '/': // Prefix: "/inscriptions"
-								origElem := elem
-								if l := len("/inscriptions"); len(elem) >= l && elem[0:l] == "/inscriptions" {
-									elem = elem[l:]
-								} else {
-									break
-								}
-
-								if len(elem) == 0 {
-									switch r.Method {
-									case "GET":
-										s.handleGetAccountInscriptionsRequest([1]string{
-											args[0],
-										}, elemIsEscaped, w, r)
-									default:
-										s.notAllowed(w, r, "GET")
-									}
-
-									return
-								}
-								switch elem[0] {
-								case '/': // Prefix: "/"
-									origElem := elem
-									if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
-										elem = elem[l:]
-									} else {
-										break
-									}
-
-									if len(elem) == 0 {
-										break
-									}
-									switch elem[0] {
-									case 'h': // Prefix: "history"
-										origElem := elem
-										if l := len("history"); len(elem) >= l && elem[0:l] == "history" {
-											elem = elem[l:]
-										} else {
-											break
-										}
-
-										if len(elem) == 0 {
-											// Leaf node.
-											switch r.Method {
-											case "GET":
-												s.handleGetAccountInscriptionsHistoryRequest([1]string{
-													args[0],
-												}, elemIsEscaped, w, r)
-											default:
-												s.notAllowed(w, r, "GET")
-											}
-
-											return
-										}
-
-										elem = origElem
-									}
-									// Param: "ticker"
-									// Match until "/"
-									idx := strings.IndexByte(elem, '/')
-									if idx < 0 {
-										idx = len(elem)
-									}
-									args[1] = elem[:idx]
-									elem = elem[idx:]
-
-									if len(elem) == 0 {
-										break
-									}
-									switch elem[0] {
-									case '/': // Prefix: "/history"
-										origElem := elem
-										if l := len("/history"); len(elem) >= l && elem[0:l] == "/history" {
-											elem = elem[l:]
-										} else {
-											break
-										}
-
-										if len(elem) == 0 {
-											// Leaf node.
-											switch r.Method {
-											case "GET":
-												s.handleGetAccountInscriptionsHistoryByTickerRequest([2]string{
-													args[0],
-													args[1],
-												}, elemIsEscaped, w, r)
-											default:
-												s.notAllowed(w, r, "GET")
-											}
-
-											return
-										}
-
-										elem = origElem
-									}
-
-									elem = origElem
-								}
-
-								elem = origElem
-							}
-
-							elem = origElem
-						case 'i': // Prefix: "inscriptions/op-template"
-							origElem := elem
-							if l := len("inscriptions/op-template"); len(elem) >= l && elem[0:l] == "inscriptions/op-template" {
-								elem = elem[l:]
-							} else {
-								break
-							}
-
-							if len(elem) == 0 {
-								// Leaf node.
-								switch r.Method {
-								case "GET":
-									s.handleGetInscriptionOpTemplateRequest([0]string{}, elemIsEscaped, w, r)
-								default:
-									s.notAllowed(w, r, "GET")
-								}
-
-								return
-							}
-
-							elem = origElem
-						}
-
-						elem = origElem
-					case 't': // Prefix: "tra-currency/"
-						origElem := elem
-						if l := len("tra-currency/"); len(elem) >= l && elem[0:l] == "tra-currency/" {
-							elem = elem[l:]
-						} else {
-							break
-						}
-
-						// Param: "id"
-						// Leaf parameter
-						args[0] = elem
-						elem = ""
-
-						if len(elem) == 0 {
-							// Leaf node.
-							switch r.Method {
-							case "GET":
-								s.handleGetExtraCurrencyInfoRequest([1]string{
-									args[0],
-								}, elemIsEscaped, w, r)
-							default:
-								s.notAllowed(w, r, "GET")
-							}
-
-							return
-						}
-
-						elem = origElem
+						return
 					}
 
 					elem = origElem
@@ -5067,217 +4892,33 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 					}
 
 					elem = origElem
-				case 'x': // Prefix: "x"
+				case 'x': // Prefix: "xtra-currency/"
 					origElem := elem
-					if l := len("x"); len(elem) >= l && elem[0:l] == "x" {
+					if l := len("xtra-currency/"); len(elem) >= l && elem[0:l] == "xtra-currency/" {
 						elem = elem[l:]
 					} else {
 						break
 					}
 
+					// Param: "id"
+					// Leaf parameter
+					args[0] = elem
+					elem = ""
+
 					if len(elem) == 0 {
-						break
-					}
-					switch elem[0] {
-					case 'p': // Prefix: "perimental/"
-						origElem := elem
-						if l := len("perimental/"); len(elem) >= l && elem[0:l] == "perimental/" {
-							elem = elem[l:]
-						} else {
-							break
+						switch method {
+						case "GET":
+							// Leaf: GetExtraCurrencyInfo
+							r.name = "GetExtraCurrencyInfo"
+							r.summary = ""
+							r.operationID = "getExtraCurrencyInfo"
+							r.pathPattern = "/v2/extra-currency/{id}"
+							r.args = args
+							r.count = 1
+							return r, true
+						default:
+							return
 						}
-
-						if len(elem) == 0 {
-							break
-						}
-						switch elem[0] {
-						case 'a': // Prefix: "accounts/"
-							origElem := elem
-							if l := len("accounts/"); len(elem) >= l && elem[0:l] == "accounts/" {
-								elem = elem[l:]
-							} else {
-								break
-							}
-
-							// Param: "account_id"
-							// Match until "/"
-							idx := strings.IndexByte(elem, '/')
-							if idx < 0 {
-								idx = len(elem)
-							}
-							args[0] = elem[:idx]
-							elem = elem[idx:]
-
-							if len(elem) == 0 {
-								break
-							}
-							switch elem[0] {
-							case '/': // Prefix: "/inscriptions"
-								origElem := elem
-								if l := len("/inscriptions"); len(elem) >= l && elem[0:l] == "/inscriptions" {
-									elem = elem[l:]
-								} else {
-									break
-								}
-
-								if len(elem) == 0 {
-									switch method {
-									case "GET":
-										r.name = "GetAccountInscriptions"
-										r.summary = ""
-										r.operationID = "getAccountInscriptions"
-										r.pathPattern = "/v2/experimental/accounts/{account_id}/inscriptions"
-										r.args = args
-										r.count = 1
-										return r, true
-									default:
-										return
-									}
-								}
-								switch elem[0] {
-								case '/': // Prefix: "/"
-									origElem := elem
-									if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
-										elem = elem[l:]
-									} else {
-										break
-									}
-
-									if len(elem) == 0 {
-										break
-									}
-									switch elem[0] {
-									case 'h': // Prefix: "history"
-										origElem := elem
-										if l := len("history"); len(elem) >= l && elem[0:l] == "history" {
-											elem = elem[l:]
-										} else {
-											break
-										}
-
-										if len(elem) == 0 {
-											switch method {
-											case "GET":
-												// Leaf: GetAccountInscriptionsHistory
-												r.name = "GetAccountInscriptionsHistory"
-												r.summary = ""
-												r.operationID = "getAccountInscriptionsHistory"
-												r.pathPattern = "/v2/experimental/accounts/{account_id}/inscriptions/history"
-												r.args = args
-												r.count = 1
-												return r, true
-											default:
-												return
-											}
-										}
-
-										elem = origElem
-									}
-									// Param: "ticker"
-									// Match until "/"
-									idx := strings.IndexByte(elem, '/')
-									if idx < 0 {
-										idx = len(elem)
-									}
-									args[1] = elem[:idx]
-									elem = elem[idx:]
-
-									if len(elem) == 0 {
-										break
-									}
-									switch elem[0] {
-									case '/': // Prefix: "/history"
-										origElem := elem
-										if l := len("/history"); len(elem) >= l && elem[0:l] == "/history" {
-											elem = elem[l:]
-										} else {
-											break
-										}
-
-										if len(elem) == 0 {
-											switch method {
-											case "GET":
-												// Leaf: GetAccountInscriptionsHistoryByTicker
-												r.name = "GetAccountInscriptionsHistoryByTicker"
-												r.summary = ""
-												r.operationID = "getAccountInscriptionsHistoryByTicker"
-												r.pathPattern = "/v2/experimental/accounts/{account_id}/inscriptions/{ticker}/history"
-												r.args = args
-												r.count = 2
-												return r, true
-											default:
-												return
-											}
-										}
-
-										elem = origElem
-									}
-
-									elem = origElem
-								}
-
-								elem = origElem
-							}
-
-							elem = origElem
-						case 'i': // Prefix: "inscriptions/op-template"
-							origElem := elem
-							if l := len("inscriptions/op-template"); len(elem) >= l && elem[0:l] == "inscriptions/op-template" {
-								elem = elem[l:]
-							} else {
-								break
-							}
-
-							if len(elem) == 0 {
-								switch method {
-								case "GET":
-									// Leaf: GetInscriptionOpTemplate
-									r.name = "GetInscriptionOpTemplate"
-									r.summary = ""
-									r.operationID = "getInscriptionOpTemplate"
-									r.pathPattern = "/v2/experimental/inscriptions/op-template"
-									r.args = args
-									r.count = 0
-									return r, true
-								default:
-									return
-								}
-							}
-
-							elem = origElem
-						}
-
-						elem = origElem
-					case 't': // Prefix: "tra-currency/"
-						origElem := elem
-						if l := len("tra-currency/"); len(elem) >= l && elem[0:l] == "tra-currency/" {
-							elem = elem[l:]
-						} else {
-							break
-						}
-
-						// Param: "id"
-						// Leaf parameter
-						args[0] = elem
-						elem = ""
-
-						if len(elem) == 0 {
-							switch method {
-							case "GET":
-								// Leaf: GetExtraCurrencyInfo
-								r.name = "GetExtraCurrencyInfo"
-								r.summary = ""
-								r.operationID = "getExtraCurrencyInfo"
-								r.pathPattern = "/v2/extra-currency/{id}"
-								r.args = args
-								r.count = 1
-								return r, true
-							default:
-								return
-							}
-						}
-
-						elem = origElem
 					}
 
 					elem = origElem
