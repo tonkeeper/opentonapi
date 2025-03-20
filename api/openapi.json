@@ -564,6 +564,10 @@
          },
          "type": "array"
         },
+        "return_emulation": {
+         "default": false,
+         "type": "boolean"
+        },
         "wallet_address": {
          "format": "address",
          "type": "string"
@@ -5299,6 +5303,9 @@
       "type": "string",
       "x-js-format": "bigint"
      },
+     "emulation": {
+      "$ref": "#/components/schemas/MessageConsequences"
+     },
      "from": {
       "example": "0:da6b1b6663a0e4d18cc8574ccd9db5296e367dd9324706f3bbd9eb1cd2caf0bf",
       "format": "address",
@@ -8612,6 +8619,9 @@
     "description": "Estimates the cost of the given messages and returns a payload to sign",
     "operationId": "gaslessEstimate",
     "parameters": [
+     {
+      "$ref": "#/components/parameters/i18n"
+     },
      {
       "description": "jetton to pay commission",
       "in": "path",

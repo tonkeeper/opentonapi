@@ -13,10 +13,11 @@ type Message struct {
 }
 
 type SignRawParams struct {
-	RelayAddress string
-	Commission   string
-	Messages     []Message
-	ProtocolName string
+	RelayAddress     string
+	Commission       string
+	Messages         []Message
+	ProtocolName     string
+	EmulationResults []byte
 }
 
 type TxSendingResults struct {

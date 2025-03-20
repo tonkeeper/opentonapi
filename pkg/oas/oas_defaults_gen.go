@@ -11,6 +11,14 @@ func (s *DomainBid) setDefaults() {
 }
 
 // setDefaults set default value of fields.
+func (s *GaslessEstimateReq) setDefaults() {
+	{
+		val := bool(false)
+		s.ReturnEmulation.SetTo(val)
+	}
+}
+
+// setDefaults set default value of fields.
 func (s *ServiceStatus) setDefaults() {
 	{
 		val := bool(true)

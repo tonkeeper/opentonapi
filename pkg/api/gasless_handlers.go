@@ -4,12 +4,14 @@ import (
 	"context"
 	"crypto/ed25519"
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"time"
 
 	"github.com/tonkeeper/opentonapi/pkg/oas"
 	"github.com/tonkeeper/tongo/ton"
+	"google.golang.org/grpc/metadata"
 )
 
 func (h *Handler) GaslessConfig(ctx context.Context) (*oas.GaslessConfig, error) {
@@ -50,7 +52,11 @@ func (h *Handler) GaslessEstimate(ctx context.Context, req *oas.GaslessEstimateR
 	for _, msg := range req.Messages {
 		messages = append(messages, msg.Boc)
 	}
-	signParams, err := h.gasless.Estimate(ctx, masterID, walletAddress, publicKey, messages)
+	if params.AcceptLanguage.IsSet() {
+		meta := metadata.Pairs("accept-language", params.AcceptLanguage.Value)
+		ctx = metadata.NewOutgoingContext(context.Background(), meta)
+	}
+	signParams, err := h.gasless.Estimate(ctx, masterID, walletAddress, publicKey, messages, req.ReturnEmulation.Value)
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
 	}
@@ -60,6 +66,13 @@ func (h *Handler) GaslessEstimate(ctx context.Context, req *oas.GaslessEstimateR
 		From:         walletAddress.ToRaw(),
 		ValidUntil:   time.Now().UTC().Add(4 * time.Minute).Unix(),
 		ProtocolName: signParams.ProtocolName,
+	}
+	if len(signParams.EmulationResults) > 0 {
+		var msgConsequences oas.MessageConsequences
+		if err := json.Unmarshal(signParams.EmulationResults, &msgConsequences); err != nil {
+			return nil, toError(http.StatusInternalServerError, fmt.Errorf("failed to unmarshal emulation results"))
+		}
+		o.Emulation = oas.NewOptMessageConsequences(msgConsequences)
 	}
 	o.Messages = make([]oas.SignRawMessage, 0, len(signParams.Messages))
 	for _, msg := range signParams.Messages {
