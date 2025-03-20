@@ -1447,6 +1447,10 @@ func (s *Server) handleGaslessEstimateRequest(args [1]string, argsEscaped bool, 
 			Body:             request,
 			Params: middleware.Parameters{
 				{
+					Name: "Accept-Language",
+					In:   "header",
+				}: params.AcceptLanguage,
+				{
 					Name: "master_id",
 					In:   "path",
 				}: params.MasterID,

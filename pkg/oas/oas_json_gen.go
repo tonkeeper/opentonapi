@@ -16708,6 +16708,12 @@ func (s *GaslessEstimateReq) Encode(e *jx.Encoder) {
 // encodeFields encodes fields.
 func (s *GaslessEstimateReq) encodeFields(e *jx.Encoder) {
 	{
+		if s.ReturnEmulation.Set {
+			e.FieldStart("return_emulation")
+			s.ReturnEmulation.Encode(e)
+		}
+	}
+	{
 		e.FieldStart("wallet_address")
 		e.Str(s.WalletAddress)
 	}
@@ -16725,10 +16731,11 @@ func (s *GaslessEstimateReq) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfGaslessEstimateReq = [3]string{
-	0: "wallet_address",
-	1: "wallet_public_key",
-	2: "messages",
+var jsonFieldsNameOfGaslessEstimateReq = [4]string{
+	0: "return_emulation",
+	1: "wallet_address",
+	2: "wallet_public_key",
+	3: "messages",
 }
 
 // Decode decodes GaslessEstimateReq from json.
@@ -16737,11 +16744,22 @@ func (s *GaslessEstimateReq) Decode(d *jx.Decoder) error {
 		return errors.New("invalid: unable to decode GaslessEstimateReq to nil")
 	}
 	var requiredBitSet [1]uint8
+	s.setDefaults()
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
+		case "return_emulation":
+			if err := func() error {
+				s.ReturnEmulation.Reset()
+				if err := s.ReturnEmulation.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"return_emulation\"")
+			}
 		case "wallet_address":
-			requiredBitSet[0] |= 1 << 0
+			requiredBitSet[0] |= 1 << 1
 			if err := func() error {
 				v, err := d.Str()
 				s.WalletAddress = string(v)
@@ -16753,7 +16771,7 @@ func (s *GaslessEstimateReq) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"wallet_address\"")
 			}
 		case "wallet_public_key":
-			requiredBitSet[0] |= 1 << 1
+			requiredBitSet[0] |= 1 << 2
 			if err := func() error {
 				v, err := d.Str()
 				s.WalletPublicKey = string(v)
@@ -16765,7 +16783,7 @@ func (s *GaslessEstimateReq) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"wallet_public_key\"")
 			}
 		case "messages":
-			requiredBitSet[0] |= 1 << 2
+			requiredBitSet[0] |= 1 << 3
 			if err := func() error {
 				s.Messages = make([]GaslessEstimateReqMessagesItem, 0)
 				if err := d.Arr(func(d *jx.Decoder) error {
@@ -16792,7 +16810,7 @@ func (s *GaslessEstimateReq) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b00000111,
+		0b00001110,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -31795,6 +31813,39 @@ func (s *OptMessage) UnmarshalJSON(data []byte) error {
 	return s.Decode(d)
 }
 
+// Encode encodes MessageConsequences as json.
+func (o OptMessageConsequences) Encode(e *jx.Encoder) {
+	if !o.Set {
+		return
+	}
+	o.Value.Encode(e)
+}
+
+// Decode decodes MessageConsequences from json.
+func (o *OptMessageConsequences) Decode(d *jx.Decoder) error {
+	if o == nil {
+		return errors.New("invalid: unable to decode OptMessageConsequences to nil")
+	}
+	o.Set = true
+	if err := o.Value.Decode(d); err != nil {
+		return err
+	}
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s OptMessageConsequences) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *OptMessageConsequences) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
 // Encode encodes NftCollectionMetadata as json.
 func (o OptNftCollectionMetadata) Encode(e *jx.Encoder) {
 	if !o.Set {
@@ -35274,15 +35325,22 @@ func (s *SignRawParams) encodeFields(e *jx.Encoder) {
 		}
 		e.ArrEnd()
 	}
+	{
+		if s.Emulation.Set {
+			e.FieldStart("emulation")
+			s.Emulation.Encode(e)
+		}
+	}
 }
 
-var jsonFieldsNameOfSignRawParams = [6]string{
+var jsonFieldsNameOfSignRawParams = [7]string{
 	0: "protocol_name",
 	1: "relay_address",
 	2: "commission",
 	3: "from",
 	4: "valid_until",
 	5: "messages",
+	6: "emulation",
 }
 
 // Decode decodes SignRawParams from json.
@@ -35371,6 +35429,16 @@ func (s *SignRawParams) Decode(d *jx.Decoder) error {
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"messages\"")
+			}
+		case "emulation":
+			if err := func() error {
+				s.Emulation.Reset()
+				if err := s.Emulation.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"emulation\"")
 			}
 		default:
 			return d.Skip()

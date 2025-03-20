@@ -5799,9 +5799,15 @@ func (s *GaslessConfigGasJettonsItem) SetMasterID(val string) {
 }
 
 type GaslessEstimateReq struct {
+	ReturnEmulation OptBool                          `json:"return_emulation"`
 	WalletAddress   string                           `json:"wallet_address"`
 	WalletPublicKey string                           `json:"wallet_public_key"`
 	Messages        []GaslessEstimateReqMessagesItem `json:"messages"`
+}
+
+// GetReturnEmulation returns the value of ReturnEmulation.
+func (s *GaslessEstimateReq) GetReturnEmulation() OptBool {
+	return s.ReturnEmulation
 }
 
 // GetWalletAddress returns the value of WalletAddress.
@@ -5817,6 +5823,11 @@ func (s *GaslessEstimateReq) GetWalletPublicKey() string {
 // GetMessages returns the value of Messages.
 func (s *GaslessEstimateReq) GetMessages() []GaslessEstimateReqMessagesItem {
 	return s.Messages
+}
+
+// SetReturnEmulation sets the value of ReturnEmulation.
+func (s *GaslessEstimateReq) SetReturnEmulation(val OptBool) {
+	s.ReturnEmulation = val
 }
 
 // SetWalletAddress sets the value of WalletAddress.
@@ -13434,6 +13445,52 @@ func (o OptMessage) Or(d Message) Message {
 	return d
 }
 
+// NewOptMessageConsequences returns new OptMessageConsequences with value set to v.
+func NewOptMessageConsequences(v MessageConsequences) OptMessageConsequences {
+	return OptMessageConsequences{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptMessageConsequences is optional MessageConsequences.
+type OptMessageConsequences struct {
+	Value MessageConsequences
+	Set   bool
+}
+
+// IsSet returns true if OptMessageConsequences was set.
+func (o OptMessageConsequences) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptMessageConsequences) Reset() {
+	var v MessageConsequences
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptMessageConsequences) SetTo(v MessageConsequences) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptMessageConsequences) Get() (v MessageConsequences, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptMessageConsequences) Or(d MessageConsequences) MessageConsequences {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptNftCollectionMetadata returns new OptNftCollectionMetadata with value set to v.
 func NewOptNftCollectionMetadata(v NftCollectionMetadata) OptNftCollectionMetadata {
 	return OptNftCollectionMetadata{
@@ -15454,10 +15511,11 @@ type SignRawParams struct {
 	ProtocolName string `json:"protocol_name"`
 	RelayAddress string `json:"relay_address"`
 	// Commission for the transaction. In nanocoins.
-	Commission string           `json:"commission"`
-	From       string           `json:"from"`
-	ValidUntil int64            `json:"valid_until"`
-	Messages   []SignRawMessage `json:"messages"`
+	Commission string                 `json:"commission"`
+	From       string                 `json:"from"`
+	ValidUntil int64                  `json:"valid_until"`
+	Messages   []SignRawMessage       `json:"messages"`
+	Emulation  OptMessageConsequences `json:"emulation"`
 }
 
 // GetProtocolName returns the value of ProtocolName.
@@ -15490,6 +15548,11 @@ func (s *SignRawParams) GetMessages() []SignRawMessage {
 	return s.Messages
 }
 
+// GetEmulation returns the value of Emulation.
+func (s *SignRawParams) GetEmulation() OptMessageConsequences {
+	return s.Emulation
+}
+
 // SetProtocolName sets the value of ProtocolName.
 func (s *SignRawParams) SetProtocolName(val string) {
 	s.ProtocolName = val
@@ -15518,6 +15581,11 @@ func (s *SignRawParams) SetValidUntil(val int64) {
 // SetMessages sets the value of Messages.
 func (s *SignRawParams) SetMessages(val []SignRawMessage) {
 	s.Messages = val
+}
+
+// SetEmulation sets the value of Emulation.
+func (s *SignRawParams) SetEmulation(val OptMessageConsequences) {
+	s.Emulation = val
 }
 
 // Ref: #/components/schemas/SizeLimitsConfig

@@ -2094,6 +2094,7 @@ paths:
       description: Estimates the cost of the given messages and returns a payload to sign
       operationId: gaslessEstimate
       parameters:
+        - $ref: '#/components/parameters/i18n'
         - name: master_id
           in: path
           required: true
@@ -3307,6 +3308,9 @@ components:
               - wallet_address
               - wallet_public_key
             properties:
+              return_emulation:
+                type: boolean
+                default: false
               wallet_address:
                 type: string
                 format: address
@@ -4850,6 +4854,8 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/SignRawMessage'
+        emulation:
+          $ref: '#/components/schemas/MessageConsequences'
     MethodExecutionResult:
       type: object
       required:

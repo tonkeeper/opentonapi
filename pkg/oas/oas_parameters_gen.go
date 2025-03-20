@@ -878,11 +878,21 @@ func decodeExecGetMethodForBlockchainAccountParams(args [2]string, argsEscaped b
 
 // GaslessEstimateParams is parameters of gaslessEstimate operation.
 type GaslessEstimateParams struct {
+	AcceptLanguage OptString
 	// Jetton to pay commission.
 	MasterID string
 }
 
 func unpackGaslessEstimateParams(packed middleware.Parameters) (params GaslessEstimateParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "Accept-Language",
+			In:   "header",
+		}
+		if v, ok := packed[key]; ok {
+			params.AcceptLanguage = v.(OptString)
+		}
+	}
 	{
 		key := middleware.ParameterKey{
 			Name: "master_id",
@@ -894,6 +904,51 @@ func unpackGaslessEstimateParams(packed middleware.Parameters) (params GaslessEs
 }
 
 func decodeGaslessEstimateParams(args [1]string, argsEscaped bool, r *http.Request) (params GaslessEstimateParams, _ error) {
+	h := uri.NewHeaderDecoder(r.Header)
+	// Set default value for header: Accept-Language.
+	{
+		val := string("en")
+		params.AcceptLanguage.SetTo(val)
+	}
+	// Decode header: Accept-Language.
+	if err := func() error {
+		cfg := uri.HeaderParameterDecodingConfig{
+			Name:    "Accept-Language",
+			Explode: false,
+		}
+		if err := h.HasParam(cfg); err == nil {
+			if err := h.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotAcceptLanguageVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotAcceptLanguageVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.AcceptLanguage.SetTo(paramsDotAcceptLanguageVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "Accept-Language",
+			In:   "header",
+			Err:  err,
+		}
+	}
 	// Decode path: master_id.
 	if err := func() error {
 		param := args[0]
