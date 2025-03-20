@@ -60,6 +60,15 @@ func (UnimplementedHandler) DnsResolve(ctx context.Context, params DnsResolvePar
 	return r, ht.ErrNotImplemented
 }
 
+// DownloadBlockchainBlockBoc implements downloadBlockchainBlockBoc operation.
+//
+// Download blockchain block BOC.
+//
+// GET /v2/blockchain/blocks/{block_id}/boc
+func (UnimplementedHandler) DownloadBlockchainBlockBoc(ctx context.Context, params DownloadBlockchainBlockBocParams) (r *DownloadBlockchainBlockBocOKHeaders, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // EmulateMessageToAccountEvent implements emulateMessageToAccountEvent operation.
 //
 // Emulate sending message to retrieve account-specific events.
