@@ -4,11 +4,12 @@ import (
 	"context"
 	"encoding/hex"
 	"fmt"
-	"go.uber.org/zap"
 	"math/big"
 	"sort"
 	"strings"
 	"sync"
+
+	"go.uber.org/zap"
 
 	"github.com/tonkeeper/tongo/ton"
 
@@ -289,63 +290,6 @@ func (h *Handler) convertActionJettonMint(ctx context.Context, m *bath.JettonMin
 	return action, simplePreview
 }
 
-func (h *Handler) convertActionInscriptionMint(ctx context.Context, m *bath.InscriptionMintAction, acceptLanguage string, viewer *tongo.AccountID) (oas.OptInscriptionMintAction, oas.ActionSimplePreview) {
-	var action oas.OptInscriptionMintAction
-	action.SetTo(oas.InscriptionMintAction{
-		Recipient: convertAccountAddress(m.Minter, h.addressBook),
-		Amount:    fmt.Sprintf("%v", m.Amount),
-		Type:      oas.InscriptionMintActionType(m.Type),
-		Ticker:    m.Ticker,
-		Decimals:  9,
-	})
-	amount := fmt.Sprintf("%v", m.Amount/1_000_000_000)
-	simplePreview := oas.ActionSimplePreview{
-		Name: "Inscription Mint",
-		Description: i18n.T(acceptLanguage, i18n.C{
-			DefaultMessage: &i18n.M{
-				ID:    "inscriptionMintAction",
-				Other: "Minting {{.Value}} {{.Ticker}}",
-			},
-			TemplateData: i18n.Template{
-				"Value":  amount,
-				"Ticker": m.Ticker,
-			},
-		}),
-		Accounts: distinctAccounts(viewer, h.addressBook, &m.Minter),
-		Value:    oas.NewOptString(fmt.Sprintf("%v %v", amount, m.Ticker)),
-	}
-	return action, simplePreview
-}
-
-func (h *Handler) convertActionInscriptionTransfer(ctx context.Context, t *bath.InscriptionTransferAction, acceptLanguage string, viewer *tongo.AccountID) (oas.OptInscriptionTransferAction, oas.ActionSimplePreview) {
-	var action oas.OptInscriptionTransferAction
-	action.SetTo(oas.InscriptionTransferAction{
-		Recipient: convertAccountAddress(t.Dst, h.addressBook),
-		Sender:    convertAccountAddress(t.Src, h.addressBook),
-		Amount:    fmt.Sprintf("%v", t.Amount),
-		Type:      oas.InscriptionTransferActionType(t.Type),
-		Ticker:    t.Ticker,
-		Decimals:  9,
-	})
-	amount := fmt.Sprintf("%v", t.Amount/1_000_000_000)
-	simplePreview := oas.ActionSimplePreview{
-		Name: "Inscription Transfer",
-		Description: i18n.T(acceptLanguage, i18n.C{
-			DefaultMessage: &i18n.M{
-				ID:    "inscriptionTransferAction",
-				Other: "Transferring {{.Value}} {{.Ticker}}",
-			},
-			TemplateData: i18n.Template{
-				"Value":  amount,
-				"Ticker": t.Ticker,
-			},
-		}),
-		Accounts: distinctAccounts(viewer, h.addressBook, &t.Src, &t.Dst),
-		Value:    oas.NewOptString(fmt.Sprintf("%v %v", amount, t.Ticker)),
-	}
-	return action, simplePreview
-}
-
 func (h *Handler) convertDepositStake(d *bath.DepositStakeAction, acceptLanguage string, viewer *tongo.AccountID) (oas.OptDepositStakeAction, oas.ActionSimplePreview) {
 	var action oas.OptDepositStakeAction
 	action.SetTo(oas.DepositStakeAction{
@@ -509,10 +453,6 @@ func (h *Handler) convertAction(ctx context.Context, viewer *tongo.AccountID, a 
 			Accounts: distinctAccounts(viewer, h.addressBook, &a.JettonBurn.Sender, &a.JettonBurn.Jetton),
 			Value:    oas.NewOptString(fmt.Sprintf("%v %v", amount, meta.Name)),
 		}
-	case bath.InscriptionMint:
-		action.InscriptionMint, action.SimplePreview = h.convertActionInscriptionMint(ctx, a.InscriptionMint, acceptLanguage.Value, viewer)
-	case bath.InscriptionTransfer:
-		action.InscriptionTransfer, action.SimplePreview = h.convertActionInscriptionTransfer(ctx, a.InscriptionTransfer, acceptLanguage.Value, viewer)
 	case bath.Subscription:
 		action.Subscribe.SetTo(oas.SubscriptionAction{
 			Amount:       a.Subscription.Amount,

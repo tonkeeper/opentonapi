@@ -76,10 +76,6 @@ tags:
     externalDocs:
       description: Additional documentation
       url: https://docs.tonconsole.com/tonapi/rest-api/emulation
-  - name: Inscriptions
-    externalDocs:
-      description: Additional documentation
-      url: https://docs.tonconsole.com/tonapi/rest-api/inscriptions
   - name: Utilities
     externalDocs:
       description: Additional documentation
@@ -1425,172 +1421,6 @@ paths:
         'default':
           $ref: '#/components/responses/Error'
 
-  /v2/experimental/accounts/{account_id}/inscriptions:
-    get:
-      description: Get all inscriptions by owner address. It's experimental API and can be dropped in the future.
-      operationId: getAccountInscriptions
-      tags:
-        - Inscriptions
-      parameters:
-        - $ref: '#/components/parameters/accountIDParameter'
-        - $ref: '#/components/parameters/limitQuery'
-        - $ref: '#/components/parameters/offsetQuery'
-      responses:
-        '200':
-          description: account inscriptions
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/InscriptionBalances'
-        'default':
-          $ref: '#/components/responses/Error'
-  /v2/experimental/accounts/{account_id}/inscriptions/history:
-    get:
-      description: Get the transfer inscriptions history for account. It's experimental API and can be dropped in the future.
-      operationId: getAccountInscriptionsHistory
-      tags:
-        - Inscriptions
-      parameters:
-        - $ref: '#/components/parameters/accountIDParameter'
-        - $ref: '#/components/parameters/i18n'
-        - name: before_lt
-          in: query
-          description: "omit this parameter to get last events"
-          required: false
-          schema:
-            type: integer
-            format: int64
-            example: 25758317000002
-            x-js-format: bigint
-        - name: limit
-          in: query
-          required: false
-          schema:
-            type: integer
-            example: 100
-            default: 100
-            maximum: 1000
-            minimum: 1
-      responses:
-        '200':
-          description: account inscriptions history
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/AccountEvents'
-        'default':
-          $ref: '#/components/responses/Error'
-  /v2/experimental/accounts/{account_id}/inscriptions/{ticker}/history:
-    get:
-      description: Get the transfer inscriptions history for account. It's experimental API and can be dropped in the future.
-      operationId: getAccountInscriptionsHistoryByTicker
-      tags:
-        - Inscriptions
-      parameters:
-        - $ref: '#/components/parameters/accountIDParameter'
-        - $ref: '#/components/parameters/i18n'
-        - name: ticker
-          in: path
-          required: true
-          schema:
-            type: string
-            example: "nano"
-        - name: before_lt
-          in: query
-          description: "omit this parameter to get last events"
-          required: false
-          schema:
-            type: integer
-            format: int64
-            example: 25758317000002
-            x-js-format: bigint
-        - name: limit
-          in: query
-          required: false
-          schema:
-            type: integer
-            example: 100
-            default: 100
-            maximum: 1000
-            minimum: 1
-      responses:
-        '200':
-          description: account inscriptions history
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/AccountEvents'
-        'default':
-          $ref: '#/components/responses/Error'
-  /v2/experimental/inscriptions/op-template:
-    get:
-      description: return comment for making operation with inscription. please don't use it if you don't know what you are doing
-      operationId: getInscriptionOpTemplate
-      tags:
-        - Inscriptions
-      parameters:
-        - in: query
-          name: type
-          required: true
-          schema:
-            type: string
-            enum: [ "ton20", "gram20" ]
-            example: "ton20"
-        - in: query
-          name: destination
-          required: false
-          schema:
-            type: string
-        - in: query
-          name: comment
-          required: false
-          schema:
-            type: string
-        - in: query
-          name: operation
-          required: true
-          schema:
-            type: string
-            enum: [ "transfer" ]
-            example: "transfer"
-        - in: query
-          name: amount
-          required: true
-          schema:
-            type: string
-            x-js-format: bigint
-            example: "1000000000"
-        - in: query
-          name: ticker
-          required: true
-          schema:
-            type: string
-            example: "nano"
-        - in: query
-          name: who
-          required: true
-          schema:
-            type: string
-            example: UQAs87W4yJHlF8mt29ocA4agnMrLsOP69jC1HPyBUjJay7Mg
-      responses:
-        '200':
-          description: inscription op template
-          content:
-            application/json:
-              schema:
-                type: object
-                required:
-                  - comment
-                  - destination
-                properties:
-                  comment:
-                    type: string
-                    example: "comment"
-                  destination:
-                    type: string
-                    example: "0:0000000000000"
-        'default':
-          $ref: '#/components/responses/Error'
   /v2/jettons:
     get:
       description: Get a list of all indexed jetton masters in the blockchain.
@@ -5898,8 +5728,6 @@ components:
             - ElectionsRecoverStake
             - ElectionsDepositStake
             - DomainRenew
-            - InscriptionTransfer
-            - InscriptionMint
             - Unknown
         status:
           type: string
@@ -5945,10 +5773,6 @@ components:
           $ref: '#/components/schemas/SmartContractAction'
         DomainRenew:
           $ref: '#/components/schemas/DomainRenewAction'
-        InscriptionTransfer:
-          $ref: '#/components/schemas/InscriptionTransferAction'
-        InscriptionMint:
-          $ref: '#/components/schemas/InscriptionMintAction'
         simple_preview:
           $ref: '#/components/schemas/ActionSimplePreview'
         base_transactions:
@@ -6077,68 +5901,6 @@ components:
           example: "0:da6b1b6663a0e4d18cc8574ccd9db5296e367dd9324706f3bbd9eb1cd2caf0bf"
         renewer:
           $ref: '#/components/schemas/AccountAddress'
-    InscriptionMintAction:
-      type: object
-      required:
-        - type
-        - ticker
-        - recipient
-        - amount
-        - decimals
-      properties:
-        recipient:
-          $ref: '#/components/schemas/AccountAddress'
-        amount:
-          type: string
-          x-js-format: bigint
-          description: amount in minimal particles
-          example: "123456789"
-        type:
-          type: string
-          enum:
-            - ton20
-            - gram20
-          example: "ton20"
-        ticker:
-          type: string
-          example: "nano"
-        decimals:
-          type: integer
-          example: 9
-    InscriptionTransferAction:
-      type: object
-      required:
-        - sender
-        - recipient
-        - amount
-        - type
-        - ticker
-        - decimals
-      properties:
-        sender:
-          $ref: '#/components/schemas/AccountAddress'
-        recipient:
-          $ref: '#/components/schemas/AccountAddress'
-        amount:
-          type: string
-          x-js-format: bigint
-          description: amount in minimal particles
-          example: "123456789"
-        comment:
-          type: string
-          example: "Hi! This is your salary. \nFrom accounting with love."
-        type:
-          type: string
-          enum:
-            - ton20
-            - gram20
-          example: "ton20"
-        ticker:
-          type: string
-          example: "nano"
-        decimals:
-          type: integer
-          example: 9
     NftItemTransferAction:
       type: object
       required:
@@ -7082,39 +6844,6 @@ components:
         custom_payload_api_uri:
           type: string
           example: "https://claim-api.tonapi.io/jettons/TESTMINT"
-    InscriptionBalances:
-      type: object
-      required:
-        - inscriptions
-      properties:
-        inscriptions:
-          type: array
-          items:
-            $ref: '#/components/schemas/InscriptionBalance'
-    InscriptionBalance:
-      type: object
-      required:
-        - type
-        - ticker
-        - balance
-        - decimals
-      properties:
-        type:
-          type: string
-          enum:
-            - ton20
-            - gram20
-          example: "ton20"
-        ticker:
-          type: string
-          example: "nano"
-        balance:
-          type: string
-          x-js-format: bigint
-          example: "1000000000"
-        decimals:
-          type: integer
-          example: 9
     Jettons:
       type: object
       required:

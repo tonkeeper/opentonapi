@@ -103,10 +103,6 @@ type storage interface {
 
 	// TrimmedConfigBase64 returns the current trimmed blockchain config in a base64 format.
 	TrimmedConfigBase64() (string, error)
-
-	GetInscriptionBalancesByAccount(ctx context.Context, a ton.AccountID) ([]core.InscriptionBalance, error)
-	GetInscriptionsHistoryByAccount(ctx context.Context, a ton.AccountID, ticker *string, beforeLt int64, limit int) ([]core.InscriptionMessage, error)
-
 	GetMissedEvents(ctx context.Context, account ton.AccountID, lt uint64, limit int) ([]oas.AccountEvent, error)
 
 	GetAccountMultisigs(ctx context.Context, accountID ton.AccountID) ([]core.Multisig, error)
