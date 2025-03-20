@@ -198,6 +198,18 @@
      "type": "boolean"
     }
    },
+   "inscription_operation": {
+    "in": "query",
+    "name": "operation",
+    "required": true,
+    "schema": {
+     "enum": [
+      "transfer"
+     ],
+     "example": "transfer",
+     "type": "string"
+    }
+   },
    "jettonIDParameter": {
     "description": "jetton ID",
     "in": "path",
@@ -8458,6 +8470,9 @@
     "operationId": "getInscriptionOpTemplate",
     "parameters": [
      {
+      "$ref": "#/components/parameters/inscription_operation"
+     },
+     {
       "in": "query",
       "name": "type",
       "required": true,
@@ -8483,18 +8498,6 @@
       "name": "comment",
       "required": false,
       "schema": {
-       "type": "string"
-      }
-     },
-     {
-      "in": "query",
-      "name": "operation",
-      "required": true,
-      "schema": {
-       "enum": [
-        "transfer"
-       ],
-       "example": "transfer",
        "type": "string"
       }
      },

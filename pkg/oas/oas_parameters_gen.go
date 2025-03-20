@@ -7604,16 +7604,23 @@ func decodeGetExtraCurrencyInfoParams(args [1]string, argsEscaped bool, r *http.
 
 // GetInscriptionOpTemplateParams is parameters of getInscriptionOpTemplate operation.
 type GetInscriptionOpTemplateParams struct {
+	Operation   GetInscriptionOpTemplateOperation
 	Type        GetInscriptionOpTemplateType
 	Destination OptString
 	Comment     OptString
-	Operation   GetInscriptionOpTemplateOperation
 	Amount      string
 	Ticker      string
 	Who         string
 }
 
 func unpackGetInscriptionOpTemplateParams(packed middleware.Parameters) (params GetInscriptionOpTemplateParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "operation",
+			In:   "query",
+		}
+		params.Operation = packed[key].(GetInscriptionOpTemplateOperation)
+	}
 	{
 		key := middleware.ParameterKey{
 			Name: "type",
@@ -7641,13 +7648,6 @@ func unpackGetInscriptionOpTemplateParams(packed middleware.Parameters) (params 
 	}
 	{
 		key := middleware.ParameterKey{
-			Name: "operation",
-			In:   "query",
-		}
-		params.Operation = packed[key].(GetInscriptionOpTemplateOperation)
-	}
-	{
-		key := middleware.ParameterKey{
 			Name: "amount",
 			In:   "query",
 		}
@@ -7672,6 +7672,50 @@ func unpackGetInscriptionOpTemplateParams(packed middleware.Parameters) (params 
 
 func decodeGetInscriptionOpTemplateParams(args [0]string, argsEscaped bool, r *http.Request) (params GetInscriptionOpTemplateParams, _ error) {
 	q := uri.NewQueryDecoder(r.URL.Query())
+	// Decode query: operation.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "operation",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.Operation = GetInscriptionOpTemplateOperation(c)
+				return nil
+			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if err := params.Operation.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "operation",
+			In:   "query",
+			Err:  err,
+		}
+	}
 	// Decode query: type.
 	if err := func() error {
 		cfg := uri.QueryParameterDecodingConfig{
@@ -7794,50 +7838,6 @@ func decodeGetInscriptionOpTemplateParams(args [0]string, argsEscaped bool, r *h
 	}(); err != nil {
 		return params, &ogenerrors.DecodeParamError{
 			Name: "comment",
-			In:   "query",
-			Err:  err,
-		}
-	}
-	// Decode query: operation.
-	if err := func() error {
-		cfg := uri.QueryParameterDecodingConfig{
-			Name:    "operation",
-			Style:   uri.QueryStyleForm,
-			Explode: true,
-		}
-
-		if err := q.HasParam(cfg); err == nil {
-			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
-				val, err := d.DecodeValue()
-				if err != nil {
-					return err
-				}
-
-				c, err := conv.ToString(val)
-				if err != nil {
-					return err
-				}
-
-				params.Operation = GetInscriptionOpTemplateOperation(c)
-				return nil
-			}); err != nil {
-				return err
-			}
-			if err := func() error {
-				if err := params.Operation.Validate(); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return err
-			}
-		} else {
-			return validate.ErrFieldRequired
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "operation",
 			In:   "query",
 			Err:  err,
 		}
