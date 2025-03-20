@@ -37,6 +37,7 @@ type storage interface {
 	GetReducedBlocks(ctx context.Context, from, to int64) ([]core.ReducedBlock, error)
 	GetBlockShards(ctx context.Context, id tongo.BlockID) ([]ton.BlockID, error)
 	LastMasterchainBlockHeader(ctx context.Context) (*core.BlockHeader, error)
+	GetBlockchainBlock(ctx context.Context, blockID ton.BlockID) ([]byte, error)
 	GetTransaction(ctx context.Context, hash tongo.Bits256) (*core.Transaction, error)
 	SearchTransactionByMessageHash(ctx context.Context, hash tongo.Bits256) (*tongo.Bits256, error)
 	// GetBlockTransactions returns low-level information about transactions in a particular block.
@@ -212,8 +213,4 @@ type metadataCache struct {
 type mempoolEmulate struct {
 	traces         cache.Cache[ton.Bits256, *core.Trace]
 	accountsTraces cache.Cache[tongo.AccountID, []ton.Bits256]
-}
-
-type blockSource interface {
-	GetBlockchainBlock(ctx context.Context, id tongo.BlockID) ([]byte, error)
 }

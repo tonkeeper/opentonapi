@@ -79,7 +79,7 @@ func (h *Handler) DownloadBlockchainBlockBoc(ctx context.Context, params oas.Dow
 		return nil, toError(http.StatusBadRequest, err)
 	}
 
-	bocBytes, err := h.blockSource.GetBlockchainBlock(ctx, blockID)
+	bocBytes, err := h.storage.GetBlockchainBlock(ctx, blockID)
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}

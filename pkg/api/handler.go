@@ -47,7 +47,6 @@ type Handler struct {
 	metaCache      metadataCache
 	tonConnect     *tonconnect.Server
 	verifierSource verifierSource
-	blockSource    blockSource
 
 	// mempoolEmulate contains results of emulation of messages that are in the mempool.
 	mempoolEmulate mempoolEmulate
@@ -137,12 +136,6 @@ func WithSpamFilter(spamFilter SpamFilter) Option {
 func WithRatesSource(source ratesSource) Option {
 	return func(o *Options) {
 		o.ratesSource = source
-	}
-}
-
-func WithBlocksSource(source blockSource) Option {
-	return func(o *Options) {
-		o.blockSource = source
 	}
 }
 
@@ -245,7 +238,6 @@ func NewHandler(logger *zap.Logger, opts ...Option) (*Handler, error) {
 		score:          options.score,
 		ratesSource:    rates.InitCalculator(options.ratesSource),
 		verifierSource: options.verifier,
-		blockSource:    options.blockSource,
 		metaCache: metadataCache{
 			collectionsCache: cache.NewLRUCache[tongo.AccountID, tep64.Metadata](10000, "nft_metadata_cache"),
 			jettonsCache:     cache.NewLRUCache[tongo.AccountID, tep64.Metadata](10000, "jetton_metadata_cache"),
