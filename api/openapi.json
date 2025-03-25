@@ -7564,6 +7564,44 @@
     ]
    }
   },
+  "/v2/blockchain/blocks/{block_id}/boc": {
+   "get": {
+    "description": "Download blockchain block BOC",
+    "operationId": "downloadBlockchainBlockBoc",
+    "parameters": [
+     {
+      "$ref": "#/components/parameters/blockchainBlockIDParameter"
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/octet-stream": {
+        "schema": {
+         "format": "binary",
+         "type": "string"
+        }
+       }
+      },
+      "description": "Block BOC file",
+      "headers": {
+       "Content-Disposition": {
+        "schema": {
+         "example": "attachment; filename=\"block.boc\"",
+         "type": "string"
+        }
+       }
+      }
+     },
+     "default": {
+      "$ref": "#/components/responses/Error"
+     }
+    },
+    "tags": [
+     "Blockchain"
+    ]
+   }
+  },
   "/v2/blockchain/blocks/{block_id}/transactions": {
    "get": {
     "description": "Get transactions from block",

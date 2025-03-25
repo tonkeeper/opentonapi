@@ -898,26 +898,64 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 						return
 					}
 					switch elem[0] {
-					case '/': // Prefix: "/transactions"
+					case '/': // Prefix: "/"
 						origElem := elem
-						if l := len("/transactions"); len(elem) >= l && elem[0:l] == "/transactions" {
+						if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
 							elem = elem[l:]
 						} else {
 							break
 						}
 
 						if len(elem) == 0 {
-							// Leaf node.
-							switch r.Method {
-							case "GET":
-								s.handleGetBlockchainBlockTransactionsRequest([1]string{
-									args[0],
-								}, elemIsEscaped, w, r)
-							default:
-								s.notAllowed(w, r, "GET")
+							break
+						}
+						switch elem[0] {
+						case 'b': // Prefix: "boc"
+							origElem := elem
+							if l := len("boc"); len(elem) >= l && elem[0:l] == "boc" {
+								elem = elem[l:]
+							} else {
+								break
 							}
 
-							return
+							if len(elem) == 0 {
+								// Leaf node.
+								switch r.Method {
+								case "GET":
+									s.handleDownloadBlockchainBlockBocRequest([1]string{
+										args[0],
+									}, elemIsEscaped, w, r)
+								default:
+									s.notAllowed(w, r, "GET")
+								}
+
+								return
+							}
+
+							elem = origElem
+						case 't': // Prefix: "transactions"
+							origElem := elem
+							if l := len("transactions"); len(elem) >= l && elem[0:l] == "transactions" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							if len(elem) == 0 {
+								// Leaf node.
+								switch r.Method {
+								case "GET":
+									s.handleGetBlockchainBlockTransactionsRequest([1]string{
+										args[0],
+									}, elemIsEscaped, w, r)
+								default:
+									s.notAllowed(w, r, "GET")
+								}
+
+								return
+							}
+
+							elem = origElem
 						}
 
 						elem = origElem
@@ -4203,28 +4241,68 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 						}
 					}
 					switch elem[0] {
-					case '/': // Prefix: "/transactions"
+					case '/': // Prefix: "/"
 						origElem := elem
-						if l := len("/transactions"); len(elem) >= l && elem[0:l] == "/transactions" {
+						if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
 							elem = elem[l:]
 						} else {
 							break
 						}
 
 						if len(elem) == 0 {
-							switch method {
-							case "GET":
-								// Leaf: GetBlockchainBlockTransactions
-								r.name = "GetBlockchainBlockTransactions"
-								r.summary = ""
-								r.operationID = "getBlockchainBlockTransactions"
-								r.pathPattern = "/v2/blockchain/blocks/{block_id}/transactions"
-								r.args = args
-								r.count = 1
-								return r, true
-							default:
-								return
+							break
+						}
+						switch elem[0] {
+						case 'b': // Prefix: "boc"
+							origElem := elem
+							if l := len("boc"); len(elem) >= l && elem[0:l] == "boc" {
+								elem = elem[l:]
+							} else {
+								break
 							}
+
+							if len(elem) == 0 {
+								switch method {
+								case "GET":
+									// Leaf: DownloadBlockchainBlockBoc
+									r.name = "DownloadBlockchainBlockBoc"
+									r.summary = ""
+									r.operationID = "downloadBlockchainBlockBoc"
+									r.pathPattern = "/v2/blockchain/blocks/{block_id}/boc"
+									r.args = args
+									r.count = 1
+									return r, true
+								default:
+									return
+								}
+							}
+
+							elem = origElem
+						case 't': // Prefix: "transactions"
+							origElem := elem
+							if l := len("transactions"); len(elem) >= l && elem[0:l] == "transactions" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							if len(elem) == 0 {
+								switch method {
+								case "GET":
+									// Leaf: GetBlockchainBlockTransactions
+									r.name = "GetBlockchainBlockTransactions"
+									r.summary = ""
+									r.operationID = "getBlockchainBlockTransactions"
+									r.pathPattern = "/v2/blockchain/blocks/{block_id}/transactions"
+									r.args = args
+									r.count = 1
+									return r, true
+								default:
+									return
+								}
+							}
+
+							elem = origElem
 						}
 
 						elem = origElem
