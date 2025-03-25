@@ -1087,12 +1087,6 @@
      "ExtraCurrencyTransfer": {
       "$ref": "#/components/schemas/ExtraCurrencyTransferAction"
      },
-     "InscriptionMint": {
-      "$ref": "#/components/schemas/InscriptionMintAction"
-     },
-     "InscriptionTransfer": {
-      "$ref": "#/components/schemas/InscriptionTransferAction"
-     },
      "JettonBurn": {
       "$ref": "#/components/schemas/JettonBurnAction"
      },
@@ -1169,8 +1163,6 @@
        "ElectionsRecoverStake",
        "ElectionsDepositStake",
        "DomainRenew",
-       "InscriptionTransfer",
-       "InscriptionMint",
        "Unknown"
       ],
       "example": "TonTransfer",
@@ -3519,88 +3511,6 @@
      "workchain",
      "root_hash",
      "file_hash"
-    ],
-    "type": "object"
-   },
-   "InscriptionMintAction": {
-    "properties": {
-     "amount": {
-      "description": "amount in minimal particles",
-      "example": "123456789",
-      "type": "string",
-      "x-js-format": "bigint"
-     },
-     "decimals": {
-      "example": 9,
-      "type": "integer"
-     },
-     "recipient": {
-      "$ref": "#/components/schemas/AccountAddress"
-     },
-     "ticker": {
-      "example": "nano",
-      "type": "string"
-     },
-     "type": {
-      "enum": [
-       "ton20",
-       "gram20"
-      ],
-      "example": "ton20",
-      "type": "string"
-     }
-    },
-    "required": [
-     "type",
-     "ticker",
-     "recipient",
-     "amount",
-     "decimals"
-    ],
-    "type": "object"
-   },
-   "InscriptionTransferAction": {
-    "properties": {
-     "amount": {
-      "description": "amount in minimal particles",
-      "example": "123456789",
-      "type": "string",
-      "x-js-format": "bigint"
-     },
-     "comment": {
-      "example": "Hi! This is your salary. \nFrom accounting with love.",
-      "type": "string"
-     },
-     "decimals": {
-      "example": 9,
-      "type": "integer"
-     },
-     "recipient": {
-      "$ref": "#/components/schemas/AccountAddress"
-     },
-     "sender": {
-      "$ref": "#/components/schemas/AccountAddress"
-     },
-     "ticker": {
-      "example": "nano",
-      "type": "string"
-     },
-     "type": {
-      "enum": [
-       "ton20",
-       "gram20"
-      ],
-      "example": "ton20",
-      "type": "string"
-     }
-    },
-    "required": [
-     "sender",
-     "recipient",
-     "amount",
-     "type",
-     "ticker",
-     "decimals"
     ],
     "type": "object"
    },
