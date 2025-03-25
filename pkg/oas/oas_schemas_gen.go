@@ -677,8 +677,6 @@ type Action struct {
 	JettonSwap            OptJettonSwapAction            `json:"JettonSwap"`
 	SmartContractExec     OptSmartContractAction         `json:"SmartContractExec"`
 	DomainRenew           OptDomainRenewAction           `json:"DomainRenew"`
-	InscriptionTransfer   OptInscriptionTransferAction   `json:"InscriptionTransfer"`
-	InscriptionMint       OptInscriptionMintAction       `json:"InscriptionMint"`
 	SimplePreview         ActionSimplePreview            `json:"simple_preview"`
 	BaseTransactions      []string                       `json:"base_transactions"`
 }
@@ -786,16 +784,6 @@ func (s *Action) GetSmartContractExec() OptSmartContractAction {
 // GetDomainRenew returns the value of DomainRenew.
 func (s *Action) GetDomainRenew() OptDomainRenewAction {
 	return s.DomainRenew
-}
-
-// GetInscriptionTransfer returns the value of InscriptionTransfer.
-func (s *Action) GetInscriptionTransfer() OptInscriptionTransferAction {
-	return s.InscriptionTransfer
-}
-
-// GetInscriptionMint returns the value of InscriptionMint.
-func (s *Action) GetInscriptionMint() OptInscriptionMintAction {
-	return s.InscriptionMint
 }
 
 // GetSimplePreview returns the value of SimplePreview.
@@ -911,16 +899,6 @@ func (s *Action) SetSmartContractExec(val OptSmartContractAction) {
 // SetDomainRenew sets the value of DomainRenew.
 func (s *Action) SetDomainRenew(val OptDomainRenewAction) {
 	s.DomainRenew = val
-}
-
-// SetInscriptionTransfer sets the value of InscriptionTransfer.
-func (s *Action) SetInscriptionTransfer(val OptInscriptionTransferAction) {
-	s.InscriptionTransfer = val
-}
-
-// SetInscriptionMint sets the value of InscriptionMint.
-func (s *Action) SetInscriptionMint(val OptInscriptionMintAction) {
-	s.InscriptionMint = val
 }
 
 // SetSimplePreview sets the value of SimplePreview.
@@ -1150,8 +1128,6 @@ const (
 	ActionTypeElectionsRecoverStake ActionType = "ElectionsRecoverStake"
 	ActionTypeElectionsDepositStake ActionType = "ElectionsDepositStake"
 	ActionTypeDomainRenew           ActionType = "DomainRenew"
-	ActionTypeInscriptionTransfer   ActionType = "InscriptionTransfer"
-	ActionTypeInscriptionMint       ActionType = "InscriptionMint"
 	ActionTypeUnknown               ActionType = "Unknown"
 )
 
@@ -1177,8 +1153,6 @@ func (ActionType) AllValues() []ActionType {
 		ActionTypeElectionsRecoverStake,
 		ActionTypeElectionsDepositStake,
 		ActionTypeDomainRenew,
-		ActionTypeInscriptionTransfer,
-		ActionTypeInscriptionMint,
 		ActionTypeUnknown,
 	}
 }
@@ -1223,10 +1197,6 @@ func (s ActionType) MarshalText() ([]byte, error) {
 	case ActionTypeElectionsDepositStake:
 		return []byte(s), nil
 	case ActionTypeDomainRenew:
-		return []byte(s), nil
-	case ActionTypeInscriptionTransfer:
-		return []byte(s), nil
-	case ActionTypeInscriptionMint:
 		return []byte(s), nil
 	case ActionTypeUnknown:
 		return []byte(s), nil
@@ -1294,12 +1264,6 @@ func (s *ActionType) UnmarshalText(data []byte) error {
 		return nil
 	case ActionTypeDomainRenew:
 		*s = ActionTypeDomainRenew
-		return nil
-	case ActionTypeInscriptionTransfer:
-		*s = ActionTypeInscriptionTransfer
-		return nil
-	case ActionTypeInscriptionMint:
-		*s = ActionTypeInscriptionMint
 		return nil
 	case ActionTypeUnknown:
 		*s = ActionTypeUnknown
@@ -7211,230 +7175,6 @@ func (s *InitStateRaw) SetFileHash(val string) {
 	s.FileHash = val
 }
 
-// Ref: #/components/schemas/InscriptionMintAction
-type InscriptionMintAction struct {
-	Recipient AccountAddress `json:"recipient"`
-	// Amount in minimal particles.
-	Amount   string                    `json:"amount"`
-	Type     InscriptionMintActionType `json:"type"`
-	Ticker   string                    `json:"ticker"`
-	Decimals int                       `json:"decimals"`
-}
-
-// GetRecipient returns the value of Recipient.
-func (s *InscriptionMintAction) GetRecipient() AccountAddress {
-	return s.Recipient
-}
-
-// GetAmount returns the value of Amount.
-func (s *InscriptionMintAction) GetAmount() string {
-	return s.Amount
-}
-
-// GetType returns the value of Type.
-func (s *InscriptionMintAction) GetType() InscriptionMintActionType {
-	return s.Type
-}
-
-// GetTicker returns the value of Ticker.
-func (s *InscriptionMintAction) GetTicker() string {
-	return s.Ticker
-}
-
-// GetDecimals returns the value of Decimals.
-func (s *InscriptionMintAction) GetDecimals() int {
-	return s.Decimals
-}
-
-// SetRecipient sets the value of Recipient.
-func (s *InscriptionMintAction) SetRecipient(val AccountAddress) {
-	s.Recipient = val
-}
-
-// SetAmount sets the value of Amount.
-func (s *InscriptionMintAction) SetAmount(val string) {
-	s.Amount = val
-}
-
-// SetType sets the value of Type.
-func (s *InscriptionMintAction) SetType(val InscriptionMintActionType) {
-	s.Type = val
-}
-
-// SetTicker sets the value of Ticker.
-func (s *InscriptionMintAction) SetTicker(val string) {
-	s.Ticker = val
-}
-
-// SetDecimals sets the value of Decimals.
-func (s *InscriptionMintAction) SetDecimals(val int) {
-	s.Decimals = val
-}
-
-type InscriptionMintActionType string
-
-const (
-	InscriptionMintActionTypeTon20  InscriptionMintActionType = "ton20"
-	InscriptionMintActionTypeGram20 InscriptionMintActionType = "gram20"
-)
-
-// AllValues returns all InscriptionMintActionType values.
-func (InscriptionMintActionType) AllValues() []InscriptionMintActionType {
-	return []InscriptionMintActionType{
-		InscriptionMintActionTypeTon20,
-		InscriptionMintActionTypeGram20,
-	}
-}
-
-// MarshalText implements encoding.TextMarshaler.
-func (s InscriptionMintActionType) MarshalText() ([]byte, error) {
-	switch s {
-	case InscriptionMintActionTypeTon20:
-		return []byte(s), nil
-	case InscriptionMintActionTypeGram20:
-		return []byte(s), nil
-	default:
-		return nil, errors.Errorf("invalid value: %q", s)
-	}
-}
-
-// UnmarshalText implements encoding.TextUnmarshaler.
-func (s *InscriptionMintActionType) UnmarshalText(data []byte) error {
-	switch InscriptionMintActionType(data) {
-	case InscriptionMintActionTypeTon20:
-		*s = InscriptionMintActionTypeTon20
-		return nil
-	case InscriptionMintActionTypeGram20:
-		*s = InscriptionMintActionTypeGram20
-		return nil
-	default:
-		return errors.Errorf("invalid value: %q", data)
-	}
-}
-
-// Ref: #/components/schemas/InscriptionTransferAction
-type InscriptionTransferAction struct {
-	Sender    AccountAddress `json:"sender"`
-	Recipient AccountAddress `json:"recipient"`
-	// Amount in minimal particles.
-	Amount   string                        `json:"amount"`
-	Comment  OptString                     `json:"comment"`
-	Type     InscriptionTransferActionType `json:"type"`
-	Ticker   string                        `json:"ticker"`
-	Decimals int                           `json:"decimals"`
-}
-
-// GetSender returns the value of Sender.
-func (s *InscriptionTransferAction) GetSender() AccountAddress {
-	return s.Sender
-}
-
-// GetRecipient returns the value of Recipient.
-func (s *InscriptionTransferAction) GetRecipient() AccountAddress {
-	return s.Recipient
-}
-
-// GetAmount returns the value of Amount.
-func (s *InscriptionTransferAction) GetAmount() string {
-	return s.Amount
-}
-
-// GetComment returns the value of Comment.
-func (s *InscriptionTransferAction) GetComment() OptString {
-	return s.Comment
-}
-
-// GetType returns the value of Type.
-func (s *InscriptionTransferAction) GetType() InscriptionTransferActionType {
-	return s.Type
-}
-
-// GetTicker returns the value of Ticker.
-func (s *InscriptionTransferAction) GetTicker() string {
-	return s.Ticker
-}
-
-// GetDecimals returns the value of Decimals.
-func (s *InscriptionTransferAction) GetDecimals() int {
-	return s.Decimals
-}
-
-// SetSender sets the value of Sender.
-func (s *InscriptionTransferAction) SetSender(val AccountAddress) {
-	s.Sender = val
-}
-
-// SetRecipient sets the value of Recipient.
-func (s *InscriptionTransferAction) SetRecipient(val AccountAddress) {
-	s.Recipient = val
-}
-
-// SetAmount sets the value of Amount.
-func (s *InscriptionTransferAction) SetAmount(val string) {
-	s.Amount = val
-}
-
-// SetComment sets the value of Comment.
-func (s *InscriptionTransferAction) SetComment(val OptString) {
-	s.Comment = val
-}
-
-// SetType sets the value of Type.
-func (s *InscriptionTransferAction) SetType(val InscriptionTransferActionType) {
-	s.Type = val
-}
-
-// SetTicker sets the value of Ticker.
-func (s *InscriptionTransferAction) SetTicker(val string) {
-	s.Ticker = val
-}
-
-// SetDecimals sets the value of Decimals.
-func (s *InscriptionTransferAction) SetDecimals(val int) {
-	s.Decimals = val
-}
-
-type InscriptionTransferActionType string
-
-const (
-	InscriptionTransferActionTypeTon20  InscriptionTransferActionType = "ton20"
-	InscriptionTransferActionTypeGram20 InscriptionTransferActionType = "gram20"
-)
-
-// AllValues returns all InscriptionTransferActionType values.
-func (InscriptionTransferActionType) AllValues() []InscriptionTransferActionType {
-	return []InscriptionTransferActionType{
-		InscriptionTransferActionTypeTon20,
-		InscriptionTransferActionTypeGram20,
-	}
-}
-
-// MarshalText implements encoding.TextMarshaler.
-func (s InscriptionTransferActionType) MarshalText() ([]byte, error) {
-	switch s {
-	case InscriptionTransferActionTypeTon20:
-		return []byte(s), nil
-	case InscriptionTransferActionTypeGram20:
-		return []byte(s), nil
-	default:
-		return nil, errors.Errorf("invalid value: %q", s)
-	}
-}
-
-// UnmarshalText implements encoding.TextUnmarshaler.
-func (s *InscriptionTransferActionType) UnmarshalText(data []byte) error {
-	switch InscriptionTransferActionType(data) {
-	case InscriptionTransferActionTypeTon20:
-		*s = InscriptionTransferActionTypeTon20
-		return nil
-	case InscriptionTransferActionTypeGram20:
-		*s = InscriptionTransferActionTypeGram20
-		return nil
-	default:
-		return errors.Errorf("invalid value: %q", data)
-	}
-}
-
 // Ref: #/components/schemas/JettonBalance
 type JettonBalance struct {
 	Balance       string               `json:"balance"`
@@ -12637,98 +12377,6 @@ func (o OptGetNftItemsByAddressesReq) Get() (v GetNftItemsByAddressesReq, ok boo
 
 // Or returns value if set, or given parameter if does not.
 func (o OptGetNftItemsByAddressesReq) Or(d GetNftItemsByAddressesReq) GetNftItemsByAddressesReq {
-	if v, ok := o.Get(); ok {
-		return v
-	}
-	return d
-}
-
-// NewOptInscriptionMintAction returns new OptInscriptionMintAction with value set to v.
-func NewOptInscriptionMintAction(v InscriptionMintAction) OptInscriptionMintAction {
-	return OptInscriptionMintAction{
-		Value: v,
-		Set:   true,
-	}
-}
-
-// OptInscriptionMintAction is optional InscriptionMintAction.
-type OptInscriptionMintAction struct {
-	Value InscriptionMintAction
-	Set   bool
-}
-
-// IsSet returns true if OptInscriptionMintAction was set.
-func (o OptInscriptionMintAction) IsSet() bool { return o.Set }
-
-// Reset unsets value.
-func (o *OptInscriptionMintAction) Reset() {
-	var v InscriptionMintAction
-	o.Value = v
-	o.Set = false
-}
-
-// SetTo sets value to v.
-func (o *OptInscriptionMintAction) SetTo(v InscriptionMintAction) {
-	o.Set = true
-	o.Value = v
-}
-
-// Get returns value and boolean that denotes whether value was set.
-func (o OptInscriptionMintAction) Get() (v InscriptionMintAction, ok bool) {
-	if !o.Set {
-		return v, false
-	}
-	return o.Value, true
-}
-
-// Or returns value if set, or given parameter if does not.
-func (o OptInscriptionMintAction) Or(d InscriptionMintAction) InscriptionMintAction {
-	if v, ok := o.Get(); ok {
-		return v
-	}
-	return d
-}
-
-// NewOptInscriptionTransferAction returns new OptInscriptionTransferAction with value set to v.
-func NewOptInscriptionTransferAction(v InscriptionTransferAction) OptInscriptionTransferAction {
-	return OptInscriptionTransferAction{
-		Value: v,
-		Set:   true,
-	}
-}
-
-// OptInscriptionTransferAction is optional InscriptionTransferAction.
-type OptInscriptionTransferAction struct {
-	Value InscriptionTransferAction
-	Set   bool
-}
-
-// IsSet returns true if OptInscriptionTransferAction was set.
-func (o OptInscriptionTransferAction) IsSet() bool { return o.Set }
-
-// Reset unsets value.
-func (o *OptInscriptionTransferAction) Reset() {
-	var v InscriptionTransferAction
-	o.Value = v
-	o.Set = false
-}
-
-// SetTo sets value to v.
-func (o *OptInscriptionTransferAction) SetTo(v InscriptionTransferAction) {
-	o.Set = true
-	o.Value = v
-}
-
-// Get returns value and boolean that denotes whether value was set.
-func (o OptInscriptionTransferAction) Get() (v InscriptionTransferAction, ok bool) {
-	if !o.Set {
-		return v, false
-	}
-	return o.Value, true
-}
-
-// Or returns value if set, or given parameter if does not.
-func (o OptInscriptionTransferAction) Or(d InscriptionTransferAction) InscriptionTransferAction {
 	if v, ok := o.Get(); ok {
 		return v
 	}
