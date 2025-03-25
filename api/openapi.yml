@@ -3138,6 +3138,10 @@ components:
               - wallet_address
               - wallet_public_key
             properties:
+              throw_error_if_not_enough_jettons:
+                type: boolean
+                default: false
+                description: TONAPI verifies that the account has enough jettons to pay the commission and make a transfer.
               return_emulation:
                 type: boolean
                 default: false

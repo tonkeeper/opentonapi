@@ -15,4 +15,6 @@ const (
 	ErrGaslessBalance
 	ErrGaslessBootstrapTransferDisabled
 	ErrGaslessUnknown
+	ErrGaslessNotEnoughJettons
+	ErrGaslessUnsupportedExtension
 )

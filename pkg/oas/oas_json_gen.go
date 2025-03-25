@@ -16669,6 +16669,12 @@ func (s *GaslessEstimateReq) Encode(e *jx.Encoder) {
 // encodeFields encodes fields.
 func (s *GaslessEstimateReq) encodeFields(e *jx.Encoder) {
 	{
+		if s.ThrowErrorIfNotEnoughJettons.Set {
+			e.FieldStart("throw_error_if_not_enough_jettons")
+			s.ThrowErrorIfNotEnoughJettons.Encode(e)
+		}
+	}
+	{
 		if s.ReturnEmulation.Set {
 			e.FieldStart("return_emulation")
 			s.ReturnEmulation.Encode(e)
@@ -16692,11 +16698,12 @@ func (s *GaslessEstimateReq) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfGaslessEstimateReq = [4]string{
-	0: "return_emulation",
-	1: "wallet_address",
-	2: "wallet_public_key",
-	3: "messages",
+var jsonFieldsNameOfGaslessEstimateReq = [5]string{
+	0: "throw_error_if_not_enough_jettons",
+	1: "return_emulation",
+	2: "wallet_address",
+	3: "wallet_public_key",
+	4: "messages",
 }
 
 // Decode decodes GaslessEstimateReq from json.
@@ -16709,6 +16716,16 @@ func (s *GaslessEstimateReq) Decode(d *jx.Decoder) error {
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
+		case "throw_error_if_not_enough_jettons":
+			if err := func() error {
+				s.ThrowErrorIfNotEnoughJettons.Reset()
+				if err := s.ThrowErrorIfNotEnoughJettons.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"throw_error_if_not_enough_jettons\"")
+			}
 		case "return_emulation":
 			if err := func() error {
 				s.ReturnEmulation.Reset()
@@ -16720,7 +16737,7 @@ func (s *GaslessEstimateReq) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"return_emulation\"")
 			}
 		case "wallet_address":
-			requiredBitSet[0] |= 1 << 1
+			requiredBitSet[0] |= 1 << 2
 			if err := func() error {
 				v, err := d.Str()
 				s.WalletAddress = string(v)
@@ -16732,7 +16749,7 @@ func (s *GaslessEstimateReq) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"wallet_address\"")
 			}
 		case "wallet_public_key":
-			requiredBitSet[0] |= 1 << 2
+			requiredBitSet[0] |= 1 << 3
 			if err := func() error {
 				v, err := d.Str()
 				s.WalletPublicKey = string(v)
@@ -16744,7 +16761,7 @@ func (s *GaslessEstimateReq) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"wallet_public_key\"")
 			}
 		case "messages":
-			requiredBitSet[0] |= 1 << 3
+			requiredBitSet[0] |= 1 << 4
 			if err := func() error {
 				s.Messages = make([]GaslessEstimateReqMessagesItem, 0)
 				if err := d.Arr(func(d *jx.Decoder) error {
@@ -16771,7 +16788,7 @@ func (s *GaslessEstimateReq) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b00001110,
+		0b00011100,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
