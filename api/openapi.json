@@ -568,6 +568,11 @@
          "default": false,
          "type": "boolean"
         },
+        "throw_error_if_not_enough_jettons": {
+         "default": false,
+         "description": "TONAPI verifies that the account has enough jettons to pay the commission and make a transfer.",
+         "type": "boolean"
+        },
         "wallet_address": {
          "format": "address",
          "type": "string"

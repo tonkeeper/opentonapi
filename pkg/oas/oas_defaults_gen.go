@@ -14,6 +14,10 @@ func (s *DomainBid) setDefaults() {
 func (s *GaslessEstimateReq) setDefaults() {
 	{
 		val := bool(false)
+		s.ThrowErrorIfNotEnoughJettons.SetTo(val)
+	}
+	{
+		val := bool(false)
 		s.ReturnEmulation.SetTo(val)
 	}
 }

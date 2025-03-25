@@ -5763,10 +5763,17 @@ func (s *GaslessConfigGasJettonsItem) SetMasterID(val string) {
 }
 
 type GaslessEstimateReq struct {
-	ReturnEmulation OptBool                          `json:"return_emulation"`
-	WalletAddress   string                           `json:"wallet_address"`
-	WalletPublicKey string                           `json:"wallet_public_key"`
-	Messages        []GaslessEstimateReqMessagesItem `json:"messages"`
+	// TONAPI verifies that the account has enough jettons to pay the commission and make a transfer.
+	ThrowErrorIfNotEnoughJettons OptBool                          `json:"throw_error_if_not_enough_jettons"`
+	ReturnEmulation              OptBool                          `json:"return_emulation"`
+	WalletAddress                string                           `json:"wallet_address"`
+	WalletPublicKey              string                           `json:"wallet_public_key"`
+	Messages                     []GaslessEstimateReqMessagesItem `json:"messages"`
+}
+
+// GetThrowErrorIfNotEnoughJettons returns the value of ThrowErrorIfNotEnoughJettons.
+func (s *GaslessEstimateReq) GetThrowErrorIfNotEnoughJettons() OptBool {
+	return s.ThrowErrorIfNotEnoughJettons
 }
 
 // GetReturnEmulation returns the value of ReturnEmulation.
@@ -5787,6 +5794,11 @@ func (s *GaslessEstimateReq) GetWalletPublicKey() string {
 // GetMessages returns the value of Messages.
 func (s *GaslessEstimateReq) GetMessages() []GaslessEstimateReqMessagesItem {
 	return s.Messages
+}
+
+// SetThrowErrorIfNotEnoughJettons sets the value of ThrowErrorIfNotEnoughJettons.
+func (s *GaslessEstimateReq) SetThrowErrorIfNotEnoughJettons(val OptBool) {
+	s.ThrowErrorIfNotEnoughJettons = val
 }
 
 // SetReturnEmulation sets the value of ReturnEmulation.

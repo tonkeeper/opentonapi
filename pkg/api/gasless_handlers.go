@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/tonkeeper/opentonapi/pkg/gasless"
 	"github.com/tonkeeper/opentonapi/pkg/oas"
 	"github.com/tonkeeper/tongo/ton"
 	"google.golang.org/grpc/metadata"
@@ -56,7 +57,15 @@ func (h *Handler) GaslessEstimate(ctx context.Context, req *oas.GaslessEstimateR
 		meta := metadata.Pairs("accept-language", params.AcceptLanguage.Value)
 		ctx = metadata.NewOutgoingContext(context.Background(), meta)
 	}
-	signParams, err := h.gasless.Estimate(ctx, masterID, walletAddress, publicKey, messages, req.ReturnEmulation.Value)
+	estimationParams := gasless.EstimationParams{
+		MasterID:                     masterID,
+		WalletAddress:                walletAddress,
+		WalletPublicKey:              publicKey,
+		Messages:                     messages,
+		ReturnEmulation:              req.ReturnEmulation.Value,
+		ThrowErrorIfNotEnoughJettons: req.ThrowErrorIfNotEnoughJettons.Value,
+	}
+	signParams, err := h.gasless.Estimate(ctx, estimationParams)
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
 	}
