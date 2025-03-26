@@ -4491,11 +4491,9 @@ components:
           x-js-format: bigint
           example: 123456789
         extra_balance:
-          type: object
-          additionalProperties:
-            type: string
-            # x-js-format: bigint ???
-            # example ???
+          type: array
+          items:
+            $ref: '#/components/schemas/ExtraCurrency'
         code:
           type: string
           format: cell
