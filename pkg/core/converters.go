@@ -466,7 +466,7 @@ func ConvertToAccount(accountId tongo.AccountID, shardAccount tlb.ShardAccount) 
 		LastPaid:        acc.Account.StorageStat.LastPaid,
 		UsedCells:       big.Int(acc.Account.StorageStat.Used.Cells),
 		UsedBits:        big.Int(acc.Account.StorageStat.Used.Bits),
-		UsedPublicCells: big.Int(acc.Account.StorageStat.Used.PublicCells),
+		UsedPublicCells: *big.NewInt(0), // not supported now
 	}
 	if acc.Account.StorageStat.DuePayment.Exists {
 		res.Storage.DuePayment = int64(acc.Account.StorageStat.DuePayment.Value)
