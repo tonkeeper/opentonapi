@@ -353,7 +353,7 @@ func emulatedTreeToTrace(
 			for _, accountID := range []ton.AccountID{*t0, *t1} {
 				_, value, err := abi.GetWalletData(ctx, sharedExecutor, accountID)
 				if err != nil {
-					return nil, err
+					continue
 				}
 				data := value.(abi.GetWalletDataResult)
 				master, _ := ton.AccountIDFromTlb(data.Jetton)
