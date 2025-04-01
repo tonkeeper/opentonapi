@@ -612,6 +612,7 @@ func extractDestinationWallet(message tlb.Message) (*ton.AccountID, error) {
 func prepareAccountState(accountID tongo.AccountID, state tlb.ShardAccount, startBalance int64) (tlb.ShardAccount, error) {
 	if state.Account.Status() == tlb.AccountActive {
 		state.Account.Account.Storage.Balance.Grams = tlb.Grams(startBalance)
+		state.Account.Account.StorageStat.StorageExtra.SumType = "StorageExtraNone"
 		return state, nil
 	}
 	return tontest.
