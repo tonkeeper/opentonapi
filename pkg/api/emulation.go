@@ -134,7 +134,7 @@ func (h *Handler) addToMempool(ctx context.Context, bytesBoc []byte, shardAccoun
 		return shardAccount, err
 	}
 	newShardAccount := emulator.FinalStates()
-	trace, err := emulatedTreeToTrace(ctx, h.executor, h.storage, tree, newShardAccount, nil, h.configPool)
+	trace, err := EmulatedTreeToTrace(ctx, h.executor, h.storage, tree, newShardAccount, nil, h.configPool)
 	if err != nil {
 		return shardAccount, err
 	}
@@ -178,7 +178,7 @@ func (h *Handler) addToMempool(ctx context.Context, bytesBoc []byte, shardAccoun
 	return newShardAccount, nil
 }
 
-func emulatedTreeToTrace(
+func EmulatedTreeToTrace(
 	ctx context.Context,
 	executor executor,
 	resolver core.LibraryResolver,
@@ -222,7 +222,7 @@ func emulatedTreeToTrace(
 	}
 	additionalInfo := &core.TraceAdditionalInfo{}
 	for i := range tree.Children {
-		child, err := emulatedTreeToTrace(ctx, executor, resolver, tree.Children[i], accounts, inspectionCache, configPool)
+		child, err := EmulatedTreeToTrace(ctx, executor, resolver, tree.Children[i], accounts, inspectionCache, configPool)
 		if err != nil {
 			return nil, err
 		}
