@@ -106,6 +106,7 @@ type Transaction struct {
 	CreditPhase     *TxCreditPhase
 	ActionPhase     *TxActionPhase
 	BouncePhase     *TxBouncePhase
+	Emulated        bool
 
 	Aborted   bool
 	Destroyed bool
