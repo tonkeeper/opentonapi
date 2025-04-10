@@ -38,6 +38,7 @@ func GetPackageVersionInt(packagePath string) (int, error) {
 	for _, dep := range info.Deps {
 		if strings.Contains(dep.Path, packagePath) {
 			version := strings.TrimPrefix(dep.Version, "v")
+			version = strings.Split(version, "-")[0]
 
 			parts := strings.Split(version, ".")
 
