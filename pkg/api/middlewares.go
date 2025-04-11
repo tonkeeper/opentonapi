@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	internalErrors "github.com/tonkeeper/opentonapi/pkg/pusher/errors"
 	"net/http"
 
 	"github.com/ogen-go/ogen/middleware"
@@ -48,7 +49,9 @@ func asyncLoggingMiddleware(logger *zap.Logger) func(next AsyncHandler) AsyncHan
 			)
 			logger.Info("Handling request")
 			if err := next(w, r, connectionType, allowTokenInQuery); err != nil {
-				logger.Error("Fail", zap.Error(err))
+				if e, ok := err.(internalErrors.HTTPError); ok && e.Code > 499 {
+					logger.Error("Fail", zap.Error(err))
+				}
 				return err
 			}
 			logger.Info("Success")
