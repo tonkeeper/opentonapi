@@ -1,6 +1,7 @@
 package api
 
 import (
+	"github.com/tonkeeper/tongo/ton"
 	"math/big"
 	"strconv"
 
@@ -33,14 +34,14 @@ type NormalizedMetadata struct {
 	PreviewImage        string // path to the converted image
 }
 
-func NormalizeMetadata(meta tep64.Metadata, info *addressbook.KnownJetton, trust core.TrustType) NormalizedMetadata {
+func NormalizeMetadata(addr ton.AccountID, meta tep64.Metadata, info *addressbook.KnownJetton, trust core.TrustType) NormalizedMetadata {
 	symbol := meta.Symbol
 	if symbol == "" {
-		symbol = UnknownJettonName
+		symbol = UnknownJettonName + addr.ToHuman(true, false)[44:]
 	}
 	name := meta.Name
 	if name == "" {
-		name = "Unknown Token"
+		name = "Unknown Token" + addr.ToHuman(true, false)[44:]
 	}
 	var image string
 	if meta.Image != "" {

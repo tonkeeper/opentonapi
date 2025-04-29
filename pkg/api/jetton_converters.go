@@ -156,13 +156,13 @@ func (h *Handler) convertJettonBalance(ctx context.Context, wallet core.JettonWa
 	var normalizedMetadata NormalizedMetadata
 	info, ok := h.addressBook.GetJettonInfoByAddress(wallet.JettonAddress)
 	if ok {
-		normalizedMetadata = NormalizeMetadata(meta, &info, core.TrustNone)
+		normalizedMetadata = NormalizeMetadata(wallet.JettonAddress, meta, &info, core.TrustNone)
 	} else {
 		trust := core.TrustNone
 		if h.spamFilter != nil {
 			trust = h.spamFilter.JettonTrust(wallet.JettonAddress, meta.Symbol, meta.Name, meta.Image)
 		}
-		normalizedMetadata = NormalizeMetadata(meta, nil, trust)
+		normalizedMetadata = NormalizeMetadata(wallet.JettonAddress, meta, nil, trust)
 	}
 	score, _ := h.score.GetJettonScore(wallet.JettonAddress)
 	jettonBalance.Jetton = jettonPreview(wallet.JettonAddress, normalizedMetadata, score)
