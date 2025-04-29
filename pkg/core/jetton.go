@@ -37,3 +37,26 @@ type JettonWalletLockData struct {
 	FullBalance decimal.Decimal
 	UnlockTime  int64
 }
+
+type JettonOperationType = string
+
+const (
+	TransferJettonOperation JettonOperationType = "transfer"
+	MintJettonOperation     JettonOperationType = "mint"
+	BurnJettonOperation     JettonOperationType = "burn"
+	UnknownJettonOperation  JettonOperationType = "unknown"
+)
+
+type JettonOperation struct {
+	Operation      JettonOperationType
+	Source         *tongo.AccountID
+	Destination    *tongo.AccountID
+	JettonMaster   tongo.AccountID
+	TraceID        TraceID
+	DestEndBalance decimal.Decimal
+	Amount         decimal.Decimal
+	QueryID        uint64
+	ForwardPayload string
+	Lt             uint64
+	Utime          int64
+}
