@@ -4,16 +4,15 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"go.uber.org/zap"
-	"net/http"
-	"slices"
-	"strings"
-
 	"github.com/tonkeeper/opentonapi/pkg/bath"
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/opentonapi/pkg/oas"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/ton"
+	"go.uber.org/zap"
+	"net/http"
+	"slices"
+	"strings"
 )
 
 func (h *Handler) GetAccountJettonsBalances(ctx context.Context, params oas.GetAccountJettonsBalancesParams) (*oas.JettonsBalances, error) {
@@ -97,16 +96,23 @@ func (h *Handler) GetAccountJettonsHistory(ctx context.Context, params oas.GetAc
 		return nil, toError(http.StatusInternalServerError, err)
 	}
 	var eventIDs []string
-	for _, traceID := range traceIDs {
-		eventIDs = append(eventIDs, traceID.Hex())
+	for _, op := range history {
+		eventIDs = append(eventIDs, op.TraceID.Hash.Hex())
 	}
+
 	isBannedTraces, err := h.spamFilter.GetEventsScamData(ctx, eventIDs)
 	if err != nil {
 		h.logger.Warn("error getting events spam data", zap.Error(err))
 	}
-	events, lastLT, err := h.convertJettonHistory(ctx, account.ID, nil, history, params.AcceptLanguage)
+
+	events, lastLT, err := h.convertJettonHistory(ctx, account.ID, history, params.AcceptLanguage)
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
+	}
+	for i := range events {
+		if isBannedTraces[events[i].EventID] {
+			events[i].IsScam = true
+		}
 	}
 	return &oas.AccountEvents{Events: events, NextFrom: lastLT}, nil
 }
@@ -128,16 +134,21 @@ func (h *Handler) GetAccountJettonHistoryByID(ctx context.Context, params oas.Ge
 		return nil, toError(http.StatusInternalServerError, err)
 	}
 	var eventIDs []string
-	for _, traceID := range traceIDs {
-		eventIDs = append(eventIDs, traceID.Hex())
+	for _, op := range history {
+		eventIDs = append(eventIDs, op.TraceID.Hash.Hex())
 	}
 	isBannedTraces, err := h.spamFilter.GetEventsScamData(ctx, eventIDs)
 	if err != nil {
 		h.logger.Warn("error getting events spam data", zap.Error(err))
 	}
-	events, lastLT, err := h.convertJettonHistory(ctx, account.ID, &jettonMasterAccount.ID, history, params.AcceptLanguage)
+	events, lastLT, err := h.convertJettonHistory(ctx, account.ID, history, params.AcceptLanguage)
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
+	}
+	for i := range events {
+		if isBannedTraces[events[i].EventID] {
+			events[i].IsScam = true
+		}
 	}
 	return &oas.AccountEvents{Events: events, NextFrom: lastLT}, nil
 }

@@ -338,6 +338,16 @@ func (h *Handler) GetAccountEvent(ctx context.Context, params oas.GetAccountEven
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
 	}
+	var wg sync.WaitGroup
+	wg.Add(1)
+	var isBannedTraces map[string]bool
+	go func() {
+		defer wg.Done()
+		isBannedTraces, err = h.spamFilter.GetEventsScamData(ctx, []string{traceID.Hex()})
+		if err != nil {
+			h.logger.Warn("error getting events spam data", zap.Error(err))
+		}
+	}()
 	trace, emulated, err := h.getTraceByHash(ctx, traceID)
 	if errors.Is(err, core.ErrEntityNotFound) {
 		return nil, toError(http.StatusNotFound, err)
@@ -357,10 +367,7 @@ func (h *Handler) GetAccountEvent(ctx context.Context, params oas.GetAccountEven
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
-	isBannedTraces, err := h.spamFilter.GetEventsScamData(ctx, []string{traceID.Hex()})
-	if err != nil {
-		h.logger.Warn("error getting events spam data", zap.Error(err))
-	}
+	wg.Wait()
 	event.IsScam = event.IsScam || isBannedTraces[traceID.Hex()]
 	if emulated {
 		event.InProgress = true

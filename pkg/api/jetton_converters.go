@@ -56,79 +56,78 @@ func jettonMetadata(account ton.AccountID, meta NormalizedMetadata) oas.JettonMe
 	return metadata
 }
 
-func (h *Handler) convertJettonHistory(ctx context.Context, account ton.AccountID, master *ton.AccountID, traceIDs []ton.Bits256, isBannedTraces map[string]bool, acceptLanguage oas.OptString) ([]oas.AccountEvent, int64, error) {
+func (h *Handler) convertJettonHistory(ctx context.Context, account ton.AccountID, history []core.JettonOperation, acceptLanguage oas.OptString) ([]oas.AccountEvent, int64, error) {
 	var lastLT uint64
 	var events []oas.AccountEvent
 
-	for id, ops := range history {
+	for _, op := range history {
 		event := oas.AccountEvent{
-			EventID:   id.Hash.Hex(),
+			EventID:   op.TraceID.Hash.Hex(),
 			Account:   convertAccountAddress(account, h.addressBook),
-			Timestamp: id.UTime, // TODO: or first/last op Utime
+			Timestamp: op.TraceID.UTime, // TODO: or first/last op Utime
 			IsScam:    false,
-			Lt:        int64(id.Lt), // TODO: or first/last op Lt
+			Lt:        int64(op.TraceID.Lt), // TODO: or first/last op Lt
 			Extra:     0,
 		}
-		for _, op := range ops {
-			var action bath.Action
-			switch op.Operation {
-			case core.TransferJettonOperation:
-				transferAction := bath.JettonTransferAction{
-					Jetton:    op.JettonMaster,
-					Recipient: op.Destination,
-					Sender:    op.Source,
-					Amount:    tlb.VarUInteger16(*op.Amount.BigInt()),
-				}
-				action.Type = "JettonTransfer"
-				action.JettonTransfer = &transferAction
-				var payload abi.JettonPayload
-				err := json.Unmarshal([]byte(op.ForwardPayload), &payload)
-				if err != nil {
-					break
-				}
-				switch p := payload.Value.(type) {
-				case abi.TextCommentJettonPayload:
-					comment := string(p.Text)
-					action.JettonTransfer.Comment = &comment
-				case abi.EncryptedTextCommentJettonPayload:
-					action.JettonTransfer.EncryptedComment = &bath.EncryptedComment{EncryptionType: "simple", CipherText: p.CipherText}
-				}
-			case core.MintJettonOperation:
-				mintAction := bath.JettonMintAction{
-					Jetton:    op.JettonMaster,
-					Recipient: *op.Destination,
-					Amount:    tlb.VarUInteger16(*op.Amount.BigInt()),
-				}
-				action.Type = "JettonMint"
-				action.JettonMint = &mintAction
-			case core.BurnJettonOperation:
-				burnAction := bath.JettonBurnAction{
-					Jetton: op.JettonMaster,
-					Sender: *op.Source,
-					Amount: tlb.VarUInteger16(*op.Amount.BigInt()),
-				}
-				action.Type = "JettonTransfer"
-				action.JettonBurn = &burnAction
-			default:
-				continue
+		var action bath.Action
+		switch op.Operation {
+		case core.TransferJettonOperation:
+			transferAction := bath.JettonTransferAction{
+				Jetton:    op.JettonMaster,
+				Recipient: op.Destination,
+				Sender:    op.Source,
+				Amount:    tlb.VarUInteger16(*op.Amount.BigInt()),
 			}
-			convertedAction, err := h.convertAction(ctx, &account, action, acceptLanguage)
+			action.Type = "JettonTransfer"
+			action.JettonTransfer = &transferAction
+			var payload abi.JettonPayload
+			err := json.Unmarshal([]byte(op.ForwardPayload), &payload)
 			if err != nil {
-				return nil, 0, err
+				break
 			}
-			event.Actions = append(event.Actions, convertedAction)
-			if lastLT == 0 {
-				lastLT = op.Lt
+			switch p := payload.Value.(type) {
+			case abi.TextCommentJettonPayload:
+				comment := string(p.Text)
+				action.JettonTransfer.Comment = &comment
+			case abi.EncryptedTextCommentJettonPayload:
+				action.JettonTransfer.EncryptedComment = &bath.EncryptedComment{EncryptionType: "simple", CipherText: p.CipherText}
 			}
-			if op.Lt < lastLT {
-				lastLT = op.Lt
+		case core.MintJettonOperation:
+			mintAction := bath.JettonMintAction{
+				Jetton:    op.JettonMaster,
+				Recipient: *op.Destination,
+				Amount:    tlb.VarUInteger16(*op.Amount.BigInt()),
 			}
+			action.Type = "JettonMint"
+			action.JettonMint = &mintAction
+		case core.BurnJettonOperation:
+			burnAction := bath.JettonBurnAction{
+				Jetton: op.JettonMaster,
+				Sender: *op.Source,
+				Amount: tlb.VarUInteger16(*op.Amount.BigInt()),
+			}
+			action.Type = "JettonTransfer"
+			action.JettonBurn = &burnAction
+		default:
+			continue
 		}
-		event.IsScam = h.spamFilter.IsScamEvent(event.Actions, &account, trace.Account, isBannedTraces[event.EventID])
+		convertedAction, err := h.convertAction(ctx, &account, action, acceptLanguage)
+		if err != nil {
+			return nil, 0, err
+		}
+		event.Actions = append(event.Actions, convertedAction)
+		if lastLT == 0 {
+			lastLT = op.Lt
+		}
+		if op.Lt < lastLT {
+			lastLT = op.Lt
+		}
+
+		event.IsScam = h.spamFilter.IsScamEvent(event.Actions, &account, ton.AccountID{})
 		if len(event.Actions) == 0 {
 			continue
 		}
-		event.IsScam = h.spamFilter.CheckActions(event.Actions, &account, nil)
+		event.IsScam = h.spamFilter.IsScamEvent(event.Actions, &account, ton.AccountID{})
 		events = append(events, event)
 	}
 	sort.Slice(events, func(i, j int) bool {
