@@ -35,23 +35,27 @@ func (b BubbleJettonTransfer) ToAction() (action *Action) {
 		Success: b.success,
 		Type:    JettonTransfer,
 	}
-	switch b.payload.SumType {
+	a.JettonTransfer.PayloadFromABI(b.payload)
+	return &a
+}
+
+func (jta *JettonTransferAction) PayloadFromABI(payload abi.JettonPayload) {
+	switch payload.SumType {
 	case abi.TextCommentJettonOp:
-		a.JettonTransfer.Comment = g.Pointer(string(b.payload.Value.(abi.TextCommentJettonPayload).Text))
+		jta.Comment = g.Pointer(string(payload.Value.(abi.TextCommentJettonPayload).Text))
 	case abi.EncryptedTextCommentJettonOp:
-		a.JettonTransfer.EncryptedComment = &EncryptedComment{
-			CipherText:     b.payload.Value.(abi.EncryptedTextCommentJettonPayload).CipherText,
+		jta.EncryptedComment = &EncryptedComment{
+			CipherText:     payload.Value.(abi.EncryptedTextCommentJettonPayload).CipherText,
 			EncryptionType: "simple",
 		}
 	case abi.EmptyJettonOp:
 	default:
-		if b.payload.SumType != abi.UnknownJettonOp {
-			a.JettonTransfer.Comment = g.Pointer("Call: " + b.payload.SumType)
-		} else if b.payload.OpCode != nil {
-			a.JettonTransfer.Comment = g.Pointer(fmt.Sprintf("Call: 0x%08x", *b.payload.OpCode))
+		if payload.SumType != abi.UnknownJettonOp {
+			jta.Comment = g.Pointer("Call: " + payload.SumType)
+		} else if payload.OpCode != nil {
+			jta.Comment = g.Pointer(fmt.Sprintf("Call: 0x%08x", *payload.OpCode))
 		}
 	}
-	return &a
 }
 
 type BubbleJettonMint struct {

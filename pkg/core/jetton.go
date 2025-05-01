@@ -1,6 +1,7 @@
 package core
 
 import (
+	"github.com/tonkeeper/tongo/abi"
 	"math/big"
 
 	"github.com/shopspring/decimal"
@@ -56,7 +57,7 @@ type JettonOperation struct {
 	DestEndBalance decimal.Decimal
 	Amount         decimal.Decimal
 	QueryID        uint64
-	ForwardPayload string
+	ForwardPayload abi.JettonPayload
 	Lt             uint64
 	Utime          int64
 }

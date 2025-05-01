@@ -2,10 +2,8 @@ package api
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/tonkeeper/tongo/abi"
 	"github.com/tonkeeper/tongo/tlb"
 	"net/http"
 	"sort"
@@ -78,20 +76,10 @@ func (h *Handler) convertJettonHistory(ctx context.Context, account ton.AccountI
 				Sender:    op.Source,
 				Amount:    tlb.VarUInteger16(*op.Amount.BigInt()),
 			}
+			transferAction.PayloadFromABI(op.ForwardPayload)
 			action.Type = "JettonTransfer"
 			action.JettonTransfer = &transferAction
-			var payload abi.JettonPayload
-			err := json.Unmarshal([]byte(op.ForwardPayload), &payload)
-			if err != nil {
-				break
-			}
-			switch p := payload.Value.(type) {
-			case abi.TextCommentJettonPayload:
-				comment := string(p.Text)
-				action.JettonTransfer.Comment = &comment
-			case abi.EncryptedTextCommentJettonPayload:
-				action.JettonTransfer.EncryptedComment = &bath.EncryptedComment{EncryptionType: "simple", CipherText: p.CipherText}
-			}
+			action.Success = true
 		case core.MintJettonOperation:
 			mintAction := bath.JettonMintAction{
 				Jetton:    op.JettonMaster,
