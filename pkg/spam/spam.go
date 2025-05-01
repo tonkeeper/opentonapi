@@ -24,13 +24,10 @@ func (f *Filter) GetNftsScamData(ctx context.Context, addresses []ton.AccountID)
 }
 
 func (f *Filter) GetEventsScamData(ctx context.Context, ids []string) (map[string]bool, error) {
-	return nil, nil
+	return map[string]bool{}, nil
 }
 
-func (f Filter) IsScamEvent(actions []oas.Action, viewer *ton.AccountID, initiator ton.AccountID, markedAsScam bool) bool {
-	if markedAsScam {
-		return true
-	}
+func (f Filter) IsScamEvent(actions []oas.Action, viewer *ton.AccountID, initiator ton.AccountID) bool {
 	var comment string
 	for _, action := range actions {
 		switch {

@@ -11,7 +11,8 @@ const TFPoolImplementationsURL = "https://tonvalidators.org/"
 // validated nominators contract code hash
 var TFPoolCodeHash = tongo.MustParseHash("9A3EC14BC098F6B44064C305222CAEA2800F17DDA85EE6A8198A7095EDE10DCF")
 
-var BemoAccount = ton.MustParseAccountID("EQDNhy-nxYFgUqzfUzImBEP67JqsyMIcyk2S5_RwNNEYku0k")
+var BemoAccountOld = ton.MustParseAccountID("EQDNhy-nxYFgUqzfUzImBEP67JqsyMIcyk2S5_RwNNEYku0k")
+var BemoAccountNew = ton.MustParseAccountID("EQCSxGZPHqa3TtnODgMan8CEM0jf6HpY-uon_NMeFgjKqkEY")
 
 const TonstakersImplementationsName = "Tonstakers"
 const LiquidImplementationsUrl = "https://tonstakers.com/"

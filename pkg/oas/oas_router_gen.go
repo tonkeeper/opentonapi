@@ -1736,7 +1736,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 						elem = origElem
 					}
-					// Param: "account_id"
+					// Param: "jetton_id"
 					// Match until "/"
 					idx := strings.IndexByte(elem, '/')
 					if idx < 0 {
@@ -1770,6 +1770,54 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 							break
 						}
 						switch elem[0] {
+						case 'a': // Prefix: "accounts/"
+							origElem := elem
+							if l := len("accounts/"); len(elem) >= l && elem[0:l] == "accounts/" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							// Param: "account_id"
+							// Match until "/"
+							idx := strings.IndexByte(elem, '/')
+							if idx < 0 {
+								idx = len(elem)
+							}
+							args[1] = elem[:idx]
+							elem = elem[idx:]
+
+							if len(elem) == 0 {
+								break
+							}
+							switch elem[0] {
+							case '/': // Prefix: "/history"
+								origElem := elem
+								if l := len("/history"); len(elem) >= l && elem[0:l] == "/history" {
+									elem = elem[l:]
+								} else {
+									break
+								}
+
+								if len(elem) == 0 {
+									// Leaf node.
+									switch r.Method {
+									case "GET":
+										s.handleGetJettonAccountHistoryByIDRequest([2]string{
+											args[0],
+											args[1],
+										}, elemIsEscaped, w, r)
+									default:
+										s.notAllowed(w, r, "GET")
+									}
+
+									return
+								}
+
+								elem = origElem
+							}
+
+							elem = origElem
 						case 'h': // Prefix: "holders"
 							origElem := elem
 							if l := len("holders"); len(elem) >= l && elem[0:l] == "holders" {
@@ -2418,6 +2466,39 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 						break
 					}
 
+					if len(elem) == 0 {
+						break
+					}
+					switch elem[0] {
+					case 'o': // Prefix: "order/"
+						origElem := elem
+						if l := len("order/"); len(elem) >= l && elem[0:l] == "order/" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						// Param: "account_id"
+						// Leaf parameter
+						args[0] = elem
+						elem = ""
+
+						if len(elem) == 0 {
+							// Leaf node.
+							switch r.Method {
+							case "GET":
+								s.handleGetMultisigOrderRequest([1]string{
+									args[0],
+								}, elemIsEscaped, w, r)
+							default:
+								s.notAllowed(w, r, "GET")
+							}
+
+							return
+						}
+
+						elem = origElem
+					}
 					// Param: "account_id"
 					// Leaf parameter
 					args[0] = elem
@@ -5159,7 +5240,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 
 						elem = origElem
 					}
-					// Param: "account_id"
+					// Param: "jetton_id"
 					// Match until "/"
 					idx := strings.IndexByte(elem, '/')
 					if idx < 0 {
@@ -5195,6 +5276,55 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 							break
 						}
 						switch elem[0] {
+						case 'a': // Prefix: "accounts/"
+							origElem := elem
+							if l := len("accounts/"); len(elem) >= l && elem[0:l] == "accounts/" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							// Param: "account_id"
+							// Match until "/"
+							idx := strings.IndexByte(elem, '/')
+							if idx < 0 {
+								idx = len(elem)
+							}
+							args[1] = elem[:idx]
+							elem = elem[idx:]
+
+							if len(elem) == 0 {
+								break
+							}
+							switch elem[0] {
+							case '/': // Prefix: "/history"
+								origElem := elem
+								if l := len("/history"); len(elem) >= l && elem[0:l] == "/history" {
+									elem = elem[l:]
+								} else {
+									break
+								}
+
+								if len(elem) == 0 {
+									switch method {
+									case "GET":
+										// Leaf: GetJettonAccountHistoryByID
+										r.name = "GetJettonAccountHistoryByID"
+										r.summary = ""
+										r.operationID = "getJettonAccountHistoryByID"
+										r.pathPattern = "/v2/jettons/{jetton_id}/accounts/{account_id}/history"
+										r.args = args
+										r.count = 2
+										return r, true
+									default:
+										return
+									}
+								}
+
+								elem = origElem
+							}
+
+							elem = origElem
 						case 'h': // Prefix: "holders"
 							origElem := elem
 							if l := len("holders"); len(elem) >= l && elem[0:l] == "holders" {
@@ -5894,6 +6024,41 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 						break
 					}
 
+					if len(elem) == 0 {
+						break
+					}
+					switch elem[0] {
+					case 'o': // Prefix: "order/"
+						origElem := elem
+						if l := len("order/"); len(elem) >= l && elem[0:l] == "order/" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						// Param: "account_id"
+						// Leaf parameter
+						args[0] = elem
+						elem = ""
+
+						if len(elem) == 0 {
+							switch method {
+							case "GET":
+								// Leaf: GetMultisigOrder
+								r.name = "GetMultisigOrder"
+								r.summary = ""
+								r.operationID = "getMultisigOrder"
+								r.pathPattern = "/v2/multisig/order/{account_id}"
+								r.args = args
+								r.count = 1
+								return r, true
+							default:
+								return
+							}
+						}
+
+						elem = origElem
+					}
 					// Param: "account_id"
 					// Leaf parameter
 					args[0] = elem

@@ -19,9 +19,11 @@ var (
 
 // TraceID identifies a trace by a hash of the transaction which created it and the logical time of the transaction.
 type TraceID struct {
-	Hash  tongo.Bits256
-	Lt    uint64
-	UTime int64
+	Hash                tongo.Bits256
+	Lt                  uint64
+	UTime               int64
+	Length              int
+	UniqueAccountsCount int
 }
 
 type Trace struct {

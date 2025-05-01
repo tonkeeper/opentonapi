@@ -2771,6 +2771,8 @@ func (s *Server) handleGetAccountJettonBalanceRequest(args [2]string, argsEscape
 //
 // Get the transfer jetton history for account and jetton.
 //
+// Deprecated: schema marks this operation as deprecated.
+//
 // GET /v2/accounts/{account_id}/jettons/{jetton_id}/history
 func (s *Server) handleGetAccountJettonHistoryByIDRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	otelAttrs := []attribute.KeyValue{
@@ -3086,7 +3088,7 @@ func (s *Server) handleGetAccountJettonsHistoryRequest(args [1]string, argsEscap
 		return
 	}
 
-	var response *AccountEvents
+	var response *JettonOperations
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:          ctx,
@@ -3100,10 +3102,6 @@ func (s *Server) handleGetAccountJettonsHistoryRequest(args [1]string, argsEscap
 					In:   "path",
 				}: params.AccountID,
 				{
-					Name: "Accept-Language",
-					In:   "header",
-				}: params.AcceptLanguage,
-				{
 					Name: "before_lt",
 					In:   "query",
 				}: params.BeforeLt,
@@ -3111,14 +3109,6 @@ func (s *Server) handleGetAccountJettonsHistoryRequest(args [1]string, argsEscap
 					Name: "limit",
 					In:   "query",
 				}: params.Limit,
-				{
-					Name: "start_date",
-					In:   "query",
-				}: params.StartDate,
-				{
-					Name: "end_date",
-					In:   "query",
-				}: params.EndDate,
 			},
 			Raw: r,
 		}
@@ -3126,7 +3116,7 @@ func (s *Server) handleGetAccountJettonsHistoryRequest(args [1]string, argsEscap
 		type (
 			Request  = struct{}
 			Params   = GetAccountJettonsHistoryParams
-			Response = *AccountEvents
+			Response = *JettonOperations
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -3340,7 +3330,7 @@ func (s *Server) handleGetAccountNftHistoryRequest(args [1]string, argsEscaped b
 		return
 	}
 
-	var response *AccountEvents
+	var response *NftOperations
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:          ctx,
@@ -3365,14 +3355,6 @@ func (s *Server) handleGetAccountNftHistoryRequest(args [1]string, argsEscaped b
 					Name: "limit",
 					In:   "query",
 				}: params.Limit,
-				{
-					Name: "start_date",
-					In:   "query",
-				}: params.StartDate,
-				{
-					Name: "end_date",
-					In:   "query",
-				}: params.EndDate,
 			},
 			Raw: r,
 		}
@@ -3380,7 +3362,7 @@ func (s *Server) handleGetAccountNftHistoryRequest(args [1]string, argsEscaped b
 		type (
 			Request  = struct{}
 			Params   = GetAccountNftHistoryParams
-			Response = *AccountEvents
+			Response = *NftOperations
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -6735,6 +6717,143 @@ func (s *Server) handleGetItemsFromCollectionRequest(args [1]string, argsEscaped
 	}
 }
 
+// handleGetJettonAccountHistoryByIDRequest handles getJettonAccountHistoryByID operation.
+//
+// Get the transfer jetton history for account and jetton.
+//
+// GET /v2/jettons/{jetton_id}/accounts/{account_id}/history
+func (s *Server) handleGetJettonAccountHistoryByIDRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("getJettonAccountHistoryByID"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/jettons/{jetton_id}/accounts/{account_id}/history"),
+	}
+
+	// Start a span for this request.
+	ctx, span := s.cfg.Tracer.Start(r.Context(), "GetJettonAccountHistoryByID",
+		trace.WithAttributes(otelAttrs...),
+		serverSpanKind,
+	)
+	defer span.End()
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		elapsedDuration := time.Since(startTime)
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		s.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	s.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	var (
+		recordError = func(stage string, err error) {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			s.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		err          error
+		opErrContext = ogenerrors.OperationContext{
+			Name: "GetJettonAccountHistoryByID",
+			ID:   "getJettonAccountHistoryByID",
+		}
+	)
+	params, err := decodeGetJettonAccountHistoryByIDParams(args, argsEscaped, r)
+	if err != nil {
+		err = &ogenerrors.DecodeParamsError{
+			OperationContext: opErrContext,
+			Err:              err,
+		}
+		recordError("DecodeParams", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+
+	var response *JettonOperations
+	if m := s.cfg.Middleware; m != nil {
+		mreq := middleware.Request{
+			Context:          ctx,
+			OperationName:    "GetJettonAccountHistoryByID",
+			OperationSummary: "",
+			OperationID:      "getJettonAccountHistoryByID",
+			Body:             nil,
+			Params: middleware.Parameters{
+				{
+					Name: "account_id",
+					In:   "path",
+				}: params.AccountID,
+				{
+					Name: "jetton_id",
+					In:   "path",
+				}: params.JettonID,
+				{
+					Name: "before_lt",
+					In:   "query",
+				}: params.BeforeLt,
+				{
+					Name: "limit",
+					In:   "query",
+				}: params.Limit,
+				{
+					Name: "start_date",
+					In:   "query",
+				}: params.StartDate,
+				{
+					Name: "end_date",
+					In:   "query",
+				}: params.EndDate,
+			},
+			Raw: r,
+		}
+
+		type (
+			Request  = struct{}
+			Params   = GetJettonAccountHistoryByIDParams
+			Response = *JettonOperations
+		)
+		response, err = middleware.HookMiddleware[
+			Request,
+			Params,
+			Response,
+		](
+			m,
+			mreq,
+			unpackGetJettonAccountHistoryByIDParams,
+			func(ctx context.Context, request Request, params Params) (response Response, err error) {
+				response, err = s.h.GetJettonAccountHistoryByID(ctx, params)
+				return response, err
+			},
+		)
+	} else {
+		response, err = s.h.GetJettonAccountHistoryByID(ctx, params)
+	}
+	if err != nil {
+		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
+			if err := encodeErrorResponse(errRes, w, span); err != nil {
+				recordError("Internal", err)
+			}
+			return
+		}
+		if errors.Is(err, ht.ErrNotImplemented) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
+			recordError("Internal", err)
+		}
+		return
+	}
+
+	if err := encodeGetJettonAccountHistoryByIDResponse(response, w, span); err != nil {
+		recordError("EncodeResponse", err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
+		return
+	}
+}
+
 // handleGetJettonHoldersRequest handles getJettonHolders operation.
 //
 // Get jetton's holders.
@@ -7672,6 +7791,123 @@ func (s *Server) handleGetMultisigAccountRequest(args [1]string, argsEscaped boo
 	}
 }
 
+// handleGetMultisigOrderRequest handles getMultisigOrder operation.
+//
+// Get multisig order.
+//
+// GET /v2/multisig/order/{account_id}
+func (s *Server) handleGetMultisigOrderRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("getMultisigOrder"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v2/multisig/order/{account_id}"),
+	}
+
+	// Start a span for this request.
+	ctx, span := s.cfg.Tracer.Start(r.Context(), "GetMultisigOrder",
+		trace.WithAttributes(otelAttrs...),
+		serverSpanKind,
+	)
+	defer span.End()
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		elapsedDuration := time.Since(startTime)
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		s.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	s.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	var (
+		recordError = func(stage string, err error) {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			s.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		err          error
+		opErrContext = ogenerrors.OperationContext{
+			Name: "GetMultisigOrder",
+			ID:   "getMultisigOrder",
+		}
+	)
+	params, err := decodeGetMultisigOrderParams(args, argsEscaped, r)
+	if err != nil {
+		err = &ogenerrors.DecodeParamsError{
+			OperationContext: opErrContext,
+			Err:              err,
+		}
+		recordError("DecodeParams", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+
+	var response *MultisigOrder
+	if m := s.cfg.Middleware; m != nil {
+		mreq := middleware.Request{
+			Context:          ctx,
+			OperationName:    "GetMultisigOrder",
+			OperationSummary: "",
+			OperationID:      "getMultisigOrder",
+			Body:             nil,
+			Params: middleware.Parameters{
+				{
+					Name: "account_id",
+					In:   "path",
+				}: params.AccountID,
+			},
+			Raw: r,
+		}
+
+		type (
+			Request  = struct{}
+			Params   = GetMultisigOrderParams
+			Response = *MultisigOrder
+		)
+		response, err = middleware.HookMiddleware[
+			Request,
+			Params,
+			Response,
+		](
+			m,
+			mreq,
+			unpackGetMultisigOrderParams,
+			func(ctx context.Context, request Request, params Params) (response Response, err error) {
+				response, err = s.h.GetMultisigOrder(ctx, params)
+				return response, err
+			},
+		)
+	} else {
+		response, err = s.h.GetMultisigOrder(ctx, params)
+	}
+	if err != nil {
+		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
+			if err := encodeErrorResponse(errRes, w, span); err != nil {
+				recordError("Internal", err)
+			}
+			return
+		}
+		if errors.Is(err, ht.ErrNotImplemented) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
+			recordError("Internal", err)
+		}
+		return
+	}
+
+	if err := encodeGetMultisigOrderResponse(response, w, span); err != nil {
+		recordError("EncodeResponse", err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
+		return
+	}
+}
+
 // handleGetNftCollectionRequest handles getNftCollection operation.
 //
 // Get NFT collection by collection address.
@@ -8030,6 +8266,8 @@ func (s *Server) handleGetNftCollectionsRequest(args [0]string, argsEscaped bool
 // handleGetNftHistoryByIDRequest handles getNftHistoryByID operation.
 //
 // Get the transfer nfts history for account.
+//
+// Deprecated: schema marks this operation as deprecated.
 //
 // GET /v2/nfts/{account_id}/history
 func (s *Server) handleGetNftHistoryByIDRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {

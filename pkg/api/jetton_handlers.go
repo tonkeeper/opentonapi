@@ -4,16 +4,15 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"go.uber.org/zap"
-	"net/http"
-	"slices"
-	"strings"
-
 	"github.com/tonkeeper/opentonapi/pkg/bath"
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/opentonapi/pkg/oas"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/ton"
+	"go.uber.org/zap"
+	"net/http"
+	"slices"
+	"strings"
 )
 
 func (h *Handler) GetAccountJettonsBalances(ctx context.Context, params oas.GetAccountJettonsBalancesParams) (*oas.JettonsBalances, error) {
@@ -87,28 +86,26 @@ func (h *Handler) GetJettonInfo(ctx context.Context, params oas.GetJettonInfoPar
 	return &converted, nil
 }
 
-func (h *Handler) GetAccountJettonsHistory(ctx context.Context, params oas.GetAccountJettonsHistoryParams) (*oas.AccountEvents, error) {
+func (h *Handler) GetAccountJettonsHistory(ctx context.Context, params oas.GetAccountJettonsHistoryParams) (*oas.JettonOperations, error) {
 	account, err := tongo.ParseAddress(params.AccountID)
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
 	}
-	history, err := h.storage.GetAccountJettonsHistory(ctx, account.ID, params.Limit, optIntToPointer(params.BeforeLt), optIntToPointer(params.StartDate), optIntToPointer(params.EndDate))
+	history, err := h.storage.GetAccountJettonsHistory(ctx, account.ID, params.Limit, optIntToPointer(params.BeforeLt), nil, nil)
+	if errors.Is(err, core.ErrEntityNotFound) {
+		return &oas.JettonOperations{}, nil
+	}
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
-	var eventIDs []string
-	for _, traceID := range traceIDs {
-		eventIDs = append(eventIDs, traceID.Hex())
+	var res oas.JettonOperations
+	for _, op := range history {
+		res.Operations = append(res.Operations, h.convertJettonOperation(ctx, op))
+		if len(history) == params.Limit {
+			res.NextFrom = oas.NewOptInt64(int64(op.Lt))
+		}
 	}
-	isBannedTraces, err := h.spamFilter.GetEventsScamData(ctx, eventIDs)
-	if err != nil {
-		h.logger.Warn("error getting events spam data", zap.Error(err))
-	}
-	events, lastLT, err := h.convertJettonHistory(ctx, account.ID, nil, history, params.AcceptLanguage)
-	if err != nil {
-		return nil, toError(http.StatusInternalServerError, err)
-	}
-	return &oas.AccountEvents{Events: events, NextFrom: lastLT}, nil
+	return &res, nil
 }
 
 func (h *Handler) GetAccountJettonHistoryByID(ctx context.Context, params oas.GetAccountJettonHistoryByIDParams) (*oas.AccountEvents, error) {
@@ -120,7 +117,7 @@ func (h *Handler) GetAccountJettonHistoryByID(ctx context.Context, params oas.Ge
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
 	}
-	history, err := h.storage.GetAccountJettonHistoryByID(ctx, account.ID, jettonMasterAccount.ID, params.Limit, optIntToPointer(params.BeforeLt), optIntToPointer(params.StartDate), optIntToPointer(params.EndDate))
+	traceIDs, err := h.storage.GetAccountJettonHistoryByID(ctx, account.ID, jettonMasterAccount.ID, params.Limit, optIntToPointer(params.BeforeLt), optIntToPointer(params.StartDate), optIntToPointer(params.EndDate))
 	if errors.Is(err, core.ErrEntityNotFound) {
 		return &oas.AccountEvents{}, nil
 	}
@@ -131,15 +128,37 @@ func (h *Handler) GetAccountJettonHistoryByID(ctx context.Context, params oas.Ge
 	for _, traceID := range traceIDs {
 		eventIDs = append(eventIDs, traceID.Hex())
 	}
-	isBannedTraces, err := h.spamFilter.GetEventsScamData(ctx, eventIDs)
-	if err != nil {
-		h.logger.Warn("error getting events spam data", zap.Error(err))
-	}
-	events, lastLT, err := h.convertJettonHistory(ctx, account.ID, &jettonMasterAccount.ID, history, params.AcceptLanguage)
+	events, lastLT, err := h.convertJettonHistory(ctx, account.ID, &jettonMasterAccount.ID, traceIDs, params.AcceptLanguage)
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
 	return &oas.AccountEvents{Events: events, NextFrom: lastLT}, nil
+}
+
+func (h *Handler) GetJettonAccountHistoryByID(ctx context.Context, params oas.GetJettonAccountHistoryByIDParams) (*oas.JettonOperations, error) {
+	account, err := tongo.ParseAddress(params.AccountID)
+	if err != nil {
+		return nil, toError(http.StatusBadRequest, err)
+	}
+	jettonMasterAccount, err := tongo.ParseAddress(params.JettonID)
+	if err != nil {
+		return nil, toError(http.StatusBadRequest, err)
+	}
+	history, err := h.storage.GetJettonAccountHistoryByID(ctx, account.ID, jettonMasterAccount.ID, params.Limit, optIntToPointer(params.BeforeLt), optIntToPointer(params.StartDate), optIntToPointer(params.EndDate))
+	if errors.Is(err, core.ErrEntityNotFound) {
+		return &oas.JettonOperations{}, nil
+	}
+	if err != nil {
+		return nil, toError(http.StatusInternalServerError, err)
+	}
+	res := oas.JettonOperations{}
+	for _, op := range history {
+		res.Operations = append(res.Operations, h.convertJettonOperation(ctx, op))
+		if len(history) == params.Limit {
+			res.NextFrom = oas.NewOptInt64(int64(op.Lt))
+		}
+	}
+	return &res, nil
 }
 
 func (h *Handler) GetJettons(ctx context.Context, params oas.GetJettonsParams) (*oas.Jettons, error) {

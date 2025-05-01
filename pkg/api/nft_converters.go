@@ -132,7 +132,7 @@ func convertNftCollection(collection core.NftCollection, book addressBook) oas.N
 	return nftCollection
 }
 
-func (h *Handler) convertNftHistory(ctx context.Context, account tongo.AccountID, traceIDs []tongo.Bits256, isBannedTraces map[string]bool, acceptLanguage oas.OptString) ([]oas.AccountEvent, int64, error) {
+func (h *Handler) convertNftHistory(ctx context.Context, account tongo.AccountID, traceIDs []tongo.Bits256, acceptLanguage oas.OptString) ([]oas.AccountEvent, int64, error) {
 	var lastLT uint64
 	events := make([]oas.AccountEvent, 0, len(traceIDs))
 	for _, traceID := range traceIDs {
@@ -166,7 +166,7 @@ func (h *Handler) convertNftHistory(ctx context.Context, account tongo.AccountID
 			}
 			event.Actions = append(event.Actions, convertedAction)
 		}
-		event.IsScam = h.spamFilter.IsScamEvent(event.Actions, &account, trace.Account, isBannedTraces[event.EventID])
+		event.IsScam = h.spamFilter.IsScamEvent(event.Actions, &account, trace.Account)
 		if len(event.Actions) > 0 {
 			events = append(events, event)
 			lastLT = trace.Lt
@@ -174,4 +174,19 @@ func (h *Handler) convertNftHistory(ctx context.Context, account tongo.AccountID
 	}
 
 	return events, int64(lastLT), nil
+}
+
+func (h *Handler) convertNftOperation(ctx context.Context, op core.NftOperation) oas.NftOperation {
+	item := h.convertNFT(ctx, core.NftItem{Address: op.Nft}, h.addressBook, h.metaCache, core.TrustNone)
+
+	operation := oas.NftOperation{
+		Operation:       op.Operation,
+		Utime:           op.Utime,
+		Lt:              int64(op.Lt),
+		TransactionHash: op.TxID.Hex(),
+		Source:          convertOptAccountAddress(op.Source, h.addressBook),
+		Destination:     convertOptAccountAddress(op.Destination, h.addressBook),
+		Item:            item,
+	}
+	return operation
 }

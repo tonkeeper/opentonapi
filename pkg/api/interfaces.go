@@ -68,7 +68,7 @@ type storage interface {
 	GetNftCollections(ctx context.Context, limit, offset *int32) ([]core.NftCollection, error)
 	GetNftCollectionsByAddresses(ctx context.Context, addresses []ton.AccountID) ([]core.NftCollection, error)
 	GetNftCollectionByCollectionAddress(ctx context.Context, address tongo.AccountID) (core.NftCollection, error)
-	GetAccountNftsHistory(ctx context.Context, address tongo.AccountID, limit int, beforeLT *int64, startTime *int64, endTime *int64) ([]tongo.Bits256, error)
+	GetAccountNftsHistory(ctx context.Context, address tongo.AccountID, limit int, beforeLT *int64, startTime *int64, endTime *int64) ([]core.NftOperation, error)
 	GetNftHistory(ctx context.Context, address tongo.AccountID, limit int, beforeLT *int64, startTime *int64, endTime *int64) ([]tongo.Bits256, error)
 
 	FindAllDomainsResolvedToAddress(ctx context.Context, a tongo.AccountID, collections map[tongo.AccountID]string) ([]string, error)
@@ -78,8 +78,9 @@ type storage interface {
 	GetJettonHolders(ctx context.Context, jettonMaster tongo.AccountID, limit, offset int) ([]core.JettonHolder, error)
 	GetJettonMasterMetadata(ctx context.Context, master tongo.AccountID) (tongo.JettonMetadata, error)
 	GetJettonMasterData(ctx context.Context, master tongo.AccountID) (core.JettonMaster, error)
-	GetAccountJettonsHistory(ctx context.Context, address tongo.AccountID, limit int, beforeLT, startTime, endTime *int64) (map[core.TraceID][]core.JettonOperation, error)
-	GetAccountJettonHistoryByID(ctx context.Context, address, jettonMaster tongo.AccountID, limit int, beforeLT, startTime, endTime *int64) (map[core.TraceID][]core.JettonOperation, error)
+	GetAccountJettonsHistory(ctx context.Context, address tongo.AccountID, limit int, beforeLT, startTime, endTime *int64) ([]core.JettonOperation, error)
+	GetAccountJettonHistoryByID(ctx context.Context, address, jettonMaster tongo.AccountID, limit int, beforeLT, startTime, endTime *int64) ([]tongo.Bits256, error)
+	GetJettonAccountHistoryByID(ctx context.Context, address, jettonMaster tongo.AccountID, limit int, beforeLT, startTime, endTime *int64) ([]core.JettonOperation, error)
 	GetJettonTransferPayload(ctx context.Context, accountID, jettonMaster ton.AccountID) (*core.JettonTransferPayload, error)
 
 	GetAllAuctions(ctx context.Context) ([]core.Auction, error)
@@ -108,6 +109,7 @@ type storage interface {
 
 	GetAccountMultisigs(ctx context.Context, accountID ton.AccountID) ([]core.Multisig, error)
 	GetMultisigByID(ctx context.Context, accountID ton.AccountID) (*core.Multisig, error)
+	GetMultisigOrderByID(ctx context.Context, accountID ton.AccountID) (*core.MultisigOrder, error)
 
 	SaveTraceWithState(ctx context.Context, msgHash string, trace *core.Trace, version int, getMethods []abi.MethodInvocation, ttl time.Duration) error
 	GetTraceWithState(ctx context.Context, msgHash string) (*core.Trace, int, []abi.MethodInvocation, error)
@@ -185,7 +187,7 @@ type scoreSource interface {
 }
 
 type SpamFilter interface {
-	IsScamEvent(actions []oas.Action, viewer *ton.AccountID, initiator ton.AccountID, markedAsScam bool) bool
+	IsScamEvent(actions []oas.Action, viewer *ton.AccountID, initiator ton.AccountID) bool
 	GetEventsScamData(ctx context.Context, ids []string) (map[string]bool, error)
 	JettonTrust(address tongo.AccountID, symbol, name, image string) core.TrustType
 	AccountTrust(address tongo.AccountID) core.TrustType

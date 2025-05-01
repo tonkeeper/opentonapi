@@ -63,12 +63,14 @@ func convertTrace(t *core.Trace, book addressBook) oas.Trace {
 }
 
 func (h *Handler) convertRisk(ctx context.Context, risk wallet.Risk, walletAddress tongo.AccountID) (oas.Risk, error) {
+	if int64(risk.Ton) < 0 {
+		return oas.Risk{}, fmt.Errorf("ivalid ton amount")
+	}
 	oasRisk := oas.Risk{
 		TransferAllRemainingBalance: risk.TransferAllRemainingBalance,
-		// TODO: verify there is no overflow
-		Ton:     int64(risk.Ton),
-		Jettons: nil,
-		Nfts:    nil,
+		Ton:                         int64(risk.Ton),
+		Jettons:                     nil,
+		Nfts:                        nil,
 	}
 	for jetton, quantity := range risk.Jettons {
 		jettonWallets, err := h.storage.GetJettonWalletsByOwnerAddress(ctx, walletAddress, &jetton, false, true)
@@ -759,7 +761,7 @@ func (h *Handler) toEvent(ctx context.Context, trace *core.Trace, result *bath.A
 		}
 		event.Actions[i] = convertedAction
 	}
-	event.IsScam = h.spamFilter.CheckActions(event.Actions, nil, trace.Account)
+	event.IsScam = h.spamFilter.IsScamEvent(event.Actions, nil, trace.Account)
 	previews := make(map[tongo.AccountID]oas.JettonPreview)
 	for _, flow := range result.ValueFlow.Accounts {
 		for jettonMaster := range flow.Jettons {
@@ -840,7 +842,7 @@ func (h *Handler) toAccountEvent(ctx context.Context, account tongo.AccountID, t
 		e.Actions = append(e.Actions, convertedAction)
 	}
 	if h.spamFilter != nil {
-		e.IsScam = h.spamFilter.CheckActions(e.Actions, &account, trace.Account)
+		e.IsScam = h.spamFilter.IsScamEvent(e.Actions, &account, trace.Account)
 	}
 	if len(e.Actions) == 0 {
 		e.Actions = []oas.Action{

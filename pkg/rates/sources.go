@@ -54,7 +54,12 @@ func (m *Mock) GetCurrentRates() (map[string]float64, error) {
 			pools[account] = price
 		}
 	}
-	if bemoPrice, err := retry(bemo, medianTonPriceToUsd, pools, m.getBemoPrice); err == nil {
+	if bemoPrice, err := retry(bemo, medianTonPriceToUsd, pools, m.getBemoPrice(references.BemoAccountOld)); err == nil {
+		for account, price := range bemoPrice {
+			pools[account] = price
+		}
+	}
+	if bemoPrice, err := retry(bemo, medianTonPriceToUsd, pools, m.getBemoPrice(references.BemoAccountNew)); err == nil {
 		for account, price := range bemoPrice {
 			pools[account] = price
 		}
@@ -101,40 +106,42 @@ func getMedianTonPrice(marketsPrice []Market) (float64, error) {
 
 // getBemoPrice retrieves the price of the Bemo jetton from the contract
 // TonApi is used because the standard liteserver executor cannot invoke methods on the account
-func (m *Mock) getBemoPrice(tonPrice float64, pools map[ton.AccountID]float64) (map[ton.AccountID]float64, error) {
-	url := fmt.Sprintf("https://tonapi.io/v2/blockchain/accounts/%v/methods/get_full_data", references.BemoAccount.ToRaw())
-	respBody, err := sendRequest(url, m.TonApiToken)
-	if err != nil {
-		return map[ton.AccountID]float64{}, err
-	}
-	defer respBody.Close()
-	type fullData struct {
-		Success bool `json:"success"`
-		Stack   []struct {
-			Num string `json:"num"`
+func (m *Mock) getBemoPrice(token ton.AccountID) func(tonPrice float64, pools map[ton.AccountID]float64) (map[ton.AccountID]float64, error) {
+	return func(tonPrice float64, pools map[ton.AccountID]float64) (map[ton.AccountID]float64, error) {
+		url := fmt.Sprintf("https://tonapi.io/v2/blockchain/accounts/%v/methods/get_full_data", token.ToRaw())
+		respBody, err := sendRequest(url, m.TonApiToken)
+		if err != nil {
+			return map[ton.AccountID]float64{}, err
 		}
-	}
-	var result fullData
-	if err = json.NewDecoder(respBody).Decode(&result); err != nil {
-		return map[ton.AccountID]float64{}, fmt.Errorf("[getBemoPrice] failed to decode response: %v", err)
-	}
-	if !result.Success {
-		return map[ton.AccountID]float64{}, fmt.Errorf("not success")
-	}
-	if len(result.Stack) < 2 {
-		return map[ton.AccountID]float64{}, fmt.Errorf("empty stack")
-	}
-	firstParam, err := strconv.ParseInt(result.Stack[0].Num, 0, 64)
-	if err != nil {
-		return map[ton.AccountID]float64{}, err
-	}
-	secondParam, err := strconv.ParseInt(result.Stack[1].Num, 0, 64)
-	if err != nil {
-		return map[ton.AccountID]float64{}, err
-	}
-	price := float64(secondParam) / float64(firstParam)
+		defer respBody.Close()
+		type fullData struct {
+			Success bool `json:"success"`
+			Stack   []struct {
+				Num string `json:"num"`
+			}
+		}
+		var result fullData
+		if err = json.NewDecoder(respBody).Decode(&result); err != nil {
+			return map[ton.AccountID]float64{}, fmt.Errorf("[getBemoPrice] failed to decode response: %v", err)
+		}
+		if !result.Success {
+			return map[ton.AccountID]float64{}, fmt.Errorf("not success")
+		}
+		if len(result.Stack) < 2 {
+			return map[ton.AccountID]float64{}, fmt.Errorf("empty stack")
+		}
+		firstParam, err := strconv.ParseInt(result.Stack[0].Num, 0, 64)
+		if err != nil {
+			return map[ton.AccountID]float64{}, err
+		}
+		secondParam, err := strconv.ParseInt(result.Stack[1].Num, 0, 64)
+		if err != nil {
+			return map[ton.AccountID]float64{}, err
+		}
+		price := float64(secondParam) / float64(firstParam)
 
-	return map[ton.AccountID]float64{references.BemoAccount: price}, nil
+		return map[ton.AccountID]float64{token: price}, nil
+	}
 }
 
 // getTonstakersPrice retrieves the price and token address of an account in the Tonstakers pool

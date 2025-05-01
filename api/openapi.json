@@ -3856,6 +3856,84 @@
     ],
     "type": "object"
    },
+   "JettonOperation": {
+    "properties": {
+     "amount": {
+      "example": "1000000000",
+      "type": "string",
+      "x-js-format": "bigint"
+     },
+     "destination": {
+      "$ref": "#/components/schemas/AccountAddress"
+     },
+     "jetton": {
+      "$ref": "#/components/schemas/JettonPreview"
+     },
+     "lt": {
+      "example": 25713146000001,
+      "format": "int64",
+      "type": "integer",
+      "x-js-format": "bigint"
+     },
+     "operation": {
+      "example": "transfer",
+      "type": "string"
+     },
+     "payload": {},
+     "query_id": {
+      "example": "17286061481122318000",
+      "type": "string",
+      "x-js-format": "bigint"
+     },
+     "source": {
+      "$ref": "#/components/schemas/AccountAddress"
+     },
+     "trace_id": {
+      "example": "8fa19eec7bd6d00d0d76048cebe31e34082a859410c9fcf7d55ef4ff8f7fcb47",
+      "type": "string"
+     },
+     "transaction_hash": {
+      "example": "cbf3e3d70ecf6f69643dd430761cd6004de2cacbdbc3029b0abd30ca3cc1c67e",
+      "type": "string"
+     },
+     "utime": {
+      "example": 1234567890,
+      "format": "int64",
+      "type": "integer"
+     }
+    },
+    "required": [
+     "operation",
+     "utime",
+     "lt",
+     "jetton",
+     "transaction_hash",
+     "amount",
+     "trace_id",
+     "query_id"
+    ],
+    "type": "object"
+   },
+   "JettonOperations": {
+    "properties": {
+     "next_from": {
+      "example": 25713146000001,
+      "format": "int64",
+      "type": "integer",
+      "x-js-format": "bigint"
+     },
+     "operations": {
+      "items": {
+       "$ref": "#/components/schemas/JettonOperation"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "operations"
+    ],
+    "type": "object"
+   },
    "JettonPreview": {
     "properties": {
      "address": {
@@ -4437,6 +4515,35 @@
       "format": "int32",
       "type": "integer"
      },
+     "changing_parameters": {
+      "properties": {
+       "proposers": {
+        "items": {
+         "format": "address",
+         "type": "string"
+        },
+        "type": "array"
+       },
+       "signers": {
+        "items": {
+         "example": "0:da6b1b6663a0e4d18cc8574ccd9db5296e367dd9324706f3bbd9eb1cd2caf0bf",
+         "format": "address",
+         "type": "string"
+        },
+        "type": "array"
+       },
+       "threshold": {
+        "format": "int32",
+        "type": "integer"
+       }
+      },
+      "required": [
+       "threshold",
+       "signers",
+       "proposers"
+      ],
+      "type": "object"
+     },
      "creation_date": {
       "format": "int64",
       "type": "integer"
@@ -4444,6 +4551,11 @@
      "expiration_date": {
       "format": "int64",
       "type": "integer"
+     },
+     "multisig_address": {
+      "example": "0:da6b1b6663a0e4d18cc8574ccd9db5296e367dd9324706f3bbd9eb1cd2caf0bf",
+      "format": "address",
+      "type": "string"
      },
      "order_seqno": {
       "example": 1,
@@ -4488,7 +4600,8 @@
      "expiration_date",
      "risk",
      "creation_date",
-     "signed_by"
+     "signed_by",
+     "multisig_address"
     ],
     "type": "object"
    },
@@ -4701,6 +4814,66 @@
     },
     "required": [
      "nft_items"
+    ],
+    "type": "object"
+   },
+   "NftOperation": {
+    "properties": {
+     "destination": {
+      "$ref": "#/components/schemas/AccountAddress"
+     },
+     "item": {
+      "$ref": "#/components/schemas/NftItem"
+     },
+     "lt": {
+      "example": 25713146000001,
+      "format": "int64",
+      "type": "integer",
+      "x-js-format": "bigint"
+     },
+     "operation": {
+      "example": "transfer",
+      "type": "string"
+     },
+     "source": {
+      "$ref": "#/components/schemas/AccountAddress"
+     },
+     "transaction_hash": {
+      "example": "0xdeadbeaf",
+      "type": "string"
+     },
+     "utime": {
+      "example": 1234567890,
+      "format": "int64",
+      "type": "integer"
+     }
+    },
+    "required": [
+     "operation",
+     "utime",
+     "lt",
+     "transaction_hash",
+     "item"
+    ],
+    "type": "object"
+   },
+   "NftOperations": {
+    "properties": {
+     "next_from": {
+      "example": 25713146000001,
+      "format": "int64",
+      "type": "integer",
+      "x-js-format": "bigint"
+     },
+     "operations": {
+      "items": {
+       "$ref": "#/components/schemas/NftOperation"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "operations"
     ],
     "type": "object"
    },
@@ -6793,9 +6966,6 @@
       "$ref": "#/components/parameters/accountIDParameter"
      },
      {
-      "$ref": "#/components/parameters/i18n"
-     },
-     {
       "description": "omit this parameter to get last events",
       "in": "query",
       "name": "before_lt",
@@ -6817,28 +6987,6 @@
        "minimum": 1,
        "type": "integer"
       }
-     },
-     {
-      "in": "query",
-      "name": "start_date",
-      "required": false,
-      "schema": {
-       "example": 1668436763,
-       "format": "int64",
-       "maximum": 2114380800,
-       "type": "integer"
-      }
-     },
-     {
-      "in": "query",
-      "name": "end_date",
-      "required": false,
-      "schema": {
-       "example": 1668436763,
-       "format": "int64",
-       "maximum": 2114380800,
-       "type": "integer"
-      }
      }
     ],
     "responses": {
@@ -6846,7 +6994,7 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/AccountEvents"
+         "$ref": "#/components/schemas/JettonOperations"
         }
        }
       },
@@ -6901,6 +7049,7 @@
   },
   "/v2/accounts/{account_id}/jettons/{jetton_id}/history": {
    "get": {
+    "deprecated": true,
     "description": "Get the transfer jetton history for account and jetton",
     "operationId": "getAccountJettonHistoryByID",
     "parameters": [
@@ -7089,28 +7238,6 @@
        "minimum": 1,
        "type": "integer"
       }
-     },
-     {
-      "in": "query",
-      "name": "start_date",
-      "required": false,
-      "schema": {
-       "example": 1668436763,
-       "format": "int64",
-       "maximum": 2114380800,
-       "type": "integer"
-      }
-     },
-     {
-      "in": "query",
-      "name": "end_date",
-      "required": false,
-      "schema": {
-       "example": 1668436763,
-       "format": "int64",
-       "maximum": 2114380800,
-       "type": "integer"
-      }
      }
     ],
     "responses": {
@@ -7118,7 +7245,7 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/AccountEvents"
+         "$ref": "#/components/schemas/NftOperations"
         }
        }
       },
@@ -7130,8 +7257,7 @@
     },
     "tags": [
      "NFT"
-    ],
-    "x-question": "duplicate of getNftHistoryByID ?"
+    ]
    }
   },
   "/v2/accounts/{account_id}/publickey": {
@@ -8466,6 +8592,83 @@
     ]
    }
   },
+  "/v2/jettons/{jetton_id}/accounts/{account_id}/history": {
+   "get": {
+    "description": "Get the transfer jetton history for account and jetton",
+    "operationId": "getJettonAccountHistoryByID",
+    "parameters": [
+     {
+      "$ref": "#/components/parameters/accountIDParameter"
+     },
+     {
+      "$ref": "#/components/parameters/jettonIDParameter"
+     },
+     {
+      "description": "omit this parameter to get last events",
+      "in": "query",
+      "name": "before_lt",
+      "required": false,
+      "schema": {
+       "example": 25758317000002,
+       "format": "int64",
+       "type": "integer",
+       "x-js-format": "bigint"
+      }
+     },
+     {
+      "in": "query",
+      "name": "limit",
+      "required": true,
+      "schema": {
+       "example": 100,
+       "maximum": 1000,
+       "minimum": 1,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "start_date",
+      "required": false,
+      "schema": {
+       "example": 1668436763,
+       "format": "int64",
+       "maximum": 2114380800,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "end_date",
+      "required": false,
+      "schema": {
+       "example": 1668436763,
+       "format": "int64",
+       "maximum": 2114380800,
+       "type": "integer"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/JettonOperations"
+        }
+       }
+      },
+      "description": "account jetton history"
+     },
+     "default": {
+      "$ref": "#/components/responses/Error"
+     }
+    },
+    "tags": [
+     "Accounts"
+    ]
+   }
+  },
   "/v2/jettons/{jetton_id}/transfer/{account_id}/payload": {
    "get": {
     "description": "Get jetton's custom payload and state init required for transfer",
@@ -9508,6 +9711,35 @@
     ]
    }
   },
+  "/v2/multisig/order/{account_id}": {
+   "get": {
+    "description": "Get multisig order",
+    "operationId": "getMultisigOrder",
+    "parameters": [
+     {
+      "$ref": "#/components/parameters/accountIDParameter"
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/MultisigOrder"
+        }
+       }
+      },
+      "description": "multisig order"
+     },
+     "default": {
+      "$ref": "#/components/responses/Error"
+     }
+    },
+    "tags": [
+     "Multisig"
+    ]
+   }
+  },
   "/v2/multisig/{account_id}": {
    "get": {
     "description": "Get multisig account info",
@@ -9735,6 +9967,7 @@
   },
   "/v2/nfts/{account_id}/history": {
    "get": {
+    "deprecated": true,
     "description": "Get the transfer nfts history for account",
     "operationId": "getNftHistoryByID",
     "parameters": [

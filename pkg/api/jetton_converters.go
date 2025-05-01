@@ -5,10 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/tonkeeper/tongo/abi"
-	"github.com/tonkeeper/tongo/tlb"
 	"net/http"
-	"sort"
 	"strings"
 
 	"github.com/tonkeeper/opentonapi/pkg/bath"
@@ -56,60 +53,43 @@ func jettonMetadata(account ton.AccountID, meta NormalizedMetadata) oas.JettonMe
 	return metadata
 }
 
-func (h *Handler) convertJettonHistory(ctx context.Context, account ton.AccountID, master *ton.AccountID, traceIDs []ton.Bits256, isBannedTraces map[string]bool, acceptLanguage oas.OptString) ([]oas.AccountEvent, int64, error) {
+func (h *Handler) convertJettonHistory(ctx context.Context, account ton.AccountID, master *ton.AccountID, traceIDs []ton.Bits256, acceptLanguage oas.OptString) ([]oas.AccountEvent, int64, error) {
 	var lastLT uint64
-	var events []oas.AccountEvent
-
-	for id, ops := range history {
-		event := oas.AccountEvent{
-			EventID:   id.Hash.Hex(),
-			Account:   convertAccountAddress(account, h.addressBook),
-			Timestamp: id.UTime, // TODO: or first/last op Utime
-			IsScam:    false,
-			Lt:        int64(id.Lt), // TODO: or first/last op Lt
-			Extra:     0,
+	events := make([]oas.AccountEvent, 0, len(traceIDs))
+	for _, traceID := range traceIDs {
+		trace, err := h.storage.GetTrace(ctx, traceID)
+		if err != nil {
+			if errors.Is(err, core.ErrTraceIsTooLong) {
+				// we ignore this for now, because we believe that this case is extremely rare.
+				continue
+			}
+			return nil, 0, err
 		}
-		for _, op := range ops {
-			var action bath.Action
-			switch op.Operation {
-			case core.TransferJettonOperation:
-				transferAction := bath.JettonTransferAction{
-					Jetton:    op.JettonMaster,
-					Recipient: op.Destination,
-					Sender:    op.Source,
-					Amount:    tlb.VarUInteger16(*op.Amount.BigInt()),
-				}
-				action.Type = "JettonTransfer"
-				action.JettonTransfer = &transferAction
-				var payload abi.JettonPayload
-				err := json.Unmarshal([]byte(op.ForwardPayload), &payload)
-				if err != nil {
-					break
-				}
-				switch p := payload.Value.(type) {
-				case abi.TextCommentJettonPayload:
-					comment := string(p.Text)
-					action.JettonTransfer.Comment = &comment
-				case abi.EncryptedTextCommentJettonPayload:
-					action.JettonTransfer.EncryptedComment = &bath.EncryptedComment{EncryptionType: "simple", CipherText: p.CipherText}
-				}
-			case core.MintJettonOperation:
-				mintAction := bath.JettonMintAction{
-					Jetton:    op.JettonMaster,
-					Recipient: *op.Destination,
-					Amount:    tlb.VarUInteger16(*op.Amount.BigInt()),
-				}
-				action.Type = "JettonMint"
-				action.JettonMint = &mintAction
-			case core.BurnJettonOperation:
-				burnAction := bath.JettonBurnAction{
-					Jetton: op.JettonMaster,
-					Sender: *op.Source,
-					Amount: tlb.VarUInteger16(*op.Amount.BigInt()),
-				}
-				action.Type = "JettonTransfer"
-				action.JettonBurn = &burnAction
-			default:
+		result, err := bath.FindActions(ctx, trace,
+			bath.WithStraws(bath.JettonTransfersBurnsMints),
+			bath.WithInformationSource(h.storage))
+		if err != nil {
+			return nil, 0, err
+		}
+		event := oas.AccountEvent{
+			EventID:    trace.Hash.Hex(),
+			Account:    convertAccountAddress(account, h.addressBook),
+			Timestamp:  trace.Utime,
+			IsScam:     false,
+			Lt:         int64(trace.Lt),
+			InProgress: trace.InProgress(),
+			Extra:      result.Extra(account),
+		}
+		for _, action := range result.Actions {
+			if action.Type != bath.JettonTransfer && action.Type != bath.JettonBurn && action.Type != bath.JettonMint {
+				continue
+			}
+			if master != nil && ((action.JettonTransfer != nil && action.JettonTransfer.Jetton != *master) ||
+				(action.JettonMint != nil && action.JettonMint.Jetton != *master) ||
+				(action.JettonBurn != nil && action.JettonBurn.Jetton != *master)) {
+				continue
+			}
+			if !action.IsSubject(account) {
 				continue
 			}
 			convertedAction, err := h.convertAction(ctx, &account, action, acceptLanguage)
@@ -117,24 +97,36 @@ func (h *Handler) convertJettonHistory(ctx context.Context, account ton.AccountI
 				return nil, 0, err
 			}
 			event.Actions = append(event.Actions, convertedAction)
-			if lastLT == 0 {
-				lastLT = op.Lt
-			}
-			if op.Lt < lastLT {
-				lastLT = op.Lt
-			}
 		}
-		event.IsScam = h.spamFilter.IsScamEvent(event.Actions, &account, trace.Account, isBannedTraces[event.EventID])
+		event.IsScam = h.spamFilter.IsScamEvent(event.Actions, &account, trace.Account)
 		if len(event.Actions) == 0 {
 			continue
 		}
-		event.IsScam = h.spamFilter.CheckActions(event.Actions, &account, nil)
 		events = append(events, event)
+		lastLT = trace.Lt
 	}
-	sort.Slice(events, func(i, j int) bool {
-		return events[i].Lt > events[j].Lt
-	})
+
 	return events, int64(lastLT), nil
+}
+
+func (h *Handler) convertJettonOperation(ctx context.Context, op core.JettonOperation) oas.JettonOperation {
+	b, err := json.Marshal(op.ForwardPayload)
+	if err != nil {
+		b = []byte{'{', '}'}
+	}
+	operation := oas.JettonOperation{
+		Operation:       op.Operation,
+		Utime:           op.Utime,
+		Lt:              int64(op.Lt),
+		TransactionHash: op.TxID.Hex(),
+		TraceID:         op.TraceID.Hex(),
+		Source:          convertOptAccountAddress(op.Source, h.addressBook),
+		Destination:     convertOptAccountAddress(op.Destination, h.addressBook),
+		Jetton:          jettonPreview(op.JettonMaster, h.GetJettonNormalizedMetadata(ctx, op.JettonMaster), 0),
+		Amount:          op.Amount.String(),
+		Payload:         b,
+	}
+	return operation
 }
 
 func (h *Handler) convertJettonBalance(ctx context.Context, wallet core.JettonWallet, currencies []string) (oas.JettonBalance, error) {

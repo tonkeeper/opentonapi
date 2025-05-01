@@ -1,7 +1,7 @@
 GET {{host}}/v2/blockchain/blocks/(-1,8000000000000000,120014)
 
 ###
-GET {{host}}/v2/blockchain/masterchain/39370361/blocks
+GET {{host}}/v2/accounts/saint.ton/nfts
 
 
 ###

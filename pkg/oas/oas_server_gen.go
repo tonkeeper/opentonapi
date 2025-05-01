@@ -150,6 +150,8 @@ type Handler interface {
 	//
 	// Get the transfer jetton history for account and jetton.
 	//
+	// Deprecated: schema marks this operation as deprecated.
+	//
 	// GET /v2/accounts/{account_id}/jettons/{jetton_id}/history
 	GetAccountJettonHistoryByID(ctx context.Context, params GetAccountJettonHistoryByIDParams) (*AccountEvents, error)
 	// GetAccountJettonsBalances implements getAccountJettonsBalances operation.
@@ -163,7 +165,7 @@ type Handler interface {
 	// Get the transfer jettons history for account.
 	//
 	// GET /v2/accounts/{account_id}/jettons/history
-	GetAccountJettonsHistory(ctx context.Context, params GetAccountJettonsHistoryParams) (*AccountEvents, error)
+	GetAccountJettonsHistory(ctx context.Context, params GetAccountJettonsHistoryParams) (*JettonOperations, error)
 	// GetAccountMultisigs implements getAccountMultisigs operation.
 	//
 	// Get account's multisigs.
@@ -175,7 +177,7 @@ type Handler interface {
 	// Get the transfer nft history.
 	//
 	// GET /v2/accounts/{account_id}/nfts/history
-	GetAccountNftHistory(ctx context.Context, params GetAccountNftHistoryParams) (*AccountEvents, error)
+	GetAccountNftHistory(ctx context.Context, params GetAccountNftHistoryParams) (*NftOperations, error)
 	// GetAccountNftItems implements getAccountNftItems operation.
 	//
 	// Get all NFT items by owner address.
@@ -353,6 +355,12 @@ type Handler interface {
 	//
 	// GET /v2/nfts/collections/{account_id}/items
 	GetItemsFromCollection(ctx context.Context, params GetItemsFromCollectionParams) (*NftItems, error)
+	// GetJettonAccountHistoryByID implements getJettonAccountHistoryByID operation.
+	//
+	// Get the transfer jetton history for account and jetton.
+	//
+	// GET /v2/jettons/{jetton_id}/accounts/{account_id}/history
+	GetJettonAccountHistoryByID(ctx context.Context, params GetJettonAccountHistoryByIDParams) (*JettonOperations, error)
 	// GetJettonHolders implements getJettonHolders operation.
 	//
 	// Get jetton's holders.
@@ -401,6 +409,12 @@ type Handler interface {
 	//
 	// GET /v2/multisig/{account_id}
 	GetMultisigAccount(ctx context.Context, params GetMultisigAccountParams) (*Multisig, error)
+	// GetMultisigOrder implements getMultisigOrder operation.
+	//
+	// Get multisig order.
+	//
+	// GET /v2/multisig/order/{account_id}
+	GetMultisigOrder(ctx context.Context, params GetMultisigOrderParams) (*MultisigOrder, error)
 	// GetNftCollection implements getNftCollection operation.
 	//
 	// Get NFT collection by collection address.
@@ -422,6 +436,8 @@ type Handler interface {
 	// GetNftHistoryByID implements getNftHistoryByID operation.
 	//
 	// Get the transfer nfts history for account.
+	//
+	// Deprecated: schema marks this operation as deprecated.
 	//
 	// GET /v2/nfts/{account_id}/history
 	GetNftHistoryByID(ctx context.Context, params GetNftHistoryByIDParams) (*AccountEvents, error)

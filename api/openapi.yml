@@ -668,7 +668,6 @@ paths:
         - Accounts
       parameters:
         - $ref: '#/components/parameters/accountIDParameter'
-        - $ref: '#/components/parameters/i18n'
         - name: before_lt
           in: query
           description: "omit this parameter to get last events"
@@ -686,33 +685,18 @@ paths:
             example: 100
             maximum: 1000
             minimum: 1
-        - name: start_date
-          in: query
-          required: false
-          schema:
-            type: integer
-            format: int64
-            maximum: 2114380800
-            example: 1668436763
-        - name: end_date
-          in: query
-          required: false
-          schema:
-            type: integer
-            format: int64
-            maximum: 2114380800
-            example: 1668436763
       responses:
         '200':
           description: account jettons history
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AccountEvents'
+                $ref: '#/components/schemas/JettonOperations'
         'default':
           $ref: '#/components/responses/Error'
   /v2/accounts/{account_id}/jettons/{jetton_id}/history:
     get:
+      deprecated: true
       description: Get the transfer jetton history for account and jetton
       operationId: getAccountJettonHistoryByID
       tags:
@@ -792,7 +776,6 @@ paths:
           $ref: '#/components/responses/Error'
   /v2/accounts/{account_id}/nfts/history:
     get:
-      x-question: duplicate of getNftHistoryByID ?
       description: Get the transfer nft history
       operationId: getAccountNftHistory
       tags:
@@ -817,29 +800,13 @@ paths:
             example: 100
             maximum: 1000
             minimum: 1
-        - name: start_date
-          in: query
-          required: false
-          schema:
-            type: integer
-            format: int64
-            maximum: 2114380800
-            example: 1668436763
-        - name: end_date
-          in: query
-          required: false
-          schema:
-            type: integer
-            format: int64
-            maximum: 2114380800
-            example: 1668436763
       responses:
         '200':
           description: nft history
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AccountEvents'
+                $ref: '#/components/schemas/NftOperations'
         'default':
           $ref: '#/components/responses/Error'
   /v2/accounts/{account_id}/events:
@@ -1358,6 +1325,7 @@ paths:
           $ref: '#/components/responses/Error'
   /v2/nfts/{account_id}/history:
     get:
+      deprecated: true
       description: Get the transfer nfts history for account
       operationId: getNftHistoryByID
       tags:
@@ -1564,6 +1532,57 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Event'
+        'default':
+          $ref: '#/components/responses/Error'
+  /v2/jettons/{jetton_id}/accounts/{account_id}/history:
+    get:
+      description: Get the transfer jetton history for account and jetton
+      operationId: getJettonAccountHistoryByID
+      tags:
+        - Accounts
+      parameters:
+        - $ref: '#/components/parameters/accountIDParameter'
+        - $ref: '#/components/parameters/jettonIDParameter'
+        - name: before_lt
+          in: query
+          description: "omit this parameter to get last events"
+          required: false
+          schema:
+            type: integer
+            format: int64
+            example: 25758317000002
+            x-js-format: bigint
+        - name: limit
+          in: query
+          required: true
+          schema:
+            type: integer
+            example: 100
+            maximum: 1000
+            minimum: 1
+        - name: start_date
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+            maximum: 2114380800
+            example: 1668436763
+        - name: end_date
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+            maximum: 2114380800
+            example: 1668436763
+      responses:
+        '200':
+          description: account jetton history
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JettonOperations'
         'default':
           $ref: '#/components/responses/Error'
   
@@ -2642,7 +2661,7 @@ paths:
                           format: uint32
         'default':
           $ref: '#/components/responses/Error'
-  
+
   /v2/multisig/{account_id}:
     get:
       description: Get multisig account info
@@ -2660,6 +2679,25 @@ paths:
                 $ref: '#/components/schemas/Multisig'
         'default':
           $ref: '#/components/responses/Error'
+
+  /v2/multisig/order/{account_id}:
+    get:
+      description: Get multisig order
+      operationId: getMultisigOrder
+      tags:
+        - Multisig
+      parameters:
+        - $ref: '#/components/parameters/accountIDParameter'
+      responses:
+        '200':
+          description: multisig order
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MultisigOrder'
+        'default':
+          $ref: '#/components/responses/Error'
+
   /v2/message/decode:
     post:
       description: Decode a given message. Only external incoming messages can be decoded currently.
@@ -5627,6 +5665,7 @@ components:
         - risk
         - creation_date
         - signed_by
+        - multisig_address
       properties:
         address:
           type: string
@@ -5665,6 +5704,31 @@ components:
             type: string
             format: address
             example: "0:da6b1b6663a0e4d18cc8574ccd9db5296e367dd9324706f3bbd9eb1cd2caf0bf"
+        multisig_address:
+          type: string
+          format: address
+          example: "0:da6b1b6663a0e4d18cc8574ccd9db5296e367dd9324706f3bbd9eb1cd2caf0bf"
+        changing_parameters:
+          type: object
+          required:
+            - threshold
+            - signers
+            - proposers
+          properties:
+            threshold:
+              type: integer
+              format: int32
+            signers:
+              type: array
+              items:
+                type: string
+                format: address
+                example: "0:da6b1b6663a0e4d18cc8574ccd9db5296e367dd9324706f3bbd9eb1cd2caf0bf"
+            proposers:
+              type: array
+              items:
+                type: string
+                format: address
     Refund:
       type: object
       required:
@@ -7401,6 +7465,111 @@ components:
         method:
           type: string
           example: "get_something"
+    NftOperations:
+      type: object
+      required:
+        - operations
+      properties:
+        operations:
+          type: array
+          items:
+            $ref: '#/components/schemas/NftOperation'
+        next_from:
+          type: integer
+          format: int64
+          example: 25713146000001
+          x-js-format: bigint
+    NftOperation:
+      type: object
+      required:
+        - operation
+        - utime
+        - lt
+        - transaction_hash
+        - item
+      properties:
+        operation:
+          type: string
+          example: "transfer"
+        utime:
+          type: integer
+          format: int64
+          example: 1234567890
+        lt:
+          type: integer
+          format: int64
+          example: 25713146000001
+          x-js-format: bigint
+        transaction_hash:
+          type: string
+          example: "0xdeadbeaf"
+        source:
+          $ref: '#/components/schemas/AccountAddress'
+        destination:
+          $ref: '#/components/schemas/AccountAddress'
+        item:
+          $ref: '#/components/schemas/NftItem'
+    JettonOperations:
+      type: object
+      required:
+        - operations
+      properties:
+        operations:
+          type: array
+          items:
+            $ref: '#/components/schemas/JettonOperation'
+        next_from:
+          type: integer
+          format: int64
+          example: 25713146000001
+          x-js-format: bigint
+    JettonOperation:
+      type: object
+      required:
+        - operation
+        - utime
+        - lt
+        - jetton
+        - transaction_hash
+        - amount
+        - trace_id
+        - query_id
+      properties:
+        operation:
+          type: string
+          example: "transfer"
+        utime:
+          type: integer
+          format: int64
+          example: 1234567890
+        lt:
+          type: integer
+          format: int64
+          example: 25713146000001
+          x-js-format: bigint
+        transaction_hash:
+          type: string
+          example: "cbf3e3d70ecf6f69643dd430761cd6004de2cacbdbc3029b0abd30ca3cc1c67e"
+        source:
+          $ref: '#/components/schemas/AccountAddress'
+        destination:
+          $ref: '#/components/schemas/AccountAddress'
+        amount:
+          type: string
+          x-js-format: bigint
+          example: "1000000000"
+        jetton:
+          $ref: '#/components/schemas/JettonPreview'
+        trace_id:
+          type: string
+          example: "8fa19eec7bd6d00d0d76048cebe31e34082a859410c9fcf7d55ef4ff8f7fcb47"
+        query_id:
+          type: string
+          example: "17286061481122318000"
+          x-js-format: bigint
+        payload: { } # free from json
+
+
   
   responses:
     Error:

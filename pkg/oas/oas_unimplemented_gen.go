@@ -221,6 +221,8 @@ func (UnimplementedHandler) GetAccountJettonBalance(ctx context.Context, params 
 //
 // Get the transfer jetton history for account and jetton.
 //
+// Deprecated: schema marks this operation as deprecated.
+//
 // GET /v2/accounts/{account_id}/jettons/{jetton_id}/history
 func (UnimplementedHandler) GetAccountJettonHistoryByID(ctx context.Context, params GetAccountJettonHistoryByIDParams) (r *AccountEvents, _ error) {
 	return r, ht.ErrNotImplemented
@@ -240,7 +242,7 @@ func (UnimplementedHandler) GetAccountJettonsBalances(ctx context.Context, param
 // Get the transfer jettons history for account.
 //
 // GET /v2/accounts/{account_id}/jettons/history
-func (UnimplementedHandler) GetAccountJettonsHistory(ctx context.Context, params GetAccountJettonsHistoryParams) (r *AccountEvents, _ error) {
+func (UnimplementedHandler) GetAccountJettonsHistory(ctx context.Context, params GetAccountJettonsHistoryParams) (r *JettonOperations, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -258,7 +260,7 @@ func (UnimplementedHandler) GetAccountMultisigs(ctx context.Context, params GetA
 // Get the transfer nft history.
 //
 // GET /v2/accounts/{account_id}/nfts/history
-func (UnimplementedHandler) GetAccountNftHistory(ctx context.Context, params GetAccountNftHistoryParams) (r *AccountEvents, _ error) {
+func (UnimplementedHandler) GetAccountNftHistory(ctx context.Context, params GetAccountNftHistoryParams) (r *NftOperations, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -523,6 +525,15 @@ func (UnimplementedHandler) GetItemsFromCollection(ctx context.Context, params G
 	return r, ht.ErrNotImplemented
 }
 
+// GetJettonAccountHistoryByID implements getJettonAccountHistoryByID operation.
+//
+// Get the transfer jetton history for account and jetton.
+//
+// GET /v2/jettons/{jetton_id}/accounts/{account_id}/history
+func (UnimplementedHandler) GetJettonAccountHistoryByID(ctx context.Context, params GetJettonAccountHistoryByIDParams) (r *JettonOperations, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // GetJettonHolders implements getJettonHolders operation.
 //
 // Get jetton's holders.
@@ -595,6 +606,15 @@ func (UnimplementedHandler) GetMultisigAccount(ctx context.Context, params GetMu
 	return r, ht.ErrNotImplemented
 }
 
+// GetMultisigOrder implements getMultisigOrder operation.
+//
+// Get multisig order.
+//
+// GET /v2/multisig/order/{account_id}
+func (UnimplementedHandler) GetMultisigOrder(ctx context.Context, params GetMultisigOrderParams) (r *MultisigOrder, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // GetNftCollection implements getNftCollection operation.
 //
 // Get NFT collection by collection address.
@@ -625,6 +645,8 @@ func (UnimplementedHandler) GetNftCollections(ctx context.Context, params GetNft
 // GetNftHistoryByID implements getNftHistoryByID operation.
 //
 // Get the transfer nfts history for account.
+//
+// Deprecated: schema marks this operation as deprecated.
 //
 // GET /v2/nfts/{account_id}/history
 func (UnimplementedHandler) GetNftHistoryByID(ctx context.Context, params GetNftHistoryByIDParams) (r *AccountEvents, _ error) {

@@ -28,3 +28,23 @@ func (h *Handler) GetMultisigAccount(ctx context.Context, params oas.GetMultisig
 	}
 	return converted, nil
 }
+
+func (h *Handler) GetMultisigOrder(ctx context.Context, params oas.GetMultisigOrderParams) (*oas.MultisigOrder, error) {
+	orderID, err := ton.ParseAccountID(params.AccountID)
+	if err != nil {
+		return nil, toError(http.StatusBadRequest, err)
+	}
+	multisigOrder, err := h.storage.GetMultisigOrderByID(ctx, orderID)
+	if errors.Is(err, core.ErrEntityNotFound) {
+		return nil, toError(http.StatusNotFound, err)
+	}
+	if err != nil {
+		return nil, toError(http.StatusInternalServerError, err)
+	}
+	converted, err := h.convertMultisigOrder(ctx, *multisigOrder)
+	if err != nil {
+		return nil, toError(http.StatusInternalServerError, err)
+	}
+	return &converted, nil
+
+}
