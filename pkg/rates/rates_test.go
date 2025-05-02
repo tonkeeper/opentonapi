@@ -1,8 +1,6 @@
 package rates
 
 import (
-	"bytes"
-	"io"
 	"reflect"
 	"testing"
 
@@ -149,8 +147,7 @@ asset_0_account_id,asset_1_account_id,asset_0_reserve,asset_1_reserve,asset_0_me
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			respBody := io.NopCloser(bytes.NewReader([]byte(tt.csv)))
-			assets, _, err := convertedStonFiPoolResponse(respBody)
+			assets, _, err := convertedStonFiPoolResponse([]byte(tt.csv))
 			if err != nil {
 				t.Fatalf("unexpected error: %v", err)
 			}
@@ -202,8 +199,7 @@ NULL,0:48cef1de34697508200b8026bf882f8e88aff894586cfd304ab513633fa7e2d3,true,fal
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			respBody := io.NopCloser(bytes.NewReader([]byte(tt.csv)))
-			assets, _, err := convertedDeDustPoolResponse(respBody)
+			assets, _, err := convertedDeDustPoolResponse([]byte(tt.csv))
 			if err != nil {
 				t.Fatalf("unexpected error: %v", err)
 			}

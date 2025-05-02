@@ -460,7 +460,7 @@ func convertedStonFiPoolResponse(respBody []byte) ([]Assets, []LpAsset, error) {
 			}
 		}
 		value, ok := firstMeta["decimals"]
-		if !ok || value != "NaN" {
+		if !ok || value == "NaN" {
 			value = fmt.Sprintf("%d", defaultDecimals)
 		}
 		firstAsset.Decimals, err = strconv.Atoi(value.(string))
@@ -474,7 +474,7 @@ func convertedStonFiPoolResponse(respBody []byte) ([]Assets, []LpAsset, error) {
 			}
 		}
 		value, ok = secondMeta["decimals"]
-		if !ok || value != "NaN" {
+		if !ok || value == "NaN" {
 			value = fmt.Sprintf("%d", defaultDecimals)
 		}
 		secondAsset.Decimals, err = strconv.Atoi(value.(string))
