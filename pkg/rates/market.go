@@ -1,6 +1,7 @@
 package rates
 
 import (
+	"bytes"
 	"context"
 	"encoding/csv"
 	"encoding/json"
@@ -70,11 +71,11 @@ type Market struct {
 	UsdPrice float64
 	URL      string
 	// Converter for calculating the TON to USD price
-	TonPriceConverter func(closer io.ReadCloser) (float64, error)
+	TonPriceConverter func(respBody []byte) (float64, error)
 	// Converter for calculating fiat prices
-	FiatPriceConverter func(closer io.ReadCloser) (map[string]float64, error)
+	FiatPriceConverter func(respBody []byte) (map[string]float64, error)
 	// Converter for calculating jetton prices within pools
-	PoolResponseConverter func(closer io.ReadCloser) ([]Assets, []LpAsset, error)
+	PoolResponseConverter func(respBody []byte) ([]Assets, []LpAsset, error)
 	DateUpdate            time.Time
 }
 
@@ -149,12 +150,11 @@ func (m *Mock) GetCurrentMarketsTonPrice() ([]Market, error) {
 	return markets, nil
 }
 
-func convertedTonGateIOResponse(respBody io.ReadCloser) (float64, error) {
-	defer respBody.Close()
+func convertedTonGateIOResponse(respBody []byte) (float64, error) {
 	var data []struct {
 		Last string `json:"last"`
 	}
-	if err := json.NewDecoder(respBody).Decode(&data); err != nil {
+	if err := json.Unmarshal(respBody, &data); err != nil {
 		return 0, fmt.Errorf("[convertedTonGateIOResponse] failed to decode response: %v", err)
 	}
 	if len(data) == 0 {
@@ -167,8 +167,7 @@ func convertedTonGateIOResponse(respBody io.ReadCloser) (float64, error) {
 	return price, nil
 }
 
-func convertedTonBybitResponse(respBody io.ReadCloser) (float64, error) {
-	defer respBody.Close()
+func convertedTonBybitResponse(respBody []byte) (float64, error) {
 	var data struct {
 		RetMsg string `json:"retMsg"`
 		Result struct {
@@ -177,7 +176,7 @@ func convertedTonBybitResponse(respBody io.ReadCloser) (float64, error) {
 			} `json:"list"`
 		} `json:"result"`
 	}
-	if err := json.NewDecoder(respBody).Decode(&data); err != nil {
+	if err := json.Unmarshal(respBody, &data); err != nil {
 		return 0, fmt.Errorf("[convertedTonBybitResponse] failed to decode response: %v", err)
 	}
 	if data.RetMsg != "OK" {
@@ -193,10 +192,9 @@ func convertedTonBybitResponse(respBody io.ReadCloser) (float64, error) {
 	return price, nil
 }
 
-func convertedTonBitFinexResponse(respBody io.ReadCloser) (float64, error) {
-	defer respBody.Close()
+func convertedTonBitFinexResponse(respBody []byte) (float64, error) {
 	var prices []float64
-	if err := json.NewDecoder(respBody).Decode(&prices); err != nil {
+	if err := json.Unmarshal(respBody, &prices); err != nil {
 		return 0, fmt.Errorf("[convertedTonBitFinexResponse] failed to decode response: %v", err)
 	}
 	if len(prices) == 0 {
@@ -209,15 +207,14 @@ func convertedTonBitFinexResponse(respBody io.ReadCloser) (float64, error) {
 	return prices[0], nil
 }
 
-func convertedTonKuCoinResponse(respBody io.ReadCloser) (float64, error) {
-	defer respBody.Close()
+func convertedTonKuCoinResponse(respBody []byte) (float64, error) {
 	var data struct {
 		Success bool `json:"success"`
 		Data    []struct {
 			LastTradedPrice string `json:"lastTradedPrice"`
 		} `json:"data"`
 	}
-	if err := json.NewDecoder(respBody).Decode(&data); err != nil {
+	if err := json.Unmarshal(respBody, &data); err != nil {
 		return 0, fmt.Errorf("[convertedTonKuCoinResponse] failed to decode response: %v", err)
 	}
 	if !data.Success {
@@ -233,15 +230,14 @@ func convertedTonKuCoinResponse(respBody io.ReadCloser) (float64, error) {
 	return price, nil
 }
 
-func convertedTonOKXResponse(respBody io.ReadCloser) (float64, error) {
-	defer respBody.Close()
+func convertedTonOKXResponse(respBody []byte) (float64, error) {
 	var data struct {
 		Code string `json:"code"`
 		Data []struct {
 			Last string `json:"last"`
 		} `json:"data"`
 	}
-	if err := json.NewDecoder(respBody).Decode(&data); err != nil {
+	if err := json.Unmarshal(respBody, &data); err != nil {
 		return 0, fmt.Errorf("[convertedTonOKXResponse] failed to decode response: %v", err)
 	}
 	if data.Code != "0" {
@@ -259,8 +255,7 @@ func convertedTonOKXResponse(respBody io.ReadCloser) (float64, error) {
 	return price, nil
 }
 
-func convertedTonHuobiResponse(respBody io.ReadCloser) (float64, error) {
-	defer respBody.Close()
+func convertedTonHuobiResponse(respBody []byte) (float64, error) {
 	var data struct {
 		Status string `json:"status"`
 		Tick   struct {
@@ -271,7 +266,7 @@ func convertedTonHuobiResponse(respBody io.ReadCloser) (float64, error) {
 			} `json:"data"`
 		} `json:"tick"`
 	}
-	if err := json.NewDecoder(respBody).Decode(&data); err != nil {
+	if err := json.Unmarshal(respBody, &data); err != nil {
 		return 0, fmt.Errorf("[convertedTonHuobiResponse] failed to decode response: %v", err)
 	}
 	if data.Status != "ok" {
@@ -316,14 +311,13 @@ func getFiatPrices(tonPrice float64) map[string]float64 {
 	return prices
 }
 
-func convertedCoinBaseFiatPricesResponse(respBody io.ReadCloser) (map[string]float64, error) {
-	defer respBody.Close()
+func convertedCoinBaseFiatPricesResponse(respBody []byte) (map[string]float64, error) {
 	var data struct {
 		Data struct {
 			Rates map[string]string `json:"rates"`
 		} `json:"data"`
 	}
-	if err := json.NewDecoder(respBody).Decode(&data); err != nil {
+	if err := json.Unmarshal(respBody, &data); err != nil {
 		return map[string]float64{}, fmt.Errorf("[convertedCoinBaseFiatPricesResponse] failed to decode response: %v", err)
 	}
 	prices := make(map[string]float64)
@@ -432,9 +426,8 @@ func (m *Mock) getJettonPricesFromDex(pools map[ton.AccountID]float64) map[ton.A
 	return pools
 }
 
-func convertedStonFiPoolResponse(respBody io.ReadCloser) ([]Assets, []LpAsset, error) {
-	defer respBody.Close()
-	reader := csv.NewReader(respBody)
+func convertedStonFiPoolResponse(respBody []byte) ([]Assets, []LpAsset, error) {
+	reader := csv.NewReader(bytes.NewReader(respBody))
 	records, err := reader.ReadAll()
 	if err != nil {
 		return nil, nil, err
@@ -546,9 +539,8 @@ func convertedStonFiPoolResponse(respBody io.ReadCloser) ([]Assets, []LpAsset, e
 	return actualAssets, maps.Values(actualLpAssets), nil
 }
 
-func convertedDeDustPoolResponse(respBody io.ReadCloser) ([]Assets, []LpAsset, error) {
-	defer respBody.Close()
-	reader := csv.NewReader(respBody)
+func convertedDeDustPoolResponse(respBody []byte) ([]Assets, []LpAsset, error) {
+	reader := csv.NewReader(bytes.NewReader(respBody))
 	records, err := reader.ReadAll()
 	if err != nil {
 		return nil, nil, err
@@ -795,8 +787,7 @@ func calculatePoolPrice(firstAsset, secondAsset Asset, pools map[ton.AccountID]f
 	return calculatedAccount, price
 }
 
-// Note: You must close resp.Body in the handler function; here, it is closed ONLY in case of a bad status_code
-func sendRequest(url, token string) (io.ReadCloser, error) {
+func sendRequest(url, token string) ([]byte, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*15)
 	defer cancel()
 
@@ -812,10 +803,14 @@ func sendRequest(url, token string) (io.ReadCloser, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
-		resp.Body.Close()
 		return nil, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
 	}
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read response body: %w", err)
+	}
 
-	return resp.Body, nil
+	return body, nil
 }

@@ -141,14 +141,12 @@ type ExecutionResult struct {
 // getBemoPrice fetches BEMO price by smart contract data
 func (m *Mock) getBemoPrice(_ float64, _ map[ton.AccountID]float64) (map[ton.AccountID]float64, error) {
 	url := fmt.Sprintf("https://tonapi.io/v2/blockchain/accounts/%v/methods/get_full_data", references.BemoAccount.ToRaw())
-	resp, err := sendRequest(url, m.TonApiToken)
+	respBody, err := sendRequest(url, m.TonApiToken)
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Close()
-
 	var result ExecutionResult
-	if err = json.NewDecoder(resp).Decode(&result); err != nil {
+	if err = json.Unmarshal(respBody, &result); err != nil {
 		return nil, err
 	}
 	if !result.Success || len(result.Stack) < 2 {
@@ -170,12 +168,10 @@ func (m *Mock) getBemoPrice(_ float64, _ map[ton.AccountID]float64) (map[ton.Acc
 // getTonstakersPrice fetches Tonstakers price by smart contract data
 func (m *Mock) getTonstakersPrice(_ float64, _ map[ton.AccountID]float64) (map[ton.AccountID]float64, error) {
 	url := fmt.Sprintf("https://tonapi.io/v2/blockchain/accounts/%v/methods/get_pool_full_data", references.TonstakersAccountPool.ToRaw())
-	resp, err := sendRequest(url, m.TonApiToken)
+	respBody, err := sendRequest(url, m.TonApiToken)
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Close()
-
 	var result struct {
 		Success bool `json:"success"`
 		Decoded struct {
@@ -184,7 +180,7 @@ func (m *Mock) getTonstakersPrice(_ float64, _ map[ton.AccountID]float64) (map[t
 			ProjectedSupply int64  `json:"projected_supply"`
 		}
 	}
-	if err = json.NewDecoder(resp).Decode(&result); err != nil {
+	if err = json.Unmarshal(respBody, &result); err != nil {
 		return nil, err
 	}
 	if !result.Success || result.Decoded.ProjectBalance == 0 || result.Decoded.ProjectedSupply == 0 {
@@ -208,14 +204,12 @@ func (m *Mock) getBeetrootPrice(tonPrice float64, _ map[ton.AccountID]float64) (
 	account := ton.MustParseAccountID("EQAFGhmx199oH6kmL78PGBHyAx4d5CiJdfXwSjDK5F5IFyfC")
 
 	url := fmt.Sprintf("https://tonapi.io/v2/blockchain/accounts/%v/methods/get_price_data", contract)
-	resp, err := sendRequest(url, m.TonApiToken)
+	respBody, err := sendRequest(url, m.TonApiToken)
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Close()
-
 	var result ExecutionResult
-	if err = json.NewDecoder(resp).Decode(&result); err != nil {
+	if err = json.Unmarshal(respBody, &result); err != nil {
 		return nil, err
 	}
 	if !result.Success || len(result.Stack) == 0 {
@@ -237,17 +231,15 @@ func (m *Mock) getTsUSDePrice(tonPrice float64, _ map[ton.AccountID]float64) (ma
 	}
 	contract := ton.MustParseAccountID("EQChGuD1u0e7KUWHH5FaYh_ygcLXhsdG2nSHPXHW8qqnpZXW")
 	account := ton.MustParseAccountID("EQDQ5UUyPHrLcQJlPAczd_fjxn8SLrlNQwolBznxCdSlfQwr")
-	refShare := decimal.NewFromInt(1_000_000)
+	refShare := decimal.NewFromInt(1_000_000_000)
 
 	url := fmt.Sprintf("https://tonapi.io/v2/blockchain/accounts/%v/methods/convertToAssets?args=%v", contract, refShare)
-	resp, err := sendRequest(url, m.TonApiToken)
+	respBody, err := sendRequest(url, m.TonApiToken)
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Close()
-
 	var result ExecutionResult
-	if err = json.NewDecoder(resp).Decode(&result); err != nil {
+	if err = json.Unmarshal(respBody, &result); err != nil {
 		return nil, err
 	}
 	if !result.Success || len(result.Stack) != 1 || result.Stack[0].Type != "num" {
@@ -270,12 +262,10 @@ func (m *Mock) getUsdEPrice(tonPrice float64, _ map[ton.AccountID]float64) (map[
 	account := ton.MustParseAccountID("EQAIb6KmdfdDR7CN1GBqVJuP25iCnLKCvBlJ07Evuu2dzP5f")
 
 	url := "https://api.bybit.com/v5/market/tickers?category=spot&symbol=USDEUSDT"
-	resp, err := sendRequest(url, "")
+	respBody, err := sendRequest(url, "")
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Close()
-
 	result := struct {
 		RetMsg string `json:"retMsg"`
 		Result struct {
@@ -284,7 +274,7 @@ func (m *Mock) getUsdEPrice(tonPrice float64, _ map[ton.AccountID]float64) (map[
 			} `json:"list"`
 		}
 	}{}
-	if err = json.NewDecoder(resp).Decode(&result); err != nil {
+	if err = json.Unmarshal(respBody, &result); err != nil {
 		return nil, err
 	}
 	if result.RetMsg != "OK" || len(result.Result.List) == 0 {
@@ -308,17 +298,14 @@ func (m *Mock) getSlpTokensPrice(tonPrice float64, pools map[ton.AccountID]float
 	result := make(map[tongo.AccountID]float64)
 	for slpType, account := range references.SlpAccounts {
 		url := fmt.Sprintf("https://tonapi.io/v2/blockchain/accounts/%v/methods/get_vault_data", account.ToRaw())
-		resp, err := sendRequest(url, m.TonApiToken)
+		respBody, err := sendRequest(url, m.TonApiToken)
 		if err != nil {
 			continue
 		}
 		var data ExecutionResult
-		if err = json.NewDecoder(resp).Decode(&data); err != nil {
-			resp.Close()
+		if err = json.Unmarshal(respBody, &data); err != nil {
 			continue
 		}
-		resp.Close()
-
 		if len(data.Stack) < 2 {
 			continue
 		}
