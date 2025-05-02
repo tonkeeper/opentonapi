@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"math/big"
+	"net/http"
 	"sort"
 	"strconv"
 	"strings"
@@ -141,7 +142,8 @@ type ExecutionResult struct {
 // getBemoPrice fetches BEMO price by smart contract data
 func (m *Mock) getBemoPrice(_ float64, _ map[ton.AccountID]float64) (map[ton.AccountID]float64, error) {
 	url := fmt.Sprintf("https://tonapi.io/v2/blockchain/accounts/%v/methods/get_full_data", references.BemoAccount.ToRaw())
-	respBody, err := sendRequest(url, m.TonApiToken)
+	headers := http.Header{"Content-Type": {"application/json"}}
+	respBody, err := sendRequest(url, m.TonApiToken, headers)
 	if err != nil {
 		return nil, err
 	}
@@ -168,7 +170,8 @@ func (m *Mock) getBemoPrice(_ float64, _ map[ton.AccountID]float64) (map[ton.Acc
 // getTonstakersPrice fetches Tonstakers price by smart contract data
 func (m *Mock) getTonstakersPrice(_ float64, _ map[ton.AccountID]float64) (map[ton.AccountID]float64, error) {
 	url := fmt.Sprintf("https://tonapi.io/v2/blockchain/accounts/%v/methods/get_pool_full_data", references.TonstakersAccountPool.ToRaw())
-	respBody, err := sendRequest(url, m.TonApiToken)
+	headers := http.Header{"Content-Type": {"application/json"}}
+	respBody, err := sendRequest(url, m.TonApiToken, headers)
 	if err != nil {
 		return nil, err
 	}
@@ -204,7 +207,8 @@ func (m *Mock) getBeetrootPrice(tonPrice float64, _ map[ton.AccountID]float64) (
 	account := ton.MustParseAccountID("EQAFGhmx199oH6kmL78PGBHyAx4d5CiJdfXwSjDK5F5IFyfC")
 
 	url := fmt.Sprintf("https://tonapi.io/v2/blockchain/accounts/%v/methods/get_price_data", contract)
-	respBody, err := sendRequest(url, m.TonApiToken)
+	headers := http.Header{"Content-Type": {"application/json"}}
+	respBody, err := sendRequest(url, m.TonApiToken, headers)
 	if err != nil {
 		return nil, err
 	}
@@ -234,7 +238,8 @@ func (m *Mock) getTsUSDePrice(tonPrice float64, _ map[ton.AccountID]float64) (ma
 	refShare := decimal.NewFromInt(1_000_000_000)
 
 	url := fmt.Sprintf("https://tonapi.io/v2/blockchain/accounts/%v/methods/convertToAssets?args=%v", contract, refShare)
-	respBody, err := sendRequest(url, m.TonApiToken)
+	headers := http.Header{"Content-Type": {"application/json"}}
+	respBody, err := sendRequest(url, m.TonApiToken, headers)
 	if err != nil {
 		return nil, err
 	}
@@ -262,7 +267,8 @@ func (m *Mock) getUsdEPrice(tonPrice float64, _ map[ton.AccountID]float64) (map[
 	account := ton.MustParseAccountID("EQAIb6KmdfdDR7CN1GBqVJuP25iCnLKCvBlJ07Evuu2dzP5f")
 
 	url := "https://api.bybit.com/v5/market/tickers?category=spot&symbol=USDEUSDT"
-	respBody, err := sendRequest(url, "")
+	headers := http.Header{"Content-Type": {"application/json"}}
+	respBody, err := sendRequest(url, "", headers)
 	if err != nil {
 		return nil, err
 	}
@@ -298,7 +304,8 @@ func (m *Mock) getSlpTokensPrice(tonPrice float64, pools map[ton.AccountID]float
 	result := make(map[tongo.AccountID]float64)
 	for slpType, account := range references.SlpAccounts {
 		url := fmt.Sprintf("https://tonapi.io/v2/blockchain/accounts/%v/methods/get_vault_data", account.ToRaw())
-		respBody, err := sendRequest(url, m.TonApiToken)
+		headers := http.Header{"Content-Type": {"application/json"}}
+		respBody, err := sendRequest(url, m.TonApiToken, headers)
 		if err != nil {
 			continue
 		}

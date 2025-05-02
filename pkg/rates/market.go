@@ -127,7 +127,8 @@ func (m *Mock) GetCurrentMarketsTonPrice() ([]Market, error) {
 		},
 	}
 	for idx, market := range markets {
-		respBody, err := sendRequest(market.URL, "")
+		headers := http.Header{"Content-Type": {"application/json"}}
+		respBody, err := sendRequest(market.URL, "", headers)
 		if err != nil {
 			slog.Error("[GetCurrentMarketsTonPrice] failed to send request", slog.Any("error", err))
 			errorsCounter.WithLabelValues(market.Name).Inc()
@@ -290,7 +291,8 @@ func getFiatPrices(tonPrice float64) map[string]float64 {
 	}
 	prices := make(map[string]float64)
 	for _, market := range markets {
-		respBody, err := sendRequest(market.URL, "")
+		headers := http.Header{"Content-Type": {"application/json"}}
+		respBody, err := sendRequest(market.URL, "", headers)
 		if err != nil {
 			slog.Error("[getFiatPrices] failed to send request", slog.Any("error", err))
 			errorsCounter.WithLabelValues(market.Name).Inc()
@@ -372,7 +374,8 @@ func (m *Mock) getJettonPricesFromDex(pools map[ton.AccountID]float64) map[ton.A
 	var actualLpAssets []LpAsset
 	// Fetch and parse pool data from each market
 	for _, market := range markets {
-		respBody, err := sendRequest(market.URL, "")
+		headers := http.Header{"Accept": {"text/csv"}}
+		respBody, err := sendRequest(market.URL, "", headers)
 		if err != nil {
 			slog.Error("[getJettonPricesFromDex] failed to send request", slog.Any("error", err), slog.String("url", market.URL))
 			errorsCounter.WithLabelValues(market.Name).Inc()
@@ -451,11 +454,13 @@ func convertedStonFiPoolResponse(respBody []byte) ([]Assets, []LpAsset, error) {
 			return Assets{}, err
 		}
 		firstMeta := make(map[string]any)
-		if err = json.Unmarshal([]byte(record[4]), &firstMeta); err != nil {
-			return Assets{}, err
+		if record[4] != "NULL" {
+			if err = json.Unmarshal([]byte(record[4]), &firstMeta); err != nil {
+				return Assets{}, err
+			}
 		}
 		value, ok := firstMeta["decimals"]
-		if !ok {
+		if !ok || value != "NaN" {
 			value = fmt.Sprintf("%d", defaultDecimals)
 		}
 		firstAsset.Decimals, err = strconv.Atoi(value.(string))
@@ -463,11 +468,13 @@ func convertedStonFiPoolResponse(respBody []byte) ([]Assets, []LpAsset, error) {
 			return Assets{}, err
 		}
 		secondMeta := make(map[string]any)
-		if err = json.Unmarshal([]byte(record[5]), &secondMeta); err != nil {
-			return Assets{}, err
+		if record[5] != "NULL" {
+			if err = json.Unmarshal([]byte(record[5]), &secondMeta); err != nil {
+				return Assets{}, err
+			}
 		}
 		value, ok = secondMeta["decimals"]
-		if !ok {
+		if !ok || value != "NaN" {
 			value = fmt.Sprintf("%d", defaultDecimals)
 		}
 		secondAsset.Decimals, err = strconv.Atoi(value.(string))
@@ -515,7 +522,7 @@ func convertedStonFiPoolResponse(respBody []byte) ([]Assets, []LpAsset, error) {
 		}
 		assets, err := parseAssets(record)
 		if err != nil {
-			slog.Error("failed to parse assets", slog.Any("error", err))
+			slog.Error("failed to parse assets", slog.Any("error", err), slog.Any("assets", record))
 			continue
 		}
 		firstAsset, secondAsset := assets.Assets[0], assets.Assets[1]
@@ -554,8 +561,8 @@ func convertedDeDustPoolResponse(respBody []byte) ([]Assets, []LpAsset, error) {
 			return 0, err
 		}
 		value, ok := converted["decimals"]
-		if !ok {
-			value = "9"
+		if !ok || value == "NaN" {
+			value = fmt.Sprintf("%d", defaultDecimals)
 		}
 		decimals, err := strconv.Atoi(value.(string))
 		if err != nil {
@@ -787,7 +794,7 @@ func calculatePoolPrice(firstAsset, secondAsset Asset, pools map[ton.AccountID]f
 	return calculatedAccount, price
 }
 
-func sendRequest(url, token string) ([]byte, error) {
+func sendRequest(url, token string, headers http.Header) ([]byte, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*15)
 	defer cancel()
 
@@ -795,7 +802,7 @@ func sendRequest(url, token string) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	req.Header.Set("Content-Type", "application/json")
+	req.Header = headers
 	if token != "" {
 		req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", token))
 	}
