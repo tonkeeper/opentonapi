@@ -1,6 +1,7 @@
 package rates
 
 import (
+	"context"
 	"encoding/csv"
 	"encoding/json"
 	"fmt"
@@ -14,8 +15,8 @@ import (
 
 	"github.com/tonkeeper/opentonapi/pkg/references"
 	"github.com/tonkeeper/tongo/ton"
-	"go.uber.org/zap"
 	"golang.org/x/exp/maps"
+	"golang.org/x/exp/slog"
 )
 
 // List of services used to calculate various prices
@@ -127,13 +128,13 @@ func (m *Mock) GetCurrentMarketsTonPrice() ([]Market, error) {
 	for idx, market := range markets {
 		respBody, err := sendRequest(market.URL, "")
 		if err != nil {
-			zap.Error(fmt.Errorf("[GetCurrentMarketsTonPrice] failed to send request: %v", err))
+			slog.Error("[GetCurrentMarketsTonPrice] failed to send request", slog.Any("error", err))
 			errorsCounter.WithLabelValues(market.Name).Inc()
 			continue
 		}
 		market.UsdPrice, err = market.TonPriceConverter(respBody)
 		if err != nil {
-			zap.Error(fmt.Errorf("[GetCurrentMarketsTonPrice] failed to convert response: %v", err))
+			slog.Error("[GetCurrentMarketsTonPrice] failed to convert response", slog.Any("error", err))
 			errorsCounter.WithLabelValues(market.Name).Inc()
 			continue
 		}
@@ -251,7 +252,7 @@ func convertedTonOKXResponse(respBody io.ReadCloser) (float64, error) {
 	}
 	price, err := strconv.ParseFloat(data.Data[0].Last, 64)
 	if err != nil {
-		zap.Error(fmt.Errorf("[convertedTonOKXResponse] failed to parse price: %v", err))
+		slog.Error("[convertedTonOKXResponse] failed to parse price", slog.Any("error", err))
 		return 0, fmt.Errorf("failed to parse price")
 	}
 
@@ -296,13 +297,13 @@ func getFiatPrices(tonPrice float64) map[string]float64 {
 	for _, market := range markets {
 		respBody, err := sendRequest(market.URL, "")
 		if err != nil {
-			zap.Error(fmt.Errorf("[getFiatPrices] failed to send request: %v", err))
+			slog.Error("[getFiatPrices] failed to send request", slog.Any("error", err))
 			errorsCounter.WithLabelValues(market.Name).Inc()
 			continue
 		}
 		converted, err := market.FiatPriceConverter(respBody)
 		if err != nil {
-			zap.Error(fmt.Errorf("[getFiatPrices] failed to convert response: %v", err))
+			slog.Error("[getFiatPrices] failed to convert response", slog.Any("error", err))
 			errorsCounter.WithLabelValues(market.Name).Inc()
 			continue
 		}
@@ -353,8 +354,8 @@ func sortAssetPairs(assetPairs map[ton.AccountID][]Assets) map[ton.AccountID][]A
 	return assetPairs
 }
 
-// updatePools calculates the price of jettons relative to TON based on liquidity pools
-func (m *Mock) updatePools(pools map[ton.AccountID]float64) map[ton.AccountID]float64 {
+// getJettonPricesFromDex calculates the price of jettons relative to TON based on liquidity pools
+func (m *Mock) getJettonPricesFromDex(pools map[ton.AccountID]float64) map[ton.AccountID]float64 {
 	// Define markets to fetch pool data from, each with a corresponding response converter
 	markets := []Market{
 		{
@@ -379,13 +380,13 @@ func (m *Mock) updatePools(pools map[ton.AccountID]float64) map[ton.AccountID]fl
 	for _, market := range markets {
 		respBody, err := sendRequest(market.URL, "")
 		if err != nil {
-			zap.Error(fmt.Errorf("[updatePools] failed to send request: %v", err))
+			slog.Error("[getJettonPricesFromDex] failed to send request", slog.Any("error", err), slog.String("url", market.URL))
 			errorsCounter.WithLabelValues(market.Name).Inc()
 			continue
 		}
 		assets, lpAssets, err := market.PoolResponseConverter(respBody)
 		if err != nil {
-			zap.Error(fmt.Errorf("[updatePools] failed to convert response: %v", err))
+			slog.Error("[getJettonPricesFromDex] failed to convert response", slog.Any("error", err))
 			errorsCounter.WithLabelValues(market.Name).Inc()
 			continue
 		}
@@ -521,7 +522,7 @@ func convertedStonFiPoolResponse(respBody io.ReadCloser) ([]Assets, []LpAsset, e
 		}
 		assets, err := parseAssets(record)
 		if err != nil {
-			zap.Error(fmt.Errorf("[convertedStonFiPoolResponse] failed to parse assets: %v", err))
+			slog.Error("failed to parse assets", slog.Any("error", err))
 			continue
 		}
 		firstAsset, secondAsset := assets.Assets[0], assets.Assets[1]
@@ -666,7 +667,7 @@ func convertedDeDustPoolResponse(respBody io.ReadCloser) ([]Assets, []LpAsset, e
 		}
 		assets, err := parseAssets(record)
 		if err != nil {
-			zap.Error(fmt.Errorf("[convertedDedustPoolResponse] failed to parse assets: %v", err))
+			slog.Error("[convertedDedustPoolResponse] failed to parse assets", slog.Any("error", err))
 			continue
 		}
 		firstAsset, secondAsset := assets.Assets[0], assets.Assets[1]
@@ -796,7 +797,10 @@ func calculatePoolPrice(firstAsset, secondAsset Asset, pools map[ton.AccountID]f
 
 // Note: You must close resp.Body in the handler function; here, it is closed ONLY in case of a bad status_code
 func sendRequest(url, token string) (io.ReadCloser, error) {
-	req, err := http.NewRequest(http.MethodGet, url, nil)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*15)
+	defer cancel()
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -809,12 +813,9 @@ func sendRequest(url, token string) (io.ReadCloser, error) {
 		return nil, err
 	}
 	if resp.StatusCode != http.StatusOK {
-		var errRespBody string
-		if respBody, err := io.ReadAll(resp.Body); err == nil {
-			errRespBody = string(respBody)
-		}
 		resp.Body.Close()
-		return nil, fmt.Errorf("bad status code: %v %v %v", resp.StatusCode, url, errRespBody)
+		return nil, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
 	}
+
 	return resp.Body, nil
 }
