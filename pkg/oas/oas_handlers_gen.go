@@ -3291,6 +3291,8 @@ func (s *Server) handleGetAccountMultisigsRequest(args [1]string, argsEscaped bo
 //
 // Get the transfer nft history.
 //
+// Deprecated: schema marks this operation as deprecated.
+//
 // GET /v2/accounts/{account_id}/nfts/history
 func (s *Server) handleGetAccountNftHistoryRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	otelAttrs := []attribute.KeyValue{

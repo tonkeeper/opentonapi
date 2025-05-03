@@ -792,6 +792,7 @@ paths:
           $ref: '#/components/responses/Error'
   /v2/accounts/{account_id}/nfts/history:
     get:
+      deprecated: true
       x-question: duplicate of getNftHistoryByID ?
       description: Get the transfer nft history
       operationId: getAccountNftHistory

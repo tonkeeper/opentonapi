@@ -174,6 +174,8 @@ type Handler interface {
 	//
 	// Get the transfer nft history.
 	//
+	// Deprecated: schema marks this operation as deprecated.
+	//
 	// GET /v2/accounts/{account_id}/nfts/history
 	GetAccountNftHistory(ctx context.Context, params GetAccountNftHistoryParams) (*AccountEvents, error)
 	// GetAccountNftItems implements getAccountNftItems operation.

@@ -7058,6 +7058,7 @@
   },
   "/v2/accounts/{account_id}/nfts/history": {
    "get": {
+    "deprecated": true,
     "description": "Get the transfer nft history",
     "operationId": "getAccountNftHistory",
     "parameters": [

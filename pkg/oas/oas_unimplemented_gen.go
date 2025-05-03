@@ -257,6 +257,8 @@ func (UnimplementedHandler) GetAccountMultisigs(ctx context.Context, params GetA
 //
 // Get the transfer nft history.
 //
+// Deprecated: schema marks this operation as deprecated.
+//
 // GET /v2/accounts/{account_id}/nfts/history
 func (UnimplementedHandler) GetAccountNftHistory(ctx context.Context, params GetAccountNftHistoryParams) (r *AccountEvents, _ error) {
 	return r, ht.ErrNotImplemented
