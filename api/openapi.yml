@@ -792,8 +792,6 @@ paths:
           $ref: '#/components/responses/Error'
   /v2/accounts/{account_id}/nfts/history:
     get:
-      deprecated: true
-      x-question: duplicate of getNftHistoryByID ?
       description: Get the transfer nft history
       operationId: getAccountNftHistory
       tags:
@@ -818,29 +816,13 @@ paths:
             example: 100
             maximum: 1000
             minimum: 1
-        - name: start_date
-          in: query
-          required: false
-          schema:
-            type: integer
-            format: int64
-            maximum: 2114380800
-            example: 1668436763
-        - name: end_date
-          in: query
-          required: false
-          schema:
-            type: integer
-            format: int64
-            maximum: 2114380800
-            example: 1668436763
       responses:
         '200':
           description: nft history
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AccountEvents'
+                $ref: '#/components/schemas/NftOperations'
         'default':
           $ref: '#/components/responses/Error'
   /v2/accounts/{account_id}/events:
@@ -7402,6 +7384,53 @@ components:
         method:
           type: string
           example: "get_something"
+    NftOperations:
+      type: object
+      required:
+        - operations
+      properties:
+        operations:
+        type: array
+        items:
+          $ref: '#/components/schemas/NftOperation'
+        next_from:
+          type: integer
+          format: int64
+          example: 25713146000001
+          x-js-format: bigint
+    NftOperation:
+      type: object
+      required:
+        - operation
+        - utime
+        - lt
+        - transaction_hash
+        - item_address
+      properties:
+        operation:
+          type: string
+          example: "transfer"
+        utime:
+          type: integer
+          format: int64
+          example: 1234567890
+        lt:
+          type: integer
+          format: int64
+          example: 25713146000001
+          x-js-format: bigint
+        transaction_hash:
+          type: string
+          example: "0xdeadbeaf"
+        source:
+          $ref: '#/components/schemas/AccountAddress'
+        destination:
+          $ref: '#/components/schemas/AccountAddress'
+        item_address:
+          type: string
+        item:
+          $ref:
+
   
   responses:
     Error:
