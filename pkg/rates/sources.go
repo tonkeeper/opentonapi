@@ -323,14 +323,16 @@ func (m *Mock) getSlpTokensPrice(tonPrice float64, pools map[ton.AccountID]float
 		val := float64(multiplier) / float64(ton.OneTON)
 
 		switch slpType {
-		case references.JUsdtSlpType, references.UsdtSlpType:
-			result[account] = val / tonPrice
+		case references.JUsdtSlpType:
+			result[references.JUsdtSlp] = val / tonPrice
+		case references.UsdtSlpType:
+			result[references.UsdtSlp] = val / tonPrice
 		case references.TonSlpType:
-			result[account] = val
+			result[references.TonSlp] = val
 		case references.NotSlpType:
 			accountID := ton.MustParseAccountID("EQAvlWFDxGF2lXm67y4yzC17wYKD9A0guwPkMs1gOsM__NOT")
 			if price, ok := pools[accountID]; ok {
-				result[account] = price * val
+				result[references.NotSlp] = price * val
 			}
 		}
 	}
