@@ -15,14 +15,15 @@ type Multisig struct {
 }
 
 type MultisigOrder struct {
-	AccountID        ton.AccountID
-	OrderSeqno       int64
-	Threshold        int32
-	SentForExecution bool
-	Signers          []ton.AccountID
-	ApprovalsMask    []byte
-	ApprovalsNum     int32
-	ExpirationDate   int64
-	CreationDate     int64
-	Actions          []abi.MultisigSendMessageAction
+	AccountID         ton.AccountID
+	MultisigAccountID ton.AccountID
+	OrderSeqno        int64
+	Threshold         int32
+	SentForExecution  bool
+	Signers           []ton.AccountID
+	ApprovalsMask     []byte
+	ApprovalsNum      int32
+	ExpirationDate    int64
+	CreationDate      int64
+	Actions           []abi.MultisigSendMessageAction
 }

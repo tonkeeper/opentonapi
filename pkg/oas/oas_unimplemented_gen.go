@@ -257,10 +257,8 @@ func (UnimplementedHandler) GetAccountMultisigs(ctx context.Context, params GetA
 //
 // Get the transfer nft history.
 //
-// Deprecated: schema marks this operation as deprecated.
-//
-// GET /v2/accounts/{account_id}/nfts/history
-func (UnimplementedHandler) GetAccountNftHistory(ctx context.Context, params GetAccountNftHistoryParams) (r *AccountEvents, _ error) {
+// GET /v2/accounts/{account_id}/nfts/operations
+func (UnimplementedHandler) GetAccountNftHistory(ctx context.Context, params GetAccountNftHistoryParams) (r *NftOperations, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -594,6 +592,15 @@ func (UnimplementedHandler) GetMarketsRates(ctx context.Context) (r *GetMarketsR
 //
 // GET /v2/multisig/{account_id}
 func (UnimplementedHandler) GetMultisigAccount(ctx context.Context, params GetMultisigAccountParams) (r *Multisig, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// GetMultisigOrder implements getMultisigOrder operation.
+//
+// Get multisig order.
+//
+// GET /v2/multisig/order/{account_id}
+func (UnimplementedHandler) GetMultisigOrder(ctx context.Context, params GetMultisigOrderParams) (r *MultisigOrder, _ error) {
 	return r, ht.ErrNotImplemented
 }
 

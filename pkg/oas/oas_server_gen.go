@@ -174,10 +174,8 @@ type Handler interface {
 	//
 	// Get the transfer nft history.
 	//
-	// Deprecated: schema marks this operation as deprecated.
-	//
-	// GET /v2/accounts/{account_id}/nfts/history
-	GetAccountNftHistory(ctx context.Context, params GetAccountNftHistoryParams) (*AccountEvents, error)
+	// GET /v2/accounts/{account_id}/nfts/operations
+	GetAccountNftHistory(ctx context.Context, params GetAccountNftHistoryParams) (*NftOperations, error)
 	// GetAccountNftItems implements getAccountNftItems operation.
 	//
 	// Get all NFT items by owner address.
@@ -403,6 +401,12 @@ type Handler interface {
 	//
 	// GET /v2/multisig/{account_id}
 	GetMultisigAccount(ctx context.Context, params GetMultisigAccountParams) (*Multisig, error)
+	// GetMultisigOrder implements getMultisigOrder operation.
+	//
+	// Get multisig order.
+	//
+	// GET /v2/multisig/order/{account_id}
+	GetMultisigOrder(ctx context.Context, params GetMultisigOrderParams) (*MultisigOrder, error)
 	// GetNftCollection implements getNftCollection operation.
 	//
 	// Get NFT collection by collection address.

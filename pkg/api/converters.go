@@ -267,39 +267,70 @@ func (h *Handler) convertMultisig(ctx context.Context, item core.Multisig) (*oas
 		converted.Proposers = append(converted.Proposers, account.ToRaw())
 	}
 	for _, order := range item.Orders {
-		var signers []string
-		for _, account := range order.Signers {
-			signers = append(signers, account.ToRaw())
-		}
-		risk := walletPkg.Risk{
-			TransferAllRemainingBalance: false,
-			Jettons:                     map[tongo.AccountID]big.Int{},
-		}
-		for _, action := range order.Actions {
-			switch action.SumType {
-			case "SendMessage":
-				var err error
-				risk, err = walletPkg.ExtractRiskFromMessage(action.SendMessage.Field0.Message, risk, action.SendMessage.Field0.Mode)
-				if err != nil {
-					return nil, err
-				}
-			}
-		}
-		oasRisk, err := h.convertRisk(ctx, risk, item.AccountID)
+		o, err := h.convertMultisigOrder(ctx, order)
 		if err != nil {
 			return nil, err
 		}
-		converted.Orders = append(converted.Orders, oas.MultisigOrder{
-			Address:          order.AccountID.ToRaw(),
-			OrderSeqno:       order.OrderSeqno,
-			Threshold:        order.Threshold,
-			SentForExecution: order.SentForExecution,
-			Signers:          signers,
-			ApprovalsNum:     order.ApprovalsNum,
-			ExpirationDate:   order.ExpirationDate,
-			CreationDate:     order.CreationDate,
-			Risk:             oasRisk,
-		})
+		converted.Orders = append(converted.Orders, o)
 	}
 	return &converted, nil
+}
+
+func (h *Handler) convertMultisigOrder(ctx context.Context, order core.MultisigOrder) (oas.MultisigOrder, error) {
+	var signers []string
+	for _, account := range order.Signers {
+		signers = append(signers, account.ToRaw())
+	}
+	risk := walletPkg.Risk{
+		TransferAllRemainingBalance: false,
+		Jettons:                     map[tongo.AccountID]big.Int{},
+	}
+	var cp oas.OptMultisigOrderChangingParameters
+	for _, action := range order.Actions {
+		switch action.SumType {
+		case "SendMessage":
+			var err error
+			risk, err = walletPkg.ExtractRiskFromMessage(action.SendMessage.Field0.Message, risk, action.SendMessage.Field0.Mode)
+			if err != nil {
+				return oas.MultisigOrder{}, err
+			}
+		case "UpdateMultisigParam":
+			newParams := oas.MultisigOrderChangingParameters{
+				Threshold: int32(action.UpdateMultisigParam.Threshold),
+			}
+			for _, s := range action.UpdateMultisigParam.Signers.Values() {
+				a, err := tongo.AccountIDFromTlb(s)
+				if err != nil || a == nil {
+					return oas.MultisigOrder{}, fmt.Errorf("can't convert %v to account id", s)
+				}
+				newParams.Signers = append(newParams.Signers, a.ToRaw())
+			}
+			for _, p := range action.UpdateMultisigParam.Proposers.Values() {
+				a, err := tongo.AccountIDFromTlb(p)
+				if err != nil || a == nil {
+					return oas.MultisigOrder{}, fmt.Errorf("can't convert %v to account id", p)
+				}
+				newParams.Proposers = append(newParams.Proposers, a.ToRaw())
+			}
+			cp.SetTo(newParams)
+		}
+	}
+	oasRisk, err := h.convertRisk(ctx, risk, order.MultisigAccountID)
+	if err != nil {
+		return oas.MultisigOrder{}, err
+	}
+
+	return oas.MultisigOrder{
+		MultisigAddress:    order.MultisigAccountID.ToRaw(),
+		Address:            order.AccountID.ToRaw(),
+		OrderSeqno:         order.OrderSeqno,
+		Threshold:          order.Threshold,
+		SentForExecution:   order.SentForExecution,
+		Signers:            signers,
+		ApprovalsNum:       order.ApprovalsNum,
+		ExpirationDate:     order.ExpirationDate,
+		CreationDate:       order.CreationDate,
+		Risk:               oasRisk,
+		ChangingParameters: cp,
+	}, nil
 }

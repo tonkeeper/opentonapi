@@ -454,28 +454,16 @@ func (h *Handler) GetAccountDiff(ctx context.Context, params oas.GetAccountDiffP
 	return &oas.GetAccountDiffOK{BalanceChange: balanceChange}, nil
 }
 
-func (h *Handler) GetAccountNftHistory(ctx context.Context, params oas.GetAccountNftHistoryParams) (*oas.AccountEvents, error) {
+func (h *Handler) GetAccountNftHistory(ctx context.Context, params oas.GetAccountNftHistoryParams) (*oas.NftOperations, error) {
 	account, err := tongo.ParseAddress(params.AccountID)
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
 	}
-	traceIDs, err := h.storage.GetAccountNftsHistory(ctx, account.ID, params.Limit, optIntToPointer(params.BeforeLt), optIntToPointer(params.StartDate), optIntToPointer(params.EndDate))
+	_, err = h.storage.GetAccountNftsHistory(ctx, account.ID, params.Limit, optIntToPointer(params.BeforeLt), nil, nil)
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
-	var eventIDs []string
-	for _, traceID := range traceIDs {
-		eventIDs = append(eventIDs, traceID.Hex())
-	}
-	isBannedTraces, err := h.spamFilter.GetEventsScamData(ctx, eventIDs)
-	if err != nil {
-		h.logger.Warn("error getting events spam data", zap.Error(err))
-	}
-	events, lastLT, err := h.convertNftHistory(ctx, account.ID, traceIDs, isBannedTraces, params.AcceptLanguage)
-	if err != nil {
-		return nil, toError(http.StatusInternalServerError, err)
-	}
-	return &oas.AccountEvents{Events: events, NextFrom: lastLT}, nil
+	return &oas.NftOperations{}, nil
 }
 
 func (h *Handler) BlockchainAccountInspect(ctx context.Context, params oas.BlockchainAccountInspectParams) (*oas.BlockchainAccountInspect, error) {

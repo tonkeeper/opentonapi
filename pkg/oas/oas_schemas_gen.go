@@ -9002,16 +9002,18 @@ func (s *Multisig) SetOrders(val []MultisigOrder) {
 
 // Ref: #/components/schemas/MultisigOrder
 type MultisigOrder struct {
-	Address          string   `json:"address"`
-	OrderSeqno       int64    `json:"order_seqno"`
-	Threshold        int32    `json:"threshold"`
-	SentForExecution bool     `json:"sent_for_execution"`
-	Signers          []string `json:"signers"`
-	ApprovalsNum     int32    `json:"approvals_num"`
-	ExpirationDate   int64    `json:"expiration_date"`
-	Risk             Risk     `json:"risk"`
-	CreationDate     int64    `json:"creation_date"`
-	SignedBy         []string `json:"signed_by"`
+	Address            string                             `json:"address"`
+	OrderSeqno         int64                              `json:"order_seqno"`
+	Threshold          int32                              `json:"threshold"`
+	SentForExecution   bool                               `json:"sent_for_execution"`
+	Signers            []string                           `json:"signers"`
+	ApprovalsNum       int32                              `json:"approvals_num"`
+	ExpirationDate     int64                              `json:"expiration_date"`
+	Risk               Risk                               `json:"risk"`
+	CreationDate       int64                              `json:"creation_date"`
+	SignedBy           []string                           `json:"signed_by"`
+	MultisigAddress    string                             `json:"multisig_address"`
+	ChangingParameters OptMultisigOrderChangingParameters `json:"changing_parameters"`
 }
 
 // GetAddress returns the value of Address.
@@ -9064,6 +9066,16 @@ func (s *MultisigOrder) GetSignedBy() []string {
 	return s.SignedBy
 }
 
+// GetMultisigAddress returns the value of MultisigAddress.
+func (s *MultisigOrder) GetMultisigAddress() string {
+	return s.MultisigAddress
+}
+
+// GetChangingParameters returns the value of ChangingParameters.
+func (s *MultisigOrder) GetChangingParameters() OptMultisigOrderChangingParameters {
+	return s.ChangingParameters
+}
+
 // SetAddress sets the value of Address.
 func (s *MultisigOrder) SetAddress(val string) {
 	s.Address = val
@@ -9112,6 +9124,52 @@ func (s *MultisigOrder) SetCreationDate(val int64) {
 // SetSignedBy sets the value of SignedBy.
 func (s *MultisigOrder) SetSignedBy(val []string) {
 	s.SignedBy = val
+}
+
+// SetMultisigAddress sets the value of MultisigAddress.
+func (s *MultisigOrder) SetMultisigAddress(val string) {
+	s.MultisigAddress = val
+}
+
+// SetChangingParameters sets the value of ChangingParameters.
+func (s *MultisigOrder) SetChangingParameters(val OptMultisigOrderChangingParameters) {
+	s.ChangingParameters = val
+}
+
+type MultisigOrderChangingParameters struct {
+	Threshold int32    `json:"threshold"`
+	Signers   []string `json:"signers"`
+	Proposers []string `json:"proposers"`
+}
+
+// GetThreshold returns the value of Threshold.
+func (s *MultisigOrderChangingParameters) GetThreshold() int32 {
+	return s.Threshold
+}
+
+// GetSigners returns the value of Signers.
+func (s *MultisigOrderChangingParameters) GetSigners() []string {
+	return s.Signers
+}
+
+// GetProposers returns the value of Proposers.
+func (s *MultisigOrderChangingParameters) GetProposers() []string {
+	return s.Proposers
+}
+
+// SetThreshold sets the value of Threshold.
+func (s *MultisigOrderChangingParameters) SetThreshold(val int32) {
+	s.Threshold = val
+}
+
+// SetSigners sets the value of Signers.
+func (s *MultisigOrderChangingParameters) SetSigners(val []string) {
+	s.Signers = val
+}
+
+// SetProposers sets the value of Proposers.
+func (s *MultisigOrderChangingParameters) SetProposers(val []string) {
+	s.Proposers = val
 }
 
 // Ref: #/components/schemas/Multisigs
@@ -9559,6 +9617,124 @@ func (s *NftItems) GetNftItems() []NftItem {
 // SetNftItems sets the value of NftItems.
 func (s *NftItems) SetNftItems(val []NftItem) {
 	s.NftItems = val
+}
+
+// Ref: #/components/schemas/NftOperation
+type NftOperation struct {
+	Operation       string            `json:"operation"`
+	Utime           int64             `json:"utime"`
+	Lt              int64             `json:"lt"`
+	TransactionHash string            `json:"transaction_hash"`
+	Source          OptAccountAddress `json:"source"`
+	Destination     OptAccountAddress `json:"destination"`
+	ItemAddress     string            `json:"item_address"`
+	Item            jx.Raw            `json:"item"`
+}
+
+// GetOperation returns the value of Operation.
+func (s *NftOperation) GetOperation() string {
+	return s.Operation
+}
+
+// GetUtime returns the value of Utime.
+func (s *NftOperation) GetUtime() int64 {
+	return s.Utime
+}
+
+// GetLt returns the value of Lt.
+func (s *NftOperation) GetLt() int64 {
+	return s.Lt
+}
+
+// GetTransactionHash returns the value of TransactionHash.
+func (s *NftOperation) GetTransactionHash() string {
+	return s.TransactionHash
+}
+
+// GetSource returns the value of Source.
+func (s *NftOperation) GetSource() OptAccountAddress {
+	return s.Source
+}
+
+// GetDestination returns the value of Destination.
+func (s *NftOperation) GetDestination() OptAccountAddress {
+	return s.Destination
+}
+
+// GetItemAddress returns the value of ItemAddress.
+func (s *NftOperation) GetItemAddress() string {
+	return s.ItemAddress
+}
+
+// GetItem returns the value of Item.
+func (s *NftOperation) GetItem() jx.Raw {
+	return s.Item
+}
+
+// SetOperation sets the value of Operation.
+func (s *NftOperation) SetOperation(val string) {
+	s.Operation = val
+}
+
+// SetUtime sets the value of Utime.
+func (s *NftOperation) SetUtime(val int64) {
+	s.Utime = val
+}
+
+// SetLt sets the value of Lt.
+func (s *NftOperation) SetLt(val int64) {
+	s.Lt = val
+}
+
+// SetTransactionHash sets the value of TransactionHash.
+func (s *NftOperation) SetTransactionHash(val string) {
+	s.TransactionHash = val
+}
+
+// SetSource sets the value of Source.
+func (s *NftOperation) SetSource(val OptAccountAddress) {
+	s.Source = val
+}
+
+// SetDestination sets the value of Destination.
+func (s *NftOperation) SetDestination(val OptAccountAddress) {
+	s.Destination = val
+}
+
+// SetItemAddress sets the value of ItemAddress.
+func (s *NftOperation) SetItemAddress(val string) {
+	s.ItemAddress = val
+}
+
+// SetItem sets the value of Item.
+func (s *NftOperation) SetItem(val jx.Raw) {
+	s.Item = val
+}
+
+// Ref: #/components/schemas/NftOperations
+type NftOperations struct {
+	Operations []NftOperation `json:"operations"`
+	NextFrom   OptInt64       `json:"next_from"`
+}
+
+// GetOperations returns the value of Operations.
+func (s *NftOperations) GetOperations() []NftOperation {
+	return s.Operations
+}
+
+// GetNextFrom returns the value of NextFrom.
+func (s *NftOperations) GetNextFrom() OptInt64 {
+	return s.NextFrom
+}
+
+// SetOperations sets the value of Operations.
+func (s *NftOperations) SetOperations(val []NftOperation) {
+	s.Operations = val
+}
+
+// SetNextFrom sets the value of NextFrom.
+func (s *NftOperations) SetNextFrom(val OptInt64) {
+	s.NextFrom = val
 }
 
 // Ref: #/components/schemas/NftPurchaseAction
@@ -12981,6 +13157,52 @@ func (o OptMessageConsequences) Get() (v MessageConsequences, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptMessageConsequences) Or(d MessageConsequences) MessageConsequences {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptMultisigOrderChangingParameters returns new OptMultisigOrderChangingParameters with value set to v.
+func NewOptMultisigOrderChangingParameters(v MultisigOrderChangingParameters) OptMultisigOrderChangingParameters {
+	return OptMultisigOrderChangingParameters{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptMultisigOrderChangingParameters is optional MultisigOrderChangingParameters.
+type OptMultisigOrderChangingParameters struct {
+	Value MultisigOrderChangingParameters
+	Set   bool
+}
+
+// IsSet returns true if OptMultisigOrderChangingParameters was set.
+func (o OptMultisigOrderChangingParameters) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptMultisigOrderChangingParameters) Reset() {
+	var v MultisigOrderChangingParameters
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptMultisigOrderChangingParameters) SetTo(v MultisigOrderChangingParameters) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptMultisigOrderChangingParameters) Get() (v MultisigOrderChangingParameters, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptMultisigOrderChangingParameters) Or(d MultisigOrderChangingParameters) MultisigOrderChangingParameters {
 	if v, ok := o.Get(); ok {
 		return v
 	}

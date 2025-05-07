@@ -63,12 +63,14 @@ func convertTrace(t *core.Trace, book addressBook) oas.Trace {
 }
 
 func (h *Handler) convertRisk(ctx context.Context, risk wallet.Risk, walletAddress tongo.AccountID) (oas.Risk, error) {
+	if int64(risk.Ton) < 0 {
+		return oas.Risk{}, fmt.Errorf("ivalid ton amount")
+	}
 	oasRisk := oas.Risk{
 		TransferAllRemainingBalance: risk.TransferAllRemainingBalance,
-		// TODO: verify there is no overflow
-		Ton:     int64(risk.Ton),
-		Jettons: nil,
-		Nfts:    nil,
+		Ton:                         int64(risk.Ton),
+		Jettons:                     nil,
+		Nfts:                        nil,
 	}
 	for jetton, quantity := range risk.Jettons {
 		jettonWallets, err := h.storage.GetJettonWalletsByOwnerAddress(ctx, walletAddress, &jetton, false, true)

@@ -4437,6 +4437,35 @@
       "format": "int32",
       "type": "integer"
      },
+     "changing_parameters": {
+      "properties": {
+       "proposers": {
+        "items": {
+         "format": "address",
+         "type": "string"
+        },
+        "type": "array"
+       },
+       "signers": {
+        "items": {
+         "example": "0:da6b1b6663a0e4d18cc8574ccd9db5296e367dd9324706f3bbd9eb1cd2caf0bf",
+         "format": "address",
+         "type": "string"
+        },
+        "type": "array"
+       },
+       "threshold": {
+        "format": "int32",
+        "type": "integer"
+       }
+      },
+      "required": [
+       "threshold",
+       "signers",
+       "proposers"
+      ],
+      "type": "object"
+     },
      "creation_date": {
       "format": "int64",
       "type": "integer"
@@ -4444,6 +4473,11 @@
      "expiration_date": {
       "format": "int64",
       "type": "integer"
+     },
+     "multisig_address": {
+      "example": "0:da6b1b6663a0e4d18cc8574ccd9db5296e367dd9324706f3bbd9eb1cd2caf0bf",
+      "format": "address",
+      "type": "string"
      },
      "order_seqno": {
       "example": 1,
@@ -4488,7 +4522,8 @@
      "expiration_date",
      "risk",
      "creation_date",
-     "signed_by"
+     "signed_by",
+     "multisig_address"
     ],
     "type": "object"
    },
@@ -4701,6 +4736,69 @@
     },
     "required": [
      "nft_items"
+    ],
+    "type": "object"
+   },
+   "NftOperation": {
+    "properties": {
+     "destination": {
+      "$ref": "#/components/schemas/AccountAddress"
+     },
+     "item": {
+      "$ref": null
+     },
+     "item_address": {
+      "type": "string"
+     },
+     "lt": {
+      "example": 25713146000001,
+      "format": "int64",
+      "type": "integer",
+      "x-js-format": "bigint"
+     },
+     "operation": {
+      "example": "transfer",
+      "type": "string"
+     },
+     "source": {
+      "$ref": "#/components/schemas/AccountAddress"
+     },
+     "transaction_hash": {
+      "example": "0xdeadbeaf",
+      "type": "string"
+     },
+     "utime": {
+      "example": 1234567890,
+      "format": "int64",
+      "type": "integer"
+     }
+    },
+    "required": [
+     "operation",
+     "utime",
+     "lt",
+     "transaction_hash",
+     "item_address"
+    ],
+    "type": "object"
+   },
+   "NftOperations": {
+    "properties": {
+     "next_from": {
+      "example": 25713146000001,
+      "format": "int64",
+      "type": "integer",
+      "x-js-format": "bigint"
+     },
+     "operations": {
+      "items": {
+       "$ref": "#/components/schemas/NftOperation"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "operations"
     ],
     "type": "object"
    },
@@ -7056,9 +7154,8 @@
     ]
    }
   },
-  "/v2/accounts/{account_id}/nfts/history": {
+  "/v2/accounts/{account_id}/nfts/operations": {
    "get": {
-    "deprecated": true,
     "description": "Get the transfer nft history",
     "operationId": "getAccountNftHistory",
     "parameters": [
@@ -7090,28 +7187,6 @@
        "minimum": 1,
        "type": "integer"
       }
-     },
-     {
-      "in": "query",
-      "name": "start_date",
-      "required": false,
-      "schema": {
-       "example": 1668436763,
-       "format": "int64",
-       "maximum": 2114380800,
-       "type": "integer"
-      }
-     },
-     {
-      "in": "query",
-      "name": "end_date",
-      "required": false,
-      "schema": {
-       "example": 1668436763,
-       "format": "int64",
-       "maximum": 2114380800,
-       "type": "integer"
-      }
      }
     ],
     "responses": {
@@ -7119,7 +7194,7 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/AccountEvents"
+         "$ref": "#/components/schemas/NftOperations"
         }
        }
       },
@@ -7131,8 +7206,7 @@
     },
     "tags": [
      "NFT"
-    ],
-    "x-question": "duplicate of getNftHistoryByID ?"
+    ]
    }
   },
   "/v2/accounts/{account_id}/publickey": {
@@ -9506,6 +9580,35 @@
     },
     "tags": [
      "Emulation"
+    ]
+   }
+  },
+  "/v2/multisig/order/{account_id}": {
+   "get": {
+    "description": "Get multisig order",
+    "operationId": "getMultisigOrder",
+    "parameters": [
+     {
+      "$ref": "#/components/parameters/accountIDParameter"
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/MultisigOrder"
+        }
+       }
+      },
+      "description": "multisig order"
+     },
+     "default": {
+      "$ref": "#/components/responses/Error"
+     }
+    },
+    "tags": [
+     "Multisig"
     ]
    }
   },

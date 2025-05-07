@@ -559,9 +559,9 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 								return
 							}
 							switch elem[0] {
-							case '/': // Prefix: "/history"
+							case '/': // Prefix: "/operations"
 								origElem := elem
-								if l := len("/history"); len(elem) >= l && elem[0:l] == "/history" {
+								if l := len("/operations"); len(elem) >= l && elem[0:l] == "/operations" {
 									elem = elem[l:]
 								} else {
 									break
@@ -2418,6 +2418,39 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 						break
 					}
 
+					if len(elem) == 0 {
+						break
+					}
+					switch elem[0] {
+					case 'o': // Prefix: "order/"
+						origElem := elem
+						if l := len("order/"); len(elem) >= l && elem[0:l] == "order/" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						// Param: "account_id"
+						// Leaf parameter
+						args[0] = elem
+						elem = ""
+
+						if len(elem) == 0 {
+							// Leaf node.
+							switch r.Method {
+							case "GET":
+								s.handleGetMultisigOrderRequest([1]string{
+									args[0],
+								}, elemIsEscaped, w, r)
+							default:
+								s.notAllowed(w, r, "GET")
+							}
+
+							return
+						}
+
+						elem = origElem
+					}
 					// Param: "account_id"
 					// Leaf parameter
 					args[0] = elem
@@ -3881,9 +3914,9 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 								}
 							}
 							switch elem[0] {
-							case '/': // Prefix: "/history"
+							case '/': // Prefix: "/operations"
 								origElem := elem
-								if l := len("/history"); len(elem) >= l && elem[0:l] == "/history" {
+								if l := len("/operations"); len(elem) >= l && elem[0:l] == "/operations" {
 									elem = elem[l:]
 								} else {
 									break
@@ -3896,7 +3929,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 										r.name = "GetAccountNftHistory"
 										r.summary = ""
 										r.operationID = "getAccountNftHistory"
-										r.pathPattern = "/v2/accounts/{account_id}/nfts/history"
+										r.pathPattern = "/v2/accounts/{account_id}/nfts/operations"
 										r.args = args
 										r.count = 1
 										return r, true
@@ -5894,6 +5927,41 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 						break
 					}
 
+					if len(elem) == 0 {
+						break
+					}
+					switch elem[0] {
+					case 'o': // Prefix: "order/"
+						origElem := elem
+						if l := len("order/"); len(elem) >= l && elem[0:l] == "order/" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						// Param: "account_id"
+						// Leaf parameter
+						args[0] = elem
+						elem = ""
+
+						if len(elem) == 0 {
+							switch method {
+							case "GET":
+								// Leaf: GetMultisigOrder
+								r.name = "GetMultisigOrder"
+								r.summary = ""
+								r.operationID = "getMultisigOrder"
+								r.pathPattern = "/v2/multisig/order/{account_id}"
+								r.args = args
+								r.count = 1
+								return r, true
+							default:
+								return
+							}
+						}
+
+						elem = origElem
+					}
 					// Param: "account_id"
 					// Leaf parameter
 					args[0] = elem

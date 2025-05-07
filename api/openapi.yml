@@ -790,7 +790,7 @@ paths:
                 $ref: '#/components/schemas/NftItems'
         'default':
           $ref: '#/components/responses/Error'
-  /v2/accounts/{account_id}/nfts/history:
+  /v2/accounts/{account_id}/nfts/operations:
     get:
       description: Get the transfer nft history
       operationId: getAccountNftHistory
@@ -2625,7 +2625,7 @@ paths:
                           format: uint32
         'default':
           $ref: '#/components/responses/Error'
-  
+
   /v2/multisig/{account_id}:
     get:
       description: Get multisig account info
@@ -2643,6 +2643,25 @@ paths:
                 $ref: '#/components/schemas/Multisig'
         'default':
           $ref: '#/components/responses/Error'
+
+  /v2/multisig/order/{account_id}:
+    get:
+      description: Get multisig order
+      operationId: getMultisigOrder
+      tags:
+        - Multisig
+      parameters:
+        - $ref: '#/components/parameters/accountIDParameter'
+      responses:
+        '200':
+          description: multisig order
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MultisigOrder'
+        'default':
+          $ref: '#/components/responses/Error'
+
   /v2/message/decode:
     post:
       description: Decode a given message. Only external incoming messages can be decoded currently.
@@ -5610,6 +5629,7 @@ components:
         - risk
         - creation_date
         - signed_by
+        - multisig_address
       properties:
         address:
           type: string
@@ -5648,6 +5668,31 @@ components:
             type: string
             format: address
             example: "0:da6b1b6663a0e4d18cc8574ccd9db5296e367dd9324706f3bbd9eb1cd2caf0bf"
+        multisig_address:
+          type: string
+          format: address
+          example: "0:da6b1b6663a0e4d18cc8574ccd9db5296e367dd9324706f3bbd9eb1cd2caf0bf"
+        changing_parameters:
+          type: object
+          required:
+            - threshold
+            - signers
+            - proposers
+          properties:
+            threshold:
+              type: integer
+              format: int32
+            signers:
+              type: array
+              items:
+                type: string
+                format: address
+                example: "0:da6b1b6663a0e4d18cc8574ccd9db5296e367dd9324706f3bbd9eb1cd2caf0bf"
+            proposers:
+              type: array
+              items:
+                type: string
+                format: address
     Refund:
       type: object
       required:
@@ -7390,9 +7435,9 @@ components:
         - operations
       properties:
         operations:
-        type: array
-        items:
-          $ref: '#/components/schemas/NftOperation'
+          type: array
+          items:
+            $ref: '#/components/schemas/NftOperation'
         next_from:
           type: integer
           format: int64
