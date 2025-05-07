@@ -141,30 +141,35 @@ type ExecutionResult struct {
 
 // getBemoPrice fetches BEMO price by smart contract data
 func (m *Mock) getBemoPrice(_ float64, _ map[ton.AccountID]float64) (map[ton.AccountID]float64, error) {
-	url := fmt.Sprintf("https://tonapi.io/v2/blockchain/accounts/%v/methods/get_full_data", references.BemoAccount.ToRaw())
+	prices := make(map[ton.AccountID]float64)
+	accounts := []ton.AccountID{references.BemoAccountOld, references.BemoAccountNew}
 	headers := http.Header{"Content-Type": {"application/json"}}
-	respBody, err := sendRequest(url, m.TonApiToken, headers)
-	if err != nil {
-		return nil, err
+	for _, account := range accounts {
+		url := fmt.Sprintf("https://tonapi.io/v2/blockchain/accounts/%v/methods/get_full_data", account.ToRaw())
+		respBody, err := sendRequest(url, m.TonApiToken, headers)
+		if err != nil {
+			return nil, err
+		}
+		var result ExecutionResult
+		if err = json.Unmarshal(respBody, &result); err != nil {
+			return nil, err
+		}
+		if !result.Success || len(result.Stack) < 2 {
+			return nil, errors.New("invalid data")
+		}
+		first, err := strconv.ParseInt(result.Stack[0].Num, 0, 64)
+		if err != nil {
+			return nil, err
+		}
+		second, err := strconv.ParseInt(result.Stack[1].Num, 0, 64)
+		if err != nil {
+			return nil, err
+		}
+		price := float64(second) / float64(first)
+		prices[account] = price
 	}
-	var result ExecutionResult
-	if err = json.Unmarshal(respBody, &result); err != nil {
-		return nil, err
-	}
-	if !result.Success || len(result.Stack) < 2 {
-		return nil, errors.New("invalid data")
-	}
-	first, err := strconv.ParseInt(result.Stack[0].Num, 0, 64)
-	if err != nil {
-		return nil, err
-	}
-	second, err := strconv.ParseInt(result.Stack[1].Num, 0, 64)
-	if err != nil {
-		return nil, err
-	}
-	price := float64(second) / float64(first)
 
-	return map[ton.AccountID]float64{references.BemoAccount: price}, nil
+	return prices, nil
 }
 
 // getTonstakersPrice fetches Tonstakers price by smart contract data
