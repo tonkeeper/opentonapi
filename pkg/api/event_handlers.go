@@ -190,7 +190,7 @@ func (h *Handler) GetEvent(ctx context.Context, params oas.GetEventParams) (*oas
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
-	result := bath.EnrichWithIntentions(trace, actions)
+	result := bath.EnrichWithIntentions(ctx, trace, actions, h.storage)
 	event, err := h.toEvent(ctx, trace, result, params.AcceptLanguage)
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
@@ -261,7 +261,7 @@ func (h *Handler) GetAccountEvents(ctx context.Context, params oas.GetAccountEve
 			continue
 			//return nil, toError(http.StatusInternalServerError, err)
 		}
-		result := bath.EnrichWithIntentions(trace, actions)
+		result := bath.EnrichWithIntentions(ctx, trace, actions, h.storage)
 		e, err := h.toAccountEvent(ctx, account.ID, trace, result, params.AcceptLanguage, params.SubjectOnly.Value)
 		if err != nil {
 			events = append(events, h.toUnknownAccountEvent(account.ID, traceID))
@@ -288,7 +288,7 @@ func (h *Handler) GetAccountEvents(ctx context.Context, params oas.GetAccountEve
 			if err != nil {
 				return nil, toError(http.StatusInternalServerError, err)
 			}
-			result := bath.EnrichWithIntentions(trace, actions)
+			result := bath.EnrichWithIntentions(ctx, trace, actions, h.storage)
 			event, err := h.toAccountEvent(ctx, account.ID, trace, result, params.AcceptLanguage, params.SubjectOnly.Value)
 			if err != nil {
 				return nil, toError(http.StatusInternalServerError, err)
@@ -352,7 +352,7 @@ func (h *Handler) GetAccountEvent(ctx context.Context, params oas.GetAccountEven
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
-	result := bath.EnrichWithIntentions(trace, actions)
+	result := bath.EnrichWithIntentions(ctx, trace, actions, h.storage)
 	event, err := h.toAccountEvent(ctx, account.ID, trace, result, params.AcceptLanguage, params.SubjectOnly.Value)
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
@@ -444,7 +444,7 @@ func (h *Handler) EmulateMessageToAccountEvent(ctx context.Context, request *oas
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
-	result := bath.EnrichWithIntentions(trace, actions)
+	result := bath.EnrichWithIntentions(ctx, trace, actions, h.storage)
 	event, err := h.toAccountEvent(ctx, account.ID, trace, result, params.AcceptLanguage, false)
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
@@ -519,7 +519,7 @@ func (h *Handler) EmulateMessageToEvent(ctx context.Context, request *oas.Emulat
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
-	result := bath.EnrichWithIntentions(trace, actions)
+	result := bath.EnrichWithIntentions(ctx, trace, actions, h.storage)
 	event, err := h.toEvent(ctx, trace, result, params.AcceptLanguage)
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
@@ -744,7 +744,7 @@ func (h *Handler) EmulateMessageToWallet(ctx context.Context, request *oas.Emula
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
-	result := bath.EnrichWithIntentions(trace, actions)
+	result := bath.EnrichWithIntentions(ctx, trace, actions, h.storage)
 	event, err := h.toAccountEvent(ctx, *walletAddress, trace, result, params.AcceptLanguage, true)
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
