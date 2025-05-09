@@ -6264,6 +6264,41 @@
     ],
     "type": "object"
    },
+   "Wallet": {
+    "properties": {
+     "address": {
+      "example": "0:da6b1b6663a0e4d18cc8574ccd9db5296e367dd9324706f3bbd9eb1cd2caf0bf",
+      "format": "address",
+      "type": "string"
+     },
+     "icon": {
+      "example": "https://ton.org/logo.png",
+      "type": "string"
+     },
+     "is_suspended": {
+      "type": "boolean"
+     },
+     "name": {
+      "example": "Ton foundation",
+      "type": "string"
+     },
+     "plugins": {
+      "items": {
+       "$ref": "#/components/schemas/WalletPlugin"
+      },
+      "type": "array"
+     },
+     "stats": {
+      "$ref": "#/components/schemas/WalletStats"
+     }
+    },
+    "required": [
+     "address",
+     "plugins",
+     "stats"
+    ],
+    "type": "object"
+   },
    "WalletDNS": {
     "properties": {
      "account": {
@@ -6301,6 +6336,62 @@
      "has_method_seqno",
      "names",
      "account"
+    ],
+    "type": "object"
+   },
+   "WalletPlugin": {
+    "properties": {
+     "address": {
+      "example": "0:da6b1b6663a0e4d18cc8574ccd9db5296e367dd9324706f3bbd9eb1cd2caf0bf",
+      "format": "address",
+      "type": "string"
+     },
+     "type": {
+      "example": "subscription_v1",
+      "type": "string"
+     }
+    },
+    "required": [
+     "address",
+     "type"
+    ],
+    "type": "object"
+   },
+   "WalletStats": {
+    "properties": {
+     "jettons_count": {
+      "example": 123456789,
+      "format": "int32",
+      "type": "integer"
+     },
+     "multisig_count": {
+      "example": 123456789,
+      "format": "int32",
+      "type": "integer"
+     },
+     "nfts_count": {
+      "example": 123456789,
+      "format": "int32",
+      "type": "integer"
+     },
+     "staking_count": {
+      "example": 123456789,
+      "format": "int32",
+      "type": "integer"
+     },
+     "ton_balance": {
+      "example": 123456789,
+      "format": "int64",
+      "type": "integer",
+      "x-js-format": "bigint"
+     }
+    },
+    "required": [
+     "ton_balance",
+     "nfts_count",
+     "jettons_count",
+     "multisig_count",
+     "staking_count"
     ],
     "type": "object"
    },
@@ -10747,6 +10838,35 @@
     },
     "tags": [
      "Emulation",
+     "Wallet"
+    ]
+   }
+  },
+  "/v2/wallet/{account_id}": {
+   "get": {
+    "description": "Get human-friendly information about a wallet without low-level details.",
+    "operationId": "getWalletInfo",
+    "parameters": [
+     {
+      "$ref": "#/components/parameters/accountIDParameter"
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Wallet"
+        }
+       }
+      },
+      "description": "wallet"
+     },
+     "default": {
+      "$ref": "#/components/responses/Error"
+     }
+    },
+    "tags": [
      "Wallet"
     ]
    }

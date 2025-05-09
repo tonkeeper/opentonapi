@@ -17284,6 +17284,76 @@ func (s *ValueFlowJettonsItem) SetQuantity(val int64) {
 	s.Quantity = val
 }
 
+// Ref: #/components/schemas/Wallet
+type Wallet struct {
+	Address     string         `json:"address"`
+	Stats       WalletStats    `json:"stats"`
+	Plugins     []WalletPlugin `json:"plugins"`
+	Name        OptString      `json:"name"`
+	Icon        OptString      `json:"icon"`
+	IsSuspended OptBool        `json:"is_suspended"`
+}
+
+// GetAddress returns the value of Address.
+func (s *Wallet) GetAddress() string {
+	return s.Address
+}
+
+// GetStats returns the value of Stats.
+func (s *Wallet) GetStats() WalletStats {
+	return s.Stats
+}
+
+// GetPlugins returns the value of Plugins.
+func (s *Wallet) GetPlugins() []WalletPlugin {
+	return s.Plugins
+}
+
+// GetName returns the value of Name.
+func (s *Wallet) GetName() OptString {
+	return s.Name
+}
+
+// GetIcon returns the value of Icon.
+func (s *Wallet) GetIcon() OptString {
+	return s.Icon
+}
+
+// GetIsSuspended returns the value of IsSuspended.
+func (s *Wallet) GetIsSuspended() OptBool {
+	return s.IsSuspended
+}
+
+// SetAddress sets the value of Address.
+func (s *Wallet) SetAddress(val string) {
+	s.Address = val
+}
+
+// SetStats sets the value of Stats.
+func (s *Wallet) SetStats(val WalletStats) {
+	s.Stats = val
+}
+
+// SetPlugins sets the value of Plugins.
+func (s *Wallet) SetPlugins(val []WalletPlugin) {
+	s.Plugins = val
+}
+
+// SetName sets the value of Name.
+func (s *Wallet) SetName(val OptString) {
+	s.Name = val
+}
+
+// SetIcon sets the value of Icon.
+func (s *Wallet) SetIcon(val OptString) {
+	s.Icon = val
+}
+
+// SetIsSuspended sets the value of IsSuspended.
+func (s *Wallet) SetIsSuspended(val OptBool) {
+	s.IsSuspended = val
+}
+
 // Ref: #/components/schemas/WalletDNS
 type WalletDNS struct {
 	Address         string         `json:"address"`
@@ -17352,6 +17422,91 @@ func (s *WalletDNS) SetHasMethodSeqno(val bool) {
 // SetNames sets the value of Names.
 func (s *WalletDNS) SetNames(val []string) {
 	s.Names = val
+}
+
+// Ref: #/components/schemas/WalletPlugin
+type WalletPlugin struct {
+	Address string `json:"address"`
+	Type    string `json:"type"`
+}
+
+// GetAddress returns the value of Address.
+func (s *WalletPlugin) GetAddress() string {
+	return s.Address
+}
+
+// GetType returns the value of Type.
+func (s *WalletPlugin) GetType() string {
+	return s.Type
+}
+
+// SetAddress sets the value of Address.
+func (s *WalletPlugin) SetAddress(val string) {
+	s.Address = val
+}
+
+// SetType sets the value of Type.
+func (s *WalletPlugin) SetType(val string) {
+	s.Type = val
+}
+
+// Ref: #/components/schemas/WalletStats
+type WalletStats struct {
+	TonBalance    int64 `json:"ton_balance"`
+	NftsCount     int32 `json:"nfts_count"`
+	JettonsCount  int32 `json:"jettons_count"`
+	MultisigCount int32 `json:"multisig_count"`
+	StakingCount  int32 `json:"staking_count"`
+}
+
+// GetTonBalance returns the value of TonBalance.
+func (s *WalletStats) GetTonBalance() int64 {
+	return s.TonBalance
+}
+
+// GetNftsCount returns the value of NftsCount.
+func (s *WalletStats) GetNftsCount() int32 {
+	return s.NftsCount
+}
+
+// GetJettonsCount returns the value of JettonsCount.
+func (s *WalletStats) GetJettonsCount() int32 {
+	return s.JettonsCount
+}
+
+// GetMultisigCount returns the value of MultisigCount.
+func (s *WalletStats) GetMultisigCount() int32 {
+	return s.MultisigCount
+}
+
+// GetStakingCount returns the value of StakingCount.
+func (s *WalletStats) GetStakingCount() int32 {
+	return s.StakingCount
+}
+
+// SetTonBalance sets the value of TonBalance.
+func (s *WalletStats) SetTonBalance(val int64) {
+	s.TonBalance = val
+}
+
+// SetNftsCount sets the value of NftsCount.
+func (s *WalletStats) SetNftsCount(val int32) {
+	s.NftsCount = val
+}
+
+// SetJettonsCount sets the value of JettonsCount.
+func (s *WalletStats) SetJettonsCount(val int32) {
+	s.JettonsCount = val
+}
+
+// SetMultisigCount sets the value of MultisigCount.
+func (s *WalletStats) SetMultisigCount(val int32) {
+	s.MultisigCount = val
+}
+
+// SetStakingCount sets the value of StakingCount.
+func (s *WalletStats) SetStakingCount(val int32) {
+	s.StakingCount = val
 }
 
 // Validator's participation in elections.

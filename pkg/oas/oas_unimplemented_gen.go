@@ -906,6 +906,15 @@ func (UnimplementedHandler) GetTrace(ctx context.Context, params GetTraceParams)
 	return r, ht.ErrNotImplemented
 }
 
+// GetWalletInfo implements getWalletInfo operation.
+//
+// Get human-friendly information about a wallet without low-level details.
+//
+// GET /v2/wallet/{account_id}
+func (UnimplementedHandler) GetWalletInfo(ctx context.Context, params GetWalletInfoParams) (r *Wallet, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // GetWalletsByPublicKey implements getWalletsByPublicKey operation.
 //
 // Get wallets by public key.
