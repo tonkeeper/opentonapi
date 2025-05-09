@@ -8,6 +8,7 @@ import (
 	"net/http"
 
 	"github.com/tonkeeper/opentonapi/pkg/core"
+	"github.com/tonkeeper/tongo/abi"
 	"github.com/tonkeeper/tongo/ton"
 
 	"github.com/tonkeeper/opentonapi/pkg/oas"
@@ -110,7 +111,25 @@ func (h *Handler) GetWalletInfo(ctx context.Context, params oas.GetWalletInfoPar
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
-	accountPlugins, err := h.storage.GetAccountPlugins(ctx, account.ID)
+	supportedWalletVersions := map[abi.ContractInterface]struct{}{
+		abi.WalletV4R1: {}, abi.WalletV4R2: {},
+		abi.WalletV5Beta: {}, abi.WalletV5R1: {},
+	}
+	var walletVersion abi.ContractInterface
+	for _, intr := range rawAccount.Interfaces {
+		if _, ok := supportedWalletVersions[intr]; !ok {
+			return nil, toError(http.StatusBadRequest, fmt.Errorf("unsupported account"))
+		}
+		walletVersion = intr
+	}
+	ab, found := h.addressBook.GetAddressInfoByAddress(account.ID)
+	var convertedAccountInfo oas.Account
+	if found {
+		convertedAccountInfo = convertToAccount(rawAccount, &ab, h.state, h.spamFilter)
+	} else {
+		convertedAccountInfo = convertToAccount(rawAccount, nil, h.state, h.spamFilter)
+	}
+	accountPlugins, err := h.storage.GetAccountPlugins(ctx, account.ID, walletVersion)
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
@@ -121,22 +140,10 @@ func (h *Handler) GetWalletInfo(ctx context.Context, params oas.GetWalletInfoPar
 	if len(stats) == 0 {
 		return nil, toError(http.StatusNotFound, fmt.Errorf("account not found"))
 	}
-	ab, found := h.addressBook.GetAddressInfoByAddress(account.ID)
-	var convertedAccountInfo oas.Account
-	if found {
-		convertedAccountInfo = convertToAccount(rawAccount, &ab, h.state, h.spamFilter)
-	} else {
-		convertedAccountInfo = convertToAccount(rawAccount, nil, h.state, h.spamFilter)
-	}
-	if !convertedAccountInfo.IsWallet {
-		return nil, toError(http.StatusBadRequest, errors.New("account is not a wallet"))
-	}
 	result := oas.Wallet{
 		Address:     account.ID.ToRaw(),
 		Name:        convertedAccountInfo.Name,
-		IsScam:      convertedAccountInfo.IsScam,
 		Icon:        convertedAccountInfo.Icon,
-		GetMethods:  convertedAccountInfo.GetMethods,
 		IsSuspended: convertedAccountInfo.IsSuspended,
 		Stats: oas.WalletStats{
 			TonBalance:    stats[0].TonBalance,

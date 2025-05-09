@@ -4660,7 +4660,6 @@ components:
         - address
         - plugins
         - stats
-        - get_methods
       properties:
         address:
           type: string
@@ -4675,17 +4674,9 @@ components:
         name:
           type: string
           example: "Ton foundation"
-        is_scam:
-          type: boolean
-          example: true
         icon:
           type: string
           example: "https://ton.org/logo.png"
-        get_methods:
-          type: array
-          items:
-            type: string
-          example: [ 'get_item_data' ]
         is_suspended:
           type: boolean
     Account:

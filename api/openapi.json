@@ -6271,22 +6271,9 @@
       "format": "address",
       "type": "string"
      },
-     "get_methods": {
-      "example": [
-       "get_item_data"
-      ],
-      "items": {
-       "type": "string"
-      },
-      "type": "array"
-     },
      "icon": {
       "example": "https://ton.org/logo.png",
       "type": "string"
-     },
-     "is_scam": {
-      "example": true,
-      "type": "boolean"
      },
      "is_suspended": {
       "type": "boolean"
@@ -6308,8 +6295,7 @@
     "required": [
      "address",
      "plugins",
-     "stats",
-     "get_methods"
+     "stats"
     ],
     "type": "object"
    },

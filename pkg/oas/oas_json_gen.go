@@ -40541,24 +40541,10 @@ func (s *Wallet) encodeFields(e *jx.Encoder) {
 		}
 	}
 	{
-		if s.IsScam.Set {
-			e.FieldStart("is_scam")
-			s.IsScam.Encode(e)
-		}
-	}
-	{
 		if s.Icon.Set {
 			e.FieldStart("icon")
 			s.Icon.Encode(e)
 		}
-	}
-	{
-		e.FieldStart("get_methods")
-		e.ArrStart()
-		for _, elem := range s.GetMethods {
-			e.Str(elem)
-		}
-		e.ArrEnd()
 	}
 	{
 		if s.IsSuspended.Set {
@@ -40568,15 +40554,13 @@ func (s *Wallet) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfWallet = [8]string{
+var jsonFieldsNameOfWallet = [6]string{
 	0: "address",
 	1: "stats",
 	2: "plugins",
 	3: "name",
-	4: "is_scam",
-	5: "icon",
-	6: "get_methods",
-	7: "is_suspended",
+	4: "icon",
+	5: "is_suspended",
 }
 
 // Decode decodes Wallet from json.
@@ -40638,16 +40622,6 @@ func (s *Wallet) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"name\"")
 			}
-		case "is_scam":
-			if err := func() error {
-				s.IsScam.Reset()
-				if err := s.IsScam.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"is_scam\"")
-			}
 		case "icon":
 			if err := func() error {
 				s.Icon.Reset()
@@ -40657,26 +40631,6 @@ func (s *Wallet) Decode(d *jx.Decoder) error {
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"icon\"")
-			}
-		case "get_methods":
-			requiredBitSet[0] |= 1 << 6
-			if err := func() error {
-				s.GetMethods = make([]string, 0)
-				if err := d.Arr(func(d *jx.Decoder) error {
-					var elem string
-					v, err := d.Str()
-					elem = string(v)
-					if err != nil {
-						return err
-					}
-					s.GetMethods = append(s.GetMethods, elem)
-					return nil
-				}); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"get_methods\"")
 			}
 		case "is_suspended":
 			if err := func() error {
@@ -40698,7 +40652,7 @@ func (s *Wallet) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b01000111,
+		0b00000111,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.

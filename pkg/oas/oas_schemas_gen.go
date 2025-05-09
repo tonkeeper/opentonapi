@@ -17290,9 +17290,7 @@ type Wallet struct {
 	Stats       WalletStats    `json:"stats"`
 	Plugins     []WalletPlugin `json:"plugins"`
 	Name        OptString      `json:"name"`
-	IsScam      OptBool        `json:"is_scam"`
 	Icon        OptString      `json:"icon"`
-	GetMethods  []string       `json:"get_methods"`
 	IsSuspended OptBool        `json:"is_suspended"`
 }
 
@@ -17316,19 +17314,9 @@ func (s *Wallet) GetName() OptString {
 	return s.Name
 }
 
-// GetIsScam returns the value of IsScam.
-func (s *Wallet) GetIsScam() OptBool {
-	return s.IsScam
-}
-
 // GetIcon returns the value of Icon.
 func (s *Wallet) GetIcon() OptString {
 	return s.Icon
-}
-
-// GetGetMethods returns the value of GetMethods.
-func (s *Wallet) GetGetMethods() []string {
-	return s.GetMethods
 }
 
 // GetIsSuspended returns the value of IsSuspended.
@@ -17356,19 +17344,9 @@ func (s *Wallet) SetName(val OptString) {
 	s.Name = val
 }
 
-// SetIsScam sets the value of IsScam.
-func (s *Wallet) SetIsScam(val OptBool) {
-	s.IsScam = val
-}
-
 // SetIcon sets the value of Icon.
 func (s *Wallet) SetIcon(val OptString) {
 	s.Icon = val
-}
-
-// SetGetMethods sets the value of GetMethods.
-func (s *Wallet) SetGetMethods(val []string) {
-	s.GetMethods = val
 }
 
 // SetIsSuspended sets the value of IsSuspended.
