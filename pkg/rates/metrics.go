@@ -6,7 +6,10 @@ import (
 )
 
 var (
-	errorsCounter = promauto.NewCounterVec(prometheus.CounterOpts{
-		Name: "rates_getter_errors_total",
-	}, []string{"source"})
+	errorsCounter = promauto.NewCounterVec(
+		prometheus.CounterOpts{
+			Name: "tonapi_rates_errors_total",
+			Help: "Total number of errors encountered while fetching token rates from various sources",
+		}, []string{"source"},
+	)
 )
