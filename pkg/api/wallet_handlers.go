@@ -8,6 +8,7 @@ import (
 	"net/http"
 
 	"github.com/tonkeeper/opentonapi/pkg/core"
+	"github.com/tonkeeper/tongo/ton"
 
 	"github.com/tonkeeper/opentonapi/pkg/oas"
 	"github.com/tonkeeper/opentonapi/pkg/wallet"
@@ -95,4 +96,62 @@ func (h *Handler) GetAccountSeqno(ctx context.Context, params oas.GetAccountSeqn
 		return nil, toError(http.StatusBadRequest, fmt.Errorf("contract doesn't have a seqno"))
 	}
 	return &oas.Seqno{Seqno: int32(seqno)}, nil
+}
+
+func (h *Handler) GetWalletInfo(ctx context.Context, params oas.GetWalletInfoParams) (*oas.Wallet, error) {
+	account, err := tongo.ParseAddress(params.AccountID)
+	if err != nil {
+		return nil, toError(http.StatusBadRequest, err)
+	}
+	rawAccount, err := h.storage.GetRawAccount(ctx, account.ID)
+	if errors.Is(err, core.ErrEntityNotFound) {
+		return nil, toError(http.StatusNotFound, err)
+	}
+	if err != nil {
+		return nil, toError(http.StatusInternalServerError, err)
+	}
+	accountPlugins, err := h.storage.GetAccountPlugins(ctx, account.ID)
+	if err != nil {
+		return nil, toError(http.StatusInternalServerError, err)
+	}
+	stats, err := h.storage.GetAccountsStats(ctx, []ton.AccountID{account.ID})
+	if err != nil {
+		return nil, toError(http.StatusInternalServerError, err)
+	}
+	if len(stats) == 0 {
+		return nil, toError(http.StatusNotFound, fmt.Errorf("account not found"))
+	}
+	ab, found := h.addressBook.GetAddressInfoByAddress(account.ID)
+	var convertedAccountInfo oas.Account
+	if found {
+		convertedAccountInfo = convertToAccount(rawAccount, &ab, h.state, h.spamFilter)
+	} else {
+		convertedAccountInfo = convertToAccount(rawAccount, nil, h.state, h.spamFilter)
+	}
+	if !convertedAccountInfo.IsWallet {
+		return nil, toError(http.StatusBadRequest, errors.New("account is not a wallet"))
+	}
+	result := oas.Wallet{
+		Address:     account.ID.ToRaw(),
+		Name:        convertedAccountInfo.Name,
+		IsScam:      convertedAccountInfo.IsScam,
+		Icon:        convertedAccountInfo.Icon,
+		GetMethods:  convertedAccountInfo.GetMethods,
+		IsSuspended: convertedAccountInfo.IsSuspended,
+		Stats: oas.WalletStats{
+			TonBalance:    stats[0].TonBalance,
+			NftsCount:     stats[0].NftsCount,
+			JettonsCount:  stats[0].JettonsCount,
+			MultisigCount: stats[0].MultisigCount,
+			StakingCount:  stats[0].StakingCount,
+		},
+	}
+	for _, plugin := range accountPlugins {
+		result.Plugins = append(result.Plugins, oas.WalletPlugin{
+			Address: plugin.AccountID.ToRaw(),
+			Type:    plugin.Type,
+		})
+	}
+
+	return &result, nil
 }

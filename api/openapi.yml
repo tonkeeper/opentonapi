@@ -1946,6 +1946,23 @@ paths:
                 $ref: '#/components/schemas/Seqno'
         'default':
           $ref: '#/components/responses/Error'
+  /v2/wallet/{account_id}:
+    get:
+      description: Get human-friendly information about a wallet without low-level details.
+      operationId: getWalletInfo
+      tags:
+        - Wallet
+      parameters:
+        - $ref: '#/components/parameters/accountIDParameter'
+      responses:
+        '200':
+          description: wallet
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Wallet'
+        'default':
+          $ref: '#/components/responses/Error'
   /v2/gasless/config:
     get:
       description: Returns configuration of gasless transfers
@@ -4594,6 +4611,83 @@ components:
               root:
                 type: string
                 format: cell
+    WalletStats:
+      type: object
+      required:
+        - ton_balance
+        - nfts_count
+        - jettons_count
+        - multisig_count
+        - staking_count
+      properties:
+        ton_balance:
+          type: integer
+          format: int64
+          example: 123456789
+          x-js-format: bigint
+        nfts_count:
+          type: integer
+          format: int32
+          example: 123456789
+        jettons_count:
+          type: integer
+          format: int32
+          example: 123456789
+        multisig_count:
+          type: integer
+          format: int32
+          example: 123456789
+        staking_count:
+          type: integer
+          format: int32
+          example: 123456789
+    WalletPlugin:
+      type: object
+      required:
+        - address
+        - type
+      properties:
+        address:
+          type: string
+          format: address
+          example: 0:da6b1b6663a0e4d18cc8574ccd9db5296e367dd9324706f3bbd9eb1cd2caf0bf
+        type:
+          type: string
+          example: "subscription_v1"
+    Wallet:
+      type: object
+      required:
+        - address
+        - plugins
+        - stats
+        - get_methods
+      properties:
+        address:
+          type: string
+          format: address
+          example: 0:da6b1b6663a0e4d18cc8574ccd9db5296e367dd9324706f3bbd9eb1cd2caf0bf
+        stats:
+          $ref: '#/components/schemas/WalletStats'
+        plugins:
+          type: array
+          items:
+            $ref: '#/components/schemas/WalletPlugin'
+        name:
+          type: string
+          example: "Ton foundation"
+        is_scam:
+          type: boolean
+          example: true
+        icon:
+          type: string
+          example: "https://ton.org/logo.png"
+        get_methods:
+          type: array
+          items:
+            type: string
+          example: [ 'get_item_data' ]
+        is_suspended:
+          type: boolean
     Account:
       type: object
       required:
@@ -7568,8 +7662,8 @@ components:
           example: "17286061481122318000"
           x-js-format: bigint
         payload: { } # free from json
-
-
+  
+  
   
   responses:
     Error:
