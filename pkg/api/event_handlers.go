@@ -156,7 +156,11 @@ func (h *Handler) GetTrace(ctx context.Context, params oas.GetTraceParams) (*oas
 	}
 	trace, emulated, err := h.getTraceByHash(ctx, hash)
 	if errors.Is(err, core.ErrEntityNotFound) {
-		return nil, toError(http.StatusNotFound, err)
+		trace, err = h.storage.GetTrace(ctx, hash)
+		if err != nil {
+			return nil, toError(http.StatusNotFound, err)
+		}
+		emulated = false
 	}
 	if errors.Is(err, core.ErrTraceIsTooLong) {
 		return nil, toError(http.StatusRequestEntityTooLarge, err)
@@ -178,7 +182,11 @@ func (h *Handler) GetEvent(ctx context.Context, params oas.GetEventParams) (*oas
 	}
 	trace, emulated, err := h.getTraceByHash(ctx, traceID)
 	if errors.Is(err, core.ErrEntityNotFound) {
-		return nil, toError(http.StatusNotFound, err)
+		trace, err = h.storage.GetTrace(ctx, traceID)
+		if err != nil {
+			return nil, toError(http.StatusNotFound, err)
+		}
+		emulated = false
 	}
 	if errors.Is(err, core.ErrTraceIsTooLong) {
 		return nil, toError(http.StatusRequestEntityTooLarge, err)
