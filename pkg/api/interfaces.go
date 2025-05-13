@@ -31,6 +31,8 @@ type storage interface {
 	GetContract(ctx context.Context, id tongo.AccountID) (*core.Contract, error)
 	// GetRawAccounts returns low-level information about several accounts taken directly from the blockchain.
 	GetRawAccounts(ctx context.Context, ids []tongo.AccountID) ([]*core.Account, error)
+	GetAccountsStats(ctx context.Context, accounts []ton.AccountID) ([]core.AccountStat, error)
+	GetAccountPlugins(ctx context.Context, accountID ton.AccountID, walletVersion abi.ContractInterface) ([]core.Plugin, error)
 	// ReindexAccount updates internal cache used to store the account's state.
 	ReindexAccount(ctx context.Context, accountID tongo.AccountID) error
 	GetBlockHeader(ctx context.Context, id tongo.BlockID) (*core.BlockHeader, error)

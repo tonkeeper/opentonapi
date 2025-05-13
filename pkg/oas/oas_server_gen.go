@@ -610,6 +610,12 @@ type Handler interface {
 	//
 	// GET /v2/traces/{trace_id}
 	GetTrace(ctx context.Context, params GetTraceParams) (*Trace, error)
+	// GetWalletInfo implements getWalletInfo operation.
+	//
+	// Get human-friendly information about a wallet without low-level details.
+	//
+	// GET /v2/wallet/{account_id}
+	GetWalletInfo(ctx context.Context, params GetWalletInfoParams) (*Wallet, error)
 	// GetWalletsByPublicKey implements getWalletsByPublicKey operation.
 	//
 	// Get wallets by public key.
