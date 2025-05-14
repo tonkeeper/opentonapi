@@ -156,7 +156,19 @@ func (h *Handler) GetTrace(ctx context.Context, params oas.GetTraceParams) (*oas
 	}
 	trace, emulated, err := h.getTraceByHash(ctx, hash)
 	if errors.Is(err, core.ErrEntityNotFound) {
-		return nil, toError(http.StatusNotFound, err)
+		var version int
+		trace, version, _, err = h.storage.GetTraceWithState(ctx, hash.Hex())
+		if errors.Is(err, core.ErrEntityNotFound) {
+			return nil, toError(http.StatusNotFound, err)
+		}
+		if err != nil {
+			return nil, toError(http.StatusInternalServerError, err)
+		}
+		if h.tongoVersion > 0 && version > h.tongoVersion {
+			savedEmulatedTraces.WithLabelValues("expired").Inc()
+			return nil, toError(http.StatusNotFound, fmt.Errorf("trace expired"))
+		}
+		emulated = false
 	}
 	if errors.Is(err, core.ErrTraceIsTooLong) {
 		return nil, toError(http.StatusRequestEntityTooLarge, err)
@@ -178,7 +190,19 @@ func (h *Handler) GetEvent(ctx context.Context, params oas.GetEventParams) (*oas
 	}
 	trace, emulated, err := h.getTraceByHash(ctx, traceID)
 	if errors.Is(err, core.ErrEntityNotFound) {
-		return nil, toError(http.StatusNotFound, err)
+		var version int
+		trace, version, _, err = h.storage.GetTraceWithState(ctx, traceID.Hex())
+		if errors.Is(err, core.ErrEntityNotFound) {
+			return nil, toError(http.StatusNotFound, err)
+		}
+		if err != nil {
+			return nil, toError(http.StatusInternalServerError, err)
+		}
+		if h.tongoVersion > 0 && version > h.tongoVersion {
+			savedEmulatedTraces.WithLabelValues("expired").Inc()
+			return nil, toError(http.StatusNotFound, fmt.Errorf("trace expired"))
+		}
+		emulated = false
 	}
 	if errors.Is(err, core.ErrTraceIsTooLong) {
 		return nil, toError(http.StatusRequestEntityTooLarge, err)
