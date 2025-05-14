@@ -166,9 +166,16 @@ func (h *Handler) GetTrace(ctx context.Context, params oas.GetTraceParams) (*oas
 	}
 	convertedTrace := convertTrace(trace, h.addressBook)
 	if emulated {
-		convertedTrace.Emulated.SetTo(true)
+		setRecursiveEmulated(&convertedTrace)
 	}
 	return &convertedTrace, nil
+}
+
+func setRecursiveEmulated(trace *oas.Trace) {
+	trace.Emulated.SetTo(true)
+	for _, c := range trace.Children {
+		setRecursiveEmulated(&c)
+	}
 }
 
 func (h *Handler) GetEvent(ctx context.Context, params oas.GetEventParams) (*oas.Event, error) {
