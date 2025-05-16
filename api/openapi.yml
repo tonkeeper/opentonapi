@@ -71,7 +71,7 @@ tags:
   - name: Lite Server
     externalDocs:
       description: Additional documentation
-      url: https://docs.tonconsole.com/tonapi/rest-api/liteserver
+      url: https://docs.tonconsole.com/tonapi/rest-api/lite-server
   - name: Emulation
     externalDocs:
       description: Additional documentation
