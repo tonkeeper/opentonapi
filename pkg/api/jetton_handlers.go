@@ -279,6 +279,9 @@ func (h *Handler) GetJettonTransferPayload(ctx context.Context, params oas.GetJe
 		return nil, toError(http.StatusBadRequest, err)
 	}
 	payload, err := h.storage.GetJettonTransferPayload(ctx, accountID, jettonMaster)
+	if errors.Is(err, core.ErrEntityNotFound) {
+		return nil, toError(http.StatusNotFound, err)
+	}
 	if err != nil {
 		if strings.Contains(err.Error(), "not implemented") {
 			return nil, toError(http.StatusNotImplemented, err)
