@@ -71,7 +71,7 @@ tags:
   - name: Lite Server
     externalDocs:
       description: Additional documentation
-      url: https://docs.tonconsole.com/tonapi/rest-api/liteserver
+      url: https://docs.tonconsole.com/tonapi/rest-api/lite-server
   - name: Emulation
     externalDocs:
       description: Additional documentation
@@ -94,6 +94,7 @@ paths:
         - Utilities
       responses:
         '200':
+          description: openapi.json
           content:
             application/json:
               schema: { } # Free-form JSON value
@@ -107,6 +108,7 @@ paths:
         - Utilities
       responses:
         '200':
+          description: openapi.yml
           content:
             application/yaml:
               schema:
