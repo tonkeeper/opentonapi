@@ -94,6 +94,7 @@ paths:
         - Utilities
       responses:
         '200':
+          description: openapi.json
           content:
             application/json:
               schema: { } # Free-form JSON value
@@ -107,6 +108,7 @@ paths:
         - Utilities
       responses:
         '200':
+          description: openapi.yml
           content:
             application/yaml:
               schema:
