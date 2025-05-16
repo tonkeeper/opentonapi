@@ -10144,7 +10144,8 @@
        "application/json": {
         "schema": {}
        }
-      }
+      },
+      "description": "openapi.json"
      },
      "default": {
       "$ref": "#/components/responses/Error"
@@ -10168,7 +10169,8 @@
          "type": "string"
         }
        }
-      }
+      },
+      "description": "openapi.yml"
      },
      "default": {
       "$ref": "#/components/responses/Error"
@@ -11014,7 +11016,7 @@
   {
    "externalDocs": {
     "description": "Additional documentation",
-    "url": "https://docs.tonconsole.com/tonapi/rest-api/liteserver"
+    "url": "https://docs.tonconsole.com/tonapi/rest-api/lite-server"
    },
    "name": "Lite Server"
   },
