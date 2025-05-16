@@ -7,6 +7,9 @@ info:
     email: support@tonkeeper.com
 servers:
   - url: "https://rt.tonapi.io"
+  - url: "https://rt-testnet.tonapi.io"
+  - url: "http://localhost:8082"
+
 paths:
   /webhooks:
     get:
@@ -330,6 +333,11 @@ paths:
           $ref: '#/components/responses/Error'
 
 components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
   parameters:
     token:
       in: header
@@ -586,3 +594,6 @@ components:
             properties:
               error:
                 type: string
+
+security:
+  - bearerAuth: []
