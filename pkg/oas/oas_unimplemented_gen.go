@@ -114,6 +114,15 @@ func (UnimplementedHandler) ExecGetMethodForBlockchainAccount(ctx context.Contex
 	return r, ht.ErrNotImplemented
 }
 
+// ExecGetMethodWithBodyForBlockchainAccount implements execGetMethodWithBodyForBlockchainAccount operation.
+//
+// Execute get method for account.
+//
+// POST /v2/blockchain/accounts/{account_id}/methods/{method_name}
+func (UnimplementedHandler) ExecGetMethodWithBodyForBlockchainAccount(ctx context.Context, req *ExecGetMethodWithBodyForBlockchainAccountReq, params ExecGetMethodWithBodyForBlockchainAccountParams) (r *MethodExecutionResult, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // GaslessConfig implements gaslessConfig operation.
 //
 // Returns configuration of gasless transfers.

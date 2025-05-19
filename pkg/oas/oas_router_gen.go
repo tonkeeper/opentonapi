@@ -831,8 +831,13 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 										args[0],
 										args[1],
 									}, elemIsEscaped, w, r)
+								case "POST":
+									s.handleExecGetMethodWithBodyForBlockchainAccountRequest([2]string{
+										args[0],
+										args[1],
+									}, elemIsEscaped, w, r)
 								default:
-									s.notAllowed(w, r, "GET")
+									s.notAllowed(w, r, "GET,POST")
 								}
 
 								return
@@ -4258,6 +4263,15 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 									r.name = "ExecGetMethodForBlockchainAccount"
 									r.summary = ""
 									r.operationID = "execGetMethodForBlockchainAccount"
+									r.pathPattern = "/v2/blockchain/accounts/{account_id}/methods/{method_name}"
+									r.args = args
+									r.count = 2
+									return r, true
+								case "POST":
+									// Leaf: ExecGetMethodWithBodyForBlockchainAccount
+									r.name = "ExecGetMethodWithBodyForBlockchainAccount"
+									r.summary = ""
+									r.operationID = "execGetMethodWithBodyForBlockchainAccount"
 									r.pathPattern = "/v2/blockchain/accounts/{account_id}/methods/{method_name}"
 									r.args = args
 									r.count = 2

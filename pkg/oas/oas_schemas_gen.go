@@ -5498,6 +5498,131 @@ func (s *Event) SetInProgress(val bool) {
 	s.InProgress = val
 }
 
+// Data type of the argument value:
+// - `nan`: Not-a-Number value
+// - `null`: Null value
+// - `tinyint`: Decimal integer (e.g., `100500`)
+// - `int257`: 256-bit integer in hex format with 0x prefix (e.g., `0xfa01d78381ae32`)
+// - `slice`: TON blockchain address (e.g., `0:6e731f2e...`)
+// - `cell_boc_base64`: Base64-encoded cell BOC (Binary Object Code) (e.g., `te6ccgEBAQEAAgAAAA==`)
+// - `slice_boc_hex`: Hex-encoded slice BOC (e.g., `b5ee9c72...`).
+// Ref: #/components/schemas/ExecGetMethodArgType
+type ExecGetMethodArgType string
+
+const (
+	ExecGetMethodArgTypeNan           ExecGetMethodArgType = "nan"
+	ExecGetMethodArgTypeNull          ExecGetMethodArgType = "null"
+	ExecGetMethodArgTypeTinyint       ExecGetMethodArgType = "tinyint"
+	ExecGetMethodArgTypeInt257        ExecGetMethodArgType = "int257"
+	ExecGetMethodArgTypeSlice         ExecGetMethodArgType = "slice"
+	ExecGetMethodArgTypeCellBocBase64 ExecGetMethodArgType = "cell_boc_base64"
+	ExecGetMethodArgTypeSliceBocHex   ExecGetMethodArgType = "slice_boc_hex"
+)
+
+// AllValues returns all ExecGetMethodArgType values.
+func (ExecGetMethodArgType) AllValues() []ExecGetMethodArgType {
+	return []ExecGetMethodArgType{
+		ExecGetMethodArgTypeNan,
+		ExecGetMethodArgTypeNull,
+		ExecGetMethodArgTypeTinyint,
+		ExecGetMethodArgTypeInt257,
+		ExecGetMethodArgTypeSlice,
+		ExecGetMethodArgTypeCellBocBase64,
+		ExecGetMethodArgTypeSliceBocHex,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s ExecGetMethodArgType) MarshalText() ([]byte, error) {
+	switch s {
+	case ExecGetMethodArgTypeNan:
+		return []byte(s), nil
+	case ExecGetMethodArgTypeNull:
+		return []byte(s), nil
+	case ExecGetMethodArgTypeTinyint:
+		return []byte(s), nil
+	case ExecGetMethodArgTypeInt257:
+		return []byte(s), nil
+	case ExecGetMethodArgTypeSlice:
+		return []byte(s), nil
+	case ExecGetMethodArgTypeCellBocBase64:
+		return []byte(s), nil
+	case ExecGetMethodArgTypeSliceBocHex:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *ExecGetMethodArgType) UnmarshalText(data []byte) error {
+	switch ExecGetMethodArgType(data) {
+	case ExecGetMethodArgTypeNan:
+		*s = ExecGetMethodArgTypeNan
+		return nil
+	case ExecGetMethodArgTypeNull:
+		*s = ExecGetMethodArgTypeNull
+		return nil
+	case ExecGetMethodArgTypeTinyint:
+		*s = ExecGetMethodArgTypeTinyint
+		return nil
+	case ExecGetMethodArgTypeInt257:
+		*s = ExecGetMethodArgTypeInt257
+		return nil
+	case ExecGetMethodArgTypeSlice:
+		*s = ExecGetMethodArgTypeSlice
+		return nil
+	case ExecGetMethodArgTypeCellBocBase64:
+		*s = ExecGetMethodArgTypeCellBocBase64
+		return nil
+	case ExecGetMethodArgTypeSliceBocHex:
+		*s = ExecGetMethodArgTypeSliceBocHex
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+type ExecGetMethodWithBodyForBlockchainAccountReq struct {
+	Args []ExecGetMethodWithBodyForBlockchainAccountReqArgsItem `json:"args"`
+}
+
+// GetArgs returns the value of Args.
+func (s *ExecGetMethodWithBodyForBlockchainAccountReq) GetArgs() []ExecGetMethodWithBodyForBlockchainAccountReqArgsItem {
+	return s.Args
+}
+
+// SetArgs sets the value of Args.
+func (s *ExecGetMethodWithBodyForBlockchainAccountReq) SetArgs(val []ExecGetMethodWithBodyForBlockchainAccountReqArgsItem) {
+	s.Args = val
+}
+
+type ExecGetMethodWithBodyForBlockchainAccountReqArgsItem struct {
+	Type ExecGetMethodArgType `json:"type"`
+	// String representation of the value according to the specified type.
+	Value string `json:"value"`
+}
+
+// GetType returns the value of Type.
+func (s *ExecGetMethodWithBodyForBlockchainAccountReqArgsItem) GetType() ExecGetMethodArgType {
+	return s.Type
+}
+
+// GetValue returns the value of Value.
+func (s *ExecGetMethodWithBodyForBlockchainAccountReqArgsItem) GetValue() string {
+	return s.Value
+}
+
+// SetType sets the value of Type.
+func (s *ExecGetMethodWithBodyForBlockchainAccountReqArgsItem) SetType(val ExecGetMethodArgType) {
+	s.Type = val
+}
+
+// SetValue sets the value of Value.
+func (s *ExecGetMethodWithBodyForBlockchainAccountReqArgsItem) SetValue(val string) {
+	s.Value = val
+}
+
 // Ref: #/components/schemas/ExtraCurrency
 type ExtraCurrency struct {
 	Amount  string    `json:"amount"`
