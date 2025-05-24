@@ -213,15 +213,6 @@ func (h *Handler) GetEvent(ctx context.Context, params oas.GetEventParams) (*oas
 	return &event, nil
 }
 
-func contains[T comparable](sl []T, s T) bool {
-	for i := range sl {
-		if sl[i] == s {
-			return true
-		}
-	}
-	return false
-}
-
 func (h *Handler) GetAccountEvents(ctx context.Context, params oas.GetAccountEventsParams) (*oas.AccountEvents, error) {
 	account, err := tongo.ParseAddress(params.AccountID)
 	if err != nil {

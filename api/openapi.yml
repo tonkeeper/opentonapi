@@ -1488,7 +1488,14 @@ paths:
       parameters:
         - $ref: '#/components/parameters/accountIDParameter'
         - $ref: '#/components/parameters/limitQuery'
-        - $ref: '#/components/parameters/offsetQuery'
+        - in: query
+          name: offset
+          required: false
+          schema:
+            type: integer
+            default: 0
+            minimum: 0
+            maximum: 9000
       responses:
         '200':
           description: jetton's holders
