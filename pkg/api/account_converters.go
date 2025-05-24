@@ -60,12 +60,7 @@ func convertToRawAccount(account *core.Account) (oas.BlockchainRawAccount, error
 		}
 	}
 	if account.ExtraBalances != nil {
-		balances := make(map[string]string, len(account.ExtraBalances))
-		for key, value := range account.ExtraBalances {
-			v := big.Int(value)
-			balances[fmt.Sprintf("%v", key)] = fmt.Sprintf("%v", v.String())
-		}
-		rawAccount.ExtraBalance = oas.NewOptBlockchainRawAccountExtraBalance(balances)
+		rawAccount.ExtraBalance = convertExtraCurrencies(account.ExtraBalances)
 	}
 	if account.Code != nil && len(account.Code) != 0 {
 		rawAccount.Code = oas.NewOptString(fmt.Sprintf("%x", account.Code[:]))

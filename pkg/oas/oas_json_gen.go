@@ -10723,9 +10723,13 @@ func (s *BlockchainRawAccount) encodeFields(e *jx.Encoder) {
 		e.Int64(s.Balance)
 	}
 	{
-		if s.ExtraBalance.Set {
+		if s.ExtraBalance != nil {
 			e.FieldStart("extra_balance")
-			s.ExtraBalance.Encode(e)
+			e.ArrStart()
+			for _, elem := range s.ExtraBalance {
+				elem.Encode(e)
+			}
+			e.ArrEnd()
 		}
 	}
 	{
@@ -10825,8 +10829,15 @@ func (s *BlockchainRawAccount) Decode(d *jx.Decoder) error {
 			}
 		case "extra_balance":
 			if err := func() error {
-				s.ExtraBalance.Reset()
-				if err := s.ExtraBalance.Decode(d); err != nil {
+				s.ExtraBalance = make([]ExtraCurrency, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem ExtraCurrency
+					if err := elem.Decode(d); err != nil {
+						return err
+					}
+					s.ExtraBalance = append(s.ExtraBalance, elem)
+					return nil
+				}); err != nil {
 					return err
 				}
 				return nil
@@ -10975,62 +10986,6 @@ func (s *BlockchainRawAccount) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *BlockchainRawAccount) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
-// Encode implements json.Marshaler.
-func (s BlockchainRawAccountExtraBalance) Encode(e *jx.Encoder) {
-	e.ObjStart()
-	s.encodeFields(e)
-	e.ObjEnd()
-}
-
-// encodeFields implements json.Marshaler.
-func (s BlockchainRawAccountExtraBalance) encodeFields(e *jx.Encoder) {
-	for k, elem := range s {
-		e.FieldStart(k)
-
-		e.Str(elem)
-	}
-}
-
-// Decode decodes BlockchainRawAccountExtraBalance from json.
-func (s *BlockchainRawAccountExtraBalance) Decode(d *jx.Decoder) error {
-	if s == nil {
-		return errors.New("invalid: unable to decode BlockchainRawAccountExtraBalance to nil")
-	}
-	m := s.init()
-	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
-		var elem string
-		if err := func() error {
-			v, err := d.Str()
-			elem = string(v)
-			if err != nil {
-				return err
-			}
-			return nil
-		}(); err != nil {
-			return errors.Wrapf(err, "decode field %q", k)
-		}
-		m[string(k)] = elem
-		return nil
-	}); err != nil {
-		return errors.Wrap(err, "decode BlockchainRawAccountExtraBalance")
-	}
-
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s BlockchainRawAccountExtraBalance) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *BlockchainRawAccountExtraBalance) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -30683,40 +30638,6 @@ func (s OptBlockchainConfig9) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *OptBlockchainConfig9) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
-// Encode encodes BlockchainRawAccountExtraBalance as json.
-func (o OptBlockchainRawAccountExtraBalance) Encode(e *jx.Encoder) {
-	if !o.Set {
-		return
-	}
-	o.Value.Encode(e)
-}
-
-// Decode decodes BlockchainRawAccountExtraBalance from json.
-func (o *OptBlockchainRawAccountExtraBalance) Decode(d *jx.Decoder) error {
-	if o == nil {
-		return errors.New("invalid: unable to decode OptBlockchainRawAccountExtraBalance to nil")
-	}
-	o.Set = true
-	o.Value = make(BlockchainRawAccountExtraBalance)
-	if err := o.Value.Decode(d); err != nil {
-		return err
-	}
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s OptBlockchainRawAccountExtraBalance) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *OptBlockchainRawAccountExtraBalance) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }

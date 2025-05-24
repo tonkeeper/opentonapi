@@ -3931,7 +3931,7 @@ func (s *BlockchainConfig9) SetMandatoryParams(val []int32) {
 type BlockchainRawAccount struct {
 	Address             string                              `json:"address"`
 	Balance             int64                               `json:"balance"`
-	ExtraBalance        OptBlockchainRawAccountExtraBalance `json:"extra_balance"`
+	ExtraBalance        []ExtraCurrency                     `json:"extra_balance"`
 	Code                OptString                           `json:"code"`
 	Data                OptString                           `json:"data"`
 	LastTransactionLt   int64                               `json:"last_transaction_lt"`
@@ -3953,7 +3953,7 @@ func (s *BlockchainRawAccount) GetBalance() int64 {
 }
 
 // GetExtraBalance returns the value of ExtraBalance.
-func (s *BlockchainRawAccount) GetExtraBalance() OptBlockchainRawAccountExtraBalance {
+func (s *BlockchainRawAccount) GetExtraBalance() []ExtraCurrency {
 	return s.ExtraBalance
 }
 
@@ -4008,7 +4008,7 @@ func (s *BlockchainRawAccount) SetBalance(val int64) {
 }
 
 // SetExtraBalance sets the value of ExtraBalance.
-func (s *BlockchainRawAccount) SetExtraBalance(val OptBlockchainRawAccountExtraBalance) {
+func (s *BlockchainRawAccount) SetExtraBalance(val []ExtraCurrency) {
 	s.ExtraBalance = val
 }
 
@@ -4050,17 +4050,6 @@ func (s *BlockchainRawAccount) SetStorage(val AccountStorageInfo) {
 // SetLibraries sets the value of Libraries.
 func (s *BlockchainRawAccount) SetLibraries(val []BlockchainRawAccountLibrariesItem) {
 	s.Libraries = val
-}
-
-type BlockchainRawAccountExtraBalance map[string]string
-
-func (s *BlockchainRawAccountExtraBalance) init() BlockchainRawAccountExtraBalance {
-	m := *s
-	if m == nil {
-		m = map[string]string{}
-		*s = m
-	}
-	return m
 }
 
 type BlockchainRawAccountLibrariesItem struct {
@@ -11687,52 +11676,6 @@ func (o OptBlockchainConfig9) Get() (v BlockchainConfig9, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptBlockchainConfig9) Or(d BlockchainConfig9) BlockchainConfig9 {
-	if v, ok := o.Get(); ok {
-		return v
-	}
-	return d
-}
-
-// NewOptBlockchainRawAccountExtraBalance returns new OptBlockchainRawAccountExtraBalance with value set to v.
-func NewOptBlockchainRawAccountExtraBalance(v BlockchainRawAccountExtraBalance) OptBlockchainRawAccountExtraBalance {
-	return OptBlockchainRawAccountExtraBalance{
-		Value: v,
-		Set:   true,
-	}
-}
-
-// OptBlockchainRawAccountExtraBalance is optional BlockchainRawAccountExtraBalance.
-type OptBlockchainRawAccountExtraBalance struct {
-	Value BlockchainRawAccountExtraBalance
-	Set   bool
-}
-
-// IsSet returns true if OptBlockchainRawAccountExtraBalance was set.
-func (o OptBlockchainRawAccountExtraBalance) IsSet() bool { return o.Set }
-
-// Reset unsets value.
-func (o *OptBlockchainRawAccountExtraBalance) Reset() {
-	var v BlockchainRawAccountExtraBalance
-	o.Value = v
-	o.Set = false
-}
-
-// SetTo sets value to v.
-func (o *OptBlockchainRawAccountExtraBalance) SetTo(v BlockchainRawAccountExtraBalance) {
-	o.Set = true
-	o.Value = v
-}
-
-// Get returns value and boolean that denotes whether value was set.
-func (o OptBlockchainRawAccountExtraBalance) Get() (v BlockchainRawAccountExtraBalance, ok bool) {
-	if !o.Set {
-		return v, false
-	}
-	return o.Value, true
-}
-
-// Or returns value if set, or given parameter if does not.
-func (o OptBlockchainRawAccountExtraBalance) Or(d BlockchainRawAccountExtraBalance) BlockchainRawAccountExtraBalance {
 	if v, ok := o.Get(); ok {
 		return v
 	}
