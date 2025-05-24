@@ -11,6 +11,7 @@ var DomainSuffixes = map[tongo.AccountID]string{
 	RootDotTon:   ".ton",
 	RootTelegram: "", //telegram use full domain
 	ton.MustParseAccountID("0:d9255340783403c635169d00aaaaaf2ab85fbb5d32c707b39a42157b7c347440"): ".dolboeb.t.me",
+	ton.MustParseAccountID("0:561b81016cf0efe178fbc653f0cf177b852c87333c302c1e4eeab63ed0105e6a"): ".vipx.ton",
 	//ton.MustParseAccountID("0:e1955aba7249f23e4fd2086654a176516d98b134e0df701302677c037c358b17"): "", //gg
 }
 
