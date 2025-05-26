@@ -5,6 +5,7 @@ import (
 	"crypto/ed25519"
 	"errors"
 	"github.com/tonkeeper/tongo/abi"
+	"github.com/tonkeeper/tongo/ton"
 	"time"
 
 	"github.com/tonkeeper/tongo/tlb"
@@ -67,4 +68,12 @@ func (s *LiteStorage) GetLatencyAndLastMasterchainSeqno(ctx context.Context) (in
 	}
 	latency := time.Now().Unix() - int64(blockHeader.GenUtime)
 	return latency, blockHeader.Seqno, nil
+}
+
+func (s *LiteStorage) GetAccountsStats(ctx context.Context, accounts []ton.AccountID) ([]core.AccountStat, error) {
+	return nil, nil
+}
+
+func (s *LiteStorage) GetAccountPlugins(ctx context.Context, accountID ton.AccountID, walletVersion abi.ContractInterface) ([]core.Plugin, error) {
+	return nil, nil
 }
