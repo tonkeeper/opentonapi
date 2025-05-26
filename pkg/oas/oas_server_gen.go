@@ -81,7 +81,7 @@ type Handler interface {
 	// Execute get method for account.
 	//
 	// POST /v2/blockchain/accounts/{account_id}/methods/{method_name}
-	ExecGetMethodWithBodyForBlockchainAccount(ctx context.Context, req *ExecGetMethodWithBodyForBlockchainAccountReq, params ExecGetMethodWithBodyForBlockchainAccountParams) (*MethodExecutionResult, error)
+	ExecGetMethodWithBodyForBlockchainAccount(ctx context.Context, req OptExecGetMethodWithBodyForBlockchainAccountReq, params ExecGetMethodWithBodyForBlockchainAccountParams) (*MethodExecutionResult, error)
 	// GaslessConfig implements gaslessConfig operation.
 	//
 	// Returns configuration of gasless transfers.

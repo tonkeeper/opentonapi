@@ -526,21 +526,7 @@
        "properties": {
         "args": {
          "items": {
-          "properties": {
-           "type": {
-            "$ref": "#/components/schemas/ExecGetMethodArgType"
-           },
-           "value": {
-            "description": "String representation of the value according to the specified type",
-            "example": "0xfa01d78381ae32",
-            "type": "string"
-           }
-          },
-          "required": [
-           "type",
-           "value"
-          ],
-          "type": "object"
+          "$ref": "#/components/schemas/ExecGetMethodArg"
          },
          "type": "array"
         }
@@ -552,8 +538,7 @@
       }
      }
     },
-    "description": "Request body for executing a GET method on a blockchain account via POST. This format allows passing arguments in the request body instead of query parameters, which is especially useful for large or complex input data.\n",
-    "required": true
+    "description": "Request body for executing a GET method on a blockchain account via POST. This format allows passing arguments in the request body instead of query parameters, which is especially useful for large or complex input data.\n"
    },
    "GaslessSend": {
     "content": {
@@ -3317,8 +3302,25 @@
     ],
     "type": "object"
    },
+   "ExecGetMethodArg": {
+    "properties": {
+     "type": {
+      "$ref": "#/components/schemas/ExecGetMethodArgType"
+     },
+     "value": {
+      "description": "String representation of the value according to the specified type",
+      "example": "0xfa01d78381ae32",
+      "type": "string"
+     }
+    },
+    "required": [
+     "type",
+     "value"
+    ],
+    "type": "object"
+   },
    "ExecGetMethodArgType": {
-    "description": "Data type of the argument value:\n- `nan`: Not-a-Number value\n- `null`: Null value\n- `tinyint`: Decimal integer (e.g., `100500`)\n- `int257`: 256-bit integer in hex format with 0x prefix (e.g., `0xfa01d78381ae32`)\n- `slice`: TON blockchain address (e.g., `0:6e731f2e...`)\n- `cell_boc_base64`: Base64-encoded cell BOC (Binary Object Code) (e.g., `te6ccgEBAQEAAgAAAA==`)\n- `slice_boc_hex`: Hex-encoded slice BOC (e.g., `b5ee9c72...`)\n",
+    "description": "Data type of the argument value:\n- `nan`: Not-a-Number value\n- `null`: Null value\n- `tinyint`: Decimal integer (e.g., `100500`)\n- `int257`: 257-bit integer in hex format with 0x prefix (e.g., `0xfa01d78381ae32`)\n- `slice`: TON blockchain address (e.g., `0:6e731f2e...`)\n- `cell_boc_base64`: Base64-encoded cell BOC (Binary Object Code) (e.g., `te6ccgEBAQEAAgAAAA==`)\n- `slice_boc_hex`: Hex-encoded slice BOC (e.g., `b5ee9c72...`)\n",
     "enum": [
      "nan",
      "null",

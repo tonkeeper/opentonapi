@@ -119,7 +119,7 @@ func (UnimplementedHandler) ExecGetMethodForBlockchainAccount(ctx context.Contex
 // Execute get method for account.
 //
 // POST /v2/blockchain/accounts/{account_id}/methods/{method_name}
-func (UnimplementedHandler) ExecGetMethodWithBodyForBlockchainAccount(ctx context.Context, req *ExecGetMethodWithBodyForBlockchainAccountReq, params ExecGetMethodWithBodyForBlockchainAccountParams) (r *MethodExecutionResult, _ error) {
+func (UnimplementedHandler) ExecGetMethodWithBodyForBlockchainAccount(ctx context.Context, req OptExecGetMethodWithBodyForBlockchainAccountReq, params ExecGetMethodWithBodyForBlockchainAccountParams) (r *MethodExecutionResult, _ error) {
 	return r, ht.ErrNotImplemented
 }
 

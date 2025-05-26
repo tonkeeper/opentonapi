@@ -331,7 +331,7 @@ func (s *Server) decodeEmulateMessageToWalletRequest(r *http.Request) (
 }
 
 func (s *Server) decodeExecGetMethodWithBodyForBlockchainAccountRequest(r *http.Request) (
-	req *ExecGetMethodWithBodyForBlockchainAccountReq,
+	req OptExecGetMethodWithBodyForBlockchainAccountReq,
 	close func() error,
 	rerr error,
 ) {
@@ -350,6 +350,9 @@ func (s *Server) decodeExecGetMethodWithBodyForBlockchainAccountRequest(r *http.
 			rerr = multierr.Append(rerr, close())
 		}
 	}()
+	if _, ok := r.Header["Content-Type"]; !ok && r.ContentLength == 0 {
+		return req, close, nil
+	}
 	ct, _, err := mime.ParseMediaType(r.Header.Get("Content-Type"))
 	if err != nil {
 		return req, close, errors.Wrap(err, "parse media type")
@@ -357,7 +360,7 @@ func (s *Server) decodeExecGetMethodWithBodyForBlockchainAccountRequest(r *http.
 	switch {
 	case ct == "application/json":
 		if r.ContentLength == 0 {
-			return req, close, validate.ErrBodyRequired
+			return req, close, nil
 		}
 		buf, err := io.ReadAll(r.Body)
 		if err != nil {
@@ -365,13 +368,14 @@ func (s *Server) decodeExecGetMethodWithBodyForBlockchainAccountRequest(r *http.
 		}
 
 		if len(buf) == 0 {
-			return req, close, validate.ErrBodyRequired
+			return req, close, nil
 		}
 
 		d := jx.DecodeBytes(buf)
 
-		var request ExecGetMethodWithBodyForBlockchainAccountReq
+		var request OptExecGetMethodWithBodyForBlockchainAccountReq
 		if err := func() error {
+			request.Reset()
 			if err := request.Decode(d); err != nil {
 				return err
 			}
@@ -388,14 +392,21 @@ func (s *Server) decodeExecGetMethodWithBodyForBlockchainAccountRequest(r *http.
 			return req, close, err
 		}
 		if err := func() error {
-			if err := request.Validate(); err != nil {
-				return err
+			if value, ok := request.Get(); ok {
+				if err := func() error {
+					if err := value.Validate(); err != nil {
+						return err
+					}
+					return nil
+				}(); err != nil {
+					return err
+				}
 			}
 			return nil
 		}(); err != nil {
 			return req, close, errors.Wrap(err, "validate")
 		}
-		return &request, close, nil
+		return request, close, nil
 	default:
 		return req, close, validate.InvalidContentType(ct)
 	}

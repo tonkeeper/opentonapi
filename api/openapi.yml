@@ -3380,7 +3380,6 @@ components:
         Request body for executing a GET method on a blockchain account via POST.
         This format allows passing arguments in the request body instead of query parameters,
         which is especially useful for large or complex input data.
-      required: true
       content:
         application/json:
           schema:
@@ -3391,17 +3390,7 @@ components:
               args:
                 type: array
                 items:
-                  type: object
-                  required:
-                    - type
-                    - value
-                  properties:
-                    type:
-                      $ref: '#/components/schemas/ExecGetMethodArgType'
-                    value:
-                      type: string
-                      description: String representation of the value according to the specified type
-                      example: "0xfa01d78381ae32"
+                  $ref: '#/components/schemas/ExecGetMethodArg'
   schemas:
     Error:
       type: object
@@ -7720,6 +7709,18 @@ components:
         - "cell_boc_base64"
         - "slice_boc_hex"
       example: int257
+    ExecGetMethodArg:
+      type: object
+      required:
+        - type
+        - value
+      properties:
+        type:
+          $ref: '#/components/schemas/ExecGetMethodArgType'
+        value:
+          type: string
+          description: String representation of the value according to the specified type
+          example: "0xfa01d78381ae32"
   
   responses:
     Error:

@@ -1478,7 +1478,7 @@ func (s *Server) handleExecGetMethodWithBodyForBlockchainAccountRequest(args [2]
 		}
 
 		type (
-			Request  = *ExecGetMethodWithBodyForBlockchainAccountReq
+			Request  = OptExecGetMethodWithBodyForBlockchainAccountReq
 			Params   = ExecGetMethodWithBodyForBlockchainAccountParams
 			Response = *MethodExecutionResult
 		)
