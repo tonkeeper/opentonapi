@@ -355,6 +355,12 @@ type Handler interface {
 	//
 	// GET /v2/extra-currency/{id}
 	GetExtraCurrencyInfo(ctx context.Context, params GetExtraCurrencyInfoParams) (*EcPreview, error)
+	// GetInvoiceHistory implements getInvoiceHistory operation.
+	//
+	// Get history of invoice payments.
+	//
+	// GET /v2/invoices/{account_id}/history
+	GetInvoiceHistory(ctx context.Context, params GetInvoiceHistoryParams) (*AccountInvoicePayments, error)
 	// GetItemsFromCollection implements getItemsFromCollection operation.
 	//
 	// Get NFT items from collection by collection address.

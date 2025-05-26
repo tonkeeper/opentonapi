@@ -84,6 +84,7 @@ tags:
     externalDocs:
       description: Additional documentation
       url: https://docs.tonconsole.com/tonapi/rest-api/extra-currency
+  - name: Payments
 
 paths:
   /v2/openapi.json:
@@ -2853,6 +2854,40 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AccountEvent'
+        'default':
+          $ref: '#/components/responses/Error'
+  /v2/invoices/{account_id}/history:
+    get:
+      description: Get history of invoice payments
+      operationId: getInvoiceHistory
+      tags:
+        - Payments
+      parameters:
+        - $ref: '#/components/parameters/accountIDParameter'
+        - name: before_lt # TODO: or use after_lt
+          in: query
+          description: "omit this parameter to get last invoices"
+          required: false
+          schema:
+            type: integer
+            format: int64
+            example: 25758317000002
+            x-js-format: bigint
+        - name: limit
+          in: query
+          required: true
+          schema:
+            type: integer
+            example: 100
+            maximum: 1000
+            minimum: 1
+      responses:
+        '200':
+          description: account invoices history
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountInvoicePayments'
         'default':
           $ref: '#/components/responses/Error'
 components:
@@ -5630,12 +5665,16 @@ components:
       type: object
       required:
         - value
+        - decimals
         - token_name
       properties:
         value:
           type: string
           x-js-format: bigint
           example: "123000000000"
+        decimals:
+          type: integer
+          example: 9
         token_name:
           type: string
           example: TON
@@ -6554,6 +6593,68 @@ components:
           type: integer
           format: int64
           example: 25713146000001
+    InvoicePayment:
+      type: object
+      description: Payment invoice.
+      required:
+        - event_id
+        - invoice_id
+        - source
+        - destination
+        - lt
+        - utime
+        - amount
+        - metadata
+      properties:
+        event_id:
+          type: string
+          example: e8b0e3fee4a26bd2317ac1f9952fcdc87dc08fdb617656b5202416323337372e
+        invoice_id:
+          type: string
+          example: 03cfc582-b1c3-410a-a9a7-1f3afe326b3b
+        source:
+          $ref: '#/components/schemas/AccountAddress'
+        destination:
+          $ref: '#/components/schemas/AccountAddress'
+        lt:
+          type: integer
+          format: int64
+          example: 25713146000001
+          x-js-format: bigint
+        utime:
+          type: integer
+          format: int64
+          example: 1645544908
+        amount:
+          $ref: '#/components/schemas/Price'
+        metadata:
+          $ref: '#/components/schemas/InvoiceMetadata'
+    AccountInvoicePayments:
+      type: object
+      required:
+        - payments
+        - next_from
+      properties:
+        payments:
+          type: array
+          items:
+            $ref: '#/components/schemas/InvoicePayment'
+        next_from:
+          type: integer
+          format: int64
+          example: 25713146000001
+    InvoiceMetadata:
+      type: object
+      required:
+        - encrypted_binary
+      properties:
+        encrypted_binary:
+          type: string
+          description: hex encoded bytes
+        decryption_key:
+          type: string
+          description: hex encoded bytes
+          example: "dead.....beef"
     TraceID:
       type: object
       required:

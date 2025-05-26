@@ -449,6 +449,32 @@ func (s *AccountInfoByStateInit) SetAddress(val string) {
 	s.Address = val
 }
 
+// Ref: #/components/schemas/AccountInvoicePayments
+type AccountInvoicePayments struct {
+	Payments []InvoicePayment `json:"payments"`
+	NextFrom int64            `json:"next_from"`
+}
+
+// GetPayments returns the value of Payments.
+func (s *AccountInvoicePayments) GetPayments() []InvoicePayment {
+	return s.Payments
+}
+
+// GetNextFrom returns the value of NextFrom.
+func (s *AccountInvoicePayments) GetNextFrom() int64 {
+	return s.NextFrom
+}
+
+// SetPayments sets the value of Payments.
+func (s *AccountInvoicePayments) SetPayments(val []InvoicePayment) {
+	s.Payments = val
+}
+
+// SetNextFrom sets the value of NextFrom.
+func (s *AccountInvoicePayments) SetNextFrom(val int64) {
+	s.NextFrom = val
+}
+
 // Ref: #/components/schemas/AccountStaking
 type AccountStaking struct {
 	Pools []AccountStakingInfo `json:"pools"`
@@ -7340,6 +7366,127 @@ func (s *InitStateRaw) SetRootHash(val string) {
 // SetFileHash sets the value of FileHash.
 func (s *InitStateRaw) SetFileHash(val string) {
 	s.FileHash = val
+}
+
+// Ref: #/components/schemas/InvoiceMetadata
+type InvoiceMetadata struct {
+	// Hex encoded bytes.
+	EncryptedBinary string `json:"encrypted_binary"`
+	// Hex encoded bytes.
+	DecryptionKey OptString `json:"decryption_key"`
+}
+
+// GetEncryptedBinary returns the value of EncryptedBinary.
+func (s *InvoiceMetadata) GetEncryptedBinary() string {
+	return s.EncryptedBinary
+}
+
+// GetDecryptionKey returns the value of DecryptionKey.
+func (s *InvoiceMetadata) GetDecryptionKey() OptString {
+	return s.DecryptionKey
+}
+
+// SetEncryptedBinary sets the value of EncryptedBinary.
+func (s *InvoiceMetadata) SetEncryptedBinary(val string) {
+	s.EncryptedBinary = val
+}
+
+// SetDecryptionKey sets the value of DecryptionKey.
+func (s *InvoiceMetadata) SetDecryptionKey(val OptString) {
+	s.DecryptionKey = val
+}
+
+// Payment invoice.
+// Ref: #/components/schemas/InvoicePayment
+type InvoicePayment struct {
+	EventID     string          `json:"event_id"`
+	InvoiceID   string          `json:"invoice_id"`
+	Source      AccountAddress  `json:"source"`
+	Destination AccountAddress  `json:"destination"`
+	Lt          int64           `json:"lt"`
+	Utime       int64           `json:"utime"`
+	Amount      Price           `json:"amount"`
+	Metadata    InvoiceMetadata `json:"metadata"`
+}
+
+// GetEventID returns the value of EventID.
+func (s *InvoicePayment) GetEventID() string {
+	return s.EventID
+}
+
+// GetInvoiceID returns the value of InvoiceID.
+func (s *InvoicePayment) GetInvoiceID() string {
+	return s.InvoiceID
+}
+
+// GetSource returns the value of Source.
+func (s *InvoicePayment) GetSource() AccountAddress {
+	return s.Source
+}
+
+// GetDestination returns the value of Destination.
+func (s *InvoicePayment) GetDestination() AccountAddress {
+	return s.Destination
+}
+
+// GetLt returns the value of Lt.
+func (s *InvoicePayment) GetLt() int64 {
+	return s.Lt
+}
+
+// GetUtime returns the value of Utime.
+func (s *InvoicePayment) GetUtime() int64 {
+	return s.Utime
+}
+
+// GetAmount returns the value of Amount.
+func (s *InvoicePayment) GetAmount() Price {
+	return s.Amount
+}
+
+// GetMetadata returns the value of Metadata.
+func (s *InvoicePayment) GetMetadata() InvoiceMetadata {
+	return s.Metadata
+}
+
+// SetEventID sets the value of EventID.
+func (s *InvoicePayment) SetEventID(val string) {
+	s.EventID = val
+}
+
+// SetInvoiceID sets the value of InvoiceID.
+func (s *InvoicePayment) SetInvoiceID(val string) {
+	s.InvoiceID = val
+}
+
+// SetSource sets the value of Source.
+func (s *InvoicePayment) SetSource(val AccountAddress) {
+	s.Source = val
+}
+
+// SetDestination sets the value of Destination.
+func (s *InvoicePayment) SetDestination(val AccountAddress) {
+	s.Destination = val
+}
+
+// SetLt sets the value of Lt.
+func (s *InvoicePayment) SetLt(val int64) {
+	s.Lt = val
+}
+
+// SetUtime sets the value of Utime.
+func (s *InvoicePayment) SetUtime(val int64) {
+	s.Utime = val
+}
+
+// SetAmount sets the value of Amount.
+func (s *InvoicePayment) SetAmount(val Price) {
+	s.Amount = val
+}
+
+// SetMetadata sets the value of Metadata.
+func (s *InvoicePayment) SetMetadata(val InvoiceMetadata) {
+	s.Metadata = val
 }
 
 // Ref: #/components/schemas/JettonBalance
@@ -15060,12 +15207,18 @@ func (s *PoolInfo) SetCycleLength(val OptInt64) {
 // Ref: #/components/schemas/Price
 type Price struct {
 	Value     string `json:"value"`
+	Decimals  int    `json:"decimals"`
 	TokenName string `json:"token_name"`
 }
 
 // GetValue returns the value of Value.
 func (s *Price) GetValue() string {
 	return s.Value
+}
+
+// GetDecimals returns the value of Decimals.
+func (s *Price) GetDecimals() int {
+	return s.Decimals
 }
 
 // GetTokenName returns the value of TokenName.
@@ -15076,6 +15229,11 @@ func (s *Price) GetTokenName() string {
 // SetValue sets the value of Value.
 func (s *Price) SetValue(val string) {
 	s.Value = val
+}
+
+// SetDecimals sets the value of Decimals.
+func (s *Price) SetDecimals(val int) {
+	s.Decimals = val
 }
 
 // SetTokenName sets the value of TokenName.
