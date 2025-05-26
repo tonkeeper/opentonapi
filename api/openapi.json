@@ -519,6 +519,42 @@
     "description": "bag-of-cells serialized to base64/hex and additional parameters to configure emulation",
     "required": true
    },
+   "ExecGetMethodArgs": {
+    "content": {
+     "application/json": {
+      "schema": {
+       "properties": {
+        "args": {
+         "items": {
+          "properties": {
+           "type": {
+            "$ref": "#/components/schemas/ExecGetMethodArgType"
+           },
+           "value": {
+            "description": "String representation of the value according to the specified type",
+            "example": "0xfa01d78381ae32",
+            "type": "string"
+           }
+          },
+          "required": [
+           "type",
+           "value"
+          ],
+          "type": "object"
+         },
+         "type": "array"
+        }
+       },
+       "required": [
+        "args"
+       ],
+       "type": "object"
+      }
+     }
+    },
+    "description": "Request body for executing a GET method on a blockchain account via POST. This format allows passing arguments in the request body instead of query parameters, which is especially useful for large or complex input data.\n",
+    "required": true
+   },
    "GaslessSend": {
     "content": {
      "application/json": {
@@ -3280,6 +3316,20 @@
      "in_progress"
     ],
     "type": "object"
+   },
+   "ExecGetMethodArgType": {
+    "description": "Data type of the argument value:\n- `nan`: Not-a-Number value\n- `null`: Null value\n- `tinyint`: Decimal integer (e.g., `100500`)\n- `int257`: 256-bit integer in hex format with 0x prefix (e.g., `0xfa01d78381ae32`)\n- `slice`: TON blockchain address (e.g., `0:6e731f2e...`)\n- `cell_boc_base64`: Base64-encoded cell BOC (Binary Object Code) (e.g., `te6ccgEBAQEAAgAAAA==`)\n- `slice_boc_hex`: Hex-encoded slice BOC (e.g., `b5ee9c72...`)\n",
+    "enum": [
+     "nan",
+     "null",
+     "tinyint",
+     "int257",
+     "slice",
+     "cell_boc_base64",
+     "slice_boc_hex"
+    ],
+    "example": "int257",
+    "type": "string"
    },
    "ExtraCurrencies": {
     "properties": {
@@ -7645,7 +7695,7 @@
       "name": "args",
       "required": false,
       "schema": {
-       "description": "Supported values:\n\"NaN\" for NaN type, \n\"Null\" for Null type, \n10-base digits for tiny int type (Example: 100500), \n0x-prefixed hex digits for int257 (Example: 0xfa01d78381ae32), \nall forms of addresses for slice type (Example: 0:6e731f2e28b73539a7f85ac47ca104d5840b229351189977bb6151d36b5e3f5e), \nsingle-root base64-encoded BOC for cell (Example: \"te6ccgEBAQEAAgAAAA==\"),\nsingle-root hex-encoded BOC for slice (Example: b5ee9c72010101010002000000)",
+       "description": "Array of method arguments in string format. Supported value formats:\n- \"NaN\" for Not-a-Number type\n- \"Null\" for Null type\n- Decimal integers for tinyint type (e.g., \"100500\")\n- 0x-prefixed hex strings for int257 type (e.g., \"0xfa01d78381ae32\")\n- TON blockchain addresses for slice type (e.g., \"0:6e731f2e28b73539a7f85ac47ca104d5840b229351189977bb6151d36b5e3f5e\")\n- Base64-encoded BOC for cell type (e.g., \"te6ccgEBAQEAAgAAAA==\")\n- Hex-encoded BOC for slice type (e.g., \"b5ee9c72010101010002000000\")",
        "example": [
         "0:9a33970f617bcd71acf2cd28357c067aa31859c02820d8f01d74c88063a8f4d8"
        ],
@@ -7656,6 +7706,39 @@
       }
      }
     ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/MethodExecutionResult"
+        }
+       }
+      },
+      "description": "method execution result"
+     },
+     "default": {
+      "$ref": "#/components/responses/Error"
+     }
+    },
+    "tags": [
+     "Blockchain"
+    ]
+   },
+   "post": {
+    "description": "Execute get method for account",
+    "operationId": "execGetMethodWithBodyForBlockchainAccount",
+    "parameters": [
+     {
+      "$ref": "#/components/parameters/accountIDParameter"
+     },
+     {
+      "$ref": "#/components/parameters/methodNameParameter"
+     }
+    ],
+    "requestBody": {
+     "$ref": "#/components/requestBodies/ExecGetMethodArgs"
+    },
     "responses": {
      "200": {
       "content": {

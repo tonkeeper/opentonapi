@@ -197,68 +197,16 @@ func getMethodCacheKey(accountID ton.AccountID, methodName string, lt uint64, ar
 }
 
 func (h *Handler) ExecGetMethodForBlockchainAccount(ctx context.Context, params oas.ExecGetMethodForBlockchainAccountParams) (*oas.MethodExecutionResult, error) {
-	account, err := tongo.ParseAddress(params.AccountID)
-	if err != nil {
-		return nil, toError(http.StatusBadRequest, err)
+	return h.execGetMethod(ctx, params.AccountID, params.MethodName, params.Args)
+}
+
+func (h *Handler) ExecGetMethodWithBodyForBlockchainAccount(ctx context.Context, request *oas.ExecGetMethodWithBodyForBlockchainAccountReq, params oas.ExecGetMethodWithBodyForBlockchainAccountParams) (*oas.MethodExecutionResult, error) {
+	// TODO: Check the argument type to apply different logic
+	args := make([]string, len(request.Args))
+	for idx, item := range request.Args {
+		args[idx] = item.Value
 	}
-	contract, err := h.storage.GetContract(ctx, account.ID)
-	if err != nil {
-		if errors.Is(err, core.ErrEntityNotFound) {
-			return nil, toError(http.StatusNotFound, err)
-		}
-		return nil, toError(http.StatusInternalServerError, err)
-	}
-	key, err := getMethodCacheKey(account.ID, params.MethodName, contract.LastTransactionLt, params.Args)
-	if err != nil {
-		return nil, toError(http.StatusInternalServerError, err)
-	}
-	if result, ok := h.getMethodsCache.Get(key); ok {
-		return result, nil
-	}
-	stack := make([]tlb.VmStackValue, 0, len(params.Args))
-	for i := len(params.Args) - 1; i >= 0; i-- {
-		r, err := stringToTVMStackRecord(params.Args[i])
-		if err != nil {
-			return nil, toError(http.StatusBadRequest, fmt.Errorf("can't parse arg '%v' as any TVMStackValue", params.Args[i]))
-		}
-		stack = append(stack, r) // we need to put the arguments on the stack in reverse order
-	}
-	// RunSmcMethodByID fetches the contract from the storage on its own,
-	// and it can happen that the contract has been changed and has another lt,
-	// in this case, we get a correct result from the executor,
-	// but we update a previous cache entry that won't be used anymore.
-	exitCode, stack, err := h.executor.RunSmcMethodByID(ctx, account.ID, utils.MethodIdFromName(params.MethodName), stack)
-	if err != nil {
-		if errors.Is(err, core.ErrEntityNotFound) {
-			return nil, toError(http.StatusNotFound, err)
-		}
-		return nil, toError(http.StatusInternalServerError, err)
-	}
-	result := oas.MethodExecutionResult{
-		Success:  exitCode == 0 || exitCode == 1,
-		ExitCode: int(exitCode),
-		Stack:    make([]oas.TvmStackRecord, 0, len(stack)),
-	}
-	for i := range stack {
-		value, err := convertTvmStackValue(stack[i])
-		if err != nil {
-			return nil, toError(http.StatusInternalServerError, err)
-		}
-		result.Stack = append(result.Stack, value)
-	}
-	for _, decoder := range abi.KnownGetMethodsDecoder[params.MethodName] {
-		_, v, err := decoder(stack)
-		if err == nil {
-			value, err := json.Marshal(v)
-			if err != nil {
-				return nil, toError(http.StatusInternalServerError, err)
-			}
-			result.SetDecoded(g.ChangeJsonKeys(value, g.CamelToSnake))
-			break
-		}
-	}
-	h.getMethodsCache.Set(key, &result)
-	return &result, nil
+	return h.execGetMethod(ctx, params.AccountID, params.MethodName, args)
 }
 
 func (h *Handler) SearchAccounts(ctx context.Context, params oas.SearchAccountsParams) (*oas.FoundAccounts, error) {
@@ -629,4 +577,69 @@ func (h *Handler) AddressParse(ctx context.Context, params oas.AddressParseParam
 
 func (h *Handler) GetAccountExtraCurrencyHistoryByID(ctx context.Context, params oas.GetAccountExtraCurrencyHistoryByIDParams) (*oas.AccountEvents, error) {
 	return &oas.AccountEvents{}, nil
+}
+
+func (h *Handler) execGetMethod(ctx context.Context, accountID string, methodName string, args []string) (*oas.MethodExecutionResult, error) {
+	account, err := tongo.ParseAddress(accountID)
+	if err != nil {
+		return nil, toError(http.StatusBadRequest, err)
+	}
+	contract, err := h.storage.GetContract(ctx, account.ID)
+	if errors.Is(err, core.ErrEntityNotFound) {
+		return nil, toError(http.StatusNotFound, err)
+	}
+	if err != nil {
+		return nil, toError(http.StatusInternalServerError, err)
+	}
+	key, err := getMethodCacheKey(account.ID, methodName, contract.LastTransactionLt, args)
+	if err != nil {
+		return nil, toError(http.StatusInternalServerError, err)
+	}
+	if result, ok := h.getMethodsCache.Get(key); ok {
+		return result, nil
+	}
+	stack := make([]tlb.VmStackValue, 0, len(args))
+	for i := len(args) - 1; i >= 0; i-- {
+		r, err := stringToTVMStackRecord(args[i])
+		if err != nil {
+			return nil, toError(http.StatusBadRequest, fmt.Errorf("can't parse arg '%v' as any TVMStackValue", args[i]))
+		}
+		stack = append(stack, r) // arguments go in reverse order
+	}
+	// RunSmcMethodByID fetches the contract from the storage on its own,
+	// and it can happen that the contract has been changed and has another lt,
+	// in this case, we get a correct result from the executor,
+	// but we update a previous cache entry that won't be used anymore.
+	exitCode, stack, err := h.executor.RunSmcMethodByID(ctx, account.ID, utils.MethodIdFromName(methodName), stack)
+	if errors.Is(err, core.ErrEntityNotFound) {
+		return nil, toError(http.StatusNotFound, err)
+	}
+	if err != nil {
+		return nil, toError(http.StatusInternalServerError, err)
+	}
+	result := oas.MethodExecutionResult{
+		Success:  exitCode == 0 || exitCode == 1,
+		ExitCode: int(exitCode),
+		Stack:    make([]oas.TvmStackRecord, 0, len(stack)),
+	}
+	for i := range stack {
+		value, err := convertTvmStackValue(stack[i])
+		if err != nil {
+			return nil, toError(http.StatusInternalServerError, err)
+		}
+		result.Stack = append(result.Stack, value)
+	}
+	for _, decoder := range abi.KnownGetMethodsDecoder[methodName] {
+		_, v, err := decoder(stack)
+		if err == nil {
+			value, err := json.Marshal(v)
+			if err != nil {
+				return nil, toError(http.StatusInternalServerError, err)
+			}
+			result.SetDecoded(g.ChangeJsonKeys(value, g.CamelToSnake))
+			break
+		}
+	}
+	h.getMethodsCache.Set(key, &result)
+	return &result, nil
 }

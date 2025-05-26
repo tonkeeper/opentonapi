@@ -1388,6 +1388,142 @@ func (s *Server) handleExecGetMethodForBlockchainAccountRequest(args [2]string, 
 	}
 }
 
+// handleExecGetMethodWithBodyForBlockchainAccountRequest handles execGetMethodWithBodyForBlockchainAccount operation.
+//
+// Execute get method for account.
+//
+// POST /v2/blockchain/accounts/{account_id}/methods/{method_name}
+func (s *Server) handleExecGetMethodWithBodyForBlockchainAccountRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("execGetMethodWithBodyForBlockchainAccount"),
+		semconv.HTTPMethodKey.String("POST"),
+		semconv.HTTPRouteKey.String("/v2/blockchain/accounts/{account_id}/methods/{method_name}"),
+	}
+
+	// Start a span for this request.
+	ctx, span := s.cfg.Tracer.Start(r.Context(), "ExecGetMethodWithBodyForBlockchainAccount",
+		trace.WithAttributes(otelAttrs...),
+		serverSpanKind,
+	)
+	defer span.End()
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		elapsedDuration := time.Since(startTime)
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		s.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	s.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	var (
+		recordError = func(stage string, err error) {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			s.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		err          error
+		opErrContext = ogenerrors.OperationContext{
+			Name: "ExecGetMethodWithBodyForBlockchainAccount",
+			ID:   "execGetMethodWithBodyForBlockchainAccount",
+		}
+	)
+	params, err := decodeExecGetMethodWithBodyForBlockchainAccountParams(args, argsEscaped, r)
+	if err != nil {
+		err = &ogenerrors.DecodeParamsError{
+			OperationContext: opErrContext,
+			Err:              err,
+		}
+		recordError("DecodeParams", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+	request, close, err := s.decodeExecGetMethodWithBodyForBlockchainAccountRequest(r)
+	if err != nil {
+		err = &ogenerrors.DecodeRequestError{
+			OperationContext: opErrContext,
+			Err:              err,
+		}
+		recordError("DecodeRequest", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+	defer func() {
+		if err := close(); err != nil {
+			recordError("CloseRequest", err)
+		}
+	}()
+
+	var response *MethodExecutionResult
+	if m := s.cfg.Middleware; m != nil {
+		mreq := middleware.Request{
+			Context:          ctx,
+			OperationName:    "ExecGetMethodWithBodyForBlockchainAccount",
+			OperationSummary: "",
+			OperationID:      "execGetMethodWithBodyForBlockchainAccount",
+			Body:             request,
+			Params: middleware.Parameters{
+				{
+					Name: "account_id",
+					In:   "path",
+				}: params.AccountID,
+				{
+					Name: "method_name",
+					In:   "path",
+				}: params.MethodName,
+			},
+			Raw: r,
+		}
+
+		type (
+			Request  = *ExecGetMethodWithBodyForBlockchainAccountReq
+			Params   = ExecGetMethodWithBodyForBlockchainAccountParams
+			Response = *MethodExecutionResult
+		)
+		response, err = middleware.HookMiddleware[
+			Request,
+			Params,
+			Response,
+		](
+			m,
+			mreq,
+			unpackExecGetMethodWithBodyForBlockchainAccountParams,
+			func(ctx context.Context, request Request, params Params) (response Response, err error) {
+				response, err = s.h.ExecGetMethodWithBodyForBlockchainAccount(ctx, request, params)
+				return response, err
+			},
+		)
+	} else {
+		response, err = s.h.ExecGetMethodWithBodyForBlockchainAccount(ctx, request, params)
+	}
+	if err != nil {
+		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
+			if err := encodeErrorResponse(errRes, w, span); err != nil {
+				recordError("Internal", err)
+			}
+			return
+		}
+		if errors.Is(err, ht.ErrNotImplemented) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
+			recordError("Internal", err)
+		}
+		return
+	}
+
+	if err := encodeExecGetMethodWithBodyForBlockchainAccountResponse(response, w, span); err != nil {
+		recordError("EncodeResponse", err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
+		return
+	}
+}
+
 // handleGaslessConfigRequest handles gaslessConfig operation.
 //
 // Returns configuration of gasless transfers.
