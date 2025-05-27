@@ -212,6 +212,63 @@ func convertTuple(v tlb.VmStkTuple) (oas.TvmStackRecord, error) {
 	return r, nil
 }
 
+func parseExecGetMethodArgs(arg oas.ExecGetMethodArg) (tlb.VmStackValue, error) {
+	switch arg.Type {
+	case oas.ExecGetMethodArgTypeNan:
+		if arg.Value != "NaN" {
+			return tlb.VmStackValue{}, fmt.Errorf("expected 'NaN' for type 'nan', got '%v'", arg.Value)
+		}
+		return tlb.VmStackValue{SumType: "VmStkNan"}, nil
+
+	case oas.ExecGetMethodArgTypeNull:
+		if arg.Value != "Null" {
+			return tlb.VmStackValue{}, fmt.Errorf("expected 'Null' for type 'null', got '%v'", arg.Value)
+		}
+		return tlb.VmStackValue{SumType: "VmStkNull"}, nil
+
+	case oas.ExecGetMethodArgTypeTinyint:
+		i, err := strconv.ParseInt(arg.Value, 10, 64)
+		if err != nil {
+			return tlb.VmStackValue{}, fmt.Errorf("invalid tinyint value: %v", err)
+		}
+		return tlb.VmStackValue{SumType: "VmStkTinyInt", VmStkTinyInt: i}, nil
+
+	case oas.ExecGetMethodArgTypeInt257:
+		if !strings.HasPrefix(arg.Value, "0x") {
+			return tlb.VmStackValue{}, fmt.Errorf("int257 value must start with '0x'")
+		}
+		i := big.Int{}
+		if _, ok := i.SetString(arg.Value[2:], 16); !ok {
+			return tlb.VmStackValue{}, fmt.Errorf("invalid int257 hex: %v", arg.Value)
+		}
+		return tlb.VmStackValue{SumType: "VmStkInt", VmStkInt: tlb.Int257(i)}, nil
+
+	case oas.ExecGetMethodArgTypeSlice:
+		account, err := tongo.ParseAddress(arg.Value)
+		if err != nil {
+			return tlb.VmStackValue{}, fmt.Errorf("invalid address: %v", err)
+		}
+		return tlb.TlbStructToVmCellSlice(account.ID.ToMsgAddress())
+
+	case oas.ExecGetMethodArgTypeCellBocBase64:
+		c, err := boc.DeserializeSinglRootBase64(arg.Value)
+		if err != nil {
+			return tlb.VmStackValue{}, fmt.Errorf("invalid cell BOC base64: %v", err)
+		}
+		return tlb.VmStackValue{SumType: "VmStkCell", VmStkCell: tlb.Ref[boc.Cell]{Value: *c}}, nil
+
+	case oas.ExecGetMethodArgTypeSliceBocHex:
+		cells, err := boc.DeserializeBocHex(arg.Value)
+		if err != nil || len(cells) != 1 {
+			return tlb.VmStackValue{}, fmt.Errorf("invalid slice BOC hex: %v", err)
+		}
+		return tlb.CellToVmCellSlice(cells[0])
+
+	default:
+		return tlb.VmStackValue{}, fmt.Errorf("unsupported argument type: %v", arg.Type)
+	}
+}
+
 func stringToTVMStackRecord(s string) (tlb.VmStackValue, error) {
 	if s == "" {
 		return tlb.VmStackValue{}, fmt.Errorf("zero length sting can't be converted to tvm stack")
