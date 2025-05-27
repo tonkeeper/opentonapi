@@ -5487,6 +5487,132 @@ func (s *Event) SetInProgress(val bool) {
 	s.InProgress = val
 }
 
+// Ref: #/components/schemas/ExecGetMethodArg
+type ExecGetMethodArg struct {
+	Type ExecGetMethodArgType `json:"type"`
+	// String representation of the value according to the specified type.
+	Value string `json:"value"`
+}
+
+// GetType returns the value of Type.
+func (s *ExecGetMethodArg) GetType() ExecGetMethodArgType {
+	return s.Type
+}
+
+// GetValue returns the value of Value.
+func (s *ExecGetMethodArg) GetValue() string {
+	return s.Value
+}
+
+// SetType sets the value of Type.
+func (s *ExecGetMethodArg) SetType(val ExecGetMethodArgType) {
+	s.Type = val
+}
+
+// SetValue sets the value of Value.
+func (s *ExecGetMethodArg) SetValue(val string) {
+	s.Value = val
+}
+
+// Data type of the argument value:
+// - `nan`: Not-a-Number value
+// - `null`: Null value
+// - `tinyint`: Decimal integer (e.g., `100500`)
+// - `int257`: 257-bit integer in hex format with 0x prefix (e.g., `0xfa01d78381ae32`)
+// - `slice`: TON blockchain address (e.g., `0:6e731f2e...`)
+// - `cell_boc_base64`: Base64-encoded cell BOC (Binary Object Code) (e.g., `te6ccgEBAQEAAgAAAA==`)
+// - `slice_boc_hex`: Hex-encoded slice BOC (e.g., `b5ee9c72...`).
+// Ref: #/components/schemas/ExecGetMethodArgType
+type ExecGetMethodArgType string
+
+const (
+	ExecGetMethodArgTypeNan           ExecGetMethodArgType = "nan"
+	ExecGetMethodArgTypeNull          ExecGetMethodArgType = "null"
+	ExecGetMethodArgTypeTinyint       ExecGetMethodArgType = "tinyint"
+	ExecGetMethodArgTypeInt257        ExecGetMethodArgType = "int257"
+	ExecGetMethodArgTypeSlice         ExecGetMethodArgType = "slice"
+	ExecGetMethodArgTypeCellBocBase64 ExecGetMethodArgType = "cell_boc_base64"
+	ExecGetMethodArgTypeSliceBocHex   ExecGetMethodArgType = "slice_boc_hex"
+)
+
+// AllValues returns all ExecGetMethodArgType values.
+func (ExecGetMethodArgType) AllValues() []ExecGetMethodArgType {
+	return []ExecGetMethodArgType{
+		ExecGetMethodArgTypeNan,
+		ExecGetMethodArgTypeNull,
+		ExecGetMethodArgTypeTinyint,
+		ExecGetMethodArgTypeInt257,
+		ExecGetMethodArgTypeSlice,
+		ExecGetMethodArgTypeCellBocBase64,
+		ExecGetMethodArgTypeSliceBocHex,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s ExecGetMethodArgType) MarshalText() ([]byte, error) {
+	switch s {
+	case ExecGetMethodArgTypeNan:
+		return []byte(s), nil
+	case ExecGetMethodArgTypeNull:
+		return []byte(s), nil
+	case ExecGetMethodArgTypeTinyint:
+		return []byte(s), nil
+	case ExecGetMethodArgTypeInt257:
+		return []byte(s), nil
+	case ExecGetMethodArgTypeSlice:
+		return []byte(s), nil
+	case ExecGetMethodArgTypeCellBocBase64:
+		return []byte(s), nil
+	case ExecGetMethodArgTypeSliceBocHex:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *ExecGetMethodArgType) UnmarshalText(data []byte) error {
+	switch ExecGetMethodArgType(data) {
+	case ExecGetMethodArgTypeNan:
+		*s = ExecGetMethodArgTypeNan
+		return nil
+	case ExecGetMethodArgTypeNull:
+		*s = ExecGetMethodArgTypeNull
+		return nil
+	case ExecGetMethodArgTypeTinyint:
+		*s = ExecGetMethodArgTypeTinyint
+		return nil
+	case ExecGetMethodArgTypeInt257:
+		*s = ExecGetMethodArgTypeInt257
+		return nil
+	case ExecGetMethodArgTypeSlice:
+		*s = ExecGetMethodArgTypeSlice
+		return nil
+	case ExecGetMethodArgTypeCellBocBase64:
+		*s = ExecGetMethodArgTypeCellBocBase64
+		return nil
+	case ExecGetMethodArgTypeSliceBocHex:
+		*s = ExecGetMethodArgTypeSliceBocHex
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+type ExecGetMethodWithBodyForBlockchainAccountReq struct {
+	Args []ExecGetMethodArg `json:"args"`
+}
+
+// GetArgs returns the value of Args.
+func (s *ExecGetMethodWithBodyForBlockchainAccountReq) GetArgs() []ExecGetMethodArg {
+	return s.Args
+}
+
+// SetArgs sets the value of Args.
+func (s *ExecGetMethodWithBodyForBlockchainAccountReq) SetArgs(val []ExecGetMethodArg) {
+	s.Args = val
+}
+
 // Ref: #/components/schemas/ExtraCurrency
 type ExtraCurrency struct {
 	Amount  string    `json:"amount"`
@@ -12460,6 +12586,52 @@ func (o OptEncryptedComment) Get() (v EncryptedComment, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptEncryptedComment) Or(d EncryptedComment) EncryptedComment {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptExecGetMethodWithBodyForBlockchainAccountReq returns new OptExecGetMethodWithBodyForBlockchainAccountReq with value set to v.
+func NewOptExecGetMethodWithBodyForBlockchainAccountReq(v ExecGetMethodWithBodyForBlockchainAccountReq) OptExecGetMethodWithBodyForBlockchainAccountReq {
+	return OptExecGetMethodWithBodyForBlockchainAccountReq{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptExecGetMethodWithBodyForBlockchainAccountReq is optional ExecGetMethodWithBodyForBlockchainAccountReq.
+type OptExecGetMethodWithBodyForBlockchainAccountReq struct {
+	Value ExecGetMethodWithBodyForBlockchainAccountReq
+	Set   bool
+}
+
+// IsSet returns true if OptExecGetMethodWithBodyForBlockchainAccountReq was set.
+func (o OptExecGetMethodWithBodyForBlockchainAccountReq) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptExecGetMethodWithBodyForBlockchainAccountReq) Reset() {
+	var v ExecGetMethodWithBodyForBlockchainAccountReq
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptExecGetMethodWithBodyForBlockchainAccountReq) SetTo(v ExecGetMethodWithBodyForBlockchainAccountReq) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptExecGetMethodWithBodyForBlockchainAccountReq) Get() (v ExecGetMethodWithBodyForBlockchainAccountReq, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptExecGetMethodWithBodyForBlockchainAccountReq) Or(d ExecGetMethodWithBodyForBlockchainAccountReq) ExecGetMethodWithBodyForBlockchainAccountReq {
 	if v, ok := o.Get(); ok {
 		return v
 	}

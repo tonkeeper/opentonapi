@@ -438,17 +438,36 @@ paths:
           schema:
             type: array
             description: |-
-              Supported values:
-              "NaN" for NaN type, 
-              "Null" for Null type, 
-              10-base digits for tiny int type (Example: 100500), 
-              0x-prefixed hex digits for int257 (Example: 0xfa01d78381ae32), 
-              all forms of addresses for slice type (Example: 0:6e731f2e28b73539a7f85ac47ca104d5840b229351189977bb6151d36b5e3f5e), 
-              single-root base64-encoded BOC for cell (Example: "te6ccgEBAQEAAgAAAA=="),
-              single-root hex-encoded BOC for slice (Example: b5ee9c72010101010002000000)
+              Array of method arguments in string format. Supported value formats:
+              - "NaN" for Not-a-Number type
+              - "Null" for Null type
+              - Decimal integers for tinyint type (e.g., "100500")
+              - 0x-prefixed hex strings for int257 type (e.g., "0xfa01d78381ae32")
+              - TON blockchain addresses for slice type (e.g., "0:6e731f2e28b73539a7f85ac47ca104d5840b229351189977bb6151d36b5e3f5e")
+              - Base64-encoded BOC for cell type (e.g., "te6ccgEBAQEAAgAAAA==")
+              - Hex-encoded BOC for slice type (e.g., "b5ee9c72010101010002000000")
             items:
               type: string
             example: [ "0:9a33970f617bcd71acf2cd28357c067aa31859c02820d8f01d74c88063a8f4d8" ]
+      responses:
+        '200':
+          description: method execution result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MethodExecutionResult'
+        'default':
+          $ref: '#/components/responses/Error'
+    post:
+      description: Execute get method for account
+      operationId: execGetMethodWithBodyForBlockchainAccount
+      tags:
+        - Blockchain
+      parameters:
+        - $ref: '#/components/parameters/accountIDParameter'
+        - $ref: '#/components/parameters/methodNameParameter'
+      requestBody:
+        $ref: "#/components/requestBodies/ExecGetMethodArgs"
       responses:
         '200':
           description: method execution result
@@ -3363,7 +3382,22 @@ components:
               body:
                 type: string
                 format: cell-base64
-
+    ExecGetMethodArgs:
+      description: >
+        Request body for executing a GET method on a blockchain account via POST.
+        This format allows passing arguments in the request body instead of query parameters,
+        which is especially useful for large or complex input data.
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - args
+            properties:
+              args:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ExecGetMethodArg'
   schemas:
     Error:
       type: object
@@ -7661,8 +7695,38 @@ components:
           example: "17286061481122318000"
           x-js-format: bigint
         payload: { } # free from json
-  
-  
+    ExecGetMethodArgType:
+      type: string
+      description: |
+        Data type of the argument value:
+        - `nan`: Not-a-Number value
+        - `null`: Null value
+        - `tinyint`: Decimal integer (e.g., `100500`)
+        - `int257`: 257-bit integer in hex format with 0x prefix (e.g., `0xfa01d78381ae32`)
+        - `slice`: TON blockchain address (e.g., `0:6e731f2e...`)
+        - `cell_boc_base64`: Base64-encoded cell BOC (Binary Object Code) (e.g., `te6ccgEBAQEAAgAAAA==`)
+        - `slice_boc_hex`: Hex-encoded slice BOC (e.g., `b5ee9c72...`)
+      enum:
+        - "nan"
+        - "null"
+        - "tinyint"
+        - "int257"
+        - "slice"
+        - "cell_boc_base64"
+        - "slice_boc_hex"
+      example: int257
+    ExecGetMethodArg:
+      type: object
+      required:
+        - type
+        - value
+      properties:
+        type:
+          $ref: '#/components/schemas/ExecGetMethodArgType'
+        value:
+          type: string
+          description: String representation of the value according to the specified type
+          example: "0xfa01d78381ae32"
   
   responses:
     Error:
