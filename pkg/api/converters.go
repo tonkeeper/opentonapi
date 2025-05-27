@@ -106,6 +106,11 @@ func anyToJSONRawMap(a any) map[string]jx.Raw { //todo: переписать э�
 	return m
 }
 
+var NoneAccount = oas.AccountAddress{
+	Address: "",
+	Name:    oas.NewOptString("NoneAddr"),
+}
+
 func convertAccountAddress(id tongo.AccountID, book addressBook) oas.AccountAddress {
 	address := oas.AccountAddress{Address: id.ToRaw()}
 	if i, prs := book.GetAddressInfoByAddress(id); prs {

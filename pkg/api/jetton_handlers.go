@@ -216,10 +216,14 @@ func (h *Handler) GetJettonHolders(ctx context.Context, params oas.GetJettonHold
 		Total:     int64(holderCounts[account.ID]),
 	}
 	for _, holder := range holders {
+		owner := NoneAccount
+		if holder.Owner != nil {
+			owner = convertAccountAddress(*holder.Owner, h.addressBook)
+		}
 		results.Addresses = append(results.Addresses, oas.JettonHoldersAddressesItem{
 			Address: holder.Address.ToRaw(),
-			Owner:   convertAccountAddress(holder.Owner, h.addressBook),
 			Balance: holder.Balance.String(),
+			Owner:   owner,
 		})
 	}
 	return &results, nil
