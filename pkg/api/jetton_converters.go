@@ -115,7 +115,7 @@ func (h *Handler) convertJettonOperation(ctx context.Context, op core.JettonOper
 		b = []byte{'{', '}'}
 	}
 	operation := oas.JettonOperation{
-		Operation:       op.Operation,
+		Operation:       oas.JettonOperationOperation(op.Operation),
 		Utime:           op.Utime,
 		Lt:              int64(op.Lt),
 		TransactionHash: op.TxID.Hex(),

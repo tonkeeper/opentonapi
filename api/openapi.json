@@ -3876,6 +3876,11 @@
       "x-js-format": "bigint"
      },
      "operation": {
+      "enum": [
+       "transfer",
+       "mint",
+       "burn"
+      ],
       "example": "transfer",
       "type": "string"
      },

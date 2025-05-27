@@ -7630,6 +7630,7 @@ components:
         operation:
           type: string
           example: "transfer"
+          enum: [ "transfer", "mint", "burn" ]
         utime:
           type: integer
           format: int64

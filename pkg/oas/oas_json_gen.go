@@ -23900,7 +23900,7 @@ func (s *JettonOperation) Encode(e *jx.Encoder) {
 func (s *JettonOperation) encodeFields(e *jx.Encoder) {
 	{
 		e.FieldStart("operation")
-		e.Str(s.Operation)
+		s.Operation.Encode(e)
 	}
 	{
 		e.FieldStart("utime")
@@ -23976,9 +23976,7 @@ func (s *JettonOperation) Decode(d *jx.Decoder) error {
 		case "operation":
 			requiredBitSet[0] |= 1 << 0
 			if err := func() error {
-				v, err := d.Str()
-				s.Operation = string(v)
-				if err != nil {
+				if err := s.Operation.Decode(d); err != nil {
 					return err
 				}
 				return nil
@@ -24151,6 +24149,48 @@ func (s *JettonOperation) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *JettonOperation) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes JettonOperationOperation as json.
+func (s JettonOperationOperation) Encode(e *jx.Encoder) {
+	e.Str(string(s))
+}
+
+// Decode decodes JettonOperationOperation from json.
+func (s *JettonOperationOperation) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode JettonOperationOperation to nil")
+	}
+	v, err := d.StrBytes()
+	if err != nil {
+		return err
+	}
+	// Try to use constant string.
+	switch JettonOperationOperation(v) {
+	case JettonOperationOperationTransfer:
+		*s = JettonOperationOperationTransfer
+	case JettonOperationOperationMint:
+		*s = JettonOperationOperationMint
+	case JettonOperationOperationBurn:
+		*s = JettonOperationOperationBurn
+	default:
+		*s = JettonOperationOperation(v)
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s JettonOperationOperation) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *JettonOperationOperation) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }

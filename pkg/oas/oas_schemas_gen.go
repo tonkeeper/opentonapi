@@ -7824,21 +7824,21 @@ func (s *JettonMintAction) SetJetton(val JettonPreview) {
 
 // Ref: #/components/schemas/JettonOperation
 type JettonOperation struct {
-	Operation       string            `json:"operation"`
-	Utime           int64             `json:"utime"`
-	Lt              int64             `json:"lt"`
-	TransactionHash string            `json:"transaction_hash"`
-	Source          OptAccountAddress `json:"source"`
-	Destination     OptAccountAddress `json:"destination"`
-	Amount          string            `json:"amount"`
-	Jetton          JettonPreview     `json:"jetton"`
-	TraceID         string            `json:"trace_id"`
-	QueryID         string            `json:"query_id"`
-	Payload         jx.Raw            `json:"payload"`
+	Operation       JettonOperationOperation `json:"operation"`
+	Utime           int64                    `json:"utime"`
+	Lt              int64                    `json:"lt"`
+	TransactionHash string                   `json:"transaction_hash"`
+	Source          OptAccountAddress        `json:"source"`
+	Destination     OptAccountAddress        `json:"destination"`
+	Amount          string                   `json:"amount"`
+	Jetton          JettonPreview            `json:"jetton"`
+	TraceID         string                   `json:"trace_id"`
+	QueryID         string                   `json:"query_id"`
+	Payload         jx.Raw                   `json:"payload"`
 }
 
 // GetOperation returns the value of Operation.
-func (s *JettonOperation) GetOperation() string {
+func (s *JettonOperation) GetOperation() JettonOperationOperation {
 	return s.Operation
 }
 
@@ -7893,7 +7893,7 @@ func (s *JettonOperation) GetPayload() jx.Raw {
 }
 
 // SetOperation sets the value of Operation.
-func (s *JettonOperation) SetOperation(val string) {
+func (s *JettonOperation) SetOperation(val JettonOperationOperation) {
 	s.Operation = val
 }
 
@@ -7945,6 +7945,54 @@ func (s *JettonOperation) SetQueryID(val string) {
 // SetPayload sets the value of Payload.
 func (s *JettonOperation) SetPayload(val jx.Raw) {
 	s.Payload = val
+}
+
+type JettonOperationOperation string
+
+const (
+	JettonOperationOperationTransfer JettonOperationOperation = "transfer"
+	JettonOperationOperationMint     JettonOperationOperation = "mint"
+	JettonOperationOperationBurn     JettonOperationOperation = "burn"
+)
+
+// AllValues returns all JettonOperationOperation values.
+func (JettonOperationOperation) AllValues() []JettonOperationOperation {
+	return []JettonOperationOperation{
+		JettonOperationOperationTransfer,
+		JettonOperationOperationMint,
+		JettonOperationOperationBurn,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s JettonOperationOperation) MarshalText() ([]byte, error) {
+	switch s {
+	case JettonOperationOperationTransfer:
+		return []byte(s), nil
+	case JettonOperationOperationMint:
+		return []byte(s), nil
+	case JettonOperationOperationBurn:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *JettonOperationOperation) UnmarshalText(data []byte) error {
+	switch JettonOperationOperation(data) {
+	case JettonOperationOperationTransfer:
+		*s = JettonOperationOperationTransfer
+		return nil
+	case JettonOperationOperationMint:
+		*s = JettonOperationOperationMint
+		return nil
+	case JettonOperationOperationBurn:
+		*s = JettonOperationOperationBurn
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
 }
 
 // Ref: #/components/schemas/JettonOperations
