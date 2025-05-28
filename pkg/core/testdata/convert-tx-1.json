@@ -10,13 +10,14 @@
      "Source": "0:6ccd325a858c379693fae2bcaab1c2906831a4e10a6c3bb44ee8b615bca1d220",
      "Destination": "0:6dcb8357c6bef52b43f0f681d976f5a46068ae195cb95f7a959d25c71b0cac6c",
      "MsgType": "IntMsg",
-     "Hash": "0000000000000000000000000000000000000000000000000000000000000000",
+     "Hash": "ec658106d3196e2ae0a2471ff8a36f9ee304c3b035862f184791f3f1097de72d",
      "SourceExtern": null,
      "DestinationExtern": null,
      "IhrDisabled": true,
      "Bounce": true,
      "Bounced": false,
      "Value": 50000000,
+     "ValueExtra": null,
      "FwdFee": 1341344,
      "IhrFee": 0,
      "ImportFee": 0,
@@ -33,13 +34,14 @@
        "Source": "0:6dcb8357c6bef52b43f0f681d976f5a46068ae195cb95f7a959d25c71b0cac6c",
        "Destination": "0:e185f22dd230150f2a9d6e9d2bf833b5c03d6215bdfd031d2691f8b835dd99de",
        "MsgType": "IntMsg",
-       "Hash": "0000000000000000000000000000000000000000000000000000000000000000",
+       "Hash": "81a3c7682efc9187b59f210432169d34e4f088fa70994b0c6a5f893f6a90d896",
        "SourceExtern": null,
        "DestinationExtern": null,
        "IhrDisabled": true,
        "Bounce": true,
        "Bounced": false,
        "Value": 50000000,
+       "ValueExtra": null,
        "FwdFee": 6756052,
        "IhrFee": 0,
        "ImportFee": 0,
@@ -55,7 +57,11 @@
            "Amount": "100000000000",
            "From": "0:6dcb8357c6bef52b43f0f681d976f5a46068ae195cb95f7a959d25c71b0cac6c",
            "ResponseAddress": "",
-           "ForwardTonAmount": "0"
+           "ForwardTonAmount": "0",
+           "ForwardPayload": {
+             "IsRight": false,
+             "Value": {}
+           }
          }
        }
      }
@@ -102,6 +108,7 @@
      "TotalFees": 3377948
    },
    "BouncePhase": null,
+   "Emulated": false,
    "Aborted": false,
    "Destroyed": false,
    "StorageFee": 126,
