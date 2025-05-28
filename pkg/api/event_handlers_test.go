@@ -4,6 +4,9 @@ import (
 	"context"
 	"encoding/hex"
 	"fmt"
+	"github.com/tonkeeper/opentonapi/pkg/addressbook"
+	"github.com/tonkeeper/opentonapi/pkg/spam"
+	"github.com/tonkeeper/tongo"
 	"net/http"
 	"testing"
 
@@ -79,7 +82,12 @@ func TestHandler_EmulateMessageToAccountEvent(t *testing.T) {
 			require.Nil(t, err)
 			liteStorage, err := litestorage.NewLiteStorage(logger, cli)
 			require.Nil(t, err)
-			h, err := NewHandler(logger, WithStorage(liteStorage), WithExecutor(liteStorage))
+			book := &mockAddressBook{
+				OnGetAddressInfoByAddress: func(a tongo.AccountID) (addressbook.KnownAddress, bool) {
+					return addressbook.KnownAddress{}, false
+				},
+			}
+			h, err := NewHandler(logger, WithStorage(liteStorage), WithExecutor(liteStorage), WithAddressBook(book), WithSpamFilter(spam.NewSpamFilter()))
 			require.Nil(t, err)
 
 			got, err := h.EmulateMessageToAccountEvent(context.Background(), &tt.request, tt.params)
