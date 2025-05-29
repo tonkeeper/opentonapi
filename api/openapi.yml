@@ -2856,6 +2856,11 @@ paths:
         'default':
           $ref: '#/components/responses/Error'
 components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
   parameters:
     masterchainSeqno:
       in: path
@@ -7767,3 +7772,6 @@ components:
               error_code:
                 type: integer
                 format: int64
+
+security:
+  - bearerAuth: []
