@@ -11913,7 +11913,7 @@ func (s *Server) handleGetWalletsByPublicKeyRequest(args [1]string, argsEscaped 
 		return
 	}
 
-	var response *Accounts
+	var response *Wallets
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:          ctx,
@@ -11933,7 +11933,7 @@ func (s *Server) handleGetWalletsByPublicKeyRequest(args [1]string, argsEscaped 
 		type (
 			Request  = struct{}
 			Params   = GetWalletsByPublicKeyParams
-			Response = *Accounts
+			Response = *Wallets
 		)
 		response, err = middleware.HookMiddleware[
 			Request,

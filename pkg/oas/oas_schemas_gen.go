@@ -14524,6 +14524,52 @@ func (o OptValidatorsSet) Or(d ValidatorsSet) ValidatorsSet {
 	return d
 }
 
+// NewOptWalletCurrenciesBalance returns new OptWalletCurrenciesBalance with value set to v.
+func NewOptWalletCurrenciesBalance(v WalletCurrenciesBalance) OptWalletCurrenciesBalance {
+	return OptWalletCurrenciesBalance{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptWalletCurrenciesBalance is optional WalletCurrenciesBalance.
+type OptWalletCurrenciesBalance struct {
+	Value WalletCurrenciesBalance
+	Set   bool
+}
+
+// IsSet returns true if OptWalletCurrenciesBalance was set.
+func (o OptWalletCurrenciesBalance) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptWalletCurrenciesBalance) Reset() {
+	var v WalletCurrenciesBalance
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptWalletCurrenciesBalance) SetTo(v WalletCurrenciesBalance) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptWalletCurrenciesBalance) Get() (v WalletCurrenciesBalance, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptWalletCurrenciesBalance) Or(d WalletCurrenciesBalance) WalletCurrenciesBalance {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptWalletDNS returns new OptWalletDNS with value set to v.
 func NewOptWalletDNS(v WalletDNS) OptWalletDNS {
 	return OptWalletDNS{
@@ -17449,17 +17495,29 @@ func (s *ValueFlowJettonsItem) SetQuantity(val int64) {
 
 // Ref: #/components/schemas/Wallet
 type Wallet struct {
-	Address     string         `json:"address"`
-	Stats       WalletStats    `json:"stats"`
-	Plugins     []WalletPlugin `json:"plugins"`
-	Name        OptString      `json:"name"`
-	Icon        OptString      `json:"icon"`
-	IsSuspended OptBool        `json:"is_suspended"`
+	Address string         `json:"address"`
+	Balance int64          `json:"balance"`
+	Stats   WalletStats    `json:"stats"`
+	Plugins []WalletPlugin `json:"plugins"`
+	Status  AccountStatus  `json:"status"`
+	// {'USD': 1, 'IDR': 1000}.
+	CurrenciesBalance OptWalletCurrenciesBalance `json:"currencies_balance"`
+	// Unix timestamp.
+	LastActivity int64     `json:"last_activity"`
+	Name         OptString `json:"name"`
+	Icon         OptString `json:"icon"`
+	GetMethods   []string  `json:"get_methods"`
+	IsSuspended  OptBool   `json:"is_suspended"`
 }
 
 // GetAddress returns the value of Address.
 func (s *Wallet) GetAddress() string {
 	return s.Address
+}
+
+// GetBalance returns the value of Balance.
+func (s *Wallet) GetBalance() int64 {
+	return s.Balance
 }
 
 // GetStats returns the value of Stats.
@@ -17472,6 +17530,21 @@ func (s *Wallet) GetPlugins() []WalletPlugin {
 	return s.Plugins
 }
 
+// GetStatus returns the value of Status.
+func (s *Wallet) GetStatus() AccountStatus {
+	return s.Status
+}
+
+// GetCurrenciesBalance returns the value of CurrenciesBalance.
+func (s *Wallet) GetCurrenciesBalance() OptWalletCurrenciesBalance {
+	return s.CurrenciesBalance
+}
+
+// GetLastActivity returns the value of LastActivity.
+func (s *Wallet) GetLastActivity() int64 {
+	return s.LastActivity
+}
+
 // GetName returns the value of Name.
 func (s *Wallet) GetName() OptString {
 	return s.Name
@@ -17480,6 +17553,11 @@ func (s *Wallet) GetName() OptString {
 // GetIcon returns the value of Icon.
 func (s *Wallet) GetIcon() OptString {
 	return s.Icon
+}
+
+// GetGetMethods returns the value of GetMethods.
+func (s *Wallet) GetGetMethods() []string {
+	return s.GetMethods
 }
 
 // GetIsSuspended returns the value of IsSuspended.
@@ -17492,6 +17570,11 @@ func (s *Wallet) SetAddress(val string) {
 	s.Address = val
 }
 
+// SetBalance sets the value of Balance.
+func (s *Wallet) SetBalance(val int64) {
+	s.Balance = val
+}
+
 // SetStats sets the value of Stats.
 func (s *Wallet) SetStats(val WalletStats) {
 	s.Stats = val
@@ -17500,6 +17583,21 @@ func (s *Wallet) SetStats(val WalletStats) {
 // SetPlugins sets the value of Plugins.
 func (s *Wallet) SetPlugins(val []WalletPlugin) {
 	s.Plugins = val
+}
+
+// SetStatus sets the value of Status.
+func (s *Wallet) SetStatus(val AccountStatus) {
+	s.Status = val
+}
+
+// SetCurrenciesBalance sets the value of CurrenciesBalance.
+func (s *Wallet) SetCurrenciesBalance(val OptWalletCurrenciesBalance) {
+	s.CurrenciesBalance = val
+}
+
+// SetLastActivity sets the value of LastActivity.
+func (s *Wallet) SetLastActivity(val int64) {
+	s.LastActivity = val
 }
 
 // SetName sets the value of Name.
@@ -17512,9 +17610,26 @@ func (s *Wallet) SetIcon(val OptString) {
 	s.Icon = val
 }
 
+// SetGetMethods sets the value of GetMethods.
+func (s *Wallet) SetGetMethods(val []string) {
+	s.GetMethods = val
+}
+
 // SetIsSuspended sets the value of IsSuspended.
 func (s *Wallet) SetIsSuspended(val OptBool) {
 	s.IsSuspended = val
+}
+
+// {'USD': 1, 'IDR': 1000}.
+type WalletCurrenciesBalance map[string]jx.Raw
+
+func (s *WalletCurrenciesBalance) init() WalletCurrenciesBalance {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
 }
 
 // Ref: #/components/schemas/WalletDNS
@@ -17615,16 +17730,10 @@ func (s *WalletPlugin) SetType(val string) {
 
 // Ref: #/components/schemas/WalletStats
 type WalletStats struct {
-	TonBalance    int64 `json:"ton_balance"`
 	NftsCount     int32 `json:"nfts_count"`
 	JettonsCount  int32 `json:"jettons_count"`
 	MultisigCount int32 `json:"multisig_count"`
 	StakingCount  int32 `json:"staking_count"`
-}
-
-// GetTonBalance returns the value of TonBalance.
-func (s *WalletStats) GetTonBalance() int64 {
-	return s.TonBalance
 }
 
 // GetNftsCount returns the value of NftsCount.
@@ -17647,11 +17756,6 @@ func (s *WalletStats) GetStakingCount() int32 {
 	return s.StakingCount
 }
 
-// SetTonBalance sets the value of TonBalance.
-func (s *WalletStats) SetTonBalance(val int64) {
-	s.TonBalance = val
-}
-
 // SetNftsCount sets the value of NftsCount.
 func (s *WalletStats) SetNftsCount(val int32) {
 	s.NftsCount = val
@@ -17670,6 +17774,21 @@ func (s *WalletStats) SetMultisigCount(val int32) {
 // SetStakingCount sets the value of StakingCount.
 func (s *WalletStats) SetStakingCount(val int32) {
 	s.StakingCount = val
+}
+
+// Ref: #/components/schemas/Wallets
+type Wallets struct {
+	Wallets []Wallet `json:"wallets"`
+}
+
+// GetWallets returns the value of Wallets.
+func (s *Wallets) GetWallets() []Wallet {
+	return s.Wallets
+}
+
+// SetWallets sets the value of Wallets.
+func (s *Wallets) SetWallets(val []Wallet) {
+	s.Wallets = val
 }
 
 // Validator's participation in elections.
