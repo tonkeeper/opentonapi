@@ -134,3 +134,38 @@ func convertToAccount(account *core.Account, ab *addressbook.KnownAddress, state
 	acc.MemoRequired = oas.NewOptBool(ab.RequireMemo)
 	return acc
 }
+
+func convertToWallet(account *core.Account, ab *addressbook.KnownAddress, state chainState, stats core.AccountStat, plugins []core.Plugin) oas.Wallet {
+	wallet := oas.Wallet{
+		Address:      account.AccountAddress.ToRaw(),
+		Balance:      account.TonBalance,
+		LastActivity: account.LastActivityTime,
+		Status:       oas.AccountStatus(account.Status),
+		GetMethods:   account.GetMethods,
+		Stats: oas.WalletStats{
+			NftsCount:     stats.NftsCount,
+			JettonsCount:  stats.JettonsCount,
+			MultisigCount: stats.MultisigCount,
+			StakingCount:  stats.StakingCount,
+		},
+	}
+	for _, plugin := range plugins {
+		wallet.Plugins = append(wallet.Plugins, oas.WalletPlugin{
+			Address: plugin.AccountID.ToRaw(),
+			Type:    plugin.Type,
+		})
+	}
+	if state.CheckIsSuspended(account.AccountAddress) {
+		wallet.IsSuspended.SetTo(true)
+	}
+	if ab == nil {
+		return wallet
+	}
+	if len(ab.Name) > 0 {
+		wallet.Name = oas.NewOptString(ab.Name)
+	}
+	if len(ab.Image) > 0 {
+		wallet.Icon = oas.NewOptString(imgGenerator.DefaultGenerator.GenerateImageUrl(ab.Image, 200, 200))
+	}
+	return wallet
+}

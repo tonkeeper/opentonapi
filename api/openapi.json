@@ -6328,12 +6328,39 @@
       "format": "address",
       "type": "string"
      },
+     "balance": {
+      "example": 123456789,
+      "format": "int64",
+      "type": "integer",
+      "x-js-format": "bigint"
+     },
+     "currencies_balance": {
+      "additionalProperties": true,
+      "description": "{'USD': 1, 'IDR': 1000}",
+      "example": {},
+      "type": "object"
+     },
+     "get_methods": {
+      "example": [
+       "get_item_data"
+      ],
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
      "icon": {
       "example": "https://ton.org/logo.png",
       "type": "string"
      },
      "is_suspended": {
       "type": "boolean"
+     },
+     "last_activity": {
+      "description": "unix timestamp",
+      "example": 1720860269,
+      "format": "int64",
+      "type": "integer"
      },
      "name": {
       "example": "Ton foundation",
@@ -6347,12 +6374,19 @@
      },
      "stats": {
       "$ref": "#/components/schemas/WalletStats"
+     },
+     "status": {
+      "$ref": "#/components/schemas/AccountStatus"
      }
     },
     "required": [
      "address",
+     "balance",
+     "stats",
      "plugins",
-     "stats"
+     "status",
+     "last_activity",
+     "get_methods"
     ],
     "type": "object"
    },
@@ -6435,20 +6469,27 @@
       "example": 123456789,
       "format": "int32",
       "type": "integer"
-     },
-     "ton_balance": {
-      "example": 123456789,
-      "format": "int64",
-      "type": "integer",
-      "x-js-format": "bigint"
      }
     },
     "required": [
-     "ton_balance",
      "nfts_count",
      "jettons_count",
      "multisig_count",
      "staking_count"
+    ],
+    "type": "object"
+   },
+   "Wallets": {
+    "properties": {
+     "wallets": {
+      "items": {
+       "$ref": "#/components/schemas/Wallet"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "wallets"
     ],
     "type": "object"
    },
@@ -10293,7 +10334,7 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/Accounts"
+         "$ref": "#/components/schemas/Wallets"
         }
        }
       },

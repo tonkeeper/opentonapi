@@ -2064,7 +2064,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Accounts'
+                $ref: '#/components/schemas/Wallets'
         'default':
           $ref: '#/components/responses/Error'
 
@@ -4655,17 +4655,11 @@ components:
     WalletStats:
       type: object
       required:
-        - ton_balance
         - nfts_count
         - jettons_count
         - multisig_count
         - staking_count
       properties:
-        ton_balance:
-          type: integer
-          format: int64
-          example: 123456789
-          x-js-format: bigint
         nfts_count:
           type: integer
           format: int32
@@ -4695,29 +4689,59 @@ components:
         type:
           type: string
           example: "subscription_v1"
+    Wallets:
+      type: object
+      required:
+        - wallets
+      properties:
+        wallets:
+          type: array
+          items:
+            $ref: '#/components/schemas/Wallet'
     Wallet:
       type: object
       required:
         - address
-        - plugins
+        - balance
         - stats
+        - plugins
+        - status
+        - last_activity
+        - get_methods
       properties:
         address:
           type: string
           format: address
           example: 0:da6b1b6663a0e4d18cc8574ccd9db5296e367dd9324706f3bbd9eb1cd2caf0bf
+        balance:
+          type: integer
+          format: int64
+          example: 123456789
+          x-js-format: bigint
         stats:
           $ref: '#/components/schemas/WalletStats'
         plugins:
           type: array
           items:
             $ref: '#/components/schemas/WalletPlugin'
+        status:
+          '$ref': '#/components/schemas/AccountStatus'
+        last_activity:
+          type: integer
+          description: unix timestamp
+          format: int64
+          example: 1720860269
         name:
           type: string
           example: "Ton foundation"
         icon:
           type: string
           example: "https://ton.org/logo.png"
+        get_methods:
+          type: array
+          items:
+            type: string
+          example: [ 'get_item_data' ]
         is_suspended:
           type: boolean
     Account:

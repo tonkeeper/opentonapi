@@ -929,7 +929,7 @@ func (UnimplementedHandler) GetWalletInfo(ctx context.Context, params GetWalletI
 // Get wallets by public key.
 //
 // GET /v2/pubkeys/{public_key}/wallets
-func (UnimplementedHandler) GetWalletsByPublicKey(ctx context.Context, params GetWalletsByPublicKeyParams) (r *Accounts, _ error) {
+func (UnimplementedHandler) GetWalletsByPublicKey(ctx context.Context, params GetWalletsByPublicKeyParams) (r *Wallets, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
