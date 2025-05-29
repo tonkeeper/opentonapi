@@ -118,6 +118,7 @@ func (h *Handler) GetWalletInfo(ctx context.Context, params oas.GetWalletInfoPar
 
 func (h *Handler) processWallet(ctx context.Context, account *core.Account) (*oas.Wallet, error, int) {
 	supported := map[abi.ContractInterface]struct{}{
+		abi.WalletV3R1: {}, abi.WalletV3R2: {},
 		abi.WalletV4R1: {}, abi.WalletV4R2: {},
 		abi.WalletV5Beta: {}, abi.WalletV5R1: {},
 	}
