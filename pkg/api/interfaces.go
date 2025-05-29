@@ -116,6 +116,8 @@ type storage interface {
 	SaveTraceWithState(ctx context.Context, msgHash string, trace *core.Trace, version int, getMethods []abi.MethodInvocation, ttl time.Duration) error
 	GetTraceWithState(ctx context.Context, msgHash string) (*core.Trace, int, []abi.MethodInvocation, error)
 
+	GetAccountInvoicesHistory(ctx context.Context, address tongo.AccountID, limit int, beforeLT *int64) ([]core.InvoicePayment, error)
+
 	liteStorageRaw
 }
 
