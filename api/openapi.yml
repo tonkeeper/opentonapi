@@ -7398,14 +7398,15 @@ components:
                 $ref: '#/components/schemas/NftItem'
     ChartPoints:
       type: array
-      items:
+      prefixItems:
         - type: integer
           format: int64
           description: Unix timestamp of the data point
         - type: number
           description: Decimal price of the token in the requested currency
+      items: false
       additionalItems: false
-      example: [ 1668436763, 97.21323234 ]
+      example: [[ 1668436763, 97.21323234 ]]
     AccountInfoByStateInit:
       type: object
       required:
