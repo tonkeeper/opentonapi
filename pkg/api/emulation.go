@@ -207,6 +207,12 @@ func EmulatedTreeToTrace(
 		Transaction: tree.TX,
 		BlockID:     tongo.BlockIDExt{BlockID: tongo.BlockID{Workchain: int32(a.AddrStd.WorkchainId)}},
 	}, nil)
+	if err != nil {
+		return nil, err
+	}
+	if transaction == nil {
+		return nil, errors.New("converted transaction is nil")
+	}
 	filteredMsgs := make([]core.Message, 0, len(transaction.OutMsgs))
 	for _, msg := range transaction.OutMsgs {
 		if msg.Destination == nil {
