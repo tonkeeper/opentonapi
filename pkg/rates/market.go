@@ -34,6 +34,15 @@ const (
 	coinbase string = "Coinbase"
 )
 
+type Invariant int
+
+// List of available pools' invariants
+const (
+	XYInv        Invariant = iota
+	X3YInv       Invariant = iota
+	IterativeInv Invariant = iota
+)
+
 // defaultMinReserve specifies the minimum jetton reserves (equivalent to TON) for which prices can be determined
 const defaultMinReserve = float64(100 * ton.OneTON)
 
@@ -51,10 +60,11 @@ type Asset struct {
 	HoldersCount int
 }
 
-// Assets represents a collection of assets in a pool
-type Assets struct {
-	Assets   []Asset
-	IsStable bool
+// Pool represents a collection of assets in a pool
+type Pool struct {
+	Assets    []Asset
+	Invariant Invariant // Pool's invariant (x*y, x^3*y + x*y^3 etc.)
+	Amp       float64   // Additional parameter for stable swap (iterative) pool invariant
 }
 
 // LpAsset represents a liquidity provider asset that holds a collection of assets in a pool
@@ -75,7 +85,7 @@ type Market struct {
 	// Converter for calculating fiat prices
 	FiatPriceConverter func(respBody []byte) (map[string]float64, error)
 	// Converter for calculating jetton prices within pools
-	PoolResponseConverter func(respBody []byte) ([]Assets, []LpAsset, error)
+	PoolResponseConverter func(respBody []byte) ([]Pool, []LpAsset, error)
 	DateUpdate            time.Time
 }
 
@@ -332,8 +342,8 @@ func convertedCoinBaseFiatPricesResponse(respBody []byte) (map[string]float64, e
 }
 
 // sortAssetPairs sorts asset pairs by reserve for a given account.
-func sortAssetPairs(assetPairs map[ton.AccountID][]Assets) map[ton.AccountID][]Assets {
-	sortReserve := func(accountID ton.AccountID, item Assets) float64 {
+func sortAssetPairs(assetPairs map[ton.AccountID][]Pool) map[ton.AccountID][]Pool {
+	sortReserve := func(accountID ton.AccountID, item Pool) float64 {
 		for _, asset := range item.Assets {
 			if asset.Account == accountID {
 				return asset.Reserve
@@ -370,7 +380,7 @@ func (m *Mock) getJettonPricesFromDex(pools map[ton.AccountID]float64) map[ton.A
 			PoolResponseConverter: convertedStonFiPoolResponse,
 		},
 	}
-	var actualAssets []Assets
+	var actualAssets []Pool
 	var actualLpAssets []LpAsset
 	// Fetch and parse pool data from each market
 	for _, market := range markets {
@@ -391,7 +401,7 @@ func (m *Mock) getJettonPricesFromDex(pools map[ton.AccountID]float64) map[ton.A
 		actualLpAssets = append(actualLpAssets, lpAssets...)
 	}
 	// Map accounts to their participating pools
-	assetPairs := make(map[ton.AccountID][]Assets)
+	assetPairs := make(map[ton.AccountID][]Pool)
 	for _, assets := range actualAssets {
 		firstAsset, secondAsset := assets.Assets[0], assets.Assets[1]
 		assetPairs[firstAsset.Account] = append(assetPairs[firstAsset.Account], assets)
@@ -403,7 +413,7 @@ func (m *Mock) getJettonPricesFromDex(pools map[ton.AccountID]float64) map[ton.A
 	for attempt := 0; attempt < 3; attempt++ {
 		for _, assets := range assetPairs {
 			for _, asset := range assets {
-				accountID, price := calculatePoolPrice(asset.Assets[0], asset.Assets[1], pools, asset.IsStable)
+				accountID, price := calculatePoolPrice(asset.Assets[0], asset.Assets[1], pools, asset.Invariant, asset.Amp)
 				if price == 0 {
 					continue
 				}
@@ -429,34 +439,34 @@ func (m *Mock) getJettonPricesFromDex(pools map[ton.AccountID]float64) map[ton.A
 	return pools
 }
 
-func convertedStonFiPoolResponse(respBody []byte) ([]Assets, []LpAsset, error) {
+func convertedStonFiPoolResponse(respBody []byte) ([]Pool, []LpAsset, error) {
 	reader := csv.NewReader(bytes.NewReader(respBody))
 	records, err := reader.ReadAll()
 	if err != nil {
 		return nil, nil, err
 	}
-	parseAssets := func(record []string) (Assets, error) {
+	parseAssets := func(record []string) (Pool, error) {
 		var firstAsset, secondAsset Asset
 		firstAsset.Account, err = ton.ParseAccountID(record[0])
 		if err != nil {
-			return Assets{}, err
+			return Pool{}, err
 		}
 		secondAsset.Account, err = ton.ParseAccountID(record[1])
 		if err != nil {
-			return Assets{}, err
+			return Pool{}, err
 		}
 		firstAsset.Reserve, err = strconv.ParseFloat(record[2], 64)
 		if err != nil {
-			return Assets{}, err
+			return Pool{}, err
 		}
 		secondAsset.Reserve, err = strconv.ParseFloat(record[3], 64)
 		if err != nil {
-			return Assets{}, err
+			return Pool{}, err
 		}
 		firstMeta := make(map[string]any)
 		if record[4] != "NULL" {
 			if err = json.Unmarshal([]byte(record[4]), &firstMeta); err != nil {
-				return Assets{}, err
+				return Pool{}, err
 			}
 		}
 		value, ok := firstMeta["decimals"]
@@ -465,12 +475,12 @@ func convertedStonFiPoolResponse(respBody []byte) ([]Assets, []LpAsset, error) {
 		}
 		firstAsset.Decimals, err = strconv.Atoi(value.(string))
 		if err != nil {
-			return Assets{}, err
+			return Pool{}, err
 		}
 		secondMeta := make(map[string]any)
 		if record[5] != "NULL" {
 			if err = json.Unmarshal([]byte(record[5]), &secondMeta); err != nil {
-				return Assets{}, err
+				return Pool{}, err
 			}
 		}
 		value, ok = secondMeta["decimals"]
@@ -479,17 +489,17 @@ func convertedStonFiPoolResponse(respBody []byte) ([]Assets, []LpAsset, error) {
 		}
 		secondAsset.Decimals, err = strconv.Atoi(value.(string))
 		if err != nil {
-			return Assets{}, err
+			return Pool{}, err
 		}
 		firstAsset.HoldersCount, err = strconv.Atoi(record[6])
 		if err != nil {
-			return Assets{}, err
+			return Pool{}, err
 		}
 		secondAsset.HoldersCount, err = strconv.Atoi(record[7])
 		if err != nil {
-			return Assets{}, err
+			return Pool{}, err
 		}
-		return Assets{Assets: []Asset{firstAsset, secondAsset}}, nil
+		return Pool{Assets: []Asset{firstAsset, secondAsset}}, nil
 	}
 	parseLpAsset := func(record []string, firstAsset, secondAsset Asset) (LpAsset, error) {
 		lpAsset, err := ton.ParseAccountID(record[8])
@@ -514,7 +524,7 @@ func convertedStonFiPoolResponse(respBody []byte) ([]Assets, []LpAsset, error) {
 			Assets:      []Asset{firstAsset, secondAsset},
 		}, nil
 	}
-	var actualAssets []Assets
+	var actualAssets []Pool
 	actualLpAssets := make(map[ton.AccountID]LpAsset)
 	for idx, record := range records {
 		if idx == 0 || len(record) < 10 { // Skip headers
@@ -546,7 +556,7 @@ func convertedStonFiPoolResponse(respBody []byte) ([]Assets, []LpAsset, error) {
 	return actualAssets, maps.Values(actualLpAssets), nil
 }
 
-func convertedDeDustPoolResponse(respBody []byte) ([]Assets, []LpAsset, error) {
+func convertedDeDustPoolResponse(respBody []byte) ([]Pool, []LpAsset, error) {
 	reader := csv.NewReader(bytes.NewReader(respBody))
 	records, err := reader.ReadAll()
 	if err != nil {
@@ -570,7 +580,7 @@ func convertedDeDustPoolResponse(respBody []byte) ([]Assets, []LpAsset, error) {
 		}
 		return decimals, nil
 	}
-	parseAssets := func(record []string) (Assets, error) {
+	parseAssets := func(record []string) (Pool, error) {
 		var firstAsset, secondAsset Asset
 		switch {
 		// If the column first_asset has no address and the column first_asset_native contains true,
@@ -579,7 +589,7 @@ func convertedDeDustPoolResponse(respBody []byte) ([]Assets, []LpAsset, error) {
 			firstAsset = Asset{Account: references.PTonV1}
 			secondAccountID, err := ton.ParseAccountID(record[1])
 			if err != nil {
-				return Assets{}, err
+				return Pool{}, err
 			}
 			secondAsset = Asset{Account: secondAccountID}
 			// If the column second_asset has no address and the column second_asset_native contains true,
@@ -587,7 +597,7 @@ func convertedDeDustPoolResponse(respBody []byte) ([]Assets, []LpAsset, error) {
 		case record[1] == "NULL" && record[3] != "true":
 			firstAccountID, err := ton.ParseAccountID(record[0])
 			if err != nil {
-				return Assets{}, err
+				return Pool{}, err
 			}
 			firstAsset = Asset{Account: firstAccountID}
 			secondAsset = Asset{Account: references.PTonV1}
@@ -596,44 +606,44 @@ func convertedDeDustPoolResponse(respBody []byte) ([]Assets, []LpAsset, error) {
 			// This could be a pair like a jetton to USDT or to other jettons
 			firstAccountID, err := ton.ParseAccountID(record[0])
 			if err != nil {
-				return Assets{}, err
+				return Pool{}, err
 			}
 			firstAsset = Asset{Account: firstAccountID}
 			secondAccountID, err := ton.ParseAccountID(record[1])
 			if err != nil {
-				return Assets{}, err
+				return Pool{}, err
 			}
 			secondAsset = Asset{Account: secondAccountID}
 		}
 		firstAsset.Reserve, err = strconv.ParseFloat(record[4], 64)
 		if err != nil {
-			return Assets{}, err
+			return Pool{}, err
 		}
 		secondAsset.Reserve, err = strconv.ParseFloat(record[5], 64)
 		if err != nil {
-			return Assets{}, err
+			return Pool{}, err
 		}
 		firstAsset.Decimals, err = parseDecimals(record[6])
 		if err != nil {
-			return Assets{}, err
+			return Pool{}, err
 		}
 		secondAsset.Decimals, err = parseDecimals(record[7])
 		if err != nil {
-			return Assets{}, err
+			return Pool{}, err
 		}
-		var isStable bool
+		invType := XYInv
 		if record[8] == "true" {
-			isStable = true
+			invType = X3YInv
 		}
 		firstAsset.HoldersCount, err = strconv.Atoi(record[9])
 		if err != nil {
-			return Assets{}, err
+			return Pool{}, err
 		}
 		secondAsset.HoldersCount, err = strconv.Atoi(record[10])
 		if err != nil {
-			return Assets{}, err
+			return Pool{}, err
 		}
-		return Assets{Assets: []Asset{firstAsset, secondAsset}, IsStable: isStable}, nil
+		return Pool{Assets: []Asset{firstAsset, secondAsset}, Invariant: invType}, nil
 	}
 	parseLpAsset := func(record []string, firstAsset, secondAsset Asset) (LpAsset, error) {
 		lpAsset, err := ton.ParseAccountID(record[11])
@@ -658,7 +668,7 @@ func convertedDeDustPoolResponse(respBody []byte) ([]Assets, []LpAsset, error) {
 			Assets:      []Asset{firstAsset, secondAsset},
 		}, nil
 	}
-	var actualAssets []Assets
+	var actualAssets []Pool
 	actualLpAssets := make(map[ton.AccountID]LpAsset)
 	for idx, record := range records {
 		if idx == 0 || len(record) < 14 { // Skip headers
@@ -721,7 +731,7 @@ func calculateLpAssetPrice(asset LpAsset, pools map[ton.AccountID]float64) float
 	return convertedPrice
 }
 
-func calculatePoolPrice(firstAsset, secondAsset Asset, pools map[ton.AccountID]float64, isStable bool) (ton.AccountID, float64) {
+func calculatePoolPrice(firstAsset, secondAsset Asset, pools map[ton.AccountID]float64, poolType Invariant, amp float64) (ton.AccountID, float64) {
 	priceFirst, okFirst := pools[firstAsset.Account]
 	priceSecond, okSecond := pools[secondAsset.Account]
 	if (okFirst && okSecond) || (!okFirst && !okSecond) {
@@ -776,12 +786,29 @@ func calculatePoolPrice(firstAsset, secondAsset Asset, pools map[ton.AccountID]f
 		return ton.AccountID{}, 0
 	}
 	var price float64
-	if isStable {
+	switch poolType {
+	case XYInv:
+		price = (firstAsset.Reserve / secondAsset.Reserve) * math.Pow(10, float64(secondAssetDecimals)-float64(firstAssetDecimals))
+	case X3YInv:
 		x := secondAsset.Reserve / math.Pow(10, float64(secondAssetDecimals))
 		y := firstAsset.Reserve / math.Pow(10, float64(firstAssetDecimals))
 		price = (3*x*x*y + y*y*y) / (x*x*x + 3*y*y*x)
-	} else {
-		price = (firstAsset.Reserve / secondAsset.Reserve) * math.Pow(10, float64(secondAssetDecimals)-float64(firstAssetDecimals))
+	case IterativeInv:
+		x := secondAsset.Reserve
+		y := firstAsset.Reserve
+		decimalsDiff := float64(firstAssetDecimals - secondAssetDecimals)
+		if decimalsDiff >= 0 {
+			x *= math.Pow(10, decimalsDiff)
+		} else {
+			y *= math.Pow(10, -decimalsDiff)
+		}
+		inv := getInvariantForStableSwap(amp, x, y)
+		dx := x / 1000
+		dy := y - getOutTokensForStableSwap(amp, x+dx, y, inv)
+		price = dy / dx
+	default:
+		// Unreachable
+		return ton.AccountID{}, 0
 	}
 	if okFirst && firstAsset.Decimals != defaultDecimals {
 		price *= priceFirst
