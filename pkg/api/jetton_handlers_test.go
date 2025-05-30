@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"github.com/tonkeeper/opentonapi/pkg/addressbook"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -37,7 +38,12 @@ func TestHandler_GetJettonsBalances(t *testing.T) {
 				tongo.MustParseAddress("0:274b605badfcecca83130b27cd375e6a73233f6e15d782a31dd2a80aff097cc0").ID, // fake jUSDT (with cyrillic T)
 			}))
 			require.Nil(t, err)
-			h, err := NewHandler(logger, WithStorage(liteStorage), WithExecutor(liteStorage))
+			book := &mockAddressBook{
+				OnGetAddressInfoByAddress: func(a tongo.AccountID) (addressbook.KnownAddress, bool) {
+					return addressbook.KnownAddress{}, false
+				},
+			}
+			h, err := NewHandler(logger, WithStorage(liteStorage), WithExecutor(liteStorage), WithAddressBook(book))
 			require.Nil(t, err)
 			res, err := h.GetAccountJettonsBalances(context.Background(), tt.params)
 			require.Nil(t, err)

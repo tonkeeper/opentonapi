@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"github.com/tonkeeper/opentonapi/pkg/spam"
 	"testing"
 
 	"github.com/tonkeeper/opentonapi/pkg/chainstate"
@@ -13,7 +14,6 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/tonkeeper/opentonapi/pkg/addressbook"
-	"github.com/tonkeeper/opentonapi/pkg/config"
 	"github.com/tonkeeper/opentonapi/pkg/litestorage"
 	"github.com/tonkeeper/opentonapi/pkg/oas"
 )
@@ -61,7 +61,12 @@ func TestHandler_GetRawAccount(t *testing.T) {
 			require.Nil(t, err)
 			liteStorage, err := litestorage.NewLiteStorage(logger, cli)
 			require.Nil(t, err)
-			h, err := NewHandler(logger, WithStorage(liteStorage), WithExecutor(liteStorage))
+			book := &mockAddressBook{
+				OnGetAddressInfoByAddress: func(a tongo.AccountID) (addressbook.KnownAddress, bool) {
+					return addressbook.KnownAddress{}, false
+				},
+			}
+			h, err := NewHandler(logger, WithStorage(liteStorage), WithExecutor(liteStorage), WithAddressBook(book))
 			require.Nil(t, err)
 			account, err := h.GetBlockchainRawAccount(context.Background(), tt.params)
 			require.Nil(t, err)
@@ -94,7 +99,12 @@ func TestHandler_GetAccount(t *testing.T) {
 			require.Nil(t, err)
 			liteStorage, err := litestorage.NewLiteStorage(logger, cli)
 			require.Nil(t, err)
-			h, err := NewHandler(logger, WithStorage(liteStorage), WithExecutor(liteStorage))
+			book := &mockAddressBook{
+				OnGetAddressInfoByAddress: func(a tongo.AccountID) (addressbook.KnownAddress, bool) {
+					return addressbook.KnownAddress{}, false
+				},
+			}
+			h, err := NewHandler(logger, WithStorage(liteStorage), WithExecutor(liteStorage), WithAddressBook(book), WithSpamFilter(spam.NewSpamFilter()))
 			require.Nil(t, err)
 			accountRes, err := h.GetAccount(context.Background(), tt.params)
 			require.Nil(t, err)
@@ -158,10 +168,34 @@ func TestHandler_GetAccounts(t *testing.T) {
 			require.Nil(t, err)
 			liteStorage, err := litestorage.NewLiteStorage(logger, cli)
 			require.Nil(t, err)
+			book := &mockAddressBook{
+				OnGetAddressInfoByAddress: func(a tongo.AccountID) (addressbook.KnownAddress, bool) {
+					switch a.ToRaw() {
+					case "-1:3333333333333333333333333333333333333333333333333333333333333333":
+						return addressbook.KnownAddress{
+							Name:    "Elector Contract",
+							Address: "-1:3333333333333333333333333333333333333333333333333333333333333333",
+						}, true
+					case "-1:5555555555555555555555555555555555555555555555555555555555555555":
+						return addressbook.KnownAddress{
+							Name:    "Config Contract",
+							Address: "-1:5555555555555555555555555555555555555555555555555555555555555555",
+						}, true
+					case "0:a3935861f79daf59a13d6d182e1640210c02f98e3df18fda74b8f5ab141abf18":
+						return addressbook.KnownAddress{
+							Name:    "Getgems Marketplace",
+							Address: "0:a3935861f79daf59a13d6d182e1640210c02f98e3df18fda74b8f5ab141abf18",
+						}, true
+					default:
+						return addressbook.KnownAddress{}, false
+					}
+				},
+			}
 			h := &Handler{
-				addressBook: addressbook.NewAddressBook(logger, config.AddressPath, config.JettonPath, config.CollectionPath, liteStorage),
+				addressBook: book,
 				storage:     liteStorage,
 				state:       chainstate.NewChainState(liteStorage),
+				spamFilter:  spam.NewSpamFilter(),
 				limits: Limits{
 					BulkLimits: 4,
 				},
