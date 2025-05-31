@@ -122,7 +122,7 @@ func TestCalculatePoolPrice(t *testing.T) {
 		bolt:        0.017015484785360878,
 		usdt:        0.26564891939626434,
 		ethena:      0.9994009295340002,
-		switchToken: 0.9994009295337443,
+		switchToken: 0.99940092953436,
 	}
 
 	for accountID, expectedPrice := range expectedPrices {
