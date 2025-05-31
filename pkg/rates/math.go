@@ -16,14 +16,14 @@ func getInvariantForStableSwap(amp, x, y float64) float64 {
 	for range 255 {
 		dP := inv
 
-		dP *= inv / (x * 2)
-		dP *= inv / (y * 2)
+		dP = dP * inv / (x * 2) // use 'dp * ...' instead of '*=' because the first one seems more accurate
+		dP = dP * inv / (y * 2)
 
 		invPrev = inv
 		firstTerm := amp*sum + dP*2
 		secondTerm := (amp-1)*inv + dP*3
 
-		inv *= firstTerm / secondTerm
+		inv = (inv * firstTerm) / secondTerm
 
 		if math.Abs(inv-invPrev) <= 1 {
 			return inv
@@ -36,7 +36,7 @@ func getInvariantForStableSwap(amp, x, y float64) float64 {
 func getOutTokensForStableSwap(amp, x, y, inv float64) float64 {
 	sum := x
 	pD := x * 2
-	pD *= (y * 2) / inv
+	pD = (pD * (y * 2)) / inv
 	sum += y
 
 	sum -= y
