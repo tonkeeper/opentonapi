@@ -30,7 +30,11 @@ func getInvariantForStableSwap(amp, x, y float64) float64 {
 		}
 	}
 
-	return 0
+	// Reaching this part means not converge
+	// There params can cause it: amp = 1, x = 1, y > 6e103
+	// But it's actually impossible
+
+	return 0 // 0 means incorrect pool
 }
 
 func getOutTokensForStableSwap(amp, x, y, inv float64) float64 {
@@ -57,5 +61,9 @@ func getOutTokensForStableSwap(amp, x, y, inv float64) float64 {
 		}
 	}
 
-	return 0
+	// Reaching this part means not converge
+	// There params can cause it: amp = 1, x = 1, y > 6e103
+	// But it's actually impossible
+
+	return 0 // 0 means incorrect pool
 }
