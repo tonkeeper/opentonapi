@@ -13,7 +13,8 @@
          "symbol": "KINGY",
          "decimals": 9,
          "image": "https://i.ibb.co/FbTCKRP/logotokenkingy.png",
-         "verification": "none"
+         "verification": "none",
+         "score": 0
        }
      },
      {
@@ -29,7 +30,8 @@
          "symbol": "LAVE",
          "decimals": 9,
          "image": "https://i.ibb.co/Bj5KqK4/IMG-20221213-115545-207.png",
-         "verification": "none"
+         "verification": "none",
+         "score": 0
        }
      },
      {
@@ -45,7 +47,8 @@
          "symbol": "jUSDТ",
          "decimals": 9,
          "image": "https://raw.githubusercontent.com/tonkeeper/opentonapi/master/pkg/references/media/token_placeholder.png",
-         "verification": "none"
+         "verification": "none",
+         "score": 0
        }
      }
    ]
