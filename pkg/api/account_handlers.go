@@ -492,6 +492,9 @@ func (h *Handler) BlockchainAccountInspect(ctx context.Context, params oas.Block
 		return nil, toError(http.StatusBadRequest, err)
 	}
 	rawAccount, err := h.storage.GetRawAccount(ctx, account.ID)
+	if errors.Is(err, core.ErrEntityNotFound) {
+		return nil, toError(http.StatusNotFound, err)
+	}
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
