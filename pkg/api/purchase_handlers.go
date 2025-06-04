@@ -17,20 +17,20 @@ import (
 	"strconv"
 )
 
-func (h *Handler) GetInvoiceHistory(ctx context.Context, params oas.GetInvoiceHistoryParams) (r *oas.AccountInvoicePayments, _ error) {
+func (h *Handler) GetPurchaseHistory(ctx context.Context, params oas.GetPurchaseHistoryParams) (r *oas.AccountPurchases, _ error) {
 	account, err := tongo.ParseAddress(params.AccountID)
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
 	}
-	rawPayments, err := h.storage.GetAccountInvoicesHistory(ctx, account.ID, params.Limit, optIntToPointer(params.BeforeLt))
+	rawPurchases, err := h.storage.GetAccountInvoicesHistory(ctx, account.ID, params.Limit.Value, optIntToPointer(params.BeforeLt))
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
-	payments, firstLT, err := h.convertInvoiceHistory(ctx, account.ID, rawPayments)
+	purchases, firstLT, err := h.convertPurchaseHistory(ctx, account.ID, rawPurchases)
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
-	return &oas.AccountInvoicePayments{Payments: payments, NextFrom: firstLT}, nil
+	return &oas.AccountPurchases{Purchases: purchases, NextFrom: firstLT}, nil
 }
 
 type encryptionParameters struct {
@@ -58,16 +58,16 @@ func prepareEncryptionParameters() (*encryptionParameters, error) {
 	}, nil
 }
 
-func (h *Handler) convertInvoiceHistory(ctx context.Context, account ton.AccountID, rawPayments []core.InvoicePayment) ([]oas.InvoicePayment, int64, error) {
+func (h *Handler) convertPurchaseHistory(ctx context.Context, account ton.AccountID, rawPayments []core.InvoicePayment) ([]oas.Purchase, int64, error) {
 	var (
-		res    []oas.InvoicePayment
+		res    []oas.Purchase
 		params *encryptionParameters
 	)
 	if len(rawPayments) == 0 {
-		return []oas.InvoicePayment{}, 0, nil
+		return []oas.Purchase{}, 0, nil
 	}
 	for _, raw := range rawPayments {
-		p := oas.InvoicePayment{
+		p := oas.Purchase{
 			EventID:     raw.TraceID.Hash.Hex(),
 			InvoiceID:   raw.InvoiceID.String(),
 			Source:      convertAccountAddress(account, h.addressBook),

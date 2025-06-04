@@ -355,12 +355,6 @@ type Handler interface {
 	//
 	// GET /v2/extra-currency/{id}
 	GetExtraCurrencyInfo(ctx context.Context, params GetExtraCurrencyInfoParams) (*EcPreview, error)
-	// GetInvoiceHistory implements getInvoiceHistory operation.
-	//
-	// Get history of invoice payments.
-	//
-	// GET /v2/invoices/{account_id}/history
-	GetInvoiceHistory(ctx context.Context, params GetInvoiceHistoryParams) (*AccountInvoicePayments, error)
 	// GetItemsFromCollection implements getItemsFromCollection operation.
 	//
 	// Get NFT items from collection by collection address.
@@ -483,6 +477,12 @@ type Handler interface {
 	//
 	// GET /v2/liteserver/get_out_msg_queue_sizes
 	GetOutMsgQueueSizes(ctx context.Context) (*GetOutMsgQueueSizesOK, error)
+	// GetPurchaseHistory implements getPurchaseHistory operation.
+	//
+	// Get history of purchases.
+	//
+	// GET /v2/purchases/{account_id}/history
+	GetPurchaseHistory(ctx context.Context, params GetPurchaseHistoryParams) (*AccountPurchases, error)
 	// GetRates implements getRates operation.
 	//
 	// Get the token price in the chosen currency for display only. Don’t use this for financial

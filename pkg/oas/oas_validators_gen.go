@@ -137,20 +137,20 @@ func (s *AccountEvents) Validate() error {
 	return nil
 }
 
-func (s *AccountInvoicePayments) Validate() error {
+func (s *AccountPurchases) Validate() error {
 	if s == nil {
 		return validate.ErrNilPointer
 	}
 
 	var failures []validate.FieldError
 	if err := func() error {
-		if s.Payments == nil {
+		if s.Purchases == nil {
 			return errors.New("nil is invalid value")
 		}
 		return nil
 	}(); err != nil {
 		failures = append(failures, validate.FieldError{
-			Name:  "payments",
+			Name:  "purchases",
 			Error: err,
 		})
 	}
@@ -4793,6 +4793,8 @@ func (s SubscriptionStatus) Validate() error {
 	case "not_ready":
 		return nil
 	case "active":
+		return nil
+	case "suspended":
 		return nil
 	case "cancelled":
 		return nil

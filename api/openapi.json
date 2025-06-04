@@ -973,22 +973,22 @@
     ],
     "type": "object"
    },
-   "AccountInvoicePayments": {
+   "AccountPurchases": {
     "properties": {
      "next_from": {
       "example": 25713146000001,
       "format": "int64",
       "type": "integer"
      },
-     "payments": {
+     "purchases": {
       "items": {
-       "$ref": "#/components/schemas/InvoicePayment"
+       "$ref": "#/components/schemas/Purchase"
       },
       "type": "array"
      }
     },
     "required": [
-     "payments",
+     "purchases",
      "next_from"
     ],
     "type": "object"
@@ -3591,53 +3591,6 @@
     ],
     "type": "object"
    },
-   "InvoicePayment": {
-    "description": "Payment invoice.",
-    "properties": {
-     "amount": {
-      "$ref": "#/components/schemas/Price"
-     },
-     "destination": {
-      "$ref": "#/components/schemas/AccountAddress"
-     },
-     "event_id": {
-      "example": "e8b0e3fee4a26bd2317ac1f9952fcdc87dc08fdb617656b5202416323337372e",
-      "type": "string"
-     },
-     "invoice_id": {
-      "example": "03cfc582-b1c3-410a-a9a7-1f3afe326b3b",
-      "type": "string"
-     },
-     "lt": {
-      "example": 25713146000001,
-      "format": "int64",
-      "type": "integer",
-      "x-js-format": "bigint"
-     },
-     "metadata": {
-      "$ref": "#/components/schemas/Metadata"
-     },
-     "source": {
-      "$ref": "#/components/schemas/AccountAddress"
-     },
-     "utime": {
-      "example": 1645544908,
-      "format": "int64",
-      "type": "integer"
-     }
-    },
-    "required": [
-     "event_id",
-     "invoice_id",
-     "source",
-     "destination",
-     "lt",
-     "utime",
-     "amount",
-     "metadata"
-    ],
-    "type": "object"
-   },
    "JettonBalance": {
     "properties": {
      "balance": {
@@ -5257,6 +5210,52 @@
     ],
     "type": "object"
    },
+   "Purchase": {
+    "properties": {
+     "amount": {
+      "$ref": "#/components/schemas/Price"
+     },
+     "destination": {
+      "$ref": "#/components/schemas/AccountAddress"
+     },
+     "event_id": {
+      "example": "e8b0e3fee4a26bd2317ac1f9952fcdc87dc08fdb617656b5202416323337372e",
+      "type": "string"
+     },
+     "invoice_id": {
+      "example": "03cfc582-b1c3-410a-a9a7-1f3afe326b3b",
+      "type": "string"
+     },
+     "lt": {
+      "example": 25713146000001,
+      "format": "int64",
+      "type": "integer",
+      "x-js-format": "bigint"
+     },
+     "metadata": {
+      "$ref": "#/components/schemas/Metadata"
+     },
+     "source": {
+      "$ref": "#/components/schemas/AccountAddress"
+     },
+     "utime": {
+      "example": 1645544908,
+      "format": "int64",
+      "type": "integer"
+     }
+    },
+    "required": [
+     "event_id",
+     "invoice_id",
+     "source",
+     "destination",
+     "lt",
+     "utime",
+     "amount",
+     "metadata"
+    ],
+    "type": "object"
+   },
    "RawBlockchainConfig": {
     "properties": {
      "config": {
@@ -5778,6 +5777,7 @@
       "enum": [
        "not_ready",
        "active",
+       "suspended",
        "cancelled"
       ],
       "type": "string"
@@ -8748,58 +8748,6 @@
     ]
    }
   },
-  "/v2/invoices/{account_id}/history": {
-   "get": {
-    "description": "Get history of invoice payments",
-    "operationId": "getInvoiceHistory",
-    "parameters": [
-     {
-      "$ref": "#/components/parameters/accountIDParameter"
-     },
-     {
-      "description": "omit this parameter to get last invoices",
-      "in": "query",
-      "name": "before_lt",
-      "required": false,
-      "schema": {
-       "example": 25758317000002,
-       "format": "int64",
-       "type": "integer",
-       "x-js-format": "bigint"
-      }
-     },
-     {
-      "in": "query",
-      "name": "limit",
-      "required": true,
-      "schema": {
-       "example": 100,
-       "maximum": 1000,
-       "minimum": 1,
-       "type": "integer"
-      }
-     }
-    ],
-    "responses": {
-     "200": {
-      "content": {
-       "application/json": {
-        "schema": {
-         "$ref": "#/components/schemas/AccountInvoicePayments"
-        }
-       }
-      },
-      "description": "account invoices history"
-     },
-     "default": {
-      "$ref": "#/components/responses/Error"
-     }
-    },
-    "tags": [
-     "Payments"
-    ]
-   }
-  },
   "/v2/jettons": {
    "get": {
     "description": "Get a list of all indexed jetton masters in the blockchain.",
@@ -10472,6 +10420,59 @@
     },
     "tags": [
      "Wallet"
+    ]
+   }
+  },
+  "/v2/purchases/{account_id}/history": {
+   "get": {
+    "description": "Get history of purchases",
+    "operationId": "getPurchaseHistory",
+    "parameters": [
+     {
+      "$ref": "#/components/parameters/accountIDParameter"
+     },
+     {
+      "description": "omit this parameter to get last invoices",
+      "in": "query",
+      "name": "before_lt",
+      "required": false,
+      "schema": {
+       "example": 25758317000002,
+       "format": "int64",
+       "type": "integer",
+       "x-js-format": "bigint"
+      }
+     },
+     {
+      "in": "query",
+      "name": "limit",
+      "required": false,
+      "schema": {
+       "default": 100,
+       "example": 100,
+       "maximum": 1000,
+       "minimum": 1,
+       "type": "integer"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/AccountPurchases"
+        }
+       }
+      },
+      "description": "account purchase history"
+     },
+     "default": {
+      "$ref": "#/components/responses/Error"
+     }
+    },
+    "tags": [
+     "Payments"
     ]
    }
   },

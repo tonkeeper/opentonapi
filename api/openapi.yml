@@ -2856,15 +2856,15 @@ paths:
                 $ref: '#/components/schemas/AccountEvent'
         'default':
           $ref: '#/components/responses/Error'
-  /v2/invoices/{account_id}/history:
+  /v2/purchases/{account_id}/history:
     get:
-      description: Get history of invoice payments
-      operationId: getInvoiceHistory
+      description: Get history of purchases
+      operationId: getPurchaseHistory
       tags:
         - Payments
       parameters:
         - $ref: '#/components/parameters/accountIDParameter'
-        - name: before_lt # TODO: or use after_lt
+        - name: before_lt
           in: query
           description: "omit this parameter to get last invoices"
           required: false
@@ -2875,19 +2875,20 @@ paths:
             x-js-format: bigint
         - name: limit
           in: query
-          required: true
+          required: false
           schema:
             type: integer
+            default: 100
             example: 100
             maximum: 1000
             minimum: 1
       responses:
         '200':
-          description: account invoices history
+          description: account purchase history
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AccountInvoicePayments'
+                $ref: '#/components/schemas/AccountPurchases'
         'default':
           $ref: '#/components/responses/Error'
 components:
@@ -6596,9 +6597,8 @@ components:
           type: integer
           format: int64
           example: 25713146000001
-    InvoicePayment:
+    Purchase:
       type: object
-      description: Payment invoice.
       required:
         - event_id
         - invoice_id
@@ -6632,16 +6632,16 @@ components:
           $ref: '#/components/schemas/Price'
         metadata:
           $ref: '#/components/schemas/Metadata'
-    AccountInvoicePayments:
+    AccountPurchases:
       type: object
       required:
-        - payments
+        - purchases
         - next_from
       properties:
-        payments:
+        purchases:
           type: array
           items:
-            $ref: '#/components/schemas/InvoicePayment'
+            $ref: '#/components/schemas/Purchase'
         next_from:
           type: integer
           format: int64
@@ -6711,6 +6711,7 @@ components:
           enum:
             - not_ready
             - active
+            - suspended
             - cancelled
         period:
           type: integer

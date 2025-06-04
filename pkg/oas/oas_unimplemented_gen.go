@@ -525,15 +525,6 @@ func (UnimplementedHandler) GetExtraCurrencyInfo(ctx context.Context, params Get
 	return r, ht.ErrNotImplemented
 }
 
-// GetInvoiceHistory implements getInvoiceHistory operation.
-//
-// Get history of invoice payments.
-//
-// GET /v2/invoices/{account_id}/history
-func (UnimplementedHandler) GetInvoiceHistory(ctx context.Context, params GetInvoiceHistoryParams) (r *AccountInvoicePayments, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
 // GetItemsFromCollection implements getItemsFromCollection operation.
 //
 // Get NFT items from collection by collection address.
@@ -713,6 +704,15 @@ func (UnimplementedHandler) GetOpenapiYml(ctx context.Context) (r GetOpenapiYmlO
 //
 // GET /v2/liteserver/get_out_msg_queue_sizes
 func (UnimplementedHandler) GetOutMsgQueueSizes(ctx context.Context) (r *GetOutMsgQueueSizesOK, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// GetPurchaseHistory implements getPurchaseHistory operation.
+//
+// Get history of purchases.
+//
+// GET /v2/purchases/{account_id}/history
+func (UnimplementedHandler) GetPurchaseHistory(ctx context.Context, params GetPurchaseHistoryParams) (r *AccountPurchases, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
