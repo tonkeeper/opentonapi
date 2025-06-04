@@ -39,7 +39,7 @@ func (h *Handler) convertNFT(ctx context.Context, item core.NftItem, book addres
 			Market:  convertAccountAddress(item.Sale.Marketplace, book),
 			Owner:   convertOptAccountAddress(item.Sale.Seller, book),
 			Price: oas.Price{
-				Value:     fmt.Sprintf("%v", item.Sale.Price.Amount),
+				Value:     item.Sale.Price.Amount,
 				TokenName: tokenName,
 			},
 		}))
