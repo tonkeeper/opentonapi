@@ -4716,6 +4716,7 @@ components:
       required:
         - address
         - type
+        - status
       properties:
         address:
           type: string
@@ -4724,6 +4725,8 @@ components:
         type:
           type: string
           example: "subscription_v1"
+        status:
+          '$ref': '#/components/schemas/AccountStatus'
     Wallets:
       type: object
       required:

@@ -6526,6 +6526,9 @@
       "format": "address",
       "type": "string"
      },
+     "status": {
+      "$ref": "#/components/schemas/AccountStatus"
+     },
      "type": {
       "example": "subscription_v1",
       "type": "string"
@@ -6533,7 +6536,8 @@
     },
     "required": [
      "address",
-     "type"
+     "type",
+     "status"
     ],
     "type": "object"
    },
