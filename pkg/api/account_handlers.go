@@ -408,25 +408,14 @@ func (h *Handler) GetAccountSubscriptions(ctx context.Context, params oas.GetAcc
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
 	}
-	subscriptions, err := h.storage.GetSubscriptions(ctx, account.ID)
+	subscriptionsV2, err := h.storage.GetSubscriptionsV2(ctx, account.ID)
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
 	var response oas.Subscriptions
-	for _, subscription := range subscriptions {
-		response.Subscriptions = append(response.Subscriptions, oas.Subscription{
-			Address:            subscription.AccountID.ToRaw(),
-			WalletAddress:      subscription.WalletAccountID.ToRaw(),
-			BeneficiaryAddress: subscription.BeneficiaryAccountID.ToRaw(),
-			Amount:             subscription.Amount,
-			Period:             subscription.Period,
-			StartTime:          subscription.StartTime,
-			Timeout:            subscription.Timeout,
-			LastPaymentTime:    subscription.LastPaymentTime,
-			LastRequestTime:    subscription.LastRequestTime,
-			SubscriptionID:     subscription.SubscriptionID,
-			FailedAttempts:     subscription.FailedAttempts,
-		})
+	for _, subscription := range subscriptionsV2 {
+		sub := h.convertSubscriptionsV2(subscription)
+		response.Subscriptions = append(response.Subscriptions, sub)
 	}
 	return &response, nil
 }
@@ -680,4 +669,62 @@ func (h *Handler) execGetMethod(ctx context.Context, accountID ton.AccountID, me
 		}
 	}
 	return &result, nil
+}
+
+func (h *Handler) convertSubscriptionsV2(sub core.SubscriptionV2) oas.Subscription {
+	res := oas.Subscription{
+		Type:           "v2",
+		Period:         sub.Period,
+		SubscriptionID: fmt.Sprintf("%d", sub.SubscriptionID),
+		Wallet:         convertAccountAddress(sub.WalletAccountID, h.addressBook),
+		NextChargeAt:   sub.ChargeDate,
+	}
+	res.Address.SetTo(sub.AccountID.ToRaw())
+	res.Beneficiary.SetTo(convertAccountAddress(sub.BeneficiaryAccountID, h.addressBook))
+	switch sub.ContractState {
+	case 0:
+		res.Status = oas.SubscriptionStatusNotReady
+	case 1:
+		if time.Now().Unix() > sub.ChargeDate+sub.GracePeriod { // grace period expired
+			res.Status = oas.SubscriptionStatusCancelled
+		} else {
+			res.Status = oas.SubscriptionStatusActive
+		}
+	case 2:
+		res.Status = oas.SubscriptionStatusCancelled
+	}
+	b, err := decodeSnakeBinary(sub.Metadata)
+	if err == nil {
+		res.Metadata.SetEncryptedBinary(fmt.Sprintf("%x", b))
+	}
+	res.PaymentPerPeriod = oas.Price{
+		Value:     fmt.Sprintf("%d", sub.PaymentPerPeriod),
+		Decimals:  9,
+		TokenName: "TON",
+	}
+	return res
+}
+
+func decodeSnakeBinary(bocBytes []byte) ([]byte, error) {
+	if len(bocBytes) == 0 {
+		return []byte{}, nil
+	}
+	c, err := boc.DeserializeSingleRootBoc(bocBytes)
+	if err != nil {
+		return nil, err
+	}
+	var sd tlb.SnakeData
+	err = tlb.Unmarshal(c, &sd)
+	if err != nil {
+		return nil, err
+	}
+	bs := boc.BitString(sd)
+	if bs.BitsAvailableForRead()%8 != 0 {
+		return nil, fmt.Errorf("invalid bits qty")
+	}
+	bytes, err := bs.ReadBytes(bs.BitsAvailableForRead() / 8)
+	if err != nil {
+		return nil, err
+	}
+	return bytes, nil
 }

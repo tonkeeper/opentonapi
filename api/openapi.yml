@@ -6631,7 +6631,7 @@ components:
         amount:
           $ref: '#/components/schemas/Price'
         metadata:
-          $ref: '#/components/schemas/InvoiceMetadata'
+          $ref: '#/components/schemas/Metadata'
     AccountInvoicePayments:
       type: object
       required:
@@ -6646,7 +6646,7 @@ components:
           type: integer
           format: int64
           example: 25713146000001
-    InvoiceMetadata:
+    Metadata:
       type: object
       required:
         - encrypted_binary
@@ -6693,62 +6693,49 @@ components:
     Subscription:
       type: object
       required:
-        - address
-        - wallet_address
-        - beneficiary_address
-        - amount
+        - type
+        - status
         - period
-        - start_time
-        - timeout
-        - last_payment_time
-        - last_request_time
         - subscription_id
-        - failed_attempts
+        - payment_per_period
+        - wallet
+        - next_charge_at
+        - metadata
       properties:
+        type:
+          type: string
+          description: type of subscription
+          example: v2
+        status:
+          type: string
+          enum:
+            - not_ready
+            - active
+            - cancelled
+        period:
+          type: integer
+          description: payment period in seconds
+          format: int64
+          example: 2592000
+        subscription_id:
+          type: string
+          description: common identifier
+        payment_per_period:
+          $ref: '#/components/schemas/Price'
+        wallet:
+          $ref: '#/components/schemas/AccountAddress'
+        next_charge_at:
+          type: integer
+          format: int64
+          example: 1653996834
+        metadata:
+          $ref: '#/components/schemas/Metadata'
         address:
           type: string
           format: address
           example: 0:dea8f638b789172ce36d10a20318125e52c649aa84893cd77858224fe2b9b0ee
-        wallet_address:
-          type: string
-          format: address
-          example: 0:567DE86AF2B6A557D7085807CF7C26338124987A5179344F0D0FA2657EB710F1
-        beneficiary_address:
-          type: string
-          format: address
-          example: 0:c704dadfabac88eab58e340de03080df81ff76636431f48624ad6e26fb2da0a4
-        amount:
-          type: integer
-          format: int64
-          example: 1000000000
-        period:
-          type: integer
-          format: int64
-          example: 2592000
-        start_time:
-          type: integer
-          format: int64
-          example: 1653996832
-        timeout:
-          type: integer
-          format: int64
-          example: 10800
-        last_payment_time:
-          type: integer
-          format: int64
-          example: 1653996834
-        last_request_time:
-          type: integer
-          format: int64
-          example: 0
-        subscription_id:
-          type: integer
-          format: int64
-          example: 217477
-        failed_attempts:
-          type: integer
-          format: int32
-          example: 0
+        beneficiary:
+          $ref: '#/components/schemas/AccountAddress'
     Subscriptions:
       type: object
       required:

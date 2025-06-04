@@ -5154,55 +5154,6 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 				}
 
 				elem = origElem
-			case 'i': // Prefix: "invoices/"
-				origElem := elem
-				if l := len("invoices/"); len(elem) >= l && elem[0:l] == "invoices/" {
-					elem = elem[l:]
-				} else {
-					break
-				}
-
-				// Param: "account_id"
-				// Match until "/"
-				idx := strings.IndexByte(elem, '/')
-				if idx < 0 {
-					idx = len(elem)
-				}
-				args[0] = elem[:idx]
-				elem = elem[idx:]
-
-				if len(elem) == 0 {
-					break
-				}
-				switch elem[0] {
-				case '/': // Prefix: "/history"
-					origElem := elem
-					if l := len("/history"); len(elem) >= l && elem[0:l] == "/history" {
-						elem = elem[l:]
-					} else {
-						break
-					}
-
-					if len(elem) == 0 {
-						switch method {
-						case "GET":
-							// Leaf: GetInvoiceHistory
-							r.name = "GetInvoiceHistory"
-							r.summary = ""
-							r.operationID = "getInvoiceHistory"
-							r.pathPattern = "/v2/invoices/{account_id}/history"
-							r.args = args
-							r.count = 1
-							return r, true
-						default:
-							return
-						}
-					}
-
-					elem = origElem
-				}
-
-				elem = origElem
 			case 'g': // Prefix: "gasless/"
 				origElem := elem
 				if l := len("gasless/"); len(elem) >= l && elem[0:l] == "gasless/" {
@@ -5288,6 +5239,55 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 							r.pathPattern = "/v2/gasless/send"
 							r.args = args
 							r.count = 0
+							return r, true
+						default:
+							return
+						}
+					}
+
+					elem = origElem
+				}
+
+				elem = origElem
+			case 'i': // Prefix: "invoices/"
+				origElem := elem
+				if l := len("invoices/"); len(elem) >= l && elem[0:l] == "invoices/" {
+					elem = elem[l:]
+				} else {
+					break
+				}
+
+				// Param: "account_id"
+				// Match until "/"
+				idx := strings.IndexByte(elem, '/')
+				if idx < 0 {
+					idx = len(elem)
+				}
+				args[0] = elem[:idx]
+				elem = elem[idx:]
+
+				if len(elem) == 0 {
+					break
+				}
+				switch elem[0] {
+				case '/': // Prefix: "/history"
+					origElem := elem
+					if l := len("/history"); len(elem) >= l && elem[0:l] == "/history" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					if len(elem) == 0 {
+						switch method {
+						case "GET":
+							// Leaf: GetInvoiceHistory
+							r.name = "GetInvoiceHistory"
+							r.summary = ""
+							r.operationID = "getInvoiceHistory"
+							r.pathPattern = "/v2/invoices/{account_id}/history"
+							r.args = args
+							r.count = 1
 							return r, true
 						default:
 							return

@@ -104,12 +104,12 @@ func (h *Handler) convertInvoiceHistory(ctx context.Context, account ton.Account
 	return res, int64(rawPayments[len(rawPayments)-1].InMsgLt), nil
 }
 
-func convertInvoiceOpenMetadata(params encryptionParameters, data []byte) (oas.InvoiceMetadata, error) {
+func convertInvoiceOpenMetadata(params encryptionParameters, data []byte) (oas.Metadata, error) {
 	encMeta, err := toncrypto.Encrypt(params.ReceiverPubkey, params.OurPrivateKey, data, params.Salt)
 	if err != nil {
-		return oas.InvoiceMetadata{}, err
+		return oas.Metadata{}, err
 	}
-	res := oas.InvoiceMetadata{EncryptedBinary: hex.EncodeToString(encMeta)}
+	res := oas.Metadata{EncryptedBinary: hex.EncodeToString(encMeta)}
 	res.DecryptionKey.SetTo(hex.EncodeToString(params.ReceiverPrivateKey))
 	return res, nil
 }

@@ -90,7 +90,7 @@ type storage interface {
 	GetDomainInfo(ctx context.Context, domain string) (core.NftItem, int64, error)
 
 	GetWalletPubKey(ctx context.Context, address tongo.AccountID) (ed25519.PublicKey, error)
-	GetSubscriptions(ctx context.Context, address tongo.AccountID) ([]core.Subscription, error)
+	GetSubscriptionsV2(ctx context.Context, address tongo.AccountID) ([]core.SubscriptionV2, error)
 	GetJettonMasters(ctx context.Context, limit, offset int) ([]core.JettonMaster, error)
 	GetJettonMastersByAddresses(ctx context.Context, addresses []ton.AccountID) ([]core.JettonMaster, error)
 

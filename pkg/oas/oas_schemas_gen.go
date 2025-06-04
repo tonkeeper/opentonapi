@@ -7368,45 +7368,17 @@ func (s *InitStateRaw) SetFileHash(val string) {
 	s.FileHash = val
 }
 
-// Ref: #/components/schemas/InvoiceMetadata
-type InvoiceMetadata struct {
-	// Hex encoded bytes.
-	EncryptedBinary string `json:"encrypted_binary"`
-	// Hex encoded bytes.
-	DecryptionKey OptString `json:"decryption_key"`
-}
-
-// GetEncryptedBinary returns the value of EncryptedBinary.
-func (s *InvoiceMetadata) GetEncryptedBinary() string {
-	return s.EncryptedBinary
-}
-
-// GetDecryptionKey returns the value of DecryptionKey.
-func (s *InvoiceMetadata) GetDecryptionKey() OptString {
-	return s.DecryptionKey
-}
-
-// SetEncryptedBinary sets the value of EncryptedBinary.
-func (s *InvoiceMetadata) SetEncryptedBinary(val string) {
-	s.EncryptedBinary = val
-}
-
-// SetDecryptionKey sets the value of DecryptionKey.
-func (s *InvoiceMetadata) SetDecryptionKey(val OptString) {
-	s.DecryptionKey = val
-}
-
 // Payment invoice.
 // Ref: #/components/schemas/InvoicePayment
 type InvoicePayment struct {
-	EventID     string          `json:"event_id"`
-	InvoiceID   string          `json:"invoice_id"`
-	Source      AccountAddress  `json:"source"`
-	Destination AccountAddress  `json:"destination"`
-	Lt          int64           `json:"lt"`
-	Utime       int64           `json:"utime"`
-	Amount      Price           `json:"amount"`
-	Metadata    InvoiceMetadata `json:"metadata"`
+	EventID     string         `json:"event_id"`
+	InvoiceID   string         `json:"invoice_id"`
+	Source      AccountAddress `json:"source"`
+	Destination AccountAddress `json:"destination"`
+	Lt          int64          `json:"lt"`
+	Utime       int64          `json:"utime"`
+	Amount      Price          `json:"amount"`
+	Metadata    Metadata       `json:"metadata"`
 }
 
 // GetEventID returns the value of EventID.
@@ -7445,7 +7417,7 @@ func (s *InvoicePayment) GetAmount() Price {
 }
 
 // GetMetadata returns the value of Metadata.
-func (s *InvoicePayment) GetMetadata() InvoiceMetadata {
+func (s *InvoicePayment) GetMetadata() Metadata {
 	return s.Metadata
 }
 
@@ -7485,7 +7457,7 @@ func (s *InvoicePayment) SetAmount(val Price) {
 }
 
 // SetMetadata sets the value of Metadata.
-func (s *InvoicePayment) SetMetadata(val InvoiceMetadata) {
+func (s *InvoicePayment) SetMetadata(val Metadata) {
 	s.Metadata = val
 }
 
@@ -9119,6 +9091,34 @@ func (s *MessageMsgType) UnmarshalText(data []byte) error {
 	default:
 		return errors.Errorf("invalid value: %q", data)
 	}
+}
+
+// Ref: #/components/schemas/Metadata
+type Metadata struct {
+	// Hex encoded bytes.
+	EncryptedBinary string `json:"encrypted_binary"`
+	// Hex encoded bytes.
+	DecryptionKey OptString `json:"decryption_key"`
+}
+
+// GetEncryptedBinary returns the value of EncryptedBinary.
+func (s *Metadata) GetEncryptedBinary() string {
+	return s.EncryptedBinary
+}
+
+// GetDecryptionKey returns the value of DecryptionKey.
+func (s *Metadata) GetDecryptionKey() OptString {
+	return s.DecryptionKey
+}
+
+// SetEncryptedBinary sets the value of EncryptedBinary.
+func (s *Metadata) SetEncryptedBinary(val string) {
+	s.EncryptedBinary = val
+}
+
+// SetDecryptionKey sets the value of DecryptionKey.
+func (s *Metadata) SetDecryptionKey(val OptString) {
+	s.DecryptionKey = val
 }
 
 // Ref: #/components/schemas/Method
@@ -14671,52 +14671,6 @@ func (o OptValidatorsSet) Or(d ValidatorsSet) ValidatorsSet {
 	return d
 }
 
-// NewOptWalletCurrenciesBalance returns new OptWalletCurrenciesBalance with value set to v.
-func NewOptWalletCurrenciesBalance(v WalletCurrenciesBalance) OptWalletCurrenciesBalance {
-	return OptWalletCurrenciesBalance{
-		Value: v,
-		Set:   true,
-	}
-}
-
-// OptWalletCurrenciesBalance is optional WalletCurrenciesBalance.
-type OptWalletCurrenciesBalance struct {
-	Value WalletCurrenciesBalance
-	Set   bool
-}
-
-// IsSet returns true if OptWalletCurrenciesBalance was set.
-func (o OptWalletCurrenciesBalance) IsSet() bool { return o.Set }
-
-// Reset unsets value.
-func (o *OptWalletCurrenciesBalance) Reset() {
-	var v WalletCurrenciesBalance
-	o.Value = v
-	o.Set = false
-}
-
-// SetTo sets value to v.
-func (o *OptWalletCurrenciesBalance) SetTo(v WalletCurrenciesBalance) {
-	o.Set = true
-	o.Value = v
-}
-
-// Get returns value and boolean that denotes whether value was set.
-func (o OptWalletCurrenciesBalance) Get() (v WalletCurrenciesBalance, ok bool) {
-	if !o.Set {
-		return v, false
-	}
-	return o.Value, true
-}
-
-// Or returns value if set, or given parameter if does not.
-func (o OptWalletCurrenciesBalance) Or(d WalletCurrenciesBalance) WalletCurrenciesBalance {
-	if v, ok := o.Get(); ok {
-		return v
-	}
-	return d
-}
-
 // NewOptWalletDNS returns new OptWalletDNS with value set to v.
 func NewOptWalletDNS(v WalletDNS) OptWalletDNS {
 	return OptWalletDNS{
@@ -16185,37 +16139,29 @@ func (s *StorageProvider) SetMaximalFileSize(val int64) {
 
 // Ref: #/components/schemas/Subscription
 type Subscription struct {
-	Address            string `json:"address"`
-	WalletAddress      string `json:"wallet_address"`
-	BeneficiaryAddress string `json:"beneficiary_address"`
-	Amount             int64  `json:"amount"`
-	Period             int64  `json:"period"`
-	StartTime          int64  `json:"start_time"`
-	Timeout            int64  `json:"timeout"`
-	LastPaymentTime    int64  `json:"last_payment_time"`
-	LastRequestTime    int64  `json:"last_request_time"`
-	SubscriptionID     int64  `json:"subscription_id"`
-	FailedAttempts     int32  `json:"failed_attempts"`
+	// Type of subscription.
+	Type   string             `json:"type"`
+	Status SubscriptionStatus `json:"status"`
+	// Payment period in seconds.
+	Period int64 `json:"period"`
+	// Common identifier.
+	SubscriptionID   string            `json:"subscription_id"`
+	PaymentPerPeriod Price             `json:"payment_per_period"`
+	Wallet           AccountAddress    `json:"wallet"`
+	NextChargeAt     int64             `json:"next_charge_at"`
+	Metadata         Metadata          `json:"metadata"`
+	Address          OptString         `json:"address"`
+	Beneficiary      OptAccountAddress `json:"beneficiary"`
 }
 
-// GetAddress returns the value of Address.
-func (s *Subscription) GetAddress() string {
-	return s.Address
+// GetType returns the value of Type.
+func (s *Subscription) GetType() string {
+	return s.Type
 }
 
-// GetWalletAddress returns the value of WalletAddress.
-func (s *Subscription) GetWalletAddress() string {
-	return s.WalletAddress
-}
-
-// GetBeneficiaryAddress returns the value of BeneficiaryAddress.
-func (s *Subscription) GetBeneficiaryAddress() string {
-	return s.BeneficiaryAddress
-}
-
-// GetAmount returns the value of Amount.
-func (s *Subscription) GetAmount() int64 {
-	return s.Amount
+// GetStatus returns the value of Status.
+func (s *Subscription) GetStatus() SubscriptionStatus {
+	return s.Status
 }
 
 // GetPeriod returns the value of Period.
@@ -16223,54 +16169,49 @@ func (s *Subscription) GetPeriod() int64 {
 	return s.Period
 }
 
-// GetStartTime returns the value of StartTime.
-func (s *Subscription) GetStartTime() int64 {
-	return s.StartTime
-}
-
-// GetTimeout returns the value of Timeout.
-func (s *Subscription) GetTimeout() int64 {
-	return s.Timeout
-}
-
-// GetLastPaymentTime returns the value of LastPaymentTime.
-func (s *Subscription) GetLastPaymentTime() int64 {
-	return s.LastPaymentTime
-}
-
-// GetLastRequestTime returns the value of LastRequestTime.
-func (s *Subscription) GetLastRequestTime() int64 {
-	return s.LastRequestTime
-}
-
 // GetSubscriptionID returns the value of SubscriptionID.
-func (s *Subscription) GetSubscriptionID() int64 {
+func (s *Subscription) GetSubscriptionID() string {
 	return s.SubscriptionID
 }
 
-// GetFailedAttempts returns the value of FailedAttempts.
-func (s *Subscription) GetFailedAttempts() int32 {
-	return s.FailedAttempts
+// GetPaymentPerPeriod returns the value of PaymentPerPeriod.
+func (s *Subscription) GetPaymentPerPeriod() Price {
+	return s.PaymentPerPeriod
 }
 
-// SetAddress sets the value of Address.
-func (s *Subscription) SetAddress(val string) {
-	s.Address = val
+// GetWallet returns the value of Wallet.
+func (s *Subscription) GetWallet() AccountAddress {
+	return s.Wallet
 }
 
-// SetWalletAddress sets the value of WalletAddress.
-func (s *Subscription) SetWalletAddress(val string) {
-	s.WalletAddress = val
+// GetNextChargeAt returns the value of NextChargeAt.
+func (s *Subscription) GetNextChargeAt() int64 {
+	return s.NextChargeAt
 }
 
-// SetBeneficiaryAddress sets the value of BeneficiaryAddress.
-func (s *Subscription) SetBeneficiaryAddress(val string) {
-	s.BeneficiaryAddress = val
+// GetMetadata returns the value of Metadata.
+func (s *Subscription) GetMetadata() Metadata {
+	return s.Metadata
 }
 
-// SetAmount sets the value of Amount.
-func (s *Subscription) SetAmount(val int64) {
-	s.Amount = val
+// GetAddress returns the value of Address.
+func (s *Subscription) GetAddress() OptString {
+	return s.Address
+}
+
+// GetBeneficiary returns the value of Beneficiary.
+func (s *Subscription) GetBeneficiary() OptAccountAddress {
+	return s.Beneficiary
+}
+
+// SetType sets the value of Type.
+func (s *Subscription) SetType(val string) {
+	s.Type = val
+}
+
+// SetStatus sets the value of Status.
+func (s *Subscription) SetStatus(val SubscriptionStatus) {
+	s.Status = val
 }
 
 // SetPeriod sets the value of Period.
@@ -16278,34 +16219,39 @@ func (s *Subscription) SetPeriod(val int64) {
 	s.Period = val
 }
 
-// SetStartTime sets the value of StartTime.
-func (s *Subscription) SetStartTime(val int64) {
-	s.StartTime = val
-}
-
-// SetTimeout sets the value of Timeout.
-func (s *Subscription) SetTimeout(val int64) {
-	s.Timeout = val
-}
-
-// SetLastPaymentTime sets the value of LastPaymentTime.
-func (s *Subscription) SetLastPaymentTime(val int64) {
-	s.LastPaymentTime = val
-}
-
-// SetLastRequestTime sets the value of LastRequestTime.
-func (s *Subscription) SetLastRequestTime(val int64) {
-	s.LastRequestTime = val
-}
-
 // SetSubscriptionID sets the value of SubscriptionID.
-func (s *Subscription) SetSubscriptionID(val int64) {
+func (s *Subscription) SetSubscriptionID(val string) {
 	s.SubscriptionID = val
 }
 
-// SetFailedAttempts sets the value of FailedAttempts.
-func (s *Subscription) SetFailedAttempts(val int32) {
-	s.FailedAttempts = val
+// SetPaymentPerPeriod sets the value of PaymentPerPeriod.
+func (s *Subscription) SetPaymentPerPeriod(val Price) {
+	s.PaymentPerPeriod = val
+}
+
+// SetWallet sets the value of Wallet.
+func (s *Subscription) SetWallet(val AccountAddress) {
+	s.Wallet = val
+}
+
+// SetNextChargeAt sets the value of NextChargeAt.
+func (s *Subscription) SetNextChargeAt(val int64) {
+	s.NextChargeAt = val
+}
+
+// SetMetadata sets the value of Metadata.
+func (s *Subscription) SetMetadata(val Metadata) {
+	s.Metadata = val
+}
+
+// SetAddress sets the value of Address.
+func (s *Subscription) SetAddress(val OptString) {
+	s.Address = val
+}
+
+// SetBeneficiary sets the value of Beneficiary.
+func (s *Subscription) SetBeneficiary(val OptAccountAddress) {
+	s.Beneficiary = val
 }
 
 // Ref: #/components/schemas/SubscriptionAction
@@ -16365,6 +16311,54 @@ func (s *SubscriptionAction) SetAmount(val int64) {
 // SetInitial sets the value of Initial.
 func (s *SubscriptionAction) SetInitial(val bool) {
 	s.Initial = val
+}
+
+type SubscriptionStatus string
+
+const (
+	SubscriptionStatusNotReady  SubscriptionStatus = "not_ready"
+	SubscriptionStatusActive    SubscriptionStatus = "active"
+	SubscriptionStatusCancelled SubscriptionStatus = "cancelled"
+)
+
+// AllValues returns all SubscriptionStatus values.
+func (SubscriptionStatus) AllValues() []SubscriptionStatus {
+	return []SubscriptionStatus{
+		SubscriptionStatusNotReady,
+		SubscriptionStatusActive,
+		SubscriptionStatusCancelled,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s SubscriptionStatus) MarshalText() ([]byte, error) {
+	switch s {
+	case SubscriptionStatusNotReady:
+		return []byte(s), nil
+	case SubscriptionStatusActive:
+		return []byte(s), nil
+	case SubscriptionStatusCancelled:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *SubscriptionStatus) UnmarshalText(data []byte) error {
+	switch SubscriptionStatus(data) {
+	case SubscriptionStatusNotReady:
+		*s = SubscriptionStatusNotReady
+		return nil
+	case SubscriptionStatusActive:
+		*s = SubscriptionStatusActive
+		return nil
+	case SubscriptionStatusCancelled:
+		*s = SubscriptionStatusCancelled
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
 }
 
 // Ref: #/components/schemas/Subscriptions
@@ -17658,8 +17652,6 @@ type Wallet struct {
 	Stats   WalletStats    `json:"stats"`
 	Plugins []WalletPlugin `json:"plugins"`
 	Status  AccountStatus  `json:"status"`
-	// {'USD': 1, 'IDR': 1000}.
-	CurrenciesBalance OptWalletCurrenciesBalance `json:"currencies_balance"`
 	// Unix timestamp.
 	LastActivity int64     `json:"last_activity"`
 	Name         OptString `json:"name"`
@@ -17691,11 +17683,6 @@ func (s *Wallet) GetPlugins() []WalletPlugin {
 // GetStatus returns the value of Status.
 func (s *Wallet) GetStatus() AccountStatus {
 	return s.Status
-}
-
-// GetCurrenciesBalance returns the value of CurrenciesBalance.
-func (s *Wallet) GetCurrenciesBalance() OptWalletCurrenciesBalance {
-	return s.CurrenciesBalance
 }
 
 // GetLastActivity returns the value of LastActivity.
@@ -17748,11 +17735,6 @@ func (s *Wallet) SetStatus(val AccountStatus) {
 	s.Status = val
 }
 
-// SetCurrenciesBalance sets the value of CurrenciesBalance.
-func (s *Wallet) SetCurrenciesBalance(val OptWalletCurrenciesBalance) {
-	s.CurrenciesBalance = val
-}
-
 // SetLastActivity sets the value of LastActivity.
 func (s *Wallet) SetLastActivity(val int64) {
 	s.LastActivity = val
@@ -17776,18 +17758,6 @@ func (s *Wallet) SetGetMethods(val []string) {
 // SetIsSuspended sets the value of IsSuspended.
 func (s *Wallet) SetIsSuspended(val OptBool) {
 	s.IsSuspended = val
-}
-
-// {'USD': 1, 'IDR': 1000}.
-type WalletCurrenciesBalance map[string]jx.Raw
-
-func (s *WalletCurrenciesBalance) init() WalletCurrenciesBalance {
-	m := *s
-	if m == nil {
-		m = map[string]jx.Raw{}
-		*s = m
-	}
-	return m
 }
 
 // Ref: #/components/schemas/WalletDNS
@@ -17862,8 +17832,9 @@ func (s *WalletDNS) SetNames(val []string) {
 
 // Ref: #/components/schemas/WalletPlugin
 type WalletPlugin struct {
-	Address string `json:"address"`
-	Type    string `json:"type"`
+	Address string        `json:"address"`
+	Type    string        `json:"type"`
+	Status  AccountStatus `json:"status"`
 }
 
 // GetAddress returns the value of Address.
@@ -17876,6 +17847,11 @@ func (s *WalletPlugin) GetType() string {
 	return s.Type
 }
 
+// GetStatus returns the value of Status.
+func (s *WalletPlugin) GetStatus() AccountStatus {
+	return s.Status
+}
+
 // SetAddress sets the value of Address.
 func (s *WalletPlugin) SetAddress(val string) {
 	s.Address = val
@@ -17884,6 +17860,11 @@ func (s *WalletPlugin) SetAddress(val string) {
 // SetType sets the value of Type.
 func (s *WalletPlugin) SetType(val string) {
 	s.Type = val
+}
+
+// SetStatus sets the value of Status.
+func (s *WalletPlugin) SetStatus(val AccountStatus) {
+	s.Status = val
 }
 
 // Ref: #/components/schemas/WalletStats
