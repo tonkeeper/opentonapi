@@ -693,9 +693,8 @@ func (h *Handler) convertSubscriptionsV2(sub core.SubscriptionV2) oas.Subscripti
 	case 2:
 		res.Status = oas.SubscriptionStatusCancelled
 	}
-	b, err := decodeSnakeBinary(sub.Metadata)
-	if err == nil {
-		res.Metadata.SetEncryptedBinary(fmt.Sprintf("%x", b))
+	if len(sub.Metadata) > 0 {
+		res.Metadata.SetEncryptedBinary(fmt.Sprintf("%x", sub.Metadata))
 	}
 	res.PaymentPerPeriod = oas.Price{
 		Value:     fmt.Sprintf("%d", sub.PaymentPerPeriod),
@@ -703,28 +702,4 @@ func (h *Handler) convertSubscriptionsV2(sub core.SubscriptionV2) oas.Subscripti
 		TokenName: "TON",
 	}
 	return res
-}
-
-func decodeSnakeBinary(bocBytes []byte) ([]byte, error) {
-	if len(bocBytes) == 0 {
-		return []byte{}, nil
-	}
-	c, err := boc.DeserializeSingleRootBoc(bocBytes)
-	if err != nil {
-		return nil, err
-	}
-	var sd tlb.SnakeData
-	err = tlb.Unmarshal(c, &sd)
-	if err != nil {
-		return nil, err
-	}
-	bs := boc.BitString(sd)
-	if bs.BitsAvailableForRead()%8 != 0 {
-		return nil, fmt.Errorf("invalid bits qty")
-	}
-	bytes, err := bs.ReadBytes(bs.BitsAvailableForRead() / 8)
-	if err != nil {
-		return nil, err
-	}
-	return bytes, nil
 }
