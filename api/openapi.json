@@ -6012,6 +6012,13 @@
       },
       "type": "array"
      },
+     "progress": {
+      "example": 0.5,
+      "format": "float",
+      "maximum": 1,
+      "minimum": 0,
+      "type": "number"
+     },
      "transaction": {
       "$ref": "#/components/schemas/Transaction"
      }
@@ -6081,6 +6088,10 @@
      },
      "destroyed": {
       "example": true,
+      "type": "boolean"
+     },
+     "emulated": {
+      "example": false,
       "type": "boolean"
      },
      "end_balance": {
@@ -6177,7 +6188,8 @@
      "block",
      "aborted",
      "destroyed",
-     "raw"
+     "raw",
+     "emulated"
     ],
     "type": "object"
    },

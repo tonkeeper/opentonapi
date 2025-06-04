@@ -137,6 +137,24 @@ func (t *Trace) countUncompleted() int {
 	return c
 }
 
+func (t *Trace) CalculateProgress() float32 {
+	var calculateProgress func(t *Trace)
+	var finished, all int
+	calculateProgress = func(t *Trace) {
+		if t == nil {
+			return
+		}
+		if !t.Emulated {
+			finished += 1
+		}
+		all += 1
+		for _, child := range t.Children {
+			calculateProgress(child)
+		}
+	}
+	return float32(finished) / float32(all)
+}
+
 type EmulatedTeleitemNFT struct {
 	Index             decimal.Decimal
 	CollectionAddress *tongo.AccountID

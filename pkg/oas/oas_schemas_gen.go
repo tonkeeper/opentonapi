@@ -12686,6 +12686,52 @@ func (o OptExtraCurrencyTransferAction) Or(d ExtraCurrencyTransferAction) ExtraC
 	return d
 }
 
+// NewOptFloat32 returns new OptFloat32 with value set to v.
+func NewOptFloat32(v float32) OptFloat32 {
+	return OptFloat32{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptFloat32 is optional float32.
+type OptFloat32 struct {
+	Value float32
+	Set   bool
+}
+
+// IsSet returns true if OptFloat32 was set.
+func (o OptFloat32) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptFloat32) Reset() {
+	var v float32
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptFloat32) SetTo(v float32) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptFloat32) Get() (v float32, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptFloat32) Or(d float32) float32 {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptGasRelayAction returns new OptGasRelayAction with value set to v.
 func NewOptGasRelayAction(v GasRelayAction) OptGasRelayAction {
 	return OptGasRelayAction{
@@ -16816,6 +16862,7 @@ type Trace struct {
 	Interfaces  []string    `json:"interfaces"`
 	Children    []Trace     `json:"children"`
 	Emulated    OptBool     `json:"emulated"`
+	Progress    OptFloat32  `json:"progress"`
 }
 
 // GetTransaction returns the value of Transaction.
@@ -16838,6 +16885,11 @@ func (s *Trace) GetEmulated() OptBool {
 	return s.Emulated
 }
 
+// GetProgress returns the value of Progress.
+func (s *Trace) GetProgress() OptFloat32 {
+	return s.Progress
+}
+
 // SetTransaction sets the value of Transaction.
 func (s *Trace) SetTransaction(val Transaction) {
 	s.Transaction = val
@@ -16856,6 +16908,11 @@ func (s *Trace) SetChildren(val []Trace) {
 // SetEmulated sets the value of Emulated.
 func (s *Trace) SetEmulated(val OptBool) {
 	s.Emulated = val
+}
+
+// SetProgress sets the value of Progress.
+func (s *Trace) SetProgress(val OptFloat32) {
+	s.Progress = val
 }
 
 // Ref: #/components/schemas/TraceID
@@ -16926,7 +16983,8 @@ type Transaction struct {
 	Aborted         bool               `json:"aborted"`
 	Destroyed       bool               `json:"destroyed"`
 	// Hex encoded boc with raw transaction.
-	Raw string `json:"raw"`
+	Raw      string `json:"raw"`
+	Emulated bool   `json:"emulated"`
 }
 
 // GetHash returns the value of Hash.
@@ -17054,6 +17112,11 @@ func (s *Transaction) GetRaw() string {
 	return s.Raw
 }
 
+// GetEmulated returns the value of Emulated.
+func (s *Transaction) GetEmulated() bool {
+	return s.Emulated
+}
+
 // SetHash sets the value of Hash.
 func (s *Transaction) SetHash(val string) {
 	s.Hash = val
@@ -17177,6 +17240,11 @@ func (s *Transaction) SetDestroyed(val bool) {
 // SetRaw sets the value of Raw.
 func (s *Transaction) SetRaw(val string) {
 	s.Raw = val
+}
+
+// SetEmulated sets the value of Emulated.
+func (s *Transaction) SetEmulated(val bool) {
+	s.Emulated = val
 }
 
 // Ref: #/components/schemas/TransactionType

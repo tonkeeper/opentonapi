@@ -31912,6 +31912,41 @@ func (s *OptExtraCurrencyTransferAction) UnmarshalJSON(data []byte) error {
 	return s.Decode(d)
 }
 
+// Encode encodes float32 as json.
+func (o OptFloat32) Encode(e *jx.Encoder) {
+	if !o.Set {
+		return
+	}
+	e.Float32(float32(o.Value))
+}
+
+// Decode decodes float32 from json.
+func (o *OptFloat32) Decode(d *jx.Decoder) error {
+	if o == nil {
+		return errors.New("invalid: unable to decode OptFloat32 to nil")
+	}
+	o.Set = true
+	v, err := d.Float32()
+	if err != nil {
+		return err
+	}
+	o.Value = float32(v)
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s OptFloat32) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *OptFloat32) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
 // Encode encodes GasRelayAction as json.
 func (o OptGasRelayAction) Encode(e *jx.Encoder) {
 	if !o.Set {
@@ -39321,13 +39356,20 @@ func (s *Trace) encodeFields(e *jx.Encoder) {
 			s.Emulated.Encode(e)
 		}
 	}
+	{
+		if s.Progress.Set {
+			e.FieldStart("progress")
+			s.Progress.Encode(e)
+		}
+	}
 }
 
-var jsonFieldsNameOfTrace = [4]string{
+var jsonFieldsNameOfTrace = [5]string{
 	0: "transaction",
 	1: "interfaces",
 	2: "children",
 	3: "emulated",
+	4: "progress",
 }
 
 // Decode decodes Trace from json.
@@ -39395,6 +39437,16 @@ func (s *Trace) Decode(d *jx.Decoder) error {
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"emulated\"")
+			}
+		case "progress":
+			if err := func() error {
+				s.Progress.Reset()
+				if err := s.Progress.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"progress\"")
 			}
 		default:
 			return d.Skip()
@@ -39800,9 +39852,13 @@ func (s *Transaction) encodeFields(e *jx.Encoder) {
 		e.FieldStart("raw")
 		e.Str(s.Raw)
 	}
+	{
+		e.FieldStart("emulated")
+		e.Bool(s.Emulated)
+	}
 }
 
-var jsonFieldsNameOfTransaction = [25]string{
+var jsonFieldsNameOfTransaction = [26]string{
 	0:  "hash",
 	1:  "lt",
 	2:  "account",
@@ -39828,6 +39884,7 @@ var jsonFieldsNameOfTransaction = [25]string{
 	22: "aborted",
 	23: "destroyed",
 	24: "raw",
+	25: "emulated",
 }
 
 // Decode decodes Transaction from json.
@@ -40121,6 +40178,18 @@ func (s *Transaction) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"raw\"")
 			}
+		case "emulated":
+			requiredBitSet[3] |= 1 << 1
+			if err := func() error {
+				v, err := d.Bool()
+				s.Emulated = bool(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"emulated\"")
+			}
 		default:
 			return d.Skip()
 		}
@@ -40134,7 +40203,7 @@ func (s *Transaction) Decode(d *jx.Decoder) error {
 		0b11111111,
 		0b01101111,
 		0b11000000,
-		0b00000001,
+		0b00000011,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
