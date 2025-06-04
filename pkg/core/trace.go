@@ -152,6 +152,9 @@ func (t *Trace) CalculateProgress() float32 {
 			calculateProgress(child)
 		}
 	}
+	if all == 0 {
+		return 0
+	}
 	return float32(finished) / float32(all)
 }
 
