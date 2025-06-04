@@ -164,6 +164,14 @@ func (h *Handler) GetTrace(ctx context.Context, params oas.GetTraceParams) (*oas
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
+	if trace.InProgress() {
+		traceId := hash.Hex()
+		trace, _, _, err = h.storage.GetTraceWithState(ctx, traceId[0:len(traceId)/2])
+		if err != nil {
+			h.logger.Warn("get trace from storage: ", zap.Error(err))
+			savedEmulatedTraces.WithLabelValues("error_restore").Inc()
+		}
+	}
 	convertedTrace := convertTrace(trace, h.addressBook)
 	if emulated {
 		setRecursiveEmulated(&convertedTrace)
@@ -193,6 +201,16 @@ func (h *Handler) GetEvent(ctx context.Context, params oas.GetEventParams) (*oas
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
+
+	if trace.InProgress() {
+		hash := traceID.Hex()
+		trace, _, _, err = h.storage.GetTraceWithState(ctx, hash[0:len(hash)/2])
+		if err != nil {
+			h.logger.Warn("get trace from storage: ", zap.Error(err))
+			savedEmulatedTraces.WithLabelValues("error_restore").Inc()
+		}
+	}
+
 	actions, err := bath.FindActions(ctx, trace, bath.WithInformationSource(h.storage))
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
@@ -399,10 +417,7 @@ func (h *Handler) EmulateMessageToAccountEvent(ctx context.Context, request *oas
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
 	}
-	hash, err := c.HashString()
-	if err != nil {
-		return nil, toError(http.StatusBadRequest, err)
-	}
+	hash := m.Hash(true).Hex()
 	trace, version, _, err := h.storage.GetTraceWithState(ctx, hash)
 	if err != nil {
 		h.logger.Warn("get trace from storage: ", zap.Error(err))
@@ -466,12 +481,13 @@ func (h *Handler) EmulateMessageToEvent(ctx context.Context, request *oas.Emulat
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
 	}
+	var m tlb.Message
+	if err := tlb.Unmarshal(c, &m); err != nil {
+		return nil, toError(http.StatusBadRequest, err)
+	}
 	trace, prs := h.mempoolEmulate.traces.Get(hash)
 	if !prs {
-		hs, err := c.HashString()
-		if err != nil {
-			return nil, toError(http.StatusBadRequest, err)
-		}
+		hs := m.Hash(true).Hex()
 		var version int
 		trace, version, _, err = h.storage.GetTraceWithState(ctx, hs)
 		if err != nil {
@@ -481,10 +497,6 @@ func (h *Handler) EmulateMessageToEvent(ctx context.Context, request *oas.Emulat
 		if trace == nil || h.tongoVersion == 0 || version > h.tongoVersion {
 			if version > h.tongoVersion {
 				savedEmulatedTraces.WithLabelValues("expired").Inc()
-			}
-			var m tlb.Message
-			if err := tlb.Unmarshal(c, &m); err != nil {
-				return nil, toError(http.StatusBadRequest, err)
 			}
 			configBase64, err := h.storage.TrimmedConfigBase64()
 			if err != nil {
@@ -541,12 +553,14 @@ func (h *Handler) EmulateMessageToTrace(ctx context.Context, request *oas.Emulat
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
 	}
+	var m tlb.Message
+	err = tlb.Unmarshal(c, &m)
+	if err != nil {
+		return nil, toError(http.StatusBadRequest, err)
+	}
 	trace, prs := h.mempoolEmulate.traces.Get(hash)
 	if !prs {
-		hs, err := c.HashString()
-		if err != nil {
-			return nil, toError(http.StatusBadRequest, err)
-		}
+		hs := m.Hash(true).Hex()
 		var version int
 		trace, version, _, err = h.storage.GetTraceWithState(ctx, hs)
 		if err != nil {
@@ -556,11 +570,6 @@ func (h *Handler) EmulateMessageToTrace(ctx context.Context, request *oas.Emulat
 		if trace == nil || h.tongoVersion == 0 || version > h.tongoVersion {
 			if version > h.tongoVersion {
 				savedEmulatedTraces.WithLabelValues("expired").Inc()
-			}
-			var m tlb.Message
-			err = tlb.Unmarshal(c, &m)
-			if err != nil {
-				return nil, toError(http.StatusBadRequest, err)
 			}
 			configBase64, err := h.storage.TrimmedConfigBase64()
 			if err != nil {
@@ -682,10 +691,7 @@ func (h *Handler) EmulateMessageToWallet(ctx context.Context, request *oas.Emula
 		return nil, toError(http.StatusInternalServerError, err)
 	}
 
-	hash, err := msgCell.HashString()
-	if err != nil {
-		return nil, toError(http.StatusBadRequest, err)
-	}
+	hash := m.Hash(true).Hex()
 	trace, version, _, err := h.storage.GetTraceWithState(ctx, hash)
 	if err != nil {
 		h.logger.Warn("get trace from storage: ", zap.Error(err))
