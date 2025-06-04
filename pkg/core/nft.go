@@ -39,7 +39,7 @@ type NftSaleInfo struct {
 	Seller      *tongo.AccountID
 	Price       struct {
 		Token  *tongo.AccountID
-		Amount uint64
+		Amount string
 	}
 	MarketplaceFee uint64
 	RoyaltyAddress *tongo.AccountID
