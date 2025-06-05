@@ -2770,47 +2770,109 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				}
 
 				elem = origElem
-			case 'p': // Prefix: "pubkeys/"
+			case 'p': // Prefix: "pu"
 				origElem := elem
-				if l := len("pubkeys/"); len(elem) >= l && elem[0:l] == "pubkeys/" {
+				if l := len("pu"); len(elem) >= l && elem[0:l] == "pu" {
 					elem = elem[l:]
 				} else {
 					break
 				}
 
-				// Param: "public_key"
-				// Match until "/"
-				idx := strings.IndexByte(elem, '/')
-				if idx < 0 {
-					idx = len(elem)
-				}
-				args[0] = elem[:idx]
-				elem = elem[idx:]
-
 				if len(elem) == 0 {
 					break
 				}
 				switch elem[0] {
-				case '/': // Prefix: "/wallets"
+				case 'b': // Prefix: "bkeys/"
 					origElem := elem
-					if l := len("/wallets"); len(elem) >= l && elem[0:l] == "/wallets" {
+					if l := len("bkeys/"); len(elem) >= l && elem[0:l] == "bkeys/" {
 						elem = elem[l:]
 					} else {
 						break
 					}
 
+					// Param: "public_key"
+					// Match until "/"
+					idx := strings.IndexByte(elem, '/')
+					if idx < 0 {
+						idx = len(elem)
+					}
+					args[0] = elem[:idx]
+					elem = elem[idx:]
+
 					if len(elem) == 0 {
-						// Leaf node.
-						switch r.Method {
-						case "GET":
-							s.handleGetWalletsByPublicKeyRequest([1]string{
-								args[0],
-							}, elemIsEscaped, w, r)
-						default:
-							s.notAllowed(w, r, "GET")
+						break
+					}
+					switch elem[0] {
+					case '/': // Prefix: "/wallets"
+						origElem := elem
+						if l := len("/wallets"); len(elem) >= l && elem[0:l] == "/wallets" {
+							elem = elem[l:]
+						} else {
+							break
 						}
 
-						return
+						if len(elem) == 0 {
+							// Leaf node.
+							switch r.Method {
+							case "GET":
+								s.handleGetWalletsByPublicKeyRequest([1]string{
+									args[0],
+								}, elemIsEscaped, w, r)
+							default:
+								s.notAllowed(w, r, "GET")
+							}
+
+							return
+						}
+
+						elem = origElem
+					}
+
+					elem = origElem
+				case 'r': // Prefix: "rchases/"
+					origElem := elem
+					if l := len("rchases/"); len(elem) >= l && elem[0:l] == "rchases/" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					// Param: "account_id"
+					// Match until "/"
+					idx := strings.IndexByte(elem, '/')
+					if idx < 0 {
+						idx = len(elem)
+					}
+					args[0] = elem[:idx]
+					elem = elem[idx:]
+
+					if len(elem) == 0 {
+						break
+					}
+					switch elem[0] {
+					case '/': // Prefix: "/history"
+						origElem := elem
+						if l := len("/history"); len(elem) >= l && elem[0:l] == "/history" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						if len(elem) == 0 {
+							// Leaf node.
+							switch r.Method {
+							case "GET":
+								s.handleGetPurchaseHistoryRequest([1]string{
+									args[0],
+								}, elemIsEscaped, w, r)
+							default:
+								s.notAllowed(w, r, "GET")
+							}
+
+							return
+						}
+
+						elem = origElem
 					}
 
 					elem = origElem
@@ -6378,49 +6440,113 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 				}
 
 				elem = origElem
-			case 'p': // Prefix: "pubkeys/"
+			case 'p': // Prefix: "pu"
 				origElem := elem
-				if l := len("pubkeys/"); len(elem) >= l && elem[0:l] == "pubkeys/" {
+				if l := len("pu"); len(elem) >= l && elem[0:l] == "pu" {
 					elem = elem[l:]
 				} else {
 					break
 				}
 
-				// Param: "public_key"
-				// Match until "/"
-				idx := strings.IndexByte(elem, '/')
-				if idx < 0 {
-					idx = len(elem)
-				}
-				args[0] = elem[:idx]
-				elem = elem[idx:]
-
 				if len(elem) == 0 {
 					break
 				}
 				switch elem[0] {
-				case '/': // Prefix: "/wallets"
+				case 'b': // Prefix: "bkeys/"
 					origElem := elem
-					if l := len("/wallets"); len(elem) >= l && elem[0:l] == "/wallets" {
+					if l := len("bkeys/"); len(elem) >= l && elem[0:l] == "bkeys/" {
 						elem = elem[l:]
 					} else {
 						break
 					}
 
+					// Param: "public_key"
+					// Match until "/"
+					idx := strings.IndexByte(elem, '/')
+					if idx < 0 {
+						idx = len(elem)
+					}
+					args[0] = elem[:idx]
+					elem = elem[idx:]
+
 					if len(elem) == 0 {
-						switch method {
-						case "GET":
-							// Leaf: GetWalletsByPublicKey
-							r.name = "GetWalletsByPublicKey"
-							r.summary = ""
-							r.operationID = "getWalletsByPublicKey"
-							r.pathPattern = "/v2/pubkeys/{public_key}/wallets"
-							r.args = args
-							r.count = 1
-							return r, true
-						default:
-							return
+						break
+					}
+					switch elem[0] {
+					case '/': // Prefix: "/wallets"
+						origElem := elem
+						if l := len("/wallets"); len(elem) >= l && elem[0:l] == "/wallets" {
+							elem = elem[l:]
+						} else {
+							break
 						}
+
+						if len(elem) == 0 {
+							switch method {
+							case "GET":
+								// Leaf: GetWalletsByPublicKey
+								r.name = "GetWalletsByPublicKey"
+								r.summary = ""
+								r.operationID = "getWalletsByPublicKey"
+								r.pathPattern = "/v2/pubkeys/{public_key}/wallets"
+								r.args = args
+								r.count = 1
+								return r, true
+							default:
+								return
+							}
+						}
+
+						elem = origElem
+					}
+
+					elem = origElem
+				case 'r': // Prefix: "rchases/"
+					origElem := elem
+					if l := len("rchases/"); len(elem) >= l && elem[0:l] == "rchases/" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					// Param: "account_id"
+					// Match until "/"
+					idx := strings.IndexByte(elem, '/')
+					if idx < 0 {
+						idx = len(elem)
+					}
+					args[0] = elem[:idx]
+					elem = elem[idx:]
+
+					if len(elem) == 0 {
+						break
+					}
+					switch elem[0] {
+					case '/': // Prefix: "/history"
+						origElem := elem
+						if l := len("/history"); len(elem) >= l && elem[0:l] == "/history" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						if len(elem) == 0 {
+							switch method {
+							case "GET":
+								// Leaf: GetPurchaseHistory
+								r.name = "GetPurchaseHistory"
+								r.summary = ""
+								r.operationID = "getPurchaseHistory"
+								r.pathPattern = "/v2/purchases/{account_id}/history"
+								r.args = args
+								r.count = 1
+								return r, true
+							default:
+								return
+							}
+						}
+
+						elem = origElem
 					}
 
 					elem = origElem

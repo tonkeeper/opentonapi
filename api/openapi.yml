@@ -84,6 +84,7 @@ tags:
     externalDocs:
       description: Additional documentation
       url: https://docs.tonconsole.com/tonapi/rest-api/extra-currency
+  - name: Payments
 
 paths:
   /v2/openapi.json:
@@ -2855,6 +2856,41 @@ paths:
                 $ref: '#/components/schemas/AccountEvent'
         'default':
           $ref: '#/components/responses/Error'
+  /v2/purchases/{account_id}/history:
+    get:
+      description: Get history of purchases
+      operationId: getPurchaseHistory
+      tags:
+        - Payments
+      parameters:
+        - $ref: '#/components/parameters/accountIDParameter'
+        - name: before_lt
+          in: query
+          description: "omit this parameter to get last invoices"
+          required: false
+          schema:
+            type: integer
+            format: int64
+            example: 25758317000002
+            x-js-format: bigint
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 100
+            example: 100
+            maximum: 1000
+            minimum: 1
+      responses:
+        '200':
+          description: account purchase history
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountPurchases'
+        'default':
+          $ref: '#/components/responses/Error'
 components:
   parameters:
     masterchainSeqno:
@@ -4681,6 +4717,7 @@ components:
       required:
         - address
         - type
+        - status
       properties:
         address:
           type: string
@@ -4689,6 +4726,8 @@ components:
         type:
           type: string
           example: "subscription_v1"
+        status:
+          '$ref': '#/components/schemas/AccountStatus'
     Wallets:
       type: object
       required:
@@ -5630,12 +5669,16 @@ components:
       type: object
       required:
         - value
+        - decimals
         - token_name
       properties:
         value:
           type: string
           x-js-format: bigint
           example: "123000000000"
+        decimals:
+          type: integer
+          example: 9
         token_name:
           type: string
           example: TON
@@ -6554,6 +6597,67 @@ components:
           type: integer
           format: int64
           example: 25713146000001
+    Purchase:
+      type: object
+      required:
+        - event_id
+        - invoice_id
+        - source
+        - destination
+        - lt
+        - utime
+        - amount
+        - metadata
+      properties:
+        event_id:
+          type: string
+          example: e8b0e3fee4a26bd2317ac1f9952fcdc87dc08fdb617656b5202416323337372e
+        invoice_id:
+          type: string
+          example: 03cfc582-b1c3-410a-a9a7-1f3afe326b3b
+        source:
+          $ref: '#/components/schemas/AccountAddress'
+        destination:
+          $ref: '#/components/schemas/AccountAddress'
+        lt:
+          type: integer
+          format: int64
+          example: 25713146000001
+          x-js-format: bigint
+        utime:
+          type: integer
+          format: int64
+          example: 1645544908
+        amount:
+          $ref: '#/components/schemas/Price'
+        metadata:
+          $ref: '#/components/schemas/Metadata'
+    AccountPurchases:
+      type: object
+      required:
+        - purchases
+        - next_from
+      properties:
+        purchases:
+          type: array
+          items:
+            $ref: '#/components/schemas/Purchase'
+        next_from:
+          type: integer
+          format: int64
+          example: 25713146000001
+    Metadata:
+      type: object
+      required:
+        - encrypted_binary
+      properties:
+        encrypted_binary:
+          type: string
+          description: hex encoded bytes
+        decryption_key:
+          type: string
+          description: hex encoded bytes
+          example: "dead.....beef"
     TraceID:
       type: object
       required:
@@ -6589,62 +6693,50 @@ components:
     Subscription:
       type: object
       required:
-        - address
-        - wallet_address
-        - beneficiary_address
-        - amount
+        - type
+        - status
         - period
-        - start_time
-        - timeout
-        - last_payment_time
-        - last_request_time
         - subscription_id
-        - failed_attempts
+        - payment_per_period
+        - wallet
+        - next_charge_at
+        - metadata
       properties:
+        type:
+          type: string
+          description: type of subscription
+          example: v2
+        status:
+          type: string
+          enum:
+            - not_ready
+            - active
+            - suspended
+            - cancelled
+        period:
+          type: integer
+          description: payment period in seconds
+          format: int64
+          example: 2592000
+        subscription_id:
+          type: string
+          description: common identifier
+        payment_per_period:
+          $ref: '#/components/schemas/Price'
+        wallet:
+          $ref: '#/components/schemas/AccountAddress'
+        next_charge_at:
+          type: integer
+          format: int64
+          example: 1653996834
+        metadata:
+          $ref: '#/components/schemas/Metadata'
         address:
           type: string
           format: address
           example: 0:dea8f638b789172ce36d10a20318125e52c649aa84893cd77858224fe2b9b0ee
-        wallet_address:
-          type: string
-          format: address
-          example: 0:567DE86AF2B6A557D7085807CF7C26338124987A5179344F0D0FA2657EB710F1
-        beneficiary_address:
-          type: string
-          format: address
-          example: 0:c704dadfabac88eab58e340de03080df81ff76636431f48624ad6e26fb2da0a4
-        amount:
-          type: integer
-          format: int64
-          example: 1000000000
-        period:
-          type: integer
-          format: int64
-          example: 2592000
-        start_time:
-          type: integer
-          format: int64
-          example: 1653996832
-        timeout:
-          type: integer
-          format: int64
-          example: 10800
-        last_payment_time:
-          type: integer
-          format: int64
-          example: 1653996834
-        last_request_time:
-          type: integer
-          format: int64
-          example: 0
-        subscription_id:
-          type: integer
-          format: int64
-          example: 217477
-        failed_attempts:
-          type: integer
-          format: int32
-          example: 0
+        beneficiary:
+          $ref: '#/components/schemas/AccountAddress'
     Subscriptions:
       type: object
       required:

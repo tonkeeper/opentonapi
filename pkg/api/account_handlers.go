@@ -408,25 +408,22 @@ func (h *Handler) GetAccountSubscriptions(ctx context.Context, params oas.GetAcc
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
 	}
-	subscriptions, err := h.storage.GetSubscriptions(ctx, account.ID)
+	subscriptionsV1, err := h.storage.GetSubscriptionsV1(ctx, account.ID)
+	if err != nil {
+		return nil, toError(http.StatusInternalServerError, err)
+	}
+	subscriptionsV2, err := h.storage.GetSubscriptionsV2(ctx, account.ID)
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
 	var response oas.Subscriptions
-	for _, subscription := range subscriptions {
-		response.Subscriptions = append(response.Subscriptions, oas.Subscription{
-			Address:            subscription.AccountID.ToRaw(),
-			WalletAddress:      subscription.WalletAccountID.ToRaw(),
-			BeneficiaryAddress: subscription.BeneficiaryAccountID.ToRaw(),
-			Amount:             subscription.Amount,
-			Period:             subscription.Period,
-			StartTime:          subscription.StartTime,
-			Timeout:            subscription.Timeout,
-			LastPaymentTime:    subscription.LastPaymentTime,
-			LastRequestTime:    subscription.LastRequestTime,
-			SubscriptionID:     subscription.SubscriptionID,
-			FailedAttempts:     subscription.FailedAttempts,
-		})
+	for _, subscription := range subscriptionsV1 {
+		sub := h.convertSubscriptionsV1(subscription)
+		response.Subscriptions = append(response.Subscriptions, sub)
+	}
+	for _, subscription := range subscriptionsV2 {
+		sub := h.convertSubscriptionsV2(subscription)
+		response.Subscriptions = append(response.Subscriptions, sub)
 	}
 	return &response, nil
 }
@@ -680,4 +677,61 @@ func (h *Handler) execGetMethod(ctx context.Context, accountID ton.AccountID, me
 		}
 	}
 	return &result, nil
+}
+
+func (h *Handler) convertSubscriptionsV2(sub core.SubscriptionV2) oas.Subscription {
+	res := oas.Subscription{
+		Type:           "v2",
+		Period:         sub.Period,
+		SubscriptionID: fmt.Sprintf("%d", sub.SubscriptionID),
+		Wallet:         convertAccountAddress(sub.WalletAccountID, h.addressBook),
+		NextChargeAt:   sub.ChargeDate,
+	}
+	res.Address.SetTo(sub.AccountID.ToRaw())
+	res.Beneficiary.SetTo(convertAccountAddress(sub.BeneficiaryAccountID, h.addressBook))
+	switch sub.ContractState {
+	case 0:
+		res.Status = oas.SubscriptionStatusNotReady
+	case 1:
+		if time.Now().Unix() > sub.ChargeDate+sub.GracePeriod { // grace period expired
+			res.Status = oas.SubscriptionStatusCancelled
+		} else {
+			res.Status = oas.SubscriptionStatusActive
+		}
+	case 2:
+		res.Status = oas.SubscriptionStatusCancelled
+	}
+	if len(sub.Metadata) > 0 {
+		res.Metadata.SetEncryptedBinary(fmt.Sprintf("%x", sub.Metadata))
+	}
+	res.PaymentPerPeriod = oas.Price{
+		Value:     fmt.Sprintf("%d", sub.PaymentPerPeriod),
+		Decimals:  9,
+		TokenName: "TON",
+	}
+	return res
+}
+
+func (h *Handler) convertSubscriptionsV1(sub core.SubscriptionV1) oas.Subscription {
+	res := oas.Subscription{
+		Type:           "v1",
+		Period:         sub.Period,
+		SubscriptionID: fmt.Sprintf("%d", sub.SubscriptionID),
+		Wallet:         convertAccountAddress(sub.WalletAccountID, h.addressBook),
+	}
+	now := time.Now().Unix()
+	timeslot := max((now-sub.StartTime)/sub.Period, 0)
+	res.NextChargeAt = sub.StartTime + sub.Period*timeslot
+	res.Address.SetTo(sub.AccountID.ToRaw())
+	res.Beneficiary.SetTo(convertAccountAddress(sub.BeneficiaryAccountID, h.addressBook))
+	res.Status = oas.SubscriptionStatusCancelled
+	if sub.Status == tlb.AccountActive {
+		res.Status = oas.SubscriptionStatusActive
+	}
+	res.PaymentPerPeriod = oas.Price{
+		Value:     fmt.Sprintf("%d", sub.Amount),
+		Decimals:  9,
+		TokenName: "TON",
+	}
+	return res
 }

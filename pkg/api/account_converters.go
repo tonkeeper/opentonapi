@@ -153,6 +153,7 @@ func convertToWallet(account *core.Account, ab *addressbook.KnownAddress, state 
 		wallet.Plugins = append(wallet.Plugins, oas.WalletPlugin{
 			Address: plugin.AccountID.ToRaw(),
 			Type:    plugin.Type,
+			Status:  oas.AccountStatus(plugin.Status),
 		})
 	}
 	if state.CheckIsSuspended(account.AccountAddress) {
