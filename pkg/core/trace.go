@@ -237,9 +237,12 @@ func DistinctAccounts(trace *Trace) []tongo.AccountID {
 	return maps.Keys(accounts)
 }
 
-func CopyAdditionalData(ctx context.Context, fromTrace *Trace, toTrace *Trace) *Trace {
+// CopyTraceData copies additional data and transaction data from one trace to another.
+// It copies TraceAdditionalInfo, AccountInterfaces, and the embedded Transaction.
+func CopyTraceData(ctx context.Context, fromTrace *Trace, toTrace *Trace) *Trace {
 	additionalDataByHash := make(map[tongo.Bits256]*TraceAdditionalInfo)
 	interfacesByHash := make(map[tongo.Bits256][]abi.ContractInterface)
+	transactionByHash := make(map[tongo.Bits256]Transaction)
 
 	Visit(fromTrace, func(trace *Trace) {
 		if trace.Hash != (tongo.Bits256{}) {
@@ -249,6 +252,7 @@ func CopyAdditionalData(ctx context.Context, fromTrace *Trace, toTrace *Trace) *
 			if len(trace.AccountInterfaces) > 0 {
 				interfacesByHash[trace.Hash] = trace.AccountInterfaces
 			}
+			transactionByHash[trace.Hash] = trace.Transaction
 		}
 	})
 
@@ -259,6 +263,9 @@ func CopyAdditionalData(ctx context.Context, fromTrace *Trace, toTrace *Trace) *
 			}
 			if interfaces, exists := interfacesByHash[trace.Hash]; exists {
 				trace.SetAccountInterfaces(interfaces)
+			}
+			if transaction, exists := transactionByHash[trace.Hash]; exists {
+				trace.Transaction = transaction
 			}
 		}
 	})
