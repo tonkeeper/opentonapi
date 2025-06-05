@@ -707,6 +707,15 @@ func (UnimplementedHandler) GetOutMsgQueueSizes(ctx context.Context) (r *GetOutM
 	return r, ht.ErrNotImplemented
 }
 
+// GetPurchaseHistory implements getPurchaseHistory operation.
+//
+// Get history of purchases.
+//
+// GET /v2/purchases/{account_id}/history
+func (UnimplementedHandler) GetPurchaseHistory(ctx context.Context, params GetPurchaseHistoryParams) (r *AccountPurchases, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // GetRates implements getRates operation.
 //
 // Get the token price in the chosen currency for display only. Don’t use this for financial

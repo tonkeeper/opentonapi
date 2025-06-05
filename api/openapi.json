@@ -973,6 +973,26 @@
     ],
     "type": "object"
    },
+   "AccountPurchases": {
+    "properties": {
+     "next_from": {
+      "example": 25713146000001,
+      "format": "int64",
+      "type": "integer"
+     },
+     "purchases": {
+      "items": {
+       "$ref": "#/components/schemas/Purchase"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "purchases",
+     "next_from"
+    ],
+    "type": "object"
+   },
    "AccountStaking": {
     "properties": {
      "pools": {
@@ -4362,6 +4382,23 @@
     ],
     "type": "object"
    },
+   "Metadata": {
+    "properties": {
+     "decryption_key": {
+      "description": "hex encoded bytes",
+      "example": "dead.....beef",
+      "type": "string"
+     },
+     "encrypted_binary": {
+      "description": "hex encoded bytes",
+      "type": "string"
+     }
+    },
+    "required": [
+     "encrypted_binary"
+    ],
+    "type": "object"
+   },
    "Method": {
     "properties": {
      "id": {
@@ -5152,6 +5189,10 @@
    },
    "Price": {
     "properties": {
+     "decimals": {
+      "example": 9,
+      "type": "integer"
+     },
      "token_name": {
       "example": "TON",
       "type": "string"
@@ -5164,7 +5205,54 @@
     },
     "required": [
      "value",
+     "decimals",
      "token_name"
+    ],
+    "type": "object"
+   },
+   "Purchase": {
+    "properties": {
+     "amount": {
+      "$ref": "#/components/schemas/Price"
+     },
+     "destination": {
+      "$ref": "#/components/schemas/AccountAddress"
+     },
+     "event_id": {
+      "example": "e8b0e3fee4a26bd2317ac1f9952fcdc87dc08fdb617656b5202416323337372e",
+      "type": "string"
+     },
+     "invoice_id": {
+      "example": "03cfc582-b1c3-410a-a9a7-1f3afe326b3b",
+      "type": "string"
+     },
+     "lt": {
+      "example": 25713146000001,
+      "format": "int64",
+      "type": "integer",
+      "x-js-format": "bigint"
+     },
+     "metadata": {
+      "$ref": "#/components/schemas/Metadata"
+     },
+     "source": {
+      "$ref": "#/components/schemas/AccountAddress"
+     },
+     "utime": {
+      "example": 1645544908,
+      "format": "int64",
+      "type": "integer"
+     }
+    },
+    "required": [
+     "event_id",
+     "invoice_id",
+     "source",
+     "destination",
+     "lt",
+     "utime",
+     "amount",
+     "metadata"
     ],
     "type": "object"
    },
@@ -5665,69 +5753,57 @@
       "format": "address",
       "type": "string"
      },
-     "amount": {
-      "example": 1000000000,
-      "format": "int64",
-      "type": "integer"
+     "beneficiary": {
+      "$ref": "#/components/schemas/AccountAddress"
      },
-     "beneficiary_address": {
-      "example": "0:c704dadfabac88eab58e340de03080df81ff76636431f48624ad6e26fb2da0a4",
-      "format": "address",
-      "type": "string"
+     "metadata": {
+      "$ref": "#/components/schemas/Metadata"
      },
-     "failed_attempts": {
-      "example": 0,
-      "format": "int32",
-      "type": "integer"
-     },
-     "last_payment_time": {
+     "next_charge_at": {
       "example": 1653996834,
       "format": "int64",
       "type": "integer"
      },
-     "last_request_time": {
-      "example": 0,
-      "format": "int64",
-      "type": "integer"
+     "payment_per_period": {
+      "$ref": "#/components/schemas/Price"
      },
      "period": {
+      "description": "payment period in seconds",
       "example": 2592000,
       "format": "int64",
       "type": "integer"
      },
-     "start_time": {
-      "example": 1653996832,
-      "format": "int64",
-      "type": "integer"
+     "status": {
+      "enum": [
+       "not_ready",
+       "active",
+       "suspended",
+       "cancelled"
+      ],
+      "type": "string"
      },
      "subscription_id": {
-      "example": 217477,
-      "format": "int64",
-      "type": "integer"
-     },
-     "timeout": {
-      "example": 10800,
-      "format": "int64",
-      "type": "integer"
-     },
-     "wallet_address": {
-      "example": "0:567DE86AF2B6A557D7085807CF7C26338124987A5179344F0D0FA2657EB710F1",
-      "format": "address",
+      "description": "common identifier",
       "type": "string"
+     },
+     "type": {
+      "description": "type of subscription",
+      "example": "v2",
+      "type": "string"
+     },
+     "wallet": {
+      "$ref": "#/components/schemas/AccountAddress"
      }
     },
     "required": [
-     "address",
-     "wallet_address",
-     "beneficiary_address",
-     "amount",
+     "type",
+     "status",
      "period",
-     "start_time",
-     "timeout",
-     "last_payment_time",
-     "last_request_time",
      "subscription_id",
-     "failed_attempts"
+     "payment_per_period",
+     "wallet",
+     "next_charge_at",
+     "metadata"
     ],
     "type": "object"
    },
@@ -6334,12 +6410,6 @@
       "type": "integer",
       "x-js-format": "bigint"
      },
-     "currencies_balance": {
-      "additionalProperties": true,
-      "description": "{'USD': 1, 'IDR': 1000}",
-      "example": {},
-      "type": "object"
-     },
      "get_methods": {
       "example": [
        "get_item_data"
@@ -6437,6 +6507,9 @@
       "format": "address",
       "type": "string"
      },
+     "status": {
+      "$ref": "#/components/schemas/AccountStatus"
+     },
      "type": {
       "example": "subscription_v1",
       "type": "string"
@@ -6444,7 +6517,8 @@
     },
     "required": [
      "address",
-     "type"
+     "type",
+     "status"
     ],
     "type": "object"
    },
@@ -10349,6 +10423,59 @@
     ]
    }
   },
+  "/v2/purchases/{account_id}/history": {
+   "get": {
+    "description": "Get history of purchases",
+    "operationId": "getPurchaseHistory",
+    "parameters": [
+     {
+      "$ref": "#/components/parameters/accountIDParameter"
+     },
+     {
+      "description": "omit this parameter to get last invoices",
+      "in": "query",
+      "name": "before_lt",
+      "required": false,
+      "schema": {
+       "example": 25758317000002,
+       "format": "int64",
+       "type": "integer",
+       "x-js-format": "bigint"
+      }
+     },
+     {
+      "in": "query",
+      "name": "limit",
+      "required": false,
+      "schema": {
+       "default": 100,
+       "example": 100,
+       "maximum": 1000,
+       "minimum": 1,
+       "type": "integer"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/AccountPurchases"
+        }
+       }
+      },
+      "description": "account purchase history"
+     },
+     "default": {
+      "$ref": "#/components/responses/Error"
+     }
+    },
+    "tags": [
+     "Payments"
+    ]
+   }
+  },
   "/v2/rates": {
    "get": {
     "description": "Get the token price in the chosen currency for display only. Don’t use this for financial transactions.",
@@ -11179,6 +11306,9 @@
     "url": "https://docs.tonconsole.com/tonapi/rest-api/extra-currency"
    },
    "name": "ExtraCurrency"
+  },
+  {
+   "name": "Payments"
   }
  ]
 }
