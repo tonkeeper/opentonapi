@@ -171,6 +171,7 @@ func (h *Handler) GetTrace(ctx context.Context, params oas.GetTraceParams) (*oas
 			h.logger.Warn("get trace from storage: ", zap.Error(err))
 		}
 		if traceEmulated != nil {
+			traceEmulated = core.CopyTraceData(ctx, trace, traceEmulated)
 			trace = traceEmulated
 		}
 	}

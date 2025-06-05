@@ -158,6 +158,8 @@ func (t *Trace) CalculateProgress() float32 {
 			calculateProgress(child)
 		}
 	}
+	calculateProgress(t)
+
 	if all == 0 {
 		return 0
 	}
