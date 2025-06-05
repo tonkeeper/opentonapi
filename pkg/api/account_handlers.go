@@ -408,11 +408,19 @@ func (h *Handler) GetAccountSubscriptions(ctx context.Context, params oas.GetAcc
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
 	}
+	subscriptionsV1, err := h.storage.GetSubscriptionsV1(ctx, account.ID)
+	if err != nil {
+		return nil, toError(http.StatusInternalServerError, err)
+	}
 	subscriptionsV2, err := h.storage.GetSubscriptionsV2(ctx, account.ID)
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
 	var response oas.Subscriptions
+	for _, subscription := range subscriptionsV1 {
+		sub := h.convertSubscriptionsV1(subscription)
+		response.Subscriptions = append(response.Subscriptions, sub)
+	}
 	for _, subscription := range subscriptionsV2 {
 		sub := h.convertSubscriptionsV2(subscription)
 		response.Subscriptions = append(response.Subscriptions, sub)
@@ -698,6 +706,30 @@ func (h *Handler) convertSubscriptionsV2(sub core.SubscriptionV2) oas.Subscripti
 	}
 	res.PaymentPerPeriod = oas.Price{
 		Value:     fmt.Sprintf("%d", sub.PaymentPerPeriod),
+		Decimals:  9,
+		TokenName: "TON",
+	}
+	return res
+}
+
+func (h *Handler) convertSubscriptionsV1(sub core.SubscriptionV1) oas.Subscription {
+	res := oas.Subscription{
+		Type:           "v1",
+		Period:         sub.Period,
+		SubscriptionID: fmt.Sprintf("%d", sub.SubscriptionID),
+		Wallet:         convertAccountAddress(sub.WalletAccountID, h.addressBook),
+	}
+	now := time.Now().Unix()
+	timeslot := max((now-sub.StartTime)/sub.Period, 0)
+	res.NextChargeAt = sub.StartTime + sub.Period*timeslot
+	res.Address.SetTo(sub.AccountID.ToRaw())
+	res.Beneficiary.SetTo(convertAccountAddress(sub.BeneficiaryAccountID, h.addressBook))
+	res.Status = oas.SubscriptionStatusCancelled
+	if sub.Status == tlb.AccountActive {
+		res.Status = oas.SubscriptionStatusActive
+	}
+	res.PaymentPerPeriod = oas.Price{
+		Value:     fmt.Sprintf("%d", sub.Amount),
 		Decimals:  9,
 		TokenName: "TON",
 	}

@@ -19,6 +19,10 @@ func (s *LiteStorage) GetSubscriptionsV2(ctx context.Context, address tongo.Acco
 	return []core.SubscriptionV2{}, nil
 }
 
+func (s *LiteStorage) GetSubscriptionsV1(ctx context.Context, address tongo.AccountID) ([]core.SubscriptionV1, error) {
+	return []core.SubscriptionV1{}, nil
+}
+
 func (s *LiteStorage) GetSeqno(ctx context.Context, account tongo.AccountID) (uint32, error) {
 	return s.client.GetSeqno(ctx, account)
 }
