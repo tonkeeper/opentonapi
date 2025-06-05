@@ -69,6 +69,12 @@ func (t *Trace) SetAdditionalInfo(info *TraceAdditionalInfo) {
 	t.additionalInfo = info
 }
 
+func (t *Trace) SetAccountInterfaces(ifaces []abi.ContractInterface) {
+	t.mu.Lock()
+	defer t.mu.Unlock()
+	t.AccountInterfaces = ifaces
+}
+
 func (t *TraceAdditionalInfo) MarshalJSON() ([]byte, error) {
 	type Alias struct {
 		JettonMasters       map[string]string    `json:",omitempty"`
@@ -229,6 +235,35 @@ func DistinctAccounts(trace *Trace) []tongo.AccountID {
 		accounts[trace.Account] = struct{}{}
 	})
 	return maps.Keys(accounts)
+}
+
+func CopyAdditionalData(ctx context.Context, fromTrace *Trace, toTrace *Trace) *Trace {
+	additionalDataByHash := make(map[tongo.Bits256]*TraceAdditionalInfo)
+	interfacesByHash := make(map[tongo.Bits256][]abi.ContractInterface)
+
+	Visit(fromTrace, func(trace *Trace) {
+		if trace.Hash != (tongo.Bits256{}) {
+			if additionalInfo := trace.AdditionalInfo(); additionalInfo != nil {
+				additionalDataByHash[trace.Hash] = additionalInfo
+			}
+			if len(trace.AccountInterfaces) > 0 {
+				interfacesByHash[trace.Hash] = trace.AccountInterfaces
+			}
+		}
+	})
+
+	Visit(toTrace, func(trace *Trace) {
+		if trace.Hash != (tongo.Bits256{}) {
+			if additionalInfo, exists := additionalDataByHash[trace.Hash]; exists {
+				trace.SetAdditionalInfo(additionalInfo)
+			}
+			if interfaces, exists := interfacesByHash[trace.Hash]; exists {
+				trace.SetAccountInterfaces(interfaces)
+			}
+		}
+	})
+
+	return toTrace
 }
 
 // CollectAdditionalInfo goes over the whole trace
