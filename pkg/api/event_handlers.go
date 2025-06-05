@@ -211,8 +211,8 @@ func (h *Handler) GetEvent(ctx context.Context, params oas.GetEventParams) (*oas
 			h.logger.Warn("get trace from storage: ", zap.Error(err))
 		}
 		if traceEmulated != nil {
-			// we copy additional data from finished transactions. for emulated it will be provided while emulation
-			traceEmulated = core.CopyAdditionalData(ctx, trace, traceEmulated)
+			// we copy data from finished transactions. for emulated it's provided while emulation
+			traceEmulated = core.CopyTraceData(ctx, trace, traceEmulated)
 			trace = traceEmulated
 		}
 	}
