@@ -5952,10 +5952,6 @@
       "example": true,
       "type": "boolean"
      },
-     "emulated": {
-      "example": false,
-      "type": "boolean"
-     },
      "end_balance": {
       "example": 25713146000001,
       "format": "int64",
@@ -6050,8 +6046,7 @@
      "block",
      "aborted",
      "destroyed",
-     "raw",
-     "emulated"
+     "raw"
     ],
     "type": "object"
    },
