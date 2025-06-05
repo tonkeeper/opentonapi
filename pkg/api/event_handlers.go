@@ -165,11 +165,13 @@ func (h *Handler) GetTrace(ctx context.Context, params oas.GetTraceParams) (*oas
 		return nil, toError(http.StatusInternalServerError, err)
 	}
 	if trace.InProgress() {
-		traceId := hash.Hex()
-		trace, _, _, err = h.storage.GetTraceWithState(ctx, traceId[0:len(traceId)/2])
+		traceId := trace.Hash.Hex()
+		traceEmulated, _, _, err := h.storage.GetTraceWithState(ctx, traceId[0:len(traceId)/2])
 		if err != nil {
 			h.logger.Warn("get trace from storage: ", zap.Error(err))
-			savedEmulatedTraces.WithLabelValues("error_restore").Inc()
+		}
+		if traceEmulated != nil {
+			trace = traceEmulated
 		}
 	}
 	convertedTrace := convertTrace(trace, h.addressBook)
@@ -203,11 +205,13 @@ func (h *Handler) GetEvent(ctx context.Context, params oas.GetEventParams) (*oas
 	}
 
 	if trace.InProgress() {
-		hash := traceID.Hex()
-		trace, _, _, err = h.storage.GetTraceWithState(ctx, hash[0:len(hash)/2])
+		hash := trace.Hash.Hex()
+		traceEmulated, _, _, err := h.storage.GetTraceWithState(ctx, hash[0:len(hash)/2])
 		if err != nil {
 			h.logger.Warn("get trace from storage: ", zap.Error(err))
-			savedEmulatedTraces.WithLabelValues("error_restore").Inc()
+		}
+		if traceEmulated != nil {
+			trace = traceEmulated
 		}
 	}
 
