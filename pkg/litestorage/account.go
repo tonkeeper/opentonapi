@@ -15,7 +15,7 @@ import (
 	"github.com/tonkeeper/tongo"
 )
 
-func (s *LiteStorage) GetSubscriptions(ctx context.Context, address tongo.AccountID) ([]core.SubscriptionV2, error) {
+func (s *LiteStorage) GetSubscriptionsV2(ctx context.Context, address tongo.AccountID) ([]core.SubscriptionV2, error) {
 	return []core.SubscriptionV2{}, nil
 }
 
