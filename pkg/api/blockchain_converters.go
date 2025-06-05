@@ -148,7 +148,6 @@ func convertTransaction(t core.Transaction, accountInterfaces []abi.ContractInte
 		Aborted:         t.Aborted,
 		Destroyed:       t.Destroyed,
 		Raw:             hex.EncodeToString(t.Raw),
-		Emulated:        t.Emulated,
 	}
 	if t.PrevTransLt != 0 {
 		tx.PrevTransLt.Value = int64(t.PrevTransLt)

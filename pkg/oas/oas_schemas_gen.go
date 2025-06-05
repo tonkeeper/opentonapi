@@ -16983,8 +16983,7 @@ type Transaction struct {
 	Aborted         bool               `json:"aborted"`
 	Destroyed       bool               `json:"destroyed"`
 	// Hex encoded boc with raw transaction.
-	Raw      string `json:"raw"`
-	Emulated bool   `json:"emulated"`
+	Raw string `json:"raw"`
 }
 
 // GetHash returns the value of Hash.
@@ -17112,11 +17111,6 @@ func (s *Transaction) GetRaw() string {
 	return s.Raw
 }
 
-// GetEmulated returns the value of Emulated.
-func (s *Transaction) GetEmulated() bool {
-	return s.Emulated
-}
-
 // SetHash sets the value of Hash.
 func (s *Transaction) SetHash(val string) {
 	s.Hash = val
@@ -17240,11 +17234,6 @@ func (s *Transaction) SetDestroyed(val bool) {
 // SetRaw sets the value of Raw.
 func (s *Transaction) SetRaw(val string) {
 	s.Raw = val
-}
-
-// SetEmulated sets the value of Emulated.
-func (s *Transaction) SetEmulated(val bool) {
-	s.Emulated = val
 }
 
 // Ref: #/components/schemas/TransactionType

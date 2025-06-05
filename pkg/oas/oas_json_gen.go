@@ -39852,13 +39852,9 @@ func (s *Transaction) encodeFields(e *jx.Encoder) {
 		e.FieldStart("raw")
 		e.Str(s.Raw)
 	}
-	{
-		e.FieldStart("emulated")
-		e.Bool(s.Emulated)
-	}
 }
 
-var jsonFieldsNameOfTransaction = [26]string{
+var jsonFieldsNameOfTransaction = [25]string{
 	0:  "hash",
 	1:  "lt",
 	2:  "account",
@@ -39884,7 +39880,6 @@ var jsonFieldsNameOfTransaction = [26]string{
 	22: "aborted",
 	23: "destroyed",
 	24: "raw",
-	25: "emulated",
 }
 
 // Decode decodes Transaction from json.
@@ -40178,18 +40173,6 @@ func (s *Transaction) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"raw\"")
 			}
-		case "emulated":
-			requiredBitSet[3] |= 1 << 1
-			if err := func() error {
-				v, err := d.Bool()
-				s.Emulated = bool(v)
-				if err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"emulated\"")
-			}
 		default:
 			return d.Skip()
 		}
@@ -40203,7 +40186,7 @@ func (s *Transaction) Decode(d *jx.Decoder) error {
 		0b11111111,
 		0b01101111,
 		0b11000000,
-		0b00000011,
+		0b00000001,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.

@@ -48,7 +48,11 @@ func distinctAccounts(skip *tongo.AccountID, book addressBook, accounts ...*tong
 }
 
 func convertTrace(t *core.Trace, book addressBook) oas.Trace {
-	trace := oas.Trace{Transaction: convertTransaction(t.Transaction, t.AccountInterfaces, book), Interfaces: g.ToStrings(t.AccountInterfaces)}
+	trace := oas.Trace{
+		Transaction: convertTransaction(t.Transaction, t.AccountInterfaces, book),
+		Interfaces:  g.ToStrings(t.AccountInterfaces),
+		Emulated:    oas.OptBool{Set: true, Value: t.Emulated},
+	}
 
 	// if root transaction
 	if t.InMsg.IsExternal() {

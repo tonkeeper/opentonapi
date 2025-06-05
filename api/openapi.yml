@@ -4032,7 +4032,6 @@ components:
         - aborted
         - destroyed
         - raw
-        - emulated
       properties:
         hash:
           type: string
@@ -4111,9 +4110,6 @@ components:
           format: cell
           description: "hex encoded boc with raw transaction"
           example: "b5ee9c72410206010001380003b372cf3b5b8c891e517c9addbda1c0386a09ccacbb0e3faf630b51cfc8152325acb00002ac5795c0e41fdf79135cb7da03cc623b165d614b562a51eeccd8a5e097f405abf6b37f4e73000002ac5629732c1666887ed000144030480102030101a004008272abc8f2971aa4404ac6da1597720f348b2e1247b1ad9f55cbd3b6812f0a5f08b269bb65039fb1f6074d00f794e857f6dfd01131d299df456af10a8a4943d4d165000d0c80608840492001ab48015581f575c3b8c6ab3d6"
-        emulated:
-          type: boolean
-          example: false
     Transactions:
       type: object
       required:
