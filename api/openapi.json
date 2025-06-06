@@ -6411,6 +6411,7 @@
       "x-js-format": "bigint"
      },
      "get_methods": {
+      "deprecated": true,
       "example": [
        "get_item_data"
       ],
@@ -6555,7 +6556,7 @@
    },
    "Wallets": {
     "properties": {
-     "wallets": {
+     "accounts": {
       "items": {
        "$ref": "#/components/schemas/Wallet"
       },
@@ -6563,7 +6564,7 @@
      }
     },
     "required": [
-     "wallets"
+     "accounts"
     ],
     "type": "object"
    },

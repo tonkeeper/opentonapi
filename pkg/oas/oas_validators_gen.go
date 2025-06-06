@@ -5514,11 +5514,11 @@ func (s *Wallets) Validate() error {
 
 	var failures []validate.FieldError
 	if err := func() error {
-		if s.Wallets == nil {
+		if s.Accounts == nil {
 			return errors.New("nil is invalid value")
 		}
 		var failures []validate.FieldError
-		for i, elem := range s.Wallets {
+		for i, elem := range s.Accounts {
 			if err := func() error {
 				if err := elem.Validate(); err != nil {
 					return err
@@ -5537,7 +5537,7 @@ func (s *Wallets) Validate() error {
 		return nil
 	}(); err != nil {
 		failures = append(failures, validate.FieldError{
-			Name:  "wallets",
+			Name:  "accounts",
 			Error: err,
 		})
 	}

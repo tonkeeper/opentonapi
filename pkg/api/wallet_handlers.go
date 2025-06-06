@@ -44,7 +44,7 @@ func (h *Handler) GetWalletsByPublicKey(ctx context.Context, params oas.GetWalle
 		}
 		wallets = append(wallets, *converted)
 	}
-	return &oas.Wallets{Wallets: wallets}, nil
+	return &oas.Wallets{Accounts: wallets}, nil
 }
 
 func (h *Handler) GetAccountSeqno(ctx context.Context, params oas.GetAccountSeqnoParams) (*oas.Seqno, error) {

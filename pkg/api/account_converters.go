@@ -140,8 +140,8 @@ func convertToWallet(account *core.Account, ab *addressbook.KnownAddress, state 
 		Address:      account.AccountAddress.ToRaw(),
 		Balance:      account.TonBalance,
 		LastActivity: account.LastActivityTime,
+		GetMethods:   []string{},
 		Status:       oas.AccountStatus(account.Status),
-		GetMethods:   account.GetMethods,
 		Stats: oas.WalletStats{
 			NftsCount:     stats.NftsCount,
 			JettonsCount:  stats.JettonsCount,

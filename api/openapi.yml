@@ -4731,9 +4731,9 @@ components:
     Wallets:
       type: object
       required:
-        - wallets
+        - accounts
       properties:
-        wallets:
+        accounts:
           type: array
           items:
             $ref: '#/components/schemas/Wallet'
@@ -4778,6 +4778,7 @@ components:
           example: "https://ton.org/logo.png"
         get_methods:
           type: array
+          deprecated: true
           items:
             type: string
           example: [ 'get_item_data' ]

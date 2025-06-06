@@ -41993,9 +41993,9 @@ func (s *Wallets) Encode(e *jx.Encoder) {
 // encodeFields encodes fields.
 func (s *Wallets) encodeFields(e *jx.Encoder) {
 	{
-		e.FieldStart("wallets")
+		e.FieldStart("accounts")
 		e.ArrStart()
-		for _, elem := range s.Wallets {
+		for _, elem := range s.Accounts {
 			elem.Encode(e)
 		}
 		e.ArrEnd()
@@ -42003,7 +42003,7 @@ func (s *Wallets) encodeFields(e *jx.Encoder) {
 }
 
 var jsonFieldsNameOfWallets = [1]string{
-	0: "wallets",
+	0: "accounts",
 }
 
 // Decode decodes Wallets from json.
@@ -42015,23 +42015,23 @@ func (s *Wallets) Decode(d *jx.Decoder) error {
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
-		case "wallets":
+		case "accounts":
 			requiredBitSet[0] |= 1 << 0
 			if err := func() error {
-				s.Wallets = make([]Wallet, 0)
+				s.Accounts = make([]Wallet, 0)
 				if err := d.Arr(func(d *jx.Decoder) error {
 					var elem Wallet
 					if err := elem.Decode(d); err != nil {
 						return err
 					}
-					s.Wallets = append(s.Wallets, elem)
+					s.Accounts = append(s.Accounts, elem)
 					return nil
 				}); err != nil {
 					return err
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"wallets\"")
+				return errors.Wrap(err, "decode field \"accounts\"")
 			}
 		default:
 			return d.Skip()

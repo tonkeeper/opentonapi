@@ -17662,8 +17662,9 @@ type Wallet struct {
 	LastActivity int64     `json:"last_activity"`
 	Name         OptString `json:"name"`
 	Icon         OptString `json:"icon"`
-	GetMethods   []string  `json:"get_methods"`
-	IsSuspended  OptBool   `json:"is_suspended"`
+	// Deprecated: schema marks this property as deprecated.
+	GetMethods  []string `json:"get_methods"`
+	IsSuspended OptBool  `json:"is_suspended"`
 }
 
 // GetAddress returns the value of Address.
@@ -17923,17 +17924,17 @@ func (s *WalletStats) SetStakingCount(val int32) {
 
 // Ref: #/components/schemas/Wallets
 type Wallets struct {
-	Wallets []Wallet `json:"wallets"`
+	Accounts []Wallet `json:"accounts"`
 }
 
-// GetWallets returns the value of Wallets.
-func (s *Wallets) GetWallets() []Wallet {
-	return s.Wallets
+// GetAccounts returns the value of Accounts.
+func (s *Wallets) GetAccounts() []Wallet {
+	return s.Accounts
 }
 
-// SetWallets sets the value of Wallets.
-func (s *Wallets) SetWallets(val []Wallet) {
-	s.Wallets = val
+// SetAccounts sets the value of Accounts.
+func (s *Wallets) SetAccounts(val []Wallet) {
+	s.Accounts = val
 }
 
 // Validator's participation in elections.
