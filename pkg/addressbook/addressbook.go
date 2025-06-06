@@ -302,18 +302,18 @@ func (m *manualAddresser) SearchAttachedAccounts(prefix string) []AttachedAccoun
 }
 
 // refreshAddresses updates the list of known addresses
-func (m *manualAddresser) refreshAddresses(addressPath, jettonPath string, addresses []addresser) error {
+func (m *manualAddresser) refreshAddresses(addressPath, jettonPath string) error {
 	accountAddresses, err := downloadJson[KnownAddress](addressPath)
 	if err != nil {
 		return err
 	}
-	// Use only external addressers for preview image collection
-	addressImages := make(map[string]string)
-	for _, addr := range addresses {
-		for _, attachedAccount := range addr.GetAttachedAccounts() {
-			addressImages[attachedAccount.Wallet.ToRaw()] = attachedAccount.Preview
-		}
-	}
+	//// Use only external addressers for preview image collection
+	//addressImages := make(map[string]string)
+	//for _, addr := range addresses {
+	//	for _, attachedAccount := range addr.GetAttachedAccounts() {
+	//		addressImages[attachedAccount.Wallet.ToRaw()] = attachedAccount.Preview
+	//	}
+	//}
 	jettons, err := downloadJson[KnownJetton](jettonPath)
 	if err != nil {
 		return err
@@ -322,9 +322,9 @@ func (m *manualAddresser) refreshAddresses(addressPath, jettonPath string, addre
 	var attachedAccounts []AttachedAccount
 	// Helper to process an account and convert it into attached accounts
 	process := func(accountID tongo.AccountID, name, image string, accountType AttachedAccountType) {
-		if image == "" {
-			image = addressImages[accountID.ToRaw()]
-		}
+		//if image == "" {
+		//	image = addressImages[accountID.ToRaw()]
+		//}
 		// Generate slug variants and create attached accounts
 		slugs := GenerateSlugVariants(name)
 		for _, slug := range slugs {
@@ -376,12 +376,12 @@ func NewAddressBook(logger *zap.Logger, addressPath, jettonPath, collectionPath 
 	for _, opt := range opts {
 		opt(&options)
 	}
-	externalSources := make([]addresser, 0, len(options.addressers))
-	for _, addr := range options.addressers {
-		if addr != manual {
-			externalSources = append(externalSources, addr)
-		}
-	}
+	//externalSources := make([]addresser, 0, len(options.addressers))
+	//for _, addr := range options.addressers {
+	//	if addr != manual {
+	//		externalSources = append(externalSources, addr)
+	//	}
+	//}
 
 	collections := make(map[tongo.AccountID]KnownCollection)
 	jettons := make(map[tongo.AccountID]KnownJetton)
@@ -397,7 +397,7 @@ func NewAddressBook(logger *zap.Logger, addressPath, jettonPath, collectionPath 
 	}
 	// Start background refreshers
 	go Refresher("gg whitelist", time.Hour, 5*time.Minute, logger, book.getGGWhitelist)
-	go Refresher("addresses", time.Minute*15, 5*time.Minute, logger, func() error { return manual.refreshAddresses(addressPath, jettonPath, externalSources) })
+	go Refresher("addresses", time.Minute*15, 5*time.Minute, logger, func() error { return manual.refreshAddresses(addressPath, jettonPath) })
 	go Refresher("jettons", time.Minute*15, 5*time.Minute, logger, func() error { return book.refreshJettons(jettonPath) })
 	go Refresher("collections", time.Minute*15, 5*time.Minute, logger, func() error { return book.refreshCollections(collectionPath) })
 	book.refreshTfPools(logger) // Refresh tfPools once on initialization as it doesn't need periodic updates
