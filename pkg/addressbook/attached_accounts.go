@@ -39,30 +39,32 @@ func ConvertAttachedAccount(name, slug, image string, account ton.AccountID, wei
 	switch accountType {
 	case TonDomainAccountType, TgDomainAccountType:
 		weight = 1000
-		convertedName = fmt.Sprintf("%v · account", name)
+		convertedName = name + " · account"
 		// Generate image URL for "t.me" subdomains
 		if strings.HasSuffix(name, "t.me") && strings.Count(name, ".") == 2 {
-			image = fmt.Sprintf("https://t.me/i/userpic/320/%v.jpg", strings.TrimSuffix(name, ".t.me"))
+			// Generate specific preview from Telegram if domain matches
+			username := strings.TrimSuffix(name, ".t.me")
+			image = "https://t.me/i/userpic/320/" + username + ".jpg"
 		} else {
 			image = references.PlugAutoCompleteDomain
 		}
 	case JettonSymbolAccountType, JettonNameAccountType:
-		convertedName = fmt.Sprintf("%v · jetton", name)
+		convertedName = name + " · jetton"
 		if image == "" {
 			image = references.PlugAutoCompleteJetton
 		}
 	case NftCollectionAccountType:
-		convertedName = fmt.Sprintf("%v · collection", name)
+		convertedName = name + " · collection"
 		if image == "" {
 			image = references.PlugAutoCompleteCollection
 		}
 	case ManualAccountType:
-		convertedName = fmt.Sprintf("%v · account", name)
+		convertedName = name + " · account"
 		if image == "" {
 			image = references.PlugAutoCompleteAccount
 		}
 	default:
-		return AttachedAccount{}, fmt.Errorf("unknown account type")
+		return AttachedAccount{}, fmt.Errorf("unknown account type: %v", accountType)
 	}
 	if len(image) > 0 { // Generate a preview image
 		image = imgGenerator.DefaultGenerator.GenerateImageUrl(image, 200, 200)
