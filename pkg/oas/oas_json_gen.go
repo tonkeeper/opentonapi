@@ -41263,6 +41263,10 @@ func (s *Wallet) encodeFields(e *jx.Encoder) {
 		e.Str(s.Address)
 	}
 	{
+		e.FieldStart("is_wallet")
+		e.Bool(s.IsWallet)
+	}
+	{
 		e.FieldStart("balance")
 		e.Int64(s.Balance)
 	}
@@ -41312,19 +41316,31 @@ func (s *Wallet) encodeFields(e *jx.Encoder) {
 			s.IsSuspended.Encode(e)
 		}
 	}
+	{
+		if s.Interfaces != nil {
+			e.FieldStart("interfaces")
+			e.ArrStart()
+			for _, elem := range s.Interfaces {
+				e.Str(elem)
+			}
+			e.ArrEnd()
+		}
+	}
 }
 
-var jsonFieldsNameOfWallet = [10]string{
-	0: "address",
-	1: "balance",
-	2: "stats",
-	3: "plugins",
-	4: "status",
-	5: "last_activity",
-	6: "name",
-	7: "icon",
-	8: "get_methods",
-	9: "is_suspended",
+var jsonFieldsNameOfWallet = [12]string{
+	0:  "address",
+	1:  "is_wallet",
+	2:  "balance",
+	3:  "stats",
+	4:  "plugins",
+	5:  "status",
+	6:  "last_activity",
+	7:  "name",
+	8:  "icon",
+	9:  "get_methods",
+	10: "is_suspended",
+	11: "interfaces",
 }
 
 // Decode decodes Wallet from json.
@@ -41348,8 +41364,20 @@ func (s *Wallet) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"address\"")
 			}
-		case "balance":
+		case "is_wallet":
 			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				v, err := d.Bool()
+				s.IsWallet = bool(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"is_wallet\"")
+			}
+		case "balance":
+			requiredBitSet[0] |= 1 << 2
 			if err := func() error {
 				v, err := d.Int64()
 				s.Balance = int64(v)
@@ -41361,7 +41389,7 @@ func (s *Wallet) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"balance\"")
 			}
 		case "stats":
-			requiredBitSet[0] |= 1 << 2
+			requiredBitSet[0] |= 1 << 3
 			if err := func() error {
 				if err := s.Stats.Decode(d); err != nil {
 					return err
@@ -41371,7 +41399,7 @@ func (s *Wallet) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"stats\"")
 			}
 		case "plugins":
-			requiredBitSet[0] |= 1 << 3
+			requiredBitSet[0] |= 1 << 4
 			if err := func() error {
 				s.Plugins = make([]WalletPlugin, 0)
 				if err := d.Arr(func(d *jx.Decoder) error {
@@ -41389,7 +41417,7 @@ func (s *Wallet) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"plugins\"")
 			}
 		case "status":
-			requiredBitSet[0] |= 1 << 4
+			requiredBitSet[0] |= 1 << 5
 			if err := func() error {
 				if err := s.Status.Decode(d); err != nil {
 					return err
@@ -41399,7 +41427,7 @@ func (s *Wallet) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"status\"")
 			}
 		case "last_activity":
-			requiredBitSet[0] |= 1 << 5
+			requiredBitSet[0] |= 1 << 6
 			if err := func() error {
 				v, err := d.Int64()
 				s.LastActivity = int64(v)
@@ -41431,7 +41459,7 @@ func (s *Wallet) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"icon\"")
 			}
 		case "get_methods":
-			requiredBitSet[1] |= 1 << 0
+			requiredBitSet[1] |= 1 << 1
 			if err := func() error {
 				s.GetMethods = make([]string, 0)
 				if err := d.Arr(func(d *jx.Decoder) error {
@@ -41460,6 +41488,25 @@ func (s *Wallet) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"is_suspended\"")
 			}
+		case "interfaces":
+			if err := func() error {
+				s.Interfaces = make([]string, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem string
+					v, err := d.Str()
+					elem = string(v)
+					if err != nil {
+						return err
+					}
+					s.Interfaces = append(s.Interfaces, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"interfaces\"")
+			}
 		default:
 			return d.Skip()
 		}
@@ -41470,8 +41517,8 @@ func (s *Wallet) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [2]uint8{
-		0b00111111,
-		0b00000001,
+		0b01111111,
+		0b00000010,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.

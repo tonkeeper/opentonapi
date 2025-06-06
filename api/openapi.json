@@ -6424,7 +6424,16 @@
       "example": "https://ton.org/logo.png",
       "type": "string"
      },
+     "interfaces": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
      "is_suspended": {
+      "type": "boolean"
+     },
+     "is_wallet": {
       "type": "boolean"
      },
      "last_activity": {
@@ -6457,7 +6466,8 @@
      "plugins",
      "status",
      "last_activity",
-     "get_methods"
+     "get_methods",
+     "is_wallet"
     ],
     "type": "object"
    },

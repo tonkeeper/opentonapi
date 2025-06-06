@@ -98,22 +98,13 @@ func convertToAccount(account *core.Account, ab *addressbook.KnownAddress, state
 		Status:       oas.AccountStatus(account.Status),
 		Interfaces:   make([]string, len(account.Interfaces)),
 		GetMethods:   account.GetMethods,
+		IsWallet:     checkIsWallet(account),
 	}
 	for i, iface := range account.Interfaces {
 		acc.Interfaces[i] = iface.String()
 	}
 	if state.CheckIsSuspended(account.AccountAddress) {
 		acc.IsSuspended.SetTo(true)
-	}
-	if account.Status == tlb.AccountUninit || account.Status == tlb.AccountNone {
-		acc.IsWallet = true
-	} else {
-		for _, i := range account.Interfaces {
-			if i.Implements(abi.Wallet) {
-				acc.IsWallet = true
-				break
-			}
-		}
 	}
 	trust := spamFilter.AccountTrust(account.AccountAddress)
 	if trust == core.TrustBlacklist {
@@ -142,12 +133,17 @@ func convertToWallet(account *core.Account, ab *addressbook.KnownAddress, state 
 		LastActivity: account.LastActivityTime,
 		GetMethods:   []string{},
 		Status:       oas.AccountStatus(account.Status),
+		IsWallet:     checkIsWallet(account),
+		Interfaces:   make([]string, len(account.Interfaces)),
 		Stats: oas.WalletStats{
 			NftsCount:     stats.NftsCount,
 			JettonsCount:  stats.JettonsCount,
 			MultisigCount: stats.MultisigCount,
 			StakingCount:  stats.StakingCount,
 		},
+	}
+	for i, iface := range account.Interfaces {
+		wallet.Interfaces[i] = iface.String()
 	}
 	for _, plugin := range plugins {
 		wallet.Plugins = append(wallet.Plugins, oas.WalletPlugin{
@@ -169,4 +165,16 @@ func convertToWallet(account *core.Account, ab *addressbook.KnownAddress, state 
 		wallet.Icon = oas.NewOptString(imgGenerator.DefaultGenerator.GenerateImageUrl(ab.Image, 200, 200))
 	}
 	return wallet
+}
+
+func checkIsWallet(account *core.Account) bool {
+	if account.Status == tlb.AccountUninit || account.Status == tlb.AccountNone {
+		return true
+	}
+	for _, i := range account.Interfaces {
+		if i.Implements(abi.Wallet) {
+			return true
+		}
+	}
+	return false
 }

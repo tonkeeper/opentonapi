@@ -17653,11 +17653,12 @@ func (s *ValueFlowJettonsItem) SetQuantity(val int64) {
 
 // Ref: #/components/schemas/Wallet
 type Wallet struct {
-	Address string         `json:"address"`
-	Balance int64          `json:"balance"`
-	Stats   WalletStats    `json:"stats"`
-	Plugins []WalletPlugin `json:"plugins"`
-	Status  AccountStatus  `json:"status"`
+	Address  string         `json:"address"`
+	IsWallet bool           `json:"is_wallet"`
+	Balance  int64          `json:"balance"`
+	Stats    WalletStats    `json:"stats"`
+	Plugins  []WalletPlugin `json:"plugins"`
+	Status   AccountStatus  `json:"status"`
 	// Unix timestamp.
 	LastActivity int64     `json:"last_activity"`
 	Name         OptString `json:"name"`
@@ -17665,11 +17666,17 @@ type Wallet struct {
 	// Deprecated: schema marks this property as deprecated.
 	GetMethods  []string `json:"get_methods"`
 	IsSuspended OptBool  `json:"is_suspended"`
+	Interfaces  []string `json:"interfaces"`
 }
 
 // GetAddress returns the value of Address.
 func (s *Wallet) GetAddress() string {
 	return s.Address
+}
+
+// GetIsWallet returns the value of IsWallet.
+func (s *Wallet) GetIsWallet() bool {
+	return s.IsWallet
 }
 
 // GetBalance returns the value of Balance.
@@ -17717,9 +17724,19 @@ func (s *Wallet) GetIsSuspended() OptBool {
 	return s.IsSuspended
 }
 
+// GetInterfaces returns the value of Interfaces.
+func (s *Wallet) GetInterfaces() []string {
+	return s.Interfaces
+}
+
 // SetAddress sets the value of Address.
 func (s *Wallet) SetAddress(val string) {
 	s.Address = val
+}
+
+// SetIsWallet sets the value of IsWallet.
+func (s *Wallet) SetIsWallet(val bool) {
+	s.IsWallet = val
 }
 
 // SetBalance sets the value of Balance.
@@ -17765,6 +17782,11 @@ func (s *Wallet) SetGetMethods(val []string) {
 // SetIsSuspended sets the value of IsSuspended.
 func (s *Wallet) SetIsSuspended(val OptBool) {
 	s.IsSuspended = val
+}
+
+// SetInterfaces sets the value of Interfaces.
+func (s *Wallet) SetInterfaces(val []string) {
+	s.Interfaces = val
 }
 
 // Ref: #/components/schemas/WalletDNS
