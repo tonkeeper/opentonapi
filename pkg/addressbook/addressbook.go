@@ -303,13 +303,16 @@ func (m *manualAddresser) SearchAttachedAccounts(prefix string) []AttachedAccoun
 
 // refreshAddresses updates the list of known addresses
 func (m *manualAddresser) refreshAddresses(addressPath, jettonPath string, addresses []addresser) error {
-	jettonAddresses, err := downloadJson[KnownAddress](addressPath)
+	accountAddresses, err := downloadJson[KnownAddress](addressPath)
 	if err != nil {
 		return err
 	}
-	// Collect preview images from all existing addresses
+	// Use only external addressers for preview image collection
 	addressImages := make(map[string]string)
 	for _, addr := range addresses {
+		if addr == m {
+			continue // Prevent memory loop
+		}
 		for _, attachedAccount := range addr.GetAttachedAccounts() {
 			addressImages[attachedAccount.Wallet.ToRaw()] = attachedAccount.Preview
 		}
@@ -336,11 +339,11 @@ func (m *manualAddresser) refreshAddresses(addressPath, jettonPath string, addre
 			attachedAccounts = append(attachedAccounts, attachedAccount)
 		}
 	}
-	// Process all known addresses
-	for _, item := range jettonAddresses {
+	// Process all known accounts
+	for _, item := range accountAddresses {
 		accountID, err := ton.ParseAccountID(item.Address)
 		if err != nil {
-			return err
+			continue
 		}
 		item.Address = accountID.ToRaw()
 		knownAccounts[accountID] = item
@@ -350,7 +353,7 @@ func (m *manualAddresser) refreshAddresses(addressPath, jettonPath string, addre
 	for _, jetton := range jettons {
 		accountID, err := ton.ParseAccountID(jetton.Address)
 		if err != nil {
-			return err
+			continue
 		}
 		process(accountID, jetton.Name, jetton.Image, JettonNameAccountType)
 	}
