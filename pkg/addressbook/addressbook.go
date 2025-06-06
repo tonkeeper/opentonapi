@@ -310,9 +310,6 @@ func (m *manualAddresser) refreshAddresses(addressPath, jettonPath string, addre
 	// Use only external addressers for preview image collection
 	addressImages := make(map[string]string)
 	for _, addr := range addresses {
-		if addr == m {
-			continue // Prevent memory loop
-		}
 		for _, attachedAccount := range addr.GetAttachedAccounts() {
 			addressImages[attachedAccount.Wallet.ToRaw()] = attachedAccount.Preview
 		}
@@ -379,6 +376,12 @@ func NewAddressBook(logger *zap.Logger, addressPath, jettonPath, collectionPath 
 	for _, opt := range opts {
 		opt(&options)
 	}
+	externalSources := make([]addresser, 0, len(options.addressers))
+	for _, addr := range options.addressers {
+		if addr != manual {
+			externalSources = append(externalSources, addr)
+		}
+	}
 
 	collections := make(map[tongo.AccountID]KnownCollection)
 	jettons := make(map[tongo.AccountID]KnownJetton)
@@ -394,7 +397,7 @@ func NewAddressBook(logger *zap.Logger, addressPath, jettonPath, collectionPath 
 	}
 	// Start background refreshers
 	go Refresher("gg whitelist", time.Hour, 5*time.Minute, logger, book.getGGWhitelist)
-	go Refresher("addresses", time.Minute*15, 5*time.Minute, logger, func() error { return manual.refreshAddresses(addressPath, jettonPath, options.addressers) })
+	go Refresher("addresses", time.Minute*15, 5*time.Minute, logger, func() error { return manual.refreshAddresses(addressPath, jettonPath, externalSources) })
 	go Refresher("jettons", time.Minute*15, 5*time.Minute, logger, func() error { return book.refreshJettons(jettonPath) })
 	go Refresher("collections", time.Minute*15, 5*time.Minute, logger, func() error { return book.refreshCollections(collectionPath) })
 	book.refreshTfPools(logger) // Refresh tfPools once on initialization as it doesn't need periodic updates
