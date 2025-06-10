@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/csv"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"math"
@@ -509,21 +510,39 @@ func convertStonFiPoolResponse(respBody []byte) ([]Pool, []LpAsset, error) {
 			return Pool{}, err
 		}
 		pool := Pool{
-			Assets: []Asset{firstAsset, secondAsset},
+			Assets:    []Asset{firstAsset, secondAsset},
+			Invariant: XYInv, // Default invariant
 		}
-		if len(record) >= 13 {
+		// Process stable swap pool parameters if the record contains enough fields
+		if len(record) >= 15 {
 			additional, err := strconv.ParseFloat(record[11], 64)
 			if err != nil {
 				return Pool{}, err
 			}
-			poolType := record[12]
+			poolType := record[14]
 			switch poolType {
 			case "stableswap":
 				pool.Invariant = IterativeInv
 				pool.Amp = additional
+			case "constant_product":
+				// Default to XYInv; no additional parameters required
 			case "weighted_const_product":
 				pool.Invariant = WXYInv
 				pool.Weight = additional / 1e18
+			case "weighted_stableswap":
+				pool.Invariant = WStableSwapInv
+				pool.Amp = additional / 1e18
+				if record[12] == "NULL" || record[13] == "NULL" {
+					return Pool{}, errors.New("missing rate or w0 for weighted stable swap pool")
+				}
+				if pool.Rate, err = strconv.ParseFloat(record[12], 64); err != nil {
+					return Pool{}, err
+				}
+				if pool.Weight, err = strconv.ParseFloat(record[13], 64); err != nil {
+					return Pool{}, err
+				}
+				pool.Rate /= 1e18
+				pool.Weight /= 1e18
 			}
 		}
 		return pool, nil

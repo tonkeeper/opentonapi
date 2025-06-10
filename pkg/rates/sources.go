@@ -25,7 +25,6 @@ func (m *Mock) GetCurrentRates() (map[string]float64, error) {
 		bemo       = "bemo"
 		beetroot   = "beetroot"
 		tsUSDe     = "tsUSDe"
-		USDe       = "USDe"
 		slpTokens  = "slp_tokens"
 	)
 
@@ -72,7 +71,6 @@ func (m *Mock) GetCurrentRates() (map[string]float64, error) {
 		{bemo, m.getBemoPrice},
 		{beetroot, m.getBeetrootPrice},
 		{tsUSDe, m.getTsUSDePrice},
-		{USDe, m.getUsdEPrice},
 	}
 	for _, pf := range priceFetchers {
 		result, err := retry(pf.label, medianTonPrice, pools, pf.fetch)
@@ -261,41 +259,6 @@ func (m *Mock) getTsUSDePrice(tonPrice float64, _ map[ton.AccountID]float64) (ma
 	}
 	assets := decimal.NewFromBigInt(bigVal, 0)
 	price := assets.Div(refShare).Div(decimal.NewFromFloat(tonPrice)).InexactFloat64()
-
-	return map[ton.AccountID]float64{account: price}, nil
-}
-
-func (m *Mock) getUsdEPrice(tonPrice float64, _ map[ton.AccountID]float64) (map[ton.AccountID]float64, error) {
-	if tonPrice == 0 {
-		return nil, errors.New("unknown TON price")
-	}
-	account := ton.MustParseAccountID("EQAIb6KmdfdDR7CN1GBqVJuP25iCnLKCvBlJ07Evuu2dzP5f")
-
-	url := "https://api.bybit.com/v5/market/tickers?category=spot&symbol=USDEUSDT"
-	headers := http.Header{"Content-Type": {"application/json"}}
-	respBody, err := sendRequest(url, "", headers)
-	if err != nil {
-		return nil, err
-	}
-	result := struct {
-		RetMsg string `json:"retMsg"`
-		Result struct {
-			List []struct {
-				LastPrice string `json:"lastPrice"`
-			} `json:"list"`
-		}
-	}{}
-	if err = json.Unmarshal(respBody, &result); err != nil {
-		return nil, err
-	}
-	if result.RetMsg != "OK" || len(result.Result.List) == 0 {
-		return nil, errors.New("invalid data")
-	}
-	val, err := strconv.ParseFloat(result.Result.List[0].LastPrice, 64)
-	if err != nil {
-		return nil, err
-	}
-	price := val / tonPrice
 
 	return map[ton.AccountID]float64{account: price}, nil
 }
