@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"crypto/ed25519"
 	"encoding/hex"
 	"errors"
 	"fmt"
@@ -25,13 +26,20 @@ func (h *Handler) GetWalletsByPublicKey(ctx context.Context, params oas.GetWalle
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
 	}
-	walletAddresses, err := h.storage.SearchAccountsByPubKey(ctx, publicKey)
-	if err != nil {
-		return nil, toError(http.StatusBadRequest, err)
+	versions := getWalletAddressesByPubkey(publicKey)
+	var addresses []ton.AccountID
+	for addr, _ := range versions {
+		addresses = append(addresses, addr)
 	}
-	rawAccounts, err := h.storage.GetRawAccounts(ctx, walletAddresses)
+	rawAccounts, err := h.storage.GetRawAccounts(ctx, addresses)
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
+	}
+	for i, _ := range rawAccounts {
+		// TODO: or check for wallet interface
+		if len(rawAccounts[i].Interfaces) == 0 {
+			rawAccounts[i].Interfaces = append(rawAccounts[i].Interfaces, versions[rawAccounts[i].AccountAddress])
+		}
 	}
 	wallets := make([]oas.Wallet, 0, len(rawAccounts))
 	for _, rawAccount := range rawAccounts {
@@ -151,4 +159,30 @@ func (h *Handler) processWallet(ctx context.Context, account *core.Account) (*oa
 		converted = convertToWallet(account, nil, h.state, stats[0], plugins)
 	}
 	return &converted, nil, http.StatusOK
+}
+
+var SupportedWallets = map[tongoWallet.Version]abi.ContractInterface{
+	tongoWallet.V1R1:   abi.WalletV1R1,
+	tongoWallet.V1R2:   abi.WalletV1R2,
+	tongoWallet.V1R3:   abi.WalletV1R3,
+	tongoWallet.V2R1:   abi.WalletV2R1,
+	tongoWallet.V2R2:   abi.WalletV2R2,
+	tongoWallet.V3R1:   abi.WalletV3R1,
+	tongoWallet.V3R2:   abi.WalletV3R2,
+	tongoWallet.V4R1:   abi.WalletV4R1,
+	tongoWallet.V4R2:   abi.WalletV4R2,
+	tongoWallet.V5Beta: abi.WalletV5Beta,
+	tongoWallet.V5R1:   abi.WalletV5R1,
+}
+
+func getWalletAddressesByPubkey(pubKey ed25519.PublicKey) map[ton.AccountID]abi.ContractInterface {
+	wallets := make(map[ton.AccountID]abi.ContractInterface, len(SupportedWallets))
+	for version, ifc := range SupportedWallets {
+		walletAddress, err := tongoWallet.GenerateWalletAddress(pubKey, version, nil, 0, nil)
+		if err != nil {
+			continue
+		}
+		wallets[walletAddress] = ifc
+	}
+	return wallets
 }

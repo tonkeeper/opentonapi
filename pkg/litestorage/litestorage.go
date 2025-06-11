@@ -67,9 +67,8 @@ type LiteStorage struct {
 	// maxGoroutines specifies a number of goroutines used to perform some time-consuming operations.
 	maxGoroutines int
 	// trackingAccounts is a list of accounts we track. Defined with ACCOUNTS env variable.
-	trackingAccounts  map[tongo.AccountID]struct{}
-	pubKeyByAccountID *xsync.MapOf[tongo.AccountID, ed25519.PublicKey]
-	configCache       cache.Cache[int, ton.BlockchainConfig]
+	trackingAccounts map[tongo.AccountID]struct{}
+	configCache      cache.Cache[int, ton.BlockchainConfig]
 
 	stopCh chan struct{}
 	// mu protects trimmedConfigBase64.
@@ -148,7 +147,6 @@ func NewLiteStorage(log *zap.Logger, cli *liteapi.Client, opts ...Option) (*Lite
 		transactionsByInMsgLT:   xsync.NewTypedMapOf[inMsgCreatedLT, tongo.Bits256](hashInMsgCreatedLT),
 		blockCache:              xsync.NewTypedMapOf[tongo.BlockIDExt, *tlb.Block](hashBlockIDExt),
 		accountInterfacesCache:  xsync.NewTypedMapOf[tongo.AccountID, []abi.ContractInterface](hashAccountID),
-		pubKeyByAccountID:       xsync.NewTypedMapOf[tongo.AccountID, ed25519.PublicKey](hashAccountID),
 		tvmLibraryCache:         cache.NewLRUCache[string, boc.Cell](10000, "tvm_libraries"),
 		configCache:             cache.NewLRUCache[int, ton.BlockchainConfig](4, "config"),
 	}
@@ -523,10 +521,6 @@ func (s *LiteStorage) GetWalletPubKey(ctx context.Context, address tongo.Account
 			}
 			return append(make([]byte, 32-len(b)), b...), nil
 		}
-	}
-	pubKey, ok := s.pubKeyByAccountID.Load(address)
-	if ok {
-		return pubKey, nil
 	}
 	return nil, fmt.Errorf("can't get public key")
 }
