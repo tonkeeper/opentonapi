@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"crypto/ed25519"
 	"encoding/hex"
 	"errors"
 	"fmt"
@@ -25,11 +26,12 @@ func (h *Handler) GetWalletsByPublicKey(ctx context.Context, params oas.GetWalle
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
 	}
-	walletAddresses, err := h.storage.SearchAccountsByPubKey(ctx, publicKey)
-	if err != nil {
-		return nil, toError(http.StatusBadRequest, err)
+	versions := getWalletAddressesByPubkey(publicKey)
+	var addresses []ton.AccountID
+	for addr, _ := range versions {
+		addresses = append(addresses, addr)
 	}
-	rawAccounts, err := h.storage.GetRawAccounts(ctx, walletAddresses)
+	rawAccounts, err := h.storage.GetRawAccounts(ctx, addresses)
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
@@ -151,4 +153,28 @@ func (h *Handler) processWallet(ctx context.Context, account *core.Account) (*oa
 		converted = convertToWallet(account, nil, h.state, stats[0], plugins)
 	}
 	return &converted, nil, http.StatusOK
+}
+
+func getWalletAddressesByPubkey(pubKey ed25519.PublicKey) map[ton.AccountID]tongoWallet.Version {
+	versions := []tongoWallet.Version{
+		tongoWallet.V1R1,
+		tongoWallet.V1R2,
+		tongoWallet.V1R3,
+		tongoWallet.V2R1,
+		tongoWallet.V2R2,
+		tongoWallet.V3R1,
+		tongoWallet.V3R2,
+		tongoWallet.V4R1,
+		tongoWallet.V4R2,
+		tongoWallet.V5Beta,
+		tongoWallet.V5R1}
+	wallets := make(map[ton.AccountID]tongoWallet.Version, len(versions))
+	for _, version := range versions {
+		walletAddress, err := tongoWallet.GenerateWalletAddress(pubKey, version, nil, 0, nil)
+		if err != nil {
+			continue
+		}
+		wallets[walletAddress] = version
+	}
+	return wallets
 }
