@@ -35,6 +35,12 @@ func (h *Handler) GetWalletsByPublicKey(ctx context.Context, params oas.GetWalle
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
+	for i, _ := range rawAccounts {
+		// TODO: or check for wallet interface
+		if len(rawAccounts[i].Interfaces) == 0 {
+			rawAccounts[i].Interfaces = append(rawAccounts[i].Interfaces, versions[rawAccounts[i].AccountAddress])
+		}
+	}
 	wallets := make([]oas.Wallet, 0, len(rawAccounts))
 	for _, rawAccount := range rawAccounts {
 		converted, err, statusCode := h.processWallet(ctx, rawAccount)
@@ -155,26 +161,28 @@ func (h *Handler) processWallet(ctx context.Context, account *core.Account) (*oa
 	return &converted, nil, http.StatusOK
 }
 
-func getWalletAddressesByPubkey(pubKey ed25519.PublicKey) map[ton.AccountID]tongoWallet.Version {
-	versions := []tongoWallet.Version{
-		tongoWallet.V1R1,
-		tongoWallet.V1R2,
-		tongoWallet.V1R3,
-		tongoWallet.V2R1,
-		tongoWallet.V2R2,
-		tongoWallet.V3R1,
-		tongoWallet.V3R2,
-		tongoWallet.V4R1,
-		tongoWallet.V4R2,
-		tongoWallet.V5Beta,
-		tongoWallet.V5R1}
-	wallets := make(map[ton.AccountID]tongoWallet.Version, len(versions))
-	for _, version := range versions {
+var SupportedWallets = map[tongoWallet.Version]abi.ContractInterface{
+	tongoWallet.V1R1:   abi.WalletV1R1,
+	tongoWallet.V1R2:   abi.WalletV1R2,
+	tongoWallet.V1R3:   abi.WalletV1R3,
+	tongoWallet.V2R1:   abi.WalletV2R1,
+	tongoWallet.V2R2:   abi.WalletV2R2,
+	tongoWallet.V3R1:   abi.WalletV3R1,
+	tongoWallet.V3R2:   abi.WalletV3R2,
+	tongoWallet.V4R1:   abi.WalletV4R1,
+	tongoWallet.V4R2:   abi.WalletV4R2,
+	tongoWallet.V5Beta: abi.WalletV5Beta,
+	tongoWallet.V5R1:   abi.WalletV5R1,
+}
+
+func getWalletAddressesByPubkey(pubKey ed25519.PublicKey) map[ton.AccountID]abi.ContractInterface {
+	wallets := make(map[ton.AccountID]abi.ContractInterface, len(SupportedWallets))
+	for version, ifc := range SupportedWallets {
 		walletAddress, err := tongoWallet.GenerateWalletAddress(pubKey, version, nil, 0, nil)
 		if err != nil {
 			continue
 		}
-		wallets[walletAddress] = version
+		wallets[walletAddress] = ifc
 	}
 	return wallets
 }
