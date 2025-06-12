@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/hex"
 	"fmt"
+	"github.com/tonkeeper/tongo/tlb"
 	"math/big"
 	"sort"
 	"strings"
@@ -397,6 +398,51 @@ func (h *Handler) convertDomainRenew(ctx context.Context, d *bath.DnsRenewAction
 	return action, simplePreview
 }
 
+func (h *Handler) convertInvoicePayment(ctx context.Context, p *bath.InvoicePaymentAction, acceptLanguage string, viewer *tongo.AccountID) (oas.OptInvoicePaymentAction, oas.ActionSimplePreview) {
+	var action oas.OptInvoicePaymentAction
+	amount := oas.Price{
+		Value:     p.Amount.String(),
+		TokenName: "TON",
+		Decimals:  9,
+	}
+	switch {
+	case p.Jetton != nil:
+		meta := h.GetJettonNormalizedMetadata(ctx, *p.Jetton)
+		amount.Decimals = meta.Decimals
+		amount.TokenName = meta.Symbol
+	case p.CurrencyID != nil:
+		meta := references.GetExtraCurrencyMeta(*p.CurrencyID)
+		amount.Decimals = meta.Decimals
+		amount.TokenName = meta.Symbol
+	}
+	action.SetTo(oas.InvoicePaymentAction{
+		Sender:    convertAccountAddress(p.Sender, h.addressBook),
+		Recipient: convertAccountAddress(p.Recipient, h.addressBook),
+		InvoiceID: p.InvoiceID.String(),
+		Amount:    amount,
+	})
+
+	// TODO: extra amount tlb.VarUInteger32
+	value := Scale(tlb.VarUInteger16(p.Amount), amount.Decimals).String()
+	simplePreview := oas.ActionSimplePreview{
+		Name: "Invoice Payment",
+		Description: i18n.T(acceptLanguage, i18n.C{
+			DefaultMessage: &i18n.M{
+				ID:    "invoicePaymentAction",
+				Other: "Payment of {{.Amount}} {{.TokenName}} for invoice {{.InvoiceID}}",
+			},
+			TemplateData: i18n.Template{
+				"Amount":    value,
+				"TokenName": amount.TokenName,
+				"InvoiceID": p.InvoiceID.String(),
+			},
+		}),
+		Accounts: distinctAccounts(viewer, h.addressBook, &p.Sender, &p.Recipient),
+		Value:    oas.NewOptString(value),
+	}
+	return action, simplePreview
+}
+
 func (h *Handler) convertAction(ctx context.Context, viewer *tongo.AccountID, a bath.Action, acceptLanguage oas.OptString) (oas.Action, error) {
 	action := oas.Action{
 		Type:             oas.ActionType(a.Type),
@@ -722,6 +768,8 @@ func (h *Handler) convertAction(ctx context.Context, viewer *tongo.AccountID, a 
 		action.WithdrawStake, action.SimplePreview = h.convertWithdrawStake(a.WithdrawStake, acceptLanguage.Value, viewer)
 	case bath.DomainRenew:
 		action.DomainRenew, action.SimplePreview = h.convertDomainRenew(ctx, a.DnsRenew, acceptLanguage.Value, viewer)
+	case bath.InvoicePayment:
+		action.InvoicePayment, action.SimplePreview = h.convertInvoicePayment(ctx, a.InvoicePayment, acceptLanguage.Value, viewer)
 
 	}
 	return action, nil

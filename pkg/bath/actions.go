@@ -5,6 +5,7 @@ import (
 	"encoding/binary"
 	"encoding/json"
 	"fmt"
+	"github.com/google/uuid"
 	"math/big"
 	"reflect"
 
@@ -37,6 +38,7 @@ const (
 	JettonSwap            ActionType = "JettonSwap"
 	AuctionBid            ActionType = "AuctionBid"
 	DomainRenew           ActionType = "DomainRenew"
+	InvoicePayment        ActionType = "InvoicePayment"
 
 	RefundDnsTg   RefundType = "DNS.tg"
 	RefundDnsTon  RefundType = "DNS.ton"
@@ -86,6 +88,7 @@ type (
 		WithdrawStakeRequest  *WithdrawStakeRequestAction  `json:",omitempty"`
 		JettonSwap            *JettonSwapAction            `json:",omitempty"`
 		DnsRenew              *DnsRenewAction              `json:",omitempty"`
+		InvoicePayment        *InvoicePaymentAction        `json:",omitempty"`
 		Success               bool
 		Type                  ActionType
 		Error                 *string `json:",omitempty"`
@@ -221,6 +224,14 @@ type (
 		JettonMaster tongo.AccountID
 		JettonWallet tongo.AccountID
 	}
+
+	InvoicePaymentAction struct {
+		Sender, Recipient tongo.AccountID
+		InvoiceID         uuid.UUID
+		Amount            big.Int
+		Jetton            *tongo.AccountID
+		CurrencyID        *int32
+	}
 )
 
 func (a Action) String() string {
@@ -270,6 +281,9 @@ func (a Action) ContributeToExtra(account tongo.AccountID) int64 {
 	}
 	switch a.Type {
 	case NftItemTransfer, ContractDeploy, UnSubscription, JettonMint, JettonBurn, WithdrawStakeRequest, DomainRenew, ExtraCurrencyTransfer: // actions without extra
+		return 0
+	case InvoicePayment:
+		// TODO: calculate extra
 		return 0
 	case TonTransfer:
 		return detectDirection(account, a.TonTransfer.Sender, a.TonTransfer.Recipient, a.TonTransfer.Amount)

@@ -703,6 +703,7 @@ type Action struct {
 	JettonSwap            OptJettonSwapAction            `json:"JettonSwap"`
 	SmartContractExec     OptSmartContractAction         `json:"SmartContractExec"`
 	DomainRenew           OptDomainRenewAction           `json:"DomainRenew"`
+	InvoicePayment        OptInvoicePaymentAction        `json:"InvoicePayment"`
 	SimplePreview         ActionSimplePreview            `json:"simple_preview"`
 	BaseTransactions      []string                       `json:"base_transactions"`
 }
@@ -810,6 +811,11 @@ func (s *Action) GetSmartContractExec() OptSmartContractAction {
 // GetDomainRenew returns the value of DomainRenew.
 func (s *Action) GetDomainRenew() OptDomainRenewAction {
 	return s.DomainRenew
+}
+
+// GetInvoicePayment returns the value of InvoicePayment.
+func (s *Action) GetInvoicePayment() OptInvoicePaymentAction {
+	return s.InvoicePayment
 }
 
 // GetSimplePreview returns the value of SimplePreview.
@@ -925,6 +931,11 @@ func (s *Action) SetSmartContractExec(val OptSmartContractAction) {
 // SetDomainRenew sets the value of DomainRenew.
 func (s *Action) SetDomainRenew(val OptDomainRenewAction) {
 	s.DomainRenew = val
+}
+
+// SetInvoicePayment sets the value of InvoicePayment.
+func (s *Action) SetInvoicePayment(val OptInvoicePaymentAction) {
+	s.InvoicePayment = val
 }
 
 // SetSimplePreview sets the value of SimplePreview.
@@ -1154,6 +1165,7 @@ const (
 	ActionTypeElectionsRecoverStake ActionType = "ElectionsRecoverStake"
 	ActionTypeElectionsDepositStake ActionType = "ElectionsDepositStake"
 	ActionTypeDomainRenew           ActionType = "DomainRenew"
+	ActionTypeInvoicePayment        ActionType = "InvoicePayment"
 	ActionTypeUnknown               ActionType = "Unknown"
 )
 
@@ -1179,6 +1191,7 @@ func (ActionType) AllValues() []ActionType {
 		ActionTypeElectionsRecoverStake,
 		ActionTypeElectionsDepositStake,
 		ActionTypeDomainRenew,
+		ActionTypeInvoicePayment,
 		ActionTypeUnknown,
 	}
 }
@@ -1223,6 +1236,8 @@ func (s ActionType) MarshalText() ([]byte, error) {
 	case ActionTypeElectionsDepositStake:
 		return []byte(s), nil
 	case ActionTypeDomainRenew:
+		return []byte(s), nil
+	case ActionTypeInvoicePayment:
 		return []byte(s), nil
 	case ActionTypeUnknown:
 		return []byte(s), nil
@@ -1290,6 +1305,9 @@ func (s *ActionType) UnmarshalText(data []byte) error {
 		return nil
 	case ActionTypeDomainRenew:
 		*s = ActionTypeDomainRenew
+		return nil
+	case ActionTypeInvoicePayment:
+		*s = ActionTypeInvoicePayment
 		return nil
 	case ActionTypeUnknown:
 		*s = ActionTypeUnknown
@@ -7368,6 +7386,54 @@ func (s *InitStateRaw) SetFileHash(val string) {
 	s.FileHash = val
 }
 
+// Ref: #/components/schemas/InvoicePaymentAction
+type InvoicePaymentAction struct {
+	Sender    AccountAddress `json:"sender"`
+	Recipient AccountAddress `json:"recipient"`
+	InvoiceID string         `json:"invoice_id"`
+	Amount    Price          `json:"amount"`
+}
+
+// GetSender returns the value of Sender.
+func (s *InvoicePaymentAction) GetSender() AccountAddress {
+	return s.Sender
+}
+
+// GetRecipient returns the value of Recipient.
+func (s *InvoicePaymentAction) GetRecipient() AccountAddress {
+	return s.Recipient
+}
+
+// GetInvoiceID returns the value of InvoiceID.
+func (s *InvoicePaymentAction) GetInvoiceID() string {
+	return s.InvoiceID
+}
+
+// GetAmount returns the value of Amount.
+func (s *InvoicePaymentAction) GetAmount() Price {
+	return s.Amount
+}
+
+// SetSender sets the value of Sender.
+func (s *InvoicePaymentAction) SetSender(val AccountAddress) {
+	s.Sender = val
+}
+
+// SetRecipient sets the value of Recipient.
+func (s *InvoicePaymentAction) SetRecipient(val AccountAddress) {
+	s.Recipient = val
+}
+
+// SetInvoiceID sets the value of InvoiceID.
+func (s *InvoicePaymentAction) SetInvoiceID(val string) {
+	s.InvoiceID = val
+}
+
+// SetAmount sets the value of Amount.
+func (s *InvoicePaymentAction) SetAmount(val Price) {
+	s.Amount = val
+}
+
 // Ref: #/components/schemas/JettonBalance
 type JettonBalance struct {
 	Balance       string               `json:"balance"`
@@ -13100,6 +13166,52 @@ func (o OptInt64) Get() (v int64, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptInt64) Or(d int64) int64 {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptInvoicePaymentAction returns new OptInvoicePaymentAction with value set to v.
+func NewOptInvoicePaymentAction(v InvoicePaymentAction) OptInvoicePaymentAction {
+	return OptInvoicePaymentAction{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptInvoicePaymentAction is optional InvoicePaymentAction.
+type OptInvoicePaymentAction struct {
+	Value InvoicePaymentAction
+	Set   bool
+}
+
+// IsSet returns true if OptInvoicePaymentAction was set.
+func (o OptInvoicePaymentAction) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptInvoicePaymentAction) Reset() {
+	var v InvoicePaymentAction
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptInvoicePaymentAction) SetTo(v InvoicePaymentAction) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptInvoicePaymentAction) Get() (v InvoicePaymentAction, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptInvoicePaymentAction) Or(d InvoicePaymentAction) InvoicePaymentAction {
 	if v, ok := o.Get(); ok {
 		return v
 	}

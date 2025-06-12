@@ -1133,6 +1133,9 @@
      "ExtraCurrencyTransfer": {
       "$ref": "#/components/schemas/ExtraCurrencyTransferAction"
      },
+     "InvoicePayment": {
+      "$ref": "#/components/schemas/InvoicePaymentAction"
+     },
      "JettonBurn": {
       "$ref": "#/components/schemas/JettonBurnAction"
      },
@@ -1209,6 +1212,7 @@
        "ElectionsRecoverStake",
        "ElectionsDepositStake",
        "DomainRenew",
+       "InvoicePayment",
        "Unknown"
       ],
       "example": "TonTransfer",
@@ -3588,6 +3592,30 @@
      "workchain",
      "root_hash",
      "file_hash"
+    ],
+    "type": "object"
+   },
+   "InvoicePaymentAction": {
+    "properties": {
+     "amount": {
+      "$ref": "#/components/schemas/Price"
+     },
+     "invoice_id": {
+      "example": "03cfc582-b1c3-410a-a9a7-1f3afe326b3b",
+      "type": "string"
+     },
+     "recipient": {
+      "$ref": "#/components/schemas/AccountAddress"
+     },
+     "sender": {
+      "$ref": "#/components/schemas/AccountAddress"
+     }
+    },
+    "required": [
+     "sender",
+     "recipient",
+     "invoice_id",
+     "amount"
     ],
     "type": "object"
    },

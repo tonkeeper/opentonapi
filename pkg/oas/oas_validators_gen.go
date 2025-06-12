@@ -602,6 +602,8 @@ func (s ActionType) Validate() error {
 		return nil
 	case "DomainRenew":
 		return nil
+	case "InvoicePayment":
+		return nil
 	case "Unknown":
 		return nil
 	default:

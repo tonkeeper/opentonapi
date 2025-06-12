@@ -6020,6 +6020,7 @@ components:
             - ElectionsRecoverStake
             - ElectionsDepositStake
             - DomainRenew
+            - InvoicePayment
             - Unknown
         status:
           type: string
@@ -6065,6 +6066,8 @@ components:
           $ref: '#/components/schemas/SmartContractAction'
         DomainRenew:
           $ref: '#/components/schemas/DomainRenewAction'
+        InvoicePayment:
+          $ref: '#/components/schemas/InvoicePaymentAction'
         simple_preview:
           $ref: '#/components/schemas/ActionSimplePreview'
         base_transactions:
@@ -6193,6 +6196,23 @@ components:
           example: "0:da6b1b6663a0e4d18cc8574ccd9db5296e367dd9324706f3bbd9eb1cd2caf0bf"
         renewer:
           $ref: '#/components/schemas/AccountAddress'
+    InvoicePaymentAction:
+      type: object
+      required:
+        - sender
+        - recipient
+        - invoice_id
+        - amount
+      properties:
+        sender:
+          $ref: '#/components/schemas/AccountAddress'
+        recipient:
+          $ref: '#/components/schemas/AccountAddress'
+        invoice_id:
+          type: string
+          example: 03cfc582-b1c3-410a-a9a7-1f3afe326b3b
+        amount:
+          $ref: '#/components/schemas/Price'
     NftItemTransferAction:
       type: object
       required:
