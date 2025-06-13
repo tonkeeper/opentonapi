@@ -283,7 +283,9 @@ func (a Action) ContributeToExtra(account tongo.AccountID) int64 {
 	case NftItemTransfer, ContractDeploy, UnSubscription, JettonMint, JettonBurn, WithdrawStakeRequest, DomainRenew, ExtraCurrencyTransfer: // actions without extra
 		return 0
 	case InvoicePayment:
-		// TODO: calculate extra
+		if a.InvoicePayment.Jetton == nil && a.InvoicePayment.CurrencyID == nil { // ton transfer
+			return detectDirection(account, a.InvoicePayment.Sender, a.InvoicePayment.Recipient, a.InvoicePayment.Amount.Int64())
+		}
 		return 0
 	case TonTransfer:
 		return detectDirection(account, a.TonTransfer.Sender, a.TonTransfer.Recipient, a.TonTransfer.Amount)
