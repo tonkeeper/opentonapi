@@ -6203,6 +6203,7 @@ components:
         - recipient
         - invoice_id
         - amount
+        - metadata
       properties:
         sender:
           $ref: '#/components/schemas/AccountAddress'
@@ -6213,6 +6214,8 @@ components:
           example: 03cfc582-b1c3-410a-a9a7-1f3afe326b3b
         amount:
           $ref: '#/components/schemas/Price'
+        metadata:
+          $ref: '#/components/schemas/Metadata'
     NftItemTransferAction:
       type: object
       required:

@@ -3604,6 +3604,9 @@
       "example": "03cfc582-b1c3-410a-a9a7-1f3afe326b3b",
       "type": "string"
      },
+     "metadata": {
+      "$ref": "#/components/schemas/Metadata"
+     },
      "recipient": {
       "$ref": "#/components/schemas/AccountAddress"
      },
@@ -3615,7 +3618,8 @@
      "sender",
      "recipient",
      "invoice_id",
-     "amount"
+     "amount",
+     "metadata"
     ],
     "type": "object"
    },

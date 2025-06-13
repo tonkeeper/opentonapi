@@ -6,23 +6,27 @@ import (
 	"github.com/tonkeeper/tongo"
 )
 
-type InvoiceMetadataType string
+type PurchaseMetadataType string
+
+type PurchaseMetadata struct {
+	Type    PurchaseMetadataType
+	Payload []byte
+}
 
 const (
-	NoneInvoiceMetadataType            InvoiceMetadataType = "none"
-	TextInvoiceMetadataType            InvoiceMetadataType = "text"
-	EncryptedBinaryInvoiceMetadataType InvoiceMetadataType = "encrypted_binary"
+	NoneMetadataType            PurchaseMetadataType = "none"
+	TextMetadataType            PurchaseMetadataType = "text"
+	EncryptedBinaryMetadataType PurchaseMetadataType = "encrypted_binary"
 )
 
 type InvoicePayment struct {
-	Source       tongo.AccountID
-	Destination  tongo.AccountID
-	TraceID      TraceID
-	InMsgLt      uint64
-	Utime        int64
-	InvoiceID    uuid.UUID
-	Amount       decimal.Decimal
-	Currency     string
-	MetadataType InvoiceMetadataType
-	Metadata     []byte
+	Source      tongo.AccountID
+	Destination tongo.AccountID
+	TraceID     TraceID
+	InMsgLt     uint64
+	Utime       int64
+	InvoiceID   uuid.UUID
+	Amount      decimal.Decimal
+	Currency    string
+	Metadata    PurchaseMetadata
 }

@@ -59,12 +59,13 @@ func prepareEncryptionParameters() (*encryptionParameters, error) {
 }
 
 func (h *Handler) convertPurchaseHistory(ctx context.Context, account ton.AccountID, rawPayments []core.InvoicePayment) ([]oas.Purchase, int64, error) {
-	var (
-		res    []oas.Purchase
-		params *encryptionParameters
-	)
+	var res []oas.Purchase
 	if len(rawPayments) == 0 {
 		return []oas.Purchase{}, 0, nil
+	}
+	params, err := prepareEncryptionParameters()
+	if err != nil {
+		return nil, 0, err
 	}
 	for _, raw := range rawPayments {
 		p := oas.Purchase{
@@ -80,28 +81,34 @@ func (h *Handler) convertPurchaseHistory(ctx context.Context, account ton.Accoun
 			return nil, 0, err
 		}
 		p.Amount = price
-		switch raw.MetadataType {
-		case core.TextInvoiceMetadataType:
-			if params == nil {
-				params, err = prepareEncryptionParameters()
-				if err != nil {
-					return nil, 0, err
-				}
-			}
-			meta, err := convertInvoiceOpenMetadata(*params, raw.Metadata)
-			if err != nil {
-				return nil, 0, err
-			} else {
-				p.Metadata = meta
-			}
-		case core.EncryptedBinaryInvoiceMetadataType:
-			p.Metadata.EncryptedBinary = hex.EncodeToString(raw.Metadata)
-		default:
-			p.Metadata.EncryptedBinary = ""
+		meta, err := convertMetadata(raw.Metadata, params)
+		if err != nil {
+			return nil, 0, err
 		}
+		p.Metadata = meta
 		res = append(res, p)
 	}
 	return res, int64(rawPayments[len(rawPayments)-1].InMsgLt), nil
+}
+
+func convertMetadata(m core.PurchaseMetadata, encryptionParameters *encryptionParameters) (oas.Metadata, error) {
+	var err error
+	switch m.Type {
+	case core.TextMetadataType:
+		params := encryptionParameters
+		if encryptionParameters == nil {
+			params, err = prepareEncryptionParameters()
+			if err != nil {
+				return oas.Metadata{}, err
+			}
+		}
+		return convertInvoiceOpenMetadata(*params, m.Payload)
+	case core.EncryptedBinaryMetadataType:
+		return oas.Metadata{
+			EncryptedBinary: hex.EncodeToString(m.Payload),
+		}, nil
+	}
+	return oas.Metadata{}, nil
 }
 
 func convertInvoiceOpenMetadata(params encryptionParameters, data []byte) (oas.Metadata, error) {

@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"crypto/ed25519"
+	"github.com/google/uuid"
 	"time"
 
 	"github.com/tonkeeper/opentonapi/pkg/gasless"
@@ -116,6 +117,7 @@ type storage interface {
 	GetTraceWithState(ctx context.Context, msgHash string) (*core.Trace, int, []abi.MethodInvocation, error)
 
 	GetAccountInvoicesHistory(ctx context.Context, address tongo.AccountID, limit int, beforeLT *int64) ([]core.InvoicePayment, error)
+	GetInvoice(ctx context.Context, source, destination tongo.AccountID, invoiceID uuid.UUID, currency string) (core.InvoicePayment, error)
 
 	liteStorageRaw
 }

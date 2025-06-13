@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/hex"
 	"fmt"
-	"github.com/tonkeeper/tongo/tlb"
 	"math/big"
 	"sort"
 	"strings"
@@ -399,31 +398,33 @@ func (h *Handler) convertDomainRenew(ctx context.Context, d *bath.DnsRenewAction
 }
 
 func (h *Handler) convertInvoicePayment(ctx context.Context, p *bath.InvoicePaymentAction, acceptLanguage string, viewer *tongo.AccountID) (oas.OptInvoicePaymentAction, oas.ActionSimplePreview) {
-	var action oas.OptInvoicePaymentAction
 	amount := oas.Price{
 		Value:     p.Amount.String(),
 		TokenName: "TON",
 		Decimals:  9,
 	}
+	currency := ""
 	switch {
 	case p.Jetton != nil:
 		meta := h.GetJettonNormalizedMetadata(ctx, *p.Jetton)
 		amount.Decimals = meta.Decimals
 		amount.TokenName = meta.Symbol
+		currency = p.Jetton.ToRaw()
 	case p.CurrencyID != nil:
 		meta := references.GetExtraCurrencyMeta(*p.CurrencyID)
 		amount.Decimals = meta.Decimals
 		amount.TokenName = meta.Symbol
+		currency = fmt.Sprintf("%d", int64(uint32(*p.CurrencyID))) // in db as uint32
 	}
-	action.SetTo(oas.InvoicePaymentAction{
+
+	invoicePaymentAction := oas.InvoicePaymentAction{
 		Sender:    convertAccountAddress(p.Sender, h.addressBook),
 		Recipient: convertAccountAddress(p.Recipient, h.addressBook),
 		InvoiceID: p.InvoiceID.String(),
 		Amount:    amount,
-	})
+	}
 
-	// TODO: extra amount tlb.VarUInteger32
-	value := Scale(tlb.VarUInteger16(p.Amount), amount.Decimals).String()
+	value := ScaleJettons(p.Amount, amount.Decimals).String()
 	simplePreview := oas.ActionSimplePreview{
 		Name: "Invoice Payment",
 		Description: i18n.T(acceptLanguage, i18n.C{
@@ -438,8 +439,17 @@ func (h *Handler) convertInvoicePayment(ctx context.Context, p *bath.InvoicePaym
 			},
 		}),
 		Accounts: distinctAccounts(viewer, h.addressBook, &p.Sender, &p.Recipient),
-		Value:    oas.NewOptString(value),
+		Value:    oas.NewOptString(fmt.Sprintf("%v %v", value, amount.TokenName)),
 	}
+	inv, err := h.storage.GetInvoice(ctx, p.Sender, p.Recipient, p.InvoiceID, currency)
+	if err == nil {
+		meta, err := convertMetadata(inv.Metadata, nil)
+		if err == nil {
+			invoicePaymentAction.Metadata = meta
+		}
+	}
+	var action oas.OptInvoicePaymentAction
+	action.SetTo(invoicePaymentAction)
 	return action, simplePreview
 }
 

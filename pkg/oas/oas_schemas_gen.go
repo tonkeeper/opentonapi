@@ -7392,6 +7392,7 @@ type InvoicePaymentAction struct {
 	Recipient AccountAddress `json:"recipient"`
 	InvoiceID string         `json:"invoice_id"`
 	Amount    Price          `json:"amount"`
+	Metadata  Metadata       `json:"metadata"`
 }
 
 // GetSender returns the value of Sender.
@@ -7414,6 +7415,11 @@ func (s *InvoicePaymentAction) GetAmount() Price {
 	return s.Amount
 }
 
+// GetMetadata returns the value of Metadata.
+func (s *InvoicePaymentAction) GetMetadata() Metadata {
+	return s.Metadata
+}
+
 // SetSender sets the value of Sender.
 func (s *InvoicePaymentAction) SetSender(val AccountAddress) {
 	s.Sender = val
@@ -7432,6 +7438,11 @@ func (s *InvoicePaymentAction) SetInvoiceID(val string) {
 // SetAmount sets the value of Amount.
 func (s *InvoicePaymentAction) SetAmount(val Price) {
 	s.Amount = val
+}
+
+// SetMetadata sets the value of Metadata.
+func (s *InvoicePaymentAction) SetMetadata(val Metadata) {
+	s.Metadata = val
 }
 
 // Ref: #/components/schemas/JettonBalance
