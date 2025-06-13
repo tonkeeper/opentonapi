@@ -5950,6 +5950,13 @@
       },
       "type": "array"
      },
+     "progress": {
+      "example": 0.5,
+      "format": "float",
+      "maximum": 1,
+      "minimum": 0,
+      "type": "number"
+     },
      "transaction": {
       "$ref": "#/components/schemas/Transaction"
      }
