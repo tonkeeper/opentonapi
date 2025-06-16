@@ -84,7 +84,7 @@ tags:
     externalDocs:
       description: Additional documentation
       url: https://docs.tonconsole.com/tonapi/rest-api/extra-currency
-  - name: Payments
+  - name: Purchases
 
 paths:
   /v2/openapi.json:
@@ -2861,7 +2861,7 @@ paths:
       description: Get history of purchases
       operationId: getPurchaseHistory
       tags:
-        - Payments
+        - Purchases
       parameters:
         - $ref: '#/components/parameters/accountIDParameter'
         - name: before_lt
@@ -5673,13 +5673,25 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/JettonBalance'
+    CurrencyType:
+      type: string
+      example: jetton
+      enum:
+        - ton
+        - extra_currency
+        - jetton
     Price:
       type: object
       required:
+        - currency_type
         - value
         - decimals
         - token_name
+        - verification
+        - image
       properties:
+        currency_type:
+          $ref: '#/components/schemas/CurrencyType'
         value:
           type: string
           x-js-format: bigint
@@ -5690,6 +5702,15 @@ components:
         token_name:
           type: string
           example: TON
+        verification:
+          $ref: '#/components/schemas/JettonVerificationType'
+        image:
+          type: string
+          example: https://cache.tonapi.io/images/jetton.jpg
+        jetton:
+          type: string
+          format: address
+          example: 0:0BB5A9F69043EEBDDA5AD2E946EB953242BD8F603FE795D90698CEEC6BFC60A0
     ImagePreview:
       type: object
       required:
@@ -6020,7 +6041,7 @@ components:
             - ElectionsRecoverStake
             - ElectionsDepositStake
             - DomainRenew
-            - InvoicePayment
+            - Purchase
             - Unknown
         status:
           type: string
@@ -6066,8 +6087,8 @@ components:
           $ref: '#/components/schemas/SmartContractAction'
         DomainRenew:
           $ref: '#/components/schemas/DomainRenewAction'
-        InvoicePayment:
-          $ref: '#/components/schemas/InvoicePaymentAction'
+        Purchase:
+          $ref: '#/components/schemas/PurchaseAction'
         simple_preview:
           $ref: '#/components/schemas/ActionSimplePreview'
         base_transactions:
@@ -6196,18 +6217,18 @@ components:
           example: "0:da6b1b6663a0e4d18cc8574ccd9db5296e367dd9324706f3bbd9eb1cd2caf0bf"
         renewer:
           $ref: '#/components/schemas/AccountAddress'
-    InvoicePaymentAction:
+    PurchaseAction:
       type: object
       required:
-        - sender
-        - recipient
+        - source
+        - destination
         - invoice_id
         - amount
         - metadata
       properties:
-        sender:
+        source:
           $ref: '#/components/schemas/AccountAddress'
-        recipient:
+        destination:
           $ref: '#/components/schemas/AccountAddress'
         invoice_id:
           type: string

@@ -1133,9 +1133,6 @@
      "ExtraCurrencyTransfer": {
       "$ref": "#/components/schemas/ExtraCurrencyTransferAction"
      },
-     "InvoicePayment": {
-      "$ref": "#/components/schemas/InvoicePaymentAction"
-     },
      "JettonBurn": {
       "$ref": "#/components/schemas/JettonBurnAction"
      },
@@ -1153,6 +1150,9 @@
      },
      "NftPurchase": {
       "$ref": "#/components/schemas/NftPurchaseAction"
+     },
+     "Purchase": {
+      "$ref": "#/components/schemas/PurchaseAction"
      },
      "SmartContractExec": {
       "$ref": "#/components/schemas/SmartContractAction"
@@ -1212,7 +1212,7 @@
        "ElectionsRecoverStake",
        "ElectionsDepositStake",
        "DomainRenew",
-       "InvoicePayment",
+       "Purchase",
        "Unknown"
       ],
       "example": "TonTransfer",
@@ -2819,6 +2819,15 @@
     ],
     "type": "object"
    },
+   "CurrencyType": {
+    "enum": [
+     "ton",
+     "extra_currency",
+     "jetton"
+    ],
+    "example": "jetton",
+    "type": "string"
+   },
    "DecodedMessage": {
     "properties": {
      "destination": {
@@ -3592,34 +3601,6 @@
      "workchain",
      "root_hash",
      "file_hash"
-    ],
-    "type": "object"
-   },
-   "InvoicePaymentAction": {
-    "properties": {
-     "amount": {
-      "$ref": "#/components/schemas/Price"
-     },
-     "invoice_id": {
-      "example": "03cfc582-b1c3-410a-a9a7-1f3afe326b3b",
-      "type": "string"
-     },
-     "metadata": {
-      "$ref": "#/components/schemas/Metadata"
-     },
-     "recipient": {
-      "$ref": "#/components/schemas/AccountAddress"
-     },
-     "sender": {
-      "$ref": "#/components/schemas/AccountAddress"
-     }
-    },
-    "required": [
-     "sender",
-     "recipient",
-     "invoice_id",
-     "amount",
-     "metadata"
     ],
     "type": "object"
    },
@@ -5221,9 +5202,21 @@
    },
    "Price": {
     "properties": {
+     "currency_type": {
+      "$ref": "#/components/schemas/CurrencyType"
+     },
      "decimals": {
       "example": 9,
       "type": "integer"
+     },
+     "image": {
+      "example": "https://cache.tonapi.io/images/jetton.jpg",
+      "type": "string"
+     },
+     "jetton": {
+      "example": "0:0BB5A9F69043EEBDDA5AD2E946EB953242BD8F603FE795D90698CEEC6BFC60A0",
+      "format": "address",
+      "type": "string"
      },
      "token_name": {
       "example": "TON",
@@ -5233,12 +5226,18 @@
       "example": "123000000000",
       "type": "string",
       "x-js-format": "bigint"
+     },
+     "verification": {
+      "$ref": "#/components/schemas/JettonVerificationType"
      }
     },
     "required": [
+     "currency_type",
      "value",
      "decimals",
-     "token_name"
+     "token_name",
+     "verification",
+     "image"
     ],
     "type": "object"
    },
@@ -5283,6 +5282,34 @@
      "destination",
      "lt",
      "utime",
+     "amount",
+     "metadata"
+    ],
+    "type": "object"
+   },
+   "PurchaseAction": {
+    "properties": {
+     "amount": {
+      "$ref": "#/components/schemas/Price"
+     },
+     "destination": {
+      "$ref": "#/components/schemas/AccountAddress"
+     },
+     "invoice_id": {
+      "example": "03cfc582-b1c3-410a-a9a7-1f3afe326b3b",
+      "type": "string"
+     },
+     "metadata": {
+      "$ref": "#/components/schemas/Metadata"
+     },
+     "source": {
+      "$ref": "#/components/schemas/AccountAddress"
+     }
+    },
+    "required": [
+     "source",
+     "destination",
+     "invoice_id",
      "amount",
      "metadata"
     ],
@@ -10515,7 +10542,7 @@
      }
     },
     "tags": [
-     "Payments"
+     "Purchases"
     ]
    }
   },
@@ -11351,7 +11378,7 @@
    "name": "ExtraCurrency"
   },
   {
-   "name": "Payments"
+   "name": "Purchases"
   }
  ]
 }
