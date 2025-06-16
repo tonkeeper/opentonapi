@@ -12083,12 +12083,14 @@ func (s *CurrencyType) Decode(d *jx.Decoder) error {
 	}
 	// Try to use constant string.
 	switch CurrencyType(v) {
-	case CurrencyTypeTon:
-		*s = CurrencyTypeTon
+	case CurrencyTypeNative:
+		*s = CurrencyTypeNative
 	case CurrencyTypeExtraCurrency:
 		*s = CurrencyTypeExtraCurrency
 	case CurrencyTypeJetton:
 		*s = CurrencyTypeJetton
+	case CurrencyTypeFiat:
+		*s = CurrencyTypeFiat
 	default:
 		*s = CurrencyType(v)
 	}

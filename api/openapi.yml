@@ -5677,9 +5677,10 @@ components:
       type: string
       example: jetton
       enum:
-        - ton
+        - native
         - extra_currency
         - jetton
+        - fiat
     Price:
       type: object
       required:
@@ -5703,7 +5704,7 @@ components:
           type: string
           example: TON
         verification:
-          $ref: '#/components/schemas/JettonVerificationType'
+          $ref: '#/components/schemas/TrustType'
         image:
           type: string
           example: https://cache.tonapi.io/images/jetton.jpg

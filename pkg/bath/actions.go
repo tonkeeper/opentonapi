@@ -38,7 +38,7 @@ const (
 	JettonSwap            ActionType = "JettonSwap"
 	AuctionBid            ActionType = "AuctionBid"
 	DomainRenew           ActionType = "DomainRenew"
-	InvoicePayment        ActionType = "InvoicePayment"
+	Purchase              ActionType = "Purchase"
 
 	RefundDnsTg   RefundType = "DNS.tg"
 	RefundDnsTon  RefundType = "DNS.ton"
@@ -88,7 +88,7 @@ type (
 		WithdrawStakeRequest  *WithdrawStakeRequestAction  `json:",omitempty"`
 		JettonSwap            *JettonSwapAction            `json:",omitempty"`
 		DnsRenew              *DnsRenewAction              `json:",omitempty"`
-		InvoicePayment        *InvoicePaymentAction        `json:",omitempty"`
+		Purchase              *PurchaseAction              `json:",omitempty"`
 		Success               bool
 		Type                  ActionType
 		Error                 *string `json:",omitempty"`
@@ -225,12 +225,10 @@ type (
 		JettonWallet tongo.AccountID
 	}
 
-	InvoicePaymentAction struct {
-		Sender, Recipient tongo.AccountID
-		InvoiceID         uuid.UUID
-		Amount            big.Int
-		Jetton            *tongo.AccountID
-		CurrencyID        *int32
+	PurchaseAction struct {
+		Source, Destination tongo.AccountID
+		InvoiceID           uuid.UUID
+		Price               core.Price
 	}
 )
 
@@ -282,9 +280,9 @@ func (a Action) ContributeToExtra(account tongo.AccountID) int64 {
 	switch a.Type {
 	case NftItemTransfer, ContractDeploy, UnSubscription, JettonMint, JettonBurn, WithdrawStakeRequest, DomainRenew, ExtraCurrencyTransfer: // actions without extra
 		return 0
-	case InvoicePayment:
-		if a.InvoicePayment.Jetton == nil && a.InvoicePayment.CurrencyID == nil { // ton transfer
-			return detectDirection(account, a.InvoicePayment.Sender, a.InvoicePayment.Recipient, a.InvoicePayment.Amount.Int64())
+	case Purchase:
+		if a.Purchase.Price.Type == core.CurrencyTON {
+			return detectDirection(account, a.Purchase.Source, a.Purchase.Destination, a.Purchase.Price.Amount.Int64())
 		}
 		return 0
 	case TonTransfer:

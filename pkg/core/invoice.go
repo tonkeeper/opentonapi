@@ -2,7 +2,6 @@ package core
 
 import (
 	"github.com/google/uuid"
-	"github.com/shopspring/decimal"
 	"github.com/tonkeeper/tongo"
 )
 
@@ -26,7 +25,6 @@ type InvoicePayment struct {
 	InMsgLt     uint64
 	Utime       int64
 	InvoiceID   uuid.UUID
-	Amount      decimal.Decimal
-	Currency    string
+	Amount      Price
 	Metadata    PurchaseMetadata
 }

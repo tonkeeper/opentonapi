@@ -397,59 +397,47 @@ func (h *Handler) convertDomainRenew(ctx context.Context, d *bath.DnsRenewAction
 	return action, simplePreview
 }
 
-func (h *Handler) convertInvoicePayment(ctx context.Context, p *bath.InvoicePaymentAction, acceptLanguage string, viewer *tongo.AccountID) (oas.OptInvoicePaymentAction, oas.ActionSimplePreview) {
-	amount := oas.Price{
-		Value:     p.Amount.String(),
-		TokenName: "TON",
-		Decimals:  9,
-	}
+func (h *Handler) convertPurchaseAction(ctx context.Context, p *bath.PurchaseAction, acceptLanguage string, viewer *tongo.AccountID) (oas.OptPurchaseAction, oas.ActionSimplePreview) {
+	price := h.convertPrice(ctx, p.Price)
 	currency := ""
-	switch {
-	case p.Jetton != nil:
-		meta := h.GetJettonNormalizedMetadata(ctx, *p.Jetton)
-		amount.Decimals = meta.Decimals
-		amount.TokenName = meta.Symbol
-		currency = p.Jetton.ToRaw()
-	case p.CurrencyID != nil:
-		meta := references.GetExtraCurrencyMeta(*p.CurrencyID)
-		amount.Decimals = meta.Decimals
-		amount.TokenName = meta.Symbol
-		currency = fmt.Sprintf("%d", int64(uint32(*p.CurrencyID))) // in db as uint32
+	switch p.Price.Type {
+	case core.CurrencyJetton:
+		currency = p.Price.Jetton.ToRaw()
+	case core.CurrencyExtra:
+		currency = fmt.Sprintf("%d", int64(uint32(*p.Price.CurrencyID))) // in db as uint32
 	}
-
-	invoicePaymentAction := oas.InvoicePaymentAction{
-		Sender:    convertAccountAddress(p.Sender, h.addressBook),
-		Recipient: convertAccountAddress(p.Recipient, h.addressBook),
-		InvoiceID: p.InvoiceID.String(),
-		Amount:    amount,
+	purchaseAction := oas.PurchaseAction{
+		Source:      convertAccountAddress(p.Source, h.addressBook),
+		Destination: convertAccountAddress(p.Destination, h.addressBook),
+		InvoiceID:   p.InvoiceID.String(),
+		Amount:      price,
 	}
-
-	value := ScaleJettons(p.Amount, amount.Decimals).String()
+	value := ScaleJettons(p.Price.Amount, price.Decimals).String()
 	simplePreview := oas.ActionSimplePreview{
-		Name: "Invoice Payment",
+		Name: "Purchase",
 		Description: i18n.T(acceptLanguage, i18n.C{
 			DefaultMessage: &i18n.M{
-				ID:    "invoicePaymentAction",
-				Other: "Payment of {{.Amount}} {{.TokenName}} for invoice {{.InvoiceID}}",
+				ID:    "purchaseAction",
+				Other: "Purchase for {{.Amount}} {{.TokenName}} by invoice {{.InvoiceID}}",
 			},
 			TemplateData: i18n.Template{
 				"Amount":    value,
-				"TokenName": amount.TokenName,
+				"TokenName": price.TokenName,
 				"InvoiceID": p.InvoiceID.String(),
 			},
 		}),
-		Accounts: distinctAccounts(viewer, h.addressBook, &p.Sender, &p.Recipient),
-		Value:    oas.NewOptString(fmt.Sprintf("%v %v", value, amount.TokenName)),
+		Accounts: distinctAccounts(viewer, h.addressBook, &p.Source, &p.Destination),
+		Value:    oas.NewOptString(fmt.Sprintf("%v %v", value, price.TokenName)),
 	}
-	inv, err := h.storage.GetInvoice(ctx, p.Sender, p.Recipient, p.InvoiceID, currency)
+	inv, err := h.storage.GetInvoice(ctx, p.Source, p.Destination, p.InvoiceID, currency)
 	if err == nil {
 		meta, err := convertMetadata(inv.Metadata, nil)
 		if err == nil {
-			invoicePaymentAction.Metadata = meta
+			purchaseAction.Metadata = meta
 		}
 	}
-	var action oas.OptInvoicePaymentAction
-	action.SetTo(invoicePaymentAction)
+	var action oas.OptPurchaseAction
+	action.SetTo(purchaseAction)
 	return action, simplePreview
 }
 
@@ -778,9 +766,8 @@ func (h *Handler) convertAction(ctx context.Context, viewer *tongo.AccountID, a 
 		action.WithdrawStake, action.SimplePreview = h.convertWithdrawStake(a.WithdrawStake, acceptLanguage.Value, viewer)
 	case bath.DomainRenew:
 		action.DomainRenew, action.SimplePreview = h.convertDomainRenew(ctx, a.DnsRenew, acceptLanguage.Value, viewer)
-	case bath.InvoicePayment:
-		action.InvoicePayment, action.SimplePreview = h.convertInvoicePayment(ctx, a.InvoicePayment, acceptLanguage.Value, viewer)
-
+	case bath.Purchase:
+		action.Purchase, action.SimplePreview = h.convertPurchaseAction(ctx, a.Purchase, acceptLanguage.Value, viewer)
 	}
 	return action, nil
 }

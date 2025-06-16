@@ -5,8 +5,6 @@ import (
 	"crypto/ed25519"
 	"crypto/rand"
 	"encoding/hex"
-	"errors"
-	"github.com/shopspring/decimal"
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/opentonapi/pkg/oas"
 	"github.com/tonkeeper/opentonapi/pkg/references"
@@ -14,7 +12,6 @@ import (
 	"github.com/tonkeeper/tongo/ton"
 	"github.com/tonkeeper/tongo/toncrypto"
 	"net/http"
-	"strconv"
 )
 
 func (h *Handler) GetPurchaseHistory(ctx context.Context, params oas.GetPurchaseHistoryParams) (r *oas.AccountPurchases, _ error) {
@@ -76,11 +73,7 @@ func (h *Handler) convertPurchaseHistory(ctx context.Context, account ton.Accoun
 			Lt:          int64(raw.InMsgLt),
 			Utime:       raw.Utime,
 		}
-		price, err := h.convertInvoicePrice(ctx, raw.Amount, raw.Currency)
-		if err != nil {
-			return nil, 0, err
-		}
-		p.Amount = price
+		p.Amount = h.convertPrice(ctx, raw.Amount)
 		meta, err := convertMetadata(raw.Metadata, params)
 		if err != nil {
 			return nil, 0, err
@@ -121,31 +114,41 @@ func convertInvoiceOpenMetadata(params encryptionParameters, data []byte) (oas.M
 	return res, nil
 }
 
-func (h *Handler) convertInvoicePrice(ctx context.Context, amount decimal.Decimal, currency string) (oas.Price, error) {
-	if len(currency) == 0 {
+func (h *Handler) convertPrice(ctx context.Context, price core.Price) oas.Price {
+	switch price.Type {
+	case core.CurrencyTON:
 		return oas.Price{
-			Value:     amount.String(),
-			Decimals:  9,
-			TokenName: "TON",
-		}, nil
-	}
-	jetton, err := ton.ParseAccountID(currency)
-	if err != nil {
-		id, err := strconv.ParseInt(currency, 10, 32)
-		if err != nil {
-			return oas.Price{}, errors.New("unknown currency type")
+			CurrencyType: oas.CurrencyTypeNative,
+			Value:        price.Amount.String(),
+			Decimals:     9,
+			TokenName:    "TON",
+			Verification: oas.TrustTypeWhitelist,
+			Image:        references.TonSymbol,
 		}
-		extraMeta := references.GetExtraCurrencyMeta(int32(id))
+	case core.CurrencyExtra:
+		meta := references.GetExtraCurrencyMeta(*price.CurrencyID)
 		return oas.Price{
-			Value:     amount.String(),
-			Decimals:  extraMeta.Decimals,
-			TokenName: extraMeta.Symbol,
-		}, nil
+			CurrencyType: oas.CurrencyTypeExtraCurrency,
+			Value:        price.Amount.String(),
+			Decimals:     meta.Decimals,
+			TokenName:    meta.Symbol,
+			Verification: oas.TrustTypeWhitelist,
+			Image:        meta.Image,
+		}
+	case core.CurrencyJetton:
+		meta := h.GetJettonNormalizedMetadata(ctx, *price.Jetton)
+		res := oas.Price{
+			CurrencyType: oas.CurrencyTypeJetton,
+			Value:        price.Amount.String(),
+			Decimals:     meta.Decimals,
+			TokenName:    meta.Symbol,
+			Verification: oas.TrustType(meta.Verification),
+			Image:        meta.PreviewImage,
+		}
+		res.Jetton.SetTo(price.Jetton.ToRaw())
+		return res
+	case core.CurrencyFiat:
+		// TODO: fiat not supported yet
 	}
-	jettonMeta := h.GetJettonNormalizedMetadata(ctx, jetton)
-	return oas.Price{
-		Value:     amount.String(),
-		Decimals:  jettonMeta.Decimals,
-		TokenName: jettonMeta.Symbol,
-	}, nil
+	return oas.Price{}
 }

@@ -3,6 +3,7 @@ package bath
 import (
 	"errors"
 	"github.com/google/uuid"
+	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
 	"math/big"
@@ -11,24 +12,20 @@ import (
 type BubbleInvoicePayment struct {
 	Sender, Recipient tongo.AccountID
 	InvoiceID         uuid.UUID
-	Amount            big.Int
-	Jetton            *tongo.AccountID
-	CurrencyID        *int32
+	Price             core.Price
 	Success           bool
 }
 
 func (b BubbleInvoicePayment) ToAction() (action *Action) {
 	return &Action{
-		InvoicePayment: &InvoicePaymentAction{
-			Sender:     b.Sender,
-			Recipient:  b.Recipient,
-			InvoiceID:  b.InvoiceID,
-			Amount:     b.Amount,
-			Jetton:     b.Jetton,
-			CurrencyID: b.CurrencyID,
+		Purchase: &PurchaseAction{
+			Source:      b.Sender,
+			Destination: b.Recipient,
+			InvoiceID:   b.InvoiceID,
+			Price:       b.Price,
 		},
 		Success: b.Success,
-		Type:    InvoicePayment,
+		Type:    Purchase,
 	}
 }
 
@@ -42,10 +39,14 @@ var InvoicePaymentStrawNative = Straw[BubbleInvoicePayment]{
 			return err
 		}
 		newAction.InvoiceID = id
-		newAction.Amount = *big.NewInt(tx.inputAmount)
+		price := core.Price{
+			Type:   core.CurrencyTON,
+			Amount: *big.NewInt(tx.inputAmount),
+		}
 		for c, am := range tx.inputExtraAmount {
-			newAction.Amount = big.Int(am)
-			newAction.CurrencyID = &c
+			price.Type = core.CurrencyExtra
+			price.Amount = big.Int(am)
+			price.CurrencyID = &c
 			break
 		}
 		if tx.inputFrom == nil {
@@ -53,7 +54,8 @@ var InvoicePaymentStrawNative = Straw[BubbleInvoicePayment]{
 		}
 		newAction.Sender = tx.inputFrom.Address
 		newAction.Recipient = tx.account.Address
-		newAction.Success = !tx.bounced // TODO: or success?
+		newAction.Price = price
+		newAction.Success = tx.success // TODO: or not bounced?
 		return nil
 	},
 }
@@ -81,8 +83,11 @@ var InvoicePaymentStrawJetton = Straw[BubbleInvoicePayment]{
 			return err
 		}
 		newAction.InvoiceID = id
-		newAction.Amount = big.Int(jettonTx.amount)
-		newAction.Jetton = &jettonTx.master
+		newAction.Price = core.Price{
+			Type:   core.CurrencyJetton,
+			Amount: big.Int(jettonTx.amount),
+			Jetton: &jettonTx.master,
+		}
 		// sender and recipient already checked for nil
 		newAction.Sender = jettonTx.sender.Address
 		newAction.Recipient = jettonTx.recipient.Address

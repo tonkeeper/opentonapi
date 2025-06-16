@@ -2821,9 +2821,10 @@
    },
    "CurrencyType": {
     "enum": [
-     "ton",
+     "native",
      "extra_currency",
-     "jetton"
+     "jetton",
+     "fiat"
     ],
     "example": "jetton",
     "type": "string"
@@ -5228,7 +5229,7 @@
       "x-js-format": "bigint"
      },
      "verification": {
-      "$ref": "#/components/schemas/JettonVerificationType"
+      "$ref": "#/components/schemas/TrustType"
      }
     },
     "required": [

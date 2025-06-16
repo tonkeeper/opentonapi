@@ -4492,28 +4492,32 @@ func (s *CreditPhase) SetCredit(val int64) {
 type CurrencyType string
 
 const (
-	CurrencyTypeTon           CurrencyType = "ton"
+	CurrencyTypeNative        CurrencyType = "native"
 	CurrencyTypeExtraCurrency CurrencyType = "extra_currency"
 	CurrencyTypeJetton        CurrencyType = "jetton"
+	CurrencyTypeFiat          CurrencyType = "fiat"
 )
 
 // AllValues returns all CurrencyType values.
 func (CurrencyType) AllValues() []CurrencyType {
 	return []CurrencyType{
-		CurrencyTypeTon,
+		CurrencyTypeNative,
 		CurrencyTypeExtraCurrency,
 		CurrencyTypeJetton,
+		CurrencyTypeFiat,
 	}
 }
 
 // MarshalText implements encoding.TextMarshaler.
 func (s CurrencyType) MarshalText() ([]byte, error) {
 	switch s {
-	case CurrencyTypeTon:
+	case CurrencyTypeNative:
 		return []byte(s), nil
 	case CurrencyTypeExtraCurrency:
 		return []byte(s), nil
 	case CurrencyTypeJetton:
+		return []byte(s), nil
+	case CurrencyTypeFiat:
 		return []byte(s), nil
 	default:
 		return nil, errors.Errorf("invalid value: %q", s)
@@ -4523,14 +4527,17 @@ func (s CurrencyType) MarshalText() ([]byte, error) {
 // UnmarshalText implements encoding.TextUnmarshaler.
 func (s *CurrencyType) UnmarshalText(data []byte) error {
 	switch CurrencyType(data) {
-	case CurrencyTypeTon:
-		*s = CurrencyTypeTon
+	case CurrencyTypeNative:
+		*s = CurrencyTypeNative
 		return nil
 	case CurrencyTypeExtraCurrency:
 		*s = CurrencyTypeExtraCurrency
 		return nil
 	case CurrencyTypeJetton:
 		*s = CurrencyTypeJetton
+		return nil
+	case CurrencyTypeFiat:
+		*s = CurrencyTypeFiat
 		return nil
 	default:
 		return errors.Errorf("invalid value: %q", data)
@@ -15180,13 +15187,13 @@ func (s *PoolInfo) SetCycleLength(val OptInt64) {
 
 // Ref: #/components/schemas/Price
 type Price struct {
-	CurrencyType CurrencyType           `json:"currency_type"`
-	Value        string                 `json:"value"`
-	Decimals     int                    `json:"decimals"`
-	TokenName    string                 `json:"token_name"`
-	Verification JettonVerificationType `json:"verification"`
-	Image        string                 `json:"image"`
-	Jetton       OptString              `json:"jetton"`
+	CurrencyType CurrencyType `json:"currency_type"`
+	Value        string       `json:"value"`
+	Decimals     int          `json:"decimals"`
+	TokenName    string       `json:"token_name"`
+	Verification TrustType    `json:"verification"`
+	Image        string       `json:"image"`
+	Jetton       OptString    `json:"jetton"`
 }
 
 // GetCurrencyType returns the value of CurrencyType.
@@ -15210,7 +15217,7 @@ func (s *Price) GetTokenName() string {
 }
 
 // GetVerification returns the value of Verification.
-func (s *Price) GetVerification() JettonVerificationType {
+func (s *Price) GetVerification() TrustType {
 	return s.Verification
 }
 
@@ -15245,7 +15252,7 @@ func (s *Price) SetTokenName(val string) {
 }
 
 // SetVerification sets the value of Verification.
-func (s *Price) SetVerification(val JettonVerificationType) {
+func (s *Price) SetVerification(val TrustType) {
 	s.Verification = val
 }
 

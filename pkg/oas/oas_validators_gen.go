@@ -1929,11 +1929,13 @@ func (s *ContractDeployAction) Validate() error {
 
 func (s CurrencyType) Validate() error {
 	switch s {
-	case "ton":
+	case "native":
 		return nil
 	case "extra_currency":
 		return nil
 	case "jetton":
+		return nil
+	case "fiat":
 		return nil
 	default:
 		return errors.Errorf("invalid value: %v", s)
