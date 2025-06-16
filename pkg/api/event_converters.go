@@ -551,8 +551,8 @@ func (h *Handler) convertAction(ctx context.Context, viewer *tongo.AccountID, a 
 			Accounts: distinctAccounts(viewer, h.addressBook, &a.ContractDeploy.Address),
 		}
 	case bath.NftPurchase:
-		price := a.NftPurchase.Price
-		value := i18n.FormatTONs(price)
+		price := h.convertPrice(ctx, a.NftPurchase.Price)
+		value := ScaleJettons(a.NftPurchase.Price.Amount, price.Decimals).String()
 		items, err := h.storage.GetNFTs(ctx, []tongo.AccountID{a.NftPurchase.Nft})
 		if err != nil {
 			return oas.Action{}, err
@@ -580,12 +580,12 @@ func (h *Handler) convertAction(ctx context.Context, viewer *tongo.AccountID, a 
 				},
 			}),
 			Accounts:   distinctAccounts(viewer, h.addressBook, &a.NftPurchase.Nft, &a.NftPurchase.Buyer),
-			Value:      oas.NewOptString(value),
+			Value:      oas.NewOptString(fmt.Sprintf("%v %v", value, price.TokenName)),
 			ValueImage: oas.NewOptString(nftImage),
 		}
 		action.NftPurchase.SetTo(oas.NftPurchaseAction{
 			AuctionType: oas.NftPurchaseActionAuctionType(a.NftPurchase.AuctionType),
-			Amount:      oas.Price{Value: fmt.Sprintf("%d", price), TokenName: "TON"},
+			Amount:      price,
 			Nft:         nft,
 			Seller:      convertAccountAddress(a.NftPurchase.Seller, h.addressBook),
 			Buyer:       convertAccountAddress(a.NftPurchase.Buyer, h.addressBook),
@@ -688,6 +688,8 @@ func (h *Handler) convertAction(ctx context.Context, viewer *tongo.AccountID, a 
 		}
 	case bath.AuctionBid:
 		var nft oas.OptNftItem
+		price := h.convertPrice(ctx, a.AuctionBid.Amount)
+		value := ScaleJettons(a.NftPurchase.Price.Amount, price.Decimals).String()
 		if a.AuctionBid.Nft == nil && a.AuctionBid.NftAddress != nil {
 			n, err := h.storage.GetNFTs(ctx, []tongo.AccountID{*a.AuctionBid.NftAddress})
 			if err != nil {
@@ -702,10 +704,7 @@ func (h *Handler) convertAction(ctx context.Context, viewer *tongo.AccountID, a 
 		}
 		nft.SetTo(h.convertNFT(ctx, *a.AuctionBid.Nft, h.addressBook, h.metaCache, ""))
 		action.AuctionBid.SetTo(oas.AuctionBidAction{
-			Amount: oas.Price{
-				Value:     fmt.Sprintf("%v", a.AuctionBid.Amount),
-				TokenName: "TON",
-			},
+			Amount:  price,
 			Nft:     nft,
 			Bidder:  convertAccountAddress(a.AuctionBid.Bidder, h.addressBook),
 			Auction: convertAccountAddress(a.AuctionBid.Auction, h.addressBook),
@@ -723,7 +722,7 @@ func (h *Handler) convertAction(ctx context.Context, viewer *tongo.AccountID, a 
 					Other: "Bidding {{.Amount}} for {{.NftName}}",
 				},
 				TemplateData: i18n.Template{
-					"Amount":  i18n.FormatTONs(a.AuctionBid.Amount),
+					"Amount":  oas.NewOptString(fmt.Sprintf("%v %v", value, price.TokenName)),
 					"NftName": optionalFromMeta(nft.Value.Metadata, "name"),
 				},
 			}),

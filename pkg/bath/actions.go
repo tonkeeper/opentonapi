@@ -132,7 +132,7 @@ type (
 		Buyer       tongo.AccountID
 		Seller      tongo.AccountID
 		AuctionType NftAuctionType
-		Price       int64
+		Price       core.Price
 	}
 
 	ElectionsDepositStakeAction struct {
@@ -290,9 +290,15 @@ func (a Action) ContributeToExtra(account tongo.AccountID) int64 {
 	case SmartContractExec:
 		return detectDirection(account, a.SmartContractExec.Executor, a.SmartContractExec.Contract, a.SmartContractExec.TonAttached)
 	case NftPurchase:
-		return detectDirection(account, a.NftPurchase.Buyer, a.NftPurchase.Seller, a.NftPurchase.Price)
+		if a.NftPurchase.Price.Type == core.CurrencyTON {
+			return detectDirection(account, a.NftPurchase.Buyer, a.NftPurchase.Seller, a.NftPurchase.Price.Amount.Int64())
+		}
+		return 0
 	case AuctionBid:
-		return detectDirection(account, a.AuctionBid.Bidder, a.AuctionBid.Auction, a.AuctionBid.Amount)
+		if a.AuctionBid.Amount.Type == core.CurrencyTON {
+			return detectDirection(account, a.AuctionBid.Bidder, a.AuctionBid.Auction, a.AuctionBid.Amount.Amount.Int64())
+		}
+		return 0
 	case ElectionsDepositStake:
 		return detectDirection(account, a.ElectionsDepositStake.Staker, a.ElectionsDepositStake.Elector, a.ElectionsDepositStake.Amount)
 	case ElectionsRecoverStake:
@@ -437,6 +443,11 @@ func (a *DepositStakeAction) SubjectAccounts() []tongo.AccountID {
 func (a *WithdrawStakeAction) SubjectAccounts() []tongo.AccountID {
 	return []tongo.AccountID{a.Staker, a.Pool}
 }
+
 func (a *WithdrawStakeRequestAction) SubjectAccounts() []tongo.AccountID {
 	return []tongo.AccountID{a.Staker, a.Pool}
+}
+
+func (a *PurchaseAction) SubjectAccounts() []tongo.AccountID {
+	return []tongo.AccountID{a.Source, a.Destination}
 }
