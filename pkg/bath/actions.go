@@ -5,6 +5,7 @@ import (
 	"encoding/binary"
 	"encoding/json"
 	"fmt"
+	"github.com/google/uuid"
 	"math/big"
 	"reflect"
 
@@ -37,6 +38,7 @@ const (
 	JettonSwap            ActionType = "JettonSwap"
 	AuctionBid            ActionType = "AuctionBid"
 	DomainRenew           ActionType = "DomainRenew"
+	Purchase              ActionType = "Purchase"
 
 	RefundDnsTg   RefundType = "DNS.tg"
 	RefundDnsTon  RefundType = "DNS.ton"
@@ -86,6 +88,7 @@ type (
 		WithdrawStakeRequest  *WithdrawStakeRequestAction  `json:",omitempty"`
 		JettonSwap            *JettonSwapAction            `json:",omitempty"`
 		DnsRenew              *DnsRenewAction              `json:",omitempty"`
+		Purchase              *PurchaseAction              `json:",omitempty"`
 		Success               bool
 		Type                  ActionType
 		Error                 *string `json:",omitempty"`
@@ -129,7 +132,7 @@ type (
 		Buyer       tongo.AccountID
 		Seller      tongo.AccountID
 		AuctionType NftAuctionType
-		Price       int64
+		Price       core.Price
 	}
 
 	ElectionsDepositStakeAction struct {
@@ -221,6 +224,12 @@ type (
 		JettonMaster tongo.AccountID
 		JettonWallet tongo.AccountID
 	}
+
+	PurchaseAction struct {
+		Source, Destination tongo.AccountID
+		InvoiceID           uuid.UUID
+		Price               core.Price
+	}
 )
 
 func (a Action) String() string {
@@ -271,14 +280,25 @@ func (a Action) ContributeToExtra(account tongo.AccountID) int64 {
 	switch a.Type {
 	case NftItemTransfer, ContractDeploy, UnSubscription, JettonMint, JettonBurn, WithdrawStakeRequest, DomainRenew, ExtraCurrencyTransfer: // actions without extra
 		return 0
+	case Purchase:
+		if a.Purchase.Price.Type == core.CurrencyTON {
+			return detectDirection(account, a.Purchase.Source, a.Purchase.Destination, a.Purchase.Price.Amount.Int64())
+		}
+		return 0
 	case TonTransfer:
 		return detectDirection(account, a.TonTransfer.Sender, a.TonTransfer.Recipient, a.TonTransfer.Amount)
 	case SmartContractExec:
 		return detectDirection(account, a.SmartContractExec.Executor, a.SmartContractExec.Contract, a.SmartContractExec.TonAttached)
 	case NftPurchase:
-		return detectDirection(account, a.NftPurchase.Buyer, a.NftPurchase.Seller, a.NftPurchase.Price)
+		if a.NftPurchase.Price.Type == core.CurrencyTON {
+			return detectDirection(account, a.NftPurchase.Buyer, a.NftPurchase.Seller, a.NftPurchase.Price.Amount.Int64())
+		}
+		return 0
 	case AuctionBid:
-		return detectDirection(account, a.AuctionBid.Bidder, a.AuctionBid.Auction, a.AuctionBid.Amount)
+		if a.AuctionBid.Amount.Type == core.CurrencyTON {
+			return detectDirection(account, a.AuctionBid.Bidder, a.AuctionBid.Auction, a.AuctionBid.Amount.Amount.Int64())
+		}
+		return 0
 	case ElectionsDepositStake:
 		return detectDirection(account, a.ElectionsDepositStake.Staker, a.ElectionsDepositStake.Elector, a.ElectionsDepositStake.Amount)
 	case ElectionsRecoverStake:
@@ -423,6 +443,11 @@ func (a *DepositStakeAction) SubjectAccounts() []tongo.AccountID {
 func (a *WithdrawStakeAction) SubjectAccounts() []tongo.AccountID {
 	return []tongo.AccountID{a.Staker, a.Pool}
 }
+
 func (a *WithdrawStakeRequestAction) SubjectAccounts() []tongo.AccountID {
 	return []tongo.AccountID{a.Staker, a.Pool}
+}
+
+func (a *PurchaseAction) SubjectAccounts() []tongo.AccountID {
+	return []tongo.AccountID{a.Source, a.Destination}
 }

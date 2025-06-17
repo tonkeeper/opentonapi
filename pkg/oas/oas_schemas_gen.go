@@ -703,6 +703,7 @@ type Action struct {
 	JettonSwap            OptJettonSwapAction            `json:"JettonSwap"`
 	SmartContractExec     OptSmartContractAction         `json:"SmartContractExec"`
 	DomainRenew           OptDomainRenewAction           `json:"DomainRenew"`
+	Purchase              OptPurchaseAction              `json:"Purchase"`
 	SimplePreview         ActionSimplePreview            `json:"simple_preview"`
 	BaseTransactions      []string                       `json:"base_transactions"`
 }
@@ -810,6 +811,11 @@ func (s *Action) GetSmartContractExec() OptSmartContractAction {
 // GetDomainRenew returns the value of DomainRenew.
 func (s *Action) GetDomainRenew() OptDomainRenewAction {
 	return s.DomainRenew
+}
+
+// GetPurchase returns the value of Purchase.
+func (s *Action) GetPurchase() OptPurchaseAction {
+	return s.Purchase
 }
 
 // GetSimplePreview returns the value of SimplePreview.
@@ -925,6 +931,11 @@ func (s *Action) SetSmartContractExec(val OptSmartContractAction) {
 // SetDomainRenew sets the value of DomainRenew.
 func (s *Action) SetDomainRenew(val OptDomainRenewAction) {
 	s.DomainRenew = val
+}
+
+// SetPurchase sets the value of Purchase.
+func (s *Action) SetPurchase(val OptPurchaseAction) {
+	s.Purchase = val
 }
 
 // SetSimplePreview sets the value of SimplePreview.
@@ -1154,6 +1165,7 @@ const (
 	ActionTypeElectionsRecoverStake ActionType = "ElectionsRecoverStake"
 	ActionTypeElectionsDepositStake ActionType = "ElectionsDepositStake"
 	ActionTypeDomainRenew           ActionType = "DomainRenew"
+	ActionTypePurchase              ActionType = "Purchase"
 	ActionTypeUnknown               ActionType = "Unknown"
 )
 
@@ -1179,6 +1191,7 @@ func (ActionType) AllValues() []ActionType {
 		ActionTypeElectionsRecoverStake,
 		ActionTypeElectionsDepositStake,
 		ActionTypeDomainRenew,
+		ActionTypePurchase,
 		ActionTypeUnknown,
 	}
 }
@@ -1223,6 +1236,8 @@ func (s ActionType) MarshalText() ([]byte, error) {
 	case ActionTypeElectionsDepositStake:
 		return []byte(s), nil
 	case ActionTypeDomainRenew:
+		return []byte(s), nil
+	case ActionTypePurchase:
 		return []byte(s), nil
 	case ActionTypeUnknown:
 		return []byte(s), nil
@@ -1290,6 +1305,9 @@ func (s *ActionType) UnmarshalText(data []byte) error {
 		return nil
 	case ActionTypeDomainRenew:
 		*s = ActionTypeDomainRenew
+		return nil
+	case ActionTypePurchase:
+		*s = ActionTypePurchase
 		return nil
 	case ActionTypeUnknown:
 		*s = ActionTypeUnknown
@@ -4468,6 +4486,62 @@ func (s *CreditPhase) SetFeesCollected(val int64) {
 // SetCredit sets the value of Credit.
 func (s *CreditPhase) SetCredit(val int64) {
 	s.Credit = val
+}
+
+// Ref: #/components/schemas/CurrencyType
+type CurrencyType string
+
+const (
+	CurrencyTypeNative        CurrencyType = "native"
+	CurrencyTypeExtraCurrency CurrencyType = "extra_currency"
+	CurrencyTypeJetton        CurrencyType = "jetton"
+	CurrencyTypeFiat          CurrencyType = "fiat"
+)
+
+// AllValues returns all CurrencyType values.
+func (CurrencyType) AllValues() []CurrencyType {
+	return []CurrencyType{
+		CurrencyTypeNative,
+		CurrencyTypeExtraCurrency,
+		CurrencyTypeJetton,
+		CurrencyTypeFiat,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s CurrencyType) MarshalText() ([]byte, error) {
+	switch s {
+	case CurrencyTypeNative:
+		return []byte(s), nil
+	case CurrencyTypeExtraCurrency:
+		return []byte(s), nil
+	case CurrencyTypeJetton:
+		return []byte(s), nil
+	case CurrencyTypeFiat:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *CurrencyType) UnmarshalText(data []byte) error {
+	switch CurrencyType(data) {
+	case CurrencyTypeNative:
+		*s = CurrencyTypeNative
+		return nil
+	case CurrencyTypeExtraCurrency:
+		*s = CurrencyTypeExtraCurrency
+		return nil
+	case CurrencyTypeJetton:
+		*s = CurrencyTypeJetton
+		return nil
+	case CurrencyTypeFiat:
+		*s = CurrencyTypeFiat
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
 }
 
 type DecodeMessageReq struct {
@@ -13796,6 +13870,52 @@ func (o OptNftPurchaseAction) Or(d NftPurchaseAction) NftPurchaseAction {
 	return d
 }
 
+// NewOptPurchaseAction returns new OptPurchaseAction with value set to v.
+func NewOptPurchaseAction(v PurchaseAction) OptPurchaseAction {
+	return OptPurchaseAction{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptPurchaseAction is optional PurchaseAction.
+type OptPurchaseAction struct {
+	Value PurchaseAction
+	Set   bool
+}
+
+// IsSet returns true if OptPurchaseAction was set.
+func (o OptPurchaseAction) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptPurchaseAction) Reset() {
+	var v PurchaseAction
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptPurchaseAction) SetTo(v PurchaseAction) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptPurchaseAction) Get() (v PurchaseAction, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptPurchaseAction) Or(d PurchaseAction) PurchaseAction {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptRefund returns new OptRefund with value set to v.
 func NewOptRefund(v Refund) OptRefund {
 	return OptRefund{
@@ -15067,9 +15187,18 @@ func (s *PoolInfo) SetCycleLength(val OptInt64) {
 
 // Ref: #/components/schemas/Price
 type Price struct {
-	Value     string `json:"value"`
-	Decimals  int    `json:"decimals"`
-	TokenName string `json:"token_name"`
+	CurrencyType CurrencyType `json:"currency_type"`
+	Value        string       `json:"value"`
+	Decimals     int          `json:"decimals"`
+	TokenName    string       `json:"token_name"`
+	Verification TrustType    `json:"verification"`
+	Image        string       `json:"image"`
+	Jetton       OptString    `json:"jetton"`
+}
+
+// GetCurrencyType returns the value of CurrencyType.
+func (s *Price) GetCurrencyType() CurrencyType {
+	return s.CurrencyType
 }
 
 // GetValue returns the value of Value.
@@ -15087,6 +15216,26 @@ func (s *Price) GetTokenName() string {
 	return s.TokenName
 }
 
+// GetVerification returns the value of Verification.
+func (s *Price) GetVerification() TrustType {
+	return s.Verification
+}
+
+// GetImage returns the value of Image.
+func (s *Price) GetImage() string {
+	return s.Image
+}
+
+// GetJetton returns the value of Jetton.
+func (s *Price) GetJetton() OptString {
+	return s.Jetton
+}
+
+// SetCurrencyType sets the value of CurrencyType.
+func (s *Price) SetCurrencyType(val CurrencyType) {
+	s.CurrencyType = val
+}
+
 // SetValue sets the value of Value.
 func (s *Price) SetValue(val string) {
 	s.Value = val
@@ -15100,6 +15249,21 @@ func (s *Price) SetDecimals(val int) {
 // SetTokenName sets the value of TokenName.
 func (s *Price) SetTokenName(val string) {
 	s.TokenName = val
+}
+
+// SetVerification sets the value of Verification.
+func (s *Price) SetVerification(val TrustType) {
+	s.Verification = val
+}
+
+// SetImage sets the value of Image.
+func (s *Price) SetImage(val string) {
+	s.Image = val
+}
+
+// SetJetton sets the value of Jetton.
+func (s *Price) SetJetton(val OptString) {
+	s.Jetton = val
 }
 
 // Ref: #/components/schemas/Purchase
@@ -15191,6 +15355,65 @@ func (s *Purchase) SetAmount(val Price) {
 
 // SetMetadata sets the value of Metadata.
 func (s *Purchase) SetMetadata(val Metadata) {
+	s.Metadata = val
+}
+
+// Ref: #/components/schemas/PurchaseAction
+type PurchaseAction struct {
+	Source      AccountAddress `json:"source"`
+	Destination AccountAddress `json:"destination"`
+	InvoiceID   string         `json:"invoice_id"`
+	Amount      Price          `json:"amount"`
+	Metadata    Metadata       `json:"metadata"`
+}
+
+// GetSource returns the value of Source.
+func (s *PurchaseAction) GetSource() AccountAddress {
+	return s.Source
+}
+
+// GetDestination returns the value of Destination.
+func (s *PurchaseAction) GetDestination() AccountAddress {
+	return s.Destination
+}
+
+// GetInvoiceID returns the value of InvoiceID.
+func (s *PurchaseAction) GetInvoiceID() string {
+	return s.InvoiceID
+}
+
+// GetAmount returns the value of Amount.
+func (s *PurchaseAction) GetAmount() Price {
+	return s.Amount
+}
+
+// GetMetadata returns the value of Metadata.
+func (s *PurchaseAction) GetMetadata() Metadata {
+	return s.Metadata
+}
+
+// SetSource sets the value of Source.
+func (s *PurchaseAction) SetSource(val AccountAddress) {
+	s.Source = val
+}
+
+// SetDestination sets the value of Destination.
+func (s *PurchaseAction) SetDestination(val AccountAddress) {
+	s.Destination = val
+}
+
+// SetInvoiceID sets the value of InvoiceID.
+func (s *PurchaseAction) SetInvoiceID(val string) {
+	s.InvoiceID = val
+}
+
+// SetAmount sets the value of Amount.
+func (s *PurchaseAction) SetAmount(val Price) {
+	s.Amount = val
+}
+
+// SetMetadata sets the value of Metadata.
+func (s *PurchaseAction) SetMetadata(val Metadata) {
 	s.Metadata = val
 }
 

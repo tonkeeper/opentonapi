@@ -33,14 +33,11 @@ type NftCollection struct {
 }
 
 type NftSaleInfo struct {
-	Contract    tongo.AccountID
-	Marketplace tongo.AccountID
-	Nft         tongo.AccountID
-	Seller      *tongo.AccountID
-	Price       struct {
-		Token  *tongo.AccountID
-		Amount string
-	}
+	Contract       tongo.AccountID
+	Marketplace    tongo.AccountID
+	Nft            tongo.AccountID
+	Seller         *tongo.AccountID
+	Price          Price
 	MarketplaceFee uint64
 	RoyaltyAddress *tongo.AccountID
 	RoyaltyAmount  uint64

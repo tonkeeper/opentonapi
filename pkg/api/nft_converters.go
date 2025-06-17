@@ -26,22 +26,11 @@ func (h *Handler) convertNFT(ctx context.Context, item core.NftItem, book addres
 		DNS:      g.Opt(item.DNS),
 	}
 	if item.Sale != nil {
-		tokenName := "TON"
-		if item.Sale.Price.Token != nil {
-			meta, _ := metaCache.getJettonMeta(ctx, *item.Sale.Price.Token)
-			tokenName = meta.Name
-			if tokenName == "" {
-				tokenName = UnknownJettonName
-			}
-		}
 		nftItem.SetSale(oas.NewOptSale(oas.Sale{
 			Address: item.Sale.Contract.ToRaw(),
 			Market:  convertAccountAddress(item.Sale.Marketplace, book),
 			Owner:   convertOptAccountAddress(item.Sale.Seller, book),
-			Price: oas.Price{
-				Value:     item.Sale.Price.Amount,
-				TokenName: tokenName,
-			},
+			Price:   h.convertPrice(ctx, item.Sale.Price),
 		}))
 	}
 	var image, description string

@@ -2,6 +2,7 @@ package bath
 
 import (
 	"fmt"
+	"math/big"
 
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/tongo"
@@ -22,7 +23,7 @@ type AuctionBidBubble struct {
 
 type AuctionBidAction struct {
 	Type       NftAuctionType
-	Amount     int64
+	Amount     core.Price
 	Nft        *core.NftItem
 	NftAddress *tongo.AccountID
 	Bidder     tongo.AccountID
@@ -32,8 +33,11 @@ type AuctionBidAction struct {
 func (a AuctionBidBubble) ToAction() *Action {
 	return &Action{
 		AuctionBid: &AuctionBidAction{
-			Type:       a.Type,
-			Amount:     a.Amount,
+			Type: a.Type,
+			Amount: core.Price{
+				Type:   core.CurrencyTON,
+				Amount: *big.NewInt(a.Amount),
+			},
 			Nft:        a.Nft,
 			NftAddress: a.NftAddress,
 			Bidder:     a.Bidder,

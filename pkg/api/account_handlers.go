@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"math/big"
 	"net/http"
 	"sort"
 	"strings"
@@ -418,11 +419,11 @@ func (h *Handler) GetAccountSubscriptions(ctx context.Context, params oas.GetAcc
 	}
 	var response oas.Subscriptions
 	for _, subscription := range subscriptionsV1 {
-		sub := h.convertSubscriptionsV1(subscription)
+		sub := h.convertSubscriptionsV1(ctx, subscription)
 		response.Subscriptions = append(response.Subscriptions, sub)
 	}
 	for _, subscription := range subscriptionsV2 {
-		sub := h.convertSubscriptionsV2(subscription)
+		sub := h.convertSubscriptionsV2(ctx, subscription)
 		response.Subscriptions = append(response.Subscriptions, sub)
 	}
 	return &response, nil
@@ -679,7 +680,7 @@ func (h *Handler) execGetMethod(ctx context.Context, accountID ton.AccountID, me
 	return &result, nil
 }
 
-func (h *Handler) convertSubscriptionsV2(sub core.SubscriptionV2) oas.Subscription {
+func (h *Handler) convertSubscriptionsV2(ctx context.Context, sub core.SubscriptionV2) oas.Subscription {
 	res := oas.Subscription{
 		Type:           "v2",
 		Period:         sub.Period,
@@ -704,15 +705,14 @@ func (h *Handler) convertSubscriptionsV2(sub core.SubscriptionV2) oas.Subscripti
 	if len(sub.Metadata) > 0 {
 		res.Metadata.SetEncryptedBinary(fmt.Sprintf("%x", sub.Metadata))
 	}
-	res.PaymentPerPeriod = oas.Price{
-		Value:     fmt.Sprintf("%d", sub.PaymentPerPeriod),
-		Decimals:  9,
-		TokenName: "TON",
-	}
+	res.PaymentPerPeriod = h.convertPrice(ctx, core.Price{
+		Type:   core.CurrencyTON,
+		Amount: *big.NewInt(sub.PaymentPerPeriod),
+	})
 	return res
 }
 
-func (h *Handler) convertSubscriptionsV1(sub core.SubscriptionV1) oas.Subscription {
+func (h *Handler) convertSubscriptionsV1(ctx context.Context, sub core.SubscriptionV1) oas.Subscription {
 	res := oas.Subscription{
 		Type:           "v1",
 		Period:         sub.Period,
@@ -728,10 +728,9 @@ func (h *Handler) convertSubscriptionsV1(sub core.SubscriptionV1) oas.Subscripti
 	if sub.Status == tlb.AccountActive {
 		res.Status = oas.SubscriptionStatusActive
 	}
-	res.PaymentPerPeriod = oas.Price{
-		Value:     fmt.Sprintf("%d", sub.Amount),
-		Decimals:  9,
-		TokenName: "TON",
-	}
+	res.PaymentPerPeriod = h.convertPrice(ctx, core.Price{
+		Type:   core.CurrencyTON,
+		Amount: *big.NewInt(sub.Amount),
+	})
 	return res
 }

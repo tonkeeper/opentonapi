@@ -1,8 +1,10 @@
 package bath
 
 import (
+	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
+	"math/big"
 )
 
 type BubbleNftPurchase struct {
@@ -21,7 +23,10 @@ func (b BubbleNftPurchase) ToAction() *Action {
 			Buyer:       b.Buyer,
 			Seller:      b.Seller,
 			AuctionType: b.AuctionType,
-			Price:       b.Price,
+			Price: core.Price{
+				Type:   core.CurrencyTON,
+				Amount: *big.NewInt(b.Price),
+			},
 		},
 		Success: b.Success,
 		Type:    NftPurchase,
