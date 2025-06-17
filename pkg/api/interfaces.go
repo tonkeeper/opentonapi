@@ -33,6 +33,7 @@ type storage interface {
 	GetRawAccounts(ctx context.Context, ids []tongo.AccountID) ([]*core.Account, error)
 	GetAccountsStats(ctx context.Context, accounts []ton.AccountID) ([]core.AccountStat, error)
 	GetAccountPlugins(ctx context.Context, accountID ton.AccountID, walletVersion abi.ContractInterface) ([]core.Plugin, error)
+	GetWalletSignatureAllowed(ctx context.Context, accountID ton.AccountID) (bool, error)
 	// ReindexAccount updates internal cache used to store the account's state.
 	ReindexAccount(ctx context.Context, accountID tongo.AccountID) error
 	GetBlockHeader(ctx context.Context, id tongo.BlockID) (*core.BlockHeader, error)

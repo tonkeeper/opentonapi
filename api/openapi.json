@@ -6452,6 +6452,9 @@
       },
       "type": "array"
      },
+     "signature_disabled": {
+      "type": "boolean"
+     },
      "stats": {
       "$ref": "#/components/schemas/WalletStats"
      },
@@ -6467,7 +6470,8 @@
      "status",
      "last_activity",
      "get_methods",
-     "is_wallet"
+     "is_wallet",
+     "signature_disabled"
     ],
     "type": "object"
    },

@@ -17664,9 +17664,10 @@ type Wallet struct {
 	Name         OptString `json:"name"`
 	Icon         OptString `json:"icon"`
 	// Deprecated: schema marks this property as deprecated.
-	GetMethods  []string `json:"get_methods"`
-	IsSuspended OptBool  `json:"is_suspended"`
-	Interfaces  []string `json:"interfaces"`
+	GetMethods        []string `json:"get_methods"`
+	IsSuspended       OptBool  `json:"is_suspended"`
+	SignatureDisabled bool     `json:"signature_disabled"`
+	Interfaces        []string `json:"interfaces"`
 }
 
 // GetAddress returns the value of Address.
@@ -17722,6 +17723,11 @@ func (s *Wallet) GetGetMethods() []string {
 // GetIsSuspended returns the value of IsSuspended.
 func (s *Wallet) GetIsSuspended() OptBool {
 	return s.IsSuspended
+}
+
+// GetSignatureDisabled returns the value of SignatureDisabled.
+func (s *Wallet) GetSignatureDisabled() bool {
+	return s.SignatureDisabled
 }
 
 // GetInterfaces returns the value of Interfaces.
@@ -17782,6 +17788,11 @@ func (s *Wallet) SetGetMethods(val []string) {
 // SetIsSuspended sets the value of IsSuspended.
 func (s *Wallet) SetIsSuspended(val OptBool) {
 	s.IsSuspended = val
+}
+
+// SetSignatureDisabled sets the value of SignatureDisabled.
+func (s *Wallet) SetSignatureDisabled(val bool) {
+	s.SignatureDisabled = val
 }
 
 // SetInterfaces sets the value of Interfaces.

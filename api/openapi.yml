@@ -4748,6 +4748,7 @@ components:
         - last_activity
         - get_methods
         - is_wallet
+        - signature_disabled
       properties:
         address:
           type: string
@@ -4786,6 +4787,8 @@ components:
             type: string
           example: [ 'get_item_data' ]
         is_suspended:
+          type: boolean
+        signature_disabled:
           type: boolean
         interfaces:
           type: array

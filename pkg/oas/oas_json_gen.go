@@ -41317,6 +41317,10 @@ func (s *Wallet) encodeFields(e *jx.Encoder) {
 		}
 	}
 	{
+		e.FieldStart("signature_disabled")
+		e.Bool(s.SignatureDisabled)
+	}
+	{
 		if s.Interfaces != nil {
 			e.FieldStart("interfaces")
 			e.ArrStart()
@@ -41328,7 +41332,7 @@ func (s *Wallet) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfWallet = [12]string{
+var jsonFieldsNameOfWallet = [13]string{
 	0:  "address",
 	1:  "is_wallet",
 	2:  "balance",
@@ -41340,7 +41344,8 @@ var jsonFieldsNameOfWallet = [12]string{
 	8:  "icon",
 	9:  "get_methods",
 	10: "is_suspended",
-	11: "interfaces",
+	11: "signature_disabled",
+	12: "interfaces",
 }
 
 // Decode decodes Wallet from json.
@@ -41488,6 +41493,18 @@ func (s *Wallet) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"is_suspended\"")
 			}
+		case "signature_disabled":
+			requiredBitSet[1] |= 1 << 3
+			if err := func() error {
+				v, err := d.Bool()
+				s.SignatureDisabled = bool(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"signature_disabled\"")
+			}
 		case "interfaces":
 			if err := func() error {
 				s.Interfaces = make([]string, 0)
@@ -41518,7 +41535,7 @@ func (s *Wallet) Decode(d *jx.Decoder) error {
 	var failures []validate.FieldError
 	for i, mask := range [2]uint8{
 		0b01111111,
-		0b00000010,
+		0b00001010,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
