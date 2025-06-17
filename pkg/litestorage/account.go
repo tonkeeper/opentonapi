@@ -58,3 +58,15 @@ func (s *LiteStorage) GetAccountsStats(ctx context.Context, accounts []ton.Accou
 func (s *LiteStorage) GetAccountPlugins(ctx context.Context, accountID ton.AccountID, walletVersion abi.ContractInterface) ([]core.Plugin, error) {
 	return nil, nil
 }
+
+func (s *LiteStorage) GetWalletSignatureAllowed(ctx context.Context, accountID ton.AccountID) (bool, error) {
+	_, value, err := abi.IsSignatureAllowed(ctx, s.executor, accountID)
+	if err != nil {
+		return false, err
+	}
+	data, ok := value.(abi.IsSignatureAllowedResult)
+	if !ok {
+		return false, errors.New("invalid get method result")
+	}
+	return data.Allowed, nil
+}

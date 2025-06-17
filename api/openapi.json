@@ -6452,6 +6452,9 @@
       },
       "type": "array"
      },
+     "signature_disabled": {
+      "type": "boolean"
+     },
      "stats": {
       "$ref": "#/components/schemas/WalletStats"
      },

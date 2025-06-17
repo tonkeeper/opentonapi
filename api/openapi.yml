@@ -4787,6 +4787,8 @@ components:
           example: [ 'get_item_data' ]
         is_suspended:
           type: boolean
+        signature_disabled:
+          type: boolean
         interfaces:
           type: array
           items:

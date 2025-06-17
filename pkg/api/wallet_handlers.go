@@ -130,10 +130,20 @@ func (h *Handler) processWallet(ctx context.Context, account *core.Account) (*oa
 		abi.WalletV4R1: {}, abi.WalletV4R2: {},
 		abi.WalletV5Beta: {}, abi.WalletV5R1: {},
 	}
-	var walletVersion abi.ContractInterface
+	var (
+		walletVersion abi.ContractInterface
+		sigAllowed    *bool
+	)
 	for _, intr := range account.Interfaces {
 		if _, ok := supported[intr]; ok {
 			walletVersion = intr
+			if intr == abi.WalletV5R1 {
+				sa, err := h.storage.GetWalletSignatureAllowed(ctx, account.AccountAddress)
+				if err != nil {
+					return nil, err, http.StatusInternalServerError
+				}
+				sigAllowed = &sa
+			}
 			break
 		}
 	}
@@ -154,9 +164,9 @@ func (h *Handler) processWallet(ctx context.Context, account *core.Account) (*oa
 	var converted oas.Wallet
 	ab, found := h.addressBook.GetAddressInfoByAddress(account.AccountAddress)
 	if found {
-		converted = convertToWallet(account, &ab, h.state, stats[0], plugins)
+		converted = convertToWallet(account, &ab, h.state, stats[0], plugins, sigAllowed)
 	} else {
-		converted = convertToWallet(account, nil, h.state, stats[0], plugins)
+		converted = convertToWallet(account, nil, h.state, stats[0], plugins, sigAllowed)
 	}
 	return &converted, nil, http.StatusOK
 }

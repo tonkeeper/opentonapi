@@ -126,7 +126,14 @@ func convertToAccount(account *core.Account, ab *addressbook.KnownAddress, state
 	return acc
 }
 
-func convertToWallet(account *core.Account, ab *addressbook.KnownAddress, state chainState, stats core.AccountStat, plugins []core.Plugin) oas.Wallet {
+func convertToWallet(
+	account *core.Account,
+	ab *addressbook.KnownAddress,
+	state chainState,
+	stats core.AccountStat,
+	plugins []core.Plugin,
+	signatureAllowed *bool,
+) oas.Wallet {
 	wallet := oas.Wallet{
 		Address:      account.AccountAddress.ToRaw(),
 		Balance:      account.TonBalance,
@@ -154,6 +161,9 @@ func convertToWallet(account *core.Account, ab *addressbook.KnownAddress, state 
 	}
 	if state.CheckIsSuspended(account.AccountAddress) {
 		wallet.IsSuspended.SetTo(true)
+	}
+	if signatureAllowed != nil {
+		wallet.SignatureDisabled.SetTo(!*signatureAllowed)
 	}
 	if ab == nil {
 		return wallet

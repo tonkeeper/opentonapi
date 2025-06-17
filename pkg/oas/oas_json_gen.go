@@ -41317,6 +41317,12 @@ func (s *Wallet) encodeFields(e *jx.Encoder) {
 		}
 	}
 	{
+		if s.SignatureDisabled.Set {
+			e.FieldStart("signature_disabled")
+			s.SignatureDisabled.Encode(e)
+		}
+	}
+	{
 		if s.Interfaces != nil {
 			e.FieldStart("interfaces")
 			e.ArrStart()
@@ -41328,7 +41334,7 @@ func (s *Wallet) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfWallet = [12]string{
+var jsonFieldsNameOfWallet = [13]string{
 	0:  "address",
 	1:  "is_wallet",
 	2:  "balance",
@@ -41340,7 +41346,8 @@ var jsonFieldsNameOfWallet = [12]string{
 	8:  "icon",
 	9:  "get_methods",
 	10: "is_suspended",
-	11: "interfaces",
+	11: "signature_disabled",
+	12: "interfaces",
 }
 
 // Decode decodes Wallet from json.
@@ -41487,6 +41494,16 @@ func (s *Wallet) Decode(d *jx.Decoder) error {
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"is_suspended\"")
+			}
+		case "signature_disabled":
+			if err := func() error {
+				s.SignatureDisabled.Reset()
+				if err := s.SignatureDisabled.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"signature_disabled\"")
 			}
 		case "interfaces":
 			if err := func() error {
