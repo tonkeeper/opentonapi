@@ -6470,8 +6470,7 @@
      "status",
      "last_activity",
      "get_methods",
-     "is_wallet",
-     "signature_disabled"
+     "is_wallet"
     ],
     "type": "object"
    },

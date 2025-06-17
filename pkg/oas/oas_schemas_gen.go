@@ -17666,7 +17666,7 @@ type Wallet struct {
 	// Deprecated: schema marks this property as deprecated.
 	GetMethods        []string `json:"get_methods"`
 	IsSuspended       OptBool  `json:"is_suspended"`
-	SignatureDisabled bool     `json:"signature_disabled"`
+	SignatureDisabled OptBool  `json:"signature_disabled"`
 	Interfaces        []string `json:"interfaces"`
 }
 
@@ -17726,7 +17726,7 @@ func (s *Wallet) GetIsSuspended() OptBool {
 }
 
 // GetSignatureDisabled returns the value of SignatureDisabled.
-func (s *Wallet) GetSignatureDisabled() bool {
+func (s *Wallet) GetSignatureDisabled() OptBool {
 	return s.SignatureDisabled
 }
 
@@ -17791,7 +17791,7 @@ func (s *Wallet) SetIsSuspended(val OptBool) {
 }
 
 // SetSignatureDisabled sets the value of SignatureDisabled.
-func (s *Wallet) SetSignatureDisabled(val bool) {
+func (s *Wallet) SetSignatureDisabled(val OptBool) {
 	s.SignatureDisabled = val
 }
 

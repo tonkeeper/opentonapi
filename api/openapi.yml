@@ -4748,7 +4748,6 @@ components:
         - last_activity
         - get_methods
         - is_wallet
-        - signature_disabled
       properties:
         address:
           type: string

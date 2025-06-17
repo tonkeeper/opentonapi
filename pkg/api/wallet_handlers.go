@@ -132,17 +132,17 @@ func (h *Handler) processWallet(ctx context.Context, account *core.Account) (*oa
 	}
 	var (
 		walletVersion abi.ContractInterface
-		err           error
-		sigAllowed    = true
+		sigAllowed    *bool
 	)
 	for _, intr := range account.Interfaces {
 		if _, ok := supported[intr]; ok {
 			walletVersion = intr
 			if intr == abi.WalletV5R1 {
-				sigAllowed, err = h.storage.GetWalletSignatureAllowed(ctx, account.AccountAddress)
+				sa, err := h.storage.GetWalletSignatureAllowed(ctx, account.AccountAddress)
 				if err != nil {
 					return nil, err, http.StatusInternalServerError
 				}
+				sigAllowed = &sa
 			}
 			break
 		}

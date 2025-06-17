@@ -132,7 +132,7 @@ func convertToWallet(
 	state chainState,
 	stats core.AccountStat,
 	plugins []core.Plugin,
-	signatureAllowed bool,
+	signatureAllowed *bool,
 ) oas.Wallet {
 	wallet := oas.Wallet{
 		Address:      account.AccountAddress.ToRaw(),
@@ -162,7 +162,9 @@ func convertToWallet(
 	if state.CheckIsSuspended(account.AccountAddress) {
 		wallet.IsSuspended.SetTo(true)
 	}
-	wallet.SignatureDisabled = !signatureAllowed
+	if signatureAllowed != nil {
+		wallet.SignatureDisabled.SetTo(!*signatureAllowed)
+	}
 	if ab == nil {
 		return wallet
 	}
