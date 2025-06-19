@@ -441,6 +441,46 @@ func (h *Handler) convertPurchaseAction(ctx context.Context, p *bath.PurchaseAct
 	return action, simplePreview
 }
 
+func (h *Handler) convertAddExtensionAction(ctx context.Context, p *bath.AddExtensionAction, acceptLanguage string, viewer *tongo.AccountID) (oas.OptAddExtensionAction, oas.ActionSimplePreview) {
+	addExtensionAction := oas.AddExtensionAction{
+		Wallet:    convertAccountAddress(p.Wallet, h.addressBook),
+		Extension: p.Extension.ToRaw(),
+	}
+	simplePreview := oas.ActionSimplePreview{
+		Name: "AddExtension",
+		Description: i18n.T(acceptLanguage, i18n.C{
+			DefaultMessage: &i18n.M{
+				ID:    "addExtensionAction",
+				Other: "Add extension to wallet",
+			},
+		}),
+		Accounts: distinctAccounts(viewer, h.addressBook, &p.Wallet, &p.Extension),
+	}
+	var action oas.OptAddExtensionAction
+	action.SetTo(addExtensionAction)
+	return action, simplePreview
+}
+
+func (h *Handler) convertRemoveExtensionAction(ctx context.Context, p *bath.RemoveExtensionAction, acceptLanguage string, viewer *tongo.AccountID) (oas.OptRemoveExtensionAction, oas.ActionSimplePreview) {
+	removeExtensionAction := oas.RemoveExtensionAction{
+		Wallet:    convertAccountAddress(p.Wallet, h.addressBook),
+		Extension: p.Extension.ToRaw(),
+	}
+	simplePreview := oas.ActionSimplePreview{
+		Name: "RemoveExtension",
+		Description: i18n.T(acceptLanguage, i18n.C{
+			DefaultMessage: &i18n.M{
+				ID:    "removeExtensionAction",
+				Other: "Remove extension from wallet",
+			},
+		}),
+		Accounts: distinctAccounts(viewer, h.addressBook, &p.Wallet, &p.Extension),
+	}
+	var action oas.OptRemoveExtensionAction
+	action.SetTo(removeExtensionAction)
+	return action, simplePreview
+}
+
 func (h *Handler) convertAction(ctx context.Context, viewer *tongo.AccountID, a bath.Action, acceptLanguage oas.OptString) (oas.Action, error) {
 	action := oas.Action{
 		Type:             oas.ActionType(a.Type),
@@ -767,6 +807,10 @@ func (h *Handler) convertAction(ctx context.Context, viewer *tongo.AccountID, a 
 		action.DomainRenew, action.SimplePreview = h.convertDomainRenew(ctx, a.DnsRenew, acceptLanguage.Value, viewer)
 	case bath.Purchase:
 		action.Purchase, action.SimplePreview = h.convertPurchaseAction(ctx, a.Purchase, acceptLanguage.Value, viewer)
+	case bath.AddExtension:
+		action.AddExtension, action.SimplePreview = h.convertAddExtensionAction(ctx, a.AddExtension, acceptLanguage.Value, viewer)
+	case bath.RemoveExtension:
+		action.RemoveExtension, action.SimplePreview = h.convertRemoveExtensionAction(ctx, a.RemoveExtension, acceptLanguage.Value, viewer)
 	}
 	return action, nil
 }

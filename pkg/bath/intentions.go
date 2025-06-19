@@ -6,6 +6,7 @@ import (
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
 	"github.com/tonkeeper/tongo/boc"
+	"github.com/tonkeeper/tongo/ton"
 	"golang.org/x/exp/slices"
 	"reflect"
 )
@@ -17,8 +18,21 @@ type OutMessage struct {
 	tx             *core.Transaction
 }
 
+type internalWalletOperation struct {
+	Type                string
+	Wallet              ton.AccountID
+	Extension           *ton.AccountID
+	SetSignatureAllowed *bool
+	Tx                  *core.Transaction
+}
+
 func EnrichWithIntentions(trace *core.Trace, actions *ActionsList) *ActionsList {
-	outMessages, inMsgCount := extractIntentions(trace)
+	outMessages, extendedActions, inMsgCount := extractIntentions(trace)
+	// TODO: deduplicate actions
+	for _, intWalletOp := range extendedActions {
+		newAction := createActionFromInternalWalletOperation(intWalletOp)
+		actions.Actions = append(actions.Actions, newAction)
+	}
 	if len(outMessages) <= inMsgCount {
 		return actions
 	}
@@ -40,8 +54,11 @@ func EnrichWithIntentions(trace *core.Trace, actions *ActionsList) *ActionsList 
 	return actions
 }
 
-func extractIntentions(trace *core.Trace) ([]OutMessage, int) {
-	var outMessages []OutMessage
+func extractIntentions(trace *core.Trace) ([]OutMessage, []internalWalletOperation, int) {
+	var (
+		outMessages              []OutMessage
+		internalWalletOperations []internalWalletOperation
+	)
 	var inMsgCount int
 
 	var getIntentions func(*core.Trace)
@@ -49,7 +66,9 @@ func extractIntentions(trace *core.Trace) ([]OutMessage, int) {
 		if trace == nil {
 			return
 		}
-		outMessages = append(outMessages, getOutMessages(&trace.Transaction)...)
+		outMsgs, intWalletOps := getEmitted(&trace.Transaction)
+		outMessages = append(outMessages, outMsgs...)
+		internalWalletOperations = append(internalWalletOperations, intWalletOps...)
 		for _, child := range trace.Children {
 			if child.InMsg != nil {
 				inMsgCount += 1
@@ -59,7 +78,7 @@ func extractIntentions(trace *core.Trace) ([]OutMessage, int) {
 	}
 	getIntentions(trace)
 
-	return outMessages, inMsgCount
+	return outMessages, internalWalletOperations, inMsgCount
 }
 
 func removeMatchedIntentions(trace *core.Trace, intentions *[]OutMessage) []OutMessage {
@@ -144,15 +163,19 @@ func compareMessageFields(msgOut OutMessage, msgIn *core.Message) bool {
 	return true
 }
 
-func getOutMessages(transaction *core.Transaction) []OutMessage {
+// TODO: maye better return Action instead of internalWalletOperation
+func getEmitted(transaction *core.Transaction) ([]OutMessage, []internalWalletOperation) {
 	if transaction == nil ||
 		transaction.InMsg == nil ||
 		transaction.InMsg.DecodedBody == nil ||
 		transaction.InMsg.DecodedBody.Value == nil {
-		return []OutMessage{}
+		return []OutMessage{}, []internalWalletOperation{}
 	}
 
-	var messages []OutMessage
+	var (
+		messages                 []OutMessage
+		internalWalletOperations []internalWalletOperation
+	)
 	switch v := transaction.InMsg.DecodedBody.Value.(type) {
 	case abi.WalletSignedV3ExtInMsgBody:
 		for _, msg := range v.Payload {
@@ -170,6 +193,19 @@ func getOutMessages(transaction *core.Transaction) []OutMessage {
 				tx:             transaction,
 				messageRelaxed: msg.Message})
 		}
+		// TODO: need to change wallet abi
+		switch v.Op {
+		case 1: // deploy and install plugin
+		// TODO: calculate plugin address first
+		//	int plugin_workchain = cs~load_int(8);
+		//	(cell state_init, cell body) = (cs~load_ref(), cs~load_ref());
+		//	int plugin_address = cell_hash(state_init);
+		// TODO: also need to extract out message
+		case 2: // install plugin
+		// slice wc_n_address = cs~load_bits(8 + 256);
+		case 3: // remove plugin
+			// slice wc_n_address = cs~load_bits(8 + 256);
+		}
 	case abi.WalletSignedExternalV5R1ExtInMsgBody:
 		if v.Actions != nil {
 			for _, msg := range *v.Actions {
@@ -179,6 +215,10 @@ func getOutMessages(transaction *core.Transaction) []OutMessage {
 					tx:             transaction,
 					messageRelaxed: msg.Msg})
 			}
+		}
+		if v.Extended != nil {
+			internalWalletOperations = append(internalWalletOperations,
+				convertW5ExtendedActions(transaction, *v.Extended)...)
 		}
 	case abi.WalletSignedInternalV5R1MsgBody:
 		if v.Actions != nil {
@@ -190,6 +230,10 @@ func getOutMessages(transaction *core.Transaction) []OutMessage {
 					messageRelaxed: msg.Msg})
 			}
 		}
+		if v.Extended != nil {
+			internalWalletOperations = append(internalWalletOperations,
+				convertW5ExtendedActions(transaction, *v.Extended)...)
+		}
 	case abi.HighloadWalletSignedV3ExtInMsgBody:
 		messages = []OutMessage{{
 			body:           v.Msg.MessageToSend.MessageInternal.Body.Value.Value,
@@ -197,7 +241,72 @@ func getOutMessages(transaction *core.Transaction) []OutMessage {
 			tx:             transaction,
 			messageRelaxed: v.Msg.MessageToSend}}
 	}
-	return messages
+	return messages, internalWalletOperations
+}
+
+func convertW5ExtendedActions(tx *core.Transaction, actions abi.W5ExtendedActions) []internalWalletOperation {
+	var res []internalWalletOperation
+	for _, a := range actions {
+		switch a.SumType {
+		case "AddExtension":
+			addr, err := ton.AccountIDFromTlb(a.AddExtension.Addr)
+			if err != nil || addr == nil {
+				continue
+			}
+			res = append(res, internalWalletOperation{
+				Type:      "AddExtension",
+				Extension: addr,
+				Wallet:    tx.Account,
+				Tx:        tx,
+			})
+		case "RemoveExtension":
+			addr, err := ton.AccountIDFromTlb(a.RemoveExtension.Addr)
+			if err != nil || addr == nil {
+				continue
+			}
+			res = append(res, internalWalletOperation{
+				Type:      "RemoveExtension",
+				Extension: addr,
+				Wallet:    tx.Account,
+				Tx:        tx,
+			})
+		case "SetSignatureAllowed":
+			res = append(res, internalWalletOperation{
+				Type:                "SetSignatureAllowed",
+				SetSignatureAllowed: &a.SetSignatureAllowed.Allowed,
+				Tx:                  tx,
+			})
+		}
+	}
+	// TODO: add base transaction?
+	return res
+}
+
+func createActionFromInternalWalletOperation(intWalletOp internalWalletOperation) Action {
+	var action Action
+	switch intWalletOp.Type {
+	case "AddExtension":
+		action = Action{
+			Type: AddExtension,
+			AddExtension: &AddExtensionAction{
+				Wallet:    intWalletOp.Wallet,
+				Extension: *intWalletOp.Extension,
+			},
+			Success: intWalletOp.Tx.Success, // TODO: or false?
+		}
+	case "RemoveExtension":
+		action = Action{
+			Type: RemoveExtension,
+			RemoveExtension: &RemoveExtensionAction{
+				Wallet:    intWalletOp.Wallet,
+				Extension: *intWalletOp.Extension,
+			},
+			Success: intWalletOp.Tx.Success, // TODO: or false?
+		}
+	case "SetSignatureAllowed":
+		// TODO
+	}
+	return action
 }
 
 func createActionFromMessage(msgOut OutMessage) Action {

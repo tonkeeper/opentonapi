@@ -639,6 +639,10 @@ func (s ActionType) Validate() error {
 		return nil
 	case "Purchase":
 		return nil
+	case "AddExtension":
+		return nil
+	case "RemoveExtension":
+		return nil
 	case "Unknown":
 		return nil
 	default:

@@ -39,6 +39,8 @@ const (
 	AuctionBid            ActionType = "AuctionBid"
 	DomainRenew           ActionType = "DomainRenew"
 	Purchase              ActionType = "Purchase"
+	AddExtension          ActionType = "AddExtension"
+	RemoveExtension       ActionType = "RemoveExtension"
 )
 
 type ActionType string
@@ -84,6 +86,8 @@ type (
 		JettonSwap            *JettonSwapAction            `json:",omitempty"`
 		DnsRenew              *DnsRenewAction              `json:",omitempty"`
 		Purchase              *PurchaseAction              `json:",omitempty"`
+		AddExtension          *AddExtensionAction          `json:",omitempty"`
+		RemoveExtension       *RemoveExtensionAction       `json:",omitempty"`
 		Success               bool
 		Type                  ActionType
 		Error                 *string `json:",omitempty"`
@@ -224,6 +228,14 @@ type (
 		Source, Destination tongo.AccountID
 		InvoiceID           uuid.UUID
 		Price               core.Price
+	}
+
+	AddExtensionAction struct {
+		Wallet, Extension tongo.AccountID
+	}
+
+	RemoveExtensionAction struct {
+		Wallet, Extension tongo.AccountID
 	}
 )
 

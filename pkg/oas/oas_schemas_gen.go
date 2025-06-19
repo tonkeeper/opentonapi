@@ -704,6 +704,8 @@ type Action struct {
 	SmartContractExec     OptSmartContractAction         `json:"SmartContractExec"`
 	DomainRenew           OptDomainRenewAction           `json:"DomainRenew"`
 	Purchase              OptPurchaseAction              `json:"Purchase"`
+	AddExtension          OptAddExtensionAction          `json:"AddExtension"`
+	RemoveExtension       OptRemoveExtensionAction       `json:"RemoveExtension"`
 	SimplePreview         ActionSimplePreview            `json:"simple_preview"`
 	BaseTransactions      []string                       `json:"base_transactions"`
 }
@@ -816,6 +818,16 @@ func (s *Action) GetDomainRenew() OptDomainRenewAction {
 // GetPurchase returns the value of Purchase.
 func (s *Action) GetPurchase() OptPurchaseAction {
 	return s.Purchase
+}
+
+// GetAddExtension returns the value of AddExtension.
+func (s *Action) GetAddExtension() OptAddExtensionAction {
+	return s.AddExtension
+}
+
+// GetRemoveExtension returns the value of RemoveExtension.
+func (s *Action) GetRemoveExtension() OptRemoveExtensionAction {
+	return s.RemoveExtension
 }
 
 // GetSimplePreview returns the value of SimplePreview.
@@ -936,6 +948,16 @@ func (s *Action) SetDomainRenew(val OptDomainRenewAction) {
 // SetPurchase sets the value of Purchase.
 func (s *Action) SetPurchase(val OptPurchaseAction) {
 	s.Purchase = val
+}
+
+// SetAddExtension sets the value of AddExtension.
+func (s *Action) SetAddExtension(val OptAddExtensionAction) {
+	s.AddExtension = val
+}
+
+// SetRemoveExtension sets the value of RemoveExtension.
+func (s *Action) SetRemoveExtension(val OptRemoveExtensionAction) {
+	s.RemoveExtension = val
 }
 
 // SetSimplePreview sets the value of SimplePreview.
@@ -1166,6 +1188,8 @@ const (
 	ActionTypeElectionsDepositStake ActionType = "ElectionsDepositStake"
 	ActionTypeDomainRenew           ActionType = "DomainRenew"
 	ActionTypePurchase              ActionType = "Purchase"
+	ActionTypeAddExtension          ActionType = "AddExtension"
+	ActionTypeRemoveExtension       ActionType = "RemoveExtension"
 	ActionTypeUnknown               ActionType = "Unknown"
 )
 
@@ -1192,6 +1216,8 @@ func (ActionType) AllValues() []ActionType {
 		ActionTypeElectionsDepositStake,
 		ActionTypeDomainRenew,
 		ActionTypePurchase,
+		ActionTypeAddExtension,
+		ActionTypeRemoveExtension,
 		ActionTypeUnknown,
 	}
 }
@@ -1238,6 +1264,10 @@ func (s ActionType) MarshalText() ([]byte, error) {
 	case ActionTypeDomainRenew:
 		return []byte(s), nil
 	case ActionTypePurchase:
+		return []byte(s), nil
+	case ActionTypeAddExtension:
+		return []byte(s), nil
+	case ActionTypeRemoveExtension:
 		return []byte(s), nil
 	case ActionTypeUnknown:
 		return []byte(s), nil
@@ -1309,12 +1339,44 @@ func (s *ActionType) UnmarshalText(data []byte) error {
 	case ActionTypePurchase:
 		*s = ActionTypePurchase
 		return nil
+	case ActionTypeAddExtension:
+		*s = ActionTypeAddExtension
+		return nil
+	case ActionTypeRemoveExtension:
+		*s = ActionTypeRemoveExtension
+		return nil
 	case ActionTypeUnknown:
 		*s = ActionTypeUnknown
 		return nil
 	default:
 		return errors.Errorf("invalid value: %q", data)
 	}
+}
+
+// Ref: #/components/schemas/AddExtensionAction
+type AddExtensionAction struct {
+	Wallet    AccountAddress `json:"wallet"`
+	Extension string         `json:"extension"`
+}
+
+// GetWallet returns the value of Wallet.
+func (s *AddExtensionAction) GetWallet() AccountAddress {
+	return s.Wallet
+}
+
+// GetExtension returns the value of Extension.
+func (s *AddExtensionAction) GetExtension() string {
+	return s.Extension
+}
+
+// SetWallet sets the value of Wallet.
+func (s *AddExtensionAction) SetWallet(val AccountAddress) {
+	s.Wallet = val
+}
+
+// SetExtension sets the value of Extension.
+func (s *AddExtensionAction) SetExtension(val string) {
+	s.Extension = val
 }
 
 type AddressParseOK struct {
@@ -10420,6 +10482,52 @@ func (o OptActionPhase) Or(d ActionPhase) ActionPhase {
 	return d
 }
 
+// NewOptAddExtensionAction returns new OptAddExtensionAction with value set to v.
+func NewOptAddExtensionAction(v AddExtensionAction) OptAddExtensionAction {
+	return OptAddExtensionAction{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptAddExtensionAction is optional AddExtensionAction.
+type OptAddExtensionAction struct {
+	Value AddExtensionAction
+	Set   bool
+}
+
+// IsSet returns true if OptAddExtensionAction was set.
+func (o OptAddExtensionAction) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptAddExtensionAction) Reset() {
+	var v AddExtensionAction
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptAddExtensionAction) SetTo(v AddExtensionAction) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptAddExtensionAction) Get() (v AddExtensionAction, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptAddExtensionAction) Or(d AddExtensionAction) AddExtensionAction {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptAuctionBidAction returns new OptAuctionBidAction with value set to v.
 func NewOptAuctionBidAction(v AuctionBidAction) OptAuctionBidAction {
 	return OptAuctionBidAction{
@@ -13962,6 +14070,52 @@ func (o OptRefund) Or(d Refund) Refund {
 	return d
 }
 
+// NewOptRemoveExtensionAction returns new OptRemoveExtensionAction with value set to v.
+func NewOptRemoveExtensionAction(v RemoveExtensionAction) OptRemoveExtensionAction {
+	return OptRemoveExtensionAction{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptRemoveExtensionAction is optional RemoveExtensionAction.
+type OptRemoveExtensionAction struct {
+	Value RemoveExtensionAction
+	Set   bool
+}
+
+// IsSet returns true if OptRemoveExtensionAction was set.
+func (o OptRemoveExtensionAction) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptRemoveExtensionAction) Reset() {
+	var v RemoveExtensionAction
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptRemoveExtensionAction) SetTo(v RemoveExtensionAction) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptRemoveExtensionAction) Get() (v RemoveExtensionAction, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptRemoveExtensionAction) Or(d RemoveExtensionAction) RemoveExtensionAction {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptSale returns new OptSale with value set to v.
 func NewOptSale(v Sale) OptSale {
 	return OptSale{
@@ -15626,6 +15780,32 @@ func (s *RefundType) UnmarshalText(data []byte) error {
 
 // ReindexAccountOK is response for ReindexAccount operation.
 type ReindexAccountOK struct{}
+
+// Ref: #/components/schemas/RemoveExtensionAction
+type RemoveExtensionAction struct {
+	Wallet    AccountAddress `json:"wallet"`
+	Extension string         `json:"extension"`
+}
+
+// GetWallet returns the value of Wallet.
+func (s *RemoveExtensionAction) GetWallet() AccountAddress {
+	return s.Wallet
+}
+
+// GetExtension returns the value of Extension.
+func (s *RemoveExtensionAction) GetExtension() string {
+	return s.Extension
+}
+
+// SetWallet sets the value of Wallet.
+func (s *RemoveExtensionAction) SetWallet(val AccountAddress) {
+	s.Wallet = val
+}
+
+// SetExtension sets the value of Extension.
+func (s *RemoveExtensionAction) SetExtension(val string) {
+	s.Extension = val
+}
 
 // Risk specifies assets that could be lost if a message would be sent to a malicious smart contract.
 // It makes sense to understand the risk BEFORE sending a message to the blockchain.
