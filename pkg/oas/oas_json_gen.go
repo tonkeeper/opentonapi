@@ -41648,9 +41648,13 @@ func (s *Wallet) encodeFields(e *jx.Encoder) {
 			e.ArrEnd()
 		}
 	}
+	{
+		e.FieldStart("last_lt")
+		e.Int64(s.LastLt)
+	}
 }
 
-var jsonFieldsNameOfWallet = [13]string{
+var jsonFieldsNameOfWallet = [14]string{
 	0:  "address",
 	1:  "is_wallet",
 	2:  "balance",
@@ -41664,6 +41668,7 @@ var jsonFieldsNameOfWallet = [13]string{
 	10: "is_suspended",
 	11: "signature_disabled",
 	12: "interfaces",
+	13: "last_lt",
 }
 
 // Decode decodes Wallet from json.
@@ -41840,6 +41845,18 @@ func (s *Wallet) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"interfaces\"")
 			}
+		case "last_lt":
+			requiredBitSet[1] |= 1 << 5
+			if err := func() error {
+				v, err := d.Int64()
+				s.LastLt = int64(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"last_lt\"")
+			}
 		default:
 			return d.Skip()
 		}
@@ -41851,7 +41868,7 @@ func (s *Wallet) Decode(d *jx.Decoder) error {
 	var failures []validate.FieldError
 	for i, mask := range [2]uint8{
 		0b01111111,
-		0b00000010,
+		0b00100010,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.

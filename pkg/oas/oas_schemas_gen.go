@@ -17891,6 +17891,7 @@ type Wallet struct {
 	IsSuspended       OptBool  `json:"is_suspended"`
 	SignatureDisabled OptBool  `json:"signature_disabled"`
 	Interfaces        []string `json:"interfaces"`
+	LastLt            int64    `json:"last_lt"`
 }
 
 // GetAddress returns the value of Address.
@@ -17958,6 +17959,11 @@ func (s *Wallet) GetInterfaces() []string {
 	return s.Interfaces
 }
 
+// GetLastLt returns the value of LastLt.
+func (s *Wallet) GetLastLt() int64 {
+	return s.LastLt
+}
+
 // SetAddress sets the value of Address.
 func (s *Wallet) SetAddress(val string) {
 	s.Address = val
@@ -18021,6 +18027,11 @@ func (s *Wallet) SetSignatureDisabled(val OptBool) {
 // SetInterfaces sets the value of Interfaces.
 func (s *Wallet) SetInterfaces(val []string) {
 	s.Interfaces = val
+}
+
+// SetLastLt sets the value of LastLt.
+func (s *Wallet) SetLastLt(val int64) {
+	s.LastLt = val
 }
 
 // Ref: #/components/schemas/WalletDNS
