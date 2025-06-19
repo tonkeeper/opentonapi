@@ -689,7 +689,7 @@ func (h *Handler) convertAction(ctx context.Context, viewer *tongo.AccountID, a 
 	case bath.AuctionBid:
 		var nft oas.OptNftItem
 		price := h.convertPrice(ctx, a.AuctionBid.Amount)
-		value := ScaleJettons(a.NftPurchase.Price.Amount, price.Decimals).String()
+		value := ScaleJettons(a.AuctionBid.Amount.Amount, price.Decimals).String()
 		if a.AuctionBid.Nft == nil && a.AuctionBid.NftAddress != nil {
 			n, err := h.storage.GetNFTs(ctx, []tongo.AccountID{*a.AuctionBid.NftAddress})
 			if err != nil {
