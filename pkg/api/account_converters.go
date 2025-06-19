@@ -148,6 +148,7 @@ func convertToWallet(
 			MultisigCount: stats.MultisigCount,
 			StakingCount:  stats.StakingCount,
 		},
+		LastLt: int64(account.LastTransactionLt),
 	}
 	for i, iface := range account.Interfaces {
 		wallet.Interfaces[i] = iface.String()

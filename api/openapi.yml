@@ -4748,6 +4748,7 @@ components:
         - last_activity
         - get_methods
         - is_wallet
+        - last_lt
       properties:
         address:
           type: string
@@ -4793,6 +4794,11 @@ components:
           type: array
           items:
             type: string
+        last_lt:
+          type: integer
+          format: int64
+          example: 25713146000001
+          x-js-format: bigint
     Account:
       type: object
       required:
