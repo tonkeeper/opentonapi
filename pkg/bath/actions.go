@@ -39,11 +39,6 @@ const (
 	AuctionBid            ActionType = "AuctionBid"
 	DomainRenew           ActionType = "DomainRenew"
 	Purchase              ActionType = "Purchase"
-
-	RefundDnsTg   RefundType = "DNS.tg"
-	RefundDnsTon  RefundType = "DNS.ton"
-	RefundGetGems RefundType = "GetGems"
-	RefundUnknown RefundType = "unknown"
 )
 
 type ActionType string
