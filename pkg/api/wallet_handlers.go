@@ -139,7 +139,9 @@ func (h *Handler) processWallet(ctx context.Context, account *core.Account) (*oa
 			walletVersion = intr
 			if intr == abi.WalletV5R1 {
 				sa, err := h.storage.GetWalletSignatureAllowed(ctx, account.AccountAddress)
-				if err != nil {
+				if err != nil && errors.Is(err, core.ErrEntityNotFound) {
+					sa = true // TODO: not indexed?
+				} else if err != nil {
 					return nil, err, http.StatusInternalServerError
 				}
 				sigAllowed = &sa
