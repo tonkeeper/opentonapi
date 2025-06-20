@@ -6033,28 +6033,6 @@ components:
         type:
           type: string
           example: "TonTransfer"
-          enum:
-            - TonTransfer
-            - ExtraCurrencyTransfer
-            - JettonTransfer
-            - JettonBurn
-            - JettonMint
-            - NftItemTransfer
-            - ContractDeploy
-            - Subscribe
-            - UnSubscribe
-            - AuctionBid
-            - NftPurchase
-            - DepositStake
-            - WithdrawStake
-            - WithdrawStakeRequest
-            - JettonSwap
-            - SmartContractExec
-            - ElectionsRecoverStake
-            - ElectionsDepositStake
-            - DomainRenew
-            - Purchase
-            - Unknown
         status:
           type: string
           example: "ok"

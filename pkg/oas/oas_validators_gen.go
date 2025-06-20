@@ -262,17 +262,6 @@ func (s *Action) Validate() error {
 
 	var failures []validate.FieldError
 	if err := func() error {
-		if err := s.Type.Validate(); err != nil {
-			return err
-		}
-		return nil
-	}(); err != nil {
-		failures = append(failures, validate.FieldError{
-			Name:  "type",
-			Error: err,
-		})
-	}
-	if err := func() error {
 		if err := s.Status.Validate(); err != nil {
 			return err
 		}
@@ -591,55 +580,6 @@ func (s ActionStatus) Validate() error {
 	case "ok":
 		return nil
 	case "failed":
-		return nil
-	default:
-		return errors.Errorf("invalid value: %v", s)
-	}
-}
-
-func (s ActionType) Validate() error {
-	switch s {
-	case "TonTransfer":
-		return nil
-	case "ExtraCurrencyTransfer":
-		return nil
-	case "JettonTransfer":
-		return nil
-	case "JettonBurn":
-		return nil
-	case "JettonMint":
-		return nil
-	case "NftItemTransfer":
-		return nil
-	case "ContractDeploy":
-		return nil
-	case "Subscribe":
-		return nil
-	case "UnSubscribe":
-		return nil
-	case "AuctionBid":
-		return nil
-	case "NftPurchase":
-		return nil
-	case "DepositStake":
-		return nil
-	case "WithdrawStake":
-		return nil
-	case "WithdrawStakeRequest":
-		return nil
-	case "JettonSwap":
-		return nil
-	case "SmartContractExec":
-		return nil
-	case "ElectionsRecoverStake":
-		return nil
-	case "ElectionsDepositStake":
-		return nil
-	case "DomainRenew":
-		return nil
-	case "Purchase":
-		return nil
-	case "Unknown":
 		return nil
 	default:
 		return errors.Errorf("invalid value: %v", s)

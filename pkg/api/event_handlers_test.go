@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"github.com/tonkeeper/opentonapi/pkg/addressbook"
+	"github.com/tonkeeper/opentonapi/pkg/bath"
 	"github.com/tonkeeper/opentonapi/pkg/spam"
 	"github.com/tonkeeper/tongo"
 	"net/http"
@@ -25,7 +26,7 @@ func TestHandler_EmulateMessageToAccountEvent(t *testing.T) {
 		name          string
 		request       oas.EmulateMessageToAccountEventReq
 		params        oas.EmulateMessageToAccountEventParams
-		wantActions   []oas.ActionType
+		wantActions   []string
 		wantErrorCode int
 	}{
 		{
@@ -36,8 +37,8 @@ func TestHandler_EmulateMessageToAccountEvent(t *testing.T) {
 			params: oas.EmulateMessageToAccountEventParams{
 				AccountID: "0:cb6ef152f217922bd71aa6ec4a1ee3d92face9a536a8e7b560834f01e62c1989",
 			},
-			wantActions: []oas.ActionType{
-				oas.ActionTypeContractDeploy,
+			wantActions: []string{
+				string(bath.ContractDeploy),
 			},
 		},
 		{
@@ -48,8 +49,8 @@ func TestHandler_EmulateMessageToAccountEvent(t *testing.T) {
 			params: oas.EmulateMessageToAccountEventParams{
 				AccountID: "EQC1DeuBq7z72sp8qPMV_wYnCo-xwtWPv1F6OHmQwikUj-cH",
 			},
-			wantActions: []oas.ActionType{
-				oas.ActionTypeTonTransfer,
+			wantActions: []string{
+				string(bath.TonTransfer),
 			},
 		},
 		{
@@ -60,8 +61,8 @@ func TestHandler_EmulateMessageToAccountEvent(t *testing.T) {
 			params: oas.EmulateMessageToAccountEventParams{
 				AccountID: "0:10fb8f61c456b7553020ca16c60c3d2907ea2ac4360b2b23df49ac6f49e9edb5",
 			},
-			wantActions: []oas.ActionType{
-				oas.ActionTypeJettonSwap,
+			wantActions: []string{
+				string(bath.JettonSwap),
 			},
 		},
 		{
@@ -97,7 +98,7 @@ func TestHandler_EmulateMessageToAccountEvent(t *testing.T) {
 			}
 			require.Nil(t, err)
 
-			var actions []oas.ActionType
+			var actions []string
 			for _, action := range got.Actions {
 				actions = append(actions, action.Type)
 			}
