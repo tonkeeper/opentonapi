@@ -682,7 +682,7 @@ func (s *Accounts) SetAccounts(val []Account) {
 
 // Ref: #/components/schemas/Action
 type Action struct {
-	Type                  ActionType                     `json:"type"`
+	Type                  string                         `json:"type"`
 	Status                ActionStatus                   `json:"status"`
 	TonTransfer           OptTonTransferAction           `json:"TonTransfer"`
 	ExtraCurrencyTransfer OptExtraCurrencyTransferAction `json:"ExtraCurrencyTransfer"`
@@ -709,7 +709,7 @@ type Action struct {
 }
 
 // GetType returns the value of Type.
-func (s *Action) GetType() ActionType {
+func (s *Action) GetType() string {
 	return s.Type
 }
 
@@ -829,7 +829,7 @@ func (s *Action) GetBaseTransactions() []string {
 }
 
 // SetType sets the value of Type.
-func (s *Action) SetType(val ActionType) {
+func (s *Action) SetType(val string) {
 	s.Type = val
 }
 
@@ -1137,180 +1137,6 @@ func (s *ActionStatus) UnmarshalText(data []byte) error {
 		return nil
 	case ActionStatusFailed:
 		*s = ActionStatusFailed
-		return nil
-	default:
-		return errors.Errorf("invalid value: %q", data)
-	}
-}
-
-type ActionType string
-
-const (
-	ActionTypeTonTransfer           ActionType = "TonTransfer"
-	ActionTypeExtraCurrencyTransfer ActionType = "ExtraCurrencyTransfer"
-	ActionTypeJettonTransfer        ActionType = "JettonTransfer"
-	ActionTypeJettonBurn            ActionType = "JettonBurn"
-	ActionTypeJettonMint            ActionType = "JettonMint"
-	ActionTypeNftItemTransfer       ActionType = "NftItemTransfer"
-	ActionTypeContractDeploy        ActionType = "ContractDeploy"
-	ActionTypeSubscribe             ActionType = "Subscribe"
-	ActionTypeUnSubscribe           ActionType = "UnSubscribe"
-	ActionTypeAuctionBid            ActionType = "AuctionBid"
-	ActionTypeNftPurchase           ActionType = "NftPurchase"
-	ActionTypeDepositStake          ActionType = "DepositStake"
-	ActionTypeWithdrawStake         ActionType = "WithdrawStake"
-	ActionTypeWithdrawStakeRequest  ActionType = "WithdrawStakeRequest"
-	ActionTypeJettonSwap            ActionType = "JettonSwap"
-	ActionTypeSmartContractExec     ActionType = "SmartContractExec"
-	ActionTypeElectionsRecoverStake ActionType = "ElectionsRecoverStake"
-	ActionTypeElectionsDepositStake ActionType = "ElectionsDepositStake"
-	ActionTypeDomainRenew           ActionType = "DomainRenew"
-	ActionTypePurchase              ActionType = "Purchase"
-	ActionTypeUnknown               ActionType = "Unknown"
-)
-
-// AllValues returns all ActionType values.
-func (ActionType) AllValues() []ActionType {
-	return []ActionType{
-		ActionTypeTonTransfer,
-		ActionTypeExtraCurrencyTransfer,
-		ActionTypeJettonTransfer,
-		ActionTypeJettonBurn,
-		ActionTypeJettonMint,
-		ActionTypeNftItemTransfer,
-		ActionTypeContractDeploy,
-		ActionTypeSubscribe,
-		ActionTypeUnSubscribe,
-		ActionTypeAuctionBid,
-		ActionTypeNftPurchase,
-		ActionTypeDepositStake,
-		ActionTypeWithdrawStake,
-		ActionTypeWithdrawStakeRequest,
-		ActionTypeJettonSwap,
-		ActionTypeSmartContractExec,
-		ActionTypeElectionsRecoverStake,
-		ActionTypeElectionsDepositStake,
-		ActionTypeDomainRenew,
-		ActionTypePurchase,
-		ActionTypeUnknown,
-	}
-}
-
-// MarshalText implements encoding.TextMarshaler.
-func (s ActionType) MarshalText() ([]byte, error) {
-	switch s {
-	case ActionTypeTonTransfer:
-		return []byte(s), nil
-	case ActionTypeExtraCurrencyTransfer:
-		return []byte(s), nil
-	case ActionTypeJettonTransfer:
-		return []byte(s), nil
-	case ActionTypeJettonBurn:
-		return []byte(s), nil
-	case ActionTypeJettonMint:
-		return []byte(s), nil
-	case ActionTypeNftItemTransfer:
-		return []byte(s), nil
-	case ActionTypeContractDeploy:
-		return []byte(s), nil
-	case ActionTypeSubscribe:
-		return []byte(s), nil
-	case ActionTypeUnSubscribe:
-		return []byte(s), nil
-	case ActionTypeAuctionBid:
-		return []byte(s), nil
-	case ActionTypeNftPurchase:
-		return []byte(s), nil
-	case ActionTypeDepositStake:
-		return []byte(s), nil
-	case ActionTypeWithdrawStake:
-		return []byte(s), nil
-	case ActionTypeWithdrawStakeRequest:
-		return []byte(s), nil
-	case ActionTypeJettonSwap:
-		return []byte(s), nil
-	case ActionTypeSmartContractExec:
-		return []byte(s), nil
-	case ActionTypeElectionsRecoverStake:
-		return []byte(s), nil
-	case ActionTypeElectionsDepositStake:
-		return []byte(s), nil
-	case ActionTypeDomainRenew:
-		return []byte(s), nil
-	case ActionTypePurchase:
-		return []byte(s), nil
-	case ActionTypeUnknown:
-		return []byte(s), nil
-	default:
-		return nil, errors.Errorf("invalid value: %q", s)
-	}
-}
-
-// UnmarshalText implements encoding.TextUnmarshaler.
-func (s *ActionType) UnmarshalText(data []byte) error {
-	switch ActionType(data) {
-	case ActionTypeTonTransfer:
-		*s = ActionTypeTonTransfer
-		return nil
-	case ActionTypeExtraCurrencyTransfer:
-		*s = ActionTypeExtraCurrencyTransfer
-		return nil
-	case ActionTypeJettonTransfer:
-		*s = ActionTypeJettonTransfer
-		return nil
-	case ActionTypeJettonBurn:
-		*s = ActionTypeJettonBurn
-		return nil
-	case ActionTypeJettonMint:
-		*s = ActionTypeJettonMint
-		return nil
-	case ActionTypeNftItemTransfer:
-		*s = ActionTypeNftItemTransfer
-		return nil
-	case ActionTypeContractDeploy:
-		*s = ActionTypeContractDeploy
-		return nil
-	case ActionTypeSubscribe:
-		*s = ActionTypeSubscribe
-		return nil
-	case ActionTypeUnSubscribe:
-		*s = ActionTypeUnSubscribe
-		return nil
-	case ActionTypeAuctionBid:
-		*s = ActionTypeAuctionBid
-		return nil
-	case ActionTypeNftPurchase:
-		*s = ActionTypeNftPurchase
-		return nil
-	case ActionTypeDepositStake:
-		*s = ActionTypeDepositStake
-		return nil
-	case ActionTypeWithdrawStake:
-		*s = ActionTypeWithdrawStake
-		return nil
-	case ActionTypeWithdrawStakeRequest:
-		*s = ActionTypeWithdrawStakeRequest
-		return nil
-	case ActionTypeJettonSwap:
-		*s = ActionTypeJettonSwap
-		return nil
-	case ActionTypeSmartContractExec:
-		*s = ActionTypeSmartContractExec
-		return nil
-	case ActionTypeElectionsRecoverStake:
-		*s = ActionTypeElectionsRecoverStake
-		return nil
-	case ActionTypeElectionsDepositStake:
-		*s = ActionTypeElectionsDepositStake
-		return nil
-	case ActionTypeDomainRenew:
-		*s = ActionTypeDomainRenew
-		return nil
-	case ActionTypePurchase:
-		*s = ActionTypePurchase
-		return nil
-	case ActionTypeUnknown:
-		*s = ActionTypeUnknown
 		return nil
 	default:
 		return errors.Errorf("invalid value: %q", data)
