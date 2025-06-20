@@ -350,6 +350,7 @@ func (a Action) IsSubject(account tongo.AccountID) bool {
 		a.JettonMint,
 		a.JettonBurn,
 		a.DnsRenew,
+		a.Purchase,
 	} {
 		if i != nil && !reflect.ValueOf(i).IsNil() {
 			return slices.Contains(i.SubjectAccounts(), account)
