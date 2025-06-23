@@ -1805,7 +1805,7 @@ func (s *Action) Encode(e *jx.Encoder) {
 func (s *Action) encodeFields(e *jx.Encoder) {
 	{
 		e.FieldStart("type")
-		s.Type.Encode(e)
+		e.Str(s.Type)
 	}
 	{
 		e.FieldStart("status")
@@ -1984,7 +1984,9 @@ func (s *Action) Decode(d *jx.Decoder) error {
 		case "type":
 			requiredBitSet[0] |= 1 << 0
 			if err := func() error {
-				if err := s.Type.Decode(d); err != nil {
+				v, err := d.Str()
+				s.Type = string(v)
+				if err != nil {
 					return err
 				}
 				return nil
@@ -2714,84 +2716,6 @@ func (s ActionStatus) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *ActionStatus) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
-// Encode encodes ActionType as json.
-func (s ActionType) Encode(e *jx.Encoder) {
-	e.Str(string(s))
-}
-
-// Decode decodes ActionType from json.
-func (s *ActionType) Decode(d *jx.Decoder) error {
-	if s == nil {
-		return errors.New("invalid: unable to decode ActionType to nil")
-	}
-	v, err := d.StrBytes()
-	if err != nil {
-		return err
-	}
-	// Try to use constant string.
-	switch ActionType(v) {
-	case ActionTypeTonTransfer:
-		*s = ActionTypeTonTransfer
-	case ActionTypeExtraCurrencyTransfer:
-		*s = ActionTypeExtraCurrencyTransfer
-	case ActionTypeJettonTransfer:
-		*s = ActionTypeJettonTransfer
-	case ActionTypeJettonBurn:
-		*s = ActionTypeJettonBurn
-	case ActionTypeJettonMint:
-		*s = ActionTypeJettonMint
-	case ActionTypeNftItemTransfer:
-		*s = ActionTypeNftItemTransfer
-	case ActionTypeContractDeploy:
-		*s = ActionTypeContractDeploy
-	case ActionTypeSubscribe:
-		*s = ActionTypeSubscribe
-	case ActionTypeUnSubscribe:
-		*s = ActionTypeUnSubscribe
-	case ActionTypeAuctionBid:
-		*s = ActionTypeAuctionBid
-	case ActionTypeNftPurchase:
-		*s = ActionTypeNftPurchase
-	case ActionTypeDepositStake:
-		*s = ActionTypeDepositStake
-	case ActionTypeWithdrawStake:
-		*s = ActionTypeWithdrawStake
-	case ActionTypeWithdrawStakeRequest:
-		*s = ActionTypeWithdrawStakeRequest
-	case ActionTypeJettonSwap:
-		*s = ActionTypeJettonSwap
-	case ActionTypeSmartContractExec:
-		*s = ActionTypeSmartContractExec
-	case ActionTypeElectionsRecoverStake:
-		*s = ActionTypeElectionsRecoverStake
-	case ActionTypeElectionsDepositStake:
-		*s = ActionTypeElectionsDepositStake
-	case ActionTypeDomainRenew:
-		*s = ActionTypeDomainRenew
-	case ActionTypePurchase:
-		*s = ActionTypePurchase
-	case ActionTypeUnknown:
-		*s = ActionTypeUnknown
-	default:
-		*s = ActionType(v)
-	}
-
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s ActionType) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *ActionType) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }

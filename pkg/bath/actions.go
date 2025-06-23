@@ -39,6 +39,7 @@ const (
 	AuctionBid            ActionType = "AuctionBid"
 	DomainRenew           ActionType = "DomainRenew"
 	Purchase              ActionType = "Purchase"
+	Unknown               ActionType = "Unknown"
 )
 
 type ActionType string

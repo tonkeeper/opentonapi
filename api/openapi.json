@@ -1192,29 +1192,6 @@
       "type": "string"
      },
      "type": {
-      "enum": [
-       "TonTransfer",
-       "ExtraCurrencyTransfer",
-       "JettonTransfer",
-       "JettonBurn",
-       "JettonMint",
-       "NftItemTransfer",
-       "ContractDeploy",
-       "Subscribe",
-       "UnSubscribe",
-       "AuctionBid",
-       "NftPurchase",
-       "DepositStake",
-       "WithdrawStake",
-       "WithdrawStakeRequest",
-       "JettonSwap",
-       "SmartContractExec",
-       "ElectionsRecoverStake",
-       "ElectionsDepositStake",
-       "DomainRenew",
-       "Purchase",
-       "Unknown"
-      ],
       "example": "TonTransfer",
       "type": "string"
      }
@@ -7297,7 +7274,8 @@
      }
     },
     "tags": [
-     "Accounts"
+     "Accounts",
+     "Jettons"
     ]
    }
   },
@@ -7387,7 +7365,8 @@
      }
     },
     "tags": [
-     "Accounts"
+     "Accounts",
+     "Jettons"
     ]
    }
   },
@@ -8034,6 +8013,7 @@
      }
     },
     "tags": [
+     "Accounts",
      "Blockchain"
     ]
    }
