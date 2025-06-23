@@ -52,7 +52,7 @@ func (h *Handler) GetChartRates(ctx context.Context, params oas.GetChartRatesPar
 	if params.EndDate.Set {
 		endDate = &params.EndDate.Value
 	}
-	var defaultPointsCount = 200
+	var defaultPointsCount = 250
 	if params.PointsCount.Set {
 		if params.PointsCount.Value > defaultPointsCount {
 			return nil, toError(http.StatusBadRequest, fmt.Errorf("max points: %v", defaultPointsCount))
