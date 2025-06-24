@@ -163,12 +163,14 @@ func getOutMessages(transaction *core.Transaction) []OutMessage {
 				messageRelaxed: msg.Message})
 		}
 	case abi.WalletSignedV4ExtInMsgBody:
-		for _, msg := range v.Payload {
-			messages = append(messages, OutMessage{
-				body:           msg.Message.MessageInternal.Body.Value.Value,
-				mode:           msg.Mode,
-				tx:             transaction,
-				messageRelaxed: msg.Message})
+		if v.Payload.SumType == "SimpleSend" {
+			for _, msg := range v.Payload.SimpleSend.Payload {
+				messages = append(messages, OutMessage{
+					body:           msg.Message.MessageInternal.Body.Value.Value,
+					mode:           msg.Mode,
+					tx:             transaction,
+					messageRelaxed: msg.Message})
+			}
 		}
 	case abi.WalletSignedExternalV5R1ExtInMsgBody:
 		if v.Actions != nil {
