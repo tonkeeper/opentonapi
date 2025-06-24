@@ -45,12 +45,17 @@ func (s Straw[newBubbleT]) match(bubble *Bubble) (mappings []struct {
 			return nil
 		}
 	}
+	matches := make([]bool, len(bubble.Children))
 	for _, childStraw := range s.Children {
 		found := false
-		for _, child := range bubble.Children {
+		for i, child := range bubble.Children {
+			if matches[i] {
+				continue
+			}
 			m := childStraw.match(child)
 			if len(m) != 0 {
 				found = true
+				matches[i] = true
 				mappings = append(mappings, m...)
 				break
 			}
@@ -230,6 +235,11 @@ func AmountInterval(min, max int64) bubbleCheck {
 func IsBounced(bubble *Bubble) bool {
 	tx, ok := bubble.Info.(BubbleTx)
 	return ok && tx.bounced
+}
+
+func IsExternal(bubble *Bubble) bool {
+	tx, ok := bubble.Info.(BubbleTx)
+	return ok && tx.external
 }
 
 func JettonTransferOpCode(opCode uint32) bubbleCheck {
