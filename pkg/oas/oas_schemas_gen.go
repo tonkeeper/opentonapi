@@ -715,6 +715,9 @@ type Action struct {
 	SmartContractExec     OptSmartContractAction         `json:"SmartContractExec"`
 	DomainRenew           OptDomainRenewAction           `json:"DomainRenew"`
 	Purchase              OptPurchaseAction              `json:"Purchase"`
+	AddExtension              OptAddExtensionAction          `json:"AddExtension"`
+	RemoveExtension           OptRemoveExtensionAction       `json:"RemoveExtension"`
+	SetSignatureAllowedAction OptSetSignatureAllowedAction   `json:"SetSignatureAllowedAction"`
 	GasRelay              OptGasRelayAction              `json:"GasRelay"`
 	SimplePreview         ActionSimplePreview            `json:"simple_preview"`
 	BaseTransactions      []string                       `json:"base_transactions"`
@@ -828,6 +831,21 @@ func (s *Action) GetDomainRenew() OptDomainRenewAction {
 // GetPurchase returns the value of Purchase.
 func (s *Action) GetPurchase() OptPurchaseAction {
 	return s.Purchase
+}
+
+// GetAddExtension returns the value of AddExtension.
+func (s *Action) GetAddExtension() OptAddExtensionAction {
+	return s.AddExtension
+}
+
+// GetRemoveExtension returns the value of RemoveExtension.
+func (s *Action) GetRemoveExtension() OptRemoveExtensionAction {
+	return s.RemoveExtension
+}
+
+// GetSetSignatureAllowedAction returns the value of SetSignatureAllowedAction.
+func (s *Action) GetSetSignatureAllowedAction() OptSetSignatureAllowedAction {
+	return s.SetSignatureAllowedAction
 }
 
 // GetGasRelay returns the value of GasRelay.
@@ -953,6 +971,21 @@ func (s *Action) SetDomainRenew(val OptDomainRenewAction) {
 // SetPurchase sets the value of Purchase.
 func (s *Action) SetPurchase(val OptPurchaseAction) {
 	s.Purchase = val
+}
+
+// SetAddExtension sets the value of AddExtension.
+func (s *Action) SetAddExtension(val OptAddExtensionAction) {
+	s.AddExtension = val
+}
+
+// SetRemoveExtension sets the value of RemoveExtension.
+func (s *Action) SetRemoveExtension(val OptRemoveExtensionAction) {
+	s.RemoveExtension = val
+}
+
+// SetSetSignatureAllowedAction sets the value of SetSignatureAllowedAction.
+func (s *Action) SetSetSignatureAllowedAction(val OptSetSignatureAllowedAction) {
+	s.SetSignatureAllowedAction = val
 }
 
 // SetGasRelay sets the value of GasRelay.
@@ -1337,6 +1370,32 @@ func (s *ActionType) UnmarshalText(data []byte) error {
 	default:
 		return errors.Errorf("invalid value: %q", data)
 	}
+}
+
+// Ref: #/components/schemas/AddExtensionAction
+type AddExtensionAction struct {
+	Wallet    AccountAddress `json:"wallet"`
+	Extension string         `json:"extension"`
+}
+
+// GetWallet returns the value of Wallet.
+func (s *AddExtensionAction) GetWallet() AccountAddress {
+	return s.Wallet
+}
+
+// GetExtension returns the value of Extension.
+func (s *AddExtensionAction) GetExtension() string {
+	return s.Extension
+}
+
+// SetWallet sets the value of Wallet.
+func (s *AddExtensionAction) SetWallet(val AccountAddress) {
+	s.Wallet = val
+}
+
+// SetExtension sets the value of Extension.
+func (s *AddExtensionAction) SetExtension(val string) {
+	s.Extension = val
 }
 
 type AddressParseOK struct {
@@ -10531,6 +10590,52 @@ func (o OptActionPhase) Or(d ActionPhase) ActionPhase {
 	return d
 }
 
+// NewOptAddExtensionAction returns new OptAddExtensionAction with value set to v.
+func NewOptAddExtensionAction(v AddExtensionAction) OptAddExtensionAction {
+	return OptAddExtensionAction{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptAddExtensionAction is optional AddExtensionAction.
+type OptAddExtensionAction struct {
+	Value AddExtensionAction
+	Set   bool
+}
+
+// IsSet returns true if OptAddExtensionAction was set.
+func (o OptAddExtensionAction) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptAddExtensionAction) Reset() {
+	var v AddExtensionAction
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptAddExtensionAction) SetTo(v AddExtensionAction) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptAddExtensionAction) Get() (v AddExtensionAction, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptAddExtensionAction) Or(d AddExtensionAction) AddExtensionAction {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptAuctionBidAction returns new OptAuctionBidAction with value set to v.
 func NewOptAuctionBidAction(v AuctionBidAction) OptAuctionBidAction {
 	return OptAuctionBidAction{
@@ -14119,6 +14224,52 @@ func (o OptRefund) Or(d Refund) Refund {
 	return d
 }
 
+// NewOptRemoveExtensionAction returns new OptRemoveExtensionAction with value set to v.
+func NewOptRemoveExtensionAction(v RemoveExtensionAction) OptRemoveExtensionAction {
+	return OptRemoveExtensionAction{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptRemoveExtensionAction is optional RemoveExtensionAction.
+type OptRemoveExtensionAction struct {
+	Value RemoveExtensionAction
+	Set   bool
+}
+
+// IsSet returns true if OptRemoveExtensionAction was set.
+func (o OptRemoveExtensionAction) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptRemoveExtensionAction) Reset() {
+	var v RemoveExtensionAction
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptRemoveExtensionAction) SetTo(v RemoveExtensionAction) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptRemoveExtensionAction) Get() (v RemoveExtensionAction, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptRemoveExtensionAction) Or(d RemoveExtensionAction) RemoveExtensionAction {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptSale returns new OptSale with value set to v.
 func NewOptSale(v Sale) OptSale {
 	return OptSale{
@@ -14205,6 +14356,52 @@ func (o OptSendBlockchainMessageReqMeta) Get() (v SendBlockchainMessageReqMeta, 
 
 // Or returns value if set, or given parameter if does not.
 func (o OptSendBlockchainMessageReqMeta) Or(d SendBlockchainMessageReqMeta) SendBlockchainMessageReqMeta {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptSetSignatureAllowedAction returns new OptSetSignatureAllowedAction with value set to v.
+func NewOptSetSignatureAllowedAction(v SetSignatureAllowedAction) OptSetSignatureAllowedAction {
+	return OptSetSignatureAllowedAction{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptSetSignatureAllowedAction is optional SetSignatureAllowedAction.
+type OptSetSignatureAllowedAction struct {
+	Value SetSignatureAllowedAction
+	Set   bool
+}
+
+// IsSet returns true if OptSetSignatureAllowedAction was set.
+func (o OptSetSignatureAllowedAction) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptSetSignatureAllowedAction) Reset() {
+	var v SetSignatureAllowedAction
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptSetSignatureAllowedAction) SetTo(v SetSignatureAllowedAction) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptSetSignatureAllowedAction) Get() (v SetSignatureAllowedAction, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptSetSignatureAllowedAction) Or(d SetSignatureAllowedAction) SetSignatureAllowedAction {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -15784,6 +15981,32 @@ func (s *RefundType) UnmarshalText(data []byte) error {
 // ReindexAccountOK is response for ReindexAccount operation.
 type ReindexAccountOK struct{}
 
+// Ref: #/components/schemas/RemoveExtensionAction
+type RemoveExtensionAction struct {
+	Wallet    AccountAddress `json:"wallet"`
+	Extension string         `json:"extension"`
+}
+
+// GetWallet returns the value of Wallet.
+func (s *RemoveExtensionAction) GetWallet() AccountAddress {
+	return s.Wallet
+}
+
+// GetExtension returns the value of Extension.
+func (s *RemoveExtensionAction) GetExtension() string {
+	return s.Extension
+}
+
+// SetWallet sets the value of Wallet.
+func (s *RemoveExtensionAction) SetWallet(val AccountAddress) {
+	s.Wallet = val
+}
+
+// SetExtension sets the value of Extension.
+func (s *RemoveExtensionAction) SetExtension(val string) {
+	s.Extension = val
+}
+
 // Risk specifies assets that could be lost if a message would be sent to a malicious smart contract.
 // It makes sense to understand the risk BEFORE sending a message to the blockchain.
 // Ref: #/components/schemas/Risk
@@ -16011,6 +16234,32 @@ func (s *ServiceStatus) SetIndexingLatency(val int) {
 // SetLastKnownMasterchainSeqno sets the value of LastKnownMasterchainSeqno.
 func (s *ServiceStatus) SetLastKnownMasterchainSeqno(val int32) {
 	s.LastKnownMasterchainSeqno = val
+}
+
+// Ref: #/components/schemas/SetSignatureAllowedAction
+type SetSignatureAllowedAction struct {
+	Wallet  AccountAddress `json:"wallet"`
+	Allowed bool           `json:"allowed"`
+}
+
+// GetWallet returns the value of Wallet.
+func (s *SetSignatureAllowedAction) GetWallet() AccountAddress {
+	return s.Wallet
+}
+
+// GetAllowed returns the value of Allowed.
+func (s *SetSignatureAllowedAction) GetAllowed() bool {
+	return s.Allowed
+}
+
+// SetWallet sets the value of Wallet.
+func (s *SetSignatureAllowedAction) SetWallet(val AccountAddress) {
+	s.Wallet = val
+}
+
+// SetAllowed sets the value of Allowed.
+func (s *SetSignatureAllowedAction) SetAllowed(val bool) {
+	s.Allowed = val
 }
 
 // Ref: #/components/schemas/SignRawMessage
@@ -16638,8 +16887,10 @@ type SubscriptionAction struct {
 	Subscriber   AccountAddress `json:"subscriber"`
 	Subscription string         `json:"subscription"`
 	Beneficiary  AccountAddress `json:"beneficiary"`
-	Amount       int64          `json:"amount"`
-	Initial      bool           `json:"initial"`
+	// Deprecated: schema marks this property as deprecated.
+	Amount  OptInt64 `json:"amount"`
+	Price   Price    `json:"price"`
+	Initial bool     `json:"initial"`
 }
 
 // GetSubscriber returns the value of Subscriber.
@@ -16658,8 +16909,13 @@ func (s *SubscriptionAction) GetBeneficiary() AccountAddress {
 }
 
 // GetAmount returns the value of Amount.
-func (s *SubscriptionAction) GetAmount() int64 {
+func (s *SubscriptionAction) GetAmount() OptInt64 {
 	return s.Amount
+}
+
+// GetPrice returns the value of Price.
+func (s *SubscriptionAction) GetPrice() Price {
+	return s.Price
 }
 
 // GetInitial returns the value of Initial.
@@ -16683,8 +16939,13 @@ func (s *SubscriptionAction) SetBeneficiary(val AccountAddress) {
 }
 
 // SetAmount sets the value of Amount.
-func (s *SubscriptionAction) SetAmount(val int64) {
+func (s *SubscriptionAction) SetAmount(val OptInt64) {
 	s.Amount = val
+}
+
+// SetPrice sets the value of Price.
+func (s *SubscriptionAction) SetPrice(val Price) {
+	s.Price = val
 }
 
 // SetInitial sets the value of Initial.

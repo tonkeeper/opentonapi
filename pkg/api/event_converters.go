@@ -508,34 +508,13 @@ func (h *Handler) convertAction(ctx context.Context, viewer *tongo.AccountID, a 
 			Accounts: distinctAccounts(viewer, h.addressBook, &a.JettonBurn.Sender, &a.JettonBurn.Jetton),
 			Value:    oas.NewOptString(value),
 		}
-	case bath.Subscription:
-		action.Subscribe.SetTo(oas.SubscriptionAction{
-			Amount:       a.Subscription.Amount,
-			Beneficiary:  convertAccountAddress(a.Subscription.Beneficiary, h.addressBook),
-			Subscriber:   convertAccountAddress(a.Subscription.Subscriber, h.addressBook),
-			Subscription: a.Subscription.Subscription.ToRaw(),
-			Initial:      a.Subscription.First,
-		})
-		value := i18n.FormatTONs(a.Subscription.Amount)
-		action.SimplePreview = oas.ActionSimplePreview{
-			Name: "Subscription",
-			Description: i18n.T(acceptLanguage.Value, i18n.C{
-				DefaultMessage: &i18n.M{
-					ID:    "subscriptionAction",
-					Other: "Paying {{.Value}} for subscription",
-				},
-				TemplateData: i18n.Template{
-					"Value": value,
-				},
-			}),
-			Accounts: distinctAccounts(viewer, h.addressBook, &a.Subscription.Beneficiary, &a.Subscription.Subscriber),
-			Value:    oas.NewOptString(value),
-		}
-	case bath.UnSubscription:
+	case bath.Subscribe:
+		action.Subscribe, action.SimplePreview = h.convertSubscribe(ctx, a.Subscribe, acceptLanguage.Value, viewer)
+	case bath.UnSubscribe:
 		action.UnSubscribe.SetTo(oas.UnSubscriptionAction{
-			Beneficiary:  convertAccountAddress(a.UnSubscription.Beneficiary, h.addressBook),
-			Subscriber:   convertAccountAddress(a.UnSubscription.Subscriber, h.addressBook),
-			Subscription: a.UnSubscription.Subscription.ToRaw(),
+			Beneficiary:  convertAccountAddress(a.UnSubscribe.Beneficiary, h.addressBook),
+			Subscriber:   convertAccountAddress(a.UnSubscribe.Subscriber, h.addressBook),
+			Subscription: a.UnSubscribe.Subscription.ToRaw(),
 		})
 	case bath.ContractDeploy:
 		interfaces := make([]string, 0, len(a.ContractDeploy.Interfaces))
@@ -772,6 +751,12 @@ func (h *Handler) convertAction(ctx context.Context, viewer *tongo.AccountID, a 
 		action.DomainRenew, action.SimplePreview = h.convertDomainRenew(ctx, a.DnsRenew, acceptLanguage.Value, viewer)
 	case bath.Purchase:
 		action.Purchase, action.SimplePreview = h.convertPurchaseAction(ctx, a.Purchase, acceptLanguage.Value, viewer)
+	case bath.AddExtension:
+		action.AddExtension, action.SimplePreview = h.convertAddExtensionAction(ctx, a.AddExtension, acceptLanguage.Value, viewer)
+	case bath.RemoveExtension:
+		action.RemoveExtension, action.SimplePreview = h.convertRemoveExtensionAction(ctx, a.RemoveExtension, acceptLanguage.Value, viewer)
+	case bath.SetSignatureAllowed:
+		action.SetSignatureAllowedAction, action.SimplePreview = h.convertSetSignatureAllowed(ctx, a.SetSignatureAllowed, acceptLanguage.Value, viewer)
 	case bath.GasRelay:
 		action.GasRelay, action.SimplePreview = h.convertGasRelayAction(a.GasRelay, acceptLanguage.Value, viewer)
 	}
@@ -917,6 +902,107 @@ func convertEncryptedComment(comment *bath.EncryptedComment) oas.OptEncryptedCom
 		c.SetTo(oas.EncryptedComment{EncryptionType: comment.EncryptionType, CipherText: hex.EncodeToString(comment.CipherText)})
 	}
 	return c
+}
+
+func (h *Handler) convertAddExtensionAction(ctx context.Context, p *bath.AddExtensionAction, acceptLanguage string, viewer *tongo.AccountID) (oas.OptAddExtensionAction, oas.ActionSimplePreview) {
+	addExtensionAction := oas.AddExtensionAction{
+		Wallet:    convertAccountAddress(p.Wallet, h.addressBook),
+		Extension: p.Extension.ToRaw(),
+	}
+	simplePreview := oas.ActionSimplePreview{
+		Name: "AddExtension",
+		Description: i18n.T(acceptLanguage, i18n.C{
+			DefaultMessage: &i18n.M{
+				ID:    "addExtensionAction",
+				Other: "Add extension to wallet",
+			},
+		}),
+		Accounts: distinctAccounts(viewer, h.addressBook, &p.Wallet, &p.Extension),
+	}
+	var action oas.OptAddExtensionAction
+	action.SetTo(addExtensionAction)
+	return action, simplePreview
+}
+
+func (h *Handler) convertRemoveExtensionAction(ctx context.Context, p *bath.RemoveExtensionAction, acceptLanguage string, viewer *tongo.AccountID) (oas.OptRemoveExtensionAction, oas.ActionSimplePreview) {
+	removeExtensionAction := oas.RemoveExtensionAction{
+		Wallet:    convertAccountAddress(p.Wallet, h.addressBook),
+		Extension: p.Extension.ToRaw(),
+	}
+	simplePreview := oas.ActionSimplePreview{
+		Name: "RemoveExtension",
+		Description: i18n.T(acceptLanguage, i18n.C{
+			DefaultMessage: &i18n.M{
+				ID:    "removeExtensionAction",
+				Other: "Remove extension from wallet",
+			},
+		}),
+		Accounts: distinctAccounts(viewer, h.addressBook, &p.Wallet, &p.Extension),
+	}
+	var action oas.OptRemoveExtensionAction
+	action.SetTo(removeExtensionAction)
+	return action, simplePreview
+}
+
+func (h *Handler) convertSetSignatureAllowed(ctx context.Context, p *bath.SetSignatureAllowedAction, acceptLanguage string, viewer *tongo.AccountID) (oas.OptSetSignatureAllowedAction, oas.ActionSimplePreview) {
+	setSignatureAllowedAction := oas.SetSignatureAllowedAction{
+		Wallet:  convertAccountAddress(p.Wallet, h.addressBook),
+		Allowed: p.SignatureAllowed,
+	}
+	act := "Disable"
+	if p.SignatureAllowed {
+		act = "Enable"
+	}
+	simplePreview := oas.ActionSimplePreview{
+		Name: "SetSignatureAllowed",
+		Description: i18n.T(acceptLanguage, i18n.C{
+			DefaultMessage: &i18n.M{
+				ID:    "setSignatureAllowedAction",
+				Other: "{{.Action}} wallet signature",
+			},
+			TemplateData: i18n.Template{"Action": act},
+		}),
+		Accounts: distinctAccounts(viewer, h.addressBook, &p.Wallet),
+	}
+	var action oas.OptSetSignatureAllowedAction
+	action.SetTo(setSignatureAllowedAction)
+	return action, simplePreview
+}
+
+func (h *Handler) convertSubscribe(ctx context.Context, a *bath.SubscribeAction, acceptLanguage string, viewer *tongo.AccountID) (oas.OptSubscriptionAction, oas.ActionSimplePreview) {
+	price := h.convertPrice(ctx, a.Amount)
+	subscribeAction := oas.SubscriptionAction{
+		Price:       price,
+		Beneficiary: convertAccountAddress(a.Beneficiary, h.addressBook),
+		Subscriber:  convertAccountAddress(a.Subscriber, h.addressBook),
+		// TODO: WithdrawTo address
+		Subscription: a.Subscription.ToRaw(),
+		Initial:      a.First,
+	}
+	subscribeAction.Amount.SetTo(a.Amount.Amount.Int64()) // for backward compatibility
+	value := ScaleJettons(a.Amount.Amount, price.Decimals).String()
+	act := "Paying {{.Amount}} {{.TokenName}} for subscription"
+	if a.Amount.Amount.Cmp(big.NewInt(0)) == 0 {
+		act = "Trial period subscription"
+	}
+	simplePreview := oas.ActionSimplePreview{
+		Name: "Subscription",
+		Description: i18n.T(acceptLanguage, i18n.C{
+			DefaultMessage: &i18n.M{
+				ID:    "subscriptionAction",
+				Other: act,
+			},
+			TemplateData: i18n.Template{
+				"Amount":    value,
+				"TokenName": price.TokenName,
+			},
+		}),
+		Accounts: distinctAccounts(viewer, h.addressBook, &a.Beneficiary, &a.Subscriber),
+		Value:    oas.NewOptString(fmt.Sprintf("%v %v", value, price.TokenName)),
+	}
+	var action oas.OptSubscriptionAction
+	action.SetTo(subscribeAction)
+	return action, simplePreview
 }
 
 func (h *Handler) convertGasRelayAction(t *bath.GasRelayAction, acceptLanguage string, viewer *tongo.AccountID) (oas.OptGasRelayAction, oas.ActionSimplePreview) {

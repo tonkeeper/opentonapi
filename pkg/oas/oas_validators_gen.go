@@ -412,6 +412,24 @@ func (s *Action) Validate() error {
 		})
 	}
 	if err := func() error {
+		if value, ok := s.Subscribe.Get(); ok {
+			if err := func() error {
+				if err := value.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "Subscribe",
+			Error: err,
+		})
+	}
+	if err := func() error {
 		if value, ok := s.AuctionBid.Get(); ok {
 			if err := func() error {
 				if err := value.Validate(); err != nil {
@@ -5065,6 +5083,29 @@ func (s *Subscription) Validate() error {
 	}(); err != nil {
 		failures = append(failures, validate.FieldError{
 			Name:  "payment_per_period",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s *SubscriptionAction) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if err := s.Price.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "price",
 			Error: err,
 		})
 	}
