@@ -220,4 +220,43 @@ func appendExtendedActions(b *Bubble, txHash tongo.Bits256) {
 			}
 		}
 	}
+	// TODO: update tongo
+	// extract extended actions from wallet V4 input
+	//if (btx.account.Is(abi.WalletV4R1) || btx.account.Is(abi.WalletV4R2)) &&
+	//	btx.decodedBody != nil &&
+	//	btx.decodedBody.Operation == abi.WalletSignedV4ExtInMsgOp {
+	//	msg := btx.decodedBody.Value.(abi.WalletSignedV4ExtInMsgBody)
+	//	var addr tongo.AccountID
+	//	switch msg.Payload.SumType {
+	//	//case "DeployAndInstallPlugin":
+	//	case "InstallPlugin":
+	//		addr.Workchain = int32(msg.Payload.InstallPlugin.PluginWorkchain)
+	//		copy(addr.Address[:], msg.Payload.InstallPlugin.PluginAddress[:])
+	//		b.Children = append(b.Children, &Bubble{
+	//			Info: BubbleAddExtension{
+	//				Wallet:    btx.account.Address,
+	//				Extension: addr,
+	//				Success:   btx.success, // TODO: or check exit codes
+	//			},
+	//			Accounts:    []tongo.AccountID{btx.account.Address, addr},
+	//			ValueFlow:   &ValueFlow{},
+	//			Transaction: []ton.Bits256{txHash},
+	//		})
+	//	case "RemovePlugin":
+	//		addr.Workchain = int32(msg.Payload.RemovePlugin.PluginWorkchain)
+	//		copy(addr.Address[:], msg.Payload.RemovePlugin.PluginAddress[:])
+	//		b.Children = append(b.Children, &Bubble{
+	//			Info: BubbleRemoveExtension{
+	//				Wallet:    btx.account.Address,
+	//				Extension: addr,
+	//				Success:   btx.success, // TODO: or check exit codes
+	//			},
+	//			Accounts:    []tongo.AccountID{btx.account.Address, addr},
+	//			ValueFlow:   &ValueFlow{},
+	//			Transaction: []ton.Bits256{txHash},
+	//		})
+	//	default:
+	//		return
+	//	}
+	//}
 }
