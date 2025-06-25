@@ -85,25 +85,39 @@ func (b BubbleSubscription) ToAction() (action *Action) {
 	}
 }
 
-var UnSubscriptionStraw = Straw[BubbleUnSubscription]{
+var UnSubscriptionBySubscriberStraw = Straw[BubbleUnSubscription]{
 	CheckFuncs: []bubbleCheck{IsTx},
 	Builder: func(newAction *BubbleUnSubscription, bubble *Bubble) error {
 		newAction.Subscriber = bubble.Info.(BubbleTx).account
+		newAction.Success = true
 		return nil
 	},
-	SingleChild: &Straw[BubbleUnSubscription]{
-		CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.WalletPluginDestructMsgOp)},
-		Builder: func(newAction *BubbleUnSubscription, bubble *Bubble) error {
-			tx := bubble.Info.(BubbleTx)
-			newAction.Subscription = tx.account
-			newAction.Success = tx.success
-			return nil
-		},
-		SingleChild: &Straw[BubbleUnSubscription]{
-			Optional:   true,
-			CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.WalletPluginDestructMsgOp)},
+	Children: []Straw[BubbleUnSubscription]{
+		{
+			CheckFuncs: []bubbleCheck{IsTx, HasOpcode(abi.WalletPluginDestructMsgOpCode)}, // TODO: or check subscription interfaces
 			Builder: func(newAction *BubbleUnSubscription, bubble *Bubble) error {
-				newAction.Beneficiary = bubble.Info.(BubbleTx).account
+				tx := bubble.Info.(BubbleTx)
+				newAction.Subscription = tx.account
+				newAction.Success = newAction.Success && tx.success
+				return nil
+			},
+			SingleChild: &Straw[BubbleUnSubscription]{
+				Optional:   true,
+				CheckFuncs: []bubbleCheck{IsTx, Or(HasOperation(abi.WalletPluginDestructMsgOp), HasEmptyBody)},
+				Builder: func(newAction *BubbleUnSubscription, bubble *Bubble) error {
+					newAction.Beneficiary = bubble.Info.(BubbleTx).account
+					return nil
+				},
+			},
+		},
+		{
+			CheckFuncs: []bubbleCheck{Is(BubbleRemoveExtension{})},
+			Builder: func(newAction *BubbleUnSubscription, bubble *Bubble) error {
+				removeExtTx := bubble.Info.(BubbleRemoveExtension)
+				if removeExtTx.Extension != newAction.Subscription.Address {
+					newAction.Success = false
+				}
+				newAction.Success = newAction.Success && removeExtTx.Success
 				return nil
 			},
 		},

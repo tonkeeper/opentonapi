@@ -57,7 +57,7 @@ var DefaultStraws = []Merger{
 	MegatonFiJettonSwap,
 	InitialSubscriptionStraw,
 	ExtendedSubscriptionStraw,
-	UnSubscriptionStraw,
+	UnSubscriptionBySubscriberStraw,
 	DepositLiquidStakeStraw,
 	PendingWithdrawRequestLiquidStraw,
 	ElectionsDepositStakeStraw,
