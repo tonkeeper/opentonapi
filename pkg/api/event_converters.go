@@ -767,6 +767,12 @@ func (h *Handler) convertAction(ctx context.Context, viewer *tongo.AccountID, a 
 		action.DomainRenew, action.SimplePreview = h.convertDomainRenew(ctx, a.DnsRenew, acceptLanguage.Value, viewer)
 	case bath.Purchase:
 		action.Purchase, action.SimplePreview = h.convertPurchaseAction(ctx, a.Purchase, acceptLanguage.Value, viewer)
+	case bath.AddExtension:
+		action.AddExtension, action.SimplePreview = h.convertAddExtensionAction(ctx, a.AddExtension, acceptLanguage.Value, viewer)
+	case bath.RemoveExtension:
+		action.RemoveExtension, action.SimplePreview = h.convertRemoveExtensionAction(ctx, a.RemoveExtension, acceptLanguage.Value, viewer)
+	case bath.SetSignatureAllowed:
+		action.SetSignatureAllowedAction, action.SimplePreview = h.convertSetSignatureAllowed(ctx, a.SetSignatureAllowed, acceptLanguage.Value, viewer)
 	}
 	return action, nil
 }
@@ -902,4 +908,69 @@ func convertEncryptedComment(comment *bath.EncryptedComment) oas.OptEncryptedCom
 		c.SetTo(oas.EncryptedComment{EncryptionType: comment.EncryptionType, CipherText: hex.EncodeToString(comment.CipherText)})
 	}
 	return c
+}
+
+func (h *Handler) convertAddExtensionAction(ctx context.Context, p *bath.AddExtensionAction, acceptLanguage string, viewer *tongo.AccountID) (oas.OptAddExtensionAction, oas.ActionSimplePreview) {
+	addExtensionAction := oas.AddExtensionAction{
+		Wallet:    convertAccountAddress(p.Wallet, h.addressBook),
+		Extension: p.Extension.ToRaw(),
+	}
+	simplePreview := oas.ActionSimplePreview{
+		Name: "AddExtension",
+		Description: i18n.T(acceptLanguage, i18n.C{
+			DefaultMessage: &i18n.M{
+				ID:    "addExtensionAction",
+				Other: "Add extension to wallet",
+			},
+		}),
+		Accounts: distinctAccounts(viewer, h.addressBook, &p.Wallet, &p.Extension),
+	}
+	var action oas.OptAddExtensionAction
+	action.SetTo(addExtensionAction)
+	return action, simplePreview
+}
+
+func (h *Handler) convertRemoveExtensionAction(ctx context.Context, p *bath.RemoveExtensionAction, acceptLanguage string, viewer *tongo.AccountID) (oas.OptRemoveExtensionAction, oas.ActionSimplePreview) {
+	removeExtensionAction := oas.RemoveExtensionAction{
+		Wallet:    convertAccountAddress(p.Wallet, h.addressBook),
+		Extension: p.Extension.ToRaw(),
+	}
+	simplePreview := oas.ActionSimplePreview{
+		Name: "RemoveExtension",
+		Description: i18n.T(acceptLanguage, i18n.C{
+			DefaultMessage: &i18n.M{
+				ID:    "removeExtensionAction",
+				Other: "Remove extension from wallet",
+			},
+		}),
+		Accounts: distinctAccounts(viewer, h.addressBook, &p.Wallet, &p.Extension),
+	}
+	var action oas.OptRemoveExtensionAction
+	action.SetTo(removeExtensionAction)
+	return action, simplePreview
+}
+
+func (h *Handler) convertSetSignatureAllowed(ctx context.Context, p *bath.SetSignatureAllowedAction, acceptLanguage string, viewer *tongo.AccountID) (oas.OptSetSignatureAllowedAction, oas.ActionSimplePreview) {
+	setSignatureAllowedAction := oas.SetSignatureAllowedAction{
+		Wallet:  convertAccountAddress(p.Wallet, h.addressBook),
+		Allowed: p.SignatureAllowed,
+	}
+	act := "Disable"
+	if p.SignatureAllowed {
+		act = "Enable"
+	}
+	simplePreview := oas.ActionSimplePreview{
+		Name: "SetSignatureAllowed",
+		Description: i18n.T(acceptLanguage, i18n.C{
+			DefaultMessage: &i18n.M{
+				ID:    "setSignatureAllowedAction",
+				Other: "{{.Action}} wallet signature",
+			},
+			TemplateData: i18n.Template{"Action": act},
+		}),
+		Accounts: distinctAccounts(viewer, h.addressBook, &p.Wallet),
+	}
+	var action oas.OptSetSignatureAllowedAction
+	action.SetTo(setSignatureAllowedAction)
+	return action, simplePreview
 }
