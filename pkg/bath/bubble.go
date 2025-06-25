@@ -150,7 +150,74 @@ func fromTrace(trace *core.Trace, parent *core.Trace) *Bubble {
 			Transaction: []ton.Bits256{trace.Hash},
 		})
 	}
+	appendExtendedActions(&b, trace.Hash)
 	b.ValueFlow.Accounts[trace.Account].Ton -= aggregatedFee
 	b.ValueFlow.Accounts[trace.Account].Fees = aggregatedFee
 	return &b
+}
+
+func appendExtendedActions(b *Bubble, txHash tongo.Bits256) {
+	// extract extended actions from wallet W5 input
+	btx := b.Info.(BubbleTx)
+	if btx.account.Is(abi.WalletV5R1) && btx.decodedBody != nil {
+		var extendedActions *abi.W5ExtendedActions
+		switch btx.decodedBody.Operation {
+		case abi.WalletSignedExternalV5R1ExtInMsgOp:
+			msg := btx.decodedBody.Value.(abi.WalletSignedExternalV5R1ExtInMsgBody)
+			extendedActions = msg.Extended
+		case abi.WalletSignedInternalV5R1MsgOp:
+			msg := btx.decodedBody.Value.(abi.WalletSignedInternalV5R1MsgBody)
+			extendedActions = msg.Extended
+		case abi.WalletExtensionActionV5R1MsgOp:
+			msg := btx.decodedBody.Value.(abi.WalletExtensionActionV5R1MsgBody)
+			extendedActions = msg.Extended
+		}
+		if extendedActions != nil {
+			for _, ea := range *extendedActions {
+				switch ea.SumType {
+				case "AddExtension":
+					addr, err := tongo.AccountIDFromTlb(ea.AddExtension.Addr)
+					if err != nil || addr == nil {
+						continue
+					}
+					b.Children = append(b.Children, &Bubble{
+						Info: BubbleAddExtension{
+							Wallet:    btx.account.Address,
+							Extension: *addr,
+							Success:   btx.success, // TODO: or check exit codes
+						},
+						Accounts:    []tongo.AccountID{btx.account.Address, *addr},
+						ValueFlow:   &ValueFlow{},
+						Transaction: []ton.Bits256{txHash},
+					})
+				case "RemoveExtension":
+					addr, err := tongo.AccountIDFromTlb(ea.RemoveExtension.Addr)
+					if err != nil || addr == nil {
+						continue
+					}
+					b.Children = append(b.Children, &Bubble{
+						Info: BubbleRemoveExtension{
+							Wallet:    btx.account.Address,
+							Extension: *addr,
+							Success:   btx.success, // TODO: or check exit codes
+						},
+						Accounts:    []tongo.AccountID{btx.account.Address, *addr},
+						ValueFlow:   &ValueFlow{},
+						Transaction: []ton.Bits256{txHash},
+					})
+				case "SetSignatureAllowed":
+					b.Children = append(b.Children, &Bubble{
+						Info: BubbleSetSignatureAllowed{
+							Wallet:           btx.account.Address,
+							SignatureAllowed: ea.SetSignatureAllowed.Allowed,
+							Success:          btx.success, // TODO: or check exit codes
+						},
+						Accounts:    []tongo.AccountID{btx.account.Address},
+						ValueFlow:   &ValueFlow{},
+						Transaction: []ton.Bits256{txHash},
+					})
+				}
+			}
+		}
+	}
 }

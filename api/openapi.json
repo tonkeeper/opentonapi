@@ -1112,6 +1112,9 @@
    },
    "Action": {
     "properties": {
+     "AddExtension": {
+      "$ref": "#/components/schemas/AddExtensionAction"
+     },
      "AuctionBid": {
       "$ref": "#/components/schemas/AuctionBidAction"
      },
@@ -1156,6 +1159,12 @@
      },
      "Purchase": {
       "$ref": "#/components/schemas/PurchaseAction"
+     },
+     "RemoveExtension": {
+      "$ref": "#/components/schemas/RemoveExtensionAction"
+     },
+     "SetSignatureAllowedAction": {
+      "$ref": "#/components/schemas/SetSignatureAllowedAction"
      },
      "SmartContractExec": {
       "$ref": "#/components/schemas/SmartContractAction"
@@ -1288,6 +1297,23 @@
      "name",
      "description",
      "accounts"
+    ],
+    "type": "object"
+   },
+   "AddExtensionAction": {
+    "properties": {
+     "extension": {
+      "example": "0:10C1073837B93FDAAD594284CE8B8EFF7B9CF25427440EB2FC682762E1471365",
+      "format": "address",
+      "type": "string"
+     },
+     "wallet": {
+      "$ref": "#/components/schemas/AccountAddress"
+     }
+    },
+    "required": [
+     "wallet",
+     "extension"
     ],
     "type": "object"
    },
@@ -5422,6 +5448,23 @@
     ],
     "type": "object"
    },
+   "RemoveExtensionAction": {
+    "properties": {
+     "extension": {
+      "example": "0:10C1073837B93FDAAD594284CE8B8EFF7B9CF25427440EB2FC682762E1471365",
+      "format": "address",
+      "type": "string"
+     },
+     "wallet": {
+      "$ref": "#/components/schemas/AccountAddress"
+     }
+    },
+    "required": [
+     "wallet",
+     "extension"
+    ],
+    "type": "object"
+   },
    "Risk": {
     "description": "Risk specifies assets that could be lost if a message would be sent to a malicious smart contract. It makes sense to understand the risk BEFORE sending a message to the blockchain.",
     "properties": {
@@ -5513,6 +5556,21 @@
      "indexing_latency",
      "rest_online",
      "last_known_masterchain_seqno"
+    ],
+    "type": "object"
+   },
+   "SetSignatureAllowedAction": {
+    "properties": {
+     "allowed": {
+      "type": "boolean"
+     },
+     "wallet": {
+      "$ref": "#/components/schemas/AccountAddress"
+     }
+    },
+    "required": [
+     "wallet",
+     "allowed"
     ],
     "type": "object"
    },

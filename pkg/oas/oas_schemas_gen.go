@@ -682,31 +682,33 @@ func (s *Accounts) SetAccounts(val []Account) {
 
 // Ref: #/components/schemas/Action
 type Action struct {
-	Type                  string                         `json:"type"`
-	Status                ActionStatus                   `json:"status"`
-	TonTransfer           OptTonTransferAction           `json:"TonTransfer"`
-	ExtraCurrencyTransfer OptExtraCurrencyTransferAction `json:"ExtraCurrencyTransfer"`
-	ContractDeploy        OptContractDeployAction        `json:"ContractDeploy"`
-	JettonTransfer        OptJettonTransferAction        `json:"JettonTransfer"`
-	JettonBurn            OptJettonBurnAction            `json:"JettonBurn"`
-	JettonMint            OptJettonMintAction            `json:"JettonMint"`
-	NftItemTransfer       OptNftItemTransferAction       `json:"NftItemTransfer"`
-	Subscribe             OptSubscriptionAction          `json:"Subscribe"`
-	UnSubscribe           OptUnSubscriptionAction        `json:"UnSubscribe"`
-	AuctionBid            OptAuctionBidAction            `json:"AuctionBid"`
-	NftPurchase           OptNftPurchaseAction           `json:"NftPurchase"`
-	DepositStake          OptDepositStakeAction          `json:"DepositStake"`
-	WithdrawStake         OptWithdrawStakeAction         `json:"WithdrawStake"`
-	WithdrawStakeRequest  OptWithdrawStakeRequestAction  `json:"WithdrawStakeRequest"`
-	ElectionsDepositStake OptElectionsDepositStakeAction `json:"ElectionsDepositStake"`
-	ElectionsRecoverStake OptElectionsRecoverStakeAction `json:"ElectionsRecoverStake"`
-	JettonSwap            OptJettonSwapAction            `json:"JettonSwap"`
-	SmartContractExec     OptSmartContractAction         `json:"SmartContractExec"`
-	DomainRenew           OptDomainRenewAction           `json:"DomainRenew"`
-	Purchase              OptPurchaseAction              `json:"Purchase"`
-	GasRelay              OptGasRelayAction              `json:"GasRelay"`
-	SimplePreview         ActionSimplePreview            `json:"simple_preview"`
-	BaseTransactions      []string                       `json:"base_transactions"`
+	Type                      string                         `json:"type"`
+	Status                    ActionStatus                   `json:"status"`
+	TonTransfer               OptTonTransferAction           `json:"TonTransfer"`
+	ExtraCurrencyTransfer     OptExtraCurrencyTransferAction `json:"ExtraCurrencyTransfer"`
+	ContractDeploy            OptContractDeployAction        `json:"ContractDeploy"`
+	JettonTransfer            OptJettonTransferAction        `json:"JettonTransfer"`
+	JettonBurn                OptJettonBurnAction            `json:"JettonBurn"`
+	JettonMint                OptJettonMintAction            `json:"JettonMint"`
+	NftItemTransfer           OptNftItemTransferAction       `json:"NftItemTransfer"`
+	Subscribe                 OptSubscriptionAction          `json:"Subscribe"`
+	UnSubscribe               OptUnSubscriptionAction        `json:"UnSubscribe"`
+	AuctionBid                OptAuctionBidAction            `json:"AuctionBid"`
+	NftPurchase               OptNftPurchaseAction           `json:"NftPurchase"`
+	DepositStake              OptDepositStakeAction          `json:"DepositStake"`
+	WithdrawStake             OptWithdrawStakeAction         `json:"WithdrawStake"`
+	WithdrawStakeRequest      OptWithdrawStakeRequestAction  `json:"WithdrawStakeRequest"`
+	ElectionsDepositStake     OptElectionsDepositStakeAction `json:"ElectionsDepositStake"`
+	ElectionsRecoverStake     OptElectionsRecoverStakeAction `json:"ElectionsRecoverStake"`
+	JettonSwap                OptJettonSwapAction            `json:"JettonSwap"`
+	SmartContractExec         OptSmartContractAction         `json:"SmartContractExec"`
+	DomainRenew               OptDomainRenewAction           `json:"DomainRenew"`
+	Purchase                  OptPurchaseAction              `json:"Purchase"`
+	AddExtension              OptAddExtensionAction          `json:"AddExtension"`
+	RemoveExtension           OptRemoveExtensionAction       `json:"RemoveExtension"`
+	SetSignatureAllowedAction OptSetSignatureAllowedAction   `json:"SetSignatureAllowedAction"`
+	SimplePreview             ActionSimplePreview            `json:"simple_preview"`
+	BaseTransactions          []string                       `json:"base_transactions"`
 }
 
 // GetType returns the value of Type.
@@ -819,9 +821,19 @@ func (s *Action) GetPurchase() OptPurchaseAction {
 	return s.Purchase
 }
 
-// GetGasRelay returns the value of GasRelay.
-func (s *Action) GetGasRelay() OptGasRelayAction {
-	return s.GasRelay
+// GetAddExtension returns the value of AddExtension.
+func (s *Action) GetAddExtension() OptAddExtensionAction {
+	return s.AddExtension
+}
+
+// GetRemoveExtension returns the value of RemoveExtension.
+func (s *Action) GetRemoveExtension() OptRemoveExtensionAction {
+	return s.RemoveExtension
+}
+
+// GetSetSignatureAllowedAction returns the value of SetSignatureAllowedAction.
+func (s *Action) GetSetSignatureAllowedAction() OptSetSignatureAllowedAction {
+	return s.SetSignatureAllowedAction
 }
 
 // GetSimplePreview returns the value of SimplePreview.
@@ -944,9 +956,19 @@ func (s *Action) SetPurchase(val OptPurchaseAction) {
 	s.Purchase = val
 }
 
-// SetGasRelay sets the value of GasRelay.
-func (s *Action) SetGasRelay(val OptGasRelayAction) {
-	s.GasRelay = val
+// SetAddExtension sets the value of AddExtension.
+func (s *Action) SetAddExtension(val OptAddExtensionAction) {
+	s.AddExtension = val
+}
+
+// SetRemoveExtension sets the value of RemoveExtension.
+func (s *Action) SetRemoveExtension(val OptRemoveExtensionAction) {
+	s.RemoveExtension = val
+}
+
+// SetSetSignatureAllowedAction sets the value of SetSignatureAllowedAction.
+func (s *Action) SetSetSignatureAllowedAction(val OptSetSignatureAllowedAction) {
+	s.SetSignatureAllowedAction = val
 }
 
 // SetSimplePreview sets the value of SimplePreview.
@@ -1152,6 +1174,32 @@ func (s *ActionStatus) UnmarshalText(data []byte) error {
 	default:
 		return errors.Errorf("invalid value: %q", data)
 	}
+}
+
+// Ref: #/components/schemas/AddExtensionAction
+type AddExtensionAction struct {
+	Wallet    AccountAddress `json:"wallet"`
+	Extension string         `json:"extension"`
+}
+
+// GetWallet returns the value of Wallet.
+func (s *AddExtensionAction) GetWallet() AccountAddress {
+	return s.Wallet
+}
+
+// GetExtension returns the value of Extension.
+func (s *AddExtensionAction) GetExtension() string {
+	return s.Extension
+}
+
+// SetWallet sets the value of Wallet.
+func (s *AddExtensionAction) SetWallet(val AccountAddress) {
+	s.Wallet = val
+}
+
+// SetExtension sets the value of Extension.
+func (s *AddExtensionAction) SetExtension(val string) {
+	s.Extension = val
 }
 
 type AddressParseOK struct {
@@ -5812,43 +5860,6 @@ func (s *GasLimitPrices) SetDeleteDueLimit(val int64) {
 	s.DeleteDueLimit = val
 }
 
-// Ref: #/components/schemas/GasRelayAction
-type GasRelayAction struct {
-	Amount  int64          `json:"amount"`
-	Relayer AccountAddress `json:"relayer"`
-	Target  AccountAddress `json:"target"`
-}
-
-// GetAmount returns the value of Amount.
-func (s *GasRelayAction) GetAmount() int64 {
-	return s.Amount
-}
-
-// GetRelayer returns the value of Relayer.
-func (s *GasRelayAction) GetRelayer() AccountAddress {
-	return s.Relayer
-}
-
-// GetTarget returns the value of Target.
-func (s *GasRelayAction) GetTarget() AccountAddress {
-	return s.Target
-}
-
-// SetAmount sets the value of Amount.
-func (s *GasRelayAction) SetAmount(val int64) {
-	s.Amount = val
-}
-
-// SetRelayer sets the value of Relayer.
-func (s *GasRelayAction) SetRelayer(val AccountAddress) {
-	s.Relayer = val
-}
-
-// SetTarget sets the value of Target.
-func (s *GasRelayAction) SetTarget(val AccountAddress) {
-	s.Target = val
-}
-
 // Ref: #/components/schemas/GaslessConfig
 type GaslessConfig struct {
 	// Sending excess to this address decreases the commission of a gasless transfer.
@@ -10294,6 +10305,52 @@ func (o OptActionPhase) Or(d ActionPhase) ActionPhase {
 	return d
 }
 
+// NewOptAddExtensionAction returns new OptAddExtensionAction with value set to v.
+func NewOptAddExtensionAction(v AddExtensionAction) OptAddExtensionAction {
+	return OptAddExtensionAction{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptAddExtensionAction is optional AddExtensionAction.
+type OptAddExtensionAction struct {
+	Value AddExtensionAction
+	Set   bool
+}
+
+// IsSet returns true if OptAddExtensionAction was set.
+func (o OptAddExtensionAction) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptAddExtensionAction) Reset() {
+	var v AddExtensionAction
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptAddExtensionAction) SetTo(v AddExtensionAction) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptAddExtensionAction) Get() (v AddExtensionAction, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptAddExtensionAction) Or(d AddExtensionAction) AddExtensionAction {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptAuctionBidAction returns new OptAuctionBidAction with value set to v.
 func NewOptAuctionBidAction(v AuctionBidAction) OptAuctionBidAction {
 	return OptAuctionBidAction{
@@ -12686,52 +12743,6 @@ func (o OptExtraCurrencyTransferAction) Or(d ExtraCurrencyTransferAction) ExtraC
 	return d
 }
 
-// NewOptGasRelayAction returns new OptGasRelayAction with value set to v.
-func NewOptGasRelayAction(v GasRelayAction) OptGasRelayAction {
-	return OptGasRelayAction{
-		Value: v,
-		Set:   true,
-	}
-}
-
-// OptGasRelayAction is optional GasRelayAction.
-type OptGasRelayAction struct {
-	Value GasRelayAction
-	Set   bool
-}
-
-// IsSet returns true if OptGasRelayAction was set.
-func (o OptGasRelayAction) IsSet() bool { return o.Set }
-
-// Reset unsets value.
-func (o *OptGasRelayAction) Reset() {
-	var v GasRelayAction
-	o.Value = v
-	o.Set = false
-}
-
-// SetTo sets value to v.
-func (o *OptGasRelayAction) SetTo(v GasRelayAction) {
-	o.Set = true
-	o.Value = v
-}
-
-// Get returns value and boolean that denotes whether value was set.
-func (o OptGasRelayAction) Get() (v GasRelayAction, ok bool) {
-	if !o.Set {
-		return v, false
-	}
-	return o.Value, true
-}
-
-// Or returns value if set, or given parameter if does not.
-func (o OptGasRelayAction) Or(d GasRelayAction) GasRelayAction {
-	if v, ok := o.Get(); ok {
-		return v
-	}
-	return d
-}
-
 // NewOptGetAccountsReq returns new OptGetAccountsReq with value set to v.
 func NewOptGetAccountsReq(v GetAccountsReq) OptGetAccountsReq {
 	return OptGetAccountsReq{
@@ -13882,6 +13893,52 @@ func (o OptRefund) Or(d Refund) Refund {
 	return d
 }
 
+// NewOptRemoveExtensionAction returns new OptRemoveExtensionAction with value set to v.
+func NewOptRemoveExtensionAction(v RemoveExtensionAction) OptRemoveExtensionAction {
+	return OptRemoveExtensionAction{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptRemoveExtensionAction is optional RemoveExtensionAction.
+type OptRemoveExtensionAction struct {
+	Value RemoveExtensionAction
+	Set   bool
+}
+
+// IsSet returns true if OptRemoveExtensionAction was set.
+func (o OptRemoveExtensionAction) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptRemoveExtensionAction) Reset() {
+	var v RemoveExtensionAction
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptRemoveExtensionAction) SetTo(v RemoveExtensionAction) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptRemoveExtensionAction) Get() (v RemoveExtensionAction, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptRemoveExtensionAction) Or(d RemoveExtensionAction) RemoveExtensionAction {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptSale returns new OptSale with value set to v.
 func NewOptSale(v Sale) OptSale {
 	return OptSale{
@@ -13968,6 +14025,52 @@ func (o OptSendBlockchainMessageReqMeta) Get() (v SendBlockchainMessageReqMeta, 
 
 // Or returns value if set, or given parameter if does not.
 func (o OptSendBlockchainMessageReqMeta) Or(d SendBlockchainMessageReqMeta) SendBlockchainMessageReqMeta {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptSetSignatureAllowedAction returns new OptSetSignatureAllowedAction with value set to v.
+func NewOptSetSignatureAllowedAction(v SetSignatureAllowedAction) OptSetSignatureAllowedAction {
+	return OptSetSignatureAllowedAction{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptSetSignatureAllowedAction is optional SetSignatureAllowedAction.
+type OptSetSignatureAllowedAction struct {
+	Value SetSignatureAllowedAction
+	Set   bool
+}
+
+// IsSet returns true if OptSetSignatureAllowedAction was set.
+func (o OptSetSignatureAllowedAction) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptSetSignatureAllowedAction) Reset() {
+	var v SetSignatureAllowedAction
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptSetSignatureAllowedAction) SetTo(v SetSignatureAllowedAction) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptSetSignatureAllowedAction) Get() (v SetSignatureAllowedAction, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptSetSignatureAllowedAction) Or(d SetSignatureAllowedAction) SetSignatureAllowedAction {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -15547,6 +15650,32 @@ func (s *RefundType) UnmarshalText(data []byte) error {
 // ReindexAccountOK is response for ReindexAccount operation.
 type ReindexAccountOK struct{}
 
+// Ref: #/components/schemas/RemoveExtensionAction
+type RemoveExtensionAction struct {
+	Wallet    AccountAddress `json:"wallet"`
+	Extension string         `json:"extension"`
+}
+
+// GetWallet returns the value of Wallet.
+func (s *RemoveExtensionAction) GetWallet() AccountAddress {
+	return s.Wallet
+}
+
+// GetExtension returns the value of Extension.
+func (s *RemoveExtensionAction) GetExtension() string {
+	return s.Extension
+}
+
+// SetWallet sets the value of Wallet.
+func (s *RemoveExtensionAction) SetWallet(val AccountAddress) {
+	s.Wallet = val
+}
+
+// SetExtension sets the value of Extension.
+func (s *RemoveExtensionAction) SetExtension(val string) {
+	s.Extension = val
+}
+
 // Risk specifies assets that could be lost if a message would be sent to a malicious smart contract.
 // It makes sense to understand the risk BEFORE sending a message to the blockchain.
 // Ref: #/components/schemas/Risk
@@ -15774,6 +15903,32 @@ func (s *ServiceStatus) SetIndexingLatency(val int) {
 // SetLastKnownMasterchainSeqno sets the value of LastKnownMasterchainSeqno.
 func (s *ServiceStatus) SetLastKnownMasterchainSeqno(val int32) {
 	s.LastKnownMasterchainSeqno = val
+}
+
+// Ref: #/components/schemas/SetSignatureAllowedAction
+type SetSignatureAllowedAction struct {
+	Wallet  AccountAddress `json:"wallet"`
+	Allowed bool           `json:"allowed"`
+}
+
+// GetWallet returns the value of Wallet.
+func (s *SetSignatureAllowedAction) GetWallet() AccountAddress {
+	return s.Wallet
+}
+
+// GetAllowed returns the value of Allowed.
+func (s *SetSignatureAllowedAction) GetAllowed() bool {
+	return s.Allowed
+}
+
+// SetWallet sets the value of Wallet.
+func (s *SetSignatureAllowedAction) SetWallet(val AccountAddress) {
+	s.Wallet = val
+}
+
+// SetAllowed sets the value of Allowed.
+func (s *SetSignatureAllowedAction) SetAllowed(val bool) {
+	s.Allowed = val
 }
 
 // Ref: #/components/schemas/SignRawMessage

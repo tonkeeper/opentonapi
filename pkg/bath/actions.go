@@ -40,6 +40,9 @@ const (
 	AuctionBid            ActionType = "AuctionBid"
 	DomainRenew           ActionType = "DomainRenew"
 	Purchase              ActionType = "Purchase"
+	AddExtension          ActionType = "AddExtension"
+	RemoveExtension       ActionType = "RemoveExtension"
+	SetSignatureAllowed   ActionType = "SetSignatureAllowed"
 	Unknown               ActionType = "Unknown"
 )
 
@@ -87,6 +90,9 @@ type (
 		JettonSwap            *JettonSwapAction            `json:",omitempty"`
 		DnsRenew              *DnsRenewAction              `json:",omitempty"`
 		Purchase              *PurchaseAction              `json:",omitempty"`
+		AddExtension          *AddExtensionAction          `json:",omitempty"`
+		RemoveExtension       *RemoveExtensionAction       `json:",omitempty"`
+		SetSignatureAllowed   *SetSignatureAllowedAction   `json:",omitempty"`
 		Success               bool
 		Type                  ActionType
 		Error                 *string `json:",omitempty"`
@@ -228,6 +234,21 @@ type (
 		InvoiceID           uuid.UUID
 		Price               core.Price
 	}
+
+	AddExtensionAction struct {
+		Wallet    tongo.AccountID
+		Extension tongo.AccountID
+	}
+
+	RemoveExtensionAction struct {
+		Wallet    tongo.AccountID
+		Extension tongo.AccountID
+	}
+
+	SetSignatureAllowedAction struct {
+		Wallet           tongo.AccountID
+		SignatureAllowed bool
+	}
 )
 
 func (a Action) String() string {
@@ -359,12 +380,27 @@ func (a Action) IsSubject(account tongo.AccountID) bool {
 		a.JettonBurn,
 		a.DnsRenew,
 		a.Purchase,
+		a.AddExtension,
+		a.RemoveExtension,
+		a.SetSignatureAllowed,
 	} {
 		if i != nil && !reflect.ValueOf(i).IsNil() {
 			return slices.Contains(i.SubjectAccounts(), account)
 		}
 	}
 	return false
+}
+
+func (a *AddExtensionAction) SubjectAccounts() []tongo.AccountID {
+	return []tongo.AccountID{a.Wallet}
+}
+
+func (a *RemoveExtensionAction) SubjectAccounts() []tongo.AccountID {
+	return []tongo.AccountID{a.Wallet}
+}
+
+func (a *SetSignatureAllowedAction) SubjectAccounts() []tongo.AccountID {
+	return []tongo.AccountID{a.Wallet}
 }
 
 func (a *TonTransferAction) SubjectAccounts() []tongo.AccountID {
