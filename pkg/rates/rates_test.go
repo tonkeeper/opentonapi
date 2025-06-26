@@ -1,12 +1,15 @@
 package rates
 
 import (
+	"math"
 	"reflect"
 	"testing"
 
 	"github.com/tonkeeper/opentonapi/pkg/references"
 	"github.com/tonkeeper/tongo/ton"
 )
+
+const EPS = 1e-12
 
 func TestSortReserveAndAssetPairs(t *testing.T) {
 	usdt := ton.MustParseAccountID("EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs")
@@ -189,7 +192,8 @@ func TestCalculatePoolPrice(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			for _, pool := range test.pools {
 				_, price := calculatePoolPrice(pool.Assets[0], pool.Assets[1], pools, pool.Invariant, pool.Amp, pool.Weight, pool.Rate)
-				if price != test.expectedPrice {
+				// diff between prices must be <= 1e-12 (accuracy up to 12 decimals)
+				if math.Abs(price-test.expectedPrice) > math.Max(math.Max(price, test.expectedPrice), EPS) {
 					t.Errorf("Unexpected price for account: got %v, want %v\n", price, test.expectedPrice)
 				}
 			}

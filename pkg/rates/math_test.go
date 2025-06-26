@@ -1,6 +1,7 @@
 package rates
 
 import (
+	"math"
 	"testing"
 )
 
@@ -74,8 +75,8 @@ func TestGetInvariantForStableSwap(t *testing.T) {
 	for _, p := range pools {
 		t.Run(p.name, func(t *testing.T) {
 			inv := getInvariantForStableSwap(p.amp, p.xReserves, p.yReserves)
-
-			if inv != p.expectedInv {
+			// diff between invariants must be <= 1e-12 (accuracy up to 12 decimals)
+			if math.Abs(inv-p.expectedInv) > math.Max(math.Max(inv, p.expectedInv)*EPS, EPS) {
 				t.Errorf("Incorrect invariant for (x: %v, y: %v, amp: %v) pool: got %v, want %v\n", p.xReserves, p.yReserves, p.amp, inv, p.expectedInv)
 			}
 		})
@@ -170,7 +171,8 @@ func TestGetTokensOutForStableSwap(t *testing.T) {
 	for _, p := range pools {
 		t.Run(p.name, func(t *testing.T) {
 			newY := getOutTokensForStableSwap(p.amp, p.newXReserves, p.yReserves, p.inv)
-			if newY != p.expectedNewY {
+			// diff between y must be <= 1e-12 (accuracy up to 12 decimals)
+			if math.Abs(newY-p.expectedNewY) > math.Max(math.Max(newY, p.expectedNewY)*EPS, EPS) {
 				t.Errorf("Incorrect new Y reserve for (x: %v, y: %v, amp: %v, inv: %v) pool: got %v, want %v\n", p.newXReserves, p.yReserves, p.amp, p.inv, newY, p.expectedNewY)
 			}
 		})
