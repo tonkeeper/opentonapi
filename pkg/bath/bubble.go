@@ -151,9 +151,12 @@ func fromTrace(trace *core.Trace) *Bubble {
 }
 
 func appendExtendedActions(b *Bubble, txHash tongo.Bits256) {
-	// extract extended actions from wallet W5 input
 	btx := b.Info.(BubbleTx)
-	if btx.account.Is(abi.WalletV5R1) && btx.decodedBody != nil {
+	if btx.decodedBody == nil {
+		return
+	}
+	// extract extended actions from wallet W5 input
+	if btx.account.Is(abi.WalletV5R1) {
 		var extendedActions *abi.W5ExtendedActions
 		switch btx.decodedBody.Operation {
 		case abi.WalletSignedExternalV5R1ExtInMsgOp:
@@ -214,11 +217,25 @@ func appendExtendedActions(b *Bubble, txHash tongo.Bits256) {
 			}
 		}
 	}
+	//extract extended actions from wallet V4 input
 	// TODO: update tongo
-	// extract extended actions from wallet V4 input
-	//if (btx.account.Is(abi.WalletV4R1) || btx.account.Is(abi.WalletV4R2)) &&
-	//	btx.decodedBody != nil &&
-	//	btx.decodedBody.Operation == abi.WalletSignedV4ExtInMsgOp {
+	//if btx.account.Is(abi.WalletV4R1) || btx.account.Is(abi.WalletV4R2) {
+	//	if btx.decodedBody.Operation == abi.WalletPluginDestructMsgOp {
+	//		b.Children = append(b.Children, &Bubble{
+	//			Info: BubbleRemoveExtension{
+	//				Wallet:    btx.account.Address,
+	//				Extension: btx.inputFrom.Address,
+	//				Success:   btx.success, // TODO: or check exit codes
+	//			},
+	//			Accounts:    []tongo.AccountID{btx.account.Address, btx.inputFrom.Address},
+	//			ValueFlow:   &ValueFlow{},
+	//			Transaction: []ton.Bits256{txHash},
+	//		})
+	//		return
+	//	}
+	//	if btx.decodedBody.Operation != abi.WalletSignedV4ExtInMsgOp {
+	//		return
+	//	}
 	//	msg := btx.decodedBody.Value.(abi.WalletSignedV4ExtInMsgBody)
 	//	var addr tongo.AccountID
 	//	switch msg.Payload.SumType {
