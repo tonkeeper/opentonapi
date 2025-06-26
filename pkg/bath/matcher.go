@@ -232,6 +232,11 @@ func IsBounced(bubble *Bubble) bool {
 	return ok && tx.bounced
 }
 
+func IsExternal(bubble *Bubble) bool {
+	tx, ok := bubble.Info.(BubbleTx)
+	return ok && tx.external
+}
+
 func JettonTransferOpCode(opCode uint32) bubbleCheck {
 	return func(bubble *Bubble) bool {
 		tx, _ := bubble.Info.(BubbleJettonTransfer)

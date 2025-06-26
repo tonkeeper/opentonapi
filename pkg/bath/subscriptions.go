@@ -124,13 +124,13 @@ var UnSubscriptionBySubscriberStraw = Straw[BubbleUnSubscription]{
 	},
 }
 
-var UnSubscriptionByBeneficiaryStraw = Straw[BubbleUnSubscription]{
-	CheckFuncs: []bubbleCheck{IsTx, HasOpcode(abi.WalletPluginDestructMsgOpCode)}, // TODO: or check subscription interfaces
+var UnSubscriptionByBeneficiaryOrExpiredStraw = Straw[BubbleUnSubscription]{
+	CheckFuncs: []bubbleCheck{IsTx, Or(IsExternal, HasOpcode(abi.WalletPluginDestructMsgOpCode))}, // TODO: or check subscription interfaces
 	Builder: func(newAction *BubbleUnSubscription, bubble *Bubble) error {
 		tx := bubble.Info.(BubbleTx)
 		newAction.Subscription = tx.account
 		newAction.Success = tx.success
-		if tx.inputFrom != nil {
+		if !tx.external && tx.inputFrom != nil {
 			newAction.Beneficiary = *tx.inputFrom
 		}
 		return nil
@@ -155,9 +155,15 @@ var UnSubscriptionByBeneficiaryStraw = Straw[BubbleUnSubscription]{
 				},
 			},
 		},
+		// TODO: can not detect newAction.Beneficiary here for external
+		// TODO: fix matching
 		{
-			Optional:   true,
+			// to beneficiary
 			CheckFuncs: []bubbleCheck{IsTx, Or(HasOpcode(abi.WalletPluginDestructMsgOpCode), HasEmptyBody)},
+		},
+		{
+			Optional:   true, // to reward address for external
+			CheckFuncs: []bubbleCheck{IsTx, HasEmptyBody},
 		},
 	},
 }
