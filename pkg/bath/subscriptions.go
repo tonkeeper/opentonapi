@@ -99,7 +99,7 @@ var UnSubscriptionBySubscriberStraw = Straw[BubbleUnSubscription]{
 			},
 			SingleChild: &Straw[BubbleUnSubscription]{
 				Optional:   true,
-				CheckFuncs: []bubbleCheck{IsTx, Or(HasOperation(abi.WalletPluginDestructMsgOp), HasEmptyBody)},
+				CheckFuncs: []bubbleCheck{IsTx, Or(HasOpcode(abi.WalletPluginDestructMsgOpCode), HasEmptyBody)},
 				Builder: func(newAction *BubbleUnSubscription, bubble *Bubble) error {
 					newAction.Beneficiary = bubble.Info.(BubbleTx).account
 					return nil
@@ -116,6 +116,44 @@ var UnSubscriptionBySubscriberStraw = Straw[BubbleUnSubscription]{
 				newAction.Success = newAction.Success && removeExtTx.Success
 				return nil
 			},
+		},
+	},
+}
+
+var UnSubscriptionByBeneficiaryStraw = Straw[BubbleUnSubscription]{
+	CheckFuncs: []bubbleCheck{IsTx, HasOpcode(abi.WalletPluginDestructMsgOpCode)}, // TODO: or check subscription interfaces
+	Builder: func(newAction *BubbleUnSubscription, bubble *Bubble) error {
+		tx := bubble.Info.(BubbleTx)
+		newAction.Subscription = tx.account
+		newAction.Success = tx.success
+		if tx.inputFrom != nil {
+			newAction.Beneficiary = *tx.inputFrom
+		}
+		return nil
+	},
+	Children: []Straw[BubbleUnSubscription]{
+		{
+			CheckFuncs: []bubbleCheck{IsTx}, // wallet here. Don't check opcodes, the only plugin deletion event is important
+			Builder: func(newAction *BubbleUnSubscription, bubble *Bubble) error {
+				tx := bubble.Info.(BubbleTx)
+				newAction.Subscriber = tx.account
+				return nil
+			},
+			SingleChild: &Straw[BubbleUnSubscription]{
+				CheckFuncs: []bubbleCheck{Is(BubbleRemoveExtension{})},
+				Builder: func(newAction *BubbleUnSubscription, bubble *Bubble) error {
+					removeExtTx := bubble.Info.(BubbleRemoveExtension)
+					if removeExtTx.Extension != newAction.Subscription.Address {
+						newAction.Success = false
+					}
+					newAction.Success = newAction.Success && removeExtTx.Success
+					return nil
+				},
+			},
+		},
+		{
+			Optional:   true,
+			CheckFuncs: []bubbleCheck{IsTx, Or(HasOpcode(abi.WalletPluginDestructMsgOpCode), HasEmptyBody)},
 		},
 	},
 }
