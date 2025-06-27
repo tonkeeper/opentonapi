@@ -53,6 +53,7 @@ var DefaultStraws = []Merger{
 	InvoicePaymentStrawNative,
 	InvoicePaymentStrawJetton,
 	MegatonFiJettonSwap,
+	SubscriptionDeployStraw,
 	InitialSubscriptionStraw,
 	ExtendedSubscriptionStraw,
 	UnSubscriptionBySubscriberStraw,
