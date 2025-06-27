@@ -6,7 +6,12 @@
          "Buyer": "0:533f30de5722157b8471f5503b9fc5800c8d8397e79743f796b11e609adae69f",
          "Seller": "0:353d4cb749da429dbee9387ff7f65c0d99a922396a3d239eff8be465422771a0",
          "AuctionType": "getgems",
-         "Price": 1200000000
+         "Price": {
+           "Type": "native",
+           "Amount": 1200000000,
+           "Jetton": null,
+           "CurrencyID": null
+         }
        },
        "Success": true,
        "Type": "NftPurchase",
