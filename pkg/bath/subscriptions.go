@@ -77,40 +77,55 @@ var SubscriptionDeployStraw = Straw[BubbleSubscription]{
 }
 
 var InitialSubscriptionStraw = Straw[BubbleSubscription]{
-	CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.PaymentRequestResponseMsgOp), AmountInterval(1, 1<<62)},
+	CheckFuncs: []bubbleCheck{IsTx, HasOpcode(abi.SubscriptionV2PaymentConfirmedMsgOpCode), AmountInterval(1, 1<<62)},
 	Builder: func(newAction *BubbleSubscription, bubble *Bubble) error {
 		tx := bubble.Info.(BubbleTx)
 		newAction.Subscriber = *tx.inputFrom
 		newAction.Subscription = tx.account
 		newAction.Amount = tx.inputAmount
-		newAction.First = len(tx.init) != 0
+		switch len(bubble.Children) {
+		case 1: // msg to withdraw to
+			if tx, ok := bubble.Children[0].Info.(BubbleTx); ok {
+				newAction.WithdrawTo = tx.account
+				newAction.Success = true
+			}
+		case 2: // reward + msg to withdraw to
+			if tx, ok := bubble.Children[1].Info.(BubbleTx); ok {
+				newAction.WithdrawTo = tx.account
+				newAction.Success = true
+			}
+		}
 		return nil
 	},
-	SingleChild: &Straw[BubbleSubscription]{
-		CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.SubscriptionPaymentMsgOp)},
-		Builder: func(newAction *BubbleSubscription, bubble *Bubble) error {
-			newAction.Success = true
-			newAction.WithdrawTo = bubble.Info.(BubbleTx).account
-			return nil
-		},
-	},
+	// TODO: We cannot match the two other messages because we cannot distinguish them.
+	// TODO: fix matching
+	//SingleChild: &Straw[BubbleSubscription]{
+	//	CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.SubscriptionPaymentMsgOp)},
+	//	Builder: func(newAction *BubbleSubscription, bubble *Bubble) error {
+	//		newAction.Success = true
+	//		newAction.WithdrawTo = bubble.Info.(BubbleTx).account
+	//		return nil
+	//	},
+	//},
 }
 
 var ExtendedSubscriptionStraw = Straw[BubbleSubscription]{
-	CheckFuncs: []bubbleCheck{IsTx, HasInterface(abi.SubscriptionV1)},
+	CheckFuncs: []bubbleCheck{IsTx, Or(HasInterface(abi.SubscriptionV1), HasInterface(abi.SubscriptionV2))},
 	Builder: func(newAction *BubbleSubscription, bubble *Bubble) error {
 		tx := bubble.Info.(BubbleTx)
 		newAction.Subscription = tx.account
 		return nil
 	},
 	SingleChild: &Straw[BubbleSubscription]{
-		CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.PaymentRequestMsgOp)},
+		CheckFuncs: []bubbleCheck{IsTx, Or(HasOperation(abi.PaymentRequestMsgOp), HasOperation(abi.WalletExtensionActionV5R1MsgOp))},
 		Builder: func(newAction *BubbleSubscription, bubble *Bubble) error {
 			tx := bubble.Info.(BubbleTx)
-			request := tx.decodedBody.Value.(abi.PaymentRequestMsgBody)
+			if request, ok := tx.decodedBody.Value.(abi.PaymentRequestMsgBody); ok {
+				newAction.Amount = int64(request.Amount.Grams)
+			}
+			// TODO: need to decode amount from WalletExtensionAction
 			newAction.Subscriber = tx.account
-			newAction.Success = tx.success
-			newAction.Amount = int64(request.Amount.Grams)
+			newAction.Success = false
 			return nil
 		},
 		SingleChild: &Straw[BubbleSubscription]{
@@ -120,6 +135,7 @@ var ExtendedSubscriptionStraw = Straw[BubbleSubscription]{
 				sub := bubble.Info.(BubbleSubscription)
 				newAction.First = false
 				newAction.WithdrawTo = sub.WithdrawTo
+				newAction.Amount = sub.Amount
 				newAction.Success = true
 				return nil
 			},
@@ -221,7 +237,6 @@ var UnSubscriptionByBeneficiaryOrExpiredStraw = Straw[BubbleUnSubscription]{
 				},
 			},
 		},
-		// TODO: can not detect newAction.Beneficiary here for external
 		// TODO: We cannot match the two other messages because we cannot distinguish them.
 		// TODO: fix matching
 		//{
