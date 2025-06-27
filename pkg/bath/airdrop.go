@@ -1,9 +1,7 @@
 package bath
 
 import (
-	"fmt"
 	"github.com/tonkeeper/tongo"
-	"github.com/tonkeeper/tongo/abi"
 	"math/big"
 )
 
@@ -33,50 +31,33 @@ func (b BubbleAirdropClaim) ToAction() *Action {
 }
 
 var AirdropClaimStraw = Straw[BubbleAirdropClaim]{
-	CheckFuncs: []bubbleCheck{
-		IsTx,
-		Or(HasInterface(abi.AirdropInterlockerV1), HasInterface(abi.AirdropInterlockerV2)), // todo find trace with interface airdrop_interlocker_v2
-		// todo add here operation with opcode 0x3a86f1a0
-	},
+	CheckFuncs: []bubbleCheck{IsTx, HasOpcode(0x3a86f1a0)}, // todo use const from tongo.abi
 	Builder: func(newAction *BubbleAirdropClaim, bubble *Bubble) error {
 		tx := bubble.Info.(BubbleTx)
 		newAction.Recipient = tx.inputFrom
-
 		return nil
 	},
-	SingleChild: &Straw[BubbleAirdropClaim]{
-		CheckFuncs: []bubbleCheck{
-			IsTx,
+	Children: []Straw[BubbleAirdropClaim]{
+		{
+			CheckFuncs: []bubbleCheck{Is(BubbleContractDeploy{})},
 		},
-		Builder: func(newAction *BubbleAirdropClaim, bubble *Bubble) error {
-			tx := bubble.Info.(BubbleTx)
-			newAction.Distributor = tx.account.Address
-
-			return nil
-		},
-		SingleChild: &Straw[BubbleAirdropClaim]{
+		{
 			CheckFuncs: []bubbleCheck{
 				IsTx,
-				HasInterface(abi.JettonWallet),
-				HasOperation(abi.JettonTransferMsgOp),
+			},
+			Builder: func(newAction *BubbleAirdropClaim, bubble *Bubble) error {
+				tx := bubble.Info.(BubbleTx)
+				newAction.Distributor = tx.account.Address
+				return nil
 			},
 			SingleChild: &Straw[BubbleAirdropClaim]{
-				CheckFuncs: []bubbleCheck{
-					IsTx,
-					HasInterface(abi.JettonWallet),
-					HasOperation(abi.JettonInternalTransferMsgOp),
-				},
+				CheckFuncs: []bubbleCheck{IsJettonTransfer},
 				Builder: func(newAction *BubbleAirdropClaim, bubble *Bubble) error {
-					tx := bubble.Info.(BubbleTx)
-					newAction.RecipientJettonWallet = tx.account.Address
-					body := tx.decodedBody.Value.(abi.JettonInternalTransferMsgBody)
-					newAction.ClaimedAmount = big.Int(body.Amount)
-					master, ok := tx.additionalInfo.JettonMaster(tx.account.Address)
-					if !ok {
-						return fmt.Errorf("cannot find jetton master")
-					}
-					newAction.JettonMaster = master
-
+					tx := bubble.Info.(BubbleJettonTransfer)
+					newAction.RecipientJettonWallet = tx.recipientWallet
+					newAction.JettonMaster = tx.master
+					newAction.ClaimedAmount = big.Int(tx.amount)
+					newAction.Success = tx.success && newAction.Recipient.Address == tx.recipient.Address
 					return nil
 				},
 			},

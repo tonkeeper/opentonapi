@@ -37,7 +37,6 @@ var SubscriptionStraws = []Merger{
 }
 
 var DefaultStraws = []Merger{
-	AirdropClaimStraw,
 	StrawFindAuctionBidFragmentSimple,
 	NftTransferStraw,
 	NftTransferNotifyStraw,
@@ -75,6 +74,7 @@ var DefaultStraws = []Merger{
 	WithdrawStakeImmediatelyStraw,
 	WithdrawLiquidStake,
 	DNSRenewStraw,
+	AirdropClaimStraw,
 }
 
 var JettonTransferClassicStraw = Straw[BubbleJettonTransfer]{
