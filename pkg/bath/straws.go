@@ -37,6 +37,7 @@ var SubscriptionStraws = []Merger{
 }
 
 var DefaultStraws = []Merger{
+	AirdropClaimStraw,
 	StrawFindAuctionBidFragmentSimple,
 	NftTransferStraw,
 	NftTransferNotifyStraw,
