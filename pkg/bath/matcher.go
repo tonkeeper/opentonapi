@@ -117,6 +117,23 @@ func (s Straw[newBubbleT]) Merge(bubble *Bubble) bool {
 	return true
 }
 
+func copyStraw[T actioner](s Straw[T]) *Straw[T] {
+	var n Straw[T]
+	n.CheckFuncs = make([]bubbleCheck, len(s.CheckFuncs))
+	copy(n.CheckFuncs, s.CheckFuncs)
+	n.Builder = s.Builder
+	n.ValueFlowUpdater = s.ValueFlowUpdater
+	if s.SingleChild != nil {
+		c := copyStraw(*s.SingleChild)
+		n.SingleChild = c
+	}
+	for _, c := range s.Children {
+		n.Children = append(n.Children, *copyStraw(c))
+	}
+	n.Optional = s.Optional
+	return &n
+}
+
 // Optional returns copy of declarative straw but optional
 func Optional[T actioner](s Straw[T]) Straw[T] {
 	s.Optional = true

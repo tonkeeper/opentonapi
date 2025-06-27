@@ -30,12 +30,6 @@ var NFTStraws = []Merger{
 	NftTransferNotifyStraw,
 }
 
-var SubscriptionStraws = []Merger{
-	InitialSubscriptionStraw,
-	ExtendedSubscriptionStraw,
-	UnSubscriptionStraw,
-}
-
 var DefaultStraws = []Merger{
 	StrawFindAuctionBidFragmentSimple,
 	NftTransferStraw,
@@ -50,9 +44,6 @@ var DefaultStraws = []Merger{
 	NftPurchaseStraw,
 	StonfiSwapStraw,
 	StonfiSwapV2Straw,
-	DedustSwapJettonsStraw,
-	DedustSwapToTONStraw,
-	DedustSwapFromTONStraw,
 	TgAuctionV1InitialBidStraw,
 	StrawAuctionBigGetgems,
 	StrawAuctionBuyGetgems,
