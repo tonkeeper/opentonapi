@@ -90,6 +90,13 @@ func fromTrace(trace *core.Trace) *Bubble {
 		inputAmount = int64(trace.Transaction.CreditPhase.CreditGrams)
 	}
 	aggregatedFee := trace.TotalFee
+
+	for _, m := range trace.OutMsgs {
+		if m.MsgType == core.ExtOutMsg {
+			btx.externalOut = append(btx.externalOut, m)
+		}
+	}
+
 	b := Bubble{
 		Info:     btx,
 		Accounts: accounts,

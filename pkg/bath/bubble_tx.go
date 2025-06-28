@@ -20,6 +20,7 @@ type BubbleTx struct {
 	opCode           *uint32
 	decodedBody      *core.DecodedMessageBody
 	init             []byte
+	externalOut      []core.Message
 
 	additionalInfo                  *core.TraceAdditionalInfo
 	accountWasActiveAtComputingTime bool
@@ -117,4 +118,13 @@ func (b BubbleTx) ToAction() *Action {
 
 func (b BubbleTx) operation(name string) bool {
 	return b.decodedBody != nil && b.decodedBody.Operation == name
+}
+
+func (b BubbleTx) findExternalOut(name abi.MsgOpName) any {
+	for i := range b.externalOut {
+		if b.externalOut[i].DecodedBody != nil && b.externalOut[i].DecodedBody.Operation == name {
+			return b.externalOut[i].DecodedBody.Value
+		}
+	}
+	return nil
 }
