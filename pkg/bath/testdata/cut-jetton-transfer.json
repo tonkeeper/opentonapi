@@ -5,7 +5,7 @@
          "Comment": null,
          "EncryptedComment": null,
          "Jetton": "0:bdf3fa8098d129b54b4f73b5bac5d1e1fd91eb054169c3916dfc8ccd536d1000",
-         "Recipient": null,
+         "Recipient": "0:1f49445edf82742597d434682248914afcba2606e4cd6176992905c37ff4f27a",
          "Sender": "0:b2d8762fd71aae04d5783e89aa15ac49bbf0eaeb84019f7fa7d15491d3993535",
          "RecipientsWallet": "0:6a51ae22c7ddabbaa97f7ae84e54aa0fe8bca1021d748f6098cffa176fc5969f",
          "SendersWallet": "0:f9f7ce41291d999826a6284822ee46bc33ca4fd17d0ae5f82dd9b755f0d27447",
@@ -22,6 +22,17 @@
      }
    ],
    "Accounts": [
+     {
+       "Account": "0:1f49445edf82742597d434682248914afcba2606e4cd6176992905c37ff4f27a",
+       "Ton": 0,
+       "Fee": 0,
+       "Jettons": [
+         {
+           "Address": "0:bdf3fa8098d129b54b4f73b5bac5d1e1fd91eb054169c3916dfc8ccd536d1000",
+           "Quantity": 196107999898
+         }
+       ]
+     },
      {
        "Account": "0:6a51ae22c7ddabbaa97f7ae84e54aa0fe8bca1021d748f6098cffa176fc5969f",
        "Ton": 2831,
