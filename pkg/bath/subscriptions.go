@@ -145,7 +145,7 @@ var ExtendedSubscriptionStraw = Straw[BubbleSubscription]{
 
 func (b BubbleSubscription) ToAction() (action *Action) {
 	return &Action{
-		Subscription: &SubscriptionAction{
+		Subscribe: &SubscribeAction{
 			Subscription: b.Subscription.Address,
 			Subscriber:   b.Subscriber.Address,
 			Beneficiary:  b.WithdrawTo.Address,
@@ -153,7 +153,7 @@ func (b BubbleSubscription) ToAction() (action *Action) {
 			First:        b.First,
 		},
 		Success: true,
-		Type:    Subscription,
+		Type:    Subscribe,
 	}
 }
 
@@ -219,6 +219,10 @@ var UnSubscriptionByBeneficiaryOrExpiredStraw = Straw[BubbleUnSubscription]{
 	},
 	Children: []Straw[BubbleUnSubscription]{
 		{
+			Optional:   true, // to reward address
+			CheckFuncs: []bubbleCheck{IsTx, HasEmptyBody},
+		},
+		{
 			CheckFuncs: []bubbleCheck{IsTx}, // wallet here. Don't check opcodes, the only plugin deletion event is important
 			Builder: func(newAction *BubbleUnSubscription, bubble *Bubble) error {
 				tx := bubble.Info.(BubbleTx)
@@ -237,27 +241,21 @@ var UnSubscriptionByBeneficiaryOrExpiredStraw = Straw[BubbleUnSubscription]{
 				},
 			},
 		},
-		// TODO: We cannot match the two other messages because we cannot distinguish them.
-		// TODO: fix matching
-		//{
-		//	// to beneficiary
-		//	CheckFuncs: []bubbleCheck{IsTx, Or(HasOpcode(abi.WalletPluginDestructMsgOpCode), HasEmptyBody)},
-		//},
-		//{
-		//	Optional:   true, // to reward address for external
-		//	CheckFuncs: []bubbleCheck{IsTx, HasEmptyBody},
-		//},
+		{
+			// to beneficiary
+			CheckFuncs: []bubbleCheck{IsTx, Or(HasOpcode(abi.WalletPluginDestructMsgOpCode), HasEmptyBody)},
+		},
 	},
 }
 
 func (b BubbleUnSubscription) ToAction() (action *Action) {
 	return &Action{
-		UnSubscription: &UnSubscriptionAction{
+		UnSubscribe: &UnSubscribeAction{
 			Subscription: b.Subscription.Address,
 			Subscriber:   b.Subscriber.Address,
 			Beneficiary:  b.Beneficiary.Address,
 		},
 		Success: true,
-		Type:    UnSubscription,
+		Type:    UnSubscribe,
 	}
 }
