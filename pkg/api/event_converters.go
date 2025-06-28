@@ -499,15 +499,15 @@ func (h *Handler) convertAction(ctx context.Context, viewer *tongo.AccountID, a 
 			Accounts: distinctAccounts(viewer, h.addressBook, &a.JettonBurn.Sender, &a.JettonBurn.Jetton),
 			Value:    oas.NewOptString(fmt.Sprintf("%v %v", amount, meta.Name)),
 		}
-	case bath.Subscription:
+	case bath.Subscribe:
 		action.Subscribe.SetTo(oas.SubscriptionAction{
-			Amount:       a.Subscription.Amount,
-			Beneficiary:  convertAccountAddress(a.Subscription.Beneficiary, h.addressBook),
-			Subscriber:   convertAccountAddress(a.Subscription.Subscriber, h.addressBook),
-			Subscription: a.Subscription.Subscription.ToRaw(),
-			Initial:      a.Subscription.First,
+			Amount:       a.Subscribe.Amount,
+			Beneficiary:  convertAccountAddress(a.Subscribe.Beneficiary, h.addressBook),
+			Subscriber:   convertAccountAddress(a.Subscribe.Subscriber, h.addressBook),
+			Subscription: a.Subscribe.Subscription.ToRaw(),
+			Initial:      a.Subscribe.First,
 		})
-		value := i18n.FormatTONs(a.Subscription.Amount)
+		value := i18n.FormatTONs(a.Subscribe.Amount)
 		action.SimplePreview = oas.ActionSimplePreview{
 			Name: "Subscription",
 			Description: i18n.T(acceptLanguage.Value, i18n.C{
@@ -519,14 +519,14 @@ func (h *Handler) convertAction(ctx context.Context, viewer *tongo.AccountID, a 
 					"Value": value,
 				},
 			}),
-			Accounts: distinctAccounts(viewer, h.addressBook, &a.Subscription.Beneficiary, &a.Subscription.Subscriber),
+			Accounts: distinctAccounts(viewer, h.addressBook, &a.Subscribe.Beneficiary, &a.Subscribe.Subscriber),
 			Value:    oas.NewOptString(value),
 		}
-	case bath.UnSubscription:
+	case bath.UnSubscribe:
 		action.UnSubscribe.SetTo(oas.UnSubscriptionAction{
-			Beneficiary:  convertAccountAddress(a.UnSubscription.Beneficiary, h.addressBook),
-			Subscriber:   convertAccountAddress(a.UnSubscription.Subscriber, h.addressBook),
-			Subscription: a.UnSubscription.Subscription.ToRaw(),
+			Beneficiary:  convertAccountAddress(a.UnSubscribe.Beneficiary, h.addressBook),
+			Subscriber:   convertAccountAddress(a.UnSubscribe.Subscriber, h.addressBook),
+			Subscription: a.UnSubscribe.Subscription.ToRaw(),
 		})
 	case bath.ContractDeploy:
 		interfaces := make([]string, 0, len(a.ContractDeploy.Interfaces))

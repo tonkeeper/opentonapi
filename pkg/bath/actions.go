@@ -29,8 +29,8 @@ const (
 	JettonMint            ActionType = "JettonMint"
 	JettonBurn            ActionType = "JettonBurn"
 	ContractDeploy        ActionType = "ContractDeploy"
-	Subscription          ActionType = "Subscribe"
-	UnSubscription        ActionType = "UnSubscribe"
+	Subscribe             ActionType = "Subscribe"
+	UnSubscribe           ActionType = "UnSubscribe"
 	ElectionsDepositStake ActionType = "ElectionsDepositStake"
 	ElectionsRecoverStake ActionType = "ElectionsRecoverStake"
 	DepositStake          ActionType = "DepositStake"
@@ -79,8 +79,8 @@ type (
 		JettonMint            *JettonMintAction            `json:",omitempty"`
 		JettonBurn            *JettonBurnAction            `json:",omitempty"`
 		ContractDeploy        *ContractDeployAction        `json:",omitempty"`
-		Subscription          *SubscriptionAction          `json:",omitempty"`
-		UnSubscription        *UnSubscriptionAction        `json:",omitempty"`
+		Subscribe             *SubscribeAction             `json:",omitempty"`
+		UnSubscribe           *UnSubscribeAction           `json:",omitempty"`
 		AuctionBid            *AuctionBidAction            `json:",omitempty"`
 		ElectionsDepositStake *ElectionsDepositStakeAction `json:",omitempty"`
 		ElectionsRecoverStake *ElectionsRecoverStakeAction `json:",omitempty"`
@@ -183,7 +183,7 @@ type (
 		Interfaces []abi.ContractInterface
 	}
 
-	SubscriptionAction struct {
+	SubscribeAction struct {
 		Subscription tongo.AccountID
 		Subscriber   tongo.AccountID
 		Beneficiary  tongo.AccountID
@@ -191,7 +191,7 @@ type (
 		First        bool
 	}
 
-	UnSubscriptionAction struct {
+	UnSubscribeAction struct {
 		Subscription tongo.AccountID
 		Subscriber   tongo.AccountID
 		Beneficiary  tongo.AccountID
@@ -297,7 +297,7 @@ func (a Action) ContributeToExtra(account tongo.AccountID) int64 {
 		return 0
 	}
 	switch a.Type {
-	case NftItemTransfer, ContractDeploy, UnSubscription, JettonMint, JettonBurn, WithdrawStakeRequest, DomainRenew, ExtraCurrencyTransfer: // actions without extra
+	case NftItemTransfer, ContractDeploy, UnSubscribe, JettonMint, JettonBurn, WithdrawStakeRequest, DomainRenew, ExtraCurrencyTransfer: // actions without extra
 		return 0
 	case Purchase:
 		if a.Purchase.Price.Type == core.CurrencyTON {
@@ -327,8 +327,8 @@ func (a Action) ContributeToExtra(account tongo.AccountID) int64 {
 		return detectDirection(account, a.ElectionsDepositStake.Staker, a.ElectionsDepositStake.Elector, a.ElectionsDepositStake.Amount)
 	case ElectionsRecoverStake:
 		return detectDirection(account, a.ElectionsRecoverStake.Elector, a.ElectionsRecoverStake.Staker, a.ElectionsRecoverStake.Amount)
-	case Subscription:
-		return detectDirection(account, a.Subscription.Subscriber, a.Subscription.Beneficiary, a.Subscription.Amount)
+	case Subscribe:
+		return detectDirection(account, a.Subscribe.Subscriber, a.Subscribe.Beneficiary, a.Subscribe.Amount)
 	case DepositStake:
 		return detectDirection(account, a.DepositStake.Staker, a.DepositStake.Pool, a.DepositStake.Amount)
 	case JettonTransfer:
@@ -367,8 +367,8 @@ func (a Action) IsSubject(account tongo.AccountID) bool {
 		a.JettonTransfer,
 		a.ContractDeploy,
 		a.ExtraCurrencyTransfer,
-		a.Subscription,
-		a.UnSubscription,
+		a.Subscribe,
+		a.UnSubscribe,
 		a.AuctionBid,
 		a.ElectionsDepositStake,
 		a.ElectionsRecoverStake,
@@ -437,7 +437,7 @@ func (a *JettonTransferAction) SubjectAccounts() []tongo.AccountID {
 	return accounts
 }
 
-func (a *SubscriptionAction) SubjectAccounts() []tongo.AccountID {
+func (a *SubscribeAction) SubjectAccounts() []tongo.AccountID {
 	return []tongo.AccountID{a.Subscriber, a.Beneficiary}
 }
 
@@ -450,6 +450,7 @@ func (a *AuctionBidAction) SubjectAccounts() []tongo.AccountID {
 	accounts = append(accounts, a.Bidder)
 	return accounts
 }
+
 func (a *ContractDeployAction) SubjectAccounts() []tongo.AccountID {
 	return []tongo.AccountID{a.Address}
 }
@@ -457,9 +458,11 @@ func (a *ContractDeployAction) SubjectAccounts() []tongo.AccountID {
 func (a *JettonSwapAction) SubjectAccounts() []tongo.AccountID {
 	return []tongo.AccountID{a.UserWallet}
 }
-func (a *UnSubscriptionAction) SubjectAccounts() []tongo.AccountID {
+
+func (a *UnSubscribeAction) SubjectAccounts() []tongo.AccountID {
 	return []tongo.AccountID{a.Subscriber, a.Beneficiary}
 }
+
 func (a *ElectionsDepositStakeAction) SubjectAccounts() []tongo.AccountID {
 	return []tongo.AccountID{a.Staker}
 }
