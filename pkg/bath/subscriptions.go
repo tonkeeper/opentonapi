@@ -1,6 +1,7 @@
 package bath
 
 import (
+	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
 )
 
@@ -13,7 +14,7 @@ type BubbleSubscription struct {
 
 type BubbleUnSubscription struct {
 	Subscription, Subscriber Account
-	Beneficiary              Account // TODO: better to remove. beneficicar != WithdrawTo and we cannot always determine it
+	Beneficiary              tongo.AccountID // TODO: better to remove. beneficicar != WithdrawTo and we cannot always determine it
 	Success                  bool
 }
 
@@ -177,7 +178,7 @@ var UnSubscriptionBySubscriberStraw = Straw[BubbleUnSubscription]{
 				Optional:   true,
 				CheckFuncs: []bubbleCheck{IsTx, Or(HasOpcode(abi.WalletPluginDestructMsgOpCode), HasEmptyBody)},
 				Builder: func(newAction *BubbleUnSubscription, bubble *Bubble) error {
-					newAction.Beneficiary = bubble.Info.(BubbleTx).account
+					newAction.Beneficiary = bubble.Info.(BubbleTx).account.Address
 					return nil
 				},
 			},
@@ -203,17 +204,9 @@ var UnSubscriptionByBeneficiaryOrExpiredStraw = Straw[BubbleUnSubscription]{
 		newAction.Subscription = tx.account
 		newAction.Success = tx.success
 		if !tx.external && tx.inputFrom != nil {
-			newAction.Beneficiary = *tx.inputFrom
-		}
-		switch len(bubble.Children) {
-		case 2: // remove + msg to beneficicar
-			if tx, ok := bubble.Children[1].Info.(BubbleTx); ok {
-				newAction.Beneficiary = tx.account
-			}
-		case 3: // remove + caller reward + msg to beneficicar
-			if tx, ok := bubble.Children[2].Info.(BubbleTx); ok {
-				newAction.Beneficiary = tx.account
-			}
+			newAction.Beneficiary = tx.inputFrom.Address
+		} else if tx.additionalInfo != nil && tx.additionalInfo.SubscriptionInfo != nil {
+			newAction.Beneficiary = tx.additionalInfo.SubscriptionInfo.Beneficiary
 		}
 		return nil
 	},
@@ -253,7 +246,7 @@ func (b BubbleUnSubscription) ToAction() (action *Action) {
 		UnSubscribe: &UnSubscribeAction{
 			Subscription: b.Subscription.Address,
 			Subscriber:   b.Subscriber.Address,
-			Beneficiary:  b.Beneficiary.Address,
+			Beneficiary:  b.Beneficiary,
 		},
 		Success: true,
 		Type:    UnSubscribe,
