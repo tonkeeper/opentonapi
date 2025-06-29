@@ -22,6 +22,7 @@ const (
 	TonTransfer           ActionType = "TonTransfer"
 	ExtraCurrencyTransfer ActionType = "ExtraCurrencyTransfer"
 	SmartContractExec     ActionType = "SmartContractExec"
+	GasRelay              ActionType = "GasRelay"
 	NftItemTransfer       ActionType = "NftItemTransfer"
 	NftPurchase           ActionType = "NftPurchase"
 	JettonTransfer        ActionType = "JettonTransfer"
@@ -68,6 +69,7 @@ type (
 		TonTransfer           *TonTransferAction           `json:",omitempty"`
 		ExtraCurrencyTransfer *ExtraCurrencyTransferAction `json:",omitempty"`
 		SmartContractExec     *SmartContractAction         `json:",omitempty"`
+		GasRelay              *GasRelayAction              `json:",omitempty"`
 		NftItemTransfer       *NftTransferAction           `json:",omitempty"`
 		NftPurchase           *NftPurchaseAction           `json:",omitempty"`
 		JettonTransfer        *JettonTransferAction        `json:",omitempty"`
@@ -285,6 +287,11 @@ func (a Action) ContributeToExtra(account tongo.AccountID) int64 {
 		return detectDirection(account, a.TonTransfer.Sender, a.TonTransfer.Recipient, a.TonTransfer.Amount)
 	case SmartContractExec:
 		return detectDirection(account, a.SmartContractExec.Executor, a.SmartContractExec.Contract, a.SmartContractExec.TonAttached)
+	case GasRelay:
+		if a.GasRelay.Relayer == account {
+			return -a.GasRelay.Amount
+		}
+		return 0
 	case NftPurchase:
 		if a.NftPurchase.Price.Type == core.CurrencyTON {
 			return detectDirection(account, a.NftPurchase.Buyer, a.NftPurchase.Seller, a.NftPurchase.Price.Amount.Int64())

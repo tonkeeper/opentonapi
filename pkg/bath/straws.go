@@ -32,6 +32,7 @@ var NFTStraws = []Merger{
 
 var DefaultStraws = []Merger{
 	StrawFindAuctionBidFragmentSimple,
+	GasRelayerStraw,
 	NftTransferStraw,
 	NftTransferNotifyStraw,
 	StonfiV1PTONStraw,
