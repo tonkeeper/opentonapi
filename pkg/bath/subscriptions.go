@@ -55,13 +55,17 @@ var ExtendedSubscriptionStraw = Straw[BubbleSubscription]{
 		},
 		SingleChild: &Straw[BubbleSubscription]{
 			Optional:   true,
-			CheckFuncs: []bubbleCheck{Is(BubbleSubscription{})},
-			Builder: func(newAction *BubbleSubscription, bubble *Bubble) error {
-				sub := bubble.Info.(BubbleSubscription)
-				newAction.First = false
-				newAction.Beneficiary = sub.Beneficiary
-				newAction.Success = true
-				return nil
+			CheckFuncs: []bubbleCheck{HasInterface(abi.SubscriptionV1)},
+			SingleChild: &Straw[BubbleSubscription]{
+				Optional:   true,
+				CheckFuncs: []bubbleCheck{HasOperation(abi.SubscriptionPaymentMsgOp)},
+				Builder: func(newAction *BubbleSubscription, bubble *Bubble) error {
+					sub := bubble.Info.(BubbleTx)
+					newAction.First = false
+					newAction.Beneficiary = sub.account
+					newAction.Success = true
+					return nil
+				},
 			},
 		},
 	},
