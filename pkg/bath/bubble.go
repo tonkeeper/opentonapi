@@ -50,11 +50,7 @@ type actioner interface {
 	ToAction() *Action
 }
 
-func FromTrace(trace *core.Trace) *Bubble {
-	return fromTrace(trace)
-}
-
-func fromTrace(trace *core.Trace) *Bubble {
+func fromTrace(trace *core.Trace, parent *core.Trace) *Bubble {
 	btx := BubbleTx{
 		success:                         trace.Success,
 		transactionType:                 trace.Transaction.Type,
@@ -69,6 +65,9 @@ func fromTrace(trace *core.Trace) *Bubble {
 	if trace.InMsg != nil && trace.InMsg.Source != nil {
 		source = &Account{
 			Address: *trace.InMsg.Source,
+		}
+		if parent != nil {
+			source.Interfaces = parent.AccountInterfaces
 		}
 		accounts = append(accounts, source.Address)
 	}
@@ -132,7 +131,7 @@ func fromTrace(trace *core.Trace) *Bubble {
 			b.ValueFlow.Accounts[trace.Account].Ton -= c.InMsg.IhrFee
 		}
 
-		b.Children[i] = fromTrace(c)
+		b.Children[i] = fromTrace(c, trace)
 	}
 	if actionPhase := trace.Transaction.ActionPhase; actionPhase != nil {
 		aggregatedFee += int64(actionPhase.FwdFees)

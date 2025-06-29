@@ -51,7 +51,7 @@ func FindActions(ctx context.Context, trace *core.Trace, opts ...Option) (*Actio
 	if err := core.CollectAdditionalInfo(ctx, options.informationSource, trace); err != nil {
 		return nil, err
 	}
-	bubble := fromTrace(trace)
+	bubble := fromTrace(trace, nil)
 	MergeAllBubbles(bubble, options.straws)
 	actions, flow := CollectActionsAndValueFlow(bubble, options.account)
 	return &ActionsList{

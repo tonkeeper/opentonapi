@@ -104,35 +104,30 @@ func (b BubbleJettonBurn) ToAction() (action *Action) {
 
 // JettonMintFromMasterStraw example: https://tonviewer.com/transaction/6d33487c44249d7844db8fac38a5cecf1502ec7e0c09d266e98e95a2b1be17b5
 var JettonMintFromMasterStraw = Straw[BubbleJettonMint]{
-	CheckFuncs: []bubbleCheck{IsTx, HasInterface(abi.JettonMaster)},
-	Builder: func(newAction *BubbleJettonMint, bubble *Bubble) (err error) {
+	CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.JettonInternalTransferMsgOp), HasInterface(abi.JettonWallet), func(bubble *Bubble) bool {
 		tx := bubble.Info.(BubbleTx)
-		newAction.master = tx.account.Address
+		return tx.inputFrom != nil && tx.inputFrom.Is(abi.JettonMaster)
+	}},
+
+	Builder: func(newAction *BubbleJettonMint, bubble *Bubble) error {
+		tx := bubble.Info.(BubbleTx)
+		msg := tx.decodedBody.Value.(abi.JettonInternalTransferMsgBody)
+		newAction.amount = msg.Amount
+		newAction.master = tx.inputFrom.Address
+		newAction.recipientWallet = tx.account.Address
+		newAction.success = tx.success
 		return nil
 	},
 	Children: []Straw[BubbleJettonMint]{
 		{
-			CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.JettonInternalTransferMsgOp)},
+			CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.JettonNotifyMsgOp)},
 			Builder: func(newAction *BubbleJettonMint, bubble *Bubble) error {
 				tx := bubble.Info.(BubbleTx)
-				msg := tx.decodedBody.Value.(abi.JettonInternalTransferMsgBody)
-				newAction.amount = msg.Amount
-				newAction.recipientWallet = tx.account.Address
-				newAction.success = tx.success
+				newAction.recipient = tx.account
 				return nil
 			},
-			Children: []Straw[BubbleJettonMint]{
-				{
-					CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.JettonNotifyMsgOp)},
-					Builder: func(newAction *BubbleJettonMint, bubble *Bubble) error {
-						tx := bubble.Info.(BubbleTx)
-						newAction.recipient = tx.account
-						return nil
-					},
-				},
-				{CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.ExcessMsgOp)}, Optional: true},
-			},
 		},
+		{CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.ExcessMsgOp)}, Optional: true},
 	},
 }
 
