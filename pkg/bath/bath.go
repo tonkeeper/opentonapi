@@ -2,6 +2,7 @@ package bath
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/tongo"
@@ -61,9 +62,9 @@ func FindActions(ctx context.Context, trace *core.Trace, opts ...Option) (*Actio
 }
 
 func MergeAllBubbles(bubble *Bubble, straws []Merger) {
-	for _, s := range straws {
+	for i, s := range straws {
 		for {
-			success := recursiveMerge(bubble, s)
+			success := recursiveMerge(bubble, s, i)
 			if success {
 				continue
 			}
@@ -72,12 +73,13 @@ func MergeAllBubbles(bubble *Bubble, straws []Merger) {
 	}
 }
 
-func recursiveMerge(bubble *Bubble, s Merger) bool {
+func recursiveMerge(bubble *Bubble, s Merger, idx int) bool {
 	if s.Merge(bubble) {
+		strawSuccess.WithLabelValues(fmt.Sprintf("%d", idx)).Inc()
 		return true
 	}
 	for _, b := range bubble.Children {
-		if recursiveMerge(b, s) {
+		if recursiveMerge(b, s, idx) {
 			return true
 		}
 	}
