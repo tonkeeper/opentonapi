@@ -910,8 +910,8 @@ func (h *Handler) convertGasRelayAction(t *bath.GasRelayAction, acceptLanguage s
 	var action oas.OptGasRelayAction
 	action.SetTo(oas.GasRelayAction{
 		Amount:  t.Amount,
-		Target:  t.Target.ToRaw(),
-		Relayer: t.Relayer.ToRaw(),
+		Target:  convertAccountAddress(t.Target, h.addressBook),
+		Relayer: convertAccountAddress(t.Relayer, h.addressBook),
 	})
 	simplePreview := oas.ActionSimplePreview{
 		Name: "Gas Relay",

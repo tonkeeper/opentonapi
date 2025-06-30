@@ -5814,9 +5814,9 @@ func (s *GasLimitPrices) SetDeleteDueLimit(val int64) {
 
 // Ref: #/components/schemas/GasRelayAction
 type GasRelayAction struct {
-	Amount  int64  `json:"amount"`
-	Relayer string `json:"relayer"`
-	Target  string `json:"target"`
+	Amount  int64          `json:"amount"`
+	Relayer AccountAddress `json:"relayer"`
+	Target  AccountAddress `json:"target"`
 }
 
 // GetAmount returns the value of Amount.
@@ -5825,12 +5825,12 @@ func (s *GasRelayAction) GetAmount() int64 {
 }
 
 // GetRelayer returns the value of Relayer.
-func (s *GasRelayAction) GetRelayer() string {
+func (s *GasRelayAction) GetRelayer() AccountAddress {
 	return s.Relayer
 }
 
 // GetTarget returns the value of Target.
-func (s *GasRelayAction) GetTarget() string {
+func (s *GasRelayAction) GetTarget() AccountAddress {
 	return s.Target
 }
 
@@ -5840,12 +5840,12 @@ func (s *GasRelayAction) SetAmount(val int64) {
 }
 
 // SetRelayer sets the value of Relayer.
-func (s *GasRelayAction) SetRelayer(val string) {
+func (s *GasRelayAction) SetRelayer(val AccountAddress) {
 	s.Relayer = val
 }
 
 // SetTarget sets the value of Target.
-func (s *GasRelayAction) SetTarget(val string) {
+func (s *GasRelayAction) SetTarget(val AccountAddress) {
 	s.Target = val
 }
 

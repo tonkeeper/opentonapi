@@ -6222,13 +6222,9 @@ components:
           x-js-format: bigint
           example: 1000000000
         relayer:
-          type: string
-          format: address
-          example: 0:da6b1b6663a0e4d18cc8574ccd9db5296e367dd9324706f3bbd9eb1cd2caf0bf
+          $ref: '#/components/schemas/AccountAddress'
         target:
-          type: string
-          format: address
-          example: 0:da6b1b6663a0e4d18cc8574ccd9db5296e367dd9324706f3bbd9eb1cd2caf0bf
+          $ref: '#/components/schemas/AccountAddress'
     PurchaseAction:
       type: object
       required:

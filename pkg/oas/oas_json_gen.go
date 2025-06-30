@@ -16805,11 +16805,11 @@ func (s *GasRelayAction) encodeFields(e *jx.Encoder) {
 	}
 	{
 		e.FieldStart("relayer")
-		e.Str(s.Relayer)
+		s.Relayer.Encode(e)
 	}
 	{
 		e.FieldStart("target")
-		e.Str(s.Target)
+		s.Target.Encode(e)
 	}
 }
 
@@ -16843,9 +16843,7 @@ func (s *GasRelayAction) Decode(d *jx.Decoder) error {
 		case "relayer":
 			requiredBitSet[0] |= 1 << 1
 			if err := func() error {
-				v, err := d.Str()
-				s.Relayer = string(v)
-				if err != nil {
+				if err := s.Relayer.Decode(d); err != nil {
 					return err
 				}
 				return nil
@@ -16855,9 +16853,7 @@ func (s *GasRelayAction) Decode(d *jx.Decoder) error {
 		case "target":
 			requiredBitSet[0] |= 1 << 2
 			if err := func() error {
-				v, err := d.Str()
-				s.Target = string(v)
-				if err != nil {
+				if err := s.Target.Decode(d); err != nil {
 					return err
 				}
 				return nil
