@@ -31,7 +31,7 @@ func (s *LiteStorage) SubscriptionInfos(ctx context.Context, ids []core.Subscrip
 					Address:   data.Wallet.Address,
 				},
 				Beneficiary:      beneficiary,
-				PayTo:            beneficiary,
+				WithdrawTo:       beneficiary,
 				PaymentPerPeriod: int64(data.Amount),
 			}
 		case abi.SubscriptionV2:
@@ -75,7 +75,7 @@ func (s *LiteStorage) SubscriptionInfos(ctx context.Context, ids []core.Subscrip
 			res[id.Account] = core.SubscriptionInfo{
 				Wallet:           *wallet,
 				Beneficiary:      *beneficiary,
-				PayTo:            *withdrawTo,
+				WithdrawTo:       *withdrawTo,
 				PaymentPerPeriod: int64(paymentInfo.PaymentPerPeriod),
 			}
 		default:

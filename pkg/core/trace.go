@@ -182,8 +182,8 @@ type SubscriptionID struct {
 }
 
 type SubscriptionInfo struct {
-	Wallet, Beneficiary, PayTo tongo.AccountID
-	PaymentPerPeriod           int64
+	Wallet, Beneficiary, WithdrawTo tongo.AccountID
+	PaymentPerPeriod                int64
 }
 
 // InformationSource provides methods to construct TraceAdditionalInfo.

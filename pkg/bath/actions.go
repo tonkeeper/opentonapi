@@ -187,6 +187,7 @@ type (
 		Subscription tongo.AccountID
 		Subscriber   tongo.AccountID
 		Beneficiary  tongo.AccountID
+		WithdrawTo   tongo.AccountID
 		Amount       int64
 		First        bool
 	}
