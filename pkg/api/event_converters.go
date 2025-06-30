@@ -767,6 +767,8 @@ func (h *Handler) convertAction(ctx context.Context, viewer *tongo.AccountID, a 
 		action.DomainRenew, action.SimplePreview = h.convertDomainRenew(ctx, a.DnsRenew, acceptLanguage.Value, viewer)
 	case bath.Purchase:
 		action.Purchase, action.SimplePreview = h.convertPurchaseAction(ctx, a.Purchase, acceptLanguage.Value, viewer)
+	case bath.GasRelay:
+		action.GasRelay, action.SimplePreview = h.convertGasRelayAction(a.GasRelay, acceptLanguage.Value, viewer)
 	}
 	return action, nil
 }
@@ -902,4 +904,28 @@ func convertEncryptedComment(comment *bath.EncryptedComment) oas.OptEncryptedCom
 		c.SetTo(oas.EncryptedComment{EncryptionType: comment.EncryptionType, CipherText: hex.EncodeToString(comment.CipherText)})
 	}
 	return c
+}
+
+func (h *Handler) convertGasRelayAction(t *bath.GasRelayAction, acceptLanguage string, viewer *tongo.AccountID) (oas.OptGasRelayAction, oas.ActionSimplePreview) {
+	var action oas.OptGasRelayAction
+	action.SetTo(oas.GasRelayAction{
+		Amount:  t.Amount,
+		Target:  t.Target.ToRaw(),
+		Relayer: t.Relayer.ToRaw(),
+	})
+	simplePreview := oas.ActionSimplePreview{
+		Name: "Gas Relay",
+		Description: i18n.T(acceptLanguage, i18n.C{
+			DefaultMessage: &i18n.M{
+				ID:    "gasRelayAction",
+				Other: "Relay {{.Value}} for gas",
+			},
+			TemplateData: i18n.Template{
+				"Value": i18n.FormatTONs(t.Amount),
+			},
+		}),
+		Accounts: distinctAccounts(viewer, h.addressBook, &t.Relayer, &t.Target),
+		Value:    oas.NewOptString(i18n.FormatTONs(t.Amount)),
+	}
+	return action, simplePreview
 }

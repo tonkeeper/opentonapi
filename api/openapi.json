@@ -1133,6 +1133,9 @@
      "ExtraCurrencyTransfer": {
       "$ref": "#/components/schemas/ExtraCurrencyTransferAction"
      },
+     "GasRelay": {
+      "$ref": "#/components/schemas/GasRelayAction"
+     },
      "JettonBurn": {
       "$ref": "#/components/schemas/JettonBurnAction"
      },
@@ -3497,6 +3500,32 @@
      "block_gas_limit",
      "freeze_due_limit",
      "delete_due_limit"
+    ],
+    "type": "object"
+   },
+   "GasRelayAction": {
+    "properties": {
+     "amount": {
+      "example": 1000000000,
+      "format": "int64",
+      "type": "integer",
+      "x-js-format": "bigint"
+     },
+     "relayer": {
+      "example": "0:da6b1b6663a0e4d18cc8574ccd9db5296e367dd9324706f3bbd9eb1cd2caf0bf",
+      "format": "address",
+      "type": "string"
+     },
+     "target": {
+      "example": "0:da6b1b6663a0e4d18cc8574ccd9db5296e367dd9324706f3bbd9eb1cd2caf0bf",
+      "format": "address",
+      "type": "string"
+     }
+    },
+    "required": [
+     "amount",
+     "relayer",
+     "target"
     ],
     "type": "object"
    },

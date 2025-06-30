@@ -6079,6 +6079,8 @@ components:
           $ref: '#/components/schemas/DomainRenewAction'
         Purchase:
           $ref: '#/components/schemas/PurchaseAction'
+        GasRelay:
+          $ref: '#/components/schemas/GasRelayAction'
         simple_preview:
           $ref: '#/components/schemas/ActionSimplePreview'
         base_transactions:
@@ -6207,6 +6209,26 @@ components:
           example: "0:da6b1b6663a0e4d18cc8574ccd9db5296e367dd9324706f3bbd9eb1cd2caf0bf"
         renewer:
           $ref: '#/components/schemas/AccountAddress'
+    GasRelayAction:
+      type: object
+      required:
+        - amount
+        - relayer
+        - target
+      properties:
+        amount:
+          type: integer
+          format: int64
+          x-js-format: bigint
+          example: 1000000000
+        relayer:
+          type: string
+          format: address
+          example: 0:da6b1b6663a0e4d18cc8574ccd9db5296e367dd9324706f3bbd9eb1cd2caf0bf
+        target:
+          type: string
+          format: address
+          example: 0:da6b1b6663a0e4d18cc8574ccd9db5296e367dd9324706f3bbd9eb1cd2caf0bf
     PurchaseAction:
       type: object
       required:
