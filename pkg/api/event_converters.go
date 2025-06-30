@@ -918,14 +918,10 @@ func (h *Handler) convertGasRelayAction(t *bath.GasRelayAction, acceptLanguage s
 		Description: i18n.T(acceptLanguage, i18n.C{
 			DefaultMessage: &i18n.M{
 				ID:    "gasRelayAction",
-				Other: "Relay {{.Value}} for gas",
-			},
-			TemplateData: i18n.Template{
-				"Value": i18n.FormatTONs(t.Amount),
+				Other: "Relay for gas",
 			},
 		}),
 		Accounts: distinctAccounts(viewer, h.addressBook, &t.Relayer, &t.Target),
-		Value:    oas.NewOptString(i18n.FormatTONs(t.Amount)),
 	}
 	return action, simplePreview
 }
