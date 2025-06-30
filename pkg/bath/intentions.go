@@ -1,6 +1,8 @@
 package bath
 
 import (
+	"context"
+	"github.com/labstack/gommon/log"
 	"github.com/tonkeeper/opentonapi/internal/g"
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/tongo"
@@ -17,14 +19,14 @@ type OutMessage struct {
 	tx             *core.Transaction
 }
 
-func EnrichWithIntentions(trace *core.Trace, actions *ActionsList) *ActionsList {
+func EnrichWithIntentions(ctx context.Context, trace *core.Trace, actions *ActionsList, source core.InformationSource) *ActionsList {
 	outMessages, inMsgCount := extractIntentions(trace)
 	if len(outMessages) <= inMsgCount {
 		return actions
 	}
 	outMessages = removeMatchedIntentions(trace, &outMessages)
 	for _, outMsg := range outMessages {
-		newAction := createActionFromMessage(outMsg)
+		newAction := createActionFromMessage(ctx, outMsg, source)
 		added := false
 		for i, action := range actions.Actions {
 			if slices.Contains(action.BaseTransactions, outMsg.tx.Hash) {
@@ -200,7 +202,7 @@ func getOutMessages(transaction *core.Transaction) []OutMessage {
 	return messages
 }
 
-func createActionFromMessage(msgOut OutMessage) Action {
+func createActionFromMessage(ctx context.Context, msgOut OutMessage, source core.InformationSource) Action {
 	var action Action
 	switch body := msgOut.body.(type) {
 	case abi.TextCommentMsgBody:
@@ -258,11 +260,20 @@ func createActionFromMessage(msgOut OutMessage) Action {
 		if msgOut.tx != nil {
 			sender = &msgOut.tx.Account
 		}
+		var jetton tongo.AccountID
+		masters, err := source.JettonMastersForWallets(ctx, []tongo.AccountID{sendersWallet})
+		if err != nil {
+			log.Warn("error getting jetton master: ", err)
+		}
+		if value, ok := masters[sendersWallet]; ok {
+			jetton = value
+		}
 		action = Action{Type: JettonTransfer, JettonTransfer: &JettonTransferAction{
 			Recipient:     recipient,
 			Sender:        sender,
 			Amount:        body.Amount,
 			SendersWallet: sendersWallet,
+			Jetton:        jetton,
 		}}
 	default:
 		dest := parseAccount(msgOut.messageRelaxed.MessageInternal.Dest)
