@@ -57,7 +57,7 @@ var SubscriptionDeployStraw = Straw[BubbleSubscription]{
 	},
 	Children: []Straw[BubbleSubscription]{
 		{
-			CheckFuncs: []bubbleCheck{IsTx, HasOpcode(abi.SubscriptionV2DeployMsgOpCode)},
+			CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.SubscriptionDeployMsgOp)},
 			Builder: func(newAction *BubbleSubscription, bubble *Bubble) error {
 				tx := bubble.Info.(BubbleTx)
 				newAction.Subscription = tx.account.Address
@@ -100,7 +100,7 @@ var SubscriptionPaymentStraw = Straw[BubbleSubscription]{
 	CheckFuncs: []bubbleCheck{
 		IsTx,
 		Or(HasInterface(abi.SubscriptionV1), HasInterface(abi.SubscriptionV2)), // define interfaces because the opcode is too generic
-		HasOpcode(abi.SubscriptionV2PaymentConfirmedMsgOpCode),
+		HasOperation(abi.PaymentConfirmedMsgOp),
 		AmountInterval(1, 1<<62)},
 	Builder: func(newAction *BubbleSubscription, bubble *Bubble) error {
 		tx := bubble.Info.(BubbleTx)
@@ -170,7 +170,7 @@ var UnSubscriptionBySubscriberStraw = Straw[BubbleUnSubscription]{
 		{
 			CheckFuncs: []bubbleCheck{
 				IsTx,
-				HasOpcode(abi.WalletPluginDestructMsgOpCode),
+				HasOperation(abi.WalletPluginDestructMsgOp),
 				Or(HasInterface(abi.SubscriptionV1), HasInterface(abi.SubscriptionV2)),
 			},
 			Builder: func(newAction *BubbleUnSubscription, bubble *Bubble) error {
@@ -182,14 +182,6 @@ var UnSubscriptionBySubscriberStraw = Straw[BubbleUnSubscription]{
 				}
 				newAction.Success = newAction.Success && tx.success
 				return nil
-			},
-			SingleChild: &Straw[BubbleUnSubscription]{
-				Optional:   true,
-				CheckFuncs: []bubbleCheck{IsTx, Or(HasOpcode(abi.WalletPluginDestructMsgOpCode), HasEmptyBody)},
-				Builder: func(newAction *BubbleUnSubscription, bubble *Bubble) error {
-					newAction.Beneficiary = bubble.Info.(BubbleTx).account.Address
-					return nil
-				},
 			},
 		},
 		{
@@ -210,7 +202,7 @@ var UnSubscriptionBySubscriberStraw = Straw[BubbleUnSubscription]{
 var UnSubscriptionByBeneficiaryOrExpiredStraw = Straw[BubbleUnSubscription]{
 	CheckFuncs: []bubbleCheck{
 		IsTx,
-		Or(IsExternal, HasOpcode(abi.WalletPluginDestructMsgOpCode)),
+		Or(IsExternal, HasOperation(abi.WalletPluginDestructMsgOp)),
 		Or(HasInterface(abi.SubscriptionV1), HasInterface(abi.SubscriptionV2)),
 	},
 	Builder: func(newAction *BubbleUnSubscription, bubble *Bubble) error {
