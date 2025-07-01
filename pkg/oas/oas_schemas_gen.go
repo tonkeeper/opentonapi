@@ -707,6 +707,7 @@ type Action struct {
 	AddExtension              OptAddExtensionAction          `json:"AddExtension"`
 	RemoveExtension           OptRemoveExtensionAction       `json:"RemoveExtension"`
 	SetSignatureAllowedAction OptSetSignatureAllowedAction   `json:"SetSignatureAllowedAction"`
+	GasRelay                  OptGasRelayAction              `json:"GasRelay"`
 	SimplePreview             ActionSimplePreview            `json:"simple_preview"`
 	BaseTransactions          []string                       `json:"base_transactions"`
 }
@@ -834,6 +835,11 @@ func (s *Action) GetRemoveExtension() OptRemoveExtensionAction {
 // GetSetSignatureAllowedAction returns the value of SetSignatureAllowedAction.
 func (s *Action) GetSetSignatureAllowedAction() OptSetSignatureAllowedAction {
 	return s.SetSignatureAllowedAction
+}
+
+// GetGasRelay returns the value of GasRelay.
+func (s *Action) GetGasRelay() OptGasRelayAction {
+	return s.GasRelay
 }
 
 // GetSimplePreview returns the value of SimplePreview.
@@ -969,6 +975,11 @@ func (s *Action) SetRemoveExtension(val OptRemoveExtensionAction) {
 // SetSetSignatureAllowedAction sets the value of SetSignatureAllowedAction.
 func (s *Action) SetSetSignatureAllowedAction(val OptSetSignatureAllowedAction) {
 	s.SetSignatureAllowedAction = val
+}
+
+// SetGasRelay sets the value of GasRelay.
+func (s *Action) SetGasRelay(val OptGasRelayAction) {
+	s.GasRelay = val
 }
 
 // SetSimplePreview sets the value of SimplePreview.
@@ -5858,6 +5869,43 @@ func (s *GasLimitPrices) SetFreezeDueLimit(val int64) {
 // SetDeleteDueLimit sets the value of DeleteDueLimit.
 func (s *GasLimitPrices) SetDeleteDueLimit(val int64) {
 	s.DeleteDueLimit = val
+}
+
+// Ref: #/components/schemas/GasRelayAction
+type GasRelayAction struct {
+	Amount  int64          `json:"amount"`
+	Relayer AccountAddress `json:"relayer"`
+	Target  AccountAddress `json:"target"`
+}
+
+// GetAmount returns the value of Amount.
+func (s *GasRelayAction) GetAmount() int64 {
+	return s.Amount
+}
+
+// GetRelayer returns the value of Relayer.
+func (s *GasRelayAction) GetRelayer() AccountAddress {
+	return s.Relayer
+}
+
+// GetTarget returns the value of Target.
+func (s *GasRelayAction) GetTarget() AccountAddress {
+	return s.Target
+}
+
+// SetAmount sets the value of Amount.
+func (s *GasRelayAction) SetAmount(val int64) {
+	s.Amount = val
+}
+
+// SetRelayer sets the value of Relayer.
+func (s *GasRelayAction) SetRelayer(val AccountAddress) {
+	s.Relayer = val
+}
+
+// SetTarget sets the value of Target.
+func (s *GasRelayAction) SetTarget(val AccountAddress) {
+	s.Target = val
 }
 
 // Ref: #/components/schemas/GaslessConfig
@@ -12737,6 +12785,52 @@ func (o OptExtraCurrencyTransferAction) Get() (v ExtraCurrencyTransferAction, ok
 
 // Or returns value if set, or given parameter if does not.
 func (o OptExtraCurrencyTransferAction) Or(d ExtraCurrencyTransferAction) ExtraCurrencyTransferAction {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptGasRelayAction returns new OptGasRelayAction with value set to v.
+func NewOptGasRelayAction(v GasRelayAction) OptGasRelayAction {
+	return OptGasRelayAction{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptGasRelayAction is optional GasRelayAction.
+type OptGasRelayAction struct {
+	Value GasRelayAction
+	Set   bool
+}
+
+// IsSet returns true if OptGasRelayAction was set.
+func (o OptGasRelayAction) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptGasRelayAction) Reset() {
+	var v GasRelayAction
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptGasRelayAction) SetTo(v GasRelayAction) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptGasRelayAction) Get() (v GasRelayAction, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptGasRelayAction) Or(d GasRelayAction) GasRelayAction {
 	if v, ok := o.Get(); ok {
 		return v
 	}
