@@ -1,8 +1,10 @@
 package bath
 
 import (
+	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
+	"math/big"
 )
 
 type BubbleSubscription struct {
@@ -20,8 +22,10 @@ func (b BubbleSubscription) ToAction() (action *Action) {
 			Subscriber:   b.Subscriber,
 			Beneficiary:  b.Beneficiary,
 			WithdrawTo:   b.WithdrawTo,
-			Amount:       b.Amount,
-			First:        b.First,
+			Amount: core.Price{
+				Type:   core.CurrencyTON,
+				Amount: *big.NewInt(b.Amount)},
+			First: b.First,
 		},
 		Success: b.Success,
 		Type:    Subscribe,

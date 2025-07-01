@@ -6405,7 +6405,7 @@ components:
         - subscriber
         - subscription
         - beneficiary
-        - amount
+        - price
         - initial
       properties:
         subscriber:
@@ -6417,10 +6417,13 @@ components:
         beneficiary:
           $ref: '#/components/schemas/AccountAddress'
         amount:
+          deprecated: true
           type: integer
           format: int64
           example: 1000000000
           x-js-format: bigint
+        price:
+          $ref: '#/components/schemas/Price'
         initial:
           type: boolean
           example: false

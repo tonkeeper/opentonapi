@@ -188,7 +188,7 @@ type (
 		Subscriber   tongo.AccountID
 		Beneficiary  tongo.AccountID
 		WithdrawTo   tongo.AccountID
-		Amount       int64
+		Amount       core.Price
 		First        bool
 	}
 
@@ -329,7 +329,10 @@ func (a Action) ContributeToExtra(account tongo.AccountID) int64 {
 	case ElectionsRecoverStake:
 		return detectDirection(account, a.ElectionsRecoverStake.Elector, a.ElectionsRecoverStake.Staker, a.ElectionsRecoverStake.Amount)
 	case Subscribe:
-		return detectDirection(account, a.Subscribe.Subscriber, a.Subscribe.Beneficiary, a.Subscribe.Amount)
+		if a.Subscribe.Amount.Type == core.CurrencyTON {
+			return detectDirection(account, a.Subscribe.Subscriber, a.Subscribe.WithdrawTo, a.Subscribe.Amount.Amount.Int64())
+		}
+		return 0
 	case DepositStake:
 		return detectDirection(account, a.DepositStake.Staker, a.DepositStake.Pool, a.DepositStake.Amount)
 	case JettonTransfer:

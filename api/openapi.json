@@ -5930,6 +5930,7 @@
    "SubscriptionAction": {
     "properties": {
      "amount": {
+      "deprecated": true,
       "example": 1000000000,
       "format": "int64",
       "type": "integer",
@@ -5941,6 +5942,9 @@
      "initial": {
       "example": false,
       "type": "boolean"
+     },
+     "price": {
+      "$ref": "#/components/schemas/Price"
      },
      "subscriber": {
       "$ref": "#/components/schemas/AccountAddress"
@@ -5955,7 +5959,7 @@
      "subscriber",
      "subscription",
      "beneficiary",
-     "amount",
+     "price",
      "initial"
     ],
     "type": "object"

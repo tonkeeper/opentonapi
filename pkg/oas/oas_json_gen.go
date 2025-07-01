@@ -38306,8 +38306,14 @@ func (s *SubscriptionAction) encodeFields(e *jx.Encoder) {
 		s.Beneficiary.Encode(e)
 	}
 	{
-		e.FieldStart("amount")
-		e.Int64(s.Amount)
+		if s.Amount.Set {
+			e.FieldStart("amount")
+			s.Amount.Encode(e)
+		}
+	}
+	{
+		e.FieldStart("price")
+		s.Price.Encode(e)
 	}
 	{
 		e.FieldStart("initial")
@@ -38315,12 +38321,13 @@ func (s *SubscriptionAction) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfSubscriptionAction = [5]string{
+var jsonFieldsNameOfSubscriptionAction = [6]string{
 	0: "subscriber",
 	1: "subscription",
 	2: "beneficiary",
 	3: "amount",
-	4: "initial",
+	4: "price",
+	5: "initial",
 }
 
 // Decode decodes SubscriptionAction from json.
@@ -38365,19 +38372,27 @@ func (s *SubscriptionAction) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"beneficiary\"")
 			}
 		case "amount":
-			requiredBitSet[0] |= 1 << 3
 			if err := func() error {
-				v, err := d.Int64()
-				s.Amount = int64(v)
-				if err != nil {
+				s.Amount.Reset()
+				if err := s.Amount.Decode(d); err != nil {
 					return err
 				}
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"amount\"")
 			}
-		case "initial":
+		case "price":
 			requiredBitSet[0] |= 1 << 4
+			if err := func() error {
+				if err := s.Price.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"price\"")
+			}
+		case "initial":
+			requiredBitSet[0] |= 1 << 5
 			if err := func() error {
 				v, err := d.Bool()
 				s.Initial = bool(v)
@@ -38398,7 +38413,7 @@ func (s *SubscriptionAction) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b00011111,
+		0b00110111,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.

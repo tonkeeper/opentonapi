@@ -500,28 +500,7 @@ func (h *Handler) convertAction(ctx context.Context, viewer *tongo.AccountID, a 
 			Value:    oas.NewOptString(fmt.Sprintf("%v %v", amount, meta.Name)),
 		}
 	case bath.Subscribe:
-		action.Subscribe.SetTo(oas.SubscriptionAction{
-			Amount:       a.Subscribe.Amount,
-			Beneficiary:  convertAccountAddress(a.Subscribe.Beneficiary, h.addressBook),
-			Subscriber:   convertAccountAddress(a.Subscribe.Subscriber, h.addressBook),
-			Subscription: a.Subscribe.Subscription.ToRaw(),
-			Initial:      a.Subscribe.First,
-		})
-		value := i18n.FormatTONs(a.Subscribe.Amount)
-		action.SimplePreview = oas.ActionSimplePreview{
-			Name: "Subscription",
-			Description: i18n.T(acceptLanguage.Value, i18n.C{
-				DefaultMessage: &i18n.M{
-					ID:    "subscriptionAction",
-					Other: "Paying {{.Value}} for subscription",
-				},
-				TemplateData: i18n.Template{
-					"Value": value,
-				},
-			}),
-			Accounts: distinctAccounts(viewer, h.addressBook, &a.Subscribe.Beneficiary, &a.Subscribe.Subscriber),
-			Value:    oas.NewOptString(value),
-		}
+		action.Subscribe, action.SimplePreview = h.convertSubscribe(ctx, a.Subscribe, acceptLanguage.Value, viewer)
 	case bath.UnSubscribe:
 		action.UnSubscribe.SetTo(oas.UnSubscriptionAction{
 			Beneficiary:  convertAccountAddress(a.UnSubscribe.Beneficiary, h.addressBook),
@@ -974,6 +953,42 @@ func (h *Handler) convertSetSignatureAllowed(ctx context.Context, p *bath.SetSig
 	}
 	var action oas.OptSetSignatureAllowedAction
 	action.SetTo(setSignatureAllowedAction)
+	return action, simplePreview
+}
+
+func (h *Handler) convertSubscribe(ctx context.Context, a *bath.SubscribeAction, acceptLanguage string, viewer *tongo.AccountID) (oas.OptSubscriptionAction, oas.ActionSimplePreview) {
+	price := h.convertPrice(ctx, a.Amount)
+	subscribeAction := oas.SubscriptionAction{
+		Price:       price,
+		Beneficiary: convertAccountAddress(a.Beneficiary, h.addressBook),
+		Subscriber:  convertAccountAddress(a.Subscriber, h.addressBook),
+		// TODO: WithdrawTo address
+		Subscription: a.Subscription.ToRaw(),
+		Initial:      a.First,
+	}
+	subscribeAction.Amount.SetTo(a.Amount.Amount.Int64()) // for backward compatibility
+	value := ScaleJettons(a.Amount.Amount, price.Decimals).String()
+	act := "Paying {{.Amount}} {{.TokenName}} for subscription"
+	if a.Amount.Amount.Cmp(big.NewInt(0)) == 0 {
+		act = "Trial period subscription"
+	}
+	simplePreview := oas.ActionSimplePreview{
+		Name: "Subscription",
+		Description: i18n.T(acceptLanguage, i18n.C{
+			DefaultMessage: &i18n.M{
+				ID:    "subscriptionAction",
+				Other: act,
+			},
+			TemplateData: i18n.Template{
+				"Amount":    value,
+				"TokenName": price.TokenName,
+			},
+		}),
+		Accounts: distinctAccounts(viewer, h.addressBook, &a.Beneficiary, &a.Subscriber),
+		Value:    oas.NewOptString(fmt.Sprintf("%v %v", value, price.TokenName)),
+	}
+	var action oas.OptSubscriptionAction
+	action.SetTo(subscribeAction)
 	return action, simplePreview
 }
 

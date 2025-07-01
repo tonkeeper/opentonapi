@@ -16556,8 +16556,10 @@ type SubscriptionAction struct {
 	Subscriber   AccountAddress `json:"subscriber"`
 	Subscription string         `json:"subscription"`
 	Beneficiary  AccountAddress `json:"beneficiary"`
-	Amount       int64          `json:"amount"`
-	Initial      bool           `json:"initial"`
+	// Deprecated: schema marks this property as deprecated.
+	Amount  OptInt64 `json:"amount"`
+	Price   Price    `json:"price"`
+	Initial bool     `json:"initial"`
 }
 
 // GetSubscriber returns the value of Subscriber.
@@ -16576,8 +16578,13 @@ func (s *SubscriptionAction) GetBeneficiary() AccountAddress {
 }
 
 // GetAmount returns the value of Amount.
-func (s *SubscriptionAction) GetAmount() int64 {
+func (s *SubscriptionAction) GetAmount() OptInt64 {
 	return s.Amount
+}
+
+// GetPrice returns the value of Price.
+func (s *SubscriptionAction) GetPrice() Price {
+	return s.Price
 }
 
 // GetInitial returns the value of Initial.
@@ -16601,8 +16608,13 @@ func (s *SubscriptionAction) SetBeneficiary(val AccountAddress) {
 }
 
 // SetAmount sets the value of Amount.
-func (s *SubscriptionAction) SetAmount(val int64) {
+func (s *SubscriptionAction) SetAmount(val OptInt64) {
 	s.Amount = val
+}
+
+// SetPrice sets the value of Price.
+func (s *SubscriptionAction) SetPrice(val Price) {
+	s.Price = val
 }
 
 // SetInitial sets the value of Initial.
