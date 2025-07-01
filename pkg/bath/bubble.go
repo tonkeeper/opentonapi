@@ -2,6 +2,7 @@ package bath
 
 import (
 	"fmt"
+	"github.com/tonkeeper/tongo/boc"
 	"sort"
 	"strings"
 
@@ -232,53 +233,46 @@ func appendExtendedActionsV4(b *Bubble, txHash tongo.Bits256) {
 	if btx.decodedBody == nil {
 		return
 	}
-	//	if btx.decodedBody.Operation == abi.WalletPluginDestructMsgOp {
-	//		b.Children = append(b.Children, &Bubble{
-	//			Info: BubbleRemoveExtension{
-	//				Wallet:    btx.account.Address,
-	//				Extension: btx.inputFrom.Address,
-	//				Success:   btx.success, // TODO: or check exit codes
-	//			},
-	//			Accounts:    []tongo.AccountID{btx.account.Address, btx.inputFrom.Address},
-	//			ValueFlow:   &ValueFlow{},
-	//			Transaction: []ton.Bits256{txHash},
-	//		})
-	//		return
-	//	}
-	//	if btx.decodedBody.Operation != abi.WalletSignedV4ExtInMsgOp {
-	//		return
-	//	}
-	//	msg := btx.decodedBody.Value.(abi.WalletSignedV4ExtInMsgBody)
-	//	var addr tongo.AccountID
-	//	switch msg.Payload.SumType {
-	//	//case "DeployAndInstallPlugin":
-	//	case "InstallPlugin":
-	//		addr.Workchain = int32(msg.Payload.InstallPlugin.PluginWorkchain)
-	//		copy(addr.Address[:], msg.Payload.InstallPlugin.PluginAddress[:])
-	//		b.Children = append(b.Children, &Bubble{
-	//			Info: BubbleAddExtension{
-	//				Wallet:    btx.account.Address,
-	//				Extension: addr,
-	//				Success:   btx.success, // TODO: or check exit codes
-	//			},
-	//			Accounts:    []tongo.AccountID{btx.account.Address, addr},
-	//			ValueFlow:   &ValueFlow{},
-	//			Transaction: []ton.Bits256{txHash},
-	//		})
-	//	case "RemovePlugin":
-	//		addr.Workchain = int32(msg.Payload.RemovePlugin.PluginWorkchain)
-	//		copy(addr.Address[:], msg.Payload.RemovePlugin.PluginAddress[:])
-	//		b.Children = append(b.Children, &Bubble{
-	//			Info: BubbleRemoveExtension{
-	//				Wallet:    btx.account.Address,
-	//				Extension: addr,
-	//				Success:   btx.success, // TODO: or check exit codes
-	//			},
-	//			Accounts:    []tongo.AccountID{btx.account.Address, addr},
-	//			ValueFlow:   &ValueFlow{},
-	//			Transaction: []ton.Bits256{txHash},
-	//		})
-	//	default:
-	//		return
-	//	}
+	newChild := Bubble{
+		ValueFlow:   &ValueFlow{},
+		Transaction: []ton.Bits256{txHash},
+	}
+	if btx.decodedBody.Operation == abi.WalletPluginDestructMsgOp {
+		newChild.Info = BubbleRemoveExtension{Wallet: btx.account.Address, Extension: btx.inputFrom.Address, Success: btx.success} // TODO: or check exit codes
+		newChild.Accounts = []tongo.AccountID{btx.account.Address, btx.inputFrom.Address}
+		b.Children = append(b.Children, &newChild)
+		return
+	}
+	if btx.decodedBody.Operation != abi.WalletSignedV4ExtInMsgOp {
+		return
+	}
+	msg := btx.decodedBody.Value.(abi.WalletSignedV4ExtInMsgBody)
+	var addr tongo.AccountID
+	switch msg.Payload.SumType {
+	case "DeployAndInstallPlugin":
+		addr.Workchain = int32(msg.Payload.DeployAndInstallPlugin.PluginWorkchain)
+		stateCell := boc.NewCell()
+		err := tlb.Marshal(stateCell, msg.Payload.DeployAndInstallPlugin.StateInit)
+		if err != nil {
+			return
+		}
+		h, err := stateCell.Hash()
+		if err != nil {
+			return
+		}
+		copy(addr.Address[:], h[:])
+		newChild.Info = BubbleAddExtension{Wallet: btx.account.Address, Extension: addr, Success: btx.success} // TODO: or check exit codes
+	case "InstallPlugin":
+		addr.Workchain = int32(msg.Payload.InstallPlugin.PluginWorkchain)
+		copy(addr.Address[:], msg.Payload.InstallPlugin.PluginAddress[:])
+		newChild.Info = BubbleAddExtension{Wallet: btx.account.Address, Extension: addr, Success: btx.success} // TODO: or check exit codes
+	case "RemovePlugin":
+		addr.Workchain = int32(msg.Payload.RemovePlugin.PluginWorkchain)
+		copy(addr.Address[:], msg.Payload.RemovePlugin.PluginAddress[:])
+		newChild.Info = BubbleRemoveExtension{Wallet: btx.account.Address, Extension: addr, Success: btx.success} // TODO: or check exit codes
+	default:
+		return
+	}
+	newChild.Accounts = []tongo.AccountID{btx.account.Address, addr}
+	b.Children = append(b.Children, &newChild)
 }
