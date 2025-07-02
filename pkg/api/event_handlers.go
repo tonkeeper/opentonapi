@@ -278,6 +278,17 @@ func (h *Handler) GetAccountEvents(ctx context.Context, params oas.GetAccountEve
 			}
 			continue
 		}
+		if trace.InProgress() {
+			traceId := trace.Hash.Hex()
+			traceEmulated, _, _, err := h.storage.GetTraceWithState(ctx, traceId[0:len(traceId)/2])
+			if err != nil {
+				h.logger.Warn("get trace from storage: ", zap.Error(err))
+			}
+			if traceEmulated != nil {
+				traceEmulated = core.CopyTraceData(ctx, trace, traceEmulated)
+				trace = traceEmulated
+			}
+		}
 		actions, err := bath.FindActions(ctx, trace, bath.ForAccount(account.ID), bath.WithInformationSource(h.storage))
 		if err != nil {
 			events = append(events, h.toUnknownAccountEvent(account.ID, traceID))
@@ -307,6 +318,14 @@ func (h *Handler) GetAccountEvents(ctx context.Context, params oas.GetAccountEve
 				continue
 			}
 			i++
+			traceId := trace.Hash.Hex()
+			traceEmulated, _, _, err := h.storage.GetTraceWithState(ctx, traceId[0:len(traceId)/2])
+			if err != nil {
+				h.logger.Warn("get trace from storage: ", zap.Error(err))
+			}
+			if traceEmulated != nil {
+				trace = traceEmulated
+			}
 			actions, err := bath.FindActions(ctx, trace, bath.ForAccount(account.ID), bath.WithInformationSource(h.storage))
 			if err != nil {
 				return nil, toError(http.StatusInternalServerError, err)
