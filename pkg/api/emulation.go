@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/base64"
 	"errors"
+	"go.uber.org/zap"
 	"math/big"
 	"sync"
 	"time"
@@ -147,6 +148,11 @@ func (h *Handler) addToMempool(ctx context.Context, bytesBoc []byte, shardAccoun
 		return shardAccount, err
 	}
 	h.mempoolEmulate.traces.Set(hash, trace, cache.WithExpiration(time.Second*time.Duration(ttl)))
+	err = h.storage.SaveTraceWithState(ctx, ton.Bits256(hash).Hex(), trace, h.tongoVersion, []abi.MethodInvocation{}, 24*time.Hour)
+	if err != nil {
+		h.logger.Warn("trace not saved: ", zap.Error(err))
+		savedEmulatedTraces.WithLabelValues("error_save").Inc()
+	}
 	var localMessageHashCache = make(map[ton.Bits256]bool)
 	for account := range accounts {
 		if _, ok := h.mempoolEmulateIgnoreAccounts[account]; ok { // the map is filled only once at the start
