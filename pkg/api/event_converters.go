@@ -48,7 +48,11 @@ func distinctAccounts(skip *tongo.AccountID, book addressBook, accounts ...*tong
 }
 
 func convertTrace(t *core.Trace, book addressBook) oas.Trace {
-	trace := oas.Trace{Transaction: convertTransaction(t.Transaction, t.AccountInterfaces, book), Interfaces: g.ToStrings(t.AccountInterfaces)}
+	trace := oas.Trace{
+		Transaction: convertTransaction(t.Transaction, t.AccountInterfaces, book),
+		Interfaces:  g.ToStrings(t.AccountInterfaces),
+		Emulated:    oas.OptBool{Set: true, Value: t.Emulated},
+	}
 
 	sort.Slice(t.Children, func(i, j int) bool {
 		if t.Children[i].InMsg == nil || t.Children[j].InMsg == nil {
@@ -799,6 +803,7 @@ func (h *Handler) toEvent(ctx context.Context, trace *core.Trace, result *bath.A
 		IsScam:     false,
 		Lt:         int64(trace.Lt),
 		InProgress: trace.InProgress(),
+		Progress:   trace.CalculateProgress(),
 	}
 	for i, a := range result.Actions {
 		convertedAction, err := h.convertAction(ctx, nil, a, lang)

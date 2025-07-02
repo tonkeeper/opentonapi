@@ -137,6 +137,29 @@ func (t *Trace) countUncompleted() int {
 	return c
 }
 
+func (t *Trace) CalculateProgress() float32 {
+	var calculateProgress func(t *Trace)
+	var finished, all int
+	calculateProgress = func(t *Trace) {
+		if t == nil {
+			return
+		}
+		if !t.Emulated {
+			finished += 1
+		}
+		all += 1
+		for _, child := range t.Children {
+			calculateProgress(child)
+		}
+	}
+	calculateProgress(t)
+
+	if all == 0 {
+		return 0
+	}
+	return float32(finished) / float32(all)
+}
+
 type EmulatedTeleitemNFT struct {
 	Index             decimal.Decimal
 	CollectionAddress *tongo.AccountID
@@ -208,6 +231,42 @@ func DistinctAccounts(trace *Trace) []tongo.AccountID {
 		accounts[trace.Account] = struct{}{}
 	})
 	return maps.Keys(accounts)
+}
+
+// CopyTraceData copies additional data and transaction data from one trace to another.
+// It copies TraceAdditionalInfo, AccountInterfaces, and the embedded Transaction.
+func CopyTraceData(ctx context.Context, fromTrace *Trace, toTrace *Trace) *Trace {
+	additionalDataByHash := make(map[tongo.Bits256]*TraceAdditionalInfo)
+	interfacesByHash := make(map[tongo.Bits256][]abi.ContractInterface)
+	transactionByHash := make(map[tongo.Bits256]Transaction)
+
+	Visit(fromTrace, func(trace *Trace) {
+		if trace.Hash != (tongo.Bits256{}) {
+			if additionalInfo := trace.AdditionalInfo(); additionalInfo != nil {
+				additionalDataByHash[trace.Hash] = additionalInfo
+			}
+			if len(trace.AccountInterfaces) > 0 {
+				interfacesByHash[trace.Hash] = trace.AccountInterfaces
+			}
+			transactionByHash[trace.Hash] = trace.Transaction
+		}
+	})
+
+	Visit(toTrace, func(trace *Trace) {
+		if trace.Hash != (tongo.Bits256{}) {
+			if additionalInfo, exists := additionalDataByHash[trace.Hash]; exists {
+				trace.SetAdditionalInfo(additionalInfo)
+			}
+			if interfaces, exists := interfacesByHash[trace.Hash]; exists {
+				trace.AccountInterfaces = interfaces
+			}
+			if transaction, exists := transactionByHash[trace.Hash]; exists {
+				trace.Transaction = transaction
+			}
+		}
+	})
+
+	return toTrace
 }
 
 // CollectAdditionalInfo goes over the whole trace

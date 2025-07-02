@@ -5351,7 +5351,8 @@ type Event struct {
 	IsScam bool  `json:"is_scam"`
 	Lt     int64 `json:"lt"`
 	// Event is not finished yet. Transactions still happening.
-	InProgress bool `json:"in_progress"`
+	InProgress bool    `json:"in_progress"`
+	Progress   float32 `json:"progress"`
 }
 
 // GetEventID returns the value of EventID.
@@ -5389,6 +5390,11 @@ func (s *Event) GetInProgress() bool {
 	return s.InProgress
 }
 
+// GetProgress returns the value of Progress.
+func (s *Event) GetProgress() float32 {
+	return s.Progress
+}
+
 // SetEventID sets the value of EventID.
 func (s *Event) SetEventID(val string) {
 	s.EventID = val
@@ -5422,6 +5428,11 @@ func (s *Event) SetLt(val int64) {
 // SetInProgress sets the value of InProgress.
 func (s *Event) SetInProgress(val bool) {
 	s.InProgress = val
+}
+
+// SetProgress sets the value of Progress.
+func (s *Event) SetProgress(val float32) {
+	s.Progress = val
 }
 
 // Ref: #/components/schemas/ExecGetMethodArg

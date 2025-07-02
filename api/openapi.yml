@@ -7162,6 +7162,7 @@ components:
         - is_scam
         - lt
         - in_progress
+        - progress
       properties:
         event_id:
           type: string
@@ -7191,6 +7192,12 @@ components:
           type: boolean
           example: false
           description: Event is not finished yet. Transactions still happening
+        progress:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 1
+          example: 0.5
     JettonMetadata:
       type: object
       required:
