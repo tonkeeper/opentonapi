@@ -14,9 +14,13 @@ const (
 	CurrencyFiat   CurrencyType = "fiat"
 )
 
-type Price struct {
+type Currency struct {
 	Type       CurrencyType
-	Amount     big.Int
 	Jetton     *tongo.AccountID
 	CurrencyID *int32
+}
+
+type Price struct {
+	Currency Currency
+	Amount   big.Int
 }

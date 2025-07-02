@@ -502,12 +502,12 @@ func ExtractTransactions(id tongo.BlockIDExt, block *tlb.Block) ([]*Transaction,
 }
 
 func ConvertToCurrencyCollection(collection tlb.CurrencyCollection) CurrencyCollection {
-	var other []Currency
+	var other []ExtraCurrency
 	if len(collection.Other.Dict.Keys()) > 0 {
-		other = make([]Currency, 0, len(collection.Other.Dict.Items()))
+		other = make([]ExtraCurrency, 0, len(collection.Other.Dict.Items()))
 		for _, item := range collection.Other.Dict.Items() {
 			value := big.Int(item.Value)
-			other = append(other, Currency{
+			other = append(other, ExtraCurrency{
 				ID:    int64(item.Key),
 				Value: value.String(),
 			})

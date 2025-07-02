@@ -40,13 +40,15 @@ var InvoicePaymentStrawNative = Straw[BubbleInvoicePayment]{
 		}
 		newAction.InvoiceID = id
 		price := core.Price{
-			Type:   core.CurrencyTON,
-			Amount: *big.NewInt(tx.inputAmount),
+			Currency: core.Currency{Type: core.CurrencyTON},
+			Amount:   *big.NewInt(tx.inputAmount),
 		}
 		for c, am := range tx.inputExtraAmount {
-			price.Type = core.CurrencyExtra
+			price.Currency = core.Currency{
+				Type:       core.CurrencyExtra,
+				CurrencyID: &c,
+			}
 			price.Amount = big.Int(am)
-			price.CurrencyID = &c
 			break
 		}
 		if tx.inputFrom == nil {
@@ -84,9 +86,11 @@ var InvoicePaymentStrawJetton = Straw[BubbleInvoicePayment]{
 		}
 		newAction.InvoiceID = id
 		newAction.Price = core.Price{
-			Type:   core.CurrencyJetton,
+			Currency: core.Currency{
+				Type:   core.CurrencyJetton,
+				Jetton: &jettonTx.master,
+			},
 			Amount: big.Int(jettonTx.amount),
-			Jetton: &jettonTx.master,
 		}
 		// sender and recipient already checked for nil
 		newAction.Sender = jettonTx.sender.Address

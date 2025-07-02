@@ -58,14 +58,14 @@ type BlockExtra struct {
 	OutMsgDescrLength int
 }
 
-type Currency struct {
+type ExtraCurrency struct {
 	ID    int64
 	Value string
 }
 
 type CurrencyCollection struct {
 	Grams uint64
-	Other []Currency
+	Other []ExtraCurrency
 }
 
 type ValueFlow struct {

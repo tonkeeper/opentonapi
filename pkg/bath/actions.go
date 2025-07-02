@@ -279,7 +279,7 @@ func (a Action) ContributeToExtra(account tongo.AccountID) int64 {
 	case NftItemTransfer, ContractDeploy, UnSubscription, JettonMint, JettonBurn, WithdrawStakeRequest, DomainRenew, ExtraCurrencyTransfer: // actions without extra
 		return 0
 	case Purchase:
-		if a.Purchase.Price.Type == core.CurrencyTON {
+		if a.Purchase.Price.Currency.Type == core.CurrencyTON {
 			return detectDirection(account, a.Purchase.Source, a.Purchase.Destination, a.Purchase.Price.Amount.Int64())
 		}
 		return 0
@@ -293,12 +293,12 @@ func (a Action) ContributeToExtra(account tongo.AccountID) int64 {
 		}
 		return 0
 	case NftPurchase:
-		if a.NftPurchase.Price.Type == core.CurrencyTON {
+		if a.NftPurchase.Price.Currency.Type == core.CurrencyTON {
 			return detectDirection(account, a.NftPurchase.Buyer, a.NftPurchase.Seller, a.NftPurchase.Price.Amount.Int64())
 		}
 		return 0
 	case AuctionBid:
-		if a.AuctionBid.Amount.Type == core.CurrencyTON {
+		if a.AuctionBid.Amount.Currency.Type == core.CurrencyTON {
 			return detectDirection(account, a.AuctionBid.Bidder, a.AuctionBid.Auction, a.AuctionBid.Amount.Amount.Int64())
 		}
 		return 0

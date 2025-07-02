@@ -706,8 +706,8 @@ func (h *Handler) convertSubscriptionsV2(ctx context.Context, sub core.Subscript
 		res.Metadata.SetEncryptedBinary(fmt.Sprintf("%x", sub.Metadata))
 	}
 	res.PaymentPerPeriod = h.convertPrice(ctx, core.Price{
-		Type:   core.CurrencyTON,
-		Amount: *big.NewInt(sub.PaymentPerPeriod),
+		Currency: core.Currency{Type: core.CurrencyTON},
+		Amount:   *big.NewInt(sub.PaymentPerPeriod),
 	})
 	return res
 }
@@ -729,8 +729,8 @@ func (h *Handler) convertSubscriptionsV1(ctx context.Context, sub core.Subscript
 		res.Status = oas.SubscriptionStatusActive
 	}
 	res.PaymentPerPeriod = h.convertPrice(ctx, core.Price{
-		Type:   core.CurrencyTON,
-		Amount: *big.NewInt(sub.Amount),
+		Currency: core.Currency{Type: core.CurrencyTON},
+		Amount:   *big.NewInt(sub.Amount),
 	})
 	return res
 }

@@ -115,7 +115,7 @@ func convertInvoiceOpenMetadata(params encryptionParameters, data []byte) (oas.M
 }
 
 func (h *Handler) convertPrice(ctx context.Context, price core.Price) oas.Price {
-	switch price.Type {
+	switch price.Currency.Type {
 	case core.CurrencyTON:
 		return oas.Price{
 			CurrencyType: oas.CurrencyTypeNative,
@@ -126,7 +126,7 @@ func (h *Handler) convertPrice(ctx context.Context, price core.Price) oas.Price 
 			Image:        references.TonSymbol,
 		}
 	case core.CurrencyExtra:
-		meta := references.GetExtraCurrencyMeta(*price.CurrencyID)
+		meta := references.GetExtraCurrencyMeta(*price.Currency.CurrencyID)
 		return oas.Price{
 			CurrencyType: oas.CurrencyTypeExtraCurrency,
 			Value:        price.Amount.String(),
@@ -136,7 +136,7 @@ func (h *Handler) convertPrice(ctx context.Context, price core.Price) oas.Price 
 			Image:        meta.Image,
 		}
 	case core.CurrencyJetton:
-		meta := h.GetJettonNormalizedMetadata(ctx, *price.Jetton)
+		meta := h.GetJettonNormalizedMetadata(ctx, *price.Currency.Jetton)
 		res := oas.Price{
 			CurrencyType: oas.CurrencyTypeJetton,
 			Value:        price.Amount.String(),
@@ -145,7 +145,7 @@ func (h *Handler) convertPrice(ctx context.Context, price core.Price) oas.Price 
 			Verification: oas.TrustType(meta.Verification),
 			Image:        meta.PreviewImage,
 		}
-		res.Jetton.SetTo(price.Jetton.ToRaw())
+		res.Jetton.SetTo(price.Currency.Jetton.ToRaw())
 		return res
 	case core.CurrencyFiat:
 		// TODO: fiat not supported yet

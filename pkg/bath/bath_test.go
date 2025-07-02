@@ -61,6 +61,10 @@ func (m *mockInfoSource) STONfiPools(ctx context.Context, pools []core.STONfiPoo
 	return map[tongo.AccountID]core.STONfiPool{}, nil
 }
 
+func (m *mockInfoSource) DedustPools(ctx context.Context, contracts []tongo.AccountID) (map[tongo.AccountID]core.DedustPool, error) {
+	return map[tongo.AccountID]core.DedustPool{}, nil
+}
+
 var _ core.InformationSource = &mockInfoSource{}
 
 func TestFindActions(t *testing.T) {

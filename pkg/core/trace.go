@@ -55,6 +55,9 @@ type TraceAdditionalInfo struct {
 	// This field is required because when a new NFT is created during emulation,
 	// there is no way to get it from the blockchain, and we have to store it somewhere.
 	EmulatedTeleitemNFT *EmulatedTeleitemNFT
+
+	// DedustPool is set, if a transaction's account implements "get_assets" method and abi.DedustPool interface.
+	DedustPool *DedustPool
 }
 
 func (t *Trace) AdditionalInfo() *TraceAdditionalInfo {
@@ -75,6 +78,7 @@ func (t *TraceAdditionalInfo) MarshalJSON() ([]byte, error) {
 		NftSaleContract     *NftSaleContract     `json:",omitempty"`
 		STONfiPool          *STONfiPool          `json:",omitempty"`
 		EmulatedTeleitemNFT *EmulatedTeleitemNFT `json:",omitempty"`
+		DedustPool          *DedustPool          `json:",omitempty"`
 	}
 
 	masters := make(map[string]string)
@@ -89,6 +93,7 @@ func (t *TraceAdditionalInfo) MarshalJSON() ([]byte, error) {
 		NftSaleContract:     t.NftSaleContract,
 		STONfiPool:          t.STONfiPool,
 		EmulatedTeleitemNFT: t.EmulatedTeleitemNFT,
+		DedustPool:          t.DedustPool,
 	})
 }
 
@@ -98,6 +103,7 @@ func (t *TraceAdditionalInfo) UnmarshalJSON(data []byte) error {
 		NftSaleContract     *NftSaleContract     `json:",omitempty"`
 		STONfiPool          *STONfiPool          `json:",omitempty"`
 		EmulatedTeleitemNFT *EmulatedTeleitemNFT `json:",omitempty"`
+		DedustPool          *DedustPool          `json:",omitempty"`
 	}
 
 	aux := &Alias{}
@@ -117,6 +123,7 @@ func (t *TraceAdditionalInfo) UnmarshalJSON(data []byte) error {
 	t.NftSaleContract = aux.NftSaleContract
 	t.STONfiPool = aux.STONfiPool
 	t.EmulatedTeleitemNFT = aux.EmulatedTeleitemNFT
+	t.DedustPool = aux.DedustPool
 
 	return nil
 }
@@ -192,11 +199,18 @@ type STONfiPoolID struct {
 	Version STONfiVersion
 }
 
+// DedustPool holds results of execution of Dedust's "get_assets" method.
+type DedustPool struct {
+	Asset0 Currency
+	Asset1 Currency
+}
+
 // InformationSource provides methods to construct TraceAdditionalInfo.
 type InformationSource interface {
 	JettonMastersForWallets(ctx context.Context, wallets []tongo.AccountID) (map[tongo.AccountID]tongo.AccountID, error)
 	NftSaleContracts(ctx context.Context, contracts []tongo.AccountID) (map[tongo.AccountID]NftSaleContract, error)
 	STONfiPools(ctx context.Context, poolIDs []STONfiPoolID) (map[tongo.AccountID]STONfiPool, error)
+	DedustPools(ctx context.Context, contracts []tongo.AccountID) (map[tongo.AccountID]DedustPool, error)
 }
 
 func isDestinationJettonWallet(inMsg *Message) bool {
@@ -205,7 +219,8 @@ func isDestinationJettonWallet(inMsg *Message) bool {
 	}
 	return (inMsg.DecodedBody.Operation == abi.JettonTransferMsgOp ||
 		inMsg.DecodedBody.Operation == abi.JettonInternalTransferMsgOp ||
-		inMsg.DecodedBody.Operation == abi.JettonBurnMsgOp) && inMsg.Destination != nil
+		inMsg.DecodedBody.Operation == abi.JettonBurnMsgOp ||
+		inMsg.DecodedBody.Operation == abi.PtonTonTransferMsgOp) && inMsg.Destination != nil
 }
 
 func hasInterface(interfacesList []abi.ContractInterface, name abi.ContractInterface) bool {
@@ -279,6 +294,7 @@ func CollectAdditionalInfo(ctx context.Context, infoSource InformationSource, tr
 	var jettonWallets []tongo.AccountID
 	var saleContracts []tongo.AccountID
 	var stonfiPoolIDs []STONfiPoolID
+	var dedustPoolIDs []tongo.AccountID
 	Visit(trace, func(trace *Trace) {
 		// when we emulate a trace,
 		// we construct "trace.AdditionalInfo" in emulatedTreeToTrace for all accounts the trace touches.
@@ -301,6 +317,9 @@ func CollectAdditionalInfo(ctx context.Context, infoSource InformationSource, tr
 		if hasInterface(trace.AccountInterfaces, abi.StonfiPoolV2) {
 			stonfiPoolIDs = append(stonfiPoolIDs, STONfiPoolID{ID: trace.Account, Version: STONfiPoolV2})
 		}
+		if hasInterface(trace.AccountInterfaces, abi.DedustPool) {
+			dedustPoolIDs = append(dedustPoolIDs, trace.Account)
+		}
 	})
 	stonfiPools, err := infoSource.STONfiPools(ctx, stonfiPoolIDs)
 	if err != nil {
@@ -309,6 +328,10 @@ func CollectAdditionalInfo(ctx context.Context, infoSource InformationSource, tr
 	for _, pool := range stonfiPools {
 		jettonWallets = append(jettonWallets, pool.Token0)
 		jettonWallets = append(jettonWallets, pool.Token1)
+	}
+	dedustPools, err := infoSource.DedustPools(ctx, dedustPoolIDs)
+	if err != nil {
+		return err
 	}
 	masters, err := infoSource.JettonMastersForWallets(ctx, jettonWallets)
 	if err != nil {
@@ -344,6 +367,11 @@ func CollectAdditionalInfo(ctx context.Context, infoSource InformationSource, tr
 				additionalInfo.STONfiPool = &pool
 				additionalInfo.SetJettonMaster(pool.Token0, masters[pool.Token0])
 				additionalInfo.SetJettonMaster(pool.Token1, masters[pool.Token1])
+			}
+		}
+		if hasInterface(trace.AccountInterfaces, abi.DedustPool) {
+			if pool, ok := dedustPools[trace.Account]; ok {
+				additionalInfo.DedustPool = &pool
 			}
 		}
 		trace.SetAdditionalInfo(additionalInfo)

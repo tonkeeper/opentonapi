@@ -404,11 +404,11 @@ func (h *Handler) convertDomainRenew(ctx context.Context, d *bath.DnsRenewAction
 func (h *Handler) convertPurchaseAction(ctx context.Context, p *bath.PurchaseAction, acceptLanguage string, viewer *tongo.AccountID) (oas.OptPurchaseAction, oas.ActionSimplePreview) {
 	price := h.convertPrice(ctx, p.Price)
 	currency := ""
-	switch p.Price.Type {
+	switch p.Price.Currency.Type {
 	case core.CurrencyJetton:
-		currency = p.Price.Jetton.ToRaw()
+		currency = p.Price.Currency.Jetton.ToRaw()
 	case core.CurrencyExtra:
-		currency = fmt.Sprintf("%d", int64(uint32(*p.Price.CurrencyID))) // in db as uint32
+		currency = fmt.Sprintf("%d", int64(uint32(*p.Price.Currency.CurrencyID))) // in db as uint32
 	}
 	purchaseAction := oas.PurchaseAction{
 		Source:      convertAccountAddress(p.Source, h.addressBook),
