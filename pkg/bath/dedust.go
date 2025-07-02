@@ -69,6 +69,7 @@ func (s UniversalDedustStraw) Merge(b *Bubble) bool {
 	}
 
 	//omniston referral account
+	// кажется потом можно будет вынести в отдельную функцию, но пока не хочется
 	if payoutDestination.Is(abi.OmnistonReferral) && len(payoutBubble.Children) == 2 {
 		if out.IsTon {
 			referalBubble := payoutBubble.Children[0]
@@ -107,6 +108,10 @@ func (s UniversalDedustStraw) Merge(b *Bubble) bool {
 			payoutDestination = *payoutBubble2Transfer.recipient
 			out.Amount = big.Int(payoutBubble2Transfer.amount)
 			swapsBubbles = append(swapsBubbles, payoutBubble2)
+			if len(referalBubble.Children) == 1 && IsTx(referalBubble.Children[0]) && referalBubble.Children[0].Info.(BubbleTx).operation(abi.ExcessMsgOp) {
+				swapsBubbles = append(swapsBubbles, referalBubble.Children[0])
+				swapsBubbles = append(swapsBubbles, referalBubble)
+			}
 		}
 	}
 
