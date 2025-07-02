@@ -69,12 +69,6 @@ func (t *Trace) SetAdditionalInfo(info *TraceAdditionalInfo) {
 	t.additionalInfo = info
 }
 
-func (t *Trace) SetAccountInterfaces(ifaces []abi.ContractInterface) {
-	t.mu.Lock()
-	defer t.mu.Unlock()
-	t.AccountInterfaces = ifaces
-}
-
 func (t *TraceAdditionalInfo) MarshalJSON() ([]byte, error) {
 	type Alias struct {
 		JettonMasters       map[string]string    `json:",omitempty"`
@@ -264,7 +258,7 @@ func CopyTraceData(ctx context.Context, fromTrace *Trace, toTrace *Trace) *Trace
 				trace.SetAdditionalInfo(additionalInfo)
 			}
 			if interfaces, exists := interfacesByHash[trace.Hash]; exists {
-				trace.SetAccountInterfaces(interfaces)
+				trace.AccountInterfaces = interfaces
 			}
 			if transaction, exists := transactionByHash[trace.Hash]; exists {
 				trace.Transaction = transaction

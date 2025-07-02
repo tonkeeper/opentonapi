@@ -54,11 +54,6 @@ func convertTrace(t *core.Trace, book addressBook) oas.Trace {
 		Emulated:    oas.OptBool{Set: true, Value: t.Emulated},
 	}
 
-	// if root transaction
-	if t.InMsg.IsExternal() {
-		trace.SetProgress(oas.OptFloat32{Set: true, Value: t.CalculateProgress()})
-	}
-
 	sort.Slice(t.Children, func(i, j int) bool {
 		if t.Children[i].InMsg == nil || t.Children[j].InMsg == nil {
 			return false
@@ -808,6 +803,7 @@ func (h *Handler) toEvent(ctx context.Context, trace *core.Trace, result *bath.A
 		IsScam:     false,
 		Lt:         int64(trace.Lt),
 		InProgress: trace.InProgress(),
+		Progress:   trace.CalculateProgress(),
 	}
 	for i, a := range result.Actions {
 		convertedAction, err := h.convertAction(ctx, nil, a, lang)

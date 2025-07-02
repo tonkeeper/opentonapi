@@ -15580,9 +15580,13 @@ func (s *Event) encodeFields(e *jx.Encoder) {
 		e.FieldStart("in_progress")
 		e.Bool(s.InProgress)
 	}
+	{
+		e.FieldStart("progress")
+		e.Float32(s.Progress)
+	}
 }
 
-var jsonFieldsNameOfEvent = [7]string{
+var jsonFieldsNameOfEvent = [8]string{
 	0: "event_id",
 	1: "timestamp",
 	2: "actions",
@@ -15590,6 +15594,7 @@ var jsonFieldsNameOfEvent = [7]string{
 	4: "is_scam",
 	5: "lt",
 	6: "in_progress",
+	7: "progress",
 }
 
 // Decode decodes Event from json.
@@ -15697,6 +15702,18 @@ func (s *Event) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"in_progress\"")
 			}
+		case "progress":
+			requiredBitSet[0] |= 1 << 7
+			if err := func() error {
+				v, err := d.Float32()
+				s.Progress = float32(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"progress\"")
+			}
 		default:
 			return d.Skip()
 		}
@@ -15707,7 +15724,7 @@ func (s *Event) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b01111111,
+		0b11111111,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -31912,41 +31929,6 @@ func (s *OptExtraCurrencyTransferAction) UnmarshalJSON(data []byte) error {
 	return s.Decode(d)
 }
 
-// Encode encodes float32 as json.
-func (o OptFloat32) Encode(e *jx.Encoder) {
-	if !o.Set {
-		return
-	}
-	e.Float32(float32(o.Value))
-}
-
-// Decode decodes float32 from json.
-func (o *OptFloat32) Decode(d *jx.Decoder) error {
-	if o == nil {
-		return errors.New("invalid: unable to decode OptFloat32 to nil")
-	}
-	o.Set = true
-	v, err := d.Float32()
-	if err != nil {
-		return err
-	}
-	o.Value = float32(v)
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s OptFloat32) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *OptFloat32) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
 // Encode encodes GasRelayAction as json.
 func (o OptGasRelayAction) Encode(e *jx.Encoder) {
 	if !o.Set {
@@ -39356,20 +39338,13 @@ func (s *Trace) encodeFields(e *jx.Encoder) {
 			s.Emulated.Encode(e)
 		}
 	}
-	{
-		if s.Progress.Set {
-			e.FieldStart("progress")
-			s.Progress.Encode(e)
-		}
-	}
 }
 
-var jsonFieldsNameOfTrace = [5]string{
+var jsonFieldsNameOfTrace = [4]string{
 	0: "transaction",
 	1: "interfaces",
 	2: "children",
 	3: "emulated",
-	4: "progress",
 }
 
 // Decode decodes Trace from json.
@@ -39437,16 +39412,6 @@ func (s *Trace) Decode(d *jx.Decoder) error {
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"emulated\"")
-			}
-		case "progress":
-			if err := func() error {
-				s.Progress.Reset()
-				if err := s.Progress.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"progress\"")
 			}
 		default:
 			return d.Skip()
