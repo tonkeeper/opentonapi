@@ -10,7 +10,6 @@ import (
 )
 
 func (s UniversalDedustStraw) Merge(b *Bubble) bool {
-	var swapParams abi.DedustSwapParams
 	var steps abi.DedustSwapStep
 	var sender ton.AccountID
 	var out, in assetTransfer
@@ -20,7 +19,6 @@ func (s UniversalDedustStraw) Merge(b *Bubble) bool {
 			return false
 		}
 		swap := tx.decodedBody.Value.(abi.DedustSwapMsgBody)
-		swapParams = swap.SwapParams
 		steps = swap.Step
 		sender = tx.inputFrom.Address
 		in.IsTon = true
@@ -31,17 +29,12 @@ func (s UniversalDedustStraw) Merge(b *Bubble) bool {
 			return false
 		}
 		swap := transfer.payload.Value.(abi.DedustSwapJettonPayload)
-		swapParams = swap.SwapParams
 		steps = swap.Step
 		sender = transfer.sender.Address
 		in.Amount = big.Int(transfer.amount)
 		in.JettonMaster = transfer.master
 		in.JettonWallet = transfer.senderWallet
 	} else {
-		return false
-	}
-	// проверяем что не подменен адрес получателя свапа
-	if to, err := ton.AccountIDFromTlb(swapParams.RecipientAddr); err != nil || !(to == nil || *to == sender) {
 		return false
 	}
 	expectStepsCount := s.countSteps(steps)
@@ -58,15 +51,67 @@ func (s UniversalDedustStraw) Merge(b *Bubble) bool {
 	}
 	out.Amount = big.Int(payoutCommand.Amount)
 	payoutBubble := payoutCommandBubble.Children[0]
-
+	var payoutDestination Account
 	if IsTx(payoutBubble) && payoutBubble.Info.(BubbleTx).operation(abi.DedustPayoutMsgOp) {
 		out.IsTon = true
+		payoutDestination = payoutBubble.Info.(BubbleTx).account
 	} else if IsJettonTransfer(payoutBubble) {
 		transfer := payoutBubble.Info.(BubbleJettonTransfer)
 		out.JettonMaster = transfer.master
 		out.JettonWallet = transfer.senderWallet
 		out.Amount = big.Int(transfer.amount)
+		if transfer.recipient == nil {
+			return false
+		}
+		payoutDestination = *transfer.recipient
 	} else {
+		return false
+	}
+
+	//omniston referral account
+	if payoutDestination.Is(abi.OmnistonReferral) && len(payoutBubble.Children) == 2 {
+		if out.IsTon {
+			referalBubble := payoutBubble.Children[0]
+			payoutBubble2 := payoutBubble.Children[1]
+
+			referalTx, ok1 := referalBubble.Info.(BubbleTx)
+			payoutBubble2tx, ok2 := payoutBubble2.Info.(BubbleTx)
+			if !(ok1 && ok2) || !(referalTx.operation(abi.ExcessMsgOp) && payoutBubble2tx.operation(abi.ExcessMsgOp)) {
+				return false
+			}
+			if referalTx.inputAmount < payoutBubble2tx.inputAmount {
+				swapsBubbles = append(swapsBubbles, payoutBubble2)
+				out.Amount.SetInt64(payoutBubble2tx.inputAmount)
+				payoutDestination = payoutBubble2tx.account
+			} else { //видимо перепутались рефералка и выплата. рефералка меньше чем выплата
+				swapsBubbles = append(swapsBubbles, referalBubble)
+				out.Amount.SetInt64(referalTx.inputAmount)
+				payoutDestination = referalTx.account
+			}
+		} else {
+			referalBubble := payoutBubble.Children[0]
+			payoutBubble2 := payoutBubble.Children[1]
+
+			referalTransfer, ok1 := referalBubble.Info.(BubbleTx)
+			if !ok1 {
+				referalBubble, payoutBubble2 = payoutBubble2, payoutBubble
+				referalTransfer, ok1 = referalBubble.Info.(BubbleTx)
+				if !ok1 || (referalTransfer.opCode == nil || *referalTransfer.opCode != 0x603f6e78) {
+					return false
+				}
+			}
+			payoutBubble2Transfer, ok2 := payoutBubble2.Info.(BubbleJettonTransfer)
+			if !ok2 || payoutBubble2Transfer.recipient == nil {
+				return false
+			}
+			payoutDestination = *payoutBubble2Transfer.recipient
+			out.Amount = big.Int(payoutBubble2Transfer.amount)
+			swapsBubbles = append(swapsBubbles, payoutBubble2)
+		}
+	}
+
+	// проверяем что не подменен адрес получателя свапа
+	if payoutDestination.Address != sender {
 		return false
 	}
 
