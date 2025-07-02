@@ -318,8 +318,7 @@ func (h *Handler) GetAccountEvents(ctx context.Context, params oas.GetAccountEve
 				continue
 			}
 			i++
-			traceId := trace.Hash.Hex()
-			traceEmulated, _, _, err := h.storage.GetTraceWithState(ctx, traceId[0:len(traceId)/2])
+			traceEmulated, _, _, err := h.storage.GetTraceWithState(ctx, trace.Hash.Hex())
 			if err != nil {
 				h.logger.Warn("get trace from storage: ", zap.Error(err))
 			}
