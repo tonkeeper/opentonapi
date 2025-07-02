@@ -6611,6 +6611,7 @@ components:
         - lt
         - in_progress
         - extra
+        - progress
       properties:
         event_id:
           type: string
@@ -6643,6 +6644,12 @@ components:
           type: integer
           format: int64
           example: 3
+        progress:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 1
+          example: 0.5
     AccountEvents:
       type: object
       required:

@@ -881,6 +881,7 @@ func (h *Handler) toAccountEvent(ctx context.Context, account tongo.AccountID, t
 		Lt:         int64(trace.Lt),
 		InProgress: trace.InProgress(),
 		Extra:      result.Extra(account),
+		Progress:   trace.CalculateProgress(),
 	}
 	for _, a := range result.Actions {
 		if subjectOnly && !a.IsSubject(account) {

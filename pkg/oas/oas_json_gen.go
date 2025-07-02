@@ -673,9 +673,13 @@ func (s *AccountEvent) encodeFields(e *jx.Encoder) {
 		e.FieldStart("extra")
 		e.Int64(s.Extra)
 	}
+	{
+		e.FieldStart("progress")
+		e.Float32(s.Progress)
+	}
 }
 
-var jsonFieldsNameOfAccountEvent = [8]string{
+var jsonFieldsNameOfAccountEvent = [9]string{
 	0: "event_id",
 	1: "account",
 	2: "timestamp",
@@ -684,6 +688,7 @@ var jsonFieldsNameOfAccountEvent = [8]string{
 	5: "lt",
 	6: "in_progress",
 	7: "extra",
+	8: "progress",
 }
 
 // Decode decodes AccountEvent from json.
@@ -691,7 +696,7 @@ func (s *AccountEvent) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode AccountEvent to nil")
 	}
-	var requiredBitSet [1]uint8
+	var requiredBitSet [2]uint8
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
@@ -795,6 +800,18 @@ func (s *AccountEvent) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"extra\"")
 			}
+		case "progress":
+			requiredBitSet[1] |= 1 << 0
+			if err := func() error {
+				v, err := d.Float32()
+				s.Progress = float32(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"progress\"")
+			}
 		default:
 			return d.Skip()
 		}
@@ -804,8 +821,9 @@ func (s *AccountEvent) Decode(d *jx.Decoder) error {
 	}
 	// Validate required fields.
 	var failures []validate.FieldError
-	for i, mask := range [1]uint8{
+	for i, mask := range [2]uint8{
 		0b11111111,
+		0b00000001,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.

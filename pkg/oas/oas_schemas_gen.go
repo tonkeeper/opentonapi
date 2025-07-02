@@ -314,7 +314,8 @@ type AccountEvent struct {
 	// Event is not finished yet. Transactions still happening.
 	InProgress bool `json:"in_progress"`
 	// TODO.
-	Extra int64 `json:"extra"`
+	Extra    int64   `json:"extra"`
+	Progress float32 `json:"progress"`
 }
 
 // GetEventID returns the value of EventID.
@@ -357,6 +358,11 @@ func (s *AccountEvent) GetExtra() int64 {
 	return s.Extra
 }
 
+// GetProgress returns the value of Progress.
+func (s *AccountEvent) GetProgress() float32 {
+	return s.Progress
+}
+
 // SetEventID sets the value of EventID.
 func (s *AccountEvent) SetEventID(val string) {
 	s.EventID = val
@@ -395,6 +401,11 @@ func (s *AccountEvent) SetInProgress(val bool) {
 // SetExtra sets the value of Extra.
 func (s *AccountEvent) SetExtra(val int64) {
 	s.Extra = val
+}
+
+// SetProgress sets the value of Progress.
+func (s *AccountEvent) SetProgress(val float32) {
+	s.Progress = val
 }
 
 // Ref: #/components/schemas/AccountEvents
