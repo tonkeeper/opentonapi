@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/tonkeeper/tongo/ton"
+	"slices"
 	"sync"
 
 	"github.com/shopspring/decimal"
@@ -151,11 +152,17 @@ func (t *Trace) CalculateProgress() float32 {
 		if t == nil {
 			return
 		}
+		all += 1
 		if !t.Emulated {
 			finished += 1
+			for _, m := range t.OutMsgs {
+				if m.Destination != nil && slices.ContainsFunc(t.Children, func(child *Trace) bool {
+					return child.InMsg.Hash == m.Hash
+				}) {
+					all += 1
+				}
+			}
 		}
-		all += 1
-		all += len(t.OutMsgs) - len(t.Children)
 		for _, child := range t.Children {
 			calculateProgress(child)
 		}
