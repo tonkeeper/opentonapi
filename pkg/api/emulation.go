@@ -221,6 +221,7 @@ func EmulatedTreeToTrace(
 		}
 		transaction.OutMsgs = filteredMsgs //all internal messages in emulation result are delivered to another account and created transaction
 	}
+	transaction.Emulated = true
 	t := &core.Trace{
 		Transaction: *transaction,
 	}
