@@ -142,8 +142,8 @@ func (h *Handler) getTraceByHash(ctx context.Context, hash tongo.Bits256) (*core
 		trace, err = h.storage.GetTrace(ctx, *txHash)
 		return trace, false, err
 	}
-	trace, ok := h.mempoolEmulate.traces.Get(hash)
-	if ok {
+	trace, _, _, err = h.storage.GetTraceWithState(ctx, hash.Hex())
+	if err == nil && trace != nil {
 		return trace, true, nil
 	}
 	return nil, false, core.ErrEntityNotFound
@@ -165,8 +165,8 @@ func (h *Handler) GetTrace(ctx context.Context, params oas.GetTraceParams) (*oas
 		return nil, toError(http.StatusInternalServerError, err)
 	}
 	if trace.InProgress() {
-		traceId := trace.Hash.Hex()
-		traceEmulated, _, _, err := h.storage.GetTraceWithState(ctx, traceId[0:len(traceId)/2])
+		traceId := trace.Hash.Hex()[:32] //uuid like hash
+		traceEmulated, _, _, err := h.storage.GetTraceWithState(ctx, traceId)
 		if err != nil {
 			h.logger.Warn("get trace from storage: ", zap.Error(err))
 		}
@@ -206,8 +206,8 @@ func (h *Handler) GetEvent(ctx context.Context, params oas.GetEventParams) (*oas
 	}
 
 	if trace.InProgress() {
-		hash := trace.Hash.Hex()
-		traceEmulated, _, _, err := h.storage.GetTraceWithState(ctx, hash[0:len(hash)/2])
+		hash := trace.Hash.Hex()[:32] //uuid like hash
+		traceEmulated, _, _, err := h.storage.GetTraceWithState(ctx, hash)
 		if err != nil {
 			h.logger.Warn("get trace from storage: ", zap.Error(err))
 		}
@@ -297,15 +297,15 @@ func (h *Handler) GetAccountEvents(ctx context.Context, params oas.GetAccountEve
 		memTraces, _ := h.mempoolEmulate.accountsTraces.Get(account.ID)
 		i := 0
 		for _, hash := range memTraces {
-			if i > params.Limit-10 { // we want always to save at least 1 real transaction
+			if i > params.Limit-10 { // we want always to save at least 10 real transaction
 				break
 			}
 			tx, _ := h.storage.SearchTransactionByMessageHash(ctx, hash)
 			var trace *core.Trace
 			if tx != nil {
 				// try by txHash
-				traceId := tx.Hex()
-				traceEmulated, _, _, err := h.storage.GetTraceWithState(ctx, traceId[0:len(traceId)/2])
+				traceId := tx.Hex()[:32] //cuted for uuid
+				traceEmulated, _, _, err := h.storage.GetTraceWithState(ctx, traceId)
 				if err != nil {
 					h.logger.Warn("get trace from storage: ", zap.Error(err))
 				}
@@ -504,61 +504,54 @@ func (h *Handler) EmulateMessageToEvent(ctx context.Context, request *oas.Emulat
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
 	}
-	hash, err := c.Hash256()
-	if err != nil {
-		return nil, toError(http.StatusBadRequest, err)
-	}
 	var m tlb.Message
 	if err := tlb.Unmarshal(c, &m); err != nil {
 		return nil, toError(http.StatusBadRequest, err)
 	}
-	trace, prs := h.mempoolEmulate.traces.Get(hash)
-	if !prs {
-		hs := m.Hash(true).Hex()
-		var version int
-		trace, version, _, err = h.storage.GetTraceWithState(ctx, hs)
-		if err != nil {
-			h.logger.Warn("get trace from storage: ", zap.Error(err))
-			savedEmulatedTraces.WithLabelValues("error_restore").Inc()
-		}
-		if trace == nil || h.tongoVersion == 0 || version > h.tongoVersion {
-			if version > h.tongoVersion {
-				savedEmulatedTraces.WithLabelValues("expired").Inc()
-			}
-			configBase64, err := h.storage.TrimmedConfigBase64()
-			if err != nil {
-				return nil, toError(http.StatusInternalServerError, err)
-			}
-			options := []txemulator.TraceOption{
-				txemulator.WithAccountsSource(h.storage),
-				txemulator.WithConfigBase64(configBase64),
-			}
-			if !params.IgnoreSignatureCheck.Value {
-				options = append(options, txemulator.WithSignatureCheck())
-			}
-
-			emulator, err := txemulator.NewTraceBuilder(options...)
-			if err != nil {
-				return nil, toError(http.StatusInternalServerError, err)
-			}
-			tree, err := emulator.Run(ctx, m)
-			if err != nil {
-				return nil, toProperEmulationError(err)
-			}
-			trace, err = EmulatedTreeToTrace(ctx, h.executor, h.storage, tree, emulator.FinalStates(), nil, h.configPool, true)
-			if err != nil {
-				return nil, toError(http.StatusInternalServerError, err)
-			}
-			err = h.storage.SaveTraceWithState(ctx, hs, trace, h.tongoVersion, []abi.MethodInvocation{}, 24*time.Hour)
-			if err != nil {
-				h.logger.Warn("trace not saved: ", zap.Error(err))
-				savedEmulatedTraces.WithLabelValues("error_save").Inc()
-			}
-			savedEmulatedTraces.WithLabelValues("success").Inc()
-		} else {
-			savedEmulatedTraces.WithLabelValues("restored").Inc()
-		}
+	hs := m.Hash(true).Hex()
+	trace, version, _, err := h.storage.GetTraceWithState(ctx, hs)
+	if err != nil {
+		h.logger.Warn("get trace from storage: ", zap.Error(err))
+		savedEmulatedTraces.WithLabelValues("error_restore").Inc()
 	}
+	if trace == nil || h.tongoVersion == 0 || version > h.tongoVersion {
+		if version > h.tongoVersion {
+			savedEmulatedTraces.WithLabelValues("expired").Inc()
+		}
+		configBase64, err := h.storage.TrimmedConfigBase64()
+		if err != nil {
+			return nil, toError(http.StatusInternalServerError, err)
+		}
+		options := []txemulator.TraceOption{
+			txemulator.WithAccountsSource(h.storage),
+			txemulator.WithConfigBase64(configBase64),
+		}
+		if !params.IgnoreSignatureCheck.Value {
+			options = append(options, txemulator.WithSignatureCheck())
+		}
+
+		emulator, err := txemulator.NewTraceBuilder(options...)
+		if err != nil {
+			return nil, toError(http.StatusInternalServerError, err)
+		}
+		tree, err := emulator.Run(ctx, m)
+		if err != nil {
+			return nil, toProperEmulationError(err)
+		}
+		trace, err = EmulatedTreeToTrace(ctx, h.executor, h.storage, tree, emulator.FinalStates(), nil, h.configPool, true)
+		if err != nil {
+			return nil, toError(http.StatusInternalServerError, err)
+		}
+		err = h.storage.SaveTraceWithState(ctx, hs, trace, h.tongoVersion, []abi.MethodInvocation{}, 24*time.Hour)
+		if err != nil {
+			h.logger.Warn("trace not saved: ", zap.Error(err))
+			savedEmulatedTraces.WithLabelValues("error_save").Inc()
+		}
+		savedEmulatedTraces.WithLabelValues("success").Inc()
+	} else {
+		savedEmulatedTraces.WithLabelValues("restored").Inc()
+	}
+
 	actions, err := bath.FindActions(ctx, trace, bath.WithInformationSource(h.storage))
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
@@ -576,62 +569,55 @@ func (h *Handler) EmulateMessageToTrace(ctx context.Context, request *oas.Emulat
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
 	}
-	hash, err := c.Hash256()
-	if err != nil {
-		return nil, toError(http.StatusBadRequest, err)
-	}
 	var m tlb.Message
 	err = tlb.Unmarshal(c, &m)
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
 	}
-	trace, prs := h.mempoolEmulate.traces.Get(hash)
-	if !prs {
-		hs := m.Hash(true).Hex()
-		var version int
-		trace, version, _, err = h.storage.GetTraceWithState(ctx, hs)
-		if err != nil {
-			h.logger.Warn("get trace from storage: ", zap.Error(err))
-			savedEmulatedTraces.WithLabelValues("error_restore").Inc()
-		}
-		if trace == nil || h.tongoVersion == 0 || version > h.tongoVersion {
-			if version > h.tongoVersion {
-				savedEmulatedTraces.WithLabelValues("expired").Inc()
-			}
-			configBase64, err := h.storage.TrimmedConfigBase64()
-			if err != nil {
-				return nil, toError(http.StatusInternalServerError, err)
-			}
-			options := []txemulator.TraceOption{
-				txemulator.WithAccountsSource(h.storage),
-				txemulator.WithConfigBase64(configBase64),
-			}
-			if !params.IgnoreSignatureCheck.Value {
-				options = append(options, txemulator.WithSignatureCheck())
-			}
-
-			emulator, err := txemulator.NewTraceBuilder(options...)
-			if err != nil {
-				return nil, toError(http.StatusInternalServerError, err)
-			}
-			tree, err := emulator.Run(ctx, m)
-			if err != nil {
-				return nil, toProperEmulationError(err)
-			}
-			trace, err = EmulatedTreeToTrace(ctx, h.executor, h.storage, tree, emulator.FinalStates(), nil, h.configPool, true)
-			if err != nil {
-				return nil, toError(http.StatusInternalServerError, err)
-			}
-			err = h.storage.SaveTraceWithState(ctx, hs, trace, h.tongoVersion, []abi.MethodInvocation{}, 24*time.Hour)
-			if err != nil {
-				h.logger.Warn("trace not saved: ", zap.Error(err))
-				savedEmulatedTraces.WithLabelValues("error_save").Inc()
-			}
-			savedEmulatedTraces.WithLabelValues("success").Inc()
-		} else {
-			savedEmulatedTraces.WithLabelValues("restored").Inc()
-		}
+	hs := m.Hash(true).Hex()
+	trace, version, _, err := h.storage.GetTraceWithState(ctx, hs)
+	if err != nil {
+		h.logger.Warn("get trace from storage: ", zap.Error(err))
+		savedEmulatedTraces.WithLabelValues("error_restore").Inc()
 	}
+	if trace == nil || h.tongoVersion == 0 || version > h.tongoVersion {
+		if version > h.tongoVersion {
+			savedEmulatedTraces.WithLabelValues("expired").Inc()
+		}
+		configBase64, err := h.storage.TrimmedConfigBase64()
+		if err != nil {
+			return nil, toError(http.StatusInternalServerError, err)
+		}
+		options := []txemulator.TraceOption{
+			txemulator.WithAccountsSource(h.storage),
+			txemulator.WithConfigBase64(configBase64),
+		}
+		if !params.IgnoreSignatureCheck.Value {
+			options = append(options, txemulator.WithSignatureCheck())
+		}
+
+		emulator, err := txemulator.NewTraceBuilder(options...)
+		if err != nil {
+			return nil, toError(http.StatusInternalServerError, err)
+		}
+		tree, err := emulator.Run(ctx, m)
+		if err != nil {
+			return nil, toProperEmulationError(err)
+		}
+		trace, err = EmulatedTreeToTrace(ctx, h.executor, h.storage, tree, emulator.FinalStates(), nil, h.configPool, true)
+		if err != nil {
+			return nil, toError(http.StatusInternalServerError, err)
+		}
+		err = h.storage.SaveTraceWithState(ctx, hs, trace, h.tongoVersion, []abi.MethodInvocation{}, 24*time.Hour)
+		if err != nil {
+			h.logger.Warn("trace not saved: ", zap.Error(err))
+			savedEmulatedTraces.WithLabelValues("error_save").Inc()
+		}
+		savedEmulatedTraces.WithLabelValues("success").Inc()
+	} else {
+		savedEmulatedTraces.WithLabelValues("restored").Inc()
+	}
+
 	t := convertTrace(trace, h.addressBook)
 	return &t, nil
 }

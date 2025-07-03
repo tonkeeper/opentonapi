@@ -103,6 +103,7 @@ func (h *Handler) addToMempool(ctx context.Context, bytesBoc []byte, shardAccoun
 	if err != nil {
 		return shardAccount, err
 	}
+	hash := message.Hash(true)
 	walletAddress, err := extractDestinationWallet(message)
 	if err != nil {
 		return nil, err
@@ -143,11 +144,6 @@ func (h *Handler) addToMempool(ctx context.Context, bytesBoc []byte, shardAccoun
 	core.Visit(trace, func(node *core.Trace) {
 		accounts[node.Account] = struct{}{}
 	})
-	hash, err := msgCell[0].Hash256()
-	if err != nil {
-		return shardAccount, err
-	}
-	h.mempoolEmulate.traces.Set(hash, trace, cache.WithExpiration(time.Second*time.Duration(ttl)))
 	err = h.storage.SaveTraceWithState(ctx, ton.Bits256(hash).Hex(), trace, h.tongoVersion, []abi.MethodInvocation{}, 24*time.Hour)
 	if err != nil {
 		h.logger.Warn("trace not saved: ", zap.Error(err))
@@ -167,12 +163,8 @@ func (h *Handler) addToMempool(ctx context.Context, bytesBoc []byte, shardAccoun
 				includedToDB = err == nil
 				localMessageHashCache[mHash] = includedToDB
 			}
-			_, existsInCache := h.mempoolEmulate.traces.Get(mHash)
-			if !includedToDB && existsInCache { //because if err is not null it already happened and if !prs it is not in mempool
-				newMemHashes = append(newMemHashes, mHash)
-			}
 		}
-		newMemHashes = append(newMemHashes, hash) // it's important to make it last
+		newMemHashes = append(newMemHashes, ton.Bits256(hash)) // it's important to make it last
 		h.mempoolEmulate.accountsTraces.Set(account, newMemHashes, cache.WithExpiration(time.Second*time.Duration(ttl)))
 	}
 	emulationCh <- blockchain.ExtInMsgCopy{
