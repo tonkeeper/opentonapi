@@ -158,7 +158,7 @@ func (t *Trace) CalculateProgress() float32 {
 		if len(t.Children) == 0 {
 			for _, st := range t.OutMsgs {
 				if st.Destination != nil {
-					finished += 1
+					all += 1
 				}
 			}
 		}
