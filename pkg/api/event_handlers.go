@@ -300,6 +300,7 @@ func (h *Handler) GetAccountEvents(ctx context.Context, params oas.GetAccountEve
 			txHash, err := h.storage.SearchTransactionByMessageHash(ctx, hash)
 			if err != nil {
 				h.logger.Warn("SearchTransactionByMessageHash error: ", zap.Error(err))
+				continue
 			}
 			if i > params.Limit-10 { // we want always to save at least 1 real transaction
 				break
