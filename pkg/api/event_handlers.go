@@ -297,33 +297,25 @@ func (h *Handler) GetAccountEvents(ctx context.Context, params oas.GetAccountEve
 		memTraces, _ := h.mempoolEmulate.accountsTraces.Get(account.ID)
 		i := 0
 		for _, hash := range memTraces {
-			txHash, err := h.storage.SearchTransactionByMessageHash(ctx, hash)
-			if err != nil {
-				h.logger.Warn("SearchTransactionByMessageHash error: ", zap.Error(err))
-				continue
-			}
 			if i > params.Limit-10 { // we want always to save at least 1 real transaction
 				break
 			}
 			tx, _ := h.storage.SearchTransactionByMessageHash(ctx, hash)
-			trace, prs := h.mempoolEmulate.traces.Get(hash)
-			if tx != nil || !prs { //if err is nil it's already processed. If !prs we can't do anything
-				h.mempoolEmulate.traces.Delete(hash)
-				continue
+			var trace *core.Trace
+			if tx != nil {
+				// try by txHash
+				traceId := tx.Hex()
+				traceEmulated, _, _, err := h.storage.GetTraceWithState(ctx, traceId[0:len(traceId)/2])
+				if err != nil {
+					h.logger.Warn("get trace from storage: ", zap.Error(err))
+				}
+				if traceEmulated != nil {
+					trace = traceEmulated
+				}
 			}
-			i++
-			// try by txHash
-			traceId := txHash.Hex()
-			traceEmulated, _, _, err := h.storage.GetTraceWithState(ctx, traceId[0:len(traceId)/2])
-			if err != nil {
-				h.logger.Warn("get trace from storage: ", zap.Error(err))
-			}
-			if traceEmulated != nil {
-				traceEmulated = core.CopyTraceData(ctx, trace, traceEmulated)
-				trace = traceEmulated
-			} else {
-				// try by external hash
-				traceEmulatedByExternal, _, _, err := h.storage.GetTraceWithState(ctx, trace.Hash.Hex())
+			if trace == nil {
+				// try by external message hash
+				traceEmulatedByExternal, _, _, err := h.storage.GetTraceWithState(ctx, hash.Hex())
 				if err != nil {
 					h.logger.Warn("get trace from storage: ", zap.Error(err))
 				}
@@ -331,6 +323,10 @@ func (h *Handler) GetAccountEvents(ctx context.Context, params oas.GetAccountEve
 					trace = traceEmulatedByExternal
 				}
 			}
+			if trace == nil {
+				continue
+			}
+			i++
 			actions, err := bath.FindActions(ctx, trace, bath.ForAccount(account.ID), bath.WithInformationSource(h.storage))
 			if err != nil {
 				return nil, toError(http.StatusInternalServerError, err)
