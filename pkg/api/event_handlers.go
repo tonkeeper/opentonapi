@@ -303,6 +303,11 @@ func (h *Handler) GetAccountEvents(ctx context.Context, params oas.GetAccountEve
 			tx, _ := h.storage.SearchTransactionByMessageHash(ctx, hash)
 			var trace *core.Trace
 			if tx != nil {
+				if slices.ContainsFunc(traceIDs, func(t core.TraceID) bool { //скипаем трейсы которые уже есть в ответе
+					return t.Hash == *tx
+				}) {
+					continue
+				}
 				// try by txHash
 				traceId := tx.Hex()[:32] //cuted for uuid
 				traceEmulated, _, _, err := h.storage.GetTraceWithState(ctx, traceId)
