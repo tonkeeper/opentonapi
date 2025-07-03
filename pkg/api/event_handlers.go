@@ -278,17 +278,6 @@ func (h *Handler) GetAccountEvents(ctx context.Context, params oas.GetAccountEve
 			}
 			continue
 		}
-		if trace.InProgress() {
-			traceId := trace.Hash.Hex()
-			traceEmulated, _, _, err := h.storage.GetTraceWithState(ctx, traceId[0:len(traceId)/2])
-			if err != nil {
-				h.logger.Warn("get trace from storage: ", zap.Error(err))
-			}
-			if traceEmulated != nil {
-				traceEmulated = core.CopyTraceData(ctx, trace, traceEmulated)
-				trace = traceEmulated
-			}
-		}
 		actions, err := bath.FindActions(ctx, trace, bath.ForAccount(account.ID), bath.WithInformationSource(h.storage))
 		if err != nil {
 			events = append(events, h.toUnknownAccountEvent(account.ID, traceID))
@@ -308,6 +297,10 @@ func (h *Handler) GetAccountEvents(ctx context.Context, params oas.GetAccountEve
 		memTraces, _ := h.mempoolEmulate.accountsTraces.Get(account.ID)
 		i := 0
 		for _, hash := range memTraces {
+			txHash, err := h.storage.SearchTransactionByMessageHash(ctx, hash)
+			if err != nil {
+				h.logger.Warn("SearchTransactionByMessageHash error: ", zap.Error(err))
+			}
 			if i > params.Limit-10 { // we want always to save at least 1 real transaction
 				break
 			}
@@ -318,12 +311,24 @@ func (h *Handler) GetAccountEvents(ctx context.Context, params oas.GetAccountEve
 				continue
 			}
 			i++
-			traceEmulated, _, _, err := h.storage.GetTraceWithState(ctx, trace.Hash.Hex())
+			// try by txHash
+			traceId := txHash.Hex()
+			traceEmulated, _, _, err := h.storage.GetTraceWithState(ctx, traceId[0:len(traceId)/2])
 			if err != nil {
 				h.logger.Warn("get trace from storage: ", zap.Error(err))
 			}
 			if traceEmulated != nil {
+				traceEmulated = core.CopyTraceData(ctx, trace, traceEmulated)
 				trace = traceEmulated
+			} else {
+				// try by external hash
+				traceEmulatedByExternal, _, _, err := h.storage.GetTraceWithState(ctx, trace.Hash.Hex())
+				if err != nil {
+					h.logger.Warn("get trace from storage: ", zap.Error(err))
+				}
+				if traceEmulatedByExternal != nil {
+					trace = traceEmulatedByExternal
+				}
 			}
 			actions, err := bath.FindActions(ctx, trace, bath.ForAccount(account.ID), bath.WithInformationSource(h.storage))
 			if err != nil {
@@ -472,7 +477,7 @@ func (h *Handler) EmulateMessageToAccountEvent(ctx context.Context, request *oas
 		if err != nil {
 			return nil, toProperEmulationError(err)
 		}
-		trace, err = EmulatedTreeToTrace(ctx, h.executor, h.storage, tree, emulator.FinalStates(), nil, h.configPool)
+		trace, err = EmulatedTreeToTrace(ctx, h.executor, h.storage, tree, emulator.FinalStates(), nil, h.configPool, true)
 		if err != nil {
 			return nil, toError(http.StatusInternalServerError, err)
 		}
@@ -543,7 +548,7 @@ func (h *Handler) EmulateMessageToEvent(ctx context.Context, request *oas.Emulat
 			if err != nil {
 				return nil, toProperEmulationError(err)
 			}
-			trace, err = EmulatedTreeToTrace(ctx, h.executor, h.storage, tree, emulator.FinalStates(), nil, h.configPool)
+			trace, err = EmulatedTreeToTrace(ctx, h.executor, h.storage, tree, emulator.FinalStates(), nil, h.configPool, true)
 			if err != nil {
 				return nil, toError(http.StatusInternalServerError, err)
 			}
@@ -616,7 +621,7 @@ func (h *Handler) EmulateMessageToTrace(ctx context.Context, request *oas.Emulat
 			if err != nil {
 				return nil, toProperEmulationError(err)
 			}
-			trace, err = EmulatedTreeToTrace(ctx, h.executor, h.storage, tree, emulator.FinalStates(), nil, h.configPool)
+			trace, err = EmulatedTreeToTrace(ctx, h.executor, h.storage, tree, emulator.FinalStates(), nil, h.configPool, true)
 			if err != nil {
 				return nil, toError(http.StatusInternalServerError, err)
 			}
@@ -762,7 +767,7 @@ func (h *Handler) EmulateMessageToWallet(ctx context.Context, request *oas.Emula
 		if err != nil {
 			return nil, toProperEmulationError(err)
 		}
-		trace, err = EmulatedTreeToTrace(ctx, h.executor, h.storage, tree, emulator.FinalStates(), nil, h.configPool)
+		trace, err = EmulatedTreeToTrace(ctx, h.executor, h.storage, tree, emulator.FinalStates(), nil, h.configPool, true)
 		if err != nil {
 			return nil, toError(http.StatusInternalServerError, err)
 		}

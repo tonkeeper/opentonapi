@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/base64"
 	"errors"
+	"go.uber.org/zap"
 	"math/big"
 	"sync"
 	"time"
@@ -134,7 +135,7 @@ func (h *Handler) addToMempool(ctx context.Context, bytesBoc []byte, shardAccoun
 		return shardAccount, err
 	}
 	newShardAccount := emulator.FinalStates()
-	trace, err := EmulatedTreeToTrace(ctx, h.executor, h.storage, tree, newShardAccount, nil, h.configPool)
+	trace, err := EmulatedTreeToTrace(ctx, h.executor, h.storage, tree, newShardAccount, nil, h.configPool, true)
 	if err != nil {
 		return shardAccount, err
 	}
@@ -147,6 +148,11 @@ func (h *Handler) addToMempool(ctx context.Context, bytesBoc []byte, shardAccoun
 		return shardAccount, err
 	}
 	h.mempoolEmulate.traces.Set(hash, trace, cache.WithExpiration(time.Second*time.Duration(ttl)))
+	err = h.storage.SaveTraceWithState(ctx, ton.Bits256(hash).Hex(), trace, h.tongoVersion, []abi.MethodInvocation{}, 24*time.Hour)
+	if err != nil {
+		h.logger.Warn("trace not saved: ", zap.Error(err))
+		savedEmulatedTraces.WithLabelValues("error_save").Inc()
+	}
 	var localMessageHashCache = make(map[ton.Bits256]bool)
 	for account := range accounts {
 		if _, ok := h.mempoolEmulateIgnoreAccounts[account]; ok { // the map is filled only once at the start
@@ -186,6 +192,7 @@ func EmulatedTreeToTrace(
 	accounts map[tongo.AccountID]tlb.ShardAccount,
 	inspectionCache map[ton.AccountID]*abi.ContractDescription,
 	configPool *sync.Pool,
+	filterOutMessages bool,
 ) (*core.Trace, error) {
 	if !tree.TX.Msgs.InMsg.Exists {
 		return nil, errors.New("there is no incoming message in emulation result")
@@ -213,22 +220,21 @@ func EmulatedTreeToTrace(
 	if transaction == nil {
 		return nil, errors.New("converted transaction is nil")
 	}
-	filteredMsgs := make([]core.Message, 0, len(transaction.OutMsgs))
-	for _, msg := range transaction.OutMsgs {
-		if msg.Destination == nil {
-			filteredMsgs = append(filteredMsgs, msg)
+	if filterOutMessages {
+		filteredMsgs := make([]core.Message, 0, len(transaction.OutMsgs))
+		for _, msg := range transaction.OutMsgs {
+			if msg.Destination == nil {
+				filteredMsgs = append(filteredMsgs, msg)
+			}
 		}
-	}
-	transaction.OutMsgs = filteredMsgs //all internal messages in emulation result are delivered to another account and created transaction
-	if err != nil {
-		return nil, err
+		transaction.OutMsgs = filteredMsgs //all internal messages in emulation result are delivered to another account and created transaction
 	}
 	t := &core.Trace{
 		Transaction: *transaction,
 	}
 	additionalInfo := &core.TraceAdditionalInfo{}
 	for i := range tree.Children {
-		child, err := EmulatedTreeToTrace(ctx, executor, resolver, tree.Children[i], accounts, inspectionCache, configPool)
+		child, err := EmulatedTreeToTrace(ctx, executor, resolver, tree.Children[i], accounts, inspectionCache, configPool, filterOutMessages)
 		if err != nil {
 			return nil, err
 		}
