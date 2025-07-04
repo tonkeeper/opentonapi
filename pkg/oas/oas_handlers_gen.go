@@ -2905,7 +2905,7 @@ func (s *Server) handleGetAccountJettonBalanceRequest(args [2]string, argsEscape
 
 // handleGetAccountJettonHistoryByIDRequest handles getAccountJettonHistoryByID operation.
 //
-// Please use getJettonAccountHistoryByID instead.
+// Please use `getJettonAccountHistoryByID“ instead.
 //
 // Deprecated: schema marks this operation as deprecated.
 //
@@ -8401,7 +8401,7 @@ func (s *Server) handleGetNftCollectionsRequest(args [0]string, argsEscaped bool
 
 // handleGetNftHistoryByIDRequest handles getNftHistoryByID operation.
 //
-// Please use getAccountNftHistory instead.
+// Please use `getAccountNftHistory“ instead.
 //
 // Deprecated: schema marks this operation as deprecated.
 //

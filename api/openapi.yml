@@ -378,7 +378,6 @@ paths:
       description: Get account transactions
       operationId: getBlockchainAccountTransactions
       tags:
-        - Accounts
         - Blockchain
       parameters:
         - $ref: '#/components/parameters/accountIDParameter'
@@ -650,7 +649,6 @@ paths:
       operationId: getAccountJettonsBalances
       tags:
         - Accounts
-        - Jettons
       parameters:
         - $ref: '#/components/parameters/accountIDParameter'
         - $ref: '#/components/parameters/currenciesQuery'
@@ -670,7 +668,6 @@ paths:
       operationId: getAccountJettonBalance
       tags:
         - Accounts
-        - Jettons
       parameters:
         - $ref: '#/components/parameters/accountIDParameter'
         - $ref: '#/components/parameters/jettonIDParameter'
@@ -722,7 +719,7 @@ paths:
   /v2/accounts/{account_id}/jettons/{jetton_id}/history:
     get:
       deprecated: true
-      description: Please use getJettonAccountHistoryByID instead
+      description: Please use `getJettonAccountHistoryByID`` instead
       operationId: getAccountJettonHistoryByID
       tags:
         - Accounts
@@ -1351,7 +1348,7 @@ paths:
   /v2/nfts/{account_id}/history:
     get:
       deprecated: true
-      description: Please use getAccountNftHistory instead
+      description: Please use `getAccountNftHistory`` instead
       operationId: getNftHistoryByID
       tags:
         - NFT

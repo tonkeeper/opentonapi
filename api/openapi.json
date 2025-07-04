@@ -7299,8 +7299,7 @@
      }
     },
     "tags": [
-     "Accounts",
-     "Jettons"
+     "Accounts"
     ]
    }
   },
@@ -7390,15 +7389,14 @@
      }
     },
     "tags": [
-     "Accounts",
-     "Jettons"
+     "Accounts"
     ]
    }
   },
   "/v2/accounts/{account_id}/jettons/{jetton_id}/history": {
    "get": {
     "deprecated": true,
-    "description": "Please use getJettonAccountHistoryByID instead",
+    "description": "Please use `getJettonAccountHistoryByID`` instead",
     "operationId": "getAccountJettonHistoryByID",
     "parameters": [
      {
@@ -8038,7 +8036,6 @@
      }
     },
     "tags": [
-     "Accounts",
      "Blockchain"
     ]
    }
@@ -10358,7 +10355,7 @@
   "/v2/nfts/{account_id}/history": {
    "get": {
     "deprecated": true,
-    "description": "Please use getAccountNftHistory instead",
+    "description": "Please use `getAccountNftHistory`` instead",
     "operationId": "getNftHistoryByID",
     "parameters": [
      {

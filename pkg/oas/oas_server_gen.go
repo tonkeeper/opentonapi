@@ -154,7 +154,7 @@ type Handler interface {
 	GetAccountJettonBalance(ctx context.Context, params GetAccountJettonBalanceParams) (*JettonBalance, error)
 	// GetAccountJettonHistoryByID implements getAccountJettonHistoryByID operation.
 	//
-	// Please use getJettonAccountHistoryByID instead.
+	// Please use `getJettonAccountHistoryByID`` instead.
 	//
 	// Deprecated: schema marks this operation as deprecated.
 	//
@@ -441,7 +441,7 @@ type Handler interface {
 	GetNftCollections(ctx context.Context, params GetNftCollectionsParams) (*NftCollections, error)
 	// GetNftHistoryByID implements getNftHistoryByID operation.
 	//
-	// Please use getAccountNftHistory instead.
+	// Please use `getAccountNftHistory`` instead.
 	//
 	// Deprecated: schema marks this operation as deprecated.
 	//
