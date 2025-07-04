@@ -262,6 +262,17 @@ func (s *Action) Validate() error {
 
 	var failures []validate.FieldError
 	if err := func() error {
+		if err := s.Type.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "type",
+			Error: err,
+		})
+	}
+	if err := func() error {
 		if err := s.Status.Validate(); err != nil {
 			return err
 		}
@@ -580,6 +591,53 @@ func (s ActionStatus) Validate() error {
 	case "ok":
 		return nil
 	case "failed":
+		return nil
+	default:
+		return errors.Errorf("invalid value: %v", s)
+	}
+}
+
+func (s ActionType) Validate() error {
+	switch s {
+	case "TonTransfer":
+		return nil
+	case "ExtraCurrencyTransfer":
+		return nil
+	case "ContractDeploy":
+		return nil
+	case "JettonTransfer":
+		return nil
+	case "JettonBurn":
+		return nil
+	case "JettonMint":
+		return nil
+	case "NftItemTransfer":
+		return nil
+	case "Subscribe":
+		return nil
+	case "UnSubscribe":
+		return nil
+	case "AuctionBid":
+		return nil
+	case "NftPurchase":
+		return nil
+	case "DepositStake":
+		return nil
+	case "WithdrawStake":
+		return nil
+	case "WithdrawStakeRequest":
+		return nil
+	case "ElectionsDepositStake":
+		return nil
+	case "ElectionsRecoverStake":
+		return nil
+	case "JettonSwap":
+		return nil
+	case "SmartContractExec":
+		return nil
+	case "DomainRenew":
+		return nil
+	case "Purchase":
 		return nil
 	default:
 		return errors.Errorf("invalid value: %v", s)
@@ -1776,22 +1834,49 @@ func (s BouncePhaseType) Validate() error {
 	}
 }
 
-func (s *ChartPoints) Validate() error {
-	if s == nil {
-		return validate.ErrNilPointer
+func (s ChartPoints) Validate() error {
+	alias := ([][]float64)(s)
+	if alias == nil {
+		return errors.New("nil is invalid value")
 	}
-
 	var failures []validate.FieldError
-	if err := func() error {
-		if err := (validate.Float{}).Validate(float64(s.V1)); err != nil {
-			return errors.Wrap(err, "float")
+	for i, elem := range alias {
+		if err := func() error {
+			if elem == nil {
+				return errors.New("nil is invalid value")
+			}
+			if err := (validate.Array{
+				MinLength:    2,
+				MinLengthSet: true,
+				MaxLength:    2,
+				MaxLengthSet: true,
+			}).ValidateLength(len(elem)); err != nil {
+				return errors.Wrap(err, "array")
+			}
+			var failures []validate.FieldError
+			for i, elem := range elem {
+				if err := func() error {
+					if err := (validate.Float{}).Validate(float64(elem)); err != nil {
+						return errors.Wrap(err, "float")
+					}
+					return nil
+				}(); err != nil {
+					failures = append(failures, validate.FieldError{
+						Name:  fmt.Sprintf("[%d]", i),
+						Error: err,
+					})
+				}
+			}
+			if len(failures) > 0 {
+				return &validate.Error{Fields: failures}
+			}
+			return nil
+		}(); err != nil {
+			failures = append(failures, validate.FieldError{
+				Name:  fmt.Sprintf("[%d]", i),
+				Error: err,
+			})
 		}
-		return nil
-	}(); err != nil {
-		failures = append(failures, validate.FieldError{
-			Name:  "V1",
-			Error: err,
-		})
 	}
 	if len(failures) > 0 {
 		return &validate.Error{Fields: failures}
@@ -4138,8 +4223,25 @@ func (s *NftItem) Validate() error {
 		})
 	}
 	if err := func() error {
-		if err := s.ApprovedBy.Validate(); err != nil {
-			return err
+		if s.ApprovedBy == nil {
+			return errors.New("nil is invalid value")
+		}
+		var failures []validate.FieldError
+		for i, elem := range s.ApprovedBy {
+			if err := func() error {
+				if err := elem.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				failures = append(failures, validate.FieldError{
+					Name:  fmt.Sprintf("[%d]", i),
+					Error: err,
+				})
+			}
+		}
+		if len(failures) > 0 {
+			return &validate.Error{Fields: failures}
 		}
 		return nil
 	}(); err != nil {
@@ -4163,6 +4265,17 @@ func (s *NftItem) Validate() error {
 		return &validate.Error{Fields: failures}
 	}
 	return nil
+}
+
+func (s NftItemApprovedByItem) Validate() error {
+	switch s {
+	case "getgems":
+		return nil
+	case "tonkeeper":
+		return nil
+	default:
+		return errors.Errorf("invalid value: %v", s)
+	}
 }
 
 func (s *NftItemTransferAction) Validate() error {

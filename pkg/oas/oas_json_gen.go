@@ -1805,7 +1805,7 @@ func (s *Action) Encode(e *jx.Encoder) {
 func (s *Action) encodeFields(e *jx.Encoder) {
 	{
 		e.FieldStart("type")
-		e.Str(s.Type)
+		s.Type.Encode(e)
 	}
 	{
 		e.FieldStart("status")
@@ -1984,9 +1984,7 @@ func (s *Action) Decode(d *jx.Decoder) error {
 		case "type":
 			requiredBitSet[0] |= 1 << 0
 			if err := func() error {
-				v, err := d.Str()
-				s.Type = string(v)
-				if err != nil {
+				if err := s.Type.Decode(d); err != nil {
 					return err
 				}
 				return nil
@@ -2716,6 +2714,82 @@ func (s ActionStatus) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *ActionStatus) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes ActionType as json.
+func (s ActionType) Encode(e *jx.Encoder) {
+	e.Str(string(s))
+}
+
+// Decode decodes ActionType from json.
+func (s *ActionType) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode ActionType to nil")
+	}
+	v, err := d.StrBytes()
+	if err != nil {
+		return err
+	}
+	// Try to use constant string.
+	switch ActionType(v) {
+	case ActionTypeTonTransfer:
+		*s = ActionTypeTonTransfer
+	case ActionTypeExtraCurrencyTransfer:
+		*s = ActionTypeExtraCurrencyTransfer
+	case ActionTypeContractDeploy:
+		*s = ActionTypeContractDeploy
+	case ActionTypeJettonTransfer:
+		*s = ActionTypeJettonTransfer
+	case ActionTypeJettonBurn:
+		*s = ActionTypeJettonBurn
+	case ActionTypeJettonMint:
+		*s = ActionTypeJettonMint
+	case ActionTypeNftItemTransfer:
+		*s = ActionTypeNftItemTransfer
+	case ActionTypeSubscribe:
+		*s = ActionTypeSubscribe
+	case ActionTypeUnSubscribe:
+		*s = ActionTypeUnSubscribe
+	case ActionTypeAuctionBid:
+		*s = ActionTypeAuctionBid
+	case ActionTypeNftPurchase:
+		*s = ActionTypeNftPurchase
+	case ActionTypeDepositStake:
+		*s = ActionTypeDepositStake
+	case ActionTypeWithdrawStake:
+		*s = ActionTypeWithdrawStake
+	case ActionTypeWithdrawStakeRequest:
+		*s = ActionTypeWithdrawStakeRequest
+	case ActionTypeElectionsDepositStake:
+		*s = ActionTypeElectionsDepositStake
+	case ActionTypeElectionsRecoverStake:
+		*s = ActionTypeElectionsRecoverStake
+	case ActionTypeJettonSwap:
+		*s = ActionTypeJettonSwap
+	case ActionTypeSmartContractExec:
+		*s = ActionTypeSmartContractExec
+	case ActionTypeDomainRenew:
+		*s = ActionTypeDomainRenew
+	case ActionTypePurchase:
+		*s = ActionTypePurchase
+	default:
+		*s = ActionType(v)
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s ActionType) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *ActionType) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -11211,23 +11285,19 @@ func (s *BouncePhaseType) UnmarshalJSON(data []byte) error {
 	return s.Decode(d)
 }
 
-// Encode implements json.Marshaler.
-func (s *ChartPoints) Encode(e *jx.Encoder) {
-	e.ArrStart()
-	s.encodeTuple(e)
-	e.ArrEnd()
-}
+// Encode encodes ChartPoints as json.
+func (s ChartPoints) Encode(e *jx.Encoder) {
+	unwrapped := [][]float64(s)
 
-// encodeTuple encodes fields.
-func (s *ChartPoints) encodeTuple(e *jx.Encoder) {
-	{
-		elem := s.V0
-		e.Int64(elem)
+	e.ArrStart()
+	for _, elem := range unwrapped {
+		e.ArrStart()
+		for _, elem := range elem {
+			e.Float64(elem)
+		}
+		e.ArrEnd()
 	}
-	{
-		elem := s.V1
-		e.Float64(elem)
-	}
+	e.ArrEnd()
 }
 
 // Decode decodes ChartPoints from json.
@@ -11235,39 +11305,39 @@ func (s *ChartPoints) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode ChartPoints to nil")
 	}
-	n := 0
-	if err := d.Arr(func(d *jx.Decoder) error {
-		switch n {
-		case 0:
-			n++
-			v, err := d.Int64()
-			s.V0 = int64(v)
-			if err != nil {
+	var unwrapped [][]float64
+	if err := func() error {
+		unwrapped = make([][]float64, 0)
+		if err := d.Arr(func(d *jx.Decoder) error {
+			var elem []float64
+			elem = make([]float64, 0)
+			if err := d.Arr(func(d *jx.Decoder) error {
+				var elemElem float64
+				v, err := d.Float64()
+				elemElem = float64(v)
+				if err != nil {
+					return err
+				}
+				elem = append(elem, elemElem)
+				return nil
+			}); err != nil {
 				return err
 			}
+			unwrapped = append(unwrapped, elem)
 			return nil
-		case 1:
-			n++
-			v, err := d.Float64()
-			s.V1 = float64(v)
-			if err != nil {
-				return err
-			}
-			return nil
-		default:
-			return errors.Errorf("expected 2 elements, got %d", n)
+		}); err != nil {
+			return err
 		}
-	}); err != nil {
-		return err
+		return nil
+	}(); err != nil {
+		return errors.Wrap(err, "alias")
 	}
-	if n == 0 {
-		return errors.Errorf("expected 2 elements, got %d", n)
-	}
+	*s = ChartPoints(unwrapped)
 	return nil
 }
 
 // MarshalJSON implements stdjson.Marshaler.
-func (s *ChartPoints) MarshalJSON() ([]byte, error) {
+func (s ChartPoints) MarshalJSON() ([]byte, error) {
 	e := jx.Encoder{}
 	s.Encode(&e)
 	return e.Bytes(), nil
@@ -28713,7 +28783,11 @@ func (s *NftItem) encodeFields(e *jx.Encoder) {
 	}
 	{
 		e.FieldStart("approved_by")
-		s.ApprovedBy.Encode(e)
+		e.ArrStart()
+		for _, elem := range s.ApprovedBy {
+			elem.Encode(e)
+		}
+		e.ArrEnd()
 	}
 	{
 		if s.IncludeCnft.Set {
@@ -28857,7 +28931,15 @@ func (s *NftItem) Decode(d *jx.Decoder) error {
 		case "approved_by":
 			requiredBitSet[1] |= 1 << 1
 			if err := func() error {
-				if err := s.ApprovedBy.Decode(d); err != nil {
+				s.ApprovedBy = make([]NftItemApprovedByItem, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem NftItemApprovedByItem
+					if err := elem.Decode(d); err != nil {
+						return err
+					}
+					s.ApprovedBy = append(s.ApprovedBy, elem)
+					return nil
+				}); err != nil {
 					return err
 				}
 				return nil
@@ -28937,6 +29019,46 @@ func (s *NftItem) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *NftItem) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes NftItemApprovedByItem as json.
+func (s NftItemApprovedByItem) Encode(e *jx.Encoder) {
+	e.Str(string(s))
+}
+
+// Decode decodes NftItemApprovedByItem from json.
+func (s *NftItemApprovedByItem) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode NftItemApprovedByItem to nil")
+	}
+	v, err := d.StrBytes()
+	if err != nil {
+		return err
+	}
+	// Try to use constant string.
+	switch NftItemApprovedByItem(v) {
+	case NftItemApprovedByItemGetgems:
+		*s = NftItemApprovedByItemGetgems
+	case NftItemApprovedByItemTonkeeper:
+		*s = NftItemApprovedByItemTonkeeper
+	default:
+		*s = NftItemApprovedByItem(v)
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s NftItemApprovedByItem) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *NftItemApprovedByItem) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
