@@ -722,7 +722,7 @@ paths:
   /v2/accounts/{account_id}/jettons/{jetton_id}/history:
     get:
       deprecated: true
-      description: Get the transfer jetton history for account and jetton
+      description: Please use getJettonAccountHistoryByID instead
       operationId: getAccountJettonHistoryByID
       tags:
         - Accounts
@@ -1351,7 +1351,7 @@ paths:
   /v2/nfts/{account_id}/history:
     get:
       deprecated: true
-      description: Get the transfer nfts history for account
+      description: Please use getAccountNftHistory instead
       operationId: getNftHistoryByID
       tags:
         - NFT
@@ -5826,7 +5826,7 @@ components:
           allOf:
             - $ref: '#/components/schemas/NftApprovedBy'
           deprecated: true
-          description: "please use trust field"
+          description: Please use trust field
         include_cnft:
           type: boolean
           example: false
