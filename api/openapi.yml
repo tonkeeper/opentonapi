@@ -6034,6 +6034,27 @@ components:
         type:
           type: string
           example: "TonTransfer"
+          enum:
+            - TonTransfer
+            - ExtraCurrencyTransfer
+            - ContractDeploy
+            - JettonTransfer
+            - JettonBurn
+            - JettonMint
+            - NftItemTransfer
+            - Subscribe
+            - UnSubscribe
+            - AuctionBid
+            - NftPurchase
+            - DepositStake
+            - WithdrawStake
+            - WithdrawStakeRequest
+            - ElectionsDepositStake
+            - ElectionsRecoverStake
+            - JettonSwap
+            - SmartContractExec
+            - DomainRenew
+            - Purchase
         status:
           type: string
           example: "ok"
