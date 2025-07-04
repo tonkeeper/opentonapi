@@ -1869,9 +1869,7 @@ paths:
                   - points
                 properties:
                   points:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/ChartPoints'
+                    $ref: '#/components/schemas/ChartPoints'
         'default':
           $ref: '#/components/responses/Error'
   /v2/rates/markets:
@@ -7561,8 +7559,7 @@ components:
         Each inner array is a pair [timestamp, price]:
           • index 0 — Unix timestamp (int64)  
           • index 1 — token price (decimal) in the requested currency.
-      example:
-        - [1668436763, 97.21323234]
+      example: [[1668436763, 97.21323234]]
     AccountInfoByStateInit:
       type: object
       required:

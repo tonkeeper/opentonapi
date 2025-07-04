@@ -10698,10 +10698,7 @@
         "schema": {
          "properties": {
           "points": {
-           "items": {
-            "$ref": "#/components/schemas/ChartPoints"
-           },
-           "type": "array"
+           "$ref": "#/components/schemas/ChartPoints"
           }
          },
          "required": [

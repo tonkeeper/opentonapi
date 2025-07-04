@@ -18076,11 +18076,7 @@ func (s *GetChartRatesOK) Encode(e *jx.Encoder) {
 func (s *GetChartRatesOK) encodeFields(e *jx.Encoder) {
 	{
 		e.FieldStart("points")
-		e.ArrStart()
-		for _, elem := range s.Points {
-			elem.Encode(e)
-		}
-		e.ArrEnd()
+		s.Points.Encode(e)
 	}
 }
 
@@ -18100,15 +18096,7 @@ func (s *GetChartRatesOK) Decode(d *jx.Decoder) error {
 		case "points":
 			requiredBitSet[0] |= 1 << 0
 			if err := func() error {
-				s.Points = make([]ChartPoints, 0)
-				if err := d.Arr(func(d *jx.Decoder) error {
-					var elem ChartPoints
-					if err := elem.Decode(d); err != nil {
-						return err
-					}
-					s.Points = append(s.Points, elem)
-					return nil
-				}); err != nil {
+				if err := s.Points.Decode(d); err != nil {
 					return err
 				}
 				return nil

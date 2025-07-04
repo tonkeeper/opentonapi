@@ -6235,16 +6235,16 @@ func (s *GetBlockchainAccountTransactionsSortOrder) UnmarshalText(data []byte) e
 }
 
 type GetChartRatesOK struct {
-	Points []ChartPoints `json:"points"`
+	Points ChartPoints `json:"points"`
 }
 
 // GetPoints returns the value of Points.
-func (s *GetChartRatesOK) GetPoints() []ChartPoints {
+func (s *GetChartRatesOK) GetPoints() ChartPoints {
 	return s.Points
 }
 
 // SetPoints sets the value of Points.
-func (s *GetChartRatesOK) SetPoints(val []ChartPoints) {
+func (s *GetChartRatesOK) SetPoints(val ChartPoints) {
 	s.Points = val
 }
 
