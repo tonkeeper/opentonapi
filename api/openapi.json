@@ -1212,7 +1212,8 @@
        "JettonSwap",
        "SmartContractExec",
        "DomainRenew",
-       "Purchase"
+       "Purchase",
+       "Unknown"
       ],
       "example": "TonTransfer",
       "type": "string"

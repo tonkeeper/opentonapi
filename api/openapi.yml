@@ -6050,6 +6050,7 @@ components:
             - SmartContractExec
             - DomainRenew
             - Purchase
+            - Unknown
         status:
           type: string
           example: "ok"

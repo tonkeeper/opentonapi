@@ -2774,6 +2774,8 @@ func (s *ActionType) Decode(d *jx.Decoder) error {
 		*s = ActionTypeDomainRenew
 	case ActionTypePurchase:
 		*s = ActionTypePurchase
+	case ActionTypeUnknown:
+		*s = ActionTypeUnknown
 	default:
 		*s = ActionType(v)
 	}

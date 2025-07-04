@@ -639,6 +639,8 @@ func (s ActionType) Validate() error {
 		return nil
 	case "Purchase":
 		return nil
+	case "Unknown":
+		return nil
 	default:
 		return errors.Errorf("invalid value: %v", s)
 	}

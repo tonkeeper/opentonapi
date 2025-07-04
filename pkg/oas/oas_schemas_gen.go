@@ -1166,6 +1166,7 @@ const (
 	ActionTypeSmartContractExec     ActionType = "SmartContractExec"
 	ActionTypeDomainRenew           ActionType = "DomainRenew"
 	ActionTypePurchase              ActionType = "Purchase"
+	ActionTypeUnknown               ActionType = "Unknown"
 )
 
 // AllValues returns all ActionType values.
@@ -1191,6 +1192,7 @@ func (ActionType) AllValues() []ActionType {
 		ActionTypeSmartContractExec,
 		ActionTypeDomainRenew,
 		ActionTypePurchase,
+		ActionTypeUnknown,
 	}
 }
 
@@ -1236,6 +1238,8 @@ func (s ActionType) MarshalText() ([]byte, error) {
 	case ActionTypeDomainRenew:
 		return []byte(s), nil
 	case ActionTypePurchase:
+		return []byte(s), nil
+	case ActionTypeUnknown:
 		return []byte(s), nil
 	default:
 		return nil, errors.Errorf("invalid value: %q", s)
@@ -1304,6 +1308,9 @@ func (s *ActionType) UnmarshalText(data []byte) error {
 		return nil
 	case ActionTypePurchase:
 		*s = ActionTypePurchase
+		return nil
+	case ActionTypeUnknown:
+		*s = ActionTypeUnknown
 		return nil
 	default:
 		return errors.Errorf("invalid value: %q", data)
