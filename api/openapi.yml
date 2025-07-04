@@ -1,4 +1,4 @@
-openapi: 3.1.0
+openapi: 3.0.0
 info:
   title: REST api to TON blockchain explorer
   version: 2.0.0
@@ -5823,9 +5823,10 @@ components:
           type: string
           example: crypto.ton
         approved_by:
+          allOf:
+            - $ref: '#/components/schemas/NftApprovedBy'
           deprecated: true
           description: "please use trust field"
-          $ref: '#/components/schemas/NftApprovedBy'
         include_cnft:
           type: boolean
           example: false
