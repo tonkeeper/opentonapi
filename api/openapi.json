@@ -1203,6 +1203,29 @@
       "type": "string"
      },
      "type": {
+      "enum": [
+       "TonTransfer",
+       "ExtraCurrencyTransfer",
+       "ContractDeploy",
+       "JettonTransfer",
+       "JettonBurn",
+       "JettonMint",
+       "NftItemTransfer",
+       "Subscribe",
+       "UnSubscribe",
+       "AuctionBid",
+       "NftPurchase",
+       "DepositStake",
+       "WithdrawStake",
+       "WithdrawStakeRequest",
+       "ElectionsDepositStake",
+       "ElectionsRecoverStake",
+       "JettonSwap",
+       "SmartContractExec",
+       "DomainRenew",
+       "Purchase",
+       "Unknown"
+      ],
       "example": "TonTransfer",
       "type": "string"
      }
@@ -2639,22 +2662,21 @@
     "type": "string"
    },
    "ChartPoints": {
-    "additionalItems": false,
+    "description": "Each inner array is a pair [timestamp, price]:\n  • index 0 — Unix timestamp (int64)  \n  • index 1 — token price (decimal) in the requested currency.\n",
     "example": [
-     1668436763,
-     97.21323234
+     [
+      1668436763,
+      97.21323234
+     ]
     ],
-    "items": [
-     {
-      "description": "Unix timestamp of the data point",
-      "format": "int64",
-      "type": "integer"
-     },
-     {
-      "description": "Decimal price of the token in the requested currency",
+    "items": {
+     "items": {
       "type": "number"
-     }
-    ],
+     },
+     "maxItems": 2,
+     "minItems": 2,
+     "type": "array"
+    },
     "type": "array"
    },
    "ComputePhase": {
@@ -4820,9 +4842,13 @@
       "type": "string"
      },
      "approved_by": {
-      "$ref": "#/components/schemas/NftApprovedBy",
+      "allOf": [
+       {
+        "$ref": "#/components/schemas/NftApprovedBy"
+       }
+      ],
       "deprecated": true,
-      "description": "please use trust field"
+      "description": "Please use trust field"
      },
      "collection": {
       "properties": {
@@ -6804,7 +6830,7 @@
   "title": "REST api to TON blockchain explorer",
   "version": "2.0.0"
  },
- "openapi": "3.1.0",
+ "openapi": "3.0.0",
  "paths": {
   "/v2/accounts/_bulk": {
    "post": {
@@ -7315,8 +7341,7 @@
      }
     },
     "tags": [
-     "Accounts",
-     "Jettons"
+     "Accounts"
     ]
    }
   },
@@ -7406,15 +7431,14 @@
      }
     },
     "tags": [
-     "Accounts",
-     "Jettons"
+     "Accounts"
     ]
    }
   },
   "/v2/accounts/{account_id}/jettons/{jetton_id}/history": {
    "get": {
     "deprecated": true,
-    "description": "Get the transfer jetton history for account and jetton",
+    "description": "Please use `getJettonAccountHistoryByID`` instead",
     "operationId": "getAccountJettonHistoryByID",
     "parameters": [
      {
@@ -8054,7 +8078,6 @@
      }
     },
     "tags": [
-     "Accounts",
      "Blockchain"
     ]
    }
@@ -10374,7 +10397,7 @@
   "/v2/nfts/{account_id}/history": {
    "get": {
     "deprecated": true,
-    "description": "Get the transfer nfts history for account",
+    "description": "Please use `getAccountNftHistory`` instead",
     "operationId": "getNftHistoryByID",
     "parameters": [
      {
@@ -10717,10 +10740,7 @@
         "schema": {
          "properties": {
           "points": {
-           "items": {
-            "$ref": "#/components/schemas/ChartPoints"
-           },
-           "type": "array"
+           "$ref": "#/components/schemas/ChartPoints"
           }
          },
          "required": [

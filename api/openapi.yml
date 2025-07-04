@@ -1,4 +1,4 @@
-openapi: 3.1.0
+openapi: 3.0.0
 info:
   title: REST api to TON blockchain explorer
   version: 2.0.0
@@ -378,7 +378,6 @@ paths:
       description: Get account transactions
       operationId: getBlockchainAccountTransactions
       tags:
-        - Accounts
         - Blockchain
       parameters:
         - $ref: '#/components/parameters/accountIDParameter'
@@ -650,7 +649,6 @@ paths:
       operationId: getAccountJettonsBalances
       tags:
         - Accounts
-        - Jettons
       parameters:
         - $ref: '#/components/parameters/accountIDParameter'
         - $ref: '#/components/parameters/currenciesQuery'
@@ -670,7 +668,6 @@ paths:
       operationId: getAccountJettonBalance
       tags:
         - Accounts
-        - Jettons
       parameters:
         - $ref: '#/components/parameters/accountIDParameter'
         - $ref: '#/components/parameters/jettonIDParameter'
@@ -722,7 +719,7 @@ paths:
   /v2/accounts/{account_id}/jettons/{jetton_id}/history:
     get:
       deprecated: true
-      description: Get the transfer jetton history for account and jetton
+      description: Please use `getJettonAccountHistoryByID`` instead
       operationId: getAccountJettonHistoryByID
       tags:
         - Accounts
@@ -1351,7 +1348,7 @@ paths:
   /v2/nfts/{account_id}/history:
     get:
       deprecated: true
-      description: Get the transfer nfts history for account
+      description: Please use `getAccountNftHistory`` instead
       operationId: getNftHistoryByID
       tags:
         - NFT
@@ -1872,9 +1869,7 @@ paths:
                   - points
                 properties:
                   points:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/ChartPoints'
+                    $ref: '#/components/schemas/ChartPoints'
         'default':
           $ref: '#/components/responses/Error'
   /v2/rates/markets:
@@ -5823,9 +5818,10 @@ components:
           type: string
           example: crypto.ton
         approved_by:
+          allOf:
+            - $ref: '#/components/schemas/NftApprovedBy'
           deprecated: true
-          description: "please use trust field"
-          $ref: '#/components/schemas/NftApprovedBy'
+          description: Please use trust field
         include_cnft:
           type: boolean
           example: false
@@ -6033,6 +6029,28 @@ components:
         type:
           type: string
           example: "TonTransfer"
+          enum:
+            - TonTransfer
+            - ExtraCurrencyTransfer
+            - ContractDeploy
+            - JettonTransfer
+            - JettonBurn
+            - JettonMint
+            - NftItemTransfer
+            - Subscribe
+            - UnSubscribe
+            - AuctionBid
+            - NftPurchase
+            - DepositStake
+            - WithdrawStake
+            - WithdrawStakeRequest
+            - ElectionsDepositStake
+            - ElectionsRecoverStake
+            - JettonSwap
+            - SmartContractExec
+            - DomainRenew
+            - Purchase
+            - Unknown
         status:
           type: string
           example: "ok"
@@ -7565,13 +7583,16 @@ components:
     ChartPoints:
       type: array
       items:
-        - type: integer
-          format: int64
-          description: Unix timestamp of the data point
-        - type: number
-          description: Decimal price of the token in the requested currency
-      additionalItems: false
-      example: [ 1668436763, 97.21323234 ]
+        type: array
+        minItems: 2
+        maxItems: 2
+        items:
+          type: number
+      description: |
+        Each inner array is a pair [timestamp, price]:
+          • index 0 — Unix timestamp (int64)  
+          • index 1 — token price (decimal) in the requested currency.
+      example: [[1668436763, 97.21323234]]
     AccountInfoByStateInit:
       type: object
       required:

@@ -447,7 +447,7 @@ func (h *Handler) convertPurchaseAction(ctx context.Context, p *bath.PurchaseAct
 
 func (h *Handler) convertAction(ctx context.Context, viewer *tongo.AccountID, a bath.Action, acceptLanguage oas.OptString) (oas.Action, error) {
 	action := oas.Action{
-		Type:             string(a.Type),
+		Type:             oas.ActionType(a.Type),
 		BaseTransactions: make([]string, len(a.BaseTransactions)),
 	}
 	for i, t := range a.BaseTransactions {
@@ -635,7 +635,7 @@ func (h *Handler) convertAction(ctx context.Context, viewer *tongo.AccountID, a 
 			Accounts: distinctAccounts(viewer, h.addressBook, &a.ElectionsRecoverStake.Elector, &a.ElectionsRecoverStake.Staker),
 		}
 	case bath.JettonSwap:
-		action.Type = string(a.Type)
+		action.Type = oas.ActionTypeJettonSwap
 		swapAction := oas.JettonSwapAction{
 			UserWallet: convertAccountAddress(a.JettonSwap.UserWallet, h.addressBook),
 			Router:     convertAccountAddress(a.JettonSwap.Router, h.addressBook),
@@ -832,7 +832,7 @@ func (h *Handler) toEvent(ctx context.Context, trace *core.Trace, result *bath.A
 
 func createUnknownAction(desc string, accounts []oas.AccountAddress) oas.Action {
 	return oas.Action{
-		Type:   string(bath.Unknown),
+		Type:   oas.ActionTypeUnknown,
 		Status: oas.ActionStatusOk,
 		SimplePreview: oas.ActionSimplePreview{
 			Name:        "Unknown",

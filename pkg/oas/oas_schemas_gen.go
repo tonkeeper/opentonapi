@@ -693,7 +693,7 @@ func (s *Accounts) SetAccounts(val []Account) {
 
 // Ref: #/components/schemas/Action
 type Action struct {
-	Type                  string                         `json:"type"`
+	Type                  ActionType                     `json:"type"`
 	Status                ActionStatus                   `json:"status"`
 	TonTransfer           OptTonTransferAction           `json:"TonTransfer"`
 	ExtraCurrencyTransfer OptExtraCurrencyTransferAction `json:"ExtraCurrencyTransfer"`
@@ -721,7 +721,7 @@ type Action struct {
 }
 
 // GetType returns the value of Type.
-func (s *Action) GetType() string {
+func (s *Action) GetType() ActionType {
 	return s.Type
 }
 
@@ -846,7 +846,7 @@ func (s *Action) GetBaseTransactions() []string {
 }
 
 // SetType sets the value of Type.
-func (s *Action) SetType(val string) {
+func (s *Action) SetType(val ActionType) {
 	s.Type = val
 }
 
@@ -1159,6 +1159,180 @@ func (s *ActionStatus) UnmarshalText(data []byte) error {
 		return nil
 	case ActionStatusFailed:
 		*s = ActionStatusFailed
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+type ActionType string
+
+const (
+	ActionTypeTonTransfer           ActionType = "TonTransfer"
+	ActionTypeExtraCurrencyTransfer ActionType = "ExtraCurrencyTransfer"
+	ActionTypeContractDeploy        ActionType = "ContractDeploy"
+	ActionTypeJettonTransfer        ActionType = "JettonTransfer"
+	ActionTypeJettonBurn            ActionType = "JettonBurn"
+	ActionTypeJettonMint            ActionType = "JettonMint"
+	ActionTypeNftItemTransfer       ActionType = "NftItemTransfer"
+	ActionTypeSubscribe             ActionType = "Subscribe"
+	ActionTypeUnSubscribe           ActionType = "UnSubscribe"
+	ActionTypeAuctionBid            ActionType = "AuctionBid"
+	ActionTypeNftPurchase           ActionType = "NftPurchase"
+	ActionTypeDepositStake          ActionType = "DepositStake"
+	ActionTypeWithdrawStake         ActionType = "WithdrawStake"
+	ActionTypeWithdrawStakeRequest  ActionType = "WithdrawStakeRequest"
+	ActionTypeElectionsDepositStake ActionType = "ElectionsDepositStake"
+	ActionTypeElectionsRecoverStake ActionType = "ElectionsRecoverStake"
+	ActionTypeJettonSwap            ActionType = "JettonSwap"
+	ActionTypeSmartContractExec     ActionType = "SmartContractExec"
+	ActionTypeDomainRenew           ActionType = "DomainRenew"
+	ActionTypePurchase              ActionType = "Purchase"
+	ActionTypeUnknown               ActionType = "Unknown"
+)
+
+// AllValues returns all ActionType values.
+func (ActionType) AllValues() []ActionType {
+	return []ActionType{
+		ActionTypeTonTransfer,
+		ActionTypeExtraCurrencyTransfer,
+		ActionTypeContractDeploy,
+		ActionTypeJettonTransfer,
+		ActionTypeJettonBurn,
+		ActionTypeJettonMint,
+		ActionTypeNftItemTransfer,
+		ActionTypeSubscribe,
+		ActionTypeUnSubscribe,
+		ActionTypeAuctionBid,
+		ActionTypeNftPurchase,
+		ActionTypeDepositStake,
+		ActionTypeWithdrawStake,
+		ActionTypeWithdrawStakeRequest,
+		ActionTypeElectionsDepositStake,
+		ActionTypeElectionsRecoverStake,
+		ActionTypeJettonSwap,
+		ActionTypeSmartContractExec,
+		ActionTypeDomainRenew,
+		ActionTypePurchase,
+		ActionTypeUnknown,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s ActionType) MarshalText() ([]byte, error) {
+	switch s {
+	case ActionTypeTonTransfer:
+		return []byte(s), nil
+	case ActionTypeExtraCurrencyTransfer:
+		return []byte(s), nil
+	case ActionTypeContractDeploy:
+		return []byte(s), nil
+	case ActionTypeJettonTransfer:
+		return []byte(s), nil
+	case ActionTypeJettonBurn:
+		return []byte(s), nil
+	case ActionTypeJettonMint:
+		return []byte(s), nil
+	case ActionTypeNftItemTransfer:
+		return []byte(s), nil
+	case ActionTypeSubscribe:
+		return []byte(s), nil
+	case ActionTypeUnSubscribe:
+		return []byte(s), nil
+	case ActionTypeAuctionBid:
+		return []byte(s), nil
+	case ActionTypeNftPurchase:
+		return []byte(s), nil
+	case ActionTypeDepositStake:
+		return []byte(s), nil
+	case ActionTypeWithdrawStake:
+		return []byte(s), nil
+	case ActionTypeWithdrawStakeRequest:
+		return []byte(s), nil
+	case ActionTypeElectionsDepositStake:
+		return []byte(s), nil
+	case ActionTypeElectionsRecoverStake:
+		return []byte(s), nil
+	case ActionTypeJettonSwap:
+		return []byte(s), nil
+	case ActionTypeSmartContractExec:
+		return []byte(s), nil
+	case ActionTypeDomainRenew:
+		return []byte(s), nil
+	case ActionTypePurchase:
+		return []byte(s), nil
+	case ActionTypeUnknown:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *ActionType) UnmarshalText(data []byte) error {
+	switch ActionType(data) {
+	case ActionTypeTonTransfer:
+		*s = ActionTypeTonTransfer
+		return nil
+	case ActionTypeExtraCurrencyTransfer:
+		*s = ActionTypeExtraCurrencyTransfer
+		return nil
+	case ActionTypeContractDeploy:
+		*s = ActionTypeContractDeploy
+		return nil
+	case ActionTypeJettonTransfer:
+		*s = ActionTypeJettonTransfer
+		return nil
+	case ActionTypeJettonBurn:
+		*s = ActionTypeJettonBurn
+		return nil
+	case ActionTypeJettonMint:
+		*s = ActionTypeJettonMint
+		return nil
+	case ActionTypeNftItemTransfer:
+		*s = ActionTypeNftItemTransfer
+		return nil
+	case ActionTypeSubscribe:
+		*s = ActionTypeSubscribe
+		return nil
+	case ActionTypeUnSubscribe:
+		*s = ActionTypeUnSubscribe
+		return nil
+	case ActionTypeAuctionBid:
+		*s = ActionTypeAuctionBid
+		return nil
+	case ActionTypeNftPurchase:
+		*s = ActionTypeNftPurchase
+		return nil
+	case ActionTypeDepositStake:
+		*s = ActionTypeDepositStake
+		return nil
+	case ActionTypeWithdrawStake:
+		*s = ActionTypeWithdrawStake
+		return nil
+	case ActionTypeWithdrawStakeRequest:
+		*s = ActionTypeWithdrawStakeRequest
+		return nil
+	case ActionTypeElectionsDepositStake:
+		*s = ActionTypeElectionsDepositStake
+		return nil
+	case ActionTypeElectionsRecoverStake:
+		*s = ActionTypeElectionsRecoverStake
+		return nil
+	case ActionTypeJettonSwap:
+		*s = ActionTypeJettonSwap
+		return nil
+	case ActionTypeSmartContractExec:
+		*s = ActionTypeSmartContractExec
+		return nil
+	case ActionTypeDomainRenew:
+		*s = ActionTypeDomainRenew
+		return nil
+	case ActionTypePurchase:
+		*s = ActionTypePurchase
+		return nil
+	case ActionTypeUnknown:
+		*s = ActionTypeUnknown
 		return nil
 	default:
 		return errors.Errorf("invalid value: %q", data)
@@ -4018,31 +4192,7 @@ func (s *BouncePhaseType) UnmarshalText(data []byte) error {
 	}
 }
 
-// Ref: #/components/schemas/ChartPoints
-type ChartPoints struct {
-	V0 int64
-	V1 float64
-}
-
-// GetV0 returns the value of V0.
-func (s *ChartPoints) GetV0() int64 {
-	return s.V0
-}
-
-// GetV1 returns the value of V1.
-func (s *ChartPoints) GetV1() float64 {
-	return s.V1
-}
-
-// SetV0 sets the value of V0.
-func (s *ChartPoints) SetV0(val int64) {
-	s.V0 = val
-}
-
-// SetV1 sets the value of V1.
-func (s *ChartPoints) SetV1(val float64) {
-	s.V1 = val
-}
+type ChartPoints [][]float64
 
 // Ref: #/components/schemas/ComputePhase
 type ComputePhase struct {
@@ -6162,16 +6312,16 @@ func (s *GetBlockchainAccountTransactionsSortOrder) UnmarshalText(data []byte) e
 }
 
 type GetChartRatesOK struct {
-	Points []ChartPoints `json:"points"`
+	Points ChartPoints `json:"points"`
 }
 
 // GetPoints returns the value of Points.
-func (s *GetChartRatesOK) GetPoints() []ChartPoints {
+func (s *GetChartRatesOK) GetPoints() ChartPoints {
 	return s.Points
 }
 
 // SetPoints sets the value of Points.
-func (s *GetChartRatesOK) SetPoints(val []ChartPoints) {
+func (s *GetChartRatesOK) SetPoints(val ChartPoints) {
 	s.Points = val
 }
 
@@ -9688,9 +9838,11 @@ type NftItem struct {
 	Previews []ImagePreview  `json:"previews"`
 	DNS      OptString       `json:"dns"`
 	// Please use trust field.
-	ApprovedBy  NftApprovedBy `json:"approved_by"`
-	IncludeCnft OptBool       `json:"include_cnft"`
-	Trust       TrustType     `json:"trust"`
+	//
+	// Deprecated: schema marks this property as deprecated.
+	ApprovedBy  []NftItemApprovedByItem `json:"approved_by"`
+	IncludeCnft OptBool                 `json:"include_cnft"`
+	Trust       TrustType               `json:"trust"`
 }
 
 // GetAddress returns the value of Address.
@@ -9739,7 +9891,7 @@ func (s *NftItem) GetDNS() OptString {
 }
 
 // GetApprovedBy returns the value of ApprovedBy.
-func (s *NftItem) GetApprovedBy() NftApprovedBy {
+func (s *NftItem) GetApprovedBy() []NftItemApprovedByItem {
 	return s.ApprovedBy
 }
 
@@ -9799,7 +9951,7 @@ func (s *NftItem) SetDNS(val OptString) {
 }
 
 // SetApprovedBy sets the value of ApprovedBy.
-func (s *NftItem) SetApprovedBy(val NftApprovedBy) {
+func (s *NftItem) SetApprovedBy(val []NftItemApprovedByItem) {
 	s.ApprovedBy = val
 }
 
@@ -9811,6 +9963,47 @@ func (s *NftItem) SetIncludeCnft(val OptBool) {
 // SetTrust sets the value of Trust.
 func (s *NftItem) SetTrust(val TrustType) {
 	s.Trust = val
+}
+
+type NftItemApprovedByItem string
+
+const (
+	NftItemApprovedByItemGetgems   NftItemApprovedByItem = "getgems"
+	NftItemApprovedByItemTonkeeper NftItemApprovedByItem = "tonkeeper"
+)
+
+// AllValues returns all NftItemApprovedByItem values.
+func (NftItemApprovedByItem) AllValues() []NftItemApprovedByItem {
+	return []NftItemApprovedByItem{
+		NftItemApprovedByItemGetgems,
+		NftItemApprovedByItemTonkeeper,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s NftItemApprovedByItem) MarshalText() ([]byte, error) {
+	switch s {
+	case NftItemApprovedByItemGetgems:
+		return []byte(s), nil
+	case NftItemApprovedByItemTonkeeper:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *NftItemApprovedByItem) UnmarshalText(data []byte) error {
+	switch NftItemApprovedByItem(data) {
+	case NftItemApprovedByItemGetgems:
+		*s = NftItemApprovedByItemGetgems
+		return nil
+	case NftItemApprovedByItemTonkeeper:
+		*s = NftItemApprovedByItemTonkeeper
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
 }
 
 type NftItemCollection struct {

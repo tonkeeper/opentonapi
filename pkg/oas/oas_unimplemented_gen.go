@@ -228,7 +228,7 @@ func (UnimplementedHandler) GetAccountJettonBalance(ctx context.Context, params 
 
 // GetAccountJettonHistoryByID implements getAccountJettonHistoryByID operation.
 //
-// Get the transfer jetton history for account and jetton.
+// Please use `getJettonAccountHistoryByID“ instead.
 //
 // Deprecated: schema marks this operation as deprecated.
 //
@@ -653,7 +653,7 @@ func (UnimplementedHandler) GetNftCollections(ctx context.Context, params GetNft
 
 // GetNftHistoryByID implements getNftHistoryByID operation.
 //
-// Get the transfer nfts history for account.
+// Please use `getAccountNftHistory“ instead.
 //
 // Deprecated: schema marks this operation as deprecated.
 //
