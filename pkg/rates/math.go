@@ -20,7 +20,7 @@ func getInvariantForStableSwap(amp, x, y float64) float64 {
 	inv := sum
 
 	// Use up to 255 iterations to reach convergence
-	for i := 0; i < 255; i++ {
+	for i := 0; i <= 255; i++ {
 		dP := inv
 
 		dP = dP * inv / (x * 2) // use 'dp * ...' instead of '*=' because the first one seems more accurate
