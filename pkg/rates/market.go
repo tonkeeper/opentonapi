@@ -861,8 +861,10 @@ func calculatePoolPrice(firstAsset, secondAsset Asset, pools map[ton.AccountID]f
 	case WXYInv:
 		price = (y * (1 - w)) / (x * w)
 	case WStableSwapInv:
-		numerator := amp*rate + math.Pow(x, w)*(1-w)*math.Pow(rate*y, -w)*rate
-		denominator := amp + w*math.Pow(x, w-1)*math.Pow(rate*y, 1-w)
+		p := w
+		q := 1 - w
+		denominator := amp*rate + q*math.Pow(y, q-1)*math.Pow(rate, q)*math.Pow(x, p)
+		numerator := amp + p*math.Pow(x, p-1)*math.Pow(rate*y, q)
 		price = numerator / denominator
 	default:
 		// Unreachable

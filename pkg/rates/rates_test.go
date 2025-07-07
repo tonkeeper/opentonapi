@@ -76,7 +76,7 @@ func TestCalculatePoolPrice(t *testing.T) {
 	anon := ton.MustParseAccountID("EQDv-yr41_CZ2urg2gfegVfa44PDPjIK9F-MilEDKDUIhlwZ")
 	switchToken := ton.MustParseAccountID("EQBxo4huVJXaf1ZOdwnnDdxa9OVoyNGhXMsJVzobmxSWITCH")
 	ston := ton.MustParseAccountID("EQA2kCVNwVsil2EM2mB0SkXytxCqQjS4mttjDpnXmwG9T6bO")
-	tsTon := ton.MustParseAccountID("EQC98_qAmNEptUtPc7W6xdHh_ZHrBUFpw5Ft_IzNU20QAJav")
+	kton := ton.MustParseAccountID("EQA2rQ-kMzVgK2lWAtWy6Y_UVia4xv8S-_Q4Ixo3y5kzUfdx")
 
 	tests := []Test{
 		{
@@ -173,18 +173,18 @@ func TestCalculatePoolPrice(t *testing.T) {
 			expectedPrice: 0.4869541744341161,
 		},
 		{
-			name: "tston->ton",
+			name: "kton->ton",
 			pools: []Pool{
 				{Assets: []Asset{
-					{Account: ton.MustParseAccountID("0:671963027f7f85659ab55b821671688601cdcf1ee674fc7fbbb1a776a18d34a3"), Decimals: 9, Reserve: 136264858400217, HoldersCount: 7},
-					{Account: tsTon, Decimals: 9, Reserve: 65206054264465, HoldersCount: 1317}},
+					{Account: kton, Decimals: 9, Reserve: 32841708701843, HoldersCount: 1317},
+					{Account: ton.MustParseAccountID("0:671963027f7f85659ab55b821671688601cdcf1ee674fc7fbbb1a776a18d34a3"), Decimals: 9, Reserve: 5793846300860, HoldersCount: 7}},
 					Invariant: WStableSwapInv,
 					Amp:       50,
-					Rate:      1.062,
-					Weight:    0.25,
+					Rate:      1.0210416258250017,
+					Weight:    0.75,
 				},
 			},
-			expectedPrice: 1.0653657385933382,
+			expectedPrice: 0.9713964976104531,
 		},
 	}
 
@@ -193,7 +193,7 @@ func TestCalculatePoolPrice(t *testing.T) {
 			for _, pool := range test.pools {
 				_, price := calculatePoolPrice(pool.Assets[0], pool.Assets[1], pools, pool.Invariant, pool.Amp, pool.Weight, pool.Rate)
 				// diff between prices must be <= 1e-12 (accuracy up to 12 decimals)
-				if math.Abs(price-test.expectedPrice) > math.Max(math.Max(price, test.expectedPrice), EPS) {
+				if math.Abs(price-test.expectedPrice) > math.Max(math.Max(price, test.expectedPrice)*EPS, EPS) {
 					t.Errorf("Unexpected price for account: got %v, want %v\n", price, test.expectedPrice)
 				}
 			}
