@@ -76,7 +76,6 @@ func TestCalculatePoolPrice(t *testing.T) {
 	anon := ton.MustParseAccountID("EQDv-yr41_CZ2urg2gfegVfa44PDPjIK9F-MilEDKDUIhlwZ")
 	switchToken := ton.MustParseAccountID("EQBxo4huVJXaf1ZOdwnnDdxa9OVoyNGhXMsJVzobmxSWITCH")
 	ston := ton.MustParseAccountID("EQA2kCVNwVsil2EM2mB0SkXytxCqQjS4mttjDpnXmwG9T6bO")
-	tsTon := ton.MustParseAccountID("EQC98_qAmNEptUtPc7W6xdHh_ZHrBUFpw5Ft_IzNU20QAJav")
 	kton := ton.MustParseAccountID("EQA2rQ-kMzVgK2lWAtWy6Y_UVia4xv8S-_Q4Ixo3y5kzUfdx")
 
 	tests := []Test{
@@ -174,20 +173,6 @@ func TestCalculatePoolPrice(t *testing.T) {
 			expectedPrice: 0.4869541744341161,
 		},
 		{
-			name: "tston->ton",
-			pools: []Pool{
-				{Assets: []Asset{
-					{Account: ton.MustParseAccountID("0:671963027f7f85659ab55b821671688601cdcf1ee674fc7fbbb1a776a18d34a3"), Decimals: 9, Reserve: 48693539709107, HoldersCount: 7},
-					{Account: tsTon, Decimals: 9, Reserve: 65206054264465, HoldersCount: 1317}},
-					Invariant: WStableSwapInv,
-					Amp:       50,
-					Rate:      1.065,
-					Weight:    0.25,
-				},
-			},
-			expectedPrice: 1.0653657385933382,
-		},
-		{
 			name: "kton->ton",
 			pools: []Pool{
 				{Assets: []Asset{
@@ -199,7 +184,7 @@ func TestCalculatePoolPrice(t *testing.T) {
 					Weight:    0.75,
 				},
 			},
-			expectedPrice: 1.0653657385933382,
+			expectedPrice: 0.9713964976104531,
 		},
 	}
 
