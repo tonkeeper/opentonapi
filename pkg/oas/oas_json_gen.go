@@ -10893,13 +10893,13 @@ func (s *BlockchainLibrary) Encode(e *jx.Encoder) {
 // encodeFields encodes fields.
 func (s *BlockchainLibrary) encodeFields(e *jx.Encoder) {
 	{
-		e.FieldStart("data")
-		e.Str(s.Data)
+		e.FieldStart("boc")
+		e.Str(s.Boc)
 	}
 }
 
 var jsonFieldsNameOfBlockchainLibrary = [1]string{
-	0: "data",
+	0: "boc",
 }
 
 // Decode decodes BlockchainLibrary from json.
@@ -10911,17 +10911,17 @@ func (s *BlockchainLibrary) Decode(d *jx.Decoder) error {
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
-		case "data":
+		case "boc":
 			requiredBitSet[0] |= 1 << 0
 			if err := func() error {
 				v, err := d.Str()
-				s.Data = string(v)
+				s.Boc = string(v)
 				if err != nil {
 					return err
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"data\"")
+				return errors.Wrap(err, "decode field \"boc\"")
 			}
 		default:
 			return d.Skip()

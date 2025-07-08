@@ -24,7 +24,7 @@ func (h *Handler) GetLibraryByHash(ctx context.Context, params oas.GetLibraryByH
 			return nil, toError(http.StatusInternalServerError, err)
 		}
 		return &oas.BlockchainLibrary{
-			Data: s,
+			Boc: s,
 		}, nil
 	}
 	return nil, toError(http.StatusNotFound, core.ErrEntityNotFound)

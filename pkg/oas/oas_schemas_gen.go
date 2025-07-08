@@ -3995,17 +3995,17 @@ func (s *BlockchainConfig9) SetMandatoryParams(val []int32) {
 
 // Ref: #/components/schemas/BlockchainLibrary
 type BlockchainLibrary struct {
-	Data string `json:"data"`
+	Boc string `json:"boc"`
 }
 
-// GetData returns the value of Data.
-func (s *BlockchainLibrary) GetData() string {
-	return s.Data
+// GetBoc returns the value of Boc.
+func (s *BlockchainLibrary) GetBoc() string {
+	return s.Boc
 }
 
-// SetData sets the value of Data.
-func (s *BlockchainLibrary) SetData(val string) {
-	s.Data = val
+// SetBoc sets the value of Boc.
+func (s *BlockchainLibrary) SetBoc(val string) {
+	s.Boc = val
 }
 
 // Ref: #/components/schemas/BlockchainRawAccount
