@@ -60,8 +60,9 @@ func (h *Handler) GetAccount(ctx context.Context, params oas.GetAccountParams) (
 	rawAccount, err := h.storage.GetRawAccount(ctx, account.ID)
 	if errors.Is(err, core.ErrEntityNotFound) {
 		return &oas.Account{
-			Address: account.ID.ToRaw(),
-			Status:  oas.AccountStatusNonexist,
+			Address:  account.ID.ToRaw(),
+			Status:   oas.AccountStatusNonexist,
+			IsWallet: true,
 		}, nil
 	}
 	if err != nil {
