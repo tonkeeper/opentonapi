@@ -82,3 +82,6 @@ GET {{host}}/v2/blockchain/masterchain/27578880/shards
 
 ###
 GET {{host}}/v2/blockchain/masterchain/120014/transactions
+
+###
+GET {{host}}/v2/blockchain/libraries/587CC789EFF1C84F46EC3797E45FC809A14FF5AE24F1E0C7A6A99CC9DC9061FF

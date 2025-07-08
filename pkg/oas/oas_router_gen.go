@@ -1010,6 +1010,34 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 					}
 
 					elem = origElem
+				case 'l': // Prefix: "libraries/"
+					origElem := elem
+					if l := len("libraries/"); len(elem) >= l && elem[0:l] == "libraries/" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					// Param: "hash"
+					// Leaf parameter
+					args[0] = elem
+					elem = ""
+
+					if len(elem) == 0 {
+						// Leaf node.
+						switch r.Method {
+						case "GET":
+							s.handleGetLibraryByHashRequest([1]string{
+								args[0],
+							}, elemIsEscaped, w, r)
+						default:
+							s.notAllowed(w, r, "GET")
+						}
+
+						return
+					}
+
+					elem = origElem
 				case 'm': // Prefix: "m"
 					origElem := elem
 					if l := len("m"); len(elem) >= l && elem[0:l] == "m" {
@@ -4523,6 +4551,36 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 						}
 
 						elem = origElem
+					}
+
+					elem = origElem
+				case 'l': // Prefix: "libraries/"
+					origElem := elem
+					if l := len("libraries/"); len(elem) >= l && elem[0:l] == "libraries/" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					// Param: "hash"
+					// Leaf parameter
+					args[0] = elem
+					elem = ""
+
+					if len(elem) == 0 {
+						switch method {
+						case "GET":
+							// Leaf: GetLibraryByHash
+							r.name = "GetLibraryByHash"
+							r.summary = ""
+							r.operationID = "getLibraryByHash"
+							r.pathPattern = "/v2/blockchain/libraries/{hash}"
+							r.args = args
+							r.count = 1
+							return r, true
+						default:
+							return
+						}
 					}
 
 					elem = origElem

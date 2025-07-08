@@ -403,6 +403,12 @@ type Handler interface {
 	//
 	// GET /v2/events/{event_id}/jettons
 	GetJettonsEvents(ctx context.Context, params GetJettonsEventsParams) (*Event, error)
+	// GetLibraryByHash implements getLibraryByHash operation.
+	//
+	// Get library cell.
+	//
+	// GET /v2/blockchain/libraries/{hash}
+	GetLibraryByHash(ctx context.Context, params GetLibraryByHashParams) (*BlockchainLibrary, error)
 	// GetMarketsRates implements getMarketsRates operation.
 	//
 	// Get the TON price from markets.

@@ -538,6 +538,23 @@ paths:
                 $ref: '#/components/schemas/BlockchainAccountInspect'
         'default':
           $ref: '#/components/responses/Error'
+  /v2/blockchain/libraries/{hash}:
+    get:
+      description: Get library cell
+      operationId: getLibraryByHash
+      tags:
+        - Blockchain
+      parameters:
+        - $ref: '#/components/parameters/hashParameter'
+      responses:
+        '200':
+          description: library cell
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BlockchainLibrary'
+        'default':
+          $ref: '#/components/responses/Error'
   /v2/address/{account_id}/parse:
     get:
       description: parse address and display in all formats
@@ -3010,6 +3027,14 @@ components:
       schema:
         type: string
         example: NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2ODQ3...
+    hashParameter:
+      in: path
+      name: hash
+      required: true
+      description: "hash in hex (without 0x) format"
+      schema:
+        type: string
+        example: "131D0C65055F04E9C19D687B51BC70F952FD9CA6F02C2801D3B89964A779DF85"
     i18n:
       in: header
       name: Accept-Language
@@ -4686,6 +4711,15 @@ components:
               root:
                 type: string
                 format: cell
+    BlockchainLibrary:
+      type: object
+      required:
+        - data
+      properties:
+        data:
+          type: string
+          format: cell
+          example: b5ee9c7201010101005f0000baff0020dd2082014c97ba218201339cbab19c71b0ed44d0d31fd70bffe304e0a4f260810200d71820d70b1fed44d0d31fd3ffd15112baf2a122f901541044f910f2a2f80001d31f3120d74a96d307d402fb00ded1a4c8cb1fcbffc9ed54
     WalletStats:
       type: object
       required:
