@@ -3993,6 +3993,21 @@ func (s *BlockchainConfig9) SetMandatoryParams(val []int32) {
 	s.MandatoryParams = val
 }
 
+// Ref: #/components/schemas/BlockchainLibrary
+type BlockchainLibrary struct {
+	Boc string `json:"boc"`
+}
+
+// GetBoc returns the value of Boc.
+func (s *BlockchainLibrary) GetBoc() string {
+	return s.Boc
+}
+
+// SetBoc sets the value of Boc.
+func (s *BlockchainLibrary) SetBoc(val string) {
+	s.Boc = val
+}
+
 // Ref: #/components/schemas/BlockchainRawAccount
 type BlockchainRawAccount struct {
 	Address             string                              `json:"address"`

@@ -7963,6 +7963,72 @@ func decodeGetJettonsEventsParams(args [1]string, argsEscaped bool, r *http.Requ
 	return params, nil
 }
 
+// GetLibraryByHashParams is parameters of getLibraryByHash operation.
+type GetLibraryByHashParams struct {
+	// Hash in hex (without 0x) format.
+	Hash string
+}
+
+func unpackGetLibraryByHashParams(packed middleware.Parameters) (params GetLibraryByHashParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "hash",
+			In:   "path",
+		}
+		params.Hash = packed[key].(string)
+	}
+	return params
+}
+
+func decodeGetLibraryByHashParams(args [1]string, argsEscaped bool, r *http.Request) (params GetLibraryByHashParams, _ error) {
+	// Decode path: hash.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "hash",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.Hash = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "hash",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
 // GetMultisigAccountParams is parameters of getMultisigAccount operation.
 type GetMultisigAccountParams struct {
 	// Account ID.

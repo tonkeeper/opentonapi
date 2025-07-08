@@ -597,6 +597,15 @@ func (UnimplementedHandler) GetJettonsEvents(ctx context.Context, params GetJett
 	return r, ht.ErrNotImplemented
 }
 
+// GetLibraryByHash implements getLibraryByHash operation.
+//
+// Get library cell.
+//
+// GET /v2/blockchain/libraries/{hash}
+func (UnimplementedHandler) GetLibraryByHash(ctx context.Context, params GetLibraryByHashParams) (r *BlockchainLibrary, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // GetMarketsRates implements getMarketsRates operation.
 //
 // Get the TON price from markets.
