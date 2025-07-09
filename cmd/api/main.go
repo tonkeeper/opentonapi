@@ -107,4 +107,5 @@ func main() {
 
 	log.Warn("start server", zap.Int("port", cfg.API.Port))
 	server.Run(fmt.Sprintf(":%d", cfg.API.Port), cfg.API.UnixSockets)
+	select {}
 }
