@@ -1,6 +1,7 @@
 package api
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"io/fs"
@@ -202,5 +203,8 @@ func (s *Server) Run(address string, unixSockets []string) {
 			s.logger.Fatal(fmt.Sprintf("ListenAndServe() failed for %v", socketPath), zap.Error(err))
 		}(socketPath)
 	}
-	<-make(chan struct{})
+}
+
+func (s *Server) Shutdown(ctx context.Context) error {
+	return s.httpServer.Shutdown(ctx)
 }
