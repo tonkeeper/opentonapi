@@ -422,11 +422,9 @@ func (h *Handler) convertPurchaseAction(ctx context.Context, p *bath.PurchaseAct
 		Description: i18n.T(acceptLanguage, i18n.C{
 			DefaultMessage: &i18n.M{
 				ID:    "purchaseAction",
-				Other: "Purchase for {{.Amount}} {{.TokenName}} by invoice {{.InvoiceID}}",
+				Other: "Payment for invoice #{{.InvoiceID}}",
 			},
 			TemplateData: i18n.Template{
-				"Amount":    value,
-				"TokenName": price.TokenName,
 				"InvoiceID": p.InvoiceID.String(),
 			},
 		}),
