@@ -970,7 +970,7 @@ func (h *Handler) convertSetSignatureAllowed(ctx context.Context, p *bath.SetSig
 }
 
 func (h *Handler) convertSubscribe(ctx context.Context, a *bath.SubscribeAction, acceptLanguage string, viewer *tongo.AccountID) (oas.OptSubscriptionAction, oas.ActionSimplePreview) {
-	price := h.convertPrice(ctx, a.Amount)
+	price := h.convertPrice(ctx, a.Price)
 	subscribeAction := oas.SubscriptionAction{
 		Price:       price,
 		Beneficiary: convertAccountAddress(a.Beneficiary, h.addressBook),
@@ -979,10 +979,10 @@ func (h *Handler) convertSubscribe(ctx context.Context, a *bath.SubscribeAction,
 		Subscription: a.Subscription.ToRaw(),
 		Initial:      a.First,
 	}
-	subscribeAction.Amount.SetTo(a.Amount.Amount.Int64()) // for backward compatibility
-	value := ScaleJettons(a.Amount.Amount, price.Decimals).String()
+	subscribeAction.Amount.SetTo(a.Price.Amount.Int64()) // for backward compatibility
+	value := ScaleJettons(a.Price.Amount, price.Decimals).String()
 	act := "Paying {{.Amount}} {{.TokenName}} for subscription"
-	if a.Amount.Amount.Cmp(big.NewInt(0)) == 0 {
+	if a.Price.Amount.Cmp(big.NewInt(0)) == 0 {
 		act = "Trial period subscription"
 	}
 	simplePreview := oas.ActionSimplePreview{
