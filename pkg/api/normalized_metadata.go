@@ -2,16 +2,13 @@ package api
 
 import (
 	"github.com/tonkeeper/tongo/ton"
-	"math/big"
 	"strconv"
 
-	"github.com/shopspring/decimal"
 	"github.com/tonkeeper/opentonapi/pkg/addressbook"
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	imgGenerator "github.com/tonkeeper/opentonapi/pkg/image"
 	"github.com/tonkeeper/opentonapi/pkg/references"
 	"github.com/tonkeeper/tongo/tep64"
-	"github.com/tonkeeper/tongo/tlb"
 )
 
 const UnknownJettonName = "UKWN"
@@ -86,15 +83,4 @@ func convertJettonDecimals(decimals string) int {
 		return 9
 	}
 	return dec
-}
-
-// Scale returns a proper decimal representation of jettons taking metadata.Decimals into account.
-func Scale(amount tlb.VarUInteger16, decimals int) decimal.Decimal {
-	value := big.Int(amount)
-	return decimal.NewFromBigInt(&value, int32(-decimals))
-}
-
-// ScaleJettons returns a proper decimal representation of jettons taking metadata.Decimals into account.
-func ScaleJettons(amount big.Int, decimals int) decimal.Decimal {
-	return decimal.NewFromBigInt(&amount, int32(-decimals))
 }
