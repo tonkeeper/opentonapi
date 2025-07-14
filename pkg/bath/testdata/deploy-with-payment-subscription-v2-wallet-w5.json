@@ -6,7 +6,14 @@
          "Subscriber": "0:35a74ba451906124a313e5fc00382b98ec81994dd93826a045a7626b0b9be6d5",
          "Beneficiary": "0:5b92ca5f8ef8683432c9192c1a7b855f6cb08912c85d029f56faf918cfaa9649",
          "WithdrawTo": "0:b8f8fecda3fca32c0ca2e5791469ba087af68d178e8be19da7aca4362be50ba9",
-         "Amount": 20000000,
+         "Price": {
+           "Currency": {
+             "Type": "native",
+             "Jetton": null,
+             "CurrencyID": null
+           },
+           "Amount": 20000000
+         },
          "First": true
        },
        "Success": true,
