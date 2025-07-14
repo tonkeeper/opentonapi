@@ -1,0 +1,52 @@
+{
+   "Actions": [
+     {
+       "UnSubscribe": {
+         "Subscription": "0:47afe208854e56c1e02e260442d986e848ec7275be2b2870e692bd96d25d11c4",
+         "Subscriber": "0:5b92ca5f8ef8683432c9192c1a7b855f6cb08912c85d029f56faf918cfaa9649",
+         "Beneficiary": "0:35a74ba451906124a313e5fc00382b98ec81994dd93826a045a7626b0b9be6d5"
+       },
+       "Success": false,
+       "Type": "UnSubscribe",
+       "BaseTransactions": [
+         "41a0256861a62d2ff0146dd48349650e9447f1f6195885c25300dc58e142ac62",
+         "87f27493ecab1385db6d90ee9bc3f47f051ff89c2f5b3a6416321ae495044b85"
+       ]
+     },
+     {
+       "TonTransfer": {
+         "Amount": 73972082,
+         "Comment": null,
+         "EncryptedComment": null,
+         "Recipient": "0:35a74ba451906124a313e5fc00382b98ec81994dd93826a045a7626b0b9be6d5",
+         "Sender": "0:47afe208854e56c1e02e260442d986e848ec7275be2b2870e692bd96d25d11c4",
+         "Refund": null
+       },
+       "Success": true,
+       "Type": "TonTransfer",
+       "BaseTransactions": [
+         "acb31c952646eab7b8d1c3575feede9beb54428e38d25edb025e4da4bdaf1cd7"
+       ]
+     }
+   ],
+   "Accounts": [
+     {
+       "Account": "0:35a74ba451906124a313e5fc00382b98ec81994dd93826a045a7626b0b9be6d5",
+       "Ton": 73546106,
+       "Fee": 425976,
+       "Jettons": null
+     },
+     {
+       "Account": "0:47afe208854e56c1e02e260442d986e848ec7275be2b2870e692bd96d25d11c4",
+       "Ton": -67319653,
+       "Fee": 3347571,
+       "Jettons": null
+     },
+     {
+       "Account": "0:5b92ca5f8ef8683432c9192c1a7b855f6cb08912c85d029f56faf918cfaa9649",
+       "Ton": -13932786,
+       "Fee": 3932786,
+       "Jettons": null
+     }
+   ]
+ }
