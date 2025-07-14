@@ -693,34 +693,34 @@ func (s *Accounts) SetAccounts(val []Account) {
 
 // Ref: #/components/schemas/Action
 type Action struct {
-	Type                  ActionType                     `json:"type"`
-	Status                ActionStatus                   `json:"status"`
-	TonTransfer           OptTonTransferAction           `json:"TonTransfer"`
-	ExtraCurrencyTransfer OptExtraCurrencyTransferAction `json:"ExtraCurrencyTransfer"`
-	ContractDeploy        OptContractDeployAction        `json:"ContractDeploy"`
-	JettonTransfer        OptJettonTransferAction        `json:"JettonTransfer"`
-	JettonBurn            OptJettonBurnAction            `json:"JettonBurn"`
-	JettonMint            OptJettonMintAction            `json:"JettonMint"`
-	NftItemTransfer       OptNftItemTransferAction       `json:"NftItemTransfer"`
-	Subscribe             OptSubscriptionAction          `json:"Subscribe"`
-	UnSubscribe           OptUnSubscriptionAction        `json:"UnSubscribe"`
-	AuctionBid            OptAuctionBidAction            `json:"AuctionBid"`
-	NftPurchase           OptNftPurchaseAction           `json:"NftPurchase"`
-	DepositStake          OptDepositStakeAction          `json:"DepositStake"`
-	WithdrawStake         OptWithdrawStakeAction         `json:"WithdrawStake"`
-	WithdrawStakeRequest  OptWithdrawStakeRequestAction  `json:"WithdrawStakeRequest"`
-	ElectionsDepositStake OptElectionsDepositStakeAction `json:"ElectionsDepositStake"`
-	ElectionsRecoverStake OptElectionsRecoverStakeAction `json:"ElectionsRecoverStake"`
-	JettonSwap            OptJettonSwapAction            `json:"JettonSwap"`
-	SmartContractExec     OptSmartContractAction         `json:"SmartContractExec"`
-	DomainRenew           OptDomainRenewAction           `json:"DomainRenew"`
-	Purchase              OptPurchaseAction              `json:"Purchase"`
+	Type                      ActionType                     `json:"type"`
+	Status                    ActionStatus                   `json:"status"`
+	TonTransfer               OptTonTransferAction           `json:"TonTransfer"`
+	ExtraCurrencyTransfer     OptExtraCurrencyTransferAction `json:"ExtraCurrencyTransfer"`
+	ContractDeploy            OptContractDeployAction        `json:"ContractDeploy"`
+	JettonTransfer            OptJettonTransferAction        `json:"JettonTransfer"`
+	JettonBurn                OptJettonBurnAction            `json:"JettonBurn"`
+	JettonMint                OptJettonMintAction            `json:"JettonMint"`
+	NftItemTransfer           OptNftItemTransferAction       `json:"NftItemTransfer"`
+	Subscribe                 OptSubscriptionAction          `json:"Subscribe"`
+	UnSubscribe               OptUnSubscriptionAction        `json:"UnSubscribe"`
+	AuctionBid                OptAuctionBidAction            `json:"AuctionBid"`
+	NftPurchase               OptNftPurchaseAction           `json:"NftPurchase"`
+	DepositStake              OptDepositStakeAction          `json:"DepositStake"`
+	WithdrawStake             OptWithdrawStakeAction         `json:"WithdrawStake"`
+	WithdrawStakeRequest      OptWithdrawStakeRequestAction  `json:"WithdrawStakeRequest"`
+	ElectionsDepositStake     OptElectionsDepositStakeAction `json:"ElectionsDepositStake"`
+	ElectionsRecoverStake     OptElectionsRecoverStakeAction `json:"ElectionsRecoverStake"`
+	JettonSwap                OptJettonSwapAction            `json:"JettonSwap"`
+	SmartContractExec         OptSmartContractAction         `json:"SmartContractExec"`
+	DomainRenew               OptDomainRenewAction           `json:"DomainRenew"`
+	Purchase                  OptPurchaseAction              `json:"Purchase"`
 	AddExtension              OptAddExtensionAction          `json:"AddExtension"`
 	RemoveExtension           OptRemoveExtensionAction       `json:"RemoveExtension"`
 	SetSignatureAllowedAction OptSetSignatureAllowedAction   `json:"SetSignatureAllowedAction"`
-	GasRelay              OptGasRelayAction              `json:"GasRelay"`
-	SimplePreview         ActionSimplePreview            `json:"simple_preview"`
-	BaseTransactions      []string                       `json:"base_transactions"`
+	GasRelay                  OptGasRelayAction              `json:"GasRelay"`
+	SimplePreview             ActionSimplePreview            `json:"simple_preview"`
+	BaseTransactions          []string                       `json:"base_transactions"`
 }
 
 // GetType returns the value of Type.
