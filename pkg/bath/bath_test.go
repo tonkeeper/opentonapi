@@ -61,6 +61,10 @@ func (m *mockInfoSource) STONfiPools(ctx context.Context, pools []core.STONfiPoo
 	return map[tongo.AccountID]core.STONfiPool{}, nil
 }
 
+func (m *mockInfoSource) SubscriptionInfos(ctx context.Context, ids []core.SubscriptionID) (map[tongo.AccountID]core.SubscriptionInfo, error) {
+	return map[tongo.AccountID]core.SubscriptionInfo{}, nil
+}
+
 func (m *mockInfoSource) DedustPools(ctx context.Context, contracts []tongo.AccountID) (map[tongo.AccountID]core.DedustPool, error) {
 	return map[tongo.AccountID]core.DedustPool{}, nil
 }
@@ -86,6 +90,18 @@ func TestFindActions(t *testing.T) {
 			tongo.MustParseAccountID("EQDYzZmfsrGzhObKJUw4gzdeIxEai3jAFbiGKGwxvxHinaPP"),
 			//liquid withdraw
 			tongo.MustParseAccountID("EQDQ0-rwRJENdk6md9-e8oApwyJJjsIgj9jJnBPQ53ytLGcs"),
+			// subscriptions
+			tongo.MustParseAccountID("0:280e6fcde865ebc2f2619ee00fdc8e11ce69b3e2981e9ca9f4847fd90be94d20"), // wallet V3R1 - reward address
+			tongo.MustParseAccountID("0:b8f8fecda3fca32c0ca2e5791469ba087af68d178e8be19da7aca4362be50ba9"), // wallet V3R2 - withdraw to
+			tongo.MustParseAccountID("0:5b92ca5f8ef8683432c9192c1a7b855f6cb08912c85d029f56faf918cfaa9649"), // wallet V4 - subscriber beneficiary
+			tongo.MustParseAccountID("0:35a74ba451906124a313e5fc00382b98ec81994dd93826a045a7626b0b9be6d5"), // wallet W5 - subscriber beneficiary
+			tongo.MustParseAccountID("0:1c274dc8fec45ebc9828c870b6721b90d89f3a7f864a1126a485997765665f0b"), // V2+W5 1: deploy with payment + prolong with caller + destroy by subscriber
+			tongo.MustParseAccountID("0:6c91b3bb05143c79bf9b375a6abb8cfc0c06f32089e73e32d396b9f57a5ed5b4"), // V2+W5 2: deploy without payment + prolong without caller + destroy by beneficiary
+			tongo.MustParseAccountID("0:e13eee2dacb5c0f522fd504ec37675a3ab9d9381b0ef18bc9b8bb96569e53f21"), // V2+W5 3: deploy with payment + cancel by expire
+			tongo.MustParseAccountID("0:47afe208854e56c1e02e260442d986e848ec7275be2b2870e692bd96d25d11c4"), // V2+V4 1: deploy with payment + prolong with caller + destroy by subscriber
+			tongo.MustParseAccountID("0:a2bf4c19c06a190b16eaeb15fc6fb0e002755a8f4384c97d4acb7908a4fb7580"), // V2+V4 2: deploy without payment + prolong without caller + destroy by subscriber
+			tongo.MustParseAccountID("0:a98161ce093d7da470170150e2493a91199af14269c1de6293fd024f8e977b22"), // V2+V4 3: deploy without payment + destroy by beneficiary
+			tongo.MustParseAccountID("0:2091c7f7e825f33980cc85a25a55afd7831f738acbe5ff92b8885533b03f3d33"), // V2+V4 4: deploy with payment + cancel by expire
 		}),
 		litestorage.WithPreloadBlocks([]tongo.BlockID{
 			// tf nominator deposit
@@ -434,6 +450,76 @@ func TestFindActions(t *testing.T) {
 			name:           "stonfi v2 swap with ref",
 			hash:           "d70fddb4786c04932669bf589ee73c16293115a1927dfbee5b719304232e2e1b",
 			filenamePrefix: "stonfi-v2-swap-ref",
+		},
+		{
+			name:           "subscription V2 + wallet W5 deploy with payment",
+			hash:           "a9c8ffdb11f1d6f80feae77c7fcbefad48dbb95999c3524538d832c5c6a7ff6c",
+			filenamePrefix: "deploy-with-payment-subscription-v2-wallet-w5",
+		},
+		{
+			name:           "subscription V2 + wallet W5 deploy without payment",
+			hash:           "043ae4fb3ef7546262a709aea01a2e4fdfb6fce66826974eeb7d9eaa61659815",
+			filenamePrefix: "deploy-without-payment-subscription-v2-wallet-w5",
+		},
+		{
+			name:           "subscription V2 + wallet W5 prolong with caller",
+			hash:           "faa897623808c6d2f8eaf3effb04d1944451c08323064ab4d11aeb568a2179d7",
+			filenamePrefix: "prolong-with-caller-subscription-v2-wallet-w5",
+		},
+		{
+			name:           "subscription V2 + wallet W5 prolong without caller",
+			hash:           "d877ae7ab945912a8d4d5a2759e747af133c763d3d3749619021b99bf436f794",
+			filenamePrefix: "prolong-without-caller-subscription-v2-wallet-w5",
+		},
+		{
+			name:           "subscription V2 + wallet W5 destroy by subscriber",
+			hash:           "4adceddfffe48e8f58a5a4519ecbdac00b40e1e139e5a147b4a1b884cd26332d",
+			filenamePrefix: "destroy-by-subscriber-subscription-v2-wallet-w5",
+		},
+		{
+			name:           "subscription V2 + wallet W5 destroy by beneficiary",
+			hash:           "fb84cdcd719debf6937720f26c354c8ff0358d978af36ea682b7a24b2581c9e2",
+			filenamePrefix: "destroy-by-beneficiary-subscription-v2-wallet-w5",
+		},
+		{
+			name:           "subscription V2 + wallet W5 cancel by expire",
+			hash:           "4f3309c9e68a860a20451de261e0cd10b5c8d2308c92408814889494405fe6e5",
+			filenamePrefix: "cancel-by-expire-subscription-v2-wallet-w5",
+		},
+		{
+			name:           "subscription V2 + wallet V4 deploy with payment",
+			hash:           "cd3b772e94a122e81fe34acbb59777dabcfef8a4fce60cffc205a6baa13bc4ff",
+			filenamePrefix: "deploy-with-payment-subscription-v2-wallet-v4",
+		},
+		{
+			name:           "subscription V2 + wallet V4 deploy without payment",
+			hash:           "7a0150ed126ec7339af9a76337cf776b3712f69494e1cdefe601bfe7ababee58",
+			filenamePrefix: "deploy-without-payment-subscription-v2-wallet-v4",
+		},
+		{
+			name:           "subscription V2 + wallet V4 prolong with caller",
+			hash:           "b2b96a30aa07124deaead600df33991e68be1e6f45dd1f273b31b571a1a4012d",
+			filenamePrefix: "prolong-with-caller-subscription-v2-wallet-v4",
+		},
+		{
+			name:           "subscription V2 + wallet V4 prolong without caller",
+			hash:           "b25c2e62568777f1ae87cc92bc0764bce0b8fb125c2e6e609f49fbb04156a357",
+			filenamePrefix: "prolong-without-caller-subscription-v2-wallet-v4",
+		},
+		{
+			name:           "subscription V2 + wallet V4 destroy by subscriber",
+			hash:           "41a0256861a62d2ff0146dd48349650e9447f1f6195885c25300dc58e142ac62",
+			filenamePrefix: "destroy-by-subscriber-subscription-v2-wallet-v4",
+		},
+		{
+			name:           "subscription V2 + wallet V4 destroy by beneficiary",
+			hash:           "2cd867233ed7c4c95025ad34db74c4371c12adfd12f025dff786399c5ce269f4",
+			filenamePrefix: "destroy-by-beneficiary-subscription-v2-wallet-v4",
+		},
+		{
+			name:           "subscription V2 + wallet V4 cancel by expire",
+			hash:           "b4ee52a17cda3a1b07f0cb3741f9545aa60385032b81e053092937fca0e7de84",
+			filenamePrefix: "cancel-by-expire-subscription-v2-wallet-v4",
 		},
 	} {
 		t.Run(c.name, func(t *testing.T) {

@@ -6131,6 +6131,12 @@ components:
           $ref: '#/components/schemas/DomainRenewAction'
         Purchase:
           $ref: '#/components/schemas/PurchaseAction'
+        AddExtension:
+          $ref: '#/components/schemas/AddExtensionAction'
+        RemoveExtension:
+          $ref: '#/components/schemas/RemoveExtensionAction'
+        SetSignatureAllowedAction:
+          $ref: '#/components/schemas/SetSignatureAllowedAction'
         GasRelay:
           $ref: '#/components/schemas/GasRelayAction'
         simple_preview:
@@ -6297,6 +6303,40 @@ components:
           $ref: '#/components/schemas/Price'
         metadata:
           $ref: '#/components/schemas/Metadata'
+    AddExtensionAction:
+      type: object
+      required:
+        - wallet
+        - extension
+      properties:
+        wallet:
+          $ref: '#/components/schemas/AccountAddress'
+        extension:
+          type: string
+          format: address
+          example: 0:10C1073837B93FDAAD594284CE8B8EFF7B9CF25427440EB2FC682762E1471365
+    RemoveExtensionAction:
+      type: object
+      required:
+        - wallet
+        - extension
+      properties:
+        wallet:
+          $ref: '#/components/schemas/AccountAddress'
+        extension:
+          type: string
+          format: address
+          example: 0:10C1073837B93FDAAD594284CE8B8EFF7B9CF25427440EB2FC682762E1471365
+    SetSignatureAllowedAction:
+      type: object
+      required:
+        - wallet
+        - allowed
+      properties:
+        wallet:
+          $ref: '#/components/schemas/AccountAddress'
+        allowed:
+          type: boolean
     NftItemTransferAction:
       type: object
       required:
@@ -6417,7 +6457,7 @@ components:
         - subscriber
         - subscription
         - beneficiary
-        - amount
+        - price
         - initial
       properties:
         subscriber:
@@ -6429,10 +6469,13 @@ components:
         beneficiary:
           $ref: '#/components/schemas/AccountAddress'
         amount:
+          deprecated: true
           type: integer
           format: int64
           example: 1000000000
           x-js-format: bigint
+        price:
+          $ref: '#/components/schemas/Price'
         initial:
           type: boolean
           example: false
