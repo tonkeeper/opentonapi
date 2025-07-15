@@ -23,20 +23,20 @@ hash = "sha1-d3486ae9136e7856bc42212385ea797094475802"
 other = "Привет, мир!"
 
 [jettonBurnAction]
-hash = "sha1-98168652a41a4d9a0044029b4c03cbc2606a4f94"
-other = "Сжигание {{.Value}} {{.JettonName}}"
+hash = "sha1-b7bb4990191c009b8aa618eaad3afa224db74245"
+other = "Сжигание {{.Value}}"
 
 [jettonMintAction]
-hash = "sha1-4a789fa79f71339b6144faad63e3b6b1e0e54f7f"
-other = "Минтинг {{.Value}} {{.JettonName}}"
+hash = "sha1-3faab4f59a2edc89432c69f6d9640a6f7cb37471"
+other = "Минтинг {{.Value}}"
 
 [jettonSwapAction]
-hash = "sha1-84af68ffef3b74c3ba384a21586aad7068520603"
-other = "Обмен {{.AmountIn}} {{.JettonIn}} на {{.AmountOut}} {{.JettonOut}}"
+hash = "sha1-7ea85e6169eaaef778be336159631b9a45e5dc07"
+other = "Обмен {{.AmountIn}} на {{.AmountOut}}"
 
 [jettonTransferAction]
-hash = "sha1-ccb6cbae2eb8763be4aa1f21ab5ade08aa88e24d"
-other = "Перевод {{.Value}} {{.JettonName}}"
+hash = "sha1-033820aa9bbe4761f0c6829bb7e2830892920316"
+other = "Перевод {{.Value}}"
 
 [nftPurchaseAction]
 hash = "sha1-cde361711f631c2a2c210f9524ad3212120423ec"
@@ -67,9 +67,13 @@ hash = "sha1-f2a2dd30da61919d98fe81bc156fdbc608a9c25d"
 other = "Вывод {{.Value}} из пула стейкинга"
 
 [withdrawStakeRequestAction]
-hash = "sha1-e368b0eb1ed2eddd20c1c015f0e648325802784b"
+hash = "sha1-c85be28075b77c0cd2bb64047bc157199a6d541d"
 other = "Запрос на вывод {{.Value}} из пула стейкинга"
 
 [domainRenewAction]
 hash = "sha1-6f2b6d4d07c4fa052752815c3e43c56fd1d26576"
 other = "Продление домена {{.Value}}"
+
+[purchaseAction]
+hash = "sha1-980bac6469ccaf2a7cb30f4969696164587599aa"
+other = "Оплата инвойса #{{.InvoiceID}}"

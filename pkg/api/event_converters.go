@@ -637,7 +637,6 @@ func (h *Handler) convertAction(ctx context.Context, viewer *tongo.AccountID, a 
 		simplePreviewData := i18n.Template{}
 		if a.JettonSwap.In.IsTon {
 			swapAction.TonIn = oas.NewOptInt64(a.JettonSwap.In.Amount.Int64())
-			simplePreviewData["JettonIn"] = ""
 			simplePreviewData["AmountIn"] = i18n.FormatTONs(a.JettonSwap.In.Amount.Int64())
 		} else {
 			swapAction.AmountIn = a.JettonSwap.In.Amount.String()
@@ -645,12 +644,10 @@ func (h *Handler) convertAction(ctx context.Context, viewer *tongo.AccountID, a 
 			score, _ := h.score.GetJettonScore(a.JettonSwap.In.JettonMaster)
 			preview := jettonPreview(a.JettonSwap.In.JettonMaster, jettonInMeta, score)
 			swapAction.JettonMasterIn.SetTo(preview)
-			simplePreviewData["JettonIn"] = preview.GetSymbol()
 			simplePreviewData["AmountIn"] = i18n.FormatTokens(a.JettonSwap.In.Amount, int32(jettonInMeta.Decimals), jettonInMeta.Symbol)
 		}
 		if a.JettonSwap.Out.IsTon {
 			swapAction.TonOut = oas.NewOptInt64(a.JettonSwap.Out.Amount.Int64())
-			simplePreviewData["JettonOut"] = ""
 			simplePreviewData["AmountOut"] = i18n.FormatTONs(a.JettonSwap.Out.Amount.Int64())
 		} else {
 			swapAction.AmountOut = a.JettonSwap.Out.Amount.String()
@@ -658,7 +655,6 @@ func (h *Handler) convertAction(ctx context.Context, viewer *tongo.AccountID, a 
 			score, _ := h.score.GetJettonScore(a.JettonSwap.Out.JettonMaster)
 			preview := jettonPreview(a.JettonSwap.Out.JettonMaster, jettonOutMeta, score)
 			swapAction.JettonMasterOut.SetTo(preview)
-			simplePreviewData["JettonOut"] = preview.GetSymbol()
 			simplePreviewData["AmountOut"] = i18n.FormatTokens(a.JettonSwap.Out.Amount, int32(jettonOutMeta.Decimals), jettonOutMeta.Symbol)
 		}
 
@@ -678,7 +674,7 @@ func (h *Handler) convertAction(ctx context.Context, viewer *tongo.AccountID, a 
 			Description: i18n.T(acceptLanguage.Value, i18n.C{
 				DefaultMessage: &i18n.M{
 					ID:    "jettonSwapAction",
-					Other: "Swapping {{.AmountIn}} {{.JettonIn}} for {{.AmountOut}} {{.JettonOut}}",
+					Other: "Swapping {{.AmountIn}} for {{.AmountOut}}",
 				},
 				TemplateData: simplePreviewData,
 			}),
