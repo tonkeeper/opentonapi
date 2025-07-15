@@ -9,8 +9,6 @@ import (
 	"net/http"
 	"sort"
 
-	"golang.org/x/exp/maps"
-
 	"github.com/tonkeeper/tongo/contract/elector"
 	"github.com/tonkeeper/tongo/tvm"
 
@@ -117,71 +115,15 @@ func (h *Handler) GetBlockchainMasterchainShards(ctx context.Context, params oas
 	return &res, nil
 }
 
-func (h *Handler) blocksDiff(ctx context.Context, masterchainSeqno int32) ([]ton.BlockID, error) {
-	shards, err := h.storage.GetBlockShards(ctx, ton.BlockID{Shard: 0x8000000000000000, Seqno: uint32(masterchainSeqno), Workchain: -1})
-	if errors.Is(err, core.ErrEntityNotFound) {
-		return nil, toError(http.StatusNotFound, err)
-	}
-	if err != nil {
-		return nil, toError(http.StatusInternalServerError, err)
-	}
-	prevShards, err := h.storage.GetBlockShards(ctx, ton.BlockID{Shard: 0x8000000000000000, Seqno: uint32(masterchainSeqno) - 1, Workchain: -1})
-	if errors.Is(err, core.ErrEntityNotFound) {
-		return nil, toError(http.StatusNotFound, err)
-	}
-	if err != nil {
-		return nil, toError(http.StatusInternalServerError, err)
-	}
-	blocks := []ton.BlockID{{Shard: 0x8000000000000000, Seqno: uint32(masterchainSeqno), Workchain: -1}}
-
-	for _, s := range shards {
-		missedBlocks, err := findMissedBlocks(ctx, h.storage, s, prevShards)
-		if err != nil {
-			return nil, err
-		}
-		blocks = append(blocks, missedBlocks...)
-	}
-
-	return blocks, nil
-}
-
-func findMissedBlocks(ctx context.Context, s storage, id ton.BlockID, prev []ton.BlockID) ([]ton.BlockID, error) {
-	for _, p := range prev {
-		if id.Shard == p.Shard && id.Workchain == p.Workchain {
-			blocks := make([]ton.BlockID, 0, int(id.Seqno-p.Seqno))
-			for i := p.Seqno + 1; i <= id.Seqno; i++ {
-				blocks = append(blocks, ton.BlockID{Workchain: p.Workchain, Shard: p.Shard, Seqno: i})
-			}
-			return blocks, nil
-		}
-	}
-	blocks := []ton.BlockID{id}
-	header, err := s.GetBlockHeader(ctx, id)
-	if err != nil {
-		return nil, err
-	}
-	for _, p := range header.PrevBlocks {
-		missed, err := findMissedBlocks(ctx, s, p.BlockID, prev)
-		if err != nil {
-			return nil, err
-		}
-		blocks = append(blocks, missed...)
-	}
-	uniq := make(map[ton.BlockID]struct{}, len(blocks))
-	for i := range blocks {
-		uniq[blocks[i]] = struct{}{}
-	}
-	if len(blocks) == len(uniq) {
-		return blocks, nil
-	}
-	return maps.Keys(uniq), nil
-}
-
 func (h *Handler) GetBlockchainMasterchainBlocks(ctx context.Context, params oas.GetBlockchainMasterchainBlocksParams) (*oas.BlockchainBlocks, error) {
-	blockIDs, err := h.blocksDiff(ctx, params.MasterchainSeqno)
+	blockIDs, err := h.storage.GetBlockIDsForMasterchain(ctx, uint32(params.MasterchainSeqno))
 	if err != nil {
-		return nil, err
+		return nil, toError(http.StatusInternalServerError, err)
 	}
+	if len(blockIDs) == 0 {
+		return nil, toError(http.StatusNotFound, fmt.Errorf("no blocks found for masterchain seqno %d", params.MasterchainSeqno))
+	}
+
 	result := oas.BlockchainBlocks{
 		Blocks: make([]oas.BlockchainBlock, len(blockIDs)),
 	}
@@ -199,10 +141,14 @@ func (h *Handler) GetBlockchainMasterchainBlocks(ctx context.Context, params oas
 }
 
 func (h *Handler) GetBlockchainMasterchainTransactions(ctx context.Context, params oas.GetBlockchainMasterchainTransactionsParams) (*oas.Transactions, error) {
-	blockIDs, err := h.blocksDiff(ctx, params.MasterchainSeqno)
+	blockIDs, err := h.storage.GetBlockIDsForMasterchain(ctx, uint32(params.MasterchainSeqno))
 	if err != nil {
-		return nil, err
+		return nil, toError(http.StatusInternalServerError, err)
 	}
+	if len(blockIDs) == 0 {
+		return nil, toError(http.StatusNotFound, fmt.Errorf("no blocks found for masterchain seqno %d", params.MasterchainSeqno))
+	}
+
 	var result oas.Transactions
 	for _, id := range blockIDs {
 		txs, err := h.storage.GetBlockTransactions(ctx, id)

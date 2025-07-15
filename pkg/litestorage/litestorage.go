@@ -23,6 +23,7 @@ import (
 	"github.com/tonkeeper/tongo/tlb"
 	"github.com/tonkeeper/tongo/ton"
 	"go.uber.org/zap"
+	"golang.org/x/exp/maps"
 
 	"github.com/tonkeeper/opentonapi/pkg/blockchain/indexer"
 	"github.com/tonkeeper/opentonapi/pkg/cache"
@@ -574,4 +575,93 @@ func (s *LiteStorage) GetBlockchainBlock(ctx context.Context, id ton.BlockID) ([
 		return nil, err
 	}
 	return block.Data, nil
+}
+
+func (s *LiteStorage) GetBlockIDsForMasterchain(ctx context.Context, masterSeqno uint32) ([]ton.BlockID, error) {
+	master := ton.BlockID{Workchain: -1, Shard: 0x8000000000000000, Seqno: masterSeqno}
+	masterBlockID, _, err := s.client.LookupBlock(ctx, master, 1, nil, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to lookup master block: %w", err)
+	}
+
+	currShardsInfo, err := s.client.GetAllShardsInfo(ctx, masterBlockID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get shards for master %d: %w", masterSeqno, err)
+	}
+
+	prev := ton.BlockID{Workchain: -1, Shard: 0x8000000000000000, Seqno: masterSeqno - 1}
+	prevBlockID, _, err := s.client.LookupBlock(ctx, prev, 1, nil, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to lookup previous master block: %w", err)
+	}
+
+	prevShardsInfo, err := s.client.GetAllShardsInfo(ctx, prevBlockID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get shards for master %d: %w", masterSeqno-1, err)
+	}
+
+	return s.diffFromShards(ctx, masterBlockID.BlockID, currShardsInfo, prevShardsInfo)
+}
+
+func (s *LiteStorage) diffFromShards(ctx context.Context, master ton.BlockID, curr []ton.BlockIDExt, prev []ton.BlockIDExt) ([]ton.BlockID, error) {
+	blocks := []ton.BlockID{master}
+
+	prevShards := make([]ton.BlockID, 0, len(prev))
+	for _, p := range prev {
+		prevShards = append(prevShards, p.BlockID)
+	}
+
+	for _, shard := range curr {
+		missed, err := findMissedBlocks(ctx, s, shard.BlockID, prevShards)
+		if err != nil {
+			return nil, err
+		}
+		blocks = append(blocks, missed...)
+	}
+
+	uniq := make(map[ton.BlockID]struct{}, len(blocks))
+	result := make([]ton.BlockID, 0, len(blocks))
+	for _, b := range blocks {
+		if _, ok := uniq[b]; !ok {
+			uniq[b] = struct{}{}
+			result = append(result, b)
+		}
+	}
+	return result, nil
+}
+
+func findMissedBlocks(ctx context.Context, s *LiteStorage, id ton.BlockID, prev []ton.BlockID) ([]ton.BlockID, error) {
+	for _, p := range prev {
+		if id.Shard == p.Shard && id.Workchain == p.Workchain {
+			blocks := make([]ton.BlockID, 0, int(id.Seqno-p.Seqno))
+			for i := p.Seqno + 1; i <= id.Seqno; i++ {
+				blocks = append(blocks, ton.BlockID{
+					Workchain: p.Workchain,
+					Shard:     p.Shard,
+					Seqno:     i,
+				})
+			}
+			return blocks, nil
+		}
+	}
+
+	var result []ton.BlockID
+	result = append(result, id)
+
+	header, err := s.GetBlockHeader(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	for _, p := range header.PrevBlocks {
+		missed, err := findMissedBlocks(ctx, s, p.BlockID, prev)
+		if err != nil {
+			return nil, err
+		}
+		result = append(result, missed...)
+	}
+	uniq := make(map[ton.BlockID]struct{}, len(result))
+	for _, b := range result {
+		uniq[b] = struct{}{}
+	}
+	return maps.Keys(uniq), nil
 }
