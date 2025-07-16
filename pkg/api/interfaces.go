@@ -3,8 +3,9 @@ package api
 import (
 	"context"
 	"crypto/ed25519"
-	"github.com/google/uuid"
 	"time"
+
+	"github.com/google/uuid"
 
 	"github.com/tonkeeper/opentonapi/pkg/gasless"
 	"github.com/tonkeeper/opentonapi/pkg/oas"
@@ -42,6 +43,7 @@ type storage interface {
 	GetBlockShards(ctx context.Context, id tongo.BlockID) ([]ton.BlockID, error)
 	LastMasterchainBlockHeader(ctx context.Context) (*core.BlockHeader, error)
 	GetBlockchainBlock(ctx context.Context, blockID ton.BlockID) ([]byte, error)
+	GetBlockIDsForMasterchain(ctx context.Context, masterSeqno uint32) ([]ton.BlockID, error)
 	GetTransaction(ctx context.Context, hash tongo.Bits256) (*core.Transaction, error)
 	SearchTransactionByMessageHash(ctx context.Context, hash tongo.Bits256) (*tongo.Bits256, error)
 	// GetBlockTransactions returns low-level information about transactions in a particular block.
