@@ -468,9 +468,9 @@ func (h *Handler) EmulateMessageToAccountEvent(ctx context.Context, request *oas
 			txemulator.WithConfigBase64(configBase64),
 			txemulator.WithLimit(1100),
 		}
-		depth := 1
+		depth := 0
 		if params.IgnoreSignatureCheck.Value {
-			depth = 1100
+			depth = 1000000
 		}
 		emulator, err := txemulator.NewTraceBuilder(options...)
 		if err != nil {
@@ -532,9 +532,9 @@ func (h *Handler) EmulateMessageToEvent(ctx context.Context, request *oas.Emulat
 			txemulator.WithAccountsSource(h.storage),
 			txemulator.WithConfigBase64(configBase64),
 		}
-		depth := 1
+		depth := 0
 		if params.IgnoreSignatureCheck.Value {
-			depth = 1000
+			depth = 1000000
 		}
 
 		emulator, err := txemulator.NewTraceBuilder(options...)
@@ -599,9 +599,9 @@ func (h *Handler) EmulateMessageToTrace(ctx context.Context, request *oas.Emulat
 			txemulator.WithAccountsSource(h.storage),
 			txemulator.WithConfigBase64(configBase64),
 		}
-		depth := 1
+		depth := 0
 		if params.IgnoreSignatureCheck.Value {
-			depth = 1000
+			depth = 1000000
 		}
 
 		emulator, err := txemulator.NewTraceBuilder(options...)
