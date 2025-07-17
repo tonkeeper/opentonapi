@@ -190,12 +190,12 @@ func (h *Handler) convertActionExtraCurrencyTransfer(t *bath.ExtraCurrencyTransf
 			Image:    meta.Image,
 		},
 	})
-	value := ScaleJettons(big.Int(t.Amount), meta.Decimals)
+	value := i18n.FormatTokens(big.Int(t.Amount), int32(meta.Decimals), meta.Symbol)
 	simplePreview := oas.ActionSimplePreview{
 		Name:        "Extra Currency Transfer",
 		Description: "", // TODO: add description
 		Accounts:    distinctAccounts(viewer, h.addressBook, &t.Sender, &t.Recipient),
-		Value:       oas.NewOptString(fmt.Sprintf("%v %v", value.String(), meta.Symbol)),
+		Value:       oas.NewOptString(value),
 	}
 	return action, simplePreview
 }
@@ -238,23 +238,21 @@ func (h *Handler) convertActionJettonTransfer(ctx context.Context, t *bath.Jetto
 		Comment:          g.Opt(t.Comment),
 		EncryptedComment: convertEncryptedComment(t.EncryptedComment),
 	})
-	amount := Scale(t.Amount, meta.Decimals)
-	amountString := amount.String()
+	value := i18n.FormatTokens(big.Int(t.Amount), int32(meta.Decimals), meta.Symbol)
 
 	simplePreview := oas.ActionSimplePreview{
 		Name: "Jetton Transfer",
 		Description: i18n.T(acceptLanguage, i18n.C{
 			DefaultMessage: &i18n.M{
 				ID:    "jettonTransferAction",
-				Other: "Transferring {{.Value}} {{.JettonName}}",
+				Other: "Transferring {{.Value}}",
 			},
 			TemplateData: i18n.Template{
-				"Value":      amountString,
-				"JettonName": meta.Name,
+				"Value": value,
 			},
 		}),
 		Accounts: distinctAccounts(viewer, h.addressBook, t.Recipient, t.Sender, &t.Jetton),
-		Value:    oas.NewOptString(fmt.Sprintf("%v %v", amountString, meta.Name)),
+		Value:    oas.NewOptString(value),
 	}
 	if len(preview.Image) > 0 {
 		simplePreview.ValueImage = oas.NewOptString(preview.Image)
@@ -274,21 +272,20 @@ func (h *Handler) convertActionJettonMint(ctx context.Context, m *bath.JettonMin
 		RecipientsWallet: m.RecipientsWallet.ToRaw(),
 	})
 
-	amount := Scale(m.Amount, meta.Decimals).String()
+	value := i18n.FormatTokens(big.Int(m.Amount), int32(meta.Decimals), meta.Symbol)
 	simplePreview := oas.ActionSimplePreview{
 		Name: "Jetton Mint",
 		Description: i18n.T(acceptLanguage, i18n.C{
 			DefaultMessage: &i18n.M{
 				ID:    "jettonMintAction",
-				Other: "Minting {{.Value}} {{.JettonName}}",
+				Other: "Minting {{.Value}}",
 			},
 			TemplateData: i18n.Template{
-				"Value":      amount,
-				"JettonName": meta.Name,
+				"Value": value,
 			},
 		}),
 		Accounts: distinctAccounts(viewer, h.addressBook, &m.Jetton, &m.Recipient),
-		Value:    oas.NewOptString(fmt.Sprintf("%v %v", amount, meta.Name)),
+		Value:    oas.NewOptString(value),
 	}
 	if len(preview.Image) > 0 {
 		simplePreview.ValueImage = oas.NewOptString(preview.Image)
@@ -416,7 +413,7 @@ func (h *Handler) convertPurchaseAction(ctx context.Context, p *bath.PurchaseAct
 		InvoiceID:   p.InvoiceID.String(),
 		Amount:      price,
 	}
-	value := ScaleJettons(p.Price.Amount, price.Decimals).String()
+	value := i18n.FormatTokens(p.Price.Amount, int32(price.Decimals), price.TokenName)
 	simplePreview := oas.ActionSimplePreview{
 		Name: "Purchase",
 		Description: i18n.T(acceptLanguage, i18n.C{
@@ -429,7 +426,7 @@ func (h *Handler) convertPurchaseAction(ctx context.Context, p *bath.PurchaseAct
 			},
 		}),
 		Accounts: distinctAccounts(viewer, h.addressBook, &p.Source, &p.Destination),
-		Value:    oas.NewOptString(fmt.Sprintf("%v %v", value, price.TokenName)),
+		Value:    oas.NewOptString(value),
 	}
 	inv, err := h.storage.GetInvoice(ctx, p.Source, p.Destination, p.InvoiceID, currency)
 	if err == nil {
@@ -485,21 +482,20 @@ func (h *Handler) convertAction(ctx context.Context, viewer *tongo.AccountID, a 
 		if len(preview.Image) > 0 {
 			action.SimplePreview.ValueImage = oas.NewOptString(preview.Image)
 		}
-		amount := Scale(a.JettonBurn.Amount, meta.Decimals).String()
+		value := i18n.FormatTokens(big.Int(a.JettonBurn.Amount), int32(meta.Decimals), meta.Symbol)
 		action.SimplePreview = oas.ActionSimplePreview{
 			Name: "Jetton Burn",
 			Description: i18n.T(acceptLanguage.Value, i18n.C{
 				DefaultMessage: &i18n.M{
 					ID:    "jettonBurnAction",
-					Other: "Burning {{.Value}} {{.JettonName}}",
+					Other: "Burning {{.Value}}",
 				},
 				TemplateData: i18n.Template{
-					"Value":      amount,
-					"JettonName": meta.Name,
+					"Value": value,
 				},
 			}),
 			Accounts: distinctAccounts(viewer, h.addressBook, &a.JettonBurn.Sender, &a.JettonBurn.Jetton),
-			Value:    oas.NewOptString(fmt.Sprintf("%v %v", amount, meta.Name)),
+			Value:    oas.NewOptString(value),
 		}
 	case bath.Subscription:
 		action.Subscribe.SetTo(oas.SubscriptionAction{
@@ -554,7 +550,7 @@ func (h *Handler) convertAction(ctx context.Context, viewer *tongo.AccountID, a 
 		}
 	case bath.NftPurchase:
 		price := h.convertPrice(ctx, a.NftPurchase.Price)
-		value := ScaleJettons(a.NftPurchase.Price.Amount, price.Decimals).String()
+		value := i18n.FormatTokens(a.NftPurchase.Price.Amount, int32(price.Decimals), price.TokenName)
 		items, err := h.storage.GetNFTs(ctx, []tongo.AccountID{a.NftPurchase.Nft})
 		if err != nil {
 			return oas.Action{}, err
@@ -582,7 +578,7 @@ func (h *Handler) convertAction(ctx context.Context, viewer *tongo.AccountID, a 
 				},
 			}),
 			Accounts:   distinctAccounts(viewer, h.addressBook, &a.NftPurchase.Nft, &a.NftPurchase.Buyer),
-			Value:      oas.NewOptString(fmt.Sprintf("%v %v", value, price.TokenName)),
+			Value:      oas.NewOptString(value),
 			ValueImage: oas.NewOptString(nftImage),
 		}
 		action.NftPurchase.SetTo(oas.NftPurchaseAction{
@@ -641,7 +637,6 @@ func (h *Handler) convertAction(ctx context.Context, viewer *tongo.AccountID, a 
 		simplePreviewData := i18n.Template{}
 		if a.JettonSwap.In.IsTon {
 			swapAction.TonIn = oas.NewOptInt64(a.JettonSwap.In.Amount.Int64())
-			simplePreviewData["JettonIn"] = ""
 			simplePreviewData["AmountIn"] = i18n.FormatTONs(a.JettonSwap.In.Amount.Int64())
 		} else {
 			swapAction.AmountIn = a.JettonSwap.In.Amount.String()
@@ -649,12 +644,10 @@ func (h *Handler) convertAction(ctx context.Context, viewer *tongo.AccountID, a 
 			score, _ := h.score.GetJettonScore(a.JettonSwap.In.JettonMaster)
 			preview := jettonPreview(a.JettonSwap.In.JettonMaster, jettonInMeta, score)
 			swapAction.JettonMasterIn.SetTo(preview)
-			simplePreviewData["JettonIn"] = preview.GetSymbol()
-			simplePreviewData["AmountIn"] = ScaleJettons(a.JettonSwap.In.Amount, jettonInMeta.Decimals).String()
+			simplePreviewData["AmountIn"] = i18n.FormatTokens(a.JettonSwap.In.Amount, int32(jettonInMeta.Decimals), jettonInMeta.Symbol)
 		}
 		if a.JettonSwap.Out.IsTon {
 			swapAction.TonOut = oas.NewOptInt64(a.JettonSwap.Out.Amount.Int64())
-			simplePreviewData["JettonOut"] = ""
 			simplePreviewData["AmountOut"] = i18n.FormatTONs(a.JettonSwap.Out.Amount.Int64())
 		} else {
 			swapAction.AmountOut = a.JettonSwap.Out.Amount.String()
@@ -662,8 +655,7 @@ func (h *Handler) convertAction(ctx context.Context, viewer *tongo.AccountID, a 
 			score, _ := h.score.GetJettonScore(a.JettonSwap.Out.JettonMaster)
 			preview := jettonPreview(a.JettonSwap.Out.JettonMaster, jettonOutMeta, score)
 			swapAction.JettonMasterOut.SetTo(preview)
-			simplePreviewData["JettonOut"] = preview.GetSymbol()
-			simplePreviewData["AmountOut"] = ScaleJettons(a.JettonSwap.Out.Amount, jettonOutMeta.Decimals).String()
+			simplePreviewData["AmountOut"] = i18n.FormatTokens(a.JettonSwap.Out.Amount, int32(jettonOutMeta.Decimals), jettonOutMeta.Symbol)
 		}
 
 		switch a.JettonSwap.Dex {
@@ -682,7 +674,7 @@ func (h *Handler) convertAction(ctx context.Context, viewer *tongo.AccountID, a 
 			Description: i18n.T(acceptLanguage.Value, i18n.C{
 				DefaultMessage: &i18n.M{
 					ID:    "jettonSwapAction",
-					Other: "Swapping {{.AmountIn}} {{.JettonIn}} for {{.AmountOut}} {{.JettonOut}}",
+					Other: "Swapping {{.AmountIn}} for {{.AmountOut}}",
 				},
 				TemplateData: simplePreviewData,
 			}),
@@ -691,7 +683,7 @@ func (h *Handler) convertAction(ctx context.Context, viewer *tongo.AccountID, a 
 	case bath.AuctionBid:
 		var nft oas.OptNftItem
 		price := h.convertPrice(ctx, a.AuctionBid.Amount)
-		value := ScaleJettons(a.AuctionBid.Amount.Amount, price.Decimals).String()
+		value := i18n.FormatTokens(a.AuctionBid.Amount.Amount, int32(price.Decimals), price.TokenName)
 		if a.AuctionBid.Nft == nil && a.AuctionBid.NftAddress != nil {
 			n, err := h.storage.GetNFTs(ctx, []tongo.AccountID{*a.AuctionBid.NftAddress})
 			if err != nil {
@@ -724,7 +716,7 @@ func (h *Handler) convertAction(ctx context.Context, viewer *tongo.AccountID, a 
 					Other: "Bidding {{.Amount}} for {{.NftName}}",
 				},
 				TemplateData: i18n.Template{
-					"Amount":  oas.NewOptString(fmt.Sprintf("%v %v", value, price.TokenName)),
+					"Amount":  oas.NewOptString(value),
 					"NftName": optionalFromMeta(nft.Value.Metadata, "name"),
 				},
 			}),
