@@ -468,14 +468,15 @@ func (h *Handler) EmulateMessageToAccountEvent(ctx context.Context, request *oas
 			txemulator.WithConfigBase64(configBase64),
 			txemulator.WithLimit(1100),
 		}
-		if !params.IgnoreSignatureCheck.Value {
-			options = append(options, txemulator.WithSignatureCheck())
+		depth := 0
+		if params.IgnoreSignatureCheck.Value {
+			depth = 1000000
 		}
 		emulator, err := txemulator.NewTraceBuilder(options...)
 		if err != nil {
 			return nil, toError(http.StatusInternalServerError, err)
 		}
-		tree, err := emulator.Run(ctx, m)
+		tree, err := emulator.Run(ctx, m, depth)
 		if err != nil {
 			return nil, toProperEmulationError(err)
 		}
@@ -531,15 +532,16 @@ func (h *Handler) EmulateMessageToEvent(ctx context.Context, request *oas.Emulat
 			txemulator.WithAccountsSource(h.storage),
 			txemulator.WithConfigBase64(configBase64),
 		}
-		if !params.IgnoreSignatureCheck.Value {
-			options = append(options, txemulator.WithSignatureCheck())
+		depth := 0
+		if params.IgnoreSignatureCheck.Value {
+			depth = 1000000
 		}
 
 		emulator, err := txemulator.NewTraceBuilder(options...)
 		if err != nil {
 			return nil, toError(http.StatusInternalServerError, err)
 		}
-		tree, err := emulator.Run(ctx, m)
+		tree, err := emulator.Run(ctx, m, depth)
 		if err != nil {
 			return nil, toProperEmulationError(err)
 		}
@@ -597,15 +599,16 @@ func (h *Handler) EmulateMessageToTrace(ctx context.Context, request *oas.Emulat
 			txemulator.WithAccountsSource(h.storage),
 			txemulator.WithConfigBase64(configBase64),
 		}
-		if !params.IgnoreSignatureCheck.Value {
-			options = append(options, txemulator.WithSignatureCheck())
+		depth := 0
+		if params.IgnoreSignatureCheck.Value {
+			depth = 1000000
 		}
 
 		emulator, err := txemulator.NewTraceBuilder(options...)
 		if err != nil {
 			return nil, toError(http.StatusInternalServerError, err)
 		}
-		tree, err := emulator.Run(ctx, m)
+		tree, err := emulator.Run(ctx, m, depth)
 		if err != nil {
 			return nil, toProperEmulationError(err)
 		}
@@ -751,7 +754,7 @@ func (h *Handler) EmulateMessageToWallet(ctx context.Context, request *oas.Emula
 		if err != nil {
 			return nil, toError(http.StatusInternalServerError, err)
 		}
-		tree, err := emulator.Run(ctx, m)
+		tree, err := emulator.Run(ctx, m, 1)
 		if err != nil {
 			return nil, toProperEmulationError(err)
 		}
