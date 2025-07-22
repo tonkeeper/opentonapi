@@ -531,8 +531,8 @@ func convertStonFiPoolResponse(respBody []byte) ([]Pool, []LpAsset, error) {
 				// Default to XYInv; no additional parameters required
 			case "weighted_const_product":
 				pool.Invariant = WXYInv
-				pool.Assets[0].Weight = additional / 1e18
-				pool.Assets[1].Weight = 1 - pool.Assets[0].Weight
+				pool.Assets[1].Weight = additional / 1e18
+				pool.Assets[0].Weight = 1 - pool.Assets[1].Weight
 			case "weighted_stableswap":
 				pool.Invariant = WRStableSwapInv
 				pool.Amp = additional / 1e18
@@ -542,12 +542,12 @@ func convertStonFiPoolResponse(respBody []byte) ([]Pool, []LpAsset, error) {
 				if pool.Rate, err = strconv.ParseFloat(record[12], 64); err != nil {
 					return Pool{}, err
 				}
-				if pool.Assets[0].Weight, err = strconv.ParseFloat(record[13], 64); err != nil {
+				if pool.Assets[1].Weight, err = strconv.ParseFloat(record[13], 64); err != nil {
 					return Pool{}, err
 				}
 				pool.Rate /= 1e18
-				pool.Assets[0].Weight /= 1e18
-				pool.Assets[1].Weight = 1 - pool.Assets[0].Weight
+				pool.Assets[1].Weight /= 1e18
+				pool.Assets[0].Weight = 1 - pool.Assets[1].Weight
 			}
 		}
 		return pool, nil
