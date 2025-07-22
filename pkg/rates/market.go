@@ -16,6 +16,8 @@ import (
 	"time"
 
 	"github.com/tonkeeper/opentonapi/pkg/references"
+	"github.com/tonkeeper/tongo/boc"
+	"github.com/tonkeeper/tongo/tlb"
 	"github.com/tonkeeper/tongo/ton"
 	"golang.org/x/exp/maps"
 	"golang.org/x/exp/slog"
@@ -23,27 +25,31 @@ import (
 
 // List of services used to calculate various prices
 const (
-	bitfinex string = "Bitfinex"
-	gateio   string = "Gate.io"
-	bybit    string = "Bybit"
-	kucoin   string = "KuCoin"
-	okx      string = "OKX"
-	huobi    string = "Huobi"
-	dedust   string = "DeDust"
-	stonfiV1 string = "STON.fi v1"
-	stonfiV2 string = "STON.fi v2"
-	coinbase string = "Coinbase"
+	bitfinex   string = "Bitfinex"
+	gateio     string = "Gate.io"
+	bybit      string = "Bybit"
+	kucoin     string = "KuCoin"
+	okx        string = "OKX"
+	huobi      string = "Huobi"
+	dedust     string = "DeDust"
+	stonfiV1   string = "STON.fi v1"
+	stonfiV2   string = "STON.fi v2"
+	bidask     string = "Bidask"
+	swapCoffee string = "SwapCoffee"
+	coinbase   string = "Coinbase"
 )
 
 type Invariant int
 
 // List of available pools' invariants
 const (
-	XYInv          Invariant = iota
-	X3YInv         Invariant = iota
-	IterativeInv   Invariant = iota
-	WXYInv         Invariant = iota
-	WStableSwapInv Invariant = iota
+	XYInv           Invariant = iota
+	X3YInv          Invariant = iota
+	StableSwapInv   Invariant = iota
+	WXYInv          Invariant = iota // xy with weight
+	WStableSwapInv  Invariant = iota // stable swap with weight
+	WRStableSwapInv Invariant = iota // stable swap with weight and rate
+	SqrtPInv        Invariant = iota
 )
 
 // defaultMinReserve specifies the minimum jetton reserves (equivalent to TON) for which prices can be determined
@@ -60,6 +66,7 @@ type Asset struct {
 	Account      ton.AccountID
 	Decimals     int
 	Reserve      float64
+	Weight       float64 // Additional parameter for weighted pools invariants
 	HoldersCount int
 }
 
@@ -67,9 +74,9 @@ type Asset struct {
 type Pool struct {
 	Assets    []Asset
 	Invariant Invariant // Pool's invariant (x*y, x^3*y + x*y^3 etc.)
-	Amp       float64   // Additional parameter for stable swap (iterative) pool invariant
-	Weight    float64   // Additional parameter for weighted pools invariants
-	Rate      float64   // Additional parameter for wighted stable swap pool invariant
+	Amp       float64   // Additional parameter for stable swap (iterative) pool invariants
+	Rate      float64   // Additional parameter for rated pools invariants
+	SqrtP     big.Float // Additional parameter for sqrt price pools invariants
 }
 
 // LpAsset represents a liquidity provider asset that holds a collection of assets in a pool
@@ -466,6 +473,11 @@ func (m *Mock) getJettonPricesFromDex(pools map[ton.AccountID]float64) map[ton.A
 			URL:                   m.StonFiV2StableSwapResultUrl,
 			PoolResponseConverter: convertStonFiPoolResponse,
 		},
+		{
+			Name:                  swapCoffee,
+			URL:                   m.SwapCoffeeResultUrl,
+			PoolResponseConverter: convertSwapCoffeePoolResponse,
+		},
 	}
 	var actualAssets []Pool
 	var actualLpAssets []LpAsset
@@ -500,7 +512,7 @@ func (m *Mock) getJettonPricesFromDex(pools map[ton.AccountID]float64) map[ton.A
 	for attempt := 0; attempt < 3; attempt++ {
 		for _, assets := range assetPairs {
 			for _, asset := range assets {
-				accountID, price := calculatePoolPrice(asset.Assets[0], asset.Assets[1], pools, asset.Invariant, asset.Amp, asset.Weight, asset.Rate)
+				accountID, price := calculatePoolPrice(asset.Assets[0], asset.Assets[1], pools, asset.Invariant, asset.Amp, asset.Rate, asset.SqrtP)
 				if price == 0 {
 					continue
 				}
@@ -599,15 +611,16 @@ func convertStonFiPoolResponse(respBody []byte) ([]Pool, []LpAsset, error) {
 			poolType := record[14]
 			switch poolType {
 			case "stableswap":
-				pool.Invariant = IterativeInv
+				pool.Invariant = StableSwapInv
 				pool.Amp = additional
 			case "constant_product":
 				// Default to XYInv; no additional parameters required
 			case "weighted_const_product":
 				pool.Invariant = WXYInv
-				pool.Weight = additional / 1e18
+				pool.Assets[1].Weight = additional / 1e18
+				pool.Assets[0].Weight = 1 - pool.Assets[1].Weight
 			case "weighted_stableswap":
-				pool.Invariant = WStableSwapInv
+				pool.Invariant = WRStableSwapInv
 				pool.Amp = additional / 1e18
 				if record[12] == "NULL" || record[13] == "NULL" {
 					return Pool{}, errors.New("missing rate or w0 for weighted stable swap pool")
@@ -615,11 +628,12 @@ func convertStonFiPoolResponse(respBody []byte) ([]Pool, []LpAsset, error) {
 				if pool.Rate, err = strconv.ParseFloat(record[12], 64); err != nil {
 					return Pool{}, err
 				}
-				if pool.Weight, err = strconv.ParseFloat(record[13], 64); err != nil {
+				if pool.Assets[1].Weight, err = strconv.ParseFloat(record[13], 64); err != nil {
 					return Pool{}, err
 				}
 				pool.Rate /= 1e18
-				pool.Weight /= 1e18
+				pool.Assets[1].Weight /= 1e18
+				pool.Assets[0].Weight = 1 - pool.Assets[1].Weight
 			}
 		}
 		return pool, nil
@@ -817,6 +831,303 @@ func convertDeDustPoolResponse(respBody []byte) ([]Pool, []LpAsset, error) {
 	return actualAssets, maps.Values(actualLpAssets), nil
 }
 
+func convertSwapCoffeePoolResponse(respBody []byte) ([]Pool, []LpAsset, error) {
+	reader := csv.NewReader(bytes.NewReader(respBody))
+	records, err := reader.ReadAll()
+	if err != nil {
+		return nil, nil, err
+	}
+	parseDecimals := func(meta string) (int, error) {
+		if meta == "NULL" {
+			return defaultDecimals, nil
+		}
+		converted := make(map[string]any)
+		if err = json.Unmarshal([]byte(meta), &converted); err != nil {
+			return 0, err
+		}
+		value, ok := converted["decimals"]
+		if !ok || value == "NaN" {
+			value = fmt.Sprintf("%d", defaultDecimals)
+		}
+		decimals, err := strconv.Atoi(value.(string))
+		if err != nil {
+			return 0, err
+		}
+		return decimals, nil
+	}
+	parseAssets := func(record []string) (Pool, error) {
+		var firstAsset, secondAsset Asset
+		switch {
+		// If the column asset_1_native contains true,
+		// then we consider this token as a pool to TON
+		case record[1] == "true":
+			firstAsset = Asset{Account: references.PTonV1}
+			secondAccountID, err := ton.ParseAccountID(record[4])
+			if err != nil {
+				return Pool{}, err
+			}
+			secondAsset = Asset{Account: secondAccountID}
+			// If the column asset_2_native contains true,
+			// then we consider this token as a pool to TON
+		case record[3] == "true":
+			firstAccountID, err := ton.ParseAccountID(record[2])
+			if err != nil {
+				return Pool{}, err
+			}
+			firstAsset = Asset{Account: firstAccountID}
+			secondAsset = Asset{Account: references.PTonV1}
+		default:
+			// By default, we assume that the two assets are not paired with TON.
+			// This could be a pair like a jetton to USDT or to other jettons
+			firstAccountID, err := ton.ParseAccountID(record[2])
+			if err != nil {
+				return Pool{}, err
+			}
+			firstAsset = Asset{Account: firstAccountID}
+			secondAccountID, err := ton.ParseAccountID(record[4])
+			if err != nil {
+				return Pool{}, err
+			}
+			secondAsset = Asset{Account: secondAccountID}
+		}
+		firstAsset.Reserve, err = strconv.ParseFloat(record[7], 64)
+		if err != nil {
+			return Pool{}, err
+		}
+		secondAsset.Reserve, err = strconv.ParseFloat(record[8], 64)
+		if err != nil {
+			return Pool{}, err
+		}
+		firstAsset.Decimals, err = parseDecimals(record[10])
+		if err != nil {
+			return Pool{}, err
+		}
+		secondAsset.Decimals, err = parseDecimals(record[11])
+		if err != nil {
+			return Pool{}, err
+		}
+		firstAsset.HoldersCount, err = strconv.Atoi(record[12])
+		if err != nil {
+			return Pool{}, err
+		}
+		secondAsset.HoldersCount, err = strconv.Atoi(record[13])
+		if err != nil {
+			return Pool{}, err
+		}
+		pool := Pool{
+			Invariant: XYInv,
+		}
+		if record[6] == "1" {
+			pool.Invariant = WStableSwapInv
+
+			var settings struct {
+				Amp     tlb.Uint16
+				Weight1 tlb.VarUInteger16
+				Weight2 tlb.VarUInteger16
+			}
+			ammSettings := record[5]
+			settingsCell, err := boc.DeserializeBocHex(ammSettings)
+			if err != nil {
+				return Pool{}, err
+			}
+			if err := tlb.Unmarshal(settingsCell[0], &settings); err != nil {
+				return Pool{}, err
+			}
+			pool.Amp = float64(settings.Amp)
+			w1 := big.Int(settings.Weight1)
+			firstAsset.Weight, _ = w1.Float64()
+			w2 := big.Int(settings.Weight2)
+			secondAsset.Weight, _ = w2.Float64()
+		}
+		pool.Assets = []Asset{firstAsset, secondAsset}
+		return pool, nil
+	}
+	parseLpAsset := func(record []string, firstAsset, secondAsset Asset) (LpAsset, error) {
+		lpAsset, err := ton.ParseAccountID(record[14])
+		if err != nil {
+			return LpAsset{}, err
+		}
+		if record[9] == "0" {
+			return LpAsset{}, fmt.Errorf("unknown total supply")
+		}
+		totalSupply, ok := new(big.Int).SetString(record[9], 10)
+		if !ok {
+			return LpAsset{}, fmt.Errorf("failed to parse total supply")
+		}
+		decimals := defaultDecimals
+		if err != nil {
+			return LpAsset{}, err
+		}
+		return LpAsset{
+			Account:     lpAsset,
+			Decimals:    decimals,
+			TotalSupply: totalSupply,
+			Assets:      []Asset{firstAsset, secondAsset},
+		}, nil
+	}
+	var actualAssets []Pool
+	actualLpAssets := make(map[ton.AccountID]LpAsset)
+	for idx, record := range records {
+		if idx == 0 || len(record) < 15 { // Skip headers
+			continue
+		}
+		assets, err := parseAssets(record)
+		if err != nil {
+			slog.Error("[convertSwapCoffeePoolResponse] failed to parse assets", slog.Any("error", err))
+			continue
+		}
+		firstAsset, secondAsset := assets.Assets[0], assets.Assets[1]
+		if firstAsset.Reserve == 0 || secondAsset.Reserve == 0 {
+			continue
+		}
+		actualAssets = append(actualAssets, assets)
+		lpAsset, err := parseLpAsset(record, firstAsset, secondAsset)
+		if err != nil {
+			continue
+		}
+		actualLpAssets[lpAsset.Account] = lpAsset
+	}
+
+	return actualAssets, maps.Values(actualLpAssets), nil
+}
+
+func convertBidaskPoolResponse(respBody []byte) ([]Pool, []LpAsset, error) {
+	reader := csv.NewReader(bytes.NewReader(respBody))
+	records, err := reader.ReadAll()
+	if err != nil {
+		return nil, nil, err
+	}
+	parseDecimals := func(meta string) (int, error) {
+		if meta == "NULL" {
+			return defaultDecimals, nil
+		}
+		converted := make(map[string]any)
+		if err = json.Unmarshal([]byte(meta), &converted); err != nil {
+			return 0, err
+		}
+		value, ok := converted["decimals"]
+		if !ok || value == "NaN" {
+			value = fmt.Sprintf("%d", defaultDecimals)
+		}
+		decimals, err := strconv.Atoi(value.(string))
+		if err != nil {
+			return 0, err
+		}
+		return decimals, nil
+	}
+	parseAssets := func(record []string) (Pool, error) {
+		var firstAsset, secondAsset Asset
+		switch {
+		// If the column asset_1_native contains true,
+		// then we consider this token as a pool to TON
+		case record[1] == "true":
+			firstAsset = Asset{Account: references.PTonV1}
+			secondAccountID, err := ton.ParseAccountID(record[4])
+			if err != nil {
+				return Pool{}, err
+			}
+			secondAsset = Asset{Account: secondAccountID}
+			// If the column asset_2_native contains true,
+			// then we consider this token as a pool to TON
+		case record[3] == "true":
+			firstAccountID, err := ton.ParseAccountID(record[2])
+			if err != nil {
+				return Pool{}, err
+			}
+			firstAsset = Asset{Account: firstAccountID}
+			secondAsset = Asset{Account: references.PTonV1}
+		default:
+			// By default, we assume that the two assets are not paired with TON.
+			// This could be a pair like a jetton to USDT or to other jettons
+			firstAccountID, err := ton.ParseAccountID(record[2])
+			if err != nil {
+				return Pool{}, err
+			}
+			firstAsset = Asset{Account: firstAccountID}
+			secondAccountID, err := ton.ParseAccountID(record[4])
+			if err != nil {
+				return Pool{}, err
+			}
+			secondAsset = Asset{Account: secondAccountID}
+		}
+		firstAsset.Reserve = defaultMinReserve // we dont need reserve in bidask pools, so set it to the min possible value
+		secondAsset.Reserve = defaultMinReserve
+		firstAsset.Decimals, err = parseDecimals(record[5]) //todo change all the random integers here
+		if err != nil {
+			return Pool{}, err
+		}
+		secondAsset.Decimals, err = parseDecimals(record[6])
+		if err != nil {
+			return Pool{}, err
+		}
+		firstAsset.HoldersCount, err = strconv.Atoi(record[7])
+		if err != nil {
+			return Pool{}, err
+		}
+		secondAsset.HoldersCount, err = strconv.Atoi(record[8])
+		if err != nil {
+			return Pool{}, err
+		}
+		sqrtP, ok := new(big.Float).SetString(record[9])
+		if !ok {
+			return Pool{}, fmt.Errorf("failed to parse sqrt p")
+		}
+		pool := Pool{
+			Assets:    []Asset{firstAsset, secondAsset},
+			Invariant: SqrtPInv,
+			SqrtP:     *sqrtP,
+		}
+		return pool, nil
+	}
+	parseLpAsset := func(record []string, firstAsset, secondAsset Asset) (LpAsset, error) {
+		lpAsset, err := ton.ParseAccountID(record[10]) // todo change 10
+		if err != nil {
+			return LpAsset{}, err
+		}
+		if record[11] == "0" {
+			return LpAsset{}, fmt.Errorf("unknown total supply")
+		}
+		totalSupply, ok := new(big.Int).SetString(record[11], 10)
+		if !ok {
+			return LpAsset{}, fmt.Errorf("failed to parse total supply")
+		}
+		decimals := defaultDecimals
+		if err != nil {
+			return LpAsset{}, err
+		}
+		return LpAsset{
+			Account:     lpAsset,
+			Decimals:    decimals,
+			TotalSupply: totalSupply,
+			Assets:      []Asset{firstAsset, secondAsset},
+		}, nil
+	}
+	var actualAssets []Pool
+	actualLpAssets := make(map[ton.AccountID]LpAsset)
+	for idx, record := range records {
+		if idx == 0 || len(record) < 14 { // Skip headers todo change 14
+			continue
+		}
+		assets, err := parseAssets(record)
+		if err != nil {
+			slog.Error("[convertBidaskPoolResponse] failed to parse assets", slog.Any("error", err))
+			continue
+		}
+		firstAsset, secondAsset := assets.Assets[0], assets.Assets[1]
+		if firstAsset.Reserve == 0 || secondAsset.Reserve == 0 {
+			continue
+		}
+		actualAssets = append(actualAssets, assets)
+		lpAsset, err := parseLpAsset(record, firstAsset, secondAsset)
+		if err != nil {
+			continue
+		}
+		actualLpAssets[lpAsset.Account] = lpAsset
+	}
+
+	return actualAssets, maps.Values(actualLpAssets), nil
+}
+
 func calculateLpAssetPrice(asset LpAsset, pools map[ton.AccountID]float64) float64 {
 	firstAsset := asset.Assets[0]
 	secondAsset := asset.Assets[1]
@@ -854,7 +1165,7 @@ func calculateLpAssetPrice(asset LpAsset, pools map[ton.AccountID]float64) float
 	return convertedPrice
 }
 
-func calculatePoolPrice(firstAsset, secondAsset Asset, pools map[ton.AccountID]float64, poolType Invariant, amp, w, rate float64) (ton.AccountID, float64) {
+func calculatePoolPrice(firstAsset, secondAsset Asset, pools map[ton.AccountID]float64, poolType Invariant, amp, rate float64, sqrtP big.Float) (ton.AccountID, float64) {
 	priceFirst, okFirst := pools[firstAsset.Account]
 	priceSecond, okSecond := pools[secondAsset.Account]
 	if (okFirst && okSecond) || (!okFirst && !okSecond) {
@@ -881,6 +1192,7 @@ func calculatePoolPrice(firstAsset, secondAsset Asset, pools map[ton.AccountID]f
 			return ton.AccountID{}, 0
 		}
 		calculatedAccount = secondAsset.Account
+		firstAsset, secondAsset = secondAsset, firstAsset
 		firstAssetDecimals, secondAssetDecimals = firstAsset.Decimals, secondAsset.Decimals
 	}
 	if okSecond { // Knowing the second asset's price, we determine the first asset's price
@@ -902,20 +1214,19 @@ func calculatePoolPrice(firstAsset, secondAsset Asset, pools map[ton.AccountID]f
 			return ton.AccountID{}, 0
 		}
 		calculatedAccount = firstAsset.Account
-		firstAsset, secondAsset = secondAsset, firstAsset
 		firstAssetDecimals, secondAssetDecimals = firstAsset.Decimals, secondAsset.Decimals
 	}
 	if firstAssetDecimals == 0 || secondAssetDecimals == 0 {
 		return ton.AccountID{}, 0
 	}
 	// Normalize decimals in reserves
-	x := secondAsset.Reserve
-	y := firstAsset.Reserve
+	x, p := firstAsset.Reserve, firstAsset.Weight
+	y, q := secondAsset.Reserve, secondAsset.Weight
 	decimalsDiff := float64(firstAssetDecimals - secondAssetDecimals)
 	if decimalsDiff >= 0 {
-		x *= math.Pow(10, decimalsDiff)
+		y *= math.Pow(10, decimalsDiff)
 	} else {
-		y *= math.Pow(10, -decimalsDiff)
+		x *= math.Pow(10, -decimalsDiff)
 	}
 	var price float64
 	switch poolType {
@@ -923,7 +1234,7 @@ func calculatePoolPrice(firstAsset, secondAsset Asset, pools map[ton.AccountID]f
 		price = y / x
 	case X3YInv:
 		price = (3*x*x*y + y*y*y) / (x*x*x + 3*y*y*x)
-	case IterativeInv:
+	case StableSwapInv:
 		inv := getInvariantForStableSwap(amp, x, y)
 		if inv == 0 { // not converge
 			return ton.AccountID{}, 0
@@ -936,13 +1247,25 @@ func calculatePoolPrice(firstAsset, secondAsset Asset, pools map[ton.AccountID]f
 		dy := y - newY
 		price = dy / dx
 	case WXYInv:
-		price = (y * (1 - w)) / (x * w)
+		price = (y * q) / (x * p)
 	case WStableSwapInv:
-		p := w
-		q := 1 - w
-		denominator := amp*rate + q*math.Pow(y, q-1)*math.Pow(rate, q)*math.Pow(x, p)
-		numerator := amp + p*math.Pow(x, p-1)*math.Pow(rate*y, q)
-		price = numerator / denominator
+		x *= p
+		y *= q
+		amp *= 2
+		inv := getInvariantForStableSwap(amp, x, y)
+		if inv == 0 { // not converge
+			return ton.AccountID{}, 0
+		}
+		dx := x / 1000
+		newY := getOutTokensForWStableSwap(amp, x, dx, inv)
+		dy := y - newY
+		price = (dy * p) / (q * dx)
+	case WRStableSwapInv:
+		dx := amp*rate + q*math.Pow(y, q-1)*math.Pow(rate, q)*math.Pow(x, p)
+		dy := amp + p*math.Pow(x, p-1)*math.Pow(rate*y, q)
+		price = dy / dx
+	case SqrtPInv:
+		price = calcSqrtP(sqrtP) / decimalsDiff
 	default:
 		// Unreachable
 		return ton.AccountID{}, 0

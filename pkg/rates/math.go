@@ -2,7 +2,10 @@ package rates
 
 import (
 	"math"
+	"math/big"
 )
+
+const Pow128 = "340282366920938463463374607431768211456" // 2^128
 
 func getInvariantForStableSwap(amp, x, y float64) float64 {
 	// Validate input: reserves must be greater than zero
@@ -96,4 +99,43 @@ func getOutTokensForStableSwap(amp, x, y, inv float64) float64 {
 	// It can be either if one of pool's reserve == 0 or if params looks like this: amp = 1, x = 1, y > 6e103
 
 	return 0 // 0 means incorrect pool
+}
+
+func getOutTokensForWStableSwap(amp, x, dx, inv float64) float64 {
+	// New x reserve amount
+	s := x + dx
+
+	// Prevent division by zero
+	if s == 0 || amp == 0 {
+		return 0
+	}
+	// Constants for iterative calculation
+	c := (inv * inv) / (s * 2) * inv / (amp * 2)
+	b := s + inv/amp
+
+	y := inv
+	prevY := y
+	for i := 0; i <= 255; i++ {
+		prevY = y
+		y = (y*y + c) / (2*y + b - inv)
+
+		// Stop if converged
+		if math.Abs(y-prevY) <= 1 {
+			return y
+		}
+	}
+
+	// Reaching this part means not converge
+	return 0
+}
+
+func calcSqrtP(sqrtP big.Float) float64 {
+	pow128, ok := new(big.Float).SetString(Pow128) // 2^128
+	if !ok {
+		return 0
+	}
+	bigPrice := new(big.Float).SetPrec(1000).Quo(&sqrtP, pow128)    // (sqrtP >> 128)
+	bigPrice = new(big.Float).SetPrec(1000).Mul(bigPrice, bigPrice) // bigPrice^2
+	price, _ := bigPrice.Float64()
+	return price
 }
