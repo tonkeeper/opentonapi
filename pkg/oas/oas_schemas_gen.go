@@ -9436,7 +9436,7 @@ func (s *MsgForwardPrices) SetNextFrac(val int64) {
 // Ref: #/components/schemas/Multisig
 type Multisig struct {
 	Address   string          `json:"address"`
-	Seqno     int64           `json:"seqno"`
+	Seqno     string          `json:"seqno"`
 	Threshold int32           `json:"threshold"`
 	Signers   []string        `json:"signers"`
 	Proposers []string        `json:"proposers"`
@@ -9449,7 +9449,7 @@ func (s *Multisig) GetAddress() string {
 }
 
 // GetSeqno returns the value of Seqno.
-func (s *Multisig) GetSeqno() int64 {
+func (s *Multisig) GetSeqno() string {
 	return s.Seqno
 }
 
@@ -9479,7 +9479,7 @@ func (s *Multisig) SetAddress(val string) {
 }
 
 // SetSeqno sets the value of Seqno.
-func (s *Multisig) SetSeqno(val int64) {
+func (s *Multisig) SetSeqno(val string) {
 	s.Seqno = val
 }
 
@@ -9506,7 +9506,7 @@ func (s *Multisig) SetOrders(val []MultisigOrder) {
 // Ref: #/components/schemas/MultisigOrder
 type MultisigOrder struct {
 	Address            string                             `json:"address"`
-	OrderSeqno         int64                              `json:"order_seqno"`
+	OrderSeqno         string                             `json:"order_seqno"`
 	Threshold          int32                              `json:"threshold"`
 	SentForExecution   bool                               `json:"sent_for_execution"`
 	Signers            []string                           `json:"signers"`
@@ -9525,7 +9525,7 @@ func (s *MultisigOrder) GetAddress() string {
 }
 
 // GetOrderSeqno returns the value of OrderSeqno.
-func (s *MultisigOrder) GetOrderSeqno() int64 {
+func (s *MultisigOrder) GetOrderSeqno() string {
 	return s.OrderSeqno
 }
 
@@ -9585,7 +9585,7 @@ func (s *MultisigOrder) SetAddress(val string) {
 }
 
 // SetOrderSeqno sets the value of OrderSeqno.
-func (s *MultisigOrder) SetOrderSeqno(val int64) {
+func (s *MultisigOrder) SetOrderSeqno(val string) {
 	s.OrderSeqno = val
 }
 

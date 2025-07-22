@@ -319,7 +319,7 @@ func stringToTVMStackRecord(s string) (tlb.VmStackValue, error) {
 func (h *Handler) convertMultisig(ctx context.Context, item core.Multisig) (*oas.Multisig, error) {
 	converted := oas.Multisig{
 		Address:   item.AccountID.ToRaw(),
-		Seqno:     item.Seqno,
+		Seqno:     item.Seqno.String(),
 		Threshold: item.Threshold,
 	}
 	for _, account := range item.Signers {
@@ -385,7 +385,7 @@ func (h *Handler) convertMultisigOrder(ctx context.Context, order core.MultisigO
 	return oas.MultisigOrder{
 		MultisigAddress:    order.MultisigAccountID.ToRaw(),
 		Address:            order.AccountID.ToRaw(),
-		OrderSeqno:         order.OrderSeqno,
+		OrderSeqno:         order.OrderSeqno.String(),
 		Threshold:          order.Threshold,
 		SentForExecution:   order.SentForExecution,
 		Signers:            signers,

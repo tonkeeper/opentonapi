@@ -5894,9 +5894,7 @@ components:
           format: address
           example: "0:da6b1b6663a0e4d18cc8574ccd9db5296e367dd9324706f3bbd9eb1cd2caf0bf"
         seqno:
-          type: integer
-          format: int64
-          example: 1
+          type: string
         threshold:
           type: integer
           format: int32
@@ -5936,9 +5934,7 @@ components:
           format: address
           example: "0:da6b1b6663a0e4d18cc8574ccd9db5296e367dd9324706f3bbd9eb1cd2caf0bf"
         order_seqno:
-          type: integer
-          format: int64
-          example: 1
+          type: string
         threshold:
           type: integer
           format: int32

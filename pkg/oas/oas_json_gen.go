@@ -27760,7 +27760,7 @@ func (s *Multisig) encodeFields(e *jx.Encoder) {
 	}
 	{
 		e.FieldStart("seqno")
-		e.Int64(s.Seqno)
+		e.Str(s.Seqno)
 	}
 	{
 		e.FieldStart("threshold")
@@ -27825,8 +27825,8 @@ func (s *Multisig) Decode(d *jx.Decoder) error {
 		case "seqno":
 			requiredBitSet[0] |= 1 << 1
 			if err := func() error {
-				v, err := d.Int64()
-				s.Seqno = int64(v)
+				v, err := d.Str()
+				s.Seqno = string(v)
 				if err != nil {
 					return err
 				}
@@ -27975,7 +27975,7 @@ func (s *MultisigOrder) encodeFields(e *jx.Encoder) {
 	}
 	{
 		e.FieldStart("order_seqno")
-		e.Int64(s.OrderSeqno)
+		e.Str(s.OrderSeqno)
 	}
 	{
 		e.FieldStart("threshold")
@@ -28068,8 +28068,8 @@ func (s *MultisigOrder) Decode(d *jx.Decoder) error {
 		case "order_seqno":
 			requiredBitSet[0] |= 1 << 1
 			if err := func() error {
-				v, err := d.Int64()
-				s.OrderSeqno = int64(v)
+				v, err := d.Str()
+				s.OrderSeqno = string(v)
 				if err != nil {
 					return err
 				}

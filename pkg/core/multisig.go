@@ -1,13 +1,15 @@
 package core
 
 import (
+	"math/big"
+
 	"github.com/tonkeeper/tongo/abi"
 	"github.com/tonkeeper/tongo/ton"
 )
 
 type Multisig struct {
 	AccountID ton.AccountID
-	Seqno     int64
+	Seqno     big.Int
 	Threshold int32
 	Signers   []ton.AccountID
 	Proposers []ton.AccountID
@@ -17,7 +19,7 @@ type Multisig struct {
 type MultisigOrder struct {
 	AccountID         ton.AccountID
 	MultisigAccountID ton.AccountID
-	OrderSeqno        int64
+	OrderSeqno        big.Int
 	Threshold         int32
 	SentForExecution  bool
 	Signers           []ton.AccountID

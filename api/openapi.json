@@ -4648,9 +4648,7 @@
       "type": "array"
      },
      "seqno": {
-      "example": 1,
-      "format": "int64",
-      "type": "integer"
+      "type": "string"
      },
      "signers": {
       "items": {
@@ -4729,9 +4727,7 @@
       "type": "string"
      },
      "order_seqno": {
-      "example": 1,
-      "format": "int64",
-      "type": "integer"
+      "type": "string"
      },
      "risk": {
       "$ref": "#/components/schemas/Risk"
