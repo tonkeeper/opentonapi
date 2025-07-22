@@ -4,13 +4,14 @@ import (
 	"context"
 	"encoding/hex"
 	"fmt"
-	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promauto"
 	"log/slog"
 	"math/big"
 	"sort"
 	"strings"
 	"sync"
+
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promauto"
 
 	"go.uber.org/zap"
 
@@ -859,7 +860,7 @@ func (h *Handler) toAccountEventForLongTrace(account tongo.AccountID, traceID co
 }
 
 func (h *Handler) toUnknownAccountEvent(account tongo.AccountID, traceID core.TraceID) oas.AccountEvent {
-	unknownEventCounterVec.WithLabelValues().Inc()
+	unknownEventCounterVec.Inc()
 	slog.Error(
 		"failed to get account event",
 		slog.String("eventID", traceID.Hash.Hex()),
