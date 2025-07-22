@@ -23,27 +23,30 @@ import (
 
 // List of services used to calculate various prices
 const (
-	bitfinex string = "Bitfinex"
-	gateio   string = "Gate.io"
-	bybit    string = "Bybit"
-	kucoin   string = "KuCoin"
-	okx      string = "OKX"
-	huobi    string = "Huobi"
-	dedust   string = "DeDust"
-	stonfiV1 string = "STON.fi v1"
-	stonfiV2 string = "STON.fi v2"
-	coinbase string = "Coinbase"
+	bitfinex   string = "Bitfinex"
+	gateio     string = "Gate.io"
+	bybit      string = "Bybit"
+	kucoin     string = "KuCoin"
+	okx        string = "OKX"
+	huobi      string = "Huobi"
+	dedust     string = "DeDust"
+	stonfiV1   string = "STON.fi v1"
+	stonfiV2   string = "STON.fi v2"
+	bidask     string = "Bidask"
+	swapCoffee string = "SwapCoffee"
+	coinbase   string = "Coinbase"
 )
 
 type Invariant int
 
 // List of available pools' invariants
 const (
-	XYInv          Invariant = iota
-	X3YInv         Invariant = iota
-	IterativeInv   Invariant = iota
-	WXYInv         Invariant = iota
-	WStableSwapInv Invariant = iota
+	XYInv           Invariant = iota
+	X3YInv          Invariant = iota
+	StableSwapInv   Invariant = iota
+	WXYInv          Invariant = iota // xy with weight
+	WStableSwapInv  Invariant = iota // stable swap with weight
+	WRStableSwapInv Invariant = iota // stable swap with weight and rate
 )
 
 // defaultMinReserve specifies the minimum jetton reserves (equivalent to TON) for which prices can be determined
@@ -60,6 +63,7 @@ type Asset struct {
 	Account      ton.AccountID
 	Decimals     int
 	Reserve      float64
+	Weight       float64 // Additional parameter for weighted pools invariants
 	HoldersCount int
 }
 
@@ -67,9 +71,8 @@ type Asset struct {
 type Pool struct {
 	Assets    []Asset
 	Invariant Invariant // Pool's invariant (x*y, x^3*y + x*y^3 etc.)
-	Amp       float64   // Additional parameter for stable swap (iterative) pool invariant
-	Weight    float64   // Additional parameter for weighted pools invariants
-	Rate      float64   // Additional parameter for wighted stable swap pool invariant
+	Amp       float64   // Additional parameter for stable swap (iterative) pool invariants
+	Rate      float64   // Additional parameter for rated pools invariants
 }
 
 // LpAsset represents a liquidity provider asset that holds a collection of assets in a pool
@@ -386,7 +389,7 @@ func (m *Mock) getJettonPricesFromDex(pools map[ton.AccountID]float64) map[ton.A
 		},
 		{
 			Name:                  stonfiV2,
-			URL:                   m.StonFiV2StableSwapResultUrl,
+			URL:                   "https://tonconsole.com/stats/results/97748918-eb43-456c-8f4d-a7a286a5d7ac.csv",
 			PoolResponseConverter: convertStonFiPoolResponse,
 		},
 	}
@@ -423,7 +426,7 @@ func (m *Mock) getJettonPricesFromDex(pools map[ton.AccountID]float64) map[ton.A
 	for attempt := 0; attempt < 3; attempt++ {
 		for _, assets := range assetPairs {
 			for _, asset := range assets {
-				accountID, price := calculatePoolPrice(asset.Assets[0], asset.Assets[1], pools, asset.Invariant, asset.Amp, asset.Weight, asset.Rate)
+				accountID, price := calculatePoolPrice(asset.Assets[0], asset.Assets[1], pools, asset.Invariant, asset.Amp, asset.Rate)
 				if price == 0 {
 					continue
 				}
@@ -522,15 +525,16 @@ func convertStonFiPoolResponse(respBody []byte) ([]Pool, []LpAsset, error) {
 			poolType := record[14]
 			switch poolType {
 			case "stableswap":
-				pool.Invariant = IterativeInv
+				pool.Invariant = StableSwapInv
 				pool.Amp = additional
 			case "constant_product":
 				// Default to XYInv; no additional parameters required
 			case "weighted_const_product":
 				pool.Invariant = WXYInv
-				pool.Weight = additional / 1e18
+				pool.Assets[0].Weight = additional / 1e18
+				pool.Assets[1].Weight = 1 - pool.Assets[0].Weight
 			case "weighted_stableswap":
-				pool.Invariant = WStableSwapInv
+				pool.Invariant = WRStableSwapInv
 				pool.Amp = additional / 1e18
 				if record[12] == "NULL" || record[13] == "NULL" {
 					return Pool{}, errors.New("missing rate or w0 for weighted stable swap pool")
@@ -538,11 +542,12 @@ func convertStonFiPoolResponse(respBody []byte) ([]Pool, []LpAsset, error) {
 				if pool.Rate, err = strconv.ParseFloat(record[12], 64); err != nil {
 					return Pool{}, err
 				}
-				if pool.Weight, err = strconv.ParseFloat(record[13], 64); err != nil {
+				if pool.Assets[0].Weight, err = strconv.ParseFloat(record[13], 64); err != nil {
 					return Pool{}, err
 				}
 				pool.Rate /= 1e18
-				pool.Weight /= 1e18
+				pool.Assets[0].Weight /= 1e18
+				pool.Assets[1].Weight = 1 - pool.Assets[0].Weight
 			}
 		}
 		return pool, nil
@@ -777,7 +782,9 @@ func calculateLpAssetPrice(asset LpAsset, pools map[ton.AccountID]float64) float
 	return convertedPrice
 }
 
-func calculatePoolPrice(firstAsset, secondAsset Asset, pools map[ton.AccountID]float64, poolType Invariant, amp, w, rate float64) (ton.AccountID, float64) {
+func calculatePoolPrice(firstAsset, secondAsset Asset, pools map[ton.AccountID]float64, poolType Invariant, amp, rate float64) (ton.AccountID, float64) {
+	p := firstAsset.Weight
+	q := secondAsset.Weight
 	priceFirst, okFirst := pools[firstAsset.Account]
 	priceSecond, okSecond := pools[secondAsset.Account]
 	if (okFirst && okSecond) || (!okFirst && !okSecond) {
@@ -846,7 +853,7 @@ func calculatePoolPrice(firstAsset, secondAsset Asset, pools map[ton.AccountID]f
 		price = y / x
 	case X3YInv:
 		price = (3*x*x*y + y*y*y) / (x*x*x + 3*y*y*x)
-	case IterativeInv:
+	case StableSwapInv:
 		inv := getInvariantForStableSwap(amp, x, y)
 		if inv == 0 { // not converge
 			return ton.AccountID{}, 0
@@ -859,13 +866,11 @@ func calculatePoolPrice(firstAsset, secondAsset Asset, pools map[ton.AccountID]f
 		dy := y - newY
 		price = dy / dx
 	case WXYInv:
-		price = (y * (1 - w)) / (x * w)
-	case WStableSwapInv:
-		p := w
-		q := 1 - w
-		denominator := amp*rate + q*math.Pow(y, q-1)*math.Pow(rate, q)*math.Pow(x, p)
-		numerator := amp + p*math.Pow(x, p-1)*math.Pow(rate*y, q)
-		price = numerator / denominator
+		price = (y * q) / (x * p)
+	case WRStableSwapInv:
+		dy := amp*rate + q*math.Pow(y, q-1)*math.Pow(rate, q)*math.Pow(x, p)
+		dx := amp + p*math.Pow(x, p-1)*math.Pow(rate*y, q)
+		price = dx / dy
 	default:
 		// Unreachable
 		return ton.AccountID{}, 0
