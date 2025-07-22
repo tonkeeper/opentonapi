@@ -4,6 +4,9 @@ import (
 	"context"
 	"encoding/hex"
 	"fmt"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promauto"
+	"log/slog"
 	"math/big"
 	"sort"
 	"strings"
@@ -24,6 +27,13 @@ import (
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/opentonapi/pkg/oas"
 	"github.com/tonkeeper/opentonapi/pkg/wallet"
+)
+
+var unknownEventCounterVec = promauto.NewCounter(
+	prometheus.CounterOpts{
+		Name: "unknown_account_event_method_called_total",
+		Help: "Total number of times toUnknownAccountEvent method was called",
+	},
 )
 
 func distinctAccounts(skip *tongo.AccountID, book addressBook, accounts ...*tongo.AccountID) []oas.AccountAddress {
@@ -847,7 +857,13 @@ func (h *Handler) toAccountEventForLongTrace(account tongo.AccountID, traceID co
 	}
 	return e
 }
+
 func (h *Handler) toUnknownAccountEvent(account tongo.AccountID, traceID core.TraceID) oas.AccountEvent {
+	unknownEventCounterVec.WithLabelValues().Inc()
+	slog.Error(
+		"failed to get account event",
+		slog.String("eventID", traceID.Hash.Hex()),
+	)
 	e := oas.AccountEvent{
 		EventID:    traceID.Hash.Hex(),
 		Account:    convertAccountAddress(account, h.addressBook),
