@@ -783,8 +783,6 @@ func calculateLpAssetPrice(asset LpAsset, pools map[ton.AccountID]float64) float
 }
 
 func calculatePoolPrice(firstAsset, secondAsset Asset, pools map[ton.AccountID]float64, poolType Invariant, amp, rate float64) (ton.AccountID, float64) {
-	p := firstAsset.Weight
-	q := secondAsset.Weight
 	priceFirst, okFirst := pools[firstAsset.Account]
 	priceSecond, okSecond := pools[secondAsset.Account]
 	if (okFirst && okSecond) || (!okFirst && !okSecond) {
@@ -839,8 +837,8 @@ func calculatePoolPrice(firstAsset, secondAsset Asset, pools map[ton.AccountID]f
 		return ton.AccountID{}, 0
 	}
 	// Normalize decimals in reserves
-	x := secondAsset.Reserve
-	y := firstAsset.Reserve
+	x, p := secondAsset.Reserve, secondAsset.Weight
+	y, q := firstAsset.Reserve, firstAsset.Weight
 	decimalsDiff := float64(firstAssetDecimals - secondAssetDecimals)
 	if decimalsDiff >= 0 {
 		x *= math.Pow(10, decimalsDiff)
