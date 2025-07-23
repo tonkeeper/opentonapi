@@ -97,3 +97,31 @@ func getOutTokensForStableSwap(amp, x, y, inv float64) float64 {
 
 	return 0 // 0 means incorrect pool
 }
+
+func getOutTokensForWStableSwap(amp, x, dx, inv float64) float64 {
+	// New x reserve amount
+	s := x + dx
+
+	// Prevent division by zero
+	if s == 0 || amp == 0 {
+		return 0
+	}
+	// Constants for iterative calculation
+	c := (inv * inv) / (s * 2) * inv / (amp * 2)
+	b := s + inv/amp
+
+	y := inv
+	prevY := y
+	for i := 0; i <= 255; i++ {
+		prevY = y
+		y = (y*y + c) / (2*y + b - inv)
+
+		// Stop if converged
+		if math.Abs(y-prevY) <= 1 {
+			return y
+		}
+	}
+
+	// Reaching this part means not converge
+	return 0
+}

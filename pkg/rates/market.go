@@ -389,7 +389,7 @@ func (m *Mock) getJettonPricesFromDex(pools map[ton.AccountID]float64) map[ton.A
 		},
 		{
 			Name:                  stonfiV2,
-			URL:                   "https://tonconsole.com/stats/results/97748918-eb43-456c-8f4d-a7a286a5d7ac.csv",
+			URL:                   m.StonFiV2StableSwapResultUrl,
 			PoolResponseConverter: convertStonFiPoolResponse,
 		},
 	}
@@ -809,6 +809,7 @@ func calculatePoolPrice(firstAsset, secondAsset Asset, pools map[ton.AccountID]f
 			return ton.AccountID{}, 0
 		}
 		calculatedAccount = secondAsset.Account
+		firstAsset, secondAsset = secondAsset, firstAsset
 		firstAssetDecimals, secondAssetDecimals = firstAsset.Decimals, secondAsset.Decimals
 	}
 	if okSecond { // Knowing the second asset's price, we determine the first asset's price
@@ -830,20 +831,19 @@ func calculatePoolPrice(firstAsset, secondAsset Asset, pools map[ton.AccountID]f
 			return ton.AccountID{}, 0
 		}
 		calculatedAccount = firstAsset.Account
-		firstAsset, secondAsset = secondAsset, firstAsset
 		firstAssetDecimals, secondAssetDecimals = firstAsset.Decimals, secondAsset.Decimals
 	}
 	if firstAssetDecimals == 0 || secondAssetDecimals == 0 {
 		return ton.AccountID{}, 0
 	}
 	// Normalize decimals in reserves
-	x, p := secondAsset.Reserve, secondAsset.Weight
-	y, q := firstAsset.Reserve, firstAsset.Weight
+	x, p := firstAsset.Reserve, firstAsset.Weight
+	y, q := secondAsset.Reserve, secondAsset.Weight
 	decimalsDiff := float64(firstAssetDecimals - secondAssetDecimals)
 	if decimalsDiff >= 0 {
-		x *= math.Pow(10, decimalsDiff)
+		y *= math.Pow(10, decimalsDiff)
 	} else {
-		y *= math.Pow(10, -decimalsDiff)
+		x *= math.Pow(10, -decimalsDiff)
 	}
 	var price float64
 	switch poolType {
@@ -865,10 +865,22 @@ func calculatePoolPrice(firstAsset, secondAsset Asset, pools map[ton.AccountID]f
 		price = dy / dx
 	case WXYInv:
 		price = (y * q) / (x * p)
+	case WStableSwapInv:
+		x *= p
+		y *= q
+		amp *= 2
+		inv := getInvariantForStableSwap(amp, x, y)
+		if inv == 0 { // not converge
+			return ton.AccountID{}, 0
+		}
+		dx := x / 1000
+		newY := getOutTokensForWStableSwap(amp, x, dx, inv)
+		dy := y - newY
+		price = (dy * p) / (q * dx)
 	case WRStableSwapInv:
-		dy := amp*rate + q*math.Pow(y, q-1)*math.Pow(rate, q)*math.Pow(x, p)
-		dx := amp + p*math.Pow(x, p-1)*math.Pow(rate*y, q)
-		price = dx / dy
+		dx := amp*rate + q*math.Pow(y, q-1)*math.Pow(rate, q)*math.Pow(x, p)
+		dy := amp + p*math.Pow(x, p-1)*math.Pow(rate*y, q)
+		price = dy / dx
 	default:
 		// Unreachable
 		return ton.AccountID{}, 0
