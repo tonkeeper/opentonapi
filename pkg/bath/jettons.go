@@ -126,6 +126,11 @@ var JettonMintFromMasterStraw = Straw[BubbleJettonMint]{
 				newAction.recipient = tx.account
 				return nil
 			},
+			ValueFlowUpdater: func(newAction *BubbleJettonMint, flow *ValueFlow) {
+				if newAction.success {
+					flow.AddJettons(newAction.recipient.Address, newAction.master, big.Int(newAction.amount))
+				}
+			},
 		},
 		{CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.ExcessMsgOp)}, Optional: true},
 	},
@@ -155,6 +160,11 @@ var JettonBurnStraw = Straw[BubbleJettonBurn]{
 		Builder: func(newAction *BubbleJettonBurn, bubble *Bubble) error { //todo: remove after fixing additionalInfo few lines above
 			newAction.master = bubble.Info.(BubbleTx).account.Address
 			return nil
+		},
+		ValueFlowUpdater: func(newAction *BubbleJettonBurn, flow *ValueFlow) {
+			if newAction.success {
+				flow.SubJettons(newAction.sender.Address, newAction.master, big.Int(newAction.amount))
+			}
 		},
 		Optional: true,
 	},
