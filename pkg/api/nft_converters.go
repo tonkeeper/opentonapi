@@ -62,6 +62,9 @@ func (h *Handler) convertNFT(ctx context.Context, item core.NftItem, book addres
 				"uri":   fmt.Sprintf("https://dns.tonkeeper.com/manage?v=%v", item.Address.ToRaw())},
 			})
 			nftItem.Metadata["buttons"] = buttons
+			delete(nftItem.Metadata, "description")
+			delete(nftItem.Metadata, "image")
+			delete(nftItem.Metadata, "lottie")
 		}
 	}
 	if len(nftItem.ApprovedBy) > 0 && nftItem.Verified {
