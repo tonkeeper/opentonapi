@@ -98,7 +98,7 @@ func TestHandler_EmulateMessageToAccountEvent(t *testing.T) {
 			}
 			require.Nil(t, err)
 
-			var actions []string
+			var actions []oas.ActionType
 			for _, action := range got.Actions {
 				actions = append(actions, action.Type)
 			}
