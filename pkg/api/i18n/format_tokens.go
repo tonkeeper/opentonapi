@@ -56,7 +56,7 @@ func formatIntPart(n int64) string {
 	}
 	var result []string
 	for length > 3 {
-		result = append([]string{s[length-3:]}, result...)
+		result = append([]string{s[length-3 : length]}, result...)
 		length -= 3
 	}
 	result = append([]string{s[:length]}, result...)
