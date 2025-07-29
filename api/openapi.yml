@@ -3491,6 +3491,32 @@ components:
         is_wallet:
           type: boolean
           example: true
+    MaybeAccountAddress:
+      type: object
+      required:
+        - address
+        - is_scam
+        - is_wallet
+      properties:
+        address:
+          type: string
+          format: maybe-address
+          example: 0:10C1073837B93FDAAD594284CE8B8EFF7B9CF25427440EB2FC682762E1471365
+          description: Address can be a valid address or empty string.
+        name:
+          type: string
+          example: Ton foundation
+          description: Display name. Data collected from different sources like moderation lists, dns, collections names and over.
+        is_scam:
+          type: boolean
+          example: true
+          description: Is this account was marked as part of scammers activity
+        icon:
+          type: string
+          example: https://ton.org/logo.png
+        is_wallet:
+          type: boolean
+          example: true
     BlockCurrencyCollection:
       type: object
       required:
@@ -7358,7 +7384,7 @@ components:
                 format: address
                 example: 0:10C1073837B93FDAAD594284CE8B8EFF7B9CF25427440EB2FC682762E1471365
               owner:
-                $ref: '#/components/schemas/AccountAddress'
+                $ref: '#/components/schemas/MaybeAccountAddress'
               balance:
                 type: string
                 x-js-format: bigint
