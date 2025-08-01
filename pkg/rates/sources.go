@@ -30,11 +30,21 @@ func (m *Mock) GetCurrentRates() (map[string]float64, error) {
 	)
 
 	// Fetch market prices and calculate the median TON/USD rate
-	marketPrices, err := m.GetCurrentMarketsTonPrice()
+	marketTonPrices, err := m.GetCurrentMarketsTonPrice()
 	if err != nil {
 		return map[string]float64{}, err
 	}
-	medianTonPrice, err := getMedianTonPrice(marketPrices)
+	medianTonPrice, err := getMedianPrice(marketTonPrices)
+	if err != nil {
+		return map[string]float64{}, err
+	}
+
+	// Fetch market prices and calculate the median TRX/USD rate
+	marketTrxPrices, err := m.GetCurrentMarketsTrxPrice()
+	if err != nil {
+		return map[string]float64{}, err
+	}
+	medianTrxPrice, err := getMedianPrice(marketTrxPrices)
 	if err != nil {
 		return map[string]float64{}, err
 	}
@@ -96,7 +106,9 @@ func (m *Mock) GetCurrentRates() (map[string]float64, error) {
 
 	// Compose final result map with fiat and jetton prices
 	rates := map[string]float64{"TON": 1}
-	for currency, price := range getFiatPrices(medianTonPrice) {
+	// Add additional coins prices that absence in market rates
+	additionalPrices := map[string]float64{"TRX": 1 / medianTrxPrice}
+	for currency, price := range getFiatPrices(medianTonPrice, additionalPrices) {
 		rates[currency] = price
 	}
 	for accountID, price := range pools {
@@ -106,8 +118,8 @@ func (m *Mock) GetCurrentRates() (map[string]float64, error) {
 	return rates, nil
 }
 
-// getMedianTonPrice computes the median TON price from available market data
-func getMedianTonPrice(markets []Market) (float64, error) {
+// getMedianPrice computes the median TON price from available market data
+func getMedianPrice(markets []Market) (float64, error) {
 	// Extract the USD prices from the market data
 	var prices []float64
 	for _, market := range markets {
