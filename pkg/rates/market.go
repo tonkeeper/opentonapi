@@ -85,8 +85,8 @@ type Market struct {
 	Name     string // Name of the service used for price calculation
 	UsdPrice float64
 	URL      string
-	// Converter for calculating the TON to USD price
-	TonPriceConverter func(respBody []byte) (float64, error)
+	// Converter for calculating the coin from market to USD price
+	MarketPriceConverter func(respBody []byte) (float64, error)
 	// Converter for calculating fiat prices
 	FiatPriceConverter func(respBody []byte) (map[string]float64, error)
 	// Converter for calculating jetton prices within pools
@@ -99,46 +99,46 @@ func (m *Mock) GetCurrentMarketsTonPrice() ([]Market, error) {
 	now := time.Now()
 	markets := []Market{
 		{
-			ID:                1,
-			Name:              bitfinex,
-			URL:               "https://api-pub.bitfinex.com/v2/ticker/tTONUSD",
-			TonPriceConverter: convertTonBitFinexResponse,
-			DateUpdate:        now,
+			ID:                   1,
+			Name:                 bitfinex,
+			URL:                  "https://api-pub.bitfinex.com/v2/ticker/tTONUSD",
+			MarketPriceConverter: convertBitFinexResponse,
+			DateUpdate:           now,
 		},
 		{
-			ID:                2,
-			Name:              gateio,
-			URL:               "https://api.gateio.ws/api/v4/spot/tickers?currency_pair=TON_USDT",
-			TonPriceConverter: convertTonGateIOResponse,
-			DateUpdate:        now,
+			ID:                   2,
+			Name:                 gateio,
+			URL:                  "https://api.gateio.ws/api/v4/spot/tickers?currency_pair=TON_USDT",
+			MarketPriceConverter: convertGateIOResponse,
+			DateUpdate:           now,
 		},
 		{
-			ID:                3,
-			Name:              bybit,
-			URL:               "https://api.bybit.com/v5/market/tickers?category=spot&symbol=TONUSDT",
-			TonPriceConverter: convertTonBybitResponse,
-			DateUpdate:        now,
+			ID:                   3,
+			Name:                 bybit,
+			URL:                  "https://api.bybit.com/v5/market/tickers?category=spot&symbol=TONUSDT",
+			MarketPriceConverter: convertBybitResponse,
+			DateUpdate:           now,
 		},
 		{
-			ID:                4,
-			Name:              kucoin,
-			URL:               "https://www.kucoin.com/_api/trade-front/market/getSymbolTick?symbols=TON-USDT",
-			TonPriceConverter: convertTonKuCoinResponse,
-			DateUpdate:        now,
+			ID:                   4,
+			Name:                 kucoin,
+			URL:                  "https://www.kucoin.com/_api/trade-front/market/getSymbolTick?symbols=TON-USDT",
+			MarketPriceConverter: convertKuCoinResponse,
+			DateUpdate:           now,
 		},
 		{
-			ID:                5,
-			Name:              okx,
-			URL:               "https://www.okx.com/api/v5/market/ticker?instId=TON-USDT",
-			TonPriceConverter: convertTonOKXResponse,
-			DateUpdate:        now,
+			ID:                   5,
+			Name:                 okx,
+			URL:                  "https://www.okx.com/api/v5/market/ticker?instId=TON-USDT",
+			MarketPriceConverter: convertOKXResponse,
+			DateUpdate:           now,
 		},
 		{
-			ID:                6,
-			Name:              huobi,
-			URL:               "https://api.huobi.pro/market/trade?symbol=tonusdt",
-			TonPriceConverter: convertTonHuobiResponse,
-			DateUpdate:        now,
+			ID:                   6,
+			Name:                 huobi,
+			URL:                  "https://api.huobi.pro/market/trade?symbol=tonusdt",
+			MarketPriceConverter: convertHuobiResponse,
+			DateUpdate:           now,
 		},
 	}
 	for idx, market := range markets {
@@ -149,7 +149,7 @@ func (m *Mock) GetCurrentMarketsTonPrice() ([]Market, error) {
 			errorsCounter.WithLabelValues(market.Name).Inc()
 			continue
 		}
-		market.UsdPrice, err = market.TonPriceConverter(respBody)
+		market.UsdPrice, err = market.MarketPriceConverter(respBody)
 		if err != nil {
 			slog.Error("[GetCurrentMarketsTonPrice] failed to convert response", slog.Any("error", err))
 			errorsCounter.WithLabelValues(market.Name).Inc()
@@ -166,24 +166,96 @@ func (m *Mock) GetCurrentMarketsTonPrice() ([]Market, error) {
 	return markets, nil
 }
 
-func convertTonGateIOResponse(respBody []byte) (float64, error) {
+// GetCurrentMarketsTrxPrice shows the TRX to USD price on different markets
+func (m *Mock) GetCurrentMarketsTrxPrice() ([]Market, error) {
+	now := time.Now()
+	markets := []Market{
+		{
+			ID:                   1,
+			Name:                 bitfinex,
+			URL:                  "https://api-pub.bitfinex.com/v2/ticker/tTRXUSD",
+			MarketPriceConverter: convertBitFinexResponse,
+			DateUpdate:           now,
+		},
+		{
+			ID:                   2,
+			Name:                 gateio,
+			URL:                  "https://api.gateio.ws/api/v4/spot/tickers?currency_pair=TRX_USDT",
+			MarketPriceConverter: convertGateIOResponse,
+			DateUpdate:           now,
+		},
+		{
+			ID:                   3,
+			Name:                 bybit,
+			URL:                  "https://api.bybit.com/v5/market/tickers?category=spot&symbol=TRXUSDT",
+			MarketPriceConverter: convertBybitResponse,
+			DateUpdate:           now,
+		},
+		{
+			ID:                   4,
+			Name:                 kucoin,
+			URL:                  "https://www.kucoin.com/_api/trade-front/market/getSymbolTick?symbols=TRX-USDT",
+			MarketPriceConverter: convertKuCoinResponse,
+			DateUpdate:           now,
+		},
+		{
+			ID:                   5,
+			Name:                 okx,
+			URL:                  "https://www.okx.com/api/v5/market/ticker?instId=TRX-USDT",
+			MarketPriceConverter: convertOKXResponse,
+			DateUpdate:           now,
+		},
+		{
+			ID:                   6,
+			Name:                 huobi,
+			URL:                  "https://api.huobi.pro/market/trade?symbol=trxusdt",
+			MarketPriceConverter: convertHuobiResponse,
+			DateUpdate:           now,
+		},
+	}
+	for idx, market := range markets {
+		headers := http.Header{"Content-Type": {"application/json"}}
+		respBody, err := sendRequest(market.URL, "", headers)
+		if err != nil {
+			slog.Error("[GetCurrentMarketsTonPrice] failed to send request", slog.Any("error", err))
+			errorsCounter.WithLabelValues(market.Name).Inc()
+			continue
+		}
+		market.UsdPrice, err = market.MarketPriceConverter(respBody)
+		if err != nil {
+			slog.Error("[GetCurrentMarketsTonPrice] failed to convert response", slog.Any("error", err))
+			errorsCounter.WithLabelValues(market.Name).Inc()
+			continue
+		}
+		if market.UsdPrice == 0 {
+			continue
+		}
+		markets[idx] = market
+	}
+	sort.Slice(markets, func(i, j int) bool {
+		return markets[i].ID > markets[j].ID
+	})
+	return markets, nil
+}
+
+func convertGateIOResponse(respBody []byte) (float64, error) {
 	var data []struct {
 		Last string `json:"last"`
 	}
 	if err := json.Unmarshal(respBody, &data); err != nil {
-		return 0, fmt.Errorf("[convertTonGateIOResponse] failed to decode response: %v", err)
+		return 0, fmt.Errorf("[convertGateIOResponse] failed to decode response: %v", err)
 	}
 	if len(data) == 0 {
-		return 0, fmt.Errorf("[convertTonGateIOResponse] empty data")
+		return 0, fmt.Errorf("[convertGateIOResponse] empty data")
 	}
 	price, err := strconv.ParseFloat(data[0].Last, 64)
 	if err != nil {
-		return 0, fmt.Errorf("[convertTonGateIOResponse] failed to parse price: %v", err)
+		return 0, fmt.Errorf("[convertGateIOResponse] failed to parse price: %v", err)
 	}
 	return price, nil
 }
 
-func convertTonBybitResponse(respBody []byte) (float64, error) {
+func convertBybitResponse(respBody []byte) (float64, error) {
 	var data struct {
 		RetMsg string `json:"retMsg"`
 		Result struct {
@@ -193,28 +265,28 @@ func convertTonBybitResponse(respBody []byte) (float64, error) {
 		} `json:"result"`
 	}
 	if err := json.Unmarshal(respBody, &data); err != nil {
-		return 0, fmt.Errorf("[convertTonBybitResponse] failed to decode response: %v", err)
+		return 0, fmt.Errorf("[convertBybitResponse] failed to decode response: %v", err)
 	}
 	if data.RetMsg != "OK" {
-		return 0, fmt.Errorf("[convertTonBybitResponse] unsuccessful response")
+		return 0, fmt.Errorf("[convertBybitResponse] unsuccessful response")
 	}
 	if len(data.Result.List) == 0 {
-		return 0, fmt.Errorf("[convertTonBybitResponse] empty data")
+		return 0, fmt.Errorf("[convertBybitResponse] empty data")
 	}
 	price, err := strconv.ParseFloat(data.Result.List[0].LastPrice, 64)
 	if err != nil {
-		return 0, fmt.Errorf("[convertTonBybitResponse] failed to parse price: %v", err)
+		return 0, fmt.Errorf("[convertBybitResponse] failed to parse price: %v", err)
 	}
 	return price, nil
 }
 
-func convertTonBitFinexResponse(respBody []byte) (float64, error) {
+func convertBitFinexResponse(respBody []byte) (float64, error) {
 	var prices []float64
 	if err := json.Unmarshal(respBody, &prices); err != nil {
-		return 0, fmt.Errorf("[convertTonBitFinexResponse] failed to decode response: %v", err)
+		return 0, fmt.Errorf("[convertBitFinexResponse] failed to decode response: %v", err)
 	}
 	if len(prices) == 0 {
-		return 0, fmt.Errorf("[convertTonBitFinexResponse] empty data")
+		return 0, fmt.Errorf("[convertBitFinexResponse] empty data")
 	}
 	if len(prices) >= 6 { // Price of the last trade
 		return prices[6], nil
@@ -223,7 +295,7 @@ func convertTonBitFinexResponse(respBody []byte) (float64, error) {
 	return prices[0], nil
 }
 
-func convertTonKuCoinResponse(respBody []byte) (float64, error) {
+func convertKuCoinResponse(respBody []byte) (float64, error) {
 	var data struct {
 		Success bool `json:"success"`
 		Data    []struct {
@@ -231,22 +303,22 @@ func convertTonKuCoinResponse(respBody []byte) (float64, error) {
 		} `json:"data"`
 	}
 	if err := json.Unmarshal(respBody, &data); err != nil {
-		return 0, fmt.Errorf("[convertTonKuCoinResponse] failed to decode response: %v", err)
+		return 0, fmt.Errorf("[convertKuCoinResponse] failed to decode response: %v", err)
 	}
 	if !data.Success {
-		return 0, fmt.Errorf("[convertTonKuCoinResponse] unsuccessful response")
+		return 0, fmt.Errorf("[convertKuCoinResponse] unsuccessful response")
 	}
 	if len(data.Data) == 0 {
-		return 0, fmt.Errorf("[convertTonKuCoinResponse] empty data")
+		return 0, fmt.Errorf("[convertKuCoinResponse] empty data")
 	}
 	price, err := strconv.ParseFloat(data.Data[0].LastTradedPrice, 64)
 	if err != nil {
-		return 0, fmt.Errorf("[convertTonKuCoinResponse] failed to parse price: %v", err)
+		return 0, fmt.Errorf("[convertKuCoinResponse] failed to parse price: %v", err)
 	}
 	return price, nil
 }
 
-func convertTonOKXResponse(respBody []byte) (float64, error) {
+func convertOKXResponse(respBody []byte) (float64, error) {
 	var data struct {
 		Code string `json:"code"`
 		Data []struct {
@@ -254,24 +326,24 @@ func convertTonOKXResponse(respBody []byte) (float64, error) {
 		} `json:"data"`
 	}
 	if err := json.Unmarshal(respBody, &data); err != nil {
-		return 0, fmt.Errorf("[convertTonOKXResponse] failed to decode response: %v", err)
+		return 0, fmt.Errorf("[convertOKXResponse] failed to decode response: %v", err)
 	}
 	if data.Code != "0" {
-		return 0, fmt.Errorf("[convertTonOKXResponse] unsuccessful response")
+		return 0, fmt.Errorf("[convertOKXResponse] unsuccessful response")
 	}
 	if len(data.Data) == 0 {
-		return 0, fmt.Errorf("[convertTonOKXResponse] empty data")
+		return 0, fmt.Errorf("[convertOKXResponse] empty data")
 	}
 	price, err := strconv.ParseFloat(data.Data[0].Last, 64)
 	if err != nil {
-		slog.Error("[convertTonOKXResponse] failed to parse price", slog.Any("error", err))
+		slog.Error("[convertOKXResponse] failed to parse price", slog.Any("error", err))
 		return 0, fmt.Errorf("failed to parse price")
 	}
 
 	return price, nil
 }
 
-func convertTonHuobiResponse(respBody []byte) (float64, error) {
+func convertHuobiResponse(respBody []byte) (float64, error) {
 	var data struct {
 		Status string `json:"status"`
 		Tick   struct {
@@ -283,20 +355,20 @@ func convertTonHuobiResponse(respBody []byte) (float64, error) {
 		} `json:"tick"`
 	}
 	if err := json.Unmarshal(respBody, &data); err != nil {
-		return 0, fmt.Errorf("[convertTonHuobiResponse] failed to decode response: %v", err)
+		return 0, fmt.Errorf("[convertHuobiResponse] failed to decode response: %v", err)
 	}
 	if data.Status != "ok" {
-		return 0, fmt.Errorf("[convertTonHuobiResponse] unsuccessful response")
+		return 0, fmt.Errorf("[convertHuobiResponse] unsuccessful response")
 	}
 	if len(data.Tick.Data) == 0 {
-		return 0, fmt.Errorf("[convertTonHuobiResponse] empty data")
+		return 0, fmt.Errorf("[convertHuobiResponse] empty data")
 	}
 
 	return data.Tick.Data[0].Price, nil
 }
 
 // getFiatPrices shows the exchange rates of various fiats to USD on different markets
-func getFiatPrices(tonPrice float64) map[string]float64 {
+func getFiatPrices(tonPrice float64, additionalPrices map[string]float64) map[string]float64 {
 	markets := []Market{
 		{
 			Name:               coinbase,
@@ -323,6 +395,11 @@ func getFiatPrices(tonPrice float64) map[string]float64 {
 			if _, ok := prices[currency]; !ok && rate != 0 {
 				prices[currency] = 1 / (rate * tonPrice)
 			}
+		}
+	}
+	for currency, rate := range additionalPrices {
+		if _, ok := prices[currency]; !ok && rate != 0 {
+			prices[currency] = 1 / (rate * tonPrice)
 		}
 	}
 	return prices
