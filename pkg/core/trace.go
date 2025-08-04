@@ -226,8 +226,14 @@ func isDestinationJettonWallet(inMsg *Message) bool {
 	}
 	return (inMsg.DecodedBody.Operation == abi.JettonTransferMsgOp ||
 		inMsg.DecodedBody.Operation == abi.JettonInternalTransferMsgOp ||
-		inMsg.DecodedBody.Operation == abi.JettonBurnMsgOp ||
-		inMsg.DecodedBody.Operation == abi.PtonTonTransferMsgOp) && inMsg.Destination != nil
+		inMsg.DecodedBody.Operation == abi.JettonBurnMsgOp) && inMsg.Destination != nil
+}
+
+func isDestinationPton(inMsg *Message) bool {
+	if inMsg == nil || inMsg.DecodedBody == nil {
+		return false
+	}
+	return (inMsg.DecodedBody.Operation == abi.PtonTonTransferMsgOp) && inMsg.Destination != nil
 }
 
 func hasInterface(interfacesList []abi.ContractInterface, name abi.ContractInterface) bool {
@@ -357,7 +363,7 @@ func CollectAdditionalInfo(ctx context.Context, infoSource InformationSource, tr
 			return
 		}
 		additionalInfo := &TraceAdditionalInfo{}
-		if isDestinationJettonWallet(trace.InMsg) {
+		if isDestinationJettonWallet(trace.InMsg) || isDestinationPton(trace.InMsg) {
 			if master, ok := masters[*trace.InMsg.Destination]; ok {
 				additionalInfo.SetJettonMaster(*trace.InMsg.Destination, master)
 			}
