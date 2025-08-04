@@ -22,6 +22,23 @@ type BubbleJettonTransfer struct {
 }
 
 func (b BubbleJettonTransfer) ToAction() (action *Action) {
+	// convert jetton transfer to ton transfer if token is pTON
+	if b.recipient.Is(abi.Wallet) && b.isWrappedTon {
+		amount := big.Int(b.amount)
+		a := Action{
+			TonTransfer: &TonTransferAction{
+				Amount:    amount.Int64(),
+				Recipient: b.recipientWallet,
+				Sender:    b.senderWallet,
+			},
+			Success: b.success,
+			Type:    TonTransfer,
+		}
+		a.TonTransfer.PayloadFromABI(b.payload)
+
+		return &a
+	}
+
 	a := Action{
 		JettonTransfer: &JettonTransferAction{
 			Jetton:           b.master,
@@ -54,6 +71,25 @@ func (jta *JettonTransferAction) PayloadFromABI(payload abi.JettonPayload) {
 			jta.Comment = g.Pointer("Call: " + payload.SumType)
 		} else if payload.OpCode != nil {
 			jta.Comment = g.Pointer(fmt.Sprintf("Call: 0x%08x", *payload.OpCode))
+		}
+	}
+}
+
+func (tta *TonTransferAction) PayloadFromABI(payload abi.JettonPayload) {
+	switch payload.SumType {
+	case abi.TextCommentJettonOp:
+		tta.Comment = g.Pointer(string(payload.Value.(abi.TextCommentJettonPayload).Text))
+	case abi.EncryptedTextCommentJettonOp:
+		tta.EncryptedComment = &EncryptedComment{
+			CipherText:     payload.Value.(abi.EncryptedTextCommentJettonPayload).CipherText,
+			EncryptionType: "simple",
+		}
+	case abi.EmptyJettonOp:
+	default:
+		if payload.SumType != abi.UnknownJettonOp {
+			tta.Comment = g.Pointer("Call: " + payload.SumType)
+		} else if payload.OpCode != nil {
+			tta.Comment = g.Pointer(fmt.Sprintf("Call: 0x%08x", *payload.OpCode))
 		}
 	}
 }
