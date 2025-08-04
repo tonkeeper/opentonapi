@@ -8725,6 +8725,7 @@ type JettonVerificationType string
 
 const (
 	JettonVerificationTypeWhitelist JettonVerificationType = "whitelist"
+	JettonVerificationTypeGraylist  JettonVerificationType = "graylist"
 	JettonVerificationTypeBlacklist JettonVerificationType = "blacklist"
 	JettonVerificationTypeNone      JettonVerificationType = "none"
 )
@@ -8733,6 +8734,7 @@ const (
 func (JettonVerificationType) AllValues() []JettonVerificationType {
 	return []JettonVerificationType{
 		JettonVerificationTypeWhitelist,
+		JettonVerificationTypeGraylist,
 		JettonVerificationTypeBlacklist,
 		JettonVerificationTypeNone,
 	}
@@ -8742,6 +8744,8 @@ func (JettonVerificationType) AllValues() []JettonVerificationType {
 func (s JettonVerificationType) MarshalText() ([]byte, error) {
 	switch s {
 	case JettonVerificationTypeWhitelist:
+		return []byte(s), nil
+	case JettonVerificationTypeGraylist:
 		return []byte(s), nil
 	case JettonVerificationTypeBlacklist:
 		return []byte(s), nil
@@ -8757,6 +8761,9 @@ func (s *JettonVerificationType) UnmarshalText(data []byte) error {
 	switch JettonVerificationType(data) {
 	case JettonVerificationTypeWhitelist:
 		*s = JettonVerificationTypeWhitelist
+		return nil
+	case JettonVerificationTypeGraylist:
+		*s = JettonVerificationTypeGraylist
 		return nil
 	case JettonVerificationTypeBlacklist:
 		*s = JettonVerificationTypeBlacklist
