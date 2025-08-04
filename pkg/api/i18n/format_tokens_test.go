@@ -101,6 +101,12 @@ func TestFormatJettons(t *testing.T) {
 			want:    "566 450 533 USDT",
 		},
 		{
+			amount:  1_566_450_533_222_111,
+			decimal: 6,
+			symbol:  "USDT",
+			want:    "1 566 450 533 USDT",
+		},
+		{
 			amount:  143_145,
 			decimal: 6,
 			symbol:  "USDT",

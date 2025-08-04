@@ -18,8 +18,8 @@ func FormatTONs(amount int64) string {
 func FormatTokens(amount big.Int, decimals int32, symbol string) string {
 	x := decimal.NewFromBigInt(&amount, -1*decimals)
 	x = truncate(x, 3)
-	intPart := x.IntPart()
-	if x.Equal(decimal.New(x.IntPart(), 0)) {
+	intPart := x.BigInt()
+	if x.Equal(decimal.NewFromBigInt(intPart, 0)) {
 		return fmt.Sprintf("%s %s", formatIntPart(intPart), symbol)
 	}
 	parts := strings.Split(x.String(), ".")
@@ -48,8 +48,8 @@ func truncate(d decimal.Decimal, n int32) decimal.Decimal {
 	return d
 }
 
-func formatIntPart(n int64) string {
-	s := fmt.Sprintf("%d", n)
+func formatIntPart(n *big.Int) string {
+	s := n.String()
 	length := len(s)
 	if length <= 3 {
 		return s
