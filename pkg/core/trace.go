@@ -220,16 +220,6 @@ type InformationSource interface {
 	DedustPools(ctx context.Context, contracts []tongo.AccountID) (map[tongo.AccountID]DedustPool, error)
 }
 
-func isDestinationJettonWallet(inMsg *Message) bool {
-	if inMsg == nil || inMsg.DecodedBody == nil {
-		return false
-	}
-	return (inMsg.DecodedBody.Operation == abi.JettonTransferMsgOp ||
-		inMsg.DecodedBody.Operation == abi.JettonInternalTransferMsgOp ||
-		inMsg.DecodedBody.Operation == abi.JettonBurnMsgOp ||
-		inMsg.DecodedBody.Operation == abi.PtonTonTransferMsgOp) && inMsg.Destination != nil
-}
-
 func hasInterface(interfacesList []abi.ContractInterface, name abi.ContractInterface) bool {
 	for _, iface := range interfacesList {
 		if iface.Implements(name) {
@@ -310,8 +300,8 @@ func CollectAdditionalInfo(ctx context.Context, infoSource InformationSource, tr
 		if trace.AdditionalInfo() != nil {
 			return
 		}
-		if isDestinationJettonWallet(trace.InMsg) {
-			jettonWallets = append(jettonWallets, *trace.InMsg.Destination)
+		if hasInterface(trace.AccountInterfaces, abi.JettonWallet) {
+			jettonWallets = append(jettonWallets, trace.Account)
 		}
 		if hasInterface(trace.AccountInterfaces, abi.NftSaleV1) ||
 			hasInterface(trace.AccountInterfaces, abi.NftSaleV2) ||
@@ -357,10 +347,8 @@ func CollectAdditionalInfo(ctx context.Context, infoSource InformationSource, tr
 			return
 		}
 		additionalInfo := &TraceAdditionalInfo{}
-		if isDestinationJettonWallet(trace.InMsg) {
-			if master, ok := masters[*trace.InMsg.Destination]; ok {
-				additionalInfo.SetJettonMaster(*trace.InMsg.Destination, master)
-			}
+		if hasInterface(trace.AccountInterfaces, abi.JettonWallet) {
+			additionalInfo.SetJettonMaster(trace.Account, masters[trace.Account])
 		}
 		if hasInterface(trace.AccountInterfaces, abi.NftSaleV1) ||
 			hasInterface(trace.AccountInterfaces, abi.NftSaleV2) ||

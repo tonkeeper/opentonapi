@@ -22,6 +22,22 @@ type BubbleJettonTransfer struct {
 }
 
 func (b BubbleJettonTransfer) ToAction() (action *Action) {
+	// convert jetton transfer to ton transfer if token is pTON
+	if b.isWrappedTon && b.recipientWallet.IsZero() {
+		amount := big.Int(b.amount)
+		a := Action{
+			TonTransfer: &TonTransferAction{
+				Amount:    amount.Int64(),
+				Recipient: b.recipient.Address,
+				Sender:    b.senderWallet,
+			},
+			Success: b.success,
+			Type:    TonTransfer,
+		}
+
+		return &a
+	}
+
 	a := Action{
 		JettonTransfer: &JettonTransferAction{
 			Jetton:           b.master,
