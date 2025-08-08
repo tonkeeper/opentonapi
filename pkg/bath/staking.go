@@ -276,3 +276,90 @@ var PendingWithdrawRequestLiquidStraw = Straw[BubbleWithdrawStakeRequest]{
 		},
 	},
 }
+
+type BubbleDepositTokenStake struct {
+	Staker          tongo.AccountID
+	Amount          int64
+	Success         bool
+	Pool            tongo.AccountID
+	PoolTokenMaster tongo.AccountID
+}
+
+func (dts BubbleDepositTokenStake) ToAction() *Action {
+	return &Action{
+		DepositTokenStake: &DepositTokenStakeAction{
+			Amount:          dts.Amount,
+			Pool:            dts.Pool,
+			Staker:          dts.Staker,
+			PoolTokenMaster: dts.PoolTokenMaster,
+		},
+		Success: dts.Success,
+		Type:    DepositTokenStake,
+	}
+}
+
+var DepositTokenStakeStraw = Straw[BubbleDepositTokenStake]{
+	CheckFuncs: []bubbleCheck{Is(BubbleJettonTransfer{})},
+	Builder: func(newAction *BubbleDepositTokenStake, bubble *Bubble) error {
+		tx := bubble.Info.(BubbleJettonTransfer)
+		newAction.Staker = tx.sender.Address
+		amount := big.Int(tx.amount)
+		newAction.Amount = amount.Int64()
+		newAction.Pool = tx.recipient.Address
+		return nil
+	},
+	SingleChild: &Straw[BubbleDepositTokenStake]{
+		CheckFuncs: []bubbleCheck{Is(BubbleJettonMint{})},
+		Builder: func(newAction *BubbleDepositTokenStake, bubble *Bubble) error {
+			tx := bubble.Info.(BubbleJettonMint)
+			newAction.PoolTokenMaster = tx.master
+			newAction.Success = tx.success
+			return nil
+		},
+	},
+}
+
+type BubbleWithdrawTokenStakeRequest struct {
+	Staker          tongo.AccountID
+	Amount          int64
+	Success         bool
+	Pool            tongo.AccountID
+	PoolTokenMaster tongo.AccountID
+}
+
+func (wts BubbleWithdrawTokenStakeRequest) ToAction() *Action {
+	return &Action{
+		WithdrawTokenStakeRequest: &WithdrawTokenStakeRequestAction{
+			Amount:          wts.Amount,
+			Pool:            wts.Pool,
+			Staker:          wts.Staker,
+			PoolTokenMaster: wts.PoolTokenMaster,
+		},
+		Success: wts.Success,
+		Type:    WithdrawTokenStake,
+	}
+}
+
+var WithdrawTokenStakeRequestStraw = Straw[BubbleWithdrawTokenStakeRequest]{
+	CheckFuncs: []bubbleCheck{Is(BubbleJettonTransfer{})},
+	Builder: func(newAction *BubbleWithdrawTokenStakeRequest, bubble *Bubble) error {
+		tx := bubble.Info.(BubbleJettonTransfer)
+		newAction.Staker = tx.sender.Address
+		amount := big.Int(tx.amount)
+		newAction.Amount = amount.Int64()
+		newAction.Pool = tx.recipient.Address
+		newAction.PoolTokenMaster = tx.master
+		return nil
+	},
+	SingleChild: &Straw[BubbleWithdrawTokenStakeRequest]{
+		CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.JettonMintMsgOp)},
+		SingleChild: &Straw[BubbleWithdrawTokenStakeRequest]{
+			CheckFuncs: []bubbleCheck{IsTx},
+			Builder: func(newAction *BubbleWithdrawTokenStakeRequest, bubble *Bubble) error {
+				tx := bubble.Info.(BubbleTx)
+				newAction.Success = tx.success
+				return nil
+			},
+		},
+	},
+}
