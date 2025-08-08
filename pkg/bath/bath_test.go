@@ -180,6 +180,10 @@ func TestFindActions(t *testing.T) {
 			tongo.MustParseBlockID("(0,2000000000000000,46145069)"),
 			tongo.MustParseBlockID("(0,6000000000000000,46151880)"),
 			tongo.MustParseBlockID("(0,2000000000000000,46145074)"),
+			// ethena deposit stake request
+			tongo.MustParseBlockID("(0,8000000000000000,55504556)"),
+			// ethena withdraw stake request
+			tongo.MustParseBlockID("(0,8000000000000000,55504824)"),
 		}),
 	)
 
@@ -434,6 +438,16 @@ func TestFindActions(t *testing.T) {
 			name:           "stonfi v2 swap with ref",
 			hash:           "d70fddb4786c04932669bf589ee73c16293115a1927dfbee5b719304232e2e1b",
 			filenamePrefix: "stonfi-v2-swap-ref",
+		},
+		{
+			name:           "ethena deposit stake request",
+			hash:           "aebe3933b325fe74094406919b9bfe60f0daccba8d893fe6d2b6ef06c8f5804b",
+			filenamePrefix: "ethena-deposit-stake-request",
+		},
+		{
+			name:           "ethena withdraw stake request",
+			hash:           "b8336722a26a86e03b986e9c8207b94a31105e75115af62649e1a95e0d4033bc",
+			filenamePrefix: "ethena-withdraw-stake-request",
 		},
 	} {
 		t.Run(c.name, func(t *testing.T) {
