@@ -180,6 +180,10 @@ func TestFindActions(t *testing.T) {
 			tongo.MustParseBlockID("(0,2000000000000000,46145069)"),
 			tongo.MustParseBlockID("(0,6000000000000000,46151880)"),
 			tongo.MustParseBlockID("(0,2000000000000000,46145074)"),
+			// airdrop claim
+			tongo.MustParseBlockID("(0,e000000000000000,54137798)"),
+			tongo.MustParseBlockID("(0,2000000000000000,54479001)"),
+			tongo.MustParseBlockID("(0,a000000000000000,54118958)"),
 		}),
 	)
 
@@ -293,9 +297,9 @@ func TestFindActions(t *testing.T) {
 			filenamePrefix: "stonfi-purchase-jUSDT",
 		},
 		{
-			name:           "failed stonfi swap",
-			hash:           "77f5acb88fd863e9c00a164eb551ef83c17088d1f603bf463f64f952b93406b0",
-			filenamePrefix: "stonfi-failed-swap",
+			name:           "claim airdrop",
+			hash:           "5da05a55dea13d511097daff8fbd227a7c2d04fb583552cd5c75f2bd56ae8266",
+			filenamePrefix: "claim-airdrop",
 		},
 		{
 			name:           "deploy contract action",

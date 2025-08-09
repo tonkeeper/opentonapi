@@ -1,0 +1,67 @@
+{
+   "Actions": [
+     {
+       "AirdropClaim": {
+         "Distributor": "0:9e32eb8b51bd1d9c4c6a5da85f8c88a58649ab287863d70f421b2b954edd38da",
+         "Recipient": "0:c05d61797f2c1ef2fcf0b6c97239ed9c525fcf59107d97dd6c7913ed1d343a13",
+         "Claimed": {
+           "Amount": 1270000000000,
+           "IsTon": false,
+           "JettonMaster": "0:1477d9dd4a416f50e82a10b4b3fac7e7e57cd37fce13fbfc33885fa36c108005",
+           "JettonWallet": "0:972bb4e6c35f45317096cae4f97bcc85e9df1fe6328714f3487772381fb11fc8"
+         }
+       },
+       "Success": true,
+       "Type": "AirdropClaim",
+       "BaseTransactions": [
+         "2f9db7f85937f9053248f6111ccf78996e3f401e8db09e176addf823c8063888",
+         "f6a3ee672260d913bfd3ee5c6166a80914131a6effd61ebeb93614ade8c82914",
+         "f448fe47d5595f2b67abd51bd6149cbdf16bd676bc92a5ff70a8b4f73ebd89b5",
+         "52f7eb7c0073f18e96788e4c5591cf93fd145830d40fb8fcd26905164d3946e7",
+         "7e0df449e50d0eccb95bc9dab88548e5e8ad56e0a9bb6d88685ddcff62112f37"
+       ]
+     }
+   ],
+   "Accounts": [
+     {
+       "Account": "0:11b67015bcfffa5b7ba5ce501bb0488ee427b5fe24bdd90f33190b421dc13892",
+       "Ton": 0,
+       "Fee": 3929200,
+       "Jettons": null
+     },
+     {
+       "Account": "0:90950a41c7471a3ec9992e2b1c61df7bd636aec56b294f64591a1047940cf479",
+       "Ton": -109,
+       "Fee": 7562109,
+       "Jettons": null
+     },
+     {
+       "Account": "0:972bb4e6c35f45317096cae4f97bcc85e9df1fe6328714f3487772381fb11fc8",
+       "Ton": 6889091,
+       "Fee": 3510909,
+       "Jettons": null
+     },
+     {
+       "Account": "0:9e32eb8b51bd1d9c4c6a5da85f8c88a58649ab287863d70f421b2b954edd38da",
+       "Ton": 121167720,
+       "Fee": 6941080,
+       "Jettons": [
+         {
+           "Address": "0:1477d9dd4a416f50e82a10b4b3fac7e7e57cd37fce13fbfc33885fa36c108005",
+           "Quantity": -1270000000000
+         }
+       ]
+     },
+     {
+       "Account": "0:c05d61797f2c1ef2fcf0b6c97239ed9c525fcf59107d97dd6c7913ed1d343a13",
+       "Ton": -159632004,
+       "Fee": 9632004,
+       "Jettons": [
+         {
+           "Address": "0:1477d9dd4a416f50e82a10b4b3fac7e7e57cd37fce13fbfc33885fa36c108005",
+           "Quantity": 1270000000000
+         }
+       ]
+     }
+   ]
+ }

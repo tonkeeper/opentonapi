@@ -41,6 +41,7 @@ const (
 	DomainRenew           ActionType = "DomainRenew"
 	Purchase              ActionType = "Purchase"
 	Unknown               ActionType = "Unknown"
+	AirdropClaim          ActionType = "AirdropClaim"
 )
 
 type ActionType string
@@ -87,6 +88,7 @@ type (
 		JettonSwap            *JettonSwapAction            `json:",omitempty"`
 		DnsRenew              *DnsRenewAction              `json:",omitempty"`
 		Purchase              *PurchaseAction              `json:",omitempty"`
+		AirdropClaim          *AirdropClaimAction          `json:",omitempty"`
 		Success               bool
 		Type                  ActionType
 		Error                 *string `json:",omitempty"`
@@ -227,6 +229,12 @@ type (
 		Source, Destination tongo.AccountID
 		InvoiceID           uuid.UUID
 		Price               core.Price
+	}
+
+	AirdropClaimAction struct {
+		Distributor tongo.AccountID
+		Recipient   *tongo.AccountID
+		Claimed     assetTransfer
 	}
 )
 
