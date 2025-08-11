@@ -229,16 +229,14 @@ type (
 		Implementation core.StakingImplementation
 	}
 	DepositTokenStakeAction struct {
-		Staker          tongo.AccountID
-		Amount          *tlb.VarUInteger16
-		Pool            string
-		PoolTokenMaster *tongo.AccountID
+		Staker    tongo.AccountID
+		Protocol  core.Protocol
+		StakeMeta *core.Price
 	}
 	WithdrawTokenStakeRequestAction struct {
-		Staker          tongo.AccountID
-		Amount          *tlb.VarUInteger16
-		Pool            string
-		PoolTokenMaster *tongo.AccountID
+		Staker    tongo.AccountID
+		Protocol  core.Protocol
+		StakeMeta *core.Price
 	}
 	assetTransfer struct {
 		Amount       big.Int
@@ -375,17 +373,15 @@ func (a Action) ContributeToExtra(account tongo.AccountID) int64 {
 	case WithdrawStake:
 		return detectDirection(account, a.WithdrawStake.Pool, a.WithdrawStake.Staker, a.WithdrawStake.Amount)
 	case DepositTokenStake:
-		if a.DepositTokenStake.PoolTokenMaster == nil || a.DepositTokenStake.Amount == nil {
+		if a.DepositTokenStake.StakeMeta == nil || a.DepositTokenStake.StakeMeta.Currency.Jetton == nil {
 			return 0
 		}
-		b := big.Int(*a.DepositTokenStake.Amount)
-		return detectDirection(account, *a.DepositTokenStake.PoolTokenMaster, a.DepositTokenStake.Staker, b.Int64())
+		return detectDirection(account, *a.DepositTokenStake.StakeMeta.Currency.Jetton, a.DepositTokenStake.Staker, a.DepositTokenStake.StakeMeta.Amount.Int64())
 	case WithdrawTokenStakeRequest:
-		if a.WithdrawTokenStakeRequest.PoolTokenMaster == nil {
+		if a.WithdrawTokenStakeRequest.StakeMeta == nil || a.WithdrawTokenStakeRequest.StakeMeta.Currency.Jetton == nil {
 			return 0
 		}
-		b := big.Int(*a.WithdrawTokenStakeRequest.Amount)
-		return detectDirection(account, *a.WithdrawTokenStakeRequest.PoolTokenMaster, a.WithdrawTokenStakeRequest.Staker, b.Int64())
+		return detectDirection(account, *a.WithdrawTokenStakeRequest.StakeMeta.Currency.Jetton, a.WithdrawTokenStakeRequest.Staker, a.WithdrawTokenStakeRequest.StakeMeta.Amount.Int64())
 	default:
 		panic("unknown action type")
 	}

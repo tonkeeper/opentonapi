@@ -382,6 +382,79 @@ func (h *Handler) convertWithdrawStake(d *bath.WithdrawStakeAction, acceptLangua
 	return action, simplePreview
 }
 
+func (h *Handler) convertDepositTokenStake(ctx context.Context, d *bath.DepositTokenStakeAction, acceptLanguage string, viewer *tongo.AccountID) (oas.OptDepositTokenStakeAction, oas.ActionSimplePreview) {
+	p := h.convertPrice(ctx, *d.StakeMeta)
+	var price oas.OptPrice
+	price.SetTo(p)
+
+	var image oas.OptString
+	if d.Protocol.Image != nil {
+		image = oas.NewOptString(*d.Protocol.Image)
+	}
+
+	var action oas.OptDepositTokenStakeAction
+	action.SetTo(oas.DepositTokenStakeAction{
+		Staker: convertAccountAddress(d.Staker, h.addressBook),
+		Protocol: oas.Protocol{
+			Name:  d.Protocol.Name,
+			Image: image,
+		},
+		StakeMeta: price,
+	})
+	simplePreview := oas.ActionSimplePreview{
+		Name: "Deposit Token Stake",
+		Description: i18n.T(acceptLanguage, i18n.C{
+			DefaultMessage: &i18n.M{
+				ID:    "depositTokenStakeAction",
+				Other: "Deposit {{.Value}} to {{.Protocol}} protocol",
+			},
+			TemplateData: i18n.Template{
+				"Value":    d.StakeMeta.Amount.String(),
+				"Protocol": d.Protocol.Name,
+			},
+		}),
+		Accounts: distinctAccounts(viewer, h.addressBook, &d.Staker, d.StakeMeta.Currency.Jetton),
+		Value:    oas.NewOptString(i18n.FormatTokens(d.StakeMeta.Amount, int32(p.Decimals), p.TokenName)),
+	}
+	return action, simplePreview
+}
+
+func (h *Handler) convertWithdrawTokenStake(ctx context.Context, w *bath.WithdrawTokenStakeRequestAction, acceptLanguage string, viewer *tongo.AccountID) (oas.OptWithdrawTokenStakeRequestAction, oas.ActionSimplePreview) {
+	p := h.convertPrice(ctx, *w.StakeMeta)
+	var price oas.OptPrice
+	price.SetTo(p)
+
+	var image oas.OptString
+	if w.Protocol.Image != nil {
+		image = oas.NewOptString(*w.Protocol.Image)
+	}
+
+	var action oas.OptWithdrawTokenStakeRequestAction
+	action.SetTo(oas.WithdrawTokenStakeRequestAction{
+		Staker: convertAccountAddress(w.Staker, h.addressBook),
+		Protocol: oas.Protocol{
+			Name:  w.Protocol.Name,
+			Image: image,
+		},
+		StakeMeta: price,
+	})
+	simplePreview := oas.ActionSimplePreview{
+		Name: "Withdraw Token Stake",
+		Description: i18n.T(acceptLanguage, i18n.C{
+			DefaultMessage: &i18n.M{
+				ID:    "withdrawTokenStakeAction",
+				Other: "Request to withdraw funds from {{.Protocol}} protocol",
+			},
+			TemplateData: i18n.Template{
+				"Protocol": w.Protocol.Name,
+			},
+		}),
+		Accounts: distinctAccounts(viewer, h.addressBook, &w.Staker, w.StakeMeta.Currency.Jetton),
+		Value:    oas.NewOptString("ALL"),
+	}
+	return action, simplePreview
+}
+
 func (h *Handler) convertDomainRenew(ctx context.Context, d *bath.DnsRenewAction, acceptLanguage string, viewer *tongo.AccountID) (oas.OptDomainRenewAction, oas.ActionSimplePreview) {
 	var action oas.OptDomainRenewAction
 	var domain = "unknown"
@@ -743,6 +816,10 @@ func (h *Handler) convertAction(ctx context.Context, viewer *tongo.AccountID, a 
 		action.SmartContractExec.SetTo(contractAction)
 	case bath.DepositStake:
 		action.DepositStake, action.SimplePreview = h.convertDepositStake(a.DepositStake, acceptLanguage.Value, viewer)
+	case bath.WithdrawTokenStakeRequest:
+		action.WithdrawTokenStakeRequest, action.SimplePreview = h.convertWithdrawTokenStake(ctx, a.WithdrawTokenStakeRequest, acceptLanguage.Value, viewer)
+	case bath.DepositTokenStake:
+		action.DepositTokenStake, action.SimplePreview = h.convertDepositTokenStake(ctx, a.DepositTokenStake, acceptLanguage.Value, viewer)
 	case bath.WithdrawStakeRequest:
 		action.WithdrawStakeRequest, action.SimplePreview = h.convertWithdrawStakeRequest(a.WithdrawStakeRequest, acceptLanguage.Value, viewer)
 	case bath.WithdrawStake:

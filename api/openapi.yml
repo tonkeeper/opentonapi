@@ -6674,36 +6674,26 @@ components:
       type: object
       required:
         - staker
-        - pool
+        - protocol
       properties:
         staker:
           $ref: '#/components/schemas/AccountAddress'
-        pool:
-          type: string
-          example: "Ethena"
-        amount:
-          type: string
-          x-js-format: bigint
-          example: "1000000000"
-        pool_token_master:
-          $ref: '#/components/schemas/AccountAddress'
+        protocol:
+          $ref: '#/components/schemas/Protocol'
+        stake_meta:
+          $ref: '#/components/schemas/Price'
     WithdrawTokenStakeRequestAction:
       type: object
       required:
         - staker
-        - pool
+        - protocol
       properties:
         staker:
           $ref: '#/components/schemas/AccountAddress'
-        pool:
-          type: string
-          example: "Ethena"
-        amount:
-          type: string
-          x-js-format: bigint
-          example: "1000000000"
-        pool_token_master:
-          $ref: '#/components/schemas/AccountAddress'
+        protocol:
+          $ref: '#/components/schemas/Protocol'
+        stake_meta:
+          $ref: '#/components/schemas/Price'
     ActionSimplePreview:
       type: object
       description: shortly describes what this action is about.
@@ -8052,7 +8042,17 @@ components:
           type: string
           description: String representation of the value according to the specified type
           example: "0xfa01d78381ae32"
-  
+    Protocol:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          example: "Ethena"
+        image:
+          type: string
+          example: https://cache.tonapi.io/images/jetton.jpg
   responses:
     Error:
       description: Some error during request processing
