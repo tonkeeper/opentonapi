@@ -6081,6 +6081,8 @@ components:
             - SmartContractExec
             - DomainRenew
             - Purchase
+            - DepositTokenStake
+            - WithdrawTokenStakeRequest
             - Unknown
         status:
           type: string
@@ -6136,6 +6138,10 @@ components:
           $ref: '#/components/schemas/SetSignatureAllowedAction'
         GasRelay:
           $ref: '#/components/schemas/GasRelayAction'
+        DepositTokenStake:
+          $ref: '#/components/schemas/DepositTokenStakeAction'
+        WithdrawTokenStakeRequest:
+          $ref: '#/components/schemas/WithdrawTokenStakeRequestAction'
         simple_preview:
           $ref: '#/components/schemas/ActionSimplePreview'
         base_transactions:
@@ -6663,6 +6669,40 @@ components:
         seller:
           $ref: '#/components/schemas/AccountAddress'
         buyer:
+          $ref: '#/components/schemas/AccountAddress'
+    DepositTokenStakeAction:
+      type: object
+      required:
+        - staker
+        - pool
+      properties:
+        staker:
+          $ref: '#/components/schemas/AccountAddress'
+        pool:
+          type: string
+          example: "Ethena"
+        amount:
+          type: string
+          x-js-format: bigint
+          example: "1000000000"
+        pool_token_master:
+          $ref: '#/components/schemas/AccountAddress'
+    WithdrawTokenStakeRequestAction:
+      type: object
+      required:
+        - staker
+        - pool
+      properties:
+        staker:
+          $ref: '#/components/schemas/AccountAddress'
+        pool:
+          type: string
+          example: "Ethena"
+        amount:
+          type: string
+          x-js-format: bigint
+          example: "1000000000"
+        pool_token_master:
           $ref: '#/components/schemas/AccountAddress'
     ActionSimplePreview:
       type: object

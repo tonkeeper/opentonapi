@@ -374,6 +374,18 @@ func (a Action) ContributeToExtra(account tongo.AccountID) int64 {
 		return 0
 	case WithdrawStake:
 		return detectDirection(account, a.WithdrawStake.Pool, a.WithdrawStake.Staker, a.WithdrawStake.Amount)
+	case DepositTokenStake:
+		if a.DepositTokenStake.PoolTokenMaster == nil || a.DepositTokenStake.Amount == nil {
+			return 0
+		}
+		b := big.Int(*a.DepositTokenStake.Amount)
+		return detectDirection(account, *a.DepositTokenStake.PoolTokenMaster, a.DepositTokenStake.Staker, b.Int64())
+	case WithdrawTokenStakeRequest:
+		if a.WithdrawTokenStakeRequest.PoolTokenMaster == nil {
+			return 0
+		}
+		b := big.Int(*a.WithdrawTokenStakeRequest.Amount)
+		return detectDirection(account, *a.WithdrawTokenStakeRequest.PoolTokenMaster, a.WithdrawTokenStakeRequest.Staker, b.Int64())
 	default:
 		panic("unknown action type")
 	}
@@ -396,6 +408,8 @@ func (a Action) IsSubject(account tongo.AccountID) bool {
 		a.DepositStake,
 		a.WithdrawStake,
 		a.WithdrawStakeRequest,
+		a.WithdrawTokenStakeRequest,
+		a.DepositTokenStake,
 		a.JettonSwap,
 		a.JettonMint,
 		a.JettonBurn,
@@ -506,6 +520,14 @@ func (a *DepositStakeAction) SubjectAccounts() []tongo.AccountID {
 
 func (a *WithdrawStakeAction) SubjectAccounts() []tongo.AccountID {
 	return []tongo.AccountID{a.Staker, a.Pool}
+}
+
+func (a *DepositTokenStakeAction) SubjectAccounts() []tongo.AccountID {
+	return []tongo.AccountID{a.Staker}
+}
+
+func (a *WithdrawTokenStakeRequestAction) SubjectAccounts() []tongo.AccountID {
+	return []tongo.AccountID{a.Staker}
 }
 
 func (a *WithdrawStakeRequestAction) SubjectAccounts() []tongo.AccountID {

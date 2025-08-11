@@ -677,6 +677,10 @@ func (s ActionType) Validate() error {
 		return nil
 	case "Purchase":
 		return nil
+	case "DepositTokenStake":
+		return nil
+	case "WithdrawTokenStakeRequest":
+		return nil
 	case "Unknown":
 		return nil
 	default:

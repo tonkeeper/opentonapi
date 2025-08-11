@@ -1142,6 +1142,9 @@
      "DepositStake": {
       "$ref": "#/components/schemas/DepositStakeAction"
      },
+     "DepositTokenStake": {
+      "$ref": "#/components/schemas/DepositTokenStakeAction"
+     },
      "DomainRenew": {
       "$ref": "#/components/schemas/DomainRenewAction"
      },
@@ -1202,6 +1205,9 @@
      "WithdrawStakeRequest": {
       "$ref": "#/components/schemas/WithdrawStakeRequestAction"
      },
+     "WithdrawTokenStakeRequest": {
+      "$ref": "#/components/schemas/WithdrawTokenStakeRequestAction"
+     },
      "base_transactions": {
       "items": {
        "description": "transaction hash",
@@ -1243,6 +1249,8 @@
        "SmartContractExec",
        "DomainRenew",
        "Purchase",
+       "DepositTokenStake",
+       "WithdrawTokenStakeRequest",
        "Unknown"
       ],
       "example": "TonTransfer",
@@ -3084,6 +3092,30 @@
      "staker",
      "pool",
      "implementation"
+    ],
+    "type": "object"
+   },
+   "DepositTokenStakeAction": {
+    "properties": {
+     "amount": {
+      "example": "1000000000",
+      "type": "string",
+      "x-js-format": "bigint"
+     },
+     "pool": {
+      "example": "Ethena",
+      "type": "string"
+     },
+     "pool_token_master": {
+      "$ref": "#/components/schemas/AccountAddress"
+     },
+     "staker": {
+      "$ref": "#/components/schemas/AccountAddress"
+     }
+    },
+    "required": [
+     "staker",
+     "pool"
     ],
     "type": "object"
    },
@@ -6824,6 +6856,30 @@
      "staker",
      "pool",
      "implementation"
+    ],
+    "type": "object"
+   },
+   "WithdrawTokenStakeRequestAction": {
+    "properties": {
+     "amount": {
+      "example": "1000000000",
+      "type": "string",
+      "x-js-format": "bigint"
+     },
+     "pool": {
+      "example": "Ethena",
+      "type": "string"
+     },
+     "pool_token_master": {
+      "$ref": "#/components/schemas/AccountAddress"
+     },
+     "staker": {
+      "$ref": "#/components/schemas/AccountAddress"
+     }
+    },
+    "required": [
+     "staker",
+     "pool"
     ],
     "type": "object"
    },
