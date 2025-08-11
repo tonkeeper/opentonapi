@@ -3,8 +3,8 @@
      {
        "WithdrawTokenStakeRequest": {
          "Staker": "0:4003cbbfb5d1a9085873f956f92040669990d9d371ce843741b5d7936f231238",
-         "Amount": 3561999,
-         "Pool": "0:a11ae0f5bb47bb2945871f915a621ff281c2d786c746da74873d71d6f2aaa7a5",
+         "Amount": "3561999",
+         "Pool": "Ethena",
          "PoolTokenMaster": "0:d0e545323c7acb7102653c073377f7e3c67f122eb94d430a250739f109d4a57d"
        },
        "Success": true,

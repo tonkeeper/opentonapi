@@ -7,6 +7,7 @@ import (
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
+	"github.com/tonkeeper/tongo/tlb"
 	"github.com/tonkeeper/tongo/ton"
 )
 
@@ -279,10 +280,10 @@ var PendingWithdrawRequestLiquidStraw = Straw[BubbleWithdrawStakeRequest]{
 
 type BubbleDepositTokenStake struct {
 	Staker          tongo.AccountID
-	Amount          int64
+	Amount          *tlb.VarUInteger16
 	Success         bool
-	Pool            tongo.AccountID
-	PoolTokenMaster tongo.AccountID
+	Pool            string
+	PoolTokenMaster *tongo.AccountID
 }
 
 func (dts BubbleDepositTokenStake) ToAction() *Action {
@@ -298,21 +299,20 @@ func (dts BubbleDepositTokenStake) ToAction() *Action {
 	}
 }
 
-var DepositTokenStakeStraw = Straw[BubbleDepositTokenStake]{
-	CheckFuncs: []bubbleCheck{Is(BubbleJettonTransfer{})},
+var DepositEthenaStakeStraw = Straw[BubbleDepositTokenStake]{
+	CheckFuncs: []bubbleCheck{IsJettonTransfer, JettonRecipientAccount(tongo.MustParseAddress("0:a11ae0f5bb47bb2945871f915a621ff281c2d786c746da74873d71d6f2aaa7a5").ID)},
 	Builder: func(newAction *BubbleDepositTokenStake, bubble *Bubble) error {
 		tx := bubble.Info.(BubbleJettonTransfer)
 		newAction.Staker = tx.sender.Address
-		amount := big.Int(tx.amount)
-		newAction.Amount = amount.Int64()
-		newAction.Pool = tx.recipient.Address
+		newAction.Amount = &tx.amount
+		newAction.Pool = "Ethena"
 		return nil
 	},
 	SingleChild: &Straw[BubbleDepositTokenStake]{
 		CheckFuncs: []bubbleCheck{Is(BubbleJettonMint{})},
 		Builder: func(newAction *BubbleDepositTokenStake, bubble *Bubble) error {
 			tx := bubble.Info.(BubbleJettonMint)
-			newAction.PoolTokenMaster = tx.master
+			newAction.PoolTokenMaster = &tx.master
 			newAction.Success = tx.success
 			return nil
 		},
@@ -321,10 +321,10 @@ var DepositTokenStakeStraw = Straw[BubbleDepositTokenStake]{
 
 type BubbleWithdrawTokenStakeRequest struct {
 	Staker          tongo.AccountID
-	Amount          int64
+	Amount          *tlb.VarUInteger16
 	Success         bool
-	Pool            tongo.AccountID
-	PoolTokenMaster tongo.AccountID
+	Pool            string
+	PoolTokenMaster *tongo.AccountID
 }
 
 func (wts BubbleWithdrawTokenStakeRequest) ToAction() *Action {
@@ -336,19 +336,18 @@ func (wts BubbleWithdrawTokenStakeRequest) ToAction() *Action {
 			PoolTokenMaster: wts.PoolTokenMaster,
 		},
 		Success: wts.Success,
-		Type:    WithdrawTokenStake,
+		Type:    WithdrawTokenStakeRequest,
 	}
 }
 
-var WithdrawTokenStakeRequestStraw = Straw[BubbleWithdrawTokenStakeRequest]{
-	CheckFuncs: []bubbleCheck{Is(BubbleJettonTransfer{})},
+var WithdrawEthenaStakeRequestStraw = Straw[BubbleWithdrawTokenStakeRequest]{
+	CheckFuncs: []bubbleCheck{IsJettonTransfer, JettonRecipientAccount(tongo.MustParseAddress("0:a11ae0f5bb47bb2945871f915a621ff281c2d786c746da74873d71d6f2aaa7a5").ID)},
 	Builder: func(newAction *BubbleWithdrawTokenStakeRequest, bubble *Bubble) error {
 		tx := bubble.Info.(BubbleJettonTransfer)
 		newAction.Staker = tx.sender.Address
-		amount := big.Int(tx.amount)
-		newAction.Amount = amount.Int64()
-		newAction.Pool = tx.recipient.Address
-		newAction.PoolTokenMaster = tx.master
+		newAction.Amount = &tx.amount
+		newAction.Pool = "Ethena"
+		newAction.PoolTokenMaster = &tx.master
 		return nil
 	},
 	SingleChild: &Straw[BubbleWithdrawTokenStakeRequest]{
