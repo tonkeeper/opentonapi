@@ -3,9 +3,18 @@
      {
        "DepositTokenStake": {
          "Staker": "0:4003cbbfb5d1a9085873f956f92040669990d9d371ce843741b5d7936f231238",
-         "Amount": "1000000",
-         "Pool": "Ethena",
-         "PoolTokenMaster": "0:d0e545323c7acb7102653c073377f7e3c67f122eb94d430a250739f109d4a57d"
+         "Protocol": {
+           "Name": "Ethena",
+           "Image": "https://ethena.fi/shared/usde.png"
+         },
+         "StakeMeta": {
+           "Currency": {
+             "Type": "jetton",
+             "Jetton": "0:d0e545323c7acb7102653c073377f7e3c67f122eb94d430a250739f109d4a57d",
+             "CurrencyID": null
+           },
+           "Amount": 1000000
+         }
        },
        "Success": true,
        "Type": "DepositTokenStake",
