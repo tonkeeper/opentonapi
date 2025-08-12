@@ -58,6 +58,9 @@ type TraceAdditionalInfo struct {
 
 	// DedustPool is set, if a transaction's account implements "get_assets" method and abi.DedustPool interface.
 	DedustPool *DedustPool
+
+	// SubscriptionContract is set, if a transaction's account implements method "get_subscription_data" for V1 or "get_subscription_info" for V2.
+	SubscriptionInfo *SubscriptionInfo
 }
 
 func (t *Trace) AdditionalInfo() *TraceAdditionalInfo {
@@ -79,6 +82,7 @@ func (t *TraceAdditionalInfo) MarshalJSON() ([]byte, error) {
 		STONfiPool          *STONfiPool          `json:",omitempty"`
 		EmulatedTeleitemNFT *EmulatedTeleitemNFT `json:",omitempty"`
 		DedustPool          *DedustPool          `json:",omitempty"`
+		SubscriptionInfo    *SubscriptionInfo    `json:",omitempty"`
 	}
 
 	masters := make(map[string]string)
@@ -94,6 +98,7 @@ func (t *TraceAdditionalInfo) MarshalJSON() ([]byte, error) {
 		STONfiPool:          t.STONfiPool,
 		EmulatedTeleitemNFT: t.EmulatedTeleitemNFT,
 		DedustPool:          t.DedustPool,
+		SubscriptionInfo:    t.SubscriptionInfo,
 	})
 }
 
@@ -104,6 +109,7 @@ func (t *TraceAdditionalInfo) UnmarshalJSON(data []byte) error {
 		STONfiPool          *STONfiPool          `json:",omitempty"`
 		EmulatedTeleitemNFT *EmulatedTeleitemNFT `json:",omitempty"`
 		DedustPool          *DedustPool          `json:",omitempty"`
+		SubscriptionInfo    *SubscriptionInfo    `json:",omitempty"`
 	}
 
 	aux := &Alias{}
@@ -124,6 +130,7 @@ func (t *TraceAdditionalInfo) UnmarshalJSON(data []byte) error {
 	t.STONfiPool = aux.STONfiPool
 	t.EmulatedTeleitemNFT = aux.EmulatedTeleitemNFT
 	t.DedustPool = aux.DedustPool
+	t.SubscriptionInfo = aux.SubscriptionInfo
 
 	return nil
 }
@@ -212,12 +219,23 @@ type DedustPool struct {
 	Asset1 Currency
 }
 
+type SubscriptionID struct {
+	Account   tongo.AccountID
+	Interface abi.ContractInterface
+}
+
+type SubscriptionInfo struct {
+	Wallet, Beneficiary, WithdrawTo tongo.AccountID
+	PaymentPerPeriod                int64
+}
+
 // InformationSource provides methods to construct TraceAdditionalInfo.
 type InformationSource interface {
 	JettonMastersForWallets(ctx context.Context, wallets []tongo.AccountID) (map[tongo.AccountID]tongo.AccountID, error)
 	NftSaleContracts(ctx context.Context, contracts []tongo.AccountID) (map[tongo.AccountID]NftSaleContract, error)
 	STONfiPools(ctx context.Context, poolIDs []STONfiPoolID) (map[tongo.AccountID]STONfiPool, error)
 	DedustPools(ctx context.Context, contracts []tongo.AccountID) (map[tongo.AccountID]DedustPool, error)
+	SubscriptionInfos(ctx context.Context, ids []SubscriptionID) (map[tongo.AccountID]SubscriptionInfo, error)
 }
 
 func hasInterface(interfacesList []abi.ContractInterface, name abi.ContractInterface) bool {
@@ -292,6 +310,7 @@ func CollectAdditionalInfo(ctx context.Context, infoSource InformationSource, tr
 	var saleContracts []tongo.AccountID
 	var stonfiPoolIDs []STONfiPoolID
 	var dedustPoolIDs []tongo.AccountID
+	var subsciptionIDs []SubscriptionID
 	Visit(trace, func(trace *Trace) {
 		// when we emulate a trace,
 		// we construct "trace.AdditionalInfo" in emulatedTreeToTrace for all accounts the trace touches.
@@ -317,6 +336,12 @@ func CollectAdditionalInfo(ctx context.Context, infoSource InformationSource, tr
 		if hasInterface(trace.AccountInterfaces, abi.DedustPool) {
 			dedustPoolIDs = append(dedustPoolIDs, trace.Account)
 		}
+		if hasInterface(trace.AccountInterfaces, abi.SubscriptionV1) {
+			subsciptionIDs = append(subsciptionIDs, SubscriptionID{Account: trace.Account, Interface: abi.SubscriptionV1})
+		}
+		if hasInterface(trace.AccountInterfaces, abi.SubscriptionV2) {
+			subsciptionIDs = append(subsciptionIDs, SubscriptionID{Account: trace.Account, Interface: abi.SubscriptionV2})
+		}
 	})
 	stonfiPools, err := infoSource.STONfiPools(ctx, stonfiPoolIDs)
 	if err != nil {
@@ -335,6 +360,10 @@ func CollectAdditionalInfo(ctx context.Context, infoSource InformationSource, tr
 		return err
 	}
 	basicNftSales, err := infoSource.NftSaleContracts(ctx, saleContracts)
+	if err != nil {
+		return err
+	}
+	subscriptionInfos, err := infoSource.SubscriptionInfos(ctx, subsciptionIDs)
 	if err != nil {
 		return err
 	}
@@ -367,6 +396,11 @@ func CollectAdditionalInfo(ctx context.Context, infoSource InformationSource, tr
 		if hasInterface(trace.AccountInterfaces, abi.DedustPool) {
 			if pool, ok := dedustPools[trace.Account]; ok {
 				additionalInfo.DedustPool = &pool
+			}
+		}
+		if hasInterface(trace.AccountInterfaces, abi.SubscriptionV1) || hasInterface(trace.AccountInterfaces, abi.SubscriptionV2) {
+			if sub, ok := subscriptionInfos[trace.Account]; ok {
+				additionalInfo.SubscriptionInfo = &sub
 			}
 		}
 		trace.SetAdditionalInfo(additionalInfo)

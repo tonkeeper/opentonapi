@@ -1,0 +1,41 @@
+{
+   "Actions": [
+     {
+       "Subscribe": {
+         "Subscription": "0:6c91b3bb05143c79bf9b375a6abb8cfc0c06f32089e73e32d396b9f57a5ed5b4",
+         "Subscriber": "0:35a74ba451906124a313e5fc00382b98ec81994dd93826a045a7626b0b9be6d5",
+         "Beneficiary": "0:5b92ca5f8ef8683432c9192c1a7b855f6cb08912c85d029f56faf918cfaa9649",
+         "WithdrawTo": "0:b8f8fecda3fca32c0ca2e5791469ba087af68d178e8be19da7aca4362be50ba9",
+         "Price": {
+           "Currency": {
+             "Type": "native",
+             "Jetton": null,
+             "CurrencyID": null
+           },
+           "Amount": 0
+         },
+         "First": true
+       },
+       "Success": true,
+       "Type": "Subscribe",
+       "BaseTransactions": [
+         "bf63b39d01432b041cfd0f9a5af71a418cb55028760417fa5748f230bd8b8abf",
+         "043ae4fb3ef7546262a709aea01a2e4fdfb6fce66826974eeb7d9eaa61659815"
+       ]
+     }
+   ],
+   "Accounts": [
+     {
+       "Account": "0:35a74ba451906124a313e5fc00382b98ec81994dd93826a045a7626b0b9be6d5",
+       "Ton": -122540908,
+       "Fee": 22540908,
+       "Jettons": null
+     },
+     {
+       "Account": "0:6c91b3bb05143c79bf9b375a6abb8cfc0c06f32089e73e32d396b9f57a5ed5b4",
+       "Ton": 94952400,
+       "Fee": 5047600,
+       "Jettons": null
+     }
+   ]
+ }

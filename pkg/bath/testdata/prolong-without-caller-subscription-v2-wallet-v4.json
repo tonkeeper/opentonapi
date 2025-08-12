@@ -1,0 +1,63 @@
+{
+   "Actions": [
+     {
+       "Subscribe": {
+         "Subscription": "0:a2bf4c19c06a190b16eaeb15fc6fb0e002755a8f4384c97d4acb7908a4fb7580",
+         "Subscriber": "0:5b92ca5f8ef8683432c9192c1a7b855f6cb08912c85d029f56faf918cfaa9649",
+         "Beneficiary": "0:35a74ba451906124a313e5fc00382b98ec81994dd93826a045a7626b0b9be6d5",
+         "WithdrawTo": "0:b8f8fecda3fca32c0ca2e5791469ba087af68d178e8be19da7aca4362be50ba9",
+         "Price": {
+           "Currency": {
+             "Type": "native",
+             "Jetton": null,
+             "CurrencyID": null
+           },
+           "Amount": 20000000
+         },
+         "First": false
+       },
+       "Success": true,
+       "Type": "Subscribe",
+       "BaseTransactions": [
+         "4b53878130de86a65291fd20c7a730dbd17bd75ecf27defcac164ce98f5c5c7f",
+         "22c6456d7da651db684a83ae2a5ec6d0df13df390df1fb1c2a5debe7fc111c11",
+         "b25c2e62568777f1ae87cc92bc0764bce0b8fb125c2e6e609f49fbb04156a357"
+       ]
+     },
+     {
+       "TonTransfer": {
+         "Amount": 40659017,
+         "Comment": null,
+         "EncryptedComment": null,
+         "Recipient": "0:b8f8fecda3fca32c0ca2e5791469ba087af68d178e8be19da7aca4362be50ba9",
+         "Sender": "0:a2bf4c19c06a190b16eaeb15fc6fb0e002755a8f4384c97d4acb7908a4fb7580",
+         "Refund": null
+       },
+       "Success": true,
+       "Type": "TonTransfer",
+       "BaseTransactions": [
+         "2be4775e451dd03f6db3c721af908668f8b674d554e9a41445a91d066ffbf3c6"
+       ]
+     }
+   ],
+   "Accounts": [
+     {
+       "Account": "0:5b92ca5f8ef8683432c9192c1a7b855f6cb08912c85d029f56faf918cfaa9649",
+       "Ton": -20000047,
+       "Fee": 2288047,
+       "Jettons": null
+     },
+     {
+       "Account": "0:a2bf4c19c06a190b16eaeb15fc6fb0e002755a8f4384c97d4acb7908a4fb7580",
+       "Ton": -28486747,
+       "Fee": 5539730,
+       "Jettons": null
+     },
+     {
+       "Account": "0:b8f8fecda3fca32c0ca2e5791469ba087af68d178e8be19da7aca4362be50ba9",
+       "Ton": 40655880,
+       "Fee": 3137,
+       "Jettons": null
+     }
+   ]
+ }
