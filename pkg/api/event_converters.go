@@ -980,8 +980,9 @@ func (h *Handler) convertSubscribe(ctx context.Context, a *bath.SubscribeAction,
 		Initial:      a.First,
 	}
 	subscribeAction.Amount.SetTo(a.Price.Amount.Int64()) // for backward compatibility
-	value := ScaleJettons(a.Price.Amount, price.Decimals).String()
-	act := "Paying {{.Amount}} {{.TokenName}} for subscription"
+
+	value := i18n.FormatTokens(a.Price.Amount, int32(price.Decimals), price.TokenName)
+	act := "Paying for subscription"
 	if a.Price.Amount.Cmp(big.NewInt(0)) == 0 {
 		act = "Trial period subscription"
 	}
@@ -992,13 +993,9 @@ func (h *Handler) convertSubscribe(ctx context.Context, a *bath.SubscribeAction,
 				ID:    "subscriptionAction",
 				Other: act,
 			},
-			TemplateData: i18n.Template{
-				"Amount":    value,
-				"TokenName": price.TokenName,
-			},
 		}),
 		Accounts: distinctAccounts(viewer, h.addressBook, &a.Beneficiary, &a.Subscriber),
-		Value:    oas.NewOptString(fmt.Sprintf("%v %v", value, price.TokenName)),
+		Value:    oas.NewOptString(value),
 	}
 	var action oas.OptSubscriptionAction
 	action.SetTo(subscribeAction)
