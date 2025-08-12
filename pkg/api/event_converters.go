@@ -747,6 +747,7 @@ func convertAccountValueFlow(accountID tongo.AccountID, flow *bath.AccountValueF
 			Account:  convertAccountAddress(jettonMaster, book),
 			Jetton:   previews[jettonMaster],
 			Quantity: quantity.Int64(),
+			Qty:      quantity.String(),
 		})
 	}
 	return valueFlow
