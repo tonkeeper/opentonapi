@@ -5083,6 +5083,99 @@ func (s *ElectionsRecoverStakeAction) SetStaker(val AccountAddress) {
 	s.Staker = val
 }
 
+type EmulateMessageToAccountEventReq struct {
+	Boc string `json:"boc"`
+}
+
+// GetBoc returns the value of Boc.
+func (s *EmulateMessageToAccountEventReq) GetBoc() string {
+	return s.Boc
+}
+
+// SetBoc sets the value of Boc.
+func (s *EmulateMessageToAccountEventReq) SetBoc(val string) {
+	s.Boc = val
+}
+
+type EmulateMessageToEventReq struct {
+	Boc string `json:"boc"`
+}
+
+// GetBoc returns the value of Boc.
+func (s *EmulateMessageToEventReq) GetBoc() string {
+	return s.Boc
+}
+
+// SetBoc sets the value of Boc.
+func (s *EmulateMessageToEventReq) SetBoc(val string) {
+	s.Boc = val
+}
+
+type EmulateMessageToTraceReq struct {
+	Boc string `json:"boc"`
+}
+
+// GetBoc returns the value of Boc.
+func (s *EmulateMessageToTraceReq) GetBoc() string {
+	return s.Boc
+}
+
+// SetBoc sets the value of Boc.
+func (s *EmulateMessageToTraceReq) SetBoc(val string) {
+	s.Boc = val
+}
+
+type EmulateMessageToWalletReq struct {
+	Boc string `json:"boc"`
+	// Additional per account configuration.
+	Params []EmulateMessageToWalletReqParamsItem `json:"params"`
+}
+
+// GetBoc returns the value of Boc.
+func (s *EmulateMessageToWalletReq) GetBoc() string {
+	return s.Boc
+}
+
+// GetParams returns the value of Params.
+func (s *EmulateMessageToWalletReq) GetParams() []EmulateMessageToWalletReqParamsItem {
+	return s.Params
+}
+
+// SetBoc sets the value of Boc.
+func (s *EmulateMessageToWalletReq) SetBoc(val string) {
+	s.Boc = val
+}
+
+// SetParams sets the value of Params.
+func (s *EmulateMessageToWalletReq) SetParams(val []EmulateMessageToWalletReqParamsItem) {
+	s.Params = val
+}
+
+type EmulateMessageToWalletReqParamsItem struct {
+	Address string   `json:"address"`
+	Balance OptInt64 `json:"balance"`
+}
+
+// GetAddress returns the value of Address.
+func (s *EmulateMessageToWalletReqParamsItem) GetAddress() string {
+	return s.Address
+}
+
+// GetBalance returns the value of Balance.
+func (s *EmulateMessageToWalletReqParamsItem) GetBalance() OptInt64 {
+	return s.Balance
+}
+
+// SetAddress sets the value of Address.
+func (s *EmulateMessageToWalletReqParamsItem) SetAddress(val string) {
+	s.Address = val
+}
+
+// SetBalance sets the value of Balance.
+func (s *EmulateMessageToWalletReqParamsItem) SetBalance(val OptInt64) {
+	s.Balance = val
+}
+
 // Ref: #/components/schemas/EncryptedComment
 type EncryptedComment struct {
 	EncryptionType string `json:"encryption_type"`
@@ -8556,6 +8649,43 @@ func (s *Message) SetDecodedOpName(val OptString) {
 // SetDecodedBody sets the value of DecodedBody.
 func (s *Message) SetDecodedBody(val jx.Raw) {
 	s.DecodedBody = val
+}
+
+// Ref: #/components/schemas/MessageConsequences
+type MessageConsequences struct {
+	Trace Trace        `json:"trace"`
+	Risk  Risk         `json:"risk"`
+	Event AccountEvent `json:"event"`
+}
+
+// GetTrace returns the value of Trace.
+func (s *MessageConsequences) GetTrace() Trace {
+	return s.Trace
+}
+
+// GetRisk returns the value of Risk.
+func (s *MessageConsequences) GetRisk() Risk {
+	return s.Risk
+}
+
+// GetEvent returns the value of Event.
+func (s *MessageConsequences) GetEvent() AccountEvent {
+	return s.Event
+}
+
+// SetTrace sets the value of Trace.
+func (s *MessageConsequences) SetTrace(val Trace) {
+	s.Trace = val
+}
+
+// SetRisk sets the value of Risk.
+func (s *MessageConsequences) SetRisk(val Risk) {
+	s.Risk = val
+}
+
+// SetEvent sets the value of Event.
+func (s *MessageConsequences) SetEvent(val AccountEvent) {
+	s.Event = val
 }
 
 type MessageMsgType string
