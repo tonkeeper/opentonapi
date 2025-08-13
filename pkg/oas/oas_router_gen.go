@@ -290,6 +290,34 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 									break
 								}
 
+								if len(elem) == 0 {
+									break
+								}
+								switch elem[0] {
+								case 'e': // Prefix: "emulate"
+									origElem := elem
+									if l := len("emulate"); len(elem) >= l && elem[0:l] == "emulate" {
+										elem = elem[l:]
+									} else {
+										break
+									}
+
+									if len(elem) == 0 {
+										// Leaf node.
+										switch r.Method {
+										case "POST":
+											s.handleEmulateMessageToAccountEventRequest([1]string{
+												args[0],
+											}, elemIsEscaped, w, r)
+										default:
+											s.notAllowed(w, r, "POST")
+										}
+
+										return
+									}
+
+									elem = origElem
+								}
 								// Param: "event_id"
 								// Leaf parameter
 								args[1] = elem
@@ -1343,6 +1371,32 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 						break
 					}
 
+					if len(elem) == 0 {
+						break
+					}
+					switch elem[0] {
+					case 'e': // Prefix: "emulate"
+						origElem := elem
+						if l := len("emulate"); len(elem) >= l && elem[0:l] == "emulate" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						if len(elem) == 0 {
+							// Leaf node.
+							switch r.Method {
+							case "POST":
+								s.handleEmulateMessageToEventRequest([0]string{}, elemIsEscaped, w, r)
+							default:
+								s.notAllowed(w, r, "POST")
+							}
+
+							return
+						}
+
+						elem = origElem
+					}
 					// Param: "event_id"
 					// Match until "/"
 					idx := strings.IndexByte(elem, '/')
@@ -3012,6 +3066,32 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 						break
 					}
 
+					if len(elem) == 0 {
+						break
+					}
+					switch elem[0] {
+					case 'e': // Prefix: "emulate"
+						origElem := elem
+						if l := len("emulate"); len(elem) >= l && elem[0:l] == "emulate" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						if len(elem) == 0 {
+							// Leaf node.
+							switch r.Method {
+							case "POST":
+								s.handleEmulateMessageToTraceRequest([0]string{}, elemIsEscaped, w, r)
+							default:
+								s.notAllowed(w, r, "POST")
+							}
+
+							return
+						}
+
+						elem = origElem
+					}
 					// Param: "trace_id"
 					// Leaf parameter
 					args[0] = elem
@@ -3085,6 +3165,27 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 							s.handleSetWalletBackupRequest([0]string{}, elemIsEscaped, w, r)
 						default:
 							s.notAllowed(w, r, "GET,PUT")
+						}
+
+						return
+					}
+
+					elem = origElem
+				case 'e': // Prefix: "emulate"
+					origElem := elem
+					if l := len("emulate"); len(elem) >= l && elem[0:l] == "emulate" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					if len(elem) == 0 {
+						// Leaf node.
+						switch r.Method {
+						case "POST":
+							s.handleEmulateMessageToWalletRequest([0]string{}, elemIsEscaped, w, r)
+						default:
+							s.notAllowed(w, r, "POST")
 						}
 
 						return
@@ -3473,6 +3574,36 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 									break
 								}
 
+								if len(elem) == 0 {
+									break
+								}
+								switch elem[0] {
+								case 'e': // Prefix: "emulate"
+									origElem := elem
+									if l := len("emulate"); len(elem) >= l && elem[0:l] == "emulate" {
+										elem = elem[l:]
+									} else {
+										break
+									}
+
+									if len(elem) == 0 {
+										switch method {
+										case "POST":
+											// Leaf: EmulateMessageToAccountEvent
+											r.name = "EmulateMessageToAccountEvent"
+											r.summary = ""
+											r.operationID = "emulateMessageToAccountEvent"
+											r.pathPattern = "/v2/accounts/{account_id}/events/emulate"
+											r.args = args
+											r.count = 1
+											return r, true
+										default:
+											return
+										}
+									}
+
+									elem = origElem
+								}
 								// Param: "event_id"
 								// Leaf parameter
 								args[1] = elem
@@ -4604,6 +4735,36 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 						break
 					}
 
+					if len(elem) == 0 {
+						break
+					}
+					switch elem[0] {
+					case 'e': // Prefix: "emulate"
+						origElem := elem
+						if l := len("emulate"); len(elem) >= l && elem[0:l] == "emulate" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						if len(elem) == 0 {
+							switch method {
+							case "POST":
+								// Leaf: EmulateMessageToEvent
+								r.name = "EmulateMessageToEvent"
+								r.summary = ""
+								r.operationID = "emulateMessageToEvent"
+								r.pathPattern = "/v2/events/emulate"
+								r.args = args
+								r.count = 0
+								return r, true
+							default:
+								return
+							}
+						}
+
+						elem = origElem
+					}
 					// Param: "event_id"
 					// Match until "/"
 					idx := strings.IndexByte(elem, '/')
@@ -6419,6 +6580,36 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 						break
 					}
 
+					if len(elem) == 0 {
+						break
+					}
+					switch elem[0] {
+					case 'e': // Prefix: "emulate"
+						origElem := elem
+						if l := len("emulate"); len(elem) >= l && elem[0:l] == "emulate" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						if len(elem) == 0 {
+							switch method {
+							case "POST":
+								// Leaf: EmulateMessageToTrace
+								r.name = "EmulateMessageToTrace"
+								r.summary = ""
+								r.operationID = "emulateMessageToTrace"
+								r.pathPattern = "/v2/traces/emulate"
+								r.args = args
+								r.count = 0
+								return r, true
+							default:
+								return
+							}
+						}
+
+						elem = origElem
+					}
 					// Param: "trace_id"
 					// Leaf parameter
 					args[0] = elem
@@ -6506,6 +6697,31 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 							r.summary = ""
 							r.operationID = "setWalletBackup"
 							r.pathPattern = "/v2/wallet/backup"
+							r.args = args
+							r.count = 0
+							return r, true
+						default:
+							return
+						}
+					}
+
+					elem = origElem
+				case 'e': // Prefix: "emulate"
+					origElem := elem
+					if l := len("emulate"); len(elem) >= l && elem[0:l] == "emulate" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					if len(elem) == 0 {
+						switch method {
+						case "POST":
+							// Leaf: EmulateMessageToWallet
+							r.name = "EmulateMessageToWallet"
+							r.summary = ""
+							r.operationID = "emulateMessageToWallet"
+							r.pathPattern = "/v2/wallet/emulate"
 							r.args = args
 							r.count = 0
 							return r, true
