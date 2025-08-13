@@ -38015,8 +38015,10 @@ func (s *ValueFlowJettonsItem) encodeFields(e *jx.Encoder) {
 		s.Jetton.Encode(e)
 	}
 	{
-		e.FieldStart("qty")
-		s.Qty.Encode(e)
+		if s.Qty.Set {
+			e.FieldStart("qty")
+			s.Qty.Encode(e)
+		}
 	}
 	{
 		e.FieldStart("quantity")
