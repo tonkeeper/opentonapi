@@ -4,8 +4,9 @@ import (
 	"context"
 	"crypto/ed25519"
 	"errors"
-	"github.com/tonkeeper/tongo/abi"
 	"time"
+
+	"github.com/tonkeeper/tongo/abi"
 
 	"github.com/tonkeeper/tongo/tlb"
 	tongoWallet "github.com/tonkeeper/tongo/wallet"
@@ -32,6 +33,9 @@ func (s *LiteStorage) AccountStatusAndInterfaces(addr tongo.AccountID) (tlb.Acco
 	account, err := s.GetRawAccount(ctx, addr) //todo: get only 2 fields
 	if errors.Is(err, core.ErrEntityNotFound) {
 		return tlb.AccountNone, nil, nil
+	}
+	if err != nil {
+		return tlb.AccountNone, nil, err
 	}
 	return account.Status, account.Interfaces, err
 }
