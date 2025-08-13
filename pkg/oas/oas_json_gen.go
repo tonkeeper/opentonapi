@@ -38061,7 +38061,6 @@ func (s *ValueFlowJettonsItem) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"jetton\"")
 			}
 		case "qty":
-			requiredBitSet[0] |= 1 << 2
 			if err := func() error {
 				v, err := d.Str()
 				s.Qty = string(v)
