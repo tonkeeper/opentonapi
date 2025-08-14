@@ -5954,6 +5954,7 @@
        },
        "required": [
         "account",
+        "qty",
         "quantity",
         "jetton"
        ],

@@ -5717,6 +5717,7 @@ components:
             type: object
             required:
               - account
+              - qty
               - quantity
               - jetton
             properties:
