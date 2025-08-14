@@ -38016,7 +38016,7 @@ func (s *ValueFlowJettonsItem) encodeFields(e *jx.Encoder) {
 	}
 	{
 		e.FieldStart("qty")
-		s.Qty.Encode(e)
+		e.Str(s.Qty)
 	}
 	{
 		e.FieldStart("quantity")
@@ -38062,8 +38062,9 @@ func (s *ValueFlowJettonsItem) Decode(d *jx.Decoder) error {
 			}
 		case "qty":
 			if err := func() error {
-				s.Qty.Reset()
-				if err := s.Qty.Decode(d); err != nil {
+				v, err := d.Str()
+				s.Qty = string(v)
+				if err != nil {
 					return err
 				}
 				return nil

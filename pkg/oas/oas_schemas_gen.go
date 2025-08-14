@@ -16497,7 +16497,7 @@ func (s *ValueFlow) SetJettons(val []ValueFlowJettonsItem) {
 type ValueFlowJettonsItem struct {
 	Account AccountAddress `json:"account"`
 	Jetton  JettonPreview  `json:"jetton"`
-	Qty     OptString      `json:"qty"`
+	Qty     string         `json:"qty"`
 	// Deprecated: schema marks this property as deprecated.
 	Quantity int64 `json:"quantity"`
 }
@@ -16513,7 +16513,7 @@ func (s *ValueFlowJettonsItem) GetJetton() JettonPreview {
 }
 
 // GetQty returns the value of Qty.
-func (s *ValueFlowJettonsItem) GetQty() OptString {
+func (s *ValueFlowJettonsItem) GetQty() string {
 	return s.Qty
 }
 
@@ -16533,7 +16533,7 @@ func (s *ValueFlowJettonsItem) SetJetton(val JettonPreview) {
 }
 
 // SetQty sets the value of Qty.
-func (s *ValueFlowJettonsItem) SetQty(val OptString) {
+func (s *ValueFlowJettonsItem) SetQty(val string) {
 	s.Qty = val
 }
 
