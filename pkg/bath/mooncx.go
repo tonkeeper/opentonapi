@@ -8,7 +8,20 @@ import (
 )
 
 var MooncxSwapStraw = Straw[BubbleJettonSwap]{
-	CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.MoonSwapMsgOp), HasInterface(abi.MoonPool)},
+	CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.MoonSwapMsgOp), HasInterface(abi.MoonPool), func(bubble *Bubble) bool {
+		tx, ok := bubble.Info.(BubbleTx)
+		if !ok {
+			return false
+		}
+		swap, ok := tx.decodedBody.Value.(abi.MoonSwapMsgBody)
+		if !ok {
+			return false
+		}
+		if swap.SwapParams.NextFulfill != nil {
+			return false
+		}
+		return true
+	}},
 	Builder: func(newAction *BubbleJettonSwap, bubble *Bubble) error {
 		tx := bubble.Info.(BubbleTx)
 		newAction.Dex = Mooncx
@@ -38,7 +51,20 @@ var MooncxSwapStraw = Straw[BubbleJettonSwap]{
 }
 
 var MooncxSwapStrawReverse = Straw[BubbleJettonSwap]{
-	CheckFuncs: []bubbleCheck{IsJettonTransfer},
+	CheckFuncs: []bubbleCheck{func(bubble *Bubble) bool {
+		tx, ok := bubble.Info.(BubbleJettonTransfer)
+		if !ok {
+			return false
+		}
+		swap, ok := tx.payload.Value.(abi.MoonSwapJettonPayload)
+		if !ok {
+			return false
+		}
+		if swap.SwapParams.NextFulfill != nil {
+			return false
+		}
+		return true
+	}},
 	Builder: func(newAction *BubbleJettonSwap, bubble *Bubble) error {
 		tx := bubble.Info.(BubbleJettonTransfer)
 		newAction.Dex = Mooncx
