@@ -3712,6 +3712,8 @@ func (s JettonSwapActionDex) Validate() error {
 		return nil
 	case "megatonfi":
 		return nil
+	case "mooncx":
+		return nil
 	default:
 		return errors.Errorf("invalid value: %v", s)
 	}

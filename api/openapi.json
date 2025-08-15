@@ -4222,7 +4222,8 @@
       "enum": [
        "stonfi",
        "dedust",
-       "megatonfi"
+       "megatonfi",
+       "mooncx"
       ],
       "type": "string"
      },

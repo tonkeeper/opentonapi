@@ -71,6 +71,8 @@ var DefaultStraws = []Merger{
 	DNSRenewStraw,
 	//DepositEthenaStakeStraw,
 	//WithdrawEthenaStakeRequestStraw,
+	MooncxSwapStraw,
+	MooncxSwapStrawReverse,
 }
 
 var JettonTransferClassicStraw = Straw[BubbleJettonTransfer]{
