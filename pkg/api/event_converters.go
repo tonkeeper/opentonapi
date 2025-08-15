@@ -584,11 +584,7 @@ func (h *Handler) convertAction(ctx context.Context, viewer *tongo.AccountID, a 
 	case bath.Subscribe:
 		action.Subscribe, action.SimplePreview = h.convertSubscribe(ctx, a.Subscribe, acceptLanguage.Value, viewer)
 	case bath.UnSubscribe:
-		action.UnSubscribe.SetTo(oas.UnSubscriptionAction{
-			Beneficiary:  convertAccountAddress(a.UnSubscribe.Beneficiary, h.addressBook),
-			Subscriber:   convertAccountAddress(a.UnSubscribe.Subscriber, h.addressBook),
-			Subscription: a.UnSubscribe.Subscription.ToRaw(),
-		})
+		action.UnSubscribe, action.SimplePreview = h.convertUnsubscribe(ctx, a.UnSubscribe, acceptLanguage.Value, viewer)
 	case bath.ContractDeploy:
 		interfaces := make([]string, 0, len(a.ContractDeploy.Interfaces))
 		for _, iface := range a.ContractDeploy.Interfaces {
@@ -1082,6 +1078,26 @@ func (h *Handler) convertSubscribe(ctx context.Context, a *bath.SubscribeAction,
 	}
 	var action oas.OptSubscriptionAction
 	action.SetTo(subscribeAction)
+	return action, simplePreview
+}
+
+func (h *Handler) convertUnsubscribe(ctx context.Context, a *bath.UnSubscribeAction, acceptLanguage string, viewer *tongo.AccountID) (oas.OptUnSubscriptionAction, oas.ActionSimplePreview) {
+	simplePreview := oas.ActionSimplePreview{
+		Name: "Unsubscribe",
+		Description: i18n.T(acceptLanguage, i18n.C{
+			DefaultMessage: &i18n.M{
+				ID:    "unsubscribeAction",
+				Other: "Unsubscribe",
+			},
+		}),
+		Accounts: distinctAccounts(viewer, h.addressBook, &a.Beneficiary, &a.Subscriber), // TODO: admin + subscriber
+	}
+	var action oas.OptUnSubscriptionAction
+	action.SetTo(oas.UnSubscriptionAction{
+		Beneficiary:  convertAccountAddress(a.Beneficiary, h.addressBook), // TODO: WithdrawTo address
+		Subscriber:   convertAccountAddress(a.Subscriber, h.addressBook),
+		Subscription: a.Subscription.ToRaw(),
+	})
 	return action, simplePreview
 }
 
