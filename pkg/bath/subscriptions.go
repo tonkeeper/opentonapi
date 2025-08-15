@@ -189,7 +189,7 @@ var UnSubscriptionBySubscriberStraw = Straw[BubbleUnSubscription]{
 					newAction.Admin = tx.additionalInfo.SubscriptionInfo.Admin
 					newAction.WithdrawTo = tx.additionalInfo.SubscriptionInfo.WithdrawTo
 				}
-				newAction.Success = newAction.Success && tx.success
+				newAction.Success = tx.success
 				return nil
 			},
 		},
