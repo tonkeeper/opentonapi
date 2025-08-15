@@ -372,16 +372,8 @@ func (a Action) ContributeToExtra(account tongo.AccountID) int64 {
 		return 0
 	case WithdrawStake:
 		return detectDirection(account, a.WithdrawStake.Pool, a.WithdrawStake.Staker, a.WithdrawStake.Amount)
-	case DepositTokenStake:
-		if a.DepositTokenStake.StakeMeta == nil || a.DepositTokenStake.StakeMeta.Currency.Jetton == nil {
-			return 0
-		}
-		return detectDirection(account, *a.DepositTokenStake.StakeMeta.Currency.Jetton, a.DepositTokenStake.Staker, a.DepositTokenStake.StakeMeta.Amount.Int64())
-	case WithdrawTokenStakeRequest:
-		if a.WithdrawTokenStakeRequest.StakeMeta == nil || a.WithdrawTokenStakeRequest.StakeMeta.Currency.Jetton == nil {
-			return 0
-		}
-		return detectDirection(account, *a.WithdrawTokenStakeRequest.StakeMeta.Currency.Jetton, a.WithdrawTokenStakeRequest.Staker, a.WithdrawTokenStakeRequest.StakeMeta.Amount.Int64())
+	case DepositTokenStake, WithdrawTokenStakeRequest:
+		return 0
 	default:
 		panic("unknown action type")
 	}
