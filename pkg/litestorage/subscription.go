@@ -3,6 +3,7 @@ package litestorage
 import (
 	"context"
 	"errors"
+
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
@@ -30,7 +31,7 @@ func (s *LiteStorage) SubscriptionInfos(ctx context.Context, ids []core.Subscrip
 					Workchain: int32(data.Wallet.Workchain),
 					Address:   data.Wallet.Address,
 				},
-				Beneficiary:      beneficiary,
+				Admin:            beneficiary,
 				WithdrawTo:       beneficiary,
 				PaymentPerPeriod: int64(data.Amount),
 			}
@@ -74,7 +75,7 @@ func (s *LiteStorage) SubscriptionInfos(ctx context.Context, ids []core.Subscrip
 			}
 			res[id.Account] = core.SubscriptionInfo{
 				Wallet:           *wallet,
-				Beneficiary:      *beneficiary,
+				Admin:            *beneficiary,
 				WithdrawTo:       *withdrawTo,
 				PaymentPerPeriod: int64(paymentInfo.PaymentPerPeriod),
 			}

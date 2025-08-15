@@ -191,7 +191,7 @@ type (
 	SubscribeAction struct {
 		Subscription tongo.AccountID
 		Subscriber   tongo.AccountID
-		Beneficiary  tongo.AccountID
+		Admin        tongo.AccountID
 		WithdrawTo   tongo.AccountID
 		Price        core.Price
 		First        bool
@@ -200,7 +200,8 @@ type (
 	UnSubscribeAction struct {
 		Subscription tongo.AccountID
 		Subscriber   tongo.AccountID
-		Beneficiary  tongo.AccountID
+		Admin        tongo.AccountID
+		WithdrawTo   tongo.AccountID
 	}
 
 	JettonSwapAction struct {
@@ -459,7 +460,7 @@ func (a *JettonTransferAction) SubjectAccounts() []tongo.AccountID {
 }
 
 func (a *SubscribeAction) SubjectAccounts() []tongo.AccountID {
-	return []tongo.AccountID{a.Subscriber, a.Beneficiary}
+	return []tongo.AccountID{a.Subscriber, a.Admin}
 }
 
 func (a *NftPurchaseAction) SubjectAccounts() []tongo.AccountID {
@@ -481,7 +482,7 @@ func (a *JettonSwapAction) SubjectAccounts() []tongo.AccountID {
 }
 
 func (a *UnSubscribeAction) SubjectAccounts() []tongo.AccountID {
-	return []tongo.AccountID{a.Subscriber, a.Beneficiary}
+	return []tongo.AccountID{a.Subscriber, a.Admin}
 }
 
 func (a *ElectionsDepositStakeAction) SubjectAccounts() []tongo.AccountID {

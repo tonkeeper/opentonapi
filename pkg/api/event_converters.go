@@ -1046,9 +1046,9 @@ func (h *Handler) convertSubscribe(ctx context.Context, a *bath.SubscribeAction,
 	price := h.convertPrice(ctx, a.Price)
 	subscribeAction := oas.SubscriptionAction{
 		Price:       price,
-		Beneficiary: convertAccountAddress(a.Beneficiary, h.addressBook),
+		Beneficiary: convertAccountAddress(a.WithdrawTo, h.addressBook),
 		Subscriber:  convertAccountAddress(a.Subscriber, h.addressBook),
-		// TODO: WithdrawTo address
+		// TODO: Admin address
 		Subscription: a.Subscription.ToRaw(),
 		Initial:      a.First,
 	}
@@ -1065,7 +1065,7 @@ func (h *Handler) convertSubscribe(ctx context.Context, a *bath.SubscribeAction,
 			},
 			TemplateData: i18n.Template{"Value": value},
 		}),
-		Accounts: distinctAccounts(viewer, h.addressBook, &a.Beneficiary, &a.Subscriber),
+		Accounts: distinctAccounts(viewer, h.addressBook, &a.Admin, &a.Subscriber, &a.WithdrawTo),
 		Value:    oas.NewOptString(value),
 	}
 	if a.Price.Amount.Cmp(big.NewInt(0)) == 0 {
@@ -1090,12 +1090,13 @@ func (h *Handler) convertUnsubscribe(ctx context.Context, a *bath.UnSubscribeAct
 				Other: "Unsubscribe",
 			},
 		}),
-		Accounts: distinctAccounts(viewer, h.addressBook, &a.Beneficiary, &a.Subscriber), // TODO: admin + subscriber
+		Accounts: distinctAccounts(viewer, h.addressBook, &a.Admin, &a.Subscriber, &a.WithdrawTo),
 	}
 	var action oas.OptUnSubscriptionAction
 	action.SetTo(oas.UnSubscriptionAction{
-		Beneficiary:  convertAccountAddress(a.Beneficiary, h.addressBook), // TODO: WithdrawTo address
-		Subscriber:   convertAccountAddress(a.Subscriber, h.addressBook),
+		Beneficiary: convertAccountAddress(a.WithdrawTo, h.addressBook),
+		Subscriber:  convertAccountAddress(a.Subscriber, h.addressBook),
+		// TODO: admin address
 		Subscription: a.Subscription.ToRaw(),
 	})
 	return action, simplePreview

@@ -1,15 +1,16 @@
 package bath
 
 import (
+	"math/big"
+
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
-	"math/big"
 )
 
 type BubbleSubscription struct {
 	Subscription, Subscriber tongo.AccountID
-	Beneficiary, WithdrawTo  tongo.AccountID
+	Admin, WithdrawTo        tongo.AccountID
 	Amount                   int64
 	Success                  bool
 	First                    bool
@@ -20,7 +21,7 @@ func (b BubbleSubscription) ToAction() (action *Action) {
 		Subscribe: &SubscribeAction{
 			Subscription: b.Subscription,
 			Subscriber:   b.Subscriber,
-			Beneficiary:  b.Beneficiary,
+			Admin:        b.Admin,
 			WithdrawTo:   b.WithdrawTo,
 			Price: core.Price{
 				Currency: core.Currency{
@@ -36,7 +37,7 @@ func (b BubbleSubscription) ToAction() (action *Action) {
 
 type BubbleUnSubscription struct {
 	Subscription, Subscriber tongo.AccountID
-	Beneficiary              tongo.AccountID // beneficiary != withdraw_to address for subscription V2
+	Admin, WithdrawTo        tongo.AccountID // beneficiary != withdraw_to address for subscription V2
 	Success                  bool
 }
 
@@ -45,7 +46,8 @@ func (b BubbleUnSubscription) ToAction() (action *Action) {
 		UnSubscribe: &UnSubscribeAction{
 			Subscription: b.Subscription,
 			Subscriber:   b.Subscriber,
-			Beneficiary:  b.Beneficiary,
+			Admin:        b.Admin,
+			WithdrawTo:   b.WithdrawTo,
 		},
 		Success: b.Success,
 		Type:    UnSubscribe,
@@ -68,7 +70,7 @@ var SubscriptionDeployStraw = Straw[BubbleSubscription]{
 				tx := bubble.Info.(BubbleTx)
 				newAction.Subscription = tx.account.Address
 				if tx.additionalInfo != nil && tx.additionalInfo.SubscriptionInfo != nil {
-					newAction.Beneficiary = tx.additionalInfo.SubscriptionInfo.Beneficiary
+					newAction.Admin = tx.additionalInfo.SubscriptionInfo.Admin
 					newAction.WithdrawTo = tx.additionalInfo.SubscriptionInfo.WithdrawTo
 					if len(bubble.Children) > 1 { // specify the amount only if there was a payment.
 						newAction.Amount = tx.additionalInfo.SubscriptionInfo.PaymentPerPeriod
@@ -113,7 +115,7 @@ var SubscriptionPaymentStraw = Straw[BubbleSubscription]{
 		newAction.Subscription = tx.account.Address
 		if tx.additionalInfo != nil && tx.additionalInfo.SubscriptionInfo != nil {
 			newAction.Subscriber = tx.additionalInfo.SubscriptionInfo.Wallet
-			newAction.Beneficiary = tx.additionalInfo.SubscriptionInfo.Beneficiary
+			newAction.Admin = tx.additionalInfo.SubscriptionInfo.Admin
 			newAction.WithdrawTo = tx.additionalInfo.SubscriptionInfo.WithdrawTo
 			newAction.Amount = tx.additionalInfo.SubscriptionInfo.PaymentPerPeriod
 		}
@@ -135,7 +137,7 @@ var SubscriptionPaymentWithRequestFundsStraw = Straw[BubbleSubscription]{
 		newAction.Subscription = tx.account.Address
 		if tx.additionalInfo != nil && tx.additionalInfo.SubscriptionInfo != nil {
 			newAction.Subscriber = tx.additionalInfo.SubscriptionInfo.Wallet
-			newAction.Beneficiary = tx.additionalInfo.SubscriptionInfo.Beneficiary
+			newAction.Admin = tx.additionalInfo.SubscriptionInfo.Admin
 			newAction.WithdrawTo = tx.additionalInfo.SubscriptionInfo.WithdrawTo
 			newAction.Amount = tx.additionalInfo.SubscriptionInfo.PaymentPerPeriod
 		}
@@ -184,7 +186,8 @@ var UnSubscriptionBySubscriberStraw = Straw[BubbleUnSubscription]{
 				newAction.Subscription = tx.account.Address
 				if tx.additionalInfo != nil && tx.additionalInfo.SubscriptionInfo != nil {
 					newAction.Subscriber = tx.additionalInfo.SubscriptionInfo.Wallet
-					newAction.Beneficiary = tx.additionalInfo.SubscriptionInfo.Beneficiary
+					newAction.Admin = tx.additionalInfo.SubscriptionInfo.Admin
+					newAction.WithdrawTo = tx.additionalInfo.SubscriptionInfo.WithdrawTo
 				}
 				newAction.Success = newAction.Success && tx.success
 				return nil
@@ -217,7 +220,8 @@ var UnSubscriptionByBeneficiaryOrExpiredStraw = Straw[BubbleUnSubscription]{
 		newAction.Success = tx.success
 		if tx.additionalInfo != nil && tx.additionalInfo.SubscriptionInfo != nil {
 			newAction.Subscriber = tx.additionalInfo.SubscriptionInfo.Wallet
-			newAction.Beneficiary = tx.additionalInfo.SubscriptionInfo.Beneficiary
+			newAction.Admin = tx.additionalInfo.SubscriptionInfo.Admin
+			newAction.WithdrawTo = tx.additionalInfo.SubscriptionInfo.WithdrawTo
 		}
 		return nil
 	},
