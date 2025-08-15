@@ -1059,20 +1059,26 @@ func (h *Handler) convertSubscribe(ctx context.Context, a *bath.SubscribeAction,
 	subscribeAction.Amount.SetTo(a.Price.Amount.Int64()) // for backward compatibility
 
 	value := i18n.FormatTokens(a.Price.Amount, int32(price.Decimals), price.TokenName)
-	act := "Paying for subscription"
-	if a.Price.Amount.Cmp(big.NewInt(0)) == 0 {
-		act = "Trial period subscription"
-	}
+
 	simplePreview := oas.ActionSimplePreview{
 		Name: "Subscription",
 		Description: i18n.T(acceptLanguage, i18n.C{
 			DefaultMessage: &i18n.M{
 				ID:    "subscriptionAction",
-				Other: act,
+				Other: "Paying {{.Value}} for subscription",
 			},
+			TemplateData: i18n.Template{"Value": value},
 		}),
 		Accounts: distinctAccounts(viewer, h.addressBook, &a.Beneficiary, &a.Subscriber),
 		Value:    oas.NewOptString(value),
+	}
+	if a.Price.Amount.Cmp(big.NewInt(0)) == 0 {
+		simplePreview.Description = i18n.T(acceptLanguage, i18n.C{
+			DefaultMessage: &i18n.M{
+				ID:    "trialSubscriptionAction",
+				Other: "Subscribe",
+			},
+		})
 	}
 	var action oas.OptSubscriptionAction
 	action.SetTo(subscribeAction)
