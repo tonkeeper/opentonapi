@@ -183,25 +183,6 @@ func (ds BubbleWithdrawStake) ToAction() *Action {
 	}
 }
 
-var WithdrawStakeImmediatelyStraw = Straw[BubbleWithdrawStake]{
-	CheckFuncs: []bubbleCheck{Is(BubbleWithdrawStakeRequest{})},
-	Builder: func(newAction *BubbleWithdrawStake, bubble *Bubble) error {
-		req := bubble.Info.(BubbleWithdrawStakeRequest)
-		newAction.Pool = req.Pool
-		newAction.Staker = req.Staker
-		newAction.Amount = -req.attachedAmount
-		newAction.Implementation = req.Implementation
-		return nil
-	},
-	SingleChild: &Straw[BubbleWithdrawStake]{
-		CheckFuncs: []bubbleCheck{IsTx, AmountInterval(int64(ton.OneTON), 1<<63-1)},
-		Builder: func(newAction *BubbleWithdrawStake, bubble *Bubble) error {
-			newAction.Amount += bubble.Info.(BubbleTx).inputAmount
-			return nil
-		},
-	},
-}
-
 var DepositLiquidStakeStraw = Straw[BubbleDepositStake]{
 	CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.TonstakePoolDepositMsgOp)}, //todo: check interface HasInterface(abi.TonstakePool),
 	Builder: func(newAction *BubbleDepositStake, bubble *Bubble) error {
