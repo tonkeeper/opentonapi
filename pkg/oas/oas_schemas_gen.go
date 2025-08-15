@@ -693,31 +693,36 @@ func (s *Accounts) SetAccounts(val []Account) {
 
 // Ref: #/components/schemas/Action
 type Action struct {
-	Type                  ActionType                     `json:"type"`
-	Status                ActionStatus                   `json:"status"`
-	TonTransfer           OptTonTransferAction           `json:"TonTransfer"`
-	ExtraCurrencyTransfer OptExtraCurrencyTransferAction `json:"ExtraCurrencyTransfer"`
-	ContractDeploy        OptContractDeployAction        `json:"ContractDeploy"`
-	JettonTransfer        OptJettonTransferAction        `json:"JettonTransfer"`
-	JettonBurn            OptJettonBurnAction            `json:"JettonBurn"`
-	JettonMint            OptJettonMintAction            `json:"JettonMint"`
-	NftItemTransfer       OptNftItemTransferAction       `json:"NftItemTransfer"`
-	Subscribe             OptSubscriptionAction          `json:"Subscribe"`
-	UnSubscribe           OptUnSubscriptionAction        `json:"UnSubscribe"`
-	AuctionBid            OptAuctionBidAction            `json:"AuctionBid"`
-	NftPurchase           OptNftPurchaseAction           `json:"NftPurchase"`
-	DepositStake          OptDepositStakeAction          `json:"DepositStake"`
-	WithdrawStake         OptWithdrawStakeAction         `json:"WithdrawStake"`
-	WithdrawStakeRequest  OptWithdrawStakeRequestAction  `json:"WithdrawStakeRequest"`
-	ElectionsDepositStake OptElectionsDepositStakeAction `json:"ElectionsDepositStake"`
-	ElectionsRecoverStake OptElectionsRecoverStakeAction `json:"ElectionsRecoverStake"`
-	JettonSwap            OptJettonSwapAction            `json:"JettonSwap"`
-	SmartContractExec     OptSmartContractAction         `json:"SmartContractExec"`
-	DomainRenew           OptDomainRenewAction           `json:"DomainRenew"`
-	Purchase              OptPurchaseAction              `json:"Purchase"`
-	GasRelay              OptGasRelayAction              `json:"GasRelay"`
-	SimplePreview         ActionSimplePreview            `json:"simple_preview"`
-	BaseTransactions      []string                       `json:"base_transactions"`
+	Type                      ActionType                         `json:"type"`
+	Status                    ActionStatus                       `json:"status"`
+	TonTransfer               OptTonTransferAction               `json:"TonTransfer"`
+	ExtraCurrencyTransfer     OptExtraCurrencyTransferAction     `json:"ExtraCurrencyTransfer"`
+	ContractDeploy            OptContractDeployAction            `json:"ContractDeploy"`
+	JettonTransfer            OptJettonTransferAction            `json:"JettonTransfer"`
+	JettonBurn                OptJettonBurnAction                `json:"JettonBurn"`
+	JettonMint                OptJettonMintAction                `json:"JettonMint"`
+	NftItemTransfer           OptNftItemTransferAction           `json:"NftItemTransfer"`
+	Subscribe                 OptSubscriptionAction              `json:"Subscribe"`
+	UnSubscribe               OptUnSubscriptionAction            `json:"UnSubscribe"`
+	AuctionBid                OptAuctionBidAction                `json:"AuctionBid"`
+	NftPurchase               OptNftPurchaseAction               `json:"NftPurchase"`
+	DepositStake              OptDepositStakeAction              `json:"DepositStake"`
+	WithdrawStake             OptWithdrawStakeAction             `json:"WithdrawStake"`
+	WithdrawStakeRequest      OptWithdrawStakeRequestAction      `json:"WithdrawStakeRequest"`
+	ElectionsDepositStake     OptElectionsDepositStakeAction     `json:"ElectionsDepositStake"`
+	ElectionsRecoverStake     OptElectionsRecoverStakeAction     `json:"ElectionsRecoverStake"`
+	JettonSwap                OptJettonSwapAction                `json:"JettonSwap"`
+	SmartContractExec         OptSmartContractAction             `json:"SmartContractExec"`
+	DomainRenew               OptDomainRenewAction               `json:"DomainRenew"`
+	Purchase                  OptPurchaseAction                  `json:"Purchase"`
+	AddExtension              OptAddExtensionAction              `json:"AddExtension"`
+	RemoveExtension           OptRemoveExtensionAction           `json:"RemoveExtension"`
+	SetSignatureAllowedAction OptSetSignatureAllowedAction       `json:"SetSignatureAllowedAction"`
+	GasRelay                  OptGasRelayAction                  `json:"GasRelay"`
+	DepositTokenStake         OptDepositTokenStakeAction         `json:"DepositTokenStake"`
+	WithdrawTokenStakeRequest OptWithdrawTokenStakeRequestAction `json:"WithdrawTokenStakeRequest"`
+	SimplePreview             ActionSimplePreview                `json:"simple_preview"`
+	BaseTransactions          []string                           `json:"base_transactions"`
 }
 
 // GetType returns the value of Type.
@@ -830,9 +835,34 @@ func (s *Action) GetPurchase() OptPurchaseAction {
 	return s.Purchase
 }
 
+// GetAddExtension returns the value of AddExtension.
+func (s *Action) GetAddExtension() OptAddExtensionAction {
+	return s.AddExtension
+}
+
+// GetRemoveExtension returns the value of RemoveExtension.
+func (s *Action) GetRemoveExtension() OptRemoveExtensionAction {
+	return s.RemoveExtension
+}
+
+// GetSetSignatureAllowedAction returns the value of SetSignatureAllowedAction.
+func (s *Action) GetSetSignatureAllowedAction() OptSetSignatureAllowedAction {
+	return s.SetSignatureAllowedAction
+}
+
 // GetGasRelay returns the value of GasRelay.
 func (s *Action) GetGasRelay() OptGasRelayAction {
 	return s.GasRelay
+}
+
+// GetDepositTokenStake returns the value of DepositTokenStake.
+func (s *Action) GetDepositTokenStake() OptDepositTokenStakeAction {
+	return s.DepositTokenStake
+}
+
+// GetWithdrawTokenStakeRequest returns the value of WithdrawTokenStakeRequest.
+func (s *Action) GetWithdrawTokenStakeRequest() OptWithdrawTokenStakeRequestAction {
+	return s.WithdrawTokenStakeRequest
 }
 
 // GetSimplePreview returns the value of SimplePreview.
@@ -955,9 +985,34 @@ func (s *Action) SetPurchase(val OptPurchaseAction) {
 	s.Purchase = val
 }
 
+// SetAddExtension sets the value of AddExtension.
+func (s *Action) SetAddExtension(val OptAddExtensionAction) {
+	s.AddExtension = val
+}
+
+// SetRemoveExtension sets the value of RemoveExtension.
+func (s *Action) SetRemoveExtension(val OptRemoveExtensionAction) {
+	s.RemoveExtension = val
+}
+
+// SetSetSignatureAllowedAction sets the value of SetSignatureAllowedAction.
+func (s *Action) SetSetSignatureAllowedAction(val OptSetSignatureAllowedAction) {
+	s.SetSignatureAllowedAction = val
+}
+
 // SetGasRelay sets the value of GasRelay.
 func (s *Action) SetGasRelay(val OptGasRelayAction) {
 	s.GasRelay = val
+}
+
+// SetDepositTokenStake sets the value of DepositTokenStake.
+func (s *Action) SetDepositTokenStake(val OptDepositTokenStakeAction) {
+	s.DepositTokenStake = val
+}
+
+// SetWithdrawTokenStakeRequest sets the value of WithdrawTokenStakeRequest.
+func (s *Action) SetWithdrawTokenStakeRequest(val OptWithdrawTokenStakeRequestAction) {
+	s.WithdrawTokenStakeRequest = val
 }
 
 // SetSimplePreview sets the value of SimplePreview.
@@ -1168,27 +1223,29 @@ func (s *ActionStatus) UnmarshalText(data []byte) error {
 type ActionType string
 
 const (
-	ActionTypeTonTransfer           ActionType = "TonTransfer"
-	ActionTypeExtraCurrencyTransfer ActionType = "ExtraCurrencyTransfer"
-	ActionTypeContractDeploy        ActionType = "ContractDeploy"
-	ActionTypeJettonTransfer        ActionType = "JettonTransfer"
-	ActionTypeJettonBurn            ActionType = "JettonBurn"
-	ActionTypeJettonMint            ActionType = "JettonMint"
-	ActionTypeNftItemTransfer       ActionType = "NftItemTransfer"
-	ActionTypeSubscribe             ActionType = "Subscribe"
-	ActionTypeUnSubscribe           ActionType = "UnSubscribe"
-	ActionTypeAuctionBid            ActionType = "AuctionBid"
-	ActionTypeNftPurchase           ActionType = "NftPurchase"
-	ActionTypeDepositStake          ActionType = "DepositStake"
-	ActionTypeWithdrawStake         ActionType = "WithdrawStake"
-	ActionTypeWithdrawStakeRequest  ActionType = "WithdrawStakeRequest"
-	ActionTypeElectionsDepositStake ActionType = "ElectionsDepositStake"
-	ActionTypeElectionsRecoverStake ActionType = "ElectionsRecoverStake"
-	ActionTypeJettonSwap            ActionType = "JettonSwap"
-	ActionTypeSmartContractExec     ActionType = "SmartContractExec"
-	ActionTypeDomainRenew           ActionType = "DomainRenew"
-	ActionTypePurchase              ActionType = "Purchase"
-	ActionTypeUnknown               ActionType = "Unknown"
+	ActionTypeTonTransfer               ActionType = "TonTransfer"
+	ActionTypeExtraCurrencyTransfer     ActionType = "ExtraCurrencyTransfer"
+	ActionTypeContractDeploy            ActionType = "ContractDeploy"
+	ActionTypeJettonTransfer            ActionType = "JettonTransfer"
+	ActionTypeJettonBurn                ActionType = "JettonBurn"
+	ActionTypeJettonMint                ActionType = "JettonMint"
+	ActionTypeNftItemTransfer           ActionType = "NftItemTransfer"
+	ActionTypeSubscribe                 ActionType = "Subscribe"
+	ActionTypeUnSubscribe               ActionType = "UnSubscribe"
+	ActionTypeAuctionBid                ActionType = "AuctionBid"
+	ActionTypeNftPurchase               ActionType = "NftPurchase"
+	ActionTypeDepositStake              ActionType = "DepositStake"
+	ActionTypeWithdrawStake             ActionType = "WithdrawStake"
+	ActionTypeWithdrawStakeRequest      ActionType = "WithdrawStakeRequest"
+	ActionTypeElectionsDepositStake     ActionType = "ElectionsDepositStake"
+	ActionTypeElectionsRecoverStake     ActionType = "ElectionsRecoverStake"
+	ActionTypeJettonSwap                ActionType = "JettonSwap"
+	ActionTypeSmartContractExec         ActionType = "SmartContractExec"
+	ActionTypeDomainRenew               ActionType = "DomainRenew"
+	ActionTypePurchase                  ActionType = "Purchase"
+	ActionTypeDepositTokenStake         ActionType = "DepositTokenStake"
+	ActionTypeWithdrawTokenStakeRequest ActionType = "WithdrawTokenStakeRequest"
+	ActionTypeUnknown                   ActionType = "Unknown"
 )
 
 // AllValues returns all ActionType values.
@@ -1214,6 +1271,8 @@ func (ActionType) AllValues() []ActionType {
 		ActionTypeSmartContractExec,
 		ActionTypeDomainRenew,
 		ActionTypePurchase,
+		ActionTypeDepositTokenStake,
+		ActionTypeWithdrawTokenStakeRequest,
 		ActionTypeUnknown,
 	}
 }
@@ -1260,6 +1319,10 @@ func (s ActionType) MarshalText() ([]byte, error) {
 	case ActionTypeDomainRenew:
 		return []byte(s), nil
 	case ActionTypePurchase:
+		return []byte(s), nil
+	case ActionTypeDepositTokenStake:
+		return []byte(s), nil
+	case ActionTypeWithdrawTokenStakeRequest:
 		return []byte(s), nil
 	case ActionTypeUnknown:
 		return []byte(s), nil
@@ -1331,12 +1394,44 @@ func (s *ActionType) UnmarshalText(data []byte) error {
 	case ActionTypePurchase:
 		*s = ActionTypePurchase
 		return nil
+	case ActionTypeDepositTokenStake:
+		*s = ActionTypeDepositTokenStake
+		return nil
+	case ActionTypeWithdrawTokenStakeRequest:
+		*s = ActionTypeWithdrawTokenStakeRequest
+		return nil
 	case ActionTypeUnknown:
 		*s = ActionTypeUnknown
 		return nil
 	default:
 		return errors.Errorf("invalid value: %q", data)
 	}
+}
+
+// Ref: #/components/schemas/AddExtensionAction
+type AddExtensionAction struct {
+	Wallet    AccountAddress `json:"wallet"`
+	Extension string         `json:"extension"`
+}
+
+// GetWallet returns the value of Wallet.
+func (s *AddExtensionAction) GetWallet() AccountAddress {
+	return s.Wallet
+}
+
+// GetExtension returns the value of Extension.
+func (s *AddExtensionAction) GetExtension() string {
+	return s.Extension
+}
+
+// SetWallet sets the value of Wallet.
+func (s *AddExtensionAction) SetWallet(val AccountAddress) {
+	s.Wallet = val
+}
+
+// SetExtension sets the value of Extension.
+func (s *AddExtensionAction) SetExtension(val string) {
+	s.Extension = val
 }
 
 type AddressParseOK struct {
@@ -4941,6 +5036,43 @@ func (s *DepositStakeAction) SetPool(val AccountAddress) {
 // SetImplementation sets the value of Implementation.
 func (s *DepositStakeAction) SetImplementation(val PoolImplementationType) {
 	s.Implementation = val
+}
+
+// Ref: #/components/schemas/DepositTokenStakeAction
+type DepositTokenStakeAction struct {
+	Staker    AccountAddress `json:"staker"`
+	Protocol  Protocol       `json:"protocol"`
+	StakeMeta OptPrice       `json:"stake_meta"`
+}
+
+// GetStaker returns the value of Staker.
+func (s *DepositTokenStakeAction) GetStaker() AccountAddress {
+	return s.Staker
+}
+
+// GetProtocol returns the value of Protocol.
+func (s *DepositTokenStakeAction) GetProtocol() Protocol {
+	return s.Protocol
+}
+
+// GetStakeMeta returns the value of StakeMeta.
+func (s *DepositTokenStakeAction) GetStakeMeta() OptPrice {
+	return s.StakeMeta
+}
+
+// SetStaker sets the value of Staker.
+func (s *DepositTokenStakeAction) SetStaker(val AccountAddress) {
+	s.Staker = val
+}
+
+// SetProtocol sets the value of Protocol.
+func (s *DepositTokenStakeAction) SetProtocol(val Protocol) {
+	s.Protocol = val
+}
+
+// SetStakeMeta sets the value of StakeMeta.
+func (s *DepositTokenStakeAction) SetStakeMeta(val OptPrice) {
+	s.StakeMeta = val
 }
 
 // Ref: #/components/schemas/DnsExpiring
@@ -10531,6 +10663,52 @@ func (o OptActionPhase) Or(d ActionPhase) ActionPhase {
 	return d
 }
 
+// NewOptAddExtensionAction returns new OptAddExtensionAction with value set to v.
+func NewOptAddExtensionAction(v AddExtensionAction) OptAddExtensionAction {
+	return OptAddExtensionAction{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptAddExtensionAction is optional AddExtensionAction.
+type OptAddExtensionAction struct {
+	Value AddExtensionAction
+	Set   bool
+}
+
+// IsSet returns true if OptAddExtensionAction was set.
+func (o OptAddExtensionAction) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptAddExtensionAction) Reset() {
+	var v AddExtensionAction
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptAddExtensionAction) SetTo(v AddExtensionAction) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptAddExtensionAction) Get() (v AddExtensionAction, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptAddExtensionAction) Or(d AddExtensionAction) AddExtensionAction {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptAuctionBidAction returns new OptAuctionBidAction with value set to v.
 func NewOptAuctionBidAction(v AuctionBidAction) OptAuctionBidAction {
 	return OptAuctionBidAction{
@@ -12647,6 +12825,52 @@ func (o OptDepositStakeAction) Or(d DepositStakeAction) DepositStakeAction {
 	return d
 }
 
+// NewOptDepositTokenStakeAction returns new OptDepositTokenStakeAction with value set to v.
+func NewOptDepositTokenStakeAction(v DepositTokenStakeAction) OptDepositTokenStakeAction {
+	return OptDepositTokenStakeAction{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptDepositTokenStakeAction is optional DepositTokenStakeAction.
+type OptDepositTokenStakeAction struct {
+	Value DepositTokenStakeAction
+	Set   bool
+}
+
+// IsSet returns true if OptDepositTokenStakeAction was set.
+func (o OptDepositTokenStakeAction) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptDepositTokenStakeAction) Reset() {
+	var v DepositTokenStakeAction
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptDepositTokenStakeAction) SetTo(v DepositTokenStakeAction) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptDepositTokenStakeAction) Get() (v DepositTokenStakeAction, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptDepositTokenStakeAction) Or(d DepositTokenStakeAction) DepositTokenStakeAction {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptDomainRenewAction returns new OptDomainRenewAction with value set to v.
 func NewOptDomainRenewAction(v DomainRenewAction) OptDomainRenewAction {
 	return OptDomainRenewAction{
@@ -14027,6 +14251,52 @@ func (o OptNftPurchaseAction) Or(d NftPurchaseAction) NftPurchaseAction {
 	return d
 }
 
+// NewOptPrice returns new OptPrice with value set to v.
+func NewOptPrice(v Price) OptPrice {
+	return OptPrice{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptPrice is optional Price.
+type OptPrice struct {
+	Value Price
+	Set   bool
+}
+
+// IsSet returns true if OptPrice was set.
+func (o OptPrice) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptPrice) Reset() {
+	var v Price
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptPrice) SetTo(v Price) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptPrice) Get() (v Price, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptPrice) Or(d Price) Price {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptPurchaseAction returns new OptPurchaseAction with value set to v.
 func NewOptPurchaseAction(v PurchaseAction) OptPurchaseAction {
 	return OptPurchaseAction{
@@ -14119,6 +14389,52 @@ func (o OptRefund) Or(d Refund) Refund {
 	return d
 }
 
+// NewOptRemoveExtensionAction returns new OptRemoveExtensionAction with value set to v.
+func NewOptRemoveExtensionAction(v RemoveExtensionAction) OptRemoveExtensionAction {
+	return OptRemoveExtensionAction{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptRemoveExtensionAction is optional RemoveExtensionAction.
+type OptRemoveExtensionAction struct {
+	Value RemoveExtensionAction
+	Set   bool
+}
+
+// IsSet returns true if OptRemoveExtensionAction was set.
+func (o OptRemoveExtensionAction) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptRemoveExtensionAction) Reset() {
+	var v RemoveExtensionAction
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptRemoveExtensionAction) SetTo(v RemoveExtensionAction) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptRemoveExtensionAction) Get() (v RemoveExtensionAction, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptRemoveExtensionAction) Or(d RemoveExtensionAction) RemoveExtensionAction {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptSale returns new OptSale with value set to v.
 func NewOptSale(v Sale) OptSale {
 	return OptSale{
@@ -14205,6 +14521,52 @@ func (o OptSendBlockchainMessageReqMeta) Get() (v SendBlockchainMessageReqMeta, 
 
 // Or returns value if set, or given parameter if does not.
 func (o OptSendBlockchainMessageReqMeta) Or(d SendBlockchainMessageReqMeta) SendBlockchainMessageReqMeta {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptSetSignatureAllowedAction returns new OptSetSignatureAllowedAction with value set to v.
+func NewOptSetSignatureAllowedAction(v SetSignatureAllowedAction) OptSetSignatureAllowedAction {
+	return OptSetSignatureAllowedAction{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptSetSignatureAllowedAction is optional SetSignatureAllowedAction.
+type OptSetSignatureAllowedAction struct {
+	Value SetSignatureAllowedAction
+	Set   bool
+}
+
+// IsSet returns true if OptSetSignatureAllowedAction was set.
+func (o OptSetSignatureAllowedAction) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptSetSignatureAllowedAction) Reset() {
+	var v SetSignatureAllowedAction
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptSetSignatureAllowedAction) SetTo(v SetSignatureAllowedAction) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptSetSignatureAllowedAction) Get() (v SetSignatureAllowedAction, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptSetSignatureAllowedAction) Or(d SetSignatureAllowedAction) SetSignatureAllowedAction {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -14993,6 +15355,52 @@ func (o OptWithdrawStakeRequestAction) Or(d WithdrawStakeRequestAction) Withdraw
 	return d
 }
 
+// NewOptWithdrawTokenStakeRequestAction returns new OptWithdrawTokenStakeRequestAction with value set to v.
+func NewOptWithdrawTokenStakeRequestAction(v WithdrawTokenStakeRequestAction) OptWithdrawTokenStakeRequestAction {
+	return OptWithdrawTokenStakeRequestAction{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptWithdrawTokenStakeRequestAction is optional WithdrawTokenStakeRequestAction.
+type OptWithdrawTokenStakeRequestAction struct {
+	Value WithdrawTokenStakeRequestAction
+	Set   bool
+}
+
+// IsSet returns true if OptWithdrawTokenStakeRequestAction was set.
+func (o OptWithdrawTokenStakeRequestAction) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptWithdrawTokenStakeRequestAction) Reset() {
+	var v WithdrawTokenStakeRequestAction
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptWithdrawTokenStakeRequestAction) SetTo(v WithdrawTokenStakeRequestAction) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptWithdrawTokenStakeRequestAction) Get() (v WithdrawTokenStakeRequestAction, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptWithdrawTokenStakeRequestAction) Or(d WithdrawTokenStakeRequestAction) WithdrawTokenStakeRequestAction {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // Ref: #/components/schemas/Oracle
 type Oracle struct {
 	Address    string `json:"address"`
@@ -15423,6 +15831,32 @@ func (s *Price) SetJetton(val OptString) {
 	s.Jetton = val
 }
 
+// Ref: #/components/schemas/Protocol
+type Protocol struct {
+	Name  string    `json:"name"`
+	Image OptString `json:"image"`
+}
+
+// GetName returns the value of Name.
+func (s *Protocol) GetName() string {
+	return s.Name
+}
+
+// GetImage returns the value of Image.
+func (s *Protocol) GetImage() OptString {
+	return s.Image
+}
+
+// SetName sets the value of Name.
+func (s *Protocol) SetName(val string) {
+	s.Name = val
+}
+
+// SetImage sets the value of Image.
+func (s *Protocol) SetImage(val OptString) {
+	s.Image = val
+}
+
 // Ref: #/components/schemas/Purchase
 type Purchase struct {
 	EventID     string         `json:"event_id"`
@@ -15784,6 +16218,32 @@ func (s *RefundType) UnmarshalText(data []byte) error {
 // ReindexAccountOK is response for ReindexAccount operation.
 type ReindexAccountOK struct{}
 
+// Ref: #/components/schemas/RemoveExtensionAction
+type RemoveExtensionAction struct {
+	Wallet    AccountAddress `json:"wallet"`
+	Extension string         `json:"extension"`
+}
+
+// GetWallet returns the value of Wallet.
+func (s *RemoveExtensionAction) GetWallet() AccountAddress {
+	return s.Wallet
+}
+
+// GetExtension returns the value of Extension.
+func (s *RemoveExtensionAction) GetExtension() string {
+	return s.Extension
+}
+
+// SetWallet sets the value of Wallet.
+func (s *RemoveExtensionAction) SetWallet(val AccountAddress) {
+	s.Wallet = val
+}
+
+// SetExtension sets the value of Extension.
+func (s *RemoveExtensionAction) SetExtension(val string) {
+	s.Extension = val
+}
+
 // Risk specifies assets that could be lost if a message would be sent to a malicious smart contract.
 // It makes sense to understand the risk BEFORE sending a message to the blockchain.
 // Ref: #/components/schemas/Risk
@@ -16011,6 +16471,32 @@ func (s *ServiceStatus) SetIndexingLatency(val int) {
 // SetLastKnownMasterchainSeqno sets the value of LastKnownMasterchainSeqno.
 func (s *ServiceStatus) SetLastKnownMasterchainSeqno(val int32) {
 	s.LastKnownMasterchainSeqno = val
+}
+
+// Ref: #/components/schemas/SetSignatureAllowedAction
+type SetSignatureAllowedAction struct {
+	Wallet  AccountAddress `json:"wallet"`
+	Allowed bool           `json:"allowed"`
+}
+
+// GetWallet returns the value of Wallet.
+func (s *SetSignatureAllowedAction) GetWallet() AccountAddress {
+	return s.Wallet
+}
+
+// GetAllowed returns the value of Allowed.
+func (s *SetSignatureAllowedAction) GetAllowed() bool {
+	return s.Allowed
+}
+
+// SetWallet sets the value of Wallet.
+func (s *SetSignatureAllowedAction) SetWallet(val AccountAddress) {
+	s.Wallet = val
+}
+
+// SetAllowed sets the value of Allowed.
+func (s *SetSignatureAllowedAction) SetAllowed(val bool) {
+	s.Allowed = val
 }
 
 // Ref: #/components/schemas/SignRawMessage
@@ -16638,8 +17124,10 @@ type SubscriptionAction struct {
 	Subscriber   AccountAddress `json:"subscriber"`
 	Subscription string         `json:"subscription"`
 	Beneficiary  AccountAddress `json:"beneficiary"`
-	Amount       int64          `json:"amount"`
-	Initial      bool           `json:"initial"`
+	// Deprecated: schema marks this property as deprecated.
+	Amount  OptInt64 `json:"amount"`
+	Price   Price    `json:"price"`
+	Initial bool     `json:"initial"`
 }
 
 // GetSubscriber returns the value of Subscriber.
@@ -16658,8 +17146,13 @@ func (s *SubscriptionAction) GetBeneficiary() AccountAddress {
 }
 
 // GetAmount returns the value of Amount.
-func (s *SubscriptionAction) GetAmount() int64 {
+func (s *SubscriptionAction) GetAmount() OptInt64 {
 	return s.Amount
+}
+
+// GetPrice returns the value of Price.
+func (s *SubscriptionAction) GetPrice() Price {
+	return s.Price
 }
 
 // GetInitial returns the value of Initial.
@@ -16683,8 +17176,13 @@ func (s *SubscriptionAction) SetBeneficiary(val AccountAddress) {
 }
 
 // SetAmount sets the value of Amount.
-func (s *SubscriptionAction) SetAmount(val int64) {
+func (s *SubscriptionAction) SetAmount(val OptInt64) {
 	s.Amount = val
+}
+
+// SetPrice sets the value of Price.
+func (s *SubscriptionAction) SetPrice(val Price) {
+	s.Price = val
 }
 
 // SetInitial sets the value of Initial.
@@ -18457,6 +18955,43 @@ func (s *WithdrawStakeRequestAction) SetPool(val AccountAddress) {
 // SetImplementation sets the value of Implementation.
 func (s *WithdrawStakeRequestAction) SetImplementation(val PoolImplementationType) {
 	s.Implementation = val
+}
+
+// Ref: #/components/schemas/WithdrawTokenStakeRequestAction
+type WithdrawTokenStakeRequestAction struct {
+	Staker    AccountAddress `json:"staker"`
+	Protocol  Protocol       `json:"protocol"`
+	StakeMeta OptPrice       `json:"stake_meta"`
+}
+
+// GetStaker returns the value of Staker.
+func (s *WithdrawTokenStakeRequestAction) GetStaker() AccountAddress {
+	return s.Staker
+}
+
+// GetProtocol returns the value of Protocol.
+func (s *WithdrawTokenStakeRequestAction) GetProtocol() Protocol {
+	return s.Protocol
+}
+
+// GetStakeMeta returns the value of StakeMeta.
+func (s *WithdrawTokenStakeRequestAction) GetStakeMeta() OptPrice {
+	return s.StakeMeta
+}
+
+// SetStaker sets the value of Staker.
+func (s *WithdrawTokenStakeRequestAction) SetStaker(val AccountAddress) {
+	s.Staker = val
+}
+
+// SetProtocol sets the value of Protocol.
+func (s *WithdrawTokenStakeRequestAction) SetProtocol(val Protocol) {
+	s.Protocol = val
+}
+
+// SetStakeMeta sets the value of StakeMeta.
+func (s *WithdrawTokenStakeRequestAction) SetStakeMeta(val OptPrice) {
+	s.StakeMeta = val
 }
 
 // Ref: #/components/schemas/WorkchainDescr
