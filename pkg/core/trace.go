@@ -4,8 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"github.com/tonkeeper/tongo/ton"
 	"sync"
+
+	"github.com/tonkeeper/tongo/ton"
 
 	"github.com/shopspring/decimal"
 	"github.com/tonkeeper/tongo"
