@@ -1142,6 +1142,9 @@
      "DepositStake": {
       "$ref": "#/components/schemas/DepositStakeAction"
      },
+     "DepositTokenStake": {
+      "$ref": "#/components/schemas/DepositTokenStakeAction"
+     },
      "DomainRenew": {
       "$ref": "#/components/schemas/DomainRenewAction"
      },
@@ -1202,6 +1205,9 @@
      "WithdrawStakeRequest": {
       "$ref": "#/components/schemas/WithdrawStakeRequestAction"
      },
+     "WithdrawTokenStakeRequest": {
+      "$ref": "#/components/schemas/WithdrawTokenStakeRequestAction"
+     },
      "base_transactions": {
       "items": {
        "description": "transaction hash",
@@ -1243,6 +1249,8 @@
        "SmartContractExec",
        "DomainRenew",
        "Purchase",
+       "DepositTokenStake",
+       "WithdrawTokenStakeRequest",
        "Unknown"
       ],
       "example": "TonTransfer",
@@ -3084,6 +3092,24 @@
      "staker",
      "pool",
      "implementation"
+    ],
+    "type": "object"
+   },
+   "DepositTokenStakeAction": {
+    "properties": {
+     "protocol": {
+      "$ref": "#/components/schemas/Protocol"
+     },
+     "stake_meta": {
+      "$ref": "#/components/schemas/Price"
+     },
+     "staker": {
+      "$ref": "#/components/schemas/AccountAddress"
+     }
+    },
+    "required": [
+     "staker",
+     "protocol"
     ],
     "type": "object"
    },
@@ -5332,6 +5358,22 @@
     ],
     "type": "object"
    },
+   "Protocol": {
+    "properties": {
+     "image": {
+      "example": "https://cache.tonapi.io/images/jetton.jpg",
+      "type": "string"
+     },
+     "name": {
+      "example": "Ethena",
+      "type": "string"
+     }
+    },
+    "required": [
+     "name"
+    ],
+    "type": "object"
+   },
    "Purchase": {
     "properties": {
      "amount": {
@@ -6824,6 +6866,24 @@
      "staker",
      "pool",
      "implementation"
+    ],
+    "type": "object"
+   },
+   "WithdrawTokenStakeRequestAction": {
+    "properties": {
+     "protocol": {
+      "$ref": "#/components/schemas/Protocol"
+     },
+     "stake_meta": {
+      "$ref": "#/components/schemas/Price"
+     },
+     "staker": {
+      "$ref": "#/components/schemas/AccountAddress"
+     }
+    },
+    "required": [
+     "staker",
+     "protocol"
     ],
     "type": "object"
    },

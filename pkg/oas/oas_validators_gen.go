@@ -574,6 +574,42 @@ func (s *Action) Validate() error {
 		})
 	}
 	if err := func() error {
+		if value, ok := s.DepositTokenStake.Get(); ok {
+			if err := func() error {
+				if err := value.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "DepositTokenStake",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if value, ok := s.WithdrawTokenStakeRequest.Get(); ok {
+			if err := func() error {
+				if err := value.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "WithdrawTokenStakeRequest",
+			Error: err,
+		})
+	}
+	if err := func() error {
 		if err := s.SimplePreview.Validate(); err != nil {
 			return err
 		}
@@ -676,6 +712,10 @@ func (s ActionType) Validate() error {
 	case "DomainRenew":
 		return nil
 	case "Purchase":
+		return nil
+	case "DepositTokenStake":
+		return nil
+	case "WithdrawTokenStakeRequest":
 		return nil
 	case "Unknown":
 		return nil
@@ -2227,6 +2267,36 @@ func (s *DepositStakeAction) Validate() error {
 	}(); err != nil {
 		failures = append(failures, validate.FieldError{
 			Name:  "implementation",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s *DepositTokenStakeAction) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if value, ok := s.StakeMeta.Get(); ok {
+			if err := func() error {
+				if err := value.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "stake_meta",
 			Error: err,
 		})
 	}
@@ -5911,6 +5981,36 @@ func (s *WithdrawStakeRequestAction) Validate() error {
 	}(); err != nil {
 		failures = append(failures, validate.FieldError{
 			Name:  "implementation",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s *WithdrawTokenStakeRequestAction) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if value, ok := s.StakeMeta.Get(); ok {
+			if err := func() error {
+				if err := value.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "stake_meta",
 			Error: err,
 		})
 	}

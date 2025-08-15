@@ -39,6 +39,11 @@ type LiquidPool struct {
 	APY             float64
 }
 
+type Protocol struct {
+	Name  string
+	Image *string
+}
+
 type StakingImplementation string
 
 const (

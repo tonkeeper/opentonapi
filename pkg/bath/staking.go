@@ -276,3 +276,104 @@ var PendingWithdrawRequestLiquidStraw = Straw[BubbleWithdrawStakeRequest]{
 		},
 	},
 }
+
+type BubbleDepositTokenStake struct {
+	Staker    tongo.AccountID
+	Success   bool
+	Protocol  core.Protocol
+	StakeMeta *core.Price
+}
+
+func (dts BubbleDepositTokenStake) ToAction() *Action {
+	return &Action{
+		DepositTokenStake: &DepositTokenStakeAction{
+			Protocol:  dts.Protocol,
+			Staker:    dts.Staker,
+			StakeMeta: dts.StakeMeta,
+		},
+		Success: dts.Success,
+		Type:    DepositTokenStake,
+	}
+}
+
+var DepositEthenaStakeStraw = Straw[BubbleDepositTokenStake]{
+	CheckFuncs: []bubbleCheck{IsJettonTransfer, JettonRecipientAccount(tongo.MustParseAddress("0:a11ae0f5bb47bb2945871f915a621ff281c2d786c746da74873d71d6f2aaa7a5").ID)},
+	Builder: func(newAction *BubbleDepositTokenStake, bubble *Bubble) error {
+		ethenaImage := "https://ethena.fi/shared/usde.png"
+		tx := bubble.Info.(BubbleJettonTransfer)
+		newAction.Staker = tx.sender.Address
+		amount := big.Int(tx.amount)
+		newAction.Protocol = core.Protocol{
+			Name:  "Ethena",
+			Image: &ethenaImage,
+		}
+		newAction.StakeMeta = &core.Price{
+			Currency: core.Currency{
+				Type: core.CurrencyJetton,
+			},
+			Amount: amount,
+		}
+		return nil
+	},
+	SingleChild: &Straw[BubbleDepositTokenStake]{
+		CheckFuncs: []bubbleCheck{Is(BubbleJettonMint{})},
+		Builder: func(newAction *BubbleDepositTokenStake, bubble *Bubble) error {
+			tx := bubble.Info.(BubbleJettonMint)
+			newAction.StakeMeta.Currency.Jetton = &tx.master
+			newAction.Success = tx.success
+			return nil
+		},
+	},
+}
+
+type BubbleWithdrawTokenStakeRequest struct {
+	Staker    tongo.AccountID
+	Success   bool
+	Protocol  core.Protocol
+	StakeMeta *core.Price
+}
+
+func (wts BubbleWithdrawTokenStakeRequest) ToAction() *Action {
+	return &Action{
+		WithdrawTokenStakeRequest: &WithdrawTokenStakeRequestAction{
+			Protocol:  wts.Protocol,
+			Staker:    wts.Staker,
+			StakeMeta: wts.StakeMeta,
+		},
+		Success: wts.Success,
+		Type:    WithdrawTokenStakeRequest,
+	}
+}
+
+var WithdrawEthenaStakeRequestStraw = Straw[BubbleWithdrawTokenStakeRequest]{
+	CheckFuncs: []bubbleCheck{IsJettonTransfer, JettonRecipientAccount(tongo.MustParseAddress("0:a11ae0f5bb47bb2945871f915a621ff281c2d786c746da74873d71d6f2aaa7a5").ID)},
+	Builder: func(newAction *BubbleWithdrawTokenStakeRequest, bubble *Bubble) error {
+		ethenaImage := "https://ethena.fi/shared/usde.png"
+		tx := bubble.Info.(BubbleJettonTransfer)
+		newAction.Staker = tx.sender.Address
+		amount := big.Int(tx.amount)
+		newAction.Protocol = core.Protocol{
+			Name:  "Ethena",
+			Image: &ethenaImage,
+		}
+		newAction.StakeMeta = &core.Price{
+			Currency: core.Currency{
+				Type:   core.CurrencyJetton,
+				Jetton: &tx.master,
+			},
+			Amount: amount,
+		}
+		return nil
+	},
+	SingleChild: &Straw[BubbleWithdrawTokenStakeRequest]{
+		CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.JettonMintMsgOp)},
+		SingleChild: &Straw[BubbleWithdrawTokenStakeRequest]{
+			CheckFuncs: []bubbleCheck{IsTx},
+			Builder: func(newAction *BubbleWithdrawTokenStakeRequest, bubble *Bubble) error {
+				tx := bubble.Info.(BubbleTx)
+				newAction.Success = tx.success
+				return nil
+			},
+		},
+	},
+}

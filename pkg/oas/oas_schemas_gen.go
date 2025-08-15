@@ -693,34 +693,36 @@ func (s *Accounts) SetAccounts(val []Account) {
 
 // Ref: #/components/schemas/Action
 type Action struct {
-	Type                      ActionType                     `json:"type"`
-	Status                    ActionStatus                   `json:"status"`
-	TonTransfer               OptTonTransferAction           `json:"TonTransfer"`
-	ExtraCurrencyTransfer     OptExtraCurrencyTransferAction `json:"ExtraCurrencyTransfer"`
-	ContractDeploy            OptContractDeployAction        `json:"ContractDeploy"`
-	JettonTransfer            OptJettonTransferAction        `json:"JettonTransfer"`
-	JettonBurn                OptJettonBurnAction            `json:"JettonBurn"`
-	JettonMint                OptJettonMintAction            `json:"JettonMint"`
-	NftItemTransfer           OptNftItemTransferAction       `json:"NftItemTransfer"`
-	Subscribe                 OptSubscriptionAction          `json:"Subscribe"`
-	UnSubscribe               OptUnSubscriptionAction        `json:"UnSubscribe"`
-	AuctionBid                OptAuctionBidAction            `json:"AuctionBid"`
-	NftPurchase               OptNftPurchaseAction           `json:"NftPurchase"`
-	DepositStake              OptDepositStakeAction          `json:"DepositStake"`
-	WithdrawStake             OptWithdrawStakeAction         `json:"WithdrawStake"`
-	WithdrawStakeRequest      OptWithdrawStakeRequestAction  `json:"WithdrawStakeRequest"`
-	ElectionsDepositStake     OptElectionsDepositStakeAction `json:"ElectionsDepositStake"`
-	ElectionsRecoverStake     OptElectionsRecoverStakeAction `json:"ElectionsRecoverStake"`
-	JettonSwap                OptJettonSwapAction            `json:"JettonSwap"`
-	SmartContractExec         OptSmartContractAction         `json:"SmartContractExec"`
-	DomainRenew               OptDomainRenewAction           `json:"DomainRenew"`
-	Purchase                  OptPurchaseAction              `json:"Purchase"`
-	AddExtension              OptAddExtensionAction          `json:"AddExtension"`
-	RemoveExtension           OptRemoveExtensionAction       `json:"RemoveExtension"`
-	SetSignatureAllowedAction OptSetSignatureAllowedAction   `json:"SetSignatureAllowedAction"`
-	GasRelay                  OptGasRelayAction              `json:"GasRelay"`
-	SimplePreview             ActionSimplePreview            `json:"simple_preview"`
-	BaseTransactions          []string                       `json:"base_transactions"`
+	Type                      ActionType                         `json:"type"`
+	Status                    ActionStatus                       `json:"status"`
+	TonTransfer               OptTonTransferAction               `json:"TonTransfer"`
+	ExtraCurrencyTransfer     OptExtraCurrencyTransferAction     `json:"ExtraCurrencyTransfer"`
+	ContractDeploy            OptContractDeployAction            `json:"ContractDeploy"`
+	JettonTransfer            OptJettonTransferAction            `json:"JettonTransfer"`
+	JettonBurn                OptJettonBurnAction                `json:"JettonBurn"`
+	JettonMint                OptJettonMintAction                `json:"JettonMint"`
+	NftItemTransfer           OptNftItemTransferAction           `json:"NftItemTransfer"`
+	Subscribe                 OptSubscriptionAction              `json:"Subscribe"`
+	UnSubscribe               OptUnSubscriptionAction            `json:"UnSubscribe"`
+	AuctionBid                OptAuctionBidAction                `json:"AuctionBid"`
+	NftPurchase               OptNftPurchaseAction               `json:"NftPurchase"`
+	DepositStake              OptDepositStakeAction              `json:"DepositStake"`
+	WithdrawStake             OptWithdrawStakeAction             `json:"WithdrawStake"`
+	WithdrawStakeRequest      OptWithdrawStakeRequestAction      `json:"WithdrawStakeRequest"`
+	ElectionsDepositStake     OptElectionsDepositStakeAction     `json:"ElectionsDepositStake"`
+	ElectionsRecoverStake     OptElectionsRecoverStakeAction     `json:"ElectionsRecoverStake"`
+	JettonSwap                OptJettonSwapAction                `json:"JettonSwap"`
+	SmartContractExec         OptSmartContractAction             `json:"SmartContractExec"`
+	DomainRenew               OptDomainRenewAction               `json:"DomainRenew"`
+	Purchase                  OptPurchaseAction                  `json:"Purchase"`
+	AddExtension              OptAddExtensionAction              `json:"AddExtension"`
+	RemoveExtension           OptRemoveExtensionAction           `json:"RemoveExtension"`
+	SetSignatureAllowedAction OptSetSignatureAllowedAction       `json:"SetSignatureAllowedAction"`
+	GasRelay                  OptGasRelayAction                  `json:"GasRelay"`
+	DepositTokenStake         OptDepositTokenStakeAction         `json:"DepositTokenStake"`
+	WithdrawTokenStakeRequest OptWithdrawTokenStakeRequestAction `json:"WithdrawTokenStakeRequest"`
+	SimplePreview             ActionSimplePreview                `json:"simple_preview"`
+	BaseTransactions          []string                           `json:"base_transactions"`
 }
 
 // GetType returns the value of Type.
@@ -851,6 +853,16 @@ func (s *Action) GetSetSignatureAllowedAction() OptSetSignatureAllowedAction {
 // GetGasRelay returns the value of GasRelay.
 func (s *Action) GetGasRelay() OptGasRelayAction {
 	return s.GasRelay
+}
+
+// GetDepositTokenStake returns the value of DepositTokenStake.
+func (s *Action) GetDepositTokenStake() OptDepositTokenStakeAction {
+	return s.DepositTokenStake
+}
+
+// GetWithdrawTokenStakeRequest returns the value of WithdrawTokenStakeRequest.
+func (s *Action) GetWithdrawTokenStakeRequest() OptWithdrawTokenStakeRequestAction {
+	return s.WithdrawTokenStakeRequest
 }
 
 // GetSimplePreview returns the value of SimplePreview.
@@ -991,6 +1003,16 @@ func (s *Action) SetSetSignatureAllowedAction(val OptSetSignatureAllowedAction) 
 // SetGasRelay sets the value of GasRelay.
 func (s *Action) SetGasRelay(val OptGasRelayAction) {
 	s.GasRelay = val
+}
+
+// SetDepositTokenStake sets the value of DepositTokenStake.
+func (s *Action) SetDepositTokenStake(val OptDepositTokenStakeAction) {
+	s.DepositTokenStake = val
+}
+
+// SetWithdrawTokenStakeRequest sets the value of WithdrawTokenStakeRequest.
+func (s *Action) SetWithdrawTokenStakeRequest(val OptWithdrawTokenStakeRequestAction) {
+	s.WithdrawTokenStakeRequest = val
 }
 
 // SetSimplePreview sets the value of SimplePreview.
@@ -1201,27 +1223,29 @@ func (s *ActionStatus) UnmarshalText(data []byte) error {
 type ActionType string
 
 const (
-	ActionTypeTonTransfer           ActionType = "TonTransfer"
-	ActionTypeExtraCurrencyTransfer ActionType = "ExtraCurrencyTransfer"
-	ActionTypeContractDeploy        ActionType = "ContractDeploy"
-	ActionTypeJettonTransfer        ActionType = "JettonTransfer"
-	ActionTypeJettonBurn            ActionType = "JettonBurn"
-	ActionTypeJettonMint            ActionType = "JettonMint"
-	ActionTypeNftItemTransfer       ActionType = "NftItemTransfer"
-	ActionTypeSubscribe             ActionType = "Subscribe"
-	ActionTypeUnSubscribe           ActionType = "UnSubscribe"
-	ActionTypeAuctionBid            ActionType = "AuctionBid"
-	ActionTypeNftPurchase           ActionType = "NftPurchase"
-	ActionTypeDepositStake          ActionType = "DepositStake"
-	ActionTypeWithdrawStake         ActionType = "WithdrawStake"
-	ActionTypeWithdrawStakeRequest  ActionType = "WithdrawStakeRequest"
-	ActionTypeElectionsDepositStake ActionType = "ElectionsDepositStake"
-	ActionTypeElectionsRecoverStake ActionType = "ElectionsRecoverStake"
-	ActionTypeJettonSwap            ActionType = "JettonSwap"
-	ActionTypeSmartContractExec     ActionType = "SmartContractExec"
-	ActionTypeDomainRenew           ActionType = "DomainRenew"
-	ActionTypePurchase              ActionType = "Purchase"
-	ActionTypeUnknown               ActionType = "Unknown"
+	ActionTypeTonTransfer               ActionType = "TonTransfer"
+	ActionTypeExtraCurrencyTransfer     ActionType = "ExtraCurrencyTransfer"
+	ActionTypeContractDeploy            ActionType = "ContractDeploy"
+	ActionTypeJettonTransfer            ActionType = "JettonTransfer"
+	ActionTypeJettonBurn                ActionType = "JettonBurn"
+	ActionTypeJettonMint                ActionType = "JettonMint"
+	ActionTypeNftItemTransfer           ActionType = "NftItemTransfer"
+	ActionTypeSubscribe                 ActionType = "Subscribe"
+	ActionTypeUnSubscribe               ActionType = "UnSubscribe"
+	ActionTypeAuctionBid                ActionType = "AuctionBid"
+	ActionTypeNftPurchase               ActionType = "NftPurchase"
+	ActionTypeDepositStake              ActionType = "DepositStake"
+	ActionTypeWithdrawStake             ActionType = "WithdrawStake"
+	ActionTypeWithdrawStakeRequest      ActionType = "WithdrawStakeRequest"
+	ActionTypeElectionsDepositStake     ActionType = "ElectionsDepositStake"
+	ActionTypeElectionsRecoverStake     ActionType = "ElectionsRecoverStake"
+	ActionTypeJettonSwap                ActionType = "JettonSwap"
+	ActionTypeSmartContractExec         ActionType = "SmartContractExec"
+	ActionTypeDomainRenew               ActionType = "DomainRenew"
+	ActionTypePurchase                  ActionType = "Purchase"
+	ActionTypeDepositTokenStake         ActionType = "DepositTokenStake"
+	ActionTypeWithdrawTokenStakeRequest ActionType = "WithdrawTokenStakeRequest"
+	ActionTypeUnknown                   ActionType = "Unknown"
 )
 
 // AllValues returns all ActionType values.
@@ -1247,6 +1271,8 @@ func (ActionType) AllValues() []ActionType {
 		ActionTypeSmartContractExec,
 		ActionTypeDomainRenew,
 		ActionTypePurchase,
+		ActionTypeDepositTokenStake,
+		ActionTypeWithdrawTokenStakeRequest,
 		ActionTypeUnknown,
 	}
 }
@@ -1293,6 +1319,10 @@ func (s ActionType) MarshalText() ([]byte, error) {
 	case ActionTypeDomainRenew:
 		return []byte(s), nil
 	case ActionTypePurchase:
+		return []byte(s), nil
+	case ActionTypeDepositTokenStake:
+		return []byte(s), nil
+	case ActionTypeWithdrawTokenStakeRequest:
 		return []byte(s), nil
 	case ActionTypeUnknown:
 		return []byte(s), nil
@@ -1363,6 +1393,12 @@ func (s *ActionType) UnmarshalText(data []byte) error {
 		return nil
 	case ActionTypePurchase:
 		*s = ActionTypePurchase
+		return nil
+	case ActionTypeDepositTokenStake:
+		*s = ActionTypeDepositTokenStake
+		return nil
+	case ActionTypeWithdrawTokenStakeRequest:
+		*s = ActionTypeWithdrawTokenStakeRequest
 		return nil
 	case ActionTypeUnknown:
 		*s = ActionTypeUnknown
@@ -5000,6 +5036,43 @@ func (s *DepositStakeAction) SetPool(val AccountAddress) {
 // SetImplementation sets the value of Implementation.
 func (s *DepositStakeAction) SetImplementation(val PoolImplementationType) {
 	s.Implementation = val
+}
+
+// Ref: #/components/schemas/DepositTokenStakeAction
+type DepositTokenStakeAction struct {
+	Staker    AccountAddress `json:"staker"`
+	Protocol  Protocol       `json:"protocol"`
+	StakeMeta OptPrice       `json:"stake_meta"`
+}
+
+// GetStaker returns the value of Staker.
+func (s *DepositTokenStakeAction) GetStaker() AccountAddress {
+	return s.Staker
+}
+
+// GetProtocol returns the value of Protocol.
+func (s *DepositTokenStakeAction) GetProtocol() Protocol {
+	return s.Protocol
+}
+
+// GetStakeMeta returns the value of StakeMeta.
+func (s *DepositTokenStakeAction) GetStakeMeta() OptPrice {
+	return s.StakeMeta
+}
+
+// SetStaker sets the value of Staker.
+func (s *DepositTokenStakeAction) SetStaker(val AccountAddress) {
+	s.Staker = val
+}
+
+// SetProtocol sets the value of Protocol.
+func (s *DepositTokenStakeAction) SetProtocol(val Protocol) {
+	s.Protocol = val
+}
+
+// SetStakeMeta sets the value of StakeMeta.
+func (s *DepositTokenStakeAction) SetStakeMeta(val OptPrice) {
+	s.StakeMeta = val
 }
 
 // Ref: #/components/schemas/DnsExpiring
@@ -12752,6 +12825,52 @@ func (o OptDepositStakeAction) Or(d DepositStakeAction) DepositStakeAction {
 	return d
 }
 
+// NewOptDepositTokenStakeAction returns new OptDepositTokenStakeAction with value set to v.
+func NewOptDepositTokenStakeAction(v DepositTokenStakeAction) OptDepositTokenStakeAction {
+	return OptDepositTokenStakeAction{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptDepositTokenStakeAction is optional DepositTokenStakeAction.
+type OptDepositTokenStakeAction struct {
+	Value DepositTokenStakeAction
+	Set   bool
+}
+
+// IsSet returns true if OptDepositTokenStakeAction was set.
+func (o OptDepositTokenStakeAction) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptDepositTokenStakeAction) Reset() {
+	var v DepositTokenStakeAction
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptDepositTokenStakeAction) SetTo(v DepositTokenStakeAction) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptDepositTokenStakeAction) Get() (v DepositTokenStakeAction, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptDepositTokenStakeAction) Or(d DepositTokenStakeAction) DepositTokenStakeAction {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptDomainRenewAction returns new OptDomainRenewAction with value set to v.
 func NewOptDomainRenewAction(v DomainRenewAction) OptDomainRenewAction {
 	return OptDomainRenewAction{
@@ -14132,6 +14251,52 @@ func (o OptNftPurchaseAction) Or(d NftPurchaseAction) NftPurchaseAction {
 	return d
 }
 
+// NewOptPrice returns new OptPrice with value set to v.
+func NewOptPrice(v Price) OptPrice {
+	return OptPrice{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptPrice is optional Price.
+type OptPrice struct {
+	Value Price
+	Set   bool
+}
+
+// IsSet returns true if OptPrice was set.
+func (o OptPrice) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptPrice) Reset() {
+	var v Price
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptPrice) SetTo(v Price) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptPrice) Get() (v Price, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptPrice) Or(d Price) Price {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptPurchaseAction returns new OptPurchaseAction with value set to v.
 func NewOptPurchaseAction(v PurchaseAction) OptPurchaseAction {
 	return OptPurchaseAction{
@@ -15190,6 +15355,52 @@ func (o OptWithdrawStakeRequestAction) Or(d WithdrawStakeRequestAction) Withdraw
 	return d
 }
 
+// NewOptWithdrawTokenStakeRequestAction returns new OptWithdrawTokenStakeRequestAction with value set to v.
+func NewOptWithdrawTokenStakeRequestAction(v WithdrawTokenStakeRequestAction) OptWithdrawTokenStakeRequestAction {
+	return OptWithdrawTokenStakeRequestAction{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptWithdrawTokenStakeRequestAction is optional WithdrawTokenStakeRequestAction.
+type OptWithdrawTokenStakeRequestAction struct {
+	Value WithdrawTokenStakeRequestAction
+	Set   bool
+}
+
+// IsSet returns true if OptWithdrawTokenStakeRequestAction was set.
+func (o OptWithdrawTokenStakeRequestAction) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptWithdrawTokenStakeRequestAction) Reset() {
+	var v WithdrawTokenStakeRequestAction
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptWithdrawTokenStakeRequestAction) SetTo(v WithdrawTokenStakeRequestAction) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptWithdrawTokenStakeRequestAction) Get() (v WithdrawTokenStakeRequestAction, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptWithdrawTokenStakeRequestAction) Or(d WithdrawTokenStakeRequestAction) WithdrawTokenStakeRequestAction {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // Ref: #/components/schemas/Oracle
 type Oracle struct {
 	Address    string `json:"address"`
@@ -15618,6 +15829,32 @@ func (s *Price) SetImage(val string) {
 // SetJetton sets the value of Jetton.
 func (s *Price) SetJetton(val OptString) {
 	s.Jetton = val
+}
+
+// Ref: #/components/schemas/Protocol
+type Protocol struct {
+	Name  string    `json:"name"`
+	Image OptString `json:"image"`
+}
+
+// GetName returns the value of Name.
+func (s *Protocol) GetName() string {
+	return s.Name
+}
+
+// GetImage returns the value of Image.
+func (s *Protocol) GetImage() OptString {
+	return s.Image
+}
+
+// SetName sets the value of Name.
+func (s *Protocol) SetName(val string) {
+	s.Name = val
+}
+
+// SetImage sets the value of Image.
+func (s *Protocol) SetImage(val OptString) {
+	s.Image = val
 }
 
 // Ref: #/components/schemas/Purchase
@@ -18718,6 +18955,43 @@ func (s *WithdrawStakeRequestAction) SetPool(val AccountAddress) {
 // SetImplementation sets the value of Implementation.
 func (s *WithdrawStakeRequestAction) SetImplementation(val PoolImplementationType) {
 	s.Implementation = val
+}
+
+// Ref: #/components/schemas/WithdrawTokenStakeRequestAction
+type WithdrawTokenStakeRequestAction struct {
+	Staker    AccountAddress `json:"staker"`
+	Protocol  Protocol       `json:"protocol"`
+	StakeMeta OptPrice       `json:"stake_meta"`
+}
+
+// GetStaker returns the value of Staker.
+func (s *WithdrawTokenStakeRequestAction) GetStaker() AccountAddress {
+	return s.Staker
+}
+
+// GetProtocol returns the value of Protocol.
+func (s *WithdrawTokenStakeRequestAction) GetProtocol() Protocol {
+	return s.Protocol
+}
+
+// GetStakeMeta returns the value of StakeMeta.
+func (s *WithdrawTokenStakeRequestAction) GetStakeMeta() OptPrice {
+	return s.StakeMeta
+}
+
+// SetStaker sets the value of Staker.
+func (s *WithdrawTokenStakeRequestAction) SetStaker(val AccountAddress) {
+	s.Staker = val
+}
+
+// SetProtocol sets the value of Protocol.
+func (s *WithdrawTokenStakeRequestAction) SetProtocol(val Protocol) {
+	s.Protocol = val
+}
+
+// SetStakeMeta sets the value of StakeMeta.
+func (s *WithdrawTokenStakeRequestAction) SetStakeMeta(val OptPrice) {
+	s.StakeMeta = val
 }
 
 // Ref: #/components/schemas/WorkchainDescr

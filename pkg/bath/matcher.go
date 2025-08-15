@@ -255,3 +255,10 @@ func JettonTransferOperation(op abi.JettonOpName) bubbleCheck {
 		return tx.payload.SumType == op
 	}
 }
+
+func JettonRecipientAccount(id tongo.AccountID) bubbleCheck {
+	return func(bubble *Bubble) bool {
+		tx, _ := bubble.Info.(BubbleJettonTransfer)
+		return tx.recipient.Address == id
+	}
+}

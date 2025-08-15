@@ -20,31 +20,33 @@ import (
 )
 
 const (
-	TonTransfer           ActionType = "TonTransfer"
-	ExtraCurrencyTransfer ActionType = "ExtraCurrencyTransfer"
-	SmartContractExec     ActionType = "SmartContractExec"
-	GasRelay              ActionType = "GasRelay"
-	NftItemTransfer       ActionType = "NftItemTransfer"
-	NftPurchase           ActionType = "NftPurchase"
-	JettonTransfer        ActionType = "JettonTransfer"
-	JettonMint            ActionType = "JettonMint"
-	JettonBurn            ActionType = "JettonBurn"
-	ContractDeploy        ActionType = "ContractDeploy"
-	Subscribe             ActionType = "Subscribe"
-	UnSubscribe           ActionType = "UnSubscribe"
-	ElectionsDepositStake ActionType = "ElectionsDepositStake"
-	ElectionsRecoverStake ActionType = "ElectionsRecoverStake"
-	DepositStake          ActionType = "DepositStake"
-	WithdrawStake         ActionType = "WithdrawStake"
-	WithdrawStakeRequest  ActionType = "WithdrawStakeRequest"
-	JettonSwap            ActionType = "JettonSwap"
-	AuctionBid            ActionType = "AuctionBid"
-	DomainRenew           ActionType = "DomainRenew"
-	Purchase              ActionType = "Purchase"
-	AddExtension          ActionType = "AddExtension"
-	RemoveExtension       ActionType = "RemoveExtension"
-	SetSignatureAllowed   ActionType = "SetSignatureAllowed"
-	Unknown               ActionType = "Unknown"
+	TonTransfer               ActionType = "TonTransfer"
+	ExtraCurrencyTransfer     ActionType = "ExtraCurrencyTransfer"
+	SmartContractExec         ActionType = "SmartContractExec"
+	GasRelay                  ActionType = "GasRelay"
+	NftItemTransfer           ActionType = "NftItemTransfer"
+	NftPurchase               ActionType = "NftPurchase"
+	JettonTransfer            ActionType = "JettonTransfer"
+	JettonMint                ActionType = "JettonMint"
+	JettonBurn                ActionType = "JettonBurn"
+	ContractDeploy            ActionType = "ContractDeploy"
+	Subscribe                 ActionType = "Subscribe"
+	UnSubscribe               ActionType = "UnSubscribe"
+	ElectionsDepositStake     ActionType = "ElectionsDepositStake"
+	ElectionsRecoverStake     ActionType = "ElectionsRecoverStake"
+	DepositStake              ActionType = "DepositStake"
+	WithdrawStake             ActionType = "WithdrawStake"
+	WithdrawStakeRequest      ActionType = "WithdrawStakeRequest"
+	DepositTokenStake         ActionType = "DepositTokenStake"
+	WithdrawTokenStakeRequest ActionType = "WithdrawTokenStakeRequest"
+	JettonSwap                ActionType = "JettonSwap"
+	AuctionBid                ActionType = "AuctionBid"
+	DomainRenew               ActionType = "DomainRenew"
+	Purchase                  ActionType = "Purchase"
+	AddExtension              ActionType = "AddExtension"
+	RemoveExtension           ActionType = "RemoveExtension"
+	SetSignatureAllowed       ActionType = "SetSignatureAllowed"
+	Unknown                   ActionType = "Unknown"
 )
 
 type ActionType string
@@ -70,34 +72,36 @@ type (
 	}
 
 	Action struct {
-		TonTransfer           *TonTransferAction           `json:",omitempty"`
-		ExtraCurrencyTransfer *ExtraCurrencyTransferAction `json:",omitempty"`
-		SmartContractExec     *SmartContractAction         `json:",omitempty"`
-		GasRelay              *GasRelayAction              `json:",omitempty"`
-		NftItemTransfer       *NftTransferAction           `json:",omitempty"`
-		NftPurchase           *NftPurchaseAction           `json:",omitempty"`
-		JettonTransfer        *JettonTransferAction        `json:",omitempty"`
-		JettonMint            *JettonMintAction            `json:",omitempty"`
-		JettonBurn            *JettonBurnAction            `json:",omitempty"`
-		ContractDeploy        *ContractDeployAction        `json:",omitempty"`
-		Subscribe             *SubscribeAction             `json:",omitempty"`
-		UnSubscribe           *UnSubscribeAction           `json:",omitempty"`
-		AuctionBid            *AuctionBidAction            `json:",omitempty"`
-		ElectionsDepositStake *ElectionsDepositStakeAction `json:",omitempty"`
-		ElectionsRecoverStake *ElectionsRecoverStakeAction `json:",omitempty"`
-		DepositStake          *DepositStakeAction          `json:",omitempty"`
-		WithdrawStake         *WithdrawStakeAction         `json:",omitempty"`
-		WithdrawStakeRequest  *WithdrawStakeRequestAction  `json:",omitempty"`
-		JettonSwap            *JettonSwapAction            `json:",omitempty"`
-		DnsRenew              *DnsRenewAction              `json:",omitempty"`
-		Purchase              *PurchaseAction              `json:",omitempty"`
-		AddExtension          *AddExtensionAction          `json:",omitempty"`
-		RemoveExtension       *RemoveExtensionAction       `json:",omitempty"`
-		SetSignatureAllowed   *SetSignatureAllowedAction   `json:",omitempty"`
-		Success               bool
-		Type                  ActionType
-		Error                 *string `json:",omitempty"`
-		BaseTransactions      []ton.Bits256
+		TonTransfer               *TonTransferAction               `json:",omitempty"`
+		ExtraCurrencyTransfer     *ExtraCurrencyTransferAction     `json:",omitempty"`
+		SmartContractExec         *SmartContractAction             `json:",omitempty"`
+		GasRelay                  *GasRelayAction                  `json:",omitempty"`
+		NftItemTransfer           *NftTransferAction               `json:",omitempty"`
+		NftPurchase               *NftPurchaseAction               `json:",omitempty"`
+		JettonTransfer            *JettonTransferAction            `json:",omitempty"`
+		JettonMint                *JettonMintAction                `json:",omitempty"`
+		JettonBurn                *JettonBurnAction                `json:",omitempty"`
+		ContractDeploy            *ContractDeployAction            `json:",omitempty"`
+		Subscribe                 *SubscribeAction                 `json:",omitempty"`
+		UnSubscribe               *UnSubscribeAction               `json:",omitempty"`
+		AuctionBid                *AuctionBidAction                `json:",omitempty"`
+		ElectionsDepositStake     *ElectionsDepositStakeAction     `json:",omitempty"`
+		ElectionsRecoverStake     *ElectionsRecoverStakeAction     `json:",omitempty"`
+		DepositStake              *DepositStakeAction              `json:",omitempty"`
+		WithdrawStake             *WithdrawStakeAction             `json:",omitempty"`
+		WithdrawStakeRequest      *WithdrawStakeRequestAction      `json:",omitempty"`
+		DepositTokenStake         *DepositTokenStakeAction         `json:",omitempty"`
+		WithdrawTokenStakeRequest *WithdrawTokenStakeRequestAction `json:",omitempty"`
+		JettonSwap                *JettonSwapAction                `json:",omitempty"`
+		DnsRenew                  *DnsRenewAction                  `json:",omitempty"`
+		Purchase                  *PurchaseAction                  `json:",omitempty"`
+		AddExtension              *AddExtensionAction              `json:",omitempty"`
+		RemoveExtension           *RemoveExtensionAction           `json:",omitempty"`
+		SetSignatureAllowed       *SetSignatureAllowedAction       `json:",omitempty"`
+		Success                   bool
+		Type                      ActionType
+		Error                     *string `json:",omitempty"`
+		BaseTransactions          []ton.Bits256
 	}
 	TonTransferAction struct {
 		Amount           int64
@@ -224,6 +228,16 @@ type (
 		Pool           tongo.AccountID
 		Implementation core.StakingImplementation
 	}
+	DepositTokenStakeAction struct {
+		Staker    tongo.AccountID
+		Protocol  core.Protocol
+		StakeMeta *core.Price
+	}
+	WithdrawTokenStakeRequestAction struct {
+		Staker    tongo.AccountID
+		Protocol  core.Protocol
+		StakeMeta *core.Price
+	}
 	assetTransfer struct {
 		Amount       big.Int
 		IsTon        bool
@@ -299,7 +313,7 @@ func (a Action) ContributeToExtra(account tongo.AccountID) int64 {
 		return 0
 	}
 	switch a.Type {
-	case NftItemTransfer, ContractDeploy, UnSubscribe, JettonMint, JettonBurn, WithdrawStakeRequest, DomainRenew, ExtraCurrencyTransfer, AddExtension, RemoveExtension, SetSignatureAllowed: // actions without extra
+	case NftItemTransfer, ContractDeploy, UnSubscribe, JettonMint, JettonBurn, WithdrawStakeRequest, DomainRenew, ExtraCurrencyTransfer, DepositTokenStake, WithdrawTokenStakeRequest, AddExtension, RemoveExtension, SetSignatureAllowed: // actions without extra
 		return 0
 	case Purchase:
 		if a.Purchase.Price.Currency.Type == core.CurrencyTON {
@@ -380,6 +394,8 @@ func (a Action) IsSubject(account tongo.AccountID) bool {
 		a.DepositStake,
 		a.WithdrawStake,
 		a.WithdrawStakeRequest,
+		a.WithdrawTokenStakeRequest,
+		a.DepositTokenStake,
 		a.JettonSwap,
 		a.JettonMint,
 		a.JettonBurn,
@@ -490,6 +506,14 @@ func (a *DepositStakeAction) SubjectAccounts() []tongo.AccountID {
 
 func (a *WithdrawStakeAction) SubjectAccounts() []tongo.AccountID {
 	return []tongo.AccountID{a.Staker, a.Pool}
+}
+
+func (a *DepositTokenStakeAction) SubjectAccounts() []tongo.AccountID {
+	return []tongo.AccountID{a.Staker}
+}
+
+func (a *WithdrawTokenStakeRequestAction) SubjectAccounts() []tongo.AccountID {
+	return []tongo.AccountID{a.Staker}
 }
 
 func (a *WithdrawStakeRequestAction) SubjectAccounts() []tongo.AccountID {
