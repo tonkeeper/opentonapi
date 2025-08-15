@@ -419,7 +419,7 @@ func (h *Handler) convertDepositTokenStake(ctx context.Context, d *bath.DepositT
 	return action, simplePreview
 }
 
-func (h *Handler) convertWithdrawTokenStake(ctx context.Context, w *bath.WithdrawTokenStakeRequestAction, acceptLanguage string, viewer *tongo.AccountID) (oas.OptWithdrawTokenStakeRequestAction, oas.ActionSimplePreview) {
+func (h *Handler) convertWithdrawTokenStakeRequest(ctx context.Context, w *bath.WithdrawTokenStakeRequestAction, acceptLanguage string, viewer *tongo.AccountID) (oas.OptWithdrawTokenStakeRequestAction, oas.ActionSimplePreview) {
 	p := h.convertPrice(ctx, *w.StakeMeta)
 	var price oas.OptPrice
 	price.SetTo(p)
@@ -817,7 +817,7 @@ func (h *Handler) convertAction(ctx context.Context, viewer *tongo.AccountID, a 
 	case bath.DepositStake:
 		action.DepositStake, action.SimplePreview = h.convertDepositStake(a.DepositStake, acceptLanguage.Value, viewer)
 	case bath.WithdrawTokenStakeRequest:
-		action.WithdrawTokenStakeRequest, action.SimplePreview = h.convertWithdrawTokenStake(ctx, a.WithdrawTokenStakeRequest, acceptLanguage.Value, viewer)
+		action.WithdrawTokenStakeRequest, action.SimplePreview = h.convertWithdrawTokenStakeRequest(ctx, a.WithdrawTokenStakeRequest, acceptLanguage.Value, viewer)
 	case bath.DepositTokenStake:
 		action.DepositTokenStake, action.SimplePreview = h.convertDepositTokenStake(ctx, a.DepositTokenStake, acceptLanguage.Value, viewer)
 	case bath.WithdrawStakeRequest:
