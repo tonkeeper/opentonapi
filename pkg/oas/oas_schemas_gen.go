@@ -17017,6 +17017,7 @@ type Subscription struct {
 	Metadata         Metadata          `json:"metadata"`
 	Address          OptString         `json:"address"`
 	Beneficiary      OptAccountAddress `json:"beneficiary"`
+	Admin            OptAccountAddress `json:"admin"`
 }
 
 // GetType returns the value of Type.
@@ -17069,6 +17070,11 @@ func (s *Subscription) GetBeneficiary() OptAccountAddress {
 	return s.Beneficiary
 }
 
+// GetAdmin returns the value of Admin.
+func (s *Subscription) GetAdmin() OptAccountAddress {
+	return s.Admin
+}
+
 // SetType sets the value of Type.
 func (s *Subscription) SetType(val string) {
 	s.Type = val
@@ -17119,11 +17125,17 @@ func (s *Subscription) SetBeneficiary(val OptAccountAddress) {
 	s.Beneficiary = val
 }
 
+// SetAdmin sets the value of Admin.
+func (s *Subscription) SetAdmin(val OptAccountAddress) {
+	s.Admin = val
+}
+
 // Ref: #/components/schemas/SubscriptionAction
 type SubscriptionAction struct {
 	Subscriber   AccountAddress `json:"subscriber"`
 	Subscription string         `json:"subscription"`
 	Beneficiary  AccountAddress `json:"beneficiary"`
+	Admin        AccountAddress `json:"admin"`
 	// Deprecated: schema marks this property as deprecated.
 	Amount  OptInt64 `json:"amount"`
 	Price   Price    `json:"price"`
@@ -17143,6 +17155,11 @@ func (s *SubscriptionAction) GetSubscription() string {
 // GetBeneficiary returns the value of Beneficiary.
 func (s *SubscriptionAction) GetBeneficiary() AccountAddress {
 	return s.Beneficiary
+}
+
+// GetAdmin returns the value of Admin.
+func (s *SubscriptionAction) GetAdmin() AccountAddress {
+	return s.Admin
 }
 
 // GetAmount returns the value of Amount.
@@ -17173,6 +17190,11 @@ func (s *SubscriptionAction) SetSubscription(val string) {
 // SetBeneficiary sets the value of Beneficiary.
 func (s *SubscriptionAction) SetBeneficiary(val AccountAddress) {
 	s.Beneficiary = val
+}
+
+// SetAdmin sets the value of Admin.
+func (s *SubscriptionAction) SetAdmin(val AccountAddress) {
+	s.Admin = val
 }
 
 // SetAmount sets the value of Amount.
@@ -18188,6 +18210,7 @@ type UnSubscriptionAction struct {
 	Subscriber   AccountAddress `json:"subscriber"`
 	Subscription string         `json:"subscription"`
 	Beneficiary  AccountAddress `json:"beneficiary"`
+	Admin        AccountAddress `json:"admin"`
 }
 
 // GetSubscriber returns the value of Subscriber.
@@ -18205,6 +18228,11 @@ func (s *UnSubscriptionAction) GetBeneficiary() AccountAddress {
 	return s.Beneficiary
 }
 
+// GetAdmin returns the value of Admin.
+func (s *UnSubscriptionAction) GetAdmin() AccountAddress {
+	return s.Admin
+}
+
 // SetSubscriber sets the value of Subscriber.
 func (s *UnSubscriptionAction) SetSubscriber(val AccountAddress) {
 	s.Subscriber = val
@@ -18218,6 +18246,11 @@ func (s *UnSubscriptionAction) SetSubscription(val string) {
 // SetBeneficiary sets the value of Beneficiary.
 func (s *UnSubscriptionAction) SetBeneficiary(val AccountAddress) {
 	s.Beneficiary = val
+}
+
+// SetAdmin sets the value of Admin.
+func (s *UnSubscriptionAction) SetAdmin(val AccountAddress) {
+	s.Admin = val
 }
 
 // Ref: #/components/schemas/Validator

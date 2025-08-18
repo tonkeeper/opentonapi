@@ -1045,10 +1045,10 @@ func (h *Handler) convertSetSignatureAllowed(ctx context.Context, p *bath.SetSig
 func (h *Handler) convertSubscribe(ctx context.Context, a *bath.SubscribeAction, acceptLanguage string, viewer *tongo.AccountID) (oas.OptSubscriptionAction, oas.ActionSimplePreview) {
 	price := h.convertPrice(ctx, a.Price)
 	subscribeAction := oas.SubscriptionAction{
-		Price:       price,
-		Beneficiary: convertAccountAddress(a.WithdrawTo, h.addressBook),
-		Subscriber:  convertAccountAddress(a.Subscriber, h.addressBook),
-		// TODO: Admin address
+		Price:        price,
+		Beneficiary:  convertAccountAddress(a.WithdrawTo, h.addressBook),
+		Subscriber:   convertAccountAddress(a.Subscriber, h.addressBook),
+		Admin:        convertAccountAddress(a.Admin, h.addressBook),
 		Subscription: a.Subscription.ToRaw(),
 		Initial:      a.First,
 	}
@@ -1094,9 +1094,9 @@ func (h *Handler) convertUnsubscribe(ctx context.Context, a *bath.UnSubscribeAct
 	}
 	var action oas.OptUnSubscriptionAction
 	action.SetTo(oas.UnSubscriptionAction{
-		Beneficiary: convertAccountAddress(a.WithdrawTo, h.addressBook),
-		Subscriber:  convertAccountAddress(a.Subscriber, h.addressBook),
-		// TODO: admin address
+		Beneficiary:  convertAccountAddress(a.WithdrawTo, h.addressBook),
+		Subscriber:   convertAccountAddress(a.Subscriber, h.addressBook),
+		Admin:        convertAccountAddress(a.Admin, h.addressBook),
 		Subscription: a.Subscription.ToRaw(),
 	})
 	return action, simplePreview

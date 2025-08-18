@@ -690,7 +690,8 @@ func (h *Handler) convertSubscriptionsV2(ctx context.Context, sub core.Subscript
 		NextChargeAt:   sub.ChargeDate,
 	}
 	res.Address.SetTo(sub.AccountID.ToRaw())
-	res.Beneficiary.SetTo(convertAccountAddress(sub.BeneficiaryAccountID, h.addressBook))
+	res.Beneficiary.SetTo(convertAccountAddress(sub.WithdrawAccountID, h.addressBook))
+	res.Admin.SetTo(convertAccountAddress(sub.AdminAccountID, h.addressBook))
 	switch sub.ContractState {
 	case 0:
 		res.Status = oas.SubscriptionStatusNotReady
@@ -724,7 +725,9 @@ func (h *Handler) convertSubscriptionsV1(ctx context.Context, sub core.Subscript
 	timeslot := max((now-sub.StartTime)/sub.Period, 0)
 	res.NextChargeAt = sub.StartTime + sub.Period*timeslot
 	res.Address.SetTo(sub.AccountID.ToRaw())
-	res.Beneficiary.SetTo(convertAccountAddress(sub.BeneficiaryAccountID, h.addressBook))
+	beneficiary := convertAccountAddress(sub.BeneficiaryAccountID, h.addressBook)
+	res.Beneficiary.SetTo(beneficiary)
+	res.Admin.SetTo(beneficiary)
 	res.Status = oas.SubscriptionStatusCancelled
 	if sub.Status == tlb.AccountActive {
 		res.Status = oas.SubscriptionStatusActive
