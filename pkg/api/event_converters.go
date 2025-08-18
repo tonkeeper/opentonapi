@@ -584,11 +584,7 @@ func (h *Handler) convertAction(ctx context.Context, viewer *tongo.AccountID, a 
 	case bath.Subscribe:
 		action.Subscribe, action.SimplePreview = h.convertSubscribe(ctx, a.Subscribe, acceptLanguage.Value, viewer)
 	case bath.UnSubscribe:
-		action.UnSubscribe.SetTo(oas.UnSubscriptionAction{
-			Beneficiary:  convertAccountAddress(a.UnSubscribe.Beneficiary, h.addressBook),
-			Subscriber:   convertAccountAddress(a.UnSubscribe.Subscriber, h.addressBook),
-			Subscription: a.UnSubscribe.Subscription.ToRaw(),
-		})
+		action.UnSubscribe, action.SimplePreview = h.convertUnsubscribe(ctx, a.UnSubscribe, acceptLanguage.Value, viewer)
 	case bath.ContractDeploy:
 		interfaces := make([]string, 0, len(a.ContractDeploy.Interfaces))
 		for _, iface := range a.ContractDeploy.Interfaces {
@@ -1049,33 +1045,60 @@ func (h *Handler) convertSetSignatureAllowed(ctx context.Context, p *bath.SetSig
 func (h *Handler) convertSubscribe(ctx context.Context, a *bath.SubscribeAction, acceptLanguage string, viewer *tongo.AccountID) (oas.OptSubscriptionAction, oas.ActionSimplePreview) {
 	price := h.convertPrice(ctx, a.Price)
 	subscribeAction := oas.SubscriptionAction{
-		Price:       price,
-		Beneficiary: convertAccountAddress(a.Beneficiary, h.addressBook),
-		Subscriber:  convertAccountAddress(a.Subscriber, h.addressBook),
-		// TODO: WithdrawTo address
+		Price:        price,
+		Beneficiary:  convertAccountAddress(a.WithdrawTo, h.addressBook),
+		Subscriber:   convertAccountAddress(a.Subscriber, h.addressBook),
+		Admin:        convertAccountAddress(a.Admin, h.addressBook),
 		Subscription: a.Subscription.ToRaw(),
 		Initial:      a.First,
 	}
 	subscribeAction.Amount.SetTo(a.Price.Amount.Int64()) // for backward compatibility
 
 	value := i18n.FormatTokens(a.Price.Amount, int32(price.Decimals), price.TokenName)
-	act := "Paying for subscription"
-	if a.Price.Amount.Cmp(big.NewInt(0)) == 0 {
-		act = "Trial period subscription"
-	}
+
 	simplePreview := oas.ActionSimplePreview{
 		Name: "Subscription",
 		Description: i18n.T(acceptLanguage, i18n.C{
 			DefaultMessage: &i18n.M{
 				ID:    "subscriptionAction",
-				Other: act,
+				Other: "Paying {{.Value}} for subscription",
 			},
+			TemplateData: i18n.Template{"Value": value},
 		}),
-		Accounts: distinctAccounts(viewer, h.addressBook, &a.Beneficiary, &a.Subscriber),
+		Accounts: distinctAccounts(viewer, h.addressBook, &a.Admin, &a.Subscriber, &a.WithdrawTo),
 		Value:    oas.NewOptString(value),
+	}
+	if a.Price.Amount.Cmp(big.NewInt(0)) == 0 {
+		simplePreview.Description = i18n.T(acceptLanguage, i18n.C{
+			DefaultMessage: &i18n.M{
+				ID:    "trialSubscriptionAction",
+				Other: "Subscribe",
+			},
+		})
 	}
 	var action oas.OptSubscriptionAction
 	action.SetTo(subscribeAction)
+	return action, simplePreview
+}
+
+func (h *Handler) convertUnsubscribe(ctx context.Context, a *bath.UnSubscribeAction, acceptLanguage string, viewer *tongo.AccountID) (oas.OptUnSubscriptionAction, oas.ActionSimplePreview) {
+	simplePreview := oas.ActionSimplePreview{
+		Name: "Unsubscribe",
+		Description: i18n.T(acceptLanguage, i18n.C{
+			DefaultMessage: &i18n.M{
+				ID:    "unsubscribeAction",
+				Other: "Unsubscribe",
+			},
+		}),
+		Accounts: distinctAccounts(viewer, h.addressBook, &a.Admin, &a.Subscriber, &a.WithdrawTo),
+	}
+	var action oas.OptUnSubscriptionAction
+	action.SetTo(oas.UnSubscriptionAction{
+		Beneficiary:  convertAccountAddress(a.WithdrawTo, h.addressBook),
+		Subscriber:   convertAccountAddress(a.Subscriber, h.addressBook),
+		Admin:        convertAccountAddress(a.Admin, h.addressBook),
+		Subscription: a.Subscription.ToRaw(),
+	})
 	return action, simplePreview
 }
 

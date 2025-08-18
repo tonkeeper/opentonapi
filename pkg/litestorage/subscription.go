@@ -3,6 +3,7 @@ package litestorage
 import (
 	"context"
 	"errors"
+
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
@@ -30,7 +31,7 @@ func (s *LiteStorage) SubscriptionInfos(ctx context.Context, ids []core.Subscrip
 					Workchain: int32(data.Wallet.Workchain),
 					Address:   data.Wallet.Address,
 				},
-				Beneficiary:      beneficiary,
+				Admin:            beneficiary,
 				WithdrawTo:       beneficiary,
 				PaymentPerPeriod: int64(data.Amount),
 			}
@@ -58,11 +59,11 @@ func (s *LiteStorage) SubscriptionInfos(ctx context.Context, ids []core.Subscrip
 			if wallet == nil {
 				return nil, errors.New("invalid wallet address")
 			}
-			beneficiary, err := tongo.AccountIDFromTlb(subInfo.Beneficiary)
+			admin, err := tongo.AccountIDFromTlb(subInfo.Admin)
 			if err != nil {
 				return nil, err
 			}
-			if beneficiary == nil {
+			if admin == nil {
 				return nil, errors.New("invalid beneficiary address")
 			}
 			withdrawTo, err := tongo.AccountIDFromTlb(subInfo.WithdrawAddress)
@@ -74,7 +75,7 @@ func (s *LiteStorage) SubscriptionInfos(ctx context.Context, ids []core.Subscrip
 			}
 			res[id.Account] = core.SubscriptionInfo{
 				Wallet:           *wallet,
-				Beneficiary:      *beneficiary,
+				Admin:            *admin,
 				WithdrawTo:       *withdrawTo,
 				PaymentPerPeriod: int64(paymentInfo.PaymentPerPeriod),
 			}

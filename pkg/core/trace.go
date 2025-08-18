@@ -4,8 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"github.com/tonkeeper/tongo/ton"
 	"sync"
+
+	"github.com/tonkeeper/tongo/ton"
 
 	"github.com/shopspring/decimal"
 	"github.com/tonkeeper/tongo"
@@ -225,8 +226,8 @@ type SubscriptionID struct {
 }
 
 type SubscriptionInfo struct {
-	Wallet, Beneficiary, WithdrawTo tongo.AccountID
-	PaymentPerPeriod                int64
+	Wallet, Admin, WithdrawTo tongo.AccountID
+	PaymentPerPeriod          int64
 }
 
 // InformationSource provides methods to construct TraceAdditionalInfo.

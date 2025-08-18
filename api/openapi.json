@@ -5977,6 +5977,9 @@
       "format": "address",
       "type": "string"
      },
+     "admin": {
+      "$ref": "#/components/schemas/AccountAddress"
+     },
      "beneficiary": {
       "$ref": "#/components/schemas/AccountAddress"
      },
@@ -6033,6 +6036,9 @@
    },
    "SubscriptionAction": {
     "properties": {
+     "admin": {
+      "$ref": "#/components/schemas/AccountAddress"
+     },
      "amount": {
       "deprecated": true,
       "example": 1000000000,
@@ -6063,6 +6069,7 @@
      "subscriber",
      "subscription",
      "beneficiary",
+     "admin",
      "price",
      "initial"
     ],
@@ -6425,6 +6432,9 @@
    },
    "UnSubscriptionAction": {
     "properties": {
+     "admin": {
+      "$ref": "#/components/schemas/AccountAddress"
+     },
      "beneficiary": {
       "$ref": "#/components/schemas/AccountAddress"
      },
@@ -6440,7 +6450,8 @@
     "required": [
      "subscriber",
      "subscription",
-     "beneficiary"
+     "beneficiary",
+     "admin"
     ],
     "type": "object"
    },

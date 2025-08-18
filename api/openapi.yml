@@ -6460,6 +6460,7 @@ components:
         - subscriber
         - subscription
         - beneficiary
+        - admin
         - price
         - initial
       properties:
@@ -6470,6 +6471,8 @@ components:
           format: address
           example: "0:da6b1b6663a0e4d18cc8574ccd9db5296e367dd9324706f3bbd9eb1cd2caf0bf"
         beneficiary:
+          $ref: '#/components/schemas/AccountAddress'
+        admin:
           $ref: '#/components/schemas/AccountAddress'
         amount:
           deprecated: true
@@ -6488,6 +6491,7 @@ components:
         - subscriber
         - subscription
         - beneficiary
+        - admin
       properties:
         subscriber:
           $ref: '#/components/schemas/AccountAddress'
@@ -6496,6 +6500,8 @@ components:
           format: address
           example: "0:da6b1b6663a0e4d18cc8574ccd9db5296e367dd9324706f3bbd9eb1cd2caf0bf"
         beneficiary:
+          $ref: '#/components/schemas/AccountAddress'
+        admin:
           $ref: '#/components/schemas/AccountAddress'
     AuctionBidAction:
       type: object
@@ -6925,6 +6931,8 @@ components:
           format: address
           example: 0:dea8f638b789172ce36d10a20318125e52c649aa84893cd77858224fe2b9b0ee
         beneficiary:
+          $ref: '#/components/schemas/AccountAddress'
+        admin:
           $ref: '#/components/schemas/AccountAddress'
     Subscriptions:
       type: object
