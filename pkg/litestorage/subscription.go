@@ -59,11 +59,11 @@ func (s *LiteStorage) SubscriptionInfos(ctx context.Context, ids []core.Subscrip
 			if wallet == nil {
 				return nil, errors.New("invalid wallet address")
 			}
-			beneficiary, err := tongo.AccountIDFromTlb(subInfo.Beneficiary)
+			admin, err := tongo.AccountIDFromTlb(subInfo.Admin)
 			if err != nil {
 				return nil, err
 			}
-			if beneficiary == nil {
+			if admin == nil {
 				return nil, errors.New("invalid beneficiary address")
 			}
 			withdrawTo, err := tongo.AccountIDFromTlb(subInfo.WithdrawAddress)
@@ -75,7 +75,7 @@ func (s *LiteStorage) SubscriptionInfos(ctx context.Context, ids []core.Subscrip
 			}
 			res[id.Account] = core.SubscriptionInfo{
 				Wallet:           *wallet,
-				Admin:            *beneficiary,
+				Admin:            *admin,
 				WithdrawTo:       *withdrawTo,
 				PaymentPerPeriod: int64(paymentInfo.PaymentPerPeriod),
 			}
