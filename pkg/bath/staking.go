@@ -309,7 +309,8 @@ var DepositEthenaStakeStraw = Straw[BubbleDepositTokenStake]{
 		}
 		newAction.StakeMeta = &core.Price{
 			Currency: core.Currency{
-				Type: core.CurrencyJetton,
+				Type:   core.CurrencyJetton,
+				Jetton: &tx.master,
 			},
 			Amount: amount,
 		}
@@ -319,7 +320,6 @@ var DepositEthenaStakeStraw = Straw[BubbleDepositTokenStake]{
 		CheckFuncs: []bubbleCheck{Is(BubbleJettonMint{})},
 		Builder: func(newAction *BubbleDepositTokenStake, bubble *Bubble) error {
 			tx := bubble.Info.(BubbleJettonMint)
-			newAction.StakeMeta.Currency.Jetton = &tx.master
 			newAction.Success = tx.success
 			return nil
 		},

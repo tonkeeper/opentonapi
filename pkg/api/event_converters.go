@@ -406,10 +406,9 @@ func (h *Handler) convertDepositTokenStake(ctx context.Context, d *bath.DepositT
 		Description: i18n.T(acceptLanguage, i18n.C{
 			DefaultMessage: &i18n.M{
 				ID:    "depositTokenStakeAction",
-				Other: "Deposit {{.Value}} to {{.Protocol}} protocol",
+				Other: "Staked with {{.Protocol}} protocol",
 			},
 			TemplateData: i18n.Template{
-				"Value":    d.StakeMeta.Amount.String(),
 				"Protocol": d.Protocol.Name,
 			},
 		}),
@@ -443,7 +442,7 @@ func (h *Handler) convertWithdrawTokenStakeRequest(ctx context.Context, w *bath.
 		Description: i18n.T(acceptLanguage, i18n.C{
 			DefaultMessage: &i18n.M{
 				ID:    "withdrawTokenStakeAction",
-				Other: "Request to withdraw funds from {{.Protocol}} protocol",
+				Other: "Request to withdraw from {{.Protocol}} protocol",
 			},
 			TemplateData: i18n.Template{
 				"Protocol": w.Protocol.Name,
