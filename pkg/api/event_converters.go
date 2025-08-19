@@ -12,7 +12,7 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
-
+	imgGenerator "github.com/tonkeeper/opentonapi/pkg/image"
 	"go.uber.org/zap"
 
 	"github.com/tonkeeper/tongo/ton"
@@ -389,7 +389,7 @@ func (h *Handler) convertDepositTokenStake(ctx context.Context, d *bath.DepositT
 
 	var image oas.OptString
 	if d.Protocol.Image != nil {
-		image = oas.NewOptString(*d.Protocol.Image)
+		image = oas.NewOptString(imgGenerator.DefaultGenerator.GenerateImageUrl(*d.Protocol.Image, 200, 200))
 	}
 
 	var action oas.OptDepositTokenStakeAction
@@ -425,7 +425,7 @@ func (h *Handler) convertWithdrawTokenStakeRequest(ctx context.Context, w *bath.
 
 	var image oas.OptString
 	if w.Protocol.Image != nil {
-		image = oas.NewOptString(*w.Protocol.Image)
+		image = oas.NewOptString(imgGenerator.DefaultGenerator.GenerateImageUrl(*w.Protocol.Image, 200, 200))
 	}
 
 	var action oas.OptWithdrawTokenStakeRequestAction
