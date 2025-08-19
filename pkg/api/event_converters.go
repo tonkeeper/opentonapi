@@ -763,7 +763,7 @@ func (h *Handler) convertAction(ctx context.Context, viewer *tongo.AccountID, a 
 		})
 		if a.AuctionBid.Nft.CollectionAddress != nil && *a.AuctionBid.Nft.CollectionAddress == references.RootTelegram {
 			action.AuctionBid.Value.AuctionType = oas.AuctionBidActionAuctionTypeDNSTg
-		} else if a.AuctionBid.Type != bath.DnsTgAuction {
+		} else {
 			action.AuctionBid.Value.AuctionType = oas.AuctionBidActionAuctionType(a.AuctionBid.Type)
 		}
 		action.SimplePreview = oas.ActionSimplePreview{
