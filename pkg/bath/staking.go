@@ -329,14 +329,14 @@ func (dts BubbleDepositTokenStake) ToAction() *Action {
 }
 
 var DepositEthenaStakeStraw = Straw[BubbleDepositTokenStake]{
-	CheckFuncs: []bubbleCheck{IsJettonTransfer, JettonRecipientAccount(references.EthenaStakingPool)},
+	CheckFuncs: []bubbleCheck{IsJettonTransfer, JettonRecipientAccount(references.EthenaPool)},
 	Builder: func(newAction *BubbleDepositTokenStake, bubble *Bubble) error {
 		tx := bubble.Info.(BubbleJettonTransfer)
 		newAction.Staker = tx.sender.Address
 		amount := big.Int(tx.amount)
 		newAction.Protocol = core.Protocol{
-			Name:  references.EthenaProtocolName,
-			Image: &references.EthenaProtocolImage,
+			Name:  references.Ethena,
+			Image: &references.EthenaImage,
 		}
 		newAction.StakeMeta = &core.Price{
 			Currency: core.Currency{
@@ -377,14 +377,14 @@ func (wts BubbleWithdrawTokenStakeRequest) ToAction() *Action {
 }
 
 var WithdrawEthenaStakeRequestStraw = Straw[BubbleWithdrawTokenStakeRequest]{
-	CheckFuncs: []bubbleCheck{IsJettonTransfer, JettonRecipientAccount(references.EthenaStakingPool)},
+	CheckFuncs: []bubbleCheck{IsJettonTransfer, JettonRecipientAccount(references.EthenaPool)},
 	Builder: func(newAction *BubbleWithdrawTokenStakeRequest, bubble *Bubble) error {
 		tx := bubble.Info.(BubbleJettonTransfer)
 		newAction.Staker = tx.sender.Address
 		amount := big.Int(tx.amount)
 		newAction.Protocol = core.Protocol{
-			Name:  references.EthenaProtocolName,
-			Image: &references.EthenaProtocolImage,
+			Name:  references.Ethena,
+			Image: &references.EthenaImage,
 		}
 		newAction.StakeMeta = &core.Price{
 			Currency: core.Currency{

@@ -47,6 +47,7 @@ const (
 	AddExtension              ActionType = "AddExtension"
 	RemoveExtension           ActionType = "RemoveExtension"
 	SetSignatureAllowed       ActionType = "SetSignatureAllowed"
+	LiquidityDeposit          ActionType = "LiquidityDeposit"
 	Unknown                   ActionType = "Unknown"
 )
 
@@ -99,6 +100,7 @@ type (
 		AddExtension              *AddExtensionAction              `json:",omitempty"`
 		RemoveExtension           *RemoveExtensionAction           `json:",omitempty"`
 		SetSignatureAllowed       *SetSignatureAllowedAction       `json:",omitempty"`
+		LiquidityDepositAction    *LiquidityDepositAction          `json:",omitempty"`
 		Success                   bool
 		Type                      ActionType
 		Error                     *string `json:",omitempty"`
@@ -267,6 +269,12 @@ type (
 		Wallet           tongo.AccountID
 		SignatureAllowed bool
 	}
+
+	LiquidityDepositAction struct {
+		Protocol core.Protocol
+		From     tongo.AccountID
+		Tokens   []core.VaultDepositInfo
+	}
 )
 
 func (a Action) String() string {
@@ -374,6 +382,26 @@ func (a Action) ContributeToExtra(account tongo.AccountID) int64 {
 		return 0
 	case WithdrawStake:
 		return detectDirection(account, a.WithdrawStake.Pool, a.WithdrawStake.Staker, a.WithdrawStake.Amount)
+	case LiquidityDeposit:
+		if account == a.LiquidityDepositAction.From {
+			if a.LiquidityDepositAction.Tokens[0].Price.Currency.Type == core.CurrencyTON {
+				return -a.LiquidityDepositAction.Tokens[0].Price.Amount.Int64()
+			}
+			if len(a.LiquidityDepositAction.Tokens) == 2 &&
+				a.LiquidityDepositAction.Tokens[1].Price.Currency.Type == core.CurrencyTON {
+				return -a.LiquidityDepositAction.Tokens[1].Price.Amount.Int64()
+			}
+		}
+		if account == a.LiquidityDepositAction.Tokens[0].Vault &&
+			a.LiquidityDepositAction.Tokens[0].Price.Currency.Type == core.CurrencyTON {
+			return a.LiquidityDepositAction.Tokens[0].Price.Amount.Int64()
+		}
+		if len(a.LiquidityDepositAction.Tokens) == 2 &&
+			account == a.LiquidityDepositAction.Tokens[1].Vault &&
+			a.LiquidityDepositAction.Tokens[1].Price.Currency.Type == core.CurrencyTON {
+			return a.LiquidityDepositAction.Tokens[1].Price.Amount.Int64()
+		}
+		return 0
 	default:
 		panic("unknown action type")
 	}
@@ -406,6 +434,7 @@ func (a Action) IsSubject(account tongo.AccountID) bool {
 		a.AddExtension,
 		a.RemoveExtension,
 		a.SetSignatureAllowed,
+		a.LiquidityDepositAction,
 	} {
 		if i != nil && !reflect.ValueOf(i).IsNil() {
 			return slices.Contains(i.SubjectAccounts(), account)
@@ -524,4 +553,8 @@ func (a *WithdrawStakeRequestAction) SubjectAccounts() []tongo.AccountID {
 
 func (a *PurchaseAction) SubjectAccounts() []tongo.AccountID {
 	return []tongo.AccountID{a.Source, a.Destination}
+}
+
+func (a *LiquidityDepositAction) SubjectAccounts() []tongo.AccountID {
+	return []tongo.AccountID{a.From}
 }

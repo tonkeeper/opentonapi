@@ -1172,6 +1172,9 @@
      "JettonTransfer": {
       "$ref": "#/components/schemas/JettonTransferAction"
      },
+     "LiquidityDeposit": {
+      "$ref": "#/components/schemas/LiquidityDepositAction"
+     },
      "NftItemTransfer": {
       "$ref": "#/components/schemas/NftItemTransferAction"
      },
@@ -1255,6 +1258,7 @@
        "GasRelay",
        "DepositTokenStake",
        "WithdrawTokenStakeRequest",
+       "LiquidityDeposit",
        "Unknown"
       ],
       "example": "TonTransfer",
@@ -4361,6 +4365,28 @@
     ],
     "type": "object"
    },
+   "LiquidityDepositAction": {
+    "properties": {
+     "from": {
+      "$ref": "#/components/schemas/AccountAddress"
+     },
+     "protocol": {
+      "$ref": "#/components/schemas/Protocol"
+     },
+     "tokens": {
+      "items": {
+       "$ref": "#/components/schemas/VaultDepositInfo"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "protocol",
+     "from",
+     "tokens"
+    ],
+    "type": "object"
+   },
    "MarketTonRates": {
     "properties": {
      "last_date_update": {
@@ -6633,6 +6659,23 @@
      "account",
      "ton",
      "fees"
+    ],
+    "type": "object"
+   },
+   "VaultDepositInfo": {
+    "properties": {
+     "price": {
+      "$ref": "#/components/schemas/Price"
+     },
+     "vault": {
+      "example": "0:0BB5A9F69043EEBDDA5AD2E946EB953242BD8F603FE795D90698CEEC6BFC60A0",
+      "format": "address",
+      "type": "string"
+     }
+    },
+    "required": [
+     "price",
+     "vault"
     ],
     "type": "object"
    },

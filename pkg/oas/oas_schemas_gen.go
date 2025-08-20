@@ -721,6 +721,7 @@ type Action struct {
 	GasRelay                  OptGasRelayAction                  `json:"GasRelay"`
 	DepositTokenStake         OptDepositTokenStakeAction         `json:"DepositTokenStake"`
 	WithdrawTokenStakeRequest OptWithdrawTokenStakeRequestAction `json:"WithdrawTokenStakeRequest"`
+	LiquidityDeposit          OptLiquidityDepositAction          `json:"LiquidityDeposit"`
 	SimplePreview             ActionSimplePreview                `json:"simple_preview"`
 	BaseTransactions          []string                           `json:"base_transactions"`
 }
@@ -863,6 +864,11 @@ func (s *Action) GetDepositTokenStake() OptDepositTokenStakeAction {
 // GetWithdrawTokenStakeRequest returns the value of WithdrawTokenStakeRequest.
 func (s *Action) GetWithdrawTokenStakeRequest() OptWithdrawTokenStakeRequestAction {
 	return s.WithdrawTokenStakeRequest
+}
+
+// GetLiquidityDeposit returns the value of LiquidityDeposit.
+func (s *Action) GetLiquidityDeposit() OptLiquidityDepositAction {
+	return s.LiquidityDeposit
 }
 
 // GetSimplePreview returns the value of SimplePreview.
@@ -1013,6 +1019,11 @@ func (s *Action) SetDepositTokenStake(val OptDepositTokenStakeAction) {
 // SetWithdrawTokenStakeRequest sets the value of WithdrawTokenStakeRequest.
 func (s *Action) SetWithdrawTokenStakeRequest(val OptWithdrawTokenStakeRequestAction) {
 	s.WithdrawTokenStakeRequest = val
+}
+
+// SetLiquidityDeposit sets the value of LiquidityDeposit.
+func (s *Action) SetLiquidityDeposit(val OptLiquidityDepositAction) {
+	s.LiquidityDeposit = val
 }
 
 // SetSimplePreview sets the value of SimplePreview.
@@ -1249,6 +1260,7 @@ const (
 	ActionTypeGasRelay                  ActionType = "GasRelay"
 	ActionTypeDepositTokenStake         ActionType = "DepositTokenStake"
 	ActionTypeWithdrawTokenStakeRequest ActionType = "WithdrawTokenStakeRequest"
+	ActionTypeLiquidityDeposit          ActionType = "LiquidityDeposit"
 	ActionTypeUnknown                   ActionType = "Unknown"
 )
 
@@ -1281,6 +1293,7 @@ func (ActionType) AllValues() []ActionType {
 		ActionTypeGasRelay,
 		ActionTypeDepositTokenStake,
 		ActionTypeWithdrawTokenStakeRequest,
+		ActionTypeLiquidityDeposit,
 		ActionTypeUnknown,
 	}
 }
@@ -1339,6 +1352,8 @@ func (s ActionType) MarshalText() ([]byte, error) {
 	case ActionTypeDepositTokenStake:
 		return []byte(s), nil
 	case ActionTypeWithdrawTokenStakeRequest:
+		return []byte(s), nil
+	case ActionTypeLiquidityDeposit:
 		return []byte(s), nil
 	case ActionTypeUnknown:
 		return []byte(s), nil
@@ -1427,6 +1442,9 @@ func (s *ActionType) UnmarshalText(data []byte) error {
 		return nil
 	case ActionTypeWithdrawTokenStakeRequest:
 		*s = ActionTypeWithdrawTokenStakeRequest
+		return nil
+	case ActionTypeLiquidityDeposit:
+		*s = ActionTypeLiquidityDeposit
 		return nil
 	case ActionTypeUnknown:
 		*s = ActionTypeUnknown
@@ -8918,6 +8936,43 @@ func (s *JettonsBalances) SetBalances(val []JettonBalance) {
 	s.Balances = val
 }
 
+// Ref: #/components/schemas/LiquidityDepositAction
+type LiquidityDepositAction struct {
+	Protocol Protocol           `json:"protocol"`
+	From     AccountAddress     `json:"from"`
+	Tokens   []VaultDepositInfo `json:"tokens"`
+}
+
+// GetProtocol returns the value of Protocol.
+func (s *LiquidityDepositAction) GetProtocol() Protocol {
+	return s.Protocol
+}
+
+// GetFrom returns the value of From.
+func (s *LiquidityDepositAction) GetFrom() AccountAddress {
+	return s.From
+}
+
+// GetTokens returns the value of Tokens.
+func (s *LiquidityDepositAction) GetTokens() []VaultDepositInfo {
+	return s.Tokens
+}
+
+// SetProtocol sets the value of Protocol.
+func (s *LiquidityDepositAction) SetProtocol(val Protocol) {
+	s.Protocol = val
+}
+
+// SetFrom sets the value of From.
+func (s *LiquidityDepositAction) SetFrom(val AccountAddress) {
+	s.From = val
+}
+
+// SetTokens sets the value of Tokens.
+func (s *LiquidityDepositAction) SetTokens(val []VaultDepositInfo) {
+	s.Tokens = val
+}
+
 // Ref: #/components/schemas/MarketTonRates
 type MarketTonRates struct {
 	Market         string  `json:"market"`
@@ -13863,6 +13918,52 @@ func (o OptJettonTransferAction) Or(d JettonTransferAction) JettonTransferAction
 	return d
 }
 
+// NewOptLiquidityDepositAction returns new OptLiquidityDepositAction with value set to v.
+func NewOptLiquidityDepositAction(v LiquidityDepositAction) OptLiquidityDepositAction {
+	return OptLiquidityDepositAction{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptLiquidityDepositAction is optional LiquidityDepositAction.
+type OptLiquidityDepositAction struct {
+	Value LiquidityDepositAction
+	Set   bool
+}
+
+// IsSet returns true if OptLiquidityDepositAction was set.
+func (o OptLiquidityDepositAction) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptLiquidityDepositAction) Reset() {
+	var v LiquidityDepositAction
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptLiquidityDepositAction) SetTo(v LiquidityDepositAction) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptLiquidityDepositAction) Get() (v LiquidityDepositAction, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptLiquidityDepositAction) Or(d LiquidityDepositAction) LiquidityDepositAction {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptMessage returns new OptMessage with value set to v.
 func NewOptMessage(v Message) OptMessage {
 	return OptMessage{
@@ -18540,6 +18641,32 @@ func (s *ValueFlowJettonsItem) SetQty(val string) {
 // SetQuantity sets the value of Quantity.
 func (s *ValueFlowJettonsItem) SetQuantity(val int64) {
 	s.Quantity = val
+}
+
+// Ref: #/components/schemas/VaultDepositInfo
+type VaultDepositInfo struct {
+	Price Price  `json:"price"`
+	Vault string `json:"vault"`
+}
+
+// GetPrice returns the value of Price.
+func (s *VaultDepositInfo) GetPrice() Price {
+	return s.Price
+}
+
+// GetVault returns the value of Vault.
+func (s *VaultDepositInfo) GetVault() string {
+	return s.Vault
+}
+
+// SetPrice sets the value of Price.
+func (s *VaultDepositInfo) SetPrice(val Price) {
+	s.Price = val
+}
+
+// SetVault sets the value of Vault.
+func (s *VaultDepositInfo) SetVault(val string) {
+	s.Vault = val
 }
 
 // Ref: #/components/schemas/Wallet

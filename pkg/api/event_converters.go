@@ -523,6 +523,48 @@ func (h *Handler) convertPurchaseAction(ctx context.Context, p *bath.PurchaseAct
 	return action, simplePreview
 }
 
+func (h *Handler) convertLiquidityDepositAction(ctx context.Context, l *bath.LiquidityDepositAction, acceptLanguage string, viewer *tongo.AccountID) (oas.OptLiquidityDepositAction, oas.ActionSimplePreview) {
+	tokens := make([]oas.VaultDepositInfo, 0)
+	for _, token := range l.Tokens {
+		price := h.convertPrice(ctx, token.Price)
+		vaultDepositInfo := oas.VaultDepositInfo{
+			Price: price,
+			Vault: token.Vault.ToRaw(),
+		}
+		tokens = append(tokens, vaultDepositInfo)
+	}
+	liquidityDepositAction := oas.LiquidityDepositAction{
+		Protocol: oas.Protocol{
+			Name:  l.Protocol.Name,
+			Image: oas.NewOptString(imgGenerator.DefaultGenerator.GenerateImageUrl(*l.Protocol.Image, 200, 200)),
+		},
+		From:   convertAccountAddress(l.From, h.addressBook),
+		Tokens: tokens,
+	}
+	value := i18n.FormatTokens(l.Tokens[0].Price.Amount, int32(tokens[0].Price.Decimals), tokens[0].Price.TokenName)
+	if len(tokens) == 2 {
+		value += " + " + i18n.FormatTokens(l.Tokens[1].Price.Amount, int32(tokens[1].Price.Decimals), tokens[1].Price.TokenName)
+	}
+	simplePreview := oas.ActionSimplePreview{
+		Name: "Liquidity Deposit",
+		Description: i18n.T(acceptLanguage, i18n.C{
+			DefaultMessage: &i18n.M{
+				ID:    "liquidityDepositAction",
+				Other: "Deposit {{.Value}} into the {{.Protocol}} liquidity pool",
+			},
+			TemplateData: i18n.Template{
+				"Value":    value,
+				"Protocol": l.Protocol.Name,
+			},
+		}),
+		Accounts: distinctAccounts(viewer, h.addressBook, &l.From),
+		Value:    oas.NewOptString(value),
+	}
+	var action oas.OptLiquidityDepositAction
+	action.SetTo(liquidityDepositAction)
+	return action, simplePreview
+}
+
 func (h *Handler) convertAction(ctx context.Context, viewer *tongo.AccountID, a bath.Action, acceptLanguage oas.OptString) (oas.Action, error) {
 	action := oas.Action{
 		Type:             oas.ActionType(a.Type),
@@ -823,6 +865,8 @@ func (h *Handler) convertAction(ctx context.Context, viewer *tongo.AccountID, a 
 		action.SetSignatureAllowedAction, action.SimplePreview = h.convertSetSignatureAllowed(ctx, a.SetSignatureAllowed, acceptLanguage.Value, viewer)
 	case bath.GasRelay:
 		action.GasRelay, action.SimplePreview = h.convertGasRelayAction(a.GasRelay, acceptLanguage.Value, viewer)
+	case bath.LiquidityDeposit:
+		action.LiquidityDeposit, action.SimplePreview = h.convertLiquidityDepositAction(ctx, a.LiquidityDepositAction, acceptLanguage.Value, viewer)
 	}
 	return action, nil
 }
