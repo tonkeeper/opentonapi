@@ -71,6 +71,9 @@ var DefaultStraws = []Merger{
 	DNSRenewStraw,
 	//DepositEthenaStakeStraw,
 	//WithdrawEthenaStakeRequestStraw,
+	BidaskLiquidityDepositBothNativeStraw,
+	BidaskLiquidityDepositBothJettonStraw,
+	BidaskLiquidityDepositJettonStraw,
 }
 
 var JettonTransferClassicStraw = Straw[BubbleJettonTransfer]{
