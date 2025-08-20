@@ -31,22 +31,22 @@ var NFTStraws = []Merger{
 }
 
 var DefaultStraws = []Merger{
-	StrawFindAuctionBidFragmentSimple,
+	StrawFindAuctionBidFragmentSimple, //0
 	GasRelayerStraw,
 	NftTransferStraw,
 	NftTransferNotifyStraw,
 	StonfiV1PTONStraw,
-	StonfiV2PTONStrawReverse,
+	StonfiV2PTONStrawReverse, //5
 	StonfiV2PTONStraw,
 	JettonTransferClassicStraw,
 	JettonTransferMinimalStraw,
 	JettonBurnStraw,
-	WtonMintStraw,
+	WtonMintStraw, //10
 	NftPurchaseStraw,
 	StonfiSwapStraw,
 	StonfiSwapV2Straw,
 	UniversalDedustStraw{},
-	TgAuctionV1InitialBidStraw,
+	TgAuctionV1InitialBidStraw, //15
 	StrawAuctionBigGetgems,
 	StrawAuctionBuyGetgems,
 	StrawAuctionBuyFragments,
@@ -69,8 +69,8 @@ var DefaultStraws = []Merger{
 	WithdrawStakeImmediatelyStraw,
 	WithdrawLiquidStake,
 	DNSRenewStraw,
-	DepositEthenaStakeStraw,
-	WithdrawEthenaStakeRequestStraw,
+	//DepositEthenaStakeStraw,
+	//WithdrawEthenaStakeRequestStraw,
 }
 
 var JettonTransferClassicStraw = Straw[BubbleJettonTransfer]{
