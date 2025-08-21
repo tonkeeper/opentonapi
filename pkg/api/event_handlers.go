@@ -741,10 +741,12 @@ func (h *Handler) EmulateMessageToWallet(ctx context.Context, request *oas.Emula
 		for accountID, balance := range accounts {
 			originalState, err := h.storage.GetAccountState(ctx, accountID)
 			if err != nil {
+				fmt.Printf("Emulator msg: %s\n", request.Boc)
 				return nil, toError(http.StatusInternalServerError, err)
 			}
 			state, err := prepareAccountState(*walletAddress, originalState, balance)
 			if err != nil {
+				fmt.Printf("Emulator msg: %s\n", request.Boc)
 				return nil, toError(http.StatusInternalServerError, err)
 			}
 			states = append(states, state)
@@ -753,6 +755,7 @@ func (h *Handler) EmulateMessageToWallet(ctx context.Context, request *oas.Emula
 		options = append(options, txemulator.WithAccounts(states...))
 		emulator, err := txemulator.NewTraceBuilder(options...)
 		if err != nil {
+			fmt.Printf("Emulator msg: %s\n", request.Boc)
 			return nil, toError(http.StatusInternalServerError, err)
 		}
 		tree, err := emulator.Run(ctx, m, 1)
@@ -763,6 +766,8 @@ func (h *Handler) EmulateMessageToWallet(ctx context.Context, request *oas.Emula
 		}
 		trace, err = EmulatedTreeToTrace(ctx, h.executor, h.storage, tree, emulator.FinalStates(), nil, h.configPool, true)
 		if err != nil {
+			fmt.Printf("Tree to tarce emulator err: %s\n", err.Error())
+			fmt.Printf("Emulator msg: %s\n", request.Boc)
 			return nil, toError(http.StatusInternalServerError, err)
 		}
 		err = h.storage.SaveTraceWithState(ctx, hash, trace, h.tongoVersion, []abi.MethodInvocation{}, 24*time.Hour)
