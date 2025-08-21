@@ -7,13 +7,14 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
-	"github.com/tonkeeper/tongo/abi"
-	"go.uber.org/zap"
-	"golang.org/x/exp/slices"
 	"net/http"
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/tonkeeper/tongo/abi"
+	"go.uber.org/zap"
+	"golang.org/x/exp/slices"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
@@ -756,6 +757,8 @@ func (h *Handler) EmulateMessageToWallet(ctx context.Context, request *oas.Emula
 		}
 		tree, err := emulator.Run(ctx, m, 1)
 		if err != nil {
+			fmt.Printf("Emulator err: %s\n", err.Error())
+			fmt.Printf("Emulator msg: %s\n", request.Boc)
 			return nil, toProperEmulationError(err)
 		}
 		trace, err = EmulatedTreeToTrace(ctx, h.executor, h.storage, tree, emulator.FinalStates(), nil, h.configPool, true)
