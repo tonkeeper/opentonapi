@@ -555,6 +555,10 @@ func (s *Server) handleDnsResolveRequest(args [1]string, argsEscaped bool, w htt
 					Name: "domain_name",
 					In:   "path",
 				}: params.DomainName,
+				{
+					Name: "filter",
+					In:   "query",
+				}: params.Filter,
 			},
 			Raw: r,
 		}
