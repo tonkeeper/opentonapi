@@ -41,7 +41,7 @@ var MooncxSwapStraw = Straw[BubbleJettonSwap]{
 		Builder: func(newAction *BubbleJettonSwap, bubble *Bubble) error {
 			tx := bubble.Info.(BubbleJettonTransfer)
 			newAction.Out.JettonMaster = tx.master
-			newAction.Out.JettonWallet = tx.senderWallet
+			newAction.Out.JettonWallet = tx.recipientWallet
 			amount := big.Int(tx.amount)
 			newAction.Out.Amount = amount
 			newAction.Success = tx.success
@@ -68,7 +68,7 @@ var MooncxSwapStrawReverse = Straw[BubbleJettonSwap]{
 	Builder: func(newAction *BubbleJettonSwap, bubble *Bubble) error {
 		tx := bubble.Info.(BubbleJettonTransfer)
 		newAction.Dex = Mooncx
-		newAction.UserWallet = tx.senderWallet
+		newAction.UserWallet = tx.sender.Address
 		newAction.Router = tx.recipient.Address
 		newAction.In.JettonMaster = tx.master
 		newAction.In.JettonWallet = tx.senderWallet
@@ -76,14 +76,13 @@ var MooncxSwapStrawReverse = Straw[BubbleJettonSwap]{
 		newAction.In.Amount = amount
 		body := tx.payload.Value.(abi.MoonSwapJettonPayload)
 		newAction.Out.Amount = big.Int(body.SwapParams.MinOut)
+		newAction.Out.IsTon = true
 		return nil
 	},
 	SingleChild: &Straw[BubbleJettonSwap]{
-		CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.MoonSwapSucceedJettonOp), HasInterface(abi.Wallet)},
+		CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.MoonSwapSucceedJettonOp)},
 		Builder: func(newAction *BubbleJettonSwap, bubble *Bubble) error {
 			tx := bubble.Info.(BubbleTx)
-			newAction.UserWallet = tx.account.Address
-			newAction.Out.IsTon = true
 			newAction.Success = tx.success
 			return nil
 		},
