@@ -479,9 +479,6 @@ func (h *Handler) EmulateMessageToAccountEvent(ctx context.Context, request *oas
 		}
 		tree, emulationErr := emulator.Run(ctx, m, depth)
 		if emulationErr != nil {
-			if saveErr := h.storage.SaveEmulationError(ctx, c, hash, emulationErr); saveErr != nil {
-				h.logger.Warn("failure to save emulation error: ", zap.Error(saveErr))
-			}
 			savedEmulatedTraces.WithLabelValues("error_save").Inc()
 			return nil, toProperEmulationError(emulationErr)
 		}
@@ -548,9 +545,6 @@ func (h *Handler) EmulateMessageToEvent(ctx context.Context, request *oas.Emulat
 		}
 		tree, emulationErr := emulator.Run(ctx, m, depth)
 		if emulationErr != nil {
-			if saveErr := h.storage.SaveEmulationError(ctx, c, hs, emulationErr); saveErr != nil {
-				h.logger.Warn("failure to save emulation error: ", zap.Error(saveErr))
-			}
 			return nil, toProperEmulationError(emulationErr)
 		}
 		trace, err = EmulatedTreeToTrace(ctx, h.executor, h.storage, tree, emulator.FinalStates(), nil, h.configPool, true)
@@ -618,9 +612,6 @@ func (h *Handler) EmulateMessageToTrace(ctx context.Context, request *oas.Emulat
 		}
 		tree, emulationErr := emulator.Run(ctx, m, depth)
 		if emulationErr != nil {
-			if saveErr := h.storage.SaveEmulationError(ctx, c, hs, emulationErr); saveErr != nil {
-				h.logger.Warn("failure to save emulation error: ", zap.Error(saveErr))
-			}
 			return nil, toProperEmulationError(emulationErr)
 		}
 		trace, err = EmulatedTreeToTrace(ctx, h.executor, h.storage, tree, emulator.FinalStates(), nil, h.configPool, true)
