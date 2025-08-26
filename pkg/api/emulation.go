@@ -4,10 +4,11 @@ import (
 	"context"
 	"encoding/base64"
 	"errors"
-	"go.uber.org/zap"
 	"math/big"
 	"sync"
 	"time"
+
+	"go.uber.org/zap"
 
 	"golang.org/x/exp/slices"
 
@@ -130,9 +131,9 @@ func (h *Handler) addToMempool(ctx context.Context, bytesBoc []byte, shardAccoun
 	if err != nil {
 		return shardAccount, err
 	}
-	tree, err := emulator.Run(ctx, message, 1)
-	if err != nil {
-		return shardAccount, err
+	tree, emulationErr := emulator.Run(ctx, message, 1)
+	if emulationErr != nil {
+		return shardAccount, emulationErr
 	}
 	newShardAccount := emulator.FinalStates()
 	trace, err := EmulatedTreeToTrace(ctx, h.executor, h.storage, tree, newShardAccount, nil, h.configPool, true)

@@ -7,13 +7,14 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
-	"github.com/tonkeeper/tongo/abi"
-	"go.uber.org/zap"
-	"golang.org/x/exp/slices"
 	"net/http"
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/tonkeeper/tongo/abi"
+	"go.uber.org/zap"
+	"golang.org/x/exp/slices"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
@@ -476,9 +477,10 @@ func (h *Handler) EmulateMessageToAccountEvent(ctx context.Context, request *oas
 		if err != nil {
 			return nil, toError(http.StatusInternalServerError, err)
 		}
-		tree, err := emulator.Run(ctx, m, depth)
-		if err != nil {
-			return nil, toProperEmulationError(err)
+		tree, emulationErr := emulator.Run(ctx, m, depth)
+		if emulationErr != nil {
+			savedEmulatedTraces.WithLabelValues("error_save").Inc()
+			return nil, toProperEmulationError(emulationErr)
 		}
 		trace, err = EmulatedTreeToTrace(ctx, h.executor, h.storage, tree, emulator.FinalStates(), nil, h.configPool, true)
 		if err != nil {
@@ -541,9 +543,9 @@ func (h *Handler) EmulateMessageToEvent(ctx context.Context, request *oas.Emulat
 		if err != nil {
 			return nil, toError(http.StatusInternalServerError, err)
 		}
-		tree, err := emulator.Run(ctx, m, depth)
-		if err != nil {
-			return nil, toProperEmulationError(err)
+		tree, emulationErr := emulator.Run(ctx, m, depth)
+		if emulationErr != nil {
+			return nil, toProperEmulationError(emulationErr)
 		}
 		trace, err = EmulatedTreeToTrace(ctx, h.executor, h.storage, tree, emulator.FinalStates(), nil, h.configPool, true)
 		if err != nil {
@@ -608,9 +610,9 @@ func (h *Handler) EmulateMessageToTrace(ctx context.Context, request *oas.Emulat
 		if err != nil {
 			return nil, toError(http.StatusInternalServerError, err)
 		}
-		tree, err := emulator.Run(ctx, m, depth)
-		if err != nil {
-			return nil, toProperEmulationError(err)
+		tree, emulationErr := emulator.Run(ctx, m, depth)
+		if emulationErr != nil {
+			return nil, toProperEmulationError(emulationErr)
 		}
 		trace, err = EmulatedTreeToTrace(ctx, h.executor, h.storage, tree, emulator.FinalStates(), nil, h.configPool, true)
 		if err != nil {
@@ -754,9 +756,12 @@ func (h *Handler) EmulateMessageToWallet(ctx context.Context, request *oas.Emula
 		if err != nil {
 			return nil, toError(http.StatusInternalServerError, err)
 		}
-		tree, err := emulator.Run(ctx, m, 1)
-		if err != nil {
-			return nil, toProperEmulationError(err)
+		tree, emulationErr := emulator.Run(ctx, m, 1)
+		if emulationErr != nil {
+			if saveErr := h.storage.SaveEmulationError(ctx, msgCell, hash, emulationErr); saveErr != nil {
+				h.logger.Warn("failure to save emulation error: ", zap.Error(saveErr))
+			}
+			return nil, toProperEmulationError(emulationErr)
 		}
 		trace, err = EmulatedTreeToTrace(ctx, h.executor, h.storage, tree, emulator.FinalStates(), nil, h.configPool, true)
 		if err != nil {
