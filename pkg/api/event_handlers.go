@@ -479,7 +479,6 @@ func (h *Handler) EmulateMessageToAccountEvent(ctx context.Context, request *oas
 		}
 		tree, emulationErr := emulator.Run(ctx, m, depth)
 		if emulationErr != nil {
-			savedEmulatedTraces.WithLabelValues("error_save").Inc()
 			return nil, toProperEmulationError(emulationErr)
 		}
 		trace, err = EmulatedTreeToTrace(ctx, h.executor, h.storage, tree, emulator.FinalStates(), nil, h.configPool, true)
