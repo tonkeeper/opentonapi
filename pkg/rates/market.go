@@ -478,6 +478,11 @@ func (m *Mock) getJettonPricesFromDex(pools map[ton.AccountID]float64) map[ton.A
 			URL:                   m.SwapCoffeeResultUrl,
 			PoolResponseConverter: convertSwapCoffeePoolResponse,
 		},
+		{
+			Name:                  bidask,
+			URL:                   m.BidaskResultUrl,
+			PoolResponseConverter: convertBidaskPoolResponse,
+		},
 	}
 	var actualAssets []Pool
 	var actualLpAssets []LpAsset
@@ -1020,17 +1025,17 @@ func convertBidaskPoolResponse(respBody []byte) ([]Pool, []LpAsset, error) {
 		switch {
 		// If the column asset_1_native contains true,
 		// then we consider this token as a pool to TON
-		case record[1] == "true":
+		case record[0] == "true":
 			firstAsset = Asset{Account: references.PTonV1}
-			secondAccountID, err := ton.ParseAccountID(record[4])
+			secondAccountID, err := ton.ParseAccountID(record[3])
 			if err != nil {
 				return Pool{}, err
 			}
 			secondAsset = Asset{Account: secondAccountID}
 			// If the column asset_2_native contains true,
 			// then we consider this token as a pool to TON
-		case record[3] == "true":
-			firstAccountID, err := ton.ParseAccountID(record[2])
+		case record[2] == "true":
+			firstAccountID, err := ton.ParseAccountID(record[1])
 			if err != nil {
 				return Pool{}, err
 			}
@@ -1039,12 +1044,12 @@ func convertBidaskPoolResponse(respBody []byte) ([]Pool, []LpAsset, error) {
 		default:
 			// By default, we assume that the two assets are not paired with TON.
 			// This could be a pair like a jetton to USDT or to other jettons
-			firstAccountID, err := ton.ParseAccountID(record[2])
+			firstAccountID, err := ton.ParseAccountID(record[1])
 			if err != nil {
 				return Pool{}, err
 			}
 			firstAsset = Asset{Account: firstAccountID}
-			secondAccountID, err := ton.ParseAccountID(record[4])
+			secondAccountID, err := ton.ParseAccountID(record[3])
 			if err != nil {
 				return Pool{}, err
 			}
@@ -1052,19 +1057,19 @@ func convertBidaskPoolResponse(respBody []byte) ([]Pool, []LpAsset, error) {
 		}
 		firstAsset.Reserve = defaultMinReserve // we dont need reserve in bidask pools, so set it to the min possible value
 		secondAsset.Reserve = defaultMinReserve
-		firstAsset.Decimals, err = parseDecimals(record[5]) //todo change all the random integers here
+		firstAsset.Decimals, err = parseDecimals(record[4])
 		if err != nil {
 			return Pool{}, err
 		}
-		secondAsset.Decimals, err = parseDecimals(record[6])
+		secondAsset.Decimals, err = parseDecimals(record[5])
 		if err != nil {
 			return Pool{}, err
 		}
-		firstAsset.HoldersCount, err = strconv.Atoi(record[7])
+		firstAsset.HoldersCount, err = strconv.Atoi(record[6])
 		if err != nil {
 			return Pool{}, err
 		}
-		secondAsset.HoldersCount, err = strconv.Atoi(record[8])
+		secondAsset.HoldersCount, err = strconv.Atoi(record[7])
 		if err != nil {
 			return Pool{}, err
 		}
@@ -1079,33 +1084,9 @@ func convertBidaskPoolResponse(respBody []byte) ([]Pool, []LpAsset, error) {
 		}
 		return pool, nil
 	}
-	parseLpAsset := func(record []string, firstAsset, secondAsset Asset) (LpAsset, error) {
-		lpAsset, err := ton.ParseAccountID(record[10]) // todo change 10
-		if err != nil {
-			return LpAsset{}, err
-		}
-		if record[11] == "0" {
-			return LpAsset{}, fmt.Errorf("unknown total supply")
-		}
-		totalSupply, ok := new(big.Int).SetString(record[11], 10)
-		if !ok {
-			return LpAsset{}, fmt.Errorf("failed to parse total supply")
-		}
-		decimals := defaultDecimals
-		if err != nil {
-			return LpAsset{}, err
-		}
-		return LpAsset{
-			Account:     lpAsset,
-			Decimals:    decimals,
-			TotalSupply: totalSupply,
-			Assets:      []Asset{firstAsset, secondAsset},
-		}, nil
-	}
 	var actualAssets []Pool
-	actualLpAssets := make(map[ton.AccountID]LpAsset)
 	for idx, record := range records {
-		if idx == 0 || len(record) < 14 { // Skip headers todo change 14
+		if idx == 0 || len(record) < 10 { // Skip headers
 			continue
 		}
 		assets, err := parseAssets(record)
@@ -1118,14 +1099,10 @@ func convertBidaskPoolResponse(respBody []byte) ([]Pool, []LpAsset, error) {
 			continue
 		}
 		actualAssets = append(actualAssets, assets)
-		lpAsset, err := parseLpAsset(record, firstAsset, secondAsset)
-		if err != nil {
-			continue
-		}
-		actualLpAssets[lpAsset.Account] = lpAsset
 	}
 
-	return actualAssets, maps.Values(actualLpAssets), nil
+	// bidask is concentrated liquidity dex, so it does not have lp asset
+	return actualAssets, nil, nil
 }
 
 func calculateLpAssetPrice(asset LpAsset, pools map[ton.AccountID]float64) float64 {
@@ -1265,7 +1242,7 @@ func calculatePoolPrice(firstAsset, secondAsset Asset, pools map[ton.AccountID]f
 		dy := amp + p*math.Pow(x, p-1)*math.Pow(rate*y, q)
 		price = dy / dx
 	case SqrtPInv:
-		price = calcSqrtP(sqrtP) / decimalsDiff
+		price = calcSqrtP(sqrtP) * math.Pow(10, decimalsDiff)
 	default:
 		// Unreachable
 		return ton.AccountID{}, 0
