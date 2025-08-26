@@ -109,7 +109,7 @@ type storage interface {
 	GetLibraries(ctx context.Context, libraries []tongo.Bits256) (map[tongo.Bits256]*boc.Cell, error)
 	GetAllShardsInfo(context.Context, ton.BlockIDExt) ([]ton.BlockIDExt, error)
 	GetMasterchainInfo(ctx context.Context) (liteclient.LiteServerMasterchainInfoC, error)
-	
+
 	// TrimmedConfigBase64 returns the current trimmed blockchain config in a base64 format.
 	TrimmedConfigBase64() (string, error)
 	GetMissedEvents(ctx context.Context, account ton.AccountID, lt uint64, limit int) ([]oas.AccountEvent, error)
@@ -120,6 +120,7 @@ type storage interface {
 
 	SaveTraceWithState(ctx context.Context, msgHash string, trace *core.Trace, version int, getMethods []abi.MethodInvocation, ttl time.Duration) error
 	GetTraceWithState(ctx context.Context, msgHash string) (*core.Trace, int, []abi.MethodInvocation, error)
+	SaveEmulationError(ctx context.Context, msg *boc.Cell, msgHash string, err error) error
 
 	GetAccountInvoicesHistory(ctx context.Context, address tongo.AccountID, limit int, beforeLT *int64) ([]core.InvoicePayment, error)
 	GetInvoice(ctx context.Context, source, destination tongo.AccountID, invoiceID uuid.UUID, currency string) (core.InvoicePayment, error)
