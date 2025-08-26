@@ -133,9 +133,6 @@ func (h *Handler) addToMempool(ctx context.Context, bytesBoc []byte, shardAccoun
 	}
 	tree, emulationErr := emulator.Run(ctx, message, 1)
 	if emulationErr != nil {
-		if saveErr := h.storage.SaveEmulationError(ctx, msgCell[0], hash.Hex(), emulationErr); saveErr != nil {
-			h.logger.Warn("failure to save emulation error: ", zap.Error(saveErr))
-		}
 		return shardAccount, emulationErr
 	}
 	newShardAccount := emulator.FinalStates()
