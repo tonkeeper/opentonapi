@@ -5,12 +5,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/tonkeeper/opentonapi/internal/g"
 	"os"
 	"sort"
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"github.com/tonkeeper/opentonapi/internal/g"
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/liteapi"
@@ -200,6 +200,9 @@ func TestFindActions(t *testing.T) {
 			tongo.MustParseBlockID("(0,8000000000000000,55504556)"),
 			// ethena withdraw stake request
 			tongo.MustParseBlockID("(0,8000000000000000,55504824)"),
+			// mooncx swap
+			tongo.MustParseBlockID("(0,8000000000000000,56398081)"),
+			tongo.MustParseBlockID("(0,8000000000000000,56397942)"),
 		}),
 	)
 
@@ -534,6 +537,16 @@ func TestFindActions(t *testing.T) {
 			name:           "ethena withdraw stake request",
 			hash:           "b8336722a26a86e03b986e9c8207b94a31105e75115af62649e1a95e0d4033bc",
 			filenamePrefix: "ethena-withdraw-stake-request",
+		},
+		{
+			name:           "mooncx usdt-ton swap",
+			hash:           "1d1ce4629fc5613d68f066da2044354d963b982f25ba8be6ea3634f81cbbf88b",
+			filenamePrefix: "mooncx-usdt-ton-swap",
+		},
+		{
+			name:           "mooncx ton-usdt swap",
+			hash:           "67aee84fa6df5fcdf85bcb9330c9181fd0629d686bf5b800420deef9e6850a99",
+			filenamePrefix: "mooncx-ton-usdt-swap",
 		},
 	} {
 		t.Run(c.name, func(t *testing.T) {

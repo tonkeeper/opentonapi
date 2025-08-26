@@ -6626,6 +6626,7 @@ components:
             - stonfi
             - dedust
             - megatonfi
+            - mooncx
         amount_in:
           type: string
           x-js-format: bigint

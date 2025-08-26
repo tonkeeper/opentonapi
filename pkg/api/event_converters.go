@@ -723,6 +723,8 @@ func (h *Handler) convertAction(ctx context.Context, viewer *tongo.AccountID, a 
 			swapAction.Dex = oas.JettonSwapActionDexMegatonfi
 		case bath.Dedust:
 			swapAction.Dex = oas.JettonSwapActionDexDedust
+		case bath.Mooncx:
+			swapAction.Dex = oas.JettonSwapActionDexMooncx
 		}
 
 		action.JettonSwap.SetTo(swapAction)
