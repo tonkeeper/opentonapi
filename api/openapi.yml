@@ -1198,6 +1198,12 @@ paths:
         - DNS
       parameters:
         - $ref: '#/components/parameters/domainNameParameter'
+        - name: filter
+          in: query
+          schema:
+            type: boolean
+            default: false
+          required: false
       responses:
         '200':
           description: dns record

@@ -8805,6 +8805,15 @@
     "parameters": [
      {
       "$ref": "#/components/parameters/domainNameParameter"
+     },
+     {
+      "in": "query",
+      "name": "filter",
+      "required": false,
+      "schema": {
+       "default": false,
+       "type": "boolean"
+      }
      }
     ],
     "responses": {

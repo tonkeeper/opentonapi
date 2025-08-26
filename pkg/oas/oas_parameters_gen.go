@@ -217,6 +217,7 @@ func decodeBlockchainAccountInspectParams(args [1]string, argsEscaped bool, r *h
 type DnsResolveParams struct {
 	// Domain name with .ton or .t.me.
 	DomainName string
+	Filter     OptBool
 }
 
 func unpackDnsResolveParams(packed middleware.Parameters) (params DnsResolveParams) {
@@ -227,10 +228,20 @@ func unpackDnsResolveParams(packed middleware.Parameters) (params DnsResolvePara
 		}
 		params.DomainName = packed[key].(string)
 	}
+	{
+		key := middleware.ParameterKey{
+			Name: "filter",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.Filter = v.(OptBool)
+		}
+	}
 	return params
 }
 
 func decodeDnsResolveParams(args [1]string, argsEscaped bool, r *http.Request) (params DnsResolveParams, _ error) {
+	q := uri.NewQueryDecoder(r.URL.Query())
 	// Decode path: domain_name.
 	if err := func() error {
 		param := args[0]
@@ -273,6 +284,52 @@ func decodeDnsResolveParams(args [1]string, argsEscaped bool, r *http.Request) (
 		return params, &ogenerrors.DecodeParamError{
 			Name: "domain_name",
 			In:   "path",
+			Err:  err,
+		}
+	}
+	// Set default value for query: filter.
+	{
+		val := bool(false)
+		params.Filter.SetTo(val)
+	}
+	// Decode query: filter.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "filter",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotFilterVal bool
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToBool(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotFilterVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.Filter.SetTo(paramsDotFilterVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "filter",
+			In:   "query",
 			Err:  err,
 		}
 	}

@@ -4,9 +4,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"go.uber.org/zap"
 	"net/http"
+	"regexp"
 	"strings"
+
+	"go.uber.org/zap"
 
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/tongo/ton"
@@ -89,6 +91,9 @@ func (h *Handler) DnsResolve(ctx context.Context, params oas.DnsResolveParams) (
 	}
 	if len(params.DomainName) > 127 {
 		return nil, toError(http.StatusBadRequest, fmt.Errorf("domain name is too long"))
+	}
+	if regexp.MustCompile(`^sei1[a-z0-9]{38}.*`).MatchString(params.DomainName) {
+		return nil, toError(http.StatusBadRequest, fmt.Errorf("domain is not allowed"))
 	}
 	dnsResolver, err := h.dnsResolver(ctx)
 	if err != nil {
