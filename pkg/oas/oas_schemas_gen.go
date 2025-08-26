@@ -8678,6 +8678,7 @@ const (
 	JettonSwapActionDexStonfi    JettonSwapActionDex = "stonfi"
 	JettonSwapActionDexDedust    JettonSwapActionDex = "dedust"
 	JettonSwapActionDexMegatonfi JettonSwapActionDex = "megatonfi"
+	JettonSwapActionDexBidask    JettonSwapActionDex = "bidask"
 )
 
 // AllValues returns all JettonSwapActionDex values.
@@ -8686,6 +8687,7 @@ func (JettonSwapActionDex) AllValues() []JettonSwapActionDex {
 		JettonSwapActionDexStonfi,
 		JettonSwapActionDexDedust,
 		JettonSwapActionDexMegatonfi,
+		JettonSwapActionDexBidask,
 	}
 }
 
@@ -8697,6 +8699,8 @@ func (s JettonSwapActionDex) MarshalText() ([]byte, error) {
 	case JettonSwapActionDexDedust:
 		return []byte(s), nil
 	case JettonSwapActionDexMegatonfi:
+		return []byte(s), nil
+	case JettonSwapActionDexBidask:
 		return []byte(s), nil
 	default:
 		return nil, errors.Errorf("invalid value: %q", s)
@@ -8714,6 +8718,9 @@ func (s *JettonSwapActionDex) UnmarshalText(data []byte) error {
 		return nil
 	case JettonSwapActionDexMegatonfi:
 		*s = JettonSwapActionDexMegatonfi
+		return nil
+	case JettonSwapActionDexBidask:
+		*s = JettonSwapActionDexBidask
 		return nil
 	default:
 		return errors.Errorf("invalid value: %q", data)
