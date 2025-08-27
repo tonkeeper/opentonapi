@@ -2,6 +2,7 @@ package rates
 
 import (
 	"math"
+	"math/big"
 	"testing"
 )
 
@@ -174,6 +175,39 @@ func TestGetTokensOutForStableSwap(t *testing.T) {
 			// diff between y must be <= 1e-12 (accuracy up to 12 decimals)
 			if math.Abs(newY-p.expectedNewY) > math.Max(math.Max(newY, p.expectedNewY)*EPS, EPS) {
 				t.Errorf("Incorrect new Y reserve for (x: %v, y: %v, amp: %v, inv: %v) pool: got %v, want %v\n", p.newXReserves, p.yReserves, p.amp, p.inv, newY, p.expectedNewY)
+			}
+		})
+	}
+}
+
+func TestCalcSqrtP(t *testing.T) {
+	type Pool struct {
+		name  string
+		sqrtP big.Float
+		// Expected output
+		expectedPrice float64
+	}
+
+	sqrtP1, _ := new(big.Float).SetString("47762678216590087718128169122709613537")
+	sqrtP2, _ := new(big.Float).SetString("5953309917844247849267535390012688668899")
+	pools := []Pool{
+		{
+			name:          "get pool with equals decimals",
+			sqrtP:         *sqrtP1,
+			expectedPrice: 0.019701461865378845,
+		},
+		{
+			name:          "get pool with different decimals",
+			sqrtP:         *sqrtP2,
+			expectedPrice: 306.0822134857971,
+		},
+	}
+	for _, p := range pools {
+		t.Run(p.name, func(t *testing.T) {
+			price := calcSqrtP(p.sqrtP)
+			// diff between y must be <= 1e-12 (accuracy up to 12 decimals)
+			if math.Abs(price-p.expectedPrice) > math.Max(math.Max(price, p.expectedPrice)*EPS, EPS) {
+				t.Errorf("Incorrect price for sqrtP pool: got %v, want %v\n", price, p.expectedPrice)
 			}
 		})
 	}

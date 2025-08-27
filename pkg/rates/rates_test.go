@@ -2,6 +2,7 @@ package rates
 
 import (
 	"math"
+	"math/big"
 	"reflect"
 	"testing"
 
@@ -77,6 +78,8 @@ func TestCalculatePoolPrice(t *testing.T) {
 	switchToken := ton.MustParseAccountID("EQBxo4huVJXaf1ZOdwnnDdxa9OVoyNGhXMsJVzobmxSWITCH")
 	ston := ton.MustParseAccountID("EQA2kCVNwVsil2EM2mB0SkXytxCqQjS4mttjDpnXmwG9T6bO")
 	kton := ton.MustParseAccountID("EQA2rQ-kMzVgK2lWAtWy6Y_UVia4xv8S-_Q4Ixo3y5kzUfdx")
+	raff := ton.MustParseAccountID("EQCJbp0kBpPwPoBG-U5C-cWfP_jnksvotGfArPF50Q9Qiv9h")
+	sqrtPRaff, _ := new(big.Float).SetString("47762678216590087718128169122709613537")
 
 	tests := []Test{
 		{
@@ -118,7 +121,7 @@ func TestCalculatePoolPrice(t *testing.T) {
 				{Assets: []Asset{
 					{Account: ethena, Decimals: 6, Reserve: 3968990293365, HoldersCount: 5169},
 					{Account: ton.MustParseAccountID("0:671963027f7f85659ab55b821671688601cdcf1ee674fc7fbbb1a776a18d34a3"), Decimals: 6, Reserve: 4195613897538, HoldersCount: 4}},
-					Invariant: IterativeInv,
+					Invariant: StableSwapInv,
 					Amp:       100,
 				},
 			},
@@ -130,7 +133,7 @@ func TestCalculatePoolPrice(t *testing.T) {
 				{Assets: []Asset{
 					{Account: redo, Decimals: 6, Reserve: 4059781684283, HoldersCount: 1317},
 					{Account: ton.MustParseAccountID("0:671963027f7f85659ab55b821671688601cdcf1ee674fc7fbbb1a776a18d34a3"), Decimals: 9, Reserve: 3941626877432000, HoldersCount: 7}},
-					Invariant: IterativeInv,
+					Invariant: StableSwapInv,
 					Amp:       100,
 				},
 			},
@@ -142,7 +145,7 @@ func TestCalculatePoolPrice(t *testing.T) {
 				{Assets: []Asset{
 					{Account: anon, Decimals: 9, Reserve: 0, HoldersCount: 1000},
 					{Account: ton.MustParseAccountID("0:671963027f7f85659ab55b821671688601cdcf1ee674fc7fbbb1a776a18d34a3"), Decimals: 9, Reserve: 3941626877432000, HoldersCount: 7}},
-					Invariant: IterativeInv,
+					Invariant: StableSwapInv,
 					Amp:       100,
 				},
 			},
@@ -152,10 +155,9 @@ func TestCalculatePoolPrice(t *testing.T) {
 			name: "switch->ton",
 			pools: []Pool{
 				{Assets: []Asset{
-					{Account: switchToken, Decimals: 9, Reserve: 126565280078085986, HoldersCount: 1317},
-					{Account: ton.MustParseAccountID("0:671963027f7f85659ab55b821671688601cdcf1ee674fc7fbbb1a776a18d34a3"), Decimals: 9, Reserve: 14187521078376, HoldersCount: 7}},
+					{Account: switchToken, Decimals: 9, Reserve: 126565280078085986, HoldersCount: 1317, Weight: 0.2},
+					{Account: ton.MustParseAccountID("0:671963027f7f85659ab55b821671688601cdcf1ee674fc7fbbb1a776a18d34a3"), Decimals: 9, Reserve: 14187521078376, HoldersCount: 7, Weight: 0.8}},
 					Invariant: WXYInv,
-					Weight:    0.2,
 				},
 			},
 			expectedPrice: 0.0004483858786429528,
@@ -164,10 +166,9 @@ func TestCalculatePoolPrice(t *testing.T) {
 			name: "ston->ton",
 			pools: []Pool{
 				{Assets: []Asset{
-					{Account: ston, Decimals: 9, Reserve: 57898953442455, HoldersCount: 1317},
-					{Account: ton.MustParseAccountID("0:671963027f7f85659ab55b821671688601cdcf1ee674fc7fbbb1a776a18d34a3"), Decimals: 9, Reserve: 9398045691390, HoldersCount: 7}},
+					{Account: ston, Decimals: 9, Reserve: 57898953442455, HoldersCount: 1317, Weight: 0.25},
+					{Account: ton.MustParseAccountID("0:671963027f7f85659ab55b821671688601cdcf1ee674fc7fbbb1a776a18d34a3"), Decimals: 9, Reserve: 9398045691390, HoldersCount: 7, Weight: 0.75}},
 					Invariant: WXYInv,
-					Weight:    0.25,
 				},
 			},
 			expectedPrice: 0.4869541744341161,
@@ -176,22 +177,33 @@ func TestCalculatePoolPrice(t *testing.T) {
 			name: "kton->ton",
 			pools: []Pool{
 				{Assets: []Asset{
-					{Account: kton, Decimals: 9, Reserve: 32841708701843, HoldersCount: 1317},
-					{Account: ton.MustParseAccountID("0:671963027f7f85659ab55b821671688601cdcf1ee674fc7fbbb1a776a18d34a3"), Decimals: 9, Reserve: 5793846300860, HoldersCount: 7}},
-					Invariant: WStableSwapInv,
+					{Account: kton, Decimals: 9, Reserve: 32841708701843, HoldersCount: 1317, Weight: 0.75},
+					{Account: ton.MustParseAccountID("0:671963027f7f85659ab55b821671688601cdcf1ee674fc7fbbb1a776a18d34a3"), Decimals: 9, Reserve: 5793846300860, HoldersCount: 7, Weight: 0.25}},
+					Invariant: WRStableSwapInv,
 					Amp:       50,
 					Rate:      1.0210416258250017,
-					Weight:    0.75,
 				},
 			},
 			expectedPrice: 0.9713964976104531,
+		},
+		{
+			name: "raff->ton",
+			pools: []Pool{
+				{Assets: []Asset{
+					{Account: raff, Decimals: 9, Reserve: defaultMinReserve, HoldersCount: 1317},
+					{Account: ton.MustParseAccountID("0:671963027f7f85659ab55b821671688601cdcf1ee674fc7fbbb1a776a18d34a3"), Decimals: 9, Reserve: defaultMinReserve, HoldersCount: 7}},
+					Invariant: SqrtPInv,
+					SqrtP:     *sqrtPRaff,
+				},
+			},
+			expectedPrice: 0.0197014618653788,
 		},
 	}
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			for _, pool := range test.pools {
-				_, price := calculatePoolPrice(pool.Assets[0], pool.Assets[1], pools, pool.Invariant, pool.Amp, pool.Weight, pool.Rate)
+				_, price := calculatePoolPrice(pool.Assets[0], pool.Assets[1], pools, pool.Invariant, pool.Amp, pool.Rate, pool.SqrtP)
 				// diff between prices must be <= 1e-12 (accuracy up to 12 decimals)
 				if math.Abs(price-test.expectedPrice) > math.Max(math.Max(price, test.expectedPrice)*EPS, EPS) {
 					t.Errorf("Unexpected price for account: got %v, want %v\n", price, test.expectedPrice)
