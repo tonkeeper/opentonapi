@@ -194,11 +194,7 @@ func convertTuple(v tlb.VmStkTuple) (oas.TvmStackRecord, error) {
 	if v.Len == 0 {
 		return r, nil
 	}
-	if v.Len == 2 && (v.Data.Tail.SumType == "VmStkTuple" || v.Data.Tail.SumType == "VmStkNull") {
-		records, err = v.RecursiveToSlice()
-	} else {
-		records, err = v.Data.RecursiveToSlice(int(v.Len))
-	}
+	records, err = v.Data.RecursiveToSlice(int(v.Len))
 	if err != nil {
 		return r, err
 	}
@@ -239,7 +235,7 @@ func parseExecGetMethodArgs(arg oas.ExecGetMethodArg) (tlb.VmStackValue, error) 
 		}
 		i := big.Int{}
 		if _, ok := i.SetString(arg.Value[2:], 16); !ok {
-			return tlb.VmStackValue{}, fmt.Errorf("invalid int257 hex: %v", arg.Value)
+			return tlb.VmStackValue{}, fmt.Errorf("invalid int257 boc: %v", arg.Value)
 		}
 		return tlb.VmStackValue{SumType: "VmStkInt", VmStkInt: tlb.Int257(i)}, nil
 
@@ -260,7 +256,7 @@ func parseExecGetMethodArgs(arg oas.ExecGetMethodArg) (tlb.VmStackValue, error) 
 	case oas.ExecGetMethodArgTypeSliceBocHex:
 		cells, err := boc.DeserializeBocHex(arg.Value)
 		if err != nil || len(cells) != 1 {
-			return tlb.VmStackValue{}, fmt.Errorf("invalid slice BOC hex: %v", err)
+			return tlb.VmStackValue{}, fmt.Errorf("invalid slice BOC boc: %v", err)
 		}
 		return tlb.CellToVmCellSlice(cells[0])
 
@@ -287,7 +283,7 @@ func stringToTVMStackRecord(s string) (tlb.VmStackValue, error) {
 		i := big.Int{}
 		_, ok := i.SetString(s[2:], 16)
 		if !ok {
-			return tlb.VmStackValue{}, fmt.Errorf("invalid hex %v", s)
+			return tlb.VmStackValue{}, fmt.Errorf("invalid boc %v", s)
 		}
 		return tlb.VmStackValue{SumType: "VmStkInt", VmStkInt: tlb.Int257(i)}, nil
 	}
