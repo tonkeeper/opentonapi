@@ -1247,11 +1247,11 @@ func calculatePoolPrice(firstAsset, secondAsset Asset, pools map[ton.AccountID]f
 		// Unreachable
 		return ton.AccountID{}, 0
 	}
-	if okFirst && firstAsset.Decimals != defaultDecimals {
+	if okFirst && secondAsset.Decimals != defaultDecimals {
 		price *= priceFirst
 	}
-	// Use firstAsset because after the revert, firstAsset equals secondAsset
-	if okSecond && firstAsset.Decimals != defaultDecimals {
+	// Use secondAsset because after the revert, secondAsset equals firstAsset
+	if okSecond && secondAsset.Decimals != defaultDecimals {
 		price *= priceSecond
 	}
 
