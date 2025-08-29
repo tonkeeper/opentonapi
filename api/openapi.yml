@@ -6632,6 +6632,7 @@ components:
             - stonfi
             - dedust
             - megatonfi
+            - bidask
         amount_in:
           type: string
           x-js-format: bigint
