@@ -4219,11 +4219,7 @@
       "x-js-format": "bigint"
      },
      "dex": {
-      "enum": [
-       "stonfi",
-       "dedust",
-       "megatonfi"
-      ],
+      "example": "stonfi",
       "type": "string"
      },
      "jetton_master_in": {

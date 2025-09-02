@@ -6628,10 +6628,7 @@ components:
       properties:
         dex:
           type: string
-          enum:
-            - stonfi
-            - dedust
-            - megatonfi
+          example: "stonfi"
         amount_in:
           type: string
           x-js-format: bigint

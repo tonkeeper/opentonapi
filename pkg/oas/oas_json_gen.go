@@ -25706,7 +25706,7 @@ func (s *JettonSwapAction) Encode(e *jx.Encoder) {
 func (s *JettonSwapAction) encodeFields(e *jx.Encoder) {
 	{
 		e.FieldStart("dex")
-		s.Dex.Encode(e)
+		e.Str(s.Dex)
 	}
 	{
 		e.FieldStart("amount_in")
@@ -25774,7 +25774,9 @@ func (s *JettonSwapAction) Decode(d *jx.Decoder) error {
 		case "dex":
 			requiredBitSet[0] |= 1 << 0
 			if err := func() error {
-				if err := s.Dex.Decode(d); err != nil {
+				v, err := d.Str()
+				s.Dex = string(v)
+				if err != nil {
 					return err
 				}
 				return nil
@@ -25918,48 +25920,6 @@ func (s *JettonSwapAction) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *JettonSwapAction) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
-// Encode encodes JettonSwapActionDex as json.
-func (s JettonSwapActionDex) Encode(e *jx.Encoder) {
-	e.Str(string(s))
-}
-
-// Decode decodes JettonSwapActionDex from json.
-func (s *JettonSwapActionDex) Decode(d *jx.Decoder) error {
-	if s == nil {
-		return errors.New("invalid: unable to decode JettonSwapActionDex to nil")
-	}
-	v, err := d.StrBytes()
-	if err != nil {
-		return err
-	}
-	// Try to use constant string.
-	switch JettonSwapActionDex(v) {
-	case JettonSwapActionDexStonfi:
-		*s = JettonSwapActionDexStonfi
-	case JettonSwapActionDexDedust:
-		*s = JettonSwapActionDexDedust
-	case JettonSwapActionDexMegatonfi:
-		*s = JettonSwapActionDexMegatonfi
-	default:
-		*s = JettonSwapActionDex(v)
-	}
-
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s JettonSwapActionDex) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *JettonSwapActionDex) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }

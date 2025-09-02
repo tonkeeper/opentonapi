@@ -691,6 +691,7 @@ func (h *Handler) convertAction(ctx context.Context, viewer *tongo.AccountID, a 
 		swapAction := oas.JettonSwapAction{
 			UserWallet: convertAccountAddress(a.JettonSwap.UserWallet, h.addressBook),
 			Router:     convertAccountAddress(a.JettonSwap.Router, h.addressBook),
+			Dex:        string(a.JettonSwap.Dex),
 		}
 		simplePreviewData := i18n.Template{}
 		if a.JettonSwap.In.IsTon {
@@ -714,15 +715,6 @@ func (h *Handler) convertAction(ctx context.Context, viewer *tongo.AccountID, a 
 			preview := jettonPreview(a.JettonSwap.Out.JettonMaster, jettonOutMeta, score)
 			swapAction.JettonMasterOut.SetTo(preview)
 			simplePreviewData["AmountOut"] = i18n.FormatTokens(a.JettonSwap.Out.Amount, int32(jettonOutMeta.Decimals), jettonOutMeta.Symbol)
-		}
-
-		switch a.JettonSwap.Dex {
-		case bath.Stonfi:
-			swapAction.Dex = oas.JettonSwapActionDexStonfi
-		case bath.Megatonfi:
-			swapAction.Dex = oas.JettonSwapActionDexMegatonfi
-		case bath.Dedust:
-			swapAction.Dex = oas.JettonSwapActionDexDedust
 		}
 
 		action.JettonSwap.SetTo(swapAction)

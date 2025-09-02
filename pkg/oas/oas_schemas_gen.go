@@ -8571,19 +8571,19 @@ func (s *JettonQuantity) SetJetton(val JettonPreview) {
 
 // Ref: #/components/schemas/JettonSwapAction
 type JettonSwapAction struct {
-	Dex             JettonSwapActionDex `json:"dex"`
-	AmountIn        string              `json:"amount_in"`
-	AmountOut       string              `json:"amount_out"`
-	TonIn           OptInt64            `json:"ton_in"`
-	TonOut          OptInt64            `json:"ton_out"`
-	UserWallet      AccountAddress      `json:"user_wallet"`
-	Router          AccountAddress      `json:"router"`
-	JettonMasterIn  OptJettonPreview    `json:"jetton_master_in"`
-	JettonMasterOut OptJettonPreview    `json:"jetton_master_out"`
+	Dex             string           `json:"dex"`
+	AmountIn        string           `json:"amount_in"`
+	AmountOut       string           `json:"amount_out"`
+	TonIn           OptInt64         `json:"ton_in"`
+	TonOut          OptInt64         `json:"ton_out"`
+	UserWallet      AccountAddress   `json:"user_wallet"`
+	Router          AccountAddress   `json:"router"`
+	JettonMasterIn  OptJettonPreview `json:"jetton_master_in"`
+	JettonMasterOut OptJettonPreview `json:"jetton_master_out"`
 }
 
 // GetDex returns the value of Dex.
-func (s *JettonSwapAction) GetDex() JettonSwapActionDex {
+func (s *JettonSwapAction) GetDex() string {
 	return s.Dex
 }
 
@@ -8628,7 +8628,7 @@ func (s *JettonSwapAction) GetJettonMasterOut() OptJettonPreview {
 }
 
 // SetDex sets the value of Dex.
-func (s *JettonSwapAction) SetDex(val JettonSwapActionDex) {
+func (s *JettonSwapAction) SetDex(val string) {
 	s.Dex = val
 }
 
@@ -8670,54 +8670,6 @@ func (s *JettonSwapAction) SetJettonMasterIn(val OptJettonPreview) {
 // SetJettonMasterOut sets the value of JettonMasterOut.
 func (s *JettonSwapAction) SetJettonMasterOut(val OptJettonPreview) {
 	s.JettonMasterOut = val
-}
-
-type JettonSwapActionDex string
-
-const (
-	JettonSwapActionDexStonfi    JettonSwapActionDex = "stonfi"
-	JettonSwapActionDexDedust    JettonSwapActionDex = "dedust"
-	JettonSwapActionDexMegatonfi JettonSwapActionDex = "megatonfi"
-)
-
-// AllValues returns all JettonSwapActionDex values.
-func (JettonSwapActionDex) AllValues() []JettonSwapActionDex {
-	return []JettonSwapActionDex{
-		JettonSwapActionDexStonfi,
-		JettonSwapActionDexDedust,
-		JettonSwapActionDexMegatonfi,
-	}
-}
-
-// MarshalText implements encoding.TextMarshaler.
-func (s JettonSwapActionDex) MarshalText() ([]byte, error) {
-	switch s {
-	case JettonSwapActionDexStonfi:
-		return []byte(s), nil
-	case JettonSwapActionDexDedust:
-		return []byte(s), nil
-	case JettonSwapActionDexMegatonfi:
-		return []byte(s), nil
-	default:
-		return nil, errors.Errorf("invalid value: %q", s)
-	}
-}
-
-// UnmarshalText implements encoding.TextUnmarshaler.
-func (s *JettonSwapActionDex) UnmarshalText(data []byte) error {
-	switch JettonSwapActionDex(data) {
-	case JettonSwapActionDexStonfi:
-		*s = JettonSwapActionDexStonfi
-		return nil
-	case JettonSwapActionDexDedust:
-		*s = JettonSwapActionDexDedust
-		return nil
-	case JettonSwapActionDexMegatonfi:
-		*s = JettonSwapActionDexMegatonfi
-		return nil
-	default:
-		return errors.Errorf("invalid value: %q", data)
-	}
 }
 
 // Ref: #/components/schemas/JettonTransferAction

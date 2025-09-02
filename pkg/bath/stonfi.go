@@ -1,9 +1,10 @@
 package bath
 
 import (
+	"math/big"
+
 	"github.com/tonkeeper/tongo/tlb"
 	"github.com/tonkeeper/tongo/ton"
-	"math/big"
 
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
@@ -15,6 +16,7 @@ const (
 	Stonfi    Dex = "stonfi"
 	Megatonfi Dex = "megatonfi"
 	Dedust    Dex = "dedust"
+	Mooncx    Dex = "mooncx"
 )
 
 // BubbleJettonSwap contains information about a jetton swap operation at a dex.
