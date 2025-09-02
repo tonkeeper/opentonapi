@@ -1,7 +1,6 @@
 package bath
 
 import (
-	"fmt"
 	"math/big"
 
 	"github.com/tonkeeper/tongo/abi"
@@ -27,10 +26,7 @@ var MooncxSwapStraw = Straw[BubbleJettonSwap]{
 		newAction.Dex = Mooncx
 		newAction.UserWallet = tx.inputFrom.Address
 		newAction.Router = tx.account.Address
-		body, ok := tx.decodedBody.Value.(abi.MoonSwapMsgBody)
-		if !ok {
-			return fmt.Errorf("body is not a mooncx swap body")
-		}
+		body := tx.decodedBody.Value.(abi.MoonSwapMsgBody)
 		amount := big.Int(body.Amount)
 		newAction.In.Amount = amount
 		newAction.In.IsTon = true

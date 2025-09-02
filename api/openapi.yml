@@ -6622,11 +6622,7 @@ components:
       properties:
         dex:
           type: string
-          enum:
-            - stonfi
-            - dedust
-            - megatonfi
-            - mooncx
+          example: "stonfi"
         amount_in:
           type: string
           x-js-format: bigint
