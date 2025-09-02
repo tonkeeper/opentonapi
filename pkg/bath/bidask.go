@@ -9,31 +9,15 @@ import (
 
 var BidaskSwapStraw = Straw[BubbleJettonSwap]{
 	CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.BidaskSwapMsgOp), HasInterface(abi.BidaskPool), func(bubble *Bubble) bool {
-		tx, ok := bubble.Info.(BubbleTx)
-		if !ok {
-			return false
-		}
-		swap, ok := tx.decodedBody.Value.(abi.BidaskSwapMsgBody)
-		if !ok {
-			return false
-		}
-		if swap.ForwardPayload != nil {
-			return false
-		}
-		return true
+		return bubble.Info.(BubbleTx).decodedBody.Value.(abi.BidaskSwapMsgBody).ForwardPayload == nil
 	}},
 	Builder: func(newAction *BubbleJettonSwap, bubble *Bubble) error {
 		tx := bubble.Info.(BubbleTx)
 		newAction.Dex = Bidask
 		newAction.UserWallet = tx.inputFrom.Address
 		newAction.Router = tx.account.Address
-		body, ok := tx.decodedBody.Value.(abi.BidaskSwapMsgBody)
-		if !ok {
-			return fmt.Errorf("body is not a mooncx swap body")
-		}
-		amount := new(big.Int)
-		amount.SetUint64(uint64(body.NativeAmount))
-		newAction.In.Amount = *amount
+		body := tx.decodedBody.Value.(abi.BidaskSwapMsgBody)
+		newAction.In.Amount = *big.NewInt(int64(body.NativeAmount))
 		newAction.In.IsTon = true
 		return nil
 	},
@@ -58,10 +42,7 @@ var BidaskSwapStraw = Straw[BubbleJettonSwap]{
 
 var BidaskSwapStrawReverse = Straw[BubbleJettonSwap]{
 	CheckFuncs: []bubbleCheck{IsJettonTransfer, func(bubble *Bubble) bool {
-		jettonTx, ok := bubble.Info.(BubbleJettonTransfer)
-		if !ok {
-			return false
-		}
+		jettonTx := bubble.Info.(BubbleJettonTransfer)
 		swap, ok := jettonTx.payload.Value.(abi.BidaskSwapJettonPayload)
 		if !ok {
 			return false
@@ -94,9 +75,7 @@ var BidaskSwapStrawReverse = Straw[BubbleJettonSwap]{
 					if !ok {
 						return fmt.Errorf("body is not a bidask native transfer notification")
 					}
-					amount := new(big.Int)
-					amount.SetUint64(uint64(body.NativeAmount))
-					newAction.Out.Amount = *amount
+					newAction.Out.Amount = *big.NewInt(int64(body.NativeAmount))
 					newAction.Success = tx.success
 					return nil
 				},
@@ -107,10 +86,7 @@ var BidaskSwapStrawReverse = Straw[BubbleJettonSwap]{
 
 var BidaskJettonSwapStraw = Straw[BubbleJettonSwap]{
 	CheckFuncs: []bubbleCheck{IsJettonTransfer, func(bubble *Bubble) bool {
-		jettonTx, ok := bubble.Info.(BubbleJettonTransfer)
-		if !ok {
-			return false
-		}
+		jettonTx := bubble.Info.(BubbleJettonTransfer)
 		swap, ok := jettonTx.payload.Value.(abi.BidaskSwapJettonPayload)
 		if !ok {
 			return false
