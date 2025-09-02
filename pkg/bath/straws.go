@@ -71,6 +71,9 @@ var DefaultStraws = []Merger{
 	DNSRenewStraw,
 	//DepositEthenaStakeStraw,
 	//WithdrawEthenaStakeRequestStraw,
+	BidaskSwapStraw,
+	BidaskSwapStrawReverse,
+	BidaskJettonSwapStraw,
 	MooncxSwapStraw,
 	MooncxSwapStrawReverse,
 }

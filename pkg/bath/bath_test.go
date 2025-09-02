@@ -200,6 +200,10 @@ func TestFindActions(t *testing.T) {
 			tongo.MustParseBlockID("(0,8000000000000000,55504556)"),
 			// ethena withdraw stake request
 			tongo.MustParseBlockID("(0,8000000000000000,55504824)"),
+			// bidask swap
+			tongo.MustParseBlockID("(0,8000000000000000,56384438)"),
+			tongo.MustParseBlockID("(0,8000000000000000,56435662)"),
+			tongo.MustParseBlockID("(0,8000000000000000,56435563)"),
 			// mooncx swap
 			tongo.MustParseBlockID("(0,8000000000000000,56398081)"),
 			tongo.MustParseBlockID("(0,8000000000000000,56397942)"),
@@ -537,6 +541,21 @@ func TestFindActions(t *testing.T) {
 			name:           "ethena withdraw stake request",
 			hash:           "b8336722a26a86e03b986e9c8207b94a31105e75115af62649e1a95e0d4033bc",
 			filenamePrefix: "ethena-withdraw-stake-request",
+		},
+		{
+			name:           "bidask usdt usde swap",
+			hash:           "89615121509a69920399f94aa5adfa9ac1b6b2e968ed772c7d3e6067f10530bf",
+			filenamePrefix: "bidask-usdt-usde-swap",
+		},
+		{
+			name:           "bidask usdt ton swap",
+			hash:           "93d5bee270c65516b6213ace03c84110c0c8fa2b1626f21dec5b848eb88ba334",
+			filenamePrefix: "bidask-usdt-ton-swap",
+		},
+		{
+			name:           "bidask ton usdt swap",
+			hash:           "f1cc8a4b6108c27df57a92ddb84fb25ed4f1f866c6b10c75905f34903f47edcf",
+			filenamePrefix: "bidask-ton-usdt-swap",
 		},
 		{
 			name:           "mooncx usdt-ton swap",
