@@ -29,7 +29,7 @@ func (b BubbleJettonTransfer) ToAction() (action *Action) {
 			TonTransfer: &TonTransferAction{
 				Amount:    amount.Int64(),
 				Recipient: b.recipient.Address,
-				Sender:    b.senderWallet,
+				Sender:    b.sender.Address,
 			},
 			Success: b.success,
 			Type:    TonTransfer,
