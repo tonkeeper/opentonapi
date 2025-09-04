@@ -16,7 +16,7 @@ var MooncxSwapStraw = Straw[BubbleJettonSwap]{
 		if !ok {
 			return false
 		}
-		if swap.SwapParams.NextFulfill != nil {
+		if swap.SwapParams.NextFulfill != nil && swap.SwapParams.NextFulfill.Recipient != tx.inputFrom.Address.ToMsgAddress() {
 			return false
 		}
 		return true
@@ -56,7 +56,7 @@ var MooncxSwapStrawReverse = Straw[BubbleJettonSwap]{
 		if !ok {
 			return false
 		}
-		if swap.SwapParams.NextFulfill != nil {
+		if swap.SwapParams.NextFulfill != nil && swap.SwapParams.NextFulfill.Recipient != tx.sender.Address.ToMsgAddress() {
 			return false
 		}
 		return true
@@ -76,7 +76,7 @@ var MooncxSwapStrawReverse = Straw[BubbleJettonSwap]{
 		return nil
 	},
 	SingleChild: &Straw[BubbleJettonSwap]{
-		CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.MoonSwapSucceedJettonOp)},
+		CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.MoonSwapSucceedMsgOp)},
 		Builder: func(newAction *BubbleJettonSwap, bubble *Bubble) error {
 			tx := bubble.Info.(BubbleTx)
 			newAction.Success = tx.success
