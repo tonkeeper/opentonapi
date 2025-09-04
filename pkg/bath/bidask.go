@@ -9,7 +9,8 @@ import (
 
 var BidaskSwapStraw = Straw[BubbleJettonSwap]{
 	CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.BidaskSwapMsgOp), HasInterface(abi.BidaskPool), func(bubble *Bubble) bool {
-		return bubble.Info.(BubbleTx).decodedBody.Value.(abi.BidaskSwapMsgBody).ForwardPayload == nil
+		tx := bubble.Info.(BubbleTx)
+		return tx.decodedBody.Value.(abi.BidaskSwapMsgBody).ToAddress == tx.inputFrom.Address.ToMsgAddress()
 	}},
 	Builder: func(newAction *BubbleJettonSwap, bubble *Bubble) error {
 		tx := bubble.Info.(BubbleTx)
@@ -47,7 +48,7 @@ var BidaskSwapStrawReverse = Straw[BubbleJettonSwap]{
 		if !ok {
 			return false
 		}
-		if swap.ForwardPayload != nil {
+		if swap.ToAddress != jettonTx.sender.Address.ToMsgAddress() {
 			return false
 		}
 		return true
@@ -91,7 +92,7 @@ var BidaskJettonSwapStraw = Straw[BubbleJettonSwap]{
 		if !ok {
 			return false
 		}
-		if swap.ForwardPayload != nil {
+		if swap.ToAddress != jettonTx.sender.Address.ToMsgAddress() {
 			return false
 		}
 		return true
