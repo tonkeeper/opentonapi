@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+
 	"github.com/tonkeeper/opentonapi/internal/g"
 	"github.com/tonkeeper/opentonapi/pkg/bath"
 	imgGenerator "github.com/tonkeeper/opentonapi/pkg/image"
@@ -43,8 +44,9 @@ func (h *Handler) convertNFT(ctx context.Context, item core.NftItem, book addres
 		}
 	}
 	if item.CollectionAddress != nil {
-		cInfo, _ := metaCache.getCollectionMeta(ctx, *item.CollectionAddress)
-		if cc, prs := book.GetCollectionInfoByAddress(*item.CollectionAddress); prs {
+		collectionAddr := *item.CollectionAddress
+		cInfo, _ := metaCache.getCollectionMeta(ctx, collectionAddr)
+		if cc, prs := book.GetCollectionInfoByAddress(collectionAddr); prs {
 			for _, approver := range cc.Approvers {
 				nftItem.ApprovedBy = append(nftItem.ApprovedBy, oas.NftItemApprovedByItem(approver))
 			}
@@ -54,17 +56,19 @@ func (h *Handler) convertNFT(ctx context.Context, item core.NftItem, book addres
 			Name:        cInfo.Name,
 			Description: cInfo.Description,
 		})
-		if *item.CollectionAddress == references.RootDotTon && item.DNS != nil && item.Verified {
+		if collectionAddr == references.RootDotTon && item.DNS != nil && item.Verified {
 			image = "https://cache.tonapi.io/dns/preview/" + *item.DNS + ".png"
 			nftItem.Metadata["name"] = []byte(fmt.Sprintf(`"%v"`, *item.DNS))
+			delete(nftItem.Metadata, "description")
+			delete(nftItem.Metadata, "image")
+			delete(nftItem.Metadata, "lottie")
+		}
+		if collectionAddr == references.RootDotTon || collectionAddr == references.RootTelegram {
 			buttons, _ := json.Marshal([]map[string]string{{
 				"label": "Manage",
 				"uri":   fmt.Sprintf("https://dns.tonkeeper.com/manage?v=%v", item.Address.ToRaw())},
 			})
 			nftItem.Metadata["buttons"] = buttons
-			delete(nftItem.Metadata, "description")
-			delete(nftItem.Metadata, "image")
-			delete(nftItem.Metadata, "lottie")
 		}
 	}
 	if len(nftItem.ApprovedBy) > 0 && nftItem.Verified {
