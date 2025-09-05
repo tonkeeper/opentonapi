@@ -118,6 +118,7 @@ var BidaskJettonSwapStraw = Straw[BubbleJettonSwap]{
 					newAction.Out.JettonMaster = jettonTx.master
 					newAction.Out.JettonWallet = jettonTx.recipientWallet
 					newAction.Out.Amount = big.Int(jettonTx.amount)
+					newAction.Success = jettonTx.success
 					return nil
 				},
 			},
