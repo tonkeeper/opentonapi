@@ -59,12 +59,12 @@ hash = "sha1-c5a82fe2e46cfa9d4568240967ec2bb4f261c4fd"
 other = "Оплата подписки {{.Value}}"
 
 [unsubscribeAction]
-hash = "sha1-834cc0ee6089e541b395509ba562516bcafa78e2"
+hash = "sha1-28bec423058236d361f50aeace34d60f81f5a48f"
 other = "Отмена подписки"
 
 [trialSubscriptionAction]
-hash = "sha1-d6981f74767d6c63d6062ad21b3bdfcd0d0d6602"
-other = "Создание подписки"
+hash = "sha1-ccd58bbee3ee9b94b2eed9be103e81926ceb4f3a"
+other = "Создание подписки с отложенным платежом"
 
 [tonTransferAction]
 hash = "sha1-033820aa9bbe4761f0c6829bb7e2830892920316"

@@ -1048,7 +1048,7 @@ func (h *Handler) convertSubscribe(ctx context.Context, a *bath.SubscribeAction,
 	value := i18n.FormatTokens(a.Price.Amount, int32(price.Decimals), price.TokenName)
 
 	simplePreview := oas.ActionSimplePreview{
-		Name: "Subscription",
+		Name: "Subscription Charge",
 		Description: i18n.T(acceptLanguage, i18n.C{
 			DefaultMessage: &i18n.M{
 				ID:    "subscriptionAction",
@@ -1060,10 +1060,11 @@ func (h *Handler) convertSubscribe(ctx context.Context, a *bath.SubscribeAction,
 		Value:    oas.NewOptString(value),
 	}
 	if a.Price.Amount.Cmp(big.NewInt(0)) == 0 {
+		simplePreview.Name = "Subscribed"
 		simplePreview.Description = i18n.T(acceptLanguage, i18n.C{
 			DefaultMessage: &i18n.M{
 				ID:    "trialSubscriptionAction",
-				Other: "Subscribe",
+				Other: "Subscription initiated with a delayed payment",
 			},
 		})
 	}
@@ -1074,11 +1075,11 @@ func (h *Handler) convertSubscribe(ctx context.Context, a *bath.SubscribeAction,
 
 func (h *Handler) convertUnsubscribe(ctx context.Context, a *bath.UnSubscribeAction, acceptLanguage string, viewer *tongo.AccountID) (oas.OptUnSubscriptionAction, oas.ActionSimplePreview) {
 	simplePreview := oas.ActionSimplePreview{
-		Name: "Unsubscribe",
+		Name: "Unsubscribed",
 		Description: i18n.T(acceptLanguage, i18n.C{
 			DefaultMessage: &i18n.M{
 				ID:    "unsubscribeAction",
-				Other: "Unsubscribe",
+				Other: "Subscription deactivated",
 			},
 		}),
 		Accounts: distinctAccounts(viewer, h.addressBook, &a.Admin, &a.Subscriber, &a.WithdrawTo),
