@@ -207,6 +207,9 @@ func TestFindActions(t *testing.T) {
 			// mooncx swap
 			tongo.MustParseBlockID("(0,8000000000000000,56398081)"),
 			tongo.MustParseBlockID("(0,8000000000000000,56397942)"),
+			// tonco swap
+			tongo.MustParseBlockID("(0,8000000000000000,56804640)"),
+			tongo.MustParseBlockID("(0,8000000000000000,56834937)"),
 		}),
 	)
 
@@ -566,6 +569,16 @@ func TestFindActions(t *testing.T) {
 			name:           "mooncx ton-usdt swap",
 			hash:           "67aee84fa6df5fcdf85bcb9330c9181fd0629d686bf5b800420deef9e6850a99",
 			filenamePrefix: "mooncx-ton-usdt-swap",
+		},
+		{
+			name:           "tonco ton-usdt swap",
+			hash:           "780cab64043ac03070f1018f98601939a2e94681278be1c1f4908bb1779d049e",
+			filenamePrefix: "tonco-ton-usdt-swap",
+		},
+		{
+			name:           "tonco usdt-ton swap",
+			hash:           "47cda8509e406d6475f173ad5a69645b2158db3191d8c087d5bbe4e8c49474ca",
+			filenamePrefix: "tonco-usdt-ton-swap",
 		},
 	} {
 		t.Run(c.name, func(t *testing.T) {

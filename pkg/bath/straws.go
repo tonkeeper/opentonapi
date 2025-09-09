@@ -76,6 +76,7 @@ var DefaultStraws = []Merger{
 	BidaskJettonSwapStraw,
 	MooncxSwapStraw,
 	MooncxSwapStrawReverse,
+	ToncoSwapStraw,
 }
 
 var JettonTransferClassicStraw = Straw[BubbleJettonTransfer]{

@@ -5,6 +5,7 @@ import (
 	"math/big"
 	"slices"
 
+	"github.com/tonkeeper/opentonapi/pkg/references"
 	"github.com/tonkeeper/tongo/abi"
 	"github.com/tonkeeper/tongo/ton"
 )
@@ -141,7 +142,7 @@ func (s UniversalDedustStraw) Merge(b *Bubble) bool {
 	}
 	b.Children = newChildren
 	b.Info = BubbleJettonSwap{
-		Dex:        Dedust,
+		Dex:        references.Dedust,
 		UserWallet: sender,
 		Router:     swapsBubbles[0].Info.(BubbleTx).account.Address,
 		Out:        out,

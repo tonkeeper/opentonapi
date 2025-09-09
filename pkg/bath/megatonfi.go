@@ -3,6 +3,7 @@ package bath
 import (
 	"math/big"
 
+	"github.com/tonkeeper/opentonapi/pkg/references"
 	"github.com/tonkeeper/tongo/abi"
 )
 
@@ -17,7 +18,7 @@ var MegatonFiJettonSwap = Straw[BubbleJettonSwap]{
 		newAction.Router = tx.recipient.Address
 		newAction.In.JettonWallet = tx.senderWallet
 		newAction.In.JettonMaster = tx.master
-		newAction.Dex = Megatonfi
+		newAction.Dex = references.Megatonfi
 		return nil
 	},
 	Children: []Straw[BubbleJettonSwap]{
