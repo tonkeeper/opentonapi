@@ -124,14 +124,16 @@ func (h *Handler) addToMempool(ctx context.Context, bytesBoc []byte, shardAccoun
 	if err != nil {
 		return shardAccount, err
 	}
-	emulator, err := txemulator.NewTraceBuilder(txemulator.WithAccountsSource(h.storage),
+	emulator, err := txemulator.NewTraceBuilder(
+		txemulator.WithAccountsSource(h.storage),
 		txemulator.WithAccountsMap(shardAccount),
 		txemulator.WithConfigBase64(config),
+		txemulator.WithIgnoreSignatureDepth(1),
 	)
 	if err != nil {
 		return shardAccount, err
 	}
-	tree, emulationErr := emulator.Run(ctx, message, 1)
+	tree, emulationErr := emulator.Run(ctx, message)
 	if emulationErr != nil {
 		return shardAccount, emulationErr
 	}
