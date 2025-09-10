@@ -264,13 +264,10 @@ var PendingWithdrawRequestLiquidStraw = Straw[BubbleWithdrawStakeRequest]{
 			Optional:   true,
 			CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.TonstakePayoutMintJettonsMsgOp)},
 			SingleChild: &Straw[BubbleWithdrawStakeRequest]{
-				CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.TonstakeNftInitMsgOp)},
-				SingleChild: &Straw[BubbleWithdrawStakeRequest]{
-					CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.NftOwnershipAssignedMsgOp)},
-					Builder: func(newAction *BubbleWithdrawStakeRequest, bubble *Bubble) error {
-						newAction.Success = true
-						return nil
-					},
+				CheckFuncs: []bubbleCheck{Is(BubbleNftTransfer{})},
+				Builder: func(newAction *BubbleWithdrawStakeRequest, bubble *Bubble) error {
+					newAction.Success = true
+					return nil
 				},
 			},
 		},
