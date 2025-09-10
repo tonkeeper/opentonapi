@@ -9,6 +9,7 @@ import (
 	"reflect"
 
 	"github.com/google/uuid"
+	"github.com/tonkeeper/opentonapi/pkg/references"
 
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/tongo/ton"
@@ -205,7 +206,7 @@ type (
 	}
 
 	JettonSwapAction struct {
-		Dex        Dex
+		Dex        references.Dex
 		UserWallet tongo.AccountID
 		Router     tongo.AccountID
 		In         assetTransfer

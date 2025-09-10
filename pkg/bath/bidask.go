@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math/big"
 
+	"github.com/tonkeeper/opentonapi/pkg/references"
 	"github.com/tonkeeper/tongo/abi"
 )
 
@@ -14,7 +15,7 @@ var BidaskSwapStraw = Straw[BubbleJettonSwap]{
 	}},
 	Builder: func(newAction *BubbleJettonSwap, bubble *Bubble) error {
 		tx := bubble.Info.(BubbleTx)
-		newAction.Dex = Bidask
+		newAction.Dex = references.Bidask
 		newAction.UserWallet = tx.inputFrom.Address
 		newAction.Router = tx.account.Address
 		body := tx.decodedBody.Value.(abi.BidaskSwapMsgBody)
@@ -55,7 +56,7 @@ var BidaskSwapStrawReverse = Straw[BubbleJettonSwap]{
 	}},
 	Builder: func(newAction *BubbleJettonSwap, bubble *Bubble) error {
 		jettonTx := bubble.Info.(BubbleJettonTransfer)
-		newAction.Dex = Bidask
+		newAction.Dex = references.Bidask
 		newAction.UserWallet = jettonTx.sender.Address
 		newAction.Router = jettonTx.recipient.Address
 		newAction.In.JettonMaster = jettonTx.master
@@ -99,7 +100,7 @@ var BidaskJettonSwapStraw = Straw[BubbleJettonSwap]{
 	}},
 	Builder: func(newAction *BubbleJettonSwap, bubble *Bubble) error {
 		jettonTx := bubble.Info.(BubbleJettonTransfer)
-		newAction.Dex = Bidask
+		newAction.Dex = references.Bidask
 		newAction.UserWallet = jettonTx.sender.Address
 		newAction.Router = jettonTx.recipient.Address
 		newAction.In.JettonMaster = jettonTx.master

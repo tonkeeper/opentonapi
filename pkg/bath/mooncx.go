@@ -3,6 +3,7 @@ package bath
 import (
 	"math/big"
 
+	"github.com/tonkeeper/opentonapi/pkg/references"
 	"github.com/tonkeeper/tongo/abi"
 )
 
@@ -23,7 +24,7 @@ var MooncxSwapStraw = Straw[BubbleJettonSwap]{
 	}},
 	Builder: func(newAction *BubbleJettonSwap, bubble *Bubble) error {
 		tx := bubble.Info.(BubbleTx)
-		newAction.Dex = Mooncx
+		newAction.Dex = references.Mooncx
 		newAction.UserWallet = tx.inputFrom.Address
 		newAction.Router = tx.account.Address
 		body := tx.decodedBody.Value.(abi.MoonSwapMsgBody)
@@ -63,7 +64,7 @@ var MooncxSwapStrawReverse = Straw[BubbleJettonSwap]{
 	}},
 	Builder: func(newAction *BubbleJettonSwap, bubble *Bubble) error {
 		tx := bubble.Info.(BubbleJettonTransfer)
-		newAction.Dex = Mooncx
+		newAction.Dex = references.Mooncx
 		newAction.UserWallet = tx.sender.Address
 		newAction.Router = tx.recipient.Address
 		newAction.In.JettonMaster = tx.master
