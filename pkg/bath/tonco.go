@@ -43,11 +43,17 @@ var ToncoSwapStraw = Straw[BubbleJettonSwap]{
 				if !ok {
 					return false
 				}
-				if body.PayTo.SumType != "PayToCode200" { // 200 - swap, 201 - burn
+				if body.PayTo.SumType != "PayToCode200" && body.PayTo.SumType != "PayToCode230" { // 200 - swap, 201 - burn
 					return false
 				}
 				return true
 			}},
+			Builder: func(newAction *BubbleJettonSwap, bubble *Bubble) error {
+				tx := bubble.Info.(BubbleTx)
+				// exit code 200 means successful swap, 230 - failed swap
+				newAction.Success = tx.decodedBody.Value.(abi.PayToMsgBody).PayTo.SumType == "PayToCode200"
+				return nil
+			},
 			SingleChild: &Straw[BubbleJettonSwap]{
 				CheckFuncs: []bubbleCheck{IsJettonTransfer},
 				Builder: func(newAction *BubbleJettonSwap, bubble *Bubble) error {
@@ -58,7 +64,6 @@ var ToncoSwapStraw = Straw[BubbleJettonSwap]{
 						newAction.Out.JettonWallet = tx.recipientWallet
 						newAction.Out.JettonMaster = tx.master
 					}
-					newAction.Success = tx.success
 					return nil
 				},
 			},
