@@ -61,6 +61,7 @@ var DefaultStraws = []Merger{
 	SubscriptionPaymentStraw,
 	SubscriptionPaymentWithRequestFundsStraw,
 	DepositLiquidStakeStraw,
+	OldPendingWithdrawRequestLiquidStraw,
 	PendingWithdrawRequestLiquidStraw,
 	ElectionsDepositStakeStraw,
 	ElectionsRecoverStakeStraw,
