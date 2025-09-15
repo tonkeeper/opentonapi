@@ -261,7 +261,6 @@ var PendingWithdrawRequestLiquidStraw = Straw[BubbleWithdrawStakeRequest]{
 			return nil
 		},
 		SingleChild: &Straw[BubbleWithdrawStakeRequest]{
-			Optional:   true,
 			CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.TonstakePayoutMintJettonsMsgOp)},
 			SingleChild: &Straw[BubbleWithdrawStakeRequest]{
 				CheckFuncs: []bubbleCheck{Is(BubbleNftTransfer{})},
@@ -294,7 +293,6 @@ var OldPendingWithdrawRequestLiquidStraw = Straw[BubbleWithdrawStakeRequest]{
 			return nil
 		},
 		SingleChild: &Straw[BubbleWithdrawStakeRequest]{
-			Optional:   true,
 			CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.TonstakePayoutMintJettonsMsgOp)},
 			SingleChild: &Straw[BubbleWithdrawStakeRequest]{
 				CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.TonstakeNftInitMsgOp)},
