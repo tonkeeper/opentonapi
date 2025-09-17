@@ -687,8 +687,9 @@ func (h *Handler) EmulateMessageToWallet(ctx context.Context, request *oas.Emula
 		return nil, toError(http.StatusBadRequest, err)
 	}
 	var code []byte
-	if account, err := h.storage.GetRawAccount(ctx, *walletAddress); err == nil && len(account.Code) > 0 {
-		code = account.Code
+	walletAccount, err := h.storage.GetRawAccount(ctx, *walletAddress)
+	if err == nil && len(walletAccount.Code) > 0 {
+		code = walletAccount.Code
 	} else if m.Init.Exists && m.Init.Value.Value.Code.Exists {
 		code, err = m.Init.Value.Value.Code.Value.Value.ToBoc()
 		if err != nil {
@@ -758,7 +759,10 @@ func (h *Handler) EmulateMessageToWallet(ctx context.Context, request *oas.Emula
 			}
 			return nil, toProperEmulationError(emulationErr)
 		}
-		trace, err = EmulatedTreeToTrace(ctx, h.executor, h.storage, tree, emulator.FinalStates(), nil, h.configPool, true)
+		initialCache := map[ton.AccountID]*abi.ContractDescription{*walletAddress: {
+			ContractInterfaces: walletAccount.Interfaces,
+		}}
+		trace, err = EmulatedTreeToTrace(ctx, h.executor, h.storage, tree, emulator.FinalStates(), initialCache, h.configPool, true)
 		if err != nil {
 			return nil, toError(http.StatusInternalServerError, fmt.Errorf("account: %s EmulatedTreeToTrace err: %w", walletAddress.ToRaw(), err))
 		}
