@@ -6,6 +6,7 @@ import (
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
+	"github.com/tonkeeper/tongo/ton"
 )
 
 type BubbleSubscription struct {
@@ -74,6 +75,16 @@ var SubscriptionDeployStraw = Straw[BubbleSubscription]{
 					newAction.WithdrawTo = tx.additionalInfo.SubscriptionInfo.WithdrawTo
 					if len(bubble.Children) > 1 { // specify the amount only if there was a payment.
 						newAction.Amount = tx.additionalInfo.SubscriptionInfo.PaymentPerPeriod
+					}
+				} else { // we have no data during the emulation
+					// We can't set the admin address here. It will remain empty.
+					body := tx.decodedBody.Value.(abi.SubscriptionDeployMsgBody)
+					withdrawTo, err := ton.AccountIDFromTlb(body.WithdrawAddress)
+					if err == nil && withdrawTo != nil {
+						newAction.WithdrawTo = *withdrawTo
+					}
+					if len(bubble.Children) > 1 { // specify the amount only if there was a payment.
+						newAction.Amount = int64(body.PaymentPerPeriod)
 					}
 				}
 				newAction.Success = newAction.Success && tx.success
