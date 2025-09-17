@@ -204,20 +204,10 @@ func EmulatedTreeToTrace(
 	default:
 		return nil, errors.New("unknown message type in emulation result")
 	}
-	addr, err := ton.AccountIDFromTlb(a)
-	if err != nil {
-		return nil, err
-	}
-	var cd *abi.ContractDescription
-	if addr != nil {
-		if c, ok := inspectionCache[*addr]; ok {
-			cd = c
-		}
-	}
 	transaction, err := core.ConvertTransaction(int32(a.AddrStd.WorkchainId), tongo.Transaction{
 		Transaction: tree.TX,
 		BlockID:     tongo.BlockIDExt{BlockID: tongo.BlockID{Workchain: int32(a.AddrStd.WorkchainId)}},
-	}, cd)
+	}, nil)
 	if err != nil {
 		return nil, err
 	}
