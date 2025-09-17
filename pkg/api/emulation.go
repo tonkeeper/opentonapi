@@ -402,6 +402,32 @@ func EmulatedTreeToTrace(
 				master, _ := ton.AccountIDFromTlb(data.Jetton)
 				additionalInfo.SetJettonMaster(accountID, *master)
 			}
+		case abi.GetPaymentInfo_SubscriptionV2Result:
+			if additionalInfo.SubscriptionInfo == nil {
+				additionalInfo.SubscriptionInfo = &core.SubscriptionInfo{
+					PaymentPerPeriod: int64(data.PaymentPerPeriod),
+				}
+			} else {
+				additionalInfo.SubscriptionInfo.PaymentPerPeriod = int64(data.PaymentPerPeriod)
+			}
+		case abi.GetSubscriptionInfo_V2Result:
+			wallet, err0 := ton.AccountIDFromTlb(data.Wallet)
+			admin, err1 := ton.AccountIDFromTlb(data.Admin)
+			withdrawTo, err2 := ton.AccountIDFromTlb(data.WithdrawAddress)
+			if err0 != nil || err1 != nil || err2 != nil || wallet == nil || admin == nil || withdrawTo == nil {
+				continue
+			}
+			if additionalInfo.SubscriptionInfo == nil {
+				additionalInfo.SubscriptionInfo = &core.SubscriptionInfo{
+					Wallet:     *wallet,
+					Admin:      *admin,
+					WithdrawTo: *withdrawTo,
+				}
+			} else {
+				additionalInfo.SubscriptionInfo.Wallet = *wallet
+				additionalInfo.SubscriptionInfo.Admin = *admin
+				additionalInfo.SubscriptionInfo.WithdrawTo = *withdrawTo
+			}
 		}
 	}
 	t.SetAdditionalInfo(additionalInfo)
