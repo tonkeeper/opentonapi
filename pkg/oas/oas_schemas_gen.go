@@ -1243,6 +1243,10 @@ const (
 	ActionTypeSmartContractExec         ActionType = "SmartContractExec"
 	ActionTypeDomainRenew               ActionType = "DomainRenew"
 	ActionTypePurchase                  ActionType = "Purchase"
+	ActionTypeAddExtension              ActionType = "AddExtension"
+	ActionTypeRemoveExtension           ActionType = "RemoveExtension"
+	ActionTypeSetSignatureAllowedAction ActionType = "SetSignatureAllowedAction"
+	ActionTypeGasRelay                  ActionType = "GasRelay"
 	ActionTypeDepositTokenStake         ActionType = "DepositTokenStake"
 	ActionTypeWithdrawTokenStakeRequest ActionType = "WithdrawTokenStakeRequest"
 	ActionTypeUnknown                   ActionType = "Unknown"
@@ -1271,6 +1275,10 @@ func (ActionType) AllValues() []ActionType {
 		ActionTypeSmartContractExec,
 		ActionTypeDomainRenew,
 		ActionTypePurchase,
+		ActionTypeAddExtension,
+		ActionTypeRemoveExtension,
+		ActionTypeSetSignatureAllowedAction,
+		ActionTypeGasRelay,
 		ActionTypeDepositTokenStake,
 		ActionTypeWithdrawTokenStakeRequest,
 		ActionTypeUnknown,
@@ -1319,6 +1327,14 @@ func (s ActionType) MarshalText() ([]byte, error) {
 	case ActionTypeDomainRenew:
 		return []byte(s), nil
 	case ActionTypePurchase:
+		return []byte(s), nil
+	case ActionTypeAddExtension:
+		return []byte(s), nil
+	case ActionTypeRemoveExtension:
+		return []byte(s), nil
+	case ActionTypeSetSignatureAllowedAction:
+		return []byte(s), nil
+	case ActionTypeGasRelay:
 		return []byte(s), nil
 	case ActionTypeDepositTokenStake:
 		return []byte(s), nil
@@ -1393,6 +1409,18 @@ func (s *ActionType) UnmarshalText(data []byte) error {
 		return nil
 	case ActionTypePurchase:
 		*s = ActionTypePurchase
+		return nil
+	case ActionTypeAddExtension:
+		*s = ActionTypeAddExtension
+		return nil
+	case ActionTypeRemoveExtension:
+		*s = ActionTypeRemoveExtension
+		return nil
+	case ActionTypeSetSignatureAllowedAction:
+		*s = ActionTypeSetSignatureAllowedAction
+		return nil
+	case ActionTypeGasRelay:
+		*s = ActionTypeGasRelay
 		return nil
 	case ActionTypeDepositTokenStake:
 		*s = ActionTypeDepositTokenStake

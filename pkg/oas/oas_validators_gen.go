@@ -713,6 +713,14 @@ func (s ActionType) Validate() error {
 		return nil
 	case "Purchase":
 		return nil
+	case "AddExtension":
+		return nil
+	case "RemoveExtension":
+		return nil
+	case "SetSignatureAllowedAction":
+		return nil
+	case "GasRelay":
+		return nil
 	case "DepositTokenStake":
 		return nil
 	case "WithdrawTokenStakeRequest":

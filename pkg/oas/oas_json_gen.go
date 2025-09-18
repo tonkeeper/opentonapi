@@ -2895,6 +2895,14 @@ func (s *ActionType) Decode(d *jx.Decoder) error {
 		*s = ActionTypeDomainRenew
 	case ActionTypePurchase:
 		*s = ActionTypePurchase
+	case ActionTypeAddExtension:
+		*s = ActionTypeAddExtension
+	case ActionTypeRemoveExtension:
+		*s = ActionTypeRemoveExtension
+	case ActionTypeSetSignatureAllowedAction:
+		*s = ActionTypeSetSignatureAllowedAction
+	case ActionTypeGasRelay:
+		*s = ActionTypeGasRelay
 	case ActionTypeDepositTokenStake:
 		*s = ActionTypeDepositTokenStake
 	case ActionTypeWithdrawTokenStakeRequest:

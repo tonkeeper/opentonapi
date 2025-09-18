@@ -1249,6 +1249,10 @@
        "SmartContractExec",
        "DomainRenew",
        "Purchase",
+       "AddExtension",
+       "RemoveExtension",
+       "SetSignatureAllowedAction",
+       "GasRelay",
        "DepositTokenStake",
        "WithdrawTokenStakeRequest",
        "Unknown"
