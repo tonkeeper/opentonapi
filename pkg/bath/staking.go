@@ -5,6 +5,7 @@ import (
 
 	"github.com/tonkeeper/opentonapi/pkg/blockchain/config"
 	"github.com/tonkeeper/opentonapi/pkg/core"
+	"github.com/tonkeeper/opentonapi/pkg/references"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
 	"github.com/tonkeeper/tongo/ton"
@@ -328,15 +329,14 @@ func (dts BubbleDepositTokenStake) ToAction() *Action {
 }
 
 var DepositEthenaStakeStraw = Straw[BubbleDepositTokenStake]{
-	CheckFuncs: []bubbleCheck{IsJettonTransfer, JettonRecipientAccount(tongo.MustParseAddress("0:a11ae0f5bb47bb2945871f915a621ff281c2d786c746da74873d71d6f2aaa7a5").ID)},
+	CheckFuncs: []bubbleCheck{IsJettonTransfer, JettonRecipientAccount(references.EthenaStakingPool)},
 	Builder: func(newAction *BubbleDepositTokenStake, bubble *Bubble) error {
-		ethenaImage := "https://ethena.fi/shared/usde.png"
 		tx := bubble.Info.(BubbleJettonTransfer)
 		newAction.Staker = tx.sender.Address
 		amount := big.Int(tx.amount)
 		newAction.Protocol = core.Protocol{
-			Name:  "Ethena",
-			Image: &ethenaImage,
+			Name:  references.EthenaProtocolName,
+			Image: &references.EthenaProtocolImage,
 		}
 		newAction.StakeMeta = &core.Price{
 			Currency: core.Currency{
@@ -377,15 +377,14 @@ func (wts BubbleWithdrawTokenStakeRequest) ToAction() *Action {
 }
 
 var WithdrawEthenaStakeRequestStraw = Straw[BubbleWithdrawTokenStakeRequest]{
-	CheckFuncs: []bubbleCheck{IsJettonTransfer, JettonRecipientAccount(tongo.MustParseAddress("0:a11ae0f5bb47bb2945871f915a621ff281c2d786c746da74873d71d6f2aaa7a5").ID)},
+	CheckFuncs: []bubbleCheck{IsJettonTransfer, JettonRecipientAccount(references.EthenaStakingPool)},
 	Builder: func(newAction *BubbleWithdrawTokenStakeRequest, bubble *Bubble) error {
-		ethenaImage := "https://ethena.fi/shared/usde.png"
 		tx := bubble.Info.(BubbleJettonTransfer)
 		newAction.Staker = tx.sender.Address
 		amount := big.Int(tx.amount)
 		newAction.Protocol = core.Protocol{
-			Name:  "Ethena",
-			Image: &ethenaImage,
+			Name:  references.EthenaProtocolName,
+			Image: &references.EthenaProtocolImage,
 		}
 		newAction.StakeMeta = &core.Price{
 			Currency: core.Currency{
