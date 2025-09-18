@@ -4,7 +4,6 @@ import "github.com/tonkeeper/tongo/ton"
 
 const (
 	Ethena = "Ethena"
-	Bidask = "Bidask"
 )
 
 var (

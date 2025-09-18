@@ -34,7 +34,7 @@ var BidaskLiquidityDepositBothNativeStraw = Straw[BubbleLiquidityDeposit]{
 	Builder: func(newAction *BubbleLiquidityDeposit, bubble *Bubble) error {
 		jettonTx := bubble.Info.(BubbleJettonTransfer)
 		newAction.Protocol = core.Protocol{
-			Name:  references.Bidask,
+			Name:  string(references.Bidask),
 			Image: &references.BidaskImage,
 		}
 		newAction.From = jettonTx.sender.Address
@@ -105,7 +105,7 @@ var BidaskLiquidityDepositBothJettonStraw = Straw[BubbleLiquidityDeposit]{
 			Builder: func(newAction *BubbleLiquidityDeposit, bubble *Bubble) error {
 				jettonTx := bubble.Info.(BubbleJettonTransfer)
 				newAction.Protocol = core.Protocol{
-					Name:  references.Bidask,
+					Name:  string(references.Bidask),
 					Image: &references.BidaskImage,
 				}
 				newAction.From = jettonTx.sender.Address
@@ -135,7 +135,7 @@ var BidaskLiquidityDepositBothJettonStraw = Straw[BubbleLiquidityDeposit]{
 			Builder: func(newAction *BubbleLiquidityDeposit, bubble *Bubble) error {
 				jettonTx := bubble.Info.(BubbleJettonTransfer)
 				newAction.Protocol = core.Protocol{
-					Name:  references.Bidask,
+					Name:  string(references.Bidask),
 					Image: &references.BidaskImage,
 				}
 				newAction.From = jettonTx.sender.Address
@@ -191,7 +191,7 @@ var BidaskLiquidityDepositJettonStraw = Straw[BubbleLiquidityDeposit]{
 	Builder: func(newAction *BubbleLiquidityDeposit, bubble *Bubble) error {
 		jettonTx := bubble.Info.(BubbleJettonTransfer)
 		newAction.Protocol = core.Protocol{
-			Name:  references.Bidask,
+			Name:  string(references.Bidask),
 			Image: &references.BidaskImage,
 		}
 		newAction.From = jettonTx.sender.Address
