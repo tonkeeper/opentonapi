@@ -259,6 +259,6 @@ func JettonTransferOperation(op abi.JettonOpName) bubbleCheck {
 func JettonRecipientAccount(id tongo.AccountID) bubbleCheck {
 	return func(bubble *Bubble) bool {
 		tx, _ := bubble.Info.(BubbleJettonTransfer)
-		return tx.recipient.Address == id
+		return tx.recipient != nil && tx.recipient.Address == id
 	}
 }
