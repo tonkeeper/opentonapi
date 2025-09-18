@@ -204,10 +204,46 @@ func EmulatedTreeToTrace(
 	default:
 		return nil, errors.New("unknown message type in emulation result")
 	}
+
+	acc, err := ton.AccountIDFromTlb(a)
+	if err != nil {
+		return nil, err
+	}
+	if acc == nil {
+		return nil, errors.New("invalid account ID")
+	}
+	accountID := *acc
+	var (
+		inspectionResult *abi.ContractDescription
+		ok               bool
+		sharedExecutor   *shardsAccountExecutor
+	)
+	code := accountCode(accounts[accountID])
+	if code != nil {
+		b, err := code.ToBoc()
+		if err != nil {
+			return nil, err
+		}
+		codeHash, err := code.HashString()
+		if err != nil {
+			return nil, err
+		}
+		emulatedAccountCode.WithLabelValues(codeHash).Inc()
+		sharedExecutor = newSharedAccountExecutor(accounts, executor, resolver, configPool)
+		inspectionResult, ok = inspectionCache[accountID]
+		if !ok {
+			inspectionResult, err = abi.NewContractInspector(abi.InspectWithLibraryResolver(resolver)).InspectContract(ctx, b, sharedExecutor, accountID)
+			if err != nil {
+				return nil, err
+			}
+			inspectionCache[accountID] = inspectionResult
+		}
+	}
+
 	transaction, err := core.ConvertTransaction(int32(a.AddrStd.WorkchainId), tongo.Transaction{
 		Transaction: tree.TX,
 		BlockID:     tongo.BlockIDExt{BlockID: tongo.BlockID{Workchain: int32(a.AddrStd.WorkchainId)}},
-	}, nil)
+	}, inspectionResult)
 	if err != nil {
 		return nil, err
 	}
@@ -235,28 +271,9 @@ func EmulatedTreeToTrace(
 		}
 		t.Children = append(t.Children, child)
 	}
-	accountID := t.Account
-	code := accountCode(accounts[accountID])
-	if code == nil {
+
+	if sharedExecutor == nil {
 		return t, nil
-	}
-	b, err := code.ToBoc()
-	if err != nil {
-		return nil, err
-	}
-	codeHash, err := code.HashString()
-	if err != nil {
-		return nil, err
-	}
-	emulatedAccountCode.WithLabelValues(codeHash).Inc()
-	sharedExecutor := newSharedAccountExecutor(accounts, executor, resolver, configPool)
-	inspectionResult, ok := inspectionCache[accountID]
-	if !ok {
-		inspectionResult, err = abi.NewContractInspector(abi.InspectWithLibraryResolver(resolver)).InspectContract(ctx, b, sharedExecutor, accountID)
-		if err != nil {
-			return nil, err
-		}
-		inspectionCache[accountID] = inspectionResult
 	}
 
 	// TODO: for all obtained Jetton Masters confirm that jetton wallets are valid
@@ -384,6 +401,32 @@ func EmulatedTreeToTrace(
 				data := value.(abi.GetWalletDataResult)
 				master, _ := ton.AccountIDFromTlb(data.Jetton)
 				additionalInfo.SetJettonMaster(accountID, *master)
+			}
+		case abi.GetPaymentInfo_SubscriptionV2Result:
+			if additionalInfo.SubscriptionInfo == nil {
+				additionalInfo.SubscriptionInfo = &core.SubscriptionInfo{
+					PaymentPerPeriod: int64(data.PaymentPerPeriod),
+				}
+			} else {
+				additionalInfo.SubscriptionInfo.PaymentPerPeriod = int64(data.PaymentPerPeriod)
+			}
+		case abi.GetSubscriptionInfo_V2Result:
+			wallet, err0 := ton.AccountIDFromTlb(data.Wallet)
+			admin, err1 := ton.AccountIDFromTlb(data.Admin)
+			withdrawTo, err2 := ton.AccountIDFromTlb(data.WithdrawAddress)
+			if err0 != nil || err1 != nil || err2 != nil || wallet == nil || admin == nil || withdrawTo == nil {
+				continue
+			}
+			if additionalInfo.SubscriptionInfo == nil {
+				additionalInfo.SubscriptionInfo = &core.SubscriptionInfo{
+					Wallet:     *wallet,
+					Admin:      *admin,
+					WithdrawTo: *withdrawTo,
+				}
+			} else {
+				additionalInfo.SubscriptionInfo.Wallet = *wallet
+				additionalInfo.SubscriptionInfo.Admin = *admin
+				additionalInfo.SubscriptionInfo.WithdrawTo = *withdrawTo
 			}
 		}
 	}
