@@ -580,7 +580,7 @@ func (h *Handler) convertLiquidityDepositAction(ctx context.Context, l *bath.Liq
 		Description: i18n.T(acceptLanguage, i18n.C{
 			DefaultMessage: &i18n.M{
 				ID:    "liquidityDepositAction",
-				Other: "Deposit {{.Value}} into the {{.Protocol}} liquidity pool",
+				Other: "Deposit liquidity into the {{.Protocol}} pool",
 			},
 			TemplateData: i18n.Template{
 				"Value":    value,
