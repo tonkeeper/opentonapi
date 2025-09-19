@@ -122,7 +122,7 @@ func (h *Handler) convertRisk(ctx context.Context, risk wallet.Risk, walletAddre
 		score, _ := h.score.GetJettonScore(jettonWallet.JettonAddress)
 		preview := jettonPreview(jettonWallet.JettonAddress, meta, score)
 		f, _ := quantity.Float64()
-		total += f / math.Pow10(preview.Decimals) * todayRates[jetton.ToRaw()]
+		total += f / math.Pow10(preview.Decimals) * todayRates[jettonWallet.JettonAddress.ToRaw()]
 		jettonQuantity := oas.JettonQuantity{
 			Quantity:      quantity.String(),
 			WalletAddress: convertAccountAddress(jettonWallet.Address, h.addressBook),
