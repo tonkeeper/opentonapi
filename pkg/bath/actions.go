@@ -383,23 +383,13 @@ func (a Action) ContributeToExtra(account tongo.AccountID) int64 {
 	case WithdrawStake:
 		return detectDirection(account, a.WithdrawStake.Pool, a.WithdrawStake.Staker, a.WithdrawStake.Amount)
 	case LiquidityDeposit:
-		if account == a.LiquidityDepositAction.From {
-			if a.LiquidityDepositAction.Tokens[0].Price.Currency.Type == core.CurrencyTON {
-				return -a.LiquidityDepositAction.Tokens[0].Price.Amount.Int64()
+		for _, token := range a.LiquidityDepositAction.Tokens {
+			if account == a.LiquidityDepositAction.From && token.Price.Currency.Type == core.CurrencyTON {
+				return -token.Price.Amount.Int64()
 			}
-			if len(a.LiquidityDepositAction.Tokens) == 2 &&
-				a.LiquidityDepositAction.Tokens[1].Price.Currency.Type == core.CurrencyTON {
-				return -a.LiquidityDepositAction.Tokens[1].Price.Amount.Int64()
+			if account == token.Vault && token.Price.Currency.Type == core.CurrencyTON {
+				return token.Price.Amount.Int64()
 			}
-		}
-		if account == a.LiquidityDepositAction.Tokens[0].Vault &&
-			a.LiquidityDepositAction.Tokens[0].Price.Currency.Type == core.CurrencyTON {
-			return a.LiquidityDepositAction.Tokens[0].Price.Amount.Int64()
-		}
-		if len(a.LiquidityDepositAction.Tokens) == 2 &&
-			account == a.LiquidityDepositAction.Tokens[1].Vault &&
-			a.LiquidityDepositAction.Tokens[1].Price.Currency.Type == core.CurrencyTON {
-			return a.LiquidityDepositAction.Tokens[1].Price.Amount.Int64()
 		}
 		return 0
 	default:
