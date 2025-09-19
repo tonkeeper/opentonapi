@@ -383,15 +383,16 @@ func (a Action) ContributeToExtra(account tongo.AccountID) int64 {
 	case WithdrawStake:
 		return detectDirection(account, a.WithdrawStake.Pool, a.WithdrawStake.Staker, a.WithdrawStake.Amount)
 	case LiquidityDeposit:
+		extra := int64(0)
 		for _, token := range a.LiquidityDepositAction.Tokens {
 			if account == a.LiquidityDepositAction.From && token.Price.Currency.Type == core.CurrencyTON {
-				return -token.Price.Amount.Int64()
+				extra -= token.Price.Amount.Int64()
 			}
 			if account == token.Vault && token.Price.Currency.Type == core.CurrencyTON {
-				return token.Price.Amount.Int64()
+				extra += token.Price.Amount.Int64()
 			}
 		}
-		return 0
+		return extra
 	default:
 		panic("unknown action type")
 	}
@@ -546,5 +547,10 @@ func (a *PurchaseAction) SubjectAccounts() []tongo.AccountID {
 }
 
 func (a *LiquidityDepositAction) SubjectAccounts() []tongo.AccountID {
-	return []tongo.AccountID{a.From}
+	accounts := make([]tongo.AccountID, 0, 3)
+	accounts = append(accounts, a.From)
+	for _, token := range a.Tokens {
+		accounts = append(accounts, token.Vault)
+	}
+	return accounts
 }

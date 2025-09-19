@@ -1,7 +1,6 @@
 package bath
 
 import (
-	"fmt"
 	"math/big"
 
 	"github.com/tonkeeper/opentonapi/pkg/core"
@@ -30,7 +29,7 @@ func (b BubbleLiquidityDeposit) ToAction() *Action {
 }
 
 var BidaskLiquidityDepositBothNativeStraw = Straw[BubbleLiquidityDeposit]{
-	CheckFuncs: []bubbleCheck{IsJettonTransfer},
+	CheckFuncs: []bubbleCheck{IsJettonTransfer, JettonTransferOperation(abi.BidaskProvideBothJettonOp)},
 	Builder: func(newAction *BubbleLiquidityDeposit, bubble *Bubble) error {
 		jettonTx := bubble.Info.(BubbleJettonTransfer)
 		newAction.Protocol = core.Protocol{
@@ -38,10 +37,7 @@ var BidaskLiquidityDepositBothNativeStraw = Straw[BubbleLiquidityDeposit]{
 			Image: &references.BidaskImage,
 		}
 		newAction.From = jettonTx.sender.Address
-		payload, ok := jettonTx.payload.Value.(abi.BidaskProvideBothJettonPayload)
-		if !ok {
-			return fmt.Errorf("jetton payload is not bidask provide both")
-		}
+		payload := jettonTx.payload.Value.(abi.BidaskProvideBothJettonPayload)
 		tonAmount := new(big.Int)
 		tonAmount.SetUint64(uint64(payload.TonAmount))
 		depositTon := core.VaultDepositInfo{
