@@ -12,6 +12,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/tonkeeper/opentonapi/internal/g"
 	"github.com/tonkeeper/tongo/abi"
 	"go.uber.org/zap"
 	"golang.org/x/exp/slices"
@@ -781,7 +782,7 @@ func (h *Handler) EmulateMessageToWallet(ctx context.Context, request *oas.Emula
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, fmt.Errorf("account: %s toAccountEvent err: %w", walletAddress.ToRaw(), err))
 	}
-	oasRisk, err := h.convertRisk(ctx, *risk, *walletAddress)
+	oasRisk, err := h.convertRisk(ctx, *risk, *walletAddress, g.UnOpt(params.Currency))
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, fmt.Errorf("account: %s convertRisk err: %w", walletAddress.ToRaw(), err))
 	}

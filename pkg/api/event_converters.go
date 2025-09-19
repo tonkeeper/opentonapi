@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"log/slog"
+	"math"
 	"math/big"
 	"sort"
 	"strings"
@@ -77,9 +78,33 @@ func convertTrace(t *core.Trace, book addressBook) oas.Trace {
 	return trace
 }
 
-func (h *Handler) convertRisk(ctx context.Context, risk wallet.Risk, walletAddress tongo.AccountID) (oas.Risk, error) {
+func (h *Handler) convertRisk(ctx context.Context, risk wallet.Risk, walletAddress tongo.AccountID, currency *string) (oas.Risk, error) {
 	if int64(risk.Ton) < 0 {
 		return oas.Risk{}, fmt.Errorf("ivalid ton amount")
+	}
+	total := float64(risk.Ton) / 1e9
+	var curPrice float64
+	var todayRates map[string]float64
+	var err error
+	if currency != nil {
+		todayRates, _, _, _, err = h.getRates()
+		if err != nil {
+			return oas.Risk{}, fmt.Errorf("can't calculate risk: %w", err)
+		}
+		var prs bool
+		curPrice, prs = todayRates[*currency]
+		if !prs {
+			return oas.Risk{}, fmt.Errorf("can't calculate risk: unknown currency")
+		}
+	}
+	if risk.TransferAllRemainingBalance {
+		a, err := h.storage.GetRawAccount(ctx, walletAddress)
+		if err != nil {
+			return oas.Risk{}, err
+		}
+		if a != nil && a.TonBalance > int64(risk.Ton) {
+			total = float64(a.TonBalance) / 1e9
+		}
 	}
 	oasRisk := oas.Risk{
 		TransferAllRemainingBalance: risk.TransferAllRemainingBalance,
@@ -96,12 +121,17 @@ func (h *Handler) convertRisk(ctx context.Context, risk wallet.Risk, walletAddre
 		meta := h.GetJettonNormalizedMetadata(ctx, jettonWallet.JettonAddress)
 		score, _ := h.score.GetJettonScore(jettonWallet.JettonAddress)
 		preview := jettonPreview(jettonWallet.JettonAddress, meta, score)
+		f, _ := quantity.Float64()
+		total += f / math.Pow10(preview.Decimals) * todayRates[jetton.ToRaw()]
 		jettonQuantity := oas.JettonQuantity{
 			Quantity:      quantity.String(),
 			WalletAddress: convertAccountAddress(jettonWallet.Address, h.addressBook),
 			Jetton:        preview,
 		}
 		oasRisk.Jettons = append(oasRisk.Jettons, jettonQuantity)
+	}
+	if currency != nil {
+		oasRisk.TotalEquivalent = oas.NewOptFloat32(float32(total / curPrice))
 	}
 	if len(risk.Nfts) > 0 {
 		var wg sync.WaitGroup

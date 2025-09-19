@@ -373,7 +373,7 @@ func (h *Handler) convertMultisigOrder(ctx context.Context, order core.MultisigO
 			cp.SetTo(newParams)
 		}
 	}
-	oasRisk, err := h.convertRisk(ctx, risk, order.MultisigAccountID)
+	oasRisk, err := h.convertRisk(ctx, risk, order.MultisigAccountID, nil)
 	if err != nil {
 		return oas.MultisigOrder{}, err
 	}

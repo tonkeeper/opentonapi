@@ -761,6 +761,7 @@ func decodeEmulateMessageToTraceParams(args [0]string, argsEscaped bool, r *http
 // EmulateMessageToWalletParams is parameters of emulateMessageToWallet operation.
 type EmulateMessageToWalletParams struct {
 	AcceptLanguage OptString
+	Currency       OptString
 }
 
 func unpackEmulateMessageToWalletParams(packed middleware.Parameters) (params EmulateMessageToWalletParams) {
@@ -773,10 +774,20 @@ func unpackEmulateMessageToWalletParams(packed middleware.Parameters) (params Em
 			params.AcceptLanguage = v.(OptString)
 		}
 	}
+	{
+		key := middleware.ParameterKey{
+			Name: "currency",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.Currency = v.(OptString)
+		}
+	}
 	return params
 }
 
 func decodeEmulateMessageToWalletParams(args [0]string, argsEscaped bool, r *http.Request) (params EmulateMessageToWalletParams, _ error) {
+	q := uri.NewQueryDecoder(r.URL.Query())
 	h := uri.NewHeaderDecoder(r.Header)
 	// Set default value for header: Accept-Language.
 	{
@@ -819,6 +830,47 @@ func decodeEmulateMessageToWalletParams(args [0]string, argsEscaped bool, r *htt
 		return params, &ogenerrors.DecodeParamError{
 			Name: "Accept-Language",
 			In:   "header",
+			Err:  err,
+		}
+	}
+	// Decode query: currency.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "currency",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotCurrencyVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotCurrencyVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.Currency.SetTo(paramsDotCurrencyVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "currency",
+			In:   "query",
 			Err:  err,
 		}
 	}

@@ -1216,6 +1216,10 @@ func (s *Server) handleEmulateMessageToWalletRequest(args [0]string, argsEscaped
 					Name: "Accept-Language",
 					In:   "header",
 				}: params.AcceptLanguage,
+				{
+					Name: "currency",
+					In:   "query",
+				}: params.Currency,
 			},
 			Raw: r,
 		}

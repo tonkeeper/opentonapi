@@ -32517,6 +32517,41 @@ func (s *OptExtraCurrencyTransferAction) UnmarshalJSON(data []byte) error {
 	return s.Decode(d)
 }
 
+// Encode encodes float32 as json.
+func (o OptFloat32) Encode(e *jx.Encoder) {
+	if !o.Set {
+		return
+	}
+	e.Float32(float32(o.Value))
+}
+
+// Decode decodes float32 from json.
+func (o *OptFloat32) Decode(d *jx.Decoder) error {
+	if o == nil {
+		return errors.New("invalid: unable to decode OptFloat32 to nil")
+	}
+	o.Set = true
+	v, err := d.Float32()
+	if err != nil {
+		return err
+	}
+	o.Value = float32(v)
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s OptFloat32) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *OptFloat32) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
 // Encode encodes GasRelayAction as json.
 func (o OptGasRelayAction) Encode(e *jx.Encoder) {
 	if !o.Set {
@@ -36383,13 +36418,20 @@ func (s *Risk) encodeFields(e *jx.Encoder) {
 		}
 		e.ArrEnd()
 	}
+	{
+		if s.TotalEquivalent.Set {
+			e.FieldStart("total_equivalent")
+			s.TotalEquivalent.Encode(e)
+		}
+	}
 }
 
-var jsonFieldsNameOfRisk = [4]string{
+var jsonFieldsNameOfRisk = [5]string{
 	0: "transfer_all_remaining_balance",
 	1: "ton",
 	2: "jettons",
 	3: "nfts",
+	4: "total_equivalent",
 }
 
 // Decode decodes Risk from json.
@@ -36460,6 +36502,16 @@ func (s *Risk) Decode(d *jx.Decoder) error {
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"nfts\"")
+			}
+		case "total_equivalent":
+			if err := func() error {
+				s.TotalEquivalent.Reset()
+				if err := s.TotalEquivalent.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"total_equivalent\"")
 			}
 		default:
 			return d.Skip()

@@ -13127,6 +13127,52 @@ func (o OptExtraCurrencyTransferAction) Or(d ExtraCurrencyTransferAction) ExtraC
 	return d
 }
 
+// NewOptFloat32 returns new OptFloat32 with value set to v.
+func NewOptFloat32(v float32) OptFloat32 {
+	return OptFloat32{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptFloat32 is optional float32.
+type OptFloat32 struct {
+	Value float32
+	Set   bool
+}
+
+// IsSet returns true if OptFloat32 was set.
+func (o OptFloat32) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptFloat32) Reset() {
+	var v float32
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptFloat32) SetTo(v float32) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptFloat32) Get() (v float32, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptFloat32) Or(d float32) float32 {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptGasRelayAction returns new OptGasRelayAction with value set to v.
 func NewOptGasRelayAction(v GasRelayAction) OptGasRelayAction {
 	return OptGasRelayAction{
@@ -16233,6 +16279,8 @@ type Risk struct {
 	Ton                         int64            `json:"ton"`
 	Jettons                     []JettonQuantity `json:"jettons"`
 	Nfts                        []NftItem        `json:"nfts"`
+	// Estimated equivalent value of all assets at risk in selected currency (for example USD).
+	TotalEquivalent OptFloat32 `json:"total_equivalent"`
 }
 
 // GetTransferAllRemainingBalance returns the value of TransferAllRemainingBalance.
@@ -16255,6 +16303,11 @@ func (s *Risk) GetNfts() []NftItem {
 	return s.Nfts
 }
 
+// GetTotalEquivalent returns the value of TotalEquivalent.
+func (s *Risk) GetTotalEquivalent() OptFloat32 {
+	return s.TotalEquivalent
+}
+
 // SetTransferAllRemainingBalance sets the value of TransferAllRemainingBalance.
 func (s *Risk) SetTransferAllRemainingBalance(val bool) {
 	s.TransferAllRemainingBalance = val
@@ -16273,6 +16326,11 @@ func (s *Risk) SetJettons(val []JettonQuantity) {
 // SetNfts sets the value of Nfts.
 func (s *Risk) SetNfts(val []NftItem) {
 	s.Nfts = val
+}
+
+// SetTotalEquivalent sets the value of TotalEquivalent.
+func (s *Risk) SetTotalEquivalent(val OptFloat32) {
+	s.TotalEquivalent = val
 }
 
 // Ref: #/components/schemas/Sale

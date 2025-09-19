@@ -41,6 +41,16 @@ func Opt[T any](t *T) struct {
 	}{Value: *t, Set: true}
 }
 
+func UnOpt[T any](o struct {
+	Value T
+	Set   bool
+}) *T {
+	if !o.Set {
+		return nil
+	}
+	return &o.Value
+}
+
 func Must[T any](t *T, err error) T {
 	if err != nil {
 		panic(err)

@@ -2840,6 +2840,7 @@ paths:
         - Wallet
       parameters:
         - $ref: '#/components/parameters/i18n'
+        - $ref: '#/components/parameters/currencyQuery'
       requestBody:
         $ref: "#/components/requestBodies/EmulationBoc"
       responses:
@@ -7156,6 +7157,10 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/NftItem'
+        total_equivalent:
+          type: number
+          format: float
+          description: "Estimated equivalent value of all assets at risk in selected currency (for example USD)"
     JettonQuantity:
       type: object
       required:
