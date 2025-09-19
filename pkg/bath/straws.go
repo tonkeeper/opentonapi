@@ -73,6 +73,8 @@ var DefaultStraws = []Merger{
 	BidaskLiquidityDepositBothNativeStraw,
 	BidaskLiquidityDepositBothJettonStraw,
 	BidaskLiquidityDepositJettonStraw,
+	StonfiLiquidityDepositSingle,
+	StonfiLiquidityDepositBoth,
 	DepositEthenaStakeStraw,
 	WithdrawEthenaStakeRequestStraw,
 	BidaskSwapStraw,

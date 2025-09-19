@@ -3,6 +3,7 @@ package bath
 import (
 	"math/big"
 
+	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/opentonapi/pkg/references"
 	"github.com/tonkeeper/tongo/tlb"
 	"github.com/tonkeeper/tongo/ton"
@@ -318,6 +319,162 @@ var StonfiSwapV2Straw = Straw[BubbleJettonSwap]{
 	},
 }
 
-// https://dev.tonviewer.com/transaction/e19381edd8f05922eeba3c31f4b8b4b737478b4ca7b37130bdbbfd7bfa773227
-// todo: add liquidity (mint lp tokens)
-var StonfiMintStraw = Straw[BubbleJettonMint]{}
+var StonfiLiquidityDepositSingle = Straw[BubbleLiquidityDeposit]{
+	CheckFuncs: []bubbleCheck{IsJettonTransfer},
+	Builder: func(newAction *BubbleLiquidityDeposit, bubble *Bubble) error {
+		jettonTx := bubble.Info.(BubbleJettonTransfer)
+		newAction.Protocol = core.Protocol{
+			Name:  string(references.Stonfi),
+			Image: &references.StonfiImage,
+		}
+		newAction.From = jettonTx.sender.Address
+		if jettonTx.isWrappedTon {
+			newAction.Tokens = append(newAction.Tokens, core.VaultDepositInfo{
+				Price: core.Price{
+					Currency: core.Currency{
+						Type: core.CurrencyTON,
+					},
+					Amount: big.Int(jettonTx.amount),
+				},
+				Vault: jettonTx.recipient.Address,
+			})
+		} else {
+			newAction.Tokens = append(newAction.Tokens, core.VaultDepositInfo{
+				Price: core.Price{
+					Currency: core.Currency{
+						Type:   core.CurrencyJetton,
+						Jetton: &jettonTx.master,
+					},
+					Amount: big.Int(jettonTx.amount),
+				},
+				Vault: jettonTx.recipientWallet,
+			})
+		}
+		return nil
+	},
+	SingleChild: &Straw[BubbleLiquidityDeposit]{
+		CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.StonfiProvideLpV2MsgOp)},
+		SingleChild: &Straw[BubbleLiquidityDeposit]{
+			CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.StonfiAddLiquidityV2MsgOp)},
+			Children: []Straw[BubbleLiquidityDeposit]{
+				{
+					CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.StonfiCbAddLiquidityV2MsgOp)},
+					Children: []Straw[BubbleLiquidityDeposit]{
+						{
+							Optional:   true,
+							CheckFuncs: []bubbleCheck{Is(BubbleJettonMint{})},
+							SingleChild: &Straw[BubbleLiquidityDeposit]{
+								CheckFuncs: []bubbleCheck{IsTx, HasInterface(abi.NftItem)},
+								Children: []Straw[BubbleLiquidityDeposit]{
+									{
+										CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.ExcessMsgOp)},
+										Builder: func(newAction *BubbleLiquidityDeposit, bubble *Bubble) error {
+											tx := bubble.Info.(BubbleTx)
+											newAction.Success = tx.success
+											return nil
+										},
+									},
+									{
+										Optional:   true,
+										CheckFuncs: []bubbleCheck{Is(BubbleContractDeploy{})},
+									},
+								},
+							},
+						},
+						{
+							Optional:   true,
+							CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.JettonInternalTransferMsgOp)},
+							SingleChild: &Straw[BubbleLiquidityDeposit]{
+								CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.ExcessMsgOp)},
+								Builder: func(newAction *BubbleLiquidityDeposit, bubble *Bubble) error {
+									tx := bubble.Info.(BubbleTx)
+									newAction.Success = tx.success
+									return nil
+								},
+							},
+						},
+					},
+				},
+				{
+					Optional:   true,
+					CheckFuncs: []bubbleCheck{Is(BubbleContractDeploy{})},
+				},
+			},
+		},
+	},
+}
+
+var StonfiLiquidityDepositBoth = Straw[BubbleLiquidityDeposit]{
+	CheckFuncs: []bubbleCheck{},
+	Children: []Straw[BubbleLiquidityDeposit]{
+		{
+			CheckFuncs: []bubbleCheck{func(bubble *Bubble) bool {
+				tx, ok := bubble.Info.(BubbleLiquidityDeposit)
+				if !ok {
+					return false
+				}
+				if tx.Protocol.Name != string(references.Stonfi) {
+					return false
+				}
+				return true
+			}},
+			Builder: func(newAction *BubbleLiquidityDeposit, bubble *Bubble) error {
+				tx := bubble.Info.(BubbleLiquidityDeposit)
+				newAction.Protocol = tx.Protocol
+				newAction.From = tx.From
+				newAction.Tokens = append(newAction.Tokens, tx.Tokens...)
+				return nil
+			},
+			Children: []Straw[BubbleLiquidityDeposit]{},
+		},
+		{
+			CheckFuncs: []bubbleCheck{IsJettonTransfer},
+			Builder: func(newAction *BubbleLiquidityDeposit, bubble *Bubble) error {
+				jettonTx := bubble.Info.(BubbleJettonTransfer)
+				if jettonTx.isWrappedTon {
+					newAction.Tokens = append(newAction.Tokens, core.VaultDepositInfo{
+						Price: core.Price{
+							Currency: core.Currency{
+								Type: core.CurrencyTON,
+							},
+							Amount: big.Int(jettonTx.amount),
+						},
+						Vault: jettonTx.recipient.Address,
+					})
+				} else {
+					newAction.Tokens = append(newAction.Tokens, core.VaultDepositInfo{
+						Price: core.Price{
+							Currency: core.Currency{
+								Type:   core.CurrencyJetton,
+								Jetton: &jettonTx.master,
+							},
+							Amount: big.Int(jettonTx.amount),
+						},
+						Vault: jettonTx.recipientWallet,
+					})
+				}
+				return nil
+			},
+			SingleChild: &Straw[BubbleLiquidityDeposit]{
+				CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.StonfiProvideLpV2MsgOp)},
+				SingleChild: &Straw[BubbleLiquidityDeposit]{
+					CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.StonfiAddLiquidityV2MsgOp)},
+					Children: []Straw[BubbleLiquidityDeposit]{
+						{
+							CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.ExcessMsgOp)},
+							Builder: func(newAction *BubbleLiquidityDeposit, bubble *Bubble) error {
+								tx := bubble.Info.(BubbleTx)
+								newAction.Success = tx.success
+								return nil
+							},
+						},
+						{
+							Optional:   true,
+							CheckFuncs: []bubbleCheck{Is(BubbleContractDeploy{})},
+						},
+					},
+				},
+			},
+		},
+	},
+}

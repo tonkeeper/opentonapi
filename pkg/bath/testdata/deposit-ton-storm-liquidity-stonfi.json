@@ -1,0 +1,116 @@
+{
+   "Actions": [
+     {
+       "LiquidityDepositAction": {
+         "Protocol": {
+           "Name": "stonfi",
+           "Image": "https://static.ston.fi/favicon/android-chrome-192x192.png"
+         },
+         "From": "0:99634b71f8c105eaeb7e46f52a0b823dc150a029b8301cfca542a19cf6036b08",
+         "Tokens": [
+           {
+             "Price": {
+               "Currency": {
+                 "Type": "native",
+                 "Jetton": null,
+                 "CurrencyID": null
+               },
+               "Amount": 156659100382
+             },
+             "Vault": "0:720032f945ad9d95dacc48172d81f4a6d97d96d4feb53555b64580dbf1e24d24"
+           },
+           {
+             "Price": {
+               "Currency": {
+                 "Type": "jetton",
+                 "Jetton": "0:6ca2c99c66b0fa1478a303ba9618bc39c28fda1fc50de37e618bddf98c9fd24c",
+                 "CurrencyID": null
+               },
+               "Amount": 33975435020400
+             },
+             "Vault": "0:61b2678a5d4c2db1e24382d875429662560d29d1988ea31147ccdda0fb2c253b"
+           }
+         ]
+       },
+       "Success": true,
+       "Type": "LiquidityDeposit",
+       "BaseTransactions": [
+         "8a42b2fea62bf92442f250ae9f20ff466e753890d4665933af0a6a2b55596dea",
+         "205d32c57b886d297d96c6a0f80b587c1a34354849eaf34f1582009b29b1a5c1",
+         "48fd4420b6f7c8296014b973a6ea5da78deef59182cd24e09b771cc1597ae6bc",
+         "8ec561ed1e61132c7a2724353177ca3ef531e279e9c4a6e6c8a60b218d862c6b",
+         "9d08aef76734353deafc115ab0dd94ca9c5aa03834b7b018fc634c0266edcd78",
+         "f68689c2817bdc3f7304506d93059bd1820294071264145761dd56cc45b43301",
+         "3db0c9bfb9ad1944f55ef35ac90245b03c82b4a797726b94bfff93c84d84943b",
+         "2df1fb15028868515e57f1a4e2c46590011fd90a6c7c3b37f30ba2e482f434ed",
+         "a1834d1e9a8f69533a5c81c6dd2c6262fb562a7428fd462bb92b0d7507996d17",
+         "7b4a28e26ccb8355e5e1405a45ffd3c4c2f90b5ba53855d9f4d7a4b882349ff8",
+         "1cace76058240b71229d2708fdf2b84cf6062bdc589a2053ee304d22f28a38c5",
+         "b7cc7385b38a1bbbe028b822f442d27b6c0e88891335cbd90606e18630834c66",
+         "2c817cdd296329cbb05c95b6648ab72743657712c619f29781678ad489e4ad16",
+         "b2a90eb046b930e4c2c0557b082cd904b11e599939e1a591f4c8730de8fcea38",
+         "e20d7ac3250d6ae6cdb31cadd773ca058b75161ddb4c8adb866c0d24b3c65c0b"
+       ]
+     }
+   ],
+   "Accounts": [
+     {
+       "Account": "0:04ff99d9ad3be7c33a38a4894d393c915e70acd958df3f575e85d998489bf0de",
+       "Ton": 6884648,
+       "Fee": 3515352,
+       "Jettons": null
+     },
+     {
+       "Account": "0:3dabdc9f1c1e88906007860b5a9eb15e888209a114c95b28a5ecd398635f9fc5",
+       "Ton": 0,
+       "Fee": 7282400,
+       "Jettons": null
+     },
+     {
+       "Account": "0:61b2678a5d4c2db1e24382d875429662560d29d1988ea31147ccdda0fb2c253b",
+       "Ton": -2,
+       "Fee": 5620402,
+       "Jettons": null
+     },
+     {
+       "Account": "0:720032f945ad9d95dacc48172d81f4a6d97d96d4feb53555b64580dbf1e24d24",
+       "Ton": 0,
+       "Fee": 18501605,
+       "Jettons": [
+         {
+           "Address": "0:6ca2c99c66b0fa1478a303ba9618bc39c28fda1fc50de37e618bddf98c9fd24c",
+           "Quantity": 33975435020400
+         }
+       ]
+     },
+     {
+       "Account": "0:7321efca606adece6492dee6bd6ee3343fcbf31273050ebb2fd69ac59f03f8de",
+       "Ton": 156659100382,
+       "Fee": 4235202,
+       "Jettons": null
+     },
+     {
+       "Account": "0:7de57e6ee41ee97eb8b8aed881e320e488c8767ecb16ff688438414a7cb9807a",
+       "Ton": 0,
+       "Fee": 25747204,
+       "Jettons": null
+     },
+     {
+       "Account": "0:99634b71f8c105eaeb7e46f52a0b823dc150a029b8301cfca542a19cf6036b08",
+       "Ton": -156744282405,
+       "Fee": 8091612,
+       "Jettons": [
+         {
+           "Address": "0:6ca2c99c66b0fa1478a303ba9618bc39c28fda1fc50de37e618bddf98c9fd24c",
+           "Quantity": -33975435020400
+         }
+       ]
+     },
+     {
+       "Account": "0:b7ce5f9edd8067065943de6621b497b2ea71583eeeae0e8d2490e51b1e8cf9ab",
+       "Ton": -2,
+       "Fee": 5303602,
+       "Jettons": null
+     }
+   ]
+ }
