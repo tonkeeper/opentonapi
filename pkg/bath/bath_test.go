@@ -202,6 +202,17 @@ func TestFindActions(t *testing.T) {
 			tongo.MustParseBlockID("(0,8000000000000000,55504556)"),
 			// ethena withdraw stake request
 			tongo.MustParseBlockID("(0,8000000000000000,55504824)"),
+			// deposit liquidity bidask ton + bmTON
+			tongo.MustParseBlockID("(0,2000000000000000,54478860)"),
+			tongo.MustParseBlockID("(0,e000000000000000,54137670)"),
+			tongo.MustParseBlockID("(0,6000000000000000,54491689)"),
+			tongo.MustParseBlockID("(0,2000000000000000,54478869)"),
+			//// deposit liquidity bidask ton + bmTON with refund
+			tongo.MustParseBlockID("(0,8000000000000000,56013085)"),
+			// deposit liquidity bidask usdt
+			tongo.MustParseBlockID("(0,8000000000000000,55134140)"),
+			// deposit liquidity bidask hydra + usdt
+			tongo.MustParseBlockID("(0,8000000000000000,56246091)"),
 			// bidask swap
 			tongo.MustParseBlockID("(0,8000000000000000,56384438)"),
 			tongo.MustParseBlockID("(0,8000000000000000,56435662)"),
@@ -547,6 +558,26 @@ func TestFindActions(t *testing.T) {
 			name:           "ethena withdraw stake request",
 			hash:           "b8336722a26a86e03b986e9c8207b94a31105e75115af62649e1a95e0d4033bc",
 			filenamePrefix: "ethena-withdraw-stake-request",
+		},
+		{
+			name:           "deposit both ton + bmTON liquidity bidask",
+			hash:           "bebf12180fa2e0a548ede0bc2aa9d3d4169eef4500f52fdff2e08238be33f6a4",
+			filenamePrefix: "deposit-both-ton-bmton-liquidity-bidask",
+		},
+		{
+			name:           "deposit both ton + bmTON liquidity bidask with refund",
+			hash:           "0f80ada2a5f96e615c85039a92b860e1237cf956e7b440acf2a904e11f061aa8",
+			filenamePrefix: "deposit-both-ton-bmton-liquidity-bidask-with-refund",
+		},
+		{
+			name:           "deposit usdt liquidity bidask",
+			hash:           "3c3981df59c333abb8d0b3aeb11c75889f4403870bb2afa9353ffde2fb2b718a",
+			filenamePrefix: "deposit-usdt-liquidity-bidask",
+		},
+		{
+			name:           "deposit hydra + usdt liquidity bidask",
+			hash:           "705b8261a3ba7790220233d81726131c4ab051396ea69b97e1340d5224de65f7",
+			filenamePrefix: "deposit-hydra-usdt-liquidity-bidask",
 		},
 		{
 			name:           "bidask usdt usde swap",

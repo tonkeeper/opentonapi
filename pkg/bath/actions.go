@@ -47,6 +47,7 @@ const (
 	AddExtension              ActionType = "AddExtension"
 	RemoveExtension           ActionType = "RemoveExtension"
 	SetSignatureAllowed       ActionType = "SetSignatureAllowed"
+	LiquidityDeposit          ActionType = "LiquidityDeposit"
 	Unknown                   ActionType = "Unknown"
 )
 
@@ -99,6 +100,7 @@ type (
 		AddExtension              *AddExtensionAction              `json:",omitempty"`
 		RemoveExtension           *RemoveExtensionAction           `json:",omitempty"`
 		SetSignatureAllowed       *SetSignatureAllowedAction       `json:",omitempty"`
+		LiquidityDepositAction    *LiquidityDepositAction          `json:",omitempty"`
 		Success                   bool
 		Type                      ActionType
 		Error                     *string `json:",omitempty"`
@@ -267,6 +269,12 @@ type (
 		Wallet           tongo.AccountID
 		SignatureAllowed bool
 	}
+
+	LiquidityDepositAction struct {
+		Protocol core.Protocol
+		From     tongo.AccountID
+		Tokens   []core.VaultDepositInfo
+	}
 )
 
 func (a Action) String() string {
@@ -374,6 +382,17 @@ func (a Action) ContributeToExtra(account tongo.AccountID) int64 {
 		return 0
 	case WithdrawStake:
 		return detectDirection(account, a.WithdrawStake.Pool, a.WithdrawStake.Staker, a.WithdrawStake.Amount)
+	case LiquidityDeposit:
+		extra := int64(0)
+		for _, token := range a.LiquidityDepositAction.Tokens {
+			if account == a.LiquidityDepositAction.From && token.Price.Currency.Type == core.CurrencyTON {
+				extra -= token.Price.Amount.Int64()
+			}
+			if account == token.Vault && token.Price.Currency.Type == core.CurrencyTON {
+				extra += token.Price.Amount.Int64()
+			}
+		}
+		return extra
 	default:
 		panic("unknown action type")
 	}
@@ -406,6 +425,7 @@ func (a Action) IsSubject(account tongo.AccountID) bool {
 		a.AddExtension,
 		a.RemoveExtension,
 		a.SetSignatureAllowed,
+		a.LiquidityDepositAction,
 	} {
 		if i != nil && !reflect.ValueOf(i).IsNil() {
 			return slices.Contains(i.SubjectAccounts(), account)
@@ -524,4 +544,13 @@ func (a *WithdrawStakeRequestAction) SubjectAccounts() []tongo.AccountID {
 
 func (a *PurchaseAction) SubjectAccounts() []tongo.AccountID {
 	return []tongo.AccountID{a.Source, a.Destination}
+}
+
+func (a *LiquidityDepositAction) SubjectAccounts() []tongo.AccountID {
+	accounts := make([]tongo.AccountID, 0, 3)
+	accounts = append(accounts, a.From)
+	for _, token := range a.Tokens {
+		accounts = append(accounts, token.Vault)
+	}
+	return accounts
 }

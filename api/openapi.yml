@@ -5729,6 +5729,18 @@ components:
         - extra_currency
         - jetton
         - fiat
+    VaultDepositInfo:
+      type: object
+      required:
+        - price
+        - vault
+      properties:
+        price:
+          $ref: "#/components/schemas/Price"
+        vault:
+          type: string
+          format: address
+          example: 0:0BB5A9F69043EEBDDA5AD2E946EB953242BD8F603FE795D90698CEEC6BFC60A0
     Price:
       type: object
       required:
@@ -6094,6 +6106,7 @@ components:
             - GasRelay
             - DepositTokenStake
             - WithdrawTokenStakeRequest
+            - LiquidityDeposit
             - Unknown
         status:
           type: string
@@ -6153,6 +6166,8 @@ components:
           $ref: '#/components/schemas/DepositTokenStakeAction'
         WithdrawTokenStakeRequest:
           $ref: '#/components/schemas/WithdrawTokenStakeRequestAction'
+        LiquidityDeposit:
+          $ref: '#/components/schemas/LiquidityDepositAction'
         simple_preview:
           $ref: '#/components/schemas/ActionSimplePreview'
         base_transactions:
@@ -6708,6 +6723,21 @@ components:
           $ref: '#/components/schemas/Protocol'
         stake_meta:
           $ref: '#/components/schemas/Price'
+    LiquidityDepositAction:
+      type: object
+      required:
+        - protocol
+        - from
+        - tokens
+      properties:
+        protocol:
+          $ref: '#/components/schemas/Protocol'
+        from:
+          $ref: '#/components/schemas/AccountAddress'
+        tokens:
+          type: array
+          items:
+            $ref: '#/components/schemas/VaultDepositInfo'
     ActionSimplePreview:
       type: object
       description: shortly describes what this action is about.
