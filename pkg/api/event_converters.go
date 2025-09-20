@@ -92,7 +92,7 @@ func (h *Handler) convertRisk(ctx context.Context, risk wallet.Risk, walletAddre
 			return oas.Risk{}, fmt.Errorf("can't calculate risk: %w", err)
 		}
 		var prs bool
-		curPrice, prs = todayRates[*currency]
+		curPrice, prs = todayRates[strings.ToUpper(*currency)]
 		if !prs {
 			return oas.Risk{}, fmt.Errorf("can't calculate risk: unknown currency")
 		}
