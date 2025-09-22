@@ -9,6 +9,7 @@ const (
 var (
 	EthenaImage = "https://ethena.fi/shared/usde.png"
 	BidaskImage = "https://bidask.finance/assets/landing/bidask-logo.webp"
+	StonfiImage = "https://static.ston.fi/favicon/android-chrome-192x192.png"
 )
 
 var (

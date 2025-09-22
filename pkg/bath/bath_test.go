@@ -224,6 +224,8 @@ func TestFindActions(t *testing.T) {
 			tongo.MustParseBlockID("(0,8000000000000000,56804640)"),
 			tongo.MustParseBlockID("(0,8000000000000000,56834937)"),
 			tongo.MustParseBlockID("(0,8000000000000000,56349139)"),
+			// liquidity deposit stonfi
+			tongo.MustParseBlockID("(0,8000000000000000,57142299)"),
 		}),
 	)
 
@@ -628,6 +630,11 @@ func TestFindActions(t *testing.T) {
 			name:           "new withdraw stake request",
 			hash:           "444e275c0fc0e8d76f2075363ff2bdc8756f315c2e159bda0c5e40b899260e07",
 			filenamePrefix: "new-withdraw-stake-request",
+		},
+		{
+			name:           "deposit ton + storm liquidity stonfi",
+			hash:           "3db0c9bfb9ad1944f55ef35ac90245b03c82b4a797726b94bfff93c84d84943b",
+			filenamePrefix: "deposit-ton-storm-liquidity-stonfi",
 		},
 	} {
 		t.Run(c.name, func(t *testing.T) {
