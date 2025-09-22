@@ -329,6 +329,10 @@ var StonfiLiquidityDepositSingle = Straw[BubbleLiquidityDeposit]{
 		if body.CrossProvideLpBody.ToAddress != tx.sender.Address.ToMsgAddress() { // todo support liquidity deposit with farming
 			return false
 		}
+		_, ok = references.StonfiWhitelistVaults[tx.recipient.Address]
+		if !ok {
+			return false
+		}
 		return true
 	}},
 	Builder: func(newAction *BubbleLiquidityDeposit, bubble *Bubble) error {

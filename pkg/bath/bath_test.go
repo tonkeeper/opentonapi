@@ -226,7 +226,6 @@ func TestFindActions(t *testing.T) {
 			tongo.MustParseBlockID("(0,8000000000000000,56349139)"),
 			// liquidity deposit stonfi
 			tongo.MustParseBlockID("(0,8000000000000000,57142299)"),
-			tongo.MustParseBlockID("(0,8000000000000000,57115822)"),
 		}),
 	)
 
