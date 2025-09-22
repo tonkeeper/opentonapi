@@ -320,7 +320,17 @@ var StonfiSwapV2Straw = Straw[BubbleJettonSwap]{
 }
 
 var StonfiLiquidityDepositSingle = Straw[BubbleLiquidityDeposit]{
-	CheckFuncs: []bubbleCheck{IsJettonTransfer},
+	CheckFuncs: []bubbleCheck{IsJettonTransfer, func(bubble *Bubble) bool {
+		tx := bubble.Info.(BubbleJettonTransfer)
+		body, ok := tx.payload.Value.(abi.StonfiProvideLpV2JettonPayload)
+		if !ok {
+			return false
+		}
+		if body.CrossProvideLpBody.ToAddress != tx.sender.Address.ToMsgAddress() { // todo support liquidity deposit with farming
+			return false
+		}
+		return true
+	}},
 	Builder: func(newAction *BubbleLiquidityDeposit, bubble *Bubble) error {
 		jettonTx := bubble.Info.(BubbleJettonTransfer)
 		newAction.Protocol = core.Protocol{
@@ -353,12 +363,12 @@ var StonfiLiquidityDepositSingle = Straw[BubbleLiquidityDeposit]{
 		return nil
 	},
 	SingleChild: &Straw[BubbleLiquidityDeposit]{
-		CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.StonfiProvideLpV2MsgOp)},
+		CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.StonfiProvideLpV2MsgOp), HasInterface(abi.StonfiPoolV2)},
 		SingleChild: &Straw[BubbleLiquidityDeposit]{
 			CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.StonfiAddLiquidityV2MsgOp)},
 			Children: []Straw[BubbleLiquidityDeposit]{
 				{
-					CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.StonfiCbAddLiquidityV2MsgOp)},
+					CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.StonfiCbAddLiquidityV2MsgOp), HasInterface(abi.StonfiPoolV2)},
 					Children: []Straw[BubbleLiquidityDeposit]{
 						{
 							Optional:   true,
@@ -456,7 +466,7 @@ var StonfiLiquidityDepositBoth = Straw[BubbleLiquidityDeposit]{
 				return nil
 			},
 			SingleChild: &Straw[BubbleLiquidityDeposit]{
-				CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.StonfiProvideLpV2MsgOp)},
+				CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.StonfiProvideLpV2MsgOp), HasInterface(abi.StonfiPoolV2)},
 				SingleChild: &Straw[BubbleLiquidityDeposit]{
 					CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.StonfiAddLiquidityV2MsgOp)},
 					Children: []Straw[BubbleLiquidityDeposit]{
