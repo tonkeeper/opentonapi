@@ -1,0 +1,75 @@
+{
+   "Actions": [
+     {
+       "LiquidityDepositAction": {
+         "Protocol": {
+           "Name": "tonco",
+           "Image": "https://944447376-files.gitbook.io/~/files/v0/b/gitbook-x-prod.appspot.com/o/organizations%2FjyKbMe1BVBh1EqgAQK0P%2Fsites%2Fsite_6QWrH%2Ficon%2Fim0pZWixHKld0xOeSVnA%2Fweb-app-manifest-512x512.png?alt=media\u0026token=71ec5a42-b734-42ea-89d9-02a0caf1f2aa"
+         },
+         "From": "0:a24c5fd387aa704c75df0a2777c10df814d168cf5685af6fdd7542a926d53821",
+         "Tokens": [
+           {
+             "Price": {
+               "Currency": {
+                 "Type": "native",
+                 "Jetton": null,
+                 "CurrencyID": null
+               },
+               "Amount": 2665003787089
+             },
+             "Vault": "0:bffadd270a738531da7b13ba8fc403826c2586173f9ede9c316fab53bc59ac86"
+           }
+         ]
+       },
+       "Success": true,
+       "Type": "LiquidityDeposit",
+       "BaseTransactions": [
+         "263aa308533e15015f10458550bacb49a080fd4bac3a48dc56f80a9bd383fdaf",
+         "77b9ef55a5c3f148f0b0ae23f9560d0ca2b3ff16cb16aa7bbacf1c834e14d3a7",
+         "7def8a71c18dd250bd8817a46551ec831c38909695a45a8dbdb23a0569a8310f",
+         "57806fdcb34c716142405d77db4c42c2e6833011d71402218b5a965b99639544",
+         "40179df067b4f493663f43062d54d1574f8b8e53f33e480c5a1ef88b5f075758",
+         "5ccf2564418187b3c03d1587c024f086be722294b1892ee9bd97cb2c10306c2f",
+         "1b8346742b9053ea6a13aed2a524eef1fec8f7db79c7fedeb6070908319d610c"
+       ]
+     }
+   ],
+   "Accounts": [
+     {
+       "Account": "0:03e24d384e114e0809bde2eb750391782af8d448e8d0d18bf5e0ed53352178fa",
+       "Ton": 25698000,
+       "Fee": 2118000,
+       "Jettons": null
+     },
+     {
+       "Account": "0:871da9215b14902166f0ea2a16db56278d528108377f8158c5f4ccfdfdd22e17",
+       "Ton": 2665003787089,
+       "Fee": 3903607,
+       "Jettons": null
+     },
+     {
+       "Account": "0:a24c5fd387aa704c75df0a2777c10df814d168cf5685af6fdd7542a926d53821",
+       "Ton": -2665092251051,
+       "Fee": 3610034,
+       "Jettons": null
+     },
+     {
+       "Account": "0:bffadd270a738531da7b13ba8fc403826c2586173f9ede9c316fab53bc59ac86",
+       "Ton": -32,
+       "Fee": 10866032,
+       "Jettons": null
+     },
+     {
+       "Account": "0:ee5277958af99d473c25a710e16f08b813f032d6f493a5d41e2d6ec6707fa8f2",
+       "Ton": 0,
+       "Fee": 3444000,
+       "Jettons": null
+     },
+     {
+       "Account": "0:f6e6f4ad13073e875413d6a96c60f430a94e4888e868c79208d02ff1b0336931",
+       "Ton": 87109,
+       "Fee": 38737212,
+       "Jettons": null
+     }
+   ]
+ }

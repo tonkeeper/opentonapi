@@ -83,6 +83,9 @@ var DefaultStraws = []Merger{
 	MooncxSwapStraw,
 	MooncxSwapStrawReverse,
 	ToncoSwapStraw,
+	ToncoDepositLiquiditySingleStraw,
+	ToncoDepositLiquidityBothStraw,
+	ToncoDepositLiquidityWithRefundStraw,
 }
 
 var JettonTransferClassicStraw = Straw[BubbleJettonTransfer]{
