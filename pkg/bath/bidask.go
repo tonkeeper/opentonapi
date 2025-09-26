@@ -26,7 +26,11 @@ var BidaskSwapStraw = Straw[BubbleJettonSwap]{
 	SingleChild: &Straw[BubbleJettonSwap]{
 		CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.BidaskInternalSwapMsgOp), HasInterface(abi.BidaskRange)},
 		SingleChild: &Straw[BubbleJettonSwap]{
-			CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.BidaskSwapSuccessMsgOp), HasInterface(abi.BidaskPool)},
+			CheckFuncs: []bubbleCheck{
+				IsTx,
+				Or(HasOperation(abi.BidaskSwapSuccessMsgOp), HasOperation(abi.BidaskSwapSuccessV2MsgOp)),
+				HasInterface(abi.BidaskPool),
+			},
 			SingleChild: &Straw[BubbleJettonSwap]{
 				CheckFuncs: []bubbleCheck{IsJettonTransfer},
 				Builder: func(newAction *BubbleJettonSwap, bubble *Bubble) error {
@@ -67,7 +71,11 @@ var BidaskSwapStrawReverse = Straw[BubbleJettonSwap]{
 	SingleChild: &Straw[BubbleJettonSwap]{
 		CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.BidaskInternalSwapMsgOp), HasInterface(abi.BidaskRange)},
 		SingleChild: &Straw[BubbleJettonSwap]{
-			CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.BidaskSwapSuccessMsgOp), HasInterface(abi.BidaskPool)},
+			CheckFuncs: []bubbleCheck{
+				IsTx,
+				Or(HasOperation(abi.BidaskSwapSuccessMsgOp), HasOperation(abi.BidaskSwapSuccessV2MsgOp)),
+				HasInterface(abi.BidaskPool),
+			},
 			SingleChild: &Straw[BubbleJettonSwap]{
 				CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.BidaskNativeTransferNotificationMsgOp)},
 				Builder: func(newAction *BubbleJettonSwap, bubble *Bubble) error {
@@ -111,7 +119,11 @@ var BidaskJettonSwapStraw = Straw[BubbleJettonSwap]{
 	SingleChild: &Straw[BubbleJettonSwap]{
 		CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.BidaskInternalSwapMsgOp), HasInterface(abi.BidaskRange)},
 		SingleChild: &Straw[BubbleJettonSwap]{
-			CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.BidaskSwapSuccessMsgOp), HasInterface(abi.BidaskPool)},
+			CheckFuncs: []bubbleCheck{
+				IsTx,
+				Or(HasOperation(abi.BidaskSwapSuccessMsgOp), HasOperation(abi.BidaskSwapSuccessV2MsgOp)),
+				HasInterface(abi.BidaskPool),
+			},
 			SingleChild: &Straw[BubbleJettonSwap]{
 				CheckFuncs: []bubbleCheck{IsJettonTransfer},
 				Builder: func(newAction *BubbleJettonSwap, bubble *Bubble) error {
