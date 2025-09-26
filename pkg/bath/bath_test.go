@@ -217,6 +217,7 @@ func TestFindActions(t *testing.T) {
 			tongo.MustParseBlockID("(0,8000000000000000,56384438)"),
 			tongo.MustParseBlockID("(0,8000000000000000,56435662)"),
 			tongo.MustParseBlockID("(0,8000000000000000,56435563)"),
+			tongo.MustParseBlockID("(0,8000000000000000,57372589)"),
 			// mooncx swap
 			tongo.MustParseBlockID("(0,8000000000000000,56398081)"),
 			tongo.MustParseBlockID("(0,8000000000000000,56397942)"),
@@ -595,6 +596,11 @@ func TestFindActions(t *testing.T) {
 			name:           "bidask ton usdt swap",
 			hash:           "f1cc8a4b6108c27df57a92ddb84fb25ed4f1f866c6b10c75905f34903f47edcf",
 			filenamePrefix: "bidask-ton-usdt-swap",
+		},
+		{
+			name:           "bidask v2 usdt ton swap",
+			hash:           "8ab5cc797da6d5788ad68fc48f1ec15ee4b3a1df75c918fae2376461f2690918",
+			filenamePrefix: "bidask-v2-usdt-ton-swap",
 		},
 		{
 			name:           "mooncx usdt-ton swap",
