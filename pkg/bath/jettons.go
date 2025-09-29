@@ -122,9 +122,15 @@ func (b BubbleJettonBurn) ToAction() (action *Action) {
 var JettonMintFromMasterStraw = Straw[BubbleJettonMint]{
 	CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.JettonInternalTransferMsgOp), HasInterface(abi.JettonWallet), func(bubble *Bubble) bool {
 		tx := bubble.Info.(BubbleTx)
+		if tx.inputFrom != nil && !tx.inputFrom.Is(abi.JettonMaster) {
+			return false
+		}
+		_, ok := tx.decodedBody.Value.(abi.JettonMintMsgBody)
+		if !ok {
+			return false
+		}
 		return tx.inputFrom != nil && tx.inputFrom.Is(abi.JettonMaster)
 	}},
-
 	Builder: func(newAction *BubbleJettonMint, bubble *Bubble) error {
 		tx := bubble.Info.(BubbleTx)
 		msg := tx.decodedBody.Value.(abi.JettonInternalTransferMsgBody)
@@ -132,22 +138,20 @@ var JettonMintFromMasterStraw = Straw[BubbleJettonMint]{
 		newAction.master = tx.inputFrom.Address
 		newAction.recipientWallet = tx.account.Address
 		newAction.success = tx.success
+		body := tx.decodedBody.Value.(abi.JettonMintMsgBody)
+		dest, err := tongo.AccountIDFromTlb(body.ToAddress)
+		if err == nil && dest != nil {
+			newAction.recipient = Account{Address: *dest}
+		}
 		return nil
 	},
+	ValueFlowUpdater: func(newAction *BubbleJettonMint, flow *ValueFlow) {
+		if newAction.success && newAction.recipient.Addr() != nil {
+			flow.AddJettons(newAction.recipient.Address, newAction.master, big.Int(newAction.amount))
+		}
+	},
 	Children: []Straw[BubbleJettonMint]{
-		{
-			CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.JettonNotifyMsgOp)},
-			Builder: func(newAction *BubbleJettonMint, bubble *Bubble) error {
-				tx := bubble.Info.(BubbleTx)
-				newAction.recipient = tx.account
-				return nil
-			},
-			ValueFlowUpdater: func(newAction *BubbleJettonMint, flow *ValueFlow) {
-				if newAction.success {
-					flow.AddJettons(newAction.recipient.Address, newAction.master, big.Int(newAction.amount))
-				}
-			},
-		},
+		{CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.JettonNotifyMsgOp)}, Optional: true},
 		{CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.ExcessMsgOp)}, Optional: true},
 	},
 }
