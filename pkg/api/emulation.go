@@ -365,43 +365,13 @@ func EmulatedTreeToTrace(
 				Item:     *item,
 			}
 		case abi.GetPoolData_StonfiResult:
-			t0, err0 := ton.AccountIDFromTlb(data.Token0Address)
-			t1, err1 := ton.AccountIDFromTlb(data.Token1Address)
-			if err1 != nil || err0 != nil {
-				continue
-			}
-			additionalInfo.STONfiPool = &core.STONfiPool{
-				Token0: *t0,
-				Token1: *t1,
-			}
-			for _, accountID := range []ton.AccountID{*t0, *t1} {
-				_, value, err := abi.GetWalletData(ctx, sharedExecutor, accountID)
-				if err != nil {
-					continue
-				}
-				data := value.(abi.GetWalletDataResult)
-				master, _ := ton.AccountIDFromTlb(data.Jetton)
-				additionalInfo.SetJettonMaster(accountID, *master)
-			}
+			getAdditionalInfoStonfi(ctx, sharedExecutor, additionalInfo, data.Token0Address, data.Token1Address)
 		case abi.GetPoolData_StonfiV2Result:
-			t0, err0 := ton.AccountIDFromTlb(data.Token0WalletAddress)
-			t1, err1 := ton.AccountIDFromTlb(data.Token1WalletAddress)
-			if err1 != nil || err0 != nil {
-				continue
-			}
-			additionalInfo.STONfiPool = &core.STONfiPool{
-				Token0: *t0,
-				Token1: *t1,
-			}
-			for _, accountID := range []ton.AccountID{*t0, *t1} {
-				_, value, err := abi.GetWalletData(ctx, sharedExecutor, accountID)
-				if err != nil {
-					continue
-				}
-				data := value.(abi.GetWalletDataResult)
-				master, _ := ton.AccountIDFromTlb(data.Jetton)
-				additionalInfo.SetJettonMaster(accountID, *master)
-			}
+			getAdditionalInfoStonfi(ctx, sharedExecutor, additionalInfo, data.Token0WalletAddress, data.Token1WalletAddress)
+		case abi.GetPoolData_StonfiV2StableswapResult:
+			getAdditionalInfoStonfi(ctx, sharedExecutor, additionalInfo, data.Token0WalletAddress, data.Token1WalletAddress)
+		case abi.GetPoolData_StonfiV2WeightedStableswapResult:
+			getAdditionalInfoStonfi(ctx, sharedExecutor, additionalInfo, data.Token0WalletAddress, data.Token1WalletAddress)
 		case abi.GetPaymentInfo_SubscriptionV2Result:
 			if additionalInfo.SubscriptionInfo == nil {
 				additionalInfo.SubscriptionInfo = &core.SubscriptionInfo{
@@ -432,4 +402,25 @@ func EmulatedTreeToTrace(
 	}
 	t.SetAdditionalInfo(additionalInfo)
 	return t, nil
+}
+
+func getAdditionalInfoStonfi(ctx context.Context, sharedExecutor *shardsAccountExecutor, additionalInfo *core.TraceAdditionalInfo, token0, token1 tlb.MsgAddress) {
+	t0, err0 := ton.AccountIDFromTlb(token0)
+	t1, err1 := ton.AccountIDFromTlb(token1)
+	if err1 != nil || err0 != nil {
+		return
+	}
+	additionalInfo.STONfiPool = &core.STONfiPool{
+		Token0: *t0,
+		Token1: *t1,
+	}
+	for _, accountID := range []ton.AccountID{*t0, *t1} {
+		_, value, err := abi.GetWalletData(ctx, sharedExecutor, accountID)
+		if err != nil {
+			continue
+		}
+		data := value.(abi.GetWalletDataResult)
+		master, _ := ton.AccountIDFromTlb(data.Jetton)
+		additionalInfo.SetJettonMaster(accountID, *master)
+	}
 }
