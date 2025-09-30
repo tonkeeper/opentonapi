@@ -42,14 +42,14 @@ var DefaultStraws = []Merger{
 	JettonTransferMinimalStraw,
 	JettonBurnStraw,
 	WtonMintStraw, //10
-	NftPurchaseStraw,
+	//NftPurchaseStraw, //temporary disabled until android update
 	StonfiSwapStraw,
 	StonfiSwapV2Straw,
 	UniversalDedustStraw{},
 	TgAuctionV1InitialBidStraw, //15
 	StrawAuctionBigGetgems,
-	StrawAuctionBuyGetgems,
-	StrawAuctionBuyFragments,
+	//StrawAuctionBuyGetgems, //temporary disabled until android update
+	//StrawAuctionBuyFragments, //temporary disabled until android update
 	JettonMintFromMasterStraw,
 	JettonMintStrawGovernance,
 	InvoicePaymentStrawNative,
