@@ -20,7 +20,6 @@ import (
 	"github.com/tonkeeper/tongo/tlb"
 	"github.com/tonkeeper/tongo/ton"
 	"golang.org/x/exp/slog"
-	"golang.org/x/net/context"
 )
 
 // GetCurrentRates fetches current jetton and fiat rates
@@ -31,7 +30,7 @@ func (m *Mock) GetCurrentRates() (map[string]float64, error) {
 		beetroot   = "beetroot"
 		tsUSDe     = "tsUSDe"
 		USDe       = "USDe"
-		affUSDe    = "affUSDe"
+		affVaults  = "affVaults"
 		slpTokens  = "slp_tokens"
 	)
 
@@ -57,12 +56,12 @@ func (m *Mock) GetCurrentRates() (map[string]float64, error) {
 
 	// Retry helper to run a task up to 3 times with backoff
 	retry := func(label string, tonPrice float64, pools map[ton.AccountID]float64,
-		task func(context.Context, float64, map[ton.AccountID]float64) (map[ton.AccountID]float64, error),
+		task func(float64, map[ton.AccountID]float64) (map[ton.AccountID]float64, error),
 	) (map[ton.AccountID]float64, error) {
 		var err error
 		var result map[ton.AccountID]float64
 		for attempt := 1; attempt <= 3; attempt++ {
-			result, err = task(context.Background(), tonPrice, pools)
+			result, err = task(tonPrice, pools)
 			if err == nil {
 				return result, nil
 			}
@@ -83,7 +82,7 @@ func (m *Mock) GetCurrentRates() (map[string]float64, error) {
 	// Fetch prices for special jettons
 	priceFetchers := []struct {
 		label string
-		fetch func(context.Context, float64, map[ton.AccountID]float64) (map[ton.AccountID]float64, error)
+		fetch func(float64, map[ton.AccountID]float64) (map[ton.AccountID]float64, error)
 	}{
 		{tonstakers, m.getTonstakersPrice},
 		{bemo, m.getBemoPrice},
@@ -104,16 +103,16 @@ func (m *Mock) GetCurrentRates() (map[string]float64, error) {
 	// Fetch and merge prices for jettons from DEX
 	pools = m.getJettonPricesFromDex(pools)
 
-	// Fetch and merge SLP tokens prices
+	// Fetch and merge SLP tokens price
 	if slpPrices, err := retry(slpTokens, medianTonPrice, pools, m.getSlpTokensPrice); err == nil {
 		for account, price := range slpPrices {
 			pools[account] = price
 		}
 	}
 
-	// Fetch and merge affluent USDe price
-	if affUsdEPrice, err := retry(affUSDe, medianTonPrice, pools, m.getAffUsdEPrice); err == nil {
-		for account, price := range affUsdEPrice {
+	// Fetch and merge affluent vaults' prices
+	if vaultsPrices, err := retry(affVaults, medianTonPrice, pools, m.getAffVaultsPrices); err == nil {
+		for account, price := range vaultsPrices {
 			pools[account] = price
 		}
 	}
@@ -201,7 +200,7 @@ type ExecutionResult struct {
 }
 
 // getBemoPrice fetches BEMO price by smart contract data
-func (m *Mock) getBemoPrice(_ context.Context, _ float64, _ map[ton.AccountID]float64) (map[ton.AccountID]float64, error) {
+func (m *Mock) getBemoPrice(_ float64, _ map[ton.AccountID]float64) (map[ton.AccountID]float64, error) {
 	prices := make(map[ton.AccountID]float64)
 	accounts := []ton.AccountID{references.BemoAccountOld, references.BemoAccountNew}
 	headers := http.Header{"Content-Type": {"application/json"}}
@@ -234,7 +233,7 @@ func (m *Mock) getBemoPrice(_ context.Context, _ float64, _ map[ton.AccountID]fl
 }
 
 // getTonstakersPrice fetches Tonstakers price by smart contract data
-func (m *Mock) getTonstakersPrice(_ context.Context, _ float64, _ map[ton.AccountID]float64) (map[ton.AccountID]float64, error) {
+func (m *Mock) getTonstakersPrice(_ float64, _ map[ton.AccountID]float64) (map[ton.AccountID]float64, error) {
 	url := fmt.Sprintf("https://tonapi.io/v2/blockchain/accounts/%v/methods/get_pool_full_data", references.TonstakersAccountPool.ToRaw())
 	headers := http.Header{"Content-Type": {"application/json"}}
 	respBody, err := sendRequest(url, m.TonApiToken, headers)
@@ -265,7 +264,7 @@ func (m *Mock) getTonstakersPrice(_ context.Context, _ float64, _ map[ton.Accoun
 }
 
 // getTonstakersPrice fetches Beetroot price by smart contract data
-func (m *Mock) getBeetrootPrice(_ context.Context, tonPrice float64, _ map[ton.AccountID]float64) (map[ton.AccountID]float64, error) {
+func (m *Mock) getBeetrootPrice(tonPrice float64, _ map[ton.AccountID]float64) (map[ton.AccountID]float64, error) {
 	if tonPrice == 0 {
 		return nil, errors.New("unknown TON price")
 	}
@@ -295,7 +294,7 @@ func (m *Mock) getBeetrootPrice(_ context.Context, tonPrice float64, _ map[ton.A
 }
 
 // getTonstakersPrice fetches tsUSDe price by smart contract data
-func (m *Mock) getTsUSDePrice(_ context.Context, tonPrice float64, _ map[ton.AccountID]float64) (map[ton.AccountID]float64, error) {
+func (m *Mock) getTsUSDePrice(tonPrice float64, _ map[ton.AccountID]float64) (map[ton.AccountID]float64, error) {
 	if tonPrice == 0 {
 		return nil, errors.New("unknown TON price")
 	}
@@ -326,7 +325,7 @@ func (m *Mock) getTsUSDePrice(_ context.Context, tonPrice float64, _ map[ton.Acc
 	return map[ton.AccountID]float64{account: price}, nil
 }
 
-func (m *Mock) getUsdEPrice(_ context.Context, tonPrice float64, _ map[ton.AccountID]float64) (map[ton.AccountID]float64, error) {
+func (m *Mock) getUsdEPrice(tonPrice float64, _ map[ton.AccountID]float64) (map[ton.AccountID]float64, error) {
 	if tonPrice == 0 {
 		return nil, errors.New("unknown TON price")
 	}
@@ -361,220 +360,8 @@ func (m *Mock) getUsdEPrice(_ context.Context, tonPrice float64, _ map[ton.Accou
 	return map[ton.AccountID]float64{account: price}, nil
 }
 
-func (m *Mock) getAffUsdEPrice(ctx context.Context, tonPrice float64, pools map[ton.AccountID]float64) (map[ton.AccountID]float64, error) {
-	if tonPrice == 0 {
-		return nil, errors.New("unknown TON price")
-	}
-
-	type GetVaultDataExecutionResult struct {
-		Success  bool `json:"success"`
-		ExitCode int  `json:"exit_code"`
-		Decoded  struct {
-			AffluentVaultData struct {
-				Assets         boc.Cell   `json:"assets"`
-				FactorialPools boc.Cell   `json:"factorial_pools"`
-				TotalSupply    tlb.Int257 `json:"total_supply"`
-			} `json:"affluent_vault_data"`
-		} `json:"decoded"`
-	}
-	type Assets struct {
-		TotalSupply  tlb.Int257     `json:"total_supply"`
-		TotalBorrow  tlb.Int257     `json:"total_borrow"`
-		SupplyShare  tlb.Int257     `json:"supply_share"`
-		BorrowShare  tlb.Int257     `json:"borrow_share"`
-		AssetAddress tlb.MsgAddress `json:"asset_address"`
-	}
-	type GetPoolDataExecutionResult struct {
-		Success  bool `json:"success"`
-		ExitCode int  `json:"exit_code"`
-		Decoded  struct {
-			Assets []Assets `json:"assets"`
-		} `json:"decoded"`
-	}
-	type Metadata struct {
-		Metadata struct {
-			Symbol   string `json:"symbol"`
-			Decimals string `json:"decimals"`
-		} `json:"metadata"`
-	}
-
-	getAssetMetadata := func(rawAddress string) (Metadata, error) {
-		url := fmt.Sprintf("https://tonapi.io/v2/jettons/%v", rawAddress)
-		headers := http.Header{"Content-Type": {"application/json"}}
-		respBody, err := sendRequest(url, m.TonApiToken, headers)
-		if err != nil {
-			return Metadata{}, err
-		}
-		var result Metadata
-		if err = json.Unmarshal(respBody, &result); err != nil {
-			return Metadata{}, err
-		}
-		return result, nil
-	}
-
-	isVaultAssets := func(metadata Metadata) (bool, error) {
-		return strings.HasPrefix(metadata.Metadata.Symbol, references.AffluentAssetPrefix), nil
-	}
-
-	assetAddress := references.AffUSDeVault
-	if ctx.Value("assetAddress") != nil {
-		assetAddress = ctx.Value("assetAddress").(string)
-	}
-	url := fmt.Sprintf("https://tonapi.io/v2/blockchain/accounts/%v/methods/get_vault_data", assetAddress)
-	headers := http.Header{"Content-Type": {"application/json"}}
-	respBody, err := sendRequest(url, m.TonApiToken, headers)
-	if err != nil {
-		return nil, err
-	}
-	var result GetVaultDataExecutionResult
-	if err = json.Unmarshal(respBody, &result); err != nil {
-		return nil, err
-	}
-	if !result.Success {
-		return nil, errors.New("invalid data")
-	}
-
-	assetTotalSupply := big.Int(result.Decoded.AffluentVaultData.TotalSupply)
-	assetTotalSupplyAmount, _ := assetTotalSupply.Float64()
-
-	affMetadata, err := getAssetMetadata(references.AffUSDeVault)
-	if err != nil {
-		return nil, err
-	}
-	affDecimals, err := strconv.ParseInt(affMetadata.Metadata.Decimals, 10, 64)
-
-	valueSum := 0.0
-	var assets tlb.Hashmap[AddressKey, abi.AssetData]
-	if err := tlb.Unmarshal(&result.Decoded.AffluentVaultData.Assets, &assets); err != nil {
-		return nil, errors.New("invalid factorial pools")
-	}
-
-	for _, asset := range assets.Items() {
-		rawAddress := fmt.Sprintf("%v:%v", asset.Key.Workchain, asset.Key.Hash.Hex())
-		addr, err := ton.ParseAccountID(rawAddress)
-		if err != nil {
-			return nil, err
-		}
-		assetMetadata, err := getAssetMetadata(rawAddress)
-		if err != nil {
-			return nil, err
-		}
-		isVaultAsset, err := isVaultAssets(assetMetadata)
-		if err != nil {
-			return nil, err
-		}
-		var assetPrice float64
-		if isVaultAsset {
-			assetPrices, err := m.getAffUsdEPrice(
-				context.WithValue(ctx, "assetAddress", rawAddress),
-				tonPrice,
-				pools,
-			)
-			if err != nil {
-				return nil, err
-			}
-			assetPrice = assetPrices[addr]
-		} else {
-			assetPrice = pools[addr]
-		}
-		assetDecimals, err := strconv.ParseInt(assetMetadata.Metadata.Decimals, 10, 64)
-		valueSum += float64(asset.Value.Cash) * assetPrice * math.Pow10(int(affDecimals-assetDecimals))
-	}
-
-	var factorialPools tlb.Hashmap[AddressKey, tlb.Maybe[tlb.Ref[tlb.Hashmap[AddressKey, abi.FactorialPoolAsset]]]]
-	if err := tlb.Unmarshal(&result.Decoded.AffluentVaultData.FactorialPools, &factorialPools); err != nil {
-		return nil, errors.New("invalid factorial pools")
-	}
-
-	for _, pool := range factorialPools.Items() {
-		poolAddr := fmt.Sprintf("%v:%v", pool.Key.Workchain, pool.Key.Hash.Hex())
-		url = fmt.Sprintf("https://tonapi.io/v2/blockchain/accounts/%v/methods/get_pool_data", poolAddr)
-		headers = http.Header{"Content-Type": {"application/json"}}
-		respBody, err = sendRequest(url, m.TonApiToken, headers)
-		if err != nil {
-			return nil, err
-		}
-		var poolResult GetPoolDataExecutionResult
-		if err = json.Unmarshal(respBody, &poolResult); err != nil {
-			return nil, err
-		}
-		if !poolResult.Success {
-			return nil, errors.New("invalid data")
-		}
-
-		assetsFromPools := map[ton.AccountID]Assets{}
-		for _, asset := range poolResult.Decoded.Assets {
-			tlbAddr, err := tongo.AccountIDFromTlb(asset.AssetAddress)
-			if err != nil {
-				return nil, err
-			}
-			assetsFromPools[*tlbAddr] = asset
-		}
-
-		if !pool.Value.Exists {
-			continue
-		}
-		for _, poolAsset := range pool.Value.Value.Value.Items() {
-			rawAddress := fmt.Sprintf("%v:%v", poolAsset.Key.Workchain, poolAsset.Key.Hash.Hex())
-			assetAddr, err := ton.ParseAccountID(rawAddress)
-			if err != nil {
-				return nil, err
-			}
-
-			assetFromPool := assetsFromPools[assetAddr]
-			supplyShare := big.Int(assetFromPool.SupplyShare)
-			totalSupplyShare, _ := supplyShare.Float64()
-			totalSupply := big.Int(assetFromPool.TotalSupply)
-			totalSupplyAmount, _ := totalSupply.Float64()
-			supplyAmount := 0.0
-			if poolAsset.Value.Supply > 0 && totalSupplyShare > 0 {
-				supplyAmount = (float64(poolAsset.Value.Supply) * totalSupplyAmount) / totalSupplyShare
-			}
-
-			borrowShare := big.Int(assetFromPool.BorrowShare)
-			totalBorrowShare, _ := borrowShare.Float64()
-			totalBorrow := big.Int(assetFromPool.TotalBorrow)
-			totalBorrowAmount, _ := totalBorrow.Float64()
-			borrowAmount := 0.0
-			if poolAsset.Value.Borrow > 0 && totalBorrowShare > 0 {
-				borrowAmount = (float64(poolAsset.Value.Borrow) * totalBorrowAmount) / totalBorrowShare
-			}
-			netAmount := supplyAmount - borrowAmount
-
-			assetMetadata, err := getAssetMetadata(rawAddress)
-			if err != nil {
-				return nil, err
-			}
-			isVaultAsset, err := isVaultAssets(assetMetadata)
-			if err != nil {
-				return nil, err
-			}
-			var assetPrice float64
-			if isVaultAsset {
-				assetPrices, err := m.getAffUsdEPrice(
-					context.WithValue(ctx, "assetAddress", rawAddress),
-					tonPrice,
-					pools,
-				)
-				if err != nil {
-					return nil, err
-				}
-				assetPrice = assetPrices[assetAddr]
-			} else {
-				assetPrice = pools[assetAddr]
-			}
-			assetDecimals, err := strconv.ParseInt(assetMetadata.Metadata.Decimals, 10, 64)
-			valueSum += assetPrice * netAmount * math.Pow10(int(affDecimals-assetDecimals))
-		}
-	}
-
-	return map[ton.AccountID]float64{
-		ton.MustParseAccountID(references.AffUSDeVault): valueSum / assetTotalSupplyAmount,
-	}, nil
-}
-
 // getSlpTokensPrice calculates SLP token prices
-func (m *Mock) getSlpTokensPrice(_ context.Context, tonPrice float64, pools map[ton.AccountID]float64) (map[tongo.AccountID]float64, error) {
+func (m *Mock) getSlpTokensPrice(tonPrice float64, pools map[ton.AccountID]float64) (map[tongo.AccountID]float64, error) {
 	if tonPrice == 0 {
 		return nil, errors.New("unknown TON price")
 	}
@@ -616,4 +403,415 @@ func (m *Mock) getSlpTokensPrice(_ context.Context, tonPrice float64, pools map[
 	}
 
 	return result, nil
+}
+
+func (m *Mock) getAffVaultsPrices(_ float64, pools map[ton.AccountID]float64) (map[ton.AccountID]float64, error) {
+	res := map[ton.AccountID]float64{}
+	for _, vault := range references.AffVaults {
+		addr := ton.MustParseAccountID(vault)
+		price, err := m.getAffVaultPrice(addr, pools)
+		if err != nil {
+			return nil, err
+		}
+		res[addr] = price
+	}
+
+	return res, nil
+}
+
+func (m *Mock) getAffVaultPrice(vaultAddress ton.AccountID, pools map[ton.AccountID]float64) (float64, error) {
+	isMultiplyVault := func(addr ton.AccountID) (bool, error) {
+		type IsStrategyVaultResult struct {
+			Success bool `json:"success"`
+		}
+		url := fmt.Sprintf("https://tonapi.io/v2/blockchain/accounts/%v/methods/is_strategy_vault", addr.ToRaw())
+		headers := http.Header{"Content-Type": {"application/json"}}
+		respBody, err := sendRequest(url, m.TonApiToken, headers)
+		if err != nil {
+			return false, err
+		}
+		var result IsStrategyVaultResult
+		if err = json.Unmarshal(respBody, &result); err != nil {
+			return false, err
+		}
+		return result.Success, nil
+	}
+	ok, err := isMultiplyVault(vaultAddress)
+	if err != nil {
+		return 0, err
+	}
+	if ok {
+		return m.getAffMultiplyAssetPrice(vaultAddress, pools)
+	}
+
+	return m.getAffLendingAssetPrice(vaultAddress, pools)
+}
+
+type Metadata struct {
+	Metadata struct {
+		Symbol   string `json:"symbol"`
+		Decimals string `json:"decimals"`
+	} `json:"metadata"`
+}
+
+type JSONGetPoolData struct {
+	Success  bool `json:"success"`
+	ExitCode int  `json:"exit_code"`
+	Decoded  struct {
+		ProtocolFeeRate tlb.Int257          `json:"protocol_fee_rate"`
+		Assets          []JSONAffluentAsset `json:"assets"`
+	} `json:"decoded"`
+}
+type JSONAffluentAsset struct {
+	LastUpdatedTime    int64          `json:"last_updated_time"`
+	StoredInterestRate string         `json:"stored_interest_rate"`
+	TotalSupply        string         `json:"total_supply"`
+	TotalBorrow        string         `json:"total_borrow"`
+	SupplyShare        string         `json:"supply_share"`
+	BorrowShare        string         `json:"borrow_share"`
+	AssetAddress       tlb.MsgAddress `json:"asset_address"`
+}
+
+type AffluentAsset struct {
+	LastUpdatedTime    int64
+	StoredInterestRate float64
+	TotalSupply        float64
+	TotalBorrow        float64
+	SupplyShare        float64
+	BorrowShare        float64
+	AssetAddress       tlb.MsgAddress
+}
+
+func (ja JSONAffluentAsset) convert() (AffluentAsset, error) {
+	storedInterestRate, err := strconv.ParseFloat(ja.StoredInterestRate, 64)
+	if err != nil {
+		return AffluentAsset{}, err
+	}
+	totalSupply, err := strconv.ParseFloat(ja.TotalSupply, 64)
+	if err != nil {
+		return AffluentAsset{}, err
+	}
+	totalBorrow, err := strconv.ParseFloat(ja.TotalBorrow, 64)
+	if err != nil {
+		return AffluentAsset{}, err
+	}
+	supplyShare, err := strconv.ParseFloat(ja.SupplyShare, 64)
+	if err != nil {
+		return AffluentAsset{}, err
+	}
+	borrowShare, err := strconv.ParseFloat(ja.BorrowShare, 64)
+	if err != nil {
+		return AffluentAsset{}, err
+	}
+	return AffluentAsset{
+		LastUpdatedTime:    ja.LastUpdatedTime,
+		StoredInterestRate: storedInterestRate,
+		TotalSupply:        totalSupply,
+		TotalBorrow:        totalBorrow,
+		SupplyShare:        supplyShare,
+		BorrowShare:        borrowShare,
+		AssetAddress:       ja.AssetAddress,
+	}, nil
+}
+
+func (a *AffluentAsset) SimulateAccrueInterest(currentTime int64, protocolFeeRate float64) {
+	if a.BorrowShare == 0 {
+		return
+	}
+
+	lastUpdatedTime := a.LastUpdatedTime
+	timeDelta := float64(currentTime - lastUpdatedTime)
+	interest := timeDelta * a.BorrowShare * a.StoredInterestRate / math.Pow10(36)
+	protocolFee := interest * protocolFeeRate / 10000
+
+	a.TotalBorrow = interest + a.TotalBorrow
+	a.TotalSupply = interest + a.TotalSupply - protocolFee
+	a.LastUpdatedTime = currentTime
+}
+
+func (m *Mock) getAffLendingAssetPrice(vaultAddress ton.AccountID, pools map[ton.AccountID]float64) (float64, error) {
+	type GetVaultDataExecutionResult struct {
+		Success  bool `json:"success"`
+		ExitCode int  `json:"exit_code"`
+		Decoded  struct {
+			TotalSupply     string `json:"total_supply"`
+			AssetAddress    string `json:"asset_address"`
+			Cash            string `json:"cash"`
+			WhitelistedPool []struct {
+				PoolAddress  string `json:"pool_address"`
+				SupplyShare  string `json:"supply_share"`
+				SupplyAmount string `json:"supply_amount"`
+			} `json:"whitelisted_pool"`
+		} `json:"decoded"`
+	}
+
+	getAssetMetadata := func(rawAddress string) (Metadata, error) {
+		url := fmt.Sprintf("https://tonapi.io/v2/jettons/%v", rawAddress)
+		headers := http.Header{"Content-Type": {"application/json"}}
+		respBody, err := sendRequest(url, m.TonApiToken, headers)
+		if err != nil {
+			return Metadata{}, err
+		}
+		var result Metadata
+		if err = json.Unmarshal(respBody, &result); err != nil {
+			return Metadata{}, err
+		}
+		return result, nil
+	}
+
+	vaultRawAddress := vaultAddress.ToRaw()
+	url := fmt.Sprintf("https://tonapi.io/v2/blockchain/accounts/%v/methods/get_vault_data", vaultRawAddress)
+	headers := http.Header{"Content-Type": {"application/json"}}
+	respBody, err := sendRequest(url, m.TonApiToken, headers)
+	if err != nil {
+		return 0, err
+	}
+	var result GetVaultDataExecutionResult
+	if err = json.Unmarshal(respBody, &result); err != nil {
+		return 0, err
+	}
+	if !result.Success {
+		return 0, errors.New("invalid data")
+	}
+
+	vaultMetadata, err := getAssetMetadata(vaultRawAddress)
+	if err != nil {
+		return 0, err
+	}
+	vaultTotalSupply, err := strconv.ParseFloat(result.Decoded.TotalSupply, 64)
+	if err != nil {
+		return 0, err
+	}
+	vaultDecimals, err := strconv.ParseInt(vaultMetadata.Metadata.Decimals, 10, 64)
+	if err != nil {
+		return 0, err
+	}
+
+	parsedAssetAddr, err := ton.ParseAccountID(result.Decoded.AssetAddress)
+	if err != nil {
+		return 0, err
+	}
+	assetMetadata, err := getAssetMetadata(result.Decoded.AssetAddress)
+	if err != nil {
+		return 0, err
+	}
+	assetDecimals, err := strconv.ParseInt(assetMetadata.Metadata.Decimals, 10, 64)
+	if err != nil {
+		return 0, err
+	}
+
+	totalVaultAssetAmount, err := strconv.ParseFloat(result.Decoded.Cash, 64)
+	if err != nil {
+		return 0, err
+	}
+	for _, pool := range result.Decoded.WhitelistedPool {
+		url = fmt.Sprintf("https://tonapi.io/v2/blockchain/accounts/%v/methods/get_pool_data", pool.PoolAddress)
+		headers = http.Header{"Content-Type": {"application/json"}}
+		respBody, err = sendRequest(url, m.TonApiToken, headers)
+		if err != nil {
+			return 0, err
+		}
+		var poolResult JSONGetPoolData
+		if err = json.Unmarshal(respBody, &poolResult); err != nil {
+			return 0, err
+		}
+		if !poolResult.Success {
+			return 0, errors.New("invalid data")
+		}
+
+		poolSupplyShare, err := strconv.ParseFloat(pool.SupplyShare, 64)
+		if err != nil {
+			return 0, err
+		}
+		protocolFeeRate := big.Int(poolResult.Decoded.ProtocolFeeRate)
+		protocolFeeRateAmount, _ := protocolFeeRate.Float64()
+		currentTime := time.Now().Unix()
+		for _, asset := range poolResult.Decoded.Assets {
+			if asset.AssetAddress != parsedAssetAddr.ToMsgAddress() {
+				continue
+			}
+
+			convertedAsset, err := asset.convert()
+			if err != nil {
+				return 0, err
+			}
+			convertedAsset.SimulateAccrueInterest(currentTime, protocolFeeRateAmount)
+			supplyAmount := 0.0
+			if convertedAsset.SupplyShare > 0 {
+				supplyAmount = poolSupplyShare * convertedAsset.TotalSupply / convertedAsset.SupplyShare
+			}
+			totalVaultAssetAmount += supplyAmount * math.Pow10(int(vaultDecimals-assetDecimals))
+		}
+	}
+
+	totalValue := totalVaultAssetAmount * pools[parsedAssetAddr]
+	return totalValue / vaultTotalSupply, nil
+}
+
+func (m *Mock) getAffMultiplyAssetPrice(vaultAddress ton.AccountID, pools map[ton.AccountID]float64) (float64, error) {
+	type GetVaultDataExecutionResult struct {
+		Success  bool `json:"success"`
+		ExitCode int  `json:"exit_code"`
+		Decoded  struct {
+			AffluentVaultData struct {
+				Assets         boc.Cell   `json:"assets"`
+				FactorialPools boc.Cell   `json:"factorial_pools"`
+				TotalSupply    tlb.Int257 `json:"total_supply"`
+			} `json:"affluent_vault_data"`
+		} `json:"decoded"`
+	}
+
+	getAssetMetadata := func(rawAddress string) (Metadata, error) {
+		url := fmt.Sprintf("https://tonapi.io/v2/jettons/%v", rawAddress)
+		headers := http.Header{"Content-Type": {"application/json"}}
+		respBody, err := sendRequest(url, m.TonApiToken, headers)
+		if err != nil {
+			return Metadata{}, err
+		}
+		var result Metadata
+		if err = json.Unmarshal(respBody, &result); err != nil {
+			return Metadata{}, err
+		}
+		return result, nil
+	}
+	isVaultAssets := func(metadata Metadata) (bool, error) {
+		return strings.HasPrefix(metadata.Metadata.Symbol, references.AffluentAssetPrefix), nil
+	}
+	getAssetPrice := func(addr tongo.AccountID, assetMetadata Metadata) (float64, error) {
+		isVaultAsset, err := isVaultAssets(assetMetadata)
+		if err != nil {
+			return 0, err
+		}
+		if isVaultAsset {
+			assetPrice, err := m.getAffVaultPrice(addr, pools)
+			if err != nil {
+				return 0, err
+			}
+			return assetPrice, nil
+		} else {
+			return pools[addr], nil
+		}
+	}
+
+	url := fmt.Sprintf("https://tonapi.io/v2/blockchain/accounts/%v/methods/get_vault_data", vaultAddress.ToRaw())
+	headers := http.Header{"Content-Type": {"application/json"}}
+	respBody, err := sendRequest(url, m.TonApiToken, headers)
+	if err != nil {
+		return 0, err
+	}
+	var result GetVaultDataExecutionResult
+	if err = json.Unmarshal(respBody, &result); err != nil {
+		return 0, err
+	}
+	if !result.Success {
+		return 0, errors.New("invalid data")
+	}
+
+	vaultTotalSupply := big.Int(result.Decoded.AffluentVaultData.TotalSupply)
+	vaultTotalSupplyAmount, _ := vaultTotalSupply.Float64()
+
+	vaultMetadata, err := getAssetMetadata(vaultAddress.ToRaw())
+	if err != nil {
+		return 0, err
+	}
+	vaultDecimals, err := strconv.ParseInt(vaultMetadata.Metadata.Decimals, 10, 64)
+
+	valueSum := 0.0
+	var assets tlb.Hashmap[AddressKey, abi.AssetData]
+	if err := tlb.Unmarshal(&result.Decoded.AffluentVaultData.Assets, &assets); err != nil {
+		return 0, errors.New("invalid factorial pools")
+	}
+
+	for _, asset := range assets.Items() {
+		rawAddress := fmt.Sprintf("%v:%v", asset.Key.Workchain, asset.Key.Hash.Hex())
+		addr, err := ton.ParseAccountID(rawAddress)
+		if err != nil {
+			return 0, err
+		}
+		assetMetadata, err := getAssetMetadata(rawAddress)
+		if err != nil {
+			return 0, err
+		}
+		assetDecimals, err := strconv.ParseInt(assetMetadata.Metadata.Decimals, 10, 64)
+		assetPrice, err := getAssetPrice(addr, assetMetadata)
+		if err != nil {
+			return 0, err
+		}
+		valueSum += float64(asset.Value.Cash) * assetPrice * math.Pow10(int(vaultDecimals-assetDecimals))
+	}
+
+	var factorialPools tlb.Hashmap[AddressKey, tlb.Maybe[tlb.Ref[tlb.Hashmap[AddressKey, abi.FactorialPoolAsset]]]]
+	if err := tlb.Unmarshal(&result.Decoded.AffluentVaultData.FactorialPools, &factorialPools); err != nil {
+		return 0, errors.New("invalid factorial pools")
+	}
+
+	for _, pool := range factorialPools.Items() {
+		poolAddr := fmt.Sprintf("%v:%v", pool.Key.Workchain, pool.Key.Hash.Hex())
+		url = fmt.Sprintf("https://tonapi.io/v2/blockchain/accounts/%v/methods/get_pool_data", poolAddr)
+		headers = http.Header{"Content-Type": {"application/json"}}
+		respBody, err = sendRequest(url, m.TonApiToken, headers)
+		if err != nil {
+			return 0, err
+		}
+		var poolResult JSONGetPoolData
+		if err = json.Unmarshal(respBody, &poolResult); err != nil {
+			return 0, err
+		}
+		if !poolResult.Success {
+			return 0, errors.New("invalid data")
+		}
+
+		protocolFeeRate := big.Int(poolResult.Decoded.ProtocolFeeRate)
+		protocolFeeRateAmount, _ := protocolFeeRate.Float64()
+		currentTime := time.Now().Unix()
+		assetsFromPools := map[ton.AccountID]AffluentAsset{}
+		for i := range poolResult.Decoded.Assets {
+			convertedAsset, err := poolResult.Decoded.Assets[i].convert()
+			if err != nil {
+				return 0, err
+			}
+			convertedAsset.SimulateAccrueInterest(currentTime, protocolFeeRateAmount)
+			tlbAddr, err := tongo.AccountIDFromTlb(convertedAsset.AssetAddress)
+			if err != nil {
+				return 0, err
+			}
+			assetsFromPools[*tlbAddr] = convertedAsset
+		}
+
+		if !pool.Value.Exists {
+			continue
+		}
+		for _, poolAsset := range pool.Value.Value.Value.Items() {
+			rawAddress := fmt.Sprintf("%v:%v", poolAsset.Key.Workchain, poolAsset.Key.Hash.Hex())
+			assetAddr, err := ton.ParseAccountID(rawAddress)
+			if err != nil {
+				return 0, err
+			}
+
+			assetFromPool := assetsFromPools[assetAddr]
+			supplyAmount := 0.0
+			if poolAsset.Value.Supply > 0 && assetFromPool.SupplyShare > 0 {
+				supplyAmount = (float64(poolAsset.Value.Supply) * assetFromPool.TotalSupply) / assetFromPool.SupplyShare
+			}
+
+			borrowAmount := 0.0
+			if poolAsset.Value.Borrow > 0 && assetFromPool.BorrowShare > 0 {
+				borrowAmount = (float64(poolAsset.Value.Borrow) * assetFromPool.TotalBorrow) / assetFromPool.BorrowShare
+			}
+			netAmount := supplyAmount - borrowAmount
+
+			assetMetadata, err := getAssetMetadata(rawAddress)
+			if err != nil {
+				return 0, err
+			}
+			assetDecimals, err := strconv.ParseInt(assetMetadata.Metadata.Decimals, 10, 64)
+			assetPrice, err := getAssetPrice(assetAddr, assetMetadata)
+			if err != nil {
+				return 0, err
+			}
+			valueSum += assetPrice * netAmount * math.Pow10(int(vaultDecimals-assetDecimals))
+		}
+	}
+
+	return valueSum / vaultTotalSupplyAmount, nil
 }
