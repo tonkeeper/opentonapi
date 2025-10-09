@@ -77,7 +77,9 @@ func fromTrace(trace *core.Trace, parent *core.Trace) *Bubble {
 		btx.bounce = msg.Bounce
 		btx.bounced = msg.Bounced
 		btx.inputAmount += msg.Value
-		btx.inputAmount += msg.IhrFee
+		if !msg.IhrDisabled {
+			btx.inputAmount += msg.IhrFee
+		}
 		btx.inputExtraAmount = msg.ValueExtra
 		btx.opCode = msg.OpCode
 		btx.decodedBody = msg.DecodedBody
@@ -128,8 +130,10 @@ func fromTrace(trace *core.Trace, parent *core.Trace) *Bubble {
 			b.ValueFlow.AddTons(trace.Account, -c.InMsg.Value)
 
 			// We want to include ihr_fee into msg.Value
-			aggregatedFee -= c.InMsg.IhrFee
-			b.ValueFlow.Accounts[trace.Account].Ton -= c.InMsg.IhrFee
+			if !c.InMsg.IhrDisabled {
+				aggregatedFee -= c.InMsg.IhrFee
+				b.ValueFlow.Accounts[trace.Account].Ton -= c.InMsg.IhrFee
+			}
 		}
 
 		b.Children[i] = fromTrace(c, trace)
