@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"math"
 	"math/big"
 	"net/http"
 	"sort"
@@ -14,6 +15,9 @@ import (
 	"github.com/shopspring/decimal"
 	"github.com/tonkeeper/opentonapi/pkg/references"
 	"github.com/tonkeeper/tongo"
+	"github.com/tonkeeper/tongo/abi"
+	"github.com/tonkeeper/tongo/boc"
+	"github.com/tonkeeper/tongo/tlb"
 	"github.com/tonkeeper/tongo/ton"
 	"golang.org/x/exp/slog"
 )
@@ -26,6 +30,7 @@ func (m *Mock) GetCurrentRates() (map[string]float64, error) {
 		beetroot   = "beetroot"
 		tsUSDe     = "tsUSDe"
 		USDe       = "USDe"
+		affUSDe    = "affUSDe"
 		slpTokens  = "slp_tokens"
 	)
 
@@ -83,6 +88,7 @@ func (m *Mock) GetCurrentRates() (map[string]float64, error) {
 		{beetroot, m.getBeetrootPrice},
 		{tsUSDe, m.getTsUSDePrice},
 		{USDe, m.getUsdEPrice},
+		{affUSDe, m.getAffUsdEPrice},
 	}
 	for _, pf := range priceFetchers {
 		result, err := retry(pf.label, medianTonPrice, pools, pf.fetch)
@@ -97,7 +103,7 @@ func (m *Mock) GetCurrentRates() (map[string]float64, error) {
 	// Fetch and merge prices for jettons from DEX
 	pools = m.getJettonPricesFromDex(pools)
 
-	// Fetch and merge SLP token prices
+	// Fetch and merge SLP tokens price
 	if slpPrices, err := retry(slpTokens, medianTonPrice, pools, m.getSlpTokensPrice); err == nil {
 		for account, price := range slpPrices {
 			pools[account] = price
@@ -137,6 +143,41 @@ func getMedianPrice(markets []Market) (float64, error) {
 	}
 	// If the number of prices is odd, return the middle price
 	return prices[n/2], nil
+}
+
+// AddressKey is an address that can be used as a key in hashmap
+type AddressKey struct {
+	Prefix    tlb.Uint3
+	Workchain tlb.Uint8
+	Hash      tlb.Bits256
+}
+
+func (a AddressKey) Compare(other any) (int, bool) {
+	otherAddr, ok := other.(AddressKey)
+	if !ok {
+		return 0, false
+	}
+	if !a.Prefix.Equal(otherAddr.Prefix) {
+		return a.Prefix.Compare(otherAddr.Prefix)
+	}
+	if !a.Workchain.Equal(otherAddr.Workchain) {
+		return a.Workchain.Compare(otherAddr.Workchain)
+	}
+	if !a.Hash.Equal(otherAddr.Hash) {
+		return a.Hash.Compare(otherAddr.Hash)
+	}
+	return 0, true
+}
+
+func (a AddressKey) Equal(other any) bool {
+	if otherAddr, ok := other.(AddressKey); ok {
+		return a.Prefix.Equal(otherAddr.Prefix) && a.Workchain.Equal(otherAddr.Workchain) && a.Hash.Equal(otherAddr.Hash)
+	}
+	return false
+}
+
+func (a AddressKey) FixedSize() int {
+	return 267
 }
 
 // ExecutionResult represents a result from a smart contract call
@@ -310,6 +351,88 @@ func (m *Mock) getUsdEPrice(tonPrice float64, _ map[ton.AccountID]float64) (map[
 	price := val / tonPrice
 
 	return map[ton.AccountID]float64{account: price}, nil
+}
+
+func (m *Mock) getAffUsdEPrice(tonPrice float64, _ map[ton.AccountID]float64) (map[ton.AccountID]float64, error) {
+	if tonPrice == 0 {
+		return nil, errors.New("unknown TON price")
+	}
+
+	type GetVaultDataExecutionResult struct {
+		Success  bool `json:"success"`
+		ExitCode int  `json:"exit_code"`
+		Decoded  struct {
+			AffluentVaultData struct {
+				Assets      boc.Cell   `json:"assets"`
+				TotalSupply tlb.Int257 `json:"total_supply"`
+			} `json:"affluent_vault_data"`
+		} `json:"decoded"`
+	}
+	type Metadata struct {
+		Metadata struct {
+			Decimals string `json:"decimals"`
+		} `json:"metadata"`
+	}
+
+	getAssetDecimals := func(rawAddress string) (int64, error) {
+		url := fmt.Sprintf("https://tonapi.io/v2/jettons/%v", rawAddress)
+		headers := http.Header{"Content-Type": {"application/json"}}
+		respBody, err := sendRequest(url, m.TonApiToken, headers)
+		if err != nil {
+			return 0, err
+		}
+		var metadata Metadata
+		if err = json.Unmarshal(respBody, &metadata); err != nil {
+			return 0, err
+		}
+		intDecimals, err := strconv.ParseInt(metadata.Metadata.Decimals, 10, 32)
+		if err != nil {
+			return 0, err
+		}
+		return intDecimals, nil
+	}
+
+	url := fmt.Sprintf("https://tonapi.io/v2/blockchain/accounts/%v/methods/get_vault_data", references.AffUSDeVault)
+	headers := http.Header{"Content-Type": {"application/json"}}
+	respBody, err := sendRequest(url, m.TonApiToken, headers)
+	if err != nil {
+		return nil, err
+	}
+	var result GetVaultDataExecutionResult
+	if err = json.Unmarshal(respBody, &result); err != nil {
+		return nil, err
+	}
+	if !result.Success {
+		return nil, errors.New("invalid data")
+	}
+	assetTotalSupply := big.Int(result.Decoded.AffluentVaultData.TotalSupply)
+	assetTotalSupplyAmount, _ := assetTotalSupply.Float64()
+
+	affUsdEDecimals, err := getAssetDecimals(references.AffUSDeVault)
+	if err != nil {
+		return nil, err
+	}
+
+	balancesSum := 0.0
+	var assets tlb.Hashmap[AddressKey, abi.AssetData]
+	if err := tlb.Unmarshal(&result.Decoded.AffluentVaultData.Assets, &assets); err != nil {
+		return nil, errors.New("invalid factor pools")
+	}
+	for _, asset := range assets.Items() {
+		assetAddr := fmt.Sprintf("%v:%v", asset.Key.Workchain, asset.Key.Hash.Hex())
+		assetDecimals, err := getAssetDecimals(assetAddr)
+		if err != nil {
+			return nil, err
+		}
+		decimalDiff := affUsdEDecimals - assetDecimals
+		balancesSum += float64(asset.Value.Balance) * math.Pow(10, float64(decimalDiff))
+	}
+
+	price := balancesSum / assetTotalSupplyAmount
+
+	return map[ton.AccountID]float64{
+		ton.MustParseAccountID(references.AffUSDeVault): price / tonPrice,
+	}, nil
 }
 
 // getSlpTokensPrice calculates SLP token prices
