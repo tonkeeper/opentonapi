@@ -312,7 +312,7 @@ func ConvertMessage(message tlb.Message, txLT uint64, cd *abi.ContractDescriptio
 		if err != nil {
 			return Message{}, err
 		}
-
+		ihrFee := big.Int(info.IhrFee)
 		return Message{
 			MessageID: MessageID{
 				CreatedLt:   info.CreatedLt,
@@ -327,7 +327,7 @@ func ConvertMessage(message tlb.Message, txLT uint64, cd *abi.ContractDescriptio
 			Value:       int64(info.Value.Grams),
 			ValueExtra:  extractExtraCurrencies(info.Value.Other),
 			FwdFee:      int64(info.FwdFee),
-			IhrFee:      int64(info.IhrFee),
+			IhrFee:      ihrFee.Int64(),
 			ImportFee:   0,
 			Init:        init,
 			Body:        body,
