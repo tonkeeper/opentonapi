@@ -3,8 +3,9 @@ package api
 import (
 	"context"
 	"fmt"
-	"golang.org/x/exp/slog"
 	"sync"
+
+	"golang.org/x/exp/slog"
 
 	"github.com/go-faster/errors"
 	"github.com/tonkeeper/opentonapi/pkg/chainstate"

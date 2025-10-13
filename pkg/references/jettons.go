@@ -14,6 +14,7 @@ var (
 )
 
 var (
-	PTonV1 = ton.MustParseAccountID("EQCM3B12QK1e4yZSf8GtBRT0aLMNyEsBc_DhVfRRtOEffLez")
-	PTonV2 = ton.MustParseAccountID("EQBnGWMCf3-FZZq1W4IWcWiGAc3PHuZ0_H-7sad2oY00o83S")
+	PTonV1      = ton.MustParseAccountID("EQCM3B12QK1e4yZSf8GtBRT0aLMNyEsBc_DhVfRRtOEffLez")
+	PTonV2      = ton.MustParseAccountID("EQBnGWMCf3-FZZq1W4IWcWiGAc3PHuZ0_H-7sad2oY00o83S")
+	AffluentTon = ton.MustParseAccountID("EQDIKEz2BYLnTRWo5W5a6moZ9PXNtyOVOFF7noi8Ufv3axz_")
 )
