@@ -1196,6 +1196,9 @@ func calculatePoolPrice(firstAsset, secondAsset Asset, pools map[ton.AccountID]f
 	if firstAssetDecimals == 0 || secondAssetDecimals == 0 {
 		return ton.AccountID{}, 0
 	}
+	if calculatedAccount == ton.MustParseAccountID("0:80e1ad1f8b908290aa307d954049839c6b3f6726185623b0e28d4dafb2887230") {
+		return ton.AccountID{}, 0
+	}
 	// Normalize decimals in reserves
 	x, p := firstAsset.Reserve, firstAsset.Weight
 	y, q := secondAsset.Reserve, secondAsset.Weight
