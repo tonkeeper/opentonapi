@@ -289,7 +289,7 @@ func stringToTVMStackRecord(s string) (tlb.VmStackValue, error) {
 	}
 	isDigit := true
 	for _, c := range s {
-		if !unicode.IsDigit(c) {
+		if !(unicode.IsDigit(c) || c == '-') {
 			isDigit = false
 			break
 		}
