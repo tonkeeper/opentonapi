@@ -86,6 +86,9 @@ var DefaultStraws = []Merger{
 	ToncoDepositLiquiditySingleStraw,
 	ToncoDepositLiquidityBothStraw,
 	ToncoDepositLiquidityWithRefundStraw,
+	DepositAffluentEarnStraw,
+	WithdrawAffluentEarnRequestStraw,
+	InstantWithdrawAffluentEarnStraw,
 }
 
 var JettonTransferClassicStraw = Straw[BubbleJettonTransfer]{
