@@ -481,7 +481,7 @@ func (m *Mock) getJettonPricesFromDex(pools map[ton.AccountID]float64) map[ton.A
 		{
 			Name:                  bidask,
 			URL:                   m.BidaskResultUrl,
-			PoolResponseConverter: convertBidaskPoolResponse,
+			PoolResponseConverter: m.convertBidaskPoolResponse,
 		},
 	}
 	var actualAssets []Pool
@@ -996,11 +996,43 @@ func convertSwapCoffeePoolResponse(respBody []byte) ([]Pool, []LpAsset, error) {
 	return actualAssets, maps.Values(actualLpAssets), nil
 }
 
-func convertBidaskPoolResponse(respBody []byte) ([]Pool, []LpAsset, error) {
+func (m *Mock) convertBidaskPoolResponse(respBody []byte) ([]Pool, []LpAsset, error) {
+	type BinReserves struct {
+		Success  bool `json:"success"`
+		ExitCode int  `json:"exit_code"`
+		Decoded  struct {
+			AmountX string `json:"amount_x"`
+			AmountY string `json:"amount_y"`
+		} `json:"decoded"`
+	}
 	reader := csv.NewReader(bytes.NewReader(respBody))
 	records, err := reader.ReadAll()
 	if err != nil {
 		return nil, nil, err
+	}
+	parseReserves := func(currentBin string, rangeAddress string) (float64, float64, error) {
+		url := fmt.Sprintf("https://tonapi.io/v2/blockchain/accounts/%v/methods/get_bin_assets?args=%v", rangeAddress, currentBin)
+		headers := http.Header{"Content-Type": {"application/json"}}
+		resp, err := sendRequest(url, m.TonApiToken, headers)
+		if err != nil {
+			return 0, 0, err
+		}
+		var result BinReserves
+		if err = json.Unmarshal(resp, &result); err != nil {
+			return 0, 0, err
+		}
+		if !result.Success {
+			return 0, 0, errors.New("invalid data")
+		}
+		reserveX, err := strconv.ParseFloat(result.Decoded.AmountX, 64)
+		if err != nil {
+			return 0, 0, err
+		}
+		reserveY, err := strconv.ParseFloat(result.Decoded.AmountY, 64)
+		if err != nil {
+			return 0, 0, err
+		}
+		return reserveX, reserveY, nil
 	}
 	parseDecimals := func(meta string) (int, error) {
 		if meta == "NULL" {
@@ -1055,8 +1087,6 @@ func convertBidaskPoolResponse(respBody []byte) ([]Pool, []LpAsset, error) {
 			}
 			secondAsset = Asset{Account: secondAccountID}
 		}
-		firstAsset.Reserve = defaultMinReserve // we dont need reserve in bidask pools, so set it to the min possible value
-		secondAsset.Reserve = defaultMinReserve
 		firstAsset.Decimals, err = parseDecimals(record[4])
 		if err != nil {
 			return Pool{}, err
@@ -1073,7 +1103,11 @@ func convertBidaskPoolResponse(respBody []byte) ([]Pool, []LpAsset, error) {
 		if err != nil {
 			return Pool{}, err
 		}
-		sqrtP, ok := new(big.Float).SetString(record[9])
+		firstAsset.Reserve, secondAsset.Reserve, err = parseReserves(record[9], record[10])
+		if err != nil {
+			return Pool{}, err
+		}
+		sqrtP, ok := new(big.Float).SetString(record[11])
 		if !ok {
 			return Pool{}, fmt.Errorf("failed to parse sqrt p")
 		}
@@ -1102,7 +1136,7 @@ func convertBidaskPoolResponse(respBody []byte) ([]Pool, []LpAsset, error) {
 	}
 
 	// bidask is concentrated liquidity dex, so it does not have lp asset
-	return nil, nil, nil
+	return actualAssets, nil, nil
 }
 
 func calculateLpAssetPrice(asset LpAsset, pools map[ton.AccountID]float64) float64 {
