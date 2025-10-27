@@ -1014,7 +1014,7 @@ func (h *Handler) toAccountEvent(ctx context.Context, account tongo.AccountID, t
 		Progress:   trace.CalculateProgress(),
 	}
 	for _, a := range result.Actions {
-		if subjectOnly && !a.IsSubject(account) {
+		if subjectOnly && !a.IsSubject(account) && a.Type != bath.UnSubscribe {
 			continue
 		}
 		convertedAction, err := h.convertAction(ctx, &account, a, lang)
