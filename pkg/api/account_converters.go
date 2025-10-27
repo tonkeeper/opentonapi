@@ -118,6 +118,10 @@ func convertToAccount(account *core.Account, ab *addressbook.KnownAddress, state
 	}
 	if len(ab.Name) > 0 {
 		acc.Name = oas.NewOptString(ab.Name)
+		trust = spamFilter.TonDomainTrust(ab.Name)
+		if trust == core.TrustBlacklist {
+			acc.IsScam = oas.NewOptBool(true)
+		}
 	}
 	if len(ab.Image) > 0 {
 		acc.Icon = oas.NewOptString(imgGenerator.DefaultGenerator.GenerateImageUrl(ab.Image, 200, 200))
