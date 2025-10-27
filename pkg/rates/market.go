@@ -37,6 +37,7 @@ const (
 	bidask     string = "Bidask"
 	swapCoffee string = "SwapCoffee"
 	coinbase   string = "Coinbase"
+	mooncx     string = "Mooncx"
 )
 
 type Invariant int
@@ -482,6 +483,11 @@ func (m *Mock) getJettonPricesFromDex(pools map[ton.AccountID]float64) map[ton.A
 			Name:                  bidask,
 			URL:                   m.BidaskResultUrl,
 			PoolResponseConverter: m.convertBidaskPoolResponse,
+		},
+		{
+			Name:                  mooncx,
+			URL:                   m.MooncxResultUrl,
+			PoolResponseConverter: convertMooncxPoolResponse,
 		},
 	}
 	var actualAssets []Pool
@@ -1137,6 +1143,142 @@ func (m *Mock) convertBidaskPoolResponse(respBody []byte) ([]Pool, []LpAsset, er
 
 	// bidask is concentrated liquidity dex, so it does not have lp asset
 	return actualAssets, nil, nil
+}
+
+func convertMooncxPoolResponse(respBody []byte) ([]Pool, []LpAsset, error) {
+	reader := csv.NewReader(bytes.NewReader(respBody))
+	records, err := reader.ReadAll()
+	if err != nil {
+		return nil, nil, err
+	}
+	parseDecimals := func(meta string) (int, error) {
+		if meta == "NULL" {
+			return defaultDecimals, nil
+		}
+		converted := make(map[string]any)
+		if err = json.Unmarshal([]byte(meta), &converted); err != nil {
+			return 0, err
+		}
+		value, ok := converted["decimals"]
+		if !ok || value == "NaN" {
+			value = fmt.Sprintf("%d", defaultDecimals)
+		}
+		decimals, err := strconv.Atoi(value.(string))
+		if err != nil {
+			return 0, err
+		}
+		return decimals, nil
+	}
+	parseAssets := func(record []string) (Pool, error) {
+		var firstAsset, secondAsset Asset
+		switch {
+		// If the column asset_1_native contains true,
+		// then we consider this token as a pool to TON
+		case record[0] == "true":
+			firstAsset = Asset{Account: references.PTonV1}
+			secondAccountID, err := ton.ParseAccountID(record[3])
+			if err != nil {
+				return Pool{}, err
+			}
+			secondAsset = Asset{Account: secondAccountID}
+			// If the column asset_2_native contains true,
+			// then we consider this token as a pool to TON
+		case record[2] == "true":
+			firstAccountID, err := ton.ParseAccountID(record[1])
+			if err != nil {
+				return Pool{}, err
+			}
+			firstAsset = Asset{Account: firstAccountID}
+			secondAsset = Asset{Account: references.PTonV1}
+		default:
+			// By default, we assume that the two assets are not paired with TON.
+			// This could be a pair like a jetton to USDT or to other jettons
+			firstAccountID, err := ton.ParseAccountID(record[1])
+			if err != nil {
+				return Pool{}, err
+			}
+			firstAsset = Asset{Account: firstAccountID}
+			secondAccountID, err := ton.ParseAccountID(record[3])
+			if err != nil {
+				return Pool{}, err
+			}
+			secondAsset = Asset{Account: secondAccountID}
+		}
+		firstAsset.Decimals, err = parseDecimals(record[4])
+		if err != nil {
+			return Pool{}, err
+		}
+		secondAsset.Decimals, err = parseDecimals(record[5])
+		if err != nil {
+			return Pool{}, err
+		}
+		firstAsset.Reserve, err = strconv.ParseFloat(record[6], 64)
+		if err != nil {
+			return Pool{}, err
+		}
+		secondAsset.Reserve, err = strconv.ParseFloat(record[7], 64)
+		if err != nil {
+			return Pool{}, err
+		}
+		firstAsset.HoldersCount, err = strconv.Atoi(record[8])
+		if err != nil {
+			return Pool{}, err
+		}
+		secondAsset.HoldersCount, err = strconv.Atoi(record[9])
+		if err != nil {
+			return Pool{}, err
+		}
+		pool := Pool{
+			Assets:    []Asset{firstAsset, secondAsset},
+			Invariant: XYInv,
+		}
+		return pool, nil
+	}
+	parseLpAsset := func(record []string, firstAsset, secondAsset Asset) (LpAsset, error) {
+		lpAsset, err := ton.ParseAccountID(record[10])
+		if err != nil {
+			return LpAsset{}, err
+		}
+		decimals, err := strconv.ParseInt(record[11], 10, 64)
+		if err != nil {
+			return LpAsset{}, err
+		}
+		if record[12] == "0" {
+			return LpAsset{}, fmt.Errorf("unknown total supply")
+		}
+		totalSupply, ok := new(big.Int).SetString(record[12], 10)
+		if !ok {
+			return LpAsset{}, fmt.Errorf("failed to parse total supply")
+		}
+		return LpAsset{
+			Account:     lpAsset,
+			Decimals:    int(decimals),
+			TotalSupply: totalSupply,
+			Assets:      []Asset{firstAsset, secondAsset},
+		}, nil
+	}
+	actualLpAssets := make(map[ton.AccountID]LpAsset)
+	for idx, record := range records {
+		if idx == 0 || len(record) < 13 { // Skip headers
+			continue
+		}
+		assets, err := parseAssets(record)
+		if err != nil {
+			slog.Error("[convertMooncxPoolResponse] failed to parse assets", slog.Any("error", err))
+			continue
+		}
+		firstAsset, secondAsset := assets.Assets[0], assets.Assets[1]
+		if firstAsset.Reserve == 0 || secondAsset.Reserve == 0 {
+			continue
+		}
+		lpAsset, err := parseLpAsset(record, firstAsset, secondAsset)
+		if err != nil {
+			continue
+		}
+		actualLpAssets[lpAsset.Account] = lpAsset
+	}
+
+	return nil, maps.Values(actualLpAssets), nil
 }
 
 func calculateLpAssetPrice(asset LpAsset, pools map[ton.AccountID]float64) float64 {
