@@ -230,6 +230,10 @@ func TestFindActions(t *testing.T) {
 			// liquidity deposit tonco
 			tongo.MustParseBlockID("(0,8000000000000000,57250836)"),
 			tongo.MustParseBlockID("(0,8000000000000000,57237195)"),
+			// deposit/withdraw affluent
+			tongo.MustParseBlockID("(0,8000000000000000,58000093)"),
+			tongo.MustParseBlockID("(0,8000000000000000,58000202)"),
+			tongo.MustParseBlockID("(0,8000000000000000,57971762)"),
 		}),
 	)
 
@@ -654,6 +658,21 @@ func TestFindActions(t *testing.T) {
 			name:           "deposit ton + usdt liquidity tonco",
 			hash:           "09c1061806e01b94fa8bf5e8fb9130f42a401f46137ce7e582cf4642d40d26da",
 			filenamePrefix: "deposit-ton-usdt-liquidity-tonco",
+		},
+		{
+			name:           "deposit usdt earn affluent",
+			hash:           "30b1487a16d3b04e19b2d66ab993eaaba0e3ceb7a91bb022bd897a0d8343eb38",
+			filenamePrefix: "deposit-usdt-earn-affluent",
+		},
+		{
+			name:           "instant withdraw usdt affluent",
+			hash:           "3219afb5d13fd687fc616cc7b0ccf6de7eaa8e4510a15aceb708ad4a0df27bba",
+			filenamePrefix: "instant-withdraw-usdt-affluent",
+		},
+		{
+			name:           "withdraw request usdt affluent",
+			hash:           "d171a300521c222094899c6b1b5fb15992a5eb4ba9dc7f8ac9c6033fed647d1c",
+			filenamePrefix: "withdraw-request-usdt-affluent",
 		},
 	} {
 		t.Run(c.name, func(t *testing.T) {

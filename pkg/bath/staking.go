@@ -407,3 +407,95 @@ var WithdrawEthenaStakeRequestStraw = Straw[BubbleWithdrawTokenStakeRequest]{
 		},
 	},
 }
+
+var DepositAffluentEarnStraw = Straw[BubbleDepositTokenStake]{
+	CheckFuncs: []bubbleCheck{IsJettonTransfer, func(bubble *Bubble) bool {
+		tx, _ := bubble.Info.(BubbleJettonTransfer)
+		return tx.recipient != nil && (tx.recipient.Is(abi.AffluentLendingVault) || tx.recipient.Is(abi.AffluentMultiplyVault))
+	}},
+	Builder: func(newAction *BubbleDepositTokenStake, bubble *Bubble) error {
+		tx := bubble.Info.(BubbleJettonTransfer)
+		newAction.Protocol = core.Protocol{
+			Name:  references.Affluent,
+			Image: &references.AffluentImage,
+		}
+		newAction.Staker = tx.sender.Address
+		amount := big.Int(tx.amount)
+		newAction.StakeMeta = &core.Price{
+			Currency: core.Currency{
+				Type:   core.CurrencyJetton,
+				Jetton: &tx.master,
+			},
+			Amount: amount,
+		}
+		return nil
+	},
+	SingleChild: &Straw[BubbleDepositTokenStake]{
+		CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.JettonInternalTransferMsgOp)},
+		Builder: func(newAction *BubbleDepositTokenStake, bubble *Bubble) error {
+			tx := bubble.Info.(BubbleTx)
+			newAction.Success = tx.success
+			return nil
+		},
+		SingleChild: &Straw[BubbleDepositTokenStake]{
+			CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.ExcessMsgOp)},
+		},
+	},
+}
+
+var WithdrawAffluentEarnRequestStraw = Straw[BubbleWithdrawTokenStakeRequest]{
+	CheckFuncs: []bubbleCheck{IsJettonTransfer},
+	Builder: func(newAction *BubbleWithdrawTokenStakeRequest, bubble *Bubble) error {
+		tx := bubble.Info.(BubbleJettonTransfer)
+		newAction.Protocol = core.Protocol{
+			Name:  references.Affluent,
+			Image: &references.AffluentImage,
+		}
+		newAction.Staker = tx.sender.Address
+		amount := big.Int(tx.amount)
+		newAction.StakeMeta = &core.Price{
+			Currency: core.Currency{
+				Type:   core.CurrencyJetton,
+				Jetton: &tx.master,
+			},
+			Amount: amount,
+		}
+		newAction.Success = tx.success
+		return nil
+	},
+	SingleChild: &Straw[BubbleWithdrawTokenStakeRequest]{
+		CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.ExcessMsgOp)},
+	},
+}
+
+var InstantWithdrawAffluentEarnStraw = Straw[BubbleWithdrawTokenStakeRequest]{
+	CheckFuncs: []bubbleCheck{Is(BubbleJettonBurn{})},
+	Builder: func(newAction *BubbleWithdrawTokenStakeRequest, bubble *Bubble) error {
+		tx := bubble.Info.(BubbleJettonBurn)
+		newAction.Protocol = core.Protocol{
+			Name:  references.Affluent,
+			Image: &references.AffluentImage,
+		}
+		newAction.Staker = tx.sender.Address
+		amount := big.Int(tx.amount)
+		newAction.StakeMeta = &core.Price{
+			Currency: core.Currency{
+				Type:   core.CurrencyJetton,
+				Jetton: &tx.master,
+			},
+			Amount: amount,
+		}
+		return nil
+	},
+	SingleChild: &Straw[BubbleWithdrawTokenStakeRequest]{
+		CheckFuncs: []bubbleCheck{IsJettonTransfer, func(bubble *Bubble) bool {
+			tx, _ := bubble.Info.(BubbleJettonTransfer)
+			return tx.recipient != nil && (tx.sender.Is(abi.AffluentLendingVault) || tx.sender.Is(abi.AffluentMultiplyVault))
+		}},
+		Builder: func(newAction *BubbleWithdrawTokenStakeRequest, bubble *Bubble) error {
+			tx := bubble.Info.(BubbleJettonTransfer)
+			newAction.Success = tx.success
+			return nil
+		},
+	},
+}
