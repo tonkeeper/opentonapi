@@ -202,6 +202,7 @@ type SpamFilter interface {
 	GetEventsScamData(ctx context.Context, ids []string) (map[string]bool, error)
 	JettonTrust(address tongo.AccountID, symbol, name, image string) core.TrustType
 	AccountTrust(address tongo.AccountID) core.TrustType
+	TonDomainTrust(domain string) core.TrustType
 	NftTrust(address tongo.AccountID, collection *ton.AccountID, description, image string) core.TrustType
 	GetNftsScamData(ctx context.Context, addresses []ton.AccountID) (map[ton.AccountID]core.TrustType, error)
 }
