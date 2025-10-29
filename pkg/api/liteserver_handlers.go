@@ -2,7 +2,6 @@ package api
 
 import (
 	"context"
-	"encoding/base64"
 	"net/http"
 	"time"
 
@@ -82,15 +81,12 @@ func (h *Handler) GetRawBlockchainBlockHeader(ctx context.Context, params oas.Ge
 }
 
 func (h *Handler) SendRawMessage(ctx context.Context, request *oas.SendRawMessageReq) (*oas.SendRawMessageOK, error) {
-	payload, err := base64.StdEncoding.DecodeString(request.Body)
+	err := h.SendBlockchainMessage(ctx, &oas.SendBlockchainMessageReq{Boc: oas.NewOptString(request.Body)})
 	if err != nil {
-		return nil, toError(http.StatusBadRequest, err)
+		return nil, err
 	}
-	code, err := h.storage.SendMessageRaw(ctx, payload)
-	if err != nil {
-		return nil, toError(http.StatusInternalServerError, err)
-	}
-	return &oas.SendRawMessageOK{Code: int32(code)}, nil
+	// https://github.com/ton-blockchain/ton/blob/4ebd7412c52248360464c2df5f434c8aaa3edfe1/validator/impl/liteserver.cpp#L564
+	return &oas.SendRawMessageOK{Code: int32(1)}, nil
 }
 
 func (h *Handler) GetRawAccountState(ctx context.Context, params oas.GetRawAccountStateParams) (*oas.GetRawAccountStateOK, error) {
