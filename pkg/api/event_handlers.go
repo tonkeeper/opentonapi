@@ -160,6 +160,9 @@ func (h *Handler) GetTrace(ctx context.Context, params oas.GetTraceParams) (*oas
 	if errors.Is(err, core.ErrEntityNotFound) {
 		return nil, toError(http.StatusNotFound, err)
 	}
+	if errors.Is(err, core.ErrTooManyEntities) {
+		return nil, toError(http.StatusNotFound, fmt.Errorf("more than one transaction with message hash"))
+	}
 	if errors.Is(err, core.ErrTraceIsTooLong) {
 		return nil, toError(http.StatusRequestEntityTooLarge, err)
 	}
@@ -199,6 +202,9 @@ func (h *Handler) GetEvent(ctx context.Context, params oas.GetEventParams) (*oas
 	trace, emulated, err := h.getTraceByHash(ctx, traceID)
 	if errors.Is(err, core.ErrEntityNotFound) {
 		return nil, toError(http.StatusNotFound, err)
+	}
+	if errors.Is(err, core.ErrTooManyEntities) {
+		return nil, toError(http.StatusNotFound, fmt.Errorf("more than one transaction with message hash"))
 	}
 	if errors.Is(err, core.ErrTraceIsTooLong) {
 		return nil, toError(http.StatusRequestEntityTooLarge, err)
@@ -401,6 +407,9 @@ func (h *Handler) GetAccountEvent(ctx context.Context, params oas.GetAccountEven
 	trace, emulated, err := h.getTraceByHash(ctx, traceID)
 	if errors.Is(err, core.ErrEntityNotFound) {
 		return nil, toError(http.StatusNotFound, err)
+	}
+	if errors.Is(err, core.ErrTooManyEntities) {
+		return nil, toError(http.StatusNotFound, fmt.Errorf("more than one transaction with message hash"))
 	}
 	if errors.Is(err, core.ErrTraceIsTooLong) {
 		return nil, toError(http.StatusRequestEntityTooLarge, err)
