@@ -234,6 +234,7 @@ func TestFindActions(t *testing.T) {
 			tongo.MustParseBlockID("(0,8000000000000000,58000093)"),
 			tongo.MustParseBlockID("(0,8000000000000000,58000202)"),
 			tongo.MustParseBlockID("(0,8000000000000000,57971762)"),
+			tongo.MustParseBlockID("(0,8000000000000000,58456395)"),
 		}),
 	)
 
@@ -673,6 +674,11 @@ func TestFindActions(t *testing.T) {
 			name:           "withdraw request usdt affluent",
 			hash:           "d171a300521c222094899c6b1b5fb15992a5eb4ba9dc7f8ac9c6033fed647d1c",
 			filenamePrefix: "withdraw-request-usdt-affluent",
+		},
+		{
+			name:           "withdraw request usdt affluent with oracles",
+			hash:           "0ed86c1e6d97887f0e644174dc8063afabfe0a088cdd1987033baf468c253b94",
+			filenamePrefix: "withdraw-request-usdt-affluent-with-oracles",
 		},
 	} {
 		t.Run(c.name, func(t *testing.T) {
