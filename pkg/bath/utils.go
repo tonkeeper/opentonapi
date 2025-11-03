@@ -16,22 +16,3 @@ func parseAccount(a tlb.MsgAddress) *Account {
 type Merge struct {
 	children []*Bubble
 }
-
-func ProcessChildren(children []*Bubble, fns ...func(child *Bubble) *Merge) []*Bubble {
-	var newChildren []*Bubble
-	for _, child := range children {
-		merged := false
-		for _, fn := range fns {
-			merge := fn(child)
-			if merge != nil {
-				newChildren = append(newChildren, merge.children...)
-				merged = true
-				break
-			}
-		}
-		if !merged {
-			newChildren = append(newChildren, child)
-		}
-	}
-	return newChildren
-}
