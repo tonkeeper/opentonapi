@@ -17,7 +17,7 @@
          }
        },
        "Success": true,
-       "Type": "WithdrawTokenStake",
+       "Type": "WithdrawTokenStakeRequest",
        "BaseTransactions": [
          "96dcf17373494225364c5b0c7f7adca6ab8e5bf0f9298b0f7bc395b428594b61",
          "68790cea13a1717252d74d16a674a5d77fb969ebab1c27942559ff163da77e5b",

@@ -4,10 +4,12 @@
        "AuctionBid": {
          "Type": "DNS.tg",
          "Amount": {
-           "Type": "native",
-           "Amount": 7000000000000,
-           "Jetton": null,
-           "CurrencyID": null
+           "Currency": {
+             "Type": "native",
+             "Jetton": null,
+             "CurrencyID": null
+           },
+           "Amount": 7000000000000
          },
          "Nft": null,
          "NftAddress": "0:1dd2c293effd99bd4dbba5e2235cb5c19794e2a2f2d4d5d2116c88a7ecd5278a",
