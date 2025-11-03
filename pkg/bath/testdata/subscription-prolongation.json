@@ -1,11 +1,19 @@
 {
    "Actions": [
      {
-       "Subscription": {
+       "Subscribe": {
          "Subscription": "0:84796c47a337716be8919014070016bd16498021b27325778394ea1893544ba6",
          "Subscriber": "0:f3b542fa6d15e4bba8c9aac63aa1b8a97d787ab7dcb34730e1e5a4e78e104b80",
-         "Beneficiary": "0:e01675b731ed41f3a186a29d4a203068f744f68162cc370b0cde92f24ff97de5",
-         "Amount": 1000000000,
+         "Admin": "0:e01675b731ed41f3a186a29d4a203068f744f68162cc370b0cde92f24ff97de5",
+         "WithdrawTo": "0:e01675b731ed41f3a186a29d4a203068f744f68162cc370b0cde92f24ff97de5",
+         "Price": {
+           "Currency": {
+             "Type": "native",
+             "Jetton": null,
+             "CurrencyID": null
+           },
+           "Amount": 1000000000
+         },
          "First": false
        },
        "Success": true,
@@ -13,7 +21,21 @@
        "BaseTransactions": [
          "d5cf39c85392e40a7f5b0e706c4df56ad89cb214e4c5b5206fbe82c6d71a09cf",
          "0869aca7038f732a29e89fc9ce1990afecc99106d8ab07d967a2e0950faf6580",
-         "f2633569822c70dc08ba37683dda23319d488f0d8a188991df929a81cc6d9780",
+         "f2633569822c70dc08ba37683dda23319d488f0d8a188991df929a81cc6d9780"
+       ]
+     },
+     {
+       "TonTransfer": {
+         "Amount": 976943593,
+         "Comment": null,
+         "EncryptedComment": null,
+         "Recipient": "0:e01675b731ed41f3a186a29d4a203068f744f68162cc370b0cde92f24ff97de5",
+         "Sender": "0:84796c47a337716be8919014070016bd16498021b27325778394ea1893544ba6",
+         "Refund": null
+       },
+       "Success": true,
+       "Type": "TonTransfer",
+       "BaseTransactions": [
          "de35ad740f3eb1f59a45428e40d751d4cc13ce60b6bfe162b063069f91442fc2"
        ]
      }

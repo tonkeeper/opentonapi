@@ -10,7 +10,7 @@
          "StakeMeta": {
            "Currency": {
              "Type": "jetton",
-             "Jetton": "0:d0e545323c7acb7102653c073377f7e3c67f122eb94d430a250739f109d4a57d",
+             "Jetton": "0:086fa2a675f74347b08dd4606a549b8fdb98829cb282bc1949d3b12fbaed9dcc",
              "CurrencyID": null
            },
            "Amount": 1000000

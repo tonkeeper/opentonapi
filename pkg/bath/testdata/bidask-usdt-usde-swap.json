@@ -18,7 +18,7 @@
            "JettonWallet": "0:2dedafcc2f87a964a56cffc96541e06c0720b8c7cef13573a60a466b9d87779b"
          }
        },
-       "Success": false,
+       "Success": true,
        "Type": "JettonSwap",
        "BaseTransactions": [
          "30a81f4ae27e0742f9c9d70b9224412bec0cc4ccacc0fa410b637dc9f1756f09",
