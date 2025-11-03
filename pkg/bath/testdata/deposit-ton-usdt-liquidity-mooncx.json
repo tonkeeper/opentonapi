@@ -1,0 +1,101 @@
+{
+   "Actions": [
+     {
+       "LiquidityDepositAction": {
+         "Protocol": {
+           "Name": "mooncx",
+           "Image": "https://moon.cx/assets/logoMoon.svg"
+         },
+         "From": "0:7f80df878a1172f5da0859cef8db18fb907bde5dbf1b3d916812e257dc86f2ee",
+         "Tokens": [
+           {
+             "Price": {
+               "Currency": {
+                 "Type": "jetton",
+                 "Jetton": "0:b113a994b5024a16719f69139328eb759596c38a25f59028b146fecdc3621dfe",
+                 "CurrencyID": null
+               },
+               "Amount": 595000000
+             },
+             "Vault": "0:c319e273266d3212d0833d06eca4a7fdc2da32845da7f7aaf746cd839cbee850"
+           },
+           {
+             "Price": {
+               "Currency": {
+                 "Type": "native",
+                 "Jetton": null,
+                 "CurrencyID": null
+               },
+               "Amount": 200200000000
+             },
+             "Vault": "0:c319e273266d3212d0833d06eca4a7fdc2da32845da7f7aaf746cd839cbee850"
+           }
+         ]
+       },
+       "Success": true,
+       "Type": "LiquidityDeposit",
+       "BaseTransactions": [
+         "f73fa4e43b75d900320bcce05caf8a18a6dcef364049e5a7303466f9dcaac917",
+         "2964e6f9f765a415e693b337e23773e67f9330f0b0ba74d97d6b8421bf015608",
+         "331c3d946bde0f34892842671c6d99038586419002334559b7112fc0e613e397",
+         "4dc08ead5577d140fca17464352cacb9c7e42f6a579dcbcdc94c7e21f4aa61b9",
+         "6b98feb32ec03985ed5345a39579b4fd5db95122fff2a417ea41b3b19e3d8b9d",
+         "5ceb0c8edfab7486bab29c1f06b35468d9891be92dbd187987902aea0b92c1a8",
+         "c97611a832ce968c7ea3dbc4b2b30be35c21a20e8dcda58e2a96534abdc0ad67",
+         "437b91009df8818f8f26d5c1583c1b0ad8861b070cbe558168cef6d9619717a7",
+         "60c34228d94daec17c2f77b09d928befb33dff0f71e3c2fbde1db226cb4ef769",
+         "dd8c58a1e8b921c2bf2f072a19dff2ec52875e251c5c6f195202e8a26295f0ee",
+         "4bbe58c61f23fede58ecc62a560297af3b610a4093cb9e4148fb4b90df20953a",
+         "b6b4517e650948f2d1affb30a53b9d18f5d352702e3e50a8c7894280da9bcba1"
+       ]
+     }
+   ],
+   "Accounts": [
+     {
+       "Account": "0:034727ec9bc6325d0d8793df99627e9a66cf9870fce90f19abb485fd55178edb",
+       "Ton": -35,
+       "Fee": 1655235,
+       "Jettons": null
+     },
+     {
+       "Account": "0:2491ac53faaaa8e522158a64152ee26b93f2fbbb51bc7021632198080260c01f",
+       "Ton": 192135598,
+       "Fee": 5675602,
+       "Jettons": null
+     },
+     {
+       "Account": "0:7f80df878a1172f5da0859cef8db18fb907bde5dbf1b3d916812e257dc86f2ee",
+       "Ton": -200254551846,
+       "Fee": 5247614,
+       "Jettons": [
+         {
+           "Address": "0:b113a994b5024a16719f69139328eb759596c38a25f59028b146fecdc3621dfe",
+           "Quantity": -595000000
+         }
+       ]
+     },
+     {
+       "Account": "0:c319e273266d3212d0833d06eca4a7fdc2da32845da7f7aaf746cd839cbee850",
+       "Ton": 200000001399,
+       "Fee": 22946801,
+       "Jettons": [
+         {
+           "Address": "0:b113a994b5024a16719f69139328eb759596c38a25f59028b146fecdc3621dfe",
+           "Quantity": 595000000
+         }
+       ]
+     },
+     {
+       "Account": "0:cef9291c81ea512a81c09211151e25851f5f4478ca35e13cdad7cd001a5712fd",
+       "Ton": 0,
+       "Fee": 1489632,
+       "Jettons": null
+     },
+     {
+       "Account": "0:f3002f825e32be87b7ca420cd3803ab4d2b66541464ccfcdc6ad56ad3a5ea39e",
+       "Ton": 21750000,
+       "Fee": 3650000,
+       "Jettons": null
+     }
+   ]
+ }

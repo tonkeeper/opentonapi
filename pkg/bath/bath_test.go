@@ -221,6 +221,16 @@ func TestFindActions(t *testing.T) {
 			// mooncx swap
 			tongo.MustParseBlockID("(0,8000000000000000,56398081)"),
 			tongo.MustParseBlockID("(0,8000000000000000,56397942)"),
+			// mooncx liquidity deposit
+			tongo.MustParseBlockID("(0,2000000000000000,53995726)"),
+			tongo.MustParseBlockID("(0,2000000000000000,53995729)"),
+			tongo.MustParseBlockID("(0,2000000000000000,53995732)"),
+			tongo.MustParseBlockID("(0,6000000000000000,54008087)"),
+			tongo.MustParseBlockID("(0,6000000000000000,54008097)"),
+			tongo.MustParseBlockID("(0,6000000000000000,54008103)"),
+			tongo.MustParseBlockID("(0,e000000000000000,53659133)"),
+			tongo.MustParseBlockID("(0,e000000000000000,53659136)"),
+			tongo.MustParseBlockID("(0,e000000000000000,53659143)"),
 			// tonco swap
 			tongo.MustParseBlockID("(0,8000000000000000,56804640)"),
 			tongo.MustParseBlockID("(0,8000000000000000,56834937)"),
@@ -621,6 +631,11 @@ func TestFindActions(t *testing.T) {
 			name:           "mooncx ton-usdt swap",
 			hash:           "67aee84fa6df5fcdf85bcb9330c9181fd0629d686bf5b800420deef9e6850a99",
 			filenamePrefix: "mooncx-ton-usdt-swap",
+		},
+		{
+			name:           "deposit ton + usdt liquidity mooncx",
+			hash:           "f73fa4e43b75d900320bcce05caf8a18a6dcef364049e5a7303466f9dcaac917",
+			filenamePrefix: "deposit-ton-usdt-liquidity-mooncx",
 		},
 		{
 			name:           "tonco ton-usdt swap",
