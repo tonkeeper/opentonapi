@@ -443,7 +443,7 @@ var DepositAffluentEarnStraw = Straw[BubbleDepositTokenStake]{
 	},
 }
 
-var DepositAffluentEarnWithOracleDataStraw = Straw[BubbleDepositTokenStake]{
+var DepositAffluentEarnWithOraclesStraw = Straw[BubbleDepositTokenStake]{
 	CheckFuncs: []bubbleCheck{IsJettonTransfer, func(bubble *Bubble) bool {
 		tx, _ := bubble.Info.(BubbleJettonTransfer)
 		return tx.recipient != nil && (tx.recipient.Is(abi.AffluentLendingVault) || tx.recipient.Is(abi.AffluentMultiplyVault))
@@ -467,24 +467,29 @@ var DepositAffluentEarnWithOracleDataStraw = Straw[BubbleDepositTokenStake]{
 	},
 	SingleChild: &Straw[BubbleDepositTokenStake]{
 		CheckFuncs: []bubbleCheck{IsTx, HasOpcode(0xb0c69ffe)},
-		SingleChild: &Straw[BubbleDepositTokenStake]{
-			CheckFuncs: []bubbleCheck{IsTx, HasOpcode(0xf1cafcb2)},
-			SingleChild: &Straw[BubbleDepositTokenStake]{
-				CheckFuncs: []bubbleCheck{IsTx, HasOpcode(0xab7bef17)},
+		Children: []Straw[BubbleDepositTokenStake]{
+			{
+				CheckFuncs: []bubbleCheck{IsTx, Or(HasOpcode(0x2a75c2f1), HasOpcode(0xf1cafcb2))},
 				SingleChild: &Straw[BubbleDepositTokenStake]{
-					CheckFuncs: []bubbleCheck{IsTx, HasOpcode(0x77c65602)},
+					CheckFuncs: []bubbleCheck{IsTx, Or(HasOpcode(0xb675cea5), HasOpcode(0xab7bef17))},
 					SingleChild: &Straw[BubbleDepositTokenStake]{
-						CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.JettonInternalTransferMsgOp)},
-						Builder: func(newAction *BubbleDepositTokenStake, bubble *Bubble) error {
-							tx := bubble.Info.(BubbleTx)
-							newAction.Success = tx.success
-							return nil
-						},
+						CheckFuncs: []bubbleCheck{IsTx, HasOpcode(0x77c65602)},
 						SingleChild: &Straw[BubbleDepositTokenStake]{
-							CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.ExcessMsgOp)},
+							CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.JettonInternalTransferMsgOp)},
+							Builder: func(newAction *BubbleDepositTokenStake, bubble *Bubble) error {
+								tx := bubble.Info.(BubbleTx)
+								newAction.Success = tx.success
+								return nil
+							},
+							SingleChild: &Straw[BubbleDepositTokenStake]{
+								CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.ExcessMsgOp)},
+							},
 						},
 					},
 				},
+			},
+			{
+				CheckFuncs: []bubbleCheck{Is(BubbleContractDeploy{})},
 			},
 		},
 	},
@@ -570,9 +575,9 @@ var InstantWithdrawAffluentEarnWithOraclesStraw = Straw[BubbleWithdrawTokenStake
 		CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.ProvideAggregatedDataWithdrawMsgOp)},
 		Children: []Straw[BubbleWithdrawTokenStakeRequest]{
 			{
-				CheckFuncs: []bubbleCheck{IsTx, HasOpcode(0x2a75c2f1)},
+				CheckFuncs: []bubbleCheck{IsTx, Or(HasOpcode(0x2a75c2f1), HasOpcode(0xf1cafcb2))},
 				SingleChild: &Straw[BubbleWithdrawTokenStakeRequest]{
-					CheckFuncs: []bubbleCheck{IsTx, HasOpcode(0xb675cea5)},
+					CheckFuncs: []bubbleCheck{IsTx, Or(HasOpcode(0xb675cea5), HasOpcode(0xab7bef17))},
 					SingleChild: &Straw[BubbleWithdrawTokenStakeRequest]{
 						CheckFuncs: []bubbleCheck{IsTx, HasOpcode(0x77c65602)},
 						SingleChild: &Straw[BubbleWithdrawTokenStakeRequest]{

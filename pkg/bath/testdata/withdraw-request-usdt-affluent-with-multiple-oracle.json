@@ -1,0 +1,348 @@
+{
+   "Actions": [
+     {
+       "GasRelay": {
+         "Amount": 707916041,
+         "Relayer": "0:1c06b78eb4c0c014b51308221f6263643746fe7be60b4831a8409051cba0306f",
+         "Target": "0:18ad6afae9ec302784e12d298bc152b338ef1ae288dfd72e814fa29ee62a7ff5"
+       },
+       "Success": true,
+       "Type": "GasRelay",
+       "BaseTransactions": [
+         "a78468ef5aaa0e95ba7ad089a26b216e219735d285f50ead69f254aa9982b03c"
+       ]
+     },
+     {
+       "WithdrawTokenStakeRequest": {
+         "Staker": "0:18ad6afae9ec302784e12d298bc152b338ef1ae288dfd72e814fa29ee62a7ff5",
+         "Protocol": {
+           "Name": "Affluent",
+           "Image": "https://ton.app/media/71e5021a-77ab-4c48-8ef3-35e9c67701b0.png"
+         },
+         "StakeMeta": {
+           "Currency": {
+             "Type": "jetton",
+             "Jetton": "0:f717b131feec418f112e6fc160783a186144886c0515c9e8426ff25288254bdf",
+             "CurrencyID": null
+           },
+           "Amount": 9976229
+         }
+       },
+       "Success": true,
+       "Type": "WithdrawTokenStakeRequest",
+       "BaseTransactions": [
+         "498d7c5594d35818789244877b2bd3223bc9ba7ffe5662fb94d9e052bda483be",
+         "1dfc06141599391ee911c0f62e2288c4c0ac2fc5845a4e5abbf11955566bbd80",
+         "6dde5ae0e00f61417a912f8f4eb1b06ecb9aff40e59bbe603811a7c2245b8d23",
+         "4195d04103207d5b247d9ad31111ddf89e238049c8745ef95adf0048bd44b7d3",
+         "525f3955ae37397b43ab93e6cff19d4e5c8427e04498090ffa7a83ed473c26e2",
+         "59095ac3f7f5c08fe9fcba3ce58a32ee65b4230800f6294802531bea7fbadecd",
+         "0e2c2a34c03935df11fa1b7e888cf607251ccee36112cb5a9cef994171c6df30",
+         "cd6cf4b659aae8e20b74504d25c9f9a74ddbc802124eecf5556bcaa695e40617",
+         "cfb689e776b443f6c583d4f7a904f9b0012955a814652de682ef502cc46f8354"
+       ]
+     },
+     {
+       "SmartContractExec": {
+         "TonAttached": 59600000,
+         "Executor": "0:37715343aa9f6b43f63418b3a39b45441893fcd41822c5cedafadcf2bdb99a49",
+         "Contract": "0:ab1071c6e057fc4c3dcfcee1f9b454b01c10f7cf17976a8b33e3c8c62de6f08a",
+         "Operation": "0x2a75c2f1",
+         "Payload": ""
+       },
+       "Success": true,
+       "Type": "SmartContractExec",
+       "BaseTransactions": [
+         "1ef577532ae9e4952f734cba69137e3676b50c55186e03e6585f8008ee2804d2"
+       ]
+     },
+     {
+       "SmartContractExec": {
+         "TonAttached": 18581600,
+         "Executor": "0:ab1071c6e057fc4c3dcfcee1f9b454b01c10f7cf17976a8b33e3c8c62de6f08a",
+         "Contract": "0:37715343aa9f6b43f63418b3a39b45441893fcd41822c5cedafadcf2bdb99a49",
+         "Operation": "0xb675cea5",
+         "Payload": ""
+       },
+       "Success": true,
+       "Type": "SmartContractExec",
+       "BaseTransactions": [
+         "dce6851a4c5111dc72b7b03ebafab8ef719b0ec5d8600a3af74813c3556c42e5"
+       ]
+     },
+     {
+       "SmartContractExec": {
+         "TonAttached": 59600000,
+         "Executor": "0:37715343aa9f6b43f63418b3a39b45441893fcd41822c5cedafadcf2bdb99a49",
+         "Contract": "0:503038d654b797d2f0143434d12fe680ebae4422d2f34af38dcb02831d72510a",
+         "Operation": "0x2a75c2f1",
+         "Payload": ""
+       },
+       "Success": true,
+       "Type": "SmartContractExec",
+       "BaseTransactions": [
+         "078d8406fe20e4a6c23ded78a8db9adcd4e73442c058fb9b6eba6686e7e6f1c9"
+       ]
+     },
+     {
+       "SmartContractExec": {
+         "TonAttached": 20766000,
+         "Executor": "0:503038d654b797d2f0143434d12fe680ebae4422d2f34af38dcb02831d72510a",
+         "Contract": "0:37715343aa9f6b43f63418b3a39b45441893fcd41822c5cedafadcf2bdb99a49",
+         "Operation": "0xb675cea5",
+         "Payload": ""
+       },
+       "Success": true,
+       "Type": "SmartContractExec",
+       "BaseTransactions": [
+         "b3ccdc181d0424b5f7a561b56fe6687a2400f8471f354dae6a2e45ca09e35bab"
+       ]
+     },
+     {
+       "SmartContractExec": {
+         "TonAttached": 59600000,
+         "Executor": "0:37715343aa9f6b43f63418b3a39b45441893fcd41822c5cedafadcf2bdb99a49",
+         "Contract": "0:8d801987541456a4c79913b13dd9133e19e727bfcf0b25a5c0966aa7e1601f24",
+         "Operation": "0x2a75c2f1",
+         "Payload": ""
+       },
+       "Success": true,
+       "Type": "SmartContractExec",
+       "BaseTransactions": [
+         "ae54e8f75e7c8d218e9d3e848bebf3fe684b641bb43768588baa7bbcb905c475"
+       ]
+     },
+     {
+       "SmartContractExec": {
+         "TonAttached": 34367600,
+         "Executor": "0:8d801987541456a4c79913b13dd9133e19e727bfcf0b25a5c0966aa7e1601f24",
+         "Contract": "0:37715343aa9f6b43f63418b3a39b45441893fcd41822c5cedafadcf2bdb99a49",
+         "Operation": "0xb675cea5",
+         "Payload": ""
+       },
+       "Success": true,
+       "Type": "SmartContractExec",
+       "BaseTransactions": [
+         "0fdcc213b3aded23161741e478272266fbb4733350b9477da7902e144195a74a"
+       ]
+     },
+     {
+       "SmartContractExec": {
+         "TonAttached": 59600000,
+         "Executor": "0:37715343aa9f6b43f63418b3a39b45441893fcd41822c5cedafadcf2bdb99a49",
+         "Contract": "0:8e03780ddc393e9a5ebaceec7fbee89aee64c805310d2b1b68983e930e09c565",
+         "Operation": "0x2a75c2f1",
+         "Payload": ""
+       },
+       "Success": true,
+       "Type": "SmartContractExec",
+       "BaseTransactions": [
+         "9b81efac2f0eec38df624b30226c4214a31f59247865f757c3d41d6a1c1029d7"
+       ]
+     },
+     {
+       "SmartContractExec": {
+         "TonAttached": 27504400,
+         "Executor": "0:8e03780ddc393e9a5ebaceec7fbee89aee64c805310d2b1b68983e930e09c565",
+         "Contract": "0:37715343aa9f6b43f63418b3a39b45441893fcd41822c5cedafadcf2bdb99a49",
+         "Operation": "0xb675cea5",
+         "Payload": ""
+       },
+       "Success": true,
+       "Type": "SmartContractExec",
+       "BaseTransactions": [
+         "5b1d122329ded7661da01f35a3090edfdd8e3dc66e993898fee0d0c847d5d665"
+       ]
+     },
+     {
+       "SmartContractExec": {
+         "TonAttached": 59600000,
+         "Executor": "0:37715343aa9f6b43f63418b3a39b45441893fcd41822c5cedafadcf2bdb99a49",
+         "Contract": "0:1825d53d24545c280c0c66fdcca83d105630443063bfe26830389b5304e1d1db",
+         "Operation": "0x2a75c2f1",
+         "Payload": ""
+       },
+       "Success": true,
+       "Type": "SmartContractExec",
+       "BaseTransactions": [
+         "2cdaf7f8ad60bbf7769bf8716649a29645a10c78470cc29e8118d158f8af27c2"
+       ]
+     },
+     {
+       "SmartContractExec": {
+         "TonAttached": 41625200,
+         "Executor": "0:1825d53d24545c280c0c66fdcca83d105630443063bfe26830389b5304e1d1db",
+         "Contract": "0:37715343aa9f6b43f63418b3a39b45441893fcd41822c5cedafadcf2bdb99a49",
+         "Operation": "0xb675cea5",
+         "Payload": ""
+       },
+       "Success": true,
+       "Type": "SmartContractExec",
+       "BaseTransactions": [
+         "eb625670af62a6d8d74d0e59dd33ec753600a1a5cd94ab4e15219f81dd380175"
+       ]
+     },
+     {
+       "SmartContractExec": {
+         "TonAttached": 59600000,
+         "Executor": "0:37715343aa9f6b43f63418b3a39b45441893fcd41822c5cedafadcf2bdb99a49",
+         "Contract": "0:3d893760b0fc6f934f227425d0a1e7c6a8918b4c3405cb85b7e00b448fb67fdb",
+         "Operation": "0x2a75c2f1",
+         "Payload": ""
+       },
+       "Success": true,
+       "Type": "SmartContractExec",
+       "BaseTransactions": [
+         "996d1d8c62d8b8c0eeab5c3cc43fcb2d6cb6e74d102543db23f9d2920fc32b92"
+       ]
+     },
+     {
+       "SmartContractExec": {
+         "TonAttached": 34373200,
+         "Executor": "0:3d893760b0fc6f934f227425d0a1e7c6a8918b4c3405cb85b7e00b448fb67fdb",
+         "Contract": "0:37715343aa9f6b43f63418b3a39b45441893fcd41822c5cedafadcf2bdb99a49",
+         "Operation": "0xb675cea5",
+         "Payload": ""
+       },
+       "Success": true,
+       "Type": "SmartContractExec",
+       "BaseTransactions": [
+         "050f846bb6646a9b13a59020b900efec09fd88a8e532ed21be4f15ed7c6097c1"
+       ]
+     },
+     {
+       "SmartContractExec": {
+         "TonAttached": 59600000,
+         "Executor": "0:37715343aa9f6b43f63418b3a39b45441893fcd41822c5cedafadcf2bdb99a49",
+         "Contract": "0:425d0a76b124c986f9d5e83941aa14ec74d31973fb49717409e578e85a2cbe38",
+         "Operation": "0x2a75c2f1",
+         "Payload": ""
+       },
+       "Success": true,
+       "Type": "SmartContractExec",
+       "BaseTransactions": [
+         "d28388636206145c690cc4aacccd58d01f3c37ea0460f1a6f8fbf0854f12fc59"
+       ]
+     },
+     {
+       "SmartContractExec": {
+         "TonAttached": 19362800,
+         "Executor": "0:425d0a76b124c986f9d5e83941aa14ec74d31973fb49717409e578e85a2cbe38",
+         "Contract": "0:37715343aa9f6b43f63418b3a39b45441893fcd41822c5cedafadcf2bdb99a49",
+         "Operation": "0xb675cea5",
+         "Payload": ""
+       },
+       "Success": true,
+       "Type": "SmartContractExec",
+       "BaseTransactions": [
+         "920eab586ef54dabe8e8bc78ffec037f6fe83c82a42512f0bc3c2a42538b24fe"
+       ]
+     }
+   ],
+   "Accounts": [
+     {
+       "Account": "0:06b609ebd46d170e294651170e077a54865f8ba3ffc9f936893f42b87b2f1cb9",
+       "Ton": -200,
+       "Fee": 17067800,
+       "Jettons": null
+     },
+     {
+       "Account": "0:1825d53d24545c280c0c66fdcca83d105630443063bfe26830389b5304e1d1db",
+       "Ton": -400,
+       "Fee": 17975200,
+       "Jettons": null
+     },
+     {
+       "Account": "0:18ad6afae9ec302784e12d298bc152b338ef1ae288dfd72e814fa29ee62a7ff5",
+       "Ton": 268242405,
+       "Fee": 8127227,
+       "Jettons": [
+         {
+           "Address": "0:b113a994b5024a16719f69139328eb759596c38a25f59028b146fecdc3621dfe",
+           "Quantity": 100090
+         },
+         {
+           "Address": "0:f717b131feec418f112e6fc160783a186144886c0515c9e8426ff25288254bdf",
+           "Quantity": -9976229
+         }
+       ]
+     },
+     {
+       "Account": "0:1c06b78eb4c0c014b51308221f6263643746fe7be60b4831a8409051cba0306f",
+       "Ton": -723646055,
+       "Fee": 15730014,
+       "Jettons": null
+     },
+     {
+       "Account": "0:37715343aa9f6b43f63418b3a39b45441893fcd41822c5cedafadcf2bdb99a49",
+       "Ton": 0,
+       "Fee": 67507200,
+       "Jettons": null
+     },
+     {
+       "Account": "0:3d893760b0fc6f934f227425d0a1e7c6a8918b4c3405cb85b7e00b448fb67fdb",
+       "Ton": -408,
+       "Fee": 25227208,
+       "Jettons": null
+     },
+     {
+       "Account": "0:425d0a76b124c986f9d5e83941aa14ec74d31973fb49717409e578e85a2cbe38",
+       "Ton": -424,
+       "Fee": 40237624,
+       "Jettons": null
+     },
+     {
+       "Account": "0:503038d654b797d2f0143434d12fe680ebae4422d2f34af38dcb02831d72510a",
+       "Ton": -420,
+       "Fee": 38834420,
+       "Jettons": null
+     },
+     {
+       "Account": "0:8d801987541456a4c79913b13dd9133e19e727bfcf0b25a5c0966aa7e1601f24",
+       "Ton": -408,
+       "Fee": 25232808,
+       "Jettons": null
+     },
+     {
+       "Account": "0:8e03780ddc393e9a5ebaceec7fbee89aee64c805310d2b1b68983e930e09c565",
+       "Ton": -416,
+       "Fee": 32096016,
+       "Jettons": null
+     },
+     {
+       "Account": "0:99f33f87d0d90f2ccc4b4de04cd51d7b5b7878fa8b06cb886689eefe87f944ce",
+       "Ton": -29,
+       "Fee": 8038829,
+       "Jettons": null
+     },
+     {
+       "Account": "0:ab1071c6e057fc4c3dcfcee1f9b454b01c10f7cf17976a8b33e3c8c62de6f08a",
+       "Ton": -416,
+       "Fee": 41018816,
+       "Jettons": null
+     },
+     {
+       "Account": "0:b1eb75ebf68b889b1e8151ab7aee2d3eb84842597f923de5744827105e42f176",
+       "Ton": 4,
+       "Fee": 800005,
+       "Jettons": null
+     },
+     {
+       "Account": "0:c6b8211bf20fd5c0ad9473db8ca52f529a7140dcb706a4ddf49b5d91b7946673",
+       "Ton": -5,
+       "Fee": 1549605,
+       "Jettons": null
+     },
+     {
+       "Account": "0:f717b131feec418f112e6fc160783a186144886c0515c9e8426ff25288254bdf",
+       "Ton": -676602,
+       "Fee": 116640602,
+       "Jettons": [
+         {
+           "Address": "0:b113a994b5024a16719f69139328eb759596c38a25f59028b146fecdc3621dfe",
+           "Quantity": -100090
+         }
+       ]
+     }
+   ]
+ }

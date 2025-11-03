@@ -235,6 +235,8 @@ func TestFindActions(t *testing.T) {
 			tongo.MustParseBlockID("(0,8000000000000000,58000202)"),
 			tongo.MustParseBlockID("(0,8000000000000000,57971762)"),
 			tongo.MustParseBlockID("(0,8000000000000000,58456395)"),
+			tongo.MustParseBlockID("(0,8000000000000000,58582951)"),
+			tongo.MustParseBlockID("(0,8000000000000000,58456309)"),
 		}),
 	)
 
@@ -666,6 +668,11 @@ func TestFindActions(t *testing.T) {
 			filenamePrefix: "deposit-usdt-earn-affluent",
 		},
 		{
+			name:           "deposit usdt earn affluent with single oracle",
+			hash:           "ef5c2f765be8f59fa2bec8d7a2fa6f2a5f6a7a226de4620d6b80ea4db8c714c4",
+			filenamePrefix: "deposit-usdt-earn-affluent-with-single-oracle",
+		},
+		{
 			name:           "instant withdraw usdt affluent",
 			hash:           "3219afb5d13fd687fc616cc7b0ccf6de7eaa8e4510a15aceb708ad4a0df27bba",
 			filenamePrefix: "instant-withdraw-usdt-affluent",
@@ -676,9 +683,14 @@ func TestFindActions(t *testing.T) {
 			filenamePrefix: "withdraw-request-usdt-affluent",
 		},
 		{
-			name:           "withdraw request usdt affluent with oracles",
+			name:           "withdraw request usdt affluent with single oracle",
 			hash:           "0ed86c1e6d97887f0e644174dc8063afabfe0a088cdd1987033baf468c253b94",
-			filenamePrefix: "withdraw-request-usdt-affluent-with-oracles",
+			filenamePrefix: "withdraw-request-usdt-affluent-with-single-oracle",
+		},
+		{
+			name:           "withdraw request usdt affluent with multiple oracles",
+			hash:           "42288aca8358bb322c2fa0a97d549a675b68d535ed89af3c311bdfe437e4f576",
+			filenamePrefix: "withdraw-request-usdt-affluent-with-multiple-oracle",
 		},
 	} {
 		t.Run(c.name, func(t *testing.T) {

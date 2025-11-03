@@ -1,0 +1,89 @@
+{
+   "Actions": [
+     {
+       "DepositTokenStake": {
+         "Staker": "0:18ad6afae9ec302784e12d298bc152b338ef1ae288dfd72e814fa29ee62a7ff5",
+         "Protocol": {
+           "Name": "Affluent",
+           "Image": "https://ton.app/media/71e5021a-77ab-4c48-8ef3-35e9c67701b0.png"
+         },
+         "StakeMeta": {
+           "Currency": {
+             "Type": "jetton",
+             "Jetton": "0:b113a994b5024a16719f69139328eb759596c38a25f59028b146fecdc3621dfe",
+             "CurrencyID": null
+           },
+           "Amount": 1000000
+         }
+       },
+       "Success": true,
+       "Type": "DepositTokenStake",
+       "BaseTransactions": [
+         "8293f8fcbcb6bc1302c1f610a2d6e7cac41d5125705e1681d0ea70d64ca3aad0",
+         "70cf8aa7a4edc2223160b24f77fc827bbb7435329ffe7d451d5b2b4565390d95",
+         "b46e7b2fe4311145bdb16b47660574f6e9431c3652983567cadb30e92ac6ead0",
+         "4f8f1db94c5074620179f821149f5284241fe3b14a6d7d1193633df8e2b5478e",
+         "ae71d31b5e9240a66272d750f78efd62a8fdbd86d69dedade68eadac42ebca81",
+         "1011fc7e7ab730e0c9499ca4df95af42404ae4be9364a835664813741bc636ad",
+         "ff22cbf3ab132ced5aed3de2f96b70841661fc13726f3db740913c4eaa3ccf9b",
+         "feecf72ecbefa5ede3f44ca5d2fc5e8be823bc705f610c9da30498be4d37e559",
+         "84714f14a73de8f54f0806e3ad5fdc52a10431ee4e02c43984c94ee22e1de0d5",
+         "0d60ab5f3d3972fdf9ccd72e1da6d8241858e9bbb57be802536b663d45943e5b"
+       ]
+     }
+   ],
+   "Accounts": [
+     {
+       "Account": "0:18ad6afae9ec302784e12d298bc152b338ef1ae288dfd72e814fa29ee62a7ff5",
+       "Ton": -160563878,
+       "Fee": 12529947,
+       "Jettons": [
+         {
+           "Address": "0:b113a994b5024a16719f69139328eb759596c38a25f59028b146fecdc3621dfe",
+           "Quantity": -1000000
+         }
+       ]
+     },
+     {
+       "Account": "0:3d893760b0fc6f934f227425d0a1e7c6a8918b4c3405cb85b7e00b448fb67fdb",
+       "Ton": -1408,
+       "Fee": 25323408,
+       "Jettons": null
+     },
+     {
+       "Account": "0:651d88131d883e1ce147394e1766ce1390b2e19c0e8a46f30c0b4e4ad5b0fe25",
+       "Ton": 0,
+       "Fee": 11990800,
+       "Jettons": null
+     },
+     {
+       "Account": "0:99f33f87d0d90f2ccc4b4de04cd51d7b5b7878fa8b06cb886689eefe87f944ce",
+       "Ton": 18802,
+       "Fee": 3547883,
+       "Jettons": null
+     },
+     {
+       "Account": "0:b1eb75ebf68b889b1e8151ab7aee2d3eb84842597f923de5744827105e42f176",
+       "Ton": -2687,
+       "Fee": 5673087,
+       "Jettons": null
+     },
+     {
+       "Account": "0:c6b8211bf20fd5c0ad9473db8ca52f529a7140dcb706a4ddf49b5d91b7946673",
+       "Ton": 0,
+       "Fee": 5504846,
+       "Jettons": null
+     },
+     {
+       "Account": "0:f717b131feec418f112e6fc160783a186144886c0515c9e8426ff25288254bdf",
+       "Ton": -685919,
+       "Fee": 96665119,
+       "Jettons": [
+         {
+           "Address": "0:b113a994b5024a16719f69139328eb759596c38a25f59028b146fecdc3621dfe",
+           "Quantity": 1000000
+         }
+       ]
+     }
+   ]
+ }
