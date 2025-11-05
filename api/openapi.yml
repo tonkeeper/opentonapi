@@ -5685,6 +5685,10 @@ components:
           type: string
           x-js-format: bigint
           example: "597968399"
+        scaled_ui_balance:
+          type: string
+          x-js-format: bigint
+          example: "597968399"
         price:
           $ref: '#/components/schemas/TokenRates'
         wallet_address:

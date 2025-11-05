@@ -144,13 +144,19 @@ func (h *Handler) convertJettonBalance(ctx context.Context, wallet core.JettonWa
 		WalletAddress: convertAccountAddress(wallet.Address, h.addressBook),
 		Extensions:    wallet.Extensions,
 	}
+	scaledUiParams, err := h.storage.GetScaledUIParameters(ctx, wallet.JettonAddress)
+	if err != nil && !errors.Is(err, core.ErrEntityNotFound) {
+		return oas.JettonBalance{}, toError(http.StatusInternalServerError, err)
+	} else if err == nil {
+		scaledUiBalance := wallet.Balance.Mul(scaledUiParams.Numerator).Div(scaledUiParams.Denominator).Floor()
+		jettonBalance.ScaledUIBalance.SetTo(scaledUiBalance.String())
+	}
 	if wallet.Lock != nil {
 		jettonBalance.Lock = oas.NewOptJettonBalanceLock(oas.JettonBalanceLock{
 			Amount: wallet.Lock.FullBalance.String(),
 			Till:   wallet.Lock.UnlockTime,
 		})
 	}
-	var err error
 	rates := make(map[string]oas.TokenRates)
 	for _, currency := range currencies {
 		rates, err = convertRates(rates, wallet.JettonAddress.ToRaw(), currency, todayRates, yesterdayRates, weekRates, monthRates)

@@ -7683,17 +7683,23 @@ func (s *InitStateRaw) SetFileHash(val string) {
 
 // Ref: #/components/schemas/JettonBalance
 type JettonBalance struct {
-	Balance       string               `json:"balance"`
-	Price         OptTokenRates        `json:"price"`
-	WalletAddress AccountAddress       `json:"wallet_address"`
-	Jetton        JettonPreview        `json:"jetton"`
-	Extensions    []string             `json:"extensions"`
-	Lock          OptJettonBalanceLock `json:"lock"`
+	Balance         string               `json:"balance"`
+	ScaledUIBalance OptString            `json:"scaled_ui_balance"`
+	Price           OptTokenRates        `json:"price"`
+	WalletAddress   AccountAddress       `json:"wallet_address"`
+	Jetton          JettonPreview        `json:"jetton"`
+	Extensions      []string             `json:"extensions"`
+	Lock            OptJettonBalanceLock `json:"lock"`
 }
 
 // GetBalance returns the value of Balance.
 func (s *JettonBalance) GetBalance() string {
 	return s.Balance
+}
+
+// GetScaledUIBalance returns the value of ScaledUIBalance.
+func (s *JettonBalance) GetScaledUIBalance() OptString {
+	return s.ScaledUIBalance
 }
 
 // GetPrice returns the value of Price.
@@ -7724,6 +7730,11 @@ func (s *JettonBalance) GetLock() OptJettonBalanceLock {
 // SetBalance sets the value of Balance.
 func (s *JettonBalance) SetBalance(val string) {
 	s.Balance = val
+}
+
+// SetScaledUIBalance sets the value of ScaledUIBalance.
+func (s *JettonBalance) SetScaledUIBalance(val OptString) {
+	s.ScaledUIBalance = val
 }
 
 // SetPrice sets the value of Price.

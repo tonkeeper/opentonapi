@@ -88,6 +88,7 @@ type storage interface {
 	GetAccountJettonHistoryByID(ctx context.Context, address, jettonMaster tongo.AccountID, limit int, beforeLT, startTime, endTime *int64) ([]tongo.Bits256, error)
 	GetJettonAccountHistoryByID(ctx context.Context, address, jettonMaster tongo.AccountID, limit int, beforeLT, startTime, endTime *int64) ([]core.JettonOperation, error)
 	GetJettonTransferPayload(ctx context.Context, accountID, jettonMaster ton.AccountID) (*core.JettonTransferPayload, error)
+	GetScaledUIParameters(ctx context.Context, jetton tongo.AccountID) (core.ScaledUIParameters, error)
 
 	GetAllAuctions(ctx context.Context) ([]core.Auction, error)
 	GetDomainBids(ctx context.Context, domain string) ([]core.DomainBid, error)

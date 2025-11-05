@@ -1,9 +1,10 @@
 package core
 
 import (
+	"math/big"
+
 	"github.com/tonkeeper/tongo/abi"
 	"github.com/tonkeeper/tongo/ton"
-	"math/big"
 
 	"github.com/shopspring/decimal"
 	"github.com/tonkeeper/tongo"
@@ -82,4 +83,9 @@ type NftOperation struct {
 	ForwardPayload abi.NFTPayload
 	Lt             uint64
 	Utime          int64
+}
+
+type ScaledUIParameters struct {
+	Numerator   decimal.Decimal
+	Denominator decimal.Decimal
 }
