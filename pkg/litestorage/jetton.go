@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"math/big"
+	"strings"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/shopspring/decimal"
@@ -166,4 +167,24 @@ func (s *LiteStorage) GetJettonsHoldersCount(ctx context.Context, accountIDs []t
 
 func (s *LiteStorage) GetJettonHolders(ctx context.Context, jettonMaster tongo.AccountID, limit, offset int) ([]core.JettonHolder, error) {
 	return []core.JettonHolder{}, nil
+}
+
+func (s *LiteStorage) GetScaledUIParameters(ctx context.Context, master tongo.AccountID) (core.ScaledUIParameters, error) {
+	_, value, err := abi.GetDisplayMultiplier(ctx, s.executor, master)
+	if err != nil && (strings.Contains(err.Error(), "can not decode outputs") || strings.Contains(err.Error(), "method execution failed")) {
+		return core.ScaledUIParameters{}, core.ErrEntityNotFound
+	} else if err != nil {
+		return core.ScaledUIParameters{}, err
+	}
+	data, ok := value.(abi.GetDisplayMultiplierResult)
+	if !ok {
+		return core.ScaledUIParameters{}, core.ErrEntityNotFound
+	}
+	numerator := big.Int(data.Numerator)
+	denominator := big.Int(data.Denominator)
+	res := core.ScaledUIParameters{
+		Numerator:   decimal.NewFromBigInt(&numerator, 0),
+		Denominator: decimal.NewFromBigInt(&denominator, 0),
+	}
+	return res, nil
 }

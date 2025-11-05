@@ -23256,6 +23256,12 @@ func (s *JettonBalance) encodeFields(e *jx.Encoder) {
 		e.Str(s.Balance)
 	}
 	{
+		if s.ScaledUIBalance.Set {
+			e.FieldStart("scaled_ui_balance")
+			s.ScaledUIBalance.Encode(e)
+		}
+	}
+	{
 		if s.Price.Set {
 			e.FieldStart("price")
 			s.Price.Encode(e)
@@ -23287,13 +23293,14 @@ func (s *JettonBalance) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfJettonBalance = [6]string{
+var jsonFieldsNameOfJettonBalance = [7]string{
 	0: "balance",
-	1: "price",
-	2: "wallet_address",
-	3: "jetton",
-	4: "extensions",
-	5: "lock",
+	1: "scaled_ui_balance",
+	2: "price",
+	3: "wallet_address",
+	4: "jetton",
+	5: "extensions",
+	6: "lock",
 }
 
 // Decode decodes JettonBalance from json.
@@ -23317,6 +23324,16 @@ func (s *JettonBalance) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"balance\"")
 			}
+		case "scaled_ui_balance":
+			if err := func() error {
+				s.ScaledUIBalance.Reset()
+				if err := s.ScaledUIBalance.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"scaled_ui_balance\"")
+			}
 		case "price":
 			if err := func() error {
 				s.Price.Reset()
@@ -23328,7 +23345,7 @@ func (s *JettonBalance) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"price\"")
 			}
 		case "wallet_address":
-			requiredBitSet[0] |= 1 << 2
+			requiredBitSet[0] |= 1 << 3
 			if err := func() error {
 				if err := s.WalletAddress.Decode(d); err != nil {
 					return err
@@ -23338,7 +23355,7 @@ func (s *JettonBalance) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"wallet_address\"")
 			}
 		case "jetton":
-			requiredBitSet[0] |= 1 << 3
+			requiredBitSet[0] |= 1 << 4
 			if err := func() error {
 				if err := s.Jetton.Decode(d); err != nil {
 					return err
@@ -23386,7 +23403,7 @@ func (s *JettonBalance) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b00001101,
+		0b00011001,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.

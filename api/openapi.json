@@ -3770,6 +3770,11 @@
      "price": {
       "$ref": "#/components/schemas/TokenRates"
      },
+     "scaled_ui_balance": {
+      "example": "597968399",
+      "type": "string",
+      "x-js-format": "bigint"
+     },
      "wallet_address": {
       "$ref": "#/components/schemas/AccountAddress"
      }
