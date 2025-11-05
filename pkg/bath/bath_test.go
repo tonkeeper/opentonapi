@@ -247,6 +247,8 @@ func TestFindActions(t *testing.T) {
 			tongo.MustParseBlockID("(0,8000000000000000,58456395)"),
 			tongo.MustParseBlockID("(0,8000000000000000,58582951)"),
 			tongo.MustParseBlockID("(0,8000000000000000,58456309)"),
+			// nft purchase
+			tongo.MustParseBlockID("(0,8000000000000000,58460832)"),
 		}),
 	)
 
@@ -299,6 +301,21 @@ func TestFindActions(t *testing.T) {
 						tongo.MustParseAccountID("0:82e5172540cc7b9aeb8dfa6a82c2053f7008f484f94472efa369a9628a8c896a"): {
 							NftPrice: 1_200_000_000,
 							Owner:    g.Pointer(tongo.MustParseAccountID("0:bbf8ca0967809097d1aa67afee9cb2db2b9aa5e5f66c50a5c92033dc57b1cc23")),
+						},
+					}, nil
+				},
+			},
+		},
+		{
+			name:           "nft getgems purchase v4",
+			hash:           "ae633abecf6cd94c93fd1697dfbb05a8af1e0ba0ed455577c614d1466563cf92",
+			filenamePrefix: "getgems-nft-purchase-v4",
+			source: &mockInfoSource{
+				OnNftSaleContracts: func(ctx context.Context, getGems []tongo.AccountID) (map[tongo.AccountID]core.NftSaleContract, error) {
+					return map[tongo.AccountID]core.NftSaleContract{
+						tongo.MustParseAccountID("0:079279ed0fd9e7e1e6b4d814c451f18cd76b91bc81478d7f8923ee8945c63be1"): {
+							NftPrice: 1_200_000_000,
+							Owner:    g.Pointer(tongo.MustParseAccountID("0:49486d3e13ae8b9df7f992e6e4c0c4e6685d66f1bd06ed223de26d7156011481")),
 						},
 					}, nil
 				},

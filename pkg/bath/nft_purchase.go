@@ -1,10 +1,11 @@
 package bath
 
 import (
+	"math/big"
+
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
-	"math/big"
 )
 
 type BubbleNftPurchase struct {
@@ -36,11 +37,15 @@ func (b BubbleNftPurchase) ToAction() *Action {
 var NftPurchaseStraw = Straw[BubbleNftPurchase]{
 	CheckFuncs: []bubbleCheck{
 		IsTx,
-		Or(HasInterface(abi.NftSaleV2), HasInterface(abi.NftSaleV1)),
-		HasEmptyBody,             //all buy transactions has empty body
 		AmountInterval(1, 1<<62), //externals has zero value
 		func(bubble *Bubble) bool {
 			tx := bubble.Info.(BubbleTx)
+			if (HasInterface(abi.NftSaleV1)(bubble) || HasInterface(abi.NftSaleV2)(bubble)) && !HasEmptyBody(bubble) {
+				return false
+			}
+			if !HasInterface(abi.NftSaleGetgemsV2)(bubble) && !HasInterface(abi.NftSaleGetgemsV3)(bubble) && !HasInterface(abi.NftSaleGetgemsV4)(bubble) {
+				return false
+			}
 			return tx.additionalInfo != nil && tx.additionalInfo.NftSaleContract != nil && tx.additionalInfo.NftSaleContract.Owner != nil
 		}},
 	Builder: func(newAction *BubbleNftPurchase, bubble *Bubble) error {
