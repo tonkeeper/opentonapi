@@ -382,6 +382,9 @@ func CollectAdditionalInfo(ctx context.Context, infoSource InformationSource, tr
 		}
 		if hasInterface(trace.AccountInterfaces, abi.NftSaleV1) ||
 			hasInterface(trace.AccountInterfaces, abi.NftSaleV2) ||
+			hasInterface(trace.AccountInterfaces, abi.NftSaleGetgemsV2) ||
+			hasInterface(trace.AccountInterfaces, abi.NftSaleGetgemsV3) ||
+			hasInterface(trace.AccountInterfaces, abi.NftSaleGetgemsV4) ||
 			hasInterface(trace.AccountInterfaces, abi.NftAuctionV1) {
 			if sale, ok := basicNftSales[trace.Account]; ok {
 				additionalInfo.NftSaleContract = &sale
