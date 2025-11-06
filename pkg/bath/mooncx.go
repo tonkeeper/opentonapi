@@ -39,7 +39,7 @@ var MooncxSwapStraw = Straw[BubbleJettonSwap]{
 		Builder: func(newAction *BubbleJettonSwap, bubble *Bubble) error {
 			tx := bubble.Info.(BubbleJettonTransfer)
 			newAction.Out.JettonMaster = tx.master
-			newAction.Out.JettonWallet = tx.recipientWallet
+			newAction.Out.JettonWallet = tx.senderWallet
 			amount := big.Int(tx.amount)
 			newAction.Out.Amount = amount
 			newAction.Success = tx.success
