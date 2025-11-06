@@ -40,6 +40,7 @@ type result struct {
 type mockInfoSource struct {
 	OnJettonMastersForWallets func(ctx context.Context, wallets []tongo.AccountID) (map[tongo.AccountID]tongo.AccountID, error)
 	OnNftSaleContracts        func(ctx context.Context, contracts []tongo.AccountID) (map[tongo.AccountID]core.NftSaleContract, error)
+	OnSubscriptionsInfos      func(ctx context.Context, ids []core.SubscriptionID) (map[tongo.AccountID]core.SubscriptionInfo, error)
 }
 
 func (m *mockInfoSource) NftSaleContracts(ctx context.Context, contracts []tongo.AccountID) (map[tongo.AccountID]core.NftSaleContract, error) {
@@ -62,7 +63,10 @@ func (m *mockInfoSource) STONfiPools(ctx context.Context, pools []core.STONfiPoo
 }
 
 func (m *mockInfoSource) SubscriptionInfos(ctx context.Context, ids []core.SubscriptionID) (map[tongo.AccountID]core.SubscriptionInfo, error) {
-	return map[tongo.AccountID]core.SubscriptionInfo{}, nil
+	if m.OnSubscriptionsInfos == nil {
+		return map[tongo.AccountID]core.SubscriptionInfo{}, nil
+	}
+	return m.OnSubscriptionsInfos(ctx, ids)
 }
 
 func (m *mockInfoSource) DedustPools(ctx context.Context, contracts []tongo.AccountID) (map[tongo.AccountID]core.DedustPool, error) {
@@ -531,8 +535,20 @@ func TestFindActions(t *testing.T) {
 			filenamePrefix: "stonfi-v2-swap-ref",
 		},
 		{
-			name:           "subscription V2 + wallet W5 deploy with payment",
-			hash:           "a9c8ffdb11f1d6f80feae77c7fcbefad48dbb95999c3524538d832c5c6a7ff6c",
+			name: "subscription V2 + wallet W5 deploy with payment",
+			hash: "a9c8ffdb11f1d6f80feae77c7fcbefad48dbb95999c3524538d832c5c6a7ff6c",
+			source: &mockInfoSource{
+				OnSubscriptionsInfos: func(ctx context.Context, ids []core.SubscriptionID) (map[tongo.AccountID]core.SubscriptionInfo, error) {
+					return map[tongo.AccountID]core.SubscriptionInfo{
+						tongo.MustParseAddress("0:1c274dc8fec45ebc9828c870b6721b90d89f3a7f864a1126a485997765665f0b").ID: {
+							Wallet:           tongo.MustParseAddress("0:35a74ba451906124a313e5fc00382b98ec81994dd93826a045a7626b0b9be6d5").ID,
+							Admin:            tongo.MustParseAddress("0:5b92ca5f8ef8683432c9192c1a7b855f6cb08912c85d029f56faf918cfaa9649").ID,
+							WithdrawTo:       tongo.MustParseAddress("0:b8f8fecda3fca32c0ca2e5791469ba087af68d178e8be19da7aca4362be50ba9").ID,
+							PaymentPerPeriod: 20000000,
+						},
+					}, nil
+				},
+			},
 			filenamePrefix: "deploy-with-payment-subscription-v2-wallet-w5",
 		},
 		{

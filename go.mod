@@ -70,7 +70,3 @@ require (
 	google.golang.org/protobuf v1.33.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
-
-replace (
-	github.com/tonkeeper/tongo v1.16.32 => ../tongo
-)

@@ -36,7 +36,7 @@ var BidaskSwapStraw = Straw[BubbleJettonSwap]{
 				Builder: func(newAction *BubbleJettonSwap, bubble *Bubble) error {
 					jettonTx := bubble.Info.(BubbleJettonTransfer)
 					newAction.Out.JettonMaster = jettonTx.master
-					newAction.Out.JettonWallet = jettonTx.recipientWallet
+					newAction.Out.JettonWallet = jettonTx.senderWallet
 					newAction.Out.Amount = big.Int(jettonTx.amount)
 					newAction.Success = jettonTx.success
 					return nil
@@ -129,7 +129,7 @@ var BidaskJettonSwapStraw = Straw[BubbleJettonSwap]{
 				Builder: func(newAction *BubbleJettonSwap, bubble *Bubble) error {
 					jettonTx := bubble.Info.(BubbleJettonTransfer)
 					newAction.Out.JettonMaster = jettonTx.master
-					newAction.Out.JettonWallet = jettonTx.recipientWallet
+					newAction.Out.JettonWallet = jettonTx.senderWallet
 					newAction.Out.Amount = big.Int(jettonTx.amount)
 					newAction.Success = jettonTx.success
 					return nil
