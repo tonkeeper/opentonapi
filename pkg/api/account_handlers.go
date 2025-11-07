@@ -75,6 +75,12 @@ func (h *Handler) GetAccount(ctx context.Context, params oas.GetAccountParams) (
 	} else {
 		res = convertToAccount(rawAccount, nil, h.state, h.spamFilter)
 	}
+	if strings.HasSuffix(params.AccountID, ".ton") {
+		trust := h.spamFilter.TonDomainTrust(params.AccountID)
+		if trust == core.TrustBlacklist {
+			res.IsScam = oas.NewOptBool(true)
+		}
+	}
 	if rawAccount.ExtraBalances != nil {
 		res.ExtraBalance = convertExtraCurrencies(rawAccount.ExtraBalances)
 	}
