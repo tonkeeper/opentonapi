@@ -26002,6 +26002,12 @@ func (s *JettonTransferAction) encodeFields(e *jx.Encoder) {
 		e.Str(s.Amount)
 	}
 	{
+		if s.ScaledUIAmount.Set {
+			e.FieldStart("scaled_ui_amount")
+			s.ScaledUIAmount.Encode(e)
+		}
+	}
+	{
 		if s.Comment.Set {
 			e.FieldStart("comment")
 			s.Comment.Encode(e)
@@ -26025,16 +26031,17 @@ func (s *JettonTransferAction) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfJettonTransferAction = [9]string{
+var jsonFieldsNameOfJettonTransferAction = [10]string{
 	0: "sender",
 	1: "recipient",
 	2: "senders_wallet",
 	3: "recipients_wallet",
 	4: "amount",
-	5: "comment",
-	6: "encrypted_comment",
-	7: "refund",
-	8: "jetton",
+	5: "scaled_ui_amount",
+	6: "comment",
+	7: "encrypted_comment",
+	8: "refund",
+	9: "jetton",
 }
 
 // Decode decodes JettonTransferAction from json.
@@ -26102,6 +26109,16 @@ func (s *JettonTransferAction) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"amount\"")
 			}
+		case "scaled_ui_amount":
+			if err := func() error {
+				s.ScaledUIAmount.Reset()
+				if err := s.ScaledUIAmount.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"scaled_ui_amount\"")
+			}
 		case "comment":
 			if err := func() error {
 				s.Comment.Reset()
@@ -26133,7 +26150,7 @@ func (s *JettonTransferAction) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"refund\"")
 			}
 		case "jetton":
-			requiredBitSet[1] |= 1 << 0
+			requiredBitSet[1] |= 1 << 1
 			if err := func() error {
 				if err := s.Jetton.Decode(d); err != nil {
 					return err
@@ -26153,7 +26170,7 @@ func (s *JettonTransferAction) Decode(d *jx.Decoder) error {
 	var failures []validate.FieldError
 	for i, mask := range [2]uint8{
 		0b00011100,
-		0b00000001,
+		0b00000010,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.

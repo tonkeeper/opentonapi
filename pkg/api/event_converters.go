@@ -13,6 +13,7 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
+	"github.com/shopspring/decimal"
 	imgGenerator "github.com/tonkeeper/opentonapi/pkg/image"
 	"go.uber.org/zap"
 
@@ -264,7 +265,7 @@ func (h *Handler) convertActionNftTransfer(t *bath.NftTransferAction, acceptLang
 	return action, simplePreview
 }
 
-func (h *Handler) convertActionJettonTransfer(ctx context.Context, t *bath.JettonTransferAction, acceptLanguage string, viewer *tongo.AccountID) (oas.OptJettonTransferAction, oas.ActionSimplePreview) {
+func (h *Handler) convertActionJettonTransfer(ctx context.Context, t *bath.JettonTransferAction, acceptLanguage string, viewer *tongo.AccountID, traceLt int64) (oas.OptJettonTransferAction, oas.ActionSimplePreview) {
 	meta := h.GetJettonNormalizedMetadata(ctx, t.Jetton)
 	score, _ := h.score.GetJettonScore(t.Jetton)
 	preview := jettonPreview(t.Jetton, meta, score)
@@ -280,7 +281,16 @@ func (h *Handler) convertActionJettonTransfer(ctx context.Context, t *bath.Jetto
 		EncryptedComment: convertEncryptedComment(t.EncryptedComment),
 	})
 	value := i18n.FormatTokens(big.Int(t.Amount), int32(meta.Decimals), meta.Symbol)
-
+	scaledUiParams, err := h.storage.GetScaledUIParameters(ctx, t.Jetton, &traceLt)
+	if err == nil {
+		scaledUiAmount := ScaledUIJettonAmount(
+			decimal.NewFromBigInt(g.Pointer(big.Int(t.Amount)), 0),
+			scaledUiParams.Numerator,
+			scaledUiParams.Denominator,
+		).BigInt()
+		action.Value.ScaledUIAmount.SetTo(scaledUiAmount.String())
+		value = i18n.FormatTokens(*scaledUiAmount, int32(meta.Decimals), meta.Symbol)
+	}
 	simplePreview := oas.ActionSimplePreview{
 		Name: "Jetton Transfer",
 		Description: i18n.T(acceptLanguage, i18n.C{
@@ -595,7 +605,7 @@ func (h *Handler) convertLiquidityDepositAction(ctx context.Context, l *bath.Liq
 	return action, simplePreview
 }
 
-func (h *Handler) convertAction(ctx context.Context, viewer *tongo.AccountID, a bath.Action, acceptLanguage oas.OptString) (oas.Action, error) {
+func (h *Handler) convertAction(ctx context.Context, viewer *tongo.AccountID, a bath.Action, acceptLanguage oas.OptString, eventLt int64) (oas.Action, error) {
 	action := oas.Action{
 		Type:             oas.ActionType(a.Type),
 		BaseTransactions: make([]string, len(a.BaseTransactions)),
@@ -621,7 +631,7 @@ func (h *Handler) convertAction(ctx context.Context, viewer *tongo.AccountID, a 
 	case bath.NftItemTransfer:
 		action.NftItemTransfer, action.SimplePreview = h.convertActionNftTransfer(a.NftItemTransfer, acceptLanguage.Value, viewer)
 	case bath.JettonTransfer:
-		action.JettonTransfer, action.SimplePreview = h.convertActionJettonTransfer(ctx, a.JettonTransfer, acceptLanguage.Value, viewer)
+		action.JettonTransfer, action.SimplePreview = h.convertActionJettonTransfer(ctx, a.JettonTransfer, acceptLanguage.Value, viewer, eventLt)
 	case bath.JettonMint:
 		action.JettonMint, action.SimplePreview = h.convertActionJettonMint(ctx, a.JettonMint, acceptLanguage.Value, viewer)
 	case bath.JettonBurn:
@@ -930,7 +940,7 @@ func (h *Handler) toEvent(ctx context.Context, trace *core.Trace, result *bath.A
 		Progress:   trace.CalculateProgress(),
 	}
 	for i, a := range result.Actions {
-		convertedAction, err := h.convertAction(ctx, nil, a, lang)
+		convertedAction, err := h.convertAction(ctx, nil, a, lang, event.Lt)
 		if err != nil {
 			return oas.Event{}, err
 		}
@@ -1017,7 +1027,7 @@ func (h *Handler) toAccountEvent(ctx context.Context, account tongo.AccountID, t
 		if subjectOnly && !a.IsSubject(account) && a.Type != bath.UnSubscribe {
 			continue
 		}
-		convertedAction, err := h.convertAction(ctx, &account, a, lang)
+		convertedAction, err := h.convertAction(ctx, &account, a, lang, e.Lt)
 		if err != nil {
 			return oas.AccountEvent{}, err
 		}

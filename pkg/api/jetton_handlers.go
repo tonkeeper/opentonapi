@@ -4,15 +4,16 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net/http"
+	"slices"
+	"strings"
+
 	"github.com/tonkeeper/opentonapi/pkg/bath"
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/opentonapi/pkg/oas"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/ton"
 	"go.uber.org/zap"
-	"net/http"
-	"slices"
-	"strings"
 )
 
 func (h *Handler) GetAccountJettonsBalances(ctx context.Context, params oas.GetAccountJettonsBalancesParams) (*oas.JettonsBalances, error) {
@@ -31,7 +32,7 @@ func (h *Handler) GetAccountJettonsBalances(ctx context.Context, params oas.GetA
 		Balances: make([]oas.JettonBalance, 0, len(wallets)),
 	}
 	for _, wallet := range wallets {
-		jettonBalance, err := h.convertJettonBalance(ctx, wallet, params.Currencies)
+		jettonBalance, err := h.convertJettonBalance(ctx, wallet, params.Currencies, nil)
 		if err != nil {
 			continue
 		}
@@ -59,7 +60,7 @@ func (h *Handler) GetAccountJettonBalance(ctx context.Context, params oas.GetAcc
 	if len(wallets) == 0 {
 		return nil, toError(http.StatusNotFound, fmt.Errorf("account %v has no jetton wallet %v", account.ID, jettonAccount.ID))
 	}
-	jettonBalance, err := h.convertJettonBalance(ctx, wallets[0], params.Currencies)
+	jettonBalance, err := h.convertJettonBalance(ctx, wallets[0], params.Currencies, nil)
 	if err != nil {
 		return nil, err
 	}
