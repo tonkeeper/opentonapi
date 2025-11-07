@@ -521,7 +521,13 @@ var WithdrawAffluentEarnRequestStraw = Straw[BubbleWithdrawTokenStakeRequest]{
 }
 
 var InstantWithdrawAffluentEarnStraw = Straw[BubbleWithdrawTokenStakeRequest]{
-	CheckFuncs: []bubbleCheck{Is(BubbleJettonBurn{})},
+	CheckFuncs: []bubbleCheck{Is(BubbleJettonBurn{}), func(bubble *Bubble) bool {
+		tx, ok := bubble.Children[0].Info.(BubbleJettonTransfer)
+		if !ok {
+			return false
+		}
+		return tx.sender.Is(abi.AffluentMultiplyVault) || tx.sender.Is(abi.AffluentLendingVault)
+	}},
 	Builder: func(newAction *BubbleWithdrawTokenStakeRequest, bubble *Bubble) error {
 		tx := bubble.Info.(BubbleJettonBurn)
 		newAction.Protocol = core.Protocol{
@@ -537,18 +543,8 @@ var InstantWithdrawAffluentEarnStraw = Straw[BubbleWithdrawTokenStakeRequest]{
 			},
 			Amount: amount,
 		}
+		newAction.Success = tx.success
 		return nil
-	},
-	SingleChild: &Straw[BubbleWithdrawTokenStakeRequest]{
-		CheckFuncs: []bubbleCheck{IsJettonTransfer, func(bubble *Bubble) bool {
-			tx, _ := bubble.Info.(BubbleJettonTransfer)
-			return tx.recipient != nil && (tx.sender.Is(abi.AffluentLendingVault) || tx.sender.Is(abi.AffluentMultiplyVault))
-		}},
-		Builder: func(newAction *BubbleWithdrawTokenStakeRequest, bubble *Bubble) error {
-			tx := bubble.Info.(BubbleJettonTransfer)
-			newAction.Success = tx.success
-			return nil
-		},
 	},
 }
 
@@ -579,17 +575,11 @@ var InstantWithdrawAffluentEarnWithOraclesStraw = Straw[BubbleWithdrawTokenStake
 				SingleChild: &Straw[BubbleWithdrawTokenStakeRequest]{
 					CheckFuncs: []bubbleCheck{IsTx, Or(HasOpcode(0xb675cea5), HasOpcode(0xab7bef17))},
 					SingleChild: &Straw[BubbleWithdrawTokenStakeRequest]{
-						CheckFuncs: []bubbleCheck{IsTx, HasOpcode(0x77c65602)},
-						SingleChild: &Straw[BubbleWithdrawTokenStakeRequest]{
-							CheckFuncs: []bubbleCheck{IsJettonTransfer, func(bubble *Bubble) bool {
-								tx, _ := bubble.Info.(BubbleJettonTransfer)
-								return tx.recipient != nil && (tx.sender.Is(abi.AffluentLendingVault) || tx.sender.Is(abi.AffluentMultiplyVault))
-							}},
-							Builder: func(newAction *BubbleWithdrawTokenStakeRequest, bubble *Bubble) error {
-								tx := bubble.Info.(BubbleJettonTransfer)
-								newAction.Success = tx.success
-								return nil
-							},
+						CheckFuncs: []bubbleCheck{IsTx, HasOpcode(0x77c65602), Or(HasInterface(abi.AffluentMultiplyVault), HasInterface(abi.AffluentLendingVault))},
+						Builder: func(newAction *BubbleWithdrawTokenStakeRequest, bubble *Bubble) error {
+							tx := bubble.Info.(BubbleTx)
+							newAction.Success = tx.success
+							return nil
 						},
 					},
 				},

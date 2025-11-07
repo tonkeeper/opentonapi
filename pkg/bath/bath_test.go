@@ -693,19 +693,19 @@ func TestFindActions(t *testing.T) {
 			filenamePrefix: "instant-withdraw-usdt-affluent",
 		},
 		{
+			name:           "instant withdraw request usdt affluent with single oracle",
+			hash:           "0ed86c1e6d97887f0e644174dc8063afabfe0a088cdd1987033baf468c253b94",
+			filenamePrefix: "instant-withdraw-request-usdt-affluent-with-single-oracle",
+		},
+		{
+			name:           "instant withdraw request usdt affluent with multiple oracles",
+			hash:           "42288aca8358bb322c2fa0a97d549a675b68d535ed89af3c311bdfe437e4f576",
+			filenamePrefix: "instant-withdraw-request-usdt-affluent-with-multiple-oracle",
+		},
+		{
 			name:           "withdraw request usdt affluent",
 			hash:           "d171a300521c222094899c6b1b5fb15992a5eb4ba9dc7f8ac9c6033fed647d1c",
 			filenamePrefix: "withdraw-request-usdt-affluent",
-		},
-		{
-			name:           "withdraw request usdt affluent with single oracle",
-			hash:           "0ed86c1e6d97887f0e644174dc8063afabfe0a088cdd1987033baf468c253b94",
-			filenamePrefix: "withdraw-request-usdt-affluent-with-single-oracle",
-		},
-		{
-			name:           "withdraw request usdt affluent with multiple oracles",
-			hash:           "42288aca8358bb322c2fa0a97d549a675b68d535ed89af3c311bdfe437e4f576",
-			filenamePrefix: "withdraw-request-usdt-affluent-with-multiple-oracle",
 		},
 	} {
 		t.Run(c.name, func(t *testing.T) {
