@@ -2,6 +2,7 @@ package spam
 
 import (
 	"context"
+
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/opentonapi/pkg/oas"
 	rules "github.com/tonkeeper/scam_backoffice_rules"
@@ -60,5 +61,9 @@ func (f Filter) NftTrust(address tongo.AccountID, collection *ton.AccountID, des
 }
 
 func (f Filter) AccountTrust(address tongo.AccountID) core.TrustType {
+	return core.TrustNone
+}
+
+func (f Filter) TonDomainTrust(domain string) core.TrustType {
 	return core.TrustNone
 }
