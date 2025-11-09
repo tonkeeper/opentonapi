@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/shopspring/decimal"
 	"github.com/tonkeeper/opentonapi/pkg/bath"
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/opentonapi/pkg/oas"
@@ -92,7 +93,7 @@ func (h *Handler) convertJettonHistory(ctx context.Context, account ton.AccountI
 			if !action.IsSubject(account) {
 				continue
 			}
-			convertedAction, err := h.convertAction(ctx, &account, action, acceptLanguage)
+			convertedAction, err := h.convertAction(ctx, &account, action, acceptLanguage, event.Lt)
 			if err != nil {
 				return nil, 0, err
 			}
@@ -129,7 +130,8 @@ func (h *Handler) convertJettonOperation(ctx context.Context, op core.JettonOper
 	return operation
 }
 
-func (h *Handler) convertJettonBalance(ctx context.Context, wallet core.JettonWallet, currencies []string) (oas.JettonBalance, error) {
+func (h *Handler) convertJettonBalance(ctx context.Context, wallet core.JettonWallet, currencies []string, scaledUiLt *int64) (oas.JettonBalance, error) {
+	// the latest scaled ui parameters for jetton master if scaledUiLt == nil
 	todayRates, yesterdayRates, weekRates, monthRates, _ := h.getRates()
 	for idx, currency := range currencies {
 		if jetton, err := tongo.ParseAddress(currency); err == nil {
@@ -144,12 +146,11 @@ func (h *Handler) convertJettonBalance(ctx context.Context, wallet core.JettonWa
 		WalletAddress: convertAccountAddress(wallet.Address, h.addressBook),
 		Extensions:    wallet.Extensions,
 	}
-	scaledUiParams, err := h.storage.GetScaledUIParameters(ctx, wallet.JettonAddress)
+	scaledUiParams, err := h.storage.GetScaledUIParameters(ctx, wallet.JettonAddress, scaledUiLt)
 	if err != nil && !errors.Is(err, core.ErrEntityNotFound) {
 		return oas.JettonBalance{}, toError(http.StatusInternalServerError, err)
 	} else if err == nil {
-		scaledUiBalance := wallet.Balance.Mul(scaledUiParams.Numerator).Div(scaledUiParams.Denominator).Floor()
-		jettonBalance.ScaledUIBalance.SetTo(scaledUiBalance.String())
+		jettonBalance.ScaledUIBalance.SetTo(ScaledUIJettonAmount(wallet.Balance, scaledUiParams.Numerator, scaledUiParams.Denominator).String())
 	}
 	if wallet.Lock != nil {
 		jettonBalance.Lock = oas.NewOptJettonBalanceLock(oas.JettonBalanceLock{
@@ -210,4 +211,8 @@ func (h *Handler) convertJettonInfo(ctx context.Context, master core.JettonMaste
 		Preview:      meta.PreviewImage,
 	}
 	return info
+}
+
+func ScaledUIJettonAmount(amount, numerator, denominator decimal.Decimal) decimal.Decimal {
+	return amount.Mul(numerator).Div(denominator).Floor()
 }

@@ -4298,6 +4298,11 @@
      "refund": {
       "$ref": "#/components/schemas/Refund"
      },
+     "scaled_ui_amount": {
+      "example": "1100000000",
+      "type": "string",
+      "x-js-format": "bigint"
+     },
      "sender": {
       "$ref": "#/components/schemas/AccountAddress"
      },
