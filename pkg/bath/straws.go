@@ -91,7 +91,7 @@ var DefaultStraws = []Merger{
 	ToncoDepositLiquidityWithRefundStraw,
 	DepositAffluentEarnStraw,
 	DepositAffluentEarnWithOraclesStraw,
-	WithdrawAffluentEarnRequestStraw,
+	//WithdrawAffluentEarnRequestStraw,
 	InstantWithdrawAffluentEarnStraw,
 	InstantWithdrawAffluentEarnWithOraclesStraw,
 }
