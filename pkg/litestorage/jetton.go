@@ -170,9 +170,7 @@ func (s *LiteStorage) GetJettonHolders(ctx context.Context, jettonMaster tongo.A
 }
 
 func (s *LiteStorage) GetScaledUIParameters(ctx context.Context, master tongo.AccountID, beforeLt *int64) (core.ScaledUIParameters, error) {
-	if beforeLt != nil {
-		return core.ScaledUIParameters{}, errors.New("historical scaled ui data not supported")
-	}
+	// return latest parameters instead of historical data
 	_, value, err := abi.GetDisplayMultiplier(ctx, s.executor, master)
 	if err != nil && (strings.Contains(err.Error(), "can not decode outputs") || strings.Contains(err.Error(), "method execution failed")) {
 		return core.ScaledUIParameters{}, core.ErrEntityNotFound
