@@ -522,6 +522,9 @@ var WithdrawAffluentEarnRequestStraw = Straw[BubbleWithdrawTokenStakeRequest]{
 
 var InstantWithdrawAffluentEarnStraw = Straw[BubbleWithdrawTokenStakeRequest]{
 	CheckFuncs: []bubbleCheck{Is(BubbleJettonBurn{}), func(bubble *Bubble) bool {
+		if len(bubble.Children) < 1 {
+			return false
+		}
 		tx, ok := bubble.Children[0].Info.(BubbleJettonTransfer)
 		if !ok {
 			return false
