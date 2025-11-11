@@ -5,6 +5,7 @@ import (
 	"math/big"
 	"slices"
 
+	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/opentonapi/pkg/references"
 	"github.com/tonkeeper/tongo/abi"
 	"github.com/tonkeeper/tongo/ton"
@@ -182,3 +183,187 @@ func (s UniversalDedustStraw) countSteps(step abi.DedustSwapStep) int {
 }
 
 type UniversalDedustStraw struct{}
+
+var DedustLiquidityDepositNativeStraw = Straw[BubbleLiquidityDeposit]{
+	CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.DedustDepositLiquidityMsgOp), HasInterface(abi.DedustVault)},
+	Builder: func(newAction *BubbleLiquidityDeposit, bubble *Bubble) error {
+		tx := bubble.Info.(BubbleTx)
+		newAction.Protocol = core.Protocol{
+			Name:  string(references.Dedust),
+			Image: &references.DedustImage,
+		}
+		newAction.From = tx.inputFrom.Address
+		body := tx.decodedBody.Value.(abi.DedustDepositLiquidityMsgBody)
+		tonAmount := new(big.Int)
+		tonAmount.SetUint64(uint64(body.Amount))
+		depositTon := core.VaultDepositInfo{
+			Price: core.Price{
+				Currency: core.Currency{
+					Type: core.CurrencyTON,
+				},
+				Amount: *tonAmount,
+			},
+			Vault: tx.account.Address,
+		}
+		newAction.Tokens = append(newAction.Tokens, depositTon)
+		return nil
+	},
+	SingleChild: &Straw[BubbleLiquidityDeposit]{
+		CheckFuncs: []bubbleCheck{IsTx, HasOpcode(0xf04ec526)},
+		Children: []Straw[BubbleLiquidityDeposit]{
+			{
+				CheckFuncs: []bubbleCheck{IsTx, HasOpcode(0x9b3aa3fa)},
+				SingleChild: &Straw[BubbleLiquidityDeposit]{
+					CheckFuncs: []bubbleCheck{Is(BubbleContractDeploy{})},
+					Optional:   true,
+				},
+			},
+			{
+				CheckFuncs: []bubbleCheck{IsTx, HasOpcode(0x54240fe5)},
+				SingleChild: &Straw[BubbleLiquidityDeposit]{
+					Optional:   true,
+					CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.DedustDepositLiquidityAllMsgOp), HasInterface(abi.DedustPool)},
+					Children: []Straw[BubbleLiquidityDeposit]{
+						{
+							CheckFuncs: []bubbleCheck{IsTx, HasOpcode(0xaae79256)},
+							Children: []Straw[BubbleLiquidityDeposit]{
+								{
+									CheckFuncs: []bubbleCheck{IsTx, HasOpcode(0x6b0b787f), HasInterface(abi.DedustVault)},
+									SingleChild: &Straw[BubbleLiquidityDeposit]{
+										CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.DedustPayoutMsgOp)},
+									},
+								},
+								{
+									CheckFuncs: []bubbleCheck{IsTx},
+								},
+							},
+						},
+						{
+							CheckFuncs: []bubbleCheck{Is(BubbleJettonMint{})},
+							Builder: func(newAction *BubbleLiquidityDeposit, bubble *Bubble) error {
+								tx := bubble.Info.(BubbleJettonMint)
+								newAction.Success = tx.success
+								return nil
+							},
+							SingleChild: &Straw[BubbleLiquidityDeposit]{
+								CheckFuncs: []bubbleCheck{Is(BubbleContractDeploy{})},
+								Optional:   true,
+							},
+						},
+					},
+				},
+			},
+		},
+	},
+}
+
+var DedustLiquidityDepositJettonStraw = Straw[BubbleLiquidityDeposit]{
+	CheckFuncs: []bubbleCheck{IsJettonTransfer, JettonTransferOperation(abi.DedustDepositLiquidityJettonOp), func(bubble *Bubble) bool {
+		tx := bubble.Info.(BubbleJettonTransfer)
+		if tx.recipient == nil {
+			return false
+		}
+		return tx.recipient.Is(abi.DedustVault)
+	}},
+	Builder: func(newAction *BubbleLiquidityDeposit, bubble *Bubble) error {
+		tx := bubble.Info.(BubbleJettonTransfer)
+		newAction.Protocol = core.Protocol{
+			Name:  string(references.Dedust),
+			Image: &references.DedustImage,
+		}
+		newAction.From = tx.sender.Address
+		depositJetton := core.VaultDepositInfo{
+			Price: core.Price{
+				Currency: core.Currency{
+					Type:   core.CurrencyJetton,
+					Jetton: &tx.master,
+				},
+				Amount: big.Int(tx.amount),
+			},
+			Vault: tx.recipient.Address,
+		}
+		newAction.Tokens = append(newAction.Tokens, depositJetton)
+		return nil
+	},
+	SingleChild: &Straw[BubbleLiquidityDeposit]{
+		CheckFuncs: []bubbleCheck{IsTx, HasOpcode(0xf04ec526)},
+		Children: []Straw[BubbleLiquidityDeposit]{
+			{
+				CheckFuncs: []bubbleCheck{IsTx, HasOpcode(0x9b3aa3fa)},
+				SingleChild: &Straw[BubbleLiquidityDeposit]{
+					CheckFuncs: []bubbleCheck{Is(BubbleContractDeploy{})},
+					Optional:   true,
+				},
+			},
+			{
+				CheckFuncs: []bubbleCheck{IsTx, HasOpcode(0x54240fe5)},
+				SingleChild: &Straw[BubbleLiquidityDeposit]{
+					Optional:   true,
+					CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.DedustDepositLiquidityAllMsgOp), HasInterface(abi.DedustPool)},
+					Children: []Straw[BubbleLiquidityDeposit]{
+						{
+							CheckFuncs: []bubbleCheck{IsTx, HasOpcode(0xaae79256)},
+							Children: []Straw[BubbleLiquidityDeposit]{
+								{
+									CheckFuncs: []bubbleCheck{IsTx, HasOpcode(0x6b0b787f), HasInterface(abi.DedustVault)},
+									SingleChild: &Straw[BubbleLiquidityDeposit]{
+										CheckFuncs: []bubbleCheck{IsJettonTransfer},
+									},
+								},
+								{
+									CheckFuncs: []bubbleCheck{IsTx},
+								},
+							},
+						},
+						{
+							CheckFuncs: []bubbleCheck{Is(BubbleJettonMint{})},
+							Builder: func(newAction *BubbleLiquidityDeposit, bubble *Bubble) error {
+								tx := bubble.Info.(BubbleJettonMint)
+								newAction.Success = tx.success
+								return nil
+							},
+							SingleChild: &Straw[BubbleLiquidityDeposit]{
+								CheckFuncs: []bubbleCheck{Is(BubbleContractDeploy{})},
+								Optional:   true,
+							},
+						},
+					},
+				},
+			},
+		},
+	},
+}
+
+var DedustLiquidityDepositBothStraw = Straw[BubbleLiquidityDeposit]{
+	CheckFuncs: []bubbleCheck{IsTx},
+	Children: []Straw[BubbleLiquidityDeposit]{
+		{
+			CheckFuncs: []bubbleCheck{Is(BubbleLiquidityDeposit{}), func(bubble *Bubble) bool {
+				tx := bubble.Info.(BubbleLiquidityDeposit)
+				return tx.Protocol.Name == string(references.Dedust)
+			}},
+			Builder: func(newAction *BubbleLiquidityDeposit, bubble *Bubble) error {
+				tx := bubble.Info.(BubbleLiquidityDeposit)
+				newAction.Protocol = tx.Protocol
+				newAction.From = tx.From
+				newAction.Tokens = append(newAction.Tokens, tx.Tokens...)
+				newAction.Success = newAction.Success || tx.Success
+				return nil
+			},
+		},
+		{
+			CheckFuncs: []bubbleCheck{Is(BubbleLiquidityDeposit{}), func(bubble *Bubble) bool {
+				tx := bubble.Info.(BubbleLiquidityDeposit)
+				return tx.Protocol.Name == string(references.Dedust)
+			}},
+			Builder: func(newAction *BubbleLiquidityDeposit, bubble *Bubble) error {
+				tx := bubble.Info.(BubbleLiquidityDeposit)
+				newAction.Protocol = tx.Protocol
+				newAction.From = tx.From
+				newAction.Tokens = append(newAction.Tokens, tx.Tokens...)
+				newAction.Success = newAction.Success || tx.Success
+				return nil
+			},
+		},
+	},
+}
