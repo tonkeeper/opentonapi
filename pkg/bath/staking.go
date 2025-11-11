@@ -521,7 +521,13 @@ var WithdrawAffluentEarnRequestStraw = Straw[BubbleWithdrawTokenStakeRequest]{
 }
 
 var InstantWithdrawAffluentEarnStraw = Straw[BubbleWithdrawTokenStakeRequest]{
-	CheckFuncs: []bubbleCheck{Is(BubbleJettonBurn{})},
+	CheckFuncs: []bubbleCheck{Is(BubbleJettonBurn{}), func(bubble *Bubble) bool {
+		tx, ok := bubble.Children[0].Info.(BubbleJettonTransfer)
+		if !ok {
+			return false
+		}
+		return tx.sender.Is(abi.AffluentMultiplyVault) || tx.sender.Is(abi.AffluentLendingVault)
+	}},
 	Builder: func(newAction *BubbleWithdrawTokenStakeRequest, bubble *Bubble) error {
 		tx := bubble.Info.(BubbleJettonBurn)
 		newAction.Protocol = core.Protocol{
@@ -539,13 +545,6 @@ var InstantWithdrawAffluentEarnStraw = Straw[BubbleWithdrawTokenStakeRequest]{
 		}
 		newAction.Success = tx.success
 		return nil
-	},
-	SingleChild: &Straw[BubbleWithdrawTokenStakeRequest]{
-		CheckFuncs: []bubbleCheck{IsJettonTransfer, func(bubble *Bubble) bool {
-			tx := bubble.Info.(BubbleJettonTransfer)
-			return tx.sender.Is(abi.AffluentMultiplyVault) || tx.sender.Is(abi.AffluentLendingVault)
-		}},
-		NotMergeBubble: true,
 	},
 }
 

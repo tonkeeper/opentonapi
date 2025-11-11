@@ -6,7 +6,6 @@ import (
 	"github.com/tonkeeper/opentonapi/pkg/sentry"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
-	"github.com/tonkeeper/tongo/ton"
 	"golang.org/x/exp/slices"
 )
 
@@ -17,7 +16,6 @@ type Straw[newBubbleT actioner] struct {
 	ValueFlowUpdater func(newAction *newBubbleT, flow *ValueFlow)
 	SingleChild      *Straw[newBubbleT]
 	Children         []Straw[newBubbleT]
-	NotMergeBubble   bool
 	Optional         bool
 }
 
@@ -80,21 +78,11 @@ func (s Straw[newBubbleT]) Merge(bubble *Bubble) bool {
 	}
 	var newBubble newBubbleT
 	var newChildren []*Bubble
-	var newAccounts []tongo.AccountID
-	var newTransaction []ton.Bits256
-	if !s.NotMergeBubble {
-		newAccounts = bubble.Accounts
-		newTransaction = bubble.Transaction
-	}
+	newAccounts := bubble.Accounts
+	newTransaction := bubble.Transaction
 	nvf := newValueFlow()
 	var finalizer func(newAction *newBubbleT, flow *ValueFlow)
 	for i := len(mapping) - 1; i >= 0; i-- {
-		if mapping[i].s.NotMergeBubble {
-			mapping[i].b.Children = nil
-			bCopy := *mapping[i].b
-			newChildren = append(newChildren, &bCopy)
-			continue
-		}
 		if mapping[i].s.Builder != nil {
 			err := mapping[i].s.Builder(&newBubble, mapping[i].b)
 			if err != nil {
