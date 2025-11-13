@@ -101,7 +101,11 @@ func (h *Handler) GetAccountJettonsHistory(ctx context.Context, params oas.GetAc
 	}
 	var res oas.JettonOperations
 	for _, op := range history {
-		res.Operations = append(res.Operations, h.convertJettonOperation(ctx, op))
+		convertedOp, err := h.convertJettonOperation(ctx, op)
+		if err != nil {
+			return nil, toError(http.StatusInternalServerError, err)
+		}
+		res.Operations = append(res.Operations, convertedOp)
 		if len(history) == params.Limit {
 			res.NextFrom = oas.NewOptInt64(int64(op.Lt))
 		}
@@ -154,7 +158,11 @@ func (h *Handler) GetJettonAccountHistoryByID(ctx context.Context, params oas.Ge
 	}
 	res := oas.JettonOperations{}
 	for _, op := range history {
-		res.Operations = append(res.Operations, h.convertJettonOperation(ctx, op))
+		convertedOp, err := h.convertJettonOperation(ctx, op)
+		if err != nil {
+			return nil, toError(http.StatusInternalServerError, err)
+		}
+		res.Operations = append(res.Operations, convertedOp)
 		if len(history) == params.Limit {
 			res.NextFrom = oas.NewOptInt64(int64(op.Lt))
 		}

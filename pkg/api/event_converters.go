@@ -7,13 +7,13 @@ import (
 	"log/slog"
 	"math"
 	"math/big"
+	"net/http"
 	"sort"
 	"strings"
 	"sync"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
-	"github.com/shopspring/decimal"
 	imgGenerator "github.com/tonkeeper/opentonapi/pkg/image"
 	"go.uber.org/zap"
 
@@ -121,7 +121,11 @@ func (h *Handler) convertRisk(ctx context.Context, risk wallet.Risk, walletAddre
 		jettonWallet := jettonWallets[0]
 		meta := h.GetJettonNormalizedMetadata(ctx, jettonWallet.JettonAddress)
 		score, _ := h.score.GetJettonScore(jettonWallet.JettonAddress)
-		preview := jettonPreview(jettonWallet.JettonAddress, meta, score)
+		scaledUiParams, err := h.storage.GetScaledUIParameters(ctx, jettonWallet.JettonAddress, nil)
+		if err != nil {
+			return oas.Risk{}, toError(http.StatusInternalServerError, err)
+		}
+		preview := jettonPreview(jettonWallet.JettonAddress, meta, score, scaledUiParams)
 		f, _ := quantity.Float64()
 		total += f / math.Pow10(preview.Decimals) * todayRates[jettonWallet.JettonAddress.ToRaw()]
 		jettonQuantity := oas.JettonQuantity{
@@ -265,10 +269,10 @@ func (h *Handler) convertActionNftTransfer(t *bath.NftTransferAction, acceptLang
 	return action, simplePreview
 }
 
-func (h *Handler) convertActionJettonTransfer(ctx context.Context, t *bath.JettonTransferAction, acceptLanguage string, viewer *tongo.AccountID, traceLt int64) (oas.OptJettonTransferAction, oas.ActionSimplePreview) {
+func (h *Handler) convertActionJettonTransfer(ctx context.Context, t *bath.JettonTransferAction, acceptLanguage string, viewer *tongo.AccountID, scaledUiParams *core.ScaledUIParameters) (oas.OptJettonTransferAction, oas.ActionSimplePreview) {
 	meta := h.GetJettonNormalizedMetadata(ctx, t.Jetton)
 	score, _ := h.score.GetJettonScore(t.Jetton)
-	preview := jettonPreview(t.Jetton, meta, score)
+	preview := jettonPreview(t.Jetton, meta, score, scaledUiParams)
 	var action oas.OptJettonTransferAction
 	action.SetTo(oas.JettonTransferAction{
 		Amount:           g.Pointer(big.Int(t.Amount)).String(),
@@ -281,16 +285,6 @@ func (h *Handler) convertActionJettonTransfer(ctx context.Context, t *bath.Jetto
 		EncryptedComment: convertEncryptedComment(t.EncryptedComment),
 	})
 	value := i18n.FormatTokens(big.Int(t.Amount), int32(meta.Decimals), meta.Symbol)
-	scaledUiParams, err := h.storage.GetScaledUIParameters(ctx, t.Jetton, &traceLt)
-	if err == nil {
-		scaledUiAmount := ScaledUIJettonAmount(
-			decimal.NewFromBigInt(g.Pointer(big.Int(t.Amount)), 0),
-			scaledUiParams.Numerator,
-			scaledUiParams.Denominator,
-		).BigInt()
-		action.Value.ScaledUIAmount.SetTo(scaledUiAmount.String())
-		value = i18n.FormatTokens(*scaledUiAmount, int32(meta.Decimals), meta.Symbol)
-	}
 	simplePreview := oas.ActionSimplePreview{
 		Name: "Jetton Transfer",
 		Description: i18n.T(acceptLanguage, i18n.C{
@@ -311,10 +305,10 @@ func (h *Handler) convertActionJettonTransfer(ctx context.Context, t *bath.Jetto
 	return action, simplePreview
 }
 
-func (h *Handler) convertActionJettonMint(ctx context.Context, m *bath.JettonMintAction, acceptLanguage string, viewer *tongo.AccountID) (oas.OptJettonMintAction, oas.ActionSimplePreview) {
+func (h *Handler) convertActionJettonMint(ctx context.Context, m *bath.JettonMintAction, acceptLanguage string, viewer *tongo.AccountID, scaledUiParams *core.ScaledUIParameters) (oas.OptJettonMintAction, oas.ActionSimplePreview) {
 	meta := h.GetJettonNormalizedMetadata(ctx, m.Jetton)
 	score, _ := h.score.GetJettonScore(m.Jetton)
-	preview := jettonPreview(m.Jetton, meta, score)
+	preview := jettonPreview(m.Jetton, meta, score, scaledUiParams)
 	var action oas.OptJettonMintAction
 	action.SetTo(oas.JettonMintAction{
 		Amount:           g.Pointer(big.Int(m.Amount)).String(),
@@ -631,13 +625,25 @@ func (h *Handler) convertAction(ctx context.Context, viewer *tongo.AccountID, a 
 	case bath.NftItemTransfer:
 		action.NftItemTransfer, action.SimplePreview = h.convertActionNftTransfer(a.NftItemTransfer, acceptLanguage.Value, viewer)
 	case bath.JettonTransfer:
-		action.JettonTransfer, action.SimplePreview = h.convertActionJettonTransfer(ctx, a.JettonTransfer, acceptLanguage.Value, viewer, eventLt)
+		scaledUiParams, err := h.storage.GetScaledUIParameters(ctx, a.JettonTransfer.Jetton, &eventLt)
+		if err != nil {
+			return oas.Action{}, fmt.Errorf("failed to get scaled UI parameters: %w", err)
+		}
+		action.JettonTransfer, action.SimplePreview = h.convertActionJettonTransfer(ctx, a.JettonTransfer, acceptLanguage.Value, viewer, scaledUiParams)
 	case bath.JettonMint:
-		action.JettonMint, action.SimplePreview = h.convertActionJettonMint(ctx, a.JettonMint, acceptLanguage.Value, viewer)
+		scaledUiParams, err := h.storage.GetScaledUIParameters(ctx, a.JettonTransfer.Jetton, &eventLt)
+		if err != nil {
+			return oas.Action{}, fmt.Errorf("failed to get scaled UI parameters: %w", err)
+		}
+		action.JettonMint, action.SimplePreview = h.convertActionJettonMint(ctx, a.JettonMint, acceptLanguage.Value, viewer, scaledUiParams)
 	case bath.JettonBurn:
+		scaledUiParams, err := h.storage.GetScaledUIParameters(ctx, a.JettonBurn.Jetton, &eventLt)
+		if err != nil {
+			return oas.Action{}, fmt.Errorf("failed to get scaled UI parameters: %w", err)
+		}
 		meta := h.GetJettonNormalizedMetadata(ctx, a.JettonBurn.Jetton)
 		score, _ := h.score.GetJettonScore(a.JettonBurn.Jetton)
-		preview := jettonPreview(a.JettonBurn.Jetton, meta, score)
+		preview := jettonPreview(a.JettonBurn.Jetton, meta, score, scaledUiParams)
 		action.JettonBurn.SetTo(oas.JettonBurnAction{
 			Amount:        g.Pointer(big.Int(a.JettonBurn.Amount)).String(),
 			Sender:        convertAccountAddress(a.JettonBurn.Sender, h.addressBook),
@@ -780,10 +786,14 @@ func (h *Handler) convertAction(ctx context.Context, viewer *tongo.AccountID, a 
 			swapAction.TonIn = oas.NewOptInt64(a.JettonSwap.In.Amount.Int64())
 			simplePreviewData["AmountIn"] = i18n.FormatTONs(a.JettonSwap.In.Amount.Int64())
 		} else {
+			scaledUiParams, err := h.storage.GetScaledUIParameters(ctx, a.JettonSwap.In.JettonMaster, &eventLt)
+			if err != nil {
+				return oas.Action{}, fmt.Errorf("failed to get scaled UI parameters: %w", err)
+			}
 			swapAction.AmountIn = a.JettonSwap.In.Amount.String()
 			jettonInMeta := h.GetJettonNormalizedMetadata(ctx, a.JettonSwap.In.JettonMaster)
 			score, _ := h.score.GetJettonScore(a.JettonSwap.In.JettonMaster)
-			preview := jettonPreview(a.JettonSwap.In.JettonMaster, jettonInMeta, score)
+			preview := jettonPreview(a.JettonSwap.In.JettonMaster, jettonInMeta, score, scaledUiParams)
 			swapAction.JettonMasterIn.SetTo(preview)
 			simplePreviewData["AmountIn"] = i18n.FormatTokens(a.JettonSwap.In.Amount, int32(jettonInMeta.Decimals), jettonInMeta.Symbol)
 		}
@@ -791,10 +801,14 @@ func (h *Handler) convertAction(ctx context.Context, viewer *tongo.AccountID, a 
 			swapAction.TonOut = oas.NewOptInt64(a.JettonSwap.Out.Amount.Int64())
 			simplePreviewData["AmountOut"] = i18n.FormatTONs(a.JettonSwap.Out.Amount.Int64())
 		} else {
+			scaledUiParams, err := h.storage.GetScaledUIParameters(ctx, a.JettonSwap.Out.JettonMaster, &eventLt)
+			if err != nil {
+				return oas.Action{}, fmt.Errorf("failed to get scaled UI parameters: %w", err)
+			}
 			swapAction.AmountOut = a.JettonSwap.Out.Amount.String()
 			jettonOutMeta := h.GetJettonNormalizedMetadata(ctx, a.JettonSwap.Out.JettonMaster)
 			score, _ := h.score.GetJettonScore(a.JettonSwap.Out.JettonMaster)
-			preview := jettonPreview(a.JettonSwap.Out.JettonMaster, jettonOutMeta, score)
+			preview := jettonPreview(a.JettonSwap.Out.JettonMaster, jettonOutMeta, score, scaledUiParams)
 			swapAction.JettonMasterOut.SetTo(preview)
 			simplePreviewData["AmountOut"] = i18n.FormatTokens(a.JettonSwap.Out.Amount, int32(jettonOutMeta.Decimals), jettonOutMeta.Symbol)
 		}
@@ -929,13 +943,14 @@ func convertAccountValueFlow(accountID tongo.AccountID, flow *bath.AccountValueF
 }
 
 func (h *Handler) toEvent(ctx context.Context, trace *core.Trace, result *bath.ActionsList, lang oas.OptString) (oas.Event, error) {
+	lt := int64(trace.Lt)
 	event := oas.Event{
 		EventID:    trace.Hash.Hex(),
 		Timestamp:  trace.Utime,
 		Actions:    make([]oas.Action, len(result.Actions)),
 		ValueFlow:  make([]oas.ValueFlow, 0, len(result.ValueFlow.Accounts)),
 		IsScam:     false,
-		Lt:         int64(trace.Lt),
+		Lt:         lt,
 		InProgress: trace.InProgress(),
 		Progress:   trace.CalculateProgress(),
 	}
@@ -955,7 +970,11 @@ func (h *Handler) toEvent(ctx context.Context, trace *core.Trace, result *bath.A
 			}
 			meta := h.GetJettonNormalizedMetadata(ctx, jettonMaster)
 			score, _ := h.score.GetJettonScore(jettonMaster)
-			previews[jettonMaster] = jettonPreview(jettonMaster, meta, score)
+			scaledUiParams, err := h.storage.GetScaledUIParameters(ctx, jettonMaster, &lt)
+			if err != nil {
+				return oas.Event{}, fmt.Errorf("failed to get scaled UI parameters: %w", err)
+			}
+			previews[jettonMaster] = jettonPreview(jettonMaster, meta, score, scaledUiParams)
 		}
 	}
 	for accountID, flow := range result.ValueFlow.Accounts {
