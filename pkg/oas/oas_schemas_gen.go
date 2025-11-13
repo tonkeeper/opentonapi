@@ -8049,6 +8049,7 @@ type JettonInfo struct {
 	Preview      string                 `json:"preview"`
 	Verification JettonVerificationType `json:"verification"`
 	HoldersCount int32                  `json:"holders_count"`
+	ScaledUI     OptScaledUI            `json:"scaled_ui"`
 }
 
 // GetMintable returns the value of Mintable.
@@ -8086,6 +8087,11 @@ func (s *JettonInfo) GetHoldersCount() int32 {
 	return s.HoldersCount
 }
 
+// GetScaledUI returns the value of ScaledUI.
+func (s *JettonInfo) GetScaledUI() OptScaledUI {
+	return s.ScaledUI
+}
+
 // SetMintable sets the value of Mintable.
 func (s *JettonInfo) SetMintable(val bool) {
 	s.Mintable = val
@@ -8119,6 +8125,11 @@ func (s *JettonInfo) SetVerification(val JettonVerificationType) {
 // SetHoldersCount sets the value of HoldersCount.
 func (s *JettonInfo) SetHoldersCount(val int32) {
 	s.HoldersCount = val
+}
+
+// SetScaledUI sets the value of ScaledUI.
+func (s *JettonInfo) SetScaledUI(val OptScaledUI) {
+	s.ScaledUI = val
 }
 
 // Ref: #/components/schemas/JettonMetadata
@@ -8496,6 +8507,7 @@ type JettonPreview struct {
 	Verification        JettonVerificationType `json:"verification"`
 	CustomPayloadAPIURI OptString              `json:"custom_payload_api_uri"`
 	Score               int32                  `json:"score"`
+	ScaledUI            OptScaledUI            `json:"scaled_ui"`
 }
 
 // GetAddress returns the value of Address.
@@ -8538,6 +8550,11 @@ func (s *JettonPreview) GetScore() int32 {
 	return s.Score
 }
 
+// GetScaledUI returns the value of ScaledUI.
+func (s *JettonPreview) GetScaledUI() OptScaledUI {
+	return s.ScaledUI
+}
+
 // SetAddress sets the value of Address.
 func (s *JettonPreview) SetAddress(val string) {
 	s.Address = val
@@ -8576,6 +8593,11 @@ func (s *JettonPreview) SetCustomPayloadAPIURI(val OptString) {
 // SetScore sets the value of Score.
 func (s *JettonPreview) SetScore(val int32) {
 	s.Score = val
+}
+
+// SetScaledUI sets the value of ScaledUI.
+func (s *JettonPreview) SetScaledUI(val OptScaledUI) {
+	s.ScaledUI = val
 }
 
 // Ref: #/components/schemas/JettonQuantity
@@ -14608,6 +14630,52 @@ func (o OptSale) Or(d Sale) Sale {
 	return d
 }
 
+// NewOptScaledUI returns new OptScaledUI with value set to v.
+func NewOptScaledUI(v ScaledUI) OptScaledUI {
+	return OptScaledUI{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptScaledUI is optional ScaledUI.
+type OptScaledUI struct {
+	Value ScaledUI
+	Set   bool
+}
+
+// IsSet returns true if OptScaledUI was set.
+func (o OptScaledUI) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptScaledUI) Reset() {
+	var v ScaledUI
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptScaledUI) SetTo(v ScaledUI) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptScaledUI) Get() (v ScaledUI, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptScaledUI) Or(d ScaledUI) ScaledUI {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptSendBlockchainMessageReqMeta returns new OptSendBlockchainMessageReqMeta with value set to v.
 func NewOptSendBlockchainMessageReqMeta(v SendBlockchainMessageReqMeta) OptSendBlockchainMessageReqMeta {
 	return OptSendBlockchainMessageReqMeta{
@@ -16480,6 +16548,32 @@ func (s *Sale) SetOwner(val OptAccountAddress) {
 // SetPrice sets the value of Price.
 func (s *Sale) SetPrice(val Price) {
 	s.Price = val
+}
+
+// Ref: #/components/schemas/ScaledUI
+type ScaledUI struct {
+	Numerator   string `json:"numerator"`
+	Denominator string `json:"denominator"`
+}
+
+// GetNumerator returns the value of Numerator.
+func (s *ScaledUI) GetNumerator() string {
+	return s.Numerator
+}
+
+// GetDenominator returns the value of Denominator.
+func (s *ScaledUI) GetDenominator() string {
+	return s.Denominator
+}
+
+// SetNumerator sets the value of Numerator.
+func (s *ScaledUI) SetNumerator(val string) {
+	s.Numerator = val
+}
+
+// SetDenominator sets the value of Denominator.
+func (s *ScaledUI) SetDenominator(val string) {
+	s.Denominator = val
 }
 
 // SendBlockchainMessageOK is response for SendBlockchainMessage operation.

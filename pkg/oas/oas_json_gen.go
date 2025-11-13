@@ -24367,9 +24367,15 @@ func (s *JettonInfo) encodeFields(e *jx.Encoder) {
 		e.FieldStart("holders_count")
 		e.Int32(s.HoldersCount)
 	}
+	{
+		if s.ScaledUI.Set {
+			e.FieldStart("scaled_ui")
+			s.ScaledUI.Encode(e)
+		}
+	}
 }
 
-var jsonFieldsNameOfJettonInfo = [7]string{
+var jsonFieldsNameOfJettonInfo = [8]string{
 	0: "mintable",
 	1: "total_supply",
 	2: "admin",
@@ -24377,6 +24383,7 @@ var jsonFieldsNameOfJettonInfo = [7]string{
 	4: "preview",
 	5: "verification",
 	6: "holders_count",
+	7: "scaled_ui",
 }
 
 // Decode decodes JettonInfo from json.
@@ -24465,6 +24472,16 @@ func (s *JettonInfo) Decode(d *jx.Decoder) error {
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"holders_count\"")
+			}
+		case "scaled_ui":
+			if err := func() error {
+				s.ScaledUI.Reset()
+				if err := s.ScaledUI.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"scaled_ui\"")
 			}
 		default:
 			return d.Skip()
@@ -25426,9 +25443,15 @@ func (s *JettonPreview) encodeFields(e *jx.Encoder) {
 		e.FieldStart("score")
 		e.Int32(s.Score)
 	}
+	{
+		if s.ScaledUI.Set {
+			e.FieldStart("scaled_ui")
+			s.ScaledUI.Encode(e)
+		}
+	}
 }
 
-var jsonFieldsNameOfJettonPreview = [8]string{
+var jsonFieldsNameOfJettonPreview = [9]string{
 	0: "address",
 	1: "name",
 	2: "symbol",
@@ -25437,6 +25460,7 @@ var jsonFieldsNameOfJettonPreview = [8]string{
 	5: "verification",
 	6: "custom_payload_api_uri",
 	7: "score",
+	8: "scaled_ui",
 }
 
 // Decode decodes JettonPreview from json.
@@ -25444,7 +25468,7 @@ func (s *JettonPreview) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode JettonPreview to nil")
 	}
-	var requiredBitSet [1]uint8
+	var requiredBitSet [2]uint8
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
@@ -25540,6 +25564,16 @@ func (s *JettonPreview) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"score\"")
 			}
+		case "scaled_ui":
+			if err := func() error {
+				s.ScaledUI.Reset()
+				if err := s.ScaledUI.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"scaled_ui\"")
+			}
 		default:
 			return d.Skip()
 		}
@@ -25549,8 +25583,9 @@ func (s *JettonPreview) Decode(d *jx.Decoder) error {
 	}
 	// Validate required fields.
 	var failures []validate.FieldError
-	for i, mask := range [1]uint8{
+	for i, mask := range [2]uint8{
 		0b10111111,
+		0b00000000,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -33671,6 +33706,39 @@ func (s *OptSale) UnmarshalJSON(data []byte) error {
 	return s.Decode(d)
 }
 
+// Encode encodes ScaledUI as json.
+func (o OptScaledUI) Encode(e *jx.Encoder) {
+	if !o.Set {
+		return
+	}
+	o.Value.Encode(e)
+}
+
+// Decode decodes ScaledUI from json.
+func (o *OptScaledUI) Decode(d *jx.Decoder) error {
+	if o == nil {
+		return errors.New("invalid: unable to decode OptScaledUI to nil")
+	}
+	o.Set = true
+	if err := o.Value.Decode(d); err != nil {
+		return err
+	}
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s OptScaledUI) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *OptScaledUI) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
 // Encode encodes SendBlockchainMessageReqMeta as json.
 func (o OptSendBlockchainMessageReqMeta) Encode(e *jx.Encoder) {
 	if !o.Set {
@@ -36896,6 +36964,119 @@ func (s *Sale) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *Sale) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *ScaledUI) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *ScaledUI) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("numerator")
+		e.Str(s.Numerator)
+	}
+	{
+		e.FieldStart("denominator")
+		e.Str(s.Denominator)
+	}
+}
+
+var jsonFieldsNameOfScaledUI = [2]string{
+	0: "numerator",
+	1: "denominator",
+}
+
+// Decode decodes ScaledUI from json.
+func (s *ScaledUI) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode ScaledUI to nil")
+	}
+	var requiredBitSet [1]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "numerator":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				v, err := d.Str()
+				s.Numerator = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"numerator\"")
+			}
+		case "denominator":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				v, err := d.Str()
+				s.Denominator = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"denominator\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode ScaledUI")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00000011,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfScaledUI) {
+					name = jsonFieldsNameOfScaledUI[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *ScaledUI) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *ScaledUI) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }

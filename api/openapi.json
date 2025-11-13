@@ -3947,6 +3947,9 @@
       "example": "https://cache.tonapi.io/images/jetton.jpg",
       "type": "string"
      },
+     "scaled_ui": {
+      "$ref": "#/components/schemas/ScaledUI"
+     },
      "total_supply": {
       "example": "5887105890579978",
       "type": "string",
@@ -4169,6 +4172,9 @@
      "name": {
       "example": "Wrapped TON",
       "type": "string"
+     },
+     "scaled_ui": {
+      "$ref": "#/components/schemas/ScaledUI"
      },
      "score": {
       "format": "int32",
@@ -5656,6 +5662,25 @@
      "address",
      "market",
      "price"
+    ],
+    "type": "object"
+   },
+   "ScaledUI": {
+    "properties": {
+     "denominator": {
+      "example": "597968399",
+      "type": "string",
+      "x-js-format": "bigint"
+     },
+     "numerator": {
+      "example": "597968399",
+      "type": "string",
+      "x-js-format": "bigint"
+     }
+    },
+    "required": [
+     "numerator",
+     "denominator"
     ],
     "type": "object"
    },

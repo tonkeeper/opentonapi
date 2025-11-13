@@ -5674,6 +5674,22 @@ components:
         score:
           type: integer
           format: int32
+        scaled_ui:
+          $ref: '#/components/schemas/ScaledUI'
+    ScaledUI:
+      type: object
+      required:
+        - numerator
+        - denominator
+      properties:
+        numerator:
+          type: string
+          x-js-format: bigint
+          example: "597968399"
+        denominator:
+          type: string
+          x-js-format: bigint
+          example: "597968399"
     JettonBalance:
       type: object
       required:
@@ -7462,6 +7478,8 @@ components:
           type: integer
           format: int32
           example: 2000
+        scaled_ui:
+          $ref: '#/components/schemas/ScaledUI'
     JettonHolders:
       type: object
       required:
