@@ -83,7 +83,11 @@ func (h *Handler) GetJettonInfo(ctx context.Context, params oas.GetJettonInfoPar
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
-	converted := h.convertJettonInfo(ctx, master, holders)
+	scaledUiParams, err := h.storage.GetScaledUIParameters(ctx, master.Address, nil)
+	if err != nil {
+		return nil, toError(http.StatusInternalServerError, err)
+	}
+	converted := h.convertJettonInfo(ctx, master, holders, scaledUiParams)
 	return &converted, nil
 }
 
@@ -199,7 +203,11 @@ func (h *Handler) GetJettons(ctx context.Context, params oas.GetJettonsParams) (
 	}
 	results := make([]oas.JettonInfo, len(jettons))
 	for idx, master := range jettons {
-		results[idx] = h.convertJettonInfo(ctx, master, holders)
+		scaledUiParams, err := h.storage.GetScaledUIParameters(ctx, master.Address, nil)
+		if err != nil {
+			return nil, toError(http.StatusInternalServerError, err)
+		}
+		results[idx] = h.convertJettonInfo(ctx, master, holders, scaledUiParams)
 	}
 	return &oas.Jettons{Jettons: results}, nil
 }
@@ -342,7 +350,11 @@ func (h *Handler) GetJettonInfosByAddresses(ctx context.Context, request oas.Opt
 	}
 	results := make([]oas.JettonInfo, len(jettons))
 	for idx, master := range jettons {
-		results[idx] = h.convertJettonInfo(ctx, master, jettonsHolders)
+		scaledUiParams, err := h.storage.GetScaledUIParameters(ctx, master.Address, nil)
+		if err != nil {
+			return nil, toError(http.StatusInternalServerError, err)
+		}
+		results[idx] = h.convertJettonInfo(ctx, master, jettonsHolders, scaledUiParams)
 	}
 
 	return &oas.Jettons{Jettons: results}, nil

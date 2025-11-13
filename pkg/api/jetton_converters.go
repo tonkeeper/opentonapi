@@ -207,7 +207,7 @@ func (h *Handler) convertJettonBalance(ctx context.Context, wallet core.JettonWa
 	return jettonBalance, nil
 }
 
-func (h *Handler) convertJettonInfo(ctx context.Context, master core.JettonMaster, holders map[tongo.AccountID]int32) oas.JettonInfo {
+func (h *Handler) convertJettonInfo(ctx context.Context, master core.JettonMaster, holders map[tongo.AccountID]int32, scaledUiParams *core.ScaledUIParameters) oas.JettonInfo {
 	meta := h.GetJettonNormalizedMetadata(ctx, master.Address)
 	metadata := jettonMetadata(master.Address, meta)
 	info := oas.JettonInfo{
@@ -218,6 +218,12 @@ func (h *Handler) convertJettonInfo(ctx context.Context, master core.JettonMaste
 		HoldersCount: holders[master.Address],
 		Admin:        convertOptAccountAddress(master.Admin, h.addressBook),
 		Preview:      meta.PreviewImage,
+	}
+	if scaledUiParams != nil {
+		info.ScaledUI.SetTo(oas.ScaledUI{
+			Numerator:   scaledUiParams.Numerator.String(),
+			Denominator: scaledUiParams.Denominator.String(),
+		})
 	}
 	return info
 }
