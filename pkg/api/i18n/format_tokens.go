@@ -6,17 +6,21 @@ import (
 	"strings"
 
 	"github.com/shopspring/decimal"
+	"github.com/tonkeeper/opentonapi/pkg/core"
 )
 
 // FormatTONs represents the given amount of nanoTONs in TONs and formats it according to the scheme (# ### or #.##)
 func FormatTONs(amount int64) string {
-	return FormatTokens(*big.NewInt(amount), 9, "TON")
+	return FormatTokens(*big.NewInt(amount), 9, "TON", nil)
 }
 
 // FormatTokens translates the value in indivisible units into a user-friendly form taking into account
 // decimals according to the scheme (# ### or #.##)
-func FormatTokens(amount big.Int, decimals int32, symbol string) string {
+func FormatTokens(amount big.Int, decimals int32, symbol string, scaledUiParams *core.ScaledUIParameters) string {
 	x := decimal.NewFromBigInt(&amount, -1*decimals)
+	if scaledUiParams != nil {
+		x = x.Mul(scaledUiParams.Numerator).Div(scaledUiParams.Denominator).Floor()
+	}
 	x = truncate(x, 3)
 	intPart := x.BigInt()
 	if x.Equal(decimal.NewFromBigInt(intPart, 0)) {

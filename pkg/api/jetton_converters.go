@@ -8,7 +8,6 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/shopspring/decimal"
 	"github.com/tonkeeper/opentonapi/pkg/bath"
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/opentonapi/pkg/oas"
@@ -226,8 +225,4 @@ func (h *Handler) convertJettonInfo(ctx context.Context, master core.JettonMaste
 		})
 	}
 	return info
-}
-
-func ScaledUIJettonAmount(amount, numerator, denominator decimal.Decimal) decimal.Decimal {
-	return amount.Mul(numerator).Div(denominator).Floor()
 }
