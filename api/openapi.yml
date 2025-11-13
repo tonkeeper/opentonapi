@@ -3482,7 +3482,7 @@ components:
       properties:
         address:
           type: string
-          format: address
+          format: maybe-address
           example: 0:10C1073837B93FDAAD594284CE8B8EFF7B9CF25427440EB2FC682762E1471365
         name:
           type: string
@@ -6381,6 +6381,7 @@ components:
           $ref: '#/components/schemas/AccountAddress'
         nft:
           type: string
+          format: maybe-address
           example: ""
         comment:
           type: string
@@ -6974,7 +6975,7 @@ components:
           $ref: '#/components/schemas/Metadata'
         address:
           type: string
-          format: address
+          format: maybe-address
           example: 0:dea8f638b789172ce36d10a20318125e52c649aa84893cd77858224fe2b9b0ee
         beneficiary:
           $ref: '#/components/schemas/AccountAddress'
@@ -7085,7 +7086,7 @@ components:
           $ref: '#/components/schemas/WalletDNS'
         next_resolver:
           type: string
-          format: address
+          format: maybe-address
           example: "0:da6b1b6663a0e4d18cc8574ccd9db5296e367dd9324706f3bbd9eb1cd2caf0bf"
         sites:
           type: array
