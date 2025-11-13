@@ -23256,12 +23256,6 @@ func (s *JettonBalance) encodeFields(e *jx.Encoder) {
 		e.Str(s.Balance)
 	}
 	{
-		if s.ScaledUIBalance.Set {
-			e.FieldStart("scaled_ui_balance")
-			s.ScaledUIBalance.Encode(e)
-		}
-	}
-	{
 		if s.Price.Set {
 			e.FieldStart("price")
 			s.Price.Encode(e)
@@ -23293,14 +23287,13 @@ func (s *JettonBalance) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfJettonBalance = [7]string{
+var jsonFieldsNameOfJettonBalance = [6]string{
 	0: "balance",
-	1: "scaled_ui_balance",
-	2: "price",
-	3: "wallet_address",
-	4: "jetton",
-	5: "extensions",
-	6: "lock",
+	1: "price",
+	2: "wallet_address",
+	3: "jetton",
+	4: "extensions",
+	5: "lock",
 }
 
 // Decode decodes JettonBalance from json.
@@ -23324,16 +23317,6 @@ func (s *JettonBalance) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"balance\"")
 			}
-		case "scaled_ui_balance":
-			if err := func() error {
-				s.ScaledUIBalance.Reset()
-				if err := s.ScaledUIBalance.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"scaled_ui_balance\"")
-			}
 		case "price":
 			if err := func() error {
 				s.Price.Reset()
@@ -23345,7 +23328,7 @@ func (s *JettonBalance) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"price\"")
 			}
 		case "wallet_address":
-			requiredBitSet[0] |= 1 << 3
+			requiredBitSet[0] |= 1 << 2
 			if err := func() error {
 				if err := s.WalletAddress.Decode(d); err != nil {
 					return err
@@ -23355,7 +23338,7 @@ func (s *JettonBalance) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"wallet_address\"")
 			}
 		case "jetton":
-			requiredBitSet[0] |= 1 << 4
+			requiredBitSet[0] |= 1 << 3
 			if err := func() error {
 				if err := s.Jetton.Decode(d); err != nil {
 					return err
@@ -23403,7 +23386,7 @@ func (s *JettonBalance) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b00011001,
+		0b00001101,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -26002,12 +25985,6 @@ func (s *JettonTransferAction) encodeFields(e *jx.Encoder) {
 		e.Str(s.Amount)
 	}
 	{
-		if s.ScaledUIAmount.Set {
-			e.FieldStart("scaled_ui_amount")
-			s.ScaledUIAmount.Encode(e)
-		}
-	}
-	{
 		if s.Comment.Set {
 			e.FieldStart("comment")
 			s.Comment.Encode(e)
@@ -26031,17 +26008,16 @@ func (s *JettonTransferAction) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfJettonTransferAction = [10]string{
+var jsonFieldsNameOfJettonTransferAction = [9]string{
 	0: "sender",
 	1: "recipient",
 	2: "senders_wallet",
 	3: "recipients_wallet",
 	4: "amount",
-	5: "scaled_ui_amount",
-	6: "comment",
-	7: "encrypted_comment",
-	8: "refund",
-	9: "jetton",
+	5: "comment",
+	6: "encrypted_comment",
+	7: "refund",
+	8: "jetton",
 }
 
 // Decode decodes JettonTransferAction from json.
@@ -26109,16 +26085,6 @@ func (s *JettonTransferAction) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"amount\"")
 			}
-		case "scaled_ui_amount":
-			if err := func() error {
-				s.ScaledUIAmount.Reset()
-				if err := s.ScaledUIAmount.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"scaled_ui_amount\"")
-			}
 		case "comment":
 			if err := func() error {
 				s.Comment.Reset()
@@ -26150,7 +26116,7 @@ func (s *JettonTransferAction) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"refund\"")
 			}
 		case "jetton":
-			requiredBitSet[1] |= 1 << 1
+			requiredBitSet[1] |= 1 << 0
 			if err := func() error {
 				if err := s.Jetton.Decode(d); err != nil {
 					return err
@@ -26170,7 +26136,7 @@ func (s *JettonTransferAction) Decode(d *jx.Decoder) error {
 	var failures []validate.FieldError
 	for i, mask := range [2]uint8{
 		0b00011100,
-		0b00000010,
+		0b00000001,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
