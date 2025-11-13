@@ -6418,10 +6418,6 @@ components:
           x-js-format: bigint
           example: "1000000000"
           description: amount in quanta of tokens
-        scaled_ui_amount:
-          type: string
-          x-js-format: bigint
-          example: "1100000000"
         comment:
           type: string
           example: "Hi! This is your salary. \nFrom accounting with love."
