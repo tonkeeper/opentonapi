@@ -8737,7 +8737,6 @@ type JettonTransferAction struct {
 	RecipientsWallet string            `json:"recipients_wallet"`
 	// Amount in quanta of tokens.
 	Amount           string              `json:"amount"`
-	ScaledUIAmount   OptString           `json:"scaled_ui_amount"`
 	Comment          OptString           `json:"comment"`
 	EncryptedComment OptEncryptedComment `json:"encrypted_comment"`
 	Refund           OptRefund           `json:"refund"`
@@ -8767,11 +8766,6 @@ func (s *JettonTransferAction) GetRecipientsWallet() string {
 // GetAmount returns the value of Amount.
 func (s *JettonTransferAction) GetAmount() string {
 	return s.Amount
-}
-
-// GetScaledUIAmount returns the value of ScaledUIAmount.
-func (s *JettonTransferAction) GetScaledUIAmount() OptString {
-	return s.ScaledUIAmount
 }
 
 // GetComment returns the value of Comment.
@@ -8817,11 +8811,6 @@ func (s *JettonTransferAction) SetRecipientsWallet(val string) {
 // SetAmount sets the value of Amount.
 func (s *JettonTransferAction) SetAmount(val string) {
 	s.Amount = val
-}
-
-// SetScaledUIAmount sets the value of ScaledUIAmount.
-func (s *JettonTransferAction) SetScaledUIAmount(val OptString) {
-	s.ScaledUIAmount = val
 }
 
 // SetComment sets the value of Comment.

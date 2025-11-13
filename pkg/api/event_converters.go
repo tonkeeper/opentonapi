@@ -288,7 +288,7 @@ func (h *Handler) convertActionJettonTransfer(ctx context.Context, t *bath.Jetto
 			scaledUiParams.Numerator,
 			scaledUiParams.Denominator,
 		).BigInt()
-		action.Value.ScaledUIAmount.SetTo(scaledUiAmount.String())
+		action.Value.Amount = scaledUiAmount.String()
 		value = i18n.FormatTokens(*scaledUiAmount, int32(meta.Decimals), meta.Symbol)
 	}
 	simplePreview := oas.ActionSimplePreview{
