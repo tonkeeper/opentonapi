@@ -13,6 +13,7 @@ import (
 	"github.com/tonkeeper/opentonapi/internal/g"
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/tongo"
+	"github.com/tonkeeper/tongo/abi"
 	"github.com/tonkeeper/tongo/liteapi"
 	"go.uber.org/zap"
 
@@ -281,6 +282,178 @@ func TestFindActions(t *testing.T) {
 		straws         []Merger
 	}
 	for _, c := range []Case{
+		{
+			name:           "not merge bubble in the very beginning",
+			hash:           "4b8b2a18abb6784c23eefa6f71d20aa2475c0a379dc2459c413e381fc7379803",
+			filenamePrefix: "not-to-merge-bubble-in-the-very-beginning",
+			straws: []Merger{
+				Straw[BubbleJettonMint]{
+					NotMergeBubble: true,
+					CheckFuncs:     []bubbleCheck{IsTx},
+					SingleChild: &Straw[BubbleJettonMint]{
+						CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.MegatonWtonMintMsgOp)},
+						Children: []Straw[BubbleJettonMint]{
+							{
+								CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.ExcessMsgOp)},
+							},
+							{
+								CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.JettonInternalTransferMsgOp)},
+							},
+						},
+					},
+				},
+			},
+		},
+		{
+			name:           "not merge bubble in the beginning",
+			hash:           "4b8b2a18abb6784c23eefa6f71d20aa2475c0a379dc2459c413e381fc7379803",
+			filenamePrefix: "not-to-merge-bubble-in-the-beginning",
+			straws: []Merger{
+				Straw[BubbleJettonMint]{
+					NotMergeBubble: true,
+					CheckFuncs:     []bubbleCheck{IsTx, HasOperation(abi.MegatonWtonMintMsgOp)},
+					Children: []Straw[BubbleJettonMint]{
+						{
+							CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.ExcessMsgOp)},
+						},
+						{
+							CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.JettonInternalTransferMsgOp)},
+						},
+					},
+				},
+			},
+		},
+		{
+			name:           "not merge bubble in the middle",
+			hash:           "4b8b2a18abb6784c23eefa6f71d20aa2475c0a379dc2459c413e381fc7379803",
+			filenamePrefix: "not-to-merge-bubble-in-the-middle",
+			straws: []Merger{
+				Straw[BubbleJettonMint]{
+					CheckFuncs: []bubbleCheck{IsTx},
+					SingleChild: &Straw[BubbleJettonMint]{
+						CheckFuncs:     []bubbleCheck{IsTx, HasOperation(abi.MegatonWtonMintMsgOp)},
+						NotMergeBubble: true,
+						Children: []Straw[BubbleJettonMint]{
+							{
+								CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.ExcessMsgOp)},
+							},
+							{
+								CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.JettonInternalTransferMsgOp)},
+							},
+						},
+					},
+				},
+			},
+		},
+		{
+			name:           "not merge bubble in the end",
+			hash:           "4b8b2a18abb6784c23eefa6f71d20aa2475c0a379dc2459c413e381fc7379803",
+			filenamePrefix: "not-to-merge-bubble-in-the-end",
+			straws: []Merger{
+				Straw[BubbleJettonMint]{
+					CheckFuncs: []bubbleCheck{IsTx},
+					SingleChild: &Straw[BubbleJettonMint]{
+						CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.MegatonWtonMintMsgOp)},
+						Children: []Straw[BubbleJettonMint]{
+							{
+								CheckFuncs:     []bubbleCheck{IsTx, HasOperation(abi.ExcessMsgOp)},
+								NotMergeBubble: true,
+							},
+							{
+								CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.JettonInternalTransferMsgOp)},
+							},
+						},
+					},
+				},
+			},
+		},
+		{
+			name:           "not merge big bubble in the middle",
+			hash:           "ba379e2e3f7636cc7a00d867d3f5213a681c0331b603226c1efb04697e9432f4",
+			filenamePrefix: "not-to-merge-big-bubble-in-the-middle",
+			straws: []Merger{
+				Straw[BubbleJettonMint]{
+					CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.TonstakePoolWithdrawMsgOp)},
+					SingleChild: &Straw[BubbleJettonMint]{
+						CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.TonstakePayoutMintJettonsMsgOp)},
+					},
+				},
+				Straw[BubbleWithdrawStakeRequest]{
+					CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.JettonBurnMsgOp)},
+					SingleChild: &Straw[BubbleWithdrawStakeRequest]{
+						CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.JettonBurnNotificationMsgOp)},
+						SingleChild: &Straw[BubbleWithdrawStakeRequest]{
+							NotMergeBubble: true,
+							CheckFuncs:     []bubbleCheck{Is(BubbleJettonMint{})},
+							SingleChild: &Straw[BubbleWithdrawStakeRequest]{
+								CheckFuncs: []bubbleCheck{HasOperation(abi.TonstakeNftInitMsgOp)},
+								SingleChild: &Straw[BubbleWithdrawStakeRequest]{
+									CheckFuncs: []bubbleCheck{HasOperation(abi.NftOwnershipAssignedMsgOp)},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		{
+			name:           "not merge bubble in the middle with tail",
+			hash:           "ba379e2e3f7636cc7a00d867d3f5213a681c0331b603226c1efb04697e9432f4",
+			filenamePrefix: "not-to-merge-bubble-in-the-middle-with-tail",
+			straws: []Merger{
+				Straw[BubbleWithdrawStakeRequest]{
+					CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.JettonBurnMsgOp)},
+					SingleChild: &Straw[BubbleWithdrawStakeRequest]{
+						CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.JettonBurnNotificationMsgOp)},
+						SingleChild: &Straw[BubbleWithdrawStakeRequest]{
+							NotMergeBubble: true,
+							CheckFuncs:     []bubbleCheck{IsTx, HasOperation(abi.TonstakePoolWithdrawMsgOp)},
+							SingleChild: &Straw[BubbleWithdrawStakeRequest]{
+								CheckFuncs: []bubbleCheck{HasOperation(abi.TonstakePayoutMintJettonsMsgOp)},
+								SingleChild: &Straw[BubbleWithdrawStakeRequest]{
+									CheckFuncs: []bubbleCheck{HasOperation(abi.TonstakeNftInitMsgOp)},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		{
+			name:           "not merge bubble in the end with tail",
+			hash:           "ba379e2e3f7636cc7a00d867d3f5213a681c0331b603226c1efb04697e9432f4",
+			filenamePrefix: "not-to-merge-bubble-in-the-end-with-tail",
+			straws: []Merger{
+				Straw[BubbleWithdrawStakeRequest]{
+					CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.JettonBurnMsgOp)},
+					SingleChild: &Straw[BubbleWithdrawStakeRequest]{
+						CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.JettonBurnNotificationMsgOp)},
+						SingleChild: &Straw[BubbleWithdrawStakeRequest]{
+							CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.TonstakePoolWithdrawMsgOp)},
+							SingleChild: &Straw[BubbleWithdrawStakeRequest]{
+								CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.TonstakePayoutMintJettonsMsgOp)},
+								SingleChild: &Straw[BubbleWithdrawStakeRequest]{
+									NotMergeBubble: true,
+									CheckFuncs:     []bubbleCheck{IsTx, HasOperation(abi.TonstakeNftInitMsgOp)},
+								},
+							},
+						},
+					},
+				},
+				Straw[BubbleNftTransfer]{
+					CheckFuncs: []bubbleCheck{IsTx, func(bubble *Bubble) bool {
+						ok := HasOperation(abi.TonstakeNftInitMsgOp)(bubble)
+						return ok
+					}, HasOperation(abi.TonstakeNftInitMsgOp)},
+					SingleChild: &Straw[BubbleNftTransfer]{
+						CheckFuncs: []bubbleCheck{IsTx, func(bubble *Bubble) bool {
+							ok := HasOperation(abi.NftOwnershipAssignedMsgOp)(bubble)
+							return ok
+						}, HasOperation(abi.NftOwnershipAssignedMsgOp)},
+					},
+				},
+			},
+		},
 		{
 			name:           "simple transfer",
 			filenamePrefix: "simple-transfer",

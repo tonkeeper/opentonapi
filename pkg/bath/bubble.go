@@ -2,9 +2,10 @@ package bath
 
 import (
 	"fmt"
-	"github.com/tonkeeper/tongo/boc"
 	"sort"
 	"strings"
+
+	"github.com/tonkeeper/tongo/boc"
 
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/tongo"
@@ -22,6 +23,7 @@ type Bubble struct {
 	Children    []*Bubble
 	ValueFlow   *ValueFlow
 	Transaction []ton.Bits256
+	IsMerged    bool
 }
 
 // ContractDeployment holds information about initialization of a contract.
