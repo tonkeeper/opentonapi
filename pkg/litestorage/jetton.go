@@ -169,17 +169,17 @@ func (s *LiteStorage) GetJettonHolders(ctx context.Context, jettonMaster tongo.A
 	return []core.JettonHolder{}, nil
 }
 
-func (s *LiteStorage) GetScaledUIParameters(ctx context.Context, master tongo.AccountID, beforeLt *int64) (core.ScaledUIParameters, error) {
+func (s *LiteStorage) GetScaledUIParameters(ctx context.Context, master tongo.AccountID, beforeLt *int64) (*core.ScaledUIParameters, error) {
 	// return latest parameters instead of historical data
 	_, value, err := abi.GetDisplayMultiplier(ctx, s.executor, master)
 	if err != nil && (strings.Contains(err.Error(), "can not decode outputs") || strings.Contains(err.Error(), "method execution failed")) {
-		return core.ScaledUIParameters{}, core.ErrEntityNotFound
+		return nil, nil
 	} else if err != nil {
-		return core.ScaledUIParameters{}, err
+		return nil, err
 	}
 	data, ok := value.(abi.GetDisplayMultiplierResult)
 	if !ok {
-		return core.ScaledUIParameters{}, core.ErrEntityNotFound
+		return nil, nil
 	}
 	numerator := big.Int(data.Numerator)
 	denominator := big.Int(data.Denominator)
@@ -187,5 +187,5 @@ func (s *LiteStorage) GetScaledUIParameters(ctx context.Context, master tongo.Ac
 		Numerator:   decimal.NewFromBigInt(&numerator, 0),
 		Denominator: decimal.NewFromBigInt(&denominator, 0),
 	}
-	return res, nil
+	return &res, nil
 }

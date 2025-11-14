@@ -3770,11 +3770,6 @@
      "price": {
       "$ref": "#/components/schemas/TokenRates"
      },
-     "scaled_ui_balance": {
-      "example": "597968399",
-      "type": "string",
-      "x-js-format": "bigint"
-     },
      "wallet_address": {
       "$ref": "#/components/schemas/AccountAddress"
      }
@@ -3951,6 +3946,9 @@
      "preview": {
       "example": "https://cache.tonapi.io/images/jetton.jpg",
       "type": "string"
+     },
+     "scaled_ui": {
+      "$ref": "#/components/schemas/ScaledUI"
      },
      "total_supply": {
       "example": "5887105890579978",
@@ -4175,6 +4173,9 @@
       "example": "Wrapped TON",
       "type": "string"
      },
+     "scaled_ui": {
+      "$ref": "#/components/schemas/ScaledUI"
+     },
      "score": {
       "format": "int32",
       "type": "integer"
@@ -4297,11 +4298,6 @@
      },
      "refund": {
       "$ref": "#/components/schemas/Refund"
-     },
-     "scaled_ui_amount": {
-      "example": "1100000000",
-      "type": "string",
-      "x-js-format": "bigint"
      },
      "sender": {
       "$ref": "#/components/schemas/AccountAddress"
@@ -5666,6 +5662,25 @@
      "address",
      "market",
      "price"
+    ],
+    "type": "object"
+   },
+   "ScaledUI": {
+    "properties": {
+     "denominator": {
+      "example": "597968399",
+      "type": "string",
+      "x-js-format": "bigint"
+     },
+     "numerator": {
+      "example": "597968399",
+      "type": "string",
+      "x-js-format": "bigint"
+     }
+    },
+    "required": [
+     "numerator",
+     "denominator"
     ],
     "type": "object"
    },

@@ -83,7 +83,11 @@ func (h *Handler) GetJettonInfo(ctx context.Context, params oas.GetJettonInfoPar
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
-	converted := h.convertJettonInfo(ctx, master, holders)
+	scaledUiParams, err := h.storage.GetScaledUIParameters(ctx, master.Address, nil)
+	if err != nil {
+		return nil, toError(http.StatusInternalServerError, err)
+	}
+	converted := h.convertJettonInfo(ctx, master, holders, scaledUiParams)
 	return &converted, nil
 }
 
@@ -101,7 +105,11 @@ func (h *Handler) GetAccountJettonsHistory(ctx context.Context, params oas.GetAc
 	}
 	var res oas.JettonOperations
 	for _, op := range history {
-		res.Operations = append(res.Operations, h.convertJettonOperation(ctx, op))
+		convertedOp, err := h.convertJettonOperation(ctx, op)
+		if err != nil {
+			return nil, toError(http.StatusInternalServerError, err)
+		}
+		res.Operations = append(res.Operations, convertedOp)
 		if len(history) == params.Limit {
 			res.NextFrom = oas.NewOptInt64(int64(op.Lt))
 		}
@@ -154,7 +162,11 @@ func (h *Handler) GetJettonAccountHistoryByID(ctx context.Context, params oas.Ge
 	}
 	res := oas.JettonOperations{}
 	for _, op := range history {
-		res.Operations = append(res.Operations, h.convertJettonOperation(ctx, op))
+		convertedOp, err := h.convertJettonOperation(ctx, op)
+		if err != nil {
+			return nil, toError(http.StatusInternalServerError, err)
+		}
+		res.Operations = append(res.Operations, convertedOp)
 		if len(history) == params.Limit {
 			res.NextFrom = oas.NewOptInt64(int64(op.Lt))
 		}
@@ -191,7 +203,11 @@ func (h *Handler) GetJettons(ctx context.Context, params oas.GetJettonsParams) (
 	}
 	results := make([]oas.JettonInfo, len(jettons))
 	for idx, master := range jettons {
-		results[idx] = h.convertJettonInfo(ctx, master, holders)
+		scaledUiParams, err := h.storage.GetScaledUIParameters(ctx, master.Address, nil)
+		if err != nil {
+			return nil, toError(http.StatusInternalServerError, err)
+		}
+		results[idx] = h.convertJettonInfo(ctx, master, holders, scaledUiParams)
 	}
 	return &oas.Jettons{Jettons: results}, nil
 }
@@ -334,7 +350,11 @@ func (h *Handler) GetJettonInfosByAddresses(ctx context.Context, request oas.Opt
 	}
 	results := make([]oas.JettonInfo, len(jettons))
 	for idx, master := range jettons {
-		results[idx] = h.convertJettonInfo(ctx, master, jettonsHolders)
+		scaledUiParams, err := h.storage.GetScaledUIParameters(ctx, master.Address, nil)
+		if err != nil {
+			return nil, toError(http.StatusInternalServerError, err)
+		}
+		results[idx] = h.convertJettonInfo(ctx, master, jettonsHolders, scaledUiParams)
 	}
 
 	return &oas.Jettons{Jettons: results}, nil

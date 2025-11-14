@@ -8,7 +8,6 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/shopspring/decimal"
 	"github.com/tonkeeper/opentonapi/pkg/bath"
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/opentonapi/pkg/oas"
@@ -17,7 +16,7 @@ import (
 	"github.com/tonkeeper/tongo/ton"
 )
 
-func jettonPreview(master ton.AccountID, meta NormalizedMetadata, score int32) oas.JettonPreview {
+func jettonPreview(master ton.AccountID, meta NormalizedMetadata, score int32, scaledUiParams *core.ScaledUIParameters) oas.JettonPreview {
 	preview := oas.JettonPreview{
 		Address:      master.ToRaw(),
 		Name:         meta.Name,
@@ -29,6 +28,12 @@ func jettonPreview(master ton.AccountID, meta NormalizedMetadata, score int32) o
 	}
 	if meta.CustomPayloadApiUri != "" {
 		preview.CustomPayloadAPIURI = oas.NewOptString(meta.CustomPayloadApiUri)
+	}
+	if scaledUiParams != nil {
+		preview.ScaledUI.SetTo(oas.ScaledUI{
+			Numerator:   scaledUiParams.Numerator.String(),
+			Denominator: scaledUiParams.Denominator.String(),
+		})
 	}
 	return preview
 }
@@ -110,24 +115,29 @@ func (h *Handler) convertJettonHistory(ctx context.Context, account ton.AccountI
 	return events, int64(lastLT), nil
 }
 
-func (h *Handler) convertJettonOperation(ctx context.Context, op core.JettonOperation) oas.JettonOperation {
+func (h *Handler) convertJettonOperation(ctx context.Context, op core.JettonOperation) (oas.JettonOperation, error) {
 	b, err := json.Marshal(op.ForwardPayload)
 	if err != nil {
 		b = []byte{'{', '}'}
 	}
+	lt := int64(op.Lt)
+	scaledUiParams, err := h.storage.GetScaledUIParameters(ctx, op.JettonMaster, &lt)
+	if err != nil {
+		return oas.JettonOperation{}, fmt.Errorf("failed to get scaled ui parameters: %w", err)
+	}
 	operation := oas.JettonOperation{
 		Operation:       oas.JettonOperationOperation(op.Operation),
 		Utime:           op.Utime,
-		Lt:              int64(op.Lt),
+		Lt:              lt,
 		TransactionHash: op.TxID.Hex(),
 		TraceID:         op.TraceID.Hex(),
 		Source:          convertOptAccountAddress(op.Source, h.addressBook),
 		Destination:     convertOptAccountAddress(op.Destination, h.addressBook),
-		Jetton:          jettonPreview(op.JettonMaster, h.GetJettonNormalizedMetadata(ctx, op.JettonMaster), 0),
+		Jetton:          jettonPreview(op.JettonMaster, h.GetJettonNormalizedMetadata(ctx, op.JettonMaster), 0, scaledUiParams),
 		Amount:          op.Amount.String(),
 		Payload:         b,
 	}
-	return operation
+	return operation, nil
 }
 
 func (h *Handler) convertJettonBalance(ctx context.Context, wallet core.JettonWallet, currencies []string, scaledUiLt *int64) (oas.JettonBalance, error) {
@@ -147,10 +157,8 @@ func (h *Handler) convertJettonBalance(ctx context.Context, wallet core.JettonWa
 		Extensions:    wallet.Extensions,
 	}
 	scaledUiParams, err := h.storage.GetScaledUIParameters(ctx, wallet.JettonAddress, scaledUiLt)
-	if err != nil && !errors.Is(err, core.ErrEntityNotFound) {
+	if err != nil {
 		return oas.JettonBalance{}, toError(http.StatusInternalServerError, err)
-	} else if err == nil {
-		jettonBalance.ScaledUIBalance.SetTo(ScaledUIJettonAmount(wallet.Balance, scaledUiParams.Numerator, scaledUiParams.Denominator).String())
 	}
 	if wallet.Lock != nil {
 		jettonBalance.Lock = oas.NewOptJettonBalanceLock(oas.JettonBalanceLock{
@@ -193,12 +201,12 @@ func (h *Handler) convertJettonBalance(ctx context.Context, wallet core.JettonWa
 		normalizedMetadata = NormalizeMetadata(wallet.JettonAddress, meta, nil, trust)
 	}
 	score, _ := h.score.GetJettonScore(wallet.JettonAddress)
-	jettonBalance.Jetton = jettonPreview(wallet.JettonAddress, normalizedMetadata, score)
+	jettonBalance.Jetton = jettonPreview(wallet.JettonAddress, normalizedMetadata, score, scaledUiParams)
 
 	return jettonBalance, nil
 }
 
-func (h *Handler) convertJettonInfo(ctx context.Context, master core.JettonMaster, holders map[tongo.AccountID]int32) oas.JettonInfo {
+func (h *Handler) convertJettonInfo(ctx context.Context, master core.JettonMaster, holders map[tongo.AccountID]int32, scaledUiParams *core.ScaledUIParameters) oas.JettonInfo {
 	meta := h.GetJettonNormalizedMetadata(ctx, master.Address)
 	metadata := jettonMetadata(master.Address, meta)
 	info := oas.JettonInfo{
@@ -210,9 +218,11 @@ func (h *Handler) convertJettonInfo(ctx context.Context, master core.JettonMaste
 		Admin:        convertOptAccountAddress(master.Admin, h.addressBook),
 		Preview:      meta.PreviewImage,
 	}
+	if scaledUiParams != nil {
+		info.ScaledUI.SetTo(oas.ScaledUI{
+			Numerator:   scaledUiParams.Numerator.String(),
+			Denominator: scaledUiParams.Denominator.String(),
+		})
+	}
 	return info
-}
-
-func ScaledUIJettonAmount(amount, numerator, denominator decimal.Decimal) decimal.Decimal {
-	return amount.Mul(numerator).Div(denominator).Floor()
 }
