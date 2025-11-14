@@ -524,15 +524,14 @@ func convertConfig(logger *zap.Logger, cfg tlb.ConfigParams) (*oas.BlockchainCon
 		}
 		config.R43 = oas.NewOptBlockchainConfig43(param43)
 	}
-	if blockchainConfig.ConfigParam44 == nil {
-		return nil, fmt.Errorf("config doesn't have %v param", 44)
-	}
-	for _, addr := range blockchainConfig.ConfigParam44.SuspendedAddressList.Addresses.Keys() {
-		accountID := ton.AccountID{
-			Workchain: int32(addr.Workchain),
-			Address:   addr.Address,
+	if blockchainConfig.ConfigParam44 != nil {
+		for _, addr := range blockchainConfig.ConfigParam44.SuspendedAddressList.Addresses.Keys() {
+			accountID := ton.AccountID{
+				Workchain: int32(addr.Workchain),
+				Address:   addr.Address,
+			}
+			config.R44.Accounts = append(config.R44.Accounts, accountID.String())
 		}
-		config.R44.Accounts = append(config.R44.Accounts, accountID.String())
 	}
 	config.R44.SetSuspendedUntil(int(blockchainConfig.ConfigParam44.SuspendedAddressList.SuspendedUntil))
 	if p45 := blockchainConfig.ConfigParam45; p45 != nil {
