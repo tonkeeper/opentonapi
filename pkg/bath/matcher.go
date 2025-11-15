@@ -6,6 +6,7 @@ import (
 	"github.com/tonkeeper/opentonapi/pkg/sentry"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
+	"github.com/tonkeeper/tongo/ton"
 	"golang.org/x/exp/slices"
 )
 
@@ -16,16 +17,20 @@ type Straw[newBubbleT actioner] struct {
 	ValueFlowUpdater func(newAction *newBubbleT, flow *ValueFlow)
 	SingleChild      *Straw[newBubbleT]
 	Children         []Straw[newBubbleT]
+	NotMergeBubble   bool
 	Optional         bool
 }
 
 func (s Straw[newBubbleT]) match(bubble *Bubble) (mappings []struct {
 	s Straw[newBubbleT]
 	b *Bubble
-}) {
+}, matched bool) {
+	if bubble.IsMerged {
+		return nil, false
+	}
 	for _, checkFunc := range s.CheckFuncs {
 		if !checkFunc(bubble) {
-			return nil
+			return nil, false
 		}
 	}
 	if s.SingleChild != nil && len(s.Children) != 0 {
@@ -34,15 +39,15 @@ func (s Straw[newBubbleT]) match(bubble *Bubble) (mappings []struct {
 	if s.SingleChild != nil {
 		found := false
 		for _, child := range bubble.Children {
-			m := s.SingleChild.match(child)
-			if len(m) != 0 {
+			m, isMatched := s.SingleChild.match(child)
+			if isMatched {
 				found = true
 				mappings = append(mappings, m...)
 				break
 			}
 		}
 		if !(found || s.SingleChild.Optional) {
-			return nil
+			return nil, false
 		}
 	}
 	matches := make([]bool, len(bubble.Children))
@@ -52,8 +57,8 @@ func (s Straw[newBubbleT]) match(bubble *Bubble) (mappings []struct {
 			if matches[i] {
 				continue
 			}
-			m := childStraw.match(child)
-			if len(m) != 0 {
+			m, isMatched := childStraw.match(child)
+			if isMatched {
 				found = true
 				matches[i] = true
 				mappings = append(mappings, m...)
@@ -61,25 +66,32 @@ func (s Straw[newBubbleT]) match(bubble *Bubble) (mappings []struct {
 			}
 		}
 		if !(found || childStraw.Optional) {
-			return nil
+			return nil, false
 		}
 	}
-	mappings = append(mappings, struct {
-		s Straw[newBubbleT]
-		b *Bubble
-	}{s, bubble})
-	return mappings
+	if !s.NotMergeBubble {
+		mappings = append(mappings, struct {
+			s Straw[newBubbleT]
+			b *Bubble
+		}{s, bubble})
+	}
+	return mappings, mappings != nil || s.NotMergeBubble
 }
 
 func (s Straw[newBubbleT]) Merge(bubble *Bubble) bool {
-	mapping := s.match(bubble)
-	if len(mapping) == 0 {
+	mapping, isMatched := s.match(bubble)
+	if !isMatched {
 		return false
 	}
 	var newBubble newBubbleT
 	var newChildren []*Bubble
-	newAccounts := bubble.Accounts
-	newTransaction := bubble.Transaction
+	var potentialChildren []*Bubble
+	var newAccounts []tongo.AccountID
+	var newTransaction []ton.Bits256
+	if !s.NotMergeBubble {
+		newAccounts = bubble.Accounts
+		newTransaction = bubble.Transaction
+	}
 	nvf := newValueFlow()
 	var finalizer func(newAction *newBubbleT, flow *ValueFlow)
 	for i := len(mapping) - 1; i >= 0; i-- {
@@ -96,6 +108,7 @@ func (s Straw[newBubbleT]) Merge(bubble *Bubble) bool {
 		nvf.Merge(mapping[i].b.ValueFlow)
 		newAccounts = append(newAccounts, mapping[i].b.Accounts...)
 		newTransaction = append(newTransaction, mapping[i].b.Transaction...)
+		mapping[i].b.IsMerged = true
 		for _, child := range mapping[i].b.Children {
 			if slices.ContainsFunc(mapping, func(s struct {
 				s Straw[newBubbleT]
@@ -105,8 +118,24 @@ func (s Straw[newBubbleT]) Merge(bubble *Bubble) bool {
 			}) {
 				continue
 			}
-			newChildren = append(newChildren, child)
+			potentialChildren = append(potentialChildren, child)
 		}
+	}
+	if s.NotMergeBubble {
+		// If we don't need to merge the first bubble in straw, then we need to add this bubble to children to not lose it
+		potentialChildren = append(potentialChildren, bubble)
+	}
+	for _, child := range potentialChildren {
+		// Find all unused bubble's children
+		var newChildChildren []*Bubble
+		for _, innerChild := range child.Children {
+			if !innerChild.IsMerged {
+				newChildChildren = append(newChildChildren, innerChild)
+			}
+		}
+		childCopy := *child
+		childCopy.Children = newChildChildren
+		newChildren = append(newChildren, &childCopy)
 	}
 	if finalizer != nil {
 		finalizer(&newBubble, nvf)
