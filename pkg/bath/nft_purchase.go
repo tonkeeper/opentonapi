@@ -41,7 +41,8 @@ var NftPurchaseStraw = Straw[BubbleNftPurchase]{
 		AmountInterval(1, 1<<62), //externals has zero value
 		func(bubble *Bubble) bool {
 			tx := bubble.Info.(BubbleTx)
-			if tx.decodedBody != nil && (tx.decodedBody.Operation != abi.TextCommentMsgOp || tx.decodedBody.Value.(abi.TextCommentMsgBody).Text == "cancel") {
+			if (tx.opCode != nil && *tx.opCode != 0) ||
+				(tx.decodedBody != nil && (tx.decodedBody.Operation != abi.TextCommentMsgOp || tx.decodedBody.Value.(abi.TextCommentMsgBody).Text == "cancel")) {
 				return false
 			}
 			return tx.additionalInfo != nil && tx.additionalInfo.NftSaleContract != nil && tx.additionalInfo.NftSaleContract.Owner != nil
