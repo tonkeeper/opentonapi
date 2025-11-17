@@ -37,14 +37,11 @@ func (b BubbleNftPurchase) ToAction() *Action {
 var NftPurchaseStraw = Straw[BubbleNftPurchase]{
 	CheckFuncs: []bubbleCheck{
 		IsTx,
+		HasInterface(abi.NftSale),
 		AmountInterval(1, 1<<62), //externals has zero value
 		func(bubble *Bubble) bool {
 			tx := bubble.Info.(BubbleTx)
-			if HasInterface(abi.NftSaleV1)(bubble) || HasInterface(abi.NftSaleV2)(bubble) {
-				if !HasEmptyBody(bubble) {
-					return false
-				}
-			} else if !HasInterface(abi.NftSaleGetgemsV2)(bubble) && !HasInterface(abi.NftSaleGetgemsV3)(bubble) && !HasInterface(abi.NftSaleGetgemsV4)(bubble) {
+			if tx.decodedBody != nil && (tx.decodedBody.Operation != abi.TextCommentMsgOp || tx.decodedBody.Value.(abi.TextCommentMsgBody).Text == "cancel") {
 				return false
 			}
 			return tx.additionalInfo != nil && tx.additionalInfo.NftSaleContract != nil && tx.additionalInfo.NftSaleContract.Owner != nil
