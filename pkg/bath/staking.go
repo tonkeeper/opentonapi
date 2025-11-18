@@ -496,7 +496,10 @@ var DepositAffluentEarnWithOraclesStraw = Straw[BubbleDepositTokenStake]{
 }
 
 var WithdrawAffluentEarnRequestStraw = Straw[BubbleWithdrawTokenStakeRequest]{
-	CheckFuncs: []bubbleCheck{IsJettonTransfer},
+	CheckFuncs: []bubbleCheck{IsJettonTransfer, func(bubble *Bubble) bool {
+		tx := bubble.Info.(BubbleJettonTransfer)
+		return tx.recipient != nil && tx.recipient.Is(abi.AffluentBatch)
+	}},
 	Builder: func(newAction *BubbleWithdrawTokenStakeRequest, bubble *Bubble) error {
 		tx := bubble.Info.(BubbleJettonTransfer)
 		newAction.Protocol = core.Protocol{
