@@ -78,7 +78,9 @@ func (s UniversalDedustStraw) Merge(b *Bubble) bool {
 
 			referalTx, ok1 := referalBubble.Info.(BubbleTx)
 			payoutBubble2tx, ok2 := payoutBubble2.Info.(BubbleTx)
-			if !(ok1 && ok2) || !(referalTx.operation(abi.ExcessMsgOp) && payoutBubble2tx.operation(abi.ExcessMsgOp)) {
+			if !(ok1 && ok2) ||
+				!(referalTx.operation(abi.DedustTonExcessesMsgOp) && payoutBubble2tx.operation(abi.DedustTonPayMsgOp)) &&
+					!(referalTx.operation(abi.ExcessMsgOp) && payoutBubble2tx.operation(abi.ExcessMsgOp)) {
 				return false
 			}
 			if referalTx.inputAmount < payoutBubble2tx.inputAmount {
