@@ -155,6 +155,8 @@ func TestFindActions(t *testing.T) {
 			tongo.MustParseBlockID("(0,9000000000000000,45489907)"),
 			tongo.MustParseBlockID("(0,d000000000000000,45500305)"),
 			tongo.MustParseBlockID("(0,2000000000000000,45500998)"),
+			tongo.MustParseBlockID("(0,8000000000000000,59172679)"),
+			tongo.MustParseBlockID("(0,8000000000000000,59172963)"),
 			// wton mint
 			tongo.MustParseBlockID("(0,8000000000000000,38493203)"),
 			// buy nft on fragment
@@ -723,6 +725,16 @@ func TestFindActions(t *testing.T) {
 			name:           "withdraw request usdt affluent",
 			hash:           "d171a300521c222094899c6b1b5fb15992a5eb4ba9dc7f8ac9c6033fed647d1c",
 			filenamePrefix: "withdraw-request-usdt-affluent",
+		},
+		{
+			name:           "dedust swap with omniston old",
+			filenamePrefix: "dedust-swap-with-omniston-old",
+			hash:           "668af03f00aaad8cfe1065151dbdda96310d4dad1c42cd86ca27a937e0741108",
+		},
+		{
+			name:           "dedust swap with omniston new",
+			filenamePrefix: "dedust-swap-with-omniston-new",
+			hash:           "2e3eb4b79911185891d54c042f648d5e6764ce7569b3071582177ba84a2097f0",
 		},
 	} {
 		t.Run(c.name, func(t *testing.T) {
