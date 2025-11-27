@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"math"
 	"net/http"
+	"net/url"
 	"strings"
 	"time"
 
@@ -79,6 +80,10 @@ func (h *Handler) GetRates(ctx context.Context, params oas.GetRatesParams) (*oas
 	human := false // temporary kludge for keeper
 	var convertedTokens []string
 	for _, token := range tokens {
+		decoded, err := url.QueryUnescape(token)
+		if err == nil {
+			token = decoded
+		}
 		if len(token) == 48 {
 			human = true
 		}
