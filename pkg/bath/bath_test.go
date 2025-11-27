@@ -397,6 +397,29 @@ func TestFindActions(t *testing.T) {
 			},
 		},
 		{
+			name:           "not merge bubble in the beginning with tail",
+			hash:           "ba379e2e3f7636cc7a00d867d3f5213a681c0331b603226c1efb04697e9432f4",
+			filenamePrefix: "not-to-merge-bubble-in-the-beginning-with-tail",
+			straws: []Merger{
+				Straw[BubbleWithdrawStakeRequest]{
+					CheckFuncs:     []bubbleCheck{IsTx, HasOperation(abi.JettonBurnMsgOp)},
+					NotMergeBubble: true,
+					SingleChild: &Straw[BubbleWithdrawStakeRequest]{
+						CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.JettonBurnNotificationMsgOp)},
+						SingleChild: &Straw[BubbleWithdrawStakeRequest]{
+							CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.TonstakePoolWithdrawMsgOp)},
+							SingleChild: &Straw[BubbleWithdrawStakeRequest]{
+								CheckFuncs: []bubbleCheck{HasOperation(abi.TonstakePayoutMintJettonsMsgOp)},
+								SingleChild: &Straw[BubbleWithdrawStakeRequest]{
+									CheckFuncs: []bubbleCheck{HasOperation(abi.TonstakeNftInitMsgOp)},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		{
 			name:           "not merge bubble in the middle with tail",
 			hash:           "ba379e2e3f7636cc7a00d867d3f5213a681c0331b603226c1efb04697e9432f4",
 			filenamePrefix: "not-to-merge-bubble-in-the-middle-with-tail",
