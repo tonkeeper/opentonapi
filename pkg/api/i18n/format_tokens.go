@@ -17,10 +17,11 @@ func FormatTONs(amount int64) string {
 // FormatTokens translates the value in indivisible units into a user-friendly form taking into account
 // decimals according to the scheme (# ### or #.##)
 func FormatTokens(amount big.Int, decimals int32, symbol string, scaledUiParams *core.ScaledUIParameters) string {
-	x := decimal.NewFromBigInt(&amount, -1*decimals)
+	x := decimal.NewFromBigInt(&amount, 0)
 	if scaledUiParams != nil {
 		x = x.Mul(scaledUiParams.Numerator).Div(scaledUiParams.Denominator).Floor()
 	}
+	x = x.Shift(-decimals)
 	x = truncate(x, 3)
 	intPart := x.BigInt()
 	if x.Equal(decimal.NewFromBigInt(intPart, 0)) {

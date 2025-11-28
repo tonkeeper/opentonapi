@@ -4,7 +4,9 @@ import (
 	"math/big"
 	"testing"
 
+	"github.com/shopspring/decimal"
 	"github.com/stretchr/testify/require"
+	"github.com/tonkeeper/opentonapi/pkg/core"
 )
 
 func TestFormatTONs(t *testing.T) {
@@ -76,11 +78,12 @@ func TestFormatTONs(t *testing.T) {
 
 func TestFormatJettons(t *testing.T) {
 	tests := []struct {
-		name    string
-		decimal int32
-		symbol  string
-		amount  int64
-		want    string
+		name     string
+		decimal  int32
+		symbol   string
+		amount   int64
+		scaledUI *core.ScaledUIParameters
+		want     string
 	}{
 		{
 			amount:  0,
@@ -112,10 +115,21 @@ func TestFormatJettons(t *testing.T) {
 			symbol:  "USDT",
 			want:    "0.143 USDT",
 		},
+		{
+			amount:  99_006_671,
+			decimal: 9,
+			symbol:  "TSUI",
+			scaledUI: &core.ScaledUIParameters{
+				Numerator:   decimal.NewFromInt(1010032948),
+				Denominator: decimal.NewFromInt(1000000000),
+			},
+			want: "0.0999 TSUI",
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := FormatTokens(*big.NewInt(tt.amount), tt.decimal, tt.symbol)
+			amount := big.NewInt(tt.amount)
+			got := FormatTokens(*amount, tt.decimal, tt.symbol, tt.scaledUI)
 			require.Equal(t, tt.want, got)
 		})
 	}
