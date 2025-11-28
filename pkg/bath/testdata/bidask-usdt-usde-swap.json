@@ -15,10 +15,10 @@
            "Amount": 108033,
            "IsTon": false,
            "JettonMaster": "0:086fa2a675f74347b08dd4606a549b8fdb98829cb282bc1949d3b12fbaed9dcc",
-           "JettonWallet": "0:2dedafcc2f87a964a56cffc96541e06c0720b8c7cef13573a60a466b9d87779b"
+           "JettonWallet": "0:eeea86672cdfd6752ef8a3785ace29251d2a4be49225bbb10c05d8fbc5e815fc"
          }
        },
-       "Success": false,
+       "Success": true,
        "Type": "JettonSwap",
        "BaseTransactions": [
          "30a81f4ae27e0742f9c9d70b9224412bec0cc4ccacc0fa410b637dc9f1756f09",

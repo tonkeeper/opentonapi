@@ -7,10 +7,12 @@
          "Seller": "0:6e9ae2fdb2c10e52b6711a64e0798e6a6c7187d42c1e1fbfdb2b2e9d1173e0c1",
          "AuctionType": "DNS.tg",
          "Price": {
-           "Type": "native",
-           "Amount": 4500000000000,
-           "Jetton": null,
-           "CurrencyID": null
+           "Currency": {
+             "Type": "native",
+             "Jetton": null,
+             "CurrencyID": null
+           },
+           "Amount": 4500000000000
          }
        },
        "Success": true,

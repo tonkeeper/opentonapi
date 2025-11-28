@@ -35,7 +35,7 @@ var MegatonFiJettonSwap = Straw[BubbleJettonSwap]{
 								newAction.Success = tx.success
 								newAction.Out.Amount = big.Int(tx.amount)
 								newAction.Out.IsTon = tx.isWrappedTon
-								newAction.Out.JettonWallet = tx.recipientWallet
+								newAction.Out.JettonWallet = tx.senderWallet
 								newAction.Out.JettonMaster = tx.master
 								return nil
 							},
