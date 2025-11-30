@@ -753,7 +753,7 @@ func TestFindActions(t *testing.T) {
 				WithStraws(straws),
 				WithInformationSource(source))
 			require.Nil(t, err)
-			actionsList = EnrichWithIntentions(trace, actionsList)
+			actionsList = EnrichWithIntentions(context.Background(), trace, actionsList, source)
 			results := result{
 				Actions: actionsList.Actions,
 			}
