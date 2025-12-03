@@ -94,6 +94,9 @@ var DefaultStraws = []Merger{
 	WithdrawAffluentEarnRequestStraw,
 	InstantWithdrawAffluentEarnStraw,
 	InstantWithdrawAffluentEarnWithOraclesStraw,
+	DedustLiquidityDepositNativeStraw,
+	DedustLiquidityDepositJettonStraw,
+	DedustLiquidityDepositBothStraw,
 }
 
 var JettonTransferClassicStraw = Straw[BubbleJettonTransfer]{
