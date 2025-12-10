@@ -6830,6 +6830,7 @@ components:
         extra:
           type: integer
           format: int64
+          x-js-format: bigint
           example: 3
           description: >
             Net TON change for this account not explained by actions, in nanotons:
@@ -7410,7 +7411,7 @@ components:
         in_progress:
           type: boolean
           example: false
-          description: Event is not finished yet. Transactions still happening
+          description: Event trace is not finished yet. Transactions still happening.
         progress:
           type: number
           format: float
