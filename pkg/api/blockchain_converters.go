@@ -11,6 +11,7 @@ import (
 	"github.com/tonkeeper/tongo/abi"
 	"github.com/tonkeeper/tongo/tlb"
 	"github.com/tonkeeper/tongo/ton"
+	"github.com/tonkeeper/tongo/tychoclient"
 	"go.uber.org/zap"
 
 	"github.com/tonkeeper/opentonapi/internal/g"
@@ -278,7 +279,7 @@ func convertMessage(m core.Message, book addressBook) oas.Message {
 func convertConfig(logger *zap.Logger, cfg tlb.ConfigParams) (*oas.BlockchainConfig, error) {
 	// TODO: configParam39
 	var config oas.BlockchainConfig
-	blockchainConfig, err := ton.ConvertBlockchainConfigStrict(cfg)
+	blockchainConfig, err := tychoclient.ConvertBlockchainConfigStrict(cfg)
 	if err != nil {
 		return nil, err
 	}
@@ -503,10 +504,10 @@ func convertConfig(logger *zap.Logger, cfg tlb.ConfigParams) (*oas.BlockchainCon
 		config.R25 = oas.NewOptBlockchainConfig25(param25)
 	}
 	if p28 := blockchainConfig.ConfigParam28; p28 != nil {
-		config.R28 = oas.NewOptBlockchainConfig28(convertCatchainConfig(logger, p28.CatchainConfig))
+		config.R28 = oas.NewOptBlockchainConfig28(convertCollationConfig(logger, *p28))
 	}
 	if p29 := blockchainConfig.ConfigParam29; p29 != nil {
-		config.R29 = oas.NewOptBlockchainConfig29(convertConsensusConfig(logger, p29.ConsensusConfig))
+		config.R29 = oas.NewOptBlockchainConfig29(convertConsensusConfig(logger, *p29))
 	}
 	if p31 := blockchainConfig.ConfigParam31; p31 != nil {
 		param31 := oas.BlockchainConfig31{
@@ -518,12 +519,13 @@ func convertConfig(logger *zap.Logger, cfg tlb.ConfigParams) (*oas.BlockchainCon
 		}
 		config.R31 = oas.NewOptBlockchainConfig31(param31)
 	}
-	if p43 := blockchainConfig.ConfigParam43; p43 != nil {
-		param43 := oas.BlockchainConfig43{
-			SizeLimitsConfig: convertSizeLimitsConfig(logger, p43.SizeLimitsConfig),
-		}
-		config.R43 = oas.NewOptBlockchainConfig43(param43)
-	}
+	// TODO: fix
+	//if p43 := blockchainConfig.ConfigParam43; p43 != nil {
+	//	param43 := oas.BlockchainConfig43{
+	//		SizeLimitsConfig: convertSizeLimitsConfig(logger, p43.SizeLimitsConfig),
+	//	}
+	//	config.R43 = oas.NewOptBlockchainConfig43(param43)
+	//}
 	if blockchainConfig.ConfigParam44 != nil {
 		for _, addr := range blockchainConfig.ConfigParam44.SuspendedAddressList.Addresses.Keys() {
 			accountID := ton.AccountID{
@@ -699,85 +701,25 @@ func convertSizeLimitsConfig(logger *zap.Logger, cfg tlb.SizeLimitsConfig) oas.S
 	return oas.SizeLimitsConfig{}
 }
 
-func convertConsensusConfig(logger *zap.Logger, cfg tlb.ConsensusConfig) oas.BlockchainConfig29 {
-	switch cfg.SumType {
-	case "ConsensusConfig":
-		return oas.BlockchainConfig29{
-			RoundCandidates:      int64(cfg.ConsensusConfig.RoundCandidates),
-			NextCandidateDelayMs: int64(cfg.ConsensusConfig.NextCandidateDelayMs),
-			ConsensusTimeoutMs:   int64(cfg.ConsensusConfig.ConsensusTimeoutMs),
-			FastAttempts:         int64(cfg.ConsensusConfig.FastAttempts),
-			AttemptDuration:      int64(cfg.ConsensusConfig.AttemptDuration),
-			CatchainMaxDeps:      int64(cfg.ConsensusConfig.CatchainMaxDeps),
-			MaxBlockBytes:        int64(cfg.ConsensusConfig.MaxBlockBytes),
-			MaxCollatedBytes:     int64(cfg.ConsensusConfig.MaxCollatedBytes),
-		}
-	case "ConsensusConfigNew":
-		return oas.BlockchainConfig29{
-			Flags:                oas.NewOptInt(int(cfg.ConsensusConfigNew.Flags)),
-			NewCatchainIds:       oas.NewOptBool(cfg.ConsensusConfigNew.NewCatchainIds),
-			RoundCandidates:      int64(cfg.ConsensusConfigNew.RoundCandidates),
-			NextCandidateDelayMs: int64(cfg.ConsensusConfigNew.NextCandidateDelayMs),
-			ConsensusTimeoutMs:   int64(cfg.ConsensusConfigNew.ConsensusTimeoutMs),
-			FastAttempts:         int64(cfg.ConsensusConfigNew.FastAttempts),
-			AttemptDuration:      int64(cfg.ConsensusConfigNew.AttemptDuration),
-			CatchainMaxDeps:      int64(cfg.ConsensusConfigNew.CatchainMaxDeps),
-			MaxBlockBytes:        int64(cfg.ConsensusConfigNew.MaxBlockBytes),
-			MaxCollatedBytes:     int64(cfg.ConsensusConfigNew.MaxCollatedBytes),
-		}
-	case "ConsensusConfigV3":
-		return oas.BlockchainConfig29{
-			Flags:                oas.NewOptInt(int(cfg.ConsensusConfigV3.Flags)),
-			NewCatchainIds:       oas.NewOptBool(cfg.ConsensusConfigV3.NewCatchainIds),
-			RoundCandidates:      int64(cfg.ConsensusConfigV3.RoundCandidates),
-			NextCandidateDelayMs: int64(cfg.ConsensusConfigV3.NextCandidateDelayMs),
-			ConsensusTimeoutMs:   int64(cfg.ConsensusConfigV3.ConsensusTimeoutMs),
-			FastAttempts:         int64(cfg.ConsensusConfigV3.FastAttempts),
-			AttemptDuration:      int64(cfg.ConsensusConfigV3.AttemptDuration),
-			CatchainMaxDeps:      int64(cfg.ConsensusConfigV3.CatchainMaxDeps),
-			MaxBlockBytes:        int64(cfg.ConsensusConfigV3.MaxBlockBytes),
-			MaxCollatedBytes:     int64(cfg.ConsensusConfigV3.MaxCollatedBytes),
-		}
-	case "ConsensusConfigV4":
-		return oas.BlockchainConfig29{
-			Flags:                  oas.NewOptInt(int(cfg.ConsensusConfigV4.Flags)),
-			NewCatchainIds:         oas.NewOptBool(cfg.ConsensusConfigV4.NewCatchainIds),
-			RoundCandidates:        int64(cfg.ConsensusConfigV4.RoundCandidates),
-			NextCandidateDelayMs:   int64(cfg.ConsensusConfigV4.NextCandidateDelayMs),
-			ConsensusTimeoutMs:     int64(cfg.ConsensusConfigV4.ConsensusTimeoutMs),
-			FastAttempts:           int64(cfg.ConsensusConfigV4.FastAttempts),
-			AttemptDuration:        int64(cfg.ConsensusConfigV4.AttemptDuration),
-			CatchainMaxDeps:        int64(cfg.ConsensusConfigV4.CatchainMaxDeps),
-			MaxBlockBytes:          int64(cfg.ConsensusConfigV4.MaxBlockBytes),
-			MaxCollatedBytes:       int64(cfg.ConsensusConfigV4.MaxCollatedBytes),
-			ProtoVersion:           oas.NewOptInt64(int64(cfg.ConsensusConfigV4.ProtoVersion)),
-			CatchainMaxBlocksCoeff: oas.NewOptInt64(int64(cfg.ConsensusConfigV4.CatchainMaxBlocksCoeff)),
-		}
+func convertConsensusConfig(logger *zap.Logger, cfg tychoclient.ConsensusConfig) oas.BlockchainConfig29 {
+	return oas.BlockchainConfig29{
+		ClockSkewMillis:       int64(cfg.ClockSkewMillis),
+		PayloadBatchBytes:     int64(cfg.PayloadBatchBytes),
+		CommitHistoryRounds:   int64(cfg.CommitHistoryRounds),
+		DeduplicateRounds:     int64(cfg.DeduplicateRounds),
+		MaxConsensusLagRounds: int64(cfg.MaxConsensusLagRounds),
+		PayloadBufferBytes:    int64(cfg.PayloadBufferBytes),
+		BroadcastRetryMillis:  int64(cfg.BroadcastRetryMillis),
+		DownloadRetryMillis:   int64(cfg.DownloadRetryMillis),
+		DownloadPeers:         int64(cfg.DownloadPeers),
+		MinSignAttempts:       int64(cfg.MinSignAttempts),
+		DownloadPeerQueries:   int64(cfg.DownloadPeerQueries),
+		SyncSupportRounds:     int64(cfg.SyncSupportRounds),
 	}
-	logger.Error("unsupported ConsensusConfig format")
-	return oas.BlockchainConfig29{}
 }
 
-func convertCatchainConfig(logger *zap.Logger, cfg tlb.CatchainConfig) oas.BlockchainConfig28 {
-	switch cfg.SumType {
-	case "CatchainConfig":
-		return oas.BlockchainConfig28{
-			McCatchainLifetime:      int64(cfg.CatchainConfig.McCatchainLifetime),
-			ShardCatchainLifetime:   int64(cfg.CatchainConfig.ShardCatchainLifetime),
-			ShardValidatorsLifetime: int64(cfg.CatchainConfig.ShardValidatorsLifetime),
-			ShardValidatorsNum:      int64(cfg.CatchainConfig.ShardValidatorsNum),
-		}
-	case "CatchainConfigNew":
-		return oas.BlockchainConfig28{
-			McCatchainLifetime:      int64(cfg.CatchainConfigNew.McCatchainLifetime),
-			ShardCatchainLifetime:   int64(cfg.CatchainConfigNew.ShardCatchainLifetime),
-			ShardValidatorsLifetime: int64(cfg.CatchainConfigNew.ShardValidatorsLifetime),
-			ShardValidatorsNum:      int64(cfg.CatchainConfigNew.ShardValidatorsNum),
-			Flags:                   oas.NewOptInt(int(cfg.CatchainConfigNew.Flags)),
-			ShuffleMcValidators:     oas.NewOptBool(cfg.CatchainConfigNew.ShuffleMcValidators),
-		}
-	}
-	logger.Error("unsupported CatchainConfig format")
+func convertCollationConfig(logger *zap.Logger, cfg tychoclient.CollationConfig) oas.BlockchainConfig28 {
+	// TODO: implement
 	return oas.BlockchainConfig28{}
 }
 

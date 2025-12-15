@@ -5407,64 +5407,56 @@ components:
               type: boolean
         "29":
           type: object
-          description: The configuration for the consensus protocol above catchain.
           required:
-            - round_candidates
-            - next_candidate_delay_ms
-            - consensus_timeout_ms
-            - fast_attempts
-            - attempt_duration
-            - catchain_max_deps
-            - max_block_bytes
-            - max_collated_bytes
+            - clock_skew_millis
+            - payload_batch_bytes
+            - commit_history_rounds
+            - deduplicate_rounds
+            - max_consensus_lag_rounds
+            - payload_buffer_bytes
+            - broadcast_retry_millis
+            - download_retry_millis
+            - download_peers
+            - min_sign_attempts
+            - download_peer_queries
+            - sync_support_rounds
           properties:
-            flags:
-              type: integer
-              format: int
-              example: 0
-            new_catchain_ids:
-              type: boolean
-              example: true
-            round_candidates:
+            clock_skew_millis:
               type: integer
               format: int64
-              example: 3
-            next_candidate_delay_ms:
+            payload_batch_bytes:
               type: integer
               format: int64
-              example: 2000
-            consensus_timeout_ms:
+            commit_history_rounds:
               type: integer
               format: int64
-              example: 16000
-            fast_attempts:
+            deduplicate_rounds:
               type: integer
               format: int64
-              example: 3
-            attempt_duration:
+            max_consensus_lag_rounds:
               type: integer
               format: int64
-              example: 8
-            catchain_max_deps:
+            payload_buffer_bytes:
               type: integer
               format: int64
-              example: 4
-            max_block_bytes:
+            broadcast_retry_millis:
               type: integer
               format: int64
-              example: 2097152
-            max_collated_bytes:
+            download_retry_millis:
               type: integer
               format: int64
-              example: 2097152
-            proto_version:
+            download_peers:
               type: integer
               format: int64
-              example: 2
-            catchain_max_blocks_coeff:
+            min_sign_attempts:
               type: integer
               format: int64
-              example: 10000
+            download_peer_queries:
+              type: integer
+              format: int64
+            sync_support_rounds:
+              type: integer
+              format: int64
         "31":
           type: object
           description: The configuration for the consensus protocol above catchain.

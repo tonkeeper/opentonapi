@@ -2679,7 +2679,6 @@ type BlockchainConfig struct {
 	R25 OptBlockchainConfig25 `json:"25"`
 	// The configuration for the Catchain protocol.
 	R28 OptBlockchainConfig28 `json:"28"`
-	// The configuration for the consensus protocol above catchain.
 	R29 OptBlockchainConfig29 `json:"29"`
 	// The configuration for the consensus protocol above catchain.
 	R31 OptBlockchainConfig31 `json:"31"`
@@ -3653,140 +3652,139 @@ func (s *BlockchainConfig28) SetShuffleMcValidators(val OptBool) {
 	s.ShuffleMcValidators = val
 }
 
-// The configuration for the consensus protocol above catchain.
 type BlockchainConfig29 struct {
-	Flags                  OptInt   `json:"flags"`
-	NewCatchainIds         OptBool  `json:"new_catchain_ids"`
-	RoundCandidates        int64    `json:"round_candidates"`
-	NextCandidateDelayMs   int64    `json:"next_candidate_delay_ms"`
-	ConsensusTimeoutMs     int64    `json:"consensus_timeout_ms"`
-	FastAttempts           int64    `json:"fast_attempts"`
-	AttemptDuration        int64    `json:"attempt_duration"`
-	CatchainMaxDeps        int64    `json:"catchain_max_deps"`
-	MaxBlockBytes          int64    `json:"max_block_bytes"`
-	MaxCollatedBytes       int64    `json:"max_collated_bytes"`
-	ProtoVersion           OptInt64 `json:"proto_version"`
-	CatchainMaxBlocksCoeff OptInt64 `json:"catchain_max_blocks_coeff"`
+	ClockSkewMillis       int64 `json:"clock_skew_millis"`
+	PayloadBatchBytes     int64 `json:"payload_batch_bytes"`
+	CommitHistoryRounds   int64 `json:"commit_history_rounds"`
+	DeduplicateRounds     int64 `json:"deduplicate_rounds"`
+	MaxConsensusLagRounds int64 `json:"max_consensus_lag_rounds"`
+	PayloadBufferBytes    int64 `json:"payload_buffer_bytes"`
+	BroadcastRetryMillis  int64 `json:"broadcast_retry_millis"`
+	DownloadRetryMillis   int64 `json:"download_retry_millis"`
+	DownloadPeers         int64 `json:"download_peers"`
+	MinSignAttempts       int64 `json:"min_sign_attempts"`
+	DownloadPeerQueries   int64 `json:"download_peer_queries"`
+	SyncSupportRounds     int64 `json:"sync_support_rounds"`
 }
 
-// GetFlags returns the value of Flags.
-func (s *BlockchainConfig29) GetFlags() OptInt {
-	return s.Flags
+// GetClockSkewMillis returns the value of ClockSkewMillis.
+func (s *BlockchainConfig29) GetClockSkewMillis() int64 {
+	return s.ClockSkewMillis
 }
 
-// GetNewCatchainIds returns the value of NewCatchainIds.
-func (s *BlockchainConfig29) GetNewCatchainIds() OptBool {
-	return s.NewCatchainIds
+// GetPayloadBatchBytes returns the value of PayloadBatchBytes.
+func (s *BlockchainConfig29) GetPayloadBatchBytes() int64 {
+	return s.PayloadBatchBytes
 }
 
-// GetRoundCandidates returns the value of RoundCandidates.
-func (s *BlockchainConfig29) GetRoundCandidates() int64 {
-	return s.RoundCandidates
+// GetCommitHistoryRounds returns the value of CommitHistoryRounds.
+func (s *BlockchainConfig29) GetCommitHistoryRounds() int64 {
+	return s.CommitHistoryRounds
 }
 
-// GetNextCandidateDelayMs returns the value of NextCandidateDelayMs.
-func (s *BlockchainConfig29) GetNextCandidateDelayMs() int64 {
-	return s.NextCandidateDelayMs
+// GetDeduplicateRounds returns the value of DeduplicateRounds.
+func (s *BlockchainConfig29) GetDeduplicateRounds() int64 {
+	return s.DeduplicateRounds
 }
 
-// GetConsensusTimeoutMs returns the value of ConsensusTimeoutMs.
-func (s *BlockchainConfig29) GetConsensusTimeoutMs() int64 {
-	return s.ConsensusTimeoutMs
+// GetMaxConsensusLagRounds returns the value of MaxConsensusLagRounds.
+func (s *BlockchainConfig29) GetMaxConsensusLagRounds() int64 {
+	return s.MaxConsensusLagRounds
 }
 
-// GetFastAttempts returns the value of FastAttempts.
-func (s *BlockchainConfig29) GetFastAttempts() int64 {
-	return s.FastAttempts
+// GetPayloadBufferBytes returns the value of PayloadBufferBytes.
+func (s *BlockchainConfig29) GetPayloadBufferBytes() int64 {
+	return s.PayloadBufferBytes
 }
 
-// GetAttemptDuration returns the value of AttemptDuration.
-func (s *BlockchainConfig29) GetAttemptDuration() int64 {
-	return s.AttemptDuration
+// GetBroadcastRetryMillis returns the value of BroadcastRetryMillis.
+func (s *BlockchainConfig29) GetBroadcastRetryMillis() int64 {
+	return s.BroadcastRetryMillis
 }
 
-// GetCatchainMaxDeps returns the value of CatchainMaxDeps.
-func (s *BlockchainConfig29) GetCatchainMaxDeps() int64 {
-	return s.CatchainMaxDeps
+// GetDownloadRetryMillis returns the value of DownloadRetryMillis.
+func (s *BlockchainConfig29) GetDownloadRetryMillis() int64 {
+	return s.DownloadRetryMillis
 }
 
-// GetMaxBlockBytes returns the value of MaxBlockBytes.
-func (s *BlockchainConfig29) GetMaxBlockBytes() int64 {
-	return s.MaxBlockBytes
+// GetDownloadPeers returns the value of DownloadPeers.
+func (s *BlockchainConfig29) GetDownloadPeers() int64 {
+	return s.DownloadPeers
 }
 
-// GetMaxCollatedBytes returns the value of MaxCollatedBytes.
-func (s *BlockchainConfig29) GetMaxCollatedBytes() int64 {
-	return s.MaxCollatedBytes
+// GetMinSignAttempts returns the value of MinSignAttempts.
+func (s *BlockchainConfig29) GetMinSignAttempts() int64 {
+	return s.MinSignAttempts
 }
 
-// GetProtoVersion returns the value of ProtoVersion.
-func (s *BlockchainConfig29) GetProtoVersion() OptInt64 {
-	return s.ProtoVersion
+// GetDownloadPeerQueries returns the value of DownloadPeerQueries.
+func (s *BlockchainConfig29) GetDownloadPeerQueries() int64 {
+	return s.DownloadPeerQueries
 }
 
-// GetCatchainMaxBlocksCoeff returns the value of CatchainMaxBlocksCoeff.
-func (s *BlockchainConfig29) GetCatchainMaxBlocksCoeff() OptInt64 {
-	return s.CatchainMaxBlocksCoeff
+// GetSyncSupportRounds returns the value of SyncSupportRounds.
+func (s *BlockchainConfig29) GetSyncSupportRounds() int64 {
+	return s.SyncSupportRounds
 }
 
-// SetFlags sets the value of Flags.
-func (s *BlockchainConfig29) SetFlags(val OptInt) {
-	s.Flags = val
+// SetClockSkewMillis sets the value of ClockSkewMillis.
+func (s *BlockchainConfig29) SetClockSkewMillis(val int64) {
+	s.ClockSkewMillis = val
 }
 
-// SetNewCatchainIds sets the value of NewCatchainIds.
-func (s *BlockchainConfig29) SetNewCatchainIds(val OptBool) {
-	s.NewCatchainIds = val
+// SetPayloadBatchBytes sets the value of PayloadBatchBytes.
+func (s *BlockchainConfig29) SetPayloadBatchBytes(val int64) {
+	s.PayloadBatchBytes = val
 }
 
-// SetRoundCandidates sets the value of RoundCandidates.
-func (s *BlockchainConfig29) SetRoundCandidates(val int64) {
-	s.RoundCandidates = val
+// SetCommitHistoryRounds sets the value of CommitHistoryRounds.
+func (s *BlockchainConfig29) SetCommitHistoryRounds(val int64) {
+	s.CommitHistoryRounds = val
 }
 
-// SetNextCandidateDelayMs sets the value of NextCandidateDelayMs.
-func (s *BlockchainConfig29) SetNextCandidateDelayMs(val int64) {
-	s.NextCandidateDelayMs = val
+// SetDeduplicateRounds sets the value of DeduplicateRounds.
+func (s *BlockchainConfig29) SetDeduplicateRounds(val int64) {
+	s.DeduplicateRounds = val
 }
 
-// SetConsensusTimeoutMs sets the value of ConsensusTimeoutMs.
-func (s *BlockchainConfig29) SetConsensusTimeoutMs(val int64) {
-	s.ConsensusTimeoutMs = val
+// SetMaxConsensusLagRounds sets the value of MaxConsensusLagRounds.
+func (s *BlockchainConfig29) SetMaxConsensusLagRounds(val int64) {
+	s.MaxConsensusLagRounds = val
 }
 
-// SetFastAttempts sets the value of FastAttempts.
-func (s *BlockchainConfig29) SetFastAttempts(val int64) {
-	s.FastAttempts = val
+// SetPayloadBufferBytes sets the value of PayloadBufferBytes.
+func (s *BlockchainConfig29) SetPayloadBufferBytes(val int64) {
+	s.PayloadBufferBytes = val
 }
 
-// SetAttemptDuration sets the value of AttemptDuration.
-func (s *BlockchainConfig29) SetAttemptDuration(val int64) {
-	s.AttemptDuration = val
+// SetBroadcastRetryMillis sets the value of BroadcastRetryMillis.
+func (s *BlockchainConfig29) SetBroadcastRetryMillis(val int64) {
+	s.BroadcastRetryMillis = val
 }
 
-// SetCatchainMaxDeps sets the value of CatchainMaxDeps.
-func (s *BlockchainConfig29) SetCatchainMaxDeps(val int64) {
-	s.CatchainMaxDeps = val
+// SetDownloadRetryMillis sets the value of DownloadRetryMillis.
+func (s *BlockchainConfig29) SetDownloadRetryMillis(val int64) {
+	s.DownloadRetryMillis = val
 }
 
-// SetMaxBlockBytes sets the value of MaxBlockBytes.
-func (s *BlockchainConfig29) SetMaxBlockBytes(val int64) {
-	s.MaxBlockBytes = val
+// SetDownloadPeers sets the value of DownloadPeers.
+func (s *BlockchainConfig29) SetDownloadPeers(val int64) {
+	s.DownloadPeers = val
 }
 
-// SetMaxCollatedBytes sets the value of MaxCollatedBytes.
-func (s *BlockchainConfig29) SetMaxCollatedBytes(val int64) {
-	s.MaxCollatedBytes = val
+// SetMinSignAttempts sets the value of MinSignAttempts.
+func (s *BlockchainConfig29) SetMinSignAttempts(val int64) {
+	s.MinSignAttempts = val
 }
 
-// SetProtoVersion sets the value of ProtoVersion.
-func (s *BlockchainConfig29) SetProtoVersion(val OptInt64) {
-	s.ProtoVersion = val
+// SetDownloadPeerQueries sets the value of DownloadPeerQueries.
+func (s *BlockchainConfig29) SetDownloadPeerQueries(val int64) {
+	s.DownloadPeerQueries = val
 }
 
-// SetCatchainMaxBlocksCoeff sets the value of CatchainMaxBlocksCoeff.
-func (s *BlockchainConfig29) SetCatchainMaxBlocksCoeff(val OptInt64) {
-	s.CatchainMaxBlocksCoeff = val
+// SetSyncSupportRounds sets the value of SyncSupportRounds.
+func (s *BlockchainConfig29) SetSyncSupportRounds(val int64) {
+	s.SyncSupportRounds = val
 }
 
 // The configuration for the consensus protocol above catchain.

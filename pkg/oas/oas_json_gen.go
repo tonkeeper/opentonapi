@@ -8949,76 +8949,68 @@ func (s *BlockchainConfig29) Encode(e *jx.Encoder) {
 // encodeFields encodes fields.
 func (s *BlockchainConfig29) encodeFields(e *jx.Encoder) {
 	{
-		if s.Flags.Set {
-			e.FieldStart("flags")
-			s.Flags.Encode(e)
-		}
+		e.FieldStart("clock_skew_millis")
+		e.Int64(s.ClockSkewMillis)
 	}
 	{
-		if s.NewCatchainIds.Set {
-			e.FieldStart("new_catchain_ids")
-			s.NewCatchainIds.Encode(e)
-		}
+		e.FieldStart("payload_batch_bytes")
+		e.Int64(s.PayloadBatchBytes)
 	}
 	{
-		e.FieldStart("round_candidates")
-		e.Int64(s.RoundCandidates)
+		e.FieldStart("commit_history_rounds")
+		e.Int64(s.CommitHistoryRounds)
 	}
 	{
-		e.FieldStart("next_candidate_delay_ms")
-		e.Int64(s.NextCandidateDelayMs)
+		e.FieldStart("deduplicate_rounds")
+		e.Int64(s.DeduplicateRounds)
 	}
 	{
-		e.FieldStart("consensus_timeout_ms")
-		e.Int64(s.ConsensusTimeoutMs)
+		e.FieldStart("max_consensus_lag_rounds")
+		e.Int64(s.MaxConsensusLagRounds)
 	}
 	{
-		e.FieldStart("fast_attempts")
-		e.Int64(s.FastAttempts)
+		e.FieldStart("payload_buffer_bytes")
+		e.Int64(s.PayloadBufferBytes)
 	}
 	{
-		e.FieldStart("attempt_duration")
-		e.Int64(s.AttemptDuration)
+		e.FieldStart("broadcast_retry_millis")
+		e.Int64(s.BroadcastRetryMillis)
 	}
 	{
-		e.FieldStart("catchain_max_deps")
-		e.Int64(s.CatchainMaxDeps)
+		e.FieldStart("download_retry_millis")
+		e.Int64(s.DownloadRetryMillis)
 	}
 	{
-		e.FieldStart("max_block_bytes")
-		e.Int64(s.MaxBlockBytes)
+		e.FieldStart("download_peers")
+		e.Int64(s.DownloadPeers)
 	}
 	{
-		e.FieldStart("max_collated_bytes")
-		e.Int64(s.MaxCollatedBytes)
+		e.FieldStart("min_sign_attempts")
+		e.Int64(s.MinSignAttempts)
 	}
 	{
-		if s.ProtoVersion.Set {
-			e.FieldStart("proto_version")
-			s.ProtoVersion.Encode(e)
-		}
+		e.FieldStart("download_peer_queries")
+		e.Int64(s.DownloadPeerQueries)
 	}
 	{
-		if s.CatchainMaxBlocksCoeff.Set {
-			e.FieldStart("catchain_max_blocks_coeff")
-			s.CatchainMaxBlocksCoeff.Encode(e)
-		}
+		e.FieldStart("sync_support_rounds")
+		e.Int64(s.SyncSupportRounds)
 	}
 }
 
 var jsonFieldsNameOfBlockchainConfig29 = [12]string{
-	0:  "flags",
-	1:  "new_catchain_ids",
-	2:  "round_candidates",
-	3:  "next_candidate_delay_ms",
-	4:  "consensus_timeout_ms",
-	5:  "fast_attempts",
-	6:  "attempt_duration",
-	7:  "catchain_max_deps",
-	8:  "max_block_bytes",
-	9:  "max_collated_bytes",
-	10: "proto_version",
-	11: "catchain_max_blocks_coeff",
+	0:  "clock_skew_millis",
+	1:  "payload_batch_bytes",
+	2:  "commit_history_rounds",
+	3:  "deduplicate_rounds",
+	4:  "max_consensus_lag_rounds",
+	5:  "payload_buffer_bytes",
+	6:  "broadcast_retry_millis",
+	7:  "download_retry_millis",
+	8:  "download_peers",
+	9:  "min_sign_attempts",
+	10: "download_peer_queries",
+	11: "sync_support_rounds",
 }
 
 // Decode decodes BlockchainConfig29 from json.
@@ -9030,141 +9022,149 @@ func (s *BlockchainConfig29) Decode(d *jx.Decoder) error {
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
-		case "flags":
+		case "clock_skew_millis":
+			requiredBitSet[0] |= 1 << 0
 			if err := func() error {
-				s.Flags.Reset()
-				if err := s.Flags.Decode(d); err != nil {
+				v, err := d.Int64()
+				s.ClockSkewMillis = int64(v)
+				if err != nil {
 					return err
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"flags\"")
+				return errors.Wrap(err, "decode field \"clock_skew_millis\"")
 			}
-		case "new_catchain_ids":
+		case "payload_batch_bytes":
+			requiredBitSet[0] |= 1 << 1
 			if err := func() error {
-				s.NewCatchainIds.Reset()
-				if err := s.NewCatchainIds.Decode(d); err != nil {
+				v, err := d.Int64()
+				s.PayloadBatchBytes = int64(v)
+				if err != nil {
 					return err
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"new_catchain_ids\"")
+				return errors.Wrap(err, "decode field \"payload_batch_bytes\"")
 			}
-		case "round_candidates":
+		case "commit_history_rounds":
 			requiredBitSet[0] |= 1 << 2
 			if err := func() error {
 				v, err := d.Int64()
-				s.RoundCandidates = int64(v)
+				s.CommitHistoryRounds = int64(v)
 				if err != nil {
 					return err
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"round_candidates\"")
+				return errors.Wrap(err, "decode field \"commit_history_rounds\"")
 			}
-		case "next_candidate_delay_ms":
+		case "deduplicate_rounds":
 			requiredBitSet[0] |= 1 << 3
 			if err := func() error {
 				v, err := d.Int64()
-				s.NextCandidateDelayMs = int64(v)
+				s.DeduplicateRounds = int64(v)
 				if err != nil {
 					return err
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"next_candidate_delay_ms\"")
+				return errors.Wrap(err, "decode field \"deduplicate_rounds\"")
 			}
-		case "consensus_timeout_ms":
+		case "max_consensus_lag_rounds":
 			requiredBitSet[0] |= 1 << 4
 			if err := func() error {
 				v, err := d.Int64()
-				s.ConsensusTimeoutMs = int64(v)
+				s.MaxConsensusLagRounds = int64(v)
 				if err != nil {
 					return err
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"consensus_timeout_ms\"")
+				return errors.Wrap(err, "decode field \"max_consensus_lag_rounds\"")
 			}
-		case "fast_attempts":
+		case "payload_buffer_bytes":
 			requiredBitSet[0] |= 1 << 5
 			if err := func() error {
 				v, err := d.Int64()
-				s.FastAttempts = int64(v)
+				s.PayloadBufferBytes = int64(v)
 				if err != nil {
 					return err
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"fast_attempts\"")
+				return errors.Wrap(err, "decode field \"payload_buffer_bytes\"")
 			}
-		case "attempt_duration":
+		case "broadcast_retry_millis":
 			requiredBitSet[0] |= 1 << 6
 			if err := func() error {
 				v, err := d.Int64()
-				s.AttemptDuration = int64(v)
+				s.BroadcastRetryMillis = int64(v)
 				if err != nil {
 					return err
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"attempt_duration\"")
+				return errors.Wrap(err, "decode field \"broadcast_retry_millis\"")
 			}
-		case "catchain_max_deps":
+		case "download_retry_millis":
 			requiredBitSet[0] |= 1 << 7
 			if err := func() error {
 				v, err := d.Int64()
-				s.CatchainMaxDeps = int64(v)
+				s.DownloadRetryMillis = int64(v)
 				if err != nil {
 					return err
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"catchain_max_deps\"")
+				return errors.Wrap(err, "decode field \"download_retry_millis\"")
 			}
-		case "max_block_bytes":
+		case "download_peers":
 			requiredBitSet[1] |= 1 << 0
 			if err := func() error {
 				v, err := d.Int64()
-				s.MaxBlockBytes = int64(v)
+				s.DownloadPeers = int64(v)
 				if err != nil {
 					return err
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"max_block_bytes\"")
+				return errors.Wrap(err, "decode field \"download_peers\"")
 			}
-		case "max_collated_bytes":
+		case "min_sign_attempts":
 			requiredBitSet[1] |= 1 << 1
 			if err := func() error {
 				v, err := d.Int64()
-				s.MaxCollatedBytes = int64(v)
+				s.MinSignAttempts = int64(v)
 				if err != nil {
 					return err
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"max_collated_bytes\"")
+				return errors.Wrap(err, "decode field \"min_sign_attempts\"")
 			}
-		case "proto_version":
+		case "download_peer_queries":
+			requiredBitSet[1] |= 1 << 2
 			if err := func() error {
-				s.ProtoVersion.Reset()
-				if err := s.ProtoVersion.Decode(d); err != nil {
+				v, err := d.Int64()
+				s.DownloadPeerQueries = int64(v)
+				if err != nil {
 					return err
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"proto_version\"")
+				return errors.Wrap(err, "decode field \"download_peer_queries\"")
 			}
-		case "catchain_max_blocks_coeff":
+		case "sync_support_rounds":
+			requiredBitSet[1] |= 1 << 3
 			if err := func() error {
-				s.CatchainMaxBlocksCoeff.Reset()
-				if err := s.CatchainMaxBlocksCoeff.Decode(d); err != nil {
+				v, err := d.Int64()
+				s.SyncSupportRounds = int64(v)
+				if err != nil {
 					return err
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"catchain_max_blocks_coeff\"")
+				return errors.Wrap(err, "decode field \"sync_support_rounds\"")
 			}
 		default:
 			return d.Skip()
@@ -9176,8 +9176,8 @@ func (s *BlockchainConfig29) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [2]uint8{
-		0b11111100,
-		0b00000011,
+		0b11111111,
+		0b00001111,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
