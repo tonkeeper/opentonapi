@@ -5378,33 +5378,36 @@ components:
           type: object
           description: The configuration for the Catchain protocol.
           required:
-            - mc_catchain_lifetime
-            - shard_catchain_lifetime
-            - shard_validators_lifetime
-            - shard_validators_num
+            - shuffle_mc_validators
+            - mc_block_min_interval_ms
+            - mc_block_max_interval_ms
+            - empty_sc_block_interval_ms
+            - max_uncommitted_chain_length
+            - wu_used_to_import_next_anchor
+            - msgs_exec_params
+            - work_units_params
           properties:
-            mc_catchain_lifetime:
-              type: integer
-              format: int64
-              example: 1000000
-            shard_catchain_lifetime:
-              type: integer
-              format: int64
-              example: 1000000
-            shard_validators_lifetime:
-              type: integer
-              format: int64
-              example: 1000000
-            shard_validators_num:
-              type: integer
-              format: int64
-              example: 1000000
-            flags:
-              type: integer
-              format: int
-              example: 1000000
             shuffle_mc_validators:
               type: boolean
+            mc_block_min_interval_ms:
+              type: integer
+              format: int64
+            mc_block_max_interval_ms:
+              type: integer
+              format: int64
+            empty_sc_block_interval_ms:
+              type: integer
+              format: int64
+            max_uncommitted_chain_length:
+              type: integer
+              format: int64
+            wu_used_to_import_next_anchor:
+              type: integer
+              format: int64
+            msgs_exec_params:
+              $ref: '#/components/schemas/MsgsExecutionParams'
+            work_units_params:
+              $ref: '#/components/schemas/WorkUnitsParams'
         "29":
           type: object
           required:
@@ -8115,6 +8118,58 @@ components:
         image:
           type: string
           example: https://cache.tonapi.io/images/jetton.jpg
+    MsgsExecutionParams:
+      type: object
+      required:
+        - buffer_limit
+        - group_limit
+        - group_vert_size
+        - externals_expire_timeout
+        - open_ranges_limit
+        - par_0_int_msgs_count_limit
+        - par_0_ext_msgs_count_limit
+        - range_messages_limit
+        - group_slots_fractions
+      properties:
+        buffer_limit:
+          type: integer
+          format: int64
+        group_limit:
+          type: integer
+          format: int64
+        group_vert_size:
+          type: integer
+          format: int64
+        externals_expire_timeout:
+          type: integer
+          format: int64
+        open_ranges_limit:
+          type: integer
+          format: int64
+        par_0_int_msgs_count_limit:
+          type: integer
+          format: int64
+        par_0_ext_msgs_count_limit:
+          type: integer
+          format: int64
+        range_messages_limit:
+          type: integer
+          format: int64       
+        group_slots_fractions:
+          #TODO: array?  (HashmapE 16 uint8)
+    WorkUnitsParams:
+      type: object
+      required:
+        - prepare
+        - execute
+        - finalize
+      properties:
+        prepare:
+          $ref: '#/components/schemas/WorkUnitsParamsPrepare'
+        execute:
+          $ref: '#/components/schemas/WorkUnitsParamsExecute'
+        finalize:
+          $ref: '#/components/schemas/WorkUnitsParamsFinalize'
   responses:
     Error:
       description: Some error during request processing
