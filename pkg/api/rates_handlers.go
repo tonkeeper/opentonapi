@@ -35,6 +35,7 @@ func (h *Handler) GetChartRates(ctx context.Context, params oas.GetChartRatesPar
 		token              string
 		startDate, endDate *int64
 	)
+	token = params.Token
 	if len(params.Token) >= 48 {
 		account, err := tongo.ParseAddress(params.Token)
 		if err != nil {
