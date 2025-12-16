@@ -278,7 +278,7 @@ func convertMessage(m core.Message, book addressBook) oas.Message {
 func convertConfig(logger *zap.Logger, cfg tlb.ConfigParams) (*oas.BlockchainConfig, error) {
 	// TODO: configParam39
 	var config oas.BlockchainConfig
-	blockchainConfig, err := ton.ConvertBlockchainConfigStrict(cfg)
+	blockchainConfig, _, err := ton.ConvertBlockchainConfig(cfg, true)
 	if err != nil {
 		return nil, err
 	}
