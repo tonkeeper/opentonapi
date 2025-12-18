@@ -71,16 +71,16 @@ func (c *LiteStorage) GetConfigFromBlock(ctx context.Context, id ton.BlockID) (t
 	return cli.GetConfigAll(ctx, 0)
 }
 
-func (c *LiteStorage) GetConfigRaw(ctx context.Context) ([]byte, error) {
+func (c *LiteStorage) GetConfigRaw(ctx context.Context) (tlb.ConfigParams, error) {
 	timer := prometheus.NewTimer(prometheus.ObserverFunc(func(v float64) {
 		storageTimeHistogramVec.WithLabelValues("get_config_raw").Observe(v)
 	}))
 	defer timer.ObserveDuration()
 	raw, err := c.client.GetConfigAllRaw(ctx, 0)
 	if err != nil {
-		return nil, err
+		return tlb.ConfigParams{}, err
 	}
-	return raw.ConfigProof, err
+	return ton.DecodeConfigParams(raw.ConfigProof)
 
 }
 

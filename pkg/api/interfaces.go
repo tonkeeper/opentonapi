@@ -101,7 +101,7 @@ type storage interface {
 	GetJettonMastersByAddresses(ctx context.Context, addresses []ton.AccountID) ([]core.JettonMaster, error)
 
 	GetLastConfig(ctx context.Context) (ton.BlockchainConfig, error)
-	GetConfigRaw(ctx context.Context) ([]byte, error)
+	GetConfigRaw(ctx context.Context) (tlb.ConfigParams, error)
 	GetConfigFromBlock(ctx context.Context, id ton.BlockID) (tlb.ConfigParams, error)
 
 	GetSeqno(ctx context.Context, account tongo.AccountID) (uint32, error)

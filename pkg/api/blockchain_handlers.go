@@ -249,11 +249,7 @@ func (h *Handler) GetBlockchainMasterchainHead(ctx context.Context) (*oas.Blockc
 }
 
 func (h *Handler) GetBlockchainConfig(ctx context.Context) (*oas.BlockchainConfig, error) {
-	rawCfg, err := h.storage.GetConfigRaw(ctx)
-	if err != nil {
-		return nil, toError(http.StatusInternalServerError, err)
-	}
-	cfg, err := ton.DecodeConfigParams(rawCfg)
+	cfg, err := h.storage.GetConfigRaw(ctx)
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
