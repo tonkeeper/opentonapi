@@ -44,7 +44,7 @@ func InitCalculator(source ratesSource) *calculator {
 	go func() {
 		for {
 			c.refresh()
-			time.Sleep(time.Minute * 5)
+			time.Sleep(time.Minute)
 		}
 	}()
 
