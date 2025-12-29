@@ -1,21 +1,27 @@
 package cache
 
 import (
+	"time"
+
 	cache "github.com/Code-Hex/go-generics-cache"
 	"github.com/Code-Hex/go-generics-cache/policy/lru"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 )
 
-var cacheMetrics = promauto.NewGaugeVec(
-	prometheus.GaugeOpts{
-		Name: "db_cache",
-		Help: "",
-	},
-	[]string{
-		"name",
-		"result",
-	},
+var (
+	cacheRequestsStatus = promauto.NewGaugeVec(
+		prometheus.GaugeOpts{
+			Name: "db_cache",
+			Help: "",
+		},
+		[]string{
+			"name",
+			"result",
+		},
+	)
+	cacheSize = promauto.NewGaugeVec(
+		prometheus.GaugeOpts{Name: "db_cache_fullness"}, []string{"name"})
 )
 
 type Cache[K comparable, V any] struct {
@@ -24,19 +30,27 @@ type Cache[K comparable, V any] struct {
 }
 
 func NewLRUCache[K comparable, V any](size int, metricName string) Cache[K, V] {
-	return Cache[K, V]{
+
+	c := Cache[K, V]{
 		cache:      cache.New(cache.AsLRU[K, V](lru.WithCapacity(size))),
 		metricName: metricName,
 	}
+	go func() {
+		for {
+			time.Sleep(5 * time.Second)
+			cacheSize.WithLabelValues(metricName).Add(float64(c.cache.Len()) / float64(size))
+		}
+	}()
+	return c
 }
 
 func (c *Cache[K, V]) Get(key K) (V, bool) {
 	val, ok := c.cache.Get(key)
 	if ok {
-		cacheMetrics.WithLabelValues(c.metricName, "hit").Inc()
+		cacheRequestsStatus.WithLabelValues(c.metricName, "hit").Inc()
 		return val, ok
 	}
-	cacheMetrics.WithLabelValues(c.metricName, "miss").Inc()
+	cacheRequestsStatus.WithLabelValues(c.metricName, "miss").Inc()
 	return val, ok
 }
 

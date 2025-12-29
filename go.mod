@@ -6,7 +6,7 @@ toolchain go1.24.1
 
 require (
 	github.com/BurntSushi/toml v1.2.1
-	github.com/Code-Hex/go-generics-cache v1.3.0
+	github.com/Code-Hex/go-generics-cache v1.5.1
 	github.com/Narasimha1997/ratelimiter v1.1.1
 	github.com/avast/retry-go v3.0.0+incompatible
 	github.com/caarlos0/env/v6 v6.10.1
