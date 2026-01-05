@@ -309,6 +309,49 @@ func (h *Handler) convertActionJettonTransfer(ctx context.Context, t *bath.Jetto
 	return action, simplePreview, nil
 }
 
+func (h *Handler) convertActionFlawedJettonTransfer(ctx context.Context, t *bath.FlawedJettonTransferAction, acceptLanguage string, viewer *tongo.AccountID, eventLt int64) (oas.OptFlawedJettonTransferAction, oas.ActionSimplePreview, error) {
+	meta := h.GetJettonNormalizedMetadata(ctx, t.Jetton)
+	score, _ := h.score.GetJettonScore(t.Jetton)
+	scaledUiParams, err := h.storage.GetScaledUIParameters(ctx, t.Jetton, &eventLt)
+	if err != nil {
+		return oas.OptFlawedJettonTransferAction{}, oas.ActionSimplePreview{}, fmt.Errorf("failed to get scaled UI parameters: %w", err)
+	}
+	preview := jettonPreview(t.Jetton, meta, score, scaledUiParams)
+	var action oas.OptFlawedJettonTransferAction
+	action.SetTo(oas.FlawedJettonTransferAction{
+		SentAmount:       g.Pointer(big.Int(t.SentAmount)).String(),
+		ReceivedAmount:   g.Pointer(big.Int(t.ReceivedAmount)).String(),
+		Recipient:        convertOptAccountAddress(t.Recipient, h.addressBook),
+		Sender:           convertOptAccountAddress(t.Sender, h.addressBook),
+		Jetton:           preview,
+		RecipientsWallet: t.RecipientsWallet.ToRaw(),
+		SendersWallet:    t.SendersWallet.ToRaw(),
+		Comment:          g.Opt(t.Comment),
+		EncryptedComment: convertEncryptedComment(t.EncryptedComment),
+	})
+	transferredValue := i18n.FormatTokens(big.Int(t.SentAmount), int32(meta.Decimals), meta.Symbol, scaledUiParams)
+	receivedValue := i18n.FormatTokens(big.Int(t.ReceivedAmount), int32(meta.Decimals), meta.Symbol, scaledUiParams)
+	simplePreview := oas.ActionSimplePreview{
+		Name: "Jetton Transfer",
+		Description: i18n.T(acceptLanguage, i18n.C{
+			DefaultMessage: &i18n.M{
+				ID:    "flawedJettonTransferAction",
+				Other: "Transferred {{.TransferredValue}}, but received {{.ReceivedValue}}",
+			},
+			TemplateData: i18n.Template{
+				"TransferredValue": transferredValue,
+				"ReceivedValue":    receivedValue,
+			},
+		}),
+		Accounts: distinctAccounts(viewer, h.addressBook, t.Recipient, t.Sender, &t.Jetton),
+		Value:    oas.NewOptString(receivedValue),
+	}
+	if len(preview.Image) > 0 {
+		simplePreview.ValueImage = oas.NewOptString(preview.Image)
+	}
+	return action, simplePreview, nil
+}
+
 func (h *Handler) convertActionJettonMint(ctx context.Context, m *bath.JettonMintAction, acceptLanguage string, viewer *tongo.AccountID, eventLt int64) (oas.OptJettonMintAction, oas.ActionSimplePreview, error) {
 	meta := h.GetJettonNormalizedMetadata(ctx, m.Jetton)
 	score, _ := h.score.GetJettonScore(m.Jetton)
@@ -654,6 +697,11 @@ func (h *Handler) convertAction(ctx context.Context, viewer *tongo.AccountID, a 
 		action.JettonTransfer, action.SimplePreview, err = h.convertActionJettonTransfer(ctx, a.JettonTransfer, acceptLanguage.Value, viewer, eventLt)
 		if err != nil {
 			return oas.Action{}, fmt.Errorf("failed to convert jetton transfer action: %w", err)
+		}
+	case bath.FlawedJettonTransfer:
+		action.FlawedJettonTransfer, action.SimplePreview, err = h.convertActionFlawedJettonTransfer(ctx, a.FlawedJettonTransfer, acceptLanguage.Value, viewer, eventLt)
+		if err != nil {
+			return oas.Action{}, fmt.Errorf("failed to convert flawed jetton transfer action: %w", err)
 		}
 	case bath.JettonMint:
 		action.JettonMint, action.SimplePreview, err = h.convertActionJettonMint(ctx, a.JettonMint, acceptLanguage.Value, viewer, eventLt)

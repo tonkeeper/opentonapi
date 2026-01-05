@@ -699,6 +699,7 @@ type Action struct {
 	ExtraCurrencyTransfer     OptExtraCurrencyTransferAction     `json:"ExtraCurrencyTransfer"`
 	ContractDeploy            OptContractDeployAction            `json:"ContractDeploy"`
 	JettonTransfer            OptJettonTransferAction            `json:"JettonTransfer"`
+	FlawedJettonTransfer      OptFlawedJettonTransferAction      `json:"FlawedJettonTransfer"`
 	JettonBurn                OptJettonBurnAction                `json:"JettonBurn"`
 	JettonMint                OptJettonMintAction                `json:"JettonMint"`
 	NftItemTransfer           OptNftItemTransferAction           `json:"NftItemTransfer"`
@@ -754,6 +755,11 @@ func (s *Action) GetContractDeploy() OptContractDeployAction {
 // GetJettonTransfer returns the value of JettonTransfer.
 func (s *Action) GetJettonTransfer() OptJettonTransferAction {
 	return s.JettonTransfer
+}
+
+// GetFlawedJettonTransfer returns the value of FlawedJettonTransfer.
+func (s *Action) GetFlawedJettonTransfer() OptFlawedJettonTransferAction {
+	return s.FlawedJettonTransfer
 }
 
 // GetJettonBurn returns the value of JettonBurn.
@@ -909,6 +915,11 @@ func (s *Action) SetContractDeploy(val OptContractDeployAction) {
 // SetJettonTransfer sets the value of JettonTransfer.
 func (s *Action) SetJettonTransfer(val OptJettonTransferAction) {
 	s.JettonTransfer = val
+}
+
+// SetFlawedJettonTransfer sets the value of FlawedJettonTransfer.
+func (s *Action) SetFlawedJettonTransfer(val OptFlawedJettonTransferAction) {
+	s.FlawedJettonTransfer = val
 }
 
 // SetJettonBurn sets the value of JettonBurn.
@@ -6010,6 +6021,122 @@ func (s *ExtraCurrencyTransferAction) SetEncryptedComment(val OptEncryptedCommen
 // SetCurrency sets the value of Currency.
 func (s *ExtraCurrencyTransferAction) SetCurrency(val EcPreview) {
 	s.Currency = val
+}
+
+// Ref: #/components/schemas/FlawedJettonTransferAction
+type FlawedJettonTransferAction struct {
+	Sender           OptAccountAddress `json:"sender"`
+	Recipient        OptAccountAddress `json:"recipient"`
+	SendersWallet    string            `json:"senders_wallet"`
+	RecipientsWallet string            `json:"recipients_wallet"`
+	// Sent amount in quanta of tokens.
+	SentAmount string `json:"sent_amount"`
+	// Actually received amount in quanta of tokens.
+	ReceivedAmount   string              `json:"received_amount"`
+	Comment          OptString           `json:"comment"`
+	EncryptedComment OptEncryptedComment `json:"encrypted_comment"`
+	Refund           OptRefund           `json:"refund"`
+	Jetton           JettonPreview       `json:"jetton"`
+}
+
+// GetSender returns the value of Sender.
+func (s *FlawedJettonTransferAction) GetSender() OptAccountAddress {
+	return s.Sender
+}
+
+// GetRecipient returns the value of Recipient.
+func (s *FlawedJettonTransferAction) GetRecipient() OptAccountAddress {
+	return s.Recipient
+}
+
+// GetSendersWallet returns the value of SendersWallet.
+func (s *FlawedJettonTransferAction) GetSendersWallet() string {
+	return s.SendersWallet
+}
+
+// GetRecipientsWallet returns the value of RecipientsWallet.
+func (s *FlawedJettonTransferAction) GetRecipientsWallet() string {
+	return s.RecipientsWallet
+}
+
+// GetSentAmount returns the value of SentAmount.
+func (s *FlawedJettonTransferAction) GetSentAmount() string {
+	return s.SentAmount
+}
+
+// GetReceivedAmount returns the value of ReceivedAmount.
+func (s *FlawedJettonTransferAction) GetReceivedAmount() string {
+	return s.ReceivedAmount
+}
+
+// GetComment returns the value of Comment.
+func (s *FlawedJettonTransferAction) GetComment() OptString {
+	return s.Comment
+}
+
+// GetEncryptedComment returns the value of EncryptedComment.
+func (s *FlawedJettonTransferAction) GetEncryptedComment() OptEncryptedComment {
+	return s.EncryptedComment
+}
+
+// GetRefund returns the value of Refund.
+func (s *FlawedJettonTransferAction) GetRefund() OptRefund {
+	return s.Refund
+}
+
+// GetJetton returns the value of Jetton.
+func (s *FlawedJettonTransferAction) GetJetton() JettonPreview {
+	return s.Jetton
+}
+
+// SetSender sets the value of Sender.
+func (s *FlawedJettonTransferAction) SetSender(val OptAccountAddress) {
+	s.Sender = val
+}
+
+// SetRecipient sets the value of Recipient.
+func (s *FlawedJettonTransferAction) SetRecipient(val OptAccountAddress) {
+	s.Recipient = val
+}
+
+// SetSendersWallet sets the value of SendersWallet.
+func (s *FlawedJettonTransferAction) SetSendersWallet(val string) {
+	s.SendersWallet = val
+}
+
+// SetRecipientsWallet sets the value of RecipientsWallet.
+func (s *FlawedJettonTransferAction) SetRecipientsWallet(val string) {
+	s.RecipientsWallet = val
+}
+
+// SetSentAmount sets the value of SentAmount.
+func (s *FlawedJettonTransferAction) SetSentAmount(val string) {
+	s.SentAmount = val
+}
+
+// SetReceivedAmount sets the value of ReceivedAmount.
+func (s *FlawedJettonTransferAction) SetReceivedAmount(val string) {
+	s.ReceivedAmount = val
+}
+
+// SetComment sets the value of Comment.
+func (s *FlawedJettonTransferAction) SetComment(val OptString) {
+	s.Comment = val
+}
+
+// SetEncryptedComment sets the value of EncryptedComment.
+func (s *FlawedJettonTransferAction) SetEncryptedComment(val OptEncryptedComment) {
+	s.EncryptedComment = val
+}
+
+// SetRefund sets the value of Refund.
+func (s *FlawedJettonTransferAction) SetRefund(val OptRefund) {
+	s.Refund = val
+}
+
+// SetJetton sets the value of Jetton.
+func (s *FlawedJettonTransferAction) SetJetton(val JettonPreview) {
+	s.Jetton = val
 }
 
 // Ref: #/components/schemas/FoundAccounts
@@ -13198,6 +13325,52 @@ func (o OptExtraCurrencyTransferAction) Get() (v ExtraCurrencyTransferAction, ok
 
 // Or returns value if set, or given parameter if does not.
 func (o OptExtraCurrencyTransferAction) Or(d ExtraCurrencyTransferAction) ExtraCurrencyTransferAction {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptFlawedJettonTransferAction returns new OptFlawedJettonTransferAction with value set to v.
+func NewOptFlawedJettonTransferAction(v FlawedJettonTransferAction) OptFlawedJettonTransferAction {
+	return OptFlawedJettonTransferAction{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptFlawedJettonTransferAction is optional FlawedJettonTransferAction.
+type OptFlawedJettonTransferAction struct {
+	Value FlawedJettonTransferAction
+	Set   bool
+}
+
+// IsSet returns true if OptFlawedJettonTransferAction was set.
+func (o OptFlawedJettonTransferAction) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptFlawedJettonTransferAction) Reset() {
+	var v FlawedJettonTransferAction
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptFlawedJettonTransferAction) SetTo(v FlawedJettonTransferAction) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptFlawedJettonTransferAction) Get() (v FlawedJettonTransferAction, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptFlawedJettonTransferAction) Or(d FlawedJettonTransferAction) FlawedJettonTransferAction {
 	if v, ok := o.Get(); ok {
 		return v
 	}

@@ -28,6 +28,7 @@ const (
 	NftItemTransfer           ActionType = "NftItemTransfer"
 	NftPurchase               ActionType = "NftPurchase"
 	JettonTransfer            ActionType = "JettonTransfer"
+	FlawedJettonTransfer      ActionType = "FlawedJettonTransfer"
 	JettonMint                ActionType = "JettonMint"
 	JettonBurn                ActionType = "JettonBurn"
 	ContractDeploy            ActionType = "ContractDeploy"
@@ -81,6 +82,7 @@ type (
 		NftItemTransfer           *NftTransferAction               `json:",omitempty"`
 		NftPurchase               *NftPurchaseAction               `json:",omitempty"`
 		JettonTransfer            *JettonTransferAction            `json:",omitempty"`
+		FlawedJettonTransfer      *FlawedJettonTransferAction      `json:",omitempty"`
 		JettonMint                *JettonMintAction                `json:",omitempty"`
 		JettonBurn                *JettonBurnAction                `json:",omitempty"`
 		ContractDeploy            *ContractDeployAction            `json:",omitempty"`
@@ -168,6 +170,20 @@ type (
 		RecipientsWallet tongo.AccountID
 		SendersWallet    tongo.AccountID
 		Amount           tlb.VarUInteger16
+		Refund           *Refund
+		isWrappedTon     bool
+	}
+
+	FlawedJettonTransferAction struct {
+		Comment          *string
+		EncryptedComment *EncryptedComment
+		Jetton           tongo.AccountID
+		Recipient        *tongo.AccountID
+		Sender           *tongo.AccountID
+		RecipientsWallet tongo.AccountID
+		SendersWallet    tongo.AccountID
+		SentAmount       tlb.VarUInteger16
+		ReceivedAmount   tlb.VarUInteger16
 		Refund           *Refund
 		isWrappedTon     bool
 	}
@@ -470,6 +486,17 @@ func (a *NftTransferAction) SubjectAccounts() []tongo.AccountID {
 }
 
 func (a *JettonTransferAction) SubjectAccounts() []tongo.AccountID {
+	accounts := make([]tongo.AccountID, 0, 2)
+	if a.Sender != nil {
+		accounts = append(accounts, *a.Sender)
+	}
+	if a.Recipient != nil {
+		accounts = append(accounts, *a.Recipient)
+	}
+	return accounts
+}
+
+func (a *FlawedJettonTransferAction) SubjectAccounts() []tongo.AccountID {
 	accounts := make([]tongo.AccountID, 0, 2)
 	if a.Sender != nil {
 		accounts = append(accounts, *a.Sender)

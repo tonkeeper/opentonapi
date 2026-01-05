@@ -74,6 +74,53 @@ func (jta *JettonTransferAction) PayloadFromABI(payload abi.JettonPayload) {
 	}
 }
 
+type BubbleFlawedJettonTransfer struct {
+	sender, recipient             *Account
+	senderWallet, recipientWallet tongo.AccountID
+	master                        tongo.AccountID
+	sentAmount                    tlb.VarUInteger16
+	receivedAmount                tlb.VarUInteger16
+	success                       bool
+	payload                       abi.JettonPayload
+}
+
+func (b BubbleFlawedJettonTransfer) ToAction() (action *Action) {
+	a := Action{
+		FlawedJettonTransfer: &FlawedJettonTransferAction{
+			Jetton:           b.master,
+			Recipient:        b.recipient.Addr(),
+			Sender:           b.sender.Addr(),
+			RecipientsWallet: b.recipientWallet,
+			SendersWallet:    b.senderWallet,
+			SentAmount:       b.sentAmount,
+			ReceivedAmount:   b.receivedAmount,
+		},
+		Success: b.success,
+		Type:    FlawedJettonTransfer,
+	}
+	a.FlawedJettonTransfer.PayloadFromABI(b.payload)
+	return &a
+}
+
+func (fjta *FlawedJettonTransferAction) PayloadFromABI(payload abi.JettonPayload) {
+	switch payload.SumType {
+	case abi.TextCommentJettonOp:
+		fjta.Comment = g.Pointer(string(payload.Value.(abi.TextCommentJettonPayload).Text))
+	case abi.EncryptedTextCommentJettonOp:
+		fjta.EncryptedComment = &EncryptedComment{
+			CipherText:     payload.Value.(abi.EncryptedTextCommentJettonPayload).CipherText,
+			EncryptionType: "simple",
+		}
+	case abi.EmptyJettonOp:
+	default:
+		if payload.SumType != abi.UnknownJettonOp {
+			fjta.Comment = g.Pointer("Call: " + payload.SumType)
+		} else if payload.OpCode != nil {
+			fjta.Comment = g.Pointer(fmt.Sprintf("Call: 0x%08x", *payload.OpCode))
+		}
+	}
+}
+
 type BubbleJettonMint struct {
 	recipient       Account
 	recipientWallet tongo.AccountID
@@ -272,6 +319,99 @@ var JettonTransferMinimalStraw = Straw[BubbleJettonTransfer]{
 					}
 					if newAction.sender != nil {
 						flow.SubJettons(newAction.sender.Address, newAction.master, big.Int(newAction.amount))
+					}
+				},
+				Optional: true,
+			},
+			{
+				CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.ExcessMsgOp)},
+				Optional:   true,
+			},
+		},
+	},
+}
+
+var FlawedJettonTransferMinimalStraw = Straw[BubbleFlawedJettonTransfer]{
+	CheckFuncs: []bubbleCheck{IsTx, HasInterface(abi.JettonWallet), HasOpcode(abi.JettonTransferMsgOpCode), func(bubble *Bubble) bool {
+		// Check that sent amount is not the same as received one
+		if len(bubble.Children) != 1 {
+			return false
+		}
+
+		currTx := bubble.Info.(BubbleTx)
+		transferBody, _ := currTx.decodedBody.Value.(abi.JettonTransferMsgBody)
+		transferAmount := big.Int(transferBody.Amount)
+
+		internalTransferTx := bubble.Children[0].Info.(BubbleTx)
+		internalTransfer, ok := internalTransferTx.decodedBody.Value.(abi.JettonInternalTransferMsgBody)
+		if !ok {
+			return false
+		}
+		internalTransferAmount := big.Int(internalTransfer.Amount)
+
+		if transferAmount.Cmp(&internalTransferAmount) == 0 {
+			return false
+		}
+
+		return true
+	}},
+	Builder: func(newAction *BubbleFlawedJettonTransfer, bubble *Bubble) error {
+		tx := bubble.Info.(BubbleTx)
+		newAction.master, _ = tx.additionalInfo.JettonMaster(tx.account.Address)
+		newAction.senderWallet = tx.account.Address
+		newAction.sender = tx.inputFrom
+		body, _ := tx.decodedBody.Value.(abi.JettonTransferMsgBody)
+		newAction.sentAmount = body.Amount
+		return nil
+	},
+	SingleChild: &Straw[BubbleFlawedJettonTransfer]{
+		CheckFuncs: []bubbleCheck{IsTx, HasInterface(abi.JettonWallet), HasOperation(abi.JettonInternalTransferMsgOp)},
+		Optional:   true,
+		Builder: func(newAction *BubbleFlawedJettonTransfer, bubble *Bubble) error {
+			tx := bubble.Info.(BubbleTx)
+			newAction.recipientWallet = tx.account.Address
+			if newAction.master.IsZero() {
+				newAction.master, _ = tx.additionalInfo.JettonMaster(tx.account.Address)
+			}
+			newAction.success = tx.success
+			body, _ := tx.decodedBody.Value.(abi.JettonInternalTransferMsgBody)
+			newAction.receivedAmount = body.Amount
+			return nil
+		},
+		ValueFlowUpdater: func(newAction *BubbleFlawedJettonTransfer, flow *ValueFlow) {
+			if newAction.success {
+				if newAction.recipient != nil {
+					flow.AddJettons(newAction.recipient.Address, newAction.master, big.Int(newAction.receivedAmount))
+				}
+				if newAction.sender != nil {
+					flow.SubJettons(newAction.sender.Address, newAction.master, big.Int(newAction.sentAmount))
+				}
+			}
+		},
+		Children: []Straw[BubbleFlawedJettonTransfer]{
+			{
+				CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.JettonNotifyMsgOp)},
+				Builder: func(newAction *BubbleFlawedJettonTransfer, bubble *Bubble) error {
+					tx := bubble.Info.(BubbleTx)
+					newAction.success = true
+					body := tx.decodedBody.Value.(abi.JettonNotifyMsgBody)
+					newAction.receivedAmount = body.Amount
+					newAction.payload = body.ForwardPayload.Value
+					newAction.recipient = &tx.account
+					if newAction.sender == nil {
+						sender, err := ton.AccountIDFromTlb(body.Sender)
+						if err == nil {
+							newAction.sender = &Account{Address: *sender}
+						}
+					}
+					return nil
+				},
+				ValueFlowUpdater: func(newAction *BubbleFlawedJettonTransfer, flow *ValueFlow) {
+					if newAction.recipient != nil {
+						flow.AddJettons(newAction.recipient.Address, newAction.master, big.Int(newAction.receivedAmount))
+					}
+					if newAction.sender != nil {
+						flow.SubJettons(newAction.sender.Address, newAction.master, big.Int(newAction.sentAmount))
 					}
 				},
 				Optional: true,

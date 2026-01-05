@@ -1854,6 +1854,12 @@ func (s *Action) encodeFields(e *jx.Encoder) {
 		}
 	}
 	{
+		if s.FlawedJettonTransfer.Set {
+			e.FieldStart("FlawedJettonTransfer")
+			s.FlawedJettonTransfer.Encode(e)
+		}
+	}
+	{
 		if s.JettonBurn.Set {
 			e.FieldStart("JettonBurn")
 			s.JettonBurn.Encode(e)
@@ -2005,38 +2011,39 @@ func (s *Action) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfAction = [31]string{
+var jsonFieldsNameOfAction = [32]string{
 	0:  "type",
 	1:  "status",
 	2:  "TonTransfer",
 	3:  "ExtraCurrencyTransfer",
 	4:  "ContractDeploy",
 	5:  "JettonTransfer",
-	6:  "JettonBurn",
-	7:  "JettonMint",
-	8:  "NftItemTransfer",
-	9:  "Subscribe",
-	10: "UnSubscribe",
-	11: "AuctionBid",
-	12: "NftPurchase",
-	13: "DepositStake",
-	14: "WithdrawStake",
-	15: "WithdrawStakeRequest",
-	16: "ElectionsDepositStake",
-	17: "ElectionsRecoverStake",
-	18: "JettonSwap",
-	19: "SmartContractExec",
-	20: "DomainRenew",
-	21: "Purchase",
-	22: "AddExtension",
-	23: "RemoveExtension",
-	24: "SetSignatureAllowedAction",
-	25: "GasRelay",
-	26: "DepositTokenStake",
-	27: "WithdrawTokenStakeRequest",
-	28: "LiquidityDeposit",
-	29: "simple_preview",
-	30: "base_transactions",
+	6:  "FlawedJettonTransfer",
+	7:  "JettonBurn",
+	8:  "JettonMint",
+	9:  "NftItemTransfer",
+	10: "Subscribe",
+	11: "UnSubscribe",
+	12: "AuctionBid",
+	13: "NftPurchase",
+	14: "DepositStake",
+	15: "WithdrawStake",
+	16: "WithdrawStakeRequest",
+	17: "ElectionsDepositStake",
+	18: "ElectionsRecoverStake",
+	19: "JettonSwap",
+	20: "SmartContractExec",
+	21: "DomainRenew",
+	22: "Purchase",
+	23: "AddExtension",
+	24: "RemoveExtension",
+	25: "SetSignatureAllowedAction",
+	26: "GasRelay",
+	27: "DepositTokenStake",
+	28: "WithdrawTokenStakeRequest",
+	29: "LiquidityDeposit",
+	30: "simple_preview",
+	31: "base_transactions",
 }
 
 // Decode decodes Action from json.
@@ -2107,6 +2114,16 @@ func (s *Action) Decode(d *jx.Decoder) error {
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"JettonTransfer\"")
+			}
+		case "FlawedJettonTransfer":
+			if err := func() error {
+				s.FlawedJettonTransfer.Reset()
+				if err := s.FlawedJettonTransfer.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"FlawedJettonTransfer\"")
 			}
 		case "JettonBurn":
 			if err := func() error {
@@ -2339,7 +2356,7 @@ func (s *Action) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"LiquidityDeposit\"")
 			}
 		case "simple_preview":
-			requiredBitSet[3] |= 1 << 5
+			requiredBitSet[3] |= 1 << 6
 			if err := func() error {
 				if err := s.SimplePreview.Decode(d); err != nil {
 					return err
@@ -2349,7 +2366,7 @@ func (s *Action) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"simple_preview\"")
 			}
 		case "base_transactions":
-			requiredBitSet[3] |= 1 << 6
+			requiredBitSet[3] |= 1 << 7
 			if err := func() error {
 				s.BaseTransactions = make([]string, 0)
 				if err := d.Arr(func(d *jx.Decoder) error {
@@ -2381,7 +2398,7 @@ func (s *Action) Decode(d *jx.Decoder) error {
 		0b00000011,
 		0b00000000,
 		0b00000000,
-		0b01100000,
+		0b11000000,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -16858,6 +16875,254 @@ func (s *ExtraCurrencyTransferAction) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *ExtraCurrencyTransferAction) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *FlawedJettonTransferAction) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *FlawedJettonTransferAction) encodeFields(e *jx.Encoder) {
+	{
+		if s.Sender.Set {
+			e.FieldStart("sender")
+			s.Sender.Encode(e)
+		}
+	}
+	{
+		if s.Recipient.Set {
+			e.FieldStart("recipient")
+			s.Recipient.Encode(e)
+		}
+	}
+	{
+		e.FieldStart("senders_wallet")
+		e.Str(s.SendersWallet)
+	}
+	{
+		e.FieldStart("recipients_wallet")
+		e.Str(s.RecipientsWallet)
+	}
+	{
+		e.FieldStart("sent_amount")
+		e.Str(s.SentAmount)
+	}
+	{
+		e.FieldStart("received_amount")
+		e.Str(s.ReceivedAmount)
+	}
+	{
+		if s.Comment.Set {
+			e.FieldStart("comment")
+			s.Comment.Encode(e)
+		}
+	}
+	{
+		if s.EncryptedComment.Set {
+			e.FieldStart("encrypted_comment")
+			s.EncryptedComment.Encode(e)
+		}
+	}
+	{
+		if s.Refund.Set {
+			e.FieldStart("refund")
+			s.Refund.Encode(e)
+		}
+	}
+	{
+		e.FieldStart("jetton")
+		s.Jetton.Encode(e)
+	}
+}
+
+var jsonFieldsNameOfFlawedJettonTransferAction = [10]string{
+	0: "sender",
+	1: "recipient",
+	2: "senders_wallet",
+	3: "recipients_wallet",
+	4: "sent_amount",
+	5: "received_amount",
+	6: "comment",
+	7: "encrypted_comment",
+	8: "refund",
+	9: "jetton",
+}
+
+// Decode decodes FlawedJettonTransferAction from json.
+func (s *FlawedJettonTransferAction) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode FlawedJettonTransferAction to nil")
+	}
+	var requiredBitSet [2]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "sender":
+			if err := func() error {
+				s.Sender.Reset()
+				if err := s.Sender.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"sender\"")
+			}
+		case "recipient":
+			if err := func() error {
+				s.Recipient.Reset()
+				if err := s.Recipient.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"recipient\"")
+			}
+		case "senders_wallet":
+			requiredBitSet[0] |= 1 << 2
+			if err := func() error {
+				v, err := d.Str()
+				s.SendersWallet = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"senders_wallet\"")
+			}
+		case "recipients_wallet":
+			requiredBitSet[0] |= 1 << 3
+			if err := func() error {
+				v, err := d.Str()
+				s.RecipientsWallet = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"recipients_wallet\"")
+			}
+		case "sent_amount":
+			requiredBitSet[0] |= 1 << 4
+			if err := func() error {
+				v, err := d.Str()
+				s.SentAmount = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"sent_amount\"")
+			}
+		case "received_amount":
+			requiredBitSet[0] |= 1 << 5
+			if err := func() error {
+				v, err := d.Str()
+				s.ReceivedAmount = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"received_amount\"")
+			}
+		case "comment":
+			if err := func() error {
+				s.Comment.Reset()
+				if err := s.Comment.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"comment\"")
+			}
+		case "encrypted_comment":
+			if err := func() error {
+				s.EncryptedComment.Reset()
+				if err := s.EncryptedComment.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"encrypted_comment\"")
+			}
+		case "refund":
+			if err := func() error {
+				s.Refund.Reset()
+				if err := s.Refund.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"refund\"")
+			}
+		case "jetton":
+			requiredBitSet[1] |= 1 << 1
+			if err := func() error {
+				if err := s.Jetton.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"jetton\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode FlawedJettonTransferAction")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [2]uint8{
+		0b00111100,
+		0b00000010,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfFlawedJettonTransferAction) {
+					name = jsonFieldsNameOfFlawedJettonTransferAction[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *FlawedJettonTransferAction) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *FlawedJettonTransferAction) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -32703,6 +32968,39 @@ func (s OptExtraCurrencyTransferAction) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *OptExtraCurrencyTransferAction) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes FlawedJettonTransferAction as json.
+func (o OptFlawedJettonTransferAction) Encode(e *jx.Encoder) {
+	if !o.Set {
+		return
+	}
+	o.Value.Encode(e)
+}
+
+// Decode decodes FlawedJettonTransferAction from json.
+func (o *OptFlawedJettonTransferAction) Decode(d *jx.Decoder) error {
+	if o == nil {
+		return errors.New("invalid: unable to decode OptFlawedJettonTransferAction to nil")
+	}
+	o.Set = true
+	if err := o.Value.Decode(d); err != nil {
+		return err
+	}
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s OptFlawedJettonTransferAction) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *OptFlawedJettonTransferAction) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
