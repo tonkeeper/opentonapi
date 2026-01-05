@@ -251,6 +251,10 @@ func TestFindActions(t *testing.T) {
 			tongo.MustParseBlockID("(0,8000000000000000,58456309)"),
 			// nft purchase
 			tongo.MustParseBlockID("(0,8000000000000000,58460832)"),
+			// dedust deposit liquidity
+			tongo.MustParseBlockID("(0,8000000000000000,55817478)"),
+			tongo.MustParseBlockID("(0,8000000000000000,55727931)"),
+			tongo.MustParseBlockID("(0,8000000000000000,55467228)"),
 		}),
 	)
 
@@ -735,6 +739,21 @@ func TestFindActions(t *testing.T) {
 			name:           "dedust swap with omniston new",
 			filenamePrefix: "dedust-swap-with-omniston-new",
 			hash:           "2e3eb4b79911185891d54c042f648d5e6764ce7569b3071582177ba84a2097f0",
+		},
+		{
+			name:           "deposit ton + tonio liquidity dedust",
+			hash:           "2d60ff5ccebf3b885aeb6e726c6189cebd934cf52c7aa24843d6ebeddd76aacf",
+			filenamePrefix: "deposit-ton-tonio-liquidity-dedust",
+		},
+		{
+			name:           "deposit tonio + ton liquidity dedust",
+			hash:           "230edd7e2f89b4d7c4b9c8183301c140539735d48bfb1e012b5d2e51a5aa82e5",
+			filenamePrefix: "deposit-tonio-ton-liquidity-dedust",
+		},
+		{
+			name:           "deposit usdt + dust liquidity dedust",
+			hash:           "ab2fa2da9430a988060b2305303d8580cd3703970682a0be071fc7f57a8384a6",
+			filenamePrefix: "deposit-usdt-dust-liquidity-dedust",
 		},
 	} {
 		t.Run(c.name, func(t *testing.T) {
