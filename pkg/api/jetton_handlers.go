@@ -269,7 +269,7 @@ func (h *Handler) GetJettonsEvents(ctx context.Context, params oas.GetJettonsEve
 		ValueFlow: &bath.ValueFlow{},
 	}
 	for _, item := range result.Actions {
-		if item.Type != bath.JettonTransfer && item.Type != bath.JettonBurn && item.Type != bath.JettonMint {
+		if item.Type != bath.FlawedJettonTransfer && item.Type != bath.JettonTransfer && item.Type != bath.JettonBurn && item.Type != bath.JettonMint {
 			continue
 		}
 		actionsList.Actions = append(actionsList.Actions, item)

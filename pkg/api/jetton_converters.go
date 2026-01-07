@@ -87,7 +87,7 @@ func (h *Handler) convertJettonHistory(ctx context.Context, account ton.AccountI
 			Extra:      result.Extra(account),
 		}
 		for _, action := range result.Actions {
-			if action.Type != bath.JettonTransfer && action.Type != bath.JettonBurn && action.Type != bath.JettonMint {
+			if action.Type != bath.FlawedJettonTransfer && action.Type != bath.JettonTransfer && action.Type != bath.JettonBurn && action.Type != bath.JettonMint {
 				continue
 			}
 			if master != nil && ((action.JettonTransfer != nil && action.JettonTransfer.Jetton != *master) ||
