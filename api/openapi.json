@@ -1157,6 +1157,9 @@
      "ExtraCurrencyTransfer": {
       "$ref": "#/components/schemas/ExtraCurrencyTransferAction"
      },
+     "FlawedJettonTransfer": {
+      "$ref": "#/components/schemas/FlawedJettonTransferAction"
+     },
      "GasRelay": {
       "$ref": "#/components/schemas/GasRelayAction"
      },
@@ -3529,6 +3532,59 @@
      "recipient",
      "amount",
      "currency"
+    ],
+    "type": "object"
+   },
+   "FlawedJettonTransferAction": {
+    "properties": {
+     "comment": {
+      "example": "Hi! This is your salary. \nFrom accounting with love.",
+      "type": "string"
+     },
+     "encrypted_comment": {
+      "$ref": "#/components/schemas/EncryptedComment"
+     },
+     "jetton": {
+      "$ref": "#/components/schemas/JettonPreview"
+     },
+     "received_amount": {
+      "description": "actually received amount in quanta of tokens",
+      "example": "1000000000",
+      "type": "string",
+      "x-js-format": "bigint"
+     },
+     "recipient": {
+      "$ref": "#/components/schemas/AccountAddress"
+     },
+     "recipients_wallet": {
+      "example": "0:E93E7D444180608B8520C00DC664383A387356FB6E16FDDF99DBE5E1415A574B",
+      "format": "address",
+      "type": "string"
+     },
+     "refund": {
+      "$ref": "#/components/schemas/Refund"
+     },
+     "sender": {
+      "$ref": "#/components/schemas/AccountAddress"
+     },
+     "senders_wallet": {
+      "example": "0:E93E7D444180608B8520C00DC664383A387356FB6E16FDDF99DBE5E1415A574B",
+      "format": "address",
+      "type": "string"
+     },
+     "sent_amount": {
+      "description": "sent amount in quanta of tokens",
+      "example": "1000000000",
+      "type": "string",
+      "x-js-format": "bigint"
+     }
+    },
+    "required": [
+     "sent_amount",
+     "received_amount",
+     "jetton",
+     "senders_wallet",
+     "recipients_wallet"
     ],
     "type": "object"
    },

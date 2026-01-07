@@ -6139,6 +6139,8 @@ components:
           $ref: '#/components/schemas/ContractDeployAction'
         JettonTransfer:
           $ref: '#/components/schemas/JettonTransferAction'
+        FlawedJettonTransfer:
+          $ref: '#/components/schemas/FlawedJettonTransferAction'
         JettonBurn:
           $ref: '#/components/schemas/JettonBurnAction'
         JettonMint:
@@ -6432,6 +6434,46 @@ components:
           x-js-format: bigint
           example: "1000000000"
           description: amount in quanta of tokens
+        comment:
+          type: string
+          example: "Hi! This is your salary. \nFrom accounting with love."
+        encrypted_comment:
+          $ref: '#/components/schemas/EncryptedComment'
+        refund:
+          $ref: '#/components/schemas/Refund'
+        jetton:
+          $ref: '#/components/schemas/JettonPreview'
+    FlawedJettonTransferAction:
+      type: object
+      required:
+        - sent_amount
+        - received_amount
+        - jetton
+        - senders_wallet
+        - recipients_wallet
+      properties:
+        sender:
+          $ref: '#/components/schemas/AccountAddress'
+        recipient:
+          $ref: '#/components/schemas/AccountAddress'
+        senders_wallet:
+          type: string
+          format: address
+          example: 0:E93E7D444180608B8520C00DC664383A387356FB6E16FDDF99DBE5E1415A574B
+        recipients_wallet:
+          type: string
+          format: address
+          example: 0:E93E7D444180608B8520C00DC664383A387356FB6E16FDDF99DBE5E1415A574B
+        sent_amount:
+          type: string
+          x-js-format: bigint
+          example: "1000000000"
+          description: sent amount in quanta of tokens
+        received_amount:
+          type: string
+          x-js-format: bigint
+          example: "1000000000"
+          description: actually received amount in quanta of tokens
         comment:
           type: string
           example: "Hi! This is your salary. \nFrom accounting with love."
