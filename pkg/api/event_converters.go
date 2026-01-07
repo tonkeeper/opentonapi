@@ -312,11 +312,7 @@ func (h *Handler) convertActionJettonTransfer(ctx context.Context, t *bath.Jetto
 func (h *Handler) convertActionFlawedJettonTransfer(ctx context.Context, t *bath.FlawedJettonTransferAction, acceptLanguage string, viewer *tongo.AccountID, eventLt int64) (oas.OptFlawedJettonTransferAction, oas.ActionSimplePreview, error) {
 	meta := h.GetJettonNormalizedMetadata(ctx, t.Jetton)
 	score, _ := h.score.GetJettonScore(t.Jetton)
-	scaledUiParams, err := h.storage.GetScaledUIParameters(ctx, t.Jetton, &eventLt)
-	if err != nil {
-		return oas.OptFlawedJettonTransferAction{}, oas.ActionSimplePreview{}, fmt.Errorf("failed to get scaled UI parameters: %w", err)
-	}
-	preview := jettonPreview(t.Jetton, meta, score, scaledUiParams)
+	preview := jettonPreview(t.Jetton, meta, score, nil)
 	var action oas.OptFlawedJettonTransferAction
 	action.SetTo(oas.FlawedJettonTransferAction{
 		SentAmount:       g.Pointer(big.Int(t.SentAmount)).String(),
@@ -329,8 +325,8 @@ func (h *Handler) convertActionFlawedJettonTransfer(ctx context.Context, t *bath
 		Comment:          g.Opt(t.Comment),
 		EncryptedComment: convertEncryptedComment(t.EncryptedComment),
 	})
-	transferredValue := i18n.FormatTokens(big.Int(t.SentAmount), int32(meta.Decimals), meta.Symbol, scaledUiParams)
-	receivedValue := i18n.FormatTokens(big.Int(t.ReceivedAmount), int32(meta.Decimals), meta.Symbol, scaledUiParams)
+	transferredValue := i18n.FormatTokens(big.Int(t.SentAmount), int32(meta.Decimals), meta.Symbol, nil)
+	receivedValue := i18n.FormatTokens(big.Int(t.ReceivedAmount), int32(meta.Decimals), meta.Symbol, nil)
 	simplePreview := oas.ActionSimplePreview{
 		Name: "Jetton Transfer",
 		Description: i18n.T(acceptLanguage, i18n.C{
