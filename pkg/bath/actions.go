@@ -339,7 +339,7 @@ func (a Action) ContributeToExtra(account tongo.AccountID) int64 {
 		return 0
 	}
 	switch a.Type {
-	case NftItemTransfer, ContractDeploy, UnSubscribe, JettonMint, JettonBurn, WithdrawStakeRequest, DomainRenew, ExtraCurrencyTransfer, DepositTokenStake, WithdrawTokenStakeRequest, AddExtension, RemoveExtension, SetSignatureAllowed: // actions without extra
+	case NftItemTransfer, ContractDeploy, UnSubscribe, JettonMint, JettonBurn, WithdrawStakeRequest, DomainRenew, ExtraCurrencyTransfer, DepositTokenStake, WithdrawTokenStakeRequest, AddExtension, RemoveExtension, SetSignatureAllowed, FlawedJettonTransfer: // actions without extra
 		return 0
 	case Purchase:
 		if a.Purchase.Price.Currency.Type == core.CurrencyTON {
