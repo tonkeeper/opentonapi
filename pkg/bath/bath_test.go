@@ -251,7 +251,9 @@ func TestFindActions(t *testing.T) {
 			tongo.MustParseBlockID("(0,8000000000000000,58456309)"),
 			// nft purchase
 			tongo.MustParseBlockID("(0,8000000000000000,58460832)"),
+			// flawed jetton trasnfer
 			tongo.MustParseBlockID("(0,8000000000000000,60561386)"),
+			tongo.MustParseBlockID("(0,8000000000000000,60214898)"),
 		}),
 	)
 
@@ -741,6 +743,11 @@ func TestFindActions(t *testing.T) {
 			name:           "flawed jetton transfer",
 			filenamePrefix: "flawed-jetton-transfer",
 			hash:           "2aed6cf09d52919ea67a057407b9dfb3d758a30ff89385ba97ed8c76c65c5252",
+		},
+		{
+			name:           "flawed jetton transfer-two-out",
+			filenamePrefix: "flawed-jetton-transfer-two-out",
+			hash:           "40c65501ab8fc4a0ca1d687e49776e9cc6a21aacd78d9b24ed3d108094310d9a",
 		},
 	} {
 		t.Run(c.name, func(t *testing.T) {

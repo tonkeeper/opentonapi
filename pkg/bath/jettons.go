@@ -334,26 +334,34 @@ var JettonTransferMinimalStraw = Straw[BubbleJettonTransfer]{
 var FlawedJettonTransferMinimalStraw = Straw[BubbleFlawedJettonTransfer]{
 	CheckFuncs: []bubbleCheck{IsTx, HasInterface(abi.JettonWallet), HasOpcode(abi.JettonTransferMsgOpCode), func(bubble *Bubble) bool {
 		// Check that sent amount is not the same as received one
-		if len(bubble.Children) != 1 {
-			return false
-		}
-
 		currTx := bubble.Info.(BubbleTx)
-		transferBody, _ := currTx.decodedBody.Value.(abi.JettonTransferMsgBody)
-		transferAmount := big.Int(transferBody.Amount)
-
-		internalTransferTx := bubble.Children[0].Info.(BubbleTx)
-		internalTransfer, ok := internalTransferTx.decodedBody.Value.(abi.JettonInternalTransferMsgBody)
+		transferBody, ok := currTx.decodedBody.Value.(abi.JettonTransferMsgBody)
 		if !ok {
 			return false
 		}
-		internalTransferAmount := big.Int(internalTransfer.Amount)
+		transferAmount := big.Int(transferBody.Amount)
 
-		if transferAmount.Cmp(&internalTransferAmount) == 0 {
-			return false
+		for _, child := range bubble.Children {
+			internalTransferTx, ok := child.Info.(BubbleTx)
+			if !ok {
+				continue
+			}
+			if internalTransferTx.decodedBody == nil {
+				continue
+			}
+			internalTransfer, ok := internalTransferTx.decodedBody.Value.(abi.JettonInternalTransferMsgBody)
+			if !ok {
+				continue
+			}
+			internalTransferAmount := big.Int(internalTransfer.Amount)
+
+			if transferAmount.Cmp(&internalTransferAmount) == 0 {
+				continue
+			}
+
+			return true
 		}
-
-		return true
+		return false
 	}},
 	Builder: func(newAction *BubbleFlawedJettonTransfer, bubble *Bubble) error {
 		tx := bubble.Info.(BubbleTx)
