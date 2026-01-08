@@ -2897,6 +2897,8 @@ func (s *ActionType) Decode(d *jx.Decoder) error {
 		*s = ActionTypeContractDeploy
 	case ActionTypeJettonTransfer:
 		*s = ActionTypeJettonTransfer
+	case ActionTypeFlawedJettonTransfer:
+		*s = ActionTypeFlawedJettonTransfer
 	case ActionTypeJettonBurn:
 		*s = ActionTypeJettonBurn
 	case ActionTypeJettonMint:

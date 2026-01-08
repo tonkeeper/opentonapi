@@ -1249,6 +1249,7 @@ const (
 	ActionTypeExtraCurrencyTransfer     ActionType = "ExtraCurrencyTransfer"
 	ActionTypeContractDeploy            ActionType = "ContractDeploy"
 	ActionTypeJettonTransfer            ActionType = "JettonTransfer"
+	ActionTypeFlawedJettonTransfer      ActionType = "FlawedJettonTransfer"
 	ActionTypeJettonBurn                ActionType = "JettonBurn"
 	ActionTypeJettonMint                ActionType = "JettonMint"
 	ActionTypeNftItemTransfer           ActionType = "NftItemTransfer"
@@ -1282,6 +1283,7 @@ func (ActionType) AllValues() []ActionType {
 		ActionTypeExtraCurrencyTransfer,
 		ActionTypeContractDeploy,
 		ActionTypeJettonTransfer,
+		ActionTypeFlawedJettonTransfer,
 		ActionTypeJettonBurn,
 		ActionTypeJettonMint,
 		ActionTypeNftItemTransfer,
@@ -1319,6 +1321,8 @@ func (s ActionType) MarshalText() ([]byte, error) {
 	case ActionTypeContractDeploy:
 		return []byte(s), nil
 	case ActionTypeJettonTransfer:
+		return []byte(s), nil
+	case ActionTypeFlawedJettonTransfer:
 		return []byte(s), nil
 	case ActionTypeJettonBurn:
 		return []byte(s), nil
@@ -1387,6 +1391,9 @@ func (s *ActionType) UnmarshalText(data []byte) error {
 		return nil
 	case ActionTypeJettonTransfer:
 		*s = ActionTypeJettonTransfer
+		return nil
+	case ActionTypeFlawedJettonTransfer:
+		*s = ActionTypeFlawedJettonTransfer
 		return nil
 	case ActionTypeJettonBurn:
 		*s = ActionTypeJettonBurn

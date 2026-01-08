@@ -717,6 +717,8 @@ func (s ActionType) Validate() error {
 		return nil
 	case "JettonTransfer":
 		return nil
+	case "FlawedJettonTransfer":
+		return nil
 	case "JettonBurn":
 		return nil
 	case "JettonMint":
