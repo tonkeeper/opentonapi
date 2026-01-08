@@ -1239,6 +1239,7 @@
        "ExtraCurrencyTransfer",
        "ContractDeploy",
        "JettonTransfer",
+       "FlawedJettonTransfer",
        "JettonBurn",
        "JettonMint",
        "NftItemTransfer",
