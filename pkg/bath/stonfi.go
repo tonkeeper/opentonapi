@@ -676,7 +676,7 @@ func (s UniversalStonfiStraw) processSingleRouterSwaps(b *Bubble, usedBubbles ma
 			usedBubbles[payoutB] = struct{}{}
 			nextB := payoutB.Children[0] // can be either swap msg on the same router or jetton transfer
 			latestNextB, ok := s.processSingleRouterSwaps(nextB, usedBubbles)
-			if ok {
+			if ok && latestNextB != nil {
 				return latestNextB, true
 			}
 
