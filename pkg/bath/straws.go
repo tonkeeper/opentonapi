@@ -48,7 +48,7 @@ var DefaultStraws = []Merger{
 	WtonMintStraw,
 	NftPurchaseStraw,
 	StonfiSwapStraw,
-	StonfiSwapV2Straw, // 15
+	UniversalStonfiStraw{}, // 15
 	UniversalDedustStraw{},
 	TgAuctionV1InitialBidStraw,
 	StrawAuctionBigGetgems,

@@ -492,3 +492,199 @@ var StonfiLiquidityDepositBoth = Straw[BubbleLiquidityDeposit]{
 		},
 	},
 }
+
+func (s UniversalStonfiStraw) Merge(b *Bubble) bool {
+	usedBubbles := map[*Bubble]struct{}{}
+	var out assetTransfer
+	poolBubble, sender, in, ok := s.processMultipleRouterSwaps(b, usedBubbles)
+	if !ok {
+		return false
+	}
+
+	poolTx, ok := poolBubble.Info.(BubbleTx)
+	if !ok {
+		return false
+	}
+	if poolTx.inputFrom == nil {
+		return false
+	}
+	routerAddr := poolTx.inputFrom.Address
+
+	if IsTx(poolBubble) && HasOperation(abi.StonfiSwapV2MsgOp)(poolBubble) && HasInterface(abi.StonfiPoolV2)(poolBubble) {
+		tx := poolBubble.Info.(BubbleTx)
+		body := tx.decodedBody.Value.(abi.StonfiSwapV2MsgBody)
+		outJettonWallet, err := tongo.AccountIDFromTlb(body.DexPayload.TokenWallet1)
+		if err != nil {
+			return false
+		}
+		out.JettonWallet = *outJettonWallet
+		if tx.additionalInfo != nil {
+			out.JettonMaster = tx.additionalInfo.JettonMasters[*outJettonWallet]
+		}
+	} else {
+		return false
+	}
+
+	swapPayoutBubble := poolBubble.Children[0]
+	if len(poolBubble.Children) == 2 { // swap with referrer payout
+		referrerBubble := poolBubble.Children[0]
+		swapPayoutBubble = poolBubble.Children[1]
+
+		if !IsTx(referrerBubble) || !HasOperation(abi.StonfiPayVaultV2MsgOp)(referrerBubble) || !HasInterface(abi.StonfiRouterV2)(referrerBubble) {
+			return false
+		}
+
+		usedBubbles[referrerBubble] = struct{}{}
+		if len(referrerBubble.Children) > 0 {
+			refPayoutBubble := referrerBubble.Children[0]
+
+			if IsTx(refPayoutBubble) && HasOperation(abi.StonfiDepositRefFeeV2MsgOp)(refPayoutBubble) && HasInterface(abi.StonfiVaultV2)(refPayoutBubble) {
+				usedBubbles[refPayoutBubble] = struct{}{}
+				if len(refPayoutBubble.Children) > 0 {
+					excessBubble := refPayoutBubble.Children[0]
+					if IsTx(excessBubble) && HasOperation(abi.ExcessMsgOp)(excessBubble) {
+						usedBubbles[excessBubble] = struct{}{}
+					}
+				}
+			}
+		}
+	}
+
+	var payoutDest tongo.AccountID
+	if IsTx(swapPayoutBubble) && HasOperation(abi.StonfiPayToV2MsgOp)(swapPayoutBubble) && HasInterface(abi.StonfiRouterV2)(swapPayoutBubble) {
+		if len(swapPayoutBubble.Children) != 1 {
+			return false
+		}
+		usedBubbles[swapPayoutBubble] = struct{}{}
+		transferBubble := swapPayoutBubble.Children[0]
+
+		if IsJettonTransfer(transferBubble) {
+			transferTx := transferBubble.Info.(BubbleJettonTransfer)
+			if transferTx.recipient == nil {
+				return false
+			}
+			payoutDest = transferTx.recipient.Address
+			out.Amount = big.Int(transferTx.amount)
+			out.IsTon = transferTx.isWrappedTon
+			usedBubbles[transferBubble] = struct{}{}
+		} else {
+			return false
+		}
+	} else {
+		return false
+	}
+
+	// проверяем что не подменен адрес получателя свапа
+	if payoutDest != *sender {
+		return false
+	}
+
+	//закончили все проверки и собрали данные. билдим выходной пузырь и мержим
+	var newChildren []*Bubble
+	for i := range b.Children {
+		if _, found := usedBubbles[b.Children[i]]; !found {
+			newChildren = append(newChildren, b.Children[i])
+		}
+	}
+	for k := range usedBubbles {
+		if k != b { // не мержим валью флоу для первого элемента, т.к. он уже был учтен в b
+			b.ValueFlow.Merge(k.ValueFlow)
+		}
+		b.Accounts = append(b.Accounts, k.Accounts...)
+		b.Transaction = append(b.Transaction, k.Transaction...)
+		for j := range k.Children { //прикрепляем детей от удаляемых баблов напрямую к родителю
+			tb := k.Children[j]
+			if _, found := usedBubbles[tb]; !found {
+				newChildren = append(newChildren, tb)
+			}
+		}
+	}
+
+	b.Children = newChildren
+	b.Info = BubbleJettonSwap{
+		Dex:        references.Stonfi,
+		UserWallet: *sender,
+		Router:     routerAddr,
+		Out:        out,
+		In:         *in,
+		Success:    true,
+	}
+	return true
+}
+
+func (s UniversalStonfiStraw) processMultipleRouterSwaps(b *Bubble, usedBubbles map[*Bubble]struct{}) (*Bubble, *tongo.AccountID, *assetTransfer, bool) {
+	var sender ton.AccountID
+	var in assetTransfer
+	if IsJettonTransfer(b) && JettonTransferOperation(abi.StonfiSwapV2JettonOp)(b) {
+		usedBubbles[b] = struct{}{}
+		transfer := b.Info.(BubbleJettonTransfer)
+		if transfer.sender == nil {
+			return nil, nil, nil, false
+		}
+		if transfer.recipient == nil || !transfer.recipient.Is(abi.StonfiRouterV2) {
+			return nil, nil, nil, false
+		}
+		sender = transfer.sender.Address
+		in.Amount = big.Int(transfer.amount)
+		in.JettonMaster = transfer.master
+		in.JettonWallet = transfer.senderWallet
+		in.IsTon = transfer.isWrappedTon
+	} else {
+		return nil, nil, nil, false
+	}
+	if len(b.Children) != 1 {
+		return nil, nil, nil, false
+	}
+
+	poolB := b.Children[0]
+	nextB, ok := s.processSingleRouterSwaps(poolB, usedBubbles)
+	if !ok {
+		return nil, nil, nil, false
+	}
+	if nextB == nil {
+		// next bubble is nil only if payout have two children: referral payout and swap payout.
+		// it means that swap is finished
+		return poolB, &sender, &in, true
+	}
+
+	// now we only have swap payout, so maybe this payout is going to be transferred to another router (multiple routers swap)
+	// since swap straw has only one router we will save the latest used router
+	latestPoolB, _, _, ok := s.processMultipleRouterSwaps(nextB, usedBubbles)
+	if ok {
+		return latestPoolB, &sender, &in, true
+	}
+
+	return poolB, &sender, &in, true
+}
+
+func (s UniversalStonfiStraw) processSingleRouterSwaps(b *Bubble, usedBubbles map[*Bubble]struct{}) (*Bubble, bool) {
+	if IsTx(b) && HasOperation(abi.StonfiSwapV2MsgOp)(b) && HasInterface(abi.StonfiPoolV2)(b) {
+		if len(b.Children) == 0 {
+			return nil, false
+		}
+		usedBubbles[b] = struct{}{}
+
+		if len(b.Children) > 1 { // referral + swap payouts
+			return nil, true
+		}
+		payoutB := b.Children[0]
+
+		if IsTx(payoutB) && HasOperation(abi.StonfiPayToV2MsgOp)(payoutB) && HasInterface(abi.StonfiRouterV2)(payoutB) {
+			if len(payoutB.Children) == 0 {
+				return nil, false
+			}
+			usedBubbles[payoutB] = struct{}{}
+			nextB := payoutB.Children[0] // can be either swap msg on the same router or jetton transfer
+			latestNextB, ok := s.processSingleRouterSwaps(nextB, usedBubbles)
+			if ok {
+				return latestNextB, true
+			}
+
+			return nextB, true
+		}
+	}
+
+	return nil, false
+}
+
+type UniversalStonfiStraw struct{}
