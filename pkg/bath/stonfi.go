@@ -443,6 +443,9 @@ func (s UniversalStonfiStraw) Merge(b *Bubble) bool {
 			}
 		}
 	}
+	if len(poolBubble.Children) > 2 { // according to docs pool payout can have maximum two children
+		return false
+	}
 
 	var payoutDest tongo.AccountID
 	if IsTx(swapPayoutBubble) && HasOperation(abi.StonfiPayToV2MsgOp)(swapPayoutBubble) && HasInterface(abi.StonfiRouterV2)(swapPayoutBubble) {
@@ -542,7 +545,7 @@ func (s UniversalStonfiStraw) processMultipleRouterSwaps(b *Bubble, usedBubbles 
 	}
 
 	// now we only have swap payout, so maybe this payout is going to be transferred to another router (multiple routers swap)
-	// since swap straw has only one router we will save the latest used router
+	// since swap straw has only one router we will save the only last used router
 	latestPoolB, _, _, ok := s.processMultipleRouterSwaps(nextB, usedBubbles)
 	if ok {
 		return latestPoolB, &sender, &in, true
@@ -564,7 +567,7 @@ func (s UniversalStonfiStraw) processSingleRouterSwaps(b *Bubble, usedBubbles ma
 		payoutB := b.Children[0]
 
 		if IsTx(payoutB) && HasOperation(abi.StonfiPayToV2MsgOp)(payoutB) && HasInterface(abi.StonfiRouterV2)(payoutB) {
-			if len(payoutB.Children) == 0 {
+			if len(payoutB.Children) != 1 {
 				return nil, false
 			}
 			usedBubbles[payoutB] = struct{}{}
