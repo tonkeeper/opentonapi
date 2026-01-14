@@ -254,6 +254,8 @@ func TestFindActions(t *testing.T) {
 			// flawed jetton trasnfer
 			tongo.MustParseBlockID("(0,8000000000000000,60561386)"),
 			tongo.MustParseBlockID("(0,8000000000000000,60214898)"),
+			//stonfi multihop
+			tongo.MustParseBlockID("(0,8000000000000000,60211010)"),
 		}),
 	)
 
@@ -748,6 +750,11 @@ func TestFindActions(t *testing.T) {
 			name:           "flawed jetton transfer-two-out",
 			filenamePrefix: "flawed-jetton-transfer-two-out",
 			hash:           "40c65501ab8fc4a0ca1d687e49776e9cc6a21aacd78d9b24ed3d108094310d9a",
+		},
+		{
+			name:           "stonfi v2 multihop swap",
+			filenamePrefix: "stonfi-v2-multihop-swap",
+			hash:           "240835c21dafcdcc7340d3050ea9e730a6dd246b30b7e01fba81e2767f881f2e",
 		},
 	} {
 		t.Run(c.name, func(t *testing.T) {
