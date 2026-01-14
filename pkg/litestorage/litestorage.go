@@ -22,6 +22,7 @@ import (
 	"github.com/tonkeeper/tongo/tep64"
 	"github.com/tonkeeper/tongo/tlb"
 	"github.com/tonkeeper/tongo/ton"
+	"github.com/tonkeeper/tongo/wallet"
 	"go.uber.org/zap"
 	"golang.org/x/exp/maps"
 
@@ -524,6 +525,37 @@ func (s *LiteStorage) GetWalletPubKey(ctx context.Context, address tongo.Account
 		}
 	}
 	return nil, fmt.Errorf("can't get public key")
+}
+
+var SupportedWallets = map[wallet.Version]abi.ContractInterface{
+	wallet.V1R1:   abi.WalletV1R1,
+	wallet.V1R2:   abi.WalletV1R2,
+	wallet.V1R3:   abi.WalletV1R3,
+	wallet.V2R1:   abi.WalletV2R1,
+	wallet.V2R2:   abi.WalletV2R2,
+	wallet.V3R1:   abi.WalletV3R1,
+	wallet.V3R2:   abi.WalletV3R2,
+	wallet.V4R1:   abi.WalletV4R1,
+	wallet.V4R2:   abi.WalletV4R2,
+	wallet.V5Beta: abi.WalletV5Beta,
+	wallet.V5R1:   abi.WalletV5R1,
+}
+
+func (s *LiteStorage) GetWalletAddressesByPubkey(ctx context.Context, pubKey ed25519.PublicKey) (map[ton.AccountID]abi.ContractInterface, error) {
+	timer := prometheus.NewTimer(prometheus.ObserverFunc(func(v float64) {
+		storageTimeHistogramVec.WithLabelValues("get_wallet_addresses_by_pubkey").Observe(v)
+	}))
+	defer timer.ObserveDuration()
+
+	wallets := make(map[ton.AccountID]abi.ContractInterface, len(SupportedWallets))
+	for version, ifc := range SupportedWallets {
+		walletAddress, err := wallet.GenerateWalletAddress(pubKey, version, nil, 0, nil)
+		if err != nil {
+			continue
+		}
+		wallets[walletAddress] = ifc
+	}
+	return wallets, nil
 }
 
 func (s *LiteStorage) ReindexAccount(ctx context.Context, accountID tongo.AccountID) error {
