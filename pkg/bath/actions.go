@@ -47,7 +47,7 @@ const (
 	Purchase                  ActionType = "Purchase"
 	AddExtension              ActionType = "AddExtension"
 	RemoveExtension           ActionType = "RemoveExtension"
-	SetSignatureAllowed       ActionType = "SetSignatureAllowed"
+	SetSignatureAllowed       ActionType = "SetSignatureAllowedAction"
 	LiquidityDeposit          ActionType = "LiquidityDeposit"
 	Unknown                   ActionType = "Unknown"
 )
