@@ -270,6 +270,7 @@ var PendingWithdrawRequestLiquidStraw = Straw[BubbleWithdrawStakeRequest]{
 					return nil
 				},
 			},
+			Optional: true,
 		},
 	},
 }
@@ -305,6 +306,7 @@ var OldPendingWithdrawRequestLiquidStraw = Straw[BubbleWithdrawStakeRequest]{
 					},
 				},
 			},
+			Optional: true,
 		},
 	},
 }

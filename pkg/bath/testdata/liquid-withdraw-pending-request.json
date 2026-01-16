@@ -65,7 +65,12 @@
        "Account": "0:f63660ff947e5fe6ed4a8f729f1b24ef859497d0483aaa9d9ae48414297c4e1b",
        "Ton": -168248238,
        "Fee": 7919238,
-       "Jettons": null
+       "Jettons": [
+         {
+           "Address": "0:bdf3fa8098d129b54b4f73b5bac5d1e1fd91eb054169c3916dfc8ccd536d1000",
+           "Quantity": -996209389
+         }
+       ]
      }
    ]
  }

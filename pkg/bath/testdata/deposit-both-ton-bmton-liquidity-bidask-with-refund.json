@@ -3,7 +3,7 @@
      {
        "LiquidityDepositAction": {
          "Protocol": {
-           "Name": "Bidask",
+           "Name": "bidask",
            "Image": "https://bidask.finance/assets/landing/bidask-logo.webp"
          },
          "From": "0:98ecf9d8ede9be43d9928250d2ba0d4b41763f7fe3ca93d78689c508e5786187",
