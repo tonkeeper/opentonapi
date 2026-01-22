@@ -144,7 +144,15 @@ var StonfiV1PTONStraw = Straw[BubbleJettonTransfer]{
 		return nil
 	},
 	SingleChild: &Straw[BubbleJettonTransfer]{
-		CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.JettonNotifyMsgOp)},
+		CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.JettonNotifyMsgOp), func(bubble *Bubble) bool {
+			tx := bubble.Info.(BubbleTx)
+			body := tx.decodedBody.Value.(abi.JettonNotifyMsgBody)
+			amount := big.Int(body.Amount)
+			if big.NewInt(tx.inputAmount).Cmp(&amount) < 1 {
+				return false
+			}
+			return true
+		}},
 		Builder: func(newAction *BubbleJettonTransfer, bubble *Bubble) error {
 			tx := bubble.Info.(BubbleTx)
 			newAction.success = true
@@ -161,7 +169,7 @@ var StonfiV2PTONStraw = Straw[BubbleJettonTransfer]{
 	CheckFuncs: []bubbleCheck{IsTx, HasInterface(abi.JettonWallet), HasOperation(abi.PtonTonTransferMsgOp), func(bubble *Bubble) bool {
 		tx := bubble.Info.(BubbleTx)
 		body := tx.decodedBody.Value.(abi.PtonTonTransferMsgBody)
-		if tx.inputAmount < int64(body.TonAmount) {
+		if uint64(tx.inputAmount) <= uint64(body.TonAmount) {
 			return false
 		}
 		return true
@@ -181,7 +189,15 @@ var StonfiV2PTONStraw = Straw[BubbleJettonTransfer]{
 		return nil
 	},
 	SingleChild: &Straw[BubbleJettonTransfer]{
-		CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.JettonNotifyMsgOp)},
+		CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.JettonNotifyMsgOp), func(bubble *Bubble) bool {
+			tx := bubble.Info.(BubbleTx)
+			body := tx.decodedBody.Value.(abi.JettonNotifyMsgBody)
+			amount := big.Int(body.Amount)
+			if big.NewInt(tx.inputAmount).Cmp(&amount) < 1 {
+				return false
+			}
+			return true
+		}},
 		Builder: func(newAction *BubbleJettonTransfer, bubble *Bubble) error {
 			tx := bubble.Info.(BubbleTx)
 			newAction.success = true
@@ -221,7 +237,14 @@ var StonfiV2PTONStrawReverse = Straw[BubbleJettonTransfer]{
 	},
 	Children: []Straw[BubbleJettonTransfer]{
 		{
-			CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.PtonTonTransferMsgOp)},
+			CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.PtonTonTransferMsgOp), func(bubble *Bubble) bool {
+				tx := bubble.Info.(BubbleTx)
+				body := tx.decodedBody.Value.(abi.PtonTonTransferMsgBody)
+				if uint64(tx.inputAmount) <= uint64(body.TonAmount) {
+					return false
+				}
+				return true
+			}},
 			Builder: func(newAction *BubbleJettonTransfer, bubble *Bubble) error {
 				tx := bubble.Info.(BubbleTx)
 				newAction.success = true
