@@ -412,6 +412,7 @@ var StonfiLiquidityDepositBoth = Straw[BubbleLiquidityDeposit]{
 func (s UniversalStonfiStraw) Merge(b *Bubble) bool {
 	usedBubbles := map[*Bubble]struct{}{}
 	var out assetTransfer
+	success := true
 	poolBubble, sender, in, ok := s.processMultipleRouterSwaps(b, usedBubbles)
 	if !ok {
 		return false
@@ -482,6 +483,11 @@ func (s UniversalStonfiStraw) Merge(b *Bubble) bool {
 			if transferTx.recipient == nil {
 				return false
 			}
+			if transferTx.master == in.JettonMaster {
+				// jetton master for out token is the same as for in one
+				// it means that swap wasn't success and funds just sent back
+				success = false
+			}
 			payoutDest = transferTx.recipient.Address
 			out.Amount = big.Int(transferTx.amount)
 			out.IsTon = transferTx.isWrappedTon
@@ -526,7 +532,7 @@ func (s UniversalStonfiStraw) Merge(b *Bubble) bool {
 		Router:     routerAddr,
 		Out:        out,
 		In:         *in,
-		Success:    true,
+		Success:    success,
 	}
 	return true
 }
