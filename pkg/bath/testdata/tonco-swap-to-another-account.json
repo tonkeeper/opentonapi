@@ -1,0 +1,337 @@
+{
+   "Actions": [
+     {
+       "GasRelay": {
+         "Amount": 574655153,
+         "Relayer": "0:f33f5a1e309236c21fd412b9d522e24a6a6ef3745c01f7ec7d731bc0f844c334",
+         "Target": "0:f22aa05e75c981a9440d178f532a1fe5426137a399afa42f2f114562a1277940"
+       },
+       "Success": true,
+       "Type": "GasRelay",
+       "BaseTransactions": [
+         "9c2208853f803550fff4bb2a82ed15eb7a2ad008fb62ce03779e310f53a0996f"
+       ]
+     },
+     {
+       "JettonTransfer": {
+         "Comment": "Call: 0xa7fb58f8",
+         "EncryptedComment": null,
+         "Jetton": "0:bdf3fa8098d129b54b4f73b5bac5d1e1fd91eb054169c3916dfc8ccd536d1000",
+         "Recipient": "0:bffadd270a738531da7b13ba8fc403826c2586173f9ede9c316fab53bc59ac86",
+         "Sender": "0:f22aa05e75c981a9440d178f532a1fe5426137a399afa42f2f114562a1277940",
+         "RecipientsWallet": "0:912cb3d915c24e910a94f0a6b769ee6d008bf5ad35f4aad1e0cff2237aa0374f",
+         "SendersWallet": "0:c2619105252d0482338e9348df8d5fd41f665afd1c9c42891d16e8e3f64ed21b",
+         "Amount": "50109089323",
+         "Refund": null
+       },
+       "Success": true,
+       "Type": "JettonTransfer",
+       "BaseTransactions": [
+         "547be1c13d5854003986b59cafcf69dff67865a0f744bb7d3fcee03baa9260e5",
+         "69d707a4678334180440e0b0053e951e90a19babd1ce9ff4c93a152b2bb2ff0d",
+         "aa078b69beceaf3e7a530de9e16518fb5a0f257961b21b713e3c78ad7bd477d3",
+         "2bb9fabd479446b6abea8ffeec2613fe0a4d95bbc0d6db6958ced4d783324f8d"
+       ]
+     },
+     {
+       "SmartContractExec": {
+         "TonAttached": 510467600,
+         "Executor": "0:bffadd270a738531da7b13ba8fc403826c2586173f9ede9c316fab53bc59ac86",
+         "Contract": "0:951aab2cc50babc6e434ffada95d55cfb75d3ee9b0d9ad2a6798049d7e89926e",
+         "Operation": "Poolv3Swap",
+         "Payload": "OwnerAddress: 0:f22aa05e75c981a9440d178f532a1fe5426137a399afa42f2f114562a1277940\nParamsCell:\n  Amount: \"50109089323\"\n  MinOutAmount: \"94013181\"\n  SqrtPriceLimitX96: \"4295128740\"\nPayloadsCell:\n  OkForwardAmount: \"320000000\"\n  OkForwardPayload: b5ee9c72010203010001320001d903cfd19b801e45540bceb930352881a2f1ea6543fca84c26f47335f485e5e228ac5424ef2810037ef56fa125ff70327f2f7f19da19210377e2b5908f5b5595f66c3a09c35b22b2004970a08d72a3449799d964544f5481c86c7fa67ddc8bd321dc8f39fb837edce8a06422c4040101e16664de2a801244183034d9fd59a236f71ec4271be377399056dda4cc3a5ebf5dc40967df641003c8aa8179d72606a510345e3d4ca87f950984de8e66be90bcbc45158a849de502006fdeadf424bfee064fe5efe33b4324206efc56b211eb6ab2becd8741386b6456000000007fffffffc002009750c77dc28cf801e45540bceb930352881a2f1ea6543fca84c26f47335f485e5e228ac5424ef28000001e400b089166b7d44a530cd1dcfe1e6e0a5b522a685cf53f0c60dfeb748d00eddfaa88\n  RetForwardAmount: \"0\"\n  RetForwardPayload: b5ee9c7201010101001900002e000000004d756c7469686f70207c204f6d6e6973746f6e\n  TargetAddress: 0:873dc12df46c54ad0dc824ee9df946047b84375aae5162c1e2106b18a3a237bf\nQueryId: 13374699591055827628\nSourceWallet: 0:912cb3d915c24e910a94f0a6b769ee6d008bf5ad35f4aad1e0cff2237aa0374f\n"
+       },
+       "Success": true,
+       "Type": "SmartContractExec",
+       "BaseTransactions": [
+         "b04c3309208a0a16a6a2fe150509eaf0aa1134dc9eeb4f598ad36f076af02d9c"
+       ]
+     },
+     {
+       "SmartContractExec": {
+         "TonAttached": 486870500,
+         "Executor": "0:951aab2cc50babc6e434ffada95d55cfb75d3ee9b0d9ad2a6798049d7e89926e",
+         "Contract": "0:bffadd270a738531da7b13ba8fc403826c2586173f9ede9c316fab53bc59ac86",
+         "Operation": "PayTo",
+         "Payload": "PayTo:\n  PayToCode0:\n    CoinsinfoCell: null\n    Seqno: 0\n  PayToCode200:\n    CoinsinfoCell:\n      Amount0: \"0\"\n      Amount1: \"94022583\"\n      Jetton0Address: 0:912cb3d915c24e910a94f0a6b769ee6d008bf5ad35f4aad1e0cff2237aa0374f\n      Jetton1Address: 0:acad45796724b3f00ad42a4311b20667da4be28a43951587a381f73aa9552209\n      PayloadCell:\n        PayloadAmount0: \"0\"\n        PayloadAmount1: \"320000000\"\n        PayloadCell0: b5ee9c7201010101001900002e000000004d756c7469686f70207c204f6d6e6973746f6e\n        PayloadCell1: b5ee9c72010203010001320001d903cfd19b801e45540bceb930352881a2f1ea6543fca84c26f47335f485e5e228ac5424ef2810037ef56fa125ff70327f2f7f19da19210377e2b5908f5b5595f66c3a09c35b22b2004970a08d72a3449799d964544f5481c86c7fa67ddc8bd321dc8f39fb837edce8a06422c4040101e16664de2a801244183034d9fd59a236f71ec4271be377399056dda4cc3a5ebf5dc40967df641003c8aa8179d72606a510345e3d4ca87f950984de8e66be90bcbc45158a849de502006fdeadf424bfee064fe5efe33b4324206efc56b211eb6ab2becd8741386b6456000000007fffffffc002009750c77dc28cf801e45540bceb930352881a2f1ea6543fca84c26f47335f485e5e228ac5424ef28000001e400b089166b7d44a530cd1dcfe1e6e0a5b522a685cf53f0c60dfeb748d00eddfaa88\n    IndexerSwapInfoCell:\n      FeeGrowthGlobal0X128: \"179679905543826727283420828486123166282\"\n      FeeGrowthGlobal1X128: \"502890802100063278596152597424533884\"\n      Liquidity: \"408581290568\"\n      PriceSqrt: \"3436628759893905197821370332\"\n      Tick: -62760\n    Seqno: 19051\n  PayToCode201:\n    CoinsinfoCell: null\n    IndexerBurnInfoCell: null\n    Seqno: 0\n  PayToCode230:\n    CoinsinfoCell: null\n    IndexerSwapInfoCell: null\n    Seqno: 0\n  SumType: PayToCode200\nQueryId: 13374699591055827628\nReciever0: 0:f22aa05e75c981a9440d178f532a1fe5426137a399afa42f2f114562a1277940\nReciever1: 0:873dc12df46c54ad0dc824ee9df946047b84375aae5162c1e2106b18a3a237bf\n"
+       },
+       "Success": true,
+       "Type": "SmartContractExec",
+       "BaseTransactions": [
+         "6b162a51d018135494844042e6a3bc421666439c01e7abf1a6b1cabf6494ad55"
+       ]
+     },
+     {
+       "JettonTransfer": {
+         "Comment": "Call: 0x03cfd19b",
+         "EncryptedComment": null,
+         "Jetton": "0:b113a994b5024a16719f69139328eb759596c38a25f59028b146fecdc3621dfe",
+         "Recipient": "0:873dc12df46c54ad0dc824ee9df946047b84375aae5162c1e2106b18a3a237bf",
+         "Sender": "0:bffadd270a738531da7b13ba8fc403826c2586173f9ede9c316fab53bc59ac86",
+         "RecipientsWallet": "0:a3359141665d8121a1f5999ed1ff095b28967a782dd91a9a49dff2b7b78c783f",
+         "SendersWallet": "0:acad45796724b3f00ad42a4311b20667da4be28a43951587a381f73aa9552209",
+         "Amount": "94022583",
+         "Refund": null
+       },
+       "Success": true,
+       "Type": "JettonTransfer",
+       "BaseTransactions": [
+         "0f3537b2d36b3b06b53c5cae4bb2363dfc789bf33606c777530a62b50beb8691",
+         "bfb15a9dd5de4816d06b6a835933baa4fd52e45a2312c3e42777b40c65b5dc34",
+         "527057ab4b7b9ca4762b74374d77dd6efbed10746ad0434eb7db17b9b315c7a7",
+         "cd79fe3368e283eb3b21a8c735b86aa72872714785f3eb56742c9bfc02c3dc70"
+       ]
+     },
+     {
+       "JettonTransfer": {
+         "Comment": "Call: StonfiSwapV2",
+         "EncryptedComment": null,
+         "Jetton": "0:b113a994b5024a16719f69139328eb759596c38a25f59028b146fecdc3621dfe",
+         "Recipient": "0:92e1411ae546892f33b2c8a89ea90390d8ff4cfbb917a643b91e73f706fdb9d1",
+         "Sender": "0:873dc12df46c54ad0dc824ee9df946047b84375aae5162c1e2106b18a3a237bf",
+         "RecipientsWallet": "0:922d627d7d8edbd00e4e23bdb0c54a76ee5e1f46573a1af4417857fa3e23e91f",
+         "SendersWallet": "0:a3359141665d8121a1f5999ed1ff095b28967a782dd91a9a49dff2b7b78c783f",
+         "Amount": "94022583",
+         "Refund": null
+       },
+       "Success": true,
+       "Type": "JettonTransfer",
+       "BaseTransactions": [
+         "ed97a2f48ce6be301ab230a345423ef79877d43c358904e1b95fc689abebd2bc",
+         "5571635969bf775aaea7a82338679ee313177264e61237f78c5a4e914a6e0044",
+         "ffa625b36d433c6eb64288455e417c863f0b83ef8ebd702c0650b256e958faf3",
+         "a35c03fc626486af27c58e79027bb64df58e5d1febe64102cf0d1be77706a8b9"
+       ]
+     },
+     {
+       "SmartContractExec": {
+         "TonAttached": 200647998,
+         "Executor": "0:92e1411ae546892f33b2c8a89ea90390d8ff4cfbb917a643b91e73f706fdb9d1",
+         "Contract": "0:8649cad97b5c5bc96a960ef748ea6ccff8601c01616fe995ee6893ae4aa7a6c6",
+         "Operation": "StonfiSwapV2",
+         "Payload": "DexPayload:\n  ExcessesAddress: 0:dfbd5be8497fdc0c9fcbdfc676864840ddf8ad6423d6d5657d9b0e8270d6c8ac\n  RefundAddress: 0:f22aa05e75c981a9440d178f532a1fe5426137a399afa42f2f114562a1277940\n  SwapBody:\n    CustomPayload: null\n    FwdGas: \"0\"\n    MinOut: \"53550524623\"\n    Receiver: 0:f22aa05e75c981a9440d178f532a1fe5426137a399afa42f2f114562a1277940\n    RefAddress: 0:b089166b7d44a530cd1dcfe1e6e0a5b522a685cf53f0c60dfeb748d00eddfaa8\n    RefFee: 60\n    RefundFwdGas: \"0\"\n    RefundPayload: null\n  TokenWallet1: 0:9220c181a6cfeacd11b7b8f62138df1bb9cc82b6ed2661d2f5faee204b3efb20\n  TransferredOp: 1717886506\n  TxDeadline: 4294967295\nFromUser: 0:873dc12df46c54ad0dc824ee9df946047b84375aae5162c1e2106b18a3a237bf\nLeftAmount: \"94022583\"\nQueryId: 13374699591055827628\nRightAmount: \"0\"\n"
+       },
+       "Success": true,
+       "Type": "SmartContractExec",
+       "BaseTransactions": [
+         "1f963a0a88d119705cbec8598ecbb3f911240f23e0614b3519df79ab04650e55"
+       ]
+     },
+     {
+       "SmartContractExec": {
+         "TonAttached": 36586854,
+         "Executor": "0:8649cad97b5c5bc96a960ef748ea6ccff8601c01616fe995ee6893ae4aa7a6c6",
+         "Contract": "0:92e1411ae546892f33b2c8a89ea90390d8ff4cfbb917a643b91e73f706fdb9d1",
+         "Operation": "StonfiPayVaultV2",
+         "Payload": "AdditionalInfo:\n  Amount0Out: \"0\"\n  Amount1Out: \"326646218\"\n  Token0Address: 0:922d627d7d8edbd00e4e23bdb0c54a76ee5e1f46573a1af4417857fa3e23e91f\n  Token1Address: 0:9220c181a6cfeacd11b7b8f62138df1bb9cc82b6ed2661d2f5faee204b3efb20\nExcessesAddress: 0:dfbd5be8497fdc0c9fcbdfc676864840ddf8ad6423d6d5657d9b0e8270d6c8ac\nOwner: 0:b089166b7d44a530cd1dcfe1e6e0a5b522a685cf53f0c60dfeb748d00eddfaa8\nQueryId: 13374699591055827628\n"
+       },
+       "Success": true,
+       "Type": "SmartContractExec",
+       "BaseTransactions": [
+         "ade2a50c5e9f4bb82c9a061d5cffb8c24c2ff5cac2cd473a73547070dbd74343"
+       ]
+     },
+     {
+       "SmartContractExec": {
+         "TonAttached": 29195254,
+         "Executor": "0:92e1411ae546892f33b2c8a89ea90390d8ff4cfbb917a643b91e73f706fdb9d1",
+         "Contract": "0:b7f50737d0f036ef7f6e396a2a2b099d5dee37a7f539186f7840ea99f67b6a64",
+         "Operation": "StonfiDepositRefFeeV2",
+         "Payload": "ExcessesAddress: 0:dfbd5be8497fdc0c9fcbdfc676864840ddf8ad6423d6d5657d9b0e8270d6c8ac\nJettonAmount: \"326646218\"\nQueryId: 13374699591055827628\n"
+       },
+       "Success": true,
+       "Type": "SmartContractExec",
+       "BaseTransactions": [
+         "1abd91d637eaeec7d5e837bf007124b3ce782d09a76b415cfabb2a9164e2d0e4"
+       ]
+     },
+     {
+       "TonTransfer": {
+         "Amount": 26450451,
+         "Comment": null,
+         "EncryptedComment": null,
+         "Recipient": "0:dfbd5be8497fdc0c9fcbdfc676864840ddf8ad6423d6d5657d9b0e8270d6c8ac",
+         "Sender": "0:b7f50737d0f036ef7f6e396a2a2b099d5dee37a7f539186f7840ea99f67b6a64",
+         "Refund": null
+       },
+       "Success": true,
+       "Type": "TonTransfer",
+       "BaseTransactions": [
+         "a6abc3a0e049baea278f688c47a75a52dbbc8f55f0d82f46f582df132db1c3b1"
+       ]
+     },
+     {
+       "SmartContractExec": {
+         "TonAttached": 154380342,
+         "Executor": "0:8649cad97b5c5bc96a960ef748ea6ccff8601c01616fe995ee6893ae4aa7a6c6",
+         "Contract": "0:92e1411ae546892f33b2c8a89ea90390d8ff4cfbb917a643b91e73f706fdb9d1",
+         "Operation": "StonfiPayToV2",
+         "Payload": "AdditionalInfo:\n  Amount0Out: \"0\"\n  Amount1Out: \"54098057661\"\n  FwdTonAmount: \"0\"\n  Token0Address: 0:922d627d7d8edbd00e4e23bdb0c54a76ee5e1f46573a1af4417857fa3e23e91f\n  Token1Address: 0:9220c181a6cfeacd11b7b8f62138df1bb9cc82b6ed2661d2f5faee204b3efb20\nCustomPayload: null\nExcessesAddress: 0:dfbd5be8497fdc0c9fcbdfc676864840ddf8ad6423d6d5657d9b0e8270d6c8ac\nExitCode: 3326308581\nOriginalCaller: 0:873dc12df46c54ad0dc824ee9df946047b84375aae5162c1e2106b18a3a237bf\nQueryId: 13374699591055827628\nToAddress: 0:f22aa05e75c981a9440d178f532a1fe5426137a399afa42f2f114562a1277940\n"
+       },
+       "Success": true,
+       "Type": "SmartContractExec",
+       "BaseTransactions": [
+         "349b8627ee925c91387cd64b7b39f43a876a9b8432dd9fd4cfca2f23c3247b31"
+       ]
+     },
+     {
+       "JettonTransfer": {
+         "Comment": null,
+         "EncryptedComment": null,
+         "Jetton": "0:671963027f7f85659ab55b821671688601cdcf1ee674fc7fbbb1a776a18d34a3",
+         "Recipient": "0:f22aa05e75c981a9440d178f532a1fe5426137a399afa42f2f114562a1277940",
+         "Sender": "0:92e1411ae546892f33b2c8a89ea90390d8ff4cfbb917a643b91e73f706fdb9d1",
+         "RecipientsWallet": "0:0000000000000000000000000000000000000000000000000000000000000000",
+         "SendersWallet": "0:9220c181a6cfeacd11b7b8f62138df1bb9cc82b6ed2661d2f5faee204b3efb20",
+         "Amount": "54098057661",
+         "Refund": null
+       },
+       "Success": false,
+       "Type": "JettonTransfer",
+       "BaseTransactions": [
+         "ecc620b9e7727b70d61b3be6b7af3188746c7052aa7a7c0c4668486ddb4721b2"
+       ]
+     },
+     {
+       "TonTransfer": {
+         "Amount": 54098057661,
+         "Comment": null,
+         "EncryptedComment": null,
+         "Recipient": "0:f22aa05e75c981a9440d178f532a1fe5426137a399afa42f2f114562a1277940",
+         "Sender": "0:9220c181a6cfeacd11b7b8f62138df1bb9cc82b6ed2661d2f5faee204b3efb20",
+         "Refund": null
+       },
+       "Success": true,
+       "Type": "TonTransfer",
+       "BaseTransactions": [
+         "a1480506c51de79339d528dbfb54a9b1c4872fd00211ed2bda4a37a095eba274"
+       ]
+     },
+     {
+       "TonTransfer": {
+         "Amount": 143837941,
+         "Comment": null,
+         "EncryptedComment": null,
+         "Recipient": "0:dfbd5be8497fdc0c9fcbdfc676864840ddf8ad6423d6d5657d9b0e8270d6c8ac",
+         "Sender": "0:9220c181a6cfeacd11b7b8f62138df1bb9cc82b6ed2661d2f5faee204b3efb20",
+         "Refund": null
+       },
+       "Success": true,
+       "Type": "TonTransfer",
+       "BaseTransactions": [
+         "c8201730cf62a20b38da6888d964e336bdba85cc800388e4e56cd34e04e99dae"
+       ]
+     }
+   ],
+   "Accounts": [
+     {
+       "Account": "0:8649cad97b5c5bc96a960ef748ea6ccff8601c01616fe995ee6893ae4aa7a6c6",
+       "Ton": 0,
+       "Fee": 9680802,
+       "Jettons": null
+     },
+     {
+       "Account": "0:873dc12df46c54ad0dc824ee9df946047b84375aae5162c1e2106b18a3a237bf",
+       "Ton": 152821286,
+       "Fee": 4385298,
+       "Jettons": null
+     },
+     {
+       "Account": "0:912cb3d915c24e910a94f0a6b769ee6d008bf5ad35f4aad1e0cff2237aa0374f",
+       "Ton": 37,
+       "Fee": 7054730,
+       "Jettons": null
+     },
+     {
+       "Account": "0:9220c181a6cfeacd11b7b8f62138df1bb9cc82b6ed2661d2f5faee204b3efb20",
+       "Ton": -54098057661,
+       "Fee": 4463201,
+       "Jettons": null
+     },
+     {
+       "Account": "0:922d627d7d8edbd00e4e23bdb0c54a76ee5e1f46573a1af4417857fa3e23e91f",
+       "Ton": -1,
+       "Fee": 2080401,
+       "Jettons": null
+     },
+     {
+       "Account": "0:92e1411ae546892f33b2c8a89ea90390d8ff4cfbb917a643b91e73f706fdb9d1",
+       "Ton": 0,
+       "Fee": 22822802,
+       "Jettons": [
+         {
+           "Address": "0:b113a994b5024a16719f69139328eb759596c38a25f59028b146fecdc3621dfe",
+           "Quantity": 94022583
+         }
+       ]
+     },
+     {
+       "Account": "0:951aab2cc50babc6e434ffada95d55cfb75d3ee9b0d9ad2a6798049d7e89926e",
+       "Ton": -279032,
+       "Fee": 23876132,
+       "Jettons": null
+     },
+     {
+       "Account": "0:a3359141665d8121a1f5999ed1ff095b28967a782dd91a9a49dff2b7b78c783f",
+       "Ton": 0,
+       "Fee": 4714014,
+       "Jettons": null
+     },
+     {
+       "Account": "0:acad45796724b3f00ad42a4311b20667da4be28a43951587a381f73aa9552209",
+       "Ton": -230,
+       "Fee": 2633830,
+       "Jettons": null
+     },
+     {
+       "Account": "0:b7f50737d0f036ef7f6e396a2a2b099d5dee37a7f539186f7840ea99f67b6a64",
+       "Ton": 0,
+       "Fee": 2744803,
+       "Jettons": null
+     },
+     {
+       "Account": "0:bffadd270a738531da7b13ba8fc403826c2586173f9ede9c316fab53bc59ac86",
+       "Ton": -3672,
+       "Fee": 17874472,
+       "Jettons": [
+         {
+           "Address": "0:b113a994b5024a16719f69139328eb759596c38a25f59028b146fecdc3621dfe",
+           "Quantity": -94022583
+         },
+         {
+           "Address": "0:bdf3fa8098d129b54b4f73b5bac5d1e1fd91eb054169c3916dfc8ccd536d1000",
+           "Quantity": 50109089323
+         }
+       ]
+     },
+     {
+       "Account": "0:c2619105252d0482338e9348df8d5fd41f665afd1c9c42891d16e8e3f64ed21b",
+       "Ton": -13261,
+       "Fee": 6528861,
+       "Jettons": null
+     },
+     {
+       "Account": "0:dfbd5be8497fdc0c9fcbdfc676864840ddf8ad6423d6d5657d9b0e8270d6c8ac",
+       "Ton": 307961124,
+       "Fee": 654403,
+       "Jettons": null
+     },
+     {
+       "Account": "0:f22aa05e75c981a9440d178f532a1fe5426137a399afa42f2f114562a1277940",
+       "Ton": 54097846474,
+       "Fee": 4866340,
+       "Jettons": [
+         {
+           "Address": "0:bdf3fa8098d129b54b4f73b5bac5d1e1fd91eb054169c3916dfc8ccd536d1000",
+           "Quantity": -50109089323
+         }
+       ]
+     },
+     {
+       "Account": "0:f33f5a1e309236c21fd412b9d522e24a6a6ef3745c01f7ec7d731bc0f844c334",
+       "Ton": -584010756,
+       "Fee": 9355603,
+       "Jettons": null
+     }
+   ]
+ }
