@@ -26,17 +26,6 @@ var ToncoSwapStraw = Straw[BubbleJettonSwap]{
 	},
 	SingleChild: &Straw[BubbleJettonSwap]{
 		CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.Poolv3SwapMsgOp), HasInterface(abi.ToncoPool)},
-		Builder: func(newAction *BubbleJettonSwap, bubble *Bubble) error {
-			tx := bubble.Info.(BubbleTx)
-			body, ok := tx.decodedBody.Value.(abi.Poolv3SwapMsgBody)
-			if !ok {
-				return fmt.Errorf("not a tonco pool_v3_swap_msg_body")
-			}
-			if body.PayloadsCell.TargetAddress != newAction.UserWallet.ToMsgAddress() {
-				return fmt.Errorf("not a user wallet")
-			}
-			return nil
-		},
 		SingleChild: &Straw[BubbleJettonSwap]{
 			CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.PayToMsgOp), HasInterface(abi.ToncoRouter), func(bubble *Bubble) bool {
 				tx := bubble.Info.(BubbleTx)
@@ -56,9 +45,15 @@ var ToncoSwapStraw = Straw[BubbleJettonSwap]{
 				return nil
 			},
 			SingleChild: &Straw[BubbleJettonSwap]{
-				CheckFuncs: []bubbleCheck{IsJettonTransfer},
+				CheckFuncs: []bubbleCheck{IsJettonTransfer, func(bubble *Bubble) bool {
+					tx := bubble.Info.(BubbleJettonTransfer)
+					return tx.recipient != nil
+				}},
 				Builder: func(newAction *BubbleJettonSwap, bubble *Bubble) error {
 					tx := bubble.Info.(BubbleJettonTransfer)
+					if *tx.recipient.Addr() != newAction.UserWallet {
+						return fmt.Errorf("not a user wallet")
+					}
 					newAction.Out.IsTon = tx.isWrappedTon
 					newAction.Out.Amount = big.Int(tx.amount)
 					if !newAction.Out.IsTon {

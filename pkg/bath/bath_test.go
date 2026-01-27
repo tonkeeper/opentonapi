@@ -237,6 +237,7 @@ func TestFindActions(t *testing.T) {
 			tongo.MustParseBlockID("(0,8000000000000000,56804640)"),
 			tongo.MustParseBlockID("(0,8000000000000000,56834937)"),
 			tongo.MustParseBlockID("(0,8000000000000000,56349139)"),
+			tongo.MustParseBlockID("(0,8000000000000000,60894631)"),
 			// liquidity deposit stonfi
 			tongo.MustParseBlockID("(0,8000000000000000,57142299)"),
 			// liquidity deposit tonco
@@ -675,6 +676,11 @@ func TestFindActions(t *testing.T) {
 			name:           "tonco storm-usdt swap",
 			hash:           "410e1fda05a63baf1ab3227886755dad96450922c400538910fbf91efc070488",
 			filenamePrefix: "tonco-storm-usdt-swap",
+		},
+		{
+			name:           "tonco swap to another account",
+			hash:           "1cb7e5fcae043079a3c742775602c8f39b9495597d1ece582d0541a4fe75fd4a",
+			filenamePrefix: "tonco-swap-to-another-account",
 		},
 		{
 			name:           "old withdraw stake request",
