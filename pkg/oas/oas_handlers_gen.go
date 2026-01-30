@@ -1137,7 +1137,8 @@ func (s *Server) handleEmulateMessageToTraceRequest(args [0]string, argsEscaped 
 
 // handleEmulateMessageToWalletRequest handles emulateMessageToWallet operation.
 //
-// Emulate sending message to retrieve the resulting wallet state.
+// Emulates a wallet message on the current blockchain state and derives its consequences for the
+// signing wallet.
 //
 // POST /v2/wallet/emulate
 func (s *Server) handleEmulateMessageToWalletRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -2458,6 +2459,10 @@ func (s *Server) handleGetAccountEventsRequest(args [1]string, argsEscaped bool,
 					In:   "query",
 				}: params.SubjectOnly,
 				{
+					Name: "after_lt",
+					In:   "query",
+				}: params.AfterLt,
+				{
 					Name: "before_lt",
 					In:   "query",
 				}: params.BeforeLt,
@@ -2473,6 +2478,10 @@ func (s *Server) handleGetAccountEventsRequest(args [1]string, argsEscaped bool,
 					Name: "end_date",
 					In:   "query",
 				}: params.EndDate,
+				{
+					Name: "sort_order",
+					In:   "query",
+				}: params.SortOrder,
 			},
 			Raw: r,
 		}

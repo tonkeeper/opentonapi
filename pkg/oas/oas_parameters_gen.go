@@ -1933,10 +1933,13 @@ type GetAccountEventsParams struct {
 	// Filter actions where requested account is not real subject (for example sender or receiver jettons).
 	SubjectOnly OptBool
 	// Omit this parameter to get last events.
+	AfterLt OptInt64
+	// Omit this parameter to get last events.
 	BeforeLt  OptInt64
 	Limit     int
 	StartDate OptInt64
 	EndDate   OptInt64
+	SortOrder OptGetAccountEventsSortOrder
 }
 
 func unpackGetAccountEventsParams(packed middleware.Parameters) (params GetAccountEventsParams) {
@@ -1976,6 +1979,15 @@ func unpackGetAccountEventsParams(packed middleware.Parameters) (params GetAccou
 	}
 	{
 		key := middleware.ParameterKey{
+			Name: "after_lt",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.AfterLt = v.(OptInt64)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
 			Name: "before_lt",
 			In:   "query",
 		}
@@ -2006,6 +2018,15 @@ func unpackGetAccountEventsParams(packed middleware.Parameters) (params GetAccou
 		}
 		if v, ok := packed[key]; ok {
 			params.EndDate = v.(OptInt64)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "sort_order",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.SortOrder = v.(OptGetAccountEventsSortOrder)
 		}
 	}
 	return params
@@ -2191,6 +2212,47 @@ func decodeGetAccountEventsParams(args [1]string, argsEscaped bool, r *http.Requ
 	}(); err != nil {
 		return params, &ogenerrors.DecodeParamError{
 			Name: "subject_only",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Decode query: after_lt.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "after_lt",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotAfterLtVal int64
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToInt64(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotAfterLtVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.AfterLt.SetTo(paramsDotAfterLtVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "after_lt",
 			In:   "query",
 			Err:  err,
 		}
@@ -2415,6 +2477,67 @@ func decodeGetAccountEventsParams(args [1]string, argsEscaped bool, r *http.Requ
 	}(); err != nil {
 		return params, &ogenerrors.DecodeParamError{
 			Name: "end_date",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Set default value for query: sort_order.
+	{
+		val := GetAccountEventsSortOrder("desc")
+		params.SortOrder.SetTo(val)
+	}
+	// Decode query: sort_order.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "sort_order",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotSortOrderVal GetAccountEventsSortOrder
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotSortOrderVal = GetAccountEventsSortOrder(c)
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.SortOrder.SetTo(paramsDotSortOrderVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if value, ok := params.SortOrder.Get(); ok {
+					if err := func() error {
+						if err := value.Validate(); err != nil {
+							return err
+						}
+						return nil
+					}(); err != nil {
+						return err
+					}
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "sort_order",
 			In:   "query",
 			Err:  err,
 		}
