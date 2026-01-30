@@ -865,6 +865,15 @@ paths:
             type: boolean
             default: false
           required: false
+        - name: after_lt
+          in: query
+          description: "omit this parameter to get last events"
+          required: false
+          schema:
+            type: integer
+            format: int64
+            example: 25758317000002
+            x-js-format: bigint
         - name: before_lt
           in: query
           description: "omit this parameter to get last events"
@@ -898,6 +907,15 @@ paths:
             format: int64
             maximum: 2114380800
             example: 1668436763
+        - name: sort_order
+          in: query
+          schema:
+            type: string
+            description: "used to sort the result-set in ascending or descending order by lt."
+            default: "desc"
+            enum:
+              - desc
+              - asc
       responses:
         '200':
           description: account's events

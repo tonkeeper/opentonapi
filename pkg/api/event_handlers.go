@@ -251,7 +251,9 @@ func (h *Handler) GetAccountEvents(ctx context.Context, params oas.GetAccountEve
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
 	}
-	traceIDs, err := h.storage.SearchTraces(ctx, account.ID, params.Limit, optIntToPointer(params.BeforeLt), optIntToPointer(params.StartDate), optIntToPointer(params.EndDate), params.Initiator.Value)
+
+	descendingOrder := params.SortOrder.Value == oas.GetAccountEventsSortOrderDesc
+	traceIDs, err := h.storage.SearchTraces(ctx, account.ID, params.Limit, optIntToPointer(params.BeforeLt), optIntToPointer(params.AfterLt), optIntToPointer(params.StartDate), optIntToPointer(params.EndDate), params.Initiator.Value, descendingOrder)
 	if err != nil && !errors.Is(err, core.ErrEntityNotFound) {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
@@ -301,7 +303,8 @@ func (h *Handler) GetAccountEvents(ctx context.Context, params oas.GetAccountEve
 		}
 		events = append(events, e)
 	}
-	if !(params.BeforeLt.IsSet() || params.StartDate.IsSet() || params.EndDate.IsSet() || (len(events) > 0 && events[0].InProgress)) { //if we look into history we don't need to mix mempool
+	// if we look into history we don't need to mix mempool
+	if descendingOrder && !(params.BeforeLt.IsSet() || params.StartDate.IsSet() || params.EndDate.IsSet() || (len(events) > 0 && events[0].InProgress)) {
 		memTraces, _ := h.mempoolEmulate.accountsTraces.Get(account.ID)
 		i := 0
 		for _, hash := range memTraces {
