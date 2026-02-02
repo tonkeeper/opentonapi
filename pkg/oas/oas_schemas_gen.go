@@ -5725,6 +5725,8 @@ type Event struct {
 	// Event is not finished yet. Transactions still happening.
 	InProgress bool    `json:"in_progress"`
 	Progress   float32 `json:"progress"`
+	// ID of the slice where this event was finalized. Null if not yet finalized.
+	LastSliceID OptInt64 `json:"last_slice_id"`
 }
 
 // GetEventID returns the value of EventID.
@@ -5805,6 +5807,16 @@ func (s *Event) SetInProgress(val bool) {
 // SetProgress sets the value of Progress.
 func (s *Event) SetProgress(val float32) {
 	s.Progress = val
+}
+
+// GetLastSliceID returns the value of LastSliceID.
+func (s *Event) GetLastSliceID() OptInt64 {
+	return s.LastSliceID
+}
+
+// SetLastSliceID sets the value of LastSliceID.
+func (s *Event) SetLastSliceID(val OptInt64) {
+	s.LastSliceID = val
 }
 
 // Ref: #/components/schemas/ExecGetMethodArg

@@ -1042,6 +1042,14 @@ func (h *Handler) toEvent(ctx context.Context, trace *core.Trace, result *bath.A
 		InProgress: trace.InProgress(),
 		Progress:   trace.CalculateProgress(),
 	}
+
+	if !event.InProgress {
+		lastSliceID, err := h.storage.GetTraceLastSliceID(ctx, trace.Hash)
+		if err == nil && lastSliceID != nil {
+			event.LastSliceID = oas.NewOptInt64(*lastSliceID)
+		}
+	}
+
 	for i, a := range result.Actions {
 		convertedAction, err := h.convertAction(ctx, nil, a, lang, event.Lt)
 		if err != nil {

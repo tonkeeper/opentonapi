@@ -16142,6 +16142,12 @@ func (s *Event) encodeFields(e *jx.Encoder) {
 		e.FieldStart("progress")
 		e.Float32(s.Progress)
 	}
+	{
+		if s.LastSliceID.Set {
+			e.FieldStart("last_slice_id")
+			s.LastSliceID.Encode(e)
+		}
+	}
 }
 
 var jsonFieldsNameOfEvent = [8]string{
@@ -16271,6 +16277,16 @@ func (s *Event) Decode(d *jx.Decoder) error {
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"progress\"")
+			}
+		case "last_slice_id":
+			if err := func() error {
+				s.LastSliceID.Reset()
+				if err := s.LastSliceID.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"last_slice_id\"")
 			}
 		default:
 			return d.Skip()

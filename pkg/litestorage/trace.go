@@ -40,6 +40,10 @@ func (s *LiteStorage) GetTrace(ctx context.Context, hash tongo.Bits256) (*core.T
 	return &trace, err
 }
 
+func (s *LiteStorage) GetTraceLastSliceID(ctx context.Context, hash tongo.Bits256) (*int64, error) {
+	return nil, nil
+}
+
 func (s *LiteStorage) SearchTraces(ctx context.Context, a tongo.AccountID, limit int, beforeLT, startTime, endTime *int64, initiator bool) ([]core.TraceID, error) {
 	return nil, nil
 }
