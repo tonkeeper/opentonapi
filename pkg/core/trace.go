@@ -31,6 +31,7 @@ type Trace struct {
 	// Transaction is slightly modified.
 	// For example, we have kept only external outbound messages in OutMsgs.
 	Transaction
+	LastSliceID       *int64
 	AccountInterfaces []abi.ContractInterface
 	Children          []*Trace
 

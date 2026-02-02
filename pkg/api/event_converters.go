@@ -1043,11 +1043,8 @@ func (h *Handler) toEvent(ctx context.Context, trace *core.Trace, result *bath.A
 		Progress:   trace.CalculateProgress(),
 	}
 
-	if !event.InProgress {
-		lastSliceID, err := h.storage.GetTraceLastSliceID(ctx, trace.Hash)
-		if err == nil && lastSliceID != nil {
-			event.LastSliceID = oas.NewOptInt64(*lastSliceID)
-		}
+	if !event.InProgress && trace.LastSliceID != nil {
+		event.LastSliceID.SetTo(*trace.LastSliceID)
 	}
 
 	for i, a := range result.Actions {
