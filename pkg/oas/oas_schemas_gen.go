@@ -6518,6 +6518,48 @@ func (s *GetAccountDiffOK) SetBalanceChange(val int64) {
 	s.BalanceChange = val
 }
 
+// Used to sort the result-set in ascending or descending order by lt.
+type GetAccountEventsSortOrder string
+
+const (
+	GetAccountEventsSortOrderDesc GetAccountEventsSortOrder = "desc"
+	GetAccountEventsSortOrderAsc  GetAccountEventsSortOrder = "asc"
+)
+
+// AllValues returns all GetAccountEventsSortOrder values.
+func (GetAccountEventsSortOrder) AllValues() []GetAccountEventsSortOrder {
+	return []GetAccountEventsSortOrder{
+		GetAccountEventsSortOrderDesc,
+		GetAccountEventsSortOrderAsc,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s GetAccountEventsSortOrder) MarshalText() ([]byte, error) {
+	switch s {
+	case GetAccountEventsSortOrderDesc:
+		return []byte(s), nil
+	case GetAccountEventsSortOrderAsc:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *GetAccountEventsSortOrder) UnmarshalText(data []byte) error {
+	switch GetAccountEventsSortOrder(data) {
+	case GetAccountEventsSortOrderDesc:
+		*s = GetAccountEventsSortOrderDesc
+		return nil
+	case GetAccountEventsSortOrderAsc:
+		*s = GetAccountEventsSortOrderAsc
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
 type GetAccountInfoByStateInitReq struct {
 	StateInit string `json:"state_init"`
 }
@@ -13470,6 +13512,52 @@ func (o OptGasRelayAction) Get() (v GasRelayAction, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptGasRelayAction) Or(d GasRelayAction) GasRelayAction {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptGetAccountEventsSortOrder returns new OptGetAccountEventsSortOrder with value set to v.
+func NewOptGetAccountEventsSortOrder(v GetAccountEventsSortOrder) OptGetAccountEventsSortOrder {
+	return OptGetAccountEventsSortOrder{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptGetAccountEventsSortOrder is optional GetAccountEventsSortOrder.
+type OptGetAccountEventsSortOrder struct {
+	Value GetAccountEventsSortOrder
+	Set   bool
+}
+
+// IsSet returns true if OptGetAccountEventsSortOrder was set.
+func (o OptGetAccountEventsSortOrder) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptGetAccountEventsSortOrder) Reset() {
+	var v GetAccountEventsSortOrder
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptGetAccountEventsSortOrder) SetTo(v GetAccountEventsSortOrder) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptGetAccountEventsSortOrder) Get() (v GetAccountEventsSortOrder, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptGetAccountEventsSortOrder) Or(d GetAccountEventsSortOrder) GetAccountEventsSortOrder {
 	if v, ok := o.Get(); ok {
 		return v
 	}

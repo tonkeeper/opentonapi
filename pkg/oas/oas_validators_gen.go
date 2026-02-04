@@ -2863,6 +2863,17 @@ func (s *GaslessEstimateReq) Validate() error {
 	return nil
 }
 
+func (s GetAccountEventsSortOrder) Validate() error {
+	switch s {
+	case "desc":
+		return nil
+	case "asc":
+		return nil
+	default:
+		return errors.Errorf("invalid value: %v", s)
+	}
+}
+
 func (s *GetAccountsReq) Validate() error {
 	if s == nil {
 		return validate.ErrNilPointer
