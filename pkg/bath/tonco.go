@@ -57,7 +57,7 @@ var ToncoSwapStraw = Straw[BubbleJettonSwap]{
 					newAction.Out.IsTon = tx.isWrappedTon
 					newAction.Out.Amount = big.Int(tx.amount)
 					if !newAction.Out.IsTon {
-						newAction.Out.JettonWallet = tx.recipientWallet
+						newAction.Out.JettonWallet = tx.senderWallet
 						newAction.Out.JettonMaster = tx.master
 					}
 					return nil

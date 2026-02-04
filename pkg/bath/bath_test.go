@@ -13,6 +13,7 @@ import (
 	"github.com/tonkeeper/opentonapi/internal/g"
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/tongo"
+	"github.com/tonkeeper/tongo/abi"
 	"github.com/tonkeeper/tongo/liteapi"
 	"go.uber.org/zap"
 
@@ -40,6 +41,7 @@ type result struct {
 type mockInfoSource struct {
 	OnJettonMastersForWallets func(ctx context.Context, wallets []tongo.AccountID) (map[tongo.AccountID]tongo.AccountID, error)
 	OnNftSaleContracts        func(ctx context.Context, contracts []tongo.AccountID) (map[tongo.AccountID]core.NftSaleContract, error)
+	OnSubscriptionsInfos      func(ctx context.Context, ids []core.SubscriptionID) (map[tongo.AccountID]core.SubscriptionInfo, error)
 }
 
 func (m *mockInfoSource) NftSaleContracts(ctx context.Context, contracts []tongo.AccountID) (map[tongo.AccountID]core.NftSaleContract, error) {
@@ -62,7 +64,10 @@ func (m *mockInfoSource) STONfiPools(ctx context.Context, pools []core.STONfiPoo
 }
 
 func (m *mockInfoSource) SubscriptionInfos(ctx context.Context, ids []core.SubscriptionID) (map[tongo.AccountID]core.SubscriptionInfo, error) {
-	return map[tongo.AccountID]core.SubscriptionInfo{}, nil
+	if m.OnSubscriptionsInfos == nil {
+		return map[tongo.AccountID]core.SubscriptionInfo{}, nil
+	}
+	return m.OnSubscriptionsInfos(ctx, ids)
 }
 
 func (m *mockInfoSource) DedustPools(ctx context.Context, contracts []tongo.AccountID) (map[tongo.AccountID]core.DedustPool, error) {
@@ -77,33 +82,44 @@ func TestFindActions(t *testing.T) {
 
 	storage, err := litestorage.NewLiteStorage(zap.L(),
 		cli,
-		litestorage.WithPreloadAccounts([]tongo.AccountID{
-			tongo.MustParseAccountID("EQAs87W4yJHlF8mt29ocA4agnMrLsOP69jC1HPyBUjJay-7l"),
-			tongo.MustParseAccountID("0:54887d7c01ead183691a703afff08adc7b653fba2022df3a4963dae5171aa2ca"),
-			tongo.MustParseAccountID("0:84796c47a337716be8919014070016bd16498021b27325778394ea1893544ba6"),
-			tongo.MustParseAccountID("0:533f30de5722157b8471f5503b9fc5800c8d8397e79743f796b11e609adae69f"),
-			tongo.MustParseAccountID("0:fe98106451d88f11b91d962dbaf032ac43134cc8f3470fb683312c258971b9ed"),
-			tongo.MustParseAccountID("Ef_Mkp0G2m4bB953bRjMdbHis2gA0TlY_Tzlhd8ETtFj1CZa"),
-			//failed stonfi swap
-			tongo.MustParseAccountID("EQDnAzaMBU_5opYldxgC_6Y3fWH5tgnvnyv2AsaB1tRztqnx"),
-			//durov
-			tongo.MustParseAccountID("EQDYzZmfsrGzhObKJUw4gzdeIxEai3jAFbiGKGwxvxHinaPP"),
-			//liquid withdraw
-			tongo.MustParseAccountID("EQDQ0-rwRJENdk6md9-e8oApwyJJjsIgj9jJnBPQ53ytLGcs"),
-			// subscriptions
-			tongo.MustParseAccountID("0:280e6fcde865ebc2f2619ee00fdc8e11ce69b3e2981e9ca9f4847fd90be94d20"), // wallet V3R1 - reward address
-			tongo.MustParseAccountID("0:b8f8fecda3fca32c0ca2e5791469ba087af68d178e8be19da7aca4362be50ba9"), // wallet V3R2 - withdraw to
-			tongo.MustParseAccountID("0:5b92ca5f8ef8683432c9192c1a7b855f6cb08912c85d029f56faf918cfaa9649"), // wallet V4 - subscriber beneficiary
-			tongo.MustParseAccountID("0:35a74ba451906124a313e5fc00382b98ec81994dd93826a045a7626b0b9be6d5"), // wallet W5 - subscriber beneficiary
-			tongo.MustParseAccountID("0:1c274dc8fec45ebc9828c870b6721b90d89f3a7f864a1126a485997765665f0b"), // V2+W5 1: deploy with payment + prolong with caller + destroy by subscriber
-			tongo.MustParseAccountID("0:6c91b3bb05143c79bf9b375a6abb8cfc0c06f32089e73e32d396b9f57a5ed5b4"), // V2+W5 2: deploy without payment + prolong without caller + destroy by beneficiary
-			tongo.MustParseAccountID("0:e13eee2dacb5c0f522fd504ec37675a3ab9d9381b0ef18bc9b8bb96569e53f21"), // V2+W5 3: deploy with payment + cancel by expire
-			tongo.MustParseAccountID("0:47afe208854e56c1e02e260442d986e848ec7275be2b2870e692bd96d25d11c4"), // V2+V4 1: deploy with payment + prolong with caller + destroy by subscriber
-			tongo.MustParseAccountID("0:a2bf4c19c06a190b16eaeb15fc6fb0e002755a8f4384c97d4acb7908a4fb7580"), // V2+V4 2: deploy without payment + prolong without caller + destroy by subscriber
-			tongo.MustParseAccountID("0:a98161ce093d7da470170150e2493a91199af14269c1de6293fd024f8e977b22"), // V2+V4 3: deploy without payment + destroy by beneficiary
-			tongo.MustParseAccountID("0:2091c7f7e825f33980cc85a25a55afd7831f738acbe5ff92b8885533b03f3d33"), // V2+V4 4: deploy with payment + cancel by expire
-		}),
 		litestorage.WithPreloadBlocks([]tongo.BlockID{
+			// subscription v2
+			tongo.MustParseBlockID("(0,2000000000000000,54592412)"),
+			tongo.MustParseBlockID("(0,a000000000000000,54231006)"),
+			tongo.MustParseBlockID("(0,2000000000000000,54592579)"),
+			tongo.MustParseBlockID("(0,6000000000000000,54605580)"),
+			tongo.MustParseBlockID("(0,2000000000000000,54593195)"),
+			tongo.MustParseBlockID("(0,a000000000000000,54231771)"),
+			tongo.MustParseBlockID("(0,6000000000000000,54607040)"),
+			tongo.MustParseBlockID("(0,2000000000000000,54594034)"),
+			tongo.MustParseBlockID("(0,6000000000000000,54607046)"),
+			tongo.MustParseBlockID("(0,a000000000000000,54232590)"),
+			tongo.MustParseBlockID("(0,2000000000000000,54593363)"),
+			tongo.MustParseBlockID("(0,6000000000000000,54606375)"),
+			tongo.MustParseBlockID("(0,6000000000000000,54607085)"),
+			tongo.MustParseBlockID("(0,2000000000000000,54594077)"),
+			tongo.MustParseBlockID("(0,e000000000000000,54251225)"),
+			tongo.MustParseBlockID("(0,2000000000000000,54593545)"),
+			tongo.MustParseBlockID("(0,6000000000000000,54606554)"),
+			tongo.MustParseBlockID("(0,8000000000000000,54937287)"),
+			tongo.MustParseBlockID("(0,8000000000000000,55058271)"),
+			tongo.MustParseBlockID("(0,8000000000000000,54937935)"),
+			tongo.MustParseBlockID("(0,8000000000000000,55058346)"),
+			tongo.MustParseBlockID("(0,8000000000000000,54938365)"),
+			tongo.MustParseBlockID("(0,8000000000000000,55058632)"),
+			tongo.MustParseBlockID("(0,8000000000000000,55058873)"),
+			// failed simple transfer
+			tongo.MustParseBlockID("(0,2000000000000000,45502666)"),
+			// simple transfer, one of two failed
+			tongo.MustParseBlockID("(0,2000000000000000,45502701)"),
+			// domain renew
+			tongo.MustParseBlockID("(0,8000000000000000,38651597)"),
+			// subscription init
+			tongo.MustParseBlockID("(0,8000000000000000,25031484)"),
+			// subscription prolongation
+			tongo.MustParseBlockID("(0,8000000000000000,24056733)"),
+			// getgems nft purchase
+			tongo.MustParseBlockID("(0,8000000000000000,35121696)"),
 			// tf nominator deposit
 			tongo.MustParseBlockID("(0,8000000000000000,35205653)"),
 			tongo.MustParseBlockID("(-1,8000000000000000,29537038)"),
@@ -209,7 +225,7 @@ func TestFindActions(t *testing.T) {
 			tongo.MustParseBlockID("(0,e000000000000000,54137670)"),
 			tongo.MustParseBlockID("(0,6000000000000000,54491689)"),
 			tongo.MustParseBlockID("(0,2000000000000000,54478869)"),
-			//// deposit liquidity bidask ton + bmTON with refund
+			// deposit liquidity bidask ton + bmTON with refund
 			tongo.MustParseBlockID("(0,8000000000000000,56013085)"),
 			// deposit liquidity bidask usdt
 			tongo.MustParseBlockID("(0,8000000000000000,55134140)"),
@@ -221,8 +237,8 @@ func TestFindActions(t *testing.T) {
 			tongo.MustParseBlockID("(0,8000000000000000,56435563)"),
 			tongo.MustParseBlockID("(0,8000000000000000,57372589)"),
 			// mooncx swap
-			tongo.MustParseBlockID("(0,8000000000000000,56398081)"),
-			tongo.MustParseBlockID("(0,8000000000000000,56397942)"),
+			tongo.MustParseBlockID("(0,8000000000000000,58583334)"),
+			tongo.MustParseBlockID("(0,8000000000000000,58586713)"),
 			// mooncx liquidity deposit
 			tongo.MustParseBlockID("(0,2000000000000000,53995726)"),
 			tongo.MustParseBlockID("(0,2000000000000000,53995729)"),
@@ -274,6 +290,201 @@ func TestFindActions(t *testing.T) {
 		straws         []Merger
 	}
 	for _, c := range []Case{
+		{
+			name:           "not merge bubble in the very beginning",
+			hash:           "4b8b2a18abb6784c23eefa6f71d20aa2475c0a379dc2459c413e381fc7379803",
+			filenamePrefix: "not-to-merge-bubble-in-the-very-beginning",
+			straws: []Merger{
+				Straw[BubbleJettonMint]{
+					NotMergeBubble: true,
+					CheckFuncs:     []bubbleCheck{IsTx},
+					SingleChild: &Straw[BubbleJettonMint]{
+						CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.MegatonWtonMintMsgOp)},
+						Children: []Straw[BubbleJettonMint]{
+							{
+								CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.ExcessMsgOp)},
+							},
+							{
+								CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.JettonInternalTransferMsgOp)},
+							},
+						},
+					},
+				},
+			},
+		},
+		{
+			name:           "not merge bubble in the beginning",
+			hash:           "4b8b2a18abb6784c23eefa6f71d20aa2475c0a379dc2459c413e381fc7379803",
+			filenamePrefix: "not-to-merge-bubble-in-the-beginning",
+			straws: []Merger{
+				Straw[BubbleJettonMint]{
+					NotMergeBubble: true,
+					CheckFuncs:     []bubbleCheck{IsTx, HasOperation(abi.MegatonWtonMintMsgOp)},
+					Children: []Straw[BubbleJettonMint]{
+						{
+							CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.ExcessMsgOp)},
+						},
+						{
+							CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.JettonInternalTransferMsgOp)},
+						},
+					},
+				},
+			},
+		},
+		{
+			name:           "not merge bubble in the middle",
+			hash:           "4b8b2a18abb6784c23eefa6f71d20aa2475c0a379dc2459c413e381fc7379803",
+			filenamePrefix: "not-to-merge-bubble-in-the-middle",
+			straws: []Merger{
+				Straw[BubbleJettonMint]{
+					CheckFuncs: []bubbleCheck{IsTx},
+					SingleChild: &Straw[BubbleJettonMint]{
+						CheckFuncs:     []bubbleCheck{IsTx, HasOperation(abi.MegatonWtonMintMsgOp)},
+						NotMergeBubble: true,
+						Children: []Straw[BubbleJettonMint]{
+							{
+								CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.ExcessMsgOp)},
+							},
+							{
+								CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.JettonInternalTransferMsgOp)},
+							},
+						},
+					},
+				},
+			},
+		},
+		{
+			name:           "not merge bubble in the end",
+			hash:           "4b8b2a18abb6784c23eefa6f71d20aa2475c0a379dc2459c413e381fc7379803",
+			filenamePrefix: "not-to-merge-bubble-in-the-end",
+			straws: []Merger{
+				Straw[BubbleJettonMint]{
+					CheckFuncs: []bubbleCheck{IsTx},
+					SingleChild: &Straw[BubbleJettonMint]{
+						CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.MegatonWtonMintMsgOp)},
+						Children: []Straw[BubbleJettonMint]{
+							{
+								CheckFuncs:     []bubbleCheck{IsTx, HasOperation(abi.ExcessMsgOp)},
+								NotMergeBubble: true,
+							},
+							{
+								CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.JettonInternalTransferMsgOp)},
+							},
+						},
+					},
+				},
+			},
+		},
+		{
+			name:           "not merge big bubble in the middle",
+			hash:           "ba379e2e3f7636cc7a00d867d3f5213a681c0331b603226c1efb04697e9432f4",
+			filenamePrefix: "not-to-merge-big-bubble-in-the-middle",
+			straws: []Merger{
+				Straw[BubbleJettonMint]{
+					CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.TonstakePoolWithdrawMsgOp)},
+					SingleChild: &Straw[BubbleJettonMint]{
+						CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.TonstakePayoutMintJettonsMsgOp)},
+					},
+				},
+				Straw[BubbleWithdrawStakeRequest]{
+					CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.JettonBurnMsgOp)},
+					SingleChild: &Straw[BubbleWithdrawStakeRequest]{
+						CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.JettonBurnNotificationMsgOp)},
+						SingleChild: &Straw[BubbleWithdrawStakeRequest]{
+							NotMergeBubble: true,
+							CheckFuncs:     []bubbleCheck{Is(BubbleJettonMint{})},
+							SingleChild: &Straw[BubbleWithdrawStakeRequest]{
+								CheckFuncs: []bubbleCheck{HasOperation(abi.TonstakeNftInitMsgOp)},
+								SingleChild: &Straw[BubbleWithdrawStakeRequest]{
+									CheckFuncs: []bubbleCheck{HasOperation(abi.NftOwnershipAssignedMsgOp)},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		{
+			name:           "not merge bubble in the beginning with tail",
+			hash:           "ba379e2e3f7636cc7a00d867d3f5213a681c0331b603226c1efb04697e9432f4",
+			filenamePrefix: "not-to-merge-bubble-in-the-beginning-with-tail",
+			straws: []Merger{
+				Straw[BubbleWithdrawStakeRequest]{
+					CheckFuncs:     []bubbleCheck{IsTx, HasOperation(abi.JettonBurnMsgOp)},
+					NotMergeBubble: true,
+					SingleChild: &Straw[BubbleWithdrawStakeRequest]{
+						CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.JettonBurnNotificationMsgOp)},
+						SingleChild: &Straw[BubbleWithdrawStakeRequest]{
+							CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.TonstakePoolWithdrawMsgOp)},
+							SingleChild: &Straw[BubbleWithdrawStakeRequest]{
+								CheckFuncs: []bubbleCheck{HasOperation(abi.TonstakePayoutMintJettonsMsgOp)},
+								SingleChild: &Straw[BubbleWithdrawStakeRequest]{
+									CheckFuncs: []bubbleCheck{HasOperation(abi.TonstakeNftInitMsgOp)},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		{
+			name:           "not merge bubble in the middle with tail",
+			hash:           "ba379e2e3f7636cc7a00d867d3f5213a681c0331b603226c1efb04697e9432f4",
+			filenamePrefix: "not-to-merge-bubble-in-the-middle-with-tail",
+			straws: []Merger{
+				Straw[BubbleWithdrawStakeRequest]{
+					CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.JettonBurnMsgOp)},
+					SingleChild: &Straw[BubbleWithdrawStakeRequest]{
+						CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.JettonBurnNotificationMsgOp)},
+						SingleChild: &Straw[BubbleWithdrawStakeRequest]{
+							NotMergeBubble: true,
+							CheckFuncs:     []bubbleCheck{IsTx, HasOperation(abi.TonstakePoolWithdrawMsgOp)},
+							SingleChild: &Straw[BubbleWithdrawStakeRequest]{
+								CheckFuncs: []bubbleCheck{HasOperation(abi.TonstakePayoutMintJettonsMsgOp)},
+								SingleChild: &Straw[BubbleWithdrawStakeRequest]{
+									CheckFuncs: []bubbleCheck{HasOperation(abi.TonstakeNftInitMsgOp)},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		{
+			name:           "not merge bubble in the end with tail",
+			hash:           "ba379e2e3f7636cc7a00d867d3f5213a681c0331b603226c1efb04697e9432f4",
+			filenamePrefix: "not-to-merge-bubble-in-the-end-with-tail",
+			straws: []Merger{
+				Straw[BubbleWithdrawStakeRequest]{
+					CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.JettonBurnMsgOp)},
+					SingleChild: &Straw[BubbleWithdrawStakeRequest]{
+						CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.JettonBurnNotificationMsgOp)},
+						SingleChild: &Straw[BubbleWithdrawStakeRequest]{
+							CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.TonstakePoolWithdrawMsgOp)},
+							SingleChild: &Straw[BubbleWithdrawStakeRequest]{
+								CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.TonstakePayoutMintJettonsMsgOp)},
+								SingleChild: &Straw[BubbleWithdrawStakeRequest]{
+									NotMergeBubble: true,
+									CheckFuncs:     []bubbleCheck{IsTx, HasOperation(abi.TonstakeNftInitMsgOp)},
+								},
+							},
+						},
+					},
+				},
+				Straw[BubbleNftTransfer]{
+					CheckFuncs: []bubbleCheck{IsTx, func(bubble *Bubble) bool {
+						ok := HasOperation(abi.TonstakeNftInitMsgOp)(bubble)
+						return ok
+					}, HasOperation(abi.TonstakeNftInitMsgOp)},
+					SingleChild: &Straw[BubbleNftTransfer]{
+						CheckFuncs: []bubbleCheck{IsTx, func(bubble *Bubble) bool {
+							ok := HasOperation(abi.NftOwnershipAssignedMsgOp)(bubble)
+							return ok
+						}, HasOperation(abi.NftOwnershipAssignedMsgOp)},
+					},
+				},
+			},
+		},
 		{
 			name:           "simple transfer",
 			filenamePrefix: "simple-transfer",
@@ -528,8 +739,20 @@ func TestFindActions(t *testing.T) {
 			filenamePrefix: "stonfi-v2-swap-ref",
 		},
 		{
-			name:           "subscription V2 + wallet W5 deploy with payment",
-			hash:           "a9c8ffdb11f1d6f80feae77c7fcbefad48dbb95999c3524538d832c5c6a7ff6c",
+			name: "subscription V2 + wallet W5 deploy with payment",
+			hash: "a9c8ffdb11f1d6f80feae77c7fcbefad48dbb95999c3524538d832c5c6a7ff6c",
+			source: &mockInfoSource{
+				OnSubscriptionsInfos: func(ctx context.Context, ids []core.SubscriptionID) (map[tongo.AccountID]core.SubscriptionInfo, error) {
+					return map[tongo.AccountID]core.SubscriptionInfo{
+						tongo.MustParseAddress("0:1c274dc8fec45ebc9828c870b6721b90d89f3a7f864a1126a485997765665f0b").ID: {
+							Wallet:           tongo.MustParseAddress("0:35a74ba451906124a313e5fc00382b98ec81994dd93826a045a7626b0b9be6d5").ID,
+							Admin:            tongo.MustParseAddress("0:5b92ca5f8ef8683432c9192c1a7b855f6cb08912c85d029f56faf918cfaa9649").ID,
+							WithdrawTo:       tongo.MustParseAddress("0:b8f8fecda3fca32c0ca2e5791469ba087af68d178e8be19da7aca4362be50ba9").ID,
+							PaymentPerPeriod: 20000000,
+						},
+					}, nil
+				},
+			},
 			filenamePrefix: "deploy-with-payment-subscription-v2-wallet-w5",
 		},
 		{
@@ -649,12 +872,12 @@ func TestFindActions(t *testing.T) {
 		},
 		{
 			name:           "mooncx usdt-ton swap",
-			hash:           "1d1ce4629fc5613d68f066da2044354d963b982f25ba8be6ea3634f81cbbf88b",
+			hash:           "f1cb797e6b4ddf9fca55243cc7cec3bf2d8fc27170e091bb9a28ce28e11d1090",
 			filenamePrefix: "mooncx-usdt-ton-swap",
 		},
 		{
 			name:           "mooncx ton-usdt swap",
-			hash:           "67aee84fa6df5fcdf85bcb9330c9181fd0629d686bf5b800420deef9e6850a99",
+			hash:           "115cdea693961371766cd968358482984039756712323235b5abd9b41d16429f",
 			filenamePrefix: "mooncx-ton-usdt-swap",
 		},
 		{

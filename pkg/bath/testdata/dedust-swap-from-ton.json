@@ -6,7 +6,7 @@
          "UserWallet": "0:bbf975f899fa1eda3f233f0d3748e5cfa7ee2abd69033514373dad3f0286f625",
          "Router": "0:82b093867547521aad1a99b245812a6d7477c33e469094a94b20a4eab5ace185",
          "In": {
-           "Amount": 40300000000,
+           "Amount": 40000000000,
            "IsTon": true,
            "JettonMaster": "0:0000000000000000000000000000000000000000000000000000000000000000",
            "JettonWallet": "0:0000000000000000000000000000000000000000000000000000000000000000"
@@ -15,7 +15,7 @@
            "Amount": 5340025692789,
            "IsTon": false,
            "JettonMaster": "0:74d8327471d503e2240345b06fe1a606de1b5e3c70512b5b46791b429dab5eb1",
-           "JettonWallet": "0:32c573568c839e4309a5d69a5dd742ee33460a2f7d6ceba9336c294ea69ebdf9"
+           "JettonWallet": "0:e5345c28217c39fe412761ae8a5d8149a88d1cffbba5eefd4458a75fd53dc9cb"
          }
        },
        "Success": true,

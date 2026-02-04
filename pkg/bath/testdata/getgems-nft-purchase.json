@@ -7,10 +7,12 @@
          "Seller": "0:353d4cb749da429dbee9387ff7f65c0d99a922396a3d239eff8be465422771a0",
          "AuctionType": "getgems",
          "Price": {
-           "Type": "native",
-           "Amount": 1200000000,
-           "Jetton": null,
-           "CurrencyID": null
+           "Currency": {
+             "Type": "native",
+             "Jetton": null,
+             "CurrencyID": null
+           },
+           "Amount": 1200000000
          }
        },
        "Success": true,
