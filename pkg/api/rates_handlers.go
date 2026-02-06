@@ -198,13 +198,13 @@ func convertRates(rates map[string]oas.TokenRates, token, currency string, today
 
 	var diff24h, diff7w, diff1m float64
 	if convertedYesterdayPrice, _ := calculateConvertedPrice(yesterdayRates, currency, token); convertedYesterdayPrice != 0 {
-		diff24h = ((convertedTodayPrice - convertedYesterdayPrice) / convertedYesterdayPrice) * 100
+		diff24h = ((convertedTodayPrice - convertedYesterdayPrice) / convertedTodayPrice) * 100
 	}
 	if convertedWeekPrice, _ := calculateConvertedPrice(weekRates, currency, token); convertedWeekPrice != 0 {
-		diff7w = ((convertedTodayPrice - convertedWeekPrice) / convertedWeekPrice) * 100
+		diff7w = ((convertedTodayPrice - convertedWeekPrice) / convertedTodayPrice) * 100
 	}
 	if convertedMonthPrice, _ := calculateConvertedPrice(monthRates, currency, token); convertedMonthPrice != 0 {
-		diff1m = ((convertedTodayPrice - convertedMonthPrice) / convertedMonthPrice) * 100
+		diff1m = ((convertedTodayPrice - convertedMonthPrice) / convertedTodayPrice) * 100
 	}
 
 	diff24h = math.Round(diff24h*100) / 100
