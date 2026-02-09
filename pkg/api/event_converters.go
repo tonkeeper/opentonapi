@@ -1042,6 +1042,11 @@ func (h *Handler) toEvent(ctx context.Context, trace *core.Trace, result *bath.A
 		InProgress: trace.InProgress(),
 		Progress:   trace.CalculateProgress(),
 	}
+
+	if !event.InProgress && trace.LastSliceID != nil {
+		event.LastSliceID.SetTo(*trace.LastSliceID)
+	}
+
 	for i, a := range result.Actions {
 		convertedAction, err := h.convertAction(ctx, nil, a, lang, event.Lt)
 		if err != nil {
