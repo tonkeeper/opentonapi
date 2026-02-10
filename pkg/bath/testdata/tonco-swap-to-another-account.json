@@ -175,51 +175,20 @@
        ]
      },
      {
-       "JettonTransfer": {
-         "Comment": null,
-         "EncryptedComment": null,
-         "Jetton": "0:671963027f7f85659ab55b821671688601cdcf1ee674fc7fbbb1a776a18d34a3",
-         "Recipient": "0:f22aa05e75c981a9440d178f532a1fe5426137a399afa42f2f114562a1277940",
-         "Sender": "0:92e1411ae546892f33b2c8a89ea90390d8ff4cfbb917a643b91e73f706fdb9d1",
-         "RecipientsWallet": "0:0000000000000000000000000000000000000000000000000000000000000000",
-         "SendersWallet": "0:9220c181a6cfeacd11b7b8f62138df1bb9cc82b6ed2661d2f5faee204b3efb20",
-         "Amount": "54098057661",
-         "Refund": null
-       },
-       "Success": false,
-       "Type": "JettonTransfer",
-       "BaseTransactions": [
-         "ecc620b9e7727b70d61b3be6b7af3188746c7052aa7a7c0c4668486ddb4721b2"
-       ]
-     },
-     {
        "TonTransfer": {
          "Amount": 54098057661,
          "Comment": null,
          "EncryptedComment": null,
          "Recipient": "0:f22aa05e75c981a9440d178f532a1fe5426137a399afa42f2f114562a1277940",
-         "Sender": "0:9220c181a6cfeacd11b7b8f62138df1bb9cc82b6ed2661d2f5faee204b3efb20",
+         "Sender": "0:92e1411ae546892f33b2c8a89ea90390d8ff4cfbb917a643b91e73f706fdb9d1",
          "Refund": null
        },
        "Success": true,
        "Type": "TonTransfer",
        "BaseTransactions": [
+         "c8201730cf62a20b38da6888d964e336bdba85cc800388e4e56cd34e04e99dae",
+         "ecc620b9e7727b70d61b3be6b7af3188746c7052aa7a7c0c4668486ddb4721b2",
          "a1480506c51de79339d528dbfb54a9b1c4872fd00211ed2bda4a37a095eba274"
-       ]
-     },
-     {
-       "TonTransfer": {
-         "Amount": 143837941,
-         "Comment": null,
-         "EncryptedComment": null,
-         "Recipient": "0:dfbd5be8497fdc0c9fcbdfc676864840ddf8ad6423d6d5657d9b0e8270d6c8ac",
-         "Sender": "0:9220c181a6cfeacd11b7b8f62138df1bb9cc82b6ed2661d2f5faee204b3efb20",
-         "Refund": null
-       },
-       "Success": true,
-       "Type": "TonTransfer",
-       "BaseTransactions": [
-         "c8201730cf62a20b38da6888d964e336bdba85cc800388e4e56cd34e04e99dae"
        ]
      }
    ],
