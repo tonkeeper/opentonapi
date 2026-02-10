@@ -216,7 +216,7 @@ var StonfiV2PTONStrawReverse = Straw[BubbleJettonTransfer]{
 			CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.PtonTonTransferMsgOp), func(bubble *Bubble) bool {
 				tx := bubble.Info.(BubbleTx)
 				body := tx.decodedBody.Value.(abi.PtonTonTransferMsgBody)
-				if uint64(tx.inputAmount) <= uint64(body.TonAmount) {
+				if uint64(tx.inputAmount) < uint64(body.TonAmount) {
 					return false
 				}
 				return true

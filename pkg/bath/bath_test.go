@@ -132,6 +132,10 @@ func TestFindActions(t *testing.T) {
 			tongo.MustParseBlockID("(0,8000000000000000,35988959)"),
 			// tf update validator set
 			tongo.MustParseBlockID("(-1,8000000000000000,30311911)"),
+			// stonfi usdt<>ton swap with tonkeeper battery
+			tongo.MustParseBlockID("(0,8000000000000000,61657368)"),
+			// stonfi usdt<>ton swap
+			tongo.MustParseBlockID("(0,8000000000000000,61720236)"),
 			// stonfi swap
 			tongo.MustParseBlockID("(0,8000000000000000,36716516)"),
 			// stonfi swap
@@ -290,6 +294,16 @@ func TestFindActions(t *testing.T) {
 		straws         []Merger
 	}
 	for _, c := range []Case{
+		{
+			name:           "stonfi usdt-ton exchange with tonkeeper battery",
+			hash:           "74ed6e6076dfa3ffb3e319285c3517c10e46c5a3352791f9d2bcf1f06116711f",
+			filenamePrefix: "stonfi-swap-usdt-ton-battery",
+		},
+		{
+			name:           "stonfi usdt-ton exchange",
+			hash:           "431b7e8d728c419fc6e85baa91b849795bc0cb024fa0cf973837224ea5be4df8",
+			filenamePrefix: "stonfi-swap-usdt-ton",
+		},
 		{
 			name:           "not merge bubble in the very beginning",
 			hash:           "4b8b2a18abb6784c23eefa6f71d20aa2475c0a379dc2459c413e381fc7379803",
