@@ -175,20 +175,16 @@ func (h *Handler) getRates() (todayRates, yesterdayRates, weekRates, monthRates 
 	return results[0], results[1], results[2], results[3], nil
 }
 
-func (h *Handler) convertRates(rates map[string]oas.TokenRates, token, currency string, todayRates, yesterdayRates, weekRates, monthRates map[string]float64) (map[string]oas.TokenRates, error) {
-	emptyRate := oas.TokenRates{
-		Prices:  oas.NewOptTokenRatesPrices(oas.TokenRatesPrices{}),
-		Diff24h: oas.NewOptTokenRatesDiff24h(oas.TokenRatesDiff24h{}),
-		Diff7d:  oas.NewOptTokenRatesDiff7d(oas.TokenRatesDiff7d{}),
-		Diff30d: oas.NewOptTokenRatesDiff30d(oas.TokenRatesDiff30d{}),
-	}
-
+func (h *Handler) convertRates(
+	rates map[string]oas.TokenRates,
+	token, currency string,
+	todayRates, yesterdayRates, weekRates, monthRates map[string]float64,
+) (map[string]oas.TokenRates, error) {
+	trust := core.TrustNone
 	if len(token) >= minTonAddressLength {
-		if accountID, err := ton.ParseAccountID(token); err == nil {
-			if h.spamFilter.AccountTrust(accountID) == core.TrustBlacklist {
-				rates[token] = emptyRate
-				return rates, nil
-			}
+		accountID, err := ton.ParseAccountID(token)
+		if err == nil {
+			trust = h.spamFilter.AccountTrust(accountID)
 		}
 	}
 
@@ -199,10 +195,20 @@ func (h *Handler) convertRates(rates map[string]oas.TokenRates, token, currency 
 
 	rate, ok := rates[token]
 	if !ok {
-		rate = emptyRate
+		rate = oas.TokenRates{
+			Prices:  oas.NewOptTokenRatesPrices(oas.TokenRatesPrices{}),
+			Diff24h: oas.NewOptTokenRatesDiff24h(oas.TokenRatesDiff24h{}),
+			Diff7d:  oas.NewOptTokenRatesDiff7d(oas.TokenRatesDiff7d{}),
+			Diff30d: oas.NewOptTokenRatesDiff30d(oas.TokenRatesDiff30d{}),
+		}
 	}
 
-	convertedTodayPrice := todayRates[token] / todayCurrencyPrice
+	tokenPrice := todayRates[token]
+	if trust == core.TrustBlacklist {
+		tokenPrice = 0
+	}
+
+	convertedTodayPrice := tokenPrice / todayCurrencyPrice
 	rate.Prices.Value[currency] = convertedTodayPrice
 
 	for _, entry := range []struct {
