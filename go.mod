@@ -24,7 +24,7 @@ require (
 	github.com/shopspring/decimal v1.3.1
 	github.com/sourcegraph/conc v0.3.0
 	github.com/stretchr/testify v1.9.0
-	github.com/tonkeeper/scam_backoffice_rules v0.0.8
+	github.com/tonkeeper/scam_backoffice_rules v0.0.11
 	github.com/tonkeeper/tongo v1.16.68
 	go.opentelemetry.io/otel v1.24.0
 	go.opentelemetry.io/otel/metric v1.24.0
