@@ -297,11 +297,10 @@ func (s *AccountCurrenciesBalance) init() AccountCurrenciesBalance {
 	return m
 }
 
-// An event is built on top of a trace which is a series of transactions caused by one inbound
-// message. TonAPI looks for known patterns inside the trace and splits the trace into actions, where
-// a single action represents a meaningful high-level operation like a Jetton Transfer or an NFT
-// Purchase. Actions are expected to be shown to users. It is advised not to build any logic on top
-// of actions because actions can be changed at any time.
+// High-level view over a transaction trace caused by a single inbound message. TonAPI analyses the
+// trace, detects known patterns and groups low-level transactions into user-facing actions (Jetton
+// transfer, NFT purchase, etc.). Actions are a best-effort UI abstraction and may change; do not
+// rely on them for protocol-critical logic.
 // Ref: #/components/schemas/AccountEvent
 type AccountEvent struct {
 	EventID   string         `json:"event_id"`
@@ -311,11 +310,16 @@ type AccountEvent struct {
 	// Scam.
 	IsScam bool  `json:"is_scam"`
 	Lt     int64 `json:"lt"`
-	// Event is not finished yet. Transactions still happening.
+	// Event trace is not finished yet. Transactions still happening.
 	InProgress bool `json:"in_progress"`
-	// TODO.
-	Extra    int64   `json:"extra"`
+	// Net TON change for this account not explained by actions, in nanotons: extra = final_balance -
+	// initial_balance - sum(explicit TON changes from actions). extra < 0 - implicit fee, extra > 0 -
+	// refund. For UI display only.
+	Extra int64 `json:"extra"`
+	// Event completion ratio in [0,1].
 	Progress float32 `json:"progress"`
+	// Normalized hash of the root external inbound message (hex).
+	ExtMsgHash OptString `json:"ext_msg_hash"`
 }
 
 // GetEventID returns the value of EventID.
@@ -363,6 +367,11 @@ func (s *AccountEvent) GetProgress() float32 {
 	return s.Progress
 }
 
+// GetExtMsgHash returns the value of ExtMsgHash.
+func (s *AccountEvent) GetExtMsgHash() OptString {
+	return s.ExtMsgHash
+}
+
 // SetEventID sets the value of EventID.
 func (s *AccountEvent) SetEventID(val string) {
 	s.EventID = val
@@ -408,6 +417,12 @@ func (s *AccountEvent) SetProgress(val float32) {
 	s.Progress = val
 }
 
+// SetExtMsgHash sets the value of ExtMsgHash.
+func (s *AccountEvent) SetExtMsgHash(val OptString) {
+	s.ExtMsgHash = val
+}
+
+// Paginated list of events for a single account.
 // Ref: #/components/schemas/AccountEvents
 type AccountEvents struct {
 	Events   []AccountEvent `json:"events"`
@@ -5722,11 +5737,13 @@ type Event struct {
 	// Scam.
 	IsScam bool  `json:"is_scam"`
 	Lt     int64 `json:"lt"`
-	// Event is not finished yet. Transactions still happening.
+	// Event trace is not finished yet. Transactions still happening.
 	InProgress bool    `json:"in_progress"`
 	Progress   float32 `json:"progress"`
 	// ID of the slice where this event was finalized. Null if not yet finalized.
 	LastSliceID OptInt64 `json:"last_slice_id"`
+	// Normalized hash of the root external inbound message (hex).
+	ExtMsgHash OptString `json:"ext_msg_hash"`
 }
 
 // GetEventID returns the value of EventID.
@@ -5769,6 +5786,16 @@ func (s *Event) GetProgress() float32 {
 	return s.Progress
 }
 
+// GetLastSliceID returns the value of LastSliceID.
+func (s *Event) GetLastSliceID() OptInt64 {
+	return s.LastSliceID
+}
+
+// GetExtMsgHash returns the value of ExtMsgHash.
+func (s *Event) GetExtMsgHash() OptString {
+	return s.ExtMsgHash
+}
+
 // SetEventID sets the value of EventID.
 func (s *Event) SetEventID(val string) {
 	s.EventID = val
@@ -5809,14 +5836,14 @@ func (s *Event) SetProgress(val float32) {
 	s.Progress = val
 }
 
-// GetLastSliceID returns the value of LastSliceID.
-func (s *Event) GetLastSliceID() OptInt64 {
-	return s.LastSliceID
-}
-
 // SetLastSliceID sets the value of LastSliceID.
 func (s *Event) SetLastSliceID(val OptInt64) {
 	s.LastSliceID = val
+}
+
+// SetExtMsgHash sets the value of ExtMsgHash.
+func (s *Event) SetExtMsgHash(val OptString) {
+	s.ExtMsgHash = val
 }
 
 // Ref: #/components/schemas/ExecGetMethodArg
@@ -9434,6 +9461,9 @@ func (s *Message) SetDecodedBody(val jx.Raw) {
 	s.DecodedBody = val
 }
 
+// Result of emulating a wallet message on the current blockchain state: describes the expected
+// on-chain consequences (trace, high-level AccountEvent, risk) for the signing wallet. For UI
+// display only.
 // Ref: #/components/schemas/MessageConsequences
 type MessageConsequences struct {
 	Trace Trace        `json:"trace"`
@@ -16719,16 +16749,22 @@ func (s *RemoveExtensionAction) SetExtension(val string) {
 	s.Extension = val
 }
 
-// Risk specifies assets that could be lost if a message would be sent to a malicious smart contract.
-// It makes sense to understand the risk BEFORE sending a message to the blockchain.
+// Conservative upper bound on assets this wallet may lose if the emulated message is sent and the
+// counterparty behaves maliciously. Values may exceed current balances (e.g. already-authorized
+// future receipts). For UI display only.
 // Ref: #/components/schemas/Risk
 type Risk struct {
-	// Transfer all the remaining balance of the wallet.
-	TransferAllRemainingBalance bool             `json:"transfer_all_remaining_balance"`
-	Ton                         int64            `json:"ton"`
-	Jettons                     []JettonQuantity `json:"jettons"`
-	Nfts                        []NftItem        `json:"nfts"`
-	// Estimated equivalent value of all assets at risk in selected currency (for example USD).
+	// True if the message semantics allow sweeping all current and future remaining TON balance of the
+	// wallet (e.g. “send all” / drain patterns).
+	TransferAllRemainingBalance bool `json:"transfer_all_remaining_balance"`
+	// Maximum TON amount that may leave the wallet in the worst case, in nanotons.
+	Ton int64 `json:"ton"`
+	// Jetton positions that may be debited from the wallet in the worst case.
+	Jettons []JettonQuantity `json:"jettons"`
+	// NFT items that may be transferred out of the wallet in the worst case.
+	Nfts []NftItem `json:"nfts"`
+	// Estimated equivalent of all assets at risk (TON, jettons, NFTs) in the selected currency from
+	// currencyQuery (e.g. USD). Approximate, best-effort UI value.
 	TotalEquivalent OptFloat32 `json:"total_equivalent"`
 }
 

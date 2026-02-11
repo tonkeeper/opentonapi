@@ -890,7 +890,7 @@
     "type": "object"
    },
    "AccountEvent": {
-    "description": "An event is built on top of a trace which is a series of transactions caused by one inbound message. TonAPI looks for known patterns inside the trace and splits the trace into actions, where a single action represents a meaningful high-level operation like a Jetton Transfer or an NFT Purchase. Actions are expected to be shown to users. It is advised not to build any logic on top of actions because actions can be changed at any time.",
+    "description": "High-level view over a transaction trace caused by a single inbound message. TonAPI analyses the trace, detects known patterns and groups low-level transactions into user-facing actions (Jetton transfer, NFT purchase, etc.). Actions are a best-effort UI abstraction and may change; do not rely on them for protocol-critical logic.\n",
     "properties": {
      "account": {
       "$ref": "#/components/schemas/AccountAddress"
@@ -905,14 +905,20 @@
       "example": "e8b0e3fee4a26bd2317ac1f9952fcdc87dc08fdb617656b5202416323337372e",
       "type": "string"
      },
+     "ext_msg_hash": {
+      "description": "Normalized hash of the root external inbound message (hex).",
+      "example": "a1b2c3d4e5f6789012345678901234567890abcdef1234567890abcdef123456",
+      "type": "string"
+     },
      "extra": {
-      "description": "TODO",
+      "description": "Net TON change for this account not explained by actions, in nanotons: extra = final_balance - initial_balance - sum(explicit TON changes from actions). extra \u003c 0 - implicit fee, extra \u003e 0 - refund. For UI display only\n",
       "example": 3,
       "format": "int64",
-      "type": "integer"
+      "type": "integer",
+      "x-js-format": "bigint"
      },
      "in_progress": {
-      "description": "Event is not finished yet. Transactions still happening",
+      "description": "Event trace is not finished yet. Transactions still happening.",
       "example": false,
       "type": "boolean"
      },
@@ -928,6 +934,7 @@
       "x-js-format": "bigint"
      },
      "progress": {
+      "description": "Event completion ratio in [0,1]",
       "example": 0.5,
       "format": "float",
       "maximum": 1,
@@ -954,6 +961,7 @@
     "type": "object"
    },
    "AccountEvents": {
+    "description": "Paginated list of events for a single account.",
     "properties": {
      "events": {
       "items": {
@@ -2418,7 +2426,6 @@
         "items": {
          "properties": {
           "code_hash": {
-           "format": "address",
            "type": "string"
           },
           "gas_usage": {
@@ -3394,8 +3401,13 @@
       "example": "e8b0e3fee4a26bd2317ac1f9952fcdc87dc08fdb617656b5202416323337372e",
       "type": "string"
      },
+     "ext_msg_hash": {
+      "description": "Normalized hash of the root external inbound message (hex).",
+      "example": "a1b2c3d4e5f6789012345678901234567890abcdef1234567890abcdef123456",
+      "type": "string"
+     },
      "in_progress": {
-      "description": "Event is not finished yet. Transactions still happening",
+      "description": "Event trace is not finished yet. Transactions still happening.",
       "example": false,
       "type": "boolean"
      },
@@ -3403,6 +3415,12 @@
       "description": "scam",
       "example": false,
       "type": "boolean"
+     },
+     "last_slice_id": {
+      "description": "ID of the slice where this event was finalized. Null if not yet finalized.",
+      "example": 12345678,
+      "format": "int64",
+      "type": "integer"
      },
      "lt": {
       "example": 25713146000001,
@@ -4583,6 +4601,7 @@
     "type": "object"
    },
    "MessageConsequences": {
+    "description": "Result of emulating a wallet message on the current blockchain state: describes the expected on-chain consequences (trace, high-level AccountEvent, risk) for the signing wallet. For UI display only.\n",
     "properties": {
      "event": {
       "$ref": "#/components/schemas/AccountEvent"
@@ -5660,33 +5679,36 @@
     "type": "object"
    },
    "Risk": {
-    "description": "Risk specifies assets that could be lost if a message would be sent to a malicious smart contract. It makes sense to understand the risk BEFORE sending a message to the blockchain.",
+    "description": "Conservative upper bound on assets this wallet may lose if the emulated message is sent and the counterparty behaves maliciously. Values may exceed current balances (e.g. already-authorized future receipts). For UI display only.\n",
     "properties": {
      "jettons": {
+      "description": "Jetton positions that may be debited from the wallet in the worst case.",
       "items": {
        "$ref": "#/components/schemas/JettonQuantity"
       },
       "type": "array"
      },
      "nfts": {
+      "description": "NFT items that may be transferred out of the wallet in the worst case.",
       "items": {
        "$ref": "#/components/schemas/NftItem"
       },
       "type": "array"
      },
      "ton": {
+      "description": "Maximum TON amount that may leave the wallet in the worst case, in nanotons.",
       "example": 500,
       "format": "int64",
       "type": "integer",
       "x-js-format": "bigint"
      },
      "total_equivalent": {
-      "description": "Estimated equivalent value of all assets at risk in selected currency (for example USD)",
+      "description": "Estimated equivalent of all assets at risk (TON, jettons, NFTs) in the selected currency from currencyQuery (e.g. USD). Approximate, best-effort UI value.\n",
       "format": "float",
       "type": "number"
      },
      "transfer_all_remaining_balance": {
-      "description": "transfer all the remaining balance of the wallet.",
+      "description": "True if the message semantics allow sweeping all current and future remaining TON balance of the wallet (e.g. “send all” / drain patterns).\n",
       "example": true,
       "type": "boolean"
      }
@@ -7362,6 +7384,18 @@
      {
       "description": "omit this parameter to get last events",
       "in": "query",
+      "name": "after_lt",
+      "required": false,
+      "schema": {
+       "example": 25758317000002,
+       "format": "int64",
+       "type": "integer",
+       "x-js-format": "bigint"
+      }
+     },
+     {
+      "description": "omit this parameter to get last events",
+      "in": "query",
       "name": "before_lt",
       "required": false,
       "schema": {
@@ -7402,6 +7436,19 @@
        "format": "int64",
        "maximum": 2114380800,
        "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "sort_order",
+      "schema": {
+       "default": "desc",
+       "description": "used to sort the result-set in ascending or descending order by lt.",
+       "enum": [
+        "desc",
+        "asc"
+       ],
+       "type": "string"
       }
      }
     ],
@@ -11524,7 +11571,7 @@
   },
   "/v2/wallet/emulate": {
    "post": {
-    "description": "Emulate sending message to retrieve the resulting wallet state",
+    "description": "Emulates a wallet message on the current blockchain state and derives its consequences for the signing wallet",
     "operationId": "emulateMessageToWallet",
     "parameters": [
      {
@@ -11546,7 +11593,7 @@
         }
        }
       },
-      "description": "emulated message"
+      "description": "Emulated wallet message consequences"
      },
      "default": {
       "$ref": "#/components/responses/Error"
