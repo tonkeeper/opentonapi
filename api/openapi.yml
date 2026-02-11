@@ -6903,6 +6903,10 @@ components:
           maximum: 1
           example: 0.5
           description: Event completion ratio in [0,1]
+        ext_msg_hash:
+          type: string
+          description: Normalized hash of the root external inbound message (hex).
+          example: a1b2c3d4e5f6789012345678901234567890abcdef1234567890abcdef123456
     AccountEvents:
       type: object
       description: Paginated list of events for a single account.
@@ -7483,6 +7487,10 @@ components:
           format: int64
           description: ID of the slice where this event was finalized. Null if not yet finalized.
           example: 12345678
+        ext_msg_hash:
+          type: string
+          description: Normalized hash of the root external inbound message (hex).
+          example: a1b2c3d4e5f6789012345678901234567890abcdef1234567890abcdef123456
     JettonMetadata:
       type: object
       required:

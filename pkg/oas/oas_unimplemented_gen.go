@@ -98,7 +98,8 @@ func (UnimplementedHandler) EmulateMessageToTrace(ctx context.Context, req *Emul
 
 // EmulateMessageToWallet implements emulateMessageToWallet operation.
 //
-// Emulate sending message to retrieve the resulting wallet state.
+// Emulates a wallet message on the current blockchain state and derives its consequences for the
+// signing wallet.
 //
 // POST /v2/wallet/emulate
 func (UnimplementedHandler) EmulateMessageToWallet(ctx context.Context, req *EmulateMessageToWalletReq, params EmulateMessageToWalletParams) (r *MessageConsequences, _ error) {

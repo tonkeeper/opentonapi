@@ -677,9 +677,15 @@ func (s *AccountEvent) encodeFields(e *jx.Encoder) {
 		e.FieldStart("progress")
 		e.Float32(s.Progress)
 	}
+	{
+		if s.ExtMsgHash.Set {
+			e.FieldStart("ext_msg_hash")
+			s.ExtMsgHash.Encode(e)
+		}
+	}
 }
 
-var jsonFieldsNameOfAccountEvent = [9]string{
+var jsonFieldsNameOfAccountEvent = [10]string{
 	0: "event_id",
 	1: "account",
 	2: "timestamp",
@@ -689,6 +695,7 @@ var jsonFieldsNameOfAccountEvent = [9]string{
 	6: "in_progress",
 	7: "extra",
 	8: "progress",
+	9: "ext_msg_hash",
 }
 
 // Decode decodes AccountEvent from json.
@@ -811,6 +818,16 @@ func (s *AccountEvent) Decode(d *jx.Decoder) error {
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"progress\"")
+			}
+		case "ext_msg_hash":
+			if err := func() error {
+				s.ExtMsgHash.Reset()
+				if err := s.ExtMsgHash.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"ext_msg_hash\"")
 			}
 		default:
 			return d.Skip()
@@ -16148,9 +16165,15 @@ func (s *Event) encodeFields(e *jx.Encoder) {
 			s.LastSliceID.Encode(e)
 		}
 	}
+	{
+		if s.ExtMsgHash.Set {
+			e.FieldStart("ext_msg_hash")
+			s.ExtMsgHash.Encode(e)
+		}
+	}
 }
 
-var jsonFieldsNameOfEvent = [8]string{
+var jsonFieldsNameOfEvent = [10]string{
 	0: "event_id",
 	1: "timestamp",
 	2: "actions",
@@ -16159,6 +16182,8 @@ var jsonFieldsNameOfEvent = [8]string{
 	5: "lt",
 	6: "in_progress",
 	7: "progress",
+	8: "last_slice_id",
+	9: "ext_msg_hash",
 }
 
 // Decode decodes Event from json.
@@ -16166,7 +16191,7 @@ func (s *Event) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode Event to nil")
 	}
-	var requiredBitSet [1]uint8
+	var requiredBitSet [2]uint8
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
@@ -16288,6 +16313,16 @@ func (s *Event) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"last_slice_id\"")
 			}
+		case "ext_msg_hash":
+			if err := func() error {
+				s.ExtMsgHash.Reset()
+				if err := s.ExtMsgHash.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"ext_msg_hash\"")
+			}
 		default:
 			return d.Skip()
 		}
@@ -16297,8 +16332,9 @@ func (s *Event) Decode(d *jx.Decoder) error {
 	}
 	// Validate required fields.
 	var failures []validate.FieldError
-	for i, mask := range [1]uint8{
+	for i, mask := range [2]uint8{
 		0b11111111,
+		0b00000000,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.

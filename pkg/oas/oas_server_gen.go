@@ -66,7 +66,8 @@ type Handler interface {
 	EmulateMessageToTrace(ctx context.Context, req *EmulateMessageToTraceReq, params EmulateMessageToTraceParams) (*Trace, error)
 	// EmulateMessageToWallet implements emulateMessageToWallet operation.
 	//
-	// Emulate sending message to retrieve the resulting wallet state.
+	// Emulates a wallet message on the current blockchain state and derives its consequences for the
+	// signing wallet.
 	//
 	// POST /v2/wallet/emulate
 	EmulateMessageToWallet(ctx context.Context, req *EmulateMessageToWalletReq, params EmulateMessageToWalletParams) (*MessageConsequences, error)

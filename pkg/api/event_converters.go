@@ -1030,6 +1030,13 @@ func convertAccountValueFlow(accountID tongo.AccountID, flow *bath.AccountValueF
 	return valueFlow
 }
 
+func getExtMsgHash(trace *core.Trace) string {
+	if trace == nil || trace.InMsg == nil {
+		return ""
+	}
+	return trace.InMsg.Hash.Hex()
+}
+
 func (h *Handler) toEvent(ctx context.Context, trace *core.Trace, result *bath.ActionsList, lang oas.OptString) (oas.Event, error) {
 	lt := int64(trace.Lt)
 	event := oas.Event{
@@ -1041,6 +1048,10 @@ func (h *Handler) toEvent(ctx context.Context, trace *core.Trace, result *bath.A
 		Lt:         lt,
 		InProgress: trace.InProgress(),
 		Progress:   trace.CalculateProgress(),
+	}
+
+	if extHash := getExtMsgHash(trace); extHash != "" {
+		event.ExtMsgHash.SetTo(extHash)
 	}
 
 	if !event.InProgress && trace.LastSliceID != nil {
@@ -1134,6 +1145,9 @@ func (h *Handler) toAccountEvent(ctx context.Context, account tongo.AccountID, t
 		InProgress: trace.InProgress(),
 		Extra:      result.Extra(account),
 		Progress:   trace.CalculateProgress(),
+	}
+	if extHash := getExtMsgHash(trace); extHash != "" {
+		e.ExtMsgHash.SetTo(extHash)
 	}
 	for _, a := range result.Actions {
 		if subjectOnly && !a.IsSubject(account) && a.Type != bath.UnSubscribe {
