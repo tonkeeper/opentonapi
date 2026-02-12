@@ -263,7 +263,7 @@ var JettonMintStrawGovernance = Straw[BubbleJettonMint]{
 }
 
 var JettonTransferMinimalStraw = Straw[BubbleJettonTransfer]{
-	CheckFuncs: []bubbleCheck{IsTx, HasInterface(abi.JettonWallet), HasOpcode(abi.JettonTransferMsgOpCode)},
+	CheckFuncs: []bubbleCheck{IsTx, HasInterface(abi.JettonWallet), HasOperation(abi.JettonTransferMsgOp)},
 	Builder: func(newAction *BubbleJettonTransfer, bubble *Bubble) error {
 		tx := bubble.Info.(BubbleTx)
 		newAction.master, _ = tx.additionalInfo.JettonMaster(tx.account.Address)
@@ -332,7 +332,7 @@ var JettonTransferMinimalStraw = Straw[BubbleJettonTransfer]{
 }
 
 var FlawedJettonTransferMinimalStraw = Straw[BubbleFlawedJettonTransfer]{
-	CheckFuncs: []bubbleCheck{IsTx, HasInterface(abi.JettonWallet), HasOpcode(abi.JettonTransferMsgOpCode), func(bubble *Bubble) bool {
+	CheckFuncs: []bubbleCheck{IsTx, HasInterface(abi.JettonWallet), HasOperation(abi.JettonTransferMsgOp), func(bubble *Bubble) bool {
 		// Check that sent amount is not the same as received one
 		currTx := bubble.Info.(BubbleTx)
 		transferBody, ok := currTx.decodedBody.Value.(abi.JettonTransferMsgBody)
