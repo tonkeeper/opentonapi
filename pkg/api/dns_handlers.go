@@ -6,19 +6,16 @@ import (
 	"fmt"
 	"net/http"
 	"regexp"
-	"strings"
-
-	"go.uber.org/zap"
 
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/tongo/ton"
+	"go.uber.org/zap"
 
 	"github.com/tonkeeper/tongo/contract/dns"
 
 	"github.com/tonkeeper/opentonapi/pkg/oas"
 	"github.com/tonkeeper/opentonapi/pkg/references"
 	"github.com/tonkeeper/tongo"
-	"github.com/tonkeeper/tongo/tlb"
 )
 
 // dnsResolver is a lazy initialization of DNS resolver.
@@ -53,7 +50,7 @@ func (h *Handler) AccountDnsBackResolve(ctx context.Context, params oas.AccountD
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
-	var result []string
+	var primaryNames, names []string
 	dnsResolver, err := h.dnsResolver(ctx)
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
@@ -63,26 +60,18 @@ func (h *Handler) AccountDnsBackResolve(ctx context.Context, params oas.AccountD
 		if err != nil { //todo: check error type
 			continue
 		}
-		found := false
-		for _, r := range records {
-			if r.SumType != "DNSSmcAddress" {
-				continue
+		if found, isPrimary := findAddress(records, account); found {
+			if isPrimary {
+				primaryNames = append(primaryNames, d)
+			} else {
+				names = append(names, d)
 			}
-			w, err := tongo.AccountIDFromTlb(r.DNSSmcAddress.Address)
-			if err != nil || w == nil {
-				break
-			}
-			if *w != account.ID {
-				break
-			}
-			found = true
-			break
-		}
-		if found {
-			result = append(result, d)
 		}
 	}
-	return &oas.DomainNames{Domains: result}, nil
+	if len(primaryNames) > 0 {
+		names = append(primaryNames, names...)
+	}
+	return &oas.DomainNames{Domains: names}, nil
 }
 
 func (h *Handler) DnsResolve(ctx context.Context, params oas.DnsResolveParams) (*oas.DnsRecord, error) {
@@ -107,36 +96,27 @@ func (h *Handler) DnsResolve(ctx context.Context, params oas.DnsResolveParams) (
 		return nil, toError(http.StatusInternalServerError, err)
 	}
 	result := oas.DnsRecord{}
-	for _, r := range records {
-		switch r.SumType {
-		case "DNSNextResolver":
-			result.NextResolver.SetTo(convertMsgAddress(r.DNSNextResolver))
-		case "DNSSmcAddress":
-			w := oas.WalletDNS{
-				Address: convertMsgAddress(r.DNSSmcAddress.Address),
-				Names:   r.DNSSmcAddress.SmcCapability.Name,
-			}
-			w.Account = convertAccountAddress(ton.MustParseAccountID(w.Address), h.addressBook)
-			for _, c := range r.DNSSmcAddress.SmcCapability.Interfaces {
-				switch c {
-				case "seqno":
-					w.HasMethodSeqno = true
-				case "pubkey":
-					w.HasMethodPubkey = true
-				case "wallet":
-					w.IsWallet = true
-				}
-			}
-			result.Wallet.SetTo(w)
-		case "DNSAdnlAddress":
-			for _, proto := range r.DNSAdnlAddress.ProtoList {
-				path := fmt.Sprintf("%v://%x", proto, r.DNSAdnlAddress.Address)
-				result.Sites = append(result.Sites, path)
-			}
-		case "DNSStorageAddress":
-			result.Storage.SetTo(r.DNSStorageAddress.Hex())
+	if r, ok := records[dns.DNSCategoryDNSNextResolver]; ok && r.SumType == "DNSNextResolver" {
+		result.NextResolver.SetTo(convertMsgAddress(r.DNSNextResolver))
+	}
+	if r, ok := records[dns.DNSCategoryWallet]; ok && r.SumType == "DNSSmcAddress" {
+		result.Wallet.SetTo(mapSmcAddressToWalletDNS(r.DNSSmcAddress.Address, r.DNSSmcAddress.SmcCapability, h.addressBook))
+	}
+	if r, ok := records[dns.DNSCategorySite]; ok && r.SumType == "DNSAdnlAddress" {
+		for _, proto := range r.DNSAdnlAddress.ProtoList {
+			path := fmt.Sprintf("%v://%x", proto, r.DNSAdnlAddress.Address)
+			result.Sites = append(result.Sites, path)
 		}
 	}
+	if r, ok := records[dns.DNSCategoryStorage]; ok && r.SumType == "DNSStorageAddress" {
+		result.Storage.SetTo(r.DNSStorageAddress.Hex())
+	}
+	if r, ok := records[dns.DNSCategoryPicture]; ok {
+		if picture, ok1 := mapDNSRecordToPicture(r); ok1 {
+			result.Picture.SetTo(picture)
+		}
+	}
+
 	return &result, nil
 }
 
@@ -164,21 +144,4 @@ func (h *Handler) GetDnsInfo(ctx context.Context, params oas.GetDnsInfoParams) (
 		convertedDomainInfo.ExpiringAt.SetTo(expTime)
 	}
 	return &convertedDomainInfo, nil
-}
-
-func convertMsgAddress(address tlb.MsgAddress) string {
-	a, _ := tongo.AccountIDFromTlb(address)
-	if a == nil {
-		return ""
-	}
-	return a.ToRaw()
-}
-
-func convertDomainName(s string) (string, error) {
-	s = strings.ToLower(s)
-	name := strings.TrimSuffix(s, ".ton")
-	if len(name) < 4 || len(name) > 126 {
-		return "", fmt.Errorf("invalid domain len")
-	}
-	return name, nil
 }

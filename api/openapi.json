@@ -3171,6 +3171,9 @@
       "format": "maybe-address",
       "type": "string"
      },
+     "picture": {
+      "$ref": "#/components/schemas/PictureDNS"
+     },
      "sites": {
       "items": {
        "example": "http://12234.ton",
@@ -5286,6 +5289,27 @@
      "oracle_multisig_address",
      "external_chain_address",
      "oracles"
+    ],
+    "type": "object"
+   },
+   "PictureDNS": {
+    "properties": {
+     "bag_id": {
+      "type": "string"
+     },
+     "type": {
+      "enum": [
+       "url",
+       "bag_id"
+      ],
+      "type": "string"
+     },
+     "url": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "type"
     ],
     "type": "object"
    },
