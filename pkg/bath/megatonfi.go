@@ -48,7 +48,7 @@ var MegatonFiJettonSwap = Straw[BubbleJettonSwap]{
 }
 
 var WtonMintStraw = Straw[BubbleJettonMint]{
-	CheckFuncs: []bubbleCheck{IsTx, HasOpcode(0x77a33521)},
+	CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.MegatonWtonMintMsgOp)},
 	Builder: func(newAction *BubbleJettonMint, bubble *Bubble) error {
 		newAction.recipient = bubble.Info.(BubbleTx).account
 		return nil

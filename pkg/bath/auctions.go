@@ -74,7 +74,7 @@ var TgAuctionV1InitialBidStraw = Straw[AuctionBidBubble]{
 		return nil
 	},
 	SingleChild: &Straw[AuctionBidBubble]{
-		CheckFuncs: []bubbleCheck{IsTx, HasOpcode(0x299a3e15)},
+		CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.TeleitemDeployMsgOp)},
 		Builder: func(newAction *AuctionBidBubble, bubble *Bubble) error {
 			tx := bubble.Info.(BubbleTx)
 			newAction.Success = tx.success
