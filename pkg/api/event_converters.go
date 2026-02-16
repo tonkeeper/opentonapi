@@ -22,7 +22,6 @@ import (
 	"github.com/tonkeeper/opentonapi/pkg/references"
 
 	"github.com/tonkeeper/tongo"
-	"golang.org/x/exp/slices"
 
 	"github.com/tonkeeper/opentonapi/internal/g"
 	"github.com/tonkeeper/opentonapi/pkg/api/i18n"
@@ -40,7 +39,8 @@ var unknownEventCounterVec = promauto.NewCounter(
 )
 
 func distinctAccounts(skip *tongo.AccountID, book addressBook, accounts ...*tongo.AccountID) []oas.AccountAddress {
-	okAccounts := make([]*tongo.AccountID, 0, len(accounts))
+	seen := make(map[*tongo.AccountID]struct{}, len(accounts))
+	result := make([]oas.AccountAddress, 0, len(accounts))
 	for _, account := range accounts {
 		if account == nil {
 			continue
@@ -48,13 +48,10 @@ func distinctAccounts(skip *tongo.AccountID, book addressBook, accounts ...*tong
 		if skip != nil && *skip == *account {
 			continue
 		}
-		if slices.Contains(okAccounts, account) {
+		if _, ok := seen[account]; ok {
 			continue
 		}
-		okAccounts = append(okAccounts, account)
-	}
-	result := make([]oas.AccountAddress, 0, len(okAccounts))
-	for _, account := range okAccounts {
+		seen[account] = struct{}{}
 		result = append(result, convertAccountAddress(*account, book))
 	}
 	return result

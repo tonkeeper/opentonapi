@@ -5305,6 +5305,7 @@
       "type": "string"
      },
      "url": {
+      "description": "WARNING! This is arbitrary url supplied by domain owner, use it very carefully.\nThere is no guarantee that URL resolves to an image file and is not a phishing site.\n",
       "type": "string"
      }
     },
