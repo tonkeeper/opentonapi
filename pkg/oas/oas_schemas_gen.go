@@ -16039,9 +16039,11 @@ func (s *OracleBridgeParams) SetOracles(val []Oracle) {
 
 // Ref: #/components/schemas/PictureDNS
 type PictureDNS struct {
-	Type  PictureDNSType `json:"type"`
-	URL   OptString      `json:"url"`
-	BagID OptString      `json:"bag_id"`
+	Type PictureDNSType `json:"type"`
+	// WARNING! This is arbitrary url supplied by domain owner, use it very carefully.
+	// There is no guarantee that URL resolves to an image file and is not a phishing site.
+	URL   OptString `json:"url"`
+	BagID OptString `json:"bag_id"`
 }
 
 // GetType returns the value of Type.

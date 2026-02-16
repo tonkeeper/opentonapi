@@ -277,31 +277,27 @@ func (h *Handler) GetAccountEvents(ctx context.Context, params oas.GetAccountEve
 	}()
 
 	var lastLT uint64
-	for _, traceID := range traceIDs {
-		lastLT = traceID.Lt
-		trace, err := h.storage.GetTrace(ctx, traceID.Hash)
-		if err != nil {
-			if errors.Is(err, core.ErrTraceIsTooLong) {
-				events = append(events, h.toAccountEventForLongTrace(account.ID, traceID))
-			} else {
-				events = append(events, h.toUnknownAccountEvent(account.ID, traceID))
-			}
-			continue
+	if len(traceIDs) > 0 {
+		lastLT = traceIDs[len(traceIDs)-1].Lt
+	}
+	if h.parallelTraceProcessing {
+		// Parallel mode: trades latency for CPU density.
+		// Disable via PARALLEL_TRACE_PROCESSING=false under DDoS.
+		results := make([]oas.AccountEvent, len(traceIDs))
+		var traceWg sync.WaitGroup
+		for i, traceID := range traceIDs {
+			traceWg.Add(1)
+			go func(idx int, tid core.TraceID) {
+				defer traceWg.Done()
+				results[idx] = h.processTrace(ctx, account.ID, tid, params.AcceptLanguage, params.SubjectOnly.Value)
+			}(i, traceID)
 		}
-		actions, err := bath.FindActions(ctx, trace, bath.ForAccount(account.ID), bath.WithInformationSource(h.storage))
-		if err != nil {
-			events = append(events, h.toUnknownAccountEvent(account.ID, traceID))
-			continue
-			//return nil, toError(http.StatusInternalServerError, err)
+		traceWg.Wait()
+		events = append(events, results...)
+	} else {
+		for _, traceID := range traceIDs {
+			events = append(events, h.processTrace(ctx, account.ID, traceID, params.AcceptLanguage, params.SubjectOnly.Value))
 		}
-		result := bath.EnrichWithIntentions(trace, actions)
-		e, err := h.toAccountEvent(ctx, account.ID, trace, result, params.AcceptLanguage, params.SubjectOnly.Value)
-		if err != nil {
-			events = append(events, h.toUnknownAccountEvent(account.ID, traceID))
-			continue
-			//return nil, toError(http.StatusInternalServerError, err)
-		}
-		events = append(events, e)
 	}
 	// if we look into history we don't need to mix mempool
 	if descendingOrder && !(params.BeforeLt.IsSet() || params.StartDate.IsSet() || params.EndDate.IsSet() || (len(events) > 0 && events[0].InProgress)) {
@@ -386,6 +382,26 @@ func (h *Handler) GetAccountEvents(ctx context.Context, params oas.GetAccountEve
 		events[i].IsScam = events[i].IsScam || isBannedTraces[events[i].EventID]
 	}
 	return &oas.AccountEvents{Events: events, NextFrom: int64(lastLT)}, nil
+}
+
+func (h *Handler) processTrace(ctx context.Context, account tongo.AccountID, tid core.TraceID, lang oas.OptString, subjectOnly bool) oas.AccountEvent {
+	trace, err := h.storage.GetTrace(ctx, tid.Hash)
+	if errors.Is(err, core.ErrTraceIsTooLong) {
+		return h.toAccountEventForLongTrace(account, tid)
+	}
+	if err != nil {
+		return h.toUnknownAccountEvent(account, tid)
+	}
+	actions, err := bath.FindActions(ctx, trace, bath.ForAccount(account), bath.WithInformationSource(h.storage))
+	if err != nil {
+		return h.toUnknownAccountEvent(account, tid)
+	}
+	result := bath.EnrichWithIntentions(trace, actions)
+	converted, err := h.toAccountEvent(ctx, account, trace, result, lang, subjectOnly)
+	if err != nil {
+		return h.toUnknownAccountEvent(account, tid)
+	}
+	return converted
 }
 
 func (h *Handler) GetAccountEvent(ctx context.Context, params oas.GetAccountEventParams) (*oas.AccountEvent, error) {

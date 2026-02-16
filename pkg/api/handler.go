@@ -49,6 +49,8 @@ type Handler struct {
 	tonConnect     *tonconnect.Server
 	verifierSource verifierSource
 
+	// parallelTraceProcessing enables parallel trace-to-action conversion.
+	parallelTraceProcessing bool
 	// mempoolEmulate contains results of emulation of messages that are in the mempool.
 	mempoolEmulate mempoolEmulate
 	// ctxToDetails converts a request context to a details instance.
@@ -87,8 +89,9 @@ type Options struct {
 	tonConnectSecret string
 	ctxToDetails     ctxToDetails
 	gasless          Gasless
-	verifier         verifierSource
-	score            scoreSource
+	verifier                verifierSource
+	score                   scoreSource
+	parallelTraceProcessing bool
 }
 
 type Option func(o *Options)
@@ -167,6 +170,12 @@ func WithVerifier(verifier verifierSource) Option {
 func WithScore(score scoreSource) Option {
 	return func(o *Options) {
 		o.score = score
+	}
+}
+
+func WithParallelTraceProcessing(enabled bool) Option {
+	return func(o *Options) {
+		o.parallelTraceProcessing = enabled
 	}
 }
 
@@ -250,7 +259,8 @@ func NewHandler(logger *zap.Logger, opts ...Option) (*Handler, error) {
 		mempoolEmulateIgnoreAccounts: map[tongo.AccountID]struct{}{
 			tongo.MustParseAddress("0:0000000000000000000000000000000000000000000000000000000000000000").ID: {},
 		},
-		tongoVersion:        tongoVersion,
+		parallelTraceProcessing: options.parallelTraceProcessing,
+		tongoVersion:            tongoVersion,
 		blacklistedBocCache: cache.NewLRUCache[[32]byte, struct{}](100000, "blacklisted_boc_cache"),
 		getMethodsCache:     cache.NewLRUCache[string, *oas.MethodExecutionResult](100000, "get_methods_cache"),
 		tonConnect:          tonConnect,

@@ -7,7 +7,6 @@ import (
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
 	"github.com/tonkeeper/tongo/ton"
-	"golang.org/x/exp/slices"
 )
 
 type bubbleCheck func(bubble *Bubble) bool
@@ -94,6 +93,10 @@ func (s Straw[newBubbleT]) Merge(bubble *Bubble) bool {
 	}
 	nvf := newValueFlow()
 	var finalizer func(newAction *newBubbleT, flow *ValueFlow)
+	merged := make(map[*Bubble]struct{}, len(mapping))
+	for _, m := range mapping {
+		merged[m.b] = struct{}{}
+	}
 	for i := len(mapping) - 1; i >= 0; i-- {
 		if mapping[i].s.Builder != nil {
 			err := mapping[i].s.Builder(&newBubble, mapping[i].b)
@@ -110,12 +113,7 @@ func (s Straw[newBubbleT]) Merge(bubble *Bubble) bool {
 		newTransaction = append(newTransaction, mapping[i].b.Transaction...)
 		mapping[i].b.IsMerged = true
 		for _, child := range mapping[i].b.Children {
-			if slices.ContainsFunc(mapping, func(s struct {
-				s Straw[newBubbleT]
-				b *Bubble
-			}) bool {
-				return s.b == child
-			}) {
+			if _, ok := merged[child]; ok {
 				continue
 			}
 			potentialChildren = append(potentialChildren, child)
