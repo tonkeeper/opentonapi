@@ -7180,6 +7180,25 @@ components:
           type: string
           description: "tonstorage bag id"
           example: "da6b1b6663a0e4d18cc8574ccd9db5296e367dd9324706f3bbd9eb1cd2caf0bf"
+        picture:
+          $ref: '#/components/schemas/PictureDNS'
+    PictureDNS:
+      type: object
+      required:
+        - type
+      properties:
+        type:
+          type: string
+          enum:
+            - url
+            - bag_id
+        url:
+          type: string
+          description: |
+            WARNING! This is arbitrary url supplied by domain owner, use it very carefully.
+            There is no guarantee that URL resolves to an image file and is not a phishing site.
+        bag_id:
+          type: string
     NftCollection:
       type: object
       required:

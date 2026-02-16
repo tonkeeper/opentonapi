@@ -5211,7 +5211,8 @@ type DnsRecord struct {
 	NextResolver OptString    `json:"next_resolver"`
 	Sites        []string     `json:"sites"`
 	// Tonstorage bag id.
-	Storage OptString `json:"storage"`
+	Storage OptString     `json:"storage"`
+	Picture OptPictureDNS `json:"picture"`
 }
 
 // GetWallet returns the value of Wallet.
@@ -5234,6 +5235,11 @@ func (s *DnsRecord) GetStorage() OptString {
 	return s.Storage
 }
 
+// GetPicture returns the value of Picture.
+func (s *DnsRecord) GetPicture() OptPictureDNS {
+	return s.Picture
+}
+
 // SetWallet sets the value of Wallet.
 func (s *DnsRecord) SetWallet(val OptWalletDNS) {
 	s.Wallet = val
@@ -5252,6 +5258,11 @@ func (s *DnsRecord) SetSites(val []string) {
 // SetStorage sets the value of Storage.
 func (s *DnsRecord) SetStorage(val OptString) {
 	s.Storage = val
+}
+
+// SetPicture sets the value of Picture.
+func (s *DnsRecord) SetPicture(val OptPictureDNS) {
+	s.Picture = val
 }
 
 // Ref: #/components/schemas/DomainBid
@@ -14710,6 +14721,52 @@ func (o OptNftPurchaseAction) Or(d NftPurchaseAction) NftPurchaseAction {
 	return d
 }
 
+// NewOptPictureDNS returns new OptPictureDNS with value set to v.
+func NewOptPictureDNS(v PictureDNS) OptPictureDNS {
+	return OptPictureDNS{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptPictureDNS is optional PictureDNS.
+type OptPictureDNS struct {
+	Value PictureDNS
+	Set   bool
+}
+
+// IsSet returns true if OptPictureDNS was set.
+func (o OptPictureDNS) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptPictureDNS) Reset() {
+	var v PictureDNS
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptPictureDNS) SetTo(v PictureDNS) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptPictureDNS) Get() (v PictureDNS, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptPictureDNS) Or(d PictureDNS) PictureDNS {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptPrice returns new OptPrice with value set to v.
 func NewOptPrice(v Price) OptPrice {
 	return OptPrice{
@@ -15978,6 +16035,84 @@ func (s *OracleBridgeParams) SetExternalChainAddress(val string) {
 // SetOracles sets the value of Oracles.
 func (s *OracleBridgeParams) SetOracles(val []Oracle) {
 	s.Oracles = val
+}
+
+// Ref: #/components/schemas/PictureDNS
+type PictureDNS struct {
+	Type  PictureDNSType `json:"type"`
+	URL   OptString      `json:"url"`
+	BagID OptString      `json:"bag_id"`
+}
+
+// GetType returns the value of Type.
+func (s *PictureDNS) GetType() PictureDNSType {
+	return s.Type
+}
+
+// GetURL returns the value of URL.
+func (s *PictureDNS) GetURL() OptString {
+	return s.URL
+}
+
+// GetBagID returns the value of BagID.
+func (s *PictureDNS) GetBagID() OptString {
+	return s.BagID
+}
+
+// SetType sets the value of Type.
+func (s *PictureDNS) SetType(val PictureDNSType) {
+	s.Type = val
+}
+
+// SetURL sets the value of URL.
+func (s *PictureDNS) SetURL(val OptString) {
+	s.URL = val
+}
+
+// SetBagID sets the value of BagID.
+func (s *PictureDNS) SetBagID(val OptString) {
+	s.BagID = val
+}
+
+type PictureDNSType string
+
+const (
+	PictureDNSTypeURL   PictureDNSType = "url"
+	PictureDNSTypeBagID PictureDNSType = "bag_id"
+)
+
+// AllValues returns all PictureDNSType values.
+func (PictureDNSType) AllValues() []PictureDNSType {
+	return []PictureDNSType{
+		PictureDNSTypeURL,
+		PictureDNSTypeBagID,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s PictureDNSType) MarshalText() ([]byte, error) {
+	switch s {
+	case PictureDNSTypeURL:
+		return []byte(s), nil
+	case PictureDNSTypeBagID:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *PictureDNSType) UnmarshalText(data []byte) error {
+	switch PictureDNSType(data) {
+	case PictureDNSTypeURL:
+		*s = PictureDNSTypeURL
+		return nil
+	case PictureDNSTypeBagID:
+		*s = PictureDNSTypeBagID
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
 }
 
 // Ref: #/components/schemas/PoolImplementation
