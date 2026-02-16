@@ -1725,6 +1725,25 @@ paths:
         - Staking
       parameters:
         - $ref: '#/components/parameters/accountIDParameter'
+        - name: before_lt
+          in: query
+          description: "omit this parameter to get last log entries"
+          required: false
+          schema:
+            type: integer
+            format: int64
+            example: 25758317000002
+            x-js-format: bigint
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int32
+            default: 100
+            maximum: 100
+            minimum: 1
+            example: 100
       responses:
         '200':
           description: pool history

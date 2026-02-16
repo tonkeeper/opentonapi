@@ -11392,6 +11392,14 @@ func (s *Server) handleGetStakingPoolHistoryRequest(args [1]string, argsEscaped 
 					Name: "account_id",
 					In:   "path",
 				}: params.AccountID,
+				{
+					Name: "before_lt",
+					In:   "query",
+				}: params.BeforeLt,
+				{
+					Name: "limit",
+					In:   "query",
+				}: params.Limit,
 			},
 			Raw: r,
 		}
