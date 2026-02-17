@@ -146,10 +146,14 @@ func (h *Handler) addToMempool(ctx context.Context, bytesBoc []byte, shardAccoun
 	core.Visit(trace, func(node *core.Trace) {
 		accounts[node.Account] = struct{}{}
 	})
-	err = h.storage.SaveTraceWithState(ctx, ton.Bits256(hash).Hex(), trace, h.tongoVersion, []abi.MethodInvocation{}, 24*time.Hour)
-	if err != nil {
-		h.logger.Warn("trace not saved: ", zap.Error(err))
-		savedEmulatedTraces.WithLabelValues("error_save").Inc()
+	if ttl := traceTTLFromMessage(msgCell[0]); ttl > 0 {
+		err = h.storage.SaveTraceWithState(ctx, ton.Bits256(hash).Hex(), trace, h.tongoVersion, []abi.MethodInvocation{}, ttl)
+		if err != nil {
+			h.logger.Warn("trace not saved: ", zap.Error(err))
+			savedEmulatedTraces.WithLabelValues("error_save").Inc()
+		} else {
+			savedEmulatedTraces.WithLabelValues("success").Inc()
+		}
 	}
 	var localMessageHashCache = make(map[ton.Bits256]bool)
 	for account := range accounts {
@@ -423,4 +427,21 @@ func getAdditionalInfoStonfi(ctx context.Context, sharedExecutor *shardsAccountE
 		master, _ := ton.AccountIDFromTlb(data.Jetton)
 		additionalInfo.SetJettonMaster(accountID, *master)
 	}
+}
+
+func traceTTLFromMessage(msg *boc.Cell) time.Duration {
+	var validUntil uint32
+	if v5, err := tongoWallet.DecodeMessageV5(msg); err == nil {
+		if v5.SumType == "SignedExternal" {
+			validUntil = v5.SignedExternal.ValidUntil
+		}
+	} else if v4, err := tongoWallet.DecodeMessageV4(msg); err == nil {
+		validUntil = v4.ValidUntil
+	} else if v3, err := tongoWallet.DecodeMessageV3(msg); err == nil {
+		validUntil = v3.ValidUntil
+	}
+	if validUntil == 0 {
+		return 24 * time.Hour
+	}
+	return min(time.Until(time.Unix(int64(validUntil), 0)), 24*time.Hour)
 }
