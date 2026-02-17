@@ -513,12 +513,15 @@ func (h *Handler) EmulateMessageToAccountEvent(ctx context.Context, request *oas
 		if err != nil {
 			return nil, toError(http.StatusInternalServerError, err)
 		}
-		err = h.storage.SaveTraceWithState(ctx, hash, trace, h.tongoVersion, []abi.MethodInvocation{}, 24*time.Hour)
-		if err != nil {
-			h.logger.Warn("trace not saved: ", zap.Error(err))
-			savedEmulatedTraces.WithLabelValues("error_save").Inc()
+		if ttl := traceTTLFromMessage(c); ttl > 0 {
+			err = h.storage.SaveTraceWithState(ctx, hash, trace, h.tongoVersion, []abi.MethodInvocation{}, ttl)
+			if err != nil {
+				h.logger.Warn("trace not saved: ", zap.Error(err))
+				savedEmulatedTraces.WithLabelValues("error_save").Inc()
+			} else {
+				savedEmulatedTraces.WithLabelValues("success").Inc()
+			}
 		}
-		savedEmulatedTraces.WithLabelValues("success").Inc()
 	} else {
 		savedEmulatedTraces.WithLabelValues("restored").Inc()
 	}
@@ -576,12 +579,15 @@ func (h *Handler) EmulateMessageToEvent(ctx context.Context, request *oas.Emulat
 		if err != nil {
 			return nil, toError(http.StatusInternalServerError, err)
 		}
-		err = h.storage.SaveTraceWithState(ctx, hs, trace, h.tongoVersion, []abi.MethodInvocation{}, 24*time.Hour)
-		if err != nil {
-			h.logger.Warn("trace not saved: ", zap.Error(err))
-			savedEmulatedTraces.WithLabelValues("error_save").Inc()
+		if ttl := traceTTLFromMessage(c); ttl > 0 {
+			err = h.storage.SaveTraceWithState(ctx, hs, trace, h.tongoVersion, []abi.MethodInvocation{}, traceTTLFromMessage(c))
+			if err != nil {
+				h.logger.Warn("trace not saved: ", zap.Error(err))
+				savedEmulatedTraces.WithLabelValues("error_save").Inc()
+			} else {
+				savedEmulatedTraces.WithLabelValues("success").Inc()
+			}
 		}
-		savedEmulatedTraces.WithLabelValues("success").Inc()
 	} else {
 		savedEmulatedTraces.WithLabelValues("restored").Inc()
 	}
@@ -641,12 +647,15 @@ func (h *Handler) EmulateMessageToTrace(ctx context.Context, request *oas.Emulat
 		if err != nil {
 			return nil, toError(http.StatusInternalServerError, err)
 		}
-		err = h.storage.SaveTraceWithState(ctx, hs, trace, h.tongoVersion, []abi.MethodInvocation{}, 24*time.Hour)
-		if err != nil {
-			h.logger.Warn("trace not saved: ", zap.Error(err))
-			savedEmulatedTraces.WithLabelValues("error_save").Inc()
+		if ttl := traceTTLFromMessage(c); ttl > 0 {
+			err = h.storage.SaveTraceWithState(ctx, hs, trace, h.tongoVersion, []abi.MethodInvocation{}, ttl)
+			if err != nil {
+				h.logger.Warn("trace not saved: ", zap.Error(err))
+				savedEmulatedTraces.WithLabelValues("error_save").Inc()
+			} else {
+				savedEmulatedTraces.WithLabelValues("success").Inc()
+			}
 		}
-		savedEmulatedTraces.WithLabelValues("success").Inc()
 	} else {
 		savedEmulatedTraces.WithLabelValues("restored").Inc()
 	}
@@ -791,12 +800,15 @@ func (h *Handler) EmulateMessageToWallet(ctx context.Context, request *oas.Emula
 		if err != nil {
 			return nil, toError(http.StatusInternalServerError, fmt.Errorf("account: %s EmulatedTreeToTrace err: %w", walletAddress.ToRaw(), err))
 		}
-		err = h.storage.SaveTraceWithState(ctx, hash, trace, h.tongoVersion, []abi.MethodInvocation{}, 24*time.Hour)
-		if err != nil {
-			h.logger.Warn("trace not saved: ", zap.Error(err))
-			savedEmulatedTraces.WithLabelValues("error_save").Inc()
+		if ttl := traceTTLFromMessage(msgCell); ttl > 0 {
+			err = h.storage.SaveTraceWithState(ctx, hash, trace, h.tongoVersion, []abi.MethodInvocation{}, ttl)
+			if err != nil {
+				h.logger.Warn("trace not saved: ", zap.Error(err))
+				savedEmulatedTraces.WithLabelValues("error_save").Inc()
+			} else {
+				savedEmulatedTraces.WithLabelValues("success").Inc()
+			}
 		}
-		savedEmulatedTraces.WithLabelValues("success").Inc()
 	} else {
 		savedEmulatedTraces.WithLabelValues("restored").Inc()
 	}
