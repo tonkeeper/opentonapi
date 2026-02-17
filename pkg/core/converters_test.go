@@ -83,6 +83,10 @@ func TestConvertToAccount(t *testing.T) {
 }
 
 func TestConvertTransaction(t *testing.T) {
+	if os.Getenv("TEST_CI") == "1" {
+		t.SkipNow()
+		return
+	}
 	tests := []struct {
 		name           string
 		accountID      tongo.AccountID

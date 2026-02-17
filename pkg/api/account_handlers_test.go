@@ -2,8 +2,10 @@ package api
 
 import (
 	"context"
-	"github.com/tonkeeper/opentonapi/pkg/spam"
+	"os"
 	"testing"
+
+	"github.com/tonkeeper/opentonapi/pkg/spam"
 
 	"github.com/tonkeeper/opentonapi/pkg/chainstate"
 	pkgTesting "github.com/tonkeeper/opentonapi/pkg/testing"
@@ -19,6 +21,10 @@ import (
 )
 
 func TestHandler_GetRawAccount(t *testing.T) {
+	if os.Getenv("TEST_CI") == "1" {
+		t.SkipNow()
+		return
+	}
 	tests := []struct {
 		name           string
 		params         oas.GetBlockchainRawAccountParams
@@ -80,6 +86,10 @@ func TestHandler_GetRawAccount(t *testing.T) {
 }
 
 func TestHandler_GetAccount(t *testing.T) {
+	if os.Getenv("TEST_CI") == "1" {
+		t.SkipNow()
+		return
+	}
 	tests := []struct {
 		name        string
 		params      oas.GetAccountParams
@@ -115,6 +125,10 @@ func TestHandler_GetAccount(t *testing.T) {
 }
 
 func TestHandler_GetAccounts(t *testing.T) {
+	if os.Getenv("TEST_CI") == "1" {
+		t.SkipNow()
+		return
+	}
 	tests := []struct {
 		name                string
 		req                 oas.OptGetAccountsReq
@@ -222,6 +236,10 @@ func TestHandler_GetAccounts(t *testing.T) {
 }
 
 func TestHandler_GetTransactions(t *testing.T) {
+	if os.Getenv("TEST_CI") == "1" {
+		t.SkipNow()
+		return
+	}
 	tests := []struct {
 		name           string
 		params         oas.GetBlockchainBlockTransactionsParams

@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -14,7 +15,10 @@ import (
 )
 
 func TestHandler_isEmulationAllowed(t *testing.T) {
-
+	if os.Getenv("TEST_CI") == "1" {
+		t.SkipNow()
+		return
+	}
 	cli, err := liteapi.NewClient(liteapi.FromEnvsOrMainnet())
 	require.Nil(t, err)
 

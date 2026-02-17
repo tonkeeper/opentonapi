@@ -77,6 +77,10 @@ func (m *mockInfoSource) DedustPools(ctx context.Context, contracts []tongo.Acco
 var _ core.InformationSource = &mockInfoSource{}
 
 func TestFindActions(t *testing.T) {
+	if os.Getenv("TEST_CI") == "1" {
+		t.SkipNow()
+		return
+	}
 	cli, err := liteapi.NewClient(liteapi.FromEnvsOrMainnet())
 	require.Nil(t, err)
 

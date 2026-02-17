@@ -2,9 +2,11 @@ package api
 
 import (
 	"context"
+	"os"
+	"testing"
+
 	"github.com/tonkeeper/opentonapi/pkg/addressbook"
 	"github.com/tonkeeper/tongo"
-	"testing"
 
 	"github.com/stretchr/testify/require"
 	"github.com/tonkeeper/opentonapi/pkg/litestorage"
@@ -14,6 +16,10 @@ import (
 )
 
 func TestHandler_GetStakingPoolInfo(t *testing.T) {
+	if os.Getenv("TEST_CI") == "1" {
+		t.SkipNow()
+		return
+	}
 	tests := []struct {
 		name     string
 		params   oas.GetStakingPoolInfoParams

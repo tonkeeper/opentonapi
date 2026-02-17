@@ -26,4 +26,4 @@ jobs:
           sudo apt-get install -y libsecp256k1-0
           mkdir -p ${{ env.LD_LIBRARY_PATH}}
           wget https://github.com/tonkeeper/tongo/raw/master/lib/linux/libemulator.so -O ${{ env.LD_LIBRARY_PATH}}/libemulator.so
-          make test
+          make test-ci

@@ -3,9 +3,11 @@ package api
 import (
 	"context"
 	"errors"
+	"os"
+	"testing"
+
 	"github.com/tonkeeper/opentonapi/pkg/addressbook"
 	"github.com/tonkeeper/tongo"
-	"testing"
 
 	"github.com/stretchr/testify/require"
 	"github.com/tonkeeper/opentonapi/pkg/litestorage"
@@ -16,6 +18,10 @@ import (
 )
 
 func TestHandler_GetRawBlockchainConfig(t *testing.T) {
+	if os.Getenv("TEST_CI") == "1" {
+		t.SkipNow()
+		return
+	}
 	logger := zap.L()
 	cli, err := liteapi.NewClient(liteapi.FromEnvsOrMainnet())
 	require.Nil(t, err)
@@ -34,6 +40,10 @@ func TestHandler_GetRawBlockchainConfig(t *testing.T) {
 }
 
 func TestHandler_GetRawBlockchainConfigFromBlock(t *testing.T) {
+	if os.Getenv("TEST_CI") == "1" {
+		t.SkipNow()
+		return
+	}
 	tests := []struct {
 		name              string
 		params            oas.GetRawBlockchainConfigFromBlockParams
@@ -117,6 +127,10 @@ func TestHandler_GetRawBlockchainConfigFromBlock(t *testing.T) {
 }
 
 func TestHandler_GetBlockchainConfigFromBlock(t *testing.T) {
+	if os.Getenv("TEST_CI") == "1" {
+		t.SkipNow()
+		return
+	}
 	tests := []struct {
 		name              string
 		params            oas.GetBlockchainConfigFromBlockParams
@@ -166,6 +180,10 @@ func TestHandler_GetBlockchainConfigFromBlock(t *testing.T) {
 }
 
 func TestHandler_GetBlockchainValidators(t *testing.T) {
+	if os.Getenv("TEST_CI") == "1" {
+		t.SkipNow()
+		return
+	}
 	logger := zap.L()
 	cli, err := liteapi.NewClient(liteapi.FromEnvsOrMainnet())
 	require.Nil(t, err)
@@ -199,6 +217,10 @@ func TestHandler_GetBlockchainValidators(t *testing.T) {
 }
 
 func TestHandler_GetBlockchainBlock(t *testing.T) {
+	if os.Getenv("TEST_CI") == "1" {
+		t.SkipNow()
+		return
+	}
 	tests := []struct {
 		name           string
 		blockID        string

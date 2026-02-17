@@ -4,12 +4,14 @@ import (
 	"context"
 	"encoding/hex"
 	"fmt"
+	"net/http"
+	"os"
+	"testing"
+
 	"github.com/tonkeeper/opentonapi/pkg/addressbook"
 	"github.com/tonkeeper/opentonapi/pkg/bath"
 	"github.com/tonkeeper/opentonapi/pkg/spam"
 	"github.com/tonkeeper/tongo"
-	"net/http"
-	"testing"
 
 	"github.com/stretchr/testify/require"
 	"github.com/tonkeeper/tongo/liteapi"
@@ -22,6 +24,10 @@ import (
 )
 
 func TestHandler_EmulateMessageToAccountEvent(t *testing.T) {
+	if os.Getenv("TEST_CI") == "1" {
+		t.SkipNow()
+		return
+	}
 	tests := []struct {
 		name          string
 		request       oas.EmulateMessageToAccountEventReq
@@ -108,6 +114,10 @@ func TestHandler_EmulateMessageToAccountEvent(t *testing.T) {
 }
 
 func Test_prepareAccountState(t *testing.T) {
+	if os.Getenv("TEST_CI") == "1" {
+		t.SkipNow()
+		return
+	}
 	cli, err := liteapi.NewClient(liteapi.FromEnvsOrMainnet())
 	require.Nil(t, err)
 
