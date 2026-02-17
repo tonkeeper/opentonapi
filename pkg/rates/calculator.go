@@ -43,8 +43,10 @@ func InitCalculator(source ratesSource) *calculator {
 
 	go func() {
 		for {
+			now := time.Now()
+			nextMinute := now.Truncate(time.Minute).Add(time.Minute + 3*time.Second)
+			time.Sleep(time.Until(nextMinute))
 			c.refresh()
-			time.Sleep(time.Second * 30)
 		}
 	}()
 
