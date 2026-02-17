@@ -427,18 +427,7 @@ func (s UniversalStonfiStraw) Merge(b *Bubble) bool {
 	}
 	routerAddr := poolTx.inputFrom.Address
 
-	if IsTx(poolBubble) && HasOperation(abi.StonfiSwapV2MsgOp)(poolBubble) && HasInterface(abi.StonfiPoolV2)(poolBubble) {
-		tx := poolBubble.Info.(BubbleTx)
-		body := tx.decodedBody.Value.(abi.StonfiSwapV2MsgBody)
-		outJettonWallet, err := tongo.AccountIDFromTlb(body.DexPayload.TokenWallet1)
-		if err != nil {
-			return false
-		}
-		out.JettonWallet = *outJettonWallet
-		if tx.additionalInfo != nil {
-			out.JettonMaster = tx.additionalInfo.JettonMasters[*outJettonWallet]
-		}
-	} else {
+	if !IsTx(poolBubble) && HasOperation(abi.StonfiSwapV2MsgOp)(poolBubble) && HasInterface(abi.StonfiPoolV2)(poolBubble) {
 		return false
 	}
 
@@ -475,6 +464,28 @@ func (s UniversalStonfiStraw) Merge(b *Bubble) bool {
 		if len(swapPayoutBubble.Children) != 1 {
 			return false
 		}
+
+		tx := swapPayoutBubble.Info.(BubbleTx)
+		body := tx.decodedBody.Value.(abi.StonfiPayToV2MsgBody)
+		amount0 := big.Int(body.AdditionalInfo.Amount0Out)
+		var outJettonWallet *tongo.AccountID
+		var err error
+		if amount0.Cmp(big.NewInt(0)) != 0 {
+			outJettonWallet, err = tongo.AccountIDFromTlb(body.AdditionalInfo.Token0Address)
+			if err != nil {
+				return false
+			}
+		} else {
+			outJettonWallet, err = tongo.AccountIDFromTlb(body.AdditionalInfo.Token1Address)
+			if err != nil {
+				return false
+			}
+		}
+		out.JettonWallet = *outJettonWallet
+		if tx.additionalInfo != nil {
+			out.JettonMaster = tx.additionalInfo.JettonMasters[*outJettonWallet]
+		}
+
 		usedBubbles[swapPayoutBubble] = struct{}{}
 		transferBubble := swapPayoutBubble.Children[0]
 
