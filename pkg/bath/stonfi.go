@@ -430,6 +430,7 @@ func (s UniversalStonfiStraw) Merge(b *Bubble) bool {
 	if !IsTx(poolBubble) && HasOperation(abi.StonfiSwapV2MsgOp)(poolBubble) && HasInterface(abi.StonfiPoolV2)(poolBubble) {
 		return false
 	}
+	poolBubbleTx := poolBubble.Info.(BubbleTx)
 
 	swapPayoutBubble := poolBubble.Children[0] // мы уже проверили длину в processMultipleRouterSwaps
 	if len(poolBubble.Children) == 2 {         // swap with referrer payout
@@ -482,8 +483,8 @@ func (s UniversalStonfiStraw) Merge(b *Bubble) bool {
 			}
 		}
 		out.JettonWallet = *outJettonWallet
-		if tx.additionalInfo != nil {
-			out.JettonMaster = tx.additionalInfo.JettonMasters[*outJettonWallet]
+		if poolBubbleTx.additionalInfo != nil {
+			out.JettonMaster = poolBubbleTx.additionalInfo.JettonMasters[*outJettonWallet]
 		}
 
 		usedBubbles[swapPayoutBubble] = struct{}{}
