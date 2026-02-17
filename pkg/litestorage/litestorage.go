@@ -3,9 +3,12 @@ package litestorage
 import (
 	"context"
 	"crypto/ed25519"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"math/big"
+	"os"
+	"path/filepath"
 	"sort"
 	"sync"
 	"time"
@@ -53,6 +56,85 @@ func extractInMsgCreatedLT(accountID tongo.AccountID, tx *tlb.Transaction) (inMs
 	return inMsgCreatedLT{}, false
 }
 
+type Cache[K fmt.Stringer, V any] interface {
+	Store(key K, value V)
+	Load(key K) (value V, ok bool)
+}
+
+type JsonTlbDiskCache[K fmt.Stringer, V any] struct {
+	dir string
+}
+
+func (dc *JsonTlbDiskCache[K, V]) Store(key K, value V) {
+	cell := boc.NewCell()
+	err := tlb.Marshal(cell, value)
+	if err != nil {
+		panic(err)
+	}
+	filePath := filepath.Join(dc.dir, key.String())
+	file, err := os.OpenFile(filePath, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
+	if err != nil {
+		panic(err)
+	}
+	defer file.Close()
+	encoder := json.NewEncoder(file)
+	err = encoder.Encode(cell)
+	if err != nil {
+		panic(err)
+	}
+}
+
+func (dc *JsonTlbDiskCache[K, V]) Load(key K) (V, bool) {
+	var value V
+	filePath := filepath.Join(dc.dir, key.String())
+	file, err := os.OpenFile(filePath, os.O_RDONLY, 0644)
+	if os.IsNotExist(err) {
+		return value, false
+	}
+	if err != nil {
+		panic(err)
+	}
+	defer file.Close()
+	decoder := json.NewDecoder(file)
+	cell := boc.NewCell()
+	err = decoder.Decode(cell)
+	if err != nil {
+		panic(err)
+	}
+	err = tlb.Unmarshal(cell, &value)
+	if err != nil {
+		panic(err)
+	}
+	return value, true
+}
+
+type BytesDiskCache[K fmt.Stringer] struct {
+	dir string
+}
+
+func (dc *BytesDiskCache[K]) Store(key K, value []byte) {
+	err := os.WriteFile(filepath.Join(dc.dir, key.String()), value, 0644)
+	if err != nil {
+		panic(err)
+	}
+}
+
+func (dc *BytesDiskCache[K]) Load(key K) ([]byte, bool) {
+	data, err := os.ReadFile(filepath.Join(dc.dir, key.String()))
+	if os.IsNotExist(err) {
+		return data, false
+	}
+	if err != nil {
+		panic(err)
+	}
+	return data, true
+}
+
+type Tuple2[V1, V2 any] struct {
+	V1 V1
+	V2 V2
+}
+
 type LiteStorage struct {
 	logger                  *zap.Logger
 	client                  *liteapi.Client
@@ -60,7 +142,8 @@ type LiteStorage struct {
 	jettonMetaCache         *xsync.MapOf[string, tep64.Metadata]
 	transactionsIndexByHash *xsync.MapOf[tongo.Bits256, *core.Transaction]
 	transactionsByInMsgLT   *xsync.MapOf[inMsgCreatedLT, tongo.Bits256]
-	blockCache              *xsync.MapOf[tongo.BlockIDExt, *tlb.Block]
+	blockCache              Cache[tongo.BlockID, Tuple2[tongo.BlockIDExt, *tlb.Block]]
+	accountCodeCache        Cache[tongo.AccountID, []byte]
 	accountInterfacesCache  *xsync.MapOf[tongo.AccountID, []abi.ContractInterface]
 	// tvmLibraryCache contains public tvm libraries.
 	// As a library is immutable, it's ok to cache it.
@@ -132,6 +215,12 @@ func NewLiteStorage(log *zap.Logger, cli *liteapi.Client, opts ...Option) (*Lite
 	if o.executor == nil {
 		o.executor = cli
 	}
+	blockCache := &JsonTlbDiskCache[tongo.BlockID, Tuple2[tongo.BlockIDExt, *tlb.Block]]{
+		dir: "./cache/blocks",
+	}
+	codeCache := &BytesDiskCache[ton.AccountID]{
+		dir: "./cache/accountcode",
+	}
 	storage := &LiteStorage{
 		logger: log,
 		// TODO: introduce an env variable to configure this number
@@ -147,7 +236,8 @@ func NewLiteStorage(log *zap.Logger, cli *liteapi.Client, opts ...Option) (*Lite
 		jettonMetaCache:         xsync.NewMapOf[tep64.Metadata](),
 		transactionsIndexByHash: xsync.NewTypedMapOf[tongo.Bits256, *core.Transaction](hashBits256),
 		transactionsByInMsgLT:   xsync.NewTypedMapOf[inMsgCreatedLT, tongo.Bits256](hashInMsgCreatedLT),
-		blockCache:              xsync.NewTypedMapOf[tongo.BlockIDExt, *tlb.Block](hashBlockIDExt),
+		blockCache:              blockCache,
+		accountCodeCache:        codeCache,
 		accountInterfacesCache:  xsync.NewTypedMapOf[tongo.AccountID, []abi.ContractInterface](hashAccountID),
 		tvmLibraryCache:         cache.NewLRUCache[string, boc.Cell](10000, "tvm_libraries"),
 		configCache:             cache.NewLRUCache[int, ton.BlockchainConfig](4, "config"),
@@ -160,14 +250,20 @@ func NewLiteStorage(log *zap.Logger, cli *liteapi.Client, opts ...Option) (*Lite
 	}
 
 	blockIterator := iter.Iterator[tongo.BlockID]{MaxGoroutines: storage.maxGoroutines}
+	log.Info("preloading blocks", zap.Int("count", len(o.preloadBlocks)))
+	var blockWG sync.WaitGroup
 	blockIterator.ForEach(o.preloadBlocks, func(id *tongo.BlockID) {
-		if err := storage.preloadBlock(*id); err != nil {
-			log.Error("failed to preload block",
-				zap.String("blockID", id.String()),
-				zap.Error(err))
-		}
+		blockWG.Go(func() {
+			if err := storage.preloadBlock(*id); err != nil {
+				log.Error("failed to preload block",
+					zap.String("blockID", id.String()),
+					zap.Error(err))
+			}
+		})
 	})
+	blockWG.Wait()
 	iterator := iter.Iterator[tongo.AccountID]{MaxGoroutines: storage.maxGoroutines}
+	log.Info("preloading acounts", zap.Int("count", len(o.preloadAccounts)))
 	iterator.ForEach(o.preloadAccounts, func(accountID *tongo.AccountID) {
 		if err := storage.preloadAccount(*accountID); err != nil {
 			log.Error("failed to preload account",
@@ -306,28 +402,54 @@ func (s *LiteStorage) preloadAccount(a tongo.AccountID) error {
 	return nil
 }
 
-func (s *LiteStorage) preloadBlock(id tongo.BlockID) error {
-	ctx := context.Background()
+func (s *LiteStorage) getCachedBlock(ctx context.Context, id tongo.BlockID) (tongo.BlockIDExt, *tlb.Block, error) {
+	cached, ok := s.blockCache.Load(id)
+	if ok {
+		return cached.V1, cached.V2, nil
+	}
 	extID, _, err := s.client.LookupBlock(ctx, id, 1, nil, nil)
 	if err != nil {
-		return err
+		return tongo.BlockIDExt{}, nil, err
 	}
 	block, err := s.client.GetBlock(ctx, extID)
 	if err != nil {
+		return tongo.BlockIDExt{}, nil, err
+	}
+	cached.V1 = extID
+	cached.V2 = &block
+	s.blockCache.Store(id, cached)
+	return cached.V1, cached.V2, nil
+}
+
+func (s *LiteStorage) getCachedAccountCode(ctx context.Context, id tongo.AccountID) ([]byte, error) {
+	if code, ok := s.accountCodeCache.Load(id); ok {
+		return code, nil
+	}
+	account, err := s.GetRawAccount(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	s.accountCodeCache.Store(id, account.Code)
+	return account.Code, nil
+}
+
+func (s *LiteStorage) preloadBlock(id tongo.BlockID) error {
+	ctx := context.Background()
+	extID, block, err := s.getCachedBlock(ctx, id)
+	if err != nil {
 		return err
 	}
-	s.blockCache.Store(extID, &block)
 	for _, tx := range block.AllTransactions() {
 		accountID := tongo.AccountID{
 			Workchain: extID.Workchain,
 			Address:   tx.AccountAddr,
 		}
 		inspector := abi.NewContractInspector(abi.InspectWithLibraryResolver(s))
-		account, err := s.GetRawAccount(ctx, accountID)
+		accountCode, err := s.getCachedAccountCode(ctx, accountID)
 		if err != nil {
 			return err
 		}
-		cd, err := inspector.InspectContract(ctx, account.Code, s.executor, accountID)
+		cd, err := inspector.InspectContract(ctx, accountCode, s.executor, accountID)
 		t, err := core.ConvertTransaction(extID.Workchain, tongo.Transaction{Transaction: *tx, BlockID: extID}, cd)
 		if err != nil {
 			return err
@@ -346,17 +468,11 @@ func (s *LiteStorage) GetBlockHeader(ctx context.Context, id tongo.BlockID) (*co
 		storageTimeHistogramVec.WithLabelValues("get_block_header").Observe(v)
 	}))
 	defer timer.ObserveDuration()
-	blockID, _, err := s.client.LookupBlock(ctx, id, 1, nil, nil)
+	blockID, block, err := s.getCachedBlock(ctx, id)
 	if err != nil {
 		return nil, err
 	}
-	block, err := s.client.GetBlock(ctx, blockID)
-	if err != nil {
-		return nil, err
-	}
-
-	s.blockCache.Store(blockID, &block)
-	header, err := core.ConvertToBlockHeader(blockID, &block)
+	header, err := core.ConvertToBlockHeader(blockID, block)
 	if err != nil {
 		return nil, err
 	}
