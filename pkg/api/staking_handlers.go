@@ -270,7 +270,12 @@ func (h *Handler) GetStakingPoolHistory(ctx context.Context, params oas.GetStaki
 	logAddress := tlb.MsgAddress{SumType: "AddrExtern"}
 	addr := g.Must(boc.BitStringFromFiftHex("0000000000000000000000000000000000000000000000000000000000000003"))
 	logAddress.AddrExtern = &addr
-	logs, err := h.storage.GetLogs(ctx, pool.ID, &logAddress, 100, 0)
+	limit := int(params.Limit.Or(100))
+	var beforeLT uint64
+	if v, ok := params.BeforeLt.Get(); ok {
+		beforeLT = uint64(v)
+	}
+	logs, err := h.storage.GetLogs(ctx, pool.ID, &logAddress, limit, beforeLT)
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}

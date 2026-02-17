@@ -11271,6 +11271,31 @@
     "parameters": [
      {
       "$ref": "#/components/parameters/accountIDParameter"
+     },
+     {
+      "description": "omit this parameter to get last log entries",
+      "in": "query",
+      "name": "before_lt",
+      "required": false,
+      "schema": {
+       "example": 25758317000002,
+       "format": "int64",
+       "type": "integer",
+       "x-js-format": "bigint"
+      }
+     },
+     {
+      "in": "query",
+      "name": "limit",
+      "required": false,
+      "schema": {
+       "default": 100,
+       "example": 100,
+       "format": "int32",
+       "maximum": 1000,
+       "minimum": 1,
+       "type": "integer"
+      }
      }
     ],
     "responses": {
