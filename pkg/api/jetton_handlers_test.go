@@ -2,8 +2,10 @@ package api
 
 import (
 	"context"
-	"github.com/tonkeeper/opentonapi/pkg/addressbook"
+	"os"
 	"testing"
+
+	"github.com/tonkeeper/opentonapi/pkg/addressbook"
 
 	"github.com/stretchr/testify/require"
 	"github.com/tonkeeper/tongo"
@@ -16,6 +18,10 @@ import (
 )
 
 func TestHandler_GetJettonsBalances(t *testing.T) {
+	if os.Getenv("TEST_CI") == "1" {
+		t.SkipNow()
+		return
+	}
 	tests := []struct {
 		name           string
 		params         oas.GetAccountJettonsBalancesParams

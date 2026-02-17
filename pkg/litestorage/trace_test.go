@@ -2,6 +2,7 @@ package litestorage
 
 import (
 	"context"
+	"os"
 	"testing"
 
 	"github.com/puzpuzpuz/xsync/v2"
@@ -12,6 +13,10 @@ import (
 )
 
 func TestLiteStorage_getAccountInterfaces(t *testing.T) {
+	if os.Getenv("TEST_CI") == "1" {
+		t.SkipNow()
+		return
+	}
 	cli, err := liteapi.NewClient(liteapi.FromEnvsOrMainnet())
 	require.Nil(t, err)
 	storage := LiteStorage{

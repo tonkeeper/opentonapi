@@ -2,6 +2,7 @@ package sources
 
 import (
 	"context"
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -37,6 +38,10 @@ func (m *mockBlockDispatcher) Run(ctx context.Context) chan BlockEvent {
 }
 
 func TestBlockchainSource_Run(t *testing.T) {
+	if os.Getenv("TEST_CI") == "1" {
+		t.SkipNow()
+		return
+	}
 	cli, err := liteapi.NewClient(liteapi.FromEnvsOrMainnet())
 	require.Nil(t, err)
 

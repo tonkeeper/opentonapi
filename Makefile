@@ -1,4 +1,4 @@
-.PHONY: all fmt test gen run
+.PHONY: all fmt test test-ci gen run
 
 all: gen fmt test
 
@@ -7,6 +7,10 @@ fmt:
 test:
 	which go
 	go test $$(go list ./... | grep -v /vendor/) -race -coverprofile cover.out
+# test-ci runs tests without coverage to avoid needing the covdata tool in CI (e.g. GitHub Actions).
+test-ci:
+	which go
+	TEST_CI=1 go test -v $$(go list ./... | grep -v /vendor/) -race
 gen:
 	go generate
 collect_i18n:
@@ -33,4 +37,3 @@ update-sdk:
 		&& git commit -m "update sdk" \
 		&& git push -u origin update -f \
 		&& gh pr create --title "Update TonAPI SDK" --body "This PR was created automatically" --head update --base main
-

@@ -2,6 +2,7 @@ package core
 
 import (
 	"context"
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -10,6 +11,10 @@ import (
 )
 
 func TestPrepareLibraries(t *testing.T) {
+	if os.Getenv("TEST_CI") == "1" {
+		t.SkipNow()
+		return
+	}
 	tests := []struct {
 		name     string
 		code     string

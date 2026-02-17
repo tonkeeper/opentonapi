@@ -1,6 +1,7 @@
 package addressbook
 
 import (
+	"os"
 	"reflect"
 	"sort"
 	"strings"
@@ -82,6 +83,10 @@ func TestNormalizeString(t *testing.T) {
 }
 
 func TestSearchAttachedAccountsByPrefix(t *testing.T) {
+	if os.Getenv("TEST_CI") == "1" {
+		t.SkipNow()
+		return
+	}
 	logger, _ := zap.NewDevelopment()
 	client, err := liteapi.NewClient(liteapi.FromEnvsOrMainnet())
 	require.NoError(t, err, "Failed to create lite API client")

@@ -2,6 +2,7 @@ package litestorage
 
 import (
 	"context"
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -11,6 +12,10 @@ import (
 )
 
 func TestLiteStorage_GetLibraries(t *testing.T) {
+	if os.Getenv("TEST_CI") == "1" {
+		t.SkipNow()
+		return
+	}
 	cli, err := liteapi.NewClient(liteapi.FromEnvsOrMainnet())
 	require.Nil(t, err)
 
