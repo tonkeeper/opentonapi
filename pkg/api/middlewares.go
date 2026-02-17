@@ -4,8 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	internalErrors "github.com/tonkeeper/opentonapi/pkg/pusher/errors"
 	"net/http"
+
+	internalErrors "github.com/tonkeeper/opentonapi/pkg/pusher/errors"
 
 	"github.com/ogen-go/ogen/middleware"
 	"github.com/ogen-go/ogen/ogenerrors"
@@ -66,17 +67,17 @@ var httpResponseTimeMetric = promauto.NewHistogramVec(prometheus.HistogramOpts{
 	Help:        "",
 	ConstLabels: nil,
 	Buckets:     []float64{0.001, 0.01, 0.05, 0.1, 0.5, 1, 10},
-}, []string{"operation"})
+}, []string{"host", "operation"})
 
 func ogenMetricsMiddleware(req middleware.Request, next middleware.Next) (middleware.Response, error) {
-	t := prometheus.NewTimer(httpResponseTimeMetric.WithLabelValues(req.OperationName))
+	t := prometheus.NewTimer(httpResponseTimeMetric.WithLabelValues(req.Raw.Host, req.OperationName))
 	defer t.ObserveDuration()
 	return next(req)
 }
 
 func asyncMetricsMiddleware(next AsyncHandler) AsyncHandler {
 	return func(w http.ResponseWriter, r *http.Request, connectionType int, allowTokenInQuery bool) error {
-		t := prometheus.NewTimer(httpResponseTimeMetric.WithLabelValues(asyncOperation(r)))
+		t := prometheus.NewTimer(httpResponseTimeMetric.WithLabelValues(r.Host, asyncOperation(r)))
 		defer t.ObserveDuration()
 		return next(w, r, connectionType, allowTokenInQuery)
 	}
