@@ -499,6 +499,9 @@ func (s UniversalStonfiStraw) Merge(b *Bubble) bool {
 				// jetton master for out token is the same as for in one
 				// it means that swap wasn't success and funds just sent back
 				success = false
+			} else {
+				// for case, if we can't get jetton master from additional info for some reason. TODO: find out why
+				out.JettonMaster = transferTx.master
 			}
 			payoutDest = transferTx.recipient.Address
 			out.Amount = big.Int(transferTx.amount)
