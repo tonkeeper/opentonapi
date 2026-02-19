@@ -126,7 +126,7 @@ type Mock struct {
 	// TonApiToken the token for TonApi to increase HTTP limits is obtained from https://tonconsole.com/tonapi
 	TonApiToken string
 	// URL to the CSV file from the analytics service https://tonconsole.com/analytics (data is sourced from the TonApi analytics database)
-	StonFiV1ResultUrl, StonFiV2ResultUrl, StonFiV2StableSwapResultUrl, SwapCoffeeResultUrl, BidaskResultUrl string
+	StonFiV1ResultUrl, StonFiV2ResultUrl, StonFiV2StableSwapResultUrl, SwapCoffeeResultUrl, BidaskResultUrl, MooncxResultUrl string
 	// URL to the CSV file from the analytics service https://tonconsole.com/analytics (data is sourced from the TonApi analytics database)
 	DedustResultUrl string
 }
