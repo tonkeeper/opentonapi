@@ -170,14 +170,16 @@ func (h *Handler) GetRawListBlockTransactions(ctx context.Context, params oas.Ge
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
 	}
-	after := &liteclient.LiteServerTransactionId3C{}
+	var after *liteclient.LiteServerTransactionId3C
 	if params.AccountID.Value != "" && params.Lt.Value != 0 {
 		account, err := tongo.ParseAddress(params.AccountID.Value)
 		if err != nil {
 			return nil, toError(http.StatusBadRequest, err)
 		}
-		after.Account = account.ID.Address
-		after.Lt = uint64(params.Lt.Value)
+		after = &liteclient.LiteServerTransactionId3C{
+			Account: account.ID.Address,
+			Lt:      uint64(params.Lt.Value),
+		}
 	}
 	listBlockTxs, err := h.storage.ListBlockTransactionsRaw(ctx, blockID, uint32(params.Mode), uint32(params.Count), after)
 	if err != nil {
