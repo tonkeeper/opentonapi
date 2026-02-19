@@ -482,17 +482,17 @@ components:
           items:
             type: object
             required:
-            - id
-            - endpoint
-            - token
-            - status
-            - status_updated_at
-            - last_online_at
-            - status_failed_attempts
-            - subscribed_accounts
-            - subscribed_to_mempool
-            - subscribed_to_new_contracts
-            - subscribed_msg_opcodes
+              - id
+              - endpoint
+              - token
+              - status
+              - status_updated_at
+              - last_online_at
+              - status_failed_attempts
+              - subscribed_accounts
+              - subscribed_to_mempool
+              - subscribed_to_new_contracts
+              - subscribed_msg_opcodes
             properties:
               id:
                 type: integer
@@ -514,6 +514,7 @@ components:
                 enum:
                   - online
                   - offline
+                  - suspended
               status_updated_at:
                 type: string
                 format: date-time
