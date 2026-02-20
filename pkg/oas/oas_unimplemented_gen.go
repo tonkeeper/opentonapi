@@ -975,8 +975,8 @@ func (UnimplementedHandler) SearchAccounts(ctx context.Context, params SearchAcc
 // Send message to blockchain.
 //
 // POST /v2/blockchain/message
-func (UnimplementedHandler) SendBlockchainMessage(ctx context.Context, req *SendBlockchainMessageReq) error {
-	return ht.ErrNotImplemented
+func (UnimplementedHandler) SendBlockchainMessage(ctx context.Context, req *SendBlockchainMessageReq) (r *SendBlockchainMessageOK, _ error) {
+	return r, ht.ErrNotImplemented
 }
 
 // SendRawMessage implements sendRawMessage operation.

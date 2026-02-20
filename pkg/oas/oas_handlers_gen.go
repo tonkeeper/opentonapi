@@ -12562,12 +12562,12 @@ func (s *Server) handleSendBlockchainMessageRequest(args [0]string, argsEscaped 
 			mreq,
 			nil,
 			func(ctx context.Context, request Request, params Params) (response Response, err error) {
-				err = s.h.SendBlockchainMessage(ctx, request)
+				response, err = s.h.SendBlockchainMessage(ctx, request)
 				return response, err
 			},
 		)
 	} else {
-		err = s.h.SendBlockchainMessage(ctx, request)
+		response, err = s.h.SendBlockchainMessage(ctx, request)
 	}
 	if err != nil {
 		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {

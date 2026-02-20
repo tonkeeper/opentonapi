@@ -489,6 +489,16 @@ paths:
       responses:
         '200':
           description: the message has been sent
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  hashes:
+                    type: array
+                    description: Normalized message hashes (same order as request)
+                    items:
+                      type: string
         'default':
           $ref: '#/components/responses/Error'
   /v2/blockchain/config:

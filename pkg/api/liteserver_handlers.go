@@ -81,7 +81,7 @@ func (h *Handler) GetRawBlockchainBlockHeader(ctx context.Context, params oas.Ge
 }
 
 func (h *Handler) SendRawMessage(ctx context.Context, request *oas.SendRawMessageReq) (*oas.SendRawMessageOK, error) {
-	err := h.SendBlockchainMessage(ctx, &oas.SendBlockchainMessageReq{Boc: oas.NewOptString(request.Body)})
+	_, err := h.SendBlockchainMessage(ctx, &oas.SendBlockchainMessageReq{Boc: oas.NewOptString(request.Body)})
 	if err != nil {
 		return nil, err
 	}

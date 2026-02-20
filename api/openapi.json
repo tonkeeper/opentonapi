@@ -8789,6 +8789,22 @@
     },
     "responses": {
      "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "hashes": {
+           "description": "Normalized message hashes (same order as request)",
+           "items": {
+            "type": "string"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
       "description": "the message has been sent"
      },
      "default": {
@@ -11292,7 +11308,7 @@
        "default": 100,
        "example": 100,
        "format": "int32",
-       "maximum": 1000,
+       "maximum": 100,
        "minimum": 1,
        "type": "integer"
       }

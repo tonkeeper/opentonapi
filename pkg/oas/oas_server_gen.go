@@ -658,7 +658,7 @@ type Handler interface {
 	// Send message to blockchain.
 	//
 	// POST /v2/blockchain/message
-	SendBlockchainMessage(ctx context.Context, req *SendBlockchainMessageReq) error
+	SendBlockchainMessage(ctx context.Context, req *SendBlockchainMessageReq) (*SendBlockchainMessageOK, error)
 	// SendRawMessage implements sendRawMessage operation.
 	//
 	// Send raw message to blockchain.

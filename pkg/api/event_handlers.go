@@ -27,6 +27,7 @@ import (
 	"github.com/tonkeeper/opentonapi/pkg/sentry"
 	"github.com/tonkeeper/opentonapi/pkg/wallet"
 	"github.com/tonkeeper/tongo"
+	"github.com/tonkeeper/tongo/liteapi"
 	"github.com/tonkeeper/tongo/tlb"
 	"github.com/tonkeeper/tongo/ton"
 	"github.com/tonkeeper/tongo/tontest"
@@ -71,12 +72,12 @@ func decodeMessage(s string) (*decodedMessage, error) {
 	}, nil
 }
 
-func (h *Handler) SendBlockchainMessage(ctx context.Context, request *oas.SendBlockchainMessageReq) error {
+func (h *Handler) SendBlockchainMessage(ctx context.Context, request *oas.SendBlockchainMessageReq) (*oas.SendBlockchainMessageOK, error) {
 	if h.msgSender == nil {
-		return toError(http.StatusBadRequest, fmt.Errorf("msg sender is not configured"))
+		return nil, toError(http.StatusBadRequest, fmt.Errorf("msg sender is not configured"))
 	}
 	if !request.Boc.IsSet() && len(request.Batch) == 0 {
-		return toError(http.StatusBadRequest, fmt.Errorf("boc not found"))
+		return nil, toError(http.StatusBadRequest, fmt.Errorf("boc not found"))
 	}
 	var meta map[string]string
 	if request.Meta.IsSet() {
@@ -85,11 +86,11 @@ func (h *Handler) SendBlockchainMessage(ctx context.Context, request *oas.SendBl
 	if request.Boc.IsSet() {
 		m, err := decodeMessage(request.Boc.Value)
 		if err != nil {
-			return err
+			return nil, err
 		}
 		checksum := sha256.Sum256(m.payload)
 		if _, prs := h.blacklistedBocCache.Get(checksum); prs {
-			return toError(http.StatusBadRequest, fmt.Errorf("duplicate message"))
+			return nil, toError(http.StatusBadRequest, fmt.Errorf("duplicate message"))
 		}
 		msgCopy := blockchain.ExtInMsgCopy{
 			MsgBoc:  m.base64,
@@ -101,19 +102,23 @@ func (h *Handler) SendBlockchainMessage(ctx context.Context, request *oas.SendBl
 		if err := h.msgSender.SendMessage(ctx, msgCopy); err != nil {
 			if strings.Contains(err.Error(), "cannot apply external message to current state") {
 				h.blacklistedBocCache.Set(checksum, struct{}{}, cache.WithExpiration(time.Minute))
-				return toError(http.StatusNotAcceptable, err)
+				return nil, toError(http.StatusNotAcceptable, err)
 			}
 			sentry.Send("sending message", sentry.SentryInfoData{"payload": request.Boc}, sentry.LevelError)
-			return toError(http.StatusInternalServerError, err)
+			return nil, toError(http.StatusInternalServerError, err)
 		}
 		h.blacklistedBocCache.Set(checksum, struct{}{}, cache.WithExpiration(time.Minute))
-		return nil
+		hashStr := externalMessageHash(m.payload)
+		return &oas.SendBlockchainMessageOK{
+			Hashes: []string{hashStr},
+		}, nil
 	}
 	copies := make([]blockchain.ExtInMsgCopy, 0, len(request.Batch))
+	hashes := make([]string, 0, len(request.Batch))
 	for _, msgBoc := range request.Batch {
 		m, err := decodeMessage(msgBoc)
 		if err != nil {
-			return err
+			return nil, err
 		}
 		msgCopy := blockchain.ExtInMsgCopy{
 			MsgBoc:  m.base64,
@@ -122,13 +127,20 @@ func (h *Handler) SendBlockchainMessage(ctx context.Context, request *oas.SendBl
 			Meta:    meta,
 		}
 		copies = append(copies, msgCopy)
+		hashes = append(hashes, externalMessageHash(m.payload))
 	}
-
 	sendMessageCounter.Add(float64(len(copies)))
 	mempoolBatchSize.Observe(float64(len(copies)))
-
 	h.msgSender.SendMultipleMessages(ctx, copies)
-	return nil
+	return &oas.SendBlockchainMessageOK{Hashes: hashes}, nil
+}
+
+func externalMessageHash(payload []byte) string {
+	tlbMsg, err := liteapi.ConvertSendMessagePayloadToMessage(payload)
+	if err != nil {
+		return ""
+	}
+	return tongo.Bits256(tlbMsg.Hash(true)).Hex()
 }
 
 func (h *Handler) getTraceByHash(ctx context.Context, hash tongo.Bits256) (*core.Trace, bool, error) {

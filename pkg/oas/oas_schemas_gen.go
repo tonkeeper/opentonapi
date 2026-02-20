@@ -17029,8 +17029,20 @@ func (s *ScaledUI) SetDenominator(val string) {
 	s.Denominator = val
 }
 
-// SendBlockchainMessageOK is response for SendBlockchainMessage operation.
-type SendBlockchainMessageOK struct{}
+type SendBlockchainMessageOK struct {
+	// Normalized message hashes (same order as request).
+	Hashes []string `json:"hashes"`
+}
+
+// GetHashes returns the value of Hashes.
+func (s *SendBlockchainMessageOK) GetHashes() []string {
+	return s.Hashes
+}
+
+// SetHashes sets the value of Hashes.
+func (s *SendBlockchainMessageOK) SetHashes(val []string) {
+	s.Hashes = val
+}
 
 type SendBlockchainMessageReq struct {
 	Boc   OptString                       `json:"boc"`
