@@ -3,12 +3,9 @@ package litestorage
 import (
 	"context"
 	"crypto/ed25519"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"math/big"
-	"os"
-	"path/filepath"
 	"sort"
 	"sync"
 	"time"
@@ -56,89 +53,11 @@ func extractInMsgCreatedLT(accountID tongo.AccountID, tx *tlb.Transaction) (inMs
 	return inMsgCreatedLT{}, false
 }
 
-type Cache[K fmt.Stringer, V any] interface {
-	Store(key K, value V)
-	Load(key K) (value V, ok bool)
-}
-
-type JsonTlbDiskCache[K fmt.Stringer, V any] struct {
-	dir string
-}
-
-func (dc *JsonTlbDiskCache[K, V]) Store(key K, value V) {
-	cell := boc.NewCell()
-	err := tlb.Marshal(cell, value)
-	if err != nil {
-		panic(err)
-	}
-	filePath := filepath.Join(dc.dir, key.String())
-	file, err := os.OpenFile(filePath, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
-	if err != nil {
-		panic(err)
-	}
-	defer file.Close()
-	encoder := json.NewEncoder(file)
-	err = encoder.Encode(cell)
-	if err != nil {
-		panic(err)
-	}
-}
-
-func (dc *JsonTlbDiskCache[K, V]) Load(key K) (V, bool) {
-	var value V
-	filePath := filepath.Join(dc.dir, key.String())
-	file, err := os.OpenFile(filePath, os.O_RDONLY, 0644)
-	if os.IsNotExist(err) {
-		return value, false
-	}
-	if err != nil {
-		panic(err)
-	}
-	defer file.Close()
-	decoder := json.NewDecoder(file)
-	cell := boc.NewCell()
-	err = decoder.Decode(cell)
-	if err != nil {
-		panic(err)
-	}
-	err = tlb.Unmarshal(cell, &value)
-	if err != nil {
-		panic(err)
-	}
-	return value, true
-}
-
-type BytesDiskCache[K fmt.Stringer] struct {
-	dir string
-}
-
-func (dc *BytesDiskCache[K]) Store(key K, value []byte) {
-	err := os.WriteFile(filepath.Join(dc.dir, key.String()), value, 0644)
-	if err != nil {
-		panic(err)
-	}
-}
-
-func (dc *BytesDiskCache[K]) Load(key K) ([]byte, bool) {
-	data, err := os.ReadFile(filepath.Join(dc.dir, key.String()))
-	if os.IsNotExist(err) {
-		return data, false
-	}
-	if err != nil {
-		panic(err)
-	}
-	return data, true
-}
-
-type Tuple2[V1, V2 any] struct {
-	V1 V1
-	V2 V2
-}
-
 type LiteStorage struct {
 	logger                  *zap.Logger
 	client                  *liteapi.Client
 	executor                abi.Executor
+	cachedExecutor          *CachedExecutor
 	jettonMetaCache         *xsync.MapOf[string, tep64.Metadata]
 	transactionsIndexByHash *xsync.MapOf[tongo.Bits256, *core.Transaction]
 	transactionsByInMsgLT   *xsync.MapOf[inMsgCreatedLT, tongo.Bits256]
@@ -215,19 +134,38 @@ func NewLiteStorage(log *zap.Logger, cli *liteapi.Client, opts ...Option) (*Lite
 	if o.executor == nil {
 		o.executor = cli
 	}
+	blockFsCache, err := NewFsCache("./cache/blocks")
+	if err != nil {
+		return nil, fmt.Errorf("failed to init block cache: %w", err)
+	}
 	blockCache := &JsonTlbDiskCache[tongo.BlockID, Tuple2[tongo.BlockIDExt, *tlb.Block]]{
-		dir: "./cache/blocks",
+		cache: blockFsCache,
+	}
+	codeFsCache, err := NewFsCache("./cache/accountcode")
+	if err != nil {
+		return nil, fmt.Errorf("failed to init account code cache: %w", err)
 	}
 	codeCache := &BytesDiskCache[ton.AccountID]{
-		dir: "./cache/accountcode",
+		cache: codeFsCache,
+	}
+	execFsCache, err := NewFsCache("./cache/executor")
+	if err != nil {
+		return nil, fmt.Errorf("failed to init executor cache: %w", err)
+	}
+	cachedExecutor := &CachedExecutor{
+		executor: cli,
+		cache: &JsonTlbDiskCache[wrappedString, CachedExecResult]{
+			cache: execFsCache,
+		},
 	}
 	storage := &LiteStorage{
 		logger: log,
 		// TODO: introduce an env variable to configure this number
-		maxGoroutines: 5,
-		client:        cli,
-		executor:      o.executor,
-		stopCh:        make(chan struct{}),
+		maxGoroutines:  5,
+		client:         cli,
+		executor:       o.executor,
+		cachedExecutor: cachedExecutor,
+		stopCh:         make(chan struct{}),
 		// read-only data
 		knownAccounts:    make(map[string][]tongo.AccountID),
 		trackingAccounts: map[tongo.AccountID]struct{}{},
@@ -449,7 +387,7 @@ func (s *LiteStorage) preloadBlock(id tongo.BlockID) error {
 		if err != nil {
 			return err
 		}
-		cd, err := inspector.InspectContract(ctx, accountCode, s.executor, accountID)
+		cd, err := inspector.InspectContract(ctx, accountCode, s.cachedExecutor, accountID)
 		t, err := core.ConvertTransaction(extID.Workchain, tongo.Transaction{Transaction: *tx, BlockID: extID}, cd)
 		if err != nil {
 			return err
