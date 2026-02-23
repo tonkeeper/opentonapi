@@ -158,6 +158,7 @@ func (h *Handler) convertJettonBalance(ctx context.Context, wallet core.JettonWa
 	}
 	scaledUiParams, err := h.storage.GetScaledUIParameters(ctx, wallet.JettonAddress, scaledUiLt)
 	if err != nil {
+		h.logger.Warn(fmt.Sprintf("failed to get scaled ui parameters for master: %v", wallet.JettonAddress.ToRaw()))
 		return oas.JettonBalance{}, toError(http.StatusInternalServerError, err)
 	}
 	if wallet.Lock != nil {
@@ -180,13 +181,16 @@ func (h *Handler) convertJettonBalance(ctx context.Context, wallet core.JettonWa
 	meta, err := h.storage.GetJettonMasterMetadata(ctx, wallet.JettonAddress)
 	if err != nil && err.Error() == "not enough refs" {
 		// happens when metadata is broken, for example.
+		h.logger.Warn(fmt.Sprintf("not enough refs for jetton master metadata, master: %v", wallet.JettonAddress.ToRaw()))
 		return oas.JettonBalance{}, toError(http.StatusInternalServerError, err)
 	}
 	if err != nil && errors.Is(err, liteapi.ErrOnchainContentOnly) {
 		// we don't support such jettons
+		h.logger.Warn(fmt.Sprintf("onchain content only for master: %v", wallet.JettonAddress.ToRaw()))
 		return oas.JettonBalance{}, toError(http.StatusInternalServerError, err)
 	}
 	if err != nil && !errors.Is(err, core.ErrEntityNotFound) {
+		h.logger.Warn(fmt.Sprintf("failed to convert jetton balance for unknown reason, master: %v", wallet.JettonAddress.ToRaw()))
 		return oas.JettonBalance{}, toError(http.StatusNotFound, err)
 	}
 	var normalizedMetadata NormalizedMetadata
