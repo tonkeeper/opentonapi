@@ -34,6 +34,7 @@ func (h *Handler) GetAccountJettonsBalances(ctx context.Context, params oas.GetA
 	for _, wallet := range wallets {
 		jettonBalance, err := h.convertJettonBalance(ctx, wallet, params.Currencies, nil)
 		if err != nil {
+			h.logger.Warn(fmt.Sprintf("Failed to convert jetton balance for wallet %v", wallet.JettonAddress.ToRaw()), zap.Error(err))
 			continue
 		}
 		balances.Balances = append(balances.Balances, jettonBalance)
