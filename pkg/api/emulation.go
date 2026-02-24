@@ -37,6 +37,18 @@ var (
 	emulatedAccountCode = promauto.NewCounterVec(prometheus.CounterOpts{
 		Name: "tonapi_emulated_account_code_counter",
 	}, []string{"code_hash"})
+	traceTTL = promauto.NewHistogram(prometheus.HistogramOpts{
+		Name: "tonapi_trace_ttl",
+		Buckets: []float64{
+			0,            // trace expired
+			60,           // a minute
+			5 * 60,       // 5 minutes
+			15 * 60,      // 15 minutes
+			30 * 60,      // 30 minutes
+			60 * 60,      // an hour
+			24 * 60 * 60, // 24 hours
+		},
+	})
 )
 
 func (h *Handler) RunEmulation(ctx context.Context, msgCh <-chan blockchain.ExtInMsgCopy, emulationCh chan<- blockchain.ExtInMsgCopy) {
@@ -146,15 +158,7 @@ func (h *Handler) addToMempool(ctx context.Context, bytesBoc []byte, shardAccoun
 	core.Visit(trace, func(node *core.Trace) {
 		accounts[node.Account] = struct{}{}
 	})
-	if ttl := traceTTLFromMessage(msgCell[0]); ttl > 0 {
-		err = h.storage.SaveTraceWithState(ctx, ton.Bits256(hash).Hex(), trace, h.tongoVersion, []abi.MethodInvocation{}, ttl)
-		if err != nil {
-			h.logger.Warn("trace not saved: ", zap.Error(err))
-			savedEmulatedTraces.WithLabelValues("error_save").Inc()
-		} else {
-			savedEmulatedTraces.WithLabelValues("success").Inc()
-		}
-	}
+	h.saveTraceWithState(ctx, trace, msgCell[0], ton.Bits256(hash).Hex())
 	var localMessageHashCache = make(map[ton.Bits256]bool)
 	for account := range accounts {
 		if _, ok := h.mempoolEmulateIgnoreAccounts[account]; ok { // the map is filled only once at the start
@@ -180,6 +184,38 @@ func (h *Handler) addToMempool(ctx context.Context, bytesBoc []byte, shardAccoun
 		Accounts: accounts,
 	}
 	return newShardAccount, nil
+}
+
+func (h *Handler) saveTraceWithState(ctx context.Context, trace *core.Trace, msg *boc.Cell, hash string) {
+	var validUntil uint32
+	if v5, err := tongoWallet.DecodeMessageV5(msg); err == nil {
+		if v5.SumType == "SignedExternal" {
+			validUntil = v5.SignedExternal.ValidUntil
+		}
+	} else if v4, err := tongoWallet.DecodeMessageV4(msg); err == nil {
+		validUntil = v4.ValidUntil
+	} else if v3, err := tongoWallet.DecodeMessageV3(msg); err == nil {
+		validUntil = v3.ValidUntil
+	}
+	var ttl time.Duration
+	if validUntil == 0 {
+		ttl = 24 * time.Hour
+		h.logger.Info("Couldn't determine trace TTL, default is 24 hours", zap.String("hash", hash))
+	} else {
+		ttl = min(time.Until(time.Unix(int64(validUntil), 0)), 24*time.Hour)
+	}
+	if ttl <= 0 {
+		traceTTL.Observe(0) // trace expired
+		return
+	}
+	traceTTL.Observe(ttl.Seconds())
+	err := h.storage.SaveTraceWithState(ctx, hash, trace, h.tongoVersion, []abi.MethodInvocation{}, ttl)
+	if err != nil {
+		h.logger.Warn("trace not saved: ", zap.Error(err))
+		savedEmulatedTraces.WithLabelValues("error_save").Inc()
+		return
+	}
+	savedEmulatedTraces.WithLabelValues("success").Inc()
 }
 
 func EmulatedTreeToTrace(
@@ -427,21 +463,4 @@ func getAdditionalInfoStonfi(ctx context.Context, sharedExecutor *shardsAccountE
 		master, _ := ton.AccountIDFromTlb(data.Jetton)
 		additionalInfo.SetJettonMaster(accountID, *master)
 	}
-}
-
-func traceTTLFromMessage(msg *boc.Cell) time.Duration {
-	var validUntil uint32
-	if v5, err := tongoWallet.DecodeMessageV5(msg); err == nil {
-		if v5.SumType == "SignedExternal" {
-			validUntil = v5.SignedExternal.ValidUntil
-		}
-	} else if v4, err := tongoWallet.DecodeMessageV4(msg); err == nil {
-		validUntil = v4.ValidUntil
-	} else if v3, err := tongoWallet.DecodeMessageV3(msg); err == nil {
-		validUntil = v3.ValidUntil
-	}
-	if validUntil == 0 {
-		return 24 * time.Hour
-	}
-	return min(time.Until(time.Unix(int64(validUntil), 0)), 24*time.Hour)
 }

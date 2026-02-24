@@ -62,7 +62,7 @@ func convertToRawAccount(account *core.Account) (oas.BlockchainRawAccount, error
 	if account.ExtraBalances != nil {
 		rawAccount.ExtraBalance = convertExtraCurrencies(account.ExtraBalances)
 	}
-	if account.Code != nil && len(account.Code) != 0 {
+	if len(account.Code) != 0 {
 		rawAccount.Code = oas.NewOptString(fmt.Sprintf("%x", account.Code[:]))
 	}
 	if account.Data != nil {
