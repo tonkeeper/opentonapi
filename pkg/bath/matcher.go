@@ -177,6 +177,10 @@ func IsTx(b *Bubble) bool {
 	return ok
 }
 
+func Never(b *Bubble) bool {
+	return false
+}
+
 type interfaceType struct {
 	typ  unsafe.Pointer
 	word unsafe.Pointer

@@ -1,7 +1,6 @@
 package bath
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -9,6 +8,7 @@ import (
 	"sort"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/tonkeeper/opentonapi/internal/g"
 	"github.com/tonkeeper/opentonapi/pkg/core"
@@ -281,6 +281,8 @@ func TestFindActions(t *testing.T) {
 			//tongo.MustParseBlockID("(0,8000000000000000,60214898)"),
 			////stonfi multihop
 			//tongo.MustParseBlockID("(0,8000000000000000,60211010)"),
+			//// tonstakers additional case
+			//tongo.MustParseBlockID("(0,8000000000000000,62341628)"),
 		}),
 	)
 
@@ -1020,6 +1022,11 @@ func TestFindActions(t *testing.T) {
 			name:           "stonfi v2 multihop swap",
 			filenamePrefix: "stonfi-v2-multihop-swap",
 			hash:           "240835c21dafcdcc7340d3050ea9e730a6dd246b30b7e01fba81e2767f881f2e",
+		},
+		{
+			name:           "tonstakers stake withdraw",
+			filenamePrefix: "tonstakers-stake-withdraw",
+			hash:           "fe1482f280383bbd791f0cd8df1920a726335d2843b7b68190f9f9d777bd3bc8",
 		},
 	} {
 		t.Run(c.name, func(t *testing.T) {

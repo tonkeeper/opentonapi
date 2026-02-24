@@ -13,6 +13,11 @@ type Merger interface {
 	Merge(bubble *Bubble) (success bool)
 }
 
+// StrawNOOP is used to fill gaps in straw's list to avoid updating
+var StrawNOOP = Straw[BubbleTx]{
+	CheckFuncs: []bubbleCheck{Never},
+}
+
 var JettonTransfersBurnsMints = []Merger{
 	StonfiV1PTONStraw,
 	StonfiV2PTONStrawReverse,
@@ -65,7 +70,7 @@ var DefaultStraws = []Merger{
 	SubscriptionPaymentStraw,
 	SubscriptionPaymentWithRequestFundsStraw, // 30
 	DepositLiquidStakeStraw,
-	OldPendingWithdrawRequestLiquidStraw,
+	StrawNOOP,
 	PendingWithdrawRequestLiquidStraw,
 	ElectionsDepositStakeStraw,
 	ElectionsRecoverStakeStraw, // 35
