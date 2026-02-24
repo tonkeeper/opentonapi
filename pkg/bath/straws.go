@@ -33,67 +33,79 @@ var NFTStraws = []Merger{
 }
 
 var DefaultStraws = []Merger{
-	StrawFindAuctionBidFragmentSimple, //0
+	//0
+	StrawFindAuctionBidFragmentSimple,
 	GasRelayerStraw,
 	NftTransferStraw,
 	NftTransferNotifyStraw,
 	StonfiV1PTONStraw,
-	StonfiV2PTONStrawReverse, //5
+	//5
+	StonfiV2PTONStrawReverse,
 	StonfiV2PTONStraw,
 	FlawedJettonTransferClassicStraw,
 	FlawedJettonTransferMinimalStraw,
 	JettonTransferClassicStraw,
-	JettonTransferMinimalStraw, // 10
+	// 10
+	JettonTransferMinimalStraw,
 	JettonBurnStraw,
 	WtonMintStraw,
 	NftPurchaseStraw,
 	StonfiSwapStraw,
-	UniversalStonfiStraw{}, // 15
+	// 15
+	UniversalStonfiStraw{},
 	UniversalDedustStraw{},
 	TgAuctionV1InitialBidStraw,
 	StrawAuctionBigGetgems,
 	StrawAuctionBuyGetgems,
-	StrawAuctionBuyFragments, // 20
+	// 20
+	StrawAuctionBuyFragments,
 	JettonMintFromMasterStraw,
 	JettonMintStrawGovernance,
 	InvoicePaymentStrawNative,
 	InvoicePaymentStrawJetton,
-	MegatonFiJettonSwap, // 25
+	// 25
+	MegatonFiJettonSwap,
 	UnSubscriptionBySubscriberStraw,
 	UnSubscriptionByBeneficiaryOrExpiredStraw,
 	SubscriptionDeployStraw,
 	SubscriptionPaymentStraw,
-	SubscriptionPaymentWithRequestFundsStraw, // 30
+	// 30
+	SubscriptionPaymentWithRequestFundsStraw,
 	DepositLiquidStakeStraw,
-	OldPendingWithdrawRequestLiquidStraw,
 	PendingWithdrawRequestLiquidStraw,
 	ElectionsDepositStakeStraw,
-	ElectionsRecoverStakeStraw, // 35
+	ElectionsRecoverStakeStraw,
+	// 35
 	DepositTFStakeStraw,
 	WithdrawTFStakeRequestStraw,
 	WithdrawStakeImmediatelyStraw,
 	WithdrawLiquidStake,
-	DNSRenewStraw, // 40
+	DNSRenewStraw,
+	// 40
 	BidaskLiquidityDepositBothNativeStraw,
 	BidaskLiquidityDepositBothJettonStraw,
 	BidaskLiquidityDepositJettonStraw,
 	StonfiLiquidityDepositSingle,
-	StonfiLiquidityDepositBoth, // 45
+	StonfiLiquidityDepositBoth,
+	// 45
 	DepositEthenaStakeStraw,
 	WithdrawEthenaStakeRequestStraw,
 	BidaskSwapStraw,
 	BidaskSwapStrawReverse,
-	BidaskJettonSwapStraw, // 50
+	BidaskJettonSwapStraw,
+	// 50
 	MooncxSwapStraw,
 	MooncxSwapStrawReverse,
 	MoocxLiquidityDepositJettonStraw,
 	MoocxLiquidityDepositNativeStraw,
-	MoocxLiquidityDepositBothStraw, // 55
+	MoocxLiquidityDepositBothStraw,
+	// 55
 	ToncoSwapStraw,
 	ToncoDepositLiquiditySingleStraw,
 	ToncoDepositLiquidityBothStraw,
 	ToncoDepositLiquidityWithRefundStraw,
-	DepositAffluentEarnStraw, // 60
+	DepositAffluentEarnStraw,
+	// 60
 	DepositAffluentEarnWithOraclesStraw,
 	WithdrawAffluentEarnRequestStraw,
 	InstantWithdrawAffluentEarnStraw,
