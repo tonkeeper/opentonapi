@@ -133,6 +133,10 @@ func (s *LiteStorage) GetJettonAccountHistoryByID(ctx context.Context, address, 
 func (s *LiteStorage) JettonMastersForWallets(ctx context.Context, wallets []tongo.AccountID) (map[tongo.AccountID]tongo.AccountID, error) {
 	masters := make(map[tongo.AccountID]tongo.AccountID)
 	for _, wallet := range wallets {
+		// deduplicate wallets
+		if _, ok := masters[wallet]; ok {
+			continue
+		}
 		_, value, err := abi.GetWalletData(ctx, s.executor, wallet)
 		if err != nil {
 			return nil, err

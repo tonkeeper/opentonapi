@@ -4,7 +4,7 @@
        "JettonSwap": {
          "Dex": "stonfi",
          "UserWallet": "0:079a6c5de3ed9d4ee178aae5a991d853f27b1fd7ed0da68a71fcf548d146a0e4",
-         "Router": "0:f1fbe8d453d3d4b4796d3d8657ef0773222d123d8dca67c9ef3acd2266f40977",
+         "Router": "0:92e1411ae546892f33b2c8a89ea90390d8ff4cfbb917a643b91e73f706fdb9d1",
          "In": {
            "Amount": 4000000000,
            "IsTon": true,
@@ -15,22 +15,45 @@
            "Amount": 5638615,
            "IsTon": false,
            "JettonMaster": "0:b113a994b5024a16719f69139328eb759596c38a25f59028b146fecdc3621dfe",
-           "JettonWallet": "0:f09216e24b4aa56c44d3cf51f079d8d54303a138d2b668b72dc3194643db9e6c"
+           "JettonWallet": "0:079a6c5de3ed9d4ee178aae5a991d853f27b1fd7ed0da68a71fcf548d146a0e4"
          }
        },
        "Success": true,
        "Type": "JettonSwap",
        "BaseTransactions": [
+         "146c63c7e49b2f66fdf4a315b61b1d17429e9fe262559cdd01c3908a65346de8",
+         "393519d5bef11a7653aaac696883fad4dddf5b376f1f45960bf4f2913280d79f",
+         "86c0562098158d953947e1b25036868ca9bdd322a0ae8592865ce3c9cd07a5e5",
+         "9102252a95bd88b63a014275c3dd6e602bafc16d655cd8f7a1adb112c0bf128f"
+       ]
+     },
+     {
+       "JettonSwap": {
+         "Dex": "stonfi",
+         "UserWallet": "0:079a6c5de3ed9d4ee178aae5a991d853f27b1fd7ed0da68a71fcf548d146a0e4",
+         "Router": "0:f1fbe8d453d3d4b4796d3d8657ef0773222d123d8dca67c9ef3acd2266f40977",
+         "In": {
+           "Amount": 5638615,
+           "IsTon": false,
+           "JettonMaster": "0:b113a994b5024a16719f69139328eb759596c38a25f59028b146fecdc3621dfe",
+           "JettonWallet": "0:922d627d7d8edbd00e4e23bdb0c54a76ee5e1f46573a1af4417857fa3e23e91f"
+         },
+         "Out": {
+           "Amount": 31302726522800,
+           "IsTon": false,
+           "JettonMaster": "0:6f5fa67d46f67e4bf9ea3566588a19781d51704f5ba40848a52a45bc4e9e97f3",
+           "JettonWallet": "0:079a6c5de3ed9d4ee178aae5a991d853f27b1fd7ed0da68a71fcf548d146a0e4"
+         }
+       },
+       "Success": false,
+       "Type": "JettonSwap",
+       "BaseTransactions": [
          "3d6b3601afbc8b12b0a934539ac907f3642b0c7cfd12a8ee2631a894a1b875c5",
          "45530adaed8bac1e0fde67eee71168f24d78a4c0ceab1c5622acfe1dbf3aa01d",
-         "146c63c7e49b2f66fdf4a315b61b1d17429e9fe262559cdd01c3908a65346de8",
          "564fff16f14c0570044fbb6897355b34a54d101fb2000a219cf4aa7a7427fb77",
-         "393519d5bef11a7653aaac696883fad4dddf5b376f1f45960bf4f2913280d79f",
          "299dc3c542c29d801ff40a18b377d3a2c86449e2d346a6c4db2be7135dbf60f9",
          "bbbdc45e6ec3b4918941c0f4a4865c9fa34552ee13b130dd1b0cd74fa447312c",
-         "86c0562098158d953947e1b25036868ca9bdd322a0ae8592865ce3c9cd07a5e5",
          "0b9ee4c992000f9c91af91d238f86d84eb626c621f7e08b7ad4cf894ad2fe006",
-         "9102252a95bd88b63a014275c3dd6e602bafc16d655cd8f7a1adb112c0bf128f",
          "24bebca37f0b49c16c4db35448a7b8a4adaaadf992a8c4d2ade30093ac577d4d",
          "32dc94b8b49b4ad1879360c9d2a6643e5f097b52bd4fc56ca0dd9c899524ce1d",
          "1aa2f48ffe0149db92cde06b5d216968e6d7cfd61c344b1816543e24726a9ec8"

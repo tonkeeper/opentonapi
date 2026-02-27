@@ -1,7 +1,6 @@
 package bath
 
 import (
-	"maps"
 	"math/big"
 
 	"github.com/tonkeeper/opentonapi/pkg/core"
@@ -417,59 +416,75 @@ var StonfiLiquidityDepositBoth = Straw[BubbleLiquidityDeposit]{
 }
 
 func (s UniversalStonfiStraw) Merge(b *Bubble) bool {
-	usedBubbles := map[*Bubble]struct{}{}
-	swapHops := s.processMultipleRouterSwaps(b, usedBubbles)
+	swapHops := s.processMultipleRouterSwaps(b)
 	if len(swapHops) == 0 {
 		return false
 	}
 
 	firstHop := swapHops[len(swapHops)-1]
 	finalHop := swapHops[0]
-	finalPayout := finalHop.srSwaps[0]
-	finalTransfer, ok := finalPayout.transfer.Info.(BubbleJettonTransfer)
+	finalTransfer, ok := finalHop.srSwaps[0].transfer.Info.(BubbleJettonTransfer)
 	// проверяем что не подменен адрес получателя свапа
 	if !ok || finalTransfer.recipient == nil || finalTransfer.recipient.Address != firstHop.sender {
 		return false
 	}
 
-	usedBubbles[finalPayout.transfer] = struct{}{}
-
 	swapInfo := BubbleJettonSwap{
 		Dex:        references.Stonfi,
 		UserWallet: firstHop.sender,
 		In:         firstHop.in,
-		Router:     finalHop.router,
-		Out:        finalHop.out,
-		Success:    finalHop.success,
+		Router:     firstHop.router,
+		Out:        firstHop.out,
+		Success:    firstHop.success,
 	}
 
-	//закончили все проверки и собрали данные. билдим выходной пузырь и мержим
+	b.Children = []*Bubble{}
+	mergeValueFlowAndTXs(b, firstHop.usedBubbles)
+
+	hasFailed := !swapInfo.Success
+	for i := len(swapHops) - 2; i >= 0; i-- {
+		nextHop := swapHops[i]
+		if !hasFailed && nextHop.success {
+			// merge consequent swaps
+			swapInfo.Router = nextHop.router
+			swapInfo.Out = nextHop.out
+			swapInfo.Success = true
+			mergeValueFlowAndTXs(b, nextHop.usedBubbles)
+		} else {
+			hasFailed = true
+			failedSwapB := &Bubble{
+				Info: BubbleJettonSwap{
+					Dex:        references.Stonfi,
+					UserWallet: firstHop.sender,
+					In:         nextHop.in,
+					Router:     nextHop.router,
+					Out:        nextHop.out,
+					Success:    false,
+				},
+				ValueFlow: newValueFlow(),
+				Children:  nextHop.nextBubble.Children,
+			}
+			mergeValueFlowAndTXs(failedSwapB, nextHop.usedBubbles)
+			b.Children = append(b.Children, failedSwapB)
+		}
+	}
+
+	if hasFailed && len(swapHops) > 1 {
+		// swap failed at a later hop, so the output jetton ends up back at the user.
+		swapInfo.Out.JettonWallet = firstHop.sender
+	}
 	b.Info = swapInfo
-	mergeUsedBubbles(b, usedBubbles)
 	return true
 }
 
-func mergeUsedBubbles(b *Bubble, usedBubbles map[*Bubble]struct{}) {
-	var newChildren []*Bubble
-	for i := range b.Children {
-		if _, found := usedBubbles[b.Children[i]]; !found {
-			newChildren = append(newChildren, b.Children[i])
-		}
-	}
+func mergeValueFlowAndTXs(b *Bubble, usedBubbles map[*Bubble]struct{}) {
 	for k := range usedBubbles {
 		if k != b { // не мержим валью флоу для первого элемента, т.к. он уже был учтен в b
 			b.ValueFlow.Merge(k.ValueFlow)
 		}
 		b.Accounts = append(b.Accounts, k.Accounts...)
 		b.Transaction = append(b.Transaction, k.Transaction...)
-		for j := range k.Children { //прикрепляем детей от удаляемых баблов напрямую к родителю
-			tb := k.Children[j]
-			if _, found := usedBubbles[tb]; !found {
-				newChildren = append(newChildren, tb)
-			}
-		}
 	}
-	b.Children = newChildren
 }
 
 // stonfiSwap represents a single swap
@@ -488,9 +503,11 @@ type stonfiSingleRouterSwapChain struct {
 	out        assetTransfer
 	transfer   BubbleJettonTransfer
 	// srSwaps contains intermediary swaps; the first element in the slice is the first payout made (to the next swap)
-	srSwaps   []stonfiSwap
-	inPayload abi.StonfiSwapV2JettonPayload
-	success   bool
+	srSwaps     []stonfiSwap
+	inPayload   abi.StonfiSwapV2JettonPayload
+	success     bool
+	usedBubbles map[*Bubble]struct{}
+	start       *Bubble
 }
 
 // stonfiSwapMultiHop contains swaps involving multiple routers; the first element is the first swap made
@@ -504,12 +521,14 @@ func (spo stonfiSwap) outAddress() (*tongo.AccountID, error) {
 	return tongo.AccountIDFromTlb(spo.payoutBody.AdditionalInfo.Token1Address)
 }
 
-func (s UniversalStonfiStraw) processMultipleRouterSwaps(b *Bubble, usedBubbles map[*Bubble]struct{}) stonfiSwapMultiHop {
+func (s UniversalStonfiStraw) processMultipleRouterSwaps(b *Bubble) stonfiSwapMultiHop {
 
 	if len(b.Children) != 1 || !IsJettonTransfer(b) || !JettonTransferOperation(abi.StonfiSwapV2JettonOp)(b) {
 		return nil
 	}
-	usedBubbles[b] = struct{}{}
+	usedBubbles := map[*Bubble]struct{}{
+		b: {},
+	}
 	transfer, ok := b.Info.(BubbleJettonTransfer)
 	if !ok || transfer.sender == nil || transfer.recipient == nil || !transfer.recipient.Is(abi.StonfiRouterV2) {
 		return nil
@@ -546,66 +565,62 @@ func (s UniversalStonfiStraw) processMultipleRouterSwaps(b *Bubble, usedBubbles 
 			JettonMaster: finalTransfer.master,
 		}
 	} else {
-		jWallet, err := tongo.AccountIDFromTlb(jettonPayload.TokenWallet1)
-		if err != nil || jWallet == nil {
+		userWallet, err := tongo.AccountIDFromTlb(srSwaps[0].payoutBody.ToAddress)
+		if err != nil || userWallet == nil {
+			return nil
+		}
+		jettonPoolWallet, err := tongo.AccountIDFromTlb(jettonPayload.TokenWallet1)
+		if err != nil || jettonPoolWallet == nil {
 			return nil
 		}
 		firstSwapTx := srSwaps[len(srSwaps)-1].swapTx
 		var jettonMaster tongo.AccountID
 		if firstSwapTx.additionalInfo != nil {
-			firstSwapTx.additionalInfo.JettonMaster(*jWallet)
+			jettonMaster, _ = firstSwapTx.additionalInfo.JettonMaster(*jettonPoolWallet)
 		}
 		out = assetTransfer{
-			Amount:       big.Int(jettonPayload.CrossSwapBody.MinOut),
-			IsTon:        false,
-			JettonWallet: *jWallet,
+			Amount: big.Int(jettonPayload.CrossSwapBody.MinOut),
+			IsTon:  false,
+			// jetton wallet of user is not defined (it should have been determined by successful payout tx), so we user's normal wallet
+			JettonWallet: *userWallet,
 			JettonMaster: jettonMaster,
 		}
 	}
 	thisHop := stonfiSingleRouterSwapChain{
-		router:     router,
-		sender:     sender,
-		in:         in,
-		out:        out,
-		nextBubble: nextB,
-		srSwaps:    srSwaps,
-		inPayload:  jettonPayload,
-		success:    success,
-	}
-	if nextB == nil {
-		// next bubble is nil only if payout have two children: referral payout and swap payout.
-		// it means that swap is finished
-		return []stonfiSingleRouterSwapChain{thisHop}
+		start:       b,
+		usedBubbles: usedBubbles,
+		router:      router,
+		sender:      sender,
+		in:          in,
+		out:         out,
+		nextBubble:  nextB,
+		srSwaps:     srSwaps,
+		inPayload:   jettonPayload,
+		success:     success,
 	}
 
-	// now we only have swap payout, so maybe this payout is going to be transferred to another router (multiple routers swap)
-	// since swap straw has only one router we will save the only last used router
-	extraUsedBubbles := map[*Bubble]struct{}{}
-	nextHops := s.processMultipleRouterSwaps(nextB, extraUsedBubbles)
-	if nextHops != nil {
-		maps.Copy(usedBubbles, extraUsedBubbles)
-		return append(nextHops, thisHop)
+	// next bubble is nil only if payout have two children: referral payout and swap payout.
+	// it means that swap is finished
+	if nextB != nil {
+		// maybe this payout is going to be transferred to another router (multiple routers swap)
+		nextHops := s.processMultipleRouterSwaps(nextB)
+		if nextHops != nil {
+			delete(usedBubbles, nextB)
+			return append(nextHops, thisHop)
+		}
 	}
 
 	return []stonfiSingleRouterSwapChain{thisHop}
 }
 
 func (s UniversalStonfiStraw) processSingleRouterSwaps(b *Bubble, usedBubbles map[*Bubble]struct{}) ([]stonfiSwap, *Bubble, bool) {
-	if !(IsTx(b) && HasOperation(abi.StonfiSwapV2MsgOp)(b) && HasInterface(abi.StonfiPoolV2)(b)) {
-		return nil, nil, false
-	}
-	swapTx, ok := b.Info.(BubbleTx)
-	if !ok {
+	swapTx, ok := b.Info.(BubbleTx) // same as IsTX(b)
+	if !(ok && HasOperation(abi.StonfiSwapV2MsgOp)(b) && HasInterface(abi.StonfiPoolV2)(b)) {
 		return nil, nil, false
 	}
 
-	if len(b.Children) == 0 {
+	if len(b.Children) == 0 || len(b.Children) > 2 { // according to docs pool payout can have maximum two children
 		return nil, nil, false
-	}
-	usedBubbles[b] = struct{}{}
-
-	if len(b.Children) > 2 { // according to docs pool payout can have maximum two children
-		return nil, nil, true
 	}
 
 	payoutB := b.Children[0]
@@ -633,29 +648,32 @@ func (s UniversalStonfiStraw) processSingleRouterSwaps(b *Bubble, usedBubbles ma
 		}
 	}
 
-	if !(IsTx(payoutB) && HasOperation(abi.StonfiPayToV2MsgOp)(payoutB) && HasInterface(abi.StonfiRouterV2)(payoutB)) {
+	tx, ok := payoutB.Info.(BubbleTx)
+	if !(ok && HasOperation(abi.StonfiPayToV2MsgOp)(payoutB) && HasInterface(abi.StonfiRouterV2)(payoutB)) {
 		return nil, nil, false
 	}
 	if len(payoutB.Children) != 1 {
 		return nil, nil, false
 	}
-	if tx, ok := payoutB.Info.(BubbleTx); ok {
-		if body, ok := tx.decodedBody.Value.(abi.StonfiPayToV2MsgBody); ok {
-			usedBubbles[payoutB] = struct{}{}
-			nextB := payoutB.Children[0] // can be either swap msg on the same router or jetton transfer
-			payout := stonfiSwap{
-				swapTx:     swapTx,
-				payoutBody: body,
-				transfer:   nextB,
-			}
-			payoutChain, latestNextB, ok := s.processSingleRouterSwaps(nextB, usedBubbles)
-			if ok && latestNextB != nil {
-				return append(payoutChain, payout), latestNextB, true
-			}
-			return append(payoutChain, payout), nextB, true
-		}
+
+	body, ok := tx.decodedBody.Value.(abi.StonfiPayToV2MsgBody)
+	if !ok {
+		return nil, nil, false
 	}
-	return nil, nil, false
+	nextB := payoutB.Children[0] // can be either swap msg on the same router or jetton transfer
+	payout := stonfiSwap{
+		swapTx:     swapTx,
+		payoutBody: body,
+		transfer:   nextB,
+	}
+	usedBubbles[payoutB] = struct{}{}
+	usedBubbles[nextB] = struct{}{}
+	usedBubbles[b] = struct{}{}
+	payoutChain, latestNextB, ok := s.processSingleRouterSwaps(nextB, usedBubbles)
+	if ok && latestNextB != nil {
+		return append(payoutChain, payout), latestNextB, true
+	}
+	return append(payoutChain, payout), nextB, true
 }
 
 type UniversalStonfiStraw struct{}

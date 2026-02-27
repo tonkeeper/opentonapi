@@ -1013,8 +1013,8 @@ func TestFindActions(t *testing.T) {
 			hash:           "fe1482f280383bbd791f0cd8df1920a726335d2843b7b68190f9f9d777bd3bc8",
 		},
 		{
-			name:           "stonfi swap ton-usdt-shitok",
-			filenamePrefix: "stonfi-swap-ton-usdt-shitok",
+			name:           "stonfi partial cross-swap",
+			filenamePrefix: "stonfi-partial-cross-swap",
 			hash:           "9a8054e9b42f8290c820b39c6496b13d00d9bd8aad516e1d0e83bbf673c1571e",
 		},
 	}
