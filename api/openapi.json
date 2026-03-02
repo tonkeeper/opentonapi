@@ -654,6 +654,28 @@
     },
     "description": "input parameters for contract get method"
    },
+   "PublicKeys": {
+    "content": {
+     "application/json": {
+      "schema": {
+       "properties": {
+        "public_keys": {
+         "items": {
+          "example": "d8519b83d5b04b17a706ef6d04f3566422be47c2b676b0823235d67b1ef4b1b2",
+          "type": "string"
+         },
+         "type": "array"
+        }
+       },
+       "required": [
+        "public_keys"
+       ],
+       "type": "object"
+      }
+     }
+    },
+    "description": "a list of hex-encoded ed25519 public keys"
+   },
    "TonConnectProof": {
     "content": {
      "application/json": {
@@ -7005,6 +7027,41 @@
     ],
     "type": "object"
    },
+   "WalletsByPublicKey": {
+    "properties": {
+     "public_key": {
+      "description": "hex-encoded ed25519 public key",
+      "example": "d8519b83d5b04b17a706ef6d04f3566422be47c2b676b0823235d67b1ef4b1b2",
+      "type": "string"
+     },
+     "wallets": {
+      "items": {
+       "$ref": "#/components/schemas/Wallet"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "public_key",
+     "wallets"
+    ],
+    "type": "object"
+   },
+   "WalletsByPublicKeys": {
+    "properties": {
+     "items": {
+      "description": "Wallets grouped by the originating public key",
+      "items": {
+       "$ref": "#/components/schemas/WalletsByPublicKey"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "items"
+    ],
+    "type": "object"
+   },
    "WithdrawStakeAction": {
     "description": "validator's participation in elections",
     "properties": {
@@ -10913,6 +10970,33 @@
     ]
    }
   },
+  "/v2/pubkeys/wallets/_bulk": {
+   "post": {
+    "description": "Get wallets by a list of public keys",
+    "operationId": "getWalletsByPublicKeyBulk",
+    "requestBody": {
+     "$ref": "#/components/requestBodies/PublicKeys"
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/WalletsByPublicKeys"
+        }
+       }
+      },
+      "description": "grouped wallets per public key"
+     },
+     "default": {
+      "$ref": "#/components/responses/Error"
+     }
+    },
+    "tags": [
+     "Wallet"
+    ]
+   }
+  },
   "/v2/pubkeys/{public_key}/wallets": {
    "get": {
     "description": "Get wallets by public key",
@@ -11292,7 +11376,7 @@
        "default": 100,
        "example": 100,
        "format": "int32",
-       "maximum": 1000,
+       "maximum": 100,
        "minimum": 1,
        "type": "integer"
       }
