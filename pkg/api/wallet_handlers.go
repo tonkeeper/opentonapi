@@ -2,11 +2,13 @@ package api
 
 import (
 	"context"
+	"crypto/ed25519"
 	"encoding/hex"
 	"errors"
 	"fmt"
 	"net/http"
 
+	"github.com/sourcegraph/conc/pool"
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/opentonapi/pkg/oas"
 	"github.com/tonkeeper/opentonapi/pkg/wallet"
@@ -16,6 +18,7 @@ import (
 	"github.com/tonkeeper/tongo/tlb"
 	"github.com/tonkeeper/tongo/ton"
 	tongoWallet "github.com/tonkeeper/tongo/wallet"
+	"golang.org/x/exp/maps"
 )
 
 var errUnsupportedWalletVersion = errors.New("unsupported wallet version")
@@ -29,32 +32,80 @@ func (h *Handler) GetWalletsByPublicKey(ctx context.Context, params oas.GetWalle
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
-	var addresses []ton.AccountID
-	for addr := range versions {
-		addresses = append(addresses, addr)
-	}
-	rawAccounts, err := h.storage.GetRawAccounts(ctx, addresses)
+	wallets, statusCode, err := h.collectWallets(ctx, versions)
 	if err != nil {
-		return nil, toError(http.StatusInternalServerError, err)
+		return nil, toError(statusCode, err)
 	}
-	for i, _ := range rawAccounts {
-		// TODO: or check for wallet interface
-		if len(rawAccounts[i].Interfaces) == 0 {
-			rawAccounts[i].Interfaces = append(rawAccounts[i].Interfaces, versions[rawAccounts[i].AccountAddress])
-		}
+	return &oas.Wallets{Accounts: wallets}, nil
+}
+
+func (h *Handler) collectWallets(ctx context.Context, versions map[ton.AccountID]abi.ContractInterface) ([]oas.Wallet, int, error) {
+	rawAccounts, err := h.storage.GetRawAccounts(ctx, maps.Keys(versions))
+	if err != nil {
+		return nil, http.StatusInternalServerError, err
 	}
 	wallets := make([]oas.Wallet, 0, len(rawAccounts))
 	for _, rawAccount := range rawAccounts {
+		if len(rawAccount.Interfaces) == 0 {
+			rawAccount.Interfaces = append(rawAccount.Interfaces, versions[rawAccount.AccountAddress])
+		}
 		converted, err, statusCode := h.processWallet(ctx, rawAccount)
 		if errors.Is(err, errUnsupportedWalletVersion) {
 			continue
 		}
 		if err != nil {
-			return nil, toError(statusCode, err)
+			return nil, statusCode, err
 		}
 		wallets = append(wallets, *converted)
 	}
-	return &oas.Wallets{Accounts: wallets}, nil
+	return wallets, http.StatusOK, nil
+}
+
+func (h *Handler) GetWalletsByPublicKeyBulk(ctx context.Context, request oas.OptGetWalletsByPublicKeyBulkReq) (*oas.WalletsByPublicKeys, error) {
+	if len(request.Value.PublicKeys) == 0 {
+		return nil, toError(http.StatusBadRequest, fmt.Errorf("empty list of public keys"))
+	}
+	if !h.limits.isBulkQuantityAllowed(len(request.Value.PublicKeys)) {
+		return nil, toError(http.StatusBadRequest, fmt.Errorf("the maximum number of public keys to request at once: %v", h.limits.BulkLimits))
+	}
+	pubKeys := make([]ed25519.PublicKey, 0, len(request.Value.PublicKeys))
+	canonicalKeys := request.Value.PublicKeys
+	for _, key := range request.Value.PublicKeys {
+		decoded, err := hex.DecodeString(key)
+		if err != nil {
+			return nil, toError(http.StatusBadRequest, err)
+		}
+		pubKeys = append(pubKeys, decoded)
+	}
+
+	versionsByKey, err := h.storage.GetWalletAddressesByPubkeys(ctx, pubKeys)
+	if err != nil {
+		return nil, toError(http.StatusInternalServerError, err)
+	}
+
+	p := pool.NewWithResults[oas.WalletsByPublicKey]().WithContext(ctx).WithCancelOnError()
+	for idx, key := range request.Value.PublicKeys {
+		pubkey := key
+		versions, ok := versionsByKey[canonicalKeys[idx]]
+		if !ok {
+			return nil, toError(http.StatusInternalServerError, fmt.Errorf("wallet versions not found for provided public key"))
+		}
+		p.Go(func(ctx context.Context) (oas.WalletsByPublicKey, error) {
+			wallets, statusCode, err := h.collectWallets(ctx, versions)
+			if err != nil {
+				return oas.WalletsByPublicKey{}, toError(statusCode, err)
+			}
+			return oas.WalletsByPublicKey{
+				PublicKey: pubkey,
+				Wallets:   wallets,
+			}, nil
+		})
+	}
+	walletGroups, err := p.Wait()
+	if err != nil {
+		return nil, err
+	}
+	return &oas.WalletsByPublicKeys{Items: walletGroups}, nil
 }
 
 func (h *Handler) GetAccountSeqno(ctx context.Context, params oas.GetAccountSeqnoParams) (*oas.Seqno, error) {

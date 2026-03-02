@@ -2818,6 +2818,32 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 						break
 					}
 
+					if len(elem) == 0 {
+						break
+					}
+					switch elem[0] {
+					case 'w': // Prefix: "wallets/_bulk"
+						origElem := elem
+						if l := len("wallets/_bulk"); len(elem) >= l && elem[0:l] == "wallets/_bulk" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						if len(elem) == 0 {
+							// Leaf node.
+							switch r.Method {
+							case "POST":
+								s.handleGetWalletsByPublicKeyBulkRequest([0]string{}, elemIsEscaped, w, r)
+							default:
+								s.notAllowed(w, r, "POST")
+							}
+
+							return
+						}
+
+						elem = origElem
+					}
 					// Param: "public_key"
 					// Match until "/"
 					idx := strings.IndexByte(elem, '/')
@@ -6518,6 +6544,36 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 						break
 					}
 
+					if len(elem) == 0 {
+						break
+					}
+					switch elem[0] {
+					case 'w': // Prefix: "wallets/_bulk"
+						origElem := elem
+						if l := len("wallets/_bulk"); len(elem) >= l && elem[0:l] == "wallets/_bulk" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						if len(elem) == 0 {
+							switch method {
+							case "POST":
+								// Leaf: GetWalletsByPublicKeyBulk
+								r.name = "GetWalletsByPublicKeyBulk"
+								r.summary = ""
+								r.operationID = "getWalletsByPublicKeyBulk"
+								r.pathPattern = "/v2/pubkeys/wallets/_bulk"
+								r.args = args
+								r.count = 0
+								return r, true
+							default:
+								return
+							}
+						}
+
+						elem = origElem
+					}
 					// Param: "public_key"
 					// Match until "/"
 					idx := strings.IndexByte(elem, '/')

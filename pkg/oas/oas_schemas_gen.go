@@ -7844,6 +7844,20 @@ func (s *GetTonConnectPayloadOK) SetPayload(val string) {
 	s.Payload = val
 }
 
+type GetWalletsByPublicKeyBulkReq struct {
+	PublicKeys []string `json:"public_keys"`
+}
+
+// GetPublicKeys returns the value of PublicKeys.
+func (s *GetWalletsByPublicKeyBulkReq) GetPublicKeys() []string {
+	return s.PublicKeys
+}
+
+// SetPublicKeys sets the value of PublicKeys.
+func (s *GetWalletsByPublicKeyBulkReq) SetPublicKeys(val []string) {
+	s.PublicKeys = val
+}
+
 // Ref: #/components/schemas/ImagePreview
 type ImagePreview struct {
 	Resolution string `json:"resolution"`
@@ -13847,6 +13861,52 @@ func (o OptGetNftItemsByAddressesReq) Or(d GetNftItemsByAddressesReq) GetNftItem
 	return d
 }
 
+// NewOptGetWalletsByPublicKeyBulkReq returns new OptGetWalletsByPublicKeyBulkReq with value set to v.
+func NewOptGetWalletsByPublicKeyBulkReq(v GetWalletsByPublicKeyBulkReq) OptGetWalletsByPublicKeyBulkReq {
+	return OptGetWalletsByPublicKeyBulkReq{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptGetWalletsByPublicKeyBulkReq is optional GetWalletsByPublicKeyBulkReq.
+type OptGetWalletsByPublicKeyBulkReq struct {
+	Value GetWalletsByPublicKeyBulkReq
+	Set   bool
+}
+
+// IsSet returns true if OptGetWalletsByPublicKeyBulkReq was set.
+func (o OptGetWalletsByPublicKeyBulkReq) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptGetWalletsByPublicKeyBulkReq) Reset() {
+	var v GetWalletsByPublicKeyBulkReq
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptGetWalletsByPublicKeyBulkReq) SetTo(v GetWalletsByPublicKeyBulkReq) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptGetWalletsByPublicKeyBulkReq) Get() (v GetWalletsByPublicKeyBulkReq, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptGetWalletsByPublicKeyBulkReq) Or(d GetWalletsByPublicKeyBulkReq) GetWalletsByPublicKeyBulkReq {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptInt returns new OptInt with value set to v.
 func NewOptInt(v int) OptInt {
 	return OptInt{
@@ -19602,6 +19662,49 @@ func (s *Wallets) GetAccounts() []Wallet {
 // SetAccounts sets the value of Accounts.
 func (s *Wallets) SetAccounts(val []Wallet) {
 	s.Accounts = val
+}
+
+// Ref: #/components/schemas/WalletsByPublicKey
+type WalletsByPublicKey struct {
+	// Hex-encoded ed25519 public key.
+	PublicKey string   `json:"public_key"`
+	Wallets   []Wallet `json:"wallets"`
+}
+
+// GetPublicKey returns the value of PublicKey.
+func (s *WalletsByPublicKey) GetPublicKey() string {
+	return s.PublicKey
+}
+
+// GetWallets returns the value of Wallets.
+func (s *WalletsByPublicKey) GetWallets() []Wallet {
+	return s.Wallets
+}
+
+// SetPublicKey sets the value of PublicKey.
+func (s *WalletsByPublicKey) SetPublicKey(val string) {
+	s.PublicKey = val
+}
+
+// SetWallets sets the value of Wallets.
+func (s *WalletsByPublicKey) SetWallets(val []Wallet) {
+	s.Wallets = val
+}
+
+// Ref: #/components/schemas/WalletsByPublicKeys
+type WalletsByPublicKeys struct {
+	// Wallets grouped by the originating public key.
+	Items []WalletsByPublicKey `json:"items"`
+}
+
+// GetItems returns the value of Items.
+func (s *WalletsByPublicKeys) GetItems() []WalletsByPublicKey {
+	return s.Items
+}
+
+// SetItems sets the value of Items.
+func (s *WalletsByPublicKeys) SetItems(val []WalletsByPublicKey) {
+	s.Items = val
 }
 
 // Validator's participation in elections.

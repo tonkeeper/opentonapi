@@ -2127,6 +2127,23 @@ paths:
                 $ref: '#/components/schemas/Wallets'
         'default':
           $ref: '#/components/responses/Error'
+  /v2/pubkeys/wallets/_bulk:
+    post:
+      description: Get wallets by a list of public keys
+      operationId: getWalletsByPublicKeyBulk
+      tags:
+        - Wallet
+      requestBody:
+        $ref: '#/components/requestBodies/PublicKeys'
+      responses:
+        '200':
+          description: grouped wallets per public key
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WalletsByPublicKeys'
+        'default':
+          $ref: '#/components/responses/Error'
 
   /v2/liteserver/get_masterchain_info:
     get:
@@ -3415,6 +3432,20 @@ components:
                   type: string
                   format: address
                   example: 0:97264395BD65A255A429B11326C84128B7D70FFED7949ABAE3036D506BA38621
+    PublicKeys:
+      description: a list of hex-encoded ed25519 public keys
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - public_keys
+            properties:
+              public_keys:
+                type: array
+                items:
+                  type: string
+                  example: d8519b83d5b04b17a706ef6d04f3566422be47c2b676b0823235d67b1ef4b1b2
     TonConnectProof:
       description: "Data that is expected from TON Connect"
       required: true
@@ -4811,6 +4842,30 @@ components:
         - accounts
       properties:
         accounts:
+          type: array
+          items:
+            $ref: '#/components/schemas/Wallet'
+    WalletsByPublicKeys:
+      type: object
+      required:
+        - items
+      properties:
+        items:
+          type: array
+          description: Wallets grouped by the originating public key
+          items:
+            $ref: '#/components/schemas/WalletsByPublicKey'
+    WalletsByPublicKey:
+      type: object
+      required:
+        - public_key
+        - wallets
+      properties:
+        public_key:
+          type: string
+          description: hex-encoded ed25519 public key
+          example: d8519b83d5b04b17a706ef6d04f3566422be47c2b676b0823235d67b1ef4b1b2
+        wallets:
           type: array
           items:
             $ref: '#/components/schemas/Wallet'

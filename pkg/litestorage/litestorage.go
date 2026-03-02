@@ -3,6 +3,7 @@ package litestorage
 import (
 	"context"
 	"crypto/ed25519"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"math/big"
@@ -556,6 +557,18 @@ func (s *LiteStorage) GetWalletAddressesByPubkey(ctx context.Context, pubKey ed2
 		wallets[walletAddress] = ifc
 	}
 	return wallets, nil
+}
+
+func (s *LiteStorage) GetWalletAddressesByPubkeys(ctx context.Context, pubKeys []ed25519.PublicKey) (map[string]map[ton.AccountID]abi.ContractInterface, error) {
+	result := make(map[string]map[ton.AccountID]abi.ContractInterface, len(pubKeys))
+	for _, pubKey := range pubKeys {
+		wallets, err := s.GetWalletAddressesByPubkey(ctx, pubKey)
+		if err != nil {
+			return nil, err
+		}
+		result[hex.EncodeToString(pubKey)] = wallets
+	}
+	return result, nil
 }
 
 func (s *LiteStorage) ReindexAccount(ctx context.Context, accountID tongo.AccountID) error {

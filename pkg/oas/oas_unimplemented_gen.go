@@ -952,6 +952,15 @@ func (UnimplementedHandler) GetWalletsByPublicKey(ctx context.Context, params Ge
 	return r, ht.ErrNotImplemented
 }
 
+// GetWalletsByPublicKeyBulk implements getWalletsByPublicKeyBulk operation.
+//
+// Get wallets by a list of public keys.
+//
+// POST /v2/pubkeys/wallets/_bulk
+func (UnimplementedHandler) GetWalletsByPublicKeyBulk(ctx context.Context, req OptGetWalletsByPublicKeyBulkReq) (r *WalletsByPublicKeys, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // ReindexAccount implements reindexAccount operation.
 //
 // Update internal cache for a particular account.

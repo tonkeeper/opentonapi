@@ -641,6 +641,12 @@ type Handler interface {
 	//
 	// GET /v2/pubkeys/{public_key}/wallets
 	GetWalletsByPublicKey(ctx context.Context, params GetWalletsByPublicKeyParams) (*Wallets, error)
+	// GetWalletsByPublicKeyBulk implements getWalletsByPublicKeyBulk operation.
+	//
+	// Get wallets by a list of public keys.
+	//
+	// POST /v2/pubkeys/wallets/_bulk
+	GetWalletsByPublicKeyBulk(ctx context.Context, req OptGetWalletsByPublicKeyBulkReq) (*WalletsByPublicKeys, error)
 	// ReindexAccount implements reindexAccount operation.
 	//
 	// Update internal cache for a particular account.
