@@ -2,6 +2,7 @@ package litestorage
 
 import (
 	"context"
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"math/big"
@@ -13,6 +14,7 @@ import (
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
+	"github.com/tonkeeper/tongo/boc"
 	"github.com/tonkeeper/tongo/liteapi"
 	"github.com/tonkeeper/tongo/ton"
 )
@@ -115,6 +117,24 @@ func (s *LiteStorage) GetJettonMasterData(ctx context.Context, master tongo.Acco
 		Mintable:    r.Mintable,
 	}
 	jettonMaster.Admin, _ = tongo.AccountIDFromTlb(r.AdminAddress)
+	// Fill code_hash, data_hash, last_transaction_lt from raw account state
+	if rawAccount, err := s.GetRawAccount(ctx, master); err == nil {
+		jettonMaster.LastTransactionLt = rawAccount.LastTransactionLt
+		if len(rawAccount.Code) > 0 {
+			if cells, err := boc.DeserializeBoc(rawAccount.Code); err == nil && len(cells) == 1 {
+				if h, err := cells[0].Hash(); err == nil {
+					jettonMaster.CodeHash = base64.StdEncoding.EncodeToString(h)
+				}
+			}
+		}
+		if len(rawAccount.Data) > 0 {
+			if cells, err := boc.DeserializeBoc(rawAccount.Data); err == nil && len(cells) == 1 {
+				if h, err := cells[0].Hash(); err == nil {
+					jettonMaster.DataHash = base64.StdEncoding.EncodeToString(h)
+				}
+			}
+		}
+	}
 	return jettonMaster, nil
 }
 

@@ -3536,6 +3536,17 @@ components:
         is_wallet:
           type: boolean
           example: true
+        interfaces:
+          type: array
+          items:
+            type: string
+          description: Contract interfaces implemented by the account (e.g. multisig_v2, wallet_v3r2)
+          example: ["multisig_v2", "wallet_v3r2"]
+        domain:
+          type: string
+          nullable: true
+          description: DNS name resolving to this address (e.g. admin.ton)
+          example: "admin.ton"
     BlockCurrencyCollection:
       type: object
       required:
@@ -7616,6 +7627,19 @@ components:
           example: 2000
         scaled_ui:
           $ref: '#/components/schemas/ScaledUI'
+        code_hash:
+          type: string
+          description: base64-encoded hash of jetton master code cell
+          example: "rOIINk/O5kGub/FI/RARmMN6SY7BLesBSOonmxrz5f4="
+        data_hash:
+          type: string
+          description: base64-encoded hash of jetton master data cell
+          example: "xd7cWaRQdVSysuG+WVJv9KRuRUGxnehLoByEcK5ukOE="
+        last_transaction_lt:
+          type: string
+          x-js-format: bigint
+          description: last transaction lt of the jetton master account
+          example: "26640202000003"
     JettonHolders:
       type: object
       required:

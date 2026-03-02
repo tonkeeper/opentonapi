@@ -175,6 +175,8 @@ type executor interface {
 type addressBook interface {
 	IsWallet(a tongo.AccountID) (bool, error)
 	GetAddressInfoByAddress(a tongo.AccountID) (addressbook.KnownAddress, bool) // todo: maybe rewrite to pointer
+	GetAccountInterfaces(a tongo.AccountID) ([]string, bool)                      // Contract interfaces (e.g. multisig_v2)
+	GetAccountDomain(a tongo.AccountID) (string, bool)                           // DNS name resolving to this address
 	GetCollectionInfoByAddress(a tongo.AccountID) (addressbook.KnownCollection, bool)
 	GetJettonInfoByAddress(a tongo.AccountID) (addressbook.KnownJetton, bool)
 	GetTFPoolInfo(a tongo.AccountID) (addressbook.TFPoolInfo, bool)

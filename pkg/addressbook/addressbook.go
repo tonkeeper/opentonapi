@@ -31,11 +31,13 @@ var NormalizeReg = regexp.MustCompile("[^\\p{L}\\p{N}]")
 
 // KnownAddress represents additional manually crafted information about a particular account in the blockchain
 type KnownAddress struct {
-	IsScam      bool   `json:"is_scam,omitempty"`
-	RequireMemo bool   `json:"require_memo,omitempty"`
-	Name        string `json:"name"`
-	Address     string `json:"address"`
-	Image       string `json:"image,omitempty"`
+	IsScam      bool     `json:"is_scam,omitempty"`
+	RequireMemo bool     `json:"require_memo,omitempty"`
+	Name        string   `json:"name"`
+	Address     string   `json:"address"`
+	Image       string   `json:"image,omitempty"`
+	Interfaces  []string `json:"interfaces,omitempty"`
+	Domain      string   `json:"domain,omitempty"`
 }
 
 // AttachedAccountType defines different types of accounts (e.g., manual, NFT)
@@ -117,10 +119,39 @@ type TFPoolInfo struct {
 func (b *Book) GetAddressInfoByAddress(a tongo.AccountID) (KnownAddress, bool) {
 	for i := range b.addressers {
 		if a1, ok := b.addressers[i].GetAddress(a); ok {
+			if b.states != nil {
+				if _, ifaces, err := b.states.AccountStatusAndInterfaces(a); err == nil && len(ifaces) > 0 {
+					a1.Interfaces = make([]string, len(ifaces))
+					for j, iface := range ifaces {
+						a1.Interfaces[j] = iface.String()
+					}
+				}
+			}
 			return a1, ok
 		}
 	}
 	return KnownAddress{}, false
+}
+
+// GetAccountInterfaces returns contract interfaces implemented by the account (e.g. multisig_v2, wallet_v3r2).
+func (b *Book) GetAccountInterfaces(a tongo.AccountID) ([]string, bool) {
+	if b.states == nil {
+		return nil, false
+	}
+	_, ifaces, err := b.states.AccountStatusAndInterfaces(a)
+	if err != nil || len(ifaces) == 0 {
+		return nil, false
+	}
+	s := make([]string, len(ifaces))
+	for i, iface := range ifaces {
+		s[i] = iface.String()
+	}
+	return s, true
+}
+
+// GetAccountDomain returns the DNS name resolving to this address, if any.
+func (b *Book) GetAccountDomain(a tongo.AccountID) (string, bool) {
+	return "", false
 }
 
 // SearchAttachedAccountsByPrefix searches for accounts by prefix

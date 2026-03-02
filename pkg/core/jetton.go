@@ -34,6 +34,9 @@ type JettonMaster struct {
 	TotalSupply big.Int
 	Mintable    bool
 	Admin       *tongo.AccountID
+	CodeHash         string
+	DataHash         string
+	LastTransactionLt uint64
 }
 
 type JettonWalletLockData struct {

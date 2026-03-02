@@ -233,6 +233,10 @@ type AccountAddress struct {
 	IsScam   bool      `json:"is_scam"`
 	Icon     OptString `json:"icon"`
 	IsWallet bool      `json:"is_wallet"`
+	// Contract interfaces implemented by the account (e.g. multisig_v2, wallet_v3r2).
+	Interfaces []string `json:"interfaces"`
+	// DNS name resolving to this address (e.g. admin.ton).
+	Domain OptNilString `json:"domain"`
 }
 
 // GetAddress returns the value of Address.
@@ -260,6 +264,16 @@ func (s *AccountAddress) GetIsWallet() bool {
 	return s.IsWallet
 }
 
+// GetInterfaces returns the value of Interfaces.
+func (s *AccountAddress) GetInterfaces() []string {
+	return s.Interfaces
+}
+
+// GetDomain returns the value of Domain.
+func (s *AccountAddress) GetDomain() OptNilString {
+	return s.Domain
+}
+
 // SetAddress sets the value of Address.
 func (s *AccountAddress) SetAddress(val string) {
 	s.Address = val
@@ -283,6 +297,16 @@ func (s *AccountAddress) SetIcon(val OptString) {
 // SetIsWallet sets the value of IsWallet.
 func (s *AccountAddress) SetIsWallet(val bool) {
 	s.IsWallet = val
+}
+
+// SetInterfaces sets the value of Interfaces.
+func (s *AccountAddress) SetInterfaces(val []string) {
+	s.Interfaces = val
+}
+
+// SetDomain sets the value of Domain.
+func (s *AccountAddress) SetDomain(val OptNilString) {
+	s.Domain = val
 }
 
 // {'USD': 1, 'IDR': 1000}.
@@ -8276,6 +8300,12 @@ type JettonInfo struct {
 	Verification JettonVerificationType `json:"verification"`
 	HoldersCount int32                  `json:"holders_count"`
 	ScaledUI     OptScaledUI            `json:"scaled_ui"`
+	// Base64-encoded hash of jetton master code cell.
+	CodeHash OptString `json:"code_hash"`
+	// Base64-encoded hash of jetton master data cell.
+	DataHash OptString `json:"data_hash"`
+	// Last transaction lt of the jetton master account.
+	LastTransactionLt OptString `json:"last_transaction_lt"`
 }
 
 // GetMintable returns the value of Mintable.
@@ -8318,6 +8348,21 @@ func (s *JettonInfo) GetScaledUI() OptScaledUI {
 	return s.ScaledUI
 }
 
+// GetCodeHash returns the value of CodeHash.
+func (s *JettonInfo) GetCodeHash() OptString {
+	return s.CodeHash
+}
+
+// GetDataHash returns the value of DataHash.
+func (s *JettonInfo) GetDataHash() OptString {
+	return s.DataHash
+}
+
+// GetLastTransactionLt returns the value of LastTransactionLt.
+func (s *JettonInfo) GetLastTransactionLt() OptString {
+	return s.LastTransactionLt
+}
+
 // SetMintable sets the value of Mintable.
 func (s *JettonInfo) SetMintable(val bool) {
 	s.Mintable = val
@@ -8356,6 +8401,21 @@ func (s *JettonInfo) SetHoldersCount(val int32) {
 // SetScaledUI sets the value of ScaledUI.
 func (s *JettonInfo) SetScaledUI(val OptScaledUI) {
 	s.ScaledUI = val
+}
+
+// SetCodeHash sets the value of CodeHash.
+func (s *JettonInfo) SetCodeHash(val OptString) {
+	s.CodeHash = val
+}
+
+// SetDataHash sets the value of DataHash.
+func (s *JettonInfo) SetDataHash(val OptString) {
+	s.DataHash = val
+}
+
+// SetLastTransactionLt sets the value of LastTransactionLt.
+func (s *JettonInfo) SetLastTransactionLt(val OptString) {
+	s.LastTransactionLt = val
 }
 
 // Ref: #/components/schemas/JettonMetadata
@@ -14715,6 +14775,69 @@ func (o OptNftPurchaseAction) Get() (v NftPurchaseAction, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptNftPurchaseAction) Or(d NftPurchaseAction) NftPurchaseAction {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptNilString returns new OptNilString with value set to v.
+func NewOptNilString(v string) OptNilString {
+	return OptNilString{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptNilString is optional nullable string.
+type OptNilString struct {
+	Value string
+	Set   bool
+	Null  bool
+}
+
+// IsSet returns true if OptNilString was set.
+func (o OptNilString) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptNilString) Reset() {
+	var v string
+	o.Value = v
+	o.Set = false
+	o.Null = false
+}
+
+// SetTo sets value to v.
+func (o *OptNilString) SetTo(v string) {
+	o.Set = true
+	o.Null = false
+	o.Value = v
+}
+
+// IsSet returns true if value is Null.
+func (o OptNilString) IsNull() bool { return o.Null }
+
+// SetNull sets value to null.
+func (o *OptNilString) SetToNull() {
+	o.Set = true
+	o.Null = true
+	var v string
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptNilString) Get() (v string, ok bool) {
+	if o.Null {
+		return v, false
+	}
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptNilString) Or(d string) string {
 	if v, ok := o.Get(); ok {
 		return v
 	}

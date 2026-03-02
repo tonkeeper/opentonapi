@@ -121,6 +121,22 @@ func convertAccountAddress(id tongo.AccountID, book addressBook) oas.AccountAddr
 			address.SetIcon(oas.NewOptString(imgGenerator.DefaultGenerator.GenerateImageUrl(i.Image, 200, 200)))
 		}
 		address.IsScam = i.IsScam
+		if len(i.Interfaces) > 0 {
+			address.Interfaces = i.Interfaces
+		}
+		if i.Domain != "" {
+			address.Domain = oas.NewOptNilString(i.Domain)
+		}
+	}
+	if len(address.Interfaces) == 0 {
+		if ifaces, ok := book.GetAccountInterfaces(id); ok && len(ifaces) > 0 {
+			address.Interfaces = ifaces
+		}
+	}
+	if !address.Domain.IsSet() {
+		if domain, ok := book.GetAccountDomain(id); ok && domain != "" {
+			address.Domain = oas.NewOptNilString(domain)
+		}
 	}
 	if wallet, err := book.IsWallet(id); err == nil {
 		address.IsWallet = wallet

@@ -21,6 +21,14 @@ func (m mockAddressBook) GetCollectionInfoByAddress(a tongo.AccountID) (addressb
 	return addressbook.KnownCollection{}, false
 }
 
+func (m mockAddressBook) GetAccountInterfaces(a tongo.AccountID) ([]string, bool) {
+	return nil, false
+}
+
+func (m mockAddressBook) GetAccountDomain(a tongo.AccountID) (string, bool) {
+	return "", false
+}
+
 func (m mockAddressBook) GetJettonInfoByAddress(a tongo.AccountID) (addressbook.KnownJetton, bool) {
 	return addressbook.KnownJetton{}, false
 }
