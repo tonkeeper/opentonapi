@@ -228,5 +228,14 @@ func (h *Handler) convertJettonInfo(ctx context.Context, master core.JettonMaste
 			Denominator: scaledUiParams.Denominator.String(),
 		})
 	}
+	if master.CodeHash != "" {
+		info.CodeHash = oas.NewOptString(master.CodeHash)
+	}
+	if master.DataHash != "" {
+		info.DataHash = oas.NewOptString(master.DataHash)
+	}
+	if master.LastTransactionLt != 0 {
+		info.LastTransactionLt = oas.NewOptString(fmt.Sprintf("%d", master.LastTransactionLt))
+	}
 	return info
 }
