@@ -5091,6 +5091,10 @@
       "deprecated": true,
       "description": "Please use trust field"
      },
+     "code_hash": {
+      "description": "Hash of the NFT item account code cell (hex)",
+      "type": "string"
+     },
      "collection": {
       "properties": {
        "address": {
@@ -5113,6 +5117,10 @@
        "description"
       ],
       "type": "object"
+     },
+     "data_hash": {
+      "description": "Hash of the NFT item account data cell (hex)",
+      "type": "string"
      },
      "dns": {
       "example": "crypto.ton",

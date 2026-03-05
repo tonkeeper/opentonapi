@@ -5993,6 +5993,12 @@ components:
           example: false
         trust:
           $ref: '#/components/schemas/TrustType'
+        code_hash:
+          type: string
+          description: Hash of the NFT item account code cell (hex)
+        data_hash:
+          type: string
+          description: Hash of the NFT item account data cell (hex)
     NftItems:
       type: object
       required:

@@ -30110,9 +30110,21 @@ func (s *NftItem) encodeFields(e *jx.Encoder) {
 		e.FieldStart("trust")
 		s.Trust.Encode(e)
 	}
+	{
+		if s.CodeHash.Set {
+			e.FieldStart("code_hash")
+			s.CodeHash.Encode(e)
+		}
+	}
+	{
+		if s.DataHash.Set {
+			e.FieldStart("data_hash")
+			s.DataHash.Encode(e)
+		}
+	}
 }
 
-var jsonFieldsNameOfNftItem = [12]string{
+var jsonFieldsNameOfNftItem = [14]string{
 	0:  "address",
 	1:  "index",
 	2:  "owner",
@@ -30125,6 +30137,8 @@ var jsonFieldsNameOfNftItem = [12]string{
 	9:  "approved_by",
 	10: "include_cnft",
 	11: "trust",
+	12: "code_hash",
+	13: "data_hash",
 }
 
 // Decode decodes NftItem from json.
@@ -30276,6 +30290,26 @@ func (s *NftItem) Decode(d *jx.Decoder) error {
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"trust\"")
+			}
+		case "code_hash":
+			if err := func() error {
+				s.CodeHash.Reset()
+				if err := s.CodeHash.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"code_hash\"")
+			}
+		case "data_hash":
+			if err := func() error {
+				s.DataHash.Reset()
+				if err := s.DataHash.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"data_hash\"")
 			}
 		default:
 			return d.Skip()
