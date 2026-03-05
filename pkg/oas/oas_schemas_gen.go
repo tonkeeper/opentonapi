@@ -8276,6 +8276,12 @@ type JettonInfo struct {
 	Verification JettonVerificationType `json:"verification"`
 	HoldersCount int32                  `json:"holders_count"`
 	ScaledUI     OptScaledUI            `json:"scaled_ui"`
+	// Base64-encoded hash of jetton master code cell.
+	CodeHash OptString `json:"code_hash"`
+	// Base64-encoded hash of jetton master data cell.
+	DataHash OptString `json:"data_hash"`
+	// Last transaction lt of the jetton master account.
+	LastTransactionLt OptString `json:"last_transaction_lt"`
 }
 
 // GetMintable returns the value of Mintable.
@@ -8318,6 +8324,21 @@ func (s *JettonInfo) GetScaledUI() OptScaledUI {
 	return s.ScaledUI
 }
 
+// GetCodeHash returns the value of CodeHash.
+func (s *JettonInfo) GetCodeHash() OptString {
+	return s.CodeHash
+}
+
+// GetDataHash returns the value of DataHash.
+func (s *JettonInfo) GetDataHash() OptString {
+	return s.DataHash
+}
+
+// GetLastTransactionLt returns the value of LastTransactionLt.
+func (s *JettonInfo) GetLastTransactionLt() OptString {
+	return s.LastTransactionLt
+}
+
 // SetMintable sets the value of Mintable.
 func (s *JettonInfo) SetMintable(val bool) {
 	s.Mintable = val
@@ -8356,6 +8377,21 @@ func (s *JettonInfo) SetHoldersCount(val int32) {
 // SetScaledUI sets the value of ScaledUI.
 func (s *JettonInfo) SetScaledUI(val OptScaledUI) {
 	s.ScaledUI = val
+}
+
+// SetCodeHash sets the value of CodeHash.
+func (s *JettonInfo) SetCodeHash(val OptString) {
+	s.CodeHash = val
+}
+
+// SetDataHash sets the value of DataHash.
+func (s *JettonInfo) SetDataHash(val OptString) {
+	s.DataHash = val
+}
+
+// SetLastTransactionLt sets the value of LastTransactionLt.
+func (s *JettonInfo) SetLastTransactionLt(val OptString) {
+	s.LastTransactionLt = val
 }
 
 // Ref: #/components/schemas/JettonMetadata

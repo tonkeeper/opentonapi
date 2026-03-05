@@ -24709,17 +24709,38 @@ func (s *JettonInfo) encodeFields(e *jx.Encoder) {
 			s.ScaledUI.Encode(e)
 		}
 	}
+	{
+		if s.CodeHash.Set {
+			e.FieldStart("code_hash")
+			s.CodeHash.Encode(e)
+		}
+	}
+	{
+		if s.DataHash.Set {
+			e.FieldStart("data_hash")
+			s.DataHash.Encode(e)
+		}
+	}
+	{
+		if s.LastTransactionLt.Set {
+			e.FieldStart("last_transaction_lt")
+			s.LastTransactionLt.Encode(e)
+		}
+	}
 }
 
-var jsonFieldsNameOfJettonInfo = [8]string{
-	0: "mintable",
-	1: "total_supply",
-	2: "admin",
-	3: "metadata",
-	4: "preview",
-	5: "verification",
-	6: "holders_count",
-	7: "scaled_ui",
+var jsonFieldsNameOfJettonInfo = [11]string{
+	0:  "mintable",
+	1:  "total_supply",
+	2:  "admin",
+	3:  "metadata",
+	4:  "preview",
+	5:  "verification",
+	6:  "holders_count",
+	7:  "scaled_ui",
+	8:  "code_hash",
+	9:  "data_hash",
+	10: "last_transaction_lt",
 }
 
 // Decode decodes JettonInfo from json.
@@ -24727,7 +24748,7 @@ func (s *JettonInfo) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode JettonInfo to nil")
 	}
-	var requiredBitSet [1]uint8
+	var requiredBitSet [2]uint8
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
@@ -24819,6 +24840,36 @@ func (s *JettonInfo) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"scaled_ui\"")
 			}
+		case "code_hash":
+			if err := func() error {
+				s.CodeHash.Reset()
+				if err := s.CodeHash.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"code_hash\"")
+			}
+		case "data_hash":
+			if err := func() error {
+				s.DataHash.Reset()
+				if err := s.DataHash.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"data_hash\"")
+			}
+		case "last_transaction_lt":
+			if err := func() error {
+				s.LastTransactionLt.Reset()
+				if err := s.LastTransactionLt.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"last_transaction_lt\"")
+			}
 		default:
 			return d.Skip()
 		}
@@ -24828,8 +24879,9 @@ func (s *JettonInfo) Decode(d *jx.Decoder) error {
 	}
 	// Validate required fields.
 	var failures []validate.FieldError
-	for i, mask := range [1]uint8{
+	for i, mask := range [2]uint8{
 		0b01111011,
+		0b00000000,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.

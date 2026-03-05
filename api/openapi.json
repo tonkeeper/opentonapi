@@ -4035,6 +4035,22 @@
      },
      "verification": {
       "$ref": "#/components/schemas/JettonVerificationType"
+     },
+     "code_hash": {
+       "description": "base64-encoded hash of jetton master code cell",
+       "example": "rOIINk/O5kGub/FI/RARmMN6SY7BLesBSOonmxrz5f4=",
+       "type": "string"
+     },
+     "data_hash": {
+       "description": "base64-encoded hash of jetton master data cell",
+       "example": "xd7cWaRQdVSysuG+WVJv9KRuRUGxnehLoByEcK5ukOE=",
+       "type": "string"
+     },
+     "last_transaction_lt": {
+       "description": "last transaction lt of the jetton master account",
+       "example": "26640202000003",
+       "type": "string",
+       "x-js-format": "bigint"
      }
     },
     "required": [

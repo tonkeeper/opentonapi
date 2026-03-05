@@ -30,10 +30,13 @@ type JettonHolder struct {
 
 type JettonMaster struct {
 	// Address of a jetton master.
-	Address     tongo.AccountID
-	TotalSupply big.Int
-	Mintable    bool
-	Admin       *tongo.AccountID
+	Address           tongo.AccountID
+	TotalSupply       big.Int
+	Mintable          bool
+	Admin             *tongo.AccountID
+	CodeHash          string
+	DataHash          string
+	LastTransactionLt uint64
 }
 
 type JettonWalletLockData struct {
