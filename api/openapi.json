@@ -4276,6 +4276,9 @@
       "example": 9,
       "type": "integer"
      },
+     "description": {
+      "type": "string"
+     },
      "image": {
       "example": "https://cache.tonapi.io/images/jetton.jpg",
       "type": "string"

@@ -35,6 +35,9 @@ func jettonPreview(master ton.AccountID, meta NormalizedMetadata, score int32, s
 			Denominator: scaledUiParams.Denominator.String(),
 		})
 	}
+	if meta.Description != "" {
+		preview.SetDescription(oas.NewOptString(meta.Description))
+	}
 	return preview
 }
 
