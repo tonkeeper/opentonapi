@@ -3137,6 +3137,14 @@ func (s *Server) handleGetAccountJettonsBalancesRequest(args [1]string, argsEsca
 					Name: "supported_extensions",
 					In:   "query",
 				}: params.SupportedExtensions,
+				{
+					Name: "limit",
+					In:   "query",
+				}: params.Limit,
+				{
+					Name: "offset",
+					In:   "query",
+				}: params.Offset,
 			},
 			Raw: r,
 		}
