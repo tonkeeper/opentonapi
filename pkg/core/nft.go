@@ -21,6 +21,8 @@ type NftItem struct {
 	DNS               *string
 	Sale              *NftSaleInfo
 	Metadata          map[string]interface{}
+	CodeHash          string
+	DataHash          string
 }
 
 type NftCollection struct {

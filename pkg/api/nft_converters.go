@@ -26,6 +26,12 @@ func (h *Handler) convertNFT(ctx context.Context, item core.NftItem, book addres
 		Metadata: anyToJSONRawMap(item.Metadata),
 		DNS:      g.Opt(item.DNS),
 	}
+	if item.CodeHash != "" {
+		nftItem.CodeHash = oas.NewOptString(item.CodeHash)
+	}
+	if item.DataHash != "" {
+		nftItem.DataHash = oas.NewOptString(item.DataHash)
+	}
 	if item.Sale != nil {
 		nftItem.SetSale(oas.NewOptSale(oas.Sale{
 			Address: item.Sale.Contract.ToRaw(),

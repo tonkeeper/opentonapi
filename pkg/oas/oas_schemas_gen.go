@@ -10354,6 +10354,10 @@ type NftItem struct {
 	ApprovedBy  []NftItemApprovedByItem `json:"approved_by"`
 	IncludeCnft OptBool                 `json:"include_cnft"`
 	Trust       TrustType               `json:"trust"`
+	// Hash of the NFT item account code cell (hex).
+	CodeHash OptString `json:"code_hash"`
+	// Hash of the NFT item account data cell (hex).
+	DataHash OptString `json:"data_hash"`
 }
 
 // GetAddress returns the value of Address.
@@ -10416,6 +10420,16 @@ func (s *NftItem) GetTrust() TrustType {
 	return s.Trust
 }
 
+// GetCodeHash returns the value of CodeHash.
+func (s *NftItem) GetCodeHash() OptString {
+	return s.CodeHash
+}
+
+// GetDataHash returns the value of DataHash.
+func (s *NftItem) GetDataHash() OptString {
+	return s.DataHash
+}
+
 // SetAddress sets the value of Address.
 func (s *NftItem) SetAddress(val string) {
 	s.Address = val
@@ -10474,6 +10488,16 @@ func (s *NftItem) SetIncludeCnft(val OptBool) {
 // SetTrust sets the value of Trust.
 func (s *NftItem) SetTrust(val TrustType) {
 	s.Trust = val
+}
+
+// SetCodeHash sets the value of CodeHash.
+func (s *NftItem) SetCodeHash(val OptString) {
+	s.CodeHash = val
+}
+
+// SetDataHash sets the value of DataHash.
+func (s *NftItem) SetDataHash(val OptString) {
+	s.DataHash = val
 }
 
 type NftItemApprovedByItem string
