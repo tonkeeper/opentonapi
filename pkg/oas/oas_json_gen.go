@@ -25992,9 +25992,15 @@ func (s *JettonPreview) encodeFields(e *jx.Encoder) {
 			s.ScaledUI.Encode(e)
 		}
 	}
+	{
+		if s.Description.Set {
+			e.FieldStart("description")
+			s.Description.Encode(e)
+		}
+	}
 }
 
-var jsonFieldsNameOfJettonPreview = [9]string{
+var jsonFieldsNameOfJettonPreview = [10]string{
 	0: "address",
 	1: "name",
 	2: "symbol",
@@ -26004,6 +26010,7 @@ var jsonFieldsNameOfJettonPreview = [9]string{
 	6: "custom_payload_api_uri",
 	7: "score",
 	8: "scaled_ui",
+	9: "description",
 }
 
 // Decode decodes JettonPreview from json.
@@ -26116,6 +26123,16 @@ func (s *JettonPreview) Decode(d *jx.Decoder) error {
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"scaled_ui\"")
+			}
+		case "description":
+			if err := func() error {
+				s.Description.Reset()
+				if err := s.Description.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"description\"")
 			}
 		default:
 			return d.Skip()
