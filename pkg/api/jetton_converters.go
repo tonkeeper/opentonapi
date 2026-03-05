@@ -237,5 +237,16 @@ func (h *Handler) convertJettonInfo(ctx context.Context, master core.JettonMaste
 	if master.LastTransactionLt != 0 {
 		info.LastTransactionLt = oas.NewOptString(fmt.Sprintf("%d", master.LastTransactionLt))
 	}
+	ab, _ := h.addressBook.GetAddressInfoByAddress(master.Address)
+	if ab.Name != "" {
+		info.SetName(oas.NewOptNilString(ab.Name))
+	}
+	rawAccount, _ := h.storage.GetRawAccount(ctx, master.Address)
+	if rawAccount != nil && len(rawAccount.Interfaces) != 0 {
+		info.Interfaces = make([]string, len(rawAccount.Interfaces))
+		for i, v := range rawAccount.Interfaces {
+			info.Interfaces[i] = v.String()
+		}
+	}
 	return info
 }

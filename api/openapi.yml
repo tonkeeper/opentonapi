@@ -7684,6 +7684,17 @@ components:
           x-js-format: bigint
           description: last transaction lt of the jetton master account
           example: '26640202000003'
+        name:
+          type: string
+          nullable: true
+          description: DNS name resolving to this address (e.g. admin.ton)
+          example: "admin.ton"
+        interfaces:
+          type: array
+          items:
+            type: string
+          description: Contract interfaces implemented by the account (e.g. multisig_v2, wallet_v3r2)
+          example: ["multisig_v2", "wallet_v3r2"]
     JettonHolders:
       type: object
       required:
