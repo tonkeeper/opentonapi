@@ -8808,6 +8808,7 @@ type JettonPreview struct {
 	CustomPayloadAPIURI OptString              `json:"custom_payload_api_uri"`
 	Score               int32                  `json:"score"`
 	ScaledUI            OptScaledUI            `json:"scaled_ui"`
+	Description         OptString              `json:"description"`
 }
 
 // GetAddress returns the value of Address.
@@ -8855,6 +8856,11 @@ func (s *JettonPreview) GetScaledUI() OptScaledUI {
 	return s.ScaledUI
 }
 
+// GetDescription returns the value of Description.
+func (s *JettonPreview) GetDescription() OptString {
+	return s.Description
+}
+
 // SetAddress sets the value of Address.
 func (s *JettonPreview) SetAddress(val string) {
 	s.Address = val
@@ -8898,6 +8904,11 @@ func (s *JettonPreview) SetScore(val int32) {
 // SetScaledUI sets the value of ScaledUI.
 func (s *JettonPreview) SetScaledUI(val OptScaledUI) {
 	s.ScaledUI = val
+}
+
+// SetDescription sets the value of Description.
+func (s *JettonPreview) SetDescription(val OptString) {
+	s.Description = val
 }
 
 // Ref: #/components/schemas/JettonQuantity

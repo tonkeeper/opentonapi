@@ -5770,6 +5770,8 @@ components:
           format: int32
         scaled_ui:
           $ref: '#/components/schemas/ScaledUI'
+        description:
+          type: string
     ScaledUI:
       type: object
       required:
