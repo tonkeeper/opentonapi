@@ -550,7 +550,10 @@ func (s UniversalStonfiStraw) processMultipleRouterSwaps(b *Bubble) stonfiSwapMu
 	if !ok || len(srSwaps) == 0 {
 		return nil
 	}
-	finalTransfer := srSwaps[0].transfer.Info.(BubbleJettonTransfer)
+	finalTransfer, ok := srSwaps[0].transfer.Info.(BubbleJettonTransfer)
+	if !ok {
+		return nil
+	}
 	outJettonWallet, err := srSwaps[0].outAddress()
 	if err != nil || outJettonWallet == nil {
 		return nil
