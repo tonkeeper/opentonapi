@@ -670,6 +670,8 @@ paths:
         - $ref: '#/components/parameters/accountIDParameter'
         - $ref: '#/components/parameters/currenciesQuery'
         - $ref: '#/components/parameters/supportedExtensions'
+        - $ref: '#/components/parameters/limitQuery'
+        - $ref: '#/components/parameters/offsetQuery'
       responses:
         '200':
           description: account jettons balances
@@ -5768,6 +5770,8 @@ components:
           format: int32
         scaled_ui:
           $ref: '#/components/schemas/ScaledUI'
+        description:
+          type: string
     ScaledUI:
       type: object
       required:
@@ -5989,6 +5993,12 @@ components:
           example: false
         trust:
           $ref: '#/components/schemas/TrustType'
+        code_hash:
+          type: string
+          description: Hash of the NFT item account code cell (hex)
+        data_hash:
+          type: string
+          description: Hash of the NFT item account data cell (hex)
     NftItems:
       type: object
       required:
@@ -7671,6 +7681,30 @@ components:
           example: 2000
         scaled_ui:
           $ref: '#/components/schemas/ScaledUI'
+        code_hash:
+          type: string
+          description: base64-encoded hash of jetton master code cell
+          example: 'rOIINk/O5kGub/FI/RARmMN6SY7BLesBSOonmxrz5f4='
+        data_hash:
+          type: string
+          description: base64-encoded hash of jetton master data cell
+          example: 'xd7cWaRQdVSysuG+WVJv9KRuRUGxnehLoByEcK5ukOE='
+        last_transaction_lt:
+          type: string
+          x-js-format: bigint
+          description: last transaction lt of the jetton master account
+          example: '26640202000003'
+        name:
+          type: string
+          nullable: true
+          description: DNS name resolving to this address (e.g. admin.ton)
+          example: "admin.ton"
+        interfaces:
+          type: array
+          items:
+            type: string
+          description: Contract interfaces implemented by the account (e.g. multisig_v2, wallet_v3r2)
+          example: ["multisig_v2", "wallet_v3r2"]
     JettonHolders:
       type: object
       required:

@@ -24817,17 +24817,56 @@ func (s *JettonInfo) encodeFields(e *jx.Encoder) {
 			s.ScaledUI.Encode(e)
 		}
 	}
+	{
+		if s.CodeHash.Set {
+			e.FieldStart("code_hash")
+			s.CodeHash.Encode(e)
+		}
+	}
+	{
+		if s.DataHash.Set {
+			e.FieldStart("data_hash")
+			s.DataHash.Encode(e)
+		}
+	}
+	{
+		if s.LastTransactionLt.Set {
+			e.FieldStart("last_transaction_lt")
+			s.LastTransactionLt.Encode(e)
+		}
+	}
+	{
+		if s.Name.Set {
+			e.FieldStart("name")
+			s.Name.Encode(e)
+		}
+	}
+	{
+		if s.Interfaces != nil {
+			e.FieldStart("interfaces")
+			e.ArrStart()
+			for _, elem := range s.Interfaces {
+				e.Str(elem)
+			}
+			e.ArrEnd()
+		}
+	}
 }
 
-var jsonFieldsNameOfJettonInfo = [8]string{
-	0: "mintable",
-	1: "total_supply",
-	2: "admin",
-	3: "metadata",
-	4: "preview",
-	5: "verification",
-	6: "holders_count",
-	7: "scaled_ui",
+var jsonFieldsNameOfJettonInfo = [13]string{
+	0:  "mintable",
+	1:  "total_supply",
+	2:  "admin",
+	3:  "metadata",
+	4:  "preview",
+	5:  "verification",
+	6:  "holders_count",
+	7:  "scaled_ui",
+	8:  "code_hash",
+	9:  "data_hash",
+	10: "last_transaction_lt",
+	11: "name",
+	12: "interfaces",
 }
 
 // Decode decodes JettonInfo from json.
@@ -24835,7 +24874,7 @@ func (s *JettonInfo) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode JettonInfo to nil")
 	}
-	var requiredBitSet [1]uint8
+	var requiredBitSet [2]uint8
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
@@ -24927,6 +24966,65 @@ func (s *JettonInfo) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"scaled_ui\"")
 			}
+		case "code_hash":
+			if err := func() error {
+				s.CodeHash.Reset()
+				if err := s.CodeHash.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"code_hash\"")
+			}
+		case "data_hash":
+			if err := func() error {
+				s.DataHash.Reset()
+				if err := s.DataHash.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"data_hash\"")
+			}
+		case "last_transaction_lt":
+			if err := func() error {
+				s.LastTransactionLt.Reset()
+				if err := s.LastTransactionLt.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"last_transaction_lt\"")
+			}
+		case "name":
+			if err := func() error {
+				s.Name.Reset()
+				if err := s.Name.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"name\"")
+			}
+		case "interfaces":
+			if err := func() error {
+				s.Interfaces = make([]string, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem string
+					v, err := d.Str()
+					elem = string(v)
+					if err != nil {
+						return err
+					}
+					s.Interfaces = append(s.Interfaces, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"interfaces\"")
+			}
 		default:
 			return d.Skip()
 		}
@@ -24936,8 +25034,9 @@ func (s *JettonInfo) Decode(d *jx.Decoder) error {
 	}
 	// Validate required fields.
 	var failures []validate.FieldError
-	for i, mask := range [1]uint8{
+	for i, mask := range [2]uint8{
 		0b01111011,
+		0b00000000,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -25893,9 +25992,15 @@ func (s *JettonPreview) encodeFields(e *jx.Encoder) {
 			s.ScaledUI.Encode(e)
 		}
 	}
+	{
+		if s.Description.Set {
+			e.FieldStart("description")
+			s.Description.Encode(e)
+		}
+	}
 }
 
-var jsonFieldsNameOfJettonPreview = [9]string{
+var jsonFieldsNameOfJettonPreview = [10]string{
 	0: "address",
 	1: "name",
 	2: "symbol",
@@ -25905,6 +26010,7 @@ var jsonFieldsNameOfJettonPreview = [9]string{
 	6: "custom_payload_api_uri",
 	7: "score",
 	8: "scaled_ui",
+	9: "description",
 }
 
 // Decode decodes JettonPreview from json.
@@ -26017,6 +26123,16 @@ func (s *JettonPreview) Decode(d *jx.Decoder) error {
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"scaled_ui\"")
+			}
+		case "description":
+			if err := func() error {
+				s.Description.Reset()
+				if err := s.Description.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"description\"")
 			}
 		default:
 			return d.Skip()
@@ -29994,9 +30110,21 @@ func (s *NftItem) encodeFields(e *jx.Encoder) {
 		e.FieldStart("trust")
 		s.Trust.Encode(e)
 	}
+	{
+		if s.CodeHash.Set {
+			e.FieldStart("code_hash")
+			s.CodeHash.Encode(e)
+		}
+	}
+	{
+		if s.DataHash.Set {
+			e.FieldStart("data_hash")
+			s.DataHash.Encode(e)
+		}
+	}
 }
 
-var jsonFieldsNameOfNftItem = [12]string{
+var jsonFieldsNameOfNftItem = [14]string{
 	0:  "address",
 	1:  "index",
 	2:  "owner",
@@ -30009,6 +30137,8 @@ var jsonFieldsNameOfNftItem = [12]string{
 	9:  "approved_by",
 	10: "include_cnft",
 	11: "trust",
+	12: "code_hash",
+	13: "data_hash",
 }
 
 // Decode decodes NftItem from json.
@@ -30160,6 +30290,26 @@ func (s *NftItem) Decode(d *jx.Decoder) error {
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"trust\"")
+			}
+		case "code_hash":
+			if err := func() error {
+				s.CodeHash.Reset()
+				if err := s.CodeHash.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"code_hash\"")
+			}
+		case "data_hash":
+			if err := func() error {
+				s.DataHash.Reset()
+				if err := s.DataHash.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"data_hash\"")
 			}
 		default:
 			return d.Skip()
@@ -34047,6 +34197,57 @@ func (s OptNftPurchaseAction) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *OptNftPurchaseAction) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes string as json.
+func (o OptNilString) Encode(e *jx.Encoder) {
+	if !o.Set {
+		return
+	}
+	if o.Null {
+		e.Null()
+		return
+	}
+	e.Str(string(o.Value))
+}
+
+// Decode decodes string from json.
+func (o *OptNilString) Decode(d *jx.Decoder) error {
+	if o == nil {
+		return errors.New("invalid: unable to decode OptNilString to nil")
+	}
+	if d.Next() == jx.Null {
+		if err := d.Null(); err != nil {
+			return err
+		}
+
+		var v string
+		o.Value = v
+		o.Set = true
+		o.Null = true
+		return nil
+	}
+	o.Set = true
+	o.Null = false
+	v, err := d.Str()
+	if err != nil {
+		return err
+	}
+	o.Value = string(v)
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s OptNilString) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *OptNilString) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }

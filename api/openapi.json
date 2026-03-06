@@ -4031,10 +4031,37 @@
      "admin": {
       "$ref": "#/components/schemas/AccountAddress"
      },
+     "code_hash": {
+      "description": "base64-encoded hash of jetton master code cell",
+      "example": "rOIINk/O5kGub/FI/RARmMN6SY7BLesBSOonmxrz5f4=",
+      "type": "string"
+     },
+     "data_hash": {
+      "description": "base64-encoded hash of jetton master data cell",
+      "example": "xd7cWaRQdVSysuG+WVJv9KRuRUGxnehLoByEcK5ukOE=",
+      "type": "string"
+     },
      "holders_count": {
       "example": 2000,
       "format": "int32",
       "type": "integer"
+     },
+     "interfaces": {
+      "description": "Contract interfaces implemented by the account (e.g. multisig_v2, wallet_v3r2)",
+      "example": [
+       "multisig_v2",
+       "wallet_v3r2"
+      ],
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "last_transaction_lt": {
+      "description": "last transaction lt of the jetton master account",
+      "example": "26640202000003",
+      "type": "string",
+      "x-js-format": "bigint"
      },
      "metadata": {
       "$ref": "#/components/schemas/JettonMetadata"
@@ -4042,6 +4069,12 @@
      "mintable": {
       "example": true,
       "type": "boolean"
+     },
+     "name": {
+      "description": "DNS name resolving to this address (e.g. admin.ton)",
+      "example": "admin.ton",
+      "nullable": true,
+      "type": "string"
      },
      "preview": {
       "example": "https://cache.tonapi.io/images/jetton.jpg",
@@ -4264,6 +4297,9 @@
      "decimals": {
       "example": 9,
       "type": "integer"
+     },
+     "description": {
+      "type": "string"
      },
      "image": {
       "example": "https://cache.tonapi.io/images/jetton.jpg",
@@ -5055,6 +5091,10 @@
       "deprecated": true,
       "description": "Please use trust field"
      },
+     "code_hash": {
+      "description": "Hash of the NFT item account code cell (hex)",
+      "type": "string"
+     },
      "collection": {
       "properties": {
        "address": {
@@ -5077,6 +5117,10 @@
        "description"
       ],
       "type": "object"
+     },
+     "data_hash": {
+      "description": "Hash of the NFT item account data cell (hex)",
+      "type": "string"
      },
      "dns": {
       "example": "crypto.ton",
@@ -7736,6 +7780,12 @@
      },
      {
       "$ref": "#/components/parameters/supportedExtensions"
+     },
+     {
+      "$ref": "#/components/parameters/limitQuery"
+     },
+     {
+      "$ref": "#/components/parameters/offsetQuery"
      }
     ],
     "responses": {

@@ -35,6 +35,9 @@ func jettonPreview(master ton.AccountID, meta NormalizedMetadata, score int32, s
 			Denominator: scaledUiParams.Denominator.String(),
 		})
 	}
+	if meta.Description != "" {
+		preview.SetDescription(oas.NewOptString(meta.Description))
+	}
 	return preview
 }
 
@@ -227,6 +230,26 @@ func (h *Handler) convertJettonInfo(ctx context.Context, master core.JettonMaste
 			Numerator:   scaledUiParams.Numerator.String(),
 			Denominator: scaledUiParams.Denominator.String(),
 		})
+	}
+	if master.CodeHash != "" {
+		info.CodeHash = oas.NewOptString(master.CodeHash)
+	}
+	if master.DataHash != "" {
+		info.DataHash = oas.NewOptString(master.DataHash)
+	}
+	if master.LastTransactionLt != 0 {
+		info.LastTransactionLt = oas.NewOptString(fmt.Sprintf("%d", master.LastTransactionLt))
+	}
+	ab, _ := h.addressBook.GetAddressInfoByAddress(master.Address)
+	if ab.Name != "" {
+		info.SetName(oas.NewOptNilString(ab.Name))
+	}
+	rawAccount, _ := h.storage.GetRawAccount(ctx, master.Address)
+	if rawAccount != nil && len(rawAccount.Interfaces) != 0 {
+		info.Interfaces = make([]string, len(rawAccount.Interfaces))
+		for i, v := range rawAccount.Interfaces {
+			info.Interfaces[i] = v.String()
+		}
 	}
 	return info
 }
