@@ -112,18 +112,9 @@ func (s *LiteStorage) searchTransactionNearBlock(ctx context.Context, a tongo.Ac
 }
 
 func (s *LiteStorage) searchTransactionInBlock(ctx context.Context, a tongo.AccountID, lt uint64, blockID tongo.BlockID, back bool) (*core.Transaction, error) {
-	blockIDExt, _, err := s.client.LookupBlock(ctx, blockID, 1, nil, nil)
+	blockIDExt, block, err := s.getCachedBlock(ctx, blockID)
 	if err != nil {
 		return nil, err
-	}
-	block, prs := s.blockCache.Load(blockIDExt)
-	if !prs {
-		b, err := s.client.GetBlock(ctx, blockIDExt)
-		if err != nil {
-			return nil, err
-		}
-		s.blockCache.Store(blockIDExt, &b)
-		block = &b
 	}
 	for _, tx := range block.AllTransactions() {
 		if tx.AccountAddr != a.Address {
