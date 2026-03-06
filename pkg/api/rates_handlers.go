@@ -40,7 +40,8 @@ func (h *Handler) GetChartRates(ctx context.Context, params oas.GetChartRatesPar
 		if err != nil {
 			return nil, toError(http.StatusBadRequest, err)
 		}
-		if h.spamFilter.AccountTrust(account.ID) == core.TrustBlacklist {
+		meta := h.GetJettonNormalizedMetadata(ctx, account.ID)
+		if meta.Verification == core.TrustBlacklist {
 			return &oas.GetChartRatesOK{}, nil
 		}
 		token = account.ID.ToRaw()
@@ -122,7 +123,7 @@ func (h *Handler) GetRates(ctx context.Context, params oas.GetRatesParams) (*oas
 	rates := make(map[string]oas.TokenRates)
 	for _, token := range tokens {
 		for _, currency := range currencies {
-			rates, err = h.convertRates(rates, token, currency, todayRates, yesterdayRates, weekRates, monthRates)
+			rates, err = h.convertRates(ctx, rates, token, currency, todayRates, yesterdayRates, weekRates, monthRates)
 			if err != nil {
 				return nil, err
 			}
@@ -176,6 +177,7 @@ func (h *Handler) getRates() (todayRates, yesterdayRates, weekRates, monthRates 
 }
 
 func (h *Handler) convertRates(
+	ctx context.Context,
 	rates map[string]oas.TokenRates,
 	token, currency string,
 	todayRates, yesterdayRates, weekRates, monthRates map[string]float64,
@@ -184,7 +186,8 @@ func (h *Handler) convertRates(
 	if len(token) >= minTonAddressLength {
 		accountID, err := ton.ParseAccountID(token)
 		if err == nil {
-			trust = h.spamFilter.AccountTrust(accountID)
+			meta := h.GetJettonNormalizedMetadata(ctx, accountID)
+			trust = meta.Verification
 		}
 	}
 
