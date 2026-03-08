@@ -438,8 +438,25 @@ func (s UniversalStonfiStraw) Merge(b *Bubble) bool {
 		Success:    firstHop.success,
 	}
 
+	// collect all consumed bubbles across all hops for child rescue later
+	allUsedBubbles := map[*Bubble]struct{}{}
+	for _, hop := range swapHops {
+		for k := range hop.usedBubbles {
+			allUsedBubbles[k] = struct{}{}
+		}
+	}
+
 	b.Children = []*Bubble{}
 	mergeValueFlowAndTXs(b, firstHop.usedBubbles)
+
+	// successUsedBubbles tracks consumed bubbles from successful hops only;
+	// their orphaned children will be rescued into b.Children after the loop
+	successUsedBubbles := map[*Bubble]struct{}{}
+	for k := range firstHop.usedBubbles {
+		if k != b {
+			successUsedBubbles[k] = struct{}{}
+		}
+	}
 
 	hasFailed := !swapInfo.Success
 	for i := len(swapHops) - 2; i >= 0; i-- {
@@ -450,6 +467,9 @@ func (s UniversalStonfiStraw) Merge(b *Bubble) bool {
 			swapInfo.Out = nextHop.out
 			swapInfo.Success = true
 			mergeValueFlowAndTXs(b, nextHop.usedBubbles)
+			for k := range nextHop.usedBubbles {
+				successUsedBubbles[k] = struct{}{}
+			}
 		} else {
 			hasFailed = true
 			failedSwapB := &Bubble{
@@ -462,9 +482,9 @@ func (s UniversalStonfiStraw) Merge(b *Bubble) bool {
 					Success:    false,
 				},
 				ValueFlow: newValueFlow(),
-				Children:  nextHop.nextBubble.Children,
 			}
 			mergeValueFlowAndTXs(failedSwapB, nextHop.usedBubbles)
+			failedSwapB.Children = rescueOrphanedChildren(nextHop.usedBubbles, allUsedBubbles)
 			b.Children = append(b.Children, failedSwapB)
 		}
 	}
@@ -473,8 +493,21 @@ func (s UniversalStonfiStraw) Merge(b *Bubble) bool {
 		// swap failed at a later hop, so the output jetton ends up back at the user.
 		swapInfo.Out.JettonWallet = firstHop.sender
 	}
+	b.Children = append(b.Children, rescueOrphanedChildren(successUsedBubbles, allUsedBubbles)...)
 	b.Info = swapInfo
 	return true
+}
+
+func rescueOrphanedChildren(usedBubbles, allUsedBubbles map[*Bubble]struct{}) []*Bubble {
+	var result []*Bubble
+	for k := range usedBubbles {
+		for _, child := range k.Children {
+			if _, found := allUsedBubbles[child]; !found {
+				result = append(result, child)
+			}
+		}
+	}
+	return result
 }
 
 func mergeValueFlowAndTXs(b *Bubble, usedBubbles map[*Bubble]struct{}) {
