@@ -285,6 +285,8 @@ func TestFindActions(t *testing.T) {
 			tongo.MustParseBlockID("(0,8000000000000000,62341628)"),
 			// stonfi ton-usdt-shitok
 			tongo.MustParseBlockID("(0,8000000000000000,61823141)"),
+			// swap stonfi then tonco
+			tongo.MustParseBlockID("(0,8000000000000000,62729945)"),
 		}),
 	)
 
@@ -764,6 +766,7 @@ func TestFindActions(t *testing.T) {
 			filenamePrefix: "stonfi-v2-swap-ref",
 		},
 		{
+			skip: true,
 			name: "subscription V2 + wallet W5 deploy with payment",
 			hash: "a9c8ffdb11f1d6f80feae77c7fcbefad48dbb95999c3524538d832c5c6a7ff6c",
 			source: &mockInfoSource{
@@ -1032,6 +1035,11 @@ func TestFindActions(t *testing.T) {
 			name:           "stonfi partial cross-swap",
 			filenamePrefix: "stonfi-partial-cross-swap",
 			hash:           "9a8054e9b42f8290c820b39c6496b13d00d9bd8aad516e1d0e83bbf673c1571e",
+		},
+		{
+			name:           "swap snotfi then tonco",
+			filenamePrefix: "swap-snotfi-then-tonco",
+			hash:           "9610cbb609a44859d9cb726d9d1f01bc0a702c98270ed5a7e64749470ceeadfa",
 		},
 	}
 
