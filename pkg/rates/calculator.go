@@ -5,6 +5,8 @@ import (
 	"log"
 	"sync"
 	"time"
+
+	"golang.org/x/exp/slog"
 )
 
 type ratesSource interface {
@@ -61,22 +63,27 @@ func (c *calculator) refresh() {
 
 	marketsTonPrice, err := c.source.GetMarketsTonPrice()
 	if err != nil {
+		slog.Error("Error getting markets ton price: ", err)
 		return
 	}
 	todayRates, err := c.source.GetRates(today.Unix())
 	if err != nil {
+		slog.Error("Error getting today rates: ", err)
 		return
 	}
 	yesterdayRates, err := c.source.GetRates(yesterday)
 	if err != nil {
+		slog.Error("Error getting yesterday rates: ", err)
 		return
 	}
 	weekRates, err := c.source.GetRates(weekAgo)
 	if err != nil {
+		slog.Error("Error getting week rates: ", err)
 		return
 	}
 	monthRates, err := c.source.GetRates(monthAgo)
 	if err != nil {
+		slog.Error("Error getting month rates: ", err)
 		return
 	}
 
