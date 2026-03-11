@@ -13,6 +13,7 @@ import (
 	"github.com/tonkeeper/opentonapi/pkg/oas"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/ton"
+	"go.uber.org/zap"
 )
 
 const minTonAddressLength = 48
@@ -224,8 +225,12 @@ func (h *Handler) convertRates(
 	} {
 		diff := 0.0
 		cp, _ := calculateConvertedPrice(entry.hist, currency, token)
+		if token == "0:4a45235191e3f5fb68dc8394ff7ffff4b391e3fafadb7cd2cc432f1d9d9b3bc5" {
+			h.logger.Info("[convertRates] currPrice", zap.Float64("price", convertedTodayPrice))
+			h.logger.Info("[convertRates] prevPrice", zap.Float64("price", cp))
+		}
 		if cp != 0 && convertedTodayPrice != 0 {
-			diff = -1 * (100 - math.Round(cp*10000/convertedTodayPrice)/100)
+			diff = 100 - math.Round(cp*10000/convertedTodayPrice)/100
 		}
 		switch {
 		case diff < 0:
