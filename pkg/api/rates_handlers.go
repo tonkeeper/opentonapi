@@ -225,7 +225,7 @@ func (h *Handler) convertRates(
 		diff := 0.0
 		cp, _ := calculateConvertedPrice(entry.hist, currency, token)
 		if cp != 0 && convertedTodayPrice != 0 {
-			diff = math.Round(((convertedTodayPrice-cp)/convertedTodayPrice)*10000) / 100
+			diff = -1 * (100 - math.Round(cp*10000/convertedTodayPrice)/100)
 		}
 		switch {
 		case diff < 0:
