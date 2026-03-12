@@ -2,6 +2,7 @@ package litestorage
 
 import (
 	"context"
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"math/big"
@@ -121,6 +122,22 @@ func (s *LiteStorage) GetJettonMasterData(ctx context.Context, master tongo.Acco
 		Mintable:    r.Mintable,
 	}
 	jettonMaster.Admin, _ = tongo.AccountIDFromTlb(r.AdminAddress)
+	if state, err := s.client.GetAccountState(ctx, master); err == nil {
+		jettonMaster.LastTransactionLt = state.LastTransLt
+		if state.Account.SumType == "Account" && state.Account.Account.Storage.State.SumType == "AccountActive" {
+			stateInit := state.Account.Account.Storage.State.AccountActive.StateInit
+			if stateInit.Code.Exists {
+				if h, err := stateInit.Code.Value.Value.Hash(); err == nil {
+					jettonMaster.CodeHash = base64.StdEncoding.EncodeToString(h)
+				}
+			}
+			if stateInit.Data.Exists {
+				if h, err := stateInit.Data.Value.Value.Hash(); err == nil {
+					jettonMaster.DataHash = base64.StdEncoding.EncodeToString(h)
+				}
+			}
+		}
+	}
 	return jettonMaster, nil
 }
 
