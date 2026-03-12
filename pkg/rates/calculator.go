@@ -71,21 +71,25 @@ func (c *calculator) refresh() {
 		slog.Error("Error getting today rates: ", err)
 		return
 	}
+	slog.Info("today rates len: ", len(todayRates))
 	yesterdayRates, err := c.source.GetRates(yesterday)
 	if err != nil {
 		slog.Error("Error getting yesterday rates: ", err)
 		return
 	}
+	slog.Info("yesterdat rates len: ", len(yesterdayRates))
 	weekRates, err := c.source.GetRates(weekAgo)
 	if err != nil {
 		slog.Error("Error getting week rates: ", err)
 		return
 	}
+	slog.Info("Week rates len: ", len(weekRates))
 	monthRates, err := c.source.GetRates(monthAgo)
 	if err != nil {
 		slog.Error("Error getting month rates: ", err)
 		return
 	}
+	slog.Info("Month rates len: ", len(monthRates))
 
 	c.mu.Lock()
 	c.todayRates = todayRates
