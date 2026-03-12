@@ -61,6 +61,7 @@ func (c *calculator) refresh() {
 	weekAgo := today.AddDate(0, 0, -7).Unix()
 	monthAgo := today.AddDate(0, 0, -30).Unix()
 
+	start := time.Now()
 	marketsTonPrice, err := c.source.GetMarketsTonPrice()
 	if err != nil {
 		slog.Error("Error getting markets ton price: ", err)
@@ -90,6 +91,7 @@ func (c *calculator) refresh() {
 		return
 	}
 	slog.Info("Month rates len: ", len(monthRates))
+	slog.Info("[refresh] time spent: ", time.Since(start).Seconds())
 
 	c.mu.Lock()
 	c.todayRates = todayRates
