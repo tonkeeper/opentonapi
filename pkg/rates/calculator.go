@@ -62,35 +62,61 @@ func (c *calculator) refresh() {
 	monthAgo := today.AddDate(0, 0, -30).Unix()
 
 	start := time.Now()
-	marketsTonPrice, err := c.source.GetMarketsTonPrice()
-	if err != nil {
-		slog.Error("Error getting markets ton price: ", err)
-		return
-	}
-	todayRates, err := c.source.GetRates(today.Unix())
-	if err != nil {
-		slog.Error("Error getting today rates: ", err)
-		return
-	}
-	slog.Info("today rates len: ", len(todayRates))
-	yesterdayRates, err := c.source.GetRates(yesterday)
-	if err != nil {
-		slog.Error("Error getting yesterday rates: ", err)
-		return
-	}
-	slog.Info("yesterdat rates len: ", len(yesterdayRates))
-	weekRates, err := c.source.GetRates(weekAgo)
-	if err != nil {
-		slog.Error("Error getting week rates: ", err)
-		return
-	}
-	slog.Info("Week rates len: ", len(weekRates))
-	monthRates, err := c.source.GetRates(monthAgo)
-	if err != nil {
-		slog.Error("Error getting month rates: ", err)
-		return
-	}
-	slog.Info("Month rates len: ", len(monthRates))
+	wg := sync.WaitGroup{}
+	wg.Add(5)
+	var marketsTonPrice []Market
+	var todayRates, yesterdayRates, weekRates, monthRates map[string]float64
+	go func() {
+		defer wg.Done()
+		res, err := c.source.GetMarketsTonPrice()
+		if err != nil {
+			slog.Error("Error getting markets ton price: ", err)
+			return
+		}
+		marketsTonPrice = res
+	}()
+
+	go func() {
+		defer wg.Done()
+		res, err := c.source.GetRates(today.Unix())
+		if err != nil {
+			slog.Error("Error getting today rates: ", err)
+			return
+		}
+		todayRates = res
+	}()
+
+	go func() {
+		defer wg.Done()
+		res, err := c.source.GetRates(yesterday)
+		if err != nil {
+			slog.Error("Error getting yesterday rates: ", err)
+			return
+		}
+		yesterdayRates = res
+	}()
+
+	go func() {
+		defer wg.Done()
+		res, err := c.source.GetRates(weekAgo)
+		if err != nil {
+			slog.Error("Error getting week rates: ", err)
+			return
+		}
+		weekRates = res
+	}()
+
+	go func() {
+		defer wg.Done()
+		res, err := c.source.GetRates(monthAgo)
+		if err != nil {
+			slog.Error("Error getting month rates: ", err)
+			return
+		}
+		monthRates = res
+	}()
+
+	wg.Wait()
 	slog.Info("[refresh] time spent: ", time.Since(start).Seconds())
 
 	c.mu.Lock()
