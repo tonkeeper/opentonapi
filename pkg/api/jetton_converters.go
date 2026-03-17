@@ -76,7 +76,8 @@ func (h *Handler) convertJettonHistory(ctx context.Context, account ton.AccountI
 		}
 		result, err := bath.FindActions(ctx, trace,
 			bath.WithStraws(bath.JettonTransfersBurnsMints),
-			bath.WithInformationSource(h.storage))
+			bath.WithInformationSource(h.storage),
+			bath.WithAddressBook(h.addressBook))
 		if err != nil {
 			return nil, 0, err
 		}

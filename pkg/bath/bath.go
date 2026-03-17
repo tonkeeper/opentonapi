@@ -17,6 +17,7 @@ type Options struct {
 	straws            []Merger
 	account           *tongo.AccountID
 	informationSource core.InformationSource
+	addressBook       AddressBook
 }
 
 type Option func(*Options)
@@ -40,14 +41,21 @@ func WithInformationSource(source core.InformationSource) Option {
 	}
 }
 
+func WithAddressBook(book AddressBook) Option {
+	return func(options *Options) {
+		options.addressBook = book
+	}
+}
+
 // FindActions finds known action patterns in the given trace and
 // returns a list of actions.
 func FindActions(ctx context.Context, trace *core.Trace, opts ...Option) (*ActionsList, error) {
-	options := Options{
-		straws: DefaultStraws,
-	}
+	options := Options{}
 	for _, o := range opts {
 		o(&options)
+	}
+	if options.straws == nil {
+		options.straws = DefaultStraws(options.addressBook)
 	}
 	if err := core.CollectAdditionalInfo(ctx, options.informationSource, trace); err != nil {
 		return nil, err

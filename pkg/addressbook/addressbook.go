@@ -38,6 +38,10 @@ type KnownAddress struct {
 	Image       string `json:"image,omitempty"`
 }
 
+func isTonAPIGasProxyName(name string) bool {
+	return strings.EqualFold(name, "TONAPI gas proxy") || strings.EqualFold(name, "TONAPI gas proxy (old)")
+}
+
 // AttachedAccountType defines different types of accounts (e.g., manual, NFT)
 type AttachedAccountType string
 
@@ -82,6 +86,7 @@ type addresser interface {
 	GetAddress(a tongo.AccountID) (KnownAddress, bool)
 	SearchAttachedAccounts(prefix string) []AttachedAccount
 	GetAttachedAccounts() []AttachedAccount
+	GasRelayers() map[ton.AccountID]bool
 }
 
 type accountsStatesSource interface {
@@ -179,6 +184,20 @@ func (b *Book) SearchAttachedAccountsByPrefix(prefix string) []AttachedAccount {
 	return result
 }
 
+// GetGasRelayers returns addresses known as TONAPI gas proxies (incl. old ones - before rotation)
+func (b *Book) GetGasRelayers() map[ton.AccountID]bool {
+	if len(b.addressers) == 1 {
+		return b.addressers[0].GasRelayers()
+	}
+	result := make(map[ton.AccountID]bool)
+	for _, src := range b.addressers {
+		for addr := range src.GasRelayers() {
+			result[addr] = true
+		}
+	}
+	return result
+}
+
 // GetTFPoolInfo retrieves token pool info for an account
 func (b *Book) GetTFPoolInfo(a tongo.AccountID) (TFPoolInfo, bool) {
 	b.mu.RLock()
@@ -263,6 +282,7 @@ type manualAddresser struct {
 	mu        sync.RWMutex
 	addresses map[tongo.AccountID]KnownAddress
 	sorted    []AttachedAccount
+	relayers  map[ton.AccountID]bool
 }
 
 // GetAttachedAccounts returns the list of attached accounts sorted by their names
@@ -301,6 +321,11 @@ func (m *manualAddresser) SearchAttachedAccounts(prefix string) []AttachedAccoun
 	return foundAccounts
 }
 
+func (m *manualAddresser) GasRelayers() map[ton.AccountID]bool {
+	// lock is not needed because m.relayers is not modified concurrently, but is just being replaced on refresh
+	return m.relayers
+}
+
 // refreshAddresses updates the list of known addresses
 func (m *manualAddresser) refreshAddresses(addressPath, jettonPath string, addresses []addresser) error {
 	accountAddresses, err := downloadJson[KnownAddress](addressPath)
@@ -320,6 +345,7 @@ func (m *manualAddresser) refreshAddresses(addressPath, jettonPath string, addre
 	}
 	knownAccounts := make(map[tongo.AccountID]KnownAddress)
 	var attachedAccounts []AttachedAccount
+	relayers := make(map[ton.AccountID]bool)
 	// Helper to process an account and convert it into attached accounts
 	process := func(accountID tongo.AccountID, name, image string, accountType AttachedAccountType) {
 		if image == "" {
@@ -344,6 +370,9 @@ func (m *manualAddresser) refreshAddresses(addressPath, jettonPath string, addre
 		}
 		item.Address = accountID.ToRaw()
 		knownAccounts[accountID] = item
+		if isTonAPIGasProxyName(item.Name) {
+			relayers[accountID] = true
+		}
 		process(accountID, item.Name, item.Image, ManualAccountType)
 	}
 	// Process all known jettons
@@ -362,6 +391,7 @@ func (m *manualAddresser) refreshAddresses(addressPath, jettonPath string, addre
 	m.mu.Lock()
 	m.addresses = knownAccounts
 	m.sorted = attachedAccounts
+	m.relayers = relayers
 	m.mu.Unlock()
 
 	return nil

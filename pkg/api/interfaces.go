@@ -181,6 +181,7 @@ type addressBook interface {
 	GetTFPoolInfo(a tongo.AccountID) (addressbook.TFPoolInfo, bool)
 	GetKnownJettons() map[tongo.AccountID]addressbook.KnownJetton
 	GetKnownCollections() map[tongo.AccountID]addressbook.KnownCollection
+	GetGasRelayers() map[tongo.AccountID]bool
 	SearchAttachedAccountsByPrefix(prefix string) []addressbook.AttachedAccount
 }
 

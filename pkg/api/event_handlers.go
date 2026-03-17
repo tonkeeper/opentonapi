@@ -225,7 +225,7 @@ func (h *Handler) GetEvent(ctx context.Context, params oas.GetEventParams) (*oas
 		}
 	}
 
-	actions, err := bath.FindActions(ctx, trace, bath.WithInformationSource(h.storage))
+	actions, err := bath.FindActions(ctx, trace, bath.WithInformationSource(h.storage), bath.WithAddressBook(h.addressBook))
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
@@ -338,7 +338,7 @@ func (h *Handler) GetAccountEvents(ctx context.Context, params oas.GetAccountEve
 				continue
 			}
 			i++
-			actions, err := bath.FindActions(ctx, trace, bath.ForAccount(account.ID), bath.WithInformationSource(h.storage))
+			actions, err := bath.FindActions(ctx, trace, bath.ForAccount(account.ID), bath.WithInformationSource(h.storage), bath.WithAddressBook(h.addressBook))
 			if err != nil {
 				return nil, toError(http.StatusInternalServerError, err)
 			}
@@ -391,7 +391,7 @@ func (h *Handler) processTrace(ctx context.Context, account tongo.AccountID, tid
 	if err != nil {
 		return h.toUnknownAccountEvent(account, tid)
 	}
-	actions, err := bath.FindActions(ctx, trace, bath.ForAccount(account), bath.WithInformationSource(h.storage))
+	actions, err := bath.FindActions(ctx, trace, bath.ForAccount(account), bath.WithInformationSource(h.storage), bath.WithAddressBook(h.addressBook))
 	if err != nil {
 		return h.toUnknownAccountEvent(account, tid)
 	}
@@ -435,7 +435,7 @@ func (h *Handler) GetAccountEvent(ctx context.Context, params oas.GetAccountEven
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
-	actions, err := bath.FindActions(ctx, trace, bath.ForAccount(account.ID), bath.WithInformationSource(h.storage))
+	actions, err := bath.FindActions(ctx, trace, bath.ForAccount(account.ID), bath.WithInformationSource(h.storage), bath.WithAddressBook(h.addressBook))
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
@@ -517,7 +517,7 @@ func (h *Handler) EmulateMessageToAccountEvent(ctx context.Context, request *oas
 	} else {
 		savedEmulatedTraces.WithLabelValues("restored").Inc()
 	}
-	actions, err := bath.FindActions(ctx, trace, bath.WithInformationSource(h.storage))
+	actions, err := bath.FindActions(ctx, trace, bath.WithInformationSource(h.storage), bath.WithAddressBook(h.addressBook))
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
@@ -576,7 +576,7 @@ func (h *Handler) EmulateMessageToEvent(ctx context.Context, request *oas.Emulat
 		savedEmulatedTraces.WithLabelValues("restored").Inc()
 	}
 
-	actions, err := bath.FindActions(ctx, trace, bath.WithInformationSource(h.storage))
+	actions, err := bath.FindActions(ctx, trace, bath.WithInformationSource(h.storage), bath.WithAddressBook(h.addressBook))
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
@@ -781,7 +781,7 @@ func (h *Handler) EmulateMessageToWallet(ctx context.Context, request *oas.Emula
 		savedEmulatedTraces.WithLabelValues("restored").Inc()
 	}
 	t := convertTrace(trace, h.addressBook)
-	actions, err := bath.FindActions(ctx, trace, bath.ForAccount(*walletAddress), bath.WithInformationSource(h.storage))
+	actions, err := bath.FindActions(ctx, trace, bath.ForAccount(*walletAddress), bath.WithInformationSource(h.storage), bath.WithAddressBook(h.addressBook))
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, fmt.Errorf("account: %s FindActions err: %w", walletAddress.ToRaw(), err))
 	}

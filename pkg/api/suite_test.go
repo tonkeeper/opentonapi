@@ -37,6 +37,10 @@ func (m mockAddressBook) GetKnownCollections() map[tongo.AccountID]addressbook.K
 	return map[tongo.AccountID]addressbook.KnownCollection{}
 }
 
+func (m mockAddressBook) GetGasRelayers() map[tongo.AccountID]bool {
+	return nil
+}
+
 func (m mockAddressBook) SearchAttachedAccountsByPrefix(prefix string) []addressbook.AttachedAccount {
 	return []addressbook.AttachedAccount{}
 }

@@ -148,7 +148,7 @@ func (h *Handler) convertNftHistory(ctx context.Context, account tongo.AccountID
 			}
 			return nil, 0, err
 		}
-		actions, err := bath.FindActions(ctx, trace, bath.WithInformationSource(h.storage), bath.WithStraws(bath.NFTStraws))
+		actions, err := bath.FindActions(ctx, trace, bath.WithInformationSource(h.storage), bath.WithStraws(bath.NFTStraws), bath.WithAddressBook(h.addressBook))
 		if err != nil {
 			return nil, 0, err
 		}
