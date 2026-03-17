@@ -1054,7 +1054,7 @@ func TestFindActions(t *testing.T) {
 			if c.source == nil {
 				source = storage
 			}
-			straws := DefaultStraws
+			straws := DefaultStraws(nil)
 			if len(c.straws) > 0 {
 				straws = c.straws
 			}

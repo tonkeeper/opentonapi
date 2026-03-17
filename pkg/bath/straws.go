@@ -32,84 +32,86 @@ var NFTStraws = []Merger{
 	NftTransferNotifyStraw,
 }
 
-var DefaultStraws = []Merger{
-	//0
-	StrawFindAuctionBidFragmentSimple,
-	GasRelayerStraw,
-	NftTransferStraw,
-	NftTransferNotifyStraw,
-	StonfiV1PTONStraw,
-	//5
-	StonfiV2PTONStrawReverse,
-	StonfiV2PTONStraw,
-	FlawedJettonTransferClassicStraw,
-	FlawedJettonTransferMinimalStraw,
-	JettonTransferClassicStraw,
-	// 10
-	JettonTransferMinimalStraw,
-	JettonBurnStraw,
-	WtonMintStraw,
-	NftPurchaseStraw,
-	StonfiSwapStraw,
-	// 15
-	UniversalStonfiStraw{},
-	UniversalDedustStraw{},
-	TgAuctionV1InitialBidStraw,
-	StrawAuctionBigGetgems,
-	StrawAuctionBuyGetgems,
-	// 20
-	StrawAuctionBuyFragments,
-	JettonMintFromMasterStraw,
-	JettonMintStrawGovernance,
-	InvoicePaymentStrawNative,
-	InvoicePaymentStrawJetton,
-	// 25
-	MegatonFiJettonSwap,
-	UnSubscriptionBySubscriberStraw,
-	UnSubscriptionByBeneficiaryOrExpiredStraw,
-	SubscriptionDeployStraw,
-	SubscriptionPaymentStraw,
-	// 30
-	SubscriptionPaymentWithRequestFundsStraw,
-	DepositLiquidStakeStraw,
-	PendingWithdrawRequestLiquidStraw,
-	ElectionsDepositStakeStraw,
-	ElectionsRecoverStakeStraw,
-	// 35
-	DepositTFStakeStraw,
-	WithdrawTFStakeRequestStraw,
-	WithdrawStakeImmediatelyStraw,
-	WithdrawLiquidStake,
-	DNSRenewStraw,
-	// 40
-	BidaskLiquidityDepositBothNativeStraw,
-	BidaskLiquidityDepositBothJettonStraw,
-	BidaskLiquidityDepositJettonStraw,
-	StonfiLiquidityDepositSingle,
-	StonfiLiquidityDepositBoth,
-	// 45
-	DepositEthenaStakeStraw,
-	WithdrawEthenaStakeRequestStraw,
-	BidaskSwapStraw,
-	BidaskSwapStrawReverse,
-	BidaskJettonSwapStraw,
-	// 50
-	MooncxSwapStraw,
-	MooncxSwapStrawReverse,
-	MoocxLiquidityDepositJettonStraw,
-	MoocxLiquidityDepositNativeStraw,
-	MoocxLiquidityDepositBothStraw,
-	// 55
-	ToncoSwapStraw,
-	ToncoDepositLiquiditySingleStraw,
-	ToncoDepositLiquidityBothStraw,
-	ToncoDepositLiquidityWithRefundStraw,
-	DepositAffluentEarnStraw,
-	// 60
-	DepositAffluentEarnWithOraclesStraw,
-	WithdrawAffluentEarnRequestStraw,
-	InstantWithdrawAffluentEarnStraw,
-	InstantWithdrawAffluentEarnWithOraclesStraw,
+func DefaultStraws(book AddressBook) []Merger {
+	return []Merger{
+		//0
+		StrawFindAuctionBidFragmentSimple,
+		GasRelayerStraw(book),
+		NftTransferStraw,
+		NftTransferNotifyStraw,
+		StonfiV1PTONStraw,
+		//5
+		StonfiV2PTONStrawReverse,
+		StonfiV2PTONStraw,
+		FlawedJettonTransferClassicStraw,
+		FlawedJettonTransferMinimalStraw,
+		JettonTransferClassicStraw,
+		// 10
+		JettonTransferMinimalStraw,
+		JettonBurnStraw,
+		WtonMintStraw,
+		NftPurchaseStraw,
+		StonfiSwapStraw,
+		// 15
+		UniversalStonfiStraw{},
+		UniversalDedustStraw{},
+		TgAuctionV1InitialBidStraw,
+		StrawAuctionBigGetgems,
+		StrawAuctionBuyGetgems,
+		// 20
+		StrawAuctionBuyFragments,
+		JettonMintFromMasterStraw,
+		JettonMintStrawGovernance,
+		InvoicePaymentStrawNative,
+		InvoicePaymentStrawJetton,
+		// 25
+		MegatonFiJettonSwap,
+		UnSubscriptionBySubscriberStraw,
+		UnSubscriptionByBeneficiaryOrExpiredStraw,
+		SubscriptionDeployStraw,
+		SubscriptionPaymentStraw,
+		// 30
+		SubscriptionPaymentWithRequestFundsStraw,
+		DepositLiquidStakeStraw,
+		PendingWithdrawRequestLiquidStraw,
+		ElectionsDepositStakeStraw,
+		ElectionsRecoverStakeStraw,
+		// 35
+		DepositTFStakeStraw,
+		WithdrawTFStakeRequestStraw,
+		WithdrawStakeImmediatelyStraw,
+		WithdrawLiquidStake,
+		DNSRenewStraw,
+		// 40
+		BidaskLiquidityDepositBothNativeStraw,
+		BidaskLiquidityDepositBothJettonStraw,
+		BidaskLiquidityDepositJettonStraw,
+		StonfiLiquidityDepositSingle,
+		StonfiLiquidityDepositBoth,
+		// 45
+		DepositEthenaStakeStraw,
+		WithdrawEthenaStakeRequestStraw,
+		BidaskSwapStraw,
+		BidaskSwapStrawReverse,
+		BidaskJettonSwapStraw,
+		// 50
+		MooncxSwapStraw,
+		MooncxSwapStrawReverse,
+		MoocxLiquidityDepositJettonStraw,
+		MoocxLiquidityDepositNativeStraw,
+		MoocxLiquidityDepositBothStraw,
+		// 55
+		ToncoSwapStraw,
+		ToncoDepositLiquiditySingleStraw,
+		ToncoDepositLiquidityBothStraw,
+		ToncoDepositLiquidityWithRefundStraw,
+		DepositAffluentEarnStraw,
+		// 60
+		DepositAffluentEarnWithOraclesStraw,
+		WithdrawAffluentEarnRequestStraw,
+		InstantWithdrawAffluentEarnStraw,
+		InstantWithdrawAffluentEarnWithOraclesStraw,
+	}
 }
 
 var JettonTransferClassicStraw = Straw[BubbleJettonTransfer]{

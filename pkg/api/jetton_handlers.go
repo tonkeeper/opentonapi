@@ -262,7 +262,7 @@ func (h *Handler) GetJettonsEvents(ctx context.Context, params oas.GetJettonsEve
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
-	result, err := bath.FindActions(ctx, trace, bath.WithInformationSource(h.storage), bath.WithStraws(bath.JettonTransfersBurnsMints))
+	result, err := bath.FindActions(ctx, trace, bath.WithInformationSource(h.storage), bath.WithStraws(bath.JettonTransfersBurnsMints), bath.WithAddressBook(h.addressBook))
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
