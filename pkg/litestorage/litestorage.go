@@ -399,7 +399,7 @@ func (s *LiteStorage) LastMasterchainBlockHeader(ctx context.Context) (*core.Blo
 	return s.GetBlockHeader(ctx, info.Last.ToBlockIdExt().BlockID)
 }
 
-func (s *LiteStorage) GetTransaction(ctx context.Context, hash tongo.Bits256) (*core.Transaction, error) {
+func (s *LiteStorage) GetTransaction(ctx context.Context, hash tongo.Bits256, isEvent bool) (*core.Transaction, error) {
 	timer := prometheus.NewTimer(prometheus.ObserverFunc(func(v float64) {
 		storageTimeHistogramVec.WithLabelValues("get_transaction").Observe(v)
 	}))
@@ -428,7 +428,7 @@ func (s *LiteStorage) SearchTransactionByMessageHash(ctx context.Context, hash t
 	return nil, core.ErrEntityNotFound
 }
 
-func (s *LiteStorage) GetBlockTransactions(ctx context.Context, id tongo.BlockID) ([]*core.Transaction, error) {
+func (s *LiteStorage) GetBlockTransactions(ctx context.Context, id tongo.BlockID, isEvent bool) ([]*core.Transaction, error) {
 	timer := prometheus.NewTimer(prometheus.ObserverFunc(func(v float64) {
 		storageTimeHistogramVec.WithLabelValues("get_block_transactions").Observe(v)
 	}))
@@ -481,7 +481,7 @@ func (s *LiteStorage) RunSmcMethodByID(ctx context.Context, id tongo.AccountID, 
 	return s.client.RunSmcMethodByID(ctx, id, method, stack)
 }
 
-func (s *LiteStorage) GetAccountTransactions(ctx context.Context, id tongo.AccountID, limit int, beforeLt, afterLt uint64, descendingOrder bool) ([]*core.Transaction, error) {
+func (s *LiteStorage) GetAccountTransactions(ctx context.Context, id tongo.AccountID, isEvent bool, limit int, beforeLt, afterLt uint64, descendingOrder bool) ([]*core.Transaction, error) {
 	timer := prometheus.NewTimer(prometheus.ObserverFunc(func(v float64) {
 		storageTimeHistogramVec.WithLabelValues("get_account_transactions").Observe(v)
 	}))

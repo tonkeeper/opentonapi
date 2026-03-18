@@ -8,7 +8,7 @@ import (
 	"github.com/tonkeeper/tongo/tlb"
 )
 
-func (s *LiteStorage) GetLogs(ctx context.Context, account tongo.AccountID, destination *tlb.MsgAddress, limit int, beforeLT uint64) ([]core.Message, error) {
+func (s *LiteStorage) GetLogs(ctx context.Context, account tongo.AccountID, destination *tlb.MsgAddress, isEvent bool, limit int, beforeLT uint64) ([]core.Message, error) {
 	var messages []core.Message
 	if beforeLT == 0 {
 		beforeLT = 1 << 63
