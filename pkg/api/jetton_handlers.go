@@ -252,7 +252,7 @@ func (h *Handler) GetJettonsEvents(ctx context.Context, params oas.GetJettonsEve
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
 	}
-	trace, err := h.storage.GetTrace(ctx, traceID)
+	trace, err := h.storage.GetTrace(ctx, traceID, true)
 	if errors.Is(err, core.ErrEntityNotFound) {
 		return nil, toError(http.StatusNotFound, err)
 	}

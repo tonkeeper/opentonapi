@@ -151,7 +151,7 @@ func (h *Handler) GetBlockchainMasterchainTransactions(ctx context.Context, para
 
 	var result oas.Transactions
 	for _, id := range blockIDs {
-		txs, err := h.storage.GetBlockTransactions(ctx, id)
+		txs, err := h.storage.GetBlockTransactions(ctx, id, false)
 		if errors.Is(err, core.ErrEntityNotFound) {
 			return nil, toError(http.StatusNotFound, err)
 		}
@@ -173,7 +173,7 @@ func (h *Handler) GetBlockchainBlockTransactions(ctx context.Context, params oas
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
 	}
-	transactions, err := h.storage.GetBlockTransactions(ctx, blockID)
+	transactions, err := h.storage.GetBlockTransactions(ctx, blockID, false)
 	if errors.Is(err, core.ErrEntityNotFound) {
 		return nil, toError(http.StatusNotFound, err)
 	}
@@ -197,7 +197,7 @@ func (h *Handler) GetBlockchainTransaction(ctx context.Context, params oas.GetBl
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
 	}
-	txs, err := h.storage.GetTransaction(ctx, hash)
+	txs, err := h.storage.GetTransaction(ctx, hash, false)
 	if errors.Is(err, core.ErrEntityNotFound) {
 		var txHash *tongo.Bits256
 		txHash, err = h.storage.SearchTransactionByMessageHash(ctx, hash)
@@ -207,7 +207,7 @@ func (h *Handler) GetBlockchainTransaction(ctx context.Context, params oas.GetBl
 		if err != nil {
 			return nil, toError(http.StatusInternalServerError, err)
 		}
-		txs, err = h.storage.GetTransaction(ctx, *txHash)
+		txs, err = h.storage.GetTransaction(ctx, *txHash, false)
 		if errors.Is(err, core.ErrEntityNotFound) {
 			return nil, toError(http.StatusNotFound, err)
 		}
@@ -232,7 +232,7 @@ func (h *Handler) GetBlockchainTransactionByMessageHash(ctx context.Context, par
 	} else if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
-	txs, err := h.storage.GetTransaction(ctx, *txHash)
+	txs, err := h.storage.GetTransaction(ctx, *txHash, false)
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
