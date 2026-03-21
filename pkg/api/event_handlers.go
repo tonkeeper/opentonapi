@@ -131,7 +131,7 @@ func (h *Handler) SendBlockchainMessage(ctx context.Context, request *oas.SendBl
 }
 
 func (h *Handler) getTraceByHash(ctx context.Context, hash tongo.Bits256) (*core.Trace, bool, error) {
-	trace, err := h.storage.GetTrace(ctx, hash, true)
+	trace, err := h.storage.GetTrace(ctx, hash)
 	if err == nil || !errors.Is(err, core.ErrEntityNotFound) {
 		return trace, false, err
 	}
@@ -140,7 +140,7 @@ func (h *Handler) getTraceByHash(ctx context.Context, hash tongo.Bits256) (*core
 		return nil, false, err
 	}
 	if err == nil {
-		trace, err = h.storage.GetTrace(ctx, *txHash, true)
+		trace, err = h.storage.GetTrace(ctx, *txHash)
 		return trace, false, err
 	}
 	trace, _, _, err = h.storage.GetTraceWithState(ctx, hash.Hex())
@@ -384,7 +384,7 @@ func (h *Handler) GetAccountEvents(ctx context.Context, params oas.GetAccountEve
 }
 
 func (h *Handler) processTrace(ctx context.Context, account tongo.AccountID, tid core.TraceID, lang oas.OptString, subjectOnly bool) oas.AccountEvent {
-	trace, err := h.storage.GetTrace(ctx, tid.Hash, true)
+	trace, err := h.storage.GetTrace(ctx, tid.Hash)
 	if errors.Is(err, core.ErrTraceIsTooLong) {
 		return h.toAccountEventForLongTrace(account, tid)
 	}

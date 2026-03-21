@@ -23,12 +23,12 @@ var (
 	}, []string{"code_hash"})
 )
 
-func (s *LiteStorage) GetTrace(ctx context.Context, hash tongo.Bits256, isEvent bool) (*core.Trace, error) {
+func (s *LiteStorage) GetTrace(ctx context.Context, hash tongo.Bits256) (*core.Trace, error) {
 	timer := prometheus.NewTimer(prometheus.ObserverFunc(func(v float64) {
 		storageTimeHistogramVec.WithLabelValues("get_trace").Observe(v)
 	}))
 	defer timer.ObserveDuration()
-	tx, err := s.GetTransaction(ctx, hash, isEvent)
+	tx, err := s.GetTransaction(ctx, hash)
 	if err != nil {
 		return nil, err
 	}

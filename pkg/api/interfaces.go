@@ -44,16 +44,16 @@ type storage interface {
 	LastMasterchainBlockHeader(ctx context.Context) (*core.BlockHeader, error)
 	GetBlockchainBlock(ctx context.Context, blockID ton.BlockID) ([]byte, error)
 	GetBlockIDsForMasterchain(ctx context.Context, masterSeqno uint32) ([]ton.BlockID, error)
-	GetTransaction(ctx context.Context, hash tongo.Bits256, isEvent bool) (*core.Transaction, error)
+	GetTransaction(ctx context.Context, hash tongo.Bits256) (*core.Transaction, error)
 	SearchTransactionByMessageHash(ctx context.Context, hash tongo.Bits256) (*tongo.Bits256, error)
 	// GetBlockTransactions returns low-level information about transactions in a particular block.
-	GetBlockTransactions(ctx context.Context, id tongo.BlockID, isEvent bool) ([]*core.Transaction, error)
-	GetAccountTransactions(ctx context.Context, id tongo.AccountID, isEvent bool, limit int, beforeLt, afterLt uint64, descendingOrder bool) ([]*core.Transaction, error)
+	GetBlockTransactions(ctx context.Context, id tongo.BlockID) ([]*core.Transaction, error)
+	GetAccountTransactions(ctx context.Context, id tongo.AccountID, limit int, beforeLt, afterLt uint64, descendingOrder bool) ([]*core.Transaction, error)
 	GetDnsExpiring(ctx context.Context, id tongo.AccountID, period *int) ([]core.DnsExpiring, error)
-	GetLogs(ctx context.Context, account tongo.AccountID, destination *tlb.MsgAddress, isEvent bool, limit int, beforeLT uint64) ([]core.Message, error)
+	GetLogs(ctx context.Context, account tongo.AccountID, destination *tlb.MsgAddress, limit int, beforeLT uint64) ([]core.Message, error)
 	GetAccountDiff(ctx context.Context, account tongo.AccountID, startTime int64, endTime int64) (int64, error)
 	GetLatencyAndLastMasterchainSeqno(ctx context.Context) (int64, uint32, error)
-	GetTrace(ctx context.Context, hash tongo.Bits256, isEvent bool) (*core.Trace, error)
+	GetTrace(ctx context.Context, hash tongo.Bits256) (*core.Trace, error)
 	SearchTraces(ctx context.Context, a tongo.AccountID, limit int, beforeLT, afterLT, startTime, endTime *int64, initiator bool, descendingOrder bool) ([]core.TraceID, error)
 
 	// GetStorageProviders returns a list of storage contracts deployed to the blockchain.

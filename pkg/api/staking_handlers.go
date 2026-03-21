@@ -275,7 +275,7 @@ func (h *Handler) GetStakingPoolHistory(ctx context.Context, params oas.GetStaki
 	if v, ok := params.BeforeLt.Get(); ok {
 		beforeLT = uint64(v)
 	}
-	logs, err := h.storage.GetLogs(ctx, pool.ID, &logAddress, true, limit, beforeLT)
+	logs, err := h.storage.GetLogs(ctx, pool.ID, &logAddress, limit, beforeLT)
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}

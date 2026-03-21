@@ -66,7 +66,7 @@ func (h *Handler) convertJettonHistory(ctx context.Context, account ton.AccountI
 	var lastLT uint64
 	events := make([]oas.AccountEvent, 0, len(traceIDs))
 	for _, traceID := range traceIDs {
-		trace, err := h.storage.GetTrace(ctx, traceID, true)
+		trace, err := h.storage.GetTrace(ctx, traceID)
 		if err != nil {
 			if errors.Is(err, core.ErrTraceIsTooLong) {
 				// we ignore this for now, because we believe that this case is extremely rare.
