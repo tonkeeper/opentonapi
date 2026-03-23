@@ -4,7 +4,9 @@ import (
 	"fmt"
 
 	"github.com/tonkeeper/opentonapi/internal/g"
+	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
+	"github.com/tonkeeper/tongo/tolk"
 )
 
 var NftTransferNotifyStraw = Straw[BubbleNftTransfer]{
@@ -18,17 +20,19 @@ var NftTransferNotifyStraw = Straw[BubbleNftTransfer]{
 	},
 	Children: []Straw[BubbleNftTransfer]{
 		{
-			CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.NftOwnershipAssignedMsgOp)},
+			CheckFuncs: []bubbleCheck{IsTx, IsTolkBody, HasOperation(abi.NftOwnershipAssignedMsgOp)},
 			Builder: func(newAction *BubbleNftTransfer, bubble *Bubble) error {
 				receiverTx := bubble.Info.(BubbleTx)
-				transfer := receiverTx.decodedBody.Value.(abi.NftOwnershipAssignedMsgBody)
+				transferVal := receiverTx.decodedBody.Value.(tolk.Value)
+				transfer := transferVal.MustGetStruct()
 				newAction.success = true
 				if receiverTx.inputFrom == nil {
 					return fmt.Errorf("nft transfer notify without sender")
 				}
 				newAction.account = *receiverTx.inputFrom
 				newAction.recipient = &receiverTx.account
-				newAction.payload = transfer.ForwardPayload.Value
+				forwardPayloadVal := transfer.MustGetField("forwardPayload")
+				newAction.payload = GetPlainNftPayload(&forwardPayloadVal)
 				return nil
 			},
 		},
@@ -40,16 +44,26 @@ var NftTransferNotifyStraw = Straw[BubbleNftTransfer]{
 }
 
 var NftTransferStraw = Straw[BubbleNftTransfer]{
-	CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.NftTransferMsgOp), HasInterface(abi.NftItem)},
+	CheckFuncs: []bubbleCheck{IsTx, IsTolkBody, HasOperation(abi.NftTransferMsgOp), HasInterface(abi.NftItem)},
 	Builder: func(newAction *BubbleNftTransfer, bubble *Bubble) error {
 		tx := bubble.Info.(BubbleTx)
-		transfer := tx.decodedBody.Value.(abi.NftTransferMsgBody)
+		transferVal := tx.decodedBody.Value.(tolk.Value)
+		transfer := transferVal.MustGetStruct()
 		newAction.account = tx.account
 		newAction.success = tx.success
 		newAction.sender = tx.inputFrom
-		newAction.payload = transfer.ForwardPayload.Value
+		forwardPayloadVal := transfer.MustGetField("forwardPayload")
+		newAction.payload = GetPlainNftPayload(&forwardPayloadVal)
 		if newAction.recipient == nil {
-			newAction.recipient = parseAccount(transfer.NewOwner)
+			forwardPayload := forwardPayloadVal.MustGetStruct()
+			newOwnerVal := forwardPayload.MustGetField("newOwner")
+			newOwnerAddr := newOwnerVal.MustGetAddress()
+			newAction.recipient = &Account{
+				Address: tongo.AccountID{
+					Workchain: int32(newOwnerAddr.Workchain),
+					Address:   newOwnerAddr.Address,
+				},
+			}
 			if newAction.recipient != nil {
 				bubble.Accounts = append(bubble.Accounts, newAction.recipient.Address)
 			}
@@ -58,13 +72,15 @@ var NftTransferStraw = Straw[BubbleNftTransfer]{
 	},
 	Children: []Straw[BubbleNftTransfer]{
 		{
-			CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.NftOwnershipAssignedMsgOp)},
+			CheckFuncs: []bubbleCheck{IsTx, IsTolkBody, HasOperation(abi.NftOwnershipAssignedMsgOp)},
 			Optional:   true,
 			Builder: func(newAction *BubbleNftTransfer, bubble *Bubble) error {
 				receiverTx := bubble.Info.(BubbleTx)
-				transfer := receiverTx.decodedBody.Value.(abi.NftOwnershipAssignedMsgBody)
+				transferVal := receiverTx.decodedBody.Value.(tolk.Value)
+				transfer := transferVal.MustGetStruct()
+				forwardPayload := transfer.MustGetField("forwardPayload")
+				newAction.payload = GetPlainNftPayload(&forwardPayload)
 				newAction.success = true
-				newAction.payload = transfer.ForwardPayload.Value
 				return nil
 			},
 		},

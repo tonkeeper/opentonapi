@@ -8,6 +8,7 @@ import (
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
 	"github.com/tonkeeper/tongo/tlb"
+	"github.com/tonkeeper/tongo/tolk"
 	"github.com/tonkeeper/tongo/ton"
 )
 
@@ -125,10 +126,12 @@ var StonfiSwapStraw = Straw[BubbleJettonSwap]{
 }
 
 var StonfiV1PTONStraw = Straw[BubbleJettonTransfer]{
-	CheckFuncs: []bubbleCheck{IsTx, HasInterface(abi.JettonWallet), HasOperation(abi.JettonTransferMsgOp), func(bubble *Bubble) bool {
+	CheckFuncs: []bubbleCheck{IsTx, IsTolkBody, HasInterface(abi.JettonWallet), HasOperation(abi.JettonTransferMsgOp), func(bubble *Bubble) bool {
 		tx := bubble.Info.(BubbleTx)
-		body := tx.decodedBody.Value.(abi.JettonTransferMsgBody)
-		amount := big.Int(body.Amount)
+		bodyVal := tx.decodedBody.Value.(tolk.Value)
+		body := bodyVal.MustGetStruct()
+		amountVal := body.MustGetField("amount")
+		amount := amountVal.MustGetCoins()
 		if big.NewInt(tx.inputAmount).Cmp(&amount) < 1 {
 			return false
 		}
@@ -139,10 +142,13 @@ var StonfiV1PTONStraw = Straw[BubbleJettonTransfer]{
 		newAction.master, _ = tx.additionalInfo.JettonMaster(tx.account.Address)
 		newAction.senderWallet = tx.account.Address
 		newAction.sender = tx.inputFrom
-		body := tx.decodedBody.Value.(abi.JettonTransferMsgBody)
-		newAction.amount = body.Amount
+		bodyVal := tx.decodedBody.Value.(tolk.Value)
+		body := bodyVal.MustGetStruct()
+		amountVal := body.MustGetField("amount")
+		newAction.amount = tlb.VarUInteger16(amountVal.MustGetCoins())
 		newAction.isWrappedTon = true
-		recipient, err := ton.AccountIDFromTlb(body.Destination)
+		destVal := body.MustGetField("destination")
+		recipient, err := ton.AccountIDFromTolk(&destVal)
 		if err == nil && recipient != nil {
 			newAction.recipient = &Account{Address: *recipient}
 			bubble.Accounts = append(bubble.Accounts, *recipient)
@@ -150,13 +156,16 @@ var StonfiV1PTONStraw = Straw[BubbleJettonTransfer]{
 		return nil
 	},
 	SingleChild: &Straw[BubbleJettonTransfer]{
-		CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.JettonNotifyMsgOp)},
+		CheckFuncs: []bubbleCheck{IsTx, IsTolkBody, HasOperation(abi.JettonNotifyMsgOp)},
 		Builder: func(newAction *BubbleJettonTransfer, bubble *Bubble) error {
 			tx := bubble.Info.(BubbleTx)
 			newAction.success = true
-			body := tx.decodedBody.Value.(abi.JettonNotifyMsgBody)
-			newAction.amount = body.Amount
-			newAction.payload = body.ForwardPayload.Value
+			bodyVal := tx.decodedBody.Value.(tolk.Value)
+			body := bodyVal.MustGetStruct()
+			amountVal := body.MustGetField("amount")
+			newAction.amount = tlb.VarUInteger16(amountVal.MustGetCoins())
+			forwardPayloadVal := body.MustGetField("forwardPayload")
+			newAction.payload = GetPlainJettonPayload(&forwardPayloadVal)
 			newAction.recipient = &tx.account
 			return nil
 		},

@@ -4,6 +4,7 @@ import (
 	"math/big"
 
 	"github.com/tonkeeper/tongo/abi"
+	"github.com/tonkeeper/tongo/tolk"
 	"github.com/tonkeeper/tongo/ton"
 )
 
@@ -34,11 +35,11 @@ var NFTStraws = []Merger{
 
 var DefaultStraws = []Merger{
 	//0
-	//StrawFindAuctionBidFragmentSimple,
-	//GasRelayerStraw,
-	//NftTransferStraw,
-	//NftTransferNotifyStraw,
-	//StonfiV1PTONStraw,
+	StrawFindAuctionBidFragmentSimple,
+	GasRelayerStraw,
+	NftTransferStraw,
+	NftTransferNotifyStraw,
+	StonfiV1PTONStraw,
 	////5
 	//StonfiV2PTONStrawReverse,
 	//StonfiV2PTONStraw,
@@ -294,4 +295,50 @@ var FlawedJettonTransferClassicStraw = Straw[BubbleFlawedJettonTransfer]{
 			},
 		},
 	},
+}
+
+func GetPlainNftPayload(v *tolk.Value) abi.NFTPayload {
+	s, ok := v.GetStruct()
+	if !ok {
+		r, ok := v.GetRemaining()
+		if ok && !r.IsRef && r.Value.BitsAvailableForRead() == 0 {
+			return abi.NFTPayload{
+				SumType: abi.EmptyNFTOp,
+			}
+		}
+		return abi.NFTPayload{
+			SumType: abi.UnknownNFTOp,
+			Value:   v,
+		}
+	}
+
+	p := uint32(s.MustGetPrefix().Prefix)
+	return abi.NFTPayload{
+		SumType: s.GetName(),
+		OpCode:  &p,
+		Value:   v,
+	}
+}
+
+func GetPlainJettonPayload(v *tolk.Value) abi.JettonPayload {
+	s, ok := v.GetStruct()
+	if !ok {
+		r, ok := v.GetRemaining()
+		if ok && !r.IsRef && r.Value.BitsAvailableForRead() == 0 {
+			return abi.JettonPayload{
+				SumType: abi.EmptyJettonOp,
+			}
+		}
+		return abi.JettonPayload{
+			SumType: abi.UnknownJettonOp,
+			Value:   v,
+		}
+	}
+
+	p := uint32(s.MustGetPrefix().Prefix)
+	return abi.JettonPayload{
+		SumType: s.GetName(),
+		OpCode:  &p,
+		Value:   v,
+	}
 }

@@ -6,6 +6,7 @@ import (
 	"github.com/tonkeeper/opentonapi/pkg/sentry"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
+	"github.com/tonkeeper/tongo/tolk"
 	"github.com/tonkeeper/tongo/ton"
 )
 
@@ -174,6 +175,12 @@ func Optional[T actioner](s Straw[T]) Straw[T] {
 
 func IsTx(b *Bubble) bool {
 	_, ok := b.Info.(BubbleTx)
+	return ok
+}
+
+func IsTolkBody(b *Bubble) bool {
+	tx, _ := b.Info.(BubbleTx)
+	_, ok := tx.decodedBody.Value.(tolk.Value)
 	return ok
 }
 
