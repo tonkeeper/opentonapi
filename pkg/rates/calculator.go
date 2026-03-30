@@ -5,6 +5,8 @@ import (
 	"log"
 	"sync"
 	"time"
+
+	"go.uber.org/zap"
 )
 
 type ratesSource interface {
@@ -14,6 +16,8 @@ type ratesSource interface {
 }
 
 type calculator struct {
+	logger *zap.Logger
+
 	mu sync.RWMutex
 	// The source contains complex logic hidden in the ratesSource interface, which is not available in the open source version
 	// See the Mock description for details
@@ -27,12 +31,13 @@ type Point struct {
 	Price     float64
 }
 
-func InitCalculator(source ratesSource) *calculator {
+func InitCalculator(logger *zap.Logger, source ratesSource) *calculator {
 	if source == nil {
 		log.Fatalf("source is not configured")
 	}
 
 	c := &calculator{
+		logger:          logger,
 		source:          source,
 		todayRates:      map[string]float64{},
 		yesterdayRates:  map[string]float64{},
@@ -61,22 +66,27 @@ func (c *calculator) refresh() {
 
 	marketsTonPrice, err := c.source.GetMarketsTonPrice()
 	if err != nil {
+		c.logger.Error("failed to get market rates", zap.Error(err))
 		return
 	}
 	todayRates, err := c.source.GetRates(today.Unix())
 	if err != nil {
+		c.logger.Error("failed to get today rates", zap.Error(err))
 		return
 	}
 	yesterdayRates, err := c.source.GetRates(yesterday)
 	if err != nil {
+		c.logger.Error("failed to get yesterday rates", zap.Error(err))
 		return
 	}
 	weekRates, err := c.source.GetRates(weekAgo)
 	if err != nil {
+		c.logger.Error("failed to get week rates", zap.Error(err))
 		return
 	}
 	monthRates, err := c.source.GetRates(monthAgo)
 	if err != nil {
+		c.logger.Error("failed to get month rates", zap.Error(err))
 		return
 	}
 

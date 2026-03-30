@@ -78,17 +78,17 @@ func (h *Handler) NewError(ctx context.Context, err error) *oas.ErrorStatusCode 
 
 // Options configures behavior of a Handler instance.
 type Options struct {
-	storage          storage
-	chainState       chainState
-	addressBook      addressBook
-	msgSender        messageSender
-	executor         executor
-	limits           Limits
-	spamFilter       SpamFilter
-	ratesSource      ratesSource
-	tonConnectSecret string
-	ctxToDetails     ctxToDetails
-	gasless          Gasless
+	storage                 storage
+	chainState              chainState
+	addressBook             addressBook
+	msgSender               messageSender
+	executor                executor
+	limits                  Limits
+	spamFilter              SpamFilter
+	ratesSource             ratesSource
+	tonConnectSecret        string
+	ctxToDetails            ctxToDetails
+	gasless                 Gasless
 	verifier                verifierSource
 	score                   scoreSource
 	parallelTraceProcessing bool
@@ -246,7 +246,7 @@ func NewHandler(logger *zap.Logger, opts ...Option) (*Handler, error) {
 		ctxToDetails:   options.ctxToDetails,
 		gasless:        options.gasless,
 		score:          options.score,
-		ratesSource:    rates.InitCalculator(options.ratesSource),
+		ratesSource:    rates.InitCalculator(logger, options.ratesSource),
 		verifierSource: options.verifier,
 		metaCache: metadataCache{
 			collectionsCache: cache.NewLRUCache[tongo.AccountID, tep64.Metadata](10000, "nft_metadata_cache"),
@@ -261,10 +261,10 @@ func NewHandler(logger *zap.Logger, opts ...Option) (*Handler, error) {
 		},
 		parallelTraceProcessing: options.parallelTraceProcessing,
 		tongoVersion:            tongoVersion,
-		blacklistedBocCache: cache.NewLRUCache[[32]byte, struct{}](100000, "blacklisted_boc_cache"),
-		getMethodsCache:     cache.NewLRUCache[string, *oas.MethodExecutionResult](100000, "get_methods_cache"),
-		tonConnect:          tonConnect,
-		configPool:          configPool,
+		blacklistedBocCache:     cache.NewLRUCache[[32]byte, struct{}](100000, "blacklisted_boc_cache"),
+		getMethodsCache:         cache.NewLRUCache[string, *oas.MethodExecutionResult](100000, "get_methods_cache"),
+		tonConnect:              tonConnect,
+		configPool:              configPool,
 	}, nil
 }
 
