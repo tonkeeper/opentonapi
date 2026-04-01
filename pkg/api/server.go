@@ -108,7 +108,17 @@ func NewServer(log *zap.Logger, handler *Handler, opts ...ServerOption) (*Server
 
 	ogenServer, err := oas.NewServer(handler,
 		oas.WithMiddleware(ogenMiddlewares...),
-		oas.WithErrorHandler(ogenErrorsHandler))
+		oas.WithErrorHandler(ogenErrorsHandler),
+		oas.WithMethodNotAllowed(func(w http.ResponseWriter, r *http.Request, allowed string) {
+			if r.Method == "OPTIONS" {
+				w.Header().Set("Access-Control-Allow-Methods", allowed)
+				w.Header().Set("Access-Control-Allow-Headers", "Content-Type, X-Capability")
+				w.WriteHeader(http.StatusNoContent)
+			} else {
+				w.Header().Set("Allow", allowed)
+				w.WriteHeader(http.StatusMethodNotAllowed)
+			}
+		}))
 	if err != nil {
 		return nil, err
 	}
