@@ -232,6 +232,14 @@ paths:
         - Blockchain
       parameters:
         - $ref: '#/components/parameters/masterchainSeqno'
+        - $ref: '#/components/parameters/offsetQuery'
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            example: 100
+            minimum: 1
       responses:
         '200':
           description: blockchain transactions

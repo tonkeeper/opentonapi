@@ -8865,6 +8865,19 @@
     "parameters": [
      {
       "$ref": "#/components/parameters/masterchainSeqno"
+     },
+     {
+      "$ref": "#/components/parameters/offsetQuery"
+     },
+     {
+      "in": "query",
+      "name": "limit",
+      "required": false,
+      "schema": {
+       "example": 100,
+       "minimum": 1,
+       "type": "integer"
+      }
      }
     ],
     "responses": {
