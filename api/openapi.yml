@@ -3398,7 +3398,6 @@ components:
             type: object
             required:
               - boc
-              - wallet_public_key
             properties:
               wallet_public_key:
                 type: string

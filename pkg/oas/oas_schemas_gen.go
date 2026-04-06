@@ -6514,13 +6514,13 @@ func (s *GaslessEstimateReqMessagesItem) SetBoc(val string) {
 }
 
 type GaslessSendReq struct {
-	// Hex encoded public key.
-	WalletPublicKey string `json:"wallet_public_key"`
-	Boc             string `json:"boc"`
+	// Hex encoded Ed25519 public key (optional; omit if not required by the relay).
+	WalletPublicKey OptString `json:"wallet_public_key"`
+	Boc             string    `json:"boc"`
 }
 
 // GetWalletPublicKey returns the value of WalletPublicKey.
-func (s *GaslessSendReq) GetWalletPublicKey() string {
+func (s *GaslessSendReq) GetWalletPublicKey() OptString {
 	return s.WalletPublicKey
 }
 
@@ -6530,7 +6530,7 @@ func (s *GaslessSendReq) GetBoc() string {
 }
 
 // SetWalletPublicKey sets the value of WalletPublicKey.
-func (s *GaslessSendReq) SetWalletPublicKey(val string) {
+func (s *GaslessSendReq) SetWalletPublicKey(val OptString) {
 	s.WalletPublicKey = val
 }
 
@@ -6542,7 +6542,7 @@ func (s *GaslessSendReq) SetBoc(val string) {
 // Ref: #/components/schemas/GaslessTx
 type GaslessTx struct {
 	ProtocolName string `json:"protocol_name"`
-	// Optional serialized external message from the gasless relay (format is implementation-defined).
+	// Normalized hash of the external message.
 	External OptString `json:"external"`
 }
 

@@ -129,12 +129,16 @@ func (h *Handler) GaslessSend(ctx context.Context, req *oas.GaslessSendReq) (*oa
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
 	}
-	pubkey, err := hex.DecodeString(req.WalletPublicKey)
-	if err != nil {
-		return nil, toError(http.StatusBadRequest, err)
-	}
-	if len(pubkey) != ed25519.PublicKeySize {
-		return nil, toError(http.StatusBadRequest, fmt.Errorf("invalid public key"))
+	var pubkey []byte
+	if req.WalletPublicKey.IsSet() {
+		p, err := hex.DecodeString(req.WalletPublicKey.Value)
+		if err != nil {
+			return nil, toError(http.StatusBadRequest, fmt.Errorf("invalid public key"))
+		}
+		if len(p) != ed25519.PublicKeySize {
+			return nil, toError(http.StatusBadRequest, fmt.Errorf("invalid public key"))
+		}
+		pubkey = p
 	}
 	results, err := h.gasless.Send(ctx, pubkey, msg.payload)
 	if err != nil {

@@ -18308,8 +18308,10 @@ func (s *GaslessSendReq) Encode(e *jx.Encoder) {
 // encodeFields encodes fields.
 func (s *GaslessSendReq) encodeFields(e *jx.Encoder) {
 	{
-		e.FieldStart("wallet_public_key")
-		e.Str(s.WalletPublicKey)
+		if s.WalletPublicKey.Set {
+			e.FieldStart("wallet_public_key")
+			s.WalletPublicKey.Encode(e)
+		}
 	}
 	{
 		e.FieldStart("boc")
@@ -18332,11 +18334,9 @@ func (s *GaslessSendReq) Decode(d *jx.Decoder) error {
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
 		case "wallet_public_key":
-			requiredBitSet[0] |= 1 << 0
 			if err := func() error {
-				v, err := d.Str()
-				s.WalletPublicKey = string(v)
-				if err != nil {
+				s.WalletPublicKey.Reset()
+				if err := s.WalletPublicKey.Decode(d); err != nil {
 					return err
 				}
 				return nil
@@ -18365,7 +18365,7 @@ func (s *GaslessSendReq) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b00000011,
+		0b00000010,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.

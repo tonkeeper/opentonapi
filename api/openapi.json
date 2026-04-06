@@ -560,13 +560,12 @@
          "type": "string"
         },
         "wallet_public_key": {
-         "description": "hex encoded public key",
+         "description": "hex encoded Ed25519 public key (optional; omit if not required by the relay)",
          "type": "string"
         }
        },
        "required": [
-        "boc",
-        "wallet_public_key"
+        "boc"
        ],
        "type": "object"
       }
@@ -3780,7 +3779,7 @@
    "GaslessTx": {
     "properties": {
      "external": {
-      "description": "Optional serialized external message from the gasless relay (format is implementation-defined).",
+      "description": "Normalized hash of the external message.",
       "type": "string"
      },
      "protocol_name": {
