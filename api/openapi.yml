@@ -5008,6 +5008,9 @@ components:
       properties:
         protocol_name:
           type: string
+        external:
+          type: string
+          description: "Optional serialized external message from the gasless relay (format is implementation-defined)."
     SignRawParams:
       type: object
       required:

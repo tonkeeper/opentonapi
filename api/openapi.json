@@ -3757,6 +3757,10 @@
    },
    "GaslessTx": {
     "properties": {
+     "external": {
+      "description": "Optional serialized external message from the gasless relay (format is implementation-defined).",
+      "type": "string"
+     },
      "protocol_name": {
       "type": "string"
      }

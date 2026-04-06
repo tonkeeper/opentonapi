@@ -35,4 +35,5 @@ type SignRawParams struct {
 
 type TxSendingResults struct {
 	ProtocolName string
+	External     *string
 }

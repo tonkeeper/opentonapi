@@ -18424,10 +18424,17 @@ func (s *GaslessTx) encodeFields(e *jx.Encoder) {
 		e.FieldStart("protocol_name")
 		e.Str(s.ProtocolName)
 	}
+	{
+		if s.External.Set {
+			e.FieldStart("external")
+			s.External.Encode(e)
+		}
+	}
 }
 
-var jsonFieldsNameOfGaslessTx = [1]string{
+var jsonFieldsNameOfGaslessTx = [2]string{
 	0: "protocol_name",
+	1: "external",
 }
 
 // Decode decodes GaslessTx from json.
@@ -18450,6 +18457,16 @@ func (s *GaslessTx) Decode(d *jx.Decoder) error {
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"protocol_name\"")
+			}
+		case "external":
+			if err := func() error {
+				s.External.Reset()
+				if err := s.External.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"external\"")
 			}
 		default:
 			return d.Skip()
