@@ -6542,6 +6542,8 @@ func (s *GaslessSendReq) SetBoc(val string) {
 // Ref: #/components/schemas/GaslessTx
 type GaslessTx struct {
 	ProtocolName string `json:"protocol_name"`
+	// Optional serialized external message from the gasless relay (format is implementation-defined).
+	External OptString `json:"external"`
 }
 
 // GetProtocolName returns the value of ProtocolName.
@@ -6549,9 +6551,19 @@ func (s *GaslessTx) GetProtocolName() string {
 	return s.ProtocolName
 }
 
+// GetExternal returns the value of External.
+func (s *GaslessTx) GetExternal() OptString {
+	return s.External
+}
+
 // SetProtocolName sets the value of ProtocolName.
 func (s *GaslessTx) SetProtocolName(val string) {
 	s.ProtocolName = val
+}
+
+// SetExternal sets the value of External.
+func (s *GaslessTx) SetExternal(val OptString) {
+	s.External = val
 }
 
 type GetAccountDiffOK struct {

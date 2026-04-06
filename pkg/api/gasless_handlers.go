@@ -140,5 +140,9 @@ func (h *Handler) GaslessSend(ctx context.Context, req *oas.GaslessSendReq) (*oa
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
-	return &oas.GaslessTx{ProtocolName: results.ProtocolName}, nil
+	tx := &oas.GaslessTx{ProtocolName: results.ProtocolName}
+	if results.External != nil {
+		tx.External = oas.NewOptString(*results.External)
+	}
+	return tx, nil
 }
