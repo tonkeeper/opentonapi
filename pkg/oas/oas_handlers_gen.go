@@ -5643,6 +5643,14 @@ func (s *Server) handleGetBlockchainMasterchainTransactionsRequest(args [1]strin
 					Name: "masterchain_seqno",
 					In:   "path",
 				}: params.MasterchainSeqno,
+				{
+					Name: "offset",
+					In:   "query",
+				}: params.Offset,
+				{
+					Name: "limit",
+					In:   "query",
+				}: params.Limit,
 			},
 			Raw: r,
 		}

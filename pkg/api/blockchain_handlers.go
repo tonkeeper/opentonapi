@@ -165,6 +165,12 @@ func (h *Handler) GetBlockchainMasterchainTransactions(ctx context.Context, para
 	sort.Slice(result.Transactions, func(i, j int) bool {
 		return result.Transactions[i].Lt < result.Transactions[j].Lt
 	})
+	if params.Offset.Value > 0 {
+		result.Transactions = result.Transactions[min(len(result.Transactions), params.Offset.Value):]
+	}
+	if params.Limit.Value > 0 {
+		result.Transactions = result.Transactions[:min(len(result.Transactions), params.Limit.Value)]
+	}
 	return &result, nil
 }
 
