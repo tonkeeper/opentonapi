@@ -5057,7 +5057,7 @@ components:
           type: string
         external:
           type: string
-          description: "Optional serialized external message from the gasless relay (format is implementation-defined)."
+          description: "Normalized hash of the external message."
     SignRawParams:
       type: object
       required:
