@@ -560,7 +560,7 @@
          "type": "string"
         },
         "wallet_public_key": {
-         "description": "hex encoded Ed25519 public key (optional; omit if not required by the relay)",
+         "description": "hex encoded public key",
          "type": "string"
         }
        },

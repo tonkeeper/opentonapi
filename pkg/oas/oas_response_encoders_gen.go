@@ -8,12 +8,11 @@ import (
 
 	"github.com/go-faster/errors"
 	"github.com/go-faster/jx"
-	"go.opentelemetry.io/otel/codes"
-	"go.opentelemetry.io/otel/trace"
-
 	"github.com/ogen-go/ogen/conv"
 	ht "github.com/ogen-go/ogen/http"
 	"github.com/ogen-go/ogen/uri"
+	"go.opentelemetry.io/otel/codes"
+	"go.opentelemetry.io/otel/trace"
 )
 
 func encodeAccountDnsBackResolveResponse(response *DomainNames, w http.ResponseWriter, span trace.Span) error {
@@ -88,6 +87,7 @@ func encodeDnsResolveResponse(response *DnsRecord, w http.ResponseWriter, span t
 
 func encodeDownloadBlockchainBlockBocResponse(response *DownloadBlockchainBlockBocOKHeaders, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/octet-stream")
+	w.Header().Set("Access-Control-Expose-Headers", "Content-Disposition")
 	// Encoding response headers.
 	{
 		h := uri.NewHeaderEncoder(w.Header())
@@ -111,6 +111,9 @@ func encodeDownloadBlockchainBlockBocResponse(response *DownloadBlockchainBlockB
 	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	writer := w
+	if closer, ok := response.Response.Data.(io.Closer); ok {
+		defer closer.Close()
+	}
 	if _, err := io.Copy(writer, response.Response); err != nil {
 		return errors.Wrap(err, "write")
 	}
@@ -1078,6 +1081,9 @@ func encodeGetOpenapiYmlResponse(response GetOpenapiYmlOK, w http.ResponseWriter
 	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	writer := w
+	if closer, ok := response.Data.(io.Closer); ok {
+		defer closer.Close()
+	}
 	if _, err := io.Copy(writer, response); err != nil {
 		return errors.Wrap(err, "write")
 	}

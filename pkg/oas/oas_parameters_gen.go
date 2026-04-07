@@ -7,7 +7,6 @@ import (
 	"net/url"
 
 	"github.com/go-faster/errors"
-
 	"github.com/ogen-go/ogen/conv"
 	"github.com/ogen-go/ogen/middleware"
 	"github.com/ogen-go/ogen/ogenerrors"
@@ -217,7 +216,7 @@ func decodeBlockchainAccountInspectParams(args [1]string, argsEscaped bool, r *h
 type DnsResolveParams struct {
 	// Domain name with .ton or .t.me.
 	DomainName string
-	Filter     OptBool
+	Filter     OptBool `json:",omitempty,omitzero"`
 }
 
 func unpackDnsResolveParams(packed middleware.Parameters) (params DnsResolveParams) {
@@ -404,10 +403,10 @@ func decodeDownloadBlockchainBlockBocParams(args [1]string, argsEscaped bool, r 
 
 // EmulateMessageToAccountEventParams is parameters of emulateMessageToAccountEvent operation.
 type EmulateMessageToAccountEventParams struct {
-	AcceptLanguage OptString
+	AcceptLanguage OptString `json:",omitempty,omitzero"`
 	// Account ID.
 	AccountID            string
-	IgnoreSignatureCheck OptBool
+	IgnoreSignatureCheck OptBool `json:",omitempty,omitzero"`
 }
 
 func unpackEmulateMessageToAccountEventParams(packed middleware.Parameters) (params EmulateMessageToAccountEventParams) {
@@ -577,8 +576,8 @@ func decodeEmulateMessageToAccountEventParams(args [1]string, argsEscaped bool, 
 
 // EmulateMessageToEventParams is parameters of emulateMessageToEvent operation.
 type EmulateMessageToEventParams struct {
-	AcceptLanguage       OptString
-	IgnoreSignatureCheck OptBool
+	AcceptLanguage       OptString `json:",omitempty,omitzero"`
+	IgnoreSignatureCheck OptBool   `json:",omitempty,omitzero"`
 }
 
 func unpackEmulateMessageToEventParams(packed middleware.Parameters) (params EmulateMessageToEventParams) {
@@ -696,7 +695,7 @@ func decodeEmulateMessageToEventParams(args [0]string, argsEscaped bool, r *http
 
 // EmulateMessageToTraceParams is parameters of emulateMessageToTrace operation.
 type EmulateMessageToTraceParams struct {
-	IgnoreSignatureCheck OptBool
+	IgnoreSignatureCheck OptBool `json:",omitempty,omitzero"`
 }
 
 func unpackEmulateMessageToTraceParams(packed middleware.Parameters) (params EmulateMessageToTraceParams) {
@@ -760,8 +759,8 @@ func decodeEmulateMessageToTraceParams(args [0]string, argsEscaped bool, r *http
 
 // EmulateMessageToWalletParams is parameters of emulateMessageToWallet operation.
 type EmulateMessageToWalletParams struct {
-	AcceptLanguage OptString
-	Currency       OptString
+	AcceptLanguage OptString `json:",omitempty,omitzero"`
+	Currency       OptString `json:",omitempty,omitzero"`
 }
 
 func unpackEmulateMessageToWalletParams(packed middleware.Parameters) (params EmulateMessageToWalletParams) {
@@ -883,7 +882,7 @@ type ExecGetMethodForBlockchainAccountParams struct {
 	AccountID string
 	// Contract get method name.
 	MethodName string
-	Args       []string
+	Args       []string `json:",omitempty"`
 }
 
 func unpackExecGetMethodForBlockchainAccountParams(packed middleware.Parameters) (params ExecGetMethodForBlockchainAccountParams) {
@@ -1173,7 +1172,7 @@ func decodeExecGetMethodWithBodyForBlockchainAccountParams(args [2]string, argsE
 
 // GaslessEstimateParams is parameters of gaslessEstimate operation.
 type GaslessEstimateParams struct {
-	AcceptLanguage OptString
+	AcceptLanguage OptString `json:",omitempty,omitzero"`
 	// Jetton to pay commission.
 	MasterID string
 }
@@ -1473,6 +1472,7 @@ func decodeGetAccountDiffParams(args [1]string, argsEscaped bool, r *http.Reques
 					MaxExclusive:  false,
 					MultipleOfSet: false,
 					MultipleOf:    0,
+					Pattern:       nil,
 				}).Validate(int64(params.StartDate)); err != nil {
 					return errors.Wrap(err, "int")
 				}
@@ -1481,7 +1481,7 @@ func decodeGetAccountDiffParams(args [1]string, argsEscaped bool, r *http.Reques
 				return err
 			}
 		} else {
-			return validate.ErrFieldRequired
+			return err
 		}
 		return nil
 	}(); err != nil {
@@ -1526,6 +1526,7 @@ func decodeGetAccountDiffParams(args [1]string, argsEscaped bool, r *http.Reques
 					MaxExclusive:  false,
 					MultipleOfSet: false,
 					MultipleOf:    0,
+					Pattern:       nil,
 				}).Validate(int64(params.EndDate)); err != nil {
 					return errors.Wrap(err, "int")
 				}
@@ -1534,7 +1535,7 @@ func decodeGetAccountDiffParams(args [1]string, argsEscaped bool, r *http.Reques
 				return err
 			}
 		} else {
-			return validate.ErrFieldRequired
+			return err
 		}
 		return nil
 	}(); err != nil {
@@ -1552,7 +1553,7 @@ type GetAccountDnsExpiringParams struct {
 	// Account ID.
 	AccountID string
 	// Number of days before expiration.
-	Period OptInt
+	Period OptInt `json:",omitempty,omitzero"`
 }
 
 func unpackGetAccountDnsExpiringParams(packed middleware.Parameters) (params GetAccountDnsExpiringParams) {
@@ -1666,6 +1667,7 @@ func decodeGetAccountDnsExpiringParams(args [1]string, argsEscaped bool, r *http
 							MaxExclusive:  false,
 							MultipleOfSet: false,
 							MultipleOf:    0,
+							Pattern:       nil,
 						}).Validate(int64(value)); err != nil {
 							return errors.Wrap(err, "int")
 						}
@@ -1696,9 +1698,9 @@ type GetAccountEventParams struct {
 	AccountID string
 	// Event ID or transaction hash in hex (without 0x) or base64url format.
 	EventID        string
-	AcceptLanguage OptString
+	AcceptLanguage OptString `json:",omitempty,omitzero"`
 	// Filter actions where requested account is not real subject (for example sender or receiver jettons).
-	SubjectOnly OptBool
+	SubjectOnly OptBool `json:",omitempty,omitzero"`
 }
 
 func unpackGetAccountEventParams(packed middleware.Parameters) (params GetAccountEventParams) {
@@ -1927,19 +1929,19 @@ func decodeGetAccountEventParams(args [2]string, argsEscaped bool, r *http.Reque
 type GetAccountEventsParams struct {
 	// Account ID.
 	AccountID      string
-	AcceptLanguage OptString
+	AcceptLanguage OptString `json:",omitempty,omitzero"`
 	// Show only events that are initiated by this account.
-	Initiator OptBool
+	Initiator OptBool `json:",omitempty,omitzero"`
 	// Filter actions where requested account is not real subject (for example sender or receiver jettons).
-	SubjectOnly OptBool
+	SubjectOnly OptBool `json:",omitempty,omitzero"`
 	// Omit this parameter to get last events.
-	AfterLt OptInt64
+	AfterLt OptInt64 `json:",omitempty,omitzero"`
 	// Omit this parameter to get last events.
-	BeforeLt  OptInt64
+	BeforeLt  OptInt64 `json:",omitempty,omitzero"`
 	Limit     int
-	StartDate OptInt64
-	EndDate   OptInt64
-	SortOrder OptGetAccountEventsSortOrder
+	StartDate OptInt64                     `json:",omitempty,omitzero"`
+	EndDate   OptInt64                     `json:",omitempty,omitzero"`
+	SortOrder OptGetAccountEventsSortOrder `json:",omitempty,omitzero"`
 }
 
 func unpackGetAccountEventsParams(packed middleware.Parameters) (params GetAccountEventsParams) {
@@ -2333,6 +2335,7 @@ func decodeGetAccountEventsParams(args [1]string, argsEscaped bool, r *http.Requ
 					MaxExclusive:  false,
 					MultipleOfSet: false,
 					MultipleOf:    0,
+					Pattern:       nil,
 				}).Validate(int64(params.Limit)); err != nil {
 					return errors.Wrap(err, "int")
 				}
@@ -2341,7 +2344,7 @@ func decodeGetAccountEventsParams(args [1]string, argsEscaped bool, r *http.Requ
 				return err
 			}
 		} else {
-			return validate.ErrFieldRequired
+			return err
 		}
 		return nil
 	}(); err != nil {
@@ -2395,6 +2398,7 @@ func decodeGetAccountEventsParams(args [1]string, argsEscaped bool, r *http.Requ
 							MaxExclusive:  false,
 							MultipleOfSet: false,
 							MultipleOf:    0,
+							Pattern:       nil,
 						}).Validate(int64(value)); err != nil {
 							return errors.Wrap(err, "int")
 						}
@@ -2460,6 +2464,7 @@ func decodeGetAccountEventsParams(args [1]string, argsEscaped bool, r *http.Requ
 							MaxExclusive:  false,
 							MultipleOfSet: false,
 							MultipleOf:    0,
+							Pattern:       nil,
 						}).Validate(int64(value)); err != nil {
 							return errors.Wrap(err, "int")
 						}
@@ -2551,12 +2556,12 @@ type GetAccountExtraCurrencyHistoryByIDParams struct {
 	AccountID string
 	// Extra currency id.
 	ID             int32
-	AcceptLanguage OptString
+	AcceptLanguage OptString `json:",omitempty,omitzero"`
 	// Omit this parameter to get last events.
-	BeforeLt  OptInt64
+	BeforeLt  OptInt64 `json:",omitempty,omitzero"`
 	Limit     int
-	StartDate OptInt64
-	EndDate   OptInt64
+	StartDate OptInt64 `json:",omitempty,omitzero"`
+	EndDate   OptInt64 `json:",omitempty,omitzero"`
 }
 
 func unpackGetAccountExtraCurrencyHistoryByIDParams(packed middleware.Parameters) (params GetAccountExtraCurrencyHistoryByIDParams) {
@@ -2833,6 +2838,7 @@ func decodeGetAccountExtraCurrencyHistoryByIDParams(args [2]string, argsEscaped 
 					MaxExclusive:  false,
 					MultipleOfSet: false,
 					MultipleOf:    0,
+					Pattern:       nil,
 				}).Validate(int64(params.Limit)); err != nil {
 					return errors.Wrap(err, "int")
 				}
@@ -2841,7 +2847,7 @@ func decodeGetAccountExtraCurrencyHistoryByIDParams(args [2]string, argsEscaped 
 				return err
 			}
 		} else {
-			return validate.ErrFieldRequired
+			return err
 		}
 		return nil
 	}(); err != nil {
@@ -2895,6 +2901,7 @@ func decodeGetAccountExtraCurrencyHistoryByIDParams(args [2]string, argsEscaped 
 							MaxExclusive:  false,
 							MultipleOfSet: false,
 							MultipleOf:    0,
+							Pattern:       nil,
 						}).Validate(int64(value)); err != nil {
 							return errors.Wrap(err, "int")
 						}
@@ -2960,6 +2967,7 @@ func decodeGetAccountExtraCurrencyHistoryByIDParams(args [2]string, argsEscaped 
 							MaxExclusive:  false,
 							MultipleOfSet: false,
 							MultipleOf:    0,
+							Pattern:       nil,
 						}).Validate(int64(value)); err != nil {
 							return errors.Wrap(err, "int")
 						}
@@ -2991,9 +2999,9 @@ type GetAccountJettonBalanceParams struct {
 	// Jetton ID.
 	JettonID string
 	// Accept ton and all possible fiat currencies, separated by commas.
-	Currencies []string
+	Currencies []string `json:",omitempty"`
 	// Comma separated list supported extensions.
-	SupportedExtensions []string
+	SupportedExtensions []string `json:",omitempty"`
 }
 
 func unpackGetAccountJettonBalanceParams(packed middleware.Parameters) (params GetAccountJettonBalanceParams) {
@@ -3219,12 +3227,12 @@ type GetAccountJettonHistoryByIDParams struct {
 	AccountID string
 	// Jetton ID.
 	JettonID       string
-	AcceptLanguage OptString
+	AcceptLanguage OptString `json:",omitempty,omitzero"`
 	// Omit this parameter to get last events.
-	BeforeLt  OptInt64
+	BeforeLt  OptInt64 `json:",omitempty,omitzero"`
 	Limit     int
-	StartDate OptInt64
-	EndDate   OptInt64
+	StartDate OptInt64 `json:",omitempty,omitzero"`
+	EndDate   OptInt64 `json:",omitempty,omitzero"`
 }
 
 func unpackGetAccountJettonHistoryByIDParams(packed middleware.Parameters) (params GetAccountJettonHistoryByIDParams) {
@@ -3501,6 +3509,7 @@ func decodeGetAccountJettonHistoryByIDParams(args [2]string, argsEscaped bool, r
 					MaxExclusive:  false,
 					MultipleOfSet: false,
 					MultipleOf:    0,
+					Pattern:       nil,
 				}).Validate(int64(params.Limit)); err != nil {
 					return errors.Wrap(err, "int")
 				}
@@ -3509,7 +3518,7 @@ func decodeGetAccountJettonHistoryByIDParams(args [2]string, argsEscaped bool, r
 				return err
 			}
 		} else {
-			return validate.ErrFieldRequired
+			return err
 		}
 		return nil
 	}(); err != nil {
@@ -3563,6 +3572,7 @@ func decodeGetAccountJettonHistoryByIDParams(args [2]string, argsEscaped bool, r
 							MaxExclusive:  false,
 							MultipleOfSet: false,
 							MultipleOf:    0,
+							Pattern:       nil,
 						}).Validate(int64(value)); err != nil {
 							return errors.Wrap(err, "int")
 						}
@@ -3628,6 +3638,7 @@ func decodeGetAccountJettonHistoryByIDParams(args [2]string, argsEscaped bool, r
 							MaxExclusive:  false,
 							MultipleOfSet: false,
 							MultipleOf:    0,
+							Pattern:       nil,
 						}).Validate(int64(value)); err != nil {
 							return errors.Wrap(err, "int")
 						}
@@ -3657,11 +3668,11 @@ type GetAccountJettonsBalancesParams struct {
 	// Account ID.
 	AccountID string
 	// Accept ton and all possible fiat currencies, separated by commas.
-	Currencies []string
+	Currencies []string `json:",omitempty"`
 	// Comma separated list supported extensions.
-	SupportedExtensions []string
-	Limit               OptInt
-	Offset              OptInt
+	SupportedExtensions []string `json:",omitempty"`
+	Limit               OptInt   `json:",omitempty,omitzero"`
+	Offset              OptInt   `json:",omitempty,omitzero"`
 }
 
 func unpackGetAccountJettonsBalancesParams(packed middleware.Parameters) (params GetAccountJettonsBalancesParams) {
@@ -3893,6 +3904,7 @@ func decodeGetAccountJettonsBalancesParams(args [1]string, argsEscaped bool, r *
 							MaxExclusive:  false,
 							MultipleOfSet: false,
 							MultipleOf:    0,
+							Pattern:       nil,
 						}).Validate(int64(value)); err != nil {
 							return errors.Wrap(err, "int")
 						}
@@ -3963,6 +3975,7 @@ func decodeGetAccountJettonsBalancesParams(args [1]string, argsEscaped bool, r *
 							MaxExclusive:  false,
 							MultipleOfSet: false,
 							MultipleOf:    0,
+							Pattern:       nil,
 						}).Validate(int64(value)); err != nil {
 							return errors.Wrap(err, "int")
 						}
@@ -3992,7 +4005,7 @@ type GetAccountJettonsHistoryParams struct {
 	// Account ID.
 	AccountID string
 	// Omit this parameter to get last events.
-	BeforeLt OptInt64
+	BeforeLt OptInt64 `json:",omitempty,omitzero"`
 	Limit    int
 }
 
@@ -4146,6 +4159,7 @@ func decodeGetAccountJettonsHistoryParams(args [1]string, argsEscaped bool, r *h
 					MaxExclusive:  false,
 					MultipleOfSet: false,
 					MultipleOf:    0,
+					Pattern:       nil,
 				}).Validate(int64(params.Limit)); err != nil {
 					return errors.Wrap(err, "int")
 				}
@@ -4154,7 +4168,7 @@ func decodeGetAccountJettonsHistoryParams(args [1]string, argsEscaped bool, r *h
 				return err
 			}
 		} else {
-			return validate.ErrFieldRequired
+			return err
 		}
 		return nil
 	}(); err != nil {
@@ -4237,9 +4251,9 @@ func decodeGetAccountMultisigsParams(args [1]string, argsEscaped bool, r *http.R
 type GetAccountNftHistoryParams struct {
 	// Account ID.
 	AccountID      string
-	AcceptLanguage OptString
+	AcceptLanguage OptString `json:",omitempty,omitzero"`
 	// Omit this parameter to get last events.
-	BeforeLt OptInt64
+	BeforeLt OptInt64 `json:",omitempty,omitzero"`
 	Limit    int
 }
 
@@ -4447,6 +4461,7 @@ func decodeGetAccountNftHistoryParams(args [1]string, argsEscaped bool, r *http.
 					MaxExclusive:  false,
 					MultipleOfSet: false,
 					MultipleOf:    0,
+					Pattern:       nil,
 				}).Validate(int64(params.Limit)); err != nil {
 					return errors.Wrap(err, "int")
 				}
@@ -4455,7 +4470,7 @@ func decodeGetAccountNftHistoryParams(args [1]string, argsEscaped bool, r *http.
 				return err
 			}
 		} else {
-			return validate.ErrFieldRequired
+			return err
 		}
 		return nil
 	}(); err != nil {
@@ -4473,12 +4488,12 @@ type GetAccountNftItemsParams struct {
 	// Account ID.
 	AccountID string
 	// Nft collection.
-	Collection OptString
-	Limit      OptInt
-	Offset     OptInt
+	Collection OptString `json:",omitempty,omitzero"`
+	Limit      OptInt    `json:",omitempty,omitzero"`
+	Offset     OptInt    `json:",omitempty,omitzero"`
 	// Selling nft items in ton implemented usually via transfer items to special selling account. This
 	// option enables including items which owned not directly.
-	IndirectOwnership OptBool
+	IndirectOwnership OptBool `json:",omitempty,omitzero"`
 }
 
 func unpackGetAccountNftItemsParams(packed middleware.Parameters) (params GetAccountNftItemsParams) {
@@ -4665,6 +4680,7 @@ func decodeGetAccountNftItemsParams(args [1]string, argsEscaped bool, r *http.Re
 							MaxExclusive:  false,
 							MultipleOfSet: false,
 							MultipleOf:    0,
+							Pattern:       nil,
 						}).Validate(int64(value)); err != nil {
 							return errors.Wrap(err, "int")
 						}
@@ -4735,6 +4751,7 @@ func decodeGetAccountNftItemsParams(args [1]string, argsEscaped bool, r *http.Re
 							MaxExclusive:  false,
 							MultipleOfSet: false,
 							MultipleOf:    0,
+							Pattern:       nil,
 						}).Validate(int64(value)); err != nil {
 							return errors.Wrap(err, "int")
 						}
@@ -5074,8 +5091,8 @@ type GetAccountTracesParams struct {
 	// Account ID.
 	AccountID string
 	// Omit this parameter to get last events.
-	BeforeLt OptInt64
-	Limit    OptInt
+	BeforeLt OptInt64 `json:",omitempty,omitzero"`
+	Limit    OptInt   `json:",omitempty,omitzero"`
 }
 
 func unpackGetAccountTracesParams(packed middleware.Parameters) (params GetAccountTracesParams) {
@@ -5244,6 +5261,7 @@ func decodeGetAccountTracesParams(args [1]string, argsEscaped bool, r *http.Requ
 							MaxExclusive:  false,
 							MultipleOfSet: false,
 							MultipleOf:    0,
+							Pattern:       nil,
 						}).Validate(int64(value)); err != nil {
 							return errors.Wrap(err, "int")
 						}
@@ -5270,7 +5288,7 @@ func decodeGetAccountTracesParams(args [1]string, argsEscaped bool, r *http.Requ
 
 // GetAccountsParams is parameters of getAccounts operation.
 type GetAccountsParams struct {
-	Currency OptString
+	Currency OptString `json:",omitempty,omitzero"`
 }
 
 func unpackGetAccountsParams(packed middleware.Parameters) (params GetAccountsParams) {
@@ -5335,7 +5353,7 @@ func decodeGetAccountsParams(args [0]string, argsEscaped bool, r *http.Request) 
 // GetAllAuctionsParams is parameters of getAllAuctions operation.
 type GetAllAuctionsParams struct {
 	// Domain filter for current auctions "ton" or "t.me".
-	Tld OptString
+	Tld OptString `json:",omitempty,omitzero"`
 }
 
 func unpackGetAllAuctionsParams(packed middleware.Parameters) (params GetAllAuctionsParams) {
@@ -5468,11 +5486,11 @@ type GetBlockchainAccountTransactionsParams struct {
 	// Account ID.
 	AccountID string
 	// Omit this parameter to get last transactions.
-	AfterLt OptInt64
+	AfterLt OptInt64 `json:",omitempty,omitzero"`
 	// Omit this parameter to get last transactions.
-	BeforeLt  OptInt64
-	Limit     OptInt32
-	SortOrder OptGetBlockchainAccountTransactionsSortOrder
+	BeforeLt  OptInt64                                     `json:",omitempty,omitzero"`
+	Limit     OptInt32                                     `json:",omitempty,omitzero"`
+	SortOrder OptGetBlockchainAccountTransactionsSortOrder `json:",omitempty,omitzero"`
 }
 
 func unpackGetBlockchainAccountTransactionsParams(packed middleware.Parameters) (params GetBlockchainAccountTransactionsParams) {
@@ -5700,6 +5718,7 @@ func decodeGetBlockchainAccountTransactionsParams(args [1]string, argsEscaped bo
 							MaxExclusive:  false,
 							MultipleOfSet: false,
 							MultipleOf:    0,
+							Pattern:       nil,
 						}).Validate(int64(value)); err != nil {
 							return errors.Wrap(err, "int")
 						}
@@ -6119,8 +6138,8 @@ func decodeGetBlockchainMasterchainShardsParams(args [1]string, argsEscaped bool
 type GetBlockchainMasterchainTransactionsParams struct {
 	// Masterchain block seqno.
 	MasterchainSeqno int32
-	Offset           OptInt
-	Limit            OptInt
+	Offset           OptInt `json:",omitempty,omitzero"`
+	Limit            OptInt `json:",omitempty,omitzero"`
 }
 
 func unpackGetBlockchainMasterchainTransactionsParams(packed middleware.Parameters) (params GetBlockchainMasterchainTransactionsParams) {
@@ -6248,6 +6267,7 @@ func decodeGetBlockchainMasterchainTransactionsParams(args [1]string, argsEscape
 							MaxExclusive:  false,
 							MultipleOfSet: false,
 							MultipleOf:    0,
+							Pattern:       nil,
 						}).Validate(int64(value)); err != nil {
 							return errors.Wrap(err, "int")
 						}
@@ -6313,6 +6333,7 @@ func decodeGetBlockchainMasterchainTransactionsParams(args [1]string, argsEscape
 							MaxExclusive:  false,
 							MultipleOfSet: false,
 							MultipleOf:    0,
+							Pattern:       nil,
 						}).Validate(int64(value)); err != nil {
 							return errors.Wrap(err, "int")
 						}
@@ -6539,10 +6560,10 @@ func decodeGetBlockchainTransactionByMessageHashParams(args [1]string, argsEscap
 type GetChartRatesParams struct {
 	// Accept jetton master address.
 	Token       string
-	Currency    OptString
-	StartDate   OptInt64
-	EndDate     OptInt64
-	PointsCount OptInt
+	Currency    OptString `json:",omitempty,omitzero"`
+	StartDate   OptInt64  `json:",omitempty,omitzero"`
+	EndDate     OptInt64  `json:",omitempty,omitzero"`
+	PointsCount OptInt    `json:",omitempty,omitzero"`
 }
 
 func unpackGetChartRatesParams(packed middleware.Parameters) (params GetChartRatesParams) {
@@ -6620,7 +6641,7 @@ func decodeGetChartRatesParams(args [0]string, argsEscaped bool, r *http.Request
 				return err
 			}
 		} else {
-			return validate.ErrFieldRequired
+			return err
 		}
 		return nil
 	}(); err != nil {
@@ -6715,6 +6736,7 @@ func decodeGetChartRatesParams(args [0]string, argsEscaped bool, r *http.Request
 							MaxExclusive:  false,
 							MultipleOfSet: false,
 							MultipleOf:    0,
+							Pattern:       nil,
 						}).Validate(int64(value)); err != nil {
 							return errors.Wrap(err, "int")
 						}
@@ -6780,6 +6802,7 @@ func decodeGetChartRatesParams(args [0]string, argsEscaped bool, r *http.Request
 							MaxExclusive:  false,
 							MultipleOfSet: false,
 							MultipleOf:    0,
+							Pattern:       nil,
 						}).Validate(int64(value)); err != nil {
 							return errors.Wrap(err, "int")
 						}
@@ -6850,6 +6873,7 @@ func decodeGetChartRatesParams(args [0]string, argsEscaped bool, r *http.Request
 							MaxExclusive:  false,
 							MultipleOfSet: false,
 							MultipleOf:    0,
+							Pattern:       nil,
 						}).Validate(int64(value)); err != nil {
 							return errors.Wrap(err, "int")
 						}
@@ -7010,7 +7034,7 @@ func decodeGetDomainBidsParams(args [1]string, argsEscaped bool, r *http.Request
 type GetEventParams struct {
 	// Event ID or transaction hash in hex (without 0x) or base64url format.
 	EventID        string
-	AcceptLanguage OptString
+	AcceptLanguage OptString `json:",omitempty,omitzero"`
 }
 
 func unpackGetEventParams(packed middleware.Parameters) (params GetEventParams) {
@@ -7197,8 +7221,8 @@ func decodeGetExtraCurrencyInfoParams(args [1]string, argsEscaped bool, r *http.
 type GetItemsFromCollectionParams struct {
 	// Account ID.
 	AccountID string
-	Limit     OptInt
-	Offset    OptInt
+	Limit     OptInt `json:",omitempty,omitzero"`
+	Offset    OptInt `json:",omitempty,omitzero"`
 }
 
 func unpackGetItemsFromCollectionParams(packed middleware.Parameters) (params GetItemsFromCollectionParams) {
@@ -7326,6 +7350,7 @@ func decodeGetItemsFromCollectionParams(args [1]string, argsEscaped bool, r *htt
 							MaxExclusive:  false,
 							MultipleOfSet: false,
 							MultipleOf:    0,
+							Pattern:       nil,
 						}).Validate(int64(value)); err != nil {
 							return errors.Wrap(err, "int")
 						}
@@ -7396,6 +7421,7 @@ func decodeGetItemsFromCollectionParams(args [1]string, argsEscaped bool, r *htt
 							MaxExclusive:  false,
 							MultipleOfSet: false,
 							MultipleOf:    0,
+							Pattern:       nil,
 						}).Validate(int64(value)); err != nil {
 							return errors.Wrap(err, "int")
 						}
@@ -7427,10 +7453,10 @@ type GetJettonAccountHistoryByIDParams struct {
 	// Jetton ID.
 	JettonID string
 	// Omit this parameter to get last events.
-	BeforeLt  OptInt64
+	BeforeLt  OptInt64 `json:",omitempty,omitzero"`
 	Limit     int
-	StartDate OptInt64
-	EndDate   OptInt64
+	StartDate OptInt64 `json:",omitempty,omitzero"`
+	EndDate   OptInt64 `json:",omitempty,omitzero"`
 }
 
 func unpackGetJettonAccountHistoryByIDParams(packed middleware.Parameters) (params GetJettonAccountHistoryByIDParams) {
@@ -7653,6 +7679,7 @@ func decodeGetJettonAccountHistoryByIDParams(args [2]string, argsEscaped bool, r
 					MaxExclusive:  false,
 					MultipleOfSet: false,
 					MultipleOf:    0,
+					Pattern:       nil,
 				}).Validate(int64(params.Limit)); err != nil {
 					return errors.Wrap(err, "int")
 				}
@@ -7661,7 +7688,7 @@ func decodeGetJettonAccountHistoryByIDParams(args [2]string, argsEscaped bool, r
 				return err
 			}
 		} else {
-			return validate.ErrFieldRequired
+			return err
 		}
 		return nil
 	}(); err != nil {
@@ -7715,6 +7742,7 @@ func decodeGetJettonAccountHistoryByIDParams(args [2]string, argsEscaped bool, r
 							MaxExclusive:  false,
 							MultipleOfSet: false,
 							MultipleOf:    0,
+							Pattern:       nil,
 						}).Validate(int64(value)); err != nil {
 							return errors.Wrap(err, "int")
 						}
@@ -7780,6 +7808,7 @@ func decodeGetJettonAccountHistoryByIDParams(args [2]string, argsEscaped bool, r
 							MaxExclusive:  false,
 							MultipleOfSet: false,
 							MultipleOf:    0,
+							Pattern:       nil,
 						}).Validate(int64(value)); err != nil {
 							return errors.Wrap(err, "int")
 						}
@@ -7808,8 +7837,8 @@ func decodeGetJettonAccountHistoryByIDParams(args [2]string, argsEscaped bool, r
 type GetJettonHoldersParams struct {
 	// Account ID.
 	AccountID string
-	Limit     OptInt
-	Offset    OptInt
+	Limit     OptInt `json:",omitempty,omitzero"`
+	Offset    OptInt `json:",omitempty,omitzero"`
 }
 
 func unpackGetJettonHoldersParams(packed middleware.Parameters) (params GetJettonHoldersParams) {
@@ -7937,6 +7966,7 @@ func decodeGetJettonHoldersParams(args [1]string, argsEscaped bool, r *http.Requ
 							MaxExclusive:  false,
 							MultipleOfSet: false,
 							MultipleOf:    0,
+							Pattern:       nil,
 						}).Validate(int64(value)); err != nil {
 							return errors.Wrap(err, "int")
 						}
@@ -8007,6 +8037,7 @@ func decodeGetJettonHoldersParams(args [1]string, argsEscaped bool, r *http.Requ
 							MaxExclusive:  false,
 							MultipleOfSet: false,
 							MultipleOf:    0,
+							Pattern:       nil,
 						}).Validate(int64(value)); err != nil {
 							return errors.Wrap(err, "int")
 						}
@@ -8219,8 +8250,8 @@ func decodeGetJettonTransferPayloadParams(args [2]string, argsEscaped bool, r *h
 
 // GetJettonsParams is parameters of getJettons operation.
 type GetJettonsParams struct {
-	Limit  OptInt32
-	Offset OptInt32
+	Limit  OptInt32 `json:",omitempty,omitzero"`
+	Offset OptInt32 `json:",omitempty,omitzero"`
 }
 
 func unpackGetJettonsParams(packed middleware.Parameters) (params GetJettonsParams) {
@@ -8296,6 +8327,7 @@ func decodeGetJettonsParams(args [0]string, argsEscaped bool, r *http.Request) (
 							MaxExclusive:  false,
 							MultipleOfSet: false,
 							MultipleOf:    0,
+							Pattern:       nil,
 						}).Validate(int64(value)); err != nil {
 							return errors.Wrap(err, "int")
 						}
@@ -8366,6 +8398,7 @@ func decodeGetJettonsParams(args [0]string, argsEscaped bool, r *http.Request) (
 							MaxExclusive:  false,
 							MultipleOfSet: false,
 							MultipleOf:    0,
+							Pattern:       nil,
 						}).Validate(int64(value)); err != nil {
 							return errors.Wrap(err, "int")
 						}
@@ -8394,7 +8427,7 @@ func decodeGetJettonsParams(args [0]string, argsEscaped bool, r *http.Request) (
 type GetJettonsEventsParams struct {
 	// Event ID or transaction hash in hex (without 0x) or base64url format.
 	EventID        string
-	AcceptLanguage OptString
+	AcceptLanguage OptString `json:",omitempty,omitzero"`
 }
 
 func unpackGetJettonsEventsParams(packed middleware.Parameters) (params GetJettonsEventsParams) {
@@ -8777,8 +8810,8 @@ func decodeGetNftCollectionParams(args [1]string, argsEscaped bool, r *http.Requ
 
 // GetNftCollectionsParams is parameters of getNftCollections operation.
 type GetNftCollectionsParams struct {
-	Limit  OptInt32
-	Offset OptInt32
+	Limit  OptInt32 `json:",omitempty,omitzero"`
+	Offset OptInt32 `json:",omitempty,omitzero"`
 }
 
 func unpackGetNftCollectionsParams(packed middleware.Parameters) (params GetNftCollectionsParams) {
@@ -8854,6 +8887,7 @@ func decodeGetNftCollectionsParams(args [0]string, argsEscaped bool, r *http.Req
 							MaxExclusive:  false,
 							MultipleOfSet: false,
 							MultipleOf:    0,
+							Pattern:       nil,
 						}).Validate(int64(value)); err != nil {
 							return errors.Wrap(err, "int")
 						}
@@ -8924,6 +8958,7 @@ func decodeGetNftCollectionsParams(args [0]string, argsEscaped bool, r *http.Req
 							MaxExclusive:  false,
 							MultipleOfSet: false,
 							MultipleOf:    0,
+							Pattern:       nil,
 						}).Validate(int64(value)); err != nil {
 							return errors.Wrap(err, "int")
 						}
@@ -8952,12 +8987,12 @@ func decodeGetNftCollectionsParams(args [0]string, argsEscaped bool, r *http.Req
 type GetNftHistoryByIDParams struct {
 	// Account ID.
 	AccountID      string
-	AcceptLanguage OptString
+	AcceptLanguage OptString `json:",omitempty,omitzero"`
 	// Omit this parameter to get last events.
-	BeforeLt  OptInt64
+	BeforeLt  OptInt64 `json:",omitempty,omitzero"`
 	Limit     int
-	StartDate OptInt64
-	EndDate   OptInt64
+	StartDate OptInt64 `json:",omitempty,omitzero"`
+	EndDate   OptInt64 `json:",omitempty,omitzero"`
 }
 
 func unpackGetNftHistoryByIDParams(packed middleware.Parameters) (params GetNftHistoryByIDParams) {
@@ -9182,6 +9217,7 @@ func decodeGetNftHistoryByIDParams(args [1]string, argsEscaped bool, r *http.Req
 					MaxExclusive:  false,
 					MultipleOfSet: false,
 					MultipleOf:    0,
+					Pattern:       nil,
 				}).Validate(int64(params.Limit)); err != nil {
 					return errors.Wrap(err, "int")
 				}
@@ -9190,7 +9226,7 @@ func decodeGetNftHistoryByIDParams(args [1]string, argsEscaped bool, r *http.Req
 				return err
 			}
 		} else {
-			return validate.ErrFieldRequired
+			return err
 		}
 		return nil
 	}(); err != nil {
@@ -9244,6 +9280,7 @@ func decodeGetNftHistoryByIDParams(args [1]string, argsEscaped bool, r *http.Req
 							MaxExclusive:  false,
 							MultipleOfSet: false,
 							MultipleOf:    0,
+							Pattern:       nil,
 						}).Validate(int64(value)); err != nil {
 							return errors.Wrap(err, "int")
 						}
@@ -9309,6 +9346,7 @@ func decodeGetNftHistoryByIDParams(args [1]string, argsEscaped bool, r *http.Req
 							MaxExclusive:  false,
 							MultipleOfSet: false,
 							MultipleOf:    0,
+							Pattern:       nil,
 						}).Validate(int64(value)); err != nil {
 							return errors.Wrap(err, "int")
 						}
@@ -9404,8 +9442,8 @@ type GetPurchaseHistoryParams struct {
 	// Account ID.
 	AccountID string
 	// Omit this parameter to get last invoices.
-	BeforeLt OptInt64
-	Limit    OptInt
+	BeforeLt OptInt64 `json:",omitempty,omitzero"`
+	Limit    OptInt   `json:",omitempty,omitzero"`
 }
 
 func unpackGetPurchaseHistoryParams(packed middleware.Parameters) (params GetPurchaseHistoryParams) {
@@ -9574,6 +9612,7 @@ func decodeGetPurchaseHistoryParams(args [1]string, argsEscaped bool, r *http.Re
 							MaxExclusive:  false,
 							MultipleOfSet: false,
 							MultipleOf:    0,
+							Pattern:       nil,
 						}).Validate(int64(value)); err != nil {
 							return errors.Wrap(err, "int")
 						}
@@ -9601,9 +9640,9 @@ func decodeGetPurchaseHistoryParams(args [1]string, argsEscaped bool, r *http.Re
 // GetRatesParams is parameters of getRates operation.
 type GetRatesParams struct {
 	// Accept ton and jetton master addresses, separated by commas.
-	Tokens []string
+	Tokens []string `json:",omitempty"`
 	// Accept ton and all possible fiat currencies, separated by commas.
-	Currencies []string
+	Currencies []string `json:",omitempty"`
 }
 
 func unpackGetRatesParams(packed middleware.Parameters) (params GetRatesParams) {
@@ -9677,7 +9716,7 @@ func decodeGetRatesParams(args [0]string, argsEscaped bool, r *http.Request) (pa
 				return err
 			}
 		} else {
-			return validate.ErrFieldRequired
+			return err
 		}
 		return nil
 	}(); err != nil {
@@ -9738,7 +9777,7 @@ func decodeGetRatesParams(args [0]string, argsEscaped bool, r *http.Request) (pa
 				return err
 			}
 		} else {
-			return validate.ErrFieldRequired
+			return err
 		}
 		return nil
 	}(); err != nil {
@@ -9756,7 +9795,7 @@ type GetRawAccountStateParams struct {
 	// Account ID.
 	AccountID string
 	// Target block: (workchain,shard,seqno,root_hash,file_hash).
-	TargetBlock OptString
+	TargetBlock OptString `json:",omitempty,omitzero"`
 }
 
 func unpackGetRawAccountStateParams(packed middleware.Parameters) (params GetRawAccountStateParams) {
@@ -9875,7 +9914,7 @@ type GetRawBlockProofParams struct {
 	// Known block: (workchain,shard,seqno,root_hash,file_hash).
 	KnownBlock string
 	// Target block: (workchain,shard,seqno,root_hash,file_hash).
-	TargetBlock OptString
+	TargetBlock OptString `json:",omitempty,omitzero"`
 	// Mode.
 	Mode int32
 }
@@ -9935,7 +9974,7 @@ func decodeGetRawBlockProofParams(args [0]string, argsEscaped bool, r *http.Requ
 				return err
 			}
 		} else {
-			return validate.ErrFieldRequired
+			return err
 		}
 		return nil
 	}(); err != nil {
@@ -10012,7 +10051,7 @@ func decodeGetRawBlockProofParams(args [0]string, argsEscaped bool, r *http.Requ
 				return err
 			}
 		} else {
-			return validate.ErrFieldRequired
+			return err
 		}
 		return nil
 	}(); err != nil {
@@ -10190,7 +10229,7 @@ func decodeGetRawBlockchainBlockHeaderParams(args [1]string, argsEscaped bool, r
 				return err
 			}
 		} else {
-			return validate.ErrFieldRequired
+			return err
 		}
 		return nil
 	}(); err != nil {
@@ -10434,7 +10473,7 @@ func decodeGetRawConfigParams(args [1]string, argsEscaped bool, r *http.Request)
 				return err
 			}
 		} else {
-			return validate.ErrFieldRequired
+			return err
 		}
 		return nil
 	}(); err != nil {
@@ -10456,9 +10495,9 @@ type GetRawListBlockTransactionsParams struct {
 	// Count.
 	Count int32
 	// Account ID.
-	AccountID OptString
+	AccountID OptString `json:",omitempty,omitzero"`
 	// Lt.
-	Lt OptInt64
+	Lt OptInt64 `json:",omitempty,omitzero"`
 }
 
 func unpackGetRawListBlockTransactionsParams(packed middleware.Parameters) (params GetRawListBlockTransactionsParams) {
@@ -10577,7 +10616,7 @@ func decodeGetRawListBlockTransactionsParams(args [1]string, argsEscaped bool, r
 				return err
 			}
 		} else {
-			return validate.ErrFieldRequired
+			return err
 		}
 		return nil
 	}(); err != nil {
@@ -10613,7 +10652,7 @@ func decodeGetRawListBlockTransactionsParams(args [1]string, argsEscaped bool, r
 				return err
 			}
 		} else {
-			return validate.ErrFieldRequired
+			return err
 		}
 		return nil
 	}(); err != nil {
@@ -10753,7 +10792,7 @@ func decodeGetRawMasterchainInfoExtParams(args [0]string, argsEscaped bool, r *h
 				return err
 			}
 		} else {
-			return validate.ErrFieldRequired
+			return err
 		}
 		return nil
 	}(); err != nil {
@@ -10949,7 +10988,7 @@ func decodeGetRawShardInfoParams(args [1]string, argsEscaped bool, r *http.Reque
 				return err
 			}
 		} else {
-			return validate.ErrFieldRequired
+			return err
 		}
 		return nil
 	}(); err != nil {
@@ -10985,7 +11024,7 @@ func decodeGetRawShardInfoParams(args [1]string, argsEscaped bool, r *http.Reque
 				return err
 			}
 		} else {
-			return validate.ErrFieldRequired
+			return err
 		}
 		return nil
 	}(); err != nil {
@@ -11021,7 +11060,7 @@ func decodeGetRawShardInfoParams(args [1]string, argsEscaped bool, r *http.Reque
 				return err
 			}
 		} else {
-			return validate.ErrFieldRequired
+			return err
 		}
 		return nil
 	}(); err != nil {
@@ -11151,7 +11190,7 @@ func decodeGetRawTransactionsParams(args [1]string, argsEscaped bool, r *http.Re
 				return err
 			}
 		} else {
-			return validate.ErrFieldRequired
+			return err
 		}
 		return nil
 	}(); err != nil {
@@ -11187,7 +11226,7 @@ func decodeGetRawTransactionsParams(args [1]string, argsEscaped bool, r *http.Re
 				return err
 			}
 		} else {
-			return validate.ErrFieldRequired
+			return err
 		}
 		return nil
 	}(); err != nil {
@@ -11223,7 +11262,7 @@ func decodeGetRawTransactionsParams(args [1]string, argsEscaped bool, r *http.Re
 				return err
 			}
 		} else {
-			return validate.ErrFieldRequired
+			return err
 		}
 		return nil
 	}(); err != nil {
@@ -11288,7 +11327,7 @@ func decodeGetReducedBlockchainBlocksParams(args [0]string, argsEscaped bool, r 
 				return err
 			}
 		} else {
-			return validate.ErrFieldRequired
+			return err
 		}
 		return nil
 	}(); err != nil {
@@ -11324,7 +11363,7 @@ func decodeGetReducedBlockchainBlocksParams(args [0]string, argsEscaped bool, r 
 				return err
 			}
 		} else {
-			return validate.ErrFieldRequired
+			return err
 		}
 		return nil
 	}(); err != nil {
@@ -11342,8 +11381,8 @@ type GetStakingPoolHistoryParams struct {
 	// Account ID.
 	AccountID string
 	// Omit this parameter to get last log entries.
-	BeforeLt OptInt64
-	Limit    OptInt32
+	BeforeLt OptInt64 `json:",omitempty,omitzero"`
+	Limit    OptInt32 `json:",omitempty,omitzero"`
 }
 
 func unpackGetStakingPoolHistoryParams(packed middleware.Parameters) (params GetStakingPoolHistoryParams) {
@@ -11512,6 +11551,7 @@ func decodeGetStakingPoolHistoryParams(args [1]string, argsEscaped bool, r *http
 							MaxExclusive:  false,
 							MultipleOfSet: false,
 							MultipleOf:    0,
+							Pattern:       nil,
 						}).Validate(int64(value)); err != nil {
 							return errors.Wrap(err, "int")
 						}
@@ -11540,7 +11580,7 @@ func decodeGetStakingPoolHistoryParams(args [1]string, argsEscaped bool, r *http
 type GetStakingPoolInfoParams struct {
 	// Account ID.
 	AccountID      string
-	AcceptLanguage OptString
+	AcceptLanguage OptString `json:",omitempty,omitzero"`
 }
 
 func unpackGetStakingPoolInfoParams(packed middleware.Parameters) (params GetStakingPoolInfoParams) {
@@ -11660,10 +11700,10 @@ func decodeGetStakingPoolInfoParams(args [1]string, argsEscaped bool, r *http.Re
 // GetStakingPoolsParams is parameters of getStakingPools operation.
 type GetStakingPoolsParams struct {
 	// Account ID.
-	AvailableFor OptString
+	AvailableFor OptString `json:",omitempty,omitzero"`
 	// Return also pools not from white list - just compatible by interfaces (maybe dangerous!).
-	IncludeUnverified OptBool
-	AcceptLanguage    OptString
+	IncludeUnverified OptBool   `json:",omitempty,omitzero"`
+	AcceptLanguage    OptString `json:",omitempty,omitzero"`
 }
 
 func unpackGetStakingPoolsParams(packed middleware.Parameters) (params GetStakingPoolsParams) {
@@ -12137,13 +12177,17 @@ func decodeSearchAccountsParams(args [0]string, argsEscaped bool, r *http.Reques
 			}
 			if err := func() error {
 				if err := (validate.String{
-					MinLength:    3,
-					MinLengthSet: true,
-					MaxLength:    15,
-					MaxLengthSet: true,
-					Email:        false,
-					Hostname:     false,
-					Regex:        nil,
+					MinLength:     3,
+					MinLengthSet:  true,
+					MaxLength:     15,
+					MaxLengthSet:  true,
+					Email:         false,
+					Hostname:      false,
+					Regex:         nil,
+					MinNumeric:    0,
+					MinNumericSet: false,
+					MaxNumeric:    0,
+					MaxNumericSet: false,
 				}).Validate(string(params.Name)); err != nil {
 					return errors.Wrap(err, "string")
 				}
@@ -12152,7 +12196,7 @@ func decodeSearchAccountsParams(args [0]string, argsEscaped bool, r *http.Reques
 				return err
 			}
 		} else {
-			return validate.ErrFieldRequired
+			return err
 		}
 		return nil
 	}(); err != nil {

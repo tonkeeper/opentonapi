@@ -6514,7 +6514,7 @@ func (s *GaslessEstimateReqMessagesItem) SetBoc(val string) {
 }
 
 type GaslessSendReq struct {
-	// Hex encoded Ed25519 public key (optional; omit if not required by the relay).
+	// Hex encoded public key.
 	WalletPublicKey OptString `json:"wallet_public_key"`
 	Boc             string    `json:"boc"`
 }
@@ -10377,9 +10377,9 @@ type NftItem struct {
 	// Please use trust field.
 	//
 	// Deprecated: schema marks this property as deprecated.
-	ApprovedBy  []NftItemApprovedByItem `json:"approved_by"`
-	IncludeCnft OptBool                 `json:"include_cnft"`
-	Trust       TrustType               `json:"trust"`
+	ApprovedBy  NftApprovedBy `json:"approved_by"`
+	IncludeCnft OptBool       `json:"include_cnft"`
+	Trust       TrustType     `json:"trust"`
 	// Hash of the NFT item account code cell (hex).
 	CodeHash OptString `json:"code_hash"`
 	// Hash of the NFT item account data cell (hex).
@@ -10432,7 +10432,7 @@ func (s *NftItem) GetDNS() OptString {
 }
 
 // GetApprovedBy returns the value of ApprovedBy.
-func (s *NftItem) GetApprovedBy() []NftItemApprovedByItem {
+func (s *NftItem) GetApprovedBy() NftApprovedBy {
 	return s.ApprovedBy
 }
 
@@ -10502,7 +10502,7 @@ func (s *NftItem) SetDNS(val OptString) {
 }
 
 // SetApprovedBy sets the value of ApprovedBy.
-func (s *NftItem) SetApprovedBy(val []NftItemApprovedByItem) {
+func (s *NftItem) SetApprovedBy(val NftApprovedBy) {
 	s.ApprovedBy = val
 }
 
@@ -10524,47 +10524,6 @@ func (s *NftItem) SetCodeHash(val OptString) {
 // SetDataHash sets the value of DataHash.
 func (s *NftItem) SetDataHash(val OptString) {
 	s.DataHash = val
-}
-
-type NftItemApprovedByItem string
-
-const (
-	NftItemApprovedByItemGetgems   NftItemApprovedByItem = "getgems"
-	NftItemApprovedByItemTonkeeper NftItemApprovedByItem = "tonkeeper"
-)
-
-// AllValues returns all NftItemApprovedByItem values.
-func (NftItemApprovedByItem) AllValues() []NftItemApprovedByItem {
-	return []NftItemApprovedByItem{
-		NftItemApprovedByItemGetgems,
-		NftItemApprovedByItemTonkeeper,
-	}
-}
-
-// MarshalText implements encoding.TextMarshaler.
-func (s NftItemApprovedByItem) MarshalText() ([]byte, error) {
-	switch s {
-	case NftItemApprovedByItemGetgems:
-		return []byte(s), nil
-	case NftItemApprovedByItemTonkeeper:
-		return []byte(s), nil
-	default:
-		return nil, errors.Errorf("invalid value: %q", s)
-	}
-}
-
-// UnmarshalText implements encoding.TextUnmarshaler.
-func (s *NftItemApprovedByItem) UnmarshalText(data []byte) error {
-	switch NftItemApprovedByItem(data) {
-	case NftItemApprovedByItemGetgems:
-		*s = NftItemApprovedByItemGetgems
-		return nil
-	case NftItemApprovedByItemTonkeeper:
-		*s = NftItemApprovedByItemTonkeeper
-		return nil
-	default:
-		return errors.Errorf("invalid value: %q", data)
-	}
 }
 
 type NftItemCollection struct {
@@ -14921,10 +14880,10 @@ func (o *OptNilString) SetTo(v string) {
 	o.Value = v
 }
 
-// IsSet returns true if value is Null.
+// IsNull returns true if value is Null.
 func (o OptNilString) IsNull() bool { return o.Null }
 
-// SetNull sets value to null.
+// SetToNull sets value to null.
 func (o *OptNilString) SetToNull() {
 	o.Set = true
 	o.Null = true

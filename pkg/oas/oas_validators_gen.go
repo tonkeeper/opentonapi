@@ -6,7 +6,6 @@ import (
 	"fmt"
 
 	"github.com/go-faster/errors"
-
 	"github.com/ogen-go/ogen/validate"
 )
 
@@ -101,6 +100,7 @@ func (s *AccountEvent) Validate() error {
 			MaxExclusive:  false,
 			MultipleOfSet: false,
 			MultipleOf:    nil,
+			Pattern:       nil,
 		}).Validate(float64(s.Progress)); err != nil {
 			return errors.Wrap(err, "float")
 		}
@@ -2631,6 +2631,7 @@ func (s *Event) Validate() error {
 			MaxExclusive:  false,
 			MultipleOfSet: false,
 			MultipleOf:    nil,
+			Pattern:       nil,
 		}).Validate(float64(s.Progress)); err != nil {
 			return errors.Wrap(err, "float")
 		}
@@ -4495,25 +4496,8 @@ func (s *NftItem) Validate() error {
 		})
 	}
 	if err := func() error {
-		if s.ApprovedBy == nil {
-			return errors.New("nil is invalid value")
-		}
-		var failures []validate.FieldError
-		for i, elem := range s.ApprovedBy {
-			if err := func() error {
-				if err := elem.Validate(); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				failures = append(failures, validate.FieldError{
-					Name:  fmt.Sprintf("[%d]", i),
-					Error: err,
-				})
-			}
-		}
-		if len(failures) > 0 {
-			return &validate.Error{Fields: failures}
+		if err := s.ApprovedBy.Validate(); err != nil {
+			return err
 		}
 		return nil
 	}(); err != nil {
@@ -4537,17 +4521,6 @@ func (s *NftItem) Validate() error {
 		return &validate.Error{Fields: failures}
 	}
 	return nil
-}
-
-func (s NftItemApprovedByItem) Validate() error {
-	switch s {
-	case "getgems":
-		return nil
-	case "tonkeeper":
-		return nil
-	default:
-		return errors.Errorf("invalid value: %v", s)
-	}
 }
 
 func (s *NftItemTransferAction) Validate() error {
@@ -5176,6 +5149,9 @@ func (s *SendBlockchainMessageReq) Validate() error {
 
 	var failures []validate.FieldError
 	if err := func() error {
+		if s.Batch == nil {
+			return nil // optional
+		}
 		if err := (validate.Array{
 			MinLength:    0,
 			MinLengthSet: false,
