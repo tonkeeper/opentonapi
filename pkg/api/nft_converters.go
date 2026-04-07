@@ -54,7 +54,7 @@ func (h *Handler) convertNFT(ctx context.Context, item core.NftItem, book addres
 		cInfo, _ := metaCache.getCollectionMeta(ctx, collectionAddr)
 		if cc, prs := book.GetCollectionInfoByAddress(collectionAddr); prs {
 			for _, approver := range cc.Approvers {
-				nftItem.ApprovedBy = append(nftItem.ApprovedBy, oas.NftItemApprovedByItem(approver))
+				nftItem.ApprovedBy = append(nftItem.ApprovedBy, oas.NftApprovedByItem(approver))
 			}
 		}
 		nftItem.Collection.SetTo(oas.NftItemCollection{
