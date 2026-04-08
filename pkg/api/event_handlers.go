@@ -298,12 +298,16 @@ func (h *Handler) GetAccountEvents(ctx context.Context, params oas.GetAccountEve
 			events = append(events, h.processTrace(ctx, account.ID, traceID, params.AcceptLanguage, params.SubjectOnly.Value))
 		}
 	}
-	// if we look into history we don't need to mix mempool
-	if descendingOrder && !(params.BeforeLt.IsSet() || params.StartDate.IsSet() || params.EndDate.IsSet() || (len(events) > 0 && events[0].InProgress)) {
+
+	isHistoryLookup := params.BeforeLt.IsSet() || params.StartDate.IsSet() || params.EndDate.IsSet()
+	pendingAlreadyAdded := len(events) > 0 && events[0].InProgress
+
+	if descendingOrder && !(isHistoryLookup || pendingAlreadyAdded) {
 		memTraces, _ := h.mempoolEmulate.accountsTraces.Get(account.ID)
+		pendingLimits := getPendingLimits(params.Limit)
 		i := 0
 		for _, hash := range memTraces {
-			if i > params.Limit-10 { // we want always to save at least 10 real transaction
+			if i > pendingLimits { // reserver slots for real transactions
 				break
 			}
 			tx, _ := h.storage.SearchTransactionByMessageHash(ctx, hash)
@@ -800,4 +804,18 @@ func (h *Handler) EmulateMessageToWallet(ctx context.Context, request *oas.Emula
 		Risk:  oasRisk,
 	}
 	return &consequences, nil
+}
+
+func getPendingLimits(limit int) int {
+	if limit >= 20 {
+		// show at least 10 finalized events
+		return limit - 10
+	} else if limit >= 10 {
+		return limit - 5
+	} else if limit >= 5 {
+		return limit - 2
+	} else if limit >= 1 {
+		return limit - 1
+	}
+	return 0
 }
