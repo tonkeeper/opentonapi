@@ -12,9 +12,11 @@ import (
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/opentonapi/pkg/rates"
 	"github.com/tonkeeper/opentonapi/pkg/score"
+	"github.com/tonkeeper/opentonapi/pkg/validation"
 	"github.com/tonkeeper/opentonapi/pkg/verifier"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/contract/dns"
+	"github.com/tonkeeper/tongo/liteapi"
 	"github.com/tonkeeper/tongo/tep64"
 	"github.com/tonkeeper/tongo/ton"
 	"github.com/tonkeeper/tongo/tonconnect"
@@ -48,6 +50,7 @@ type Handler struct {
 	metaCache      metadataCache
 	tonConnect     *tonconnect.Server
 	verifierSource verifierSource
+	validation     *validation.Service
 
 	// parallelTraceProcessing enables parallel trace-to-action conversion.
 	parallelTraceProcessing bool
@@ -78,20 +81,21 @@ func (h *Handler) NewError(ctx context.Context, err error) *oas.ErrorStatusCode 
 
 // Options configures behavior of a Handler instance.
 type Options struct {
-	storage          storage
-	chainState       chainState
-	addressBook      addressBook
-	msgSender        messageSender
-	executor         executor
-	limits           Limits
-	spamFilter       SpamFilter
-	ratesSource      ratesSource
-	tonConnectSecret string
-	ctxToDetails     ctxToDetails
-	gasless          Gasless
+	storage                 storage
+	chainState              chainState
+	addressBook             addressBook
+	msgSender               messageSender
+	executor                executor
+	limits                  Limits
+	spamFilter              SpamFilter
+	ratesSource             ratesSource
+	tonConnectSecret        string
+	ctxToDetails            ctxToDetails
+	gasless                 Gasless
 	verifier                verifierSource
 	score                   scoreSource
 	parallelTraceProcessing bool
+	liteapi                 *liteapi.Client
 }
 
 type Option func(o *Options)
@@ -179,6 +183,12 @@ func WithParallelTraceProcessing(enabled bool) Option {
 	}
 }
 
+func WithLiteapiClient(client *liteapi.Client) Option {
+	return func(o *Options) {
+		o.liteapi = client
+	}
+}
+
 func NewHandler(logger *zap.Logger, opts ...Option) (*Handler, error) {
 	options := &Options{}
 	for _, o := range opts {
@@ -234,6 +244,10 @@ func NewHandler(logger *zap.Logger, opts ...Option) (*Handler, error) {
 	if err != nil {
 		slog.Warn("unable to detect tongo version", "err", err)
 	}
+	var validationService *validation.Service
+	if options.liteapi != nil {
+		validationService = validation.New(options.liteapi)
+	}
 	return &Handler{
 		logger:         logger,
 		storage:        options.storage,
@@ -261,10 +275,11 @@ func NewHandler(logger *zap.Logger, opts ...Option) (*Handler, error) {
 		},
 		parallelTraceProcessing: options.parallelTraceProcessing,
 		tongoVersion:            tongoVersion,
-		blacklistedBocCache: cache.NewLRUCache[[32]byte, struct{}](100000, "blacklisted_boc_cache"),
-		getMethodsCache:     cache.NewLRUCache[string, *oas.MethodExecutionResult](100000, "get_methods_cache"),
-		tonConnect:          tonConnect,
-		configPool:          configPool,
+		blacklistedBocCache:     cache.NewLRUCache[[32]byte, struct{}](100000, "blacklisted_boc_cache"),
+		getMethodsCache:         cache.NewLRUCache[string, *oas.MethodExecutionResult](100000, "get_methods_cache"),
+		tonConnect:              tonConnect,
+		configPool:              configPool,
+		validation:              validationService,
 	}, nil
 }
 

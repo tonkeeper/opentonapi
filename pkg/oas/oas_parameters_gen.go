@@ -11376,6 +11376,123 @@ func decodeGetReducedBlockchainBlocksParams(args [0]string, argsEscaped bool, r 
 	return params, nil
 }
 
+// GetRoundRewardsParams is parameters of getRoundRewards operation.
+type GetRoundRewardsParams struct {
+	// Election ID of the finished round. Mutually exclusive with `block`.
+	ElectionID OptInt64 `json:",omitempty,omitzero"`
+	// Masterchain block seqno within the finished round. Mutually exclusive with `election_id`.
+	Block OptUint32 `json:",omitempty,omitzero"`
+}
+
+func unpackGetRoundRewardsParams(packed middleware.Parameters) (params GetRoundRewardsParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "election_id",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.ElectionID = v.(OptInt64)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "block",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.Block = v.(OptUint32)
+		}
+	}
+	return params
+}
+
+func decodeGetRoundRewardsParams(args [0]string, argsEscaped bool, r *http.Request) (params GetRoundRewardsParams, _ error) {
+	q := uri.NewQueryDecoder(r.URL.Query())
+	// Decode query: election_id.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "election_id",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotElectionIDVal int64
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToInt64(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotElectionIDVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.ElectionID.SetTo(paramsDotElectionIDVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "election_id",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Decode query: block.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "block",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotBlockVal uint32
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToUint32(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotBlockVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.Block.SetTo(paramsDotBlockVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "block",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
 // GetStakingPoolHistoryParams is parameters of getStakingPoolHistory operation.
 type GetStakingPoolHistoryParams struct {
 	// Account ID.
@@ -11929,6 +12046,189 @@ func decodeGetTraceParams(args [1]string, argsEscaped bool, r *http.Request) (pa
 		return params, &ogenerrors.DecodeParamError{
 			Name: "trace_id",
 			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// GetValidationRoundsParams is parameters of getValidationRounds operation.
+type GetValidationRoundsParams struct {
+	// Return the single round matching this election ID. Mutually exclusive with `block`.
+	ElectionID OptInt64 `json:",omitempty,omitzero"`
+	// Find the round containing this masterchain block seqno and return it plus up to `limit-1` older
+	// rounds. Mutually exclusive with `election_id`.
+	Block OptUint32 `json:",omitempty,omitzero"`
+}
+
+func unpackGetValidationRoundsParams(packed middleware.Parameters) (params GetValidationRoundsParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "election_id",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.ElectionID = v.(OptInt64)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "block",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.Block = v.(OptUint32)
+		}
+	}
+	return params
+}
+
+func decodeGetValidationRoundsParams(args [0]string, argsEscaped bool, r *http.Request) (params GetValidationRoundsParams, _ error) {
+	q := uri.NewQueryDecoder(r.URL.Query())
+	// Decode query: election_id.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "election_id",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotElectionIDVal int64
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToInt64(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotElectionIDVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.ElectionID.SetTo(paramsDotElectionIDVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "election_id",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Decode query: block.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "block",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotBlockVal uint32
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToUint32(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotBlockVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.Block.SetTo(paramsDotBlockVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "block",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// GetValidatorsParams is parameters of getValidators operation.
+type GetValidatorsParams struct {
+	// Masterchain block seqno. Defaults to latest.
+	Seqno OptUint32 `json:",omitempty,omitzero"`
+}
+
+func unpackGetValidatorsParams(packed middleware.Parameters) (params GetValidatorsParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "seqno",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.Seqno = v.(OptUint32)
+		}
+	}
+	return params
+}
+
+func decodeGetValidatorsParams(args [0]string, argsEscaped bool, r *http.Request) (params GetValidatorsParams, _ error) {
+	q := uri.NewQueryDecoder(r.URL.Query())
+	// Decode query: seqno.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "seqno",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotSeqnoVal uint32
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToUint32(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotSeqnoVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.Seqno.SetTo(paramsDotSeqnoVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "seqno",
+			In:   "query",
 			Err:  err,
 		}
 	}

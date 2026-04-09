@@ -70,6 +70,7 @@ func main() {
 		api.WithMessageSender(msgSender),
 		api.WithSpamFilter(spamFilter),
 		api.WithTonConnectSecret(cfg.TonConnect.Secret),
+		api.WithLiteapiClient(client),
 	)
 	if err != nil {
 		log.Fatal("failed to create api handler", zap.Error(err))

@@ -1549,6 +1549,26 @@
     ],
     "type": "object"
    },
+   "BlockInfo": {
+    "properties": {
+     "seqno": {
+      "description": "Masterchain block sequence number.",
+      "example": 57486221,
+      "format": "uint32",
+      "type": "integer"
+     },
+     "utime": {
+      "example": 23814011000000,
+      "format": "int64",
+      "type": "integer"
+     }
+    },
+    "required": [
+     "seqno",
+     "time"
+    ],
+    "type": "object"
+   },
    "BlockLimits": {
     "properties": {
      "bytes": {
@@ -5315,6 +5335,50 @@
     ],
     "type": "object"
    },
+   "NominatorRewardEntry": {
+    "properties": {
+     "address": {
+      "description": "Nominator's wallet address (bounceable, base64url).",
+      "example": "EQAqR4RYauq7p3jqKGnD-eSYVDoOCak9g8ZsSNVHI9fevCzB",
+      "type": "string"
+     },
+     "effective_stake": {
+      "description": "amount in nanotons",
+      "example": 123456789,
+      "format": "int64",
+      "type": "integer",
+      "x-js-format": "bigint"
+     },
+     "reward": {
+      "description": "amount in nanotons",
+      "example": 123456789,
+      "format": "int64",
+      "type": "integer",
+      "x-js-format": "bigint"
+     },
+     "stake": {
+      "description": "amount in nanotons",
+      "example": 123456789,
+      "format": "int64",
+      "type": "integer",
+      "x-js-format": "bigint"
+     },
+     "weight": {
+      "description": "Nominator's share of total nominators' deposit (0–1).",
+      "example": 0.15,
+      "format": "double",
+      "type": "number"
+     }
+    },
+    "required": [
+     "address",
+     "weight",
+     "reward",
+     "effective_stake",
+     "stake"
+    ],
+    "type": "object"
+   },
    "Oracle": {
     "properties": {
      "address": {
@@ -5812,6 +5876,122 @@
      "ton",
      "jettons",
      "nfts"
+    ],
+    "type": "object"
+   },
+   "RoundInfo": {
+    "properties": {
+     "end_block": {
+      "description": "Masterchain block seqno at (or nearest to) validation round end.",
+      "example": 57546000,
+      "format": "uint32",
+      "type": "integer"
+     },
+     "end_utime": {
+      "example": 23814011000000,
+      "format": "int64",
+      "type": "integer"
+     },
+     "start_block": {
+      "description": "Masterchain block seqno at (or nearest to) validation round start.",
+      "example": 57480000,
+      "format": "uint32",
+      "type": "integer"
+     },
+     "start_utime": {
+      "example": 23814011000000,
+      "format": "int64",
+      "type": "integer"
+     }
+    },
+    "required": [
+     "start",
+     "end",
+     "start_block",
+     "end_block"
+    ],
+    "type": "object"
+   },
+   "RoundRewardsResponse": {
+    "properties": {
+     "election_id": {
+      "description": "Election ID (electAt timestamp).",
+      "example": 1740053384,
+      "format": "int64",
+      "type": "integer"
+     },
+     "end_block": {
+      "description": "Last masterchain block of the round.",
+      "format": "uint32",
+      "type": "integer"
+     },
+     "error": {
+      "type": "string"
+     },
+     "next_election_id": {
+      "description": "Election ID of the round immediately after this one.",
+      "example": 1772658824,
+      "format": "int64",
+      "type": "integer"
+     },
+     "prev_election_id": {
+      "description": "Election ID of the round immediately before this one.",
+      "example": 1772486024,
+      "format": "int64",
+      "type": "integer"
+     },
+     "response_time_ms": {
+      "description": "Server-side response time in milliseconds.",
+      "example": 5432,
+      "format": "int64",
+      "type": "integer"
+     },
+     "round_end": {
+      "description": "Validation round end time.",
+      "format": "date-time",
+      "type": "string"
+     },
+     "round_start": {
+      "description": "Validation round start time.",
+      "format": "date-time",
+      "type": "string"
+     },
+     "start_block": {
+      "description": "First masterchain block of the round.",
+      "format": "uint32",
+      "type": "integer"
+     },
+     "total_bonuses": {
+      "description": "amount in nanotons",
+      "example": 123456789,
+      "format": "int64",
+      "type": "integer",
+      "x-js-format": "bigint"
+     },
+     "total_stake": {
+      "description": "amount in nanotons",
+      "example": 123456789,
+      "format": "int64",
+      "type": "integer",
+      "x-js-format": "bigint"
+     },
+     "validators": {
+      "items": {
+       "$ref": "#/components/schemas/ValidatorRewardEntry"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "response_time_ms",
+     "election_id",
+     "round_start",
+     "round_end",
+     "start_block",
+     "end_block",
+     "total_bonuses",
+     "total_stake",
+     "validators"
     ],
     "type": "object"
    },
@@ -6685,6 +6865,98 @@
     ],
     "type": "object"
    },
+   "ValidationRound": {
+    "properties": {
+     "bonuses": {
+      "description": "Total rewards the elector pays for the round. Omitted if round hasn't finished.",
+      "example": 123456789,
+      "format": "int64",
+      "type": "integer",
+      "x-js-format": "bigint"
+     },
+     "elect_at": {
+      "description": "Election ID (electAt timestamp).",
+      "example": 1740053384,
+      "format": "int64",
+      "type": "integer"
+     },
+     "end_block": {
+      "description": "Masterchain block seqno at (or nearest to) round end. Omitted if round hasn't finished.",
+      "example": 57546000,
+      "format": "uint32",
+      "type": "integer"
+     },
+     "end_utime": {
+      "example": 23814011000000,
+      "format": "int64",
+      "type": "integer"
+     },
+     "finished": {
+      "description": "Whether the validation round is complete.",
+      "example": true,
+      "type": "boolean"
+     },
+     "next_election_id": {
+      "description": "Election ID of the round immediately after this one. Omitted when this round is not yet finished (next round not known).\n",
+      "example": 1772658824,
+      "format": "int64",
+      "type": "integer"
+     },
+     "prev_election_id": {
+      "description": "Election ID of the round immediately before this one.",
+      "example": 1772486024,
+      "format": "int64",
+      "type": "integer"
+     },
+     "start_block": {
+      "description": "Masterchain block seqno at (or nearest to) round start.",
+      "example": 57480000,
+      "format": "uint32",
+      "type": "integer"
+     },
+     "start_utime": {
+      "example": 23814011000000,
+      "format": "int64",
+      "type": "integer"
+     },
+     "total_stake": {
+      "description": "Total stake locked in the round.",
+      "example": 123456789,
+      "format": "int64",
+      "type": "integer",
+      "x-js-format": "bigint"
+     }
+    },
+    "required": [
+     "election_id",
+     "start",
+     "end",
+     "start_block",
+     "finished"
+    ],
+    "type": "object"
+   },
+   "ValidationRoundsResponse": {
+    "properties": {
+     "response_time_ms": {
+      "description": "Server-side response time in milliseconds.",
+      "example": 1234,
+      "format": "int64",
+      "type": "integer"
+     },
+     "rounds": {
+      "items": {
+       "$ref": "#/components/schemas/ValidationRound"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "response_time_ms",
+     "rounds"
+    ],
+    "type": "object"
+   },
    "Validator": {
     "properties": {
      "address": {
@@ -6713,6 +6985,106 @@
      "adnl_address",
      "stake",
      "max_factor"
+    ],
+    "type": "object"
+   },
+   "ValidatorRewardEntry": {
+    "properties": {
+     "effective_stake": {
+      "description": "amount in nanotons",
+      "example": 123456789,
+      "format": "int64",
+      "type": "integer",
+      "x-js-format": "bigint"
+     },
+     "nominators": {
+      "items": {
+       "$ref": "#/components/schemas/NominatorRewardEntry"
+      },
+      "type": "array"
+     },
+     "nominators_count": {
+      "format": "uint32",
+      "type": "integer"
+     },
+     "nominators_stake": {
+      "description": "amount in nanotons",
+      "example": 123456789,
+      "format": "int64",
+      "type": "integer",
+      "x-js-format": "bigint"
+     },
+     "owner_address": {
+      "type": "string"
+     },
+     "pool": {
+      "description": "Pool smart contract address (bounceable, base64url).",
+      "example": "Ef_bmCmMPsrHKOC4hV8foWBs2TEUAggQ1Wfe6EAqjrI3sGNI",
+      "type": "string"
+     },
+     "pool_type": {
+      "description": "Contract type detected by code hash.",
+      "enum": [
+       "nominator-pool-v1.0",
+       "single-nominator-pool-v1.0",
+       "single-nominator-pool-v1.1",
+       "other"
+      ],
+      "type": "string"
+     },
+     "public_key": {
+      "description": "Validator's public key (hex-encoded Ed25519).",
+      "example": "e33f0e53552f951e0a27c8e5a461a1bd65975af369a2c85a06e51f7fbb8ae667",
+      "type": "string"
+     },
+     "rank": {
+      "description": "Position sorted by effective stake (descending).",
+      "example": 1,
+      "type": "integer"
+     },
+     "reward": {
+      "description": "amount in nanotons",
+      "example": 123456789,
+      "format": "int64",
+      "type": "integer",
+      "x-js-format": "bigint"
+     },
+     "total_stake": {
+      "description": "Total funds deposited by the pool: effective_stake + credit (leftover balance kept in the elector contract after election).\n",
+      "example": 123456789,
+      "format": "int64",
+      "type": "integer",
+      "x-js-format": "bigint"
+     },
+     "validator_address": {
+      "type": "string"
+     },
+     "validator_reward_share": {
+      "description": "Fraction of staking rewards kept by the validator (0.3 = 30%).",
+      "example": 0.3,
+      "format": "double",
+      "type": "number"
+     },
+     "validator_stake": {
+      "description": "amount in nanotons",
+      "example": 123456789,
+      "format": "int64",
+      "type": "integer",
+      "x-js-format": "bigint"
+     },
+     "weight": {
+      "description": "Fraction of total effective stake (0–1).",
+      "example": 0.004648,
+      "format": "double",
+      "type": "number"
+     }
+    },
+    "required": [
+     "rank",
+     "public_key",
+     "effective_stake",
+     "weight",
+     "reward"
     ],
     "type": "object"
    },
@@ -6753,6 +7125,78 @@
      "elect_close",
      "min_stake",
      "total_stake"
+    ],
+    "type": "object"
+   },
+   "ValidatorsResponse": {
+    "properties": {
+     "block": {
+      "$ref": "#/components/schemas/BlockInfo"
+     },
+     "election_id": {
+      "description": "Current election ID (electAt timestamp).",
+      "example": 1740053384,
+      "format": "int64",
+      "type": "integer"
+     },
+     "elector_balance": {
+      "description": "amount in nanotons",
+      "example": 123456789,
+      "format": "int64",
+      "type": "integer",
+      "x-js-format": "bigint"
+     },
+     "next_election_id": {
+      "description": "Election ID of the round immediately after this one. Omitted when the current round is not yet finished (next round not known).\n",
+      "example": 1772658824,
+      "format": "int64",
+      "type": "integer"
+     },
+     "prev_election_id": {
+      "description": "Election ID of the round immediately before this one.",
+      "example": 1772486024,
+      "format": "int64",
+      "type": "integer"
+     },
+     "response_time_ms": {
+      "description": "Server-side response time in milliseconds.",
+      "example": 12345,
+      "format": "int64",
+      "type": "integer"
+     },
+     "reward_per_block": {
+      "description": "amount in nanotons",
+      "example": 123456789,
+      "format": "int64",
+      "type": "integer",
+      "x-js-format": "bigint"
+     },
+     "total_stake": {
+      "description": "amount in nanotons",
+      "example": 123456789,
+      "format": "int64",
+      "type": "integer",
+      "x-js-format": "bigint"
+     },
+     "validation_round": {
+      "$ref": "#/components/schemas/RoundInfo"
+     },
+     "validators": {
+      "items": {
+       "$ref": "#/components/schemas/ValidatorRewardEntry"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "response_time_ms",
+     "block",
+     "validation_round",
+     "election_id",
+     "elector_balance",
+     "total_stake",
+     "reward_per_block",
+     "validators"
     ],
     "type": "object"
    },
@@ -11731,6 +12175,128 @@
     "tags": [
      "Traces"
     ]
+   }
+  },
+  "/v2/validation/rewards": {
+   "get": {
+    "description": "Computes per-validator and per-nominator reward distribution for a finished validation round using the elector's bonuses value.\n",
+    "operationId": "getRoundRewards",
+    "parameters": [
+     {
+      "description": "Election ID of the finished round. Mutually exclusive with `block`.\n",
+      "in": "query",
+      "name": "election_id",
+      "required": false,
+      "schema": {
+       "format": "int64",
+       "type": "integer"
+      }
+     },
+     {
+      "description": "Masterchain block seqno within the finished round. Mutually exclusive with `election_id`.\n",
+      "in": "query",
+      "name": "block",
+      "required": false,
+      "schema": {
+       "format": "uint32",
+       "type": "integer"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/RoundRewardsResponse"
+        }
+       }
+      },
+      "description": "Successful response"
+     },
+     "default": {
+      "$ref": "#/components/responses/Error"
+     }
+    },
+    "summary": "Get per-validator reward distribution for a finished round"
+   }
+  },
+  "/v2/validation/rounds": {
+   "get": {
+    "description": "Returns past and current validation rounds with boundaries, stakes, and bonuses. Always uses the latest masterchain block.\n",
+    "operationId": "getValidationRounds",
+    "parameters": [
+     {
+      "description": "Return the single round matching this election ID. Mutually exclusive with `block`.\n",
+      "in": "query",
+      "name": "election_id",
+      "required": false,
+      "schema": {
+       "format": "int64",
+       "type": "integer"
+      }
+     },
+     {
+      "description": "Find the round containing this masterchain block seqno and return it plus up to `limit-1` older rounds. Mutually exclusive with `election_id`.\n",
+      "in": "query",
+      "name": "block",
+      "required": false,
+      "schema": {
+       "format": "uint32",
+       "type": "integer"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ValidationRoundsResponse"
+        }
+       }
+      },
+      "description": "Successful response"
+     },
+     "default": {
+      "$ref": "#/components/responses/Error"
+     }
+    },
+    "summary": "Get validation round metadata"
+   }
+  },
+  "/v2/validation/validators": {
+   "get": {
+    "description": "Returns all current validators with stakes, rewards, pool addresses, and (optionally) nominator breakdowns.\n",
+    "operationId": "getValidators",
+    "parameters": [
+     {
+      "description": "Masterchain block seqno. Defaults to latest.",
+      "in": "query",
+      "name": "seqno",
+      "required": false,
+      "schema": {
+       "format": "uint32",
+       "type": "integer"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ValidatorsResponse"
+        }
+       }
+      },
+      "description": "Successful response"
+     },
+     "default": {
+      "$ref": "#/components/responses/Error"
+     }
+    },
+    "summary": "Get all current validators"
    }
   },
   "/v2/wallet/auth/proof": {
