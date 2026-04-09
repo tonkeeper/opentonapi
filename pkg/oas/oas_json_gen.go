@@ -8,6 +8,7 @@ import (
 
 	"github.com/go-faster/errors"
 	"github.com/go-faster/jx"
+	"github.com/ogen-go/ogen/json"
 	"github.com/ogen-go/ogen/validate"
 )
 
@@ -4312,6 +4313,119 @@ func (s *BlockCurrencyCollectionOtherItem) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *BlockCurrencyCollectionOtherItem) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *BlockInfo) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *BlockInfo) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("seqno")
+		e.UInt32(s.Seqno)
+	}
+	{
+		if s.Utime.Set {
+			e.FieldStart("utime")
+			s.Utime.Encode(e)
+		}
+	}
+}
+
+var jsonFieldsNameOfBlockInfo = [2]string{
+	0: "seqno",
+	1: "utime",
+}
+
+// Decode decodes BlockInfo from json.
+func (s *BlockInfo) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode BlockInfo to nil")
+	}
+	var requiredBitSet [1]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "seqno":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				v, err := d.UInt32()
+				s.Seqno = uint32(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"seqno\"")
+			}
+		case "utime":
+			if err := func() error {
+				s.Utime.Reset()
+				if err := s.Utime.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"utime\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode BlockInfo")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00000001,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfBlockInfo) {
+					name = jsonFieldsNameOfBlockInfo[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *BlockInfo) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *BlockInfo) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -31381,6 +31495,170 @@ func (s *NftPurchaseActionAuctionType) UnmarshalJSON(data []byte) error {
 	return s.Decode(d)
 }
 
+// Encode implements json.Marshaler.
+func (s *NominatorRewardEntry) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *NominatorRewardEntry) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("address")
+		e.Str(s.Address)
+	}
+	{
+		e.FieldStart("weight")
+		e.Float64(s.Weight)
+	}
+	{
+		e.FieldStart("reward")
+		e.Int64(s.Reward)
+	}
+	{
+		e.FieldStart("effective_stake")
+		e.Int64(s.EffectiveStake)
+	}
+	{
+		e.FieldStart("stake")
+		e.Int64(s.Stake)
+	}
+}
+
+var jsonFieldsNameOfNominatorRewardEntry = [5]string{
+	0: "address",
+	1: "weight",
+	2: "reward",
+	3: "effective_stake",
+	4: "stake",
+}
+
+// Decode decodes NominatorRewardEntry from json.
+func (s *NominatorRewardEntry) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode NominatorRewardEntry to nil")
+	}
+	var requiredBitSet [1]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "address":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				v, err := d.Str()
+				s.Address = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"address\"")
+			}
+		case "weight":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				v, err := d.Float64()
+				s.Weight = float64(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"weight\"")
+			}
+		case "reward":
+			requiredBitSet[0] |= 1 << 2
+			if err := func() error {
+				v, err := d.Int64()
+				s.Reward = int64(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"reward\"")
+			}
+		case "effective_stake":
+			requiredBitSet[0] |= 1 << 3
+			if err := func() error {
+				v, err := d.Int64()
+				s.EffectiveStake = int64(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"effective_stake\"")
+			}
+		case "stake":
+			requiredBitSet[0] |= 1 << 4
+			if err := func() error {
+				v, err := d.Int64()
+				s.Stake = int64(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"stake\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode NominatorRewardEntry")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00011111,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfNominatorRewardEntry) {
+					name = jsonFieldsNameOfNominatorRewardEntry[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *NominatorRewardEntry) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *NominatorRewardEntry) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
 // Encode encodes AccountAddress as json.
 func (o OptAccountAddress) Encode(e *jx.Encoder) {
 	if !o.Set {
@@ -33333,6 +33611,41 @@ func (s *OptFloat32) UnmarshalJSON(data []byte) error {
 	return s.Decode(d)
 }
 
+// Encode encodes float64 as json.
+func (o OptFloat64) Encode(e *jx.Encoder) {
+	if !o.Set {
+		return
+	}
+	e.Float64(float64(o.Value))
+}
+
+// Decode decodes float64 from json.
+func (o *OptFloat64) Decode(d *jx.Decoder) error {
+	if o == nil {
+		return errors.New("invalid: unable to decode OptFloat64 to nil")
+	}
+	o.Set = true
+	v, err := d.Float64()
+	if err != nil {
+		return err
+	}
+	o.Value = float64(v)
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s OptFloat64) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *OptFloat64) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
 // Encode encodes GasRelayAction as json.
 func (o OptGasRelayAction) Encode(e *jx.Encoder) {
 	if !o.Set {
@@ -34916,6 +35229,41 @@ func (s *OptTonTransferAction) UnmarshalJSON(data []byte) error {
 	return s.Decode(d)
 }
 
+// Encode encodes uint32 as json.
+func (o OptUint32) Encode(e *jx.Encoder) {
+	if !o.Set {
+		return
+	}
+	e.UInt32(uint32(o.Value))
+}
+
+// Decode decodes uint32 from json.
+func (o *OptUint32) Decode(d *jx.Decoder) error {
+	if o == nil {
+		return errors.New("invalid: unable to decode OptUint32 to nil")
+	}
+	o.Set = true
+	v, err := d.UInt32()
+	if err != nil {
+		return err
+	}
+	o.Value = uint32(v)
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s OptUint32) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *OptUint32) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
 // Encode encodes UnSubscriptionAction as json.
 func (o OptUnSubscriptionAction) Encode(e *jx.Encoder) {
 	if !o.Set {
@@ -34945,6 +35293,39 @@ func (s OptUnSubscriptionAction) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *OptUnSubscriptionAction) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes ValidatorRewardEntryPoolType as json.
+func (o OptValidatorRewardEntryPoolType) Encode(e *jx.Encoder) {
+	if !o.Set {
+		return
+	}
+	e.Str(string(o.Value))
+}
+
+// Decode decodes ValidatorRewardEntryPoolType from json.
+func (o *OptValidatorRewardEntryPoolType) Decode(d *jx.Decoder) error {
+	if o == nil {
+		return errors.New("invalid: unable to decode OptValidatorRewardEntryPoolType to nil")
+	}
+	o.Set = true
+	if err := o.Value.Decode(d); err != nil {
+		return err
+	}
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s OptValidatorRewardEntryPoolType) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *OptValidatorRewardEntryPoolType) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -37697,6 +38078,447 @@ func (s *Risk) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *Risk) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *RoundInfo) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *RoundInfo) encodeFields(e *jx.Encoder) {
+	{
+		if s.StartUtime.Set {
+			e.FieldStart("start_utime")
+			s.StartUtime.Encode(e)
+		}
+	}
+	{
+		if s.EndUtime.Set {
+			e.FieldStart("end_utime")
+			s.EndUtime.Encode(e)
+		}
+	}
+	{
+		e.FieldStart("start_block")
+		e.UInt32(s.StartBlock)
+	}
+	{
+		e.FieldStart("end_block")
+		e.UInt32(s.EndBlock)
+	}
+}
+
+var jsonFieldsNameOfRoundInfo = [4]string{
+	0: "start_utime",
+	1: "end_utime",
+	2: "start_block",
+	3: "end_block",
+}
+
+// Decode decodes RoundInfo from json.
+func (s *RoundInfo) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode RoundInfo to nil")
+	}
+	var requiredBitSet [1]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "start_utime":
+			if err := func() error {
+				s.StartUtime.Reset()
+				if err := s.StartUtime.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"start_utime\"")
+			}
+		case "end_utime":
+			if err := func() error {
+				s.EndUtime.Reset()
+				if err := s.EndUtime.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"end_utime\"")
+			}
+		case "start_block":
+			requiredBitSet[0] |= 1 << 2
+			if err := func() error {
+				v, err := d.UInt32()
+				s.StartBlock = uint32(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"start_block\"")
+			}
+		case "end_block":
+			requiredBitSet[0] |= 1 << 3
+			if err := func() error {
+				v, err := d.UInt32()
+				s.EndBlock = uint32(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"end_block\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode RoundInfo")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00001100,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfRoundInfo) {
+					name = jsonFieldsNameOfRoundInfo[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *RoundInfo) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *RoundInfo) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *RoundRewardsResponse) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *RoundRewardsResponse) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("response_time_ms")
+		e.Int64(s.ResponseTimeMs)
+	}
+	{
+		e.FieldStart("election_id")
+		e.Int64(s.ElectionID)
+	}
+	{
+		if s.PrevElectionID.Set {
+			e.FieldStart("prev_election_id")
+			s.PrevElectionID.Encode(e)
+		}
+	}
+	{
+		if s.NextElectionID.Set {
+			e.FieldStart("next_election_id")
+			s.NextElectionID.Encode(e)
+		}
+	}
+	{
+		e.FieldStart("round_start")
+		json.EncodeDateTime(e, s.RoundStart)
+	}
+	{
+		e.FieldStart("round_end")
+		json.EncodeDateTime(e, s.RoundEnd)
+	}
+	{
+		e.FieldStart("start_block")
+		e.UInt32(s.StartBlock)
+	}
+	{
+		e.FieldStart("end_block")
+		e.UInt32(s.EndBlock)
+	}
+	{
+		e.FieldStart("total_bonuses")
+		e.Int64(s.TotalBonuses)
+	}
+	{
+		e.FieldStart("total_stake")
+		e.Int64(s.TotalStake)
+	}
+	{
+		e.FieldStart("validators")
+		e.ArrStart()
+		for _, elem := range s.Validators {
+			elem.Encode(e)
+		}
+		e.ArrEnd()
+	}
+	{
+		if s.Error.Set {
+			e.FieldStart("error")
+			s.Error.Encode(e)
+		}
+	}
+}
+
+var jsonFieldsNameOfRoundRewardsResponse = [12]string{
+	0:  "response_time_ms",
+	1:  "election_id",
+	2:  "prev_election_id",
+	3:  "next_election_id",
+	4:  "round_start",
+	5:  "round_end",
+	6:  "start_block",
+	7:  "end_block",
+	8:  "total_bonuses",
+	9:  "total_stake",
+	10: "validators",
+	11: "error",
+}
+
+// Decode decodes RoundRewardsResponse from json.
+func (s *RoundRewardsResponse) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode RoundRewardsResponse to nil")
+	}
+	var requiredBitSet [2]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "response_time_ms":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				v, err := d.Int64()
+				s.ResponseTimeMs = int64(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"response_time_ms\"")
+			}
+		case "election_id":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				v, err := d.Int64()
+				s.ElectionID = int64(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"election_id\"")
+			}
+		case "prev_election_id":
+			if err := func() error {
+				s.PrevElectionID.Reset()
+				if err := s.PrevElectionID.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"prev_election_id\"")
+			}
+		case "next_election_id":
+			if err := func() error {
+				s.NextElectionID.Reset()
+				if err := s.NextElectionID.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"next_election_id\"")
+			}
+		case "round_start":
+			requiredBitSet[0] |= 1 << 4
+			if err := func() error {
+				v, err := json.DecodeDateTime(d)
+				s.RoundStart = v
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"round_start\"")
+			}
+		case "round_end":
+			requiredBitSet[0] |= 1 << 5
+			if err := func() error {
+				v, err := json.DecodeDateTime(d)
+				s.RoundEnd = v
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"round_end\"")
+			}
+		case "start_block":
+			requiredBitSet[0] |= 1 << 6
+			if err := func() error {
+				v, err := d.UInt32()
+				s.StartBlock = uint32(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"start_block\"")
+			}
+		case "end_block":
+			requiredBitSet[0] |= 1 << 7
+			if err := func() error {
+				v, err := d.UInt32()
+				s.EndBlock = uint32(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"end_block\"")
+			}
+		case "total_bonuses":
+			requiredBitSet[1] |= 1 << 0
+			if err := func() error {
+				v, err := d.Int64()
+				s.TotalBonuses = int64(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"total_bonuses\"")
+			}
+		case "total_stake":
+			requiredBitSet[1] |= 1 << 1
+			if err := func() error {
+				v, err := d.Int64()
+				s.TotalStake = int64(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"total_stake\"")
+			}
+		case "validators":
+			requiredBitSet[1] |= 1 << 2
+			if err := func() error {
+				s.Validators = make([]ValidatorRewardEntry, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem ValidatorRewardEntry
+					if err := elem.Decode(d); err != nil {
+						return err
+					}
+					s.Validators = append(s.Validators, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"validators\"")
+			}
+		case "error":
+			if err := func() error {
+				s.Error.Reset()
+				if err := s.Error.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"error\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode RoundRewardsResponse")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [2]uint8{
+		0b11110011,
+		0b00000111,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfRoundRewardsResponse) {
+					name = jsonFieldsNameOfRoundRewardsResponse[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *RoundRewardsResponse) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *RoundRewardsResponse) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -43157,6 +43979,379 @@ func (s *UnSubscriptionAction) UnmarshalJSON(data []byte) error {
 }
 
 // Encode implements json.Marshaler.
+func (s *ValidationRound) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *ValidationRound) encodeFields(e *jx.Encoder) {
+	{
+		if s.ElectAt.Set {
+			e.FieldStart("elect_at")
+			s.ElectAt.Encode(e)
+		}
+	}
+	{
+		if s.StartUtime.Set {
+			e.FieldStart("start_utime")
+			s.StartUtime.Encode(e)
+		}
+	}
+	{
+		if s.EndUtime.Set {
+			e.FieldStart("end_utime")
+			s.EndUtime.Encode(e)
+		}
+	}
+	{
+		e.FieldStart("start_block")
+		e.UInt32(s.StartBlock)
+	}
+	{
+		if s.EndBlock.Set {
+			e.FieldStart("end_block")
+			s.EndBlock.Encode(e)
+		}
+	}
+	{
+		if s.PrevElectionID.Set {
+			e.FieldStart("prev_election_id")
+			s.PrevElectionID.Encode(e)
+		}
+	}
+	{
+		if s.NextElectionID.Set {
+			e.FieldStart("next_election_id")
+			s.NextElectionID.Encode(e)
+		}
+	}
+	{
+		if s.TotalStake.Set {
+			e.FieldStart("total_stake")
+			s.TotalStake.Encode(e)
+		}
+	}
+	{
+		if s.Bonuses.Set {
+			e.FieldStart("bonuses")
+			s.Bonuses.Encode(e)
+		}
+	}
+	{
+		e.FieldStart("finished")
+		e.Bool(s.Finished)
+	}
+}
+
+var jsonFieldsNameOfValidationRound = [10]string{
+	0: "elect_at",
+	1: "start_utime",
+	2: "end_utime",
+	3: "start_block",
+	4: "end_block",
+	5: "prev_election_id",
+	6: "next_election_id",
+	7: "total_stake",
+	8: "bonuses",
+	9: "finished",
+}
+
+// Decode decodes ValidationRound from json.
+func (s *ValidationRound) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode ValidationRound to nil")
+	}
+	var requiredBitSet [2]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "elect_at":
+			if err := func() error {
+				s.ElectAt.Reset()
+				if err := s.ElectAt.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"elect_at\"")
+			}
+		case "start_utime":
+			if err := func() error {
+				s.StartUtime.Reset()
+				if err := s.StartUtime.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"start_utime\"")
+			}
+		case "end_utime":
+			if err := func() error {
+				s.EndUtime.Reset()
+				if err := s.EndUtime.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"end_utime\"")
+			}
+		case "start_block":
+			requiredBitSet[0] |= 1 << 3
+			if err := func() error {
+				v, err := d.UInt32()
+				s.StartBlock = uint32(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"start_block\"")
+			}
+		case "end_block":
+			if err := func() error {
+				s.EndBlock.Reset()
+				if err := s.EndBlock.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"end_block\"")
+			}
+		case "prev_election_id":
+			if err := func() error {
+				s.PrevElectionID.Reset()
+				if err := s.PrevElectionID.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"prev_election_id\"")
+			}
+		case "next_election_id":
+			if err := func() error {
+				s.NextElectionID.Reset()
+				if err := s.NextElectionID.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"next_election_id\"")
+			}
+		case "total_stake":
+			if err := func() error {
+				s.TotalStake.Reset()
+				if err := s.TotalStake.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"total_stake\"")
+			}
+		case "bonuses":
+			if err := func() error {
+				s.Bonuses.Reset()
+				if err := s.Bonuses.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"bonuses\"")
+			}
+		case "finished":
+			requiredBitSet[1] |= 1 << 1
+			if err := func() error {
+				v, err := d.Bool()
+				s.Finished = bool(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"finished\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode ValidationRound")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [2]uint8{
+		0b00001000,
+		0b00000010,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfValidationRound) {
+					name = jsonFieldsNameOfValidationRound[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *ValidationRound) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *ValidationRound) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *ValidationRoundsResponse) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *ValidationRoundsResponse) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("response_time_ms")
+		e.Int64(s.ResponseTimeMs)
+	}
+	{
+		e.FieldStart("rounds")
+		e.ArrStart()
+		for _, elem := range s.Rounds {
+			elem.Encode(e)
+		}
+		e.ArrEnd()
+	}
+}
+
+var jsonFieldsNameOfValidationRoundsResponse = [2]string{
+	0: "response_time_ms",
+	1: "rounds",
+}
+
+// Decode decodes ValidationRoundsResponse from json.
+func (s *ValidationRoundsResponse) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode ValidationRoundsResponse to nil")
+	}
+	var requiredBitSet [1]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "response_time_ms":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				v, err := d.Int64()
+				s.ResponseTimeMs = int64(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"response_time_ms\"")
+			}
+		case "rounds":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				s.Rounds = make([]ValidationRound, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem ValidationRound
+					if err := elem.Decode(d); err != nil {
+						return err
+					}
+					s.Rounds = append(s.Rounds, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"rounds\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode ValidationRoundsResponse")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00000011,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfValidationRoundsResponse) {
+					name = jsonFieldsNameOfValidationRoundsResponse[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *ValidationRoundsResponse) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *ValidationRoundsResponse) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
 func (s *Validator) Encode(e *jx.Encoder) {
 	e.ObjStart()
 	s.encodeFields(e)
@@ -43299,6 +44494,396 @@ func (s *Validator) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *Validator) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *ValidatorRewardEntry) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *ValidatorRewardEntry) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("rank")
+		e.Int(s.Rank)
+	}
+	{
+		e.FieldStart("public_key")
+		e.Str(s.PublicKey)
+	}
+	{
+		e.FieldStart("effective_stake")
+		e.Int64(s.EffectiveStake)
+	}
+	{
+		e.FieldStart("weight")
+		e.Float64(s.Weight)
+	}
+	{
+		e.FieldStart("reward")
+		e.Int64(s.Reward)
+	}
+	{
+		if s.Pool.Set {
+			e.FieldStart("pool")
+			s.Pool.Encode(e)
+		}
+	}
+	{
+		if s.PoolType.Set {
+			e.FieldStart("pool_type")
+			s.PoolType.Encode(e)
+		}
+	}
+	{
+		if s.OwnerAddress.Set {
+			e.FieldStart("owner_address")
+			s.OwnerAddress.Encode(e)
+		}
+	}
+	{
+		if s.ValidatorAddress.Set {
+			e.FieldStart("validator_address")
+			s.ValidatorAddress.Encode(e)
+		}
+	}
+	{
+		if s.ValidatorStake.Set {
+			e.FieldStart("validator_stake")
+			s.ValidatorStake.Encode(e)
+		}
+	}
+	{
+		if s.NominatorsStake.Set {
+			e.FieldStart("nominators_stake")
+			s.NominatorsStake.Encode(e)
+		}
+	}
+	{
+		if s.TotalStake.Set {
+			e.FieldStart("total_stake")
+			s.TotalStake.Encode(e)
+		}
+	}
+	{
+		if s.ValidatorRewardShare.Set {
+			e.FieldStart("validator_reward_share")
+			s.ValidatorRewardShare.Encode(e)
+		}
+	}
+	{
+		if s.NominatorsCount.Set {
+			e.FieldStart("nominators_count")
+			s.NominatorsCount.Encode(e)
+		}
+	}
+	{
+		if s.Nominators != nil {
+			e.FieldStart("nominators")
+			e.ArrStart()
+			for _, elem := range s.Nominators {
+				elem.Encode(e)
+			}
+			e.ArrEnd()
+		}
+	}
+}
+
+var jsonFieldsNameOfValidatorRewardEntry = [15]string{
+	0:  "rank",
+	1:  "public_key",
+	2:  "effective_stake",
+	3:  "weight",
+	4:  "reward",
+	5:  "pool",
+	6:  "pool_type",
+	7:  "owner_address",
+	8:  "validator_address",
+	9:  "validator_stake",
+	10: "nominators_stake",
+	11: "total_stake",
+	12: "validator_reward_share",
+	13: "nominators_count",
+	14: "nominators",
+}
+
+// Decode decodes ValidatorRewardEntry from json.
+func (s *ValidatorRewardEntry) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode ValidatorRewardEntry to nil")
+	}
+	var requiredBitSet [2]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "rank":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				v, err := d.Int()
+				s.Rank = int(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"rank\"")
+			}
+		case "public_key":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				v, err := d.Str()
+				s.PublicKey = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"public_key\"")
+			}
+		case "effective_stake":
+			requiredBitSet[0] |= 1 << 2
+			if err := func() error {
+				v, err := d.Int64()
+				s.EffectiveStake = int64(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"effective_stake\"")
+			}
+		case "weight":
+			requiredBitSet[0] |= 1 << 3
+			if err := func() error {
+				v, err := d.Float64()
+				s.Weight = float64(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"weight\"")
+			}
+		case "reward":
+			requiredBitSet[0] |= 1 << 4
+			if err := func() error {
+				v, err := d.Int64()
+				s.Reward = int64(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"reward\"")
+			}
+		case "pool":
+			if err := func() error {
+				s.Pool.Reset()
+				if err := s.Pool.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"pool\"")
+			}
+		case "pool_type":
+			if err := func() error {
+				s.PoolType.Reset()
+				if err := s.PoolType.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"pool_type\"")
+			}
+		case "owner_address":
+			if err := func() error {
+				s.OwnerAddress.Reset()
+				if err := s.OwnerAddress.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"owner_address\"")
+			}
+		case "validator_address":
+			if err := func() error {
+				s.ValidatorAddress.Reset()
+				if err := s.ValidatorAddress.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"validator_address\"")
+			}
+		case "validator_stake":
+			if err := func() error {
+				s.ValidatorStake.Reset()
+				if err := s.ValidatorStake.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"validator_stake\"")
+			}
+		case "nominators_stake":
+			if err := func() error {
+				s.NominatorsStake.Reset()
+				if err := s.NominatorsStake.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"nominators_stake\"")
+			}
+		case "total_stake":
+			if err := func() error {
+				s.TotalStake.Reset()
+				if err := s.TotalStake.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"total_stake\"")
+			}
+		case "validator_reward_share":
+			if err := func() error {
+				s.ValidatorRewardShare.Reset()
+				if err := s.ValidatorRewardShare.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"validator_reward_share\"")
+			}
+		case "nominators_count":
+			if err := func() error {
+				s.NominatorsCount.Reset()
+				if err := s.NominatorsCount.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"nominators_count\"")
+			}
+		case "nominators":
+			if err := func() error {
+				s.Nominators = make([]NominatorRewardEntry, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem NominatorRewardEntry
+					if err := elem.Decode(d); err != nil {
+						return err
+					}
+					s.Nominators = append(s.Nominators, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"nominators\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode ValidatorRewardEntry")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [2]uint8{
+		0b00011111,
+		0b00000000,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfValidatorRewardEntry) {
+					name = jsonFieldsNameOfValidatorRewardEntry[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *ValidatorRewardEntry) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *ValidatorRewardEntry) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes ValidatorRewardEntryPoolType as json.
+func (s ValidatorRewardEntryPoolType) Encode(e *jx.Encoder) {
+	e.Str(string(s))
+}
+
+// Decode decodes ValidatorRewardEntryPoolType from json.
+func (s *ValidatorRewardEntryPoolType) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode ValidatorRewardEntryPoolType to nil")
+	}
+	v, err := d.StrBytes()
+	if err != nil {
+		return err
+	}
+	// Try to use constant string.
+	switch ValidatorRewardEntryPoolType(v) {
+	case ValidatorRewardEntryPoolTypeNominatorPoolV10:
+		*s = ValidatorRewardEntryPoolTypeNominatorPoolV10
+	case ValidatorRewardEntryPoolTypeSingleNominatorPoolV10:
+		*s = ValidatorRewardEntryPoolTypeSingleNominatorPoolV10
+	case ValidatorRewardEntryPoolTypeSingleNominatorPoolV11:
+		*s = ValidatorRewardEntryPoolTypeSingleNominatorPoolV11
+	case ValidatorRewardEntryPoolTypeOther:
+		*s = ValidatorRewardEntryPoolTypeOther
+	default:
+		*s = ValidatorRewardEntryPoolType(v)
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s ValidatorRewardEntryPoolType) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *ValidatorRewardEntryPoolType) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -43473,6 +45058,262 @@ func (s *Validators) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *Validators) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *ValidatorsResponse) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *ValidatorsResponse) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("response_time_ms")
+		e.Int64(s.ResponseTimeMs)
+	}
+	{
+		e.FieldStart("block")
+		s.Block.Encode(e)
+	}
+	{
+		e.FieldStart("validation_round")
+		s.ValidationRound.Encode(e)
+	}
+	{
+		e.FieldStart("election_id")
+		e.Int64(s.ElectionID)
+	}
+	{
+		if s.PrevElectionID.Set {
+			e.FieldStart("prev_election_id")
+			s.PrevElectionID.Encode(e)
+		}
+	}
+	{
+		if s.NextElectionID.Set {
+			e.FieldStart("next_election_id")
+			s.NextElectionID.Encode(e)
+		}
+	}
+	{
+		e.FieldStart("elector_balance")
+		e.Int64(s.ElectorBalance)
+	}
+	{
+		e.FieldStart("total_stake")
+		e.Int64(s.TotalStake)
+	}
+	{
+		e.FieldStart("reward_per_block")
+		e.Int64(s.RewardPerBlock)
+	}
+	{
+		e.FieldStart("validators")
+		e.ArrStart()
+		for _, elem := range s.Validators {
+			elem.Encode(e)
+		}
+		e.ArrEnd()
+	}
+}
+
+var jsonFieldsNameOfValidatorsResponse = [10]string{
+	0: "response_time_ms",
+	1: "block",
+	2: "validation_round",
+	3: "election_id",
+	4: "prev_election_id",
+	5: "next_election_id",
+	6: "elector_balance",
+	7: "total_stake",
+	8: "reward_per_block",
+	9: "validators",
+}
+
+// Decode decodes ValidatorsResponse from json.
+func (s *ValidatorsResponse) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode ValidatorsResponse to nil")
+	}
+	var requiredBitSet [2]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "response_time_ms":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				v, err := d.Int64()
+				s.ResponseTimeMs = int64(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"response_time_ms\"")
+			}
+		case "block":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				if err := s.Block.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"block\"")
+			}
+		case "validation_round":
+			requiredBitSet[0] |= 1 << 2
+			if err := func() error {
+				if err := s.ValidationRound.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"validation_round\"")
+			}
+		case "election_id":
+			requiredBitSet[0] |= 1 << 3
+			if err := func() error {
+				v, err := d.Int64()
+				s.ElectionID = int64(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"election_id\"")
+			}
+		case "prev_election_id":
+			if err := func() error {
+				s.PrevElectionID.Reset()
+				if err := s.PrevElectionID.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"prev_election_id\"")
+			}
+		case "next_election_id":
+			if err := func() error {
+				s.NextElectionID.Reset()
+				if err := s.NextElectionID.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"next_election_id\"")
+			}
+		case "elector_balance":
+			requiredBitSet[0] |= 1 << 6
+			if err := func() error {
+				v, err := d.Int64()
+				s.ElectorBalance = int64(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"elector_balance\"")
+			}
+		case "total_stake":
+			requiredBitSet[0] |= 1 << 7
+			if err := func() error {
+				v, err := d.Int64()
+				s.TotalStake = int64(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"total_stake\"")
+			}
+		case "reward_per_block":
+			requiredBitSet[1] |= 1 << 0
+			if err := func() error {
+				v, err := d.Int64()
+				s.RewardPerBlock = int64(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"reward_per_block\"")
+			}
+		case "validators":
+			requiredBitSet[1] |= 1 << 1
+			if err := func() error {
+				s.Validators = make([]ValidatorRewardEntry, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem ValidatorRewardEntry
+					if err := elem.Decode(d); err != nil {
+						return err
+					}
+					s.Validators = append(s.Validators, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"validators\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode ValidatorsResponse")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [2]uint8{
+		0b11001111,
+		0b00000011,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfValidatorsResponse) {
+					name = jsonFieldsNameOfValidatorsResponse[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *ValidatorsResponse) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *ValidatorsResponse) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }

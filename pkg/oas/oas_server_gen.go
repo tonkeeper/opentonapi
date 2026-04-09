@@ -593,6 +593,13 @@ type Handler interface {
 	//
 	// GET /v2/blockchain/reduced/blocks
 	GetReducedBlockchainBlocks(ctx context.Context, params GetReducedBlockchainBlocksParams) (*ReducedBlocks, error)
+	// GetRoundRewards implements getRoundRewards operation.
+	//
+	// Computes per-validator and per-nominator reward distribution for a finished validation round using
+	// the elector's bonuses value.
+	//
+	// GET /v2/validation/rewards
+	GetRoundRewards(ctx context.Context, params GetRoundRewardsParams) (*RoundRewardsResponse, error)
 	// GetStakingPoolHistory implements getStakingPoolHistory operation.
 	//
 	// Pool history.
@@ -629,6 +636,20 @@ type Handler interface {
 	//
 	// GET /v2/traces/{trace_id}
 	GetTrace(ctx context.Context, params GetTraceParams) (*Trace, error)
+	// GetValidationRounds implements getValidationRounds operation.
+	//
+	// Returns past and current validation rounds with boundaries, stakes, and bonuses. Always uses the
+	// latest masterchain block.
+	//
+	// GET /v2/validation/rounds
+	GetValidationRounds(ctx context.Context, params GetValidationRoundsParams) (*ValidationRoundsResponse, error)
+	// GetValidators implements getValidators operation.
+	//
+	// Returns all current validators with stakes, rewards, pool addresses, and (optionally) nominator
+	// breakdowns.
+	//
+	// GET /v2/validation/validators
+	GetValidators(ctx context.Context, params GetValidatorsParams) (*ValidatorsResponse, error)
 	// GetWalletInfo implements getWalletInfo operation.
 	//
 	// Get human-friendly information about a wallet without low-level details.

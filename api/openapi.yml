@@ -2978,6 +2978,100 @@ paths:
                 $ref: '#/components/schemas/AccountPurchases'
         'default':
           $ref: '#/components/responses/Error'
+  /v2/validation/validators:
+    get:
+      operationId: getValidators
+      summary: Get all current validators
+      description: >
+        Returns all current validators with stakes, rewards, pool addresses,
+        and (optionally) nominator breakdowns.
+      parameters:
+        - name: seqno
+          in: query
+          description: Masterchain block seqno. Defaults to latest.
+          required: false
+          schema:
+            type: integer
+            format: uint32
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidatorsResponse"
+        'default':
+          $ref: '#/components/responses/Error'
+  /v2/validation/rounds:
+    get:
+      operationId: getValidationRounds
+      summary: Get validation round metadata
+      description: >
+        Returns past and current validation rounds with boundaries, stakes,
+        and bonuses. Always uses the latest masterchain block.
+      parameters:
+        - name: election_id
+          in: query
+          description: >
+            Return the single round matching this election ID.
+            Mutually exclusive with `block`.
+          required: false
+          schema:
+            type: integer
+            format: int64
+        - name: block
+          in: query
+          description: >
+            Find the round containing this masterchain block seqno and return
+            it plus up to `limit-1` older rounds. Mutually exclusive with
+            `election_id`.
+          required: false
+          schema:
+            type: integer
+            format: uint32
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationRoundsResponse"
+        'default':
+          $ref: '#/components/responses/Error'
+  /v2/validation/rewards:
+    get:
+      operationId: getRoundRewards
+      summary: Get per-validator reward distribution for a finished round
+      description: >
+        Computes per-validator and per-nominator reward distribution for a
+        finished validation round using the elector's bonuses value.
+      parameters:
+        - name: election_id
+          in: query
+          description: >
+            Election ID of the finished round. Mutually exclusive with `block`.
+          required: false
+          schema:
+            type: integer
+            format: int64
+        - name: block
+          in: query
+          description: >
+            Masterchain block seqno within the finished round.
+            Mutually exclusive with `election_id`.
+          required: false
+          schema:
+            type: integer
+            format: uint32
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RoundRewardsResponse"
+        'default':
+          $ref: '#/components/responses/Error'
 components:
   parameters:
     masterchainSeqno:
@@ -8356,6 +8450,344 @@ components:
         image:
           type: string
           example: https://cache.tonapi.io/images/jetton.jpg
+    BlockInfo:
+      type: object
+      required: [seqno, time]
+      properties:
+        seqno:
+          type: integer
+          format: uint32
+          description: Masterchain block sequence number.
+          example: 57486221
+        utime:
+          type: integer
+          format: int64
+          example: 23814011000000
+    RoundInfo:
+      type: object
+      required: [start, end, start_block, end_block]
+      properties:
+        start_utime:
+          type: integer
+          format: int64
+          example: 23814011000000
+        end_utime:
+          type: integer
+          format: int64
+          example: 23814011000000
+        start_block:
+          type: integer
+          format: uint32
+          description: Masterchain block seqno at (or nearest to) validation round start.
+          example: 57480000
+        end_block:
+          type: integer
+          format: uint32
+          description: Masterchain block seqno at (or nearest to) validation round end.
+          example: 57546000
+    ValidatorsResponse:
+      type: object
+      required:
+        - response_time_ms
+        - block
+        - validation_round
+        - election_id
+        - elector_balance
+        - total_stake
+        - reward_per_block
+        - validators
+      properties:
+        response_time_ms:
+          type: integer
+          format: int64
+          description: Server-side response time in milliseconds.
+          example: 12345
+        block:
+          $ref: "#/components/schemas/BlockInfo"
+        validation_round:
+          $ref: "#/components/schemas/RoundInfo"
+        election_id:
+          type: integer
+          format: int64
+          description: Current election ID (electAt timestamp).
+          example: 1740053384
+        prev_election_id:
+          type: integer
+          format: int64
+          description: Election ID of the round immediately before this one.
+          example: 1772486024
+        next_election_id:
+          type: integer
+          format: int64
+          description: >
+            Election ID of the round immediately after this one.
+            Omitted when the current round is not yet finished (next round not known).
+          example: 1772658824
+        elector_balance:
+          type: integer
+          description: amount in nanotons
+          format: int64
+          example: 123456789
+          x-js-format: bigint
+        total_stake:
+          type: integer
+          description: amount in nanotons
+          format: int64
+          example: 123456789
+          x-js-format: bigint
+        reward_per_block:
+          type: integer
+          description: amount in nanotons
+          format: int64
+          example: 123456789
+          x-js-format: bigint
+        validators:
+          type: array
+          items:
+            $ref: "#/components/schemas/ValidatorRewardEntry"
+    ValidationRound:
+      type: object
+      required: [election_id, start, end, start_block, finished]
+      properties:
+        elect_at:
+          type: integer
+          format: int64
+          description: Election ID (electAt timestamp).
+          example: 1740053384
+        start_utime:
+          type: integer
+          format: int64
+          example: 23814011000000
+        end_utime:
+          type: integer
+          format: int64
+          example: 23814011000000
+        start_block:
+          type: integer
+          format: uint32
+          description: Masterchain block seqno at (or nearest to) round start.
+          example: 57480000
+        end_block:
+          type: integer
+          format: uint32
+          description: Masterchain block seqno at (or nearest to) round end. Omitted if round hasn't finished.
+          example: 57546000
+        prev_election_id:
+          type: integer
+          format: int64
+          description: Election ID of the round immediately before this one.
+          example: 1772486024
+        next_election_id:
+          type: integer
+          format: int64
+          description: >
+            Election ID of the round immediately after this one.
+            Omitted when this round is not yet finished (next round not known).
+          example: 1772658824
+        total_stake:
+          type: integer
+          description: Total stake locked in the round.
+          format: int64
+          example: 123456789
+          x-js-format: bigint
+        bonuses:
+          type: integer
+          description: Total rewards the elector pays for the round. Omitted if round hasn't finished.
+          format: int64
+          example: 123456789
+          x-js-format: bigint
+        finished:
+          type: boolean
+          description: Whether the validation round is complete.
+          example: true
+    ValidationRoundsResponse:
+      type: object
+      required: [response_time_ms, rounds]
+      properties:
+        response_time_ms:
+          type: integer
+          format: int64
+          description: Server-side response time in milliseconds.
+          example: 1234
+        rounds:
+          type: array
+          items:
+            $ref: "#/components/schemas/ValidationRound"
+    NominatorRewardEntry:
+      type: object
+      required: [address, weight, reward, effective_stake, stake]
+      properties:
+        address:
+          type: string
+          description: Nominator's wallet address (bounceable, base64url).
+          example: "EQAqR4RYauq7p3jqKGnD-eSYVDoOCak9g8ZsSNVHI9fevCzB"
+        weight:
+          type: number
+          format: double
+          description: Nominator's share of total nominators' deposit (0–1).
+          example: 0.15
+        reward:
+          type: integer
+          description: amount in nanotons
+          format: int64
+          example: 123456789
+          x-js-format: bigint
+        effective_stake:
+          type: integer
+          description: amount in nanotons
+          format: int64
+          example: 123456789
+          x-js-format: bigint
+        stake:
+          type: integer
+          description: amount in nanotons
+          format: int64
+          example: 123456789
+          x-js-format: bigint
+    ValidatorRewardEntry:
+      type: object
+      required: [rank, public_key, effective_stake, weight, reward]
+      properties:
+        rank:
+          type: integer
+          description: Position sorted by effective stake (descending).
+          example: 1
+        public_key:
+          type: string
+          description: Validator's public key (hex-encoded Ed25519).
+          example: "e33f0e53552f951e0a27c8e5a461a1bd65975af369a2c85a06e51f7fbb8ae667"
+        effective_stake:
+          type: integer
+          description: amount in nanotons
+          format: int64
+          example: 123456789
+          x-js-format: bigint
+        weight:
+          type: number
+          format: double
+          description: Fraction of total effective stake (0–1).
+          example: 0.004648
+        reward:
+          type: integer
+          description: amount in nanotons
+          format: int64
+          example: 123456789
+          x-js-format: bigint
+        pool:
+          type: string
+          description: Pool smart contract address (bounceable, base64url).
+          example: "Ef_bmCmMPsrHKOC4hV8foWBs2TEUAggQ1Wfe6EAqjrI3sGNI"
+        pool_type:
+          type: string
+          description: Contract type detected by code hash.
+          enum:
+            - nominator-pool-v1.0
+            - single-nominator-pool-v1.0
+            - single-nominator-pool-v1.1
+            - other
+        owner_address:
+          type: string
+        validator_address:
+          type: string
+        validator_stake:
+          type: integer
+          description: amount in nanotons
+          format: int64
+          example: 123456789
+          x-js-format: bigint
+        nominators_stake:
+          type: integer
+          description: amount in nanotons
+          format: int64
+          example: 123456789
+          x-js-format: bigint
+        total_stake:
+          type: integer
+          description: >
+            Total funds deposited by the pool: effective_stake + credit
+            (leftover balance kept in the elector contract after election).
+          format: int64
+          example: 123456789
+          x-js-format: bigint
+        validator_reward_share:
+          type: number
+          format: double
+          description: Fraction of staking rewards kept by the validator (0.3 = 30%).
+          example: 0.3
+        nominators_count:
+          type: integer
+          format: uint32
+        nominators:
+          type: array
+          items:
+            $ref: "#/components/schemas/NominatorRewardEntry"
+    RoundRewardsResponse:
+      type: object
+      required:
+        - response_time_ms
+        - election_id
+        - round_start
+        - round_end
+        - start_block
+        - end_block
+        - total_bonuses
+        - total_stake
+        - validators
+      properties:
+        response_time_ms:
+          type: integer
+          format: int64
+          description: Server-side response time in milliseconds.
+          example: 5432
+        election_id:
+          type: integer
+          format: int64
+          description: Election ID (electAt timestamp).
+          example: 1740053384
+        prev_election_id:
+          type: integer
+          format: int64
+          description: Election ID of the round immediately before this one.
+          example: 1772486024
+        next_election_id:
+          type: integer
+          format: int64
+          description: Election ID of the round immediately after this one.
+          example: 1772658824
+        round_start:
+          type: string
+          format: date-time
+          description: Validation round start time.
+        round_end:
+          type: string
+          format: date-time
+          description: Validation round end time.
+        start_block:
+          type: integer
+          format: uint32
+          description: First masterchain block of the round.
+        end_block:
+          type: integer
+          format: uint32
+          description: Last masterchain block of the round.
+        total_bonuses:
+          type: integer
+          description: amount in nanotons
+          format: int64
+          example: 123456789
+          x-js-format: bigint
+        total_stake:
+          type: integer
+          description: amount in nanotons
+          format: int64
+          example: 123456789
+          x-js-format: bigint
+        validators:
+          type: array
+          items:
+            $ref: "#/components/schemas/ValidatorRewardEntry"
+        error:
+          type: string
   responses:
     Error:
       description: Some error during request processing

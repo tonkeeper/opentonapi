@@ -5,6 +5,7 @@ package oas
 import (
 	"fmt"
 	"io"
+	"time"
 
 	"github.com/go-faster/errors"
 	"github.com/go-faster/jx"
@@ -1895,6 +1896,33 @@ func (s *BlockCurrencyCollectionOtherItem) SetID(val int64) {
 // SetValue sets the value of Value.
 func (s *BlockCurrencyCollectionOtherItem) SetValue(val string) {
 	s.Value = val
+}
+
+// Ref: #/components/schemas/BlockInfo
+type BlockInfo struct {
+	// Masterchain block sequence number.
+	Seqno uint32   `json:"seqno"`
+	Utime OptInt64 `json:"utime"`
+}
+
+// GetSeqno returns the value of Seqno.
+func (s *BlockInfo) GetSeqno() uint32 {
+	return s.Seqno
+}
+
+// GetUtime returns the value of Utime.
+func (s *BlockInfo) GetUtime() OptInt64 {
+	return s.Utime
+}
+
+// SetSeqno sets the value of Seqno.
+func (s *BlockInfo) SetSeqno(val uint32) {
+	s.Seqno = val
+}
+
+// SetUtime sets the value of Utime.
+func (s *BlockInfo) SetUtime(val OptInt64) {
+	s.Utime = val
 }
 
 // Ref: #/components/schemas/BlockLimits
@@ -10891,6 +10919,70 @@ func (s *NftPurchaseActionAuctionType) UnmarshalText(data []byte) error {
 	}
 }
 
+// Ref: #/components/schemas/NominatorRewardEntry
+type NominatorRewardEntry struct {
+	// Nominator's wallet address (bounceable, base64url).
+	Address string `json:"address"`
+	// Nominator's share of total nominators' deposit (0–1).
+	Weight float64 `json:"weight"`
+	// Amount in nanotons.
+	Reward int64 `json:"reward"`
+	// Amount in nanotons.
+	EffectiveStake int64 `json:"effective_stake"`
+	// Amount in nanotons.
+	Stake int64 `json:"stake"`
+}
+
+// GetAddress returns the value of Address.
+func (s *NominatorRewardEntry) GetAddress() string {
+	return s.Address
+}
+
+// GetWeight returns the value of Weight.
+func (s *NominatorRewardEntry) GetWeight() float64 {
+	return s.Weight
+}
+
+// GetReward returns the value of Reward.
+func (s *NominatorRewardEntry) GetReward() int64 {
+	return s.Reward
+}
+
+// GetEffectiveStake returns the value of EffectiveStake.
+func (s *NominatorRewardEntry) GetEffectiveStake() int64 {
+	return s.EffectiveStake
+}
+
+// GetStake returns the value of Stake.
+func (s *NominatorRewardEntry) GetStake() int64 {
+	return s.Stake
+}
+
+// SetAddress sets the value of Address.
+func (s *NominatorRewardEntry) SetAddress(val string) {
+	s.Address = val
+}
+
+// SetWeight sets the value of Weight.
+func (s *NominatorRewardEntry) SetWeight(val float64) {
+	s.Weight = val
+}
+
+// SetReward sets the value of Reward.
+func (s *NominatorRewardEntry) SetReward(val int64) {
+	s.Reward = val
+}
+
+// SetEffectiveStake sets the value of EffectiveStake.
+func (s *NominatorRewardEntry) SetEffectiveStake(val int64) {
+	s.EffectiveStake = val
+}
+
+// SetStake sets the value of Stake.
+func (s *NominatorRewardEntry) SetStake(val int64) {
+	s.Stake = val
+}
+
 // NewOptAccountAddress returns new OptAccountAddress with value set to v.
 func NewOptAccountAddress(v AccountAddress) OptAccountAddress {
 	return OptAccountAddress{
@@ -13605,6 +13697,52 @@ func (o OptFloat32) Or(d float32) float32 {
 	return d
 }
 
+// NewOptFloat64 returns new OptFloat64 with value set to v.
+func NewOptFloat64(v float64) OptFloat64 {
+	return OptFloat64{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptFloat64 is optional float64.
+type OptFloat64 struct {
+	Value float64
+	Set   bool
+}
+
+// IsSet returns true if OptFloat64 was set.
+func (o OptFloat64) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptFloat64) Reset() {
+	var v float64
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptFloat64) SetTo(v float64) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptFloat64) Get() (v float64, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptFloat64) Or(d float64) float64 {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptGasRelayAction returns new OptGasRelayAction with value set to v.
 func NewOptGasRelayAction(v GasRelayAction) OptGasRelayAction {
 	return OptGasRelayAction{
@@ -15876,6 +16014,52 @@ func (o OptTonTransferAction) Or(d TonTransferAction) TonTransferAction {
 	return d
 }
 
+// NewOptUint32 returns new OptUint32 with value set to v.
+func NewOptUint32(v uint32) OptUint32 {
+	return OptUint32{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptUint32 is optional uint32.
+type OptUint32 struct {
+	Value uint32
+	Set   bool
+}
+
+// IsSet returns true if OptUint32 was set.
+func (o OptUint32) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptUint32) Reset() {
+	var v uint32
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptUint32) SetTo(v uint32) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptUint32) Get() (v uint32, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptUint32) Or(d uint32) uint32 {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptUnSubscriptionAction returns new OptUnSubscriptionAction with value set to v.
 func NewOptUnSubscriptionAction(v UnSubscriptionAction) OptUnSubscriptionAction {
 	return OptUnSubscriptionAction{
@@ -15916,6 +16100,52 @@ func (o OptUnSubscriptionAction) Get() (v UnSubscriptionAction, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptUnSubscriptionAction) Or(d UnSubscriptionAction) UnSubscriptionAction {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptValidatorRewardEntryPoolType returns new OptValidatorRewardEntryPoolType with value set to v.
+func NewOptValidatorRewardEntryPoolType(v ValidatorRewardEntryPoolType) OptValidatorRewardEntryPoolType {
+	return OptValidatorRewardEntryPoolType{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptValidatorRewardEntryPoolType is optional ValidatorRewardEntryPoolType.
+type OptValidatorRewardEntryPoolType struct {
+	Value ValidatorRewardEntryPoolType
+	Set   bool
+}
+
+// IsSet returns true if OptValidatorRewardEntryPoolType was set.
+func (o OptValidatorRewardEntryPoolType) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptValidatorRewardEntryPoolType) Reset() {
+	var v ValidatorRewardEntryPoolType
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptValidatorRewardEntryPoolType) SetTo(v ValidatorRewardEntryPoolType) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptValidatorRewardEntryPoolType) Get() (v ValidatorRewardEntryPoolType, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptValidatorRewardEntryPoolType) Or(d ValidatorRewardEntryPoolType) ValidatorRewardEntryPoolType {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -17142,6 +17372,202 @@ func (s *Risk) SetNfts(val []NftItem) {
 // SetTotalEquivalent sets the value of TotalEquivalent.
 func (s *Risk) SetTotalEquivalent(val OptFloat32) {
 	s.TotalEquivalent = val
+}
+
+// Ref: #/components/schemas/RoundInfo
+type RoundInfo struct {
+	StartUtime OptInt64 `json:"start_utime"`
+	EndUtime   OptInt64 `json:"end_utime"`
+	// Masterchain block seqno at (or nearest to) validation round start.
+	StartBlock uint32 `json:"start_block"`
+	// Masterchain block seqno at (or nearest to) validation round end.
+	EndBlock uint32 `json:"end_block"`
+}
+
+// GetStartUtime returns the value of StartUtime.
+func (s *RoundInfo) GetStartUtime() OptInt64 {
+	return s.StartUtime
+}
+
+// GetEndUtime returns the value of EndUtime.
+func (s *RoundInfo) GetEndUtime() OptInt64 {
+	return s.EndUtime
+}
+
+// GetStartBlock returns the value of StartBlock.
+func (s *RoundInfo) GetStartBlock() uint32 {
+	return s.StartBlock
+}
+
+// GetEndBlock returns the value of EndBlock.
+func (s *RoundInfo) GetEndBlock() uint32 {
+	return s.EndBlock
+}
+
+// SetStartUtime sets the value of StartUtime.
+func (s *RoundInfo) SetStartUtime(val OptInt64) {
+	s.StartUtime = val
+}
+
+// SetEndUtime sets the value of EndUtime.
+func (s *RoundInfo) SetEndUtime(val OptInt64) {
+	s.EndUtime = val
+}
+
+// SetStartBlock sets the value of StartBlock.
+func (s *RoundInfo) SetStartBlock(val uint32) {
+	s.StartBlock = val
+}
+
+// SetEndBlock sets the value of EndBlock.
+func (s *RoundInfo) SetEndBlock(val uint32) {
+	s.EndBlock = val
+}
+
+// Ref: #/components/schemas/RoundRewardsResponse
+type RoundRewardsResponse struct {
+	// Server-side response time in milliseconds.
+	ResponseTimeMs int64 `json:"response_time_ms"`
+	// Election ID (electAt timestamp).
+	ElectionID int64 `json:"election_id"`
+	// Election ID of the round immediately before this one.
+	PrevElectionID OptInt64 `json:"prev_election_id"`
+	// Election ID of the round immediately after this one.
+	NextElectionID OptInt64 `json:"next_election_id"`
+	// Validation round start time.
+	RoundStart time.Time `json:"round_start"`
+	// Validation round end time.
+	RoundEnd time.Time `json:"round_end"`
+	// First masterchain block of the round.
+	StartBlock uint32 `json:"start_block"`
+	// Last masterchain block of the round.
+	EndBlock uint32 `json:"end_block"`
+	// Amount in nanotons.
+	TotalBonuses int64 `json:"total_bonuses"`
+	// Amount in nanotons.
+	TotalStake int64                  `json:"total_stake"`
+	Validators []ValidatorRewardEntry `json:"validators"`
+	Error      OptString              `json:"error"`
+}
+
+// GetResponseTimeMs returns the value of ResponseTimeMs.
+func (s *RoundRewardsResponse) GetResponseTimeMs() int64 {
+	return s.ResponseTimeMs
+}
+
+// GetElectionID returns the value of ElectionID.
+func (s *RoundRewardsResponse) GetElectionID() int64 {
+	return s.ElectionID
+}
+
+// GetPrevElectionID returns the value of PrevElectionID.
+func (s *RoundRewardsResponse) GetPrevElectionID() OptInt64 {
+	return s.PrevElectionID
+}
+
+// GetNextElectionID returns the value of NextElectionID.
+func (s *RoundRewardsResponse) GetNextElectionID() OptInt64 {
+	return s.NextElectionID
+}
+
+// GetRoundStart returns the value of RoundStart.
+func (s *RoundRewardsResponse) GetRoundStart() time.Time {
+	return s.RoundStart
+}
+
+// GetRoundEnd returns the value of RoundEnd.
+func (s *RoundRewardsResponse) GetRoundEnd() time.Time {
+	return s.RoundEnd
+}
+
+// GetStartBlock returns the value of StartBlock.
+func (s *RoundRewardsResponse) GetStartBlock() uint32 {
+	return s.StartBlock
+}
+
+// GetEndBlock returns the value of EndBlock.
+func (s *RoundRewardsResponse) GetEndBlock() uint32 {
+	return s.EndBlock
+}
+
+// GetTotalBonuses returns the value of TotalBonuses.
+func (s *RoundRewardsResponse) GetTotalBonuses() int64 {
+	return s.TotalBonuses
+}
+
+// GetTotalStake returns the value of TotalStake.
+func (s *RoundRewardsResponse) GetTotalStake() int64 {
+	return s.TotalStake
+}
+
+// GetValidators returns the value of Validators.
+func (s *RoundRewardsResponse) GetValidators() []ValidatorRewardEntry {
+	return s.Validators
+}
+
+// GetError returns the value of Error.
+func (s *RoundRewardsResponse) GetError() OptString {
+	return s.Error
+}
+
+// SetResponseTimeMs sets the value of ResponseTimeMs.
+func (s *RoundRewardsResponse) SetResponseTimeMs(val int64) {
+	s.ResponseTimeMs = val
+}
+
+// SetElectionID sets the value of ElectionID.
+func (s *RoundRewardsResponse) SetElectionID(val int64) {
+	s.ElectionID = val
+}
+
+// SetPrevElectionID sets the value of PrevElectionID.
+func (s *RoundRewardsResponse) SetPrevElectionID(val OptInt64) {
+	s.PrevElectionID = val
+}
+
+// SetNextElectionID sets the value of NextElectionID.
+func (s *RoundRewardsResponse) SetNextElectionID(val OptInt64) {
+	s.NextElectionID = val
+}
+
+// SetRoundStart sets the value of RoundStart.
+func (s *RoundRewardsResponse) SetRoundStart(val time.Time) {
+	s.RoundStart = val
+}
+
+// SetRoundEnd sets the value of RoundEnd.
+func (s *RoundRewardsResponse) SetRoundEnd(val time.Time) {
+	s.RoundEnd = val
+}
+
+// SetStartBlock sets the value of StartBlock.
+func (s *RoundRewardsResponse) SetStartBlock(val uint32) {
+	s.StartBlock = val
+}
+
+// SetEndBlock sets the value of EndBlock.
+func (s *RoundRewardsResponse) SetEndBlock(val uint32) {
+	s.EndBlock = val
+}
+
+// SetTotalBonuses sets the value of TotalBonuses.
+func (s *RoundRewardsResponse) SetTotalBonuses(val int64) {
+	s.TotalBonuses = val
+}
+
+// SetTotalStake sets the value of TotalStake.
+func (s *RoundRewardsResponse) SetTotalStake(val int64) {
+	s.TotalStake = val
+}
+
+// SetValidators sets the value of Validators.
+func (s *RoundRewardsResponse) SetValidators(val []ValidatorRewardEntry) {
+	s.Validators = val
+}
+
+// SetError sets the value of Error.
+func (s *RoundRewardsResponse) SetError(val OptString) {
+	s.Error = val
 }
 
 // Ref: #/components/schemas/Sale
@@ -19128,6 +19554,156 @@ func (s *UnSubscriptionAction) SetAdmin(val AccountAddress) {
 	s.Admin = val
 }
 
+// Ref: #/components/schemas/ValidationRound
+type ValidationRound struct {
+	// Election ID (electAt timestamp).
+	ElectAt    OptInt64 `json:"elect_at"`
+	StartUtime OptInt64 `json:"start_utime"`
+	EndUtime   OptInt64 `json:"end_utime"`
+	// Masterchain block seqno at (or nearest to) round start.
+	StartBlock uint32 `json:"start_block"`
+	// Masterchain block seqno at (or nearest to) round end. Omitted if round hasn't finished.
+	EndBlock OptUint32 `json:"end_block"`
+	// Election ID of the round immediately before this one.
+	PrevElectionID OptInt64 `json:"prev_election_id"`
+	// Election ID of the round immediately after this one. Omitted when this round is not yet finished
+	// (next round not known).
+	NextElectionID OptInt64 `json:"next_election_id"`
+	// Total stake locked in the round.
+	TotalStake OptInt64 `json:"total_stake"`
+	// Total rewards the elector pays for the round. Omitted if round hasn't finished.
+	Bonuses OptInt64 `json:"bonuses"`
+	// Whether the validation round is complete.
+	Finished bool `json:"finished"`
+}
+
+// GetElectAt returns the value of ElectAt.
+func (s *ValidationRound) GetElectAt() OptInt64 {
+	return s.ElectAt
+}
+
+// GetStartUtime returns the value of StartUtime.
+func (s *ValidationRound) GetStartUtime() OptInt64 {
+	return s.StartUtime
+}
+
+// GetEndUtime returns the value of EndUtime.
+func (s *ValidationRound) GetEndUtime() OptInt64 {
+	return s.EndUtime
+}
+
+// GetStartBlock returns the value of StartBlock.
+func (s *ValidationRound) GetStartBlock() uint32 {
+	return s.StartBlock
+}
+
+// GetEndBlock returns the value of EndBlock.
+func (s *ValidationRound) GetEndBlock() OptUint32 {
+	return s.EndBlock
+}
+
+// GetPrevElectionID returns the value of PrevElectionID.
+func (s *ValidationRound) GetPrevElectionID() OptInt64 {
+	return s.PrevElectionID
+}
+
+// GetNextElectionID returns the value of NextElectionID.
+func (s *ValidationRound) GetNextElectionID() OptInt64 {
+	return s.NextElectionID
+}
+
+// GetTotalStake returns the value of TotalStake.
+func (s *ValidationRound) GetTotalStake() OptInt64 {
+	return s.TotalStake
+}
+
+// GetBonuses returns the value of Bonuses.
+func (s *ValidationRound) GetBonuses() OptInt64 {
+	return s.Bonuses
+}
+
+// GetFinished returns the value of Finished.
+func (s *ValidationRound) GetFinished() bool {
+	return s.Finished
+}
+
+// SetElectAt sets the value of ElectAt.
+func (s *ValidationRound) SetElectAt(val OptInt64) {
+	s.ElectAt = val
+}
+
+// SetStartUtime sets the value of StartUtime.
+func (s *ValidationRound) SetStartUtime(val OptInt64) {
+	s.StartUtime = val
+}
+
+// SetEndUtime sets the value of EndUtime.
+func (s *ValidationRound) SetEndUtime(val OptInt64) {
+	s.EndUtime = val
+}
+
+// SetStartBlock sets the value of StartBlock.
+func (s *ValidationRound) SetStartBlock(val uint32) {
+	s.StartBlock = val
+}
+
+// SetEndBlock sets the value of EndBlock.
+func (s *ValidationRound) SetEndBlock(val OptUint32) {
+	s.EndBlock = val
+}
+
+// SetPrevElectionID sets the value of PrevElectionID.
+func (s *ValidationRound) SetPrevElectionID(val OptInt64) {
+	s.PrevElectionID = val
+}
+
+// SetNextElectionID sets the value of NextElectionID.
+func (s *ValidationRound) SetNextElectionID(val OptInt64) {
+	s.NextElectionID = val
+}
+
+// SetTotalStake sets the value of TotalStake.
+func (s *ValidationRound) SetTotalStake(val OptInt64) {
+	s.TotalStake = val
+}
+
+// SetBonuses sets the value of Bonuses.
+func (s *ValidationRound) SetBonuses(val OptInt64) {
+	s.Bonuses = val
+}
+
+// SetFinished sets the value of Finished.
+func (s *ValidationRound) SetFinished(val bool) {
+	s.Finished = val
+}
+
+// Ref: #/components/schemas/ValidationRoundsResponse
+type ValidationRoundsResponse struct {
+	// Server-side response time in milliseconds.
+	ResponseTimeMs int64             `json:"response_time_ms"`
+	Rounds         []ValidationRound `json:"rounds"`
+}
+
+// GetResponseTimeMs returns the value of ResponseTimeMs.
+func (s *ValidationRoundsResponse) GetResponseTimeMs() int64 {
+	return s.ResponseTimeMs
+}
+
+// GetRounds returns the value of Rounds.
+func (s *ValidationRoundsResponse) GetRounds() []ValidationRound {
+	return s.Rounds
+}
+
+// SetResponseTimeMs sets the value of ResponseTimeMs.
+func (s *ValidationRoundsResponse) SetResponseTimeMs(val int64) {
+	s.ResponseTimeMs = val
+}
+
+// SetRounds sets the value of Rounds.
+func (s *ValidationRoundsResponse) SetRounds(val []ValidationRound) {
+	s.Rounds = val
+}
+
 // Ref: #/components/schemas/Validator
 type Validator struct {
 	Address     string `json:"address"`
@@ -19174,6 +19750,243 @@ func (s *Validator) SetStake(val int64) {
 // SetMaxFactor sets the value of MaxFactor.
 func (s *Validator) SetMaxFactor(val int64) {
 	s.MaxFactor = val
+}
+
+// Ref: #/components/schemas/ValidatorRewardEntry
+type ValidatorRewardEntry struct {
+	// Position sorted by effective stake (descending).
+	Rank int `json:"rank"`
+	// Validator's public key (hex-encoded Ed25519).
+	PublicKey string `json:"public_key"`
+	// Amount in nanotons.
+	EffectiveStake int64 `json:"effective_stake"`
+	// Fraction of total effective stake (0–1).
+	Weight float64 `json:"weight"`
+	// Amount in nanotons.
+	Reward int64 `json:"reward"`
+	// Pool smart contract address (bounceable, base64url).
+	Pool OptString `json:"pool"`
+	// Contract type detected by code hash.
+	PoolType         OptValidatorRewardEntryPoolType `json:"pool_type"`
+	OwnerAddress     OptString                       `json:"owner_address"`
+	ValidatorAddress OptString                       `json:"validator_address"`
+	// Amount in nanotons.
+	ValidatorStake OptInt64 `json:"validator_stake"`
+	// Amount in nanotons.
+	NominatorsStake OptInt64 `json:"nominators_stake"`
+	// Total funds deposited by the pool: effective_stake + credit (leftover balance kept in the elector
+	// contract after election).
+	TotalStake OptInt64 `json:"total_stake"`
+	// Fraction of staking rewards kept by the validator (0.3 = 30%).
+	ValidatorRewardShare OptFloat64             `json:"validator_reward_share"`
+	NominatorsCount      OptUint32              `json:"nominators_count"`
+	Nominators           []NominatorRewardEntry `json:"nominators"`
+}
+
+// GetRank returns the value of Rank.
+func (s *ValidatorRewardEntry) GetRank() int {
+	return s.Rank
+}
+
+// GetPublicKey returns the value of PublicKey.
+func (s *ValidatorRewardEntry) GetPublicKey() string {
+	return s.PublicKey
+}
+
+// GetEffectiveStake returns the value of EffectiveStake.
+func (s *ValidatorRewardEntry) GetEffectiveStake() int64 {
+	return s.EffectiveStake
+}
+
+// GetWeight returns the value of Weight.
+func (s *ValidatorRewardEntry) GetWeight() float64 {
+	return s.Weight
+}
+
+// GetReward returns the value of Reward.
+func (s *ValidatorRewardEntry) GetReward() int64 {
+	return s.Reward
+}
+
+// GetPool returns the value of Pool.
+func (s *ValidatorRewardEntry) GetPool() OptString {
+	return s.Pool
+}
+
+// GetPoolType returns the value of PoolType.
+func (s *ValidatorRewardEntry) GetPoolType() OptValidatorRewardEntryPoolType {
+	return s.PoolType
+}
+
+// GetOwnerAddress returns the value of OwnerAddress.
+func (s *ValidatorRewardEntry) GetOwnerAddress() OptString {
+	return s.OwnerAddress
+}
+
+// GetValidatorAddress returns the value of ValidatorAddress.
+func (s *ValidatorRewardEntry) GetValidatorAddress() OptString {
+	return s.ValidatorAddress
+}
+
+// GetValidatorStake returns the value of ValidatorStake.
+func (s *ValidatorRewardEntry) GetValidatorStake() OptInt64 {
+	return s.ValidatorStake
+}
+
+// GetNominatorsStake returns the value of NominatorsStake.
+func (s *ValidatorRewardEntry) GetNominatorsStake() OptInt64 {
+	return s.NominatorsStake
+}
+
+// GetTotalStake returns the value of TotalStake.
+func (s *ValidatorRewardEntry) GetTotalStake() OptInt64 {
+	return s.TotalStake
+}
+
+// GetValidatorRewardShare returns the value of ValidatorRewardShare.
+func (s *ValidatorRewardEntry) GetValidatorRewardShare() OptFloat64 {
+	return s.ValidatorRewardShare
+}
+
+// GetNominatorsCount returns the value of NominatorsCount.
+func (s *ValidatorRewardEntry) GetNominatorsCount() OptUint32 {
+	return s.NominatorsCount
+}
+
+// GetNominators returns the value of Nominators.
+func (s *ValidatorRewardEntry) GetNominators() []NominatorRewardEntry {
+	return s.Nominators
+}
+
+// SetRank sets the value of Rank.
+func (s *ValidatorRewardEntry) SetRank(val int) {
+	s.Rank = val
+}
+
+// SetPublicKey sets the value of PublicKey.
+func (s *ValidatorRewardEntry) SetPublicKey(val string) {
+	s.PublicKey = val
+}
+
+// SetEffectiveStake sets the value of EffectiveStake.
+func (s *ValidatorRewardEntry) SetEffectiveStake(val int64) {
+	s.EffectiveStake = val
+}
+
+// SetWeight sets the value of Weight.
+func (s *ValidatorRewardEntry) SetWeight(val float64) {
+	s.Weight = val
+}
+
+// SetReward sets the value of Reward.
+func (s *ValidatorRewardEntry) SetReward(val int64) {
+	s.Reward = val
+}
+
+// SetPool sets the value of Pool.
+func (s *ValidatorRewardEntry) SetPool(val OptString) {
+	s.Pool = val
+}
+
+// SetPoolType sets the value of PoolType.
+func (s *ValidatorRewardEntry) SetPoolType(val OptValidatorRewardEntryPoolType) {
+	s.PoolType = val
+}
+
+// SetOwnerAddress sets the value of OwnerAddress.
+func (s *ValidatorRewardEntry) SetOwnerAddress(val OptString) {
+	s.OwnerAddress = val
+}
+
+// SetValidatorAddress sets the value of ValidatorAddress.
+func (s *ValidatorRewardEntry) SetValidatorAddress(val OptString) {
+	s.ValidatorAddress = val
+}
+
+// SetValidatorStake sets the value of ValidatorStake.
+func (s *ValidatorRewardEntry) SetValidatorStake(val OptInt64) {
+	s.ValidatorStake = val
+}
+
+// SetNominatorsStake sets the value of NominatorsStake.
+func (s *ValidatorRewardEntry) SetNominatorsStake(val OptInt64) {
+	s.NominatorsStake = val
+}
+
+// SetTotalStake sets the value of TotalStake.
+func (s *ValidatorRewardEntry) SetTotalStake(val OptInt64) {
+	s.TotalStake = val
+}
+
+// SetValidatorRewardShare sets the value of ValidatorRewardShare.
+func (s *ValidatorRewardEntry) SetValidatorRewardShare(val OptFloat64) {
+	s.ValidatorRewardShare = val
+}
+
+// SetNominatorsCount sets the value of NominatorsCount.
+func (s *ValidatorRewardEntry) SetNominatorsCount(val OptUint32) {
+	s.NominatorsCount = val
+}
+
+// SetNominators sets the value of Nominators.
+func (s *ValidatorRewardEntry) SetNominators(val []NominatorRewardEntry) {
+	s.Nominators = val
+}
+
+// Contract type detected by code hash.
+type ValidatorRewardEntryPoolType string
+
+const (
+	ValidatorRewardEntryPoolTypeNominatorPoolV10       ValidatorRewardEntryPoolType = "nominator-pool-v1.0"
+	ValidatorRewardEntryPoolTypeSingleNominatorPoolV10 ValidatorRewardEntryPoolType = "single-nominator-pool-v1.0"
+	ValidatorRewardEntryPoolTypeSingleNominatorPoolV11 ValidatorRewardEntryPoolType = "single-nominator-pool-v1.1"
+	ValidatorRewardEntryPoolTypeOther                  ValidatorRewardEntryPoolType = "other"
+)
+
+// AllValues returns all ValidatorRewardEntryPoolType values.
+func (ValidatorRewardEntryPoolType) AllValues() []ValidatorRewardEntryPoolType {
+	return []ValidatorRewardEntryPoolType{
+		ValidatorRewardEntryPoolTypeNominatorPoolV10,
+		ValidatorRewardEntryPoolTypeSingleNominatorPoolV10,
+		ValidatorRewardEntryPoolTypeSingleNominatorPoolV11,
+		ValidatorRewardEntryPoolTypeOther,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s ValidatorRewardEntryPoolType) MarshalText() ([]byte, error) {
+	switch s {
+	case ValidatorRewardEntryPoolTypeNominatorPoolV10:
+		return []byte(s), nil
+	case ValidatorRewardEntryPoolTypeSingleNominatorPoolV10:
+		return []byte(s), nil
+	case ValidatorRewardEntryPoolTypeSingleNominatorPoolV11:
+		return []byte(s), nil
+	case ValidatorRewardEntryPoolTypeOther:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *ValidatorRewardEntryPoolType) UnmarshalText(data []byte) error {
+	switch ValidatorRewardEntryPoolType(data) {
+	case ValidatorRewardEntryPoolTypeNominatorPoolV10:
+		*s = ValidatorRewardEntryPoolTypeNominatorPoolV10
+		return nil
+	case ValidatorRewardEntryPoolTypeSingleNominatorPoolV10:
+		*s = ValidatorRewardEntryPoolTypeSingleNominatorPoolV10
+		return nil
+	case ValidatorRewardEntryPoolTypeSingleNominatorPoolV11:
+		*s = ValidatorRewardEntryPoolTypeSingleNominatorPoolV11
+		return nil
+	case ValidatorRewardEntryPoolTypeOther:
+		*s = ValidatorRewardEntryPoolTypeOther
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
 }
 
 // Ref: #/components/schemas/Validators
@@ -19232,6 +20045,128 @@ func (s *Validators) SetTotalStake(val int64) {
 
 // SetValidators sets the value of Validators.
 func (s *Validators) SetValidators(val []Validator) {
+	s.Validators = val
+}
+
+// Ref: #/components/schemas/ValidatorsResponse
+type ValidatorsResponse struct {
+	// Server-side response time in milliseconds.
+	ResponseTimeMs  int64     `json:"response_time_ms"`
+	Block           BlockInfo `json:"block"`
+	ValidationRound RoundInfo `json:"validation_round"`
+	// Current election ID (electAt timestamp).
+	ElectionID int64 `json:"election_id"`
+	// Election ID of the round immediately before this one.
+	PrevElectionID OptInt64 `json:"prev_election_id"`
+	// Election ID of the round immediately after this one. Omitted when the current round is not yet
+	// finished (next round not known).
+	NextElectionID OptInt64 `json:"next_election_id"`
+	// Amount in nanotons.
+	ElectorBalance int64 `json:"elector_balance"`
+	// Amount in nanotons.
+	TotalStake int64 `json:"total_stake"`
+	// Amount in nanotons.
+	RewardPerBlock int64                  `json:"reward_per_block"`
+	Validators     []ValidatorRewardEntry `json:"validators"`
+}
+
+// GetResponseTimeMs returns the value of ResponseTimeMs.
+func (s *ValidatorsResponse) GetResponseTimeMs() int64 {
+	return s.ResponseTimeMs
+}
+
+// GetBlock returns the value of Block.
+func (s *ValidatorsResponse) GetBlock() BlockInfo {
+	return s.Block
+}
+
+// GetValidationRound returns the value of ValidationRound.
+func (s *ValidatorsResponse) GetValidationRound() RoundInfo {
+	return s.ValidationRound
+}
+
+// GetElectionID returns the value of ElectionID.
+func (s *ValidatorsResponse) GetElectionID() int64 {
+	return s.ElectionID
+}
+
+// GetPrevElectionID returns the value of PrevElectionID.
+func (s *ValidatorsResponse) GetPrevElectionID() OptInt64 {
+	return s.PrevElectionID
+}
+
+// GetNextElectionID returns the value of NextElectionID.
+func (s *ValidatorsResponse) GetNextElectionID() OptInt64 {
+	return s.NextElectionID
+}
+
+// GetElectorBalance returns the value of ElectorBalance.
+func (s *ValidatorsResponse) GetElectorBalance() int64 {
+	return s.ElectorBalance
+}
+
+// GetTotalStake returns the value of TotalStake.
+func (s *ValidatorsResponse) GetTotalStake() int64 {
+	return s.TotalStake
+}
+
+// GetRewardPerBlock returns the value of RewardPerBlock.
+func (s *ValidatorsResponse) GetRewardPerBlock() int64 {
+	return s.RewardPerBlock
+}
+
+// GetValidators returns the value of Validators.
+func (s *ValidatorsResponse) GetValidators() []ValidatorRewardEntry {
+	return s.Validators
+}
+
+// SetResponseTimeMs sets the value of ResponseTimeMs.
+func (s *ValidatorsResponse) SetResponseTimeMs(val int64) {
+	s.ResponseTimeMs = val
+}
+
+// SetBlock sets the value of Block.
+func (s *ValidatorsResponse) SetBlock(val BlockInfo) {
+	s.Block = val
+}
+
+// SetValidationRound sets the value of ValidationRound.
+func (s *ValidatorsResponse) SetValidationRound(val RoundInfo) {
+	s.ValidationRound = val
+}
+
+// SetElectionID sets the value of ElectionID.
+func (s *ValidatorsResponse) SetElectionID(val int64) {
+	s.ElectionID = val
+}
+
+// SetPrevElectionID sets the value of PrevElectionID.
+func (s *ValidatorsResponse) SetPrevElectionID(val OptInt64) {
+	s.PrevElectionID = val
+}
+
+// SetNextElectionID sets the value of NextElectionID.
+func (s *ValidatorsResponse) SetNextElectionID(val OptInt64) {
+	s.NextElectionID = val
+}
+
+// SetElectorBalance sets the value of ElectorBalance.
+func (s *ValidatorsResponse) SetElectorBalance(val int64) {
+	s.ElectorBalance = val
+}
+
+// SetTotalStake sets the value of TotalStake.
+func (s *ValidatorsResponse) SetTotalStake(val int64) {
+	s.TotalStake = val
+}
+
+// SetRewardPerBlock sets the value of RewardPerBlock.
+func (s *ValidatorsResponse) SetRewardPerBlock(val int64) {
+	s.RewardPerBlock = val
+}
+
+// SetValidators sets the value of Validators.
+func (s *ValidatorsResponse) SetValidators(val []ValidatorRewardEntry) {
 	s.Validators = val
 }
 
