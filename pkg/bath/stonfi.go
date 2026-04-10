@@ -233,6 +233,18 @@ var StonfiV2PTONStrawReverse = Straw[BubbleJettonTransfer]{
 				newAction.recipient = &tx.account
 				return nil
 			},
+			SingleChild: &Straw[BubbleJettonTransfer]{
+				CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.JettonNotifyMsgOp)},
+				Builder: func(newAction *BubbleJettonTransfer, bubble *Bubble) error {
+					tx := bubble.Info.(BubbleTx)
+					newAction.success = true
+					body := tx.decodedBody.Value.(abi.JettonNotifyMsgBody)
+					newAction.amount = body.Amount
+					newAction.payload = body.ForwardPayload.Value
+					newAction.recipient = &tx.account
+					return nil
+				},
+			},
 		},
 		{
 			CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.ExcessMsgOp)},
