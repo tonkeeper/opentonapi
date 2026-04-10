@@ -178,6 +178,10 @@ func (h *Handler) GetStakingPools(ctx context.Context, params oas.GetStakingPool
 	for _, p := range liquidPools {
 		info, _ := h.addressBook.GetAddressInfoByAddress(p.Address)
 		p.Name = info.Name
+		switch p.Address.ToRaw() {
+		case "0:a45b17f28409229b78360e3290420f13e4fe20f90d7e2bf8c4ac6703259e22fa":
+			p.APY = 20.3
+		}
 		result.Pools = append(result.Pools, convertLiquidStaking(p, cycleStart, cycleEnd))
 	}
 	slices.SortFunc(result.Pools, func(a, b oas.PoolInfo) int {
