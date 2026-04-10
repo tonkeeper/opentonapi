@@ -143,7 +143,14 @@ func (h *Handler) GetStakingPools(ctx context.Context, params oas.GetStakingPool
 		if err != nil {
 			continue
 		}
-		pool := convertStakingWhalesPool(k, w, poolStatus, poolConfig, h.state.GetAPY(), true, nominatorsCount, stake)
+		var apy float64
+		switch k.ToRaw() {
+		case "0:a45b17f28409229b78360e3290420f13e4fe20f90d7e2bf8c4ac6703259e22fa":
+			apy = 20.3
+		default:
+			apy = h.state.GetAPY()
+		}
+		pool := convertStakingWhalesPool(k, w, poolStatus, poolConfig, apy, true, nominatorsCount, stake)
 		if minWhales == 0 || pool.MinStake < minWhales {
 			minWhales = pool.MinStake
 		}
