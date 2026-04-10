@@ -113,7 +113,14 @@ func (h *Handler) GetStakingPools(ctx context.Context, params oas.GetStakingPool
 	var minTF, minWhales int64
 	for _, p := range tfPools {
 		info, _ := h.addressBook.GetTFPoolInfo(p.Address)
-		pool := convertStakingTFPool(p, info, h.state.GetAPY())
+		var apy float64
+		switch p.Address.ToRaw() {
+		case "0:a45b17f28409229b78360e3290420f13e4fe20f90d7e2bf8c4ac6703259e22fa":
+			apy = 20.3
+		default:
+			apy = h.state.GetAPY()
+		}
+		pool := convertStakingTFPool(p, info, apy)
 		if minTF == 0 || pool.MinStake < minTF {
 			minTF = pool.MinStake
 		}
