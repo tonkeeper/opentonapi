@@ -41,7 +41,7 @@ func New(client *liteapi.Client) *Service {
 }
 
 // FetchPerBlockRewards fetches validator statistics for the given seqno (or latest if nil).
-func (s *Service) FetchPerBlockRewards(ctx context.Context, seqno *uint32) (*ValidatorsResponse, error) {
+func (s *Service) FetchPerBlockRewards(ctx context.Context, seqno uint32) (*ValidatorsResponse, error) {
 	client := s.client
 
 	// Resolve the target block: use provided seqno or fall back to latest.
@@ -51,9 +51,9 @@ func (s *Service) FetchPerBlockRewards(ctx context.Context, seqno *uint32) (*Val
 	// needBlockTime: for seqno=nil we defer LookupBlock to the parallel group.
 	var needBlockTime bool
 
-	if seqno != nil {
+	if seqno > 0 {
 		var err error
-		blockIDExt, blockTime, err = lookupMasterchainBlock(ctx, client, *seqno)
+		blockIDExt, blockTime, err = lookupMasterchainBlock(ctx, client, seqno)
 		if err != nil {
 			return nil, fmt.Errorf("lookupMasterchainBlock: %w", err)
 		}

@@ -15,7 +15,7 @@ func (h *Handler) GetValidators(ctx context.Context, params oas.GetValidatorsPar
 	if h.validation == nil {
 		return nil, toError(http.StatusServiceUnavailable, errServiceUnavailable)
 	}
-	return h.validation.FetchPerBlockRewards(ctx, &params.Seqno.Value)
+	return h.validation.FetchPerBlockRewards(ctx, params.Seqno.Value)
 }
 
 func (h *Handler) GetValidationRounds(ctx context.Context, params oas.GetValidationRoundsParams) (*oas.ValidationRoundsResponse, error) {
