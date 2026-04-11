@@ -23,6 +23,9 @@ import (
 	"github.com/tonkeeper/opentonapi/pkg/references"
 )
 
+const tonstakersAddr = "0:a45b17f28409229b78360e3290420f13e4fe20f90d7e2bf8c4ac6703259e22fa"
+const tonstakersAPY = 21.6
+
 func (h *Handler) GetStakingPoolInfo(ctx context.Context, params oas.GetStakingPoolInfoParams) (*oas.GetStakingPoolInfoOK, error) {
 	pool, err := tongo.ParseAddress(params.AccountID)
 	if err != nil {
@@ -115,8 +118,8 @@ func (h *Handler) GetStakingPools(ctx context.Context, params oas.GetStakingPool
 		info, _ := h.addressBook.GetTFPoolInfo(p.Address)
 		var apy float64
 		switch p.Address.ToRaw() {
-		case "0:a45b17f28409229b78360e3290420f13e4fe20f90d7e2bf8c4ac6703259e22fa":
-			apy = 20.3
+		case tonstakersAddr:
+			apy = tonstakersAPY
 		default:
 			apy = h.state.GetAPY()
 		}
@@ -145,8 +148,8 @@ func (h *Handler) GetStakingPools(ctx context.Context, params oas.GetStakingPool
 		}
 		var apy float64
 		switch k.ToRaw() {
-		case "0:a45b17f28409229b78360e3290420f13e4fe20f90d7e2bf8c4ac6703259e22fa":
-			apy = 20.3
+		case tonstakersAddr:
+			apy = tonstakersAPY
 		default:
 			apy = h.state.GetAPY()
 		}
@@ -179,8 +182,8 @@ func (h *Handler) GetStakingPools(ctx context.Context, params oas.GetStakingPool
 		info, _ := h.addressBook.GetAddressInfoByAddress(p.Address)
 		p.Name = info.Name
 		switch p.Address.ToRaw() {
-		case "0:a45b17f28409229b78360e3290420f13e4fe20f90d7e2bf8c4ac6703259e22fa":
-			p.APY = 20.3
+		case tonstakersAddr:
+			p.APY = tonstakersAPY
 		}
 		result.Pools = append(result.Pools, convertLiquidStaking(p, cycleStart, cycleEnd))
 	}
