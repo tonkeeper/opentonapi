@@ -2981,6 +2981,8 @@ paths:
   /v2/validation/validators:
     get:
       operationId: getValidators
+      tags:
+        - Validation
       summary: Get all current validators
       description: >
         Returns all current validators with stakes, rewards, pool addresses,
@@ -3005,6 +3007,8 @@ paths:
   /v2/validation/rounds:
     get:
       operationId: getValidationRounds
+      tags:
+        - Validation
       summary: Get validation round metadata
       description: >
         Returns past and current validation rounds with boundaries, stakes,
@@ -3041,6 +3045,8 @@ paths:
   /v2/validation/rewards:
     get:
       operationId: getRoundRewards
+      tags:
+        - Validation
       summary: Get per-validator reward distribution for a finished round
       description: >
         Computes per-validator and per-nominator reward distribution for a
