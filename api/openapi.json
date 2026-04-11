@@ -12218,7 +12218,10 @@
       "$ref": "#/components/responses/Error"
      }
     },
-    "summary": "Get per-validator reward distribution for a finished round"
+    "summary": "Get per-validator reward distribution for a finished round",
+    "tags": [
+     "Validation"
+    ]
    }
   },
   "/v2/validation/rounds": {
@@ -12262,7 +12265,10 @@
       "$ref": "#/components/responses/Error"
      }
     },
-    "summary": "Get validation round metadata"
+    "summary": "Get validation round metadata",
+    "tags": [
+     "Validation"
+    ]
    }
   },
   "/v2/validation/validators": {
@@ -12296,7 +12302,10 @@
       "$ref": "#/components/responses/Error"
      }
     },
-    "summary": "Get all current validators"
+    "summary": "Get all current validators",
+    "tags": [
+     "Validation"
+    ]
    }
   },
   "/v2/wallet/auth/proof": {
